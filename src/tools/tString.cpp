@@ -32,7 +32,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tConfiguration.h"
 #include "tException.h"
 #include <ctype.h>
-#include <time.h>
 #include <string>
 #include <iostream>
 #include "utf8.h"
@@ -52,23 +51,24 @@ static bool st_ReadEscapeSequence( char & c, char & c2, std::istream & s )
     c2 = '\0';
 
     // detect escaping
-    if ( c == '\\' )
+    if ( c == '\\' && !s.eof() && s.good() )
     {
-        c = s.get();
+        c2 = s.get();
 
         // nothing useful read?
         if ( s.eof() )
         {
-            c = '\\';
+            c2 = 0;
             return false;
         }
 
         // interpret special escape sequences
-        switch (c)
+        switch (c2)
         {
         case 'n':
             // turn \n into newline
             c = '\n';
+            c2 = 0;
             return true;
         case '"':
         case ' ':
@@ -79,8 +79,6 @@ static bool st_ReadEscapeSequence( char & c, char & c2, std::istream & s )
             return true;
         default:
             // take the whole \x sequence as it appeared.
-            c2 = c;
-            c = '\\';
             return false;
         }
     }
@@ -95,10 +93,8 @@ static bool st_ReadEscapeSequence( char & c, std::istream & s )
 {
     char c2 = '\0';
     bool ret = st_ReadEscapeSequence( c, c2, s );
-    if ( c2 && s.good() )
-    {
+    if ( c2 )
         s.putback( c2 );
-    }
     return ret;
 }
 
@@ -153,10 +149,7 @@ std::istream & operator>> (std::istream &s,tString &x)
         // lastEscape = thisEscape;
     }
 
-    if(s.good())
-    {
-        s.putback(c);
-    }
+    s.putback(c);
     return s;
 }
 
@@ -346,30 +339,18 @@ tString::size_type tString::Size( void ) const
 //!
 //!		@param	s	stream to read from
 //!		@param	enableEscapeSequences set to true if escape sequences (\n) shall be respected
-//!     @param  indent maximum amount of indentation to remove
-//!     @param  eatenWhitespace will be set to how much spacing was stripped
 //!
 // *******************************************************************************
 
-void tString::ReadLine( std::istream & s, bool enableEscapeSequences, int indent, int * eatenWhitespace )
+void tString::ReadLine( std::istream & s, bool enableEscapeSequences )
 {
     char c=' ';
     Clear();
-    int whitespace = -1;
-    while(c!='\n' && c!='\r' && isblank(c) && (whitespace < indent || indent < 0) &&  s.good() && !s.eof()){
+    while(c!='\n' && c!='\r' && isblank(c) &&  s.good() && !s.eof()){
         c=s.get();
-        whitespace++;
     }
 
-    if (eatenWhitespace != 0)
-    {
-        *eatenWhitespace = whitespace;
-    }
-
-    if(s.good())
-    {
-        s.putback(c);
-    }
+    s.putback(c);
     c='x';
 
     while( true )
@@ -998,11 +979,6 @@ int tString::RemoveWordLeft( int start ) {
 
 void tString::RemoveSubStr( int start, int length ) {
     int strLen = size();
-
-    if ( start < 0 ) {
-        start += strLen;
-    }
-
     if ( length < 0 ) {
         start += length;
         length = abs( length );
@@ -1140,32 +1116,6 @@ tString tString::Truncate( int truncateAt ) const
         return *this;
 
     return SubStr( 0, truncateAt ) + "...";
-}
-
-// *******************************************************************************************
-// *
-// *	FromUnknown
-// *
-// *******************************************************************************************
-//!
-//!    @param      source       Source string of unknown format
-//!    @return     A new string that is valid utf8
-//!
-// *******************************************************************************************
-tString tString::FromUnknown( char const * source )
-{
-    std::string ret( source );
-
-    // if the string already is utf8, just return it
-    if( utf8::is_valid( ret.begin(), ret.end() ) )
-    {
-        return ret;
-    }
-    else
-    {
-        // convert it
-        return st_Latin1ToUTF8( ret );
-    }
 }
 
 // *******************************************************************************
@@ -1581,7 +1531,7 @@ tString tColoredString::RemoveColors( const char * c, bool darkonly )
     tString ret;
     int len = strlen(c);
     bool removed = false;
-
+    
     // walk through string
     while (*c!='\0'){
         // skip color codes
@@ -1596,7 +1546,7 @@ tString tColoredString::RemoveColors( const char * c, bool darkonly )
                     removed = true;
 
                 c   += 8;
-                len -= 8;
+                len -= 8;	
             }
             else if( len >= 8 )
             {
@@ -1716,34 +1666,6 @@ void tColoredString::RemoveTrailingColor( void )
     ::RemoveTrailingColor( *this );
 }
 
-static inline bool st_IsSeparatorCharacter( wchar_t c )
-{
-    // Character categories: http://www.fileformat.info/info/unicode/category/index.htm
-    switch ( c )
-    {
-        case 0x00A0:
-        case 0x1680:
-        case 0x2000:
-        case 0x2001:
-        case 0x2002:
-        case 0x2003:
-        case 0x2004:
-        case 0x2005:
-        case 0x2006:
-        case 0x2007:
-        case 0x2008:
-        case 0x2009:
-        case 0x200A:
-        case 0x2028:
-        case 0x2029:
-        case 0x202F:
-        case 0x205F:
-        case 0x3000:
-            return true;
-    }
-    return false;
-}
-
 // *******************************************************************************************
 // *
 // *	NetFilter
@@ -1775,12 +1697,12 @@ void tString::NetFilter( bool filterWhitespace )
             if ( c != 0x7f )
             {
                 // filter
-                if ( st_IsSeparatorCharacter( c ) )
+                if ( isblank(c) )
                 {
                     // unify whitespace to regular space
                     c = ' ';
                 }
-                else if ( c < 32 || ( c > 126 && c < 161) )
+                else if ( c < 32 )
                 {
                     // nonprintable characters -> underscore
                     c = '_';
@@ -2502,7 +2424,7 @@ void tCharacterFilter::SetMap( wchar_t in1, wchar_t in2, wchar_t out)
     {
         filter[ i ] = '_';
     }
-
+    
     tASSERT( in1 <= in2 );
     for( wchar_t i = in2; i >= in1; --i )
         filter[ i ] = out;

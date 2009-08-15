@@ -48,11 +48,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #endif
 
 // include definition for top source directory
+#ifndef MACOSX_XCODE
 #ifdef TOP_SOURCE_DIR
 static const char * s_topSourceDir = TOP_SOURCE_DIR;
 #else
 static const char * s_topSourceDir = ".";
 #endif
+#endif // !MACOSX_XCODE
 
 // program name definition
 #ifndef PROGNAME
@@ -163,96 +165,79 @@ tString expand_home(const tString & pathname);
 
 #define expand_home_c(c) expand_home(tString(c))
 
-#ifndef DATA_DIR
-#define DATA_DIR "."
-#endif
+#ifdef DATA_DIR
 static tString st_DataDir(expand_home_c(DATA_DIR));    // directory for game data
-
-#ifndef MUSIC_DIR
-#define MUSIC_DIR "."
+#else
+static tString st_DataDir(".");    // directory for game data
 #endif
+
+#ifdef MUSIC_DIR
 static tString st_MusicDir(expand_home_c(DATA_DIR));    // directory for game music
-
-// use XDG directories?
-#ifndef WIN32
-#ifndef MACOSX
-#define USE_XDG
-#endif
-#endif
-
-#ifndef USER_DATA_DIR
-#ifdef USE_XDG
-#define USER_DATA_DIR "${XDG_DATA_HOME}/" PROGDIR
 #else
-#define USER_DATA_DIR "~/." PROGDIR
+static tString st_MusicDir(".");    // directory for game music
 #endif
-#endif
+
+#ifdef USER_DATA_DIR
 static tString st_UserDataDir(expand_home_c(USER_DATA_DIR));    // directory for game data
-
-// load data from unbranded configuration directory on branded builds in Linux
-#if !defined DEDICATED && !defined MACOSX && !defined LEGACY_USER_DATA_DIR && !defined DEBUG
-#define LEGACY_USER_DATA_DIR "~/.armagetronad"
-#define LEGACY_USER_DATA_DIR2 "~/." PROGDIR
-#endif
-
-#ifdef LEGACY_USER_DATA_DIR
-static tString st_LegacyUserDataDir(expand_home_c(LEGACY_USER_DATA_DIR));    // directory for game data (old location)
-#endif
-
-#ifdef LEGACY_USER_DATA_DIR2
-static tString st_LegacyUserDataDir2(expand_home_c(LEGACY_USER_DATA_DIR2));    // directory for game data
-#endif
-
-#ifndef CONFIG_DIR
-#define CONFIG_DIR ""
-#endif
-static tString st_ConfigDir(expand_home_c(CONFIG_DIR));  // directory for static configuration files
-
-#ifndef SCRIPT_DIR
-#define SCRIPT_DIR ""
-#endif
-static tString st_ScriptDir(expand_home_c(SCRIPT_DIR));  // directory for scripts
-
-#ifndef USER_CONFIG_DIR
-#ifdef USE_XDG
-#define USER_CONFIG_DIR "${XDG_CONFIG_HOME}/" PROGDIR
 #else
-#define USER_CONFIG_DIR ""
+static tString st_UserDataDir(expand_home_c("~/." PROGDIR));    // directory for game data
 #endif
-#endif
-static tString st_UserConfigDir(expand_home_c(USER_CONFIG_DIR));  // directory for static configuration files
 
-#ifndef VAR_DIR
-#define VAR_DIR ""
+#ifdef CONFIG_DIR
+static tString st_ConfigDir(expand_home_c(CONFIG_DIR));  // directory for static configuration files
+#else
+static tString st_ConfigDir("");  // directory for static configuration files
 #endif
+
+#ifdef SCRIPT_DIR
+static tString st_ScriptDir(expand_home_c(SCRIPT_DIR));  // directory for scripts
+#else
+static tString st_ScriptDir("");  // directory for scripts
+#endif
+
+#ifdef USER_CONFIG_DIR
+static tString st_UserConfigDir(expand_home_c(USER_CONFIG_DIR));  // directory for static configuration files
+#else
+static tString st_UserConfigDir("");  // directory for static configuration files
+#endif
+
+#ifdef VAR_DIR
 static tString st_VarDir(expand_home_c(VAR_DIR));     // directory for dynamic logs and highscores
+#else
+static tString st_VarDir("");     // directory for dynamic logs and highscores
+#endif
 
 #ifdef DEDICATED
-#ifndef WWWROOTDIR
-#define WWWROOTDIR ""
-#endif
+#ifdef WWWROOTDIR
 static tString st_WwwDir(expand_home_c(WWWROOTDIR));     // directory for dynamic logs and highscores
+#else
+static tString st_WwwDir("");     // directory for dynamic logs and highscores
+#endif
 #endif
 
-#ifndef RESOURCE_DIR
-#define RESOURCE_DIR ""
-#endif
+#ifdef RESOURCE_DIR
 static tString st_ResourceDir(expand_home_c(RESOURCE_DIR));
-
-#ifndef AUTORESOURCE_DIR
-#define AUTORESOURCE_DIR ""
+#else
+static tString st_ResourceDir("");
 #endif
+
+#ifdef AUTORESOURCE_DIR
 static tString st_AutoResourceDir(expand_home_c(AUTORESOURCE_DIR));
-
-#ifndef INCLUDEDRESOURCE_DIR
-#define INCLUDEDRESOURCE_DIR ""
+#else
+static tString st_AutoResourceDir("");
 #endif
+
+#ifdef INCLUDEDRESOURCE_DIR
 static tString st_IncludedResourceDir(expand_home_c(INCLUDEDRESOURCE_DIR));
-
-#ifndef SCREENSHOT_DIR
-#define SCREENSHOT_DIR ""
+#else
+static tString st_IncludedResourceDir("");
 #endif
+
+#ifdef SCREENSHOT_DIR
 static tString st_ScreenshotDir(expand_home_c(SCREENSHOT_DIR));
+#else
+static tString st_ScreenshotDir("");
+#endif
 
 // checks whether a character is a path delimiter
 static bool st_IsPathDelimiter( char c )
@@ -477,37 +462,17 @@ char *eh_getdir(const char *da, size_t *len) {
                 ret = strdup(path);
         }
 # else
-
-        if (type)
-        {
+        // fall back to default for HOME
+        if (!strcmp(type, "HOME")) {
             struct passwd *pw;
 
             if (user[0] == '\0') // Current user
                 pw = getpwuid(getuid());
             else
                 pw = getpwnam(user);
-
-            if(pw)
-            {
-                if (!strcmp(type, "XDG_CONFIG_HOME"))
-                {
-                    char const * xdg_config = getenv("XDG_CONFIG_HOME");
-                    tString config(xdg_config ? xdg_config : tString(pw->pw_dir) + "/.config");
-                    ret = strdup( config );
-                }
-                else if (!strcmp(type, "XDG_DATA_HOME"))
-                {
-                    char const * xdg_data = getenv("XDG_DATA_HOME");
-                    tString data(xdg_data ? xdg_data : tString(pw->pw_dir) + "/.local/share");
-                    ret = strdup( data );
-                }
-
-                // fall back to default for HOME
-                if (!strcmp(type, "HOME"))
-                {
-                    ret = strdup(pw->pw_dir);
-                }
-            }
+            if (pw)
+                ret = strdup(pw->pw_dir);
+            // struct passwd seems to do some really freaky stuff and doesn't like freeing? can someone confirm this?
         }
 # endif
         // TODO: fall back to hardcoded stuff in some cases?
@@ -533,7 +498,7 @@ char *eh_getdir(const char *da, size_t *len) {
 tString expand_home(tString const & pathname) {
     const char *pn = (const char *)pathname;
     char *s;
-    size_t len = 0;
+    size_t len;
     tString r;
 
     if ((pn[0] == '~' || !strncmp(pn, "${", 2)) && (s = eh_getdir(pn, &len))) {
@@ -545,10 +510,7 @@ tString expand_home(tString const & pathname) {
         r = pathname;
 
 #ifdef DEBUG
-    if(strcmp(pathname, r))
-    {
-        printf("changed %s to %s\n", (const char *)pathname, (const char *)r);
-    }
+    printf("changed %s to %s\n", (const char *)pathname, (const char *)r);
 #endif
     return r;
 }
@@ -556,7 +518,6 @@ tString expand_home(tString const & pathname) {
 class tPathConfig: public tPath
 {
 public:
-    tPathConfig() {}
 private:
     void Paths ( tArray< tString >& paths ) const
     {
@@ -569,20 +530,6 @@ private:
         {
             paths[ pos++ ] = st_ConfigDir;
         }
-
-#ifdef LEGACY_USER_DATA_DIR
-        if ( st_LegacyUserDataDir.Len() > 1 )
-        {
-            paths[ pos++ ] = st_LegacyUserDataDir + "/config";
-        }
-#endif
-
-#ifdef LEGACY_USER_DATA_DIR2
-        if ( st_LegacyUserDataDir2.Len() > 1 )
-        {
-            paths[ pos++ ] = st_LegacyUserDataDir2 + "/config";
-        }
-#endif
 
         if ( st_UserDataDir.Len() > 1 )
         {
@@ -601,7 +548,6 @@ static const tPathConfig st_Config;
 class tPathData: public tPath
 {
 public:
-    tPathData() {}
 private:
     void Paths ( tArray< tString >& paths ) const
     {
@@ -609,31 +555,6 @@ private:
         int pos = 0;
 
         paths[ pos++ ] = st_DataDir;
-
-
-        // for finding data packet in 0install
-        char const * extradata = getenv("ARMAGETRONAD_EXTRADATA");
-        static bool isThere = extradata;
-        // should probably be spit like proper unix paths, colon separated
-        if( isThere )
-        {
-            static tString ed(extradata);
-            paths[ pos++ ] = ed;
-        }
-
-#ifdef LEGACY_USER_DATA_DIR
-        if ( st_LegacyUserDataDir.Len() > 1 )
-        {
-            paths[ pos++ ] = st_LegacyUserDataDir;
-        }
-#endif
-
-#ifdef LEGACY_USER_DATA_DIR2
-        if ( st_LegacyUserDataDir2.Len() > 1 )
-        {
-            paths[ pos++ ] = st_LegacyUserDataDir2;
-        }
-#endif
 
         if ( st_UserDataDir.Len() > 1 )
         {
@@ -648,7 +569,6 @@ static const tPathData st_Data;
 class tPathMusic: public tPath
 {
 public:
-    tPathMusic() {}
 private:
     void Paths ( tArray< tString >& paths ) const
     {
@@ -687,7 +607,6 @@ const tPathWebroot& tDirectories::Webroot()
 class tPathVar: public tPath
 {
 public:
-    tPathVar() {}
 private:
     void Paths ( tArray< tString >& paths ) const
     {
@@ -695,20 +614,6 @@ private:
         int pos = 0;
 
         paths[ pos++ ] = st_DataDir + "/var";
-
-#ifdef LEGACY_USER_DATA_DIR
-        if ( st_LegacyUserDataDir.Len() > 1 )
-        {
-            paths[ pos++ ] = st_LegacyUserDataDir + "/var";
-        }
-#endif
-
-#ifdef LEGACY_USER_DATA_DIR2
-        if ( st_LegacyUserDataDir2.Len() > 1 )
-        {
-            paths[ pos++ ] = st_LegacyUserDataDir2 + "/var";
-        }
-#endif
 
         if ( st_UserDataDir.Len() > 1 )
         {
@@ -728,7 +633,6 @@ static const tPathVar st_Var;
 class tPathScreenshot: public tPath
 {
 public:
-    tPathScreenshot() {}
 private:
     void Paths ( tArray< tString >& paths ) const
     {
@@ -1057,44 +961,6 @@ void tDirectories::SetIncludedResource( const tString& dir ) {
     st_IncludedResourceDir = dir;
 }
 
-tString const & tDirectories::GetUserData()
-{
-    return st_UserDataDir;
-}
-
-tString const & tDirectories::GetData()
-{
-    return st_DataDir;
-}
-
-tString tDirectories::GetConfig()
-{
-    return st_ConfigDir.Len() > 1 ? st_ConfigDir : (st_DataDir + "/config");
-}
-
-tString tDirectories::GetUserConfig()
-{
-    return st_UserConfigDir.Len() > 1 ? st_UserConfigDir : (st_UserDataDir + "/config");
-}
-
-static tString st_BuildCWD()
-{
-#define MAX_CWD 1000
-
-#ifdef WIN32
-#define getcwd _getcwd
-#endif
-
-    char buffer[MAX_CWD+2];
-    return tString( getcwd( buffer, MAX_CWD ) );
-}
-
-tString const & tDirectories::GetCWD()
-{
-    static tString ret = st_BuildCWD();
-    return ret;
-}
-
 /*
  * robust glob pattern matcher
  * ozan s. yigit/dec 1994
@@ -1169,7 +1035,7 @@ bool tDirectories::FileMatchesWildcard(const char *str, const char *pattern,
         case '\\':
             if (*pattern)
                 c = *pattern++;
-            [[fallthrough]];
+
         default:
             if (ignoreCase)
             {
@@ -1478,102 +1344,25 @@ static tString GetParent( char const * child, int levels )
 {
     tString ret( child );
 
-// TODO Add windows support for this behavior.
-#ifndef WIN32    
-    if ( ret == "." )
-    {
-        ret = "";
-    }
-    // If it's a relative path, ensure it starts with "./"
-    else if ( ret.compare( 0, 1, "/" ) != 0 && ret.compare( 0, 2, "./" ) != 0 )
-    {
-        ret = "./" + ret;
-    }
-    bool isRelative = ret.compare( 0, 1, "/" ) != 0;
-#endif
-
-    // strip the requested number of path segments
+    // strip last two path segments
     int toStrip = levels;
     int stripCurrent = ret.Size()-1;
     while (stripCurrent >= 0 && toStrip > 0)
     {
-        const char & c = ret[ stripCurrent ];
+        char & c = ret[ stripCurrent ];
         // count separators
         if (c == '/' || c == '\\' || c == ':')
             --toStrip;
+        c=0;
         --stripCurrent;
     }
-    ret.erase( stripCurrent + 1 );
-
-// TODO Add windows support for this behavior.
-#ifndef WIN32    
-    if ( toStrip && isRelative )
-    {
-        // No more path segments to strip, but we still need to go down more levels
-        tString moreLevels;
-        for (int i = 0; i < toStrip; i++)
-        {
-            // We don't want the path to end with a "/"
-            if (i > 0)
-                moreLevels += "/";
-            moreLevels += "..";
-        }
-        ret = moreLevels + ret;
-    }
-    else if ( ret == "" )
-    {
-        ret = isRelative ? "." : "/";
-    }
-#endif
 
 #ifdef DEBUG_PATH
-    std::cout << "Parent (levels=" << levels << "): " << ret << "\n";
+    std::cout << "Parent: " << ret << "\n";
 #endif
-    return ret;
+
+    return tString(static_cast<char const *>(ret));
 }
-
-#if 0
-struct TestGetParent
-{
-    TestGetParent()
-    {
-        std::cout << "== Testing GetParent()\n";
-
-        Test("./path/to/file", 1, "./path/to");
-        Test("./path/to/file", 2, "./path");
-        Test("./path/to/file", 3, ".");
-        Test("./path/to/file", 4, "..");
-        Test("./path/to/file", 5, "../..");
-        
-        Test( "path/to/file", 1, "./path/to" );
-        Test( "path/to/file", 2, "./path" );
-        Test( "path/to/file", 3, "." );
-        Test( "path/to/file", 4, ".." );
-        Test( "path/to/file", 5, "../.." );
-        
-        Test("/path/to/file", 1, "/path/to");
-        Test("/path/to/file", 2, "/path");
-        Test("/path/to/file", 3, "/");
-        Test("/path/to/file", 4, "/");
-        
-        Test( ".", 1, ".." );
-        Test( ".", 2, "../.." ),
-        Test( ".", 3, "../../.." ),
-
-        exit(0);
-    }
-    void Test( char const *path, int levels, char const *expectedPath )
-    {
-        tString gotPath = GetParent( path, levels );
-        if ( gotPath != expectedPath )
-        {
-            std::cout << "TEST FAILURE\npath=" << path << " levels=" << levels << '\n';
-            std::cout << "Got '" << gotPath << "', but expected '" << expectedPath << "'\n\n";
-        }
-    }
-};
-static TestGetParent st_getParentTests;
-#endif
 
 //! Class holding our best guess of the path to the binary executable
 class tPathToExecutable
@@ -1704,7 +1493,6 @@ static tString AddPrefix( const char * suffix )
 */
 
 #ifndef WIN32
-#ifndef MACOSX_XCODE
 static tString st_RelocatePath( tString const & original )
 {
     // fetch prefix as it was compiled in
@@ -1725,20 +1513,14 @@ static tString st_RelocatePath( tString const & original )
     }
 }
 #endif
-#endif
 
 // tries to find the path to the data files, given the location of the executable
 static void FindDataPath()
 {
-#if defined(WIN32)
+#ifndef MACOSX_XCODE
+#ifdef WIN32
     // look for data in the same directory as the executable
     if ( TestDataPath(GetParent(st_pathToExecutable.Get(), 1) ) ) return;
-#elif defined(MACOSX_XCODE)
-#ifdef DEDICATED
-    if ( TestDataPath( GetParent( st_pathToExecutable.Get(), 2 ) ) ) return;
-#else
-    if ( TestDataPath( GetParent( st_pathToExecutable.Get(), 2 ) + "/Resources" ) ) return;
-#endif
 #else
     // try to use path substitution
     if ( TestDataPath( st_RelocatePath( tString(AA_DATADIR ) ) ) ) return;
@@ -1752,6 +1534,7 @@ static void FindDataPath()
 #ifdef DEBUG_PATH
     tERR_MESSAGE("Could not determine path to data files. Using defaults or command line arguments.\n");
 #endif
+#endif // !MACOSX_XCODE
 }
 
 // tries to find the path to the configuration files, given the location of the executable
@@ -1761,21 +1544,12 @@ static void FindConfigurationPath()
 #ifndef WIN32
     if ( TestConfigurationPath( st_RelocatePath( tString( AA_SYSCONFDIR ) ) ) ) return;
 #endif
-#endif
 
     // look for configuration where the data is
-    if ( TestConfigurationPath(st_DataDir + "/config") )
-    {
-        return;
-    }
-#ifdef MACOSX_XCODE
-    else if ( TestPath( st_DataDir, "Makefile" ) )
-    {
-        throw tRunningInBuildDirectory();
-    }
-#endif
+    if ( TestConfigurationPath(st_DataDir + "/config") ) return;
 
     tERR_WARN("Could not determine path to configuration files. Using defaults or command line arguments.\n");
+#endif // !MACOSX_XCODE
 }
 
 // tries to read a direcory type argument from the command line parser; result is written
@@ -1792,71 +1566,44 @@ static bool ReadDir( tCommandLineParser & parser, tString & target, const char* 
     return false;
 }
 
-void tDirectoriesCommandLineAnalyzer::DoInitialize( tCommandLineParser & parser )
+class tDirectoriesCommandLineAnalyzer: public tCommandLineAnalyzer
 {
-    // Puts the data files in the executable's bundle
-    try
+private:
+    virtual void DoInitialize( tCommandLineParser & parser )
     {
-        st_pathToExecutable.Set( parser.Executable() );
-        FindDataPath();
-        FindConfigurationPath();
+        // Puts the data files in the executable's bundle
+#ifndef MACOSX_XCODE
+        try
+        {
+            st_pathToExecutable.Set( parser.Executable() );
+            FindDataPath();
+            FindConfigurationPath();
+        }
+        catch( tRunningInBuildDirectory )
+        {
+            // last fallback for debugging (activated only if there is data in the current directory)
+            if ( TestPath( ".", "language/languages.txt") && TestDataPath(s_topSourceDir) && TestConfigurationPath(st_DataDir + "/config") )
+            {
+                // we must be running the game in debug mode; set user data dir to current directory.
+                st_UserDataDir = ".";
 
-#ifdef LEGACY_USER_DATA_DIR
-        // blank out legacy user data dir if it matches the real user data dir
-        if ( st_UserDataDir == st_LegacyUserDataDir )
-        {
-            st_LegacyUserDataDir = "";
+                // the included resources are scrambled and put into the current directory as well.
+                st_IncludedResourceDir = "./resource/included";
+                return;
+            }
         }
-#endif
+#endif // !MACOSX_XCODE
 
-#ifdef LEGACY_USER_DATA_DIR2
-        // blank out legacy user data dir if it matches the real user data dir
-        if ( st_UserDataDir == st_LegacyUserDataDir2 )
-        {
-            st_LegacyUserDataDir2 = "";
-        }
-#ifdef LEGACY_USER_DATA_DIR
-        // blank out legacy user data dir if it matches the other legacy user data dir
-        if ( st_LegacyUserDataDir == st_LegacyUserDataDir2 )
-        {
-            st_LegacyUserDataDir2 = "";
-        }
-#endif
-#endif
+
     }
-    catch( tRunningInBuildDirectory )
+
+    virtual bool DoAnalyze( tCommandLineParser & parser )
     {
-        // last fallback for debugging (activated only if there is data in the current directory)
-        if ( TestPath( ".", "language/languages.txt") && TestDataPath(s_topSourceDir) && TestConfigurationPath(st_DataDir + "/config") )
-        {
-            // we must be running the game in debug mode; set user data dir to current directory.
-            st_UserDataDir = ".";
-            st_UserConfigDir = "./userconfig";
-
-            // the included resources are scrambled and put into the current directory as well.
-            st_IncludedResourceDir = "./resource/included";
-
-#ifdef LEGACY_USER_DATA_DIR
-            st_LegacyUserDataDir = "";
-#endif
-#ifdef LEGACY_USER_DATA_DIR2
-            st_LegacyUserDataDir2 = "";
-#endif
-            return;
-        }
-    }
-}
-
-bool tDirectoriesCommandLineAnalyzer::DoAnalyze( tCommandLineParser & parser )
-{
-    if( ReadDir( parser, st_DataDir, "--datadir" ) ) return true;
-    if( ReadDir( parser, st_UserDataDir, "--userdatadir" ) ) return true;
-    if( ReadDir( parser, st_ConfigDir, "--configdir" ) ) return true;
-    if( ReadDir( parser, st_UserConfigDir, "--userconfigdir" ) ) return true;
-    if( ReadDir( parser, st_VarDir, "--vardir" ) ) return true;
-    
-    if ( enableExtraOptions_ )
-    {
+        if( ReadDir( parser, st_DataDir, "--datadir" ) ) return true;
+        if( ReadDir( parser, st_UserDataDir, "--userdatadir" ) ) return true;
+        if( ReadDir( parser, st_ConfigDir, "--configdir" ) ) return true;
+        if( ReadDir( parser, st_UserConfigDir, "--userconfigdir" ) ) return true;
+        if( ReadDir( parser, st_VarDir, "--vardir" ) ) return true;
         if( ReadDir( parser, st_ResourceDir, "--resourcedir" ) ) return true;
         if( ReadDir( parser, st_AutoResourceDir, "--autoresourcedir" ) ) return true;
 
@@ -1884,24 +1631,20 @@ bool tDirectoriesCommandLineAnalyzer::DoAnalyze( tCommandLineParser & parser )
             throw 1;
             return true;
         }
+
+        return false;
     }
 
-    return false;
-}
-
-void tDirectoriesCommandLineAnalyzer::DoHelp( std::ostream & s )
-{                                      //
-    s << "--datadir <Directory>        : read game data (textures, sounds and texts)\n"
-    <<   "                               from this directory\n";
-    s << "--userdatadir <Directory>    : read customized game data from this directory\n";
-    s << "--configdir <Directory>      : read game configuration (.cfg-files)\n"
-    <<   "                               from this directory\n";
-    s << "--userconfigdir <Directory>  : read user game configuration from this directory\n";
-    s << "--vardir <Directory>         : save game logs and highscores in this directory\n";
-    
-    if ( enableExtraOptions_ )
-    {
-        s << "\n--resourcedir <Directory>    : look for resources in this directory\n\n";
+    virtual void DoHelp( std::ostream & s )
+    {                                      //
+        s << "--datadir <Directory>        : read game data (textures, sounds and texts)\n"
+        <<   "                               from this directory\n";
+        s << "--userdatadir <Directory>    : read customized game data from this directory\n";
+        s << "--configdir <Directory>      : read game configuration (.cfg-files)\n"
+        <<   "                               from this directory\n";
+        s << "--userconfigdir <Directory>  : read user game configuration from this directory\n";
+        s << "--vardir <Directory>         : save game logs and highscores in this directory\n\n";
+        s << "--resourcedir <Directory>    : look for resources in this directory\n\n";
         s << "--autoresourcedir <Directory>: download missing resources into this directory\n\n";
         s << "--path-no-absolutecheck      : disables security check against absolute paths\n";
         s << "--path-no-hiddencheck        : disables security check against hidden paths\n";
@@ -1909,7 +1652,7 @@ void tDirectoriesCommandLineAnalyzer::DoHelp( std::ostream & s )
         <<   "                               Not recommended, this check is really important.\n\n";
         s << "--prefix                     : prints the prefix the game was installed to\n";
     }
-}
+};
 
 static tDirectoriesCommandLineAnalyzer analyzer;
 
@@ -1924,25 +1667,10 @@ tString tPath::GetPaths(void) const {
     return ret;
 }
 
-tString tPath::GetPaths(char const * delimiter, char const * finalizer) const {
-    tString ret;
-    tArray<tString> paths;
-    Paths(paths);
-    for (int i = 0; i < paths.Len(); ++i) {
-        ret << paths[i];
-        ret << ( (i == paths.Len() - 1) ? finalizer : delimiter );
-    }
-    return ret;
-}
-
 extern char *st_userConfigs[];
 void st_PrintPathInfo(tOutput &buf) {
     tString const hcol("0xff8888");
-    const char * userCfg = "user_3_1_utf8.cfg";
-    string uc = tDirectories::Config().GetReadPath(userCfg);
-    if(uc.size() <= 1)
-        uc = tDirectories::Var().GetReadPath(userCfg);
-    buf << hcol << "$path_info_user_cfg"   << "0xRESETT\n   " << uc << "\n"
+    buf << hcol << "$path_info_user_cfg"   << "0xRESETT\n   " << tDirectories::Var().GetReadPath("user.cfg") << "\n"
     << hcol << "$path_info_config"     << "0xRESETT\n" << tDirectories::Config().GetPaths()
     << hcol << "$path_info_resource"   << "0xRESETT\n" << tDirectories::Resource().GetPaths()
     << hcol << "$path_info_data"       << "0xRESETT\n" << tDirectories::Data().GetPaths()

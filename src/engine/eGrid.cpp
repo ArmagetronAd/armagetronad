@@ -167,7 +167,7 @@ inline void eHalfEdge::Unlink()
 {
     if (point && this == point->edge)
     {
-        if (prev && prev->other)
+        if (prev && prev->other && prev->other)
             point->edge = prev->other;
         else if (other && other->next)
             point->edge = other->next;
@@ -359,7 +359,7 @@ eFaceScorePair se_FindBestReplacement( const eFace *old, eFaceReplacementArgumen
 {
     // return invalid return if the face was already visited
     if ( arg.visited.find( old ) != arg.visited.end() )
-        return eFaceScorePair( 0, -se_maxGridSize*se_maxGridSize );
+        return eFaceScorePair( 0, -se_maxGridSize );
 
     // register face as visited
     arg.visited.insert( old );
@@ -374,7 +374,7 @@ eFaceScorePair se_FindBestReplacement( const eFace *old, eFaceReplacementArgumen
         // iterate it
 
         // the currently best face/insideness pair
-        std::pair< eFace*, REAL > best( 0, -se_maxGridSize*se_maxGridSize );
+        std::pair< eFace*, REAL > best( 0, -100000 );
         for( eReplacementStorage::const_iterator i = storage.begin(); i != storage.end(); ++i )
         {
             // the current face/insideness pair
@@ -396,10 +396,8 @@ eFaceScorePair se_FindBestReplacement( const eFace *old, eFaceReplacementArgumen
                 current = se_FindBestReplacement( face, arg );
             }
 
-            if ( ( current.second > best.second && current.first ) || !best.first )
-            {
+            if ( current.second > best.second && current.first )
                 best = current;
-            }
         }
 
         return best;
@@ -728,7 +726,7 @@ ePoint * eGrid::DrawLine(ePoint *start, const eCoord &end, eWall *w, bool change
     //tJUST_CONTROLLED_PTR< eWall > wal( w );
 
     // sanity check
-    if ( !isfinite( end.x ) || !isfinite( end.y ) )
+    if ( !finite( end.x ) || !finite( end.y ) )
         return start;
 
     Range(end.NormSquared());

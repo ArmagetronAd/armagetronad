@@ -49,8 +49,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 // This is a little ugly, open to suggestions :)
 tResourceManager::Reference tResourceManager::__inst = tResourceManager::Reference(new tResourceManager() );
-tResourceTypeMap st_resourceList;
-tResourceTypeMap* tResourceManager::m_ResourceList = &st_resourceList;
+tResourceTypeMap* tResourceManager::m_ResourceList = new tResourceTypeMap();
 
 /** The constructor for tResourceManager. */
 tResourceManager::tResourceManager() {
@@ -140,7 +139,7 @@ static int myHTTPFetch(const char *URI, const char *filename, const char *savepa
     }
 
     fd = fopen(savepath, "wb");
-    if (fd == 0) {
+    if (fd < 0) {
         xmlNanoHTTPClose(ctxt);
         con << tOutput( "$resource_no_write", savepath );
         return 3;
@@ -176,9 +175,9 @@ static int myFetch(const char *URIs, const char *filename, const char *savepath)
         (p = strchr(r, ';')) ? 0 : (p = strchr(r, '\0'));
         n = (p[0] == '\0') ? p : (p + 1);	// next item starts after the semicolon
         // NOTE: skip semicolons, *NOT* nulls
-        while (p[-1] == ' ' && p > r) --p;			// skip spaces at the end of the item
-        if (p > r) {						// skip this for null-length items
-            len = (size_t)(p - r);
+        while (p[-1] == ' ') --p;			// skip spaces at the end of the item
+        len = (size_t)(p - r);
+        if (len > 0) {						// skip this for null-length items
             u = (char*)malloc((len + 1) * sizeof(char));
             strncpy(u, r, len);
             u[len] = '\0';					// u now contains the individual URI
@@ -202,12 +201,10 @@ parameter is required.
 Parameters:
 uri: The full uri to obtain the ressource
 filename: The filename to use for the local ressource
-fullPath: determines the type of the return path
-forceFetch: if true, existence in the cache is ignored
-Return the path to the resource, relative to resources if fullPath is false, absolute or relative to the working directory otherwise.
+Return a file handle to the ressource
 NOTE: There must be *at least* one directory level, even if it is ./
 */
-tString tResourceManager::locateResource(const char *file, const char *uri, bool fullPath, bool forceFetch) {
+tString tResourceManager::locateResource(const char *file, const char *uri, bool fullPath) {
     tString filepath, a_uri = tString(), savepath, resourcepath;
     int rv;
 
@@ -239,48 +236,33 @@ tString tResourceManager::locateResource(const char *file, const char *uri, bool
                 free( nf );
             }
         }
-        // Otherwise, it's a plain resource path without explicit URL
-        else
-        {
-            resourcepath = file;
-        }
     }
     // Validate paths and determine detination savepath
     if (!file || file[0] == '\0') {
         con << tOutput( "$resource_no_filename" );
-        free( to_free );
         return (tString) NULL;
     }
     if (file[0] == '/' || file[0] == '\\') {
         con << tOutput( "$resource_abs_path" );
-        free( to_free );
         return (tString) NULL;
     }
-
-    if( !forceFetch )
-    {
-        // Do we have this file locally ?
-        filepath = tDirectories::Resource().GetReadPath(file);
-
-        if (filepath != "")
-        {
-            if ( NULL != to_free )
-                free( to_free );
-            if ( fullPath )
-                return filepath;
-            else
-                return resourcepath;
-        }
-
-        con << tOutput( "$resource_not_cached", file );
-    }
-
-    // determine place to save the resource
     savepath = tDirectories::Resource().GetWritePath(file);
     if (savepath == "") {
         con << tOutput( "$resource_no_writepath" );
-        free( to_free );
         return (tString) NULL;
+    }
+
+    // Do we have this file locally ?
+    filepath = tDirectories::Resource().GetReadPath(file);
+
+    if (filepath != "")
+    {
+        if ( NULL != to_free )
+            free( to_free );
+        if ( fullPath )
+            return filepath;
+        else
+            return resourcepath;
     }
 
     // Some sort of File not found
@@ -293,6 +275,8 @@ tString tResourceManager::locateResource(const char *file, const char *uri, bool
 
     if ( AccessRepoClient().Len() > 2 && AccessRepoClient() != AccessRepoServer() )
         a_uri << AccessRepoClient() << file << ';';
+
+    con << tOutput( "$resource_not_cached", file );
 
     rv = myFetch((const char *)a_uri, file, (const char *)savepath);
 
@@ -405,21 +389,19 @@ tResourcePath::tResourcePath(tString const &Author,
     m_URI      (URI      ),
     m_Valid(false) {
     m_Path << Author << '/';
-    if(!Category.empty()) {
-        m_Path << Category << '/';
-    }
-    m_Path << Name << '-' << Version << '.' << Type << '.' << Extension;
-    if(!URI.empty()) {
-        m_Path << '(' << URI << ')';
-    }
     if(!st_checkAuthor(Author)) return;
     if(!Category.empty()) {
         if(!st_checkCategory(Category)) return;
+        m_Path << Category << '/';
     }
     if(!st_checkName(Name)) return;
     if(!st_checkExtension(Extension)) return;
     if(!st_checkType(Extension)) return;
     if(!st_checkVersion(Version)) return;
+    m_Path << Name << '-' << Version << '.' << Type << '.' << Extension;
+    if(!URI.empty()) {
+        m_Path << '(' << URI << ')';
+    }
     m_Valid = true;
 }
 

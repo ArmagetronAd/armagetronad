@@ -86,8 +86,10 @@ static tSettingItem<bool> sg_("DEBUG_GNUPLOT",sg_gnuplotDebug);
 static REAL sg_minDropInterval=0.05;
 static tSettingItem< REAL > sg_minDropIntervalConf( "CYCLE_MIN_WALLDROP_INTERVAL", sg_minDropInterval );
 
+#ifdef DEDICATED
 static bool sg_predictWalls=true;
 static tSettingItem< bool > sg_predictWallsConf( "PREDICT_WALLS", sg_predictWalls );
+#endif
 
 //  *****************************************************************
 

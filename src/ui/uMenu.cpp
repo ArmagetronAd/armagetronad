@@ -1110,12 +1110,13 @@ void uAutoCompleter::ShowPossibilities(std::deque<tString> &results, tString &wo
         con << tOutput("$tab_completion_results");
         tString::size_type len=word.length();
         for(std::deque<tString>::iterator i=results.begin(); i!=results.end(); ++i) {
-            tString::size_type pos=(m_ignorecase?Simplify(*i):*i).find(word);
-            con << i->SubStr(0,pos)
+            tString result = m_ignorecase ? Simplify( *i ) : *i;
+            tString::size_type pos= result.find(word);
+            con << result.SubStr(0,pos)
             << "0xff8888"
-            << i->SubStr(pos, len)
+            << result.SubStr(pos, len)
             << "0xffffff"
-            << i->SubStr(pos+len)
+            << result.SubStr(pos+len)
             << "\n";
         }
     }

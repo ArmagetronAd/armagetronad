@@ -820,14 +820,14 @@ void se_SecretConsoleOut( tOutput const & message, ePlayerNetID const * hider, H
     }
     else
     {
-        // well, the admin will want to see it.
-        con << message;
-
         bool canSee[ MAXCLIENTS+1 ];
         for( int i = MAXCLIENTS; i>=0; --i )
         {
             canSee[i] = false;
         }
+        
+        // well, the admin will want to see it.
+        canSee[0] = true;
 
         // look which clients have someone who can see the message
         for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
@@ -1518,57 +1518,78 @@ static void se_DisplayChatLocally( ePlayerNetID* p, const tString& say )
 static bool se_enableNameHilighting=true; // maximal size of chat history
 static tSettingItem< bool > se_enableNameHilightingConf("ENABLE_NAME_HILIGHTING",se_enableNameHilighting);
 
+static bool se_silenceEnemies = false;
+static tSettingItem< bool > se_silenceEnemiesConf( "SILENCE_ENEMIES", se_silenceEnemies );
+
+static void se_HighlightName( tString const & name, tString & message )
+{
+    if ( name.size() > 0 )
+    {
+        //find all occureces of the name...
+        for(tString::size_type pos = message.find(name); pos != tString::npos; pos = message.find(name, pos+16)) {
+            //find the last color code
+            tString::size_type lastcolorpos = message.rfind("0x", pos);
+            tString lastcolorstring;
+            if(lastcolorpos != tString::npos) {
+                lastcolorstring = message.SubStr(lastcolorpos, 8);
+            } else {
+                lastcolorstring = "0xffff7f";
+            }
+            
+            if(lastcolorpos == 0 || lastcolorpos >= pos - 8) {
+                //the name we matched is within a color code... bad idea to substitute it.
+                pos -= 16 - name.size();
+                continue;
+            }
+            
+            //actually insert the color codes around the name
+            message.insert(pos+name.size(), lastcolorstring);
+            message.insert(pos, "0xff887f");
+        }
+    }
+}
+
 static void se_DisplayChatLocallyClient( ePlayerNetID* p, const tString& message )
 {
     if ( p && !p->IsSilenced() && se_enableChat )
     {
-        if (!p->Object() || !p->Object()->Alive()) {
-            con << tOutput("$dead_console_decoration");
-        }
-
         tString actualMessage(message);
 
-        if(se_enableNameHilighting) {
-            //iterate through players...
+        bool sentFromTeamMember = false;
+        if( se_enableNameHilighting || se_silenceEnemies )
+        {
             rViewportConfiguration* viewportConfiguration = rViewportConfiguration::CurrentViewportConfiguration();
             if(viewportConfiguration == 0) return;
+            
+            
             for ( int viewport = viewportConfiguration->num_viewports-1; viewport >= 0; --viewport ) {
-                int playerID = sr_viewportBelongsToPlayer[ viewport ];
-
-                // get the player
-                ePlayer* player = ePlayer::PlayerConfig( playerID );
-                if(player == 0) continue;
-                ePlayerNetID* netPlayer = player->netPlayer;
-                if(netPlayer == 0) continue;
-                if(netPlayer == p) continue; //the same player who chatted, no point in hilighting
-                tString const &name = netPlayer->GetName();
-
-                if ( name.size() > 0 )
+                ePlayer* player = ePlayer::PlayerConfig( sr_viewportBelongsToPlayer[ viewport ] );
+                
+                if ( !player )
+                    continue;
+                
+                ePlayerNetID *me = player->netPlayer;
+                if ( me )
                 {
-                    //find all occureces of the name...
-                    for(tString::size_type pos = actualMessage.find(name); pos != tString::npos; pos = actualMessage.find(name, pos+16)) {
-                        //find the last color code
-                        tString::size_type lastcolorpos = actualMessage.rfind("0x", pos);
-                        tString lastcolorstring;
-                        if(lastcolorpos != tString::npos) {
-                            lastcolorstring = actualMessage.SubStr(lastcolorpos, 8);
-                        } else {
-                            lastcolorstring = "0xffff7f";
-                        }
-
-                        if(lastcolorpos == 0 || lastcolorpos >= pos - 8) {
-                            //the name we matched is within a color code... bad idea to substitute it.
-                            pos -= 16 - name.size();
-                            continue;
-                        }
-
-                        //actually insert the color codes around the name
-                        actualMessage.insert(pos+name.size(), lastcolorstring);
-                        actualMessage.insert(pos, "0xff887f");
+                    if ( se_enableNameHilighting && me != p )
+                        se_HighlightName( me->GetName(), actualMessage );
+                    
+                    if ( se_silenceEnemies )
+                    {
+                        // If we're dead, display all chat
+                        if ( ( !me->Object() || !me->Object()->Alive() ) || me->CurrentTeam() == p->CurrentTeam() )
+                            sentFromTeamMember = true;
                     }
                 }
             }
         }
+        
+        if ( se_silenceEnemies && !sentFromTeamMember )
+            return;
+        
+        if (!p->Object() || !p->Object()->Alive())
+            con << tOutput("$dead_console_decoration");
+        
         con << actualMessage << "\n";
     }
 }
@@ -4502,6 +4523,16 @@ protected:
     {
         tString name;
         s >> name;
+        
+        if ( name == "" )
+        {
+            tString usageKey("$");
+            usageKey += GetTitle();
+            usageKey += "_usage";
+            tToLower( usageKey );
+            con << tOutput( (const char *)usageKey );
+            return;
+        }
 
         TransformName( name );
 
@@ -4961,7 +4992,7 @@ public:
 
         if ( alias == "" )
         {
-            con << tOutput( "$alias_usage" );
+            con << tOutput( "$user_alias_usage" );
             return GetDefault();
         }
 
