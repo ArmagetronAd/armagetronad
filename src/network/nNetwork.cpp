@@ -1522,7 +1522,6 @@ void sn_LoginHandler_intermediate( nMessage &m )
     if ( !m.End() )
     {
         // read authentication methods
-        tString supportedAuthenticationMethods("");
         m >> supportedAuthenticationMethods;
     }
     login.set_authentication_methods( supportedAuthenticationMethods );
