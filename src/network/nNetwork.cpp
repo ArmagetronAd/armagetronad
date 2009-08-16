@@ -1507,6 +1507,8 @@ void sn_LoginHandler_intermediate( nMessage &m )
         login.set_big_brother( rem_bb );
     }
 
+    tString supportedAuthenticationMethods("");
+
     // read version and suppored authentication methods
     if ( !m.End() )
     {
@@ -1514,14 +1516,16 @@ void sn_LoginHandler_intermediate( nMessage &m )
         nVersion version;
         m >> version;
         version.WriteSync( *login.mutable_version() );
+
+        supportedAuthenticationMethods = "bmd5";
     }
     if ( !m.End() )
     {
         // read authentication methods
         tString supportedAuthenticationMethods("");
         m >> supportedAuthenticationMethods;
-        login.set_authentication_methods( supportedAuthenticationMethods );
     }
+    login.set_authentication_methods( supportedAuthenticationMethods );
     if ( !m.End() )
     {
         // also read a login salt, the client expects to get it returned verbatim
