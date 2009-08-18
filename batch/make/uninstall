@@ -53,7 +53,7 @@ chmod 755 ${RM} || exit 1
 OLDPATH=$PATH
 PATH=${TMPBIN}:$OLDPATH
 export PATH
-AA_FAKE_UNINSTALL="YES" DESTDIR=DESTDIR_UNINSTALL ${MAKE} uninstall > /dev/null || exit 1
+AA_FAKE_UNINSTALL="YES" DESTDIR=$DESTDIR_UNINSTALL ${MAKE} uninstall > /dev/null || exit 1
 
 # remove the wrapper
 PATH=$OLDPATH

@@ -2204,6 +2204,11 @@ static void se_ChangeAccess( ePlayerNetID * admin, std::istream & s, char const 
             }
         }
 
+        if ( !isexplicit && victim->IsAuthenticated() )
+        {
+            level = se_opAccessLevelMax;
+        }
+
         s >> level;
 
         // Make a last safety check on the given AL, then DON'T TOUCH IT ANYMORE
