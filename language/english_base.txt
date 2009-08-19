@@ -2308,6 +2308,7 @@ player_allowed_rename		\1 0x7fff7fis allowed to rename again.\n
 player_disallowed_rename	\1 0xff7f7fis not allowed to rename anymore.\n
 player_welcome			\n\nWelcome \1! This server is running version \2.\n
 player_win_default		\1 got \2 points for a very strange reason.\n
+player_koh_score        \1 Wins \2 points for being The King of the Hill\n
 player_lose_default		\1 lost \2 points for a very strange reason.\n
 player_lose_suicide		\1 committed suicide and lost \2 points.\n
 player_lose_deathzone	\1 exploded on a deathzone and lost \2 points.\n

@@ -3815,7 +3815,7 @@ void gBallZoneHack::OnEnter( gCycle * target, REAL time )
 		return;
 
 	REAL r1 = this->GetRadius();
-	REAL r2 = target->Player()->ping/.2;				 // the cycle "radius". accomidates for higher ping players
+	REAL r2 = target->Player()->ping/.2;                             // the cycle "radius". accomidates for higher ping players
 	REAL R = r1 + r2;
 	eCoord p1 = this->Position();
 	eCoord dp = p2 - p1;
@@ -4900,6 +4900,237 @@ void gTargetZoneHack::OnVanish( void )
 
 // *******************************************************************************
 // *
+// *	gKOHZoneHack settings
+// *
+// *******************************************************************************
+
+// score added to a player that has been in the zone for KOH_SCORE_TIME
+static int sg_kohScore = 1;
+static tSettingItem<int> sg_kohScoreConf( "KOH_SCORE", sg_kohScore );
+
+// the interval that KOH_SCORE is added
+static int sg_kohScoreTime = 5;
+static tSettingItem<int> sg_kohScoreTimeConf( "KOH_SCORE_TIME", sg_kohScoreTime );
+
+// *******************************************************************************
+// *
+// *	gKOHZoneHack
+// *
+// *******************************************************************************
+//!
+//!		@param	grid Grid to put the zone into
+//!		@param	pos	 Position to spawn the zone at
+//!
+// *******************************************************************************
+
+gKOHZoneHack::gKOHZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreation)
+:gZone( grid, pos, dynamicCreation )
+{
+	color_.r = 1.0f;
+	color_.g = 1.0f;
+	color_.b = 1.0f;
+
+	PlayersInside_=0;
+	EnteredTime_ = -1;
+    owner_=NULL;
+	grid->AddGameObjectInteresting(this);
+
+	SetExpansionSpeed(0);
+	SetRotationSpeed( .5f );
+	RequestSync();
+}
+
+
+// *******************************************************************************
+// *
+// *	gKOHZoneHack
+// *
+// *******************************************************************************
+//!
+//!		@param	m Message to read creation data from
+//!		@param	null
+//!
+// *******************************************************************************
+
+gKOHZoneHack::gKOHZoneHack( nMessage & m )
+: gZone( m )
+{
+	PlayersInside_=0;
+	EnteredTime_ = -1;
+    owner_=NULL;
+}
+
+
+// *******************************************************************************
+// *
+// *	~gKOHZoneHack
+// *
+// *******************************************************************************
+//!
+//!
+// *******************************************************************************
+
+gKOHZoneHack::~gKOHZoneHack( void )
+{
+}
+
+
+// *******************************************************************************
+// *
+// *	Timestep
+// *
+// *******************************************************************************
+//!
+//!		@param	time    the current time
+//!
+// *******************************************************************************
+
+bool gKOHZoneHack::Timestep( REAL time )
+{
+    if (PlayersInside_ > 0){
+        int totalInside=0;
+        float r = GetRadius();
+        float rr = r*r;
+        for(int i = se_PlayerNetIDs.Len()-1; i >=0; --i)
+        {
+            ePlayerNetID *player = se_PlayerNetIDs(i);
+            if(!player)
+            {
+                continue;
+            }
+            gCycle *cycle = dynamic_cast<gCycle *>(player->Object());
+            if(!cycle)
+            {
+                continue;
+            }
+            if(cycle->Alive() && (cycle->Position() - Position()).NormSquared() < rr)
+            {
+                totalInside++;
+            }
+        }
+        if (totalInside == 1){
+            for(int i = se_PlayerNetIDs.Len()-1; i >=0; --i)
+            {
+                ePlayerNetID *player = se_PlayerNetIDs(i);
+                if(!player)
+                {
+                    continue;
+                }
+                gCycle *cycle = dynamic_cast<gCycle *>(player->Object());
+                if(!cycle)
+                {
+                    continue;
+                }
+                if(cycle->Alive() && (cycle->Position() - Position()).NormSquared() < rr)
+                {
+                    if (owner_ != cycle){
+                        owner_=cycle;
+                        color_.r = owner_->Player()->r/15.0;
+                        color_.g = owner_->Player()->g/15.0;
+                        color_.b = owner_->Player()->b/15.0;
+                        RequestSync();
+                        EnteredTime_=time;
+                    }
+                }
+            }
+        }else{
+            owner_=NULL;
+            EnteredTime_=-1;
+            color_.r = 1.0;
+            color_.g = 1.0;
+            color_.b = 1.0;
+            RequestSync();
+        }
+        PlayersInside_=totalInside;
+    }
+    
+    // check if the flag is owned
+	if (owner_ && PlayersInside_ ==1)
+	{
+		ePlayerNetID *player = owner_->Player();
+
+		if ((player) &&
+			(sg_kohScoreTime > 0) &&
+			(time >= (EnteredTime_ + sg_kohScoreTime)))
+		{
+			tColoredString playerName;
+			playerName << *player << tColoredString::ColorString(1,1,1);
+            owner_->Player()->AddScore( sg_kohScore, "$player_koh_score", tOutput());
+            EnteredTime_=time;
+            
+		}
+	}
+    
+
+	// delegate
+	bool returnStatus = gZone::Timestep( time );
+
+	return (returnStatus);
+}
+
+
+// *******************************************************************************
+// *
+// *	OnEnter
+// *
+// *******************************************************************************
+//!
+//!		@param	target  the cycle that has been found inside the zone
+//!		@param	time    the current time
+//!
+// *******************************************************************************
+
+void gKOHZoneHack::OnEnter( gCycle * target, REAL time )
+{
+	// make sure target and player are OK
+	if ((!target) ||
+		(!target->Player())|| (owner_== target))
+	{
+		return;
+	}
+
+	// keep first player in memory, if it's the last zone, he is the winner ...
+	if (!owner_)
+	{
+		owner_= target;
+		EnteredTime_ = time;
+        PlayersInside_++;
+        color_.r = target->Player()->r/15.0;
+        color_.g = target->Player()->g/15.0;
+        color_.b = target->Player()->b/15.0;
+        RequestSync();
+	}
+    else
+    {
+        owner_= NULL;
+        EnteredTime_ = -1;
+        PlayersInside_++;
+        color_.r = 1.0;
+        color_.g = 1.0;
+        color_.b = 1.0;
+        RequestSync(); 
+    }
+
+}
+
+
+// *******************************************************************************
+// *
+// *	OnVanish
+// *
+// *******************************************************************************
+
+void gKOHZoneHack::OnVanish( void )
+{
+	owner_= NULL;
+    EnteredTime_ = -1;
+    PlayersInside_=0;
+    grid->RemoveGameObjectInteresting(this);
+}
+
+
+// *******************************************************************************
+// *
 // *	gTeleportZoneHack
 // *
 // *******************************************************************************
@@ -5427,11 +5658,14 @@ static void sg_CreateZone_conf(std::istream &s)
 	{
 		Zone = tNEW( gBlastZoneHack( grid, zonePos, true ) );
 	}
+    else if (zoneTypeStr=="koh"){
+        Zone = tNEW( gKOHZoneHack( grid, zonePos, true ) );
+    }
 	else
 	{
 		usage:
 		con << "Usage:\n"
-			"SPAWN_ZONE <win|death|ball|target|blast> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
+			"SPAWN_ZONE <win|death|ball|target|blast|koh> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
 			"SPAWN_ZONE rubber <x> <y> <size> <growth> <xdir> <ydir> <rubber> <interactive> <r> <g> <b> <target_size> \n"
 			"SPAWN_ZONE teleport <x> <y> <size> <growth> <xdir> <ydir> <xjump> <yjump> <rel|abs> <interactive> <r> <g> <b> <target_size> \n"
 			"SPAWN_ZONE <fortress|flag|deathTeam|ballTeam> <team> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"

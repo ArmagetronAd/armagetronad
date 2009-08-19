@@ -535,6 +535,32 @@ class gTargetZoneHack: public gZone
 		void SetOnEnterCmd(tString &cmd, tString &mode) {if (mode=="add") OnEnterCmd << "\n" << cmd; else OnEnterCmd = cmd;};
 		void SetOnVanishCmd(tString &cmd, tString &mode) {if (mode=="add") OnVanishCmd << "\n" << cmd; else OnVanishCmd = cmd;};
 };
+class gKOHZoneHack: public gZone
+{
+	public:
+								 //!< local constructor
+		gKOHZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false );
+								 //!< network constructor
+		gKOHZoneHack(nMessage &m);
+		~gKOHZoneHack();		 //!< destructor
+
+	protected:
+
+	private:
+								 //!< simulates behaviour up to currentTime
+		virtual bool Timestep(REAL currentTime);
+		virtual void OnVanish(); //!< called when the zone vanishes
+								 //!< reacts on objects inside the zone
+		virtual void OnEnter( gCycle *target, REAL time );
+
+								 //!< count check zone on grid
+		int PlayersInside_;
+		REAL EnteredTime_; //!< game time when a winner can be declared if nothing happens soon
+								 //!< first player entering the last zone to be declare winner
+		gCycle *owner_;
+								 //!< first player entering the zone
+	public:
+};
 
 class gTeleportZoneHack: public gZone
 {
