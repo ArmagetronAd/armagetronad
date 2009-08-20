@@ -402,6 +402,11 @@ bool eTeam::IsLocked() const
     return locked_;
 }
 
+bool eTeam::IsLockedFor( const ePlayerNetID * p ) const
+{
+    return IsLocked() || ( p->GetAccessLevel() > ePlayerNetID::AccessLevelRequiredToPlay() );
+}
+
 static void se_UnlockAllTeams ( void )
 {
     for ( int i = eTeam::teams.Len()-1; i>=0; --i )
@@ -427,9 +432,9 @@ static tAccessLevelSetter se_unlockAllTemasConfLevel( se_unlockAllTeamsConf, tAc
 void eTeam::Invite( ePlayerNetID * player )
 {
     tASSERT( player );
-    if ( !IsInvited( player ) && this->IsLocked() )
+    if ( !IsInvited( player ) && this->IsLockedFor( player ) )
     {
-	sn_ConsoleOut( tOutput( "$invite_team_can_join", player->GetColoredName(), Name() ) );
+        sn_ConsoleOut( tOutput( "$invite_team_can_join", player->GetColoredName(), Name() ) );
     }
     else if ( !IsInvited( player ) )
     {
@@ -442,7 +447,7 @@ void eTeam::Invite( ePlayerNetID * player )
 void eTeam::UnInvite( ePlayerNetID * player )
 {
     tASSERT( player );
-    if ( player->CurrentTeam() == this && this->IsLocked() )
+    if ( player->CurrentTeam() == this && this->IsLockedFor( player ) )
     {
         sn_ConsoleOut( tOutput( "$invite_team_kick", player->GetColoredName(), Name() ) );
         player->SetTeam(0);
@@ -1196,7 +1201,7 @@ bool eTeam::PlayerMayJoin( const ePlayerNetID* player ) const
         return false;
 
     // check for invitations. Not with those shoes!
-    if ( IsLocked() && !IsInvited( player ) )
+    if ( IsLockedFor( player ) && !IsInvited( player ) )
     {
         return false;
     }
