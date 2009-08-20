@@ -686,6 +686,10 @@ static tAccessLevel se_playAccessLevel = tAccessLevel_Program;
 static tSettingItem< tAccessLevel > se_playAccessLevelConf( "ACCESS_LEVEL_PLAY", se_playAccessLevel );
 static tAccessLevelSetter se_playAccessLevelConfLevel( se_playAccessLevelConf, tAccessLevel_Owner );
 
+static tAccessLevel se_playAccessLevelInvited = tAccessLevel_Program;
+static tSettingItem< tAccessLevel > se_playAccessLevelInvitedConf( "ACCESS_LEVEL_PLAY_INVITED", se_playAccessLevelInvited );
+static tAccessLevelSetter se_playAccessLevelInvitedConfLevel( se_playAccessLevelInvitedConf, tAccessLevel_Owner );
+
 // minimal sliding access level to play (slides up as soon as enoughpeople of higher access level get authenticated )
 static tAccessLevel se_playAccessLevelSliding = tAccessLevel_Program;
 static tSettingItem< tAccessLevel > se_playAccessLevelSlidingConf( "ACCESS_LEVEL_PLAY_SLIDING", se_playAccessLevelSliding );
@@ -6344,7 +6348,7 @@ void ePlayerNetID::Update(){
     for( int i=se_PlayerNetIDs.Len()-1; i >= 0; --i )
     {
         ePlayerNetID* player = se_PlayerNetIDs(i);
-        if ( player->GetAccessLevel() > required && player->IsHuman() )
+        if ( player->GetAccessLevel() > required && ( player->GetAccessLevel() > se_playAccessLevelInvited || player->GetInvitations().size() < 1 ) && player->IsHuman() )
         {
             player->SetTeamWish(0);
         }
@@ -7020,8 +7024,8 @@ bool ePlayerNetID::TeamChangeAllowed( bool informPlayer ) const {
     }
 
 #ifdef KRAWALL_SERVER
-       // only allow players with enough access level to enter the game, everyone is free to leave, though
-    if (!( GetAccessLevel() <= AccessLevelRequiredToPlay() || CurrentTeam() ))
+    // only allow players with enough access level to enter the game, everyone is free to leave, though
+    if (!( GetAccessLevel() <= AccessLevelRequiredToPlay() || CurrentTeam() || ( GetAccessLevel() <= se_playAccessLevelInvited && GetInvitations().size() > 0 ) ))
     {
         if ( informPlayer )
         {
@@ -7222,7 +7226,7 @@ void ePlayerNetID::CreateNewTeam()
     // check if the team change is legal
     tASSERT ( nCLIENT !=  sn_GetNetState() );
 
-    if(!TeamChangeAllowed( true )) {
+    if(!TeamChangeAllowed( true ) || GetAccessLevel() > AccessLevelRequiredToPlay()) {
         return;
     }
 
