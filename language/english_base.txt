@@ -1653,6 +1653,11 @@ kick_player_help					Pressing enter or space on this menu item will issue a kick
 suspend_player_details_text			If accepted, \1 will be suspended for some rounds.
 suspend_player_text					Suspend \1
 
+referee_player_details_text         If accepted, \1 will be made referee: He will be able to administrate teams.
+referee_player_text                 Make \1 referee
+demotereferee_player_details_text   If accepted, \1 won't be referee anymore: He will not be able to administrate teams.
+demotereferee_player_text           Demote \1 as referee
+
 vote_include_details_text			If accepted, the file \1 will be included as a configuration file.
 vote_include_text					Include \1
 vote_include_error					Include file \1 not found or not readable.\n
@@ -2429,6 +2434,11 @@ player_noshuffleup      You are not allowed to shuffle up.\n
 player_noshuffle        Your shuffling wish has no effect.\n
 player_shuffle_error    /shuffle expects a number as argument; an explicit sign (+/-) will change your position by the indicated number of steps, no sign will shuffle you to the given position.\n
 
+player_referee          0x7fff7fBy order of \10x7fff7f, \20x7fff7f is now a referee.\n
+player_referee_anon     \10x7fff7f is now a referee.\n
+player_referee_nomore   0xff7f7fBy order of \10xff7f7f, \20xff7f7f is no longer a referee.\n
+player_referee_nomore_anon \1 0xff7f7fis no longer a referee.\n
+
 player_message_help     Sends a message to a specified player.
 player_message_usage    Usage: PLAYER_MESSAGE <user ID or name> "<Message>"\n
 kick_usage              Usage: KICK <user ID or name> <Reason>\n
@@ -2659,6 +2669,8 @@ vote_vote_for						\1 voted for Poll "\2".\n
 vote_vote_against					\1 voted against Poll "\2".\n
 vote_unknown_command                Unknown /vote command \1, available are: \2\n
 vote_kick_local                     Can't vote against local player/AI \1.\n
+vote_referee_already                \10xRESETT is already a referee.\n
+vote_demotereferee_notref           \10xRESETT is not a referee.\n
 
 #********************************************
 #********************************************
@@ -2810,6 +2822,7 @@ config_accesslevel_0        Owner
 config_accesslevel_1        Administrator
 config_accesslevel_2        Moderator
 config_accesslevel_5        Armatrator
+config_accesslevel_6        Referee
 config_accesslevel_7        Team Leader
 config_accesslevel_8        Team Member
 config_accesslevel_12       Local User
@@ -2932,7 +2945,9 @@ access_level_op_same        \1: This would have no effect.\n
 access_level_op_unclear     \1: User is already logged in, please explicitly set an access level.\n
 
 access_level_demote         \1 has been demoted to "\2" by order of \3.\n
+access_level_demote_anon    \1 has been demoted to "\2".\n
 access_level_promote        \1 has been promoted to "\2" by order of \3.\n
+access_level_promote_anon   \1 has been promoted to "\2".\n
 
 access_level_admin_denied   0xff7f7f/admin denied,0xffffff insufficient access level.\n
 access_level_shuffle_up_denied Required access level to shuffle up is "\1", you only have "\2".\n

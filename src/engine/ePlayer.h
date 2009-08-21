@@ -319,8 +319,9 @@ public:
 #ifdef KRAWALL_SERVER
     void Authenticate( tString const & authName, 
                        tAccessLevel accessLevel = tAccessLevel_Authenticated,
-                       ePlayerNetID const * admin = 0 );    //!< make the authentification valid
-    void DeAuthenticate( ePlayerNetID const * admin = 0 );  //!< make the authentification invalid
+                       ePlayerNetID const * admin = 0,
+                       bool messages = true );    //!< make the authentification valid
+    void DeAuthenticate( ePlayerNetID const * admin = 0, bool messages = true );  //!< make the authentification invalid
     bool IsAuthenticated() const;                     //!< is the authentification valid?
 #endif
 
@@ -533,6 +534,9 @@ public:
 };
 
 void ForceName ( std::istream & s );
+
+void se_MakeReferee( ePlayerNetID * victim, ePlayerNetID * admin = 0 );
+void se_CancelReferee( ePlayerNetID * victim, ePlayerNetID * admin = 0 );
 
 // ******************************************************************************************
 // *

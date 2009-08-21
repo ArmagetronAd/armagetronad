@@ -50,7 +50,7 @@ enum tAccessLevel
     tAccessLevel_3 = 3,            // reserved
     tAccessLevel_4 = 4,            // reserved
     tAccessLevel_Armatrator = 5,   // reserved
-    tAccessLevel_6 = 6,            // reserved
+    tAccessLevel_Referee = 6,      // a referee elected by players
     tAccessLevel_TeamLeader = 7,   // a team leader
     tAccessLevel_TeamMember = 8,   // a team member
     tAccessLevel_9 = 9,            // reserved

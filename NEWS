@@ -7,6 +7,8 @@ Changes since 0.3.1
 - New setting SILENCE_ENEMIES (boolean). When enabled, chat sent from enemies
   is not displayed on your client if you are alive. If you are dead all chat
   is displayed.
+- New console commands OP and DEOP replicate the functionnality of chat commands /op and /deop
+- New vote: /callvote referee <player>: Elevates <player> to access level 6. /callvote demotereferee reverts.
 
 Changes since 0.3.0
 ===================
