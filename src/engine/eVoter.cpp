@@ -1509,6 +1509,7 @@ static void se_SendKick( ePlayerNetID* p )
     kick.SendMessage();
 }
 
+#ifdef DEDICATED
 #ifdef KRAWALL_SERVER
 
 // console with filter for redirection to anyone with a certain access level
@@ -1801,7 +1802,7 @@ protected:
 };
 
 #endif
-
+#endif
 
 
 // **************************************************************************************
@@ -2279,6 +2280,7 @@ void eVoter::HandleChat( ePlayerNetID * p, std::istream & message ) //!< handles
             item = tNEW( eVoteItemSuspend )( toSuspend );
         }
     }
+#ifdef DEDICATED
 #ifdef KRAWALL_SERVER
     else if ( command == "include" )
     {
@@ -2323,9 +2325,10 @@ void eVoter::HandleChat( ePlayerNetID * p, std::istream & message ) //!< handles
         }
     }
 #endif
+#endif
     else
     {
-#ifdef KRAWALL_SERVER
+#if defined(DEDICATED) && defined(KRAWALL_SERVER)
         sn_ConsoleOut( tOutput("$vote_unknown_command", command, "command, demotereferee, include, kick, referee, suspend" ), p->Owner() );
 #else
         sn_ConsoleOut( tOutput("$vote_unknown_command", command, "kick, suspend" ), p->Owner() );
