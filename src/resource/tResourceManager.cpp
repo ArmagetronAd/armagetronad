@@ -236,6 +236,11 @@ tString tResourceManager::locateResource(const char *file, const char *uri, bool
                 free( nf );
             }
         }
+        // Otherwise, it's a plain resource path without explicit URL
+        else
+        {
+            resourcepath = file;
+        }
     }
     // Validate paths and determine detination savepath
     if (!file || file[0] == '\0') {
@@ -287,7 +292,7 @@ tString tResourceManager::locateResource(const char *file, const char *uri, bool
         return (tString) NULL;
 
     if( fullPath )
-        return savepath;
+        return filepath;
     else
         return resourcepath;
 }
