@@ -196,6 +196,17 @@ public:
     tAccessLevelSetter( tConfItemBase & item, tAccessLevel level );
 };
 
+//! Sets tConfItemBase::printChange/printErrors
+class tNoisinessSetter
+{
+public:
+    tNoisinessSetter( bool printChange = true, bool printErrors = true );
+    ~tNoisinessSetter();
+private:
+    bool oldPrintChange;
+    bool oldPrintErrors;
+};
+
 // Arg! Msvc++ could not handle bool IO. Seems to be fine now.
 #ifdef _MSC_VER_XXX
 inline std::istream & operator >> (std::istream &s,bool &b){
@@ -419,7 +430,7 @@ public:
 };
 
 // includes a single configuration file by name, searches in var and config directories
-void st_Include( tString const & file, bool reportError = true );
+void st_Include( tString const & file );
 
 void st_LoadConfig();
 void st_SaveConfig();
