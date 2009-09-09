@@ -45,6 +45,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "nConfig.h"
 #include "rScreen.h"
 #include "rViewport.h"
+#include "rModel.h"
 #include "uInput.h"
 #include "ePlayer.h"
 #include "gArena.h"
@@ -4564,6 +4565,8 @@ void sg_EnterGameCleanup()
     ePlayerNetID::ClearAll();
     sg_currentGame = NULL;
     uMenu::exitToMain = false;
+
+    rModel::ClearCache();
 }
 
 void sg_EnterGame( nNetState enter_state )
