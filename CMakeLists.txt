@@ -11,6 +11,12 @@ if (DEDICATED)
     message(STATUS "Building Dedicated")
 endif()
 
+option(RELEASE "Build a release with this version number" "")
+if(NOT RELEASE)
+    set(RELEASE "")
+endif()
+
+
 ##### CONFIGURE CHECKS #####
 include (UniversalVariables)
 include (CheckIncludeFiles)
@@ -203,13 +209,13 @@ add_custom_target (sortresources ALL
     )
 
 add_custom_command (OUTPUT ${ARMA_BINARY_DIR}/src/tTrueVersion.h
-    COMMAND ${PYTHON_EXECUTABLE} ${ARMA_SOURCE_DIR}/batch/make/version.py -o ${ARMA_BINARY_DIR}/src/tTrueVersion.h
+    COMMENT "Generating version tag"
+    COMMAND ${PYTHON_EXECUTABLE} ${ARMA_SOURCE_DIR}/batch/make/version.py ${ARMA_SOURCE_DIR} --release=${RELEASE} -o ${ARMA_BINARY_DIR}/src/tTrueVersion.h
     DEPENDS ${ARMA_SOURCE_DIR}/batch/make/version.py
     WORKING_DIRECTORY ${ARMA_SOURCE_DIR}
     )
 
 add_custom_target (generateversion ALL
-    COMMENT "Generating version tag"
     DEPENDS ${ARMA_BINARY_DIR}/src/tTrueVersion.h
     )
 
