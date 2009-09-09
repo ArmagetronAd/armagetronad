@@ -87,7 +87,7 @@ public:
     void addEffectGroupLeave  (zEffectGroupPtr anEffectGroup) {effectGroupLeave.push_back  (anEffectGroup);};
     void addEffectGroupOutside(zEffectGroupPtr anEffectGroup) {effectGroupOutside.push_back(anEffectGroup);};
 
-    void setShape (zShapePtr aShape) { shape = aShape; };
+    void setShape (zShapePtr aShape) { shape = aShape; if( shape ) eGameObject::pos = shape->Position(); };
     zShapePtr getShape() { return shape; };
 
     void setName(string name) {name_ = name;};
