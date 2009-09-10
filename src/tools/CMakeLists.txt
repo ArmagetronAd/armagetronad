@@ -76,6 +76,7 @@ ADD_CUSTOM_COMMAND(
    COMMAND ${BISON_EXECUTABLE} 
    ARGS -y ${ARMA_SOURCE_DIR}/src/tools/values/vParser.ypp
         -o ${ARMA_BINARY_DIR}/src/tools/values/vParser.cpp
+   DEPENDS ${ARMA_SOURCE_DIR}/src/tools/values/vParser.ypp
    OUTPUT ${ARMA_BINARY_DIR}/src/tools/values/vParser.cpp)
 
 
@@ -83,8 +84,3 @@ add_dependencies (tools
     protos
     )
 
-## Set program to define version
-#add_custom_command(
-#    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/build/info/tTrueVersion.h
-#    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/batch/make/version ${CMAKE_CURRENT_SOURCE_DIR} >${CMAKE_CURRENT_BINARY_DIR}/build/info/tTrueVersion.h
-#    )
