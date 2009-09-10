@@ -91,6 +91,8 @@ public:							// public configuration options
     static bool Enemies( eTeam const * team1, eTeam const * team2 ); //!< determines whether two teams are enemies
 
     static void Enforce( int minTeams, int maxTeams, int maxImbalance );
+    
+    static void WritePlayers( eLadderLogWriter & writer, const eTeam *team );
 public:												// public methods
     static void	EnforceConstraints();					// make sure the limits on team number and such are met
 
