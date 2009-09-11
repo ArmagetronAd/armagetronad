@@ -11,4 +11,4 @@ include french.txt
 include deutsch.txt
 include british.txt
 include american.txt
-
+include custom.txt

@@ -968,6 +968,14 @@ void eTeam::Enforce( int minTeams, int maxTeams, int maxImbalance)
     }
 }
 
+void eTeam::WritePlayers( eLadderLogWriter & writer, const eTeam *team )
+{
+    for ( int i = team->players.Len() - 1; i >= 0; --i )
+    {
+        writer << team->players( i )->GetLogName();
+    }
+}
+
 // inquire or set the ability to use a color as a team name
 bool eTeam::NameTeamAfterColor ( bool wish )
 {
@@ -1673,9 +1681,14 @@ void eTeam::Shuffle( int startID, int stopID )
 
     if ( startID == stopID )
         return;
-
-    tOutput message( "$team_shuffle", players[startID]->GetName(), startID+1, stopID+1 );
-    sn_ConsoleOut( message );
+    
+    ePlayerNetID *player = players[startID];
+    eShuffleSpamTester & spam = player->shuffleSpam;
+    
+    if ( spam.ShouldAnnounce() )
+    {
+        sn_ConsoleOut( player->shuffleSpam.ShuffleMessage( player, startID + 1, stopID + 1 ) );
+    }
 
     // simply swap the one player over all the players in between.
     while ( startID < stopID )
@@ -1688,6 +1701,8 @@ void eTeam::Shuffle( int startID, int stopID )
         SwapPlayers( players[startID], players[startID-1] );
         startID--;
     }
+    
+    spam.Shuffle();
 }
 
 tColoredString eTeam::GetColoredName(void) const

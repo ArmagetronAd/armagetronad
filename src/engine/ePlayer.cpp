@@ -5365,8 +5365,8 @@ void ePlayerNetID::Authenticate( tString const & authName, tAccessLevel accessLe
 
     GetScoreFromDisconnectedCopy();
 
-    // force name update
-    UpdateName();
+    // force update (removed again to fix name change possibility during a round)
+    // UpdateName();
 }
 
 void ePlayerNetID::DeAuthenticate( ePlayerNetID const * admin, bool messages ){
@@ -5387,8 +5387,8 @@ void ePlayerNetID::DeAuthenticate( ePlayerNetID const * admin, bool messages ){
 
     rawAuthenticatedName_ = "";
 
-    // force update
-    UpdateName();
+    // force update (removed again to fix name change possibility during a round)
+    // UpdateName();
 }
 
 bool ePlayerNetID::IsAuthenticated() const
@@ -8811,6 +8811,8 @@ void ePlayerNetID::Suspend( int rounds )
     {
         sn_ConsoleOut( tOutput( "$player_suspended", GetColoredName(), suspended ) );
         SetTeam( NULL );
+        if ( Object() && Object()->Alive() )
+            Object()->Kill();
     }
 }
 
@@ -8853,6 +8855,15 @@ void ePlayerNetID::UpdateSuspensions() {
                 p->Suspend( suspended - 1 );
             }
         }
+    }
+}
+
+void ePlayerNetID::UpdateShuffleSpamTesters()
+{
+    for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
+    {
+        ePlayerNetID *p = se_PlayerNetIDs( i );
+        p->shuffleSpam.Reset();
     }
 }
 

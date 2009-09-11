@@ -243,6 +243,7 @@ public:
     nSpamProtection chatSpam_;
     
     eChatLastSaid lastSaid_; //!< last said information
+    eShuffleSpamTester shuffleSpam;
 
     ePlayerNetID(int p=-1);
     virtual ~ePlayerNetID();
@@ -354,6 +355,7 @@ public:
     static void ResetScoreDifferences(); //<! Resets the last stored score so ScoreDifferences takes this as a reference time
     static void LogScoreDifferences();   //<! Logs accumulated scores of all players since the last call to ResetScoreDifferences() to ladderlog.txt
     static void UpdateSuspensions();     //<! Decrements the number of rounds players are suspended for
+    static void UpdateShuffleSpamTesters();    //<! Reset shuffle spam checks
     void LogScoreDifference();           //<! Logs accumulated scores since the last call to ResetScoreDifferences() to ladderlog.txt
 
     static void SortByScore(); // brings the players into the right order

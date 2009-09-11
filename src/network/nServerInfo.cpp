@@ -200,7 +200,10 @@ nServerInfo::~nServerInfo()
         sn_Requesting = sn_Requesting->Next();
 
     if (sn_QuerySoon == this)
+    {
         sn_Requesting = NULL;
+        sn_QuerySoon  = NULL;
+    }
 }
 
 

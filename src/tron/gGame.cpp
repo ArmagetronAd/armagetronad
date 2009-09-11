@@ -45,6 +45,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "nConfig.h"
 #include "rScreen.h"
 #include "rViewport.h"
+#include "rModel.h"
 #include "uInput.h"
 #include "ePlayer.h"
 #include "gSpawn.h"
@@ -1385,6 +1386,7 @@ static void own_game( nNetState enter_state ){
     // write scores one last time
     ePlayerNetID::LogScoreDifferences();
     ePlayerNetID::UpdateSuspensions();
+    ePlayerNetID::UpdateShuffleSpamTesters();
     sg_gameEndWriter.write();
     se_sendEventNotification(tString("Game end"), tString("The Game has ended"));
 
@@ -2670,6 +2672,7 @@ void gGame::StateUpdate(){
             // log scores before players get renamed
             ePlayerNetID::LogScoreDifferences();
             ePlayerNetID::UpdateSuspensions();
+            ePlayerNetID::UpdateShuffleSpamTesters();
             sg_newRoundWriter.write();
             se_sendEventNotification(tString("New Round"), tString("Starting a new round"));
 
@@ -3500,6 +3503,7 @@ void gGame::Analysis(REAL time){
                         se_SaveToScoreFile(message);
 
                         sg_roundWinnerWriter << ePlayerNetID::FilterName( eTeam::teams[winner-1]->Name() );
+                        eTeam::WritePlayers( sg_roundWinnerWriter, eTeam::teams[winner-1] );
                         sg_roundWinnerWriter.write();
                         tString notificationMessage( ePlayerNetID::FilterName( eTeam::teams[winner-1]->Name() ) );
                         notificationMessage << " has won the round";
@@ -3584,6 +3588,7 @@ void gGame::Analysis(REAL time){
                         name << tColoredString::ColorString(1,1,1);
 
                         sg_matchWinnerWriter << ePlayerNetID::FilterName( eTeam::teams[0]->Name() );
+                        eTeam::WritePlayers( sg_matchWinnerWriter, eTeam::teams[0] );
                         sg_matchWinnerWriter.write();
                         tString notificationMessage( ePlayerNetID::FilterName( eTeam::teams[0]->Name() ) );
                         notificationMessage << " has won the match";
@@ -4256,6 +4261,8 @@ void sg_EnterGameCleanup()
     ePlayerNetID::ClearAll();
     sg_currentGame = NULL;
     uMenu::exitToMain = false;
+
+    rModel::ClearCache();
 }
 
 void sg_EnterGame( nNetState enter_state )
@@ -4324,7 +4331,7 @@ void Activate(bool act){
 
     sr_Activate( act );
 
-    if (!tRecorder::IsRunning() )
+    if ( !tRecorder::IsRunning() )
     {
         if (sn_GetNetState()==nSTANDALONE)
         {
