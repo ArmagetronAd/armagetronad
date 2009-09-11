@@ -5170,20 +5170,27 @@ static void se_StripNameEnds( tString & name )
     se_StripMatchingEnds( name, se_IsBlank, se_IsInvalidNameEnd );
 }
 
+static bool se_allowImposters = false;
+static tSettingItem< bool > se_allowImposters1( "ALLOW_IMPOSTERS", se_allowImposters );
+static tSettingItem< bool > se_allowImposters2( "ALLOW_IMPOSTORS", se_allowImposters );
+
 // test if a user name is used by anyone else than the passed player
 static bool se_IsNameTaken( tString const & name, ePlayerNetID const * exception )
 {
     if ( name.Len() <= 1 )
         return false;
 
-    // check for other players with the same name
-    for (int i = se_PlayerNetIDs.Len()-1; i >= 0; --i )
+    if ( !se_allowImposters )
     {
-        ePlayerNetID * player = se_PlayerNetIDs(i);
-        if ( player != exception )
+        // check for other players with the same name
+        for (int i = se_PlayerNetIDs.Len()-1; i >= 0; --i )
         {
-            if ( name == player->GetUserName() || name == ePlayerNetID::FilterName( player->GetName() ) )
-                return true;
+            ePlayerNetID * player = se_PlayerNetIDs(i);
+            if ( player != exception )
+            {
+                if ( name == player->GetUserName() || name == ePlayerNetID::FilterName( player->GetName() ) )
+                    return true;
+            }
         }
     }
 
@@ -5202,10 +5209,6 @@ static bool se_IsNameTaken( tString const & name, ePlayerNetID const * exception
 
     return false;
 }
-
-static bool se_allowImposters = false;
-static tSettingItem< bool > se_allowImposters1( "ALLOW_IMPOSTERS", se_allowImposters );
-static tSettingItem< bool > se_allowImposters2( "ALLOW_IMPOSTORS", se_allowImposters );
 
 static bool se_filterColorNames=false;
 tSettingItem< bool > se_coloredNamesConf( "FILTER_COLOR_NAMES", se_filterColorNames );
@@ -7665,7 +7668,7 @@ void ePlayerNetID::UpdateName( void )
     tString newUserName = se_UnauthenticatedUserName( newName );
 
     // test if it is already taken, find an alternative name if so.
-    if ( sn_GetNetState() != nCLIENT && !se_allowImposters && se_IsNameTaken( newUserName, this ) )
+    if ( sn_GetNetState() != nCLIENT && se_IsNameTaken( newUserName, this ) )
     {
         // Remove possilble trailing digit.
         if ( newName.Len() > 2 && isdigit(newName(newName.Len()-2)) )
