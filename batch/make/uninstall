@@ -67,6 +67,7 @@ sed -e "s,rm.*\\\$,rmdir --ignore-fail-on-non-empty \$," < ${UNINSTALL}.files > 
 
 echo "" > ${UNINSTALL}.dir
 
+# add all parent directories of those that are still game-specific
 while test -s ${UNINSTALL}.dir0; do
   sed -e "s,/[^/]*\$,," < ${UNINSTALL}.dir0 | grep ${PROGNAME} > ${UNINSTALL}.dir1
   cat ${UNINSTALL}.dir1 >> ${UNINSTALL}.dir

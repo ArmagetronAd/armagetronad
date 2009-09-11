@@ -45,6 +45,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "nConfig.h"
 #include "rScreen.h"
 #include "rViewport.h"
+#include "rModel.h"
 #include "uInput.h"
 #include "ePlayer.h"
 #include "gArena.h"
@@ -4084,6 +4085,7 @@ void gGame::Analysis(REAL time){
                         se_SaveToScoreFile(message);
 
                         sg_roundWinnerWriter << ePlayerNetID::FilterName( eTeam::teams[winner-1]->Name() );
+                        eTeam::WritePlayers( sg_roundWinnerWriter, eTeam::teams[winner-1] );
                         sg_roundWinnerWriter.write();
                     }
                 }
@@ -4182,7 +4184,8 @@ void gGame::Analysis(REAL time){
 	                        }
 	
 	                        sg_matchWinnerWriter << ePlayerNetID::FilterName( eTeam::teams[0]->Name() );
-	                        sg_matchWinnerWriter.write();
+                            eTeam::WritePlayers( sg_matchWinnerWriter, eTeam::teams[0] );
+                            sg_matchWinnerWriter.write();
 	
 	                        message.SetTemplateParameter(1, name);
 	                        message << "$gamestate_champ_console";
@@ -4834,6 +4837,8 @@ void sg_EnterGameCleanup()
     ePlayerNetID::ClearAll();
     sg_currentGame = NULL;
     uMenu::exitToMain = false;
+
+    rModel::ClearCache();
 }
 
 void sg_EnterGame( nNetState enter_state )

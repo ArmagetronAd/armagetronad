@@ -200,13 +200,13 @@ class LanguageUpdater:
 
 if __name__ == "__main__":
     # determine languages to update: everything included from
-    # languages.txt.in except am/eng.
+    # languages.txt.in except am/eng and custom.
     files = []
     listfile = open("languages.txt.in")
     for line in listfile.readlines():
         if line.startswith("include"):
             file =line.split()[1]
-            if file != "american.txt" and file != "english.txt" and file != "british.txt":
+            if file != "american.txt" and file != "english.txt" and file != "british.txt" and file != "custom.txt":
                 files += [file]
 
     lu = LanguageUpdater()

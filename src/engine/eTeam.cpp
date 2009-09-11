@@ -916,6 +916,14 @@ void eTeam::Enforce( int minTeams, int maxTeams, int maxImbalance)
     }
 }
 
+void eTeam::WritePlayers( eLadderLogWriter & writer, const eTeam *team )
+{
+    for ( int i = team->players.Len() - 1; i >= 0; --i )
+    {
+        writer << team->players( i )->GetLogName();
+    }
+}
+
 // inquire or set the ability to use a color as a team name
 bool eTeam::NameTeamAfterColor ( bool wish )
 {
