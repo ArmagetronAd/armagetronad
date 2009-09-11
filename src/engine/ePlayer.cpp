@@ -5043,8 +5043,8 @@ void ePlayerNetID::Authenticate( tString const & authName, tAccessLevel accessLe
 
     GetScoreFromDisconnectedCopy();
     
-    // force name update
-    UpdateName();
+    // force update (removed again to fix name change possibility during a round)
+    // UpdateName();
 }
 
 void ePlayerNetID::DeAuthenticate( ePlayerNetID const * admin ){
@@ -5065,8 +5065,8 @@ void ePlayerNetID::DeAuthenticate( ePlayerNetID const * admin ){
 
     rawAuthenticatedName_ = "";
 
-    // force update
-    UpdateName();
+    // force update (removed again to fix name change possibility during a round)
+    // UpdateName();
 }
 
 bool ePlayerNetID::IsAuthenticated() const

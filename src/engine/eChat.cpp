@@ -36,33 +36,33 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 //!< Should spam prefix checking be enabled?
 static bool se_prefixSpamShouldEnable = true;
-static tConfItem< bool > se_prefixSpamShouldEnableConf( "PREFIX_SPAM_ENABLE", se_prefixSpamShouldEnable );
+static tSettingItem< bool > se_prefixSpamShouldEnableConf( "PREFIX_SPAM_ENABLE", se_prefixSpamShouldEnable );
 
 //!< If a prefix begins with a color code it will have this multiplier applied to the score.
 static REAL se_prefixSpamStartColorMultiplier = 1.5;
-static tConfItem< REAL > se_prefixSpamStartColorMultiplierConf( "PREFIX_SPAM_START_COLOR_MULTIPLIER", se_prefixSpamStartColorMultiplier );
+static tSettingItem< REAL > se_prefixSpamStartColorMultiplierConf( "PREFIX_SPAM_START_COLOR_MULTIPLIER", se_prefixSpamStartColorMultiplier );
 
 //!< Increase score by f( prefix_length * multiplier )
 static REAL se_prefixSpamLengthMultiplier = 1.2;
-static tConfItem< REAL > se_prefixSpamLengthMultiplierConf( "PREFIX_SPAM_LENGTH_MULTIPLIER", se_prefixSpamLengthMultiplier );
+static tSettingItem< REAL > se_prefixSpamLengthMultiplierConf( "PREFIX_SPAM_LENGTH_MULTIPLIER", se_prefixSpamLengthMultiplier );
 
 //!< Increase score by f( num_color_codes * multiplier )
 static REAL se_prefixSpamNumberColorCodesMultiplier = 1.2;
-static tConfItem< REAL > se_prefixSpamNumberColorCodesMultiplierConf( "PREFIX_SPAM_NUMBER_COLOR_CODES_MULTIPLIER",
+static tSettingItem< REAL > se_prefixSpamNumberColorCodesMultiplierConf( "PREFIX_SPAM_NUMBER_COLOR_CODES_MULTIPLIER",
                                                                       se_prefixSpamNumberColorCodesMultiplier );
 
 //!< Increase score by f( know_prefixes * multiplier )
 static REAL se_prefixNumberKnownPrefixesMultiplier = 1;
-static tConfItem< REAL > se_prefixNumberKnownPrefixesMultiplierConf( "PREFIX_SPAM_NUMBER_KNOWN_PREFIXES_MULTIPLIER",
+static tSettingItem< REAL > se_prefixNumberKnownPrefixesMultiplierConf( "PREFIX_SPAM_NUMBER_KNOWN_PREFIXES_MULTIPLIER",
                                                                      se_prefixNumberKnownPrefixesMultiplier );
 
 //!< The score, from prefix checking, a message must have for it to be considered spam.
 static REAL se_prefixSpamRequiredScore = 10.0;
-static tConfItem< REAL > se_prefixSpamRequiredScoreConf( "PREFIX_SPAM_REQUIRED_SCORE", se_prefixSpamRequiredScore );
+static tSettingItem< REAL > se_prefixSpamRequiredScoreConf( "PREFIX_SPAM_REQUIRED_SCORE", se_prefixSpamRequiredScore );
 
 //!< Found prefixes will timeout after f( score ) * multiplier seconds.
 static REAL se_prefixSpamTimeoutMultiplier = 15.0;
-static tConfItem< REAL > se_prefixSpamTimeoutMultiplierConf( "PREFIX_SPAM_TIMEOUT_MULTIPLIER", se_prefixSpamTimeoutMultiplier );
+static tSettingItem< REAL > se_prefixSpamTimeoutMultiplierConf( "PREFIX_SPAM_TIMEOUT_MULTIPLIER", se_prefixSpamTimeoutMultiplier );
 
 /**
  * Helper class for predicate stl-comparisons
