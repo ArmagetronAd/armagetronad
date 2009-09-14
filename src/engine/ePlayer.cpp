@@ -7025,7 +7025,7 @@ void ePlayerNetID::ReceiveControlNet(nMessage &m)
             if ( !newTeam )
             {
                 if ( currentTeam )
-                    sn_ConsoleOut( tOutput( "$player_joins_team_noex" ), Owner() );
+                    sn_ConsoleOut( tOutput( "$player_joins_team_noex", tColoredString::RemoveColors(GetName()) ), Owner() );
                 break;
             }
 
