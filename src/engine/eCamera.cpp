@@ -491,7 +491,7 @@ void eCamera::SwitchView(){
         rise=0;
 
     // custom camera with turn speed 0: align it with the cycle once
-    if( mode == CAMERA_CUSTOM && s_customTurnSpeed <= 0 || mode == CAMERA_SERVER_CUSTOM && s_serverCustomTurnSpeed <= 0 )
+    if( ( mode == CAMERA_CUSTOM && s_customTurnSpeed <= 0 ) || ( mode == CAMERA_SERVER_CUSTOM && s_serverCustomTurnSpeed <= 0 ) )
     {
         dir = CenterDir();
     }
