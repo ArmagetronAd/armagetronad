@@ -4416,6 +4416,11 @@ public:
 
         return level;
     }
+    
+    virtual void TransformName( tString & name ) const
+    {
+        name = se_EscapeName( name ).c_str();
+    }
 };
 
 static eUserLevel se_userLevel;

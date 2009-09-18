@@ -1,5 +1,8 @@
 Changes since 0.2.8.3_rc3:
 - RESERVE_SCREEN_NAME now works regardless of the ALLOW_IMPOSTOR setting.
+- USER_LEVEL now escapes the given authenticated name so you don't have to
+  guess the escaping rules. Ex: USER_LEVEL "name with spaces@forums" 2
+  changes user level for name\_with\_spaces@forums
 
 Changes since 0.2.8.3_rc2:
 - Fixed crash with server polling
