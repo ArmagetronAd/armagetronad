@@ -1060,7 +1060,7 @@ void tConfItemFunc::WriteVal(std::ostream &){}
 
 bool tConfItemFunc::Save(){return false;}
 
-void st_Include( tString const & file, bool error )
+void st_Include( tString const & file )
 {
     // refuse to load illegal paths
     if( !tPath::IsValidPath( file ) )
@@ -1071,7 +1071,7 @@ void st_Include( tString const & file, bool error )
         // really load include file
         if ( !Load( tDirectories::Var(), file ) )
         {
-            if (!Load( tDirectories::Config(), file ) && error )
+            if (!Load( tDirectories::Config(), file ) && tConfItemBase::printErrors )
             {
                 con << tOutput( "$config_include_not_found", file );
             }
@@ -1091,7 +1091,7 @@ void st_Include( tString const & file, bool error )
 
 }
 
-static void Include(std::istream& s, bool error )
+static void Include(std::istream& s )
 {
     // allow CASACL
     tCasaclPreventer allower(false);
@@ -1099,21 +1099,32 @@ static void Include(std::istream& s, bool error )
     tString file;
     s >> file;
 
-    st_Include( file, error );
-}
-
-static void Include(std::istream& s )
-{
-    Include( s, true );
+    st_Include( file );
 }
 
 static void SInclude(std::istream& s )
 {
-    Include( s, false );
+    tNoisinessSetter setter( false, false );
+    Include( s );
 }
 
 static tConfItemFunc s_Include("INCLUDE",  &Include);
 static tConfItemFunc s_SInclude("SINCLUDE",  &SInclude);
+
+tNoisinessSetter::tNoisinessSetter( bool printChange, bool printErrors )
+{
+    oldPrintChange = tConfItemBase::printChange;
+    oldPrintErrors = tConfItemBase::printErrors;
+
+    tConfItemBase::printChange = printChange;
+    tConfItemBase::printErrors = printErrors;
+}
+
+tNoisinessSetter::~tNoisinessSetter()
+{
+    tConfItemBase::printChange = oldPrintChange;
+    tConfItemBase::printErrors = oldPrintErrors;
+}
 
 // obsoleted settings that still are around in some distruted configuration files
 static void st_Dummy(std::istream &s){tString rest; rest.ReadLine(s);}

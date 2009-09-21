@@ -117,9 +117,7 @@ void rModel::Load(std::istream &in,const char *fileName){
         int offset=0;       //
         int current_vertex=0; //
 
-#define MAXVERT 10000
-
-        int   translate[MAXVERT];
+        tArray< int > translate(10000);
 
         enum {VERTICES,FACES} status=VERTICES;
 
@@ -242,7 +240,7 @@ void rModel::Load(std::istream &in,const char *fileName){
 #endif
 }
 
-rModel::rModel(const char *fileName,const char *fileName_alt)
+rModel::rModel(const char *fileName)
 {
 #ifndef DEDICATED
     //	tString s;
@@ -253,24 +251,13 @@ rModel::rModel(const char *fileName,const char *fileName_alt)
 
     if ( !tDirectories::Data().Open( in, fileName ) )
     {
-        if (fileName_alt){
-            std::ifstream in2;
-            tDirectories::Data().Open( in2, fileName_alt );
-
-            if (!in2.good()){
-                tERR_ERROR("\n\nModel file " << fileName_alt << " could not be found.\n" <<
-                           "are you sure you are running " << tOutput("$program_name") << " in it's own directory?\n\n");
-            }
-            else
-                Load(in2,fileName_alt);
-        }
-        else
-            tERR_ERROR("\n\nModel file " << fileName << " could not be found.\n" <<
-                       "are you sure you are running " << tOutput("$program_name") << " in it's own directory?\n\n");
-
+        tERR_ERROR("\n\nModel file " << fileName << " could not be found.\n" <<
+                   "are you sure you are running " << tOutput("$program_name") << " in it's own directory?\n\n");
     }
     else
+    {
         Load(in,fileName);
+    }
 #endif
 }
 
@@ -360,6 +347,37 @@ void rModel::Render(){
 
 rModel::~rModel(){
     tCHECK_DEST;
+}
+
+static std::map<std::string, rModel *> sr_modelCache;
+
+//! returns a model from the cache
+rModel * rModel::GetModel(const char * filename)
+{
+    std::string key(filename);
+    if(sr_modelCache.find(key) == sr_modelCache.end())
+    {
+        std::ifstream in;
+        rModel * model = 0;
+        if ( tDirectories::Data().Open( in, filename ) )
+        {
+            model = tNEW(rModel( filename ));
+        }
+        sr_modelCache[key] = model;
+    }
+
+    return sr_modelCache[key];
+}
+
+//! clears the model cache
+void rModel::ClearCache()
+{
+    for(std::map<std::string, rModel *>::iterator iter = sr_modelCache.begin(); iter != sr_modelCache.end(); ++iter)
+    {
+        delete (*iter).second;
+    }
+
+    sr_modelCache.clear();
 }
 
 

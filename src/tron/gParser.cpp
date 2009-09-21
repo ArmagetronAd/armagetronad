@@ -682,6 +682,7 @@ gParser::parseShapeCircleBachus(eGrid *grid, xmlNodePtr cur, zZone * zone, const
             shapePtr->setRadius( tfRadius );
     }
 
+    zone->setShape(shape);
     return shape;
 }
 

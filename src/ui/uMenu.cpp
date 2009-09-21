@@ -1110,12 +1110,13 @@ void uAutoCompleter::ShowPossibilities(std::deque<tString> &results, tString &wo
         con << tOutput("$tab_completion_results");
         tString::size_type len=word.length();
         for(std::deque<tString>::iterator i=results.begin(); i!=results.end(); ++i) {
-            tString::size_type pos=(m_ignorecase?Simplify(*i):*i).find(word);
-            con << i->SubStr(0,pos)
+            tString result = m_ignorecase ? Simplify( *i ) : *i;
+            tString::size_type pos= result.find(word);
+            con << result.SubStr(0,pos)
             << "0xff8888"
-            << i->SubStr(pos, len)
+            << result.SubStr(pos, len)
             << "0xffffff"
-            << i->SubStr(pos+len)
+            << result.SubStr(pos+len)
             << "\n";
         }
     }
@@ -1582,11 +1583,12 @@ bool uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL 
                 //REAL middle=-.6;
 
                 tString m(message);
-                int len = m.Len();
-                if (w * len > 1.8)
+                int len = tColoredString::RemoveColors(m).Len();
+                float maxWidth = 4.8;
+                if (w * len > maxWidth)
                 {
-                    h = h * 1.8 / (w * len);
-                    w = 1.8 / len;
+                    h = h * maxWidth / (w * len);
+                    w = maxWidth / len;
                 }
 
                 Color(1,1,1);

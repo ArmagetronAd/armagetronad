@@ -686,6 +686,10 @@ static tAccessLevel se_playAccessLevel = tAccessLevel_Program;
 static tSettingItem< tAccessLevel > se_playAccessLevelConf( "ACCESS_LEVEL_PLAY", se_playAccessLevel );
 static tAccessLevelSetter se_playAccessLevelConfLevel( se_playAccessLevelConf, tAccessLevel_Owner );
 
+static tAccessLevel se_playAccessLevelInvited = tAccessLevel_Program;
+static tSettingItem< tAccessLevel > se_playAccessLevelInvitedConf( "ACCESS_LEVEL_PLAY_INVITED", se_playAccessLevelInvited );
+static tAccessLevelSetter se_playAccessLevelInvitedConfLevel( se_playAccessLevelInvitedConf, tAccessLevel_Owner );
+
 // minimal sliding access level to play (slides up as soon as enoughpeople of higher access level get authenticated )
 static tAccessLevel se_playAccessLevelSliding = tAccessLevel_Program;
 static tSettingItem< tAccessLevel > se_playAccessLevelSlidingConf( "ACCESS_LEVEL_PLAY_SLIDING", se_playAccessLevelSliding );
@@ -2204,6 +2208,11 @@ static void se_ChangeAccess( ePlayerNetID * admin, std::istream & s, char const 
             }
         }
 
+        if ( !isexplicit && victim->IsAuthenticated() )
+        {
+            level = se_opAccessLevelMax;
+        }
+
         s >> level;
 
         // Make a last safety check on the given AL, then DON'T TOUCH IT ANYMORE
@@ -2282,6 +2291,7 @@ void se_OpBase( ePlayerNetID * admin, ePlayerNetID * victim, char const * comman
     if ( !victim->IsHuman() )
     {
         sn_ConsoleOut( tOutput( "$access_level_op_denied_ai", command ), admin->Owner() );
+        return;
     }
 
     victim->Authenticate( authName, accessLevel, admin );
@@ -2322,6 +2332,170 @@ void se_DeOp( ePlayerNetID * admin, std::istream & s, char const * command )
         {
             sn_ConsoleOut( tOutput( "$access_level_op_same", command ), admin->Owner() );
         }
+    }
+}
+
+// Changes the access level of a player, from console or other anonymous sources
+// and which is not to be called when you can call an OPFUNC
+// This isn't meant to be an user command, rather a simple switch between promoting and logging in, so make necessary checks yourself
+void se_AnonOp( ePlayerNetID * victim, tAccessLevel accessLevel, bool messages=true )
+{
+    if ( !victim->IsHuman() )
+    {
+        return;
+    }
+
+    if ( victim->IsAuthenticated() )
+    {
+        if ( accessLevel > tAccessLevel_Authenticated )
+        {
+            accessLevel = tAccessLevel_Authenticated;
+        }
+
+        tAccessLevel oldAccessLevel = victim->GetAccessLevel();
+        victim->SetAccessLevel( accessLevel );
+
+
+        if ( accessLevel < oldAccessLevel && messages )
+        {
+            se_SecretConsoleOut( tOutput( "$access_level_promote_anon",
+                                          victim->GetLogName(),
+                                          tCurrentAccessLevel::GetName( accessLevel )
+                                            ), victim, &se_Hide, 0, 0, &se_CanHide );
+        }
+        else if ( accessLevel > oldAccessLevel && messages )
+        {
+            se_SecretConsoleOut( tOutput( "$access_level_demote_anon",
+                                 victim->GetLogName(),
+                                 tCurrentAccessLevel::GetName( accessLevel )
+                                        ), victim, &se_Hide, 0, 0, &se_CanHide );
+        }
+    }
+    else
+    {
+        tString authName = victim->GetUserName() + "@L_OP";
+        if ( victim->IsAuthenticated() )
+        {
+            authName = victim->GetRawAuthenticatedName();
+        }
+
+        victim->Authenticate( authName, accessLevel, 0, messages );
+    }
+}
+
+// Console command for it
+void se_OpConf( std::istream &s )
+{
+    if ( se_NeedsServer( "OP", s ) )
+    {
+        return;
+    }
+
+    ePlayerNetID * victim = se_FindPlayerInChatCommand( 0, "OP", s );
+    bool isexplicit = false;
+
+    if ( victim )
+    {
+        // read optional access level, this part is merly a copypaste from the /shuffle code
+        int level = se_opAccessLevelMax;
+        if ( victim->IsAuthenticated() )
+        {
+            level = victim->GetAccessLevel();
+        }
+        char first;
+        s >> first;
+        if ( !s.eof() && !s.fail() )
+        {
+            isexplicit = true;
+            s.unget();
+            int newLevel = 0;
+            s >> newLevel;
+
+            if ( first == '+' || first == '-' )
+            {
+                level += newLevel;
+            }
+            else
+            {
+                level = newLevel;
+            }
+        }
+
+        s >> level;
+
+        tAccessLevel accessLevel;
+        accessLevel = static_cast< tAccessLevel >( level );
+
+        if ( accessLevel == victim->GetAccessLevel() )
+        {
+            if ( isexplicit )
+            {
+                sn_ConsoleOut( tOutput( "$access_level_op_same", "OP" ), 0 );
+            }
+            else
+            {
+                sn_ConsoleOut( tOutput( "$access_level_op_unclear", "OP" ), 0 );
+            }
+        }
+        else
+        {
+            se_AnonOp( victim, accessLevel );
+        }
+    }
+
+}
+
+static tConfItemFunc se_opConf( "OP", &se_OpConf );
+static tAccessLevelSetter se_opConfLevel( se_opConf, tAccessLevel_Owner );
+
+void se_AnonDeOp( ePlayerNetID * victim, bool messages=true )
+{
+    if ( victim->IsAuthenticated() )
+    {
+        victim->DeAuthenticate( 0, messages );
+    }
+}
+void se_DeOpConf( std::istream &s )
+{
+    if ( se_NeedsServer( "DEOP", s ) )
+    {
+        return;
+    }
+
+    ePlayerNetID * victim = se_FindPlayerInChatCommand( 0, "DEOP", s );
+
+    if ( victim )
+    {
+        se_AnonDeOp( victim, true );
+    }
+}
+
+static tConfItemFunc se_deOpConf( "DEOP", &se_DeOpConf );
+static tAccessLevelSetter se_deOpConfLevel( se_deOpConf, tAccessLevel_Owner );
+
+void se_MakeReferee( ePlayerNetID * victim, ePlayerNetID * admin )
+{
+    se_AnonOp( victim, tAccessLevel_Referee, false );
+    if ( admin )
+    {
+        sn_ConsoleOut( tOutput( "$player_referee", admin->GetColoredName(), victim->GetColoredName() ) );
+    }
+    else
+    {
+        sn_ConsoleOut( tOutput( "$player_referee_anon", victim->GetColoredName() ) );
+    }
+}
+
+void se_CancelReferee( ePlayerNetID * victim, ePlayerNetID * admin )
+{
+    se_AnonDeOp( victim, false );
+    if ( admin )
+    {
+        sn_ConsoleOut( tOutput( "$player_referee_nomore", admin->GetColoredName(), victim->GetColoredName() ) );
+    }
+    else
+    {
+        sn_ConsoleOut( tOutput( "$player_referee_nomore_anon", victim->GetColoredName() ) );
     }
 }
 
@@ -5146,7 +5320,7 @@ static void se_CheckAccessLevel( tAccessLevel & level, tString const & authName 
     }
 }
 
-void ePlayerNetID::Authenticate( tString const & authName, tAccessLevel accessLevel_, ePlayerNetID const * admin )
+void ePlayerNetID::Authenticate( tString const & authName, tAccessLevel accessLevel_, ePlayerNetID const * admin, bool messages )
 {
     tString newAuthenticatedName( se_EscapeName( authName ).c_str() );
 
@@ -5192,45 +5366,47 @@ void ePlayerNetID::Authenticate( tString const & authName, tAccessLevel accessLe
             SetAccessLevel( accessLevel_ );
         }
 
-        tString order( "" );
-        if ( admin )
+        if ( messages )
         {
-            order = tOutput( "$login_message_byorder",
-                             admin->GetLogName() );
-        }
-
-        if ( IsHuman() )
-        {
-            if ( GetAccessLevel() != tAccessLevel_Default )
+            tString order( "" );
+            if ( admin )
             {
-                se_SecretConsoleOut( tOutput( "$login_message_special",
-                                              GetName(),
-                                              newAuthenticatedName,
-                                              tCurrentAccessLevel::GetName( GetAccessLevel() ),
-                                              order ), this, &se_Hide, admin, 0, &se_CanHide );
-            }
-            else
-            {
-                se_SecretConsoleOut( tOutput( "$login_message", GetName(), newAuthenticatedName, order ), this, &se_Hide, admin, 0, &se_CanHide );
+                order = tOutput( "$login_message_byorder",
+                                 admin->GetLogName() );
             }
 
+            if ( IsHuman() )
+            {
+                if ( GetAccessLevel() != tAccessLevel_Remote )
+                {
+                    se_SecretConsoleOut( tOutput( "$login_message_special",
+                                                  GetName(),
+                                                  newAuthenticatedName,
+                                                  tCurrentAccessLevel::GetName( GetAccessLevel() ),
+                                                  order ), this, &se_Hide, admin, 0, &se_CanHide );
+                }
+                else
+                {
+                    se_SecretConsoleOut( tOutput( "$login_message", GetName(), newAuthenticatedName, order ), this, &se_Hide, admin, 0, &se_CanHide );
+                }
+            }
         }
     }
 
     GetScoreFromDisconnectedCopy();
 
-    // force name update
-    UpdateName();
+    // force update (removed again to fix name change possibility during a round)
+    // UpdateName();
 }
 
-void ePlayerNetID::DeAuthenticate( ePlayerNetID const * admin ){
+void ePlayerNetID::DeAuthenticate( ePlayerNetID const * admin, bool messages ){
     if ( IsAuthenticated() )
     {
-        if ( admin )
+        if ( admin && messages )
         {
             se_SecretConsoleOut( tOutput( "$logout_message_deop", GetName(), GetFilteredAuthenticatedName(), admin->GetLogName() ), this, &se_Hide, admin, 0, &se_CanHide );
         }
-        else
+        else if ( messages )
         {
             se_SecretConsoleOut( tOutput( "$logout_message", GetName(), GetFilteredAuthenticatedName() ), this, &se_Hide, 0, 0, &se_CanHide );
         }
@@ -5241,8 +5417,8 @@ void ePlayerNetID::DeAuthenticate( ePlayerNetID const * admin ){
 
     rawAuthenticatedName_ = "";
 
-    // force update
-    UpdateName();
+    // force update (removed again to fix name change possibility during a round)
+    // UpdateName();
 }
 
 bool ePlayerNetID::IsAuthenticated() const
@@ -6372,7 +6548,7 @@ void ePlayerNetID::Update(){
     for( int i=se_PlayerNetIDs.Len()-1; i >= 0; --i )
     {
         ePlayerNetID* player = se_PlayerNetIDs(i);
-        if ( player->GetAccessLevel() > required && player->IsHuman() )
+        if ( player->GetAccessLevel() > required && ( player->GetAccessLevel() > se_playAccessLevelInvited || player->GetInvitations().size() < 1 ) && player->IsHuman() )
         {
             player->SetTeamWish(0);
         }
@@ -7048,8 +7224,8 @@ bool ePlayerNetID::TeamChangeAllowed( bool informPlayer ) const {
     }
 
 #ifdef KRAWALL_SERVER
-       // only allow players with enough access level to enter the game, everyone is free to leave, though
-    if (!( GetAccessLevel() <= AccessLevelRequiredToPlay() || CurrentTeam() ))
+    // only allow players with enough access level to enter the game, everyone is free to leave, though
+    if (!( GetAccessLevel() <= AccessLevelRequiredToPlay() || CurrentTeam() || ( GetAccessLevel() <= se_playAccessLevelInvited && GetInvitations().size() > 0 ) ))
     {
         if ( informPlayer )
         {
@@ -7250,7 +7426,7 @@ void ePlayerNetID::CreateNewTeam()
     // check if the team change is legal
     tASSERT ( nCLIENT !=  sn_GetNetState() );
 
-    if(!TeamChangeAllowed( true )) {
+    if(!TeamChangeAllowed( true ) || GetAccessLevel() > AccessLevelRequiredToPlay()) {
         return;
     }
 
@@ -8668,6 +8844,8 @@ void ePlayerNetID::Suspend( int rounds )
     {
         sn_ConsoleOut( tOutput( "$player_suspended", GetColoredName(), suspended ) );
         SetTeam( NULL );
+        if ( Object() && Object()->Alive() )
+            Object()->Kill();
     }
 }
 
@@ -8710,6 +8888,15 @@ void ePlayerNetID::UpdateSuspensions() {
                 p->Suspend( suspended - 1 );
             }
         }
+    }
+}
+
+void ePlayerNetID::UpdateShuffleSpamTesters()
+{
+    for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
+    {
+        ePlayerNetID *p = se_PlayerNetIDs( i );
+        p->shuffleSpam.Reset();
     }
 }
 

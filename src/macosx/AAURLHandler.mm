@@ -36,8 +36,10 @@
     NSMutableString *_startupEvent; //! Set when the game is started via URL
     BOOL _shouldConnect;
 }
-- (void) setShouldConnect:(BOOL)shouldConnect;
+- (void) setShouldConnect:(BOOL)shouldConnect showSplash:(bool *)showSplash;
 @end
+
+void ret_to_MainMenu();
 
 @implementation AAURLHandler
 
@@ -56,7 +58,7 @@
     return self;
 }
 
-- (void)connectToServer:(NSString *)server
+- (void)connectToServer:(NSString *)server showSplash:(bool *)showSplash
 {
     if ( ![server isEqualToString:@"armagetronad://"] )
     {
@@ -66,6 +68,9 @@
         ExtractConnectionInformation( raw, servername, port );
         if ( servername != "" )
         {
+            if ( showSplash )
+                *showSplash = false;
+            ret_to_MainMenu();
             nServerInfoRedirect server( servername, port.ToInt() );
             AAURLHandlerConnect( &server );
         }
@@ -76,7 +81,7 @@
 {
     if ( _shouldConnect )
     {
-        [self connectToServer:[[[event descriptorAtIndex:1] stringValue] retain]];
+        [self connectToServer:[[[event descriptorAtIndex:1] stringValue] retain] showSplash:NULL];
     }
     // Save the event for later, we must finish initializing
     else
@@ -86,7 +91,7 @@
 }
 
 //! Set after Armagetron is finished initializing.
-- (void) setShouldConnect:(BOOL)shouldConnect
+- (void) setShouldConnect:(BOOL)shouldConnect showSplash:(bool *)showSplash
 {
     _shouldConnect = shouldConnect;
     if ( _shouldConnect )
@@ -94,7 +99,7 @@
         // _startupEvent is initialized to an empty string. Check if a URL event actually occured
         if ( ![_startupEvent isEqualToString:@""] )
         {
-            [self connectToServer:_startupEvent];
+            [self connectToServer:_startupEvent showSplash:showSplash];
         }
     }
 
@@ -115,9 +120,9 @@ void SetupAAURLHandler()
     urlhandler = [[AAURLHandler alloc] init];
 }
 
-void StartAAURLHandler()
+void StartAAURLHandler( bool & showSplash )
 {
-    [urlhandler setShouldConnect:YES];
+    [urlhandler setShouldConnect:YES showSplash:&showSplash];
 }
 
 void CleanupAAURLHandler()
