@@ -39,7 +39,7 @@ class Vec3{
 public:
     float x[3];
     Vec3(REAL a=0,REAL b=0,REAL c=0){x[0]=a;x[1]=b;x[2]=c;}
-    ~Vec3(){}
+    ~Vec3(){};
 
     REAL Norm(){return REAL(sqrt(x[0]*x[0]+x[1]*x[1]+x[2]*x[2]));}
 
@@ -54,7 +54,7 @@ class rModelFace{
 public:
     int A[3];
     rModelFace(int a=0,int b=0,int c=0){A[0]=a;A[1]=b;A[2]=c;}
-    ~rModelFace(){}
+    ~rModelFace(){};
 };
 
 class rModel

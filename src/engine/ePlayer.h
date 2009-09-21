@@ -245,6 +245,7 @@ public:
     nSpamProtection chatSpam_;
     
     eChatLastSaid lastSaid_; //!< last said information
+    eShuffleSpamTester shuffleSpam;
 
     ePlayerNetID(int p=-1);
     virtual ~ePlayerNetID();
@@ -321,8 +322,9 @@ public:
 #ifdef KRAWALL_SERVER
     void Authenticate( tString const & authName, 
                        tAccessLevel accessLevel = tAccessLevel_Authenticated,
-                       ePlayerNetID const * admin = 0 );    //!< make the authentification valid
-    void DeAuthenticate( ePlayerNetID const * admin = 0 );  //!< make the authentification invalid
+                       ePlayerNetID const * admin = 0,
+                       bool messages = true );    //!< make the authentification valid
+    void DeAuthenticate( ePlayerNetID const * admin = 0, bool messages = true );  //!< make the authentification invalid
     bool IsAuthenticated() const;                     //!< is the authentification valid?
 #endif
 
@@ -355,6 +357,7 @@ public:
     static void ResetScoreDifferences(); //<! Resets the last stored score so ScoreDifferences takes this as a reference time
     static void LogScoreDifferences();   //<! Logs accumulated scores of all players since the last call to ResetScoreDifferences() to ladderlog.txt
     static void UpdateSuspensions();     //<! Decrements the number of rounds players are suspended for
+    static void UpdateShuffleSpamTesters();    //<! Reset shuffle spam checks
     void LogScoreDifference();           //<! Logs accumulated scores since the last call to ResetScoreDifferences() to ladderlog.txt
 
     static void SortByScore(); // brings the players into the right order
@@ -535,6 +538,9 @@ public:
 };
 
 void ForceName ( std::istream & s );
+
+void se_MakeReferee( ePlayerNetID * victim, ePlayerNetID * admin = 0 );
+void se_CancelReferee( ePlayerNetID * victim, ePlayerNetID * admin = 0 );
 
 // ******************************************************************************************
 // *

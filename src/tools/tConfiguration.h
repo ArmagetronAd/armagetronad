@@ -50,7 +50,7 @@ enum tAccessLevel
     tAccessLevel_3 = 3,            // reserved
     tAccessLevel_4 = 4,            // reserved
     tAccessLevel_Armatrator = 5,   // reserved
-    tAccessLevel_6 = 6,            // reserved
+    tAccessLevel_Referee = 6,      // a referee elected by players
     tAccessLevel_TeamLeader = 7,   // a team leader
     tAccessLevel_TeamMember = 8,   // a team member
     tAccessLevel_9 = 9,            // reserved
@@ -194,6 +194,17 @@ class tAccessLevelSetter
 public:
     //! modifies the access level of <item> to <level>
     tAccessLevelSetter( tConfItemBase & item, tAccessLevel level );
+};
+
+//! Sets tConfItemBase::printChange/printErrors
+class tNoisinessSetter
+{
+public:
+    tNoisinessSetter( bool printChange = true, bool printErrors = true );
+    ~tNoisinessSetter();
+private:
+    bool oldPrintChange;
+    bool oldPrintErrors;
 };
 
 // Arg! Msvc++ could not handle bool IO. Seems to be fine now.
@@ -419,7 +430,7 @@ public:
 };
 
 // includes a single configuration file by name, searches in var and config directories
-void st_Include( tString const & file, bool reportError = true );
+void st_Include( tString const & file );
 
 void st_LoadConfig();
 void st_SaveConfig();

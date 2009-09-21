@@ -2335,7 +2335,7 @@ no_real_teams                 Nie ma druzyn z ponad jednym graczem.\n
 
 player_topologypolice        Rozkaz z Kontroli Mapy: \1
 
-team_shuffle                  \1, który dotad startowal na pozycji \2, przetasowal sie i teraz wyruszy z pozycji \3.\n
+team_shuffle                  \1, który dotad startowal na pozycji \2, przetasowal sie i teraz wyruszy z pozycji \3.
 player_noshuffleup            Nie wolno Ci tasowac.\n
 player_noshuffle              Twoje tasowanie nie przynioslo zadnego efektu.\n
 player_shuffle_error          /shuffle expects a number as argument; an explicit sign (+/-) will change your position by the indicated number of steps, no sign will shuffle you to the given position.\n

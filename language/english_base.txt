@@ -396,6 +396,7 @@ ping_flood_time_50_help             Minimum time for 50 ping packets from one ma
 ping_flood_time_100_help            Minimum time for 100 ping packets from one machine to arrive.
 ping_flood_global_help              The times PING_FLOOD_TIME_X, multiplied by this value, count for all pings from all machines. Negative values disable global flood protection.
 
+shuffle_spam_messages_per_round_help Per round, per player limit on the number of shuffle messages displayed. A negative or zero value disables this check.
 spam_protection_repeat_help         Minimum time between identical chat messages.
 spam_protection_help				Harshness of spam protection; determines min delay between chat messages accepted.
 spam_protection_vote_help           Extra factor for SPAM_PROTECTION for votes.
@@ -1653,6 +1654,11 @@ kick_player_help					Pressing enter or space on this menu item will issue a kick
 suspend_player_details_text			If accepted, \1 will be suspended for some rounds.
 suspend_player_text					Suspend \1
 
+referee_player_details_text         If accepted, \1 will be made referee: He will be able to administrate teams.
+referee_player_text                 Make \1 referee
+demotereferee_player_details_text   If accepted, \1 won't be referee anymore: He will not be able to administrate teams.
+demotereferee_player_text           Demote \1 as referee
+
 vote_include_details_text			If accepted, the file \1 will be included as a configuration file.
 vote_include_text					Include \1
 vote_include_error					Include file \1 not found or not readable.\n
@@ -2297,7 +2303,7 @@ gamestate_reset_console		Resetting scores and starting new match after this roun
 gamestate_resetnow_center	New Match
 gamestate_resetnow_console	Resetting scores...\n
 gamestate_resetnow_log		New Match\n
-gamestate_newround_console	Go (round \1 of \2 )!\n
+gamestate_newround_console	Go (round \1 of \2)!\n
 gamestate_newround_goldengoal	Go (extra round; whoever gains the lead wins)!\n
 gamestate_newround_log		New Round\n
 gamestate_chat_wait         Waiting up to \2 seconds for \1 to finish chatting.\n
@@ -2467,10 +2473,16 @@ player_spectator_message Spectators
 no_real_teams           No teams with more than one player.\n
 player_topologypolice	Order from Topology Police: \1
 
-team_shuffle            \1 gets shuffled from rank \2 to \3.\n
+team_shuffle            \1 gets shuffled from rank \2 to \3.
+team_shuffle_suppress   Future shuffle messages from this player will be suppressed.\n
 player_noshuffleup      You are not allowed to shuffle up.\n
 player_noshuffle        Your shuffling wish has no effect.\n
 player_shuffle_error    /shuffle expects a number as argument; an explicit sign (+/-) will change your position by the indicated number of steps, no sign will shuffle you to the given position.\n
+
+player_referee          0x7fff7fBy order of \10x7fff7f, \20x7fff7f is now a referee.\n
+player_referee_anon     \10x7fff7f is now a referee.\n
+player_referee_nomore   0xff7f7fBy order of \10xff7f7f, \20xff7f7f is no longer a referee.\n
+player_referee_nomore_anon \1 0xff7f7fis no longer a referee.\n
 
 player_message_help     Sends a message to a specified player.
 player_message_usage    Usage: PLAYER_MESSAGE <user ID or name> "<Message>"\n
@@ -2702,6 +2714,8 @@ vote_vote_for						\1 voted for Poll "\2".\n
 vote_vote_against					\1 voted against Poll "\2".\n
 vote_unknown_command                Unknown /vote command \1, available are: \2\n
 vote_kick_local                     Can't vote against local player/AI \1.\n
+vote_referee_already                \10xRESETT is already a referee.\n
+vote_demotereferee_notref           \10xRESETT is not a referee.\n
 
 #********************************************
 #********************************************
@@ -2853,6 +2867,7 @@ config_accesslevel_0        Owner
 config_accesslevel_1        Administrator
 config_accesslevel_2        Moderator
 config_accesslevel_5        Armatrator
+config_accesslevel_6        Referee
 config_accesslevel_7        Team Leader
 config_accesslevel_8        Team Member
 config_accesslevel_12       Local User
@@ -2967,7 +2982,7 @@ access_level_chat_timeout_help   Time in seconds between public announcements th
 access_level_chat_request   \10xRESETT would like to chat, but is not authorized yet. Would someone be so kind and say "/op \2"?\n
 access_level_chat_denied    0xff7f7fChat denied,0xffffff insufficient access level.\n
 access_level_op_denied      0xff7f7f\1 denied,0xffffff insufficient access level.\n
-access_level_op_overpowered 0xff7f7f\1 denied,0xffffff your need higher access righrs than your victim.\n
+access_level_op_overpowered 0xff7f7f\1 denied,0xffffff your need higher access rights than your victim.\n
 access_level_op_self        0xff7f7f\1 denied,0xffffff can't do that to yourself :).\n
 access_level_op_denied_max  0xff7f7f\1 denied,0xffffff your victim already has maximal rights.\n
 access_level_op_denied_ai   0xff7f7f\1 denied,0xffffff your victim is an AI.\n
@@ -2975,7 +2990,9 @@ access_level_op_same        \1: This would have no effect.\n
 access_level_op_unclear     \1: User is already logged in, please explicitly set an access level.\n
 
 access_level_demote         \1 has been demoted to "\2" by order of \3.\n
+access_level_demote_anon    \1 has been demoted to "\2".\n
 access_level_promote        \1 has been promoted to "\2" by order of \3.\n
+access_level_promote_anon   \1 has been promoted to "\2".\n
 
 access_level_admin_denied   0xff7f7f/admin denied,0xffffff insufficient access level.\n
 access_level_shuffle_up_denied Required access level to shuffle up is "\1", you only have "\2".\n

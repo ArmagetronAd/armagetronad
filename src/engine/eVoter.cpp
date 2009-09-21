@@ -100,7 +100,15 @@ static tSettingItem< int > se_vbKick( "VOTING_BIAS_KICK", se_votingBiasKick );
 static int se_votingBiasSuspend = 0;
 static tSettingItem< int > se_vbSuspend( "VOTING_BIAS_SUSPEND", se_votingBiasSuspend );
 
-// the number set here always acts as additional votes against a suspend vote.
+// the number set here always acts as additional votes against a referee vote.
+static int se_votingBiasReferee = 0;
+static tSettingItem< int > se_vbReferee( "VOTING_BIAS_REFEREE", se_votingBiasReferee );
+
+// the number set here always acts as additional votes against a demotereferee vote.
+static int se_votingBiasCancelReferee = 0;
+static tSettingItem< int > se_vbCancelReferee( "VOTING_BIAS_DEMOTEREFEREE", se_votingBiasCancelReferee );
+
+// the number set here always acts as additional votes against a include vote.
 static int se_votingBiasInclude = 0;
 static tSettingItem< int > se_vbInclude( "VOTING_BIAS_INCLUDE", se_votingBiasInclude );
 
@@ -142,6 +150,17 @@ static tAccessLevelSetter se_accessLevelVoteKickSILevel( se_accessLevelVoteKickS
 static tAccessLevel se_accessLevelVoteSuspend = tAccessLevel_Program;
 static tSettingItem< tAccessLevel > se_accessLevelVoteSuspendSI( "ACCESS_LEVEL_VOTE_SUSPEND", se_accessLevelVoteSuspend );
 static tAccessLevelSetter se_accessLevelVoteSuspendSILevel( se_accessLevelVoteSuspendSI, tAccessLevel_Owner );
+
+// minimal access level for referee votes
+static tAccessLevel se_accessLevelVoteReferee = tAccessLevel_Moderator;
+static tSettingItem< tAccessLevel > se_accessLevelVoteRefereeSI( "ACCESS_LEVEL_VOTE_REFEREE", se_accessLevelVoteReferee );
+static tAccessLevelSetter se_accessLevelVoteRefereeSILevel( se_accessLevelVoteRefereeSI, tAccessLevel_Owner );
+
+// minimal access level for demotereferee votes
+static tAccessLevel se_accessLevelVoteCancelReferee = tAccessLevel_Moderator;
+static tSettingItem< tAccessLevel > se_accessLevelVoteCancelRefereeSI( "ACCESS_LEVEL_VOTE_DEMOTEREFEREE", se_accessLevelVoteCancelReferee );
+static tAccessLevelSetter se_accessLevelVoteCancelRefereeSILevel( se_accessLevelVoteCancelRefereeSI, tAccessLevel_Owner );
+
 
 // minimal access level for include votes
 static tAccessLevel se_accessLevelVoteInclude = tAccessLevel_Moderator;
@@ -363,7 +382,7 @@ public:
         }
 
         // enough voters online?
-        if ( eVoter::voters_.Len() < se_minVoters )
+        if ( eVoter::voters_.Len() < se_minVoters || eVoter::voters_.Len() < 2 )
         {
             tOutput message("$vote_toofew");
             sn_ConsoleOut( message, senderID );
@@ -519,7 +538,7 @@ public:
         if ( sn_GetNetState() == nSERVER )
         {
             // see if there are enough voters
-            if ( total <= se_minVoters )
+            if ( total < se_minVoters || total < 2 )
             {
                 this->BroadcastMessage( tOutput("$vote_toofew") );
                 delete this;
@@ -553,9 +572,9 @@ public:
 
                 tOutput voteMessage;
                 voteMessage.SetTemplateParameter( 1, GetDescription() );
-                voteMessage.SetTemplateParameter( 2, pro-1 );
-                voteMessage.SetTemplateParameter( 3, con-se_votingBias );
-                voteMessage.SetTemplateParameter( 4, total-se_votingBias);
+                voteMessage.SetTemplateParameter( 2, pro );
+                voteMessage.SetTemplateParameter( 3, con-bias );
+                voteMessage.SetTemplateParameter( 4, total-pro-con+bias );
                 voteMessage << "$vote_rejected";
                 this->BroadcastMessage( voteMessage );
                 delete this;
@@ -565,14 +584,14 @@ public:
             // see if the vote has been accepted
             if ( pro >= con && pro * 2 > total )
             {
-                this->DoExecute();
                 tOutput voteMessage;
                 voteMessage.SetTemplateParameter( 1, GetDescription() );
-                voteMessage.SetTemplateParameter( 2, pro-1 );
-                voteMessage.SetTemplateParameter( 3, con-se_votingBias );
-                voteMessage.SetTemplateParameter( 4, total-se_votingBias);
+                voteMessage.SetTemplateParameter( 2, pro );
+                voteMessage.SetTemplateParameter( 3, con-bias );
+                voteMessage.SetTemplateParameter( 4, total-pro-con+bias );
                 voteMessage << "$vote_accepted";
                 this->BroadcastMessage( voteMessage );
+                this->DoExecute();
                 delete this;
                 return;
             }
@@ -1490,6 +1509,7 @@ static void se_SendKick( ePlayerNetID* p )
     kick.SendMessage();
 }
 
+#ifdef DEDICATED
 #ifdef KRAWALL_SERVER
 
 // console with filter for redirection to anyone with a certain access level
@@ -1681,7 +1701,109 @@ protected:
     tAccessLevel level_; //!< the level to execute the file with
 };
 
+class eVoteItemReferee: public eVoteItemHarmServerControlled
+{
+public:
+    eVoteItemReferee( ePlayerNetID* player = 0 )
+    : eVoteItemHarm( player )
+    {}
+
+    ~eVoteItemReferee()
+    {}
+protected:
+    // get the language string prefix
+    virtual char const * DoGetPrefix() const{ return "referee"; }
+
+    // access level required for this kind of vote
+    virtual tAccessLevel DoGetAccessLevel() const
+    {
+        return se_accessLevelVoteReferee;
+    }
+
+    virtual bool DoCheckValid( int senderID )
+    {
+        if ( !eVoteItemHarm::DoCheckValid( senderID ) )
+            return false;
+
+        ePlayerNetID * victim = GetPlayer();
+        if ( victim->GetAccessLevel() <= tAccessLevel_Referee )
+        {
+            sn_ConsoleOut( tOutput("$vote_referee_already", victim->GetColoredName() ), senderID );
+            return false;
+        }
+
+        return true;
+    }
+
+    // return vote-specific extra bias
+    virtual int DoGetExtraBias() const
+    {
+        return se_votingBiasReferee;
+    }
+    virtual void DoExecute()                        // called when the voting was successful
+    {
+        ePlayerNetID * player = GetPlayer();
+        if ( player )
+        {
+            se_MakeReferee ( player );
+        }
+    }
+
+};
+
+class eVoteItemCancelReferee: public eVoteItemHarmServerControlled
+{
+public:
+    eVoteItemCancelReferee( ePlayerNetID* player = 0 )
+    : eVoteItemHarm( player )
+    {}
+
+    ~eVoteItemCancelReferee()
+    {}
+protected:
+    // get the language string prefix
+    virtual char const * DoGetPrefix() const{ return "demotereferee"; }
+
+    // access level required for this kind of vote
+    virtual tAccessLevel DoGetAccessLevel() const
+    {
+        return se_accessLevelVoteReferee;
+    }
+
+    virtual bool DoCheckValid( int senderID )
+    {
+        if ( !eVoteItemHarm::DoCheckValid( senderID ) )
+            return false;
+
+        ePlayerNetID * victim = GetPlayer();
+        if ( victim->GetAccessLevel() != tAccessLevel_Referee )
+        {
+            sn_ConsoleOut( tOutput("$vote_demotereferee_notref", victim->GetColoredName() ), senderID );
+            return false;
+        }
+
+        return true;
+    }
+
+    // return vote-specific extra bias
+    virtual int DoGetExtraBias() const
+    {
+        return se_votingBiasCancelReferee;
+    }
+    virtual void DoExecute()                        // called when the voting was successful
+    {
+        ePlayerNetID * player = GetPlayer();
+        if ( player )
+        {
+            se_CancelReferee ( player );
+        }
+    }
+
+};
+
 #endif
+#endif
+
 
 // **************************************************************************************
 // **************************************************************************************
@@ -2158,6 +2280,7 @@ void eVoter::HandleChat( ePlayerNetID * p, std::istream & message ) //!< handles
             item = tNEW( eVoteItemSuspend )( toSuspend );
         }
     }
+#ifdef DEDICATED
 #ifdef KRAWALL_SERVER
     else if ( command == "include" )
     {
@@ -2166,6 +2289,30 @@ void eVoter::HandleChat( ePlayerNetID * p, std::istream & message ) //!< handles
         {
             // accept message
             item = tNEW( eVoteItemInclude )( file, p->GetAccessLevel() );
+        }
+    }
+    else if ( command == "referee" )
+    {
+        tString name;
+        name.ReadLine( message );
+        ePlayerNetID * toMakeReferee = ePlayerNetID::FindPlayerByName( name, p );
+
+        if ( toMakeReferee )
+        {
+            // accept message
+            item = tNEW( eVoteItemReferee )( toMakeReferee );
+        }
+    }
+    else if ( command == "demotereferee" )
+    {
+        tString name;
+        name.ReadLine( message );
+        ePlayerNetID * toDemoteReferee = ePlayerNetID::FindPlayerByName( name, p );
+
+        if ( toDemoteReferee )
+        {
+            // accept message
+            item = tNEW( eVoteItemCancelReferee )( toDemoteReferee );
         }
     }
     else if ( command == "command" )
@@ -2178,12 +2325,13 @@ void eVoter::HandleChat( ePlayerNetID * p, std::istream & message ) //!< handles
         }
     }
 #endif
+#endif
     else
     {
-#ifdef KRAWALL_SERVER
-        sn_ConsoleOut( tOutput("$vote_unknown_command", command, "suspend, kick, include, command" ), p->Owner() );
+#if defined(DEDICATED) && defined(KRAWALL_SERVER)
+        sn_ConsoleOut( tOutput("$vote_unknown_command", command, "command, demotereferee, include, kick, referee, suspend" ), p->Owner() );
 #else
-        sn_ConsoleOut( tOutput("$vote_unknown_command", command, "suspend, kick" ), p->Owner() );
+        sn_ConsoleOut( tOutput("$vote_unknown_command", command, "kick, suspend" ), p->Owner() );
 #endif
     }
 

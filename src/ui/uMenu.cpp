@@ -1583,11 +1583,12 @@ bool uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL 
                 //REAL middle=-.6;
 
                 tString m(message);
-                int len = m.Len();
-                if (w * len > 1.8)
+                int len = tColoredString::RemoveColors(m).Len();
+                float maxWidth = 4.8;
+                if (w * len > maxWidth)
                 {
-                    h = h * 1.8 / (w * len);
-                    w = 1.8 / len;
+                    h = h * maxWidth / (w * len);
+                    w = maxWidth / len;
                 }
 
                 Color(1,1,1);
