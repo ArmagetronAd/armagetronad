@@ -2900,7 +2900,7 @@ static void se_ChatMsg( ePlayerNetID * p, std::istream & s, eChatSpamTester & sp
             //send /msg to chatlog
             if (se_chatLogWritePM ){
                 tString str;
-                str << p->GetUserName() << " /msg " << receiver->GetUserName() << msg_core;
+                str << p->GetUserName() << " /msg " << receiver->GetUserName() << " " << msg_core;
                 se_SaveToChatLog(str);
             }
         }
