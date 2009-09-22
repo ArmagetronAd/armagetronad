@@ -250,6 +250,11 @@ void uMenu::OnEnter(){
         // we're about to render, last chance to make changes to the menu
         OnRender();
 
+#ifndef DEDICATED
+        rSysDep::PostSwapGL();
+        rSysDep::ClearGL();
+#endif
+
         // clamp cursor
         if (selected < 0 )
             selected = 0;
@@ -357,7 +362,6 @@ void uMenu::OnEnter(){
 
 #ifndef DEDICATED
         rSysDep::SwapGL();
-        rSysDep::ClearGL();
 #endif
     }
 

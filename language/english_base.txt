@@ -712,11 +712,15 @@ moviepack_rim_wall_stretch_y_help  Extension of the rim wall texture in the vert
 swapmode_text           Swap Mode:
 swapmode_help           Determines the commands used to sync graphics and input every frame. The current value implies:
 swapmode_fastest_text   Fastest
-swapmode_fastest_help   No sync commands. This is fastest and uses the least CPU, but may cause graphics to severely lag behind input. Use at your own risk.
+swapmode_fastest_help   No sync commands. This is fastest and uses the least CPU, providing optimal througput, but may cause graphics to severely lag behind input. Use at your own risk.
 swapmode_glflush_text   Flush
-swapmode_glflush_help   Calls glFlush() to sync graphics output. Very little overhead and prevents graphics lag. This is the default.
+swapmode_glflush_help   Calls glFlush() to sync graphics output. Very little overhead and prevents graphics lag for most, but sadly not all, configurations.
+swapmode_fence_text     Fence
+swapmode_glflush_help   Uses fences where available to ensure no more than one frame of output lag; this guarantees good throughput with controllable latency. Without fences, falls back to Late Finish.
+swapmode_latefinish_text Late Finish
+swapmode_glflush_help   Calls glFinish before starting to render the next frame. Same overhead as regular Finish, minimally higher latency, higher throughput. This is the default.
 swapmode_glfinish_text  Finish
-swapmode_glfinish_help  Calls glFinish() to sync graphics output. This is guaranteed to prevent graphics lagging behind input, but causes loss of framerate on some systems and full CPU load on others. Use if Flush does not work.
+swapmode_glfinish_help  Calls glFinish() after rendering a frame to sync graphics output. This is guaranteed to prevent graphics lagging behind input, but causes loss of framerate on some systems and full CPU load on others. Use if Flush or Fence do not work.
 swap_mode_help          Determines the commands used to sync graphics and input. 0: do nothing, 1: call glFlush(), 2: call glFinish().
 
 texture_mode_0_help		Floor Texture:

@@ -35,13 +35,9 @@ public:
     {
         rSwap_Fastest = 0,
         rSwap_glFlush = 1,
-        rSwap_glFinish = 2
-                         /*
-                                 rSwap_150Hz = 5,
-                                 rSwap_100Hz = 7,
-                                 rSwap_80Hz  = 9,
-                                 rSwap_60Hz  = 11
-                         */
+        rSwap_glFinish = 2,
+        rSwap_Fence = 3,
+        rSwap_LateFinish = 4
     };
 
 #ifndef DEDICATED
@@ -51,6 +47,7 @@ public:
 
     // buffer swap:
     static void SwapGL();
+    static void PostSwapGL(); // call after the game logic before the first new draw command of the next frame
     static void ClearGL(); // not really system depentent.......
 
     // starting and stopping of background network processing

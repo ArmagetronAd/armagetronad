@@ -1323,6 +1323,11 @@ void Render(eGrid *grid, REAL time, bool swap=true){
 
 #ifndef DEDICATED
     if (sr_glOut){
+        if(swap)
+        {
+            rSysDep::PostSwapGL();
+            rSysDep::ClearGL();
+        }
         RenderAllViewports(grid);
 
         sr_ResetRenderState(true);
@@ -1330,13 +1335,14 @@ void Render(eGrid *grid, REAL time, bool swap=true){
 
         if (swap){
             rSysDep::SwapGL();
-            rSysDep::ClearGL();
         }
     }
     else
     {
         if ( swap )
+        {
             rSysDep::SwapGL();
+        }
 
         tDelay( sn_defaultDelay );
     }
