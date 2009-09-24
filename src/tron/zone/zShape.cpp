@@ -9,6 +9,11 @@
 #include "nConfig.h"
 #include "nProtoBuf.h"
 
+// Where does this isset macro come from? I don't know. But it's just messing this up around here.
+#ifdef isset
+#undef isset
+#endif
+
 #ifndef ENABLE_ZONESV1
 int sz_zoneAlphaToggle = 0;
 static tSettingItem<int> sz_zoneAlphaToggleConf( "ZONE_ALPHA_TOGGLE", sz_zoneAlphaToggle );

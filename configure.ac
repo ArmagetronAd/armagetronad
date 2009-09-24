@@ -661,6 +661,34 @@ AC_MSG_ERROR([
 ])
 )
 
+# fi
+
+dnl *************************************************
+dnl         Armathentication Threading
+dnl *************************************************
+
+if test x$enable_armathentication = xyes; then
+
+AC_LANG([C++])
+
+ACX_PTHREAD([
+
+LIBS="${PTHREAD_LIBS} ${LIBS}"
+CXXFLAGS="${CXXFLAGS} ${PTHREAD_CFLAGS}"
+CC="${PTHREAD_CC}"
+dnl AC_DEFINE(HAVE_PTHREAD,1,[Define if you have POSIX threads libraries and header files.])
+
+],[
+
+AM_PATH_ZTHREAD_AA(2.3.2)
+CXXFLAGS="${CXXFLAGS} ${ZTHREAD_CXXFLAGS}"
+LIBS="${LIBS} ${ZTHREAD_LIBS}"
+
+])
+
+fi # krawall
+
+
 dnl *************************************************
 dnl         pattern buffers
 dnl *************************************************
@@ -680,34 +708,8 @@ AC_CHECK_HEADERS([google/protobuf/message.h],,
 AC_MSG_ERROR([[The library protobuf (Google Protocol Buffers, http://code.google.com/p/protobuf/) is required with all development files, but was not found.]])
 )
 
-AC_LANG([C])
+dnl AC_LANG([C])
 
-# fi
-
-dnl *************************************************
-dnl         Armathentication Threading
-dnl *************************************************
-
-if test x$enable_armathentication = xyes; then
-
-AC_LANG([C++])
-
-dnl ACX_PTHREAD([
-
-dnl LIBS="${PTHREAD_LIBS} ${LIBS}"
-dnl CXXFLAGS="${CXXFLAGS} ${PTHREAD_CFLAGS}"
-dnl CC="${PTHREAD_CC}"
-dnl AC_DEFINE(HAVE_PTHREAD,1,[Define if you have POSIX threads libraries and header files.])
-
-dnl ],[
-
-AM_PATH_ZTHREAD_AA(2.3.2)
-CXXFLAGS="${CXXFLAGS} ${ZTHREAD_CXXFLAGS}"
-LIBS="${LIBS} ${ZTHREAD_LIBS}"
-
-dnl ])
-
-fi # krawall
 fi # armamain
 
 dnl *************************************************
