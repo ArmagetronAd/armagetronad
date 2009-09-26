@@ -1,4 +1,6 @@
 Changes since 0.2.8.3_rc3:
+- Custom camera snaps to cycle direction once when activated if the turn speed
+  is zero.
 - RESERVE_SCREEN_NAME now works regardless of the ALLOW_IMPOSTOR setting.
 - USER_LEVEL now escapes the given authenticated name so you don't have to
   guess the escaping rules. Ex: USER_LEVEL "name with spaces@forums" 2
