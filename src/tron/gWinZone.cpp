@@ -1578,7 +1578,7 @@ void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
     {
 		target->Player()->AddScore(score_deathzone, tOutput(), "$player_lose_deathzone");
     target->Kill();
-		sg_deathDeathZoneWriter << ePlayerNetID::FilterName(target->Player()->GetUserName());
+		sg_deathDeathZoneWriter << target->Player()->GetUserName();
 		sg_deathDeathZoneWriter.write();
     }
     else
@@ -2513,7 +2513,7 @@ void gBaseZoneHack::OnVanish( void )
 
 			if ( closest )
 			{
-				sg_deathBasezoneConqueredWriter << ePlayerNetID::FilterName(closest->GetUserName());
+				sg_deathBasezoneConqueredWriter << closest->GetUserName();
 				if ( enemies_.size() > 0 || sg_defendRate < 0)
 				{
                     tColoredString playerName;
