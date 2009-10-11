@@ -7392,10 +7392,13 @@ void ePlayerNetID::CreateNewTeam()
 {
     // check if the team change is legal
     tASSERT ( nCLIENT !=  sn_GetNetState() );
-
-    if(!TeamChangeAllowed( true ) || GetAccessLevel() > AccessLevelRequiredToPlay()) {
+    
+    if ( !TeamChangeAllowed( true ) )
         return;
-    }
+#ifdef KRAWALL_SERVER
+    if( GetAccessLevel() > AccessLevelRequiredToPlay())
+        return;
+#endif
 
     if ( !eTeam::NewTeamAllowed() ||
             ( bool( currentTeam ) && ( currentTeam->NumHumanPlayers() == 1 ) ) ||

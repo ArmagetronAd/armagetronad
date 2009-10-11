@@ -34,6 +34,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "nProtoBuf.h"
 #include "eTeam.pb.h"
+#include "aa_config.h"
 
 tString & operator << ( tString &s, const eTeam & team)
 {
@@ -404,7 +405,11 @@ bool eTeam::IsLocked() const
 
 bool eTeam::IsLockedFor( const ePlayerNetID * p ) const
 {
-    return IsLocked() || ( p->GetAccessLevel() > ePlayerNetID::AccessLevelRequiredToPlay() );
+    bool isLocked = IsLocked();
+#ifdef KRAWALL_SERVER
+    isLocked = isLocked || ( p->GetAccessLevel() > ePlayerNetID::AccessLevelRequiredToPlay() )
+#endif
+    return isLocked;
 }
 
 static void se_UnlockAllTeams ( void )
