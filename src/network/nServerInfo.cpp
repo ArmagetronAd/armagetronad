@@ -1514,7 +1514,7 @@ void nServerInfo::GetFromMaster(nServerInfoBase *masterInfo, char const * fileSu
         if ( masterInfo )
         {
             con << tOutput( "$network_master_timeout_retry" );
-            GetFromMaster( masterInfo );
+            GetFromMaster();
         }
         else
         {
@@ -2287,7 +2287,7 @@ nServerInfo *nServerInfo::GetMasters()
 {
     // reload master list at least once per minute
     double time = tSysTimeFloat();
-    static double deleteTime = time;
+    static double deleteTime = time + 60.0;
     if ( time > deleteTime )
     {
         deleteTime = time + 60.0;

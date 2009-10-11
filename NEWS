@@ -1,4 +1,8 @@
 Changes since 0.2.8.3_rc3:
+- Pinging previously popular servers earlier for quicker server
+  browsing
+- Improved master server random polling, the second polled master now
+  also is random, and all masters are polled if need be
 - Custom camera snaps to cycle direction once when activated if the turn speed
   is zero.
 - RESERVE_SCREEN_NAME now works regardless of the ALLOW_IMPOSTOR setting.
