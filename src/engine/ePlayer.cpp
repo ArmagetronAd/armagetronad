@@ -6383,7 +6383,18 @@ void ePlayerNetID::RankingLadderLog() {
         se_onlinePlayerWriter << p->GetLogName();
         
         // add player color to the message
-		se_onlinePlayerWriter << p->color.r_ << p->color.g_ << p->color.b_;
+        REAL w = 5;
+        REAL r_w = 2;
+        REAL g_w = 1;
+        REAL b_w = 2;
+        if (p->currentTeam)
+        {
+            se_onlinePlayerWriter << (r_w*p->color.r_ + w*p->currentTeam->R())/( w + r_w );
+            se_onlinePlayerWriter << (g_w*p->color.g_ + w*p->currentTeam->G())/( w + g_w );
+            se_onlinePlayerWriter << (b_w*p->color.b_ + w*p->currentTeam->B())/( w + b_w );
+        }else{
+            se_onlinePlayerWriter << p->color.r_ << p->color.g_ << p->color.b_;
+        }
         
         if(p->IsActive()) {
             se_onlinePlayerWriter << p->ping;
