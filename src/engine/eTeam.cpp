@@ -407,7 +407,7 @@ bool eTeam::IsLockedFor( const ePlayerNetID * p ) const
 {
     bool isLocked = IsLocked();
 #ifdef KRAWALL_SERVER
-    isLocked = isLocked || ( p->GetAccessLevel() > ePlayerNetID::AccessLevelRequiredToPlay() )
+    isLocked = isLocked || ( p->GetAccessLevel() > ePlayerNetID::AccessLevelRequiredToPlay() );
 #endif
     return isLocked;
 }
