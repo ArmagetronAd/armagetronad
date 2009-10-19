@@ -6409,6 +6409,28 @@ void ePlayerNetID::RankingLadderLog() {
     se_numHumansWriter.write();
 }
 
+static eLadderLogWriter se_playerGridPosWriter("PLAYER_GRIDPOS", false);
+
+void ePlayerNetID::GridPosLadderLog() {
+    if(!se_playerGridPosWriter.isEnabled()) {
+        return;
+    }
+    if (se_PlayerNetIDs.Len()>0){
+        int max = se_PlayerNetIDs.Len();
+        for(int i=0;i<max;i++){
+            ePlayerNetID *p=se_PlayerNetIDs(i);
+            if (p->IsActive() && p->currentTeam && p->Object() && p->Object()->Alive() )
+            {
+                se_playerGridPosWriter << p->GetUserName() << p->Object()->Position().x << p->Object()->Position().y << p->Object()->Direction().x << p->Object()->Direction().y;
+                if (p->Object() && p->Object()->Team())
+                    se_playerGridPosWriter << FilterName(p->Object()->Team()->Name());
+                else se_playerGridPosWriter << " ";
+                se_playerGridPosWriter.write();
+            }
+        }
+    }
+}
+
 void ePlayerNetID::ClearAll(){
     for(int i=MAX_PLAYERS-1;i>=0;i--){
         ePlayer *local_p=ePlayer::PlayerConfig(i);

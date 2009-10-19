@@ -3816,6 +3816,11 @@ static uActionGlobalFunc ingamemenu_action(&ingamemenu,&ingamemenu_func, true );
 
 static eLadderLogWriter sg_gameTimeWriter("GAME_TIME", true);
 
+static float sg_gridPosInterval=1;
+static tSettingItem<float> sggpi("GRID_POSITION_INTERVAL",
+                                 sg_gridPosInterval);
+
+
 bool gGame::GameLoop(bool input){
     nNetState netstate = sn_GetNetState();
 
@@ -3849,6 +3854,7 @@ bool gGame::GameLoop(bool input){
         static int lastcountdown=0;
         int cd=int(floor(-time))+1;
         if (cd>=0 && cd<PREPARE_TIME && cd!=lastcountdown && se_mainGameTimer && se_mainGameTimer->IsSynced() ){
+            if (cd==1) ePlayerNetID::GridPosLadderLog();
             lastcountdown=cd;
             tString s;
             s << cd;
@@ -3980,7 +3986,7 @@ bool gGame::GameLoop(bool input){
 
         synced_ = true;
     }
-
+    {
     static float lastTime = 1e42;
 
     if(sg_gameTimeInterval >= 0 && (gtime >= lastTime + sg_gameTimeInterval || gtime < lastTime)) {
@@ -3993,6 +3999,13 @@ bool gGame::GameLoop(bool input){
         sg_gameTimeWriter << time;
         sg_gameTimeWriter.write();
         lastTime = time;
+    }
+    } {
+        static float lastTime = 1e42;
+        if((sg_gridPosInterval >= 0) && (gtime > sg_gridPosInterval) && (gtime >= lastTime + sg_gridPosInterval + 1 || gtime < lastTime)) {
+            ePlayerNetID::GridPosLadderLog();
+            lastTime = gtime;
+        }
     }
 
     if (state==GS_PLAY){

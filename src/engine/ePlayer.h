@@ -364,6 +364,8 @@ public:
     static float RankingGraph( float y, int MAX );     // prints a ranking list
 
     static void RankingLadderLog();     // writes a small ranking list to ladderlog
+    
+    static void GridPosLadderLog();     // writes a cycle positions to ladderlog
 
     static void  ResetScore();  // resets the ranking list
 
