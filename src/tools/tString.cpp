@@ -339,15 +339,24 @@ tString::size_type tString::Size( void ) const
 //!
 //!		@param	s	stream to read from
 //!		@param	enableEscapeSequences set to true if escape sequences (\n) shall be respected
+//!     @param  indent maximum amount of indentation to remove
+//!     @param  eatenWhitespace will be set to how much spacing was stripped
 //!
 // *******************************************************************************
 
-void tString::ReadLine( std::istream & s, bool enableEscapeSequences )
+void tString::ReadLine( std::istream & s, bool enableEscapeSequences, int indent, int * eatenWhitespace )
 {
     char c=' ';
     Clear();
-    while(c!='\n' && c!='\r' && isblank(c) &&  s.good() && !s.eof()){
+    int whitespace = -1;
+    while(c!='\n' && c!='\r' && isblank(c) && (whitespace < indent || indent < 0) &&  s.good() && !s.eof()){
         c=s.get();
+        whitespace++;
+    }
+
+    if (eatenWhitespace != 0)
+    {
+        *eatenWhitespace = whitespace;
     }
 
     s.putback(c);

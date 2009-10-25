@@ -641,7 +641,8 @@ void tConfItemBase::LoadAll(std::istream &s, bool record ){
         tString line;
 
         // read line from stream
-        line.ReadLine( s );
+        int indent = 0;
+        line.ReadLine( s, false, 0, &indent );
 
         /// concatenate lines ending in a backslash
         while ( line.Size() > 0 && line[line.Size()-1] == '\\' && s.good() && !s.eof() )
@@ -655,7 +656,7 @@ void tConfItemBase::LoadAll(std::istream &s, bool record ){
             }
 
             tString rest;
-            rest.ReadLine( s );
+            rest.ReadLine( s, false, indent );
             line << rest;
         }
 
