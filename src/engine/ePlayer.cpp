@@ -2029,7 +2029,7 @@ static tSettingItem< tAccessLevel > se_adminAccessLevelConf( "ACCESS_LEVEL_ADMIN
 static tAccessLevelSetter se_adminAccessLevelConfLevel( se_adminAccessLevelConf, tAccessLevel_Owner );
 
 void handle_command_intercept(ePlayerNetID *p, tString say) {
-    con << "[cmd] " << *p << ": " << say << '\n';
+    con << "[cmd] " << p->GetLogName() << ": " << say << '\n';
 }
 
 #ifdef KRAWALL_SERVER
