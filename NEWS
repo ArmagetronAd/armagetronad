@@ -1,3 +1,7 @@
+Changes since 0.2.8.3_rc4:
+- Intercepted chat commands are now written to ladderlog.txt. Format:
+  COMMAND /command-intercepted player [command arguments]
+
 Changes since 0.2.8.3_rc3:
 - Pinging previously popular servers earlier for quicker server
   browsing
@@ -297,7 +301,7 @@ Changes since 0.2.8.1:
   can be no bigger than the effect of ping.
 - Spectators are now regular players and can chat
 - The /msg command now converts the entered pattern into the internal
-  name so if you write "/msg öäü" and there is a user named "öäü" with
+  name so if you write "/msg Ã¶Ã¤Ã¼" and there is a user named "Ã¶Ã¤Ã¼" with
   an internal nick of "oau" it will still get matched
 - Team changes are now only executed when allowed, the need for the 
   temporary/permanent team imbalance setting distinction has gone away

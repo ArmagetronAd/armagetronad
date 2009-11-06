@@ -2028,7 +2028,15 @@ static tAccessLevel se_adminAccessLevel = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_adminAccessLevelConf( "ACCESS_LEVEL_ADMIN", se_adminAccessLevel );
 static tAccessLevelSetter se_adminAccessLevelConfLevel( se_adminAccessLevelConf, tAccessLevel_Owner );
 
-void handle_command_intercept(ePlayerNetID *p, tString say) {
+void handle_command_intercept( ePlayerNetID *p, tString const & command, std::istream & s, tString const & say ) {
+    static eLadderLogWriter se_commandWriter( "COMMAND", true );
+    
+    tString commandArguments;
+    commandArguments.ReadLine( s );
+    
+    se_commandWriter << command << p->GetLogName() << commandArguments;
+    se_commandWriter.write();
+    
     con << "[cmd] " << p->GetLogName() << ": " << say << '\n';
 }
 
@@ -2554,7 +2562,7 @@ static void handle_chat_admin_commands( ePlayerNetID * p, tString const & comman
     else
         if (se_interceptUnknownCommands)
         {
-            handle_command_intercept(p, say);
+            handle_command_intercept(p, command, s, say);
         }
         else
         {
@@ -3386,7 +3394,7 @@ void handle_chat( nMessage &m )
 #ifdef DEDICATED
                 if (se_InterceptCommands.StrPos(command) != -1)
                 {
-                    handle_command_intercept(p, say);
+                    handle_command_intercept(p, command, s, say);
                     return;
                 }
                 else
