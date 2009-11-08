@@ -205,15 +205,15 @@ void nServerInfo::CalcScore()
 {
     static int userScore[8] = { -100, 0, 100, 250, 300, 300, 250, 100 };
 
-    // do nothing if we are requerying
-    if ( !this->advancedInfoSet && this->advancedInfoSetEver )
+    // do nothing if we are querying
+    if ( !this->advancedInfoSet )
     {
         // score = scoreBias_;
 
         return;
     }
 
-    score  = 100;
+    score = 100;
     if (ping > .1)
         score  -= (ping - .1) * 300;
 
@@ -277,6 +277,7 @@ static const tString NAME       ("name");
 static const tString VERSION_TAG    ("version");
 static const tString RELEASE    ("release");
 static const tString SCOREBIAS  ("scorebias");
+static const tString SCORE      ("score");
 static const tString URL		("url");
 static const tString END        ("ServerEnd");
 static const tString START      ("ServerBegin");
@@ -299,6 +300,7 @@ void nServerInfo::Save(std::ostream &s) const
     s << URL		<< "\t" << url_ << "\n";
 
     s << SCOREBIAS  << "\t" << scoreBias_ << "\n";
+    s << SCORE      << "\t" << score      << "\n";
     s << NAME  << "\t" << name             << "\n";
     s << TNA  << "\t" << timesNotAnswered  << "\n";
     s << END   << "\t" << "\n\n";
@@ -327,7 +329,14 @@ void nServerInfo::Load(std::istream &s)
         else if ( id == VERSION_TAG )
             s >> version_;
         else if ( id == SCOREBIAS )
+        {
             s >> scoreBias_;
+            score = scoreBias_;
+        }
+        else if ( id == SCORE )
+        {
+            s >> score;
+        }
         else if ( id == RELEASE )
             release_.ReadLine( s );
         else if ( id == URL )
@@ -374,8 +383,6 @@ void nServerInfo::Load(std::istream &s)
     queried = 0;
     advancedInfoSet = false;
     advancedInfoSetEver =false;
-
-    score = scoreBias_;
 }
 
 nServerInfo *nServerInfo::GetFirstServer()
@@ -1507,7 +1514,7 @@ void nServerInfo::GetFromMaster(nServerInfoBase *masterInfo, char const * fileSu
         if ( masterInfo )
         {
             con << tOutput( "$network_master_timeout_retry" );
-            GetFromMaster( masterInfo );
+            GetFromMaster();
         }
         else
         {
@@ -1942,6 +1949,7 @@ void GetSenderData(const nMessage &m,tString& name, int& port)
 
 void nServerInfo::StartQueryAll( QueryType queryType )                         // start querying the advanced info of each of the servers in our list
 {
+    Sort(KEY_SCORE);
     sn_Requesting     = GetFirstServer();
 
     while (sn_Polling.Len())
@@ -2279,7 +2287,7 @@ nServerInfo *nServerInfo::GetMasters()
 {
     // reload master list at least once per minute
     double time = tSysTimeFloat();
-    static double deleteTime = time;
+    static double deleteTime = time + 60.0;
     if ( time > deleteTime )
     {
         deleteTime = time + 60.0;
