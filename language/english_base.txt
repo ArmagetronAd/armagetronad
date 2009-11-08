@@ -556,8 +556,8 @@ camera_forbid_custom_help	Forbids the use of the custom camera on all clients
 camera_forbid_server_custom_help  Forbids the use of the server custom camera
 
 camera_forbid_custom_glance_help                 Forbids use of special glance camera settings
-camera_override_custom_glance_help               Overrides custom glance settings with vanues from the server
-camera_override_custom_glance_server_custom_help Overrides custom glance settings with vanues from the server only for the server custom camera
+camera_override_custom_glance_help               Overrides custom glance settings with values from the server
+camera_override_custom_glance_server_custom_help Overrides custom glance settings with values from the server only for the server custom camera
 
 camera_follow_start_x_help	Start position of the fixed external camera
 camera_follow_start_y_help	Start position of the fixed external camera

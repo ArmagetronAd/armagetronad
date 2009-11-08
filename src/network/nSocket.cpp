@@ -1526,16 +1526,7 @@ int nSocket::Create( void )
 #ifndef WIN32
     char tos = IPTOS_LOWDELAY;
 
-    int ret = setsockopt( socket_, IPPROTO_IP, IP_TOS, &tos, sizeof(char) );
-
-    // remove this error reporting some time later, the success is not critical
-    if ( ret != 0 )
-    {
-        static bool warn=true;
-        if ( warn )
-            con << "Setting TOS to LOWDELAY failed.\n";
-        warn=false;
-    }
+    setsockopt( socket_, IPPROTO_IP, IP_TOS, &tos, sizeof(char) );
 #endif    
 
     // unblock it
