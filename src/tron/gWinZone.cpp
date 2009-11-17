@@ -4615,6 +4615,51 @@ REAL gTargetZoneHack::winnerTime_ = 0;
 								 //!< first player entering the last zone to be declare winner
 ePlayerNetID *gTargetZoneHack::winner_ = 0;
 
+static void sg_SetTargetCmd(std::istream &s)
+{
+	tString params;
+	params.ReadLine( s, true );
+	
+	// first parse the line to get the param : object_id
+	int pos = 0;				 //
+	const tString object_id_str = params.ExtractNonBlankSubString(pos);
+	tString event_str = params.ExtractNonBlankSubString(pos);
+	tString mode_str("new");
+	if (event_str=="add") {
+		mode_str = tString("add");
+		event_str = params.ExtractNonBlankSubString(pos);
+	}
+	tString cmd_str = params.SubStr(pos);
+	// first check for the name
+	int zone_id;
+	zone_id=gZone::FindFirst(object_id_str);
+	if (zone_id==-1)
+	{
+		zone_id = atoi(object_id_str);
+		if (zone_id==0 && object_id_str!="0") return;
+	}
+	
+	const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
+	while (zone_id!=-1)
+	{
+		// get the zone ...
+		gTargetZoneHack *zone=dynamic_cast<gTargetZoneHack *>(gameObjects(zone_id));
+		if (zone)
+		{
+			if (event_str=="onenter") {
+				zone->SetOnEnterCmd(cmd_str, mode_str);
+				con << "Zone " << zone->GOID() << " command onenter '" << cmd_str << "'\n";
+			} else if (event_str=="onvanish") {
+				zone->SetOnVanishCmd(cmd_str, mode_str);
+				con << "Zone " << zone->GOID() << " command onvanish '" << cmd_str << "'\n";
+			}
+			zone_id=gZone::FindNext(object_id_str, zone_id);
+		}
+	}
+}
+
+static tConfItemFunc sg_SetTargetCmd_conf("SET_TARGET_COMMAND",&sg_SetTargetCmd);
+
 // *******************************************************************************
 // *
 // *	gTargetZoneHack
@@ -4836,6 +4881,7 @@ void gTargetZoneHack::OnEnter( gCycle * target, REAL time )
 		winner_ = firstPlayer_;
 		// send on enter commands ...
 		std::istringstream stream(&OnEnterCmd(0));
+		tCurrentAccessLevel elevator( sg_SetTargetCmd_conf.GetRequiredLevel(), true );
 		tConfItemBase::LoadAll(stream);
 	}
 
@@ -4883,6 +4929,7 @@ void gTargetZoneHack::OnVanish( void )
 {
 	// send on vanish commands ...
 	std::istringstream stream(&OnVanishCmd(0));
+	tCurrentAccessLevel elevator( sg_SetTargetCmd_conf.GetRequiredLevel(), true );
     tConfItemBase::LoadAll(stream);
 
 	// check if we have a winner ...
@@ -5951,47 +5998,3 @@ static void sg_SetZoneColor(std::istream &s)
 
 static tConfItemFunc sg_SetZoneColor_conf("SET_ZONE_COLOR",&sg_SetZoneColor);
 
-static void sg_SetTargetCmd(std::istream &s)
-{
-	tString params;
-	params.ReadLine( s, true );
-
-	// first parse the line to get the param : object_id
-	int pos = 0;				 //
-	const tString object_id_str = params.ExtractNonBlankSubString(pos);
-	tString event_str = params.ExtractNonBlankSubString(pos);
-	tString mode_str("new");
-	if (event_str=="add") {
-		mode_str = tString("add");
-		event_str = params.ExtractNonBlankSubString(pos);
-	}
-	tString cmd_str = params.SubStr(pos);
-	// first check for the name
-	int zone_id;
-	zone_id=gZone::FindFirst(object_id_str);
-	if (zone_id==-1)
-	{
-		zone_id = atoi(object_id_str);
-		if (zone_id==0 && object_id_str!="0") return;
-	}
-
-	const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
-	while (zone_id!=-1)
-	{
-		// get the zone ...
-		gTargetZoneHack *zone=dynamic_cast<gTargetZoneHack *>(gameObjects(zone_id));
-		if (zone)
-		{
-			if (event_str=="onenter") {
-				zone->SetOnEnterCmd(cmd_str, mode_str);
-				con << "Zone " << zone->GOID() << " command onenter '" << cmd_str << "'\n";
-			} else if (event_str=="onvanish") {
-				zone->SetOnVanishCmd(cmd_str, mode_str);
-				con << "Zone " << zone->GOID() << " command onvanish '" << cmd_str << "'\n";
-			}
-			zone_id=gZone::FindNext(object_id_str, zone_id);
-		}
-	}
-}
-
-static tConfItemFunc sg_SetTargetCmd_conf("SET_TARGET_COMMAND",&sg_SetTargetCmd);
