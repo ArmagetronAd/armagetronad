@@ -1362,8 +1362,6 @@ void exit_game_objects(eGrid *grid){
 
 	se_unsplittedRimWalls.clear();
 	
-	delayedCommands::Clear();
-	
     exit_game_grid(grid);
 }
 
@@ -3612,6 +3610,8 @@ void gGame::StateUpdate(){
                     goon = 0;
 
                 Analysis(0);
+
+                delayedCommands::Clear();
 
                 // log scores before players get renamed
                 //ePlayerNetID::LogScoreDifferences();
