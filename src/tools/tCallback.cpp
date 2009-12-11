@@ -42,27 +42,21 @@ void tCallback::Exec(tCallback *anchor){
 }
 
 
-#ifdef HAVE_LIBRUBY
+#ifdef ENABLE_SCRIPTING
 
-tCallbackRuby::tCallbackRuby(tCallbackRuby *& anchor)
-        :tListItem<tCallbackRuby>(anchor), block(rb_block_proc())
+tCallbackScripting::tCallbackScripting(tCallbackScripting *& anchor)
+        :tListItem<tCallbackScripting>(anchor), block(tScripting::GetInstance().GetProcRef(""))
 {
 }
 
-void tCallbackRuby::Exec(tCallbackRuby *anchor) {
+void tCallbackScripting::Exec(tCallbackScripting *anchor) {
     if (anchor) {
-        int status = 0;
-        rb_protect(ExecProtect, anchor->block, &status);
-        tRuby::CheckStatus(status);
+        tScripting::GetInstance().Exec(anchor->block, NULL);
         Exec(anchor->Next());
     }
 }
 
-VALUE tCallbackRuby::ExecProtect(VALUE block)
-{
-    return rb_funcall(block, rb_intern("call"), 0);
-}
-#endif // HAVE_LIBRUBY
+#endif // ENABLE_SCRIPTING
 
 tCallbackAnd::tCallbackAnd(tCallbackAnd*& anchor, BOOLRETFUNC *f)
         :tListItem<tCallbackAnd>(anchor), func(f){

@@ -46,7 +46,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tColor.h"
 
 #include <set>
-#include <list>
+#include <map>
 #include <utility>
 #include "eChat.h"
 
@@ -485,18 +485,26 @@ void se_SaveToChatLog( tOutput const & out );  //!< writes something to chatlog.
 
 //! create a global instance of this to write stuff to ladderlog.txt
 class eLadderLogWriter {
-    static std::list<eLadderLogWriter *> &writers();
+    static std::map<std::string, eLadderLogWriter *> &writers();
     tString id;
     bool enabled;
     tSettingItem<bool> *conf;
     tColoredString cache;
+#ifdef ENABLE_SCRIPTING
+    tScripting::proc_type callback;
+    args data;
+#endif
 public:
-    eLadderLogWriter(char const *ID, bool enabledByDefault);
+    eLadderLogWriter(const char *ID, bool enabledByDefault);
     ~eLadderLogWriter();
+    static eLadderLogWriter *getWriter(char const *ID);
     //! append a field to the current message. Spaces are added automatically.
     template<typename T> eLadderLogWriter &operator<<(T const &s) {
         if(enabled) {
             cache << ' ' << s;
+#ifdef ENABLE_SCRIPTING
+	    data << s;
+#endif
         }
         return *this;
     }
@@ -505,6 +513,10 @@ public:
     bool isEnabled() { return enabled; } //!< check this if you're going to make expensive calculations for ladderlog output
 
     static void setAll(bool enabled); //!< enable or disable all writers
+#ifdef ENABLE_SCRIPTING
+    // bind a procedure from scripting language to this ladder log writer.
+    void setCallback(tScripting::proc_type proc) { callback = proc; }
+#endif
 };
 
 tColoredString & operator << (tColoredString &s,const ePlayer &p);

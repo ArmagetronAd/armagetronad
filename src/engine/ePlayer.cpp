@@ -59,7 +59,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "nNetwork.h"
 #include "nProtoBuf.h"
 #include <time.h>
-#include "tRuby.h"
+#include "tScripting.h"
 
 #include "ePlayer.pb.h"
 
@@ -1315,8 +1315,9 @@ void ePlayer::Render(){
 #endif
 
 static void chat( ePlayer * chatter, tString const & msgCore );
-void se_rubyEval(tString msgCore) {
-#ifdef HAVE_LIBRUBY
+void se_scriptingEval(tString msgCore) {
+//#ifdef ENABLE_SCRIPTING
+#ifdef false
     try {
         tRuby::Safe safe(0.3);
         safe.Load(tDirectories::Data(), "scripts/subbanese.rb");
@@ -1514,7 +1515,7 @@ static void se_DisplayChatLocally( ePlayerNetID* p, const tString& say )
         con << message;
 
         if (say.StartsWith("eval ")) {
-            se_rubyEval(say.SubStr(5));
+            se_scriptingEval(say.SubStr(5));
         }
     }
 }
@@ -5936,18 +5937,18 @@ void se_SaveToChatLog(tOutput const &out) {
     }
 }
 
-std::list<eLadderLogWriter *> &eLadderLogWriter::writers() {
-    static std::list<eLadderLogWriter *> list;
+std::map<std::string, eLadderLogWriter *> &eLadderLogWriter::writers() {
+    static std::map<std::string, eLadderLogWriter *> list;
     return list;
 }
 
-eLadderLogWriter::eLadderLogWriter(char const *ID, bool enabledByDefault) :
+eLadderLogWriter::eLadderLogWriter(const char *ID, bool enabledByDefault) :
     id(ID),
     enabled(enabledByDefault),
     conf(new tSettingItem<bool>(&(tString("LADDERLOG_WRITE_") + id)(0),
     enabled)),
     cache(id) {
-    writers().push_back(this);
+    writers().insert(std::pair<std::string,eLadderLogWriter*>(std::string(ID),this));
 }
 
 eLadderLogWriter::~eLadderLogWriter() {
@@ -5956,22 +5957,36 @@ eLadderLogWriter::~eLadderLogWriter() {
     }
     // generic algorithms aren't exactly easier to understand than regular
     // code, but anyways, let's try one...
-    std::list<eLadderLogWriter *> list = writers();
-    list.erase(std::find_if(list.begin(), list.end(), std::bind2nd(std::equal_to<eLadderLogWriter *>(), this)));
+    std::map<std::string, eLadderLogWriter *> list = writers();
+    list.erase(list.find(string(id)));
+}
+
+eLadderLogWriter *eLadderLogWriter::getWriter(char const *ID) {
+    std::map<std::string, eLadderLogWriter *>::iterator it;
+    it = writers().find(ID);
+    return (*it).second;
 }
 
 void eLadderLogWriter::write() {
     if(enabled) {
         se_SaveToLadderLog(cache);
+#ifdef ENABLE_SCRIPTING
+        args tmp;
+        tmp << data;
+        tScripting::GetInstance().Exec(callback, &tmp);
+#endif
     }
     cache = id;
+#ifdef ENABLE_SCRIPTING
+    data.clear();
+#endif
 }
 
 void eLadderLogWriter::setAll(bool enabled) {
-    std::list<eLadderLogWriter *> list = writers();
-    std::list<eLadderLogWriter *>::iterator end = list.end();
-    for(std::list<eLadderLogWriter *>::iterator iter = list.begin(); iter != end; ++iter) {
-        (*iter)->enabled = enabled;
+    std::map<std::string, eLadderLogWriter *> list = writers();
+    std::map<std::string, eLadderLogWriter *>::iterator end = list.end();
+    for(std::map<std::string, eLadderLogWriter *>::iterator iter = list.begin(); iter != end; ++iter) {
+        ((*iter).second)->enabled = enabled;
     }
 }
 

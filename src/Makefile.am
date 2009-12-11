@@ -94,7 +94,7 @@ libtools_a_SOURCES = ${tools_extra} tools/tVersion.cpp tools/tVersion.h tTrueVer
 	tools/tPolynomial.h tools/tPolynomial.cpp\
 	tools/tPolynomialMarshaler.h tools/tPolynomialMarshaler.cpp \
 	tools/tPolynomialWithBase.h tools/tPolynomialWithBase.cpp \
-	tools/tRuby.h tools/tRuby.cpp \
+	tools/tScripting.h tools/tScripting.cpp \
 	tools/tDict.h \
 	resource/tResource.h resource/tResource.cpp resource/tResourceType.h resource/tResourceType.cpp\
 	tools/tMemManager.cpp tools/tMemManager.h
@@ -230,13 +230,13 @@ endif
 games_PROGRAMS = $(buildmain) $(buildthemaster)
 #EXTRA_PROGRAMS = armagetronad_main_master
 
-#if ENABLE_RUBY
-#rubysources = ${top_builddir}/src/swig/ext/armagetronad_wrap.cxx
-#librubywrap_a_SOURCES    = $(rubysources)
-#librubywrap_a_CXXFLAGS   = $(libtron_a_CXXFLAGS) -w
-#else
-#librubywrap_a_SOURCES    = 
-#endif
+if ENABLE_SCRIPTING
+scripting_sources = ${top_builddir}/src/swig/ext/armagetronad_wrap.cxx
+lib_scripting_wrap_a_SOURCES    = $(scripting_sources)
+lib_scripting_wrap_a_CXXFLAGS   = $(libtron_a_CXXFLAGS) -w
+else
+lib_scripting_wrap_a_SOURCES    = 
+endif
 
 if BUILDFAKERELEASE
 BUILDFAKE=echo -e "\#!/bin/sh\necho Running FAKE \"\$$0\" \"\$$@\"\ntest \"\$$1\" = "--doc" || test \"\$$1\" = "--help" || sleep 5" > $@; chmod 755 $@
@@ -247,8 +247,7 @@ armagetronad_main_master$(EXEEXT): Makefile
 	${BUILDFAKE}
 else
 if BUILDMAIN
-noinst_LIBRARIES = libtools.a libnetwork.a libenginecore.a libengine.a librender.a  libtron.a libui.a
-# librubywrap.a
+noinst_LIBRARIES = libtools.a libnetwork.a libenginecore.a libengine.a librender.a  libtron.a libui.a lib_scripting_wrap.a 
 else
 noinst_LIBRARIES = libtools.a libnetwork.a
 endif
@@ -264,8 +263,7 @@ armagetronad_main_SOURCES = \
 	tron/cockpit/cCockpit.cpp tron/cockpit/cMap.cpp tron/cockpit/cCamview.cpp \
 	$(INCLUDED_MODULE_SOURCES)
 armagetronad_main_CXXFLAGS =$(libtron_a_CXXFLAGS)
-armagetronad_main_LDADD= libtron.a libenginecore.a libengine.a libnetwork.a libui.a librender.a libtools.a protobuf/libprotobuf.a thirdparty/mathexpr/libmathexpr.a ${extralibs}
-#  librubywrap.a
+armagetronad_main_LDADD= libtron.a libenginecore.a libengine.a libnetwork.a libui.a librender.a libtools.a protobuf/libprotobuf.a thirdparty/mathexpr/libmathexpr.a ${extralibs} lib_scripting_wrap.a
 # armagetronad_main_LDFLAGS=
 
 armagetronad_main_master_SOURCES = network/master.cpp

@@ -29,7 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "AARuby.h"
 #include "aa_config.h"
 
-#ifdef HAVE_LIBRUBY
+#ifdef WITH_RUBY
 #include <ruby.h>
 
 void AARuby_init_loadpath()

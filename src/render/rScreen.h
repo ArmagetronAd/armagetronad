@@ -31,7 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tString.h"
 #include "tCallback.h"
 #include "tCallbackString.h"
-#include "tRuby.h"
+#include "tScripting.h"
 
 typedef enum {
     ArmageTron_Desktop=0,ArmageTron_320_200,ArmageTron_Min=ArmageTron_320_200, ArmageTron_320_240,ArmageTron_400_300,
@@ -162,10 +162,10 @@ public:
     static void DoPerFrameTasks();
 };
 
-#ifdef HAVE_LIBRUBY
-class rPerFrameTaskRuby : public tCallbackRuby {
+#ifdef ENABLE_SCRIPTING
+class rPerFrameTaskScripting : public tCallbackScripting {
 public:
-    rPerFrameTaskRuby();
+    rPerFrameTaskScripting();
     static void DoPerFrameTasks();
 };
 #endif

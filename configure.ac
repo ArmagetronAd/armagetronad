@@ -258,13 +258,6 @@ AC_ARG_ENABLE(desktop,
 enable_desktop=yes)
 AC_SUBST(enable_desktop)
 
-AC_ARG_ENABLE(ruby,
-	AC_HELP_STRING([--enable-ruby],
-		[enable ruby scripting api.  Requires ruby to be installed. (default=disabled)]),,
-enable_ruby=no)
-AC_SUBST(enable_ruby)
-AM_CONDITIONAL(ENABLE_RUBY, test "x$enable_ruby" = "xyes")
-
 initdir=location
 AC_ARG_ENABLE(initscripts,
 	AC_HELP_STRING([--enable-initscripts=location],
@@ -453,16 +446,6 @@ fi
 
 dnl Boost
 AX_BOOST_BASE([1.33.1])
-
-dnl Ruby
-
-AC_ARG_WITH(ruby,
-    AC_HELP_STRING([--with-ruby],
-        [The ruby to use]),
-    if test ! -z "${withval}"; then
-        RUBY="${withval}"
-    fi
-)
 
 dnl glew
 
@@ -688,6 +671,359 @@ LIBS="${LIBS} ${ZTHREAD_LIBS}"
 
 fi # krawall
 
+AC_CHECK_PROG(GREP,grep,grep,false)
+
+dnl ---------------------------------------------------------------
+dnl Look for Scripting
+dnl ----------------------------------------------------------------
+
+dnl -----------------------------------
+dnl check for SWIG - needed for script-language bindings
+
+AC_ARG_ENABLE(swig,
+  [AS_HELP_STRING([--enable-swig=yes],[swig-generated language bindings])],
+  [],[enable_swig=yes])
+
+if test "x$enable_swig" != "xyes"; then
+  use_swig="No (disabled)"
+else
+  AC_CHECK_PROG(SWIG,swig,swig)
+  if test "x$SWIG" = "x"; then
+    use_swig="No (swig not available)"
+  else
+    SWIG_VERSION=`$SWIG -version 2>&1 | $GREP Version | cut -d ' ' -f 3`
+    SWIG_VERSION_MAJOR=`echo $SWIG_VERSION | cut -d '.' -f 1`
+    SWIG_VERSION_MINOR=`echo $SWIG_VERSION | cut -d '.' -f 2`
+    if test $SWIG_VERSION_MAJOR -lt 2; then
+      if test $SWIG_VERSION_MAJOR -lt 1; then
+	SWIG=
+      else
+        if test $SWIG_VERSION_MINOR -lt 3; then
+	  SWIG=
+        fi
+      fi
+    fi
+    if test "x$SWIG" = "x"; then
+      AC_MSG_WARN([The version of swig is too old.])
+      use_swig="No (swig too old)"
+    else
+      use_swig="Yes"
+    fi
+  fi
+fi
+AM_CONDITIONAL(WITH_SWIG, [test "x$SWIG" != "x"])
+
+dnl -----------------------------------
+dnl INCLUDES and LIBS for PHP
+
+AC_ARG_ENABLE(php,
+  [AS_HELP_STRING([--enable-php=yes],[php language bindings])],
+  [], [enable_php=no])
+
+if test "x$enable_php" != "xyes"; then
+  use_php="No (disabled)"
+else
+  if test "x$use_swig" != "xYes"; then
+    use_php="No (swig not available)"
+  else
+    if test `$SWIG -help 2>&1 | $GREP -c '\-php5* *- Generate'` = 0 ; then
+      use_php="No (swig does not support -php or -php5 option)"
+    else
+      AC_CHECK_PROG(PHP,php,php)
+      if test "x$PHP" = "x"; then
+        use_php="No (php not available)"
+      else
+        if test -d /usr/include/php5; then
+          PHP_INCLUDES="-I/usr/include/php5 -I/usr/include/php5/main -I/usr/include/php5/Zend -I/usr/include/php5/TSRM"
+        else
+          PHP_INCLUDES="-I/usr/include/php -I/usr/include/php/main -I/usr/include/php/Zend -I/usr/include/php/TSRM"
+        fi
+        PHP_INSTALL_DIR="/usr/lib${LIBPOSTFIX}/php/modules"
+        PHP_INSTALL_DATADIR="/usr/share/php"
+        PHP_LIBS=
+        save_CPPFLAGS=$CPPFLAGS
+        CPPFLAGS="$CPPFLAGS $PHP_INCLUDES"
+        AC_CHECK_HEADER(php.h,,[
+          use_php="No (missing header)"
+          PHP=
+        ])
+        CPPFLAGS=$save_CPPFLAGS
+        if test "x$PHP" != "x"; then
+          use_php="Yes"
+          AC_SUBST(PHP_INSTALL_DATADIR)
+          AC_SUBST(PHP_INSTALL_DIR)
+          AC_SUBST(PHP_INCLUDES)
+          AC_SUBST(PHP_LIBS)
+          AC_DEFINE(WITH_PHP,,[Php scripting enabled])
+        fi
+      fi
+    fi
+  fi
+fi
+CPPFLAGS="$CPPFLAGS $PHP_INCLUDES"
+LIBS="$LIBS $PHP_LIBS"
+AM_CONDITIONAL(WITH_PHP, [test "x$use_php" = "xYes"])
+
+dnl -----------------------------------
+dnl INCLUDES and LIBS for LUA
+
+AC_ARG_ENABLE(lua,
+  [AS_HELP_STRING([--enable-lua],[lua language bindings])],
+  [], [enable_lua=no])
+
+if test "x$enable_lua" != "xyes"; then
+  use_lua="No (disabled)"
+else
+  if test "x$use_swig" != "xYes"; then
+    use_lua="No (swig not available)"
+  else
+    if test `$SWIG -help 2>&1 | $GREP -c '\-lua *- Generate'` = 0; then
+      use_lua="No (swig does not support -lua option)"
+    else
+      AC_CHECK_PROG(LUA,lua,lua)
+      if test "x$LUA" = "x"; then
+        use_lua="No (lua not available)"
+      else
+        ac_save_CPPFLAGS="$CPPFLAGS"
+        ac_save_CFLAGS="$CFLAGS"
+        ac_save_LDFLAGS="$LDFLAGS"
+    
+        AC_CHECK_PROG(LUA,lua,lua)
+    
+        LUA_INCLUDES=""
+        LUA_LIBS=""
+        LUA_INSTALL_DIR=""
+    
+        if test -n "$lua_inc"; then
+           CFLAGS="$CFLAGS -I$lua_inc"
+           CPPFLAGS="$CPPFLAGS -I$lua_inc"
+        fi
+        if test -n "$lua_lib"; then
+           LDFLAGS="$LDFLAGS -L$lua_lib"
+        fi
+    
+        if test "x$LUA_INCLUDES" = "x" -o "x$LUA_LIBS" = "x" ; then
+            PKGCONFIG=""
+            AC_CHECK_PROGS(PKGCONFIG, pkg-config)
+            if test "x$PKGCONFIG" != "x"; then
+	        AC_MSG_CHECKING(for Lua headers and libraries with pkg-config)
+	        echo
+	        for l in "$lua_suffix" "" "51" "5.1" "50" "5.0" ; do
+	            pkgconfig_lua_found=`$PKGCONFIG --exists lua$l 2>/dev/null`
+	            if test "x$?" = "x0" ; then
+		        LUA_VERSION=`$PKGCONFIG --modversion lua$l`
+                        LUA_INCLUDES="$LUA_CFLAGS "`$PKGCONFIG --cflags lua$l`
+                        LUA_LIBS="$LUA_LFLAGS "`$PKGCONFIG --libs lua$l`
+		        LUA_INSTALL_DIR="/usr/lib$LIBPOSTFIX/lua/`$PKGCONFIG --variable=V lua`"
+    
+		        pkgconfig_lualib_found=`$PKGCONFIG --exists lualib$l 2>/dev/null`
+		        if test  "x$?" = "x0"; then
+		           LUA_INCLUDES="$LUA_CFLAGS "`$PKGCONFIG --cflags lualib$l`
+		           LUA_LIBS="$LUA_LFLAGS "`$PKGCONFIG --libs lualib$l`
+		        fi
+                        break
+                    fi
+                done
+            fi
+        fi
+    
+        if test "x$LUA_INCLUDES" = "x" -o "x$LUA_LIBS" = "x" ; then
+            LUACONFIG=""
+            AC_CHECK_PROGS(LUACONFIG, lua-config lua-config51 lua-config5.1 lua-config50 lua-config5.0)
+            if test "x$LUACONFIG" != "x" ; then
+                AC_MSG_CHECKING(for Lua headers and libraries with lua-config)
+	        echo
+                LUA_INCLUDES=`$LUACONFIG --include`
+                LUA_LIBS=`$LUACONFIG --libs`
+	        LUA_VERSION="5.0.x"
+	        LUA_INSTALL_DIR="/usr/lib$LIBPOSTFIX/lua/5.0"
+            fi
+        fi
+    
+        if test "x$LUA_INCLUDES" = "x" -o "x$LUA_LIBS" = "x" ; then
+            AC_MSG_CHECKING(for Lua headers and libraries)
+	    echo
+            AC_CHECK_HEADER(lua.h,ac_found_lua_header="yes",ac_found_lua_header="no")
+            AC_CHECK_HEADER(lualib.h,ac_found_liblua_header="yes",ac_found_liblua_header="no")
+            if test "x$ac_found_lua_header" = "xyes" -a "x$ac_found_liblua_header" = "xyes"; then
+                LUA_INCLUDES="$CFLAGS"
+            fi
+            for l in "$lua_suffix" "" "51" "5.1" "50" "5.0" ; do
+                AC_CHECK_LIB(lua$l,lua_call,ac_found_lua_lib="yes",ac_found_lua_lib="no")
+                if test "x$ac_found_lua_lib" = "xyes" ; then
+	            LUA_VERSION=">=5.1.0"
+    
+	            LUA_LIBS="$LDFLAGS -llua$l -lm"
+    
+		    ac2_save_LDFLAGS="$LDFLAGS"
+		    LDFLAGS="$LDFLAGS -llua$l -lm"
+    
+		    if echo "$host_os" | grep "^linux" 1>/dev/null 2>&1 ; then
+		       LDFLAGS="$LDFLAGS -ldl"
+		    fi
+    
+		    AC_CHECK_LIB(lualib$l,luaL_openlib,ac_found_liblua_lib="yes",ac_found_liblua_lib="no")
+		    if test "x$ac_found_liblua_lib" = "xyes" ; then
+		       LUA_VERSION="5.0.x"
+    
+		       LUA_LIBS="$LUA_LFLAGS -llualib$l"
+    
+		       if echo "$host_os" | grep "^linux" 1>/dev/null 2>&1 ; then
+		          LUA_LIBS="$LUA_LFLAGS -ldl"
+		       fi
+		    fi
+    
+		    LDFLAGS="$ac2_save_LDFLAGS"
+		    break
+	        fi
+            done
+        fi
+    
+        AC_MSG_CHECKING(for Lua compiling and linking)
+	echo
+        LUA_TEST=`LT=luatest.c ; echo "#include <lua.h>" > $LT;  echo "#include <lualib.h>" >> $LT; echo "int main() { luaopen_base((lua_State *)lua_open()); return 0; }" >> $LT ; $CC -Wall $LT -o $LT.out $LUA_INCLUDES $LUA_LIBS $CFLAGS $LDFLAGS 1>/dev/null 2>&1 ; echo $?; rm -f $LT $LT.out 1>/dev/null 2>&1`
+        if test "x$LUA_TEST" != "x0" ; then
+          AC_MSG_RESULT(no)
+          AC_MSG_WARN([
+*** Lua (>=5.0) headers and/or libraries could not be found in your system.
+*** Try to install liblua, liblualib and liblua-dev with your software package manager.])
+          use_lua="No ($not_found lua)"
+        else
+	  use_lua="Yes"
+          AC_SUBST(LUA_INCLUDES)
+          AC_SUBST(LUA_LIBS)
+          AC_SUBST(LUA_INSTALL_DIR)
+          AC_DEFINE(WITH_LUA,,[Lua scripting enabled])
+        fi
+        CFLAGS="$ac_save_CFLAGS"
+        CPPFLAGS="$ac_save_CPPFLAGS"
+        LDFLAGS="$ac_save_LDFLAGS"
+      fi
+    fi
+  fi
+fi
+CPPFLAGS="$CPPFLAGS $LUA_INCLUDES"
+LIBS="$LIBS $LUA_LIBS"
+AM_CONDITIONAL(WITH_LUA, [test "x$use_lua" = "xYes"])
+
+dnl -----------------------------------
+dnl INCLUDES and LIBS for PYTHON
+
+AC_ARG_ENABLE(python,
+  [AS_HELP_STRING([--enable-python=yes],[python language bindings])],
+  [], [enable_python=no])
+
+if test "x$enable_python" != "xyes"; then
+  use_python="No (disabled)"
+else
+  if test "x$use_swig" != "xYes"; then
+    use_python="No (swig not available)"
+  else
+    if test `$SWIG -help 2>&1 | $GREP -c '\-python *- Generate'` = 0; then
+      use_python="No (swig does not support -python option)"
+    else
+      AC_CHECK_PROG(PYTHON,python,python)
+      if test "x$PYTHON" = "x"; then
+        use_python="No (python not available)"
+      else
+        PYTHON_VERSION=`$PYTHON -V 2>&1 | $GREP Python | cut -d ' ' -f 2`
+        if test "x$PYTHON_VERSION" = "x"; then
+          PYTHON=
+        else
+          PYTHON_VERSION_MAJOR=`echo $PYTHON_VERSION | cut -d '.' -f 1`
+          PYTHON_VERSION_MINOR=`echo $PYTHON_VERSION | cut -d '.' -f 2`
+          PYTHON_VERSION_SHORT=$PYTHON_VERSION_MAJOR.$PYTHON_VERSION_MINOR
+          if test $PYTHON_VERSION_MAJOR -lt 3; then
+            if test $PYTHON_VERSION_MAJOR -lt 2; then
+	      PYTHON=
+            else
+              if test $PYTHON_VERSION_MINOR -lt 3; then
+	        PYTHON=
+              fi
+            fi
+          fi
+        fi
+      fi
+      if test "x$PYTHON" = "x"; then
+	use_python="No (python is too old)"
+      else
+        PYTHON_PREFIX=`$PYTHON -c "import sys; print sys.prefix"`
+        PYTHON_INCLUDES=-I$PYTHON_PREFIX/include/python$PYTHON_VERSION_SHORT
+        PYTHON_LIBS="-lpython$PYTHON_VERSION_SHORT"
+        PYTHON_INSTALL_DIR="`$PYTHON -c print "sysconfig.get_python_lib(1,0)"`"
+        save_CPPFLAGS=$CPPFLAGS
+        CPPFLAGS="$CPPFLAGS $PYTHON_INCLUDES"
+        AC_CHECK_HEADER(Python.h,,[
+          use_python="No (missing header)"
+          PYTHON=
+        ])
+        CPPFLAGS=$save_CPPFLAGS
+	if test "x$PYTHON" != "x"; then
+	  use_python="Yes"
+          AC_SUBST(PYTHON_INSTALL_DIR)
+          AC_SUBST(PYTHON_INCLUDES)
+          AC_SUBST(PYTHON_LIBS)
+          AC_DEFINE(WITH_PYTHON,,[Python scripting enabled])
+        fi
+      fi
+    fi
+  fi
+fi
+CPPFLAGS="$CPPFLAGS $PYTHON_INCLUDES"
+LIBS="$LIBS $PYTHON_LIBS"
+AM_CONDITIONAL(WITH_PYTHON, [test "x$use_python" = "xYes"])
+
+dnl -----------------------------------
+dnl INCLUDES and LIBS for RUBY
+
+AC_ARG_ENABLE(ruby,
+  [AS_HELP_STRING([--enable-ruby=yes],[ruby language bindings])],
+  [], [enable_ruby=no])
+
+if test "x$enable_ruby" != "xyes"; then
+  use_ruby="No (disabled)"
+else
+  if test "x$use_swig" != "xYes"; then
+    use_ruby="No (swig not available)"
+  else
+    if test `$SWIG -help 2>&1 | $GREP -c '\-ruby *- Generate'` = 0; then
+      use_ruby="No (swig does not support -ruby option)"
+    else
+      AC_CHECK_PROG(RUBY,ruby,ruby)
+      if test "x$RUBY" = "x"; then
+	use_ruby="No (ruby not available)"
+      else
+        RUBY_INCLUDES="-I`$RUBY -rmkmf -e 'print Config::CONFIG[["archdir"]]'`"
+	# hack for powerpc-darwin8 (10.4)
+	RUBY_INCLUDES=`echo $RUBY_INCLUDES | sed 's/powerpc/universal/'`
+        RUBY_LIBS="-L`$RUBY -rrbconfig -e 'print Config::CONFIG[["libdir"]]'` `$RUBY -rrbconfig -e \"puts Config::CONFIG[['LIBRUBYARG_SHARED']]\"`"
+        RUBY_INSTALL_DIR="`$RUBY -rrbconfig -e 'print Config::CONFIG[["sitearchdir"]]'`"
+        save_CPPFLAGS=$CPPFLAGS
+        CPPFLAGS="$CPPFLAGS $RUBY_INCLUDES"
+        AC_CHECK_HEADER(ruby.h,,[
+          use_ruby="No (missing header)"
+          RUBY=
+        ])
+        CPPFLAGS=$save_CPPFLAGS
+      fi
+      if test "x$RUBY" != "x"; then
+	use_ruby="Yes"
+        AC_SUBST(RUBY_INCLUDES)
+        AC_SUBST(RUBY_LIBS)
+        AC_SUBST(RUBY_INSTALL_DIR)
+        AC_DEFINE(WITH_RUBY,,[Ruby scripting enabled])
+      fi
+    fi
+  fi
+fi
+CPPFLAGS="$CPPFLAGS $RUBY_INCLUDES"
+LIBS="$LIBS $RUBY_LIBS"
+AM_CONDITIONAL(WITH_RUBY, [test "x$use_ruby" = "xYes"])
+
+AM_CONDITIONAL(ENABLE_SCRIPTING, [test "x$use_lua" = "xYes" || test "x$use_python" = "xYes" || test "x$use_ruby" = "xYes"])
+if [test "x$use_lua" = "xYes" || test "x$use_python" = "xYes" || test "x$use_ruby" = "xYes"]; then
+AC_DEFINE(ENABLE_SCRIPTING,,[scripting enabled])
+fi
 
 dnl *************************************************
 dnl         pattern buffers
@@ -1269,11 +1605,35 @@ echo "     Configuration will be installed in : `eval echo ${aa_sysconfdir}`"
 echo "     Documentation will be installed in : `eval echo ${aa_docdir}`"
 test "x$enable_etc" = "xyes" && echo "     Link to configuration will go to   : /etc/${progname}"
 echo "     Build with Krawall authentication support: $enable_krawall"
-echo "     Ruby support: $enable_ruby"
-if test "x$enable_ruby" = "xyes"; then
-echo "         Ruby include dir: $ruby_include_dir"
-echo "         Ruby lib dir: $ruby_lib_dir"
+
+if test "x$enable_php" = "xyes"; then
+echo "     Php support: $WITH_PHP"
+echo "         Php include flags: $PHP_INCLUDES"
+echo "         Php lib flags: $PHP_LIBS"
+echo "         Php install directory: $PHP_INSTALL_DIR"
 fi
+
+if test "x$enable_lua" = "xyes"; then
+echo "     Lua support: $WITH_LUA"
+echo "         Lua include flags: $LUA_INCLUDES"
+echo "         Lua lib flags: $LUA_LIBS"
+echo "         Lua install directory: $LUA_INSTALL_DIR"
+fi
+
+if test "x$enable_python" = "xyes"; then
+echo "     Python support: $WITH_PYTHON"
+echo "         Python include flags: $PYTHON_INCLUDES"
+echo "         Python lib flags: $PYTHON_LIBS"
+echo "         Python install directory: $PYTHON_INSTALL_DIR"
+fi
+
+if test "x$enable_ruby" = "xyes"; then
+echo "     Ruby support: $WITH_RUBY"
+echo "         Ruby include flags: $RUBY_INCLUDES"
+echo "         Ruby lib flags: $RUBY_LIBS"
+echo "         Ruby install directory: $RUBY_INSTALL_DIR"
+fi
+
 echo "     Use dirty SDL initialization: $enable_dirty"
 echo "     Call sysinstall: $enable_sysinstall"
 if test "$enable_uninstall" = "yes" &&

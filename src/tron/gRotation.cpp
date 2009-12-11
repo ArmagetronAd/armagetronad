@@ -29,40 +29,40 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 void gRotation::HandleNewRound() {
     std::cerr << "round!\n";
-#ifdef HAVE_LIBRUBY
-    gRoundEventRuby::DoRoundEvents();
+#ifdef ENABLE_SCRIPTING
+    gRoundEventScripting::DoRoundEvents();
 #endif
 }
 void gRotation::HandleNewMatch() {
     std::cerr << "match!\n";
-#ifdef HAVE_LIBRUBY
-    gMatchEventRuby::DoMatchEvents();
+#ifdef ENABLE_SCRIPTING
+    gMatchEventScripting::DoMatchEvents();
 #endif
 }
 
-#ifdef HAVE_LIBRUBY
+#ifdef ENABLE_SCRIPTING
 
-static tCallbackRuby *roundEventRuby_anchor;
-gRoundEventRuby::gRoundEventRuby()
-        :tCallbackRuby(roundEventRuby_anchor)
+static tCallbackScripting *roundEventScripting_anchor;
+gRoundEventScripting::gRoundEventScripting()
+        :tCallbackScripting(roundEventScripting_anchor)
 {
 }
 
-void gRoundEventRuby::DoRoundEvents()
+void gRoundEventScripting::DoRoundEvents()
 {
-    Exec(roundEventRuby_anchor);
+    Exec(roundEventScripting_anchor);
 }
 
-static tCallbackRuby *matchEventRuby_anchor;
+static tCallbackScripting *matchEventScripting_anchor;
 
-gMatchEventRuby::gMatchEventRuby()
-        :tCallbackRuby(matchEventRuby_anchor)
+gMatchEventScripting::gMatchEventScripting()
+        :tCallbackScripting(matchEventScripting_anchor)
 {
 }
 
-void gMatchEventRuby::DoMatchEvents()
+void gMatchEventScripting::DoMatchEvents()
 {
-    Exec(matchEventRuby_anchor);
+    Exec(matchEventScripting_anchor);
 }
 #endif
 

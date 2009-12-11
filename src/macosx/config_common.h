@@ -8,7 +8,8 @@
 #define ENABLE_ZONESV2 1
 
 #define MACOSX_XCODE 1
-// #define HAVE_LIBRUBY 1
+// #define ENABLE_SCRIPTING 1
+// #define WITH_RUBY 1
 
 /* AIX */
 /* #undef AIX */

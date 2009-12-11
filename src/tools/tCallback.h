@@ -30,7 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "defs.h"
 #include "tLinkedList.h"
-#include "tRuby.h"
+#include "tScripting.h"
 
 class tCallback:public tListItem<tCallback>{
     AA_VOIDFUNC *func;
@@ -39,16 +39,16 @@ public:
     static void Exec(tCallback *anchor);
 };
 
-#ifdef HAVE_LIBRUBY
-class tCallbackRuby : public tListItem<tCallbackRuby> {
-    VALUE block;
-protected:
-    static VALUE ExecProtect(VALUE);
+#ifdef ENABLE_SCRIPTING
+class tCallbackScripting : public tListItem<tCallbackScripting> {
+    tScripting::proc_type block;
+//protected:
+//    static tScripting::value_type ExecProtect(tScripting::value_type);
 public:
-    tCallbackRuby(tCallbackRuby *& anchor);
-    static void Exec(tCallbackRuby *anchor);
+    tCallbackScripting(tCallbackScripting *& anchor);
+    static void Exec(tCallbackScripting *anchor);
 };
-#endif // HAVE_LIBRUBY
+#endif // ENABLE_SCRIPTING
 
 class tCallbackAnd:public tListItem<tCallbackAnd>{
     BOOLRETFUNC *func;

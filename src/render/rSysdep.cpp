@@ -32,6 +32,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #ifndef DEDICATED
 #include "rSDL.h"
 #include "rGLEW.h"
+#include "SDL_thread.h"
+#include "SDL_mutex.h"
+
+#include <png.h>
+#include <unistd.h>
 #endif
 
 #include "rSysdep.h"
@@ -50,11 +55,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <memory>
 
 #ifndef DEDICATED
-#include "SDL_thread.h"
-#include "SDL_mutex.h"
-
-#include <png.h>
-#include <unistd.h>
 #define SCREENSHOT_PNG_BITDEPTH 8
 #define SCREENSHOT_BYTES_PER_PIXEL 3
 #ifndef SDL_OPENGL
@@ -1007,8 +1007,8 @@ void rSysDep::SwapGL(){
         // in playback or recording mode, always execute frame tasks, they may be improtant for consistency
         if ( tRecorder::IsRunning() ) {
             rPerFrameTask::DoPerFrameTasks();
-#ifdef HAVE_LIBRUBY
-            rPerFrameTaskRuby::DoPerFrameTasks();
+#ifdef ENABLE_SCRIPTING
+            rPerFrameTaskScripting::DoPerFrameTasks();
 #endif
         }
 
@@ -1018,8 +1018,8 @@ void rSysDep::SwapGL(){
 
 
     rPerFrameTask::DoPerFrameTasks();
-#ifdef HAVE_LIBRUBY
-    rPerFrameTaskRuby::DoPerFrameTasks();
+#ifdef ENABLE_SCRIPTING
+    rPerFrameTaskScripting::DoPerFrameTasks();
 #endif
 
     // unlock the mutex while waiting for the swap operation to finish

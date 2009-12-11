@@ -75,6 +75,8 @@ public:							// public configuration options
     static bool enforceRulesOnQuit; // if the quitting of one player unbalances the teams, enforce the rules by redistributing
 
     static tList<eTeam> teams;		//  list of all teams
+    static eTeam *GetTeam(int i) {return teams[i];}
+    static int NbTeams() {return teams.Len();}
 
     int RoundsPlayed() const;       //!< number of rounds played (updated right after spawning, so it includes the current round)
     void PlayRound();               //!< increase round counter

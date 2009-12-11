@@ -6,6 +6,7 @@
 
 class nNetObject{
     friend class nWaitForAckSync;
+    friend class nProtoBufNetControlDescriptor;
 
     bool createdLocally;		 // was the object created on this computer? (alternative: it was created on remote order)
     unsigned long int lastSyncID_;  // the extended id of the last accepted sync message
@@ -20,10 +21,11 @@ private:
 public:
     class nKnowsAboutInfo{
     public:
+    tJUST_CONTROLLED_PTR< nProtoBufMessageBase > lastSync_;
     bool knowsAboutExistence:1; // is the creation message through?
     bool nextSyncAck:1;         // should the next sync message wait
     bool syncReq:1;              // should a sync message be sent?
-    int  acksPending:4;          // how many messages are underway?
+    unsigned char  acksPending:4;          // how many messages are underway?
     nKnowsAboutInfo();
     void Reset();
     };

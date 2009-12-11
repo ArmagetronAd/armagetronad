@@ -59,7 +59,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "nServerInfo.h"
 #include "nSocket.h"
-#include "tRuby.h"
+#include "tScripting.h"
 #ifndef DEDICATED
 #include "rRender.h"
 #include "rSDL.h"
@@ -632,14 +632,8 @@ int main(int argc,char **argv){
         // tERR_MESSAGE( "Initializing player data." );
         ePlayer::Init();
 
-#ifdef HAVE_LIBRUBY
-        tRuby::InitializeInterpreter();
-        try {
-            tRuby::Load(tDirectories::Data(), "scripts/initialize.rb");
-        }
-        catch (std::runtime_error & e) {
-            std::cerr << e.what() << '\n';
-        }
+#ifdef ENABLE_SCRIPTING
+        tScripting::GetInstance().InitializeInterpreter();
 #endif
 
         // tERR_MESSAGE( "Loading configuration." );
@@ -756,10 +750,10 @@ int main(int argc,char **argv){
 
                     sn_bigBrotherString = renderer_identification + "VER=" + st_programVersion + "\n\n";
 
-#ifdef HAVE_LIBRUBY      
+#ifdef ENABLE_SCRIPTING      
                     try {
-                        // tRuby::Load(tDirectories::Data(), "scripts/menu.rb");
-                        tRuby::Load(tDirectories::Data(), "scripts/ai.rb");
+                        // tScripting::GetInstance().Load(tDirectories::Data(), "scripts/menu.rb");
+                        // tScripting::GetInstance().Load(tDirectories::Data(), "scripts/ai.rb");
                     }
                     catch (std::runtime_error & e) {
                         std::cerr << e.what() << '\n';
@@ -819,8 +813,8 @@ int main(int argc,char **argv){
 
         ePlayer::Exit();
 
-#ifdef HAVE_LIBRUBY
-        tRuby::CleanupInterpreter();
+#ifdef ENABLE_SCRIPTING
+        tScripting::GetInstance().CleanupInterpreter();
 #endif
 
         //	tLocale::Clear();
