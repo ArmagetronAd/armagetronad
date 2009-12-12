@@ -13,6 +13,7 @@
 }
 
 
+
 #if defined(SWIGRUBY)
 /* Return the results as a string object in the scripting language */
 %typemap(argout) std::ostream& 
@@ -40,6 +41,8 @@
 {
   if (alloc$argnum == SWIG_NEWOBJ) %delete_array(buf$argnum);
 }
+
+
 
 #elif defined(SWIGPYTHON)
 /* Return the results as a string object in the scripting language */

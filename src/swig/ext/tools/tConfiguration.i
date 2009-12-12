@@ -3,6 +3,7 @@
 %}
 
 //! access levels for admin interfaces; lower numeric values are better
+%rename(AccessLevel) tAccessLevel;
 enum tAccessLevel
 {
     tAccessLevel_Owner = 0,        // the server owner
@@ -36,27 +37,25 @@ enum tAccessLevel
     tAccessLevel_Default = 20
 };
 
-%rename(ConfItemBase) tConfItemBase;
+%rename(ConfItem) tConfItemBase;
 class tConfItemBase
 {
 public:
     typedef void callbackFunc(void);
     tConfItemBase(const char *title, callbackFunc *cb=0);
     virtual ~tConfItemBase();
+%rename(required_level) GetRequiredLevel;
     tAccessLevel GetRequiredLevel() const;
+%rename(load_all) LoadAll;
     static void LoadAll(std::istream &s);
+%rename(load_line) LoadLine;
     static void LoadLine(std::istream &s);
+%rename(find) FindConfigItem;
     static tConfItemBase *FindConfigItem(std::string const &name);
-    
-    %extend {
-        static void LoadString(std::string str)
-        {
-            std::istringstream stream(str);
-            tConfItemBase::LoadAll(stream);
-        }
-    }
 
+%rename(set) ReadVal;
     virtual void ReadVal(std::istream &s)=0;
+%rename(get) WriteVal;
     virtual void WriteVal(std::ostream &s)=0;
 };
 
@@ -74,6 +73,7 @@ public:
     tConfItemScript(const char *title, tScripting::proc_type proc);
     virtual ~tConfItemScript();
 
+%rename(call) ReadVal;
     virtual void ReadVal(std::istream &s);
     virtual void WriteVal(std::ostream &s);
 };
