@@ -834,7 +834,7 @@ void se_SecretConsoleOut( tOutput const & message, ePlayerNetID const * hider, H
         {
             canSee[i] = false;
         }
-        
+
         // well, the admin will want to see it.
         canSee[0] = true;
 
@@ -2045,13 +2045,13 @@ static tAccessLevelSetter se_adminAccessLevelConfLevel( se_adminAccessLevelConf,
 
 void handle_command_intercept( ePlayerNetID *p, tString const & command, std::istream & s, tString const & say ) {
     static eLadderLogWriter se_commandWriter( "COMMAND", true );
-    
+
     tString commandArguments;
     commandArguments.ReadLine( s );
-    
+
     se_commandWriter << command << p->GetLogName() << commandArguments;
     se_commandWriter.write();
-    
+
     con << "[cmd] " << p->GetLogName() << ": " << say << '\n';
 }
 
@@ -2530,7 +2530,7 @@ static void se_AdminAdmin( ePlayerNetID * p, std::istream & s )
     }
 }
 
-static eLadderLogWriter se_commandWriter("COMMAND", false);
+static eLadderLogWriter se_cmdWriter("CMD", false);
 static eLadderLogWriter se_invalidCommandWriter("INVALID_COMMAND", false);
 
 static void handle_chat_admin_commands( ePlayerNetID * p, tString const & command, tString const & say, std::istream & s, eChatSpamTester &spam )
@@ -2588,12 +2588,12 @@ static void handle_chat_admin_commands( ePlayerNetID * p, tString const & comman
     {
         se_AdminAdmin( p, s );
     }
-    else  if ( command == "/cmd" && se_commandWriter.isEnabled() )
+    else  if ( command == "/cmd" && se_cmdWriter.isEnabled() )
     {
         tString str;
         str.ReadLine(s);
-        se_commandWriter << p->GetUserName() << nMachine::GetMachine(p->Owner()).GetIP() << p->GetAccessLevel() << str;
-        se_commandWriter.write();
+        se_cmdWriter << p->GetUserName() << nMachine::GetMachine(p->Owner()).GetIP() << p->GetAccessLevel() << str;
+        se_cmdWriter.write();
     }
     else{
         if (se_invalidCommandWriter.isEnabled() )
@@ -2620,7 +2620,7 @@ static eTeam * se_GetManagedTeam( ePlayerNetID * admin )
     return admin->CurrentTeam();
 }
 #endif // DEDICATED
- 
+
 static bool se_silenceDead = false;
 static tSettingItem<bool> se_silenceDeadConf("SILENCE_DEAD", se_silenceDead);
 
@@ -2848,7 +2848,7 @@ static void se_ChatTeam( ePlayerNetID * p, std::istream & s, eChatSpamTester & s
             }
         }
     }
-    
+
     //add /team to chatlog
     if (se_chatLogWriteTeam){
         tString str;
@@ -2904,7 +2904,7 @@ static void se_ChatMsg( ePlayerNetID * p, std::istream & s, eChatSpamTester & sp
                     se_SendPrivateMessage( p, receiver, admin, msg_core );
                 }
             }
-            
+
             //send /msg to chatlog
             if (se_chatLogWritePM ){
                 tString str;
@@ -3598,13 +3598,13 @@ void ePlayerNetID::Chat(const tString &s_orig)
     {
         // direct commands are executed at owner level
         tCurrentAccessLevel level( tAccessLevel_Owner, true );
-        
+
         tString params("");
         if (s_orig.StrPos(" ") == -1)
             return;
         else
             params = s_orig.SubStr(s_orig.StrPos(" ") + 1);
-        
+
         if ( tRecorder::IsPlayingBack() )
         {
             tConfItemBase::LoadPlayback();
@@ -3628,7 +3628,7 @@ void ePlayerNetID::Chat(const tString &s_orig)
         case nSERVER:
         {
             se_BroadcastChat( this, s );
-            
+
             // falling through on purpose
             // break;
         }
@@ -4427,7 +4427,7 @@ protected:
     {
         tString name;
         s >> name;
-        
+
         if ( name == "" )
         {
             tString usageKey("$");
@@ -4499,7 +4499,7 @@ public:
 
         return level;
     }
-    
+
     virtual void TransformName( tString & name ) const
     {
         name = se_EscapeName( name ).c_str();
@@ -5100,7 +5100,7 @@ void ePlayerNetID::Authenticate( tString const & authName, tAccessLevel accessLe
     }
 
     GetScoreFromDisconnectedCopy();
-    
+
     // force update (removed again to fix name change possibility during a round)
     // UpdateName();
 }
@@ -5171,12 +5171,12 @@ void ePlayerNetID::WriteSync(nMessage &m){
     m << ping;
 
     bool tempChat = chatting_;
- 
+
     if (flagOverrideChat)
     {
         tempChat = flagChatState;
     }
- 
+
     // pack chat, spectator and stealth status together
     unsigned short flags = ( tempChat ? 1 : 0 ) | ( spectating_ ? 2 : 0 ) | ( stealth_ ? 4 : 0 );
     m << flags;
@@ -7619,8 +7619,8 @@ static void Kill_conf(std::istream &s)
 		if (se_enableAdminKillMessage){
             sn_ConsoleOut( tOutput( "$player_admin_kill", p->GetColoredName() ) );
         }
-        
-        se_playerKilledWriter << p->GetUserName() << nMachine::GetMachine(p->Owner()).GetIP() << p->Object()->Position().x << p->Object()->Position().y << p->Object()->Direction().x << p->Object()->Direction().y; 
+
+        se_playerKilledWriter << p->GetUserName() << nMachine::GetMachine(p->Owner()).GetIP() << p->Object()->Position().x << p->Object()->Position().y << p->Object()->Direction().x << p->Object()->Direction().y;
         se_playerKilledWriter.write();
         p->Object()->Kill();
 
@@ -7870,7 +7870,7 @@ public:
 #ifdef KRAWALL_SERVER
             se_playerRenamedWriter << (player_.IsAuthenticated()?1:0);
 #endif
-            se_playerRenamedWriter << screenName; 
+            se_playerRenamedWriter << screenName;
             se_playerRenamedWriter.write();
 
             if ( oldScreenName_ != screenName )
@@ -8766,7 +8766,7 @@ static void sg_SetPlayerTeam(std::istream &s)
             }
         }
         if (!pTeam) return;
-        
+
 		// Force player to a team
 		pPlayer->SetTeamForce(pTeam);
 }
