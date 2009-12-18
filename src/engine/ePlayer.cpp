@@ -2038,6 +2038,10 @@ static bool se_interceptUnknownCommands = false;
 static tSettingItem<bool> se_interceptUnknownCommandsConf("INTERCEPT_UNKNOWN_COMMANDS",
         se_interceptUnknownCommands);
 
+static bool se_legacyLadderlogCommand = true;
+static tSettingItem<bool> se_legacyLadderlogCommandConf("LEGACY_LADDERLOG_COMMAND",
+        se_legacyLadderlogCommand);
+
 // minimal access level for /admin
 static tAccessLevel se_adminAccessLevel = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_adminAccessLevelConf( "ACCESS_LEVEL_ADMIN", se_adminAccessLevel );
@@ -2049,9 +2053,18 @@ void handle_command_intercept( ePlayerNetID *p, tString const & command, std::is
     tString commandArguments;
     commandArguments.ReadLine( s );
 
-    se_commandWriter << command << p->GetLogName() << commandArguments;
-    se_commandWriter.write();
-
+    if (!se_legacyLadderlogCommand){
+        se_commandWriter << command << p->GetLogName();
+        se_commandWriter << nMachine::GetMachine(p->Owner()).GetIP() << p->GetAccessLevel();
+        se_commandWriter << commandArguments;
+        se_commandWriter.write();
+    }
+    if (se_legacyLadderlogCommand && command=="/cmd"){
+        se_commandWriter << p->GetLogName();
+        se_commandWriter << nMachine::GetMachine(p->Owner()).GetIP() << p->GetAccessLevel();
+        se_commandWriter << commandArguments;
+        se_commandWriter.write();
+    }
     con << "[cmd] " << p->GetLogName() << ": " << say << '\n';
 }
 
@@ -2530,7 +2543,6 @@ static void se_AdminAdmin( ePlayerNetID * p, std::istream & s )
     }
 }
 
-static eLadderLogWriter se_cmdWriter("CMD", false);
 static eLadderLogWriter se_invalidCommandWriter("INVALID_COMMAND", false);
 
 static void handle_chat_admin_commands( ePlayerNetID * p, tString const & command, tString const & say, std::istream & s, eChatSpamTester &spam )
@@ -2587,13 +2599,6 @@ static void handle_chat_admin_commands( ePlayerNetID * p, tString const & comman
     else  if ( command == "/admin" )
     {
         se_AdminAdmin( p, s );
-    }
-    else  if ( command == "/cmd" && se_cmdWriter.isEnabled() )
-    {
-        tString str;
-        str.ReadLine(s);
-        se_cmdWriter << p->GetUserName() << nMachine::GetMachine(p->Owner()).GetIP() << p->GetAccessLevel() << str;
-        se_cmdWriter.write();
     }
     else{
         if (se_invalidCommandWriter.isEnabled() )
