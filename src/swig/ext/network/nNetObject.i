@@ -5,80 +5,240 @@
 %feature("director") nNetObject;
 
 class nNetObject{
-    friend class nWaitForAckSync;
-    friend class nProtoBufNetControlDescriptor;
-
-    bool createdLocally;		 // was the object created on this computer? (alternative: it was created on remote order)
-    unsigned long int lastSyncID_;  // the extended id of the last accepted sync message
-
-private:
-    unsigned short id;  // the global id; this is the same on all
-    mutable int refCtr_; // how many references from
-    unsigned short owner; // who owns this object?
-    // TODO
-    //mutable tCONTROLLED_PTR( nObserver ) observer_;  // this object's observer
-    int syncListID_;                                 // ID for the list of objects to sync
 public:
-    class nKnowsAboutInfo{
-    public:
-    tJUST_CONTROLLED_PTR< nProtoBufMessageBase > lastSync_;
-    bool knowsAboutExistence:1; // is the creation message through?
-    bool nextSyncAck:1;         // should the next sync message wait
-    bool syncReq:1;              // should a sync message be sent?
-    unsigned char  acksPending:4;          // how many messages are underway?
-    nKnowsAboutInfo();
-    void Reset();
-    };
+    static nNetObject *Object(int i);
+    // returns a pointer to the nNetObject
+    // with id=i. If that does not exist yet, wait for it to spawn,
+    // or, on the server, kill the person responsible.
+    // should be only called in constructors.
+
 protected:
+
     nKnowsAboutInfo knowsAbout[MAXCLIENTS+2];
-    nNetObject *Object(int i);
+
     void DoBroadcastExistence();
 public:
     static bool DoDebugPrint(); // tells ClearToTransmit to print reason of failure
+
     static nNetObject *ObjectDangerous(int i );
+    // the same thin but returns NULL if the object is not yet available.
+    
+    // clears an eventually deleted object of the given ID out of the main lists
+    static void ClearDeleted( unsigned short ID );
+
     virtual void AddRef(); // call this every time you add a pointer
+    // to this nNetObject from another nNetObject, so we know when it is
+    // safe to delete this.
     virtual void Release(); // the same if you remove a pointer to this.
+    // AND: it should be called instead of delete.
     int GetRefcount() const; // get refcount. Use only for Debgging purposes, never base any decisions on it.
+
     virtual void ReleaseOwnership(); // release the object only if it was created on this machine
     virtual void TakeOwnership(); // treat an object like it was created locally
-    bool Owned(){ return createdLocally; } //!< returns whether the object is owned by this machine
+    bool Owned(){
+        return createdLocally;    //!< returns whether the object is owned by this machine
+    }
+
     nObserver& GetObserver() const;    // retunrs the observer of this object
+
+    void ClearCache() const; //!< clears the message cache, call on object changes
+
     virtual void Dump( tConsole& con ); // dumps object stats
-    unsigned short ID() const;
-    unsigned short Owner() const;
+
+    unsigned short ID() const{
+        if (this)
+            return id;
+        else
+            return 0;
+    }
+
+    unsigned short Owner() const{
+        if (this)
+            return owner;
+        else
+            return ::sn_myNetID;
+    }
+
     inline nMachine & GetMachine() const;  //!< returns the machine this object belongs to
-    virtual nDescriptor& CreatorDescriptor() const=0;
+
     nNetObject(int owner=-1); // sn_netObjects can be normally created on the server
-    nNetObject(nMessage &m); // or, if initially created on the
+    // and will
+    // send the clients a notification that
+    // follows exaclty the same format as the sync command,
+    // but has a different descriptor (the one from CreatorDescriptor() )
+    // and the id and owner are sent, too.
+
+    // owner=-1 means: this object belongs to us!
+
     virtual void InitAfterCreation(); // after remote creation,
+    // this routine is called
+
+    // for the internal works, don't call them
+    //  static void RegisterRegistrar( nNetObjectRegistrar& r );	// tell the basic nNetObject constructor where to store itself
     void Register( const nNetObjectRegistrar& r );    // register with the object database
 protected:
     virtual ~nNetObject();
+    // if called on the server, the destructor will send
+    // destroy messages to the clients.
+
+    // you normally should not call this
+
     virtual nMachine & DoGetMachine() const;  //!< returns the machine this object belongs to
 public:
-    virtual bool ActionOnQuit();
-    virtual void ActionOnDelete();
-    virtual bool BroadcastExistence();
+
+    // what shall we do if the owner quits the game?
+    // return value: should this object be destroyed?
+    virtual bool ActionOnQuit(){
+        return true;
+    }
+
+    // what shall we do if the owner decides to delete the object?
+    virtual void ActionOnDelete(){
+    }
+
+    // should every other networked computer be informed about
+    // this objects existance?
+    virtual bool BroadcastExistence(){
+        return true;
+    }
+
+    // print out an understandable name in to s
     virtual void PrintName(tString &s) const;
+
+    // indicates whether this object is created at peer user.
     bool HasBeenTransmitted(int user) const;
-    bool syncRequested(int user) const;
+    bool syncRequested(int user) const{
+        return knowsAbout[user].syncReq;
+    }
+
+    // we must not transmit an object that contains pointers
+    // to non-transmitted objects. this function is supposed to check that.
     virtual bool ClearToTransmit(int user) const;
-    virtual void WriteSync(nMessage &m); // store sync message in m
-    virtual void ReadSync(nMessage &m); // guess what
-    virtual bool SyncIsNew(nMessage &m); // is the message newer
-    virtual void WriteCreate(nMessage &m); // store sync message in m
+
+    // turn an ID into an object pointer
+    template<class T>  static void IDToPointer( unsigned short id, T * & p )
+    {
+        if ( 0 != id )
+            p = dynamic_cast<T*> ( nNetObject::ObjectDangerous(id) );
+        else
+            p = NULL;
+    }
+
+    template<class T> static void IDToPointer( unsigned short id, tControlledPTR<T> & p )
+    {
+        if ( 0 != id )
+            p = dynamic_cast<T*> ( nNetObject::ObjectDangerous(id) );
+        else
+            p = NULL;
+    }
+
+    template<class T> static void IDToPointer( unsigned short id, tJUST_CONTROLLED_PTR<T> & p )
+    {
+        if ( 0 != id )
+            p = dynamic_cast<T*> ( nNetObject::ObjectDangerous(id) );
+        else
+            p = NULL;
+    }
+
+    template<class T> static void IDToPointer( unsigned short id, nObserverPtr<T> & p )
+    {
+        if ( 0 != id )
+            p = dynamic_cast<T*> ( nNetObject::ObjectDangerous(id) );
+        else
+            p = NULL;
+    }
+
+    // turn an object pointer int an ID
+    template<class T>  static unsigned short PointerToID( T * p )
+    {
+        if ( !p )
+        {
+            return 0;
+        }
+        else
+        {
+            return p->ID();
+        }
+    }
+
+    // turn an object pointer int an ID
+    template<class T>  static unsigned short PointerToID( T const & p )
+    {
+        if ( !p )
+        {
+            return 0;
+        }
+        else
+        {
+            return p->ID();
+        }
+    }
+
+    //! returns a creation message for this object
+    nProtoBufMessageBase * CreationMessage();
+
+    //! returns a sync message for this object
+    nProtoBufMessageBase * SyncMessage();
+
+    //! creates a netobject form sync data
+    nNetObject( Network::NetObjectSync const & sync, nSenderInfo const & sender );
+    //! reads sync data, returns false if sync was old or otherwise invalid
+    void ReadSync( Network::NetObjectSync const & sync, nSenderInfo const & sender );
+    //! writes sync data (and initialization data if flag is set)
+    void WriteSync( Network::NetObjectSync & sync, bool init ) const;
+    //! returns true if sync message is new (and updates 
+    bool SyncIsNew( Network::NetObjectSync const & sync, nSenderInfo const & sender );
+
+    //! returns the descriptor responsible for this class
+    inline nNetObjectDescriptorBase const & GetDescriptor() const { return DoGetDescriptor(); }
+private:
+    //! returns the descriptor responsible for this class
+    virtual nNetObjectDescriptorBase const & DoGetDescriptor() const = 0;
+
+    // control functions:
+
 protected:
-    static int SyncedUser();
-    nMessage *NewControlMessage();
+    Network::NetObjectControl & BroadcastControl();
+    // creates a new control message that can be used to control other
+    // copies of this nNetObject; control is received with ReceiveControlNet().
+    // It is automatically broadcast (sent to the server in client mode).
+
+private:
+    // conversion for stream legacy control messages.
+    virtual void StreamControl( Network::NetObjectControl const & control, nStreamMessage & stream );
+    virtual void UnstreamControl( nStreamMessage & stream, Network::NetObjectControl & control );
+
+    // easier to implement conversion helpers: just extract the relevant sub-protbuf.
+    virtual nProtoBuf       * ExtractControl( Network::NetObjectControl       & control );
+    virtual nProtoBuf const * ExtractControl( Network::NetObjectControl const & control );
 public:
-    virtual void ReceiveControlNet(nMessage &m);
+
+    virtual void ReceiveControlNet( Network::NetObjectControl const & control );
+    // receives the control message. the data written to the message created
+    // by *NewControlMessage() can be read directly from m.
+
+    // shall the server accept sync messages from the clients?
     virtual bool AcceptClientSync() const;
+
     void GetID();			// get a network ID
     void RequestSync(bool ack=true);  // request a sync
     void RequestSync(int user,bool ack); // only for a single user
+
+    // global functions:
+
     static void SyncAll();
+    // on the server, this will send sync tEvents to all clients
+    // for as many sn_netObjects as possible (currently: simply all...)
+
     static void ClearAll();
+    // this reinits the list of sn_netObjects. If called on the server,
+    // the clients are cleared, too.
+
     static void ClearAllDeleted();
+    // this reinits the list of deleted Objects.
+
     static void ClearKnows(int user, bool clear);
+
+    //give the sn_netObjects new id's after connecting to a server
     static void RelabelOnConnect();
 };

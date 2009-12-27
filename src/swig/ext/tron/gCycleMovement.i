@@ -2,6 +2,7 @@
 #include "gCycleMovement.h"
 %}
 
+//! class handling lightcycle movement aspects ( not networking beyond construction, no rendering, no wall building )
 class gCycleMovement : public eNetGameObject
 {
 public:
@@ -66,9 +67,11 @@ public:
             ,                                         const eCoord &        dir
             ,                                         ePlayerNetID *        p=NULL
                     ,                                 bool                  autodelete=1 )          ;   //!< local constructor
-    gCycleMovement                                  ( nMessage &            message      )          ;   //!< remote constructor
     virtual ~gCycleMovement                         ()                                              ;   //!< destructor
-    virtual void RemoveFromGame(); // call this instead of the destructor
+    virtual void OnRemoveFromGame(); // called when the cycle is physically removed from the game
+
+    void RequestSync(bool ack=true);     //!< request a sync
+    void RequestSync(int user,bool ack); //!< only for a single user
 protected:
     //! data from sync message
     struct SyncData
@@ -91,10 +94,14 @@ protected:
     virtual void            InitAfterCreation       ()                                              ;   //!< shared initialization routine
 
     // acceleration handling
+public:
     virtual void            AccelerationDiscontinuity ()                                            ;   //!< call when you know the acceleration makes a sharp jump now
     virtual void            CalculateAcceleration   (                                   )           ;   //!< calculate acceleration to apply later
     virtual void            ApplyAcceleration       ( REAL                  dt          )           ;   //!< apply acceleration calculated earlier
 
+    //! creates a netobject form sync data
+    gCycleMovement( Game::CycleMovementSync const & sync, nSenderInfo const & sender );
+protected:
     // destination handling
     REAL                    DistanceToDestination   ( gDestination &        dest        ) const     ;   //!< calculates the distance to the given destination
     virtual void            OnNotifyNewDestination  ( gDestination *        dest        )           ;   //!< notifies cycle of the insertion of a new destination
@@ -137,6 +144,7 @@ protected:
     eCoord          dirSpawn;                   //!< the direction we were facing on the last spawn
     eCoord          lastDirDrive;               //!< the direction we were facing before the last turn
     REAL            acceleration;               //!< current acceleration
+    REAL            totalZoneAcceleration;      //!< current acceleration from the effect of zones and monitor
 
     REAL            lastTimestep_;              //!< the length of the last timestep
     REAL            verletSpeed_;               //!< object speed according to verlet (speed of half a frame ago)
@@ -154,7 +162,10 @@ protected:
     int             windingNumber_;             //!< number that gets increased on every right turn and decreased on every left turn ( used by the AI )
     int             windingNumberWrapped_;      //!< winding number wrapped to be used as an index to the axes code
 
-    eCoord			lastTurnPos_;	            //! the location of the last turn
+    mutable REAL    gap_[2];                    //!< when driving towards a wall, this is set to the maximal distance we need to approach it so that when the cycle turns, it can squeeze through any gaps
+    mutable bool    keepLookingForGap_[2];      //!< flags telling the system whether it is worthwile to look for further, smaller, gaps
+
+    eCoord			lastTurnPos_;	            //!< the location of the last turn
     REAL            lastTurnTimeRight_;         //!< the time of the last turn right
     REAL            lastTurnTimeLeft_;          //!< the time of the last turn left
     REAL            lastTimeAlive_;             //!< the time of the last timestep where we would not have been killed
@@ -164,12 +175,15 @@ protected:
     REAL            rubber;                     //!< the amount rubber used up by the cycle
     REAL            rubberMalus;                //!< additional rubber usage factor
     REAL            rubberSpeedFactor;          //!< the factor by which the speed is currently multiplied by rubber
+    REAL            rubberDepleteTime_;         //!< the time rubber got depleted
 
     REAL            brakeUsage;                 //!< current brake usage
     REAL            rubberUsage;                //!< current rubber usage (not from hitting a wall, but from tunneling. Without taking efficiency into account.)
 
     // room for accessors
 public:
+    REAL RubberDepleteTime() const;                //!< returns the time rubber got fully used (or 0 if it hasn't)
+
     REAL GetMaxSpaceAhead( REAL maxReport ) const; //< Returns the current maximal space ahead
 
     inline REAL GetDistance( void ) const;  //!< Gets the distance traveled so far
@@ -190,6 +204,8 @@ public:
     inline REAL const & GetLastTurnTime( void ) const;	//!< Gets the time of the last turn
     inline gCycleMovement const & GetLastTurnTime( REAL & lastTurnTime ) const;	//!< Gets the time of the last turn
     REAL GetAcceleration(void) const  { return acceleration; };  //!< Gets the cycle's acceleration
+    virtual void            AddZoneAcceleration     ( REAL zoneAcceleration             )           ;
+
 protected:
     inline gCycleMovement & SetLastTurnPos( eCoord const & lastTurnPos );	//!< Sets the location of the last turn
     inline gCycleMovement & SetLastTurnTime( REAL const & lastTurnTime );	//!< Sets the time of the last turn
@@ -207,3 +223,4 @@ public:  // HACK
 private: // END OF HACK
     inline gCycleMovement & SetRubberMalus( REAL rubberMalus );	//!< Sets additional rubber usage factor
 };
+

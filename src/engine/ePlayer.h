@@ -510,7 +510,8 @@ public:
     }
     void write(); //!< send to ladderlog and clear message
 
-    bool isEnabled() { return enabled; } //!< check this if you're going to make expensive calculations for ladderlog output
+    bool isEnabled() { return enabled; }  //!< check this if you're going to make expensive calculations for ladderlog output
+    void Enabled(bool b) { enabled = b; } //!< set or unset enabled flag
 
     static void setAll(bool enabled); //!< enable or disable all writers
 #ifdef ENABLE_SCRIPTING

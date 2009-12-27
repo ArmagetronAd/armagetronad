@@ -20,9 +20,4 @@ public:
     inline eSensor & SetInverseSpeed( REAL inverseSpeed );	//!< Sets the inverse speed of the sensor
     inline REAL GetInverseSpeed( void ) const;	//!< Gets the inverse speed of the sensor
     inline eSensor const & GetInverseSpeed( REAL & inverseSpeed ) const;	//!< Gets the inverse speed of the sensor
-protected:
-        // TODO
-        // tCHECKED_PTR(eGameObject) owned;
-private:
-        REAL inverseSpeed_; //! the inverse speed of the sensor; walls far away will be checked for opacity a bit in the future if this is set.
 };

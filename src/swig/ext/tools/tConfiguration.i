@@ -73,7 +73,6 @@ public:
     tConfItemScript(const char *title, tScripting::proc_type proc);
     virtual ~tConfItemScript();
 
-%rename(call) ReadVal;
     virtual void ReadVal(std::istream &s);
     virtual void WriteVal(std::ostream &s);
 };

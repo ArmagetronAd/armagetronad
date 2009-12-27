@@ -1,11 +1,11 @@
 # all the SWIG interface files
-INTERFACEFILES = ext/armagetronad.i ext/std/sstream.i ext/tools/tConfiguration.i ext/tools/tString.i \
+INTERFACEFILES = ext/armagetronad.i ext/std/sstream.i ext/tools/tConfiguration.i ext/tools/tCoord.i ext/tools/tString.i ext/tools/tArray.i \
                  ext/engine/eTeam.i ext/engine/ePlayer.i \
-                 ext/tools/tDirectories.i ext/tools/tLocale.i  
-#                 ext/ui/uMenu.i ext/engine/eGameObject.i ext/engine/eSensor.i     \
-#                 ext/tron/gSensor.i ext/defs.i ext/tron/gAIBase.i                 \
-#                 ext/tron/gCycleMovement.i ext/tron/gCycle.i                      \
-#                 ext/engine/eNetGameObject.i ext/network/nNetObject.i
+                 ext/tools/tDirectories.i ext/tools/tLocale.i \ 
+                 ext/ui/uMenu.i ext/engine/eGameObject.i ext/engine/eSensor.i     \
+                 ext/tron/gSensor.i ext/defs.i ext/tron/gAIBase.i                 \
+                 ext/tron/gCycleMovement.i ext/tron/gCycle.i                      \
+                 ext/engine/eNetGameObject.i ext/network/nNetObject.i
 
 # although they should not be needed for a plain build, the interfaces are the true sources.
 EXTRA_DIST = ${INTERFACEFILES}
