@@ -8,6 +8,8 @@
 %ignore operator-=;
 %ignore operator*=;
 %ignore operator=;
+%ignore operator<<;
+%ignore operator>>;
 
 %rename(Coord) tCoord;
 %rename(estimated_range_of_mult) se_EstimatedRangeOfMult;

@@ -11,35 +11,8 @@ class gCycle: public gCycleMovement
     friend class gDestination;
     friend class gCycleWallRenderer;
 
-    REAL spawnTime_;    //!< time the cycle spawned at
-    REAL lastTimeAnim;  //!< last time animation was simulated at
-
-    REAL timeCameIntoView;
-
-    friend class gCycleChatBot;
-    std::auto_ptr< gCycleChatBot > chatBot_;
-
-    bool dropWallRequested_; //!< flag indicating that someone requested a wall drop
-public:
-    eCoord            lastGoodPosition_;    // the location of the last known good position
-
-    REAL skew,skewDot;						// leaning to the side
-
-    bool 				mp; 				// use moviepack or not?
-
-    rModel *body,*front,*rear,
-    *customModel;
-
-    gTextureCycle  *wheelTex,*bodyTex;
-    gTextureCycle  *customTexture;
-
-    eCoord rotationFrontWheel,rotationRearWheel; 	// wheel position (rotation)
-    REAL   heightFrontWheel,heightRearWheel;  		// wheel (suspension)
 public:
     //REAL	brakingReservoir; // reservoir for braking. 1 means full, 0 is empty
-
-//    static uActionPlayer s_brake;
-//    gCycleMemory memory;
 
     gRealColor color_;
     gRealColor trailColor_;
@@ -65,14 +38,18 @@ public:
     virtual void Die ( REAL time )  ;  //!< dies at the specified time
     void KillAt( const eCoord& pos );  //!< kill this cycle at the given position and take care of scoring
 
+%rename(winding_number) WindingNumber;
     int WindingNumber() const {return windingNumber_;}
 
+%rename(vulnerable) Vulnerable;
     virtual bool            Vulnerable              ()                                    const     ;   //!< returns whether the cycle can be killed
 
     // bool CanMakeTurn() const { return pendingTurns <= 0 && lastTime >= nextTurn; }
 
     virtual void InitAfterCreation();
     gCycle(eGrid *grid, const eCoord &pos,const eCoord &dir,ePlayerNetID *p=NULL);
+%rename(respawn_cycle) RespawnCycle;
+    static      bool    RespawnCycle(const eCoord &pos, const eCoord &dir, ePlayerNetID *p, bool warn=true);
 
     static	void 	SetWallsStayUpDelay		( REAL delay );				//!< the time the cycle walls stay up ( negative values: they stay up forever )
     static	void 	SetWallsLength			( REAL length);				//!< the maximum total length of the walls
@@ -80,14 +57,18 @@ public:
 
     static	REAL 	WallsStayUpDelay()	 { return wallsStayUpDelay;	}	//!< the time the cycle walls stay up ( negative values: they stay up forever )
     static	REAL	WallsLength()	 	 { return wallsLength;		}	//!< the default total length of the walls
+%rename(max_walls_length) MaxWallsLength;
     REAL	        MaxWallsLength() const;                             //!< the maximum total length of the walls (including max effect of rubber growth)
+%rename(this_walls_length) ThisWallsLength;
     REAL	        ThisWallsLength() const;                            //!< the maximum total length of this cycle's wall (including rubber shrink)
     REAL	        WallEndSpeed() const;                               //!< the speed the end of the trail is receeding with right now
     static	REAL	ExplosionRadius()	 { return explosionRadius;	}	//!< the radius of the holes blewn in by an explosion
 
     bool    IsMe( eGameObject const * other ) const;              //!< checks whether the passed pointer is logically identical with this cycle
 
+%rename(request_sync_owner) RequestSyncOwner;
     virtual void RequestSyncOwner(); //!< requests special syncs to the owner on important points (just passed an enemy trail end safely...)
+%rename(request_sync_all) RequestSyncAll;
     virtual void RequestSyncAll(); //!< requests special syncs to everyone on important points (just passed an enemy trail end safely...)
 
     virtual void SyncEnemy ( const eCoord& begWall );    //!< handle sync message for enemy cycles
@@ -123,9 +104,9 @@ public:
 
     virtual REAL PathfindingModifier( const eWall *w ) const;
 
-//    virtual bool Act(uActionPlayer *Act,REAL x);
-
+%rename(do_turn) DoTurn;
     virtual bool DoTurn(int dir);
+%rename(drop_wall) DropWall;
     void DropWall( bool buildNew=true );                                    //!< Drops the current wall and builds a new one
 
     // void Turbo(bool turbo);
@@ -138,7 +119,7 @@ public:
 
     virtual eCoord CamPos() const;
     virtual eCoord PredictPosition() const;
-    virtual eCoord  CamTop() const;
+    virtual eCoord CamTop() const;
     virtual eCoord CamDir()  const;
     virtual eCoord Direction()  const;
 

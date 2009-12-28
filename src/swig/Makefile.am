@@ -1,5 +1,6 @@
 # all the SWIG interface files
-INTERFACEFILES = ext/armagetronad.i ext/std/sstream.i ext/tools/tConfiguration.i ext/tools/tCoord.i ext/tools/tString.i ext/tools/tArray.i \
+INTERFACEFILES = ext/armagetronad.i ext/std/sstream.i ext/tools/tConfiguration.i  \
+                 ext/tools/tCoord.i ext/tools/tColor.i ext/tools/tString.i ext/tools/tArray.i \
                  ext/engine/eTeam.i ext/engine/ePlayer.i \
                  ext/tools/tDirectories.i ext/tools/tLocale.i \ 
                  ext/ui/uMenu.i ext/engine/eGameObject.i ext/engine/eSensor.i     \

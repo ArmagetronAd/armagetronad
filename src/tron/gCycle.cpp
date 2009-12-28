@@ -6191,3 +6191,38 @@ bool gCycle::Vulnerable() const
 {
     return Alive() && lastTime > spawnTime_ + sg_cycleInvulnerableTime;
 }
+
+bool gCycle::RespawnCycle(const eCoord &pos, const eCoord &dir, ePlayerNetID *p, bool warn)
+{
+        eGrid *grid = eGrid::CurrentGrid();
+        if(!grid) {
+                con << "Must be called while a grid exists!\n";
+                return false;
+        }
+
+        // let's respawn now ...
+        eGameObject *pGameObject = p->Object();
+        if ((!pGameObject) ||
+            (!(pGameObject->Alive()) ))
+        {
+            gCycle *pCycle = new gCycle(grid, pos, dir, p);
+            if (!pCycle) {
+                con << "cycle creation failed!\n";
+                return false;
+            }
+            p->ControlObject(pCycle);
+
+            if (warn) {
+                tColoredString playerName;
+                playerName << *p << tColoredString::ColorString(1,1,1);
+
+                // send a console message to the player
+                sn_CenterMessage(tOutput("$player_respawn_center_message"), p->Owner());
+            }
+        } else {
+            con << "Cycle is still alive!\n";
+            return false;
+        }
+        return true;
+}
+

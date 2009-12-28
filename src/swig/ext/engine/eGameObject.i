@@ -80,13 +80,15 @@ public:
 
 protected:
     virtual void OnRemoveFromGame(); //!< called on RemoveFromGame(). Call base class implementation, too, in your implementation. Must keep the object alive.
+
 private:
     virtual void DoRemoveFromGame(); //!< called on RemoveFromGame() after OnRemoveFromGame(). Do not call base class implementation of this function, don't expect to get called from subclasses.
-public:
 
-    int GOID() const {return id;}
-    REAL LastTime() const {return lastTime;}
-    virtual REAL NextInterestingTime() const {return lastTime;} //!< the next time something interesting is going to happen with this object
+public:
+    int GOID() const;
+%rename(last_time) LastTime;
+    REAL LastTime() const;
+    virtual REAL NextInterestingTime() const;
 
     eGameObject(eGrid *grid, const eCoord &p,const eCoord &d, eFace *currentface, bool autodelete=1);
     virtual ~eGameObject();
@@ -95,7 +97,9 @@ public:
     virtual eCoord Position()const{return pos;}
 %rename(direction) Direction;
     virtual eCoord Direction()const{return dir;}
+%rename(last_direction) LastDirection;
     virtual eCoord LastDirection()const{return dir;}
+%rename(death_time) DeathTime;
     virtual REAL DeathTime()const{return deathTime;}
 %rename(speed) Speed;
     virtual REAL  Speed()const{return 20;}
@@ -110,7 +114,7 @@ public:
     virtual void PassEdge( const eWall *w,REAL time,REAL a,int recursion=1 );
 
     // what length multiplicator does driving along the given wall get when it is the given distance away?
-    virtual REAL PathfindingModifier( const eWall *w ) const { return 1 ;}
+    virtual REAL PathfindingModifier( const eWall *w ) const;
 
     // moves the object from pos to dest during the timeinterval
     // [startTime,endTime] and issues all eWall-crossing tEvents
@@ -123,9 +127,7 @@ public:
     virtual bool Timestep(REAL currentTime);
     // return value: shall this object be destroyed?
 
-    virtual bool EdgeIsDangerous(const eWall *w, REAL time, REAL a) const{
-        return w;
-    }
+    virtual bool EdgeIsDangerous(const eWall *w, REAL time, REAL a) const;
 
     //! called when the round begins, after all game objects have been created,
     //! before the first network sync is sent out.
@@ -138,10 +140,12 @@ public:
     void EnsureBorn();
 
     //! destroys the gameobject (in the game)
+%rename(kill) Kill;
     virtual void Kill();
 
     //! tells whether the object is alive
-    virtual bool Alive() const {return false;}
+%rename(alive) Alive;
+    virtual bool Alive() const;
 
     //! draws object to the screen using OpenGL
     virtual void Render(const eCamera *cam);
@@ -175,8 +179,10 @@ public:
     virtual eCoord  CamTop() const {return eCoord(0,0);}
 
     // sr_laggometer
-    virtual REAL Lag() const{return 0;}          //!< expected average network latency
-    virtual REAL LagThreshold() const{return 0;} //!< tolerated network latency variation
+%rename(lag) Lag;
+    virtual REAL Lag() const;		 //!< expected average network latency
+%rename(lag_threshold) LagThreshold;
+    virtual REAL LagThreshold() const;	 //!< tolerated network latency variation
 
 #ifdef POWERPAK_DEB
 //    virtual void PPDisplay();

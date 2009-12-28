@@ -4,6 +4,7 @@
 %include "defs.i"
 %include "std/sstream.i"
 %include "tools/tCoord.i"
+%include "tools/tColor.i"
 %include "tools/tString.i"
 %include "tools/tDirectories.i"
 %include "tools/tLocale.i"

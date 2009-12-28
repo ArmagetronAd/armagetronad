@@ -22,6 +22,7 @@ public:
     virtual REAL            Speed                   ()                                    const     ;   //!< returns the current speed
     virtual bool            Alive                   ()                                    const     ;   //!< returns whether the cycle is still alive
     virtual bool            Vulnerable              ()                                    const     ;   //!< returns whether the cycle can be killed
+%rename(spawn_direction) SpawnDirection;
     virtual eCoord          SpawnDirection         ()                                    const     ;   //!< returns the driving direction when the cycle was last spawned
 
     bool                    CanMakeTurn             (int direction                      ) const     ;   //!< returns whether a turn is currently possible
@@ -51,6 +52,7 @@ public:
     bool                    Turn                    ( REAL                  dir         )           ;   //!< Turn left for positive argument, right for negative argument
     bool                    Turn                    ( int                   dir         )           ;   //!< Turn left for positive argument, right for negative argument
 
+%rename(move_safely) MoveSafely;
     void                    MoveSafely              (const eCoord &         dest
             ,                                        REAL                   startTime
             ,                                        REAL                   endTime     )           ;   //!< move without throwing exceptions on passing a wall
@@ -186,24 +188,32 @@ public:
 
     REAL GetMaxSpaceAhead( REAL maxReport ) const; //< Returns the current maximal space ahead
 
+%rename(get_distance) GetDistance( void ) const;
     inline REAL GetDistance( void ) const;  //!< Gets the distance traveled so far
     inline gCycleMovement const & GetDistance( REAL & distance ) const; //!< Gets the distance traveled so far
+%rename(get_rubber) GetRubber( void ) const;
     inline REAL GetRubber( void ) const;    //!< Gets the amount rubber used up by the cycle
     inline gCycleMovement const & GetRubber( REAL & rubber ) const; //!< Gets the amount rubber used up by the cycle
+%rename(get_turns) GetTurns( void ) const;
     inline unsigned short GetTurns( void ) const;   //!< Gets the number of turns taken so far
     inline gCycleMovement const & GetTurns( unsigned short & turns ) const; //!< Gets the number of turns taken so far
+%rename(get_braking) GetBraking( void ) const;
     inline unsigned short GetBraking( void ) const; //!< Gets flag indicating status of brakes ( on/off )
     inline gCycleMovement const & GetBraking( unsigned short & braking ) const; //!< Gets flag indicating status of brakes ( on/off )
+%rename(get_braking_reservoir) GetBrakingReservoir( void ) const;
     inline REAL GetBrakingReservoir( void ) const;	//!< Gets the reservoir for braking. 1 means full, 0 is empty
     inline gCycleMovement const & GetBrakingReservoir( REAL & brakingReservoir ) const;	//!< Gets the reservoir for braking. 1 means full, 0 is empty
     inline REAL GetRubberMalus( void ) const;	//!< Gets additional rubber usage factor
     inline gCycleMovement const & GetRubberMalus( REAL & rubberMalus ) const;	//!< Gets additional rubber usage factor
     static bool RubberMalusActive( void ) ; //!< Returns whether rubber malus code is active
+%rename(get_last_turn_pos) GetLastTurnPos( void ) const;
     inline eCoord const & GetLastTurnPos( void ) const;	//!< Gets the location of the last turn
     inline gCycleMovement const & GetLastTurnPos( eCoord & lastTurnPos ) const;	//!< Gets the location of the last turn
+%rename(get_last_turn_time) GetLastTurnTime( void ) const;
     inline REAL const & GetLastTurnTime( void ) const;	//!< Gets the time of the last turn
     inline gCycleMovement const & GetLastTurnTime( REAL & lastTurnTime ) const;	//!< Gets the time of the last turn
-    REAL GetAcceleration(void) const  { return acceleration; };  //!< Gets the cycle's acceleration
+%rename(get_acceleration) GetAcceleration( void ) const;
+    REAL GetAcceleration(void) const;  //!< Gets the cycle's acceleration
     virtual void            AddZoneAcceleration     ( REAL zoneAcceleration             )           ;
 
 protected:
@@ -213,12 +223,14 @@ private:
     inline gCycleMovement & SetDistance( REAL distance );   //!< Sets the distance traveled so far
 public:  // HACK
     //To have the zone able to influence it
+%rename(set_rubber) SetRubber;
     inline gCycleMovement & SetRubber( REAL rubber );   //!< Sets the amount rubber used up by the cycle
 private: // END OF HACK
     inline gCycleMovement & SetTurns( unsigned short turns );   //!< Sets the number of turns taken so far
     inline gCycleMovement & SetBraking( unsigned short braking );   //!< Sets flag indicating status of brakes ( on/off )
 public:  // HACK
     //To have the zone able to influence it
+%rename(set_braking_reservoir) SetBrakingReservoir;
     inline gCycleMovement & SetBrakingReservoir( REAL brakingReservoir );	//!< Sets the reservoir for braking. 1 means full, 0 is empty
 private: // END OF HACK
     inline gCycleMovement & SetRubberMalus( REAL rubberMalus );	//!< Sets additional rubber usage factor

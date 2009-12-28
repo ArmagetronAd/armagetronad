@@ -249,8 +249,8 @@ public:
     // bool CanMakeTurn() const { return pendingTurns <= 0 && lastTime >= nextTurn; }
 
     virtual void InitAfterCreation();
-    gCycle(eGrid *grid, const eCoord &pos,const eCoord &dir,ePlayerNetID *p=NULL);
-
+    gCycle(eGrid *grid, const eCoord &pos, const eCoord &dir, ePlayerNetID *p=NULL);
+    static      bool    RespawnCycle(const eCoord &pos, const eCoord &dir, ePlayerNetID *p, bool warn=true);
     static	void 	SetWallsStayUpDelay		( REAL delay );				//!< the time the cycle walls stay up ( negative values: they stay up forever )
     static	void 	SetWallsLength			( REAL length);				//!< the maximum total length of the walls
     static	void 	SetExplosionRadius		( REAL radius);				//!< the radius of the holes blewn in by an explosion
