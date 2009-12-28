@@ -91,6 +91,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <fstream>
 #include <ctype.h>
 #include <time.h>
+#include <map>
 
 #include "nSocket.h"
 
@@ -718,6 +719,72 @@ static tConfItem<REAL>   sg_ctimeout("GAME_TIMEOUT"		,		sg_Timeout );
 bool sg_TalkToMaster = true;
 static tSettingItem<bool> sg_ttm("TALK_TO_MASTER",
                                  sg_TalkToMaster);
+
+// *************************
+// ***   delayed commands   
+// *************************
+
+class delayedCommands {
+private:
+	static std::multimap<int, std::string> cmd_map;
+	// compute key for std::multimap
+	static int Key(REAL time) {return int(ceil(time*10));};
+public:
+	// clear all delayed commands
+	static void Clear() {
+		cmd_map.clear();
+		con << "Clearing delayed commands ...\n";
+	};
+	// add new delayed commands
+	static void Add(REAL time, std::string cmd) {
+		cmd_map.insert(std::pair<int,std::string>(Key(time),cmd));
+	};
+	// check, run and remove delayed commands
+	static void Run(REAL currentTime);
+};
+
+std::multimap<int, std::string> delayedCommands::cmd_map;
+
+static void sg_AddDelayedCmd(std::istream &s)
+{	
+	// first parse the line to get the param : delay
+	// if the param start by a +, assume that it's a delay relative to current game time ...
+	tString delay_str;
+        s >> delay_str;
+	REAL delay = atof(delay_str);
+	if (delay_str.SubStr(0,1)=="+") {
+		REAL gt = se_GameTime();
+		delay += gt;
+	}
+	tString cmd_str;
+        cmd_str.ReadLine( s, true );
+	if (cmd_str.length()==0) return;
+	
+	// add extracted command
+	delayedCommands::Add(delay,cmd_str);
+	//con << "DELAY_COMMAND " << delay << " &" << cmd_str.str() << "&\n";
+}
+
+static tConfItemFunc sg_AddDelayedCmd_conf("DELAY_COMMAND",&sg_AddDelayedCmd);
+static tAccessLevelSetter sg_AddDelayedCmdConfLevel( sg_AddDelayedCmd_conf, tAccessLevel_Owner );
+
+void delayedCommands::Run(REAL currentTime) {
+	if (cmd_map.empty()) return;
+	std::multimap<int, std::string>::iterator it = cmd_map.begin();
+	while ((it != cmd_map.end())&&((*it).first<=Key(currentTime))) {
+		std::istringstream stream((*it).second);
+		if ((*it).first>Key(currentTime-1.0)) {
+			tCurrentAccessLevel elevator( sg_AddDelayedCmd_conf.GetRequiredLevel(), true );
+			tConfItemBase::LoadAll(stream); // run command if it's not too old, otherwise, just skip it ...
+			con << stream << "\n";
+		}
+		cmd_map.erase(it++); // erase current and get next iterator
+	};
+}
+
+// *****************************
+// ***   end delayed commands   
+// *****************************
 
 #define PREPARE_TIME 4
 
@@ -2892,6 +2959,8 @@ void gGame::StateUpdate(){
 
                 Analysis(0);
 
+                delayedCommands::Clear();
+
                 // wait for external script to end its work if needed
                 REAL timeout = tSysTimeFloat() + sg_waitForExternalScriptTimeout;
                 if ( sg_waitForExternalScript )
@@ -3977,6 +4046,8 @@ bool gGame::GameLoop(bool input){
 
         synced_ = true;
     }
+
+    delayedCommands::Run(gtime);
 
     static float lastTime = 1e42;
 
