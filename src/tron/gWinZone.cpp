@@ -1152,7 +1152,7 @@ void gZone::Render( const eCamera * cam )
     if ( alpha <= 0 )
         return;
     alpha *= sg_zoneAlpha * sg_zoneAlphaServer;
-    
+
 	    ModelMatrix();
     glPushMatrix();
 
@@ -1177,7 +1177,7 @@ void gZone::Render( const eCamera * cam )
         lastAlpha = useAlpha;
 
         rDisplayListFiller filler( zoneList );
-        
+
         glDisable(GL_LIGHT0);
         glDisable(GL_LIGHT1);
         glDisable(GL_LIGHTING);
@@ -1185,7 +1185,7 @@ void gZone::Render( const eCamera * cam )
         glDepthMask(GL_FALSE);
         glBlendFunc( GL_SRC_ALPHA, GL_ONE );
         glDisable(GL_TEXTURE_2D);
-        
+
         if ( useAlpha )
             BeginQuads();
         else
@@ -1198,17 +1198,17 @@ void gZone::Render( const eCamera * cam )
         {
             REAL a = i * 2 * M_PI / REAL( sg_zoneSegments );
             REAL b = a + seglen;
-            
+
             REAL sa = sin(a);
             REAL ca = cos(a);
             REAL sb = sin(b);
             REAL cb = cos(b);
-            
+
             glVertex3f(sa, ca, 0);
             glVertex3f(sa, ca, 1);
             glVertex3f(sb, cb, 1);
             glVertex3f(sb, cb, 0);
-            
+
             if ( !useAlpha )
             {
                 glVertex3f(sa, ca, 0);
@@ -1216,7 +1216,7 @@ void gZone::Render( const eCamera * cam )
                 BeginLineStrip();
             }
         }
-        
+
         RenderEnd();
 
         sr_DepthOffset(false);
@@ -1235,7 +1235,7 @@ void gZone::Render( const eCamera * cam )
 // *
 // *******************************************************************************
 //!
-//!		@return	
+//!		@return
 //!
 // *******************************************************************************
 //! draws it in a svg file
@@ -1249,7 +1249,7 @@ void gZone::DrawSvg(std::ofstream &f) {
     if ( alpha <= 0 )
         return;
     alpha *= sg_zoneAlpha * sg_zoneAlphaServer;
-    
+
     f << "  <circle cx=\"0\" cy=\"0\" r=\"" << r << "\" fill=\"none\" stroke='" << gSvgColor(color_) << "' stroke-width=\"1\" stroke-dasharray=\""
       << dash << ", " << dash << "\" opacity=\"" <<  alpha << "\" transform=\"translate("
       << pos.x << " " << -pos.y << ")\">\n";
@@ -1956,14 +1956,14 @@ void gRubberZoneHack::OnVanish( void )
 gZone & gRubberZoneHack::SetRubber(REAL rubber)
 {
 	rmRubber = rubber;
-    
+
     color_.r = 1.0f;
     REAL p_rubber = (1-(rmRubber/sg_rubberCycle));
     if (p_rubber <0)
         p_rubber=0;
     color_.g = (p_rubber);
     color_.b = (p_rubber/3);
-    
+
 	return (*this);
 }
 
@@ -2475,7 +2475,7 @@ static eLadderLogWriter sg_deathBasezoneConqueredWriter("DEATH_BASEZONE_CONQUERE
 
 void gBaseZoneHack::OnVanish( void )
 {
-	
+
 	if (!team)
 		return;
 
@@ -2646,7 +2646,7 @@ void gBaseZoneHack::OnConquest( void )
 			{
 				sg_basezoneConquererTeamWriter << ePlayerNetID::FilterName((*iter)->Name()) << score;
 				sg_basezoneConquererTeamWriter.write();
-			}		
+			}
 		}
 	// trigger immediate win
 	if ( sg_onConquestWin && enemies_.size() > 0 )
@@ -2966,7 +2966,7 @@ void gBaseZoneHack::OnEnter( gCycle * target, REAL time )
                     allFlagsHome=true;
                 }
 			}
-            
+
 			if (!allFlagsHome)
 			{
 				target->flag_->WarnFlagNotHome();
@@ -4348,7 +4348,7 @@ void gFlagZoneHack::OnEnter( gCycle * target, REAL time )
             }
         }
     }
-    
+
     // check if the player is on our team or not (check will fail if team not enabled)
     if (target->Player()->CurrentTeam() == team)
     {
@@ -4619,7 +4619,7 @@ static void sg_SetTargetCmd(std::istream &s)
 {
 	tString params;
 	params.ReadLine( s, true );
-	
+
 	// first parse the line to get the param : object_id
 	int pos = 0;				 //
 	const tString object_id_str = params.ExtractNonBlankSubString(pos);
@@ -4638,7 +4638,7 @@ static void sg_SetTargetCmd(std::istream &s)
 		zone_id = atoi(object_id_str);
 		if (zone_id==0 && object_id_str!="0") return;
 	}
-	
+
 	const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
 	while (zone_id!=-1)
 	{
@@ -5090,7 +5090,7 @@ bool gKOHZoneHack::Timestep( REAL time )
         }
         PlayersInside_=totalInside;
     }
-    
+
     // check if the flag is owned
 	if (owner_ && PlayersInside_ ==1)
 	{
@@ -5104,10 +5104,10 @@ bool gKOHZoneHack::Timestep( REAL time )
 			playerName << *player << tColoredString::ColorString(1,1,1);
             owner_->Player()->AddScore( sg_kohScore, "$player_koh_score", tOutput());
             EnteredTime_=time;
-            
+
 		}
 	}
-    
+
 
 	// delegate
 	bool returnStatus = gZone::Timestep( time );
@@ -5155,7 +5155,7 @@ void gKOHZoneHack::OnEnter( gCycle * target, REAL time )
         color_.r = 1.0;
         color_.g = 1.0;
         color_.b = 1.0;
-        RequestSync(); 
+        RequestSync();
     }
 
 }
@@ -5318,9 +5318,9 @@ gBlastZoneHack::gBlastZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCr
 	color_.r = 0.0f;
 	color_.g = 1.0f;
 	color_.b = 0.0f;
-	
+
 	grid->AddGameObjectInteresting(this);
-	
+
 	SetExpansionSpeed(0);
 	SetRotationSpeed( .3f );
 	RequestSync();
@@ -5372,7 +5372,7 @@ bool gBlastZoneHack::Timestep( REAL time )
 {
 	// delegate
 	bool returnStatus = gZone::Timestep( time );
-	
+
 	return (returnStatus);
 }
 
@@ -5522,7 +5522,7 @@ static void sg_CreateZone_conf(std::istream &s)
 		if (zoneRelAbsStr=="rel") relJump=1;
 		else if (zoneRelAbsStr=="cycle") relJump=2;
 		else relJump = 0;
-		
+
 		const tString xdir_str = params.ExtractNonBlankSubString(pos);
 		REAL xdir = atof(xdir_str);
 		const tString ydir_str = params.ExtractNonBlankSubString(pos);
@@ -5911,7 +5911,7 @@ static void sg_SetZoneSpeed(std::istream &s)
 {
 	tString params;
 	params.ReadLine( s, true );
-	
+
 	// parse the line to get the param : object_id, speed ...
 	int pos = 0;				 //
 	const tString object_id_str = params.ExtractNonBlankSubString(pos);
@@ -5919,7 +5919,7 @@ static void sg_SetZoneSpeed(std::istream &s)
 	tString speedstr;
 	speedstr = params.ExtractNonBlankSubString(pos);
 	REAL speed = atof(speedstr);
-	
+
 	// first check for the name
 	int zone_id;
 	zone_id=gZone::FindFirst(object_id_str);
@@ -5928,7 +5928,7 @@ static void sg_SetZoneSpeed(std::istream &s)
 		zone_id = atoi(object_id_str);
 		if (zone_id==0 && object_id_str!="0") return;
 	}
-	
+
 	const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
 	while (zone_id!=-1)
 	{
@@ -5955,7 +5955,7 @@ static void sg_SetZoneColor(std::istream &s)
 {
 	tString params;
 	params.ReadLine( s, true );
-	
+
 	// parse the line to get the param : object_id, r, g, b ...
 	int pos = 0;				 //
 	const tString object_id_str = params.ExtractNonBlankSubString(pos);
@@ -5968,7 +5968,7 @@ static void sg_SetZoneColor(std::istream &s)
 	zoneColor.r = atof(zoneRedStr);
 	zoneColor.g = atof(zoneGreenStr);
 	zoneColor.b = atof(zoneBlueStr);
-	
+
 	// first check for the name
 	int zone_id;
 	zone_id=gZone::FindFirst(object_id_str);
@@ -5977,7 +5977,7 @@ static void sg_SetZoneColor(std::istream &s)
 		zone_id = atoi(object_id_str);
 		if (zone_id==0 && object_id_str!="0") return;
 	}
-	
+
 	const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
 	while (zone_id!=-1)
 	{
@@ -5997,4 +5997,41 @@ static void sg_SetZoneColor(std::istream &s)
 }
 
 static tConfItemFunc sg_SetZoneColor_conf("SET_ZONE_COLOR",&sg_SetZoneColor);
+
+static void sg_SetZoneExpansion(std::istream &s)
+{
+	tString params;
+	params.ReadLine( s, true );
+
+	// parse the line to get the param : object_id, expansion
+	int pos = 0;				 //
+	const tString object_id_str = params.ExtractNonBlankSubString(pos);
+	const tString expansion_str = params.ExtractNonBlankSubString(pos);
+	REAL expansion = atof(expansion_str);
+
+	// first check for the name
+	int zone_id;
+	zone_id=gZone::FindFirst(object_id_str);
+	if (zone_id==-1)
+	{
+		zone_id = atoi(object_id_str);
+		if (zone_id==0 && object_id_str!="0") return;
+	}
+
+	const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
+	while (zone_id!=-1)
+	{
+		// get the zone ...
+		gZone *zone=dynamic_cast<gZone *>(gameObjects(zone_id));
+		if (zone)
+		{
+			zone->SetReferenceTime();
+			zone->SetExpansionSpeed( expansion );
+			zone->RequestSync();
+		}
+		zone_id=gZone::FindNext(object_id_str, zone_id);
+	}
+}
+
+static tConfItemFunc sg_SetZoneExpansion_conf("SET_ZONE_EXPANSION",&sg_SetZoneExpansion);
 
