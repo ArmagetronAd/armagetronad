@@ -1206,7 +1206,7 @@ static ladder highscore_ladder("ladder.txt",
                                "$ladder_description");
 
 // *************************
-// ***   delayed commands   
+// ***   delayed commands
 // *************************
 
 class delayedCommands {
@@ -1221,8 +1221,11 @@ public:
 		con << "Clearing delayed commands ...\n";
 	};
 	// add new delayed commands
-	static void Add(REAL time, std::string cmd) {
-		cmd_map.insert(std::pair<int,std::string>(Key(time),cmd));
+	static void Add(REAL time, std::string cmd, int interval) {
+        std::stringstream store;
+        store << interval << " " << cmd;
+        //std::string stored = store;
+		cmd_map.insert(std::pair<int,std::string>(Key(time),store.str()));
 	};
 	// check, run and remove delayed commands
 	static void Run(REAL currentTime);
@@ -1234,26 +1237,42 @@ static void sg_AddDelayedCmd(std::istream &s)
 {
 	tString params;
 	params.ReadLine( s, true );
-	
-	// first parse the line to get the param : delay
+
+	// first parse the line to get the param : delay or interval
+    // if the param start by an r then it means we have the interval
 	// if the param start by a +, assume that it's a delay relative to current game time ...
 	int pos = 0;				 //
-	const tString delay_str = params.ExtractNonBlankSubString(pos);
-	REAL delay = atof(delay_str);
-	if (delay_str.SubStr(0,1)=="+") {
+    int interval=0;
+	tString delay_str = params.ExtractNonBlankSubString(pos);
+
+	if (delay_str.SubStr(0,1)=="r")
+    {
+		interval = atoi(delay_str.SubStr(1));
+        delay_str = params.ExtractNonBlankSubString(pos);
+	}
+    REAL delay = atof(delay_str);
+    if (delay_str.SubStr(0,1)=="+") {
 		REAL gt = se_GameTime();
 		delay += gt;
 	}
+    // this will make sure it using the command if  start time has passed
+    if ((interval > 0) && (se_GameTime() > delay)){
+        REAL ogt = se_GameTime() - delay;
+        int disposition = (ogt/interval)+1;
+        delay = disposition*interval+delay;
+    }
+
 	std::stringstream cmd_str;
 	cmd_str << params.SubStr(pos+1);
 	if (cmd_str.str().length()==0) return;
-	
+
 	// add extracted command
-	delayedCommands::Add(delay,cmd_str.str());
-	//con << "DELAY_COMMAND " << delay << " &" << cmd_str.str() << "&\n";
+	delayedCommands::Add(delay,cmd_str.str(),interval);
+	//con << "DELAY_COMMAND " << delay << " "<< interval<<" &" << cmd_str.str() << "&\n";
 }
 
 static tConfItemFunc sg_AddDelayedCmd_conf("DELAY_COMMAND",&sg_AddDelayedCmd);
+
 static tAccessLevelSetter sg_AddDelayedCmdConfLevel( sg_AddDelayedCmd_conf, tAccessLevel_Owner );
 
 void delayedCommands::Run(REAL currentTime) {
@@ -1262,16 +1281,27 @@ void delayedCommands::Run(REAL currentTime) {
 	while ((it != cmd_map.end())&&((*it).first<=Key(currentTime))) {
 		std::istringstream stream((*it).second);
 		if ((*it).first>Key(currentTime-1.0)) {
+            tString params;
+            params.ReadLine( stream, true );
+            int pos = 0;
+            const tString interval_str = params.ExtractNonBlankSubString(pos);
+            int interval = atoi(interval_str);
 			tCurrentAccessLevel elevator( sg_AddDelayedCmd_conf.GetRequiredLevel(), true );
-			tConfItemBase::LoadAll(stream); // run command if it's not too old, otherwise, just skip it ...
-			con << stream << "\n";
-		}
+            std::stringstream command;
+            const tString command_str = params.SubStr(interval_str.Len());
+            command << command_str;
+			tConfItemBase::LoadAll(command); // run command if it's not too old, otherwise, just skip it ...
+			con << command << " " << interval <<"\n";
+            if (interval>0){
+                delayedCommands::Add(currentTime+interval,command.str(),interval);
+            }
+        }
 		cmd_map.erase(it++); // erase current and get next iterator
 	};
 };
 
 // *****************************
-// ***   end delayed commands   
+// ***   end delayed commands
 // *****************************
 
 #define PREPARE_TIME 4
@@ -1361,7 +1391,7 @@ void exit_game_objects(eGrid *grid){
     gNetPlayerWall::Clear();
 
 	se_unsplittedRimWalls.clear();
-	
+
     exit_game_grid(grid);
 }
 
@@ -1566,7 +1596,7 @@ void init_game_objects(eGrid *grid){
       static REAL g[MAX_PLAYERS]={.2,1,.2,1};
       static REAL b[MAX_PLAYERS]={.2,.2,1,.2};
     */
-    
+
     if (sn_GetNetState()!=nCLIENT)
     {
         // update team settings
@@ -1575,12 +1605,12 @@ void init_game_objects(eGrid *grid){
                                   sg_currentSettings->AI_IQ);
 
         int spawnPointsUsed = 0;
-        
+
         if( sg_spawnAlternate == 1 )
         {
             eTeam::SortByPosition();
         }
-        
+
         for(int t=eTeam::teams.Len()-1;t>=0;t--)
         {
             int z;
@@ -1614,8 +1644,8 @@ void init_game_objects(eGrid *grid){
                     team->SetPosition(0);
                 }
             }
-            
-            
+
+
             // reset team color of fresh teams
             if ( team->RoundsPlayed() == 0 )
             {
@@ -1683,7 +1713,7 @@ void init_game_objects(eGrid *grid){
                 // se_PauseGameTimer(true);
             }
         }
-        
+
         eTeam::SortByScore(); //sort again by score, so new players will join the losing team.
 
 #ifdef ALLOW_NO_TEAM
@@ -2635,9 +2665,9 @@ static void StartChallenge_conf(std::istream &s){
     // read nb sets
     REAL sets;
     s >> sets;
-    
+
 	if (sets<1) sets=1;
-	
+
     sg_startChallenge(sets);
 }
 
@@ -3369,7 +3399,7 @@ void gGame::StateUpdate(){
             ePlayerNetID::LogScoreDifferences();
             ePlayerNetID::UpdateSuspensions();
             ePlayerNetID::UpdateShuffleSpamTesters();
-            
+
             sg_newRoundWriter << sg_GetCurrentTime("%Y-%m-%d %H:%M:%S");
             sg_newRoundWriter.write();
 
@@ -4213,7 +4243,7 @@ void gGame::Analysis(REAL time){
                         declareChampion = false;
                         holdBackNextRound= true;
                     }
-					
+
                     if ( declareChampion )
                     {
 						// handle sets before declaring the winner ...
@@ -4224,7 +4254,7 @@ void gGame::Analysis(REAL time){
 							setsPlayed = eTeam::SetsPlayed();
 							flagSets= eTeam::teams(0)->SetsWon()<sg_currentSettings->limitSet ? true : false;
                     	}
-                    	
+
                         lastdeath = time + ( sg_currentSettings->finishType==gFINISH_EXPRESS ? 2.0f : 6.0f );
 
                         tOutput message;
@@ -4240,10 +4270,10 @@ void gGame::Analysis(REAL time){
 	                            message << "$gamestate_set_center";
 	                            sn_CenterMessage(message);
 	                        }
-	
+
 	                        sg_setWinnerWriter << ePlayerNetID::FilterName( eTeam::teams[0]->Name() );
 	                        sg_setWinnerWriter.write();
-	
+
                             message.SetTemplateParameter(1, setsPlayed );
                             message.SetTemplateParameter(2, name );
 	                        message << "$gamestate_set_console";
@@ -4254,11 +4284,11 @@ void gGame::Analysis(REAL time){
 	                            message << "$gamestate_champ_center";
 	                            sn_CenterMessage(message);
 	                        }
-	
+
 	                        sg_matchWinnerWriter << ePlayerNetID::FilterName( eTeam::teams[0]->Name() );
                             eTeam::WritePlayers( sg_matchWinnerWriter, eTeam::teams[0] );
                             sg_matchWinnerWriter.write();
-	
+
 	                        message.SetTemplateParameter(1, name);
 	                        message << "$gamestate_champ_console";
 						}
@@ -4281,9 +4311,9 @@ void gGame::Analysis(REAL time){
                         }
 
 						ePlayerNetID::LogMatchScores();
-						
+
                         se_SaveToScoreFile(message);
-                        
+
                         if (flagSets) {
                         	tOutput mess;
                         	mess.SetTemplateParameter(1, setsPlayed);
@@ -4479,7 +4509,7 @@ bool gGame::GameLoop(bool input){
         static int lastcountdown=0;
         int cd=int(floor(-time))+1;
         if (cd>=0 && cd<PREPARE_TIME && cd!=lastcountdown && se_mainGameTimer && se_mainGameTimer->IsSynced() ){
-		    if (cd==1) ePlayerNetID::GridPosLadderLog();  
+		    if (cd==1) ePlayerNetID::GridPosLadderLog();
             lastcountdown=cd;
             tString s;
             s << cd;
@@ -5019,7 +5049,7 @@ void sg_ClientFullscreenMessage( tOutput const & title, tOutput const & message,
     uMenu::Message( title, message, timeout );
 
     // and print it to the console
-#ifndef DEDICATED    
+#ifndef DEDICATED
     con <<  title << "\n" << message << "\n";
 #endif
 
