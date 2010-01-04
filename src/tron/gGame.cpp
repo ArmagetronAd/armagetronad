@@ -736,8 +736,10 @@ public:
 		con << "Clearing delayed commands ...\n";
 	};
 	// add new delayed commands
-	static void Add(REAL time, std::string cmd) {
-		cmd_map.insert(std::pair<int,std::string>(Key(time),cmd));
+	static void Add(REAL time, std::string cmd, int interval) {
+                std::stringstream store;
+                store << interval << " " << cmd;
+                cmd_map.insert(std::pair<int,std::string>(Key(time),store.str()));
 	};
 	// check, run and remove delayed commands
 	static void Run(REAL currentTime);
@@ -747,22 +749,34 @@ std::multimap<int, std::string> delayedCommands::cmd_map;
 
 static void sg_AddDelayedCmd(std::istream &s)
 {	
-	// first parse the line to get the param : delay
+	// first parse the line to get the param : delay or interval
+        // if the param start by an r then it means we have the interval
 	// if the param start by a +, assume that it's a delay relative to current game time ...
+	int interval=0;
 	tString delay_str;
         s >> delay_str;
+	if (delay_str.SubStr(0,1)=="r") {
+		interval = atoi(delay_str.SubStr(1));
+		s >> delay_str;
+	}
 	REAL delay = atof(delay_str);
 	if (delay_str.SubStr(0,1)=="+") {
 		REAL gt = se_GameTime();
 		delay += gt;
+	}
+	// this will make sure it using the command if  start time has passed
+ 	if ((interval > 0) && (se_GameTime() > delay)){
+		REAL ogt = se_GameTime() - delay;
+		int disposition = (ogt/interval)+1;
+		delay = disposition*interval+delay;
 	}
 	tString cmd_str;
         cmd_str.ReadLine( s, true );
 	if (cmd_str.length()==0) return;
 	
 	// add extracted command
-	delayedCommands::Add(delay,cmd_str);
-	//con << "DELAY_COMMAND " << delay << " &" << cmd_str.str() << "&\n";
+	delayedCommands::Add(delay,cmd_str,interval);
+	//con << "DELAY_COMMAND " << delay << " "<< interval<<" &" << cmd_str.str() << "&\n";
 }
 
 static tConfItemFunc sg_AddDelayedCmd_conf("DELAY_COMMAND",&sg_AddDelayedCmd);
@@ -774,9 +788,14 @@ void delayedCommands::Run(REAL currentTime) {
 	while ((it != cmd_map.end())&&((*it).first<=Key(currentTime))) {
 		std::istringstream stream((*it).second);
 		if ((*it).first>Key(currentTime-1.0)) {
+                        int interval;
+			stream >> interval;
 			tCurrentAccessLevel elevator( sg_AddDelayedCmd_conf.GetRequiredLevel(), true );
 			tConfItemBase::LoadAll(stream); // run command if it's not too old, otherwise, just skip it ...
-			con << stream << "\n";
+			con << stream << " " << interval <<"\n";
+			if (interval>0) {
+				delayedCommands::Add(currentTime+interval,stream.str(),interval);
+			}
 		}
 		cmd_map.erase(it++); // erase current and get next iterator
 	};
