@@ -315,7 +315,7 @@ void eTeam::UpdateAppearance()
                     updateName = oldest->teamname;
                 else
                     // use player name as teamname
-                    updateName = oldest->GetUserName();
+                    updateName = oldest->GetName();
             }
 
             color = oldest->color;
@@ -343,7 +343,7 @@ void eTeam::UpdateAppearance()
         // only display a message if
         // the oldest player changed the name of the team
         // the server also sets the teamname sometimes
-        if(sn_GetNetState()!=nCLIENT && oldest)
+        if(sn_GetNetState()!=nCLIENT && oldest && !( name == "" || name == tString(tOutput("$team_empty"))) )
         {
             tOutput message;
             tColoredString name;

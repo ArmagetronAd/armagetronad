@@ -442,7 +442,8 @@ bool tXmlParser::ValidateXml(FILE* docfd, const char* uri, const char* filepath)
     /* free up the parser context */
     xmlFreeParserCtxt(ctxt);
 
-    m_Doc->_private = this;
+    if (m_Doc)
+        m_Doc->_private = this;
 
 #ifndef DEDICATED
     /* reset error handler */
