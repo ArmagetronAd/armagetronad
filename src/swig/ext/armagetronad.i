@@ -19,5 +19,7 @@
 %include "tron/gCycleMovement.i"
 %include "tron/gCycle.i"
 %include "tron/gSensor.i"
+%include "tron/gSpawn.i"
+%include "tron/gArena.i"
 #%include "tron/gAIBase.i"
 

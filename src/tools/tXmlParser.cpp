@@ -452,6 +452,84 @@ bool tXmlParser::ValidateXml(FILE* docfd, const char* uri, const char* filepath)
     return validated;
 }
 
+bool tXmlParser::ValidateXml(const char* buffer, const char* uri)
+{
+#ifndef DEDICATED
+    /* register error handler */
+    xmlGenericErrorFunc errorFunc = &st_ErrorFunc;
+    initGenericErrorDefaultFunc( &errorFunc );
+    st_errorLeadIn = "XML validation error in ";
+    st_errorLeadIn += filepath;
+    st_errorLeadIn += ":\n\n";
+#endif
+
+    bool validated = false;
+
+    if (buffer == NULL) {
+        con << "empty buffer!\n";
+        return false;
+    }
+
+#ifndef HAVE_LIBXML2_WO_PIBCREATE
+    //xmlSetExternalEntityLoader(myxmlResourceEntityLoader);
+    xmlParserInputBufferCreateFilenameDefault(myxmlParserInputBufferCreateFilenameFunc);    //should be moved to some program init area
+#endif
+
+    if (m_Doc)
+    {
+        xmlFreeDoc(m_Doc);
+        m_Doc=0;
+    }
+
+    /*Validate the xml*/
+    xmlParserCtxtPtr ctxt; /*Parser context*/
+
+    ctxt = xmlNewParserCtxt();
+
+    if (ctxt == 0) {
+        fprintf(stderr, "Failed to allocate parser context\n");
+        return false;
+    }
+
+    /* parse the file, activating the DTD validation option */
+    m_Doc = xmlCtxtReadMemory(ctxt, buffer, sizeof(buffer),
+#if HAVE_LIBXML2_WO_PIBCREATE
+                          (const char *)tDirectories::Resource().GetReadPath("map-0.1.dtd")
+                          // TODO: don't hardcode the file
+#else
+                          uri
+#endif
+                          , NULL, XML_PARSE_DTDVALID);
+    // NOTE: Do *not* pass myxmlInputCloseFILE; we close the file *later*
+
+    /* check if parsing suceeded */
+    if (m_Doc == NULL) {
+        fprintf(stderr, "Failed to parse \n");
+    } else {
+        /* check if validation suceeded */
+        if (ctxt->valid == 0) {
+            fprintf(stderr, "Failed to validate \n");
+            xmlFreeDoc(m_Doc);
+            m_Doc=NULL;
+        }
+        else
+        {
+            validated = true;
+        }
+    }
+
+    /* free up the parser context */
+    xmlFreeParserCtxt(ctxt);
+
+    m_Doc->_private = this;
+
+#ifndef DEDICATED
+    /* reset error handler */
+    initGenericErrorDefaultFunc( NULL );
+#endif
+    return validated;
+}
+
 tXmlParser::node tXmlParser::GetRoot() {
     return node(xmlDocGetRootElement(m_Doc));
 }

@@ -50,6 +50,9 @@ public:
     // draw the gArena
     virtual void PrepareGrid(eGrid *grid, gParser *aParser);
 
+    // parse additional data from a string
+    virtual void ExtraParsing() {}
+
     // get a random position
     virtual eCoord		GetRandomPos( REAL factor ) const;
 
