@@ -34,6 +34,7 @@ bool AAPastePasteboardData(CFDataRef &outData) {
     
     OSStatus status;
     PasteboardRef pasteboard;
+    bool success = false;
     
     status = PasteboardCreate(kPasteboardClipboard, &pasteboard);
     require_noerr(status, CantCreatePasteboard);
@@ -56,12 +57,12 @@ bool AAPastePasteboardData(CFDataRef &outData) {
     require_noerr(status, CantGetDataFlavor);
     
     outData = data;
-    return true;
+    success = true;
     
 CantGetDataFlavor:
 CantGetItemID:
 CantGetItemCount:
     CFRelease(pasteboard);
 CantCreatePasteboard:
-    return false;
+    return success;
 }
