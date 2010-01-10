@@ -264,6 +264,7 @@ public:
     static void LoadLine(std::istream &s); //! loads one configuration line
     static bool LoadPlayback( bool print = false ); //! loads configuration from playback
     static void DocAll(std::ostream &s);
+    static int AccessLevel(std::istream &s); //! Returns access level needed for command -1 if command not found
 
     // helper functions for files (use these, they manage recording and playback properly)
     enum SearchPath
@@ -330,7 +331,7 @@ template<> struct tTypeToConfig< TYPE > \
     typedef STREAM TOSTREAM; \
   typedef int * DUMMYREQUIRED; \
 } \
- 
+
 //! macro for configuration enums: convert them to int.
 #define tCONFIG_ENUM( TYPE ) tCONFIG_AS( TYPE, int )
 
@@ -362,7 +363,7 @@ public:
 
     tConfItem(const char *title,T& t)
             :tConfItemBase(title),target(&t), shouldChangeFunc_(NULL) {}
-        
+
     tConfItem(const char*title, T& t, ShouldChangeFuncT changeFunc)
             :tConfItemBase(title),target(&t),shouldChangeFunc_(changeFunc) {}
 
@@ -464,7 +465,7 @@ public:
 
     tSettingItem(const char *title,T& t)
             :tConfItemBase(title),tConfItem<T>(title, t){}
-    
+
     tSettingItem(const char *title, T& t, typename tConfItem<T>::ShouldChangeFuncT changeFunc)
             :tConfItemBase(title), tConfItem<T>(title, t, changeFunc) {}
 

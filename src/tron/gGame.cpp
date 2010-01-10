@@ -1261,13 +1261,24 @@ static void sg_AddDelayedCmd(std::istream &s)
         int disposition = (ogt/interval)+1;
         delay = disposition*interval+delay;
     }
-
+    tString cmd_name;
+    cmd_name= params.ExtractNonBlankSubString(pos);
 	std::stringstream cmd_str;
-	cmd_str << params.SubStr(pos+1);
+	cmd_str << cmd_name <<"  " << params.SubStr(pos+1);
 	if (cmd_str.str().length()==0) return;
 
+    int cLevel = tConfItemBase::AccessLevel(cmd_str);
 	// add extracted command
-	delayedCommands::Add(delay,cmd_str.str(),interval);
+    if (tCurrentAccessLevel::GetAccessLevel() <=cLevel){
+        delayedCommands::Add(delay,cmd_str.str(),interval);
+    }else{
+        tToUpper( cmd_name );
+        con << tOutput( "$access_level_error",
+                    cmd_name,
+                    tCurrentAccessLevel::GetName( static_cast< tAccessLevel >(cLevel) ),
+                    tCurrentAccessLevel::GetName( tCurrentAccessLevel::GetAccessLevel() )
+                    );
+    }
 	//con << "DELAY_COMMAND " << delay << " "<< interval<<" &" << cmd_str.str() << "&\n";
 }
 

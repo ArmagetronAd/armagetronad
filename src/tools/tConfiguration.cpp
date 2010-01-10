@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -499,9 +499,9 @@ void tConfItemBase::LoadLine(std::istream &s){
             {
                 tString discard;
                 discard.ReadLine(s);
-                
+
                 con << tOutput( "$access_level_error",
-                                name,  
+                                name,
                                 tCurrentAccessLevel::GetName( ci->requiredLevel ),
                                 tCurrentAccessLevel::GetName( tCurrentAccessLevel::GetAccessLevel() )
                     );
@@ -570,6 +570,24 @@ void tConfItemBase::LoadLine(std::istream &s){
     }
 
     //  std::cout << line << " lines read.\n";
+}
+
+int tConfItemBase::AccessLevel(std::istream &s){
+    if(!s.eof() && s.good()){
+        tString name;
+        s >> name;
+        // make name uppercase:
+        tToUpper( name );
+        tConfItemMap & confmap = ConfItemMap();
+        tConfItemMap::iterator iter = confmap.find( name );
+        if ( iter != confmap.end() )
+        {
+            tConfItemBase * ci = (*iter).second;
+            return ci->requiredLevel;
+        }
+    }
+    return -1;
+
 }
 
 static char const * recordingSection = "CONFIG";
@@ -797,11 +815,11 @@ void tConfItemBase::LoadAll(std::ifstream &s, bool record )
 bool tConfItemBase::OpenFile( std::ifstream & s, tString const & filename, SearchPath path )
 {
     bool ret = ( ( path & Config ) && tDirectories::Config().Open(s, filename ) ) || ( ( path & Var ) && tDirectories::Var().Open(s, filename ) );
-    
+
     static char const * section = "INCLUDE_VOTE";
     tRecorder::Playback( section, ret );
     tRecorder::Record( section, ret );
-    
+
     return ret;
 }
 
@@ -828,7 +846,7 @@ tString configfile(){
 	tString f;
 	//#ifndef WIN32
 	//  f << static_cast<const char *>(getenv("HOME"));
-	//  f << st_LogDir << 
+	//  f << st_LogDir <<
 	//  f << "/.ArmageTronrc";
 	//#else
 		const tPath& vpath = tDirectories::Var();

@@ -2524,8 +2524,13 @@ static void se_AdminAdmin( ePlayerNetID * p, std::istream & s )
 
     tString str;
     str.ReadLine(s);
-    se_adminCommandWriter << p->GetUserName() << nMachine::GetMachine(p->Owner()).GetIP() << p->GetAccessLevel() << str;
-    se_adminCommandWriter.write();
+    std::istringstream astream(&str(0));
+    int cLevel = tConfItemBase::AccessLevel(astream);
+    //no need to write commands that may not work or commands that they can't use.
+    if ((p->GetAccessLevel() <= cLevel) && (cLevel >= 0)){
+        se_adminCommandWriter << p->GetUserName() << nMachine::GetMachine(p->Owner()).GetIP() << p->GetAccessLevel() << str;
+        se_adminCommandWriter.write();
+    }
     tColoredString msg;
     msg << tColoredString::ColorString(1,0,0) << "Remote admin command" << tColoredString::ColorString(-1,-1,-1) << " by " << tColoredString::ColorString(1,1,.5) << p->GetUserName() << tColoredString::ColorString(-1,-1,-1) << ": " << tColoredString::ColorString(.5,.5,1) << str << "\n";
     se_SecretConsoleOut( msg, p, &se_cannotSeeConsole, p );
