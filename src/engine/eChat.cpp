@@ -557,7 +557,7 @@ void eShuffleSpamTester::Reset()
 tString eShuffleSpamTester::ShuffleMessage( ePlayerNetID *player, int fromPosition, int toPosition ) const
 {
     tString message;
-    message << tOutput( "$team_shuffle", player->GetName(), fromPosition, toPosition );
+    message << tOutput( "$team_shuffle", player->GetColoredName() + "0xRESETT", fromPosition, toPosition );
     
     if ( ShouldDisplaySuppressMessage() )
         message << " " << tOutput( "$team_shuffle_suppress" );
