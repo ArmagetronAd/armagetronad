@@ -1032,6 +1032,8 @@ dnl *************************************************
 dnl check for compiler
 AC_CHECK_PROG([PROTOC],protoc,protoc,no)
 
+AC_LANG([C])
+
 dnl check for library
 AC_CHECK_LIB([protobuf],main,,
 AC_MSG_ERROR([[The library protobuf (Google Protocol Buffers, http://code.google.com/p/protobuf/) is required, but was not found.]])
