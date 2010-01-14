@@ -1,5 +1,5 @@
 include_directories (
-    ${ARMA_INCLUDE_DIRS}
+    ${armagetronad_INCLUDE_DIRS}
     )
 
 

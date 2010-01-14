@@ -1,0 +1,3 @@
+install (DIRECTORY ""
+    DESTINATION ${AA_DATADIR}/models/
+    FILES_MATCHING PATTERN "*.mod")

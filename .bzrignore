@@ -74,3 +74,10 @@ CMakeFiles
 cmake_install.cmake
 CMakeCache.txt
 src/tools/values/vParser.cpp
+CTestTestfile.cmake
+_CPack_Packages
+./CPackConfig.cmake
+./CPackSourceConfig.cmake
+./DartConfiguration.tcl
+./Testing
+./install_manifest.txt

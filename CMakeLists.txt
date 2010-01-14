@@ -1,13 +1,13 @@
 cmake_minimum_required (VERSION 2.6)
 
-project (ARMA)
+project (armagetronad)
 set (progtitle "Armagetron Advanced")
 
-list(APPEND CMAKE_MODULE_PATH ${ARMA_SOURCE_DIR}/batch/make/cmake/)
+list(APPEND CMAKE_MODULE_PATH ${armagetronad_SOURCE_DIR}/batch/make/cmake/)
 
 option(DEDICATED "Build dedicated server (otherwise only a client)" OFF)
 if (DEDICATED)
-    list(APPEND ARMA_DEFINES -DDEDICATED)
+    list(APPEND armagetronad_DEFINES -DDEDICATED)
     message(STATUS "Building Dedicated")
 endif()
 
@@ -16,6 +16,10 @@ if(NOT RELEASE)
     set(RELEASE "")
 endif()
 
+option(PREFIX "Prefix where to install armagetronad" "")
+if(NOT PREFIX)
+    set(PREFIX "usr/local/")
+endif()
 
 ##### CONFIGURE CHECKS #####
 include (UniversalVariables)
@@ -94,13 +98,13 @@ CLIENTDEP(SDL "Simple DirectMedia Layer(SDL)")
 CLIENTDEP(SDLMIXER "SDL_mixer")
 CLIENTDEP(SDLIMAGE "SDL_image")
 
-set (ARMA_INCLUDE_DIRS
-    ${ARMA_BINARY_DIR}/src/
-    ${ARMA_SOURCE_DIR}/src/
+set (armagetronad_INCLUDE_DIRS
+    ${armagetronad_BINARY_DIR}/src/
+    ${armagetronad_SOURCE_DIR}/src/
 
-    ${ARMA_SOURCE_DIR}/src/thirdparty/utf8/
-    ${ARMA_SOURCE_DIR}/src/thirdparty/mathexpr/
-    ${ARMA_SOURCE_DIR}/src/thirdparty/scrap/
+    ${armagetronad_SOURCE_DIR}/src/thirdparty/utf8/
+    ${armagetronad_SOURCE_DIR}/src/thirdparty/mathexpr/
+    ${armagetronad_SOURCE_DIR}/src/thirdparty/scrap/
 
     ${LIBXML2_INCLUDE_DIR}
     ${FTGL_INCLUDE_DIR}/FTGL/
@@ -114,30 +118,30 @@ set (ARMA_INCLUDE_DIRS
     ${PNG_INCLUDE_DIR}
     )
 
-set (ARMA_DEFINES
+set (armagetronad_DEFINES
     -DENABLE_ZONESV2 -DENABLE_ZONESV1 # Hacks :(
     ${PNG_DEFINITIONS}
     )
 
-add_definitions(${ARMA_DEFINES})
+add_definitions(${armagetronad_DEFINES})
 
 ##### PATHS #####
-UNIVERSAL_INSTALL_VAR (PREFIX "")
-UNIVERSAL_INSTALL_VAR (BINDIR "bin")
-UNIVERSAL_INSTALL_VAR (SBINDIR "sbin")
-UNIVERSAL_INSTALL_VAR (DATADIR "share")
+UNIVERSAL_VAR (PREFIX ${PREFIX})
+UNIVERSAL_VAR (BINDIR "${PREFIX}bin")
+UNIVERSAL_VAR (SBINDIR "${PREFIX}sbin")
+UNIVERSAL_VAR (DATADIR "${PREFIX}share")
 UNIVERSAL_VAR (DATADIR_SUFFIX "/games/armagetronad")
 UNIVERSAL_VAR (AA_DATADIR ${DATADIR}${DATADIR_SUFFIX})
-UNIVERSAL_INSTALL_VAR (SYSCONFDIR "etc")
+UNIVERSAL_VAR (SYSCONFDIR "etc")
 UNIVERSAL_VAR (SYSCONFDIR_SUFFIX "/games/armagetronad")
 UNIVERSAL_VAR (AA_SYSCONFDIR ${SYSCONFDIR}${SYSCONFDIR_SUFFIX})
-UNIVERSAL_INSTALL_VAR (LOCALSTATEDIR "var")
+UNIVERSAL_VAR (LOCALSTATEDIR "var")
 UNIVERSAL_VAR (LOCALSTATEDIR_SUFFIX "/games/armagetronad")
 UNIVERSAL_VAR (AA_LOCALSTATEDIR "${LOCALSTATEDIR}${LOCALSTATEDIR_SUFFIX}")
-UNIVERSAL_INSTALL_VAR (INFODIR "")
+UNIVERSAL_VAR (INFODIR "")
 UNIVERSAL_VAR (INFODIR_SUFFIX "/games/armagetronad")
 UNIVERSAL_VAR (AA_INFODIR "${INFODIR}${INFODIR_SUFFIX}")
-UNIVERSAL_INSTALL_VAR (MANDIR "")
+UNIVERSAL_VAR (MANDIR "")
 UNIVERSAL_VAR (MANDIR_SUFFIX "/games/armagetronad")
 UNIVERSAL_VAR (AA_MANDIR "${MANDIR}${MANDIR_SUFFIX}")
 UNIVERSAL_VAR (SCRIPTDIR "${AA_DATADIR}/scripts/")
@@ -155,10 +159,7 @@ UNIVERSAL_VAR (OLDVARDIR "${LOCALSTATEDIR}/games/armagetronad/var")
 UNIVERSAL_VAR (OLDVARDIR_SUFFIX "")
 UNIVERSAL_VAR (AA_OLDVARDIR "${OLDVARDIR}${OLDVARDIR_SUFFIX}")
 
-CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/aa_config.h.in ${CMAKE_CURRENT_BINARY_DIR}/src/aa_config.h)
-
-message (STATUS "Generating language/languages.txt")
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/language/languages.txt.in ${CMAKE_CURRENT_BINARY_DIR}/language/languages.txt)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/aa_config.h.in ${CMAKE_CURRENT_BINARY_DIR}/src/aa_config.h)
 
 message (STATUS "Generating src/tUniversalVariables.h")
 WRITE_UNIVARS()
@@ -169,8 +170,16 @@ endif()
 
 
 add_subdirectory (src)
+add_subdirectory (config)
+add_subdirectory (desktop)
+add_subdirectory (language)
+add_subdirectory (models)
+add_subdirectory (music)
+add_subdirectory (resource)
+add_subdirectory (sound)
+add_subdirectory (textures)
 
-set (ARMA_LINK_LIBRARIES
+set (armagetronad_LINK_LIBRARIES
     ${SDL_LIBRARY}
     ${SDLMIXER_LIBRARY}
     ${SDLIMAGE_LIBRARY}
@@ -183,40 +192,40 @@ set (ARMA_LINK_LIBRARIES
     )
 
 include_directories (
-    ${ARMA_SOURCE_DIR}/src/tools/
-    ${ARMA_SOURCE_DIR}/src/resource/
-    ${ARMA_SOURCE_DIR}/src/network/
-    ${ARMA_SOURCE_DIR}/src/render/
-    ${ARMA_SOURCE_DIR}/src/ui/
-    ${ARMA_SOURCE_DIR}/src/engine/
-    ${ARMA_SOURCE_DIR}/src/engine/sound/
-    ${ARMA_SOURCE_DIR}/src/tron/
-    ${ARMA_SOURCE_DIR}/src/tron/cockpit/
+    ${armagetronad_SOURCE_DIR}/src/tools/
+    ${armagetronad_SOURCE_DIR}/src/resource/
+    ${armagetronad_SOURCE_DIR}/src/network/
+    ${armagetronad_SOURCE_DIR}/src/render/
+    ${armagetronad_SOURCE_DIR}/src/ui/
+    ${armagetronad_SOURCE_DIR}/src/engine/
+    ${armagetronad_SOURCE_DIR}/src/engine/sound/
+    ${armagetronad_SOURCE_DIR}/src/tron/
+    ${armagetronad_SOURCE_DIR}/src/tron/cockpit/
 
-    ${ARMA_BINARY_DIR}/src/protobuf/
+    ${armagetronad_BINARY_DIR}/src/protobuf/
 
-    ${ARMA_INCLUDE_DIRS}
+    ${armagetronad_INCLUDE_DIRS}
     )
 
 
 add_custom_command (TARGET sortresources
-    COMMAND ${PYTHON_EXECUTABLE} ${ARMA_SOURCE_DIR}/batch/make/copyresources.py ${ARMA_SOURCE_DIR}/resource/proto/ ${ARMA_BINARY_DIR}/resource/included/ ${ARMA_SOURCE_DIR}/batch/make/sortresources.py
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${ARMA_SOURCE_DIR}/resource/binary/ ${ARMA_SOURCE_DIR}/resource/included/
+    COMMAND ${PYTHON_EXECUTABLE} ${armagetronad_SOURCE_DIR}/batch/make/copyresources.py ${armagetronad_SOURCE_DIR}/resource/proto/ ${armagetronad_BINARY_DIR}/resource/included/ ${armagetronad_SOURCE_DIR}/batch/make/sortresources.py
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${armagetronad_SOURCE_DIR}/resource/binary/ ${armagetronad_SOURCE_DIR}/resource/included/
     )
 
 add_custom_target (sortresources ALL
     COMMENT "Sorting resources"
     )
 
-add_custom_command (OUTPUT ${ARMA_BINARY_DIR}/src/tTrueVersion.h
+add_custom_command (OUTPUT ${armagetronad_BINARY_DIR}/src/tTrueVersion.h
     COMMENT "Generating version tag"
-    COMMAND ${PYTHON_EXECUTABLE} ${ARMA_SOURCE_DIR}/batch/make/version.py ${ARMA_SOURCE_DIR} --release=${RELEASE} -o ${ARMA_BINARY_DIR}/src/tTrueVersion.h
-    DEPENDS ${ARMA_SOURCE_DIR}/batch/make/version.py
-    WORKING_DIRECTORY ${ARMA_SOURCE_DIR}
+    COMMAND ${PYTHON_EXECUTABLE} ${armagetronad_SOURCE_DIR}/batch/make/version.py ${armagetronad_SOURCE_DIR} --release=${RELEASE} -o ${armagetronad_BINARY_DIR}/src/tTrueVersion.h
+    DEPENDS ${armagetronad_SOURCE_DIR}/batch/make/version.py
+    WORKING_DIRECTORY ${armagetronad_SOURCE_DIR}
     )
 
 add_custom_target (generateversion ALL
-    DEPENDS ${ARMA_BINARY_DIR}/src/tTrueVersion.h
+    DEPENDS ${armagetronad_BINARY_DIR}/src/tTrueVersion.h
     )
 
 set(EXTRA_SOURCES 
@@ -228,16 +237,20 @@ set(EXTRA_SOURCES
 
 if(BUILDCLIENT AND NOT DEDICATED)
     add_executable (armagetronad WIN32 src/tools/tVersion.cpp ${EXTRA_SOURCES} src/tron/gClient.cpp)
-    target_link_libraries (armagetronad tron engine ui render network tools protos mathexpr particles scrap ${ARMA_LINK_LIBRARIES})
+    target_link_libraries (armagetronad tron engine ui render network tools protos mathexpr particles scrap ${armagetronad_LINK_LIBRARIES})
     add_dependencies (armagetronad 
         generateversion
         )
+    install (TARGETS armagetronad
+        RUNTIME DESTINATION ${BINDIR})
 endif()
 
 if(DEDICATED)
 add_executable (armagetronad-dedicated src/tools/tVersion.cpp ${EXTRA_SOURCES} src/tron/gDedicated.cpp)
-target_link_libraries (armagetronad-dedicated tron engine ui render network tools protos mathexpr particles scrap ${ARMA_LINK_LIBRARIES})
+target_link_libraries (armagetronad-dedicated tron engine ui render network tools protos mathexpr particles scrap ${armagetronad_LINK_LIBRARIES})
 add_dependencies (armagetronad-dedicated 
     generateversion
     )
 endif()
+
+

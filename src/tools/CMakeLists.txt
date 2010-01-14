@@ -1,10 +1,10 @@
 include_directories (
-    ${ARMA_SOURCE_DIR}/src/tools/
-    ${ARMA_SOURCE_DIR}/src/resource/
+    ${armagetronad_SOURCE_DIR}/src/tools/
+    ${armagetronad_SOURCE_DIR}/src/resource/
 
-    ${ARMA_BINARY_DIR}/src/protobuf/
+    ${armagetronad_BINARY_DIR}/src/protobuf/
 
-    ${ARMA_INCLUDE_DIRS}    
+    ${armagetronad_INCLUDE_DIRS}    
     )
 
 add_library (tools
@@ -42,7 +42,7 @@ add_library (tools
     tXmlParser.h                tXmlParser.cpp
     ../thirdparty/binreloc/prefix.h ../thirdparty/binreloc/prefix.c
     values/vCore.h              values/vCore.cpp
-    values/vParser.h            ${ARMA_BINARY_DIR}/src/tools/values/vParser.cpp
+    values/vParser.h            ${armagetronad_BINARY_DIR}/src/tools/values/vParser.cpp
     values/vRegistry.h          values/vRegistry.cpp
     values/vCollection.h        values/vCollection.cpp
     values/veComparison.h       values/veComparison.cpp
@@ -74,10 +74,10 @@ add_library (tools
 ADD_CUSTOM_COMMAND(
    SOURCE values/vParser.ypp
    COMMAND ${BISON_EXECUTABLE} 
-   ARGS -y ${ARMA_SOURCE_DIR}/src/tools/values/vParser.ypp
-        -o ${ARMA_BINARY_DIR}/src/tools/values/vParser.cpp
-   DEPENDS ${ARMA_SOURCE_DIR}/src/tools/values/vParser.ypp
-   OUTPUT ${ARMA_BINARY_DIR}/src/tools/values/vParser.cpp)
+   ARGS -y ${armagetronad_SOURCE_DIR}/src/tools/values/vParser.ypp
+        -o ${armagetronad_BINARY_DIR}/src/tools/values/vParser.cpp
+   DEPENDS ${armagetronad_SOURCE_DIR}/src/tools/values/vParser.ypp
+   OUTPUT ${armagetronad_BINARY_DIR}/src/tools/values/vParser.cpp)
 
 
 add_dependencies (tools

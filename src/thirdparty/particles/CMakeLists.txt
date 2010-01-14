@@ -1,6 +1,6 @@
 include_directories (
-    ${ARMA_SOURCE_DIR}/src/thirdparty/particles/
-    ${ARMA_INCLUDE_DIRS}
+    ${armagetronad_SOURCE_DIR}/src/thirdparty/particles/
+    ${armagetronad_INCLUDE_DIRS}
     )
 
 
