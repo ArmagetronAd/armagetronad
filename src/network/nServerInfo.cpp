@@ -1036,9 +1036,9 @@ void nServerInfo::GetSmallServerInfo(nMessage &m){
     // check if we already have that server lised
     nServerInfo *run = GetFirstServer();
     int countSameAdr = 0;
-    while(run)
+    while(run && !n)
     {
-        if (run->GetAddress() == baseInfo.GetAddress() )
+        if ( run->GetConnectionName() == baseInfo.GetConnectionName() )
         {
             if (countSameAdr++ > 32)
                 n = run;
@@ -1051,6 +1051,18 @@ void nServerInfo::GetSmallServerInfo(nMessage &m){
 
     if (m.End())
         return;
+
+    // second pass, look harder if no match was found. Use DNS lookup if you have to.
+    if(!n)
+    {
+        run = GetFirstServer();
+        while(run && !n)
+        {
+            if( run->GetAddress() == baseInfo.GetAddress() )
+                n = run;
+            run = run->Next();
+        }
+    }
 
     if (!n)
     {
