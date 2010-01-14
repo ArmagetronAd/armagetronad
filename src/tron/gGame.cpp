@@ -4047,7 +4047,7 @@ void gGame::Analysis(REAL time){
 
         if ( !winner && !absolute_winner && sg_currentSettings->finishType==gFINISH_SPEEDUP && se_mainGameTimer)
         {
-            se_mainGameTimer->speed*=1.01;
+            se_mainGameTimer->speed*=1.1;
             if(se_mainGameTimer->speed>16)
                 se_mainGameTimer->speed=16;
         }
