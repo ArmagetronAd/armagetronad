@@ -584,7 +584,7 @@ static void CheckDuplicate( nServerInfo * server )
     
     if (IsDouble)
     {
-#ifdef DEBUG_X
+#ifdef DEBUG
         con << "Deleting duplicate server " << server->GetName() << "\n";
 #endif  
         delete server;
@@ -1038,7 +1038,7 @@ void nServerInfo::GetSmallServerInfo(nMessage &m){
     int countSameAdr = 0;
     while(run)
     {
-        if (run->GetConnectionName() == baseInfo.GetConnectionName() )
+        if (run->GetAddress() == baseInfo.GetAddress() )
         {
             if (countSameAdr++ > 32)
                 n = run;
