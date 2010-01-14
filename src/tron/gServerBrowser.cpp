@@ -40,6 +40,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "rRender.h"
 
 #include "uMenu.h"
+#include "uInputQueue.h"
 
 #include "tMemManager.h"
 #include "tSysTime.h"
@@ -292,6 +293,12 @@ void gServerBrowser::BrowseServers()
       ConnectToServer(nServerInfo::GetFirstServer());
     */
     browser.Update();
+
+    // eat excess input the user made while the list was fetched
+    SDL_Event ignore;
+    REAL time;
+    while(su_GetSDLInput(ignore, time));
+
     browser.Enter();
 
     nServerInfo::GetFromLANContinuouslyStop();
