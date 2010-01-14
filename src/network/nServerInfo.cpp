@@ -1067,6 +1067,12 @@ void nServerInfo::GetSmallServerInfo(nMessage &m){
     {
         n->Alive();
 
+        // on update, prefer to keep the IP version to avoid needless DNS loopups.
+        if ( n->GetConnectionName() != baseInfo.GetConnectionName() && n->GetAddress().ToString() != ToString(*n) )
+        {
+            n->SetConnectionName( baseInfo.GetConnectionName() );
+        }
+
         if ( sn_IsMaster )
         {
             con << "Updated server: " <<  ToString( baseInfo ) << "\n";
