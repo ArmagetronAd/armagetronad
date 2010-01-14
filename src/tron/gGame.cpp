@@ -2400,13 +2400,13 @@ void net_game(){
       "$network_host_help",&sg_HostGameMenu);
     */
 
-    uMenuItemFunction inter
-    (&net_menu,"$network_menu_internet_text",
-     "$network_menu_internet_help",&gServerBrowser::BrowseMaster);
-
     uMenuItemFunction lan
     (&net_menu,"$network_menu_lan_text",
      "$network_menu_lan_help",&gServerBrowser::BrowseLAN);
+
+    uMenuItemFunction inter
+    (&net_menu,"$network_menu_internet_text",
+     "$network_menu_internet_help",&gServerBrowser::BrowseMaster);
 
     gNetIdler idler;
     // rSysDep::StartNetSyncThread( &idler );
@@ -2515,14 +2515,14 @@ void MainMenu(bool ingame){
     uMenuItemFunction *connect=NULL,*start=NULL,*sound=NULL;
 
     if (!ingame){
+        start= new uMenuItemFunction(&game_menu,"$game_menu_start_text",
+                                     "$game_menu_start_help",&singlePlayer_game);
         connect=new uMenuItemFunction
                 (&game_menu,
                  "$network_menu_text",
                  "$network_menu_help",
                  &net_game);
 
-        start= new uMenuItemFunction(&game_menu,"$game_menu_start_text",
-                                     "$game_menu_start_help",&singlePlayer_game);
     }
 
     tOutput title;
