@@ -3740,7 +3740,7 @@ void gGame::Analysis(REAL time){
     }
 
     // keep the game running when there are only login processes running
-    if (notyetloggedin && humans > 0)
+    if (notyetloggedin && humans > 0 && ais == 0)
         alive++;
 
 
