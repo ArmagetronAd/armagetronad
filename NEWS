@@ -1,6 +1,9 @@
 Changes since 0.2.8.3_rc4:
 - Intercepted chat commands are now written to ladderlog.txt. Format:
   COMMAND /command-intercepted player [command arguments]
+- Increased default speed of server pinging
+- Reordered game menus a bit
+- fast finish works again
 
 Changes since 0.2.8.3_rc3:
 - Pinging previously popular servers earlier for quicker server
