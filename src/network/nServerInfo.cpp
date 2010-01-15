@@ -70,8 +70,8 @@ static bool sn_IsMaster               = false;
 static nServerInfo*           sn_QuerySoon =NULL;
 static nTimeRolling           sn_QueryTimeout = 0;
 
-static REAL sn_queryDelay = 1.5f;	// time delay between queries of the same server
-static REAL sn_queryDelayGlobal = 0.1f;	// time delay between all queries
+static REAL sn_queryDelay = 0.5f;	// time delay between queries of the same server
+static REAL sn_queryDelayGlobal = 0.025f;	// time delay between all queries
 static int sn_numQueries = 3;	// number of queries per try
 static int sn_TNALostContact = 4;  // minimum TNA value to be considered contact loss
 
