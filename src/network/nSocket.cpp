@@ -1446,10 +1446,6 @@ int nAddress::Compare( const nAddress & a1, const nAddress & a2 )
     if (a1.addr_.addr_in.sin_port != a2.addr_.addr_in.sin_port)
         return 1;
 
-    // if one of the addresses is ANY, count that as no match.
-    if (a1.addr_.addr.sa_family == AF_INET && a1.addr_.addr_in.sin_addr.s_addr == INADDR_ANY)
-        return -1;
-
     return 0;
 }
 

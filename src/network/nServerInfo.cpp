@@ -576,7 +576,7 @@ static void CheckDuplicate( nServerInfo * server )
     nServerInfo *run = nServerInfo::GetFirstServer();
     while(!IsDouble && run)
     {
-        if (run != server && *run == *server )
+        if (run != server && *run == *server)
             IsDouble = true;
         
         run = run->Next();
@@ -2458,7 +2458,7 @@ nServerInfoBase::~nServerInfoBase()
 
 bool nServerInfoBase::operator ==( const nServerInfoBase & other ) const
 {
-    return GetAddress() == other.GetAddress() && port_ == other.port_;
+    return GetAddress().IsSet() && GetAddress() == other.GetAddress() && port_ == other.port_;
 }
 
 // *******************************************************************************************
