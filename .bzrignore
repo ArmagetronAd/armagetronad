@@ -89,3 +89,4 @@ a.out.dSYM
 src/tFakeVersion.h
 config/settings_custom.cfg
 config/server_info.cfg
+./armagetronad-master

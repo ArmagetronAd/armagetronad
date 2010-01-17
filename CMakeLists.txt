@@ -254,4 +254,8 @@ add_dependencies (armagetronad-dedicated
     )
 endif()
 
-
+add_executable(armagetronad-master src/tools/tVersion.cpp src/network/master.cpp)
+target_link_libraries (armagetronad-master network tools protos scrap ${armagetronad_LINK_LIBRARIES})
+add_dependencies (armagetronad-master 
+    generateversion
+    )
