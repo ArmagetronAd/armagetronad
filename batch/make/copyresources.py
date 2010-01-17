@@ -18,7 +18,7 @@ while not foundModule:
     try:
         import armabuild
         foundModule = True
-#        print "Found armabuild!"
+        #print "Found armabuild!"
     except:
         sys.path[0] = os.path.dirname(newPathSearch)
     numAttempts += 1
@@ -52,7 +52,7 @@ if __name__ == "__main__":
     shutil.copytree(source, destination, IgnoreFiles)
 
 #    print "Running sortresources"
-    resource.main(["", destination] )
+    resource.main([destination] )
 #    print "Done"
 
     if os.path.exists(os.path.join(destination, "AATeam") ) is False:

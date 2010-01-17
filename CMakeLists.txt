@@ -209,12 +209,14 @@ include_directories (
     )
 
 
-add_custom_command (TARGET sortresources
-    COMMAND ${PYTHON_EXECUTABLE} ${armagetronad_SOURCE_DIR}/batch/make/copyresources.py ${armagetronad_SOURCE_DIR}/resource/proto/ ${armagetronad_BINARY_DIR}/resource/included/ ${armagetronad_SOURCE_DIR}/batch/make/sortresources.py
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${armagetronad_SOURCE_DIR}/resource/binary/ ${armagetronad_SOURCE_DIR}/resource/included/
-    )
+#add_custom_command (TARGET sortresources
+#    COMMAND ${PYTHON_EXECUTABLE} ${armagetronad_SOURCE_DIR}/batch/make/copyresources.py ${armagetronad_SOURCE_DIR}/resource/proto/ ${armagetronad_BINARY_DIR}/resource/included/ ${armagetronad_SOURCE_DIR}/batch/make/sortresources.py
+#    COMMAND ${CMAKE_COMMAND} -E copy_directory ${armagetronad_SOURCE_DIR}/resource/binary/ ${armagetronad_SOURCE_DIR}/resource/included/
+#    )
 
 add_custom_target (sortresources ALL
+    ${PYTHON_EXECUTABLE} ${armagetronad_SOURCE_DIR}/batch/make/copyresources.py ${armagetronad_SOURCE_DIR}/resource/proto/ ${armagetronad_BINARY_DIR}/resource/included/ ${armagetronad_SOURCE_DIR}/batch/make/sortresources.py
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${armagetronad_SOURCE_DIR}/resource/binary/ ${armagetronad_SOURCE_DIR}/resource/included/
     COMMENT "Sorting resources"
     )
 

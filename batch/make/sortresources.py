@@ -15,7 +15,6 @@ while not foundModule:
         import armabuild
         import armabuild.resource
         foundModule = True
-#        print "Found armabuild!"
     except:
         sys.path[0] = os.path.dirname(newPathSearch)
     numAttempts += 1

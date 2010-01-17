@@ -2,7 +2,7 @@ set (UNIVERSAL_VARS)
 
 macro (UNIVERSAL_VAR VARNAME VAL)
     set (${VARNAME} ${VAL})
-    set (${VARNAME} ${VAL} PARENT_SCOPE)
+#    set (${VARNAME} ${VAL} PARENT_SCOPE)
     list(APPEND
         UNIVERSAL_VARS
         ${VARNAME}
@@ -11,7 +11,7 @@ endmacro(UNIVERSAL_VAR VARNAME VAL)
 
 macro (UNIVERSAL_INSTALL_VAR VARNAME VAL)
     set (${VARNAME} ${VAL})
-    set (${VARNAME} ${VAL} PARENT_SCOPE)    
+#    set (${VARNAME} ${VAL} PARENT_SCOPE)    
     UNIVERSAL_VAR(${VARNAME} ${${VARNAME}})
 endmacro(UNIVERSAL_INSTALL_VAR VARNAME VAL)
 
