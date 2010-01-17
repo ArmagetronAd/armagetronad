@@ -73,6 +73,8 @@
 /* Begin PBXBuildFile section */
 		8CBA60B1089F00F2007E21DC /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CBA60B0089F00F2007E21DC /* OpenGL.framework */; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		9B0C8B3D0F7EBA78001802CD /* eChat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B0C8B3B0F7EBA78001802CD /* eChat.cpp */; };
+		9B0C8B3E0F7EBA78001802CD /* eChat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B0C8B3B0F7EBA78001802CD /* eChat.cpp */; };
 		9B1ECD060F159F3500288C28 /* cCamview.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B1ECD040F159F3500288C28 /* cCamview.cpp */; };
 		9B1ECD080F159F3500288C28 /* cCamview.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B1ECD040F159F3500288C28 /* cCamview.cpp */; };
 		9B1ECD260F159FF800288C28 /* tVersion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B1ECD240F159FF800288C28 /* tVersion.cpp */; };
@@ -587,6 +589,8 @@
 		8C11CA42095A268E007AE0EA /* armagetronad-dedicated */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "armagetronad-dedicated"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8CBA60B0089F00F2007E21DC /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = /System/Library/Frameworks/OpenGL.framework; sourceTree = "<absolute>"; };
 		8D1107320486CEB800E47090 /* Armagetron Advanced.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Armagetron Advanced.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		9B0C8B3B0F7EBA78001802CD /* eChat.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = eChat.cpp; sourceTree = "<group>"; };
+		9B0C8B3C0F7EBA78001802CD /* eChat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = eChat.h; sourceTree = "<group>"; };
 		9B1ECD040F159F3500288C28 /* cCamview.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cCamview.cpp; sourceTree = "<group>"; };
 		9B1ECD050F159F3500288C28 /* cCamview.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cCamview.h; sourceTree = "<group>"; };
 		9B1ECD240F159FF800288C28 /* tVersion.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tVersion.cpp; sourceTree = "<group>"; };
@@ -1159,6 +1163,8 @@
 				9BB7B5AB0D8302FA004FE8C3 /* eAxis.h */,
 				9BB7B5AC0D8302FA004FE8C3 /* eCamera.cpp */,
 				9BB7B5AD0D8302FA004FE8C3 /* eCamera.h */,
+				9B0C8B3B0F7EBA78001802CD /* eChat.cpp */,
+				9B0C8B3C0F7EBA78001802CD /* eChat.h */,
 				9BB7B5AE0D8302FA004FE8C3 /* eCoord.h */,
 				9BB7B5AF0D8302FA004FE8C3 /* eDebugLine.cpp */,
 				9BB7B5B00D8302FA004FE8C3 /* eDebugLine.h */,
@@ -2050,6 +2056,7 @@
 				9B9755170F44B0DE00E41662 /* nBinary.cpp in Sources */,
 				9B62588C0F5865410083C429 /* zFortress.cpp in Sources */,
 				9B62588D0F5865410083C429 /* zTimedZone.cpp in Sources */,
+				9B0C8B3E0F7EBA78001802CD /* eChat.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2216,6 +2223,7 @@
 				9B9755160F44B0DE00E41662 /* nBinary.cpp in Sources */,
 				9B62588A0F5865410083C429 /* zFortress.cpp in Sources */,
 				9B62588B0F5865410083C429 /* zTimedZone.cpp in Sources */,
+				9B0C8B3D0F7EBA78001802CD /* eChat.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

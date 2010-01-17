@@ -554,6 +554,8 @@ uMenuItemSelection<rSysDep::rSwapMode> swapMode
 
 static uSelectEntry<rSysDep::rSwapMode> swapMode_fastest(swapMode,"$swapmode_fastest_text","$swapmode_fastest_help",rSysDep::rSwap_Fastest);
 static uSelectEntry<rSysDep::rSwapMode> swapMode_glFlush(swapMode,"$swapmode_glflush_text","$swapmode_glflush_help",rSysDep::rSwap_glFlush);
+static uSelectEntry<rSysDep::rSwapMode> swapMode_Fence(swapMode,"$swapmode_fence_text","$swapmode_glflush_help",rSysDep::rSwap_Fence);
+static uSelectEntry<rSysDep::rSwapMode> swapMode_LateFinish(swapMode,"$swapmode_latefinish_text","$swapmode_glflush_help",rSysDep::rSwap_LateFinish);
 static uSelectEntry<rSysDep::rSwapMode> swapMode_glFinish(swapMode,"$swapmode_glfinish_text","$swapmode_glfinish_help",rSysDep::rSwap_glFinish);
 
 /*

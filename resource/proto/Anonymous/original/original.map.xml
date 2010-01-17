@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE Resource SYSTEM "map-0.2.8_beta3.dtd">
+<!DOCTYPE Resource SYSTEM "AATeam/map-0.2.8.0_rc4.dtd">
 <!-- Note: this map, by definition, never changes functionally. That's a requirement for
      compatibility with older clients. The version of this map included with a release always
      is the right map, it should never be downloaded even when connecting to a server that uses

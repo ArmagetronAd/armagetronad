@@ -53,6 +53,9 @@ public:
     // get a random position
     virtual eCoord		GetRandomPos( REAL factor ) const;
 
+    // find the closes gSpawnPoint 
+    gSpawnPoint * ClosestSpawnPoint(eCoord loc);
+
     // find the best gSpawnPoint
     gSpawnPoint * LeastDangerousSpawnPoint();
 

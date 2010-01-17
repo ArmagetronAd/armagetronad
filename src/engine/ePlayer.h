@@ -47,10 +47,28 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include <set>
 #include <list>
+#include <utility>
+#include "eChat.h"
 
 namespace Engine{ class PlayerNetIDSync; }
 
 #define PLAYER_CONFITEMS (30+MAX_INSTANT_CHAT)
+
+// maximal length of chat message
+extern int se_SpamMaxLen;
+
+// Maximum number of chat entries to save for spam analysis
+extern int se_lastSaidMaxEntries;
+
+// time during which no repeaded chat messages are printed
+extern REAL se_alreadySaidTimeout;
+
+// minimal access level for chat
+extern tAccessLevel se_chatAccessLevel;
+
+// time between public chat requests, set to 0 to disable
+extern REAL se_chatRequestTimeout;
+
 
 // call on commands that only work on the server; quit if it returns true
 bool se_NeedsServer(char const * command, std::istream & s, bool strict = true );
@@ -162,6 +180,7 @@ private:
     bool							silenced_;		// flag indicating whether the player has been silenced
     int                             suspended_;     //! number of rounds the player is currently suspended from playing
 
+    nTimeAbsolute                   timeCreated_;   // the time the player was created
     nTimeAbsolute					timeJoinedTeam; // the time the player joined the team he is in now
     tCONTROLLED_PTR(eTeam)			nextTeam;		// the team we're in ( logically )
     tCONTROLLED_PTR(eTeam)			currentTeam;	// the team we currently are spawned for
@@ -207,9 +226,7 @@ public:
     int    pID;
     tString teamname;
     // REAL	rubberstatus;
-    tArray<tString> lastSaid;
-    tArray<nTimeRolling> lastSaidTimes;
-    //	void SetLastSaid(tString ls);
+        
     tShortColor color; // our color
 
     unsigned short pingCharity; // max ping you are willing to take over
@@ -224,6 +241,9 @@ public:
     bool renameAllowed_;     //!< specifies if the player is allowed to rename or not, does not know about votes.
 
     nSpamProtection chatSpam_;
+    
+    eChatLastSaid lastSaid_; //!< last said information
+    eShuffleSpamTester shuffleSpam;
 
     ePlayerNetID(int p=-1);
     virtual ~ePlayerNetID();
@@ -300,8 +320,9 @@ public:
 #ifdef KRAWALL_SERVER
     void Authenticate( tString const & authName, 
                        tAccessLevel accessLevel = tAccessLevel_Authenticated,
-                       ePlayerNetID const * admin = 0 );    //!< make the authentification valid
-    void DeAuthenticate( ePlayerNetID const * admin = 0 );  //!< make the authentification invalid
+                       ePlayerNetID const * admin = 0,
+                       bool messages = true );    //!< make the authentification valid
+    void DeAuthenticate( ePlayerNetID const * admin = 0, bool messages = true );  //!< make the authentification invalid
     bool IsAuthenticated() const;                     //!< is the authentification valid?
 #endif
 
@@ -334,6 +355,7 @@ public:
     static void ResetScoreDifferences(); //<! Resets the last stored score so ScoreDifferences takes this as a reference time
     static void LogScoreDifferences();   //<! Logs accumulated scores of all players since the last call to ResetScoreDifferences() to ladderlog.txt
     static void UpdateSuspensions();     //<! Decrements the number of rounds players are suspended for
+    static void UpdateShuffleSpamTesters();    //<! Reset shuffle spam checks
     void LogScoreDifference();           //<! Logs accumulated scores since the last call to ResetScoreDifferences() to ladderlog.txt
 
     static void SortByScore(); // brings the players into the right order
@@ -370,6 +392,8 @@ public:
     void GetScoreFromDisconnectedCopy(); // get the player's data from the previous login
 
     void Chat(const tString &s);
+    
+    nTimeAbsolute GetTimeCreated() const { return timeCreated_; }
 
     virtual void Color( REAL&r, REAL&g, REAL&b ) const;
     virtual void TrailColor( REAL&r, REAL&g, REAL&b ) const;
@@ -380,7 +404,7 @@ public:
     void BeNotLoggedIn() { SetAccessLevel( tAccessLevel_Program ); }
     tAccessLevel GetLastAccessLevel() const { return lastAccessLevel; }
 
-    static ePlayerNetID * FindPlayerByName( tString const & name, ePlayerNetID * requester = 0 ); //!< finds a player by name using lax name matching. Reports errors to the console or to the requesting player.
+    static ePlayerNetID * FindPlayerByName( tString const & name, ePlayerNetID * requester = 0, bool print=true ); //!< finds a player by name using lax name matching. Reports errors to the console or to the requesting player.
 
     void UpdateName();                                           //!< update the player name from either the client's wishes, either the admin's wishes.
     static void FilterName( tString const & in, tString & out ); //!< filters a name (removes unprintables, color codes and spaces)
@@ -511,24 +535,10 @@ public:
     eCallbackGreeting(STRINGRETFUNC* f);
 };
 
-extern int se_SpamMaxLen;	// maximal length of chat message
-
-class eChatSpamTester
-{
-public:
-    eChatSpamTester( ePlayerNetID * p, tString const & say );
-    bool Block();
-    bool Check();
-
-    bool tested_;             //!< flag indicating whether the chat line has already been checked fro spam
-    bool shouldBlock_;        //!< true if the message should be blocked for spam
-    ePlayerNetID * player_;   //!< the chatting player
-    tColoredString say_;      //!< the chat line
-    REAL factor_;             //!< extra spam weight factor
-
-};
-
 void ForceName ( std::istream & s );
+
+void se_MakeReferee( ePlayerNetID * victim, ePlayerNetID * admin = 0 );
+void se_CancelReferee( ePlayerNetID * victim, ePlayerNetID * admin = 0 );
 
 // ******************************************************************************************
 // *

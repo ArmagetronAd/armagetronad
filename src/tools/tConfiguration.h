@@ -50,7 +50,7 @@ enum tAccessLevel
     tAccessLevel_3 = 3,            // reserved
     tAccessLevel_4 = 4,            // reserved
     tAccessLevel_Armatrator = 5,   // reserved
-    tAccessLevel_6 = 6,            // reserved
+    tAccessLevel_Referee = 6,      // a referee elected by players
     tAccessLevel_TeamLeader = 7,   // a team leader
     tAccessLevel_TeamMember = 8,   // a team member
     tAccessLevel_9 = 9,            // reserved
@@ -196,6 +196,17 @@ public:
     tAccessLevelSetter( tConfItemBase & item, tAccessLevel level );
 };
 
+//! Sets tConfItemBase::printChange/printErrors
+class tNoisinessSetter
+{
+public:
+    tNoisinessSetter( bool printChange = true, bool printErrors = true );
+    ~tNoisinessSetter();
+private:
+    bool oldPrintChange;
+    bool oldPrintErrors;
+};
+
 // Arg! Msvc++ could not handle bool IO. Seems to be fine now.
 #ifdef _MSC_VER_XXX
 inline std::istream & operator >> (std::istream &s,bool &b){
@@ -297,6 +308,31 @@ public:
     {
         s << static_cast< typename tTypeToConfig< T >::TOSTREAM >( value );
     }
+    
+    void SetVal( T const & val )
+    {
+        if (!shouldChangeFunc_ || shouldChangeFunc_( val ))
+        {
+            if (printChange)
+            {
+                tOutput o;
+                o.SetTemplateParameter(1, title);
+                o.SetTemplateParameter(2, *target);
+                o.SetTemplateParameter(3, val);
+                o << "$config_value_changed";
+                con << o;
+            }
+            
+            *target = val;
+            changed = true;
+        }
+        ExecuteCallback();    
+    }
+    
+    const T *GetTarget() const
+    {
+        return target;
+    }
 
     virtual void ReadVal(std::istream &s){
         // eat whitepsace
@@ -321,23 +357,9 @@ public:
                         o << "$nconfig_errror_protected";
                         con << "";
                     }
-                    else{
-                        if (!shouldChangeFunc_ || shouldChangeFunc_(dummy))
-                        {
-                            if (printChange)
-                            {
-                                tOutput o;
-                                o.SetTemplateParameter(1, title);
-                                o.SetTemplateParameter(2, *target);
-                                o.SetTemplateParameter(3, dummy);
-                                o << "$config_value_changed";
-                                con << o;
-                            }
-
-                            *target = dummy;
-                            changed = true;
-                        }
-                        ExecuteCallback();
+                    else
+                    {
+                        SetVal( dummy );
                     }
                 }
         }
@@ -408,7 +430,7 @@ public:
 };
 
 // includes a single configuration file by name, searches in var and config directories
-void st_Include( tString const & file, bool reportError = true );
+void st_Include( tString const & file );
 
 void st_LoadConfig();
 void st_SaveConfig();

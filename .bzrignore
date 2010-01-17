@@ -81,3 +81,11 @@ _CPack_Packages
 ./DartConfiguration.tcl
 ./Testing
 ./install_manifest.txt
+src/test/chat_prefix_test
+leak.log
+memprofile1.txt
+memprofile2.txt
+a.out.dSYM
+src/tFakeVersion.h
+config/settings_custom.cfg
+config/server_info.cfg

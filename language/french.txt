@@ -253,7 +253,6 @@ spam_protection_help          Determine la "puissance" du filtre anti-spam: dete
 spam_penalty_help             Nombre de secondes ou un spammeur ne peut plus poster
 spam_maxlen_help              Taille maximale des messages dans le chat
 spam_autokick_help            Les "points de spam", qui vous bannissent d'un serveur instantanement.
-silence_all_help              Si "1", le chat sera desactive
 # spam kick messages
 
 #********************************************
@@ -1617,7 +1616,7 @@ gamestate_reset_console       Remise a zero des scores et debut d'un nouveau mat
 gamestate_resetnow_center     Nouveau match!
 gamestate_resetnow_console    Remise a zero des scores...\n
 gamestate_resetnow_log        Nouveau match\n
-gamestate_newround_console    C'est parti (round \1 sur \2 )!\n
+gamestate_newround_console    C'est parti (round \1 sur \2)!\n
 gamestate_newround_goldengoal C'est parti! (Round special; le gagnant gagne le match)!\n
 gamestate_newround_log        Nouveau round\n
 gamestate_wait_players        En attente de joueurs reels...\n

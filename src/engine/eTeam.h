@@ -85,6 +85,7 @@ public:							// public configuration options
 
     void SetLocked( bool locked );  // sets the lock status (whether invitations are required)
     bool IsLocked() const;          // returns the lock status
+    bool IsLockedFor( const ePlayerNetID * p ) const;   // returns if a team is locked to join by a certain player (due to ACCESS_LEVEL_PLAY)
 
     void Invite( ePlayerNetID * player );                // invite the player to join
     void UnInvite( ePlayerNetID * player );              // revoke an invitation
@@ -94,6 +95,8 @@ public:							// public configuration options
     static bool Enemies( eTeam const * team1, eTeam const * team2 ); //!< determines whether two teams are enemies
 
     static void Enforce( int minTeams, int maxTeams, int maxImbalance );
+    
+    static void WritePlayers( eLadderLogWriter & writer, const eTeam *team );
 public:												// public methods
     static void	EnforceConstraints();					// make sure the limits on team number and such are met
 

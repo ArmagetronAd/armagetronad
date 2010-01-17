@@ -213,7 +213,7 @@ static void welcome(){
         }
 
 #ifdef MACOSX
-        StartAAURLHandler();
+        StartAAURLHandler( showSplash );
 #endif
         tRecorder::Record( splashSection, showSplash );
 

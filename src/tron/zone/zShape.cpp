@@ -9,6 +9,11 @@
 #include "nConfig.h"
 #include "nProtoBuf.h"
 
+// Where does this isset macro come from? I don't know. But it's just messing this up around here.
+#ifdef isset
+#undef isset
+#endif
+
 #ifndef ENABLE_ZONESV1
 int sz_zoneAlphaToggle = 0;
 static tSettingItem<int> sz_zoneAlphaToggleConf( "ZONE_ALPHA_TOGGLE", sz_zoneAlphaToggle );
@@ -952,6 +957,15 @@ public:
         dest.mutable_pos_x()->CopyFrom( shape.pos_x() );
         dest.mutable_pos_y()->CopyFrom( shape.pos_y() );
 
+        if (shape.color().a() < .01)
+        {
+            // Transmit invisible zones as a 0 radius
+            static tFunction zeroRadius(.0, .0);
+            zeroRadius.WriteSync( *dest.mutable_radius() );
+        }
+        else
+        {
+
         // transfer radius function
         tFunction scale, radius;
         scale.ReadSync( shape.scale() );
@@ -963,6 +977,8 @@ public:
         // mend them together, ignoring the quadratic term
         tFunction mendedRadius( scale.GetOffset() * radius.GetOffset(), scale.GetOffset() * radius.GetSlope() + scale.GetSlope() * radius.GetOffset() );
         mendedRadius.WriteSync( *dest.mutable_radius() );
+
+        }
 
         // FIXME: the above mostly applies here too
         // calculate rotation speed

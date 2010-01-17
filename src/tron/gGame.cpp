@@ -45,6 +45,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "nConfig.h"
 #include "rScreen.h"
 #include "rViewport.h"
+#include "rModel.h"
 #include "uInput.h"
 #include "ePlayer.h"
 #include "gSpawn.h"
@@ -140,7 +141,6 @@ static REAL sg_waitForExternalScriptTimeout = 3;
 static tSettingItem<REAL> sg_waitForExternalScriptTimeoutConf( "WAIT_FOR_EXTERNAL_SCRIPT_TIMEOUT", sg_waitForExternalScriptTimeout );
 
 static nSettingItemWatched<tString> conf_mapfile("MAP_FILE",mapfile, nConfItemVersionWatcher::Group_Breaking, 8 );
-static tAccessLevelSetter conf_mapfile_setter( conf_mapfile.GetSetting(), tAccessLevel_Owner );
 
 // config item for semi-colon deliminated list of maps/configs, needs semi-colon at the end
 // ie, original/map-1.0.1.xml;original/map-1.0.1.xml;
@@ -216,8 +216,6 @@ private:
 
 static tSettingRotation sg_mapRotation("MAP_ROTATION");
 static tSettingRotation sg_configRotation("CONFIG_ROTATION");
-static tAccessLevelSetter sg_mapRotationSetter( sg_mapRotation, tAccessLevel_Owner );
-static tAccessLevelSetter sg_configSetter( sg_configRotation, tAccessLevel_Owner );
 
 enum gRotationType
 {
@@ -1325,6 +1323,11 @@ void Render(eGrid *grid, REAL time, bool swap=true){
 
 #ifndef DEDICATED
     if (sr_glOut){
+        if(swap)
+        {
+            rSysDep::PostSwapGL();
+            rSysDep::ClearGL();
+        }
         RenderAllViewports(grid);
 
         sr_ResetRenderState(true);
@@ -1332,13 +1335,14 @@ void Render(eGrid *grid, REAL time, bool swap=true){
 
         if (swap){
             rSysDep::SwapGL();
-            rSysDep::ClearGL();
         }
     }
     else
     {
         if ( swap )
+        {
             rSysDep::SwapGL();
+        }
 
         tDelay( sn_defaultDelay );
     }
@@ -1388,6 +1392,7 @@ static void own_game( nNetState enter_state ){
     // write scores one last time
     ePlayerNetID::LogScoreDifferences();
     ePlayerNetID::UpdateSuspensions();
+    ePlayerNetID::UpdateShuffleSpamTesters();
     sg_gameEndWriter.write();
     se_sendEventNotification(tString("Game end"), tString("The Game has ended"));
 
@@ -2673,6 +2678,7 @@ void gGame::StateUpdate(){
             // log scores before players get renamed
             ePlayerNetID::LogScoreDifferences();
             ePlayerNetID::UpdateSuspensions();
+            ePlayerNetID::UpdateShuffleSpamTesters();
             sg_newRoundWriter.write();
             se_sendEventNotification(tString("New Round"), tString("Starting a new round"));
 
@@ -2754,7 +2760,7 @@ void gGame::StateUpdate(){
                 const tList<eGameObject>& gameObjects = Grid()->GameObjects();
                 for (int i=gameObjects.Len()-1;i>=0;i--)
                 {
-                    eGameObject * e = gameObjects(i);
+                    tJUST_CONTROLLED_PTR< eGameObject > e = gameObjects(i);
                     if ( e )
                     {
                         e->OnRoundBegin();
@@ -2994,6 +3000,62 @@ static void sg_Respawn( REAL time, eGrid *grid, gArena & arena )
     }
 }
 #endif
+
+void sg_RespawnPlayer(eGrid * grid, gArena * arena, tCoord & pos, tCoord & dir, ePlayerNetID * p) {
+    eGameObject *e=p->Object();
+
+    if ( ( !e || !e->Alive()) && sn_GetNetState() != nCLIENT )
+    {
+#ifdef DEBUG
+        //                std::cout << "spawning player " << pni->name << '\n';
+#endif
+        gCycle * cycle = new gCycle(grid, pos, dir, p);
+        p->ControlObject(cycle);
+
+        sg_Timestamp();
+    }
+}
+
+void sg_RespawnPlayer(eGrid * grid, gArena * arena, tCoord & near, ePlayerNetID * p) {
+    eGameObject *e=p->Object();
+
+    if ( ( !e || !e->Alive()) && sn_GetNetState() != nCLIENT )
+    {
+        tCoord pos,dir;
+        arena->ClosestSpawnPoint(near)->Spawn( pos, dir );
+
+#ifdef DEBUG
+        //                std::cout << "spawning player " << pni->name << '\n';
+#endif
+        gCycle * cycle = new gCycle(grid, pos, dir, p);
+        p->ControlObject(cycle);
+
+        sg_Timestamp();
+    }
+}
+
+void sg_RespawnPlayer(eGrid * grid, gArena * arena, tCoord * near, ePlayerNetID * p) {
+    if (near)
+        sg_RespawnPlayer(grid, arena, *near, p);
+    else
+        sg_RespawnPlayer(grid, arena, p);
+}
+
+void sg_RespawnPlayer(eGameObject & near, ePlayerNetID * p) {
+    // FIXME: how to get arena info from object?
+    tCoord npos = near.Position();
+    sg_RespawnPlayer(near.Grid(), &Arena, npos, p);
+}
+
+void sg_RespawnPlayer(eGrid * grid, gArena * arena, eGameObject * near, ePlayerNetID * p) {
+    if (near)
+    {
+        tCoord npos = near->Position();
+        sg_RespawnPlayer(near->Grid(), arena, npos, p);
+    }
+    else
+        sg_RespawnPlayer(grid, arena, p);
+}
 
 void sg_RespawnPlayer(eGrid *grid, gArena *arena, ePlayerNetID *p)
 {
@@ -3447,6 +3509,7 @@ void gGame::Analysis(REAL time){
                         se_SaveToScoreFile(message);
 
                         sg_roundWinnerWriter << ePlayerNetID::FilterName( eTeam::teams[winner-1]->Name() );
+                        eTeam::WritePlayers( sg_roundWinnerWriter, eTeam::teams[winner-1] );
                         sg_roundWinnerWriter.write();
                         tString notificationMessage( ePlayerNetID::FilterName( eTeam::teams[winner-1]->Name() ) );
                         notificationMessage << " has won the round";
@@ -3531,6 +3594,7 @@ void gGame::Analysis(REAL time){
                         name << tColoredString::ColorString(1,1,1);
 
                         sg_matchWinnerWriter << ePlayerNetID::FilterName( eTeam::teams[0]->Name() );
+                        eTeam::WritePlayers( sg_matchWinnerWriter, eTeam::teams[0] );
                         sg_matchWinnerWriter.write();
                         tString notificationMessage( ePlayerNetID::FilterName( eTeam::teams[0]->Name() ) );
                         notificationMessage << " has won the match";
@@ -4203,6 +4267,8 @@ void sg_EnterGameCleanup()
     ePlayerNetID::ClearAll();
     sg_currentGame = NULL;
     uMenu::exitToMain = false;
+
+    rModel::ClearCache();
 }
 
 void sg_EnterGame( nNetState enter_state )
@@ -4271,7 +4337,7 @@ void Activate(bool act){
 
     sr_Activate( act );
 
-    if (!tRecorder::IsRunning() )
+    if ( !tRecorder::IsRunning() )
     {
         if (sn_GetNetState()==nSTANDALONE)
         {

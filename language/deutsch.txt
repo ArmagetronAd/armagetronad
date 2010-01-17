@@ -399,9 +399,19 @@ spam_penalty_help             Extrastrafe für eine erkanne Spam-Aktion
 spam_maxlen_help              Maximallänge für die Chat-Nachrichten.
 spam_autokick_help            Spamer-Wert, bei dem der Spieler automatisch vom Server geworfen wird.
 spam_autokick_count_help      Zahl der Spam-Warnungen, bevor ein Spieler gekickt wird.
-silence_all_help              Wenn dieser Wert auf 1 gesetzt ist, dann wird aller Chat unterbunden.
+silence_default_help          Wenn dieser Wert auf 1 gesetzt ist, dann werden alle neuen Spieler stummgeschaltet.
 enable_chat_help              Wenn dies auf 0 gesetzt wird, dann werden alle öffentlichen Chat-Nachrichten unterdrückt (Auf dem Server sind Nachrichten von Administratoren und /msg und /team-Nachrichten Ausnahmen).
 allow_team_change_help        Nur wenn dieser Wert 1 ist dürfen Spieler irh Team beliebig wählen. Wenn dieser Wert 0 ist, muss ein Administrator jeden Teamwechsel mit ALLOW_TEAM_CHANGE_PLAYER authorisieren.
+
+# spam prefix settings
+prefix_spam_enable_help       Soll chat auf nervige gemeinsame Prefixe getestet werden? 1 um die Tests to aktivieren, 0 um sie zu deaktivieren.
+prefix_spam_start_color_multiplier_help Prefixe, die Farbcodes enthalten, bekommen ihre Spam-Bewertung mit diesem Wert multipliziert.
+prefix_spam_length_multiplier_help Die Länge des Prefixes geht mit diesem Faktor in die Spam-Bewertung ein.
+prefix_spam_number_color_codes_multiplier_help Die Zahl der Farbcodes in einem Prefix geht mit diesem Faktor in die Spam-Bewertung ein.
+prefix_spam_number_known_prefixes_multiplier_help Die Anzahl der bisher bekannten Spam-Prefixe geht mit diesem Faktor in die Spam-Bewertung eines neuen Prefixes ein.
+prefix_spam_required_score_help Die Spam-Bewertung, ab der ein Prefix als Spam gewertet und blockiert wird.
+prefix_spam_timeout_multiplier_help Das Produkt aus diesem Wert und der Spam-Bewertung bestimmt, wie lange ein Prefix blockiert bleibt.
+
 
 # spam kick messages
 spam_chat                     Du warst zu laut.
@@ -2223,7 +2233,7 @@ gamestate_reset_console       Nach dieser Runde beginnt ein neues Match; Punktza
 gamestate_resetnow_center     Neues Match
 gamestate_resetnow_console    Setzte Punktzahlen zurück...\n
 gamestate_resetnow_log        Neues Match\n
-gamestate_newround_console    Los (Runde \1 von \2 )!\n
+gamestate_newround_console    Los (Runde \1 von \2)!\n
 gamestate_newround_goldengoal Los (Verlängerung; Wer als erster die Führung übernimmt, gewinnt)!\n
 gamestate_newround_log        Neue Runde\n
 gamestate_chat_wait           Warte bis zu \2 Sekunden auf \1.\n
@@ -2288,6 +2298,8 @@ player_vote_accesslevel       Dein Zugriffslevel reicht nicht aus, um über das a
 player_pingcharity_changed    Ping-Spende ist nun \2 (vorher: \1).\n
 spam_protection_repeat        SPAM PROTECTION: du sagsest bereits: \1\n
 spam_protection               LABER-SCHUTZ: du bist für die nächsten \1 Sekunden geknebelt.\n
+spam_protection_prefix        LABER_SCHUTZ: deine Nachrichten fangen alle mit \1 an.\nLABER-SCHUTZ: Nachrichten mit diesem Prefix werden erst wieder in \2 Sekunden erlaubt sein\n
+
 spam_protection_silenceall    LABER-SCHUTZ: öffentliches Reden ist verboten.\n
 spam_protection_silenced      LABER-SCHUTZ: du wurdest vom Administrator geknebelt.\n
 spam_protection_silenced_default LABER-SCHUTZ: der Administrator hat dir dein Rederecht zurückgegeben.
@@ -2340,7 +2352,7 @@ player_spectator_message      Zuschauer
 no_real_teams                 Keine Teams mit mehr als einem Spieler.\n
 player_topologypolice         Die Topologiepolizei befiehlt: \1
 
-team_shuffle                  \1 wird von Position \2 auf \3 verschoben.\n
+team_shuffle                  \1 wird von Position \2 auf \3 verschoben.
 player_noshuffleup            Du darfst dich hier nicht selbst befördern.\n
 player_noshuffle              Dein Positionsänderungswunsch hat keinen Effekt.\n
 player_shuffle_error          /shuffle erwartet eine Zahl als Argument; mit explizitem Vorzeichen (+/-) wird die Position um die angegebene Zahl an Plätzen verändert, ohne Vorzeichen geht es and die angegebene absolute Position.\n
@@ -2911,17 +2923,19 @@ md5_password_removed          Benutzer/Team \1 entfernt.\n
 md5_password_remove_notfound  Benutzer/Team \1 nicht gefunden.\n
 
 reserve_screen_name_help      Reserviert einen Spitznamen für einen registrierten Benutzer
-reserve_screen_namne_usage    Verwendung: RESERVE_SCREEN_NAME <Spitzname (in Anfürungszeichen)> <Benutzername>
+reserve_screen_name_usage     Verwendung: RESERVE_SCREEN_NAME <Spitzname (in Anfürungszeichen)> <Benutzername>\n
 reserve_screen_name_change    Der Spitzname "\1" ist für \2 reserviert.\n
 
 user_alias_help               Erlaubt es, Authentifizierungs-IDs umzubiegen: ein Spieler, der eigentlich als X authentifiziert ist, kann als Y erscheinen.
-alias_usage                   Verwendung: USER_ALIAS <eigentlicher Benutzername> <Benutzername, wie er erscheinen soll>
+user_alias_usage              Verwendung: USER_ALIAS <eigentlicher Benutzername> <Benutzername, wie er erscheinen soll>\n
 alias_change                  Benutzer \1 wird als \2 erscheinen.\n
 
 ban_user_help                 Verbannt Spieler mit bestimmter Authentifizierungs-ID
 ban_user_message              Benutzer \1 wurde verbannt.\n
+ban_user_usage                Verwendung: BAN_USER <global ID>\n
 unban_user_help               Macht BAN_USER rückgängig.
 unban_user_message            Benutzer \1 ist nicht mehr verbannt.\n
+unban_user_usage              Verwendung: UNBAN_USER <global ID>\n
 ban_user_list_help            Gibt die Liste der verbannten Authentifizierungs-IDs aus.
 
 md5_prefix_help               Prefix, der bei lokalen Accounts zum Verschüsseln des Passworts verwendet wird

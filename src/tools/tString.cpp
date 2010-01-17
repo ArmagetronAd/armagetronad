@@ -339,15 +339,24 @@ tString::size_type tString::Size( void ) const
 //!
 //!		@param	s	stream to read from
 //!		@param	enableEscapeSequences set to true if escape sequences (\n) shall be respected
+//!     @param  indent maximum amount of indentation to remove
+//!     @param  eatenWhitespace will be set to how much spacing was stripped
 //!
 // *******************************************************************************
 
-void tString::ReadLine( std::istream & s, bool enableEscapeSequences )
+void tString::ReadLine( std::istream & s, bool enableEscapeSequences, int indent, int * eatenWhitespace )
 {
     char c=' ';
     Clear();
-    while(c!='\n' && c!='\r' && isblank(c) &&  s.good() && !s.eof()){
+    int whitespace = -1;
+    while(c!='\n' && c!='\r' && isblank(c) && (whitespace < indent || indent < 0) &&  s.good() && !s.eof()){
         c=s.get();
+        whitespace++;
+    }
+
+    if (eatenWhitespace != 0)
+    {
+        *eatenWhitespace = whitespace;
     }
 
     s.putback(c);
@@ -1529,32 +1538,26 @@ tString tColoredString::RemoveColors( const char * c, bool darkonly )
 {
     // st_Breakpoint();
     tString ret;
-
     int len = strlen(c);
-
     bool removed = false;
-
+    
     // walk through string
     while (*c!='\0'){
         // skip color codes
         if (*c=='0' && len >= 2 && c[1]=='x')
         {
-        if( len >= 8 && darkonly && strncmp( c, "0xRESETT", 8 ) != 0 )
-        {
-        tColor colorToFilter;
-        colorToFilter = tColor( c );
-        if ( !colorToFilter.IsDark() )
-        {
-                ret << c[0] << c[1] << c[2] << c[3] << c[4] << c[5] << c[6] << c[7];
-        }
-        else
-        {
+            if( len >= 8 && darkonly )
+            {
+                tColor colorToFilter( c );
+                if ( !colorToFilter.IsDark() || strncmp( c, "0xRESETT", 8 ) == 0 )
+                    ret << c[0] << c[1] << c[2] << c[3] << c[4] << c[5] << c[6] << c[7];
+                else
                     removed = true;
-        }
-        c   += 8;
-        len -= 8;
-        }
-        else if( len >= 8 )
+
+                c   += 8;
+                len -= 8;	
+            }
+            else if( len >= 8 )
             {
                 c   += 8;
                 len -= 8;

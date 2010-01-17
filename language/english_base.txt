@@ -396,6 +396,7 @@ ping_flood_time_50_help             Minimum time for 50 ping packets from one ma
 ping_flood_time_100_help            Minimum time for 100 ping packets from one machine to arrive.
 ping_flood_global_help              The times PING_FLOOD_TIME_X, multiplied by this value, count for all pings from all machines. Negative values disable global flood protection.
 
+shuffle_spam_messages_per_round_help Per round, per player limit on the number of shuffle messages displayed. A negative or zero value disables this check.
 spam_protection_repeat_help         Minimum time between identical chat messages.
 spam_protection_help				Harshness of spam protection; determines min delay between chat messages accepted.
 spam_protection_vote_help           Extra factor for SPAM_PROTECTION for votes.
@@ -404,9 +405,19 @@ spam_penalty_help					Number of seconds to silence a spammer.
 spam_maxlen_help					Maximal length of chat message.
 spam_autokick_help					Spam score that causes you to get kicked instantly.
 spam_autokick_count_help			Number of spam warnings before a player gets spamkicked.
-silence_all_help					If set to 1, new players will be silenced
+silence_default_help				If set to 1, new players will be silenced
 enable_chat_help					If set to 0, all chat will be surpressed (if reset on the server, messages from logged in players and private/team messages are still shown)
 allow_team_change_help				If set to 1, all players can change teams. If set to 0, players can only change teams if they've been specifically allowed to by ALLOW_TEAM_CHANGE_PLAYER
+
+# spam prefix settings
+prefix_spam_enable_help                           Should spam prefix checking be enabled? Set to 1 to enable, 0 to disable.
+prefix_spam_start_color_multiplier_help           If a prefix begins with a color code it will have this multiplier applied to its score.
+prefix_spam_length_multiplier_help                Multiplier applied to prefix length when calculating prefix spam score.
+prefix_spam_number_color_codes_multiplier_help    Multiplier applied to the number of color codes in prefix when calculating prefix spam score.
+prefix_spam_number_known_prefixes_multiplier_help Multiplier applied to the number of known spam prefixes when calculating prefix spam score.
+prefix_spam_required_score_help                   The required prefix spam score a prefix must have for it to be considered spam.
+prefix_spam_timeout_multiplier_help               Multiplier applied to time calculation to determine how long a known prefix is remembered.
+
 
 # spam kick messages
 spam_chat                   You chatted too much.
@@ -701,11 +712,15 @@ moviepack_rim_wall_stretch_y_help  Extension of the rim wall texture in the vert
 swapmode_text           Swap Mode:
 swapmode_help           Determines the commands used to sync graphics and input every frame. The current value implies:
 swapmode_fastest_text   Fastest
-swapmode_fastest_help   No sync commands. This is fastest and uses the least CPU, but may cause graphics to severely lag behind input. Use at your own risk.
+swapmode_fastest_help   No sync commands. This is fastest and uses the least CPU, providing optimal througput, but may cause graphics to severely lag behind input. Use at your own risk.
 swapmode_glflush_text   Flush
-swapmode_glflush_help   Calls glFlush() to sync graphics output. Very little overhead and prevents graphics lag. This is the default.
+swapmode_glflush_help   Calls glFlush() to sync graphics output. Very little overhead and prevents graphics lag for most, but sadly not all, configurations.
+swapmode_fence_text     Fence
+swapmode_glflush_help   Uses fences where available to ensure no more than one frame of output lag; this guarantees good throughput with controllable latency. Without fences, falls back to Late Finish.
+swapmode_latefinish_text Late Finish
+swapmode_glflush_help   Calls glFinish before starting to render the next frame. Same overhead as regular Finish, minimally higher latency, higher throughput. This is the default.
 swapmode_glfinish_text  Finish
-swapmode_glfinish_help  Calls glFinish() to sync graphics output. This is guaranteed to prevent graphics lagging behind input, but causes loss of framerate on some systems and full CPU load on others. Use if Flush does not work.
+swapmode_glfinish_help  Calls glFinish() after rendering a frame to sync graphics output. This is guaranteed to prevent graphics lagging behind input, but causes loss of framerate on some systems and full CPU load on others. Use if Flush or Fence do not work.
 swap_mode_help          Determines the commands used to sync graphics and input. 0: do nothing, 1: call glFlush(), 2: call glFinish().
 
 texture_mode_0_help		Floor Texture:
@@ -950,6 +965,8 @@ say_help					Dedicated server only: let the server administator say something.
 rename_help		    Renames the given player.
 allow_rename_player_help    Gives the given player the ability to rename.
 disallow_rename_player_help Prevents the given player from renameing.
+
+silence_enemies_help        When enabled, chat sent from enemies is not displayed on your client if you are alive. If you are dead all chat is displayed.
 
 #********************************************
 #********************************************
@@ -1641,6 +1658,11 @@ kick_player_help					Pressing enter or space on this menu item will issue a kick
 suspend_player_details_text			If accepted, \1 will be suspended for some rounds.
 suspend_player_text					Suspend \1
 
+referee_player_details_text         If accepted, \1 will be made referee: He will be able to administrate teams.
+referee_player_text                 Make \1 referee
+demotereferee_player_details_text   If accepted, \1 won't be referee anymore: He will not be able to administrate teams.
+demotereferee_player_text           Demote \1 as referee
+
 vote_include_details_text			If accepted, the file \1 will be included as a configuration file.
 vote_include_text					Include \1
 vote_include_error					Include file \1 not found or not readable.\n
@@ -2285,7 +2307,7 @@ gamestate_reset_console		Resetting scores and starting new match after this roun
 gamestate_resetnow_center	New Match
 gamestate_resetnow_console	Resetting scores...\n
 gamestate_resetnow_log		New Match\n
-gamestate_newround_console	Go (round \1 of \2 )!\n
+gamestate_newround_console	Go (round \1 of \2)!\n
 gamestate_newround_goldengoal	Go (extra round; whoever gains the lead wins)!\n
 gamestate_newround_log		New Round\n
 gamestate_chat_wait         Waiting up to \2 seconds for \1 to finish chatting.\n
@@ -2329,6 +2351,9 @@ player_kill_collapse        \1 was eradicated by its collapsing zone.\n
 player_win_hole             \1 got \2 points for a sacrifice for the good of the team.\n
 player_lose_hole            0xffff00ZOMG! 0xff7f00HOLER!!1!!0xRESETT \1 lost \2 points for being a cheap ass lamer.\n
 
+player_base_respawn		\1 was respawned by \2.\n
+player_base_enemy_respawn	\1 was respawned by their enemy \2.\n
+
 player_no_longer_suspended  \1 0x77ff77is allowed to play again.\n
 player_suspended            \1 0xff7777is banned to spectator mode for \2 round(s).\n
 
@@ -2350,6 +2375,8 @@ player_vote_accesslevel Sorry, your access level is not high enough to issue a v
 player_pingcharity_changed	Ping charity changed from \1 to \2.\n
 spam_protection_repeat  SPAM PROTECTION: you already said: \1\n
 spam_protection			SPAM PROTECTION: you are silenced for the next \1 seconds.\n
+spam_protection_prefix  SPAM PROTECTION: your messages have a common prefix: \1\nSPAM PROTECTION: messages with this prefix will be allowed again in \2 seconds\n
+
 spam_protection_silenceall SPAM PROTECTION: public chat is disabled.\n
 spam_protection_silenced SPAM PROTECTION: you have been silenced by the server administrator.\n
 spam_protection_silenced_default SPAM PROTECTION: you have to be given voice in order to chat publically.\n
@@ -2387,6 +2414,7 @@ player_win_frag_ai		\1 got \2 points for core dumping an AI player.\n
 player_lose_frag		\1 lost \2 points since it caused a general protection fault.\n
 player_lose_rim		    \1 lost \2 points for trying to escape from the game grid.\n
 player_win_survivor		\1 was awarded \2 points for being last active team.\n
+player_respawn_center_message	You've been respawned\n
 player_joins_team       \1 wants to play for \2 on the next respawn.\n
 player_joins_team_wish  \1 still wants to play for \2, but isn't currently allowed to.\n
 player_joins_team_noex  \1 wants to play for a team that ceased to exist, ignoring request.\n
@@ -2406,10 +2434,16 @@ player_spectator_message Spectators
 no_real_teams           No teams with more than one player.\n
 player_topologypolice	Order from Topology Police: \1
 
-team_shuffle            \1 gets shuffled from rank \2 to \3.\n
+team_shuffle            \1 gets shuffled from rank \2 to \3.
+team_shuffle_suppress   Future shuffle messages from this player will be suppressed.\n
 player_noshuffleup      You are not allowed to shuffle up.\n
 player_noshuffle        Your shuffling wish has no effect.\n
 player_shuffle_error    /shuffle expects a number as argument; an explicit sign (+/-) will change your position by the indicated number of steps, no sign will shuffle you to the given position.\n
+
+player_referee          0x7fff7fBy order of \10x7fff7f, \20x7fff7f is now a referee.\n
+player_referee_anon     \10x7fff7f is now a referee.\n
+player_referee_nomore   0xff7f7fBy order of \10xff7f7f, \20xff7f7f is no longer a referee.\n
+player_referee_nomore_anon \1 0xff7f7fis no longer a referee.\n
 
 player_message_help     Sends a message to a specified player.
 player_message_usage    Usage: PLAYER_MESSAGE <user ID or name> "<Message>"\n
@@ -2427,6 +2461,7 @@ remove_help_topic_notfound Help topic "\1" doesn't exist.\n
 rtfm_announcement \2 wants \3 to know about /help \1.\n
 
 help_introductory_blurb_help Message that is displayed before the list of help topics if someone uses /help without arguments
+help_message_help       Deprecated alias for HELP_INTRODUCTORY_BLURB
 
 help_topics_list_start  Say /help TOPIC to get help on the following topics.\n
 help_topic_not_found    Help topic \1 not found. Try /help with no arguments to see a list of available topics.\n
@@ -2628,7 +2663,7 @@ vote_accepted						Poll "\1" has been accepted. (\2 Players voted for the poll, 
 vote_rejected						Poll "\1" has been rejected. (\2 Players voted for the poll, \3 against, \4 didn't vote)\n
 vote_timeout						Poll "\1" timed out.\n
 vote_cancel_all                     All polls have been canceled by an administrator.\n
-vote_new							New poll: "\1". Enter the main menu vote on it.\n
+vote_new							New poll: "\1". Enter the main menu to vote on it.\n
 vote_redundant                      Poll rejected, same suggestion was made already recently.\n
 vote_maturity                       Poll rejected, you're not old enough to issue votes, wait \1 seconds.\n
 vote_overflow						Poll rejected, too many pending polls.\n
@@ -2640,6 +2675,8 @@ vote_vote_for						\1 voted for Poll "\2".\n
 vote_vote_against					\1 voted against Poll "\2".\n
 vote_unknown_command                Unknown /vote command \1, available are: \2\n
 vote_kick_local                     Can't vote against local player/AI \1.\n
+vote_referee_already                \10xRESETT is already a referee.\n
+vote_demotereferee_notref           \10xRESETT is not a referee.\n
 
 #********************************************
 #********************************************
@@ -2791,6 +2828,7 @@ config_accesslevel_0        Owner
 config_accesslevel_1        Administrator
 config_accesslevel_2        Moderator
 config_accesslevel_5        Armatrator
+config_accesslevel_6        Referee
 config_accesslevel_7        Team Leader
 config_accesslevel_8        Team Member
 config_accesslevel_12       Local User
@@ -2813,12 +2851,16 @@ abort_loading_name          Loading Abort
 abort_loading_description   Current config file/stream loading was aborted by command \1.
 
 user_level_help             Changes the access level of a user.
-user_level_usage            usage: USER_LEVEL <authenticated name> <user access level (numerical)>\n
+user_level_usage            Usage: USER_LEVEL <authenticated name> <user access level (numerical)>\n
 user_level_change           Access level of user \1 changed to "\2".\n
 
 authority_level_help             Changes the access level for all users from the same authority. Mainly only useful for private authorities.
 authority_level_usage            usage: AUTHORITY_LEVEL <authority> <new access level (numerical)>\n
 authority_level_change           Access level of users from authority \1 changed to "\2".\n
+
+toggle_help                 Cycle between 0 and 1 for a boolean config item. Example: TOGGLE PREDICT_OBJECTS\n
+toggle_usage_error          TOGGLE requires a config item name. Usage: TOGGLE config_item\n
+toggle_invalid_config_item  TOGGLE requires a boolean config item, and \1 is not.\n
 
 #*************************************
 #*************************************
@@ -2901,7 +2943,7 @@ access_level_chat_timeout_help   Time in seconds between public announcements th
 access_level_chat_request   \10xRESETT would like to chat, but is not authorized yet. Would someone be so kind and say "/op \2"?\n
 access_level_chat_denied    0xff7f7fChat denied,0xffffff insufficient access level.\n
 access_level_op_denied      0xff7f7f\1 denied,0xffffff insufficient access level.\n
-access_level_op_overpowered 0xff7f7f\1 denied,0xffffff your need higher access righrs than your victim.\n
+access_level_op_overpowered 0xff7f7f\1 denied,0xffffff your need higher access rights than your victim.\n
 access_level_op_self        0xff7f7f\1 denied,0xffffff can't do that to yourself :).\n
 access_level_op_denied_max  0xff7f7f\1 denied,0xffffff your victim already has maximal rights.\n
 access_level_op_denied_ai   0xff7f7f\1 denied,0xffffff your victim is an AI.\n
@@ -2909,7 +2951,9 @@ access_level_op_same        \1: This would have no effect.\n
 access_level_op_unclear     \1: User is already logged in, please explicitly set an access level.\n
 
 access_level_demote         \1 has been demoted to "\2" by order of \3.\n
+access_level_demote_anon    \1 has been demoted to "\2".\n
 access_level_promote        \1 has been promoted to "\2" by order of \3.\n
+access_level_promote_anon   \1 has been promoted to "\2".\n
 
 access_level_admin_denied   0xff7f7f/admin denied,0xffffff insufficient access level.\n
 access_level_shuffle_up_denied Required access level to shuffle up is "\1", you only have "\2".\n
@@ -2983,17 +3027,19 @@ md5_password_removed        User name/team tag \1 removed.\n
 md5_password_remove_notfound User name/team tag \1 to remove not found.\n
 
 reserve_screen_name_help      Reserves a screen name to a registered user
-reserve_screen_namne_usage   Usage: RESERVE_SCREEN_NAME <screen name (in quotes if it contains spaces)> <user>
+reserve_screen_name_usage   Usage: RESERVE_SCREEN_NAME <screen name (in quotes if it contains spaces)> <user>\n
 reserve_screen_name_change   Screen name "\1" reserved for user \2.\n
 
 user_alias_help               Allows bending authenticated names around: a player authenticated as X originally can appear as y.
-alias_usage                   Usage: USER_ALIAS <user> <alias of user>
+user_alias_usage              Usage: USER_ALIAS <user> <alias of user>\n
 alias_change                  User \1 will be known as \2.\n
 
 ban_user_help                 Allows to ban players based on their authentication ID.
 ban_user_message              User \1 has been banned.\n
+ban_user_usage                Usage: BAN_USER <authenticated name>\n
 unban_user_help               Undoes BAN_USER.
 unban_user_message            User \1 has been unbanned.\n
+unban_user_usage              Usage: UNBAN_USER <authenticated name>\n
 ban_user_list_help            Gives a list of banned users.
 
 md5_prefix_help               Extra hash prefix for local accounts used to scramble the password

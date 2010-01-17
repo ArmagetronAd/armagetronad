@@ -366,7 +366,7 @@ bool tPath::IsValidPath( char const * filename )
             if ( run[0] == '.' )
             {
                 // don't give false alarm for relative paths
-                if ( run[1] != '.' || ( !st_IsPathDelimiter( run[2] ) && run[2] != 0 ) )
+                if ( !( st_IsPathDelimiter( run[1] ) || ( run[1] == '.' && st_IsPathDelimiter( run[2] ) ) ) )
                 {
                     con << tOutput( "$directory_path_hidden", filename );
                     return false;

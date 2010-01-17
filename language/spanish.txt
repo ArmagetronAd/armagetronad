@@ -296,7 +296,6 @@ spam_protection_chat_help     Factor adicional del SPAM_PROTECTION para los mens
 spam_penalty_help             Número de segundos de silencio contra un spammer.
 spam_maxlen_help              Longitud máxima de los mensajes en el chat.
 spam_autokick_help            Los puntos de spam que provocan la expulsión inmediata de un servidor.
-silence_all_help              Si vale 1, todos los mensajes de chat serán omitidos.
 
 #********************************************
 #********************************************
