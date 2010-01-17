@@ -217,16 +217,17 @@ add_custom_target (sortresources ALL
     COMMENT "Sorting resources"
     )
 
-add_custom_command (OUTPUT ${armagetronad_BINARY_DIR}/src/tTrueVersion.h
+add_custom_target (generateversion ALL 
+    ${PYTHON_EXECUTABLE} ${armagetronad_SOURCE_DIR}/batch/make/version.py ${armagetronad_SOURCE_DIR} --release=${RELEASE} -o ${armagetronad_BINARY_DIR}/src/tTrueVersion.h
     COMMENT "Generating version tag"
     COMMAND ${PYTHON_EXECUTABLE} ${armagetronad_SOURCE_DIR}/batch/make/version.py ${armagetronad_SOURCE_DIR} --release=${RELEASE} -o ${armagetronad_BINARY_DIR}/src/tTrueVersion.h
     DEPENDS ${armagetronad_SOURCE_DIR}/batch/make/version.py
     WORKING_DIRECTORY ${armagetronad_SOURCE_DIR}
     )
 
-add_custom_target (generateversion ALL
-    DEPENDS ${armagetronad_BINARY_DIR}/src/tTrueVersion.h
-    )
+#add_custom_target (generateversion ALL
+#    DEPENDS ${armagetronad_BINARY_DIR}/src/tTrueVersion.h
+#    )
 
 set(EXTRA_SOURCES 
     src/tron/gFloor.cpp

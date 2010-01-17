@@ -68,15 +68,13 @@ elif branch.get_push_location():
     outvars['BRANCHURL'] = branch.get_push_location()
 elif branch.get_old_bound_location():
     outvars['BRANCHURL'] = branch.get_old_bound_location()
-elif branch.get_parent_location():
-    outvars['BRANCHURL'] = branch.get_parent_location()
 
 # Open parent branch and find last common ancestor.
 parentBranch = Branch.open( branch.get_parent() )
 branch.lock_read()
 
 lca = graph.find_lca( outvars['REVID'], parentBranch.last_revision() ).pop()
-outvars['BRANCHLCA'] = branch.revision_id_to_revno( lca )
+outvars['BRANCHLCA'] = parentBranch.revision_id_to_revno( lca )
 outvars['BRANCHLCAZ'] = ZNR( lca )
 
 branch.unlock()
