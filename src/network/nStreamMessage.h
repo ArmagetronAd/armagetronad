@@ -94,7 +94,7 @@ public:
 #endif
     }
 
-    nStreamMessage( const nStreamDescriptor &, unsigned int messageID );  // create a new message
+    nStreamMessage( const nStreamDescriptor &, unsigned int messageID, unsigned int senderID );  // create a new message
 
     explicit nStreamMessage( const nStreamDescriptor & );  // create a new message
 

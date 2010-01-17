@@ -17,6 +17,7 @@ add_library (engine
     eAuthentication.h           eAuthentication.cpp
     eAxis.h                     eAxis.cpp
     eCamera.h                   eCamera.cpp
+    eChat.h                     eChat.cpp
     eCoord.h
     eDebugLine.h                eDebugLine.cpp
                                 eDisplay.cpp
