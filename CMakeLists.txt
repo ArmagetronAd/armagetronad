@@ -119,6 +119,7 @@ set (armagetronad_INCLUDE_DIRS
     )
 
 set (armagetronad_DEFINES
+    ${armagetronad_DEFINES}
     -DENABLE_ZONESV2 -DENABLE_ZONESV1 # Hacks :(
     ${PNG_DEFINITIONS}
     )
