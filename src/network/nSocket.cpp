@@ -1431,7 +1431,7 @@ bool nAddress::IsSet () const
 //!
 //!		@param	a1  first address to compare
 //!		@param	a2  second address to compare
-//!		@return
+//!		@return -1 if the addresses don't match, +1 if the ports don't match, 0 if everything matches.
 //!
 // *******************************************************************************************
 
