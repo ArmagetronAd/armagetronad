@@ -1227,7 +1227,7 @@ path_info_var                 Verzeichnisse für Spieldaten:
 game_menu_start_text          Solospiel
 game_menu_start_help          Transportiert alle lokal eingerichteten Spieler auf das Spieleraster.
 
-network_menu_text             Netzwerkspiel
+network_menu_text             Mehrspieler
 network_menu_help             Verbindet dich mit einem Netzwerkspiel oder fängt eines an.
 
 game_settings_menu_text       Spiel konfigurieren

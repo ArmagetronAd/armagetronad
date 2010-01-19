@@ -145,7 +145,7 @@ static nSettingItemWatched<tString> conf_mapfile("MAP_FILE",mapfile, nConfItemVe
 // otherwise, it's from game state changes.
 static void sg_SoundPause( bool pause, bool fromActivity )
 {
-    bool flags[2]={true, false};
+    static bool flags[2]={true, false};
     flags[ fromActivity ] = pause;
     se_SoundPause( flags[0] || flags[1] );
 }
@@ -2586,13 +2586,13 @@ void net_game(){
       "$network_host_help",&sg_HostGameMenu);
     */
 
-    uMenuItemFunction inter
-    (&net_menu,"$network_menu_internet_text",
-     "$network_menu_internet_help",&gServerBrowser::BrowseMaster);
-
     uMenuItemFunction lan
     (&net_menu,"$network_menu_lan_text",
      "$network_menu_lan_help",&gServerBrowser::BrowseLAN);
+
+    uMenuItemFunction inter
+    (&net_menu,"$network_menu_internet_text",
+     "$network_menu_internet_help",&gServerBrowser::BrowseMaster);
 
     gNetIdler idler;
     // rSysDep::StartNetSyncThread( &idler );
@@ -2773,14 +2773,14 @@ void MainMenu(bool ingame){
     uMenuItemFunction *connect=NULL,*start=NULL,*sound=NULL;
 
     if (!ingame){
+        start= new uMenuItemFunction(&game_menu,"$game_menu_start_text",
+                                     "$game_menu_start_help",&singlePlayer_game);
         connect=new uMenuItemFunction
                 (&game_menu,
                  "$network_menu_text",
                  "$network_menu_help",
                  &net_game);
 
-        start= new uMenuItemFunction(&game_menu,"$game_menu_start_text",
-                                     "$game_menu_start_help",&singlePlayer_game);
     }
 
     tOutput title;
@@ -4051,7 +4051,7 @@ void gGame::Analysis(REAL time){
     }
 
     // keep the game running when there are only login processes running
-    if (notyetloggedin && humans > 0)
+    if (notyetloggedin && humans > 0 && ais == 0)
         alive++;
 
 
@@ -4402,7 +4402,7 @@ void gGame::Analysis(REAL time){
 
         if ( !winner && !absolute_winner && sg_currentSettings->finishType==gFINISH_SPEEDUP && se_mainGameTimer)
         {
-            se_mainGameTimer->speed*=1.01;
+            se_mainGameTimer->speed*=1.41;
             if(se_mainGameTimer->speed>16)
                 se_mainGameTimer->speed=16;
         }
@@ -5052,6 +5052,13 @@ void sg_ClientFullscreenMessage( tOutput const & title, tOutput const & message,
     // keep syncing the network
     rPerFrameTask idle( sg_FullscreenIdle );
 
+    // stop the game
+    bool paused = se_mainGameTimer && se_mainGameTimer->speed < .0001;
+    if( sn_GetNetState() != nCLIENT )
+    {
+        se_PauseGameTimer(true);
+    }
+
     // put players into idle mode
     ePlayerNetID::SpectateAll();
     se_ChatState( ePlayerNetID::ChatFlags_Menu, true );
@@ -5064,6 +5071,13 @@ void sg_ClientFullscreenMessage( tOutput const & title, tOutput const & message,
     con <<  title << "\n" << message << "\n";
 #endif
 
+        
+    // continue the game
+    if( sn_GetNetState() != nCLIENT )
+    {
+        se_PauseGameTimer(paused);
+    }
+
     // get players out of idle mode again
     ePlayerNetID::SpectateAll(false);
     se_ChatState( ePlayerNetID::ChatFlags_Menu, false );
@@ -5071,7 +5085,7 @@ void sg_ClientFullscreenMessage( tOutput const & title, tOutput const & message,
 
 static tString sg_fullscreenMessageTitle;
 static tString sg_fullscreenMessageMessage;
-static REAL sg_fullscreenMessageTimeout;
+static REAL sg_fullscreenMessageTimeout = 0.0;
 static void sg_TodoClientFullscreenMessage()
 {
     sg_ClientFullscreenMessage( sg_fullscreenMessageTitle, sg_fullscreenMessageMessage, sg_fullscreenMessageTimeout );
@@ -5094,6 +5108,46 @@ static void sg_ClientFullscreenMessage(nMessage &m){
 
 static nDescriptor sg_clientFullscreenMessage(312,sg_ClientFullscreenMessage,"client_fsm");
 
+void sg_FullscreenMessageWait()
+{
+    // wait for the clients to have seen the message
+    {
+        // stop the game
+        bool paused = se_mainGameTimer && se_mainGameTimer->speed < .0001;
+        se_PauseGameTimer(true);
+        gGame::NetSyncIdle();
+        
+        REAL waitTo = tSysTimeFloat() + sg_fullscreenMessageTimeout;
+        REAL waitToMin = tSysTimeFloat() + 1.0;
+        
+        // wait for players to see it
+        bool goon = true;
+        while( goon && waitTo > tSysTimeFloat() )
+        {
+            sg_FullscreenIdle();
+            gameloop_idle();
+            if ( se_GameTime() > sg_lastChatBreakTime )
+                se_PauseGameTimer(true);
+            
+            // give the clients a second to enter chat state
+            if ( tSysTimeFloat() > waitToMin )
+            {
+                goon = false;
+                for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
+                {
+                    ePlayerNetID* player = se_PlayerNetIDs(i);
+                    if ( player->IsChatting() )
+                        goon = true;
+                }
+            }
+        }
+
+        // continue the game
+        se_PauseGameTimer(paused);
+        gGame::NetSyncIdle();
+    }
+}
+
 // causes the connected clients to break and print a fullscreen message
 void sg_FullscreenMessage(tOutput const & title, tOutput const & message, REAL timeout, int client){
     tJUST_CONTROLLED_PTR< nMessage > m=new nMessage(sg_clientFullscreenMessage);
@@ -5114,50 +5168,24 @@ void sg_FullscreenMessage(tOutput const & title, tOutput const & message, REAL t
                 if ( sn_Connections[c].socket )
                 {
                     if ( sg_fullscreenMessages.Supported(c) )
-                        m->Send(c);
-                    else
-                        sn_ConsoleOut(complete, c);
-                }
-            }
-        }
-
-        // display the message locally, waiting for the clients to have seen it
-        {
-            // stop the game
-            bool paused = se_mainGameTimer && se_mainGameTimer->speed < .0001;
-            se_PauseGameTimer(true);
-            gGame::NetSyncIdle();
-
-            REAL waitTo = tSysTimeFloat() + timeout;
-            REAL waitToMin = tSysTimeFloat() + 1.0;
-            sg_ClientFullscreenMessage( title, message, timeout );
-
-            // wait for players to see it
-            bool goon = true;
-            while( goon && waitTo > tSysTimeFloat() )
-            {
-                sg_FullscreenIdle();
-                gameloop_idle();
-                if ( se_GameTime() > sg_lastChatBreakTime )
-                    se_PauseGameTimer(true);
-
-                // give the clients a second to enter chat state
-                if ( tSysTimeFloat() > waitToMin )
-                {
-                    goon = false;
-                    for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
                     {
-                        ePlayerNetID* player = se_PlayerNetIDs(i);
-                        if ( player->IsChatting() )
-                            goon = true;
+                        m->Send(c);
+                    }
+                    else
+                    {
+                        sn_ConsoleOut(complete, c);
                     }
                 }
             }
-
-            // continue the game
-            se_PauseGameTimer(paused);
-            gGame::NetSyncIdle();
         }
+
+        double before = tSysTimeFloat();
+        sg_ClientFullscreenMessage( title, message, timeout );
+        double after = tSysTimeFloat();
+
+        // store rest of timeout and wait for the clients.
+        sg_fullscreenMessageTimeout = timeout - (after-before);
+        st_ToDo( sg_FullscreenMessageWait );
     }
     else
     {

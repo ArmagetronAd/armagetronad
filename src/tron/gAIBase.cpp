@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -44,16 +44,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tRecorder.h"
 #include <stdlib.h>
 
-#define AI_REACTION          0 
-#define AI_EMERGENCY         1 
-#define AI_RANGE             2 
-#define AI_STATE_TRACE       3 
-#define AI_STATE_CLOSECOMBAT 4 
-#define AI_STATE_PATH        5 
-#define AI_LOOP              6 
-#define AI_ENEMY             7 
-#define AI_TUNNEL            8 
-#define AI_DETECTTRACE       9 
+#define AI_REACTION          0
+#define AI_EMERGENCY         1
+#define AI_RANGE             2
+#define AI_STATE_TRACE       3
+#define AI_STATE_CLOSECOMBAT 4
+#define AI_STATE_PATH        5
+#define AI_LOOP              6
+#define AI_ENEMY             7
+#define AI_TUNNEL            8
+#define AI_DETECTTRACE       9
 #define AI_STARTSTATE        10
 #define AI_STARTSTRAIGHT     11
 #define AI_STATECHANGE       12
@@ -1342,6 +1342,10 @@ void gAIPlayer::SetTraceSide(int side)
         lazySideChange = -10;
 }
 
+// flag set if pathfinding is enabled. It's an expensive opeeration, so we just turn it
+// off if the PC can't handle it. Doesn't doo much good, anyway.
+static bool sg_pathEnabled = true;
+
 // state change:
 void gAIPlayer::SwitchToState(gAI_STATE nextState, REAL minTime)
 {
@@ -1374,6 +1378,10 @@ void gAIPlayer::SwitchToState(gAI_STATE nextState, REAL minTime)
         break;
     case AI_PATH:
         nextAbility = character->properties[AI_STATE_PATH];
+        if (!sg_pathEnabled )
+        {
+            nextAbility = 0;
+        }
         break;
     case AI_ROUTE:
         break;
@@ -1431,7 +1439,7 @@ void gAIPlayer::ThinkSurvive(  ThinkData & data )
     {
         data.thinkAgain = .5f;
 	// if a route path is define, update the path and return to path state
-	if (!route_.empty()) 
+	if (!route_.empty())
 	{
             UpdateRouteStep();
 	}
@@ -1604,6 +1612,14 @@ void gAIPlayer::ThinkPath( ThinkData & data )
 
     if ( nextStateChange < se_GameTime() )
     {
+        if( !sg_pathEnabled )
+        {
+            SwitchToState(AI_SURVIVE, 5);
+            EmergencySurvive( data );
+
+            return;
+        }
+
         gSensor p(Object(),Object()->Position(), tDir);
         p.detect(REAL(.9999999));
         if (p.hit >=  .9999999)  // free line of sight to victim. Switch to close combat.
@@ -1619,11 +1635,38 @@ void gAIPlayer::ThinkPath( ThinkData & data )
     if (lastPath < se_GameTime() - 10)
         if (target->CurrentFace())
         {
+            if( !sg_pathEnabled )
+            {
+                // yeah, apparently, we can't go on with this. Bail out.
+                SwitchToState(AI_SURVIVE, 5);
+                EmergencySurvive( data );
+                return;
+            }
+
             Object()->FindCurrentFace();
+            REAL before = tRealSysTimeFloat();
             eHalfEdge::FindPath(Object()->Position(), Object()->CurrentFace(),
                                 target->Position(), target->CurrentFace(),
                                 Object(),
                                 path);
+
+            // calculate (and archive) time used for pathfinding
+            REAL used = tRealSysTimeFloat() - before;
+            static char const * section = "PATH_TIME";
+            tRecorder::PlaybackStrict( section, used );
+            tRecorder::Record( section, used );
+            static REAL usedAverage = 0;
+            const REAL decay = .1;
+            usedAverage = (usedAverage+used*decay)/(1+decay);
+
+            // disable pathfinding if it just takes too long.
+            if ( used > .06 || usedAverage > .03 )
+            {
+#ifdef DEBUG
+                con << "Path finding is too expensive for this PC. Disabling it.\n";
+#endif
+                sg_pathEnabled = false;
+            }
             lastPath = se_GameTime();
         }
 
@@ -1740,7 +1783,7 @@ void gAIPlayer::ThinkRoute( ThinkData & data )
     {
         tDir = route_[lastCoord_] - Object()->Position();
 
-        // check closest enemy ... 
+        // check closest enemy ...
         eCoord enemypos=eCoord(1000,1000);
 
         const tList<eGameObject>& gameObjects = Object()->Grid()->GameObjects();
@@ -1908,17 +1951,9 @@ void gAIPlayer::ThinkCloseCombat( ThinkData & data )
         p.detect(REAL(1));
         if (p.hit <=  .999999)  // no free line of sight to victim. Switch to path mode.
         {
-            // if a route path is define, update the path and return to path state
-            if (!route_.empty())
-            {
-                UpdateRouteStep();
-            } 
-            else 
-            {
-                SwitchToState(AI_PATH, 5);
-                EmergencySurvive( data );
-                return;
-            }
+            SwitchToState(sg_pathEnabled ? AI_PATH : AI_SURVIVE, 5);
+            EmergencySurvive( data );
+            return;
         }
     }
 
@@ -2274,7 +2309,7 @@ bool gAIPlayer::EmergencySurvive( ThinkData & data, int enemyevade, int prefered
     /*
       if (front.front.wallType == gSENSOR_ENEMY)
       sideDanger[LOOPLEVEL][(1-front.front.lr*enemyevade) >> 1] += 5;
-    */  
+    */
 
     if (!isTrapped)
         for (i = 1; i>=0; i--)
@@ -2783,7 +2818,7 @@ void gAIPlayer::RightBeforeDeath(int triesLeft) // is called right before the ve
 
 
 
-#ifdef TESTSTATE  
+#ifdef TESTSTATE
     state = TESTSTATE;
     nextStateChange = se_GameTime() + 100;
 #else
@@ -2899,7 +2934,7 @@ REAL gAIPlayer::Think(){
     // get the delay between two turns
     REAL delay = Delay();
 
-#ifdef DEBUG_X  
+#ifdef DEBUG_X
     if (log && !Object()->Alive())
     {
         log->Print();
@@ -2956,7 +2991,7 @@ REAL gAIPlayer::Think(){
         }
     }
 
-#ifdef TESTSTATE  
+#ifdef TESTSTATE
     state = TESTSTATE;
     nextStateChange = se_GameTime() + 100;
 #else
