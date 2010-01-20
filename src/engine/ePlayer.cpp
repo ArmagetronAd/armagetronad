@@ -1275,7 +1275,7 @@ void ePlayer::Render(){
     double now = tSysTimeFloat();
     if( se_GameTime() > 1 && now-lastTooltip_ > 1 && !rConsole::CenterDisplayActive() )
     {
-        if( uActionTooltip::Help( ID()+1 ) )
+        if( uActionTooltip::Help( ID()+1 ) || VetoActiveTooltip(ID()+1) )
             lastTooltip_ = now;
         else
             lastTooltip_ = now+60;
@@ -3885,6 +3885,33 @@ bool ePlayer::PlayerIsInGame(int p){
     return PlayerViewport(p) && PlayerConfig(p);
 }
 
+// veto function for tooltips that require a controllable game object
+bool ePlayer::VetoActiveTooltip(int player)
+{
+    // check if the player exists and controls a living object
+    if( player == 0 )
+    {
+        return true;
+    }
+    ePlayer * p = PlayerConfig(player-1);
+    if ( !p )
+    {
+        return true;
+    }
+    ePlayerNetID * pn = p->netPlayer;
+    if ( !pn )
+    {
+        return true;
+    }
+    eNetGameObject *o = pn->Object();
+    if (!o || !o->Alive())
+    {
+        return true;
+    }
+
+    return false;
+}
+
 static tConfItemBase *vpbtp[MAX_VIEWPORTS];
 
 void ePlayer::Init(){
@@ -3932,7 +3959,7 @@ void ePlayer::Exit(){
 uActionPlayer ePlayer::s_chat("CHAT");
 
 // only display chat in multiplayer games
-static bool se_ChatTooltipVeto()
+static bool se_ChatTooltipVeto(int)
 {
     return sn_GetNetState() == nSTANDALONE;
 }

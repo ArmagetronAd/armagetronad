@@ -100,7 +100,8 @@ public:
 class uActionTooltip: public tConfItemBase
 {
 public:
-    uActionTooltip( uAction & action, int numHelp, BOOLRETFUNC * veto = NULL );
+    typedef bool VETOFUNC(int player);
+    uActionTooltip( uAction & action, int numHelp, VETOFUNC * veto = NULL );
     ~uActionTooltip();
 
     //! presents help to the specified player, starting counting at 1. 
@@ -117,7 +118,7 @@ private:
     int activationsLeft_[uMAX_PLAYERS+1];
     tString help_;        //!< help languate item
     uAction & action_;    //!< action this belongs to
-    BOOLRETFUNC * veto_;  //!< function that can block help display
+    VETOFUNC * veto_;  //!< function that can block help display
 };
 
 

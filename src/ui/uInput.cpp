@@ -839,7 +839,7 @@ static uActionGlobalFunc md(&mess_down,&messdown_func);
 // tooltips
 // ********
 
-uActionTooltip::uActionTooltip( uAction & action, int numHelp, BOOLRETFUNC * veto )
+uActionTooltip::uActionTooltip( uAction & action, int numHelp, VETOFUNC * veto )
 : tConfItemBase(action.internalName + "_TOOLTIP"), action_( action ), veto_(veto)
 {
     help_ = tString("$input_") + action.internalName + "_tooltip";
@@ -880,7 +880,7 @@ bool uActionTooltip::Help( int player )
         if( !action )
             continue;
         uActionTooltip * tooltip = action->GetTooltip();
-        if( !tooltip || ( tooltip->veto_ && (*tooltip->veto_)() ) )
+        if( !tooltip || ( tooltip->veto_ && (*tooltip->veto_)(player) ) )
         {
             continue;
         }

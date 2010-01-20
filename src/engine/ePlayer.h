@@ -134,6 +134,9 @@ public:
 
     static bool PlayerIsInGame(int p);
 
+    // veto function for tooltips that require a controllable game object
+    static bool VetoActiveTooltip(int player);
+
     static rViewport * PlayerViewport(int p);
 
     static void LogIn();          //!< sends authentication login messages for all local players
