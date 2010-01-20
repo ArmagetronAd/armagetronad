@@ -772,15 +772,18 @@ bool uBindPlayer::Delayable()
 }
 
 bool uBindPlayer::DoActivate(REAL x){
-    if( act && act->GetTooltip() && x > 0 )
+    bool ret = false;
+    if (ePlayer==0)
+        ret = GlobalAct(act,x);
+    else
+        ret = uPlayerPrototype::PlayerConfig(ePlayer-1)->Act(act,x);
+
+    if( ret && act && act->GetTooltip() && x > 0 )
     {
         act->GetTooltip()->Count(ePlayer);
     }
     
-    if (ePlayer==0)
-        return  GlobalAct(act,x);
-    else
-        return uPlayerPrototype::PlayerConfig(ePlayer-1)->Act(act,x);
+    return ret;
 }
 
 
