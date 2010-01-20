@@ -80,6 +80,7 @@ class eVoter;
 class ePlayer: public uPlayerPrototype{
     friend class eMenuItemChat;
     static uActionPlayer s_chat;
+    static uActionTooltip s_chatTooltip;
 
     tConfItemBase *configuration[PLAYER_CONFITEMS];
     int            CurrentConfitem;

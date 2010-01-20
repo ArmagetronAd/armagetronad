@@ -1273,10 +1273,12 @@ void ePlayer::Render(){
 
     // present tooltip help
     double now = tSysTimeFloat();
-    if( now-lastTooltip_ > 1 && !rConsole::CenterDisplayActive() )
+    if( se_GameTime() > 1 && now-lastTooltip_ > 1 && !rConsole::CenterDisplayActive() )
     {
-        uActionTooltip::Help( ID()+1 );
-        lastTooltip_ = now;
+        if( uActionTooltip::Help( ID()+1 ) )
+            lastTooltip_ = now;
+        else
+            lastTooltip_ = now+60;
     }
 }
 #endif
@@ -3928,6 +3930,14 @@ void ePlayer::Exit(){
 }
 
 uActionPlayer ePlayer::s_chat("CHAT");
+
+// only display chat in multiplayer games
+static bool se_ChatTooltipVeto()
+{
+    return sn_GetNetState() == nSTANDALONE;
+}
+
+uActionTooltip ePlayer::s_chatTooltip(ePlayer::s_chat, "$input_chat_tooltip", 1, &se_ChatTooltipVeto);
 
 int pingCharity = 100;
 static const int maxPingCharity = 300;

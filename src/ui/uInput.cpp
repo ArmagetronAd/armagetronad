@@ -772,7 +772,7 @@ bool uBindPlayer::Delayable()
 }
 
 bool uBindPlayer::DoActivate(REAL x){
-    if( act && act->GetTooltip() )
+    if( act && act->GetTooltip() && x > 0 )
     {
         act->GetTooltip()->Count(ePlayer);
     }
@@ -844,8 +844,8 @@ static tString su_ToConfigName(char const *in)
     return ret;
 }
 
-uActionTooltip::uActionTooltip( uAction & action, char const * help, int numHelp )
-: tConfItemBase(su_ToConfigName(help)), help_(help), action_( action )
+uActionTooltip::uActionTooltip( uAction & action, char const * help, int numHelp, BOOLRETFUNC * veto )
+: tConfItemBase(su_ToConfigName(help)), help_(help), action_( action ), veto_(veto)
 {
     // initialize array holding the number of help attempts to give left
     for( int i = uMAX_PLAYERS; i >= 0; --i )
@@ -882,7 +882,7 @@ bool uActionTooltip::Help( int player )
         if( !action )
             continue;
         uActionTooltip * tooltip = action->GetTooltip();
-        if( !tooltip )
+        if( !tooltip || ( tooltip->veto_ && (*tooltip->veto_)() ) )
         {
             continue;
         }

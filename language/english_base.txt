@@ -1009,6 +1009,7 @@ input_console_input_help			Lets you enter a message for the console system.
 input_screenshot_text				Screenshot
 input_screenshot_help				Makes a screenshot and saves it as screenshot_X.bmp in the var directory
 
+input_chat_tooltip                  Press \1 to chat.
 input_chat_text						Chat
 input_chat_help						Lets you talk to other players over the network.
 
