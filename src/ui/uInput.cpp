@@ -42,7 +42,7 @@ static int     su_allActionsLen = 0;
 uAction::uAction(uAction *&anchor,const char* name,
                  int priority_,
                  uInputType t)
-        :tListItem<uAction>(anchor),type(t),tooltip_(NULL),priority(priority_),internalName(name){
+        :tListItem<uAction>(anchor),tooltip_(NULL),type(t),priority(priority_),internalName(name){
     globalID = localID = su_allActionsLen++;
 
     tASSERT(localID < uMAX_ACTIONS);
