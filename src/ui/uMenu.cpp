@@ -147,8 +147,10 @@ static rNoAutoDisplayAtNewlineCallback su_noNewline( uMenu::MenuActive );
 void uMenu::OnEnter(){
 #ifndef DEDICATED
     float nextrepeat = 0.0f;
-    static const float repeatdelay = 0.3f;
-    static const float repeatrate  = 0.05f;
+    static const float repeatdelay = 0.2f;
+    static const float repeatrateStart  = 0.2f;
+    static const float repeatrateMin  = 0.05f;
+    static float repeatrate  = repeatrateStart;
     SDL_Event tEventRepeat;
 #else
     return;
@@ -170,7 +172,7 @@ void uMenu::OnEnter(){
 
 #ifndef DEDICATED
     lastkey=tSysTimeFloat();
-    static const REAL timeout=3;
+    static const REAL timeout=.5;
 #endif
 
     while (!exitFlag && !quickexit && !exitToMain){
@@ -212,6 +214,7 @@ void uMenu::OnEnter(){
                     break;
                 case SDL_KEYUP:
                     repeat = false;
+                    repeatrate = repeatrateStart;
                     break;
                 }
 
@@ -231,6 +234,9 @@ void uMenu::OnEnter(){
             {
                 this->HandleEvent( tEventRepeat );
                 nextrepeat = tSysTimeFloat() + repeatrate;
+                repeatrate *= .71;
+                if ( repeatrate < repeatrateMin )
+                    repeatrate = repeatrateMin;
             }
         }
 
