@@ -43,10 +43,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <map>
 
 uActionPlayer eGameObject::se_turnRight("CYCLE_TURN_RIGHT", -10);
-static uActionTooltip se_turnRightTooltip( eGameObject::se_turnRight, "$input_cycle_turn_right_tooltip", 10 );
+static uActionTooltip se_turnRightTooltip( eGameObject::se_turnRight, 10 );
 
 uActionPlayer eGameObject::se_turnLeft("CYCLE_TURN_LEFT", -10);
-static uActionTooltip se_turnLeftTooltip( eGameObject::se_turnLeft, "$input_cycle_turn_left_tooltip", 10 );
+static uActionTooltip se_turnLeftTooltip( eGameObject::se_turnLeft, 10 );
 
 
 // entry and deletion in the list of all gameObjects

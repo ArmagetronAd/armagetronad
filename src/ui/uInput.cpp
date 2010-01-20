@@ -836,17 +836,12 @@ static uActionGlobalFunc md(&mess_down,&messdown_func);
 // tooltips
 // ********
 
-static tString su_ToConfigName(char const *in)
+uActionTooltip::uActionTooltip( uAction & action, int numHelp, BOOLRETFUNC * veto )
+: tConfItemBase(action.internalName + "_TOOLTIP"), action_( action ), veto_(veto)
 {
-    tString ret(in+1);
-    ret += "_count";
-    tToUpper(ret);
-    return ret;
-}
+    help_ = tString("$input_") + action.internalName + "_tooltip";
+    tToLower( help_ );
 
-uActionTooltip::uActionTooltip( uAction & action, char const * help, int numHelp, BOOLRETFUNC * veto )
-: tConfItemBase(su_ToConfigName(help)), help_(help), action_( action ), veto_(veto)
-{
     // initialize array holding the number of help attempts to give left
     for( int i = uMAX_PLAYERS; i >= 0; --i )
     {

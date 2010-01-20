@@ -3937,7 +3937,7 @@ static bool se_ChatTooltipVeto()
     return sn_GetNetState() == nSTANDALONE;
 }
 
-uActionTooltip ePlayer::s_chatTooltip(ePlayer::s_chat, "$input_chat_tooltip", 1, &se_ChatTooltipVeto);
+uActionTooltip ePlayer::s_chatTooltip(ePlayer::s_chat, 1, &se_ChatTooltipVeto);
 
 int pingCharity = 100;
 static const int maxPingCharity = 300;

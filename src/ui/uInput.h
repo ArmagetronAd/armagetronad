@@ -100,7 +100,7 @@ public:
 class uActionTooltip: public tConfItemBase
 {
 public:
-    uActionTooltip( uAction & action, char const * help, int numHelp, BOOLRETFUNC * veto = NULL );
+    uActionTooltip( uAction & action, int numHelp, BOOLRETFUNC * veto = NULL );
     ~uActionTooltip();
 
     //! presents help to the specified player, starting counting at 1. 
@@ -115,7 +115,7 @@ private:
 
     //! counts how many activations are required to make the tip go away
     int activationsLeft_[uMAX_PLAYERS+1];
-    tString const help_;  //!< help languate item
+    tString help_;        //!< help languate item
     uAction & action_;    //!< action this belongs to
     BOOLRETFUNC * veto_;  //!< function that can block help display
 };
