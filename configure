@@ -1,0 +1,61 @@
+#!/usr/bin/python
+
+available_paths = {
+    'prefix': ('PREFIX', 'prefix where to install'),
+    'sysconfdir': ('AA_SYSCONFDIR', 'prefix where to install configuration files'),
+    'mandir': ('AA_MANDIR', 'prefix where to install manpages'),
+    }
+
+available_options = {
+    'dedicated': ('DEDICATED', 'build a dedicated server'),
+#    'sysinstall': '',
+#    'useradd': '',
+#    'initscripts': '',
+    }
+
+# These get special attention:
+# --enable-games, --enable-multiver, --enable-etc
+
+import sys
+import os.path
+from os import remove
+from optparse import OptionParser, SUPPRESS_HELP
+from subprocess import call
+
+parser = OptionParser()
+
+parser.add_option('--dry-run', action='store_true', dest='dry_run', default=False)
+
+def handle_path_option(option, opt, value, parser, cmakevar):
+    cmakecall.append('-D'+cmakevar+'='+value)
+
+for cooption, (cmoption, help) in available_paths.iteritems():
+    parser.add_option('--'+cooption, action="callback", type="string", callback=handle_path_option, callback_args=(cmoption,), help=help)
+
+def handle_option_option(option, opt, value, parser, cmakevar, enable):
+    if enable:
+        cmakecall.append('-D'+cmakevar+'=yes')
+    else:
+        cmakecall.append('-D'+cmakevar+'=no')
+
+for cooption, (cmoption, help) in available_options.iteritems():
+    parser.add_option('--enable-'+cooption, action="callback", callback=handle_option_option, callback_args=(cmoption,True), help=help)
+    parser.add_option('--disable-'+cooption, action="callback", callback=handle_option_option, callback_args=(cmoption,False), help=SUPPRESS_HELP)
+
+cmakecall = []
+dirname = os.path.dirname(sys.argv[0])
+cmakecall.extend(['cmake', dirname])
+
+(options, args) = parser.parse_args()
+
+# Remove previously set options, to stay in the spirit of ./configure
+
+if not options.dry_run:
+    try:
+        remove( os.path.join(dirname, 'CMakeCache.txt') )
+    except:
+        pass
+
+print 'Calling ' + ' '.join(cmakecall)
+if not options.dry_run:
+    ret = call( cmakecall )

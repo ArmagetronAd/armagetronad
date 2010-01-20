@@ -1,18 +1,15 @@
 set (UNIVERSAL_VARS)
 
 macro (UNIVERSAL_VAR VARNAME VAL)
-    set (${VARNAME} ${VAL})
-#    set (${VARNAME} ${VAL} PARENT_SCOPE)
+    set ("${VARNAME}" "${VAL}" CACHE STRING "Universal variable ${VARNAME}")
     list(APPEND
         UNIVERSAL_VARS
-        ${VARNAME}
+        "${VARNAME}"
         )
 endmacro(UNIVERSAL_VAR VARNAME VAL)
 
 macro (UNIVERSAL_INSTALL_VAR VARNAME VAL)
-    set (${VARNAME} ${VAL})
-#    set (${VARNAME} ${VAL} PARENT_SCOPE)    
-    UNIVERSAL_VAR(${VARNAME} ${${VARNAME}})
+    UNIVERSAL_VAR(${VARNAME} ${VAL})
 endmacro(UNIVERSAL_INSTALL_VAR VARNAME VAL)
 
 macro (WRITE_UNIVARS)

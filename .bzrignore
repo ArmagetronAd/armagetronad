@@ -20,7 +20,6 @@ Makefile.in
 ./autom4te.cache
 ./config.h.in
 ./config.sub
-./configure
 ./depcomp
 ./install-sh
 ./ylwrap
@@ -90,3 +89,4 @@ src/tFakeVersion.h
 config/settings_custom.cfg
 config/server_info.cfg
 ./armagetronad-master
+./screenshot
