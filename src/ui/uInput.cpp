@@ -907,7 +907,7 @@ bool uActionTooltip::Help( int player )
             {
                 maps << last;
             }
-            last = keyname(i);
+            last = tString("<") + keyname(i) + ">";
         }
     }
 
