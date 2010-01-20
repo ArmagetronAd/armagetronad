@@ -29,6 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define LANGUAGE_MENU_INCLUDED
 
 void sg_LanguageInit(); // set languages
-void sg_LanguageMenu(); // language menu
+void sg_LanguageMenu(); // detailed language menu
+void sg_StartupLanguageMenu(); // language menu for startup
 
 #endif

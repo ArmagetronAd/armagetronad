@@ -245,7 +245,7 @@ static void welcome(){
     }
     rSysDep::SwapGL();
 
-    sg_LanguageMenu();
+    sg_StartupLanguageMenu();
 
     // catch some keyboard input
     {

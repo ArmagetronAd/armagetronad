@@ -1559,6 +1559,8 @@ language_second_help		Fallback language if the first language is not available
 language_menu_title		Language Settings
 language_menu_help		Choose the language used for all onscreen texts
 
+language_firstchoice_help Press Enter, Return or Space to select this language.
+
 language_menu_item_fist		First Language:
 language_menu_item_first_help	\g will display most text messages in this language. Use Cursor Left/Right to choose.
 
