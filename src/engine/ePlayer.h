@@ -85,6 +85,8 @@ class ePlayer: public uPlayerPrototype{
     int            CurrentConfitem;
     void   StoreConfitem(tConfItemBase *c);
     void   DeleteConfitems();
+
+    double lastTooltip_;
 public:
     tString    name;                 // the player's screen name
     tString    globalID;             // the global ID of the player in user@authority form

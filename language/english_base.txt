@@ -992,6 +992,8 @@ bug_color_overflow_help     Allows the player's colors to overflow and wrap arou
 input_items_unbound		Unbound
 input_items_global		Global Controls
 
+# used for listing key bindings
+input_or                or
 
 #********************************************
 #********************************************
@@ -1053,15 +1055,18 @@ input_mess_down_help				Scrolls the messages down a page.
 #********************************************
 #********************************************
 
+input_cycle_brake_tooltip   Press \1 to brake (or activate other special functions).
 input_cycle_brake_text		Brake
 input_cycle_brake_help		decreases your speed in critical situations
 
 input_cycle_brake_toggle_text		Toggle Brake
 input_cycle_brake_toggle_help		turns your brake on and off permanently without you needing to hold down a key
 
+input_cycle_turn_right_tooltip	Press \1 to turn right.
 input_cycle_turn_right_text	Turn right
 input_cycle_turn_right_help	Makes a 90 degrees turn to the right
 
+input_cycle_turn_left_tooltip	Press \1 to turn left.
 input_cycle_turn_left_text	Turn left
 input_cycle_turn_left_help	Makes a 90 degrees turn to the left
 
@@ -1098,12 +1103,15 @@ input_zoom_out_help		Shows more of the scene, but with less details.
 input_zoom_in_text		Zoom in
 input_zoom_in_help		Reduces the field of vision and reveals more details on faraway objects.
 
+input_glance_back_tooltip   Press \1 to glance back.
 input_glance_back_text		Glance back
 input_glance_back_help		Turns the camera temporarily backwards.
 
+input_glance_right_tooltip   Press \1 to glance right.
 input_glance_right_text		Glance right
 input_glance_right_help		Turns the camera temporarily to the right.
 
+input_glance_left_tooltip   Press \1 to glance left.
 input_glance_left_text		Glance left
 input_glance_left_help		Turns the camera temporarily to the left.
 
@@ -1119,6 +1127,7 @@ input_look_right_help		Turns the camera to the right or moves it left if the cam
 input_look_left_text		Look left
 input_look_left_help		Turns the camera to the left or moves it right if the camera direction is fixed.
 
+input_switch_view_tooltip   Press \1 to switch camera modes.
 input_switch_view_text		Switch view
 input_switch_view_help		Switches the camera perspective. Available views: Smart external camera (default) and dumb external camera (both fixed to look at your cycle), free floating and internal camera (position fixed at your cycle ).
 

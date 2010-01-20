@@ -225,6 +225,7 @@ static tSettingItem<int> s_s("SCORE_SUICIDE",score_suicide);
 
 uActionPlayer gCycle::s_brake("CYCLE_BRAKE", -5);
 static uActionPlayer s_brakeToggle("CYCLE_BRAKE_TOGGLE", -5);
+static uActionTooltip sg_brakeTooltip( gCycle::s_brake, "$input_cycle_brake_tooltip", 1 );
 
 static eWavData cycle_run("moviesounds/engine.wav","sound/cyclrun.wav");
 static eWavData turn_wav("moviesounds/cycturn.wav","sound/expl.wav");

@@ -1091,6 +1091,8 @@ ePlayer::ePlayer(){
     nAuthentication::SetLoginResultCallback (&ResultCallback);
 #endif
 
+    lastTooltip_ = -100;
+
     nameTeamAfterMe = false;
     favoriteNumberOfPlayersPerTeam = 3;
 
@@ -1268,6 +1270,14 @@ ePlayer::~ePlayer(){
 #ifndef DEDICATED
 void ePlayer::Render(){
     if (cam) cam->Render();
+
+    // present tooltip help
+    double now = tSysTimeFloat();
+    if( now-lastTooltip_ > 1 && !rConsole::CenterDisplayActive() )
+    {
+        uActionTooltip::Help( ID()+1 );
+        lastTooltip_ = now;
+    }
 }
 #endif
 

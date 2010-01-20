@@ -78,6 +78,9 @@ public:
     virtual void DoCenterDisplay(const tString &s,REAL timeout=2,REAL r=1,REAL g=1,REAL b=1);
 
     virtual tString ColorString(REAL r, REAL g, REAL b) const;
+
+    //! returns whether a center display is currently in progress
+    static bool CenterDisplayActive();
 };
 
 

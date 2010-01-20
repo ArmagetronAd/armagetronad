@@ -44,6 +44,7 @@ class eNetGameObject;
 class eCamera;
 class eGrid;
 class uActionCamera;
+class uActionTooltip;
 
 //extern REAL se_cameraRise; // how far down does the current camera look?
 //extern REAL se_cameraZ;
@@ -56,7 +57,7 @@ protected:
     se_moveLeft,se_moveRight,se_moveUp,se_moveDown,se_moveForward,se_moveBack,
     se_zoomIn,se_zoomOut,se_glanceLeft,se_glanceRight,se_glanceBack,
     se_switchView;
-
+    static uActionTooltip se_glanceLeftTooltip, se_glanceRightTooltip, se_glanceBackTooltip, se_switchViewTooltip;
 
     int id;
     //  tCHECKED_PTR(eGameObject) foot;
