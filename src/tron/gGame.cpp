@@ -1862,7 +1862,7 @@ static void own_game( nNetState enter_state ){
     se_KillGameTimer();
 }
 
-static void singlePlayer_game(){
+void sg_SinglePlayerGame(){
     sn_SetNetState(nSTANDALONE);
 
     update_settings();
@@ -2516,7 +2516,7 @@ void MainMenu(bool ingame){
 
     if (!ingame){
         start= new uMenuItemFunction(&game_menu,"$game_menu_start_text",
-                                     "$game_menu_start_help",&singlePlayer_game);
+                                     "$game_menu_start_help",&sg_SinglePlayerGame);
         connect=new uMenuItemFunction
                 (&game_menu,
                  "$network_menu_text",

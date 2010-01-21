@@ -2122,8 +2122,20 @@ welcome_message_intro		Default Settings have been loaded according to your confi
 welcome_message_vendor		GL Vendor   : 
 welcome_message_renderer	GL Renderer : 
 welcome_message_version		GL Version  : 
-welcome_message_finish		\nHave fun!\n
+welcome_message_finish		You will now be hurled directly into a local game to get a feeling for things. Good luck and have fun!\n\nLater on, you can access local games from the main menu via the "Play Game/"Local Game" menu path.
 #\n\nThis Game is supported from KGN (Krawall Gaming Network, www.krawall.de).
+
+#********************************************
+#********************************************
+#
+#   Initial setup menu and first game
+#
+#********************************************
+#********************************************
+
+first_setup                 First Setup
+first_game_title            First Game
+first_game_text             
 
 #********************************************
 #********************************************

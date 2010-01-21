@@ -247,63 +247,42 @@ static void welcome(){
 
     sg_StartupLanguageMenu();
 
-    // catch some keyboard input
+    // initial setup menu
     {
-        uInputProcessGuard inputProcessGuard;
-        while (su_GetSDLInput(tEvent)) ;
+        uMenu firstSetup("$first_setup");
+
+        uMenuItemString n(&firstSetup,
+                          "$player_name_text",
+                          "$player_name_help",
+                          ePlayer::PlayerConfig(0)->name, 16);
+
+        firstSetup.ReverseItems();
+        firstSetup.Enter();
     }
 
-    timeout = tSysTimeFloat() + 10;
+    if ( sr_glOut )
+    {
+        tOutput full;
+        
+        full.Append(tOutput("$welcome_message_intro"));
 
-    sr_UnlockSDL();
-    uInputProcessGuard inputProcessGuard;
-    while ((!su_GetSDLInput(tEvent) || tEvent.type!=SDL_KEYDOWN) &&
-            tSysTimeFloat() < timeout){
+        full.Append(tOutput("$welcome_message_vendor"));
+        full.AddLiteral( gl_vendor );
+        full.AddLiteral( "\n" );
+        full.Append(tOutput("$welcome_message_renderer"));
+        full.AddLiteral(gl_renderer);
+        full.AddLiteral("\n");
+        full.Append(tOutput("$welcome_message_version"));
+        full.AddLiteral(gl_version);
+        full.AddLiteral("\n\n");
 
-        sr_ResetRenderState(true);
-        rViewport::s_viewportFullscreen.Select();
+        full.Append(tOutput("$welcome_message_finish"));
 
-        if ( sr_glOut )
-        {
-            rSysDep::ClearGL();
-
-            uMenu::GenericBackground();
-
-            REAL w=16*2/640.0;
-            REAL h=32*2/480.0;
-
-
-            //REAL middle=-.6;
-
-            Color(1,1,1);
-            DisplayText(0,.8,w,h,tOutput("$welcome_message_heading"));
-
-            w/=2;
-            h/=2;
-
-            rTextField c(-.8,.6, w, h);
-
-
-            c << tOutput("$welcome_message_intro");
-
-            c.SetIndent(12);
-
-            c << tOutput("$welcome_message_vendor")   << gl_vendor   << '\n';
-            c << tOutput("$welcome_message_renderer") << gl_renderer << '\n';
-            c << tOutput("$welcome_message_version")  << gl_version  << '\n';
-
-            c.SetIndent(0);
-
-            c << tOutput("$welcome_message_finish");
-
-            rSysDep::SwapGL();
-        }
-
-        tAdvanceFrame();
+        uMenu::Message( tOutput("$welcome_message_heading"), full, 30 );
     }
-    sr_LockSDL();
 
-    sr_textOut = textOutBack;
+    // start a first single player game
+    sg_SinglePlayerGame();
 }
 #endif
 
