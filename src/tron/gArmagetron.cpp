@@ -147,6 +147,84 @@ static tConfItem<bool> udx("USE_DIRECTX","makes use of the DirectX input "
 
 extern void exit_game_objects(eGrid *grid);
 
+// initial setup menu
+void sg_StartupPlayerMenu()
+{
+    uMenu firstSetup("$first_setup", false);
+    
+    uMenuItemExit e2(&firstSetup, "$menuitem_accept", "$menuitem_accept_help");
+    
+    ePlayer * player = ePlayer::PlayerConfig(0);
+    tASSERT( player );
+
+    tString keyboardTemplate("");
+    uMenuItemSelection<tString> k(&firstSetup, "$first_setup_keys", "$first_setup_keys_help", keyboardTemplate );
+    if ( !st_FirstUse )
+    {
+        k.NewChoice( "$first_setup_keys_leave", "$first_setup_keys_leave_help", tString("") );
+    }
+    k.NewChoice( "$first_setup_keys_cursor", "$first_setup_keys_cursor_help", tString("keys_cursor.cfg") );
+    k.NewChoice( "$first_setup_keys_wasd", "$first_setup_keys_wasd_help", tString("keys_wasd.cfg") );
+    k.NewChoice( "$first_setup_keys_both", "$first_setup_keys_both_help", tString("keys_twohand.cfg") );
+
+    tColor leave(0,0,0,0);
+    tColor color(1,0,0);
+    uMenuItemSelection<tColor> c(&firstSetup,
+                                 "$first_setup_color",
+                                 "$first_setup_color_help",
+                                 color);   
+    c.NewChoice( "$first_setup_color_red", "", tColor(1,0,0) );
+    c.NewChoice( "$first_setup_color_blue", "", tColor(0,0,1) );
+    c.NewChoice( "$first_setup_color_green", "", tColor(0,1,0) );
+    c.NewChoice( "$first_setup_color_yellow", "", tColor(1,1,0) );
+    c.NewChoice( "$first_setup_color_orange", "", tColor(1,.5,0) );
+    c.NewChoice( "$first_setup_color_purple", "", tColor(.5,0,1) );
+    c.NewChoice( "$first_setup_color_magenta", "", tColor(1,0,1) );
+    c.NewChoice( "$first_setup_color_cyan", "", tColor(0,1,1) );
+    c.NewChoice( "$first_setup_color_white", "", tColor(1,1,1) );
+    c.NewChoice( "$first_setup_color_dark", "", tColor(0,0,0) );
+    
+    if ( !st_FirstUse )
+    {
+        color = leave;
+        c.NewChoice( "$first_setup_color_leave", "", leave );
+    }
+    else
+    {
+        for(int i=tRandomizer::GetInstance().Get(4); i>=0; --i)
+        {
+            c.LeftRight(1);
+        }
+    }
+
+    uMenuItemString n(&firstSetup,
+                      "$player_name_text",
+                      "$player_name_help",
+                      player->name, 16);
+    
+    uMenuItemExit e(&firstSetup, "$menuitem_accept", "$menuitem_accept_help");
+    
+    firstSetup.Enter();
+    
+    // store color
+    if( ! (color == leave) )
+    {
+        player->rgb[0] = color.r_*15;
+        player->rgb[1] = color.g_*15;
+        player->rgb[2] = color.b_*15;
+    }
+
+    // load keyboard layout
+    if( keyboardTemplate.Len() > 1 )
+    {
+        std::ifstream s;
+        if( tConfItemBase::OpenFile( s, keyboardTemplate, tConfItemBase::Config ) )
+        {
+            tConfItemBase::ReadFile( s );
+        }
+    }
+}
+
 #ifndef DEDICATED
 static void welcome(){
     bool textOutBack = sr_textOut;
@@ -176,7 +254,6 @@ static void welcome(){
 
     if (st_FirstUse)
     {
-        st_FirstUse=false;
         sr_LoadDefaultConfig();
         textOutBack = sr_textOut;
         sr_textOut = false;
@@ -248,50 +325,9 @@ static void welcome(){
 
     sg_StartupLanguageMenu();
 
-    // initial setup menu
-    {
-        uMenu firstSetup("$first_setup", false);
+    sg_StartupPlayerMenu();
 
-        uMenuItemExit e2(&firstSetup, "$menuitem_accept", "$menuitem_accept_help");
-
-        ePlayer * player = ePlayer::PlayerConfig(0);
-        tASSERT( player );
-
-        tColor color(1,0,0);
-        uMenuItemSelection<tColor> c(&firstSetup,
-                                           "$first_setup_color",
-                                           "$first_setup_color_help",
-                          color);
-        c.NewChoice( "$first_setup_color_red", "", tColor(1,0,0) );
-        c.NewChoice( "$first_setup_color_blue", "", tColor(0,0,1) );
-        c.NewChoice( "$first_setup_color_green", "", tColor(0,1,0) );
-        c.NewChoice( "$first_setup_color_yellow", "", tColor(1,1,0) );
-       c.NewChoice( "$first_setup_color_orange", "", tColor(1,.5,0) );
-        c.NewChoice( "$first_setup_color_purple", "", tColor(.5,0,1) );
-         c.NewChoice( "$first_setup_color_magenta", "", tColor(1,0,1) );
-        c.NewChoice( "$first_setup_color_cyan", "", tColor(0,1,1) );
-        c.NewChoice( "$first_setup_color_white", "", tColor(1,1,1) );
-        c.NewChoice( "$first_setup_color_dark", "", tColor(0,0,0) );
-
-        for(int i=tRandomizer::GetInstance().Get(4); i>=0; --i)
-        {
-            c.LeftRight(1);
-        }
-
-        uMenuItemString n(&firstSetup,
-                          "$player_name_text",
-                          "$player_name_help",
-                          player->name, 16);
-
-        uMenuItemExit e(&firstSetup, "$menuitem_accept", "$menuitem_accept_help");
-
-        firstSetup.Enter();
-
-        // store color
-        player->rgb[0] = color.r_*15;
-        player->rgb[1] = color.g_*15;
-        player->rgb[2] = color.b_*15;
-    }
+    st_FirstUse=false;
 
     uMenu::Message( tOutput("$welcome_message_heading"), tOutput("$welcome_message"), 300 );
 
