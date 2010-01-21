@@ -2160,11 +2160,13 @@ first_setup_keys_help       Select your startup keyboard layout here. You can in
 first_setup_keys_cursor     Cursor Keys
 first_setup_keys_cursor_help Control your cycle with the cursor keys, bulk of keyboard used for camera control and special actions. Good for right handed people.
 first_setup_keys_wasd       WASD Keys
-first_setup_keys_wasd_help  Control your cycle with the ASD keys (well, W is not really used), Cursor keys and rest of keyboard control camera and special actions. Good for left handed people and others used to move with WASD.
-first_setup_keys_both       Two Handed
-first_setup_keys_both_help  Turn and look left with your left hand, turn and look right with the right hand. Good for ambidextrous people who don't want to use the mouse in any way.
+first_setup_keys_wasd_help  Control your cycle with the ASD keys (well, W is not really used), Cursor keys and rest of keyboard control camera and special actions. Good for left handed people and others used to move with WASD. Bad for people with uncommon keyboard layouts.
+#first_setup_keys_both       Two Handed
+#first_setup_keys_both_help  Turn and look left with your left hand, turn and look right with the right hand. Good for ambidextrous people who don't want to use the mouse in any way and never play with a second player in splitscreen.
+first_setup_keys_x          Around X
+first_setup_keys_x_help     The default setup of old versions of the game. X turns right, the key left to that turns left. For veterans.
 first_setup_keys_leave      Leave Alone
-first_setup_keys_wasd_help  Don't load a new template.
+first_setup_keys_leave_help  Don't load a new template.
 
 #********************************************
 #********************************************
