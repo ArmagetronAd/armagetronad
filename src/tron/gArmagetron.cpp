@@ -249,14 +249,15 @@ static void welcome(){
 
     // initial setup menu
     {
-        uMenu firstSetup("$first_setup");
+        uMenu firstSetup("$first_setup", false);
 
         uMenuItemString n(&firstSetup,
                           "$player_name_text",
                           "$player_name_help",
                           ePlayer::PlayerConfig(0)->name, 16);
 
-        firstSetup.ReverseItems();
+        uMenuItemExit e(&firstSetup, "$menuitem_accept", "$menuitem_accept_help");
+
         firstSetup.Enter();
     }
 
@@ -266,12 +267,15 @@ static void welcome(){
         
         full.Append(tOutput("$welcome_message_intro"));
 
+        full.AddLiteral( "    " );
         full.Append(tOutput("$welcome_message_vendor"));
         full.AddLiteral( gl_vendor );
         full.AddLiteral( "\n" );
+        full.AddLiteral( "    " );
         full.Append(tOutput("$welcome_message_renderer"));
         full.AddLiteral(gl_renderer);
         full.AddLiteral("\n");
+        full.AddLiteral( "    " );
         full.Append(tOutput("$welcome_message_version"));
         full.AddLiteral(gl_version);
         full.AddLiteral("\n\n");

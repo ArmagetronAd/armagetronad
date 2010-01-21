@@ -2135,7 +2135,6 @@ welcome_message_finish		You will now be hurled directly into a local game to get
 
 first_setup                 First Setup
 first_game_title            First Game
-first_game_text             
 
 #********************************************
 #********************************************
