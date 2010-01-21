@@ -1424,7 +1424,7 @@ game_menu_wz_ld_help		Minimum number of seconds since the last death before the 
 network_menu_lan_text		LAN Multiplayer
 network_menu_lan_help		Connect to a server on your local network or start a server.
 
-network_menu_internet_text	Internet Multiplayer
+network_menu_internet_text	Online Multiplayer
 network_menu_internet_help	Connect to an internet server or start one.
 
 network_opts_text		Network Setup
@@ -2118,11 +2118,10 @@ timer_hickup                Timer hickup of \1 seconds detected and compensated.
 #********************************************
 
 welcome_message_heading		Welcome to \g!
-welcome_message_intro		Default Settings have been loaded according to your configuration\n\n
-welcome_message_vendor		GL Vendor   : 
-welcome_message_renderer	GL Renderer : 
-welcome_message_version		GL Version  : 
-welcome_message_finish2		You will now be hurled directly into a local game to get a feeling for things. Good luck and have fun!\n\nLater on, you can access local games from the main menu via the "Play Game/"Local Game" menu path.
+welcome_message		        You will now be hurled directly into a local game to get a feeling for things. It is set to a slower speed than a usual game. Your task is to make the other cycle crash into a wall. Don't panic, good luck and have fun!
+
+welcome_message_2_heading   We hope you enjoyed it so far.
+welcome_message_2           You will now enter the regular main menu. You can access local games now via the "Play Game/"Local Game" menu path.\n\nBut the true action is to be found online, many industrious people have put up interesting servers with gameplay variations not available if you play solo.\nTo go online, select "Play Game"/"Multiplayer"/"Online Multiplayer".
 
 #********************************************
 #********************************************
