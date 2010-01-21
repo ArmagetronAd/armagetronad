@@ -1215,6 +1215,12 @@ path_info_data                  Data directories (textures, moviepack, ...):
 path_info_screenshot            Screenshot directories:
 path_info_var                   Var directories:
 
+version_info_gl_intro       \n\n0xff8888System OpenGL information:0xRESETT 
+version_info_gl_vendor		\n  GL Vendor   : 
+version_info_gl_renderer	\n  GL Renderer : 
+version_info_gl_version		\n  GL Version  : 
+
+
 #********************************************
 #********************************************
 #
@@ -2118,6 +2124,7 @@ timer_hickup                Timer hickup of \1 seconds detected and compensated.
 #********************************************
 
 welcome_message_heading		Welcome to \g!
+
 welcome_message		        You will now be hurled directly into a local game to get a feeling for things. It is set to a slower speed than a usual game. Your task is to make the other cycle crash into a wall. Don't panic, good luck and have fun!
 
 welcome_message_2_heading   We hope you enjoyed it so far.

@@ -261,29 +261,7 @@ static void welcome(){
         firstSetup.Enter();
     }
 
-    if ( sr_glOut )
-    {
-        /*
-        tOutput full;
-
-        full.Append(tOutput("$welcome_message_intro"));
-        full.AddLiteral( "    " );
-        full.Append(tOutput("$welcome_message_vendor"));
-        full.AddLiteral( gl_vendor );
-        full.AddLiteral( "\n    " );
-        full.Append(tOutput("$welcome_message_renderer"));
-        full.AddLiteral(gl_renderer);
-        full.AddLiteral("\n    ");
-        full.Append(tOutput("$welcome_message_version"));
-        full.AddLiteral(gl_version);
-        full.AddLiteral("\n\n");
-
-        full.Append(tOutput("$welcome_message"));
-        */
-
-
-        uMenu::Message( tOutput("$welcome_message_heading"), tOutput("$welcome_message"), 30 );
-    }
+    uMenu::Message( tOutput("$welcome_message_heading"), tOutput("$welcome_message"), 300 );
 
     // start a first single player game
     sg_currentSettings->speedFactor = -2;
@@ -292,7 +270,7 @@ static void welcome(){
     sg_currentSettings->autoNum = 1;
     sg_currentSettings->speedFactor = 0;
 
-    uMenu::Message( tOutput("$welcome_message_2_heading"), tOutput("$welcome_message_2"), 30 );
+    uMenu::Message( tOutput("$welcome_message_2_heading"), tOutput("$welcome_message_2"), 300 );
 }
 #endif
 

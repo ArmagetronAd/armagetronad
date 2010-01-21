@@ -2469,6 +2469,15 @@ void sg_DisplayVersionInfo() {
     versionInfo << "$version_info_version" << "\n";
     st_PrintPathInfo(versionInfo);
     versionInfo << "$version_info_misc_stuff";
+
+    versionInfo << "$version_info_gl_intro";
+    versionInfo << "$version_info_gl_vendor";
+    versionInfo << gl_vendor;
+    versionInfo << "$version_info_gl_renderer";
+    versionInfo << gl_renderer;
+    versionInfo << "$version_info_gl_version";
+    versionInfo << gl_version;
+
     sg_FullscreenMessage("$version_info_title", versionInfo, 1000);
 }
 
