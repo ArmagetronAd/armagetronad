@@ -133,7 +133,7 @@ static nSettingItemWatched<tString> conf_mapfile("MAP_FILE",mapfile, nConfItemVe
 // otherwise, it's from game state changes.
 static void sg_SoundPause( bool pause, bool fromActivity )
 {
-    bool flags[2]={true, false};
+    static bool flags[2]={true, false};
     flags[ fromActivity ] = pause;
     se_SoundPause( flags[0] || flags[1] );
 }

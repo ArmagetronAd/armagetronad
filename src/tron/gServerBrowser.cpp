@@ -297,7 +297,7 @@ void gServerBrowser::BrowseServers()
     // eat excess input the user made while the list was fetched
     SDL_Event ignore;
     REAL time;
-    while(su_GetSDLInput(ignore, time));
+    while(su_GetSDLInput(ignore, time)) ;
 
     browser.Enter();
 

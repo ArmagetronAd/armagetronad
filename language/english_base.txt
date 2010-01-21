@@ -1277,7 +1277,7 @@ game_menu_iq_text		AI IQ:
 game_menu_iq_help		Lets you select the average intelligence of the computer controlled players("Artificial Intelligence") in the game.
 
 game_menu_minplayers_text	Min Players:
-game_menu_minplayers_help	Selects the minimum nuber of players that will be on the game grid. If not enough humans are present, the empty positions will be filled by AIs.
+game_menu_minplayers_help	Selects the minimum number of players that will be on the game grid. If not enough humans are present, the empty positions will be filled by AIs.
 
 game_menu_speed_text		Speed:
 game_menu_speed_help		Speed modifier. Negative values slow the game down, positive values speed it up. An increase of two in this value will double the speed. Reasonable values lie between -2 and +4.
@@ -1563,7 +1563,7 @@ language_menu_item_fist		First Language:
 language_menu_item_first_help	\g will display most text messages in this language. Use Cursor Left/Right to choose.
 
 language_menu_item_second	Second Language:
-language_menu_item_second_help	If the fist language is not available for one text item, it will be displayed in the second language (or in english as final fallback).  Use Cursor Left/Right to choose.
+language_menu_item_second_help	If the first language is not available for one text item, it will be displayed in the second language (or in english as final fallback).  Use Cursor Left/Right to choose.
 
 #*************************************
 #*************************************
