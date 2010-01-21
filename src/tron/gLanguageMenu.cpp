@@ -92,9 +92,21 @@ void sg_LanguageMenu()
 // for the first language selection, use a menu item for each language
 class uMenuItemLanguage: public uMenuItemAction
 {
+    // translates the language choice help message
+    static tString TranslateHelpOnTheFly(tLanguage & language)
+    {
+        // temporarily set and translate
+        tLanguage * oldFirst = tLanguage::FirstLanguage();
+        language.SetFirstLanguage();
+        tString ret(tOutput("$language_firstchoice_help"));
+        oldFirst->SetFirstLanguage();
+
+        return ret;
+    }
+    
 public:
     uMenuItemLanguage( uMenu *M, tLanguage & language )
-    : uMenuItemAction(M, language.Name(), tOutput("$language_firstchoice_help"))
+    : uMenuItemAction(M, language.Name(), TranslateHelpOnTheFly(language) )
     , language_( language )
     {
     }
