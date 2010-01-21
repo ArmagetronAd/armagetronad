@@ -848,7 +848,7 @@ uActionTooltip::uActionTooltip( uAction & action, int numHelp, VETOFUNC * veto )
     // initialize array holding the number of help attempts to give left
     for( int i = uMAX_PLAYERS; i >= 0; --i )
     {
-        activationsLeft_[i] = numHelp;
+        activationsLeft_[i] = 0; // numHelp;
     }
 
     action.tooltip_ = this;
