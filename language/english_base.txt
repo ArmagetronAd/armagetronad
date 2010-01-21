@@ -2156,7 +2156,7 @@ first_setup_color_dark      0x000000Dark0xRESETT
 first_setup_color_leave     Leave Alone
 
 first_setup_keys            Keyboard Layout:
-first_setup_keys_help       Select your startup keyboard layout here. It can be customized later.
+first_setup_keys_help       Select your startup keyboard layout here. It can be customized later, individual bindings can be changed. Select with cursor left and cursor right.
 first_setup_keys_cursor     Cursor Keys
 first_setup_keys_cursor_help Control your cycle with the cursor keys, bulk of keyboard used for camera control and special actions. Good for right handed people.
 first_setup_keys_wasd       WASD Keys
