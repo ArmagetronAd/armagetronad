@@ -2141,6 +2141,19 @@ welcome_message_2           You will now enter the regular main menu. You can ac
 first_setup                 First Setup
 first_game_title            First Game
 
+first_setup_color           Colour:
+first_setup_color_help      Selects the colour of your lightcylce. You'll later be able to customize it in more detail.
+first_setup_color_red       0xff0000Red0xRESETT
+first_setup_color_green     0x00ff00Green0xRESETT
+first_setup_color_blue      0x0000ffBlue0xRESETT
+first_setup_color_yellow    0xffff00Yellow0xRESETT
+first_setup_color_purple    0x7f00ffPurple0xRESETT
+first_setup_color_orange    0xff7f00Orange0xRESETT
+first_setup_color_magenta   0xff00ffMagenta0xRESETT
+first_setup_color_cyan      0x00ffffCyan0xRESETT
+first_setup_color_white     0xffffffWhite0xRESETT
+first_setup_color_dark      0x000000Dark0xRESETT
+
 #********************************************
 #********************************************
 #

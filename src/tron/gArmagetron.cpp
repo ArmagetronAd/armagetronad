@@ -40,6 +40,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //#include "eTess.h"
 #include "rTexture.h"
 #include "tConfiguration.h"
+#include "tRandom.h"
 #include "tRecorder.h"
 #include "tCommandLine.h"
 #include "eAdvWall.h"
@@ -251,14 +252,43 @@ static void welcome(){
     {
         uMenu firstSetup("$first_setup", false);
 
+        ePlayer * player = ePlayer::PlayerConfig(0);
+        tASSERT( player );
+
+        tColor color(1,0,0);
+        uMenuItemSelection<tColor> c(&firstSetup,
+                                           "$first_setup_color",
+                                           "$first_setup_color_help",
+                          color);
+        c.NewChoice( "$first_setup_color_red", "", tColor(1,0,0) );
+        c.NewChoice( "$first_setup_color_blue", "", tColor(0,0,1) );
+        c.NewChoice( "$first_setup_color_green", "", tColor(0,1,0) );
+        c.NewChoice( "$first_setup_color_yellow", "", tColor(1,1,0) );
+       c.NewChoice( "$first_setup_color_orange", "", tColor(1,.5,0) );
+        c.NewChoice( "$first_setup_color_purple", "", tColor(.5,0,1) );
+         c.NewChoice( "$first_setup_color_magenta", "", tColor(1,0,1) );
+        c.NewChoice( "$first_setup_color_cyan", "", tColor(0,1,1) );
+        c.NewChoice( "$first_setup_color_white", "", tColor(1,1,1) );
+        c.NewChoice( "$first_setup_color_dark", "", tColor(0,0,0) );
+
+        for(int i=tRandomizer::GetInstance().Get(4); i>=0; --i)
+        {
+            c.LeftRight(1);
+        }
+
         uMenuItemString n(&firstSetup,
                           "$player_name_text",
                           "$player_name_help",
-                          ePlayer::PlayerConfig(0)->name, 16);
+                          player->name, 16);
 
         uMenuItemExit e(&firstSetup, "$menuitem_accept", "$menuitem_accept_help");
 
         firstSetup.Enter();
+
+        // store color
+        player->rgb[0] = color.r_*15;
+        player->rgb[1] = color.g_*15;
+        player->rgb[2] = color.b_*15;
     }
 
     uMenu::Message( tOutput("$welcome_message_heading"), tOutput("$welcome_message"), 300 );
