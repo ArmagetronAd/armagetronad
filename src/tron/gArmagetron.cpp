@@ -270,17 +270,15 @@ static void welcome(){
         full.AddLiteral( "    " );
         full.Append(tOutput("$welcome_message_vendor"));
         full.AddLiteral( gl_vendor );
-        full.AddLiteral( "\n" );
-        full.AddLiteral( "    " );
+        full.AddLiteral( "\n    " );
         full.Append(tOutput("$welcome_message_renderer"));
         full.AddLiteral(gl_renderer);
-        full.AddLiteral("\n");
-        full.AddLiteral( "    " );
+        full.AddLiteral("\n    ");
         full.Append(tOutput("$welcome_message_version"));
         full.AddLiteral(gl_version);
         full.AddLiteral("\n\n");
 
-        full.Append(tOutput("$welcome_message_finish"));
+        full.Append(tOutput("$welcome_message_finish2"));
 
         uMenu::Message( tOutput("$welcome_message_heading"), full, 30 );
     }
