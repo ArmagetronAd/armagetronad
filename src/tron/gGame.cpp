@@ -2481,6 +2481,8 @@ void sg_DisplayVersionInfo() {
     sg_FullscreenMessage("$version_info_title", versionInfo, 1000);
 }
 
+void sg_StartupPlayerMenu();
+
 void MainMenu(bool ingame){
     //	update_settings();
 
@@ -2632,6 +2634,11 @@ void MainMenu(bool ingame){
     uMenu misc("$misc_menu_text");
 
     //  misc.SetCenter(.25);
+
+    uMenuItemFunction first_setup
+    (&misc,"$misc_initial_menu_title",
+     "$misc_initial_menu_help",
+     &sg_StartupPlayerMenu);
 
     uMenuItemFunction language
     (&misc,"$language_menu_title",

@@ -1550,6 +1550,8 @@ misc_textout_help		Toggles the display of text messages (chat, status info...) o
 misc_moviepack_text		Moviepack:
 misc_moviepack_help		If this is enabled and the moviepack is installed, \g will display more movie-like graphics.
 
+misc_initial_menu_title Redo First Setup
+misc_initial_menu_help Restarts the first setup menu where you can select color and keyboard layout templates.
 
 #*************************************
 #*************************************

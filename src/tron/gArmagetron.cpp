@@ -163,6 +163,7 @@ void sg_StartupPlayerMenu()
     if ( !st_FirstUse )
     {
         k.NewChoice( "$first_setup_keys_leave", "$first_setup_keys_leave_help", tString("") );
+        keyboardTemplate="";
     }
     k.NewChoice( "$first_setup_keys_cursor", "$first_setup_keys_cursor_help", tString("keys_cursor.cfg") );
     k.NewChoice( "$first_setup_keys_wasd", "$first_setup_keys_wasd_help", tString("keys_wasd.cfg") );
@@ -176,6 +177,13 @@ void sg_StartupPlayerMenu()
                                  "$first_setup_color",
                                  "$first_setup_color_help",
                                  color);   
+
+    if ( !st_FirstUse )
+    {
+        color = leave;
+        c.NewChoice( "$first_setup_color_leave", "", leave );
+    }
+
     c.NewChoice( "$first_setup_color_red", "", tColor(1,0,0) );
     c.NewChoice( "$first_setup_color_blue", "", tColor(0,0,1) );
     c.NewChoice( "$first_setup_color_green", "", tColor(0,1,0) );
@@ -187,12 +195,7 @@ void sg_StartupPlayerMenu()
     c.NewChoice( "$first_setup_color_white", "", tColor(1,1,1) );
     c.NewChoice( "$first_setup_color_dark", "", tColor(0,0,0) );
     
-    if ( !st_FirstUse )
-    {
-        color = leave;
-        c.NewChoice( "$first_setup_color_leave", "", leave );
-    }
-    else
+    if ( st_FirstUse )
     {
         for(int i=tRandomizer::GetInstance().Get(4); i>=0; --i)
         {

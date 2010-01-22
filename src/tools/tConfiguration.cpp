@@ -940,7 +940,7 @@ void st_LoadConfig( bool printChange )
 #else
     if (st_FirstUse)
     {
-//        Load( config, "default.cfg" );
+        Load( config, "default.cfg" );
     }
 #endif
 
