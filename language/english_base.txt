@@ -2162,7 +2162,9 @@ first_setup_leave_help      Don't change this.
 first_setup_keys            Keyboard Layout:
 first_setup_keys_help       Select your startup keyboard layout here. It can be customized later, individual bindings can be changed. Select with cursor left and cursor right.
 first_setup_keys_cursor     Cursor Keys
-first_setup_keys_cursor_help Control your cycle with the cursor keys, bulk of keyboard used for camera control and special actions. Good for right handed people and our general recommendation.
+first_setup_keys_cursor_help Control your cycle with the cursor keys, bulk of keyboard used for camera control, special actions and the second player. Good for right handed people and our general recommendation.
+first_setup_keys_cursor_single     Cursor Keys, Single Player
+first_setup_keys_cursor_single_help Control your cycle with the cursor keys, bulk of keyboard used for camera control and special actions. Good for right handed people when no friends are around.
 first_setup_keys_wasd       WASD Keys
 first_setup_keys_wasd_help  Control your cycle with the ASD keys and surroundings, Cursor keys and rest of keyboard control camera and special actions. Good for left handed people and those used to move with WASD. Bad for people with AZERTY layout.
 first_setup_keys_zqsd       ZQSD Keys
