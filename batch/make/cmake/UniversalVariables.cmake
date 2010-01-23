@@ -12,6 +12,10 @@ macro (WRITE_UNIVARS)
     file(REMOVE src/tUniversalVariables.h)
     foreach(UNIVAR ${UNIVERSAL_VARS})
         file(APPEND src/tUniversalVariables.h
+"#ifndef ${UNIVAR}
+    #define ${UNIVAR} \"${${UNIVAR}}\"
+#endif
+"
             )
     endforeach(UNIVAR ${UNIVERSAL_VARS})
 endmacro(WRITE_UNIVARS)

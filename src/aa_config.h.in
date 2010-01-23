@@ -15,6 +15,9 @@
 
 #cmakedefine HAVE_FTGL_H 1
 #cmakedefine HAVE_GOOGLE_PROTOBUF_MESSAGE_H 1
+#cmakedefine HAVE_LIBSDL_MIXER 1
+#cmakedefine SDLMIXER_FOUND 1
+
 #cmakedefine HAVE_INTTYPES_H 1
 #cmakedefine HAVE_MEMORY_H 1
 #cmakedefine HAVE_STDINT_H 1
@@ -26,4 +29,11 @@
 #cmakedefine HAVE_UNISTD_H 1
 
 #cmakedefine HAVE_SOCKLEN_T 1
+
+// Options
+#cmakedefine ENABLE_ZONESV1 1
+#cmakedefine ENABLE_ZONESV2 1
+#cmakedefine USEPARTICLES 1
+#cmakedefine NOJOYSTICK 1
+#cmakedefine BUILD_FORTRESS 1
 

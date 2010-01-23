@@ -23,6 +23,16 @@ endif()
 
 option(SYSINSTALL "Enable system-wide install" YES)
 
+option(ENABLE_ZONESV1 "Enable deprecated zonesv1 code" NO)
+option(ENABLE_ZONESV2 "Enable experimental zonesv2 code" YES)
+option(FORTRESS "Enable fortress support" ${ENABLE_ZONESV2})
+option(USEPARTICLES "Compile in support for experimental particle system" NO)
+option(NOJOYSTICK "Disable joystick support" NO)
+
+if(ENABLE_ZONESV2 AND FORTRESS)
+    set(BUILD_FORTRESS 1)
+endif()
+
 ##### CONFIGURE CHECKS #####
 include (UniversalVariables)
 include (CheckIncludeFiles)
@@ -79,11 +89,15 @@ include (FindPythonInterp)
 
 if (FTGL_FOUND)
     set(HAVE_FTGL_H 1)
-endif (FTGL_FOUND)
+endif ()
 
 if (PROTOBUF_FOUND)
     set(HAVE_GOOGLE_PROTOBUF_MESSAGE_H 1)
-endif (PROTOBUF_FOUND)
+endif ()
+
+if (SDLMIXER_FOUND)
+    set(HAVE_LIBSDL_MIXER 1)
+endif ()
 
 find_package( Boost 1.36.0 )
 
@@ -122,7 +136,6 @@ set (${progname}_INCLUDE_DIRS
 
 set (${progname}_DEFINES
     ${${progname}_DEFINES}
-    -DENABLE_ZONESV2 -DENABLE_ZONESV1 # Hacks :(
     ${PNG_DEFINITIONS}
     )
 
