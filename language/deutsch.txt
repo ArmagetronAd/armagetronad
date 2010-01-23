@@ -391,6 +391,7 @@ ping_flood_time_50_help       Kürzeste tolerierte Zeit, während der 10 Pings von
 ping_flood_time_100_help      Kürzeste tolerierte Zeit, während der 10 Pings von einer Maschine kommen dürfen.
 ping_flood_global_help        Die Zeiten, die bei PING_FLOOD_TIME_X angegeben sind, zählen, mit diesem Faktor multipliziert, auch für Pings von allen Maschinen zusammengenommen. Ein negativer Wert schaltet dieses Feature ab.
 
+shuffle_spam_messages_per_round_help Maximale Zahl an Positionsänderungsnachrichten, die pro Spieler und pro Runde gezeigt werden. Null bedeutet keine Grenze.
 spam_protection_repeat_help   Mindestzeit, die zwischen gleichlautenden Chat-Nachrichten liegen muss.
 spam_protection_help          Schärfe des Spamschutzes; der Kehrwert bestimmt die minimale Zeit zwischen zwei Nachrichten.
 spam_protection_vote_help     Extrafaktor auf SPAM_PROTECTION für das eröffnen von Abstimmungen.
@@ -1260,7 +1261,7 @@ path_info_var                 Verzeichnisse für Spieldaten:
 game_menu_start_text          Solospiel
 game_menu_start_help          Transportiert alle lokal eingerichteten Spieler auf das Spieleraster.
 
-network_menu_text             Netzwerkspiel
+network_menu_text             Mehrspieler
 network_menu_help             Verbindet dich mit einem Netzwerkspiel oder fängt eines an.
 
 game_settings_menu_text       Spiel konfigurieren
@@ -2353,6 +2354,7 @@ no_real_teams                 Keine Teams mit mehr als einem Spieler.\n
 player_topologypolice         Die Topologiepolizei befiehlt: \1
 
 team_shuffle                  \1 wird von Position \2 auf \3 verschoben.
+team_shuffle_suppress         Diese Runde werden keine weiteren Verschiebenachrichten für diesen Spieler mehr gezeigt.\n
 player_noshuffleup            Du darfst dich hier nicht selbst befördern.\n
 player_noshuffle              Dein Positionsänderungswunsch hat keinen Effekt.\n
 player_shuffle_error          /shuffle erwartet eine Zahl als Argument; mit explizitem Vorzeichen (+/-) wird die Position um die angegebene Zahl an Plätzen verändert, ohne Vorzeichen geht es and die angegebene absolute Position.\n

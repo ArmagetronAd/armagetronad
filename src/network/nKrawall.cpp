@@ -255,7 +255,6 @@ nKrawall::nMethod::nMethod( char const * method_, std::istream & properties )
         properties >> property;
         tToLower( property );
 
-        std::ws( properties );
         if ( property == "prefix" )
         {
             prefix.ReadLine( properties );

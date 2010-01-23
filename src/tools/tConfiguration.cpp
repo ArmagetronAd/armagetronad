@@ -136,7 +136,9 @@ tAccessLevel tCurrentAccessLevel::currentLevel_ = tAccessLevel_Invalid; //!< the
 
 tAccessLevelSetter::tAccessLevelSetter( tConfItemBase & item, tAccessLevel level )
 {
+#ifdef KRAWALL_SERVER
     item.requiredLevel = level;
+#endif
 }
 
 static std::map< tString, tConfItemBase * > * st_confMap = 0;
@@ -159,8 +161,6 @@ tCasaclPreventer::~tCasaclPreventer()
 {
     st_preventCasacl = previous_;
 }
-
-#ifdef KRAWALL_SERVER
 
 // changes the access level of a configuration item
 class tConfItemLevel: public tConfItemBase
@@ -231,6 +231,8 @@ public:
 };
 
 static tConfItemLevel st_confLevel;
+
+#ifdef KRAWALL_SERVER
 
 static char const *st_casacl = "CASACL";
 
