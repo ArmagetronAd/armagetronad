@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-available_paths = {
+available_strs = {
     'prefix': ('PREFIX', 'prefix where to install'),
     'sysconfdir': ('AA_SYSCONFDIR', 'prefix where to install configuration files'),
     'mandir': ('AA_MANDIR', 'prefix where to install manpages'),
@@ -8,13 +8,13 @@ available_paths = {
 
 available_options = {
     'dedicated': ('DEDICATED', 'build a dedicated server'),
-#    'sysinstall': '',
+    'sysinstall': ('SYSINSTALL', 'install system-wide'),
 #    'useradd': '',
 #    'initscripts': '',
     }
 
 # These get special attention:
-# --enable-games, --enable-multiver, --enable-etc
+# --enable-games, --enable-multiver
 
 import sys
 import os.path
@@ -26,12 +26,14 @@ parser = OptionParser()
 
 parser.add_option('--dry-run', action='store_true', dest='dry_run', default=False)
 
-def handle_path_option(option, opt, value, parser, cmakevar):
+# String options
+def handle_str_option(option, opt, value, parser, cmakevar):
     cmakecall.append('-D'+cmakevar+'='+value)
 
-for cooption, (cmoption, help) in available_paths.iteritems():
-    parser.add_option('--'+cooption, action="callback", type="string", callback=handle_path_option, callback_args=(cmoption,), help=help)
+for cooption, (cmoption, help) in available_strs.iteritems():
+    parser.add_option('--'+cooption, action="callback", type="string", callback=handle_str_option, callback_args=(cmoption,), help=help)
 
+# "Enable/Disable" options
 def handle_option_option(option, opt, value, parser, cmakevar, enable):
     if enable:
         cmakecall.append('-D'+cmakevar+'=yes')
@@ -39,8 +41,22 @@ def handle_option_option(option, opt, value, parser, cmakevar, enable):
         cmakecall.append('-D'+cmakevar+'=no')
 
 for cooption, (cmoption, help) in available_options.iteritems():
-    parser.add_option('--enable-'+cooption, action="callback", callback=handle_option_option, callback_args=(cmoption,True), help=help)
-    parser.add_option('--disable-'+cooption, action="callback", callback=handle_option_option, callback_args=(cmoption,False), help=SUPPRESS_HELP)
+    parser.add_option('--enable-'+cooption, action="callback",
+        callback=handle_option_option, callback_args=(cmoption,True), help=help)
+    parser.add_option('--disable-'+cooption, action="callback",
+        callback=handle_option_option, callback_args=(cmoption,False), help=SUPPRESS_HELP)
+
+# Pseudo "enable/disable" options
+## --enable-games
+def enable_games(option, opt, value, parser, enable):
+    if enable:
+        cmakecall.append('-DGAMES_SUFFIX="games/"')
+    else:
+        cmakecall.append('-DGAMES_SUFFIX=""')
+parser.add_option('--enable-games', action="callback", callback=enable_games,
+    callback_args=(True,), help="install under games/ directories")
+parser.add_option('--disable-games', action="callback", callback=enable_games,
+    callback_args=(False,), help=SUPPRESS_HELP)
 
 cmakecall = []
 dirname = os.path.dirname(sys.argv[0])

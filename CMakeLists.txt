@@ -1,11 +1,14 @@
 cmake_minimum_required (VERSION 2.6)
 
 set(progname "armagetronad")
+set(release "")
 
 project (${progname})
 set (progtitle "Armagetron Advanced")
 
 list(APPEND CMAKE_MODULE_PATH ${${progname}_SOURCE_DIR}/batch/make/cmake/)
+
+##### OPTIONS #####
 
 option(DEDICATED "Build dedicated server (otherwise only a client)" OFF)
 if (DEDICATED)
@@ -13,15 +16,12 @@ if (DEDICATED)
     message(STATUS "Building Dedicated")
 endif()
 
-option(RELEASE "Build a release with this version number" "")
+option(RELEASE "Build a release with this version number" ${release})
 if(NOT RELEASE)
-    set(RELEASE "")
+    set(RELEASE ${release})
 endif()
 
-option(PREFIX "Prefix where to install ${progname}" "")
-if(NOT PREFIX)
-    set(PREFIX "usr/local/")
-endif()
+option(SYSINSTALL "Enable system-wide install" YES)
 
 ##### CONFIGURE CHECKS #####
 include (UniversalVariables)
@@ -129,16 +129,20 @@ set (${progname}_DEFINES
 add_definitions(${${progname}_DEFINES})
 
 ##### PATHS #####
-UNIVERSAL_VAR (PREFIX ${PREFIX})
+UNIVERSAL_VAR (PREFIX "usr/local/")
+if(SYSINSTALL)
+    set(PREFIX "usr/")
+endif()
 UNIVERSAL_VAR (BINDIR "${PREFIX}bin")
 UNIVERSAL_VAR (SBINDIR "${PREFIX}sbin")
 UNIVERSAL_VAR (DATADIR "${PREFIX}share")
 UNIVERSAL_VAR (GAMES_SUFFIX "/games")
 UNIVERSAL_VAR (DATADIR_SUFFIX "${GAMES_SUFFIX}/${progname}")
 UNIVERSAL_VAR (AA_DATADIR ${DATADIR}${DATADIR_SUFFIX})
-UNIVERSAL_VAR (SYSCONFDIR "etc")
-UNIVERSAL_VAR (SYSCONFDIR_SUFFIX "${GAMES_SUFFIX}/${progname}")
-UNIVERSAL_VAR (AA_SYSCONFDIR ${SYSCONFDIR}${SYSCONFDIR_SUFFIX})
+UNIVERSAL_VAR (AA_SYSCONFDIR "${AA_DATADIR}/config")
+if(SYSINSTALL)
+    set(AA_SYSCONFDIR "etc${GAMES_SUFFIX}/${progname}")
+endif()
 UNIVERSAL_VAR (LOCALSTATEDIR "var")
 UNIVERSAL_VAR (LOCALSTATEDIR_SUFFIX "${GAMES_SUFFIX}/${progname}")
 UNIVERSAL_VAR (AA_LOCALSTATEDIR "${LOCALSTATEDIR}${LOCALSTATEDIR_SUFFIX}")
