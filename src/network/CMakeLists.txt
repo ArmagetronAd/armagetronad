@@ -1,11 +1,11 @@
 include_directories (
-    ${armagetronad_SOURCE_DIR}/src/tools/
-    ${armagetronad_SOURCE_DIR}/src/resource/
-    ${armagetronad_SOURCE_DIR}/src/network/
+    ${${progname}_SOURCE_DIR}/src/tools/
+    ${${progname}_SOURCE_DIR}/src/resource/
+    ${${progname}_SOURCE_DIR}/src/network/
 
-    ${armagetronad_BINARY_DIR}/src/protobuf/
+    ${${progname}_BINARY_DIR}/src/protobuf/
 
-    ${armagetronad_INCLUDE_DIRS}
+    ${${progname}_INCLUDE_DIRS}
     )
 
 add_library (network

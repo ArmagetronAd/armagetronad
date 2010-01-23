@@ -14,7 +14,7 @@ available_options = {
     }
 
 # These get special attention:
-# --enable-games, --enable-multiver
+# --enable-games, (--enable-multiver)
 
 import sys
 import os.path

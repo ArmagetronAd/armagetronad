@@ -1,15 +1,15 @@
 include_directories (
-    ${armagetronad_SOURCE_DIR}/src/
-    ${armagetronad_SOURCE_DIR}/src/tools/
-    ${armagetronad_SOURCE_DIR}/src/resource/
-    ${armagetronad_SOURCE_DIR}/src/thirdparty/utf8/
-    ${armagetronad_SOURCE_DIR}/src/thirdparty/mathexpr/
-    ${armagetronad_SOURCE_DIR}/src/render/
+    ${${progname}_SOURCE_DIR}/src/
+    ${${progname}_SOURCE_DIR}/src/tools/
+    ${${progname}_SOURCE_DIR}/src/resource/
+    ${${progname}_SOURCE_DIR}/src/thirdparty/utf8/
+    ${${progname}_SOURCE_DIR}/src/thirdparty/mathexpr/
+    ${${progname}_SOURCE_DIR}/src/render/
 
-    ${armagetronad_BINARY_DIR}/src/
-    ${armagetronad_BINARY_DIR}/src/protobuf/
+    ${${progname}_BINARY_DIR}/src/
+    ${${progname}_BINARY_DIR}/src/protobuf/
 
-    ${armagetronad_INCLUDE_DIRS}
+    ${${progname}_INCLUDE_DIRS}
     )
 
 add_library (render

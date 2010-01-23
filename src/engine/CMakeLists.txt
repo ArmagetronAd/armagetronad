@@ -1,15 +1,15 @@
 include_directories (
-    ${armagetronad_SOURCE_DIR}/src/tools/
-    ${armagetronad_SOURCE_DIR}/src/resource/
-    ${armagetronad_SOURCE_DIR}/src/network/
-    ${armagetronad_SOURCE_DIR}/src/render/
-    ${armagetronad_SOURCE_DIR}/src/ui/
-    ${armagetronad_SOURCE_DIR}/src/engine/
-    ${armagetronad_SOURCE_DIR}/src/engine/sound/
+    ${${progname}_SOURCE_DIR}/src/tools/
+    ${${progname}_SOURCE_DIR}/src/resource/
+    ${${progname}_SOURCE_DIR}/src/network/
+    ${${progname}_SOURCE_DIR}/src/render/
+    ${${progname}_SOURCE_DIR}/src/ui/
+    ${${progname}_SOURCE_DIR}/src/engine/
+    ${${progname}_SOURCE_DIR}/src/engine/sound/
 
-    ${armagetronad_BINARY_DIR}/src/protobuf/
+    ${${progname}_BINARY_DIR}/src/protobuf/
 
-    ${armagetronad_INCLUDE_DIRS}
+    ${${progname}_INCLUDE_DIRS}
     )
 
 add_library (engine
