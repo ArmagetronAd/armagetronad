@@ -1443,10 +1443,10 @@ network_opts_predict_text	Prediction:
 network_opts_predict_help	In a network game, this extrapolates the cycles' movement. Leaving it disabled makes the graphics smoother, enabling it gives yo a better image of the actual situation. I leave it disabled; the Lag-O-Meter is a good substitute for prediction. This is always disabled in server mode.
 
 network_opts_inrate_text	Input Rate:
-network_opts_inrate_help	The maximum number of kilobytes your network can receive per second. 1 for 9.6k modems (only limited play possible), 3 for 28.8k modems (usualy no problems)...7 for 56k modems, 8 for ISDN, more for cable modems, (A)DSL and LAN.
+network_opts_inrate_help	The maximum number of kilobytes your network can receive per second. 3 for 28.8k modems, 7 for 56k modems, 8 for ISDN, more for cable modems, (A)DSL and LAN.
 
 network_opts_outrate_text	Output Rate:
-network_opts_outrate_help	The maximum number of kilobytes your network can send per second. Set it to two or three if you do not wish to act as a server; more bandwidth is never used. Of course, it does not hurt to set it higher if you have a bigger pipe.
+network_opts_outrate_help	The maximum number of kilobytes your network can send per second. Eight is a good number for this for almost everyone.
 
 
 network_opts_deletepw_text	Delete Passwords

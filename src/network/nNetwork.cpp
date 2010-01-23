@@ -131,8 +131,8 @@ void sn_Delay()
     tAdvanceFrame();
 }
 
-int sn_maxRateIn=8; // maximum data rate in kb/s
-int sn_maxRateOut=8; // maximum output data rate in kb/s
+int sn_maxRateIn=32; // maximum data rate in kb/s
+int sn_maxRateOut=16; // maximum output data rate in kb/s
 
 static nConnectError sn_Error = nOK;
 
