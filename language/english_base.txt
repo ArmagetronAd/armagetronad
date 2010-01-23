@@ -2155,7 +2155,9 @@ first_setup_color_magenta   0xff00ffMagenta0xRESETT
 first_setup_color_cyan      0x00ffffCyan0xRESETT
 first_setup_color_white     0xffffffWhite0xRESETT
 first_setup_color_dark      0x000000Dark0xRESETT
-first_setup_color_leave     Leave Alone
+
+first_setup_leave           Leave Alone
+first_setup_leave_help      Don't change this.
 
 first_setup_keys            Keyboard Layout:
 first_setup_keys_help       Select your startup keyboard layout here. It can be customized later, individual bindings can be changed. Select with cursor left and cursor right.
@@ -2170,7 +2172,16 @@ first_setup_keys_zqsd_help  Control your cycle with the QSD keys and surrounding
 first_setup_keys_x          Traditional
 first_setup_keys_x_help     The default setup of old versions of the game. X turns right, the key left to that turns left. Recommended only for veterans.
 first_setup_keys_leave      Leave Alone
-first_setup_keys_leave_help  Don't load a new template.
+
+first_setup_net             Internet Connection:
+first_setup_net_help        Select the rough type of your internet connection here.
+first_setup_net_dialup      Dialup
+first_setup_net_dialup_help You are connected to the internet via a traditional modem connected to a telephone line.
+first_setup_net_isdn        ISDN
+first_setup_net_isdn_help   You are connected to the internet via a digital ISDN line.
+first_setup_net_dsl         ADSL, Cable or better
+first_setup_net_dsl_help    You are connected to the internet via DSL, ADSL, Cable, T1 or other kinds of broadband.
+
 
 #********************************************
 #********************************************

@@ -147,6 +147,15 @@ static tConfItem<bool> udx("USE_DIRECTX","makes use of the DirectX input "
 
 extern void exit_game_objects(eGrid *grid);
 
+enum gConnection
+{
+    gLeave,
+    gDialup,
+    gISDN,
+    gDSL
+    // gT1
+};
+
 // initial setup menu
 void sg_StartupPlayerMenu()
 {
@@ -158,11 +167,23 @@ void sg_StartupPlayerMenu()
     ePlayer * player = ePlayer::PlayerConfig(0);
     tASSERT( player );
 
+    gConnection connection = gDSL;
+
+    uMenuItemSelection<gConnection> net(&firstSetup, "$first_setup_net", "$first_setup_net_help", connection );
+    if ( !st_FirstUse )
+    {
+        net.NewChoice( "$first_setup_leave", "$first_setup_leave_help", gLeave );
+        connection = gLeave;
+    }
+    net.NewChoice( "$first_setup_net_dialup", "$first_setup_net_dialup_help", gDialup );
+    net.NewChoice( "$first_setup_net_isdn", "$first_setup_net_isdn_help", gISDN );
+    net.NewChoice( "$first_setup_net_dsl", "$first_setup_net_dsl_help", gDSL );
+
     tString keyboardTemplate("keys_cursor.cfg");
     uMenuItemSelection<tString> k(&firstSetup, "$first_setup_keys", "$first_setup_keys_help", keyboardTemplate );
     if ( !st_FirstUse )
     {
-        k.NewChoice( "$first_setup_keys_leave", "$first_setup_keys_leave_help", tString("") );
+        k.NewChoice( "$first_setup_leave", "$first_setup_leave_help", tString("") );
         keyboardTemplate="";
     }
     k.NewChoice( "$first_setup_keys_cursor", "$first_setup_keys_cursor_help", tString("keys_cursor.cfg") );
@@ -181,7 +202,7 @@ void sg_StartupPlayerMenu()
     if ( !st_FirstUse )
     {
         color = leave;
-        c.NewChoice( "$first_setup_color_leave", "", leave );
+        c.NewChoice( "$first_setup_leave", "$first_setup_leave_help", leave );
     }
 
     c.NewChoice( "$first_setup_color_red", "", tColor(1,0,0) );
@@ -211,7 +232,26 @@ void sg_StartupPlayerMenu()
     uMenuItemExit e(&firstSetup, "$menuitem_accept", "$menuitem_accept_help");
     
     firstSetup.Enter();
-    
+
+    // apply network rates
+    switch(connection)
+    {
+    case gDialup:
+        sn_maxRateIn  = 6;
+        sn_maxRateOut = 4;
+        break;
+    case gISDN:
+        sn_maxRateIn  = 8;
+        sn_maxRateOut = 8;
+        break;
+    case gDSL:
+        sn_maxRateIn  = 64;
+        sn_maxRateOut = 16;
+        break;
+    case gLeave:
+        break;
+    }
+
     // store color
     if( ! (color == leave) )
     {
