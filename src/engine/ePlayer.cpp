@@ -1275,7 +1275,7 @@ void ePlayer::Render(){
     double now = tSysTimeFloat();
     if( se_GameTime() > 1 && now-lastTooltip_ > 1 && !rConsole::CenterDisplayActive() )
     {
-        if( uActionTooltip::Help( ID()+1 ) || VetoActiveTooltip(ID()+1) )
+        if( uActionTooltip::Help( ID()+1 ) || uActionTooltip::Help( 0 ) || VetoActiveTooltip(ID()+1) )
             lastTooltip_ = now;
         else
             lastTooltip_ = now+60;

@@ -1029,6 +1029,7 @@ input_toggle_mousegrab_help         Frees the mouse pointer or contstrains it to
 input_reload_textures_text          Reload textures
 input_reload_textures_help          Reloads all textures. Useful for content creators.
 
+input_ingame_menu_tooltip           Press \1 to access the ingame menu.
 input_ingame_menu_text              Ingame menu
 input_ingame_menu_help              Triggers the ingame menu. ESC is hardcoded to this function so you don't get trapped in the game :)
 
