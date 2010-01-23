@@ -1013,6 +1013,7 @@ input_chat_tooltip                  Press \1 to chat.
 input_chat_text						Chat
 input_chat_help						Lets you talk to other players over the network.
 
+input_toggle_spectator_tooltip	    Press \1 to toggle spectator mode.
 input_toggle_spectator_text	        Toggle Spectator
 input_toggle_spectator_help	        Toggles spectator mode, conveniently taking you out of the game so you can take a call (of nature, possibly) and back into the game when you're done.
 
