@@ -1045,6 +1045,9 @@ input_mess_up_help					Scrolls the messages up a page.
 input_mess_down_text				Scroll down
 input_mess_down_help				Scrolls the messages down a page.
 
+input_mess_end_text					Scroll to end
+input_mess_end_help					Scrolls to the end of the messages to show the most recent ones.
+
 #********************************************
 #********************************************
 #
