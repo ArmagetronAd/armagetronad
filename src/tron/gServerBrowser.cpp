@@ -64,13 +64,6 @@ static tSettingItem< nServerInfo::QueryType > sg_query_type( "BROWSER_QUERY_FILT
 
 class gServerMenuItem;
 
-static nServerInfo::PrimaryKey sg_sortKey = nServerInfo::KEY_USERS;
-tCONFIG_ENUM( nServerInfo::PrimaryKey );
-static tConfItem< nServerInfo::PrimaryKey > sg_sortKeyConf( "BROWSER_SORT_KEY", sg_sortKey );
-
-//  enabling this will cause friend's names to be case sensitive
-static bool sg_enableFriendsCasing = true;
-static tConfItem< bool > sg_enableFriendsCasingConf("ENABLE_FRIENDS_CASING", sg_enableFriendsCasing);
 
 class gServerInfo: public nServerInfo
 {
@@ -80,7 +73,7 @@ public:
 
     gServerInfo():menuItem(NULL), show(true)
     {
-    }
+    };
 
     virtual ~gServerInfo();
 
@@ -112,9 +105,10 @@ nServerInfo* CreateGServer()
 
 class gServerMenu: public uMenu
 {
+    int sortKey_;
+
 public:
     virtual void OnRender();
-    tString filter_string;
 
     void Update(); // sort the server view by score
     gServerMenu(const char *title);
@@ -129,16 +123,12 @@ public:
     void Render(REAL y,
                 const tString &servername, const tString &score,
                 const tString &users     , const tString &ping);
-    
-    void Render(REAL x, REAL y, tString &c, int center, int cursor, int cursorPos);
 };
+
 
 class gBrowserMenuItem: public uMenuItem
 {
 protected:
-    bool displayHelp_;
-    REAL helpAlpha_;
-    
     gBrowserMenuItem(uMenu *M,const tOutput &help): uMenuItem( M, help )
     {
     }
@@ -147,26 +137,6 @@ protected:
     virtual bool Event( SDL_Event& event );
 
     virtual void RenderBackground();
-
-    virtual bool DisplayHelp( bool display, REAL y, REAL alpha )
-    {
-        helpAlpha_ = alpha;
-        displayHelp_ = display;
-        return false;
-    }
-};
-
-class gServerFilterMenuItem: public uMenuItemString
-{
-public:
-    gServerFilterMenuItem(gServerMenu *M)
-        :uMenuItemString(M,"$network_master_filter","",M->filter_string)
-    {}
-        
-    virtual ~gServerFilterMenuItem(){}
-    
-    virtual void Render(REAL x,REAL y,REAL alpha=1, bool selected=0);
-    virtual bool Event( SDL_Event& event );
 };
 
 class gServerMenuItem: public gBrowserMenuItem
@@ -177,7 +147,6 @@ protected:
     bool        favorite_; //!< flag indicating whether this is a favorite
 public:
     void AddFavorite();
-    void RemoveFavorite();
     void SetServer(nServerInfo *s);
     gServerInfo *GetServer();
 
@@ -249,24 +218,6 @@ void gServerBrowser::BrowseSpecialMaster( nServerInfoBase * master, char const *
     nServerInfo::GetFromMaster( master, prefix );
     nServerInfo::Save();
 
-#ifdef SERVER_SURVEY
-    // connect to all servers and log stats
-    nServerInfo * info = nServerInfo::GetFirstServer();
-    {
-        std::ofstream o;
-        if ( tDirectories::Var().Open(o, "serversurvey.txt", std::ios::app) )
-        {
-            o << "New survey\n";
-        }
-    }
-    while( info )
-    {
-        ConnectToServer(info);
-        info = info->Next();
-    }
-    return;
-#endif
-
     //  gLogo::SetBig(true);
     //  gLogo::SetSpinning(false);
 
@@ -324,20 +275,14 @@ void gServerBrowser::BrowseLAN()
 
 void gServerBrowser::BrowseServers()
 {
-    if( nServerInfoAdmin::GetAdmin() )
-    {
-        nServerInfoAdmin::GetAdmin()->BeforeNewScan();
-    }
-
     //nServerInfo::CalcScoreAll();
     //nServerInfo::Sort();
     nServerInfo::StartQueryAll( sg_queryType );
     continuePoll = true;
 
     gServerMenu browser("Server Browser");
-    
+
     gServerStartMenuItem start(&browser);
-    gServerFilterMenuItem filter(&browser);
 
     /*
       while (nServerInfo::DoQueryAll(sg_simultaneous));
@@ -353,7 +298,7 @@ void gServerBrowser::BrowseServers()
     SDL_Event ignore;
     REAL time;
     while(su_GetSDLInput(ignore, time)) ;
-    
+
     browser.Enter();
 
     nServerInfo::GetFromLANContinuouslyStop();
@@ -363,29 +308,25 @@ void gServerBrowser::BrowseServers()
     // gLogo::SetDisplayed(true);
 }
 
+
+
+
+
 void gServerMenu::HandleEvent( SDL_Event event )
 {
 #ifndef DEDICATED
-    // Ignore event when we have the filter menu item
-    if(items.Len() - selected == 1)
-    {
-        return uMenu::HandleEvent( event );
-    }
-    
     switch (event.type)
     {
     case SDL_KEYDOWN:
         switch (event.key.keysym.sym)
         {
         case(SDLK_LEFT):
-                        sg_sortKey = static_cast<nServerInfo::PrimaryKey>
-                            ( ( sg_sortKey + nServerInfo::KEY_MAX-1 ) % nServerInfo::KEY_MAX );
+                        sortKey_ = ( sortKey_ + nServerInfo::KEY_MAX-1 ) % nServerInfo::KEY_MAX;
             Update();
             return;
             break;
         case(SDLK_RIGHT):
-                        sg_sortKey = static_cast<nServerInfo::PrimaryKey>
-                            ( ( sg_sortKey + 1 ) % nServerInfo::KEY_MAX );
+                        sortKey_ = ( sortKey_ + 1 ) % nServerInfo::KEY_MAX;
             Update();
             return;
             break;
@@ -394,14 +335,6 @@ void gServerMenu::HandleEvent( SDL_Event event )
             Update();
             return;
             break;
-        case(SDLK_HOME):
-            SetSelected(NumItems() - 1);
-            Update();
-            return;
-        case(SDLK_END):
-            SetSelected(0);
-            Update();
-            return;
         default:
             break;
         }
@@ -425,22 +358,6 @@ void gServerMenu::OnRender()
     }
 }
 
-// priority of bookmarks in sorting
-static nServerInfo::SortHelperPriority sg_bookmarkPriority[nServerInfo::KEY_MAX]=
-{
-    nServerInfo::PRIORITY_NONE,
-    nServerInfo::PRIORITY_PRIMARY,
-    nServerInfo::PRIORITY_SECONDARY,
-    nServerInfo::PRIORITY_PRIMARY
-};
-
-tCONFIG_ENUM( nServerInfo::SortHelperPriority );
-static tSettingItem< nServerInfo::SortHelperPriority > sgc_bookmarkPriorityName( "BROWSER_BOOKMARK_PRIORITY_NAME", sg_bookmarkPriority[nServerInfo::KEY_NAME] );
-static tSettingItem< nServerInfo::SortHelperPriority > sgc_bookmarkPriorityPing( "BROWSER_BOOKMARK_PRIORITY_PING", sg_bookmarkPriority[nServerInfo::KEY_PING] );
-static tSettingItem< nServerInfo::SortHelperPriority > sgc_bookmarkPriorityUsers( "BROWSER_BOOKMARK_PRIORITY_USERS", sg_bookmarkPriority[nServerInfo::KEY_USERS] );
-static tSettingItem< nServerInfo::SortHelperPriority > sgc_bookmarkPriorityScore( "BROWSER_BOOKMARK_PRIORITY_SCORE", sg_bookmarkPriority[nServerInfo::KEY_SCORE] );
-
-
 void gServerMenu::Update()
 {
     // get currently selected server
@@ -461,44 +378,23 @@ void gServerMenu::Update()
     ReverseItems();
 
     nServerInfo::CalcScoreAll();
-    nServerInfo::Sort( nServerInfo::PrimaryKey( sg_sortKey ), &gServerFavorites::IsFavorite, sg_bookmarkPriority[sg_sortKey] );
+    nServerInfo::Sort( nServerInfo::PrimaryKey( sortKey_ ) );
 
-    int mi = 2;
+    int mi = 1;
     gServerInfo *run = gServerInfo::GetFirstServer();
     bool oneFound = false; //so we can display all if none were found
-    
-    tString filteredFriends[MAX_FRIENDS];
-    tString* friends = getFriends();
-    int i;
-    for (i = MAX_FRIENDS-1; i>=0; i--)
-    {
-        filteredFriends[i] = sg_enableFriendsCasing ? friends[i] : friends[i].ToLower();
-    }
-
     while (run)
     {
-        if(filter_string.Len() > 1)
-        {
-            run->show = false;
-            oneFound = true;
-            
-            tString name;
-            name << tColoredString::RemoveColors( run->GetName(), false );
-            
-            if(name.ToLower().find(filter_string.ToLower()) != std::string::npos)
-            {
-                run->show = true;
-            }
-        }
         //check friend filter
-        else if (getFriendsEnabled())
+        if (getFriendsEnabled())
         {
             run->show = false;
-            tString userNames = sg_enableFriendsCasing ? run->UserNames() : run->UserNames().ToLower();
-            tString globalIds = sg_enableFriendsCasing ? run->UserGlobalIDs() : run->UserGlobalIDs().ToLower();
-            for (i = MAX_FRIENDS-1; i>=0; i--)
+            int i;
+            tString userNames = run->UserNames();
+            tString* friends = getFriends();
+            for (i = MAX_FRIENDS; i>=0; i--)
             {
-                if (run->Users() > 0 && friends[i].Len() > 1 && (userNames.StrPos(filteredFriends[i]) >= 0 || globalIds.StrPos(filteredFriends[i]) >= 0))
+                if (run->Users() > 0 && friends[i].Len() > 1 && userNames.StrPos(friends[i]) >= 0)
                 {
                     oneFound = true;
                     run->show = true;
@@ -564,9 +460,9 @@ void gServerMenu::Update()
 
 gServerMenu::gServerMenu(const char *title)
         : uMenu(title, false)
+        , sortKey_( nServerInfo::KEY_SCORE )
 {
     nServerInfo *run = nServerInfo::GetFirstServer();
-    
     while (run)
     {
         gServerMenuItem *item = tNEW(gServerMenuItem)(this);
@@ -610,14 +506,6 @@ void gServerMenu::Render(REAL y,
     }
 }
 
-void gServerMenu::Render(REAL x,REAL y, tString &c, int center = 0, int cursor = 0, int cursorPos = 0)
-{
-    if (sr_glOut)
-    {
-        DisplayText(x, y, text_height, c.c_str(), sr_fontServerBrowser, -1, cursor, cursorPos);
-    }
-}
-
 void gServerMenu::Render(REAL y,
                          const tString &servername, const tOutput &score,
                          const tOutput &users     , const tOutput &ping)
@@ -633,7 +521,7 @@ void gServerMenu::Render(REAL y,
     u << normal;
     p << normal;
 
-    switch ( sg_sortKey )
+    switch ( sortKey_ )
     {
     case nServerInfo::KEY_NAME:
         sn = highlight;
@@ -693,10 +581,6 @@ void gServerMenuItem::Render(REAL x,REAL y,REAL alpha, bool selected)
         if (server->Score() < -10000)
             s = -10000;
 
-        if ( favorite_ )
-        {
-            score << "B ";
-        }
         if (server->Polling())
         {
             score << tOutput("$network_master_polling");
@@ -720,10 +604,6 @@ void gServerMenuItem::Render(REAL x,REAL y,REAL alpha, bool selected)
                 break;
             }
         }
-        else if ( !favorite_ && server->GetClassification().noJoin_.Len() > 1 )
-        {
-            score << server->GetClassification().noJoin_;
-        }
         else if ( server->Users() >= server->MaxUsers() )
         {
             score << tOutput( "$network_master_full" );
@@ -731,6 +611,11 @@ void gServerMenuItem::Render(REAL x,REAL y,REAL alpha, bool selected)
         }
         else
         {
+            if ( favorite_ )
+            {
+                score << "B ";
+            }
+
             score << s;
             users << server->Users() << "/" << server->MaxUsers();
             ping  << p;
@@ -762,22 +647,18 @@ void gServerMenuItem::Render(REAL x,REAL y,REAL alpha, bool selected)
 #endif
 }
 
-static REAL sg_menuBottom    = -.9;
-static REAL sg_requestBottom = -.9;
 
 void gServerMenuItem::RenderBackground()
 {
 #ifndef DEDICATED
-    REAL helpTopReal = sg_requestBottom*shrink + displace - .05;;
-
     gBrowserMenuItem::RenderBackground();
 
-    rTextField::SetDefaultColor( tColor(1,1,1) );
-
-    rTextField players( -.9, helpTopReal, text_height, sr_fontServerDetails );
-    players.EnableLineWrap();
     if ( server )
     {
+        rTextField::SetDefaultColor( tColor(1,1,1) );
+
+        rTextField players( -.9, -.3, text_height, sr_fontServerDetails );
+        players.EnableLineWrap();
         players << tOutput( "$network_master_players" );
         if ( server->UserNamesOneLine().Len() > 2 )
             players << server->UserNamesOneLine();
@@ -786,33 +667,8 @@ void gServerMenuItem::RenderBackground()
         players << "\n" << tColoredString::ColorString(1,1,1);
         tColoredString uri;
         uri << server->Url() << tColoredString::ColorString(1,1,1);
-        tColoredString options;
-        options << server->GetClassification().description_;
-        options << server->Options();
-        players << tOutput( "$network_master_serverinfo", server->Release(), uri, options );
+        players << tOutput( "$network_master_serverinfo", server->Release(), uri, server->Options() );
     }
-
-    if( displayHelp_ )
-    {
-        players << "\n";
-        players.SetColor(tColor(1,1,1,helpAlpha_));
-        players << Help();
-    }
-
-    REAL helpSpace = players.GetTop() - players.GetBottom();
-    REAL helpTop = -.85 + helpSpace;
-    REAL helpTopScaled = ( helpTop - displace )/shrink;
-    REAL helpTopMax = .25;
-    REAL helpTopMin = -.9;
-    if( helpTopScaled > helpTopMax )
-    {
-        helpTopScaled = helpTopMax;
-    }
-    if( helpTopScaled < helpTopMin )
-    {
-        helpTopScaled = helpTopMin;
-    }
-    sg_requestBottom = helpTopScaled;
 #endif
 }
 
@@ -853,6 +709,7 @@ bool gBrowserMenuItem::Event( SDL_Event& event )
     return uMenuItem::Event( event );
 }
 
+
 bool gServerMenuItem::Event( SDL_Event& event )
 {
 #ifndef DEDICATED
@@ -876,10 +733,9 @@ bool gServerMenuItem::Event( SDL_Event& event )
         default:
             break;
         }
-        switch (event.key.keysym.sym)
+        switch (event.key.keysym.unicode)
         {
-        case SDLK_KP_PLUS:
-        case SDLK_PLUS:
+        case '+':
             if ( server )
             {
                 server->SetScoreBias( server->GetScoreBias() + 10 );
@@ -889,8 +745,7 @@ bool gServerMenuItem::Event( SDL_Event& event )
 
             return true;
             break;
-        case SDLK_KP_MINUS:
-        case SDLK_MINUS:
+        case '-':
             if ( server )
             {
                 server->SetScoreBias( server->GetScoreBias() - 10 );
@@ -900,20 +755,13 @@ bool gServerMenuItem::Event( SDL_Event& event )
 
             return true;
             break;
-        case SDLK_b:
-            if ( server )
+        case 'b':
+            if ( server && !favorite_ )
             {
-                if (favorite_ ) {
-                    gServerFavorites::RemoveFavorite( server );
-                    favorite_ = false;
-                } else {
-                    favorite_ = gServerFavorites::AddFavorite( server );
-                }
+                favorite_ = gServerFavorites::AddFavorite( server );
             }
-            (static_cast<gServerMenu*>(menu))->Update();
-
             return true;
-            break;    
+            break;
         default:
             break;
         }
@@ -925,24 +773,6 @@ bool gServerMenuItem::Event( SDL_Event& event )
 
 void gBrowserMenuItem::RenderBackground()
 {
-    if( menu )
-    {
-        double now = tSysTimeFloat();
-        static double lastTime = now;
-        if( sg_menuBottom > sg_requestBottom )
-        {
-            sg_menuBottom -= now - lastTime;
-        }
-        lastTime = now;
-        if( sg_menuBottom < sg_requestBottom )
-        {
-            sg_menuBottom = sg_requestBottom;
-        }
-
-        menu->SetBot( sg_menuBottom );
-        sg_requestBottom = -.9;
-    }
-
     sn_Receive();
     sn_SendPlanned();
 
@@ -1051,8 +881,6 @@ void gServerStartMenuItem::Render(REAL x,REAL y,REAL alpha, bool selected)
 #endif
 }
 
-
-
 void gServerStartMenuItem::Enter()
 {
     nServerInfo::GetFromLANContinuouslyStop();
@@ -1067,78 +895,6 @@ void gServerStartMenuItem::Enter()
 }
 
 
-void gServerFilterMenuItem::Render(REAL x,REAL y,REAL alpha, bool selected)
-{
-#ifndef DEDICATED
-    SetColor( selected, alpha );
-    
-    tString s;
-    s << description;
-    
-    x = -.9f;
-    REAL x2 = s.Len() * 0.018 + x;
-    
-    int cMode = selected ? 1 : 0;
-    
-    static_cast<gServerMenu*>(menu)->Render(x, y*shrink + displace, s);
-    static_cast<gServerMenu*>(menu)->Render(x2, y*shrink + displace, *content, 1, cMode, realCursorPos);
-#endif
-}
-
-bool gServerFilterMenuItem::Event( SDL_Event& event )
-{
-#ifndef DEDICATED
-    auto prev_filter_string = *content; // store current content for later comparison
-    bool update = false; // do we need to update the server list?
-    bool ret = false; // have we handled the event?
-
-    if (event.type==SDL_KEYDOWN)
-    {
-        switch (event.key.keysym.sym)
-        {
-        case(SDLK_ESCAPE):
-            // escape clears the filter
-            if(!content->empty())
-            {
-                *content = "";
-
-                update = true;
-                ret = true;
-
-                break;
-            }
-
-            // fall through
-        default:
-            // let base handle it
-            ret = uMenuItemString::Event( event );
-
-            break;
-        }
-    }
-    else
-    {
-        // let base handle it
-        ret = uMenuItemString::Event( event );
-    }
-
-    // update on change
-    if(prev_filter_string != *content)
-    {
-        update = true;
-    }
-
-    if(update)
-    {
-        // update menu, filter has changed
-        (static_cast<gServerMenu*>(menu))->Update();
-    }
-
-    return ret;
-#else
-    return false;
-#endif
-}
 
 gServerStartMenuItem::gServerStartMenuItem(gServerMenu *men)
         :gBrowserMenuItem(men, *sg_StartHelpText)
@@ -1147,3 +903,5 @@ gServerStartMenuItem::gServerStartMenuItem(gServerMenu *men)
 gServerStartMenuItem::~gServerStartMenuItem()
 {
 }
+
+

@@ -149,29 +149,17 @@ REAL Random()
     }
 }
 
-// from gGame.cpp
-extern REAL sg_timestepMax;
-static REAL sg_FrameTime()
-{
-    REAL ret = se_AverageFrameTime();
-    if( ret > sg_timestepMax )
-    {
-        ret = sg_timestepMax;
-    }
-
-    return ret;
-}
-
 static REAL Delay()
 {
     REAL delay = sg_delayCycle * .9f;
 
-    REAL fd    = sg_FrameTime()*1.5f;
+    REAL fd    = se_AverageFrameTime()*1.5f;
     if ( fd > delay)
         delay = fd;
 
     return delay;
 }
+
 
 
 static gAICharacter* BestIQ( int iq )
@@ -1403,10 +1391,6 @@ void gAIPlayer::SwitchToState(gAI_STATE nextState, REAL minTime)
     case AI_PATH:
         thisAbility = character->properties[AI_STATE_PATH];
         break;
-    case AI_PATH_GIVEN:
-    case AI_PATH_MINDLESS:
-        thisAbility = 1000;
-        break;
     case AI_SURVIVE:
         break;
     };
@@ -1421,8 +1405,6 @@ void gAIPlayer::SwitchToState(gAI_STATE nextState, REAL minTime)
         nextAbility = character->properties[AI_STATE_CLOSECOMBAT];
         break;
     case AI_PATH:
-    case AI_PATH_GIVEN:
-    case AI_PATH_MINDLESS:
         nextAbility = character->properties[AI_STATE_PATH];
         if (!sg_pathEnabled )
         {
@@ -1444,26 +1426,6 @@ void gAIPlayer::SwitchToState(gAI_STATE nextState, REAL minTime)
 
     state           = nextState;
     nextStateChange = se_GameTime() + minTime;
-}
-
-// add a coordinate to the path, switch to path follow mode
-void gAIPlayer::AddToPath( eCoord const & target, bool mindless )
-{
-    gAI_STATE desiredState = mindless ? AI_PATH_MINDLESS : AI_PATH_GIVEN;
-    if( state != desiredState )
-    {
-        if( state != AI_PATH_GIVEN && state != AI_PATH_MINDLESS )
-        {
-            path.Clear();
-        }
-
-        // hard state change, avoid random changes back from it
-        state = desiredState;
-        lastPath = 10000;
-        nextStateChange = 10000;
-        nextTime = 0;
-    }
-    path.Add( target );
 }
 
 // state update functions:
@@ -1649,9 +1611,16 @@ void gAIPlayer::ThinkTrace( ThinkData & data )
 
 void gAIPlayer::ThinkPath( ThinkData & data )
 {
-    eCoord dir = Object()->Direction();
+    int lr = 0;
+    REAL mindist = 10;
 
-    if (!target || !target->CurrentFace() || IsTrapped(target, Object()))
+    eCoord dir = Object()->Direction();
+    // REAL fs=front.distance;
+    REAL ls=data.left.distance;
+    REAL rs=data.right.distance;
+
+
+    if (!target->CurrentFace() || IsTrapped(target, Object()))
     {
         SwitchToState(AI_SURVIVE, 1);
         EmergencySurvive( data );
@@ -1730,7 +1699,10 @@ void gAIPlayer::ThinkPath( ThinkData & data )
         return;
     }
 
-    path.Proceed();
+    // find the most advanced path point that is in our viewing range:
+
+    for (int z = 10; z>=0; z--)
+        path.Proceed();
 
     bool goon   = path.Proceed();
     bool nogood = false;
@@ -1746,22 +1718,17 @@ void gAIPlayer::ThinkPath( ThinkData & data )
         eCoord opos  = Object()->Position();
         eCoord odir  = pos - opos;
 
-        REAL forward = eCoord::F(odir, dir);
-        if( forward < 0 )
-        {
-            forward = 0;
-        }
-        eCoord intermediate = opos + dir * forward;
+        eCoord intermediate = opos + dir * eCoord::F(odir, dir);
 
         gSensor p(Object(), opos, intermediate - opos);
-        p.detect(.99f);
-        nogood = p.ehit;
+        p.detect(1.1f);
+        nogood = (p.hit <= .999999999 || eCoord::F(path.CurrentOffset(), odir) < 0);
 
         if (!nogood)
         {
             gSensor p(Object(), intermediate, pos - intermediate);
-            p.detect(.99f);
-            nogood = p.ehit;
+            p.detect(1);
+            nogood = (p.hit <= .99999999 || eCoord::F(path.CurrentOffset(), odir) < 0);
         }
 
     }
@@ -1769,117 +1736,46 @@ void gAIPlayer::ThinkPath( ThinkData & data )
 
     if (goon)
     {
-        ThinkPathGiven( data );
+        // now we have found our next goal. Try to get there.
+        eCoord pos    = Object()->Position();
+        eCoord target = path.CurrentPosition();
+
+        // look how far ahead the target is:
+        REAL ahead = eCoord::F(target - pos, dir)
+                     + eCoord::F(path.CurrentOffset(), dir);
+
+        if ( ahead > 0)
+        {	  // it is still before us. just wait a while.
+            mindist = ahead;
+        }
+        else
+        { // we have passed it. Make a turn towards it.
+            REAL side = (target - pos) * dir;
+
+            if ( !((side > 0 && ls < 3) || (side < 0 && rs < 3))
+                    && (fabs(side) > 3 || ahead < -10) )
+            {
+#ifdef DEBUG
+                con << "Following path...\n";
+#endif
+                lr += (side > 0 ? 1 : -1);
+            }
+        }
     }
-    else
+    else // nogood
     {
         lastPath -= 1;
         SwitchToState(AI_SURVIVE);
     }
-}
 
-// get rubber values in effect
-void sg_RubberValues( ePlayerNetID const * player, REAL speed, REAL & max, REAL & effectiveness );
+    EmergencySurvive( data, 1, -lr );
 
-// find the most advanced path point that is in our viewing range:
-void gAIPlayer::ThinkPathGiven( ThinkData & data, bool emergency )
-{
-    if( !path.Valid() )
-    {
-        SwitchToState( AI_SURVIVE, 1 );
-        ThinkSurvive( data );
-        return;
-    }
-
-    eCoord dir = Object()->Direction();
-
-    int lr = 0;
-    REAL mindist = 100;
-
-    // now we have found our next goal. Try to get there.
-    eCoord pos    = Object()->Position();
-    eCoord t      = path.CurrentPosition();
-    
-    // to which side is the target?
-    REAL side = (t - pos) * dir;
-    REAL delay = Object()->GetTurnDelay();
-    // already aligned? Advance.
-    REAL sideThresh = delay * Object()->Speed()*.5;
-    if( fabs( side ) < sideThresh )
-    {
-        if ( !path.Proceed() )
-        { 
-            SwitchToState( AI_SURVIVE, 1 );
-            ThinkSurvive( data );
-            return;
-        }
-        t = path.CurrentPosition();
-        side = (t - pos) * dir;
-    }
-
-    // look how far ahead the target is:
-    REAL ahead = eCoord::F(t - pos, dir)
-    + eCoord::F(path.CurrentOffset(), dir);
-
-    if ( ahead > ( delay *.1 + sg_FrameTime() ) * Object()->Speed() && !emergency )
-    {	  // it is still before us. just wait a while.
-        mindist = ahead;
-    }
-    else
-    { // we have passed it. Make a turn towards it.
-        if( fabs( side ) < mindist )
-        {
-            mindist = fabs( side );
-        }
-
-        // switch to survival mode if cut off, no questions asked
-        if( emergency && ahead > delay * Object()->Speed() && data.front.front.wallType == gSENSOR_ENEMY && state != AI_PATH_MINDLESS )
-        {
-            nextStateChange = 0;
-            SwitchToState( AI_SURVIVE, 1 );
-        }
-        
-        {
-#ifdef DEBUG
-            con << "Following path...\n";
-#endif
-            lr += (side > 0 ? 1 : -1);
-            if( ahead < -sideThresh*.9 )
-            {
-                if ( !path.Proceed() )
-                { 
-                    SwitchToState( AI_SURVIVE, 1 );
-                }
-            }
-        }
-    }
-
-    if( lr && state != AI_PATH_MINDLESS )
-    {
-        // don't commit suicide
-        gAISensor const & side = lr > 0 ? data.left : data.right;
-        REAL rubber, effectiveness;
-        sg_RubberValues( this, Object()->Speed(), rubber, effectiveness );
-        rubber -= Object()->GetRubber();
-        if( side.distance < delay * Object()->Speed() - rubber*effectiveness )
-        {
-            EmergencySurvive( data );
-            return;
-        }
-    }
-    data.turn = -lr;
-
-    if( target )
-    {
-        eCoord tDir = target->Position() - Object()->Position();
-
-        REAL d = sqrt(tDir.NormSquared()) * .2f;
-        if (d < mindist)
-            mindist = d;
-    }
+    REAL d = sqrt(tDir.NormSquared()) * .2f;
+    if (d < mindist)
+        mindist = d;
 
     data.thinkAgain = mindist / Object()->Speed();
-    if (data.thinkAgain > 1)
+    if (data.thinkAgain > .4)
         data.thinkAgain *= .7;
 }
 
@@ -2437,7 +2333,7 @@ bool gAIPlayer::EmergencySurvive( ThinkData & data, int enemyevade, int prefered
         if (character->properties[AI_ENEMY] > 7)
         {
             // would he be able to trap us if we drive straight on?
-            // bool trap[2] = {false, false};
+            bool trap[2] = {false, false};
 
             if (!isTrapped)
                 for (i = 1; i>=0; i--)
@@ -2460,7 +2356,7 @@ bool gAIPlayer::EmergencySurvive( ThinkData & data, int enemyevade, int prefered
                     if (loop)
                         if (winding * (i+i-1) < 0)
                         {
-                            // trap[i] = true;
+                            trap[i] = true;
                             REAL x = enemypos.x * (i+i-1);
                             REAL y = enemypos.y;
 
@@ -2683,7 +2579,7 @@ void gAIPlayer::EmergencyTrace( ThinkData & data )
 
 void gAIPlayer::EmergencyPath( ThinkData & data )
 {
-    ThinkPathGiven( data, true );
+    EmergencySurvive( data );
 }
 
 void gAIPlayer::EmergencyCloseCombat( ThinkData & data )
@@ -2767,7 +2663,7 @@ void gAIPlayer::RightBeforeDeath(int triesLeft) // is called right before the ve
     nextStateChange = se_GameTime() + 100;
 #else
     // switch to survival state if our victim died:
-    if ((!target || !target->Alive()) && state != AI_TRACE && state != AI_PATH_MINDLESS && state != AI_PATH_GIVEN )
+    if ((!target || !target->Alive()) && state != AI_TRACE)
         SwitchToState(AI_SURVIVE, 1);
 #endif
 
@@ -2777,9 +2673,6 @@ void gAIPlayer::RightBeforeDeath(int triesLeft) // is called right before the ve
     case AI_SURVIVE:
         EmergencySurvive(data);
         break;
-    case AI_PATH_MINDLESS:
-        break;
-    case AI_PATH_GIVEN:
     case AI_PATH:
         EmergencyPath(data);
         break;
@@ -2801,11 +2694,9 @@ void gAIPlayer::RightBeforeDeath(int triesLeft) // is called right before the ve
 #endif
 }
 
-gAIPlayer * sg_watchAI = 0;
-
 void gAIPlayer::NewObject()         // called when we control a new object
 {
-    lastTime = se_GameTime();
+    lastTime = 0;
     lastPath = 0;
     lastChangeAttempt = 0;
     lazySideChange = 0;
@@ -2813,8 +2704,8 @@ void gAIPlayer::NewObject()         // called when we control a new object
 
     if (character)
     {
-        nextTime        = lastTime + character->properties[AI_STARTSTRAIGHT] * gArena::SizeMultiplier()/gCycleMovement::SpeedMultiplier();
-        nextStateChange = lastTime + character->properties[AI_STATECHANGE];
+        nextTime        = character->properties[AI_STARTSTRAIGHT] * gArena::SizeMultiplier()/gCycleMovement::SpeedMultiplier();
+        nextStateChange = character->properties[AI_STATECHANGE];
         state           = (gAI_STATE)character->properties[AI_STARTSTATE];
     }
     else
@@ -2939,8 +2830,8 @@ REAL gAIPlayer::Think(){
     // get the sensors to the left and right with the most free space
     int currentDirectionNumber = Object()->Grid()->DirectionWinding( dir );
     REAL mindistLeft = 1E+30, mindistRight = 1E+30;
-    std::unique_ptr< gAISensor > left  ( sg_GetSensor( currentDirectionNumber, *Object(), -1, side, range, corridor, mindistLeft ) );
-    std::unique_ptr< gAISensor > right ( sg_GetSensor( currentDirectionNumber, *Object(), 1, side, range, corridor, mindistRight ) );
+    std::auto_ptr< gAISensor > left  ( sg_GetSensor( currentDirectionNumber, *Object(), -1, side, range, corridor, mindistLeft ) );
+    std::auto_ptr< gAISensor > right ( sg_GetSensor( currentDirectionNumber, *Object(), 1, side, range, corridor, mindistRight ) );
 
     // count intermediate walls to the left and right as if they were in front
     {
@@ -2956,7 +2847,7 @@ REAL gAIPlayer::Think(){
     nextStateChange = se_GameTime() + 100;
 #else
     // switch to survival state if our victim died:
-    if (state == AI_CLOSECOMBAT && (!target || !target->Alive()))
+    if (state != AI_SURVIVE && state != AI_TRACE && (!target || !target->Alive()))
         SwitchToState(AI_SURVIVE, 1);
 #endif
 
@@ -2982,10 +2873,6 @@ REAL gAIPlayer::Think(){
             break;
         case AI_PATH:
             ThinkPath(data);
-            break;
-        case AI_PATH_MINDLESS:
-        case AI_PATH_GIVEN:
-            ThinkPathGiven(data);
             break;
         case AI_TRACE:
             ThinkTrace(data);
@@ -3014,7 +2901,7 @@ REAL gAIPlayer::Think(){
     for (int i=gameObjects.Len()-1;i>=0;i--){
         gCycle *other=dynamic_cast<gCycle *>(gameObjects(i));
 
-        if (other && other != Object() && other->Team() != CurrentTeam()){
+        if (other && other != Object()){
             // then, enemy is realy an enemy
             eCoord otherpos=other->Position()-Object()->Position();
             REAL dist = otherpos.NormSquared();
@@ -3095,16 +2982,7 @@ void gAIPlayer::ActOnData( ThinkDataBase & data )
 
     // execute turn
     if ( data.turn )
-    {
-        if( Object()->CanMakeTurn( data.turn ) )
-        {
-            Object()->Turn( data.turn );
-        }
-        else
-        {
-            data.thinkAgain = Object()->GetNextTurn( data.turn ) - Object()->LastTime();
-        }
-    }
+        Object()->Turn( data.turn );
 }
 
 const REAL relax=25;

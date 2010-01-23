@@ -13,7 +13,7 @@ The AA-DevTeam currently consists of (alphabetic username order):
 +---------------------+---------------+---------------------------------------+
 | Luke-Jr             | luke-jr       |                                       |
 +---------------------+---------------+---------------------------------------+
-| Daniel Harple       | dlh3          |                                       |
+| Daniel Harple       | nemostultae   |                                       |
 +---------------------+---------------+---------------------------------------+
 | Mathias Plichta     | wrtlprnft     |                                       |
 +---------------------+---------------+---------------------------------------+
@@ -37,10 +37,12 @@ Alex E. Kelly
 Kurt Johnson (k_at_work, K )
 Peter ? ( klaxnek, klax )
 Philippe Villeneuve ( philippeqc )
-fman23                   : Console commands
 
 Additional contributions from
 =============================
+
+Pippijn van Steenhoven
+    Map rotation optimization
 
 Belenus
     OpenBSD support sniplets
@@ -54,32 +56,20 @@ Christian Reitwiessner
 Edd Keefe
     contributed Mac OS X icon and the title screen
 
-Emmanuel Rollet (voodoo)
+Emmanuel Rollet
     clipping and basic movement for the overhead map, camview widget
-    SDL2 support, touch controls
-    
+
 Fabrice Holbe
     original Moviepack and font
 
 hang3r
     skeleton for more accurate timer on Windows
 
-hoop
-    Zone rendering settings
-
-brandesign (Jip on the forums)
-    Server browser name filter
-    GID mate filter
-    Tab completion for colored names
-
 Jonathan
     Headlight (needs activation) and overhead map
 
 Meriton
     Replacement for the old buggy Lag-O-Meter and new camera glancing code
-
-clime
-    Tweaks to that glancing code
 
 mygal
     French translation (part)
@@ -90,9 +80,6 @@ Oscilloscope/Louven
 pavelo
     extension to the tab completion code
 
-Pippijn van Steenhoven
-    Map rotation optimization
-
 Rafal Cieslak
     Polish translation
 
@@ -102,20 +89,8 @@ tang322
 Tomas Birraux
     french accents in font
 
-Tru
-    Russian translation
-
-Vitty
-    Function to randomise teams (SCRAMBLE), and other titbits
-
-Word
-    0.4 German translation
-
-Vertex
-    /report player reporting
-
-<|tux (ubuntu_dpg)
-    POSIX Thread improvements
+hoop
+    Zone rendering settings
 
 External code merged in from
 ============================

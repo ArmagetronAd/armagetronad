@@ -351,7 +351,7 @@ int nProtoBufMessageBase::OnWrite( WriteArguments & arguments ) const
         {
             // Transform to old style message.
             static nStreamDescriptor dummy( 0, NULL, NULL );
-            oldFormat_ = tNEW(nStreamMessage)( dummy, MessageID() );
+            oldFormat_ = tNEW(nStreamMessage)( dummy, MessageID(), SenderID() );
 
             tASSERT( streamer_ );
             streamer_->StreamFromProtoBuf( *this, *oldFormat_ );
@@ -423,7 +423,7 @@ void nProtoBufMessageBase::OnRead( unsigned char const * & buffer, unsigned char
         {
             // read old format
             static nStreamDescriptor dummy( 0, NULL, NULL );
-            oldFormat_ = tNEW(nStreamMessage)( dummy, MessageID() );
+            oldFormat_ = tNEW(nStreamMessage)( dummy, MessageID(), SenderID() );
             static_cast< nMessageBase * >( oldFormat_ )->Read( buffer, end );
         }
 

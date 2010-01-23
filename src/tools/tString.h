@@ -144,8 +144,7 @@ public:
 
     tString Truncate( int truncateAt ) const;   //!< Returns a truncated string (copy of this with excess chars replaced by "...")
 
-    static tString FromUnknown( char const * source ); //!< Cleans up a string from an external source to be valid utf8.
-    
+
     // TO BE REPLACED
     // auto-expanding subscription operators, will become non-expanding
     CHAR operator[]( size_t i ) const;

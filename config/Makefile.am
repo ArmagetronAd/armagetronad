@@ -5,6 +5,7 @@ configdir=${aa_sysconfdir}
 
 nobase_config_DATA=default.cfg master.srv settings.cfg\
 	settings_dedicated.cfg aiplayers.cfg rc.config\
+	subcultures.srv\
 	settings_visual.cfg\
     settings_authentication.cfg\
     examples/breakfast_in_hell.cfg examples/single_use_turbo.cfg\

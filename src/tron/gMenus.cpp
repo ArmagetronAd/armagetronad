@@ -41,15 +41,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "gCycle.h"
 #include "tRecorder.h"
 #include "rSysdep.h"
-#include "uInput.h"
 
 #include <sstream>
 #include <set>
-#include <ctime>
-#include <vector>
-#include <memory>
 
-#ifndef DEDICATED
 static tConfItem<int>   tm0("TEXTURE_MODE_0",rTextureGroups::TextureMode[0]);
 static tConfItem<int>   tm1("TEXTURE_MODE_1",rTextureGroups::TextureMode[1]);
 static tConfItem<int>   tm2("TEXTURE_MODE_2",rTextureGroups::TextureMode[2]);
@@ -82,17 +77,19 @@ static tConfItemLine c_rEnd("GL_RENDERER",gl_renderer);
 static tConfItemLine c_vEnd("GL_VENDOR",gl_vendor);
 // static tConfItemLine a_ver("ARMAGETRON_VERSION",st_programVersion);
 
+#ifndef DEDICATED
 static uMenuItemStringWithHistory::history_t &sg_consoleHistory() {
     static uMenuItemStringWithHistory::history_t instance("console_history.txt");
     return instance;
 }
+#endif
 
 static int sg_consoleHistoryMaxSize=100; // size of the console history
 static tSettingItem< int > sg_consoleHistoryMaxSizeConf("HISTORY_SIZE_CONSOLE",sg_consoleHistoryMaxSize);
 
 class ArmageTron_feature_menuitem: public uMenuItemSelection<int>{
-    void NewChoice(uSelectItem<bool> *){}
-    void NewChoice(char *,bool ){}
+    void NewChoice(uSelectItem<bool> *){};
+    void NewChoice(char *,bool ){};
 public:
     ArmageTron_feature_menuitem(uMenu *m,char const * tit,char const * help,int &targ)
             :uMenuItemSelection<int>(m,tit,help,targ){
@@ -110,13 +107,13 @@ public:
             rFEAT_ON);
     }
 
-    ~ArmageTron_feature_menuitem(){}
+    ~ArmageTron_feature_menuitem(){};
 };
 
 
 class ArmageTron_texmode_menuitem: public uMenuItemSelection<int>{
-    void NewChoice(uSelectItem<bool> *){}
-    void NewChoice(char *,bool ){}
+    void NewChoice(uSelectItem<bool> *){};
+    void NewChoice(char *,bool ){};
 public:
     ArmageTron_texmode_menuitem(uMenu *m,char const * tit,int &targ,
                                 bool font=false)
@@ -151,7 +148,7 @@ public:
     #endif
     }
 
-    ~ArmageTron_texmode_menuitem(){}
+    ~ArmageTron_texmode_menuitem(){};
 };
 
 static tConfItem<bool>    ab("ALPHA_BLEND",sr_alphaBlend);
@@ -191,107 +188,13 @@ bool operator < ( rScreenSize const & a, rScreenSize const & b )
     return a.Compare(b) < 0;
 }
 
-#if SDL_VERSION_ATLEAST(2,0,0)
-class gRefreshRateMenuItem: public uMenuItemSelection<int>
+class gResMenEntry
 {
-public:
-    void Rescan()
-    {
-        Clear();
-
-        // collect refresh rates
-        std::set<int> refreshRates;
-        int modes = SDL_GetNumDisplayModes(currentScreensetting.displayIndex);
-
-        for(int run = 0; run <= 1; ++run)
-        {
-            int width = currentScreensetting.res.width;
-            int height = currentScreensetting.res.height;
-            
-            if(width + height == 0)
-            {
-                // desktop mode, get real res
-                SDL_DisplayMode mode;
-                if(SDL_GetDesktopDisplayMode(currentScreensetting.displayIndex, &mode) == 0)
-                {
-                    width = mode.w;
-                    height = mode.h;
-                }
-            }
-
-            for(int i = modes-1; i >= 0; --i)
-            {
-                SDL_DisplayMode mode;
-                if (0>SDL_GetDisplayMode(currentScreensetting.displayIndex, i, &mode)) continue;
-
-                // first scan only matching modes, then all
-                if(run == 0)
-                {
-                    if(width != mode.w)
-                        continue;
-                    if(height != mode.h)
-                        continue;
-                }
-                if(refreshRates.find(mode.refresh_rate) == refreshRates.end())
-                {
-                    refreshRates.insert(mode.refresh_rate);
-                }
-            }
-
-            if(refreshRates.size() > 0)
-                break;
-        }
-
-        // emergenct default fallback
-        if(refreshRates.size() == 0)
-            refreshRates.insert(60);
-
-        // add them to menu
-        for(std::set<int>::iterator i = refreshRates.begin(); i != refreshRates.end(); ++i)
-        {
-            int displayRate = *i;
-
-            // round up display rates ending in 9.
-            if((displayRate % 10) == 9 && refreshRates.find(displayRate+1) == refreshRates.end())
-                displayRate++;
-
-            tOutput text("$screen_refreshrate_select", displayRate);
-            NewChoice(text, text, *i);
-        }
-
-        // add default on top
-        NewChoice("$screen_refreshrate_desk_text", "$screen_refreshrate_desk_help", 0);
-
-        select = -1;
-        PickFromValue();
-        if(select < 0)
-        {
-            select = choices.Len()-1;
-        }
-        LeftRight(0);
-    }
-
-    gRefreshRateMenuItem( uMenu & screen_menu_mode, const tOutput& text, const tOutput& help )
-            :uMenuItemSelection<int>
-            (&screen_menu_mode,
-             text,
-             help,
-             currentScreensetting.refreshRate)
-    {
-        Rescan();
-    }
-};
-
-static gRefreshRateMenuItem * sg_refreshRateMenuItem = NULL;
-#endif // SDL_VER
-
-class gResolutionMenuItem: uMenuItemSelection<rScreenSize> 
-{
+    uMenuItemSelection<rScreenSize> res_men; // menu item
     std::set< rScreenSize > sizes;           // set of already added modes
-    bool addFixed; // true if fixed set of resolutions is to be added
 
     // adds a single custom screen resolution
-    void NewSize( rScreenSize const & size )
+    void NewChoice( rScreenSize const & size )
     {
         if ( sizes.find( size ) == sizes.end() )
         {
@@ -300,68 +203,53 @@ class gResolutionMenuItem: uMenuItemSelection<rScreenSize>
     }
 
     // adds a single predefined resolution
-    void NewSize( rResolution res )
+    void NewChoice( rResolution res )
     {
         rScreenSize size( res );
-        NewSize( size );
+        NewChoice( size );
     }
 
 public:
-    void Rescan()
+    gResMenEntry( uMenu & screen_menu_mode, rScreenSize& res, const tOutput& text, const tOutput& help, bool addFixed )
+            :res_men
+            (&screen_menu_mode,
+             text,
+             help,
+             res)
     {
-        sizes.clear();
-        Clear();
-
 #ifndef DEDICATED
         // fetch valid screen modes from SDL
-        int i;
-#if SDL_VERSION_ATLEAST(2,0,0)
-        int modes = SDL_GetNumDisplayModes(currentScreensetting.displayIndex);
-
-        // Check is there are any modes available
-        if(modes < 0)
-#else
         SDL_Rect **modes;
         modes=SDL_ListModes(NULL, SDL_FULLSCREEN|SDL_OPENGL);
 
         // Check is there are any modes available
+        int i;
         if(modes == 0 || modes == (SDL_Rect **)-1)
-#endif
-
         {
             // add all fixed resolutions
             for ( i = ArmageTron_Custom; i>=0; --i )
             {
-                NewSize( rResolution(i) );
+                NewChoice( rResolution(i) );
             }
         }
         else
         {
             // add custom resolution
-            NewSize( ArmageTron_Custom );
+            NewChoice( ArmageTron_Custom );
 
             // add desktop resolution
             if ( sr_DesktopScreensizeSupported() && !addFixed )
-                NewSize( ArmageTron_Desktop );
+                NewChoice( ArmageTron_Desktop );
 
             // the maximal allowed screen size
             rScreenSize maxSize(0,0);
 
             // fill in available modes (avoid duplicates)
-#if SDL_VERSION_ATLEAST(2,0,0)
-            for ( i = 0 ; i < modes ; i++ )
-            {
-                SDL_DisplayMode mode;
-                // add mode (if it's new)
-                if (0>SDL_GetDisplayMode(currentScreensetting.displayIndex, i, &mode)) continue;
-                rScreenSize size(mode.w, mode.h);
- #else
             for(i=0;modes[i];++i)
             {
                 // add mode (if it's new)
                 rScreenSize size(modes[i]->w, modes[i]->h);
-#endif
-                NewSize( size );
+                NewChoice( size );
                 if ( maxSize.width < size.width )
                     maxSize.width = size.width;
                 if ( maxSize.height < size.height )
@@ -377,7 +265,7 @@ public:
 
                     // only add those that fit the maximal resolution
                     if ( maxSize.height >= size.height && maxSize.width >= size.width )
-                        NewSize( size );
+                        NewChoice( size );
                 }
             }
         }
@@ -393,82 +281,22 @@ public:
                 else
                     s << tOutput("$screen_size_desktop");
 
-                NewChoice( s.str().c_str(), "", size );
+                res_men.NewChoice( s.str().c_str(), help, size );
             }
 
 #endif
-
-        select = -1;
-        PickFromValue();
-        if(select < 0)
-        {
-            select = choices.Len()-1;
-        }
-        LeftRight(0);
-    }
-
-        
-    virtual void LeftRight(int lr)
-    {
-        uMenuItemSelection<rScreenSize>::LeftRight(lr);
-
-#if SDL_VERSION_ATLEAST(2,0,0)       
-        if(sg_refreshRateMenuItem)
-            sg_refreshRateMenuItem->Rescan();
-#endif
-    }
-
-    gResolutionMenuItem( uMenu & screen_menu_mode, rScreenSize& res, const tOutput& text, const tOutput& help, bool addFixed )
-            :uMenuItemSelection<rScreenSize>
-            (&screen_menu_mode,
-             text,
-             help,
-             res)
-    {
-        this->addFixed = addFixed;
-
-        Rescan();
     }
 };
 
-static gResolutionMenuItem * sg_windowResMen = NULL, * sg_screenResMen = NULL;
-
-class gDisplayMenuItem: public uMenuItemInt
+static void sg_ScreenModeMenu()
 {
-public:
-    gDisplayMenuItem( uMenu & screen_menu_mode, const tOutput& text, const tOutput& help, int max )
-            :uMenuItemInt
-            (&screen_menu_mode,
-             text,
-             help,
-             currentScreensetting.displayIndex, 0, max)
-    {
-    }
+    uMenu screen_menu_mode("$screen_mode_menu");
 
-    virtual void LeftRight(int lr)
-    {
-        uMenuItemInt::LeftRight(lr);
-        
-        if(sg_windowResMen)
-        {
-            sg_windowResMen->Rescan();
-        }
-        if(sg_screenResMen)
-        {
-            sg_screenResMen->Rescan();
-        }
-    }
-};
-
-static void sg_ScreenModeAdvanced()
-{
-    uMenu screen_menu_mode("$screen_mode_advanced");
-    
-    uMenuItemToggle gm(
-        &screen_menu_mode,
-        "$screen_grab_mouse_text",
-        "$screen_grab_mouse_help",
-        su_mouseGrab);
+    uMenuItemFunction appl
+    (&screen_menu_mode,
+     "$screen_apply_changes_text",
+     "$screen_apply_changes_help",
+     &sr_ReinitDisplay);
 
     uMenuItemToggle kwa_t(
         &screen_menu_mode,
@@ -476,15 +304,22 @@ static void sg_ScreenModeAdvanced()
         "$screen_keep_window_active_help",
         sr_keepWindowActive);
 
-#if !SDL_VERSION_ATLEAST(2,0,0)
     uMenuItemToggle ie_t
     (&screen_menu_mode,
      "$screen_check_errors_text",
      "$screen_check_errors_help",
      currentScreensetting.checkErrors);
-#endif
+
 
 #ifdef SDL_OPENGL
+#ifdef DIRTY
+    uMenuItemToggle sdl_t
+    (&screen_menu_mode,
+     "$screen_use_sdl_text",
+     "$screen_use_sdl_help",
+     currentScreensetting.useSDL);
+#endif // dirty
+
 #if SDL_VERSION_ATLEAST(1, 2, 10)
     uMenuItemSelection<rVSync> zvs_t
     (&screen_menu_mode,
@@ -500,6 +335,12 @@ static void sg_ScreenModeAdvanced()
 #endif // HAVE_GLEW
 #endif // SDL_GL_SWAP_CONTROL
 #endif // SDL_OPENGL
+
+    uMenuItemToggle gm(
+        &screen_menu_mode,
+        "$screen_grab_mouse_text",
+        "$screen_grab_mouse_help",
+        su_mouseGrab);
 
     uMenuItemSelection<rColorDepth> zd_t
     (&screen_menu_mode,
@@ -521,154 +362,42 @@ static void sg_ScreenModeAdvanced()
     uSelectEntry<rColorDepth> cd_d(cd_t,"$screen_colordepth_desk_text","$screen_colordepth_desk_help",ArmageTron_ColorDepth_Desktop);
     uSelectEntry<rColorDepth> cd_32(cd_t,"$screen_colordepth_32_text","$screen_colordepth_32_help",ArmageTron_ColorDepth_32);
 
-    screen_menu_mode.Enter();
-}
-
-static void sg_ScreenModeMenu()
-{
-    uMenu screen_menu_mode("$screen_mode_menu");
-
-    uMenuItemFunction appl
-    (&screen_menu_mode,
-     "$screen_apply_changes_text",
-     "$screen_apply_changes_help",
-     &sr_ReinitDisplay);
-
-    uMenuItemFunction sma(&screen_menu_mode,"$screen_mode_advanced",
-                          "$screen_mode_advanced_help", sg_ScreenModeAdvanced );
-
-    gResolutionMenuItem winsize( screen_menu_mode, currentScreensetting.windowSize, "$window_size_text", "$window_size_help", true );
-
     uMenuItemToggle fs_t
     (&screen_menu_mode,
      "$screen_fullscreen_text",
      "$screen_fullscreen_help",
      currentScreensetting.fullscreen);
 
-#if SDL_VERSION_ATLEAST(2,0,0)
-    gRefreshRateMenuItem refreshRate
-    (screen_menu_mode,
-     "$screen_refreshrate_text",
-     "$screen_refreshrate_help");
 
-    sg_refreshRateMenuItem = &refreshRate;
-#endif
+    gResMenEntry res( screen_menu_mode, currentScreensetting.res, "$screen_resolution_text", "$screen_resolution_help", false );
+    gResMenEntry winsize( screen_menu_mode, currentScreensetting.windowSize, "$window_size_text", "$window_size_help", true );
+
+    /*
+    uMenuItemSelection<rResolution> res_men
+    (&screen_menu_mode,
+     "$screen_resolution_text",
+     "$screen_resolution_help",
+     currentScreensetting.res);
 
 
-    gResolutionMenuItem res( screen_menu_mode, currentScreensetting.res, "$screen_resolution_text", "$screen_resolution_help", false );
-
-    sg_windowResMen = &winsize;
-    sg_screenResMen = &res;
-
-#if SDL_VERSION_ATLEAST(2,0,0)
-
-    int numDisplays = SDL_GetNumVideoDisplays();
-    std::unique_ptr<uMenuItemInt> pDisplayIndex;
-    if(numDisplays > 1)
-    {
-        pDisplayIndex.reset( tNEW(gDisplayMenuItem)
-        (screen_menu_mode,
-         "$screen_displayindex_text",
-         "$screen_displayindex_help",
-         numDisplays-1) );
-    }
-#endif
+    uSelectEntry<rResolution> a(res_men,"320x200","",ArmageTron_320_200);
+     static uSelectEntry<rResolution> b(res_men,"320x240","",ArmageTron_320_240);
+    static uSelectEntry<rResolution> c(res_men,"400x300","",ArmageTron_400_300);
+    static uSelectEntry<rResolution> d(res_men,"512x384","",ArmageTron_512_384);
+    static uSelectEntry<rResolution> e(res_men,"640x480","",ArmageTron_640_480);
+    static uSelectEntry<rResolution> f(res_men,"800x600","",ArmageTron_800_600);
+    static uSelectEntry<rResolution> g(res_men,"1024x768","",ArmageTron_1024_768);
+    static uSelectEntry<rResolution> h(res_men,"1280x1024","",ArmageTron_1280_1024);
+    static uSelectEntry<rResolution> i(res_men,"1600x1200","",ArmageTron_1600_1200);
+    static uSelectEntry<rResolution> j(res_men,"2048x1572","",ArmageTron_2048_1572);
+    static uSelectEntry<rResolution> jj(res_men,
+    				    "$screen_custom_text",
+    				    "$screen_custom_help"
+    				    ,ArmageTron_Custom);
+    */
 
     screen_menu_mode.Enter();
-
-    sg_windowResMen = NULL;
-    sg_screenResMen = NULL;
-
-#if SDL_VERSION_ATLEAST(2,0,0)       
-    sg_refreshRateMenuItem = NULL;
-#endif
 }
-
-
-#define gZONE_STYLE_VERT 0
-#define gZONE_STYLE_FLAT 1
-#define gZONE_STYLE_COMB 2
-#define gZONE_STYLE_CUST 3
-static int sg_zoneStyle;
-
-void zone_style_on_select(int const& val) {
-    // default include files are executed at owner level
-    tCurrentAccessLevel level( tAccessLevel_Owner, true );
-
-    // hardcoded includes
-    switch (val) {
-        case gZONE_STYLE_VERT:
-            st_Include(tString("zonestyle_vertical.cfg"));
-            break;
-        case gZONE_STYLE_FLAT:
-            st_Include(tString("zonestyle_flat.cfg"));
-            break;
-        case gZONE_STYLE_COMB:
-            st_Include(tString("zonestyle_combined.cfg"));
-    }
-}
-
-extern int  sz_zoneSegments;
-extern int  sz_zoneSegSteps;
-extern REAL sz_zoneSegLength;
-extern REAL sz_zoneBottom;
-extern REAL sz_zoneHeight;
-extern REAL sz_zoneFloorScalePercent;
-extern REAL sz_zoneProximityDistance;
-extern REAL sz_zoneProximityOffset;
-
-void zone_style_on_enter(int const& val) {
-    if (val!=gZONE_STYLE_CUST) return;
-    uMenu customMenu("$zone_style_custom_menu");
-    uMenuItemReal cm8(&customMenu,
-                      "$zone_style_proximity_offset_text",
-                      "$zone_style_proximity_offset_help",
-                      sz_zoneProximityOffset, (REAL)0, (REAL)100, (REAL)1 );
-    uMenuItemReal cm7(&customMenu,
-                      "$zone_style_proximity_distance_text",
-                      "$zone_style_proximity_distance_help",
-                      sz_zoneProximityDistance, (REAL)-1, (REAL)100, (REAL)1 );
-    uMenuItemReal cm6(&customMenu,
-                      "$zone_style_floor_scale_pct_text",
-                      "$zone_style_floor_scale_pct_help",
-                      sz_zoneFloorScalePercent, (REAL)0, (REAL)1, (REAL).05 );
-    uMenuItemReal cm5(&customMenu,
-                      "$zone_style_height_text",
-                      "$zone_style_height_help",
-                      sz_zoneHeight, (REAL)0, (REAL)20, (REAL)1 );
-    uMenuItemReal cm4(&customMenu,
-                      "$zone_style_bottom_text",
-                      "$zone_style_bottom_help",
-                      sz_zoneBottom, (REAL)0, (REAL)10, (REAL)1 );
-    uMenuItemReal cm3(&customMenu,
-                      "$zone_style_segment_length_text",
-                      "$zone_style_segment_length_help",
-                      sz_zoneSegLength, (REAL)0, (REAL)1, (REAL).05 );
-    uMenuItemInt  cm2(&customMenu,
-                      "$zone_style_segment_steps_text",
-                      "$zone_style_segment_steps_help",
-                      sz_zoneSegSteps, 1, 16, 1);
-    uMenuItemInt  cm1(&customMenu,
-                      "$zone_style_segments_text",
-                      "$zone_style_segments_help",
-                      sz_zoneSegments, 2, 20, 1);
-    customMenu.SetCenter(.3);
-    customMenu.Enter();
-}
-
-static uMenuItemSelection<int> mzm
-(&screen_menu_prefs,
- "$detail_zone_style_text",
- "$detail_zone_style_help",
- sg_zoneStyle, &zone_style_on_select, &zone_style_on_enter);
-static uSelectEntry<int> mzm0(mzm,"$detail_zone_style_vertical_text",
-                              "$detail_zone_style_vertical_help", gZONE_STYLE_VERT);
-static uSelectEntry<int> mzm1(mzm,"$detail_zone_style_flat_text",
-                              "$detail_zone_style_flat_help", gZONE_STYLE_FLAT);
-static uSelectEntry<int> mzm2(mzm,"$detail_zone_style_combined_text",
-                              "$detail_zone_style_combined_help", gZONE_STYLE_COMB);
-static uSelectEntry<int> mzm3(mzm,"$detail_zone_style_custom_text",
-                              "$detail_zone_style_custom_help", gZONE_STYLE_CUST);
 
 
 static uMenuItemSelection<int> mfm
@@ -693,14 +422,6 @@ static uMenuItemToggle fs_dither
 (&screen_menu_detail,"$detail_dither_text",
  "$detail_dither_help",
  sr_dither);
-
-// from gWall.cpp
-extern bool sg_simpleTrail;
-static uMenuItemToggle sgm_simpleTrail
-(&screen_menu_detail,
- "$detail_simple_trail_text",
- "$detail_simple_trail_help",
- sg_simpleTrail);
 
 static uMenuItemSelection<int> mfd
 (&screen_menu_detail,
@@ -741,8 +462,10 @@ static tConfItem<bool> crexp("EXPLOSION",sg_crashExplosion);
 extern bool sg_crashExplosionHud;   // from gExplosion.cpp
 static tConfItem<bool> crexph("EXPLOSION_HUD",sg_crashExplosionHud);
 
+#ifndef DEDICATED
 //extern bool png_screenshot;		// from rSysdep.cpp
 //static tConfItem<bool> pns("PNG_SCREENSHOT",png_screenshot);
+#endif
 
 static uMenuItemToggle  t32b
 (&screen_menu_detail,"$detail_text_truecolor_text",
@@ -823,38 +546,38 @@ static uMenuItemToggle infp
  "$tweaks_infinity_help"
  ,sr_infinityPlane);
 
-uMenuItemSelection<rSysDep::rFramedropTolerance> framedropTolerance
+uMenuItemSelection<rSysDep::rSwapMode> swapMode
 (&screen_menu_tweaks,
- "$framedroptolerance_text",
- "$framedroptolerance_help",
- rSysDep::framedropTolerance_);
+ "$swapmode_text",
+ "$swapmode_help",
+ rSysDep::swapMode_);
 
-static uSelectEntry<rSysDep::rFramedropTolerance> framedropTolerance_Lenient(framedropTolerance,"$framedrop_tolerance_lenient_text","$framedrop_tolerance_lenient_help",rSysDep::rSwap_Lenient);
-static uSelectEntry<rSysDep::rFramedropTolerance> framedropTolerance_Normal(framedropTolerance,"$framedrop_tolerance_normal_text","$framedrop_tolerance_normal_help",rSysDep::rSwap_Normal);
-static uSelectEntry<rSysDep::rFramedropTolerance> framedropTolerance_Strict(framedropTolerance,"$framedrop_tolerance_strict_text","$framedrop_tolerance_strict_help",rSysDep::rSwap_Strict);
-static uSelectEntry<rSysDep::rFramedropTolerance> framedropTolerance_Draconic(framedropTolerance,"$framedrop_tolerance_draconic_text","$framedrop_tolerance_draconic_help",rSysDep::rSwap_Draconic);
+static uSelectEntry<rSysDep::rSwapMode> swapMode_fastest(swapMode,"$swapmode_fastest_text","$swapmode_fastest_help",rSysDep::rSwap_Fastest);
+static uSelectEntry<rSysDep::rSwapMode> swapMode_glFlush(swapMode,"$swapmode_glflush_text","$swapmode_glflush_help",rSysDep::rSwap_glFlush);
+static uSelectEntry<rSysDep::rSwapMode> swapMode_Fence(swapMode,"$swapmode_fence_text","$swapmode_glflush_help",rSysDep::rSwap_Fence);
+static uSelectEntry<rSysDep::rSwapMode> swapMode_LateFinish(swapMode,"$swapmode_latefinish_text","$swapmode_glflush_help",rSysDep::rSwap_LateFinish);
+static uSelectEntry<rSysDep::rSwapMode> swapMode_glFinish(swapMode,"$swapmode_glfinish_text","$swapmode_glfinish_help",rSysDep::rSwap_glFinish);
 
-tCONFIG_ENUM( rSysDep::rFramedropTolerance );
-
-static tConfItem< rSysDep::rFramedropTolerance > framedropToleranceCI("FRAMEDROP_TOLERANCE", rSysDep::framedropTolerance_ );
-
-uMenuItemSelection<rSysDep::rSwapOptimize> swapOptimize
+/*
+uMenuItemSelection<int> targetFPS
 (&screen_menu_tweaks,
- "$swapoptimize_text",
- "$swapoptimize_help",
- rSysDep::swapOptimize_);
+ "$targetfps_text",
+ "$targetfps_help",
+rSysDep::swapMode_);
 
-static uSelectEntry<rSysDep::rSwapOptimize> swapOptimize_Latency(swapOptimize,"$swapoptimize_latency_text","$swapoptimize_latency_help",rSysDep::rSwap_Latency);
-static uSelectEntry<rSysDep::rSwapOptimize> swapOptimize_Auto(swapOptimize,"$swapoptimize_auto_text","$swapoptimize_auto_help",rSysDep::rSwap_Auto);
-static uSelectEntry<rSysDep::rSwapOptimize> swapOptimize_Throughput(swapOptimize,"$swapoptimize_throughput_text","$swapoptimize_throughput_help",rSysDep::rSwap_Throughput);
-static uSelectEntry<rSysDep::rSwapOptimize> swapOptimize_ThroughputFlush(swapOptimize,"$swapoptimize_throughput_flush_text","$swapoptimize_throughput_flush_help",rSysDep::rSwap_ThroughputFlush);
-static uSelectEntry<rSysDep::rSwapOptimize> swapOptimize_ThroughputFastest(swapOptimize,"$swapoptimize_throughput_fastest_text","$swapoptimize_throughput_fastest_help",rSysDep::rSwap_ThroughputFastest);
+static uSelectEntry<rSysDep::rSwapMode> swapMode_150Hz(swapMode,"$swapmode_150hz_text","$swapmode_150hz_help",rSysDep::rSwap_150Hz);
+static uSelectEntry<rSysDep::rSwapMode> swapMode_100Hz(swapMode,"$swapmode_100hz_text","$swapmode_100hz_help",rSysDep::rSwap_100Hz);
+static uSelectEntry<rSysDep::rSwapMode> swapMode_80Hz(swapMode,"$swapmode_80hz_text","$swapmode_80hz_help",rSysDep::rSwap_80Hz);
+static uSelectEntry<rSysDep::rSwapMode> swapMode_60Hz(swapMode,"$swapmode_60hz_text","$swapmode_60hz_help",rSysDep::rSwap_60Hz);
+*/
 
-tCONFIG_ENUM( rSysDep::rSwapOptimize );
+tCONFIG_ENUM( rSysDep::rSwapMode );
 
-static tConfItem< rSysDep::rSwapOptimize > swapOptimizeCI("SWAP_OPTIMIZE", rSysDep::swapOptimize_ );
+static tConfItem< rSysDep::rSwapMode > swapModeCI("SWAP_MODE", rSysDep::swapMode_ );
 
 static tConfItem<bool> WRAP("WRAP_MENU",uMenu::wrap);
+
+#ifndef DEDICATED
 
 class gAutoCompleterConsole : public uAutoCompleter {
 public:
@@ -914,8 +637,6 @@ bool gMemuItemConsole::Event(SDL_Event &e){
 }
 
 void do_con(){
-    su_ClearKeys();
-
     se_ChatState( ePlayerNetID::ChatFlags_Console, true );
     sr_con.SetHeight(20,false);
     se_SetShowScoresAuto(false);
@@ -940,7 +661,7 @@ void do_con(){
 
 void sg_ConsoleInput(){
 #ifndef DEDICATED
-    st_ToDoOnce(&do_con);
+    st_ToDo(&do_con);
 #endif
 }
 
@@ -1068,7 +789,7 @@ public:
         m->RequestSpaceBelow(.2);
     }
 
-    ~ArmageTron_color_menuitem(){}
+    ~ArmageTron_color_menuitem(){};
 
     virtual REAL SpaceRight(){return .2;}
 
@@ -1085,14 +806,13 @@ public:
         }
         */
 #ifndef DEDICATED
-        uMenuItem::RenderBackground();
         if (!sr_glOut)
             return;
+        uMenuItem::RenderBackground();
         REAL r = rgb[0]/15.0;
         REAL g = rgb[1]/15.0;
         REAL b = rgb[2]/15.0;
         se_MakeColorValid(r, g, b, 1.0f);
-        RenderEnd();
         glColor3f(r, g, b);
         glRectf(.8,-.8,.98,-.98);
 #endif
@@ -1116,29 +836,21 @@ void sg_PlayerMenu(int Player){
     //  name.Clear();
     chat_menu.SetCenter(-.5);
 
+    uMenuItemString *ic[MAX_INSTANT_CHAT];
+
     ePlayer *p = ePlayer::PlayerConfig(Player);
     if (!p)
         return;
 
-    std::vector< uMenuItemString * > instantChatSlots;
-    std::vector< uMenuItemInput * > instantChatInputs;
-    std::vector< uMenuItemDivider * > instantChatDividers;
-
-    for ( int i = MAX_INSTANT_CHAT - 1 ; i >= 0; i-- )
-    {
-        instantChatSlots.push_back(
-            new uMenuItemString(
-                &chat_menu,
-                tOutput( "$player_chat_chat" ),
-                "$player_chat_chat_help",
-                p->instantChatString[ i ],
-                se_SpamMaxLen
-            )
-        );
-        instantChatInputs.push_back(
-            new uMenuItemInput( &chat_menu, p->se_instantChatAction[ i ], Player + 1 )
-        );
-        instantChatDividers.push_back( new uMenuItemDivider( &chat_menu ) );
+    int i;
+    for(i=MAX_INSTANT_CHAT-1;i>=0;i--){
+        tOutput name;
+        name.SetTemplateParameter(1, i+1);
+        name << "$player_chat_chat";
+        ic[i]=new uMenuItemString
+              (&chat_menu,name,
+               "$player_chat_chat_help",
+               p->instantChatString[i], se_SpamMaxLen);
     }
 
     uMenuItemToggle al
@@ -1271,7 +983,7 @@ void sg_PlayerMenu(int Player){
     (&camera_menu,
      "$player_camera_fov_text",
      "$player_camera_fov_help",
-     p->startFOV,30,160,5);
+     p->startFOV,30,120,5);
 
     uMenuItemSelection<eCamMode> cam_s
     (&camera_menu,
@@ -1295,16 +1007,13 @@ void sg_PlayerMenu(int Player){
     uMenuItemString n(&playerMenu,
                       "$player_name_text",
                       "$player_name_help",
-                      p->name, ePlayerNetID::MAX_NAME_LENGTH);
+                      p->name, 16);
 
     playerMenu.Enter();
 
-    for ( std::vector< uMenuItemString * >::const_iterator it = instantChatSlots.begin(); it != instantChatSlots.end(); ++it )
-        delete *it;
-    for ( std::vector< uMenuItemInput * >::const_iterator it = instantChatInputs.begin(); it != instantChatInputs.end(); ++it )
-        delete *it;
-    for ( std::vector< uMenuItemDivider * >::const_iterator it = instantChatDividers.begin(); it != instantChatDividers.end(); ++it )
-        delete *it;
+    for(i=MAX_INSTANT_CHAT-1; i>=0; i--)
+        delete ic[i];
+
 
     // request network synchronisation if the server can handle it
     static nVersionFeature inGameRenames( 5 );
@@ -1407,21 +1116,9 @@ static uActionGlobal screenshot( "SCREENSHOT" );
 
 static uActionGlobal togglefullscreen( "TOGGLE_FULLSCREEN" );
 
-#ifndef DEDICATED
-static const char* sg_defaultScreenshotName = "%Y-%m-%d_%H-%M-%S";
-#endif
-
 static bool screenshot_func(REAL x){
     if (x>0){
 #ifndef DEDICATED
-        time_t rawtime;
-        char rawname[30];
-        time( &rawtime );
-        strftime(
-            rawname, 29,
-            sg_defaultScreenshotName, localtime( &rawtime )
-            );
-        sr_screenshotName = rawname;
         sr_screenshotIsPlanned=true;
 #endif
     }
@@ -1447,12 +1144,7 @@ static bool toggle_fullscreen_func( REAL x )
 #endif
 
     // only do anything if the application is active (work around odd bug)
-#if SDL_VERSION_ATLEAST(2,0,0)
-    Uint32 flags = SDL_GetWindowFlags(sr_screen);
-    if ( x > 0 && (flags & SDL_WINDOW_SHOWN) && !(flags & SDL_WINDOW_MINIMIZED))
-#else
     if ( x > 0 && ( SDL_GetAppState() & SDL_APPACTIVE ) )
-#endif
     {
         currentScreensetting.fullscreen = !currentScreensetting.fullscreen;
         sr_ReinitDisplay();

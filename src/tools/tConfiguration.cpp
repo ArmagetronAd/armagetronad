@@ -136,7 +136,9 @@ tAccessLevel tCurrentAccessLevel::currentLevel_ = tAccessLevel_Invalid; //!< the
 
 tAccessLevelSetter::tAccessLevelSetter( tConfItemBase & item, tAccessLevel level )
 {
+#ifdef KRAWALL_SERVER
     item.requiredLevel = level;
+#endif
 }
 
 static std::map< tString, tConfItemBase * > * st_confMap = 0;
@@ -159,8 +161,6 @@ tCasaclPreventer::~tCasaclPreventer()
 {
     st_preventCasacl = previous_;
 }
-
-#ifdef KRAWALL_SERVER
 
 // changes the access level of a configuration item
 class tConfItemLevel: public tConfItemBase
@@ -231,6 +231,8 @@ public:
 };
 
 static tConfItemLevel st_confLevel;
+
+#ifdef KRAWALL_SERVER
 
 static char const *st_casacl = "CASACL";
 
@@ -641,7 +643,8 @@ void tConfItemBase::LoadAll(std::istream &s, bool record ){
         tString line;
 
         // read line from stream
-        line.ReadLine( s );
+        int indent = 0;
+        line.ReadLine( s, false, -1, &indent );
 
         /// concatenate lines ending in a backslash
         while ( line.Size() > 0 && line[line.Size()-1] == '\\' && s.good() && !s.eof() )
@@ -655,7 +658,7 @@ void tConfItemBase::LoadAll(std::istream &s, bool record ){
             }
 
             tString rest;
-            rest.ReadLine( s );
+            rest.ReadLine( s, false, indent );
             line << rest;
         }
 
