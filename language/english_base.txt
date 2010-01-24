@@ -56,7 +56,7 @@ cycle_sound_speed_help		    Sound speed divisor
 
 cycle_accel_help                Wall acceleration factor
 cycle_accel_self_help           Multiplicator to CYCLE_ACCEL for your own wall
-cycle_accel_team_help           Multiplicator to CYCLE_ACCEL for your temmates' walls
+cycle_accel_team_help           Multiplicator to CYCLE_ACCEL for your teammates' walls
 cycle_accel_enemy_help          Multiplicator to CYCLE_ACCEL for your enemies' walls
 cycle_accel_rim_help            Multiplicator to CYCLE_ACCEL for the rim walls
 cycle_accel_slingshot_help      Multiplicator to the total effect of CYCLE_ACCEL, if the cycle is between its own wall and another wall
@@ -80,7 +80,7 @@ cycle_rubber_timebased_help		Rubber usage is based on distance travelled if this
 cycle_rubber_speed_help             Logarithmic speed of wall approximation when rubber is in effect (every second, you get closer to the wall by a factor of ~0.4^{this value})
 cycle_rubber_mindistance_help		The minimal distance rubber code keeps you from the wall in front of you
 cycle_rubber_mindistance_ratio_help	Additional distance to CYCLE_RUBBER_MINDISTANCE for every length unit of the wall you have in front of you
-cycle_rubber_mindistance_reservoir_help		Addidional distance if you have an empty rubber meter (gets faded out gradually as you use up all your rubber)
+cycle_rubber_mindistance_reservoir_help		Additional distance if you have an empty rubber meter (gets faded out gradually as you use up all your rubber)
 cycle_rubber_mindistance_unprepared_help	Additional distance for unprepared grinds; it gets applied when the cycle's last turn was just a fraction of a second ago and faded out preparation times larger than CYCLE_RUBBER_MINDISTANCE_PREPARATION.	
 cycle_rubber_mindistance_preparation_help	Timescale in seconds a cycle's last turn time is compared with to determine the effect of CYCLE_RUBBER_MINDISTANCE_UNPREPARED.	
 cycle_rubber_mindistance_legacy_help		Extra factor for minimal distance to walls enforced by the rubber code, active when peers with the rip bug are connected
@@ -210,7 +210,7 @@ size_factor_help		Arena size modifier
 sp_size_factor_help		Arena size modifier
 
 # single player settings (used by dedicated server only)
-sp_ais_help			nummer of AI Players in Single-Player-mode
+sp_ais_help			number of AI Players in Single-Player-mode
 
 start_new_match_help		Initiates a new match
 
@@ -235,9 +235,9 @@ win_zone_initial_size_help			Initial size of the instant win zone
 win_zone_deaths_help	            A value of 1 turns it into a death zone.
 win_zone_randomness_help            Randomness factor of the initial win zone position. 0 fixes it at the arena center, 1 spreads the zone all over it.
 
-game_timeout_help					Base timeout for game state synchronisation; gives appoximately the maximum time between rounds.
+game_timeout_help					Base timeout for game state synchronisation; gives approximately the maximum time between rounds.
 last_chat_break_time_help           Last round time a player in chat mode is able to pause the timer
-extra_round_time_help               Lenght of an extra pause at the beginning of the round
+extra_round_time_help               Length of an extra pause at the beginning of the round
 player_chat_wait_max_help           Maximum time in seconds to wait for a single player to stop chatting.
 player_chat_wait_fraction_help      Maximum fraction of time to wait for a single player to stop chatting.
 player_chat_wait_single_help        Set to 1 if only one player should get his chat wait time reduced at any given time.
@@ -354,7 +354,7 @@ min_voters_help						Number of voters that need to be online to enable voting.
 max_votes_help                      The maximum number of total votes that can be active at any given moment.
 max_votes_per_voter_help            The maximum number of votes suggested by each voter that can be active at any given moment.
 voting_start_decay_help				Number of seconds after that the non-voters start to get ignored.
-voting_decay_help					One non-voter is ignored everytime this many secons pass.
+voting_decay_help					One non-voter is ignored everytime this many seconds pass.
 voting_bias_help					Add virtual voters that oppose every change.
 voting_privacy_help					Controls logging of voting process. 2: nothing gets logged 1: vote submission is logged for the server admin 0: voting is logged for the server admin -1: vote submission is made public -2: everything is made public
 voting_spam_issue_help              The spam level of issuing a vote.
@@ -380,7 +380,7 @@ show_own_name_help					  Should your name be displayed above your cycle on your 
 #********************************************
 #********************************************
 
-recording_debuglevel_help		    Level of additonal information in recording file.
+recording_debuglevel_help		    Level of additional information in recording file.
 fast_forward_maxstep_help           Maximum recording time between rendered frames in fast forward mode
 fast_forward_maxstep_real_help      Maximum real time between rendered frames in fast forward mode
 fast_forward_maxstep_rel_help       Maximum fraction of the time left until the end of FF mode between rendered frames
@@ -434,10 +434,10 @@ camera_server_custom_turn_speed_180_help Extra factor to CAMERA_SERVER_CUSTOM_TU
 
 camera_visibility_recovery_speed_help The speed the external visibility targets recovers from wall hits
 camera_visibility_wall_distance_help  The distance the visibility targets keep from walls
-camera_visibility_clip_speed_help     Speed with wich the visibility targets is brought into view
+camera_visibility_clip_speed_help     Speed with which the visibility targets is brought into view
 camera_visibility_extension_help      Distance (measured in seconds, gets multiplied by speed) of the visibility targets from the watched object
 camera_visibility_sideskew_help       Extra forward component of the sideways visibility targets
-camera_visibility_lower_wall_help     If set to 1, walls are lowerd when they block the view and the camera is not moved
+camera_visibility_lower_wall_help     If set to 1, walls are lowered when they block the view and the camera is not moved
 camera_visibility_lower_wall_smart_help  Like CAMERA_VISIBILITY_LOWER_WALL, but special setting for the smart camera
 bug_transparency_help                    Unsupported: make all rim walls semi-transparent by rendering them without occlusion tests
 bug_transparency_demand_help             Unsupported: use transparency instead of lowering walls
@@ -468,7 +468,7 @@ max_clients_help		Maximum number of network clients to accept
 max_clients_same_ip_soft_help		Maximum number of network clients to accept from the same IP; more logins will get kicked when the server is full
 max_clients_same_ip_hard_help		Maximum number of network clients to accept from the same IP; more logins will be ignored
 max_players_same_ip_help  maximum number of players from the same IP (note that each client can legally host up to four players)
-url_help				HTTP URI assiciated with a server
+url_help				HTTP URI associated with a server
 
 # settings compatibility 
 
@@ -616,8 +616,8 @@ zdepth_help				z buffer depth to use (0: 16 1: from colour depth 2: 32)
 last_zdepth_help		z buffer depth, last successful init
 use_sdl_help			Use SDL to init OpenGL?
 last_use_sdl_help		Use SDL to init OpenGL, last successful init
-failed_attempts_help		Number of failed attemts to initialise graphics mode
-software_renderer_help		Is the OpenGL renderer not hadware accelerated?
+failed_attempts_help		Number of failed attempts to initialise graphics mode
+software_renderer_help		Is the OpenGL renderer not hardware accelerated?
 
 #model
 use_displaylists_help		Use display lists for rendering the cycles?
@@ -679,14 +679,14 @@ players_help                Prints list of currently active players
 kill_help                   Kill a specific player (as warning before a kick)
 kick_help					Kicks the specified player from the server.
 ban_help                    Bans the specified player from the server (kicks him first) for a variable time in minutes.
-ban_ip_help                 Bans the spedified IP address from the server for a variable time.
+ban_ip_help                 Bans the specified IP address from the server for a variable time.
 ban_list_help               Prints a list of currently banned IPs.
 unban_ip_help               Revokes the ban of the specified IP address.
 
 # communication
 console_message_help		Prints a message on the console of all connected clients.
 center_message_help			Prints a big message on the screen of all connected clients.
-say_help					Dedicated server only: let the server administator say something.
+say_help					Dedicated server only: let the server administrator say something.
 
 #********************************************
 #********************************************
@@ -749,7 +749,7 @@ input_toggle_fullscreen_text		Toggle fullscreen
 input_toggle_fullscreen_help		Toggles windowed and fullscreen mode
 
 input_toggle_mousegrab_text         Toggle mousegrab
-input_toggle_mousegrab_help         Frees the mouse pointer or contstrains it to the program window
+input_toggle_mousegrab_help         Frees the mouse pointer or constrains it to the program window
 
 input_reload_textures_text          Reload textures
 input_reload_textures_help          Reloads all textures. Useful for content creators.
@@ -898,7 +898,7 @@ player_mainmenu_text		Player Setup
 player_mainmenu_help		Select player names and control methods.
 
 system_settings_menu_text	System Setup
-system_settings_menu_help	Configure sound, graphics and overall appearence of \g
+system_settings_menu_help	Configure sound, graphics and overall appearance of \g
 
 main_menu_exit_text		Exit Game
 main_menu_exit_help		Goodbye!
@@ -956,10 +956,10 @@ game_menu_finish_stop_text	Reset
 game_menu_finish_stop_help	Abort the game after some seconds.
 
 game_menu_finish_fast_text	Fast Finish
-game_menu_finish_fast_help	Let the game continue regularily until there is a winner, but in fast forward mode.
+game_menu_finish_fast_help	Let the game continue regularly until there is a winner, but in fast forward mode.
 
 game_menu_finish_normal_text	Normal Finish
-game_menu_finish_normal_help	Let the game continue regularily until there is a winner. Boooring.
+game_menu_finish_normal_help	Let the game continue regularly until there is a winner. Boooring.
 
 game_menu_mode_text		Game Mode:
 game_menu_mode_help		Select the rules you want to play by:
@@ -986,7 +986,7 @@ game_menu_iq_text		AI IQ:
 game_menu_iq_help		Lets you select the average intelligence of the computer controlled players("Artificial Intelligence") in the game.
 
 game_menu_minplayers_text	Min Players:
-game_menu_minplayers_help	Selects the minimum nuber of players that will be on the game grid. If not enough humans are present, the empty positions will be filled by AIs.
+game_menu_minplayers_help	Selects the minimum number of players that will be on the game grid. If not enough humans are present, the empty positions will be filled by AIs.
 
 game_menu_speed_text		Speed:
 game_menu_speed_help		Speed modifier. Negative values slow the game down, positive values speed it up. An increase of two in this value will double the speed. Reasonable values lie between -2 and +4.
@@ -1001,7 +1001,7 @@ game_menu_balance_ais_text	Balance with AIs:
 game_menu_balance_ais_help	Make teams equally strong by adding AIs to the weaker team?
 
 game_menu_imb_perm_text		Max. permanent imbalance:
-game_menu_imb_perm_help		Maximum difference in team strengths that is tolerated permanetly; may be violated for short periods of time
+game_menu_imb_perm_help		Maximum difference in team strengths that is tolerated permanently; may be violated for short periods of time
 
 game_menu_imb_text		Max. temporary imbalance:
 game_menu_imb_help		Maximum difference in team strengths that is tolerated
@@ -1025,28 +1025,28 @@ game_menu_wallstayup_infinite_text	infinite
 game_menu_wallstayup_infinite_help	Walls stay up forever
 
 game_menu_wallstayup_immediate_text	immediate
-game_menu_wallstayup_immediate_help	Walls disapear immediately
+game_menu_wallstayup_immediate_help	Walls disappear immediately
 
 game_menu_wallstayup_halfsecond_text	1/2s
-game_menu_wallstayup_halfsecond_help	Walls dissapear after half a second
+game_menu_wallstayup_halfsecond_help	Walls disappear after half a second
 
 game_menu_wallstayup_second_text	1s
-game_menu_wallstayup_second_help	Walls dissapear after one second
+game_menu_wallstayup_second_help	Walls disappear after one second
 
 game_menu_wallstayup_2second_text	2s
-game_menu_wallstayup_2second_help	Walls dissapear after two seconds
+game_menu_wallstayup_2second_help	Walls disappear after two seconds
 
 game_menu_wallstayup_4second_text	4s
-game_menu_wallstayup_4second_help	Walls dissapear after 4 seconds
+game_menu_wallstayup_4second_help	Walls disappear after 4 seconds
 
 game_menu_wallstayup_8second_text	8s
-game_menu_wallstayup_8second_help	Walls dissapear after 8 seconds
+game_menu_wallstayup_8second_help	Walls disappear after 8 seconds
 
 game_menu_wallstayup_16second_text	16s
-game_menu_wallstayup_16second_help	Walls dissapear after 16 seconds
+game_menu_wallstayup_16second_help	Walls disappear after 16 seconds
 
 game_menu_wallstayup_32second_text	32s
-game_menu_wallstayup_32second_help	Walls dissapear after 32 seconds
+game_menu_wallstayup_32second_help	Walls disappear after 32 seconds
 
 game_menu_wallslength_text		Wall Length:
 game_menu_wallslength_help		Length of the cycle walls in meters
@@ -1150,7 +1150,7 @@ network_opts_predict_text	Prediction:
 network_opts_predict_help	In a network game, this extrapolates the cycles' movement. Leaving it disabled makes the graphics smoother, enabling it gives yo a better image of the actual situation. I leave it disabled; the Lag-O-Meter is a good substitute for prediction. This is always disabled in server mode.
 
 network_opts_inrate_text	Input Rate:
-network_opts_inrate_help	The maximum number of kilobytes your network can receive per second. 1 for 9.6k modems (only limited play possible), 3 for 28.8k modems (usualy no problems)...7 for 56k modems, 8 for ISDN, more for cable modems, (A)DSL and LAN.
+network_opts_inrate_help	The maximum number of kilobytes your network can receive per second. 1 for 9.6k modems (only limited play possible), 3 for 28.8k modems (usually no problems)...7 for 56k modems, 8 for ISDN, more for cable modems, (A)DSL and LAN.
 
 network_opts_outrate_text	Output Rate:
 network_opts_outrate_help	The maximum number of kilobytes your network can send per second. Set it to two or three if you do not wish to act as a server; more bandwidth is never used. Of course, it does not hurt to set it higher if you have a bigger pipe.
@@ -1178,7 +1178,7 @@ network_custjoin_port_text	Server Port:
 network_custjoin_port_help	The network port the server listens on; must match the corresponding option set on the server you wish to join.
 
 network_custjoin_name_text	Server Name:
-network_custjoin_name_help	The name or IP adress of the server you wish to join
+network_custjoin_name_help	The name or IP address of the server you wish to join
 
 network_custjoin_connect_text	Connect To Server
 network_custjoin_connect_help	Enter the game grid!
@@ -1216,7 +1216,7 @@ bookmarks_menu_connect      Connect to \1
 #********************************************
 
 misc_menu_text			Misc Stuff
-misc_menu_help			Diverse items that had no place elsewere, i.e. global keys.
+misc_menu_help			Diverse items that had no place elsewhere, i.e. global keys.
 
 misc_global_key_text		Global Keyboard Configuration
 misc_global_key_help		Some keyboard settings independent of the current player.
@@ -1364,7 +1364,7 @@ player_spectator_text		Spectator Mode:
 player_spectator_help		In spectator mode, you do not control a cycle; you just watch the game as if you were already dead. The other players don't know at all that you are there; you don't appear on the score table.
 
 player_name_team_text		Name Team after Player:
-player_name_team_help		You can set your prefered method for naming your team here: On indicates you want the team to be named after its most senior player, Off means you want a simple colour label.
+player_name_team_help		You can set your preferred method for naming your team here: On indicates you want the team to be named after its most senior player, Off means you want a simple colour label.
 
 player_num_per_team_text	Players per Team:
 player_num_per_team_help	Set your favourite number of players per team here. When you join a game and the smallest team has less players than specified here, you'll join that team. Otherwise, you will create a new team. Only the default behaviour is governed by this setting; you can switch teams later.
@@ -1429,7 +1429,7 @@ team_menu_title			Team Menu
 team_menu_help			Let the players change their teams or created new teams
 
 team_menu_player_title		Choose team for \1
-team_menu_player_help		Let this player make team related decicions
+team_menu_player_help		Let this player make team related decisions
 
 team_menu_join			join \1
 team_menu_join_help		Let the current player join the specified team
@@ -1483,13 +1483,13 @@ sound_menu_buffer_text		Buffer Length:
 sound_menu_buffer_help		Selects the size of the sound buffer.
 
 sound_menu_buffer_vsmall_text	Very Small
-sound_menu_buffer_vsmall_help	Latency of about 0.02s, but very high probability of artefacts.
+sound_menu_buffer_vsmall_help	Latency of about 0.02s, but very high probability of artifacts.
 
 sound_menu_buffer_small_text	Small
-sound_menu_buffer_small_help	Latency below 0.04s, but high probability of artefacts.
+sound_menu_buffer_small_help	Latency below 0.04s, but high probability of artefact's.
 
 sound_menu_buffer_med_text	Normal
-sound_menu_buffer_med_help	Latency of about 0.1s, and may still produce artefacts.	
+sound_menu_buffer_med_help	Latency of about 0.1s, and may still produce artefact's.	
 
 sound_menu_buffer_high_text	High
 sound_menu_buffer_high_help	Latency of about 0.2s, probably no artifacts.
@@ -1523,7 +1523,7 @@ detail_settings_menu		Detail Settings
 detail_settings_menu_help	Allows you to adjust the graphical detail to your system's performance.
 
 performance_tweaks_menu		Performance Tweaks
-performance_tweaks_menu_help	Settings that may improve game performace, but do not work on all systems.
+performance_tweaks_menu_help	Settings that may improve game performance, but do not work on all systems.
 
 graphics_load_defaults_text	Load Defaults
 graphics_load_defaults_help	This will reset all this options to the ones that suit your system best. (In the opinion of this stupid program...)
@@ -1540,7 +1540,7 @@ feature_enabled_text		On
 feature_enabled_help		Feature is currently activated.
 
 #texture menuitem
-texture_menuitem_help		Selects the texture mapping mode; note how it affects the menu background. The curent state is:
+texture_menuitem_help		Selects the texture mapping mode; note how it affects the menu background. The current state is:
 
 texture_off_text		Off
 texture_off_help		No textures at all
@@ -1602,7 +1602,7 @@ screen_check_errors_text	Check Errors:
 screen_check_errors_help	Should we listen to the warnings about non-existent video modes during initialisation? Usually, you should leave this option alone.
 
 screen_use_sdl_text		Use SDL OpenGL:
-screen_use_sdl_help		Toggles use of the clean OpenGL initialisation routines; if disabled, \g will use the dirty method that was neccesary with SDL 1.0.
+screen_use_sdl_help		Toggles use of the clean OpenGL initialisation routines; if disabled, \g will use the dirty method that was necessary with SDL 1.0.
 
 screen_grab_mouse_text		Grab Mouse:
 screen_grab_mouse_help		If activated, the mouse pointer is centered after every move; thus, it is unable to leave the window. This option is only useful when you play \g in a window.
@@ -1642,7 +1642,7 @@ detail_floor_grid_text		Just Grid
 detail_floor_grid_help		Only a grid of lines is drawn. This option is your choice if you use software rendering.
 
 detail_floor_tex_text		Textured Plane
-detail_floor_tex_help		An infinite plane is drawn, with the texture of the grid painted on it. Recomended for all 3D-card owners. Problem: looking at the horizon, the grid will lose its sharpness too fast.
+detail_floor_tex_help		An infinite plane is drawn, with the texture of the grid painted on it. Recommended for all 3D-card owners. Problem: looking at the horizon, the grid will lose its sharpness too fast.
 
 detail_floor_2tex_text		Dual Texture Plane
 detail_floor_2tex_help		Just as in "Textured Plane", the floor is an infinite textured plane. But here, the two groups of lines are drawn in two separate rendering steps, resulting in a much sharper image.
@@ -1712,20 +1712,20 @@ pref_showbrake_text		Show Brake Meter
 pref_showbrake_help		Shows your brake depletion state in a meter in the HUD (Needs Show HUD = On to work).
 
 pref_showspeed_text		Show Speed Meter
-pref_showspeed_help		Shows your speed in a metter in the HUD (Needs Show HUD = On to work).
+pref_showspeed_help		Shows your speed in a meter in the HUD (Needs Show HUD = On to work).
 
 pref_showrubber_text		Show Rubber Meter
 pref_showrubber_help		Shows the status of your rubber in a meter in the HUD (Needs Show HUD = On to work).
 
 misc_fps_text			Show FPS:
-misc_fps_help			Toggles the display of the current FPS (frames per secon) rate in the upper right corner (Needs Show HUD = On to work).
+misc_fps_help			Toggles the display of the current FPS (frames per second) rate in the upper right corner (Needs Show HUD = On to work).
 
 #tweaks menu
 tweaks_displaylists_text	Display Lists:
 tweaks_displaylists_help	Display lists are a feature of OpenGL for rendering the same thing many times; it is normally used for the cycles. Some implementations are broken however; if you do no see the cycles, you should disable this feature.
 
 tweaks_ztrick_text		ZTrick:
-tweaks_ztrick_help		A speedup that probably only works on old 3dfx cards: instead of clearing the screen after each frame, we just draw the backgroud (floor and rim walls).
+tweaks_ztrick_help		A speedup that probably only works on old 3dfx cards: instead of clearing the screen after each frame, we just draw the background (floor and rim walls).
 
 tweaks_infinity_text		Infinity:
 tweaks_infinity_help		Some planes (grid, sky...) have an infinite extension; if this feature is enabled, they are really drawn as infinite planes. Some OpenGL renderers do not seem to like this (all Windows versions I have seen...); disable it if the floor or sky textures are screwed up.
@@ -1802,7 +1802,7 @@ setting_legacy_change_blocked   Setting \1 (Group: \2) can't be changed currentl
 #********************************************
 #********************************************
 #
-#      leaque/highscore messages
+#      league/highscore messages
 #
 #********************************************
 #********************************************
@@ -2039,7 +2039,7 @@ network_server_login_success	New user: \1\n
 
 network_toomanyservers		\n\n\nWarning: too many servers open on this computer.\nLeaving the port range that is scanned by clients with default settings.\n\n\n
 
-network_browser_unidentified Reveived unidentifiable server information from \1 over socket \2.\n
+network_browser_unidentified Received unidentifiable server information from \1 over socket \2.\n
 
 network_logout_process		Logging out...\n
 network_logout_done		Done!\n
@@ -2059,9 +2059,9 @@ network_kill_preface		Reason given by server:
 network_kill_maxidgrabber	It ran out of IDs; your client was the one occupying most of them for himself. The reason for this can be a bug.
 network_kill_maxiduser		It ran out of IDs; your client was the one occupying most of them.
 network_kill_cheater		It assumed you are cheating. If that is untrue, it is a bug you should report.
-network_kill_error			An error occured while processing messages from your client. This usually indicates a client or server bug.
+network_kill_error			An error occurred while processing messages from your client. This usually indicates a client or server bug.
 network_kill_timeout		You timed out.
-network_kill_logout			You logged out regularily.
+network_kill_logout			You logged out regularly.
 network_kill_incompatible	You are running a version incompatible with the server.				
 network_kill_full			The server is full.
 network_kill_shutdown		The server was shut down.				
@@ -2231,7 +2231,7 @@ config_include_not_found    Configuration file "\1" to be included not found.\n
 config_command_unknown		Command \1 unknown.\n
 config_command_other		You probably want:\n
 config_command_more		    There are more commands containing your search string that were left out to avoid flooding your terminal.\n
-config_file_write_error		Could not write configuratrion file!\n
+config_file_write_error		Could not write configuration file!\n
 config_value_changed		\1 changed from \2 to \3.\n
 config_error_read		Input error reading \1: invalid format.\n
 config_message_info		\1 is currently set to \2.\n
