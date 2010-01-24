@@ -622,8 +622,10 @@ static bool lowlevel_sr_InitDisplay(){
             }
         }
 
+#ifdef MACOSX
         // MacOSX SDL 1.2.4 crashes if we SetCaption after switch to fullscreen. (fixed in 1.2.5)
         if(!currentScreensetting.fullscreen)
+#endif
         {
             tOutput o("Armagetron Advanced");
             tString s;
