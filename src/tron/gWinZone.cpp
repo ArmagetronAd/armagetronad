@@ -427,6 +427,16 @@ static void S_ZoneWallInteraction(eWall *pWall)
     }
 }
 
+gZone & gZone::SetOwner(ePlayerNetID *pOwner)
+{
+    pOwner_ = pOwner;
+    if (pOwner) 
+        team = pOwner->CurrentTeam();
+    else
+        team = NULL;
+    return *this;
+}
+
 void gZone::BounceOffPoint(eCoord dest, eCoord collide, REAL mod)
 {
     //Use a simple angle deflection for now not even accounting for points that made too far in
@@ -1078,6 +1088,11 @@ gDeathZoneHack::gDeathZoneHack( nMessage & m )
 
 gDeathZoneHack::~gDeathZoneHack( void )
 {
+    if( pLastShotCollision )
+    {
+        pLastShotCollision->pLastShotCollision = NULL;
+        pLastShotCollision = NULL;
+    }
 }
 
 static int score_deathzone=-1;

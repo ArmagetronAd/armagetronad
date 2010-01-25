@@ -99,7 +99,7 @@ public:
     gZone &         SetColor            (gRealColor color) {color_ = color; return *this;}      //!< Sets the current color
     gRealColor &    GetColor            () {return color_;}             //!< Gets the current color
     gZone &         GetColor            (gRealColor & color) {color = color_; return *this;}    //!< Gets the current color
-    gZone &         SetOwner            (ePlayerNetID *pOwner) {pOwner_ = pOwner; return *this;}  //!< Sets the current owner
+    gZone &         SetOwner            (ePlayerNetID *pOwner); //!< Sets the current owner
     ePlayerNetID *  GetOwner            () {return pOwner_;}  //!< Sets the current owner
     gZone &         SetSeekingCycle     (gCycle *pCycle) {if (pCycle) {seeking_ = true;} else {seeking_ = false;} pSeekingCycle_ = pCycle; return *this;}  //!< Sets the current seeking cycle
     gCycle *        GetSeekingCycle     () {return pSeekingCycle_;}  //!< Sets the current seeking cycle
@@ -113,11 +113,11 @@ public:
 protected:
     bool wallInteract_;
     int wallBouncesLeft_;
-    eWall *pLastWall_;
+    eWall *pLastWall_; // dumb pointer is OK, it is never dereferenced.
 
     bool dynamicCreation_;  //??? remove
-    ePlayerNetID *pOwner_;
-    gCycle *pSeekingCycle_;       //!< cycle owner of this zone
+    tJUST_CONTROLLED_PTR< ePlayerNetID > pOwner_;
+    tJUST_CONTROLLED_PTR< gCycle > pSeekingCycle_;       //!< cycle owner of this zone
     bool seeking_;
     REAL targetRadius_;
     REAL fallSpeed_;
@@ -309,13 +309,13 @@ protected:
     eCoord originalPosition_;
     eCoord homePosition_;
     REAL originalRadius_;
-    gCycle *owner_;
+    tJUST_CONTROLLED_PTR<gCycle> owner_;
     REAL ownerTime_;
     bool ownerWarnedNotHome_;
     REAL chatBlinkUpdateTime_;
     REAL blinkUpdateTime_;
     REAL blinkTrackUpdateTime_;
-    gCycle *ownerDropped_;
+    tJUST_CONTROLLED_PTR<gCycle> ownerDropped_;
     REAL ownerDroppedTime_;
     REAL lastHoldScoreTime_;
     bool positionUpdatePending_;
