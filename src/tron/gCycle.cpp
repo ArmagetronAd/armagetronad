@@ -2050,10 +2050,6 @@ struct gCycleVisuals
 
     ~gCycleVisuals()
     {
-        delete customModel;
-        delete bodyModel;
-        delete frontModel;
-        delete rearModel;
         delete customTexture;
         delete bodyTexture;
         delete wheelTexture;
@@ -2120,12 +2116,7 @@ struct gCycleVisuals
     // loads a model, checking before if the file exists
     static rModel * LoadModelSafe( char const * filename )
     {
-        std::ifstream in;
-        if ( tDirectories::Data().Open( in, filename ) )
-        {
-            return tNEW(rModel( filename ));
-        }
-        return 0;
+        return rModel::GetModel(filename);
     }
 
     // load a model of specified type from a specified directory
@@ -2473,13 +2464,9 @@ gCycle::~gCycle(){
     this->RemoveFromGame();
 
     if (mp){
-        delete customModel;
         delete customTexture;
     }
     else{
-        delete body;
-        delete front;
-        delete rear;
         delete wheelTex;
         delete bodyTex;
     }

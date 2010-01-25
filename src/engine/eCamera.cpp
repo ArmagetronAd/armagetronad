@@ -490,6 +490,12 @@ void eCamera::SwitchView(){
     if ( mode == CAMERA_IN || mode == CAMERA_CUSTOM || mode == CAMERA_SERVER_CUSTOM )
         rise=0;
 
+    // custom camera with turn speed 0: align it with the cycle once
+    if( ( mode == CAMERA_CUSTOM && s_customTurnSpeed <= 0 ) || ( mode == CAMERA_SERVER_CUSTOM && s_serverCustomTurnSpeed <= 0 ) )
+    {
+        dir = CenterDir();
+    }
+
     if(mode==CAMERA_SMART){
         smartcamIncamSmooth=1;
         z=z+1;
@@ -1664,7 +1670,7 @@ void eCamera::Timestep(REAL ts){
     if (!CenterAlive() && (mode==CAMERA_IN || mode==CAMERA_SMART_IN)){// || mode==CAMERA_CUSTOM || mode==CAMERA_SERVER_CUSTOM)){
         pos=pos-dir.Turn(eCoord(5,1));
         z+=2;
-        mode=CAMERA_SMART;
+        mode = localPlayer ? localPlayer->startCamera : CAMERA_SMART;
     }
 
     const REAL dirSmooth = se_cameraSmartCenterDirSmooth;

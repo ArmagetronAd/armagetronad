@@ -499,7 +499,9 @@ static bool lowlevel_sr_InitDisplay(){
 #endif
         int CD = fullCD;
 
-        if (currentScreensetting.checkErrors)
+        // only check for errors if requested and if we're not about to set the
+        // desktop resolution, where SDL_VideoModeOK apparently doesn't work.
+        if (currentScreensetting.checkErrors && sr_screenWidth + sr_screenHeight > 0)
         {
             // check if the video mode should be OK:
             CD = SDL_VideoModeOK
@@ -568,8 +570,15 @@ static bool lowlevel_sr_InitDisplay(){
             sr_screenWidth = sr_desktopWidth;
             sr_screenHeight = sr_desktopHeight;
         }
+        else
+        {
+            // have the screen reinited
+            sr_screen = NULL;
+        }
 
-        if ( (sr_screen=SDL_SetVideoMode
+        // only reinit the screen if the desktop res detection hasn't left us
+        // with a perfectly good one.
+        if ( !sr_screen && (sr_screen=SDL_SetVideoMode
                         (sr_screenWidth, sr_screenHeight,   CD,
                          attrib))
                 == NULL)
@@ -613,8 +622,10 @@ static bool lowlevel_sr_InitDisplay(){
             }
         }
 
+#ifdef MACOSX
         // MacOSX SDL 1.2.4 crashes if we SetCaption after switch to fullscreen. (fixed in 1.2.5)
         if(!currentScreensetting.fullscreen)
+#endif
         {
             tOutput o("Armagetron Advanced");
             tString s;

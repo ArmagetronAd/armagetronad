@@ -1,4 +1,27 @@
+Changes since 0.2.8.3_rc4:
+- Intercepted chat commands are now written to ladderlog.txt. Format:
+  COMMAND /command-intercepted player [command arguments]
+- Increased default speed of server pinging
+- Reordered game menus a bit
+- fast finish works again
+
+Changes since 0.2.8.3_rc3:
+- Pinging previously popular servers earlier for quicker server
+  browsing
+- Improved master server random polling, the second polled master now
+  also is random, and all masters are polled if need be
+- Custom camera snaps to cycle direction once when activated if the turn speed
+  is zero.
+- RESERVE_SCREEN_NAME now works regardless of the ALLOW_IMPOSTOR setting.
+- USER_LEVEL now escapes the given authenticated name so you don't have to
+  guess the escaping rules. Ex: USER_LEVEL "name with spaces@forums" 2
+  changes user level for name\_with\_spaces@forums
+
 Changes since 0.2.8.3_rc2:
+- Fixed crash with server polling
+- ROUND_WINNER and MATCH_WINNER logged to ladderlog
+- Camera switches to user preferred camera when you die in incam mode
+- Better support for custom language files
 - Players can no longer spam chat with /shuffle messages. Added new setting
   SHUFFLE_SPAM_MESSAGES_PER_ROUND, a per round, per player limit on the number
   of shuffle messages displayed.
@@ -281,7 +304,7 @@ Changes since 0.2.8.1:
   can be no bigger than the effect of ping.
 - Spectators are now regular players and can chat
 - The /msg command now converts the entered pattern into the internal
-  name so if you write "/msg öäü" and there is a user named "öäü" with
+  name so if you write "/msg Ã¶Ã¤Ã¼" and there is a user named "Ã¶Ã¤Ã¼" with
   an internal nick of "oau" it will still get matched
 - Team changes are now only executed when allowed, the need for the 
   temporary/permanent team imbalance setting distinction has gone away

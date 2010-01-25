@@ -68,10 +68,16 @@ class rModel
     tArray<rModelFace> modelTexFaces;
     bool modelTexFacesCoherent; // if modelFaces and modelTexFaces are identical
     void Load(std::istream &s,const char *fileName);
-public:
-    rModel(const char *fileName,const char *fileName_alt="");
+    explicit rModel(const char *fileName);
+    rModel(rModel const &);
     ~rModel();
+public:
+    //! returns a model from the cache
+    static rModel * GetModel(const char * filename);
 
+    //! clears the model cache
+    static void ClearCache();
+    
     void Render();
 };
 

@@ -556,8 +556,8 @@ camera_forbid_custom_help	Forbids the use of the custom camera on all clients
 camera_forbid_server_custom_help  Forbids the use of the server custom camera
 
 camera_forbid_custom_glance_help                 Forbids use of special glance camera settings
-camera_override_custom_glance_help               Overrides custom glance settings with vanues from the server
-camera_override_custom_glance_server_custom_help Overrides custom glance settings with vanues from the server only for the server custom camera
+camera_override_custom_glance_help               Overrides custom glance settings with values from the server
+camera_override_custom_glance_server_custom_help Overrides custom glance settings with values from the server only for the server custom camera
 
 camera_follow_start_x_help	Start position of the fixed external camera
 camera_follow_start_y_help	Start position of the fixed external camera
@@ -1045,6 +1045,9 @@ input_mess_up_help					Scrolls the messages up a page.
 input_mess_down_text				Scroll down
 input_mess_down_help				Scrolls the messages down a page.
 
+input_mess_end_text					Scroll to end
+input_mess_end_help					Scrolls to the end of the messages to show the most recent ones.
+
 #********************************************
 #********************************************
 #
@@ -1162,7 +1165,7 @@ input_instant_chat_help		Issues a special instant chat macro
 
 main_menu_text			\g v\1
 
-game_menu_text			Game
+game_menu_text			Play Game
 game_menu_main_help		Game configuration and launch.
 
 player_mainmenu_text		Player Setup
@@ -1226,7 +1229,7 @@ path_info_var                   Var directories:
 game_menu_start_text		Local Game
 game_menu_start_help		Enter the game grid! Only players configured on this computer will play.
 
-network_menu_text		Network Game
+network_menu_text		Multiplayer
 network_menu_help		This joins or creates a network multiplayer game.
 
 game_settings_menu_text		Game Setup
@@ -1277,7 +1280,7 @@ game_menu_iq_text		AI IQ:
 game_menu_iq_help		Lets you select the average intelligence of the computer controlled players("Artificial Intelligence") in the game.
 
 game_menu_minplayers_text	Min Players:
-game_menu_minplayers_help	Selects the minimum nuber of players that will be on the game grid. If not enough humans are present, the empty positions will be filled by AIs.
+game_menu_minplayers_help	Selects the minimum number of players that will be on the game grid. If not enough humans are present, the empty positions will be filled by AIs.
 
 game_menu_speed_text		Speed:
 game_menu_speed_help		Speed modifier. Negative values slow the game down, positive values speed it up. An increase of two in this value will double the speed. Reasonable values lie between -2 and +4.
@@ -1421,10 +1424,10 @@ game_menu_wz_ld_help		Minimum number of seconds since the last death before the 
 #********************************************
 
 #network game menu
-network_menu_lan_text		LAN Game
+network_menu_lan_text		LAN Multiplayer
 network_menu_lan_help		Connect to a server on your local network or start a server.
 
-network_menu_internet_text	Internet Game
+network_menu_internet_text	Internet Multiplayer
 network_menu_internet_help	Connect to an internet server or start one.
 
 network_opts_text		Network Setup
@@ -1443,10 +1446,10 @@ network_opts_predict_text	Prediction:
 network_opts_predict_help	In a network game, this extrapolates the cycles' movement. Leaving it disabled makes the graphics smoother, enabling it gives yo a better image of the actual situation. I leave it disabled; the Lag-O-Meter is a good substitute for prediction. This is always disabled in server mode.
 
 network_opts_inrate_text	Input Rate:
-network_opts_inrate_help	The maximum number of kilobytes your network can receive per second. 1 for 9.6k modems (only limited play possible), 3 for 28.8k modems (usualy no problems)...7 for 56k modems, 8 for ISDN, more for cable modems, (A)DSL and LAN.
+network_opts_inrate_help	The maximum number of kilobytes your network can receive per second. 3 for 28.8k modems, 7 for 56k modems, 8 for ISDN, more for cable modems, (A)DSL and LAN.
 
 network_opts_outrate_text	Output Rate:
-network_opts_outrate_help	The maximum number of kilobytes your network can send per second. Set it to two or three if you do not wish to act as a server; more bandwidth is never used. Of course, it does not hurt to set it higher if you have a bigger pipe.
+network_opts_outrate_help	The maximum number of kilobytes your network can send per second. Eight is a good number for this for almost everyone.
 
 
 network_opts_deletepw_text	Delete Passwords
@@ -1563,7 +1566,7 @@ language_menu_item_fist		First Language:
 language_menu_item_first_help	\g will display most text messages in this language. Use Cursor Left/Right to choose.
 
 language_menu_item_second	Second Language:
-language_menu_item_second_help	If the fist language is not available for one text item, it will be displayed in the second language (or in english as final fallback).  Use Cursor Left/Right to choose.
+language_menu_item_second_help	If the first language is not available for one text item, it will be displayed in the second language (or in english as final fallback).  Use Cursor Left/Right to choose.
 
 #*************************************
 #*************************************

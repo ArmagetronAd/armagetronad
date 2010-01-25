@@ -70,8 +70,8 @@ static bool sn_IsMaster               = false;
 static nServerInfo*           sn_QuerySoon =NULL;
 static nTimeRolling           sn_QueryTimeout = 0;
 
-static REAL sn_queryDelay = 1.5f;	// time delay between queries of the same server
-static REAL sn_queryDelayGlobal = 0.1f;	// time delay between all queries
+static REAL sn_queryDelay = 0.5f;	// time delay between queries of the same server
+static REAL sn_queryDelayGlobal = 0.025f;	// time delay between all queries
 static int sn_numQueries = 3;	// number of queries per try
 static int sn_TNALostContact = 4;  // minimum TNA value to be considered contact loss
 
@@ -193,7 +193,10 @@ nServerInfo::~nServerInfo()
         sn_Requesting = sn_Requesting->Next();
 
     if (sn_QuerySoon == this)
+    {
         sn_Requesting = NULL;
+        sn_QuerySoon  = NULL;
+    }
 }
 
 
@@ -202,15 +205,15 @@ void nServerInfo::CalcScore()
 {
     static int userScore[8] = { -100, 0, 100, 250, 300, 300, 250, 100 };
 
-    // do nothing if we are requerying
-    if ( !this->advancedInfoSet && this->advancedInfoSetEver )
+    // do nothing if we are querying
+    if ( !this->advancedInfoSet )
     {
         // score = scoreBias_;
 
         return;
     }
 
-    score  = 100;
+    score = 100;
     if (ping > .1)
         score  -= (ping - .1) * 300;
 
@@ -274,6 +277,7 @@ static const tString NAME       ("name");
 static const tString VERSION_TAG    ("version");
 static const tString RELEASE    ("release");
 static const tString SCOREBIAS  ("scorebias");
+static const tString SCORE      ("score");
 static const tString URL		("url");
 static const tString END        ("ServerEnd");
 static const tString START      ("ServerBegin");
@@ -296,6 +300,7 @@ void nServerInfo::Save(std::ostream &s) const
     s << URL		<< "\t" << url_ << "\n";
 
     s << SCOREBIAS  << "\t" << scoreBias_ << "\n";
+    s << SCORE      << "\t" << score      << "\n";
     s << NAME  << "\t" << name             << "\n";
     s << TNA  << "\t" << timesNotAnswered  << "\n";
     s << END   << "\t" << "\n\n";
@@ -324,7 +329,14 @@ void nServerInfo::Load(std::istream &s)
         else if ( id == VERSION_TAG )
             s >> version_;
         else if ( id == SCOREBIAS )
+        {
             s >> scoreBias_;
+            score = scoreBias_;
+        }
+        else if ( id == SCORE )
+        {
+            s >> score;
+        }
         else if ( id == RELEASE )
             release_.ReadLine( s );
         else if ( id == URL )
@@ -371,8 +383,6 @@ void nServerInfo::Load(std::istream &s)
     queried = 0;
     advancedInfoSet = false;
     advancedInfoSetEver =false;
-
-    score = scoreBias_;
 }
 
 nServerInfo *nServerInfo::GetFirstServer()
@@ -566,7 +576,7 @@ static void CheckDuplicate( nServerInfo * server )
     nServerInfo *run = nServerInfo::GetFirstServer();
     while(!IsDouble && run)
     {
-        if (run != server && *run == *server )
+        if (run != server && *run == *server)
             IsDouble = true;
         
         run = run->Next();
@@ -574,7 +584,7 @@ static void CheckDuplicate( nServerInfo * server )
     
     if (IsDouble)
     {
-#ifdef DEBUG_X
+#ifdef DEBUG
         con << "Deleting duplicate server " << server->GetName() << "\n";
 #endif  
         delete server;
@@ -1026,9 +1036,9 @@ void nServerInfo::GetSmallServerInfo(nMessage &m){
     // check if we already have that server lised
     nServerInfo *run = GetFirstServer();
     int countSameAdr = 0;
-    while(run)
+    while(run && !n)
     {
-        if (run->GetConnectionName() == baseInfo.GetConnectionName() )
+        if ( run->GetConnectionName() == baseInfo.GetConnectionName() )
         {
             if (countSameAdr++ > 32)
                 n = run;
@@ -1041,6 +1051,18 @@ void nServerInfo::GetSmallServerInfo(nMessage &m){
 
     if (m.End())
         return;
+
+    // second pass, look harder if no match was found. Use DNS lookup if you have to.
+    if(!n)
+    {
+        run = GetFirstServer();
+        while(run && !n)
+        {
+            if( run->GetAddress() == baseInfo.GetAddress() )
+                n = run;
+            run = run->Next();
+        }
+    }
 
     if (!n)
     {
@@ -1056,6 +1078,12 @@ void nServerInfo::GetSmallServerInfo(nMessage &m){
     else
     {
         n->Alive();
+
+        // on update, prefer to keep the IP version to avoid needless DNS loopups.
+        if ( n->GetConnectionName() != baseInfo.GetConnectionName() && n->GetAddress().ToString() != ToString(*n) )
+        {
+            n->SetConnectionName( baseInfo.GetConnectionName() );
+        }
 
         if ( sn_IsMaster )
         {
@@ -1504,7 +1532,7 @@ void nServerInfo::GetFromMaster(nServerInfoBase *masterInfo, char const * fileSu
         if ( masterInfo )
         {
             con << tOutput( "$network_master_timeout_retry" );
-            GetFromMaster( masterInfo );
+            GetFromMaster();
         }
         else
         {
@@ -1939,6 +1967,7 @@ void GetSenderData(const nMessage &m,tString& name, int& port)
 
 void nServerInfo::StartQueryAll( QueryType queryType )                         // start querying the advanced info of each of the servers in our list
 {
+    Sort(KEY_SCORE);
     sn_Requesting     = GetFirstServer();
 
     while (sn_Polling.Len())
@@ -2276,7 +2305,7 @@ nServerInfo *nServerInfo::GetMasters()
 {
     // reload master list at least once per minute
     double time = tSysTimeFloat();
-    static double deleteTime = time;
+    static double deleteTime = time + 60.0;
     if ( time > deleteTime )
     {
         deleteTime = time + 60.0;
@@ -2429,7 +2458,7 @@ nServerInfoBase::~nServerInfoBase()
 
 bool nServerInfoBase::operator ==( const nServerInfoBase & other ) const
 {
-    return GetAddress() == other.GetAddress() && port_ == other.port_;
+    return GetAddress().IsSet() && GetAddress() == other.GetAddress() && port_ == other.port_;
 }
 
 // *******************************************************************************************
