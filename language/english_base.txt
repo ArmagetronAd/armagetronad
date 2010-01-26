@@ -2162,7 +2162,7 @@ first_setup_color_dark      0x000000Dark0xRESETT
 first_setup_leave           Leave Alone
 first_setup_leave_help      Don't change this.
 
-first_setup_keys            Keyboard Layout:
+first_setup_keys            Controls:
 first_setup_keys_help       Select your startup keyboard layout here. It can be customized later, individual bindings can be changed. Select with cursor left and cursor right.
 first_setup_keys_cursor     Cursor Keys
 first_setup_keys_cursor_help Control your cycle with the cursor keys, bulk of keyboard used for camera control, special actions and the second player. Good for right handed people and our general recommendation.
@@ -2178,7 +2178,7 @@ first_setup_keys_x          Traditional
 first_setup_keys_x_help     The default setup of old versions of the game. X turns right, the key left to that turns left. Recommended only for veterans.
 first_setup_keys_leave      Leave Alone
 
-first_setup_net             Internet Connection:
+first_setup_net             Connection:
 first_setup_net_help        Select the rough type of your internet connection here.
 first_setup_net_dialup      Dialup
 first_setup_net_dialup_help You are connected to the internet via a traditional modem connected to a telephone line.
