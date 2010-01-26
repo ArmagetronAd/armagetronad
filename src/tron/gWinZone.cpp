@@ -1178,6 +1178,12 @@ extern tList<ePlayerNetID> se_PlayerNetIDs;
 
 ePlayerNetID * validatePlayer(ePlayerNetID *pPlayer)
 {
+    // with smart pointers, all players are now valid.
+    return pPlayer;
+
+    // old code when player pointers were dumb pointers, before dereferencing them,
+    // it was required to check whether they were still alive (not very safe, by the way.)
+    /*
     if (pPlayer)
     {
         int i;
@@ -1196,6 +1202,7 @@ ePlayerNetID * validatePlayer(ePlayerNetID *pPlayer)
     }
 
     return (pPlayer);
+    */
 }
 
 gCycle * gDeathZoneHack::getPlayerCycle(ePlayerNetID *pPlayer)
@@ -1295,7 +1302,7 @@ void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
                 preyName << *prey;
                 preyName << tColoredString::ColorString(1,1,1);
 
-                if (prey->CurrentTeam() != hunter->CurrentTeam())
+                if (prey->CurrentTeam() != team)
                 {
                     char const *pWinString = "$player_win_shot";
                     char const *pFreeString = "$player_free_shot";
@@ -1419,7 +1426,7 @@ void gDeathZoneHack::OnEnter( gDeathZoneHack * target, REAL time )
             if ((pOwner_) && (pShotOwner))
             {
                 //We have both owners
-                if ((pOwner_->CurrentTeam() != pShotOwner->CurrentTeam()) ||
+                if ((team != target->team) ||
                     (sg_shotKillSelf))
                 {
                     //Shoot the zombie!
