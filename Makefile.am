@@ -58,8 +58,8 @@ dist-hook-scm:
 	sed \
 	-e "s/m4_include(version)//" \
 	-e "s/AUTOMATIC_VERSION/$(VERSION)/" \
-	-e "s/  progname=.*/  progname=@prognamebase@/" \
-	-e "s/  progtitle=.*/  progtitle=@progtitle@/" \
+	-e "s/  progname=.*/  progname='@prognamebase@'/" \
+	-e "s/  progtitle=.*/  progtitle='@progtitle@'/" \
 	< @srcdir@/configure.ac > $(distdir)/configure.ac
 
 #	same for src/macosx/config_common.h.in
