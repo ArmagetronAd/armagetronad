@@ -53,8 +53,14 @@ nobase_language_DATA=language/languages.txt $(languagedata)
 
 # generate configure.ac with version hardcoded and ChangeLog
 dist-hook-scm:
-#	replace dynamic version in configure.ac with the version this build is configured with
-	sed -e "s/m4_include(version)//" -e "s/AUTOMATIC_VERSION/$(VERSION)/" < @srcdir@/configure.ac > $(distdir)/configure.ac
+#	replace dynamic version in configure.ac with the version this build is configured with,
+#   as well as default package and program name
+	sed \
+	-e "s/m4_include(version)//" \
+	-e "s/AUTOMATIC_VERSION/$(VERSION)/" \
+	-e "s/  progname=.*/  progname=@prognamebase@/" \
+	-e "s/  progtitle=.*/  progtitle=@progtitle@/" \
+	< @srcdir@/configure.ac > $(distdir)/configure.ac
 
 #	same for src/macosx/config_common.h.in
 	sed -e "s/@ver""sion@/\"$(VERSION)\"/" < @srcdir@/src/macosx/config_common.h.in > $(distdir)/src/macosx/config_common.h.in
