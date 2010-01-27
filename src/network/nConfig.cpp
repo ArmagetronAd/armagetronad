@@ -448,7 +448,7 @@ static char const * sn_versionString[] =
         "0.2.8.2", // 13
         "0.2.8.3_alpha", // 14
         "0.2.8.3_alpha_auth", // 15
-        "0.2.8.3", // 16, was: 0.2.8.3_beta2
+        "0.2.8.3.X", // 16, was: 0.2.8.3_beta2
        0
     };
 
