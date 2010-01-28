@@ -57,7 +57,7 @@ dist-hook-scm:
 #   as well as default package and program name
 	sed \
 	-e "s/m4_include(version)//" \
-	-e "s/AUTOMATIC_VERSION/$(VERSION)/" \
+	-e "s/AC_INIT(armagetronad,AUTOMATIC_VERSION)/AC_INIT(@prognamebase@,$(VERSION))/" \
 	-e "s/  progname=.*/  progname='@prognamebase@'/" \
 	-e "s/  progtitle=.*/  progtitle='@progtitle@'/" \
 	< @srcdir@/configure.ac > $(distdir)/configure.ac

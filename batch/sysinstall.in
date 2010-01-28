@@ -304,7 +304,8 @@ if test @enable_desktop@ = yes && kde-config --install icon > /dev/null 2>&1; th
         echo "No permission to write to KDE icons directory."
     else
         echo "${INSTALLING} KDE icon in ${ICONSDEST}..."
-        install_link ${DESKTOPSOURCE}/icons/large/armagetronad.png ${ICONSDEST}/@progname@.png
+        test "$MODE" = "install" && test @prognamebase@ != armagetronad && for f in large small medium; do mv ${DESTDIR}${DESKTOPSOURCE}/icons/$f/armagetronad.png ${DESTDIR}${DESKTOPSOURCE}/icons/$f/@prognamebase@.png; done
+        install_link ${DESKTOPSOURCE}/icons/large/@prognamebase@.png ${ICONSDEST}/@progname@.png
     fi
 
     DESKTOPDEST=`kde_get_write_path apps ${DESTDIR}`
@@ -312,7 +313,8 @@ if test @enable_desktop@ = yes && kde-config --install icon > /dev/null 2>&1; th
         echo "No permission to write to KDE application menu directory."
     else
         echo "${INSTALLING} KDE start menu entry in ${DESKTOPDEST}..."
-        install_link ${DESKTOPSOURCE}/armagetronad.desktop ${DESKTOPDEST}/@progname@.desktop
+        test "$MODE" = "install" && test @prognamebase@ != armagetronad && mv ${DESTDIR}${DESKTOPSOURCE}/armagetronad.desktop ${DESTDIR}${DESKTOPSOURCE}/@prognamebase@.desktop 
+        install_link ${DESKTOPSOURCE}/@prognamebase@.desktop ${DESKTOPDEST}/@progname@.desktop
     fi
 fi
 
