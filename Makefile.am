@@ -33,7 +33,7 @@ masterUninstallTasks=echo 'No tasks for the master server'
 endif
 
 languagedata=language/english_base.txt language/english_base_notranslate.txt language/american.txt language/british.txt\
-             language/deutsch.txt language/french.txt language/spanish.txt language/polish_transliterated.txt language/polish.txt
+             language/deutsch.txt language/french.txt language/spanish.txt language/polish.txt
 
 nobase_dist_language_DATA=language/languages.txt.in $(languagedata) language/update.py
 
