@@ -66,8 +66,14 @@ doxy:
 
 # generate configure.ac with version hardcoded and ChangeLog
 dist-hook-scm:
-#	replace dynamic version in configure.ac with the version this build is configured with
-	sed -e "s/m4_include(version)//" -e "s/AUTOMATIC_VERSION/$(VERSION)/" < @srcdir@/configure.ac > $(distdir)/configure.ac
+#	replace dynamic version in configure.ac with the version this build is configured with,
+#   as well as default package and program name
+	sed \
+	-e "s/m4_include(version)//" \
+	-e "s/AC_INIT(armagetronad,AUTOMATIC_VERSION)/AC_INIT(@prognamebase@,$(VERSION))/" \
+	-e "s/  progname=.*/  progname='@prognamebase@'/" \
+	-e "s/  progtitle=.*/  progtitle='@progtitle@'/" \
+	< @srcdir@/configure.ac > $(distdir)/configure.ac
 
 #   regenerate dependant files so they no longer reference to the file "version" which will be removed
 	cp @srcdir@/bootstrap.sh $(distdir)

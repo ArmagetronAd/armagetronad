@@ -1480,9 +1480,11 @@ bool uActionGlobalFunc::GlobalAct(uAction *act, REAL x){
     return false;
 }
 
-static uActionGlobal mess_up("MESS_UP");
+static uActionGlobal mess_up("MESS_UP",1);
 
-static uActionGlobal mess_down("MESS_DOWN");
+static uActionGlobal mess_down("MESS_DOWN",2);
+
+static uActionGlobal mess_end("MESS_END",3);
 
 static bool messup_func(REAL x){
     if (x>0){
@@ -1498,5 +1500,13 @@ static bool messdown_func(REAL x){
     return true;
 }
 
+static bool messend_func(REAL x){
+    if (x>0){
+        sr_con.End(2);
+    }
+    return true;
+}
+
 static uActionGlobalFunc mu(&mess_up,&messup_func);
 static uActionGlobalFunc md(&mess_down,&messdown_func);
+static uActionGlobalFunc me(&mess_end,&messend_func);
