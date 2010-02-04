@@ -482,18 +482,27 @@ public:
     static nMessageStreamer * SyncStreamer();
 
 protected:
+    // fetches the network object part from a creation/sync message
+    template< class PROTOBUF >
+    static Network::NetObjectSync const & GetNetObjectSync( PROTOBUF const & message )
+    {
+        tASSERT( message.has_base() );
+        return GetNetObjectSync( message.base() );
+    }
+
+    static Network::NetObjectSync const & GetNetObjectSync ( Network::NetObjectSync const & message );
+
     // fetches the network object ID from a creation message
     template< class PROTOBUF >
     static unsigned int GetObjectID( PROTOBUF const & message )
     {
-        tASSERT( message.has_base() );
-        return GetObjectID( message.base() );
+        return GetObjectID( GetNetObjectSync( message ) );
     }
 
-    static unsigned int GetObjectID ( Network::NetObjectSync const & message );
+    static unsigned int GetObjectID( Network::NetObjectSync const & message );
 
     //! checks to run before creating a new object
-    static bool PreCheck( unsigned short id, nSenderInfo sender );
+    static bool PreCheck( Network::NetObjectSync const & sync, nSenderInfo sender );
 
     //! checks to run after creating a new object
     static void PostCheck( nNetObject * object, nSenderInfo sender );
@@ -751,9 +760,7 @@ private:
 
     static void HandleCreation( PROTOBUF const & message, nSenderInfo const & sender )
     {
-        unsigned short id = GetObjectID( message );
-
-        if( PreCheck( id, sender ) )
+        if( PreCheck( GetNetObjectSync( message ), sender ) )
         {
             nNetObjectRegistrar registrar;
             tJUST_CONTROLLED_PTR< OBJECT > n=tNEW(OBJECT)( message, sender );
