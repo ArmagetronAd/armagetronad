@@ -1247,7 +1247,7 @@ void nNetObject::GetID()
             tERR_ERROR("Dublicate nNetObject id " << id);
 
         sn_netObjectsOwner[id]=owner;
-        sn_netObjects_AcceptClientSync[id]=false;
+        sn_netObjects_AcceptClientSync[id]=AcceptClientSync();
 
 #ifdef DEBUG
         sn_BreakOnObjectID(id);
