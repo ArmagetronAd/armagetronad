@@ -4580,7 +4580,11 @@ void ePlayerNetID::RemoveFromGame()
     }
 
     se_PlayerNetIDs.Remove(this, listID);
-    SetTeamWish( NULL );
+
+    if ( sn_GetNetState() == nCLIENT )
+    {
+        SetTeamWish( NULL );
+    }
     SetTeam( NULL );
     UpdateTeam();
     ControlObject( NULL );
@@ -7558,9 +7562,9 @@ void ePlayerNetID::ReceiveControlNet( Network::NetObjectControl const & controlB
             if ( bool(newTeam) && newTeam->TeamID() < 0 )
                 newTeam = 0;
 
-            // NULL team probably means that the change target does not
+            // NULL team, but non-null team ID probably means that the change target does not
             // exist any more. Create a new team instead.
-            if ( !newTeam )
+            if ( !newTeam && control.team_id() != 0 )
             {
                 if ( currentTeam )
                     sn_ConsoleOut( tOutput( "$player_joins_team_noex", tColoredString::RemoveColors(GetName()) ), Owner() );
