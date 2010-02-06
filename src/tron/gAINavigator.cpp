@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "tRandom.h"
 #include "tSysTime.h"
+#include "tMath.h"
 
 #include "eGrid.h"
 
@@ -264,6 +265,36 @@ void gAINavigator::Path::Fill( gAINavigator const & navigator, Sensor const & le
     this->left.FillFrom( left );
     this->right.FillFrom( right );
 
+    // get width by checking the edges (there's a better way for sure, but for now, this suffices)
+    eHalfEdge const * leftEdge = left.ehit;
+    eHalfEdge const * rightEdge = right.ehit;
+    if( leftEdge && rightEdge )
+    {
+        // get distance of the endpoints of the edges to the extended
+        // line of the other edge
+        eCoord const & leftBeg = *leftEdge->Point();
+        eCoord leftDir = leftEdge->Vec();
+        eCoord const & rightBeg = *rightEdge->Point();
+        eCoord rightDir = rightEdge->Vec();
+        eCoord offset = leftBeg - rightBeg;
+
+        REAL widthLeftBeg = offset * rightDir;
+        REAL widthLeftEnd = widthLeftBeg + leftDir * rightDir;
+        REAL widthRightBeg = -(offset * leftDir);
+        REAL widthRightEnd = widthRightBeg + rightDir * leftDir;
+
+        // take the minimum of those distances without sign change
+        width = this->left.distance + this->right.distance;
+        if ( widthLeftBeg * widthLeftEnd >= 0 )
+        {
+            width = tMin( width, tMin( fabs(widthLeftBeg), fabs(widthLeftEnd) )/rightDir.Norm() );
+        }
+        if ( widthRightBeg * widthRightEnd >= 0 )
+        {
+            width = tMin( width, tMin( fabs(widthRightBeg), fabs(widthRightEnd) )/leftDir.Norm() );
+        }
+    }
+
     this->turn = turn;
     this->driveOn = 0;
 }
@@ -304,6 +335,7 @@ gAINavigator::Path::~Path()
 gAINavigator::Path::Path()
 : distance(HUGE)
 , immediateDistance(HUGE)
+, width(HUGE)
 , shortTermDirection(0,0)
 , longTermDirection(0,0)
 , followedSince(0)
@@ -532,6 +564,27 @@ void gAINavigator::CowardEvaluator::Evaluate( Path const & path, PathEvaluation 
             {
                 evaluation.score = 0;
             }
+        }
+    }
+}
+
+gAINavigator::TunnelEvaluator::TunnelEvaluator( gCycle const & cycle ): cycle_( cycle ){}
+gAINavigator::TunnelEvaluator::~TunnelEvaluator(){}
+
+void gAINavigator::TunnelEvaluator::Evaluate( Path const & path, PathEvaluation & evaluation ) const
+{
+    evaluation.score = 100;
+
+    // check for tunnel situation
+    if( path.left.owner && path.right.owner && path.left.owner != path.right.owner )
+    {
+        // the narrower, the worse the score gets
+        REAL referenceWidth = cycle_.GetTurnDelay() * cycle_.Speed() * 2;
+        if( path.width < referenceWidth )
+        {
+            REAL w = (path.width/referenceWidth - .25)/.75;
+            w = tMin(0,w);
+            evaluation.score = 100*w*w;
         }
     }
 }
@@ -1223,6 +1276,10 @@ void gAINavigator::UpdatePaths()
     self.windingNumber_ = owner_->windingNumber_;
     self.type = gSENSOR_SELF;
     self.hit = 0;
+    if ( owner_->CurrentWall() )
+    {
+        self.ehit = owner_->CurrentWall()->Edge();
+    }
     self.hitDistance_ = 0;
     self.hitOwner_ = owner_;
     self.hitTime_ = owner_->LastTime();

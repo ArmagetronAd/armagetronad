@@ -137,6 +137,7 @@ public:
     public:
         REAL   distance;           //!< expected distance possible to travel this path without getting killed
         REAL   immediateDistance;  //!< distance to next problem
+        REAL   width;              //!< width of the narrowest bit of the path
         eCoord shortTermDirection; //!< direction to travel in in the short run
         eCoord longTermDirection;  //!< direction to travel in in the long run
         int    followedSince;      //!< number of turns this path is already being followed
@@ -261,6 +262,19 @@ public:
     public:
         explicit CowardEvaluator( gCycle const & cycle );
         ~CowardEvaluator();
+
+        //! evaluate a path.
+        virtual void Evaluate( Path const & path, PathEvaluation & evaluation ) const;
+    private:
+        gCycle const & cycle_;
+    };
+
+    //! tunnel evaluator: avoids tunneling between walls of different cycles
+    class TunnelEvaluator: public PathEvaluator
+    {
+    public:
+        explicit TunnelEvaluator( gCycle const & cycle );
+        ~TunnelEvaluator();
 
         //! evaluate a path.
         virtual void Evaluate( Path const & path, PathEvaluation & evaluation ) const;

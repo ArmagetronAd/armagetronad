@@ -178,8 +178,22 @@ void zZoneEvaluator::Init( gCycle const & cycle, zZone const & zone, eCoord & ra
         // blocked by an enemy. kill him.
         gCycle::WallInfo info;
         blocker_->FillWallInfo( info );
-        tailToChase = ( info.tailPos + blocker_->Position() ) * .5;
-        tailToChaseVelocity = ( info.tailDir + blocker_->Direction() ) * blocker_->Speed() * .5;
+
+        // check whether we already passed the tail end. If yes, attack directly.
+        if( eCoord::F( cycle.Direction(), info.tailPos - cycle.Position() ) < 0 )
+        {
+            tailToChase = blocker_->Position();
+            tailToChaseVelocity = blocker_->Direction() * blocker_->Speed();
+            tailToChase += tailToChaseVelocity*.01;
+        }
+        else
+        {
+            // aim for the gap.
+            tailToChase = ( info.tailPos + blocker_->Position() ) * .5;
+            tailToChaseVelocity = ( info.tailDir + blocker_->Direction() ) * blocker_->Speed() * .5;
+        }
+
+        // extrapolate
         tailToChase += tailToChaseVelocity * ( cycle_.LastTime() - blocker_->LastTime() );
         
 #ifdef DEBUG
@@ -232,6 +246,12 @@ REAL zStateDefend::Think( REAL maxStep )
     }
 
     manager.Evaluate( gAINavigator::CowardEvaluator( cycle ), cowardice );
+
+    // avoid tunnels
+    if (cowardice > 0)
+    {
+        manager.Evaluate( gAINavigator::TunnelEvaluator( cycle ), cowardice );
+    }
 
     gAINavigator::CycleControllerBasic controller;
     return manager.Finish( controller, *Parent().Object(), maxStep );

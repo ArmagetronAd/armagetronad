@@ -41,11 +41,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <ieeefp.h>
 #endif
 
+//! returns wiether a float value is good and finite
 inline bool good( REAL f )
 {
     return finite( f );
 }
 
+//! clamps a value between two others
 static inline bool clamp(REAL &c, REAL min, REAL max){
     tASSERT(min <= max);
 
@@ -68,6 +70,18 @@ static inline bool clamp(REAL &c, REAL min, REAL max){
     }
 
     return false;
+}
+
+//! returns the minumum of two values
+static inline REAL tMin(REAL a, REAL b)
+{
+    return a > b ? b : a;
+}
+
+//! returns the maximum of two values
+static inline REAL tMax(REAL a, REAL b)
+{
+    return a > b ? a : b;
 }
 
 #endif
