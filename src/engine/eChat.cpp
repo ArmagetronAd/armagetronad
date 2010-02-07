@@ -168,8 +168,8 @@ static nTimeRolling se_CalcTimeout( double score )
     return se_CalcScore2( score ) * se_prefixSpamTimeoutMultiplier;
 }
 
-eChatSaidEntry::eChatSaidEntry(const tString & said, const tString & name, const nTimeRolling & t, eChatMessageType type)
-: said_( said ), playerName_(name), time_( t ), type_( type )
+eChatSaidEntry::eChatSaidEntry(const tString & said, const nTimeRolling & t, eChatMessageType type)
+: said_( said ), time_( t ), type_( type )
 {
 }
 
@@ -180,11 +180,6 @@ eChatSaidEntry::~eChatSaidEntry()
 const tString & eChatSaidEntry::Said() const
 {
     return said_;
-}
-
-const tString & eChatSaidEntry::PlayerName() const
-{
-    return playerName_;
 }
 
 const nTimeRolling & eChatSaidEntry::Time() const
@@ -220,7 +215,7 @@ bool eChatLastSaid::Prefix::StartsWith( const eChatLastSaid::Prefix & other ) co
 
 
 eChatLastSaid::eChatLastSaid()
-  : lastSaid_(), knownPrefixes_(), disconnected_(false)
+: lastSaid_(), knownPrefixes_()
 {
 }
 
@@ -238,20 +233,8 @@ const eChatLastSaid::PrefixList & eChatLastSaid::KnownPrefixes() const
     return knownPrefixes_;
 }
 
-bool eChatLastSaid::Disconnected() const
-{
-    return disconnected_;
-}
-
-void eChatLastSaid::MarkDisconnected()
-{
-    disconnected_ = true;
-}
-
 void eChatLastSaid::AddSaid( const eChatSaidEntry & saidEntry )
 {
-    disconnected_ = false;
-
     if ( lastSaid_.size() >= static_cast< size_t >( se_lastSaidMaxEntries ) )
         lastSaid_.pop_back();
     
@@ -260,7 +243,6 @@ void eChatLastSaid::AddSaid( const eChatSaidEntry & saidEntry )
 
 nTimeRolling eChatLastSaid::AddPrefix( const tString & s, REAL score, nTimeRolling now )
 {
-    disconnected_ = false;
     nTimeRolling timeoutAt = now + se_CalcTimeout( score );
     Prefix prefix( s, score, timeoutAt );
     knownPrefixes_.push_back( prefix );
@@ -290,7 +272,7 @@ bool eChatSpamTester::Check()
     nTimeRolling currentTime = tSysTimeFloat();
     
     // check if the player already said the same thing not too long ago
-    eChatLastSaid::SaidList const & lastSaid = player_->GetLastSaid().LastSaid();
+    eChatLastSaid::SaidList const & lastSaid = player_->lastSaid_.LastSaid();
     const size_t saidSize = lastSaid.size();
     for ( size_t i = 0; i < saidSize; i++ )
     {
@@ -302,7 +284,7 @@ bool eChatSpamTester::Check()
         }
     }
     
-    eChatSaidEntry saidEntry( say_, player_->GetUserName(), currentTime, lastSaidType_ );
+    eChatSaidEntry saidEntry( say_, currentTime, lastSaidType_ );
     
     // check for prefix spam
     if ( se_prefixSpamShouldEnable )
@@ -353,14 +335,14 @@ bool eChatSpamTester::Check()
     }
 #endif
     
-    player_->GetLastSaid().AddSaid( saidEntry );
+    player_->lastSaid_.AddSaid( saidEntry );
     
     return false;
 }
 
 bool eChatSpamTester::CheckSpam( REAL factor, tOutput const & message ) const
 {
-    if ( nSpamProtection::Level_Mild <= player_->GetChatSpam().CheckSpam( factor, player_->Owner(), message ) )
+    if ( nSpamProtection::Level_Mild <= player_->chatSpam_.CheckSpam( factor, player_->Owner(), message ) )
         return true;
 
     return false;
@@ -408,7 +390,7 @@ bool eChatPrefixSpamTester::Check( tString & out, nTimeRolling & timeOut, eChatP
     }
         
     
-    eChatLastSaid::SaidList & lastSaid = player_->GetLastSaid().lastSaid_;
+    eChatLastSaid::SaidList & lastSaid = player_->lastSaid_.lastSaid_;
     
     // Map of Prefix => Data
     std::map< tString, PrefixEntry > foundPrefixes;
@@ -452,7 +434,7 @@ bool eChatPrefixSpamTester::Check( tString & out, nTimeRolling & timeOut, eChatP
 #ifdef DEBUG
                 con << "Spam prefix found: \"" << se_EscapeColors( prefix ) << "\" with score " << data.score << '\n';
 #endif
-                nTimeRolling t = player_->GetLastSaid().AddPrefix( prefix, data.score, say_.Time() );
+                nTimeRolling t = player_->lastSaid_.AddPrefix( prefix, data.score, say_.Time() );
                 timeOut = RemainingTime( t );
                 
                 // We caught the prefix. Don't catch words that start with the prefix.
@@ -478,7 +460,7 @@ void eChatPrefixSpamTester::CalcScore( PrefixEntry & data, const int & len, cons
     data.score += se_CalcScore2( se_CountColorCodes( prefix ) * se_prefixSpamNumberColorCodesMultiplier );
 
     // Apply based on number of known prefixes.
-    data.score += se_CalcScore2( player_->GetLastSaid().KnownPrefixes().size() * se_prefixNumberKnownPrefixesMultiplier );
+    data.score += se_CalcScore2( player_->lastSaid_.KnownPrefixes().size() * se_prefixNumberKnownPrefixesMultiplier );
 
     // Apply multiplier for annoying color messages
     if ( se_StartsWithColorCode( prefix ) )
@@ -487,14 +469,14 @@ void eChatPrefixSpamTester::CalcScore( PrefixEntry & data, const int & len, cons
 
 void eChatPrefixSpamTester::RemovePrefixEntries( const tString & prefix, const eChatSaidEntry & e ) const
 {
-    eChatSaidEntry entry( prefix, player_->GetUserName(), e.Time(), e.Type() );
-    eChatLastSaid::SaidList & xs = player_->GetLastSaid().lastSaid_;
+    eChatSaidEntry entry( prefix, e.Time(), e.Type() );
+    eChatLastSaid::SaidList & xs = player_->lastSaid_.lastSaid_;
     xs.erase( std::remove_if( xs.begin(), xs.end(), IsPrefixPredicate< eChatSaidEntry >( entry, false ) ), xs.end() );
 }
 
 bool eChatPrefixSpamTester::HasKnownPrefix( tString & out, nTimeRolling & timeOut ) const
 {
-    eChatLastSaid::PrefixList & prefixes = player_->GetLastSaid().knownPrefixes_;
+    eChatLastSaid::PrefixList & prefixes = player_->lastSaid_.knownPrefixes_;
     eChatLastSaid::Prefix testPrefix( say_.Said(), 0, 0 );
     
     eChatLastSaid::PrefixList::iterator it =
@@ -521,7 +503,7 @@ nTimeRolling eChatPrefixSpamTester::RemainingTime( nTimeRolling t ) const
 
 void eChatPrefixSpamTester::RemoveTimedOutPrefixes() const
 {
-    eChatLastSaid::PrefixList & xs = player_->GetLastSaid().knownPrefixes_;
+    eChatLastSaid::PrefixList & xs = player_->lastSaid_.knownPrefixes_;
     tString empty;
     eChatLastSaid::Prefix entry( empty, 0, say_.Time() );
     xs.erase( std::remove_if( xs.begin(), xs.end(), TimeOutPredicate< eChatLastSaid::Prefix >( entry ) ), xs.end() );
@@ -533,7 +515,7 @@ bool eChatPrefixSpamTester::ChatDirectedTowardsPlayer( const tString & prefix, i
     
     // When using 0.3 name completion at the start of a message,
     // ": " is appended to the end of the player name.
-    if ( st_StringEndsWith( possiblePlayer, ": " ) || st_StringEndsWith( possiblePlayer, ", " ) )
+    if ( possiblePlayer.EndsWith( ": " ) || possiblePlayer.EndsWith( ", " ) )
         possiblePlayer = possiblePlayer.SubStr( 0, possiblePlayer.Len() - 3 );
     
     if ( ePlayerNetID::FindPlayerByName( possiblePlayer, 0, false ) )
@@ -570,19 +552,6 @@ void eShuffleSpamTester::Shuffle()
 void eShuffleSpamTester::Reset()
 {
     numberShuffles_ = 0;
-}
-
-tString eShuffleSpamTester::ShuffleMessage( ePlayerNetID *player, int position ) const
-{
-    tString message;
-    message << tOutput( "$team_preshuffle", player->GetColoredName() + "0xRESETT", position );
-    
-    if ( ShouldDisplaySuppressMessage() )
-        message << " " << tOutput( "$team_shuffle_suppress" );
-    else
-        message << '\n';
-    
-    return message;
 }
 
 tString eShuffleSpamTester::ShuffleMessage( ePlayerNetID *player, int fromPosition, int toPosition ) const

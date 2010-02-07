@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #ifndef DEDICATED
 #include "rSDL.h"
+#include "rGLEW.h"
 #endif
 
 #include "rSysdep.h"
@@ -94,6 +95,116 @@ Display *dpy=NULL;
 Window  win;
 
 #endif
+
+#ifndef DEDICATED
+// fence support
+class rGLFence: public rGLuintObject
+{
+public:
+    // check whether fences are availalbe
+    static bool Available()
+    {
+        static bool ret = CheckAvailable();
+        return ret;
+    }
+
+    // sets the fence up
+    void Set()
+    {
+        sr_CheckGLError();
+#ifdef GLEW_NV_fence
+        if( GLEW_NV_fence )
+        {
+            glSetFenceNV( *this, GL_ALL_COMPLETED_NV );
+        }
+#endif       
+#ifdef GLEW_APPLE_fence
+        if( GLEW_APPLE_fence )
+        {
+            glSetFenceAPPLE( *this );
+        }
+#endif       
+        sr_CheckGLError();
+    }
+
+    // finishes the fence (waits for all commands sent before it was set to be finished)
+    void Finish()
+    {
+        sr_CheckGLError();
+#ifdef GLEW_NV_fence
+        if( GLEW_NV_fence )
+        {
+            glFinishFenceNV( *this );
+        }
+#endif       
+#ifdef GLEW_APPLE_fence
+        if( GLEW_APPLE_fence )
+        {
+            glFinishFenceAPPLE( *this );
+        }
+#endif       
+        sr_CheckGLError();
+    }
+
+    virtual ~rGLFence()
+    {
+        Delete();
+    }
+private:
+    static bool CheckAvailable()
+    {
+#ifdef HAVE_GLEW
+#ifdef GLEW_NV_fence
+        if( GLEW_NV_fence )
+        {
+            return true;
+        }
+#endif       
+#ifdef GLEW_APPLE_fence
+        if( GLEW_APPLE_fence )
+        {
+            return true;
+        }
+#endif       
+#endif
+        // fallback: no fence
+        return false;
+    }
+
+    virtual void DoGen()       //!< really reserves the object
+    {
+#ifdef GLEW_NV_fence
+        if( GLEW_NV_fence )
+        {
+            glGenFencesNV( 1, &object_ );
+        }
+#endif       
+#ifdef GLEW_APPLE_fence
+        if( GLEW_APPLE_fence )
+        {
+            glGenFencesAPPLE( 1, &object_ );
+        }
+#endif       
+    }
+
+    virtual void DoDelete()    //!< really frees the object
+    {
+#ifdef GLEW_NV_fence
+        if( GLEW_NV_fence )
+        {
+            glDeleteFencesNV( 1, &object_ );
+        }
+#endif       
+#ifdef GLEW_APPLE_fence
+        if( GLEW_APPLE_fence )
+        {
+            glDeleteFencesAPPLE( 1, &object_ );
+        }
+#endif       
+    }
+};
+
+#endif // DEDICATED
 
 #ifdef DIRTY
 #include <SDL_syswm.h>
@@ -511,8 +622,7 @@ static void sr_DelayFrame( int targetFPS )
 }
 */
 
-rSysDep::rSwapMode rSysDep::swapMode_ = rSysDep::rSwap_glFlush;
-//rSysDep::rSwapMode rSysDep::swapMode_ = rSysDep::rSwap_60Hz;
+rSysDep::rSwapMode rSysDep::swapMode_ = rSysDep::rSwap_LateFinish;
 
 // buffer swap:
 #ifndef DEDICATED
@@ -806,6 +916,14 @@ bool sr_MotionBlur( double time, std::auto_ptr< rTextureRenderTarget > & blurTar
     return true;
 }
 
+// returns the fence to be used for syncing the GPU and CPU
+static rGLFence & sr_GetFence()
+{
+    static rGLFence fence;
+    fence.Set();
+    return fence;
+}
+
 void rSysDep::SwapGL(){
     static std::auto_ptr< rTextureRenderTarget > blurTarget(0);
 
@@ -913,16 +1031,29 @@ void rSysDep::SwapGL(){
 
     switch ( swapMode_ )
     {
-    case rSwap_Fastest:
-        break;
     case rSwap_glFlush:
         glFlush();
         break;
     case rSwap_glFinish:
         glFinish();
         break;
+    case rSwap_Fence:
+        if( rGLFence::Available() )
+        {
+            static rGLFence & fence = sr_GetFence();
+            // finish last frame's fence
+            fence.Finish();
+            // set new fence
+            fence.Set();
+            break;
+        }
+    case rSwap_LateFinish:
+        glFlush();
+        break;
+    case rSwap_Fastest:
+        break;
     }
-
+        
     if ( shouldSwap )
     {
 #if defined(SDL_OPENGL)
@@ -989,6 +1120,26 @@ void rSysDep::SwapGL(){
 
     sr_glOut = next_glOut;
 }
+
+void rSysDep::PostSwapGL()
+{
+    switch ( swapMode_ )
+    {
+    case rSwap_Fence:
+        if( rGLFence::Available() )
+        {
+            break;
+        }
+    case rSwap_LateFinish:
+        // calls glFinish after the next frame's physics are calculated. This should keep
+        // both CPU and GPU busy.
+        glFinish();
+        break;
+    default:
+        break;
+    }
+}
+
 #endif // dedicated
 
 #ifndef DEDICATED
@@ -1034,6 +1185,18 @@ void  rSysDep::ClearGL(){
 
         glClearColor(0.0,0.0,0.0,1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // call glFlush(). glClear is an expensive operation, and we want the
+        // GPU to start working on it ASAP.
+        switch ( swapMode_ )
+        {
+        case rSwap_Fastest:
+            // unless the mode is fastest, of course.
+            break;
+        default:
+            glFlush();
+            break;
+        }
     }
 }
 #endif

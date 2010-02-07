@@ -293,6 +293,12 @@ public:
         // finish all pending tasks
         while( pendingForBreak_.size() > 0 )
         {
+            // sync the network so built up auth requests don't cause connection drops so quickly
+            sn_Receive();
+            nNetObject::SyncAll();
+            tAdvanceFrame();
+            sn_SendPlanned();
+
             nMemberFunctionRunnerTemplate & next = pendingForBreak_.front();
             next.run();
             pendingForBreak_.pop_front();
@@ -922,7 +928,7 @@ static tSettingItem< bool > sn_TrustLANConf( "TRUST_LAN", sn_trustLAN );
 // sanity check the server address
 bool nLoginProcess::CheckServerAddress()
 {
-    // if no check is requested (only canm happen for old bmd5 protocol), don't check.
+    // if no check is requested (only can happen for old bmd5 protocol), don't check.
     if ( !checkAddress )
     {
         return true;

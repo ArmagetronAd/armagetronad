@@ -2,6 +2,13 @@ Changes since 0.3.1
 ===================
 - Switched to utf-8 encoded strings internally and for config files.
   Language files can be either utf-8 or latin-1.
+- New command: “TOGGLE”. Cycle between 0 and 1 for a boolean config item.
+  Example: Create an instant chat with the text “/console toggle predict_objects”.
+- New setting SILENCE_ENEMIES (boolean). When enabled, chat sent from enemies
+  is not displayed on your client if you are alive. If you are dead all chat
+  is displayed.
+- New console commands OP and DEOP replicate the functionnality of chat commands /op and /deop
+- New vote: /callvote referee <player>: Elevates <player> to access level 6. /callvote demotereferee reverts.
 
 Changes since 0.3.0
 ===================
@@ -86,6 +93,55 @@ Changes since 0.2.8
 - Voting outcome messages show how many players voted for/against the poll and how many didn't vote yet
 - Added support for armagetronad URLs on Mac OS X and KDE -- armagetronad://<server>[:<port>]. port defaults to 4534.
 - New command-line flag: --connect <server>[:<port>]. Startup the game and connect directly to <server>.
+
+Changes since 0.2.8.3_rc4:
+==========================
+- Intercepted chat commands are now written to ladderlog.txt. Format:
+  COMMAND /command-intercepted player [command arguments]
+- Increased default speed of server pinging
+- Reordered game menus a bit
+- fast finish works again
+
+Changes since 0.2.8.3_rc3:
+==========================
+- Pinging previously popular servers earlier for quicker server
+  browsing
+- Improved master server random polling, the second polled master now
+  also is random, and all masters are polled if need be
+- Custom camera snaps to cycle direction once when activated if the turn speed
+  is zero.
+- RESERVE_SCREEN_NAME now works regardless of the ALLOW_IMPOSTOR setting.
+- USER_LEVEL now escapes the given authenticated name so you don't have to
+  guess the escaping rules. Ex: USER_LEVEL "name with spaces@forums" 2
+  changes user level for name\_with\_spaces@forums
+
+Changes since 0.2.8.3_rc2:
+==========================
+- Fixed crash with server polling
+- ROUND_WINNER and MATCH_WINNER logged to ladderlog
+- Camera switches to user preferred camera when you die in incam mode
+- Better support for custom language files
+- Players can no longer spam chat with /shuffle messages. Added new setting
+  SHUFFLE_SPAM_MESSAGES_PER_ROUND, a per round, per player limit on the number
+  of shuffle messages displayed.
+
+Changes since 0.2.8.3_rc1:
+==========================
+- Fixed dark color filters, such as FILTER_DARK_COLOR_STRINGS, to not filter
+  the reset color.
+- ASE moviepack models no longer have a vertex count limit
+- Fixed endless recursion crash between rounds
+
+Changes since 0.2.8.3_beta3:
+============================
+- Chat prefix spam protection. Guards against prefix spam, such as when a
+  user always changes their chat message color, or prefixes all messages
+  with a clan tag. Toggle with the PREFIX_SPAM_ENABLE setting.
+- Fixed VOTING_MATURITY to use the time when the player entered as its 
+  reference time.
+- Fixed single player highscore list not containing everyone.
+- Fixed generation of duplicate names in highscore lists.
+- Fixed camera crash when the grid is empty.
 
 Changes since 0.2.8.3_beta2:
 ============================

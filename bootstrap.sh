@@ -25,7 +25,7 @@ echo "Running autoconf..."
 $AUTOCONF || { rm configure; exit 1; }
 
 echo "Running automake..."
-$AUTOMAKE -av || { echo "Automake failed"; exit 1; }
+$AUTOMAKE -a -Wno-portability || { echo "Automake failed"; exit 1; }
 
 echo "Flagging scripts as executable..."
 chmod a+x $MYDIR/*.sh || exit 1

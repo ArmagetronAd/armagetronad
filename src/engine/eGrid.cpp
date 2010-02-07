@@ -2111,6 +2111,8 @@ void eGrid::Create(){
 void eGrid::Clear(){
     eHalfEdge::ClearPathData();
 
+    eGameObject::DeleteAll( this );
+
     base=eCoord(0,100);
     maxNormSquared=0;
 
@@ -2134,8 +2136,6 @@ void eGrid::Clear(){
 
     A=B=C=NULL;
     a=b=c=NULL;
-
-    eGameObject::DeleteAll( this );
 
     //	se_faceReplacements.clear();
 }

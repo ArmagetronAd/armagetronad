@@ -95,7 +95,8 @@ public:
     template < class T > bool Convert( T & target, size_type startPos = 0 ) const;
 #endif
 
-    void ReadLine(std::istream &s, bool enableEscapeSequences=false); //!< read a whole line from a stream into this string
+    void ReadLine(std::istream &s, bool enableEscapeSequences=false,
+        int indent=-1, int * eatenWhitespace=0); //!< read a whole line from a stream into this string
 
     void Clear();                       //!< clears the string
     void SetPos( int len, bool cut );   //!< makes this string exactly of length len.

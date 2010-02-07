@@ -81,7 +81,7 @@ Section "MainSection" SEC01
   CreateShortCut "$SMPROGRAMS\Armagetron Advanced\Armagetron Advanced Server.lnk" "$INSTDIR\armagetronad_dedicated.exe"
   SetOutPath "$INSTDIR\config"
   File ".\config\*.cfg"
-  File ".\config\master.srv"
+  File ".\config\*.srv"
   SetOutPath "$INSTDIR\config\examples"
   File ".\config\examples\*.cfg"
   SetOutPath "$INSTDIR\config\examples\cvs_test"

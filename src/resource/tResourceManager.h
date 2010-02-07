@@ -70,7 +70,7 @@ public:
     static int RegisterResourceType(tResourceType* newType);
 
     //! Return the position of the resource in the cache
-    static tString locateResource(const char *filename, const char *uri="");
+    static tString locateResource(const char *filename, const char *uri="", bool fullPath=true);
 
     //! opens a resource
     static FILE *openResource(const char *filename, const char *uri="");

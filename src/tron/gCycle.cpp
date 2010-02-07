@@ -87,8 +87,10 @@ static tSettingItem<bool> sg_("DEBUG_GNUPLOT",sg_gnuplotDebug);
 static REAL sg_minDropInterval=0.05;
 static tSettingItem< REAL > sg_minDropIntervalConf( "CYCLE_MIN_WALLDROP_INTERVAL", sg_minDropInterval );
 
+#ifdef DEDICATED
 static bool sg_predictWalls=true;
 static tSettingItem< bool > sg_predictWallsConf( "PREDICT_WALLS", sg_predictWalls );
+#endif
 
 //  *****************************************************************
 
@@ -101,7 +103,7 @@ static nNetObjectDescriptor< gCycle, Game::CycleSync > cycle_init( 320 );
 //tCONTROLLED_PTR(ePlayerNetID)   lastEnemyInfluence;  	// the last enemy wall we encountered
 //REAL							lastTime;				// the time it was drawn at
 bool headlights=0;
-bool cycleprograminited=0;
+extern bool cycleprograminited;
 
 static float sg_cycleSyncSmoothTime = .1f;
 static tSettingItem<float> conf_smoothTime ("CYCLE_SMOOTH_TIME", sg_cycleSyncSmoothTime);
@@ -1355,10 +1357,6 @@ struct gCycleVisuals
 
     ~gCycleVisuals()
     {
-        delete customModel;
-        delete bodyModel;
-        delete frontModel;
-        delete rearModel;
         delete customTexture;
         delete bodyTexture;
         delete wheelTexture;
@@ -1425,12 +1423,7 @@ struct gCycleVisuals
     // loads a model, checking before if the file exists
     static rModel * LoadModelSafe( char const * filename )
     {
-        std::ifstream in;
-        if ( tDirectories::Data().Open( in, filename ) )
-        {
-            return tNEW(rModel( filename ));
-        }
-        return 0;
+        return rModel::GetModel(filename);
     }
 
     // load a model of specified type from a specified directory
@@ -1753,13 +1746,9 @@ gCycle::~gCycle(){
     this->RemoveFromGame();
 
     if (mp){
-        delete customModel;
         delete customTexture;
     }
     else{
-        delete body;
-        delete front;
-        delete rear;
         delete wheelTex;
         delete bodyTex;
     }

@@ -33,7 +33,7 @@
 void SetupAAURLHandler();
 
 //! 2) Call after everything is initialized.
-void StartAAURLHandler();
+void StartAAURLHandler( bool & showSplash );
 
 //! 3) Call before exiting
 void CleanupAAURLHandler();

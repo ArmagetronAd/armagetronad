@@ -73,7 +73,11 @@ public:
     //  rConsole & operator<<(const tString &s);
     virtual tConsole & DoPrint( const tString& s );
 
+    //! scrolls up or down
     void Scroll(int dir);
+
+    //! moves to the end, showing the last lines
+    void End(int last);
 
     virtual void DoCenterDisplay(const tString &s,REAL timeout=2,REAL r=1,REAL g=1,REAL b=1);
 

@@ -124,8 +124,8 @@ void sn_Delay()
     tAdvanceFrame();
 }
 
-int sn_maxRateIn=8; // maximum data rate in kb/s
-int sn_maxRateOut=8; // maximum output data rate in kb/s
+int sn_maxRateIn=32; // maximum data rate in kb/s
+int sn_maxRateOut=16; // maximum output data rate in kb/s
 
 static nConnectError sn_Error = nOK;
 
@@ -1507,6 +1507,8 @@ void sn_LoginHandler_intermediate( nMessage &m )
         login.set_big_brother( rem_bb );
     }
 
+    tString supportedAuthenticationMethods("");
+
     // read version and suppored authentication methods
     if ( !m.End() )
     {
@@ -1514,14 +1516,15 @@ void sn_LoginHandler_intermediate( nMessage &m )
         nVersion version;
         m >> version;
         version.WriteSync( *login.mutable_version() );
+
+        supportedAuthenticationMethods = "bmd5";
     }
     if ( !m.End() )
     {
         // read authentication methods
-        tString supportedAuthenticationMethods("");
         m >> supportedAuthenticationMethods;
-        login.set_authentication_methods( supportedAuthenticationMethods );
     }
+    login.set_authentication_methods( supportedAuthenticationMethods );
     if ( !m.End() )
     {
         // also read a login salt, the client expects to get it returned verbatim
@@ -2006,6 +2009,13 @@ void nMessageBase::Send(int peer,REAL priority,bool ack){
     if (!ack)
         messageIDBig_ = 0;
 #endif
+    
+    // don't send messages to unsupported peers
+    if( peer > MAXCLIENTS+1 )
+    {
+        tJUST_CONTROLLED_PTR< nMessageBase > bounce(this);
+        return;
+    }
 
     // messages to yourself are a bit strange...
     if ( sn_GetNetState() == nSERVER && peer == 0 && ack )
@@ -2592,11 +2602,19 @@ nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket
     // reset redirection
     sn_redirectTo.release();
 
+    // first, get all pending messages, ignoring them.
+    sn_SetNetState(nSTANDALONE);
+    sn_SetNetState(nCLIENT);
+    sn_Receive();
+    sn_Receive();
+    sn_Receive();
+
     // pings in the beginning of the login are not really representative
     nPingAverager::SetWeight(.0001);
 
     // net_hostport = sn_clientPort;
 
+    // reset sockets again
     sn_SetNetState(nSTANDALONE);
     sn_SetNetState(nCLIENT);
 
@@ -2618,11 +2636,6 @@ nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket
     sn_Connections[0].bandwidthControl_.SetRate( sn_maxRateOut );
 
     sn_myNetID=0; // MAXCLIENTS+1; // reset network id
-
-    // first, get all pending messages
-    sn_Receive();
-    sn_Receive();
-    sn_Receive();
 
     // reset version control until the true value is given by the server.
     sn_currentVersion = nVersion(0,0);

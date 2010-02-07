@@ -160,8 +160,10 @@ static rNoAutoDisplayAtNewlineCallback su_noNewline( uMenu::MenuActive );
 void uMenu::OnEnter(){
 #ifndef DEDICATED
     float nextrepeat = 0.0f;
-    static const float repeatdelay = 0.3f;
-    static const float repeatrate  = 0.05f;
+    static const float repeatdelay = 0.2f;
+    static const float repeatrateStart  = 0.2f;
+    static const float repeatrateMin  = 0.05f;
+    static float repeatrate  = repeatrateStart;
     SDL_Event tEventRepeat;
 #else
     return;
@@ -183,10 +185,9 @@ void uMenu::OnEnter(){
 
 #ifndef DEDICATED
     lastkey=tSysTimeFloat();
-    static const REAL timeout=3;
+    static const REAL timeout=.5;
 #endif
-    // inverted logic (0 = last item! prev(0) = top most item)
-    selected = GetPrevSelectable(0);
+    selected = items.Len() - 1;
     while (!exitFlag && !quickexit && !exitToMain){
         st_DoToDo();
         tAdvanceFrame();
@@ -226,6 +227,7 @@ void uMenu::OnEnter(){
                     break;
                 case SDL_KEYUP:
                     repeat = false;
+                    repeatrate = repeatrateStart;
                     break;
                 }
 
@@ -245,11 +247,19 @@ void uMenu::OnEnter(){
             {
                 this->HandleEvent( tEventRepeat );
                 nextrepeat = tSysTimeFloat() + repeatrate;
+                repeatrate *= .71;
+                if ( repeatrate < repeatrateMin )
+                    repeatrate = repeatrateMin;
             }
         }
 
         // we're about to render, last chance to make changes to the menu
         OnRender();
+
+#ifndef DEDICATED
+        rSysDep::PostSwapGL();
+        rSysDep::ClearGL();
+#endif
 
         // clamp cursor
         if (selected < 0 )
@@ -358,7 +368,6 @@ void uMenu::OnEnter(){
 
 #ifndef DEDICATED
         rSysDep::SwapGL();
-        rSysDep::ClearGL();
 #endif
     }
 
@@ -1111,12 +1120,13 @@ void uAutoCompleter::ShowPossibilities(std::deque<tString> &results, tString &wo
         con << tOutput("$tab_completion_results");
         tString::size_type len=word.length();
         for(std::deque<tString>::iterator i=results.begin(); i!=results.end(); ++i) {
-            tString::size_type pos=(m_ignorecase?Simplify(*i):*i).find(word);
-            con << i->SubStr(0,pos)
+            tString result = m_ignorecase ? Simplify( *i ) : *i;
+            tString::size_type pos= result.find(word);
+            con << result.SubStr(0,pos)
             << "0xff8888"
-            << i->SubStr(pos, len)
+            << result.SubStr(pos, len)
             << "0xffffff"
-            << i->SubStr(pos+len)
+            << result.SubStr(pos+len)
             << "\n";
         }
     }
@@ -1583,11 +1593,12 @@ bool uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL 
                 //REAL middle=-.6;
 
                 tString m(message);
-                int len = m.Len();
-                if (w * len > 1.8)
+                int len = tColoredString::RemoveColors(m).Len();
+                float maxWidth = 4.8;
+                if (w * len > maxWidth)
                 {
-                    h = h * 1.8 / (w * len);
-                    w = 1.8 / len;
+                    h = h * maxWidth / (w * len);
+                    w = maxWidth / len;
                 }
 
                 Color(1,1,1);

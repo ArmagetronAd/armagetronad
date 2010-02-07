@@ -503,8 +503,8 @@ void eGameObject::FindCurrentFace(){
 #ifdef DEBUG
         con << "Attempting to get a current face, but object is not in game.\n";
         st_Breakpoint();
-        return;
 #endif        
+        return;
     }
 
     // did that do the trick? If no, use brute force.

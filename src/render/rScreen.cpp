@@ -607,7 +607,9 @@ static bool lowlevel_sr_InitDisplay(){
     #endif
         int CD = fullCD;
 
-        if (currentScreensetting.checkErrors)
+        // only check for errors if requested and if we're not about to set the
+        // desktop resolution, where SDL_VideoModeOK apparently doesn't work.
+        if (currentScreensetting.checkErrors && sr_screenWidth + sr_screenHeight > 0)
         {
             // check if the video mode should be OK:
             CD = SDL_VideoModeOK
@@ -671,8 +673,15 @@ static bool lowlevel_sr_InitDisplay(){
             sr_screenWidth = sr_desktopWidth;
             sr_screenHeight = sr_desktopHeight;
         }
+        else
+        {
+            // have the screen reinited
+            sr_screen = NULL;
+        }
 
-        if ( (sr_screen=SDL_SetVideoMode
+        // only reinit the screen if the desktop res detection hasn't left us
+        // with a perfectly good one.
+        if ( !sr_screen && (sr_screen=SDL_SetVideoMode
                         (sr_screenWidth, sr_screenHeight,   CD,
                          attrib))
                 == NULL)
@@ -735,7 +744,15 @@ static bool lowlevel_sr_InitDisplay(){
         sr_blacklistDisplayLists=true;
     }
 
-    #ifndef WIN32
+    if(strstr(gl_vendor,"SiS"))
+    {
+        // almost nobody has those cards/chips, and we have
+        // at least one bluescreen problem reported.
+        sr_blacklistDisplayLists=true;
+    }
+
+   
+#ifndef WIN32
     if(!strstr(gl_renderer,"Voodoo3"))
     #endif
     {
@@ -839,7 +856,7 @@ static bool lowlevel_sr_InitDisplay(){
     return true;
 }
 
-extern bool cycleprograminited;
+bool cycleprograminited = false;
 
 bool sr_InitDisplay(){
     cycleprograminited = false;

@@ -58,6 +58,38 @@ bool           tConfItemBase::printErrors=true;
 // flag indicating the currently loaded config is in latin1 encoding (default: utf8)
 static bool st_loadAsLatin1 = false;
 
+static void st_ToggleConfigItem( std::istream & s )
+{
+    tString name;
+    s >> name;
+    
+    if ( name.Size() == 0 )
+    {
+        con << tOutput( "$toggle_usage_error" );
+        return;
+    }
+    
+    tConfItemBase *base = tConfItemBase::FindConfigItem( name );
+    
+    if ( !base )
+    {
+        con << tOutput( "$config_command_unknown", name );
+        return;
+    }
+    
+    tConfItem< bool > *confItem = dynamic_cast< tConfItem< bool > * >( base );
+    if ( confItem )
+    {
+        confItem->SetVal( !*confItem->GetTarget() );
+    }
+    else
+    {
+        con << tOutput( "$toggle_invalid_config_item", name );
+    }
+}
+
+static tConfItemFunc toggleConfItemFunc( "TOGGLE", st_ToggleConfigItem );
+
 //! @param newLevel         the new access level to set over the course of the lifetime of this object
 //! @param allowElevation   only if set to true, getting higher access rights is possible. Use with extreme care.
 tCurrentAccessLevel::tCurrentAccessLevel( tAccessLevel newLevel, bool allowElevation )
@@ -104,7 +136,9 @@ tAccessLevel tCurrentAccessLevel::currentLevel_ = tAccessLevel_Invalid; //!< the
 
 tAccessLevelSetter::tAccessLevelSetter( tConfItemBase & item, tAccessLevel level )
 {
+#ifdef KRAWALL_SERVER
     item.requiredLevel = level;
+#endif
 }
 
 static std::map< tString, tConfItemBase * > * st_confMap = 0;
@@ -127,8 +161,6 @@ tCasaclPreventer::~tCasaclPreventer()
 {
     st_preventCasacl = previous_;
 }
-
-#ifdef KRAWALL_SERVER
 
 // changes the access level of a configuration item
 class tConfItemLevel: public tConfItemBase
@@ -199,6 +231,8 @@ public:
 };
 
 static tConfItemLevel st_confLevel;
+
+#ifdef KRAWALL_SERVER
 
 static char const *st_casacl = "CASACL";
 
@@ -609,7 +643,8 @@ void tConfItemBase::LoadAll(std::istream &s, bool record ){
         tString line;
 
         // read line from stream
-        line.ReadLine( s );
+        int indent = 0;
+        line.ReadLine( s, false, -1, &indent );
 
         /// concatenate lines ending in a backslash
         while ( line.Size() > 0 && line[line.Size()-1] == '\\' && s.good() && !s.eof() )
@@ -623,7 +658,7 @@ void tConfItemBase::LoadAll(std::istream &s, bool record ){
             }
 
             tString rest;
-            rest.ReadLine( s );
+            rest.ReadLine( s, false, indent );
             line << rest;
         }
 
@@ -1028,7 +1063,7 @@ void tConfItemFunc::WriteVal(std::ostream &){}
 
 bool tConfItemFunc::Save(){return false;}
 
-void st_Include( tString const & file, bool error )
+void st_Include( tString const & file )
 {
     // refuse to load illegal paths
     if( !tPath::IsValidPath( file ) )
@@ -1039,7 +1074,7 @@ void st_Include( tString const & file, bool error )
         // really load include file
         if ( !Load( tDirectories::Var(), file ) )
         {
-            if (!Load( tDirectories::Config(), file ) && error )
+            if (!Load( tDirectories::Config(), file ) && tConfItemBase::printErrors )
             {
                 con << tOutput( "$config_include_not_found", file );
             }
@@ -1059,7 +1094,7 @@ void st_Include( tString const & file, bool error )
 
 }
 
-static void Include(std::istream& s, bool error )
+static void Include(std::istream& s )
 {
     // allow CASACL
     tCasaclPreventer allower(false);
@@ -1067,21 +1102,32 @@ static void Include(std::istream& s, bool error )
     tString file;
     s >> file;
 
-    st_Include( file, error );
-}
-
-static void Include(std::istream& s )
-{
-    Include( s, true );
+    st_Include( file );
 }
 
 static void SInclude(std::istream& s )
 {
-    Include( s, false );
+    tNoisinessSetter setter( false, false );
+    Include( s );
 }
 
 static tConfItemFunc s_Include("INCLUDE",  &Include);
 static tConfItemFunc s_SInclude("SINCLUDE",  &SInclude);
+
+tNoisinessSetter::tNoisinessSetter( bool printChange, bool printErrors )
+{
+    oldPrintChange = tConfItemBase::printChange;
+    oldPrintErrors = tConfItemBase::printErrors;
+
+    tConfItemBase::printChange = printChange;
+    tConfItemBase::printErrors = printErrors;
+}
+
+tNoisinessSetter::~tNoisinessSetter()
+{
+    tConfItemBase::printChange = oldPrintChange;
+    tConfItemBase::printErrors = oldPrintErrors;
+}
 
 // obsoleted settings that still are around in some distruted configuration files
 static void st_Dummy(std::istream &s){tString rest; rest.ReadLine(s);}

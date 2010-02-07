@@ -204,8 +204,8 @@ filename: The filename to use for the local ressource
 Return a file handle to the ressource
 NOTE: There must be *at least* one directory level, even if it is ./
 */
-tString tResourceManager::locateResource(const char *file, const char *uri) {
-    tString filepath, a_uri = tString(), savepath;
+tString tResourceManager::locateResource(const char *file, const char *uri, bool fullPath) {
+    tString filepath, a_uri = tString(), savepath, resourcepath;
     int rv;
 
     char * to_free = NULL; // string to delete later
@@ -223,6 +223,7 @@ tString tResourceManager::locateResource(const char *file, const char *uri) {
             nf[l] = '\0';
             file = nf;
             to_free = nf;
+            resourcepath = nf;
 
             // Step 2: Extract URI, if any
             ++pos;
@@ -234,6 +235,11 @@ tString tResourceManager::locateResource(const char *file, const char *uri) {
                 a_uri << nf << ';';
                 free( nf );
             }
+        }
+        // Otherwise, it's a plain resource path without explicit URL
+        else
+        {
+            resourcepath = file;
         }
     }
     // Validate paths and determine detination savepath
@@ -258,7 +264,10 @@ tString tResourceManager::locateResource(const char *file, const char *uri) {
     {
         if ( NULL != to_free )
             free( to_free );
-        return filepath;
+        if ( fullPath )
+            return filepath;
+        else
+            return resourcepath;
     }
 
     // Some sort of File not found
@@ -281,7 +290,11 @@ tString tResourceManager::locateResource(const char *file, const char *uri) {
 
     if (rv)
         return (tString) NULL;
-    return savepath;
+
+    if( fullPath )
+        return savepath;
+    else
+        return resourcepath;
 }
 
 FILE* tResourceManager::openResource(const char *file, const char *uri) {
@@ -300,16 +313,19 @@ static void RInclude(std::istream& s)
     tString resourceID;
     s >> resourceID;
 
-    tString filename = tResourceManager::locateResource(resourceID);
+    tString filename = tResourceManager::locateResource(resourceID, "", false);
 
     if ( filename )
     {
-        st_Include( filename, true );
-
-        return;
+        std::ifstream s;
+        if ( (tDirectories::Resource()).Open( s, filename ) )
+        {
+            tConfItemBase::LoadAll( s, true );
+            return;
+        }
     }
 
-    con << tOutput( "$config_rinclude_not_found", resourceID );
+    con << tOutput( "$config_rinclude_not_found", filename );
 }
 
 static tConfItemFunc s_RInclude("RINCLUDE",  &RInclude);

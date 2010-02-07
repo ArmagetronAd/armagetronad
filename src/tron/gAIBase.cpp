@@ -1494,6 +1494,45 @@ void gAIPlayer::SetNumberOfAIs(int num, int minPlayers, int iq, int tries)
 
 }
 
+// Possible state changes:
+// Every state -> Survive for 20 seconds if the victim is dead or can be assumed dead soon, or if the situation gets too dangerous
+
+// Survive -> CloseCombat if survival gets too boring
+
+// Trace -> Closecombat
+// Path  -> Closecombat  if the victim gets in view
+
+// Survive -> Trace if an enemy wall is hit
+// Path    -> Trace
+
+// CloseCombat -> Path if the vicim gets out of view
+
+
+#ifdef OLD_AI_OUTDATED
+void gAIPlayer::SetTraceSide(int side)
+{
+    REAL time = se_GameTime();
+    REAL ts   = time - lastChangeAttempt + 1;
+    lastChangeAttempt = time;
+
+    lazySideChange += ts * side;
+    if (lazySideChange * traceSide <= 0)
+    {
+        // state change!
+        traceSide = lazySideChange > 0 ? 1 : -1;
+        lazySideChange = 10 * traceSide;
+    }
+
+    if (lazySideChange > 10)
+        lazySideChange = 10;
+    if (lazySideChange < -10)
+        lazySideChange = -10;
+}
+
+// flag set if pathfinding is enabled. It's an expensive opeeration, so we just turn it
+// off if the PC can't handle it. Doesn't doo much good, anyway.
+static bool sg_pathEnabled = true;
+#endif // OLD_AI
 
 // state change:
 void gAIPlayer::SwitchToState( State * state )
@@ -1501,7 +1540,408 @@ void gAIPlayer::SwitchToState( State * state )
     state_           = state;
 }
 
-/*
+#ifdef OLD_AI_OUTDATED
+void gAIPlayer::SwitchToState(gAI_STATE nextState, REAL minTime)
+{
+    int thisAbility = 10 - character->properties[AI_STATE_TRACE];
+    switch (state)
+    {
+    case AI_TRACE:
+        thisAbility = character->properties[AI_STATE_TRACE];
+        break;
+    case AI_CLOSECOMBAT:
+        thisAbility = character->properties[AI_STATE_CLOSECOMBAT];
+        break;
+    case AI_PATH:
+        thisAbility = character->properties[AI_STATE_PATH];
+        break;
+    case AI_SURVIVE:
+        break;
+    };
+
+    int nextAbility = 10;
+    switch (nextState)
+    {
+    case AI_TRACE:
+        nextAbility = character->properties[AI_STATE_TRACE];
+        break;
+    case AI_CLOSECOMBAT:
+        nextAbility = character->properties[AI_STATE_CLOSECOMBAT];
+        break;
+    case AI_PATH:
+        nextAbility = character->properties[AI_STATE_PATH];
+        if (!sg_pathEnabled )
+        {
+            nextAbility = 0;
+        }
+        break;
+    case AI_SURVIVE:
+        break;
+    };
+
+
+    if (nextAbility > thisAbility && Random() * 10 > nextAbility)
+        return;
+
+#ifdef DEBUG
+    if (state != nextState)
+        con << "Switching to state " << nextState << "\n";
+#endif
+
+    state           = nextState;
+    nextStateChange = se_GameTime() + minTime;
+}
+
+// state update functions:
+void gAIPlayer::ThinkSurvive(  ThinkData & data )
+{
+    if (!character)
+    {
+        st_Breakpoint();
+        return;
+    }
+
+    REAL random = 0;
+    // do nothing much. Rely on the emergency program.
+    /*
+      random=10*(Random()/float(1));
+      if (random < .2)
+      EmergencySurvive(front, left, right, -1, 1);
+      else if (random > 9.8)
+      EmergencySurvive(front, left, right, -1, -1);
+      else
+      if (front.front.wallType == gSENSOR_RIM && front.distance < 10)
+      st_Breakpoint();
+
+
+    */
+
+    if (data.left.front.wallType == gSENSOR_RIM)
+        EmergencySurvive( data, 1);
+    else if (data.right.front.wallType == gSENSOR_RIM)
+        EmergencySurvive( data, -1);
+    else
+        EmergencySurvive( data );
+
+
+
+    if (nextStateChange > se_GameTime())
+    {
+        data.thinkAgain = .5f;
+        return;
+    }
+
+    // switch from Survival to close combat if surviving is too boring
+    random=10*Random();
+    if (random < 5)
+    {
+        // find a new victim:
+        eCoord enemypos=eCoord(1000,100);
+
+        const tList<eGameObject>& gameObjects = Object()->Grid()->GameObjects();
+        gCycle *secondbest = NULL;
+
+        // find the closest enemy
+        for (int i=gameObjects.Len()-1;i>=0;i--){
+            gCycle *other=dynamic_cast<gCycle *>(gameObjects(i));
+
+            if (other && other->Team()!=Object()->Team() &&
+                    !IsTrapped(other, Object())){
+                // then, enemy is realy an enemy
+                eCoord otherpos=other->Position()-Object()->Position();
+                if (otherpos.NormSquared()<enemypos.NormSquared()){
+                    // check if the path is clear
+                    gSensor p(Object(),Object()->Position(),otherpos);
+                    p.detect(REAL(.98));
+                    secondbest = dynamic_cast<gCycle *>(other);
+                    if (p.hit>=.98){
+                        enemypos = otherpos;
+                        target = secondbest;
+                    }
+                }
+            }
+        }
+
+        if (!target)
+            target = secondbest;
+
+        if (target)
+            SwitchToState(AI_CLOSECOMBAT, 1);
+    }
+
+    data.thinkAgain = 1;
+}
+
+void gAIPlayer::ThinkTrace( ThinkData & data )
+{
+    gAISensor const & front = data.front;
+    gAISensor const & left = data.left;
+    gAISensor const & right = data.right;
+
+    bool inverse = front.Hit() && front.distance < Object()->Speed() * Delay();
+
+    if (left.front.wallType == gSENSOR_RIM)
+        SetTraceSide(1);
+
+    if (right.front.wallType == gSENSOR_RIM)
+        SetTraceSide(-1);
+
+    bool success = EmergencySurvive(data, 0, traceSide * ( inverse ? -1 : 1));
+
+    REAL & nextTurn = data.thinkAgain;
+    nextTurn = 100;
+    if (left.front.edge)
+    {
+        REAL a = eCoord::F(Object()->Direction(), *left.front.edge->Point() - Object()->Position());
+        REAL b = eCoord::F(Object()->Direction(), *left.front.edge->Other()->Point() - Object()->Position());
+
+        if (a < b)
+            a = b;
+        if ( a > 0 )
+            nextTurn = a;
+    }
+
+    if (right.front.edge)
+    {
+        REAL a = eCoord::F(Object()->Direction(), *right.front.edge->Point() - Object()->Position());
+        REAL b = eCoord::F(Object()->Direction(), *right.front.edge->Other()->Point() - Object()->Position());
+
+        if (a < b)
+            a = b;
+        if ( ( a > 0 && a < nextTurn ) || !left.front.edge)
+            nextTurn = a;
+    }
+
+    nextTurn/= Object()->Speed() * .98f;
+
+    REAL delay = Delay() * 1.5f;
+    if ((!Object()->CanMakeTurn(1) || !Object()->CanMakeTurn(-1) || success) && nextTurn > delay)
+        nextTurn = delay;
+
+    if (nextTurn > .3f)
+        nextTurn = .3f;
+
+    if (nextStateChange > se_GameTime())
+        return;
+
+    // find a new victim:
+    eCoord enemypos=eCoord(1000,100);
+
+    const tList<eGameObject>& gameObjects = Object()->Grid()->GameObjects();
+    gCycle *secondbest = NULL;
+
+    // find the closest enemy
+    for (int i=gameObjects.Len()-1;i>=0;i--){
+        gCycle *other=dynamic_cast<gCycle *>(gameObjects(i));
+
+        if (other && other->Team()!=Object()->Team() &&
+                !IsTrapped(other, Object())){
+            // then, enemy is realy an enemy
+            eCoord otherpos=other->Position()-Object()->Position();
+            if (otherpos.NormSquared()<enemypos.NormSquared()){
+                // check if the path is clear
+                gSensor p(Object(),Object()->Position(),otherpos);
+                p.detect(REAL(.98));
+                secondbest = dynamic_cast<gCycle *>(other);
+
+                if (!target)
+                    enemypos = otherpos;
+
+                if (p.hit>=.98){
+                    enemypos = otherpos;
+                    target = secondbest;
+                }
+            }
+        }
+    }
+
+    eCoord relpos=enemypos.Turn(Object()->Direction().Conj()).Turn(0,1);
+
+
+    if (!target)
+        target = secondbest;
+    else
+        SwitchToState(AI_CLOSECOMBAT, 1);
+
+    if (target)
+        SetTraceSide((relpos.x  > 0 ? 10 : -10) *
+                     (target->Speed() > Object()->Speed() ? -1 : 1));
+
+    nextStateChange = se_GameTime() + 10;
+
+    //  SwitchToState(AI_SURVIVE, 1);
+    return;
+}
+
+void gAIPlayer::ThinkPath( ThinkData & data )
+{
+    int lr = 0;
+    REAL mindist = 10;
+
+    eCoord dir = Object()->Direction();
+    // REAL fs=front.distance;
+    REAL ls=data.left.distance;
+    REAL rs=data.right.distance;
+
+
+    if (!target->CurrentFace() || IsTrapped(target, Object()))
+    {
+        SwitchToState(AI_SURVIVE, 1);
+        EmergencySurvive( data );
+
+        data.thinkAgain = 4;
+        return;
+    }
+
+    eCoord tDir = target->Position() - Object()->Position();
+
+    if ( nextStateChange < se_GameTime() )
+    {
+        if( !sg_pathEnabled )
+        {
+            SwitchToState(AI_SURVIVE, 5);
+            EmergencySurvive( data );
+
+            return;
+        }
+
+        gSensor p(Object(),Object()->Position(), tDir);
+        p.detect(REAL(.9999999));
+        if (p.hit >=  .9999999)  // free line of sight to victim. Switch to close combat.
+        {
+            SwitchToState(AI_CLOSECOMBAT, 5);
+            EmergencySurvive( data );
+
+            return;
+        }
+    }
+
+
+
+    // find a new path if the one we got is outdated:
+    if (lastPath < se_GameTime() - 10)
+        if (target->CurrentFace())
+        {
+            if( !sg_pathEnabled )
+            {
+                // yeah, apparently, we can't go on with this. Bail out.
+                SwitchToState(AI_SURVIVE, 5);
+                EmergencySurvive( data );
+                return;
+            }
+
+            Object()->FindCurrentFace();
+            REAL before = tRealSysTimeFloat();
+            eHalfEdge::FindPath(Object()->Position(), Object()->CurrentFace(),
+                                target->Position(), target->CurrentFace(),
+                                Object(),
+                                path);
+
+            // calculate (and archive) time used for pathfinding
+            REAL used = tRealSysTimeFloat() - before;
+            static char const * section = "PATH_TIME";
+            tRecorder::PlaybackStrict( section, used );
+            tRecorder::Record( section, used );
+            static REAL usedAverage = 0;
+            const REAL decay = .1;
+            usedAverage = (usedAverage+used*decay)/(1+decay);
+
+            // disable pathfinding if it just takes too long.
+            if ( used > .06 || usedAverage > .03 )
+            {
+#ifdef DEBUG
+                con << "Path finding is too expensive for this PC. Disabling it.\n";
+#endif
+                sg_pathEnabled = false;
+            }
+            lastPath = se_GameTime();
+        }
+
+    if (!path.Valid())
+    {
+        data.thinkAgain = 1;
+        return;
+    }
+
+    // find the most advanced path point that is in our viewing range:
+
+    for (int z = 10; z>=0; z--)
+        path.Proceed();
+
+    bool goon   = path.Proceed();
+    bool nogood = false;
+
+    do
+    {
+        if (goon)
+            goon = path.GoBack();
+        else
+            goon = true;
+
+        eCoord pos   = path.CurrentPosition() + path.CurrentOffset() * 0.1f;
+        eCoord opos  = Object()->Position();
+        eCoord odir  = pos - opos;
+
+        eCoord intermediate = opos + dir * eCoord::F(odir, dir);
+
+        gSensor p(Object(), opos, intermediate - opos);
+        p.detect(1.1f);
+        nogood = (p.hit <= .999999999 || eCoord::F(path.CurrentOffset(), odir) < 0);
+
+        if (!nogood)
+        {
+            gSensor p(Object(), intermediate, pos - intermediate);
+            p.detect(1);
+            nogood = (p.hit <= .99999999 || eCoord::F(path.CurrentOffset(), odir) < 0);
+        }
+
+    }
+    while (goon && nogood);
+
+    if (goon)
+    {
+        // now we have found our next goal. Try to get there.
+        eCoord pos    = Object()->Position();
+        eCoord target = path.CurrentPosition();
+
+        // look how far ahead the target is:
+        REAL ahead = eCoord::F(target - pos, dir)
+                     + eCoord::F(path.CurrentOffset(), dir);
+
+        if ( ahead > 0)
+        {	  // it is still before us. just wait a while.
+            mindist = ahead;
+        }
+        else
+        { // we have passed it. Make a turn towards it.
+            REAL side = (target - pos) * dir;
+
+            if ( !((side > 0 && ls < 3) || (side < 0 && rs < 3))
+                    && (fabs(side) > 3 || ahead < -10) )
+            {
+#ifdef DEBUG
+                con << "Following path...\n";
+#endif
+                lr += (side > 0 ? 1 : -1);
+            }
+        }
+    }
+    else // nogood
+    {
+        lastPath -= 1;
+        SwitchToState(AI_SURVIVE);
+    }
+
+    EmergencySurvive( data, 1, -lr );
+
+    REAL d = sqrt(tDir.NormSquared()) * .2f;
+    if (d < mindist)
+        mindist = d;
+
+    data.thinkAgain = mindist / Object()->Speed();
+    if (data.thinkAgain > .4)
+        data.thinkAgain *= .7;
+}
 
 void gAIPlayer::ThinkCloseCombat( ThinkData & data )
 {
@@ -1525,7 +1965,7 @@ void gAIPlayer::ThinkCloseCombat( ThinkData & data )
         p.detect(REAL(1));
         if (p.hit <=  .999999)  // no free line of sight to victim. Switch to path mode.
         {
-            SwitchToState(AI_PATH, 5);
+            SwitchToState(sg_pathEnabled ? AI_PATH : AI_SURVIVE, 5);
             EmergencySurvive( data );
 
             return;
@@ -1706,7 +2146,7 @@ void gAIPlayer::ThinkCloseCombat( ThinkData & data )
 
     data.thinkAgain = ed + nextThought;
 }
-*/
+#endif // OLD_AI
 
 // **********
 // * States *

@@ -34,6 +34,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "nProtoBuf.h"
 #include "eTeam.pb.h"
+#include "aa_config.h"
 
 tString & operator << ( tString &s, const eTeam & team)
 {
@@ -314,7 +315,7 @@ void eTeam::UpdateAppearance()
                     updateName = oldest->teamname;
                 else
                     // use player name as teamname
-                    updateName = oldest->GetUserName();
+                    updateName = oldest->GetName();
             }
 
             color = oldest->color;
@@ -342,7 +343,7 @@ void eTeam::UpdateAppearance()
         // only display a message if
         // the oldest player changed the name of the team
         // the server also sets the teamname sometimes
-        if(sn_GetNetState()!=nCLIENT && oldest)
+        if(sn_GetNetState()!=nCLIENT && oldest && !( name == "" || name == tString(tOutput("$team_empty"))) )
         {
             tOutput message;
             tColoredString name;
@@ -402,6 +403,15 @@ bool eTeam::IsLocked() const
     return locked_;
 }
 
+bool eTeam::IsLockedFor( const ePlayerNetID * p ) const
+{
+    bool isLocked = IsLocked();
+#ifdef KRAWALL_SERVER
+    isLocked = isLocked || ( p->GetAccessLevel() > ePlayerNetID::AccessLevelRequiredToPlay() );
+#endif
+    return isLocked;
+}
+
 static void se_UnlockAllTeams ( void )
 {
     for ( int i = eTeam::teams.Len()-1; i>=0; --i )
@@ -427,9 +437,9 @@ static tAccessLevelSetter se_unlockAllTemasConfLevel( se_unlockAllTeamsConf, tAc
 void eTeam::Invite( ePlayerNetID * player )
 {
     tASSERT( player );
-    if ( !IsInvited( player ) && this->IsLocked() )
+    if ( !IsInvited( player ) && this->IsLockedFor( player ) )
     {
-	sn_ConsoleOut( tOutput( "$invite_team_can_join", player->GetColoredName(), Name() ) );
+        sn_ConsoleOut( tOutput( "$invite_team_can_join", player->GetColoredName(), Name() ) );
     }
     else if ( !IsInvited( player ) )
     {
@@ -442,7 +452,7 @@ void eTeam::Invite( ePlayerNetID * player )
 void eTeam::UnInvite( ePlayerNetID * player )
 {
     tASSERT( player );
-    if ( player->CurrentTeam() == this && this->IsLocked() )
+    if ( player->CurrentTeam() == this && this->IsLockedFor( player ) )
     {
         sn_ConsoleOut( tOutput( "$invite_team_kick", player->GetColoredName(), Name() ) );
         player->SetTeam(0);
@@ -963,6 +973,14 @@ void eTeam::Enforce( int minTeams, int maxTeams, int maxImbalance)
     }
 }
 
+void eTeam::WritePlayers( eLadderLogWriter & writer, const eTeam *team )
+{
+    for ( int i = team->players.Len() - 1; i >= 0; --i )
+    {
+        writer << team->players( i )->GetLogName();
+    }
+}
+
 // inquire or set the ability to use a color as a team name
 bool eTeam::NameTeamAfterColor ( bool wish )
 {
@@ -1196,7 +1214,7 @@ bool eTeam::PlayerMayJoin( const ePlayerNetID* player ) const
         return false;
 
     // check for invitations. Not with those shoes!
-    if ( IsLocked() && !IsInvited( player ) )
+    if ( IsLockedFor( player ) && !IsInvited( player ) )
     {
         return false;
     }
@@ -1668,9 +1686,14 @@ void eTeam::Shuffle( int startID, int stopID )
 
     if ( startID == stopID )
         return;
-
-    tOutput message( "$team_shuffle", players[startID]->GetName(), startID+1, stopID+1 );
-    sn_ConsoleOut( message );
+    
+    ePlayerNetID *player = players[startID];
+    eShuffleSpamTester & spam = player->shuffleSpam;
+    
+    if ( spam.ShouldAnnounce() )
+    {
+        sn_ConsoleOut( player->shuffleSpam.ShuffleMessage( player, startID + 1, stopID + 1 ) );
+    }
 
     // simply swap the one player over all the players in between.
     while ( startID < stopID )
@@ -1683,6 +1706,8 @@ void eTeam::Shuffle( int startID, int stopID )
         SwapPlayers( players[startID], players[startID-1] );
         startID--;
     }
+    
+    spam.Shuffle();
 }
 
 tColoredString eTeam::GetColoredName(void) const
