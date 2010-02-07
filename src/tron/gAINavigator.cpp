@@ -268,6 +268,7 @@ void gAINavigator::Path::Fill( gAINavigator const & navigator, Sensor const & le
     // get width by checking the edges (there's a better way for sure, but for now, this suffices)
     eHalfEdge const * leftEdge = left.ehit;
     eHalfEdge const * rightEdge = right.ehit;
+    width = HUGE;
     if( leftEdge && rightEdge )
     {
         // get distance of the endpoints of the edges to the extended
@@ -311,7 +312,7 @@ REAL gAINavigator::Path::Take( CycleController & controller, gCycle & cycle, REA
         {
             maxStep = driveOnTime;
         }
-        driveOn = 0;
+        // driveOn = 0;
         return maxStep;
     }
 
@@ -385,11 +386,13 @@ REAL gAINavigator::PathGroup::TakePath( CycleController & controller, gCycle & c
         path.driveOn = 0;
     }
 
+    last.followedSince++;
+
     // check whether execution was successful
     if( last.driveOn > 0 )
     {
         // turn was not executed. memorize that it was a good choilce
-        paths[ id ].followedSince++;
+        paths[ id ].followedSince = last.followedSince;
         return ret;
     }
 
@@ -397,41 +400,41 @@ REAL gAINavigator::PathGroup::TakePath( CycleController & controller, gCycle & c
     switch( id )
     {
     case PATH_UTURN_LEFT:
-        paths[ PATH_UTURN_LEFT ].followedSince = last.followedSince + 1;
-        paths[ PATH_TURN_LEFT  ].followedSince = last.followedSince + 1;
+        paths[ PATH_UTURN_LEFT ].followedSince = last.followedSince;
+        paths[ PATH_TURN_LEFT  ].followedSince = last.followedSince;
         break;
     case PATH_UTURN_RIGHT:
-        paths[ PATH_UTURN_RIGHT ].followedSince = last.followedSince + 1;
-        paths[ PATH_TURN_RIGHT  ].followedSince = last.followedSince + 1;
+        paths[ PATH_UTURN_RIGHT ].followedSince = last.followedSince;
+        paths[ PATH_TURN_RIGHT  ].followedSince = last.followedSince;
         break;
     case PATH_ZIGZAG_LEFT:
         if ( last.driveOn )
         {
-            paths[ PATH_TURN_LEFT  ].followedSince = last.followedSince + 1;
-            paths[ PATH_ZIGZAG_LEFT].followedSince = last.followedSince + 1;
+            paths[ PATH_TURN_LEFT  ].followedSince = last.followedSince;
+            paths[ PATH_ZIGZAG_LEFT].followedSince = last.followedSince;
         }
         else
         {
-            paths[ PATH_STRAIGHT   ].followedSince = last.followedSince + 1;
-            paths[ PATH_TURN_RIGHT ].followedSince = last.followedSince + 1;
+            paths[ PATH_STRAIGHT   ].followedSince = last.followedSince;
+            paths[ PATH_TURN_RIGHT ].followedSince = last.followedSince;
         }
         break;
     case PATH_ZIGZAG_RIGHT:
         if ( last.driveOn )
         {
-            paths[ PATH_TURN_RIGHT  ].followedSince = last.followedSince + 1;
-            paths[ PATH_ZIGZAG_RIGHT].followedSince = last.followedSince + 1;
+            paths[ PATH_TURN_RIGHT  ].followedSince = last.followedSince;
+            paths[ PATH_ZIGZAG_RIGHT].followedSince = last.followedSince;
         }
         else
         {
-            paths[ PATH_STRAIGHT  ].followedSince = last.followedSince + 1;
-            paths[ PATH_TURN_LEFT ].followedSince = last.followedSince + 1;
+            paths[ PATH_STRAIGHT  ].followedSince = last.followedSince;
+            paths[ PATH_TURN_LEFT ].followedSince = last.followedSince;
         }
         break;
     case PATH_TURN_LEFT:
     case PATH_STRAIGHT:
     case PATH_TURN_RIGHT:
-        paths[ PATH_STRAIGHT ].followedSince = last.followedSince + 1;
+        paths[ PATH_STRAIGHT ].followedSince = last.followedSince;
         break;
     }
 
@@ -553,8 +556,11 @@ void gAINavigator::CowardEvaluator::Evaluate( Path const & path, PathEvaluation 
     evaluation.score = 100;
     if( path.left.owner || path.right.owner )
     {
-        // REAL turnDelay = cycle_.GetTurnDelay() * cycle_.Speed();
-        // if( path.right.distance + path.left.distance < turnDelay * 4 )
+        REAL turnDelay = cycle_.GetTurnDelay() * cycle_.Speed();
+        if( path.width < turnDelay * 2 )
+        {
+            evaluation.score = tMax(0,(path.width/turnDelay)-1);
+        }
         {
             if(  path.left.owner && path.left.owner->Alive() && path.left.owner->Team() != cycle_.Team() && path.left.lr == 1 )
             {
@@ -713,7 +719,7 @@ void gAINavigator::FollowEvaluator::SolveTurn( int direction, eCoord const & tar
     int winding = cycle_.WindingNumber();
     cycle_.Grid()->Turn( winding, direction );
     data.turnDir = cycle_.Grid()->GetDirection( winding );
-    eCoord turnVelocityDifference = data.turnDir * cycle_.Speed() - targetVelocity;
+    eCoord turnVelocityDifference = data.turnDir * cycle_.Speed() * GetTurnSpeedFactor() - targetVelocity;
         
     // some little algebra to solve velocityDifference * turnTime + turnVelocityDifference * Quality == targetPosition
     REAL determinant = turnVelocityDifference * velocityDifference;
@@ -745,21 +751,10 @@ void gAINavigator::FollowEvaluator::SolveTurn( int direction, eCoord const & tar
     winding = cycle_.WindingNumber();
     cycle_.Grid()->Turn( winding, -direction );
     eCoord antiTurnDir = -cycle_.Grid()->GetDirection( winding );
-    turnVelocityDifference = antiTurnDir * cycle_.Speed() - targetVelocity;
 
     // and handle the rest primitively via dot product
-    data.quality = eCoord::F( turnVelocityDifference, targetPosition - velocityDifference * data.turnTime );
-    REAL velocityDifferenceLen = turnVelocityDifference.NormSquared();
-    if( velocityDifferenceLen > EPS )
-    {
-        data.quality /= velocityDifferenceLen;
-
-        // turn right now if target is much to the side
-        if( data.quality > 2 * data.turnTime )
-        {
-            data.turnTime = 0;
-        }
-    }
+    data.quality = eCoord::F( antiTurnDir, targetPosition - velocityDifference * data.turnTime );
+    data.quality /= antiTurnDir.Norm();
 }
 
 //! sensor picking up several walls between cycle and target
@@ -797,11 +792,11 @@ public:
 
 void gAINavigator::FollowEvaluator::SetTarget( eCoord const & target, eCoord const & velocity )
 {
-    blocker_ = 0;
-    blockedBySelf_ = false;
-
     // determine direction to center
     toTarget_ = target - cycle_.Position();
+
+    blocker_ = 0;
+    blockedBySelf_ = false;
 
     // check whether the path is blocked
     gTargetSensor sensor( &cycle_, cycle_.Position(), toTarget_ );
@@ -845,9 +840,15 @@ void gAINavigator::FollowEvaluator::SetTarget( eCoord const & target, eCoord con
                 toTarget_.Normalize();
                 eCoord follow = - w->Vec();
                 follow.Normalize();
+
+                // hah, but if we're faster than the other guy, try to overtake him.
+                if( blocker_->Speed() < cycle_.Speed() )
+                {
+                    follow *= -1;
+                }
+
                 toTarget_ += follow * .9;
                 toTarget_.Normalize();
-                toTarget_ *= .1;
                 return;
             }
         }
@@ -874,21 +875,25 @@ void gAINavigator::FollowEvaluator::SetTarget( eCoord const & target, eCoord con
         turnTime_ = right.turnTime;
     }
 
-    if ( turnTime_ > 0 )
-    {
-        toTarget_ = cycle_.Direction();
-    }
-    else
+    if( turnTime_ < 0 )
     {
         turnTime_ = HUGE;
     }
+    else
+    {
+        // bend direction into current direction
+        toTarget_.Normalize();
+        toTarget_ += cycle_.Direction()*turnTime_*20;
+    }
+
+    toTarget_.Normalize();
 }
 
 void gAINavigator::FollowEvaluator::Evaluate( gAINavigator::Path const & path, gAINavigator::PathEvaluation & evaluation ) const
 {
     eCoord pathDir = path.shortTermDirection;
     REAL f = eCoord::F( toTarget_, pathDir );
-    if( f > 0 && f*f > .99 * toTarget_.NormSquared() * pathDir.NormSquared() )
+    if( f > 0 && f*f > .5 * pathDir.NormSquared() )
     {
         evaluation.nextThought = turnTime_;
     }

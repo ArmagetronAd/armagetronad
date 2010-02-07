@@ -344,6 +344,8 @@ public:
         void SetTarget( eCoord const & target, eCoord const & velocity );
 
         virtual void Evaluate( gAINavigator::Path const & path, gAINavigator::PathEvaluation & evaluation ) const;
+
+        gCycle * GetBlocker() const { return blocker_; }
     protected:
         gCycle const & cycle_; //!< the owning cycle
         gCycle * blocker_;     //!< other cycle blocking the path to the target

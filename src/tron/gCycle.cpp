@@ -5526,6 +5526,7 @@ struct gWallInfoTemp
     
     // tail end
     eCoord end;
+    eCoord endDir;
 
     REAL smallestBlend;
     
@@ -5548,6 +5549,7 @@ struct gWallInfoTemp
             if( blend >= 0 && blend < smallestBlend )
             {
                 end = wall->EndPoint(0) + wall->Vec() * blend;
+                endDir = wall->Vec();
                 smallestBlend = blend;
             }
         }
@@ -5575,6 +5577,10 @@ void gCycle::FillWallInfoFlexible( WallInfo & info, REAL totalLength ) const
     }
 
     info.tailPos = temp.end;
+    info.tailDir = temp.endDir;
+    REAL norm = info.tailDir.Norm();
+    if( norm > 0 )
+        info.tailDir *= 1/norm;
     if( temp.weight > 0 )
     {
         info.centerOfMass = temp.com*(1/temp.weight);

@@ -42,14 +42,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //!@param zone  the zone to protect/attack
 //!@param random persistent random coordinates
 //!@papam maxstep the maximal delay until the next thought
-zZoneEvaluator::zZoneEvaluator( gCycle const & cycle, zZone const & zone, eCoord & random, REAL maxStep ): gAINavigator::FollowEvaluator( cycle )
+zZoneEvaluator::zZoneEvaluator( gCycle const & cycle, zZone const & zone, eCoord & random, REAL maxStep, gCycle * lastBlocker ): gAINavigator::FollowEvaluator( cycle )
 {
-    Init( cycle, zone, random, maxStep );
+    Init( cycle, zone, random, maxStep, lastBlocker );
 }
 
 zZoneEvaluator::~zZoneEvaluator(){}
 
-void zZoneEvaluator::Init( gCycle const & cycle, zZone const & zone, eCoord & random, REAL maxStep )
+void zZoneEvaluator::Init( gCycle const & cycle, zZone const & zone, eCoord & random, REAL maxStep, gCycle * lastBlocker )
 {
     zShape * shape = zone.getShape();
     if ( !shape )
@@ -173,43 +173,65 @@ void zZoneEvaluator::Init( gCycle const & cycle, zZone const & zone, eCoord & ra
         static tReproducibleRandomizer randomizer;
         random = eCoord( randomizer.Get() * 2 - 1, randomizer.Get() * 2 - 1 );
     }
+
+    if( !blocker_ && lastBlocker && lastBlocker->Alive() && (lastBlocker->Position()-cycle.Position()).NormSquared() < (tailToChase - cycle.Position()).NormSquared() )
+    {
+        blocker_ = lastBlocker;
+    }
+    gCycle * blocker = blocker_;
     if( blocker_ && blocker_->Team() != cycle_.Team() )
     {
         // blocked by an enemy. kill him.
         gCycle::WallInfo info;
         blocker_->FillWallInfo( info );
 
-        // check whether we already passed the tail end. If yes, attack directly.
-        if( eCoord::F( cycle.Direction(), info.tailPos - cycle.Position() ) < 0 )
+        // check if we can attack directly
+        tailToChase = blocker_->Position();
+        tailToChaseVelocity = blocker_->Direction() * blocker_->Speed();
+
+        // extrapolate a bit
+        tailToChase += tailToChaseVelocity * .01;
+        
+        // and maybe some more, up to half the tail end
+        REAL tailGap = eCoord::F( blocker_->Direction(), info.tailPos - tailToChase );
+        if ( tailGap > 0 )
         {
-            tailToChase = blocker_->Position();
-            tailToChaseVelocity = blocker_->Direction() * blocker_->Speed();
-            tailToChase += tailToChaseVelocity*.01;
-        }
-        else
-        {
-            // aim for the gap.
-            tailToChase = ( info.tailPos + blocker_->Position() ) * .5;
-            tailToChaseVelocity = ( info.tailDir + blocker_->Direction() ) * blocker_->Speed() * .5;
+            tailToChase += blocker_->Direction() * tailGap * .5;
         }
 
-        // extrapolate
-        tailToChase += tailToChaseVelocity * ( cycle_.LastTime() - blocker_->LastTime() );
-        
 #ifdef DEBUG
         eDebugLine::SetTimeout(.5);
-        eDebugLine::SetColor  (1, 0, 1);
+        eDebugLine::SetColor  (1, 0, 0);
         eDebugLine::Draw(tailToChase, .5, tailToChase, 5.5);
         eDebugLine::SetTimeout(0);
 #endif
-
         SetTarget( tailToChase, tailToChaseVelocity );
 
-        // free path? Goody.
-        if( !blocker_ )
+        if( blocker_ )
         {
-            toTarget_ *= 10;
+            // still blocked? aim for the gap.
+            tailToChase = ( info.tailPos + blocker_->Position() ) * .5;
+            tailToChaseVelocity = ( info.tailDir + blocker_->Direction() ) * blocker_->Speed() * .5;
+            tailToChase += tailToChaseVelocity * ( cycle_.LastTime() - blocker_->LastTime() );
+        
+#ifdef DEBUG
+            eDebugLine::SetTimeout(.5);
+            eDebugLine::SetColor  (1, 0, 1);
+            eDebugLine::Draw(tailToChase, .5, tailToChase, 5.5);
+            eDebugLine::SetTimeout(0);
+#endif
+
+            SetTarget( tailToChase, tailToChaseVelocity );
         }
+
+        // free path? Goody.
+        // if( !blocker_ )
+        // {
+        // toTarget_ *= 10;
+        // }
+
+        // restore blocker
+        blocker_ = blocker;
     }
 }
    
@@ -234,7 +256,9 @@ REAL zStateDefend::Think( REAL maxStep )
     zZone const * zoneTarget = dynamic_cast< zZone const * >( Parent().GetTarget() );
     if ( zoneTarget )
     {
-        manager.Evaluate( zZoneEvaluator( cycle, *zoneTarget, randomPos, maxStep ), gAINavigator::EvaluationManager::BLEND_ADD, 2 );
+        zZoneEvaluator zoneEvaluator( cycle, *zoneTarget, randomPos, maxStep, lastBlocker_ );
+        lastBlocker_ = zoneEvaluator.GetBlocker();
+        manager.Evaluate( zoneEvaluator, gAINavigator::EvaluationManager::BLEND_ADD, 2 );
         if( zoneTarget->Team() == cycle.Team() )
         {
             cowardice = -1;
@@ -250,9 +274,17 @@ REAL zStateDefend::Think( REAL maxStep )
     // avoid tunnels
     if (cowardice > 0)
     {
-        manager.Evaluate( gAINavigator::TunnelEvaluator( cycle ), cowardice );
+        // manager.Evaluate( gAINavigator::TunnelEvaluator( cycle ), cowardice );
     }
 
     gAINavigator::CycleControllerBasic controller;
-    return manager.Finish( controller, *Parent().Object(), maxStep );
+    eCoord before = cycle.Direction();
+    REAL ret = manager.Finish( controller, *Parent().Object(), maxStep );
+    if ( fabs(cycle.Direction()*before) > EPS)
+    {
+        // cycle was turned. Forget about last blocker.
+        lastBlocker_ = 0;
+    }
+
+    return ret;
 }
