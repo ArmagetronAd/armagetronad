@@ -49,7 +49,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 // This is a little ugly, open to suggestions :)
 tResourceManager::Reference tResourceManager::__inst = tResourceManager::Reference(new tResourceManager() );
-tResourceTypeMap* tResourceManager::m_ResourceList = new tResourceTypeMap();
+tResourceTypeMap st_resourceList;
+tResourceTypeMap* tResourceManager::m_ResourceList = &st_resourceList;
 
 /** The constructor for tResourceManager. */
 tResourceManager::tResourceManager() {

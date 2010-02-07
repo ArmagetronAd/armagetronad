@@ -86,9 +86,10 @@ public:
 
 private:
     class VoidFactoryBase {
+    public:
+        virtual ~VoidFactoryBase() {};
     protected:
         VoidFactoryBase() {};
-        virtual ~VoidFactoryBase() {};
     };
 public:
     typedef zEffector* (*NullFactory_t)();
@@ -121,7 +122,7 @@ public:
 
     ~zEffectorManager();
 private:
-    typedef std::map<std::string, VoidFactoryBase*> FactoryList;
+    typedef std::map<std::string, boost::shared_ptr<VoidFactoryBase> > FactoryList;
     static FactoryList & _effectors();
 
     //! We make the constructor private so that nobody else can
