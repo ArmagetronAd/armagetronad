@@ -14,6 +14,6 @@ install(FILES
     new.txt
     ${CMAKE_CURRENT_BINARY_DIR}/languages.txt
 
-    DESTINATION "${AA_DATADIR}/languages"
+    DESTINATION "${AA_DATADIR}/language"
     )
 

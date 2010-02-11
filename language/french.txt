@@ -690,7 +690,7 @@ input_instant_chat_help       Publie un macro special pour le chat
 #********************************************
 #********************************************
 
-main_menu_text                \g v\1
+main_menu_text                \g \1
 
 game_menu_text                Jeu
 game_menu_main_help           Configuration et lancement du jeu.

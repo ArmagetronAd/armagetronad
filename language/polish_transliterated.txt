@@ -1178,7 +1178,7 @@ input_instant_chat_help       Wlacza specjalny, dowolnie ustawiany tekst.
 #********************************************
 #********************************************
 
-main_menu_text                \g v\1
+main_menu_text                \g \1
 
 game_menu_text                Gra
 game_menu_main_help           Konfiguracja i uruchomienie gry.

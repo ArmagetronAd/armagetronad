@@ -1226,7 +1226,7 @@ input_music_volume_down_help Decreases the volume of the music
 #********************************************
 #********************************************
 
-main_menu_text			\g v\1
+main_menu_text			\g \1
 
 game_menu_text			Game
 game_menu_main_help		Game configuration and launch.
