@@ -30,6 +30,7 @@ option(ENABLE_ZONESV2 "Enable experimental zonesv2 code" YES)
 option(FORTRESS "Enable fortress support" ${ENABLE_ZONESV2})
 option(USEPARTICLES "Compile in support for experimental particle system" NO)
 option(NOJOYSTICK "Disable joystick support" NO)
+option(DESKTOP "Install menu entries" YES)
 
 if(ENABLE_ZONESV2 AND FORTRESS)
     set(BUILD_FORTRESS 1)
@@ -41,7 +42,6 @@ include (CheckIncludeFiles)
 include (CheckFunctionExists)
 include (CheckLibraryExists)
 include (CheckTypeSize)
-include (protobuf)
 include (Deps)
 
 CHECK_FUNCTION_EXISTS (isblank HAVE_ISBLANK)
@@ -77,31 +77,28 @@ SET(CMAKE_EXTRA_INCLUDE_FILES)
 
 SET (SDL_BUILDING_LIBRARY TRUE)
 
-include (FindLibXml2)
-include (FindSDL)
-include (FindSDL_mixer)
-include (FindSDL_image)
-include (FindFTGL)
-include (FindFreetype)
-include (FindBoost)
-include (FindOpenGL)
-include (bison)
-include (FindPNG)
-include (FindPythonInterp)
+find_package (LibXml2 REQUIRED)
+find_package (Boost 1.36.0 REQUIRED )
+find_package (Bison REQUIRED)
+find_package (PythonInterp REQUIRED)
+find_package (Protobuf REQUIRED)
 
-if (FTGL_FOUND)
-    set(HAVE_FTGL_H 1)
-endif ()
+find_package (SDL)
+find_package (SDL_mixer)
+find_package (SDL_image)
+find_package (FTGL)
+find_package (Freetype)
+find_package (OpenGL)
+find_package (PNG)
 
-if (PROTOBUF_FOUND)
-    set(HAVE_GOOGLE_PROTOBUF_MESSAGE_H 1)
-endif ()
-
-if (SDLMIXER_FOUND)
-    set(HAVE_LIBSDL_MIXER 1)
-endif ()
-
-find_package( Boost 1.36.0 )
+if(WIN32)
+    find_library (WS2_LIBRARIES ws2_32)
+    if(NOT WS2_LIBRARIES)
+        message(ERROR "You need winsock2 in order to build ${progtitle} for windows.")
+    endif()
+else()
+    set(WS2_LIBRARIES "")
+endif()
 
 DEP(Boost Boost)
 DEP(BISON Bison)
@@ -116,29 +113,88 @@ CLIENTDEP(SDL "Simple DirectMedia Layer(SDL)")
 CLIENTDEP(SDLMIXER "SDL_mixer")
 CLIENTDEP(SDLIMAGE "SDL_image")
 
-set (${progname}_INCLUDE_DIRS
-    ${${progname}_BINARY_DIR}/src/
-    ${${progname}_SOURCE_DIR}/src/
+CLEANCLIENTDEPS()
 
+if (FTGL_FOUND)
+    set(HAVE_FTGL_H 1)
+endif ()
+
+if (PROTOBUF_FOUND)
+    set(HAVE_GOOGLE_PROTOBUF_MESSAGE_H 1)
+endif ()
+
+if (SDLMIXER_FOUND)
+    set(HAVE_LIBSDL_MIXER 1)
+endif ()
+
+include_directories (BEFORE 
+    ${${progname}_SOURCE_DIR}/src/
+    )
+
+include_directories (
     ${${progname}_SOURCE_DIR}/src/thirdparty/utf8/
     ${${progname}_SOURCE_DIR}/src/thirdparty/mathexpr/
     ${${progname}_SOURCE_DIR}/src/thirdparty/scrap/
-
-    ${LIBXML2_INCLUDE_DIR}
-    ${FTGL_INCLUDE_DIR}/FTGL/
-    ${FREETYPE_INCLUDE_DIR_ft2build}
-    ${FREETYPE_INCLUDE_DIR_freetype2}
-    ${SDL_INCLUDE_DIR}
-    ${SDLMIXER_INCLUDE_DIR}
-    ${SDLIMAGE_INCLUDE_DIR}
-    ${Boost_INCLUDE_DIRS}
-    ${PROTOBUF_INCLUDE_DIR}
-    ${PNG_INCLUDE_DIR}
     )
 
-set (${progname}_DEFINES
-    ${${progname}_DEFINES}
-    ${PNG_DEFINITIONS}
+include_directories ( SYSTEM
+    ${LIBXML2_INCLUDE_DIR}
+    ${Boost_INCLUDE_DIRS}
+    ${PROTOBUF_INCLUDE_DIR}
+    )
+
+
+if(BUILD_CLIENT)
+    include_directories( SYSTEM
+        ${FTGL_INCLUDE_DIR}/FTGL/
+        ${FREETYPE_INCLUDE_DIR_ft2build}
+        ${FREETYPE_INCLUDE_DIR_freetype2}
+        ${SDL_INCLUDE_DIR}
+        ${SDLMIXER_INCLUDE_DIR}
+        ${SDLIMAGE_INCLUDE_DIR}
+        ${PNG_INCLUDE_DIR}
+        )
+
+    LIST (${progname}_DEFINES APPEND
+        ${PNG_DEFINITIONS}
+    )
+endif()
+
+set (${progname}_LINK_LIBRARIES
+    ${PROTOBUF_LIBRARY}
+    ${LIBXML2_LIBRARIES}
+    ${WS2_LIBRARIES}
+    )
+
+if(BUILD_CLIENT)
+    LIST(${progname}_LINK_LIBRARIES APPEND
+        ${SDL_LIBRARY}
+        ${SDLMIXER_LIBRARY}
+        ${SDLIMAGE_LIBRARY}
+        ${OPENGL_LIBRARIES}
+        ${FTGL_LIBRARIES}
+        ${FREETYPE_LIBRARIES}
+        ${PNG_LIBRARIES}
+        )
+endif()
+
+message("${${progname}_LINK_LIBRARIES}}")
+
+include_directories (
+    ${${progname}_SOURCE_DIR}/src/tools/
+    ${${progname}_SOURCE_DIR}/src/resource/
+    ${${progname}_SOURCE_DIR}/src/network/
+    ${${progname}_SOURCE_DIR}/src/render/
+    ${${progname}_SOURCE_DIR}/src/ui/
+    ${${progname}_SOURCE_DIR}/src/engine/
+    ${${progname}_SOURCE_DIR}/src/engine/sound/
+    ${${progname}_SOURCE_DIR}/src/tron/
+    ${${progname}_SOURCE_DIR}/src/tron/cockpit/
+
+    ${${progname}_BINARY_DIR}/src/protobuf/
+    )
+include_directories ( BEFORE
+    ${${progname}_BINARY_DIR}/src/
     )
 
 add_definitions(${${progname}_DEFINES})
@@ -202,35 +258,6 @@ add_subdirectory (resource)
 add_subdirectory (sound)
 add_subdirectory (textures)
 
-set (${progname}_LINK_LIBRARIES
-    ${SDL_LIBRARY}
-    ${SDLMIXER_LIBRARY}
-    ${SDLIMAGE_LIBRARY}
-    ${OPENGL_LIBRARIES}
-    ${PROTOBUF_LIBRARY}
-    ${FTGL_LIBRARIES}
-    ${FREETYPE_LIBRARIES}
-    ${LIBXML2_LIBRARIES}
-    ${PNG_LIBRARIES}
-    )
-
-include_directories (
-    ${${progname}_SOURCE_DIR}/src/tools/
-    ${${progname}_SOURCE_DIR}/src/resource/
-    ${${progname}_SOURCE_DIR}/src/network/
-    ${${progname}_SOURCE_DIR}/src/render/
-    ${${progname}_SOURCE_DIR}/src/ui/
-    ${${progname}_SOURCE_DIR}/src/engine/
-    ${${progname}_SOURCE_DIR}/src/engine/sound/
-    ${${progname}_SOURCE_DIR}/src/tron/
-    ${${progname}_SOURCE_DIR}/src/tron/cockpit/
-
-    ${${progname}_BINARY_DIR}/src/protobuf/
-
-    ${${progname}_INCLUDE_DIRS}
-    )
-
-
 #add_custom_command (TARGET sortresources
 #    COMMAND ${PYTHON_EXECUTABLE} ${${progname}_SOURCE_DIR}/batch/make/copyresources.py ${${progname}_SOURCE_DIR}/resource/proto/ ${${progname}_BINARY_DIR}/resource/included/ ${${progname}_SOURCE_DIR}/batch/make/sortresources.py
 #    COMMAND ${CMAKE_COMMAND} -E copy_directory ${${progname}_SOURCE_DIR}/resource/binary/ ${${progname}_SOURCE_DIR}/resource/included/
@@ -238,7 +265,7 @@ include_directories (
 
 add_custom_target (sortresources ALL
     ${PYTHON_EXECUTABLE} ${${progname}_SOURCE_DIR}/batch/make/copyresources.py ${${progname}_SOURCE_DIR}/resource/proto/ ${${progname}_BINARY_DIR}/resource/included/ ${${progname}_SOURCE_DIR}/batch/make/sortresources.py
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${${progname}_SOURCE_DIR}/resource/binary/ ${${progname}_SOURCE_DIR}/resource/included/
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${${progname}_SOURCE_DIR}/resource/binary/ ${${progname}_BINARY_DIR}/resource/included/
     COMMENT "Sorting resources"
     )
 
@@ -268,19 +295,30 @@ if(BUILDCLIENT AND NOT DEDICATED)
         generateversion
         )
     install (TARGETS ${progname}
-        RUNTIME DESTINATION ${BINDIR})
+        RUNTIME DESTINATION ${BINDIR}
+        COMPONENT client
+        )
 endif()
 
 if(DEDICATED)
-add_executable (${progname}-dedicated src/tools/tVersion.cpp ${EXTRA_SOURCES} src/tron/gDedicated.cpp)
-target_link_libraries (${progname}-dedicated tron engine ui render network tools protos mathexpr particles scrap ${${progname}_LINK_LIBRARIES})
-add_dependencies (${progname}-dedicated 
-    generateversion
-    )
+    add_executable (${progname}-dedicated src/tools/tVersion.cpp ${EXTRA_SOURCES} src/tron/gDedicated.cpp)
+    target_link_libraries (${progname}-dedicated tron engine ui render network tools protos mathexpr ${${progname}_LINK_LIBRARIES})
+    add_dependencies (${progname}-dedicated 
+        generateversion
+        )
+    install (TARGETS ${progname}-dedicated
+        RUNTIME DESTINATION ${BINDIR}
+        COMPONENT dedicated
+        )
 endif()
 
 add_executable(${progname}-master src/tools/tVersion.cpp src/network/master.cpp)
-target_link_libraries (${progname}-master network tools protos scrap ${${progname}_LINK_LIBRARIES})
+target_link_libraries (${progname}-master network tools protos ${${progname}_LINK_LIBRARIES})
 add_dependencies (${progname}-master 
     generateversion
     )
+install (TARGETS ${progname}-master
+    RUNTIME DESTINATION ${BINDIR}
+    COMPONENT master
+    )
+

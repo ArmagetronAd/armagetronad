@@ -37,3 +37,5 @@
 #cmakedefine NOJOYSTICK 1
 #cmakedefine BUILD_FORTRESS 1
 
+// Platforms
+#cmakedefine WIN32 1

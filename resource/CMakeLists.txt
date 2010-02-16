@@ -1,2 +1,2 @@
 install(DIRECTORY included
-    DESTINATION "${AA_DATADIR}/resource/")
+    DESTINATION "${AA_DATADIR}/resource")

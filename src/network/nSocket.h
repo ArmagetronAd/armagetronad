@@ -46,7 +46,7 @@ struct hostentry;
 struct sockaddr;
 
 #ifdef WIN32
-#include  <winsock.h>
+//#include  <winsock.h>
 #else
 #include <sys/socket.h>
 #include <netinet/in.h>

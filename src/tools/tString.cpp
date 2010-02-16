@@ -31,10 +31,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tLocale.h"
 #include "tConfiguration.h"
 #include "tException.h"
+#include "utf8.h"
+
 #include <ctype.h>
 #include <string>
 #include <iostream>
-#include "utf8.h"
+#include <time.h>
 
 // *******************************************************************************
 // *

@@ -1,5 +1,5 @@
 [Protocol]
-exec=@progname@ --connect "%u"
+exec=${BINDIR}/${progname} --connect "%u"
 protocol=armagetronad
 input=none
 output=none
@@ -10,4 +10,4 @@ writing=false
 makedir=false
 deleting=false
 URIMode=rawuri
-Icon=@progname@.png
+Icon=${AA_DATADIR}/desktop/icons/large/armagetronad.png

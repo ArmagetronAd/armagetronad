@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "tConsole.h"
 #include "tLocale.h"
+#include "tSysTime.h"
 #include <iostream>
 
 // anchor for the linked list of filters; filters are added automatically from the constructor.

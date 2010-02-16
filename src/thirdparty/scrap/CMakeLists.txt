@@ -3,6 +3,6 @@ include_directories (
     )
 
 
-add_library (scrap
+add_library (scrap STATIC EXCLUDE_FROM_ALL
     scrap.h                     scrap.cpp
     )

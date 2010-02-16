@@ -4,7 +4,7 @@ include_directories (
     )
 
 
-add_library (particles
+add_library (particles STATIC EXCLUDE_FROM_ALL
     pDomain.h
     pVec.h
     papi.h

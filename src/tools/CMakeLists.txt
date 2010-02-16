@@ -73,6 +73,8 @@ add_library (tools
 
 ADD_CUSTOM_COMMAND(
    SOURCE values/vParser.ypp
+   COMMAND ${CMAKE_COMMAND}
+   ARGS -E make_directory ${${progname}_BINARY_DIR}/src/tools/values/
    COMMAND ${BISON_EXECUTABLE} 
    ARGS -y ${${progname}_SOURCE_DIR}/src/tools/values/vParser.ypp
         -o ${${progname}_BINARY_DIR}/src/tools/values/vParser.cpp

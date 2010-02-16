@@ -63,6 +63,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <sys/param.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #else // #ifndef WIN32
 //#include <winsock2.h>
 //#include <ws2tcpip.h>
@@ -108,10 +111,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #ifndef MAXHOSTNAMELEN
 #define MAXHOSTNAMELEN 256
-#endif
-
-#if HAVE_UNISTD_H
-#include <unistd.h>
 #endif
 
 #include "tConfiguration.h"

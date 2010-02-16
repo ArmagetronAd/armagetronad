@@ -1,11 +1,11 @@
 [Desktop Entry]
 Type=Application
-Name=@progtitle@@progtitle_server@
-Exec=@progname@
+Name=${progtitle}${progtitle_server}
+Exec=${progname}
 Comment=3d light cycle game
-Icon=@progname@.png
-Terminal=@build_dedicated@
-Path=@prefix@/bin/@progname@
+Icon=${AA_DATADIR}/desktop/icons/large/armagetronad.png
+Terminal=${BUILD_DEDICATED}
+Path=${BINDIR}/${progname}
 Categories=Game;ActionGame;
-StartupNotify=@build_dedicated@
+StartupNotify=${BUILD_DEDICATED}
 MimeType=application/x-armagetronad;

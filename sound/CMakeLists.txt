@@ -1,3 +1,3 @@
-install (DIRECTORY .
-    DESTINATION "${AA_DATADIR}/sound/"
+install (DIRECTORY ""
+    DESTINATION "${AA_DATADIR}/sound"
     FILES_MATCHING PATTERN "*.ogg")
