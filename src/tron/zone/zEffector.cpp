@@ -128,7 +128,7 @@ zEffectorManager::Create(std::string const & typex, tXmlParser::node const * nod
     }
         
     
-    VoidFactoryBase*Fy = iterEffectorFactory->second;
+    VoidFactoryBase*Fy = iterEffectorFactory->second.get();
 
     if (NullFactory*ptr = dynamic_cast<NullFactory*>(Fy))
     {

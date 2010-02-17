@@ -148,6 +148,16 @@ tConsole & rConsole::DoPrint(const tString &s){
     return *this;
 }
 
+// moves to the end, showing the last lines
+void rConsole::End(int last)
+{
+    currentTop = currentIn - last;
+    if ( currentTop < 0 )
+    {
+        currentTop = 0;
+    }
+}
+
 void rConsole::Scroll(int dir){
     rCenterDisplayCallback::CenterDisplay();
 

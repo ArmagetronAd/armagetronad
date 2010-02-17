@@ -136,8 +136,10 @@ gStatList::~gStatList()
         delete myFile;
     }
 
-    for (int c = 0; c < entries.Len(); c++)
+    for (int c = entries.Len()-1; c >= 0; c--)
     {
-        entries.Remove(entries[c], entries[c]->id);
+        tStatEntry * remove = entries[c];
+        entries.Remove(remove, remove->id);
+        delete remove;
     }
 }

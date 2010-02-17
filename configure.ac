@@ -8,7 +8,7 @@ dnl Comment this out to disable autoconf custom directories:
 m4_include(accustomdir.m4)
 
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(Armagetronad,AUTOMATIC_VERSION)
+AC_INIT(armagetronad,AUTOMATIC_VERSION)
 
 dnl FIXME: remove this in the future, when automake decides to actually set datarootdir by default
 dnl http://www.gnu.org/software/hello/manual/autoconf/Changed-Directory-Variables.html

@@ -50,7 +50,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 // debug watchs
 #ifdef DEBUG
-int sn_WatchNetID = 0;
+int sn_WatchNetID = -1;
 extern nMessageBase* sn_WatchMessage;
 #endif
 
@@ -81,7 +81,7 @@ static unsigned short net_max_current_id = net_max_current_id_min;
 #ifdef DEBUG
 static void sn_BreakOnObjectID( unsigned short id )
 {
-#ifdef DEBUG_X
+#ifdef DEBUG
     static unsigned int breakOnID = sn_WatchNetID;
     static REAL minTime = 0;
     if ( id == breakOnID  && tSysTimeFloat() > minTime )
@@ -1247,7 +1247,7 @@ void nNetObject::GetID()
             tERR_ERROR("Dublicate nNetObject id " << id);
 
         sn_netObjectsOwner[id]=owner;
-        sn_netObjects_AcceptClientSync[id]=false;
+        sn_netObjects_AcceptClientSync[id]=AcceptClientSync();
 
 #ifdef DEBUG
         sn_BreakOnObjectID(id);
@@ -2225,6 +2225,9 @@ nNetObject::nNetObject( Network::NetObjectSync const & sync, nSenderInfo const &
     nNetObjectRegistrar& registrar = *sn_Registrar;
 
     createdLocally = false;
+
+    tASSERT(sync.has_object_id());
+    tASSERT(sync.has_owner_id());
 
     registrar.id = sync.object_id();
 #ifdef DEBUG
