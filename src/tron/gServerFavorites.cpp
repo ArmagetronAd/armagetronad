@@ -167,23 +167,23 @@ public:
         return false;
 	}
 	
-	bool RemoveFavorite( nServerInfoBase const * server )
-	{
-		if ( !server )
-			return false;
-		
-		for ( int i = 0; i<NUM_FAVORITES; i++ )
-		{
-			gServerFavorite & fav = GetFavorite(i);
-			
-			if (fav.name_ == tColoredString::RemoveColors(server->GetName())) {
-				fav.name_ = "";
-				return true;
-			}
-		}
-		
-		return false;
-	}
+    bool RemoveFavorite( nServerInfoBase const * server )
+    {
+        if ( !server )
+            return false;
+
+        for ( int i = 0; i<NUM_FAVORITES; i++ )
+        {
+            gServerFavorite & fav = GetFavorite(i);
+
+            if (fav.name_ == tColoredString::RemoveColors(server->GetName())) {
+                fav.name_ = "";
+                return true;
+            }
+        }
+
+        return false;
+    }    
 
     bool IsFavorite( nServerInfoBase const * server )
     {
@@ -550,7 +550,7 @@ bool gServerFavorites::AddFavorite( nServerInfoBase const * server )
 
 // *********************************************************************************************
 // *
-// *	AddFavorite
+// *	RemoveFavorite
 // *
 // *********************************************************************************************
 //!

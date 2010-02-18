@@ -147,7 +147,7 @@ protected:
     bool        favorite_; //!< flag indicating whether this is a favorite
 public:
     void AddFavorite();
-	void RemoveFavorite();
+    void RemoveFavorite();
     void SetServer(nServerInfo *s);
     gServerInfo *GetServer();
 
@@ -619,8 +619,7 @@ void gServerMenuItem::Render(REAL x,REAL y,REAL alpha, bool selected)
             else
             {
                 score << "  ";
-			}
-
+            }
 
             score << s;
             users << server->Users() << "/" << server->MaxUsers();
@@ -761,24 +760,20 @@ bool gServerMenuItem::Event( SDL_Event& event )
 
             return true;
             break;
-		case 'b':
-			if ( server )
-			{
-				if (favorite_ ) {
-					gServerFavorites::RemoveFavorite( server );
-					favorite_ = false;
-				} else {
-					favorite_ = gServerFavorites::AddFavorite( server );
-					
-					// if (favorite_ == false) {
-					//		unable to add favorite - message to the user?
-					// }
-				}
-			}
-			(static_cast<gServerMenu*>(menu))->Update();
-				
-			return true;
-			break;
+        case 'b':
+            if ( server )
+            {
+                if (favorite_ ) {
+                    gServerFavorites::RemoveFavorite( server );
+                    favorite_ = false;
+                } else {
+                    favorite_ = gServerFavorites::AddFavorite( server );
+                }
+            }
+            (static_cast<gServerMenu*>(menu))->Update();
+
+            return true;
+            break;    
         default:
             break;
         }
