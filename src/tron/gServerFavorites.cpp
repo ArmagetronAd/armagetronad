@@ -165,7 +165,25 @@ public:
         }
         
         return false;
-}
+	}
+	
+	bool RemoveFavorite( nServerInfoBase const * server )
+	{
+		if ( !server )
+			return false;
+		
+		for ( int i = 0; i<NUM_FAVORITES; i++ )
+		{
+			gServerFavorite & fav = GetFavorite(i);
+			
+			if (fav.name_ == tColoredString::RemoveColors(server->GetName())) {
+				fav.name_ = "";
+				return true;
+			}
+		}
+		
+		return false;
+	}
 
     bool IsFavorite( nServerInfoBase const * server )
     {
@@ -528,6 +546,22 @@ void gServerFavorites::CustomConnectMenu( void )
 bool gServerFavorites::AddFavorite( nServerInfoBase const * server )
 {
     return sg_favoriteHolder.AddFavorite( server );
+}
+
+// *********************************************************************************************
+// *
+// *	AddFavorite
+// *
+// *********************************************************************************************
+//!
+//!		@param	server	 the server to remove from the favorites
+//!     @return true if successful, false if the server does not exist
+//!
+// *********************************************************************************************
+
+bool gServerFavorites::RemoveFavorite ( nServerInfoBase const * server )
+{
+    return sg_favoriteHolder.RemoveFavorite( server );
 }
 
 // *********************************************************************************************
