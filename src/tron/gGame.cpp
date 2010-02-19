@@ -3878,12 +3878,15 @@ void gGame::Analysis(REAL time){
                         }
 
                         // print winning message
-                        tOutput message;
-                        message << "$gamestate_winner_winner";
-                        message << eTeam::teams[winner-1]->Name();
-                        sn_CenterMessage(message);
-                        message << '\n';
-                        se_SaveToScoreFile(message);
+                        if( sg_currentSettings->scoreWin != 0 )
+                        {
+                            tOutput message;
+                            message << "$gamestate_winner_winner";
+                            message << eTeam::teams[winner-1]->Name();
+                            sn_CenterMessage(message);
+                            message << '\n';
+                            se_SaveToScoreFile(message);
+                        }
 
                         sg_roundWinnerWriter << ePlayerNetID::FilterName( eTeam::teams[winner-1]->Name() );
                         eTeam::WritePlayers( sg_roundWinnerWriter, eTeam::teams[winner-1] );
