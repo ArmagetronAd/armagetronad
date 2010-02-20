@@ -190,6 +190,11 @@ void rConsole::DoCenterDisplay(const tString &s,REAL timeout,REAL r,REAL g,REAL 
     center_b=b;
 }
 
+bool rConsole::CenterDisplayActive()
+{
+    return tSysTimeFloat() - center_fadetime < 1.5;
+}
+
 #else
 #include "rConsoleCout.cpp"
 #endif

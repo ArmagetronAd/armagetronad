@@ -191,7 +191,7 @@ void gTeam::TeamMenu()
     uMenu Menu( tOutput("$team_menu_title") );
     tArray<uMenuItem*> items;
 
-    for ( i = MAX_PLAYERS; i>=0; --i )
+    for ( i = MAX_PLAYERS-1; i>=0; --i )
     {
         if ( ePlayer::PlayerIsInGame(i))
         {
