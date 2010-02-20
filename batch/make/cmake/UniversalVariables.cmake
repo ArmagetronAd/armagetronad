@@ -9,9 +9,9 @@ macro (UNIVERSAL_VAR VARNAME VAL)
 endmacro(UNIVERSAL_VAR VARNAME VAL)
 
 macro (WRITE_UNIVARS)
-    file(REMOVE src/tUniversalVariables.h)
+    file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/src/tUniversalVariables.h)
     foreach(UNIVAR ${UNIVERSAL_VARS})
-        file(APPEND src/tUniversalVariables.h
+        file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/src/tUniversalVariables.h
 "#ifndef ${UNIVAR}
     #define ${UNIVAR} \"${${UNIVAR}}\"
 #endif

@@ -12,7 +12,7 @@ endmacro(DEP)
 
 macro(CLIENTDEP VAR NICK)
     list(APPEND CLIENTDEPS "${VAR}")
-    if ( NOT DEDICATEDONLY )
+    if ( NOT DEDICATED )
         if( NOT ${VAR}_FOUND )
             message( "${NICK} is required to build a ${progtitle} client" )
             set(BUILDCLIENT FALSE)

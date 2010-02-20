@@ -36,6 +36,7 @@
 #cmakedefine USEPARTICLES 1
 #cmakedefine NOJOYSTICK 1
 #cmakedefine BUILD_FORTRESS 1
+#cmakedefine DONTUSEMEMMANAGER 1
 
 // Platforms
 #cmakedefine WIN32 1
