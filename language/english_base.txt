@@ -1230,6 +1230,12 @@ path_info_data                  Data directories (textures, moviepack, ...):
 path_info_screenshot            Screenshot directories:
 path_info_var                   Var directories:
 
+version_info_gl_intro       \n\n0xff8888System OpenGL information:0xRESETT 
+version_info_gl_vendor		\n  GL Vendor   : 
+version_info_gl_renderer	\n  GL Renderer : 
+version_info_gl_version		\n  GL Version  : 
+
+
 #********************************************
 #********************************************
 #
@@ -1439,7 +1445,7 @@ game_menu_wz_ld_help		Minimum number of seconds since the last death before the 
 network_menu_lan_text		LAN Multiplayer
 network_menu_lan_help		Connect to a server on your local network or start a server.
 
-network_menu_internet_text	Internet Multiplayer
+network_menu_internet_text	Online Multiplayer
 network_menu_internet_help	Connect to an internet server or start one.
 
 network_opts_text		Network Setup
@@ -1559,6 +1565,8 @@ misc_textout_help		Toggles the display of text messages (chat, status info...) o
 misc_moviepack_text		Moviepack:
 misc_moviepack_help		If this is enabled and the moviepack is installed, \g will display more movie-like graphics.
 
+misc_initial_menu_title Redo First Setup
+misc_initial_menu_help Restarts the first setup menu where you can select color and keyboard layout templates.
 
 #*************************************
 #*************************************
@@ -1573,6 +1581,8 @@ language_second_help		Fallback language if the first language is not available
 
 language_menu_title		Language Settings
 language_menu_help		Choose the language used for all onscreen texts
+
+language_firstchoice_help Press Enter, Return or Space to select this language.
 
 language_menu_item_fist		First Language:
 language_menu_item_first_help	\g will display most text messages in this language. Use Cursor Left/Right to choose.
@@ -2131,12 +2141,64 @@ timer_hickup                Timer hickup of \1 seconds detected and compensated.
 #********************************************
 
 welcome_message_heading		Welcome to \g!
-welcome_message_intro		Default Settings have been loaded according to your configuration\n\n
-welcome_message_vendor		GL Vendor   : 
-welcome_message_renderer	GL Renderer : 
-welcome_message_version		GL Version  : 
-welcome_message_finish		\nHave fun!\n
-#\n\nThis Game is supported from KGN (Krawall Gaming Network, www.krawall.de).
+
+welcome_message		        You will now be hurled directly into a local game to get a feeling for things. It is set to a slower speed than a usual game. Your task is to make the other cycle crash into a wall. Don't panic, good luck and have fun!
+
+welcome_message_2_heading   We hope you enjoyed it so far.
+welcome_message_2           You will now enter the regular main menu. You can access local games now via the "Play Game/"Local Game" menu path.\n\nBut the true action is to be found online, many industrious people have put up interesting servers with gameplay variations not available if you play solo.\nTo go online, select "Play Game"/"Multiplayer"/"Online Multiplayer".
+
+#********************************************
+#********************************************
+#
+#   Initial setup menu and first game
+#
+#********************************************
+#********************************************
+
+first_setup                 First Setup
+first_game_title            First Game
+
+first_setup_color           Colour:
+first_setup_color_help      Selects the colour of your lightcylce. You'll later be able to customize it in more detail.
+first_setup_color_red       0xff0000Red0xRESETT
+first_setup_color_green     0x00ff00Green0xRESETT
+first_setup_color_blue      0x0000ffBlue0xRESETT
+first_setup_color_yellow    0xffff00Yellow0xRESETT
+first_setup_color_purple    0x7f00ffPurple0xRESETT
+first_setup_color_orange    0xff7f00Orange0xRESETT
+first_setup_color_magenta   0xff00ffMagenta0xRESETT
+first_setup_color_cyan      0x00ffffCyan0xRESETT
+first_setup_color_white     0xffffffWhite0xRESETT
+first_setup_color_dark      0x000000Dark0xRESETT
+
+first_setup_leave           Leave Alone
+first_setup_leave_help      Don't change this.
+
+first_setup_keys            Controls:
+first_setup_keys_help       Select your startup keyboard layout here. It can be customized later, individual bindings can be changed. Select with cursor left and cursor right.
+first_setup_keys_cursor     Cursor Keys
+first_setup_keys_cursor_help Control your cycle with the cursor keys, bulk of keyboard used for camera control, special actions and the second player. Good for right handed people and our general recommendation.
+first_setup_keys_cursor_single     Cursor Keys, Single Player
+first_setup_keys_cursor_single_help Control your cycle with the cursor keys, bulk of keyboard used for camera control and special actions. Good for right handed people when no friends are around.
+first_setup_keys_wasd       WASD Keys
+first_setup_keys_wasd_help  Control your cycle with the ASD keys and surroundings, Cursor keys and rest of keyboard control camera and special actions. Good for left handed people and those used to move with WASD. Bad for people with AZERTY layout.
+first_setup_keys_zqsd       ZQSD Keys
+first_setup_keys_zqsd_help  Control your cycle with the QSD keys and surroundings, Cursor keys and rest of keyboard control camera and special actions. Good for left handed people and those used to move with ZQSD on AZERTY keyboards.
+#first_setup_keys_both       Two Handed
+#first_setup_keys_both_help  Turn and look left with your left hand, turn and look right with the right hand. Good for ambidextrous people who don't want to use the mouse in any way and never play with a second player in splitscreen.
+first_setup_keys_x          Traditional
+first_setup_keys_x_help     The default setup of old versions of the game. X turns right, the key left to that turns left. Recommended only for veterans.
+first_setup_keys_leave      Leave Alone
+
+first_setup_net             Connection:
+first_setup_net_help        Select the rough type of your internet connection here.
+first_setup_net_dialup      Dialup
+first_setup_net_dialup_help You are connected to the internet via a traditional modem connected to a telephone line.
+first_setup_net_isdn        ISDN
+first_setup_net_isdn_help   You are connected to the internet via a digital ISDN line.
+first_setup_net_dsl         ADSL, Cable or better
+first_setup_net_dsl_help    You are connected to the internet via DSL, ADSL, Cable, T1 or other kinds of broadband.
+
 
 #********************************************
 #********************************************

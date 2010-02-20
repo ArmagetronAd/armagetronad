@@ -1862,7 +1862,7 @@ static void own_game( nNetState enter_state ){
     se_KillGameTimer();
 }
 
-static void singlePlayer_game(){
+void sg_SinglePlayerGame(){
     sn_SetNetState(nSTANDALONE);
 
     update_settings();
@@ -2469,8 +2469,19 @@ void sg_DisplayVersionInfo() {
     versionInfo << "$version_info_version" << "\n";
     st_PrintPathInfo(versionInfo);
     versionInfo << "$version_info_misc_stuff";
+
+    versionInfo << "$version_info_gl_intro";
+    versionInfo << "$version_info_gl_vendor";
+    versionInfo << gl_vendor;
+    versionInfo << "$version_info_gl_renderer";
+    versionInfo << gl_renderer;
+    versionInfo << "$version_info_gl_version";
+    versionInfo << gl_version;
+
     sg_FullscreenMessage("$version_info_title", versionInfo, 1000);
 }
+
+void sg_StartupPlayerMenu();
 
 void MainMenu(bool ingame){
     //	update_settings();
@@ -2516,7 +2527,7 @@ void MainMenu(bool ingame){
 
     if (!ingame){
         start= new uMenuItemFunction(&game_menu,"$game_menu_start_text",
-                                     "$game_menu_start_help",&singlePlayer_game);
+                                     "$game_menu_start_help",&sg_SinglePlayerGame);
         connect=new uMenuItemFunction
                 (&game_menu,
                  "$network_menu_text",
@@ -2623,6 +2634,11 @@ void MainMenu(bool ingame){
     uMenu misc("$misc_menu_text");
 
     //  misc.SetCenter(.25);
+
+    uMenuItemFunction first_setup
+    (&misc,"$misc_initial_menu_title",
+     "$misc_initial_menu_help",
+     &sg_StartupPlayerMenu);
 
     uMenuItemFunction language
     (&misc,"$language_menu_title",

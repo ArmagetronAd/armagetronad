@@ -1,6 +1,7 @@
 language American English
 include english_base.txt
 
+first_setup_color                 Color:
 fav_num_per_team_player_help      The favorite number of players per team for this player
 color_b_help                      Cycle and wall color, blue component.
 color_g_help                      Cycle and wall color, green component.
