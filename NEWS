@@ -1,3 +1,9 @@
+Changes since 0.2.8.3:
+- default subcultures are now distributed
+- enable 32 bit color depth at desktop resolution
+- no more display lists for SiS cards
+- spelling mistakes and missing German translations
+
 Changes since 0.2.8.3_rc4:
 - Intercepted chat commands are now written to ladderlog.txt. Format:
   COMMAND /command-intercepted player [command arguments]
