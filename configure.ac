@@ -557,7 +557,7 @@ AC_CHECK_LIB(xml2,xmlParseMemory,
 CPPFLAGS="$CPPFLAGS `$XML2_CONFIG --cflags`"
 LIBS="`$XML2_CONFIG --libs` $LIBS"
 AC_DEFINE(HAVE_LIBXML2, 1, [Define if you have the xml2 library (-lxml2).]),
-AC_MSG_ERROR([You need the library xml2 to compile Armagetron. Read the file doc/install_linux.html.])
+AC_MSG_ERROR([You need the library xml2 to compile ${progtitle}. Read the file doc/install_linux.html.])
 ,`$XML2_CONFIG --libs`)
 
 AC_CHECK_FUNC(xmlParserInputBufferCreateFilenameDefault,
@@ -641,7 +641,7 @@ LIBS="${SDLLIBS} $LIBS"
 
 AC_CHECK_FUNC(SDL_Init,
 AC_DEFINE(HAVE_LIBSDL,,[Define if you have the library SDL]),
-AC_MSG_ERROR([You need the library SDL to compile Armagetron. Read the file doc/install_linux.html.])
+AC_MSG_ERROR([You need the library SDL to compile ${progtitle}. Read the file doc/install_linux.html.])
 ,)
 
 dnl *************************************************
@@ -688,7 +688,7 @@ AC_CHECK_LIB($SYS_GL_LIB, glVertex3f,,
  AC_CHECK_LIB(Xi,main,-L/usr/X11R6/lib)
  AC_CHECK_LIB(Xmu,main,-L/usr/X11R6/lib)
 AC_CHECK_LIB($SYS_GL_LIB, glBegin,,AC_MSG_ERROR([
-  You need Mesa or an OpenGL-System to compile Armagetron.
+  You need Mesa or an OpenGL-System to compile ${progtitle}.
   Maybe your libGL needs the X libraries and your system does not
   find them? Read the file doc/install_linux.html.]),-L/usr/X11R6/lib)
 )
@@ -708,7 +708,7 @@ if test $SYS_GLU_LIB && echo $LIBS | grep -v "\-lGLU" > /dev/null; then
 dnl AC_CHECK_LIB($SYS_GLU_LIB, gluBuild2DMipmaps,,
 AC_CHECK_LIB($SYS_GLU_LIB, gluBuild3DMipmaps,,
 AC_MSG_ERROR([
-You need GLU to compile Armagetron; it SHOULD have come with OpenGL.
+You need GLU to compile ${progtitle}; it SHOULD have come with OpenGL.
 Read the file doc/install_linux.html.]))
 
 fi
@@ -721,7 +721,7 @@ dnl AC_CHECK_LIB(g++, main,,
 dnl AC_MSG_WARN([C++ standard library not found. You can ignore this warning on non-GNU-systems.]))
 
 AC_CHECK_LIB(z, main,,
-AC_MSG_ERROR([You need libz to compile Armagetron.]))
+AC_MSG_ERROR([You need libz to compile ${progtitle}.]))
 
 AC_MSG_CHECKING(whether libpng is installed)
 if PNGLIBS=`libpng-config --libs`; then
@@ -733,7 +733,7 @@ LIBS="$LIBS $PNGLIBS"
 
 AC_CHECK_FUNC(png_check_sig,
 ,
-AC_MSG_ERROR([You need libpng to compile Armagetron.]))
+AC_MSG_ERROR([You need libpng to compile ${progtitle}.]))
 
 AC_CHECK_LIB(jpeg, main,,
 	AC_MSG_WARN([
@@ -743,7 +743,7 @@ AC_CHECK_LIB(jpeg, main,,
 
 AC_CHECK_LIB(SDL_image, IMG_Load,,
 dnl AC_CHECK_LIB(IMG, main,,
-AC_MSG_ERROR([You need the library SDL_image to compile Armagetron.]
+AC_MSG_ERROR([You need the library SDL_image to compile ${progtitle}.]
 dnl )
 ))
 
@@ -783,7 +783,7 @@ AC_MSG_WARN(
 [
 
 
-You are using PGCC to compile Armagetron. Due to a bug in PGCC,
+You are using PGCC to compile ${progtitle}. Due to a bug in PGCC,
 exception handling needs to be disabled. This makes the server
 mode vulnerable to an attack that causes the server to block or
 crash. (The attack is still detected, but nothing can be done 
