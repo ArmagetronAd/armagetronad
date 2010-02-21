@@ -14,7 +14,7 @@ include_directories (
     ${${progname}_INCLUDE_DIRS}
     )
 
-add_library (tron
+add_library (tron EXCLUDE_FROM_ALL
     gAIBase.h                   gAIBase.cpp
     gAICharacter.h              gAICharacter.cpp
     gArena.h                    gArena.cpp

@@ -6,7 +6,7 @@ set (progtitle "Armagetron Advanced")
 
 project (${progname})
 
-list(APPEND CMAKE_MODULE_PATH ${${progname}_SOURCE_DIR}/batch/make/cmake/)
+list(APPEND CMAKE_MODULE_PATH ${${progname}_SOURCE_DIR}/cmake/modules/)
 
 ##### OPTIONS #####
 
@@ -298,16 +298,16 @@ add_subdirectory (textures)
 #    )
 
 add_custom_target (sortresources ALL
-    ${PYTHON_EXECUTABLE} ${${progname}_SOURCE_DIR}/batch/make/copyresources.py ${${progname}_SOURCE_DIR}/resource/proto/ ${${progname}_BINARY_DIR}/resource/included/ ${${progname}_SOURCE_DIR}/batch/make/sortresources.py
+    ${PYTHON_EXECUTABLE} ${${progname}_SOURCE_DIR}/cmake/scripts/copyresources.py ${${progname}_SOURCE_DIR}/resource/proto/ ${${progname}_BINARY_DIR}/resource/included/ ${${progname}_SOURCE_DIR}/cmake/scripts/sortresources.py
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${${progname}_SOURCE_DIR}/resource/binary/ ${${progname}_BINARY_DIR}/resource/included/
     COMMENT "Sorting resources"
     )
 
 add_custom_target (generateversion ALL 
-    ${PYTHON_EXECUTABLE} ${${progname}_SOURCE_DIR}/batch/make/version.py ${${progname}_SOURCE_DIR} --release=${RELEASE} -o ${${progname}_BINARY_DIR}/src/tTrueVersion.h
+    ${PYTHON_EXECUTABLE} ${${progname}_SOURCE_DIR}/cmake/scripts/version.py ${${progname}_SOURCE_DIR} --release=${RELEASE} -o ${${progname}_BINARY_DIR}/src/tTrueVersion.h
     COMMENT "Generating version tag"
-    COMMAND ${PYTHON_EXECUTABLE} ${${progname}_SOURCE_DIR}/batch/make/version.py ${${progname}_SOURCE_DIR} --release=${RELEASE} -o ${${progname}_BINARY_DIR}/src/tTrueVersion.h
-    DEPENDS ${${progname}_SOURCE_DIR}/batch/make/version.py
+    COMMAND ${PYTHON_EXECUTABLE} ${${progname}_SOURCE_DIR}/cmake/scripts/version.py ${${progname}_SOURCE_DIR} --release=${RELEASE} -o ${${progname}_BINARY_DIR}/src/tTrueVersion.h
+    DEPENDS ${${progname}_SOURCE_DIR}/cmake/scripts/version.py
     WORKING_DIRECTORY ${${progname}_SOURCE_DIR}
     )
 

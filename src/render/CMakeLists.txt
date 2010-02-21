@@ -12,7 +12,7 @@ include_directories (
     ${${progname}_INCLUDE_DIRS}
     )
 
-add_library (render
+add_library (render EXCLUDE_FROM_ALL
     rConsole.h                  rConsole.cpp
                                 rConsoleGraph.cpp
     rFont.h                     rFont.cpp

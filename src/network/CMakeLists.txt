@@ -8,7 +8,7 @@ include_directories (
     ${${progname}_INCLUDE_DIRS}
     )
 
-add_library (network
+add_library (network EXCLUDE_FROM_ALL
     md5.cpp                     md5.h
     nAuthentication.cpp         nAuthentication.h
     nConfig.cpp                 nConfig.h

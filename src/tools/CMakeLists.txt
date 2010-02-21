@@ -7,7 +7,7 @@ include_directories (
     ${${progname}_INCLUDE_DIRS}    
     )
 
-add_library (tools
+add_library (tools EXCLUDE_FROM_ALL
     tArray.h                    tArray.cpp
     tCallback.h                 tCallback.cpp
     tCallbackString.h

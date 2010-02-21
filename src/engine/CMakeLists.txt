@@ -12,7 +12,7 @@ include_directories (
     ${${progname}_INCLUDE_DIRS}
     )
 
-add_library (engine
+add_library (engine EXCLUDE_FROM_ALL
     eAdvWall.h                  eAdvWall.cpp
     eAuthentication.h           eAuthentication.cpp
     eAxis.h                     eAxis.cpp

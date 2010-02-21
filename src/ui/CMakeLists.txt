@@ -8,7 +8,7 @@ include_directories (
     ${${progname}_INCLUDE_DIRS}
     )
 
-add_library(ui
+add_library(ui EXCLUDE_FROM_ALL
     uInput.h                    uInput.cpp
     uInputQueue.h               uInputQueue.cpp
     uMenu.h                     uMenu.cpp

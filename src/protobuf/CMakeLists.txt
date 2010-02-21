@@ -1,4 +1,4 @@
-add_library(protos
+add_library(protos EXCLUDE_FROM_ALL
     tColor.pb.cc
     tCoord.pb.cc
     tFunction.pb.cc
