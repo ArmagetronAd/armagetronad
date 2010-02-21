@@ -248,7 +248,7 @@ void tAdvanceFrameSys( tTime & start, tTime & relative )
     // get time from OS
     GetTime( time );
 
-    // test hickupery
+    // test hiccupery
     // time.seconds -= time.seconds/10;
 
     // record starting point
@@ -257,7 +257,7 @@ void tAdvanceFrameSys( tTime & start, tTime & relative )
         start = time;
     }
 
-    // detect and counter timer hickups
+    // detect and counter timer hiccups
     tTime newRelative = time - start;
     tTime timeStep = newRelative - relative;
     if ( !tRecorder::IsPlayingBack() && ( timeStep.seconds < 0 || timeStep.seconds > 10 ) )
@@ -351,7 +351,7 @@ void tAdvanceFrame( int usecdelay )
         REAL step = float( timeStep.seconds + timeStep.microseconds * 1E-6  );
         if ( step > 3 * bigStep )
         {
-            con << "Small timer hickup of " << step << " seconds.\n";
+            con << "Small timer hiccup of " << step << " seconds.\n";
             bigStep = bigStep * 1.02;
         }
         else if ( step > bigStep )
