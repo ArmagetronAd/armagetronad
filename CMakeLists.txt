@@ -6,7 +6,16 @@ set (progtitle "Armagetron Advanced")
 
 project (${progname})
 
+##### MODULES #####
+
 list(APPEND CMAKE_MODULE_PATH ${${progname}_SOURCE_DIR}/cmake/modules/)
+
+include (UniversalVariables)
+include (CheckIncludeFiles)
+include (CheckFunctionExists)
+include (CheckLibraryExists)
+include (CheckTypeSize)
+include (Deps)
 
 ##### OPTIONS #####
 
@@ -40,12 +49,6 @@ if(ENABLE_ZONESV2 AND FORTRESS)
 endif()
 
 ##### CONFIGURE CHECKS #####
-include (UniversalVariables)
-include (CheckIncludeFiles)
-include (CheckFunctionExists)
-include (CheckLibraryExists)
-include (CheckTypeSize)
-include (Deps)
 
 CHECK_FUNCTION_EXISTS (isblank HAVE_ISBLANK)
 CHECK_FUNCTION_EXISTS (select HAVE_SELECT)
@@ -147,7 +150,7 @@ include_directories ( SYSTEM
     )
 
 
-if(BUILD_CLIENT)
+if(NOT DEDICATED)
     include_directories( SYSTEM
         ${FTGL_INCLUDE_DIR}/FTGL/
         ${FREETYPE_INCLUDE_DIR_ft2build}
@@ -158,28 +161,29 @@ if(BUILD_CLIENT)
         ${PNG_INCLUDE_DIR}
         )
 
-    LIST (${progname}_DEFINES APPEND
+    LIST (APPEND ${progname}_DEFINES
         ${PNG_DEFINITIONS}
     )
 endif()
 
-set (${progname}_LINK_LIBRARIES
-    ${PROTOBUF_LIBRARY}
-    ${LIBXML2_LIBRARIES}
-    ${WS2_LIBRARIES}
-    )
-
-if(BUILD_CLIENT)
-    LIST(${progname}_LINK_LIBRARIES APPEND
+if(NOT DEDICATED)
+    link_libraries(
         ${SDL_LIBRARY}
         ${SDLMIXER_LIBRARY}
         ${SDLIMAGE_LIBRARY}
-        ${OPENGL_LIBRARIES}
+        SDLmain
         ${FTGL_LIBRARIES}
+        ${OPENGL_LIBRARIES}
         ${FREETYPE_LIBRARIES}
         ${PNG_LIBRARIES}
         )
 endif()
+
+link_libraries(
+    ${PROTOBUF_LIBRARY}
+    ${LIBXML2_LIBRARIES}
+    ${WS2_LIBRARIES}
+    )
 
 include_directories (
     ${${progname}_SOURCE_DIR}/src/tools/
@@ -271,6 +275,25 @@ endif()
 ##### UNIVERSAL PATHS #####
 UNIVERSAL_VAR (AA_SYSCONFDIR "${AA_DATADIR}/config")
 
+##### CPACK #####
+if(DEDICATED)
+    set(CPACK_PACKAGE_NAME "${progtitle} Dedicated Server")
+endif()
+set(CPACK_PACKAGE_VENDOR "Armagetron Advanced Team")
+
+if(EXISTS ${${progname}_BINARY_DIR}/src/tTrueVersion.h)
+    file(STRINGS ${${progname}_BINARY_DIR}/src/tTrueVersion.h trueversionfile)
+    foreach(line ${trueversionfile})
+        if(${line} MATCHES "^#define TRUE_ARMAGETRONAD_VERSION \"([0-9a-zA-Z_.-]+)\"$")
+            set(CPACK_PACKAGE_VERSION ${CMAKE_MATCH_1})
+        endif()
+    endforeach()
+else()
+    message("If you intend on building packages with CPack, please call cmake again after building.")
+    set(CPACK_PACKAGE_VERSION NOTFOUND)
+endif()
+
+include (CPack)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/aa_config.h.in ${CMAKE_CURRENT_BINARY_DIR}/src/aa_config.h)
 
@@ -307,7 +330,6 @@ add_custom_target (generateversion ALL
     ${PYTHON_EXECUTABLE} ${${progname}_SOURCE_DIR}/cmake/scripts/version.py ${${progname}_SOURCE_DIR} --release=${RELEASE} -o ${${progname}_BINARY_DIR}/src/tTrueVersion.h
     COMMENT "Generating version tag"
     COMMAND ${PYTHON_EXECUTABLE} ${${progname}_SOURCE_DIR}/cmake/scripts/version.py ${${progname}_SOURCE_DIR} --release=${RELEASE} -o ${${progname}_BINARY_DIR}/src/tTrueVersion.h
-    DEPENDS ${${progname}_SOURCE_DIR}/cmake/scripts/version.py
     WORKING_DIRECTORY ${${progname}_SOURCE_DIR}
     )
 
@@ -324,7 +346,7 @@ set(EXTRA_SOURCES
 
 if(BUILDCLIENT AND NOT DEDICATED)
     add_executable (${progname} WIN32 src/tools/tVersion.cpp ${EXTRA_SOURCES} src/tron/gClient.cpp)
-    target_link_libraries (${progname} tron engine ui render network tools protos mathexpr particles scrap ${${progname}_LINK_LIBRARIES})
+    target_link_libraries (${progname} tron engine ui render network tools protos mathexpr particles scrap )
     add_dependencies (${progname} 
         generateversion
         )
@@ -336,7 +358,7 @@ endif()
 
 if(DEDICATED)
     add_executable (${progname}-dedicated src/tools/tVersion.cpp ${EXTRA_SOURCES} src/tron/gDedicated.cpp)
-    target_link_libraries (${progname}-dedicated tron engine ui render network tools protos mathexpr ${${progname}_LINK_LIBRARIES})
+    target_link_libraries (${progname}-dedicated tron engine ui render network tools protos mathexpr)
     add_dependencies (${progname}-dedicated 
         generateversion
         )
@@ -347,7 +369,7 @@ if(DEDICATED)
 endif()
 
 add_executable(${progname}-master src/tools/tVersion.cpp src/network/master.cpp)
-target_link_libraries (${progname}-master network tools protos ${${progname}_LINK_LIBRARIES})
+target_link_libraries (${progname}-master network tools protos)
 add_dependencies (${progname}-master 
     generateversion
     )

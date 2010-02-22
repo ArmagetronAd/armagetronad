@@ -61,7 +61,7 @@ FIND_PATH(FTGL_INCLUDE_DIR FTGL/ftgl.h
       /usr/local/include
 )
 
-IF (NOT WIN32)
+# IF (NOT WIN32)
 
 FIND_FILE(FTGL_LIBRARIES libftgl.a  
        ${ADDITIONAL_LIBRARY_PATH}
@@ -72,18 +72,19 @@ FIND_FILE(FTGL_LIBRARIES libftgl.a
       /usr/local/include
 )
 
-ELSE (NOT WIN32)
-
-FIND_LIBRARY(FTGL_LIBRARIES ftgl_static_MT
-       ${ADDITIONAL_LIBRARY_PATH}
-      /usr/lib
-      /usr/X11/lib
-      /usr/X11R6/lib
-      /sw/lib
-      /usr/local/lib
-)
-
-ENDIF (NOT WIN32)
+# # Not sure what's that for...
+# ELSE (NOT WIN32)
+# 
+# FIND_LIBRARY(FTGL_LIBRARIES ftgl_static_MT
+#        ${ADDITIONAL_LIBRARY_PATH}
+#       /usr/lib
+#       /usr/X11/lib
+#       /usr/X11R6/lib
+#       /sw/lib
+#       /usr/local/lib
+# )
+# 
+# ENDIF (NOT WIN32)
 
 
 IF (FTGL_INCLUDE_DIR AND FTGL_LIBRARIES)
