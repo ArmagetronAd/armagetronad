@@ -40,6 +40,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "rRender.h"
 
 #include "uMenu.h"
+#include "uInputQueue.h"
 
 #include "tMemManager.h"
 #include "tSysTime.h"
@@ -52,7 +53,7 @@ int gServerBrowser::lowPort  = 4534;
 
 int gServerBrowser::highPort = 4540;
 static bool continuePoll = false;
-static int sg_simultaneous = 5;
+static int sg_simultaneous = 20;
 static tSettingItem< int > sg_simultaneousConf( "BROWSER_QUERIES_SIMULTANEOUS", sg_simultaneous );
 
 static tOutput *sg_StartHelpText = NULL;
@@ -146,6 +147,7 @@ protected:
     bool        favorite_; //!< flag indicating whether this is a favorite
 public:
     void AddFavorite();
+    void RemoveFavorite();
     void SetServer(nServerInfo *s);
     gServerInfo *GetServer();
 
@@ -292,6 +294,12 @@ void gServerBrowser::BrowseServers()
       ConnectToServer(nServerInfo::GetFirstServer());
     */
     browser.Update();
+
+    // eat excess input the user made while the list was fetched
+    SDL_Event ignore;
+    REAL time;
+    while(su_GetSDLInput(ignore, time)) ;
+
     browser.Enter();
 
     nServerInfo::GetFromLANContinuouslyStop();
@@ -608,6 +616,10 @@ void gServerMenuItem::Render(REAL x,REAL y,REAL alpha, bool selected)
             {
                 score << "B ";
             }
+            else
+            {
+                score << "  ";
+            }
 
             score << s;
             users << server->Users() << "/" << server->MaxUsers();
@@ -749,12 +761,19 @@ bool gServerMenuItem::Event( SDL_Event& event )
             return true;
             break;
         case 'b':
-            if ( server && !favorite_ )
+            if ( server )
             {
-                favorite_ = gServerFavorites::AddFavorite( server );
+                if (favorite_ ) {
+                    gServerFavorites::RemoveFavorite( server );
+                    favorite_ = false;
+                } else {
+                    favorite_ = gServerFavorites::AddFavorite( server );
+                }
             }
+            (static_cast<gServerMenu*>(menu))->Update();
+
             return true;
-            break;
+            break;    
         default:
             break;
         }
