@@ -136,6 +136,13 @@ gParser::myxmlGetProp(xmlNodePtr cur, const char *name) {
     return (char *)xmlGetProp(cur, (const xmlChar *)name);
 }
 
+const char *
+gParser::myxmlGetPropString(xmlNodePtr cur, const char *name, const char *defaultValue) {
+    char *r = myxmlGetProp(cur, name);
+    if (r == NULL)	return defaultValue;
+    return r;
+}
+
 int
 gParser::myxmlGetPropInt(xmlNodePtr cur, const char *name) {
     char *v = myxmlGetProp(cur, name);
@@ -975,7 +982,7 @@ gParser::parseZoneEffectGroupSelector(eGrid * grid, xmlNodePtr cur, const xmlCha
 
     // TODO: add tolower()
     // Get the label of the selector to be used
-    string selectorAttribute( myxmlGetProp(cur, "target"));
+    string selectorAttribute( myxmlGetPropString(cur, "target", "self"));
     transform (selectorAttribute.begin(), selectorAttribute.end(), selectorAttribute.begin(), tolower);
 
     std::map<tString, selectorFactory>::const_iterator iterSelectorFactory;
@@ -1030,7 +1037,7 @@ gParser::parseZoneEffectGroupValidator(eGrid * grid, xmlNodePtr cur, const xmlCh
 
     // TODO: add tolower()
     // Get the label of the validator to be used
-    string validatorAttribute( myxmlGetProp(cur, "user"));
+    string validatorAttribute( myxmlGetPropString(cur, "user", "all"));
     transform (validatorAttribute.begin(),validatorAttribute.end(), validatorAttribute.begin(), tolower);
 
     std::map<tString, validatorFactory>::const_iterator iterValidatorFactory;

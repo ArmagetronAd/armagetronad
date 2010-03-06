@@ -141,7 +141,6 @@ private:
     int m_Mode;
 protected:
     virtual bool ValidateXml(FILE* docfd, const char* uri=NULL, const char* filepath=NULL);
-    virtual bool ValidateXml(const char* buffer, const char* uri=NULL);
 };
 
 #ifndef _MSC_VER

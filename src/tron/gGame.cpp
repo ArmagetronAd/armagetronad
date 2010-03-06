@@ -89,6 +89,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <stdlib.h>
 #include <string>
 #include <fstream>
+#include <sstream>
 #include <ctype.h>
 #include <time.h>
 #include <map>
@@ -4259,6 +4260,63 @@ void gameloop_idle()
     sn_SendPlanned();
     GameLoop(false);
 }
+
+void gGame::InGameParsing(const char * buffer)
+{
+    con << "> Start ingame parsing ...\n";
+    if (!(grid && aParser)) {
+        con << "ERROR: grid or parser not ready!\n";
+        return;
+    }
+    if (!buffer) {
+        con << "ERROR: ingame parsing can't parsed null string!\n";
+        return;
+    }
+    xmlDocPtr doc = xmlParseMemory(buffer, strlen(buffer));
+    if (!doc) {
+        con << "ERROR: xml parsing failed!\n";
+        return;
+    }
+    con << "  Dtd: " << (const char*) aParser->m_Doc->extSubset->SystemID << "\n";
+    xmlDtdPtr dtd = xmlParseDTD(NULL, aParser->m_Doc->extSubset->SystemID);
+    if (!dtd) {
+        con << "ERROR: dtd parsing failed!\n";
+        return;
+    }
+    xmlValidCtxt vctx;
+    memset(&vctx, 0, sizeof(vctx));
+    if (!xmlValidateDtd(&vctx, doc, dtd)) {
+        xmlErrorPtr err = xmlGetLastError();
+        if (!err) return;
+        con << "ERROR: xml validation failed at line " << err->line; 
+        if (err->int2) con << ", column " << err->int2;
+        con << ": " << err->message << "\n";
+        return;
+    }
+    xmlNodePtr node;
+    node = xmlDocGetRootElement (doc);
+    if (!node) {
+        con << "ERROR: ingame parsing can't get root node!\n";
+        return;
+    }
+    con << "> xml successfully parsed!\n";
+    aParser->parseMap(grid, node);
+    xmlFreeDoc(doc);
+    con << "> Ingame parsing successful!\n";
+}
+
+static void sg_InGameParsing(std::istream &s)
+{
+    std::stringstream ss;
+    ss << s.rdbuf();
+    std::string str = ss.str();
+    const char* pStr = str.c_str();
+    sg_currentGame->InGameParsing(pStr);
+}
+
+static tConfItemFunc sg_InGameParsing_conf("INGAME_PARSING",&sg_InGameParsing);
+static tAccessLevelSetter sg_InGameParsingConfLevel( sg_InGameParsing_conf, tAccessLevel_Owner );
+
 
 static void sg_EnterGameCleanup();
 

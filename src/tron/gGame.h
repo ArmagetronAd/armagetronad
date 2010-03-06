@@ -120,6 +120,8 @@ public:
 
     virtual bool GameLoop(bool input=true); // return values: exit the game loop?
 
+    void InGameParsing(const char * buffer); // parse a string to spawn additional objects to the grid
+
     bool GridIsReady(int c); // can we transfer gameObjects that need the grid to exist?
     eGrid * Grid() const { return grid; }
 

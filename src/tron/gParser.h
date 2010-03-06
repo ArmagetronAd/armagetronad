@@ -93,6 +93,7 @@ public:
 protected:
     bool trueOrFalse(char *str);
     char *myxmlGetProp(xmlNodePtr cur, const char *name);
+    const char *myxmlGetPropString(xmlNodePtr cur, const char *name, const char *defaultValue);
     int myxmlGetPropInt(xmlNodePtr cur, const char *name);
     float myxmlGetPropFloat(xmlNodePtr cur, const char *name);
     bool myxmlGetPropBool(xmlNodePtr cur, const char *name);
@@ -148,7 +149,9 @@ protected:
 
     void parseField(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
     void parseWorld(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword = NULL);
+public:
     void parseMap(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword = NULL);
+protected:
 
     void parseSettings(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword = NULL);
     void parseSetting(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
