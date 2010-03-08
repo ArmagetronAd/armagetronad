@@ -390,6 +390,7 @@ ping_flood_time_50_help       Kürzeste tolerierte Zeit, während der 10 Pings von
 ping_flood_time_100_help      Kürzeste tolerierte Zeit, während der 10 Pings von einer Maschine kommen dürfen.
 ping_flood_global_help        Die Zeiten, die bei PING_FLOOD_TIME_X angegeben sind, zählen, mit diesem Faktor multipliziert, auch für Pings von allen Maschinen zusammengenommen. Ein negativer Wert schaltet dieses Feature ab.
 
+shuffle_spam_messages_per_round_help Maximale Zahl an Positionsänderungsnachrichten, die pro Spieler und pro Runde gezeigt werden. Null bedeutet keine Grenze.
 spam_protection_repeat_help   Mindestzeit, die zwischen gleichlautenden Chat-Nachrichten liegen muss.
 spam_protection_help          Schärfe des Spamschutzes; der Kehrwert bestimmt die minimale Zeit zwischen zwei Nachrichten.
 spam_protection_vote_help     Extrafaktor auf SPAM_PROTECTION für das eröffnen von Abstimmungen.
@@ -1444,10 +1445,10 @@ network_opts_predict_text     Vorhersage:
 network_opts_predict_help     Sagt die Bewegung der Vehikel im Spiel, basierend auf der Netzwerkverzögerung, voraus. Allerdings wirken die Bewegungen dadurch sehr eckig. Ich persönlich verlasse mich lieber auf das Lag-O-Meter.
 
 network_opts_inrate_text      Bandbreite, eingehend:
-network_opts_inrate_help      Die maximale Anzahl von Kilobytes, die der Server diesem Rechner schickt. Maximale Werte: 1 für 9.6k-Modems, 3 für 28.8k-Modems, 7 für 56k-Modems, 8 für ISDN, mehr für Kabelmodems, (A)DSL and LAN. 4 ist üblicherweise ausreichend.
+network_opts_inrate_help      Die maximale Anzahl von Kilobytes, die der Server diesem Rechner schickt. Maximale Werte: 3 für 28.8k-Modems, 7 für 56k-Modems, 8 für ISDN, 16 und mehr für Kabelmodems, (A)DSL and LAN.
 
 network_opts_outrate_text     Bandbreite, ausgehend:
-network_opts_outrate_help     Die maximale Anzahl von Kilobytes, die das Netzwerk nach aussen schickt. Drei ist normalerweise für Clients völlig ausreichend.
+network_opts_outrate_help     Die maximale Anzahl von Kilobytes, die das Netzwerk nach aussen schickt. Drei ist normalerweise für Clients völlig ausreichend, zuviel einzutragen schadet aber auch fast nie.
 
 
 network_opts_deletepw_text    Passwörter löschen
@@ -2320,6 +2321,7 @@ no_real_teams                 Keine Teams mit mehr als einem Spieler.\n
 player_topologypolice         Die Topologiepolizei befiehlt: \1
 
 team_shuffle                  \1 wird von Position \2 auf \3 verschoben.
+team_shuffle_suppress         Diese Runde werden keine weiteren Verschiebenachrichten für diesen Spieler mehr gezeigt.\n
 player_noshuffleup            Du darfst dich hier nicht selbst befördern.\n
 player_noshuffle              Dein Positionsänderungswunsch hat keinen Effekt.\n
 player_shuffle_error          /shuffle erwartet eine Zahl als Argument; mit explizitem Vorzeichen (+/-) wird die Position um die angegebene Zahl an Plätzen verändert, ohne Vorzeichen geht es and die angegebene absolute Position.\n

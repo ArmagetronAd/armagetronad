@@ -427,6 +427,16 @@ static void S_ZoneWallInteraction(eWall *pWall)
     }
 }
 
+gZone & gZone::SetOwner(ePlayerNetID *pOwner)
+{
+    pOwner_ = pOwner;
+    if (pOwner) 
+        team = pOwner->CurrentTeam();
+    else
+        team = NULL;
+    return *this;
+}
+
 void gZone::BounceOffPoint(eCoord dest, eCoord collide, REAL mod)
 {
     //Use a simple angle deflection for now not even accounting for points that made too far in
@@ -1078,6 +1088,11 @@ gDeathZoneHack::gDeathZoneHack( nMessage & m )
 
 gDeathZoneHack::~gDeathZoneHack( void )
 {
+    if( pLastShotCollision )
+    {
+        pLastShotCollision->pLastShotCollision = NULL;
+        pLastShotCollision = NULL;
+    }
 }
 
 static int score_deathzone=-1;
@@ -1163,6 +1178,12 @@ extern tList<ePlayerNetID> se_PlayerNetIDs;
 
 ePlayerNetID * validatePlayer(ePlayerNetID *pPlayer)
 {
+    // with smart pointers, all players are now valid.
+    return pPlayer;
+
+    // old code when player pointers were dumb pointers, before dereferencing them,
+    // it was required to check whether they were still alive (not very safe, by the way.)
+    /*
     if (pPlayer)
     {
         int i;
@@ -1181,6 +1202,7 @@ ePlayerNetID * validatePlayer(ePlayerNetID *pPlayer)
     }
 
     return (pPlayer);
+    */
 }
 
 gCycle * gDeathZoneHack::getPlayerCycle(ePlayerNetID *pPlayer)
@@ -1280,7 +1302,7 @@ void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
                 preyName << *prey;
                 preyName << tColoredString::ColorString(1,1,1);
 
-                if (prey->CurrentTeam() != hunter->CurrentTeam())
+                if (prey->CurrentTeam() != team)
                 {
                     char const *pWinString = "$player_win_shot";
                     char const *pFreeString = "$player_free_shot";
@@ -1404,7 +1426,7 @@ void gDeathZoneHack::OnEnter( gDeathZoneHack * target, REAL time )
             if ((pOwner_) && (pShotOwner))
             {
                 //We have both owners
-                if ((pOwner_->CurrentTeam() != pShotOwner->CurrentTeam()) ||
+                if ((team != target->team) ||
                     (sg_shotKillSelf))
                 {
                     //Shoot the zombie!
