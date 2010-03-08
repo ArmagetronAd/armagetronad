@@ -1094,6 +1094,8 @@ ePlayer::ePlayer(){
     nAuthentication::SetLoginResultCallback (&ResultCallback);
 #endif
 
+    lastTooltip_ = -100;
+
     nameTeamAfterMe = false;
     favoriteNumberOfPlayersPerTeam = 3;
 
@@ -1271,6 +1273,16 @@ ePlayer::~ePlayer(){
 #ifndef DEDICATED
 void ePlayer::Render(){
     if (cam) cam->Render();
+
+    // present tooltip help
+    double now = tSysTimeFloat();
+    if( se_GameTime() > 1 && now-lastTooltip_ > 1 && !rConsole::CenterDisplayActive() )
+    {
+        if( uActionTooltip::Help( ID()+1 ) || uActionTooltip::Help( 0 ) || VetoActiveTooltip(ID()+1) )
+            lastTooltip_ = now;
+        else
+            lastTooltip_ = now+60;
+    }
 }
 #endif
 
@@ -3897,6 +3909,33 @@ bool ePlayer::PlayerIsInGame(int p){
     return PlayerViewport(p) && PlayerConfig(p);
 }
 
+// veto function for tooltips that require a controllable game object
+bool ePlayer::VetoActiveTooltip(int player)
+{
+    // check if the player exists and controls a living object
+    if( player == 0 )
+    {
+        return true;
+    }
+    ePlayer * p = PlayerConfig(player-1);
+    if ( !p )
+    {
+        return true;
+    }
+    ePlayerNetID * pn = p->netPlayer;
+    if ( !pn )
+    {
+        return true;
+    }
+    eNetGameObject *o = pn->Object();
+    if (!o || !o->Alive())
+    {
+        return true;
+    }
+
+    return false;
+}
+
 static tConfItemBase *vpbtp[MAX_VIEWPORTS];
 
 void ePlayer::Init(){
@@ -3942,6 +3981,15 @@ void ePlayer::Exit(){
 }
 
 uActionPlayer ePlayer::s_chat("CHAT");
+
+// only display chat in multiplayer games
+static bool se_ChatTooltipVeto(int)
+{
+    return sn_GetNetState() == nSTANDALONE;
+}
+
+uActionTooltip ePlayer::s_chatTooltip(ePlayer::s_chat, 1, &se_ChatTooltipVeto);
+uActionTooltip s_toggleSpectatorTooltip(se_toggleSpectator, 1, &se_ChatTooltipVeto);
 
 int pingCharity = 100;
 static const int maxPingCharity = 300;

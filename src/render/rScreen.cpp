@@ -662,6 +662,14 @@ static bool lowlevel_sr_InitDisplay(){
         sr_blacklistDisplayLists=true;
     }
 
+    if(strstr(gl_vendor,"SiS"))
+    {
+        // almost nobody has those cards/chips, and we have
+        // at least one bluescreen problem reported.
+        sr_blacklistDisplayLists=true;
+    }
+
+   
 #ifndef WIN32
     if(!strstr(gl_renderer,"Voodoo3"))
 #endif

@@ -3128,11 +3128,11 @@ static REAL sn_SendPlanned1(){
     if (time<lastTime-.01 || time>lastTime+1000)
 #ifdef DEBUG
     {
-        tERR_ERROR("Timer hickup!");
+        tERR_ERROR("Timer hiccup!");
     }
 #else
     {
-        tERR_WARN("Timer hickup!");
+        tERR_WARN("Timer hiccup!");
         lastTime=time;
     }
 #endif
