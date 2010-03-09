@@ -1432,7 +1432,7 @@ bool nAddress::IsSet () const
 //!
 //!		@param	a1  first address to compare
 //!		@param	a2  second address to compare
-//!		@return
+//!		@return -1 if the addresses don't match, +1 if the ports don't match, 0 if everything matches.
 //!
 // *******************************************************************************************
 
@@ -1533,16 +1533,7 @@ int nSocket::Create( void )
 #ifndef WIN32
     char tos = IPTOS_LOWDELAY;
 
-    int ret = setsockopt( socket_, IPPROTO_IP, IP_TOS, &tos, sizeof(char) );
-
-    // remove this error reporting some time later, the success is not critical
-    if ( ret != 0 )
-    {
-        static bool warn=true;
-        if ( warn )
-            con << "Setting TOS to LOWDELAY failed.\n";
-        warn=false;
-    }
+    setsockopt( socket_, IPPROTO_IP, IP_TOS, &tos, sizeof(char) );
 #endif    
 
     // unblock it
@@ -2088,9 +2079,9 @@ int nSocket::Write( const int8 * buf, int len, const sockaddr * addr, int addrle
 
     // check if return value was archived
     static char const * section = "SEND";
+    static tReproducibleRandomizer randomizer;
     if ( !tRecorder::Playback( section, ret ) )
     {
-        static tReproducibleRandomizer randomizer;
 #ifdef DEBUG
         // pretend send was successful in packet loss simulation
         if ( sn_simulateSendPacketLoss > randomizer.Get() )

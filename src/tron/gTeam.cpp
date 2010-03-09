@@ -163,7 +163,7 @@ public:
 
     virtual void Enter()
     {
-        player->SetTeamWish(NULL);
+        SetSpectator( player, true );
         menu->Exit();
     }
 };
@@ -258,14 +258,9 @@ public:
         uMenu playerMenu( title );
         tArray<uMenuItem*> items;
 
-        if ( !player->IsSpectating() )
+        if ( !player->IsSpectating() || player->NextTeam() != NULL)
         {
             items[ items.Len() ] = tNEW( gMenuItemSpectate ) ( &playerMenu, player );
-        }
-
-        if ( player->NextTeam()!=NULL)
-        {
-            items[items.Len()] = tNEW(gMenuItemSpectate) (&playerMenu, player);
         }
 
         // first pass add teams who probably can't be joined

@@ -34,6 +34,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "nProtoBuf.h"
 #include "eTeam.pb.h"
+#include "aa_config.h"
 
 tString & operator << ( tString &s, const eTeam & team)
 {
@@ -314,7 +315,7 @@ void eTeam::UpdateAppearance()
                     updateName = oldest->teamname;
                 else
                     // use player name as teamname
-                    updateName = oldest->GetUserName();
+                    updateName = oldest->GetName();
             }
 
             color = oldest->color;
@@ -342,7 +343,7 @@ void eTeam::UpdateAppearance()
         // only display a message if
         // the oldest player changed the name of the team
         // the server also sets the teamname sometimes
-        if(sn_GetNetState()!=nCLIENT && oldest)
+        if(sn_GetNetState()!=nCLIENT && oldest && !( name == "" || name == tString(tOutput("$team_empty"))) )
         {
             tOutput message;
             tColoredString name;
@@ -404,7 +405,11 @@ bool eTeam::IsLocked() const
 
 bool eTeam::IsLockedFor( const ePlayerNetID * p ) const
 {
-    return IsLocked() || ( p->GetAccessLevel() > ePlayerNetID::AccessLevelRequiredToPlay() );
+    bool isLocked = IsLocked();
+#ifdef KRAWALL_SERVER
+    isLocked = isLocked || ( p->GetAccessLevel() > ePlayerNetID::AccessLevelRequiredToPlay() );
+#endif
+    return isLocked;
 }
 
 static void se_UnlockAllTeams ( void )

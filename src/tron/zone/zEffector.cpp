@@ -120,9 +120,15 @@ zEffectorManager::Create(std::string const & typex, tXmlParser::node const * nod
 
     FactoryList::const_iterator iterEffectorFactory;
     if ((iterEffectorFactory = _effectors().find(type)) == _effectors().end())
-        return NULL;
+    {
+#ifdef DEBUG
+        tERR_WARN("Unknown effect \"" + type + '"');
+#endif
+        return zEffector::create();
+    }
+        
     
-    VoidFactoryBase*Fy = iterEffectorFactory->second;
+    VoidFactoryBase*Fy = iterEffectorFactory->second.get();
 
     if (NullFactory*ptr = dynamic_cast<NullFactory*>(Fy))
     {

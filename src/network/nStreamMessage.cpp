@@ -93,9 +93,10 @@ unsigned long int sn_ExpandMessageID( unsigned short id, unsigned short sender )
     return expanders[sender].ExpandMessageID(id);
 }
 
-nStreamMessage::nStreamMessage( nStreamDescriptor const & descriptor, unsigned int messageID )
+nStreamMessage::nStreamMessage( nStreamDescriptor const & descriptor, unsigned int messageID, unsigned int senderID )
 : nMessageBase( descriptor, messageID ), readOut(0), descriptor_( descriptor )
 {
+    senderID_ = senderID;
 }
 
 nStreamMessage::nStreamMessage( nStreamDescriptor const & descriptor )

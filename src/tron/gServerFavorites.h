@@ -60,6 +60,9 @@ public:
 
     //! add a server to the list of favorites
     static bool AddFavorite( nServerInfoBase const * server );
+	
+	//! remove a server from the list of favorites
+	static bool RemoveFavorite( nServerInfoBase const * server );
 
     //! test whether a server is bookmarked
     static bool IsFavorite( nServerInfoBase const * server );

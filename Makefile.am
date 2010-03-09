@@ -33,7 +33,7 @@ masterUninstallTasks=echo 'No tasks for the master server'
 endif
 
 languagedata=language/english_base.txt language/english_base_notranslate.txt language/american.txt language/british.txt\
-             language/deutsch.txt language/french.txt language/spanish.txt language/polish_transliterated.txt language/polish.txt
+             language/deutsch.txt language/french.txt language/spanish.txt language/polish.txt
 
 nobase_dist_language_DATA=language/languages.txt.in $(languagedata) language/update.py
 
@@ -66,8 +66,14 @@ doxy:
 
 # generate configure.ac with version hardcoded and ChangeLog
 dist-hook-scm:
-#	replace dynamic version in configure.ac with the version this build is configured with
-	sed -e "s/m4_include(version)//" -e "s/AUTOMATIC_VERSION/$(VERSION)/" < @srcdir@/configure.ac > $(distdir)/configure.ac
+#	replace dynamic version in configure.ac with the version this build is configured with,
+#   as well as default package and program name
+	sed \
+	-e "s/m4_include(version)//" \
+	-e "s/AC_INIT(armagetronad,AUTOMATIC_VERSION)/AC_INIT(@prognamebase@,$(VERSION))/" \
+	-e "s/  progname=.*/  progname='@prognamebase@'/" \
+	-e "s/  progtitle=.*/  progtitle='@progtitle@'/" \
+	< @srcdir@/configure.ac > $(distdir)/configure.ac
 
 #   regenerate dependant files so they no longer reference to the file "version" which will be removed
 	cp @srcdir@/bootstrap.sh $(distdir)

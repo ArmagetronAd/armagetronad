@@ -1372,6 +1372,10 @@ void gAIPlayer::SetTraceSide(int side)
         lazySideChange = -10;
 }
 
+// flag set if pathfinding is enabled. It's an expensive opeeration, so we just turn it
+// off if the PC can't handle it. Doesn't doo much good, anyway.
+static bool sg_pathEnabled = true;
+
 // state change:
 void gAIPlayer::SwitchToState(gAI_STATE nextState, REAL minTime)
 {
@@ -1402,6 +1406,10 @@ void gAIPlayer::SwitchToState(gAI_STATE nextState, REAL minTime)
         break;
     case AI_PATH:
         nextAbility = character->properties[AI_STATE_PATH];
+        if (!sg_pathEnabled )
+        {
+            nextAbility = 0;
+        }
         break;
     case AI_SURVIVE:
         break;
@@ -1601,7 +1609,6 @@ void gAIPlayer::ThinkTrace( ThinkData & data )
     return;
 }
 
-
 void gAIPlayer::ThinkPath( ThinkData & data )
 {
     int lr = 0;
@@ -1626,6 +1633,14 @@ void gAIPlayer::ThinkPath( ThinkData & data )
 
     if ( nextStateChange < se_GameTime() )
     {
+        if( !sg_pathEnabled )
+        {
+            SwitchToState(AI_SURVIVE, 5);
+            EmergencySurvive( data );
+
+            return;
+        }
+
         gSensor p(Object(),Object()->Position(), tDir);
         p.detect(REAL(.9999999));
         if (p.hit >=  .9999999)  // free line of sight to victim. Switch to close combat.
@@ -1643,11 +1658,38 @@ void gAIPlayer::ThinkPath( ThinkData & data )
     if (lastPath < se_GameTime() - 10)
         if (target->CurrentFace())
         {
+            if( !sg_pathEnabled )
+            {
+                // yeah, apparently, we can't go on with this. Bail out.
+                SwitchToState(AI_SURVIVE, 5);
+                EmergencySurvive( data );
+                return;
+            }
+
             Object()->FindCurrentFace();
+            REAL before = tRealSysTimeFloat();
             eHalfEdge::FindPath(Object()->Position(), Object()->CurrentFace(),
                                 target->Position(), target->CurrentFace(),
                                 Object(),
                                 path);
+
+            // calculate (and archive) time used for pathfinding
+            REAL used = tRealSysTimeFloat() - before;
+            static char const * section = "PATH_TIME";
+            tRecorder::PlaybackStrict( section, used );
+            tRecorder::Record( section, used );
+            static REAL usedAverage = 0;
+            const REAL decay = .1;
+            usedAverage = (usedAverage+used*decay)/(1+decay);
+
+            // disable pathfinding if it just takes too long.
+            if ( used > .06 || usedAverage > .03 )
+            {
+#ifdef DEBUG
+                con << "Path finding is too expensive for this PC. Disabling it.\n";
+#endif
+                sg_pathEnabled = false;
+            }
             lastPath = se_GameTime();
         }
 
@@ -1759,7 +1801,7 @@ void gAIPlayer::ThinkCloseCombat( ThinkData & data )
         p.detect(REAL(1));
         if (p.hit <=  .999999)  // no free line of sight to victim. Switch to path mode.
         {
-            SwitchToState(AI_PATH, 5);
+            SwitchToState(sg_pathEnabled ? AI_PATH : AI_SURVIVE, 5);
             EmergencySurvive( data );
             return;
         }
