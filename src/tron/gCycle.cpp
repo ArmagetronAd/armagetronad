@@ -2409,6 +2409,8 @@ void gCycle::InitAfterCreation(){
     MyInitAfterCreation();
 }
 
+static eLadderLogWriter se_cycleCreatedWriter("CYCLE_CREATED", false);
+
 gCycle::gCycle(eGrid *grid, const eCoord &pos,const eCoord &d,ePlayerNetID *p)
         :gCycleMovement(grid, pos,d,p,false),
         engine(NULL),
@@ -2418,6 +2420,9 @@ gCycle::gCycle(eGrid *grid, const eCoord &pos,const eCoord &d,ePlayerNetID *p)
         currentWall(NULL),
         lastWall(NULL)
 {
+    se_cycleCreatedWriter << p->GetLogName() << pos.x << pos.y << d.x << d.y;
+    se_cycleCreatedWriter.write();
+    
     windingNumberWrapped_ = windingNumber_ = Grid()->DirectionWinding(dirDrive);
     dirDrive = Grid()->GetDirection(windingNumberWrapped_);
     dir = dirDrive;
