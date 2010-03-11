@@ -62,6 +62,21 @@ std::deque<zZone *> sz_Zones;
 
 // *******************************************************************************
 // *
+// *   MapZones
+// *
+// *******************************************************************************
+//!
+//!        @param      none
+//!        @return     reference to static std::map of zone pointers
+//!
+// *******************************************************************************
+zZone::zoneMap& zZone::MapZones() {
+    static zZone::zoneMap mapZones;
+    return mapZones;
+}
+
+// *******************************************************************************
+// *
 // *   EvaluateFunctionNow
 // *
 // *******************************************************************************
@@ -183,6 +198,7 @@ void zZone::RemoveFromZoneList(void) {
         );
     if(pos_found != sz_Zones.end())
         sz_Zones.erase(pos_found);
+    if (!name_.empty()) MapZones().erase(name_);
 }
 
 void

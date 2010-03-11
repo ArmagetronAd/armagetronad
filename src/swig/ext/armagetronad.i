@@ -22,4 +22,5 @@
 %include "tron/gSpawn.i"
 %include "tron/gArena.i"
 #%include "tron/gAIBase.i"
+%include "tron/zZone.i"
 

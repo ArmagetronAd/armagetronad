@@ -6,6 +6,21 @@
 #include "defs.h"
 #include "nNetwork.h"
 
+// *******************************************************************************
+// *
+// *   Monitors
+// *
+// *******************************************************************************
+//!
+//!        @param      none
+//!        @return     reference to static std::map of monitor pointers
+//!
+// *******************************************************************************
+zMonitor::monitorMap& zMonitor::Monitors() {
+    static zMonitor::monitorMap monitors;
+    return monitors;
+}
+
 /*
  * Keep track of everybody contributing to the monitor (for a tic atm)
  */

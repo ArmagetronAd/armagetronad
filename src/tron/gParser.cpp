@@ -48,11 +48,6 @@
 #endif
 
 #ifdef ENABLE_ZONESV2
-typedef std::map< string, zMonitorPtr > monitorMap;
-monitorMap monitors;
-
-typedef std::map< string, zZonePtr > zoneMap;
-zoneMap mapZones;
 
 #include "nNetObject.h"
 typedef std::map< string, nNetObjectID > MapIdToGameId;
@@ -795,8 +790,8 @@ gParser::parseZoneEffectGroupZone(eGrid * grid, xmlNodePtr cur, const xmlChar * 
     zZonePtr refZone;
 
     // Does the zone to be monitored is already registered
-    zoneMap::const_iterator iterZone;
-    if ((iterZone = mapZones.find(zoneName)) != mapZones.end()) {
+    zZone::zoneMap::const_iterator iterZone;
+    if ((iterZone = zZone::MapZones().find(zoneName)) != zZone::MapZones().end()) {
         // load the zone
         refZone = iterZone->second;
         infl = zZoneInfluencePtr(new zZoneInfluence(refZone));
@@ -880,9 +875,9 @@ gParser::parseZoneEffectGroupMonitor(eGrid * grid, xmlNodePtr cur, const xmlChar
     zMonitorPtr ref;
     // Find the associated monitor
 
-    monitorMap::const_iterator iterMonitor;
+    zMonitor::monitorMap::const_iterator iterMonitor;
     // associate the label to the proper effector
-    if ((iterMonitor = monitors.find(monitorName)) != monitors.end()) {
+    if ((iterMonitor = zMonitor::Monitors().find(monitorName)) != zMonitor::Monitors().end()) {
         ref = iterMonitor->second;
     }
     else {
@@ -890,7 +885,7 @@ gParser::parseZoneEffectGroupMonitor(eGrid * grid, xmlNodePtr cur, const xmlChar
         // It should be populated later
         ref = zMonitorPtr(new zMonitor(grid));
         if (!monitorName.empty()) {
-            monitors[monitorName] = ref;
+            zMonitor::Monitors()[monitorName] = ref;
             ref->setName(monitorName);
         }
     }
@@ -1195,7 +1190,7 @@ gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
             // If a name was assigned to it, save the zone in a map so it can be refered to
             if (!zoneName.empty())
             {
-                mapZones[zoneName] = zone;
+                zZone::MapZones()[zoneName] = zone;
 
                 std::vector< zZoneInfluencePtr > myZIP = ZIPtoMap[zoneName];
                 std::vector< zZoneInfluencePtr >::iterator i;
@@ -1450,9 +1445,9 @@ gParser::parseMonitor(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
         zMonitorPtr monitor;
 
         string monitorName(myxmlGetProp(cur, "name"));
-        monitorMap::const_iterator iterMonitor;
+        zMonitor::monitorMap::const_iterator iterMonitor;
         // associate the label to the proper effector
-        if ((iterMonitor = monitors.find(monitorName)) != monitors.end()) {
+        if ((iterMonitor = zMonitor::Monitors().find(monitorName)) != zMonitor::Monitors().end()) {
             monitor = iterMonitor->second;
         }
         else {
@@ -1460,7 +1455,7 @@ gParser::parseMonitor(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
             // It should be populated later
             monitor = zMonitorPtr(new zMonitor(grid));
             if (!monitorName.empty()) {
-                monitors[monitorName] = monitor;
+                zMonitor::Monitors()[monitorName] = monitor;
                 monitor->setName(monitorName);
             }
         }
@@ -2112,7 +2107,8 @@ gParser::Parse()
     cur = xmlDocGetRootElement(m_Doc);
 
 #ifdef ENABLE_ZONESV2
-    monitors.clear();
+    zZone::MapZones().clear();
+    zMonitor::Monitors().clear();
     state.set("arena", theArena);
     state.set("grid", theGrid);
 #endif
@@ -2170,7 +2166,6 @@ gParser::Parse()
     }
 
 #ifdef ENABLE_ZONESV2
-    mapZones.clear();
     ZIPtoMap.clear();
 #endif
 
@@ -2182,6 +2177,6 @@ gParser::Parse()
 zMonitorPtr
 gParser::getMonitor(string monitorName)
 {
-    return monitors[monitorName];
+    return zMonitor::Monitors()[monitorName];
 }
 #endif

@@ -26,6 +26,12 @@ typedef gVectorExtra<Triggerer> triggerers;
 
 class zMonitor: public eReferencableGameObject {
 public:
+// std::map of monitors for parsing and scripting ...
+// monitors are always named so all of them should be included. 
+    typedef std::map< string, zMonitorPtr > monitorMap;
+    static monitorMap& Monitors();
+
+public:
     zMonitor(eGrid * _grid):
             eReferencableGameObject( _grid, eCoord( 1,1 ), eCoord( 0,0 ), NULL, true ),
             totalInfluence(0),
@@ -48,10 +54,13 @@ public:
 
     virtual void RemoveFromGame(){
         RemoveFromListsAll();
+        if (!name.empty()) Monitors().erase(name);
     };
 
-    void setName(string name) {
-        this->name = name;
+    void setName(string p_name) {
+        if (!p_name.empty()) Monitors().erase(p_name);
+        this->name = p_name;
+        if (!p_name.empty()) Monitors()[p_name]=this;
     };
     void addRule(zMonitorRulePtr aRule);
 

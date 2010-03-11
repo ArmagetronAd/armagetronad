@@ -183,7 +183,11 @@ bool zFortressZone::Timestep( REAL time )
     // no team?!? Get rid of this zone ASAP.
     if ( !team )
     {
-        return true;
+        if ( currentState_ != State_Conquering )
+        {
+            OnRoundBegin();
+            if ( !team ) currentState_ = State_Conquering;
+        }
     }
 
     if ( currentState_ == State_Conquering )

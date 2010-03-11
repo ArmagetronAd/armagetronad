@@ -43,9 +43,17 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 namespace Zone { class ZoneSync; }
 
 class gParserState;
+class zZone;
+typedef tJUST_CONTROLLED_PTR< zZone> zZonePtr;
 
 class zZone: public eNetGameObject
 {
+public:
+// std::map of zones for parsing and scripting ...
+// only named zones will be included.
+    typedef std::map< string, zZonePtr > zoneMap;
+    static zoneMap& MapZones();
+
 private:
     static
     void*pos;  //!< pos is not valid for zones
@@ -82,16 +90,20 @@ public:
     REAL           __deprecated GetScale           ( void ) const;	                //!< Gets the current scale
     rColor const   __deprecated GetColor( void ) const;	//!< Gets the current color
 
-    void addEffectGroupEnter  (zEffectGroupPtr anEffectGroup) {effectGroupEnter.push_back  (anEffectGroup);};
-    void addEffectGroupInside (zEffectGroupPtr anEffectGroup) {effectGroupInside.push_back (anEffectGroup);};
-    void addEffectGroupLeave  (zEffectGroupPtr anEffectGroup) {effectGroupLeave.push_back  (anEffectGroup);};
-    void addEffectGroupOutside(zEffectGroupPtr anEffectGroup) {effectGroupOutside.push_back(anEffectGroup);};
+    void addEffectGroupEnter  (zEffectGroupPtr anEffectGroup) {effectGroupEnter.push_back  (anEffectGroup);}
+    void addEffectGroupInside (zEffectGroupPtr anEffectGroup) {effectGroupInside.push_back (anEffectGroup);}
+    void addEffectGroupLeave  (zEffectGroupPtr anEffectGroup) {effectGroupLeave.push_back  (anEffectGroup);}
+    void addEffectGroupOutside(zEffectGroupPtr anEffectGroup) {effectGroupOutside.push_back(anEffectGroup);}
 
-    void setShape (zShapePtr aShape) { shape = aShape; if( shape ) eGameObject::pos = shape->Position(); };
-    zShapePtr getShape() { return shape; };
+    void setShape (zShapePtr aShape) { shape = aShape; if( shape ) eGameObject::pos = shape->Position(); }
+    zShapePtr getShape() { return shape; }
 
-    void setName(string name) {name_ = name;};
-    string getName() { return name_; };
+    void setName(string name) {
+        if (!name_.empty()) MapZones().erase(name_);
+        name_ = name;
+        if (!name.empty()) MapZones()[name]=this;
+    }
+    string getName() { return name_; }
 
 protected:
     REAL createTime_;            //!< the time the zone was created at
