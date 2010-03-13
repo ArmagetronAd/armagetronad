@@ -4261,6 +4261,14 @@ void gameloop_idle()
     GameLoop(false);
 }
 
+static bool sg_InGameParsingDtDValidation = true;
+static tSettingItem< bool > sg_InGameParsingDtDValidation_conf( "INGAME_PARSING_DTD_VALIDATION", sg_InGameParsingDtDValidation );
+static tAccessLevelSetter sg_InGameParsingDtDValidationConfLevel( sg_InGameParsingDtDValidation_conf, tAccessLevel_Owner );
+
+static tString sg_InGameParsingDtd("");
+static tConfItemLine sg_InGameParsingDtdConf( "INGAME_PARSING_DTD", sg_InGameParsingDtd );
+static tAccessLevelSetter sg_InGameParsingDtdConfLevel( sg_InGameParsingDtdConf, tAccessLevel_Owner );
+
 void gGame::InGameParsing(const char * buffer)
 {
     con << "> Start ingame parsing ...\n";
@@ -4277,21 +4285,26 @@ void gGame::InGameParsing(const char * buffer)
         con << "ERROR: xml parsing failed!\n";
         return;
     }
-    con << "  Dtd: " << (const char*) aParser->m_Doc->extSubset->SystemID << "\n";
-    xmlDtdPtr dtd = xmlParseDTD(NULL, aParser->m_Doc->extSubset->SystemID);
-    if (!dtd) {
-        con << "ERROR: dtd parsing failed!\n";
-        return;
-    }
-    xmlValidCtxt vctx;
-    memset(&vctx, 0, sizeof(vctx));
-    if (!xmlValidateDtd(&vctx, doc, dtd)) {
-        xmlErrorPtr err = xmlGetLastError();
-        if (!err) return;
-        con << "ERROR: xml validation failed at line " << err->line; 
-        if (err->int2) con << ", column " << err->int2;
-        con << ": " << err->message << "\n";
-        return;
+    if (sg_InGameParsingDtDValidation) {
+        // first try specific dtd
+        xmlDtdPtr dtd = xmlParseDTD(NULL, reinterpret_cast<xmlChar const *>(sg_InGameParsingDtd.c_str()));
+        // if it failed, get the one from current map
+        if (!dtd) dtd = xmlParseDTD(NULL, aParser->m_Doc->extSubset->SystemID);
+        if (!dtd) {
+            con << "ERROR: dtd parsing failed!\n";
+            return;
+        }
+        con << "  Dtd: " << (const char*) aParser->m_Doc->extSubset->SystemID << "\n";
+        xmlValidCtxt vctx;
+        memset(&vctx, 0, sizeof(vctx));
+        if (!xmlValidateDtd(&vctx, doc, dtd)) {
+            xmlErrorPtr err = xmlGetLastError();
+            if (!err) return;
+            con << "ERROR: xml validation failed at line " << err->line; 
+            if (err->int2) con << ", column " << err->int2;
+            con << ": " << err->message << "\n";
+            return;
+        }
     }
     xmlNodePtr node;
     node = xmlDocGetRootElement (doc);

@@ -5978,6 +5978,7 @@ void eLadderLogWriter::write() {
         args tmp;
         tmp << data;
         tScripting::GetInstance().Exec(callback, &tmp);
+        tmp.clear();
 #endif
     }
     cache = id;

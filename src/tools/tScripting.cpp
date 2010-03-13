@@ -218,7 +218,10 @@ extern "C" {
         return NULL;
     }
 
-    tScripting::proc_type tScripting::GetProcRef(std::string code) {
+    tScripting::proc_type tScripting::GetProcRef(std::string name) {
+        PyObject *result;
+        result = PyObject_GetAttrString(main_module, name.c_str());
+        if (PyCallable_Check(result)) return result;
         return NULL;
     }
 

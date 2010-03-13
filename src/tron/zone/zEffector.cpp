@@ -318,6 +318,10 @@ void zEffectorSpawnPlayer::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTarg
     }
 }
 
+//
+//
+//
+
 static zEffectorRegistration regSetting("setting", "", zEffectorSetting::create);
 
 void
@@ -336,5 +340,39 @@ void zEffectorSetting::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
     tConfItemBase::LoadAll(ss);
 
 }
+
+//
+//
+//
+
+#ifdef ENABLE_SCRIPTING
+static zEffectorRegistration regScripting("script", "", zEffectorScripting::create);
+
+void
+zEffectorScripting::readXML(tXmlParser::node const & node)
+{
+    if (node.HasProp("scriptName"))
+    {
+        callback = tScripting::GetInstance().GetProcRef(node.GetProp("scriptName"));
+    }
+}
+
+void zEffectorScripting::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
+{
+    if (!callback) return;
+    args data, tmp;
+    gVectorExtra<ePlayerNetID *>::iterator iter;
+    for(iter = d_calculatedTargets.begin();
+            iter != d_calculatedTargets.end();
+            ++iter)
+    {
+        data << (*iter)->GetName();
+    }
+    tmp << data;
+    tScripting::GetInstance().Exec(callback, &tmp);
+    tmp.clear();
+    data.clear();
+}
+#endif
 
 

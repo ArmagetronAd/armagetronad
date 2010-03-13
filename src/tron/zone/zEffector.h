@@ -41,6 +41,10 @@ class gParserState;
 #include "tFunction.h"
 #include "tXmlParser.h"
 
+#ifdef ENABLE_SCRIPTING
+#include "tScripting.h"
+#endif
+
 class gParserState;
 
 class zEffector
@@ -287,6 +291,25 @@ protected:
 };
 
 
+#ifdef ENABLE_SCRIPTING
+class zEffectorScripting : public zEffector
+{
+public:
+    static zEffector* create() { return new zEffectorScripting(); };
+    zEffectorScripting():zEffector() { }; //<! Constructor
+    zEffectorScripting(zEffectorScripting const &other):
+            zEffector(other) { };
+    void operator=(zEffectorScripting const &other) { this->zEffector::operator=(other); }; //!< overloaded assignment operator
+    virtual zEffectorScripting *copy(void) const { return new zEffectorScripting(*this); };
+    virtual ~zEffectorScripting() {};
+
+    void readXML(tXmlParser::node const &);
+
+    virtual void effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets);
+protected:
+    tScripting::proc_type callback;
+};
+#endif
 
 
 #endif
