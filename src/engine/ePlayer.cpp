@@ -5772,7 +5772,8 @@ void se_SaveToScoreFile(const tOutput &o){
 
 void ePlayerNetID::AddScore(int points,
                             const tOutput& reasonwin,
-                            const tOutput& reasonlose)
+                            const tOutput& reasonlose,
+                            bool shouldPrint)
 {
     if (points==0)
         return;
@@ -5803,8 +5804,9 @@ void ePlayerNetID::AddScore(int points,
         else
             message.Append(reasonlose);
     }
-
-    sn_ConsoleOut(message);
+    
+    if (shouldPrint)
+        sn_ConsoleOut(message);
     RequestSync(true);
 
     se_SaveToScoreFile(message);

@@ -3270,6 +3270,9 @@ eLadderLogWriter sg_deathFragWriter("DEATH_FRAG", true);
 eLadderLogWriter sg_deathSuicideWriter("DEATH_SUICIDE", true);
 eLadderLogWriter sg_deathTeamkillWriter("DEATH_TEAMKILL", true);
 
+static bool sg_suicideMessage = true;
+static tSettingItem< bool > sg_suicideMessageConf( "SUICIDE_MESSAGE", sg_suicideMessage );
+
 void gCycle::KillAt( const eCoord& deathPos){
     // don't kill invulnerable cycles
     if ( !Vulnerable() )
@@ -3314,12 +3317,15 @@ void gCycle::KillAt( const eCoord& deathPos){
             sg_deathSuicideWriter.write();
 
             if ( score_suicide )
-                hunter->AddScore(score_suicide, tOutput(), "$player_lose_suicide" );
+                hunter->AddScore(score_suicide, tOutput(), "$player_lose_suicide", sg_suicideMessage );
             else
             {
-                tColoredString hunterName;
-                hunterName << *hunter << tColoredString::ColorString(1,1,1);
-                sn_ConsoleOut( tOutput( "$player_free_suicide", hunterName ) );
+                if (sg_suicideMessage)
+                {
+                    tColoredString hunterName;
+                    hunterName << *hunter << tColoredString::ColorString(1,1,1);
+                    sn_ConsoleOut( tOutput( "$player_free_suicide", hunterName ) );
+                }
             }
         }
     }
