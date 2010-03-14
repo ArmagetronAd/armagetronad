@@ -344,7 +344,7 @@ public:
     eNetGameObject *Object() const;
 
     // void SetRubber(REAL rubber2);
-    void AddScore(int points, const tOutput& reasonwin, const tOutput& reasonlose);
+    void AddScore(int points, const tOutput& reasonwin, const tOutput& reasonlose, bool shouldPrint=true);
     int Score()const {return score;}
     int TotalScore() const;
     static void ResetScoreDifferences(); //<! Resets the last stored score so ScoreDifferences takes this as a reference time
