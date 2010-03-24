@@ -1,0 +1,9 @@
+# http://www.cmake.org/Bug/view.php?id=4068
+
+if(MINGW)
+  set(CMAKE_RC_COMPILER_INIT windres)
+  ENABLE_LANGUAGE(RC)
+  SET(CMAKE_RC_OUTPUT_EXTENSION .o)
+  SET(CMAKE_RC_COMPILE_OBJECT
+    "<CMAKE_RC_COMPILER> <FLAGS> <DEFINES> -o <OBJECT> <SOURCE>")
+endif(MINGW)

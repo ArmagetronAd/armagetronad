@@ -1,7 +1,7 @@
 //Microsoft Developer Studio generated resource script.
 //http://msdn.microsoft.com/library/default.asp?url=/library/en-us/tools/tools/about_resource_files.asp
 #include "resource.h"
-#include "..\tTrueVersion.h"
+#include "tTrueVersion.h"
 
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
@@ -22,6 +22,7 @@ LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
 #pragma code_page(1252)
 //28605 code page value for ISO-885-15 (includes euro sign)
 #endif //_WIN32
+#endif    // German (Germany) resources
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -30,24 +31,21 @@ LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-10               ICON    DISCARDABLE     "..\\icons\\armagetronad-16-16-32.ico"
-11               ICON    DISCARDABLE     "..\\icons\\armagetronad-24-24-32.ico"
-12               ICON    DISCARDABLE     "..\\icons\\armagetronad-32-32-32.ico"
-13               ICON    DISCARDABLE     "..\\icons\\armagetronad-48-48-32.ico"
-14               ICON    DISCARDABLE     "..\\icons\\armagetronad-64-64-32.ico"
-15               ICON    DISCARDABLE     "..\\icons\\armagetronad-16-16-16.ico"
-16               ICON    DISCARDABLE     "..\\icons\\armagetronad-24-24-16.ico"
-17               ICON    DISCARDABLE     "..\\icons\\armagetronad-32-32-16.ico"
-18               ICON    DISCARDABLE     "..\\icons\\armagetronad-16-16-256.ico"
-1                ICON    DISCARDABLE     "..\\icons\\armagetronad-32-32-256.ico"
-2                ICON    DISCARDABLE     "..\\icons\\armagetronad-24-24-256.ico"
-3                ICON    DISCARDABLE     "..\\icons\\armagetronad-48-48-256.ico"
-4                ICON    DISCARDABLE     "..\\icons\\armagetronad-64-64-256.ico"
+10               ICON    DISCARDABLE     "../win32/icons/armagetronad-16-16-32.ico"
+11               ICON    DISCARDABLE     "../win32/icons/armagetronad-24-24-32.ico"
+12               ICON    DISCARDABLE     "../win32/icons/armagetronad-32-32-32.ico"
+13               ICON    DISCARDABLE     "../win32/icons/armagetronad-48-48-32.ico"
+14               ICON    DISCARDABLE     "../win32/icons/armagetronad-64-64-32.ico"
+15               ICON    DISCARDABLE     "../win32/icons/armagetronad-16-16-16.ico"
+16               ICON    DISCARDABLE     "../win32/icons/armagetronad-24-24-16.ico"
+17               ICON    DISCARDABLE     "../win32/icons/armagetronad-32-32-16.ico"
+18               ICON    DISCARDABLE     "../win32/icons/armagetronad-16-16-256.ico"
+1                ICON    DISCARDABLE     "../win32/icons/armagetronad-32-32-256.ico"
+2                ICON    DISCARDABLE     "../win32/icons/armagetronad-24-24-256.ico"
+3                ICON    DISCARDABLE     "../win32/icons/armagetronad-48-48-256.ico"
+4                ICON    DISCARDABLE     "../win32/icons/armagetronad-64-64-256.ico"
 
 
-
-
-#endif    // German (Germany) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
@@ -59,6 +57,7 @@ LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
 LANGUAGE LANG_SPANISH, SUBLANG_SPANISH_MODERN
 #pragma code_page(1252)
 #endif //_WIN32
+#endif    // Spanish (Modern) resources
 
 #ifndef _MAC
 /////////////////////////////////////////////////////////////////////////////
@@ -66,9 +65,12 @@ LANGUAGE LANG_SPANISH, SUBLANG_SPANISH_MODERN
 // Version
 //
 
+#define VER_FILEVERSION 0
+#define VER_PRODUCTVERSION 0
+
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION MAJOR_VERSION
- PRODUCTVERSION MAJOR_VERSION
+/* FILEVERSION VER_FILEVERSION
+ PRODUCTVERSION VER_PRODUCTVERSION*/
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS VS_FF_PRERELEASE | VS_FF_DEBUG//0x1L
@@ -128,7 +130,6 @@ END
 
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Spanish (Modern) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

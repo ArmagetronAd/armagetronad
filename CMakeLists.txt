@@ -16,6 +16,8 @@ include (CheckFunctionExists)
 include (CheckLibraryExists)
 include (CheckTypeSize)
 include (Deps)
+include (DLLs)
+include (RcMingwHack)
 
 ##### OPTIONS #####
 
@@ -177,6 +179,20 @@ if(NOT DEDICATED)
         ${FREETYPE_LIBRARIES}
         ${PNG_LIBRARIES}
         )
+    if(WIN32)
+        GetDLLs(dlls
+            ${SDL_LIBRARY}
+            ${SDLMIXER_LIBRARY}
+            ${SDLIMAGE_LIBRARY}
+            ${FTGL_LIBRARY}
+            ${FREETYPE_LIBRARY}
+            ${PNG_LIBRARY}
+        )
+        install(FILES
+            ${dlls}
+            DESTINATION ${BINDIR}
+            COMPONENT client)
+    endif()
 endif()
 
 link_libraries(
@@ -184,6 +200,18 @@ link_libraries(
     ${LIBXML2_LIBRARIES}
     ${WS2_LIBRARIES}
     )
+if(WIN32)
+    GetDLLs(dlls
+    ${PROTOBUF_LIBRARY}
+    ${LIBXML2_LIBRARIES}
+    )
+    install(FILES
+        ${dlls}
+        DESTINATION ${BINDIR}
+    )
+endif()
+
+
 
 include_directories (
     ${${progname}_SOURCE_DIR}/src/tools/
@@ -261,9 +289,9 @@ if(UNIX AND NOT APPLE)
     UNIVERSAL_VAR (AA_OLDVARDIR "${OLDVARDIR}${OLDVARDIR_SUFFIX}")
 elseif(WIN32)
 ##### WINDOWS PATHS #####
-    UNIVERSAL_VAR (PREFIX "/Program\ Files/${progtitle}/")
-    UNIVERSAL_VAR (BINDIR "${PREFIX}")
-    UNIVERSAL_VAR (AA_DATADIR "${PREFIX}")
+    UNIVERSAL_VAR (PREFIX "${CMAKE_INSTALL_PREFIX}")
+    UNIVERSAL_VAR (BINDIR ".")
+    UNIVERSAL_VAR (AA_DATADIR ".")
     UNIVERSAL_VAR (USER_DATA_DIR "\\\${APPDATA}/${progtitle}")
     UNIVERSAL_VAR (SCREENSHOT_DIR "\\\${MYPICTURES}/${progtitle}")
 elseif(APPLE)
@@ -276,11 +304,6 @@ endif()
 UNIVERSAL_VAR (AA_SYSCONFDIR "${AA_DATADIR}/config")
 
 ##### CPACK #####
-if(DEDICATED)
-    set(CPACK_PACKAGE_NAME "${progtitle} Dedicated Server")
-endif()
-set(CPACK_PACKAGE_VENDOR "Armagetron Advanced Team")
-
 if(EXISTS ${${progname}_BINARY_DIR}/src/tTrueVersion.h)
     file(STRINGS ${${progname}_BINARY_DIR}/src/tTrueVersion.h trueversionfile)
     foreach(line ${trueversionfile})
@@ -290,11 +313,29 @@ if(EXISTS ${${progname}_BINARY_DIR}/src/tTrueVersion.h)
     endforeach()
 else()
     message("If you intend on building packages with CPack, please call cmake again after building.")
-    set(CPACK_PACKAGE_VERSION NOTFOUND)
+    unset(CPACK_PACKAGE_VERSION)
 endif()
 
-include (CPack)
+set(CPACK_PACKAGE_NAME "${progtitle}")
+if(DEDICATED)
+    set(CPACK_PACKAGE_NAME "${progtitle} Dedicated Server")
+endif()
+set(CPACK_PACKAGE_VENDOR "Armagetron Advanced Team")
 
+set(CPACK_RESOURCE_FILE_LICENSE "${${progname}_SOURCE_DIR}/COPYING.txt")
+#set(CPACK_TOPLEVEL_DIRECTORY "${${progname}_BINARY_DIR}/CPackFiles/")
+#SET(CPACK_SET_DESTDIR "ON")
+
+set(CPACK_PACKAGE_FILE_NAME "${progname}-${CPACK_PACKAGE_VERSION}-${CMAKE_SYSTEM_NAME}")
+#set(CPACK_PACKAGE_EXECUTABLES armagetronad;"Armagetron Advanced")
+
+set(CPACK_PACKAGE_ICON "${${progname}_SOURCE_DIR}/win32/banner.bmp")
+
+if(DEFINED CPACK_PACKAGE_VERSION) # Don't allow making CPack packages if version can't be known
+    include (CPack)
+endif()
+
+#########
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/aa_config.h.in ${CMAKE_CURRENT_BINARY_DIR}/src/aa_config.h)
 
 message (STATUS "Generating src/tUniversalVariables.h")
@@ -343,9 +384,15 @@ set(EXTRA_SOURCES
     src/tron/cockpit/cMap.cpp
     src/tron/cockpit/cCamview.cpp
     )
+if(WIN32 AND NOT DEDICATED)
+    set(RESOURCEFILE
+        src/win32/armagetron.rc
+    )
+    message("armagetron.rc passed")
+endif()
 
 if(BUILDCLIENT AND NOT DEDICATED)
-    add_executable (${progname} WIN32 src/tools/tVersion.cpp ${EXTRA_SOURCES} src/tron/gClient.cpp)
+    add_executable (${progname} WIN32 ${RESOURCEFILE} src/tools/tVersion.cpp ${EXTRA_SOURCES} src/tron/gClient.cpp)
     target_link_libraries (${progname} tron engine ui render network tools protos mathexpr particles scrap )
     add_dependencies (${progname} 
         generateversion

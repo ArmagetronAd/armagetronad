@@ -1,7 +1,7 @@
 configure_file (armagetronad.desktop.in ${CMAKE_CURRENT_BINARY_DIR}/armagetronad.desktop)
 configure_file (armagetronad.protocol.in ${CMAKE_CURRENT_BINARY_DIR}/armagetronad.protocol)
 
-if(DESKTOP)
+if(DESKTOP AND NOT WIN32)
     install(FILES armagetronad.desktop
         DESTINATION "${DATADIR}/applications")
     install(DIRECTORY icons
