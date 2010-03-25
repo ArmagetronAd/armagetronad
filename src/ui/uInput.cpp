@@ -42,7 +42,7 @@ static int     su_allActionsLen = 0;
 uAction::uAction(uAction *&anchor,const char* name,
                  int priority_,
                  uInputType t)
-        :tListItem<uAction>(anchor),type(t),priority(priority_),internalName(name){
+        :tListItem<uAction>(anchor),tooltip_(NULL),type(t),priority(priority_),internalName(name){
     globalID = localID = su_allActionsLen++;
 
     tASSERT(localID < uMAX_ACTIONS);
@@ -67,7 +67,7 @@ uAction::uAction(uAction *&anchor,const char* name,
                  const tOutput& help,
                  int priority_,
                  uInputType t)
-        :tListItem<uAction>(anchor),type(t),priority(priority_),internalName(name), description(desc), helpText(help){
+        :tListItem<uAction>(anchor),tooltip_(NULL),type(t),priority(priority_),internalName(name), description(desc), helpText(help){
     globalID = localID = su_allActionsLen++;
 
     tASSERT(localID < uMAX_ACTIONS);
@@ -615,7 +615,7 @@ bool su_HandleEvent(SDL_Event &e, bool delayed ){
 
     su_delayed = delayed;
 
-    // there is nearly alllways a mouse motion tEvent:
+    // there is nearly allways a mouse motion tEvent:
     int xrel=e.motion.xrel;
     int yrel=-e.motion.yrel;
 
@@ -772,10 +772,18 @@ bool uBindPlayer::Delayable()
 }
 
 bool uBindPlayer::DoActivate(REAL x){
+    bool ret = false;
     if (ePlayer==0)
-        return  GlobalAct(act,x);
+        ret = GlobalAct(act,x);
     else
-        return uPlayerPrototype::PlayerConfig(ePlayer-1)->Act(act,x);
+        ret = uPlayerPrototype::PlayerConfig(ePlayer-1)->Act(act,x);
+
+    if( ret && act && act->GetTooltip() && x > 0 )
+    {
+        act->GetTooltip()->Count(ePlayer);
+    }
+    
+    return ret;
 }
 
 
@@ -806,9 +814,11 @@ bool uActionGlobalFunc::GlobalAct(uAction *act, REAL x){
     return false;
 }
 
-static uActionGlobal mess_up("MESS_UP");
+static uActionGlobal mess_up("MESS_UP",1);
 
-static uActionGlobal mess_down("MESS_DOWN");
+static uActionGlobal mess_down("MESS_DOWN",2);
+
+static uActionGlobal mess_end("MESS_END",3);
 
 static bool messup_func(REAL x){
     if (x>0){
@@ -824,5 +834,130 @@ static bool messdown_func(REAL x){
     return true;
 }
 
+static bool messend_func(REAL x){
+    if (x>0){
+        sr_con.End(2);
+    }
+    return true;
+}
+
 static uActionGlobalFunc mu(&mess_up,&messup_func);
 static uActionGlobalFunc md(&mess_down,&messdown_func);
+static uActionGlobalFunc me(&mess_end,&messend_func);
+
+// ********
+// tooltips
+// ********
+
+uActionTooltip::uActionTooltip( uAction & action, int numHelp, VETOFUNC * veto )
+: tConfItemBase(action.internalName + "_TOOLTIP"), action_( action ), veto_(veto)
+{
+    help_ = tString("$input_") + action.internalName + "_tooltip";
+    tToLower( help_ );
+
+    // initialize array holding the number of help attempts to give left
+    for( int i = uMAX_PLAYERS; i >= 0; --i )
+    {
+        activationsLeft_[i] = 0; // numHelp;
+    }
+
+    action.tooltip_ = this;
+}
+
+uActionTooltip::~uActionTooltip()
+{
+    if( action_.tooltip_ == this )
+        action_.tooltip_ = NULL;
+        
+}
+
+bool uActionTooltip::Help( int player )
+{
+    // find most needed tooltip
+    uActionTooltip * mostWanted = NULL;
+
+    // keys bound to the action of the tooltip that needs help
+    tString maps;
+    tString last;
+
+    // run through binds
+    for( int i = SDLK_NEWLAST - 1; i >= 0; --i )
+    {
+        uBind * bind = keymap[i];
+        if( !bind ||!bind->CheckPlayer(player) )
+            continue;
+        uAction * action = bind->act;
+        if( !action )
+            continue;
+        uActionTooltip * tooltip = action->GetTooltip();
+        if( !tooltip || ( tooltip->veto_ && (*tooltip->veto_)(player) ) )
+        {
+            continue;
+        }
+        
+        int activationsLeft = tooltip->activationsLeft_[player];
+        if( activationsLeft > 0 && 
+            ( !mostWanted || mostWanted->activationsLeft_[player] < activationsLeft ) )
+        {
+            mostWanted = tooltip;
+            maps = "";
+            last = "";
+        }
+
+        // build up key list
+        if( mostWanted == tooltip )
+        {
+            if ( maps.Len() > 1 )
+            {
+                maps << ", ";
+            }
+            if ( last.Len() > 1 )
+            {
+                maps << last;
+            }
+            last = tString("<") + keyname(i) + ">";
+        }
+    }
+
+    if( mostWanted )
+    {
+        if( last.Len() > 1 )
+        {
+            if( maps.Len() > 1 )
+                maps << " " << tOutput("$input_or") << " " << last;
+            else
+                maps = last;
+        }
+
+        con.CenterDisplay(tString(tOutput(mostWanted->help_, maps)));
+
+        return true;
+    }
+
+        return false;
+}
+
+void uActionTooltip::Count( int player )
+{
+    if ( activationsLeft_[player] > 0 )
+    {
+        activationsLeft_[player]--;
+        Help(player);
+    }
+}
+
+void uActionTooltip::WriteVal(std::ostream & s )
+{
+    for( int i = 0; i <= uMAX_PLAYERS; ++i )
+    {
+        s << activationsLeft_[i] << " ";
+    }
+}
+
+void uActionTooltip::ReadVal(std::istream & s )
+{
+    for( int i = 0; i <= uMAX_PLAYERS; ++i )
+    {
+        s >> activationsLeft_[i];
+    }
+}

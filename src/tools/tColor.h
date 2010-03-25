@@ -43,6 +43,8 @@ public:
 
     void FillFrom( const char * c );		//!< Fills this color object from a color code string
 
+    bool operator == ( const tColor & other ) const; //!< comparison operator
+
     // the colors are public because they are independent of each other
     REAL r_, g_, b_, a_;                    //!< Color values
 

@@ -158,7 +158,7 @@ $(srcdir)/ChangeLog: .changetag
 	touch $@
 	rm -f $@
 	@echo -e "\nGenerating ChangeLog from SVN/BZR, please be patient...\n"
-	cd ${srcdir}; svn log 2>&1 > ChangeLog || bzr log 2>&1 > ChangeLog || echo "No official releasse: no changelog" > ChangeLog
+	cd ${srcdir}; svn log 2>&1 > ChangeLog || bzr log --gnu-changelog 2>&1 > ChangeLog || echo "No official releasse: no changelog" > ChangeLog
 	test -r $@ || touch $@
 
 # extra target to make before a real distribution is built

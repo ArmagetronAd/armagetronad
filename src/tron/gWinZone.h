@@ -79,191 +79,115 @@ nMessage & operator >> ( nMessage & m, tFunction & f );
 //! basic zone class: handles rendering and entwork syncing
 class gZone: public eNetGameObject
 {
-	public:
-								 //!< local constructor
-		gZone(eGrid *grid, const eCoord &pos, bool dynamicCreation = false);
-		gZone(nMessage &m);		 //!< network constructor
-		~gZone();				 //!< destructor
+public:
+    gZone(eGrid *grid, const eCoord &pos, bool dynamicCreation = false); //!< local constructor
+    gZone(nMessage &m);                    //!< network constructor
+    ~gZone();                              //!< destructor
 
-		void SetReferenceTime(); //!< sets the reference time to the current time
+    void SetReferenceTime();               //!< sets the reference time to the current time
 
-								 //!< Sets the current position
-		gZone &         SetPosition         ( eCoord const & position );
-								 //!< Gets the current position
-		eCoord          GetPosition         ( void ) const;
-								 //!< Gets the current position
-		gZone const &   GetPosition         ( eCoord & position ) const;
-								 //!< Sets the current velocity
-		gZone &         SetVelocity         ( eCoord const & velocity );
-								 //!< Gets the current velocity
-		eCoord          GetVelocity         ( void ) const;
-								 //!< Gets the current velocity
-		gZone const &   GetVelocity         ( eCoord & velocity ) const;
-								 //!< Sets the current radius
-		gZone &         SetRadius           ( REAL radius );
-								 //!< Sets the radius to go to smoothly
-		gZone &         SetRadiusSmoothly   ( REAL radius, REAL expansionSpeed = 5);
-								 //!< Gets the current radius
-		REAL            GetRadius           ( void ) const;
-								 //!< Gets the current radius
-		gZone const &   GetRadius           ( REAL & radius ) const;
-								 //!< Sets the current expansion speed
-		gZone &         SetExpansionSpeed   ( REAL expansionSpeed );
-								 //!< Gets the current expansion speed
-		REAL            GetExpansionSpeed   ( void ) const;
-								 //!< Gets the current expansion speed
-		gZone const &   GetExpansionSpeed   ( REAL & expansionSpeed ) const;
-								 //!< Sets the current rotation speed
-		gZone &         SetRotationSpeed    ( REAL rotationSpeed );
-								 //!< Gets the current rotation speed
-		REAL            GetRotationSpeed    ( void ) const;
-								 //!< Gets the current rotation speed
-		gZone const &   GetRotationSpeed    ( REAL & rotationSpeed ) const;
-								 //!< Sets the current acceleration of the rotation
-		gZone &         SetRotationAcceleration( REAL rotationAcceleration );
-								 //!< Gets the current acceleration of the rotation
-		REAL            GetRotationAcceleration( void ) const;
-								 //!< Gets the current acceleration of the rotation
-		gZone const &   GetRotationAcceleration( REAL & rotationAcceleration ) const;
+    gZone &         SetPosition         ( eCoord const & position );	//!< Sets the current position
+    eCoord          GetPosition         ( void ) const;	                //!< Gets the current position
+    gZone const &   GetPosition         ( eCoord & position ) const;	//!< Gets the current position
+    gZone &         SetVelocity         ( eCoord const & velocity );	//!< Sets the current velocity
+    eCoord          GetVelocity         ( void ) const;	                //!< Gets the current velocity
+    gZone const &   GetVelocity         ( eCoord & velocity ) const;	//!< Gets the current velocity
+    gZone &         SetRadius           ( REAL radius );	            //!< Sets the current radius
+    gZone &         SetRadiusSmoothly   ( REAL radius, REAL expansionSpeed = 5); //!< Gets the current radius
+    REAL            GetRadius           ( void ) const;	                //!< Gets the current radius
+    gZone const &   GetRadius           ( REAL & radius ) const;	    //!< Gets the current radius
+    gZone &         SetExpansionSpeed   ( REAL expansionSpeed );	    //!< Sets the current expansion speed
+    REAL            GetExpansionSpeed   ( void ) const;	                //!< Gets the current expansion speed
+    gZone const &   GetExpansionSpeed   ( REAL & expansionSpeed ) const;//!< Gets the current expansion speed
+    gZone &         SetRotationSpeed    ( REAL rotationSpeed );	        //!< Sets the current rotation speed
+    REAL            GetRotationSpeed    ( void ) const;	                //!< Gets the current rotation speed
+    gZone const &   GetRotationSpeed    ( REAL & rotationSpeed ) const;	//!< Gets the current rotation speed
+    gZone &         SetRotationAcceleration( REAL rotationAcceleration );	        //!< Sets the current acceleration of the rotation
+    REAL            GetRotationAcceleration( void ) const;	                        //!< Gets the current acceleration of the rotation
+    gZone const &   GetRotationAcceleration( REAL & rotationAcceleration ) const;	//!< Gets the current acceleration of the rotation
+    gZone &         SetWallInteract     (bool wallInteract) {wallInteract_=wallInteract; return *this;}
+    gZone &         SetWallBouncesLeft  (int wallBouncesLeft) {wallBouncesLeft_=wallBouncesLeft; return *this;}
 
-		gZone &         SetWallInteract     (bool wallInteract) {wallInteract_=wallInteract; return *this;}
-		gZone &         SetWallBouncesLeft  (int wallBouncesLeft) {wallBouncesLeft_=wallBouncesLeft; return *this;}
+    gZone &         SetColor            (gRealColor color) {color_ = color; return *this;}      //!< Sets the current color
+    gRealColor &    GetColor            () {return color_;}             //!< Gets the current color
+    gZone &         GetColor            (gRealColor & color) {color = color_; return *this;}    //!< Gets the current color
+    gZone &         SetOwner            (ePlayerNetID *pOwner); //!< Sets the current owner
+    ePlayerNetID *  GetOwner            () {return pOwner_;}  //!< Sets the current owner
+    gZone &         SetSeekingCycle     (gCycle *pCycle) {if (pCycle) {seeking_ = true;} else {seeking_ = false;} pSeekingCycle_ = pCycle; return *this;}  //!< Sets the current seeking cycle
+    gCycle *        GetSeekingCycle     () {return pSeekingCycle_;}  //!< Sets the current seeking cycle
+    gZone &         SetTargetRadius     (REAL radius) {targetRadius_ = radius; return *this;}      //!< Sets the target radius
+    gZone &         SetFallSpeed        (REAL speed) {fallSpeed_ = speed; return *this;}      //!< Sets the fall speed
+    void BounceOffPoint(eCoord dest, eCoord collide);
+    gZone & AddWaypoint(eCoord const &point);
+    void Destroy();
+    bool destroyed_;
+    tString             GetName() {return name_;}
+    void                SetName(tString name) {name_ = name;}
+    static int          FindFirst(tString name);
+    static int          FindNext(tString name, int prev_pos);
 
-								 //!< Sets the current color
-		gZone &         SetColor            (gRealColor color)
-		{
-			color_ = color; return *this;
-		}
-								 //!< Gets the current color
-		gRealColor &    GetColor            ()
-		{
-			return color_;
-		}
-								 //!< Gets the current color
-		gZone &         GetColor            (gRealColor & color)
-		{
-			color = color_; return *this;
-		}
-								 //!< Sets the current owner
-		gZone &         SetOwner            (ePlayerNetID *pOwner)
-		{
-			pOwner_ = pOwner; return *this;
-		}
-								 //!< Sets the current owner
-		ePlayerNetID *  GetOwner            ()
-		{
-			return pOwner_;
-		}
-								 //!< Sets the current seeking cycle
-		gZone &         SetSeekingCycle     (gCycle *pCycle)
-		{
-			if (pCycle)
-			{
-				seeking_ = true;
-			}
-			else
-			{
-				seeking_ = false;
-			}
-			pSeekingCycle_ = pCycle; return *this;
-		}
-								 //!< Sets the current seeking cycle
-		gCycle *        GetSeekingCycle     ()
-		{
-			return pSeekingCycle_;
-		}
-								 //!< Sets the target radius
-		gZone &         SetTargetRadius     (REAL radius)
-		{
-			targetRadius_ = radius; return *this;
-		}
-								 //!< Sets the fall speed
-		gZone &         SetFallSpeed        (REAL speed)
-		{
-			fallSpeed_ = speed; return *this;
-		}
-		void BounceOffPoint(eCoord dest, eCoord collide);
+protected:
+    bool wallInteract_;
+    int wallBouncesLeft_;
+    eWall *pLastWall_; // dumb pointer is OK, it is never dereferenced.
+    REAL lastImpactTime_;
+    REAL newImpactTime_;
+    eCoord newImpactPos_;
+    eCoord newImpactVelocity_;
 
-		gZone & AddWaypoint(eCoord const &point);
-		void Destroy();
-		bool destroyed_;
+    bool dynamicCreation_;  //??? remove
+    tJUST_CONTROLLED_PTR< ePlayerNetID > pOwner_;
+    tJUST_CONTROLLED_PTR< gCycle > pSeekingCycle_;       //!< cycle owner of this zone
+    bool seeking_;
+    REAL targetRadius_;
+    REAL expectedRadius_;
+    bool resizeRequested_;
+    REAL previousExpansionSpeed_;
+    REAL fallSpeed_;
+    REAL lastSeekTime_;
 
-		tString             GetName() {return name_;}
-		void                SetName(tString name) {name_ = name;}
-		static int          FindFirst(tString name);
-		static int          FindNext(tString name, int prev_pos);
-	protected:
-		bool wallInteract_;
-		int wallBouncesLeft_;
-		REAL lastImpactTime_;
-		REAL newImpactTime_;
-		eCoord newImpactPos_;
-		eCoord newImpactVelocity_;
+    tString         name_;
+    gRealColor color_;           //!< the zone's color
+    REAL createTime_;            //!< the time the zone was created at
 
-		bool dynamicCreation_;	 //??? remove
-		ePlayerNetID *pOwner_;
-		gCycle *pSeekingCycle_;	 //!< cycle owner of this zone
-		bool seeking_;
-		REAL targetRadius_;
-		REAL expectedRadius_;
-		bool resizeRequested_;
-		REAL previousExpansionSpeed_;
-		REAL fallSpeed_;
-		REAL lastSeekTime_;
+    REAL referenceTime_;         //!< reference time for function evaluations
+    tFunction posx_;             //!< time dependence of x component of position
+    tFunction posy_;             //!< time dependence of y component of position
+    tFunction radius_;           //!< time dependence of radius
+    tFunction rotationSpeed_;    //!< the zone's rotation speed
+    eCoord    rotation_;         //!< the current rotation state
+    
+    std::vector<eCoord> route_;
+    unsigned int lastCoord_;
+    REAL nextUpdate_;
 
-		tString         name_;
-		gRealColor color_;		 //!< the zone's color
-		REAL createTime_;		 //!< the time the zone was created at
+    virtual bool Timestep(REAL currentTime);     //!< simulates behaviour up to currentTime
+    virtual void OnVanish();                     //!< called when the zone vanishes
 
-		REAL referenceTime_;	 //!< reference time for function evaluations
-		tFunction posx_;		 //!< time dependence of x component of position
-		tFunction posy_;		 //!< time dependence of y component of position
-		tFunction radius_;		 //!< time dependence of radius
-		tFunction rotationSpeed_;//!< the zone's rotation speed
-		eCoord    rotation_;	 //!< the current rotation state
+private:
+    virtual void WriteCreate(nMessage &m); //!< writes data for network constructor
+    virtual void WriteSync(nMessage &m);   //!< writes sync data
+    virtual void ReadSync(nMessage &m);    //!< reads sync data
 
-		std::vector<eCoord> route_;
-		unsigned int lastCoord_;
-		REAL nextUpdate_;
+    virtual void InteractWith( eGameObject *target,REAL time,int recursion=1 ); //!< looks for objects inzide the zone and reacts on them
 
-								 //!< simulates behaviour up to currentTime
-		virtual bool Timestep(REAL currentTime);
-		virtual void OnVanish(); //!< called when the zone vanishes
+    virtual void OnEnter( gCycle *target, REAL time ); //!< reacts on objects inside the zone
+    virtual void OnEnter( gZone *target, REAL time );  //!< reacts on objects inside the zone
 
-	private:
-								 //!< writes data for network constructor
-		virtual void WriteCreate(nMessage &m);
-								 //!< writes sync data
-		virtual void WriteSync(nMessage &m);
-								 //!< reads sync data
-		virtual void ReadSync(nMessage &m);
+    virtual nDescriptor& CreatorDescriptor() const; //!< returns the descriptor to recreate this object over the network
 
-								 //!< looks for objects inzide the zone and reacts on them
-		virtual void InteractWith( eGameObject *target,REAL time,int recursion=1 );
+    REAL Radius() const;           //!< returns the current radius
 
-								 //!< reacts on objects inside the zone
-		virtual void OnEnter( gCycle *target, REAL time );
-								 //!< reacts on objects inside the zone
-		virtual void OnEnter( gZone *target, REAL time );
+    virtual void Render(const eCamera *cam);  //!< renders the zone
 
-								 //!< returns the descriptor to recreate this object over the network
-		virtual nDescriptor& CreatorDescriptor() const;
+    virtual void DrawSvg(std::ofstream &f); //! draws it in a svg file
 
-		REAL Radius() const;	 //!< returns the current radius
+    //! returns whether the rendering uses alpha blending (massively, so sorting errors would show)
+    virtual bool RendersAlpha() const;
 
-								 //!< renders the zone
-		virtual void Render(const eCamera *cam);
+    inline REAL EvaluateFunctionNow( tFunction const & f ) const;  //!< evaluates the given function with lastTime - referenceTime_ as argument
+    inline void SetFunctionNow( tFunction & f, REAL value ) const; //!< makes sure EvaluateFunctionNow() returns the given value
 
-		//! draws it in a svg file
-		virtual void DrawSvg(std::ofstream &f);
-
-		//! returns whether the rendering uses alpha blending (massively, so sorting errors would show)
-		virtual bool RendersAlpha() const;
-
-								 //!< evaluates the given function with lastTime - referenceTime_ as argument
-		inline REAL EvaluateFunctionNow( tFunction const & f ) const;
-								 //!< makes sure EvaluateFunctionNow() returns the given value
-		inline void SetFunctionNow( tFunction & f, REAL value ) const;
 };
 
 // all the following zones are hacks until the full zone system is in place
@@ -474,13 +398,13 @@ protected:
     eCoord originalPosition_;
     eCoord homePosition_;
     REAL originalRadius_;
-    gCycle *owner_;
+    tJUST_CONTROLLED_PTR<gCycle> owner_;
     REAL ownerTime_;
     bool ownerWarnedNotHome_;
     REAL chatBlinkUpdateTime_;
     REAL blinkUpdateTime_;
     REAL blinkTrackUpdateTime_;
-    gCycle *ownerDropped_;
+    tJUST_CONTROLLED_PTR<gCycle> ownerDropped_;
     REAL ownerDroppedTime_;
     REAL lastHoldScoreTime_;
     bool positionUpdatePending_;

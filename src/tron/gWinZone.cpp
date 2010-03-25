@@ -582,7 +582,17 @@ static void S_ZoneWallIntersect(eWall *pWall)
 		}
 	}
 }
+	
 
+gZone & gZone::SetOwner(ePlayerNetID *pOwner)
+{
+    pOwner_ = pOwner;
+    if (pOwner) 
+        team = pOwner->CurrentTeam();
+	else
+        team = NULL;
+    return *this;
+}
 
 void gZone::BounceOffPoint(eCoord dest, eCoord collide)
 {
@@ -1424,6 +1434,11 @@ gDeathZoneHack::gDeathZoneHack( nMessage & m )
 
 gDeathZoneHack::~gDeathZoneHack( void )
 {
+    if( pLastShotCollision )
+    {
+        pLastShotCollision->pLastShotCollision = NULL;
+        pLastShotCollision = NULL;
+    }
 }
 
 
@@ -1512,24 +1527,31 @@ extern tList<ePlayerNetID> se_PlayerNetIDs;
 
 ePlayerNetID * validatePlayer(ePlayerNetID *pPlayer)
 {
-	if (pPlayer)
-	{
-		int i;
-		for (i = se_PlayerNetIDs.Len()-1; i>=0; --i)
-		{
-			if (se_PlayerNetIDs(i) == pPlayer)
-			{
-				break;
-			}
-		}
+    // with smart pointers, all players are now valid.
+    return pPlayer;
 
-		if (i < 0)
-		{
-			pPlayer = NULL;
-		}
-	}
+    // old code when player pointers were dumb pointers, before dereferencing them,
+    // it was required to check whether they were still alive (not very safe, by the way.)
+    /*
+    if (pPlayer)
+    {
+        int i;
+        for (i = se_PlayerNetIDs.Len()-1; i>=0; --i)
+        {
+            if (se_PlayerNetIDs(i) == pPlayer)
+            {
+                break;
+            }
+        }
 
-	return (pPlayer);
+        if (i < 0)
+        {
+            pPlayer = NULL;
+        }
+    }
+
+    return (pPlayer);
+    */
 }
 
 
@@ -1649,7 +1671,7 @@ void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
                 preyName << *prey;
                 preyName << tColoredString::ColorString(1,1,1);
 
-                if (prey->CurrentTeam() != hunter->CurrentTeam())
+                if (prey->CurrentTeam() != team)
                 {
                     sg_deathShotFragWriter << prey->GetUserName() << hunter->GetUserName();
                     sg_deathShotFragWriter.write();
@@ -1757,157 +1779,158 @@ void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
 
 void gDeathZoneHack::OnEnter( gDeathZoneHack * target, REAL time )
 {
-	//Process if we're a zombie
-	if (deathZoneType == TYPE_ZOMBIE_ZONE)
-	{
-		if (target->deathZoneType == TYPE_ZOMBIE_ZONE)
-		{
-			//Two zombies met
-			if (GetSeekingCycle() == target->GetSeekingCycle())
-			{
-				//Zombies had same maker, merge
-			}
-		}
-		else if ((sg_zombieZoneShoot > 0) &&
-			((target->deathZoneType == TYPE_SHOT) ||
-			(target->deathZoneType == TYPE_DEATH_SHOT)))
-		{
-			//A shot entered the zombie
+ //Process if we're a zombie
+    if (deathZoneType == TYPE_ZOMBIE_ZONE)
+    {
+        if (target->deathZoneType == TYPE_ZOMBIE_ZONE)
+        {
+            //Two zombies met
+            if (GetSeekingCycle() == target->GetSeekingCycle())
+            {
+                //Zombies had same maker, merge
+            }
+        }
+        else if ((sg_zombieZoneShoot > 0) &&
+                 ((target->deathZoneType == TYPE_SHOT) ||
+                  (target->deathZoneType == TYPE_DEATH_SHOT)))
+        {
+            //A shot entered the zombie
 
-			//Validate the owner player ID
-			pOwner_ = validatePlayer(pOwner_);
-			//??? Really need for the player to get cleared when they exit, it is possible for
-			//a new player to enter and own a zone
+            //Validate the owner player ID
+            pOwner_ = validatePlayer(pOwner_);
+            //??? Really need for the player to get cleared when they exit, it is possible for
+            //a new player to enter and own a zone
 
-			//Validate the shot owner player ID
-			ePlayerNetID *pShotOwner = validatePlayer(target->pOwner_);
+            //Validate the shot owner player ID
+            ePlayerNetID *pShotOwner = validatePlayer(target->pOwner_);
 
-			if ((pOwner_) && (pShotOwner))
-			{
-				//We have both owners
-				if ((pOwner_->CurrentTeam() != pShotOwner->CurrentTeam()) ||
-					(sg_shotKillSelf))
-				{
-					//Shoot the zombie!
+            if ((pOwner_) && (pShotOwner))
+            {
+                //We have both owners
+                if ((team != target->team) ||
+                    (sg_shotKillSelf))
+                {
+                    //Shoot the zombie!
 
-					REAL zombieRadius = targetRadius_;
-					REAL shotRadius = target->GetRadius() * sg_zombieZoneShoot;
+                    REAL zombieRadius = targetRadius_;
+                    REAL shotRadius = target->GetRadius() * sg_zombieZoneShoot;
 
-					if (targetRadius_ <= 0)
-					{
-						zombieRadius = GetRadius();
-					}
+                    if (targetRadius_ <= 0)
+                    {
+                        zombieRadius = GetRadius();
+                    }
 
-					if (shotRadius >= zombieRadius)
-					{
-						//Shot was bigger than the zombie, destroy zombie
-						destroyed_ = true;
-						SetReferenceTime();
-						SetExpansionSpeed(-1);
-						SetRadius(0);
-						RequestSync();
+                    if (shotRadius >= zombieRadius)
+                    {
+                        //Shot was bigger than the zombie, destroy zombie
+                        destroyed_ = true;
+                        SetReferenceTime();
+                        SetExpansionSpeed(-1);
+                        SetRadius(0);
+                        RequestSync();
 
-						tColoredString zombieName;
-						zombieName << *pOwner_;
-						zombieName << tColoredString::ColorString(1,1,1);
+                        tColoredString zombieName;
+                        zombieName << *pOwner_;
+                        zombieName << tColoredString::ColorString(1,1,1);
 
-						tColoredString shooterName;
-						shooterName << *pShotOwner << tColoredString::ColorString(1,1,1);
-						sn_ConsoleOut( tOutput( "$player_free_zombie_zone_die", shooterName, zombieName ) );
-					}
-					else
-					{
-						//Take the zombie and target radius down by the shot radius
-						SetReferenceTime();
-						if (targetRadius_ > 0)
-						{
-							zombieRadius = GetRadius();
-							SetRadius(zombieRadius - (shotRadius * zombieRadius / targetRadius_));
-							targetRadius_ -= shotRadius;
-						}
-						else
-						{
-							SetRadius(zombieRadius - shotRadius);
+                        tColoredString shooterName;
+                        shooterName << *pShotOwner << tColoredString::ColorString(1,1,1);
+                        sn_ConsoleOut( tOutput( "$player_free_zombie_zone_die", shooterName, zombieName ) );
+                    }
+                    else
+                    {
+                        //Take the zombie and target radius down by the shot radius
+                        SetReferenceTime();
+                        if (targetRadius_ > 0)
+                        {
+                            zombieRadius = GetRadius();
+                            SetRadius(zombieRadius - (shotRadius * zombieRadius / targetRadius_));
+                            targetRadius_ -= shotRadius;
+                        }
+                        else
+                        {
+                            SetRadius(zombieRadius - shotRadius);
 
-						}
-						RequestSync();
-					}
+                        }
+                        RequestSync();
+                    }
 
-					//Destroy the shot, it is done
-					target->destroyed_ = true;
-					target->SetReferenceTime();
-					target->SetExpansionSpeed(-1);
-					target->SetRadius(0);
-					target->RequestSync();
-				}
-			}
-		}
-	}
-	else if ((deathZoneType == TYPE_SHOT) ||
-		(deathZoneType == TYPE_DEATH_SHOT))
-	{
-		if ((target->deathZoneType == TYPE_SHOT) ||
-			(target->deathZoneType == TYPE_DEATH_SHOT))
-		{
-			//??? Warning - shot collision isn't working quite right
-			if (sg_shotCollision)
-			{
-				SetReferenceTime();
-				target->SetReferenceTime();
+                    //Destroy the shot, it is done
+                    target->destroyed_ = true;
+                    target->SetReferenceTime();
+                    target->SetExpansionSpeed(-1);
+                    target->SetRadius(0);
+                    target->RequestSync();
+                }
+            }
+        }
+    }
+    else if ((deathZoneType == TYPE_SHOT) ||
+             (deathZoneType == TYPE_DEATH_SHOT))
+    {
+        if ((target->deathZoneType == TYPE_SHOT) ||
+            (target->deathZoneType == TYPE_DEATH_SHOT))
+        {
+            //??? Warning - shot collision isn't working quite right
+            if (sg_shotCollision)
+            {
+                SetReferenceTime();
+                target->SetReferenceTime();
 
-				eCoord position1 = GetPosition();
-				eCoord position2 = target->GetPosition();
+                eCoord position1 = GetPosition();
+                eCoord position2 = target->GetPosition();
 
-				eCoord velocity1 = GetVelocity();
-				eCoord velocity2 = target->GetVelocity();
+                eCoord velocity1 = GetVelocity();
+                eCoord velocity2 = target->GetVelocity();
 
-				REAL radius1 = GetRadius();
-				REAL radius2 = target->GetRadius();
+                REAL radius1 = GetRadius();
+                REAL radius2 = target->GetRadius();
 
-				#if 1
-				//Base the mass on a shot sphere volume
-				REAL massConstant = M_PI * 4 / 3;
-				REAL mass1 = radius1 * radius1 * radius1 * massConstant;
-				REAL mass2 = radius2 * radius2 * radius2 * massConstant;
-				#else
-				//Base the mass on a shot circle area
-				REAL massConstant = M_PI;
-				REAL mass1 = radius1 * radius1 * massConstant;
-				REAL mass2 = radius2 * radius2 * massConstant;
-				#endif
+#if 1
+                //Base the mass on a shot sphere volume
+                REAL massConstant = M_PI * 4 / 3;
+                REAL mass1 = radius1 * radius1 * radius1 * massConstant;
+                REAL mass2 = radius2 * radius2 * radius2 * massConstant;
+#else
+                //Base the mass on a shot circle area
+                REAL massConstant = M_PI;
+                REAL mass1 = radius1 * radius1 * massConstant;
+                REAL mass2 = radius2 * radius2 * massConstant;
+#endif
 
-				eCoord impact = velocity2 - velocity1;
-				eCoord impulse = position2 - position1;
-				impulse.Normalize();
+                eCoord impact = velocity2 - velocity1;
+                eCoord impulse = position2 - position1;
+                impulse.Normalize();
 
-				REAL impactSpeed = eCoord::F(impact, impulse);
+                REAL impactSpeed = eCoord::F(impact, impulse);
 
-				REAL sign = 1;
-				if (impactSpeed < 0)
-				{
-					sign = -1;
-					impactSpeed *= -1;
-				}
+                REAL sign = 1;
+                if (impactSpeed < 0)
+                {
+                    sign = -1;
+                    impactSpeed *= -1;
+                }
 
-				impulse *= sqrt(impactSpeed * mass1 * mass2);
-				impulse *= sign;
+                impulse *= sqrt(impactSpeed * mass1 * mass2);
+                impulse *= sign;
 
-				velocity1 = velocity1 + (impulse * (1 / mass1));
-				velocity2 = velocity2 - (impulse * (1 / mass2));
+                velocity1 = velocity1 + (impulse * (1 / mass1));
+                velocity2 = velocity2 - (impulse * (1 / mass2));
 
-				SetVelocity(velocity1);
-				target->SetVelocity(velocity2);
+                SetVelocity(velocity1);
+                target->SetVelocity(velocity2);
 
-				RequestSync();
-				target->RequestSync();
+                RequestSync();
+                target->RequestSync();
 
-				//Record the last collision so we don't do it again
-				pLastShotCollision = target;
-				target->pLastShotCollision = this;
-			}
-		}
-	}
+                //Record the last collision so we don't do it again
+                pLastShotCollision = target;
+                target->pLastShotCollision = this;
+            }
+        }
+    }
 }
+
 
 // *******************************************************************************
 // *
@@ -2039,7 +2062,6 @@ void gRubberZoneHack::OnEnter( gCycle * target, REAL time )
 {
     sg_RubberZoneHurt( target, rmRubber );
 }
-
 
 // *******************************************************************************
 // *

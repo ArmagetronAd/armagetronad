@@ -955,7 +955,7 @@ static tSettingItem< bool > sn_TrustLANConf( "TRUST_LAN", sn_trustLAN );
 // sanity check the server address
 bool nLoginProcess::CheckServerAddress()
 {
-    // if no check is requested (only canm happen for old bmd5 protocol), don't check.
+    // if no check is requested (only can happen for old bmd5 protocol), don't check.
     if ( !checkAddress )
     {
         return true;
