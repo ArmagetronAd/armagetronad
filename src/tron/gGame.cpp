@@ -3413,6 +3413,9 @@ void gGame::StateUpdate(){
         case GS_TRANSFER_SETTINGS:
             // sr_con.autoDisplayAtNewline=true;
 
+            // log scores before players get renamed
+            ePlayerNetID::LogScoreDifferences();
+
             // transfer game settings
             if ( nCLIENT != sn_GetNetState() )
             {
@@ -3422,8 +3425,6 @@ void gGame::StateUpdate(){
 
             rViewport::Update(MAX_PLAYERS);
 
-            // log scores before players get renamed
-            ePlayerNetID::LogScoreDifferences();
             ePlayerNetID::UpdateSuspensions();
             ePlayerNetID::UpdateShuffleSpamTesters();
 

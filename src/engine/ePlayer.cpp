@@ -8733,7 +8733,7 @@ void ePlayerNetID::LogScoreDifference( void )
 {
     if ( lastScore_ > IMPOSSIBLY_LOW_SCORE && IsHuman() )
     {
-        int scoreDifference = score - lastScore_;
+        int scoreDifference = (currentTeam?score - lastScore_:0);
         //lastScore_ = IMPOSSIBLY_LOW_SCORE;
         se_roundScoreWriter << scoreDifference << GetUserName();
         if ( currentTeam )
