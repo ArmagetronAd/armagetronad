@@ -700,7 +700,16 @@ AC_LANG([C])
 
 dnl check for library
 AC_CHECK_LIB([protobuf],_ZN6google8protobuf7MessageD2Ev,,
+[
+	AC_CHECK_LIB([protobuf],_ZN6google8protobuf7ClosureD2Ev,
+		AC_MSG_WARN([[The library protobuf (Google Protobuf Buffers) has a broken dependency on library pthread on your system.]])
+		AC_DEFINE_UNQUOTED(HAVE_LIBPROTOBUF)
+		LIBS="-lprotobuf -lpthread $LIBS"
+	,
 AC_MSG_ERROR([[The library protobuf (Google Protocol Buffers, http://code.google.com/p/protobuf/) is required, but was not found.]])
+	,[-lpthread]
+	)
+]
 )
 
 AC_LANG([C++])
