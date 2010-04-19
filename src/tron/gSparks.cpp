@@ -19,7 +19,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 ***************************************************************************
 
@@ -37,7 +37,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 bool white_sparks=false;
 
 gSpark::gSpark(eGrid *grid, const eCoord &pos,const eCoord &dir,REAL time,REAL ocolor_r,REAL ocolor_g,REAL ocolor_b,REAL ecolor_r,REAL ecolor_g,REAL ecolor_b)
-        :eReferencableGameObject(grid, pos, dir , NULL, true),
+        :eGameObject(grid, pos, dir , NULL, true),
         //   sound(scrap),
 createTime(time){
     lastTime=createTime;
@@ -74,13 +74,11 @@ createTime(time){
         lastBreak[i]=createTime;
     }
 #else
-#ifndef DEDICATED
     particle_handle = pGenParticleGroups(1, SPARKS);
 
     pCurrentGroup(particle_handle);
     // Generate particles along a very small line in the nozzle.
     pSource(SPARKS, PDLine(pVec(Position().x, Position().y, 0.3), pVec(Position().x, Position().y, 0.8)));
-#endif
 #endif
     // add to game grid
     this->AddToList();
@@ -93,6 +91,7 @@ gSpark::~gSpark(){  }
 bool gSpark::Timestep(REAL currentTime){
 #ifndef USEPARTICLES
     REAL ts=currentTime-lastTime;
+    lastTime=currentTime;
 
     for (int i=SPARKS-1;i>=0;i--){
         x[i]+=xDot[i]*ts;
@@ -139,13 +138,12 @@ bool gSpark::Timestep(REAL currentTime){
     if (pGetGroupCount() < SPARKS/10) {
         pDeleteParticleGroups(particle_handle, particle_handle);
         return true;
-    }
+    } else
+        return false;
 #endif // dedicated
 #endif // particles
 
     lastTime=currentTime;
-
-    return false;
 }
 
 void gSpark::InteractWith(eGameObject *,REAL ,int){}
@@ -220,7 +218,7 @@ void gSpark::Render(const eCamera *cam){
     size_t flstride, pos3Ofs, posB3Ofs, size3Ofs, vel3Ofs, velB3Ofs, color3Ofs, alpha1Ofs, age1Ofs;
 
     cnt = (int)pGetParticlePointer(ptr, flstride, pos3Ofs, posB3Ofs,
-                                   size3Ofs, vel3Ofs, velB3Ofs, color3Ofs, alpha1Ofs, age1Ofs);
+        size3Ofs, vel3Ofs, velB3Ofs, color3Ofs, alpha1Ofs, age1Ofs);
     if(cnt < 1) return;
 
     glEnableClientState(GL_COLOR_ARRAY);
