@@ -86,7 +86,7 @@ SET(CMAKE_EXTRA_INCLUDE_FILES)
 SET (SDL_BUILDING_LIBRARY TRUE)
 
 find_package (LibXml2 REQUIRED)
-find_package (Boost 1.36.0 REQUIRED )
+find_package (Boost 1.34.0 REQUIRED )
 find_package (Bison REQUIRED)
 find_package (PythonInterp REQUIRED)
 find_package (Protobuf REQUIRED)
