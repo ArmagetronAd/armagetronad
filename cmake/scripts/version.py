@@ -110,8 +110,8 @@ for var, val in outvars.iteritems():
         out = '\n'.join([out, "#define TRUE_ARMAGETRONAD_%(var)s %(val)s" %{ 'var': var, 'val': val }])
 
 if options.outputFileName:
-    with open(options.outputFileName, "w") as f:
-        f.write(out)
+    f = open(options.outputFileName, "w")
+    f.write(out.join('\n'))
 else:
     print out
 
