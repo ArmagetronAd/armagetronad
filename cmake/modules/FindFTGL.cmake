@@ -69,7 +69,7 @@ FIND_FILE(FTGL_LIBRARIES libftgl.a
       /usr/X11/lib
       /usr/X11R6/lib
       /sw/lib
-      /usr/local/include
+      /usr/local/lib
 )
 
 # # Not sure what's that for...
