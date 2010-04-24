@@ -29,6 +29,7 @@ ELSE (PROTOBUF_LIBRARY AND PROTOBUF_INCLUDE_DIR AND PROTOBUF_PROTOC_EXECUTABLE)
 
   FIND_PATH(PROTOBUF_INCLUDE_DIR stubs/common.h
     /usr/include/google/protobuf
+    /usr/local/include/google/protobuf
   )
 
   FIND_LIBRARY(PROTOBUF_LIBRARY NAMES protobuf
