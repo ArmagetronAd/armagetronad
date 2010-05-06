@@ -2882,6 +2882,9 @@ void gBaseZoneHack::OnRoundEnd( void )
 }
 
 
+static bool sg_flagConquestWinsRound = false;
+static tSettingItem< bool > sg_flagConquestWinsRoundConfig( "FLAG_CONQUEST_WINS_ROUND", sg_flagConquestWinsRound );
+
 // *******************************************************************************
 // *
 // *	OnEnter
@@ -2993,9 +2996,9 @@ void gBaseZoneHack::OnEnter( gCycle * target, REAL time )
 			{
 				target->flag_->WarnFlagNotHome();
 			}
-			else
-			{
-				// player has scored a flag capture
+            else
+            {
+                // player has scored a flag capture
 				tOutput lose;
 				tOutput win;
 				int score = sg_scoreFlag;
@@ -3005,7 +3008,12 @@ void gBaseZoneHack::OnEnter( gCycle * target, REAL time )
 
 				// tell the flag to go back home
 				target->flag_->GoHome();
-			}
+                if (sg_flagConquestWinsRound)
+                {
+                    static const char*message="$player_win_flag";
+                    sg_DeclareWinner( otherTeam, message );
+                }
+            }
 		}
 	}
 }
