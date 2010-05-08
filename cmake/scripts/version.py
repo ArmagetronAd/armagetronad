@@ -111,7 +111,7 @@ for var, val in outvars.iteritems():
 
 if options.outputFileName:
     f = open(options.outputFileName, "w")
-    f.write(out.join('\n'))
+    f.write('\n'.join(out))
 else:
-    print out.join('\n')
+    print '\n'.join(out)
 
