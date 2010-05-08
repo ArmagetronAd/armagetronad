@@ -313,7 +313,7 @@ if(EXISTS ${${progname}_BINARY_DIR}/src/tTrueVersion.h)
     endforeach()
 else()
     message("If you intend on building packages with CPack, please call cmake again after building.")
-    unset(CPACK_PACKAGE_VERSION)
+    set(CPACK_PACKAGE_VERSION) #equiv to unset
 endif()
 
 set(CPACK_PACKAGE_NAME "${progtitle}")
