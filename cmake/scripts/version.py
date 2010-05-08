@@ -96,22 +96,22 @@ else:
         outvars['VERSION'] += "_" + outvars['REVTAG']
 
 
-out = str()
+out = []
 #iter = outvars.iteritems()
 for var, val in outvars.iteritems():
     # Convert python types to C++ types, and put quotes on strings
     if type(val) == str or type(val) == unicode:
-        out = '\n'.join([out, "#define TRUE_ARMAGETRONAD_%(var)s \"%(val)s\"" %{ 'var': var, 'val': val }])
+        out.append("#define TRUE_ARMAGETRONAD_%(var)s \"%(val)s\"" %{ 'var': var, 'val': val })
     elif type(val) == bool and val == True:
-        out = '\n'.join([out, "#define TRUE_ARMAGETRONAD_%(var)s true" %{ 'var': var, 'val': val }])        
+        out.append("#define TRUE_ARMAGETRONAD_%(var)s true" %{ 'var': var, 'val': val })
     elif type(val) == bool and val == False:
-        out = '\n'.join([out, "#define TRUE_ARMAGETRONAD_%(var)s false" %{ 'var': var, 'val': val }])        
+        out.append("#define TRUE_ARMAGETRONAD_%(var)s false" %{ 'var': var, 'val': val })
     else:
-        out = '\n'.join([out, "#define TRUE_ARMAGETRONAD_%(var)s %(val)s" %{ 'var': var, 'val': val }])
+        out.append("#define TRUE_ARMAGETRONAD_%(var)s %(val)s" %{ 'var': var, 'val': val })
 
 if options.outputFileName:
     f = open(options.outputFileName, "w")
     f.write(out.join('\n'))
 else:
-    print out
+    print out.join('\n')
 
