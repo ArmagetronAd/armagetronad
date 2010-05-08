@@ -15,6 +15,6 @@ install (FILES
     )
 
 install (DIRECTORY examples
-    DESTINATION ${AA_SYSCONFDIR}/examples
+    DESTINATION ${AA_SYSCONFDIR}
     FILES_MATCHING PATTERN "*.cfg")
 
