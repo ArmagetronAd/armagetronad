@@ -38,13 +38,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <vector>
 #include <map>
 
-// Touch devices support (touchscreen or touchpad)
-// 0:disabled
-// 1:touch control by left/right touches
-// 2:touch control by swipes and drawing
-static int su_enableTouch = 0;
-static tSettingItem< int > su_enableTouchConf( "ENABLE_TOUCH", su_enableTouch );
-
 bool su_mouseGrab = false;
 
 static uAction* su_allActions[uMAX_ACTIONS];
@@ -53,8 +46,7 @@ static int     su_allActionsLen = 0;
 uAction::uAction(uAction *&anchor,const char* name,
                  int priority_,
                  uInputType t)
-        :tListItem<uAction>(anchor),tooltip_(NULL), shouldShowInGenericConfigurationMenu_( true ), type(t),priority(priority_),internalName(name)
-{
+        :tListItem<uAction>(anchor),type(t),priority(priority_),internalName(name){
     globalID = localID = su_allActionsLen++;
 
     tASSERT(localID < uMAX_ACTIONS);
@@ -79,8 +71,7 @@ uAction::uAction(uAction *&anchor,const char* name,
                  const tOutput& help,
                  int priority_,
                  uInputType t)
-        :tListItem<uAction>(anchor),tooltip_(NULL), shouldShowInGenericConfigurationMenu_( true ), type(t),priority(priority_),internalName(name), description(desc), helpText(help)
-{
+        :tListItem<uAction>(anchor),type(t),priority(priority_),internalName(name), description(desc), helpText(help){
     globalID = localID = su_allActionsLen++;
 
     tASSERT(localID < uMAX_ACTIONS);
@@ -107,13 +98,10 @@ uAction * uAction::Find( char const * name )
 
 typedef std::vector< uInput * > uInputs;
 uInputs su_inputs;
-std::map< std::string, uInput * > su_inputMap; // map from persistent ID to input
-
-// alternative map for legacy keycodes
-std::map< std::string, uInput * > su_alternativeInputMap;
+std::map< std::string, uInput * > su_inputMap;
 
 uInput::uInput( tString const & persistentID, tString const & name )
-  : persistentID_( persistentID ), name_( name )
+        : persistentID_( persistentID ), name_( name )
         , pressed_( 0 )
 {
     ID_ = su_inputs.size();
@@ -131,10 +119,7 @@ static uInput * su_GetInput( tString const & persistentID )
 {
     try
     {
-        uInput * ret = su_inputMap[ persistentID ];
-        if(!ret)
-            ret = su_alternativeInputMap[ persistentID ];
-        return ret;
+        return su_inputMap[ persistentID ];
     }
     catch (...)
     {
@@ -186,121 +171,42 @@ static uInput * su_NewInput( char const * ID, char const * name )
     return su_GetAutoDeleteInput().Create( tString( ID ), tString( name ) );
 }
 
-static void su_WriteSanitizedKeyname(std::ostream & s, char const * input)
-{
-    for ( char const * c = input; *c; ++c )
-    {
-        if ( isblank( *c ) )
-        {
-            s << "_";
-        }
-        else
-        {
-            s << char(toupper( *c ));
-        }
-    }
-}
-
 // class that manages keyboard input
 class uKeyInput
 {
 public:
     uKeyInput()
     {
-#if SDL_VERSION_ATLEAST(2,0,0)
-        for ( int i = 0; i <= SDL_NUM_SCANCODES; ++i )
-#else
         for ( int i = 0; i <= SDLK_LAST; ++i )
-#endif
         {
-            tString displayID;
-            tString persistentID;
-            tString alternativePersistentID;
 #ifndef DEDICATED
-#if SDL_VERSION_ATLEAST(2,0,0)
-            SDL_Scancode scancode = static_cast<SDL_Scancode>(i);
-            SDL_Keycode key = SDL_GetKeyFromScancode(scancode);
-            displayID = SDL_GetKeyName(key);
-            switch(scancode)
-            {
-            default:
-            {
-                std::ostringstream s;
-                const char * name = SDL_GetScancodeName(scancode); // probably the same as displayID for US keyboards
-                if(name && name[0] >= ' ')
-                {
-                    s << "SCANCODE_";
-                    su_WriteSanitizedKeyname(s, name);
-                }
-                else
-                {
-                    s << "UNKNOWNSCANCODE_" << i;
-                }
-                persistentID = s.str();
-            }
-            break;
-            // couple of special cases
-            case SDL_SCANCODE_RETURN2:
-                persistentID = "SCANCODE_RETURN2";
-                break;
-            case SDL_SCANCODE_BACKSLASH:
-                persistentID = "SCANCODE_BACKSLASH";
-                break;
-            case SDL_SCANCODE_APOSTROPHE:
-                persistentID = "SCANCODE_APOSTROPHE";
-                break;
-            case SDL_SCANCODE_SLASH:
-                persistentID = "SCANCODE_SLASH";
-                break;
-            case SDL_SCANCODE_LEFTBRACKET:
-                persistentID = "SCANCODE_LEFTBRACKET";
-                break;
-            case SDL_SCANCODE_RIGHTBRACKET:
-                persistentID = "SCANCODE_RIGHTBRACKET";
-                break;
-            case SDL_SCANCODE_KP_LEFTPAREN:
-                persistentID = "SCANCODE_KP_LEFTPAREN";
-                break;
-            case SDL_SCANCODE_KP_RIGHTPAREN:
-                persistentID = "SCANCODE_KP_RIGHTPAREN";
-                break;
-            case SDL_SCANCODE_KP_LEFTBRACE:
-                persistentID = "SCANCODE_KP_LEFTBRACE";
-                break;
-            case SDL_SCANCODE_KP_RIGHTBRACE:
-                persistentID = "SCANCODE_KP_RIGHTBRACE";
-                break;
-            }
+            char const * ID_Raw = SDL_GetKeyName(static_cast< SDLKey >( i ) );
 #else
-            SDLKey key = static_cast<SDLKey>(i);
-            displayID = SDL_GetKeyName(key);
+            char const * ID_Raw = "unknown key";
 #endif
-#endif
-            if(displayID.size() == 0)
+            std::ostringstream id;
+            id << "KEY_";
+            if ( strcmp( ID_Raw, "unknown key" ) == 0 )
             {
-                std::ostringstream s;
-                s << "UNKNOWN_" << i;
-                displayID = s.str();
+                id << "UNKNONW_" << i;
             }
+            else
             {
-                std::ostringstream s;
-                s << "KEY_";
-                su_WriteSanitizedKeyname(s, displayID.c_str());
-                alternativePersistentID = s.str();
-            }
-            if(persistentID.size() == 0)
-            {
-                persistentID = alternativePersistentID;
+                for ( char const * c = ID_Raw; *c; ++c )
+                {
+                    if ( isblank( *c ) )
+                    {
+                        id << "_";
+                    }
+                    else
+                    {
+                        id << char(toupper( *c ));
+                    }
+                }
             }
 
             // store new input key
-            uInput * pNewInput = su_NewInput( persistentID, displayID );
-            sdl_keys[i] = pNewInput;
-
-            // store in alternative map
-            if(alternativePersistentID != persistentID)
-                su_alternativeInputMap[ alternativePersistentID ] = pNewInput;
-
+            sdl_keys[i] = su_NewInput( id.str(), tString(ID_Raw) );
 
             tASSERT( sdl_keys[i]->ID() == i );
         }
@@ -310,11 +216,7 @@ public:
     {
     }
 
-#if SDL_VERSION_ATLEAST(2,0,0)
-    uInput * sdl_keys[SDL_NUM_SCANCODES+1];
-#else
     uInput * sdl_keys[SDLK_LAST+1];
-#endif
 };
 
 static uKeyInput const & su_GetKeyInput()
@@ -322,42 +224,6 @@ static uKeyInput const & su_GetKeyInput()
     static uKeyInput filler;
     return filler;
 }
-
-#ifndef DEDICATED
-#if SDL_VERSION_ATLEAST(2,0,0)
-class uTouchInput
-{
-public:
-    uTouchInput() {
-        turnLeft  = su_NewInput( "TOUCH_LEFT_TURN", "touch left turn" );
-        turnRight = su_NewInput( "TOUCH_RIGHT_TURN", "touch right turn" );
-        brake     = su_NewInput( "TOUCH_BRAKE", "touch brake" );
-
-        uAction * actLeft  = uAction::Find( "CYCLE_TURN_LEFT" );
-        uAction * actRight = uAction::Find( "CYCLE_TURN_RIGHT" );
-        uAction * actBrake = uAction::Find( "CYCLE_BRAKE" );
-
-        tJUST_CONTROLLED_PTR< uBind > bindLeft  = uBindPlayer::NewBind(actLeft, 1);
-        tJUST_CONTROLLED_PTR< uBind > bindRight = uBindPlayer::NewBind(actRight, 1);
-        tJUST_CONTROLLED_PTR< uBind > bindBrake = uBindPlayer::NewBind(actBrake, 1);
-
-        turnLeft->SetBind(bindLeft);
-        turnRight->SetBind(bindRight);
-        brake->SetBind(bindBrake);
-    }
-
-    uInput* turnLeft;
-    uInput* turnRight;
-    uInput* brake;
-};
-
-static uTouchInput const & su_GetTouchInput()
-{
-    static uTouchInput filler;
-    return filler;
-}
-#endif
-#endif
 
 # define MOUSE_BUTTONS 7
 
@@ -412,7 +278,7 @@ void su_KeyInit()
 class tConfItem_key:public tConfItemBase{
 public:
     tConfItem_key():tConfItemBase("KEYBOARD"){}
-    ~tConfItem_key(){}
+    ~tConfItem_key(){};
 
     // write the complete keymap
     virtual void WriteVal(std::ostream &s){
@@ -453,43 +319,6 @@ public:
                 std::istringstream readValue( id );
                 int value = -1;
                 readValue >> value;
-
-#ifndef DEDICATED
-#if SDL_VERSION_ATLEAST(2,0,0)
-                // map from old SDLKey to SDL_Scancode
-                switch(value)
-                {
-                default:
-                    if(value < 127)
-                    {
-                        // regular keys
-                        value = SDL_GetScancodeFromKey(value);
-                    }
-                    else if( value >= 282 && value <= 293)
-                    {
-                        // function keys
-                        value = value - 282 + SDL_SCANCODE_F1;
-                    }
-                    else
-                    {
-                        // no mapping, ignore
-                        return;
-                    }
-                    break;
-                    // special keys
-                case 273: value = SDL_SCANCODE_UP; break;
-                case 274: value = SDL_SCANCODE_DOWN; break;
-                case 275: value = SDL_SCANCODE_RIGHT; break;
-                case 276: value = SDL_SCANCODE_LEFT; break;
-                case 277: value = SDL_SCANCODE_INSERT; break;
-                case 278: value = SDL_SCANCODE_HOME; break;
-                case 279: value = SDL_SCANCODE_END; break;
-                case 280: value = SDL_SCANCODE_PAGEUP; break;
-                case 281: value = SDL_SCANCODE_PAGEDOWN; break;
-                    // other keys have no unique mapping
-                }
-#endif
-#endif
 
                 if ( value >= 0 && value < (int)su_inputs.size() )
                 {
@@ -550,7 +379,6 @@ uActionPlayer *uActionPlayer::Find(int id){
     while (run){
         if (run->ID() == id)
             return static_cast<uActionPlayer*>(run);
-        run = run->Next();
     }
 
     return NULL;
@@ -630,16 +458,11 @@ public:
         Down = 3
     };
 
-    uJoystick( int id_ ):id(id_)
+    uJoystick( int id_ ): id( id_ )
     {
         tASSERT( id >= 0 && id < SDL_NumJoysticks() );
 
-        SDL_Joystick * stick = SDL_JoystickOpen( id );
-#if SDL_VERSION_ATLEAST(2,0,0)
-        name = SDL_JoystickName( stick );
-#else
         name = SDL_JoystickName( id );
-#endif
 
         std::ostringstream iName;
         iName << "JOYSTICK_";
@@ -657,6 +480,7 @@ public:
 
         internalName = iName.str();
 
+        SDL_Joystick * stick = SDL_JoystickOpen( id );
         numAxes = SDL_JoystickNumAxes( stick );
         numButtons = SDL_JoystickNumButtons( stick );
         numBalls = SDL_JoystickNumBalls( stick );
@@ -831,10 +655,9 @@ static uJoystickInput & su_GetJoystickInput()
 static uJoystick * su_GetJoystick( int id )
 {
     uJoystickInput & joysticks = su_GetJoystickInput();
-    if(id >= 0 && id < (int)joysticks.joysticks.size() )
-        return joysticks.joysticks[id];
-    else
-        return NULL;
+    tASSERT( id >= 0 && id < (int)joysticks.joysticks.size() );
+
+    return joysticks.joysticks[id];
 }
 
 void su_JoystickInit()
@@ -967,9 +790,6 @@ struct uTransformEventInfo
     uTransformEventInfo( uInput * input_, float value_ = 1 , bool needsRepeat_ = true ): input(input_), value(value_), needsRepeat(needsRepeat_){}
 };
 
-int GetPlayerCameraClosestDirection(int player);
-int GetPlayerWindingNumber(int player);
-
 // transform SDL event into vector of abstract events
 #ifndef DEDICATED
 static void su_TransformEvent( SDL_Event & e, std::vector< uTransformEventInfo > & info )
@@ -977,7 +797,6 @@ static void su_TransformEvent( SDL_Event & e, std::vector< uTransformEventInfo >
     switch (e.type)
     {
     case SDL_MOUSEMOTION:
-        if (!su_enableTouch)
         {
             // ignore events generated by mouse grabbing
             if ( su_mouseGrab &&
@@ -1052,114 +871,13 @@ static void su_TransformEvent( SDL_Event & e, std::vector< uTransformEventInfo >
             }
         }
         break;
-#if SDL_VERSION_ATLEAST(2,0,0)
-    case SDL_FINGERDOWN:
-    case SDL_FINGERUP:
-    case SDL_FINGERMOTION:
-        if (su_enableTouch==1)
-        {
-            static SDL_FingerID finger = 0;
-
-            if (e.type == SDL_FINGERDOWN) {
-                float px = e.tfinger.x;
-                if (px<0.33)      info.push_back( uTransformEventInfo( su_GetTouchInput().turnLeft, 1 ) );
-                else if (px>0.67) info.push_back( uTransformEventInfo( su_GetTouchInput().turnRight, 1 ) );
-                else if (!finger) {
-                    finger = e.tfinger.fingerId;
-                    info.push_back( uTransformEventInfo( su_GetTouchInput().brake, 1 ) );
-                }
-            } else if (e.type == SDL_FINGERUP) {
-                if (finger == e.tfinger.fingerId) {
-                    finger = 0;
-                    info.push_back( uTransformEventInfo( su_GetTouchInput().brake, 0 ) );
-                }
-            }
-        }
-        else if (su_enableTouch>=2)
-        {
-            static SDL_FingerID finger = 0;
-            static float dx=0, dy=0;
-            static char count = 0;
-            static int previous_dir = -1;
-            static int last_time = 0;
-
-            if (e.type == SDL_FINGERDOWN) {
-                // if new finger tracking, reset current state
-                if (!finger) {
-                    finger = e.tfinger.fingerId;
-                    count = 0;
-                    dx = 0; dy = 0;
-                    last_time = e.tfinger.timestamp;
-                    previous_dir = su_enableTouch==2 ? -1 : GetPlayerCameraClosestDirection(0);
-                }
-            } else if (e.type == SDL_FINGERUP) {
-                // release finger tracking if tracked finger is up
-                if (finger == e.tfinger.fingerId) finger = 0;
-            } else if (e.type == SDL_FINGERMOTION) {
-                // if this finger is tracked, process touch motion analysis
-                if (finger == e.tfinger.fingerId) {
-                    // check motion timeout reset current state
-                    if (e.tfinger.timestamp-last_time>50) {
-                        count = 0;
-                        dx = 0; dy = 0;
-                        last_time = e.tfinger.timestamp;
-                    }
-                    last_time = e.tfinger.timestamp;
-
-                    // cumulate some motion to be more accurate
-                    dx+=e.tfinger.dx;
-                    dy+=e.tfinger.dy;
-                    ++count;
-
-                    if (count==4) {
-                        // if move is big enough, process it
-                        if (dx*dx+dy*dy>0.0001) {
-                            float a = atan2f(dx, -dy);
-                            int axes = GetPlayerWindingNumber(0);
-                            a = (a<0?fabs(a+M_PI*2.0f):a) * axes / (M_PI*2.0f);
-                            int dir = static_cast<int>(round(a)) % axes; // direction of this move
-                            int side = (a-round(a))<0?0:1;               // from which side
-                            // if direction changed, generate 1 or more turns
-                            if (previous_dir!=dir) {
-                                int diff_dir = previous_dir==-1 ? dir : dir - previous_dir;
-                                diff_dir = diff_dir>axes/2 ? diff_dir - axes : diff_dir<-axes/2 ? axes + diff_dir : diff_dir;
-                                // handling the annoying case where you're trying to do a u-turn.
-                                // we need to take care from which side we are coming from (really dangerous move as
-                                // detection might failed).
-                                if (diff_dir!=0) {
-                                    if ((diff_dir==axes/2 && side==1)||(diff_dir==-axes/2 && side==0)) diff_dir=-diff_dir;
-                                    uInput* input = diff_dir<0 ? su_GetTouchInput().turnLeft : su_GetTouchInput().turnRight;
-                                    for(int i=abs(diff_dir); i==1; --i) {
-                                        info.push_back( uTransformEventInfo( input, 1 ) );
-                                    }
-                                }
-                                previous_dir=dir;
-                            }
-                        }
-                        count = 0;
-                        dx = 0; dy = 0;
-                    }
-                }
-            }
-        }
-        break;
-#endif
     case SDL_KEYDOWN:
     case SDL_KEYUP:
         {
-#if SDL_VERSION_ATLEAST(2,0,0)
-            if (e.key.repeat) break;
-            SDL_Keysym &c = e.key.keysym;
-#else
             SDL_keysym &c = e.key.keysym;
-#endif
 
             info.push_back( uTransformEventInfo(
-#if SDL_VERSION_ATLEAST(2,0,0)
-                                su_GetKeyInput().sdl_keys[ c.scancode ],
-#else
                                 su_GetKeyInput().sdl_keys[ c.sym ],
-#endif
                                 ( e.type == SDL_KEYDOWN ) ? 1 : 0 ) );
 
             break;
@@ -1168,7 +886,6 @@ static void su_TransformEvent( SDL_Event & e, std::vector< uTransformEventInfo >
     case SDL_JOYAXISMOTION:
         {
             uJoystick * joystick = su_GetJoystick( e.jaxis.which );
-            if(!joystick) break;
             int dir = e.jaxis.value > 0 ? 1 : 0;
 
             info.push_back( uTransformEventInfo(
@@ -1182,20 +899,15 @@ static void su_TransformEvent( SDL_Event & e, std::vector< uTransformEventInfo >
         }
     case SDL_JOYBUTTONDOWN:
     case SDL_JOYBUTTONUP:
-    {
-        uJoystick * joystick = su_GetJoystick( e.jbutton.which );
-        if(!joystick) break;
         info.push_back( uTransformEventInfo(
-                            joystick->GetButton( e.jbutton.button ),
+                            su_GetJoystick( e.jbutton.which )->GetButton( e.jbutton.button ),
                             ( e.type == SDL_JOYBUTTONDOWN ) ? 1 : 0 ) );
-    }
-    break;
+        break;
     case SDL_JOYHATMOTION:
         {
             info.reserve(4);
 
             uJoystick * joystick = su_GetJoystick( e.jhat.which );
-            if(!joystick) break;
             int hat = e.jhat.hat;
             int hatDirection = e.jhat.value;
 
@@ -1282,12 +994,10 @@ static void su_TransformEvent( SDL_Event & e, std::vector< uTransformEventInfo >
         break;
     case SDL_JOYBALLMOTION:
         {
-            uJoystick * joystick = su_GetJoystick( e.jball.which );
-            if(!joystick) break;
-
-            int ball = e.jball.ball;
             info.reserve(4);
 
+            uJoystick * joystick = su_GetJoystick( e.jball.which );
+            int ball = e.jball.ball;
 
             REAL xrel=e.jball.xrel;
             if (xrel > 0) // right
@@ -1347,6 +1057,141 @@ static void su_TransformEvent( SDL_Event & e, std::vector< uTransformEventInfo >
 }
 #endif // DEDICATED
 
+// *****************************************************
+//  Menuitem for input selection
+// *****************************************************
+
+class uMenuItemInput: uMenuItem{
+    uAction      *act;
+    int         ePlayer;
+    bool        active;
+public:
+    uMenuItemInput(uMenu *M,uAction *a,int p)
+            :uMenuItem(M,a->helpText),act(a),ePlayer(p),active(0){
+    }
+
+    virtual ~uMenuItemInput(){}
+
+    virtual void Render(REAL x,REAL y,REAL alpha=1,bool selected=0)
+    {
+        DisplayText(REAL(x-.02),y,act->description,selected,alpha,1);
+
+        if (active)
+        {
+            tString s;
+            s << tOutput("$input_press_any_key");
+            DisplayText(REAL(x+.02),y,s,selected,alpha,-1);
+        }
+        else
+        {
+            tString s;
+
+            bool first=1;
+
+            for ( uInputs::const_iterator i = su_inputs.begin(); i != su_inputs.end(); ++i )
+            {
+                uBind * bind = (*i)->GetBind();
+                if ( bind && (*i)->Name().size() > 0 &&
+                        bind->act==act &&
+                        bind->CheckPlayer(ePlayer) )
+                {
+                    if (!first)
+                        s << ", ";
+                    else
+                        first=0;
+
+                    s << (*i)->Name();
+                }
+            }
+            if (!first)
+            {
+                DisplayText(REAL(x+.02),y,s,selected,alpha,-1);
+            }
+            else
+            {
+                DisplayText(REAL(x+.02),y,tOutput("$input_items_unbound"),selected,alpha,-1);
+            }
+        }
+    }
+
+    virtual void Enter()
+    {
+        active=1;
+    }
+
+#define MTHRESH 5
+#define MREL    2
+
+#ifndef DEDICATED
+
+    virtual bool Event(SDL_Event &e){
+        if ( e.type == SDL_KEYDOWN )
+        {
+            SDL_keysym &c = e.key.keysym;
+            if (!active)
+            {
+                if (c.sym==SDLK_DELETE || c.sym==SDLK_BACKSPACE)
+                {
+                    // clear all bindings
+                    for ( uInputs::const_iterator i = su_inputs.begin(); i != su_inputs.end(); ++i )
+                    {
+                        uBind * bind = (*i)->GetBind();
+                        if ( bind &&
+                                bind->act==act &&
+                                bind->CheckPlayer(ePlayer) )
+                        {
+                            (*i)->SetBind( NULL );
+                        }
+                    }
+                    return true;
+                }
+                return false;
+            }
+
+            // ignore escape
+            if ( c.sym == SDLK_ESCAPE )
+            {
+                return false;
+            }
+        }
+
+        // transform events
+        std::vector< uTransformEventInfo > events;
+        su_TransformEvent( e, events );
+
+        for ( std::vector< uTransformEventInfo >::const_iterator i = events.begin(); i != events.end(); ++i )
+        {
+            uTransformEventInfo const & info = *i;
+            if ( info.input && info.value > 0.5 && active )
+            {
+                uBind * bind = info.input->GetBind();
+                if ( bind &&
+                        bind->act==act &&
+                        bind->CheckPlayer(ePlayer))
+                {
+                    info.input->SetBind( NULL );
+                }
+                else
+                {
+                    info.input->SetBind( uBindPlayer::NewBind(act,ePlayer) );
+                }
+
+                active = false;
+                return true;
+            }
+        }
+
+        return false;
+    }
+#endif
+
+    virtual tString Help(){
+        tString ret;
+        ret << helpText << "\n";
+        ret << tOutput("$input_item_help");
+        return ret;
+    }
+};
 
 namespace
 {
@@ -1372,23 +1217,29 @@ static int Input_Compare( const tListItemBase* a, const tListItemBase* b)
 
 
 static void s_InputConfigGeneric(int ePlayer, uAction *&actions,const tOutput &title){
+    uMenuItemInput **input;
+
     uMenu input_menu(title);
 
-    if(actions)
-        actions->tListItemBase::Sort(&Input_Compare);
+    actions->tListItemBase::Sort(&Input_Compare);
 
-    std::vector< uMenuItemInput * > inputs;
-    for ( uAction *a = actions; a; a = a->Next() )
-    {
-        if ( a->ShowInGenericConfigurationMenu() )
-            inputs.push_back( new uMenuItemInput( &input_menu, a, ePlayer + 1 ) );
+    int len = actions->Len();
+
+    input=tNEW(uMenuItemInput*)[len];
+    int a=0;
+    for (uAction *A=actions;A; A = A->Next()){
+        input[a++]=new uMenuItemInput(&input_menu,
+                                      A,
+                                      ePlayer+1);
+
     }
 
     input_menu.ReverseItems();
     input_menu.Enter();
 
-    for ( std::vector< uMenuItemInput * >::const_iterator it = inputs.begin(); it != inputs.end(); ++it )
-        delete *it;
+    for (int b=a-1;b>=0;b--)
+        delete input[b];
+    delete[] input;
 }
 
 void su_InputConfig(int ePlayer){
@@ -1595,18 +1446,10 @@ bool uBindPlayer::Delayable()
 }
 
 bool uBindPlayer::DoActivate(REAL x){
-    bool ret = false;
     if (ePlayer==0)
-        ret = GlobalAct(act,x);
+        return  GlobalAct(act,x);
     else
-        ret = uPlayerPrototype::PlayerConfig(ePlayer-1)->Act(act,x);
-
-    if( ret && act && act->GetTooltip() && x > 0 )
-    {
-        act->GetTooltip()->Count(ePlayer);
-    }
-
-    return ret;
+        return uPlayerPrototype::PlayerConfig(ePlayer-1)->Act(act,x);
 }
 
 
@@ -1667,266 +1510,3 @@ static bool messend_func(REAL x){
 static uActionGlobalFunc mu(&mess_up,&messup_func);
 static uActionGlobalFunc md(&mess_down,&messdown_func);
 static uActionGlobalFunc me(&mess_end,&messend_func);
-
-// ********
-// tooltips
-// ********
-
-uActionTooltip::Level su_helpLevel = uActionTooltip::Level_Expert;
-
-uActionTooltip::uActionTooltip( Level level, uAction & action, int numHelp, VETOFUNC * veto )
-: tConfItemBase(action.internalName + "_TOOLTIP")
-  , action_( action )
-  , veto_(veto)
-  , level_( level )
-{
-    help_ = tString("$input_") + action.internalName + "_tooltip";
-    tToLower( help_ );
-
-    // initialize array holding the number of help attempts to give left
-    for( int i = uMAX_PLAYERS; i >= 0; --i )
-    {
-        activationsLeft_[i] = 0; // numHelp;
-    }
-
-    action.tooltip_ = this;
-}
-
-uActionTooltip::~uActionTooltip()
-{
-    if( action_.tooltip_ == this )
-        action_.tooltip_ = NULL;
-
-}
-
-bool uActionTooltip::Help( int player )
-{
-#ifndef DEDICATED
-    if( rConsole::CenterDisplayActive() )
-    {
-        return false;
-    }
-
-    // find most needed tooltip
-    uActionTooltip * mostWanted = NULL;
-
-    // keys bound to the action of the tooltip that needs help
-    tString maps;
-    tString last;
-
-    // run through binds
-    for ( uInputs::const_iterator i = su_inputs.begin(); i != su_inputs.end(); ++i )
-    {
-        uBind * bind = (*i)->GetBind();
-        if( !bind ||!bind->CheckPlayer(player) )
-            continue;
-        uAction * action = bind->act;
-        if( !action )
-            continue;
-        uActionTooltip * tooltip = action->GetTooltip();
-        if( !tooltip || ( tooltip->veto_ && (*tooltip->veto_)(player) ) || ( su_helpLevel < tooltip->level_ ) )
-        {
-            continue;
-        }
-
-        int activationsLeft = tooltip->activationsLeft_[player];
-        if( activationsLeft > 0 &&
-            ( !mostWanted || mostWanted->activationsLeft_[player] < activationsLeft ) )
-        {
-            mostWanted = tooltip;
-            maps = "";
-            last = "";
-        }
-
-        // build up key list
-        if( mostWanted == tooltip )
-        {
-            if ( maps.Len() > 1 )
-            {
-                maps << ", ";
-            }
-            if ( last.Len() > 1 )
-            {
-                maps << last;
-            }
-            last = tString("<") + (*i)->Name() + ">";
-        }
-    }
-
-    if( mostWanted )
-    {
-        if( last.Len() > 1 )
-        {
-            if( maps.Len() > 1 )
-                maps << " " << tOutput("$input_or") << " " << last;
-            else
-                maps = last;
-        }
-
-        con.CenterDisplay(tString(tOutput(mostWanted->help_, maps)));
-
-        return true;
-    }
-#endif
-    return false;
-}
-
-void uActionTooltip::Count( int player )
-{
-    if ( activationsLeft_[player] > 0 )
-    {
-        activationsLeft_[player]--;
-        Help(player);
-    }
-}
-
-//! call to show the tooltip one more time
-void uActionTooltip::ShowAgain()
-{
-    for( int i = uMAX_PLAYERS; i >= 0; --i )
-    {
-        if( 0 == activationsLeft_[i] )
-        {
-            activationsLeft_[i] = 1;
-        }
-    }
-}
-
-void uActionTooltip::WriteVal(std::ostream & s )
-{
-    for( int i = 0; i <= uMAX_PLAYERS; ++i )
-    {
-        s << activationsLeft_[i] << " ";
-    }
-}
-
-void uActionTooltip::ReadVal(std::istream & s )
-{
-    for( int i = 0; i <= uMAX_PLAYERS; ++i )
-    {
-        s >> activationsLeft_[i];
-    }
-}
-
-// *****************************************************
-//  Menuitem for input selection
-// *****************************************************
-
-uMenuItemInput::uMenuItemInput(uMenu *M,uAction *a,int p)
-    :uMenuItem(M,a->helpText),act(a),ePlayer(p),active(0)
-{
-}
-
-void uMenuItemInput::Render(REAL x,REAL y,REAL alpha,bool selected)
-{
-    DisplayText(REAL(x-.02),y,act->description,selected,alpha,1);
-
-    if (active)
-    {
-        tString s;
-        s << tOutput("$input_press_any_key");
-        DisplayText(REAL(x+.02),y,s,selected,alpha,-1);
-    }
-    else
-    {
-        tString s;
-
-        bool first=1;
-
-        for ( uInputs::const_iterator i = su_inputs.begin(); i != su_inputs.end(); ++i )
-        {
-            uBind * bind = (*i)->GetBind();
-            if ( bind && (*i)->Name().size() > 0 &&
-                    bind->act==act &&
-                    bind->CheckPlayer(ePlayer) )
-            {
-                if (!first)
-                    s << ", ";
-                else
-                    first=0;
-
-                s << (*i)->Name();
-            }
-        }
-        if (!first)
-        {
-            DisplayText(REAL(x+.02),y,s,selected,alpha,-1);
-        }
-        else
-        {
-            DisplayText(REAL(x+.02),y,tOutput("$input_items_unbound"),selected,alpha,-1);
-        }
-    }
-}
-
-void uMenuItemInput::Enter()
-{
-    active=1;
-}
-
-
-bool uMenuItemInput::Event(SDL_Event &e)
-{
-#ifndef DEDICATED
-    if ( e.type == SDL_KEYDOWN )
-    {
-#if SDL_VERSION_ATLEAST(2,0,0)
-        SDL_Keysym &c = e.key.keysym;
-#else
-        SDL_keysym &c = e.key.keysym;
-#endif
-        if (!active)
-        {
-            if (c.sym==SDLK_DELETE || c.sym==SDLK_BACKSPACE)
-            {
-                // clear all bindings
-                for ( uInputs::const_iterator i = su_inputs.begin(); i != su_inputs.end(); ++i )
-                {
-                    uBind * bind = (*i)->GetBind();
-                    if ( bind &&
-                            bind->act==act &&
-                            bind->CheckPlayer(ePlayer) )
-                    {
-                        (*i)->SetBind( NULL );
-                    }
-                }
-                return true;
-            }
-            return false;
-        }
-
-        // ignore escape
-        if ( c.sym == SDLK_ESCAPE )
-        {
-            return false;
-        }
-    }
-
-    // transform events
-    std::vector< uTransformEventInfo > events;
-    su_TransformEvent( e, events );
-
-    for ( std::vector< uTransformEventInfo >::const_iterator i = events.begin(); i != events.end(); ++i )
-    {
-        uTransformEventInfo const & info = *i;
-        if ( info.input && info.value > 0.5 && active )
-        {
-            uBind * bind = info.input->GetBind();
-            if ( bind &&
-                    bind->act==act &&
-                    bind->CheckPlayer(ePlayer))
-            {
-                info.input->SetBind( NULL );
-            }
-            else
-            {
-                info.input->SetBind( uBindPlayer::NewBind(act,ePlayer) );
-            }
-
-            active = false;
-            return true;
-        }
-    }
-#endif
-    return false;
-}

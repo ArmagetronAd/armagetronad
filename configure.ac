@@ -8,7 +8,7 @@ dnl Comment this out to disable autoconf custom directories:
 m4_include(accustomdir.m4)
 
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(Armagetronad,AUTOMATIC_VERSION)
+AC_INIT(armagetronad,AUTOMATIC_VERSION)
 
 dnl FIXME: remove this in the future, when automake decides to actually set datarootdir by default
 dnl http://www.gnu.org/software/hello/manual/autoconf/Changed-Directory-Variables.html
@@ -714,8 +714,17 @@ AC_CHECK_PROG([PROTOC],protoc,protoc,no)
 AC_LANG([C])
 
 dnl check for library
-AC_CHECK_LIB([protobuf],main,,
+AC_CHECK_LIB([protobuf],_ZN6google8protobuf7MessageD2Ev,,
+[
+	AC_CHECK_LIB([protobuf],_ZN6google8protobuf7ClosureD2Ev,
+		AC_MSG_WARN([[The library protobuf (Google Protobuf Buffers) has a broken dependency on library pthread on your system.]])
+		AC_DEFINE_UNQUOTED(HAVE_LIBPROTOBUF)
+		LIBS="-lprotobuf -lpthread $LIBS"
+	,
 AC_MSG_ERROR([[The library protobuf (Google Protocol Buffers, http://code.google.com/p/protobuf/) is required, but was not found.]])
+	,[-lpthread]
+	)
+]
 )
 
 AC_LANG([C++])

@@ -243,7 +243,7 @@ void nConfItemBase::SendConfig(bool force, int peer){
     }
 }
 
-void nConfItemBase::CheckChange( bool nonDefault ){
+void nConfItemBase::WasChanged( bool nonDefault ){
     // inform watcher
     if (this->watcher_ )
         this->watcher_->Change( nonDefault );
@@ -547,9 +547,6 @@ static char const * sn_groupName[ nConfItemVersionWatcher::Group_Max ] =
         "Visual"
     };
 
-// uncomment on Trunk as soon as it diverges from 0.4
-// #define RESERVE_FOR_0_4
-
 // mapping network version to program version
 static char const * sn_versionString[] =
     {
@@ -570,23 +567,11 @@ static char const * sn_versionString[] =
         "0.2.8.3_alpha", // 14
         "0.2.8.3_alpha_auth", // 15
         "0.2.8.3.X", // 16, was: 0.2.8.3_beta2
-        "0.2.9_alpha", // 17
-        "0.2.9_alpha2", // 18
-        "0.2.9_alpha3", // 19
+        "0.2.8.4", // 17
+        "0.2.8.5_alpha", // 18
+        "0.2.8.5", // 19
         "0.3.1", // 20
         "0.3.1_pb", // 21
-        "0.4_auto_team", // 22
-        // move #ifdef downwards to define new protocol versions on 0.4
-#ifdef RESERVE_FOR_0_4 
-        "0.4_reserved2", // 23
-        "0.4_reserved3", // 24
-        "0.4_reserved4", // 25
-        "0.4_reserved5", // 26
-        "0.4_reserved6", // 27
-        "0.4_reserved7", // 28
-        "0.4_reserved8", // 29
-        "0.5_alpha", // 30
-#endif
         0
     };
 

@@ -37,8 +37,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 extern REAL rCWIDTH_CON;
 extern REAL rCHEIGHT_CON;
 
-extern float sr_chatLayer;
-
 class rConsole:public tConsole{
     tArray<tString> lines;
 
@@ -84,27 +82,15 @@ public:
     virtual void DoCenterDisplay(const tString &s,REAL timeout=2,REAL r=1,REAL g=1,REAL b=1);
 
     virtual tString ColorString(REAL r, REAL g, REAL b) const;
-
-    //! returns whether a center display is currently in progress
-    static bool CenterDisplayActive();
 };
 
 
 extern rConsole sr_con; // where all the output is directed to
 
 #ifdef DEDICATED
+// read from stdin
+void sr_Unblock_stdin();
 void sr_Read_stdin();
-#endif
-
-// passes ladderlog output to external scripts
-void sr_InputForScripts( char const * input );
-
-#ifdef DEDICATED
-class rScriptSpawnedCallback : public tCallback
-{
-public:
-    rScriptSpawnedCallback( AA_VOIDFUNC *f );
-};
 #endif
 
 class rForceTextCallback:public tCallbackOr{

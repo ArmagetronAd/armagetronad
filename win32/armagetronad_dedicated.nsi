@@ -1,10 +1,9 @@
 ; Armagetron Advanced Dedicated Server Setup Script
-!define PRODUCT_BASENAME "Armagetron Advanced"
-!define PRODUCT_NAME "${PRODUCT_BASENAME} Dedicated Server"
+!define PRODUCT_NAME "Armagetron Advanced Dedicated Server"
 !define PRODUCT_VERSION "CVS"
 !define PRODUCT_PUBLISHER "Armagetron Advanced Team"
 !define PRODUCT_WEB_SITE "http://armagetronad.sf.net"
-!define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\${PRODUCT_BASENAME}\armagetronad_dedicated.exe"
+!define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\armagetronad_dedicated.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
 
@@ -56,7 +55,7 @@ SetCompressor lzma
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
 OutFile "armagetronad-dedicated-${PRODUCT_VERSION}.win32.exe"
-InstallDir "$PROGRAMFILES\${PRODUCT_BASENAME} Dedicated"
+InstallDir "$PROGRAMFILES\Armagetron Advanced Dedicated"
 InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 ShowInstDetails show
 ShowUnInstDetails show
@@ -72,14 +71,14 @@ Section "MainSection" SEC01
   File "Armagetron Forums.url"
 
   # install desktop entry for current user
-  CreateShortCut "$DESKTOP\${PRODUCT_BASENAME} Server.lnk" "$INSTDIR\armagetronad_dedicated.exe"
+  CreateShortCut "$DESKTOP\Armagetron Advanced Server.lnk" "$INSTDIR\armagetronad_dedicated.exe"
 
   # install start menu for all users
   SetShellVarContext all
-  CreateDirectory "$SMPROGRAMS\${PRODUCT_BASENAME}"
-  CreateShortCut "$SMPROGRAMS\${PRODUCT_BASENAME}\Armagetron Forums.lnk" "$INSTDIR\Armagetron Forums.url"
+  CreateDirectory "$SMPROGRAMS\Armagetron Advanced"
+  CreateShortCut "$SMPROGRAMS\Armagetron Advanced\Armagetron Forums.lnk" "$INSTDIR\Armagetron Forums.url"
   File "armagetronad_dedicated.exe"
-  CreateShortCut "$SMPROGRAMS\${PRODUCT_BASENAME}\${PRODUCT_BASENAME} Server.lnk" "$INSTDIR\armagetronad_dedicated.exe"
+  CreateShortCut "$SMPROGRAMS\Armagetron Advanced\Armagetron Advanced Server.lnk" "$INSTDIR\armagetronad_dedicated.exe"
   SetOutPath "$INSTDIR\config"
   File ".\config\*.cfg"
   File ".\config\*.srv"
@@ -90,10 +89,10 @@ Section "MainSection" SEC01
   SetOutPath "$INSTDIR"
   File "*.txt"
   SetOutPath "$INSTDIR\doc"
-  File /nonfatal ".\doc\*.html"
-  CreateShortCut "$SMPROGRAMS\${PRODUCT_BASENAME}\Documentation.lnk" "$INSTDIR\doc\index.html"
+  File ".\doc\*.html"
+  CreateShortCut "$SMPROGRAMS\Armagetron Advanced\Documentation.lnk" "$INSTDIR\doc\index.html"
   SetOutPath "$INSTDIR\doc\net"
-  File /nonfatal ".\doc\net\*.html"
+  File ".\doc\net\*.html"
   SetOutPath "$INSTDIR\language"
   File ".\language\*.*"
   SetOutPath "$INSTDIR"
@@ -114,7 +113,7 @@ Section "MainSection" SEC01
 SectionEnd
 
 Section -AdditionalIcons
-  CreateShortCut "$SMPROGRAMS\${PRODUCT_BASENAME}\Uninstall ${PRODUCT_BASENAME} Server.lnk" "$INSTDIR\uninst_dedicated.exe"
+  CreateShortCut "$SMPROGRAMS\Armagetron Advanced\Uninstall Armagetron Advanced Server.lnk" "$INSTDIR\uninst_dedicated.exe"
 SectionEnd
 
 Section -Post
@@ -163,13 +162,13 @@ Section Uninstall
   RMDir "$INSTDIR\config"
   RMDir "$INSTDIR"
 
-  Delete "$SMPROGRAMS\${PRODUCT_BASENAME}\Uninstall ${PRODUCT_BASENAME} Server.lnk"
-  Delete "$SMPROGRAMS\${PRODUCT_BASENAME}\Documentation.lnk"
-  Delete "$DESKTOP\${PRODUCT_BASENAME} Server.lnk"
-  Delete "$SMPROGRAMS\${PRODUCT_BASENAME}\${PRODUCT_BASENAME} Server.lnk"
-  Delete "$SMPROGRAMS\${PRODUCT_BASENAME}\Armagetron Forums.lnk"
+  Delete "$SMPROGRAMS\Armagetron Advanced\Uninstall Armagetron Advanced Server.lnk"
+  Delete "$SMPROGRAMS\Armagetron Advanced\Documentation.lnk"
+  Delete "$DESKTOP\Armagetron Advanced Server.lnk"
+  Delete "$SMPROGRAMS\Armagetron Advanced\Armagetron Advanced Server.lnk"
+  Delete "$SMPROGRAMS\Armagetron Advanced\Armagetron Forums.lnk"
 
-  RMDir "$SMPROGRAMS\${PRODUCT_BASENAME}"
+  RMDir "$SMPROGRAMS\Armagetron Advanced"
 
   DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
   DeleteRegKey HKLM "${PRODUCT_DIR_REGKEY}"

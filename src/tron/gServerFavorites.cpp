@@ -48,17 +48,16 @@ static bool sg_ConnectionStress = false;
 
 enum { NUM_FAVORITES = 10 };
 
+/*
 //! favorite server information, just to connect
-gServerInfoFavorite::gServerInfoFavorite( tString const & name_, tString const & connectionName, unsigned int port )
-    :nServerInfo::nServerInfo()
+gServerInfoFavorite::gServerInfoFavorite( tString const & connectionName, unsigned int port )
 {
     nServerInfoBase::SetConnectionName( connectionName );
     nServerInfoBase::SetPort( port );
-    if ( name_.empty() )
-        name = ToString();
-    else
-        name = name_;
 }
+*/
+
+typedef nServerInfoRedirect gServerInfoFavorite;
 
 //********************************************************************************
 //********************************************************************************
@@ -86,12 +85,12 @@ public:
             , confAddress_( sg_ConfName( ID, prefix, "_ADDRESS"), address_ )
             , confPort( sg_ConfName( ID, prefix, "_PORT"), port_ )
     {
-    }
+    };
 
     //! connects to the server
     void Connect()
     {
-        gServerInfoFavorite fav( name_, address_, port_ );
+        gServerInfoFavorite fav( address_, port_ );
 
         gLogo::SetDisplayed(false);
 
@@ -253,7 +252,7 @@ static void sg_AlternativeMaster( int ID )
 
     // fetch server info
     gServerFavorite & favorite = sg_masterHolder.GetFavorite(ID);
-    nServerInfoRedirect fav( favorite.address_, favorite.port_ );
+    gServerInfoFavorite fav( favorite.address_, favorite.port_ );
 
     // browse master info
     gServerBrowser::BrowseSpecialMaster( &fav, suffix.str().c_str() );
@@ -430,8 +429,7 @@ static void sg_TransferCustomServer()
     if ( sg_customServerName != "" )
     {
         // add custom connect server to favorites
-        gServerInfoFavorite server( sg_customServerName,
-            sg_customServerName, sg_clientPort );
+        gServerInfoFavorite server( sg_customServerName, sg_clientPort );
         gServerFavorites::AddFavorite( &server );
 
         // clear custom connect server

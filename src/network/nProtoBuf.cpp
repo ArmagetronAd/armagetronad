@@ -1101,6 +1101,11 @@ nStreamMessage& operator << ( nStreamMessage& m, nProtoBuf const & buffer )
 nNetObjectDescriptorBase::~nNetObjectDescriptorBase()
 {}
 
+Network::NetObjectSync const & nNetObjectDescriptorBase::GetNetObjectSync ( Network::NetObjectSync const & message )
+{
+    return message;
+}
+
 unsigned int nNetObjectDescriptorBase::GetObjectID ( Network::NetObjectSync const & message )
 {
     if( !message.has_object_id() )
@@ -1112,9 +1117,16 @@ unsigned int nNetObjectDescriptorBase::GetObjectID ( Network::NetObjectSync cons
 
 //! checks to run before creating a new object
 //! @return true if all is OK
-bool nNetObjectDescriptorBase::PreCheck( unsigned short id, nSenderInfo sender )
+bool nNetObjectDescriptorBase::PreCheck( Network::NetObjectSync const & sync, nSenderInfo sender )
 {
+    unsigned short id = GetObjectID( sync );
     nNetObject::ClearDeleted(id);
+
+    // reject sync messages for nonexistent objects
+    if( !sync.has_owner_id() && !bool(sn_netObjects[id]) )
+    {
+        return false;
+    }
 
     if (sn_netObjectsOwner[id]!=sender.SenderID() || bool(sn_netObjects[id]))
     {

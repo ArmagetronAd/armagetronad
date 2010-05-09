@@ -104,17 +104,6 @@ endif
 installcheck_douninstall.inst:
 	DESTDIR=`pwd`/._inst $(MAKE) uninstall
 
-installcheck_uninstall.inst: installcheck_test.inst
-
-installcheck_uninstall.%: installcheck_install.%
-	rm -rf ._$*/${localstatedir} ._$*/.doc ._$*/.help ._$*/leak.log ._$*/memprofile*.txt ._$*/gmon.out ._$*/@logdir@
-	$(MAKE) installcheck_douninstall.$*
-	find ._$* -type f -exec echo leftover file \{\} >> .leftover.$* \;
-	find ._$* -type l -exec echo leftover link \{\} >> .leftover.$* \;
-	if test -s .leftover.$*; then cat .leftover.$*; false; else true; fi
-	rm -f .leftover.$*
-
-if USE_UNINSTALL
 installcheck_douninstall.inst2:
 	./._inst2/$(bindir)/${uninstaller}
 	find ._inst2 -mindepth 1 -type d -name ${progname} -exec echo leftover directory \{\} >> .leftover.inst2 \;
@@ -123,15 +112,20 @@ installcheck_douninstall.inst3:
 	./._inst3/$(bindir)/${uninstaller}
 	find ._inst3 -mindepth 1 -type d -name ${progname} -exec echo leftover directory \{\} >> .leftover.inst3 \;
 
-myinstallcheck: installcheck_uninstall.inst installcheck_uninstall.inst2
-else
-myinstallcheck: installcheck_uninstall.inst
-endif
+installcheck_uninstall.inst: installcheck_test.inst
+installcheck_uninstall.%: installcheck_install.%
+	rm -rf ._$*/${localstatedir} ._$*/.doc ._$*/.help ._$*/leak.log ._$*/memprofile*.txt ._$*/gmon.out ._$*/@logdir@
+	$(MAKE) installcheck_douninstall.$*
+	find ._$* -type f -exec echo leftover file \{\} >> .leftover.$* \;
+	find ._$* -type l -exec echo leftover link \{\} >> .leftover.$* \;
+	if test -s .leftover.$*; then cat .leftover.$*; false; else true; fi
+	rm -f .leftover.$*
+
+installcheck: installcheck_uninstall.inst installcheck_uninstall.inst2
 	$(predistcheckclean)
 	@echo -e "\n---------------------------------------\nInstallation and uninstallation worked!\n---------------------------------------\n"
 
-installcheck: myinstallcheck
-devcheck: beautify myinstallcheck
+devcheck: beautify installcheck
 fullcheck: beautify devcheck distcheck
 
 # run all that don't require a full rebuild
@@ -143,13 +137,13 @@ test: installcheck
 
 # initial rule for source change tag (make it really old)
 .changetag:
-	touch -t 9001010101 $@
+	touch -t 7001010101 $@
 
 # make snapshot of SVN state, tracking relevant changes in .changetag
 fingerprint: .changetag
 # easy, just do svn info, that contains all the information needed. If that fails, try other scms.
-	{ bzr testament ${top_srcdir}; bzr info ${top_srcdir};  } > $@ || { svn info ${top_srcdir} > $@; svn info `dirname ${top_srcdir}` >> @$ || svn info `dirname ${top_srcdir}` >> $@ || echo "unknown" >> $@; } || svk info ${top_srcdir} > $@ || echo "unknown" > $@
-	
+	svn info ${top_srcdir} > $@ || svk info ${top_srcdir} > $@ || { bzr testament ${top_srcdir}; bzr info ${top_srcdir};  } > $@ || echo "unknown" > $@
+	svn info `dirname ${top_srcdir}` >> @$ || svn info `dirname ${top_srcdir}` >> $@ || echo "unknown" >> $@
 	diff $@ .changetag > /dev/null 2>&1 || { cp $@ .changetag; rm $(srcdir)/ChangeLog;  touch -t 198001010000 $(srcdir)/ChangeLog; }
 
 ########################
@@ -162,8 +156,9 @@ $(srcdir)/version: $(wildcard $(srcdir)/*_version) .changetag
 
 # Keep the changelog up to date as well (triggered by make dist only)
 $(srcdir)/ChangeLog: .changetag
+	rm -f $@
 	@echo -e "\nGenerating ChangeLog from SVN/BZR, please be patient...\n"
-	cd ${srcdir}; bzr log --gnu-changelog 2>&1 > ChangeLog || svn log 2>&1 > ChangeLog || echo "No official releasse: no changelog" > ChangeLog
+	cd ${srcdir}; svn log 2>&1 > ChangeLog || bzr log --gnu-changelog 2>&1 > ChangeLog || echo "No official releasse: no changelog" > ChangeLog
 	test -r $@ || touch $@
 
 # extra target to make before a real distribution is built
@@ -181,7 +176,6 @@ distprep:
 
 @progname@: all
 	test -r $@ || ln -sf src/armagetronad_main $@
-	ln -sf ./src/doc .
 
 DEBUGFILES=.gdbinit @progname@
 debug: $(DEBUGFILES)

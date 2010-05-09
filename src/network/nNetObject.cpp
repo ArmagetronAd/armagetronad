@@ -483,12 +483,6 @@ unsigned short next_free(){
                 sn_SendPlanned();
                 //	st_Breakpoint();
                 tAdvanceFrame(1000000);
-
-                // check for user abort, but just make it time out faster
-                if ( tConsole::Idle(false) )
-                {
-                    timeout -= 10;
-                }
             }
             if (tSysTimeFloat()>=timeout)
                 tERR_ERROR_INT("Not enough nNetObject IDs to distribute. Sorry!\n");
@@ -554,11 +548,14 @@ nDescriptor& nNetObject::CreatorDescriptor() const{
 */
 
 void nNetObject::AddRef(){
-    tASSERT_THIS();
+    tASSERT ( this );
 
-    tASSERT( refCtr_ >= 0 );
-    refCtr_++;
-    tASSERT( refCtr_ >= 0 );
+    if ( this )
+    {
+        tASSERT( refCtr_ >= 0 );
+        refCtr_++;
+        tASSERT( refCtr_ >= 0 );
+    }
 }
 
 void nNetObject::ReleaseOwnership(){
@@ -578,9 +575,9 @@ void nNetObject::TakeOwnership(){
 }
 
 void nNetObject::Release(){
-    tASSERT_THIS();
+    tASSERT( this );
 
-    {
+    if (this){
         if (refCtr_>0)
             refCtr_--;
         else
@@ -1115,15 +1112,7 @@ nNetObject *nNetObject::Object(int i){
 
     bool printMessage=true;
     while (sn_Connections[0].socket &&
-            NULL==(ret=sn_netObjects[i]) && timeout >tSysTimeFloat())
-    { // wait until it is spawned
-
-        // check for user abort, but just make it time out faster
-        if ( tConsole::Idle(false) )
-        {
-            timeout -= 10;
-        }
-
+            NULL==(ret=sn_netObjects[i]) && timeout >tSysTimeFloat()){ // wait until it is spawned
         if (tSysTimeFloat()>timeout-(totalTimeout + printMessageTimeout))
         {
             if (printMessage)
@@ -1638,11 +1627,6 @@ bool nNetObject::DoDebugPrint()
 
 static int sn_syncedUser = -1;
 
-int nNetObject::SyncedUser()
-{
-    return sn_syncedUser;
-}
-
 void nNetObject::SyncAll()
 {
 #ifdef DEBUG
@@ -1666,7 +1650,7 @@ void nNetObject::SyncAll()
             // con << sn_SyncRequestedObject.Len() << "/" << sn_netObjects.Len() << "\n";
 
             int currentSync = sn_SyncRequestedObject.Len()-1;
-            while(sn_Connections[user].socket &&
+            while (sn_Connections[user].socket>0 &&
                     sn_Connections[user].bandwidthControl_.CanSend() &&
                     sn_Connections[user].ackPending<sn_maxNoAck &&
                     currentSync >= 0){
@@ -1920,16 +1904,18 @@ void nNetObject::ClearKnows(int user, bool clear){
 #ifdef DEBUG
                         sn_BreakOnObjectID(i);
 #endif
-                        bool destroy = no->ActionOnQuit();
-                        
-                        // take ownership of the object in any case
-                        no->createdLocally=true;
-                        no->owner=::sn_myNetID;
-                        sn_netObjectsOwner(i)=::sn_myNetID;
-
-                        if (destroy || no->AcceptClientSync())
+                        if (no->ActionOnQuit())
                         {
+                            no->createdLocally=true;
                             tControlledPTR< nNetObject > bounce( no ); // destroy it, if noone wants it
+                        }
+                        else
+                        {
+                            no->owner=::sn_myNetID; // or make it mine.
+                            sn_netObjectsOwner(i)=::sn_myNetID;
+                            if (no->AcceptClientSync()){
+                                tControlledPTR< nNetObject > bounce( no ); // destroy it, if noone wants it
+                            }
                         }
                     }
                 }
@@ -2088,13 +2074,6 @@ void sn_Sync(REAL timeout,bool sync_sn_netObjects, bool otherEnd){
                 if (sync_sn_netObjects)
                     nNetObject::SyncAll();
                 sn_SendPlanned();
-
-                // check for user abort, but just make it time out faster
-                if ( tConsole::Idle(false) )
-                {
-                    endTime -= 10;
-                    timeout *= .5;
-                }
             }
 
             // decrease timeout for next try
@@ -2129,12 +2108,6 @@ void sn_Sync(REAL timeout,bool sync_sn_netObjects, bool otherEnd){
                 {
                     goon=true;
                 }
-            }
-
-            // check for user abort, but just make it time out faster
-            if ( tConsole::Idle(false) )
-            {
-                endTime -= 10;
             }
 
             if (tSysTimeFloat()>endTime)

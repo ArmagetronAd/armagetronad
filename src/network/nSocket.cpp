@@ -2079,9 +2079,9 @@ int nSocket::Write( const int8 * buf, int len, const sockaddr * addr, int addrle
 
     // check if return value was archived
     static char const * section = "SEND";
+    static tReproducibleRandomizer randomizer;
     if ( !tRecorder::Playback( section, ret ) )
     {
-        static tReproducibleRandomizer randomizer;
 #ifdef DEBUG
         // pretend send was successful in packet loss simulation
         if ( sn_simulateSendPacketLoss > randomizer.Get() )
