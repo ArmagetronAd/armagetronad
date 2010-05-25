@@ -606,7 +606,7 @@ static void PasswordCallback( nKrawall::nPasswordRequest const & request,
     // menu entry since the user probably just wants to enter the password.
     for(int i = 0; i < MAX_PLAYERS; ++i) {
         tString const &id = se_Players[i].globalID;
-        if(id.Len() <= username.Len() || id(username.Len() - 1) != '@') {
+        if(username.Len() <= 1 || id.Len() <= username.Len() || id(username.Len() - 1) != '@') {
             continue;
         }
         bool match = true;
@@ -1106,6 +1106,9 @@ ePlayer::ePlayer(){
     }
     if ( !getUserName )
         name << "Player " << id+1;
+
+    // default global ID so logins are redirected to the forums
+    globalID = "@forums";
 
 #ifndef DEDICATED
     tString confname;
