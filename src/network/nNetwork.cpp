@@ -1670,6 +1670,9 @@ extern bool FloodProtection( nMessage const & m );
 static bool sn_lockOut028tTest = true;
 static tSettingItem< bool > sn_lockOut028TestConf( "NETWORK_LOCK_OUT_028_TEST", sn_lockOut028tTest );
 
+// the network stuff planned to send:
+tHeap<planned_send> send_queue[MAXCLIENTS+2];
+
 int login_handler( nMessage &m, unsigned short rate ){
     nCurrentSenderID senderID;
 
@@ -1821,6 +1824,10 @@ int login_handler( nMessage &m, unsigned short rate ){
         {
             sn_Connections[MAXCLIENTS+1].ackMess=NULL;
         }
+
+        // clear message queue
+        while (send_queue[new_id].Len())
+            delete (send_queue[new_id](0));
 
         // send login accept message with high priority
         nMessage *rep=new nMessage(login_accept);
@@ -3060,13 +3067,6 @@ static void CeterMessage_conf(std::istream &s)
 
 static tConfItemFunc CenterMessage_c("CENTER_MESSAGE",&CeterMessage_conf);
 static tAccessLevelSetter sn_CenterConfLevel( CenterMessage_c, tAccessLevel_Moderator );
-
-// ****************************************************************
-//                    Send Queue
-// ****************************************************************
-
-// the network stuff planned to send:
-tHeap<planned_send> send_queue[MAXCLIENTS+2];
 
 planned_send::planned_send(REAL priority,int Peer){
     peer=Peer;
