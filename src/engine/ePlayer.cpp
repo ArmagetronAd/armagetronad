@@ -1989,9 +1989,11 @@ ePlayerNetID * se_GetAlivePlayerFromUserID( int uid )
     return 0;
 }
 
+#ifndef KRAWALL_SERVER
 //The Base Remote Admin Password
 static tString sg_adminPass( "NONE" );
 static tConfItemLine sg_adminPassConf( "ADMIN_PASS", sg_adminPass );
+#endif
 
 #ifdef DEDICATED
 
