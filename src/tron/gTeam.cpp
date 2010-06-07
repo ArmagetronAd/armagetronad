@@ -33,7 +33,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // sets the spectator mode of a local player
 static void SetSpectator( ePlayerNetID * player, bool spectate )
 {
-    for ( int i = MAX_PLAYERS; i>=0; --i )
+    for ( int i = MAX_PLAYERS-1; i>=0; --i )
     {
         if ( ePlayer::PlayerIsInGame(i))
         {
