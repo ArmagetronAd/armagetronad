@@ -837,9 +837,9 @@ public:
         }
         */
 #ifndef DEDICATED
+        uMenuItem::RenderBackground();
         if (!sr_glOut)
             return;
-        uMenuItem::RenderBackground();
         REAL r = rgb[0]/15.0;
         REAL g = rgb[1]/15.0;
         REAL b = rgb[2]/15.0;
