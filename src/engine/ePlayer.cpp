@@ -2944,8 +2944,8 @@ static void se_ChatMe( ePlayerNetID * p, std::istream & s, eChatSpamTester & spa
     sn_ConsoleOut(console,0);
 
     tString str;
-    str << p->GetUserName() << " /me " << msg;
-    se_SaveToChatLog(str);
+    str << "/me " << msg;
+    se_SaveToChatLog(p->GetUserName(), str);
     return;
 }
 
@@ -3768,9 +3768,7 @@ void se_ChatHandlerServer( unsigned short id, tColoredString const & say, nMessa
                 se_BroadcastChat( p, say );
                 se_DisplayChatLocally( p, say);
 
-                tString s;
-                s << p->GetUserName() << ' ' << say;
-                se_SaveToChatLog(s);
+                se_SaveToChatLog(p->GetUserName(), say);
             }
         }
     }
@@ -5926,10 +5924,10 @@ static tSettingItem<bool> se_chatLogConf("CHAT_LOG", se_chatLog);
 
 static eLadderLogWriter se_chatWriter("CHAT", false);
 
-void se_SaveToChatLog(tOutput const &out) {
+void se_SaveToChatLog(tString const p, tOutput const &out) {
     if(sn_GetNetState() != nCLIENT && !tRecorder::IsPlayingBack()) {
         if(se_chatWriter.isEnabled()) {
-            se_chatWriter << out;
+            se_chatWriter << p << out;
             se_chatWriter.write();
         }
         if(se_chatLog) {
