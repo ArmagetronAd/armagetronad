@@ -3341,11 +3341,11 @@ void gCycle::KillAt( const eCoord& deathPos){
         //always a death
         if (Player()->IsHuman())
         {
-            gStats->deaths->add(Player()->GetName(), 1);
+            gStats->deaths->add(Player()->GetLogName(), 1);
         }
         if (hunter != Player() && hunter->IsHuman()) //but a kill too?
         {
-            gStats->kills->add(hunter->GetName(), 1);
+            gStats->kills->add(hunter->GetLogName(), 1);
         }
     }
 
