@@ -12,6 +12,7 @@ chown -R "${user}" ${VARDIR}
 # export PIDDIR and VARDIR for service starter script
 export PIDDIR
 export VARDIR
+export CONFIG
 
 # ps command listing all PIDs
 PS="ps -a"
