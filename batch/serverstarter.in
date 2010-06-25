@@ -12,8 +12,7 @@ echo $$ > ${PIDDIR}/@progname@-starter.pid
 cd ${VARDIR}
 
 run() {
-    #${BINDIR}/armagetronad-dedicated --configdir ${CONFIG} --userdatadir ${VARDIR} --daemon $* &
-    ${BINDIR}/armagetronad-dedicated --userdatadir ${VARDIR} --daemon $* &
+    ${BINDIR}/armagetronad-dedicated --configdir ${CONFIG} --userdatadir ${VARDIR} --daemon $* &
     jobs -p > ${PIDDIR}/@progname@.pid
     [ -s ${PIDDIR}/@progname@.pid ] || { echo "Warning: main program PID unavailable, server can't be stopped reliably."; echo $$ > ${PIDDIR}/@progname@.pid ; }
     wait
