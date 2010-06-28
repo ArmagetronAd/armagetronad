@@ -26,6 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
 #include "rFont.h"
+#include "rRender.h"
 #include "rScreen.h"
 #include "rViewport.h"
 #include "rConsole.h"
@@ -83,7 +84,7 @@ void rViewport::Perspective(REAL fov,REAL nnear,REAL ffar){
 
     // transfer that directly to the vertical fov.
     REAL ymul = xmul/aspectratio;
-    glMatrixMode(GL_PROJECTION);
+    ProjMatrix();
     glFrustum(-nnear * xmul, nnear * xmul, -nnear * ymul, nnear * ymul, nnear, ffar);
 #endif
 
@@ -227,6 +228,8 @@ void rViewportConfiguration::DemonstrateViewport(tString *titles){
         rViewport sub(rViewport::s_viewportDemonstation,*(s_viewportConfigurations[next_conf_num]->Port(i)));
         sub.Select();
 
+        RenderEnd();
+
         glDisable(GL_TEXTURE_2D);
         glDisable(GL_DEPTH_TEST);
 
@@ -234,12 +237,11 @@ void rViewportConfiguration::DemonstrateViewport(tString *titles){
         glRectf(-.9,-.9,.9,.9);
 
         glColor3f(.6,.6,.6);
-        glBegin(GL_LINE_LOOP);
+        BeginLineLoop();
         glVertex2f(-1,-1);
         glVertex2f(-1,1);
         glVertex2f(1,1);
         glVertex2f(1,-1);
-        glEnd();
 
         glColor3f(1,1,1);
         DisplayText(0,0,.15,.5,titles[i]);

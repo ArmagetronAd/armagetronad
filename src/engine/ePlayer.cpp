@@ -6741,10 +6741,13 @@ void ePlayerNetID::GreetHighscores(tString &s){
 // *******************
 void ePlayerNetID::SetChatting ( ChatFlags flag, bool chatting )
 {
+    /* z-man can't remember why this exception was made; probably
+       just do disable the chat indicator while you play in local menus.
     if ( sn_GetNetState() == nSTANDALONE && flag == ChatFlags_Menu )
     {
         chatting = false;
     }
+    */
 
     if ( chatting )
     {

@@ -110,6 +110,10 @@ public:
     REAL GetTop() const{
         return top;
     }
+    REAL GetBottom() const{
+        return top - cheight * y;
+    }
+
 
     REAL GetLeft() const{
         return left;

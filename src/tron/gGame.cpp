@@ -1776,6 +1776,12 @@ void RenderAllViewports(eGrid *grid){
         // glDisable( GL_FOG );
     }
 
+    // render the console so it appears behind the global HUD
+    if( sr_con.autoDisplayAtSwap )
+    {
+        sr_con.Render();
+    }
+
 #ifdef POWERPAK_DEB
     if (pp_out){
         eGameObject::PPDisplayAll();
