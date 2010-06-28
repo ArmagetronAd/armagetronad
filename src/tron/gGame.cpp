@@ -3676,7 +3676,7 @@ void gGame::StateUpdate(){
 
                 //ePlayerNetID::RankingLadderLog();
 
-                sg_roundCommencingWriter << rounds+1 << sg_currentSettings->limitRounds;
+                sg_roundCommencingWriter << (rounds <= 0 ? 1 : rounds+1) << sg_currentSettings->limitRounds;
                 sg_roundCommencingWriter.write();
 
                 // wait for external script to end its work if needed
