@@ -251,7 +251,7 @@ add_definitions(${${progname}_DEFINES})
 
 if(UNIX AND NOT APPLE)
 ##### LINUX PATHS #####
-    UNIVERSAL_VAR (PREFIX ${CMAKE_INSTALL_PREFIX})
+    UNIVERSAL_VAR (PREFIX "${CMAKE_INSTALL_PREFIX}/")
     if(SYSINSTALL)
         set(PREFIX "/usr/")
     endif()
