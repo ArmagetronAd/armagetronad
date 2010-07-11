@@ -2771,6 +2771,9 @@ static void se_AdminAdmin( ePlayerNetID * p, std::istream & s )
 
 static void handle_chat_admin_commands( ePlayerNetID * p, tString const & command, tString const & say, std::istream & s, eChatSpamTester &spam )
 {
+#ifdef ENABLE_SCRIPTING
+    eChatCommand *scriptCmd;
+#endif
     if  (command == "/login")
     {
         // Really, there's no reason one would log in and log out all the time
@@ -2824,6 +2827,12 @@ static void handle_chat_admin_commands( ePlayerNetID * p, tString const & comman
     {
         se_AdminAdmin( p, s );
     }
+#ifdef ENABLE_SCRIPTING
+    else if (scriptCmd=eChatCommand::getChatCommand(command))
+    {
+        scriptCmd->run(p, say, command);
+    }
+#endif
     else
         if (se_interceptUnknownCommands)
         {
@@ -6011,6 +6020,49 @@ static void LadderLogWriteAll(std::istream &s) {
     }
     eLadderLogWriter::setAll(enabled);
 }
+
+#ifdef ENABLE_SCRIPTING
+//! chat command
+std::map<std::string, eChatCommand *> &eChatCommand::chatCommands() {
+    static std::map<std::string, eChatCommand *> list;
+    return list;
+}
+
+eChatCommand::eChatCommand(const char *ID, tScripting::proc_type proc, tAccessLevel level) :
+    id(ID), callback(proc), accessLevel(level)
+{
+    con << "add " << ID << " chat command !\n";
+    chatCommands().insert(std::pair<std::string,eChatCommand*>(std::string(ID),this));
+}
+
+eChatCommand::~eChatCommand() {
+    std::map<std::string, eChatCommand *> list = chatCommands();
+    list.erase(list.find(string(id)));
+}
+
+void eChatCommand::setAccessLevel(tAccessLevel level) {
+    accessLevel = level;
+}
+
+void eChatCommand::run(ePlayerNetID * admin, tString say, char const * command) {
+    if ( admin->GetAccessLevel() > accessLevel ) // Can he even use this command?
+    {
+        sn_ConsoleOut( tOutput( "$access_level_op_denied", command ), admin->Owner() );
+        return;
+    }
+    args tmp;
+    tmp << say;
+    tScripting::GetInstance().Exec(callback, &tmp);
+    tmp.clear();
+}
+
+eChatCommand *eChatCommand::getChatCommand(char const *ID) {
+    std::map<std::string, eChatCommand *>::iterator it;
+    it = chatCommands().find(ID);
+    if (it == chatCommands().end()) return 0;
+    return (*it).second;
+}
+#endif
 
 static tConfItemFunc LadderLogWriteAllConf("LADDERLOG_WRITE_ALL", &LadderLogWriteAll);
 

@@ -520,6 +520,23 @@ public:
 #endif
 };
 
+#ifdef ENABLE_SCRIPTING
+//! chat command 
+class eChatCommand {
+    static std::map<std::string, eChatCommand *> &chatCommands();
+    tString id;
+    tScripting::proc_type callback;
+    // access level a user has to have to be able to run this chat command 
+    tAccessLevel accessLevel;
+public:
+    eChatCommand(const char *ID, tScripting::proc_type proc, tAccessLevel level);
+    ~eChatCommand();
+    void setAccessLevel(tAccessLevel level);
+    void run(ePlayerNetID * admin, tString say, char const * command);
+    static eChatCommand *getChatCommand(char const *ID);
+};
+#endif
+
 tColoredString & operator << (tColoredString &s,const ePlayer &p);
 tColoredString & operator << (tColoredString &s,const ePlayerNetID &p);
 

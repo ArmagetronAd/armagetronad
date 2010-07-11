@@ -211,3 +211,16 @@ public:
     void setCallback(tScripting::proc_type proc);
 };
 
+//! chat command
+%rename(ChatCommand) eChatCommand;
+class eChatCommand {
+public:
+    eChatCommand(const char *ID, tScripting::proc_type proc, tAccessLevel level);
+    ~eChatCommand();
+%rename(set_access_level) setAccessLevel;
+    void setAccessLevel(tAccessLevel level);
+%rename(find) getChatCommand;
+    static eChatCommand *getChatCommand(char const *ID);
+};
+
+
