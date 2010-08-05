@@ -93,6 +93,7 @@ gSpark::~gSpark(){  }
 bool gSpark::Timestep(REAL currentTime){
 #ifndef USEPARTICLES
     REAL ts=currentTime-lastTime;
+    lastTime=currentTime;
 
     for (int i=SPARKS-1;i>=0;i--){
         x[i]+=xDot[i]*ts;

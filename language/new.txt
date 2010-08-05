@@ -7,7 +7,7 @@
 # replace "English" with the language you translate into.
 language English
 
-# rename this file to <YourLanguage>.txt, include it from languages.txt
+# Copy this file to <YourLanguage>.txt, include it from languages.txt
 # and run update.py to fill it with things to translate.
 
 # Uncomment one of thoese lines, depending on which

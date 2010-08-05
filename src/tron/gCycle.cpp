@@ -2226,8 +2226,6 @@ void gCycle::MyInitAfterCreation(){
 #ifdef DEBUG
     // con << "creating cycle.\n";
 #endif
-    eSoundMixer* mixer = eSoundMixer::GetMixer();
-    mixer->PlayContinuous(CYCLE_MOTOR, this);
 
     //correctDistSmooth=correctTimeSmooth=correctSpeedSmooth=0;
     correctDistanceSmooth = 0;
@@ -2323,6 +2321,10 @@ void gCycle::MyInitAfterCreation(){
 
         mp = false;
     }
+
+    // Start the cycle engine sound
+    eSoundMixer* mixer = eSoundMixer::GetMixer();
+    mixer->PlayContinuous(CYCLE_MOTOR, this);
 #endif // DEDICATED
 
     /*
@@ -3341,11 +3343,11 @@ void gCycle::KillAt( const eCoord& deathPos){
         //always a death
         if (Player()->IsHuman())
         {
-            gStats->deaths->add(Player()->GetName(), 1);
+            gStats->deaths->add(Player()->GetLogName(), 1);
         }
         if (hunter != Player() && hunter->IsHuman()) //but a kill too?
         {
-            gStats->kills->add(hunter->GetName(), 1);
+            gStats->kills->add(hunter->GetLogName(), 1);
         }
     }
 

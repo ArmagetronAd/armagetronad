@@ -413,6 +413,9 @@ void nProtoBufMessageBase::OnRead( unsigned char const * & buffer, unsigned char
         {
             // just read directly
             out.ParsePartialFromArray( payload, header.len );
+
+            // another harmless leak source here
+            tKnownExternalLeak l;
             out.DiscardUnknownFields();
         }
     }
@@ -472,6 +475,11 @@ nMessageStreamer & nProtoBufDescriptorBase::GetDefaultStreamer()
 
 std::string const & nProtoBufDescriptorBase::DetermineName( nProtoBuf const & prototype )
 {
+    // the protobuf initialization code allocates stuff without bothering to
+    // deallocate it later. It's not a bad leak, the memory stays reachable,
+    // but our memory manager needs to be told so so it doesn't annoy
+    // with alarms.
+    tKnownExternalLeak l;
     return prototype.GetDescriptor()->full_name();
 }
 

@@ -3487,7 +3487,7 @@ void gGame::Analysis(REAL time){
                             {
                                 if (eTeam::teams[winner-1]->Player(i)->IsHuman())
                                 {
-                                    gStats->won_rounds->add(eTeam::teams[winner-1]->Player(i)->GetName(), 1);
+                                    gStats->won_rounds->add(eTeam::teams[winner-1]->Player(i)->GetLogName(), 1);
                                 }
                             }
                             //gStatistics - ladder add
@@ -3519,7 +3519,7 @@ void gGame::Analysis(REAL time){
                 //gStatistics - highscore check
                 if (sg_singlePlayer && gStats && se_PlayerNetIDs.Len() > 0 && se_PlayerNetIDs(0)->IsHuman())
                 {
-                    gStats->highscores->greater(se_PlayerNetIDs(0)->GetName(), se_PlayerNetIDs(0)->Score());
+                    gStats->highscores->greater(se_PlayerNetIDs(0)->GetLogName(), se_PlayerNetIDs(0)->Score());
                 }
                 winner = -1;
             }
@@ -3636,7 +3636,7 @@ void gGame::Analysis(REAL time){
                             {
                                 if (winningTeam->Player(i)->IsHuman())
                                 {
-                                    gStats->won_matches->add(winningTeam->Player(i)->GetName(), 1);
+                                    gStats->won_matches->add(winningTeam->Player(i)->GetLogName(), 1);
                                 }
                             }
                         }
@@ -3734,7 +3734,7 @@ void gGame::StartNewMatch(){
     //gStatistics - highscore check
     if (sg_singlePlayer && gStats && se_PlayerNetIDs.Len() > 0 && se_PlayerNetIDs(0)->IsHuman())
     {
-        gStats->highscores->greater(se_PlayerNetIDs(0)->GetName(), se_PlayerNetIDs(0)->Score());
+        gStats->highscores->greater(se_PlayerNetIDs(0)->GetLogName(), se_PlayerNetIDs(0)->Score());
     }
 
     rounds=-100;
