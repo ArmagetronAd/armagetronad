@@ -2226,8 +2226,6 @@ void gCycle::MyInitAfterCreation(){
 #ifdef DEBUG
     // con << "creating cycle.\n";
 #endif
-    eSoundMixer* mixer = eSoundMixer::GetMixer();
-    mixer->PlayContinuous(CYCLE_MOTOR, this);
 
     //correctDistSmooth=correctTimeSmooth=correctSpeedSmooth=0;
     correctDistanceSmooth = 0;
@@ -2323,6 +2321,10 @@ void gCycle::MyInitAfterCreation(){
 
         mp = false;
     }
+
+    // Start the cycle engine sound
+    eSoundMixer* mixer = eSoundMixer::GetMixer();
+    mixer->PlayContinuous(CYCLE_MOTOR, this);
 #endif // DEDICATED
 
     /*
