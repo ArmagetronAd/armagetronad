@@ -472,6 +472,11 @@ nMessageStreamer & nProtoBufDescriptorBase::GetDefaultStreamer()
 
 std::string const & nProtoBufDescriptorBase::DetermineName( nProtoBuf const & prototype )
 {
+    // the protobuf initialization code allocates stuff without bothering to
+    // deallocate it later. It's not a bad leak, the memory stays reachable,
+    // but our memory manager needs to be told so so it doesn't annoy
+    // with alarms.
+    tKnownExternalLeak l;
     return prototype.GetDescriptor()->full_name();
 }
 
