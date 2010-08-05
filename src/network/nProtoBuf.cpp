@@ -413,6 +413,9 @@ void nProtoBufMessageBase::OnRead( unsigned char const * & buffer, unsigned char
         {
             // just read directly
             out.ParsePartialFromArray( payload, header.len );
+
+            // another harmless leak source here
+            tKnownExternalLeak l;
             out.DiscardUnknownFields();
         }
     }
