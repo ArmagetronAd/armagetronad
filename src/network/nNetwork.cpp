@@ -1489,6 +1489,9 @@ extern bool FloodProtection( int senderID );
 static bool sn_lockOut028tTest = true;
 static tSettingItem< bool > sn_lockOut028TestConf( "NETWORK_LOCK_OUT_028_TEST", sn_lockOut028tTest );
 
+// the network stuff planned to send:
+tHeap<planned_send> send_queue[MAXCLIENTS+2];
+
 void sn_LoginHandler_intermediate( nMessage &m )
 {
     Network::Login login;
@@ -1680,6 +1683,10 @@ void sn_LoginHandler( Network::Login const & login, nSenderInfo const & sender )
         nWaitForAck::AckAllPeer(MAXCLIENTS+1);
         reset_last_acks(MAXCLIENTS+1);
         sn_Connections[MAXCLIENTS+1].acks_.clear();
+
+        // clear message queue
+        while (send_queue[new_id].Len())
+            delete (send_queue[new_id](0));
 
         // send login accept message with high priority
         Network::LoginAccepted & accepted = sn_loginAcceptedDescriptor.Send( new_id );
@@ -2973,13 +2980,6 @@ static void CeterMessage_conf(std::istream &s)
 static tConfItemFunc CenterMessage_c("CENTER_MESSAGE",&CeterMessage_conf);
 static tAccessLevelSetter sn_CenterConfLevel( CenterMessage_c, tAccessLevel_Moderator );
 
-// ****************************************************************
-//                    Send Queue
-// ****************************************************************
-
-// the network stuff planned to send:
-tHeap<planned_send> send_queue[MAXCLIENTS+2];
-
 planned_send::planned_send(REAL priority,int Peer){
     peer=Peer;
 
@@ -3040,11 +3040,11 @@ static REAL sn_SendPlanned1(){
     if (time<lastTime-.01 || time>lastTime+1000)
 #ifdef DEBUG
     {
-        tERR_ERROR("Timer hickup!");
+        tERR_ERROR("Timer hiccup!");
     }
 #else
     {
-        tERR_WARN("Timer hickup!");
+        tERR_WARN("Timer hiccup!");
         lastTime=time;
     }
 #endif

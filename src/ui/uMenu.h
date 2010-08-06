@@ -90,6 +90,8 @@ public:
     void SetCenter(REAL c) {center=c;}
     void SetTop(REAL t) {menuTop=t;}
     void SetBot(REAL b) {menuBot=b;spaceBelow=1+menuBot;}
+    REAL GetTop() const {return menuTop;}
+    REAL GetBot() const {return menuBot;}
     void SetSelected(int s) {selected = s;}
     int  NumItems()         {return items.Len();}
     uMenuItem* Item(int i)  { return items[i]; }
@@ -108,7 +110,7 @@ public:
     void ReverseItems();
 
     // paints a nice background
-    static void GenericBackground();
+    static void GenericBackground(REAL top=1.0);
 
     // marks the menu for exit
     inline void Exit(){OnExit();}
@@ -491,6 +493,9 @@ public:
 
     virtual bool Event(SDL_Event &e); //!< Handles an event
     virtual void Render(REAL x,REAL y,REAL alpha=1,bool selected=0); //!< Renders the search suggestion if needed and calls uMenuItemString::Render()
+    virtual void RenderBackground(){
+        menu->GenericBackground(menu->GetTop());
+    };
 };
 
 // *****************************************************

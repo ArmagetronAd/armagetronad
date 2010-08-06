@@ -1904,18 +1904,16 @@ void nNetObject::ClearKnows(int user, bool clear){
 #ifdef DEBUG
                         sn_BreakOnObjectID(i);
 #endif
-                        if (no->ActionOnQuit())
+                        bool destroy = no->ActionOnQuit();
+                        
+                        // take ownership of the object in any case
+                        no->createdLocally=true;
+                        no->owner=::sn_myNetID;
+                        sn_netObjectsOwner(i)=::sn_myNetID;
+
+                        if (destroy || no->AcceptClientSync())
                         {
-                            no->createdLocally=true;
                             tControlledPTR< nNetObject > bounce( no ); // destroy it, if noone wants it
-                        }
-                        else
-                        {
-                            no->owner=::sn_myNetID; // or make it mine.
-                            sn_netObjectsOwner(i)=::sn_myNetID;
-                            if (no->AcceptClientSync()){
-                                tControlledPTR< nNetObject > bounce( no ); // destroy it, if noone wants it
-                            }
                         }
                     }
                 }

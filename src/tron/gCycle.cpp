@@ -221,6 +221,7 @@ static tSettingItem<int> s_s("SCORE_SUICIDE",score_suicide);
 
 uActionPlayer gCycle::s_brake("CYCLE_BRAKE", -5);
 static uActionPlayer s_brakeToggle("CYCLE_BRAKE_TOGGLE", -5);
+static uActionTooltip sg_brakeTooltip( gCycle::s_brake, 1, &ePlayer::VetoActiveTooltip );
 
 // a class of textures where the transparent part of the
 // image is replaced by the player color
@@ -2507,7 +2508,7 @@ static inline void rotate(eCoord &r,REAL angle){
 }
 
 #ifdef MACOSX
-// Sparks have a large performance problem on Macs. See http://guru3.sytes.net/viewtopic.php?t=2167
+// Sparks have a large performance problem on Macs. See http://forums.armagetronad.net/viewtopic.php?t=2167
 bool crash_sparks=false;
 #else
 bool crash_sparks=true;

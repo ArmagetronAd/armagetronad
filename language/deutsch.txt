@@ -1594,6 +1594,8 @@ language_second_help          Legt die zweite Wahl für die verwendete Sprache fe
 language_menu_title           Spracheinstellungen
 language_menu_help            wählt die Sprache für alle Bildschirmtexte aus
 
+language_firstchoice_help     Drücke Enter, Return oder Leertaste, um deutsche Bildschirmtexte auszuwählen.
+
 language_menu_item_fist       Erste Sprache:
 language_menu_item_first_help \g wird die meisten Textmeldungen in dieser Sprache anzeigen
 
