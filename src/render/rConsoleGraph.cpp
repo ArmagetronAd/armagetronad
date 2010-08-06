@@ -207,7 +207,7 @@ void rConsole::Render(){
             }
            
             // check for mispredictions of console height
-            lastBottom = out.GetBottom();
+            lastBottom = out.GetBottom()-.4*out.GetCHeight();
             if( fabs(predictBottom - lastBottom) > .0001 )
             {
                 sr_consoleDisplayList.Clear();
