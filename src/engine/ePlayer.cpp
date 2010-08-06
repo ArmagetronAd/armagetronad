@@ -6196,7 +6196,19 @@ void ePlayerNetID::ResetScore(){
     ResetScoreDifferences();
 }
 
-void ePlayerNetID::DisplayScores(){
+// flag memorizing whether the scores already have been rendered this frame
+static bool se_alreadyDisplayedScores = false;
+
+static bool show_scores=false;
+
+void ePlayerNetID::DisplayScores()
+{
+    if( !show_scores || !se_mainGameTimer || se_alreadyDisplayedScores )
+    {
+        return;
+    }
+    se_alreadyDisplayedScores = true;
+
     sr_ResetRenderState(true);
 
     REAL W=sr_screenWidth;
@@ -7121,7 +7133,6 @@ void ePlayerNetID::GetScoreFromDisconnectedCopy()
 }
 
 
-static bool show_scores=false;
 static bool ass=true;
 
 void se_AutoShowScores(){
@@ -7138,14 +7149,9 @@ void se_SetShowScoresAuto(bool a){
     ass=a;
 }
 
-
 static void scores(){
-    if (show_scores){
-        if ( se_mainGameTimer )
-            ePlayerNetID::DisplayScores();
-        else
-            show_scores = false;
-    }
+    ePlayerNetID::DisplayScores();
+    se_alreadyDisplayedScores = false;
 }
 
 
@@ -7157,11 +7163,10 @@ static bool force_small_cons(){
 
 static rSmallConsoleCallback sc(&force_small_cons);
 
-static void cd(){
-    show_scores = false;
-}
-
-
+//static void cd(){
+//    show_scores = false;
+//}
+//static rCenterDisplayCallback c_d(&cd);
 
 static uActionGlobal score("SCORE");
 
@@ -7173,8 +7178,6 @@ static bool sf(REAL x){
 
 static uActionGlobalFunc saf(&score,&sf);
 
-
-static rCenterDisplayCallback c_d(&cd);
 
 tOutput& operator << (tOutput& o, const ePlayerNetID& p)
 {
