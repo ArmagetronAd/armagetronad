@@ -1776,7 +1776,8 @@ void RenderAllViewports(eGrid *grid){
         // glDisable( GL_FOG );
     }
 
-    // render the console so it appears behind the global HUD
+    // render the console and scores so it appears behind the global HUD
+    ePlayerNetID::DisplayScores();
     if( sr_con.autoDisplayAtSwap )
     {
         sr_con.Render();
@@ -3421,7 +3422,7 @@ void gGame::StateUpdate(){
             // pings should not count as much in the between-round phase
             nPingAverager::SetWeight(1E-20);
 
-            se_UserShowScores(false);
+            // se_UserShowScores(false);
 
             //con.autoDisplayAtNewline=true;
             sr_con.fullscreen=true;
@@ -4492,7 +4493,7 @@ bool GameLoop(bool input=true){
 
 void gameloop_idle()
 {
-    se_UserShowScores( false );
+    // se_UserShowScores( false );
     sg_Receive();
     nNetObject::SyncAll();
     sn_SendPlanned();
