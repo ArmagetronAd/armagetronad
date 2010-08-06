@@ -4506,6 +4506,8 @@ static eSoundPlayer extroPlayer(extro);
 static void sg_EnterGameCleanup();
 
 void sg_EnterGameCore( nNetState enter_state ){
+    se_UserShowScores( false );
+
     sg_RequestedDisconnection = false;
 
     sr_con.SetHeight(7);
