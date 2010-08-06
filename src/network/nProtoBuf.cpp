@@ -1467,14 +1467,29 @@ unsigned short nMessageCache::CompressProtoBuff( nProtoBuf const & source, nProt
     // count when last best message was found
     int bestCount = 0;
 
-    // check the cache hint
+
+    typedef nMessageCacheByDescriptor::CacheQueue CacheQueue;
+
+    // check whether the hint actually is in the cache. Needs to be done.
     if( hint )
     {
-        sn_CheckMessage( source, hint, size, bestDifference, best, lastMessageID );
+        bool hintCached = false;
+        for( CacheQueue::reverse_iterator i = cache.queue_.rbegin();
+             i != cache.queue_.rend(); ++i )
+        {
+            if( hint == *i )
+            {
+                hintCached = true;
+                break;
+            }
+        }
+        if( hintCached )
+        {
+            sn_CheckMessage( source, hint, size, bestDifference, best, lastMessageID );
+        }
     }
 
-    // find the cacheID from the cache
-    typedef nMessageCacheByDescriptor::CacheQueue CacheQueue;
+    // find the best cacheID from the cache
     for( CacheQueue::reverse_iterator i = cache.queue_.rbegin();
          i != cache.queue_.rend(); ++i )
     {
@@ -1484,7 +1499,10 @@ unsigned short nMessageCache::CompressProtoBuff( nProtoBuf const & source, nProt
             break;
         }
 
-        sn_CheckMessage( source, *i, size, bestDifference, best, lastMessageID );
+        if( hint != *i )
+        {
+            sn_CheckMessage( source, *i, size, bestDifference, best, lastMessageID );
+        }
 
         ++count;
     }
