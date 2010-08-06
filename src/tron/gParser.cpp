@@ -532,6 +532,9 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
         else if (!xmlStrcmp(myxmlGetProp(cur, "effect").GetXML(), (const xmlChar *)"fortress")) {
             zone = tNEW( gBaseZoneHack) ( grid, eCoord(x*sizeMultiplier,y*sizeMultiplier) );
         }
+        else if (!xmlStrcmp(myxmlGetProp(cur, "effect").GetXML(), (const xmlChar *)"sumo")) {
+            zone = tNEW( gSumoZoneHack) ( grid, eCoord(x*sizeMultiplier,y*sizeMultiplier) );
+        }
         else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"flag")) {
             zone = tNEW( gFlagZoneHack) ( grid, eCoord(x*sizeMultiplier,y*sizeMultiplier) );
         }

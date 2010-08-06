@@ -289,6 +289,7 @@ class gBaseZoneHack: public gZone
 		~gBaseZoneHack();		 //!< destructor
 
 		bool CheckTeamAssignment(); //!< Check if this zone is assigned to a team, if not, try to assign one.
+        bool CheckTeamAssignmentOnTeam(); //!< If a zone is assigned a team It will make sure any unsigned zone that is closer to a team will have this team.
 	private:
 								 //!< simulates behaviour up to currentTime
 		virtual bool Timestep(REAL currentTime);
@@ -347,7 +348,31 @@ class gBaseZoneHack: public gZone
 		REAL lastRespawnRemindTime_;
 		int lastRespawnRemindWaiting_;
 };
+//! sumo zone: creates base zones for teams
+class gSumoZoneHack: public gZone
+{
+	public:
+								 //!< local constructor
+		gSumoZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false);
+								 //!< network constructor
+		gSumoZoneHack(nMessage &m);
+		~gSumoZoneHack();		 //!< destructor
+        void SetUnspawnedState(){currentState_=State_Unspawned;}
+    protected:
+        virtual bool Timestep(REAL currentTime);     //!< simulates behaviour up to currentTime
+    private:
+        enum State
+		{
+            State_Parsing,      //!< This zone is still being created
+			State_Unspawned,	//!< team zones have yet to be created
+			State_Spawned	   //!< Team zones have been created
 
+		};
+		State currentState_;	 //!< the current state
+        void SetStateParsing(){currentState_=State_Parsing;}
+        virtual void OnVanish();                     //!< called when the zone vanishes
+
+};
 class gBallZoneHack: public gZone
 {
 	public:
