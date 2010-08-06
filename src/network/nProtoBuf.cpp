@@ -640,11 +640,18 @@ void nProtoBufDescriptorBase::StreamFromDefault( nStreamMessage & in, nProtoBuf 
                     {
                         unsigned short value;
                         in.Read( value );
+
+                        // another harmless leak source here
+                        tKnownExternalLeak l;
+
                         reflection->REFL_SET( AddUInt32, &out, field, value );
                         break;
                     }
                     case FieldDescriptor::CPPTYPE_MESSAGE:
                     {
+                        // another harmless leak source here
+                        tKnownExternalLeak l;
+
                         nProtoBuf * message = reflection->REFL_GET( AddMessage, &out, field );
                         StreamFromStatic( in, *message, SECTION_First );
                         break;
