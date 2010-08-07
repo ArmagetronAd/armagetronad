@@ -3442,6 +3442,8 @@ static void sg_HoleScore( gCycle & cycle )
 
 static eLadderLogWriter sg_sacrificeWriter("SACRIFICE", true);
 
+static eLadderLogWriter sg_holeWriter("HOLE", true);
+
 void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
     {
         // deactivate time check
@@ -3455,13 +3457,17 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
             
             // check whether we drove through a hole in an enemy wall made by a teammate
             gPlayerWall const * w = dynamic_cast< gPlayerWall const * >( ww );
-            if ( Alive() && w && score_hole )
+            if ( Alive() && w )
             {
                 gExplosion * explosion = w->Holer( a, time );
                 if ( explosion )
                 {
                     gCycle * holer = explosion->GetOwner();
-                    if ( holer && holer != this && holer->Player() &&
+                    if (holer) {
+                        sg_holeWriter << Player()->GetUserName() << holer->Player()->GetUserName() << w->Cycle()->Player()->GetUserName() << time - explosion->CreationTime();
+                        sg_holeWriter.write();
+                    }
+                    if ( score_hole && holer && holer != this && holer->Player() &&
                          Player() &&
                          w->Cycle() && w->Cycle()->Player() &&
                          holer->Player()->CurrentTeam() == Player()->CurrentTeam() &&       // holer must have been a teammate 
@@ -3482,9 +3488,8 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
                             {
                                 // negative hole score to the driver
                                 sg_HoleScore( *this );
-
                             }
-                       }
+                        }
                     }
                 }
             }

@@ -90,5 +90,7 @@ private:
     int 		listID;
 
     tJUST_CONTROLLED_PTR< gCycle > owner_; // the owner/victim of the explosion
+public:
+    REAL CreationTime() { return createTime; }
 };
 #endif
