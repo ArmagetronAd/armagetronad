@@ -1304,10 +1304,6 @@ bool su_HandleEvent(SDL_Event &e, bool delayed ){
     // transform events
     bool ret = false;
 
-    // there is nearly allways a mouse motion tEvent:
-    int xrel=e.motion.xrel;
-    int yrel=-e.motion.yrel;
-
     std::vector< uTransformEventInfo > events;
     su_TransformEvent( e, events );
 
