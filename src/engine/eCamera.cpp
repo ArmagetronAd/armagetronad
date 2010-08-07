@@ -26,7 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 // CHECK: consistent with project's logging policy?
-// define iff camera should log its state at every timestep
+// define if camera should log its state at every timestep
 // #define CAMERA_LOGGING
 
 #include "rSDL.h"
@@ -35,6 +35,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <iostream>
 #endif
 
+#include "tCommandLine.h"
+#include "tRecorder.h"
 #include "eSensor.h"
 #include "eCamera.h"
 #include "rScreen.h"
@@ -390,6 +392,65 @@ static void se_SetWatchedObject( eCamera * cam, eGameObject * obj )
     }
 }
 
+#ifdef DEBUG
+// name of player to watch
+static tString se_pleaseWatch;
+static eGameObject * se_GetPleaseWatch()
+{
+    if( !tRecorderBase::IsPlayingBack() )
+    {
+        return NULL;
+    }
+
+    if( se_pleaseWatch.size() == 0 )
+    {
+        return NULL;
+    }
+
+    // yeah, umm, finding players requires authorization. Let's steal it. Just this once.
+    tCurrentAccessLevel thief(tAccessLevel_Owner, true);
+    ePlayerNetID * p = ePlayerNetID::FindPlayerByName( se_pleaseWatch, 0, false );
+    if( !p )
+    {
+        return NULL;
+    }
+
+    eGameObject * ret = p->Object();
+    if( ret && ret->Alive() )
+    {
+        return ret;
+    }
+
+    return NULL;
+}
+
+class rWatchCommandLineAnalyzer: public tCommandLineAnalyzer
+{
+private:
+    virtual bool DoAnalyze( tCommandLineParser & parser )
+    {
+        // get option
+        tString name;
+        if ( parser.GetOption( name, "--watch" ) )
+        {
+            // set fast forward mode
+            se_pleaseWatch = name;
+
+            return true;
+        }
+
+        return false;
+    }
+
+    virtual void DoHelp( std::ostream & s )
+    {                                      //
+        s << "--watch <name>               : during playback, prefers to watch a player with that\n"
+             "                               name (part) instead of the originally active player.";
+    }
+};
+static rWatchCommandLineAnalyzer se_WatchAnalyzer;
+#endif
+
 void eCamera::MyInit(){
     if (localPlayer){
         if (cameraMain_) mode=localPlayer->startCamera; //PENDING:
@@ -406,6 +467,14 @@ void eCamera::MyInit(){
         // or an arbitrary game object
         center = grid->gameObjectsInteresting[0];
     }
+
+#ifdef DEBUG
+    eGameObject * pleaseWatch = se_GetPleaseWatch();
+    if( pleaseWatch )
+    {
+        center = pleaseWatch;
+    }
+#endif
 
     // switch away from forbidden camera mode
     if (forbid_camera[mode] && bool(netPlayer) && netPlayer->Object()==Center())
@@ -1666,7 +1735,11 @@ void eCamera::Timestep(REAL ts){
     }
 
     // the best center is always our own vehicle. Focus on it if possible.
-    if (netPlayer)
+    if (netPlayer
+#ifdef DEBUG
+        && se_pleaseWatch.size() == 0
+#endif
+        )
     {
         eGameObject * bestCenter = netPlayer->Object();
         if ( InterestingToWatch(bestCenter) )
