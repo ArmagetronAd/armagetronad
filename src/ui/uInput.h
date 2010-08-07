@@ -32,10 +32,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tString.h"
 #include "defs.h"
 #include "tLinkedList.h"
+#include "tConfiguration.h"
 #include "tLocale.h"
 #include "tSafePTR.h"
 
-#define uMAX_PLAYERS 8
+#define uMAX_PLAYERS 4
 
 extern bool su_mouseGrab;         //! true if the mouse cursor is to be confined into the window
 extern REAL su_doubleBindTimeout; //! timeout value for double binds; second keypress for the same action gets ignored from a different key when within the timeout
@@ -46,9 +47,14 @@ extern REAL su_doubleBindTimeout; //! timeout value for double binds; second key
 
 #define uMAX_ACTIONS 300
 
+class uActionTooltip;
+
 // the possible actions; player actions and global actions
 
 class uAction:public tListItem<uAction>{
+    friend class uActionTooltip;
+
+    uActionTooltip *tooltip_;
 protected:
     int localID;  // unique id on this host
     int globalID; // unique ID send from the server
@@ -60,6 +66,11 @@ public:
     tString        	internalName;
     const tOutput  	description;
     const tOutput  	helpText;
+
+    uActionTooltip * GetTooltip() const
+    {
+        return tooltip_;
+    }
 
 #ifdef SLOPPYLOCALE
     //  uAction(uAction *&anchor,const char *name,const char *desc,const char *help,
@@ -82,6 +93,33 @@ public:
 
     unsigned short ID() const{return globalID;}
 };
+
+// tooltips, little help messages popping up, reminding the player
+// of keybindings
+class uActionTooltip: public tConfItemBase
+{
+public:
+    typedef bool VETOFUNC(int player);
+    uActionTooltip( uAction & action, int numHelp, VETOFUNC * veto = NULL );
+    ~uActionTooltip();
+
+    //! presents help to the specified player, starting counting at 1. 
+    //! player = 0 helps on global actions. Returns true if help was given.
+    static bool Help( int player = 0 );
+
+    //! call if an action was triggered
+    void Count( int player );
+private:
+    virtual void WriteVal(std::ostream & s );
+    virtual void ReadVal(std::istream & s );
+
+    //! counts how many activations are required to make the tip go away
+    int activationsLeft_[uMAX_PLAYERS+1];
+    tString help_;        //!< help languate item
+    uAction & action_;    //!< action this belongs to
+    VETOFUNC * veto_;  //!< function that can block help display
+};
+
 
 // player actions (move,shoot) and global actions (stop game, pause..)
 

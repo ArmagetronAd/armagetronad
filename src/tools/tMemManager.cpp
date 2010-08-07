@@ -106,6 +106,20 @@ public:
 static tMockMutex st_mutex;
 #endif
 
+// create an object of this class while calling external functions
+// that are known to have (harmless!) leaks
+static int st_knownExternalLeak = 0;
+
+tKnownExternalLeak::tKnownExternalLeak()
+{
+    st_knownExternalLeak++;
+}
+
+tKnownExternalLeak::~tKnownExternalLeak()
+{
+    st_knownExternalLeak--;
+}
+
 class tBottleNeck
 {
 public:
@@ -171,15 +185,21 @@ struct tAllocationInfo
     int checksum;
     int line;
     bool array;
+    bool report;
 #endif
 
     tAllocationInfo( bool 
 #ifdef LEAKFINDER
                      array_ 
 #endif
+                     , bool 
+#ifdef LEAKFINDER
+                     alwaysReport 
+#endif
+                     = false
         )
 #ifdef LEAKFINDER
-    : filename( "XXX" ), classname( "XXX" ), checksum(-1), line(0), array( array_ )
+    : filename( "XXX" ), classname( "XXX" ), checksum(-1), line(0), array( array_ ), report(alwaysReport || st_knownExternalLeak==0)
 #endif
     {
     }
@@ -289,7 +309,8 @@ unsigned char prev:8;      // ....
 #ifdef LEAKFINDER
     int checksum;
     int counter;
-    bool array;
+    bool array:1;
+    bool report:1;
 #endif
 #ifdef PROFILER
     size_t realSize;
@@ -421,6 +442,7 @@ public: // everything is local to this file anyway...
             chunk(ret).realSize = size;
 #endif
             chunk(ret).array=info.array;
+            chunk(ret).report=info.report;
             chunk(ret).checksum=info.checksum;
             chunk(ret).counter =++counter[info.checksum];
 
@@ -455,6 +477,7 @@ public: // everything is local to this file anyway...
         chunk(ret).realSize = size;
 #endif
         chunk(ret).array=info.array;
+        chunk(ret).report=info.report;
         chunk(ret).checksum=info.checksum;
 #endif
 
@@ -577,12 +600,18 @@ public: // everything is local to this file anyway...
     }
 
 #ifdef LEAKFINDER
-    void dumpleaks(std::ostream &s){
+    bool dumpleaks(std::ostream &s){
+        bool ret = false;
         for (int i=myman->blocksize-1;i>=0;i--)
-            if (chunk(i).occupied && chunk(i).checksum >= 0 ){
+        {
+            if (chunk(i).occupied && chunk(i).report && chunk(i).checksum >= 0 )
+            {
                 s << chunk(i).checksum << " " << chunk(i).counter << '\n';
                 leak();
+                ret = true;
             }
+        }
+        return ret;
     }
 #endif
 };
@@ -614,7 +643,7 @@ bool tMemManager::SwapIf(int i,int j){
 
 tMemManager::~tMemManager(){
 #ifdef LEAKFINDER
-    bool warn = true;
+    static bool warn = true;
 #ifdef HAVE_LIBZTHREAD
     warn = false;
 #endif
@@ -641,13 +670,13 @@ tMemManager::~tMemManager(){
             memblock::destroy(blocks(i));
         else{
 #ifdef LEAKFINDER
-            if ( warn )
+            std::ofstream l(leakname,std::ios::app);
+            bool report = blocks(i)->dumpleaks(l);
+            if ( report && warn )
             {
                 std::cout << "Memmanager warning: leaving block untouched.\n";
                 warn = false;
             }
-            std::ofstream l(leakname,std::ios::app);
-            blocks(i)->dumpleaks(l);
 #endif
         }
     }
@@ -657,13 +686,13 @@ tMemManager::~tMemManager(){
             memblock::destroy(full_blocks(i));
         else{
 #ifdef LEAKFINDER
-            if ( warn )
+            std::ofstream l(leakname,std::ios::app);
+            bool report = full_blocks(i)->dumpleaks(l);
+            if ( report && warn )
             {
                 std::cout << "Memmanager warning: leaving block untouched.\n";
                 warn = false;
             }
-            std::ofstream l(leakname,std::ios::app);
-            full_blocks(i)->dumpleaks(l);
 #endif
         }
     }
@@ -1092,6 +1121,7 @@ void *tMemManager::AllocDefault(tAllocationInfo const & info, size_t s){
     void *ret=malloc(s+sizeof(chunkinfo));//,classname,fileName,line);
     ((chunkinfo *)ret)->checksum=info.checksum;
     ((chunkinfo *)ret)->array=info.array;
+    ((chunkinfo *)ret)->report=info.report;
 #ifdef PROFILER
     ((chunkinfo *)ret)->realSize=s;
     if ( info.checksum >= 0 )
@@ -1305,7 +1335,7 @@ void  operator delete(void *ptr,bool keep) THROW_NOTHING{
 
 
 void* operator new	(size_t size,const char *classn,const char *file,int l) THROW_BADALLOC{
-    tAllocationInfo info( false );
+    tAllocationInfo info( false, true );
 #ifdef LEAKFINDER
     info.filename=file;
     info.classname=classn;
@@ -1339,7 +1369,7 @@ void* operator new	(size_t size,const char *classn,const char *file,int l) THROW
 }
 
 void  operator delete   (void *ptr,const char *classname,const char *file,int line)  THROW_NOTHING{
-    tAllocationInfo info( false );
+    tAllocationInfo info( false, true );
 
     if (ptr) tMemMan::Dispose(info, ptr);
 }
@@ -1364,7 +1394,7 @@ void  operator delete[](void *ptr) THROW_NOTHING {
 
 
 void* operator new[]	(size_t size,const char *classn,const char *file,int l)  THROW_BADALLOC{
-    tAllocationInfo info( true );
+    tAllocationInfo info( true, true );
 #ifdef LEAKFINDER
     info.filename=file;
     info.classname=classn;
@@ -1398,7 +1428,7 @@ void* operator new[]	(size_t size,const char *classn,const char *file,int l)  TH
 }
 
 void  operator delete[]   (void *ptr,const char *classname,const char *file,int line)   THROW_NOTHING{
-    tAllocationInfo info( true );
+    tAllocationInfo info( true, true );
 
     if (ptr) tMemMan::Dispose(info, ptr);
 }

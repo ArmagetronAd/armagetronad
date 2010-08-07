@@ -637,6 +637,8 @@ bool gMemuItemConsole::Event(SDL_Event &e){
 }
 
 void do_con(){
+    su_ClearKeys();
+        
     se_ChatState( ePlayerNetID::ChatFlags_Console, true );
     sr_con.SetHeight(20,false);
     se_SetShowScoresAuto(false);
@@ -806,13 +808,14 @@ public:
         }
         */
 #ifndef DEDICATED
+        uMenuItem::RenderBackground();
         if (!sr_glOut)
             return;
-        uMenuItem::RenderBackground();
         REAL r = rgb[0]/15.0;
         REAL g = rgb[1]/15.0;
         REAL b = rgb[2]/15.0;
         se_MakeColorValid(r, g, b, 1.0f);
+        RenderEnd();
         glColor3f(r, g, b);
         glRectf(.8,-.8,.98,-.98);
 #endif

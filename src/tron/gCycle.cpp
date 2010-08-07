@@ -220,6 +220,7 @@ static tSettingItem<int> s_s("SCORE_SUICIDE",score_suicide);
 
 uActionPlayer gCycle::s_brake("CYCLE_BRAKE", -5);
 static uActionPlayer s_brakeToggle("CYCLE_BRAKE_TOGGLE", -5);
+static uActionTooltip sg_brakeTooltip( gCycle::s_brake, 1, &ePlayer::VetoActiveTooltip );
 
 // a class of textures where the transparent part of the
 // image is replaced by the player color
@@ -1533,8 +1534,6 @@ void gCycle::MyInitAfterCreation(){
 #ifdef DEBUG
     // con << "creating cycle.\n";
 #endif
-    eSoundMixer* mixer = eSoundMixer::GetMixer();
-    mixer->PlayContinuous(CYCLE_MOTOR, this);
 
     //correctDistSmooth=correctTimeSmooth=correctSpeedSmooth=0;
     correctDistanceSmooth = 0;
@@ -1630,6 +1629,10 @@ void gCycle::MyInitAfterCreation(){
 
         mp = false;
     }
+
+    // Start the cycle engine sound
+    eSoundMixer* mixer = eSoundMixer::GetMixer();
+    mixer->PlayContinuous(CYCLE_MOTOR, this);
 #endif // DEDICATED
 
     /*
@@ -1812,7 +1815,7 @@ static inline void rotate(eCoord &r,REAL angle){
 }
 
 #ifdef MACOSX
-// Sparks have a large performance problem on Macs. See http://guru3.sytes.net/viewtopic.php?t=2167
+// Sparks have a large performance problem on Macs. See http://forums.armagetronad.net/viewtopic.php?t=2167
 bool crash_sparks=false;
 #else
 bool crash_sparks=true;
@@ -2648,11 +2651,11 @@ void gCycle::KillAt( const eCoord& deathPos){
         //always a death
         if (Player()->IsHuman())
         {
-            gStats->deaths->add(Player()->GetName(), 1);
+            gStats->deaths->add(Player()->GetLogName(), 1);
         }
         if (hunter != Player() && hunter->IsHuman()) //but a kill too?
         {
-            gStats->kills->add(hunter->GetName(), 1);
+            gStats->kills->add(hunter->GetLogName(), 1);
         }
     }
 
