@@ -932,6 +932,47 @@ eCoord gCycleMovement::SpawnDirection() const {
 
 // *******************************************************************************************
 // *
+// *	Killer
+// *
+// *******************************************************************************************
+//!
+//!		@return	the potential killer of this cycle
+//!
+// *******************************************************************************************
+
+eGameObject const * gCycleMovement::Killer() const
+{
+    ePlayerNetID const * killer = enemyInfluence.GetEnemy();
+    if( killer )
+    {
+        eNetGameObject * killerObject = killer->Object();
+        if( killerObject )
+        {
+            return killerObject;
+        }
+    }
+
+    // not found? Assume the object closest to the death position is responsible
+    gCycleMovement * nearest = NULL;
+    float bestDist = 0;
+    for( int i = grid->GameObjectsInteresting().Len()-1; i >= 0; --i )
+    {
+        gCycleMovement * candidate = dynamic_cast< gCycleMovement * >( grid->GameObjectsInteresting()(i) );
+        if( candidate && candidate->Alive() && candidate != this )
+        {
+            REAL dist = (Position() - candidate->Position()).NormSquared();
+            if ( !nearest || bestDist > dist )
+            {
+                bestDist = dist;
+                nearest = candidate;
+            }
+        }
+    }
+    return nearest;
+}
+
+// *******************************************************************************************
+// *
 // *	LastDirection
 // *
 // *******************************************************************************************

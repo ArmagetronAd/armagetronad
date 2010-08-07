@@ -362,6 +362,7 @@ static nObserverPtr< ePlayerNetID > & se_GetWatchedPlayer( eCamera * cam )
 }
 
 // returns the last watched game object
+/*
 static eGameObject * se_GetWatchedObject( eCamera * cam )
 {
     ePlayerNetID const * player = se_GetWatchedPlayer( cam );
@@ -370,6 +371,7 @@ static eGameObject * se_GetWatchedObject( eCamera * cam )
 
     return NULL;
 }
+*/
 
 static void se_SetWatchedObject( eCamera * cam, eGameObject * obj )
 {
@@ -1713,9 +1715,26 @@ void eCamera::Timestep(REAL ts){
         lastSwitch=lastTime;
 
     if (!InterestingToWatch(Center()) && lastTime-lastSwitch>2 && (center==0 || lastTime-center->deathTime > 4)){ // CHECK: not glancing-related. gives the player a chance to analyse the cause of his death before the camera switches away.
-        center = se_GetWatchedObject( this );
+        if( center )
+        {
+            // switch to the potential killer
+            eGameObject const * killer = center->Killer();
+            if ( killer )
+            {
+                center = const_cast< eGameObject * >( killer );
+                lastSwitch=lastTime;
+            }
+        }
+        
+        // center = se_GetWatchedObject( this );
         if ( !center || !InterestingToWatch(center) )
-            SwitchCenter(1);
+        {
+            bool switched = false;
+            if ( !switched )
+            {
+                SwitchCenter(1);
+            }
+        }
 
         if (!InterestingToWatch(Center()))
         {

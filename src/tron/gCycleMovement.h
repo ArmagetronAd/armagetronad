@@ -93,6 +93,9 @@ public:
     virtual bool            Vulnerable              ()                                    const     ;   //!< returns whether the cycle can be killed
     virtual eCoord          SpawnDirection         ()                                    const     ;   //!< returns the driving direction when the cycle was last spawned
 
+    //! returns a guess about which other object killed this cycle (provided it is dead)
+    virtual eGameObject const * Killer() const;
+
     bool                    CanMakeTurn             (int direction                      ) const     ;   //!< returns whether a turn is currently possible
     bool                    CanMakeTurn             ( REAL time, int direction          ) const     ;   //!< returns whether a turn is possible at the given time
     inline  REAL            GetDistanceSinceLastTurn(                                   ) const     ;   //!< returns the distance since the last turn
