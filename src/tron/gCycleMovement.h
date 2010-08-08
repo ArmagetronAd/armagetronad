@@ -66,7 +66,7 @@ public:
     REAL                            GetTime() const;        // the time of the influence
     void							AddSensor( const gSensor& sensor, REAL timePenalty, gCycleMovement * thisCycle ); // add the result of the sensor scan to our data
     void							AddWall( const eWall * wall, eCoord const & point, REAL timePenalty, gCycleMovement * thisCycle ); // add the interaction with a wall to our data
-    void							AddWall( const gPlayerWall * wall, REAL timeBuilt, gCycleMovement * thisCycle ); // add the interaction with a wall to our data
+    void							AddWall( const gPlayerWall * wall, REAL timeBuilt, REAL timePenalty, gCycleMovement * thisCycle ); // add the interaction with a wall to our data
 };
 
 typedef rColor gRealColor;
