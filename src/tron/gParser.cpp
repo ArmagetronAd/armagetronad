@@ -1201,7 +1201,7 @@ gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
         bool needSimpleEffect = false;
         if (myxmlHasProp(zoneroot, "effect"))
         {
-            char*ztype = myxmlGetProp(zoneroot, "effect");
+            string ztype( myxmlGetProp(zoneroot, "effect") );
             zZone*zptr = zZoneExtManager::Create(ztype, grid);
             if (zptr)
                 zone = zZonePtr(zptr);
