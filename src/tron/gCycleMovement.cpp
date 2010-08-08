@@ -567,6 +567,17 @@ void gEnemyInfluence::AddSensor( const gSensor& sensor, REAL timePenalty, gCycle
     if ( !wall )
         return;
 
+    // faraway walls count less.
+    if( sensor.GetOwner() )
+    {
+        REAL speed = sensor.GetOwner()->Speed();
+        if( speed > 0 )
+        {
+            REAL distance = sensor.Direction().Norm() * sensor.hit;
+            timePenalty += distance/speed;
+        }
+    }
+
     AddWall( wall, sensor.before_hit, timePenalty, thisCycle );
 }
 
@@ -592,11 +603,11 @@ void gEnemyInfluence::AddWall( const eWall * wall, eCoord const & pos, REAL time
     }
     REAL timeBuilt = playerWall->Time( alpha );
 
-    AddWall( playerWall, timeBuilt - timePenalty, thisCycle );
+    AddWall( playerWall, timeBuilt, timePenalty, thisCycle );
 }
 
 // add the interaction with a wall to our data
-void gEnemyInfluence::AddWall( const gPlayerWall * wall, REAL timeBuilt, gCycleMovement * thisCycle )
+void gEnemyInfluence::AddWall( const gPlayerWall * wall, REAL timeBuilt, REAL timePenalty, gCycleMovement * thisCycle )
 {
     // the client has no need for this, it does not execute AI code
     if ( sn_GetNetState() == nCLIENT )
@@ -620,6 +631,7 @@ void gEnemyInfluence::AddWall( const gPlayerWall * wall, REAL timeBuilt, gCycleM
         REAL currentTime = thisCycle->LastTime();
         time += ( currentTime - time ) * sg_enemyCurrentTimeInfluence;
     }
+    time -= timePenalty;
 
     // get the player
     ePlayerNetID* player = cycle->Player();
