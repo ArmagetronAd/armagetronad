@@ -5,6 +5,7 @@ program_name \g
 # Note: Keep this list in reverse-alphabetical order for it to show up in the correct order in the languages menu.
 
 include spanish.txt
+include russian.txt
 include polish.txt
 include french.txt
 include deutsch.txt
