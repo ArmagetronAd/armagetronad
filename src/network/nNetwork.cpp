@@ -34,17 +34,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tConsole.h"
 #include "tDirectories.h"
 #include "nSocket.h"
-#include "nProtoBuf.h"
 #include "nConfig.h"
-#include "nKrawall.h"
 #include "tSysTime.h"
 #include "tRecorder.h"
 #include "tRandom.h"
-#include "nBinary.h"
 #include <stdlib.h>
 #include <fstream>
 #include "tMath.h"
-#include <string.h>
 
 #ifndef WIN32
 #include  <netinet/in.h>
@@ -54,53 +50,40 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include <deque>
 
-#include "nNetwork.pb.h"
-
-#include "nStreamMessage.h"
-
 #ifdef MACOSX_XCODE
 #include "version.h"
 #endif // MACOSX_XCODE
 
-// my IP address. Master server/game server hopefully tell me a correct one.
-static tString sn_myAddress ("*.*.*.*:*");
-tString const & sn_GetMyAddress()
-{
-    return sn_myAddress;
-}
+#ifdef WIN32
+#include "version.h"
+#endif // WIN32
 
-//! checks wheter a given address is on the user's LAN (or on loopback).
-bool sn_IsLANAddress( tString const & address )
-{
-    if ( address.StartsWith("127.") || address.StartsWith("10.") || address.StartsWith("192.168.") )
-    {
-        // easy LANs. Accept the client sent IP, we don't know our own LAN address.
-        return true;
-    }
-
-    if( address.StartsWith( "172." ) && address[6] == '.' )
-    {
-        // more complicated LAN :)
-        int second = address.SubStr(4,2).ToInt();
-        if ( 16 <= second && second < 32 )
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
+// debug watchs
+#ifdef DEBUG
+nMessage* sn_WatchMessage = NULL;
+unsigned int sn_WatchMessageID = 76;
+#endif
 
 #define NO_ACK
 
 tString sn_bigBrotherString;
 // tString sn_greeting[5];  //made 4 = 5 (lol i broke the laws of maths. subby),  k's bug fix
 
+
+#ifdef TOP_SOURCE_DIR
+#include "nTrueVersion.h"
+#endif
+
+#ifndef TRUE_ARMAGETRONAD_VERSION
+#define TRUE_ARMAGETRONAD_VERSION VERSION
+#endif
+
+tString sn_programVersion (TRUE_ARMAGETRONAD_VERSION)    ;
+
 tString sn_serverName("Unnamed Server");
 
 const unsigned int sn_defaultPort = 4534;
 unsigned int sn_serverPort = 4534;
-bool sn_decorateTS = false;
 
 tString net_hostip("ANY");
 
@@ -124,8 +107,8 @@ void sn_Delay()
     tAdvanceFrame();
 }
 
-int sn_maxRateIn=32; // maximum data rate in kb/s
-int sn_maxRateOut=16; // maximum output data rate in kb/s
+int sn_maxRateIn=8; // maximum data rate in kb/s
+int sn_maxRateOut=8; // maximum output data rate in kb/s
 
 static nConnectError sn_Error = nOK;
 
@@ -206,92 +189,6 @@ static unsigned short highest_ack[MAXCLIENTS+2];
 // Version control
 //********************************************************
 
-//! class that can temporarily override the current version
-class nTempVersionOverrider
-{
-public:
-    nTempVersionOverrider()
-    : lastOverrider_( overrider_ )
-    , overridden_( false )
-    , version_( sn_CurrentVersion() )
-    {
-        overrider_ = this;
-    }
-    
-    ~nTempVersionOverrider()
-    {
-        // restore old overrider
-        overrider_ = lastOverrider_;
-    }
-
-    //! send a version override message to a peer
-    static void SendOverrideMessage( int peer, nVersion const & version )
-    {
-        // create message
-        nProtoBufMessage< Network::VersionOverride > * m = descriptor_.CreateMessage();
-
-        // write info
-        version.WriteSync( *m->AccessProtoBuf().mutable_version() );
-        
-        // send info
-        m->ClearMessageID();
-        m->SendImmediately(peer, false);
-    }
-
-    static bool Overridden()
-    {
-        return ( overrider_ && overrider_->overridden_ );
-    }
-
-    static nVersion const & OverriddenVersion()
-    {
-        if ( Overridden() )
-            return overrider_->version_;
-        else
-            return sn_CurrentVersion();
-    }
-
-    //! override currently active version
-    static void Override( nVersion const & version )
-    {
-        if ( overrider_ && ! overrider_->overridden_ )
-        {
-            overrider_->overridden_ = true;
-        }
-
-        overrider_->version_ = version;
-    }
-    
-    //! accept version override message
-    static void ReceiveOverrideMessage( Network::VersionOverride const & versionOverride, nSenderInfo const & sender )
-    {
-        // as the server, return the favor
-        if ( sn_GetNetState() == nSERVER )
-            SendOverrideMessage( sender.SenderID(), sn_MyVersion() );
-
-        nVersion version;
-        version.ReadSync( versionOverride.version() );
-
-        Override( version );
-    }
-
-    //! returns the network message descriptor
-    static nProtoBufDescriptor< Network::VersionOverride > const & Descriptor()
-    {
-        return descriptor_;
-    }
-private:
-    static nTempVersionOverrider * overrider_;    //!< the current overrider
-    nTempVersionOverrider * lastOverrider_;       //!< the last overrider
-    static nProtoBufDescriptor< Network::VersionOverride > descriptor_; //!< message descriptor for version override messages
-
-    bool overridden_;                             //!< flag telling the destructor whether it needs to revert stuff
-    nVersion version_;                            //!< the version to use as override
-};
-
-nTempVersionOverrider * nTempVersionOverrider::overrider_ = 0;
-nProtoBufDescriptor< Network::VersionOverride > nTempVersionOverrider::descriptor_( 12, nTempVersionOverrider::ReceiveOverrideMessage,  true );
-
 static int sn_MaxBackwardsCompatibility = 1000;
 static tSettingItem<int> sn_mxc("BACKWARD_COMPATIBILITY",sn_MaxBackwardsCompatibility);
 
@@ -362,19 +259,6 @@ bool nVersion::Merge( const nVersion& a,
     }
 }
 
-void nVersion::WriteSync( Network::VersionSync       & sync ) const
-{
-    sync.set_min( min_ );
-    sync.set_max( max_ );
-
-}
-
-void nVersion::ReadSync ( Network::VersionSync const & sync )
-{
-    min_ = sync.min();
-    max_ = sync.max();
-}
-
 bool nVersion::operator == ( const nVersion& other )
 {
     return this->max_ == other.max_ && this->min_ == other.min_;
@@ -426,7 +310,7 @@ std::ostream& operator << ( std::ostream& s, const nVersion& ver )
     return s;
 }
 
-nVersionFeature::nVersionFeature( int min, int max ) // creates a feature that is supported from version min to max; values of -1 indicate no bordera
+nVersionFeature::nVersionFeature( int min, int max ) // creates a feature that is supported from version min to max; values of -1 indicate no border
 {
     tASSERT( min_ >= sn_MyVersion().Min() );
     tASSERT( max < 0 || max <= sn_MyVersion().Max() );
@@ -435,20 +319,18 @@ nVersionFeature::nVersionFeature( int min, int max ) // creates a feature that i
     max_ = max;
 }
 
-bool nVersionFeature::Supported() const
+bool nVersionFeature::Supported()
 {
-    return 
-    ( min_ < 0 || nTempVersionOverrider::OverriddenVersion().Max() >= min_ ) &&  
-    ( max_ < 0 || nTempVersionOverrider::OverriddenVersion().Min() <= max_ );
+    return ( min_ < 0 || sn_CurrentVersion().Max() >= min_ ) &&  ( max_ < 0 || sn_CurrentVersion().Min() <= max_ );
 }
 
-bool nVersionFeature::Supported( int client ) const
+bool nVersionFeature::Supported( int client )
 {
     if ( client < 0 || client > MAXCLIENTS )
         return false;
 
     // the version to check the feature for
-    const nVersion * version = &nTempVersionOverrider::OverriddenVersion();
+    const nVersion * version = &sn_CurrentVersion();
 
     if ( sn_GetNetState() == nCLIENT )
     {
@@ -466,18 +348,18 @@ bool nVersionFeature::Supported( int client ) const
     return ( min_ < 0 || version->Max() >= min_ ) &&  ( max_ < 0 || version->Min() <= max_ );
 }
 
-void sn_VersionControlHandler( Network::VersionControl const & control, nSenderInfo const & sender )
+void handle_version_control( nMessage& m )
 {
     if ( sn_GetNetState() == nCLIENT )
     {
-        sn_currentVersion.ReadSync( control.version() );
+        m >> sn_currentVersion;
 
         // inform configuration of changes
         nConfItemVersionWatcher::OnVersionChange( sn_currentVersion );
     }
 }
 
-nProtoBufDescriptor< Network::VersionControl > sn_versionControlDescriptor(10, sn_VersionControlHandler );
+nDescriptor versionControl(10, handle_version_control,"version" );
 
 void sn_UpdateCurrentVersion()
 {
@@ -502,7 +384,6 @@ void sn_UpdateCurrentVersion()
 
     if ( sn_GetNetState() == nCLIENT )
     {
-        version.Merge( version, sn_Connections[0].version );
         sn_currentVersion = version;
         return;
     }
@@ -535,7 +416,10 @@ void sn_UpdateCurrentVersion()
     {
         sn_currentVersion = version;
 
-        version.WriteSync( *sn_versionControlDescriptor.Broadcast().mutable_version() );
+        nMessage* m = tNEW( nMessage )( versionControl );
+        (*m) << version;
+
+        m->BroadCast();
     }
 }
 
@@ -563,20 +447,7 @@ static void reset_last_acks(int i){
 //#ifndef DEBUG
 int sn_maxClients=MAXCLIENTS;
 
-bool restrictMaxClients( int const &newValue )
-{
-    if (newValue > MAXCLIENTS)
-    {
-        tOutput o;
-        o.SetTemplateParameter(1, MAXCLIENTS);
-        o << "$max_clients_limit";
-        con << o << '\n';
-        return false;
-    }
-    return true;
-}
-
-static tSettingItem< int > sn_maxClientsConf( "MAX_CLIENTS", sn_maxClients, &restrictMaxClients );
+static tSettingItem< int > sn_maxClientsConf( "MAX_CLIENTS", sn_maxClients );
 
 int sn_allowSameIPCountSoft=4;
 static tSettingItem< int > sn_allowSameIPCountSoftConf( "MAX_CLIENTS_SAME_IP_SOFT", sn_allowSameIPCountSoft );
@@ -592,7 +463,7 @@ int sn_myNetID=0; // our network identification:  0: server
 //                                            1..MAXCLIENTS: client
 
 #define IDS_RESERVED 16		 // number of message IDs reserved for special purposes: id 0 is reserved for no-ack messages.
-unsigned long current_id=1; // current running network number
+unsigned short current_id=1; // current running network number
 
 
 // the classes that are responsible for the queuing of network send tEvents:
@@ -613,11 +484,11 @@ public:
 };
 
 class nMessage_planned_send:public planned_send{
-    tCONTROLLED_PTR(nMessageBase) m;
+    tCONTROLLED_PTR(nMessage) m;
     bool ack;
 
 public:
-    nMessage_planned_send(nMessageBase *m,REAL priority,bool ack,int peer);
+    nMessage_planned_send(nMessage *m,REAL priority,bool ack,int peer);
     ~nMessage_planned_send();
 
     virtual void execute();
@@ -625,25 +496,30 @@ public:
 
 // *************************************************************
 
+unsigned short nDescriptor::s_nextID(1);
+
 #define MAXDESCRIPTORS 400
-static nDescriptorBase* streamDescriptors[MAXDESCRIPTORS];
-static nDescriptorBase* protoBufDescriptors[MAXDESCRIPTORS];
+static nDescriptor* descriptors[MAXDESCRIPTORS];
 
-static nDescriptorBase* nDescriptor_anchor;
+static nDescriptor* nDescriptor_anchor;
 
-nDescriptorBase::nDescriptorBase(unsigned short identification,
-                                 const char *Name, bool awl)
-: tListItem<nDescriptorBase>(nDescriptor_anchor),
-  id(identification), name(Name), acceptWithoutLogin(awl)
+nDescriptor::nDescriptor(unsigned short identification,
+                         nHandler *handle,const char *Name, bool awl)
+        :tListItem<nDescriptor>(nDescriptor_anchor),
+        id(identification),handler(handle),name(Name), acceptWithoutLogin(awl)
 {
 #ifdef DEBUG
 #ifndef WIN32
     //  con << "Descriptor " << id << ": " << name << '\n';
 #endif
 #endif
+    if (MAXDESCRIPTORS<=id || descriptors[id]!=NULL){
+        con << "Descriptor " << id << " already used!\n";
+        exit(-1);
+    }
+    s_nextID=id+1;
+    descriptors[id]=this;
 }
-
-nDescriptorBase::~nDescriptorBase(){}
 
 /*
 nDescriptor::nDescriptor(nHandler *handle,const char *Name)
@@ -663,214 +539,71 @@ nDescriptor::nDescriptor(nHandler *handle,const char *Name)
 
 int nCurrentSenderID::currentSenderID_ = 0;
 
-tJUST_CONTROLLED_PTR< nMessageBase > nDescriptorBase::CreateMessage( unsigned char const * & data, unsigned char const * end, int sender )
-{
+void nDescriptor::HandleMessage(nMessage &message){
     static tArray<bool> warned;
 
     // store sender ID for console
-    nCurrentSenderID currentSender( sender );
+    nCurrentSenderID currentSender( message.SenderID() );
 
 #ifdef DEBUG_X
     if (message.descriptor>1)
         con << "RMT " << message.descriptor << "\n";
 #endif
 
-    nBinaryReader reader( data, end );
-    
-    // read descriptor ID
-    unsigned short descriptor = reader.ReadShort();
-    
-    nDescriptorBase *nd = 0;
-    
-    // index into arrays
-    int index = descriptor;
-    
-    // pick right descriptor set according to highest bit
-    nDescriptorBase * const * descriptors = streamDescriptors;
-    if ( descriptor & nProtoBufDescriptorBase::protoBufFlag )
-    {
-        descriptors = protoBufDescriptors;
-        index &= ~nProtoBufDescriptorBase::protoBufFlag;
-    }
-    
-    // z-man: security check ( thanks, Luigi Auriemma! )
-    if ( index  < MAXDESCRIPTORS )
-    {
-        // try default descriptor first
-        nd=descriptors[index];
-        
-        // not found? Try a protocol buffer replacement.
-        if( !nd && descriptors == streamDescriptors )
-        {
-            nd = protoBufDescriptors[ index ];
+#ifndef NOEXCEPT
+    try{
+#endif
+        nDescriptor *nd = 0;
+
+        // z-man: security check ( thanks, Luigi Auriemma! )
+        if ( message.descriptor  < MAXDESCRIPTORS )
+            nd=descriptors[message.descriptor];
+
+        if (nd){
+            if ((message.SenderID() <= MAXCLIENTS) || nd->acceptWithoutLogin)
+                nd->handler(message);
         }
+        else
+            if (!warned[message.Descriptor()]){
+                tOutput warn;
+                warn.SetTemplateParameter(1, message.Descriptor());
+                warn << "$network_warn_unknowndescriptor";
+                con << warn;
+                warned[message.Descriptor()]=true;
+            }
+#ifndef NOEXCEPT
     }
-    
-    if (!nd)
+    catch(nKillHim){
+        // st_Breakpoint();
+        con << tOutput("$network_error");
+        sn_DisconnectUser(message.SenderID(), "$network_kill_error" );
+    }
+    catch( tGenericException & e )
     {
-        // fallback to global default descriptor
-        nd = descriptors[0];
-        
-        // nope, error.
-        if (!warned[index]){
-            con << tOutput( "$network_warn_unknowndescriptor", index );
-            warned[index]=true;
-        }
-    }
-    
-    if ( !nd )
-    {
-        nReadError( false );
-    }
-    
-    // create message
-    tJUST_CONTROLLED_PTR< nMessageBase > ret = nd->CreateReceivedMessage();
-    tASSERT(ret);
-    
-    // fill in the bits we know
-    ret->senderID_ = sender;
-    ret->descriptorID_ = descriptor;
-    
-    // and read the rest.
-    ret->Read( data, end );
-
-    return ret;
-}
-
-// flag set only while receiving a message
-static bool sn_readingFromPeer = false;
-
-//! creates a message while receiving
-nMessageBase * nDescriptorBase::CreateMessage() const
-{
-    return DoCreateMessage();
-}
-
-//! creates a message while receiving
-nMessageBase * nDescriptorBase::CreateReceivedMessage() const
-{
-    sn_readingFromPeer = true;
-    nMessageBase * ret = CreateMessage();
-    sn_readingFromPeer = false;
-        
-    return ret;
-}
-
-nStreamDescriptor::nStreamDescriptor(unsigned short identification,nHandler *handle,
-                                     const char *name, bool acceptEvenIfNotLoggedIn )
-: nDescriptorBase( identification, name, acceptEvenIfNotLoggedIn ),
-  handler( handle )
-{
-    if( name )
-    {
-        if (MAXDESCRIPTORS<=identification || streamDescriptors[identification]!=NULL)
-        {
-            con << "Descriptor " << identification << " already used!\n";
-            exit(-1);
-        }
-
-        streamDescriptors[identification]=this;
-    }
-}
-
-nStreamDescriptor::~nStreamDescriptor(){}
-
-//! creates a message
-nStreamMessage * nStreamDescriptor::CreateMessage() const
-{
-    return tNEW(nStreamMessage)( *this );
-}
-
-//! creates a message
-nMessageBase * nStreamDescriptor::DoCreateMessage() const
-{
-    return CreateMessage();
-}
-
-// write one data element, a short.
-void nMessageBase::WriteArguments::Write( unsigned short data )
-{
-    nBinaryWriter( buffer_ ).WriteShort( data );
-}
-
-nMessageBase::WriteArguments::WriteArguments( nSendBuffer::Buffer & buffer, int receiver )
-: buffer_( buffer ), receiver_( receiver )
-{}
-
-nVersionFeature sn_protoBuf( 21 );
-
-nProtoBufDescriptorBase::nProtoBufDescriptorBase
-(unsigned short identification,
- nProtoBuf const & prototype, 
- bool acceptEvenIfNotLoggedIn )
-: nDescriptorBase( 
-    identification | nProtoBufDescriptorBase::protoBufFlag,
-    DetermineName( prototype ).c_str(),
-    acceptEvenIfNotLoggedIn ),
-    streamer_( &nProtoBufDescriptorBase::GetDefaultStreamer() ),
-    translator_( NULL )
-{
-    if (MAXDESCRIPTORS<=identification || protoBufDescriptors[identification]!=NULL)
-    {
-        con << "Protocol Buffer Descriptor " << identification << " already used!\n";
-        exit(-1);
+        // relay generic errors to sender of message; don't do anything else bad. Especially, we don't
+        // want a harmless uncaught exception to bring down the server.
+        sn_ConsoleOut( e.GetName() + ": " + e.GetDescription() + '\n', message.SenderID() );
     }
 
-    AccessDescriptorsByName()[ GetName() ] = this;
-    
-    protoBufDescriptors[identification]=this;
+#endif
 }
-
-nProtoBufDescriptorBase::~nProtoBufDescriptorBase(){}
 
 // *************************************************************
 
-// default descriptors
-static void handleDefault( nMessage & m )
-{}
 
-static void handleDefaultProtoBuf( Network::Dummy const & pb, nSenderInfo const & sender )
-{}
+void ack_handler(nMessage &m){
+    while (!m.End()){
+        sn_Connections[m.SenderID()].AckReceived();
 
-static nStreamDescriptor s_DefaultDescriptor( 0, handleDefault, "default" );
-static nProtoBufDescriptor< Network::Dummy > s_DefaultProtoBufDescriptor( 0, handleDefaultProtoBuf );
-
-// protobuf ack packets
-void sn_AckHandler( Network::Ack const & ack, nSenderInfo const & sender )
-{
-    for( int i = ack.ack_ids_size() - 1; i >= 0; --i )
-    {
-        sn_Connections[sender.SenderID()].AckReceived();
-
-        nWaitForAck::Ackt( ack.ack_ids(i), sender.SenderID() );
+        unsigned short ack;
+        m.Read(ack);
+        //con << "Got ack:" << ack << ":" << m.SenderID() << '\n';
+        nWaitForAck::Ackt(ack,m.SenderID());
     }
 }
 
-static nProtoBufDescriptor< Network::Ack > sn_ackDescriptor( 1, sn_AckHandler );
+static nDescriptor s_Acknowledge(1,ack_handler,"ack");
 
-// send ack message for received packets
-static void sn_SendAcks( int peer, bool immediately )
-{
-    std::deque< unsigned short > & acks = sn_Connections[ peer ].acks_;
-
-    nProtoBufMessage< Network::Ack > * m = sn_ackDescriptor.CreateMessage(0);
-    for( std::deque< unsigned short >::const_iterator i = acks.begin(); i != acks.end(); ++i )
-    {
-        m->AccessProtoBuf().add_ack_ids( *i );
-    }
-    
-    // m->BendMessageID(0);
-    if( immediately )
-    {
-        m->SendImmediately( peer, false );
-    }
-    else
-    {
-        m->Send( peer, 0, false );
-    }
-    
-    acks.clear();
-}
 
 class nWaitForAck;
 static tList<nWaitForAck> sn_pendingAcks;
@@ -883,11 +616,7 @@ static int acks=0;
 static int max_acks=0;
 #endif
 
-void nWaitForAck::AckExtraAction()
-{
-}
-
-nWaitForAck::nWaitForAck(nMessageBase* m,int rec)
+nWaitForAck::nWaitForAck(nMessage* m,int rec)
         :id(-1),message(m),receiver(rec)
 {
 #ifdef DEBUG
@@ -899,11 +628,10 @@ nWaitForAck::nWaitForAck(nMessageBase* m,int rec)
     if (!message)
         tERR_ERROR("Null ack!");
 
-    if ( sn_StripDescriptor( message->DescriptorID() ) != sn_StripDescriptor( sn_ackDescriptor.ID() ) )
+    if (message->Descriptor()!=s_Acknowledge.ID())
         sn_Connections[receiver].ackPending++;
     else
-        tERR_ERROR("Should not wait for ack of an ack message itself.");
-
+        tASSERT(false);
     //    sn_ackAckPending[receiver]++;
 #ifdef NET_DEBUG
     acks++;
@@ -916,11 +644,11 @@ nWaitForAck::nWaitForAck(nMessageBase* m,int rec)
 
     timeout=sn_GetTimeout( rec );
 
-#ifdef nSIMULATE_PING 
-   timeSendAgain=::netTime + nSIMULATE_PING;
+#ifdef nSIMULATE_PING
+    timeSendAgain=::netTime + nSIMULATE_PING;
 #ifndef WIN32
     tRandomizer & randomizer = tReproducibleRandomizer::GetInstance();
-    timeSendAgain+= randomizer.Get() * nSIMULATE_PING_VARIANT;
+    timeSendAgain+= randimizer.Get() * nSIMULATE_PING_VARIANT;
     // timeSendAgain+=(nSIMULATE_PING_VARIANT*random())/RAND_MAX;
 #endif
 #else
@@ -943,15 +671,13 @@ nWaitForAck::~nWaitForAck(){
     }
 #endif
 
-    if (bool(message) && sn_StripDescriptor( message->DescriptorID() ) != sn_StripDescriptor( sn_ackDescriptor.ID() ) )
+    if (bool(message) && message->Descriptor()!=s_Acknowledge.ID())
     {
         sn_Connections[receiver].ackPending--;
         sn_Connections[receiver].ReliableMessageSent();
     }
     else
-    {
-        tERR_ERROR( "No message." );
-    }
+        tASSERT(false);
     //    sn_ackAckPending[receiver]--;
 
     sn_pendingAcks.Remove(this,id);
@@ -965,11 +691,6 @@ void nWaitForAck::Ackt(unsigned short id,unsigned short peer){
         if (ack->message->MessageID()==id &&
                 ack->receiver==peer){
             success=1;
-
-            // cache the message in the outgoing cache, 
-            // we know the receiver has it stored
-            // in its incoming cache
-            sn_Connections[peer].messageCacheOut_.AddMessage( ack->message, false );
 
 #ifdef DEBUG
             //      if (sn_pendingAcks(i)->message == sn_WatchMessage)
@@ -1013,13 +734,6 @@ void nWaitForAck::AckAllPeer(unsigned short peer){
             if (i<sn_pendingAcks.Len()-1) i++;
         }
     }
-}
-
-bool nWaitForAck::DoResend()
-{ 
-    message->SendImmediately( receiver,false);
-        
-    return true;
 }
 
 void nWaitForAck::Resend(){
@@ -1101,10 +815,8 @@ void nWaitForAck::Resend(){
                             deb_net=true;
                         }
                         connection.ReliableMessageSent();
-                        if ( !pendingAck->DoResend() )
-                        {
-                            delete pendingAck;
-                        }
+                        pendingAck->message->SendImmediately
+                        (pendingAck->receiver,false);
                         deb_net=false;
                     }
                 }
@@ -1126,56 +838,106 @@ static int max_nMessages=0;
 #endif
 
 #ifdef DEBUG
-void sn_BreakOnMessageID( unsigned int id );
-#endif
-
-// the last assigned big message ID
-unsigned long nMessageBase::CurrentMessageIDBig()
+void BreakOnMessageID( unsigned int messageID )
 {
-    return current_id;
-}
-
-nMessageBase::nMessageBase( const nDescriptorBase &d, unsigned int messageID )
-: descriptorID_( d.id ),
-  messageIDBig_( messageID ),
-  senderID_(::sn_myNetID)
-{
-#ifdef NET_DEBUG
-    nMessages++;
-#endif
-}
-
-nMessageBase::nMessageBase( const nDescriptorBase & d )
-: descriptorID_( d.id ),
-  messageIDBig_( 0 ),
-  senderID_(::sn_myNetID)
-{
-#ifdef NET_DEBUG
-    nMessages++;
-#endif
-
-    if ( !sn_readingFromPeer )
+    if (messageID == sn_WatchMessageID && messageID != 0 )
     {
-        current_id++;
-        if ( ( current_id & 0xffff ) <= IDS_RESERVED )
-            current_id += IDS_RESERVED + 1;
-        
-        messageIDBig_ = current_id;
-        
-#ifdef DEBUG_X
-        con << "Message " << d.id << " " << current_id << "\n";
-#endif
-        
-#ifdef DEBUG
-        sn_BreakOnMessageID( messageIDBig_ );
-#endif
-        
-        tRecorderSync< unsigned long >::Archive( "_MESSAGE_ID_OUT", 3, messageIDBig_ );
-        tRecorderSync< unsigned short >::Archive( "_MESSAGE_DECL_OUT", 3, descriptorID_ );
+        int x;
+        x = 0;
     }
 }
+#endif
 
-nMessageBase::~nMessageBase(){
+class nMessageIDExpander
+{
+    unsigned long quarters[4];
+public:
+    nMessageIDExpander()
+    {
+        for (int i=3; i>=0; --i)
+            quarters[i]=i << 14;
+    }
+
+    unsigned long ExpandMessageID( unsigned short id )
+    {
+        // the current ID is in this quarter
+        int thisQuarter = ( id >> 14 ) & 3;
+
+        // the following quarter will be this
+        int nextQuarter = ( thisQuarter + 1 ) & 3;
+
+        // make sure the following quarter has a higher upper ID completion than this
+        quarters[nextQuarter] = quarters[thisQuarter] + ( 1 << 14 );
+
+        // replace high two bits of incoming ID with the counted up ID
+        return quarters[thisQuarter] | id;
+    }
+};
+
+//! expands a short message ID to a full int message ID, assuming it is from a message that was
+// just received.
+static unsigned long int sn_ExpandMessageID( unsigned short id, unsigned short sender )
+{
+#ifdef DEBUG
+    BreakOnMessageID( id );
+#endif
+
+    static nMessageIDExpander expanders[MAXCLIENTS+2];
+
+    tASSERT( sender <= MAXCLIENTS+2 )
+    return expanders[sender].ExpandMessageID(id);
+}
+
+nMessage::nMessage(unsigned short*& buffer,short sender, int lenLeft )
+        :descriptor(ntohs(*(buffer++))),messageIDBig_(sn_ExpandMessageID(ntohs(*(buffer++)),sender)),
+senderID(sender),readOut(0){
+#ifdef NET_DEBUG
+    nMessages++;
+#endif
+
+    tRecorderSync< unsigned long >::Archive( "_MESSAGE_ID_IN", 3, messageIDBig_ );
+    tRecorderSync< unsigned short >::Archive( "_MESSAGE_DECL_IN", 3, descriptor );
+
+    unsigned short len=ntohs(*(buffer++));
+    lenLeft--;
+    if ( len > lenLeft )
+    {
+        len = lenLeft;
+#ifndef NOEXCEPT
+        throw nKillHim();
+#endif
+    }
+    for(int i=0;i<len;i++)
+        data[i]=ntohs(*(buffer++));
+
+#ifdef DEBUG
+    BreakOnMessageID( messageIDBig_ );
+#endif
+}
+
+nMessage::nMessage(const nDescriptor &d)
+        :descriptor(d.id),
+senderID(::sn_myNetID), readOut(0){
+#ifdef NET_DEBUG
+    nMessages++;
+#endif
+
+    current_id++;
+    if (current_id <= IDS_RESERVED)
+        current_id = IDS_RESERVED + 1;
+
+    messageIDBig_ = current_id;
+
+#ifdef DEBUG
+    BreakOnMessageID( messageIDBig_ );
+#endif
+
+    tRecorderSync< unsigned long >::Archive( "_MESSAGE_ID_OUT", 3, messageIDBig_ );
+    tRecorderSync< unsigned short >::Archive( "_MESSAGE_DECL_OUT", 3, descriptor );
+}
+
+
+nMessage::~nMessage(){
 #ifdef NET_DEBUG
     nMessages--;
     if (nMessages>max_nMessages){
@@ -1192,31 +954,344 @@ nMessageBase::~nMessageBase(){
     tCHECK_DEST;
 }
 
-// send it to anyone who is interested and upports the given feature
-void nMessageBase::BroadCast( nVersionFeature const & feature, bool ack )
-{
-    tControlledPTR< nMessageBase > keep( this );
-    if (sn_GetNetState()==nCLIENT && feature.Supported( 0 ) )
+
+
+
+void nMessage::BroadCast(bool ack){
+    tControlledPTR< nMessage > keep( this );
+    if (sn_GetNetState()==nCLIENT)
         Send(0,ack);
 
     if (sn_GetNetState()==nSERVER){
-        for(int i=MAXCLIENTS;i>0;i--)
-        {
-            if ( sn_Connections[i].socket && feature.Supported(i) )
-            {
-                Send(i,0,ack);
-            }
+        for(int i=MAXCLIENTS;i>0;i--){
+            if (sn_Connections[i].socket)
+                Send(i,ack);
         }
     }
 }
 
-// send it to anyone who is interested
-void nMessageBase::BroadCast(bool ack)
-{
-    static nVersionFeature all(0);
-    BroadCast( all, ack );
+
+static nVersionFeature sn_ZeroMessageCrashfix( 1 );
+
+nMessage& nMessage::operator << (const tString &s){
+    if ( !sn_ZeroMessageCrashfix.Supported() && s.Len() <= 0 )
+    {
+        return this->operator<<( s + " " );
+    }
+
+    unsigned short len=s.Size()+1;
+    Write(len);
+    int i;
+
+    char const * sRaw = s;
+
+    // write first pairs of bytes
+    for(i=0;i+1<len;i+=2)
+        Write(sRaw[i]+(sRaw[i+1] << 8));
+
+    // write last byte
+    if (i<len)
+        Write(sRaw[i]);
+
+    return *this;
 }
 
+nMessage& nMessage::operator << (const tColoredString &s){
+    return *this << static_cast< const tString & >( s );
+}
+
+nMessage& nMessage::operator << ( const tOutput &o ){
+    return *this << tString( static_cast< const char * >( o ) );
+}
+
+bool sn_filterColorStrings = false;
+static tConfItem<bool> cs("FILTER_COLOR_STRINGS",sn_filterColorStrings);
+
+static void sn_AddToString( tColoredString & s, tString::CHAR c )
+{
+    if ( c )
+        s += c;
+}
+
+nMessage& nMessage::operator >> (tColoredString &s )
+{
+    s.Clear();
+    unsigned short w,len;
+    Read(len);
+    if ( len > 0 )
+    {
+        s.reserve(len);
+        for(int i=0;i<len;i+=2){
+            Read(w);
+            tString::CHAR c1 = w & 255;
+            sn_AddToString( s, c1 );
+            if (i+1<len)
+                sn_AddToString( s, (w-c1) >> 8 );
+        }
+    }
+
+    // filter client string messages
+    if ( sn_GetNetState() == nSERVER )
+    {
+        s.NetFilter();
+        s.RemoveTrailingColor();
+    }
+
+    // filter color codes away
+    if ( sn_filterColorStrings )
+        s = tColoredString::RemoveColors( s );
+
+    return *this;
+}
+
+nMessage& nMessage::operator >> (tString &s )
+{
+    tColoredString safe;
+    operator>>( safe );
+    s = safe;
+
+    return *this;
+}
+
+
+#define MANT 26
+#define EXP (32-MANT)
+#define MS (MANT-1)
+
+
+typedef struct{
+int mant:MANT;
+unsigned int exp:EXP;
+} myfloat;
+
+
+nMessage& nMessage::operator<<(const REAL &x){
+
+
+#ifdef DEBUG
+    // con << "write x= " << x;
+
+
+    if(sizeof(myfloat)!=sizeof(int))
+        tERR_ERROR_INT("floating ePoint format does not work!");
+#endif
+    /*
+      REAL nachkomma=x-floor(x);
+      Write(short(x-nachkomma));
+      Write(60000*nachkomma);
+    */
+    // no fuss. Read and write floats in binary format.
+    // will likely cause problems for systems other than i386.
+
+    //Write(((short *)&x)[0]);
+    //Write(((short *)&x)[1]);
+
+    // right. Caused severe problems with the AIX port.
+
+    // new way: own floating ePoint format that is not good with small numbers
+    // (we do not need them anyway)
+    REAL y=x;
+
+    unsigned int negative=0;
+    if (y<0){
+        y=-y;
+        negative=1;
+    }
+
+    unsigned int exp=0;
+    while ( fabs(y)>=64 && exp < (1<<EXP)-6 )
+    {
+        exp +=6;
+        y/=64;
+    }
+    while ( fabs(y)>=1 && exp < (1<<EXP)-1 )
+    {
+        exp++;
+        y/=2;
+    }
+    // now x=y*2^exp
+    unsigned int mant=int(y*(1<<MS));
+    // now x=mant*2^exp * (1/ (1<<MANT))
+
+    // cutoffs:
+    if (mant>((1<<MS))-1)
+        mant=(1<<MS)-1;
+
+    if (exp>(1<<EXP)-1){
+        exp=(1<<EXP)-1;
+        if (mant>0)
+            mant=(1<<MS)-1;
+    }
+
+    // put them together:
+
+    unsigned int trans=(mant & ((1<<MS)-1)) | (negative << MS) | (exp << MANT);
+    /*
+      myfloat trans;
+      trans.exp=exp;
+      trans.mant=mant;
+    */
+
+    operator<<(reinterpret_cast<int &>(trans));
+
+#ifdef DEBUG
+    /*
+      con << "mant: " << mant
+      << ", exp: " << exp
+      << ", negative: " << negative;
+    */
+
+    unsigned int mant2=trans & ((1 << MS)-1);
+    unsigned int negative2=(trans >> MS) & 1;
+    unsigned int nt=trans-mant-(negative << MS);
+    unsigned int exp2=nt >> MANT;
+
+    if (mant2!=mant || negative2!=negative || exp2!=exp)
+        tERR_ERROR_INT("Floating ePoint tranfer failure!");
+
+    /*
+      con << ", x: " << x;
+
+      con << ", mant: " << mant
+      << ", exp: " << exp
+      << ", negative: " << negative;
+    */
+
+    // check:
+
+    REAL z=REAL(mant)/(1<<MS);
+    if (negative)
+        z=-z;
+
+    while (exp>=6){
+        exp-=6;
+        z*=64;
+    }
+    while (exp>0){
+        exp--;
+        z*=2;
+    }
+
+    if (fabs(z-x)>(fabs(x)+1)*.001)
+        tERR_ERROR_INT("Floating ePoint tranfer failure!");
+
+    //con << ", z: " << z << '\n';
+#endif
+
+    return *this;
+}
+
+nMessage& nMessage::operator>>(REAL &x){
+    /*
+      short vorkomma;
+      unsigned short nachkomma;
+      Read((unsigned short &)vorkomma);
+      Read(nachkomma);
+      x=vorkomma+nachkomma/60000.0;
+
+      Read(((unsigned short *)&x)[0]);
+      Read(((unsigned short *)&x)[1]);
+     */
+
+    unsigned int trans;
+    operator>>(reinterpret_cast<int &>(trans));
+
+    int mant=trans & ((1 << MS)-1);
+    unsigned int negative=(trans >> MS) & 1;
+    unsigned int exp=(trans-mant-(negative << MS)) >> MANT;
+
+    x=REAL(mant)/(1<<MS);
+    if (negative)
+        x=-x;
+
+#ifdef DEBUG
+    //  con << "read mant: " <<mant << ", exp: " << exp;
+#endif
+
+    while (exp>=6){
+        exp-=6;
+        x*=64;
+    }
+    while (exp>0){
+        exp--;
+        x*=2;
+    }
+
+#ifdef DEBUG
+#ifndef WIN32
+    if (!finite(x))
+        st_Breakpoint();
+    // con << " , x= " << x << '\n';
+#endif
+#endif
+    return *this;
+}
+
+nMessage& nMessage::operator<< (const short &x){
+    Write((reinterpret_cast<const short *>(&x))[0]);
+
+    return *this;
+}
+
+nMessage& nMessage::operator>> (short &x){
+    Read(reinterpret_cast<unsigned short *>(&x)[0]);
+
+    return *this;
+}
+
+nMessage& nMessage::operator<< (const int &x){
+    unsigned short a=x & (0xFFFF);
+    short b=(x-a) >> 16;
+
+    Write(a);
+    operator<<(b);
+
+    return *this;
+}
+
+nMessage& nMessage::operator>> (int &x){
+    unsigned short a;
+    short b;
+
+    Read(a);
+    operator>>(b);
+
+    x=(b << 16)+a;
+
+    return *this;
+}
+
+nMessage& nMessage::operator<< (const bool &x){
+    if (x)
+        Write(1);
+    else
+        Write(0);
+
+    return *this;
+}
+
+nMessage& nMessage::operator>> (bool &x){
+    unsigned short y;
+    Read(y);
+    x= (y!=0);
+
+    return *this;
+}
+
+
+void nMessage::Read(unsigned short &x){
+    if (End()){
+        tOutput o;
+        st_Breakpoint();
+        o.SetTemplateParameter(1, senderID);
+        o << "$network_error_shortmessage";
+        con << o;
+        sn_DisconnectUser(senderID, "$network_kill_error");
+        nReadError();
+    }
+    else
+        x=data(readOut++);
+}
 
 
 // **********************************************
@@ -1226,10 +1301,20 @@ void nMessageBase::BroadCast(bool ack)
 static bool login_failed=false;
 static bool login_succeeded=false;
 
-// salt value sent as past login tokens. They are returned by
-// the server as you sent them, and make sure you only accept
-// the right answer.
-static nKrawall::nSalt loginSalt;
+static nHandler *real_req_info_handler=NULL;
+
+void req_info_handler(nMessage &m){
+    if (real_req_info_handler)
+        (*real_req_info_handler)(m);
+    if (m.SenderID()==MAXCLIENTS+1)
+        sn_DisconnectUser(MAXCLIENTS+1, "$network_kill_logout");
+}
+
+static nDescriptor req_info(2,req_info_handler,"req_info");
+
+void RequestInfoHandler(nHandler *handle){
+    real_req_info_handler=handle;
+}
 
 // the server we are redirected to
 static std::auto_ptr< nServerInfoBase > sn_redirectTo;
@@ -1243,21 +1328,26 @@ nServerInfoBase * sn_PeekRedirectTo()
     return sn_redirectTo.get();
 }
 
-static void sn_LoginDeniedHandler( Network::LoginDenied const & denied, nSenderInfo const & sender ){
-    if ( denied.has_reason() )
+void login_deny_handler(nMessage &m){
+    if ( !m.End() )
     {
-        sn_DenyReason = denied.reason();
+        //		tOutput output;
+        //		m >> output;
+        //		sn_DenyReason = output;
+        m >> sn_DenyReason;
     }
     else
     {
         sn_DenyReason = tOutput( "$network_kill_unknown" );
     }
 
-    if ( denied.has_forward_to() )
+    if ( !m.End() )
     {
         // read redirection data from message
-        tString connectionName = denied.forward_to().hostname();
-        int port               = denied.forward_to().port();
+        tString connectionName;
+        m >> connectionName;
+        int port;
+        m >> port;
 
         if ( connectionName.Len() > 1 )
         {
@@ -1275,25 +1365,40 @@ static void sn_LoginDeniedHandler( Network::LoginDenied const & denied, nSenderI
     }
 }
 
-static nProtoBufDescriptor< Network::LoginDenied > sn_loginDeniedDescriptor( 3, sn_LoginDeniedHandler );
+static nDescriptor login_deny(3,login_deny_handler,"login_deny");
 
-// handles very old and protobuf logins
-static void sn_LoginHandler( Network::Login const & login, nSenderInfo const & sender );
-static void sn_LoginHandler_intermediate( nMessage & m );
-static void sn_LogoutHandler( Network::Logout const &, nSenderInfo const & );
+void login_handler_1( nMessage&m );
+void login_handler_2( nMessage&m );
+void logout_handler( nMessage&m );
 
-nProtoBufDescriptor< Network::Login > sn_loginDescriptor ( 6, sn_LoginHandler, true );
-nStreamDescriptor login_2(11,sn_LoginHandler_intermediate,"login2", true);
-nProtoBufDescriptor< Network::Logout> logout( 7, sn_LogoutHandler );
+nDescriptor login(6,login_handler_1,"login1", true);
+nDescriptor login_2(11,login_handler_2,"login2", true);
+nDescriptor logout(7,logout_handler,"logout");
 
 tString sn_DenyReason;
 
-static void sn_LoginIgnoredHandler( Network::LoginIgnored const &, nSenderInfo const & )
-{
-    // ignore.
+void login_ignore_handler(nMessage &m){
+    if (sn_GetNetState()!=nSERVER && !login_succeeded){
+        /*
+          login_failed=true;
+          login_succeeded=false;
+
+          // kicking the one who uses our place
+          // (he is probably timing out anyway..)
+          nMessage *lo=new nMessage(logout);
+          lo->Write((unsigned short)sn_myNetID);
+          lo->Send(0);
+
+          sn_Sync(10);
+
+          (new nMessage(login))->Send(0);
+        */
+    }
+
+
 }
 
-static nProtoBufDescriptor< Network::LoginIgnored > sn_loginIgnoredDescriptor( 4, sn_LoginIgnoredHandler );
+static nDescriptor login_ignore(4,login_ignore_handler,"login_ignore");
 
 
 void first_fill_ids();
@@ -1301,21 +1406,17 @@ void first_fill_ids();
 // from nServerInfo.cpp
 extern bool sn_AcceptingFromMaster;
 
-static void sn_LoginAcceptedHandler( Network::LoginAccepted const & accepted, nSenderInfo const & sender )
-{
-    // accepted.PrintDebugString();
-
-    if ( sn_GetNetState() != nSERVER && sender.SenderID() == 0 )
-    {
-        unsigned short id = accepted.net_id();
-
-        sn_Connections[0].diffCompression = accepted.options().diff_compression();
-        sn_Connections[0].zipCompression  = accepted.options().diff_compression();
+void login_accept_handler(nMessage &m){
+    if (sn_GetNetState()!=nSERVER && m.SenderID() == 0){
+        login_succeeded=true;
+        unsigned short id=0;
+        m.Read(id);
+        sn_myNetID=id;
 
         // read or reset server version info
-        if ( accepted.has_version() )
+        if ( !m.End() )
         {
-            sn_Connections[0].version.ReadSync( accepted.version() );
+            m >> sn_Connections[0].version;
 
 #ifdef DEBUG
 #define NOEXPIRE
@@ -1323,23 +1424,10 @@ static void sn_LoginAcceptedHandler( Network::LoginAccepted const & accepted, nS
 
 #ifndef NOEXPIRE
 #ifndef DEDICATED
-            // last checked to be compatible with 0.3.1_pb from trunk.
-            // It's ulikely this branch will introduce more bugs/network code revisions, so we're fine accepting all 
-            int lastCheckedTrunkVersion = 21;
-
-            // start of trunk as seen from this branch
-            int trunkBegin = 20;
-
-            // maximal allowed version from this branch
-            int maxVersionThisBranch = sn_currentProtocolVersion + 1;
-
             // expiration for public beta versions
             if ( !sn_AcceptingFromMaster &&
-                    ( strstr( st_programVersion.c_str(), "rc" ) || strstr( st_programVersion.c_str(), "alpha" ) || strstr( st_programVersion.c_str(), "beta" ) ) &&
-                 ( sn_Connections[0].version.Max() > lastCheckedTrunkVersion ||
-                   ( sn_Connections[0].version.Max() > maxVersionThisBranch && sn_Connections[0].version.Max() < trunkBegin )
-                     )
-                )
+                    ( strstr( VERSION, "rc" ) || strstr( VERSION, "alpha" ) || strstr( VERSION, "beta" ) ) &&
+                    sn_Connections[0].version.Max() > sn_currentProtocolVersion + 1 )
             {
                 throw tGenericException( tOutput("$testing_version_expired"), tOutput("$testing_version_expired_title" ) );
             }
@@ -1349,49 +1437,13 @@ static void sn_LoginAcceptedHandler( Network::LoginAccepted const & accepted, nS
         else
             sn_Connections[0].version = nVersion( 0, 0);
 
-        if( accepted.has_token() )
-        {
-            // read salt reply and compare it to what we sent
-            nKrawall::nSalt replySalt;
-            nKrawall::ReadScrambledPassword( accepted.token(), replySalt );
-
-            int compare = memcmp( &loginSalt,&replySalt, sizeof(replySalt) );
-
-            // since we generate a different random salt on playback, record the comparison result
-            static const char * section = "LOGIN_SALT";
-            tRecorder::Playback( section, compare );
-            tRecorder::Record( section, compare );
-
-            if ( compare != 0 )
-            {
-                nReadError( false );
-            }
-        }
-
-        // read my public IP
-        if ( accepted.has_address() )
-        {
-            // only accept it if it is not a LAN address
-            tString address = accepted.address();
-            if ( !sn_IsLANAddress( address ) )
-            {
-                if ( sn_myAddress != address )
-                {
-                    con << "Got address " << address << ".\n";
-                }
-                sn_myAddress = address;
-            }
-        }
-
-        // only now, login can be considered a success
-        login_succeeded=true;
-        sn_myNetID=id;
-
         first_fill_ids();
     }
 }
 
-static nProtoBufDescriptor< Network::LoginAccepted > sn_loginAcceptedDescriptor( 5, sn_LoginAcceptedHandler, true );
+static nDescriptor login_accept(5,login_accept_handler,"login_accept", true);
+
+
 
 //static short new_id=0;
 
@@ -1479,88 +1531,41 @@ int GetFreeSlot()
     return -1;
 }
 
+static tString sn_fullRedirectServer("");
+static int sn_fullRedirectPort = 4534;
+
+static tSettingItem< tString > se_fullRedirectServerConf( "FULL_REDIRECT_SERVER", sn_fullRedirectServer );
+static tSettingItem< int > se_fullRedirectPortConf( "FULL_REDIRECT_PORT", sn_fullRedirectPort );
+
+static
+void sn_DisconnectUserFull(int i)
+{
+    nServerInfoRedirect *redirectTo = NULL;
+    if (sn_fullRedirectServer.Len())
+        redirectTo = new nServerInfoRedirect( sn_fullRedirectServer, sn_fullRedirectPort );
+    sn_DisconnectUser( i, "$network_kill_full", redirectTo );
+    delete redirectTo;
+}
+
 static REAL sn_minBan    = 120; // minimal ban time in seconds for trying to connect while you're banned
 static tSettingItem< REAL > sn_minBanSetting( "NETWORK_MIN_BAN", sn_minBan );
 
 // defined in nServerInfo.cpp
-extern bool FloodProtection( int senderID );
+extern bool FloodProtection( nMessage const & m );
 
 // flag to disable 0.2.8 test version lockout
 static bool sn_lockOut028tTest = true;
 static tSettingItem< bool > sn_lockOut028TestConf( "NETWORK_LOCK_OUT_028_TEST", sn_lockOut028tTest );
 
-// the network stuff planned to send:
-tHeap<planned_send> send_queue[MAXCLIENTS+2];
-
-void sn_LoginHandler_intermediate( nMessage &m )
-{
-    Network::Login login;
-
-    unsigned short rate;
-    unsigned short bb;
-
-    m.Read( rate );
-    m.Read( bb );
-    login.set_rate( rate );
-
-    if ( bb )
-    { // we get a big brother message
-        tString rem_bb;
-        m >> rem_bb;
-        login.set_big_brother( rem_bb );
-    }
-
-    tString supportedAuthenticationMethods("");
-
-    // read version and suppored authentication methods
-    if ( !m.End() )
-    {
-        // read version
-        nVersion version;
-        m >> version;
-        version.WriteSync( *login.mutable_version() );
-
-        supportedAuthenticationMethods = "bmd5";
-    }
-    if ( !m.End() )
-    {
-        // read authentication methods
-        m >> supportedAuthenticationMethods;
-    }
-    login.set_authentication_methods( supportedAuthenticationMethods );
-    if ( !m.End() )
-    {
-        // also read a login salt, the client expects to get it returned verbatim
-        nKrawall::nSalt salt; // it's OK that this may stay uninitialized
-        nKrawall::ReadScrambledPassword( m, salt );
-        nKrawall::WriteScrambledPassword( salt, *login.mutable_token() );
-    }
-
-    if ( !m.End() )
-    {
-        // read compression options
-        // (yeah, only protobuf enabled clients send them, but maybe over the old protocol)
-        unsigned short diff, zip;
-        m.Read( diff );
-        m.Read( zip );
-        login.mutable_options()->set_diff_compression( diff );
-        login.mutable_options()->set_zip_compression( zip );
-    }
-
-    // delegate to protobuf method
-    sn_LoginHandler( login, nSenderInfo( m ) );
-}
-
-void sn_LoginHandler( Network::Login const & login, nSenderInfo const & sender )
-{
+int login_handler(const nMessage &m, const nVersion& version, unsigned short rate ){
     nCurrentSenderID senderID;
 
     // don't accept logins in client mode
     if (sn_GetNetState() != nSERVER)
-        return;
+        return -1;
 
     // ban users
-    nMachine & machine = nMachine::GetMachine( sender.SenderID() );
+    nMachine & machine = nMachine::GetMachine( m.SenderID() );
     REAL banned = machine.IsBanned();
     if ( banned > 0 )
     {
@@ -1576,16 +1581,16 @@ void sn_LoginHandler( Network::Login const & login, nSenderInfo const & sender )
         else
             con << tOutput( "$network_ban", machine.GetIP() , int(banned/60), reason.Len() > 1 ? reason : tOutput( "$network_ban_noreason" ) );
 
-        sn_DisconnectUser(sender.SenderID(), tOutput( "$network_kill_banned", int(banned/60), reason ) );
+        sn_DisconnectUser(m.SenderID(), tOutput( "$network_kill_banned", int(banned/60), reason ) );
     }
 
     // ignore multiple logins
-    if( CountSameConnection( sender.SenderID() ) > 0 )
-        return;
+    if( CountSameConnection( m.SenderID() ) > 0 )
+        return -1;
 
     // ignore login floods
-    if ( FloodProtection( sender.SenderID() ) )
-        return;
+    if ( FloodProtection( m ) )
+        return -1;
 
     bool success=false;
 
@@ -1596,38 +1601,36 @@ void sn_LoginHandler( Network::Login const & login, nSenderInfo const & sender )
     //	return -1;
 
     nVersion mergedVersion;
-    nVersion version;
-    version.ReadSync( login.version() );
     if ( !mergedVersion.Merge( version, sn_CurrentVersion() ) )
     {
-        sn_DisconnectUser( sender.SenderID(), "$network_kill_incompatible" );
+        sn_DisconnectUser(m.SenderID(), "$network_kill_incompatible");
     }
 
     // expire 0.2.8 test versions, they have a security flaw
     if ( sn_lockOut028tTest && version.Max() >= 5 && version.Max() <= 10 )
     {
-        sn_DisconnectUser( sender.SenderID(), "0.2.8_beta and 0.2.8.0_rc versions have a dangerous security flaw and are obsoleted, please upgrade to 0.2.8.2.1." );
+        sn_DisconnectUser(m.SenderID(), "0.2.8_beta and 0.2.8.0_rc versions have a dangerous security flaw and are obsoleted, please upgrade to 0.2.8.0.");
     }
 
-    if ( sender.SenderID()!=MAXCLIENTS+1 )
+    if (m.SenderID()!=MAXCLIENTS+1)
     {
         //con << "Ignoring second login from " << m.SenderID() << ".\n";
-        sn_loginIgnoredDescriptor.Send( sender.SenderID() );
+        (new nMessage(login_ignore))->Send(m.SenderID());
     }
-    else if (sn_Connections[sender.SenderID()].socket)
+    else if (sn_Connections[m.SenderID()].socket)
     {
         if ( sn_maxClients > MAXCLIENTS )
             sn_maxClients = MAXCLIENTS;
 
         // count doublicate IPs
-        if ( CountSameIP( sender.SenderID(), true ) < sn_allowSameIPCountHard )
+        if ( CountSameIP( m.SenderID(), true ) < sn_allowSameIPCountHard )
         {
             // find new free ( or freeable ) ID
             new_id = GetFreeSlot();
             if ( new_id > 0 )
             {
                 if(sn_Connections[new_id].socket)
-                    sn_DisconnectUser( new_id, "$network_kill_full" );
+                    sn_DisconnectUserFull( new_id );
 
                 success = true;
 
@@ -1641,8 +1644,6 @@ void sn_LoginHandler( Network::Login const & login, nSenderInfo const & sender )
                 // peers			[ MAXCLIENTS+1 ].sa_family	= 0;
                 //				nCallbackLoginLogout::UserLoggedIn(i);
 
-                sn_Connections	[ new_id ].supportedAuthenticationMethods_ = login.authentication_methods();
-
                 // recount doublicate IPs
                 CountSameIP( new_id, true );
             }
@@ -1650,10 +1651,8 @@ void sn_LoginHandler( Network::Login const & login, nSenderInfo const & sender )
 
         // log login to console
         tOutput o;
-        o.SetTemplateParameter(1, peers[sender.SenderID()].ToString() );
-        o.SetTemplateParameter(2, sn_Connections[sender.SenderID()].socket->GetAddress().ToString() );
-        o.SetTemplateParameter(3, sn_GetClientVersionString(version.Max()) );
-        o.SetTemplateParameter(4, version.Max() );
+        o.SetTemplateParameter(1, peers[m.SenderID()].ToString() );
+        o.SetTemplateParameter(2, sn_Connections[m.SenderID()].socket->GetAddress().ToString() );
         o << "$network_server_login";
         con << o;
     }
@@ -1670,10 +1669,6 @@ void sn_LoginHandler( Network::Login const & login, nSenderInfo const & sender )
         sn_Connections[new_id].bandwidthControl_.Reset();
         reset_last_acks(new_id);
 
-        sn_Connections[new_id].diffCompression = login.options().diff_compression();
-        sn_Connections[new_id].zipCompression = login.options().diff_compression();
-
-        short rate = login.rate();
         if (rate>sn_maxRateOut)
             rate=sn_maxRateOut;
 
@@ -1682,19 +1677,18 @@ void sn_LoginHandler( Network::Login const & login, nSenderInfo const & sender )
 
         nWaitForAck::AckAllPeer(MAXCLIENTS+1);
         reset_last_acks(MAXCLIENTS+1);
-        sn_Connections[MAXCLIENTS+1].acks_.clear();
-
-        // clear message queue
-        while (send_queue[new_id].Len())
-            delete (send_queue[new_id](0));
+        if (sn_Connections[MAXCLIENTS+1].ackMess)
+        {
+            sn_Connections[MAXCLIENTS+1].ackMess=NULL;
+        }
 
         // send login accept message with high priority
-        Network::LoginAccepted & accepted = sn_loginAcceptedDescriptor.Send( new_id );
-        accepted.set_net_id( new_id );
-        sn_myVersion.WriteSync( *accepted.mutable_version() );
-        accepted.set_address( peers[sender.SenderID()].ToString() );
-        accepted.mutable_token()->CopyFrom( login.token() );
-        nMessageBase::SendCollected( new_id );
+        nMessage *rep=new nMessage(login_accept);
+        rep->Write(new_id);
+        (*rep) << sn_myVersion;
+        rep->Send(new_id, -killTimeout);
+
+        nMessage::SendCollected( new_id );
 
         nConfItemBase::s_SendConfig(true, new_id);
 
@@ -1708,32 +1702,76 @@ void sn_LoginHandler( Network::Login const & login, nSenderInfo const & sender )
         //      ANET_Listen(false);
         //      ANET_Listen(true);
     }
-    else if (sender.SenderID()==MAXCLIENTS+1)
+    else if (m.SenderID()==MAXCLIENTS+1)
     {
-        sn_DisconnectUser(MAXCLIENTS+1, "$network_kill_full");
+        sn_DisconnectUserFull(MAXCLIENTS+1);
     }
 
     sn_UpdateCurrentVersion();
 
-    if ( new_id > 0 )
-    {
-        sn_currentVersion.WriteSync( *sn_versionControlDescriptor.Send( new_id ).mutable_version() );
+    return new_id;
+}
 
-        // store big brother message
-        if ( login.has_big_brother() && login.big_brother().size() > 0 )
+void login_handler_1(nMessage& m)
+{
+    nVersion version;
+    unsigned short rate;
+
+    m.Read( rate );
+
+    if ( !m.End() ){ // we get a big brother message (ignore it)
+        tString rem_bb;
+        m >> rem_bb;
+    }
+
+    if ( !m.End() )
+    {
+        // version!
+        m >> version;
+    }
+
+    login_handler( m, version, rate );
+}
+
+void login_handler_2(nMessage& m)
+{
+    unsigned short rate;
+    unsigned short bb;
+
+    m.Read( rate );
+    m.Read( bb );
+    tString rem_bb;
+
+    if ( bb )
+    { // we get a big brother message
+        m >> rem_bb;
+    }
+
+    nVersion ver;
+    m >> ver;
+
+    int new_ID = login_handler( m, ver , rate );
+
+    if ( new_ID > 0 )
+    {
+        nMessage* m = tNEW( nMessage )( versionControl );
+        (*m) << sn_currentVersion;
+
+        m->Send( new_ID );
+
+        if ( bb )
         {
             std::ofstream s;
             if ( tDirectories::Var().Open(s, "big_brother",std::ios::app) )
-            {
-                s << login.big_brother() << '\n';
-            }
+                s << rem_bb << '\n';
         }
     }
 }
 
-void sn_LogoutHandler( Network::Logout const &, nSenderInfo const & sender )
-{
-    unsigned short id = sender.SenderID();
+
+void logout_handler(nMessage &m){
+    unsigned short id = m.SenderID();
+    //m.Read(id);
 
     if (sn_Connections[id].socket)
     {
@@ -1763,34 +1801,27 @@ int sn_ReceivedBytes    = 0;
 int sn_ReceivedPackets  = 0;
 nTimeRolling sn_StatsTime		= 0;
 
+
 // adds a message to the buffer
-void nSendBuffer::AddMessage( nMessageBase & message, nBandwidthControl* control, int peer )
+void nSendBuffer::AddMessage	( nMessage&			message, nBandwidthControl* control )
 {
     unsigned long id = message.MessageID();
-
+    unsigned short len = message.DataLen();
     tRecorderSync< unsigned long >::Archive( "_MESSAGE_ID_SEND", 5, id );
-    size_t lenBefore = sendBuffer_.Len();
 
-    // prepare writer
-    nBinaryWriter writer( sendBuffer_ );
+    sendBuffer_[sendBuffer_.Len()]=htons(message.Descriptor());
 
-    // reserve space for descriptor
-    nBinaryWriter descriptorWriter( writer );
-    writer.WriteShort( message.DescriptorID() );
+    sendBuffer_[sendBuffer_.Len()]=htons(message.MessageID());
 
-    // give control to message
-    nMessageBase::WriteArguments arguments( sendBuffer_, peer );
-    int descriptor = message.Write( arguments );
+    sendBuffer_[sendBuffer_.Len()]=htons(message.DataLen());
+    for(int i=0;i<len;i++)
+        sendBuffer_[sendBuffer_.Len()]=htons(message.Data(i));
 
-    // write the real descriptor
-    descriptorWriter.WriteShort( descriptor );
-
-    unsigned short len = sendBuffer_.Len() - lenBefore;
     tRecorderSync< unsigned short >::Archive( "_MESSAGE_SEND_LEN", 5, len );
 
     if ( control )
     {
-        control->Use( nBandwidthControl::Usage_Planning, len );
+        control->Use( nBandwidthControl::Usage_Planning, len * 2 );
     }
 }
 
@@ -1801,17 +1832,17 @@ void nSendBuffer::Send			( nSocket const &				socket
 {
     if (sendBuffer_.Len()){
         sn_SentPackets++;
-        sn_SentBytes  += sendBuffer_.Len() + OVERHEAD;
+        sn_SentBytes  += sendBuffer_.Len() * 2 + OVERHEAD;
 
         // store our id
-        nBinaryWriter( sendBuffer_ ).WriteShort( ::sn_myNetID );
+        sendBuffer_[sendBuffer_.Len()]=htons(::sn_myNetID);
 
         socket.Write( reinterpret_cast<int8 *>(&(sendBuffer_[0])),
-                      sendBuffer_.Len(), peer);
+                      2*sendBuffer_.Len(), peer);
 
         if ( control )
         {
-            control->Use( nBandwidthControl::Usage_Execution, sendBuffer_.Len() + OVERHEAD );
+            control->Use( nBandwidthControl::Usage_Execution, 2*sendBuffer_.Len() + OVERHEAD );
         }
 
         this->Clear();
@@ -1825,19 +1856,19 @@ void nSendBuffer::Broadcast	( nSocket const &				socket
 {
     if (sendBuffer_.Len()){
         sn_SentPackets++;
-        sn_SentBytes  += sendBuffer_.Len() + OVERHEAD;
+        sn_SentBytes  += sendBuffer_.Len() * 2 + OVERHEAD;
 
         // store our id
-        nBinaryWriter( sendBuffer_ ).WriteShort(::sn_myNetID);
+        sendBuffer_[sendBuffer_.Len()]=htons(::sn_myNetID);
 
         socket.Broadcast( reinterpret_cast<int8 *>(&(sendBuffer_[0])),
-                          sendBuffer_.Len(), port);
+                          2*sendBuffer_.Len(), port);
 
         Clear();
 
         if ( control )
         {
-            control->Use( nBandwidthControl::Usage_Execution, sendBuffer_.Len() + OVERHEAD );
+            control->Use( nBandwidthControl::Usage_Execution, 2*sendBuffer_.Len() + OVERHEAD );
         }
     }
 }
@@ -1845,6 +1876,9 @@ void nSendBuffer::Broadcast	( nSocket const &				socket
 // clears the buffer
 void nSendBuffer::Clear()
 {
+    for(int i=sendBuffer_.Len()-1;i>=0;i--)
+        sendBuffer_(i)=0;
+
     sendBuffer_.SetLen( 0 );
 }
 
@@ -1899,7 +1933,7 @@ void nBandwidthControl::Update( REAL ts)
     rateControlPlanned_ = rateControl_;
 }
 
-void nMessageBase::SendCollected(int peer)
+void nMessage::SendCollected(int peer)
 {
     //if ( peer == 7 && sn_Connections[peer].sendBuffer_.Len() > 0 )
     //    con << tSysTimeFloat() << "\n";
@@ -1913,32 +1947,29 @@ void nMessageBase::SendCollected(int peer)
 }
 
 
-void nMessageBase::BroadcastCollected(int peer, unsigned int port){
+void nMessage::BroadcastCollected(int peer, unsigned int port){
     if (peer<0 || peer > MAXCLIENTS+1 || !sn_Connections[peer].socket)
         tERR_ERROR("Invalid peer!");
 
     sn_Connections[peer].sendBuffer_.Broadcast( *sn_Connections[peer].socket, port, &sn_Connections[peer].bandwidthControl_ );
 }
 
+
 // TODO_NOACK
-void nMessageBase::SendImmediately(int peer,bool ack){
+void nMessage::SendImmediately(int peer,bool ack){
     if (ack)
     {
 #ifdef NO_ACK
         tASSERT(messageIDBig_);
 #endif
         new nWaitForAck(this,peer);
-
-#ifdef nSIMULATE_PING
-        return;
-#endif
     }
 
     // server: messages to yourself are a bit strange...
     if ( sn_GetNetState() == nSERVER && peer == 0 && ack )
     {
         st_Breakpoint();
-        tJUST_CONTROLLED_PTR< nMessageBase > bounce(this);
+        tJUST_CONTROLLED_PTR< nMessage > bounce(this);
         return;
     }
 
@@ -1960,7 +1991,7 @@ void nMessageBase::SendImmediately(int peer,bool ack){
 
     if (peer==MAXCLIENTS+1){
 #ifdef DEBUG
-        if(descriptorID_==sn_ackDescriptor.id)
+        if(descriptor==s_Acknowledge.id)
             con << "Sending ack to login slot.\n";
 #endif
         //      else if (descriptor
@@ -1968,7 +1999,7 @@ void nMessageBase::SendImmediately(int peer,bool ack){
     }
 #endif
 
-    if (sn_Connections[peer].sendBuffer_.Len() + Size() + 6 > MAX_MESS_LEN ){
+    if (sn_Connections[peer].sendBuffer_.Len()+data.Len()+3 > MAX_MESS_LEN/2){
         SendCollected(peer);
         //con << "Overflow packets sent to " << peer << '\n';
     }
@@ -1976,7 +2007,7 @@ void nMessageBase::SendImmediately(int peer,bool ack){
 
     if (sn_Connections[peer].socket)
     {
-        sn_Connections[peer].sendBuffer_.AddMessage( *this, &sn_Connections[peer].bandwidthControl_, peer );
+        sn_Connections[peer].sendBuffer_.AddMessage( *this, &sn_Connections[peer].bandwidthControl_ );
 
         /*
           if (sn_Connections[].rate_control[peer]>0)
@@ -2002,40 +2033,33 @@ void nMessageBase::SendImmediately(int peer,bool ack){
         */
 
         if (deb_net)
-            con << "Sent " <<descriptorID_ << ':' << messageIDBig_ << ":"
+            con << "Sent " <<descriptor << ':' << messageIDBig_ << ":"
             << peer << '\n';
     }
 
-    tControlledPTR< nMessageBase > bounce( this ); // delete this message if nobody is interested in it any more
+    tControlledPTR< nMessage > bounce( this ); // delete this message if nobody is interested in it any more
 }
 
 REAL sent_per_messid[MAXDESCRIPTORS+100];
 
-void nMessageBase::Send(int peer,REAL priority,bool ack){
+void nMessage::Send(int peer,REAL priority,bool ack){
 #ifdef NO_ACK
     if (!ack)
         messageIDBig_ = 0;
 #endif
-    
-    // don't send messages to unsupported peers
-    if( peer > MAXCLIENTS+1 )
-    {
-        tJUST_CONTROLLED_PTR< nMessageBase > bounce(this);
-        return;
-    }
 
     // messages to yourself are a bit strange...
     if ( sn_GetNetState() == nSERVER && peer == 0 && ack )
     {
         st_Breakpoint();
-        tJUST_CONTROLLED_PTR< nMessageBase > bounce(this);
+        tJUST_CONTROLLED_PTR< nMessage > bounce(this);
         return;
     }
 
 #ifdef DEBUG
 
     if (peer==MAXCLIENTS+1){
-        if(descriptorID_==sn_ackDescriptor.id)
+        if(descriptor==s_Acknowledge.id)
             con << "Sending ack to login slot.\n";
         //      else if (descriptor
         //	tERR_ERROR("the last user only should receive denials or acks.");
@@ -2050,52 +2074,24 @@ void nMessageBase::Send(int peer,REAL priority,bool ack){
     // the next line was redundant; the send buffer handles that part of accounting.
     //sn_Connections[peer].bandwidthControl_.Use( nBandwidthControl::Usage_Planning, 2*(data.Len()+3) );
 
-    sent_per_messid[sn_StripDescriptor(descriptorID_)] += Size() + 6;
+    sent_per_messid[descriptor]+=2*(data.Len()+3);
 
-    tASSERT( sn_StripDescriptor( DescriptorID() )!= sn_StripDescriptor( sn_ackDescriptor.ID() ) || !ack);
+    tASSERT(Descriptor()!=s_Acknowledge.ID() || !ack);
 
     new nMessage_planned_send(this,priority+sn_OrderPriority,ack,peer);
     sn_OrderPriority += .01; // to roughly keep the relative order of netmessages
 }
 
-//! handle this message
-void nMessageBase::Handle()
-{
-    try
-    {
-        if ( (SenderID() <= MAXCLIENTS) || DoGetDescriptor().acceptWithoutLogin )
-        {
-            OnHandle();
-        }
-    }
-    catch(nIgnore const &){
-        // well, do nothing.
-    }
-    catch(nKillHim const &){
-        // st_Breakpoint();
-        con << tOutput("$network_error");
-        sn_DisconnectUser(senderID_, "$network_kill_error" );
-    }
-    catch( tGenericException & e )
-    {
-        // relay generic errors to sender of message; don't do anything else bad. Especially, we don't
-        // want a harmless uncaught exception to bring down the server.
-        sn_ConsoleOut( e.GetName() + ": " + e.GetDescription() + '\n', senderID_ );
-    }
-}
-
-/*
 // ack messages: don't get an ID
 class nAckMessage: public nMessage
 {
 public:
-    nAckMessage(): nMessage( sn_ackDescriptor ){ messageIDBig_ = 0; }
+    nAckMessage(): nMessage( s_Acknowledge ){ messageIDBig_ = 0; }
 };
-*/
 
-// receive and acknowledge the recently reveived network messages
+// receive and s_Acknowledge the recently reveived network messages
 
-typedef std::deque< tJUST_CONTROLLED_PTR< nMessageBase > > nMessageFifo;
+typedef std::deque< tJUST_CONTROLLED_PTR< nMessage > > nMessageFifo;
 
 static void rec_peer(unsigned int peer){
     tASSERT( sn_Connections[peer].socket );
@@ -2108,31 +2104,30 @@ static void rec_peer(unsigned int peer){
 
     // the growing buffer we read messages into
     const int serverMaxAcceptedSize=2000;
-    static tArray< unsigned char > storage(2000);
-    int maxReceive = 0; maxReceive = storage.Len();
-    unsigned char * buffer = 0; buffer = &storage[0];
+    static tArray< unsigned short > storage(2000);
+    int maxrec = 0; maxrec = storage.Len();
+    unsigned short * buff = 0; buff = &storage[0];
 
     // short buff[maxrec];
     if (sn_Connections[peer].socket){
         int count=0;
-        int received = 1;
-        while ( received>=0 && sn_Connections[peer].socket )
+        int len=1;
+        while (len>=0 && sn_Connections[peer].socket)
         {
             nAddress addrFrom; // the sender of the current packet
-            received = sn_Connections[peer].socket->Read( reinterpret_cast< int8 *>( buffer ), maxReceive, addrFrom);
+            len = sn_Connections[peer].socket->Read( reinterpret_cast<int8 *>(buff),maxrec*2, addrFrom);
 
-            if ( received > 0 )
-            {
-                if ( received >= maxReceive )
+            if (len>0){
+                if ( len >= maxrec*2 )
                 {
                     // the message was too long to receive. What to do?
-                    if ( sn_GetNetState() != nSERVER || received < serverMaxAcceptedSize )
+                    if ( sn_GetNetState() != nSERVER || len < serverMaxAcceptedSize )
                     {
                         // expand the buffer. The message is lost now, but the
                         // peer will certainly resend it. Hopefully, the buffer will be large enough to hold it then.
-                        storage[maxReceive*2-1]=0;
-                        maxReceive = storage.Len();
-                        buffer = &storage[0];
+                        storage[maxrec*2-1]=0;
+                        maxrec = storage.Len();
+                        buff = &storage[0];
 
                         tERR_WARN( "Oversized network packet received. Read buffer has been enlargened to catch it the next time.");
 
@@ -2148,14 +2143,13 @@ static void rec_peer(unsigned int peer){
                     }
                 }
 
-                unsigned char const * currentRead = buffer;
-                unsigned char *bufferEnd = buffer+(received-2);
+                unsigned short *b=buff;
+                unsigned short *bend=buff+(len/2-1);
 
                 sn_ReceivedPackets++;
-                sn_ReceivedBytes  += received + OVERHEAD;
+                sn_ReceivedBytes  += len + OVERHEAD;
 
-                // last two bytes hold the ID of the sender
-                unsigned short claim_id=(*(bufferEnd+1)) + ( static_cast< unsigned short >(*bufferEnd) << 8 );
+                unsigned short claim_id=ntohs(*bend);
 
                 // z-man: security check ( thanks, Luigi Auriemma! )
                 if ( claim_id > MAXCLIENTS+1 )
@@ -2167,7 +2161,7 @@ static void rec_peer(unsigned int peer){
                 */
                 count ++;
 
-                unsigned int id = peer;
+                unsigned int id=peer;
                 //	 for(unsigned int i=1;i<=(unsigned int)maxclients;i++)
                 int comp=nAddress::Compare( addrFrom, peers[claim_id] );
                 if ( comp == 0 ) // || claim_id == MAXCLIENTS+1 )
@@ -2183,29 +2177,20 @@ static void rec_peer(unsigned int peer){
                     sn_Connections[ MAXCLIENTS+1 ].socket = sn_Connections[peer].socket;
                 }
 
+                //	 if (peer!=id)
+                //  con << "Changed incoming address.\n";
+                int lenleft = bend - b;
+
+#ifndef NOEXCEPT
                 try
                 {
-                    while( bufferEnd > currentRead ){
-                        tJUST_CONTROLLED_PTR< nMessageBase > pmess;
-                        unsigned char const * lastRead = currentRead;
-                        try
-                        {
-                            pmess = nDescriptorBase::CreateMessage( currentRead, bufferEnd, id );
-                        }
-                        catch( nIgnore const & )
-                        {
-                            if ( lastRead < currentRead )
-                            {
-                                // just ignore this one message
-                                continue;
-                            }
-                            else
-                            {
-                                throw;
-                            }
-                        }
+#endif
+                    while( lenleft > 0 ){
+                        tJUST_CONTROLLED_PTR< nMessage > pmess;
+                        pmess = tNEW( nMessage )(b,id,lenleft);
+                        nMessage& mess = *pmess;
 
-                        nMessageBase& mess = *pmess;
+                        lenleft = bend - b;
 
                         bool mess_is_new=true;
                         // see if we have got this packet before
@@ -2221,7 +2206,7 @@ static void rec_peer(unsigned int peer){
                                 // do not accept normal packages from the login
                                 // slot; just login and information packets are allowed.
                                 ( sn_GetNetState() != nSERVER && !login_succeeded && !nCallbackAcceptPackedWithoutConnection::Accept( mess ) )
-                                // if we are not yet logged in, accept only login and sn_loginDeniedDescriptor.
+                                // if we are not yet logged in, accept only login and login_deny.
                             )
                             {
                                 //							con << "Ignoring packet " << mess_id << ":" << id << ".\n";
@@ -2231,11 +2216,11 @@ static void rec_peer(unsigned int peer){
                                 if (id <= MAXCLIENTS && mess_id != 0)  // messages with ID 0 are non-ack messages and come really often. they are always new.
                                 {
                                     unsigned short diff=mess_id-highest_ack[id];
-                                    if ( ( diff>0 && diff<10000 ) ||
+                                    if (diff>0 && diff<10000 ||
                                             ((
-                                                 sn_StripDescriptor( mess.DescriptorID() ) == sn_StripDescriptor( sn_loginAcceptedDescriptor.ID() )||
-                                                 sn_StripDescriptor( mess.DescriptorID() ) == sn_StripDescriptor( sn_loginDeniedDescriptor.ID() )   ||
-                                                 sn_StripDescriptor( mess.DescriptorID() ) == sn_StripDescriptor( sn_loginDescriptor.ID() )
+                                                 mess.Descriptor() == login_accept.ID() ||
+                                                 mess.Descriptor() == login_deny.ID()   ||
+                                                 mess.Descriptor() == login.ID()
                                              ) && highest_ack[id] == 0)
                                        ){
                                         // the message has a more recent id than anything before.
@@ -2257,15 +2242,15 @@ static void rec_peer(unsigned int peer){
                                 // special situation: logout. Do not sent ack any more.
                                 if ((!sn_Connections[id].socket))
                                 {
-                                    sn_Connections[id].acks_.clear();
+                                    sn_Connections[id].ackMess=NULL;
                                 }
                                 else if (
 #ifdef NO_ACK
                                     (mess.MessageID()) &&
 #endif
-                                    ( sn_StripDescriptor( mess.DescriptorID() ) != sn_StripDescriptor( sn_loginIgnoredDescriptor.ID() ) ||
+                                    (mess.Descriptor()!=login_ignore.ID() ||
                                      login_succeeded )){
-                                    // do not ack the sn_loginIgnoredDescriptor packet that did not let you in.
+                                    // do not ack the login_ignore packet that did not let you in.
 
 #ifdef DEBUG
                                     if ( id > MAXCLIENTS )
@@ -2274,11 +2259,15 @@ static void rec_peer(unsigned int peer){
                                     }
 #endif
 
-                                    sn_Connections[id].acks_.push_back( mess.MessageID() );
-
-                                    if (sn_Connections[id].acks_.size()>100)
+                                    if(sn_Connections[id].ackMess==NULL)
                                     {
-                                        sn_SendAcks(id, false);
+                                        sn_Connections[id].ackMess=new nAckMessage();
+                                    }
+
+                                    sn_Connections[id].ackMess->Write(mess.MessageID());
+                                    if (sn_Connections[id].ackMess->DataLen()>100){
+                                        sn_Connections[id].ackMess->Send(id, 0, false);
+                                        sn_Connections[id].ackMess=NULL;
                                     }
                                 }
 
@@ -2307,60 +2296,49 @@ static void rec_peer(unsigned int peer){
                                 //con << "Message " << mess_id << ":" << id << " was not new.\n";
                             }
                     }
+#ifndef NOEXCEPT
                 }
-                catch(nIgnore const &){
-                    // well, do nothing.
-                }
+
                 catch(nKillHim)
                 {
                     con << "nKillHim signal caught.\n";
-                    sn_DisconnectUser(id, "$network_kill_error");
+                    sn_DisconnectUser(peer, "$network_kill_error");
                 }
-                catch( tGenericException & e )
-                {
-                    // relay generic errors to sender of message; don't do anything else bad. Especially, we don't
-                    // want a harmless uncaught exception to bring down the server.
-                    sn_ConsoleOut( e.GetName() + ": " + e.GetDescription() + '\n', id );
-                }
+#endif
             }
-
+	#ifndef NOEXCEPT
+            try
             {
-                // prepare to override currently active version
-                nTempVersionOverrider overrider;
-
+	#endif
                 static int recursionCount = 0;
                 ++recursionCount;
 
                 // handle messages
                 while ( receivedMessages.begin() != receivedMessages.end() )
                 {
-                    tJUST_CONTROLLED_PTR< nMessageBase > mess = receivedMessages.front();
+                    tJUST_CONTROLLED_PTR< nMessage > mess = receivedMessages.front();
                     receivedMessages.pop_front();
-
-                    // set version to something really old on messages from the login slot
-                    // or messages the client receives while it's not yet logged in
-                    if ( ( mess->SenderID() == MAXCLIENTS+1 ||
-                         ( sn_GetNetState() == nCLIENT && !login_succeeded ) ) 
-                         && !nTempVersionOverrider::Overridden() )
-                    {
-                        nTempVersionOverrider::Override( nVersion( 0, 4 ) );
-                    }
 
                     // perhaps the connection died?
                     if ( sn_Connections[ mess->SenderID() ].socket )
-                    {
-                        mess->Handle();
-
-                        // store message in incoming cache
-                        sn_Connections[ mess->SenderID() ].messageCacheIn_.AddMessage( mess, true );
-                    }
+                        nDescriptor::HandleMessage( *mess );
                 }
 
                 if ( --recursionCount <= 0 )
                 {
                     nCallbackReceivedComplete::ReceivedComplete();
                 }
+
+	#ifndef NOEXCEPT
             }
+
+            catch(nKillHim)
+            {
+                con << "nKillHim signal caught.\n";
+                sn_DisconnectUser(peer, "$network_kill_error");
+            }
+	#endif
+
         }
     }
 }
@@ -2513,14 +2491,11 @@ void sn_SetNetState(nNetState x){
                     { // logout: fire and forget
                         con << tOutput("$network_logout_process");
                         for(int j=3;j>=0;j--){ // just to make sure
-                            nProtoBufMessage< Network::Logout > * lo = logout.CreateMessage();
-                            if( !sn_protoBuf.Supported( 0 ) )
-                            {
-                                lo->AccessProtoBuf().set_my_id( sn_myNetID );
-                            }
+                            nMessage *lo=new nMessage(logout);
+                            lo->Write(static_cast<unsigned short>(sn_myNetID));
                             lo->ClearMessageID();
                             lo->SendImmediately(0, false);
-                            nMessageBase::SendCollected(0);
+                            nMessage::SendCollected(0);
                             tDelay(1000);
                         }
                         con << tOutput("$network_logout_done");
@@ -2528,13 +2503,6 @@ void sn_SetNetState(nNetState x){
                         sn_myNetID=0; // MAXCLIENTS+1; // reset network id
                     }
                 }
-                sn_DisconnectUserNoWarn(i, "$network_kill_shutdown");
-            }
-
-            // repeat to clear out pending stuff created during
-            // the last run (destruction messages, for example)
-            for(int i=MAXCLIENTS+1;i>=0;i--)
-            {
                 sn_DisconnectUserNoWarn(i, "$network_kill_shutdown");
             }
 
@@ -2563,9 +2531,6 @@ void sn_Bend( nAddress const & address )
         sn_SetNetState(nCLIENT);
 
     peers[0] = address;
-
-    // prepend packet with version information
-    nTempVersionOverrider::SendOverrideMessage( 0, sn_myVersion );
 }
 
 void sn_Bend( tString const & server, unsigned int port)
@@ -2579,49 +2544,17 @@ void sn_Bend( tString const & server, unsigned int port)
     sn_Bend( address );
 }
 
-nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket const * socket )
-{
-    if ( loginType == Login_All )
-    {
-        nConnectError ret = nABORT;
-        if ( sn_GetNetState() != nCLIENT )
-        {
-            // ret = sn_Connect( server, Login_Protobuf, socket );
-        }
-        if ( sn_GetNetState() != nCLIENT )
-        {
-            ret = sn_Connect( server, Login_Post0252, socket );
-        }
-        if ( sn_GetNetState() != nCLIENT )
-        {
-            sn_Connect( server, Login_Protobuf, socket );
-        }
-        if ( sn_GetNetState() != nCLIENT )
-        {
-            ret = sn_Connect( server, Login_Pre0252, socket );
-        }
-
-        return ret;
-    }
-
+nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket const * socket ){
     sn_DenyReason = "";
 
     // reset redirection
     sn_redirectTo.release();
-
-    // first, get all pending messages, ignoring them.
-    sn_SetNetState(nSTANDALONE);
-    sn_SetNetState(nCLIENT);
-    sn_Receive();
-    sn_Receive();
-    sn_Receive();
 
     // pings in the beginning of the login are not really representative
     nPingAverager::SetWeight(.0001);
 
     // net_hostport = sn_clientPort;
 
-    // reset sockets again
     sn_SetNetState(nSTANDALONE);
     sn_SetNetState(nCLIENT);
 
@@ -2644,75 +2577,53 @@ nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket
 
     sn_myNetID=0; // MAXCLIENTS+1; // reset network id
 
+    // first, get all pending messages
+    sn_Receive();
+    sn_Receive();
+    sn_Receive();
+
     // reset version control until the true value is given by the server.
     sn_currentVersion = nVersion(0,0);
 
-    // prepare login data
-    Network::Login login;
-    login.set_rate( sn_maxRateIn );
-    if( big_brother )
+    // Login stuff.....
+    tJUST_CONTROLLED_PTR< nMessage > mess;
+    if ( loginType != Login_Pre0252 )
     {
-        login.set_big_brother( sn_bigBrotherString );
-        big_brother = false;
-    }
+        mess=new nMessage(login_2);
+        mess->Write(sn_maxRateIn);
 
-    sn_MyVersion().WriteSync( *login.mutable_version() );
-    login.set_authentication_methods( nKrawall::nMethod::SupportedMethods() );
-
-    nKrawall::RandomSalt( loginSalt );
-    nKrawall::WriteScrambledPassword( loginSalt, *login.mutable_token() );
-
-    tJUST_CONTROLLED_PTR< nMessageBase > mess;
-
-    // set server version to safe version
-    sn_Connections[0].version = sn_currentVersion;
-
-    switch( loginType )
-    {
-    case Login_All:
-        tASSERT(0);
-        break;
-    case Login_Protobuf:
-        // switch server connection to protobuf capable version
-        sn_Connections[0].version = sn_myVersion;
-    case Login_Pre0252:
-        // just write a protobuf message. In pre-0.2.5.2 mode, it'll get converted
-        // to a stream message correctly.
-        mess = sn_loginDescriptor.Transform( login );
-        break;
-    case Login_Post0252:
-        // old style login
-        tJUST_CONTROLLED_PTR< nStreamMessage > stream = new nStreamMessage(login_2);
-        mess = stream;
-        stream->Write(sn_maxRateIn);
-        
         unsigned short bb = big_brother;
-        stream->Write( bb );
+        mess->Write( bb );
         if ( bb ){
-            (*stream) << sn_bigBrotherString;
+            (*mess) << sn_bigBrotherString;
             big_brother=false;
         }
-        
-        // write our version
-        (*stream) << sn_MyVersion();
-        
-        // write our supported authentication methods
-        (*stream) << nKrawall::nMethod::SupportedMethods();
-        
-        // write a random salt
-        nKrawall::WriteScrambledPassword( loginSalt, *stream );
 
-        // write encoding options: we understand both.
-        stream->Write(1);
-        stream->Write(1);
-        
-        break;
+        (*mess) << sn_MyVersion();
+    }
+    else
+    {
+        mess=new nMessage(login);
+        mess->Write(sn_maxRateIn);
+
+        // send (worthless) big brother string
+        if (big_brother)
+        {
+            (*mess) << sn_bigBrotherString;
+        }
+        else
+        {
+            (*mess) << tString("");
+        }
+
+        (*mess) << sn_MyVersion();
+
+        big_brother=false;
     }
 
-    // send message
     mess->ClearMessageID();
     mess->SendImmediately(0,false);
-    nMessageBase::SendCollected(0);
+    nMessage::SendCollected(0);
 
     con << tOutput("$network_login_process");
 
@@ -2730,20 +2641,12 @@ nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket
             // con << "retrying...\n";
             nextSend = tSysTimeFloat() + resend;
             mess->SendImmediately(0,false);
-            nMessageBase::SendCollected(0);
+            nMessage::SendCollected(0);
         }
 
         tAdvanceFrame(10000);
         sn_Receive();
         sn_SendPlanned();
-
-        // check for user abort
-        if ( tConsole::Idle() )
-        {
-            con << tOutput("$network_login_failed_abort");
-            sn_SetNetState(nSTANDALONE);
-            return nABORT;
-        }
     }
     if (login_failed)
     {
@@ -2751,8 +2654,19 @@ nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket
         sn_SetNetState(nSTANDALONE);
         return nDENIED;
     }
-    else if (login_succeeded)
-    {
+    else if (tSysTimeFloat()>=timeout || sn_GetNetState()!=nCLIENT){
+        if ( loginType == Login_All )
+        {
+            return 	sn_Connect( server, Login_Pre0252, socket );
+        }
+        else
+        {
+            con << tOutput("$network_login_failed_timeout");
+            sn_SetNetState(nSTANDALONE);
+            return nTIMEOUT;
+        }
+    }
+    else{
         nCallbackLoginLogout::UserLoggedIn(0);
 
         tOutput mess;
@@ -2771,21 +2685,19 @@ nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket
 
         return nOK;
     }
-    else
-    {
-        sn_SetNetState(nSTANDALONE);
-        return nTIMEOUT;
-    }
 }
 
 
-void nReadError( bool critical )
+void nReadError()
 {
     // st_Breakpoint();
-    if ( critical )
-        throw nKillHim();
-    else
-        throw nIgnore();
+#ifndef NOEXCEPT
+    throw nKillHim();
+#else
+    con << "\nI told you not to use PGCC! Now we need to leave the\n"
+    << "system in an undefined state. The progam will crash now.\n"
+    << "\n\n";
+#endif
 }
 
 #ifdef DEDICATED
@@ -2794,8 +2706,6 @@ static tConfItem< short > sn_decorateIDConf( "CONSOLE_DECORATE_ID", sn_decorateI
 
 static short sn_decorateIP = false;
 static tConfItem< short > sn_decorateIPConf( "CONSOLE_DECORATE_IP", sn_decorateIP );
-
-static tConfItem< bool > sn_decorateTSConf( "CONSOLE_DECORATE_TIMESTAMP", sn_decorateTS );
 
 // console with filter for better machine readable log format
 class nConsoleFilter:public tConsoleFilter{
@@ -2813,11 +2723,7 @@ private:
             line << "[";
             if ( sn_decorateID )
                 line << id;
-            if ( sn_decorateID && sn_decorateTS )
-                line << " ";
-            if ( sn_decorateTS )
-                line << st_GetCurrentTime("TS=%Y/%m/%d-%H:%M:%S");
-            if ( (sn_decorateID || sn_decorateTS) && printIP )
+            if ( sn_decorateID && printIP )
                 line << " ";
             if ( printIP )
             {
@@ -2835,113 +2741,75 @@ private:
 static nConsoleFilter sn_consoleFilter;
 #endif
 
-static void sn_ConsoleMessageHandler( Network::ConsoleMessage const & message, nSenderInfo const & )
-{
-    if (sn_GetNetState()!=nSERVER)
-    {
-        con << message.message();
+static void sn_ConsoleOut_handler(nMessage &m){
+    if (sn_GetNetState()!=nSERVER){
+        tString s;
+        m >> s;
+        con << s;
     }
 }
 
 
-static nProtoBufDescriptor< Network::ConsoleMessage > sn_consoleOutDescriptor( 8, sn_ConsoleMessageHandler );
-
-// rough maximal packet size, better send nothig bigger, or it will
-// get fragmented.
-#define MTU 1400
+static nDescriptor sn_ConsoleOut_nd(8,sn_ConsoleOut_handler,"sn_ConsoleOut");
 
 // causes the connected clients to print a message
-nMessageBase * sn_ConsoleOutMessage( tString const & message )
+nMessage* sn_ConsoleOutMessage( const tOutput& o )
 {
-    // truncate message to about 1.5K, a safe size for all UDP packets
-    static const int maxLen = MTU+100;
+    tString message(o);
+    message  << "0xffffff";
+
+    // truncate message to 1.4K, a safe size for all UDP packets
+    static const int maxLen = 1400;
     static bool recurse = true;
     if ( message.Len() > maxLen && recurse )
     {
         recurse = false;
         tERR_WARN( "Long console message truncated.");
-        nMessageBase * m = sn_ConsoleOutMessage( message.SubStr( 0, MTU ) );
-        recurse = true;
-        return m;
+
+        message.SetLen( maxLen+1 );
+        message[maxLen]='\0';
+        recurse = false;
     }
 
-    nProtoBufMessage< Network::ConsoleMessage > * m = sn_consoleOutDescriptor.CreateMessage();
-    m->AccessProtoBuf().set_message( message );
+    nMessage* m=new nMessage(sn_ConsoleOut_nd);
+    *m << message;
+
     return m;
 }
 
-void sn_ConsoleOutRaw( tString & message,int client){
-    tJUST_CONTROLLED_PTR< nMessageBase > m = sn_ConsoleOutMessage( message );
+void sn_ConsoleOut(const tOutput& o,int client){
+    //	tString message(o);
 
-    if (client<0)
-    {
+    tJUST_CONTROLLED_PTR< nMessage > m = sn_ConsoleOutMessage( o );
+
+    if (client<0){
         m->BroadCast();
-        con << message;
+        con << o;
     }
     else if (client==sn_myNetID)
     {
-        con << message;
+        con << o;
     }
     else
-    {
         m->Send(client);
+}
+
+static void client_cen_handler(nMessage &m){
+    if (sn_GetNetState()!=nSERVER){
+        tString s;
+        m >> s;
+        con.CenterDisplay(s);
     }
 }
 
-void sn_ConsoleOutString( tString & message,int client){
-    // check if string is too long
-    if ( message.Len() <= MTU )
-    {
-        // no? Fine, just send it in one go.
-        message  << "0xffffff";
-        sn_ConsoleOutRaw( message, client );
-
-        return;
-    }
-
-    // darn, it is too long. Try to find a good spot to cut it
-    int cut = MTU;
-    while ( cut > 0 && message(cut) != '\n' )
-    {
-        --cut;
-    }
-    if ( cut == 0 )
-    {
-        // no suitable spot found, just cut anywhere.
-        cut = MTU;
-    }
-
-    // split the string
-    tString beginning = message.SubStr( 0, cut ) + "0xffffff";
-    tString rest = message.SubStr( cut );
-
-    // and send the bits
-    sn_ConsoleOutRaw( beginning, client );
-    sn_ConsoleOutString( rest, client );
-}
-
-void sn_ConsoleOut(const tOutput& o,int client){
-    // transform message to string
-    tString message( o );
-    sn_ConsoleOutString( message, client );
-}
-
-static void sn_CenterMessageHandler( Network::CenterMessage const & message, nSenderInfo const & )
-{
-    if (sn_GetNetState()!=nSERVER)
-    {
-        con.CenterDisplay( message.message() );
-    }
-}
-
-static nProtoBufDescriptor< Network::CenterMessage > sn_centerMessageDescriptor( 9, sn_CenterMessageHandler );
+static nDescriptor client_cen_nd(9,client_cen_handler,"client_cen");
 
 // causes the connected clients to print a message in the center of the screeen
 void sn_CenterMessage(const tOutput &o,int client){
     tString message(o);
 
-    tJUST_CONTROLLED_PTR< nProtoBufMessage< Network::CenterMessage > > m = sn_centerMessageDescriptor.CreateMessage();
-    m->AccessProtoBuf().set_message( message );
+    nMessage *m=new nMessage(client_cen_nd);
+    *m << message;
     if (client<0){
         m->BroadCast();
         con.CenterDisplay(message);
@@ -2965,7 +2833,6 @@ static void ConsoleOut_conf(std::istream &s)
 }
 
 static tConfItemFunc ConsoleOut_c("CONSOLE_MESSAGE",&ConsoleOut_conf);
-static tAccessLevelSetter sn_ConsoleConfLevel( ConsoleOut_c, tAccessLevel_Moderator );
 
 static void CeterMessage_conf(std::istream &s)
 {
@@ -2978,7 +2845,15 @@ static void CeterMessage_conf(std::istream &s)
 }
 
 static tConfItemFunc CenterMessage_c("CENTER_MESSAGE",&CeterMessage_conf);
-static tAccessLevelSetter sn_CenterConfLevel( CenterMessage_c, tAccessLevel_Moderator );
+
+
+
+// ****************************************************************
+//                    Send Queue
+// ****************************************************************
+
+// the network stuff planned to send:
+tHeap<planned_send> send_queue[MAXCLIENTS+2];
 
 planned_send::planned_send(REAL priority,int Peer){
     peer=Peer;
@@ -3004,7 +2879,7 @@ void planned_send::add_to_priority(REAL diff)
 // **********************************************
 
 nMessage_planned_send::nMessage_planned_send
-(nMessageBase *M,REAL priority,bool Ack,int Peer)
+(nMessage *M,REAL priority,bool Ack,int Peer)
         :planned_send(priority,Peer),m(M),ack(Ack){
     //if (m)
 }
@@ -3040,11 +2915,11 @@ static REAL sn_SendPlanned1(){
     if (time<lastTime-.01 || time>lastTime+1000)
 #ifdef DEBUG
     {
-        tERR_ERROR("Timer hiccup!");
+        tERR_ERROR("Timer hickup!");
     }
 #else
     {
-        tERR_WARN("Timer hiccup!");
+        tERR_WARN("Timer hickup!");
         lastTime=time;
     }
 #endif
@@ -3081,7 +2956,7 @@ static void sn_SendPlanned2( REAL dt ){
         if ( connection.socket )
         {
             if (connection.sendBuffer_.Len()>0 && connection.bandwidthControl_.CanSend() )
-                nMessageBase::SendCollected(i);
+                nMessage::SendCollected(i);
 
             // update bandwidth usage and other time related data
             connection.Timestep( dt );
@@ -3096,11 +2971,12 @@ void sn_SendPlanned()
 
     // schedule the acks: send them if it's possible (bandwith limit) or if there already is a packet in the pipe.
     for(int i=0;i<=MAXCLIENTS+1;i++)
-        if(sn_Connections[i].socket && sn_Connections[i].acks_.size()
+        if(sn_Connections[i].socket && sn_Connections[i].ackMess && !sn_Connections[i].ackMess->End()
                 //	&& sn_ackAckPending[i] <= 1+sn_Connections[].ackMess[i]->DataLen()
                 && ( sn_Connections[i].bandwidthControl_.CanSend() || sn_Connections[i].sendBuffer_.Len() > 0 )
           ){
-            sn_SendAcks(i, true);
+            sn_Connections[i].ackMess->SendImmediately(i, false);
+            sn_Connections[i].ackMess=NULL;
         }
 
     // schedule lost messages for resending
@@ -3143,12 +3019,8 @@ void sn_Receive(){
                 // clear peer info used for receiving
                 memset( &peers[MAXCLIENTS+1], 0, sizeof(sockaddr) );
 
-                // copy socket info over to [MAXCLIENTS+1] and receive. The copy
-                // step is important, nAuthentication.cpp relies on the socket being set.
                 if((sn_Connections[MAXCLIENTS+1].socket = (*i).CheckNewConnection() ) != NULL)
-                {
                     rec_peer(MAXCLIENTS+1);
-                }
             }
         }
         // z-man: after much thought, the server does also need to listen to the
@@ -3180,10 +3052,7 @@ void sn_KickUser(int i, const tOutput& reason, REAL severity, nServerInfoBase * 
     con << tOutput( "$network_kill_log", i, reason );
 
     // log it
-    if ( severity > 0 )
-    {
-        nMachine::GetMachine(i).OnKick( severity );
-    }
+    nMachine::GetMachine(i).OnKick( severity );
 
     // do it
     sn_DisconnectUser( i, reason, redirectTo );
@@ -3229,32 +3098,35 @@ void sn_DisconnectUserNoWarn(int i, const tOutput& reason, nServerInfoBase * red
 
     if (sn_Connections[i].socket)
     {
-        nMessageBase::SendCollected(i);
+        nMessage::SendCollected(i);
         printMessage = true;
 
         // to make sure...
         if ( i!=0 && i != MAXCLIENTS+2 && sn_GetNetState() == nSERVER ){
             for(int j=2;j>=0;j--){
-                nProtoBufMessage< Network::LoginDenied > * mess = sn_loginDeniedDescriptor.CreateMessage();
-                mess->AccessProtoBuf().set_reason( reason );
+                nMessage* mess = (new nMessage(login_deny));
+                *mess << tString( reason );
 
                 // write redirection
+                tString redirection;
+                int port;
                 if ( redirectTo )
                 {
-                    Network::Connection * redirect = mess->AccessProtoBuf().mutable_forward_to();
-                    redirect->set_hostname( redirectTo->GetConnectionName() );
-                    redirect->set_port    ( redirectTo->GetPort() );
+                    redirection = redirectTo->GetConnectionName();
+                    port        = redirectTo->GetPort();
                 }
+                *mess << redirection;
+                *mess << port;
 
                 mess->SendImmediately(i, false);
-                nMessageBase::SendCollected(i);
+                nMessage::SendCollected(i);
             }
         }
     }
 
     nWaitForAck::AckAllPeer(i);
 
-    sn_Connections[i].acks_.clear();
+    sn_Connections[i].ackMess=NULL;
 
     if (i==0 && sn_GetNetState()==nCLIENT)
         sn_SetNetState(nSTANDALONE);
@@ -3300,27 +3172,15 @@ nCallbackLoginLogout::nCallbackLoginLogout(AA_VOIDFUNC *f)
         :tCallback(s_loginoutAnchor,f){}
 
 void nCallbackLoginLogout::UserLoggedIn(int u){
-    bool loginBack = login;
-    int userBack = user;
-
     login = true;
     user = u;
     Exec(s_loginoutAnchor);
-    
-    login = loginBack;
-    user = userBack;
 }
 
 void nCallbackLoginLogout::UserLoggedOut(int u){
-    bool loginBack = login;
-    int userBack = user;
-
     login = false;
     user = u;
     Exec(s_loginoutAnchor);
-    
-    login = loginBack;
-    user = userBack;
 }
 
 unsigned short nCallbackAcceptPackedWithoutConnection::descriptor=0;	// the descriptor of the incoming packet
@@ -3331,9 +3191,9 @@ nCallbackAcceptPackedWithoutConnection::nCallbackAcceptPackedWithoutConnection(B
 {
 }
 
-bool nCallbackAcceptPackedWithoutConnection::Accept( const nMessageBase& m )
+bool nCallbackAcceptPackedWithoutConnection::Accept( const nMessage& m )
 {
-    descriptor=sn_StripDescriptor( m.DescriptorID() );
+    descriptor=m.Descriptor();
     return Exec( s_AcceptAnchor );
 }
 
@@ -3352,9 +3212,8 @@ void nCallbackReceivedComplete::ReceivedComplete( )
 static bool net_Accept()
 {
     return
-        nCallbackAcceptPackedWithoutConnection::Descriptor() == sn_StripDescriptor( sn_loginAcceptedDescriptor.ID() ) ||
-        nCallbackAcceptPackedWithoutConnection::Descriptor() == sn_StripDescriptor( sn_loginDeniedDescriptor.ID() ) ||
-        nCallbackAcceptPackedWithoutConnection::Descriptor() == sn_StripDescriptor( nTempVersionOverrider::Descriptor().ID() );
+        nCallbackAcceptPackedWithoutConnection::Descriptor()==login_accept.ID() ||
+        nCallbackAcceptPackedWithoutConnection::Descriptor()==login_deny.ID();
 }
 
 static nCallbackAcceptPackedWithoutConnection net_acc( &net_Accept );
@@ -3362,7 +3221,7 @@ static nCallbackAcceptPackedWithoutConnection net_acc( &net_Accept );
 static void net_exit(){
     for (int i=MAXCLIENTS+1;i>=0;i--)
     {
-        sn_Connections[i].acks_.clear();
+        sn_Connections[i].ackMess = NULL;
         while (send_queue[i].Len())
             delete send_queue[i].Remove(0);
     }
@@ -3406,38 +3265,22 @@ void sn_Statistics()
 
 
 
-nConnectionInfo::nConnectionInfo()
-: messageCacheIn_(*new nMessageCache())
-, messageCacheOut_(*new nMessageCache())
-{
-    Clear();
-}
-
-nConnectionInfo::~nConnectionInfo()
-{ 
-    delete & messageCacheIn_;
-    delete & messageCacheOut_;
-}
+nConnectionInfo::nConnectionInfo(){Clear();}
+nConnectionInfo::~nConnectionInfo(){}
 
 void nConnectionInfo::Clear(){
-    messageCacheIn_.Clear();
-    messageCacheOut_.Clear();
-
     socket     = NULL;
     ackPending = 0;
     ping.Reset();
-    // crypt      = NULL;
-
-    supportedAuthenticationMethods_ = "";
+    crypt      = NULL;
 
     sendBuffer_.Clear();
 
     bandwidthControl_.Reset();
 
-    acks_.clear();
+    ackMess = NULL;
 
-    diffCompression=true;
-    zipCompression=false;
+    userName.Clear();
 
     // start with 10% packet loss with low statistical weight
     packetLoss_.Reset();
@@ -3534,11 +3377,6 @@ nBasicNetworkSystem sn_BasicNetworkSystem;
 
 nKillHim::nKillHim( void )
 {
-#ifdef DEBUG
-    // for breakpoints
-    int x;
-    x = 0;
-#endif
 }
 
 // *******************************************************************************************
@@ -3582,62 +3420,6 @@ tString nKillHim::DoGetName( void ) const
 tString nKillHim::DoGetDescription( void ) const
 {
     return tString( "The currently handled peer must have done something illegal, so it should be terminated." );
-}
-
-// *******************************************************************************************
-// *
-// *	nIgnore
-// *
-// *******************************************************************************************
-//!
-//!
-// *******************************************************************************************
-
-nIgnore::nIgnore( void )
-{
-}
-
-// *******************************************************************************************
-// *
-// *	~nIgnore
-// *
-// *******************************************************************************************
-//!
-//!
-// *******************************************************************************************
-
-nIgnore::~nIgnore( void )
-{
-}
-
-// *******************************************************************************************
-// *
-// *	DoGetName
-// *
-// *******************************************************************************************
-//!
-//!		@return		short name
-//!
-// *******************************************************************************************
-
-tString nIgnore::DoGetName( void ) const
-{
-    return tString( "Packet ignore request" );
-}
-
-// *******************************************************************************************
-// *
-// *	DoGetDescription
-// *
-// *******************************************************************************************
-//!
-//!		@return		description
-//!
-// *******************************************************************************************
-
-tString nIgnore::DoGetDescription( void ) const
-{
-    return tString( "An error that should lead to the current message getting ingored was detected." );
 }
 
 // *******************************************************************************************
@@ -4252,7 +4034,7 @@ nMachine & nMachine::GetMachine( unsigned short userID )
     peers[ userID ].GetAddress( address );
 
 #ifdef DEBUG_X
-    // add client ID so multiple connects from one machine are distinguished
+    // add client ID so multiple connects from one machine are distinquished
     tString newIP;
     newIP << address << " " << userID;
     address = newIP;
@@ -4293,6 +4075,7 @@ void nMachine::Expire( void )
     // iterate over known machines
     nMachineMap & map = sn_GetMachineMap();
     nMachineMap::iterator toErase = map.end();
+    int size = map.size();
     for( nMachineMap::iterator iter = map.begin(); iter != map.end(); ++iter )
     {
         // erase last deleted machine
@@ -4308,7 +4091,7 @@ void nMachine::Expire( void )
         }
 
         // if the machine is no longer in use, mark it for deletion
-        if ( machine.players_ == 0 && machine.lastUsed_ < time - 300.0 && machine.banned_ < time && machine.kph_.GetAverage() < 0.5 )
+        if ( machine.players_ == 0 && machine.lastUsed_ < time - 300.0/size && machine.banned_ < time && machine.kph_.GetAverage() < 0.5 )
             toErase = iter;
 
     }
