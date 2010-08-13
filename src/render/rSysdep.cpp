@@ -693,7 +693,7 @@ private:
     REAL min_;
 };
 
-#define DEBUG_SWAP
+// #define DEBUG_SWAP
 
 #ifdef DEBUG_SWAP
 #include "tRandom.h"
@@ -727,11 +727,12 @@ public:
     : frameTimes_(SWAP_TIMESCALE_LOG+6, 1/20.0)
     , frameTimesMax_(4, 0)
     , waitTimes_(SWAP_TIMESCALE_LOG+1, 0)
-    , badFrame_( -200 )
-    , counter_ ( 100 )
     , delay_(0)
     , smoothDelay_(0)
     , delayFactor_(.8f)
+    , badFrame_( -200 )
+    , counter_ ( 100 )
+    , inGame_( false )
     {
         lastTime_ = Time();
     }
@@ -750,6 +751,12 @@ public:
     REAL GetDelay() const
     {
         return delay_;
+    }
+
+    // call while in game
+    void IsInGame()
+    {
+        inGame_ = true;
     }
 
     rSysDep::rSwapOptimize GetCurrentSwapOptimizeMode() const
@@ -947,13 +954,20 @@ protected:
         // the time spent waiting, not doing anything, during the last frame
         REAL timeSpentWaiting = (now - startTime_) + delay_;
 
-        bool frameDrop = ( rSysDep::rSwap_glFinish == swapMode ? timeSpent : timeSpentAverage ) > frameDropTolerance * minFrameTime || ( rSysDep::rSwap_glFinish == swapMode && timeSpentWaiting < smallDelay/10 );
+        bool frameDrop = inGame_ && 
+            (
+                ( rSysDep::rSwap_glFinish == swapMode ? timeSpent : timeSpentAverage ) > frameDropTolerance * minFrameTime 
+                || 
+                ( rSysDep::rSwap_glFinish == swapMode && timeSpentWaiting < smallDelay/10 )
+                );
+        inGame_ = false;
+
         if( frameDrop )
         {
             REAL waitTime = waitTimes_.GetMin();
 
             // forge the wait time so the next delays get lower.
-            if( waitTime > smallDelay/10 )
+            if( delay_ > smallDelay/10 )
             {
                 timeSpentWaiting = waitTime * .8;
 
@@ -966,7 +980,15 @@ protected:
                 {
                     weight = 1;
                 }
+#ifdef DEBUG_SWAP
+                con << "delayFactor " << delayFactor_;
+#endif
+
                 delayFactor_ *= (1-delayFactorPenalty*weight);
+
+#ifdef DEBUG_SWAP
+                con << " -> " << delayFactor_ << "\n";
+#endif
             }
 
 #ifdef DEBUG_SWAP
@@ -1015,8 +1037,8 @@ protected:
         REAL newDelay = waitTimes_.GetMin() * delayFactor_;
 
         // let delay factor recover so that there will be about at
-        // most one dropped frame every 10000.
-        delayFactor_ = 1 - (1-delayFactor_)*(1-delayFactorPenalty*0.0001);
+        // most one dropped frame every 1000.
+        delayFactor_ = 1 - (1-delayFactor_)*(1-(1-delayFactor_)*delayFactorPenalty*0.001);
 
         // smooth out delay changes. Lowering is immediate
         if( newDelay < smoothDelay_ )
@@ -1079,6 +1101,9 @@ private:
 
     // random frame counter
     int counter_;
+
+    // flag indicating whether we're in a game
+    bool inGame_;
 
     // a frame swap delay that is considered small
     static const REAL smallDelay = 1E-3;
@@ -1615,6 +1640,12 @@ void  rSysDep::ClearGL(){
 bool rSysDep::IsBenchmark()
 {
     return s_benchmark;
+}
+
+ //!< call while game content is rendered
+void rSysDep::IsInGame()
+{
+    sr_swapTime.IsInGame();
 }
 #endif
 

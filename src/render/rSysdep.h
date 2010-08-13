@@ -57,6 +57,8 @@ public:
 
     static bool IsBenchmark(); //!< returns true if a benchmark is running
 
+    static void IsInGame(); //!< call while game content is rendered
+
     // starting and stopping of background network processing
     class rNetIdler
     {
