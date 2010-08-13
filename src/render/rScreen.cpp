@@ -461,7 +461,13 @@ static void sr_SetSwapControlAuto( bool after = false )
     if ( tRecorder::IsRecording() )
     {
         // recordings are always done with VSync enabled
-        sr_SetSwapControl( 1 );
+#ifndef DEBUG        
+        sr_SetSwapControl( 1, after );
+#endif
+    }
+    else if( rSysDep::IsBenchmark() )
+    {
+        sr_SetSwapControl( 0, after );
     }
     else
     {
