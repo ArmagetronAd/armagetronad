@@ -2148,8 +2148,16 @@ static tAccessLevel se_adminAccessLevel = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_adminAccessLevelConf( "ACCESS_LEVEL_ADMIN", se_adminAccessLevel );
 static tAccessLevelSetter se_adminAccessLevelConfLevel( se_adminAccessLevelConf, tAccessLevel_Owner );
 
-void handle_command_intercept(ePlayerNetID *p, tString say) {
-    con << "[cmd] " << *p << ": " << say << '\n';
+void handle_command_intercept( ePlayerNetID *p, tString const & command, std::istream & s, tString const & say ) {
+    static eLadderLogWriter se_commandWriter( "COMMAND", true );
+    
+    tString commandArguments;
+    commandArguments.ReadLine( s );
+    
+    se_commandWriter << command << p->GetLogName() << commandArguments;
+    se_commandWriter.write();
+    
+    con << "[cmd] " << p->GetLogName() << ": " << say << '\n';
 }
 
 #ifdef KRAWALL_SERVER
@@ -2853,7 +2861,7 @@ static void handle_chat_admin_commands( ePlayerNetID * p, tString const & comman
     else
         if (se_interceptUnknownCommands)
         {
-            handle_command_intercept(p, say);
+            handle_command_intercept(p, command, s, say);
         }
         else
         {
@@ -3689,7 +3697,7 @@ void se_ChatHandlerServer( unsigned short id, tColoredString const & say, nMessa
 #ifdef DEDICATED
                 if (se_InterceptCommands.StrPos(command) != -1)
                 {
-                    handle_command_intercept(p, say);
+                    handle_command_intercept(p, command, s, say);
                     return;
                 }
                 else
@@ -4831,6 +4839,11 @@ public:
 
         return level;
     }
+    
+    virtual void TransformName( tString & name ) const
+    {
+        name = se_EscapeName( name ).c_str();
+    }
 };
 
 static eUserLevel se_userLevel;
@@ -5592,20 +5605,27 @@ static void se_StripNameEnds( tString & name )
     se_StripMatchingEnds( name, se_IsBlank, se_IsInvalidNameEnd );
 }
 
+static bool se_allowImposters = false;
+static tSettingItem< bool > se_allowImposters1( "ALLOW_IMPOSTERS", se_allowImposters );
+static tSettingItem< bool > se_allowImposters2( "ALLOW_IMPOSTORS", se_allowImposters );
+
 // test if a user name is used by anyone else than the passed player
 static bool se_IsNameTaken( tString const & name, ePlayerNetID const * exception )
 {
     if ( name.Len() <= 1 )
         return false;
 
-    // check for other players with the same name
-    for (int i = se_PlayerNetIDs.Len()-1; i >= 0; --i )
+    if ( !se_allowImposters )
     {
-        ePlayerNetID * player = se_PlayerNetIDs(i);
-        if ( player != exception )
+        // check for other players with the same name
+        for (int i = se_PlayerNetIDs.Len()-1; i >= 0; --i )
         {
-            if ( name == player->GetUserName() || name == ePlayerNetID::FilterName( player->GetName() ) )
-                return true;
+            ePlayerNetID * player = se_PlayerNetIDs(i);
+            if ( player != exception )
+            {
+                if ( name == player->GetUserName() || name == ePlayerNetID::FilterName( player->GetName() ) )
+                    return true;
+            }
         }
     }
 
@@ -5624,10 +5644,6 @@ static bool se_IsNameTaken( tString const & name, ePlayerNetID const * exception
 
     return false;
 }
-
-static bool se_allowImposters = false;
-static tSettingItem< bool > se_allowImposters1( "ALLOW_IMPOSTERS", se_allowImposters );
-static tSettingItem< bool > se_allowImposters2( "ALLOW_IMPOSTORS", se_allowImposters );
 
 static bool se_filterColorNames=false;
 tSettingItem< bool > se_coloredNamesConf( "FILTER_COLOR_NAMES", se_filterColorNames );
@@ -6006,7 +6022,7 @@ std::map<std::string, eLadderLogWriter *> &eLadderLogWriter::writers() {
     return list;
 }
 
-eLadderLogWriter::eLadderLogWriter(const char *ID, bool enabledByDefault) :
+eLadderLogWriter::eLadderLogWriter(char const *ID, bool enabledByDefault) :
     id(ID),
     enabled(enabledByDefault),
     conf(new tSettingItem<bool>(&(tString("LADDERLOG_WRITE_") + id)(0),
@@ -7676,7 +7692,7 @@ void ePlayerNetID::ReceiveControlNet( Network::NetObjectControl const & controlB
             if ( !newTeam && control.team_id() != 0 )
             {
                 if ( currentTeam )
-                    sn_ConsoleOut( tOutput( "$player_joins_team_noex" ), Owner() );
+                    sn_ConsoleOut( tOutput( "$player_joins_team_noex", tColoredString::RemoveColors(GetName()) ), Owner() );
                 break;
             }
 
@@ -8337,7 +8353,7 @@ void ePlayerNetID::UpdateName( void )
     tString newUserName = se_UnauthenticatedUserName( newName );
 
     // test if it is already taken, find an alternative name if so.
-    if ( sn_GetNetState() != nCLIENT && !se_allowImposters && se_IsNameTaken( newUserName, this ) )
+    if ( sn_GetNetState() != nCLIENT && se_IsNameTaken( newUserName, this ) )
     {
         // Remove possilble trailing digit.
         if ( newName.Len() > 2 && isdigit(newName(newName.Len()-2)) )

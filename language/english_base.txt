@@ -565,8 +565,8 @@ camera_forbid_server_custom_help  Forbids the use of the server custom camera
 camera_forbid_mer_help		Forbids the use of Meriton's camera
 
 camera_forbid_custom_glance_help                 Forbids use of special glance camera settings
-camera_override_custom_glance_help               Overrides custom glance settings with vanues from the server
-camera_override_custom_glance_server_custom_help Overrides custom glance settings with vanues from the server only for the server custom camera
+camera_override_custom_glance_help               Overrides custom glance settings with values from the server
+camera_override_custom_glance_server_custom_help Overrides custom glance settings with values from the server only for the server custom camera
 
 camera_follow_start_x_help	Start position of the fixed external camera
 camera_follow_start_y_help	Start position of the fixed external camera
@@ -1243,7 +1243,7 @@ input_music_volume_down_help Decreases the volume of the music
 
 main_menu_text			\g v\1
 
-game_menu_text			Game
+game_menu_text			Play Game
 game_menu_main_help		Game configuration and launch.
 
 player_mainmenu_text		Player Setup
@@ -1313,7 +1313,7 @@ version_info_gl_version		\n  GL Version  :
 game_menu_start_text		Local Game
 game_menu_start_help		Enter the game grid! Only players configured on this computer will play.
 
-network_menu_text		Network Game
+network_menu_text		Multiplayer
 network_menu_help		This joins or creates a network multiplayer game.
 
 game_settings_menu_text		Game Setup
@@ -1364,7 +1364,7 @@ game_menu_iq_text		AI IQ:
 game_menu_iq_help		Lets you select the average intelligence of the computer controlled players("Artificial Intelligence") in the game.
 
 game_menu_minplayers_text	Min Players:
-game_menu_minplayers_help	Selects the minimum nuber of players that will be on the game grid. If not enough humans are present, the empty positions will be filled by AIs.
+game_menu_minplayers_help	Selects the minimum number of players that will be on the game grid. If not enough humans are present, the empty positions will be filled by AIs.
 
 game_menu_speed_text		Speed:
 game_menu_speed_help		Speed modifier. Negative values slow the game down, positive values speed it up. An increase of two in this value will double the speed. Reasonable values lie between -2 and +4.
@@ -1654,7 +1654,7 @@ language_menu_item_fist		First Language:
 language_menu_item_first_help	\g will display most text messages in this language. Use Cursor Left/Right to choose.
 
 language_menu_item_second	Second Language:
-language_menu_item_second_help	If the fist language is not available for one text item, it will be displayed in the second language (or in english as final fallback).  Use Cursor Left/Right to choose.
+language_menu_item_second_help	If the first language is not available for one text item, it will be displayed in the second language (or in english as final fallback).  Use Cursor Left/Right to choose.
 
 #*************************************
 #*************************************

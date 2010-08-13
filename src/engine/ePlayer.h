@@ -501,7 +501,7 @@ class eLadderLogWriter {
     args data;
 #endif
 public:
-    eLadderLogWriter(const char *ID, bool enabledByDefault);
+    eLadderLogWriter(char const *ID, bool enabledByDefault);
     ~eLadderLogWriter();
     static eLadderLogWriter *getWriter(char const *ID);
     //! append a field to the current message. Spaces are added automatically.

@@ -293,7 +293,7 @@ tString tResourceManager::locateResource(const char *file, const char *uri, bool
         return (tString) NULL;
 
     if( fullPath )
-        return filepath;
+        return savepath;
     else
         return resourcepath;
 }
