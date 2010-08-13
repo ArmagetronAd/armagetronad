@@ -23,4 +23,5 @@
 %include "tron/gArena.i"
 #%include "tron/gAIBase.i"
 %include "tron/zZone.i"
+%include "tron/gGame.i"
 

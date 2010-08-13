@@ -6120,7 +6120,7 @@ void eChatCommand::run(ePlayerNetID * admin, tString say, char const * command) 
         return;
     }
     args tmp;
-    tmp << say;
+    tmp << admin->GetUserName() << say;
     tScripting::GetInstance().Exec(callback, &tmp);
     tmp.clear();
 }

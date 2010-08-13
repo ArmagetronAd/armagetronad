@@ -8,7 +8,7 @@ INTERFACEFILES = ext/armagetronad.i ext/std/sstream.i ext/tools/tConfiguration.i
                  ext/tron/gCycleMovement.i ext/tron/gCycle.i			\
                  ext/tron/gSpawn.i ext/tron/gArena.i				\
                  ext/engine/eNetGameObject.i ext/network/nNetObject.i		\
-                 ext/tron/zZone.i
+                 ext/tron/zZone.i ext/tron/gGame.i
 
 # although they should not be needed for a plain build, the interfaces are the true sources.
 EXTRA_DIST = ${INTERFACEFILES}
