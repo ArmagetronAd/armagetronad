@@ -1106,11 +1106,14 @@ private:
     bool inGame_;
 
     // a frame swap delay that is considered small
-    static const REAL smallDelay = 1E-3;
+    static const REAL smallDelay;
 
     // reduction in the delay factor whenever a frame is dropped
-    static const REAL delayFactorPenalty = .05;
+    static const REAL delayFactorPenalty;
 };
+
+const REAL rSwapTime::smallDelay = 1E-3f;
+const REAL rSwapTime::delayFactorPenalty = .05;
 
 static rSwapTime sr_swapTime;
 
