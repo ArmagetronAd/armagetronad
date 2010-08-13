@@ -693,7 +693,7 @@ private:
     REAL min_;
 };
 
-// #define DEBUG_SWAP
+#define DEBUG_SWAP
 
 #ifdef DEBUG_SWAP
 #include "tRandom.h"
@@ -731,6 +731,7 @@ public:
     , counter_ ( 100 )
     , delay_(0)
     , smoothDelay_(0)
+    , delayFactor_(.8f)
     {
         lastTime_ = Time();
     }
@@ -952,9 +953,20 @@ protected:
             REAL waitTime = waitTimes_.GetMin();
 
             // forge the wait time so the next delays get lower.
-            if( waitTime > 0 )
+            if( waitTime > smallDelay/10 )
             {
                 timeSpentWaiting = waitTime * .8;
+
+                // and lower the delay factor for longterm reduction of the delay;
+                // count rapid fire framedrops as less important.
+                static double lastDrop = now-1;
+                REAL weight = (now - lastDrop)/3.0;
+                lastDrop = now;
+                if( weight > 1 )
+                {
+                    weight = 1;
+                }
+                delayFactor_ *= (1-delayFactorPenalty*weight);
             }
 
 #ifdef DEBUG_SWAP
@@ -1000,7 +1012,11 @@ protected:
         waitTimes_.Add( timeSpentWaiting );
 
         // calculate optimal delay
-        REAL newDelay = waitTimes_.GetMin() * .8;
+        REAL newDelay = waitTimes_.GetMin() * delayFactor_;
+
+        // let delay factor recover so that there will be about at
+        // most one dropped frame every 10000.
+        delayFactor_ = 1 - (1-delayFactor_)*(1-delayFactorPenalty*0.0001);
 
         // smooth out delay changes. Lowering is immediate
         if( newDelay < smoothDelay_ )
@@ -1043,10 +1059,20 @@ private:
     // minimum wait time per frame
     rRollingMinimum waitTimes_;
 
+    // time sync is started
     double startTime_;
+
+    // last time swap was complete
     double lastTime_;
+
+    // current pre-simulation delay
     REAL delay_;
+
+    // smoothed pre-simulation delay
     REAL smoothDelay_;
+
+    // suppression factor for delay measurements
+    REAL delayFactor_;
 
     // if a frame dropped, this is set to a finite value and counted down
     int badFrame_;
@@ -1056,6 +1082,9 @@ private:
 
     // a frame swap delay that is considered small
     static const REAL smallDelay = 1E-3;
+
+    // reduction in the delay factor whenever a frame is dropped
+    static const REAL delayFactorPenalty = .05;
 };
 
 static rSwapTime sr_swapTime;
