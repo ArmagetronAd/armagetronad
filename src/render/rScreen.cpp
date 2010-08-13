@@ -1000,7 +1000,8 @@ void sr_LoadDefaultConfig(){
     sr_lowerSky=false;
     sr_upperSky=false;
     sr_keepWindowActive=false;
-    rSysDep::swapMode_=rSysDep::rSwap_glFinish;
+    // rSysDep::swapModeLatency_=rSysDep::rSwap_glFinish;
+    rSysDep::swapModeThroughput_=rSysDep::rSwap_glFinish;
 
     if (software_renderer){
         // A software renderer! Poor soul. Set low details:
@@ -1028,12 +1029,12 @@ void sr_LoadDefaultConfig(){
         // infinity , display lists and glFlush swapping work for NVIDIA
         sr_infinityPlane=true;
         sr_useDisplayLists=rDisplayList_CAC;
-        rSysDep::swapMode_=rSysDep::rSwap_glFlush;
+        // rSysDep::swapMode_=rSysDep::rSwap_glFlush;
     }
     #ifdef MACOSX
     else if(strstr(gl_vendor,"ATI")){
         // glFlush swapping work for ATI on the mac
-        rSysDep::swapMode_=rSysDep::rSwap_glFlush;
+        // rSysDep::swapMode_=rSysDep::rSwap_glFlush;
     }
     #endif
     else if(strstr(gl_vendor,"Matrox")){

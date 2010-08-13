@@ -35,9 +35,14 @@ public:
     {
         rSwap_Fastest = 0,
         rSwap_glFlush = 1,
-        rSwap_glFinish = 2,
-        rSwap_Fence = 3,
-        rSwap_LateFinish = 4
+        rSwap_glFinish = 2
+    };
+
+    enum rSwapOptimize
+    {
+        rSwap_Latency = 0,
+        rSwap_Auto = 1,
+        rSwap_Throughput = 2
     };
 
 #ifndef DEDICATED
@@ -56,14 +61,16 @@ public:
     public:
         virtual ~rNetIdler(){};
         // only during Do(), gamestate may be modified.
-        virtual bool Wait() = 0; //!< wait for something to do, return true fi there is work
+        virtual bool Wait() = 0; //!< wait for something to do, return true if there is work
         virtual void Do() = 0;   //!< do the work.
     };
     static void StartNetSyncThread( rNetIdler * idler );
     static void StopNetSyncThread();
 #endif
 
-    static rSwapMode swapMode_;
+    static const rSwapMode swapModeLatency_;
+    static rSwapMode swapModeThroughput_;
+    static rSwapOptimize swapOptimize_;
 };
 
 #endif

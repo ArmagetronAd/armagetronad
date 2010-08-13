@@ -177,7 +177,9 @@ tConsole & tConsole::Print(tString s)
 
     if ( newline )
     {
+#ifdef DEDICATED
         tDelay(1000);
+#endif
 
         // filter
         FilterLine( line_ );
