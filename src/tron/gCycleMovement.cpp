@@ -545,6 +545,17 @@ void gEnemyInfluence::AddSensor( const gSensor& sensor, REAL timePenalty, gCycle
     if ( !wall )
         return;
 
+    // faraway walls count less.
+    if( sensor.GetOwner() )
+    {
+        REAL speed = sensor.GetOwner()->Speed();
+        if( speed > 0 )
+        {
+            REAL distance = sensor.Direction().Norm() * sensor.hit;
+            timePenalty += distance/speed;
+        }
+    }
+
     AddWall( wall, sensor.before_hit, timePenalty, thisCycle );
 }
 
@@ -568,13 +579,13 @@ void gEnemyInfluence::AddWall( const eWall * wall, eCoord const & pos, REAL time
         // get the position of the collision point
         alpha = playerWall->Edge()->Ratio( pos );
     }
-    REAL timeBuilt = playerWall->Time( 0.5f );
+    REAL timeBuilt = playerWall->Time( alpha );
 
-    AddWall( playerWall, timeBuilt - timePenalty, thisCycle );
+    AddWall( playerWall, timeBuilt, timePenalty, thisCycle );
 }
 
 // add the interaction with a wall to our data
-void gEnemyInfluence::AddWall( const gPlayerWall * wall, REAL timeBuilt, gCycleMovement * thisCycle )
+void gEnemyInfluence::AddWall( const gPlayerWall * wall, REAL timeBuilt, REAL timePenalty, gCycleMovement * thisCycle )
 {
     // the client has no need for this, it does not execute AI code
     if ( sn_GetNetState() == nCLIENT )
@@ -598,6 +609,7 @@ void gEnemyInfluence::AddWall( const gPlayerWall * wall, REAL timeBuilt, gCycleM
         REAL currentTime = thisCycle->LastTime();
         time += ( currentTime - time ) * sg_enemyCurrentTimeInfluence;
     }
+    time -= timePenalty;
 
     // get the player
     ePlayerNetID* player = cycle->Player();
@@ -928,6 +940,47 @@ eCoord gCycleMovement::Direction( void ) const
 
 eCoord gCycleMovement::SpawnDirection() const {
     return dirSpawn;
+}
+
+// *******************************************************************************************
+// *
+// *	Killer
+// *
+// *******************************************************************************************
+//!
+//!		@return	the potential killer of this cycle
+//!
+// *******************************************************************************************
+
+eGameObject const * gCycleMovement::Killer() const
+{
+    ePlayerNetID const * killer = enemyInfluence.GetEnemy();
+    if( killer )
+    {
+        eNetGameObject * killerObject = killer->Object();
+        if( killerObject )
+        {
+            return killerObject;
+        }
+    }
+
+    // not found? Assume the object closest to the death position is responsible
+    gCycleMovement * nearest = NULL;
+    float bestDist = 0;
+    for( int i = grid->GameObjectsInteresting().Len()-1; i >= 0; --i )
+    {
+        gCycleMovement * candidate = dynamic_cast< gCycleMovement * >( grid->GameObjectsInteresting()(i) );
+        if( candidate && candidate->Alive() && candidate != this )
+        {
+            REAL dist = (Position() - candidate->Position()).NormSquared();
+            if ( !nearest || bestDist > dist )
+            {
+                bestDist = dist;
+                nearest = candidate;
+            }
+        }
+    }
+    return nearest;
 }
 
 // *******************************************************************************************

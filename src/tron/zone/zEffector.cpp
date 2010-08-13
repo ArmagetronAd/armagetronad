@@ -366,7 +366,7 @@ void zEffectorScripting::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTarget
             iter != d_calculatedTargets.end();
             ++iter)
     {
-        data << (*iter)->GetName();
+        data << (*iter)->GetUserName();
     }
     tmp << data;
     tScripting::GetInstance().Exec(callback, &tmp);

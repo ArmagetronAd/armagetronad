@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define LANGUAGE_MENU_INCLUDED
 
 void sg_LanguageInit(); // set languages
-void sg_LanguageMenu(); // language menu
+void sg_LanguageMenu(); // detailed language menu
+void sg_StartupLanguageMenu(); // language menu for startup
 
 #endif

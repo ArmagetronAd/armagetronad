@@ -183,19 +183,19 @@ private:
         tString mapsT;
         mapsT.ReadLine (is);
         items_.SetLen (0);
-        
+
         int strpos = 0;
         int nextsemicolon = mapsT.StrPos(";");
-        
+
         if (nextsemicolon != -1)
         {
             do
             {
                 tString const &map = mapsT.SubStr(strpos, nextsemicolon - strpos);
-                
+
                 strpos = nextsemicolon + 1;
                 nextsemicolon = mapsT.StrPos(strpos, ";");
-                
+
                 items_.Insert(map);
             }
             while ((nextsemicolon = mapsT.StrPos(strpos, ";")) != -1);
@@ -213,7 +213,7 @@ private:
     virtual bool Save(){return false;}
 
     tArray<tString> items_; // the various values the rotating config can take
-    int current_;           // the index of the current 
+    int current_;           // the index of the current
 };
 
 static tSettingRotation sg_mapRotation("MAP_ROTATION");
@@ -1209,7 +1209,7 @@ void init_game_objects(eGrid *grid){
     	// don't give inactive players a cycle
     	if (!pni->IsActive())
     		continue;
-       
+
     	eCoord pos,dir;
     	gCycle *cycle=NULL;
     	if (sn_GetNetState()!=nCLIENT){
@@ -1386,10 +1386,17 @@ void RenderAllViewports(eGrid *grid){
 			} else {
 				cameras(i)->SetRenderInCockpit(false);
 			}
-			
+
         }
 
         // glDisable( GL_FOG );
+    }
+
+    // render the console and scores so it appears behind the global HUD
+    ePlayerNetID::DisplayScores();
+    if( sr_con.autoDisplayAtSwap )
+    {
+        sr_con.Render();
     }
 
 #ifdef POWERPAK_DEB
@@ -1487,7 +1494,7 @@ static void own_game( nNetState enter_state ){
     se_KillGameTimer();
 }
 
-static void singlePlayer_game(){
+void sg_SinglePlayerGame(){
     sn_SetNetState(nSTANDALONE);
 
     update_settings();
@@ -1885,7 +1892,7 @@ void net_options(){
     							"$network_opts_deletepw_text",
     							"$network_opts_deletepw_help",
     							&se_DeletePasswords);
-      
+
     	uMenuItemSelection<int> storepw(&net_menu,
     									"$login_storepw_text",
     									"$login_storepw_help",
@@ -2095,8 +2102,19 @@ void sg_DisplayVersionInfo() {
     versionInfo << "$version_info_version" << "\n";
     st_PrintPathInfo(versionInfo);
     versionInfo << "$version_info_misc_stuff";
+
+    versionInfo << "$version_info_gl_intro";
+    versionInfo << "$version_info_gl_vendor";
+    versionInfo << gl_vendor;
+    versionInfo << "$version_info_gl_renderer";
+    versionInfo << gl_renderer;
+    versionInfo << "$version_info_gl_version";
+    versionInfo << gl_version;
+
     sg_FullscreenMessage("$version_info_title", versionInfo, 1000);
 }
+
+void sg_StartupPlayerMenu();
 
 void MainMenu(bool ingame){
     //	update_settings();
@@ -2141,14 +2159,14 @@ void MainMenu(bool ingame){
     uMenuItemFunction *connect=NULL,*start=NULL,*sound=NULL;
 
     if (!ingame){
+        start= new uMenuItemFunction(&game_menu,"$game_menu_start_text",
+                                     "$game_menu_start_help",&sg_SinglePlayerGame);
         connect=new uMenuItemFunction
                 (&game_menu,
                  "$network_menu_text",
                  "$network_menu_help",
                  &net_game);
 
-        start= new uMenuItemFunction(&game_menu,"$game_menu_start_text",
-                                     "$game_menu_start_help",&singlePlayer_game);
     }
 
     tOutput title;
@@ -2249,6 +2267,11 @@ void MainMenu(bool ingame){
     uMenu misc("$misc_menu_text");
 
     //  misc.SetCenter(.25);
+
+    uMenuItemFunction first_setup
+    (&misc,"$misc_initial_menu_title",
+     "$misc_initial_menu_help",
+     &sg_StartupPlayerMenu);
 
     uMenuItemFunction language
     (&misc,"$language_menu_title",
@@ -2483,7 +2506,7 @@ static void sg_ParseMap ( gParser * aParser, tString mapfile )
 #ifndef DEDICATED
             errorMessage << "\nLog:\n" << consoleLog.message_;
 #endif
-	   
+
             tOutput errorTitle("$map_file_load_failure_title");
 
             if ( sn_GetNetState() != nSTANDALONE )
@@ -3018,7 +3041,7 @@ void gGame::StateUpdate(){
             // pings should not count as much in the between-round phase
             nPingAverager::SetWeight(1E-20);
 
-            se_UserShowScores(false);
+            // se_UserShowScores(false);
 
             //con.autoDisplayAtNewline=true;
             sr_con.fullscreen=true;
@@ -3105,13 +3128,13 @@ void sg_RespawnPlayer(eGrid * grid, gArena * arena, tCoord & pos, tCoord & dir, 
     }
 }
 
-void sg_RespawnPlayer(eGrid * grid, gArena * arena, tCoord & near, ePlayerNetID * p) {
+void sg_RespawnPlayer(eGrid * grid, gArena * arena, tCoord & nearPosition, ePlayerNetID * p) {
     eGameObject *e=p->Object();
 
     if ( ( !e || !e->Alive()) && sn_GetNetState() != nCLIENT )
     {
         tCoord pos,dir;
-        arena->ClosestSpawnPoint(near)->Spawn( pos, dir );
+        arena->ClosestSpawnPoint(nearPosition)->Spawn( pos, dir );
 
 #ifdef DEBUG
         //                std::cout << "spawning player " << pni->name << '\n';
@@ -3123,24 +3146,24 @@ void sg_RespawnPlayer(eGrid * grid, gArena * arena, tCoord & near, ePlayerNetID 
     }
 }
 
-void sg_RespawnPlayer(eGrid * grid, gArena * arena, tCoord * near, ePlayerNetID * p) {
-    if (near)
-        sg_RespawnPlayer(grid, arena, *near, p);
+void sg_RespawnPlayer(eGrid * grid, gArena * arena, tCoord * nearPosition, ePlayerNetID * p) {
+    if (nearPosition)
+        sg_RespawnPlayer(grid, arena, *nearPosition, p);
     else
         sg_RespawnPlayer(grid, arena, p);
 }
 
-void sg_RespawnPlayer(eGameObject & near, ePlayerNetID * p) {
+void sg_RespawnPlayer(eGameObject & nearObject, ePlayerNetID * p) {
     // FIXME: how to get arena info from object?
-    tCoord npos = near.Position();
-    sg_RespawnPlayer(near.Grid(), &Arena, npos, p);
+    tCoord npos = nearObject.Position();
+    sg_RespawnPlayer(nearObject.Grid(), &Arena, npos, p);
 }
 
-void sg_RespawnPlayer(eGrid * grid, gArena * arena, eGameObject * near, ePlayerNetID * p) {
-    if (near)
+void sg_RespawnPlayer(eGrid * grid, gArena * arena, eGameObject * nearObject, ePlayerNetID * p) {
+    if (nearObject)
     {
-        tCoord npos = near->Position();
-        sg_RespawnPlayer(near->Grid(), arena, npos, p);
+        tCoord npos = nearObject->Position();
+        sg_RespawnPlayer(nearObject->Grid(), arena, npos, p);
     }
     else
         sg_RespawnPlayer(grid, arena, p);
@@ -3583,19 +3606,22 @@ void gGame::Analysis(REAL time){
                         }
 
                         // print winning message
-                        tOutput message;
-                        message << "$gamestate_winner_winner";
+                        if( sg_currentSettings->scoreWin != 0 )
+                        {
+                            tOutput message;
+                            message << "$gamestate_winner_winner";
 #ifdef LUCIFER_ALWAYS_WINS
-                        message << "Lucifer";
+                            message << "Lucifer";
 #else
-                        message << eTeam::teams[winner-1]->Name();
+                            message << eTeam::teams[winner-1]->Name();
 #endif
 
-                        m_Mixer->PushButton(ROUND_WINNER);
+                            m_Mixer->PushButton(ROUND_WINNER);
 
-                        sn_CenterMessage(message);
-                        message << '\n';
-                        se_SaveToScoreFile(message);
+                            sn_CenterMessage(message);
+                            message << '\n';
+                            se_SaveToScoreFile(message);
+                        }
 
                         sg_roundWinnerWriter << ePlayerNetID::FilterName( eTeam::teams[winner-1]->Name() );
                         eTeam::WritePlayers( sg_roundWinnerWriter, eTeam::teams[winner-1] );
@@ -3811,7 +3837,7 @@ void rotate()
 
     if ( sg_configRotation.Size() > 0 )
     {
-        // transfer 
+        // transfer
         tCurrentAccessLevel level( sg_configRotation.GetSetLevel(), true );
 
         st_Include( sg_configRotation.Current() );
@@ -3898,6 +3924,7 @@ static bool ingamemenu_func(REAL x){
     return true;
 }
 static uActionGlobalFunc ingamemenu_action(&ingamemenu,&ingamemenu_func, true );
+static uActionTooltip ingamemenuTooltip( ingamemenu, 1 );
 #endif // dedicated
 
 static eLadderLogWriter sg_gameTimeWriter("GAME_TIME", true);
@@ -4199,10 +4226,10 @@ bool GameLoop(bool input=true){
       int oldflags = fcntl (fileno(stdin), F_GETFD, 0);
       if (oldflags<0)
       std::cout << errno << '\n';
-       
+
       if (fcntl(fileno(stdin), F_SETFL, oldflags | O_NONBLOCK)<0)
       std::cout << errno << '\n';
-      
+
     //if (std::cin && std::cin.good() && !std::cin.eof() && !std::cin.fail() && !std::cin.bad()){
     //if (std::cin.rdbuf()->overflow()!=EOF){
     //if (std::cin.rdbuf()->in_avail()>0){
@@ -4254,7 +4281,7 @@ bool GameLoop(bool input=true){
 
 void gameloop_idle()
 {
-    se_UserShowScores( false );
+    // se_UserShowScores( false );
     sg_Receive();
     nNetObject::SyncAll();
     sn_SendPlanned();
@@ -4335,6 +4362,7 @@ static void sg_EnterGameCleanup();
 
 void sg_EnterGameCore( nNetState enter_state ){
     gLogo::SetBig(false);
+    se_UserShowScores( false );
 
     sg_RequestedDisconnection = false;
 
@@ -4528,6 +4556,13 @@ void sg_ClientFullscreenMessage( tOutput const & title, tOutput const & message,
     // keep syncing the network
     rPerFrameTask idle( sg_FullscreenIdle );
 
+    // stop the game
+    bool paused = se_mainGameTimer && se_mainGameTimer->speed < .0001;
+    if( sn_GetNetState() != nCLIENT )
+    {
+        se_PauseGameTimer(true);
+    }
+
     // put players into idle mode
     ePlayerNetID::SpectateAll();
     se_ChatState( ePlayerNetID::ChatFlags_Menu, true );
@@ -4540,6 +4575,13 @@ void sg_ClientFullscreenMessage( tOutput const & title, tOutput const & message,
     con <<  title << "\n" << message << "\n";
 #endif
 
+
+    // continue the game
+    if( sn_GetNetState() != nCLIENT )
+    {
+        se_PauseGameTimer(paused);
+    }
+
     // get players out of idle mode again
     ePlayerNetID::SpectateAll(false);
     se_ChatState( ePlayerNetID::ChatFlags_Menu, false );
@@ -4547,7 +4589,7 @@ void sg_ClientFullscreenMessage( tOutput const & title, tOutput const & message,
 
 static tString sg_fullscreenMessageTitle;
 static tString sg_fullscreenMessageMessage;
-static REAL sg_fullscreenMessageTimeout;
+static REAL sg_fullscreenMessageTimeout = 0.0;
 static void sg_TodoClientFullscreenMessage()
 {
     sg_ClientFullscreenMessage( sg_fullscreenMessageTitle, sg_fullscreenMessageMessage, sg_fullscreenMessageTimeout );
@@ -4570,6 +4612,46 @@ static void sg_fullscreenMessageHandler( Game::FullscreenMessage const & message
 }
 
 static nProtoBufDescriptor< Game::FullscreenMessage > sg_fullscreenMessageDescriptor( 312, sg_fullscreenMessageHandler );
+
+void sg_FullscreenMessageWait()
+{
+    // wait for the clients to have seen the message
+    {
+        // stop the game
+        bool paused = se_mainGameTimer && se_mainGameTimer->speed < .0001;
+        se_PauseGameTimer(true);
+        gGame::NetSyncIdle();
+
+        REAL waitTo = tSysTimeFloat() + sg_fullscreenMessageTimeout;
+        REAL waitToMin = tSysTimeFloat() + 1.0;
+
+        // wait for players to see it
+        bool goon = true;
+        while( goon && waitTo > tSysTimeFloat() )
+        {
+            sg_FullscreenIdle();
+            gameloop_idle();
+            if ( se_GameTime() > sg_lastChatBreakTime )
+                se_PauseGameTimer(true);
+
+            // give the clients a second to enter chat state
+            if ( tSysTimeFloat() > waitToMin )
+            {
+                goon = false;
+                for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
+                {
+                    ePlayerNetID* player = se_PlayerNetIDs(i);
+                    if ( player->IsChatting() )
+                        goon = true;
+                }
+            }
+        }
+
+        // continue the game
+        se_PauseGameTimer(paused);
+        gGame::NetSyncIdle();
+    }
+}
 
 // causes the connected clients to break and print a fullscreen message
 void sg_FullscreenMessage(tOutput const & title, tOutput const & message, REAL timeout, int client){

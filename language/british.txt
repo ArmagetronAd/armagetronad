@@ -17,11 +17,11 @@ color_strings_help                Print coloured strings
 colordepth_help                   colour depth to use (0: 16 1: desktop 2: 24)
 last_colordepth_help              colour depth, last successful init
 zdepth_help                       z buffer depth to use (0: 16 1: from colour depth 2: 32)
-failed_attempts_help              Number of failed attemts to initialise graphics mode
+failed_attempts_help              Number of failed attempts to initialise graphics mode
 player_blue_help                  Lets you choose the blue component of your colour.
 player_green_help                 Lets you choose the green component of your colour.
 player_red_help                   Lets you choose the red component of your colour.
-player_name_team_help             You can set your prefered method for naming your team here: On indicates you want the team to be named after its most senior player, Off means you want a simple colour label.
+player_name_team_help             You can set your preferred method for naming your team here: On indicates you want the team to be named after its most senior player, Off means you want a simple colour label.
 player_num_per_team_help          Set your favourite number of players per team here. When you join a game and the smallest team has less players than specified here, you'll join that team. Otherwise, you will create a new team. Only the default behaviour is governed by this setting; you can switch teams later.
 player_camera_initial_help        Choose your favourite camera perspective here.
 player_camera_fov_help            Choose your favourite FOV (Field of vision).

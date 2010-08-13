@@ -26,7 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 // CHECK: consistent with project's logging policy?
-// define iff camera should log its state at every timestep
+// define if camera should log its state at every timestep
 // #define CAMERA_LOGGING
 
 #include "rSDL.h"
@@ -35,6 +35,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <iostream>
 #endif
 
+#include "tCommandLine.h"
+#include "tRecorder.h"
 #include "eSensor.h"
 #include "eCamera.h"
 #include "rScreen.h"
@@ -197,7 +199,6 @@ uGlanceAction eCamera::se_glance[eCamera::se_glances] = {
         };
 
 
-
 uActionCamera eCamera::se_lookDown("BANK_DOWN",
                                    -120,
                                    uAction::uINPUT_ANALOG);
@@ -216,6 +217,11 @@ uActionCamera eCamera::se_lookLeft("LOOK_LEFT",
 
 
 uActionCamera eCamera::se_switchView("SWITCH_VIEW", -160);
+
+uActionTooltip eCamera::se_glanceBackTooltip( eCamera::se_glance[GLANCE_FORWARD], 1 );
+uActionTooltip eCamera::se_glanceRightTooltip( eCamera::se_glance[GLANCE_RIGHT], 3 );
+uActionTooltip eCamera::se_glanceLeftTooltip( eCamera::se_glance[GLANCE_LEFT], 3 );
+uActionTooltip eCamera::se_switchViewTooltip( eCamera::se_switchView, 2 );
 
 
 static REAL s_startFollowX = -30, s_startFollowY = -30, s_startFollowZ = 80;
@@ -358,6 +364,7 @@ static nObserverPtr< ePlayerNetID > & se_GetWatchedPlayer( eCamera * cam )
 }
 
 // returns the last watched game object
+/*
 static eGameObject * se_GetWatchedObject( eCamera * cam )
 {
     ePlayerNetID const * player = se_GetWatchedPlayer( cam );
@@ -366,6 +373,7 @@ static eGameObject * se_GetWatchedObject( eCamera * cam )
 
     return NULL;
 }
+*/
 
 static void se_SetWatchedObject( eCamera * cam, eGameObject * obj )
 {
@@ -384,6 +392,65 @@ static void se_SetWatchedObject( eCamera * cam, eGameObject * obj )
     }
 }
 
+#ifdef DEBUG
+// name of player to watch
+static tString se_pleaseWatch;
+static eGameObject * se_GetPleaseWatch()
+{
+    if( !tRecorderBase::IsPlayingBack() )
+    {
+        return NULL;
+    }
+
+    if( se_pleaseWatch.size() == 0 )
+    {
+        return NULL;
+    }
+
+    // yeah, umm, finding players requires authorization. Let's steal it. Just this once.
+    tCurrentAccessLevel thief(tAccessLevel_Owner, true);
+    ePlayerNetID * p = ePlayerNetID::FindPlayerByName( se_pleaseWatch, 0, false );
+    if( !p )
+    {
+        return NULL;
+    }
+
+    eGameObject * ret = p->Object();
+    if( ret && ret->Alive() )
+    {
+        return ret;
+    }
+
+    return NULL;
+}
+
+class rWatchCommandLineAnalyzer: public tCommandLineAnalyzer
+{
+private:
+    virtual bool DoAnalyze( tCommandLineParser & parser )
+    {
+        // get option
+        tString name;
+        if ( parser.GetOption( name, "--watch" ) )
+        {
+            // set fast forward mode
+            se_pleaseWatch = name;
+
+            return true;
+        }
+
+        return false;
+    }
+
+    virtual void DoHelp( std::ostream & s )
+    {                                      //
+        s << "--watch <name>               : during playback, prefers to watch a player with that\n"
+             "                               name (part) instead of the originally active player.";
+    }
+};
+static rWatchCommandLineAnalyzer se_WatchAnalyzer;
+#endif
+
 void eCamera::MyInit(){
     if (localPlayer){
         if (cameraMain_) mode=localPlayer->startCamera; //PENDING:
@@ -400,6 +467,14 @@ void eCamera::MyInit(){
         // or an arbitrary game object
         center = grid->gameObjectsInteresting[0];
     }
+
+#ifdef DEBUG
+    eGameObject * pleaseWatch = se_GetPleaseWatch();
+    if( pleaseWatch )
+    {
+        center = pleaseWatch;
+    }
+#endif
 
     // switch away from forbidden camera mode
     if (forbid_camera[mode] && bool(netPlayer) && netPlayer->Object()==Center())
@@ -1654,7 +1729,11 @@ void eCamera::Timestep(REAL ts){
     }
 
     // the best center is always our own vehicle. Focus on it if possible.
-    if (netPlayer)
+    if (netPlayer
+#ifdef DEBUG
+        && se_pleaseWatch.size() == 0
+#endif
+        )
     {
         eGameObject * bestCenter = netPlayer->Object();
         if ( InterestingToWatch(bestCenter) )
@@ -1703,9 +1782,26 @@ void eCamera::Timestep(REAL ts){
         lastSwitch=lastTime;
 
     if (!InterestingToWatch(Center()) && lastTime-lastSwitch>2 && (center==0 || lastTime-center->deathTime > 4)){ // CHECK: not glancing-related. gives the player a chance to analyse the cause of his death before the camera switches away.
-        center = se_GetWatchedObject( this );
+        if( center )
+        {
+            // switch to the potential killer
+            eGameObject const * killer = center->Killer();
+            if ( killer )
+            {
+                center = const_cast< eGameObject * >( killer );
+                lastSwitch=lastTime;
+            }
+        }
+        
+        // center = se_GetWatchedObject( this );
         if ( !center || !InterestingToWatch(center) )
-            SwitchCenter(1);
+        {
+            bool switched = false;
+            if ( !switched )
+            {
+                SwitchCenter(1);
+            }
+        }
 
         if (!InterestingToWatch(Center()))
         {

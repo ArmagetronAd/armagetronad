@@ -395,19 +395,21 @@ tResourcePath::tResourcePath(tString const &Author,
     m_URI      (URI      ),
     m_Valid(false) {
     m_Path << Author << '/';
+    if(!Category.empty()) {
+        m_Path << Category << '/';
+    }
+    m_Path << Name << '-' << Version << '.' << Type << '.' << Extension;
+    if(!URI.empty()) {
+        m_Path << '(' << URI << ')';
+    }
     if(!st_checkAuthor(Author)) return;
     if(!Category.empty()) {
         if(!st_checkCategory(Category)) return;
-        m_Path << Category << '/';
     }
     if(!st_checkName(Name)) return;
     if(!st_checkExtension(Extension)) return;
     if(!st_checkType(Extension)) return;
     if(!st_checkVersion(Version)) return;
-    m_Path << Name << '-' << Version << '.' << Type << '.' << Extension;
-    if(!URI.empty()) {
-        m_Path << '(' << URI << ')';
-    }
     m_Valid = true;
 }
 

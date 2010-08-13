@@ -6,7 +6,6 @@
 		<Option title="Master"/>
 		<Option makefile="Makefile"/>
 		<Option makefile_is_custom="0"/>
-		<Option active_target="0"/>
 		<Option compiler="0"/>
 		<Build>
 			<Target title="Win32 Release">
@@ -47,23 +46,6 @@
 					<Add library="..\..\..\winlibs\protobuf\vsprojects\libprotobuf_debug.a"/>
 				</Linker>
 			</Target>
-			<Target title="Win32 Profile">
-				<Option output="..\..\build\profile\armagetronad_master.exe"/>
-				<Option working_dir="..\..\build\profile\"/>
-				<Option object_output="..\..\build\tmp\Armagetron_Master___Win32_Profile"/>
-				<Option deps_output=".deps"/>
-				<Option type="1"/>
-				<Option compiler="0"/>
-				<Option includeInTargetAll="0"/>
-				<Option projectResourceIncludeDirsRelation="1"/>
-				<Compiler>
-					<Add option="-O2"/>
-					<Add option="-W"/>
-					<Add option="-g"/>
-					<Add option="-D_DEBUG"/>
-					<Add option="-DDEBUG"/>
-				</Compiler>
-			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-fexceptions"/>
@@ -94,13 +76,11 @@
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\network\md5.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\network\md5.h">
 			<Option compilerVar=""/>
@@ -108,13 +88,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\network\nAuthentication.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\network\nAuthentication.h">
 			<Option compilerVar=""/>
@@ -122,13 +100,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\network\nBinary.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\network\nBinary.h">
 			<Option compilerVar=""/>
@@ -136,13 +112,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\network\nConfig.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\network\nConfig.h">
 			<Option compilerVar=""/>
@@ -150,13 +124,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\network\nKrawall.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\network\nKrawall.h">
 			<Option compilerVar=""/>
@@ -164,19 +136,16 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\network\nKrawallPrivate.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\network\nNetObject.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\network\nNetObject.h">
 			<Option compilerVar=""/>
@@ -184,13 +153,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\network\nNetwork.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\network\nNetwork.h">
 			<Option compilerVar=""/>
@@ -198,13 +165,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\network\nObserver.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\network\nObserver.h">
 			<Option compilerVar=""/>
@@ -212,13 +177,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\network\nPriorizing.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\network\nPriorizing.h">
 			<Option compilerVar=""/>
@@ -226,13 +189,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\network\nProtoBuf.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\network\nProtoBuf.h">
 			<Option compilerVar=""/>
@@ -240,13 +201,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\network\nServerInfo.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\network\nServerInfo.h">
 			<Option compilerVar=""/>
@@ -254,7 +213,6 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\network\nSimulatePing.h">
 			<Option compilerVar=""/>
@@ -262,13 +220,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\network\nSocket.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\network\nSocket.h">
 			<Option compilerVar=""/>
@@ -276,13 +232,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\network\nSpamProtection.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\network\nSpamProtection.h">
 			<Option compilerVar=""/>
@@ -290,13 +244,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\network\nStreamMessage.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\network\nStreamMessage.h">
 			<Option compilerVar=""/>
@@ -304,13 +256,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\eEventNotification.pb.cc">
 			<Option compilerVar="CC"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\eEventNotification.pb.h">
 			<Option compilerVar=""/>
@@ -318,7 +268,6 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\eEventNotification.proto">
 			<Option compilerVar=""/>
@@ -326,13 +275,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\eLagCompensation.pb.cc">
 			<Option compilerVar="CC"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\eLagCompensation.pb.h">
 			<Option compilerVar=""/>
@@ -340,7 +287,6 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\eLagCompensation.proto">
 			<Option compilerVar=""/>
@@ -348,13 +294,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\eNetGameObject.pb.cc">
 			<Option compilerVar="CC"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\eNetGameObject.pb.h">
 			<Option compilerVar=""/>
@@ -362,7 +306,6 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\eNetGameObject.proto">
 			<Option compilerVar=""/>
@@ -370,13 +313,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\ePlayer.pb.cc">
 			<Option compilerVar="CC"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\ePlayer.pb.h">
 			<Option compilerVar=""/>
@@ -384,7 +325,6 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\ePlayer.proto">
 			<Option compilerVar=""/>
@@ -392,13 +332,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\eTeam.pb.cc">
 			<Option compilerVar="CC"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\eTeam.pb.h">
 			<Option compilerVar=""/>
@@ -406,7 +344,6 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\eTeam.proto">
 			<Option compilerVar=""/>
@@ -414,13 +351,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\eTimer.pb.cc">
 			<Option compilerVar="CC"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\eTimer.pb.h">
 			<Option compilerVar=""/>
@@ -428,7 +363,6 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\eTimer.proto">
 			<Option compilerVar=""/>
@@ -436,13 +370,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\eVoter.pb.cc">
 			<Option compilerVar="CC"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\eVoter.pb.h">
 			<Option compilerVar=""/>
@@ -450,7 +382,6 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\eVoter.proto">
 			<Option compilerVar=""/>
@@ -458,13 +389,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\gAIBase.pb.cc">
 			<Option compilerVar="CC"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\gAIBase.pb.h">
 			<Option compilerVar=""/>
@@ -472,7 +401,6 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\gAIBase.proto">
 			<Option compilerVar=""/>
@@ -480,13 +408,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\gCycle.pb.cc">
 			<Option compilerVar="CC"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\gCycle.pb.h">
 			<Option compilerVar=""/>
@@ -494,7 +420,6 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\gCycle.proto">
 			<Option compilerVar=""/>
@@ -502,13 +427,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\gGame.pb.cc">
 			<Option compilerVar="CC"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\gGame.pb.h">
 			<Option compilerVar=""/>
@@ -516,7 +439,6 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\gGame.proto">
 			<Option compilerVar=""/>
@@ -524,13 +446,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\gWall.pb.cc">
 			<Option compilerVar="CC"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\gWall.pb.h">
 			<Option compilerVar=""/>
@@ -538,7 +458,6 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\gWall.proto">
 			<Option compilerVar=""/>
@@ -546,13 +465,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\gZone.pb.cc">
 			<Option compilerVar="CC"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\gZone.pb.h">
 			<Option compilerVar=""/>
@@ -560,7 +477,6 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\gZone.proto">
 			<Option compilerVar=""/>
@@ -568,13 +484,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\nAuthentication.pb.cc">
 			<Option compilerVar="CC"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\nAuthentication.pb.h">
 			<Option compilerVar=""/>
@@ -582,7 +496,6 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\nAuthentication.proto">
 			<Option compilerVar=""/>
@@ -590,13 +503,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\nConfig.pb.cc">
 			<Option compilerVar="CC"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\nConfig.pb.h">
 			<Option compilerVar=""/>
@@ -604,7 +515,6 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\nConfig.proto">
 			<Option compilerVar=""/>
@@ -612,13 +522,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\nNetObject.pb.cc">
 			<Option compilerVar="CC"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\nNetObject.pb.h">
 			<Option compilerVar=""/>
@@ -626,7 +534,6 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\nNetObject.proto">
 			<Option compilerVar=""/>
@@ -634,13 +541,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\nNetObjectPrivate.pb.cc">
 			<Option compilerVar="CC"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\nNetObjectPrivate.pb.h">
 			<Option compilerVar=""/>
@@ -648,7 +553,6 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\nNetObjectPrivate.proto">
 			<Option compilerVar=""/>
@@ -656,13 +560,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\nNetwork.pb.cc">
 			<Option compilerVar="CC"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\nNetwork.pb.h">
 			<Option compilerVar=""/>
@@ -670,7 +572,6 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\nNetwork.proto">
 			<Option compilerVar=""/>
@@ -678,13 +579,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\nServerInfo.pb.cc">
 			<Option compilerVar="CC"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\nServerInfo.pb.h">
 			<Option compilerVar=""/>
@@ -692,7 +591,6 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\nServerInfo.proto">
 			<Option compilerVar=""/>
@@ -700,7 +598,6 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\prototype.pb.cc">
 			<Option compilerVar="CC"/>
@@ -711,7 +608,6 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\prototype.proto">
 			<Option compilerVar=""/>
@@ -719,13 +615,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\tColor.pb.cc">
 			<Option compilerVar="CC"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\tColor.pb.h">
 			<Option compilerVar=""/>
@@ -733,7 +627,6 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\tColor.proto">
 			<Option compilerVar=""/>
@@ -741,13 +634,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\tCoord.pb.cc">
 			<Option compilerVar="CC"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\tCoord.pb.h">
 			<Option compilerVar=""/>
@@ -755,7 +646,6 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\tCoord.proto">
 			<Option compilerVar=""/>
@@ -763,13 +653,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\tFunction.pb.cc">
 			<Option compilerVar="CC"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\tFunction.pb.h">
 			<Option compilerVar=""/>
@@ -777,7 +665,6 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\tFunction.proto">
 			<Option compilerVar=""/>
@@ -785,13 +672,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\tPolynomial.pb.cc">
 			<Option compilerVar="CC"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\tPolynomial.pb.h">
 			<Option compilerVar=""/>
@@ -799,7 +684,6 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\tPolynomial.proto">
 			<Option compilerVar=""/>
@@ -807,13 +691,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\zShape.pb.cc">
 			<Option compilerVar="CC"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\zShape.pb.h">
 			<Option compilerVar=""/>
@@ -821,7 +703,6 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\zShape.proto">
 			<Option compilerVar=""/>
@@ -829,13 +710,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\zZone.pb.cc">
 			<Option compilerVar="CC"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\zZone.pb.h">
 			<Option compilerVar=""/>
@@ -843,7 +722,6 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\protobuf\zZone.proto">
 			<Option compilerVar=""/>
@@ -851,13 +729,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\resource\tResource.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\resource\tResource.h">
 			<Option compilerVar=""/>
@@ -865,13 +741,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\resource\tResourceManager.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\resource\tResourceManager.h">
 			<Option compilerVar=""/>
@@ -879,13 +753,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\resource\tResourceType.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\resource\tResourceType.h">
 			<Option compilerVar=""/>
@@ -893,13 +765,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tArray.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tArray.h">
 			<Option compilerVar=""/>
@@ -907,13 +777,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tCallback.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tCallback.h">
 			<Option compilerVar=""/>
@@ -921,7 +789,6 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tCallbackString.h">
 			<Option compilerVar=""/>
@@ -929,13 +796,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tColor.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tColor.h">
 			<Option compilerVar=""/>
@@ -943,13 +808,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tCommandLine.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tCommandLine.h">
 			<Option compilerVar=""/>
@@ -957,13 +820,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tConfiguration.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tConfiguration.h">
 			<Option compilerVar=""/>
@@ -971,13 +832,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tConsole.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tConsole.h">
 			<Option compilerVar=""/>
@@ -985,13 +844,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tCrypt.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tCrypt.h">
 			<Option compilerVar=""/>
@@ -999,13 +856,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tDirectories.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tDirectories.h">
 			<Option compilerVar=""/>
@@ -1013,13 +868,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tError.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tError.h">
 			<Option compilerVar=""/>
@@ -1027,13 +880,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tEventQueue.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tEventQueue.h">
 			<Option compilerVar=""/>
@@ -1041,13 +892,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tException.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tException.h">
 			<Option compilerVar=""/>
@@ -1055,13 +904,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tHeap.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tHeap.h">
 			<Option compilerVar=""/>
@@ -1069,7 +916,6 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tInitExit.h">
 			<Option compilerVar=""/>
@@ -1077,13 +923,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tLinkedList.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tLinkedList.h">
 			<Option compilerVar=""/>
@@ -1091,7 +935,6 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tList.h">
 			<Option compilerVar=""/>
@@ -1099,13 +942,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tLocale.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tLocale.h">
 			<Option compilerVar=""/>
@@ -1113,7 +954,6 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tMath.h">
 			<Option compilerVar=""/>
@@ -1121,13 +961,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tMemManager.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tMemManager.h">
 			<Option compilerVar=""/>
@@ -1135,13 +973,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tMemStack.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tMemStack.h">
 			<Option compilerVar=""/>
@@ -1149,13 +985,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tRandom.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tRandom.h">
 			<Option compilerVar=""/>
@@ -1163,13 +997,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tRecorder.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tRecorder.h">
 			<Option compilerVar=""/>
@@ -1177,13 +1009,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tRecorderInternal.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tRecorderInternal.h">
 			<Option compilerVar=""/>
@@ -1191,7 +1021,6 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tReferenceHolder.h">
 			<Option compilerVar=""/>
@@ -1199,13 +1028,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tRing.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tRing.h">
 			<Option compilerVar=""/>
@@ -1213,13 +1040,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tSafePTR.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tSafePTR.h">
 			<Option compilerVar=""/>
@@ -1227,13 +1052,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tString.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tString.h">
 			<Option compilerVar=""/>
@@ -1241,13 +1064,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tSysTime.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tSysTime.h">
 			<Option compilerVar=""/>
@@ -1255,13 +1076,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tToDo.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tToDo.h">
 			<Option compilerVar=""/>
@@ -1269,13 +1088,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tVersion.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tVersion.h">
 			<Option compilerVar=""/>
@@ -1283,13 +1100,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tXmlParser.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tXmlParser.h">
 			<Option compilerVar=""/>
@@ -1297,14 +1112,12 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\win32\armagetron.rc">
 			<Option compilerVar="WINDRES"/>
 			<Option objectName="src\win32\armagetron.res"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\win32_ded\config.h">
 			<Option compilerVar=""/>
@@ -1312,13 +1125,11 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\win32_ded\dirent.c">
 			<Option compilerVar="CC"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\win32_ded\dirent.h">
 			<Option compilerVar=""/>
@@ -1326,7 +1137,6 @@
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
 		</Unit>
 	</Project>
 </CodeBlocks_project_file>

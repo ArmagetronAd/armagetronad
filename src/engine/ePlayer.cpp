@@ -612,7 +612,7 @@ static void PasswordCallback( nKrawall::nPasswordRequest const & request,
     // menu entry since the user probably just wants to enter the password.
     for(int i = 0; i < MAX_PLAYERS; ++i) {
         tString const &id = se_Players[i].globalID;
-        if(id.Len() <= username.Len() || id(username.Len() - 1) != '@') {
+        if(username.Len() <= 1 || id.Len() <= username.Len() || id(username.Len() - 1) != '@') {
             continue;
         }
         bool match = true;
@@ -1125,6 +1125,8 @@ ePlayer::ePlayer():cockpit(0){
     nAuthentication::SetLoginResultCallback (&ResultCallback);
 #endif
 
+    lastTooltip_ = -100;
+
     nameTeamAfterMe = false;
     favoriteNumberOfPlayersPerTeam = 3;
 
@@ -1138,6 +1140,9 @@ ePlayer::ePlayer():cockpit(0){
     }
     if ( !getUserName )
         name << "Player " << id+1;
+
+    // default global ID so logins are redirected to the forums
+    globalID = "@forums";
 
 #ifndef DEDICATED
     tString confname;
@@ -1311,6 +1316,16 @@ ePlayer::~ePlayer(){
 #ifndef DEDICATED
 void ePlayer::Render(){
     if (cam) cam->Render();
+
+    // present tooltip help
+    double now = tSysTimeFloat();
+    if( se_GameTime() > 1 && now-lastTooltip_ > 1 && !rConsole::CenterDisplayActive() )
+    {
+        if( uActionTooltip::Help( ID()+1 ) || uActionTooltip::Help( 0 ) || VetoActiveTooltip(ID()+1) )
+            lastTooltip_ = now;
+        else
+            lastTooltip_ = now+60;
+    }
 }
 #endif
 
@@ -2077,9 +2092,11 @@ ePlayerNetID * se_GetAlivePlayerFromUserID( int uid )
     return 0;
 }
 
+#ifndef KRAWALL_SERVER
 //The Base Remote Admin Password
 static tString sg_adminPass( "NONE" );
 static tConfItemLine sg_adminPassConf( "ADMIN_PASS", sg_adminPass );
+#endif
 
 #ifdef DEDICATED
 
@@ -4256,6 +4273,33 @@ bool ePlayer::PlayerIsInGame(int p){
     return PlayerViewport(p) && PlayerConfig(p);
 }
 
+// veto function for tooltips that require a controllable game object
+bool ePlayer::VetoActiveTooltip(int player)
+{
+    // check if the player exists and controls a living object
+    if( player == 0 )
+    {
+        return true;
+    }
+    ePlayer * p = PlayerConfig(player-1);
+    if ( !p )
+    {
+        return true;
+    }
+    ePlayerNetID * pn = p->netPlayer;
+    if ( !pn )
+    {
+        return true;
+    }
+    eNetGameObject *o = pn->Object();
+    if (!o || !o->Alive())
+    {
+        return true;
+    }
+
+    return false;
+}
+
 static tConfItemBase *vpbtp[MAX_VIEWPORTS];
 
 void ePlayer::Init(){
@@ -4301,6 +4345,15 @@ void ePlayer::Exit(){
 }
 
 uActionPlayer ePlayer::s_chat("CHAT");
+
+// only display chat in multiplayer games
+static bool se_ChatTooltipVeto(int)
+{
+    return sn_GetNetState() == nSTANDALONE;
+}
+
+uActionTooltip ePlayer::s_chatTooltip(ePlayer::s_chat, 1, &se_ChatTooltipVeto);
+uActionTooltip s_toggleSpectatorTooltip(se_toggleSpectator, 1, &se_ChatTooltipVeto);
 
 int pingCharity = 100;
 static const int maxPingCharity = 300;
@@ -6193,7 +6246,19 @@ void ePlayerNetID::ResetScore(){
     ResetScoreDifferences();
 }
 
-void ePlayerNetID::DisplayScores(){
+// flag memorizing whether the scores already have been rendered this frame
+static bool se_alreadyDisplayedScores = false;
+
+static bool show_scores=false;
+
+void ePlayerNetID::DisplayScores()
+{
+    if( !show_scores || !se_mainGameTimer || se_alreadyDisplayedScores )
+    {
+        return;
+    }
+    se_alreadyDisplayedScores = true;
+
     sr_ResetRenderState(true);
 
     REAL W=sr_screenWidth;
@@ -7118,7 +7183,6 @@ void ePlayerNetID::GetScoreFromDisconnectedCopy()
 }
 
 
-static bool show_scores=false;
 static bool ass=true;
 
 void se_AutoShowScores(){
@@ -7135,14 +7199,9 @@ void se_SetShowScoresAuto(bool a){
     ass=a;
 }
 
-
 static void scores(){
-    if (show_scores){
-        if ( se_mainGameTimer )
-            ePlayerNetID::DisplayScores();
-        else
-            show_scores = false;
-    }
+    ePlayerNetID::DisplayScores();
+    se_alreadyDisplayedScores = false;
 }
 
 
@@ -7154,11 +7213,10 @@ static bool force_small_cons(){
 
 static rSmallConsoleCallback sc(&force_small_cons);
 
-static void cd(){
-    show_scores = false;
-}
-
-
+//static void cd(){
+//    show_scores = false;
+//}
+//static rCenterDisplayCallback c_d(&cd);
 
 static uActionGlobal score("SCORE");
 
@@ -7170,8 +7228,6 @@ static bool sf(REAL x){
 
 static uActionGlobalFunc saf(&score,&sf);
 
-
-static rCenterDisplayCallback c_d(&cd);
 
 tOutput& operator << (tOutput& o, const ePlayerNetID& p)
 {
@@ -7210,10 +7266,13 @@ void ePlayerNetID::GreetHighscores(tString &s){
 // *******************
 void ePlayerNetID::SetChatting ( ChatFlags flag, bool chatting )
 {
+    /* z-man can't remember why this exception was made; probably
+       just do disable the chat indicator while you play in local menus.
     if ( sn_GetNetState() == nSTANDALONE && flag == ChatFlags_Menu )
     {
         chatting = false;
     }
+    */
 
     if ( chatting )
     {

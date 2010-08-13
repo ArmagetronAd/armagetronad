@@ -66,7 +66,7 @@ public:
     REAL                            GetTime() const;        // the time of the influence
     void							AddSensor( const gSensor& sensor, REAL timePenalty, gCycleMovement * thisCycle ); // add the result of the sensor scan to our data
     void							AddWall( const eWall * wall, eCoord const & point, REAL timePenalty, gCycleMovement * thisCycle ); // add the interaction with a wall to our data
-    void							AddWall( const gPlayerWall * wall, REAL timeBuilt, gCycleMovement * thisCycle ); // add the interaction with a wall to our data
+    void							AddWall( const gPlayerWall * wall, REAL timeBuilt, REAL timePenalty, gCycleMovement * thisCycle ); // add the interaction with a wall to our data
 };
 
 typedef rColor gRealColor;
@@ -92,6 +92,9 @@ public:
     virtual bool            Alive                   ()                                    const     ;   //!< returns whether the cycle is still alive
     virtual bool            Vulnerable              ()                                    const     ;   //!< returns whether the cycle can be killed
     virtual eCoord          SpawnDirection         ()                                    const     ;   //!< returns the driving direction when the cycle was last spawned
+
+    //! returns a guess about which other object killed this cycle (provided it is dead)
+    virtual eGameObject const * Killer() const;
 
     bool                    CanMakeTurn             (int direction                      ) const     ;   //!< returns whether a turn is currently possible
     bool                    CanMakeTurn             ( REAL time, int direction          ) const     ;   //!< returns whether a turn is possible at the given time

@@ -47,7 +47,7 @@ class eCamera;
 class eGrid;
 class uActionCamera;
 class uGlanceAction;
-
+class uActionTooltip;
 
 //extern REAL se_cameraRise; // how far down does the current camera look?
 //extern REAL se_cameraZ;
@@ -62,11 +62,12 @@ public:
 
 class eCamera{
 protected:
-    enum { se_glances = 4 };
+    enum { GLANCE_FORWARD, GLANCE_BACK, GLANCE_RIGHT, GLANCE_LEFT, se_glances = 4 };
     static uActionCamera se_lookUp,se_lookDown,se_lookLeft,se_lookRight,
     se_moveLeft,se_moveRight,se_moveUp,se_moveDown,se_moveForward,se_moveBack,
     se_zoomIn,se_zoomOut, se_switchView;
     static uGlanceAction se_glance[se_glances];
+    static uActionTooltip se_glanceLeftTooltip, se_glanceRightTooltip, se_glanceBackTooltip, se_switchViewTooltip;
 
     int id;
     //  tCHECKED_PTR(eGameObject) foot;

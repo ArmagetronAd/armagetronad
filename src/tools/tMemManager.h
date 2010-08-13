@@ -72,6 +72,14 @@ public:
 #define THROW_NOTHING  throw ()
 #endif
 
+// create an object of this class while calling external functions
+// that are known to have (harmless!) leaks
+class tKnownExternalLeak
+{
+public:
+    tKnownExternalLeak();
+    ~tKnownExternalLeak();
+};
 
 #ifndef DONTUSEMEMMANAGER
 

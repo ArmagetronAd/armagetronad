@@ -221,6 +221,7 @@ static tSettingItem<int> s_s("SCORE_SUICIDE",score_suicide);
 
 uActionPlayer gCycle::s_brake("CYCLE_BRAKE", -5);
 static uActionPlayer s_brakeToggle("CYCLE_BRAKE_TOGGLE", -5);
+static uActionTooltip sg_brakeTooltip( gCycle::s_brake, 1, &ePlayer::VetoActiveTooltip );
 
 // a class of textures where the transparent part of the
 // image is replaced by the player color
@@ -2226,8 +2227,6 @@ void gCycle::MyInitAfterCreation(){
 #ifdef DEBUG
     // con << "creating cycle.\n";
 #endif
-    eSoundMixer* mixer = eSoundMixer::GetMixer();
-    mixer->PlayContinuous(CYCLE_MOTOR, this);
 
     //correctDistSmooth=correctTimeSmooth=correctSpeedSmooth=0;
     correctDistanceSmooth = 0;
@@ -2323,6 +2322,10 @@ void gCycle::MyInitAfterCreation(){
 
         mp = false;
     }
+
+    // Start the cycle engine sound
+    eSoundMixer* mixer = eSoundMixer::GetMixer();
+    mixer->PlayContinuous(CYCLE_MOTOR, this);
 #endif // DEDICATED
 
     /*
@@ -2505,7 +2508,7 @@ static inline void rotate(eCoord &r,REAL angle){
 }
 
 #ifdef MACOSX
-// Sparks have a large performance problem on Macs. See http://guru3.sytes.net/viewtopic.php?t=2167
+// Sparks have a large performance problem on Macs. See http://forums.armagetronad.net/viewtopic.php?t=2167
 bool crash_sparks=false;
 #else
 bool crash_sparks=true;
@@ -3463,8 +3466,10 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
                 if ( explosion )
                 {
                     gCycle * holer = explosion->GetOwner();
-                    if (holer) {
-                        sg_holeWriter << Player()->GetUserName() << holer->Player()->GetUserName() << w->Cycle()->Player()->GetUserName() << time - explosion->CreationTime();
+                    if (holer && Player()) {
+                        tString name1(holer->Player()?holer->Player()->GetUserName():tString("Player_who_already_left"));
+                        tString name2(w->Cycle() && w->Cycle()->Player()?w->Cycle()->Player()->GetUserName():tString("Player_who_already_left"));
+                        sg_holeWriter << Player()->GetUserName() << name1 << name2 << time - explosion->CreationTime();
                         sg_holeWriter.write();
                     }
                     if ( score_hole && holer && holer != this && holer->Player() &&
@@ -3620,7 +3625,7 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
                 {
                     // err, trouble. Can't push the other guy back far enough. Better kill him.
                     if ( currentWall )
-                        otherPlayer->enemyInfluence.AddWall( currentWall->Wall(), lastTime, otherPlayer );
+                        otherPlayer->enemyInfluence.AddWall( currentWall->Wall(), lastTime, 0, otherPlayer );
                     otherPlayer->distance = wallDist;
                     otherPlayer->DropWall();
                     otherPlayer->KillAt( collPos );

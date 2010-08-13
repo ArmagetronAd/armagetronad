@@ -18,6 +18,7 @@ class gArena;
 class ePoint;
 class gGame;
 class gWallRim;
+class gXMLCharReturn;
 
 #ifdef ENABLE_ZONESV2
 #include "zone/zShape.h"
@@ -92,7 +93,7 @@ public:
 
 protected:
     bool trueOrFalse(char *str);
-    char *myxmlGetProp(xmlNodePtr cur, const char *name);
+    gXMLCharReturn myxmlGetProp(xmlNodePtr cur, const char *name);
     const char *myxmlGetPropString(xmlNodePtr cur, const char *name, const char *defaultValue);
     int myxmlGetPropInt(xmlNodePtr cur, const char *name);
     float myxmlGetPropFloat(xmlNodePtr cur, const char *name);

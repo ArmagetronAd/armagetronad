@@ -123,6 +123,7 @@ private:
 public:
 
     int GOID() const {return id;}
+    int InterestingID() const {return interestingID;}
     REAL LastTime() const {return lastTime;}
     virtual REAL NextInterestingTime() const {return lastTime;} //!< the next time something interesting is going to happen with this object
 
@@ -134,6 +135,9 @@ public:
     virtual eCoord LastDirection()const{return dir;}
     virtual REAL DeathTime()const{return deathTime;}
     virtual REAL  Speed()const{return 20;}
+
+    //! returns a guess about which other object killed this
+    virtual eGameObject const * Killer() const { return NULL; }
 
     // position after FPS dependant extrapolation
     virtual eCoord PredictPosition() const {return pos;}

@@ -1,5 +1,6 @@
 %{
 #include "eTeam.h"
+extern void sg_DeclareWinner( eTeam* team, char const * message );
 %}
 
 %template(PlayersList) std::vector<ePlayerNetID *>;
@@ -7,6 +8,7 @@
 %extend eTeam {
     static int num_teams()  { return eTeam::teams.Len(); }
     static eTeam *team(int i) { return eTeam::teams[i]; }
+    void declare_winner(char const * message ) {sg_DeclareWinner( $self, message );}
 };
 
 %rename(Team) eTeam;
