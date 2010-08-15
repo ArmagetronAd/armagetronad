@@ -693,7 +693,7 @@ private:
     REAL min_;
 };
 
-// #define DEBUG_SWAP
+#define DEBUG_SWAP
 
 #ifdef DEBUG_SWAP
 #include "tRandom.h"
@@ -727,6 +727,7 @@ public:
     : frameTimes_(SWAP_TIMESCALE_LOG+6, 1/20.0)
     , frameTimesMax_(4, 0)
     , waitTimes_(SWAP_TIMESCALE_LOG+1, 0)
+    , timeSpentAverage_(0)
     , delay_(0)
     , smoothDelay_(0)
     , delayFactor_(.8f)
@@ -890,8 +891,25 @@ public:
             lastSwap = rSysDep::swapModeThroughput_;
         }
 
-        // get the correct swap mode
-        rSysDep::rSwapMode swapMode = ( opt == rSysDep::rSwap_Throughput ) ? rSysDep::swapModeThroughput_ : rSysDep::swapModeLatency_;
+        // get the correct swap mode. Pick according to the swap optimize mode
+        rSysDep::rSwapMode swapMode;
+        if ( opt == rSysDep::rSwap_Throughput )
+        {
+            // exception: if the swap mode is auto and we're about to switch
+            // to latency mode, throw in some glFinishs to measure the wait time.
+            if( rSysDep::swapOptimize_ == rSysDep::rSwap_Auto )
+            {
+                swapMode = rSysDep::swapModeLatency_;
+            }
+            else
+            {
+                swapMode = rSysDep::swapModeThroughput_;
+            }
+        }
+        else
+        {
+            swapMode = rSysDep::swapModeLatency_;
+        }
 
         switch( swapMode )
         {
@@ -928,10 +946,9 @@ protected:
         REAL timeSpent = now - lastTime_;
 
         // average over some frames for flush/fastest modes; they tend to jitter.
-        static REAL timeSpentAverage = 0;
         {
             static const REAL decay = .3;
-            timeSpentAverage = ( timeSpentAverage + timeSpent * decay )/(1+decay);
+            timeSpentAverage_ = ( timeSpentAverage_ + timeSpent * decay )/(1+decay);
         }
 
         lastTime_ = now;
@@ -946,7 +963,9 @@ protected:
             minFrameTime = referenceFrameTime;
         }
         
-        static const REAL frameDropTolerance = 1.3;
+        // tolerance factor for dropped frames, higher in finish mode
+        REAL frameDropTolerance = rSysDep::rSwap_glFinish == swapMode ? 1.5 : 1.2;
+
         static const int framePenaltyMax = 1200;
         static const int framePenaltySingle = framePenaltyMax/10;
         static const int framePenaltyMin = -framePenaltySingle*3;
@@ -956,7 +975,7 @@ protected:
 
         bool frameDrop = inGame_ && 
             (
-                ( rSysDep::rSwap_glFinish == swapMode ? timeSpent : timeSpentAverage ) > frameDropTolerance * minFrameTime 
+                ( rSysDep::rSwap_glFinish == swapMode ? timeSpent : timeSpentAverage_ ) > frameDropTolerance * minFrameTime 
                 || 
                 ( rSysDep::rSwap_glFinish == swapMode && timeSpentWaiting < smallDelay/10 )
                 );
@@ -1001,6 +1020,13 @@ protected:
             if( badFrame_ < framePenaltyMax )
             {
                 badFrame_ += framePenaltySingle;
+
+                // hysteresis: if we are just disabling latency mode, go all the way and some
+                if ( badFrame_ > 0 && badFrame_ <= framePenaltySingle )
+                {
+                    con << "Too many framedrops.\n";
+                    badFrame_ = framePenaltyMax*2;
+                }
             }
         }
         else
@@ -1080,6 +1106,9 @@ private:
 
     // minimum wait time per frame
     rRollingMinimum waitTimes_;
+
+    // slighlty smoothed frame time
+    REAL timeSpentAverage_;
 
     // time sync is started
     double startTime_;
