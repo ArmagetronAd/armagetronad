@@ -209,6 +209,9 @@ public:
     // bind a procedure from scripting language to this ladder log writer.
 %rename(set_callback) setCallback;
     void setCallback(tScripting::proc_type proc);
+    // remove a procedure from scripting language previously binded to this ladder log writer.
+%rename(unset_callback) unsetCallback;
+    void unsetCallback(tScripting::proc_type proc);
 };
 
 //! chat command

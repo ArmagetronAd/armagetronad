@@ -6053,7 +6053,8 @@ void eLadderLogWriter::write() {
 #ifdef ENABLE_SCRIPTING
         args tmp;
         tmp << data;
-        tScripting::GetInstance().Exec(callback, &tmp);
+        for(std::vector<tScripting::proc_type>::iterator it = callbacks.begin(); it < callbacks.end(); it++)
+            tScripting::GetInstance().Exec(*it, &tmp);
         tmp.clear();
 #endif
     }

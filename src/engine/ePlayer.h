@@ -47,6 +47,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include <set>
 #include <map>
+#include <algorithm>
 #include <utility>
 #include "eChat.h"
 
@@ -497,7 +498,7 @@ class eLadderLogWriter {
     tSettingItem<bool> *conf;
     tColoredString cache;
 #ifdef ENABLE_SCRIPTING
-    tScripting::proc_type callback;
+    std::vector<tScripting::proc_type> callbacks;
     args data;
 #endif
 public:
@@ -522,7 +523,14 @@ public:
     static void setAll(bool enabled); //!< enable or disable all writers
 #ifdef ENABLE_SCRIPTING
     // bind a procedure from scripting language to this ladder log writer.
-    void setCallback(tScripting::proc_type proc) { callback = proc; }
+    void setCallback(tScripting::proc_type proc) { callbacks.push_back(proc); }
+    // remove a procedure from scripting language previously binded to this ladder log writer.
+    void unsetCallback(tScripting::proc_type proc) {callbacks.erase(std::find(callbacks.begin(),callbacks.end(),proc));}
+    // clear all callback (for scripting reinit)
+    static void clearCallbacks() {
+        for(std::map<std::string, eLadderLogWriter *>::iterator it = writers().begin(); it != writers().end(); ++it)
+            it->second->callbacks.clear();
+    }
 #endif
 };
 
@@ -540,6 +548,8 @@ public:
     void setAccessLevel(tAccessLevel level);
     void run(ePlayerNetID * admin, tString say, char const * command);
     static eChatCommand *getChatCommand(char const *ID);
+    // clear all chat commands (for scripting reinit)
+    static void clearChatCommands() { chatCommands().clear(); }
 };
 #endif
 
