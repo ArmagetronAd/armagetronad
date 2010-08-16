@@ -1565,8 +1565,8 @@ void rSysDep::SwapGL(){
 #endif
 
     // unlock the mutex while waiting for the swap operation to finish
-    SDL_mutexV(  sr_netLock );
-    sr_LockSDL();
+    // SDL_mutexV(  sr_netLock );
+    // sr_LockSDL();
 
     // actiate motion blur (does not use the game state, so it's OK to call here )
     bool shouldSwap = sr_MotionBlur( time, blurTarget );
@@ -1580,9 +1580,9 @@ void rSysDep::SwapGL(){
     else if (s_videoout)
         make_screenshot();
 
-    sr_UnlockSDL();
+    // sr_UnlockSDL();
     // lock mutex again
-    SDL_mutexP(  sr_netLock );
+    // SDL_mutexP(  sr_netLock );
 
 
     // disable output in fast forward mode
