@@ -600,6 +600,12 @@ static rFastForwardCommandLineAnalyzer analyzer;
 
 rSysDep::rSwapOptimize rSysDep::swapOptimize_ = rSysDep::rSwap_Auto;
 
+// random benchmarks. Median of three runs.
+// rSwap_Latency          : 306.8 FPS
+// rSwap_Throughput       : 307.0 FPS
+// rSwap_ThrougputFlush   : 308.3 FPS
+// rSwap_ThrougputFastest : 305.9 FPS (!)
+
 #ifndef DEDICATED
 
 // determines minimum of past values
@@ -690,7 +696,9 @@ private:
     REAL min_;
 };
 
+#ifdef DEBUG
 #define DEBUG_SWAP
+#endif
 
 #ifdef DEBUG_SWAP
 #include "tRandom.h"
@@ -817,8 +825,6 @@ public:
     // and once just before rendering with an argument 
     void Finish( bool delayed, bool swap = false )
     {
-        sr_needPostSwap = false;
-
 #ifdef DEBUG_SWAP_X
         {
             static tRandomizer randomDelay;
@@ -901,7 +907,20 @@ public:
         }
 
         // mark end of swap mode
-        StopSwap( opt );
+        StopSwap( opt < rSysDep::rSwap_ThroughputFlush );
+
+        // preemptively call glClear
+        if( !delayed && swap )
+        {
+            sr_needPostSwap = false;
+            sr_needClear = true;
+            rSysDep::ClearGL();
+            sr_needClear = false;
+        }
+
+        // set flag that next call to ClearGL should also trigger the post-swap
+        // code
+        sr_needPostSwap = !delayed;
 
         // delay
         if( opt == rSysDep::rSwap_Latency && !delayed && delay_ > smallDelay )

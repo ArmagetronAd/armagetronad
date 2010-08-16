@@ -719,8 +719,8 @@ swapoptimize_throughput_text Throughput
 swapoptimize_throughput_help This optimizes for high FPS counts and low number of dropped frames, but keeps input lag below one frame anyway.
 swapoptimize_throughput_flush_text Throughput+Flush
 swapoptimize_throughput_flush_help This optimizes for high FPS counts and low number of dropped frames. It uses pipeline flush commands instead of proper sync commands which causes various amounts of input lag on some systems, so beware.
-swapoptimize_throughput_fastest_text Throughput+No Sync
-swapoptimize_throughput_fastest_help This optimizes for high FPS counts and low number of dropped frames. It does not flush the rendering pipeline at all, so expect insane amounts of input lag.
+swapoptimize_throughput_fastest_text Overhead
+swapoptimize_throughput_fastest_help This optimizes low sync overhead. It does not flush the rendering pipeline at all. Expect insane amounts of input lag and performance drops due to inconveniently timed pipeline stalls.
 swap_optimize_help          Determines the algorithm used to swap and sync. 0: Optimize for low latency, 1: Auto, 2: optimize for high throughput, 3 and 4 optimize even more for throughput, but are very dangerous.
 
 texture_mode_0_help		Floor Texture:
