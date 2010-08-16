@@ -1006,8 +1006,6 @@ void sr_LoadDefaultConfig(){
     sr_lowerSky=false;
     sr_upperSky=false;
     sr_keepWindowActive=false;
-    // rSysDep::swapModeLatency_=rSysDep::rSwap_glFinish;
-    rSysDep::swapModeThroughput_=rSysDep::rSwap_glFinish;
 
     if (software_renderer){
         // A software renderer! Poor soul. Set low details:

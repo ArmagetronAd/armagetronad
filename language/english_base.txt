@@ -723,11 +723,15 @@ swapoptimize_text           Optimize Swap for:
 swapoptimize_help           Determines the algorithm used on buffer swaps and syncs.
 swapoptimize_latency_text   Low Latency
 swapoptimize_latency_help   This optimizes for low latency between input and display (also known as input lag). Side effect: lowers load on the CPU.
-swapoptimize_throughput_text Throughput
-swapoptimize_throughput_help This optimizes for high FPS counts and low number of dropped frames.
 swapoptimize_auto_text       Automatic
-swapoptimize_auto_help       This choses low latency mode if your framerate appears stable and high enough and falls into throughput mode if too many frames are dropped.
-swap_optimize_help          Determines the algorithm used to swap and sync. 0: Optimize for low latency, 1: Auto, 2: optimize for high throughput.
+swapoptimize_auto_help       This choses low latency mode if your framerate appears stable and high enough and falls into throughput mode if too many frames are dropped or framerates are so high that latency is not a problem anyway. Recommended setting.
+swapoptimize_throughput_text Throughput
+swapoptimize_throughput_help This optimizes for high FPS counts and low number of dropped frames, but keeps input lag below one frame anyway.
+swapoptimize_throughput_flush_text Throughput+Flush
+swapoptimize_throughput_flush_help This optimizes for high FPS counts and low number of dropped frames. It uses pipeline flush commands instead of proper sync commands which causes various amounts of input lag on some systems, so beware.
+swapoptimize_throughput_fastest_text Throughput+No Sync
+swapoptimize_throughput_fastest_help This optimizes for high FPS counts and low number of dropped frames. It does not flush the rendering pipeline at all, so expect insane amounts of input lag.
+swap_optimize_help          Determines the algorithm used to swap and sync. 0: Optimize for low latency, 1: Auto, 2: optimize for high throughput, 3 and 4 optimize even more for throughput, but are very dangerous.
 
 texture_mode_0_help		Floor Texture:
 texture_mode_1_help		Wall Textures:

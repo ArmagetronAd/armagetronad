@@ -31,18 +31,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 class rSysDep
 {
 public:
-    enum rSwapMode
-    {
-        rSwap_Fastest = 0,
-        rSwap_glFlush = 1,
-        rSwap_glFinish = 2
-    };
-
     enum rSwapOptimize
     {
         rSwap_Latency = 0,
         rSwap_Auto = 1,
-        rSwap_Throughput = 2
+        rSwap_Throughput = 2,
+        rSwap_ThroughputFlush = 3,
+        rSwap_ThroughputFastest = 4
     };
 
 #ifndef DEDICATED
@@ -72,8 +67,6 @@ public:
     static void StopNetSyncThread();
 #endif
 
-    static const rSwapMode swapModeLatency_;
-    static rSwapMode swapModeThroughput_;
     static rSwapOptimize swapOptimize_;
 };
 

@@ -598,9 +598,6 @@ static rFastForwardCommandLineAnalyzer analyzer;
 
 // #define MILLION 1000000
 
-
-const rSysDep::rSwapMode rSysDep::swapModeLatency_(rSysDep::rSwap_glFinish);
-rSysDep::rSwapMode rSysDep::swapModeThroughput_ = rSysDep::rSwap_glFinish;
 rSysDep::rSwapOptimize rSysDep::swapOptimize_ = rSysDep::rSwap_Auto;
 
 #ifndef DEDICATED
@@ -879,55 +876,23 @@ public:
         }
 #endif
 
-        // on swap mode changes, go to throughput mode for a bit (about a minute),
-        // only that demonstrates the effect
-        static rSysDep::rSwapMode lastSwap = rSysDep::swapModeThroughput_;
-        if( lastSwap != rSysDep::swapModeThroughput_ )
+        switch( opt )
         {
-            if( rSysDep::swapModeThroughput_ != rSysDep::rSwap_glFinish )
-            {
-                badFrame_ = 60/(frameTimes_.GetMin()+.001)+60*30;
-            }
-            lastSwap = rSysDep::swapModeThroughput_;
-        }
-
-        // get the correct swap mode. Pick according to the swap optimize mode
-        rSysDep::rSwapMode swapMode;
-        if ( opt == rSysDep::rSwap_Throughput )
-        {
-            // exception: if the swap mode is auto and we're about to switch
-            // to latency mode, throw in some glFinishs to measure the wait time.
-            if( rSysDep::swapOptimize_ == rSysDep::rSwap_Auto )
-            {
-                swapMode = rSysDep::swapModeLatency_;
-            }
-            else
-            {
-                swapMode = rSysDep::swapModeThroughput_;
-            }
-        }
-        else
-        {
-            swapMode = rSysDep::swapModeLatency_;
-        }
-
-        switch( swapMode )
-        {
-        case rSysDep::rSwap_Fastest:
+        case rSysDep::rSwap_ThroughputFastest:
             break;
-        case rSysDep::rSwap_glFlush:
+        case rSysDep::rSwap_ThroughputFlush:
             glFlush();
             break;
-        case rSysDep::rSwap_glFinish:
+        default:
             glFinish();
             break;
         }
 
         // mark end of swap mode
-        StopSwap( swapMode );
+        StopSwap( opt );
 
         // delay
-        if( swapMode == rSysDep::rSwap_glFinish && opt == rSysDep::rSwap_Latency && !delayed && delay_ > smallDelay )
+        if( opt == rSysDep::rSwap_Latency && !delayed && delay_ > smallDelay )
         {
             tDelay( delay_ * 1000 * 1000 );
         }
@@ -940,7 +905,7 @@ protected:
     }
 
     // call after swapping
-    void StopSwap( rSysDep::rSwapMode swapMode )
+    void StopSwap( bool frameTimesReliable )
     {
         double now = Time();
         REAL timeSpent = now - lastTime_;
@@ -964,7 +929,7 @@ protected:
         }
         
         // tolerance factor for dropped frames, higher in finish mode
-        REAL frameDropTolerance = rSysDep::rSwap_glFinish == swapMode ? 1.5 : 1.2;
+        REAL frameDropTolerance = frameTimesReliable ? 1.5 : 1.2;
 
         static const int framePenaltyMax = 1200;
         static const int framePenaltySingle = framePenaltyMax/10;
@@ -975,9 +940,9 @@ protected:
 
         bool frameDrop = inGame_ && 
             (
-                ( rSysDep::rSwap_glFinish == swapMode ? timeSpent : timeSpentAverage_ ) > frameDropTolerance * minFrameTime 
+                ( frameTimesReliable ? timeSpent : timeSpentAverage_ ) > frameDropTolerance * minFrameTime 
                 || 
-                ( rSysDep::rSwap_glFinish == swapMode && timeSpentWaiting < smallDelay/10 )
+                ( frameTimesReliable && timeSpentWaiting < smallDelay/10 )
                 );
         inGame_ = false;
 
@@ -1655,6 +1620,7 @@ void  rSysDep::ClearGL(){
         glClearColor(0.0,0.0,0.0,1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        /*
         // call glFlush(). glClear is an expensive operation, and we want the
         // GPU to start working on it ASAP.
         switch ( swapModeThroughput_ )
@@ -1666,6 +1632,7 @@ void  rSysDep::ClearGL(){
             glFlush();
             break;
         }
+        */
     }
 }
 

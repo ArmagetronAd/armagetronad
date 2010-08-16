@@ -546,6 +546,7 @@ static uMenuItemToggle infp
  "$tweaks_infinity_help"
  ,sr_infinityPlane);
 
+/*
 uMenuItemSelection<rSysDep::rSwapMode> swapModeThroughput
 (&screen_menu_tweaks,
  "$swapmode_text",
@@ -555,6 +556,7 @@ rSysDep::swapModeThroughput_);
 static uSelectEntry<rSysDep::rSwapMode> swapMode_fastest(swapModeThroughput,"$swapmode_fastest_text","$swapmode_fastest_help",rSysDep::rSwap_Fastest);
 static uSelectEntry<rSysDep::rSwapMode> swapMode_glFlush(swapModeThroughput,"$swapmode_glflush_text","$swapmode_glflush_help",rSysDep::rSwap_glFlush);
 static uSelectEntry<rSysDep::rSwapMode> swapMode_glFinish(swapModeThroughput,"$swapmode_glfinish_text","$swapmode_glfinish_help",rSysDep::rSwap_glFinish);
+*/
 
 uMenuItemSelection<rSysDep::rSwapOptimize> swapOptimize
 (&screen_menu_tweaks,
@@ -563,8 +565,10 @@ uMenuItemSelection<rSysDep::rSwapOptimize> swapOptimize
  rSysDep::swapOptimize_);
 
 static uSelectEntry<rSysDep::rSwapOptimize> swapOptimize_Latency(swapOptimize,"$swapoptimize_latency_text","$swapoptimize_latency_help",rSysDep::rSwap_Latency);
-static uSelectEntry<rSysDep::rSwapOptimize> swapOptimize_Throughput(swapOptimize,"$swapoptimize_throughput_text","$swapoptimize_throughput_help",rSysDep::rSwap_Throughput);
 static uSelectEntry<rSysDep::rSwapOptimize> swapOptimize_Auto(swapOptimize,"$swapoptimize_auto_text","$swapoptimize_auto_help",rSysDep::rSwap_Auto);
+static uSelectEntry<rSysDep::rSwapOptimize> swapOptimize_Throughput(swapOptimize,"$swapoptimize_throughput_text","$swapoptimize_throughput_help",rSysDep::rSwap_Throughput);
+static uSelectEntry<rSysDep::rSwapOptimize> swapOptimize_ThroughputFlush(swapOptimize,"$swapoptimize_throughput_flush_text","$swapoptimize_throughput_flush_help",rSysDep::rSwap_ThroughputFlush);
+static uSelectEntry<rSysDep::rSwapOptimize> swapOptimize_ThroughputFastest(swapOptimize,"$swapoptimize_throughput_fastest_text","$swapoptimize_throughput_fastest_help",rSysDep::rSwap_ThroughputFastest);
 
 /*
 uMenuItemSelection<int> targetFPS
@@ -579,10 +583,7 @@ static uSelectEntry<rSysDep::rSwapMode> swapMode_80Hz(swapMode,"$swapmode_80hz_t
 static uSelectEntry<rSysDep::rSwapMode> swapMode_60Hz(swapMode,"$swapmode_60hz_text","$swapmode_60hz_help",rSysDep::rSwap_60Hz);
 */
 
-tCONFIG_ENUM( rSysDep::rSwapMode );
 tCONFIG_ENUM( rSysDep::rSwapOptimize );
-
-static tConfItem< rSysDep::rSwapMode > swapModeCI("SWAP_MODE", rSysDep::swapModeThroughput_ );
 
 static tConfItem< rSysDep::rSwapOptimize > swapOptimizeCI("SWAP_OTPIMIZE", rSysDep::swapOptimize_ );
 
