@@ -740,7 +740,6 @@ public:
     : frameTimes_(SWAP_TIMESCALE_LOG+6, 1/20.0)
     , frameTimesMax_(4, 0)
     , waitTimes_(SWAP_TIMESCALE_LOG+1, 0)
-    , timeSpentAverage_(0)
     , delay_(0)
     , smoothDelay_(0)
     , delayFactor_(.6f)
@@ -825,6 +824,44 @@ public:
     // and once just before rendering with an argument 
     void Finish( bool delayed, bool swap = false )
     {
+        if( rSysDep::swapOptimize_ >= rSysDep::rSwap_Throughput )
+        {
+            if( !delayed )
+            {
+                if( swap )
+                {
+                    Swap();
+                }
+            }
+            else
+            {
+                switch( rSysDep::swapOptimize_ )
+                {
+                case rSysDep::rSwap_ThroughputFastest:
+                    break;
+                case rSysDep::rSwap_ThroughputFlush:
+                    glFlush();
+                    break;
+                default:
+                    glFinish();
+                    break;
+                }
+            }
+        }
+        else
+        {
+            FinishComplicated( delayed, swap );
+        }
+
+        // set flag that next call to ClearGL should also trigger the post-swap
+        // code
+        sr_needPostSwap = !delayed;
+    }
+
+    // call after swapping buffers with an argument of true
+    // and once just before rendering with an argument 
+    void FinishComplicated( bool delayed, bool swap = false )
+    {
 #ifdef DEBUG_SWAP_X
         {
             static tRandomizer randomDelay;
@@ -839,7 +876,7 @@ public:
         rSysDep::rSwapOptimize opt = GetCurrentSwapOptimizeMode();
 
         // do nothing if this is the wrong time to flush
-        bool shouldDelayFlush = ( opt == rSysDep::rSwap_Throughput );
+        bool shouldDelayFlush = ( opt >= rSysDep::rSwap_Throughput );
         static const int backsize = 3;
         static bool shouldDelayFlushOld[backsize];
         if( delayed != shouldDelayFlushOld[backsize-1] )
@@ -894,33 +931,22 @@ public:
         }
 #endif
 
-        switch( opt )
-        {
-        case rSysDep::rSwap_ThroughputFastest:
-            break;
-        case rSysDep::rSwap_ThroughputFlush:
-            glFlush();
-            break;
-        default:
-            glFinish();
-            break;
-        }
+        glFinish();
 
         // mark end of swap mode
-        StopSwap( opt < rSysDep::rSwap_ThroughputFlush );
+        if( opt < rSysDep::rSwap_Throughput )
+        {
+            StopSwap();
+        }
 
         // preemptively call glClear
-        if( !delayed && swap )
+        if( !delayed )
         {
             sr_needPostSwap = false;
             sr_needClear = true;
             rSysDep::ClearGL();
             sr_needClear = false;
         }
-
-        // set flag that next call to ClearGL should also trigger the post-swap
-        // code
-        sr_needPostSwap = !delayed;
 
         // delay
         if( opt == rSysDep::rSwap_Latency && !delayed && delay_ > smallDelay )
@@ -936,16 +962,10 @@ protected:
     }
 
     // call after swapping
-    void StopSwap( bool frameTimesReliable )
+    void StopSwap()
     {
         double now = Time();
         REAL timeSpent = now - lastTime_;
-
-        // average over some frames for flush/fastest modes; they tend to jitter.
-        {
-            static const REAL decay = .3;
-            timeSpentAverage_ = ( timeSpentAverage_ + timeSpent * decay )/(1+decay);
-        }
 
         lastTime_ = now;
         frameTimesMax_.Add( -timeSpent );
@@ -960,8 +980,7 @@ protected:
         }
         
         // tolerance factor for dropped frames, higher in finish mode
-        REAL frameDropTolerance = frameTimesReliable ? 1.5 : 1.2;
-
+        static const REAL frameDropTolerance = 1.5;
         static const int framePenaltyMax = 1200;
         static const int framePenaltySingle = framePenaltyMax/10;
         static const int framePenaltyMin = -framePenaltySingle*3;
@@ -971,9 +990,9 @@ protected:
 
         bool frameDrop = inGame_ && 
             (
-                ( frameTimesReliable ? timeSpent : timeSpentAverage_ ) > frameDropTolerance * minFrameTime 
+                timeSpent > frameDropTolerance * minFrameTime 
                 || 
-                ( frameTimesReliable && timeSpentWaiting < smallDelay/10 )
+                timeSpentWaiting < smallDelay/10
                 );
         inGame_ = false;
 
@@ -1106,9 +1125,6 @@ private:
 
     // minimum wait time per frame
     rRollingMinimum waitTimes_;
-
-    // slighlty smoothed frame time
-    REAL timeSpentAverage_;
 
     // time sync is started
     double startTime_;
