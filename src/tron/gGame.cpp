@@ -793,9 +793,8 @@ void delayedCommands::Run(REAL currentTime) {
 			stream >> interval;
 			tCurrentAccessLevel elevator( sg_AddDelayedCmd_conf.GetRequiredLevel(), true );
 			tConfItemBase::LoadAll(stream); // run command if it's not too old, otherwise, just skip it ...
-			con << stream << " " << interval <<"\n";
 			if (interval>0) {
-				delayedCommands::Add(currentTime+interval,stream.str(),interval);
+                                cmd_map.insert(std::pair<int,std::string>(Key(currentTime+interval),stream.str()));
 			}
 		}
 		cmd_map.erase(it++); // erase current and get next iterator
