@@ -47,7 +47,6 @@ public:
 
     // buffer swap:
     static void SwapGL();
-    static void PostSwapGL(); // call after the game logic before the first new draw command of the next frame
     static void ClearGL(); // not really system depentent.......
 
     static bool IsBenchmark(); //!< returns true if a benchmark is running

@@ -716,6 +716,14 @@ render
 swap
 */
 
+// flag indicating that the next call to glClear needs execution.
+// sometimes, we preemptively call it after swaps.
+static bool sr_needClear = true;
+
+// flag indicating whether post-swap code (doing glFlush) needs to be
+// called on glClear.
+static bool sr_needPostSwap = false;
+
 // measures time wasted on waiting for swaps 
 class rSwapTime
 {
@@ -727,7 +735,7 @@ public:
     , timeSpentAverage_(0)
     , delay_(0)
     , smoothDelay_(0)
-    , delayFactor_(.8f)
+    , delayFactor_(.6f)
     , badFrame_( -200 )
     , counter_ ( 100 )
     , inGame_( false )
@@ -784,6 +792,8 @@ public:
 
     void Swap() const
     {
+        sr_needPostSwap = true;
+
         // do the actual buffer swap.
 #if defined(    SDL_OPENGL)
         if (lastSuccess.useSDL)
@@ -807,6 +817,8 @@ public:
     // and once just before rendering with an argument 
     void Finish( bool delayed, bool swap = false )
     {
+        sr_needPostSwap = false;
+
 #ifdef DEBUG_SWAP_X
         {
             static tRandomizer randomDelay;
@@ -953,12 +965,14 @@ protected:
             // forge the wait time so the next delays get lower.
             if( delay_ > smallDelay/10 )
             {
-                timeSpentWaiting = waitTime * .8;
+                timeSpentWaiting = waitTime * .8f;
 
                 // and lower the delay factor for longterm reduction of the delay;
-                // count rapid fire framedrops as less important.
+                // count rapid fire framedrops as less important, as well as isolated
+                // drops.
                 static double lastDrop = now-1;
-                REAL weight = (now - lastDrop)/3.0;
+                REAL weight = (now - lastDrop)/3.0f;
+                weight = weight * exp(-weight/3.0f);
                 lastDrop = now;
                 if( weight > 1 )
                 {
@@ -989,7 +1003,9 @@ protected:
                 // hysteresis: if we are just disabling latency mode, go all the way and some
                 if ( badFrame_ > 0 && badFrame_ <= framePenaltySingle )
                 {
+#ifdef DEBUG_SWAP
                     con << "Too many framedrops.\n";
+#endif
                     badFrame_ = framePenaltyMax*2;
                 }
             }
@@ -1569,11 +1585,6 @@ void rSysDep::SwapGL(){
     sr_glOut = next_glOut;
 }
 
-void rSysDep::PostSwapGL()
-{
-    sr_swapTime.Finish( true );
-}
-
 #endif // dedicated
 
 #ifndef DEDICATED
@@ -1608,32 +1619,17 @@ void sr_UnlockSDL(){
 
 #ifndef DEDICATED
 void  rSysDep::ClearGL(){
-    if (sr_glOut){
+    if ( sr_needPostSwap )
+    {
+        sr_swapTime.Finish( true );
+    }
 
-        /*
-        if (sr_screenshotIsPlanned){
-          make_screenshot();
-          sr_screenshotIsPlanned=false;
-        }
-        */
-
+    if (sr_glOut && sr_needClear )
+    {
         glClearColor(0.0,0.0,0.0,1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        /*
-        // call glFlush(). glClear is an expensive operation, and we want the
-        // GPU to start working on it ASAP.
-        switch ( swapModeThroughput_ )
-        {
-        case rSwap_Fastest:
-            // unless the mode is fastest, of course.
-            break;
-        default:
-            glFlush();
-            break;
-        }
-        */
     }
+    sr_needClear = true;
 }
 
 bool rSysDep::IsBenchmark()
