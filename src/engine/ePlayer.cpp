@@ -2677,10 +2677,30 @@ bool IsSilencedWithWarning( ePlayerNetID const * p )
     return false;
 }
 
+// returns true if the player is allowed to shout
+static bool se_CheckAccessLevelShout( ePlayerNetID * p )
+{
+#ifdef KRAWALL_SERVER
+    // check if the player has the right to shout
+    if( p->GetAccessLevel() > se_shoutAccessLevel )
+    {
+        sn_ConsoleOut( tOutput("$access_level_shout_denied" ), p->Owner() );
+        return false;
+    }
+#endif
+    return true;
+}
+
 // /me chat commant
 static void se_ChatMe( ePlayerNetID * p, std::istream & s, eChatSpamTester & spam )
 {
     if ( IsSilencedWithWarning(p) || spam.Block() )
+    {
+        return;
+    }
+
+    // check for global chat access right
+    if ( !se_CheckAccessLevelShout( p ) )
     {
         return;
     }
@@ -2752,20 +2772,16 @@ tSettingItem< bool > se_coloredDarkTeamConf( "FILTER_DARK_COLOR_TEAM", se_filter
 // regular chat; reaches all players
 static void se_ChatShout( ePlayerNetID * p, tString const & say, eChatSpamTester & spam )
 {
+    if ( !se_CheckAccessLevelShout( p ) )
+    {
+        return;
+    }
+
     // check for spam
     if ( spam.Block() )
     {
         return;
     }
-
-#ifdef KRAWALL_SERVER
-    // check if the player has the right to shout
-    if( p->GetAccessLevel() > se_shoutAccessLevel )
-    {
-        sn_ConsoleOut( tOutput("$access_level_shout_denied" ), p->Owner() );
-        return;
-    }
-#endif
 
     if ( say.Len() <= se_SpamMaxLen+2 && !IsSilencedWithWarning(p) )
     {
