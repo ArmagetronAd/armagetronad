@@ -831,10 +831,18 @@ public:
                 if( swap )
                 {
                     Swap();
+
+                    // no need for postswap action if we're not going to do anything
+                    // anyway.
+                    if( rSysDep::swapOptimize_ == rSysDep::rSwap_ThroughputFastest )
+                    {
+                        sr_needPostSwap = false;
+                    }
                 }
             }
             else
             {
+                sr_needPostSwap = false;
                 switch( rSysDep::swapOptimize_ )
                 {
                 case rSysDep::rSwap_ThroughputFastest:
@@ -852,10 +860,6 @@ public:
         {
             FinishComplicated( delayed, swap );
         }
-
-        // set flag that next call to ClearGL should also trigger the post-swap
-        // code
-        sr_needPostSwap = !delayed;
     }
 
     // call after swapping buffers with an argument of true
