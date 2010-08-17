@@ -560,7 +560,7 @@ static uSelectEntry<rSysDep::rSwapOptimize> swapOptimize_ThroughputFastest(swapO
 
 tCONFIG_ENUM( rSysDep::rSwapOptimize );
 
-static tConfItem< rSysDep::rSwapOptimize > swapOptimizeCI("SWAP_OTPIMIZE", rSysDep::swapOptimize_ );
+static tConfItem< rSysDep::rSwapOptimize > swapOptimizeCI("SWAP_OPTIMIZE", rSysDep::swapOptimize_ );
 
 static tConfItem<bool> WRAP("WRAP_MENU",uMenu::wrap);
 
