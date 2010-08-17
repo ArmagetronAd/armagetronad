@@ -674,7 +674,18 @@ static void se_AdminLogin_ReallyOnlyCallFromChatKTHNXBYE( ePlayerNetID * p )
 #endif
 #endif
 
+// flags indicating whether shouting should be the default chat action; if not, it's /team.
+static bool se_shoutSpectator=true;
+tSettingItem< bool > se_shoutSpectatorConf( "DEFAULT_SHOUT_SPECTATOR", se_shoutSpectator );
+static bool se_shoutPlayer=true;
+tSettingItem< bool > se_shoutPlayerConf( "DEFAULT_SHOUT_PLAYER", se_shoutPlayer );
+
 #ifdef KRAWALL_SERVER
+// minimal access level to shout
+static tAccessLevel se_shoutAccessLevel = tAccessLevel_Program;
+static tSettingItem< tAccessLevel > se_shoutAccessLevelConf( "ACCESS_LEVEL_SHOUT", se_shoutAccessLevel );
+static tAccessLevelSetter se_shoutAccessLevelConfLevel( se_shoutAccessLevelConf, tAccessLevel_Owner );
+
 // minimal access level to play
 static tAccessLevel se_playAccessLevel = tAccessLevel_Program;
 static tSettingItem< tAccessLevel > se_playAccessLevelConf( "ACCESS_LEVEL_PLAY", se_playAccessLevel );
@@ -2738,8 +2749,47 @@ tSettingItem< bool > se_coloredTeamConf( "FILTER_COLOR_TEAM", se_filterColorTeam
 static bool se_filterDarkColorTeam=false;
 tSettingItem< bool > se_coloredDarkTeamConf( "FILTER_DARK_COLOR_TEAM", se_filterDarkColorTeam );
 
+// regular chat; reaches all players
+static void se_ChatShout( ePlayerNetID * p, tString const & say, eChatSpamTester & spam )
+{
+    // check for spam
+    if ( spam.Block() )
+    {
+        return;
+    }
+
+#ifdef KRAWALL_SERVER
+    // check if the player has the right to shout
+    if( p->GetAccessLevel() > se_shoutAccessLevel )
+    {
+        sn_ConsoleOut( tOutput("$access_level_shout_denied" ), p->Owner() );
+        return;
+    }
+#endif
+
+    if ( say.Len() <= se_SpamMaxLen+2 && !IsSilencedWithWarning(p) )
+    {
+        se_BroadcastChat( p, say );
+        se_DisplayChatLocally( p, say);
+        
+        tString s;
+        s << p->GetUserName() << ' ' << say;
+        se_SaveToChatLog(s);
+    }
+}
+
+static void se_ChatShout( ePlayerNetID * p, std::istream & s, eChatSpamTester & spam )
+{
+    // parse string
+    tString say;
+    say.ReadLine( s );
+    
+    // delegate
+    se_ChatShout( p, say, spam );
+}
+
 // /team chat commant: talk to your team
-static void se_ChatTeam( ePlayerNetID * p, std::istream & s, eChatSpamTester & spam )
+static void se_ChatTeam( ePlayerNetID * p, tString msg, eChatSpamTester & spam )
 {
     eTeam *currentTeam = se_GetManagedTeam( p );
 
@@ -2752,9 +2802,6 @@ static void se_ChatTeam( ePlayerNetID * p, std::istream & s, eChatSpamTester & s
     {
         return;
     }
-
-    tString msg;
-    msg.ReadLine( s );
 
     // Apply filters if we don't already
     if ( se_filterColorTeam )
@@ -2816,6 +2863,15 @@ static void se_ChatTeam( ePlayerNetID * p, std::istream & s, eChatSpamTester & s
             }
         }
     }
+}
+
+// /team chat commant: talk to your team
+static void se_ChatTeam( ePlayerNetID * p, std::istream & s, eChatSpamTester & spam )
+{
+    tString msg;
+    msg.ReadLine( s );
+
+    se_ChatTeam( p, msg, spam );
 }
 
 // /msg chat commant: talk to anyone team
@@ -3438,6 +3494,12 @@ void handle_chat( nMessage &m )
                         se_ChatTeam( p, s, spam );
                         return;
                     }
+                    else if (command == "/shout")
+                    {
+                        spam.lastSaidType_ = eChatMessageType_Public;
+                        se_ChatShout( p, s, spam );
+                        return;
+                    }
                     else if (command == "/msg" ) {
                         spam.lastSaidType_ = eChatMessageType_Private;
                         se_ChatMsg( p, s, spam );
@@ -3494,21 +3556,15 @@ void handle_chat( nMessage &m )
 #endif
             }
 
-            // check for spam
-            if ( spam.Block() )
-            {
-                return;
-            }
-
             // well, that leaves only regular, boring chat.
-            if ( say.Len() <= se_SpamMaxLen+2 && !IsSilencedWithWarning(p) )
+            bool shout = se_GetManagedTeam( p ) ? se_shoutPlayer : se_shoutSpectator;
+            if( shout )
             {
-                se_BroadcastChat( p, say );
-                se_DisplayChatLocally( p, say);
-
-                tString s;
-                s << p->GetUserName() << ' ' << say;
-                se_SaveToChatLog(s);
+                se_ChatShout( p, say, spam );
+            }
+            else
+            {
+                se_ChatTeam( p, say, spam );
             }
         }
     }
