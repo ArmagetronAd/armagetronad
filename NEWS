@@ -1,4 +1,5 @@
 Changes since 0.2.8.3_rc4:
+- Implemented /shout command and associated settings
 - Intercepted chat commands are now written to ladderlog.txt. Format:
   COMMAND /command-intercepted player [command arguments]
 - Increased default speed of server pinging
