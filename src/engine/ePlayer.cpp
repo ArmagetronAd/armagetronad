@@ -4237,7 +4237,7 @@ static void se_KickUnworthy()
     for( int i = MAXCLIENTS; i >= 1; --i )
     {
         // NULL players are actually more worthy here now
-        if( !( mostWorthy[i] && se_autokickImmunity >= mostWorthy[i]->GetAccessLevel() ) && ( !mostUnworthyUser || se_comparePlayerWorth( mostWorthy[mostUnworthyUser], mostWorthy[i], -1 ) > 0 ) )
+        if( i != nCallbackLoginLogout::User() && !( mostWorthy[i] && se_autokickImmunity >= mostWorthy[i]->GetAccessLevel() ) && ( !mostUnworthyUser || se_comparePlayerWorth( mostWorthy[mostUnworthyUser], mostWorthy[i], -1 ) > 0 ) )
         {   
             mostUnworthyUser = i;
         }
