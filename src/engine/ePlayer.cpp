@@ -4123,7 +4123,7 @@ static bool se_kickUnworthy=false;
 tSettingItem< bool > se_kickUnworthyConf( "KEEP_PLAYER_SLOT", se_kickUnworthy );
 
 // access level needed to grant immunity against all forms of idle kicks
-static tAccessLevel se_autokickImmunity = tAccessLevel_TeamMember;
+static tAccessLevel se_autokickImmunity = tAccessLevel_TeamLeader;
 static tSettingItem< tAccessLevel > se_autokickImmunityConf( "ACCESS_LEVEL_AUTOKICK_IMMUNITY", se_autokickImmunity );
 
 // compares the worth of two players. Returns 1 if the first is better, -1 if the second is better, 0 if they are equal.
