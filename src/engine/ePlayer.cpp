@@ -2678,17 +2678,28 @@ bool IsSilencedWithWarning( ePlayerNetID const * p )
 }
 
 // returns true if the player is allowed to shout
-static bool se_CheckAccessLevelShout( ePlayerNetID * p )
+static bool se_CheckAccessLevelShoutNoWarn( ePlayerNetID * p )
 {
 #ifdef KRAWALL_SERVER
     // check if the player has the right to shout
-    if( p->GetAccessLevel() > se_shoutAccessLevel )
+    return p->GetAccessLevel() <= se_shoutAccessLevel;
+#else
+    return true;
+#endif
+}
+
+// returns true if the player is allowed to shout
+static bool se_CheckAccessLevelShout( ePlayerNetID * p )
+{
+    if( !se_CheckAccessLevelShoutNoWarn( p ) )
     {
         sn_ConsoleOut( tOutput("$access_level_shout_denied" ), p->Owner() );
         return false;
     }
-#endif
-    return true;
+    else
+    {
+        return true;
+    }
 }
 
 // /me chat commant
@@ -3573,13 +3584,14 @@ void handle_chat( nMessage &m )
             }
 
             // well, that leaves only regular, boring chat.
-            bool shout = se_GetManagedTeam( p ) ? se_shoutPlayer : se_shoutSpectator;
-            if( shout )
+            if( ( se_GetManagedTeam( p ) ? se_shoutPlayer : se_shoutSpectator ) && se_CheckAccessLevelShoutNoWarn( p ) )
             {
+                // if it's the default and the player is allowed to, shout it out
                 se_ChatShout( p, say, spam );
             }
             else
             {
+                // otherwise, fall back to team chat.
                 se_ChatTeam( p, say, spam );
             }
         }
