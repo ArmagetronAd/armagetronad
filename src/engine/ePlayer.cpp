@@ -4207,11 +4207,11 @@ static int se_comparePlayerWorth( ePlayerNetID * a, ePlayerNetID * b, int nullPo
 }
 
 // clear out one unworthy spectator
-static void se_KickUnworthy()
+static void se_KickUnworthy( int userToSpare=-1 )
 {
-    if( sn_NumUsers() < sn_MaxUsers() || !nCallbackLoginLogout::Login() )
+    // nothing to do?
+    if( !se_kickUnworthy || sn_NumUsers() < sn_MaxUsers() )
     {
-        // server not full, nothing to do.
         return;
     }
 
@@ -4237,7 +4237,7 @@ static void se_KickUnworthy()
     for( int i = MAXCLIENTS; i >= 1; --i )
     {
         // NULL players are actually more worthy here now
-        if( i != nCallbackLoginLogout::User() && !( mostWorthy[i] && se_autokickImmunity >= mostWorthy[i]->GetAccessLevel() ) && ( !mostUnworthyUser || se_comparePlayerWorth( mostWorthy[mostUnworthyUser], mostWorthy[i], -1 ) > 0 ) )
+        if( ( i != userToSpare ) && !( mostWorthy[i] && se_autokickImmunity >= mostWorthy[i]->GetAccessLevel() ) && ( !mostUnworthyUser || se_comparePlayerWorth( mostWorthy[mostUnworthyUser], mostWorthy[i], -1 ) > 0 ) )
         {   
             mostUnworthyUser = i;
         }
@@ -4273,9 +4273,9 @@ static void se_PlayerLoginLogoutCallback()
     se_ClearLegacySpectator( nCallbackLoginLogout::User() );
 
     // always keep one slot free
-    if( se_kickUnworthy )
-    {
-        se_KickUnworthy();
+    if( nCallbackLoginLogout::Login() )
+    { 
+        se_KickUnworthy( nCallbackLoginLogout::User() );
     }
 }
 static nCallbackLoginLogout se_playerLoginLogoutCallback( se_PlayerLoginLogoutCallback );
@@ -6748,6 +6748,9 @@ void ePlayerNetID::RemoveChatbots()
             }
         }
     }
+
+    // kick unworthy spectators (in case MAX_CLIENTS has changed)
+    se_KickUnworthy();
 }
 
 void ePlayerNetID::ThrowOutDisconnected()
