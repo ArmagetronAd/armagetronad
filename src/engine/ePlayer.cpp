@@ -4232,20 +4232,19 @@ static void se_KickUnworthy()
     }
 
     // find the most unworthy client
-    int mostUnworthyUser = 1;
+    int mostUnworthyUser = 0;
 
     for( int i = MAXCLIENTS; i >= 1; --i )
     {
         // NULL players are actually more worthy here now
-        if( se_comparePlayerWorth( mostWorthy[mostUnworthyUser], mostWorthy[i], -1 ) > 0 )
-        {
+        if( !( mostWorthy[i] && se_autokickImmunity >= mostWorthy[i]->GetAccessLevel() ) && ( !mostUnworthyUser || se_comparePlayerWorth( mostWorthy[mostUnworthyUser], mostWorthy[i], -1 ) > 0 ) )
+        {   
             mostUnworthyUser = i;
         }
     }
 
     // take care not to auto-kick someone with a high access level
-    ePlayerNetID * kick = mostWorthy[mostUnworthyUser];
-    if( !kick || se_autokickImmunity < kick->GetAccessLevel() )
+    if( mostUnworthyUser )
     {
         sn_DisconnectUser( mostUnworthyUser, tOutput( "$network_kill_unworthy" ) );
     }
