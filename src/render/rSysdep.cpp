@@ -1164,7 +1164,11 @@ private:
 const REAL rSwapTime::smallDelay = 1E-3f;
 const REAL rSwapTime::delayFactorPenalty = .05;
 
-static rSwapTime sr_swapTime;
+static rSwapTime & sr_SwapTime()
+{
+    static rSwapTime ret;
+    return ret;
+}
 
 #endif // DEDICATED
 
@@ -1575,7 +1579,7 @@ void rSysDep::SwapGL(){
     // actiate motion blur (does not use the game state, so it's OK to call here )
     bool shouldSwap = sr_MotionBlur( time, blurTarget );
 
-    sr_swapTime.Finish( false, shouldSwap );
+    sr_SwapTime().Finish( false, shouldSwap );
 
     if (sr_screenshotIsPlanned){
         make_screenshot();
@@ -1660,7 +1664,7 @@ void sr_UnlockSDL(){
 void  rSysDep::ClearGL(){
     if ( sr_needPostSwap )
     {
-        sr_swapTime.Finish( true );
+        sr_SwapTime().Finish( true );
     }
 
     if (sr_glOut && sr_needClear )
@@ -1679,7 +1683,7 @@ bool rSysDep::IsBenchmark()
  //!< call while game content is rendered
 void rSysDep::IsInGame()
 {
-    sr_swapTime.IsInGame();
+    sr_SwapTime().IsInGame();
 }
 #endif
 
