@@ -335,6 +335,7 @@ wait_for_external_script_timeout_help If the server has been paused by WAIT_FOR_
 chatter_remove_time_help            Time in seconds after which a permanent chatter is removed from the game
 idle_remove_time_help               Time in seconds after which an inactive player is removed from the game
 idle_kick_time_help                 Time in seconds after which an inactive player is kicked
+keep_player_slot_help               If set to 1, every time the server gets full, an unworthy spectator is kicked.
 
 #********************************************
 #********************************************
@@ -2590,6 +2591,7 @@ network_kill_unknown		No reason was given.
 network_kill_spamkick		You have been auto-kicked for spamming.
 voted_kill_kick				You have been kicked by an angry mob of players; please stay away.
 network_kill_spectator      You have been sitting in spectator mode for too long.
+network_kill_unworthy       The server is full; you have been removed to make room for potential players. Only come back if you really have to.
 
 network_ban_kph             Kicks per hour of IP \1 are now \2.\n
 network_ban                 Players from IP \1 are banned for \2 minutes. Reason: \3\n
@@ -2852,6 +2854,7 @@ access_level_admin_help        Minimal access level for /admin command.
 access_level_rtfm_help         Minimal access level for /teach or /rtfm command.
 access_level_chat_help         Minimal access level for chatting.
 access_level_ips_help          Minimal access level you need for seeing IPs of other players in the /players command.
+access_level_autokick_immunity_help Minimal access level to be protected against autokicks.
 access_level_nver_help         Minimal access level you need for seeing Network versions/strings from other players in /players.
 access_level_spy_console_help  Minimal access level you need for seeing console input from other (in-game) admins.
 access_level_spy_team_help     Minimal access level you need for seeing /team messages as a spectator.
