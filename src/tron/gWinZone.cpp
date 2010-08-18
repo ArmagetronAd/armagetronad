@@ -109,6 +109,7 @@ static eLadderLogWriter sg_flagReturnWriter("FLAG_RETURN", true);
 static eLadderLogWriter sg_flagTakeWriter("FLAG_TAKE", true);
 static eLadderLogWriter sg_flagDropWriter("FLAG_DROP", true);
 static eLadderLogWriter sg_flagScoreWriter("FLAG_SCORE", true);
+static eLadderLogWriter sg_flagHeldWriter("FLAG_HELD", true);
 
 //! creates a win or death zone (according to configuration) at the specified position
 gZone * sg_CreateWinDeathZone( eGrid * grid, const eCoord & pos )
@@ -4427,6 +4428,9 @@ bool gFlagZoneHack::Timestep( REAL time )
 				(time >= (lastHoldScoreTime_ + sg_flagHoldScoreTime)))
 			{
 				lastHoldScoreTime_ = time;
+
+                sg_flagHeldWriter << player->GetUserName();
+                sg_flagHeldWriter.write();
 
 				tOutput win;
 				tOutput lose;
