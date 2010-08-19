@@ -261,27 +261,35 @@ extern "C" {
 
     args &args::operator<< (int x){
         if (!data) return *this;
-        PyList_Append(data, Py_BuildValue("i", x));
+        PyObject *item = Py_BuildValue("i", x);
+        PyList_Append(data, item);
+        Py_DECREF(item);
         return *this;
     }
 
     args &args::operator<< (double x){
         if (!data) return *this;
-        PyList_Append(data, Py_BuildValue("d", x));
+        PyObject *item = Py_BuildValue("d", x);
+        PyList_Append(data, item);
+        Py_DECREF(item);
         return *this;
     }
 
     args &args::operator<< (tOutput const &x){
         if (!data) return *this;
-	tString ret;
+        tString ret;
         ret << x;
-        PyList_Append(data, Py_BuildValue("s", (std::string(ret)).c_str()));
-	return *this;
+        PyObject *item = Py_BuildValue("s", (std::string(ret)).c_str());
+        PyList_Append(data, item);
+        Py_DECREF(item);
+        return *this;
     }
 
     args &args::operator<< (tString &x){
         if (!data) return *this;
-        PyList_Append(data, Py_BuildValue("s", (std::string(x)).c_str()));
+        PyObject *item = Py_BuildValue("s", (std::string(x)).c_str());
+        PyList_Append(data, item);
+        Py_DECREF(item);
         return *this;
     }
 
