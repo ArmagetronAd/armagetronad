@@ -197,6 +197,7 @@ extern "C" {
     }
 
     void tScripting::CleanupInterpreter() {
+        Py_XDECREF(main_dict); main_dict=0;
         Py_Finalize();
     }
 
@@ -221,21 +222,29 @@ extern "C" {
     tScripting::proc_type tScripting::GetProcRef(std::string name) {
         PyObject *result;
         result = PyObject_GetAttrString(main_module, name.c_str());
-        if (PyCallable_Check(result)) return result;
+        if (result && PyCallable_Check(result)) return result;
+        if (PyErr_Occurred())
+            PyErr_Print();
+        con << "Cannot find function " << name << "\n";
+        Py_XDECREF(result);
         return NULL;
     }
 
     void tScripting::Exec(proc_type proc, args *data) {
         if (!proc||!PyCallable_Check(proc)) return;
 
-        PyObject *result;
+        PyObject *result, *params;
         tCurrentAccessLevel elevator( tAccessLevel_Owner, true );
-        result = PyEval_CallObject(proc, PyList_AsTuple(data->get()));
+        params = PyList_AsTuple(data->get());
+        result = PyEval_CallObject(proc, params);
         if(PyErr_Occurred()) PyErr_Print();
+        Py_XDECREF(params);
         Py_XDECREF(result);
     }
 
-    args::args(): data(PyList_New(0)) {
+    args::args() {
+        data = PyList_New(0);
+        Py_INCREF(data);
     }
 
     args::~args() {
@@ -245,6 +254,7 @@ extern "C" {
     void args::clear() {
         Py_DECREF(data);
         data=PyList_New(0);
+        Py_INCREF(data);
     }
 
     args &args::operator<< (args x){
@@ -262,16 +272,20 @@ extern "C" {
     args &args::operator<< (int x){
         if (!data) return *this;
         PyObject *item = Py_BuildValue("i", x);
-        PyList_Append(data, item);
-        Py_DECREF(item);
+        if (item) {
+            PyList_Append(data, item);
+            Py_DECREF(item);
+        } else {}
         return *this;
     }
 
     args &args::operator<< (double x){
         if (!data) return *this;
         PyObject *item = Py_BuildValue("d", x);
-        PyList_Append(data, item);
-        Py_DECREF(item);
+        if (item) {
+            PyList_Append(data, item);
+            Py_DECREF(item);
+        } else {}
         return *this;
     }
 
@@ -280,16 +294,20 @@ extern "C" {
         tString ret;
         ret << x;
         PyObject *item = Py_BuildValue("s", (std::string(ret)).c_str());
-        PyList_Append(data, item);
-        Py_DECREF(item);
+        if (item) {
+            PyList_Append(data, item);
+            Py_DECREF(item);
+        } else {}
         return *this;
     }
 
     args &args::operator<< (tString &x){
         if (!data) return *this;
         PyObject *item = Py_BuildValue("s", (std::string(x)).c_str());
-        PyList_Append(data, item);
-        Py_DECREF(item);
+        if (item) {
+            PyList_Append(data, item);
+            Py_DECREF(item);
+        } else {}
         return *this;
     }
 
