@@ -755,7 +755,7 @@ bool eGameObject::TimestepThis(REAL currentTime,eGameObject *c){
 }
 
 #ifdef DEDICATED
-static REAL se_maxSimulateAhead = .01f;
+static REAL se_maxSimulateAhead = .1f;
 static tSettingItem<REAL> se_maxSimulateAheadConf( "MAX_SIMULATE_AHEAD", se_maxSimulateAhead );
 #endif
 
