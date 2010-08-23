@@ -121,6 +121,7 @@ void eGameObject::DoRemoveFromGame()
 eGameObject::eGameObject(eGrid *g,const eCoord &p,const eCoord &d,eFace *currentface,bool autodel)
         :autodelete(autodel),pos(p),dir(d),z(0),grid(g){
     tASSERT(g);
+    urgentSimulationRequested_=false;
     currentFace=currentface;
     lastTime=se_GameTime();
     id=-1;
@@ -730,6 +731,7 @@ bool eGameObject::TimestepThis(REAL currentTime,eGameObject *c){
                 c->InteractWith(c->grid->gameObjectsInteresting(j),currentTime,0);
 
         REAL timeThisStep = lastTime+i*(currentTime-lastTime)/number_of_steps;
+
         ret = ret || c->Timestep(timeThisStep);
         c->FindCurrentFace();
 
@@ -737,6 +739,14 @@ bool eGameObject::TimestepThis(REAL currentTime,eGameObject *c){
         if ( 2 * c->lastTime < timeThisStep + lastTime )
             break;
     }
+    for(int timeout = 10; timeout >= 0 && c->urgentSimulationRequested_; --timeout )
+    {
+        // simulate on while events are pending
+        c->urgentSimulationRequested_ = false;
+        ret = ret || c->Timestep(currentTime);
+        c->FindCurrentFace();
+    }
+
 #ifdef DEBUG
     c->grid->Check();
 #endif
@@ -781,22 +791,10 @@ void eGameObject::TimestepThisWrapper(eGrid * grid, REAL currentTime, eGameObjec
         simTime -= c->Lag();
 
 #ifdef DEDICATED
-    REAL nextTime = c->NextInterestingTime();
-
-    // store the time left to simulate
-    se_maxSimulateAheadLeft = simTime + se_maxSimulateAhead - nextTime;
-    if ( se_maxSimulateAheadLeft < 0 )
-        se_maxSimulateAheadLeft = 0;
-
     REAL lagThreshold = c->LagThreshold();
-    if ( simTime - lagThreshold < nextTime && nextTime < simTime + se_maxSimulateAhead )
+    if( !c->urgentSimulationRequested_ )
     {
-        // something interesting is going to happen, see what it is
-        simTime = nextTime;
-    }
-    else
-    {
-        // add an extra portion of lag compensation
+        // nothing interesting happening. add an extra portion of lag compensation
         simTime -= lagThreshold;
 
         if ( simTime < c->LastTime() + minTimestep )
@@ -805,6 +803,8 @@ void eGameObject::TimestepThisWrapper(eGrid * grid, REAL currentTime, eGameObjec
             return;
         }
     }
+
+    se_maxSimulateAheadLeft = se_maxSimulateAhead;
 #endif
 
     // check for teleports out of arena bounds
