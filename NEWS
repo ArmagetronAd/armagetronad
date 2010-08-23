@@ -1,3 +1,11 @@
+Changes since 0.2.8.3.x:
+- Tweaks to enemy influence system.
+- Ingame menu and console now are drawn on top of a semi-transparent,
+  darkened area for increased readability.
+- New first start menu with clearer language selection and initial setup.
+- Tutorial match against one AI at slower speed.
+- Tutorial tooltips for the most important keybindings.
+
 Changes since 0.2.8.3_rc4:
 - Intercepted chat commands are now written to ladderlog.txt. Format:
   COMMAND /command-intercepted player [command arguments]
