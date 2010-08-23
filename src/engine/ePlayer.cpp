@@ -2705,13 +2705,13 @@ static bool se_CheckAccessLevelShout( ePlayerNetID * p )
 // /me chat commant
 static void se_ChatMe( ePlayerNetID * p, std::istream & s, eChatSpamTester & spam )
 {
-    if ( IsSilencedWithWarning(p) || spam.Block() )
+    // check for global chat access right
+    if ( !se_CheckAccessLevelShout( p ) )
     {
         return;
     }
 
-    // check for global chat access right
-    if ( !se_CheckAccessLevelShout( p ) )
+    if ( IsSilencedWithWarning(p) || spam.Block() )
     {
         return;
     }
