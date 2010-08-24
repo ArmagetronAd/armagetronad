@@ -1732,7 +1732,7 @@ void s_Timestep(eGrid *grid, REAL time,bool cam){
     eSoundLocker locker;
     REAL minstep = 0;
 #ifdef DEDICATED
-    minstep = 1.0/sg_dedicatedFPS;
+    minstep = 0.9/sg_dedicatedFPS;
 
     // the low possible simulation frequency, together with lazy timesteps, produces
     // this much possible extra time difference between gameobjects
