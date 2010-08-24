@@ -146,8 +146,8 @@ public:												// public methods
     void LogScoreDifference();           //<! Logs accumulated scores since the last call to ResetScoreDifferences() to ladderlog.txt
 
     // player inquiry
-    int	 			NumPlayers		(		) const {
-        return players.Len();    // total number of players
+    int	 			NumPlayers(		) const {
+        return players.Len();    // total number of players, includes players that quit the team during the current round
     }
     ePlayerNetID*	Player			( int i ) const {
         return players(i); 	   // player of index i
@@ -162,16 +162,17 @@ public:												// public methods
     }
 
 
-    int	 			NumHumanPlayers	(		) const; 							// number of human players
-    int	 			NumAIPlayers	(		) const; 							// number of human players
-    int	 			AlivePlayers	(		) const;							// how many of the current players are currently alive?
-    ePlayerNetID*	OldestPlayer	(		) const;							// the oldest player
-    ePlayerNetID*	OldestHumanPlayer(		) const;							// the oldest human player
-    ePlayerNetID*	OldestAIPlayer	(		) const;							// the oldest AI player
-    ePlayerNetID*	YoungestPlayer	(		) const;							// the youngest player
-    ePlayerNetID*	YoungestHumanPlayer(	) const;							// the youngest human player
-    ePlayerNetID*	YoungestAIPlayer(		) const;							// the youngest AI player
-    bool			Alive			(		) const;							// is any of the players currently alive?
+    int	 			NumHumanPlayers	(		) const; 							//!< number of human players
+    int	 			NumAIPlayers	(		) const; 							//!< number of human players
+    int             NumActivePlayers(       ) const;                            //!< how many active players are there right now that can spawn next round?
+    int	 			AlivePlayers	(		) const;							//!< how many of the current players are currently alive?
+    ePlayerNetID*	OldestPlayer	(		) const;							//!< the oldest player
+    ePlayerNetID*	OldestHumanPlayer(		) const;							//!< the oldest human player
+    ePlayerNetID*	OldestAIPlayer	(		) const;							//!< the oldest AI player
+    ePlayerNetID*	YoungestPlayer	(		) const;							//!< the youngest player
+    ePlayerNetID*	YoungestHumanPlayer(	) const;							//!< the youngest human player
+    ePlayerNetID*	YoungestAIPlayer(		) const;							//!< the youngest AI player
+    bool			Alive			(		) const;							//!< is any of the players currently alive?
 
     // color
     tShortColor const & Color() const

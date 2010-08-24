@@ -661,7 +661,7 @@ tString eTeam::Ranking( int MAX, bool cut ){
             line.SetPos(25, false );
             line << t->score;
             line.SetPos(32, false );
-            line << t->NumPlayers();
+            line << t->NumActivePlayers();
             line.SetPos(41, false);
             int alive=t->AlivePlayers();
             line << alive;
@@ -711,7 +711,7 @@ float eTeam::RankingGraph( float y, int MAX ){
             score << t->score;
             DisplayText(-.3, y, .06, score.c_str(), sr_fontScoretable, -1);
             tColoredString members;
-            members << t->NumPlayers();
+            members << t->NumActivePlayers();
             DisplayText(-.1, y, .06, members.c_str(), sr_fontScoretable, -1);
             tColoredString alive;
             int alivep=t->AlivePlayers();
@@ -745,6 +745,12 @@ static int imbalance = 1;
 int	eTeam::NumAIPlayers	(		) const
 {
     return numAIs;
+}
+
+// how many active players are there right now that can spawn next round?
+int eTeam::NumActivePlayers(       ) const
+{
+    return numHumans + numAIs;
 }
 
 // make sure the limits on team number and such are met
