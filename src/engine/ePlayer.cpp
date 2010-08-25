@@ -3698,9 +3698,19 @@ public:
             MyMenu()->Exit();
             return true;
         }
-        else if (e.type==SDL_KEYDOWN &&
-                 uActionGlobal::IsBreakingGlobalBind(e.key.keysym.sym))
-            return su_HandleEvent(e, true);
+        else if (e.type==SDL_KEYDOWN)
+        { 
+            if (uActionGlobal::IsBreakingGlobalBind(e.key.keysym.sym))
+            {
+                return su_HandleEvent(e, true);
+            }
+            if (e.key.keysym.sym == SDLK_ESCAPE)
+            {
+                // escape needs to be handled by the surrounding menu, otherwise it
+                // probably brings up the ingame menu via global bind.
+                return false;
+            }
+        }
         else
         {
             if ( uMenuItemStringWithHistory::Event(e) )
