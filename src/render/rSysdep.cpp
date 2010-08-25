@@ -170,6 +170,14 @@ private:
     }
 };
 
+// returns the fence to be used for syncing the GPU and CPU
+static rGLFence & sr_GetFence()
+{
+    static rGLFence fence;
+    fence.Set();
+    return fence;
+}
+
 #endif // DEDICATED
 
 bool sr_screenshotIsPlanned=false;
@@ -409,10 +417,16 @@ static rFastForwardCommandLineAnalyzer analyzer;
 rSysDep::rSwapOptimize rSysDep::swapOptimize_ = rSysDep::rSwap_Auto;
 
 // random benchmarks. Median of three runs.
-// rSwap_Latency          : 306.8 FPS
-// rSwap_Throughput       : 307.0 FPS
-// rSwap_ThrougputFlush   : 308.3 FPS
-// rSwap_ThrougputFastest : 305.9 FPS (!)
+// rSwap_Latency          : 382.841
+// rSwap_Throughput       : 405.552
+// rSwap_ThrougputFlush   : 405.194
+// rSwap_ThrougputFastest : 406.676
+// same recording, old client:
+// rSwap_glFinish         : 395.892
+// rSwap_LateFinish       : 398.132
+// rSwap_Fence            : 400.248
+// rSwap_glFlush          : 398.037
+// rSwap_Fastest          : 396.392
 
 #ifndef DEDICATED
 
@@ -536,17 +550,13 @@ swap
 // sometimes, we preemptively call it after swaps.
 static bool sr_needClear = true;
 
-// flag indicating whether post-swap code (doing glFlush) needs to be
-// called on glClear.
-static bool sr_needPostSwap = false;
-
 // measures time wasted on waiting for swaps 
 class rSwapTime
 {
 public:
     rSwapTime()
     : frameTimes_(SWAP_TIMESCALE_LOG+6, 1/20.0)
-    , frameTimesMax_(4, 0)
+    , frameTimesMax_(4, -1/20.0)
     , waitTimes_(SWAP_TIMESCALE_LOG+1, 0)
     , delay_(0)
     , smoothDelay_(0)
@@ -585,18 +595,6 @@ public:
         switch( rSysDep::swapOptimize_ )
         {
         case rSysDep::rSwap_Auto:
-            // some special cases. In vsync off situations, don't optimize
-            // for latency. The high framerate already takes care of that.
-            switch( currentScreensetting.vSync )
-            {
-            case ArmageTron_VSync_Off:
-            case ArmageTron_VSync_MotionBlur:
-                return rSysDep::rSwap_Throughput;
-                break;
-            default:
-                break;
-            }
-
             return badFrame_ > 0 ? rSysDep::rSwap_Throughput : rSysDep::rSwap_Latency;
             break;
         default:
@@ -605,59 +603,154 @@ public:
         }
     }
 
-    void Swap() const
+    void Swap( bool reallyDoIt ) const
     {
-        sr_needPostSwap = true;
-
         // do the actual buffer swap.
-        SDL_GL_SwapBuffers();
+        if( reallyDoIt )
+        {
+            SDL_GL_SwapBuffers();
+
+#ifdef DEBUG_SWAP_X
+            {
+                static int roughStart = SWAP_TIMESCALE*5;
+                if( roughStart-- > 0 && (roughStart % 10) == 0 )
+                {
+                    tDelay( 1000 * 20 );
+                }
+                else if( roughStart == -1 )
+                {
+                    st_Breakpoint();
+                }
+            }
+#endif
+
+        
+
+        }
     }
 
-    // call after swapping buffers with an argument of true
-    // and once just before rendering with an argument 
-    void Finish( bool delayed, bool swap = false )
+    // Clears the buffer in advance of the main code requesting it later
+    void AdvanceClear()
     {
-        if( rSysDep::swapOptimize_ >= rSysDep::rSwap_Throughput )
-        {
-            if( !delayed )
-            {
-                if( swap )
-                {
-                    Swap();
+        sr_needClear = true;
+        rSysDep::ClearGL();
+        sr_needClear = false;
+    }
 
-                    // no need for postswap action if we're not going to do anything
-                    // anyway.
-                    if( rSysDep::swapOptimize_ == rSysDep::rSwap_ThroughputFastest )
-                    {
-                        sr_needPostSwap = false;
-                    }
-                }
-            }
-            else
-            {
-                sr_needPostSwap = false;
-                switch( rSysDep::swapOptimize_ )
-                {
-                case rSysDep::rSwap_ThroughputFastest:
-                    break;
-                case rSysDep::rSwap_ThroughputFlush:
-                    glFlush();
-                    break;
-                default:
-                    glFinish();
-                    break;
-                }
-            }
+    // swaps for minimum latency mode, returning the time needed to wait for the GPU
+    REAL LatencySwap(bool swap)
+    {
+        // flush
+        if( delay_ > smallDelay/10 )
+        {
+            // another extra finish if we're planning to to add delays.
+            // we only want to measure the time spent waiting for vsync,
+            // not the time waiting for rendering to finish.
+            glFinish();
+        }
+
+        Swap(swap);
+
+        // flush
+        double start = Time();
+        glFinish();
+        REAL ret = Time() - start;
+        
+        AdvanceClear();
+
+        return ret;
+    }
+
+    // swaps for maximum througput mode, returning the time needed to wait for the GPU
+    REAL ThroughputSwap(bool swap)
+    {
+        REAL ret;
+
+        if( rGLFence::Available() )
+        {
+            // oddly enough, on NVidia cards, the Swap() already
+            // eats up the idle time; for the return value to
+            // properly represent time waiting for stuff to finish,
+            // we need to include it in the measurements.
+            double start = Time();
+
+            Swap(swap);
+            
+            static rGLFence & fence = sr_GetFence();
+
+            // finish last frame's fence
+            fence.Finish();
+
+            ret = Time() - start;
+
+            // set new fence
+            fence.Set();
+
+            AdvanceClear();
         }
         else
         {
-            FinishComplicated( delayed, swap );
+            double start = Time();
+
+            // flush
+            glFinish();
+            ret = Time() - start;
+
+            Swap(swap);
+
+            AdvanceClear();
+        }
+
+#ifdef DEBUG_SWAP_X
+        static int count = 0;
+        if( count-- < 0 )
+        {
+            count = 60;
+            con << "SwapTime " << ret*1000 << "\n";
+        }
+#endif       
+
+        return ret;
+    }
+
+    // call after swapping buffers with an argument of true
+    // and once just before rendering with an argument
+    void Finish( bool swap = false )
+    {
+        switch( rSysDep::swapOptimize_ )
+        {
+        case rSysDep::rSwap_ThroughputFastest:
+            Swap(swap);
+            AdvanceClear();
+            break;
+        case rSysDep::rSwap_ThroughputFlush:
+            Swap(swap);
+            glFlush();
+            AdvanceClear();
+            break;
+        case rSysDep::rSwap_Throughput:
+            ThroughputSwap(swap);
+            break;
+        case rSysDep::rSwap_Auto:
+            // some special cases. In vsync off situations, don't optimize
+            // for latency. The high framerate already takes care of that.
+            switch( currentScreensetting.vSync )
+            {
+            case ArmageTron_VSync_Off:
+            case ArmageTron_VSync_MotionBlur:
+                ThroughputSwap(swap);
+                return;
+            default:
+                break;
+            }
+        default:
+            FinishComplicated( swap );
         }
     }
 
     // call after swapping buffers with an argument of true
     // and once just before rendering with an argument 
-    void FinishComplicated( bool delayed, bool swap = false )
+    void FinishComplicated( bool swap = false )
     {
 #ifdef DEBUG_SWAP_X
         {
@@ -672,94 +765,18 @@ public:
 
         rSysDep::rSwapOptimize opt = GetCurrentSwapOptimizeMode();
 
-        // do nothing if this is the wrong time to flush
-        bool shouldDelayFlush = ( opt >= rSysDep::rSwap_Throughput );
-        static const int backsize = 3;
-        static bool shouldDelayFlushOld[backsize];
-        if( delayed != shouldDelayFlushOld[backsize-1] )
-        {
-            if( !delayed && swap )
-            {
-                Swap();
-            }
-
-            // workaround: extra glFinishs before really switching mode
-            if ( shouldDelayFlushOld[backsize-1] != shouldDelayFlush )
-            {
-                glFinish();
-                lastTime_ = Time();
-            }
-
-            return;
-        }
-        for( int i = backsize-1; i > 0; --i )
-        {
-            shouldDelayFlushOld[i] = shouldDelayFlushOld[i-1];
-        }
-        shouldDelayFlushOld[0] = shouldDelayFlush;
-
-        if( delay_ > smallDelay/10 && !delayed )
-        {
-            // another extra finish if we're planning to to add delays.
-            // we only want to measure the time spent waiting for vsync,
-            // not the time waiting for rendering to finish.
-            glFinish();
-        }
-
-        // mark beginning of swap mode
-        StartSwap();
-
-        if( !delayed && swap )
-        {
-            Swap();
-        }
-
-#ifdef DEBUG_SWAP_X
-        {
-            static int roughStart = SWAP_TIMESCALE*5;
-            if( roughStart-- > 0 )
-            {
-                tDelay( 1000 * 24 );
-            }
-            else if( roughStart == -1 )
-            {
-                st_Breakpoint();
-            }
-        }
-#endif
-
-        glFinish();
-
-        // mark end of swap mode
-        if( opt < rSysDep::rSwap_Throughput )
-        {
-            StopSwap();
-        }
-
-        // preemptively call glClear
-        if( !delayed )
-        {
-            sr_needPostSwap = false;
-            sr_needClear = true;
-            rSysDep::ClearGL();
-            sr_needClear = false;
-        }
+        REAL neededToWait = ( opt == rSysDep::rSwap_Throughput ) ? ThroughputSwap(swap) : LatencySwap(swap);
+        StopSwap( neededToWait );
 
         // delay
-        if( opt == rSysDep::rSwap_Latency && !delayed && delay_ > smallDelay )
+        if( opt == rSysDep::rSwap_Latency && delay_ > smallDelay )
         {
             tDelay( delay_ * 1000 * 1000 );
         }
     }
 protected:
-    // call before swapping
-    void StartSwap()
-    {
-        startTime_ = Time();
-    }
-
     // call after swapping
-    void StopSwap()
+    void StopSwap( REAL timeSpentWaiting )
     {
         double now = Time();
         REAL timeSpent = now - lastTime_;
@@ -782,8 +799,8 @@ protected:
         static const int framePenaltySingle = framePenaltyMax/10;
         static const int framePenaltyMin = -framePenaltySingle*3;
 
-        // the time spent waiting, not doing anything, during the last frame
-        REAL timeSpentWaiting = (now - startTime_) + delay_;
+        // the real time spent waiting, not doing anything, during the last frame
+        timeSpentWaiting += delay_;
 
         bool frameDrop = inGame_ && 
             (
@@ -1257,16 +1274,6 @@ bool sr_MotionBlur( double time, std::auto_ptr< rTextureRenderTarget > & blurTar
     return true;
 }
 
-// returns the fence to be used for syncing the GPU and CPU
-/*
-static rGLFence & sr_GetFence()
-{
-    static rGLFence fence;
-    fence.Set();
-    return fence;
-}
-*/
-
 void rSysDep::SwapGL(){
     static std::auto_ptr< rTextureRenderTarget > blurTarget(0);
 
@@ -1372,7 +1379,7 @@ void rSysDep::SwapGL(){
     // actiate motion blur (does not use the game state, so it's OK to call here )
     bool shouldSwap = sr_MotionBlur( time, blurTarget );
 
-    sr_SwapTime().Finish( false, shouldSwap );
+    sr_SwapTime().Finish( shouldSwap );
 
     if (sr_screenshotIsPlanned){
         make_screenshot();
@@ -1455,11 +1462,6 @@ void sr_UnlockSDL(){
 
 #ifndef DEDICATED
 void  rSysDep::ClearGL(){
-    if ( sr_needPostSwap )
-    {
-        sr_SwapTime().Finish( true );
-    }
-
     if (sr_glOut && sr_needClear )
     {
         glClearColor(0.0,0.0,0.0,1.0);
