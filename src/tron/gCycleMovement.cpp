@@ -1186,6 +1186,8 @@ void gCycleMovement::AddDestination( gDestination * dest )
         return;
     }
 
+    this->RequestSimulation();
+
     this->NotifyNewDestination( dest );
 
     // repeat insertion: position may have changed
@@ -2514,6 +2516,15 @@ bool gCycleMovement::Timestep( REAL currentTime )
     bool ret = false;
     if ( currentTime > lastTime )
         ret = TimestepCore( currentTime );
+
+    // if we get here and turns are left pending within our reach,
+    // request the function gets called again right away.
+    if( currentDestination || 
+        ( !pendingTurns.empty() && GetNextTurn( pendingTurns.front() < currentTime + MaxSimulateAhead() ) )
+        )
+    {
+        RequestSimulation();
+    }
 
     return ret;
 }
@@ -4212,34 +4223,6 @@ void gCycleMovement::MoveSafely( const eCoord & dest, REAL startTime, REAL endTi
 
 REAL GetTurnSpeedFactor(void) {
     return sg_cycleTurnSpeedFactor;
-}
-
-// *******************************************************************************
-// *
-// *	NextInterestingTime
-// *
-// *******************************************************************************
-//!
-//!		@return
-//!
-// *******************************************************************************
-
-REAL gCycleMovement::NextInterestingTime( void ) const
-{
-    // default to the last time
-    REAL ret = LastTime();
-
-    // look for a later destination
-    gDestination * run = currentDestination;
-    while ( run )
-    {
-        REAL time = run->GetGameTime();
-        if ( time > ret )
-            ret = time;
-        run = run->next;
-    }
-
-    return ret;
 }
 
 void gCycleMovement::AddZoneAcceleration( REAL zoneAcceleration )
