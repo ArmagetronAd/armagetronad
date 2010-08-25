@@ -49,17 +49,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     #endif
     #endif
 
-    #ifndef SDL_OPENGL
-    #ifndef DIRTY
-    #define DIRTY
-    #endif
-    #endif
-
     #ifdef DEBUG
 //#ifdef WIN32
     #define FORCE_WINDOW
 //#endif
     #endif
+
+#ifndef SDL_OPENGL
+#error "need SDL 1.1"
+#endif
 
 tCONFIG_ENUM( rResolution );
 tCONFIG_ENUM( rColorDepth );
@@ -84,7 +82,7 @@ static tSettingItem<int>  at_ch("CUSTOM_SCREEN_HEIGHT"	, height[ArmageTron_Custo
 static tSettingItem<int>  at_cw("CUSTOM_SCREEN_WIDTH" 	, width	[ArmageTron_Custom]);
 static tSettingItem<REAL> at_ca("CUSTOM_SCREEN_ASPECT" , aspect[ArmageTron_Custom]);
 
-    #define MAXEMERGENCY 6
+    #define MAXEMERGENCY 5
 
 rScreenSettings lastSuccess(ArmageTron_640_480, false);
 
@@ -101,14 +99,13 @@ std::istream & operator >> ( std::istream & s, rScreenSize const & size )
 */
 
     #ifndef DEBUG
-static rScreenSettings em6(ArmageTron_320_240, false, ArmageTron_ColorDepth_16, true, false);
-static rScreenSettings em5(ArmageTron_320_240, false, ArmageTron_ColorDepth_Desktop, true, false);
-static rScreenSettings em4(ArmageTron_640_480, false,ArmageTron_ColorDepth_16);
-static rScreenSettings em3(ArmageTron_640_480, true, ArmageTron_ColorDepth_16);
-static rScreenSettings em2(ArmageTron_640_480, true, ArmageTron_ColorDepth_16, false);
+static rScreenSettings em5(ArmageTron_320_240, false, ArmageTron_ColorDepth_16, false);
+static rScreenSettings em4(ArmageTron_320_240, false, ArmageTron_ColorDepth_Desktop, false);
+static rScreenSettings em3(ArmageTron_640_480, false,ArmageTron_ColorDepth_16);
+static rScreenSettings em2(ArmageTron_640_480, true, ArmageTron_ColorDepth_16);
 static rScreenSettings em1(ArmageTron_640_480);
 
-static rScreenSettings *emergency[MAXEMERGENCY+2]={ &lastSuccess, &lastSuccess, &em1, &em2, &em3 , &em4, &em5, &em6};
+static rScreenSettings *emergency[MAXEMERGENCY+2]={ &lastSuccess, &lastSuccess, &em1, &em2 , &em3, &em4, &em5};
     #endif
 
     #ifdef DEBUG
@@ -165,13 +162,6 @@ static tConfItem<rColorDepth> tc("COLORDEPTH",currentScreensetting.colorDepth);
 static tConfItem<rColorDepth> ltc("LAST_COLORDEPTH",lastSuccess.colorDepth);
 static tConfItem<rColorDepth> tzd("ZDEPTH",currentScreensetting.zDepth);
 static tConfItem<rColorDepth> ltzd("LAST_ZDEPTH",lastSuccess.zDepth);
-
-    #ifdef DIRTY
-    #ifdef SDL_OPENGL
-static tConfItem<bool> sdl("USE_SDL",currentScreensetting.useSDL);
-static tConfItem<bool> lsdl("LAST_USE_SDL",lastSuccess.useSDL);
-    #endif
-    #endif
 
 static tConfItem<bool> check_errors("CHECK_ERRORS",currentScreensetting.checkErrors);
 static tConfItem<bool> check_errorsl("LAST_CHECK_ERRORS",lastSuccess.checkErrors);
@@ -356,8 +346,8 @@ int rScreenSize::Compare( rScreenSize const & other ) const
 //!
 // *******************************************************************************************
 
-rScreenSettings::rScreenSettings( rResolution r, bool fs, rColorDepth cd, bool sdl, bool ce )
-        :res(r), windowSize(r), fullscreen(fs), colorDepth(cd), zDepth( ArmageTron_ColorDepth_Desktop ), useSDL(sdl), checkErrors(true), vSync( ArmageTron_VSync_Default ), aspect (1)
+rScreenSettings::rScreenSettings( rResolution r, bool fs, rColorDepth cd, bool ce )
+        :res(r), windowSize(r), fullscreen(fs), colorDepth(cd), zDepth( ArmageTron_ColorDepth_Desktop ), checkErrors(true), vSync( ArmageTron_VSync_Default ), aspect (1)
 {
     // special case for desktop resolution: window size of 640x480
     if ( r == ArmageTron_Desktop )
@@ -514,9 +504,6 @@ static bool lowlevel_sr_InitDisplay(){
     if ( res.res != ArmageTron_Invalid )
         currentScreensetting.aspect = aspect[res.res];
 
-    #ifndef DIRTY
-    currentScreensetting.useSDL = true;
-    #endif
     res.UpdateSize();
     sr_screenWidth = res.width;
     sr_screenHeight= res.height;
@@ -560,16 +547,7 @@ static bool lowlevel_sr_InitDisplay(){
         default: break;
         }
 
-    #ifdef SDL_OPENGL
-        if (currentScreensetting.useSDL)
-        {
-            sr_SetGLAttributes( singleCD_R, singleCD_G, singleCD_B, zDepth );
-        }
-    #else
-        currentScreensetting.useSDL = false;
-    #endif
-
-
+        sr_SetGLAttributes( singleCD_R, singleCD_G, singleCD_B, zDepth );
 
         /*
           #ifdef POWERPAK_DEB
@@ -580,26 +558,15 @@ static bool lowlevel_sr_InitDisplay(){
 
         int attrib;
 
-    #ifdef SDL_OPENGL
-        if (currentScreensetting.useSDL)
+#ifndef FORCE_WINDOW
+        if (currentScreensetting.fullscreen)
         {
-            // SDL 1.1
-    #ifndef FORCE_WINDOW
-            if (currentScreensetting.fullscreen)
-                attrib=SDL_OPENGL | SDL_FULLSCREEN;
-            else
-    #endif
-                attrib=SDL_OPENGL;
+            attrib=SDL_OPENGL | SDL_FULLSCREEN;
         }
         else
-    #endif
+#endif
         {
-    #ifndef FORCE_WINDOW
-            if (currentScreensetting.fullscreen)
-                attrib=SDL_DOUBLEBUF | SDL_SWSURFACE | SDL_FULLSCREEN;
-            else
-    #endif
-                attrib=SDL_DOUBLEBUF | SDL_SWSURFACE;
+            attrib=SDL_OPENGL;
         }
 
     #ifdef FORCE_WINDOW
@@ -641,12 +608,7 @@ static bool lowlevel_sr_InitDisplay(){
             {
                 currentScreensetting.colorDepth = ArmageTron_ColorDepth_16;
 
-    #ifdef SDL_OPENGL
-                if (currentScreensetting.useSDL)
-                {
-                    sr_SetGLAttributes( 5, 5, 5, 16 );
-                }
-    #endif
+                sr_SetGLAttributes( 5, 5, 5, 16 );
             }
         }
 
@@ -724,11 +686,6 @@ static bool lowlevel_sr_InitDisplay(){
         SDL_EnableUNICODE(1);
     }
 
-    #ifdef DIRTY
-    if (!currentScreensetting.useSDL)
-        if(!rSysDep::InitGL()) return false;
-    #endif
-
     #ifndef DEDICATED
     gl_vendor.Clear();
     gl_renderer.Clear();
@@ -778,13 +735,7 @@ static bool lowlevel_sr_InitDisplay(){
     #endif
     #endif
     renderer_identification << rRenderIdCallback::RenderId() << ' ';
-    #ifdef SDL_OPENGL
     renderer_identification << "SDL 1.2\n";
-    renderer_identification << "USE_SDL=" << currentScreensetting.useSDL
-    << '\n';
-    #else
-    renderer_identification << "SDL 1.0\n";
-    #endif
     renderer_identification << "CD=" << currentScreensetting.colorDepth  << '\n';
     renderer_identification << "FS=" << currentScreensetting.fullscreen  << '\n';
     renderer_identification << "GL_VENDOR=" << gl_vendor   << '\n';
@@ -941,10 +892,6 @@ bool sr_InitDisplay(){
 void sr_ExitDisplay(){
     #ifndef DEDICATED
     rCallbackBeforeScreenModeChange::Exec();
-
-    #ifdef DIRTY
-    rSysDep::ExitGL();
-    #endif
 
     if (sr_screen){
         failed_attempts = 0;

@@ -41,10 +41,6 @@ public:
     };
 
 #ifndef DEDICATED
-    // graphics initialisation and cleanup:
-    static bool InitGL();
-    static void ExitGL();
-
     // buffer swap:
     static void SwapGL();
     static void ClearGL(); // not really system depentent.......

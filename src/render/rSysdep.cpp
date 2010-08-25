@@ -57,43 +57,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <unistd.h>
 #define SCREENSHOT_PNG_BITDEPTH 8
 #define SCREENSHOT_BYTES_PER_PIXEL 3
+
 #ifndef SDL_OPENGL
-#ifndef DIRTY
-#define DIRTY
-#endif
-#endif
-
-//#ifndef SDL_OPENGL
-//#error "need SDL 1.1"
-//#endif
-
-#ifndef DIRTY
-
-// nothing to be done.
-
-/*
-//#elif defined(HAVE_FXMESA)
- #include <GL/gl>
- #include <GL/fxmesa>
-
- static fxMesaContext ctx=NULL;
-*/
-
-#elif defined(WIN32)
-
-#include <windows.h>
-#include <windef.h>
-#include "rGL.h"
-static HDC hDC=NULL;
-static HGLRC hRC=NULL;
-
-#elif defined(unix) || defined(__unix__)
-
-#include <GL/glx.h>
-static GLXContext cx;
-Display *dpy=NULL;
-Window  win;
-
+#error "need SDL 1.1"
 #endif
 
 #ifndef DEDICATED
@@ -205,164 +171,6 @@ private:
 };
 
 #endif // DEDICATED
-
-#ifdef DIRTY
-#include <SDL_syswm.h>
-
-// graphics initialisation and cleanup:
-bool  rSysDep::InitGL(){
-    SDL_SysWMinfo system;
-    SDL_VERSION(&system.version);
-    if (!SDL_GetWMInfo(&system)){
-        std::cerr << "Video information not available!\n";
-        return(false);
-    }
-
-    /*
-    con << "SDL version: " << (int)system.version.major
-         << "." <<  (int)system.version.minor << "." <<  (int)system.version.patch << '\n';
-    */
-
-    /*
-    //#ifdef HAVE_FXMESA
-    if(!ctx){
-      int x=fxQueryHardware();
-      if(x){
-        std::cerr << "No 3Dfx hardware available.\n" << x << '\n';
-        return(false);
-      }
-
-      GLint attribs[]={FXMESA_DOUBLEBUFFER,FXMESA_DEPTH_SIZE,16,FXMESA_NONE};
-      ctx=fxMesaCreateBestContext(0,sr_screenWidth,sr_screenHeight,attribs);
-
-      if (!ctx){
-        std::cerr << "Could not create FX rendering context!\n";
-        return(false);
-      }
-
-      fxMesaMakeCurrent(ctx);
-    }
-    */
-#ifdef WIN32
-    // windows GL initialisation stolen from
-    // http://www.geocities.com/SiliconValley/Code/1219/opengl32.html
-
-    if (!hRC){
-        HWND hWnd=system.window;
-
-        PIXELFORMATDESCRIPTOR pfd;
-        int iFormat;
-
-        // get the device context (DC)
-        hDC = GetDC( hWnd );
-        if (!hDC) return false;
-
-        // set the pixel format for the DC
-        ZeroMemory( &pfd, sizeof( pfd ) );
-        pfd.nSize = sizeof( pfd );
-        pfd.nVersion = 1;
-        pfd.dwFlags = PFD_DRAW_TO_WINDOW |
-                      PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-        pfd.iPixelType = PFD_TYPE_RGBA;
-        pfd.cColorBits = currentScreensetting.colorDepth ? 24 : 16;
-        pfd.cDepthBits = 16;
-        pfd.iLayerType = PFD_MAIN_PLANE;
-        iFormat = ChoosePixelFormat( hDC, &pfd );
-        SetPixelFormat( hDC, iFormat, &pfd );
-
-        // create and enable the render context (RC)
-        hRC = wglCreateContext( hDC );
-        if (!hRC || !wglMakeCurrent( hDC, hRC ))
-            return false;
-    }
-
-#elif defined(unix) || defined(__unix__)
-    if (system.subsystem!=SDL_SYSWM_X11){
-        std::cerr << "System is not X11!\n";
-        std::cerr << (int)system.subsystem << "!=" << (int)SDL_SYSWM_X11 <<'\n';
-        return false;
-    }
-
-    if (!dpy){
-
-        dpy=system.info.x11.display;
-        win=system.info.x11.window;
-
-        int errorbase,tEventbase;
-        if (glXQueryExtension(dpy,&errorbase,&tEventbase) == False){
-            std::cerr << "OpenGL through GLX not supported.\n";
-            return false;
-        }
-
-        int configuration[]={GLX_DOUBLEBUFFER,GLX_RGBA,GLX_DEPTH_SIZE ,12, GLX_RED_SIZE,1,
-                             GLX_BLUE_SIZE,1,GLX_GREEN_SIZE,1,None
-                            };
-
-        XVisualInfo *vi=glXChooseVisual(dpy,DefaultScreen(dpy),configuration);
-
-        if (vi== NULL){
-            std::cerr << "Could not initialize Visual.\n";
-            return false;
-        }
-
-        cx=glXCreateContext(dpy,vi,
-                            NULL,True);
-
-        if (cx== NULL){
-            std::cerr << "Could not initialize GL context.\n";
-            return false;
-        }
-
-        if (!glXMakeCurrent(dpy,win,cx)){
-            dpy=0;
-            return false;
-        }
-    }
-
-#endif
-
-    return true;
-}
-
-void  rSysDep::ExitGL(){
-    SDL_SysWMinfo system;
-    SDL_GetWMInfo(&system);
-
-    /*
-    #ifdef HAVE_FXMESA
-
-    if(ctx){
-      fxMesaDestroyContext(ctx);
-      ctx=NULL;
-      fxCloseHardware();
-    }
-    */
-
-#if defined(WIN32)
-    HWND hWnd=system.window;
-
-    // windows GL cleanup stolen from
-    // http://www.geocities.com/SiliconValley/Code/1219/opengl32.html
-    if (hRC){
-
-        wglMakeCurrent( NULL, NULL );
-        wglDeleteContext( hRC );
-        ReleaseDC( hWnd, hDC );
-
-        hRC=NULL;
-        hDC=NULL;
-    }
-#elif defined(unix) || defined(__unix__)
-    if (dpy){
-
-        //    glXReleaseBuffersMESA( dpy, win );
-        glXMakeCurrent(dpy,None,NULL);
-        glXDestroyContext(dpy, cx );
-        dpy=NULL;
-    }
-#endif
-}
-#endif // DIRTY
 
 bool sr_screenshotIsPlanned=false;
 static bool   s_videoout    =false;
@@ -802,22 +610,7 @@ public:
         sr_needPostSwap = true;
 
         // do the actual buffer swap.
-#if defined(    SDL_OPENGL)
-        if (lastSuccess.useSDL)
-            SDL_GL_SwapBuffers();
-        //#elif defined(HAVE_FXMESA)
-        //fxMesaSwapBuffers();
-#endif  
-            
-#ifdef DIRTY    
-        if (!lastSuccess.useSDL){
-#if defined(WIN32)
-            SwapBuffers( hDC );
-#elif defined(unix) || defined(__unix__)
-            glXSwapBuffers(dpy,win);
-#endif  
-        }
-#endif  
+        SDL_GL_SwapBuffers();
     }
 
     // call after swapping buffers with an argument of true
@@ -1464,8 +1257,8 @@ bool sr_MotionBlur( double time, std::auto_ptr< rTextureRenderTarget > & blurTar
     return true;
 }
 
-/*
 // returns the fence to be used for syncing the GPU and CPU
+/*
 static rGLFence & sr_GetFence()
 {
     static rGLFence fence;
