@@ -546,6 +546,21 @@ static uMenuItemToggle infp
  "$tweaks_infinity_help"
  ,sr_infinityPlane);
 
+uMenuItemSelection<rSysDep::rFramedropTolerance> framedropTolerance
+(&screen_menu_tweaks,
+ "$framedroptolerance_text",
+ "$framedroptolerance_help",
+ rSysDep::framedropTolerance_);
+
+static uSelectEntry<rSysDep::rFramedropTolerance> framedropTolerance_Lenient(framedropTolerance,"$framedrop_tolerance_lenient_text","$framedrop_tolerance_lenient_help",rSysDep::rSwap_Lenient);
+static uSelectEntry<rSysDep::rFramedropTolerance> framedropTolerance_Normal(framedropTolerance,"$framedrop_tolerance_normal_text","$framedrop_tolerance_normal_help",rSysDep::rSwap_Normal);
+static uSelectEntry<rSysDep::rFramedropTolerance> framedropTolerance_Strict(framedropTolerance,"$framedrop_tolerance_strict_text","$framedrop_tolerance_strict_help",rSysDep::rSwap_Strict);
+static uSelectEntry<rSysDep::rFramedropTolerance> framedropTolerance_Draconic(framedropTolerance,"$framedrop_tolerance_draconic_text","$framedrop_tolerance_draconic_help",rSysDep::rSwap_Draconic);
+
+tCONFIG_ENUM( rSysDep::rFramedropTolerance );
+
+static tConfItem< rSysDep::rFramedropTolerance > framedropToleranceCI("FRAMEDROP_TOLERANCE", rSysDep::framedropTolerance_ );
+
 uMenuItemSelection<rSysDep::rSwapOptimize> swapOptimize
 (&screen_menu_tweaks,
  "$swapoptimize_text",

@@ -415,6 +415,7 @@ static rFastForwardCommandLineAnalyzer analyzer;
 // #define MILLION 1000000
 
 rSysDep::rSwapOptimize rSysDep::swapOptimize_ = rSysDep::rSwap_Auto;
+rSysDep::rFramedropTolerance rSysDep::framedropTolerance_ = rSysDep::rSwap_Normal;
 
 // random benchmarks. Median of three runs.
 // rSwap_Latency          : 382.841
@@ -541,14 +542,18 @@ delay
 THROUGHPUT order:
 input
 simulate
-sync
 render
+sync
 swap
 */
 
 // flag indicating that the next call to glClear needs execution.
 // sometimes, we preemptively call it after swaps.
 static bool sr_needClear = true;
+
+static REAL sr_swapDelayFactor = .5f;
+static tConfItem< REAL > sr_swapDelayFactorCI("SWAP_LATENCY_DELAY_FACTOR", sr_swapDelayFactor );
+
 
 // measures time wasted on waiting for swaps 
 class rSwapTime
@@ -560,12 +565,21 @@ public:
     , waitTimes_(SWAP_TIMESCALE_LOG+1, 0)
     , delay_(0)
     , smoothDelay_(0)
-    , delayFactor_(.6f)
     , badFrame_( -200 )
     , counter_ ( 100 )
     , inGame_( false )
     {
         lastTime_ = Time();
+
+        // clamp delay factor
+        if( sr_swapDelayFactor < .2 )
+        {
+            sr_swapDelayFactor = .2;
+        }
+        if( sr_swapDelayFactor > .95 )
+        {
+            sr_swapDelayFactor = .95;
+        }
     }
 
     static double Time()
@@ -775,6 +789,26 @@ public:
         }
     }
 protected:
+    // one frame every so many seconds is tolarated
+    static REAL FrameDropTolerance()
+    {
+        switch (rSysDep::framedropTolerance_)
+        {
+        case rSysDep::rSwap_Lenient:
+            return 20;
+            break;
+        case rSysDep::rSwap_Normal:
+            return 60;
+            break;
+        case rSysDep::rSwap_Strict:
+            return 600;
+            break;
+        default:
+            return 60*60*24;
+            break;
+        }
+    }
+
     // call after swapping
     void StopSwap( REAL timeSpentWaiting )
     {
@@ -793,7 +827,7 @@ protected:
             minFrameTime = referenceFrameTime;
         }
         
-        // tolerance factor for dropped frames, higher in finish mode
+        // tolerance factor for dropped frames
         static const REAL frameDropTolerance = 1.5;
         static const int framePenaltyMax = 1200;
         static const int framePenaltySingle = framePenaltyMax/10;
@@ -824,20 +858,20 @@ protected:
                 // drops.
                 static double lastDrop = now-1;
                 REAL weight = (now - lastDrop)/3.0f;
-                weight = weight * exp(-weight/3.0f);
+                weight = weight * exp(-3*weight/FrameDropTolerance());
                 lastDrop = now;
                 if( weight > 1 )
                 {
                     weight = 1;
                 }
 #ifdef DEBUG_SWAP
-                con << "delayFactor " << delayFactor_;
+                con << "delayFactor " << sr_swapDelayFactor;
 #endif
 
-                delayFactor_ *= (1-delayFactorPenalty*weight);
+                sr_swapDelayFactor *= (1-delayFactorPenalty*weight);
 
 #ifdef DEBUG_SWAP
-                con << " -> " << delayFactor_ << "\n";
+                con << " -> " << sr_swapDelayFactor << "\n";
 #endif
             }
 
@@ -893,11 +927,12 @@ protected:
         waitTimes_.Add( timeSpentWaiting );
 
         // calculate optimal delay
-        REAL newDelay = waitTimes_.GetMin() * delayFactor_;
+        REAL newDelay = waitTimes_.GetMin() * sr_swapDelayFactor;
 
         // let delay factor recover so that there will be about at
-        // most one dropped frame every 1000.
-        delayFactor_ = 1 - (1-delayFactor_)*(1-(1-delayFactor_)*delayFactorPenalty*0.001);
+        // most one dropped frame every so many
+        REAL recovery=2*timeSpent/FrameDropTolerance();
+        sr_swapDelayFactor = 1 - (1-sr_swapDelayFactor)*(1-(1-sr_swapDelayFactor)*delayFactorPenalty*recovery);
 
         // smooth out delay changes. Lowering is immediate
         if( newDelay < smoothDelay_ )
@@ -913,7 +948,8 @@ protected:
         delay_ = smoothDelay_;
 
         // clear artificial delay if the current swap mode says so
-        if( GetCurrentSwapOptimizeMode() != rSysDep::rSwap_Latency )
+        if( GetCurrentSwapOptimizeMode() != rSysDep::rSwap_Latency ||
+            rSysDep::framedropTolerance_ == rSysDep::rSwap_Draconic )
         {
             delay_ = 0;
         }
@@ -951,9 +987,6 @@ private:
 
     // smoothed pre-simulation delay
     REAL smoothDelay_;
-
-    // suppression factor for delay measurements
-    REAL delayFactor_;
 
     // if a frame dropped, this is set to a finite value and counted down
     int badFrame_;
