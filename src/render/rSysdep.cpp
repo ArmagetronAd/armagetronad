@@ -569,6 +569,7 @@ public:
     , badFrame_( -200 )
     , counter_ ( 100 )
     , inGame_( false )
+    , lowFrameTime_( 0.001 )
     {
         lastTime_ = Time();
 
@@ -610,6 +611,18 @@ public:
         switch( rSysDep::swapOptimize_ )
         {
         case rSysDep::rSwap_Auto:
+            // check for ridiculously high framerate
+            if (frameTimesMax_.GetMin() > -lowFrameTime_)
+            {
+                lowFrameTime_ = 1/200.0;
+
+                return rSysDep::rSwap_Throughput;
+            }
+            else
+            {
+                lowFrameTime_ = 1/400.0;
+            }
+
             return badFrame_ > 0 ? rSysDep::rSwap_Throughput : rSysDep::rSwap_Latency;
             break;
         default:
@@ -781,7 +794,7 @@ public:
         rSysDep::rSwapOptimize opt = GetCurrentSwapOptimizeMode();
 
         REAL neededToWait = ( opt == rSysDep::rSwap_Throughput ) ? ThroughputSwap(swap) : LatencySwap(swap);
-        StopSwap( neededToWait );
+        StopSwap( neededToWait, opt );
 
         // delay
         if( opt == rSysDep::rSwap_Latency && delay_ > smallDelay )
@@ -811,7 +824,7 @@ protected:
     }
 
     // call after swapping
-    void StopSwap( REAL timeSpentWaiting )
+    void StopSwap( REAL timeSpentWaiting, rSysDep::rSwapOptimize opt )
     {
         double now = Time();
         REAL timeSpent = now - lastTime_;
@@ -877,7 +890,7 @@ protected:
             }
 
 #ifdef DEBUG_SWAP
-            if( badFrame_ < framePenaltyMax/2 && GetCurrentSwapOptimizeMode() == rSysDep::rSwap_Latency )
+            if( badFrame_ < framePenaltyMax/2 && opt == rSysDep::rSwap_Latency )
             {
                 con << "Framedrop! " << timeSpent*1000 << " > " << frameTimes_.GetMin()*1000 << ", minWait=" << waitTime*1000 << " at " << counter_ << "\n";
             }
@@ -930,10 +943,20 @@ protected:
         // calculate optimal delay
         REAL newDelay = waitTimes_.GetMin() * sr_swapDelayFactor;
 
-        // let delay factor recover so that there will be about at
-        // most one dropped frame every so many
-        REAL recovery=2*timeSpent/FrameDropTolerance();
-        sr_swapDelayFactor = 1 - (1-sr_swapDelayFactor)*(1-(1-sr_swapDelayFactor)*delayFactorPenalty*recovery);
+        // clear artificial delay if the current swap mode says so
+        if( opt == rSysDep::rSwap_Latency &&
+            rSysDep::framedropTolerance_ != rSysDep::rSwap_Draconic )
+        {
+            // let delay factor recover so that there will be about at
+            // most one dropped frame every so many
+            REAL recovery=2*timeSpent/FrameDropTolerance();
+            sr_swapDelayFactor = 1 - (1-sr_swapDelayFactor)*(1-(1-sr_swapDelayFactor)*delayFactorPenalty*recovery);
+        }
+        else
+        {
+            delay_ = newDelay = 0;
+        }
+
 
         // smooth out delay changes. Lowering is immediate
         if( newDelay < smoothDelay_ )
@@ -949,7 +972,7 @@ protected:
         delay_ = smoothDelay_;
 
         // clear artificial delay if the current swap mode says so
-        if( GetCurrentSwapOptimizeMode() != rSysDep::rSwap_Latency ||
+        if( opt != rSysDep::rSwap_Latency ||
             rSysDep::framedropTolerance_ == rSysDep::rSwap_Draconic )
         {
             delay_ = 0;
@@ -971,7 +994,8 @@ private:
     // minimum total frame time
     rRollingMinimum frameTimes_;
 
-    // maximum short-time frame time
+    // maximum short-time frame time (contains negative frametimes so rRollingMinimum
+    // can be abused to get the maximum frame time)
     rRollingMinimum frameTimesMax_;
 
     // minimum wait time per frame
@@ -997,6 +1021,9 @@ private:
 
     // flag indicating whether we're in a game
     bool inGame_;
+
+    // ridiculously low frametime limit
+    mutable REAL lowFrameTime_;
 
     // a frame swap delay that is considered small
     static const REAL smallDelay;
