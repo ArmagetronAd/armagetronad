@@ -311,14 +311,14 @@ class PerformanceCounter
 {
 public:
     PerformanceCounter(): count_(0){
-        tRealSysTimeFloat();
+        start_ = tRealSysTimeFloat();
     }
     unsigned int Count(){
         return count_++;
     }
     ~PerformanceCounter()
     {
-        double time = tRealSysTimeFloat();
+        double time = tRealSysTimeFloat()-start_;
         std::stringstream s;
         s << count_ << " frames in " << time << " seconds: " << count_ / time << " fps.\n";
 #ifdef WIN32
@@ -329,6 +329,7 @@ public:
     }
 private:
     unsigned int count_;
+    double start_;
 };
 
 static double s_nextFastForwardFrameRecorded=0; // the next frame to render in recorded time
