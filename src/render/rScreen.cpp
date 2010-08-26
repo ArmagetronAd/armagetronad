@@ -55,10 +55,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //#endif
     #endif
 
-#ifndef SDL_OPENGL
-#error "need SDL 1.1"
-#endif
-
 tCONFIG_ENUM( rResolution );
 tCONFIG_ENUM( rColorDepth );
 tCONFIG_ENUM( rVSync );
@@ -66,6 +62,10 @@ tCONFIG_ENUM( rVSync );
 SDL_Surface *sr_screen=NULL; // our window
 
     #ifndef DEDICATED
+#ifndef SDL_OPENGL
+#error "need SDL 1.1"
+#endif
+
 static int default_texturemode = GL_LINEAR_MIPMAP_LINEAR;
     #endif
 
