@@ -1,6 +1,7 @@
 %{
 #include "ePlayer.h"
 #include "gCycle.h"
+#include "nNetwork.h"
 %}
 
 %include "std_list.i"
@@ -11,6 +12,9 @@
         return c;
     }
     static ePlayerNetID * find_player( tString const & name ) { return ePlayerNetID::FindPlayerByName( name );}
+    void center_message(tString const & msg) {
+        sn_CenterMessage(msg, $self->Owner());
+    }
 };
 
 %rename(PlayerConf) ePlayer;
