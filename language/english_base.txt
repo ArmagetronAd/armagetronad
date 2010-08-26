@@ -709,19 +709,38 @@ moviepack_rim_wall_stretch_x_help  Extension of one square of rim wall texture i
 moviepack_rim_wall_stretch_y_help  Extension of the rim wall texture in the vertical direction for the moviepack
 
 #detail settings
-swapmode_text           Swap Mode:
-swapmode_help           Determines the commands used to sync graphics and input every frame. The current value implies:
-swapmode_fastest_text   Fastest
-swapmode_fastest_help   No sync commands. This is fastest and uses the least CPU, providing optimal througput, but may cause graphics to severely lag behind input. Use at your own risk.
-swapmode_glflush_text   Flush
-swapmode_glflush_help   Calls glFlush() to sync graphics output. Very little overhead and prevents graphics lag for most, but sadly not all, configurations.
-swapmode_fence_text     Fence
-swapmode_glflush_help   Uses fences where available to ensure no more than one frame of output lag; this guarantees good throughput with controllable latency. Without fences, falls back to Late Finish.
-swapmode_latefinish_text Late Finish
-swapmode_glflush_help   Calls glFinish before starting to render the next frame. Same overhead as regular Finish, minimally higher latency, higher throughput. This is the default.
-swapmode_glfinish_text  Finish
-swapmode_glfinish_help  Calls glFinish() after rendering a frame to sync graphics output. This is guaranteed to prevent graphics lagging behind input, but causes loss of framerate on some systems and full CPU load on others. Use if Flush or Fence do not work.
-swap_mode_help          Determines the commands used to sync graphics and input. 0: do nothing, 1: call glFlush(), 2: call glFinish().
+swapoptimize_text           Optimize Swap for:
+swapoptimize_help           Determines the algorithm used on buffer swaps and syncs.
+swapoptimize_latency_text   Low Latency
+swapoptimize_latency_help   This optimizes for low latency between input and display (also known as input lag).
+swapoptimize_auto_text       Automatic
+swapoptimize_auto_help       This choses low latency mode if your framerate appears stable and high enough and falls into throughput mode if too many frames are dropped or framerates are so high that latency is not a problem anyway. Recommended setting.
+swapoptimize_throughput_text Throughput
+swapoptimize_throughput_help This optimizes for high FPS counts and low number of dropped frames, but keeps input lag below one frame anyway.
+swapoptimize_throughput_flush_text Throughput+Flush
+swapoptimize_throughput_flush_help This optimizes for high FPS counts and low number of dropped frames. It uses pipeline flush commands instead of proper sync commands which causes various amounts of input lag on some systems, so beware.
+swapoptimize_throughput_fastest_text Overhead
+swapoptimize_throughput_fastest_help This optimizes low sync overhead. It does not flush the rendering pipeline at all. Expect insane amounts of input lag and performance drops due to inconveniently timed pipeline stalls.
+swap_optimize_help          Determines the algorithm used to swap and sync. 0: Optimize for low latency, 1: Auto, 2: optimize for high throughput, 3 and 4 optimize even more for throughput, but are very dangerous.
+
+framedroptolerance_text Framedrop Tolerance:
+framedroptolerance_help In Latency mode, this controls how hard the system tries to avoid occasional dropped frames to get latency down. The more you want the latency to reduce, the more framedrops you will have to tolerate.
+
+framedrop_tolerance_lenient_text Lenient
+framedrop_tolerance_lenient_help Expect about one dropped frame every twenty seconds.
+
+framedrop_tolerance_normal_text Normal
+framedrop_tolerance_normal_help Expect one dropped frame per minute.
+
+framedrop_tolerance_strict_text Strict
+framedrop_tolerance_strict_help Expect one dropped frame every ten minutes.
+
+framedrop_tolerance_draconic_text Draconic
+framedrop_tolerance_draconic_help Do not tolerate any unnecessary framedrops.
+
+framedrop_tolerance_help Controls the amount of dropped frames tolerated for the sake of lower latency in Latency swap mode. 0 tolerates the most, 4 the least.
+
+swap_latency_delay_factor_help   Safety factor for calculating the delay after swaps in Latency Swap mode. Between 0 and 1, don't touch, it gets adapted automatically according to your FRAMEDROP_TOLERANCE setting.
 
 texture_mode_0_help		Floor Texture:
 texture_mode_1_help		Wall Textures:

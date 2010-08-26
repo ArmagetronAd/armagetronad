@@ -1332,7 +1332,6 @@ void Render(eGrid *grid, REAL time, bool swap=true){
     if (sr_glOut){
         if(swap)
         {
-            rSysDep::PostSwapGL();
             rSysDep::ClearGL();
         }
         RenderAllViewports(grid);

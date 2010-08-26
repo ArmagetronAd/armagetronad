@@ -257,7 +257,6 @@ void uMenu::OnEnter(){
         OnRender();
 
 #ifndef DEDICATED
-        rSysDep::PostSwapGL();
         rSysDep::ClearGL();
 #endif
 

@@ -1,5 +1,6 @@
 Changes since 0.3.1
 ===================
+- New Low Latency or High Throughput optimizing swap/sync system.
 - Switched to utf-8 encoded strings internally and for config files.
   Language files can be either utf-8 or latin-1.
 - New command: “TOGGLE”. Cycle between 0 and 1 for a boolean config item.
