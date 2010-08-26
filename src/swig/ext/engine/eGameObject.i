@@ -88,7 +88,6 @@ public:
     int GOID() const;
 %rename(last_time) LastTime;
     REAL LastTime() const;
-    virtual REAL NextInterestingTime() const;
 
     eGameObject(eGrid *grid, const eCoord &p,const eCoord &d, eFace *currentface, bool autodelete=1);
     virtual ~eGameObject();

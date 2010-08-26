@@ -180,11 +180,11 @@ void rConsole::Render(){
             out.EnableLineWrap();
             out.SetIndent(sr_indent);
 
-            if( sr_alphaBlend )
+            if( sr_alphaBlend && predictBottom < out.GetTop() )
             {
                 RenderEnd();
                 glColor4f(0, 0, 0, .5f);
-                glRectf(-1,predictBottom,1,1);
+                glRectf(-1,predictBottom-.4*out.GetCHeight(),1,1);
             }
 
             int i;
@@ -207,7 +207,7 @@ void rConsole::Render(){
             }
            
             // check for mispredictions of console height
-            lastBottom = out.GetBottom()-.4*out.GetCHeight();
+            lastBottom = out.GetBottom();
             if( fabs(predictBottom - lastBottom) > .0001 )
             {
                 sr_consoleDisplayList.Clear();
