@@ -3524,6 +3524,7 @@ void handle_chat( nMessage &m )
                     else if (command == "/shout")
                     {
                         spam.lastSaidType_ = eChatMessageType_Public;
+                        spam.say_ = spam.say_.SubStr(7); // cut /shout prefix
                         se_ChatShout( p, s, spam );
                         return;
                     }
