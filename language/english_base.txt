@@ -2396,6 +2396,7 @@ no_real_teams           No teams with more than one player.\n
 player_topologypolice	Order from Topology Police: \1
 
 team_shuffle            \1 gets shuffled from rank \2 to \3.
+team_preshuffle         \1 will join at rank \2.
 team_shuffle_suppress   Future shuffle messages from this player will be suppressed.\n
 player_noshuffleup      You are not allowed to shuffle up.\n
 player_noshuffle        Your shuffling wish has no effect.\n
