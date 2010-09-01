@@ -417,6 +417,10 @@ spam_teamchage              You switched teams too often.
 spam_vote_kick_issue        You issued too many kick votes.
 spam_vote_rejected          Too many of your votes got rejected.
 
+# default shouting
+default_shout_spectator_help 1 if the default chat action for spectators should be shouting, 0 if it should be spectator chat.
+default_shout_player_help    1 if the default chat action for players should be shouting, 0 if it should be team chat.
+
 #********************************************
 #********************************************
 #
@@ -2852,6 +2856,7 @@ access_level_op_max_help       Maximal access level directly attainable by /op c
 access_level_admin_help        Minimal access level for /admin command.
 access_level_rtfm_help         Minimal access level for /teach or /rtfm command.
 access_level_chat_help         Minimal access level for chatting.
+access_level_shout_help        Minimal access level for shouting.
 access_level_ips_help          Minimal access level you need for seeing IPs of other players in the /players command.
 access_level_nver_help         Minimal access level you need for seeing Network versions/strings from other players in /players.
 access_level_spy_console_help  Minimal access level you need for seeing console input from other (in-game) admins.
@@ -2873,6 +2878,7 @@ access_level_vote_command_execute_help    Minimal access level successful comman
 access_level_chat_timeout_help   Time in seconds between public announcements that someone wants to chat, but can't. Set to 0 to disable the public warnings.
 access_level_chat_request   \10xRESETT would like to chat, but is not authorized yet. Would someone be so kind and say "/op \2"?\n
 access_level_chat_denied    0xff7f7fChat denied,0xffffff insufficient access level.\n
+access_level_shout_denied    0xff7f7fShout denied,0xffffff insufficient access level.\n
 access_level_op_denied      0xff7f7f\1 denied,0xffffff insufficient access level.\n
 access_level_op_overpowered 0xff7f7f\1 denied,0xffffff your need higher access rights than your victim.\n
 access_level_op_self        0xff7f7f\1 denied,0xffffff can't do that to yourself :).\n
