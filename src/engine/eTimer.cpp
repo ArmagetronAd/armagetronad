@@ -34,6 +34,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tMath.h"
 #include "tConfiguration.h"
 #include "eLagCompensation.h"
+#include "rSysdep.h"
+
 
 #include "eTimer.pb.h"
 
@@ -298,6 +300,11 @@ void eTimer::SyncTime(){
     {
         averageSpf_.Add( timeStep );
         averageSpf_.Timestep( timeStep );
+
+#ifndef DEDICATED
+        // inform renderer that a game is going on and that frame drops are for real.
+        rSysDep::IsInGame();
+#endif
     }
 
     // let averagers decay

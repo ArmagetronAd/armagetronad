@@ -230,11 +230,6 @@ AC_ARG_ENABLE(automakedefaults,
 		[enforce the default installation directories as set by automake. localstatedir=prefix/var violates the FHS, so this is off by default.]),,
 enable_automakedefaults=no enable_automakedefaults_default=yes)
 
-AC_ARG_ENABLE(dirty,
-	AC_HELP_STRING([--enable-dirty],
-		[allow dirty GL initialisation (like used with SDL 1.0) even if you have SDL 1.1 or up (default=disabled)]),,
-enable_dirty=no)
-
 AC_ARG_ENABLE(sysinstall,
 	AC_HELP_STRING([--enable-sysinstall],
 		[will install configuration files to /etc/armagetron and create a user if possible (default=enabled)]),,
@@ -633,7 +628,7 @@ AC_CHECK_LIB(xml2,xmlParseMemory,
 CPPFLAGS="$CPPFLAGS `$XML2_CONFIG --cflags`"
 LIBS="`$XML2_CONFIG --libs` $LIBS"
 AC_DEFINE(HAVE_LIBXML2, 1, [Define if you have the xml2 library (-lxml2).]),
-AC_MSG_ERROR([You need the library xml2 to compile ${progtitle}. Read the file doc/install_linux.html.])
+AC_MSG_ERROR([You need the library xml2 to compile ${progtitle}. Read the file doc/installation.txt.])
 ,`$XML2_CONFIG --libs`)
 
 AC_CHECK_FUNC(xmlParserInputBufferCreateFilenameDefault,
@@ -1093,13 +1088,6 @@ dnl ****************************************************
  AC_SUBST(needdata)
 else
 
-
-if test x$enable_dirty = xyes; then
-  AC_DEFINE(DIRTY,,[Define if you wish to use the old and dirty OpenGL
-  initialization method])
-fi
-
-
 dnl *************************************************
 dnl         SDL
 dnl *************************************************
@@ -1114,9 +1102,9 @@ fi
 CPPFLAGS="$CPPFLAGS `${SDL_CONFIG} --cflags`"
 LIBS="${SDLLIBS} $LIBS"
 
-AC_CHECK_FUNC(SDL_Init,
+AC_CHECK_FUNC(SDL_GL_SetAttribute,
 AC_DEFINE(HAVE_LIBSDL,,[Define if you have the library SDL]),
-AC_MSG_ERROR([You need the library SDL to compile ${progtitle}. Read the file doc/install_linux.html.])
+ AC_MSG_ERROR([You need the library SDL to compile ${progtitle}. Read the file doc/installation.txt.])
 ,)
 
 dnl ***************** OPTIONAL STUFF AFTER THIS POINT **********************
@@ -1181,7 +1169,7 @@ AC_CHECK_LIB($SYS_GL_LIB, glVertex3f,,
 AC_CHECK_LIB($SYS_GL_LIB, glBegin,,AC_MSG_ERROR([
   You need Mesa or an OpenGL-System to compile ${progtitle}.
   Maybe your libGL needs the X libraries and your system does not
-  find them? Read the file doc/install_linux.html.]),-L/usr/X11R6/lib)
+  find them? Read the file doc/installation.txt.]),-L/usr/X11R6/lib)
 )
 
 dnl check for 3DFX-MESA
@@ -1200,7 +1188,7 @@ dnl AC_CHECK_LIB($SYS_GLU_LIB, gluBuild2DMipmaps,,
 AC_CHECK_LIB($SYS_GLU_LIB, gluBuild3DMipmaps,,
 AC_MSG_ERROR([
 You need GLU to compile ${progtitle}; it SHOULD have come with OpenGL.
-Read the file doc/install_linux.html.]))
+Read the file doc/installation.txt.]))
 
 dnl *************************************************
 dnl         GLEW
@@ -1231,7 +1219,7 @@ test -z "$FREETYPE_CONFIG" && FREETYPE_CONFIG=freetype-config
 FTGL_CFLAGS="`pkg-config ftgl --cflags`"
 FTGL_LIBS="`pkg-config ftgl --libs`"
 
-FTGL_ERROR="You need the library ftgl in at least version 2.1.3~rc5 to compile Armagetron. Read the file doc/install_linux.html."
+FTGL_ERROR="You need the library ftgl in at least version 2.1.3~rc5 to compile Armagetron. Read the file doc/installation.txt."
 
 AC_CHECK_LIB(ftgl,ftglRenderGlyph,
 CPPFLAGS="$CPPFLAGS $FTGL_CFLAGS"
@@ -1287,7 +1275,7 @@ AC_CHECK_LIB(freetype,FT_Init_FreeType,
 CPPFLAGS="$CPPFLAGS `$FREETYPE_CONFIG --cflags`"
 LIBS="$LIBS `$FREETYPE_CONFIG --libs`"
 ,
-AC_MSG_ERROR([You need the library freetype to compile Armagetron. Read the file doc/install_linux.html.])
+AC_MSG_ERROR([You need the library freetype to compile Armagetron. Read the file doc/installation.txt.])
 )
 
 dnl FTGL again. Check for the headers. First, try the individual header.
@@ -1651,7 +1639,6 @@ echo "         Ruby lib flags: $RUBY_LIBS"
 echo "         Ruby install directory: $RUBY_INSTALL_DIR"
 fi
 
-echo "     Use dirty SDL initialization: $enable_dirty"
 echo "     Call sysinstall: $enable_sysinstall"
 if test "$enable_uninstall" = "yes" &&
    test "$external_uninstall_cmd" != ""; then

@@ -76,7 +76,6 @@ public:
     bool				fullscreen;
     rColorDepth			colorDepth;
     rColorDepth			zDepth;
-    bool				useSDL;
     bool				checkErrors;
     rVSync              vSync;          // whether to wait for vsync
     REAL				aspect;			// aspect ratio of pixels ( width/height )
@@ -84,7 +83,6 @@ public:
     rScreenSettings(rResolution r,
                     bool fs=true,
                     rColorDepth cd=ArmageTron_ColorDepth_Desktop,
-                    bool sdl=true,
                     bool ce =true);
 };
 

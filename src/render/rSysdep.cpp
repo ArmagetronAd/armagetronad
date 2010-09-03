@@ -57,43 +57,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #ifndef DEDICATED
 #define SCREENSHOT_PNG_BITDEPTH 8
 #define SCREENSHOT_BYTES_PER_PIXEL 3
+
 #ifndef SDL_OPENGL
-#ifndef DIRTY
-#define DIRTY
-#endif
-#endif
-
-//#ifndef SDL_OPENGL
-//#error "need SDL 1.1"
-//#endif
-
-#ifndef DIRTY
-
-// nothing to be done.
-
-/*
-//#elif defined(HAVE_FXMESA)
- #include <GL/gl>
- #include <GL/fxmesa>
-
- static fxMesaContext ctx=NULL;
-*/
-
-#elif defined(WIN32)
-
-#include <windows.h>
-#include <windef.h>
-#include "rGL.h"
-static HDC hDC=NULL;
-static HGLRC hRC=NULL;
-
-#elif defined(unix) || defined(__unix__)
-
-#include <GL/glx.h>
-static GLXContext cx;
-Display *dpy=NULL;
-Window  win;
-
+#error "need SDL 1.1"
 #endif
 
 #ifndef DEDICATED
@@ -204,165 +170,15 @@ private:
     }
 };
 
+// returns the fence to be used for syncing the GPU and CPU
+static rGLFence & sr_GetFence()
+{
+    static rGLFence fence;
+    fence.Set();
+    return fence;
+}
+
 #endif // DEDICATED
-
-#ifdef DIRTY
-#include <SDL_syswm.h>
-
-// graphics initialisation and cleanup:
-bool  rSysDep::InitGL(){
-    SDL_SysWMinfo system;
-    SDL_VERSION(&system.version);
-    if (!SDL_GetWMInfo(&system)){
-        std::cerr << "Video information not available!\n";
-        return(false);
-    }
-
-    /*
-    con << "SDL version: " << (int)system.version.major
-         << "." <<  (int)system.version.minor << "." <<  (int)system.version.patch << '\n';
-    */
-
-    /*
-    //#ifdef HAVE_FXMESA
-    if(!ctx){
-      int x=fxQueryHardware();
-      if(x){
-        std::cerr << "No 3Dfx hardware available.\n" << x << '\n';
-        return(false);
-      }
-
-      GLint attribs[]={FXMESA_DOUBLEBUFFER,FXMESA_DEPTH_SIZE,16,FXMESA_NONE};
-      ctx=fxMesaCreateBestContext(0,sr_screenWidth,sr_screenHeight,attribs);
-
-      if (!ctx){
-        std::cerr << "Could not create FX rendering context!\n";
-        return(false);
-      }
-
-      fxMesaMakeCurrent(ctx);
-    }
-    */
-#ifdef WIN32
-    // windows GL initialisation stolen from
-    // http://www.geocities.com/SiliconValley/Code/1219/opengl32.html
-
-    if (!hRC){
-        HWND hWnd=system.window;
-
-        PIXELFORMATDESCRIPTOR pfd;
-        int iFormat;
-
-        // get the device context (DC)
-        hDC = GetDC( hWnd );
-        if (!hDC) return false;
-
-        // set the pixel format for the DC
-        ZeroMemory( &pfd, sizeof( pfd ) );
-        pfd.nSize = sizeof( pfd );
-        pfd.nVersion = 1;
-        pfd.dwFlags = PFD_DRAW_TO_WINDOW |
-                      PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-        pfd.iPixelType = PFD_TYPE_RGBA;
-        pfd.cColorBits = currentScreensetting.colorDepth ? 24 : 16;
-        pfd.cDepthBits = 16;
-        pfd.iLayerType = PFD_MAIN_PLANE;
-        iFormat = ChoosePixelFormat( hDC, &pfd );
-        SetPixelFormat( hDC, iFormat, &pfd );
-
-        // create and enable the render context (RC)
-        hRC = wglCreateContext( hDC );
-        if (!hRC || !wglMakeCurrent( hDC, hRC ))
-            return false;
-    }
-
-#elif defined(unix) || defined(__unix__)
-    if (system.subsystem!=SDL_SYSWM_X11){
-        std::cerr << "System is not X11!\n";
-        std::cerr << (int)system.subsystem << "!=" << (int)SDL_SYSWM_X11 <<'\n';
-        return false;
-    }
-
-    if (!dpy){
-
-        dpy=system.info.x11.display;
-        win=system.info.x11.window;
-
-        int errorbase,tEventbase;
-        if (glXQueryExtension(dpy,&errorbase,&tEventbase) == False){
-            std::cerr << "OpenGL through GLX not supported.\n";
-            return false;
-        }
-
-        int configuration[]={GLX_DOUBLEBUFFER,GLX_RGBA,GLX_DEPTH_SIZE ,12, GLX_RED_SIZE,1,
-                             GLX_BLUE_SIZE,1,GLX_GREEN_SIZE,1,None
-                            };
-
-        XVisualInfo *vi=glXChooseVisual(dpy,DefaultScreen(dpy),configuration);
-
-        if (vi== NULL){
-            std::cerr << "Could not initialize Visual.\n";
-            return false;
-        }
-
-        cx=glXCreateContext(dpy,vi,
-                            NULL,True);
-
-        if (cx== NULL){
-            std::cerr << "Could not initialize GL context.\n";
-            return false;
-        }
-
-        if (!glXMakeCurrent(dpy,win,cx)){
-            dpy=0;
-            return false;
-        }
-    }
-
-#endif
-
-    return true;
-}
-
-void  rSysDep::ExitGL(){
-    SDL_SysWMinfo system;
-    SDL_GetWMInfo(&system);
-
-    /*
-    #ifdef HAVE_FXMESA
-
-    if(ctx){
-      fxMesaDestroyContext(ctx);
-      ctx=NULL;
-      fxCloseHardware();
-    }
-    */
-
-#if defined(WIN32)
-    HWND hWnd=system.window;
-
-    // windows GL cleanup stolen from
-    // http://www.geocities.com/SiliconValley/Code/1219/opengl32.html
-    if (hRC){
-
-        wglMakeCurrent( NULL, NULL );
-        wglDeleteContext( hRC );
-        ReleaseDC( hWnd, hDC );
-
-        hRC=NULL;
-        hDC=NULL;
-    }
-#elif defined(unix) || defined(__unix__)
-    if (dpy){
-
-        //    glXReleaseBuffersMESA( dpy, win );
-        glXMakeCurrent(dpy,None,NULL);
-        glXDestroyContext(dpy, cx );
-        dpy=NULL;
-    }
-#endif
-}
-#endif // DIRTY
 
 bool sr_screenshotIsPlanned=false;
 static bool   s_videoout    =false;
@@ -495,14 +311,14 @@ class PerformanceCounter
 {
 public:
     PerformanceCounter(): count_(0){
-        tRealSysTimeFloat();
+        start_ = tRealSysTimeFloat();
     }
     unsigned int Count(){
         return count_++;
     }
     ~PerformanceCounter()
     {
-        double time = tRealSysTimeFloat();
+        double time = tRealSysTimeFloat()-start_;
         std::stringstream s;
         s << count_ << " frames in " << time << " seconds: " << count_ / time << " fps.\n";
 #ifdef WIN32
@@ -513,6 +329,7 @@ public:
     }
 private:
     unsigned int count_;
+    double start_;
 };
 
 static double s_nextFastForwardFrameRecorded=0; // the next frame to render in recorded time
@@ -598,31 +415,633 @@ static rFastForwardCommandLineAnalyzer analyzer;
 
 // #define MILLION 1000000
 
-/*
-static double lastFrame = -1;
-static void sr_DelayFrame( int targetFPS )
+rSysDep::rSwapOptimize rSysDep::swapOptimize_ = rSysDep::rSwap_Auto;
+rSysDep::rFramedropTolerance rSysDep::framedropTolerance_ = rSysDep::rSwap_Normal;
+
+// random benchmarks. Median of three runs.
+// rSwap_Latency          : 382.841
+// rSwap_Throughput       : 405.552
+// rSwap_ThrougputFlush   : 405.194
+// rSwap_ThrougputFastest : 406.676
+// same recording, old client:
+// rSwap_glFinish         : 395.892
+// rSwap_LateFinish       : 398.132
+// rSwap_Fence            : 400.248
+// rSwap_glFlush          : 398.037
+// rSwap_Fastest          : 396.392
+
+#ifndef DEDICATED
+
+// determines minimum of past values
+class rRollingMinimum
 {
-    // calculate microseconds per frame
-    int uSecsPerFrame = MILLION/(targetFPS + 10);
+public:
+    rRollingMinimum( int level, REAL value )
+    :levels_( level )
+    {
+        for( int i = level-1; i >= 0; --i )
+        {
+            levels_[i].Add(value);
+            levels_[i].Add(value);
+        }
 
-    // calculate microseconds spent rendering
-    double thisFrame = tRealSysTimeFloat();
+        min_ = value;
+    }
 
-    int uSecsPassed = static_cast<int>( MILLION * ( thisFrame - lastFrame ) );
+    // returns the current minimum
+    REAL GetMin() const
+    {
+        return min_;
+    }
 
-//    con << uSecsPassed << "\n";
+    // returns sublevel minimum
+    REAL GetSubMin(int level) const
+    {
+        return levels_[level].GetMin();
+    }
 
-    // wait
-    int uSecsToWait = uSecsPerFrame - uSecsPassed;
-    if ( uSecsToWait > 0 )
-        tDelay( uSecsToWait );
+    int Size()
+    {
+        return 1 << levels_.Len();
+    }
 
-    // call glFinish to wait for GPU
-    glFinish();
-}
+    // adds a value to the list to find a minimum of
+    void Add( REAL value )
+    {
+        if( min_ > value )
+        {
+            min_ = value;
+        }
+
+        int level = levels_.Len()-1;
+        while( level >= 0 && levels_[level].Add(value) )
+        {
+            value = levels_[level].GetMin();
+            level--;
+        }
+
+        // trown out old data? Recalculate min. Actually, we just
+        // can copy it.
+        if( level <= 0 )
+        {
+            min_ = levels_[0].GetMin();
+        }
+    }
+private:
+    struct Level
+    {
+        REAL value[2];
+        bool toggle;
+
+        Level( REAL v=0 )
+        : toggle(true)
+        {
+            value[0] = value[1] = v;
+        }
+
+        // adds a value, returns true on every second call
+        bool Add( REAL v )
+        {
+            value[0] = value[1];
+            value[1] = v;
+
+            toggle = !toggle;
+            return toggle;
+        }
+
+        // returns the current minimum
+        REAL GetMin() const
+        {
+            return value[0] < value[1] ? value[0] : value[1];
+        }
+    };
+
+    tArray<Level> levels_;
+    REAL min_;
+};
+
+#ifdef DEBUG
+// #define DEBUG_SWAP
+#endif
+
+#ifdef DEBUG_SWAP
+#include "tRandom.h"
+#endif
+
+#define SWAP_TIMESCALE_LOG 8
+// #define SWAP_TIMESCALE_LOG 3
+#define SWAP_TIMESCALE (1 << SWAP_TIMESCALE_LOG)
+
+/* LATENCY order:
+input
+simulate
+render
+swap
+sync
+delay
+
+THROUGHPUT order:
+input
+simulate
+render
+sync
+swap
 */
 
-rSysDep::rSwapMode rSysDep::swapMode_ = rSysDep::rSwap_LateFinish;
+// flag indicating that the next call to glClear needs execution.
+// sometimes, we preemptively call it after swaps.
+static bool sr_needClear = true;
+
+static REAL sr_swapDelayFactor = .5f;
+static tConfItem< REAL > sr_swapDelayFactorCI("SWAP_LATENCY_DELAY_FACTOR", sr_swapDelayFactor );
+
+
+// measures time wasted on waiting for swaps 
+class rSwapTime
+{
+public:
+    rSwapTime()
+    : frameTimes_(SWAP_TIMESCALE_LOG+6, 1/20.0)
+    , frameTimesMax_(4, -1/20.0)
+    , waitTimes_(SWAP_TIMESCALE_LOG+1, 0)
+    , delay_(0)
+    , smoothDelay_(0)
+    , badFrame_( -200 )
+    , counter_ ( 100 )
+    , inGame_( false )
+    , lowFrameTime_( 0.001 )
+    {
+        lastTime_ = Time();
+
+        // clamp delay factor
+        if( sr_swapDelayFactor < .2 )
+        {
+            sr_swapDelayFactor = .2;
+        }
+        if( sr_swapDelayFactor > .95 )
+        {
+            sr_swapDelayFactor = .95;
+        }
+    }
+
+    static double Time()
+    {
+#ifdef DEBUG_SWAP
+        tAdvanceFrame();
+        return tSysTimeFloat();
+#else
+        return tRealSysTimeFloat();
+#endif
+    }
+
+    // return the delay for next frame
+    REAL GetDelay() const
+    {
+        return delay_;
+    }
+
+    // call while in game
+    void IsInGame()
+    {
+        inGame_ = true;
+    }
+
+    rSysDep::rSwapOptimize GetCurrentSwapOptimizeMode() const
+    {
+        switch( rSysDep::swapOptimize_ )
+        {
+        case rSysDep::rSwap_Auto:
+            // check for ridiculously high framerate
+            if (frameTimesMax_.GetMin() > -lowFrameTime_)
+            {
+                lowFrameTime_ = 1/200.0;
+
+                return rSysDep::rSwap_Throughput;
+            }
+            else
+            {
+                lowFrameTime_ = 1/400.0;
+            }
+
+            return badFrame_ > 0 ? rSysDep::rSwap_Throughput : rSysDep::rSwap_Latency;
+            break;
+        default:
+            return rSysDep::swapOptimize_;
+            break;
+        }
+    }
+
+    void Swap( bool reallyDoIt ) const
+    {
+        // do the actual buffer swap.
+        if( reallyDoIt )
+        {
+            SDL_GL_SwapBuffers();
+
+#ifdef DEBUG_SWAP_X
+            {
+                static int roughStart = SWAP_TIMESCALE*5;
+                if( roughStart-- > 0 && (roughStart % 10) == 0 )
+                {
+                    tDelay( 1000 * 20 );
+                }
+                else if( roughStart == -1 )
+                {
+                    st_Breakpoint();
+                }
+            }
+#endif
+
+        
+
+        }
+    }
+
+    // Clears the buffer in advance of the main code requesting it later
+    void AdvanceClear()
+    {
+        sr_needClear = true;
+        rSysDep::ClearGL();
+        sr_needClear = false;
+    }
+
+    // swaps for minimum latency mode, returning the time needed to wait for the GPU
+    REAL LatencySwap(bool swap)
+    {
+        // flush
+        if( delay_ > smallDelay/10 )
+        {
+            // another extra finish if we're planning to to add delays.
+            // we only want to measure the time spent waiting for vsync,
+            // not the time waiting for rendering to finish.
+            glFinish();
+        }
+
+        Swap(swap);
+
+        // flush
+        double start = Time();
+        glFinish();
+        REAL ret = Time() - start;
+        
+        AdvanceClear();
+
+        return ret;
+    }
+
+    // swaps for maximum througput mode, returning the time needed to wait for the GPU
+    REAL ThroughputSwap(bool swap)
+    {
+        REAL ret;
+
+        if( rGLFence::Available() )
+        {
+            // oddly enough, on NVidia cards, the Swap() already
+            // eats up the idle time; for the return value to
+            // properly represent time waiting for stuff to finish,
+            // we need to include it in the measurements.
+            double start = Time();
+
+            Swap(swap);
+            
+            static rGLFence & fence = sr_GetFence();
+
+            // finish last frame's fence
+            fence.Finish();
+
+            ret = Time() - start;
+
+            // set new fence
+            fence.Set();
+
+            AdvanceClear();
+        }
+        else
+        {
+            double start = Time();
+
+            // flush
+            glFinish();
+            ret = Time() - start;
+
+            Swap(swap);
+
+            AdvanceClear();
+        }
+
+#ifdef DEBUG_SWAP_X
+        static int count = 0;
+        if( count-- < 0 )
+        {
+            count = 60;
+            con << "SwapTime " << ret*1000 << "\n";
+        }
+#endif       
+
+        return ret;
+    }
+
+    // call after swapping buffers with an argument of true
+    // and once just before rendering with an argument
+    void Finish( bool swap = false )
+    {
+        switch( rSysDep::swapOptimize_ )
+        {
+        case rSysDep::rSwap_ThroughputFastest:
+            Swap(swap);
+            AdvanceClear();
+            break;
+        case rSysDep::rSwap_ThroughputFlush:
+            Swap(swap);
+            glFlush();
+            AdvanceClear();
+            break;
+        case rSysDep::rSwap_Throughput:
+            ThroughputSwap(swap);
+            break;
+        case rSysDep::rSwap_Auto:
+            // some special cases. In vsync off situations, don't optimize
+            // for latency. The high framerate already takes care of that.
+            switch( currentScreensetting.vSync )
+            {
+            case ArmageTron_VSync_Off:
+            case ArmageTron_VSync_MotionBlur:
+                ThroughputSwap(swap);
+                return;
+            default:
+                break;
+            }
+        default:
+            FinishComplicated( swap );
+        }
+    }
+
+    // call after swapping buffers with an argument of true
+    // and once just before rendering with an argument 
+    void FinishComplicated( bool swap = false )
+    {
+#ifdef DEBUG_SWAP_X
+        {
+            static tRandomizer randomDelay;
+            static int counter = -1000;
+            if( counter++ > 0 )
+            {
+                tDelay( 1+randomDelay.Get( counter ) );
+            }
+        }
+#endif
+
+        rSysDep::rSwapOptimize opt = GetCurrentSwapOptimizeMode();
+
+        REAL neededToWait = ( opt == rSysDep::rSwap_Throughput ) ? ThroughputSwap(swap) : LatencySwap(swap);
+        StopSwap( neededToWait, opt );
+
+        // delay
+        if( opt == rSysDep::rSwap_Latency && delay_ > smallDelay )
+        {
+            tDelay( delay_ * 1000 * 1000 );
+        }
+    }
+protected:
+    // one frame every so many seconds is tolarated
+    static REAL FrameDropTolerance()
+    {
+        switch (rSysDep::framedropTolerance_)
+        {
+        case rSysDep::rSwap_Lenient:
+            return 20;
+            break;
+        case rSysDep::rSwap_Normal:
+            return 60;
+            break;
+        case rSysDep::rSwap_Strict:
+            return 600;
+            break;
+        default:
+            return 60*60*24;
+            break;
+        }
+    }
+
+    // call after swapping
+    void StopSwap( REAL timeSpentWaiting, rSysDep::rSwapOptimize opt )
+    {
+        double now = Time();
+        REAL timeSpent = now - lastTime_;
+
+        lastTime_ = now;
+        frameTimesMax_.Add( -timeSpent );
+        frameTimes_.Add( -frameTimesMax_.GetMin() );
+
+        // check for unusually long frames
+        REAL referenceFrameTime = 1/10.0;
+        REAL minFrameTime = frameTimes_.GetMin();
+        if( minFrameTime > referenceFrameTime )
+        {
+            minFrameTime = referenceFrameTime;
+        }
+        
+        // tolerance factor for dropped frames
+        static const REAL frameDropTolerance = 1.5;
+        static const int framePenaltyMax = 1200;
+        static const int framePenaltySingle = framePenaltyMax/10;
+        static const int framePenaltyMin = -framePenaltySingle*3;
+
+        // the real time spent waiting, not doing anything, during the last frame
+        timeSpentWaiting += delay_;
+
+        bool frameDrop = inGame_ && 
+            (
+                timeSpent > frameDropTolerance * minFrameTime 
+                || 
+                timeSpentWaiting < smallDelay/10
+                );
+        inGame_ = false;
+
+        if( frameDrop )
+        {
+            REAL waitTime = waitTimes_.GetMin();
+
+            // forge the wait time so the next delays get lower.
+            if( delay_ > smallDelay/10 )
+            {
+                timeSpentWaiting = waitTime * .8f;
+
+                // and lower the delay factor for longterm reduction of the delay;
+                // count rapid fire framedrops as less important, as well as isolated
+                // drops.
+                static double lastDrop = now-1;
+                REAL weight = (now - lastDrop)/3.0f;
+                weight = weight * exp(-3*weight/FrameDropTolerance());
+                lastDrop = now;
+                if( weight > 1 )
+                {
+                    weight = 1;
+                }
+#ifdef DEBUG_SWAP
+                con << "delayFactor " << sr_swapDelayFactor;
+#endif
+
+                sr_swapDelayFactor *= (1-delayFactorPenalty*weight);
+
+#ifdef DEBUG_SWAP
+                con << " -> " << sr_swapDelayFactor << "\n";
+#endif
+            }
+
+#ifdef DEBUG_SWAP
+            if( badFrame_ < framePenaltyMax/2 && opt == rSysDep::rSwap_Latency )
+            {
+                con << "Framedrop! " << timeSpent*1000 << " > " << frameTimes_.GetMin()*1000 << ", minWait=" << waitTime*1000 << " at " << counter_ << "\n";
+            }
+#endif
+
+            if( badFrame_ < framePenaltyMax )
+            {
+                badFrame_ += framePenaltySingle;
+
+                // hysteresis: if we are just disabling latency mode, go all the way and some
+                if ( badFrame_ > 0 && badFrame_ <= framePenaltySingle )
+                {
+#ifdef DEBUG_SWAP
+                    con << "Too many framedrops.\n";
+#endif
+                    badFrame_ = framePenaltyMax*2;
+                }
+            }
+        }
+        else
+        {
+            badFrame_--;
+
+            if( badFrame_ == 0 )
+            {
+#ifdef DEBUG_SWAP
+                con << "Rendering fine again.\n";
+#endif
+                badFrame_ = framePenaltyMin;
+                
+                // just dropping out of throughput mode; better still be a bit careful
+                smoothDelay_ = delay_ = 0;
+                counter_ = 0;
+            }
+            else if( badFrame_ < framePenaltyMin )
+            {
+                badFrame_ = framePenaltyMin;
+
+#ifdef DEBUG_SWAP
+                if ( counter_ == 20 )
+                {
+                    con << "Rendering OK:" << timeSpent*1000 << " < " << frameTimes_.GetMin()*frameDropTolerance*1000 << ", delay " << delay_*1000 << "\n";
+                }
+#endif
+            }
+        }
+
+        waitTimes_.Add( timeSpentWaiting );
+
+        // calculate optimal delay
+        REAL newDelay = waitTimes_.GetMin() * sr_swapDelayFactor;
+
+        // clear artificial delay if the current swap mode says so
+        if( opt == rSysDep::rSwap_Latency &&
+            rSysDep::framedropTolerance_ != rSysDep::rSwap_Draconic )
+        {
+            // let delay factor recover so that there will be about at
+            // most one dropped frame every so many
+            REAL recovery=2*timeSpent/FrameDropTolerance();
+            sr_swapDelayFactor = 1 - (1-sr_swapDelayFactor)*(1-(1-sr_swapDelayFactor)*delayFactorPenalty*recovery);
+        }
+        else
+        {
+            delay_ = newDelay = 0;
+        }
+
+
+        // smooth out delay changes. Lowering is immediate
+        if( newDelay < smoothDelay_ )
+        {
+            smoothDelay_ = newDelay;
+        }
+        else
+        {
+            // while increases are smoothed with a sub-second timescale.
+            REAL w = timeSpent * 3;
+            smoothDelay_ = ( smoothDelay_ + newDelay * w )/(1 + w );
+        }
+        delay_ = smoothDelay_;
+
+        // clear artificial delay if the current swap mode says so
+        if( opt != rSysDep::rSwap_Latency ||
+            rSysDep::framedropTolerance_ == rSysDep::rSwap_Draconic )
+        {
+            delay_ = 0;
+        }
+
+        // every so many frames, do a test frame with lower delay
+        if( counter_-- <= 0 )
+        {
+            // con << "d=" << delay_ << ", bf=" << badFrame_ << "\n";
+
+            counter_ = waitTimes_.Size();
+
+            // this reduction is enough to get rendering stuck at 30 FPS back
+            // to 60 FPS, if that's at all possible.
+            delay_ *= .4;
+        }
+    }
+private:
+    // minimum total frame time
+    rRollingMinimum frameTimes_;
+
+    // maximum short-time frame time (contains negative frametimes so rRollingMinimum
+    // can be abused to get the maximum frame time)
+    rRollingMinimum frameTimesMax_;
+
+    // minimum wait time per frame
+    rRollingMinimum waitTimes_;
+
+    // time sync is started
+    double startTime_;
+
+    // last time swap was complete
+    double lastTime_;
+
+    // current pre-simulation delay
+    REAL delay_;
+
+    // smoothed pre-simulation delay
+    REAL smoothDelay_;
+
+    // if a frame dropped, this is set to a finite value and counted down
+    int badFrame_;
+
+    // random frame counter
+    int counter_;
+
+    // flag indicating whether we're in a game
+    bool inGame_;
+
+    // ridiculously low frametime limit
+    mutable REAL lowFrameTime_;
+
+    // a frame swap delay that is considered small
+    static const REAL smallDelay;
+
+    // reduction in the delay factor whenever a frame is dropped
+    static const REAL delayFactorPenalty;
+};
+
+const REAL rSwapTime::smallDelay = 1E-3f;
+const REAL rSwapTime::delayFactorPenalty = .05;
+
+static rSwapTime & sr_SwapTime()
+{
+    static rSwapTime ret;
+    return ret;
+}
+
+#endif // DEDICATED
 
 // buffer swap:
 #ifndef DEDICATED
@@ -916,14 +1335,6 @@ bool sr_MotionBlur( double time, std::auto_ptr< rTextureRenderTarget > & blurTar
     return true;
 }
 
-// returns the fence to be used for syncing the GPU and CPU
-static rGLFence & sr_GetFence()
-{
-    static rGLFence fence;
-    fence.Set();
-    return fence;
-}
-
 void rSysDep::SwapGL(){
     static std::auto_ptr< rTextureRenderTarget > blurTarget(0);
 
@@ -1023,56 +1434,13 @@ void rSysDep::SwapGL(){
 #endif
 
     // unlock the mutex while waiting for the swap operation to finish
-    SDL_mutexV(  sr_netLock );
-    sr_LockSDL();
+    // SDL_mutexV(  sr_netLock );
+    // sr_LockSDL();
 
     // actiate motion blur (does not use the game state, so it's OK to call here )
     bool shouldSwap = sr_MotionBlur( time, blurTarget );
 
-    switch ( swapMode_ )
-    {
-    case rSwap_glFlush:
-        glFlush();
-        break;
-    case rSwap_glFinish:
-        glFinish();
-        break;
-    case rSwap_Fence:
-        if( rGLFence::Available() )
-        {
-            static rGLFence & fence = sr_GetFence();
-            // finish last frame's fence
-            fence.Finish();
-            // set new fence
-            fence.Set();
-            break;
-        }
-    case rSwap_LateFinish:
-        glFlush();
-        break;
-    case rSwap_Fastest:
-        break;
-    }
-        
-    if ( shouldSwap )
-    {
-#if defined(SDL_OPENGL)
-        if (lastSuccess.useSDL)
-            SDL_GL_SwapBuffers();
-        //#elif defined(HAVE_FXMESA)
-        //fxMesaSwapBuffers();
-#endif
-
-#ifdef DIRTY
-        if (!lastSuccess.useSDL){
-#if defined(WIN32)
-            SwapBuffers( hDC );
-#elif defined(unix) || defined(__unix__)
-            glXSwapBuffers(dpy,win);
-#endif
-        }
-#endif
-    }
+    sr_SwapTime().Finish( shouldSwap );
 
     if (sr_screenshotIsPlanned){
         make_screenshot();
@@ -1081,9 +1449,9 @@ void rSysDep::SwapGL(){
     else if (s_videoout)
         make_screenshot();
 
-    sr_UnlockSDL();
+    // sr_UnlockSDL();
     // lock mutex again
-    SDL_mutexP(  sr_netLock );
+    // SDL_mutexP(  sr_netLock );
 
 
     // disable output in fast forward mode
@@ -1121,25 +1489,6 @@ void rSysDep::SwapGL(){
     sr_glOut = next_glOut;
 }
 
-void rSysDep::PostSwapGL()
-{
-    switch ( swapMode_ )
-    {
-    case rSwap_Fence:
-        if( rGLFence::Available() )
-        {
-            break;
-        }
-    case rSwap_LateFinish:
-        // calls glFinish after the next frame's physics are calculated. This should keep
-        // both CPU and GPU busy.
-        glFinish();
-        break;
-    default:
-        break;
-    }
-}
-
 #endif // dedicated
 
 #ifndef DEDICATED
@@ -1174,30 +1523,23 @@ void sr_UnlockSDL(){
 
 #ifndef DEDICATED
 void  rSysDep::ClearGL(){
-    if (sr_glOut){
-
-        /*
-        if (sr_screenshotIsPlanned){
-          make_screenshot();
-          sr_screenshotIsPlanned=false;
-        }
-        */
-
+    if (sr_glOut && sr_needClear )
+    {
         glClearColor(0.0,0.0,0.0,1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        // call glFlush(). glClear is an expensive operation, and we want the
-        // GPU to start working on it ASAP.
-        switch ( swapMode_ )
-        {
-        case rSwap_Fastest:
-            // unless the mode is fastest, of course.
-            break;
-        default:
-            glFlush();
-            break;
-        }
     }
+    sr_needClear = true;
+}
+
+bool rSysDep::IsBenchmark()
+{
+    return s_benchmark;
+}
+
+ //!< call while game content is rendered
+void rSysDep::IsInGame()
+{
+    sr_SwapTime().IsInGame();
 }
 #endif
 
