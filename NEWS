@@ -96,6 +96,7 @@ Changes since 0.2.8
 - New command-line flag: --connect <server>[:<port>]. Startup the game and connect directly to <server>.
 
 Changes since 0.2.8.3.x:
+- Implemented /shout command and associated settings
 - Tweaks to enemy influence system.
 - Ingame menu and console now are drawn on top of a semi-transparent,
   darkened area for increased readability.
