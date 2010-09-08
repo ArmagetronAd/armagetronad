@@ -4225,6 +4225,18 @@ static int se_comparePlayerWorth( ePlayerNetID * a, ePlayerNetID * b, int nullPo
 // clear out one unworthy spectator
 static void se_KickUnworthy( int userToSpare=-1 )
 {
+    static REAL banForMinutes = 0;
+
+    // each player joining increases the ban, rounds passing decrease it
+    if( userToSpare >= 0 )
+    {
+        banForMinutes += .05f;
+    }
+    else
+    {
+        banForMinutes *= 0.875;
+    }
+
     // nothing to do?
     if( !se_kickUnworthy || sn_NumUsers() < sn_MaxUsers() )
     {
@@ -4262,7 +4274,28 @@ static void se_KickUnworthy( int userToSpare=-1 )
     // take care not to auto-kick someone with a high access level
     if( mostUnworthyUser )
     {
-        sn_DisconnectUser( mostUnworthyUser, tOutput( "$network_kill_unworthy" ) );
+        tString name;
+        if( mostWorthy[mostUnworthyUser] )
+        {
+            mostWorthy[mostUnworthyUser]->PrintName( name );
+        }
+        else
+        {
+            name = "?";
+        }
+        
+        con << tOutput( "$network_kill_unworthy_log", name, banForMinutes );
+        if( banForMinutes > 1 )
+        {
+            nMachine::GetMachine( mostUnworthyUser ).Ban( banForMinutes*60, 
+                                                          tString( 
+                                                              tOutput( "$network_kill_unworthy_banreason" ) ) );
+            sn_DisconnectUser( mostUnworthyUser, tOutput( "$network_kill_unworthy_ban", banForMinutes ) );
+        }
+        else
+        {   
+            sn_DisconnectUser( mostUnworthyUser, tOutput( "$network_kill_unworthy" ) );
+        }
     }
 }
 

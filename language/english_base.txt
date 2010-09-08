@@ -2592,6 +2592,9 @@ network_kill_spamkick		You have been auto-kicked for spamming.
 voted_kill_kick				You have been kicked by an angry mob of players; please stay away.
 network_kill_spectator      You have been sitting in spectator mode for too long.
 network_kill_unworthy       The server is full; you have been removed to make room for potential players. Only come back if you really have to.
+network_kill_unworthy_banreason The server is overloaded and new connections need to be throttled. Sorry for the inconvenience.
+network_kill_unworthy_ban   The server is full; you have been removed to make room for potential players. Only come back if you really have to, and wait \1 minutes.
+network_kill_unworthy_log   Kicking unworthy spectator \1 for \2 minutes.\n
 
 network_ban_kph             Kicks per hour of IP \1 are now \2.\n
 network_ban                 Players from IP \1 are banned for \2 minutes. Reason: \3\n
