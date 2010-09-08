@@ -3392,15 +3392,27 @@ nCallbackLoginLogout::nCallbackLoginLogout(VOIDFUNC *f)
         :tCallback(s_loginoutAnchor,f){}
 
 void nCallbackLoginLogout::UserLoggedIn(int u){
+    bool loginBack = login;
+    int userBack = user;
+
     login = true;
     user = u;
     Exec(s_loginoutAnchor);
+    
+    login = loginBack;
+    user = userBack;
 }
 
 void nCallbackLoginLogout::UserLoggedOut(int u){
+    bool loginBack = login;
+    int userBack = user;
+
     login = false;
     user = u;
     Exec(s_loginoutAnchor);
+    
+    login = loginBack;
+    user = userBack;
 }
 
 unsigned short nCallbackAcceptPackedWithoutConnection::descriptor=0;	// the descriptor of the incoming packet
