@@ -4193,6 +4193,22 @@ static int se_comparePlayerWorth( ePlayerNetID * a, ePlayerNetID * b, int nullPo
     }
 #endif
 
+    // players with login process > players without
+    if( !nAuthentication::LoginInProcess( a ) )
+    {
+        if( nAuthentication::LoginInProcess( b ) )
+        {
+            return -1;
+        }
+    }
+    else
+    {
+        if( !nAuthentication::LoginInProcess( b ) )
+        {
+            return 1;
+        }
+    }
+
     // players online for shorter times are more worthy
     if( a->GetTimeCreated() < b->GetTimeCreated() )
     {
