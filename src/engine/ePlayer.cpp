@@ -6458,7 +6458,7 @@ void ePlayerNetID::Update(){
                 // if the player is not currently on a team, but wants to join a specific team, let it join any, but keep the wish stored
                 if ( player->NextTeam() && !player->CurrentTeam() && player->TeamChangeAllowed() )
                 {
-                    eTeam * wish = player->NextTeam();
+                    tJUST_CONTROLLED_PTR< eTeam > wish = player->NextTeam();
                     bool assignBack = se_assignTeamAutomatically;
                     se_assignTeamAutomatically = true;
                     player->FindDefaultTeam();
@@ -6484,8 +6484,9 @@ void ePlayerNetID::Update(){
             // announce unfullfilled wishes
             if ( player->NextTeam() != player->CurrentTeam() && player->NextTeam() )
             {
-                //if the player can't change teams delete the team wish
-                if(!player->TeamChangeAllowed()) {
+                // if the player can't change teams or their wish team emptied, delete the team wish
+                if(!player->TeamChangeAllowed() || player->NextTeam()->NumPlayers() == 0)
+                {
                     player->SetTeam( player->CurrentTeam() );
                     continue;
                 }
