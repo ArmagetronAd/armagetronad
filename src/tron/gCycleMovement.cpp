@@ -2015,8 +2015,10 @@ bool gCycleMovement::Timestep( REAL currentTime )
     tJUST_CONTROLLED_PTR< gCycleMovement > keep( this->GetRefcount()>0 ? this : 0 );
 
     // don't make a fuss about negative timesteps
-    if ( currentTime < lastTime )
-        return TimestepCore( currentTime );
+    // if ( currentTime < lastTime )
+    // {
+    //     return TimestepCore( currentTime );
+    // }
 
     // remove old destinations
     //REAL lag = 1;
@@ -3746,6 +3748,16 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
     tASSERT( rubber >= 0 );
 
     sg_ArchiveReal( step, 9 );
+
+    // don't go back further than the last turn
+    if( step < 0 )
+    {
+        REAL min = -GetDistanceSinceLastTurn();
+        if( step < min )
+        {
+            step = min;
+        }
+    }
 
     // move forward
     eCoord nextpos;
