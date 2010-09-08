@@ -732,6 +732,7 @@ bool eGameObject::TimestepThis(REAL currentTime,eGameObject *c){
 
         REAL timeThisStep = lastTime+i*(currentTime-lastTime)/number_of_steps;
 
+        c->urgentSimulationRequested_ = false;
         ret = ret || c->Timestep(timeThisStep);
         c->FindCurrentFace();
 
