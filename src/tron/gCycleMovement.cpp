@@ -2034,6 +2034,8 @@ bool gCycleMovement::Timestep( REAL currentTime )
 
     sg_ArchiveReal( dt, 9 );
 
+    bool vetoSimulationRequest = false; // set if the simulation was aborted even though events are still there to be taken care of
+
     // if (currentTime > lastTime)
     {
         int timeout=10;
@@ -2140,10 +2142,16 @@ bool gCycleMovement::Timestep( REAL currentTime )
             REAL simulateAhead = MaxSimulateAhead();
 
             if ( dist_to_dest > ( ts + simulateAhead ) * avgspeed && currentTime < latestTurnTime )
+            {
+                vetoSimulationRequest = true;
                 break; // no need to worry; we won't reach the next destination
+            }
 
-            if ( currentTime < earliestTurnTime && sg_CommandTime.Supported( Owner() ) )
+            if ( currentTime + simulateAhead < earliestTurnTime && sg_CommandTime.Supported( Owner() ) )
+            {
+                vetoSimulationRequest = true;
                 break; // the turn is too far in the future
+            }
 
             // if ( currentTime < turnTime + EPS )
             //    simulateAhead = 0;
@@ -2401,20 +2409,17 @@ bool gCycleMovement::Timestep( REAL currentTime )
                     if ( latestTurnTime < nextTurn )
                         latestTurnTime = nextTurn;
 
-                    if ( currentTime - lastTime > turnStep )
+                    if ( ts + + simulateAhead > turnStep )
                     {
-                        tsTodo = turnStep;
-
                         // if we can simulate to the turn in the next step, do so, overriding
                         // the turn delay then.
-                        if ( tsTodo < ts + simulateAhead && tsTodo > 0 )
-                        {
-                            overrideTurnDelay = true;
-                        }
+                        tsTodo = turnStep;
+                        overrideTurnDelay = true;
                     }
                     else
                     {
                         // not enough time to simulate to turn possibility; skip out of loop
+                        vetoSimulationRequest = true;
                         break;
                     }
                 }
@@ -2450,6 +2455,7 @@ bool gCycleMovement::Timestep( REAL currentTime )
                 {
                     tsTodo = ts + simulateAhead ;
                     forceTurn = false;
+                    overrideTurnDelay = false;
 
                     // quit from here if there is nothing to do
                     if ( tsTodo <= EPS )
@@ -2496,8 +2502,10 @@ bool gCycleMovement::Timestep( REAL currentTime )
 
     // if we get here and turns are left pending within our reach,
     // request the function gets called again right away.
-    if( currentDestination || 
-        ( !pendingTurns.empty() && GetNextTurn( pendingTurns.front() < currentTime + MaxSimulateAhead() ) )
+    if( !vetoSimulationRequest &&
+        ( currentDestination || 
+          ( !pendingTurns.empty() && GetNextTurn( pendingTurns.front() < currentTime + MaxSimulateAhead() ) )
+            )
         )
     {
         RequestSimulation();
