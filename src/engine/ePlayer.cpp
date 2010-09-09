@@ -8527,6 +8527,115 @@ void ePlayerNetID::UpdateShuffleSpamTesters()
 
 // *******************************************************************************
 // *
+// *    AnalyzeTiming
+// *
+// *******************************************************************************
+//!
+//!
+// *******************************************************************************
+
+void ePlayerNetID::AnalyzeTiming( REAL timing )
+{
+    // just delegate safely
+    tJUST_CONTROLLED_PTR< ePlayerNetID > keep( this );
+    uncannyTimingDetector_.Analyze( timing, this );
+}
+
+
+REAL eUncannyTimingDetector::eUncannyTimingAnalysis::Analyze( REAL timing, eUncannyTimingSettings const & settings )
+{
+    if( timing < settings.timescale )
+    {
+        REAL increment = 1.0/settings.averageOverEvents;
+        
+        // event falls into the buckets
+        if( 2*timing < settings.timescale )
+        {
+            // event falls into the 'good' bucket, count it
+            accurateRatio += increment;
+        }
+
+        // let ratio decay
+        accurateRatio /= 1+increment;
+    }
+
+    // return normalized ratio
+    return accurateRatio/((1-accurateRatio)*settings.maxGoodRatio);
+}
+
+eUncannyTimingDetector::eUncannyTimingAnalysis::eUncannyTimingAnalysis()
+: accurateRatio( 0 )
+{}
+
+static eUncannyTimingDetector::eUncannyTimingSettings 
+se_uncannyTimingSettingsFast(1/20.0, 1.5),
+    se_uncannyTimingSettingsMedium(1/10.0, 3),
+    se_uncannyTimingSettingsSlow(1/5.0, 30);
+
+static REAL se_Max( REAL a, REAL b )
+{
+    return a > b ? a : b;
+}
+
+eUncannyTimingDetector::eUncannyTimingDetector()
+: dangerLevel( DangerLevel_Low )
+{
+}
+
+//! analzye a timing event
+void eUncannyTimingDetector::Analyze( REAL timing, ePlayerNetID * player )
+{
+    // ignore really uncanny timings
+    if( timing < 0 )
+    {
+        return;
+    }
+
+    REAL maxUncanny = fast.Analyze( timing, se_uncannyTimingSettingsFast );
+    maxUncanny = se_Max( maxUncanny, medium.Analyze( timing, se_uncannyTimingSettingsMedium ) );
+    maxUncanny = se_Max( maxUncanny, slow.Analyze( timing, se_uncannyTimingSettingsSlow ) );
+
+    switch( dangerLevel )
+    {
+    case DangerLevel_Low:
+        if( maxUncanny > .5 )
+        {
+            dangerLevel =DangerLevel_Medium;
+            con << "Medium uncanniness!\n";
+        }
+        break;
+    case DangerLevel_Medium:
+        if( maxUncanny > .75 )
+        {
+            dangerLevel = DangerLevel_High;
+            con << "High uncanniness!\n";
+        }
+        else if( maxUncanny < .25 )
+        {
+            dangerLevel = DangerLevel_Low;
+        }
+        break;
+    case DangerLevel_High:
+        if( maxUncanny > 1 )
+        {
+            dangerLevel = DangerLevel_Max;
+            con << "Max uncanniness!\n";
+        }
+        else if( maxUncanny < .5 )
+        {
+            dangerLevel = DangerLevel_Medium;
+        }
+        break;
+    case DangerLevel_Max:
+        if( maxUncanny < .75 )
+        {
+            dangerLevel = DangerLevel_High;
+        }
+    }
+}
+
+// *******************************************************************************
+// *
 // *    LogScoreDifference
 // *
 // *******************************************************************************
