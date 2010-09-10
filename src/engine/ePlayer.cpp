@@ -8541,12 +8541,22 @@ void ePlayerNetID::AnalyzeTiming( REAL timing )
     uncannyTimingDetector_.Analyze( timing, this );
 }
 
+eUncannyTimingDetector::eUncannyTimingSettings::~eUncannyTimingSettings()
+{
+#ifdef DEBUG
+    con << "Best ratio achieved for " << timescale*1000 << "ms stat: " << bestRatio << "\n";
+#endif
+}
 
 REAL eUncannyTimingDetector::eUncannyTimingAnalysis::Analyze( REAL timing, eUncannyTimingSettings const & settings )
 {
     if( timing < settings.timescale )
     {
-        REAL increment = 1.0/settings.averageOverEvents;
+        REAL increment = 1.0/turnsSoFar;
+        if( turnsSoFar < settings.averageOverEvents )
+        {
+            turnsSoFar++;
+        }
         
         // event falls into the buckets
         if( 2*timing < settings.timescale )
@@ -8560,11 +8570,19 @@ REAL eUncannyTimingDetector::eUncannyTimingAnalysis::Analyze( REAL timing, eUnca
     }
 
     // return normalized ratio
-    return accurateRatio/((1-accurateRatio)*settings.maxGoodRatio);
+    REAL ratio = turnsSoFar*accurateRatio/((1-accurateRatio)*settings.averageOverEvents);
+    
+    // keep stats
+    if (ratio > settings.bestRatio)
+    {
+        settings.bestRatio = ratio;
+    }
+
+    return ratio/settings.maxGoodRatio;
 }
 
 eUncannyTimingDetector::eUncannyTimingAnalysis::eUncannyTimingAnalysis()
-: accurateRatio( 0 )
+: accurateRatio( 0 ), turnsSoFar(10)
 {}
 
 static eUncannyTimingDetector::eUncannyTimingSettings 

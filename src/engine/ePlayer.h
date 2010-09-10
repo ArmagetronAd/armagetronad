@@ -169,10 +169,15 @@ public:
         REAL timescale; //!< the timescale. Events are divided in two buckets, one between 0 and timescale/2, the other from timescale/2 to timescale.
         REAL maxGoodRatio; //!< the maximal allowed recent ratio of events to land in the 'good' bucket
         int  averageOverEvents; //!< number of events to average over
+        
+        mutable REAL bestRatio; //!< best ratio achieved by players during this session
 
         eUncannyTimingSettings( REAL ts, REAL max )
-        : timescale( ts ), maxGoodRatio( max ), averageOverEvents(20)
+        : timescale( ts ), maxGoodRatio( max ), averageOverEvents(40)
+        , bestRatio(0)
         {}
+
+        ~eUncannyTimingSettings();
     };
 
     //! single analyzer with single timescale
@@ -184,6 +189,7 @@ public:
         eUncannyTimingAnalysis();
     private:
         REAL accurateRatio; //!< ratio of events in the more accurate half
+        int turnsSoFar;     //!< number of turns accounted for so far
     };
 
     //! detection level of timing aid hacks
