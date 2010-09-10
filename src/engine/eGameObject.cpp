@@ -701,10 +701,6 @@ bool eGameObject::TimestepThis(REAL currentTime,eGameObject *c){
 
     REAL maxstep=.2;
 
-    // don't do a thing if the timestep is too small
-    if (fabs(currentTime - c->lastTime) < .001)
-        return false;
-
     // be more careful when going back
     if (currentTime<c->lastTime)
         maxstep=.1;
@@ -791,7 +787,10 @@ void eGameObject::TimestepThisWrapper(eGrid * grid, REAL currentTime, eGameObjec
 #endif
         simTime -= c->Lag();
 
+    REAL maxSimTime = simTime;
 #ifdef DEDICATED
+    se_maxSimulateAheadLeft = se_maxSimulateAhead+se_lazyLag;
+
     REAL lagThreshold = c->LagThreshold();
     if( !c->urgentSimulationRequested_ )
     {
@@ -804,8 +803,11 @@ void eGameObject::TimestepThisWrapper(eGrid * grid, REAL currentTime, eGameObjec
             return;
         }
     }
+    else
+    {
+        maxSimTime += se_maxSimulateAheadLeft;
+    }
 
-    se_maxSimulateAheadLeft = se_maxSimulateAhead;
 #endif
 
     // check for teleports out of arena bounds
@@ -818,7 +820,7 @@ void eGameObject::TimestepThisWrapper(eGrid * grid, REAL currentTime, eGameObjec
     }
 
     // only simulate forward here
-    if ( simTime > c->lastTime )
+    if ( maxSimTime > c->lastTime )
     {
         if (TimestepThis(simTime,c))
         {
