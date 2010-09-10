@@ -2081,8 +2081,8 @@ bool gCycleMovement::Timestep( REAL currentTime )
                 sg_ArchiveReal( avgspeed, 9 );
 
                 // don't drive into a wall, turn before getting too close
-                REAL lookahead = ts * avgspeed * 2;
-
+                REAL lookahead = ( fabs(ts * avgspeed)+fabs(dist_to_dest) ) * 2;
+ 
                 distToWall = GetMaxSpaceAhead( lookahead );
 
                 // don't turn after passing a wall, if timing allows
@@ -3221,8 +3221,11 @@ bool gCycleMovement::DoTurn( int dir )
             // if rubber was used in this turn, check for depletion timing
             if( rubberSpeedFactor < 1 )
             {
-                  // turns out this is a bad idea; the server niceness makes
-                  // perfect rubber depletions quite likely.
+                /*
+                  // turns out this is a bad idea; default clients cheat and
+                  // often produce perfectly timed grinds.
+                  // Maybe they'll send additional timing information one day
+                  // and this can be reactivated.
 
                 REAL rubber_granted, rubberEffectiveness;
                 // get rubber values
@@ -3251,6 +3254,7 @@ bool gCycleMovement::DoTurn( int dir )
                 
                 // and report
                 // player->AnalyzeTiming( timing );
+                */
             }
             else
             {
@@ -3797,8 +3801,7 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
                 }
 
                 rubberneeded = rubberAvailable;
-
-                con << "Deep!\n";
+                // con << "Deep!\n";
             }
 
             // update rubber usage
