@@ -1167,6 +1167,7 @@ void nAuthentication::OnBreak()
 //! returns whether a login is currently in process for the given user ID
 bool nAuthentication::LoginInProcess( nNetObject * user )
 {
+#ifdef KRAWALL_SERVER
     if( !user )
     {
         return false;
@@ -1177,4 +1178,7 @@ bool nAuthentication::LoginInProcess( nNetObject * user )
 
     // compare the user
     return ( process && user == process->user );
+#else
+    return false;
+#endif
 }
