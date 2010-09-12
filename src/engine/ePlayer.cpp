@@ -816,7 +816,7 @@ typedef bool (*CANHIDEFUNC)( ePlayerNetID const * hider );
 typedef bool (*HIDEFUNC)( ePlayerNetID const * hider, ePlayerNetID const * seeker );
 
 // secret console messages: If CanHideFunc returns false it is displayed to everyone. Else, for each player we apply HideFunc, to see if one can hide his message to the other. The two exceptions get a message anyway.
-void se_SecretConsoleOut( tOutput const & message, ePlayerNetID const * hider, HIDEFUNC HideFunc, ePlayerNetID const * exception1, ePlayerNetID const * exception2 = 0, CANHIDEFUNC CanHideFunc = 0 )
+void se_SecretConsoleOut( tOutput const & message, ePlayerNetID const * hider, HIDEFUNC HideFunc, ePlayerNetID const * exception1 = 0, ePlayerNetID const * exception2 = 0, CANHIDEFUNC CanHideFunc = 0 )
 {
     // high enough access levels are never secret
     if ( CanHideFunc != 0 && !(*CanHideFunc)( hider ) )
@@ -8558,6 +8558,13 @@ REAL eUncannyTimingDetector::eUncannyTimingAnalysis::Analyze( REAL timing, eUnca
             turnsSoFar++;
         }
         
+        // don't rate failed timings too much. The user may not even have
+        // attempted to time something.
+        if( timing < 0 )
+        {
+            increment /= 4;
+        }
+
         // event falls into the buckets
         if( 2*timing < settings.timescale && timing > 0 )
         {
@@ -8569,8 +8576,7 @@ REAL eUncannyTimingDetector::eUncannyTimingAnalysis::Analyze( REAL timing, eUnca
         accurateRatio /= 1+increment;
     }
 
-    // return normalized ratio
-    REAL ratio = turnsSoFar*accurateRatio/((1-accurateRatio)*settings.averageOverEvents);
+    REAL ratio = accurateRatio/(1-accurateRatio);
     
     // keep stats
     if (ratio > settings.bestRatio)
@@ -8603,12 +8609,16 @@ proper, after assertions had been removed:
 [0] Best ratio achieved for 125ms stat: 1.71929, 4686turns.
 [0] Best ratio achieved for 62.5ms stat: 1.08824, 713turns.
 [0] Best ratio achieved for 31.25ms stat: 0.952494, 163turns.
+z-man, trying really hard:
+[0] Best ratio achieved for 125ms stat: 4.71739
+[0] Best ratio achieved for 62.5ms stat: 0.945886
+[0] Best ratio achieved for 31.25ms stat: 0.444307
 */
 
 static eUncannyTimingDetector::eUncannyTimingSettings 
 se_uncannyTimingSettingsFast(1/32.0, 1, 1.5),
 se_uncannyTimingSettingsMedium(1/16.0, 1, 2),
-se_uncannyTimingSettingsSlow(1/8.0, 2, 4);
+se_uncannyTimingSettingsSlow(1/8.0, 5, 15);
 
 static REAL se_Max( REAL a, REAL b )
 {
@@ -8620,14 +8630,73 @@ eUncannyTimingDetector::eUncannyTimingDetector()
 {
 }
 
+// opportunity to tune timebot detection sensitivity
+static REAL se_timebotSensitivity = 1.0;
+static tSettingItem< REAL > se_timebotSensitivityConf( "TIMEBOT_SENSITIVITY", se_timebotSensitivity );
+
+// different ways to react to timebot detection
+enum eTimebotAction
+{
+    eTimebotAction_Nothing = 0, // do nothing
+    eTimebotAction_Log     = 1, // log it
+    eTimebotAction_NotifyModerator = 2, // notify moderators that happen to be online
+    eTimebotAction_NotifyEveryone  = 3, // notify all players
+    eTimebotAction_Kick  = 4            // kick the player
+};
+tCONFIG_ENUM( eTimebotAction );
+
+static eTimebotAction se_timebotActionMedium = eTimebotAction_Log;
+static eTimebotAction se_timebotActionHigh   = eTimebotAction_Log;
+static eTimebotAction se_timebotActionMax    = eTimebotAction_Log;
+static tSettingItem< eTimebotAction > se_timebotActionMediumConf( "TIMEBOT_ACTION_MEDIUM", se_timebotActionMedium );
+static tSettingItem< eTimebotAction > se_timebotActionHighConf( "TIMEBOT_ACTION_HIGH", se_timebotActionHigh );
+static tSettingItem< eTimebotAction > se_timebotActionMaxConf( "TIMEBOT_ACTION_MAX", se_timebotActionMax );
+
+// severity of kick (for autobans)
+static REAL se_timebotKickSeverity = 0.5;
+static tSettingItem< REAL > se_timebotKickSeverityConf( "TIMEBOT_KICK_SEVERITY", se_timebotKickSeverity );
+
+static void se_TimebotAction( eTimebotAction action, ePlayerNetID * player, char const * message )
+{
+    if (action == eTimebotAction_Nothing)
+    {
+        return;
+    }
+    // look up message
+    tOutput m (message, player->GetName());
+    switch (action)
+    {
+    case eTimebotAction_Kick:
+        if( player->Owner() > 0 )
+        {
+            sn_KickUser( player->Owner(), m, se_timebotKickSeverity );
+        }
+        // no break on purpose.
+    case eTimebotAction_NotifyEveryone:
+        sn_ConsoleOut( m );
+        break;
+    case eTimebotAction_NotifyModerator:
+        se_SecretConsoleOut( m, player, &se_cannotSeeConsole );
+        // no break on purose
+    case eTimebotAction_Log:
+        con << m;
+        break;
+    case eTimebotAction_Nothing:
+        break;
+    }
+}
+
 //! analzye a timing event
 void eUncannyTimingDetector::Analyze( REAL timing, ePlayerNetID * player )
 {
     // ignore this system on the client itself
-    if( sn_GetNetState() != nSERVER )
+    if( sn_GetNetState() != nSERVER || se_timebotSensitivity <= 0 )
     {
         return;
     }
+
+    // apply sensitivity
+    timing /= se_timebotSensitivity;
 
     REAL maxUncanny = fast.Analyze( timing, se_uncannyTimingSettingsFast );
     maxUncanny = se_Max( maxUncanny, medium.Analyze( timing, se_uncannyTimingSettingsMedium ) );
@@ -8639,14 +8708,14 @@ void eUncannyTimingDetector::Analyze( REAL timing, ePlayerNetID * player )
         if( maxUncanny > .25 )
         {
             dangerLevel =DangerLevel_Medium;
-            con << "Medium uncanniness!\n";
+            se_TimebotAction( se_timebotActionMedium, player, "$timebot_action_medium" );
         }
         break;
     case DangerLevel_Medium:
         if( maxUncanny > .5 )
         {
             dangerLevel = DangerLevel_High;
-            con << "High uncanniness!\n";
+            se_TimebotAction( se_timebotActionHigh, player, "$timebot_action_high" );
         }
         else if( maxUncanny <= 0.01 )
         {
@@ -8657,7 +8726,7 @@ void eUncannyTimingDetector::Analyze( REAL timing, ePlayerNetID * player )
         if( maxUncanny > 1 )
         {
             dangerLevel = DangerLevel_Max;
-            con << "Max uncanniness!\n";
+            se_TimebotAction( se_timebotActionMax, player, "$timebot_action_max" );
         }
         else if( maxUncanny < .25 )
         {
