@@ -4222,9 +4222,14 @@ static int se_comparePlayerWorth( ePlayerNetID * a, ePlayerNetID * b, int nullPo
     return 0;
 }
 
+// the user that last logged in; spare him.
+static int se_kickUnworthySpare=-1;
+
 // clear out one unworthy spectator
-static void se_KickUnworthy( int userToSpare=-1 )
+static void se_KickUnworthy()
 {
+    int userToSpare=se_kickUnworthySpare;
+
     static REAL banForMinutes = 0;
 
     // each player joining increases the ban, rounds passing decrease it
@@ -4324,7 +4329,8 @@ static void se_PlayerLoginLogoutCallback()
     // always keep one slot free
     if( nCallbackLoginLogout::Login() )
     { 
-        se_KickUnworthy( nCallbackLoginLogout::User() );
+        se_kickUnworthySpare=nCallbackLoginLogout::User();
+        st_ToDo( se_KickUnworthy );
     }
 }
 static nCallbackLoginLogout se_playerLoginLogoutCallback( se_PlayerLoginLogoutCallback );
@@ -6799,6 +6805,7 @@ void ePlayerNetID::RemoveChatbots()
     }
 
     // kick unworthy spectators (in case MAX_CLIENTS has changed)
+    se_kickUnworthySpare = -1;
     se_KickUnworthy();
 }
 
