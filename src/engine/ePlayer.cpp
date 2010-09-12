@@ -8677,7 +8677,7 @@ static void se_TimebotAction( eTimebotAction action, ePlayerNetID * player, char
         break;
     case eTimebotAction_NotifyModerator:
         se_SecretConsoleOut( m, player, &se_cannotSeeConsole );
-        // no break on purose
+        break;
     case eTimebotAction_Log:
         con << m;
         break;
