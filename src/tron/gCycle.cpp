@@ -3203,6 +3203,12 @@ void gCycle::Die( REAL time )
         RequestSync( true );
     }
 
+    if( player && Alive() )
+    {
+        // death is hardly good timing.
+        player->AnalyzeTiming( -1 );
+    }
+
     gCycleMovement::Die( time );
 
     // reset smoothing

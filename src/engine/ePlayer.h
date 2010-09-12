@@ -168,12 +168,13 @@ public:
     {
         REAL timescale; //!< the timescale. Events are divided in two buckets, one between 0 and timescale/2, the other from timescale/2 to timescale.
         REAL maxGoodRatio; //!< the maximal allowed recent ratio of events to land in the 'good' bucket
+        REAL goodHumanRatio; //!< the maximal observed ratio for a human
         int  averageOverEvents; //!< number of events to average over
         
         mutable REAL bestRatio; //!< best ratio achieved by players during this session
 
-        eUncannyTimingSettings( REAL ts, REAL max )
-        : timescale( ts ), maxGoodRatio( max ), averageOverEvents(40)
+        eUncannyTimingSettings( REAL ts, REAL human, REAL max )
+        : timescale( ts ), maxGoodRatio( max ), goodHumanRatio(human), averageOverEvents(40)
         , bestRatio(0)
         {}
 

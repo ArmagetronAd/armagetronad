@@ -8559,7 +8559,7 @@ REAL eUncannyTimingDetector::eUncannyTimingAnalysis::Analyze( REAL timing, eUnca
         }
         
         // event falls into the buckets
-        if( 2*timing < settings.timescale )
+        if( 2*timing < settings.timescale && timing > 0 )
         {
             // event falls into the 'good' bucket, count it
             accurateRatio += increment;
@@ -8578,17 +8578,37 @@ REAL eUncannyTimingDetector::eUncannyTimingAnalysis::Analyze( REAL timing, eUnca
         settings.bestRatio = ratio;
     }
 
-    return ratio/settings.maxGoodRatio;
+    REAL ret = (ratio-settings.goodHumanRatio)/(settings.maxGoodRatio-settings.goodHumanRatio);
+    if( ret < 0 )
+    {
+        ret = 0;
+    }
+    return ret;
 }
 
 eUncannyTimingDetector::eUncannyTimingAnalysis::eUncannyTimingAnalysis()
-: accurateRatio( 0 ), turnsSoFar(10)
+: accurateRatio( .3 ), turnsSoFar(10)
 {}
 
+/* stats; ladle 37:
+prematch:
+[0] Best ratio achieved for 125ms stat: 0.653367, 591turns.
+[0] Best ratio achieved for 62.5ms stat: 1.07667, 124turns.
+[0] Best ratio achieved for 31.25ms stat: 0.464286, 43turns.
+up to zealous assertion failure:
+[0] Best ratio achieved for 125ms stat: 1.45674
+[0] Best ratio achieved for 62.5ms stat: 1.08824
+[0] Best ratio achieved for 31.25ms stat: 0.942842
+proper, after assertions had been removed:
+[0] Best ratio achieved for 125ms stat: 1.71929, 4686turns.
+[0] Best ratio achieved for 62.5ms stat: 1.08824, 713turns.
+[0] Best ratio achieved for 31.25ms stat: 0.952494, 163turns.
+*/
+
 static eUncannyTimingDetector::eUncannyTimingSettings 
-se_uncannyTimingSettingsFast(1/20.0, 1.5),
-    se_uncannyTimingSettingsMedium(1/10.0, 3),
-    se_uncannyTimingSettingsSlow(1/5.0, 30);
+se_uncannyTimingSettingsFast(1/32.0, 1, 1.5),
+se_uncannyTimingSettingsMedium(1/16.0, 1, 2),
+se_uncannyTimingSettingsSlow(1/8.0, 2, 4);
 
 static REAL se_Max( REAL a, REAL b )
 {
@@ -8603,8 +8623,8 @@ eUncannyTimingDetector::eUncannyTimingDetector()
 //! analzye a timing event
 void eUncannyTimingDetector::Analyze( REAL timing, ePlayerNetID * player )
 {
-    // ignore really uncanny timings
-    if( timing < 0 )
+    // ignore this system on the client itself
+    if( sn_GetNetState() != nSERVER )
     {
         return;
     }
@@ -8616,19 +8636,19 @@ void eUncannyTimingDetector::Analyze( REAL timing, ePlayerNetID * player )
     switch( dangerLevel )
     {
     case DangerLevel_Low:
-        if( maxUncanny > .5 )
+        if( maxUncanny > .25 )
         {
             dangerLevel =DangerLevel_Medium;
             con << "Medium uncanniness!\n";
         }
         break;
     case DangerLevel_Medium:
-        if( maxUncanny > .75 )
+        if( maxUncanny > .5 )
         {
             dangerLevel = DangerLevel_High;
             con << "High uncanniness!\n";
         }
-        else if( maxUncanny < .25 )
+        else if( maxUncanny <= 0.01 )
         {
             dangerLevel = DangerLevel_Low;
         }
@@ -8639,7 +8659,7 @@ void eUncannyTimingDetector::Analyze( REAL timing, ePlayerNetID * player )
             dangerLevel = DangerLevel_Max;
             con << "Max uncanniness!\n";
         }
-        else if( maxUncanny < .5 )
+        else if( maxUncanny < .25 )
         {
             dangerLevel = DangerLevel_Medium;
         }
