@@ -415,6 +415,12 @@ public:
     {
     }
 
+    // returns true if this process is still to be considered active
+    bool IsActive() const
+    {
+        return IsInList() && sn_UserID( user ) > 0;
+    }
+
     static nLoginProcess * Find( int userID )
     {
         nMachine & machine = nMachine::GetMachine( userID );
@@ -518,6 +524,12 @@ void nLoginProcess::FetchInfoFromAuthority()
     method.prefix = "";
     method.suffix = "";
     
+    if( !IsActive() )
+    {
+        Abort();
+        return;
+    }
+
     bool ret = false;
     if ( !tRecorder::IsPlayingBack() )
     {
@@ -851,7 +863,7 @@ void nLoginProcess::QueryFromClient()
     // check whether the user disappeared by now (this is run in the main thread,
     // so no risk of the user disconnecting while the function runs)
     int userID = sn_UserID( user );
-    if ( userID <= 0 )
+    if ( !IsActive() )
         return;
 
     // create a random salt value
@@ -1004,6 +1016,11 @@ bool nLoginProcess::CheckServerAddress()
 // and determines whether the client is authorized or not.
 void nLoginProcess::Authorize()
 {
+    if( !IsActive() )
+    {
+        Abort();
+    }
+
     if ( aborted )
     {
         success = false;
@@ -1054,7 +1071,7 @@ void nLoginProcess::Finish()
 {
     // again, userID is safe in this function
     int userID = sn_UserID( user );
-    if ( userID <= 0 )
+    if ( !IsActive() )
         return;
 
     // decorate console with correct sender ID

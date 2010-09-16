@@ -681,10 +681,18 @@ static void se_AdminLogin_ReallyOnlyCallFromChatKTHNXBYE( ePlayerNetID * p )
 #endif
 
 // flags indicating whether shouting should be the default chat action; if not, it's /team.
-static bool se_shoutSpectator=true;
-tSettingItem< bool > se_shoutSpectatorConf( "DEFAULT_SHOUT_SPECTATOR", se_shoutSpectator );
-static bool se_shoutPlayer=true;
-tSettingItem< bool > se_shoutPlayerConf( "DEFAULT_SHOUT_PLAYER", se_shoutPlayer );
+enum eShoutDefault
+{
+    eShoutDefault_Team = 0,             // default to /team chat
+    eShoutDefault_Shout = 1,            // default to /shout chat
+    eShoutDefault_ShoutAndOverride = 2  // default to /shout chat and override access level restrictions
+};
+tCONFIG_ENUM( eShoutDefault );
+
+static eShoutDefault se_shoutSpectator=eShoutDefault_Shout;
+tSettingItem< eShoutDefault > se_shoutSpectatorConf( "DEFAULT_SHOUT_SPECTATOR", se_shoutSpectator );
+static eShoutDefault se_shoutPlayer=eShoutDefault_Shout;
+tSettingItem< eShoutDefault > se_shoutPlayerConf( "DEFAULT_SHOUT_PLAYER", se_shoutPlayer );
 
 #ifdef KRAWALL_SERVER
 // minimal access level to shout
@@ -2961,6 +2969,12 @@ bool IsSilencedWithWarning( ePlayerNetID const * p )
 static bool se_CheckAccessLevelShoutNoWarn( ePlayerNetID * p )
 {
 #ifdef KRAWALL_SERVER
+    eShoutDefault shout = se_GetManagedTeam( p ) ? se_shoutPlayer : se_shoutSpectator;
+    if( shout == eShoutDefault_ShoutAndOverride )
+    {
+        return true;
+    }
+
     // check if the player has the right to shout
     return p->GetAccessLevel() <= se_shoutAccessLevel;
 #else
@@ -3871,7 +3885,8 @@ void se_ChatHandlerServer( unsigned short id, tColoredString const & say, nMessa
             }
 
             // well, that leaves only regular, boring chat.
-            if( ( se_GetManagedTeam( p ) ? se_shoutPlayer : se_shoutSpectator ) && se_CheckAccessLevelShoutNoWarn( p ) )
+            eShoutDefault shout = se_GetManagedTeam( p ) ? se_shoutPlayer : se_shoutSpectator;
+            if( shout != eShoutDefault_Team && se_CheckAccessLevelShoutNoWarn( p ) )
             {
                 // if it's the default and the player is allowed to, shout it out
                 se_ChatShout( p, say, spam );
@@ -6930,7 +6945,7 @@ void ePlayerNetID::Update(){
                 // if the player is not currently on a team, but wants to join a specific team, let it join any, but keep the wish stored
                 if ( player->NextTeam() && !player->CurrentTeam() && player->TeamChangeAllowed() )
                 {
-                    eTeam * wish = player->NextTeam();
+                    tJUST_CONTROLLED_PTR< eTeam > wish = player->NextTeam();
                     bool assignBack = se_assignTeamAutomatically;
                     se_assignTeamAutomatically = true;
                     player->SetDefaultTeam();
@@ -6956,8 +6971,9 @@ void ePlayerNetID::Update(){
             // announce unfullfilled wishes
             if ( player->NextTeam() != player->CurrentTeam() && player->NextTeam() )
             {
-                //if the player can't change teams delete the team wish
-                if(!player->TeamChangeAllowed()) {
+                // if the player can't change teams or their wish team emptied, delete the team wish
+                if(!player->TeamChangeAllowed() || player->NextTeam()->NumPlayers() == 0)
+                {
                     player->SetTeam( player->CurrentTeam() );
                     continue;
                 }
