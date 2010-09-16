@@ -652,6 +652,30 @@ static bool lowlevel_sr_InitDisplay(){
         SDL_EnableUNICODE(1);
     }
 
+    // sanity check texture modes
+    for(int i=rTextureGroups::TEX_GROUPS-1; i>=0; --i)
+    {
+        int & texmode = rTextureGroups::TextureMode[i];
+
+        // don't do anything for deliberately disabled textures
+        if( i == rTextureGroups::TEX_FONT || texmode >= 0 )
+        {
+            // to default if the modes have been reset for some reason
+            if( texmode == 0 )
+            {
+                texmode = default_texturemode;
+            }
+            if( texmode < GL_NEAREST )
+            {
+                texmode = GL_NEAREST;
+            }
+            if( texmode > GL_LINEAR_MIPMAP_LINEAR )
+            {
+                texmode = GL_LINEAR_MIPMAP_LINEAR;
+            }
+        }
+    }
+
 #ifdef DIRTY
     if (!currentScreensetting.useSDL)
         if(!rSysDep::InitGL()) return false;
