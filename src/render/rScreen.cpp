@@ -419,10 +419,15 @@ static bool lowlevel_sr_InitDisplay(){
             {
                 const SDL_VideoInfo* videoInfo     = SDL_GetVideoInfo( );
                 const SDL_PixelFormat* pixelFormat = videoInfo->vfmt;
-                fullCD         		               = pixelFormat->BitsPerPixel;
-                singleCD_R                         = countBits(pixelFormat->Rmask);
-                singleCD_G                         = countBits(pixelFormat->Gmask);
-                singleCD_B                         = countBits(pixelFormat->Bmask);
+
+                // don't accept anything less than 15 bpp, OpenGL doesn't like indexed colors.
+                if( 15 <= pixelFormat->BitsPerPixel && NULL == pixelFormat->palette )
+                {
+                    fullCD         		               = pixelFormat->BitsPerPixel;
+                    singleCD_R                         = countBits(pixelFormat->Rmask);
+                    singleCD_G                         = countBits(pixelFormat->Gmask);
+                    singleCD_B                         = countBits(pixelFormat->Bmask);
+                }
             }
             break;
         case ArmageTron_ColorDepth_32:
