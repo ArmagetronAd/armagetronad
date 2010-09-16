@@ -98,7 +98,6 @@ std::istream & operator >> ( std::istream & s, rScreenSize const & size )
 }
 */
 
-#ifndef DEBUG
 static rScreenSettings em6(ArmageTron_320_240, false, ArmageTron_ColorDepth_16, true, false);
 static rScreenSettings em5(ArmageTron_320_240, false, ArmageTron_ColorDepth_Desktop, true, false);
 static rScreenSettings em4(ArmageTron_640_480, false,ArmageTron_ColorDepth_16);
@@ -107,7 +106,6 @@ static rScreenSettings em2(ArmageTron_640_480, true, ArmageTron_ColorDepth_16, f
 static rScreenSettings em1(ArmageTron_640_480);
 
 static rScreenSettings *emergency[MAXEMERGENCY+2]={ &lastSuccess, &lastSuccess, &em1, &em2, &em3 , &em4, &em5, &em6};
-#endif
 
 #ifdef DEBUG
 rScreenSettings currentScreensetting(ArmageTron_640_480);
@@ -788,6 +786,10 @@ static bool lowlevel_sr_InitDisplay(){
     sr_ResetRenderState(true);
 
     rCallbackAfterScreenModeChange::Exec();
+
+    lastSuccess=currentScreensetting;
+    failed_attempts = 0;
+    st_SaveConfig();
 #endif
     return true;
 }
@@ -798,16 +800,19 @@ bool sr_InitDisplay(){
     cycleprograminited = false;
     while (failed_attempts <= MAXEMERGENCY+1)
     {
-#ifndef DEBUG
         if (failed_attempts)
+        {
+#ifdef DEBUG
+            std::cout << "failed attempts:" << failed_attempts << "\n";
+            std::cout.flush();
+#endif
             currentScreensetting = *emergency[failed_attempts];
+        }
 
+        // prepare for crash, note failure and save config
         failed_attempts++;
         st_SaveConfig();
 
-        //      std::cout << failed_attempts << "\n";
-        //      std::cout.flush();
-#endif
 
 #ifdef MACOSX
         // init the screen once in windowed mode
@@ -831,7 +836,6 @@ bool sr_InitDisplay(){
         sr_LockSDL();
         if (lowlevel_sr_InitDisplay())
         {
-            lastSuccess=currentScreensetting;
             sr_UnlockSDL();
             return true;
         }
@@ -840,7 +844,6 @@ bool sr_InitDisplay(){
 
         if (lowlevel_sr_InitDisplay())
         {
-            lastSuccess=currentScreensetting;
             sr_UnlockSDL();
             return true;
         }
@@ -873,9 +876,6 @@ void sr_ExitDisplay(){
 #endif
 
     if (sr_screen){
-        failed_attempts = 0;
-        st_SaveConfig();
-
         sr_LockSDL();
         // z-man: according to man SDL_SetVideoSurface, screen should not bee freed.
         // SDL_FreeSurface(sr_screen);
