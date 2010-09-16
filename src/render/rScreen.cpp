@@ -402,6 +402,49 @@ static bool lowlevel_sr_InitDisplay(){
     sr_screenWidth = res.width;
     sr_screenHeight= res.height;
 
+    // desktop color depth
+    static int desktopCD_R = 5;
+    static int desktopCD_G = 5;
+    static int desktopCD_B = 5;
+    static int desktopCD   = 16;
+    // desktop resolution
+    static int sr_desktopWidth = 0, sr_desktopHeight = 0;
+
+    // determine those values
+    if ( sr_desktopWidth == 0 && !sr_screen )
+    {
+        // select sane defaults in case the following operation fails
+        sr_desktopWidth = 800;
+        sr_desktopHeight = 600;
+        
+        const SDL_VideoInfo* videoInfo     = SDL_GetVideoInfo( );
+        if( videoInfo )
+        {
+            const SDL_PixelFormat* pixelFormat = videoInfo->vfmt;
+
+            // don't accept anything less than 15 bpp, OpenGL doesn't like indexed colors.
+            if( pixelFormat && 15 <= pixelFormat->BitsPerPixel && NULL == pixelFormat->palette )
+            {
+                desktopCD    = pixelFormat->BitsPerPixel;
+                desktopCD_R  = countBits(pixelFormat->Rmask);
+                desktopCD_G  = countBits(pixelFormat->Gmask);
+                desktopCD_B  = countBits(pixelFormat->Bmask);
+            }
+
+            // the struct components we read here only exist since 
+            // SDL 1.2.10. The version check here is to safeguard against
+            // code compiled against SDL 1.2.10, but linked with an earlier
+            // version, accessing data out of bounds.
+#if SDL_VERSION_ATLEAST(1, 2, 10)
+            if( sr_DesktopScreensizeSupported() )
+            {
+                sr_desktopWidth  = videoInfo->current_w;
+                sr_desktopHeight = videoInfo->current_h;
+            }
+#endif
+        }
+    }
+
     if (!sr_screen)
     {
         int singleCD_R	= 5;
@@ -417,17 +460,10 @@ static bool lowlevel_sr_InitDisplay(){
             break;
         case ArmageTron_ColorDepth_Desktop:
             {
-                const SDL_VideoInfo* videoInfo     = SDL_GetVideoInfo( );
-                const SDL_PixelFormat* pixelFormat = videoInfo->vfmt;
-
-                // don't accept anything less than 15 bpp, OpenGL doesn't like indexed colors.
-                if( 15 <= pixelFormat->BitsPerPixel && NULL == pixelFormat->palette )
-                {
-                    fullCD         		               = pixelFormat->BitsPerPixel;
-                    singleCD_R                         = countBits(pixelFormat->Rmask);
-                    singleCD_G                         = countBits(pixelFormat->Gmask);
-                    singleCD_B                         = countBits(pixelFormat->Bmask);
-                }
+                fullCD     = desktopCD;
+                singleCD_R = desktopCD_R;
+                singleCD_G = desktopCD_G;
+                singleCD_B = desktopCD_B;
             }
             break;
         case ArmageTron_ColorDepth_32:
@@ -514,13 +550,13 @@ static bool lowlevel_sr_InitDisplay(){
                   attrib);
 
             // if not quite right
-            if (CD < fullCD){
+            if (CD < 15){
                 // check if the other fs/windowed mode is better
                 int CD_fsinv = SDL_VideoModeOK
                                (sr_screenWidth, sr_screenHeight,   fullCD,
                                 attrib^SDL_FULLSCREEN);
 
-                if (CD_fsinv > fullCD){
+                if (CD_fsinv > 15){
                     // yes! change the mode
                     currentScreensetting.fullscreen=!currentScreensetting.fullscreen;
                     attrib ^= SDL_FULLSCREEN;
@@ -543,29 +579,6 @@ static bool lowlevel_sr_InitDisplay(){
                     SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
                 }
 #endif
-            }
-        }
-
-        // determine desktop resolution
-        static int sr_desktopWidth = 0, sr_desktopHeight = 0;
-        if ( sr_desktopWidth == 0 && !sr_screen )
-        {
-            // select sane defaults in case the following operation fails
-            sr_desktopWidth = 640;
-            sr_desktopHeight = 480;
-
-            if ( sr_DesktopScreensizeSupported()
-#ifdef DEBUG
-                 && currentScreensetting.fullscreen && sr_screenWidth + sr_screenHeight == 0
-#endif
-                )
-            {
-                sr_screen=SDL_SetVideoMode( 0, 0, CD, attrib );
-                if ( sr_screen )
-                {
-                    sr_desktopWidth = sr_screen->w;
-                    sr_desktopHeight = sr_screen->h;
-                }
             }
         }
 
