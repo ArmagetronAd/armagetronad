@@ -151,6 +151,32 @@ static nServerInfo *CreateServerInfo()
         return tNEW(nServerInfo());
 }
 
+static void sn_AddMasterServer( std::istream &s )
+{
+    tString connectionName;
+    unsigned port = 4533;
+    
+    s >> connectionName;
+    if ( !s.eof() )
+        s >> port;
+    
+    // back up regular server list
+    nServerInfo *oldFirstServer = sn_FirstServer;
+    sn_FirstServer = NULL;
+
+    nServerInfo *newMaster = CreateServerInfo();
+    newMaster->SetConnectionName( connectionName );
+    newMaster->SetPort( port );
+    newMaster->Remove();
+    newMaster->Insert( sn_masterList );
+    
+    // restore regular server list
+    sn_FirstServer = oldFirstServer;
+    nServerInfo::TellMasterAboutMe( newMaster );    
+}
+
+static tConfItemFunc sn_addMasterServerConfItemFunc( "ADD_MASTER_SERVER", &sn_AddMasterServer );
+
 nServerInfo::nServerInfo()
         :tListItem<nServerInfo>(sn_FirstServer),
         pollID(-1),
