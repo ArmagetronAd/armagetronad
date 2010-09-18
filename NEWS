@@ -14,6 +14,7 @@ Changes since 0.3.1
 Changes since 0.3.0
 ===================
 
+- FULL_REDIRECT_SERVER/PORT: redirection target used when the server is full.
 - The chat and console history are now remembered between restarts of arma
 - Added an incremental reverse search for the console and chat history:
   In chat or console mode press CTRL-R and start entering your search term.
