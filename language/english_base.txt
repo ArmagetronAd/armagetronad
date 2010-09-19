@@ -426,8 +426,8 @@ spam_vote_kick_issue        You issued too many kick votes.
 spam_vote_rejected          Too many of your votes got rejected.
 
 # default shouting
-default_shout_spectator_help 1 if the default chat action for spectators should be shouting, 0 if it should be spectator chat.
-default_shout_player_help    1 if the default chat action for players should be shouting, 0 if it should be team chat.
+default_shout_spectator_help 1 if the default chat action for spectators should be shouting, 0 if it should be spectator chat. 2 if the default action should be shouting and the access level requirement should be overridden.
+default_shout_player_help    1 if the default chat action for players should be shouting, 0 if it should be team chat. 2 if the default action should be shouting and the access level requirement should be overridden.
 
 #********************************************
 #********************************************

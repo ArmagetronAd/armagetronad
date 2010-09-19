@@ -1030,7 +1030,7 @@ AC_CHECK_PROG([PROTOC],protoc,protoc,no)
 AC_LANG([C])
 
 dnl check for library
-AC_CHECK_LIB([protobuf],_ZN6google8protobuf7ClosureD2Ev,,
+AC_CHECK_LIB([protobuf],_ZN6google8protobuf7MessageD2Ev,,
 [
 	AC_CHECK_LIB([protobuf],_ZN6google8protobuf7ClosureD2Ev,
 		AC_MSG_WARN([[The library protobuf (Google Protobuf Buffers) has a broken dependency on library pthread on your system.]])
@@ -1638,7 +1638,6 @@ echo "         Ruby include flags: $RUBY_INCLUDES"
 echo "         Ruby lib flags: $RUBY_LIBS"
 echo "         Ruby install directory: $RUBY_INSTALL_DIR"
 fi
-
 echo "     Call sysinstall: $enable_sysinstall"
 if test "$enable_uninstall" = "yes" &&
    test "$external_uninstall_cmd" != ""; then

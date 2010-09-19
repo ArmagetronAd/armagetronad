@@ -2040,8 +2040,10 @@ bool gCycleMovement::Timestep( REAL currentTime )
     tJUST_CONTROLLED_PTR< gCycleMovement > keep( this->GetRefcount()>0 ? this : 0 );
 
     // don't make a fuss about negative timesteps
-    if ( currentTime < lastTime )
-        return TimestepCore( currentTime );
+    // if ( currentTime < lastTime )
+    // {
+    //     return TimestepCore( currentTime );
+    // }
 
     // remove old destinations
     //REAL lag = 1;
@@ -2056,6 +2058,8 @@ bool gCycleMovement::Timestep( REAL currentTime )
     REAL dt = currentTime - lastTime;
 
     sg_ArchiveReal( dt, 9 );
+
+    bool vetoSimulationRequest = false; // set if the simulation was aborted even though events are still there to be taken care of
 
     // if (currentTime > lastTime)
     {
@@ -2163,10 +2167,16 @@ bool gCycleMovement::Timestep( REAL currentTime )
             REAL simulateAhead = MaxSimulateAhead();
 
             if ( dist_to_dest > ( ts + simulateAhead ) * avgspeed && currentTime < latestTurnTime )
+            {
+                vetoSimulationRequest = true;
                 break; // no need to worry; we won't reach the next destination
+            }
 
-            if ( currentTime < earliestTurnTime && sg_CommandTime.Supported( Owner() ) )
+            if ( currentTime + simulateAhead < earliestTurnTime && sg_CommandTime.Supported( Owner() ) )
+            {
+                vetoSimulationRequest = true;
                 break; // the turn is too far in the future
+            }
 
             // if ( currentTime < turnTime + EPS )
             //    simulateAhead = 0;
@@ -2424,20 +2434,17 @@ bool gCycleMovement::Timestep( REAL currentTime )
                     if ( latestTurnTime < nextTurn )
                         latestTurnTime = nextTurn;
 
-                    if ( currentTime - lastTime > turnStep )
+                    if ( ts + + simulateAhead > turnStep )
                     {
-                        tsTodo = turnStep;
-
                         // if we can simulate to the turn in the next step, do so, overriding
                         // the turn delay then.
-                        if ( tsTodo < ts + simulateAhead && tsTodo > 0 )
-                        {
-                            overrideTurnDelay = true;
-                        }
+                        tsTodo = turnStep;
+                        overrideTurnDelay = true;
                     }
                     else
                     {
                         // not enough time to simulate to turn possibility; skip out of loop
+                        vetoSimulationRequest = true;
                         break;
                     }
                 }
@@ -2473,6 +2480,7 @@ bool gCycleMovement::Timestep( REAL currentTime )
                 {
                     tsTodo = ts + simulateAhead ;
                     forceTurn = false;
+                    overrideTurnDelay = false;
 
                     // quit from here if there is nothing to do
                     if ( tsTodo <= EPS )
@@ -2519,8 +2527,10 @@ bool gCycleMovement::Timestep( REAL currentTime )
 
     // if we get here and turns are left pending within our reach,
     // request the function gets called again right away.
-    if( currentDestination || 
-        ( !pendingTurns.empty() && GetNextTurn( pendingTurns.front() < currentTime + MaxSimulateAhead() ) )
+    if( !vetoSimulationRequest &&
+        ( currentDestination || 
+          ( !pendingTurns.empty() && GetNextTurn( pendingTurns.front() < currentTime + MaxSimulateAhead() ) )
+            )
         )
     {
         RequestSimulation();
@@ -3775,6 +3785,16 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
     tASSERT( rubber >= 0 );
 
     sg_ArchiveReal( step, 9 );
+
+    // don't go back further than the last turn
+    if( step < 0 )
+    {
+        REAL min = -GetDistanceSinceLastTurn();
+        if( step < min )
+        {
+            step = min;
+        }
+    }
 
     // move forward
     eCoord nextpos;
