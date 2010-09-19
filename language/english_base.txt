@@ -630,6 +630,7 @@ dedicated_idle_help		After running this time (in hours), the dedicated server ta
 dedicated_fps_help      Maximum simulation steps per second the dedicated server will perform
 dedicated_fps_idle_factor_help Number of times per frame the server should check whether simulation can be done if no network input is coming
 talk_to_master_help		Announce this server on the internet?
+add_master_server_help  Announce this server to another master server. Usage: ADD_MASTER_SERVER host port(optional, default=4533).
 max_out_rate_help		Maximum network output rate
 max_in_rate_help		Maximum network input rate
 ping_charity_help		How much ping are you willing to take over from your opponent?
