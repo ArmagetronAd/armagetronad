@@ -8613,12 +8613,28 @@ z-man, trying really hard:
 [0] Best ratio achieved for 125ms stat: 4.71739
 [0] Best ratio achieved for 62.5ms stat: 0.945886
 [0] Best ratio achieved for 31.25ms stat: 0.444307
+tst prematch, only counting enemy grinds:
+[0] Best ratio achieved for 125ms stat: 6.04985
+[0] Best ratio achieved for 62.5ms stat: 1.80428
+[0] Best ratio achieved for 31.25ms stat: 0.819629
+all grinds:
+[0] Best ratio achieved for 125ms stat: 2.09805
+[0] Best ratio achieved for 62.5ms stat: 2.32939
+[0] Best ratio achieved for 31.25ms stat: 1
+tst proper, enemies only: 
+[0] Best ratio achieved for 125ms stat: 5.60549
+[0] Best ratio achieved for 62.5ms stat: 1.01227
+[0] Best ratio achieved for 31.25ms stat: 0.681035
+all grinds:
+[0] Best ratio achieved for 125ms stat: 1.72932
+[0] Best ratio achieved for 62.5ms stat: 1.68816
+[0] Best ratio achieved for 31.25ms stat: 0.750099
 */
 
 static eUncannyTimingDetector::eUncannyTimingSettings 
 se_uncannyTimingSettingsFast(1/32.0, 1, 1.5),
-se_uncannyTimingSettingsMedium(1/16.0, 1, 2),
-se_uncannyTimingSettingsSlow(1/8.0, 5, 15);
+se_uncannyTimingSettingsMedium(1/16.0, 2, 4),
+se_uncannyTimingSettingsSlow(1/8.0, 7, 15);
 
 static REAL se_Max( REAL a, REAL b )
 {

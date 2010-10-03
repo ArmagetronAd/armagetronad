@@ -2964,7 +2964,7 @@ void gCycleMovement::CalculateAcceleration()
             if ( fabs( eCoord::F( wallVec, dirDrive  ) ) > .9 * dirDrive.NormSquared() )
             {
                 // detect uncanny timing of earlier turns, only check outside corner grinds
-                if( uncannyTimingToReport_ && player && ( lastTurnTimeRight_ - lastTurnTimeLeft_ ) * d < 0 )
+                if ( uncannyTimingToReport_ && player && ( lastTurnTimeRight_ - lastTurnTimeLeft_ ) * d < 0 )
                 {
                     // check that the wall we're grinding was there before we turned
                     bool wasMe = true;
@@ -2972,7 +2972,7 @@ void gCycleMovement::CalculateAcceleration()
                     if( !w && rear.ehit->Other() )
                         w = dynamic_cast< gPlayerWall * >( rear.ehit->Other()->GetWall() );
 
-                    if( w )
+                    if ( w )
                     {
                         REAL lastTurnTime = GetLastTurnTime();
                         if( lastTurnTime < w->Time(0) &&
@@ -2982,12 +2982,17 @@ void gCycleMovement::CalculateAcceleration()
                         }
                     }
 
-                    if( wasMe )
+                    if ( wasMe )
                     {
-                        REAL timing = rear.hit/(verletSpeed_ + 1E-10);
                         uncannyTimingToReport_ = false;
-                    
-                        player->AnalyzeTiming( timing );
+
+                        // don't count grinding own wall on the outside, it may
+                        // be a practiced pattern
+                        if( rear.type != gSENSOR_SELF )
+                        {
+                            REAL timing = rear.hit/(verletSpeed_ + 1E-10);
+                            player->AnalyzeTiming( timing );
+                        }
                     }
                 }
                 
