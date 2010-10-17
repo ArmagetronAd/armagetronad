@@ -782,6 +782,7 @@ ladderlog_write_online_player_help            Write to ladderlog: ONLINE_PLAYER 
 ladderlog_write_player_entered_help           Write to ladderlog: PLAYER_ENTERED <name> <IP> <screen name>
 ladderlog_write_player_left_help              Write to ladderlog: PLAYER_LEFT <name> <IP>
 ladderlog_write_player_renamed_help           Write to ladderlog: PLAYER_RENAMED <old name> <new name> <ip> <screen name>
+ladderlog_write_position_help                 Write to ladderlog: POSITION <position> <player> <team>
 ladderlog_write_round_score_help              Write to ladderlog: ROUND_SCORE <score difference> <player> [<team>]
 ladderlog_write_round_score_team_help         Write to ladderlog: ROUND_SCORE_TEAM <score difference> <team>
 ladderlog_write_round_winner_help             Write to ladderlog: ROUND_WINNER <winner>
