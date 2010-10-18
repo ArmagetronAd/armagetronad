@@ -2453,7 +2453,7 @@ bool gBaseZoneHack::Timestep( REAL time )
 					if ((ownersInside_ > 0) && (sg_baseRespawn))
 					{
 						tColoredString spawnerName;
-						spawnerName << teamPlayerName_ << tColoredString::ColorString(1,1,1);
+						spawnerName << teamPlayer_->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
 						sn_ConsoleOut( tOutput( "$player_base_respawn", playerName, spawnerName ) );
 					}
 					else
@@ -3035,7 +3035,7 @@ void gBaseZoneHack::OnEnter( gCycle * target, REAL time )
 		if ( ownersInside_ == 0 )
 		{
 			// store the name
-			teamPlayerName_ = target->Player()->GetColoredName();
+            teamPlayer_ = target;
 		}
 
 		++ ownersInside_;
@@ -3209,7 +3209,7 @@ void gBaseZoneHack::OnEnter( gZone * target, REAL time )
 						if ((ownersInside_ > 0) && (sg_baseRespawn))
 						{
 							tColoredString spawnerName;
-							spawnerName << teamPlayerName_ << tColoredString::ColorString(1,1,1);
+							spawnerName << teamPlayer_->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
 							sn_ConsoleOut( tOutput( "$player_base_respawn", playerName, spawnerName ) );
 						}
 						else

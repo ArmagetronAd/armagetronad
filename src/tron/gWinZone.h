@@ -321,8 +321,8 @@ class gBaseZoneHack: public gZone
 		tColoredString enemyPlayerName_;
 
 		int ownersInside_;		 //!< count of owners currently inside the zone
-								 //!< name of the first team player that was inside us
-		tColoredString teamPlayerName_;
+		gCycle *teamPlayer_;     //!< the first team player that was inside us
+        
 
 		bool onlySurvivor_;		 //!< flag set if this zone is the only survivor
 
