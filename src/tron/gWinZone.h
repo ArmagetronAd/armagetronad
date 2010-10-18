@@ -317,8 +317,8 @@ class gBaseZoneHack: public gZone
 								 //!< time spend in the zone
 		REAL conquerer_[MAXCLIENTS+1];
 		int enemiesInside_;		 //!< count of enemies currently inside the zone
-								 //!< name of the first enemy player that was inside us
-		tColoredString enemyPlayerName_;
+								 
+        gCycle *enemyPlayer_;     //!< the first enemy player that was inside us
 
 		int ownersInside_;		 //!< count of owners currently inside the zone
 		gCycle *teamPlayer_;     //!< the first team player that was inside us

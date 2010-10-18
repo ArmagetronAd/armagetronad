@@ -2459,7 +2459,7 @@ bool gBaseZoneHack::Timestep( REAL time )
 					else
 					{
 						tColoredString spawnerName;
-						spawnerName << enemyPlayerName_ << tColoredString::ColorString(1,1,1);
+						spawnerName << enemyPlayer_->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
 						sn_ConsoleOut( tOutput( "$player_base_enemy_respawn", playerName, spawnerName ) );
 					}
 
@@ -3059,7 +3059,7 @@ void gBaseZoneHack::OnEnter( gCycle * target, REAL time )
 			enemies_.clear();
 
 			// store the name
-			enemyPlayerName_ = target->Player()->GetColoredName();
+			enemyPlayer_ = target;
 		}
 
 		++ enemiesInside_;
@@ -3215,7 +3215,7 @@ void gBaseZoneHack::OnEnter( gZone * target, REAL time )
 						else
 						{
 							tColoredString spawnerName;
-							spawnerName << enemyPlayerName_ << tColoredString::ColorString(1,1,1);
+							spawnerName << enemyPlayer_->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
 							sn_ConsoleOut( tOutput( "$player_base_enemy_respawn", playerName, spawnerName ) );
 						}
 
