@@ -110,6 +110,8 @@ static eLadderLogWriter sg_flagTakeWriter("FLAG_TAKE", true);
 static eLadderLogWriter sg_flagDropWriter("FLAG_DROP", true);
 static eLadderLogWriter sg_flagScoreWriter("FLAG_SCORE", true);
 static eLadderLogWriter sg_flagHeldWriter("FLAG_HELD", true);
+static eLadderLogWriter sg_baseRespawnWriter("BASE_RESPAWN", true);
+static eLadderLogWriter sg_baseEnemyRespawnWriter("BASE_ENEMY_RESPAWN", true);
 
 //! creates a win or death zone (according to configuration) at the specified position
 gZone * sg_CreateWinDeathZone( eGrid * grid, const eCoord & pos )
@@ -2455,12 +2457,18 @@ bool gBaseZoneHack::Timestep( REAL time )
 						tColoredString spawnerName;
 						spawnerName << teamPlayer_->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
 						sn_ConsoleOut( tOutput( "$player_base_respawn", playerName, spawnerName ) );
+						
+                        sg_baseRespawnWriter << teamPlayer_->Player()->GetLogName() << pPlayer->GetLogName();
+                        sg_baseRespawnWriter.write();
 					}
 					else
 					{
 						tColoredString spawnerName;
 						spawnerName << enemyPlayer_->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
 						sn_ConsoleOut( tOutput( "$player_base_enemy_respawn", playerName, spawnerName ) );
+						
+                        sg_baseEnemyRespawnWriter << enemyPlayer_->Player()->GetLogName() << pPlayer->GetLogName();
+                        sg_baseEnemyRespawnWriter.write();
 					}
 
 					// send a console message to the player
@@ -3211,12 +3219,18 @@ void gBaseZoneHack::OnEnter( gZone * target, REAL time )
 							tColoredString spawnerName;
 							spawnerName << teamPlayer_->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
 							sn_ConsoleOut( tOutput( "$player_base_respawn", playerName, spawnerName ) );
+							
+                            sg_baseRespawnWriter << teamPlayer_->Player()->GetLogName() << pPlayer->GetLogName();
+                            sg_baseRespawnWriter.write();
 						}
 						else
 						{
 							tColoredString spawnerName;
 							spawnerName << enemyPlayer_->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
 							sn_ConsoleOut( tOutput( "$player_base_enemy_respawn", playerName, spawnerName ) );
+							
+                            sg_baseEnemyRespawnWriter << enemyPlayer_->Player()->GetLogName() << pPlayer->GetLogName();
+                            sg_baseEnemyRespawnWriter.write();
 						}
 
 						// send a console message to the player
