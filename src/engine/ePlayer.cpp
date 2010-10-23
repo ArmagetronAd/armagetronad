@@ -3191,12 +3191,19 @@ static void se_ChatShuffle( ePlayerNetID * p, std::istream & s )
     // /teamshuffle +/-<dist>: shuffles you dist to the outside/inside
     // con << msgRest << "\n";
     int IDNow = p->TeamListID();
+    int len = eTeam::maxPlayers;
     if (!p->CurrentTeam())
     {
-        sn_ConsoleOut(tOutput("$player_not_on_team"), p->Owner());
-        return;
+        // players start on the outside by default
+        if( IDNow < 0 )
+        {
+            IDNow = len-1;
+        }
     }
-    int len = p->CurrentTeam()->NumPlayers();
+    else
+    {
+        len = p->CurrentTeam()->NumPlayers();
+    }
 
     // but read the target position as additional parameter
     int IDWish = len-1; // default to shuffle to the outside
@@ -3233,7 +3240,7 @@ static void se_ChatShuffle( ePlayerNetID * p, std::istream & s )
     if (IDWish >= len)
         IDWish = len-1;
 
-    if(IDWish < IDNow)
+    if( !p->CurrentTeam() || IDWish < IDNow )
     {
 #ifndef KRAWALL_SERVER
         if ( !se_allowShuffleUp )
@@ -3256,8 +3263,29 @@ static void se_ChatShuffle( ePlayerNetID * p, std::istream & s )
         return;
     }
 
-    p->CurrentTeam()->Shuffle( IDNow, IDWish );
-    se_ListTeam( p, p->CurrentTeam() );
+    if( p->CurrentTeam() )
+    {  
+        // really shuffle
+        p->CurrentTeam()->Shuffle( IDNow, IDWish );
+        se_ListTeam( p, p->CurrentTeam() );
+    }
+    else
+    {
+        // just store the shuffle wish for later
+        p->SetShuffleWish( IDWish );
+    }
+}
+
+void ePlayerNetID::SetShuffleWish( int pos )
+{
+    tASSERT( !CurrentTeam() );
+
+    if ( shuffleSpam.ShouldAnnounce() )
+    {
+        sn_ConsoleOut( shuffleSpam.ShuffleMessage( this, pos+1 ) );
+    }
+
+    teamListID = pos;
 }
 
 class eHelpTopic {
@@ -6420,6 +6448,13 @@ static bool se_ForceSpectate( REAL & time, REAL minTime, char const * message, c
     }
 }
 
+// sorted storage for pre-join shuffle commands
+typedef std::multimap< int, tJUST_CONTROLLED_PTR< ePlayerNetID > >
+ePrejoinShuffleMap;
+typedef std::pair< int, tJUST_CONTROLLED_PTR< ePlayerNetID > >
+ePrejoinPair;
+static ePrejoinShuffleMap se_prejoinShuffles;
+
 // Update the netPlayer_id list
 void ePlayerNetID::Update(){
 #ifdef KRAWALL_SERVER
@@ -6718,6 +6753,35 @@ void ePlayerNetID::Update(){
     {
         eTeam::teams(i)->UpdateProperties();
     }
+
+    // execute all prejoin shuffles
+    for( ePrejoinShuffleMap::iterator i = se_prejoinShuffles.begin(); i!= se_prejoinShuffles.end(); ++i )
+    {
+        ePlayerNetID * player = (*i).second;
+        if( player && player->IsActive() )
+        {
+            eTeam * team = player->CurrentTeam();
+            if( team )
+            {
+                int wish = (*i).first;
+
+                // sanity check
+                if( wish < 0 )
+                {
+                    wish = 0;
+                }
+                if( wish >= team->NumPlayers() )
+                {
+                    wish = team->NumPlayers()-1;
+                }
+
+                // delegate shuffling work
+                team->Shuffle( player->TeamListID(), wish );
+            }
+        }
+    }
+    se_prejoinShuffles.clear();
+             
 
     // get rid of deleted netobjects
     nNetObject::ClearAllDeleted();
@@ -7241,9 +7305,20 @@ void ePlayerNetID::UpdateTeamForce()
     eTeam *oldTeam = currentTeam;
 
     if ( nextTeam )
+    {
+        if( !oldTeam && teamListID >= 0 )
+        {
+            // clear current team list ID, it was just a shuffle wish
+            // but store the shuffle wish first
+            se_prejoinShuffles.insert( ePrejoinPair( teamListID, this ) );
+            teamListID = -1;
+        }
         nextTeam->AddPlayer ( this );
+    }
     else if ( oldTeam )
+    {
         oldTeam->RemovePlayer( this );
+    }
 
     if( nCLIENT !=  sn_GetNetState() && GetRefcount() > 0 )
     {

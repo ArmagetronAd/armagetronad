@@ -1,4 +1,5 @@
 Changes since 0.2.8.3.x:
+- /shuffle now works before you actually join a team
 - Implemented /shout command and associated settings
 - Tweaks to enemy influence system.
 - Ingame menu and console now are drawn on top of a semi-transparent,
