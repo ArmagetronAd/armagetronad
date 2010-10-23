@@ -10,6 +10,10 @@ Changes since 0.2.8.3.x:
   Simplifies the process to list your server on a subculture.
 
 Changes since 0.2.8.3_rc4:
+- New setting: KEEP_PLAYER_SLOT allows the server to kick (preferably) spectators
+   if it gets full so there is always one slot open for players
+- New setting: ACCESS_LEVEL_AUTOKICK_IMMUNITY sets the access level required 
+  to be immune from such kicks (and idle autokicks, too)
 - Intercepted chat commands are now written to ladderlog.txt. Format:
   COMMAND /command-intercepted player [command arguments]
 - Increased default speed of server pinging

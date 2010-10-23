@@ -4227,6 +4227,192 @@ void ePlayerNetID::Activity()
 static int se_maxPlayersPerIP = 4;
 static tSettingItem<int> se_maxPlayersPerIPConf( "MAX_PLAYERS_SAME_IP", se_maxPlayersPerIP );
 
+// should unworthy spectators be kicked if the server is full?
+static bool se_kickUnworthy=false;
+tSettingItem< bool > se_kickUnworthyConf( "KEEP_PLAYER_SLOT", se_kickUnworthy );
+
+// access level needed to grant immunity against all forms of idle kicks
+static tAccessLevel se_autokickImmunity = tAccessLevel_TeamLeader;
+static tSettingItem< tAccessLevel > se_autokickImmunityConf( "ACCESS_LEVEL_AUTOKICK_IMMUNITY", se_autokickImmunity );
+
+// compares the worth of two players. Returns 1 if the first is better, -1 if the second is better, 0 if they are equal.
+static int se_comparePlayerWorth( ePlayerNetID * a, ePlayerNetID * b, int nullPointerSign=1 )
+{
+    // check for NULL pointers
+    if( !a )
+    {
+        if ( !b )
+        {
+            return 0;
+        }
+        else
+        {
+            return -nullPointerSign;
+        }
+    }
+    else
+    {
+        if ( !b )
+        {
+            return nullPointerSign;
+        }
+    }
+
+    // potential players > spectators
+    if ( !se_GetManagedTeam( a ) )
+    {
+        if( se_GetManagedTeam( b ) )
+        {
+            return -1;
+        }
+    }
+    else
+    {
+        if( !se_GetManagedTeam( b ) )
+        {
+            return 1;
+        }
+    }
+
+    // actual players > potential players
+    if ( !a->CurrentTeam() )
+    {
+        if( b->CurrentTeam() )
+        {
+            return -1;
+        }
+    }
+    else
+    {
+        if( !b->CurrentTeam() )
+        {
+            return 1;
+        }
+    }
+
+    // access level counts
+#ifdef KRAWALL_SERVER
+    if( a->GetAccessLevel() < b->GetAccessLevel() )
+    {
+        return 1;
+    }
+    else if( a->GetAccessLevel() > b->GetAccessLevel() )
+    {
+        return -1;
+    }
+#endif
+
+    // players with login process > players without
+    if( !nAuthentication::LoginInProcess( a ) )
+    {
+        if( nAuthentication::LoginInProcess( b ) )
+        {
+            return -1;
+        }
+    }
+    else
+    {
+        if( !nAuthentication::LoginInProcess( b ) )
+        {
+            return 1;
+        }
+    }
+
+    // players online for shorter times are more worthy
+    if( a->GetTimeCreated() < b->GetTimeCreated() )
+    {
+        return 1;
+    }
+    else if( a->GetTimeCreated() > b->GetTimeCreated() )
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
+// the user that last logged in; spare him.
+static int se_kickUnworthySpare=-1;
+
+// clear out one unworthy spectator
+static void se_KickUnworthy()
+{
+    int userToSpare=se_kickUnworthySpare;
+
+    static REAL banForMinutes = 0;
+
+    // each player joining increases the ban, rounds passing decrease it
+    if( userToSpare >= 0 )
+    {
+        banForMinutes += .05f;
+    }
+    else
+    {
+        banForMinutes *= 0.875;
+    }
+
+    // nothing to do?
+    if( !se_kickUnworthy || sn_NumUsers() < sn_MaxUsers() )
+    {
+        return;
+    }
+
+    // find the most worthy player for each client
+    ePlayerNetID * mostWorthy[MAXCLIENTS+2];
+    for( int i = MAXCLIENTS+1; i >= 0; --i )
+    {
+        mostWorthy[i] = NULL;
+    }
+    for( int i = se_PlayerNetIDs.Len() - 1; i >=0; --i )
+    {
+        ePlayerNetID * p = se_PlayerNetIDs(i);
+        ePlayerNetID * & rival = mostWorthy[p->Owner()];
+        if( se_comparePlayerWorth( p, rival ) > 0 )
+        {
+            rival = p;
+        }
+    }
+
+    // find the most unworthy client
+    int mostUnworthyUser = 0;
+
+    for( int i = MAXCLIENTS; i >= 1; --i )
+    {
+        // NULL players are actually more worthy here now
+        if( ( i != userToSpare ) && !( mostWorthy[i] && se_autokickImmunity >= mostWorthy[i]->GetAccessLevel() ) && ( !mostUnworthyUser || se_comparePlayerWorth( mostWorthy[mostUnworthyUser], mostWorthy[i], -1 ) > 0 ) )
+        {   
+            mostUnworthyUser = i;
+        }
+    }
+
+    // take care not to auto-kick someone with a high access level
+    if( mostUnworthyUser )
+    {
+        tString name;
+        if( mostWorthy[mostUnworthyUser] )
+        {
+            mostWorthy[mostUnworthyUser]->PrintName( name );
+        }
+        else
+        {
+            name = "?";
+        }
+        
+        con << tOutput( "$network_kill_unworthy_log", name, banForMinutes );
+        if( banForMinutes > 1 )
+        {
+            nMachine::GetMachine( mostUnworthyUser ).Ban( banForMinutes*60, 
+                                                          tString( 
+                                                              tOutput( "$network_kill_unworthy_banreason" ) ) );
+            sn_DisconnectUser( mostUnworthyUser, tOutput( "$network_kill_unworthy_ban", banForMinutes ) );
+        }
+        else
+        {   
+            sn_DisconnectUser( mostUnworthyUser, tOutput( "$network_kill_unworthy" ) );
+        }
+    }
+}
+
 // array of players in legacy spectator mode: they have been
 // deleted by their clients, but no new player has popped up for them yet
 static tJUST_CONTROLLED_PTR< ePlayerNetID > se_legacySpectators[MAXCLIENTS+2];
@@ -4244,12 +4430,19 @@ static void se_ClearLegacySpectator( int owner )
     se_legacySpectators[ owner ] = NULL;
 }
 
-// callback clearing the legacy spectator when a client enters or leaves
-static void se_LegacySpectatorClearer()
+static void se_PlayerLoginLogoutCallback()
 {
+    // clear the legacy spectator when a client enters or leaves
     se_ClearLegacySpectator( nCallbackLoginLogout::User() );
+
+    // always keep one slot free
+    if( nCallbackLoginLogout::Login() )
+    { 
+        se_kickUnworthySpare=nCallbackLoginLogout::User();
+        st_ToDo( se_KickUnworthy );
+    }
 }
-static nCallbackLoginLogout se_legacySpectatorClearer( se_LegacySpectatorClearer );
+static nCallbackLoginLogout se_playerLoginLogoutCallback( se_PlayerLoginLogoutCallback );
 
 
 
@@ -6710,7 +6903,7 @@ void ePlayerNetID::RemoveChatbots()
             }
 
             // kick idle players (Removes player from list, this must be the last operation of the loop)
-            if ( se_idleKickTime > 0 && se_idleKickTime < p->LastActivity() - roundTime )
+            if ( se_idleKickTime > 0 && se_idleKickTime < p->LastActivity() - roundTime && se_autokickImmunity < p->GetAccessLevel() )
             {
                 sn_KickUser( p->Owner(), tOutput( "$network_kill_idle" ) );
 
@@ -6720,6 +6913,10 @@ void ePlayerNetID::RemoveChatbots()
             }
         }
     }
+
+    // kick unworthy spectators (in case MAX_CLIENTS has changed)
+    se_kickUnworthySpare = -1;
+    se_KickUnworthy();
 }
 
 void ePlayerNetID::ThrowOutDisconnected()

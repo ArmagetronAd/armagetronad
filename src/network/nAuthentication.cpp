@@ -1181,3 +1181,21 @@ void nAuthentication::OnBreak()
     st_DoToDo();
 }
 
+//! returns whether a login is currently in process for the given user ID
+bool nAuthentication::LoginInProcess( nNetObject * user )
+{
+#ifdef KRAWALL_SERVER
+    if( !user )
+    {
+        return false;
+    }
+
+    // fetch the process
+    nLoginProcess * process = nLoginProcess::Find( user->Owner() );
+
+    // compare the user
+    return ( process && user == process->user );
+#else
+    return false;
+#endif
+}
