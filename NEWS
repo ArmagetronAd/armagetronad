@@ -8,6 +8,7 @@ Changes since 0.2.8.3.x:
 - Tutorial tooltips for the most important keybindings.
 - ADD_MASTER_SERVER command to announce a server to a new master server.
   Simplifies the process to list your server on a subculture.
+- Player positions logged to ladderlog with POSITIONS event.
 
 Changes since 0.2.8.3_rc4:
 - Intercepted chat commands are now written to ladderlog.txt. Format:
