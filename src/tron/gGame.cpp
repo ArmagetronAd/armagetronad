@@ -3171,7 +3171,10 @@ void gGame::StateUpdate(){
             ePlayerNetID::LogScoreDifferences();
             ePlayerNetID::UpdateSuspensions();
             ePlayerNetID::UpdateShuffleSpamTesters();
+            
             sg_newRoundWriter.write();
+            if ( rounds < 0 )
+                sg_newMatchWriter.write();
 
             // kick spectators
             nMachine::KickSpectators();
@@ -3180,16 +3183,7 @@ void gGame::StateUpdate(){
             if ( synced_ && sn_GetNetState() != nSERVER )
                 ePlayerNetID::Update();
 
-            // If a new match begins, then the ladderlog events occur in this order:
-            // 
-            // NEW_ROUND
-            // NEW_MATCH
-            // 
-            // Writing the launch positions in between NEW_ROUND and NEW_MATCH makes
-            // parsing ladderlog.txt more difficult. Logging launch positions for
-            // the first round of a match is handled in StartNewMatchNow().
-            if ( rounds > 0 )
-                eTeam::WriteLaunchPositions();
+            eTeam::WriteLaunchPositions();
 
             // delete game objects again (in case new ones were spawned)
             exit_game_objects(grid);
@@ -4100,12 +4094,6 @@ void gGame::StartNewMatch(){
 }
 
 void gGame::StartNewMatchNow(){
-    if ( rounds != 0 )
-    {
-        sg_newMatchWriter.write();
-        eTeam::WriteLaunchPositions();
-    }
-
     rounds=0;
     warning=0;
     startTime=tSysTimeFloat()-10;
