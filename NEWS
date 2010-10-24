@@ -31,7 +31,8 @@ Changes since 0.2.8.3_rc3:
 
 Changes since 0.2.8.3_rc2:
 - Fixed crash with server polling
-- ROUND_WINNER and MATCH_WINNER logged to ladderlog
+- ROUND_WINNER and MATCH_WINNER ladderlog events now include the players of
+  the team.
 - Camera switches to user preferred camera when you die in incam mode
 - Better support for custom language files
 - Players can no longer spam chat with /shuffle messages. Added new setting
