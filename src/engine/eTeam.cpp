@@ -856,7 +856,7 @@ void eTeam::WritePlayers( eLadderLogWriter & writer, const eTeam *team )
     }
 }
 
-static eLadderLogWriter se_positionWriter( "POSITION", true );
+static eLadderLogWriter se_positionWriter( "POSITIONS", true );
 void eTeam::WriteLaunchPositions()
 {
     for ( int i = teams.Len() - 1; i >= 0; --i )
@@ -867,11 +867,10 @@ void eTeam::WriteLaunchPositions()
         if ( !team->IsHuman() )
             continue;
 
-        for ( int j = team->players.Len() - 1; j >= 0; --j )
-        {
-            se_positionWriter << (j + 1) << team->players( j )->GetLogName() << ePlayerNetID::FilterName( team->Name() );
-            se_positionWriter.write();
-        }
+        se_positionWriter << ePlayerNetID::FilterName( team->Name() );
+        for ( int j = 0; j < team->players.Len(); j++ )
+            se_positionWriter << team->players( j )->GetLogName();
+        se_positionWriter.write();
     }
 }
 
