@@ -3183,8 +3183,6 @@ void gGame::StateUpdate(){
             if ( synced_ && sn_GetNetState() != nSERVER )
                 ePlayerNetID::Update();
 
-            eTeam::WriteLaunchPositions();
-
             // delete game objects again (in case new ones were spawned)
             exit_game_objects(grid);
 
@@ -3251,6 +3249,7 @@ void gGame::StateUpdate(){
             init_game_objects(grid);
 
             ePlayerNetID::RankingLadderLog();
+            eTeam::WriteLaunchPositions();
 
             // do round begin stuff
             {
