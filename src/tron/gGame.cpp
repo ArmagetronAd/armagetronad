@@ -3171,7 +3171,10 @@ void gGame::StateUpdate(){
             ePlayerNetID::LogScoreDifferences();
             ePlayerNetID::UpdateSuspensions();
             ePlayerNetID::UpdateShuffleSpamTesters();
+            
             sg_newRoundWriter.write();
+            if ( rounds < 0 )
+                sg_newMatchWriter.write();
 
             // kick spectators
             nMachine::KickSpectators();
@@ -3246,6 +3249,7 @@ void gGame::StateUpdate(){
             init_game_objects(grid);
 
             ePlayerNetID::RankingLadderLog();
+            eTeam::WriteLaunchPositions();
 
             // do round begin stuff
             {
@@ -4089,9 +4093,6 @@ void gGame::StartNewMatch(){
 }
 
 void gGame::StartNewMatchNow(){
-    if ( rounds != 0 )
-        sg_newMatchWriter.write();
-
     rounds=0;
     warning=0;
     startTime=tSysTimeFloat()-10;
