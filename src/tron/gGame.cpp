@@ -3464,7 +3464,7 @@ void gGame::StateUpdate(){
             }
 
             nConfItemBase::s_SendConfig(false);
-
+			delayedCommands::Clear();
             // wait extra long for the clients to delete the grid; they really need to be
             // synced this time
             sn_Sync( sg_Timeout*.4, true );
