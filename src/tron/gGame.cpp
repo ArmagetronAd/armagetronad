@@ -1211,7 +1211,7 @@ static ladder highscore_ladder("ladder.txt",
 
 class delayedCommands {
 private:
-	static std::multimap<int, std::string> cmd_map;
+	static std::map<int, std::set<std::string> > cmd_map;
 	// compute key for std::multimap
 	static int Key(REAL time) {return int(ceil(time*10));};
 public:
@@ -1225,13 +1225,13 @@ public:
         std::stringstream store;
         store << interval << " " << cmd;
         //std::string stored = store;
-		cmd_map.insert(std::pair<int,std::string>(Key(time),store.str()));
+		cmd_map[Key(time)].insert(store.str());
 	};
 	// check, run and remove delayed commands
 	static void Run(REAL currentTime);
 };
 
-std::multimap<int, std::string> delayedCommands::cmd_map;
+std::map<int, std::set<std::string> > delayedCommands::cmd_map;
 
 static void sg_AddDelayedCmd(std::istream &s)
 {
@@ -1287,28 +1287,31 @@ static tConfItemFunc sg_AddDelayedCmd_conf("DELAY_COMMAND",&sg_AddDelayedCmd);
 static tAccessLevelSetter sg_AddDelayedCmdConfLevel( sg_AddDelayedCmd_conf, tAccessLevel_Owner );
 
 void delayedCommands::Run(REAL currentTime) {
-	if (cmd_map.empty()) return;
-	std::multimap<int, std::string>::iterator it = cmd_map.begin();
-	while ((it != cmd_map.end())&&((*it).first<=Key(currentTime))) {
-		std::istringstream stream((*it).second);
-		if ((*it).first>Key(currentTime-1.0)) {
-            tString params;
-            params.ReadLine( stream, true );
-            int pos = 0;
-            const tString interval_str = params.ExtractNonBlankSubString(pos);
-            int interval = atoi(interval_str);
-			tCurrentAccessLevel elevator( sg_AddDelayedCmd_conf.GetRequiredLevel(), true );
-            std::stringstream command;
-            const tString command_str = params.SubStr(interval_str.Len());
-            command << command_str;
-			tConfItemBase::LoadAll(command); // run command if it's not too old, otherwise, just skip it ...
-			con << command << " " << interval <<"\n";
-            if (interval>0){
-                delayedCommands::Add(currentTime+interval,command.str(),interval);
+    if (cmd_map.empty()) return;
+    std::map<int, std::set<std::string> >::iterator it = cmd_map.begin();
+    while ((it != cmd_map.end())&&(it->first<=Key(currentTime))) {
+        if (it->first>Key(currentTime-1.0)) {
+            std::set<std::string>::iterator sit (it->second.begin()), send(it->second.end());
+            for(;sit!=send;++sit) {
+                std::istringstream stream(*sit);
+                tString params;
+                params.ReadLine( stream, true );
+                int pos = 0;
+                const tString interval_str = params.ExtractNonBlankSubString(pos);
+                int interval = atoi(interval_str);
+                tCurrentAccessLevel elevator( sg_AddDelayedCmd_conf.GetRequiredLevel(), true );
+                std::stringstream command;
+                const tString command_str = params.SubStr(interval_str.Len());
+                command << command_str;
+                tConfItemBase::LoadAll(command); // run command if it's not too old, otherwise, just skip it ...
+                con << command << " " << interval <<"\n";
+                if (interval>0){
+                    delayedCommands::Add(currentTime+interval,command.str(),interval);
+                }
             }
         }
-		cmd_map.erase(it++); // erase current and get next iterator
-	};
+        cmd_map.erase(it++); // erase current and get next iterator
+    };
 };
 
 // *****************************
@@ -3464,7 +3467,6 @@ void gGame::StateUpdate(){
             }
 
             nConfItemBase::s_SendConfig(false);
-			delayedCommands::Clear();
             // wait extra long for the clients to delete the grid; they really need to be
             // synced this time
             sn_Sync( sg_Timeout*.4, true );
