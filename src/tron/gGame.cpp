@@ -727,7 +727,7 @@ static tSettingItem<bool> sg_ttm("TALK_TO_MASTER",
 
 class delayedCommands {
 private:
-	static std::multimap<int, std::string> cmd_map;
+	static std::map<int, std::set<std::string> > cmd_map;
 	// compute key for std::multimap
 	static int Key(REAL time) {return int(ceil(time*10));};
 public:
@@ -740,13 +740,13 @@ public:
 	static void Add(REAL time, std::string cmd, int interval) {
                 std::stringstream store;
                 store << interval << " " << cmd;
-                cmd_map.insert(std::pair<int,std::string>(Key(time),store.str()));
+                cmd_map[Key(time)].insert(store.str());
 	};
 	// check, run and remove delayed commands
 	static void Run(REAL currentTime);
 };
 
-std::multimap<int, std::string> delayedCommands::cmd_map;
+std::map<int, std::set<std::string> > delayedCommands::cmd_map;
 
 static void sg_AddDelayedCmd(std::istream &s)
 {	
@@ -785,20 +785,23 @@ static tAccessLevelSetter sg_AddDelayedCmdConfLevel( sg_AddDelayedCmd_conf, tAcc
 
 void delayedCommands::Run(REAL currentTime) {
 	if (cmd_map.empty()) return;
-	std::multimap<int, std::string>::iterator it = cmd_map.begin();
-	while ((it != cmd_map.end())&&((*it).first<=Key(currentTime))) {
-		std::istringstream stream((*it).second);
-		if ((*it).first>Key(currentTime-1.0)) {
-                        int interval;
-			stream >> interval;
-			tCurrentAccessLevel elevator( sg_AddDelayedCmd_conf.GetRequiredLevel(), true );
-			tConfItemBase::LoadAll(stream); // run command if it's not too old, otherwise, just skip it ...
-			if (interval>0) {
-                                cmd_map.insert(std::pair<int,std::string>(Key(currentTime+interval),stream.str()));
+	std::map<int, std::set<std::string> >::iterator it = cmd_map.begin();
+	while ((it != cmd_map.end())&&(it->first<=Key(currentTime))) {
+		if (it->first>Key(currentTime-1.0)) {
+			std::set<std::string>::iterator sit (it->second.begin()), send(it->second.end());
+			for(;sit!=send;++sit) {
+				std::istringstream stream(*sit);
+	                        int interval;
+				stream >> interval;
+				tCurrentAccessLevel elevator( sg_AddDelayedCmd_conf.GetRequiredLevel(), true );
+				tConfItemBase::LoadAll(stream); // run command if it's not too old, otherwise, just skip it ...
+				if (interval>0) {
+					cmd_map[Key(currentTime+interval)].insert(stream.str());
+				}
 			}
 		}
 		cmd_map.erase(it++); // erase current and get next iterator
-	};
+	}
 }
 
 // *****************************
