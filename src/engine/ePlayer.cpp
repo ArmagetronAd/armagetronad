@@ -4368,6 +4368,8 @@ static void se_KickUnworthy()
     int userToSpare=se_kickUnworthySpare;
 
     static REAL banForMinutes = 0;
+    static double roundBegin = -1;
+    double lastRoundBegin = roundBegin;
 
     // each player joining increases the ban, rounds passing decrease it
     if( userToSpare >= 0 )
@@ -4377,6 +4379,7 @@ static void se_KickUnworthy()
     else
     {
         banForMinutes *= 0.875;
+        roundBegin = tSysTimeFloat();
     }
 
     // nothing to do?
@@ -4407,7 +4410,13 @@ static void se_KickUnworthy()
     for( int i = MAXCLIENTS; i >= 1; --i )
     {
         // NULL players are actually more worthy here now
-        if( ( i != userToSpare ) && !( mostWorthy[i] && se_autokickImmunity >= mostWorthy[i]->GetAccessLevel() ) && ( !mostUnworthyUser || se_comparePlayerWorth( mostWorthy[mostUnworthyUser], mostWorthy[i], -1 ) > 0 ) )
+        ePlayerNetID * player = mostWorthy[i];
+        if( ( i != userToSpare && sn_Connections[i].socket ) && 
+            // don't kick players with immune access level
+            !( player && se_autokickImmunity >= player->GetAccessLevel() ) && 
+            // give players one round to sign in
+            !( player && nAuthentication::LoginInProcess(player) && player->GetTimeCreated() <= lastRoundBegin ) && 
+            ( !mostUnworthyUser || se_comparePlayerWorth( mostWorthy[mostUnworthyUser], mostWorthy[i], -1 ) > 0 ) )
         {   
             mostUnworthyUser = i;
         }
@@ -4417,7 +4426,8 @@ static void se_KickUnworthy()
     if( mostUnworthyUser )
     {
         tString name;
-        if( mostWorthy[mostUnworthyUser] )
+        ePlayerNetID * player = mostWorthy[mostUnworthyUser];
+        if( player )
         {
             mostWorthy[mostUnworthyUser]->PrintName( name );
         }
