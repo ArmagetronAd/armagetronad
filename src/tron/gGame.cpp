@@ -3416,6 +3416,8 @@ void gGame::StateUpdate(){
         case GS_TRANSFER_SETTINGS:
             // sr_con.autoDisplayAtNewline=true;
 
+            ePlayerNetID::ApplySubstitutions();
+
             // log scores before players get renamed
             ePlayerNetID::LogScoreDifferences();
 

@@ -210,7 +210,15 @@ private:
     nMachine *      registeredMachine_; //!< the machine the player is registered with
     void RegisterWithMachine();         //!< registers with a machine
     void UnregisterWithMachine();       //!< un registers with a machine
+
+    tJUST_CONTROLLED_PTR< ePlayerNetID > substitute; // the player who will replace this one next round
+
 public:
+    bool SetSubstitute(ePlayerNetID *p); //!< set substitute for this player
+    bool ApplySubstitution();            //!< perform substitution ie remove this player from the game and replace him by his substitute at the same position
+    static void ClearSubstitutes();      //!< remove all substitutes
+    static void ApplySubstitutions();    //!< perform substitutions for all players
+
     enum			ChatFlags
     {
         ChatFlags_Chat = 1,

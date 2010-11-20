@@ -3038,6 +3038,11 @@ md5_suffix_help               Extra hash suffix for local accounts used to scram
 
 global_id_help                If set to 1, Global IDs (Armathentication) will be enabled on this server.
 
+access_level_substitute_denied  Required access level to substitute is "\1", you only have "\2".\n
+substitute_message_usage        Usage: /substitute <user out ID or name> <user in ID or name>\n
+substitute_player_request       User \1 requests substitution : \2 will be replaced by \3 next round.\n
+substitute_player               \1 is replaced by \2.\n
+
 # items that should not be translated
 include english_base_notranslate.txt
 

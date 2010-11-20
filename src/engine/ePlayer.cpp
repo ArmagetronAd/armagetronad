@@ -2662,6 +2662,12 @@ static tSettingItem< tAccessLevel > se_shuffleUpAccessLevelConf( "ACCESS_LEVEL_S
 static tAccessLevelSetter se_shuffleUpAccessLevelConfLevel( se_shuffleUpAccessLevelConf, tAccessLevel_Owner );
 #endif
 
+#ifdef KRAWALL_SERVER
+static tAccessLevel se_substituteAccessLevel = tAccessLevel_TeamLeader;
+static tSettingItem< tAccessLevel > se_substituteAccessLevelConf( "ACCESS_LEVEL_SUBSTITUTE", se_substituteAccessLevel );
+static tAccessLevelSetter se_substituteAccessLevelConfLevel( se_substituteAccessLevelConf, tAccessLevel_Owner );
+#endif
+
 static bool se_silenceDefault = false;        // flag indicating whether new players should be silenced
 
 // minimal access level for chat
@@ -3231,6 +3237,9 @@ static void se_ChatShuffle( ePlayerNetID * p, std::istream & s )
     se_ListTeam( p, p->CurrentTeam() );
 }
 
+// substitute: swap 2 players within a team
+static void se_ChatSubstitute( ePlayerNetID * p, std::istream & s );
+
 class eHelpTopic {
     tString m_shortdesc, m_text;
 
@@ -3500,6 +3509,13 @@ void handle_chat( nMessage &m )
                         se_ChatShuffle( p, s );
                         return;
                     }
+#ifdef KRAWALL_SERVER
+                    else if (command == "/substitute" || command == "/sub") {
+                        spam.lastSaidType_ = eChatMessageType_Command;
+                        se_ChatSubstitute( p, s );
+                        return;
+                    }
+#endif
                     else if (command == "/team")
                     {
                         spam.lastSaidType_ = eChatMessageType_Team;
@@ -4094,6 +4110,8 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), timeC
     disconnected        = false;
     suspended_          = 0;
 
+    substitute          = NULL;
+
     loginWanted = false;
 
 
@@ -4159,6 +4177,7 @@ ePlayerNetID::ePlayerNetID(nMessage &m):nNetObject(m),listID(-1), teamListID(-1)
 
     nameTeamAfterMe = false;
 
+    substitute          = NULL;
 
     pID=-1;
     se_PlayerNetIDs.Add(this,listID);
@@ -4284,6 +4303,9 @@ ePlayerNetID::~ePlayerNetID()
         mess << "$player_left_game";
         sn_ConsoleOut(mess);
     }
+
+    nextTeam = NULL; // this will force autosubstitution if this feature is active
+    ApplySubstitution();
 
     UnregisterWithMachine();
 
@@ -8832,4 +8854,138 @@ static void sg_SetPlayerTeam(std::istream &s)
 }
 
 static tConfItemFunc sg_SetPlayerTeam_conf("SET_PLAYER_TEAM",&sg_SetPlayerTeam);
+
+// * =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+// * Substitute feature
+// * =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+static bool se_substituteAutomatically = false;
+static tSettingItem< bool > se_substituteAutomaticallyConf( "AUTO_SUBSTITUTION", se_substituteAutomatically );
+static tAccessLevelSetter se_substituteAutomaticallyConfLevel( se_substituteAutomaticallyConf, tAccessLevel_Owner );
+
+// * SetSubstitute
+// * Goal: check whether this substitute is valid and store it
+// * Params: a pointer to a player
+// * Return: true is substitute is valid and has been set, false otherwise
+bool ePlayerNetID::SetSubstitute(ePlayerNetID *p) {
+    // first, this player must be a active human playing for a team ...
+    if (!IsActive()||!IsHuman()||!CurrentTeam()) { // Substitution failed !
+        substitute = NULL;
+        return false;
+    }
+    // substitute must be human spectator and must be invited first.
+    if (p && p->IsHuman() && p->CurrentTeam() == NULL && CurrentTeam()->IsInvited(p)) {
+        substitute = p;
+        return true;
+    }
+    substitute = NULL;
+    return false;
+}
+
+// * ApplySubstitution
+// * Goal: check whether the substitute is still valid (since it has been stored) and performs substitution
+// * Return: true is substitute is valid and has been performed, false otherwise
+bool ePlayerNetID::ApplySubstitution() {
+    // first, this player must be a active human playing for a team ...
+    if (!IsActive()||!IsHuman()||!CurrentTeam()) { // Substitution failed !
+        substitute = NULL;
+        return false;
+    }
+    // substitute must join the team while this player leave. substitute must take this player's position too. Let's keep these data first.
+    tJUST_CONTROLLED_PTR< eTeam > team( CurrentTeam() );
+    int IDWish = TeamListID();
+    // try to find a substitute for any leaving player if auto substitution is on and no substitute is defined
+    if (se_substituteAutomatically && !substitute && !NextTeam()) {
+        for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
+        {
+            ePlayerNetID *p = se_PlayerNetIDs( i );
+            if (p != this && p->IsHuman() && p->CurrentTeam() == NULL && currentTeam->IsInvited(p))
+                substitute = p;
+        }
+    }
+    // substitute must be invited first
+    if (substitute && substitute->IsHuman() && substitute->CurrentTeam() == NULL && currentTeam->IsInvited(substitute)) {
+        // remove this player
+        SetTeamForce(NULL);
+        UpdateTeamForce();
+        team->Invite(this);
+        // add substitute
+        substitute->SetTeamForce(team);
+        substitute->UpdateTeamForce();
+        if (substitute->CurrentTeam()!=team) { // Substitution failed ! Try to add leaving player again ...
+            SetTeamForce(team);
+            UpdateTeamForce();
+            CurrentTeam()->Shuffle( TeamListID(), IDWish );
+            substitute = NULL;
+            return false;
+        }
+        substitute->CurrentTeam()->Shuffle( substitute->TeamListID(), IDWish );
+        substitute = NULL;
+        return true;
+    }
+    substitute = NULL;
+    return false;
+}
+
+// * ClearSubstitutes
+// * Goal: reset all players'substitutes
+void ePlayerNetID::ClearSubstitutes() {
+    for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
+    {
+        ePlayerNetID *p = se_PlayerNetIDs( i );
+        p->SetSubstitute(NULL);
+    }
+}
+
+// * ApplySubstitutions
+// * Goal: performs all pending substitutions (and reset substitutes)
+void ePlayerNetID::ApplySubstitutions() {
+    for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
+    {
+        ePlayerNetID *p = se_PlayerNetIDs( i );
+        if (p->ApplySubstitution()) {
+            ePlayerNetID *p_in = se_PlayerNetIDs( i );
+            // inform players about substitution
+            tOutput out( tOutput("$substitute_player_request",p->GetLogName(), p->GetLogName(), p_in->GetLogName()) );
+            sn_ConsoleOut( out, p->Owner() );
+            sn_ConsoleOut( out, p_in->Owner() );
+    con << out;
+        } else p->SetSubstitute(NULL);
+    }
+}
+
+#ifdef KRAWALL_SERVER
+// substitute: swap 2 players within a team
+static void se_ChatSubstitute( ePlayerNetID * p, std::istream & s )
+{
+    // substitute. Allow to swap 2 players within a team. The second player might be spectator.
+    // syntax:
+    // /substitute <player_out> <player_in>: replace player_out by player_in
+
+    if ( p->GetAccessLevel() > se_substituteAccessLevel )
+    {
+        sn_ConsoleOut(tOutput("$access_level_substitute_denied", tCurrentAccessLevel::GetName(se_substituteAccessLevel), tCurrentAccessLevel::GetName(p->GetAccessLevel())), p->Owner());
+        return;
+    }
+
+    tString n_out, n_in;
+    s >> n_out;
+    s >> n_in;
+    ePlayerNetID * p_out = ePlayerNetID::FindPlayerByName( n_out );
+    ePlayerNetID * p_in = ePlayerNetID::FindPlayerByName( n_in );
+    if (p_out && p_in && p_out->SetSubstitute(p_in))
+    {
+        // inform players about substitution
+        tOutput out( tOutput("$substitute_player_request",p->GetLogName(), p_out->GetLogName(), p_in->GetLogName()) );
+        sn_ConsoleOut( out, p_out->Owner() );
+        sn_ConsoleOut( out, p_in->Owner() );
+        con << out;
+        return;
+    }
+    tOutput out( tOutput("$substitute_message_usage") );
+    sn_ConsoleOut( out, p->Owner() );
+    con << out;
+}
+#endif
+
 
