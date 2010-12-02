@@ -730,11 +730,15 @@ bool gZone::Timestep( REAL time )
 	eCoord V = GetVelocity();
 	if (sg_ballSpeedDecay)
 	{
-		REAL SpeedFactor = V.Norm();
-		SpeedFactor = SpeedFactor - dt*sg_ballSpeedDecay;
-		SpeedFactor = SpeedFactor<0 ? 0 : SpeedFactor;
-		SetVelocity(V * SpeedFactor);
-		doRequestSync = true;
+            REAL SpeedFactor = V.Norm();
+            if( SpeedFactor > 0 )
+            {
+                SpeedFactor = SpeedFactor - dt*sg_ballSpeedDecay;
+                SpeedFactor = SpeedFactor<0 ? 0 : SpeedFactor;
+                V.Normalize();
+                SetVelocity(V * SpeedFactor);
+                doRequestSync = true;
+            }
 	}
 
 	// update time
