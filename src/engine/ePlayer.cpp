@@ -4415,7 +4415,7 @@ static void se_KickUnworthy()
             // don't kick players with immune access level
             !( player && se_autokickImmunity >= player->GetAccessLevel() ) && 
             // give players one round to sign in
-            !( player && nAuthentication::LoginInProcess(player) && player->GetTimeCreated() <= lastRoundBegin ) && 
+            !( player && nAuthentication::LoginInProcess(player) && player->GetTimeCreated() >= lastRoundBegin ) && 
             ( !mostUnworthyUser || se_comparePlayerWorth( mostWorthy[mostUnworthyUser], mostWorthy[i], -1 ) > 0 ) )
         {   
             mostUnworthyUser = i;
