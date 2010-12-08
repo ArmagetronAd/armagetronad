@@ -3454,7 +3454,10 @@ void gGame::StateUpdate(){
         }
 
         // now would be a good time to tend for pending tasks
-        nAuthentication::OnBreak();
+        if( state != GS_PLAY )
+        {
+            nAuthentication::OnBreak();
+        }
 
         if (sn_GetNetState()==nSERVER){
             NetSyncIdle();
@@ -4542,8 +4545,8 @@ void sg_EnterGameCore( nNetState enter_state ){
             tAdvanceFrame();
             sg_Receive();
             se_SyncGameTimer();
-            REAL time=se_GameTime();
             sg_currentGame->StateUpdate();
+            REAL time=se_GameTime();
             if ( time > 0 )
             {
                 // only simulate the objects that have pending events to execute
