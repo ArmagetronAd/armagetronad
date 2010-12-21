@@ -1,5 +1,6 @@
 Changes since 0.3.1
 ===================
+- New Low Latency or High Throughput optimizing swap/sync system.
 - Switched to utf-8 encoded strings internally and for config files.
   Language files can be either utf-8 or latin-1.
 - New command: “TOGGLE”. Cycle between 0 and 1 for a boolean config item.
@@ -13,6 +14,7 @@ Changes since 0.3.1
 Changes since 0.3.0
 ===================
 
+- FULL_REDIRECT_SERVER/PORT: redirection target used when the server is full.
 - The chat and console history are now remembered between restarts of arma
 - Added an incremental reverse search for the console and chat history:
   In chat or console mode press CTRL-R and start entering your search term.
@@ -93,6 +95,15 @@ Changes since 0.2.8
 - Voting outcome messages show how many players voted for/against the poll and how many didn't vote yet
 - Added support for armagetronad URLs on Mac OS X and KDE -- armagetronad://<server>[:<port>]. port defaults to 4534.
 - New command-line flag: --connect <server>[:<port>]. Startup the game and connect directly to <server>.
+
+Changes since 0.2.8.3.x:
+- Implemented /shout command and associated settings
+- Tweaks to enemy influence system.
+- Ingame menu and console now are drawn on top of a semi-transparent,
+  darkened area for increased readability.
+- New first start menu with clearer language selection and initial setup.
+- Tutorial match against one AI at slower speed.
+- Tutorial tooltips for the most important keybindings.
 
 Changes since 0.2.8.3_rc4:
 ==========================

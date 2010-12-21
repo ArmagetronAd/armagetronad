@@ -68,9 +68,6 @@ case "$1" in
     reload)
     kill -HUP `cat ${MAINPIDFILE}`
     ;;
-    force-reload)
-    kill -HUP `cat ${MAINPIDFILE}`
-    ;;
     restart)
 	$0 stop  ;  sleep 1 ; $0 start  || return=${rc_failed}
 	;;

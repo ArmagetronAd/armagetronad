@@ -77,7 +77,7 @@ static tOutput* PrepareTeamText(tOutput* text, eTeam* team, const ePlayerNetID* 
 // sets the spectator mode of a local player
 static void SetSpectator( ePlayerNetID * player, bool spectate )
 {
-    for ( int i = MAX_PLAYERS; i>=0; --i )
+    for ( int i = MAX_PLAYERS-1; i>=0; --i )
     {
         if ( ePlayer::PlayerIsInGame(i))
         {
@@ -313,7 +313,7 @@ void gTeam::TeamMenu()
     uMenu Menu( tOutput("$team_menu_title") );
     tArray<uMenuItem*> items;
 
-    for ( i = MAX_PLAYERS; i>=0; --i )
+    for ( i = MAX_PLAYERS-1; i>=0; --i )
     {
         if ( ePlayer::PlayerIsInGame(i))
         {

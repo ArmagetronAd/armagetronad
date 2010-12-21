@@ -87,11 +87,14 @@ public:
 class ePlayer: public uPlayerPrototype{
     friend class eMenuItemChat;
     static uActionPlayer s_chat;
+    static uActionTooltip s_chatTooltip;
 
     tConfItemBase *configuration[PLAYER_CONFITEMS];
     int            CurrentConfitem;
     void   StoreConfitem(tConfItemBase *c);
     void   DeleteConfitems();
+
+    double lastTooltip_;
 public:
     tString    name;                 // the player's screen name
     tString    globalID;             // the global ID of the player in user@authority form
@@ -140,6 +143,9 @@ public:
     static ePlayer * PlayerConfig(int p);
 
     static bool PlayerIsInGame(int p);
+
+    // veto function for tooltips that require a controllable game object
+    static bool VetoActiveTooltip(int player);
 
     static rViewport * PlayerViewport(int p);
 

@@ -257,7 +257,6 @@ void uMenu::OnEnter(){
         OnRender();
 
 #ifndef DEDICATED
-        rSysDep::PostSwapGL();
         rSysDep::ClearGL();
 #endif
 
@@ -514,7 +513,7 @@ int uMenu::GetNextSelectable(int start)
 
 
 // paints a nice background
-void uMenu::GenericBackground(){
+void uMenu::GenericBackground(REAL top){
 #ifndef DEDICATED
     if (idle)
     {
@@ -522,6 +521,42 @@ void uMenu::GenericBackground(){
         {
             // throw tGenericException("test"); // (test exception throw to see if error handling works right)
             (*idle)();
+
+            // render the console so it appears behind the menu
+            if( sr_con.autoDisplayAtSwap )
+            {
+                sr_con.Render();
+            }
+
+            // fade everything rendered so far to black
+            if( sr_alphaBlend )
+            {
+                sr_ResetRenderState(true);
+
+                double time = tSysTimeFloat();
+                static double lastTime = time - 100;
+                static REAL alpha = 0.0f;
+                double timePassed = time - lastTime;
+                if( time - lastTime > 1.0 )
+                {
+                    alpha = 0.0f;
+                }
+                else
+                {
+                    alpha += timePassed;
+                    static const REAL limit = .5;
+
+                    if( alpha > limit )
+                    {
+                        alpha = limit;
+                    }
+                }
+                lastTime = time;
+
+                RenderEnd();
+                glColor4f(0, 0, 0, alpha);
+                glRectf(-1,-1,1,top);
+            }
         }
         catch ( ... )
         {

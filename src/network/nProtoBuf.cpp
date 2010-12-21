@@ -67,6 +67,35 @@ typedef nProtoBuf::Reflection Reflection;
 #define REFLECTION_CONST Reflection const
 #endif
 
+// wrappers fake-leaky for protobuf functions
+REFLECTION_CONST * GetReflection( nProtoBuf const & buf )
+{
+    // the protobuf initialization code allocates stuff without bothering to
+    // deallocate it later. It's not a bad leak, the memory stays reachable,
+    // but our memory manager needs to be told so so it doesn't annoy
+    // with alarms.
+    tKnownExternalLeak l;
+    return buf.GetReflection();
+}
+
+const Descriptor * GetDescriptor( nProtoBuf const & buf )
+{
+    tKnownExternalLeak l;
+    return buf.GetDescriptor();
+}
+
+void DiscardUnknownFields( nProtoBuf & buf )
+{
+    tKnownExternalLeak l;
+    return buf.DiscardUnknownFields();
+}
+
+const nProtoBufDescriptorBase & GetDescriptor( nProtoBufMessageBase const & buf )
+{
+    // leak allowance already in this function
+    return buf.GetDescriptor();
+}
+
 void sn_PrintDebug( nProtoBuf const & buf )
 {
     buf.PrintDebugString();
@@ -159,7 +188,7 @@ nMessageStreamer::~nMessageStreamer(){}
 void nMessageStreamer::StreamFromProtoBuf( nProtoBufMessageBase const & source, nStreamMessage & target ) const
 {
     // stream to message
-    source.GetDescriptor().StreamTo( source.GetProtoBuf(), target, nProtoBufDescriptorBase::SECTION_First );
+    GetDescriptor(source).StreamTo( source.GetProtoBuf(), target, nProtoBufDescriptorBase::SECTION_First );
     
     // bend the descriptor
     target.BendDescriptorID( source.DescriptorID() & ~nProtoBufDescriptorBase::protoBufFlag );
@@ -169,7 +198,7 @@ void nMessageStreamer::StreamFromProtoBuf( nProtoBufMessageBase const & source, 
 void nMessageStreamer::StreamToProtoBuf( nStreamMessage & source, nProtoBufMessageBase & target ) const
 {
     // stream from message
-    target.GetDescriptor().StreamFrom( source, target.AccessProtoBuf(), nProtoBufDescriptorBase::SECTION_First );
+    GetDescriptor(target).StreamFrom( source, target.AccessProtoBuf(), nProtoBufDescriptorBase::SECTION_First );
 }
 
 nProtoBufMessageBase::~nProtoBufMessageBase(){}
@@ -220,8 +249,8 @@ std::string sn_FilterString( std::string const & s, FieldDescriptor const * fiel
 void nProtoBufMessageBase::Filter( nProtoBuf & buf )
 {
     // get reflection interface
-    REFLECTION_CONST * r = buf.GetReflection();
-    Descriptor const * descriptor  = buf.GetDescriptor();
+    REFLECTION_CONST * r = GetReflection(buf);
+    Descriptor const * descriptor  = ::GetDescriptor(buf);
 
     // iterate over fields in ID order
     int count = descriptor->field_count();
@@ -278,6 +307,8 @@ void nProtoBufMessageBase::Filter( nProtoBuf & buf )
 //! returns the descriptor
 nProtoBufDescriptorBase const & nProtoBufMessageBase::GetDescriptor() const
 {
+    tKnownExternalLeak l;
+
     // we'd use covariant return types, but that only works in one direction,
     // and nProtoBufDescriptorBase has a covariant return that requires
     // this class definition to be complete.
@@ -396,7 +427,7 @@ void nProtoBufMessageBase::OnRead( unsigned char const * & buffer, unsigned char
         if ( inCache )
         {
             work.ParsePartialFromArray( payload, header.len );
-            work.DiscardUnknownFields();
+            DiscardUnknownFields(work);
             
 #ifdef DEBUG_STRINGS
             con << "Base  : " << out.ShortDebugString() << "\n";
@@ -413,7 +444,8 @@ void nProtoBufMessageBase::OnRead( unsigned char const * & buffer, unsigned char
         {
             // just read directly
             out.ParsePartialFromArray( payload, header.len );
-            out.DiscardUnknownFields();
+
+            DiscardUnknownFields(out);
         }
     }
     else
@@ -472,7 +504,7 @@ nMessageStreamer & nProtoBufDescriptorBase::GetDefaultStreamer()
 
 std::string const & nProtoBufDescriptorBase::DetermineName( nProtoBuf const & prototype )
 {
-    return prototype.GetDescriptor()->full_name();
+    return GetDescriptor(prototype)->full_name();
 }
 
 nProtoBufDescriptorBase::DescriptorMap const & nProtoBufDescriptorBase::GetDescriptorsByName()
@@ -543,8 +575,8 @@ void nProtoBufDescriptorBase::StreamToStatic( nProtoBuf const & in, nStreamMessa
 void nProtoBufDescriptorBase::StreamFromDefault( nStreamMessage & in, nProtoBuf & out, StreamSections sections )
 {
     // get reflection interface
-    REFLECTION_CONST * reflection = out.GetReflection();
-    Descriptor const * descriptor = out.GetDescriptor();
+    REFLECTION_CONST * reflection = GetReflection(out);
+    Descriptor const * descriptor = GetDescriptor(out);
 
     // flags for the current section
     int currentSectionFlags = 1;
@@ -632,11 +664,18 @@ void nProtoBufDescriptorBase::StreamFromDefault( nStreamMessage & in, nProtoBuf 
                     {
                         unsigned short value;
                         in.Read( value );
+
+                        // another harmless leak source here
+                        tKnownExternalLeak l;
+
                         reflection->REFL_SET( AddUInt32, &out, field, value );
                         break;
                     }
                     case FieldDescriptor::CPPTYPE_MESSAGE:
                     {
+                        // another harmless leak source here
+                        tKnownExternalLeak l;
+
                         nProtoBuf * message = reflection->REFL_GET( AddMessage, &out, field );
                         StreamFromStatic( in, *message, SECTION_First );
                         break;
@@ -709,8 +748,8 @@ void nProtoBufDescriptorBase::StreamFromDefault( nStreamMessage & in, nProtoBuf 
 void nProtoBufDescriptorBase::StreamToDefault( nProtoBuf const & in, nStreamMessage & out, StreamSections sections )
 {
     // get reflection interface
-    const Reflection * reflection = in.GetReflection();
-    const Descriptor * descriptor = in.GetDescriptor();
+    const Reflection * reflection = GetReflection(in);
+    const Descriptor * descriptor = GetDescriptor(in);
 
     // flags for the current section
     int currentSectionFlags = 1;
@@ -851,10 +890,10 @@ void nProtoBufDescriptorBase::EstimateMessageDifference( nProtoBuf const & a,
                                                    bool & removed )
 {
     // get reflection interface
-    const Reflection * ra = a.GetReflection();
-    Descriptor const * descriptor  = a.GetDescriptor();
-    const Reflection * rb = b.GetReflection();
-    tASSERT( descriptor == b.GetDescriptor() );
+    const Reflection * ra = GetReflection(a);
+    Descriptor const * descriptor  = GetDescriptor(a);
+    const Reflection * rb = GetReflection(a);
+    tASSERT( descriptor == GetDescriptor(b) );
 
 #ifdef DEBUG
     // tString da = a.ShortDebugString();
@@ -941,12 +980,12 @@ void nProtoBufDescriptorBase::DiffMessages( nProtoBuf const & base,
                                       bool copy )
 {
     // get reflection interface
-    Reflection const * r_base     = base.GetReflection();
-    Descriptor const * descriptor = base.GetDescriptor();
-    Reflection const * r_derived  = derived.GetReflection();
-    REFLECTION_CONST *  r_diff     = diff.GetReflection();
-    tASSERT( descriptor == derived.GetDescriptor() );
-    tASSERT( descriptor == diff.GetDescriptor() );
+    Reflection const * r_base     = GetReflection(base);
+    Descriptor const * descriptor = GetDescriptor(base);
+    Reflection const * r_derived  = GetReflection(derived);
+    REFLECTION_CONST *  r_diff     = GetReflection(diff);
+    tASSERT( descriptor == GetDescriptor(derived) );
+    tASSERT( descriptor == GetDescriptor(diff) );
 
     // make copy
     if ( copy )
@@ -1024,8 +1063,8 @@ void nProtoBufDescriptorBase::DiffMessages( nProtoBuf const & base,
 void nProtoBufDescriptorBase::ClearRepeated( nProtoBuf & message )
 {
     // get reflection interface
-    Descriptor const * descriptor = message.GetDescriptor();
-    REFLECTION_CONST * reflection = message.GetReflection();
+    Descriptor const * descriptor = GetDescriptor(message);
+    REFLECTION_CONST * reflection = GetReflection(message);
 
     // iterate over fields in ID order
     int count = descriptor->field_count();
@@ -1244,7 +1283,7 @@ void nMessageCache::AddMessage( nProtoBufMessageBase * message, bool incoming, b
 #endif    
 
     // get the cache belonging to this descriptor
-    Descriptor const * descriptor = message->GetProtoBuf().GetDescriptor();
+    Descriptor const * descriptor = GetDescriptor(message->GetProtoBuf());
     nMessageCacheByDescriptor & cache = parts[ descriptor ];
 
     // and push the message into the cache
@@ -1293,7 +1332,7 @@ bool nMessageCache::UncompressProtoBuf( unsigned short cacheID, nProtoBuf & targ
     }
 
     // get the cache belonging to this descriptor
-    Descriptor const * descriptor = target.GetDescriptor();
+    Descriptor const * descriptor = GetDescriptor(target);
     nMessageCacheByDescriptor & cache = parts[ descriptor ];
 
     // find the cacheID
@@ -1407,7 +1446,7 @@ unsigned short nMessageCache::CompressProtoBuff( nProtoBuf const & source, nProt
     }
 
     // get the cache belonging to this descriptor
-    Descriptor const * descriptor = target.GetDescriptor();
+    Descriptor const * descriptor = GetDescriptor(target);
     nMessageCacheByDescriptor & cache = parts[ descriptor ];
 
     // try to find the best matching message in the queue
@@ -1428,14 +1467,29 @@ unsigned short nMessageCache::CompressProtoBuff( nProtoBuf const & source, nProt
     // count when last best message was found
     int bestCount = 0;
 
-    // check the cache hint
+
+    typedef nMessageCacheByDescriptor::CacheQueue CacheQueue;
+
+    // check whether the hint actually is in the cache. Needs to be done.
     if( hint )
     {
-        sn_CheckMessage( source, hint, size, bestDifference, best, lastMessageID );
+        bool hintCached = false;
+        for( CacheQueue::reverse_iterator i = cache.queue_.rbegin();
+             i != cache.queue_.rend(); ++i )
+        {
+            if( hint == *i )
+            {
+                hintCached = true;
+                break;
+            }
+        }
+        if( hintCached )
+        {
+            sn_CheckMessage( source, hint, size, bestDifference, best, lastMessageID );
+        }
     }
 
-    // find the cacheID from the cache
-    typedef nMessageCacheByDescriptor::CacheQueue CacheQueue;
+    // find the best cacheID from the cache
     for( CacheQueue::reverse_iterator i = cache.queue_.rbegin();
          i != cache.queue_.rend(); ++i )
     {
@@ -1445,7 +1499,10 @@ unsigned short nMessageCache::CompressProtoBuff( nProtoBuf const & source, nProt
             break;
         }
 
-        sn_CheckMessage( source, *i, size, bestDifference, best, lastMessageID );
+        if( hint != *i )
+        {
+            sn_CheckMessage( source, *i, size, bestDifference, best, lastMessageID );
+        }
 
         ++count;
     }

@@ -68,13 +68,8 @@ public:
 #define THROW_BADALLOC
 #define THROW_NOTHING
 #else
-#if __cplusplus >= 201103L
-#define THROW_BADALLOC
-#define THROW_NOTHING  throw ()
-#else
 #define THROW_BADALLOC throw (std::bad_alloc)
 #define THROW_NOTHING  throw ()
-#endif
 #endif
 
 // create an object of this class while calling external functions
@@ -87,22 +82,6 @@ public:
 };
 
 #ifndef DONTUSEMEMMANAGER
-#ifdef DEBUG
-// have some of those around as static objects so we know when our code starts
-// allocating
-class tKnownExternalLeakBegins
-{
-public:
-    tKnownExternalLeakBegins();
-};
-
-namespace
-{
-    // these cause tKnownExternalLeakBegins() to be called from the static
-    // initializers of every single of our source files. Should do it.
-    static tKnownExternalLeakBegins s_knownLeaksBegin;
-}
-#endif
 
 #ifndef NO_MALLOC_REPLACEMENT
 
@@ -118,7 +97,7 @@ namespace
 #define malloc(SIZE)                static_cast<void *>(tNEW(char)[SIZE])
 #define calloc(ELEMCOUNT, ELEMSIZE) static_cast<void *>(tNEW(char)[(ELEMCOUNT)*(ELEMSIZE)])
 #define free(BASEADR)               delete[] (reinterpret_cast< char* >(BASEADR))
-// #define realloc(BASEADR, NEWSIZE)   realloc not defined
+#define realloc(BASEADR, NEWSIZE)   realloc not defined
 
 // and other allocating functions
 #define strdup(ADR)  tStrDup(ADR)

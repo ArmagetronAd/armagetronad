@@ -144,6 +144,9 @@ void sg_EnterGame( nNetState enter_state );
 void sg_HostGame();
 void sg_HostGameMenu();
 
+// runs a single player game
+void sg_SinglePlayerGame();
+
 void MainMenu(bool ingame=false);
 
 bool GridIsReady(int c);

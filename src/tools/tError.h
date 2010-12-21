@@ -33,7 +33,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define __PRETTY_FUNCTION__ ""
 #endif
 #include <iomanip>
-#include <iostream>
 #include <sstream>
 #include <iosfwd>
 #include <string>
@@ -81,10 +80,6 @@ void st_Breakpoint();
 
 void st_PresentError( const char* caption, const char *message );
 void st_PresentMessage( const char* caption, const char *message );
-
-// complaint free check for THIS pointer so dereferencing null objects can get caugt in debug builds
-bool st_CheckThis(void const *in);
-#define tASSERT_THIS() tASSERT(st_CheckThis(this));
 
 /*
 #ifndef WIN32

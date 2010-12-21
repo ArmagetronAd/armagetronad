@@ -545,6 +545,17 @@ void gEnemyInfluence::AddSensor( const gSensor& sensor, REAL timePenalty, gCycle
     if ( !wall )
         return;
 
+    // faraway walls count less.
+    if( sensor.GetOwner() )
+    {
+        REAL speed = sensor.GetOwner()->Speed();
+        if( speed > 0 )
+        {
+            REAL distance = sensor.Direction().Norm() * sensor.hit;
+            timePenalty += distance/speed;
+        }
+    }
+
     AddWall( wall, sensor.before_hit, timePenalty, thisCycle );
 }
 
@@ -568,13 +579,13 @@ void gEnemyInfluence::AddWall( const eWall * wall, eCoord const & pos, REAL time
         // get the position of the collision point
         alpha = playerWall->Edge()->Ratio( pos );
     }
-    REAL timeBuilt = playerWall->Time( 0.5f );
+    REAL timeBuilt = playerWall->Time( alpha );
 
-    AddWall( playerWall, timeBuilt - timePenalty, thisCycle );
+    AddWall( playerWall, timeBuilt, timePenalty, thisCycle );
 }
 
 // add the interaction with a wall to our data
-void gEnemyInfluence::AddWall( const gPlayerWall * wall, REAL timeBuilt, gCycleMovement * thisCycle )
+void gEnemyInfluence::AddWall( const gPlayerWall * wall, REAL timeBuilt, REAL timePenalty, gCycleMovement * thisCycle )
 {
     // the client has no need for this, it does not execute AI code
     if ( sn_GetNetState() == nCLIENT )
@@ -598,6 +609,7 @@ void gEnemyInfluence::AddWall( const gPlayerWall * wall, REAL timeBuilt, gCycleM
         REAL currentTime = thisCycle->LastTime();
         time += ( currentTime - time ) * sg_enemyCurrentTimeInfluence;
     }
+    time -= timePenalty;
 
     // get the player
     ePlayerNetID* player = cycle->Player();
@@ -932,6 +944,47 @@ eCoord gCycleMovement::SpawnDirection() const {
 
 // *******************************************************************************************
 // *
+// *	Killer
+// *
+// *******************************************************************************************
+//!
+//!		@return	the potential killer of this cycle
+//!
+// *******************************************************************************************
+
+eGameObject const * gCycleMovement::Killer() const
+{
+    ePlayerNetID const * killer = enemyInfluence.GetEnemy();
+    if( killer )
+    {
+        eNetGameObject * killerObject = killer->Object();
+        if( killerObject )
+        {
+            return killerObject;
+        }
+    }
+
+    // not found? Assume the object closest to the death position is responsible
+    gCycleMovement * nearest = NULL;
+    float bestDist = 0;
+    for( int i = grid->GameObjectsInteresting().Len()-1; i >= 0; --i )
+    {
+        gCycleMovement * candidate = dynamic_cast< gCycleMovement * >( grid->GameObjectsInteresting()(i) );
+        if( candidate && candidate->Alive() && candidate != this )
+        {
+            REAL dist = (Position() - candidate->Position()).NormSquared();
+            if ( !nearest || bestDist > dist )
+            {
+                bestDist = dist;
+                nearest = candidate;
+            }
+        }
+    }
+    return nearest;
+}
+
+// *******************************************************************************************
+// *
 // *	LastDirection
 // *
 // *******************************************************************************************
@@ -1132,6 +1185,8 @@ void gCycleMovement::AddDestination( gDestination * dest )
         delete dest;
         return;
     }
+
+    this->RequestSimulation();
 
     this->NotifyNewDestination( dest );
 
@@ -1985,8 +2040,10 @@ bool gCycleMovement::Timestep( REAL currentTime )
     tJUST_CONTROLLED_PTR< gCycleMovement > keep( this->GetRefcount()>0 ? this : 0 );
 
     // don't make a fuss about negative timesteps
-    if ( currentTime < lastTime )
-        return TimestepCore( currentTime );
+    // if ( currentTime < lastTime )
+    // {
+    //     return TimestepCore( currentTime );
+    // }
 
     // remove old destinations
     //REAL lag = 1;
@@ -2001,6 +2058,8 @@ bool gCycleMovement::Timestep( REAL currentTime )
     REAL dt = currentTime - lastTime;
 
     sg_ArchiveReal( dt, 9 );
+
+    bool vetoSimulationRequest = false; // set if the simulation was aborted even though events are still there to be taken care of
 
     // if (currentTime > lastTime)
     {
@@ -2108,10 +2167,16 @@ bool gCycleMovement::Timestep( REAL currentTime )
             REAL simulateAhead = MaxSimulateAhead();
 
             if ( dist_to_dest > ( ts + simulateAhead ) * avgspeed && currentTime < latestTurnTime )
+            {
+                vetoSimulationRequest = true;
                 break; // no need to worry; we won't reach the next destination
+            }
 
-            if ( currentTime < earliestTurnTime && sg_CommandTime.Supported( Owner() ) )
+            if ( currentTime + simulateAhead < earliestTurnTime && sg_CommandTime.Supported( Owner() ) )
+            {
+                vetoSimulationRequest = true;
                 break; // the turn is too far in the future
+            }
 
             // if ( currentTime < turnTime + EPS )
             //    simulateAhead = 0;
@@ -2369,20 +2434,17 @@ bool gCycleMovement::Timestep( REAL currentTime )
                     if ( latestTurnTime < nextTurn )
                         latestTurnTime = nextTurn;
 
-                    if ( currentTime - lastTime > turnStep )
+                    if ( ts + + simulateAhead > turnStep )
                     {
-                        tsTodo = turnStep;
-
                         // if we can simulate to the turn in the next step, do so, overriding
                         // the turn delay then.
-                        if ( tsTodo < ts + simulateAhead && tsTodo > 0 )
-                        {
-                            overrideTurnDelay = true;
-                        }
+                        tsTodo = turnStep;
+                        overrideTurnDelay = true;
                     }
                     else
                     {
                         // not enough time to simulate to turn possibility; skip out of loop
+                        vetoSimulationRequest = true;
                         break;
                     }
                 }
@@ -2418,6 +2480,7 @@ bool gCycleMovement::Timestep( REAL currentTime )
                 {
                     tsTodo = ts + simulateAhead ;
                     forceTurn = false;
+                    overrideTurnDelay = false;
 
                     // quit from here if there is nothing to do
                     if ( tsTodo <= EPS )
@@ -2461,6 +2524,17 @@ bool gCycleMovement::Timestep( REAL currentTime )
     bool ret = false;
     if ( currentTime > lastTime )
         ret = TimestepCore( currentTime );
+
+    // if we get here and turns are left pending within our reach,
+    // request the function gets called again right away.
+    if( !vetoSimulationRequest &&
+        ( currentDestination || 
+          ( !pendingTurns.empty() && GetNextTurn( pendingTurns.front() < currentTime + MaxSimulateAhead() ) )
+            )
+        )
+    {
+        RequestSimulation();
+    }
 
     return ret;
 }
@@ -3712,6 +3786,16 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
 
     sg_ArchiveReal( step, 9 );
 
+    // don't go back further than the last turn
+    if( step < 0 )
+    {
+        REAL min = -GetDistanceSinceLastTurn();
+        if( step < min )
+        {
+            step = min;
+        }
+    }
+
     // move forward
     eCoord nextpos;
     if ( verletSpeed_ >0 )
@@ -4159,34 +4243,6 @@ void gCycleMovement::MoveSafely( const eCoord & dest, REAL startTime, REAL endTi
 
 REAL GetTurnSpeedFactor(void) {
     return sg_cycleTurnSpeedFactor;
-}
-
-// *******************************************************************************
-// *
-// *	NextInterestingTime
-// *
-// *******************************************************************************
-//!
-//!		@return
-//!
-// *******************************************************************************
-
-REAL gCycleMovement::NextInterestingTime( void ) const
-{
-    // default to the last time
-    REAL ret = LastTime();
-
-    // look for a later destination
-    gDestination * run = currentDestination;
-    while ( run )
-    {
-        REAL time = run->GetGameTime();
-        if ( time > ret )
-            ret = time;
-        run = run->next;
-    }
-
-    return ret;
 }
 
 void gCycleMovement::AddZoneAcceleration( REAL zoneAcceleration )

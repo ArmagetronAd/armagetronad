@@ -169,9 +169,6 @@ public:
     virtual void            CalculateAcceleration   (                                   )           ;   //!< calculate acceleration to apply later
     virtual void            ApplyAcceleration       ( REAL                  dt          )           ;   //!< apply acceleration calculated earlier
 
-    static eCoord const &   DeathPosition           ()                                              ;   //!< position passed to DieDuringMove()
-
-
     //! creates a netobject form sync data
     gCycleMovement( Game::CycleMovementSync const & sync, nSenderInfo const & sender );
 protected:
@@ -193,9 +190,6 @@ protected:
 
     virtual bool            TimestepCore            ( REAL                  currentTime
             ,                                         bool                  calculateAcceleration = true )           ;   //!< core physics simulation routine
-
-    ePassEdgeResult         DieWhileMoving          ( eCoord const &        deathPosition )         ;   //!< equivalent to old throw gCycleDeath
-    ePassEdgeResult         StopMoving              ()                                              ;   //!< equivalent to old throw gCycleStop
 private:
     void                    MyInitAfterCreation     ()                                              ;   //!< private shared initialization code
 
@@ -210,10 +204,7 @@ private:
     short           alive_;                     //!< status: 1: cycle is alive, -1: cycle just died, 0: cycle is dead
 
 protected:
-    static eCoord   deathPosition_;             //!< the position the last move let a cylce die on
-    static bool     stoppedMovement_;           //!< true if (extrapolating) movement should be stopped
-
-    gEnemyInfluence	enemyInfluence;             //!< keeps track of enemies that influenced this cycle
+    gEnemyInfluence				enemyInfluence; //!< keeps track of enemies that influenced this cycle
 
     gDestination*   destinationList;            //!< the list of destinations that belong to this cycle ( for memory management )
     gDestination*   currentDestination;         //!< the destination this cycle aims for now
@@ -237,15 +228,12 @@ protected:
 
     unsigned short  turns;                      //!< the number of turns taken so far
     unsigned short  braking;                    //!< flag indicating status of brakes ( on/off )
-    
-    bool            uncannyTimingToReport_;     //!< flag indicating whether we have uncanny timing to report from the last turn
 
     int             windingNumber_;             //!< number that gets increased on every right turn and decreased on every left turn ( used by the AI )
     int             windingNumberWrapped_;      //!< winding number wrapped to be used as an index to the axes code
 
     mutable REAL    gap_[2];                    //!< when driving towards a wall, this is set to the maximal distance we need to approach it so that when the cycle turns, it can squeeze through any gaps
     mutable bool    keepLookingForGap_[2];      //!< flags telling the system whether it is worthwile to look for further, smaller, gaps
-    mutable bool    gapIsBackdoor_[2];          //!< flags indicating whether gaps are backdoors
 
     eCoord			lastTurnPos_;	            //!< the location of the last turn
     REAL            lastTurnTimeRight_;         //!< the time of the last turn right
@@ -308,6 +296,22 @@ private: // END OF HACK
 
 //! Determines the maximum space ahead of a cycle
 // float MaxSpaceAhead( const gCycleMovement* cycle, float ts, float lookAhead, float maxReport );
+
+//! Exception to throw when cycle dies in a simulation frame
+class gCycleDeath: public eDeath
+{
+public:
+    gCycleDeath( eCoord const & pos )
+            : pos_(pos)
+    {}
+
+    eCoord pos_;
+};
+
+//! Exception thrown to indicate simulation should be held for a while
+class gCycleStop: public eDeath
+{
+};
 
 // this class describes a point on the map the cycle on another
 // computer of the game IS at. The copies of the cycle on the

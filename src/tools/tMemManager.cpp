@@ -88,13 +88,27 @@ static CRITICAL_SECTION  mutex;
 
 static bool reported=false;
 
-#include "tMutex.h"
+#ifdef HAVE_LIBZTHREAD
+#include <zthread/FastRecursiveMutex.h>
 
-typedef boost::recursive_mutex MUTEX;
+static ZThread::FastRecursiveMutex st_mutex;
+#elif defined(HAVE_PTHREAD)
+#include "pthread-binding.h"
+static tPThreadRecursiveMutex st_mutex;
+#else
+class tMockMutex
+{
+public:
+    void acquire(){};
+    void release(){};
+};
+
+static tMockMutex st_mutex;
+#endif
 
 // create an object of this class while calling external functions
 // that are known to have (harmless!) leaks
-static int st_knownExternalLeak = 1;
+static int st_knownExternalLeak = 0;
 
 tKnownExternalLeak::tKnownExternalLeak()
 {
@@ -106,54 +120,17 @@ tKnownExternalLeak::~tKnownExternalLeak()
     st_knownExternalLeak--;
 }
 
-#ifndef DONTUSEMEMMANAGER
-#ifdef DEBUG
-// have some of those around as static objects so we know when our code starts
-// allocating
-tKnownExternalLeakBegins::tKnownExternalLeakBegins()
-{
-    static bool st_firstKnownExternalLeak = true;
-
-    // our code begins here. Leaks start counting.
-    if(st_firstKnownExternalLeak)
-    {
-        st_firstKnownExternalLeak = false;
-        st_knownExternalLeak--;
-    }
-}
-static tKnownExternalLeakBegins st_knownLeaksBegin;
-#endif
-#endif
-
-static bool inited=true;
-
-static MUTEX & st_CreateMutex()
-{
-    inited = false;
-    static MUTEX newMutex;
-    inited = true;
-
-#ifdef WIN32
-    InitializeCriticalSection(&mutex);
-#endif
-
-    return newMutex;
-}
-
-static MUTEX & st_Mutex()
-{
-    static MUTEX & mutex = st_CreateMutex();
-    return mutex;
-}
-
 class tBottleNeck
 {
-private:
-    boost::lock_guard< boost::recursive_mutex > lock_;
 public:
     tBottleNeck()
-    :lock_(st_Mutex())
     {
+        st_mutex.acquire();
+    }
+
+    ~tBottleNeck()
+    {
+        st_mutex.release();
     }
 };
 
@@ -296,6 +273,8 @@ private:
 
     int semaphore;
 };
+
+static bool inited=false;
 
 #ifdef LEAKFINDER
 #include <fstream>
@@ -665,6 +644,9 @@ bool tMemManager::SwapIf(int i,int j){
 tMemManager::~tMemManager(){
 #ifdef LEAKFINDER
     static bool warn = true;
+#ifdef HAVE_LIBZTHREAD
+    warn = false;
+#endif
 
     if (inited){
         // l???sche das ding
@@ -725,6 +707,11 @@ tMemManager::tMemManager(int s,int bs):size(s),blocksize(s){
 
     tBottleNeck neck;
 
+#ifdef WIN32
+    if (!inited)
+        InitializeCriticalSection(&mutex);
+#endif
+
     inited = true;
 }
 
@@ -770,6 +757,11 @@ tMemManager::tMemManager(int s):size(s){//,blocks(1000),full_blocks(1000){
         std::ofstream lw(leakname);
         lw << "\n\n";
     }
+#endif
+
+#ifdef WIN32
+    if (!inited)
+        InitializeCriticalSection(&mutex);
 #endif
 
     inited = true;
@@ -990,9 +982,7 @@ void tMemManager::Check(){
 #define MAX_SIZE 109
 
 
-static tMemManager & st_MemMan(int id)
-{
-    static tMemManager memman[MAX_SIZE+1]={
+static tMemManager memman[MAX_SIZE+1]={
                                           tMemManager(0),
                                           tMemManager(4),
                                           tMemManager(8),
@@ -1103,12 +1093,7 @@ static tMemManager & st_MemMan(int id)
                                           tMemManager(428),
                                           tMemManager(432),
                                           tMemManager(436)
-    };
-
-    tASSERT(id >= 0 && id <= MAX_SIZE);
-    return memman[id];
-}
-
+                                      };
 
 
 void tMemManager::Dispose(tAllocationInfo const & info, void *p, bool keep){
@@ -1121,7 +1106,7 @@ void tMemManager::Dispose(tAllocationInfo const & info, void *p, bool keep){
 #ifndef DOUBLEFREEFINDER
     if (inited && block){
         tBottleNeck neck;
-        st_MemMan(size >> 2).complete_Dispose(block);
+        memman[size >> 2].complete_Dispose(block);
 #ifdef WIN32
         LeaveCriticalSection(&mutex);
 #endif
@@ -1171,7 +1156,7 @@ void *tMemMan::Alloc(tAllocationInfo const & info, size_t s){
     if (inited && s < (MAX_SIZE << 2))
     {
         tBottleNeck neck;
-        ret=st_MemMan(((s+3)>>2)).Alloc( info );
+        ret=memman[((s+3)>>2)].Alloc( info );
     }
     else
     {
@@ -1231,7 +1216,6 @@ void tMemMan::Dispose(tAllocationInfo const & info, void *p){
 
 
 void tMemManBase::Check(){
-#ifndef DONTUSEMEMMANAGER
     if (!inited)
         return;
 
@@ -1239,13 +1223,11 @@ void tMemManBase::Check(){
     EnterCriticalSection(&mutex);
 #endif
 
-    tBottleNeck neck;
     for (int i=MAX_SIZE;i>=0;i--)
-        st_MemMan(i).Check();
+        memman[i].Check();
 
 #ifdef WIN32
     LeaveCriticalSection(&mutex);
-#endif
 #endif
 }
 
@@ -1324,7 +1306,9 @@ void* _cdecl operator new	(size_t size) THROW_BADALLOC{
     tAllocationInfo info( false );
 
 #ifdef LEAKFINDER
+#ifndef HAVE_LIBZTHREAD
     info.checksum = size;
+#endif
 #endif
     return tMemMan::Alloc(info, size);
 }
@@ -1393,7 +1377,9 @@ void  operator delete   (void *ptr,const char *classname,const char *file,int li
 void* operator new[]	(size_t size) THROW_BADALLOC{
     tAllocationInfo info( true );
 #ifdef LEAKFINDER
+#ifndef HAVE_LIBZTHREAD
     info.checksum = size % MAXCHECKSUM;
+#endif
 #endif
     return tMemMan::Alloc(info, size);
 }
@@ -1499,8 +1485,6 @@ void  tMemManBase::Profile(){
 
 
     FILE *f = fopen( name, "w" );
-    if ( !f )
-        return;
     //	fprintf( f, "%d\t%d\t%d\t%s\t%s\t%d\t%d\t\n", )
 
     int total_blocks=0,total_bytes =0;

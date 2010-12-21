@@ -1479,6 +1479,22 @@ int GetFreeSlot()
     return -1;
 }
 
+static tString sn_fullRedirectServer("");
+static int sn_fullRedirectPort = 4534;
+
+static tSettingItem< tString > se_fullRedirectServerConf( "FULL_REDIRECT_SERVER", sn_fullRedirectServer );
+static tSettingItem< int > se_fullRedirectPortConf( "FULL_REDIRECT_PORT", sn_fullRedirectPort );
+
+static
+void sn_DisconnectUserFull(int i)
+{
+    nServerInfoRedirect *redirectTo = NULL;
+    if (sn_fullRedirectServer.Len())
+        redirectTo = new nServerInfoRedirect( sn_fullRedirectServer, sn_fullRedirectPort );
+    sn_DisconnectUser( i, "$network_kill_full", redirectTo );
+    delete redirectTo;
+}
+
 static REAL sn_minBan    = 120; // minimal ban time in seconds for trying to connect while you're banned
 static tSettingItem< REAL > sn_minBanSetting( "NETWORK_MIN_BAN", sn_minBan );
 
@@ -1488,6 +1504,9 @@ extern bool FloodProtection( int senderID );
 // flag to disable 0.2.8 test version lockout
 static bool sn_lockOut028tTest = true;
 static tSettingItem< bool > sn_lockOut028TestConf( "NETWORK_LOCK_OUT_028_TEST", sn_lockOut028tTest );
+
+// the network stuff planned to send:
+tHeap<planned_send> send_queue[MAXCLIENTS+2];
 
 void sn_LoginHandler_intermediate( nMessage &m )
 {
@@ -1624,7 +1643,7 @@ void sn_LoginHandler( Network::Login const & login, nSenderInfo const & sender )
             if ( new_id > 0 )
             {
                 if(sn_Connections[new_id].socket)
-                    sn_DisconnectUser( new_id, "$network_kill_full" );
+                    sn_DisconnectUserFull( new_id );
 
                 success = true;
 
@@ -1681,6 +1700,10 @@ void sn_LoginHandler( Network::Login const & login, nSenderInfo const & sender )
         reset_last_acks(MAXCLIENTS+1);
         sn_Connections[MAXCLIENTS+1].acks_.clear();
 
+        // clear message queue
+        while (send_queue[new_id].Len())
+            delete (send_queue[new_id](0));
+
         // send login accept message with high priority
         Network::LoginAccepted & accepted = sn_loginAcceptedDescriptor.Send( new_id );
         accepted.set_net_id( new_id );
@@ -1703,7 +1726,7 @@ void sn_LoginHandler( Network::Login const & login, nSenderInfo const & sender )
     }
     else if (sender.SenderID()==MAXCLIENTS+1)
     {
-        sn_DisconnectUser(MAXCLIENTS+1, "$network_kill_full");
+        sn_DisconnectUserFull(MAXCLIENTS+1);
     }
 
     sn_UpdateCurrentVersion();
@@ -2973,13 +2996,6 @@ static void CeterMessage_conf(std::istream &s)
 static tConfItemFunc CenterMessage_c("CENTER_MESSAGE",&CeterMessage_conf);
 static tAccessLevelSetter sn_CenterConfLevel( CenterMessage_c, tAccessLevel_Moderator );
 
-// ****************************************************************
-//                    Send Queue
-// ****************************************************************
-
-// the network stuff planned to send:
-tHeap<planned_send> send_queue[MAXCLIENTS+2];
-
 planned_send::planned_send(REAL priority,int Peer){
     peer=Peer;
 
@@ -3040,11 +3056,11 @@ static REAL sn_SendPlanned1(){
     if (time<lastTime-.01 || time>lastTime+1000)
 #ifdef DEBUG
     {
-        tERR_ERROR("Timer hickup!");
+        tERR_ERROR("Timer hiccup!");
     }
 #else
     {
-        tERR_WARN("Timer hickup!");
+        tERR_WARN("Timer hiccup!");
         lastTime=time;
     }
 #endif
@@ -3300,15 +3316,27 @@ nCallbackLoginLogout::nCallbackLoginLogout(AA_VOIDFUNC *f)
         :tCallback(s_loginoutAnchor,f){}
 
 void nCallbackLoginLogout::UserLoggedIn(int u){
+    bool loginBack = login;
+    int userBack = user;
+
     login = true;
     user = u;
     Exec(s_loginoutAnchor);
+    
+    login = loginBack;
+    user = userBack;
 }
 
 void nCallbackLoginLogout::UserLoggedOut(int u){
+    bool loginBack = login;
+    int userBack = user;
+
     login = false;
     user = u;
     Exec(s_loginoutAnchor);
+    
+    login = loginBack;
+    user = userBack;
 }
 
 unsigned short nCallbackAcceptPackedWithoutConnection::descriptor=0;	// the descriptor of the incoming packet

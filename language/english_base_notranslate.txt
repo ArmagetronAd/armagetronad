@@ -112,37 +112,37 @@ fortress_collapse_speed_help      Speed a fortress zone collapses with
 fortress_conquest_timeout_help    time without enemy contact that makes a fortress zone collapse harmlessly
 
 # should not actually be documented, rather hidden
-bookmark_0_address_help           Server adress of the 1st server bookmark 
+bookmark_0_address_help           Server address of the 1st server bookmark 
 bookmark_0_name_help              Name of the 1st server bookmark 
 bookmark_0_port_help              Server port of the 1st server bookmark 
-bookmark_10_address_help          Server adress of the 11th server bookmark 
+bookmark_10_address_help          Server address of the 11th server bookmark 
 bookmark_10_name_help             Name of the 11th server bookmark 
 bookmark_10_port_help             Server port of the 11th server bookmark 
-bookmark_1_address_help           Server adress of the 2nd server bookmark 
+bookmark_1_address_help           Server address of the 2nd server bookmark 
 bookmark_1_name_help              Name of the 2nd server bookmark 
 bookmark_1_port_help              Server port of the 2nd server bookmark 
-bookmark_2_address_help           Server adress of the 3rd server bookmark 
+bookmark_2_address_help           Server address of the 3rd server bookmark 
 bookmark_2_name_help              Name of the 3rd server bookmark 
 bookmark_2_port_help              Server port of the 3rd server bookmark 
-bookmark_3_address_help           Server adress of the 4th server bookmark 
+bookmark_3_address_help           Server address of the 4th server bookmark 
 bookmark_3_name_help              Name of the 4th server bookmark 
 bookmark_3_port_help              Server port of the 4th server bookmark 
-bookmark_4_address_help           Server adress of the 5th server bookmark 
+bookmark_4_address_help           Server address of the 5th server bookmark 
 bookmark_4_name_help              Name of the 5th server bookmark 
 bookmark_4_port_help              Server port of the 5th server bookmark 
-bookmark_5_address_help           Server adress of the 6th server bookmark 
+bookmark_5_address_help           Server address of the 6th server bookmark 
 bookmark_5_name_help              Name of the 6th server bookmark 
 bookmark_5_port_help              Server port of the 6th server bookmark 
-bookmark_6_address_help           Server adress of the 7th server bookmark 
+bookmark_6_address_help           Server address of the 7th server bookmark 
 bookmark_6_name_help              Name of the 7th server bookmark 
 bookmark_6_port_help              Server port of the 7th server bookmark 
-bookmark_7_address_help           Server adress of the 8th server bookmark 
+bookmark_7_address_help           Server address of the 8th server bookmark 
 bookmark_7_name_help              Name of the 8th server bookmark 
 bookmark_7_port_help              Server port of the 8th server bookmark 
-bookmark_8_address_help           Server adress of the 9th server bookmark 
+bookmark_8_address_help           Server address of the 9th server bookmark 
 bookmark_8_name_help              Name of the 9th server bookmark 
 bookmark_8_port_help              Server port of the 9th server bookmark 
-bookmark_9_address_help           Server adress of the 10th server bookmark 
+bookmark_9_address_help           Server address of the 10th server bookmark 
 bookmark_9_name_help              Name of the 10th server bookmark 
 bookmark_9_port_help              Server port of the 10th server bookmark 
 

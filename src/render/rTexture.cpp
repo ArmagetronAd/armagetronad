@@ -40,7 +40,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tResourceManager.h"
 
 #include <sstream>
-#include <set>
 
 #ifndef DEDICATED
 #include "rRender.h"
@@ -221,10 +220,7 @@ void rSurface::Create( char const * fileName, tPath const *path )
 #ifndef DEDICATED
     sr_LockSDL();
 
-#if !SDL_VERSION_ATLEAST(2,0,0)
-    // this function was already a no-op for backward compatibility in SDL_image 1.2, as stated in corresponding header
     IMG_InvertAlpha(true);
-#endif
 
     // find path of image and load it
     SDL_Surface *surface;
@@ -275,39 +271,22 @@ void rSurface::Create( SDL_Surface * surface )
             break;
 
         case 3:
-#ifdef GL_BRG
-            if (surface_->format->Rmask == 0x000000ff)
-                format_ = GL_RGB;
-            else
-                format_ = GL_BGR;
-#else
             format_ = GL_RGB;
-#endif
             break;
 
         case 4:
-#ifdef GL_BGRA
-            if (surface_->format->Rmask == 0x000000ff)
-                format_ = GL_RGBA;
-            else
-                format_ = GL_BGRA;
-#else
             format_ = GL_RGBA;
-#endif
             break;
 
         default:
             {
                 // fallback: convert the texture into a known format.
+
                 SDL_Surface *dummy =
                     SDL_CreateRGBSurface(SDL_SWSURFACE, 1, 1,
                                          32,
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-                                         0xFF0000, 0x00FF00, 0x0000FF
-#else
-                                         0x0000FF, 0x00FF00, 0xFF0000
-#endif
-                                         ,0xFF000000);
+                                         0x0000FF, 0x00FF00,
+                                         0xFF0000 ,0xFF000000);
 
                 SDL_Surface *convtex =
                     SDL_ConvertSurface(surface_, dummy->format, SDL_SWSURFACE);
@@ -316,74 +295,9 @@ void rSurface::Create( SDL_Surface * surface )
                 surface_ = convtex;
                 SDL_FreeSurface(dummy);
 
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-                format_ = GL_BGRA;
-#else
                 format_ = GL_RGBA;
-#endif
             }
             break;
-        }
-    }
-#endif
-}
-
-// ******************************************************************************************
-// *
-// *	CreateQuarter
-// *
-// ******************************************************************************************
-//!
-//!		@param	surface to scale down
-//!
-// ******************************************************************************************
-
-void rSurface::CreateQuarter( rSurface const & big )
-{
-#ifndef DEDICATED
-    // clear previous surface
-    Clear();
-
-    tASSERT( big.surface_ );
-    format_ = big.format_;
-
-    // determine dimensions
-    int sourceW = big.surface_->w;
-    int sourceH = big.surface_->h;
-    int w = (sourceW+1)/2;
-    int h = (sourceH+1)/2;
-
-    // create new surface of new sizes
-    surface_ = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h,
-                                    big.surface_->format->BitsPerPixel,
-                                    big.surface_->format->Rmask,
-                                    big.surface_->format->Gmask,
-                                    big.surface_->format->Bmask,
-                                    big.surface_->format->Amask);
-
-    tASSERT( surface_ );
-
-    int bytesPerPixel = surface_->format->BytesPerPixel;
-    int sourcePitch = big.surface_->pitch;
-    int pitch = surface_->pitch;
-    unsigned char const * source = (unsigned char const *)big.surface_->pixels;
-    unsigned char * dest = (unsigned char *) surface_->pixels;
-    for( int i = 0; i < h; ++i )
-    {
-        int off = i * pitch;
-        int soff1 = (i<<1)*sourcePitch;
-        int soff2 = (((i<<1)+1)%sourceH)*sourcePitch;
-        for( int j = 0; j < w; ++j )
-        {
-            int ind = j*bytesPerPixel;
-            int sind1 = (j<<1)*bytesPerPixel;
-            int sind2 = (((j<<1)+1)%sourceW)*bytesPerPixel;
-
-            for( int b = 0; b < bytesPerPixel; ++b )
-            {
-                // box filter
-                dest[off+ind+b] = ( source[soff1+sind1+b] + source[soff2+sind1+b] + source[soff1+sind2+b] + source[soff2+sind2+b] )>>2;
-            }
         }
     }
 #endif
@@ -403,107 +317,14 @@ void rSurface::CopyFrom( rSurface const & other )
 {
 #ifndef DEDICATED
     tASSERT( 0 == surface_ );
-    if( other.surface_ )
-    {
-        // copy surface
-        surface_ = SDL_ConvertSurface(other.surface_, other.surface_->format, SDL_SWSURFACE);
+    tASSERT( other.surface_ );
 
-        // copy flags
-        format_ = other.format_;
-    }
+    // copy surface
+    surface_ = SDL_ConvertSurface(other.surface_, other.surface_->format, SDL_SWSURFACE);
+
+    // copy flags
+    format_ = other.format_;
 #endif
-}
-
-// surface cache
-typedef std::pair< tString, tPath const * > rSurfaceCacheKey;
-
-class rSurfaceCacheValue
-{
-public:
-    rSurface surface;
-    bool used;
-
-    rSurfaceCacheValue()
-    : used( true )
-    {}
-};
-
-typedef std::map< rSurfaceCacheKey, rSurfaceCacheValue > rSurfaceCacheMap;
-static rSurfaceCacheMap sr_surfaceCacheMap;
-
-// ******************************************************************************************
-// *
-// *	GetSurface
-// *
-// ******************************************************************************************
-//!
-//!		@param	fileName the file name of the surface relative to the given path
-//!     @param  path     search path
-//!
-// ******************************************************************************************
-rSurface const * rSurfaceCache::GetSurface( char const * fileName, tPath const *path )
-{
-    rSurfaceCacheKey key( tString( fileName ), path );
-    // bool inCache = ( sr_surfaceCacheMap.find(key) != sr_surfaceCacheMap.end() );
-
-    rSurfaceCacheValue & val = sr_surfaceCacheMap[ key ];
-    if( !val.surface.GetSurface() )
-    {
-        // first time, load
-        val.surface.Create( fileName, path );
-    }
-
-    if( !val.surface.GetSurface() )
-    {
-        // previous error, don't retry
-        return NULL;
-    }
-
-    // mark as used and return
-    val.used = true;
-    return &val.surface;
-}
-
-// ******************************************************************************************
-// *
-// *	CycleCache
-// *
-// ******************************************************************************************
-//!
-//!
-// ******************************************************************************************
-void rSurfaceCache::CycleCache()
-{
-    for( rSurfaceCacheMap::iterator i = sr_surfaceCacheMap.begin(); i != sr_surfaceCacheMap.end();  )
-    {
-        rSurfaceCacheMap::iterator next = i;
-        next++;
-
-        rSurfaceCacheValue & value = (*i).second;
-        if( !value.used )
-        {
-            sr_surfaceCacheMap.erase( i );
-        }
-        else
-        {
-            value.used = false;
-        }
-
-        i = next;
-    }
-}
-
-// ******************************************************************************************
-// *
-// *	ClearCache
-// *
-// ******************************************************************************************
-//!
-//!
-// ******************************************************************************************
-void rSurfaceCache::ClearCache()
-{
-    sr_surfaceCacheMap.clear();
 }
 
 // ******************************************************************************************
@@ -535,7 +356,6 @@ void rITexture::UnloadAll( void )
     {
         s_textures_(i)->Unload();
     }
-    rSurfaceCache::ClearCache();
 }
 
 // ******************************************************************************************
@@ -651,27 +471,6 @@ void rISurfaceTexture::ProcessImage( SDL_Surface * surface )
 {
 }
 
-#ifndef DEDICATED
-static bool sr_IsPowerOfTwo( int i )
-{
-    return i == 1 || ( ( (i & 1) == 0  ) && sr_IsPowerOfTwo( i >> 1 ) );
-}
-
-static int sr_GetMaxTextureSizeCore()
-{
-    // guaranteed supported size
-    GLint maxSize = 64;
-    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxSize);
-    return maxSize;
-}
-
-static int sr_GetMaxTextureSize()
-{
-    static int maxSize = sr_GetMaxTextureSizeCore();
-    return maxSize;
-}
-#endif
-
 // ******************************************************************************************
 // *
 // *	Upload
@@ -682,7 +481,7 @@ static int sr_GetMaxTextureSize()
 //!
 // ******************************************************************************************
 
-void rISurfaceTexture::Upload( rSurface const & surface )
+void rISurfaceTexture::Upload( rSurface & surface )
 {
 #ifndef DEDICATED
     sr_LockSDL();
@@ -715,76 +514,8 @@ void rISurfaceTexture::Upload( rSurface const & surface )
         else
             format=GL_RGB5;
 
-    if( !sr_IsPowerOfTwo( tex->w ) || !sr_IsPowerOfTwo( tex->h ) )
-    {
-        static bool warn = true;
-        if( warn )
-        {
-            warn = false;
-            rFileTexture * texture = dynamic_cast< rFileTexture * >( this );
-            if( texture )
-            {
-                con << "\nWARNING: non-power-of-two texture dimensions in texture " << texture->GetFileName() << ". If you're the artist creating it, correct it by rescaling, please; it may cease to work in future versions or even not work right now for some people.\n\n";
-            }
-            else
-            {
-                con << "\nWARNING: non-power-of-two texture dimensions in unknown texture. If you're the artist creating one, recheck your work, it may cease to work in future versions or even not work right now for some people.\n\n";
-            }
-        }
-
-        // no power of two, delegate to legacy function without checks
-        gluBuild2DMipmaps(GL_TEXTURE_2D,format,tex->w,tex->h,
-                          texformat,GL_UNSIGNED_BYTE,tex->pixels);
-    }
-    else
-    {
-        int level = 0;
-
-        // mipmap generation pipeline
-        rSurface even(surface), odd(surface);
-        rSurface * current = &even;
-        rSurface * next = &odd;
-
-        bool sizeOK = false;
-        while(true)
-        {
-            // upload current as mipmap level.
-            tex = current->GetSurface();
-            tASSERT( tex );
-
-            // test whether the size is OK
-            if( !sizeOK && tex->w <= sr_GetMaxTextureSize() && tex->h <= sr_GetMaxTextureSize() )
-            {
-                // so far, so good; check via proxy
-                glTexImage2D(GL_PROXY_TEXTURE_2D,level,format,tex->w,tex->h,0,
-                             texformat,GL_UNSIGNED_BYTE,tex->pixels);
-                GLint width;
-                glGetTexLevelParameteriv(GL_PROXY_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
-                sizeOK = ( width != 0 );
-            }
-
-            if( sizeOK )
-            {
-                // upload and increase level
-                glTexImage2D(GL_TEXTURE_2D,level,format,tex->w,tex->h,0,
-                             texformat,GL_UNSIGNED_BYTE,tex->pixels);
-                level++;
-            }
-
-            // scale down for next level
-            if( tex->w == 1 && tex->h == 1 )
-            {
-                break;
-            }
-            else
-            {
-                next->CreateQuarter( *current );
-                rSurface * swap = next;
-                next = current;
-                current = swap;
-            }
-        }
-    }
+    gluBuild2DMipmaps(GL_TEXTURE_2D,format,tex->w,tex->h,
+                      texformat,GL_UNSIGNED_BYTE,tex->pixels);
 
     sr_UnlockSDL();
  #endif
@@ -825,7 +556,7 @@ void rISurfaceTexture::OnSelect( bool enforce )
                 if (textureModeLast_<0)
                 {
                     // delegate core loading work to derived class
-                    OnSelectCore();
+                    OnSelect();
                 }
 
                 //glEnable(GL_TEXTURE);
@@ -869,6 +600,21 @@ void rISurfaceTexture::OnSelect( bool enforce )
     }
     rITexture::OnSelect(enforce);
 #endif
+}
+
+// ******************************************************************************************
+// *
+// * OnSelect
+// *
+// ******************************************************************************************
+//!
+//!  In derived classes, this routine is supposed to do the work of loading the texture
+//!  into memory and using the Upload() function to upload it to OpenGL.
+//!
+// ******************************************************************************************
+
+void rISurfaceTexture::OnSelect()
+{
 }
 
 // ******************************************************************************************
@@ -944,26 +690,27 @@ rFileTexture::~rFileTexture( void )
 
 // ******************************************************************************************
 // *
-// *	OnSelectCore
+// *	OnSelect
 // *
 // ******************************************************************************************
 //!
 //!
 // ******************************************************************************************
 
-void rFileTexture::OnSelectCore()
+void rFileTexture::OnSelect()
 {
 #ifndef DEDICATED
     // std::cerr << "loading texture " << fileName_ << "\n";
-    rSurface const * surface = rSurfaceCache::GetSurface( fileName_, path_ );
-    if ( surface )
+    rSurface surface( fileName_, path_ );
+    if ( surface.GetSurface() )
     {
-        this->Upload( *surface );
+        this->Upload( surface );
     }
     else if (s_reportErrors_)
     {
         throw tGenericException( tOutput( "$texture_error_filenotfound", fileName_ ), tOutput("$texture_error_filenotfound_title") );
     }
+    rISurfaceTexture::OnSelect();
 #endif
 }
 
@@ -1002,14 +749,14 @@ rSurfaceTexture::~rSurfaceTexture( void )
 
 // ******************************************************************************************
 // *
-// *	OnSelectCore
+// *	OnSelect
 // *
 // ******************************************************************************************
 //!
 //!
 // ******************************************************************************************
 
-void rSurfaceTexture::OnSelectCore()
+void rSurfaceTexture::OnSelect()
 {
 #ifndef DEDICATED
     // upload a copy of the surface ( it may get modified )
@@ -1017,6 +764,7 @@ void rSurfaceTexture::OnSelectCore()
     {
         rSurface copy( surface_ );
         this->Upload( copy );
+        rISurfaceTexture::OnSelect();
     }
 #endif
 }
@@ -1066,42 +814,7 @@ rResourceTexture::rResourceTexture(tResourcePath const &path, bool repx, bool re
     tex_ = new tex_t(path);
 }
 
-// verifies a resource texture, redownloads it if it is corrupted (once per session)
-static void sr_VerifyResourceTexture( tString const & resourcePath )
-{
-#ifndef DEDICATED
-    static std::set< tString > verified;
-    if( verified.find(resourcePath) == verified.end() )
-    {
-        tString filePath = tResourceManager::locateResource( resourcePath, "", false  );
-        if( filePath != "" )
-        {
-            // check read and write path
-            tString w = tDirectories::Resource().GetWritePath( filePath );
-            tString r = tDirectories::Resource().GetReadPath( filePath );
-
-            // if they're equal, that means the resource has been downloaded before. Check it
-            // by loading it once
-            if( w == r )
-            {
-                rSurface const * surface = rSurfaceCache::GetSurface( filePath, &tDirectories::Resource() );
-                if( !surface )
-                {
-                    // trigger a redownload
-                    tResourceManager::locateResource( resourcePath, "", true, true );
-                }
-            }
-        }
-
-        // mark as checked
-        verified.insert( resourcePath );
-    }
-#endif
-}
-
 rResourceTexture::InternalTex::InternalTex(tResourcePath const &path) : rFileTexture(rTextureGroups::TEX_OBJ, tResourceManager::locateResource(path.Path().c_str()).c_str(), true, true, true, 0), use_(1), path_(path) {
-    sr_VerifyResourceTexture( path.Path() );
-
     textures.push_back(this);
 }
 

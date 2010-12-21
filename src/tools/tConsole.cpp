@@ -164,33 +164,7 @@ tConsole::~tConsole(){
 // stored line
 static tString line_("");
 
-void tConsole::PrintLine(tString const & line, int repetitions)
-{
-    if( repetitions > 1 )
-    {
-        // find the true line end. Sometimes, there are trailing color codes.
-        char const * lineEnd = strstr( line, "\n" );
-        int length = line.Len()-2;
-        if( lineEnd )
-        {
-            length = lineEnd - (char const *)line;
-        }
-        std::stringstream combined;
-        combined << line.SubStr(0, length) << " 0xffffff" << tOutput("$console_repetition", repetitions );
-
-        PrintLine( combined.str(), 1 );
-    }
-    else
-    {
-        // print
-        if (s_betterConsole)
-            s_betterConsole->DoPrint( line );
-        else
-            DoPrint( line );
-    }
-}
-
-tConsole & tConsole::Print(tString const & s)
+tConsole & tConsole::Print(tString s)
 {
     // append to line
     line_ += s;
@@ -210,44 +184,14 @@ tConsole & tConsole::Print(tString const & s)
         // filter
         FilterLine( line_ );
 
-        // check for repetitions
-        static tString lastLine("not the last line");
-        static int repetitions = 0;
-        static int threshold = 1;
-        if( lastLine != line_ )
+        // print
+        tConsole * better = s_betterConsole;
+        if (better)
         {
-            if( repetitions > 0 )
-            {
-                PrintLine( lastLine, repetitions );
-            }
-
-            repetitions = 0;
-            threshold = 1;
-            lastLine = line_;
+            better->DoPrint( line_ );
         }
         else
-        {
-            repetitions++;
-            if( threshold < 10 || repetitions >= threshold )
-            {
-                PrintLine( line_, repetitions );
- 
-                if( threshold < 10 )
-                {
-                    threshold++;
-                }
-                else
-                {
-                    threshold*=10;
-                }
-                repetitions = 0;
-            }
-
-            line_ = "";
-            return *this;
-        }
-
-        PrintLine( line_, 1 );
+            DoPrint( line_ );
 
         line_ = "";
     }
@@ -266,7 +210,7 @@ void tConsole::CenterDisplay(tString s,REAL timeout,REAL r,REAL g,REAL b)
 }
 
 tConsole & tConsole::DoPrint(const tString& s){
-    std::cout << tColoredString::RemoveColors(s);
+    std::cout << s;
     std::cout.flush();
     return *this;
 }
@@ -311,10 +255,10 @@ void tConsole::RegisterIdleCallback(IdleCallback *a_callback)
     s_idleCallback = a_callback;
 }
 
-bool tConsole::Idle( bool processInput ){
+bool tConsole::Idle(){
     if (s_idleCallback)
     {
-        return (*s_idleCallback)( processInput );
+        return (*s_idleCallback)();
     }
     else
     {

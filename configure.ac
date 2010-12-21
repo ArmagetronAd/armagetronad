@@ -235,11 +235,6 @@ AC_ARG_ENABLE(automakedefaults,
 		[enforce the default installation directories as set by automake. localstatedir=prefix/var violates the FHS, so this is off by default.]),,
 enable_automakedefaults=no enable_automakedefaults_default=yes)
 
-AC_ARG_ENABLE(dirty,
-	AC_HELP_STRING([--enable-dirty],
-		[allow dirty GL initialisation (like used with SDL 1.0) even if you have SDL 1.1 or up (default=disabled)]),,
-enable_dirty=no)
-
 AC_ARG_ENABLE(sysinstall,
 	AC_HELP_STRING([--enable-sysinstall],
 		[will install configuration files to /etc/armagetron and create a user if possible (default=enabled)]),,
@@ -665,7 +660,7 @@ AC_CHECK_LIB(xml2,xmlParseMemory,
 CPPFLAGS="$CPPFLAGS `$XML2_CONFIG --cflags`"
 LIBS="`$XML2_CONFIG --libs` $LIBS"
 AC_DEFINE(HAVE_LIBXML2, 1, [Define if you have the xml2 library (-lxml2).]),
-AC_MSG_ERROR([You need the library xml2 to compile Armagetron. Read the file doc/install_linux.html.])
+AC_MSG_ERROR([You need the library xml2 to compile ${progtitle}. Read the file doc/installation.txt.])
 ,`$XML2_CONFIG --libs`)
 
 AC_CHECK_FUNC(xmlParserInputBufferCreateFilenameDefault,
@@ -772,13 +767,6 @@ dnl ****************************************************
  AC_SUBST(needdata)
 else
 
-
-if test x$enable_dirty = xyes; then
-  AC_DEFINE(DIRTY,,[Define if you wish to use the old and dirty OpenGL
-  initialization method])
-fi
-
-
 dnl *************************************************
 dnl         SDL
 dnl *************************************************
@@ -793,9 +781,9 @@ fi
 CPPFLAGS="$CPPFLAGS `${SDL_CONFIG} --cflags`"
 LIBS="${SDLLIBS} $LIBS"
 
-AC_CHECK_FUNC(SDL_Init,
+AC_CHECK_FUNC(SDL_GL_SetAttribute,
 AC_DEFINE(HAVE_LIBSDL,,[Define if you have the library SDL]),
-AC_MSG_ERROR([You need the library SDL to compile Armagetron. Read the file doc/install_linux.html.])
+ AC_MSG_ERROR([You need the library SDL to compile ${progtitle}. Read the file doc/installation.txt.])
 ,)
 
 dnl ***************** OPTIONAL STUFF AFTER THIS POINT **********************
@@ -829,6 +817,14 @@ if test x$enable_joystick = xno; then
 fi
 
 dnl *************************************************
+dnl Winsock linking for cross-compilation. Not really supported.
+dnl *************************************************
+
+if test "`${SDL_CONFIG} --libs | grep windows`" ; then
+	AC_CHECK_LIB(wsock32, connect)
+fi
+
+dnl *************************************************
 dnl         GL
 dnl *************************************************
 
@@ -838,21 +834,21 @@ dnl AC_CHECK_LIB($SYS_GL_LIB, glEnd,,
 
 AC_CHECK_LIB($SYS_GL_LIB, glVertex3f,,
  AC_MSG_RESULT([OpenGL not found. Maybe it needs X11 to compile? Checking that...])
- AC_CHECK_LIB(X11,main,
+ AC_CHECK_LIB(X11,XOpenDisplay,
   LIBS="-lX11 -L/usr/X11R6/lib $LIBS"
   AC_DEFINE(HAVE_LIBX11, 1, [Define if you have the X11 library (-lX11).])
   ,
   AC_MSG_WARN([
   Standard X11 library needed by OpenGL not found.
   ]),-L/usr/X11R6/lib)
- AC_CHECK_LIB(Xext,main,-L/usr/X11R6/lib)
-  AC_CHECK_LIB(Xt,main,-L/usr/X11R6/lib)
- AC_CHECK_LIB(Xi,main,-L/usr/X11R6/lib)
- AC_CHECK_LIB(Xmu,main,-L/usr/X11R6/lib)
+ AC_CHECK_LIB(Xext,XextFindDisplay,-L/usr/X11R6/lib)
+  AC_CHECK_LIB(Xt,XtFree,-L/usr/X11R6/lib)
+ AC_CHECK_LIB(Xi,XOpenDevice,-L/usr/X11R6/lib)
+ AC_CHECK_LIB(Xmu,XmuDrawLogo,-L/usr/X11R6/lib)
 AC_CHECK_LIB($SYS_GL_LIB, glBegin,,AC_MSG_ERROR([
-  You need Mesa or an OpenGL-System to compile Armagetron.
+  You need Mesa or an OpenGL-System to compile ${progtitle}.
   Maybe your libGL needs the X libraries and your system does not
-  find them? Read the file doc/install_linux.html.]),-L/usr/X11R6/lib)
+  find them? Read the file doc/installation.txt.]),-L/usr/X11R6/lib)
 )
 
 dnl check for 3DFX-MESA
@@ -870,8 +866,8 @@ if test $SYS_GLU_LIB && echo $LIBS | grep -v "\-lGLU" > /dev/null; then
 dnl AC_CHECK_LIB($SYS_GLU_LIB, gluBuild2DMipmaps,,
 AC_CHECK_LIB($SYS_GLU_LIB, gluBuild3DMipmaps,,
 AC_MSG_ERROR([
-You need GLU to compile Armagetron; it SHOULD have come with OpenGL.
-Read the file doc/install_linux.html.]))
+You need GLU to compile ${progtitle}; it SHOULD have come with OpenGL.
+Read the file doc/installation.txt.]))
 
 dnl *************************************************
 dnl         GLEW
@@ -902,7 +898,7 @@ test -z "$FREETYPE_CONFIG" && FREETYPE_CONFIG=freetype-config
 FTGL_CFLAGS="`pkg-config ftgl --cflags`"
 FTGL_LIBS="`pkg-config ftgl --libs`"
 
-FTGL_ERROR="You need the library ftgl in at least version 2.1.3~rc5 to compile Armagetron. Read the file doc/install_linux.html."
+FTGL_ERROR="You need the library ftgl in at least version 2.1.3~rc5 to compile Armagetron. Read the file doc/installation.txt."
 
 AC_CHECK_LIB(ftgl,ftglRenderGlyph,
 CPPFLAGS="$CPPFLAGS $FTGL_CFLAGS"
@@ -958,7 +954,7 @@ AC_CHECK_LIB(freetype,FT_Init_FreeType,
 CPPFLAGS="$CPPFLAGS `$FREETYPE_CONFIG --cflags`"
 LIBS="$LIBS `$FREETYPE_CONFIG --libs`"
 ,
-AC_MSG_ERROR([You need the library freetype to compile Armagetron. Read the file doc/install_linux.html.])
+AC_MSG_ERROR([You need the library freetype to compile Armagetron. Read the file doc/installation.txt.])
 )
 
 dnl FTGL again. Check for the headers. First, try the individual header.
@@ -980,13 +976,13 @@ dnl *************************************************
 dnl         Other Stuff
 dnl *************************************************
 
-dnl AC_CHECK_LIB(g++, main,,
+dnl AC_CHECK_LIB(g++, cin,,
 dnl AC_MSG_WARN([C++ standard library not found. You can ignore this warning on non-GNU-systems.]))
 
 AC_LANG([C])
 
-AC_CHECK_LIB(z, main,,
-AC_MSG_ERROR([You need libz to compile Armagetron.]))
+AC_CHECK_LIB(z, gzread,,
+AC_MSG_ERROR([You need libz to compile ${progtitle}.]))
 
 AC_MSG_CHECKING(whether libpng is installed)
 if PNGLIBS=`libpng-config --libs`; then
@@ -996,11 +992,11 @@ fi
 CPPFLAGS="$CPPFLAGS `libpng-config --cflags`"
 LIBS="$LIBS $PNGLIBS"
 
-AC_CHECK_FUNC(png_check_sig,
+AC_CHECK_FUNC(png_sig_cmp,
 ,
-AC_MSG_ERROR([You need libpng to compile Armagetron.]))
+AC_MSG_ERROR([You need libpng to compile ${progtitle}.]))
 
-AC_CHECK_LIB(jpeg, main,,
+AC_CHECK_LIB(jpeg, jpeg_read_header,,
 	AC_MSG_WARN([
 	libjpeg not found. Expect small graphical errors ( missing moviepack title screen ).]
 	)
@@ -1008,7 +1004,7 @@ AC_CHECK_LIB(jpeg, main,,
 
 AC_CHECK_LIB(SDL_image, IMG_Load,,
 dnl AC_CHECK_LIB(IMG, main,,
-AC_MSG_ERROR([You need the library SDL_image to compile Armagetron.]
+AC_MSG_ERROR([You need the library SDL_image to compile ${progtitle}.]
 dnl )
 ))
 
@@ -1047,8 +1043,6 @@ export CXXFLAGS
 fi dnl (dedicated server)
 
 
-
-dnl Replace `main' with a function in -lpthread:
 
 dnl Checks for header files.
 AC_HEADER_STDC
@@ -1303,7 +1297,6 @@ if test "x$enable_ruby" = "xyes"; then
 echo "         Ruby include dir: $ruby_include_dir"
 echo "         Ruby lib dir: $ruby_lib_dir"
 fi
-echo "     Use dirty SDL initialization: $enable_dirty"
 echo "     Call sysinstall: $enable_sysinstall"
 if test "$enable_uninstall" = "yes" &&
    test "$external_uninstall_cmd" != ""; then

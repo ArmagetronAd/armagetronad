@@ -570,12 +570,7 @@ public:
                 if ( this->suggestor_ )
                     this->suggestor_->Spam( user_, se_votingSpamReject, tOutput("$spam_vote_rejected") );
 
-                tOutput voteMessage;
-                voteMessage.SetTemplateParameter( 1, GetDescription() );
-                voteMessage.SetTemplateParameter( 2, pro );
-                voteMessage.SetTemplateParameter( 3, con-bias );
-                voteMessage.SetTemplateParameter( 4, total-pro-con+bias );
-                voteMessage << "$vote_rejected";
+                tOutput voteMessage("$vote_rejected", GetDescription(), pro, con-bias, total-pro-con+bias );
                 this->BroadcastMessage( voteMessage );
                 delete this;
                 return;
@@ -584,12 +579,7 @@ public:
             // see if the vote has been accepted
             if ( pro >= con && pro * 2 > total )
             {
-                tOutput voteMessage;
-                voteMessage.SetTemplateParameter( 1, GetDescription() );
-                voteMessage.SetTemplateParameter( 2, pro );
-                voteMessage.SetTemplateParameter( 3, con-bias );
-                voteMessage.SetTemplateParameter( 4, total-pro-con+bias );
-                voteMessage << "$vote_accepted";
+                tOutput voteMessage("$vote_accepted", GetDescription(), pro, con-bias, total-pro-con+bias);
                 this->BroadcastMessage( voteMessage );
                 this->DoExecute();
                 delete this;

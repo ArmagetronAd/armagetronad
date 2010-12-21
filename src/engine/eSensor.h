@@ -32,6 +32,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "eTess2.h"
 //#include "eGrid.h"
 
+// exception that is thrown when the sensor hit something
+class eSensorFinished{};
+
 // sensor sent out to detect near eWalls
 class eSensor: public eStackGameObject{
 public:
@@ -42,7 +45,7 @@ public:
 
     eSensor(eGameObject *o,const eCoord &start,const eCoord &d);
 
-    virtual ePassEdgeResult PassEdge(const eWall *w,REAL time,REAL,int =1) override;
+    virtual void PassEdge(const eWall *w,REAL time,REAL,int =1);
     //  virtual void PassEdge(eEdge *e,REAL time,REAL a,int recursion=1);
     void detect(REAL range);
 

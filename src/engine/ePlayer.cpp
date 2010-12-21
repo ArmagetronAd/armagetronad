@@ -612,7 +612,7 @@ static void PasswordCallback( nKrawall::nPasswordRequest const & request,
     // menu entry since the user probably just wants to enter the password.
     for(int i = 0; i < MAX_PLAYERS; ++i) {
         tString const &id = se_Players[i].globalID;
-        if(id.Len() <= username.Len() || id(username.Len() - 1) != '@') {
+        if(username.Len() <= 1 || id.Len() <= username.Len() || id(username.Len() - 1) != '@') {
             continue;
         }
         bool match = true;
@@ -680,7 +680,26 @@ static void se_AdminLogin_ReallyOnlyCallFromChatKTHNXBYE( ePlayerNetID * p )
 #endif
 #endif
 
+// flags indicating whether shouting should be the default chat action; if not, it's /team.
+enum eShoutDefault
+{
+    eShoutDefault_Team = 0,             // default to /team chat
+    eShoutDefault_Shout = 1,            // default to /shout chat
+    eShoutDefault_ShoutAndOverride = 2  // default to /shout chat and override access level restrictions
+};
+tCONFIG_ENUM( eShoutDefault );
+
+static eShoutDefault se_shoutSpectator=eShoutDefault_Shout;
+tSettingItem< eShoutDefault > se_shoutSpectatorConf( "DEFAULT_SHOUT_SPECTATOR", se_shoutSpectator );
+static eShoutDefault se_shoutPlayer=eShoutDefault_Shout;
+tSettingItem< eShoutDefault > se_shoutPlayerConf( "DEFAULT_SHOUT_PLAYER", se_shoutPlayer );
+
 #ifdef KRAWALL_SERVER
+// minimal access level to shout
+static tAccessLevel se_shoutAccessLevel = tAccessLevel_Program;
+static tSettingItem< tAccessLevel > se_shoutAccessLevelConf( "ACCESS_LEVEL_SHOUT", se_shoutAccessLevel );
+static tAccessLevelSetter se_shoutAccessLevelConfLevel( se_shoutAccessLevelConf, tAccessLevel_Owner );
+
 // minimal access level to play
 static tAccessLevel se_playAccessLevel = tAccessLevel_Program;
 static tSettingItem< tAccessLevel > se_playAccessLevelConf( "ACCESS_LEVEL_PLAY", se_playAccessLevel );
@@ -1125,6 +1144,8 @@ ePlayer::ePlayer():cockpit(0){
     nAuthentication::SetLoginResultCallback (&ResultCallback);
 #endif
 
+    lastTooltip_ = -100;
+
     nameTeamAfterMe = false;
     favoriteNumberOfPlayersPerTeam = 3;
 
@@ -1138,6 +1159,9 @@ ePlayer::ePlayer():cockpit(0){
     }
     if ( !getUserName )
         name << "Player " << id+1;
+
+    // default global ID so logins are redirected to the forums
+    globalID = "@forums";
 
 #ifndef DEDICATED
     tString confname;
@@ -1311,6 +1335,16 @@ ePlayer::~ePlayer(){
 #ifndef DEDICATED
 void ePlayer::Render(){
     if (cam) cam->Render();
+
+    // present tooltip help
+    double now = tSysTimeFloat();
+    if( se_GameTime() > 1 && now-lastTooltip_ > 1 && !rConsole::CenterDisplayActive() )
+    {
+        if( uActionTooltip::Help( ID()+1 ) || uActionTooltip::Help( 0 ) || VetoActiveTooltip(ID()+1) )
+            lastTooltip_ = now;
+        else
+            lastTooltip_ = now+60;
+    }
 }
 #endif
 
@@ -2076,9 +2110,11 @@ ePlayerNetID * se_GetAlivePlayerFromUserID( int uid )
     return 0;
 }
 
+#ifndef KRAWALL_SERVER
 //The Base Remote Admin Password
 static tString sg_adminPass( "NONE" );
 static tConfItemLine sg_adminPassConf( "ADMIN_PASS", sg_adminPass );
+#endif
 
 #ifdef DEDICATED
 
@@ -2929,9 +2965,46 @@ bool IsSilencedWithWarning( ePlayerNetID const * p )
     return false;
 }
 
+// returns true if the player is allowed to shout
+static bool se_CheckAccessLevelShoutNoWarn( ePlayerNetID * p )
+{
+#ifdef KRAWALL_SERVER
+    eShoutDefault shout = se_GetManagedTeam( p ) ? se_shoutPlayer : se_shoutSpectator;
+    if( shout == eShoutDefault_ShoutAndOverride )
+    {
+        return true;
+    }
+
+    // check if the player has the right to shout
+    return p->GetAccessLevel() <= se_shoutAccessLevel;
+#else
+    return true;
+#endif
+}
+
+// returns true if the player is allowed to shout
+static bool se_CheckAccessLevelShout( ePlayerNetID * p )
+{
+    if( !se_CheckAccessLevelShoutNoWarn( p ) )
+    {
+        sn_ConsoleOut( tOutput("$access_level_shout_denied" ), p->Owner() );
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
 // /me chat commant
 static void se_ChatMe( ePlayerNetID * p, std::istream & s, eChatSpamTester & spam )
 {
+    // check for global chat access right
+    if ( !se_CheckAccessLevelShout( p ) )
+    {
+        return;
+    }
+
     if ( IsSilencedWithWarning(p) || spam.Block() )
     {
         return;
@@ -2996,8 +3069,43 @@ tSettingItem< bool > se_coloredTeamConf( "FILTER_COLOR_TEAM", se_filterColorTeam
 static bool se_filterDarkColorTeam=false;
 tSettingItem< bool > se_coloredDarkTeamConf( "FILTER_DARK_COLOR_TEAM", se_filterDarkColorTeam );
 
+// regular chat; reaches all players
+static void se_ChatShout( ePlayerNetID * p, tString const & say, eChatSpamTester & spam )
+{
+    if ( !se_CheckAccessLevelShout( p ) )
+    {
+        return;
+    }
+
+    // check for spam
+    if ( spam.Block() )
+    {
+        return;
+    }
+
+    if ( ( say.Len() <= se_SpamMaxLen+2 || p->GetAccessLevel() <= se_spamAccessLevel ) && !IsSilencedWithWarning(p) )
+    {
+        se_BroadcastChat( p, say );
+        se_DisplayChatLocally( p, say);
+        
+        tString s;
+        s << p->GetUserName() << ' ' << say;
+        se_SaveToChatLog(s);
+    }
+}
+
+static void se_ChatShout( ePlayerNetID * p, std::istream & s, eChatSpamTester & spam )
+{
+    // parse string
+    tString say;
+    say.ReadLine( s );
+    
+    // delegate
+    se_ChatShout( p, say, spam );
+}
+
 // /team chat commant: talk to your team
-static void se_ChatTeam( ePlayerNetID * p, std::istream & s, eChatSpamTester & spam )
+static void se_ChatTeam( ePlayerNetID * p, tString msg, eChatSpamTester & spam )
 {
     eTeam *currentTeam = se_GetManagedTeam( p );
 
@@ -3010,9 +3118,6 @@ static void se_ChatTeam( ePlayerNetID * p, std::istream & s, eChatSpamTester & s
     {
         return;
     }
-
-    tString msg;
-    msg.ReadLine( s );
 
     // Apply filters if we don't already
     if ( se_filterColorTeam )
@@ -3074,6 +3179,15 @@ static void se_ChatTeam( ePlayerNetID * p, std::istream & s, eChatSpamTester & s
             }
         }
     }
+}
+
+// /team chat commant: talk to your team
+static void se_ChatTeam( ePlayerNetID * p, std::istream & s, eChatSpamTester & spam )
+{
+    tString msg;
+    msg.ReadLine( s );
+
+    se_ChatTeam( p, msg, spam );
 }
 
 // /msg chat commant: talk to anyone team
@@ -3707,6 +3821,13 @@ void se_ChatHandlerServer( unsigned short id, tColoredString const & say, nMessa
                         se_ChatTeam( p, s, spam );
                         return;
                     }
+                    else if (command == "/shout")
+                    {
+                        spam.lastSaidType_ = eChatMessageType_Public;
+                        spam.say_ = spam.say_.SubStr(7); // cut /shout prefix
+                        se_ChatShout( p, s, spam );
+                        return;
+                    }
                     else if (command == "/msg" ) {
                         spam.lastSaidType_ = eChatMessageType_Private;
                         se_ChatMsg( p, s, spam );
@@ -3763,21 +3884,17 @@ void se_ChatHandlerServer( unsigned short id, tColoredString const & say, nMessa
 #endif
             }
 
-            // check for spam
-            if ( spam.Block() )
-            {
-                return;
-            }
-
             // well, that leaves only regular, boring chat.
-            if ( ( say.Len() <= se_SpamMaxLen+2 || p->GetAccessLevel() <= se_spamAccessLevel ) && !IsSilencedWithWarning(p) )
+            eShoutDefault shout = se_GetManagedTeam( p ) ? se_shoutPlayer : se_shoutSpectator;
+            if( shout != eShoutDefault_Team && se_CheckAccessLevelShoutNoWarn( p ) )
             {
-                se_BroadcastChat( p, say );
-                se_DisplayChatLocally( p, say);
-
-                tString s;
-                s << p->GetUserName() << ' ' << say;
-                se_SaveToChatLog(s);
+                // if it's the default and the player is allowed to, shout it out
+                se_ChatShout( p, say, spam );
+            }
+            else
+            {
+                // otherwise, fall back to team chat.
+                se_ChatTeam( p, say, spam );
             }
         }
     }
@@ -4056,7 +4173,16 @@ public:
         }
         else if (e.type==SDL_KEYDOWN &&
                  uActionGlobal::IsBreakingGlobalBind(e.key.keysym.sym))
+        {
             return su_HandleEvent(e, true);
+        }
+        else if (e.type==SDL_KEYDOWN &&
+                 e.key.keysym.sym == SDLK_ESCAPE)
+        {
+            // escape needs to be handled by the surrounding menu, otherwise it
+            // probably brings up the ingame menu via global bind.
+            return false;
+        }
         else
         {
             if ( uMenuItemStringWithHistory::Event(e) )
@@ -4256,6 +4382,33 @@ bool ePlayer::PlayerIsInGame(int p){
     return PlayerViewport(p) && PlayerConfig(p);
 }
 
+// veto function for tooltips that require a controllable game object
+bool ePlayer::VetoActiveTooltip(int player)
+{
+    // check if the player exists and controls a living object
+    if( player == 0 )
+    {
+        return true;
+    }
+    ePlayer * p = PlayerConfig(player-1);
+    if ( !p )
+    {
+        return true;
+    }
+    ePlayerNetID * pn = p->netPlayer;
+    if ( !pn )
+    {
+        return true;
+    }
+    eNetGameObject *o = pn->Object();
+    if (!o || !o->Alive())
+    {
+        return true;
+    }
+
+    return false;
+}
+
 static tConfItemBase *vpbtp[MAX_VIEWPORTS];
 
 void ePlayer::Init(){
@@ -4301,6 +4454,15 @@ void ePlayer::Exit(){
 }
 
 uActionPlayer ePlayer::s_chat("CHAT");
+
+// only display chat in multiplayer games
+static bool se_ChatTooltipVeto(int)
+{
+    return sn_GetNetState() == nSTANDALONE;
+}
+
+uActionTooltip ePlayer::s_chatTooltip(ePlayer::s_chat, 1, &se_ChatTooltipVeto);
+uActionTooltip s_toggleSpectatorTooltip(se_toggleSpectator, 1, &se_ChatTooltipVeto);
 
 int pingCharity = 100;
 static const int maxPingCharity = 300;
@@ -6153,7 +6315,19 @@ void ePlayerNetID::ResetScore(){
     ResetScoreDifferences();
 }
 
-void ePlayerNetID::DisplayScores(){
+// flag memorizing whether the scores already have been rendered this frame
+static bool se_alreadyDisplayedScores = false;
+
+static bool show_scores=false;
+
+void ePlayerNetID::DisplayScores()
+{
+    if( !show_scores || !se_mainGameTimer || se_alreadyDisplayedScores )
+    {
+        return;
+    }
+    se_alreadyDisplayedScores = true;
+
     sr_ResetRenderState(true);
 
     REAL W=sr_screenWidth;
@@ -6781,7 +6955,7 @@ void ePlayerNetID::Update(){
                 // if the player is not currently on a team, but wants to join a specific team, let it join any, but keep the wish stored
                 if ( player->NextTeam() && !player->CurrentTeam() && player->TeamChangeAllowed() )
                 {
-                    eTeam * wish = player->NextTeam();
+                    tJUST_CONTROLLED_PTR< eTeam > wish = player->NextTeam();
                     bool assignBack = se_assignTeamAutomatically;
                     se_assignTeamAutomatically = true;
                     player->SetDefaultTeam();
@@ -6807,8 +6981,9 @@ void ePlayerNetID::Update(){
             // announce unfullfilled wishes
             if ( player->NextTeam() != player->CurrentTeam() && player->NextTeam() )
             {
-                //if the player can't change teams delete the team wish
-                if(!player->TeamChangeAllowed()) {
+                // if the player can't change teams or their wish team emptied, delete the team wish
+                if(!player->TeamChangeAllowed() || player->NextTeam()->NumPlayers() == 0)
+                {
                     player->SetTeam( player->CurrentTeam() );
                     continue;
                 }
@@ -7078,7 +7253,6 @@ void ePlayerNetID::GetScoreFromDisconnectedCopy()
 }
 
 
-static bool show_scores=false;
 static bool ass=true;
 
 void se_AutoShowScores(){
@@ -7095,14 +7269,9 @@ void se_SetShowScoresAuto(bool a){
     ass=a;
 }
 
-
 static void scores(){
-    if (show_scores){
-        if ( se_mainGameTimer )
-            ePlayerNetID::DisplayScores();
-        else
-            show_scores = false;
-    }
+    ePlayerNetID::DisplayScores();
+    se_alreadyDisplayedScores = false;
 }
 
 
@@ -7114,11 +7283,10 @@ static bool force_small_cons(){
 
 static rSmallConsoleCallback sc(&force_small_cons);
 
-static void cd(){
-    show_scores = false;
-}
-
-
+//static void cd(){
+//    show_scores = false;
+//}
+//static rCenterDisplayCallback c_d(&cd);
 
 static uActionGlobal score("SCORE");
 
@@ -7130,8 +7298,6 @@ static bool sf(REAL x){
 
 static uActionGlobalFunc saf(&score,&sf);
 
-
-static rCenterDisplayCallback c_d(&cd);
 
 tOutput& operator << (tOutput& o, const ePlayerNetID& p)
 {
@@ -7170,10 +7336,13 @@ void ePlayerNetID::GreetHighscores(tString &s){
 // *******************
 void ePlayerNetID::SetChatting ( ChatFlags flag, bool chatting )
 {
+    /* z-man can't remember why this exception was made; probably
+       just do disable the chat indicator while you play in local menus.
     if ( sn_GetNetState() == nSTANDALONE && flag == ChatFlags_Menu )
     {
         chatting = false;
     }
+    */
 
     if ( chatting )
     {
