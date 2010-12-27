@@ -694,7 +694,7 @@ void do_con(){
 
 void sg_ConsoleInput(){
 #ifndef DEDICATED
-    st_ToDo(&do_con);
+    st_ToDoOnce(&do_con);
 #endif
 }
 
