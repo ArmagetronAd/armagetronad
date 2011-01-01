@@ -273,6 +273,7 @@ public:
     eTeam* NextTeam()    const { return nextTeam; }		// return the team I will be next round
     eTeam* CurrentTeam() const { return currentTeam; }	// return the team I am in
     int  TeamListID() const { return teamListID; }		// return my position in the team
+    void SetShuffleWish( int pos ); 	        //!< sets a desired team position
     eTeam* FindDefaultTeam();					// find a good default team for us
     void SetDefaultTeam();						// register me in a good default team
     void SetTeamForce(eTeam* team );           	// register me in the given team without checks

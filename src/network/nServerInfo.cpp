@@ -157,6 +157,32 @@ static nServerInfo *CreateServerInfo()
         return tNEW(nServerInfo());
 }
 
+static void sn_AddMasterServer( std::istream &s )
+{
+    tString connectionName;
+    unsigned port = 4533;
+    
+    s >> connectionName;
+    if ( !s.eof() )
+        s >> port;
+    
+    // back up regular server list
+    nServerInfo *oldFirstServer = sn_FirstServer;
+    sn_FirstServer = NULL;
+
+    nServerInfo *newMaster = CreateServerInfo();
+    newMaster->SetConnectionName( connectionName );
+    newMaster->SetPort( port );
+    newMaster->Remove();
+    newMaster->Insert( sn_masterList );
+    
+    // restore regular server list
+    sn_FirstServer = oldFirstServer;
+    nServerInfo::TellMasterAboutMe( newMaster );    
+}
+
+static tConfItemFunc sn_addMasterServerConfItemFunc( "ADD_MASTER_SERVER", &sn_AddMasterServer );
+
 nServerInfo::nServerInfo()
         :tListItem<nServerInfo>(sn_FirstServer),
         pollID(-1),
@@ -1250,7 +1276,7 @@ nServerInfo* nServerInfo::GetBigServerInfoCommon(  Network::BigServerInfo const 
         {
             tOutput message;
             message.SetTemplateParameter(1, ToString( baseInfo ) );
-            message.SetTemplateParameter(2, sn_Connections[sender.MessageID()].socket->GetAddress().ToString() );
+            message.SetTemplateParameter(2, sn_Connections[sender.SenderID()].socket->GetAddress().ToString() );
             message << "$network_browser_unidentified";
             con << message;
         }
@@ -1311,6 +1337,19 @@ void nServerInfo::GiveBigServerInfo( Network::RequestBigServerInfo const & info,
 
     if (sn_IsMaster)
         return;
+
+    // log first polls
+    static int logPolls=10;
+    if( logPolls > 0 )
+    {
+        logPolls--;
+        tString senderName;
+        sn_GetAdr( sender.SenderID(), senderName );
+        con << tOutput(
+            logPolls > 0 ? "$network_master_pollanswer" : "$network_master_pollanswer_last", 
+            senderName
+            );
+    }
 
     // collect info
     nServerInfo me;

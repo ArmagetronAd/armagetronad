@@ -665,8 +665,6 @@ int nCurrentSenderID::currentSenderID_ = 0;
 
 tJUST_CONTROLLED_PTR< nMessageBase > nDescriptorBase::CreateMessage( unsigned char const * & data, unsigned char const * end, int sender )
 {
-    static tArray<bool> warned;
-
     // store sender ID for console
     nCurrentSenderID currentSender( sender );
 
@@ -712,10 +710,14 @@ tJUST_CONTROLLED_PTR< nMessageBase > nDescriptorBase::CreateMessage( unsigned ch
         nd = descriptors[0];
         
         // nope, error.
+#ifdef DEBUG
+        static tArray<bool> warned;
+
         if (!warned[index]){
             con << tOutput( "$network_warn_unknowndescriptor", index );
             warned[index]=true;
         }
+#endif
     }
     
     if ( !nd )

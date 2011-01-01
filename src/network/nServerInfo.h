@@ -102,7 +102,7 @@ public:
 private:
     nAddress & AccessAddress( void ) const;	                       //!< Accesses the network address of the server
     nServerInfoBase & SetAddress( nAddress const & address );	   //!< Sets the network address of the server
-protected:
+public:
     inline nServerInfoBase & SetConnectionName( tString const & connectionName );	         //!< Sets the internet name of the server ("192.168.10.10", "atron.dyndns.org")
     inline nServerInfoBase & SetPort( unsigned int port );	                                 //!< Sets the network port the server listens on
 };

@@ -635,7 +635,7 @@ static bool lowlevel_sr_InitDisplay(){
                                (sr_screenWidth, sr_screenHeight,   fullCD,
                                 attrib^SDL_FULLSCREEN);
 
-                if (CD_fsinv > 15){
+                if (CD_fsinv >= 15){
                     // yes! change the mode
                     currentScreensetting.fullscreen=!currentScreensetting.fullscreen;
                     attrib ^= SDL_FULLSCREEN;
