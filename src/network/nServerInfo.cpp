@@ -1262,7 +1262,7 @@ nServerInfo* nServerInfo::GetBigServerInfoCommon(nMessage &m)
         {
             tOutput message;
             message.SetTemplateParameter(1, ToString( baseInfo ) );
-            message.SetTemplateParameter(2, sn_Connections[m.MessageID()].socket->GetAddress().ToString() );
+            message.SetTemplateParameter(2, sn_Connections[m.SenderID()].socket->GetAddress().ToString() );
             message << "$network_browser_unidentified";
             con << message;
         }
