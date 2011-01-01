@@ -577,8 +577,6 @@ nDescriptor::nDescriptor(nHandler *handle,const char *Name)
 int nCurrentSenderID::currentSenderID_ = 0;
 
 void nDescriptor::HandleMessage(nMessage &message){
-    static tArray<bool> warned;
-
     // store sender ID for console
     nCurrentSenderID currentSender( message.SenderID() );
 
@@ -600,7 +598,11 @@ void nDescriptor::HandleMessage(nMessage &message){
             if ((message.SenderID() <= MAXCLIENTS) || nd->acceptWithoutLogin)
                 nd->handler(message);
         }
+#ifdef DEBUG
         else
+        {
+            static tArray<bool> warned;
+
             if (!warned[message.Descriptor()]){
                 tOutput warn;
                 warn.SetTemplateParameter(1, message.Descriptor());
@@ -608,6 +610,8 @@ void nDescriptor::HandleMessage(nMessage &message){
                 con << warn;
                 warned[message.Descriptor()]=true;
             }
+        }
+#endif
 #ifndef NOEXCEPT
     }
     catch(nIgnore const &){
