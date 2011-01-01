@@ -2659,6 +2659,8 @@ network_master_reqlist		Requesting server list...\n
 network_master_status		Receiving server \1...\n
 network_master_finish		Received \1 servers.\n
 network_master_start		Host Game
+network_master_pollanswer       Answering ping poll from \1.\n
+network_master_pollanswer_last	Answering ping poll from \1. This is the last logged poll.\n
 network_master_host_inet_help	This will start a network game on your computer and announce it on the internet.
 network_master_host_lan_help	This will start a network game that is only visible from your LAN.
 

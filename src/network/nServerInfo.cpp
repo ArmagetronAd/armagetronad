@@ -1325,6 +1325,19 @@ void nServerInfo::GiveBigServerInfo(nMessage &m)
     if (sn_IsMaster)
         return;
 
+    // log first polls
+    static int logPolls=10;
+    if( logPolls > 0 )
+    {
+        logPolls--;
+        tString sender;
+        sn_GetAdr( m.SenderID(), sender );
+        con << tOutput(
+            logPolls > 0 ? "$network_master_pollanswer" : "$network_master_pollanswer_last", 
+            sender
+            );
+    }
+
     // collect info
     nServerInfo me;
     me.GetFrom( sn_Connections[m.SenderID()].socket );
