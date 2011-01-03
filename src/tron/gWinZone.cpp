@@ -3152,7 +3152,7 @@ void gBaseZoneHack::OnEnter( gCycle * target, REAL time )
 
                     sg_flagConquestRoundWinWriter << target->Player()->GetUserName();
                     if(target->flag_->Team()){
-                       sg_flagScoreWriter << ePlayerNetID::FilterName( target->flag_->Team()->Name() );
+                       sg_flagConquestRoundWinWriter << ePlayerNetID::FilterName( target->flag_->Team()->Name() );
                     }
                     sg_flagConquestRoundWinWriter.write();
                     
