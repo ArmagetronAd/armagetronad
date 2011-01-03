@@ -410,7 +410,7 @@ public:
     ~gFlagZoneHack();                                            //!< destructor
 
     void SetTeam(tJUST_CONTROLLED_PTR< eTeam > team) { this->team = team; }
-
+    eTeam* Team(){return team;}
     void WarnFlagNotHome();
     bool IsHome();
     void GoHome();

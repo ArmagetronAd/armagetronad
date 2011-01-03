@@ -3132,7 +3132,10 @@ void gBaseZoneHack::OnEnter( gCycle * target, REAL time )
             else
             {
                 // player has scored a flag capture
-                sg_flagScoreWriter << target->Player()->GetUserName() << ePlayerNetID::FilterName( target->flag_->Team()->Name() );
+                sg_flagScoreWriter << target->Player()->GetUserName();
+                if(target->flag_->Team()){
+                   sg_flagScoreWriter << ePlayerNetID::FilterName( target->flag_->Team()->Name() );
+               }
                 sg_flagScoreWriter.write();
                 
 				tOutput lose;
@@ -3146,7 +3149,11 @@ void gBaseZoneHack::OnEnter( gCycle * target, REAL time )
 				target->flag_->GoHome();
                 if (sg_flagConquestWinsRound)
                 {
-                    sg_flagConquestRoundWinWriter << target->Player()->GetUserName() << ePlayerNetID::FilterName( target->flag_->Team()->Name() );
+
+                    sg_flagConquestRoundWinWriter << target->Player()->GetUserName();
+                    if(target->flag_->Team()){
+                       sg_flagScoreWriter << ePlayerNetID::FilterName( target->flag_->Team()->Name() );
+                    }
                     sg_flagConquestRoundWinWriter.write();
                     
                     static const char*message="$player_win_flag";
@@ -4425,7 +4432,10 @@ bool gFlagZoneHack::Timestep( REAL time )
 			// go home
 			GoHome();
 
-            sg_flagTimeoutWriter << player->GetUserName() << ePlayerNetID::FilterName( Team()->Name() );
+            sg_flagTimeoutWriter << player->GetUserName();
+            if(team){
+                sg_flagTimeoutWriter << ePlayerNetID::FilterName( team->Name() );
+            }
             sg_flagTimeoutWriter.write();
             
 			tColoredString playerName;
@@ -4666,7 +4676,10 @@ void gFlagZoneHack::OnEnter( gCycle * target, REAL time )
         RequestSync();
         positionUpdatePending_ = true;
 
-        sg_flagTakeWriter << target->Player()->GetUserName() << ePlayerNetID::FilterName( Team()->Name() );
+        sg_flagTakeWriter << target->Player()->GetUserName();
+        if(team){
+           sg_flagTakeWriter << ePlayerNetID::FilterName( team->Name() );
+        }
         sg_flagTakeWriter.write();
 
         tColoredString playerName;
@@ -4838,7 +4851,10 @@ void gFlagZoneHack::OwnerDropped()
 		{
 			//??? prints after round ends... can check if enemies are alive?
 			//??? add flag for knowing when grid is getting deleted?
-            sg_flagDropWriter << player->GetUserName() << ePlayerNetID::FilterName( Team()->Name() );
+            sg_flagDropWriter << player->GetUserName();
+            if(team){
+                sg_flagDropWriter << ePlayerNetID::FilterName( team->Name() );
+            }
             sg_flagDropWriter.write();
 
 			tColoredString playerName;
