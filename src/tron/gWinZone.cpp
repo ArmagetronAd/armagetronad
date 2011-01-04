@@ -5745,7 +5745,7 @@ static void sg_CreateZone_conf(std::istream &s)
 	tString zoneTeamStr = tString("");
 	if ((zoneTypeStr=="fortress")||(zoneTypeStr=="flag")||(zoneTypeStr=="deathTeam")||(zoneTypeStr=="ballTeam"))
 	{
-		zoneTeamStr = params.ExtractNonBlankSubString(pos);
+		zoneTeamStr = ePlayerNetID::FilterName(params.ExtractNonBlankSubString(pos));
 		for (int i = eTeam::teams.Len() - 1; i>=0; --i)
 		{
 			tString teamName = eTeam::teams(i)->Name();
