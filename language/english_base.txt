@@ -760,15 +760,32 @@ ladderlog_write_all_help Set all the LADDER_LOG_WRITE_* settings to the same val
 ladderlog_write_all_usage Usage: LADDER_LOG_WRITE_ALL 1|0
 ladderlog_write_all_enabled Enabled full ladderlog output.
 ladderlog_write_all_disabled Disabled ladderlog output.
-ladderlog_write_admin_command                 Write to ladderlog: ADMIN_COMMAND <name> <setting>
+ladderlog_write_admin_command _help           Write to ladderlog: ADMIN_COMMAND <name> <setting>
 ladderlog_write_authority_blurb_help          Write to ladderlog: AUTHORITY_BLURB <name> <value>
+ladderlog_write_ball_vanish_help              Write to ladderlog: BALL_VANISH <object id> <zone_name> <cx> <cy>
+ladderlog_write_base_enemy_respawn_help       Write to ladderlog: BASE_ENEMY_RESPAWN  <spawner> <spawned>
+ladderlog_write_base_respawn_help             Write to ladderlog: BASE_RESPAWN <spawner> <spawned>
 ladderlog_write_basezone_conquered_help       Write to ladderlog: BASEZONE_CONQUERED <team> <cx> <cy>
-ladderlog_write_basezone_conquerer_help       Write to ladderlog: BASEZONE_CONQUERER <player>
+ladderlog_write_basezone_conquerer_help       Write to ladderlog: BASEZONE_CONQUERER <player> <% of zone>
+ladderlog_write_basezone_conquerer_team_help  Write to ladderlog: BASEZONE_CONQUERER_TEAM <team> <score>
 ladderlog_write_chat_help                     Write to ladderlog: CHAT <chatter> [/me] <chat string>
 ladderlog_write_command_help                  Write to ladderlog: COMMAND <player> <ip> <auth level> <command> <options>
+ladderlog_write_death_basezone_conquered_help Write to ladderlog: DEATH_BASEZONE_CONQUERED <player> [NO_ENEMIES]
+ladderlog_write_death_deathzone_help          Write to ladderlog: DEATH_DEATHZONE <player>
 ladderlog_write_death_frag_help               Write to ladderlog: DEATH_FRAG <prey> <predator>
+ladderlog_write_death_rubberzone_help         Write to ladderlog: DEATH_RUBBERZONE <player>
+ladderlog_write_death_shot_frag_help          Write to ladderlog: DEATH_SHOT_FRAG <prey> <predator>
+ladderlog_write_death_shot_suicide_help       Write to ladderlog: DEATH_SHOT_SUICIDE <player>
+ladderlog_write_death_shot_teamkill_help      Write to ladderlog: DEATH_SHOT_TEAMKILL <prey> <predator>
 ladderlog_write_death_suicide_help            Write to ladderlog: DEATH_SUICIDE <player>
 ladderlog_write_death_teamkill_help           Write to ladderlog: DEATH_TEAMKILL <prey> <predator>
+ladderlog_write_flag_conquest_round_win_help  Write to ladderlog: FLAG_CONQUEST_ROUND_WIN <player> <flag team>
+ladderlog_write_flag_drop_help                Write to ladderlog: FLAG_DROP <player> <flag team>
+ladderlog_write_flag_held_help                Write to ladderlog: FLAG_HELD <player>
+ladderlog_write_flag_return_help              Write to ladderlog: FLAG_RETURN <player>
+ladderlog_write_flag_score_help               Write to ladderlog: FLAG_SCORE <player> <flag team>
+ladderlog_write_flag_take_help                Write to ladderlog: FLAG_TAKE <player> <flag team>
+ladderlog_write_flag_timeout_help             Write to ladderlog: FLAG_TIMEOUT <player> <flag team>
 ladderlog_write_game_end_help                 Write to ladderlog: GAME_END
 ladderlog_write_game_time_help                Write to ladderlog: GAME_TIME <time> (see also: GAME_TIME_INTERVAL)
 ladderlog_write_match_winner_help             Write to ladderlog: MATCH_WINNER <winner>
@@ -783,8 +800,14 @@ ladderlog_write_round_score_help              Write to ladderlog: ROUND_SCORE <s
 ladderlog_write_round_score_team_help         Write to ladderlog: ROUND_SCORE_TEAM <score difference> <team>
 ladderlog_write_round_winner_help             Write to ladderlog: ROUND_WINNER <winner>
 ladderlog_write_sacrifice_help                Write to ladderlog: SACRIFICE <player who used the hole> <player who created the hole> <player owning the wall the hole was made into>
+ladderlog_write_targetzone_conquered_help     Write to ladderlog: TARGETZONE_CONQUERED <object_id> <zone_name> <cx> <cy> [<player> [<team>]]
+ladderlog_write_targetzone_player_left_help   Write to ladderlog: TARGETZONE_PLAYER_LEFT <object_id> <zone_name> <cx> <cy> <player> <player x> <player y> <player xdir> <player ydir>
+ladderlog_write_targetzone_player_enter_help  Write to ladderlog: TARGETZONE_PLAYER_ENTER <object_id> <zone_name> <cx> <cy> <player> <player x> <player y> <player xdir> <player ydir> <time>
+ladderlog_write_targetzone_timeout_help       Write to ladderlog: TARGETZONE_TIMEOUT <object_id> <zone_name> <cx> <cy>
 ladderlog_write_wait_for_external_script_help Write to ladderlog: WAIT_FOR_EXTERNAL_SCRIPT (see also: WAIT_FOR_EXTERNAL_SCRIPT and WAIT_FOR_EXTERNAL_SCRIPT_TIMEOUT)
-ladderlog_game_time_interval_help If nonnegative, write a line with the current game time to the ladder log every n seconds.
+ladderlog_write_winzone_player_enter_help     Write to ladderlog: WINZONE_PLAYER_ENTER <object id> <zone_name> <cx> <cy> <player> <player x> <player y> <player xdir> <player ydir> <time>
+ladderlog_write_zone_collapsed_help           Write to ladderlog: ZONE_COLLAPSED <zone_id> <object_id> <cx> <cy>
+ladderlog_write_zone_spawned_help             Write to ladderlog: ZONE_SPAWNED <object id> <zone_name> <cx> <cy>
 
 
 chat_log_help			Write machine parsable chat messages to var/chatlog.txt
@@ -3042,6 +3065,93 @@ access_level_substitute_denied  Required access level to substitute is "\1", you
 substitute_message_usage        Usage: /substitute <user out ID or name> <user in ID or name>\n
 substitute_player_request       User \1 requests substitution : \2 will be replaced by \3 next round.\n
 substitute_player               \1 is replaced by \2.\n
+
+
+
+# Sty patch help
+## flag zones
+min_flags_home_help                 Number of flags that must be home in order to capture a flag
+flag_blink_time_help                Time in seconds between flag blinking over player with the flag, -1 to disable
+flag_blink_start_help               Percentage of the flag radius to start the flag blink at.
+flag_blink_end_help                 Percentage of the flag radius to end the flag blink at.
+flag_blink_on_time_help             Time in seconds that flag is on in a blink (not recommended to set this below 0.1)
+flag_blink_estimate_position_help   0 to start the flag blink at the current player position, 1 to start the flag blink where the player would be at the end of the blink at current speed and direction
+flag_blink_track_time_help          If set above zero, this tracks the cycle position and speed at the rate defined by this setting.  it is not recommended to set this below 0.1 for lag reasons.
+flag_color_r_help                   (0-15) red color for a neutral flag
+flag_color_g_help                   (0-15) green color for a neutral flag
+flag_color_b_help                   (0-15) blue color for a neutral flag
+flag_conquest_wins_round_help       Flag indicating whether capturing the flag wins the round or not
+flag_chat_blink_time_help           Time in seconds that the chat triangle above a player with a flag will blink, -1 to disable
+flag_drop_home_help                 Flag indicating whether dropping the flag sends it home
+flag_drop_time_help                 If positive, enables player to drop flag by chatting "/drop". value is the number of seconds they can't pick up the flag afterwards, 2-3 recommended.
+flag_hold_score_help                Points given for holding the flag see FLAG_HOLD_SCORE_TIME
+flag_hold_score_time_help           Seconds until points are awarded for holding the flag see FLAG_HOLD_SCORE
+flag_hold_time_help                 Time in seconds that the player can hold the flag before it is returned home, -1 to disable
+flag_home_randomness_x_help         Y direction the flag can vary from its starting spot when returned.
+flag_home_randomness_y_help         X direction the flag can vary from its starting spot when returned.
+flag_required_home_help             Flag indicating whether flags need to be home to score
+flag_team_help                      0 - Flags are neutral, 1 Flags have team that own them
+score_flag_help                     Number of points a player scores on returning a captured flag to their base
+
+## Shooting
+score_shot_help                                Number of points a player shoots another player
+score_shot_suicide_help                        Number of points a player shoots themselves of their teammates
+score_death_shot_help                          Number of points a player gets for shooting someone with their deathshot
+score_self_destruct_help                       Number of points a player gets
+score_zombie_zone_revenge_help                 Number of points a player gets for having their zombie kill someone
+score_zombie_zone_help                         Number of points a player gets for killing a zombie zone
+shot_kill_self_help                            Flag for if a player can shot themself or their team
+shot_kill_vanish_help                          Flag for if a shot should vanish
+self_destruct_vanish_help                      Flag for if a self distruct zone should vanish
+zombie_zone_vanish_help                        Flag for if a zombie zone should vanish
+zombie_zone_shoot_help                         How much zone to take away from a zombie when a shot enters it
+shot_collision_help                            Flag for if shots can collide and bounce off one another.
+shot_wall_bounce_help                          Flag for if shots can bounce off walls
+shot_kill_invulnerable_help                    Flag for if Shot can kill invulnerable cycles
+
+
+## Styball
+score_goal_help                     Number of points a player scores on kicking the ball into the enemy goal
+goal_round_end_help                 Flag indicating whether the round ends when a goal is shot
+balls_interact_help                 Flag indicating whether balls can bounce off one another
+balls_bounce_on_cycle_walls_help    Flag indicating whether balls can bounce off cycle walls
+ball_team_mode_help                 Flag 0=ball score other team, 1=ball score only team owner
+ball_kills_help                     Flag indicating if a team owned ball can kill opposing team players
+ball_speed_decay_help               Rate at which the ball slows down
+ball_cycle_accel_boost_help         Boost Cycle gives the ball when colliding 
+ball_autorespawn_help               Flag indicating whether balls should automatically respawn when goal is scored
+
+## Target Zone
+target_lifetime_help                Time in seconds before the zone vanished. -1 for infinite
+target_survive_time_help            Time in sec before the zone vanished once a player entered. -1 for infinite
+target_initial_score_help           Score for the first player entering the zone
+target_score_deplete_help           Score suppress to the zone score each time a player entered
+target_declare_winner_help          Last target zone is a winzone ?;
+set_target_command_help             Add commands for a target zone to issue when someone enters it.
+
+## King of the hill
+koh_score_help                      Score given for being the only one in a zone for KOH_SCORE_TIME
+koh_score_time_help                 The interval that KOH_SCORE is added
+
+## rubberzone
+score_rubberzone_help               Score player is given for dieing on a rubber zone.
+
+## Other sty commands
+base_respawn_help                   Flag indicating whether a base will respawn team if a team player enters it
+base_respawn_remind_time_help       Time between respawn reminders
+base_enemy_respawn_help             Flag indicating whether a base will respawn team if an enemy player enters it
+base_enemy_kill_help                Flag indicating whether a base will kill enemy players
+
+## General zone commands
+spawn_zone_help                                spawn a zone onto the grid
+collapse_zone_help                             collapse a zone
+set_zone_radius_help                           change zones radius
+set_zone_position_help                         change a zones position
+set_zone_speed_help                            change a zones speed
+set_zone_color_help                            Change the color of a zone
+set_zone_expansion_help                        Change the Expansion rat of a zone
+
+
 
 # items that should not be translated
 include english_base_notranslate.txt
