@@ -8692,8 +8692,10 @@ static void se_TimebotAction( eTimebotAction action, ePlayerNetID * player, char
         sn_ConsoleOut( m );
         break;
     case eTimebotAction_NotifyModerator:
+#ifdef DEDICATED
         se_SecretConsoleOut( m, player, &se_cannotSeeConsole );
         break;
+#endif
     case eTimebotAction_Log:
         con << m;
         break;

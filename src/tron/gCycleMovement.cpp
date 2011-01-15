@@ -2986,9 +2986,9 @@ void gCycleMovement::CalculateAcceleration()
                     {
                         uncannyTimingToReport_ = false;
 
-                        // don't count grinding own wall on the outside, it may
+                        // don't count grinding own or teammate wall on the outside, it may
                         // be a practiced pattern
-                        if( rear.type != gSENSOR_SELF )
+                        if( rear.type != gSENSOR_SELF && rear.type != gSENSOR_TEAMMATE )
                         {
                             REAL timing = rear.hit/(verletSpeed_ + 1E-10);
                             player->AnalyzeTiming( timing );
