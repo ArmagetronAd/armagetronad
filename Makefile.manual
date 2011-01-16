@@ -122,14 +122,15 @@ installcheck_douninstall.inst3:
 	./._inst3/$(bindir)/${uninstaller}
 	find ._inst3 -mindepth 1 -type d -name ${progname} -exec echo leftover directory \{\} >> .leftover.inst3 \;
 
-installcheck: installcheck_uninstall.inst installcheck_uninstall.inst2
+myinstallcheck: installcheck_uninstall.inst installcheck_uninstall.inst2
 else
-installcheck: installcheck_uninstall.inst
+myinstallcheck: installcheck_uninstall.inst
 endif
 	$(predistcheckclean)
 	@echo -e "\n---------------------------------------\nInstallation and uninstallation worked!\n---------------------------------------\n"
 
-devcheck: beautify installcheck
+installcheck: myinstallcheck
+devcheck: beautify myinstallcheck
 fullcheck: beautify devcheck distcheck
 
 # run all that don't require a full rebuild
