@@ -241,14 +241,14 @@ AC_SUBST(enable_restoreold)
 
 AC_ARG_ENABLE(uninstall,
 	AC_HELP_STRING([--enable-uninstall@<:@=cmd@:>@],
-		[will install an uninstaller script (default=disabled)]),
+		[will install an uninstaller script (default=enabled)]),
 if test "$enableval" = "no"; then
 	enable_uninstall=no
 else
 	enable_uninstall=yes
 	external_uninstall_cmd=$enableval
 fi,
-enable_uninstall=no)
+enable_uninstall=yes)
 AC_SUBST(external_uninstall_cmd)
 
 AC_ARG_ENABLE(multiver,
