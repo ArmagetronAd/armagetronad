@@ -19,16 +19,16 @@ regrcScriptLN=
 endif
 
 if BUILDMASTER
-masterScripts=$(basercScripts) masterstarter
+masterScripts=masterstarter
 masrcScripts=rcd_master
 endif
 
 if BUILDDEDICATED
-dedScripts=$(basercScripts) serverstarter
+dedScripts=serverstarter
 dedrcScripts=rcd_server
 endif
 
-scriptsToBuild=$(masterScripts) $(dedScripts) $(regScripts) sysinstall relocate
+scriptsToBuild=$(basercScripts) $(masterScripts) $(dedScripts) $(regScripts) sysinstall relocate
 rcScripts=$(regrcScripts) $(masrcScripts) $(dedrcScripts)
 
 armascript_SCRIPTS=$(scriptsToBuild) $(rcScripts)
