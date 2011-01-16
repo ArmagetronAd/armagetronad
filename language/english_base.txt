@@ -438,6 +438,16 @@ allow_control_during_chat_help     If set to 1, this allows a player to issue cy
 allow_imposters_help               If set to 1, players with identical names are tolerated. If set to 0, all but one will be renamed.
 allow_impostors_help               If set to 1, players with identical names are tolerated. If set to 0, all but one will be renamed.
 
+timebot_kick_severity_help         If players get kicked by the timebot detection, it's done with this severity level.
+timebot_sensitivity_help           The sensitivity of the timebot detection code. 1.0 is the default and you probably shouldn't deviate more than .5 from that.
+timebot_action_medium_help         Action to take on a medium suspicion of timebottery. 0: do nothing, 1: log it, 2: message moderators, 3: message all players, 4: kick the offending player.
+timebot_action_high_help           Action to take on a high suspicion of timebottery. 0: do nothing, 1: log it, 2: message moderators, 3: message all players, 4: kick the offending player.
+timebot_action_max_help            Action to take on a very high suspicion of timebottery. 0: do nothing, 1: log it, 2: message moderators, 3: message all players, 4: kick the offending player.
+
+timebot_action_medium              \1 is showing excelent timing ability, almost too good for a human.\n
+timebot_action_high                \1 is showing suspiciously superhuman timing ability.\n
+timebot_action_max                 \1 is very likely using timing assistance software.\n
+
 #********************************************
 #********************************************
 #

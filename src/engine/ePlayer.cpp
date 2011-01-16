@@ -824,7 +824,7 @@ typedef bool (*CANHIDEFUNC)( ePlayerNetID const * hider );
 typedef bool (*HIDEFUNC)( ePlayerNetID const * hider, ePlayerNetID const * seeker );
 
 // secret console messages: If CanHideFunc returns false it is displayed to everyone. Else, for each player we apply HideFunc, to see if one can hide his message to the other. The two exceptions get a message anyway.
-void se_SecretConsoleOut( tOutput const & message, ePlayerNetID const * hider, HIDEFUNC HideFunc, ePlayerNetID const * exception1, ePlayerNetID const * exception2 = 0, CANHIDEFUNC CanHideFunc = 0 )
+void se_SecretConsoleOut( tOutput const & message, ePlayerNetID const * hider, HIDEFUNC HideFunc, ePlayerNetID const * exception1 = 0, ePlayerNetID const * exception2 = 0, CANHIDEFUNC CanHideFunc = 0 )
 {
     // high enough access levels are never secret
     if ( CanHideFunc != 0 && !(*CanHideFunc)( hider ) )
@@ -8819,6 +8819,244 @@ void ePlayerNetID::UpdateShuffleSpamTesters()
     {
         ePlayerNetID *p = se_PlayerNetIDs( i );
         p->shuffleSpam.Reset();
+    }
+}
+
+// *******************************************************************************
+// *
+// *    AnalyzeTiming
+// *
+// *******************************************************************************
+//!
+//!
+// *******************************************************************************
+
+void ePlayerNetID::AnalyzeTiming( REAL timing )
+{
+    // just delegate safely
+    tJUST_CONTROLLED_PTR< ePlayerNetID > keep( this );
+    uncannyTimingDetector_.Analyze( timing, this );
+}
+
+eUncannyTimingDetector::eUncannyTimingSettings::~eUncannyTimingSettings()
+{
+#ifdef DEBUG
+    con << "Best ratio achieved for " << timescale*1000 << "ms stat: " << bestRatio << "\n";
+#endif
+}
+
+REAL eUncannyTimingDetector::eUncannyTimingAnalysis::Analyze( REAL timing, eUncannyTimingSettings const & settings )
+{
+    if( timing < settings.timescale )
+    {
+        REAL increment = 1.0/turnsSoFar;
+        if( turnsSoFar < settings.averageOverEvents )
+        {
+            turnsSoFar++;
+        }
+        
+        // don't rate failed timings too much. The user may not even have
+        // attempted to time something.
+        if( timing < 0 )
+        {
+            increment /= 4;
+        }
+
+        // event falls into the buckets
+        if( 2*timing < settings.timescale && timing > 0 )
+        {
+            // event falls into the 'good' bucket, count it
+            accurateRatio += increment;
+        }
+
+        // let ratio decay
+        accurateRatio /= 1+increment;
+    }
+
+    REAL ratio = accurateRatio/(1-accurateRatio);
+    
+    // keep stats
+    if (ratio > settings.bestRatio)
+    {
+        settings.bestRatio = ratio;
+    }
+
+    REAL ret = (ratio-settings.goodHumanRatio)/(settings.maxGoodRatio-settings.goodHumanRatio);
+    if( ret < 0 )
+    {
+        ret = 0;
+    }
+    return ret;
+}
+
+eUncannyTimingDetector::eUncannyTimingAnalysis::eUncannyTimingAnalysis()
+: accurateRatio( .3 ), turnsSoFar(10)
+{}
+
+/* stats; ladle 37:
+prematch:
+[0] Best ratio achieved for 125ms stat: 0.653367, 591turns.
+[0] Best ratio achieved for 62.5ms stat: 1.07667, 124turns.
+[0] Best ratio achieved for 31.25ms stat: 0.464286, 43turns.
+up to zealous assertion failure:
+[0] Best ratio achieved for 125ms stat: 1.45674
+[0] Best ratio achieved for 62.5ms stat: 1.08824
+[0] Best ratio achieved for 31.25ms stat: 0.942842
+proper, after assertions had been removed:
+[0] Best ratio achieved for 125ms stat: 1.71929, 4686turns.
+[0] Best ratio achieved for 62.5ms stat: 1.08824, 713turns.
+[0] Best ratio achieved for 31.25ms stat: 0.952494, 163turns.
+z-man, trying really hard:
+[0] Best ratio achieved for 125ms stat: 4.71739
+[0] Best ratio achieved for 62.5ms stat: 0.945886
+[0] Best ratio achieved for 31.25ms stat: 0.444307
+tst prematch, only counting enemy grinds:
+[0] Best ratio achieved for 125ms stat: 6.04985
+[0] Best ratio achieved for 62.5ms stat: 1.80428
+[0] Best ratio achieved for 31.25ms stat: 0.819629
+all grinds:
+[0] Best ratio achieved for 125ms stat: 2.09805
+[0] Best ratio achieved for 62.5ms stat: 2.32939
+[0] Best ratio achieved for 31.25ms stat: 1
+tst proper, enemies only: 
+[0] Best ratio achieved for 125ms stat: 5.60549
+[0] Best ratio achieved for 62.5ms stat: 1.01227
+[0] Best ratio achieved for 31.25ms stat: 0.681035
+all grinds:
+[0] Best ratio achieved for 125ms stat: 1.72932
+[0] Best ratio achieved for 62.5ms stat: 1.68816
+[0] Best ratio achieved for 31.25ms stat: 0.750099
+ladle41, hamar and partner team actions included:
+[0] Best ratio achieved for 125ms stat: 23.7208
+[0] Best ratio achieved for 62.5ms stat: 2.01171
+[0] Best ratio achieved for 31.25ms stat: 0.90623
+*/
+
+static eUncannyTimingDetector::eUncannyTimingSettings 
+se_uncannyTimingSettingsFast(1/32.0, 1, 1.5),
+se_uncannyTimingSettingsMedium(1/16.0, 2, 4);
+// se_uncannyTimingSettingsSlow(1/8.0, 7, 15);
+
+static REAL se_Max( REAL a, REAL b )
+{
+    return a > b ? a : b;
+}
+
+eUncannyTimingDetector::eUncannyTimingDetector()
+: dangerLevel( DangerLevel_Low )
+{
+}
+
+// opportunity to tune timebot detection sensitivity
+static REAL se_timebotSensitivity = 1.0;
+static tSettingItem< REAL > se_timebotSensitivityConf( "TIMEBOT_SENSITIVITY", se_timebotSensitivity );
+
+// different ways to react to timebot detection
+enum eTimebotAction
+{
+    eTimebotAction_Nothing = 0, // do nothing
+    eTimebotAction_Log     = 1, // log it
+    eTimebotAction_NotifyModerator = 2, // notify moderators that happen to be online
+    eTimebotAction_NotifyEveryone  = 3, // notify all players
+    eTimebotAction_Kick  = 4            // kick the player
+};
+tCONFIG_ENUM( eTimebotAction );
+
+static eTimebotAction se_timebotActionMedium = eTimebotAction_Log;
+static eTimebotAction se_timebotActionHigh   = eTimebotAction_Log;
+static eTimebotAction se_timebotActionMax    = eTimebotAction_Log;
+static tSettingItem< eTimebotAction > se_timebotActionMediumConf( "TIMEBOT_ACTION_MEDIUM", se_timebotActionMedium );
+static tSettingItem< eTimebotAction > se_timebotActionHighConf( "TIMEBOT_ACTION_HIGH", se_timebotActionHigh );
+static tSettingItem< eTimebotAction > se_timebotActionMaxConf( "TIMEBOT_ACTION_MAX", se_timebotActionMax );
+
+// severity of kick (for autobans)
+static REAL se_timebotKickSeverity = 0.5;
+static tSettingItem< REAL > se_timebotKickSeverityConf( "TIMEBOT_KICK_SEVERITY", se_timebotKickSeverity );
+
+static void se_TimebotAction( eTimebotAction action, ePlayerNetID * player, char const * message )
+{
+    if (action == eTimebotAction_Nothing)
+    {
+        return;
+    }
+    // look up message
+    tOutput m (message, player->GetName());
+    switch (action)
+    {
+    case eTimebotAction_Kick:
+        if( player->Owner() > 0 )
+        {
+            sn_KickUser( player->Owner(), m, se_timebotKickSeverity );
+        }
+        // no break on purpose.
+    case eTimebotAction_NotifyEveryone:
+        sn_ConsoleOut( m );
+        break;
+    case eTimebotAction_NotifyModerator:
+#ifdef DEDICATED
+        se_SecretConsoleOut( m, player, &se_cannotSeeConsole );
+        break;
+#endif
+    case eTimebotAction_Log:
+        con << m;
+        break;
+    case eTimebotAction_Nothing:
+        break;
+    }
+}
+
+//! analzye a timing event
+void eUncannyTimingDetector::Analyze( REAL timing, ePlayerNetID * player )
+{
+    // ignore this system on the client itself
+    if( sn_GetNetState() != nSERVER || se_timebotSensitivity <= 0 )
+    {
+        return;
+    }
+
+    // apply sensitivity
+    timing /= se_timebotSensitivity;
+
+    REAL maxUncanny = fast.Analyze( timing, se_uncannyTimingSettingsFast );
+    maxUncanny = se_Max( maxUncanny, medium.Analyze( timing, se_uncannyTimingSettingsMedium ) );
+    // maxUncanny = se_Max( maxUncanny, slow.Analyze( timing, se_uncannyTimingSettingsSlow ) );
+
+    switch( dangerLevel )
+    {
+    case DangerLevel_Low:
+        if( maxUncanny > .25 )
+        {
+            dangerLevel =DangerLevel_Medium;
+            se_TimebotAction( se_timebotActionMedium, player, "$timebot_action_medium" );
+        }
+        break;
+    case DangerLevel_Medium:
+        if( maxUncanny > .5 )
+        {
+            dangerLevel = DangerLevel_High;
+            se_TimebotAction( se_timebotActionHigh, player, "$timebot_action_high" );
+        }
+        else if( maxUncanny <= 0.01 )
+        {
+            dangerLevel = DangerLevel_Low;
+        }
+        break;
+    case DangerLevel_High:
+        if( maxUncanny > 1 )
+        {
+            dangerLevel = DangerLevel_Max;
+            se_TimebotAction( se_timebotActionMax, player, "$timebot_action_max" );
+        }
+        else if( maxUncanny < .25 )
+        {
+            dangerLevel = DangerLevel_Medium;
+        }
+        break;
+    case DangerLevel_Max:
+        if( maxUncanny < .75 )
+        {
+            dangerLevel = DangerLevel_High;
+        }
     }
 }
 
