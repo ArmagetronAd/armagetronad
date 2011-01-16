@@ -8629,12 +8629,16 @@ all grinds:
 [0] Best ratio achieved for 125ms stat: 1.72932
 [0] Best ratio achieved for 62.5ms stat: 1.68816
 [0] Best ratio achieved for 31.25ms stat: 0.750099
+ladle41, hamar and partner team actions included:
+[0] Best ratio achieved for 125ms stat: 23.7208
+[0] Best ratio achieved for 62.5ms stat: 2.01171
+[0] Best ratio achieved for 31.25ms stat: 0.90623
 */
 
 static eUncannyTimingDetector::eUncannyTimingSettings 
 se_uncannyTimingSettingsFast(1/32.0, 1, 1.5),
-se_uncannyTimingSettingsMedium(1/16.0, 2, 4),
-se_uncannyTimingSettingsSlow(1/8.0, 7, 15);
+se_uncannyTimingSettingsMedium(1/16.0, 2, 4);
+// se_uncannyTimingSettingsSlow(1/8.0, 7, 15);
 
 static REAL se_Max( REAL a, REAL b )
 {
@@ -8718,7 +8722,7 @@ void eUncannyTimingDetector::Analyze( REAL timing, ePlayerNetID * player )
 
     REAL maxUncanny = fast.Analyze( timing, se_uncannyTimingSettingsFast );
     maxUncanny = se_Max( maxUncanny, medium.Analyze( timing, se_uncannyTimingSettingsMedium ) );
-    maxUncanny = se_Max( maxUncanny, slow.Analyze( timing, se_uncannyTimingSettingsSlow ) );
+    // maxUncanny = se_Max( maxUncanny, slow.Analyze( timing, se_uncannyTimingSettingsSlow ) );
 
     switch( dangerLevel )
     {
