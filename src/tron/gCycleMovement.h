@@ -228,6 +228,8 @@ protected:
 
     unsigned short  turns;                      //!< the number of turns taken so far
     unsigned short  braking;                    //!< flag indicating status of brakes ( on/off )
+    
+    bool            uncannyTimingToReport_;     //!< flag indicating whether we have uncanny timing to report from the last turn
 
     int             windingNumber_;             //!< number that gets increased on every right turn and decreased on every left turn ( used by the AI )
     int             windingNumberWrapped_;      //!< winding number wrapped to be used as an index to the axes code

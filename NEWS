@@ -98,6 +98,7 @@ Changes since 0.2.8
 
 Changes since 0.2.8.3.x:
 ==========================
+- Added detection and reaction code for timing assist bots
 - /shuffle now works before you actually join a team
 - Implemented /shout command and associated settings
 - Tweaks to enemy influence system.

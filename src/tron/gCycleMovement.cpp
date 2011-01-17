@@ -2106,12 +2106,13 @@ bool gCycleMovement::Timestep( REAL currentTime )
                 sg_ArchiveReal( avgspeed, 9 );
 
                 // don't drive into a wall, turn before getting too close
-                REAL lookahead = ts * avgspeed * 2;
+                REAL lookahead = ( fabs(ts * avgspeed)+fabs(dist_to_dest) ) * 2;
+ 
+                distToWall = GetMaxSpaceAhead( lookahead );
 
-                REAL dist_to_wall = GetMaxSpaceAhead( lookahead );
-
-                if ( dist_to_dest > dist_to_wall )
-                    dist_to_dest = dist_to_wall;
+                // don't turn after passing a wall, if timing allows
+                if ( dist_to_dest > distToWall )
+                    dist_to_dest = distToWall;
             }
 
             static bool breakp = false;
@@ -2989,6 +2990,40 @@ void gCycleMovement::CalculateAcceleration()
             eCoord wallVec = rear.ehit->Vec();
             if ( fabs( eCoord::F( wallVec, dirDrive  ) ) > .9 * dirDrive.NormSquared() )
             {
+                // detect uncanny timing of earlier turns, only check outside corner grinds
+                if ( uncannyTimingToReport_ && player && ( lastTurnTimeRight_ - lastTurnTimeLeft_ ) * d < 0 )
+                {
+                    // check that the wall we're grinding was there before we turned
+                    bool wasMe = true;
+                    gPlayerWall * w = dynamic_cast< gPlayerWall * >( rear.ehit->GetWall() );
+                    if( !w && rear.ehit->Other() )
+                        w = dynamic_cast< gPlayerWall * >( rear.ehit->Other()->GetWall() );
+
+                    if ( w )
+                    {
+                        REAL lastTurnTime = GetLastTurnTime();
+                        if( lastTurnTime < w->Time(0) &&
+                            lastTurnTime < w->Time(1) )
+                        {
+                            wasMe = false;
+                        }
+                    }
+
+                    if ( wasMe )
+                    {
+                        uncannyTimingToReport_ = false;
+
+                        // don't count grinding own or teammate wall on the outside, it may
+                        // be a practiced pattern
+                        if( rear.type != gSENSOR_SELF && rear.type != gSENSOR_TEAMMATE )
+                        {
+                            REAL timing = rear.hit/(verletSpeed_ + 1E-10);
+                            player->AnalyzeTiming( timing );
+                        }
+                    }
+                }
+                
+
                 // enemyInfluence.AddSensor( rear, 1 );
                 REAL wallAcceleration=SpeedMultiplier() * sg_accelerationCycle * ((1/(rear.hit+sg_accelerationCycleOffs))
                                       -(1/(sg_nearCycle+sg_accelerationCycleOffs)));
@@ -3211,8 +3246,58 @@ bool gCycleMovement::DoTurn( int dir )
     if (dir >  1) dir =  1;
     if (dir < -1) dir = -1;
 
-    if ( CanMakeTurn( lastTime, dir ) )
+    REAL nextTurnTime = GetNextTurn( dir );
+    if ( nextTurnTime <= lastTime )
     {
+        // prepare for uncanny timing checks if the turn was user-controlled
+        if( sn_GetNetState() == nSERVER && nextTurnTime + .05 < lastTime )
+        {
+            // if rubber was used in this turn, check for depletion timing
+            if( rubberSpeedFactor < 1 )
+            {
+                /*
+                  // turns out this is a bad idea; default clients cheat and
+                  // often produce perfectly timed grinds.
+                  // Maybe they'll send additional timing information one day
+                  // and this can be reactivated.
+
+                REAL rubber_granted, rubberEffectiveness;
+                // get rubber values
+                sg_RubberValues( player, verletSpeed_, rubber_granted, rubberEffectiveness );
+                rubberEffectiveness /= (1 + rubberMalus );
+
+                // get timing from it
+                REAL timing = (rubber_granted - rubber)*rubberEffectiveness/verletSpeed_;
+
+                if( currentDestination )
+                {
+                    if( sg_CommandTime.Supported( Owner() ) )
+                    {
+                        // take net fluctiations into account
+                        timing += fabs(currentDestination->gameTime - lastTime);
+                    }
+                    else
+                    {
+                        // do the same, but via locations. Less accurate.
+                        timing += (currentDestination->position - pos).Norm()/(verletSpeed_*rubberSpeedFactor+1E-10);
+                    }
+                }
+
+                // add space left after rubber ran out
+                timing += GetMaxSpaceAhead( maxSpaceMaxCast_ )/(verletSpeed_ + 1E-10);
+                
+                // and report
+                // player->AnalyzeTiming( timing );
+                */
+            }
+            else
+            {
+                // mark the turn. Later, during grind detection, we can
+                // measure the quality of an outside corner grind.
+                uncannyTimingToReport_ = true;
+            }
+        }
+
         // request regeneration of maximum space
         refreshSpaceAhead_ = true;
 
@@ -3750,6 +3835,7 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
                 }
 
                 rubberneeded = rubberAvailable;
+                // con << "Deep!\n";
             }
 
             // update rubber usage
@@ -4032,6 +4118,8 @@ void gCycleMovement::MyInitAfterCreation( void )
     rubberDepleteTime_ = 0.0f;
 
     braking = false;
+
+    uncannyTimingToReport_ = false;
 
     acceleration = 0;
 
