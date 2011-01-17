@@ -97,6 +97,7 @@ public:							// public configuration options
     static void Enforce( int minTeams, int maxTeams, int maxImbalance );
     
     static void WritePlayers( eLadderLogWriter & writer, const eTeam *team );
+    static void WriteLaunchPositions(); // Logs player positions to ladderlog.txt
 public:												// public methods
     static void	EnforceConstraints();					// make sure the limits on team number and such are met
 

@@ -2790,8 +2790,12 @@ void gGame::StateUpdate(){
             ePlayerNetID::LogScoreDifferences();
             ePlayerNetID::UpdateSuspensions();
             ePlayerNetID::UpdateShuffleSpamTesters();
-            sg_newRoundWriter.write();
+            
             se_sendEventNotification(tString("New Round"), tString("Starting a new round"));
+
+            sg_newRoundWriter.write();
+            if ( rounds < 0 )
+                sg_newMatchWriter.write();
 
             // kick spectators
             nMachine::KickSpectators();
@@ -2865,6 +2869,7 @@ void gGame::StateUpdate(){
             init_game_objects(grid);
 
             ePlayerNetID::RankingLadderLog();
+            eTeam::WriteLaunchPositions();
 
             // do round begin stuff
             {
@@ -3071,7 +3076,10 @@ void gGame::StateUpdate(){
         }
 
         // now would be a good time to tend for pending tasks
-        nAuthentication::OnBreak();
+        if( state != GS_PLAY )
+        {
+            nAuthentication::OnBreak();
+        }
 
         if (sn_GetNetState()==nSERVER){
             NetSyncIdle();
@@ -3863,7 +3871,6 @@ void gGame::StartNewMatchNow(){
         se_sendEventNotification(tString("New match"), tString("Starting a new match"));
     }
 
-
     rounds=0;
     warning=0;
     startTime=tSysTimeFloat()-10;
@@ -4406,8 +4413,8 @@ void sg_EnterGameCore( nNetState enter_state ){
             tAdvanceFrame();
             sg_Receive();
             se_SyncGameTimer();
-            REAL time=se_GameTime();
             sg_currentGame->StateUpdate();
+            REAL time=se_GameTime();
             if ( time > 0 )
             {
                 // only simulate the objects that have pending events to execute

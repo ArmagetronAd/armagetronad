@@ -194,6 +194,9 @@ zEffectorWin::setupVisuals(gParserState & state)
     state.set("color", rColor(0, 1, 0, .7));
 }
 
+static int sz_score_deathzone=-1;
+static tSettingItem<int> sz_dz("SCORE_DEATHZONE",sz_score_deathzone);
+
 static zEffectorRegistration regDeath("death", "", zEffectorDeath::create);
 
 void zEffectorDeath::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
@@ -203,7 +206,8 @@ void zEffectorDeath::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
             iter != d_calculatedTargets.end();
             ++iter)
     {
-        static_cast<gCycle *>((*iter)->Object())->Kill();
+        (*iter)->AddScore(sz_score_deathzone, tOutput(), "$player_lose_suicide");
+        (*iter)->Object()->Kill();
     }
 }
 

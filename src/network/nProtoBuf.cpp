@@ -626,6 +626,7 @@ void nProtoBufDescriptorBase::StreamFromDefault( nStreamMessage & in, nProtoBuf 
                 in.Read( size );
                 
                 // clear the array
+                tKnownExternalLeak l;
                 reflection->REFL_GET( ClearField, &out, field );
                 
                 switch( field->cpp_type() )

@@ -170,6 +170,60 @@ private:
     tAccessLevel     accessLevel;    //!< admin access level of the current user
 };
 
+//! detector for turn timing assist bots
+class eUncannyTimingDetector
+{
+public:
+    //! settings for a single analyzer
+    struct eUncannyTimingSettings
+    {
+        REAL timescale; //!< the timescale. Events are divided in two buckets, one between 0 and timescale/2, the other from timescale/2 to timescale.
+        REAL maxGoodRatio; //!< the maximal allowed recent ratio of events to land in the 'good' bucket
+        REAL goodHumanRatio; //!< the maximal observed ratio for a human
+        int  averageOverEvents; //!< number of events to average over
+        
+        mutable REAL bestRatio; //!< best ratio achieved by players during this session
+
+        eUncannyTimingSettings( REAL ts, REAL human, REAL max )
+        : timescale( ts ), maxGoodRatio( max ), goodHumanRatio(human), averageOverEvents(40)
+        , bestRatio(0)
+        {}
+
+        ~eUncannyTimingSettings();
+    };
+
+    //! single analyzer with single timescale
+    class eUncannyTimingAnalysis
+    {
+    public:
+        //! analyze a single timing event
+        REAL Analyze( REAL timing, eUncannyTimingSettings const & settings );
+        eUncannyTimingAnalysis();
+    private:
+        REAL accurateRatio; //!< ratio of events in the more accurate half
+        int turnsSoFar;     //!< number of turns accounted for so far
+    };
+
+    //! detection level of timing aid hacks
+    enum DangerLevel
+    {
+        DangerLevel_Low,    //!< about 25% of the tolerance reached
+        DangerLevel_Medium, //!< about 50% of the tolerance reached
+        DangerLevel_High,   //!< about 75% of the tolerance reached
+        DangerLevel_Max     //!< 100% of the tolerance reached, worst action triggered
+    };
+
+    eUncannyTimingDetector();
+
+    //! analzye a timing event
+    void Analyze( REAL timing, ePlayerNetID * player );
+private:
+    //! three analyzers for varying timescales
+    eUncannyTimingAnalysis fast, medium, slow;
+
+    DangerLevel dangerLevel;
+};
+
 // the class that identifies players across the network
 class ePlayerNetID: public nNetObject, public eAccessLevelHolder{
     friend class ePlayer;
@@ -217,6 +271,8 @@ private:
 
     //For improved remoteadmin
     tAccessLevel     lastAccessLevel;//!< access level at the time of the last name update
+
+    eUncannyTimingDetector uncannyTimingDetector_; //!< detector for timingbots
 
     nMachine *      registeredMachine_; //!< the machine the player is registered with
     void RegisterWithMachine();         //!< registers with a machine
@@ -274,6 +330,7 @@ public:
     eTeam* NextTeam()    const { return nextTeam; }		// return the team I will be next round
     eTeam* CurrentTeam() const { return currentTeam; }	// return the team I am in
     int  TeamListID() const { return teamListID; }		// return my position in the team
+    void SetShuffleWish( int pos ); 	        //!< sets a desired team position
     eTeam* FindDefaultTeam();					// find a good default team for us
     void SetDefaultTeam();						// register me in a good default team
     void SetTeamForce(eTeam* team );           	// register me in the given team without checks
@@ -364,6 +421,8 @@ public:
     static void UpdateSuspensions();     //<! Decrements the number of rounds players are suspended for
     static void UpdateShuffleSpamTesters();    //<! Reset shuffle spam checks
     void LogScoreDifference();           //<! Logs accumulated scores since the last call to ResetScoreDifferences() to ladderlog.txt
+
+    void AnalyzeTiming( REAL timing );   //<! analzye a timing event for timebot detection
 
     static void SortByScore(); // brings the players into the right order
     static tString Ranking( int MAX=12, bool cut = true );     // returns a ranking list
