@@ -2244,6 +2244,10 @@ static tSettingItem<bool> sg_baseEnemyKillConfig ("BASE_ENEMY_KILL", sg_baseEnem
 static int sg_scoreFlag=1;
 static tSettingItem<int> sg_scoreFlagConfig("SCORE_FLAG", sg_scoreFlag);
 
+// flag indicating whether the goal is to bring flag in player home base or enemy base to score. true=home base / false=enemy base 
+static bool sg_scoreFlagHomeBase=true;
+static tSettingItem<bool> sg_scoreFlagHomeBaseConfig("SCORE_FLAG_HOME_BASE", sg_scoreFlagHomeBase);
+
 // number of points a player scores on kicking the ball into the enemy goal
 static int sg_scoreGoal=1;
 static tSettingItem<int> sg_scoreGoalConfig("SCORE_GOAL", sg_scoreGoal);
@@ -3089,8 +3093,8 @@ void gBaseZoneHack::OnEnter( gCycle * target, REAL time )
 	// check if player has a flag
 	if (target->flag_)
 	{
-		// check if the player is on our team
-		if (team == otherTeam)
+		// check if the player is on our team (or not in zone team according to setting score_flag_home_base)
+		if ((team == otherTeam)==sg_scoreFlagHomeBase)
 		{
 			// search for another flag owned by our team
 			bool allFlagsHome = true;
@@ -3123,12 +3127,12 @@ void gBaseZoneHack::OnEnter( gCycle * target, REAL time )
                 }else if(sg_minFlagsHome <= flagsHome){
                     allFlagsHome=true;
                 }
-			}
+	    }
 
-			if (!allFlagsHome)
-			{
-				target->flag_->WarnFlagNotHome();
-			}
+	    if (!allFlagsHome)
+	    {
+		target->flag_->WarnFlagNotHome();
+	    }
             else
             {
                 // player has scored a flag capture
