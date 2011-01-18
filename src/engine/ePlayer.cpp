@@ -8834,8 +8834,11 @@ void ePlayerNetID::UpdateShuffleSpamTesters()
 void ePlayerNetID::AnalyzeTiming( REAL timing )
 {
     // just delegate safely
-    tJUST_CONTROLLED_PTR< ePlayerNetID > keep( this );
-    uncannyTimingDetector_.Analyze( timing, this );
+    if( GetRefcount() > 0 )
+    {
+        tJUST_CONTROLLED_PTR< ePlayerNetID > keep( this );
+        uncannyTimingDetector_.Analyze( timing, this );
+    }
 }
 
 eUncannyTimingDetector::eUncannyTimingSettings::~eUncannyTimingSettings()
