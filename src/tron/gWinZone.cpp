@@ -3136,10 +3136,7 @@ void gBaseZoneHack::OnEnter( gCycle * target, REAL time )
             else
             {
                 // player has scored a flag capture
-                sg_flagScoreWriter << target->Player()->GetUserName();
-                if(target->flag_->Team()){
-                   sg_flagScoreWriter << ePlayerNetID::FilterName( target->flag_->Team()->Name() );
-               }
+                sg_flagScoreWriter << target->Player()->GetUserName() << ePlayerNetID::FilterName( otherTeam->Name() );
                 sg_flagScoreWriter.write();
                 
 				tOutput lose;
@@ -3154,10 +3151,7 @@ void gBaseZoneHack::OnEnter( gCycle * target, REAL time )
                 if (sg_flagConquestWinsRound)
                 {
 
-                    sg_flagConquestRoundWinWriter << target->Player()->GetUserName();
-                    if(target->flag_->Team()){
-                       sg_flagConquestRoundWinWriter << ePlayerNetID::FilterName( target->flag_->Team()->Name() );
-                    }
+                    sg_flagConquestRoundWinWriter << target->Player()->GetUserName() << ePlayerNetID::FilterName( otherTeam->Name() );
                     sg_flagConquestRoundWinWriter.write();
                     
                     static const char*message="$player_win_flag";
