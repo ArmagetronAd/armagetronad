@@ -103,6 +103,7 @@ private:
         }
         else if ( parser.GetOption( inputFile_, "--input" ) )
         {
+            daemon_ = false;
         }
 #ifdef WIN32
         else if ( parser.GetSwitch( "+directx") )
@@ -829,7 +830,7 @@ int main(int argc,char **argv){
                         std::cerr << "Error opening input file '" << commandLineAnalyzer.inputFile_ << "': "
                                   << strerror( errno ) << ". Using stdin to poll for input.\n";
                     }
-                }   
+                }
                 sr_Unblock_stdin();
             }
 
