@@ -136,7 +136,7 @@ private:
 #else
 #ifndef WIN32
         s << "-d, --daemon                 : allow the dedicated server to run as a daemon\n"
-        << "                               (will not poll for input from stdin or user-specified file)\n";
+          << "                               (will not poll for input, unless overridden by --input)\n";
         s << "--input <file>               : Poll for input from this file. Default is stdin\n";
 #endif
 #endif
