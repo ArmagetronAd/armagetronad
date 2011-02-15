@@ -54,6 +54,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <stdio.h>
 #include <stdlib.h>
 #include <fstream>
+#include <errno.h>
 
 #include "nServerInfo.h"
 #include "nSocket.h"
@@ -72,6 +73,7 @@ public:
     bool     windowed_;
     bool     use_directx_;
     bool     dont_use_directx_;
+    tString  inputFile_;
 
     gMainCommandLineAnalyzer()
     {
@@ -80,6 +82,7 @@ public:
         fullscreen_ = false;
         use_directx_ = false;
         dont_use_directx_ = false;
+        inputFile_ = "";
     }
 
 
@@ -98,7 +101,9 @@ private:
         {
             windowed_=true;
         }
-
+        else if ( parser.GetOption( inputFile_, "--input" ) )
+        {
+        }
 #ifdef WIN32
         else if ( parser.GetSwitch( "+directx") )
         {
@@ -130,7 +135,8 @@ private:
 #else
 #ifndef WIN32
         s << "-d, --daemon                 : allow the dedicated server to run as a daemon\n"
-        << "                               (will not poll for input on stdin)\n";
+        << "                               (will not poll for input from stdin or user-specified file)\n";
+        s << "--input <file>               : Poll for input from this file. Default is stdin\n";
 #endif
 #endif
     }
@@ -808,7 +814,24 @@ int main(int argc,char **argv){
             SDL_Quit();
 #else
             if (!commandLineAnalyzer.daemon_)
+            {
+                if ( commandLineAnalyzer.inputFile_.Len() > 0 )
+                {
+                    FILE *in = fopen( commandLineAnalyzer.inputFile_, "r" );
+                    if ( in )
+                    {
+                        atexit( sr_Close_stdin );
+                        fseek( in, 0, SEEK_END );
+                        sr_input = in;
+                    }
+                    else
+                    {
+                        std::cerr << "Error opening input file '" << commandLineAnalyzer.inputFile_ << "': "
+                                  << strerror( errno ) << ". Using stdin to poll for input.\n";
+                    }
+                }   
                 sr_Unblock_stdin();
+            }
 
             sr_glOut=0;
 
