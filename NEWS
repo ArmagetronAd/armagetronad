@@ -11,6 +11,8 @@ Changes since 0.2.8.3.x:
 - ADD_MASTER_SERVER command to announce a server to a new master server.
   Simplifies the process to list your server on a subculture.
 - Player positions logged to ladderlog with POSITIONS event.
+- New command-line option "--input" added to poll for input from a file
+  instead of stdin.
 
 Changes since 0.2.8.3_rc4:
 - New setting: KEEP_PLAYER_SLOT allows the server to kick (preferably) spectators
