@@ -187,6 +187,7 @@ sp_num_ais_help			Number of AI players in single player mode
 sp_limit_score_help		End the match when a player reaches this score in single player mode
 sp_limit_rounds_help		End the match after this number of rounds in single player mode
 sp_limit_time_help		End the match after this number of minutes in single player mode
+sp_limit_advance_help   End the match in single player mode when the first team in score is this number of points ahead of the second team
 
 spawn_wingmen_back_help     Determines how much each wingman is placed backwards in a team.
 spawn_wingmen_side_help     Determines how much each wingman is placed sidewards in a team.
@@ -215,6 +216,7 @@ num_ais_help			Number of AI players
 limit_score_help		End the match when a player reaches this score	 
 limit_rounds_help		End the match after this number of rounds
 limit_time_help			End the match after this number of minutes 
+limit_advance_help      End the match when the first team in score is this number of points ahead of the second team
 
 auto_team_help          Flag indicating whether players should be put into teams automatically.
 no_spectators_allowed	Sorry, does not work with automatic team assignment.\n
@@ -2440,6 +2442,7 @@ gamestate_champ_center		Match Winner: \1
 gamestate_champ_console		Overall Winner: \1 
 gamestate_champ_scorehit	with \1 points.\n
 gamestate_champ_timehit		after the timelimit of \1 minutes was hit.\n
+gamestate_champ_blowout     after getting a \1-point advantage.\n
 gamestate_champ_default		after \1 rounds.\n
 gamestate_champ_finalscores	Final Scores:\n
 
