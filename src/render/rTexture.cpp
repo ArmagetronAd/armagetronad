@@ -774,7 +774,11 @@ void rSurfaceTexture::OnSelect()
 bool rISurfaceTexture::s_reportErrors_=false;
 tList<rITexture> rITexture::s_textures_;
 
-int rTextureGroups::TextureMode[rTextureGroups::TEX_GROUPS];
+int rTextureGroups::TextureMode[rTextureGroups::TEX_GROUPS]
+#ifndef DEDICATED
+={GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR }
+#endif
+;
 
 char const * rTextureGroups::TextureGroupDescription[rTextureGroups::TEX_GROUPS]=
     {

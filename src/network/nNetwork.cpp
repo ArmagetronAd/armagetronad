@@ -577,8 +577,6 @@ nDescriptor::nDescriptor(nHandler *handle,const char *Name)
 int nCurrentSenderID::currentSenderID_ = 0;
 
 void nDescriptor::HandleMessage(nMessage &message){
-    static tArray<bool> warned;
-
     // store sender ID for console
     nCurrentSenderID currentSender( message.SenderID() );
 
@@ -600,7 +598,11 @@ void nDescriptor::HandleMessage(nMessage &message){
             if ((message.SenderID() <= MAXCLIENTS) || nd->acceptWithoutLogin)
                 nd->handler(message);
         }
+#ifdef DEBUG
         else
+        {
+            static tArray<bool> warned;
+
             if (!warned[message.Descriptor()]){
                 tOutput warn;
                 warn.SetTemplateParameter(1, message.Descriptor());
@@ -608,6 +610,8 @@ void nDescriptor::HandleMessage(nMessage &message){
                 con << warn;
                 warned[message.Descriptor()]=true;
             }
+        }
+#endif
 #ifndef NOEXCEPT
     }
     catch(nIgnore const &){
@@ -1670,6 +1674,9 @@ extern bool FloodProtection( nMessage const & m );
 static bool sn_lockOut028tTest = true;
 static tSettingItem< bool > sn_lockOut028TestConf( "NETWORK_LOCK_OUT_028_TEST", sn_lockOut028tTest );
 
+// the network stuff planned to send:
+tHeap<planned_send> send_queue[MAXCLIENTS+2];
+
 int login_handler( nMessage &m, unsigned short rate ){
     nCurrentSenderID senderID;
 
@@ -1821,6 +1828,10 @@ int login_handler( nMessage &m, unsigned short rate ){
         {
             sn_Connections[MAXCLIENTS+1].ackMess=NULL;
         }
+
+        // clear message queue
+        while (send_queue[new_id].Len())
+            delete (send_queue[new_id](0));
 
         // send login accept message with high priority
         nMessage *rep=new nMessage(login_accept);
@@ -3061,13 +3072,6 @@ static void CeterMessage_conf(std::istream &s)
 static tConfItemFunc CenterMessage_c("CENTER_MESSAGE",&CeterMessage_conf);
 static tAccessLevelSetter sn_CenterConfLevel( CenterMessage_c, tAccessLevel_Moderator );
 
-// ****************************************************************
-//                    Send Queue
-// ****************************************************************
-
-// the network stuff planned to send:
-tHeap<planned_send> send_queue[MAXCLIENTS+2];
-
 planned_send::planned_send(REAL priority,int Peer){
     peer=Peer;
 
@@ -3392,15 +3396,27 @@ nCallbackLoginLogout::nCallbackLoginLogout(VOIDFUNC *f)
         :tCallback(s_loginoutAnchor,f){}
 
 void nCallbackLoginLogout::UserLoggedIn(int u){
+    bool loginBack = login;
+    int userBack = user;
+
     login = true;
     user = u;
     Exec(s_loginoutAnchor);
+    
+    login = loginBack;
+    user = userBack;
 }
 
 void nCallbackLoginLogout::UserLoggedOut(int u){
+    bool loginBack = login;
+    int userBack = user;
+
     login = false;
     user = u;
     Exec(s_loginoutAnchor);
+    
+    login = loginBack;
+    user = userBack;
 }
 
 unsigned short nCallbackAcceptPackedWithoutConnection::descriptor=0;	// the descriptor of the incoming packet

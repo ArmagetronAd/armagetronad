@@ -2528,7 +2528,7 @@ static inline void rotate(eCoord &r,REAL angle){
 }
 
 #ifdef MACOSX
-// Sparks have a large performance problem on Macs. See http://guru3.sytes.net/viewtopic.php?t=2167
+// Sparks have a large performance problem on Macs. See http://forums.armagetronad.net/viewtopic.php?t=2167
 bool crash_sparks=false;
 #else
 bool crash_sparks=true;
@@ -3248,6 +3248,12 @@ void gCycle::Die( REAL time )
         RequestSync( true );
     }
 
+    if( player && Alive() )
+    {
+        // death is hardly good timing.
+        player->AnalyzeTiming( -1 );
+    }
+
     gCycleMovement::Die( time );
 
     // reset smoothing
@@ -3656,7 +3662,7 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
                 {
                     // err, trouble. Can't push the other guy back far enough. Better kill him.
                     if ( currentWall )
-                        otherPlayer->enemyInfluence.AddWall( currentWall->Wall(), lastTime, otherPlayer );
+                        otherPlayer->enemyInfluence.AddWall( currentWall->Wall(), lastTime, 0, otherPlayer );
                     otherPlayer->distance = wallDist;
                     otherPlayer->DropWall();
                     otherPlayer->KillAt( collPos );

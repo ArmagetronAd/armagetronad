@@ -417,6 +417,8 @@ bool tPlaybackBlockBase::Initialize( char const * section, tPlayback * playback 
     if (!playback_)
         return false;
 
+    // std::cout << playback_->GetNextSection() << "," << section << "\n";
+
     // read section
     if( playback_->GetNextSection() != section )
     {

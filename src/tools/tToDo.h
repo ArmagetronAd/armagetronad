@@ -34,6 +34,7 @@ typedef void tTODO_FUNC();
 
 void st_ToDo_Signal(tTODO_FUNC *td); // postpone something, callable from a signal handler
 void st_ToDo(tTODO_FUNC *td); // postpone something
+void st_ToDoOnce(tTODO_FUNC *td); // postpone something, avoid double entries
 void st_DoToDo(); // do the things that have been postponed
 
 #endif

@@ -1380,7 +1380,7 @@ void update_settings( bool const * goon )
             bool restarted = false;
 
             REAL timeout = tSysTimeFloat() + 3.0f;
-            while ( sg_NumHumans() <= 0 && sg_NumUsers() > 0 && ( !goon || *goon ) )
+            while ( sg_NumHumans() <= 0 && sg_NumUsers() > 0 && ( !goon || *goon ) && uMenu::quickexit == uMenu::QuickExit_Off )
             {
                 if ( !restarted && bool(sg_currentGame) )
                 {
@@ -1732,7 +1732,7 @@ void s_Timestep(eGrid *grid, REAL time,bool cam){
     eSoundLocker locker;
     REAL minstep = 0;
 #ifdef DEDICATED
-    minstep = 1.0/sg_dedicatedFPS;
+    minstep = 0.9/sg_dedicatedFPS;
 
     // the low possible simulation frequency, together with lazy timesteps, produces
     // this much possible extra time difference between gameobjects
@@ -1774,6 +1774,13 @@ void RenderAllViewports(eGrid *grid){
         }
 
         // glDisable( GL_FOG );
+    }
+
+    // render the console and scores so it appears behind the global HUD
+    ePlayerNetID::DisplayScores();
+    if( sr_con.autoDisplayAtSwap )
+    {
+        sr_con.Render();
     }
 
 #ifdef POWERPAK_DEB
@@ -3164,7 +3171,10 @@ void gGame::StateUpdate(){
             ePlayerNetID::LogScoreDifferences();
             ePlayerNetID::UpdateSuspensions();
             ePlayerNetID::UpdateShuffleSpamTesters();
+            
             sg_newRoundWriter.write();
+            if ( rounds < 0 )
+                sg_newMatchWriter.write();
 
             // kick spectators
             nMachine::KickSpectators();
@@ -3239,6 +3249,7 @@ void gGame::StateUpdate(){
             init_game_objects(grid);
 
             ePlayerNetID::RankingLadderLog();
+            eTeam::WriteLaunchPositions();
 
             // do round begin stuff
             {
@@ -3415,7 +3426,7 @@ void gGame::StateUpdate(){
             // pings should not count as much in the between-round phase
             nPingAverager::SetWeight(1E-20);
 
-            se_UserShowScores(false);
+            // se_UserShowScores(false);
 
             //con.autoDisplayAtNewline=true;
             sr_con.fullscreen=true;
@@ -3443,7 +3454,10 @@ void gGame::StateUpdate(){
         }
 
         // now would be a good time to tend for pending tasks
-        nAuthentication::OnBreak();
+        if( state != GS_PLAY )
+        {
+            nAuthentication::OnBreak();
+        }
 
         if (sn_GetNetState()==nSERVER){
             NetSyncIdle();
@@ -4092,9 +4106,6 @@ void gGame::StartNewMatch(){
 }
 
 void gGame::StartNewMatchNow(){
-    if ( rounds != 0 )
-        sg_newMatchWriter.write();
-
     rounds=0;
     warning=0;
     startTime=tSysTimeFloat()-10;
@@ -4496,7 +4507,7 @@ bool GameLoop(bool input=true){
 
 void gameloop_idle()
 {
-    se_UserShowScores( false );
+    // se_UserShowScores( false );
     sg_Receive();
     nNetObject::SyncAll();
     sn_SendPlanned();
@@ -4509,6 +4520,8 @@ static eSoundPlayer extroPlayer(extro);
 static void sg_EnterGameCleanup();
 
 void sg_EnterGameCore( nNetState enter_state ){
+    se_UserShowScores( false );
+
     sg_RequestedDisconnection = false;
 
     sr_con.SetHeight(7);
@@ -4542,8 +4555,8 @@ void sg_EnterGameCore( nNetState enter_state ){
             tAdvanceFrame();
             sg_Receive();
             se_SyncGameTimer();
-            REAL time=se_GameTime();
             sg_currentGame->StateUpdate();
+            REAL time=se_GameTime();
             if ( time > 0 )
             {
                 // only simulate the objects that have pending events to execute

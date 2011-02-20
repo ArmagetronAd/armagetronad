@@ -26,6 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
 #include "rFont.h"
+#include "rRender.h"
 #include "rScreen.h"
 #include "rViewport.h"
 #include "rConsole.h"
@@ -66,13 +67,26 @@ void rViewport::Perspective(REAL fov,REAL nnear,REAL ffar){
     if (!sr_glOut)
         return;
 
-    // Jonathan's improved version
-    REAL aspectratio = (height * sr_screenHeight) / (width * sr_screenWidth * currentScreensetting.aspect);
-    REAL ensureverticalfov = fmax((3.0 / 5.0) * aspectratio, 1.0);
+#if 1
+    // Jonathan's improved version (fixed again)
+
+    // the true aspect ratio of the viewport. 16/9, 16/10, 4/3, 5/4 (or halves of that for splitscreen)
+    REAL aspectratio = (width * sr_screenWidth * currentScreensetting.aspect)/(height * sr_screenHeight);
+
+    // usually, fov is the horizontal fov. However, for widescreen, we want to expand the
+    // horizontal fov without distorting the image in such a way that we don't sacrifice too much of
+    // the vertical fov. For non-widescreen, the following number will be 1, for aspect ratios > 1.5 (semi-widescreen),
+    // it'll be higher.
+    REAL ensureverticalfov = fmax(aspectratio/1.5, 1.0);
+
+    // calculate the horizontal fov. For widescreen, make it extra wide.
     REAL xmul = ensureverticalfov * tan((M_PI / 360.0) * fov);
-    REAL ymul = ensureverticalfov * aspectratio * xmul;
-    glMatrixMode(GL_PROJECTION);
+
+    // transfer that directly to the vertical fov.
+    REAL ymul = xmul/aspectratio;
+    ProjMatrix();
     glFrustum(-nnear * xmul, nnear * xmul, -nnear * ymul, nnear * ymul, nnear, ffar);
+#endif
 
 #if 0 // Z-Man's old and clumsy version
     REAL ratio=currentScreensetting.aspect*(width*sr_screenWidth)/(height*sr_screenHeight);
@@ -214,6 +228,8 @@ void rViewportConfiguration::DemonstrateViewport(tString *titles){
         rViewport sub(rViewport::s_viewportDemonstation,*(s_viewportConfigurations[next_conf_num]->Port(i)));
         sub.Select();
 
+        RenderEnd();
+
         glDisable(GL_TEXTURE_2D);
         glDisable(GL_DEPTH_TEST);
 
@@ -221,12 +237,11 @@ void rViewportConfiguration::DemonstrateViewport(tString *titles){
         glRectf(-.9,-.9,.9,.9);
 
         glColor3f(.6,.6,.6);
-        glBegin(GL_LINE_LOOP);
+        BeginLineLoop();
         glVertex2f(-1,-1);
         glVertex2f(-1,1);
         glVertex2f(1,1);
         glVertex2f(1,-1);
-        glEnd();
 
         glColor3f(1,1,1);
         DisplayText(0,0,.15,.5,titles[i]);

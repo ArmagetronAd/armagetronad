@@ -335,6 +335,7 @@ wait_for_external_script_timeout_help If the server has been paused by WAIT_FOR_
 chatter_remove_time_help            Time in seconds after which a permanent chatter is removed from the game
 idle_remove_time_help               Time in seconds after which an inactive player is removed from the game
 idle_kick_time_help                 Time in seconds after which an inactive player is kicked
+keep_player_slot_help               If set to 1, every time the server gets full, an unworthy spectator is kicked.
 
 #********************************************
 #********************************************
@@ -417,6 +418,10 @@ spam_teamchage              You switched teams too often.
 spam_vote_kick_issue        You issued too many kick votes.
 spam_vote_rejected          Too many of your votes got rejected.
 
+# default shouting
+default_shout_spectator_help 1 if the default chat action for spectators should be shouting, 0 if it should be spectator chat. 2 if the default action should be shouting and the access level requirement should be overridden.
+default_shout_player_help    1 if the default chat action for players should be shouting, 0 if it should be team chat. 2 if the default action should be shouting and the access level requirement should be overridden.
+
 #********************************************
 #********************************************
 #
@@ -432,6 +437,16 @@ allow_control_during_chat_help     If set to 1, this allows a player to issue cy
 
 allow_imposters_help               If set to 1, players with identical names are tolerated. If set to 0, all but one will be renamed.
 allow_impostors_help               If set to 1, players with identical names are tolerated. If set to 0, all but one will be renamed.
+
+timebot_kick_severity_help         If players get kicked by the timebot detection, it's done with this severity level.
+timebot_sensitivity_help           The sensitivity of the timebot detection code. 1.0 is the default and you probably shouldn't deviate more than .5 from that.
+timebot_action_medium_help         Action to take on a medium suspicion of timebottery. 0: do nothing, 1: log it, 2: message moderators, 3: message all players, 4: kick the offending player.
+timebot_action_high_help           Action to take on a high suspicion of timebottery. 0: do nothing, 1: log it, 2: message moderators, 3: message all players, 4: kick the offending player.
+timebot_action_max_help            Action to take on a very high suspicion of timebottery. 0: do nothing, 1: log it, 2: message moderators, 3: message all players, 4: kick the offending player.
+
+timebot_action_medium              \1 is showing excelent timing ability, almost too good for a human.\n
+timebot_action_high                \1 is showing suspiciously superhuman timing ability.\n
+timebot_action_max                 \1 is very likely using timing assistance software.\n
 
 #********************************************
 #********************************************
@@ -626,6 +641,7 @@ dedicated_idle_help		After running this time (in hours), the dedicated server ta
 dedicated_fps_help      Maximum simulation steps per second the dedicated server will perform
 dedicated_fps_idle_factor_help Number of times per frame the server should check whether simulation can be done if no network input is coming
 talk_to_master_help		Announce this server on the internet?
+add_master_server_help  Announce this server to another master server. Usage: ADD_MASTER_SERVER host port(optional, default=4533).
 max_out_rate_help		Maximum network output rate
 max_in_rate_help		Maximum network input rate
 ping_charity_help		How much ping are you willing to take over from your opponent?
@@ -769,7 +785,7 @@ ladderlog_write_death_suicide_help            Write to ladderlog: DEATH_SUICIDE 
 ladderlog_write_death_teamkill_help           Write to ladderlog: DEATH_TEAMKILL <prey> <predator>
 ladderlog_write_game_end_help                 Write to ladderlog: GAME_END
 ladderlog_write_game_time_help                Write to ladderlog: GAME_TIME <time> (see also: GAME_TIME_INTERVAL)
-ladderlog_write_match_winner_help             Write to ladderlog: MATCH_WINNER <winner>
+ladderlog_write_match_winner_help             Write to ladderlog: MATCH_WINNER <team> <players>
 ladderlog_write_new_match_help                Write to ladderlog: NEW_MATCH
 ladderlog_write_new_round_help                Write to ladderlog: NEW_ROUND
 ladderlog_write_num_humans_help               Write to ladderlog: NUM_HUMANS <number of humans>
@@ -777,9 +793,10 @@ ladderlog_write_online_player_help            Write to ladderlog: ONLINE_PLAYER 
 ladderlog_write_player_entered_help           Write to ladderlog: PLAYER_ENTERED <name> <IP> <screen name>
 ladderlog_write_player_left_help              Write to ladderlog: PLAYER_LEFT <name> <IP>
 ladderlog_write_player_renamed_help           Write to ladderlog: PLAYER_RENAMED <old name> <new name> <ip> <screen name>
+ladderlog_write_positions_help                Write to ladderlog: POSITIONS <team> <player1 player2 ...>
 ladderlog_write_round_score_help              Write to ladderlog: ROUND_SCORE <score difference> <player> [<team>]
 ladderlog_write_round_score_team_help         Write to ladderlog: ROUND_SCORE_TEAM <score difference> <team>
-ladderlog_write_round_winner_help             Write to ladderlog: ROUND_WINNER <winner>
+ladderlog_write_round_winner_help             Write to ladderlog: ROUND_WINNER <team> <players>
 ladderlog_write_sacrifice_help                Write to ladderlog: SACRIFICE <player who used the hole> <player who created the hole> <player owning the wall the hole was made into>
 ladderlog_write_wait_for_external_script_help Write to ladderlog: WAIT_FOR_EXTERNAL_SCRIPT (see also: WAIT_FOR_EXTERNAL_SCRIPT and WAIT_FOR_EXTERNAL_SCRIPT_TIMEOUT)
 ladderlog_game_time_interval_help If nonnegative, write a line with the current game time to the ladder log every n seconds.
@@ -2431,6 +2448,7 @@ player_base_respawn_reminder_alone	0xff4444Reminder (Last Player): 0xffffffRespa
 msg_deadsilenced		Chat discarded, the dead cannot speak...\n
 
 team_shuffle            \1 gets shuffled from rank \2 to \3.
+team_preshuffle         \1 will join at rank \2.
 team_shuffle_suppress   Future shuffle messages from this player will be suppressed.\n
 player_noshuffleup      You are not allowed to shuffle up.\n
 player_noshuffle        Your shuffling wish has no effect.\n
@@ -2625,6 +2643,10 @@ network_kill_unknown		No reason was given.
 network_kill_spamkick		You have been auto-kicked for spamming.
 voted_kill_kick				You have been kicked by an angry mob of players; please stay away.
 network_kill_spectator      You have been sitting in spectator mode for too long.
+network_kill_unworthy       The server is full; you have been removed to make room for potential players. Only come back if you really have to.
+network_kill_unworthy_banreason The server is overloaded and new connections need to be throttled. Sorry for the inconvenience.
+network_kill_unworthy_ban   The server is full; you have been removed to make room for potential players. Only come back if you really have to, and wait \1 minutes.
+network_kill_unworthy_log   Kicking unworthy spectator \1 for \2 minutes.\n
 
 network_ban_kph             Kicks per hour of IP \1 are now \2.\n
 network_ban                 Players from IP \1 are banned for \2 minutes. Reason: \3\n
@@ -2682,6 +2704,8 @@ network_master_reqlist		Requesting server list...\n
 network_master_status		Receiving server \1...\n
 network_master_finish		Received \1 servers.\n
 network_master_start		Host Game
+network_master_pollanswer       Answering ping poll from \1.\n
+network_master_pollanswer_last	Answering ping poll from \1. This is the last logged poll.\n
 network_master_host_inet_help	This will start a network game on your computer and announce it on the internet.
 network_master_host_lan_help	This will start a network game that is only visible from your LAN.
 
@@ -2886,7 +2910,9 @@ access_level_op_max_help       Maximal access level directly attainable by /op c
 access_level_admin_help        Minimal access level for /admin command.
 access_level_rtfm_help         Minimal access level for /teach or /rtfm command.
 access_level_chat_help         Minimal access level for chatting.
+access_level_shout_help        Minimal access level for shouting.
 access_level_ips_help          Minimal access level you need for seeing IPs of other players in the /players command.
+access_level_autokick_immunity_help Minimal access level to be protected against autokicks.
 access_level_nver_help         Minimal access level you need for seeing Network versions/strings from other players in /players.
 access_level_spy_console_help  Minimal access level you need for seeing console input from other (in-game) admins.
 access_level_spy_team_help     Minimal access level you need for seeing /team messages as a spectator.
@@ -2907,6 +2933,7 @@ access_level_vote_command_execute_help    Minimal access level successful comman
 access_level_chat_timeout_help   Time in seconds between public announcements that someone wants to chat, but can't. Set to 0 to disable the public warnings.
 access_level_chat_request   \10xRESETT would like to chat, but is not authorized yet. Would someone be so kind and say "/op \2"?\n
 access_level_chat_denied    0xff7f7fChat denied,0xffffff insufficient access level.\n
+access_level_shout_denied    0xff7f7fShout denied,0xffffff insufficient access level.\n
 access_level_op_denied      0xff7f7f\1 denied,0xffffff insufficient access level.\n
 access_level_op_overpowered 0xff7f7f\1 denied,0xffffff your need higher access rights than your victim.\n
 access_level_op_self        0xff7f7f\1 denied,0xffffff can't do that to yourself :).\n
@@ -2961,7 +2988,7 @@ login_error_invalidurl_notfound      Authentication URL \1 invalid, it was not f
 login_error_noremote                 Authentication via Global ID not available on this server.
 login_error_blacklist                Authority \1 is on this server's blacklist.
 login_error_whitelist                Authority \1 is not on this server's whitelist.
-login_error_pharm                    Server adress mismatch, \1 (sent by client) != \2 (our address). Pharming suspected. If  you are connecting from the LAN and get this error, either set "TRUST_LAN" on the server (only if your LAN can be fully trusted, of course) or use "SERVER_IP" to make the local IP known to the server.
+login_error_pharm                    Server adress mismatch, \1 (sent by client) != \2 (our address). Pharming suspected. If  you are connecting from the LAN and get this error, set "TRUST_LAN" on the server (only if your LAN can be fully trusted, of course). If you are connecting from the internet, use "SERVER_DNS" to make its own real IP known to the server.
 login_error_pharm_cheap              Server address trouble. Client sent unspecific server address.
 login_error_methodmismatch  The local method used for auhtentication has been modified since your password was set. In the server's config files, put all commands that define authentication methods before all local password definitions.
 login_error_nomethod        No authentication method could be found. Your client supports \1, this server supports \2, and the authentication server supports \3.

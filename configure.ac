@@ -663,7 +663,7 @@ dnl  Winsock on windows cross-compile
 dnl *************************************************
 
 if test "`${SDL_CONFIG} --libs | grep windows`" ; then
-	AC_CHECK_LIB(wsock32, main)
+	AC_CHECK_LIB(wsock32, connect)
 fi
 
 dnl *************************************************
@@ -676,17 +676,17 @@ dnl AC_CHECK_LIB($SYS_GL_LIB, glEnd,,
 
 AC_CHECK_LIB($SYS_GL_LIB, glVertex3f,,
  AC_MSG_RESULT([OpenGL not found. Maybe it needs X11 to compile? Checking that...])
- AC_CHECK_LIB(X11,main,
+ AC_CHECK_LIB(X11,XOpenDisplay,
   LIBS="-lX11 -L/usr/X11R6/lib $LIBS"
   AC_DEFINE(HAVE_LIBX11, 1, [Define if you have the X11 library (-lX11).])
   ,
   AC_MSG_WARN([
   Standard X11 library needed by OpenGL not found.
   ]),-L/usr/X11R6/lib)
- AC_CHECK_LIB(Xext,main,-L/usr/X11R6/lib)
-  AC_CHECK_LIB(Xt,main,-L/usr/X11R6/lib)
- AC_CHECK_LIB(Xi,main,-L/usr/X11R6/lib)
- AC_CHECK_LIB(Xmu,main,-L/usr/X11R6/lib)
+ AC_CHECK_LIB(Xext,XextFindDisplay,-L/usr/X11R6/lib)
+  AC_CHECK_LIB(Xt,XtFree,-L/usr/X11R6/lib)
+ AC_CHECK_LIB(Xi,XOpenDevice,-L/usr/X11R6/lib)
+ AC_CHECK_LIB(Xmu,XmuDrawLogo,-L/usr/X11R6/lib)
 AC_CHECK_LIB($SYS_GL_LIB, glBegin,,AC_MSG_ERROR([
   You need Mesa or an OpenGL-System to compile ${progtitle}.
   Maybe your libGL needs the X libraries and your system does not
@@ -717,10 +717,10 @@ dnl *************************************************
 dnl         Other Stuff
 dnl *************************************************
 
-dnl AC_CHECK_LIB(g++, main,,
+dnl AC_CHECK_LIB(g++, cin,,
 dnl AC_MSG_WARN([C++ standard library not found. You can ignore this warning on non-GNU-systems.]))
 
-AC_CHECK_LIB(z, main,,
+AC_CHECK_LIB(z, gzread,,
 AC_MSG_ERROR([You need libz to compile ${progtitle}.]))
 
 AC_MSG_CHECKING(whether libpng is installed)
@@ -731,11 +731,11 @@ fi
 CPPFLAGS="$CPPFLAGS `libpng-config --cflags`"
 LIBS="$LIBS $PNGLIBS"
 
-AC_CHECK_FUNC(png_check_sig,
+AC_CHECK_FUNC(png_sig_cmp,
 ,
 AC_MSG_ERROR([You need libpng to compile ${progtitle}.]))
 
-AC_CHECK_LIB(jpeg, main,,
+AC_CHECK_LIB(jpeg, jpeg_read_header,,
 	AC_MSG_WARN([
 	libjpeg not found. Expect small graphical errors ( missing moviepack title screen ).]
 	)
@@ -794,8 +794,6 @@ about it. You will get the message \"I told you not to use PGCC!\")
 CXXFLAGS="$CXXFLAGS -fno-exceptions -DNOEXCEPT"
 fi
 
-
-dnl Replace `main' with a function in -lpthread:
 
 dnl Checks for header files.
 AC_HEADER_STDC

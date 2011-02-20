@@ -54,6 +54,26 @@ void st_ToDo(tTODO_FUNC *td){ // postpone something
     st_mutex.release();
 }
 
+// the function currently in execution
+static tTODO_FUNC * st_toDoCurrent = 0;
+
+void st_ToDoOnce(tTODO_FUNC *td){ // postpone something, avoid double entries
+    st_mutex.acquire();
+    if( st_toDoCurrent == td )
+    {
+        return;
+    }
+    for( int i = tToDos.Len()-1; i >= 0; --i )
+    {
+        if( tToDos[i]==td )
+        {
+            return;
+        }
+    }
+    tToDos[tToDos.Len()]=td;
+    st_mutex.release();
+}
+
 // a lone (but relatively safe) function pointer for things to do triggered by signals.
 static tTODO_FUNC * st_toDoFromSignal = 0;
 
@@ -65,9 +85,12 @@ void st_DoToDo(){ // do the things that have been postponed
     }
     st_mutex.acquire();
     while (tToDos.Len()){
-        tTODO_FUNC *td=tToDos[tToDos.Len()-1];
+        tTODO_FUNC *last = st_toDoCurrent;
+        tTODO_FUNC *td = tToDos[tToDos.Len()-1];
+        st_toDoCurrent = td;
         tToDos.SetLen(tToDos.Len()-1);
         (*td)();
+        st_toDoCurrent = last;
     }
     st_mutex.release();
 }
