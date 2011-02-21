@@ -62,7 +62,7 @@ public:
     REAL                            GetTime() const;        // the time of the influence
     void							AddSensor( const gSensor& sensor, REAL timePenalty, gCycleMovement * thisCycle ); // add the result of the sensor scan to our data
     void							AddWall( const eWall * wall, eCoord const & point, REAL timePenalty, gCycleMovement * thisCycle ); // add the interaction with a wall to our data
-    void							AddWall( const gPlayerWall * wall, REAL timeBuilt, gCycleMovement * thisCycle ); // add the interaction with a wall to our data
+    void							AddWall( const gPlayerWall * wall, REAL timeBuilt, REAL timePenalty, gCycleMovement * thisCycle ); // add the interaction with a wall to our data
 };
 
 struct gRealColor {
@@ -126,8 +126,6 @@ public:
             ,                                        REAL                   endTime     )           ;   //!< move without throwing exceptions on passing a wall
 
     virtual bool            Timestep                ( REAL                  currentTime )           ;   //!< advance to the given time
-
-    virtual REAL            NextInterestingTime     () const                                        ;   //!< the next time something interesting is going to happen with this object
 
     // existence management
     virtual void            AddRef                  ()                                              ;   //!< increase reference count
@@ -224,6 +222,8 @@ protected:
 
     unsigned short  turns;                      //!< the number of turns taken so far
     unsigned short  braking;                    //!< flag indicating status of brakes ( on/off )
+    
+    bool            uncannyTimingToReport_;     //!< flag indicating whether we have uncanny timing to report from the last turn
 
     int             windingNumber_;             //!< number that gets increased on every right turn and decreased on every left turn ( used by the AI )
     int             windingNumberWrapped_;      //!< winding number wrapped to be used as an index to the axes code

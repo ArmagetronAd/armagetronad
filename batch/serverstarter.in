@@ -4,6 +4,7 @@
 
 [ X"${PIDDIR}" = X"" ] && PIDDIR=${HOME}/.@prognamebase@
 [ X"${VARDIR}" = X"" ] && VARDIR=${HOME}/.@prognamebase@/var
+[ X"${CONFIG}" = X"" ] && CONFIG=@aa_sysconfdir_reloc@
 [ X"${BINDIR}" = X"" ] && BINDIR=@prefix_reloc@/bin
 
 echo $$ > ${PIDDIR}/@progname@-starter.pid
@@ -11,7 +12,7 @@ echo $$ > ${PIDDIR}/@progname@-starter.pid
 cd ${VARDIR}
 
 run() {
-    ${BINDIR}/@progname@@executable_suffix@ --userdatadir ${VARDIR} --daemon $* &
+    ${BINDIR}/armagetronad-dedicated --configdir ${CONFIG} --userdatadir ${VARDIR} --daemon $* &
     jobs -p > ${PIDDIR}/@progname@.pid
     [ -s ${PIDDIR}/@progname@.pid ] || { echo "Warning: main program PID unavailable, server can't be stopped reliably."; echo $$ > ${PIDDIR}/@progname@.pid ; }
     wait

@@ -924,6 +924,24 @@ void eTeam::WritePlayers( eLadderLogWriter & writer, const eTeam *team )
     }
 }
 
+static eLadderLogWriter se_positionWriter( "POSITIONS", true );
+void eTeam::WriteLaunchPositions()
+{
+    for ( int i = teams.Len() - 1; i >= 0; --i )
+    {
+        eTeam *team = teams(i);
+        
+        // AI teams are boring.
+        if ( !team->IsHuman() )
+            continue;
+
+        se_positionWriter << ePlayerNetID::FilterName( team->Name() );
+        for ( int j = 0; j < team->players.Len(); j++ )
+            se_positionWriter << team->players( j )->GetLogName();
+        se_positionWriter.write();
+    }
+}
+
 // inquire or set the ability to use a color as a team name
 bool eTeam::NameTeamAfterColor ( bool wish )
 {

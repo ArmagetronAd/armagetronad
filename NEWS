@@ -1,4 +1,24 @@
+Changes since 0.2.8.3.x:
+- Added detection and reaction code for timing assist bots
+- /shuffle now works before you actually join a team
+- Implemented /shout command and associated settings
+- Tweaks to enemy influence system.
+- Ingame menu and console now are drawn on top of a semi-transparent,
+  darkened area for increased readability.
+- New first start menu with clearer language selection and initial setup.
+- Tutorial match against one AI at slower speed.
+- Tutorial tooltips for the most important keybindings.
+- ADD_MASTER_SERVER command to announce a server to a new master server.
+  Simplifies the process to list your server on a subculture.
+- Player positions logged to ladderlog with POSITIONS event.
+- New command-line option "--input" added to poll for input from a file
+  instead of stdin.
+
 Changes since 0.2.8.3_rc4:
+- New setting: KEEP_PLAYER_SLOT allows the server to kick (preferably) spectators
+   if it gets full so there is always one slot open for players
+- New setting: ACCESS_LEVEL_AUTOKICK_IMMUNITY sets the access level required 
+  to be immune from such kicks (and idle autokicks, too)
 - Intercepted chat commands are now written to ladderlog.txt. Format:
   COMMAND /command-intercepted player [command arguments]
 - Increased default speed of server pinging
@@ -19,7 +39,8 @@ Changes since 0.2.8.3_rc3:
 
 Changes since 0.2.8.3_rc2:
 - Fixed crash with server polling
-- ROUND_WINNER and MATCH_WINNER logged to ladderlog
+- ROUND_WINNER and MATCH_WINNER ladderlog events now include the players of
+  the team.
 - Camera switches to user preferred camera when you die in incam mode
 - Better support for custom language files
 - Players can no longer spam chat with /shuffle messages. Added new setting

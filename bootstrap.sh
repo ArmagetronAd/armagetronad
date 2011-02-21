@@ -8,6 +8,8 @@ if test -r batch/make/version; then
     echo "Generating version..."
     echo "m4_define(AUTOMATIC_VERSION,["`sh batch/make/version $MYDIR`"])" > version || exit 1
 fi
+echo "Copying license..."
+cp COPYING.txt COPYING
 echo "Running aclocal..."
 aclocal || { rm aclocal.m4; exit 1; }
 echo "Running autoheader..."

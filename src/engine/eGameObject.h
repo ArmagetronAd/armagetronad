@@ -60,6 +60,8 @@ class eGameObject{
     // small wrapper of TimestepThis doing preparation and cleanup work
     static void TimestepThisWrapper(eGrid * grid, REAL currentTime, eGameObject *t, REAL minTimestep);
 
+    bool urgentSimulationRequested_;   //!< Flag set when a pending event needs simulation
+
 protected:
     // does a timestep and all interactions for this gameobject,
     // divided in many small steps
@@ -67,6 +69,9 @@ protected:
 
     // tells game objects how far they are allowed to exeed the given simulation time
     static REAL MaxSimulateAhead();
+
+    //! call if you need to be simulated right now
+    void RequestSimulation(){ urgentSimulationRequested_ = true; }
 
     // a list of all eGameObjects that are interesting to watch
     int interestingID;
@@ -122,7 +127,6 @@ public:
 
     int GOID() const {return id;}
     REAL LastTime() const {return lastTime;}
-    virtual REAL NextInterestingTime() const {return lastTime;} //!< the next time something interesting is going to happen with this object
 
     eGameObject(eGrid *grid, const eCoord &p,const eCoord &d, eFace *currentface, bool autodelete=1);
     virtual ~eGameObject();

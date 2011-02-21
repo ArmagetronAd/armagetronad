@@ -295,7 +295,8 @@ public:
     bool ShouldAnnounce() const;
     void Reset();
     void Shuffle();
-    tString ShuffleMessage( ePlayerNetID *player, int fromPosition, int toPosition ) const;
+    tString ShuffleMessage( ePlayerNetID *player, int position ) const; //!< print message for player wishing to pre-join shuffle to position
+    tString ShuffleMessage( ePlayerNetID *player, int fromPosition, int toPosition ) const; //!< print message for player shuffling in-team
 protected:
     bool ShouldDisplaySuppressMessage() const;
     int numberShuffles_;

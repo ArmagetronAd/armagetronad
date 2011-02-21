@@ -567,6 +567,17 @@ void gEnemyInfluence::AddSensor( const gSensor& sensor, REAL timePenalty, gCycle
     if ( !wall )
         return;
 
+    // faraway walls count less.
+    if( sensor.GetOwner() )
+    {
+        REAL speed = sensor.GetOwner()->Speed();
+        if( speed > 0 )
+        {
+            REAL distance = sensor.Direction().Norm() * sensor.hit;
+            timePenalty += distance/speed;
+        }
+    }
+
     AddWall( wall, sensor.before_hit, timePenalty, thisCycle );
 }
 
@@ -590,13 +601,13 @@ void gEnemyInfluence::AddWall( const eWall * wall, eCoord const & pos, REAL time
         // get the position of the collision point
         alpha = playerWall->Edge()->Ratio( pos );
     }
-    REAL timeBuilt = playerWall->Time( 0.5f );
+    REAL timeBuilt = playerWall->Time( alpha );
 
-    AddWall( playerWall, timeBuilt - timePenalty, thisCycle );
+    AddWall( playerWall, timeBuilt, timePenalty, thisCycle );
 }
 
 // add the interaction with a wall to our data
-void gEnemyInfluence::AddWall( const gPlayerWall * wall, REAL timeBuilt, gCycleMovement * thisCycle )
+void gEnemyInfluence::AddWall( const gPlayerWall * wall, REAL timeBuilt, REAL timePenalty, gCycleMovement * thisCycle )
 {
     // the client has no need for this, it does not execute AI code
     if ( sn_GetNetState() == nCLIENT )
@@ -620,6 +631,7 @@ void gEnemyInfluence::AddWall( const gPlayerWall * wall, REAL timeBuilt, gCycleM
         REAL currentTime = thisCycle->LastTime();
         time += ( currentTime - time ) * sg_enemyCurrentTimeInfluence;
     }
+    time -= timePenalty;
 
     // get the player
     ePlayerNetID* player = cycle->Player();
@@ -1148,6 +1160,8 @@ void gCycleMovement::AddDestination( gDestination * dest )
         delete dest;
         return;
     }
+
+    this->RequestSimulation();
 
     this->NotifyNewDestination( dest );
 
@@ -2001,8 +2015,10 @@ bool gCycleMovement::Timestep( REAL currentTime )
     tJUST_CONTROLLED_PTR< gCycleMovement > keep( this->GetRefcount()>0 ? this : 0 );
 
     // don't make a fuss about negative timesteps
-    if ( currentTime < lastTime )
-        return TimestepCore( currentTime );
+    // if ( currentTime < lastTime )
+    // {
+    //     return TimestepCore( currentTime );
+    // }
 
     // remove old destinations
     //REAL lag = 1;
@@ -2017,6 +2033,8 @@ bool gCycleMovement::Timestep( REAL currentTime )
     REAL dt = currentTime - lastTime;
 
     sg_ArchiveReal( dt, 9 );
+
+    bool vetoSimulationRequest = false; // set if the simulation was aborted even though events are still there to be taken care of
 
     // if (currentTime > lastTime)
     {
@@ -2063,12 +2081,13 @@ bool gCycleMovement::Timestep( REAL currentTime )
                 sg_ArchiveReal( avgspeed, 9 );
 
                 // don't drive into a wall, turn before getting too close
-                REAL lookahead = ts * avgspeed * 2;
+                REAL lookahead = ( fabs(ts * avgspeed)+fabs(dist_to_dest) ) * 2;
+ 
+                distToWall = GetMaxSpaceAhead( lookahead );
 
-                REAL dist_to_wall = GetMaxSpaceAhead( lookahead );
-
-                if ( dist_to_dest > dist_to_wall )
-                    dist_to_dest = dist_to_wall;
+                // don't turn after passing a wall, if timing allows
+                if ( dist_to_dest > distToWall )
+                    dist_to_dest = distToWall;
             }
 
             static bool breakp = false;
@@ -2124,10 +2143,16 @@ bool gCycleMovement::Timestep( REAL currentTime )
             REAL simulateAhead = MaxSimulateAhead();
 
             if ( dist_to_dest > ( ts + simulateAhead ) * avgspeed && currentTime < latestTurnTime )
+            {
+                vetoSimulationRequest = true;
                 break; // no need to worry; we won't reach the next destination
+            }
 
-            if ( currentTime < earliestTurnTime && sg_CommandTime.Supported( Owner() ) )
+            if ( currentTime + simulateAhead < earliestTurnTime && sg_CommandTime.Supported( Owner() ) )
+            {
+                vetoSimulationRequest = true;
                 break; // the turn is too far in the future
+            }
 
             // if ( currentTime < turnTime + EPS )
             //    simulateAhead = 0;
@@ -2385,20 +2410,17 @@ bool gCycleMovement::Timestep( REAL currentTime )
                     if ( latestTurnTime < nextTurn )
                         latestTurnTime = nextTurn;
 
-                    if ( currentTime - lastTime > turnStep )
+                    if ( ts + + simulateAhead > turnStep )
                     {
-                        tsTodo = turnStep;
-
                         // if we can simulate to the turn in the next step, do so, overriding
                         // the turn delay then.
-                        if ( tsTodo < ts + simulateAhead && tsTodo > 0 )
-                        {
-                            overrideTurnDelay = true;
-                        }
+                        tsTodo = turnStep;
+                        overrideTurnDelay = true;
                     }
                     else
                     {
                         // not enough time to simulate to turn possibility; skip out of loop
+                        vetoSimulationRequest = true;
                         break;
                     }
                 }
@@ -2434,6 +2456,7 @@ bool gCycleMovement::Timestep( REAL currentTime )
                 {
                     tsTodo = ts + simulateAhead ;
                     forceTurn = false;
+                    overrideTurnDelay = false;
 
                     // quit from here if there is nothing to do
                     if ( tsTodo <= EPS )
@@ -2477,6 +2500,17 @@ bool gCycleMovement::Timestep( REAL currentTime )
     bool ret = false;
     if ( currentTime > lastTime )
         ret = TimestepCore( currentTime );
+
+    // if we get here and turns are left pending within our reach,
+    // request the function gets called again right away.
+    if( !vetoSimulationRequest &&
+        ( currentDestination || 
+          ( !pendingTurns.empty() && GetNextTurn( pendingTurns.front() < currentTime + MaxSimulateAhead() ) )
+            )
+        )
+    {
+        RequestSimulation();
+    }
 
     return ret;
 }
@@ -2929,6 +2963,40 @@ void gCycleMovement::CalculateAcceleration()
             eCoord wallVec = rear.ehit->Vec();
             if ( fabs( eCoord::F( wallVec, dirDrive  ) ) > .9 * dirDrive.NormSquared() )
             {
+                // detect uncanny timing of earlier turns, only check outside corner grinds
+                if ( uncannyTimingToReport_ && player && ( lastTurnTimeRight_ - lastTurnTimeLeft_ ) * d < 0 )
+                {
+                    // check that the wall we're grinding was there before we turned
+                    bool wasMe = true;
+                    gPlayerWall * w = dynamic_cast< gPlayerWall * >( rear.ehit->GetWall() );
+                    if( !w && rear.ehit->Other() )
+                        w = dynamic_cast< gPlayerWall * >( rear.ehit->Other()->GetWall() );
+
+                    if ( w )
+                    {
+                        REAL lastTurnTime = GetLastTurnTime();
+                        if( lastTurnTime < w->Time(0) &&
+                            lastTurnTime < w->Time(1) )
+                        {
+                            wasMe = false;
+                        }
+                    }
+
+                    if ( wasMe )
+                    {
+                        uncannyTimingToReport_ = false;
+
+                        // don't count grinding own or teammate wall on the outside, it may
+                        // be a practiced pattern
+                        if( rear.type != gSENSOR_SELF && rear.type != gSENSOR_TEAMMATE )
+                        {
+                            REAL timing = rear.hit/(verletSpeed_ + 1E-10);
+                            player->AnalyzeTiming( timing );
+                        }
+                    }
+                }
+                
+
                 // enemyInfluence.AddSensor( rear, 1 );
                 REAL wallAcceleration=SpeedMultiplier() * sg_accelerationCycle * ((1/(rear.hit+sg_accelerationCycleOffs))
                                       -(1/(sg_nearCycle+sg_accelerationCycleOffs)));
@@ -3149,8 +3217,58 @@ bool gCycleMovement::DoTurn( int dir )
     if (dir >  1) dir =  1;
     if (dir < -1) dir = -1;
 
-    if ( CanMakeTurn( lastTime, dir ) )
+    REAL nextTurnTime = GetNextTurn( dir );
+    if ( nextTurnTime <= lastTime )
     {
+        // prepare for uncanny timing checks if the turn was user-controlled
+        if( sn_GetNetState() == nSERVER && nextTurnTime + .05 < lastTime )
+        {
+            // if rubber was used in this turn, check for depletion timing
+            if( rubberSpeedFactor < 1 )
+            {
+                /*
+                  // turns out this is a bad idea; default clients cheat and
+                  // often produce perfectly timed grinds.
+                  // Maybe they'll send additional timing information one day
+                  // and this can be reactivated.
+
+                REAL rubber_granted, rubberEffectiveness;
+                // get rubber values
+                sg_RubberValues( player, verletSpeed_, rubber_granted, rubberEffectiveness );
+                rubberEffectiveness /= (1 + rubberMalus );
+
+                // get timing from it
+                REAL timing = (rubber_granted - rubber)*rubberEffectiveness/verletSpeed_;
+
+                if( currentDestination )
+                {
+                    if( sg_CommandTime.Supported( Owner() ) )
+                    {
+                        // take net fluctiations into account
+                        timing += fabs(currentDestination->gameTime - lastTime);
+                    }
+                    else
+                    {
+                        // do the same, but via locations. Less accurate.
+                        timing += (currentDestination->position - pos).Norm()/(verletSpeed_*rubberSpeedFactor+1E-10);
+                    }
+                }
+
+                // add space left after rubber ran out
+                timing += GetMaxSpaceAhead( maxSpaceMaxCast_ )/(verletSpeed_ + 1E-10);
+                
+                // and report
+                // player->AnalyzeTiming( timing );
+                */
+            }
+            else
+            {
+                // mark the turn. Later, during grind detection, we can
+                // measure the quality of an outside corner grind.
+                uncannyTimingToReport_ = true;
+            }
+        }
+
         // request regeneration of maximum space
         refreshSpaceAhead_ = true;
 
@@ -3688,6 +3806,7 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
                 }
 
                 rubberneeded = rubberAvailable;
+                // con << "Deep!\n";
             }
 
             // update rubber usage
@@ -3723,6 +3842,16 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
     tASSERT( rubber >= 0 );
 
     sg_ArchiveReal( step, 9 );
+
+    // don't go back further than the last turn
+    if( step < 0 )
+    {
+        REAL min = -GetDistanceSinceLastTurn();
+        if( step < min )
+        {
+            step = min;
+        }
+    }
 
     // move forward
     eCoord nextpos;
@@ -3961,6 +4090,8 @@ void gCycleMovement::MyInitAfterCreation( void )
 
     braking = false;
 
+    uncannyTimingToReport_ = false;
+
     acceleration = 0;
 
     refreshSpaceAhead_ = true;
@@ -4172,32 +4303,5 @@ REAL GetTurnSpeedFactor(void) {
     return sg_cycleTurnSpeedFactor;
 }
 
-// *******************************************************************************
-// *
-// *	NextInterestingTime
-// *
-// *******************************************************************************
-//!
-//!		@return
-//!
-// *******************************************************************************
-
-REAL gCycleMovement::NextInterestingTime( void ) const
-{
-    // default to the last time
-    REAL ret = LastTime();
-
-    // look for a later destination
-    gDestination * run = currentDestination;
-    while ( run )
-    {
-        REAL time = run->GetGameTime();
-        if ( time > ret )
-            ret = time;
-        run = run->next;
-    }
-
-    return ret;
-}
 
 
