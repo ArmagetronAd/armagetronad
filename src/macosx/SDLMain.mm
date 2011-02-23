@@ -54,8 +54,13 @@ SDL_Event event;
 {
     NSEventType eventType = [event type];
     
-    // Let Mac OS X handle Hide, Minimize, etc
-    if ((eventType == NSKeyDown || eventType == NSKeyUp) && ([event modifierFlags] & NSCommandKeyMask))
+    if (eventType == NSKeyDown || eventType == NSKeyUp)
+    {
+        // Let Mac OS X handle Hide, Minimize, etc
+        if ([event modifierFlags] & NSCommandKeyMask)
+            [super sendEvent:event];
+    }
+    else
     {
         [super sendEvent:event];
     }
