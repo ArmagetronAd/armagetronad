@@ -50,6 +50,17 @@ SDL_Event event;
     uMenu::quickexit=uMenu::QuickExit_Total;  
 }
 
+- (void)sendEvent:(NSEvent *)event
+{
+    NSEventType eventType = [event type];
+    
+    // Let Mac OS X handle Hide, Minimize, etc
+    if ((eventType == NSKeyDown || eventType == NSKeyUp) && ([event modifierFlags] & NSCommandKeyMask))
+    {
+        [super sendEvent:event];
+    }
+}
+
 @end
 
 //this changes the current working directory to the resource folder of 
@@ -122,6 +133,9 @@ void MacOSX_SetCWD(char **argv) {
     /* Set the main menu to contain the real app name instead of "SDL App" */
     [self fixMenu:[NSApp mainMenu] withAppName:[[NSProcessInfo processInfo] processName]];
 #endif
+
+    // Forward events to NSApp
+    setenv("SDL_ENABLEAPPEVENTS", "1", 1);
 
     /* Hand off to main application code */
     status = SDL_main (gArgc, gArgv);
