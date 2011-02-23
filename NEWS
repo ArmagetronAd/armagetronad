@@ -10,7 +10,8 @@ Changes since 0.2.8.3.x:
 - Tutorial tooltips for the most important keybindings.
 - ADD_MASTER_SERVER command to announce a server to a new master server.
   Simplifies the process to list your server on a subculture.
-- Player positions logged to ladderlog with POSITIONS event.
+- Team launch positions logged to ladderlog with POSITIONS event. Disabled by
+  default.
 - New command-line option "--input" added to poll for input from a file
   instead of stdin.
 

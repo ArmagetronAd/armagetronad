@@ -856,7 +856,7 @@ void eTeam::WritePlayers( eLadderLogWriter & writer, const eTeam *team )
     }
 }
 
-static eLadderLogWriter se_positionWriter( "POSITIONS", true );
+static eLadderLogWriter se_positionWriter( "POSITIONS", false );
 void eTeam::WriteLaunchPositions()
 {
     for ( int i = teams.Len() - 1; i >= 0; --i )
