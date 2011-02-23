@@ -179,7 +179,7 @@ void MacOSX_SetCWD(char **argv) {
 
 
 /* Main entry point to executable - should *not* be SDL_main! */
-int main (int argc, char **argv)
+int main (int argc, const char *argv[])
 {
 
     /* Copy the arguments into a global variable */
@@ -202,7 +202,7 @@ int main (int argc, char **argv)
 	MacOSX_SetCWD(gArgv);
 #if SDL_USE_NIB_FILE
     [SDLApplication poseAsClass:[NSApplication class]];
-    NSApplicationMain (argc, (const char **)argv); // There is a bug in NSApplicationMain (in Appkit). Ñ Dan
+    NSApplicationMain (argc, argv);
 #else
     CustomApplicationMain (argc, argv);
 #endif
