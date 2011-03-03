@@ -6126,15 +6126,20 @@ void ePlayerNetID::SwapPlayersNo(int a,int b){
 void ePlayerNetID::SortByScore(){
     // bubble sort (AAARRGGH! but good for lists that change not much)
 
-    bool inorder=false;
-    while (!inorder){
-        inorder=true;
-        int i;
-        for(i=se_PlayerNetIDs.Len()-2;i>=0;i--)
-            if (se_PlayerNetIDs(i)->TotalScore() < se_PlayerNetIDs(i+1)->TotalScore() ){
-                SwapPlayersNo(i,i+1);
-                inorder=false;
+    bool inorder = false;
+    while ( !inorder )
+    {
+        inorder = true;
+        for( int i = se_PlayerNetIDs.Len() - 2; i >= 0; i-- )
+        {
+            ePlayerNetID *a = se_PlayerNetIDs( i );
+            ePlayerNetID *b = se_PlayerNetIDs( i + 1 );
+            if ( a->TotalScore() < b->TotalScore() || ( a->TotalScore() == b->TotalScore() && !a->CurrentTeam() && b->CurrentTeam() ) )
+            {
+                SwapPlayersNo( i, i + 1 );
+                inorder = false;
             }
+        }
     }
 }
 
