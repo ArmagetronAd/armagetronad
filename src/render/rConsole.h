@@ -82,15 +82,20 @@ public:
     virtual void DoCenterDisplay(const tString &s,REAL timeout=2,REAL r=1,REAL g=1,REAL b=1);
 
     virtual tString ColorString(REAL r, REAL g, REAL b) const;
+
+    //! returns whether a center display is currently in progress
+    static bool CenterDisplayActive();
 };
 
 
 extern rConsole sr_con; // where all the output is directed to
 
 #ifdef DEDICATED
-// read from stdin
+// read from sr_input
+extern FILE *sr_input;
 void sr_Unblock_stdin();
 void sr_Read_stdin();
+void sr_Close_stdin();
 #endif
 
 class rForceTextCallback:public tCallbackOr{

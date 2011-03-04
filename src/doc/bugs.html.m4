@@ -100,7 +100,7 @@ what would have to be done. But I'm too lazy currently)</li>
 enters, you got accounted one won round on your score, and the
 multiplayer settings were not restored.</li>
 
-<li>camera hickups</li>
+<li>camera hiccups</li>
 
 <li> ALT-Tabbing out of PROGTITLE for Windows causes BAAAD lockups.</li>
 

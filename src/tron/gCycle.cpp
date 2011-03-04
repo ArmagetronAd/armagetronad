@@ -226,6 +226,7 @@ static tSettingItem<int> s_s("SCORE_SUICIDE",score_suicide);
 
 uActionPlayer gCycle::s_brake("CYCLE_BRAKE", -5);
 static uActionPlayer s_brakeToggle("CYCLE_BRAKE_TOGGLE", -5);
+static uActionTooltip sg_brakeTooltip( gCycle::s_brake, 1, &ePlayer::VetoActiveTooltip );
 
 static eWavData cycle_run("moviesounds/engine.wav","sound/cyclrun.wav");
 static eWavData turn_wav("moviesounds/cycturn.wav","sound/expl.wav");
@@ -2527,7 +2528,7 @@ static inline void rotate(eCoord &r,REAL angle){
 }
 
 #ifdef MACOSX
-// Sparks have a large performance problem on Macs. See http://guru3.sytes.net/viewtopic.php?t=2167
+// Sparks have a large performance problem on Macs. See http://forums.armagetronad.net/viewtopic.php?t=2167
 bool crash_sparks=false;
 #else
 bool crash_sparks=true;
@@ -3247,6 +3248,12 @@ void gCycle::Die( REAL time )
         RequestSync( true );
     }
 
+    if( player && Alive() )
+    {
+        // death is hardly good timing.
+        player->AnalyzeTiming( -1 );
+    }
+
     gCycleMovement::Die( time );
 
     // reset smoothing
@@ -3655,7 +3662,7 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
                 {
                     // err, trouble. Can't push the other guy back far enough. Better kill him.
                     if ( currentWall )
-                        otherPlayer->enemyInfluence.AddWall( currentWall->Wall(), lastTime, otherPlayer );
+                        otherPlayer->enemyInfluence.AddWall( currentWall->Wall(), lastTime, 0, otherPlayer );
                     otherPlayer->distance = wallDist;
                     otherPlayer->DropWall();
                     otherPlayer->KillAt( collPos );

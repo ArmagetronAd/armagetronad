@@ -671,6 +671,8 @@ public:
 };
 
 void do_con(){
+    su_ClearKeys();
+        
     se_ChatState( ePlayerNetID::ChatFlags_Console, true );
     sr_con.SetHeight(20,false);
     se_SetShowScoresAuto(false);
@@ -692,7 +694,7 @@ void do_con(){
 
 void sg_ConsoleInput(){
 #ifndef DEDICATED
-    st_ToDo(&do_con);
+    st_ToDoOnce(&do_con);
 #endif
 }
 
@@ -837,13 +839,14 @@ public:
         }
         */
 #ifndef DEDICATED
+        uMenuItem::RenderBackground();
         if (!sr_glOut)
             return;
-        uMenuItem::RenderBackground();
         REAL r = rgb[0]/15.0;
         REAL g = rgb[1]/15.0;
         REAL b = rgb[2]/15.0;
         se_MakeColorValid(r, g, b, 1.0f);
+        RenderEnd();
         glColor3f(r, g, b);
         glRectf(.8,-.8,.98,-.98);
 #endif

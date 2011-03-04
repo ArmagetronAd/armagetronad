@@ -47,7 +47,11 @@ public:
     tListItemBase(tListItemBase *&a):next(NULL),anchor(NULL){Insert(a);}
     virtual ~tListItemBase()                                {Remove();}
 
+    //! returns the next list element
     tListItemBase *Next()                             {return next;}
+
+    //! returns true if this object is in a list
+    bool IsInList() const {return anchor;}
 
     int Len();
     void Sort( Comparator* comparator );

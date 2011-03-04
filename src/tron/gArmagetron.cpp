@@ -40,6 +40,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //#include "eTess.h"
 #include "rTexture.h"
 #include "tConfiguration.h"
+#include "tRandom.h"
 #include "tRecorder.h"
 #include "tCommandLine.h"
 #include "eAdvWall.h"
@@ -53,6 +54,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <stdio.h>
 #include <stdlib.h>
 #include <fstream>
+#include <errno.h>
 
 #include "nServerInfo.h"
 #include "nSocket.h"
@@ -71,6 +73,7 @@ public:
     bool     windowed_;
     bool     use_directx_;
     bool     dont_use_directx_;
+    tString  inputFile_;
 
     gMainCommandLineAnalyzer()
     {
@@ -79,6 +82,7 @@ public:
         fullscreen_ = false;
         use_directx_ = false;
         dont_use_directx_ = false;
+        inputFile_ = "";
     }
 
 
@@ -97,7 +101,10 @@ private:
         {
             windowed_=true;
         }
-
+        else if ( parser.GetOption( inputFile_, "--input" ) )
+        {
+            daemon_ = false;
+        }
 #ifdef WIN32
         else if ( parser.GetSwitch( "+directx") )
         {
@@ -129,7 +136,8 @@ private:
 #else
 #ifndef WIN32
         s << "-d, --daemon                 : allow the dedicated server to run as a daemon\n"
-        << "                               (will not poll for input on stdin)\n";
+          << "                               (will not poll for input, unless overridden by --input)\n";
+        s << "--input <file>               : Poll for input from this file. Default is stdin\n";
 #endif
 #endif
     }
@@ -145,6 +153,132 @@ static tConfItem<bool> udx("USE_DIRECTX","makes use of the DirectX input "
 #endif
 
 extern void exit_game_objects(eGrid *grid);
+
+enum gConnection
+{
+    gLeave,
+    gDialup,
+    gISDN,
+    gDSL
+    // gT1
+};
+
+// initial setup menu
+void sg_StartupPlayerMenu()
+{
+    uMenu firstSetup("$first_setup", false);
+    firstSetup.SetBot(-.2);
+    
+    uMenuItemExit e2(&firstSetup, "$menuitem_accept", "$menuitem_accept_help");
+    
+    ePlayer * player = ePlayer::PlayerConfig(0);
+    tASSERT( player );
+
+    gConnection connection = gDSL;
+
+    uMenuItemSelection<gConnection> net(&firstSetup, "$first_setup_net", "$first_setup_net_help", connection );
+    if ( !st_FirstUse )
+    {
+        net.NewChoice( "$first_setup_leave", "$first_setup_leave_help", gLeave );
+        connection = gLeave;
+    }
+    net.NewChoice( "$first_setup_net_dialup", "$first_setup_net_dialup_help", gDialup );
+    net.NewChoice( "$first_setup_net_isdn", "$first_setup_net_isdn_help", gISDN );
+    net.NewChoice( "$first_setup_net_dsl", "$first_setup_net_dsl_help", gDSL );
+
+    tString keyboardTemplate("keys_cursor.cfg");
+    uMenuItemSelection<tString> k(&firstSetup, "$first_setup_keys", "$first_setup_keys_help", keyboardTemplate );
+    if ( !st_FirstUse )
+    {
+        k.NewChoice( "$first_setup_leave", "$first_setup_leave_help", tString("") );
+        keyboardTemplate="";
+    }
+    k.NewChoice( "$first_setup_keys_cursor", "$first_setup_keys_cursor_help", tString("keys_cursor.cfg") );
+    k.NewChoice( "$first_setup_keys_wasd", "$first_setup_keys_wasd_help", tString("keys_wasd.cfg") );
+    k.NewChoice( "$first_setup_keys_zqsd", "$first_setup_keys_zqsd_help", tString("keys_zqsd.cfg") );
+    k.NewChoice( "$first_setup_keys_cursor_single", "$first_setup_keys_cursor_single_help", tString("keys_cursor_single.cfg") );
+    // k.NewChoice( "$first_setup_keys_both", "$first_setup_keys_both_help", tString("keys_twohand.cfg") );
+    k.NewChoice( "$first_setup_keys_x", "$first_setup_keys_x_help", tString("keys_x.cfg") );
+
+    tColor leave(0,0,0,0);
+    tColor color(1,0,0);
+    uMenuItemSelection<tColor> c(&firstSetup,
+                                 "$first_setup_color",
+                                 "$first_setup_color_help",
+                                 color);   
+
+    if ( !st_FirstUse )
+    {
+        color = leave;
+        c.NewChoice( "$first_setup_leave", "$first_setup_leave_help", leave );
+    }
+
+    c.NewChoice( "$first_setup_color_red", "", tColor(1,0,0) );
+    c.NewChoice( "$first_setup_color_blue", "", tColor(0,0,1) );
+    c.NewChoice( "$first_setup_color_green", "", tColor(0,1,0) );
+    c.NewChoice( "$first_setup_color_yellow", "", tColor(1,1,0) );
+    c.NewChoice( "$first_setup_color_orange", "", tColor(1,.5,0) );
+    c.NewChoice( "$first_setup_color_purple", "", tColor(.5,0,1) );
+    c.NewChoice( "$first_setup_color_magenta", "", tColor(1,0,1) );
+    c.NewChoice( "$first_setup_color_cyan", "", tColor(0,1,1) );
+    c.NewChoice( "$first_setup_color_white", "", tColor(1,1,1) );
+    c.NewChoice( "$first_setup_color_dark", "", tColor(0,0,0) );
+    
+    if ( st_FirstUse )
+    {
+        for(int i=tRandomizer::GetInstance().Get(4); i>=0; --i)
+        {
+            c.LeftRight(1);
+        }
+    }
+
+    uMenuItemString n(&firstSetup,
+                      "$player_name_text",
+                      "$player_name_help",
+                      player->name, 16);
+    
+    uMenuItemExit e(&firstSetup, "$menuitem_accept", "$menuitem_accept_help");
+    
+    firstSetup.Enter();
+
+    // apply network rates
+    switch(connection)
+    {
+    case gDialup:
+        sn_maxRateIn  = 6;
+        sn_maxRateOut = 4;
+        break;
+    case gISDN:
+        sn_maxRateIn  = 8;
+        sn_maxRateOut = 8;
+        break;
+    case gDSL:
+        sn_maxRateIn  = 64;
+        sn_maxRateOut = 16;
+        break;
+    case gLeave:
+        break;
+    }
+
+    // store color
+    if( ! (color == leave) )
+    {
+        player->rgb[0] = color.r_*15;
+        player->rgb[1] = color.g_*15;
+        player->rgb[2] = color.b_*15;
+    }
+
+    // load keyboard layout
+    if( keyboardTemplate.Len() > 1 )
+    {
+        std::ifstream s;
+        if( tConfItemBase::OpenFile( s, keyboardTemplate, tConfItemBase::Config ) )
+        {
+            tCurrentAccessLevel level( tAccessLevel_Owner, true );
+            tConfItemBase::ReadFile( s );
+        }
+    }
+}
 
 #ifndef DEDICATED
 static void welcome(){
@@ -175,7 +309,6 @@ static void welcome(){
 
     if (st_FirstUse)
     {
-        st_FirstUse=false;
         sr_LoadDefaultConfig();
         textOutBack = sr_textOut;
         sr_textOut = false;
@@ -245,63 +378,27 @@ static void welcome(){
     }
     rSysDep::SwapGL();
 
-    sg_LanguageMenu();
+    sr_textOut = textOutBack;
+    sg_StartupLanguageMenu();
 
-    // catch some keyboard input
-    {
-        uInputProcessGuard inputProcessGuard;
-        while (su_GetSDLInput(tEvent)) ;
-    }
+    sr_textOut = textOutBack;
+    sg_StartupPlayerMenu();
 
-    timeout = tSysTimeFloat() + 10;
+    st_FirstUse=false;
 
-    sr_UnlockSDL();
-    uInputProcessGuard inputProcessGuard;
-    while ((!su_GetSDLInput(tEvent) || tEvent.type!=SDL_KEYDOWN) &&
-            tSysTimeFloat() < timeout){
+    sr_textOut = textOutBack;
+    uMenu::Message( tOutput("$welcome_message_heading"), tOutput("$welcome_message"), 300 );
 
-        sr_ResetRenderState(true);
-        rViewport::s_viewportFullscreen.Select();
+    // start a first single player game
+    sg_currentSettings->speedFactor = -2;
+    sg_currentSettings->autoNum = 0;
+    sr_textOut = textOutBack;
+    sg_SinglePlayerGame();
+    sg_currentSettings->autoNum = 1;
+    sg_currentSettings->speedFactor = 0;
 
-        if ( sr_glOut )
-        {
-            rSysDep::ClearGL();
-
-            uMenu::GenericBackground();
-
-            REAL w=16*2/640.0;
-            REAL h=32*2/480.0;
-
-
-            //REAL middle=-.6;
-
-            Color(1,1,1);
-            DisplayText(0,.8,w,h,tOutput("$welcome_message_heading"));
-
-            w/=2;
-            h/=2;
-
-            rTextField c(-.8,.6, w, h);
-
-
-            c << tOutput("$welcome_message_intro");
-
-            c.SetIndent(12);
-
-            c << tOutput("$welcome_message_vendor")   << gl_vendor   << '\n';
-            c << tOutput("$welcome_message_renderer") << gl_renderer << '\n';
-            c << tOutput("$welcome_message_version")  << gl_version  << '\n';
-
-            c.SetIndent(0);
-
-            c << tOutput("$welcome_message_finish");
-
-            rSysDep::SwapGL();
-        }
-
-        tAdvanceFrame();
-    }
-    sr_LockSDL();
+    sr_textOut = textOutBack;
+    uMenu::Message( tOutput("$welcome_message_2_heading"), tOutput("$welcome_message_2"), 300 );
 
     sr_textOut = textOutBack;
 }
@@ -718,7 +815,24 @@ int main(int argc,char **argv){
             SDL_Quit();
 #else
             if (!commandLineAnalyzer.daemon_)
+            {
+                if ( commandLineAnalyzer.inputFile_.Len() > 1 )
+                {
+                    FILE *in = fopen( commandLineAnalyzer.inputFile_, "r" );
+                    if ( in )
+                    {
+                        atexit( sr_Close_stdin );
+                        fseek( in, 0, SEEK_END );
+                        sr_input = in;
+                    }
+                    else
+                    {
+                        std::cerr << "Error opening input file '" << commandLineAnalyzer.inputFile_ << "': "
+                                  << strerror( errno ) << ". Using stdin to poll for input.\n";
+                    }
+                }
                 sr_Unblock_stdin();
+            }
 
             sr_glOut=0;
 

@@ -30,6 +30,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tLocale.h"
 #include "tConfiguration.h"
 
+#include <vector>
+
 static tString sg_FirstLanguage("American English"), sg_SecondLanguage("American English");
 
 static tConfItemLine sg_fl("LANGUAGE_FIRST",sg_FirstLanguage);
@@ -75,8 +77,6 @@ void sg_LanguageMenu()
                                       sg_FirstLanguage);
 
     tLanguage* run = tLanguage::FirstLanguage();
-
-
     while (run)
     {
         first.NewChoice(run->Name(),"", run->Name());
@@ -87,6 +87,63 @@ void sg_LanguageMenu()
     menu.Enter();
 
     sg_LanguageInit();
+}
+
+// for the first language selection, use a menu item for each language
+class uMenuItemLanguage: public uMenuItemAction
+{
+    // translates the language choice help message
+    static tString TranslateHelpOnTheFly(tLanguage & language)
+    {
+        // temporarily set and translate
+        tLanguage * oldFirst = tLanguage::FirstLanguage();
+        language.SetFirstLanguage();
+        tString ret(tOutput("$language_firstchoice_help"));
+        oldFirst->SetFirstLanguage();
+
+        return ret;
+    }
+    
+public:
+    uMenuItemLanguage( uMenu *M, tLanguage & language )
+    : uMenuItemAction(M, language.Name(), TranslateHelpOnTheFly(language) )
+    , language_( language )
+    {
+    }
+
+    virtual void Enter()
+    {
+        language_.SetFirstLanguage();
+        sg_FirstLanguage = language_.Name();
+
+        menu->Exit();
+    }
+private:
+    tLanguage & language_;
+};
+
+void sg_StartupLanguageMenu()
+{
+    uMenu menu("$language_menu_title", false);
+
+    std::vector< uMenuItem * > items;
+    
+    tLanguage* run = tLanguage::FirstLanguage();
+    while (run)
+    {
+        uMenuItem * item = tNEW(uMenuItemLanguage)( &menu, *run );
+        items.push_back( item );
+
+        run = run->Next();
+    }
+
+    menu.ReverseItems();
+    menu.Enter();
+
+    for( std::vector< uMenuItem * >::iterator i = items.begin(); i != items.end(); ++i )
+    {
+        delete *i;
+    }
 }
 
 

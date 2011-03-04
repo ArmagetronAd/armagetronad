@@ -55,6 +55,9 @@ public:
 
     //! call when you have some time for lengthy authentication queries to servers
     static void OnBreak();
+
+    //! returns whether a login is currently in process for the given user
+    static bool LoginInProcess(nNetObject * user);
 };
 
 #endif

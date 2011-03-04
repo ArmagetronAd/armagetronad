@@ -432,6 +432,12 @@ public:
     {
     }
 
+    // returns true if this process is still to be considered active
+    bool IsActive() const
+    {
+        return IsInList() && sn_UserID( user ) > 0;
+    }
+
     static nLoginProcess * Find( int userID )
     {
         nMachine & machine = nMachine::GetMachine( userID );
@@ -535,6 +541,12 @@ void nLoginProcess::FetchInfoFromAuthority()
     method.prefix = "";
     method.suffix = "";
     
+    if( !IsActive() )
+    {
+        Abort();
+        return;
+    }
+
     bool ret = false;
     if ( !tRecorder::IsPlayingBack() )
     {
@@ -868,7 +880,7 @@ void nLoginProcess::QueryFromClient()
     // check whether the user disappeared by now (this is run in the main thread,
     // so no risk of the user disconnecting while the function runs)
     int userID = sn_UserID( user );
-    if ( userID <= 0 )
+    if ( !IsActive() )
         return;
 
     // create a random salt value
@@ -955,7 +967,7 @@ static tSettingItem< bool > sn_TrustLANConf( "TRUST_LAN", sn_trustLAN );
 // sanity check the server address
 bool nLoginProcess::CheckServerAddress()
 {
-    // if no check is requested (only canm happen for old bmd5 protocol), don't check.
+    // if no check is requested (only can happen for old bmd5 protocol), don't check.
     if ( !checkAddress )
     {
         return true;
@@ -1031,6 +1043,11 @@ bool nLoginProcess::CheckServerAddress()
 // and determines whether the client is authorized or not.
 void nLoginProcess::Authorize()
 {
+    if( !IsActive() )
+    {
+        Abort();
+    }
+
     if ( aborted )
     {
         success = false;
@@ -1081,7 +1098,7 @@ void nLoginProcess::Finish()
 {
     // again, userID is safe in this function
     int userID = sn_UserID( user );
-    if ( userID <= 0 )
+    if ( !IsActive() )
         return;
 
     // decorate console with correct sender ID
@@ -1164,3 +1181,21 @@ void nAuthentication::OnBreak()
     st_DoToDo();
 }
 
+//! returns whether a login is currently in process for the given user ID
+bool nAuthentication::LoginInProcess( nNetObject * user )
+{
+#ifdef KRAWALL_SERVER
+    if( !user )
+    {
+        return false;
+    }
+
+    // fetch the process
+    nLoginProcess * process = nLoginProcess::Find( user->Owner() );
+
+    // compare the user
+    return ( process && user == process->user );
+#else
+    return false;
+#endif
+}
