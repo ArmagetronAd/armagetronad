@@ -3613,7 +3613,7 @@ void gGame::StateUpdate(){
                     int setsPlayed = eTeam::SetsPlayed ( );
                     // first challenge log message if needed
                     if (eTeam::ongoingChallenge && setsPlayed==0) {
-                    	sg_startChallengeWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S");
+                    	sg_startChallengeWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
                     	sg_startChallengeWriter.write();
                     }
                     // second match log message if needed
@@ -3626,7 +3626,7 @@ void gGame::StateUpdate(){
                        	mess.SetTemplateParameter(1, setsPlayed+1);
                        	mess << "$gamestate_set_start_console";
 						se_SaveToScoreFile(mess);
-				        sg_newSetWriter << (setsPlayed+1) << st_GetCurrentTime("%Y-%m-%d %H:%M:%S");
+				        sg_newSetWriter << (setsPlayed+1) << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
 				        sg_newSetWriter.write();
                     }
                     // finally, center message
@@ -4450,7 +4450,7 @@ void gGame::StartNewMatch(){
 
 void gGame::StartNewMatchNow(){
     if ( rounds != 0 ) {
-        sg_newMatchWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S");
+        sg_newMatchWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
         sg_newMatchWriter.write();
 	}
     rounds=0;
