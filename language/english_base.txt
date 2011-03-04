@@ -783,11 +783,11 @@ ladderlog_write_chat_help                     Write to ladderlog: CHAT <chatter>
 ladderlog_write_death_frag_help               Write to ladderlog: DEATH_FRAG <prey> <predator>
 ladderlog_write_death_suicide_help            Write to ladderlog: DEATH_SUICIDE <player>
 ladderlog_write_death_teamkill_help           Write to ladderlog: DEATH_TEAMKILL <prey> <predator>
-ladderlog_write_game_end_help                 Write to ladderlog: GAME_END
+ladderlog_write_game_end_help                 Write to ladderlog: GAME_END <date and time>
 ladderlog_write_game_time_help                Write to ladderlog: GAME_TIME <time> (see also: GAME_TIME_INTERVAL)
 ladderlog_write_match_winner_help             Write to ladderlog: MATCH_WINNER <team> <players>
-ladderlog_write_new_match_help                Write to ladderlog: NEW_MATCH
-ladderlog_write_new_round_help                Write to ladderlog: NEW_ROUND
+ladderlog_write_new_match_help                Write to ladderlog: NEW_MATCH <date and time>
+ladderlog_write_new_round_help                Write to ladderlog: NEW_ROUND <date and time>
 ladderlog_write_num_humans_help               Write to ladderlog: NUM_HUMANS <number of humans>
 ladderlog_write_online_player_help            Write to ladderlog: ONLINE_PLAYER <name> [<ping> [<team>]]
 ladderlog_write_player_entered_help           Write to ladderlog: PLAYER_ENTERED <name> <IP> <screen name>

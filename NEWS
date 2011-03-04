@@ -14,6 +14,7 @@ Changes since 0.2.8.3.x:
   default.
 - New command-line option "--input" added to poll for input from a file
   instead of stdin.
+- GAME_END, NEW_MATCH, and NEW_ROUND ladderlog events include date and time.
 
 Changes since 0.2.8.3_rc4:
 - New setting: KEEP_PLAYER_SLOT allows the server to kick (preferably) spectators

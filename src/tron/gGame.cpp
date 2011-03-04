@@ -1853,6 +1853,7 @@ static void own_game( nNetState enter_state ){
     ePlayerNetID::LogScoreDifferences();
     ePlayerNetID::UpdateSuspensions();
     ePlayerNetID::UpdateShuffleSpamTesters();
+    sg_gameEndWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
     sg_gameEndWriter.write();
 
     sg_currentGame=NULL;
@@ -3162,9 +3163,13 @@ void gGame::StateUpdate(){
             ePlayerNetID::UpdateSuspensions();
             ePlayerNetID::UpdateShuffleSpamTesters();
             
+            sg_newRoundWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
             sg_newRoundWriter.write();
             if ( rounds < 0 )
+            {
+                sg_newMatchWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
                 sg_newMatchWriter.write();
+            }
 
             // kick spectators
             nMachine::KickSpectators();
