@@ -6264,15 +6264,20 @@ void ePlayerNetID::SwapPlayersNo(int a,int b){
 void ePlayerNetID::SortByScore(){
     // bubble sort (AAARRGGH! but good for lists that change not much)
 
-    bool inorder=false;
-    while (!inorder){
-        inorder=true;
-        int i;
-        for(i=se_PlayerNetIDs.Len()-2;i>=0;i--)
-            if (se_PlayerNetIDs(i)->TotalScore() < se_PlayerNetIDs(i+1)->TotalScore() ){
-                SwapPlayersNo(i,i+1);
-                inorder=false;
+    bool inorder = false;
+    while ( !inorder )
+    {
+        inorder = true;
+        for( int i = se_PlayerNetIDs.Len() - 2; i >= 0; i-- )
+        {
+            ePlayerNetID *a = se_PlayerNetIDs( i );
+            ePlayerNetID *b = se_PlayerNetIDs( i + 1 );
+            if ( a->TotalScore() < b->TotalScore() || ( a->TotalScore() == b->TotalScore() && !a->CurrentTeam() && b->CurrentTeam() ) )
+            {
+                SwapPlayersNo( i, i + 1 );
+                inorder = false;
             }
+        }
     }
 }
 
@@ -7560,13 +7565,7 @@ void ePlayerNetID::UpdateTeam()
         return;
     }
 
-    // check if the team change is legal
-    if ( nCLIENT ==  sn_GetNetState() )
-    {
-        return;
-    }
-
-    if ( bool( nextTeam ) && !nextTeam->PlayerMayJoin( this ) )
+    if ( nCLIENT != sn_GetNetState() && bool( nextTeam ) && !nextTeam->PlayerMayJoin( this ) )
     {
         tOutput message;
         message.SetTemplateParameter(1, GetName() );
@@ -7595,7 +7594,7 @@ void ePlayerNetID::UpdateTeamForce()
 
     if ( nextTeam )
     {
-        if( !oldTeam && teamListID >= 0 )
+        if( nCLIENT != sn_GetNetState() && !oldTeam && teamListID >= 0 )
         {
             // clear current team list ID, it was just a shuffle wish
             // but store the shuffle wish first
@@ -7609,7 +7608,7 @@ void ePlayerNetID::UpdateTeamForce()
         oldTeam->RemovePlayer( this );
     }
 
-    if( nCLIENT !=  sn_GetNetState() && GetRefcount() > 0 )
+    if ( nCLIENT != sn_GetNetState() && GetRefcount() > 0 )
     {
         RequestSync();
     }
