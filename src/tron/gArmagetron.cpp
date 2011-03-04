@@ -816,7 +816,7 @@ int main(int argc,char **argv){
 #else
             if (!commandLineAnalyzer.daemon_)
             {
-                if ( commandLineAnalyzer.inputFile_.Len() > 0 )
+                if ( commandLineAnalyzer.inputFile_.Len() > 1 )
                 {
                     FILE *in = fopen( commandLineAnalyzer.inputFile_, "r" );
                     if ( in )
