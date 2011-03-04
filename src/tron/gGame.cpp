@@ -139,20 +139,10 @@ static void sg_SoundPause( bool pause, bool fromActivity )
 }
 
 // bool globalingame=false;
-tString sg_GetCurrentTime( char const * szFormat )
-{
-    char szTemp[128];
-    time_t     now;
-    struct tm *pTime;
-    now = time(NULL);
-    pTime = localtime(&now);
-    strftime(szTemp,sizeof(szTemp),szFormat,pTime);
-    return tString(szTemp);
-}
 
 void sg_PrintCurrentTime( char const * szFormat )
 {
-    con << sg_GetCurrentTime(szFormat);
+    con << st_GetCurrentTime(szFormat);
 }
 
 void sg_PrintCurrentDate()
@@ -4018,7 +4008,7 @@ void gGame::Analysis(REAL time){
                         se_SaveToScoreFile("$gamestate_champ_finalscores");
                         se_SaveToScoreFile(eTeam::Ranking( -1, false ));
                         se_SaveToScoreFile(ePlayerNetID::Ranking( -1, false ));
-                        se_SaveToScoreFile(sg_GetCurrentTime( "Time: %Y/%m/%d %H:%M:%S\n" ));
+                        se_SaveToScoreFile(st_GetCurrentTime( "Time: %Y/%m/%d %H:%M:%S\n" ));
                         se_SaveToScoreFile("\n\n");
 
                         eTeam* winningTeam = eTeam::teams(0);
