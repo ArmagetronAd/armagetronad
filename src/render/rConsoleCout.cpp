@@ -51,6 +51,7 @@ void rConsole::DoCenterDisplay(const tString &s,REAL timeout,REAL r,REAL g,REAL 
     DisplayAtNewline();
 }
 
+FILE *sr_input = stdin;
 static int stdin_descriptor;
 static bool unblocked = false;
 
@@ -71,7 +72,7 @@ void sr_Unblock_stdin(){
 #endif
 
     unblocked = true;
-    stdin_descriptor=fileno(stdin);
+    stdin_descriptor=fileno( sr_input );
 #ifndef WIN32
     // if (isatty(stdin_descriptor))
     {
@@ -153,6 +154,11 @@ void sr_Read_stdin(){
             currentIn++;
     }
 #endif
+}
+
+void sr_Close_stdin()
+{
+    fclose( sr_input );
 }
 
 

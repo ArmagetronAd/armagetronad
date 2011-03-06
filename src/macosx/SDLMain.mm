@@ -47,6 +47,22 @@ SDL_Event event;
     uMenu::quickexit=uMenu::QuickExit_Total;  
 }
 
+- (void)sendEvent:(NSEvent *)event
+{
+    NSEventType eventType = [event type];
+    
+    if (eventType == NSKeyDown || eventType == NSKeyUp)
+    {
+        // Let Mac OS X handle Hide, Minimize, etc
+        if ([event modifierFlags] & NSCommandKeyMask)
+            [super sendEvent:event];
+    }
+    else
+    {
+        [super sendEvent:event];
+    }
+}
+
 @end
 
 //! Change to the resource folder of the application bundle
@@ -118,6 +134,9 @@ void MacOSX_SetCWD(char **argv) {
     [self fixMenu:[NSApp mainMenu] withAppName:[[NSProcessInfo processInfo] processName]];
 #endif
 
+    // Forward events to NSApp
+    setenv("SDL_ENABLEAPPEVENTS", "1", 1);
+
     /* Hand off to main application code */
     status = SDL_main(gArgc, gArgv);
     
@@ -170,7 +189,7 @@ void MacOSX_SetCWD(char **argv) {
 #endif
 
 /* Main entry point to executable - should *not* be SDL_main! */
-int main (int argc, char **argv)
+int main (int argc, const char *argv[])
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     AAGrowlPlugin *growl = [[AAGrowlPlugin alloc] init];
@@ -202,7 +221,7 @@ int main (int argc, char **argv)
     
 #if SDL_USE_NIB_FILE
     [SDLApplication poseAsClass:[NSApplication class]];
-    NSApplicationMain (argc, (const char **)argv);
+    NSApplicationMain (argc, argv);
 #else
     CustomApplicationMain (argc, argv);
 #endif

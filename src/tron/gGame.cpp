@@ -230,20 +230,10 @@ static gRotationType rotationtype = gROTATION_NEVER;
 static tSettingItem<gRotationType> conf_rotationtype("ROTATION_TYPE",rotationtype);
 
 // bool globalingame=false;
-tString sg_GetCurrentTime( char const * szFormat )
-{
-    char szTemp[128];
-    time_t     now;
-    struct tm *pTime;
-    now = time(NULL);
-    pTime = localtime(&now);
-    strftime(szTemp,sizeof(szTemp),szFormat,pTime);
-    return tString(szTemp);
-}
 
 void sg_PrintCurrentTime( char const * szFormat )
 {
-    con << sg_GetCurrentTime(szFormat);
+    con << st_GetCurrentTime(szFormat);
 }
 
 void sg_PrintCurrentDate()
@@ -1401,6 +1391,7 @@ static void own_game( nNetState enter_state ){
     ePlayerNetID::LogScoreDifferences();
     ePlayerNetID::UpdateSuspensions();
     ePlayerNetID::UpdateShuffleSpamTesters();
+    sg_gameEndWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
     sg_gameEndWriter.write();
     se_sendEventNotification(tString("Game end"), tString("The Game has ended"));
 
@@ -2705,10 +2696,13 @@ void gGame::StateUpdate(){
             ePlayerNetID::UpdateShuffleSpamTesters();
             
             se_sendEventNotification(tString("New Round"), tString("Starting a new round"));
-
+            sg_newRoundWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
             sg_newRoundWriter.write();
             if ( rounds < 0 )
+            {
+                sg_newMatchWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
                 sg_newMatchWriter.write();
+            }
 
             // kick spectators
             nMachine::KickSpectators();
@@ -3666,7 +3660,7 @@ void gGame::Analysis(REAL time){
                         se_SaveToScoreFile("$gamestate_champ_finalscores");
                         se_SaveToScoreFile(eTeam::Ranking( -1, false ));
                         se_SaveToScoreFile(ePlayerNetID::Ranking( -1, false ));
-                        se_SaveToScoreFile(sg_GetCurrentTime( "Time: %Y/%m/%d %H:%M:%S\n" ));
+                        se_SaveToScoreFile(st_GetCurrentTime( "Time: %Y/%m/%d %H:%M:%S\n" ));
                         se_SaveToScoreFile("\n\n");
 
                         eTeam* winningTeam = eTeam::teams(0);
