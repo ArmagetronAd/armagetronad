@@ -1012,8 +1012,9 @@ bool FloodProtection( nMessage const & m )
     if ( sn_minPingTimes[sn_minPingCount - 1] <= 0 )
         return false;
 
-    // and delegate
-    return FloodProtection( peer ) || ( sn_minPingTimeGlobalFactor > 0 && FloodProtection( server, sn_minPingTimeGlobalFactor ) );
+    // and delegate. Only do global check, the per-peer check has already been
+    // done earlier as the packet was received.
+    return sn_minPingTimeGlobalFactor > 0 && FloodProtection( server, sn_minPingTimeGlobalFactor );
 }
 
 void nServerInfo::GetSmallServerInfo(nMessage &m){

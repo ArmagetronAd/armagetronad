@@ -1663,8 +1663,6 @@ int GetFreeSlot()
 static REAL sn_minBan    = 120; // minimal ban time in seconds for trying to connect while you're banned
 static tSettingItem< REAL > sn_minBanSetting( "NETWORK_MIN_BAN", sn_minBan );
 
-// defined in nServerInfo.cpp
-extern bool FloodProtection( nMessage const & m );
 
 // flag to disable 0.2.8 test version lockout
 static bool sn_lockOut028tTest = true;
@@ -1725,10 +1723,6 @@ int login_handler( nMessage &m, unsigned short rate ){
 
     // ignore multiple logins
     if( CountSameConnection( m.SenderID() ) > 0 )
-        return -1;
-
-    // ignore login floods
-    if ( FloodProtection( m ) )
         return -1;
 
     bool success=false;
@@ -2245,6 +2239,9 @@ public:
 
 typedef std::deque< tJUST_CONTROLLED_PTR< nMessage > > nMessageFifo;
 
+// defined in nServerInfo.cpp
+extern bool FloodProtection( nMachine & machine, REAL timeFactor=1.0 );
+
 static void rec_peer(unsigned int peer){
     tASSERT( sn_Connections[peer].socket );
 
@@ -2323,11 +2320,22 @@ static void rec_peer(unsigned int peer){
                 }
                 else
                 {
+// #define NO_GLOBAL_FLOODPROTECTION
+#ifndef NO_GLOBAL_FLOODPROTECTION
+                    // flood check for pings, logins and other potential nasties; as early as possible
+                    if( sn_GetNetState() == nSERVER && 
+                        FloodProtection( nMachine::GetMachine( MAXCLIENTS+1 ) ) )
+                    {
+                        continue;
+                    }
+#endif
+
                     // assume it's a new connection
                     id = MAXCLIENTS+1;
                     peers[ MAXCLIENTS+1 ] = addrFrom;
                     sn_Connections[ MAXCLIENTS+1 ].socket = sn_Connections[peer].socket;
                 }
+
 
                 //	 if (peer!=id)
                 //  con << "Changed incoming address.\n";
@@ -3237,6 +3245,7 @@ void sn_Receive(){
                 if((sn_Connections[MAXCLIENTS+1].socket = (*i).CheckNewConnection() ) != NULL)
                 {
                     rec_peer(MAXCLIENTS+1);
+                    sn_Connections[MAXCLIENTS+1].socket = NULL;
                 }
             }
         }
