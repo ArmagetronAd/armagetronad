@@ -1671,6 +1671,24 @@ static tSettingItem< bool > sn_lockOut028TestConf( "NETWORK_LOCK_OUT_028_TEST", 
 // the network stuff planned to send:
 tHeap<planned_send> send_queue[MAXCLIENTS+2];
 
+// defined in nServerInfo.cpp
+extern bool FloodProtection( nMachine & machine, REAL timeFactor=1.0 );
+extern bool GlobalFloodProtection();
+
+// report login failure. Or don't if we're flooded.
+int sn_ReportFailure(nMessage &m, char const * reason)
+{
+    // check whether we're currently getting flooded with failures
+    bool turtleMode = GlobalFloodProtection();
+
+    if( !turtleMode )
+    {
+        sn_DisconnectUser(m.SenderID(), reason);
+    }
+
+    return -1;
+}
+
 int login_handler( nMessage &m, unsigned short rate ){
     nCurrentSenderID senderID;
 
@@ -1719,6 +1737,8 @@ int login_handler( nMessage &m, unsigned short rate ){
             con << tOutput( "$network_ban", machine.GetIP() , int(banned/60), reason.Len() > 1 ? reason : tOutput( "$network_ban_noreason" ) );
 
         sn_DisconnectUser(m.SenderID(), tOutput( "$network_kill_banned", int(banned/60), reason ) );
+
+        return -1;
     }
 
     // ignore multiple logins
@@ -1736,13 +1756,13 @@ int login_handler( nMessage &m, unsigned short rate ){
     nVersion mergedVersion;
     if ( !mergedVersion.Merge( version, sn_CurrentVersion() ) )
     {
-        sn_DisconnectUser(m.SenderID(), "$network_kill_incompatible");
+        return sn_ReportFailure(m, "$network_kill_incompatible");
     }
 
     // expire 0.2.8 test versions, they have a security flaw
     if ( sn_lockOut028tTest && version.Max() >= 5 && version.Max() <= 10 )
     {
-        sn_DisconnectUser(m.SenderID(), "0.2.8_beta and 0.2.8.0_rc versions have a dangerous security flaw and are obsoleted, please upgrade to 0.2.8.2.1.");
+        return sn_ReportFailure(m, "0.2.8_beta and 0.2.8.0_rc versions have a dangerous security flaw and are obsoleted, please upgrade to 0.2.8.2.1.");
     }
 
     if (m.SenderID()!=MAXCLIENTS+1)
@@ -1763,7 +1783,9 @@ int login_handler( nMessage &m, unsigned short rate ){
             if ( new_id > 0 )
             {
                 if(sn_Connections[new_id].socket)
+                {
                     sn_DisconnectUser( new_id, "$network_kill_full" );
+                }
 
                 success = true;
 
@@ -1848,7 +1870,7 @@ int login_handler( nMessage &m, unsigned short rate ){
     }
     else if (m.SenderID()==MAXCLIENTS+1)
     {
-        sn_DisconnectUser(MAXCLIENTS+1, "$network_kill_full");
+        return sn_ReportFailure(m, "$network_kill_full");
     }
 
     sn_UpdateCurrentVersion();
@@ -2238,9 +2260,6 @@ public:
 // receive and s_Acknowledge the recently reveived network messages
 
 typedef std::deque< tJUST_CONTROLLED_PTR< nMessage > > nMessageFifo;
-
-// defined in nServerInfo.cpp
-extern bool FloodProtection( nMachine & machine, REAL timeFactor=1.0 );
 
 static void rec_peer(unsigned int peer){
     tASSERT( sn_Connections[peer].socket );

@@ -991,16 +991,23 @@ static nCallbackReceivedComplete sn_resetFirstInPacket( sn_ResetFirstInPacket );
 static REAL sn_minPingTimeGlobalFactor = 0.1;
 static tSettingItem< REAL > sn_minPingTimeGlobal( "PING_FLOOD_GLOBAL", sn_minPingTimeGlobalFactor );
 
+// checks for global flood events
+bool GlobalFloodProtection()
+{
+    nMachine & server = nMachine::GetMachine( 0 );
+
+    return sn_minPingTimeGlobalFactor > 0 && FloodProtection( server, sn_minPingTimeGlobalFactor );
+}
+
 // determines wheter the message comes from a flood attack; if so, reject it (return true)
 bool FloodProtection( nMessage const & m )
 {
-    // get the machine infos
-    nMachine & server = nMachine::GetMachine( 0 );
-    nMachine & peer   = nMachine::GetMachine( m.SenderID() );
-
     // only accept one ping per packet
     if ( !sn_firstInPacket )
     {
+        // get the machine infos
+        nMachine & peer   = nMachine::GetMachine( m.SenderID() );
+
         GetQueryMessageStats( peer ).Block();
 
         return true;
@@ -1014,7 +1021,7 @@ bool FloodProtection( nMessage const & m )
 
     // and delegate. Only do global check, the per-peer check has already been
     // done earlier as the packet was received.
-    return sn_minPingTimeGlobalFactor > 0 && FloodProtection( server, sn_minPingTimeGlobalFactor );
+    return GlobalFloodProtection();
 }
 
 void nServerInfo::GetSmallServerInfo(nMessage &m){
