@@ -2404,12 +2404,12 @@ static void rec_peer(unsigned int peer){
 // #define NO_GLOBAL_FLOODPROTECTION
 #ifndef NO_GLOBAL_FLOODPROTECTION
                     // flood check for pings, logins and other potential nasties; as early as possible
+                    nMachine * machinePointer = nMachine::PeekMachine( peer );
+
                     if( sn_GetNetState() == nSERVER )
                     {
                         // check whether we're currently getting flooded
                         sn_turtleMode = GlobalFloodProtection();
-
-                        nMachine & machine = nMachine::GetMachine( peer );
 
                         if( sn_turtleMode )
                         {
@@ -2417,7 +2417,7 @@ static void rec_peer(unsigned int peer){
                             unsigned short descriptor = ntohs(*b);
 
                             // do some extra checks
-                            if( descriptor != 1 && !machine.IsValidated() )
+                            if( descriptor != 1 && (!machinePointer || !machinePointer->IsValidated() ) )
                             {
                                 // send a fake login accept message; the ack response whitelists the IP
                                 tJUST_CONTROLLED_PTR<nMessage> r = tNEW(nMessage)(login_accept);
@@ -2429,6 +2429,14 @@ static void rec_peer(unsigned int peer){
                                 continue;
                             }
                         }
+
+                        // IP is not spoofed or there is no
+                        // current spoof heavy attack. Really look up the machine.
+                        if( !machinePointer )
+                        {
+                            machinePointer = &nMachine::GetMachine( peer );
+                        }
+                        nMachine & machine = *machinePointer;
       
                         // check individual flood protection
                         if ( FloodProtection( machine ) )
@@ -4379,18 +4387,55 @@ public:
     nMachinePTR & operator=(nMachinePTR const & other){ machine = other.machine; other.machine=0;return *this;}
 };
 
-typedef std::map< tString, nMachinePTR > nMachineMap;
+typedef sockaddr nMachineKey;
+
+bool operator < ( nMachineKey const & a, nMachineKey const & b )
+{
+    return reinterpret_cast< sockaddr_in const & >( a ).sin_addr.s_addr < reinterpret_cast< sockaddr_in const & >( b ).sin_addr.s_addr;
+}
+
+typedef std::map< nMachineKey, nMachinePTR > nMachineMap;
 static nMachineMap & sn_GetMachineMap()
 {
     static nMachineMap map;
     return map;
 }
 
-static nMachine & sn_LookupMachine( tString const & address )
+static nMachine & sn_LookupMachine( nMachineKey const * address )
 {
     // get map of all machines and look address up
     nMachineMap & map = sn_GetMachineMap();
-    return map[ address ].machine->SetIP( address );
+    nMachine & ret = *map[ *address ].machine;
+    if( ret.GetIP().Len() <= 2 )
+    {
+        nAddress addr;
+        sockaddr * target = addr;
+        *target = *address;
+        ret.SetIP( addr.GetAddress() );
+    }
+    return ret;
+}
+
+static nMachine * sn_PeekMachine( nMachineKey const * address )
+{
+    // get map of all machines and look address up
+    nMachineMap & map = sn_GetMachineMap();
+    nMachineMap::const_iterator i = map.find( *address );
+    if( i != map.end() )
+    {
+        return (*i).second.machine;
+    }
+    else
+    {
+        return NULL;
+    }
+}
+
+static nMachine & sn_LookupMachine( tString const & address )
+{
+    nAddress addr;
+    addr.SetAddress( address );
+    return sn_LookupMachine( addr );
 }
 
 // *******************************************************************************
@@ -4433,18 +4478,51 @@ nMachine & nMachine::GetMachine( unsigned short userID )
         static nMachine invalid;
         return invalid;
     }
-    tString address;
-    peers[ userID ].GetAddress( address );
-
-#ifdef DEBUG_X
-    // add client ID so multiple connects from one machine are distinguished
-    tString newIP;
-    newIP << address << " " << userID;
-    address = newIP;
-#endif
 
     // delegate
-    return sn_LookupMachine( address );
+    return sn_LookupMachine( peers[userID] );
+}
+
+// *******************************************************************************
+// *
+// *	PeekMachine
+// *
+// *******************************************************************************
+//!
+//!		@param	userID	the user ID to fetch the machine for
+//!		@return		    the machine the user ID belongs to
+//!
+// *******************************************************************************
+
+nMachine * nMachine::PeekMachine( unsigned short userID )
+{
+    // throw out old machines
+    Expire();
+
+    // hardcoding: the server itself
+    if ( userID == 0 && sn_GetNetState() != nCLIENT )
+    {
+        return &GetMachine( userID );
+    }
+
+    tASSERT( userID <= MAXCLIENTS+1 );
+
+    if( sn_GetNetState() != nSERVER )
+    {
+        // invalid ID, return invalid machine (clients don't track machines)
+        return &GetMachine( userID );
+    }
+
+    // get address
+    tVERIFY( userID <= MAXCLIENTS+1 );
+    if( !sn_Connections[userID].socket )
+    {
+        // invalid ID, return invalid machine
+        return &GetMachine( userID );
+    }
+
+    // delegate
+    return sn_PeekMachine( peers[userID] );
 }
 
 // safely delete iterator from map
@@ -4712,7 +4790,7 @@ public:
                 nMachine & machine = *(*iter).second.machine;
                 // if ( machine.IsBanned() > 0 )
                 {
-                    s << (*iter).first << " " << machine.IsBanned() << " " << machine.kph_ << " " << machine.GetBanReason() << "\n";
+                    s << machine.GetIP() << " " << machine.IsBanned() << " " << machine.kph_ << " " << machine.GetBanReason() << "\n";
                 }
             }
         }

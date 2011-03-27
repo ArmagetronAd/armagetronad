@@ -722,7 +722,8 @@ public:
     bool operator == ( nMachine const & other ) const; //!< equality operator
     bool operator != ( nMachine const & other ) const; //!< inequality operator
 
-    static nMachine & GetMachine( unsigned short userID ); //!< fetches the machine information of a user
+    static nMachine & GetMachine( unsigned short userID ); //!< fetches the machine information of a user, creating it on demand
+    static nMachine * PeekMachine( unsigned short userID ); //!< fetches the machine information of a user, returning NULL if none is found
     static void Expire();                       //!< expires machine information that is no longer needed
     static void KickSpectators();               //!< remove clients without players from the server
 
