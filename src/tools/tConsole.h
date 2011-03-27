@@ -78,7 +78,7 @@ public:
 
     virtual ~tConsole();
 
-    tConsole & Print(tString s);
+    tConsole & Print(tString const & s);
 
     template<class T> tConsole & operator<<(const T&x){
         tColoredString s;
@@ -105,6 +105,7 @@ protected:
 private:
     static tConsole *s_betterConsole;
 
+    void PrintLine(tString const & s, int repetitions);
     virtual tConsole & DoPrint(const tString& s);
     virtual void DoCenterDisplay(const tString& s,REAL timeout=5,REAL r=1,REAL g=1,REAL b=1);
 };
