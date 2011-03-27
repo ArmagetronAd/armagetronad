@@ -624,14 +624,26 @@ void nDescriptor::HandleMessage(nMessage &message){
 
 // *************************************************************
 
+// random offset
+static int sn_GetRandomOffset()
+{
+    static tReproducibleRandomizer rand;
+    return rand.Get();
+}
+
 // syn cookie
 static int sn_SynTimestamp()
 {
-    return tSysTimeFloat()/16;
+    static int offset = sn_GetRandomOffset();
+
+    return offset + tSysTimeFloat()/16;
 }
 
 static unsigned short sn_SynGenerateCookie(int stamp, nAddress const & sender)
 {
+    static const int modulo = 0xff71;
+    stamp %= modulo;
+
     // calculate just some random checksum. Doesn't need to be any good.
     int checksum = stamp;
     int mul = stamp;
@@ -641,7 +653,7 @@ static unsigned short sn_SynGenerateCookie(int stamp, nAddress const & sender)
         ++mul;
         checksum *= mul;
         checksum += reinterpret_cast< char const * >( sock )[i];
-        checksum %= 0xff71;
+        checksum %= modulo;
     }
 
     return checksum+1;
@@ -2407,7 +2419,7 @@ static void rec_peer(unsigned int peer){
                             // do some extra checks
                             if( descriptor != 1 && !machine.IsValidated() )
                             {
-                                // send a fake login accept message
+                                // send a fake login accept message; the ack response whitelists the IP
                                 tJUST_CONTROLLED_PTR<nMessage> r = tNEW(nMessage)(login_accept);
                                 r->BendMessageID( sn_SynGenerateCookie( sn_SynTimestamp(), peers[peer] ) );
                                 r->SendImmediately(peer,false);
