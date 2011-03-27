@@ -624,6 +624,37 @@ void nDescriptor::HandleMessage(nMessage &message){
 
 // *************************************************************
 
+// syn cookie
+static int sn_SynTimestamp()
+{
+    return tSysTimeFloat()/16;
+}
+
+static unsigned short sn_SynGenerateCookie(int stamp, nAddress const & sender)
+{
+    // calculate just some random checksum. Doesn't need to be any good.
+    int checksum = stamp;
+    int mul = stamp;
+    sockaddr const * sock = sender;
+    for(int i = sender.GetAddressLength()-1; i >= 0; --i )
+    {
+        ++mul;
+        checksum *= mul;
+        checksum += reinterpret_cast< char const * >( sock )[i];
+        checksum %= 0xff71;
+    }
+
+    return checksum+1;
+}
+
+static unsigned short sn_SynGenerateCookie(int stamp, nMessage const &m)
+{
+    return sn_SynGenerateCookie( stamp, peers[m.SenderID()] );
+}
+
+
+// *************************************************************
+
 
 void ack_handler(nMessage &m){
     while (!m.End()){
@@ -631,12 +662,26 @@ void ack_handler(nMessage &m){
 
         unsigned short ack;
         m.Read(ack);
-        //con << "Got ack:" << ack << ":" << m.SenderID() << '\n';
-        nWaitForAck::Ackt(ack,m.SenderID());
+
+        // check for syn cookie response
+        if( m.SenderID() == MAXCLIENTS+1 )
+        {
+            int stamp = sn_SynTimestamp();
+            if ( ack == sn_SynGenerateCookie( stamp , m ) ||
+                 ack == sn_SynGenerateCookie( stamp-1 , m ) )
+            {
+                nMachine::GetMachine( m.SenderID() ).Validate();
+            }
+        }
+        else
+        {
+            //con << "Got ack:" << ack << ":" << m.SenderID() << '\n';
+            nWaitForAck::Ackt(ack,m.SenderID());
+        }
     }
 }
 
-static nDescriptor s_Acknowledge(1,ack_handler,"ack");
+static nDescriptor s_Acknowledge(1,ack_handler,"ack",true);
 
 
 class nWaitForAck;
@@ -1675,13 +1720,13 @@ tHeap<planned_send> send_queue[MAXCLIENTS+2];
 extern bool FloodProtection( nMachine & machine, REAL timeFactor=1.0 );
 extern bool GlobalFloodProtection();
 
+// true while we're turtling from a flood
+static bool sn_turtleMode = false;
+
 // report login failure. Or don't if we're flooded.
 int sn_ReportFailure(nMessage &m, char const * reason)
 {
-    // check whether we're currently getting flooded with failures
-    bool turtleMode = GlobalFloodProtection();
-
-    if( !turtleMode )
+    if( !sn_turtleMode )
     {
         sn_DisconnectUser(m.SenderID(), reason);
     }
@@ -2339,20 +2384,47 @@ static void rec_peer(unsigned int peer){
                 }
                 else
                 {
-// #define NO_GLOBAL_FLOODPROTECTION
-#ifndef NO_GLOBAL_FLOODPROTECTION
-                    // flood check for pings, logins and other potential nasties; as early as possible
-                    if( sn_GetNetState() == nSERVER && 
-                        FloodProtection( nMachine::GetMachine( MAXCLIENTS+1 ) ) )
-                    {
-                        continue;
-                    }
-#endif
-
                     // assume it's a new connection
                     id = MAXCLIENTS+1;
                     peers[ MAXCLIENTS+1 ] = addrFrom;
                     sn_Connections[ MAXCLIENTS+1 ].socket = sn_Connections[peer].socket;
+
+// #define NO_GLOBAL_FLOODPROTECTION
+#ifndef NO_GLOBAL_FLOODPROTECTION
+                    // flood check for pings, logins and other potential nasties; as early as possible
+                    if( sn_GetNetState() == nSERVER )
+                    {
+                        // check whether we're currently getting flooded
+                        sn_turtleMode = GlobalFloodProtection();
+
+                        nMachine & machine = nMachine::GetMachine( peer );
+
+                        if( sn_turtleMode )
+                        {
+                            // peek at descriptor
+                            unsigned short descriptor = ntohs(*b);
+
+                            // do some extra checks
+                            if( descriptor != 1 && !machine.IsValidated() )
+                            {
+                                // send a fake login accept message
+                                tJUST_CONTROLLED_PTR<nMessage> r = tNEW(nMessage)(login_accept);
+                                r->BendMessageID( sn_SynGenerateCookie( sn_SynTimestamp(), peers[peer] ) );
+                                r->SendImmediately(peer,false);
+                                nMessage::SendCollected(peer);
+
+                                // and ignore for now
+                                continue;
+                            }
+                        }
+      
+                        // check individual flood protection
+                        if ( FloodProtection( machine ) )
+                        {
+                            continue;
+                        }
+                    }
+#endif
                 }
 
 
@@ -4225,6 +4297,7 @@ nMachine::nMachine( void )
         : lastUsed_(tSysTimeFloat())
         , banned_(-1)
         , players_(0)
+        , validated_(false)
         , decorators_(0)
 {
     kph_.Add(0,.1666);
