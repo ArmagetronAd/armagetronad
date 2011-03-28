@@ -1772,7 +1772,27 @@ tHeap<planned_send> send_queue[MAXCLIENTS+2];
 
 // defined in nServerInfo.cpp
 extern bool FloodProtection( nMachine & machine, REAL timeFactor=1.0 );
-extern bool GlobalFloodProtection();
+
+// time factor for incoming connections, lower makes turtle mode kick in later
+static REAL sn_minConnectionTimeGlobalFactor = 0.1;
+static tSettingItem< REAL > sn_minPingTimeGlobal( "CONNECTION_FLOOD_SENSITIVITY", sn_minConnectionTimeGlobalFactor );
+
+// enforce turtle mode
+static bool sn_forceTurtleMode = false;
+static tSettingItem< bool > sn_forceTurtleModeConf( "FORCE_TURTLE_MODE", sn_forceTurtleMode );
+
+// number of packets from unknown sources to process each call to rec_peer
+static int sn_connectionLimit = 1000;
+static tSettingItem< int > sn_connectionLimitConf( "CONNECTION_LIMIT", sn_connectionLimit );
+
+
+// checks for global flood events
+static bool GlobalConnectionFloodProtection()
+{
+    static nMachine server;
+
+    return sn_minConnectionTimeGlobalFactor > 0 && FloodProtection( server, sn_minConnectionTimeGlobalFactor );
+}
 
 // true while we're turtling from a flood
 static bool sn_turtleMode = false;
@@ -2454,10 +2474,15 @@ static void rec_peer(unsigned int peer){
                     if( sn_GetNetState() == nSERVER )
                     {
                         // check whether we're currently getting flooded
-                        sn_turtleMode = GlobalFloodProtection();
+                        sn_turtleMode = GlobalConnectionFloodProtection() || sn_forceTurtleMode;
 
                         if( sn_turtleMode )
                         {
+                            if( count > sn_connectionLimit )
+                            {
+                                continue;
+                            }
+
                             // peek at descriptor
                             unsigned short descriptor = ntohs(*b);
 
