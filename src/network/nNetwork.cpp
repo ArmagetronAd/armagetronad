@@ -2530,8 +2530,8 @@ static void rec_peer(unsigned int peer){
                             machinePointer = &nMachine::GetMachine( peer );
                         }
       
-                        // check individual flood protection
-                        if ( FloodProtection( *machinePointer ) )
+                        // check individual flood protection (be lenient in turtle mode, login responses may have trouble getting through an attack)
+                        if ( FloodProtection( *machinePointer, sn_turtleMode ? .2 : .1 ) )
                         {
                             return;
                         }
