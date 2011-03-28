@@ -2456,13 +2456,13 @@ static void rec_peer(unsigned int peer){
                         // check whether we're currently getting flooded
                         sn_turtleMode = GlobalFloodProtection();
 
-                        if( true || sn_turtleMode )
+                        if( sn_turtleMode )
                         {
                             // peek at descriptor
                             unsigned short descriptor = ntohs(*b);
 
                             // do some extra checks
-                            if( descriptor == 1 )
+                            if( descriptor == s_Acknowledge.ID() )
                             {
                                 // this must be the cookie response triggered by the code below.
                                 // allow it, but be careful to only read the first message.
@@ -2479,7 +2479,10 @@ static void rec_peer(unsigned int peer){
                                 r = tNEW(nMessage)(login_accept);
                                 r->BendMessageID( cookie.second );
                                 r->SendImmediately(peer,false);
+                                int idback = ::sn_myNetID;
+                                sn_myNetID = 1; // set a fake ID so the client doesn't consider the packet as a response from the server and messes up its ack data
                                 nMessage::SendCollected(peer);
+                                ::sn_myNetID = idback;
 
                                 // and ignore for now
                                 return;
@@ -2580,7 +2583,7 @@ static void rec_peer(unsigned int peer){
                                     // do not ack the login_ignore packet that did not let you in.
 
 #ifdef DEBUG
-                                    if ( id > MAXCLIENTS )
+                                    if ( id > MAXCLIENTS && mess.Descriptor() != login_accept.ID() )
                                     {
                                         con << "Sending ack to login slot.\n";
                                     }
