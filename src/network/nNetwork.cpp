@@ -1782,7 +1782,7 @@ static bool sn_forceTurtleMode = false;
 static tSettingItem< bool > sn_forceTurtleModeConf( "FORCE_TURTLE_MODE", sn_forceTurtleMode );
 
 // number of packets from unknown sources to process each call to rec_peer
-static int sn_connectionLimit = 1000;
+static int sn_connectionLimit = 100;
 static tSettingItem< int > sn_connectionLimitConf( "CONNECTION_LIMIT", sn_connectionLimit );
 
 
@@ -2469,6 +2469,11 @@ static void rec_peer(unsigned int peer){
 // #define NO_GLOBAL_FLOODPROTECTION
 #ifndef NO_GLOBAL_FLOODPROTECTION
                     // flood check for pings, logins and other potential nasties; as early as possible
+                    if( sn_turtleMode && count > sn_connectionLimit*10 )
+                    {
+                        continue;
+                    }
+
                     nMachine * machinePointer = nMachine::PeekMachine( peer );
 
                     if( sn_GetNetState() == nSERVER )
@@ -2514,7 +2519,7 @@ static void rec_peer(unsigned int peer){
                                 ::sn_myNetID = idback;
 
                                 // and ignore for now
-                                return;
+                                continue;
                             }
                         }
 
@@ -2524,10 +2529,9 @@ static void rec_peer(unsigned int peer){
                         {
                             machinePointer = &nMachine::GetMachine( peer );
                         }
-                        nMachine & machine = *machinePointer;
       
                         // check individual flood protection
-                        if ( FloodProtection( machine ) )
+                        if ( FloodProtection( *machinePointer ) )
                         {
                             return;
                         }
