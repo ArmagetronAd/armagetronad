@@ -2488,6 +2488,10 @@ static void rec_peer(unsigned int peer){
                                 // allow it, but be careful to only read the first message.
                                 onlyReadFirstMessage = true;
                             }
+                            else if( descriptor == login_accept.ID() )
+                            {
+                                // Hah. Nice trick. Won't work, though.
+                            }
                             else if( !machinePointer || !machinePointer->IsValidated() )
                             {
                                 if( count > sn_connectionLimit )
