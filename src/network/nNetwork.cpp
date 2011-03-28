@@ -628,7 +628,7 @@ void nDescriptor::HandleMessage(nMessage &message){
 static int sn_GetRandomOffset()
 {
     static tReproducibleRandomizer rand;
-    return rand.Get();
+    return rand.Get(0x7fffffff);
 }
 
 // syn cookie
@@ -639,29 +639,45 @@ static int sn_SynTimestamp()
     return offset + tSysTimeFloat()/16;
 }
 
-static unsigned short sn_SynGenerateCookie(int stamp, nAddress const & sender)
+// a cookie consists of two shorts, each transmitted as MessageID
+// of two consecutive fake login accept packets. They'll be sent back
+// to the server inside ONE ack message by a real, non-spoofed client.
+struct nCookie
 {
-    static const int modulo = 0xff71;
+    unsigned short first; 
+    unsigned short second;
+
+    nCookie(): first(0), second(0){}
+};
+
+static void sn_SynGenerateCookie(int stamp, nAddress const & sender, nCookie & ret)
+{
+    // just some random modulus.
+    static const unsigned int modulo = 0x7f71fa35;
     stamp %= modulo;
 
-    // calculate just some random checksum. Doesn't need to be any good.
+    // calculate just some random checksum. Doesn't need to be any good,
+    // we can change it any time should someone be able to predict it.
     int checksum = stamp;
-    int mul = stamp;
+    int mul = ( stamp & 0x7fff ) + 3;
     sockaddr const * sock = sender;
     for(int i = sender.GetAddressLength()-1; i >= 0; --i )
     {
         ++mul;
-        checksum *= mul;
+        checksum += (checksum >> 16) * mul;
         checksum += reinterpret_cast< char const * >( sock )[i];
         checksum %= modulo;
     }
 
-    return checksum+1;
+    // message IDs must not be 0, so we need to add a 1 offset and can't
+    // do the usual &0xffff / >>16 split.
+    ret.first = ( checksum % 0xfffe ) + 1;
+    ret.second = (checksum + 1 - ret.first)/0xfffe + 1;
 }
 
-static unsigned short sn_SynGenerateCookie(int stamp, nMessage const &m)
+static void sn_SynGenerateCookie(int stamp, nMessage const &m, nCookie & ret)
 {
-    return sn_SynGenerateCookie( stamp, peers[m.SenderID()] );
+    sn_SynGenerateCookie( stamp, peers[m.SenderID()], ret );
 }
 
 
@@ -669,27 +685,47 @@ static unsigned short sn_SynGenerateCookie(int stamp, nMessage const &m)
 
 
 void ack_handler(nMessage &m){
-    while (!m.End()){
-        sn_Connections[m.SenderID()].AckReceived();
-
-        unsigned short ack;
-        m.Read(ack);
-
-        // check for syn cookie response
-        if( m.SenderID() == MAXCLIENTS+1 )
+    if( m.SenderID() == MAXCLIENTS+1 )
+    {
+    // check for syn cookie response
+        nCookie cookie;
+        if(m.End())
         {
-            int stamp = sn_SynTimestamp();
-            if ( ack == sn_SynGenerateCookie( stamp , m ) ||
-                 ack == sn_SynGenerateCookie( stamp-1 , m ) )
+            return;
+        }
+        m.Read(cookie.first);
+        if(m.End())
+        {
+            return;
+        }
+        m.Read(cookie.second);
+        if(!m.End())
+        {
+            return;
+        }
+
+        int stamp = sn_SynTimestamp();
+        for(int offset=0; offset >= -1; --offset)
+        {
+            nCookie correct;
+            sn_SynGenerateCookie( stamp+offset , m, correct );
+            if( correct.first == cookie.first && correct.second == cookie.second )
             {
                 nMachine::GetMachine( m.SenderID() ).Validate();
             }
         }
-        else
-        {
-            //con << "Got ack:" << ack << ":" << m.SenderID() << '\n';
-            nWaitForAck::Ackt(ack,m.SenderID());
-        }
+            
+        return;
+    }
+
+    while (!m.End())
+    {
+        sn_Connections[m.SenderID()].AckReceived();
+
+        unsigned short ack;
+        m.Read(ack);
+        //con << "Got ack:" << ack << ":" << m.SenderID() << '\n';
+        nWaitForAck::Ackt(ack,m.SenderID());
     }
 }
 
@@ -1547,6 +1583,12 @@ extern bool sn_AcceptingFromMaster;
 
 void login_accept_handler(nMessage &m){
     if (sn_GetNetState()!=nSERVER && m.SenderID() == 0){
+        if(m.End())
+        {
+            // fake login accept sent only for cookie ack response. ignore.
+            return;
+        }
+
         unsigned short id=0;
         m.Read(id);
 
@@ -2419,9 +2461,14 @@ static void rec_peer(unsigned int peer){
                             // do some extra checks
                             if( descriptor != 1 && (!machinePointer || !machinePointer->IsValidated() ) )
                             {
-                                // send a fake login accept message; the ack response whitelists the IP
+                                // send fake login accept messages; the ack response whitelists the IP
+                                nCookie cookie;
+                                sn_SynGenerateCookie( sn_SynTimestamp(), peers[peer], cookie );
                                 tJUST_CONTROLLED_PTR<nMessage> r = tNEW(nMessage)(login_accept);
-                                r->BendMessageID( sn_SynGenerateCookie( sn_SynTimestamp(), peers[peer] ) );
+                                r->BendMessageID( cookie.first );
+                                r->SendImmediately(peer,false);
+                                r = tNEW(nMessage)(login_accept);
+                                r->BendMessageID( cookie.second );
                                 r->SendImmediately(peer,false);
                                 nMessage::SendCollected(peer);
 
