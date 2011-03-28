@@ -2428,6 +2428,9 @@ static void rec_peer(unsigned int peer){
                 */
                 count ++;
 
+                // set if only the first message of the packet is to be processed.
+                bool onlyReadFirstMessage = false;
+
                 unsigned int id=peer;
                 //	 for(unsigned int i=1;i<=(unsigned int)maxclients;i++)
                 int comp=nAddress::Compare( addrFrom, peers[claim_id] );
@@ -2453,13 +2456,19 @@ static void rec_peer(unsigned int peer){
                         // check whether we're currently getting flooded
                         sn_turtleMode = GlobalFloodProtection();
 
-                        if( sn_turtleMode )
+                        if( true || sn_turtleMode )
                         {
                             // peek at descriptor
                             unsigned short descriptor = ntohs(*b);
 
                             // do some extra checks
-                            if( descriptor != 1 && (!machinePointer || !machinePointer->IsValidated() ) )
+                            if( descriptor == 1 )
+                            {
+                                // this must be the cookie response triggered by the code below.
+                                // allow it, but be careful to only read the first message.
+                                onlyReadFirstMessage = true;
+                            }
+                            else if( !machinePointer || !machinePointer->IsValidated() )
                             {
                                 // send fake login accept messages; the ack response whitelists the IP
                                 nCookie cookie;
@@ -2473,7 +2482,7 @@ static void rec_peer(unsigned int peer){
                                 nMessage::SendCollected(peer);
 
                                 // and ignore for now
-                                continue;
+                                return;
                             }
                         }
 
@@ -2488,7 +2497,7 @@ static void rec_peer(unsigned int peer){
                         // check individual flood protection
                         if ( FloodProtection( machine ) )
                         {
-                            continue;
+                            return;
                         }
                     }
 #endif
@@ -2613,6 +2622,12 @@ static void rec_peer(unsigned int peer){
                                 //else
                                 //con << "Message " << mess_id << ":" << id << " was not new.\n";
                             }
+
+                        // abort if we're only supoosed to process the first message
+                        if( onlyReadFirstMessage )
+                        {
+                            break;
+                        }
                     }
 #ifndef NOEXCEPT
                 }
