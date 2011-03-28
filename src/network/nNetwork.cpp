@@ -2478,11 +2478,6 @@ static void rec_peer(unsigned int peer){
 
                         if( sn_turtleMode )
                         {
-                            if( count > sn_connectionLimit )
-                            {
-                                continue;
-                            }
-
                             // peek at descriptor
                             unsigned short descriptor = ntohs(*b);
 
@@ -2495,6 +2490,11 @@ static void rec_peer(unsigned int peer){
                             }
                             else if( !machinePointer || !machinePointer->IsValidated() )
                             {
+                                if( count > sn_connectionLimit )
+                                {
+                                    continue;
+                                }
+
                                 // send fake login accept messages; the ack response whitelists the IP
                                 nCookie cookie;
                                 sn_SynGenerateCookie( sn_SynTimestamp(), peers[peer], cookie );
