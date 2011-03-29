@@ -4594,9 +4594,6 @@ nMachine & nMachine::GetMachine( unsigned short userID )
 
 nMachine * nMachine::PeekMachine( unsigned short userID )
 {
-    // throw out old machines
-    Expire();
-
     // hardcoding: the server itself
     if ( userID == 0 && sn_GetNetState() != nCLIENT )
     {
