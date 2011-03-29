@@ -2390,7 +2390,9 @@ static void rec_peer(unsigned int peer){
     static nMessageFifo receivedMessages;
 
     // the growing buffer we read messages into
+#ifndef DEDICATED
     const int serverMaxAcceptedSize=2000;
+#endif
     static tArray< unsigned short > storage(2000);
     int maxrec = 0; maxrec = storage.Len();
     unsigned short * buff = 0; buff = &storage[0];
@@ -2407,6 +2409,7 @@ static void rec_peer(unsigned int peer){
             if (len>0){
                 if ( len >= maxrec*2 )
                 {
+#ifndef DEDICATED
                     // the message was too long to receive. What to do?
                     if ( sn_GetNetState() != nSERVER || len < serverMaxAcceptedSize )
                     {
@@ -2418,16 +2421,55 @@ static void rec_peer(unsigned int peer){
 
                         tERR_WARN( "Oversized network packet received. Read buffer has been enlargened to catch it the next time.");
 
-                        // no use in processing the truncated packet. Some messages may get lost,
-                        // but that's better than the inevitable network error and connection
-                        // termination that expects us if we go on.
-                        continue;
                     }
                     else
+#endif
                     {
-                        // terminate the connection
-                        sn_DisconnectUser( peer, "$network_kill_error" );
+                        // packet WAAAAY too large.
+                        static float totalFatsoes = 10;  // number of oversized packages checked
+                        static float clientFatsoes = 10; // number of oversized pacakges that could be attributed to clients
+                        static float bother = 5;         // counter that determines whether we bother to check.
+                        bother+=clientFatsoes;
+
+                        // what follows is work, so we only do it if it payed off in the past
+                        // if this block is entered not at all by error, no biggie. The clients
+                        // will time out eventually.
+                        if(bother>totalFatsoes)
+                        {
+                            bother-=totalFatsoes;
+
+                            // increase total stat
+                            totalFatsoes++;
+
+                            // If it's from a connected client,
+                            // terminate the connection. If not, it's an attack and
+                            // we should rather ignore it.
+                            bool success = false;
+                            for( int id=MAXCLIENTS; id > 0; --id )
+                            {
+                                if (sn_Connections[id].socket && peers[id] == addrFrom)
+                                {
+                                    sn_DisconnectUser( id, "$network_kill_error" );
+                                    success=true;
+                                }
+                            }
+
+                            // count the successfully removed client
+                            if( success )
+                                clientFatsoes++;
+
+                            // scale down the stats
+                            const float factor=.99;
+                            totalFatsoes*=factor;
+                            clientFatsoes*=factor;
+                            bother*=factor;
+                        }
                     }
+
+                    // no use in processing the truncated packet. Some messages may get lost,
+                    // but that's better than the inevitable network error and connection
+                    // termination that expects us if we go on.
+                    continue;
                 }
 
                 unsigned short *b=buff;
