@@ -389,7 +389,7 @@ ping_flood_time_100_help            Minimum time for 100 ping packets from one m
 ping_flood_global_help              The times PING_FLOOD_TIME_X, multiplied by this value, count for all pings from all machines. Negative values disable global flood protection.
 connection_flood_sensitivity_help   The times PING_FLOOD_TIME_X, multiplied by this value, count for all incoming messages from clients not connected already. A flood here activates turtle mode. Negative values disable global flood protection.
 connection_limit_help               Maximum number of packets from unknown peers to handle at one 
-anti_spoof_help                     If set to 1, checks connecting clients for spoofed IPs. Only clients passing a connectivity test are allowed in. This is done in turtle mode automatically, but may be useful to have on at all times. Connecting clients will see two odd warning messages.
+anti_spoof_help                     If set to 1, checks connecting clients for spoofed IPs. Only clients passing a connectivity test are allowed in. This is done in turtle mode automatically, but may be useful to have on at all times.
 turtle_mode_activated               Server is under attack. Turtle mode activated.\n
 turtle_mode_deactivated             The attack seems to have stopped for now. Turtle mode deactivated.\n
 
