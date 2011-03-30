@@ -1857,11 +1857,11 @@ public:
 static nTurtleControl sn_turtleMode;
 
 // checks for global flood events
-static inline bool GlobalConnectionFloodProtection()
+static inline bool GlobalConnectionFloodProtection( REAL extraFactor = 1.0f )
 {
     static nMachine server;
 
-    if( sn_minConnectionTimeGlobalFactor > 0 && FloodProtection( server, sn_minConnectionTimeGlobalFactor ) )
+    if( sn_minConnectionTimeGlobalFactor > 0 && FloodProtection( server, sn_minConnectionTimeGlobalFactor*extraFactor ) )
     {
         sn_turtleMode.SetTurtleMode();
     }
@@ -1870,7 +1870,7 @@ static inline bool GlobalConnectionFloodProtection()
 }
 
 // checks for individual flood events
-bool IndividualConnectionFloodProtection( nMachine * machine, int peer )
+bool IndividualConnectionFloodProtection( nMachine * machine, int peer,  REAL extraFactor = 1.0f )
 {
     // IP is not spoofed or there is no
     // current spoof heavy attack. Really look up the machine.
@@ -1880,7 +1880,7 @@ bool IndividualConnectionFloodProtection( nMachine * machine, int peer )
     }
     
     // check individual flood protection (be lenient in turtle mode, login responses may have trouble getting through an attack)
-    return FloodProtection( *machine, sn_turtleMode ? .2 : 1 );
+    return FloodProtection( *machine, ( sn_turtleMode ? .2 : 1 ) * extraFactor );
 }
 
 // report login failure. Or don't if we're flooded.
@@ -2561,10 +2561,11 @@ static void rec_peer(unsigned int peer){
                         {
                             // check for global and local spam (just for reporting, the packet
                             // is going to get blocked either way)
-                            if( !GlobalConnectionFloodProtection() )
+                            REAL severity = len*.5/MAX_MESS_LEN;
+                            if( !GlobalConnectionFloodProtection( severity ) )
                             {
                                 peers[ MAXCLIENTS+1] = addrFrom;
-                                IndividualConnectionFloodProtection( NULL, MAXCLIENTS+1 );
+                                IndividualConnectionFloodProtection( NULL, MAXCLIENTS+1, severity );
                             }
                         }
                     }
