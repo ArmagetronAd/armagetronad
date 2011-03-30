@@ -2657,10 +2657,10 @@ static void rec_peer(unsigned int peer){
                         }
 
                         // IP is not spoofed or there is no
-                        // current spoof heavy attack. Really look up the machine.
+                        // current spoof heavy attack. Check closer.
                         if( IndividualConnectionFloodProtection( machine, peer ) )
                         {
-                            return;
+                            continue;
                         }
                     }
 #endif
