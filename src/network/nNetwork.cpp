@@ -3612,6 +3612,7 @@ void sn_Receive(){
 
     case nCLIENT:
         rec_peer(0);
+        sn_Connections[MAXCLIENTS+1].socket = NULL;
         break;
 
     case nSTANDALONE:
