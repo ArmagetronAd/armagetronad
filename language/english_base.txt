@@ -2556,7 +2556,7 @@ network_error			Network error.\n
 network_error_timeout		User \1 timed out.\n
 network_error_shortmessage	User \1's message was too short.\n
 network_error_overflow		User \1 is unable to keep up with the network traffic.\n
-network_killuser		Killing user \1, ping \2.\n
+network_killuser		Killing user \1, ping \2, IP \3: \4\n
 network_statistics1		Time:     \1 seconds\n
 network_statistics2		Sent:     \2 bytes in \3 packets (\4 bytes/s)\n
 network_statistics3		Received: \5 bytes in \6 packets (\7 bytes/s)\n

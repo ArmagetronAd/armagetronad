@@ -3665,6 +3665,8 @@ void sn_DisconnectUserNoWarn(int i, const tOutput& reason, nServerInfoBase * red
 
     bool printMessage = false; // is it worth printing a message for this event?
 
+    tString reasonString( reason );
+
     if (sn_Connections[i].socket)
     {
         nMessage::SendCollected(i);
@@ -3674,7 +3676,7 @@ void sn_DisconnectUserNoWarn(int i, const tOutput& reason, nServerInfoBase * red
         if ( i!=0 && i != MAXCLIENTS+2 && sn_GetNetState() == nSERVER ){
             for(int j=2;j>=0;j--){
                 nMessage* mess = (new nMessage(login_deny));
-                *mess << tString( reason );
+                *mess << reasonString;
 
                 // write redirection
                 tString redirection;
@@ -3711,7 +3713,7 @@ void sn_DisconnectUserNoWarn(int i, const tOutput& reason, nServerInfoBase * red
 
     if ( printMessage )
     {
-        con << tOutput( "$network_killuser", i, sn_Connections[i].ping.GetPing() );
+        con << tOutput( "$network_killuser", i, sn_Connections[i].ping.GetPing(), peers[i].ToString(), reasonString );
     }
 
     // clear address, socket and send queue

@@ -2471,7 +2471,7 @@ network_error                 Blad sieci.\n
 network_error_timeout         Uzytkownik \1 przekroczyl limit czasu.\n
 network_error_shortmessage    Wiadomosc uzytkownika \1's byla zbyt krótka.\n
 network_error_overflow        Uzytkownik \1 nie jest w stanie utrzymac przesyl danych.\n
-network_killuser              Usuwanie uzytkownika \1, ping \2.\n
+network_killuser              Usuwanie uzytkownika \1, ping \2, IP \3: \4\n
 network_statistics1           Czas:     \1 sek.\n
 network_statistics2           Wyslano:     \2 bajtów w \3 pakietach (\4 bajtów/s)\n
 network_statistics3           Otrzymano: \5 bajtów w \6 pakietach (\7 bajtów/s)\n
