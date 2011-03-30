@@ -1794,8 +1794,67 @@ static bool GlobalConnectionFloodProtection()
     return sn_minConnectionTimeGlobalFactor > 0 && FloodProtection( server, sn_minConnectionTimeGlobalFactor );
 }
 
-// true while we're turtling from a flood
-static bool sn_turtleMode = false;
+// turtle mode control
+class nTurtleControl
+{
+    REAL lastTurtleModeTime; // last time turtle mode was activated
+    bool setThisFrame;
+
+    // true while we're turtling from a flood
+    bool turtleMode;
+public:
+    nTurtleControl()
+    : lastTurtleModeTime(-700)
+    , setThisFrame(false)
+    , turtleMode(false)
+    {
+    }
+
+    operator bool() const
+    {
+        return turtleMode;
+    }
+
+    // activates turtle mode. It will persist for at least 60 seconds.
+    void SetTurtleMode()
+    {
+        if( !setThisFrame )
+        {
+            if( !turtleMode )
+            {
+                // report
+                sn_ConsoleOut( tOutput("$turtle_mode_activated") ); 
+
+                // stop recording
+                if( tRecorder::IsRecording() )
+                {
+                    tRecorder::StopRecording();
+                }
+            }
+
+            turtleMode = true;
+            setThisFrame = true;
+            lastTurtleModeTime = tSysTimeFloat();
+            
+        }
+    }
+
+    void Update()
+    {
+        setThisFrame = false;
+        if( lastTurtleModeTime + 60 < tSysTimeFloat() )
+        {
+            if( turtleMode && !sn_forceTurtleMode )
+            {
+                // report
+                sn_ConsoleOut( tOutput("$turtle_mode_deactivated") ); 
+            }
+
+            turtleMode = sn_forceTurtleMode;
+        }
+    }
+};
+static nTurtleControl sn_turtleMode;
 
 // report login failure. Or don't if we're flooded.
 int sn_ReportFailure(nMessage &m, char const * reason)
@@ -2383,6 +2442,7 @@ typedef std::deque< tJUST_CONTROLLED_PTR< nMessage > > nMessageFifo;
 static void rec_peer(unsigned int peer){
     tASSERT( sn_Connections[peer].socket );
 
+    sn_turtleMode.Update();
     nMachine::Expire();
 
     // temporary fifo for received messages
@@ -2521,7 +2581,10 @@ static void rec_peer(unsigned int peer){
                     if( sn_GetNetState() == nSERVER )
                     {
                         // check whether we're currently getting flooded
-                        sn_turtleMode = GlobalConnectionFloodProtection() || sn_forceTurtleMode;
+                        if( GlobalConnectionFloodProtection() )
+                        {
+                            sn_turtleMode.SetTurtleMode();
+                        }
 
                         if( sn_turtleMode )
                         {
