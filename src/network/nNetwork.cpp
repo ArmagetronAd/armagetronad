@@ -3323,12 +3323,13 @@ void sn_DisconnectUserNoWarn(int i, const tOutput& reason, nServerInfoBase * red
     if (sn_Connections[i].socket)
     {
         nMessage::SendCollected(i);
-        printMessage = true;
 
         // to make sure...
         if ( i!=0 && i != MAXCLIENTS+2 && sn_GetNetState() == nSERVER ){
+            printMessage = true;
             for(int j=2;j>=0;j--){
                 nMessage* mess = (new nMessage(login_deny));
+                mess->ClearMessageID();
                 *mess << tString( reason );
 
                 // write redirection
