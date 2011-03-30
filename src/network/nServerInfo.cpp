@@ -667,10 +667,10 @@ static nDescriptor BigServerDescriptor(51,nServerInfo::GetBigServerInfo,"big_ser
 static nDescriptor BigServerMasterDescriptor(54,nServerInfo::GetBigServerInfoMaster,"big_server_master", true);
 
 // request small server information from master server/broadcast
-static nDescriptor RequestSmallServerInfoDescriptor(52,nServerInfo::GiveSmallServerInfo,"small_request", true);
+nDescriptor RequestSmallServerInfoDescriptor(52,nServerInfo::GiveSmallServerInfo,"small_request", true);
 
 // request big server information from master server/broadcast
-static nDescriptor RequestBigServerInfoDescriptor(53,nServerInfo::GiveBigServerInfo,"big_request", true);
+nDescriptor RequestBigServerInfoDescriptor(53,nServerInfo::GiveBigServerInfo,"big_request", true);
 static nDescriptor RequestBigServerInfoMasterDescriptor(55,nServerInfo::GiveBigServerInfoMaster,"big_request_master", true);
 
 // used to transfer the rest of the server info (name, number of players, etc)

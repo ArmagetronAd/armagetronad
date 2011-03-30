@@ -1785,6 +1785,11 @@ static tSettingItem< bool > sn_forceTurtleModeConf( "FORCE_TURTLE_MODE", sn_forc
 static bool sn_recordTurtleMode = false;
 static tSettingItem< bool > sn_recordTurtleModeConf( "RECORD_TURTLE_MODE", sn_recordTurtleMode );
 
+// enforce the anti-spoof login part of turtle mode at all times
+static bool sn_synCookie = false;
+static tSettingItem< bool > sn_synCookieConf( "ANTI_SPOOF", sn_synCookie );
+
+
 // number of packets from unknown sources to process each call to rec_peer
 static int sn_connectionLimit = 100;
 static tSettingItem< int > sn_connectionLimitConf( "CONNECTION_LIMIT", sn_connectionLimit );
@@ -2461,6 +2466,9 @@ public:
 
 typedef std::deque< tJUST_CONTROLLED_PTR< nMessage > > nMessageFifo;
 
+// from nServerInfo.cpp
+extern nDescriptor RequestSmallServerInfoDescriptor, RequestBigServerInfoDescriptor;
+
 static void rec_peer(unsigned int peer){
     tASSERT( sn_Connections[peer].socket );
 
@@ -2618,7 +2626,7 @@ static void rec_peer(unsigned int peer){
                         // check whether we're currently getting flooded
                         GlobalConnectionFloodProtection();
 
-                        if( sn_turtleMode )
+                        if( sn_turtleMode || sn_synCookie )
                         {
                             // peek at descriptor
                             unsigned short descriptor = ntohs(*b);
@@ -2633,6 +2641,13 @@ static void rec_peer(unsigned int peer){
                             else if( descriptor == login_accept.ID() )
                             {
                                 // Hah. Nice trick. Won't work, though.
+                            }
+                            else if( !sn_turtleMode && 
+                                     ( descriptor == RequestSmallServerInfoDescriptor.ID() || 
+                                       descriptor == RequestBigServerInfoDescriptor.ID() ) )
+                            {
+                                // Pings. Let them in unless we're under real attack.
+                                onlyReadFirstMessage = true;
                             }
                             else if( !machine || !machine->IsValidated() )
                             {
