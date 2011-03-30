@@ -1781,6 +1781,10 @@ static tSettingItem< REAL > sn_minPingTimeGlobal( "CONNECTION_FLOOD_SENSITIVITY"
 static bool sn_forceTurtleMode = false;
 static tSettingItem< bool > sn_forceTurtleModeConf( "FORCE_TURTLE_MODE", sn_forceTurtleMode );
 
+// keep recording even in turtle mode
+static bool sn_recordTurtleMode = false;
+static tSettingItem< bool > sn_recordTurtleModeConf( "RECORD_TURTLE_MODE", sn_recordTurtleMode );
+
 // number of packets from unknown sources to process each call to rec_peer
 static int sn_connectionLimit = 100;
 static tSettingItem< int > sn_connectionLimitConf( "CONNECTION_LIMIT", sn_connectionLimit );
@@ -1817,7 +1821,7 @@ public:
                 sn_ConsoleOut( tOutput("$turtle_mode_activated") ); 
 
                 // stop recording
-                if( tRecorder::IsRecording() )
+                if( !sn_recordTurtleMode && tRecorder::IsRecording() )
                 {
                     tRecorder::StopRecording();
                 }
