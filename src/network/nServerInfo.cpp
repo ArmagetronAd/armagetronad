@@ -857,6 +857,7 @@ public:
     double lastTime_[MAX];   // log of the last times the server was pinged by this client
     int lastTimeIndex_;      // the current index in the array
     bool warned_;            // flag to avoid warning spam in the log file
+    REAL timeFactor_;        // locked time factor
 
     tString GetIP()
     {
@@ -913,6 +914,19 @@ public:
     // determines whether this client should be considered flooding
     bool FloodProtection( REAL timeFactor )
     {
+        if( warned_ && timeFactor < timeFactor_ )
+        {
+            // restore time factor
+            timeFactor = timeFactor_;
+        }
+        else
+        {
+            // store passed time factor for next time
+            timeFactor_ = timeFactor;
+        }
+
+
+
         int i;
         double now = tSysTimeFloat();
 
@@ -931,7 +945,7 @@ public:
             tolerance = sn_minPingTimes[i]*timeFactor;
             if ( tolerance > 0 )
             {
-                if( tolerance*minRelDiff < diff )
+                if( tolerance*minRelDiff > diff )
                 {
                     minRelDiff = diff/tolerance;
                 }
