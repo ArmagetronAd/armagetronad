@@ -201,6 +201,7 @@ static nNetState current_state;
 nConnectionInfo sn_Connections[MAXCLIENTS+2];
 
 static nAddress peers[MAXCLIENTS+2]; // the same logic for the peer adresses.
+static nAddress lastPeers[MAXCLIENTS+2]; // the peers last connected to each slot
 static int timeouts[MAXCLIENTS+2];
 
 #define ACKBACK 1000
@@ -2607,6 +2608,14 @@ static void rec_peer(unsigned int peer){
                 }
                 else
                 {
+                    // check for communication from last partner
+                    if( claim_id > 0 && 0 == nAddress::Compare( addrFrom, lastPeers[claim_id] ) )
+                    {
+                        // ignore. The peer think it's still a client, but it's wrong.
+                        // new login packets, pings etc. all come with claim_id == 0.
+                        continue;
+                    }
+
                     // assume it's a new connection
                     id = MAXCLIENTS+1;
                     peers[ MAXCLIENTS+1 ] = addrFrom;
@@ -3686,6 +3695,9 @@ void sn_DisconnectUserNoWarn(int i, const tOutput& reason, nServerInfoBase * red
 
     if (sn_Connections[i].socket)
     {
+        // store IP:port for later
+        lastPeers[i] = peers[i];
+
         nMessage::SendCollected(i);
         printMessage = true;
 
