@@ -2590,10 +2590,11 @@ network_login_done		Done!\n
 network_kill_log            User \1 kicked, reason given to him: \2\n
 network_redirect            \n\nYou will now be redirected to the server \1:\2. You can prevent that by pressing ESC.\n
 network_kill_preface		Reason given by server:
-network_kill_maxidgrabber	It ran out of IDs; your client was the one occupying most of them for himself. The reason for this can be a bug.
+network_kill_maxidgrabber	It ran out of IDs; your client was the one occupying most of them for itself. The reason for this can be a bug.
 network_kill_maxiduser		It ran out of IDs; your client was the one occupying most of them.
 network_kill_cheater		It assumed you are cheating. If that is untrue, it is a bug you should report.
 network_kill_error			An error occurred while processing messages from your client. This usually indicates a client or server bug.
+network_kill_servercomplete	Server list transfer complete.
 network_kill_timeout		You timed out.
 network_kill_logout			You logged out regularly.
 network_kill_incompatible	You are running a version incompatible with the server.

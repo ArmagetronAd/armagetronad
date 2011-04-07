@@ -2263,13 +2263,17 @@ void nServerInfo::RunMaster()
                     sn_Timeout[i] = tSysTimeFloat() + .2f;
             }
 
-            // defend against DOS attacks: Kill idle clients
+            // defend against DoS attacks: Kill idle clients
             if(sn_Timeout[i] < tSysTimeFloat())
+            {
+                sn_DisconnectUser(i, "$network_kill_servercomplete");
+                continue;
+            }
+            else if (!sn_Requested[i] && sn_Timeout[i] < tSysTimeFloat() + 60.0f)
+            {
                 sn_DisconnectUser(i, "$network_kill_timeout");
-
-            if (!sn_Requested[i] && sn_Timeout[i] < tSysTimeFloat() + 60.0f)
-                sn_DisconnectUser(i, "$network_kill_timeout");
-
+                continue;
+            }
         }
 
         if (sn_Transmitting[i] && sn_MessagesPending(i) < 3)
