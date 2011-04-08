@@ -258,7 +258,7 @@ void tConsole::CenterDisplay(tString s,REAL timeout,REAL r,REAL g,REAL b)
 }
 
 tConsole & tConsole::DoPrint(const tString& s){
-    std::cout << s;
+    std::cout << tColoredString::RemoveColors(s);
     std::cout.flush();
     return *this;
 }

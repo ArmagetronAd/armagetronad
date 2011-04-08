@@ -942,7 +942,7 @@ public:
         // only check 10 and 20 ping limit for the default timefactor
         if( timeFactor < 1 && sn_minPingTimes[sn_minPingCount-1] > 0 )
         {
-            lowest = 2;
+            // lowest = 2;
         }
 
         for ( i = sn_minPingCount-1; i >= lowest; --i )
