@@ -4139,7 +4139,7 @@ public:
         tString actualString;
         if(pos - len == 0 || ( pos - len == 6 && string.StartsWith("/team ") ) ) {
             actualString = match + ": ";
-        } else if(string.StartsWith("/admin ")) {
+        } else if(string.StartsWith("/admin ") || string.StartsWith("/vote shuffle ")) {
             actualString = Simplify(match) + " ";
         } else {
             int i;
