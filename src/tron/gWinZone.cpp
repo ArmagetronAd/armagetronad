@@ -2754,8 +2754,9 @@ void gBaseZoneHack::OnConquest( void )
             tOutput message;
             message.SetTemplateParameter(1, TeamOutputNames);
             message.SetTemplateParameter(2, score > 0 ? score : -score);
+            message.SetTemplateParameter(3, team->GetColoredName());
             if(tCount==1){
-                message << "$player_win_conquest";
+                message << "$player_win_conquest2";
             }else{
                 message << "$players_win_conquest";
             }
