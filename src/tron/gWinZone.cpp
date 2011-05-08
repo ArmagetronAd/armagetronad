@@ -2733,6 +2733,7 @@ void gBaseZoneHack::OnConquest( void )
         int score = totalScore / enemies_.size();
         int tCount=0;
         tColoredString TeamOutputNames;
+        tColoredString lastTeam;
         for ( TeamArray::iterator iter = enemies_.begin(); iter != enemies_.end(); ++iter )
         {
             //sg_basezoneConquererTeamWriter << ePlayerNetID::FilterName((*iter)->Name()) << score;
@@ -2741,9 +2742,14 @@ void gBaseZoneHack::OnConquest( void )
             if (sg_condenceConquestOutput){
                 (*iter)->AddScore( score);
                 if(tCount==0){
-                    TeamOutputNames << (*iter)->GetColoredName();
+                    lastTeam = (*iter)->GetColoredName();
+                }
+                else if(tCount==1){
+                    TeamOutputNames << lastTeam;
+                    lastTeam = (*iter)->GetColoredName();
                 }else{
-                    TeamOutputNames << tColoredString::ColorString(1,1,1) << ", " <<(*iter)->GetColoredName();
+                    TeamOutputNames << tColoredString::ColorString(1,1,1) << ", " << lastTeam;
+                    lastTeam = (*iter)->GetColoredName();
                 }
                 tCount++;
             }else{
@@ -2751,6 +2757,11 @@ void gBaseZoneHack::OnConquest( void )
             }
         }
         if (sg_condenceConquestOutput){
+			if(tCount==1){
+                TeamOutputNames << tColoredString::ColorString(1,1,1) << lastTeam;
+            }else{
+                TeamOutputNames << tColoredString::ColorString(1,1,1) << " and " << lastTeam;
+            }
             tOutput message;
             message.SetTemplateParameter(1, TeamOutputNames);
             message.SetTemplateParameter(2, score > 0 ? score : -score);
