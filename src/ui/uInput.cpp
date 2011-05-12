@@ -171,6 +171,7 @@ uActionPlayer *uActionPlayer::Find(int id){
     while (run){
         if (run->ID() == id)
             return static_cast<uActionPlayer*>(run);
+        run = run->Next();
     }
 
     return NULL;
