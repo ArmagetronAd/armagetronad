@@ -433,6 +433,8 @@ default_shout_player_help    1 if the default chat action for players should be 
 
 allow_enemies_same_ip_help         If set to 1, this allows two players that apparently come from the same machine to fight for points with each other.
 allow_enemies_same_client_help     If set to 1, this allows two players that play on the same client to fight for points with each other.
+whitelist_enemies_username_help    Allow a set of authenticated players to be enemies, even if they come from the same IP address. Usage: WHITELIST_ENEMIES_USERNAME <authenticated name1> <authenticated name2> ...
+whitelist_enemies_ip_help          Allow any players from the specified IP address to be enemies. Usage: WHITELIST_ENEMIES_IP <ip1> ...
 
 allow_control_during_chat_help     If set to 1, this allows a player to issue cycle and camera control commands during chat (losing the chatbot and the yellow chat pyramid).
 

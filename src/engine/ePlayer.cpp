@@ -8590,6 +8590,76 @@ tString ePlayerNetID::GetFilteredAuthenticatedName( void ) const
 #endif
 }
 
+class eEnemiesWhitelist
+{
+public:
+    eEnemiesWhitelist()
+        :usernames_whitelist_(), ip_addresses_whitelist_()
+    {
+    }
+    
+    // Returns true if the two players can be enemies.
+    // 
+    // Assumes both "a" and "b" are from the same IP address.
+    bool CanBeEnemies( const ePlayerNetID * a, const ePlayerNetID * b ) const
+    {
+        // Check by IP address
+        if ( HasEntry( ip_addresses_whitelist_, a->GetMachine().GetIP() ) )
+            return true;
+        
+        // Check by username
+        if ( HasEntry( usernames_whitelist_, a->GetLogName() ) && HasEntry( usernames_whitelist_, b->GetLogName() ) )
+            return true;
+        
+        // No whitelist entries
+        return false;
+    }
+    
+    void AddUsernames( std::istream & s )
+    {
+        Parse( usernames_whitelist_, s );
+    }
+    
+    void AddIPAddresses( std::istream & s )
+    {
+        Parse( ip_addresses_whitelist_, s );
+    }
+protected:
+    typedef std::set< tString > StringSet;
+    
+    void Parse( StringSet & whitelist, std::istream & s )
+    {
+        while ( s.good() )
+        {
+            tString name;
+            s >> name;
+            whitelist.insert( name );
+        }
+    }
+    
+    bool HasEntry( const StringSet & whitelist, const tString & value ) const
+    {
+        return whitelist.find( value ) != whitelist.end();
+    }
+    
+    StringSet usernames_whitelist_;
+    StringSet ip_addresses_whitelist_;    
+};
+
+static eEnemiesWhitelist se_enemiesWhitelist;
+
+void se_WhiteListEnemiesUsername( std::istream & s )
+{
+    se_enemiesWhitelist.AddUsernames( s );
+}
+static tConfItemFunc se_whiteListEnemiesUsernameConfItemFunc( "WHITELIST_ENEMIES_USERNAME", se_WhiteListEnemiesUsername );
+
+void se_WhiteListEnemiesIP( std::istream & s )
+{
+    se_enemiesWhitelist.AddIPAddresses( s );
+}
+static tConfItemFunc se_whiteListEnemiesIPConfItemFunc( "WHITELIST_ENEMIES_IP", se_WhiteListEnemiesIP );
+
 // allow enemies from the same IP?
 static bool se_allowEnemiesSameIP = false;
 static tSettingItem< bool > se_allowEnemiesSameIPConf( "ALLOW_ENEMIES_SAME_IP", se_allowEnemiesSameIP );
@@ -8620,7 +8690,7 @@ bool ePlayerNetID::Enemies( ePlayerNetID const * a, ePlayerNetID const * b )
         return false;
 
     // no scoring for two players from the same IP
-    if ( !se_allowEnemiesSameIP && a->Owner() != 0 && a->GetMachine() == b->GetMachine() )
+    if ( !se_allowEnemiesSameIP && a->Owner() != 0 && a->GetMachine() == b->GetMachine() && !se_enemiesWhitelist.CanBeEnemies( a, b ) )
         return false;
 
     // no scoring for two players from the same client
