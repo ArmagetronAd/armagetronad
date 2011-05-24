@@ -371,7 +371,7 @@ public:
     //nDescriptor desc;
 
     //  nNOInitialisator(const char *name):nDescriptor(init,name){};
-    nNOInitialisator(unsigned short id,const char *name):nDescriptor(id,Init,name){};
+    nNOInitialisator(unsigned short id,const char *name):nDescriptor(id,Init,name){}
 };
 
 // Z-Man: operators moved here from nNetwork.h. TODO: make them nonmember operators if possible.

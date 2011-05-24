@@ -183,7 +183,7 @@ class tListMember
 public:
     int ListID(){return listID_;}
     int& ListIDRef(){return listID_;}
-    tListMember():listID_(-1){};
+    tListMember():listID_(-1){}
 private:
     int listID_;
 };

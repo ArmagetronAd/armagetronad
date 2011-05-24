@@ -63,10 +63,10 @@ public:
 template<class T> class tCheckedPTR:public tCheckedPTRBase{
     typedef T myclass;
 public:
-    tCheckedPTR(T *x):tCheckedPTRBase(x){};
-    tCheckedPTR(const tCheckedPTR<T> &x):tCheckedPTRBase(x.target){};
-    tCheckedPTR():tCheckedPTRBase(){};
-    ~tCheckedPTR(){};
+    tCheckedPTR(T *x):tCheckedPTRBase(x){}
+    tCheckedPTR(const tCheckedPTR<T> &x):tCheckedPTRBase(x.target){}
+    tCheckedPTR():tCheckedPTRBase(){}
+    ~tCheckedPTR(){}
 
     tCheckedPTR<T> &operator=(T *x){tCheckedPTRBase::operator=(x); return *this;}
     tCheckedPTR<T> &operator=(const tCheckedPTR<T> &x)
@@ -93,11 +93,11 @@ public:
 template<class T> class tCheckedPTRConst:public tCheckedPTRBase{
     typedef T myclass;
 public:
-    tCheckedPTRConst():tCheckedPTRBase(NULL){};
-    tCheckedPTRConst(const T *x):tCheckedPTRBase(reinterpret_cast<void *>(x)){};
-    tCheckedPTRConst(const tCheckedPTRConst<T> &x):tCheckedPTRBase(x.target){};
-    tCheckedPTRConst(const tCheckedPTR<T> &x):tCheckedPTRBase(x.operator->()){};
-    ~tCheckedPTRConst(){};
+    tCheckedPTRConst():tCheckedPTRBase(NULL){}
+    tCheckedPTRConst(const T *x):tCheckedPTRBase(reinterpret_cast<void *>(x)){}
+    tCheckedPTRConst(const tCheckedPTRConst<T> &x):tCheckedPTRBase(x.target){}
+    tCheckedPTRConst(const tCheckedPTR<T> &x):tCheckedPTRBase(x.operator->()){}
+    ~tCheckedPTRConst(){}
 
     tCheckedPTRConst<T> &operator=(const T *x)
     {tCheckedPTRBase::operator=(reinterpret_cast<T *>(x)); return *this;}
@@ -194,7 +194,7 @@ public:
     tControlledPTR(T *x):target(x){AddRef();}
     tControlledPTR(const tCheckedPTR<T> &x):target(x.operator->()){AddRef();}
     tControlledPTR(const tControlledPTR<T> &x):target(x.target){AddRef();}
-    tControlledPTR():target(NULL){};
+    tControlledPTR():target(NULL){}
 
 
     tControlledPTR<T> &operator=(T *x){
@@ -281,7 +281,7 @@ public:
 
     ~tControlledPTR(){
         Release();
-    };
+    }
 };
 
 template<class T> class tJUST_CONTROLLED_PTR{
@@ -305,7 +305,7 @@ public:
     tJUST_CONTROLLED_PTR(T *x):target(x){AddRef();}
     tJUST_CONTROLLED_PTR(const tCheckedPTR<T> &x):target(x.operator->()){AddRef();}
     tJUST_CONTROLLED_PTR(const tJUST_CONTROLLED_PTR<T> &x):target(x.target){AddRef();}
-    tJUST_CONTROLLED_PTR():target(NULL){};
+    tJUST_CONTROLLED_PTR():target(NULL){}
 
 
     tJUST_CONTROLLED_PTR<T> &operator=(T *x){
@@ -372,7 +372,7 @@ public:
 
     ~tJUST_CONTROLLED_PTR(){
         Release();
-    };
+    }
 };
 
 
@@ -424,8 +424,8 @@ void st_ReleaseBreakpint( void const * object );
 // not thread-safe mutex
 struct tNonMutex
 {
-    void acquire(){};
-    void release(){};
+    void acquire(){}
+    void release(){}
 };
 
 template< class T, class MUTEX = tNonMutex > class tReferencable
@@ -433,8 +433,8 @@ template< class T, class MUTEX = tNonMutex > class tReferencable
     friend class tStackObject< T >;
 
 public:
-    tReferencable()												:refCtr_(0) {};
-    tReferencable				( const tReferencable& )						:refCtr_(0) {};
+    tReferencable()												:refCtr_(0) {}
+    tReferencable				( const tReferencable& )						:refCtr_(0) {}
     tReferencable& operator =	( const tReferencable& ){ return *this; }
 
     void		AddRef		()	const

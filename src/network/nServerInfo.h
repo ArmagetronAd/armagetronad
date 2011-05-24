@@ -107,7 +107,7 @@ public:
     {
         nServerInfoBase::SetConnectionName( connectionName );
         nServerInfoBase::SetPort( port );
-    };
+    }
 };
 
 //! Full server information

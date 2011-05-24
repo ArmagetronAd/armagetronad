@@ -146,7 +146,7 @@ class uMenuItem{
     friend class uMenu;
 
     int idnum;
-    uMenuItem(){};
+    uMenuItem(){}
 protected:
     uMenu  *menu;
     tOutput helpText;
@@ -177,17 +177,17 @@ public:
 virtual tString Help(){return tString(helpText);}
     // displays the menuitem at position x,y. set selected to true
     // if the item is currently under the cursor
-    virtual void Render(REAL ,REAL ,REAL =1,bool =0){};
+    virtual void Render(REAL ,REAL ,REAL =1,bool =0){}
 
     virtual void RenderBackground(){
         menu->GenericBackground();
-    };
+    }
 
     // if the user presses left/right on menuitem
-    virtual void LeftRight(int ){}; //lr=-1:left lr=+1: right
-    virtual void LeftRightRelease(){};
+    virtual void LeftRight(int ){} //lr=-1:left lr=+1: right
+    virtual void LeftRightRelease(){}
 
-    virtual void Enter(){}; // if the user presses enter/space on menu
+    virtual void Enter(){} // if the user presses enter/space on menu
 
     virtual bool Event(SDL_Event &){return false;} // if the key c is
     // pressed,mouse moved ...
@@ -223,7 +223,7 @@ public:
     // if the item is currently under the cursor
     virtual void Render(REAL x,REAL y,REAL alpha=1,bool selected=0){
         DisplayTextSpecial(x,y,tString(t),selected,alpha);
-    };
+    }
 
     virtual void Enter(){menu->Exit();}
     // if the user presses enter/space on menu
@@ -366,7 +366,7 @@ public:
                  const tOutput &help,int &targ,
                  int mi,int ma,int step=1);
 
-    ~uMenuItemInt(){};
+    ~uMenuItemInt(){}
 
     virtual void LeftRight(int);
 
@@ -393,7 +393,7 @@ public:
                  const tOutput &help,REAL &targ,
                  REAL mi,REAL ma,REAL step=1);
 
-    ~uMenuItemReal(){};
+    ~uMenuItemReal(){}
 
     virtual void LeftRight(int);
 
@@ -448,7 +448,7 @@ public:
 
     virtual void RenderBackground(){
         menu->GenericBackground(menu->GetTop());
-    };
+    }
 
     virtual bool Event(SDL_Event &e);
 };
@@ -553,7 +553,7 @@ public:
         Reload();
     }
 
-    virtual ~uMenuItemFileSelection() {};
+    virtual ~uMenuItemFileSelection() {}
 
     void SetDir( const char *dir ) { dir_ = dir; }
     void SetFileSpec( const char *fileSpec ) { fileSpec_ = fileSpec; }

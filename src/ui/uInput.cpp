@@ -95,7 +95,7 @@ uAction * uAction::Find( char const * name )
 class tConfItem_key:public tConfItemBase{
 public:
     tConfItem_key():tConfItemBase("KEYBOARD"){}
-    ~tConfItem_key(){};
+    ~tConfItem_key(){}
 
     // write the complete keymap
     virtual void WriteVal(std::ostream &s){
