@@ -149,7 +149,7 @@ public:
             }
             (*this)[this->Len()-1] = NULL;
 
-            SetLen(this->Len()-1);
+            this->SetLen(this->Len()-1);
 
             if ( REFERENCE )
             {

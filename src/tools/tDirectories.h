@@ -58,6 +58,7 @@ protected:
 
 class tPathResource: public tPath {
 public:
+    tPathResource() {}
     tString GetWritePath(const char *filename) const;
     tString GetIncluded() const; //!< returns the path to the included resources
 private:
