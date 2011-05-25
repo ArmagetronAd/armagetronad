@@ -1302,7 +1302,7 @@ void delayedCommands::Run(REAL currentTime) {
         }
         cmd_map.erase(it++); // erase current and get next iterator
     };
-};
+}
 
 // *****************************
 // ***   end delayed commands
