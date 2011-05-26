@@ -3591,7 +3591,7 @@ void gGame::Analysis(REAL time){
                         rounds + winnerExtraRound >= sg_currentSettings->limitRounds ||     // or the round limit
                         tSysTimeFloat()>=startTime+sg_currentSettings->limitTime*60 ||      // or the time limit
                         (active <= 1 && eTeam::teams.Len() > 1)	||							// or all but one players must have disconnected.
-                        ( sg_currentSettings->maxBlowout && eTeam::teams(0)->Score() >= eTeam::teams(1)->Score() + sg_currentSettings->maxBlowout) // or if a team gets a dramatically high advance.
+                        ( sg_currentSettings->maxBlowout && eTeam::teams.Len() > 1 && eTeam::teams(0)->Score() >= eTeam::teams(1)->Score() + sg_currentSettings->maxBlowout) // or if a team gets a dramatically high advance.
                    )
                 {
                     bool declareChampion = true;
