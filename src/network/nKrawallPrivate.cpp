@@ -451,7 +451,7 @@ int nKrawall::FetchURL( tString const & authority, char const * query, std::ostr
 {
     // compose real URL
     std::ostringstream fullURL;
-    fullURL << "http://" << authority << "/armaauth/0.1";
+    fullURL << "http://" << authority << "/armaauth/0.1/";
     fullURL << query;
 
     // better not. output is not thread safe.
