@@ -8620,12 +8620,18 @@ protected:
     
     void Parse( StringSet & whitelist, std::istream & s )
     {
+        int entries_count = 0;
         while ( s.good() )
         {
             tString name;
             s >> name;
-            whitelist.insert( name );
+            if ( name.Len() > 1 )
+            {
+                std::pair< StringSet::iterator, bool > ret = whitelist.insert( name );
+                if ( ret.second ) entries_count++;
+            }
         }
+        con << tOutput( "$whitelist_enemies_success", entries_count ) << '\n';
     }
     
     bool HasEntry( const StringSet & whitelist, const tString & value ) const
