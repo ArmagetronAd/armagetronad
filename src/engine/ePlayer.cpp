@@ -8593,26 +8593,17 @@ tString ePlayerNetID::GetFilteredAuthenticatedName( void ) const
 class eEnemiesWhitelist
 {
 public:
-    eEnemiesWhitelist()
-        :usernames_whitelist_(), ip_addresses_whitelist_()
-    {
-    }
+    eEnemiesWhitelist() :usernames_whitelist_(), ip_addresses_whitelist_() {}
     
     // Returns true if the two players can be enemies.
     // 
     // Assumes both "a" and "b" are from the same IP address.
     bool CanBeEnemies( const ePlayerNetID * a, const ePlayerNetID * b ) const
     {
-        // Check by IP address
-        if ( HasEntry( ip_addresses_whitelist_, a->GetMachine().GetIP() ) )
-            return true;
-        
-        // Check by username
-        if ( HasEntry( usernames_whitelist_, a->GetLogName() ) && HasEntry( usernames_whitelist_, b->GetLogName() ) )
-            return true;
-        
-        // No whitelist entries
-        return false;
+        return(
+            HasEntry( ip_addresses_whitelist_, a->GetMachine().GetIP() ) ||
+            ( HasEntry( usernames_whitelist_, a->GetLogName() ) && HasEntry( usernames_whitelist_, b->GetLogName() ) )
+        );
     }
     
     void AddUsernames( std::istream & s )
