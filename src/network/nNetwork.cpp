@@ -2196,8 +2196,8 @@ void nMessage::Send(int peer,REAL priority,bool ack){
         messageIDBig_ = 0;
 #endif
     
-    // don't send messages to unsupported peers
-    if( peer > MAXCLIENTS+1 )
+    // don't send messages to unsupported peers or in non-networked mode
+    if( peer > MAXCLIENTS+1 || sn_GetNetState() == nSTANDALONE )
     {
         tJUST_CONTROLLED_PTR< nMessage > bounce(this);
         return;
@@ -2846,15 +2846,33 @@ nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket
     else{
         nCallbackLoginLogout::UserLoggedIn(0);
 
+        if(sn_GetNetState() != nCLIENT)
+        {
+            return nDENIED;
+        }
+
         tOutput mess;
         mess.SetTemplateParameter(1, sn_myNetID);
         mess << "$network_login_success";
         con << mess;
         con << tOutput("$network_login_sync");
         sn_Sync(40);
+
+        if(sn_GetNetState() != nCLIENT)
+        {
+            return nDENIED;
+        }
+
         con << tOutput("$network_login_relabeling");
         con << tOutput("$network_login_sync2");
+
         sn_Sync(40,true);
+
+        if(sn_GetNetState() != nCLIENT)
+        {
+            return nDENIED;
+        }
+
         con << tOutput("$network_login_done");
 
         // marginalize past ping values
