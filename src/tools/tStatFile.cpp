@@ -110,7 +110,7 @@ void tStatFile::flushWrites()
             int found = 0;
             REAL t1;
             tString t2;
-            while (!myFileD.eof())
+            while (myFileD.good() && !myFileD.eof())
             {
                 myFileD >> t1;
                 t2.ReadLine(myFileD);
