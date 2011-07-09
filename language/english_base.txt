@@ -623,6 +623,13 @@ camera_glance_back_fromspeed_help		This value is multiplied with the current spe
 camera_glance_rise_fromspeed_help		This value is multiplied with the current speed and added to CAMERA_GLANCE_RISE.
 camera_glance_pitch_help	Position of the glance camera: how much does it look up/down?
 
+camera_glance_mode_help           Way the camera switches into glances. Valid settings range from 0 to 3 
+camera_glance_stacking_help       If this is set, glances stack, glance directions are relative to the current view then.
+camera_glance_return_help         If you release all glance keys and this is set, the order to glance forward directly into the direction you're driving in is issued. This can return the view back to normal faster than if you leave it up to the default camera code.
+camera_glance_return_stop_help    Cosine of the angle between driving direction and glance direction the return glance command is aborted at and control is returned to the normal (non-smart) camera.
+camera_glance_return_stop_smart_help When the smart camera is used: cosine of the angle between driving direction and glance direction the return glance command is aborted at and control is returned to the normal camera.
+camera_glance_snap_help          If the cosine between the desired and current glance direction is smaller than this, the glance snaps directly to the desired target, irrespective of CAMERA_GLANCE_MODE.
+
 camera_server_glance_back_help		Position of the server glance camera: how much is it moved back from the cycle?
 camera_server_glance_rise_help		Position of the server glance camera: how much is it moved up from the cycle?
 camera_server_glance_back_fromspeed_help		This value is multiplied with the current speed and added to CAMERA_SERVER_GLANCE_BACK.

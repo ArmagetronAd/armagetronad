@@ -98,11 +98,6 @@ predict_walls UNDOCUMENTED
 #*************************************
 #*************************************
 
-# meriton's custom camera (not yet in CVS)
-camera_glance_mode_help           Way the camera switches into glances. Valid settings range from 0 to 3 
-camera_smart_glance_back_help     Horizontal distance of the smartcam from the cycle when glancing 
-camera_smart_glance_height_help   Elevation of the smartcam when glancing 
-
 # preliminary settings for fortress dynamics
 fortress_held_score_help          Score you get for holding your fortress.
 fortress_conquest_decay_rate_help Rate a fortress zone "recovers" from being conquered 
