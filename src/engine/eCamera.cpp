@@ -586,6 +586,9 @@ eCamera::eCamera(eGrid *g, rViewport *view,ePlayerNetID *p,
       localPlayer=playerConfig[p->pID];
     */
     MyInit();
+
+    // dummy timestep to get things set up
+    Timestep(0);
 }
 
 
@@ -2292,6 +2295,12 @@ void eCamera::Timestep(REAL ts){
 
     if (activeGlanceRequest) {
         bool internal = mode==CAMERA_IN || mode==CAMERA_SMART_IN;
+
+        // avoid division by zero later
+        if( rise >= 0 )
+        {
+            rise = -1;
+        }
 
         if (internal) {
             pos  = newpos;
