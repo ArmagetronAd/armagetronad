@@ -271,7 +271,9 @@ static tSettingItem<REAL> s_mercamz("CAMERA_MER_Z",mercamz);
 // glancing configuration
 static int glanceMode = 2;
 static REAL glanceAngularVelocity = 4*M_PI; //!< angular velocity if target direction perpendicular to current one
-static int glanceReturn = 1;
+static int glanceReturn = 1;  // if true, releasing glance keys automatically glances forward
+static REAL se_glanceReturnStop = 0.9999; // cosine of the angle between driving direction and glance direction the return glance will automatically stop and return control to the regular camera logic for all but the smart camera
+static REAL se_glanceReturnStopSmart = 2; // same for the smart camera
 static REAL glanceAngularVelocityBonus = 12.; //!< factor to glanceAngularVelocity for glances larger than M_PI_2
 static REAL smartcamGlancingBack = 20;
 static REAL smartcamGlancingHeight = 10;
@@ -564,7 +566,7 @@ eCamera::eCamera(eGrid *g, rViewport *view,ePlayerNetID *p,
         // centerID(0),
         mode(m),pos(0,0),dir(1,0),top(0,0),
         vp(view),
-        returnGlanceRequest(NULL),
+        returnGlanceRequest(NULL), 
         cameraMain_(rMain), renderInCockpit_(false),
         mirrorView_(false)
 		{
@@ -770,12 +772,13 @@ bool eCamera::Act(uActionCamera *Act,REAL x){
         } else {
             gr->Remove(); // remove current glance request
             // now we want to align camera with cycle direction again by forward glance
-            if (glanceReturn > 0 and activeGlanceRequest == NULL) { // but only if enabled and no other glance is active
+            if (glanceReturn > 0 and activeGlanceRequest == NULL and gr != &glanceRequests[0]) { // but only if enabled and no other glance is active and the released glance is not the forward glance
                 returnGlanceRequest = &glanceRequests[0]; // forward glancing
                 eCoord baseDir = grid->GetDirection(grid->DirectionWinding(CenterDir()));
                 returnGlanceRequest->dir = baseDir;
                 returnGlanceRequest->Insert(activeGlanceRequest);
             }
+            Timestep(0);
         }
     } else
         return false;
@@ -2299,11 +2302,12 @@ void eCamera::Timestep(REAL ts){
             t = nextDirIfGlancing(t,activeGlanceRequest->dir,ts);
 
             // if we have just finished returning from a glance...
-            if (returnGlanceRequest != NULL and fabs(t * CenterDir()) < 0.01) {
+            if (returnGlanceRequest != NULL and eCoord::F(t,CenterDir()) >= ((mode == CAMERA_SMART) ? se_glanceReturnStopSmart : se_glanceReturnStop)) {
                 // remove returnGlance request
                 returnGlanceRequest->Remove();
                 returnGlanceRequest = NULL;
             }
+            
             // advance time
             focus = focus + focusTarget - focusTargetLast;
 
