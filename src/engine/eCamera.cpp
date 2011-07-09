@@ -271,16 +271,22 @@ static tSettingItem<REAL> s_mercamz("CAMERA_MER_Z",mercamz);
 // glancing configuration
 static int glanceMode = 2;
 static REAL glanceAngularVelocity = 4*M_PI; //!< angular velocity if target direction perpendicular to current one
-static int glanceReturn = 1;  // if true, releasing glance keys automatically glances forward
-static REAL se_glanceReturnStop = 0.9999; // cosine of the angle between driving direction and glance direction the return glance will automatically stop and return control to the regular camera logic for all but the smart camera
-static REAL se_glanceReturnStopSmart = 2; // same for the smart camera
+static bool se_glanceReturn = true;     // if true, releasing glance keys automatically glances forward
+static bool se_glanceStacking = false;  // if true, subsequent glances stack: pressing left twice quickly glances back etc.
+static REAL se_glanceReturnStop = 0.99; // cosine of the angle between driving direction and glance direction the return glance will automatically stop and return control to the regular camera logic for all but the smart camera
+static REAL se_glanceReturnStopSmart = 0; // same for the smart camera
+static REAL se_glanceSnap = -.5; // if the cosine the angle between glance target and current glance is smaller than this, the glance snaps instantly to the target
 static REAL glanceAngularVelocityBonus = 12.; //!< factor to glanceAngularVelocity for glances larger than M_PI_2
 static REAL smartcamGlancingBack = 20;
 static REAL smartcamGlancingHeight = 10;
 
 static tSettingItem<int>  s_glanceMode("CAMERA_GLANCE_MODE",glanceMode);
 static tSettingItem<REAL> s_glanceRotSpeed("CAMERA_GLANCE_ANGULAR_VELOCITY",glanceAngularVelocity);
-static tSettingItem<int>  s_glanceReturn("CAMERA_GLANCE_RETURN",glanceReturn);
+static tSettingItem<bool>  s_glanceReturn("CAMERA_GLANCE_RETURN",se_glanceReturn);
+static tSettingItem<REAL>  s_glanceReturnStop("CAMERA_GLANCE_RETURN_STOP",se_glanceReturnStop);
+static tSettingItem<REAL>  s_glanceReturnStopSmart("CAMERA_GLANCE_RETURN_STOP_SMART",se_glanceReturnStopSmart);
+static tSettingItem<REAL>  s_glanceSnap("CAMERA_GLANCE_SNAP",se_glanceSnap);
+static tSettingItem<bool>  s_glanceStacking("CAMERA_GLANCE_STACKING",se_glanceStacking);
 static tSettingItem<REAL> s_glanceRotSpeedBonus("CAMERA_GLANCE_ANGULAR_VELOCITY_BONUS",glanceAngularVelocityBonus);
 static tSettingItem<REAL> s_smartcamGlanceBack("CAMERA_SMART_GLANCING_BACK",smartcamGlancingBack);
 static tSettingItem<REAL> s_smartcamGlanceHeight("CAMERA_SMART_GLANCING_HEIGHT",smartcamGlancingHeight);
@@ -311,6 +317,11 @@ inline REAL robust_acos(REAL arg) {
 
 
 eCoord eCamera::nextDirIfGlancing(eCoord const & dir, eCoord const & targetDir, REAL ts) {
+
+    if( eCoord::F(dir, targetDir) < se_glanceSnap )
+    {
+        return targetDir;
+    }
 
     switch (glanceMode) {
     case 0: {
@@ -762,23 +773,28 @@ bool eCamera::Act(uActionCamera *Act,REAL x){
 
             // CHECK: proper focal point?
             eCoord baseDir;
-            if (glanceReturn > 0) {
-                baseDir = grid->GetDirection(grid->DirectionWinding(CenterDir()));
-            } else {
+            if (se_glanceStacking)
+            {
                 baseDir = grid->GetDirection(grid->DirectionWinding(dir));
+            }
+            else
+            {
+                baseDir = grid->GetDirection(grid->DirectionWinding(CenterDir()));
             }
             gr->dir = baseDir.Turn(ga->relDir);
             gr->Insert(activeGlanceRequest);
-        } else {
+        }
+        else
+        {
             gr->Remove(); // remove current glance request
             // now we want to align camera with cycle direction again by forward glance
-            if (glanceReturn > 0 and activeGlanceRequest == NULL and gr != &glanceRequests[0]) { // but only if enabled and no other glance is active and the released glance is not the forward glance
+            if (se_glanceReturn and activeGlanceRequest == NULL and gr != &glanceRequests[0]) { // but only if enabled and no other glance is active and the released glance is not the forward glance
                 returnGlanceRequest = &glanceRequests[0]; // forward glancing
                 eCoord baseDir = grid->GetDirection(grid->DirectionWinding(CenterDir()));
                 returnGlanceRequest->dir = baseDir;
                 returnGlanceRequest->Insert(activeGlanceRequest);
             }
-            Timestep(0);
+            Timestep(0); // simulate a zero step, mostly to get an immediate return glance abort right
         }
     } else
         return false;
