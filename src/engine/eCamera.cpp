@@ -1918,7 +1918,7 @@ void eCamera::Timestep(REAL ts){
     if (!CenterAlive() && (newmode==CAMERA_IN || newmode==CAMERA_SMART_IN)){// || newmode==CAMERA_CUSTOM || newmode==CAMERA_SERVER_CUSTOM)){
         pos=pos-dir.Turn(eCoord(5,1));
         z+=2;
-        mode = localPlayer ? localPlayer->startCamera : CAMERA_SMART;
+        mode = ( localPlayer && localPlayer->startCamera != CAMERA_IN ) ? localPlayer->startCamera : CAMERA_SMART;
     }
 
     const REAL dirSmooth = se_cameraSmartCenterDirSmooth;
