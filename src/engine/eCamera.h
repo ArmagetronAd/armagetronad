@@ -111,6 +111,7 @@ protected:
 
     eGlanceRequest* activeGlanceRequest;
     eGlanceRequest glanceRequests[se_glances];
+    eGlanceRequest* returnGlanceRequest; // request for returning back from glance
 
     bool renderingMain_;	// flag indicating whether the current rendering process is the main process or just a mirror effect
 

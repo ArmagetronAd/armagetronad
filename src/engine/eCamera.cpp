@@ -271,12 +271,14 @@ static tSettingItem<REAL> s_mercamz("CAMERA_MER_Z",mercamz);
 // glancing configuration
 static int glanceMode = 2;
 static REAL glanceAngularVelocity = 4*M_PI; //!< angular velocity if target direction perpendicular to current one
+static int glanceReturn = 1;
 static REAL glanceAngularVelocityBonus = 12.; //!< factor to glanceAngularVelocity for glances larger than M_PI_2
 static REAL smartcamGlancingBack = 20;
 static REAL smartcamGlancingHeight = 10;
 
 static tSettingItem<int>  s_glanceMode("CAMERA_GLANCE_MODE",glanceMode);
 static tSettingItem<REAL> s_glanceRotSpeed("CAMERA_GLANCE_ANGULAR_VELOCITY",glanceAngularVelocity);
+static tSettingItem<int>  s_glanceReturn("CAMERA_GLANCE_RETURN",glanceReturn);
 static tSettingItem<REAL> s_glanceRotSpeedBonus("CAMERA_GLANCE_ANGULAR_VELOCITY_BONUS",glanceAngularVelocityBonus);
 static tSettingItem<REAL> s_smartcamGlanceBack("CAMERA_SMART_GLANCING_BACK",smartcamGlancingBack);
 static tSettingItem<REAL> s_smartcamGlanceHeight("CAMERA_SMART_GLANCING_HEIGHT",smartcamGlancingHeight);
@@ -562,7 +564,9 @@ eCamera::eCamera(eGrid *g, rViewport *view,ePlayerNetID *p,
         // centerID(0),
         mode(m),pos(0,0),dir(1,0),top(0,0),
         vp(view),
-        cameraMain_(rMain), renderInCockpit_(false), mirrorView_(false)
+        returnGlanceRequest(NULL),
+        cameraMain_(rMain), renderInCockpit_(false),
+        mirrorView_(false)
 		{
     /*
       if (p->pID>=0)
@@ -585,7 +589,7 @@ eCamera::~eCamera(){
     	grid->cameras.Remove(this, id);
     else
 		grid->subcameras.Remove(this, id);
-		
+
     tCHECK_DEST;
 }
 
@@ -749,11 +753,29 @@ bool eCamera::Act(uActionCamera *Act,REAL x){
         uGlanceAction* ga = static_cast<uGlanceAction*>(Act);
         eGlanceRequest* gr = &glanceRequests[ga-se_glance];
         if (x>0) {
-            eCoord baseDir = grid->GetDirection(grid->DirectionWinding(dir)); // CHECK: proper focal point?
+            if (returnGlanceRequest != NULL) { // cancel any returning from glance
+              returnGlanceRequest->Remove();
+              returnGlanceRequest = NULL;
+            }
+
+            // CHECK: proper focal point?
+            eCoord baseDir;
+            if (glanceReturn > 0) {
+                baseDir = grid->GetDirection(grid->DirectionWinding(CenterDir()));
+            } else {
+                baseDir = grid->GetDirection(grid->DirectionWinding(dir));
+            }
             gr->dir = baseDir.Turn(ga->relDir);
             gr->Insert(activeGlanceRequest);
         } else {
-            gr->Remove();
+            gr->Remove(); // remove current glance request
+            // now we want to align camera with cycle direction again by forward glance
+            if (glanceReturn > 0 and activeGlanceRequest == NULL) { // but only if enabled and no other glance is active
+                returnGlanceRequest = &glanceRequests[0]; // forward glancing
+                eCoord baseDir = grid->GetDirection(grid->DirectionWinding(CenterDir()));
+                returnGlanceRequest->dir = baseDir;
+                returnGlanceRequest->Insert(activeGlanceRequest);
+            }
         }
     } else
         return false;
@@ -1629,7 +1651,7 @@ void eCamera::Render(){
                 test.detect(se_cameraInMaxFocusDistance*Center()->Speed());
                 offset = test.hit;
             }
- 
+
             gluLookAt(0,
                       0,
                       0,
@@ -1798,7 +1820,7 @@ void eCamera::Timestep(REAL ts){
                 lastSwitch=lastTime;
             }
         }
-        
+
         // center = se_GetWatchedObject( this );
         if ( !center || !InterestingToWatch(center) )
         {
@@ -1826,6 +1848,11 @@ void eCamera::Timestep(REAL ts){
     if (!Center())
         return;
 
+    // if cycle has just turned, cancel potentional returning from glance
+    if (returnGlanceRequest != NULL and centerDirLast != CenterDir()) {
+        returnGlanceRequest->Remove();
+        returnGlanceRequest = NULL;
+    }
     // watch for turns of the center game object
     if ( fabs( centerDirLast * Center()->Direction() ) > .01 )
     {
@@ -2037,11 +2064,11 @@ void eCamera::Timestep(REAL ts){
         {
             REAL zoom = lastTime > 0 ? 1 : exp( s_customZoom * lastTime );
 
-            newdir=newdir*(1/sqrt(newdir.NormSquared()));
-            newpos     = newpos - newdir * customBack * zoom;
-            usernewpos = usernewpos + CenterPos() - centerPosLast;
+            newdir=newdir*(1/sqrt(newdir.NormSquared()));          // make newdir vector unit
+            newpos     = newpos - newdir * customBack * zoom;      // an actual position is shifted back
+            usernewpos = usernewpos + CenterPos() - centerPosLast; // usernewpos used for blending with newpos
             newrise    = customPitch;
-            newz       = CenterCamZ() + customRise * zoom;
+            newz       = CenterCamZ() + customRise * zoom;         // an actual position is shifted up
         }
 
         break;
@@ -2271,6 +2298,12 @@ void eCamera::Timestep(REAL ts){
             t.Normalize();
             t = nextDirIfGlancing(t,activeGlanceRequest->dir,ts);
 
+            // if we have just finished returning from a glance...
+            if (returnGlanceRequest != NULL and fabs(t * CenterDir()) < 0.01) {
+                // remove returnGlance request
+                returnGlanceRequest->Remove();
+                returnGlanceRequest = NULL;
+            }
             // advance time
             focus = focus + focusTarget - focusTargetLast;
 
