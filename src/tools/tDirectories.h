@@ -53,14 +53,15 @@ public:
 
     tString GetPaths(void) const; //!< Puts all paths into a tString for outputting to the user
 
-    tPath(){};
-    virtual ~tPath(){};
+    tPath(){}
+    virtual ~tPath(){}
 protected:
     virtual void    Paths ( tArray< tString >& paths ) const = 0;  // maximum priority
 };
 
 class tPathResource: public tPath {
 public:
+    tPathResource() {}
     tString GetWritePath(const char *filename) const;
     static tString GetDirPath(); //!< returns the path to the included resources
 private:

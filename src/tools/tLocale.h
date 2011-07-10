@@ -184,7 +184,7 @@ template <class T>class tOutputItem: public tOutputItemBase
 {
     T element;
     public:
-tOutputItem(tOutput& o, const T& e): tOutputItemBase(o), element(e){};
+tOutputItem(tOutput& o, const T& e): tOutputItemBase(o), element(e){}
 virtual void Print(tString& target) const {
     target << element;
 }

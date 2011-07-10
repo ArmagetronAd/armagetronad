@@ -113,6 +113,9 @@ Changes since 0.2.8.3.x:
   default.
 - New command-line option "--input" added to poll for input from a file
   instead of stdin.
+- Added WHITELIST_ENEMIES_[IP/USERNAME] to allow players to be enemies, even
+  if they come from the same IP address and ALLOW_ENEMIES_SAME_IP is
+  disabled (which is its default setting).
 - GAME_END, NEW_MATCH, and NEW_ROUND ladderlog events include date and time.
 
 Changes since 0.2.8.3_rc4:

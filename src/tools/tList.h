@@ -149,7 +149,7 @@ public:
             }
             (*this)[this->Len()-1] = NULL;
 
-            SetLen(this->Len()-1);
+            this->SetLen(this->Len()-1);
 
             if ( REFERENCE )
             {
@@ -183,7 +183,7 @@ class tListMember
 public:
     int ListID(){return listID_;}
     int& ListIDRef(){return listID_;}
-    tListMember():listID_(-1){};
+    tListMember():listID_(-1){}
 private:
     int listID_;
 };

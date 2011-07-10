@@ -264,7 +264,7 @@ protected:
     T    *target;
     ShouldChangeFuncT shouldChangeFunc_;
 
-    tConfItem(T &t):tConfItemBase(""),target(&t), shouldChangeFunc_(NULL) {};
+    tConfItem(T &t):tConfItemBase(""),target(&t), shouldChangeFunc_(NULL) {}
 public:
     tConfItem(const char *title,const tOutput& help,T& t, callbackFunc *cb)
             :tConfItemBase(title,help,cb),target(&t), shouldChangeFunc_(NULL) {}

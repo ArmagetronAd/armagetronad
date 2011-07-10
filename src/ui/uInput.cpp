@@ -278,7 +278,7 @@ void su_KeyInit()
 class tConfItem_key:public tConfItemBase{
 public:
     tConfItem_key():tConfItemBase("KEYBOARD"){}
-    ~tConfItem_key(){};
+    ~tConfItem_key(){}
 
     // write the complete keymap
     virtual void WriteVal(std::ostream &s){
@@ -379,6 +379,7 @@ uActionPlayer *uActionPlayer::Find(int id){
     while (run){
         if (run->ID() == id)
             return static_cast<uActionPlayer*>(run);
+        run = run->Next();
     }
 
     return NULL;

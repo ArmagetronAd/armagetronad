@@ -175,7 +175,7 @@ public:
     nKrawall::nScrambledPassword password;
     bool save;
 
-    PasswordStorage(): save(false){};
+    PasswordStorage(): save(false){}
 };
 
 static bool operator == ( PasswordStorage const & a, PasswordStorage const & b )
@@ -362,7 +362,7 @@ void se_DeletePasswords(){
 class tConfItemPassword:public tConfItemBase{
 public:
     tConfItemPassword():tConfItemBase("PASSWORD"){}
-    ~tConfItemPassword(){};
+    ~tConfItemPassword(){}
 
     // write the complete passwords
     virtual void WriteVal(std::ostream &s){
@@ -3569,7 +3569,7 @@ class eHelpTopic {
     // singleton accessor
     static std::map<tString, eHelpTopic> & GetHelpTopics();
 public:
-    eHelpTopic() {};
+    eHelpTopic() {}
     eHelpTopic(tString const &shortdesc, tString const &text) : m_shortdesc(shortdesc), m_text(text) {
     }
 
@@ -5093,7 +5093,7 @@ protected:
 
     virtual P ReadRawVal(tString const & name, std::istream &s) const = 0;
     virtual P GetDefault() const = 0;
-    virtual void TransformName( tString & name ) const {};
+    virtual void TransformName( tString & name ) const {}
 
     virtual void ReadVal(std::istream &s)
     {
@@ -8483,7 +8483,7 @@ static tConfItemLine sg_optionsConf( "SERVER_OPTIONS", sg_options );
 class gServerInfoAdmin: public nServerInfoAdmin
 {
 public:
-    gServerInfoAdmin(){};
+    gServerInfoAdmin(){}
 
 private:
     virtual tString GetUsers() const
@@ -9109,6 +9109,73 @@ tString ePlayerNetID::GetFilteredAuthenticatedName( void ) const
 #endif
 }
 
+class eEnemiesWhitelist
+{
+public:
+    eEnemiesWhitelist() :usernames_whitelist_(), ip_addresses_whitelist_() {}
+    
+    // Returns true if the two players can be enemies.
+    // 
+    // Assumes both "a" and "b" are from the same IP address.
+    bool CanBeEnemies( const ePlayerNetID * a, const ePlayerNetID * b ) const
+    {
+        return(
+            HasEntry( ip_addresses_whitelist_, a->GetMachine().GetIP() ) ||
+            ( HasEntry( usernames_whitelist_, a->GetLogName() ) && HasEntry( usernames_whitelist_, b->GetLogName() ) )
+        );
+    }
+    
+    void AddUsernames( std::istream & s )
+    {
+        Parse( usernames_whitelist_, s );
+    }
+    
+    void AddIPAddresses( std::istream & s )
+    {
+        Parse( ip_addresses_whitelist_, s );
+    }
+protected:
+    typedef std::set< tString > StringSet;
+    
+    void Parse( StringSet & whitelist, std::istream & s )
+    {
+        int entries_count = 0;
+        while ( s.good() )
+        {
+            tString name;
+            s >> name;
+            if ( name.Len() > 1 )
+            {
+                std::pair< StringSet::iterator, bool > ret = whitelist.insert( name );
+                if ( ret.second ) entries_count++;
+            }
+        }
+        con << tOutput( "$whitelist_enemies_success", entries_count ) << '\n';
+    }
+    
+    bool HasEntry( const StringSet & whitelist, const tString & value ) const
+    {
+        return whitelist.find( value ) != whitelist.end();
+    }
+    
+    StringSet usernames_whitelist_;
+    StringSet ip_addresses_whitelist_;    
+};
+
+static eEnemiesWhitelist se_enemiesWhitelist;
+
+void se_WhiteListEnemiesUsername( std::istream & s )
+{
+    se_enemiesWhitelist.AddUsernames( s );
+}
+static tConfItemFunc se_whiteListEnemiesUsernameConfItemFunc( "WHITELIST_ENEMIES_USERNAME", se_WhiteListEnemiesUsername );
+
+void se_WhiteListEnemiesIP( std::istream & s )
+{
+    se_enemiesWhitelist.AddIPAddresses( s );
+}
+static tConfItemFunc se_whiteListEnemiesIPConfItemFunc( "WHITELIST_ENEMIES_IP", se_WhiteListEnemiesIP );
+
 // allow enemies from the same IP?
 static bool se_allowEnemiesSameIP = false;
 static tSettingItem< bool > se_allowEnemiesSameIPConf( "ALLOW_ENEMIES_SAME_IP", se_allowEnemiesSameIP );
@@ -9139,7 +9206,7 @@ bool ePlayerNetID::Enemies( ePlayerNetID const * a, ePlayerNetID const * b )
         return false;
 
     // no scoring for two players from the same IP
-    if ( !se_allowEnemiesSameIP && a->Owner() != 0 && a->GetMachine() == b->GetMachine() )
+    if ( !se_allowEnemiesSameIP && a->Owner() != 0 && a->GetMachine() == b->GetMachine() && !se_enemiesWhitelist.CanBeEnemies( a, b ) )
         return false;
 
     // no scoring for two players from the same client

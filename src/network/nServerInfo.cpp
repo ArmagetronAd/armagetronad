@@ -2957,7 +2957,6 @@ void nServerInfo::ReadSyncThis(  Network::BigServerInfo const & info,
             if ( !advancedInfoSetEver )
             {
                 con << "Acknowledged server: " <<  ToString( *this ) << ", name: \"" << tColoredString::RemoveColors(name) << "\"\n";
-                con << "\n";
                 Save();
             }
             else if ( name != oldName )

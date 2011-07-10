@@ -88,8 +88,8 @@ static int sg_consoleHistoryMaxSize=100; // size of the console history
 static tSettingItem< int > sg_consoleHistoryMaxSizeConf("HISTORY_SIZE_CONSOLE",sg_consoleHistoryMaxSize);
 
 class ArmageTron_feature_menuitem: public uMenuItemSelection<int>{
-    void NewChoice(uSelectItem<bool> *){};
-    void NewChoice(char *,bool ){};
+    void NewChoice(uSelectItem<bool> *){}
+    void NewChoice(char *,bool ){}
 public:
     ArmageTron_feature_menuitem(uMenu *m,char const * tit,char const * help,int &targ)
             :uMenuItemSelection<int>(m,tit,help,targ){
@@ -107,13 +107,13 @@ public:
             rFEAT_ON);
     }
 
-    ~ArmageTron_feature_menuitem(){};
+    ~ArmageTron_feature_menuitem(){}
 };
 
 
 class ArmageTron_texmode_menuitem: public uMenuItemSelection<int>{
-    void NewChoice(uSelectItem<bool> *){};
-    void NewChoice(char *,bool ){};
+    void NewChoice(uSelectItem<bool> *){}
+    void NewChoice(char *,bool ){}
 public:
     ArmageTron_texmode_menuitem(uMenu *m,char const * tit,int &targ,
                                 bool font=false)
@@ -148,7 +148,7 @@ public:
     #endif
     }
 
-    ~ArmageTron_texmode_menuitem(){};
+    ~ArmageTron_texmode_menuitem(){}
 };
 
 static tConfItem<bool>    ab("ALPHA_BLEND",sr_alphaBlend);
@@ -793,7 +793,7 @@ public:
         m->RequestSpaceBelow(.2);
     }
 
-    ~ArmageTron_color_menuitem(){};
+    ~ArmageTron_color_menuitem(){}
 
     virtual REAL SpaceRight(){return .2;}
 

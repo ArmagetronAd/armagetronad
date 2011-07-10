@@ -198,6 +198,7 @@ cycle_boost_self_override_help                Block out older clients if CYCLE_B
 cycle_boost_team_override_help                Block out older clients if CYCLE_BOOST_TEAM differs from its default? 
 cycle_delay_doublebind_bonus_override_help    Block out older clients if CYCLE_DELAY_DOUBLEBIND_BONUS differs from its default? 
 cycle_rubber_mindistance_gap_override_help    Block out older clients if CYCLE_RUBBER_MINDISTANCE_GAP differs from its default? 
+cycle_rubber_mindistance_gap_backdoor_override_help    Block out older clients if CYCLE_RUBBER_MINDISTANCE_GAP_BACKDOOR differs from its default? 
 cycle_speed_max_override_help                 Block out older clients if CYCLE_SPEED_MAX differs from its default? 
 cycle_width_override_help                     Block out older clients if CYCLE_WIDTH differs from its default? 
 cycle_width_rubber_max_override_help          Block out older clients if CYCLE_WIDTH_RUBBER_MAX differs from its default? 

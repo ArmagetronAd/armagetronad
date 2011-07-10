@@ -230,7 +230,7 @@ public:
     eVoteItem( void ): creationTime_( tSysTimeFloat() ), user_( 0 ), id_( ++se_votingItemID ), menuItem_( 0 ), total_( 0 )
     {
         items_.Add( this );
-    };
+    }
 
     virtual ~eVoteItem( void );
 
@@ -324,7 +324,7 @@ public:
         con << tOutput( "$vote_new", GetDescription() );
 
         this->Evaluate();
-    };
+    }
 
     virtual nMessageBase * CreateMessage( void ) const = 0 ;
 
@@ -672,7 +672,7 @@ protected:
         }
 
         return true;
-    };
+    }
 
     virtual bool DoCheckValid( int senderID ){ return true; }
 
@@ -683,7 +683,7 @@ protected:
             // write our message ID
             item.set_vote_id( id_ );
         }
-    };
+    }
 
 protected:
     virtual tString DoGetDetails() const 		    // returns the detailed description of the voting item
@@ -936,7 +936,7 @@ public:
         description_ = item.properties().description();
         details_     = item.properties().details();
         return eVoteItem::DoFillFromMessage( item.base(), sender );
-    };
+    }
 
     void DoFillToMessage( Engine::VoteItemServerControlled & item ) const
     {
@@ -944,7 +944,7 @@ public:
         item.mutable_properties()->set_details( details_ );
 
         eVoteItem::DoFillToMessage( *item.mutable_base() );
-    };
+    }
 
     virtual nMessageBase * CreateMessage() const
     {
@@ -954,7 +954,7 @@ public:
         return m;
     }
 
-    virtual void DoExecute(){};						// called when the voting was successful
+    virtual void DoExecute(){}						// called when the voting was successful
 protected:
     virtual void Evaluate()
     {
@@ -1120,7 +1120,7 @@ protected:
     virtual nMessageBase * CreateMessageLegacy() const
     {
         return eVoteItemHarm::CreateMessage();
-    };
+    }
 
     virtual nMessageBase * CreateMessage( void ) const
     {
@@ -1188,14 +1188,14 @@ protected:
         }
 
         return eVoteItem::DoCheckValid( senderID );
-    };
+    }
 
     void DoFillToMessage( Engine::VoteItemHarm & harm ) const
     {
         harm.set_player_id( nNetObject::PointerToID( player_ ) );
 
         eVoteItem::DoFillToMessage( *harm.mutable_base() );
-    };
+    }
 
 protected:
     // get the language string prefix
@@ -1292,7 +1292,7 @@ protected:
         }
 
         return eVoteItemHarm::DoCheckValid( senderID );
-    };
+    }
 
     virtual void DoExecute()						// called when the voting was successful
     {
@@ -1355,7 +1355,7 @@ protected:
         Update();
 
         return ret;
-    };
+    }
 
     void DoFillToMessage( Engine::VoteItemHarm & harm ) const
     {
@@ -1363,7 +1363,7 @@ protected:
         tASSERT( sn_GetNetState() != nCLIENT );
 
         eVoteItemHarm::DoFillToMessage( harm );
-    };
+    }
 private:
     virtual void Update() //!< update description and details
     {
@@ -1465,7 +1465,7 @@ protected:
 
         // no transformation needed or transformation failed. Proceed as usual.
         return eVoteItemHarm::DoCheckValid( senderID );
-    };
+    }
 
     virtual void DoExecute()						// called when the voting was successful
     {

@@ -449,7 +449,7 @@ class nTestObject: public nNetObject
 {
 public:
     nTestObject( nStreamMessage& m ): nNetObject( m ){}
-    nTestObject(){};
+    nTestObject(){}
     virtual nDescriptor& CreatorDescriptor() const;
     virtual bool AcceptClientSync() const{return true;}
 };

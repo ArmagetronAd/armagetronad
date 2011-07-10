@@ -452,16 +452,16 @@ void eTeam::Invite( ePlayerNetID * player )
 void eTeam::UnInvite( ePlayerNetID * player )
 {
     tASSERT( player );
+    size_t wasInvited = player->invitations_.erase( this );
     if ( player->CurrentTeam() == this && this->IsLockedFor( player ) )
     {
         sn_ConsoleOut( tOutput( "$invite_team_kick", player->GetColoredName(), Name() ) );
         player->SetTeam(0);
     }
-    else
+    else if ( wasInvited )
     {
         sn_ConsoleOut( tOutput( "$invite_team_uninvite", player->GetColoredName(), Name() ) );
     }
-    player->invitations_.erase( this );
 }
 
 // check if a player is invited

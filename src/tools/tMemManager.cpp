@@ -99,8 +99,8 @@ static tPThreadRecursiveMutex st_mutex;
 class tMockMutex
 {
 public:
-    void acquire(){};
-    void release(){};
+    void acquire(){}
+    void release(){}
 };
 
 static tMockMutex st_mutex;
