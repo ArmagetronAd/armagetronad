@@ -571,6 +571,7 @@ static const tPathData st_Data;
 class tPathMusic: public tPath
 {
 public:
+    tPathMusic() {}
 private:
     void Paths ( tArray< tString >& paths ) const
     {
