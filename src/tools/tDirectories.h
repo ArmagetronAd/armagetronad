@@ -80,6 +80,7 @@ private:
 class tPathWebroot: public tPath
 {
 public:
+    tPathWebroot () {}
     static tString GetDirPath();
 private:
     void Paths ( tArray< tString >& paths ) const;
