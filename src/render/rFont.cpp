@@ -617,21 +617,23 @@ rTextField & rTextField::StringOutput(const FTGL_CHAR * c, ColorMode colorMode)
         //}
 
         // detect presence of color code
-        if (*c=='0' && my_strnlen(c, 8)>=8 && c[1]=='x' && colorMode != COLOR_IGNORE )
+
+        FTGL_CHAR const resett[] = {
+                                     static_cast<FTGL_CHAR>('0'),
+                                     static_cast<FTGL_CHAR>('x'),
+                                     static_cast<FTGL_CHAR>('R'),
+                                     static_cast<FTGL_CHAR>('E'),
+                                     static_cast<FTGL_CHAR>('S'),
+                                     static_cast<FTGL_CHAR>('E'),
+                                     static_cast<FTGL_CHAR>('T'),
+                                     static_cast<FTGL_CHAR>('T'),
+                                     0};
+
+        if (*c=='0' && my_strnlen(c, 8)>=8 && c[1]=='x' && colorMode != COLOR_IGNORE && (tColor::VerifyColorCode(c) || 0 == my_strncmp(c,resett,8)))
         {
             tColor color;
             bool use = false;
 
-            FTGL_CHAR const resett[] = {
-                                         static_cast<FTGL_CHAR>('0'),
-                                         static_cast<FTGL_CHAR>('x'),
-                                         static_cast<FTGL_CHAR>('R'),
-                                         static_cast<FTGL_CHAR>('E'),
-                                         static_cast<FTGL_CHAR>('S'),
-                                         static_cast<FTGL_CHAR>('E'),
-                                         static_cast<FTGL_CHAR>('T'),
-                                         static_cast<FTGL_CHAR>('T'),
-                                         0};
             if ( 0 == my_strncmp(c,resett,8) )
             {
                 // color reset to default requested
