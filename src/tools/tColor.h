@@ -50,6 +50,9 @@ public:
     void WriteSync( Tools::Color & target ) const; //!< writes sync data
     void ReadSync( Tools::Color const & source );  //!< reads sync data
 
+    static bool VerifyColorCode( const char * c );        // Verifys it's a valid color code
+    bool VerifyColorCode( const wchar_t * c);      // Verifys it's a valid color code
+
     // the colors are public because they are independent of each other
     REAL r_, g_, b_, a_;                    //!< Color values
 
