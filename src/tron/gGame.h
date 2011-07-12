@@ -131,6 +131,8 @@ public:
 
     eSoundMixer* m_Mixer;
 
+    bool scramble;
+
 private:
     //! returns the descriptor responsible for this class
     virtual nNetObjectDescriptorBase const & DoGetDescriptor() const;

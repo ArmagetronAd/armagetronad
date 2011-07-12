@@ -447,6 +447,7 @@ public:
     static bool WaitToLeaveChat(); //!< waits for players to leave chat state. Returns true if the caller should wait to proceed with whatever he wants to do.
 
     static void RemoveChatbots(); //!< removes chatbots and idling players from the game
+    static void ScrambleTeams(); //!< scramble the teams
 
     static void CompleteRebuild(); // same as above, but rebuilds every ePlayerNetID.
     static void ClearAll(); // deletes all ePlayerNetIDs.

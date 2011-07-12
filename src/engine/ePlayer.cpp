@@ -7470,6 +7470,60 @@ void ePlayerNetID::RemoveChatbots()
     se_KickUnworthy();
 }
 
+//Scramble up the teams
+void ePlayerNetID::ScrambleTeams()
+{
+    // nothing to be done on the clients
+    if ( nCLIENT == sn_GetNetState() )
+        return;
+
+#ifdef KRAWALL_SERVER
+    // update access level
+    UpdateAccessLevelRequiredToPlay();
+#endif
+
+    // determine the length of the last round
+    static double lastTime = 0;
+    double currentTime = tSysTimeFloat();
+    REAL roundTime = currentTime - lastTime;
+    lastTime = currentTime;
+
+    std::vector<ePlayerNetID*> players;
+    // go through all players that don't have a team assigned currently, and assign one
+    for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
+    {
+        ePlayerNetID *p = se_PlayerNetIDs(i);
+        if ( p && p->IsHuman() )
+        {
+            // time allowed to be idle
+            REAL idleTime = p->IsChatting() ? se_chatterRemoveTime : se_idleRemoveTime;
+
+            // determine whether the player should have a team
+            bool shouldHaveTeam = idleTime <= 0 || p->LastActivity() - roundTime < idleTime;
+            shouldHaveTeam &= !p->IsSpectating();
+
+            // see to it that the player has or has not a team.
+            if ( shouldHaveTeam )
+            {
+                if ( p->CurrentTeam() )
+                {
+                    p->SetTeam(NULL);
+                }
+                players.push_back(p);
+            }
+        }
+    }
+
+    ePlayerNetID::Update();
+
+    std::random_shuffle(players.begin(), players.end());
+
+    for ( int i = players.size()-1; i>=0; i--)
+    {
+        players[i]->SetDefaultTeam();
+    }
+}
+
 void ePlayerNetID::ThrowOutDisconnected()
 {
     int i;
