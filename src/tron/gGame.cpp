@@ -1974,6 +1974,10 @@ static void Scramble_conf(std::istream &){
         {
             sg_currentGame->scramble = true;
             StartNewMatch();
+            if (sn_GetNetState() != nCLIENT)
+            {
+                sn_ConsoleOut("$gamestate_scramble_teams");
+            }
         } else {
             con << tOutput( "$scramble_teams_too_small" );
         }

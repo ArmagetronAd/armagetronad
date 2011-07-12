@@ -7494,6 +7494,8 @@ void ePlayerNetID::ScrambleTeams()
         }
     }
 
+    sn_CenterMessage("$gamestate_scramble_teams_center");
+
     ePlayerNetID::Update();
 
     std::random_shuffle(players.begin(), players.end());

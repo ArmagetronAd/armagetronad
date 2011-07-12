@@ -2439,6 +2439,9 @@ gamestate_newround_goldengoal	Go (extra round; whoever gains the lead wins)!\n
 gamestate_newround_log		New Round\n
 gamestate_chat_wait         Waiting up to \2 seconds for \1 to finish chatting.\n
 
+gamestate_scramble_teams        Scrambling the teams after this round.\n
+gamestate_scramble_teams_center Scrambling the teams...\n
+
 gamestate_wait_players		Waiting for real players...\n
 gamestate_wait_players_con	Waiting for real players (only spectators online)...\n
 
