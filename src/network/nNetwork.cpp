@@ -1468,6 +1468,22 @@ int GetFreeSlot()
     return -1;
 }
 
+static tString sn_fullRedirectServer("");
+static int sn_fullRedirectPort = 4534;
+
+static tSettingItem< tString > se_fullRedirectServerConf( "FULL_REDIRECT_SERVER", sn_fullRedirectServer );
+static tSettingItem< int > se_fullRedirectPortConf( "FULL_REDIRECT_PORT", sn_fullRedirectPort );
+
+static
+void sn_DisconnectUserFull(int i)
+{
+    nServerInfoRedirect *redirectTo = NULL;
+    if (sn_fullRedirectServer.Len())
+        redirectTo = new nServerInfoRedirect( sn_fullRedirectServer, sn_fullRedirectPort );
+    sn_DisconnectUser( i, "$network_kill_full", redirectTo );
+    delete redirectTo;
+}
+
 static REAL sn_minBan    = 120; // minimal ban time in seconds for trying to connect while you're banned
 static tSettingItem< REAL > sn_minBanSetting( "NETWORK_MIN_BAN", sn_minBan );
 
@@ -1610,7 +1626,7 @@ void sn_LoginHandler( Network::Login const & login, nSenderInfo const & sender )
             if ( new_id > 0 )
             {
                 if(sn_Connections[new_id].socket)
-                    sn_DisconnectUser( new_id, "$network_kill_full" );
+                    sn_DisconnectUserFull( new_id );
 
                 success = true;
 
@@ -1689,7 +1705,7 @@ void sn_LoginHandler( Network::Login const & login, nSenderInfo const & sender )
     }
     else if (sender.SenderID()==MAXCLIENTS+1)
     {
-        sn_DisconnectUser(MAXCLIENTS+1, "$network_kill_full");
+        sn_DisconnectUserFull(MAXCLIENTS+1);
     }
 
     sn_UpdateCurrentVersion();

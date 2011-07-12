@@ -915,6 +915,7 @@ default_kick_to_port_help   Default server port a player is redirected to by KIC
 vote_kick_to_server_help    Server IP/name a player is redirected to by vote kicks.
 vote_kick_to_port_help      Default server port a player is redirected to by vote kicks.
 vote_kick_reason_help       Default reason given to players when they're vote-kicked.
+full_redirect_server_help   Server a player is redirected to when this server is full.
 
 ban_help                    Bans the specified player from the server (kicks him first) for a variable time in minutes.
 ban_ip_help                 Bans the spedified IP address from the server for a variable time.
