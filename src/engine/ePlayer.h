@@ -267,6 +267,7 @@ private:
     bool			chatting_;   //!< are we currently chatting?
     int				chatFlags_;  //!< different types of reasons for beeing chatting
     bool			allowTeamChange_; //!< allow team changes even if ALLOW_TEAM_CHANGE is disabled?
+    bool            kickIdle_; //!< Should we be kicked for being idle?
 
     //For improved remoteadmin
     tAccessLevel     lastAccessLevel;//!< access level at the time of the last name update
@@ -319,6 +320,9 @@ public:
 
     // spectating
     bool IsSpectating() const { return spectating_; }
+
+    // Should be kicked for being idle
+    bool KickIdle() const { return kickIdle_; }
 
     bool StealthMode() const { return stealth_; }
 
@@ -408,6 +412,7 @@ public:
 
     void Activity(); // call it if this player just showed some activity.
     REAL LastActivity() const; //!< returns how long the last activity of this player was ago
+    bool IsIdle();
 
     eNetGameObject *Object() const;
 
