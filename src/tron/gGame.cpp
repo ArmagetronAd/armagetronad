@@ -1970,8 +1970,13 @@ static void StartNewMatch_conf(std::istream &){
 
 static void Scramble_conf(std::istream &){
     if (sg_currentGame) {
-        sg_currentGame->scramble = true;
-        StartNewMatch();
+        if (sg_currentSettings->maxPlayersPerTeam > 1 && se_PlayerNetIDs.Len() > 2)
+        {
+            sg_currentGame->scramble = true;
+            StartNewMatch();
+        } else {
+            con << tOutput( "$scramble_teams_too_small" );
+        }
     }
 }
 
