@@ -7503,6 +7503,7 @@ void ePlayerNetID::ScrambleTeams()
     for ( int i = players.size()-1; i>=0; i--)
     {
         players[i]->SetDefaultTeam();
+        ePlayerNetID::Update();
     }
 }
 
