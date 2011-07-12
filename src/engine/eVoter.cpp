@@ -116,6 +116,10 @@ static tSettingItem< int > se_vbInclude( "VOTING_BIAS_INCLUDE", se_votingBiasInc
 static int se_votingBiasCommand = 0;
 static tSettingItem< int > se_vbCommand( "VOTING_BIAS_COMMAND", se_votingBiasCommand );
 
+// the number set here always acts as additional votes against a command vote.
+static int se_votingBiasScramble = 0;
+static tSettingItem< int > se_vbScramble( "VOTING_BIAS_SCRAMBLE", se_votingBiasScramble );
+
 // voting privacy level. -2 means total disclosure, +2 total secrecy.
 static int se_votingPrivacy = 1;
 static tSettingItem< int > se_vp( "VOTING_PRIVACY", se_votingPrivacy );
@@ -150,6 +154,16 @@ static tAccessLevelSetter se_accessLevelVoteKickSILevel( se_accessLevelVoteKickS
 static tAccessLevel se_accessLevelVoteSuspend = tAccessLevel_Program;
 static tSettingItem< tAccessLevel > se_accessLevelVoteSuspendSI( "ACCESS_LEVEL_VOTE_SUSPEND", se_accessLevelVoteSuspend );
 static tAccessLevelSetter se_accessLevelVoteSuspendSILevel( se_accessLevelVoteSuspendSI, tAccessLevel_Owner );
+
+// minimal access level for scramble votes
+static tAccessLevel se_accessLevelVoteScramble = tAccessLevel_DefaultAuthenticated;
+static tSettingItem< tAccessLevel > se_accessLevelVoteScrambleSI( "ACCESS_LEVEL_VOTE_SCRAMBLE", se_accessLevelVoteScramble );
+static tAccessLevelSetter se_accessLevelVoteScrambleSILevel( se_accessLevelVoteScrambleSI, tAccessLevel_Owner );
+
+// minimal access level for scramble votes
+static tAccessLevel se_accessLevelVoteScrambleExecute = tAccessLevel_Admin;
+static tSettingItem< tAccessLevel > se_accessLevelVoteScrambleExecuteSI( "ACCESS_LEVEL_VOTE_SCRAMBLE_EXECUTE", se_accessLevelVoteScrambleExecute );
+static tAccessLevelSetter se_accessLevelVoteIncludeScrambleSILevel( se_accessLevelVoteScrambleExecuteSI, tAccessLevel_Owner );
 
 // minimal access level for referee votes
 static tAccessLevel se_accessLevelVoteReferee = tAccessLevel_Moderator;
@@ -1675,7 +1689,7 @@ protected:
         return se_votingBiasCommand;
     }
 
-    virtual void DoExecute()						// called when the voting was successful
+    virtual void DoExecute()                        // called when the voting was successful
     {
         // set the access level for the following operation
         tCurrentAccessLevel accessLevel( level_, true );
@@ -1689,6 +1703,44 @@ protected:
 
     tString command_;    //!< the command to execute
     tAccessLevel level_; //!< the level to execute the file with
+};
+
+// scramble vote items
+class eVoteItemScramble: public eVoteItemServerControlled
+{
+public:
+    // constructors/destructor
+    eVoteItemScramble()
+    : eVoteItemServerControlled()
+    {
+        description_ = tOutput( "$vote_scramble_text" );
+        details_ = tOutput( "$vote_scramble_details_text" );
+
+    }
+
+    ~eVoteItemScramble()
+    {}
+protected:
+    // access level required for this kind of vote
+    virtual tAccessLevel DoGetAccessLevel() const
+    {
+        return se_accessLevelVoteScramble;
+    }
+
+    // return vote-specific extra bias
+    virtual int DoGetExtraBias() const
+    {
+        return se_votingBiasScramble;
+    }
+
+    virtual void DoExecute()                        // called when the voting was successful
+    {
+        tCurrentAccessLevel accessLevel( se_accessLevelVoteScrambleExecute, true );
+        eAccessConsoleFilter filter( tAccessLevel_Default );
+        std::istringstream s;
+        s.str("SCRAMBLE");
+        tConfItemBase::LoadLine(s);
+    }
 };
 
 class eVoteItemReferee: public eVoteItemHarmServerControlled
@@ -2305,6 +2357,10 @@ void eVoter::HandleChat( ePlayerNetID * p, std::istream & message ) //!< handles
             item = tNEW( eVoteItemCancelReferee )( toDemoteReferee );
         }
     }
+    else if ( command == "scramble" )
+    {
+        item = tNEW ( eVoteItemScramble );
+    }
     else if ( command == "command" )
     {
         tString console;
@@ -2319,7 +2375,7 @@ void eVoter::HandleChat( ePlayerNetID * p, std::istream & message ) //!< handles
     else
     {
 #if defined(DEDICATED) && defined(KRAWALL_SERVER)
-        sn_ConsoleOut( tOutput("$vote_unknown_command", command, "command, demotereferee, include, kick, referee, suspend" ), p->Owner() );
+        sn_ConsoleOut( tOutput("$vote_unknown_command", command, "command, demotereferee, include, kick, referee, suspend, scramble" ), p->Owner() );
 #else
         sn_ConsoleOut( tOutput("$vote_unknown_command", command, "kick, suspend" ), p->Owner() );
 #endif
