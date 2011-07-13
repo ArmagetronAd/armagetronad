@@ -239,7 +239,7 @@ void sg_ResetRotation()
     sg_mapRotation.Reset();
     sg_configRotation.Reset();
     if ( rotationtype != gROTATION_NEVER )
-        con << tOutput( "$reset_rotaion_message" ) << '\n';
+        con << tOutput( "$reset_rotation_message" ) << '\n';
 }
 
 void sg_ResetRotation( std::istream & )

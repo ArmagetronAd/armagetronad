@@ -940,7 +940,7 @@ map_rotation_help                       A list of map files to rotate through, w
 config_rotation_help                    A list of config files to rotate through, with values separated by semicolons
 reset_rotation_help                     Resets map and config rotation
 reset_rotation_on_start_new_match_help  If enabled, map and config rotation will be reset when a START_NEW_MATCH command is issued
-reset_rotaion_message                   Map and config rotation have been reset.
+reset_rotation_message                  Map and config rotation have been reset.
 
 word_delimiters_help    Characters that count as word delimiters when skipping over words in a text input field.
 
