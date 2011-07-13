@@ -7474,7 +7474,7 @@ void ePlayerNetID::SetScramble()
         ePlayerNetID::Scramble = true;
         sn_ConsoleOut("$gamestate_scramble_teams");
     } else {
-        con << tOutput( "$scramble_teams_too_small" );
+        sn_ConsoleOut("$scramble_teams_too_small");
     }
 }
 
