@@ -4518,6 +4518,8 @@ static int IMPOSSIBLY_LOW_SCORE=(-1 << 31);
 
 static nSpamProtectionSettings se_chatSpamSettings( 1.0f, "SPAM_PROTECTION_CHAT", tOutput("$spam_protection") );
 
+bool ePlayerNetID::Scramble = false;
+
 ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), timeCreated_( tSysTimeFloat() ), allowTeamChange_(false), registeredMachine_(0), pID(p), chatSpam_( se_chatSpamSettings )
 {
     // default access level
@@ -7460,6 +7462,22 @@ void ePlayerNetID::RemoveChatbots()
     se_KickUnworthy();
 }
 
+// Set players to be scrambled next round
+void ePlayerNetID::SetScramble()
+{
+    // nothing to be done on the clients
+    if ( nCLIENT == sn_GetNetState() )
+        return;
+
+    if (eTeam::maxPlayers > 1 && se_PlayerNetIDs.Len() > 2)
+    {
+        ePlayerNetID::Scramble = true;
+        sn_ConsoleOut("$gamestate_scramble_teams");
+    } else {
+        con << tOutput( "$scramble_teams_too_small" );
+    }
+}
+
 //Scramble up the teams
 void ePlayerNetID::ScrambleTeams()
 {
@@ -7471,6 +7489,8 @@ void ePlayerNetID::ScrambleTeams()
     // update access level
     UpdateAccessLevelRequiredToPlay();
 #endif
+
+    ePlayerNetID::Scramble = false;
 
     std::vector<ePlayerNetID*> players;
     // go through all players that don't have a team assigned currently, and assign one

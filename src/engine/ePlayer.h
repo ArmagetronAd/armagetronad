@@ -372,6 +372,8 @@ public:
     virtual nNetObjectDescriptorBase const & DoGetDescriptor() const;
 public:
 
+    static bool Scramble;                   // Should we scramble the teams?
+
     virtual void 			NewObject(){}        				// called when we control a new object
     virtual void 			RightBeforeDeath(int triesLeft){} 	// is called right before the vehicle gets destroyed.
 
@@ -452,6 +454,7 @@ public:
     static bool WaitToLeaveChat(); //!< waits for players to leave chat state. Returns true if the caller should wait to proceed with whatever he wants to do.
 
     static void RemoveChatbots(); //!< removes chatbots and idling players from the game
+    static void SetScramble(); //!< Scramble the teams the next round
     static void ScrambleTeams(); //!< scramble the teams
 
     static void CompleteRebuild(); // same as above, but rebuilds every ePlayerNetID.

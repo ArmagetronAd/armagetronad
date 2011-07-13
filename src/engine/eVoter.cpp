@@ -160,11 +160,6 @@ static tAccessLevel se_accessLevelVoteScramble = tAccessLevel_DefaultAuthenticat
 static tSettingItem< tAccessLevel > se_accessLevelVoteScrambleSI( "ACCESS_LEVEL_VOTE_SCRAMBLE", se_accessLevelVoteScramble );
 static tAccessLevelSetter se_accessLevelVoteScrambleSILevel( se_accessLevelVoteScrambleSI, tAccessLevel_Owner );
 
-// minimal access level for scramble votes
-static tAccessLevel se_accessLevelVoteScrambleExecute = tAccessLevel_Admin;
-static tSettingItem< tAccessLevel > se_accessLevelVoteScrambleExecuteSI( "ACCESS_LEVEL_VOTE_SCRAMBLE_EXECUTE", se_accessLevelVoteScrambleExecute );
-static tAccessLevelSetter se_accessLevelVoteIncludeScrambleSILevel( se_accessLevelVoteScrambleExecuteSI, tAccessLevel_Owner );
-
 // minimal access level for referee votes
 static tAccessLevel se_accessLevelVoteReferee = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_accessLevelVoteRefereeSI( "ACCESS_LEVEL_VOTE_REFEREE", se_accessLevelVoteReferee );
@@ -1735,11 +1730,7 @@ protected:
 
     virtual void DoExecute()                        // called when the voting was successful
     {
-        tCurrentAccessLevel accessLevel( se_accessLevelVoteScrambleExecute, true );
-        eAccessConsoleFilter filter( tAccessLevel_Default );
-        std::istringstream s;
-        s.str("SCRAMBLE");
-        tConfItemBase::LoadLine(s);
+        ePlayerNetID::SetScramble();
     }
 };
 

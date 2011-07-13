@@ -1970,17 +1970,7 @@ static void StartNewMatch_conf(std::istream &){
 
 static void Scramble_conf(std::istream &){
     if (sg_currentGame) {
-        if (sg_currentSettings->maxPlayersPerTeam > 1 && se_PlayerNetIDs.Len() > 2)
-        {
-            sg_currentGame->scramble = true;
-            StartNewMatch();
-            if (sn_GetNetState() != nCLIENT)
-            {
-                sn_ConsoleOut("$gamestate_scramble_teams");
-            }
-        } else {
-            con << tOutput( "$scramble_teams_too_small" );
-        }
+        ePlayerNetID::SetScramble();
     }
 }
 
@@ -2370,7 +2360,6 @@ void gGame::Init(){
     state=GS_CREATED;
     stateNext=GS_TRANSFER_SETTINGS;
     goon=true;
-    scramble=false;
 
     sg_currentGame=this;
 #ifdef DEBUG
@@ -2704,9 +2693,9 @@ void gGame::StateUpdate(){
             {
                 update_settings( &goon );
                 ePlayerNetID::RemoveChatbots();
-                if (scramble) {
+                if (ePlayerNetID::Scramble) {
+                    StartNewMatch();
                     ePlayerNetID::ScrambleTeams();
-                    scramble = false;
                 }
             }
 
