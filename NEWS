@@ -12,7 +12,7 @@ Changes since 0.3.1
 - New vote: /callvote referee <player>: Elevates <player> to access level 6. /callvote demotereferee reverts.
 - Config and map rotation can be manually reset with the command
   “RESET_ROTATION”. Rotation can automatically be reset when a START_NEW_MATCH
-  command is issued by enabling “RESET_ROTAION_ON_START_NEW_MATCH”.
+  command is issued by enabling “RESET_ROTATION_ON_START_NEW_MATCH”.
 
 Changes since 0.3.0
 ===================
