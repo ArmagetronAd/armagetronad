@@ -2491,7 +2491,7 @@ player_base_enemy_respawn	\1 was respawned by their enemy \2.\n
 player_no_longer_suspended  \1 0x77ff77is allowed to play again.\n
 player_suspended            \1 0xff7777is banned to spectator mode for \2 round(s).\n
 
-scramble_teams_too_small     The teams are too small too scramble them.\n
+scramble_teams_too_small     The teams are too small to scramble them.\n
 
 zone_collapse_harmless      \1's zone collapses harmlessly for lack of enemy contacts.\n
 

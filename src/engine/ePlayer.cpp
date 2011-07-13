@@ -4519,6 +4519,7 @@ static int IMPOSSIBLY_LOW_SCORE=(-1 << 31);
 static nSpamProtectionSettings se_chatSpamSettings( 1.0f, "SPAM_PROTECTION_CHAT", tOutput("$spam_protection") );
 
 bool ePlayerNetID::Scramble = false;
+std::vector<ePlayerNetID*> ePlayerNetID::ScramblePlayerIDs;
 
 ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), timeCreated_( tSysTimeFloat() ), allowTeamChange_(false), registeredMachine_(0), pID(p), chatSpam_( se_chatSpamSettings )
 {
@@ -4841,7 +4842,6 @@ void ePlayerNetID::MyInitAfterCreation()
 
     this->silenced_ = se_silenceDefault;
     this->renameAllowed_ = true;
-    this->idle_ = false;
 
     // register with machine and kick user if too many players are present
     if ( Owner() != 0 && sn_GetNetState() == nSERVER )
@@ -7432,11 +7432,9 @@ void ePlayerNetID::RemoveChatbots()
             // time allowed to be idle
             REAL idleTime = p->IsChatting() ? se_chatterRemoveTime : se_idleRemoveTime;
 
-            // determine whether the player is idle
-            p->SetIdle(!(idleTime <= 0 || p->LastActivity() - roundTime < idleTime));
-
             // determine whether the player should have a team
-            bool shouldHaveTeam = !p->IsIdle() && !p->IsSpectating();
+            bool shouldHaveTeam = idleTime <= 0 || p->LastActivity() - roundTime < idleTime;
+            shouldHaveTeam &= !p->IsSpectating();
 
             tColoredString name;
             name << *p << tColoredString::ColorString(1,.5,.5);
@@ -7444,9 +7442,15 @@ void ePlayerNetID::RemoveChatbots()
             // see to it that the player has or has not a team.
             if ( shouldHaveTeam )
             {
-                if ( !p->CurrentTeam() )
+                if ( !p->CurrentTeam() && !ePlayerNetID::Scramble )
                 {
                     p->SetDefaultTeam();
+                }
+
+                if (ePlayerNetID::Scramble)
+                {
+                    if ( p->CurrentTeam() ) p->SetTeam(NULL);
+                    ScramblePlayerIDs.push_back(p);
                 }
             }
             else
@@ -7504,41 +7508,18 @@ void ePlayerNetID::ScrambleTeams()
 #endif
 
     ePlayerNetID::Scramble = false;
-
-    std::vector<ePlayerNetID*> players;
-    // go through all players that don't have a team assigned currently, and assign one
-    for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
-    {
-        ePlayerNetID *p = se_PlayerNetIDs(i);
-        if ( p && p->IsHuman() )
-        {
-            // determine whether the player should have a team
-            bool shouldHaveTeam = !p->IsIdle() && !p->IsSpectating();
-
-            // see to it that the player has or has not a team.
-            if ( shouldHaveTeam )
-            {
-                if ( p->CurrentTeam() )
-                {
-                    p->SetTeam(NULL);
-                }
-                players.push_back(p);
-            }
-        }
-    }
-
     sn_CenterMessage("$gamestate_scramble_teams_center");
 
     ePlayerNetID::Update();
+    std::random_shuffle(ScramblePlayerIDs.begin(), ScramblePlayerIDs.end());
 
-    std::random_shuffle(players.begin(), players.end());
-
-    for ( int i = players.size()-1; i>=0; i--)
+    for ( int i = ScramblePlayerIDs.size()-1; i>=0; i--)
     {
-        players[i]->SetDefaultTeam( true );
+        ScramblePlayerIDs[i]->SetDefaultTeam( true );
     }
 
     ePlayerNetID::Update();
+    ScramblePlayerIDs.clear();
 }
 
 void ePlayerNetID::ThrowOutDisconnected()

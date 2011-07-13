@@ -239,7 +239,6 @@ private:
 
     bool							silenced_;		// flag indicating whether the player has been silenced
     int                             suspended_;     //! number of rounds the player is currently suspended from playing
-    bool                            idle_;          // true if the player is idle
 
     nTimeAbsolute                   timeCreated_;   // the time the player was created
     nTimeAbsolute					timeJoinedTeam; // the time the player joined the team he is in now
@@ -321,10 +320,6 @@ public:
     // spectating
     bool IsSpectating() const { return spectating_; }
 
-    // idle
-    bool IsIdle() const { return idle_; }
-    void SetIdle(bool idle) { idle_ = idle; }
-
     bool StealthMode() const { return stealth_; }
 
     // team management
@@ -374,6 +369,7 @@ public:
 public:
 
     static bool Scramble;                   // Should we scramble the teams?
+    static std::vector<ePlayerNetID*> ScramblePlayerIDs; // List of all the players to be scrambled
 
     virtual void 			NewObject(){}        				// called when we control a new object
     virtual void 			RightBeforeDeath(int triesLeft){} 	// is called right before the vehicle gets destroyed.
