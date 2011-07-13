@@ -4841,6 +4841,7 @@ void ePlayerNetID::MyInitAfterCreation()
 
     this->silenced_ = se_silenceDefault;
     this->renameAllowed_ = true;
+    this->idle_ = false;
 
     // register with machine and kick user if too many players are present
     if ( Owner() != 0 && sn_GetNetState() == nSERVER )
@@ -7432,10 +7433,10 @@ void ePlayerNetID::RemoveChatbots()
             REAL idleTime = p->IsChatting() ? se_chatterRemoveTime : se_idleRemoveTime;
 
             // determine whether the player is idle
-            p->Idle = !(idleTime <= 0 || p->LastActivity() - roundTime < idleTime);
+            p->SetIdle(!(idleTime <= 0 || p->LastActivity() - roundTime < idleTime));
 
             // determine whether the player should have a team
-            bool shouldHaveTeam = !p->Idle && !p->IsSpectating();
+            bool shouldHaveTeam = !p->IsIdle() && !p->IsSpectating();
 
             tColoredString name;
             name << *p << tColoredString::ColorString(1,.5,.5);
@@ -7512,7 +7513,7 @@ void ePlayerNetID::ScrambleTeams()
         if ( p && p->IsHuman() )
         {
             // determine whether the player should have a team
-            bool shouldHaveTeam = !p->Idle && !p->IsSpectating();
+            bool shouldHaveTeam = !p->IsIdle() && !p->IsSpectating();
 
             // see to it that the player has or has not a team.
             if ( shouldHaveTeam )

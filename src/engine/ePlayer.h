@@ -107,7 +107,6 @@ public:
     bool       spectate;              // shall this player always spectate?
     bool       stealth;               // does this player wish to hide his/her identity?
     bool       autoLogin;             // should the player always request authentication on servers?
-    bool       Idle;                  // true if the player is idle
 
     bool 		nameTeamAfterMe; // player prefers to call his team after his name
     int			favoriteNumberOfPlayersPerTeam;
@@ -240,6 +239,7 @@ private:
 
     bool							silenced_;		// flag indicating whether the player has been silenced
     int                             suspended_;     //! number of rounds the player is currently suspended from playing
+    bool                            idle_;          // true if the player is idle
 
     nTimeAbsolute                   timeCreated_;   // the time the player was created
     nTimeAbsolute					timeJoinedTeam; // the time the player joined the team he is in now
@@ -320,6 +320,10 @@ public:
 
     // spectating
     bool IsSpectating() const { return spectating_; }
+
+    // idle
+    bool IsIdle() const { return idle_; }
+    void SetIdle(bool idle) { idle_ = idle; }
 
     bool StealthMode() const { return stealth_; }
 
