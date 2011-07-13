@@ -175,6 +175,11 @@ public:
             current_ = 0;
         }
     }
+
+    void Reset()
+    {
+        current_ = 0;
+    }
 private:
     virtual void ReadVal( std::istream &is )
     {
@@ -228,6 +233,24 @@ tCONFIG_ENUM( gRotationType );
 
 static gRotationType rotationtype = gROTATION_NEVER;
 static tSettingItem<gRotationType> conf_rotationtype("ROTATION_TYPE",rotationtype);
+
+void sg_ResetRotation()
+{
+    sg_mapRotation.Reset();
+    sg_configRotation.Reset();
+    if ( rotationtype != gROTATION_NEVER )
+        con << tOutput( "$reset_rotaion_message" ) << '\n';
+}
+
+void sg_ResetRotation( std::istream & )
+{
+    sg_ResetRotation();
+}
+
+static tConfItemFunc sg_resetRotationConfItemFunc( "RESET_ROTATION", sg_ResetRotation );
+
+static bool sg_resetRotationOnNewMatch = false;
+static tSettingItem< bool > sg_resetRotationOnNewMatchSettingItem( "RESET_ROTATION_ON_START_NEW_MATCH", sg_resetRotationOnNewMatch );
 
 // bool globalingame=false;
 
@@ -1965,6 +1988,8 @@ static void StartNewMatch(){
 }
 
 static void StartNewMatch_conf(std::istream &){
+    if ( sg_resetRotationOnNewMatch )
+        sg_ResetRotation();
     StartNewMatch();
 }
 
