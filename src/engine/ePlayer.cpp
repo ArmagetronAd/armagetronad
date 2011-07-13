@@ -7416,14 +7416,26 @@ void ePlayerNetID::RemoveChatbots()
     UpdateAccessLevelRequiredToPlay();
 #endif
 
+    // determine the length of the last round
+    static double lastTime = 0;
+    double currentTime = tSysTimeFloat();
+    REAL roundTime = currentTime - lastTime;
+    lastTime = currentTime;
+
     // go through all players that don't have a team assigned currently, and assign one
     for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
     {
         ePlayerNetID *p = se_PlayerNetIDs(i);
         if ( p && p->IsHuman() )
         {
+            // time allowed to be idle
+            REAL idleTime = p->IsChatting() ? se_chatterRemoveTime : se_idleRemoveTime;
+
+            // determine whether the player is idle
+            p->Idle = !(idleTime <= 0 || p->LastActivity() - roundTime < idleTime);
+
             // determine whether the player should have a team
-            bool shouldHaveTeam = !p->IsIdle() && !p->IsSpectating();
+            bool shouldHaveTeam = !p->Idle && !p->IsSpectating();
 
             tColoredString name;
             name << *p << tColoredString::ColorString(1,.5,.5);
@@ -7446,7 +7458,7 @@ void ePlayerNetID::RemoveChatbots()
             }
 
             // kick idle players (Removes player from list, this must be the last operation of the loop)
-            if ( p->KickIdle() )
+            if ( se_idleKickTime > 0 && se_idleKickTime < p->LastActivity() - roundTime && se_autokickImmunity < p->GetAccessLevel() )
             {
                 sn_KickUser( p->Owner(), tOutput( "$network_kill_idle" ) );
 
@@ -7500,7 +7512,7 @@ void ePlayerNetID::ScrambleTeams()
         if ( p && p->IsHuman() )
         {
             // determine whether the player should have a team
-            bool shouldHaveTeam = !p->IsIdle() && !p->IsSpectating();
+            bool shouldHaveTeam = !p->Idle && !p->IsSpectating();
 
             // see to it that the player has or has not a team.
             if ( shouldHaveTeam )
@@ -9351,32 +9363,6 @@ nMachine & ePlayerNetID::DoGetMachine( void ) const
 REAL ePlayerNetID::LastActivity( void ) const
 {
     return tSysTimeFloat() - lastActivity_;
-}
-
-// *******************************************************************************
-// *
-// *    IsIdle
-// *
-// *******************************************************************************
-//!
-//!        @return
-//!
-// *******************************************************************************
-
-bool ePlayerNetID::IsIdle( void )
-{
-    static double lastTime = 0;
-    double currentTime = tSysTimeFloat();
-    REAL roundTime = currentTime - lastTime;
-    lastTime = currentTime;
-
-    // time allowed to be idle
-    REAL idleTime = IsChatting() ? se_chatterRemoveTime : se_idleRemoveTime;
-
-    // determine whether the player is idle
-    bool idle = !(idleTime <= 0 || LastActivity() - roundTime < idleTime);
-    kickIdle_ =  se_idleKickTime > 0 && se_idleKickTime < LastActivity() - roundTime && se_autokickImmunity < GetAccessLevel();
-    return idle;
 }
 
 // *******************************************************************************
