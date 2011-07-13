@@ -8602,7 +8602,8 @@ public:
     {
         return(
             HasEntry( ip_addresses_whitelist_, a->GetMachine().GetIP() ) ||
-            ( HasEntry( usernames_whitelist_, a->GetLogName() ) && HasEntry( usernames_whitelist_, b->GetLogName() ) )
+            HasEntry( usernames_whitelist_, a->GetLogName() ) ||
+            HasEntry( usernames_whitelist_, b->GetLogName() )
         );
     }
     
