@@ -7503,8 +7503,9 @@ void ePlayerNetID::ScrambleTeams()
     for ( int i = players.size()-1; i>=0; i--)
     {
         players[i]->SetDefaultTeam();
-        ePlayerNetID::Update();
     }
+
+    ePlayerNetID::Update();
 }
 
 void ePlayerNetID::ThrowOutDisconnected()
@@ -7711,10 +7712,10 @@ bool ePlayerNetID::TeamChangeAllowed( bool informPlayer ) const {
 }
 
 // put a new player into a default team
-void ePlayerNetID::SetDefaultTeam( )
+void ePlayerNetID::SetDefaultTeam( bool isScrambleCommand )
 {
     // only the server should do this, the client does not have the full information on how to do do it right.
-    if ( sn_GetNetState() == nCLIENT || !se_assignTeamAutomatically || spectating_ || !TeamChangeAllowed() )
+    if ( sn_GetNetState() == nCLIENT || ( !se_assignTeamAutomatically && !isScrambleCommand ) || spectating_ || !TeamChangeAllowed() )
         return;
 
     //    if ( !IsHuman() )

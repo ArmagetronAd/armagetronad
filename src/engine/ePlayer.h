@@ -335,7 +335,7 @@ public:
     int  TeamListID() const { return teamListID; }		// return my position in the team
     void SetShuffleWish( int pos ); 	        //!< sets a desired team position
     eTeam* FindDefaultTeam();					// find a good default team for us
-    void SetDefaultTeam();						// register me in a good default team
+    void SetDefaultTeam( bool isScrambleCommand=false );    // register me in a good default team
     void SetTeamForce(eTeam* team );           	// register me in the given team without checks
     void SetTeam(eTeam* team);          		// register me in the given team (callable on the server)
     void SetTeamWish(eTeam* team); 				// express the wish to be part of the given team (always callable)
