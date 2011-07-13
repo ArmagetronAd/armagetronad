@@ -3803,6 +3803,7 @@ void gGame::StartNewMatch(){
 void gGame::StartNewMatchNow(){
     if ( rounds != 0 )
     {
+        sg_newMatchWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
         sg_newMatchWriter.write();
         se_sendEventNotification(tString("New match"), tString("Starting a new match"));
     }
