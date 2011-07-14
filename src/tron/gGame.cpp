@@ -1993,7 +1993,14 @@ static void StartNewMatch_conf(std::istream &){
     StartNewMatch();
 }
 
+static void Scramble_conf(std::istream &){
+    if (sg_currentGame) {
+        ePlayerNetID::SetScramble();
+    }
+}
+
 static tConfItemFunc snm("START_NEW_MATCH",&StartNewMatch_conf);
+static tConfItemFunc scr("SCRAMBLE",&Scramble_conf);
 
 #ifdef DEDICATED
 static void Quit_conf(std::istream &){
@@ -2711,6 +2718,10 @@ void gGame::StateUpdate(){
             {
                 update_settings( &goon );
                 ePlayerNetID::RemoveChatbots();
+                if (ePlayerNetID::Scramble) {
+                    StartNewMatch();
+                    ePlayerNetID::ScrambleTeams();
+                }
             }
 
             rViewport::Update(MAX_PLAYERS);

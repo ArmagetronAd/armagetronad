@@ -13,6 +13,8 @@ Changes since 0.3.1
 - Config and map rotation can be manually reset with the command
   “RESET_ROTATION”. Rotation can automatically be reset when a START_NEW_MATCH
   command is issued by enabling “RESET_ROTATION_ON_START_NEW_MATCH”.
+- New admin command: "SCRAMBLE". Scrambles/randomises which players are in which team.
+- New vote: /callvote scramble: Executes the SCRAMBLE command.
 
 Changes since 0.3.0
 ===================

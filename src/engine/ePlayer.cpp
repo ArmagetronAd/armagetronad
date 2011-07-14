@@ -4518,6 +4518,9 @@ static int IMPOSSIBLY_LOW_SCORE=(-1 << 31);
 
 static nSpamProtectionSettings se_chatSpamSettings( 1.0f, "SPAM_PROTECTION_CHAT", tOutput("$spam_protection") );
 
+bool ePlayerNetID::Scramble = false;
+std::vector<ePlayerNetID*> ePlayerNetID::ScramblePlayerIDs;
+
 ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), timeCreated_( tSysTimeFloat() ), allowTeamChange_(false), registeredMachine_(0), pID(p), chatSpam_( se_chatSpamSettings )
 {
     // default access level
@@ -7439,9 +7442,15 @@ void ePlayerNetID::RemoveChatbots()
             // see to it that the player has or has not a team.
             if ( shouldHaveTeam )
             {
-                if ( !p->CurrentTeam() )
+                if ( !p->CurrentTeam() && !ePlayerNetID::Scramble )
                 {
                     p->SetDefaultTeam();
+                }
+
+                if (ePlayerNetID::Scramble)
+                {
+                    if ( p->CurrentTeam() ) p->SetTeam(NULL);
+                    ScramblePlayerIDs.push_back(p);
                 }
             }
             else
@@ -7468,6 +7477,49 @@ void ePlayerNetID::RemoveChatbots()
     // kick unworthy spectators (in case MAX_CLIENTS has changed)
     se_kickUnworthySpare = -1;
     se_KickUnworthy();
+}
+
+// Set players to be scrambled next round
+void ePlayerNetID::SetScramble()
+{
+    // nothing to be done on the clients
+    if ( nCLIENT == sn_GetNetState() )
+        return;
+
+    if (eTeam::maxPlayers > 1 && se_PlayerNetIDs.Len() > 2)
+    {
+        ePlayerNetID::Scramble = true;
+        sn_ConsoleOut("$gamestate_scramble_teams");
+    } else {
+        sn_ConsoleOut("$scramble_teams_too_small");
+    }
+}
+
+//Scramble up the teams
+void ePlayerNetID::ScrambleTeams()
+{
+    // nothing to be done on the clients
+    if ( nCLIENT == sn_GetNetState() )
+        return;
+
+#ifdef KRAWALL_SERVER
+    // update access level
+    UpdateAccessLevelRequiredToPlay();
+#endif
+
+    ePlayerNetID::Scramble = false;
+    sn_CenterMessage("$gamestate_scramble_teams_center");
+
+    ePlayerNetID::Update();
+    std::random_shuffle(ScramblePlayerIDs.begin(), ScramblePlayerIDs.end());
+
+    for ( int i = ScramblePlayerIDs.size()-1; i>=0; i--)
+    {
+        ScramblePlayerIDs[i]->SetDefaultTeam( true );
+    }
+
+    ePlayerNetID::Update();
+    ScramblePlayerIDs.clear();
 }
 
 void ePlayerNetID::ThrowOutDisconnected()
@@ -7674,10 +7726,10 @@ bool ePlayerNetID::TeamChangeAllowed( bool informPlayer ) const {
 }
 
 // put a new player into a default team
-void ePlayerNetID::SetDefaultTeam( )
+void ePlayerNetID::SetDefaultTeam( bool isScrambleCommand )
 {
     // only the server should do this, the client does not have the full information on how to do do it right.
-    if ( sn_GetNetState() == nCLIENT || !se_assignTeamAutomatically || spectating_ || !TeamChangeAllowed() )
+    if ( sn_GetNetState() == nCLIENT || ( !se_assignTeamAutomatically && !isScrambleCommand ) || spectating_ || !TeamChangeAllowed() )
         return;
 
     //    if ( !IsHuman() )
