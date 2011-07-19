@@ -787,6 +787,7 @@ ladderlog_write_chat_help                     Write to ladderlog: CHAT <chatter>
 ladderlog_write_death_frag_help               Write to ladderlog: DEATH_FRAG <prey> <predator>
 ladderlog_write_death_suicide_help            Write to ladderlog: DEATH_SUICIDE <player>
 ladderlog_write_death_teamkill_help           Write to ladderlog: DEATH_TEAMKILL <prey> <predator>
+ladderlog_write_encoding_help                 Write to ladderlog: ENCODING <charset>. Specifies the encoding for data in ladderlog.txt.
 ladderlog_write_game_end_help                 Write to ladderlog: GAME_END <date and time>
 ladderlog_write_game_time_help                Write to ladderlog: GAME_TIME <time> (see also: GAME_TIME_INTERVAL)
 ladderlog_write_match_winner_help             Write to ladderlog: MATCH_WINNER <team> <players>

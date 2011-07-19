@@ -652,6 +652,10 @@ int main(int argc,char **argv){
         sg_LanguageInit();
         atexit(tLocale::Clear);
 
+        static eLadderLogWriter sg_encodingWriter( "ENCODING", true );
+        sg_encodingWriter << "latin1";
+        sg_encodingWriter.write();
+
         if ( commandLine.Execute() )
         {
             gCycle::PrivateSettings();
