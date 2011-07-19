@@ -91,6 +91,7 @@
 		9B7CFE1F0EFCE74700126634 /* tResource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B7CFE130EFCE74700126634 /* tResource.cpp */; };
 		9B7CFE210EFCE74700126634 /* tResourceManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B7CFE150EFCE74700126634 /* tResourceManager.cpp */; };
 		9B7CFE230EFCE74700126634 /* tResourceType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B7CFE170EFCE74700126634 /* tResourceType.cpp */; };
+		9B82FB1313D0DE89003335AC /* libprotobuf.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B9753910F44A34A00E41662 /* libprotobuf.a */; };
 		9B83FE950B12161600878E8A /* Growl-WithInstaller.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B83FE940B12161600878E8A /* Growl-WithInstaller.framework */; };
 		9B83FF0F0B121B3100878E8A /* Growl-WithInstaller.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9B83FE940B12161600878E8A /* Growl-WithInstaller.framework */; };
 		9B9753920F44A34A00E41662 /* libprotobuf.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B9753910F44A34A00E41662 /* libprotobuf.a */; };
@@ -1008,6 +1009,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9B82FB1313D0DE89003335AC /* libprotobuf.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2575,7 +2577,11 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				HEADER_SEARCH_PATHS = "$(SHARED_HEADER_SEARCH_PATHS)";
 				INSTALL_PATH = /usr/local/lib;
-				LIBRARY_SEARCH_PATHS = "$(SHARED_LIBRARY_SEARCH_PATHS)";
+				LIBRARY_SEARCH_PATHS = (
+					"$(SHARED_LIBRARY_SEARCH_PATHS)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+				);
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(LOCAL_LIBRARY_DIR)/Frameworks/ArmagetronAdvanced/current\"";
 				PREBINDING = NO;
 				PRODUCT_NAME = armaprotobuf;
 			};
@@ -2592,7 +2598,11 @@
 				GCC_MODEL_TUNING = G5;
 				HEADER_SEARCH_PATHS = "$(SHARED_HEADER_SEARCH_PATHS)";
 				INSTALL_PATH = /usr/local/lib;
-				LIBRARY_SEARCH_PATHS = "$(SHARED_LIBRARY_SEARCH_PATHS)";
+				LIBRARY_SEARCH_PATHS = (
+					"$(SHARED_LIBRARY_SEARCH_PATHS)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+				);
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(LOCAL_LIBRARY_DIR)/Frameworks/ArmagetronAdvanced/current\"";
 				PREBINDING = NO;
 				PRODUCT_NAME = armaprotobuf;
 				ZERO_LINK = NO;

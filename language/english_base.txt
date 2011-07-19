@@ -935,6 +935,13 @@ viewport_belongs_help		Assign this viewport to a player
 #********************************************
 #********************************************
 
+rotation_type_help                      Determines when map and config rotation should occur. Possible values: (0) Do not do any rotation, (1) Rotate every round (2) Rotate every match
+map_rotation_help                       A list of map files to rotate through, with values separated by semicolons
+config_rotation_help                    A list of config files to rotate through, with values separated by semicolons
+reset_rotation_help                     Resets map and config rotation
+reset_rotation_on_start_new_match_help  If enabled, map and config rotation will be reset when a START_NEW_MATCH command is issued
+reset_rotation_message                  Map and config rotation have been reset.
+
 word_delimiters_help    Characters that count as word delimiters when skipping over words in a text input field.
 
 mouse_grab_help			Grab the mouse pointer, so it can't leave the window
@@ -1747,6 +1754,9 @@ vote_command_details_text			If accepted, the console command "\1" will be execut
 vote_command_text					Command \1
 vote_command_message				Executing command "\1".\n
 
+vote_scramble_details                           If accepted, all players will be removed from their team and assigned a new one randomly.
+vote_scramble_text                              Scramble the teams
+
 #*************************************
 #*************************************
 #
@@ -2439,6 +2449,9 @@ gamestate_newround_goldengoal	Go (extra round; whoever gains the lead wins)!\n
 gamestate_newround_log		New Round\n
 gamestate_chat_wait         Waiting up to \2 seconds for \1 to finish chatting.\n
 
+gamestate_scramble_teams        Resetting the scores and scrambling the teams after this round.\n
+gamestate_scramble_teams_center Scrambling the teams...\n
+
 gamestate_wait_players		Waiting for real players...\n
 gamestate_wait_players_con	Waiting for real players (only spectators online)...\n
 
@@ -2484,6 +2497,8 @@ player_base_enemy_respawn	\1 was respawned by their enemy \2.\n
 
 player_no_longer_suspended  \1 0x77ff77is allowed to play again.\n
 player_suspended            \1 0xff7777is banned to spectator mode for \2 round(s).\n
+
+scramble_teams_too_small     The teams are too small to scramble them.\n
 
 zone_collapse_harmless      \1's zone collapses harmlessly for lack of enemy contacts.\n
 

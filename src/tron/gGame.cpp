@@ -175,6 +175,11 @@ public:
             current_ = 0;
         }
     }
+
+    void Reset()
+    {
+        current_ = 0;
+    }
 private:
     virtual void ReadVal( std::istream &is )
     {
@@ -228,6 +233,24 @@ tCONFIG_ENUM( gRotationType );
 
 static gRotationType rotationtype = gROTATION_NEVER;
 static tSettingItem<gRotationType> conf_rotationtype("ROTATION_TYPE",rotationtype);
+
+void sg_ResetRotation()
+{
+    sg_mapRotation.Reset();
+    sg_configRotation.Reset();
+    if ( rotationtype != gROTATION_NEVER )
+        con << tOutput( "$reset_rotation_message" ) << '\n';
+}
+
+void sg_ResetRotation( std::istream & )
+{
+    sg_ResetRotation();
+}
+
+static tConfItemFunc sg_resetRotationConfItemFunc( "RESET_ROTATION", sg_ResetRotation );
+
+static bool sg_resetRotationOnNewMatch = false;
+static tSettingItem< bool > sg_resetRotationOnNewMatchSettingItem( "RESET_ROTATION_ON_START_NEW_MATCH", sg_resetRotationOnNewMatch );
 
 // bool globalingame=false;
 
@@ -1965,10 +1988,19 @@ static void StartNewMatch(){
 }
 
 static void StartNewMatch_conf(std::istream &){
+    if ( sg_resetRotationOnNewMatch )
+        sg_ResetRotation();
     StartNewMatch();
 }
 
+static void Scramble_conf(std::istream &){
+    if (sg_currentGame) {
+        ePlayerNetID::SetScramble();
+    }
+}
+
 static tConfItemFunc snm("START_NEW_MATCH",&StartNewMatch_conf);
+static tConfItemFunc scr("SCRAMBLE",&Scramble_conf);
 
 #ifdef DEDICATED
 static void Quit_conf(std::istream &){
@@ -2686,6 +2718,10 @@ void gGame::StateUpdate(){
             {
                 update_settings( &goon );
                 ePlayerNetID::RemoveChatbots();
+                if (ePlayerNetID::Scramble) {
+                    StartNewMatch();
+                    ePlayerNetID::ScrambleTeams();
+                }
             }
 
             rViewport::Update(MAX_PLAYERS);
@@ -3778,6 +3814,7 @@ void gGame::StartNewMatch(){
 void gGame::StartNewMatchNow(){
     if ( rounds != 0 )
     {
+        sg_newMatchWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
         sg_newMatchWriter.write();
         se_sendEventNotification(tString("New match"), tString("Starting a new match"));
     }
