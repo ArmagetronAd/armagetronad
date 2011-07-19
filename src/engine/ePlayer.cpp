@@ -9171,11 +9171,12 @@ public:
     // Assumes both "a" and "b" are from the same IP address.
     bool CanBeEnemies( const ePlayerNetID * a, const ePlayerNetID * b ) const
     {
-        return(
-            HasEntry( ip_addresses_whitelist_, a->GetMachine().GetIP() ) ||
-            HasEntry( usernames_whitelist_, a->GetLogName() ) ||
-            HasEntry( usernames_whitelist_, b->GetLogName() )
-        );
+        bool enemies = HasEntry( ip_addresses_whitelist_, a->GetMachine().GetIP() );
+#ifdef KRAWALL_SERVER
+        enemies |= a->IsAuthenticated() && HasEntry( usernames_whitelist_, a->GetLogName() );
+        enemies |= b->IsAuthenticated() && HasEntry( usernames_whitelist_, b->GetLogName() );
+#endif
+        return enemies;
     }
     
     void AddUsernames( std::istream & s )
@@ -9217,11 +9218,13 @@ protected:
 
 static eEnemiesWhitelist se_enemiesWhitelist;
 
+#ifdef KRAWALL_SERVER
 void se_WhiteListEnemiesUsername( std::istream & s )
 {
     se_enemiesWhitelist.AddUsernames( s );
 }
 static tConfItemFunc se_whiteListEnemiesUsernameConfItemFunc( "WHITELIST_ENEMIES_USERNAME", se_WhiteListEnemiesUsername );
+#endif
 
 void se_WhiteListEnemiesIP( std::istream & s )
 {

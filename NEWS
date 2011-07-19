@@ -122,6 +122,8 @@ Changes since 0.2.8.3.x:
   if they come from the same IP address and ALLOW_ENEMIES_SAME_IP is
   disabled (which is its default setting).
 - GAME_END, NEW_MATCH, and NEW_ROUND ladderlog events include date and time.
+- Added ENCODING ladderlog event, which specifies the encoding for data in
+  ladderlog.txt.
 
 Changes since 0.2.8.3_rc4:
 ==========================
