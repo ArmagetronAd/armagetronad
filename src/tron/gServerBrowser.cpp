@@ -73,7 +73,7 @@ public:
 
     gServerInfo():menuItem(NULL), show(true)
     {
-    };
+    }
 
     virtual ~gServerInfo();
 

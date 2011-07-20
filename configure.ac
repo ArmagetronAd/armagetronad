@@ -720,8 +720,8 @@ dnl *************************************************
 dnl AC_CHECK_LIB(g++, cin,,
 dnl AC_MSG_WARN([C++ standard library not found. You can ignore this warning on non-GNU-systems.]))
 
-AC_CHECK_LIB(z, gzread,,
-AC_MSG_ERROR([You need libz to compile ${progtitle}.]))
+dnl AC_CHECK_LIB(z, gzread,,
+dnl AC_MSG_ERROR([You need libz to compile ${progtitle}.]))
 
 AC_MSG_CHECKING(whether libpng is installed)
 if PNGLIBS=`libpng-config --libs`; then
@@ -735,11 +735,11 @@ AC_CHECK_FUNC(png_sig_cmp,
 ,
 AC_MSG_ERROR([You need libpng to compile ${progtitle}.]))
 
-AC_CHECK_LIB(jpeg, jpeg_read_header,,
-	AC_MSG_WARN([
-	libjpeg not found. Expect small graphical errors ( missing moviepack title screen ).]
-	)
-)
+dnl AC_CHECK_LIB(jpeg, jpeg_read_header,,
+dnl	AC_MSG_WARN([
+dnl	libjpeg not found. Expect small graphical errors ( missing moviepack title screen ).]
+dnl	)
+dnl )
 
 AC_CHECK_LIB(SDL_image, IMG_Load,,
 dnl AC_CHECK_LIB(IMG, main,,

@@ -44,7 +44,7 @@ class gSpawnPoint{
 
 public:
     gSpawnPoint(const eCoord &loc,const eCoord &dir);
-    ~gSpawnPoint(){};
+    ~gSpawnPoint(){}
 
     //enters valid spawn eCoordinates and direction in loc and dir
     void Spawn(eCoord &loc,eCoord &dir);

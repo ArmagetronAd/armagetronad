@@ -433,6 +433,9 @@ default_shout_player_help    1 if the default chat action for players should be 
 
 allow_enemies_same_ip_help         If set to 1, this allows two players that apparently come from the same machine to fight for points with each other.
 allow_enemies_same_client_help     If set to 1, this allows two players that play on the same client to fight for points with each other.
+whitelist_enemies_username_help    Allow players from the same IP address to be enemies if one of them is authenticated, and in this list. WHITELIST_ENEMIES_USERNAME <authenticated name1> <authenticated name2> ...
+whitelist_enemies_ip_help          Allow any players from the specified IP address to be enemies. Usage: WHITELIST_ENEMIES_IP <ip1> ...
+whitelist_enemies_success          Added \1 entries to the whitelist.
 
 allow_control_during_chat_help     If set to 1, this allows a player to issue cycle and camera control commands during chat (losing the chatbot and the yellow chat pyramid).
 
@@ -803,6 +806,7 @@ ladderlog_write_flag_return_help              Write to ladderlog: FLAG_RETURN <p
 ladderlog_write_flag_score_help               Write to ladderlog: FLAG_SCORE <player> <flag team>
 ladderlog_write_flag_take_help                Write to ladderlog: FLAG_TAKE <player> <flag team>
 ladderlog_write_flag_timeout_help             Write to ladderlog: FLAG_TIMEOUT <player> <flag team>
+ladderlog_write_encoding_help                 Write to ladderlog: ENCODING <charset>. Specifies the encoding for data in ladderlog.txt.
 ladderlog_write_game_end_help                 Write to ladderlog: GAME_END <date and time>
 ladderlog_write_game_time_help                Write to ladderlog: GAME_TIME <time> (see also: GAME_TIME_INTERVAL)
 ladderlog_write_match_winner_help             Write to ladderlog: MATCH_WINNER <team> <players>

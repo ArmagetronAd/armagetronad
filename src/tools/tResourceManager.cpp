@@ -77,7 +77,9 @@ static int myFetch(const char *URIs, const char *filename, const char *savepath)
 
     while (r[0] != '\0') {
         while (r[0] == ' ') ++r;			// skip spaces at the start of the item
-        (p = strchr(r, ';')) ? 0 : (p = strchr(r, '\0'));
+        p = strchr(r, ';');
+        if ( !p )
+            p = strchr(r, '\0');
         n = (p[0] == '\0') ? p : (p + 1);	// next item starts after the semicolon
         // NOTE: skip semicolons, *NOT* nulls
         while (p[-1] == ' ') --p;			// skip spaces at the end of the item

@@ -2441,7 +2441,7 @@ gExplosion * gNetPlayerWall::Holer( REAL a, REAL time ) const
     // for other reasons
     if ( !IsDangerousApartFromHoles( a, time ) )
     {
-        return false;
+        return NULL;
     }
 
     const gPlayerWallCoord* coord = &coords_(IndexAlpha(a));
