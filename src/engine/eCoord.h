@@ -34,7 +34,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 class eCoord{
 public:
     REAL x,y;
-    explicit eCoord(REAL X=0,REAL Y=0):x(X),y(Y){};
+    explicit eCoord(REAL X=0,REAL Y=0):x(X),y(Y){}
 
     // Calculations:
     inline bool operator==(const eCoord &a) const;

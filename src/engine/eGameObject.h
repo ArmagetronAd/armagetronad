@@ -193,7 +193,7 @@ public:
 
     //sound output
     virtual void SoundMix(unsigned char *dest,unsigned int len,
-                          int viewer,REAL rvol,REAL lvol){};
+                          int viewer,REAL rvol,REAL lvol){}
 
     // internal camera
     virtual eCoord CamDir()  const {return dir;}
@@ -256,8 +256,8 @@ private:
 class eDeath
 {
 public:
-    eDeath(){};   //!< constructor
-    ~eDeath(){};  //!< destructor
+    eDeath(){}   //!< constructor
+    ~eDeath(){}  //!< destructor
 };
 
 #endif

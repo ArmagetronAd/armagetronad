@@ -229,6 +229,7 @@ protected:
 
     mutable REAL    gap_[2];                    //!< when driving towards a wall, this is set to the maximal distance we need to approach it so that when the cycle turns, it can squeeze through any gaps
     mutable bool    keepLookingForGap_[2];      //!< flags telling the system whether it is worthwile to look for further, smaller, gaps
+    mutable bool    gapIsBackdoor_[2];          //!< flags indicating whether gaps are backdoors
 
     eCoord			lastTurnPos_;	            //!< the location of the last turn
     REAL            lastTurnTimeRight_;         //!< the time of the last turn right

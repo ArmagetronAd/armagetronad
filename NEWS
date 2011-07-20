@@ -10,9 +10,16 @@ Changes since 0.2.8.3.x:
 - Tutorial tooltips for the most important keybindings.
 - ADD_MASTER_SERVER command to announce a server to a new master server.
   Simplifies the process to list your server on a subculture.
-- Player positions logged to ladderlog with POSITIONS event.
+- Team launch positions logged to ladderlog with POSITIONS event. Disabled by
+  default.
 - New command-line option "--input" added to poll for input from a file
   instead of stdin.
+- Added WHITELIST_ENEMIES_[IP/USERNAME] to allow players to be enemies, even
+  if they come from the same IP address and ALLOW_ENEMIES_SAME_IP is
+  disabled (which is its default setting).
+- GAME_END, NEW_MATCH, and NEW_ROUND ladderlog events include date and time.
+- Added ENCODING ladderlog event, which specifies the encoding for data in
+  ladderlog.txt.
 
 Changes since 0.2.8.3_rc4:
 - New setting: KEEP_PLAYER_SLOT allows the server to kick (preferably) spectators

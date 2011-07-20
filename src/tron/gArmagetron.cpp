@@ -652,6 +652,10 @@ int main(int argc,char **argv){
         sg_LanguageInit();
         atexit(tLocale::Clear);
 
+        static eLadderLogWriter sg_encodingWriter( "ENCODING", true );
+        sg_encodingWriter << "latin1";
+        sg_encodingWriter.write();
+
         if ( commandLine.Execute() )
         {
             gCycle::PrivateSettings();
@@ -816,7 +820,7 @@ int main(int argc,char **argv){
 #else
             if (!commandLineAnalyzer.daemon_)
             {
-                if ( commandLineAnalyzer.inputFile_.Len() > 0 )
+                if ( commandLineAnalyzer.inputFile_.Len() > 1 )
                 {
                     FILE *in = fopen( commandLineAnalyzer.inputFile_, "r" );
                     if ( in )
