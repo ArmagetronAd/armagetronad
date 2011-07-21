@@ -626,7 +626,7 @@ void eTeam::SortByPosition(){
         inorder=true;
         int i;
         for (i=teams.Len()-2;i>=0;i--)
-            if (teams(i)->position_ < teams(i+1)->position_){
+            if (teams(i)->position_ > teams(i+1)->position_){
                 SwapTeamsNo(i,i+1);
                 inorder=false;
             }
@@ -1476,7 +1476,7 @@ eTeam::eTeam()
     score = 0;
     setsWon = 0;
     lastScore_=IMPOSSIBLY_LOW_SCORE;
-    position_ = 2;
+    position_ = -1;
     locked_ = false;
     maxPlayersLocal = maxPlayers;
     maxImbalanceLocal = maxImbalance;
@@ -1493,7 +1493,7 @@ eTeam::eTeam(nMessage &m)
     score = 0;
     setsWon = 0;
     lastScore_=IMPOSSIBLY_LOW_SCORE;
-    position_ = 2;
+    position_ = -1;
     locked_ = false;
     maxPlayersLocal = maxPlayers;
     maxImbalanceLocal = maxImbalance;

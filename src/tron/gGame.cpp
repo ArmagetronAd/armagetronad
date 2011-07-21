@@ -1627,26 +1627,16 @@ void init_game_objects(eGrid *grid){
             }
             eTeam *team = eTeam::teams(z);
 
-            if ( eTeam::teams.Len() == 2 && sg_spawnAlternate == 1 ) //switch position for next round
+            if ( sg_spawnAlternate == 1 ) //switch position for next round
             {
-                if ( team->GetPosition() == 2 ) //first spawn for this team
+                if ( (team->GetPosition() < 0) || (team->GetPosition() > eTeam::teams.Len()-1) ) //first spawn for this team
                 {
-                    team->SetPosition(spawnPointsUsed);
+                    team->SetPosition(z);
                 }
-                if ( team->GetPosition() == 0 )
-                {
-                    sg_spawnPositionTeamWriter << ePlayerNetID::FilterName( team->Name() );
-                    sg_spawnPositionTeamWriter << "0";
-                    sg_spawnPositionTeamWriter.write();
-                    team->SetPosition(1); //next round
-                }
-                else
-                {
-                    sg_spawnPositionTeamWriter << ePlayerNetID::FilterName( team->Name() );
-                    sg_spawnPositionTeamWriter << "1";
-                    sg_spawnPositionTeamWriter.write();
-                    team->SetPosition(0);
-                }
+                sg_spawnPositionTeamWriter << ePlayerNetID::FilterName( team->Name() );
+                sg_spawnPositionTeamWriter << team->GetPosition();
+                sg_spawnPositionTeamWriter.write();
+                team->SetPosition(((z+1)>(eTeam::teams.Len()-1))?0:(z+1)); //next round
             }
 
 
