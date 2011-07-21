@@ -1785,21 +1785,102 @@ static tSettingItem< REAL > sn_minPingTimeGlobal( "CONNECTION_FLOOD_SENSITIVITY"
 static bool sn_forceTurtleMode = false;
 static tSettingItem< bool > sn_forceTurtleModeConf( "FORCE_TURTLE_MODE", sn_forceTurtleMode );
 
+// keep recording even in turtle mode
+static bool sn_recordTurtleMode = false;
+static tSettingItem< bool > sn_recordTurtleModeConf( "RECORD_TURTLE_MODE", sn_recordTurtleMode );
+
 // number of packets from unknown sources to process each call to rec_peer
 static int sn_connectionLimit = 100;
 static tSettingItem< int > sn_connectionLimitConf( "CONNECTION_LIMIT", sn_connectionLimit );
 
+// turtle mode control
+class nTurtleControl
+{
+    REAL lastTurtleModeTime; // last time turtle mode was activated
+    bool setThisFrame;
+
+    // true while we're turtling from a flood
+    bool turtleMode;
+public:
+    nTurtleControl()
+    : lastTurtleModeTime(-700)
+    , setThisFrame(false)
+    , turtleMode(false)
+    {
+    }
+
+    operator bool() const
+    {
+        return turtleMode;
+    }
+
+    // activates turtle mode. It will persist for at least 60 seconds.
+    void SetTurtleMode()
+    {
+        if( !setThisFrame )
+        {
+            if( !turtleMode )
+            {
+                // report
+                sn_ConsoleOut( tOutput("$turtle_mode_activated") ); 
+
+                // stop recording
+                if( !sn_recordTurtleMode && tRecorder::IsRecording() )
+                {
+                    tRecorder::StopRecording();
+                }
+            }
+
+            turtleMode = true;
+            setThisFrame = true;
+            lastTurtleModeTime = tSysTimeFloat();
+            
+        }
+    }
+
+    void Update()
+    {
+        setThisFrame = false;
+        if( lastTurtleModeTime + 60 < tSysTimeFloat() )
+        {
+            if( turtleMode && !sn_forceTurtleMode )
+            {
+                // report
+                sn_ConsoleOut( tOutput("$turtle_mode_deactivated") ); 
+            }
+
+            turtleMode = sn_forceTurtleMode;
+        }
+    }
+};
+static nTurtleControl sn_turtleMode;
 
 // checks for global flood events
-static bool GlobalConnectionFloodProtection()
+static inline bool GlobalConnectionFloodProtection()
 {
     static nMachine server;
 
-    return sn_minConnectionTimeGlobalFactor > 0 && FloodProtection( server, sn_minConnectionTimeGlobalFactor );
+    if( sn_minConnectionTimeGlobalFactor > 0 && FloodProtection( server, sn_minConnectionTimeGlobalFactor ) )
+    {
+        sn_turtleMode.SetTurtleMode();
+    }
+    
+    return sn_turtleMode;
 }
 
-// true while we're turtling from a flood
-static bool sn_turtleMode = false;
+// checks for individual flood events
+bool IndividualConnectionFloodProtection( nMachine * machine, int peer )
+{
+    // IP is not spoofed or there is no
+    // current spoof heavy attack. Really look up the machine.
+    if( !machine )
+    {
+        machine = &nMachine::GetMachine( peer );
+    }
+    
+    // check individual flood protection (be lenient in turtle mode, login responses may have trouble getting through an attack)
+    return FloodProtection( *machine, sn_turtleMode ? .2 : 1 );
+}
 
 // report login failure. Or don't if we're flooded.
 int sn_ReportFailure(nMessage &m, char const * reason)
@@ -2387,6 +2468,7 @@ typedef std::deque< tJUST_CONTROLLED_PTR< nMessage > > nMessageFifo;
 static void rec_peer(unsigned int peer){
     tASSERT( sn_Connections[peer].socket );
 
+    sn_turtleMode.Update();
     nMachine::Expire();
 
     // temporary fifo for received messages
@@ -2438,6 +2520,7 @@ static void rec_peer(unsigned int peer){
                         // what follows is work, so we only do it if it payed off in the past
                         // if this block is entered not at all by error, no biggie. The clients
                         // will time out eventually.
+                        bool success = false;
                         if(bother>totalFatsoes)
                         {
                             bother-=totalFatsoes;
@@ -2448,7 +2531,6 @@ static void rec_peer(unsigned int peer){
                             // If it's from a connected client,
                             // terminate the connection. If not, it's an attack and
                             // we should rather ignore it.
-                            bool success = false;
                             for( int id=MAXCLIENTS; id > 0; --id )
                             {
                                 if (sn_Connections[id].socket && peers[id] == addrFrom)
@@ -2460,13 +2542,26 @@ static void rec_peer(unsigned int peer){
 
                             // count the successfully removed client
                             if( success )
+                            {
                                 clientFatsoes++;
+                            }
 
                             // scale down the stats
                             const float factor=.99;
                             totalFatsoes*=factor;
                             clientFatsoes*=factor;
                             bother*=factor;
+                        }
+
+                        if( !success )
+                        {
+                            // check for global and local spam (just for reporting, the packet
+                            // is going to get blocked either way)
+                            if( !GlobalConnectionFloodProtection() )
+                            {
+                                peers[ MAXCLIENTS+1] = addrFrom;
+                                IndividualConnectionFloodProtection( NULL, MAXCLIENTS+1 );
+                            }
                         }
                     }
 
@@ -2520,12 +2615,12 @@ static void rec_peer(unsigned int peer){
                         continue;
                     }
 
-                    nMachine * machinePointer = nMachine::PeekMachine( peer );
+                    nMachine * machine = nMachine::PeekMachine( peer );
 
                     if( sn_GetNetState() == nSERVER )
                     {
                         // check whether we're currently getting flooded
-                        sn_turtleMode = GlobalConnectionFloodProtection() || sn_forceTurtleMode;
+                        GlobalConnectionFloodProtection();
 
                         if( sn_turtleMode )
                         {
@@ -2543,7 +2638,7 @@ static void rec_peer(unsigned int peer){
                             {
                                 // Hah. Nice trick. Won't work, though.
                             }
-                            else if( !machinePointer || !machinePointer->IsValidated() )
+                            else if( !machine || !machine->IsValidated() )
                             {
                                 if( count > sn_connectionLimit )
                                 {
@@ -2570,16 +2665,10 @@ static void rec_peer(unsigned int peer){
                         }
 
                         // IP is not spoofed or there is no
-                        // current spoof heavy attack. Really look up the machine.
-                        if( !machinePointer )
+                        // current spoof heavy attack. Check closer.
+                        if( IndividualConnectionFloodProtection( machine, peer ) )
                         {
-                            machinePointer = &nMachine::GetMachine( peer );
-                        }
-      
-                        // check individual flood protection (be lenient in turtle mode, login responses may have trouble getting through an attack)
-                        if ( FloodProtection( *machinePointer, sn_turtleMode ? .2 : .1 ) )
-                        {
-                            return;
+                            continue;
                         }
                     }
 #endif
