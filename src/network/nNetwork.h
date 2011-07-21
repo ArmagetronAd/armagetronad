@@ -448,6 +448,10 @@ public:
         messageIDBig_ = 0;
     }
 
+    void BendMessageID( int id ){ // bends the message ID. Use with extreme caution.
+        messageIDBig_ = id;
+    }
+
     nMessage(const nDescriptor &);  // create a new message
     nMessage(unsigned short*& buffer, short sn_myNetID, int lenLeft );
     // read a message from the network stream
@@ -716,7 +720,8 @@ public:
     bool operator == ( nMachine const & other ) const; //!< equality operator
     bool operator != ( nMachine const & other ) const; //!< inequality operator
 
-    static nMachine & GetMachine( unsigned short userID ); //!< fetches the machine information of a user
+    static nMachine & GetMachine( unsigned short userID ); //!< fetches the machine information of a user, creating it on demand
+    static nMachine * PeekMachine( unsigned short userID ); //!< fetches the machine information of a user, returning NULL if none is found
     static void Expire();                       //!< expires machine information that is no longer needed
     static void KickSpectators();               //!< remove clients without players from the server
 
@@ -727,6 +732,9 @@ public:
     void     Ban( REAL time );                         //!< ban users from this machine for the given time
     void     Ban( REAL time, tString const & reason ); //!< ban users from this machine for the given time
     REAL     IsBanned() const; //!< returns the number of seconds users from this machine are currently banned for
+
+    bool      IsValidated() const { return validated_; }
+    void      Validate()          { validated_ = true; }
 
     // player accounting
     void      AddPlayer();     //!< call when a player joins from this machine
@@ -743,6 +751,8 @@ private:
     nAverager      kph_;          //!< averaged kicks per hour of players from this machine
     int            players_;      //!< number of players coming from this machine currently
     REAL           lastPlayerAction_; //!< time of the last player action
+
+    bool           validated_;    //!< true if the machine has been validated as a real client without spoofed IP
 
     tString        IP_;           //!< IP address of the machine
     nMachineDecorator * decorators_; //!< list of decorators

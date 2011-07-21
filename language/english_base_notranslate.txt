@@ -87,6 +87,8 @@ timestep_max_help UNDOCUMENTED
 max_simulate_ahead_help UNDOCUMENTED
 predict_walls UNDOCUMENTED
 
+force_turtle_mode_help Forces turtle mode, usually only active while a server is under attack. For testing only.
+
 #*************************************
 #*************************************
 #
