@@ -87,7 +87,7 @@ timestep_max_help UNDOCUMENTED
 max_simulate_ahead_help UNDOCUMENTED
 predict_walls UNDOCUMENTED
 
-force_turtle_mode_help Forces turtle mode, usually only active while a server is under attack. For testing only.
+force_turtle_mode_help Forces turtle mode, usually only active while a server is under attack. For testing, mainly.
 record_turtle_mode_help Keep debug recording even in turtle mode. Normally, it is stopped to keep the server responsive. The begginning of an attack is recorded anyway, of course.
 
 #*************************************
