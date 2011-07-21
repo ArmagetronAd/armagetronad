@@ -399,6 +399,8 @@ ping_flood_time_20_help             Minimum time for 20 ping packets from one ma
 ping_flood_time_50_help             Minimum time for 50 ping packets from one machine to arrive.
 ping_flood_time_100_help            Minimum time for 100 ping packets from one machine to arrive.
 ping_flood_global_help              The times PING_FLOOD_TIME_X, multiplied by this value, count for all pings from all machines. Negative values disable global flood protection.
+connection_flood_sensitivity_help   The times PING_FLOOD_TIME_X, multiplied by this value, count for all incoming messages from clients not connected already. A flood here activates turtle mode. Negative values disable global flood protection.
+connection_limit_help               Maximum number of packets from unknown peers to handle at one 
 
 shuffle_spam_messages_per_round_help Per round, per player limit on the number of shuffle messages displayed. A negative or zero value disables this check.
 spam_protection_repeat_help         Minimum time between identical chat messages.
@@ -1290,6 +1292,15 @@ input_music_volume_down_help Decreases the volume of the music
 #********************************************
 #********************************************
 
+#********************************************
+#********************************************
+#
+#             console
+#
+#********************************************
+#********************************************
+
+console_repetition          (\1 times)\n
 
 #********************************************
 #********************************************
