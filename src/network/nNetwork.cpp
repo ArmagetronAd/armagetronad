@@ -1033,7 +1033,7 @@ senderID(sender),readOut(0){
     tRecorderSync< unsigned short >::Archive( "_MESSAGE_DECL_IN", 3, descriptor );
 
     unsigned short len=ntohs(*(buffer++));
-    lenLeft--;
+    lenLeft-=3;
     if ( len > lenLeft )
     {
         len = lenLeft;
@@ -2683,7 +2683,7 @@ static void rec_peer(unsigned int peer){
                 try
                 {
 #endif
-                    while( lenleft > 0 ){
+                    while( lenleft >= 3 ){
                         tJUST_CONTROLLED_PTR< nMessage > pmess;
                         pmess = tNEW( nMessage )(b,id,lenleft);
                         nMessage& mess = *pmess;
@@ -2805,7 +2805,7 @@ static void rec_peer(unsigned int peer){
 
                 catch(nKillHim)
                 {
-                    con << "nKillHim signal caught.\n";
+                    con << "nKillHim signal caught: ";
                     sn_DisconnectUser(peer, "$network_kill_error");
                 }
 #endif
@@ -2838,7 +2838,7 @@ static void rec_peer(unsigned int peer){
 
             catch(nKillHim const &)
             {
-                con << "nKillHim signal caught.\n";
+                con << "nKillHim signal caught: ";
                 sn_DisconnectUser(peer, "$network_kill_error");
             }
 	#endif
