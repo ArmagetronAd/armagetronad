@@ -125,7 +125,7 @@ bzr_count_revisions()
     
     test -z "$limit" || limit="-l $limit"
     
-    bzr log $limit "${srcdir}" 2>/dev/null | egrep -c '^ *revno: [0-9\.]+$'
+    bzr log --include-merges --line $limit "${srcdir}" 2>/dev/null | wc -l
 }
 
 # *TODO* once we get our superproject up on launchpad (and thus get saner branch nicks), use branch nicks for $major_version
