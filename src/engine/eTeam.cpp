@@ -627,7 +627,7 @@ void eTeam::SortByPosition(){
         int i;
         for (i=teams.Len()-2;i>=0;i--)
             if (teams(i)->position_ > teams(i+1)->position_){
-                SwapTeamsNo(i,i+1);
+                SwapTeamsNo(i+1,i);
                 inorder=false;
             }
     }

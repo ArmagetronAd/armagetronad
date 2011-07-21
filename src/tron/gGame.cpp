@@ -1618,7 +1618,7 @@ void init_game_objects(eGrid *grid){
         for(int t=eTeam::teams.Len()-1;t>=0;t--)
         {
             int z;
-            if (sg_spawnWinnersFirst == 1){
+            if (sg_spawnWinnersFirst == 1 || sg_spawnAlternate == 1){
                 z =(-1*t)+ eTeam::teams.Len()-1;
             }
             else
