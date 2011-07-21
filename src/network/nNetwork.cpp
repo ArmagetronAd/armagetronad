@@ -2531,19 +2531,6 @@ static void rec_peer(unsigned int peer){
                                 nMessageBase::SendCollected(peer);
                                 ::sn_myNetID = idback;
 
-                                /*
-                                tJUST_CONTROLLED_PTR<nMessage> r = tNEW(nMessage)(login_accept);
-                                r->BendMessageID( cookie.first );
-                                r->SendImmediately(peer,false);
-                                r = tNEW(nMessage)(login_accept);
-                                r->BendMessageID( cookie.second );
-                                r->SendImmediately(peer,false);
-                                int idback = ::sn_myNetID;
-                                sn_myNetID = 1; // set a fake ID so the client doesn't consider the packet as a response from the server and messes up its ack data
-                                nMessage::SendCollected(peer);
-                                ::sn_myNetID = idback;
-                                */
-
                                 // and ignore for now
                                 continue;
                             }
@@ -2695,7 +2682,7 @@ static void rec_peer(unsigned int peer){
                 }
                 catch(nKillHim)
                 {
-                    con << "nKillHim signal caught.\n";
+                    con << "nKillHim signal caught: ";
                     sn_DisconnectUser(id, "$network_kill_error");
                 }
                 catch( tGenericException & e )
