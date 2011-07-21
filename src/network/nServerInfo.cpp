@@ -1062,6 +1062,9 @@ bool FloodProtection( int sender )
 void nServerInfo::GetSmallServerInfo( Network::SmallServerInfo const & info,
                                       nSenderInfo              const & sender )
 {
+    if ( !sn_IsMaster && sn_GetNetState() == nSERVER )
+        return;
+
     nServerInfoBase baseInfo;
     baseInfo.ReadSync( info.base(), sender );
 
@@ -1313,6 +1316,9 @@ void nServerInfo::GiveBigServerInfoCommon( int receiver, const nServerInfo & inf
 void nServerInfo::GetBigServerInfo( Network::BigServerInfo const & info,
                                     nSenderInfo            const & sender )
 {
+    if ( !sn_IsMaster && sn_GetNetState() == nSERVER )
+        return;
+
     GetBigServerInfoCommon( info, sender );
 }
 
@@ -1374,7 +1380,7 @@ void nServerInfo::SetFromMaster()
 void nServerInfo::GetBigServerInfoMaster( Network::BigServerInfo const & info,
                                           nSenderInfo            const & sender )
 {
-    if ( sn_GetNetState() == nSERVER && FloodProtection( sender.SenderID() ) )
+    if ( sn_GetNetState() == nSERVER )
         return;
 
     nServerInfo *server = GetBigServerInfoCommon( info, sender );
@@ -1388,10 +1394,10 @@ void nServerInfo::GetBigServerInfoMaster( Network::BigServerInfo const & info,
 void nServerInfo::GiveBigServerInfoMaster( Network::RequestBigServerInfoMaster const & info,
                                            nSenderInfo                         const & sender )
 {
-    if ( FloodProtection( sender.SenderID() ) )
+    if ( !sn_IsMaster )
         return;
 
-    if ( !sn_IsMaster )
+    if ( FloodProtection( sender.SenderID() ) )
         return;
 
     // read info of desired server from message
