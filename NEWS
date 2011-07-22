@@ -1,4 +1,5 @@
 Changes since 0.2.8.3:
+- fixed temporary sound disappearance when alt-tabbing away and back
 - default subcultures are now distributed
 - enable 32 bit color depth at desktop resolution
 - no more display lists for SiS cards
