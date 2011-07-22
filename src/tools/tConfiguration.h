@@ -355,7 +355,7 @@ protected:
     T    *target;
     ShouldChangeFuncT shouldChangeFunc_;
 
-    tConfItem(T &t):tConfItemBase(""),target(&t), shouldChangeFunc_(NULL) {};
+    tConfItem(T &t):tConfItemBase(""),target(&t), shouldChangeFunc_(NULL) {}
 public:
     tConfItem(const char *title,const tOutput& help,T& t)
             :tConfItemBase(title,help),target(&t), shouldChangeFunc_(NULL) {}
@@ -479,12 +479,12 @@ public:
 class tConfItemLine:public tConfItem<tString>, virtual public tConfItemBase{
 public:
     tConfItemLine(const char *title,const char *help,tString &s)
-            :tConfItemBase(title,help),tConfItem<tString>(title,help,s){};
+            :tConfItemBase(title,help),tConfItem<tString>(title,help,s){}
 
     virtual ~tConfItemLine(){}
 
     tConfItemLine(const char *title, tString &s)
-            :tConfItemBase(title),tConfItem<tString>(title,s){};
+            :tConfItemBase(title),tConfItem<tString>(title,s){}
 
     virtual void ReadVal(std::istream &s);
     virtual void WriteVal(std::ostream &s);

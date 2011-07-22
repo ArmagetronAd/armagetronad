@@ -4290,7 +4290,7 @@ class nMachinePTR
 {
 public:
     mutable nMachine * machine;
-    nMachinePTR(): machine(tNEW(nMachine)()){};
+    nMachinePTR(): machine(tNEW(nMachine)()){}
     ~nMachinePTR(){tDESTROY(machine);}
     nMachinePTR(nMachinePTR const & other): machine(other.machine){other.machine=0;}
     nMachinePTR & operator=(nMachinePTR const & other){ machine = other.machine; other.machine=0;return *this;}

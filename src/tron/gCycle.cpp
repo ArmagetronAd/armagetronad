@@ -418,7 +418,7 @@ class Sensor: public gSensor
                     // don't see new walls
                     if ( hitTime_ > hitOwner_->LastTime() - sg_chatBotNewWallBlindness && hitOwner_ != owned )
                     {
-                        ehit = false;
+                        ehit = NULL;
                         hit = 1E+40;
                         return false;
                     }

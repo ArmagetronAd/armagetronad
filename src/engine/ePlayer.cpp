@@ -169,7 +169,7 @@ public:
     nKrawall::nScrambledPassword password;
     bool save;
 
-    PasswordStorage(): save(false){};
+    PasswordStorage(): save(false){}
 };
 
 static bool operator == ( PasswordStorage const & a, PasswordStorage const & b )
@@ -356,7 +356,7 @@ void se_DeletePasswords(){
 class tConfItemPassword:public tConfItemBase{
 public:
     tConfItemPassword():tConfItemBase("PASSWORD"){}
-    ~tConfItemPassword(){};
+    ~tConfItemPassword(){}
 
     // write the complete passwords
     virtual void WriteVal(std::ostream &s){
@@ -3152,7 +3152,7 @@ class eHelpTopic {
     // singleton accessor
     static std::map<tString, eHelpTopic> & GetHelpTopics();
 public:
-    eHelpTopic() {};
+    eHelpTopic() {}
     eHelpTopic(tString const &shortdesc, tString const &text) : m_shortdesc(shortdesc), m_text(text) {
     }
 
@@ -4346,7 +4346,7 @@ protected:
 
     virtual P ReadRawVal(tString const & name, std::istream &s) const = 0;
     virtual P GetDefault() const = 0;
-    virtual void TransformName( tString & name ) const {};
+    virtual void TransformName( tString & name ) const {}
 
     virtual void ReadVal(std::istream &s)
     {
@@ -7486,7 +7486,7 @@ static tConfItemLine sg_optionsConf( "SERVER_OPTIONS", sg_options );
 class gServerInfoAdmin: public nServerInfoAdmin
 {
 public:
-    gServerInfoAdmin(){};
+    gServerInfoAdmin(){}
 
 private:
     virtual tString GetUsers() const
