@@ -2975,6 +2975,7 @@ void sn_SetNetState(nNetState x){
         {
             if (x==nCLIENT)
             {
+                // sn_Connections[MAXCLIENTS+1].socket = NULL;
                 sn_DisconnectAll();
             }
             else
@@ -3612,7 +3613,6 @@ void sn_Receive(){
 
     case nCLIENT:
         rec_peer(0);
-        sn_Connections[MAXCLIENTS+1].socket = NULL;
         break;
 
     case nSTANDALONE:
