@@ -8913,7 +8913,7 @@ void ePlayerNetID::AnalyzeTiming( REAL timing )
 
 eUncannyTimingDetector::eUncannyTimingSettings::~eUncannyTimingSettings()
 {
-#ifdef DEBUG
+#ifdef DEBUG_X
 #ifdef DEDICATED
     con << "Best ratio achieved for " << timescale*1000 << "ms stat: " << bestRatio << "\n";
 #endif
