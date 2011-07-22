@@ -1997,7 +1997,7 @@ network_error                 Error de red.\n
 network_error_timeout         El usuario \1 excedió el tiempo.\n
 network_error_shortmessage    El mensaje del usuario \1 era muy corto.\n
 network_error_overflow        El usuario \1 no es capaz de mantener el tráfico de red.\n
-network_killuser              Eliminando el usuario \1, ping \2.\n
+network_killuser              Eliminando el usuario \1, ping \2, IP \3: \4\n
 network_statistics1           Tiempo:   \1 segundos\n
 network_statistics2           Enviado:  \2 bytes en \3 paquetes (\4 bytes/s)\n
 network_statistics3           Recibido: \5 bytes en \6 paquetes (\7 bytes/s)\n

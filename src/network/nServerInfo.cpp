@@ -710,10 +710,10 @@ static nProtoBufDescriptor< Network::BigServerInfo > sn_bigServerInfoDescriptor(
 static nProtoBufDescriptor< Network::BigServerInfo > sn_bigServerInfoDescriptorMaster(54,nServerInfo::GetBigServerInfoMaster, true);
 
 // request small server information from master server/broadcast
-static nProtoBufDescriptor< Network::RequestSmallServerInfo > sn_requestSmallServerInfoDescriptor(52,nServerInfo::GiveSmallServerInfo, true);
+nProtoBufDescriptor< Network::RequestSmallServerInfo > sn_requestSmallServerInfoDescriptor(52,nServerInfo::GiveSmallServerInfo, true);
 
 // request big server information from master server/broadcast
-static nProtoBufDescriptor< Network::RequestBigServerInfo > sn_requestBigServerInfoDescriptor(53,nServerInfo::GiveBigServerInfo, true);
+nProtoBufDescriptor< Network::RequestBigServerInfo > sn_requestBigServerInfoDescriptor(53,nServerInfo::GiveBigServerInfo, true);
 static nProtoBufDescriptor< Network::RequestBigServerInfoMaster > sn_requestBigServerInfoDescriptorMaster(55,nServerInfo::GiveBigServerInfoMaster, true);
 
 // used to transfer the rest of the server info (name, number of players, etc)
@@ -900,6 +900,7 @@ public:
     double lastTime_[MAX];   // log of the last times the server was pinged by this client
     int lastTimeIndex_;      // the current index in the array
     bool warned_;            // flag to avoid warning spam in the log file
+    REAL timeFactor_;        // locked time factor
 
     tString GetIP()
     {
@@ -956,6 +957,19 @@ public:
     // determines whether this client should be considered flooding
     bool FloodProtection( REAL timeFactor )
     {
+        if( warned_ && timeFactor < timeFactor_ )
+        {
+            // restore time factor
+            timeFactor = timeFactor_;
+        }
+        else
+        {
+            // store passed time factor for next time
+            timeFactor_ = timeFactor;
+        }
+
+
+
         int i;
         double now = tSysTimeFloat();
 
@@ -966,7 +980,15 @@ public:
         REAL minRelDiff = 10;
 
         // go through the different levels
-        for ( i = sn_minPingCount-1; i >= 0; --i )
+        int lowest = 0;
+
+        // only check 10 and 20 ping limit for the default timefactor
+        if( timeFactor < 1 && sn_minPingTimes[sn_minPingCount-1] > 0 )
+        {
+            // lowest = 2;
+        }
+
+        for ( i = sn_minPingCount-1; i >= lowest; --i )
         {
             // this many pings should be tracked
             count = sn_minPingCounts[i];
@@ -974,7 +996,7 @@ public:
             tolerance = sn_minPingTimes[i]*timeFactor;
             if ( tolerance > 0 )
             {
-                if( tolerance*minRelDiff < diff )
+                if( tolerance*minRelDiff > diff )
                 {
                     minRelDiff = diff/tolerance;
                 }
@@ -2340,13 +2362,17 @@ void nServerInfo::RunMaster()
                     sn_Timeout[i] = tSysTimeFloat() + .2f;
             }
 
-            // defend against DOS attacks: Kill idle clients
+            // defend against DoS attacks: Kill idle clients
             if(sn_Timeout[i] < tSysTimeFloat())
+            {
+                sn_DisconnectUser(i, "$network_kill_servercomplete");
+                continue;
+            }
+            else if (!sn_Requested[i] && sn_Timeout[i] < tSysTimeFloat() + 60.0f)
+            {
                 sn_DisconnectUser(i, "$network_kill_timeout");
-
-            if (!sn_Requested[i] && sn_Timeout[i] < tSysTimeFloat() + 60.0f)
-                sn_DisconnectUser(i, "$network_kill_timeout");
-
+                continue;
+            }
         }
 
         if (sn_Transmitting[i] && sn_MessagesPending(i) < 3)

@@ -194,6 +194,7 @@ static nNetState current_state;
 nConnectionInfo sn_Connections[MAXCLIENTS+2];
 
 static nAddress peers[MAXCLIENTS+2]; // the same logic for the peer adresses.
+static nAddress lastPeers[MAXCLIENTS+2]; // the peers last connected to each slot
 static int timeouts[MAXCLIENTS+2];
 
 #define ACKBACK 1000
@@ -1617,6 +1618,11 @@ static tSettingItem< bool > sn_forceTurtleModeConf( "FORCE_TURTLE_MODE", sn_forc
 static bool sn_recordTurtleMode = false;
 static tSettingItem< bool > sn_recordTurtleModeConf( "RECORD_TURTLE_MODE", sn_recordTurtleMode );
 
+// enforce the anti-spoof login part of turtle mode at all times
+static bool sn_synCookie = false;
+static tSettingItem< bool > sn_synCookieConf( "ANTI_SPOOF", sn_synCookie );
+
+
 // number of packets from unknown sources to process each call to rec_peer
 static int sn_connectionLimit = 100;
 static tSettingItem< int > sn_connectionLimitConf( "CONNECTION_LIMIT", sn_connectionLimit );
@@ -1684,11 +1690,11 @@ public:
 static nTurtleControl sn_turtleMode;
 
 // checks for global flood events
-static inline bool GlobalConnectionFloodProtection()
+static inline bool GlobalConnectionFloodProtection( REAL extraFactor = 1.0f )
 {
     static nMachine server;
 
-    if( sn_minConnectionTimeGlobalFactor > 0 && FloodProtection( server, sn_minConnectionTimeGlobalFactor ) )
+    if( sn_minConnectionTimeGlobalFactor > 0 && FloodProtection( server, sn_minConnectionTimeGlobalFactor*extraFactor ) )
     {
         sn_turtleMode.SetTurtleMode();
     }
@@ -1697,7 +1703,7 @@ static inline bool GlobalConnectionFloodProtection()
 }
 
 // checks for individual flood events
-bool IndividualConnectionFloodProtection( nMachine * machine, int peer )
+bool IndividualConnectionFloodProtection( nMachine * machine, int peer,  REAL extraFactor = 1.0f )
 {
     // IP is not spoofed or there is no
     // current spoof heavy attack. Really look up the machine.
@@ -1707,7 +1713,7 @@ bool IndividualConnectionFloodProtection( nMachine * machine, int peer )
     }
     
     // check individual flood protection (be lenient in turtle mode, login responses may have trouble getting through an attack)
-    return FloodProtection( *machine, sn_turtleMode ? .2 : 1 );
+    return FloodProtection( *machine, ( sn_turtleMode ? .2 : 1 ) * extraFactor );
 }
 
 // report login failure. Or don't if we're flooded.
@@ -2329,6 +2335,10 @@ public:
 
 typedef std::deque< tJUST_CONTROLLED_PTR< nMessageBase > > nMessageFifo;
 
+// from nServerInfo.cpp
+extern nProtoBufDescriptor< Network::RequestSmallServerInfo > sn_requestSmallServerInfoDescriptor;
+extern nProtoBufDescriptor< Network::RequestBigServerInfo > sn_requestBigServerInfoDescriptor;
+
 static void rec_peer(unsigned int peer){
     tASSERT( sn_Connections[peer].socket );
 
@@ -2423,10 +2433,11 @@ static void rec_peer(unsigned int peer){
                         {
                             // check for global and local spam (just for reporting, the packet
                             // is going to get blocked either way)
-                            if( !GlobalConnectionFloodProtection() )
+                            REAL severity = received*.5/MAX_MESS_LEN;
+                            if( !GlobalConnectionFloodProtection( severity ) )
                             {
                                 peers[ MAXCLIENTS+1] = addrFrom;
-                                IndividualConnectionFloodProtection( NULL, MAXCLIENTS+1 );
+                                IndividualConnectionFloodProtection( NULL, MAXCLIENTS+1, severity );
                             }
                         }
                     }
@@ -2470,6 +2481,14 @@ static void rec_peer(unsigned int peer){
                 }
                 else
                 {
+                    // check for communication from last partner
+                    if( claim_id > 0 && 0 == nAddress::Compare( addrFrom, lastPeers[claim_id] ) )
+                    {
+                        // ignore. The peer think it's still a client, but it's wrong.
+                        // new login packets, pings etc. all come with claim_id == 0.
+                        continue;
+                    }
+
                     // assume it's a new connection
                     id = MAXCLIENTS+1;
                     peers[ MAXCLIENTS+1 ] = addrFrom;
@@ -2490,7 +2509,7 @@ static void rec_peer(unsigned int peer){
                         // check whether we're currently getting flooded
                         GlobalConnectionFloodProtection();
 
-                        if( sn_turtleMode )
+                        if( sn_turtleMode || sn_synCookie )
                         {
                             // peek at descriptor
                             unsigned char const * b = buffer;
@@ -2507,6 +2526,13 @@ static void rec_peer(unsigned int peer){
                             else if( descriptor == sn_StripDescriptor( sn_loginAcceptedDescriptor.ID() ) )
                             {
                                 // Hah. Nice trick. Won't work, though.
+                            }
+                            else if( !sn_turtleMode && 
+                                     ( descriptor == sn_StripDescriptor( sn_requestSmallServerInfoDescriptor.ID() ) || 
+                                       descriptor == sn_StripDescriptor( sn_requestBigServerInfoDescriptor.ID() ) ) )
+                            {
+                                // Pings. Let them in unless we're under real attack.
+                                onlyReadFirstMessage = true;
                             }
                             else if( !machine || !machine->IsValidated() )
                             {
@@ -3546,6 +3572,7 @@ void sn_Receive(){
 
     case nCLIENT:
         rec_peer(0);
+        sn_Connections[MAXCLIENTS+1].socket = NULL;
         break;
 
     case nSTANDALONE:
@@ -3615,8 +3642,13 @@ void sn_DisconnectUserNoWarn(int i, const tOutput& reason, nServerInfoBase * red
 
     bool printMessage = false; // is it worth printing a message for this event?
 
+    tString reasonString( reason );
+
     if (sn_Connections[i].socket)
     {
+        // store IP:port for later
+        lastPeers[i] = peers[i];
+
         nMessageBase::SendCollected(i);
 
         // to make sure...
@@ -3625,7 +3657,7 @@ void sn_DisconnectUserNoWarn(int i, const tOutput& reason, nServerInfoBase * red
             for(int j=2;j>=0;j--){
                 nProtoBufMessage< Network::LoginDenied > * mess = sn_loginDeniedDescriptor.CreateMessage();
                 mess->ClearMessageID();
-                mess->AccessProtoBuf().set_reason( reason );
+                mess->AccessProtoBuf().set_reason( reasonString );
 
                 // write redirection
                 if ( redirectTo )
@@ -3659,7 +3691,7 @@ void sn_DisconnectUserNoWarn(int i, const tOutput& reason, nServerInfoBase * red
 
     if ( printMessage )
     {
-        con << tOutput( "$network_killuser", i, sn_Connections[i].ping.GetPing() );
+        con << tOutput( "$network_killuser", i, sn_Connections[i].ping.GetPing(), peers[i].ToString(), reasonString );
     }
 
     // clear address, socket and send queue

@@ -2501,7 +2501,7 @@ network_error                 Netzwerkfehler.\n
 network_error_timeout         Verbindung zu Benutzer \1 verloren.\n
 network_error_shortmessage    Benutzer \1 sendet eine unzulässige (zu kurze) Nachricht.\n
 network_error_overflow        Benutzer \1 kommt mit dem Netzwerkverkehr nicht hinterher.\n
-network_killuser              Beseitige Benutzer \1, Ping \2.\n
+network_killuser              Beseitige Benutzer \1, Ping \2, IP \3: \4\n
 network_statistics1           Zeit:      \1 Sekunden\n
 network_statistics2           Gesendet:  \2 Bytes in \3 Paketen (\4 Bytes/s)\n
 network_statistics3           Empfangen: \5 Bytes in \6 Paketen (\7 Bytes/s)\n

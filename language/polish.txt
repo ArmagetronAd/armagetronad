@@ -2516,7 +2516,7 @@ network_error                 Błąd sieci.\n
 network_error_timeout         Użytkownik \1 przekroczył limit czasu.\n
 network_error_shortmessage    Wiadomość użytkownika \1 była zbyt krótka.\n
 network_error_overflow        Użytkownik \1 nie jest w stanie utrzymać przesyłu danych.\n
-network_killuser              Usuwanie użytkownika \1, ping \2.\n
+network_killuser              Usuwanie użytkownika \1, ping \2, IP: \3, \4\n
 network_statistics1           Czas:     \1 sek.\n
 network_statistics2           Wysłano:     \2 bajtów w \3 pakietach (\4 bajtów/s)\n
 network_statistics3           Otrzymano: \5 bajtów w \6 pakietach (\7 bajtów/s)\n
