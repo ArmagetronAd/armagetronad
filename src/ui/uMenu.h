@@ -444,10 +444,6 @@ public:
 
     ~uMenuItemStringWithHistory();
 
-    virtual void RenderBackground(){
-        menu->GenericBackground(menu->GetTop());
-    }
-
     virtual bool Event(SDL_Event &e);
 };
 
