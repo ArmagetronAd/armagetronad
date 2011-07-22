@@ -3186,6 +3186,9 @@ set_zone_color_help                            Change the color of a zone
 set_zone_expansion_help                        Change the Expansion rate of a zone
 condense_conquest_output                       Zone conquest output condensed into one line
 
+cycle_target_assignment      0xff9900Your target is now \1.\n
+cycle_target_score           \1 get \2 extra points for core dumping his target \3.\n
+cycle_target_timeout         You fail core dumping your target \1 in time.
 
 # items that should not be translated
 include english_base_notranslate.txt

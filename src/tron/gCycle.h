@@ -29,7 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define ArmageTron_CYCLE_H
 
 //#define USE_HEADLIGHT
-
+#include <vector>
 #include "gStuff.h"
 //#include "eSound.h"
 //#include "rTexture.h"
@@ -147,6 +147,45 @@ private:
 };
 #endif
 
+// a class to manage cycle's targets
+typedef std::vector<gCycle *> vec_cycle_ptr;
+class gTarget {
+	friend class gCycle; 
+    gCycle * m_this;
+    gCycle * m_target;
+    vec_cycle_ptr m_hunters;
+    int m_killed_counter;
+    REAL m_assignment_time;
+
+    bool Set(ePlayerNetID *p_player);    // Set a player's cycle as target. Return true/false for success/failure
+    void Unset();                        // Unset current target
+    void Timestep(REAL p_gametime);      // check for timeout
+    bool Is(gCycle *p_cycle);            // check whether p_cycle is assigned target
+    void AddScore();                     // grant hunter some points
+    int HuntersCount() { return m_hunters.size(); }
+    
+    gTarget(gCycle * p_cycle) : m_this(p_cycle), m_target(0), m_killed_counter(0), m_assignment_time(.0) {}
+public:
+    ~gTarget() { Unset(); }
+
+    bool Set(gCycle *p_cycle);           // Set a cycle as target. Return true/false for success/failure
+    void Reset();                        // Unset current target and reset counters
+
+    // Try to set target automatically
+    // hint: RANDOM = look for a "random" cycle, FORCE = force p_cycle as target (if possible), EXCLUDE = exclude p_cycle as suitable target
+    enum t_hint{RANDOM, FORCE, EXCLUDE};
+    bool AutoSet(t_hint p_hint=RANDOM, gCycle *p_cycle=NULL);
+    // same on a list of cycles
+    static void AutoSetCycles(vec_cycle_ptr &p_cycles, t_hint p_hint=RANDOM, gCycle *p_cycle=NULL);
+
+    // _assignment_mode: 0=disable, 1/2 is enable, 1 affects the player killing your target while 2 randomly affects new target
+    static int _assignment_mode;
+    static int _base_score;
+    static int _base_score_deplete;
+    static int _max_target;
+    static REAL _timeout_delay;
+};
+
 // a complete lightcycle
 class gCycle: public gCycleMovement
 {
@@ -168,6 +207,8 @@ class gCycle: public gCycleMovement
 
     bool dropWallRequested_; //!< flag indicating that someone requested a wall drop
 public:
+    static std::vector<gCycle *> _cycles;
+
     eCoord            lastGoodPosition_;    // the location of the last known good position
 
     REAL skew,skewDot;						// leaning to the side
@@ -182,6 +223,19 @@ public:
 
     eCoord rotationFrontWheel,rotationRearWheel; 	// wheel position (rotation)
     REAL   heightFrontWheel,heightRearWheel;  		// wheel (suspension)
+
+// *** special target mode (begin) ***
+private:
+    // auto_ptr might not be the best choice here but I don't want to add extra dependencies to use boost::scoped_ptr.
+    // The goal here is to have a just-in-time construction and avoid any important memory footprint on gCycle when it's not needed.
+    // The cost is the use of auto_ptr and extra check on his internal pointer whether the use of m_target requires it.
+    // Side note: never made a copy of m_target as auto_ptr ownership transfer will lead to target management corruption
+    std::auto_ptr<gTarget> m_target;
+public:
+    struct LessHuntersCount;
+    gTarget &Target();
+// *** special target mode (end) ***
+
 public:
     //REAL	brakingReservoir; // reservoir for braking. 1 means full, 0 is empty
 

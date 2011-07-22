@@ -56,6 +56,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <stdlib.h>
 #include <fstream>
 #include <memory>
+#include <functional>
 
 #ifndef DEDICATED
 #define DONTDOIT
@@ -88,6 +89,8 @@ static tSettingItem< bool > sg_predictWallsConf( "PREDICT_WALLS", sg_predictWall
 static nNOInitialisator<gCycle> cycle_init(320,"cycle");
 
 //  *****************************************************************
+
+std::vector<gCycle *> gCycle::_cycles;
 
 // static nVersionFeature sg_DoubleSpeed( 1 );
 
@@ -2421,6 +2424,8 @@ gCycle::gCycle(eGrid *grid, const eCoord &pos,const eCoord &d,ePlayerNetID *p)
         currentWall(NULL),
         lastWall(NULL)
 {
+	_cycles.push_back(this);
+	
     se_cycleCreatedWriter << p->GetLogName() << pos.x << pos.y << d.x << d.y;
     se_cycleCreatedWriter.write();
     
@@ -2468,6 +2473,8 @@ gCycle::~gCycle(){
     tDESTROY(turning);
     tDESTROY(spark);
 
+    _cycles.erase(std::find(_cycles.begin(),_cycles.end(),this));
+
     this->RemoveFromGame();
 
     if (mp){
@@ -2477,6 +2484,9 @@ gCycle::~gCycle(){
         delete wheelTex;
         delete bodyTex;
     }
+    
+    // check target
+    if (m_target.get()) Target().Unset();
 #ifdef DEBUG
     //con << "Deleted cycle.\n";
 #endif
@@ -2855,6 +2865,13 @@ bool gCycle::Timestep(REAL currentTime){
         {
             ProcessShoot(false);
         }
+    }
+
+    // check target assignment timeout
+    if (currentTime > .0)
+    {
+        if (m_target.get()) Target().Timestep(currentTime);
+        else if (gTarget::_assignment_mode) gTarget::AutoSetCycles(gCycle::_cycles);
     }
 
     // check whether simulation has fallen too far behind the requested time
@@ -3262,6 +3279,15 @@ void gCycle::Die( REAL time )
 
     gCycleMovement::Die( time );
 
+    // handle cycle's target and hunters
+    if (m_target.get())
+    {
+        // unset this cycle target
+        Target().Unset();
+        // set this cycle's hunters new targets
+        gTarget::AutoSetCycles(Target().m_hunters, gTarget::EXCLUDE, this);
+    }
+    
     // reset smoothing
     correctPosSmooth = eCoord();
     TransferPositionCorrectionToDistanceCorrection();
@@ -3397,10 +3423,32 @@ void gCycle::KillAt( const eCoord& deathPos){
                     }
                 }
             }
-
             if (pHunterCycle)
             {
+                if (m_target.get())
+                {
+            	    if ((pHunterCycle->m_target.get()) && (pHunterCycle->Target().Is(this)))
+            	    {
+            	        // handle target scoring
+            		    pHunterCycle->Target().AddScore();
+            		    // Assign pHunter a new target
+            	        pHunterCycle->Target().AutoSet(gTarget::EXCLUDE, this);
+            	    }
+            	    // unset this cycle target
+            	    Target().Unset();
+            	    // set this cycle's hunters new targets
+                    // _assignment_mode: 0=disable, 1/2 is enable
+                    //   1 affects the player killing your target while 2 randomly affects new target
+            	    if (gTarget::_assignment_mode==1)
+            	    {
+            	        gTarget::AutoSetCycles(Target().m_hunters, gTarget::FORCE, pHunterCycle);
+            	    } else {
+            	    	gTarget::AutoSetCycles(Target().m_hunters, gTarget::EXCLUDE, this);
+            	    }
+                }
+                
                 Killed(pHunterCycle);
+
             }
         }
         //	if (prey->player && (prey->player->CurrentTeam() != hunter->player->CurrentTeam()))
@@ -5155,6 +5203,8 @@ gCycle::gCycle(nMessage &m)
         currentWall(NULL),
         lastWall(NULL)
 {
+    _cycles.push_back(this);
+    
     deathTime=0;
     lastNetWall=lastWall=currentWall=NULL;
     windingNumberWrapped_ = windingNumber_ = Grid()->DirectionWinding(dirDrive);
@@ -6621,6 +6671,233 @@ void gCycle::TeleportTo(eCoord dest, eCoord dir, REAL time) {
 	RequestSync();		
 }
 
+// ***************************
+// *** target mode (begin) ***
+/*
+At start, assigned every players a target 
+If playerA kills his target, he wins extra points and a new target might be assigned to him 
+If playerB kills playerA's target, a new target must be assigned to playerA 
+If playerA's target leave, a new target must be assigned to playerA
+wap's idea: make target assignment for limited time, then reassign a new target ... 
+*/
+typedef std::vector<gCycle *>::iterator gCycleItr;
+
+gTarget &gCycle::Target()
+{
+	if (m_target.get()==NULL) m_target.reset(new gTarget(this));
+	return *m_target;
+}
+
+// _assignment_mode: 0=disable, 1/2 is enable, 1 affects the player killing your target while 2 randomly affects new target
+int gTarget::_assignment_mode = 1;
+int gTarget::_base_score = 10;
+int gTarget::_base_score_deplete = 2;
+int gTarget::_max_target = 2;
+REAL gTarget::_timeout_delay = .0;
+
+static tSettingItem< int > sg_TargetAssignmentModeConf( "CYCLE_TARGET_MODE", gTarget::_assignment_mode );
+static tSettingItem<int> sg_TargetScoreConf("CYCLE_TARGET_SCORE", gTarget::_base_score);
+static tSettingItem<int> sg_TargetScoreDepleteConf("CYCLE_TARGET_SCORE_DEPLETE", gTarget::_base_score_deplete);
+static tSettingItem<int> sg_TargetMaxConf("CYCLE_TARGET_MAX", gTarget::_max_target);
+static nSettingItem<REAL> sg_TargetTimeoutConf("CYCLE_TARGET_TIMEOUT", gTarget::_timeout_delay);
+
+eLadderLogWriter sg_targetKilledWriter("CYCLE_TARGET_KILLED", true);
+
+struct gCycle::LessHuntersCount : public std::binary_function<gCycle*, gCycle*, bool> {
+    bool operator()(gCycle* lhs, gCycle* rhs) const
+    { return lhs->Target().HuntersCount() < rhs->Target().HuntersCount(); }
+};
+
+bool gTarget::Set(gCycle *p_cycle)
+{
+	if ((!_assignment_mode) ||
+	    (!p_cycle) ||
+	    (!p_cycle->Alive()) ||
+	    (p_cycle==m_this) ||
+	    (p_cycle==m_target) ||
+	    (!p_cycle->Player()) ||
+	    (p_cycle->Player()->CurrentTeam() == m_this->Player()->CurrentTeam()) ||
+	    (!m_this->Player()->IsHuman()) ||
+	    (m_killed_counter>=gTarget::_max_target)) return false;
+
+    Unset(); // this unsure that is a target is already set, it is properly removed from hunters'list
+    m_target = p_cycle;
+    p_cycle->Target().m_hunters.push_back(m_this);
+    m_assignment_time = se_GameTime();
+    tOutput out( tOutput("$cycle_target_assignment", m_target->Player()->GetName()) );
+    sn_ConsoleOut( out, m_this->Player()->Owner() );
+    con << m_this->Player()->GetName() << ": " << out;
+    return true;
+}
+
+bool gTarget::Set(ePlayerNetID *p_player)
+{
+    if ((!p_player) || (!p_player->Object())) return false;
+    gCycle *cycle(static_cast<gCycle *>(p_player->Object()));
+    return Set(cycle);
+}
+
+void gTarget::Unset()
+{
+    if ((!m_target) || (!m_this)) return;
+    // first remove p_hunter from m_target's hunters' list
+    vec_cycle_ptr &v(m_target->Target().m_hunters);
+    gCycleItr pos(std::find(v.begin(), v.end(), m_this));
+    if (pos!=v.end()) v.erase(pos);
+    // then clear m_target
+    m_target = NULL;
+}
+
+void gTarget::Reset()
+{
+    m_killed_counter = 0;
+    m_assignment_time = .0;
+    Unset();
+}
+
+void gTarget::Timestep(REAL p_gametime)
+{
+    // if no target is set and score to be granted is still positive, try to reassign
+    if ((!m_target) && (m_this->Alive()) && (_base_score > _base_score_deplete*m_killed_counter)) AutoSet();
+    // if a target is set, check for timeout
+    if ((m_target) && (gTarget::_timeout_delay<=0?false:(p_gametime >= (m_assignment_time + gTarget::_timeout_delay))))
+    {
+        tOutput out( tOutput("$cycle_target_timeout", m_target->Player()->GetName()) );
+        sn_ConsoleOut( out, m_this->Owner() );
+        con << out;
+
+        AutoSet();
+    }
+}
+
+bool gTarget::Is(gCycle *p_cycle)
+{
+	return p_cycle==m_target;
+}
+
+void gTarget::AddScore()
+{
+	// target mode must be enable + cycle needs a target to score
+	if ((!_assignment_mode) || (!m_target)) return;
+	
+    tOutput lose;
+    tOutput win;
+    if (m_this->Player())
+    {
+        tColoredString preyName;
+        preyName << m_target->Player()->GetName();
+        preyName << tColoredString::ColorString(1,1,1);
+        sg_targetKilledWriter << m_target->Player()->GetUserName() << m_this->Player()->GetName();
+        sg_targetKilledWriter.write();
+
+        win.SetTemplateParameter(3, preyName);
+        win << "$cycle_target_score";
+        int score = _base_score-_base_score_deplete*m_killed_counter;
+        if ( score > 0 )
+        {
+            m_this->Player()->AddScore(score, win, lose );
+            ++m_killed_counter;
+        }
+    }
+}
+
+// Try to set target automatically
+// hint: RANDOM = look for a "random" cycle, FORCE = force p_cycle as target (if possible), EXCLUDE = exclude p_cycle as suitable target
+bool gTarget::AutoSet(t_hint p_hint, gCycle *p_cycle)
+{
+	if ((!_assignment_mode) || (!m_this->Player()->IsHuman())) return false;
+	
+	if ((p_hint==FORCE) && (p_cycle)) return Set(p_cycle);
+	
+    std::vector<gCycle *> cycles(gCycle::_cycles.begin(),gCycle::_cycles.end());
+
+    // exclude p_cycle is requested
+    if ((p_hint==EXCLUDE) && (p_cycle))
+    {
+        gCycleItr pos(std::find(cycles.begin(), cycles.end(), p_cycle));
+        if (pos!=cycles.end()) cycles.erase(pos);
+    }
+    
+    // remove any cycle of this cycle's team
+    for (gCycleItr itr = cycles.begin(); itr != cycles.end();)
+        if ((*itr)->Player()->CurrentTeam()==m_this->Player()->CurrentTeam()) itr=cycles.erase(itr);
+        else ++itr;
+
+    // no suitable target, every cycles are in the same team.
+    if (!cycles.size()) return false;
+
+    // sort by targeted counter ascendant and keep only less targeted cycles
+    std::sort(cycles.begin(), cycles.end(), gCycle::LessHuntersCount());
+    gCycle *first = *(cycles.begin());
+    int lowest_counter = first->Target().HuntersCount();
+    for (gCycleItr itr = cycles.begin(); itr != cycles.end();)
+        if ((*itr)->Target().HuntersCount()!=lowest_counter) itr=cycles.erase(itr);
+        else ++itr;
+
+    if (cycles.size()) 
+        // finally, scramble vector and get the first one
+        std::random_shuffle( cycles.begin(), cycles.end() );
+        first = *(cycles.begin());
+    return Set(first);
+}
+
+// static version of autoset, to address a list of target
+void gTarget::AutoSetCycles(vec_cycle_ptr &p_cycles, t_hint p_hint, gCycle *p_cycle)
+{
+    for (gCycleItr itr = p_cycles.begin(); itr != p_cycles.end(); ++itr)
+    {
+        (*itr)->Target().AutoSet(p_hint, p_cycle);
+    }
+}
+
+static void sg_targetReset(std::istream &s)
+{
+	if (!gTarget::_assignment_mode) return;
+
+    // First, reset all targets. In this case, we explicitly wants to allocate gTarget
+    for (gCycleItr itr = gCycle::_cycles.begin(); itr != gCycle::_cycles.end(); ++itr)
+    {
+        (*itr)->Target().Reset();
+    }
+    // Then, assigns targets to all cycles.
+    gTarget::AutoSetCycles(gCycle::_cycles);	
+}
+
+static tConfItemFunc sg_targetResetConf("CYCLE_TARGET_RESET",&sg_targetReset);
+
+static void sg_setTarget(std::istream &s)
+{
+	if (!gTarget::_assignment_mode) return;
+
+	eGrid *grid = eGrid::CurrentGrid();
+	if(!grid) {
+		con << "Must be called while a grid exists!\n";
+		return;
+	}
+
+    tString strHunter, strTarget;
+    s >> strHunter;
+    s >> strTarget;
+    ePlayerNetID *pHunter = ePlayerNetID::FindPlayerByName(strHunter, NULL);
+    ePlayerNetID *pTarget = ePlayerNetID::FindPlayerByName(strTarget, NULL);
+    if (!pHunter) return;
+    gCycle *pHunterCycle = dynamic_cast<gCycle *>(pHunter->Object());
+    if (!pHunterCycle) return;
+    gCycle *pTargetCycle = NULL;
+    if (pTarget)
+    	pTargetCycle = dynamic_cast<gCycle *>(pTarget->Object());
+    if (!pTargetCycle)
+    {
+    	pHunterCycle->Target().AutoSet();
+    }
+    pHunterCycle->Target().Set(pTargetCycle);
+}
+
+static tConfItemFunc sg_setTargetConf("CYCLE_TARGET_SET",&sg_setTarget);
+
+// *** target mode (end) ***
+// *************************
+
 static void sg_RespawnPlayer(std::istream &s)
 {
         eGrid *grid = eGrid::CurrentGrid();
@@ -6734,3 +7011,5 @@ static void sg_TeleportPlayer(std::istream &s)
 }
 
 static tConfItemFunc sg_TeleportPlayer_conf("TELEPORT_PLAYER",&sg_TeleportPlayer);
+
+
