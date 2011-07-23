@@ -2486,7 +2486,7 @@ gCycle::~gCycle(){
     }
     
     // check target
-    if (m_target.get()) Target().Unset();
+    if (m_target_ptr.get()) Target().Unset();
 #ifdef DEBUG
     //con << "Deleted cycle.\n";
 #endif
@@ -2870,7 +2870,7 @@ bool gCycle::Timestep(REAL currentTime){
     // check target assignment timeout
     if (currentTime > .0)
     {
-        if (m_target.get()) Target().Timestep(currentTime);
+        if (m_target_ptr.get()) Target().Timestep(currentTime);
         else if (gTarget::_assignment_mode) gTarget::AutoSetCycles(gCycle::_cycles);
     }
 
@@ -3280,7 +3280,7 @@ void gCycle::Die( REAL time )
     gCycleMovement::Die( time );
 
     // handle cycle's target and hunters
-    if (m_target.get())
+    if (m_target_ptr.get())
     {
         // unset this cycle target
         Target().Unset();
@@ -3423,11 +3423,12 @@ void gCycle::KillAt( const eCoord& deathPos){
                     }
                 }
             }
+
             if (pHunterCycle)
             {
-                if (m_target.get())
+                if (m_target_ptr.get())
                 {
-            	    if ((pHunterCycle->m_target.get()) && (pHunterCycle->Target().Is(this)))
+            	    if ((pHunterCycle->m_target_ptr.get()) && (pHunterCycle->Target().Is(this)))
             	    {
             	        // handle target scoring
             		    pHunterCycle->Target().AddScore();
@@ -6684,8 +6685,8 @@ typedef std::vector<gCycle *>::iterator gCycleItr;
 
 gTarget &gCycle::Target()
 {
-	if (m_target.get()==NULL) m_target.reset(new gTarget(this));
-	return *m_target;
+	if (m_target_ptr.get()==NULL) m_target_ptr.reset(new gTarget(this));
+	return *m_target_ptr;
 }
 
 // _assignment_mode: 0=disable, 1/2 is enable, 1 affects the player killing your target while 2 randomly affects new target
@@ -6844,7 +6845,9 @@ bool gTarget::AutoSet(t_hint p_hint, gCycle *p_cycle)
 // static version of autoset, to address a list of target
 void gTarget::AutoSetCycles(vec_cycle_ptr &p_cycles, t_hint p_hint, gCycle *p_cycle)
 {
-    for (gCycleItr itr = p_cycles.begin(); itr != p_cycles.end(); ++itr)
+	// well, p_cycles might be changed in this loop so let's start by a local copy
+	vec_cycle_ptr l_cycles(p_cycles);
+    for (gCycleItr itr = l_cycles.begin(); itr != l_cycles.end(); ++itr)
     {
         (*itr)->Target().AutoSet(p_hint, p_cycle);
     }

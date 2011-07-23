@@ -230,7 +230,7 @@ private:
     // The goal here is to have a just-in-time construction and avoid any important memory footprint on gCycle when it's not needed.
     // The cost is the use of auto_ptr and extra check on his internal pointer whether the use of m_target requires it.
     // Side note: never made a copy of m_target as auto_ptr ownership transfer will lead to target management corruption
-    std::auto_ptr<gTarget> m_target;
+    std::auto_ptr<gTarget> m_target_ptr;
 public:
     struct LessHuntersCount;
     gTarget &Target();
