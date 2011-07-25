@@ -402,8 +402,8 @@ ping_flood_global_help              The times PING_FLOOD_TIME_X, multiplied by t
 connection_flood_sensitivity_help   The times PING_FLOOD_TIME_X, multiplied by this value, count for all incoming messages from clients not connected already. A flood here activates turtle mode. Negative values disable global flood protection.
 connection_limit_help               Maximum number of packets from unknown peers to handle at one 
 anti_spoof_help                     If set to 1, checks connecting clients for spoofed IPs. Only clients passing a connectivity test are allowed in. This is done in turtle mode automatically, but may be useful to have on at all times.
-turtle_mode_activated               Server is under attack. Turtle mode activated.\n
-turtle_mode_deactivated             The attack seems to have stopped for now. Turtle mode deactivated.\n
+turtle_mode_activated               Server is under heavy load. Turtle mode activated. Communication with new clients is on a budget.\n
+turtle_mode_deactivated             The high load seems to have normalized for now. Turtle mode deactivated.\n
 
 shuffle_spam_messages_per_round_help Per round, per player limit on the number of shuffle messages displayed. A negative or zero value disables this check.
 spam_protection_repeat_help         Minimum time between identical chat messages.

@@ -1,9 +1,10 @@
 ; Armagetron Advanced Client Setup Script
-!define PRODUCT_NAME "Armagetron Advanced"
+!define PRODUCT_BASENAME "Armagetron Advanced"
+!define PRODUCT_NAME "${PRODUCT_BASENAME}"
 !define PRODUCT_VERSION "CVS"
 !define PRODUCT_PUBLISHER "Armagetron Advanced Team"
 !define PRODUCT_WEB_SITE "http://armagetronad.net"
-!define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\armagetronad.exe"
+!define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\${PRODUCT_BASENAME}\armagetronad.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
 
@@ -56,7 +57,7 @@ SetCompressor lzma
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
 OutFile "armagetronad-${PRODUCT_VERSION}.win32.exe"
-InstallDir "$PROGRAMFILES\Armagetron Advanced"
+InstallDir "$PROGRAMFILES\${PRODUCT_NAME}"
 InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 ShowInstDetails show
 ShowUnInstDetails show
@@ -72,20 +73,20 @@ Section "MainSection" SEC01
   File "Armagetron Forums.url"
 
   # install desktop shortcut for current user
-  CreateShortCut "$DESKTOP\Armagetron Advanced.lnk" "$INSTDIR\armagetronad.exe"
+  CreateShortCut "$DESKTOP\${PRODUCT_BASENAME}.lnk" "$INSTDIR\armagetronad.exe"
 
   # install start menu for all users
   SetShellVarContext all
-  CreateDirectory "$SMPROGRAMS\Armagetron Advanced"
+  CreateDirectory "$SMPROGRAMS\${PRODUCT_BASENAME}"
   CreateDirectory "$APPDATA\Armagetron"
-  CreateShortCut "$SMPROGRAMS\Armagetron Advanced\Armagetron Forums.lnk" "$INSTDIR\Armagetron Forums.url"
+  CreateShortCut "$SMPROGRAMS\${PRODUCT_BASENAME}\Armagetron Forums.lnk" "$INSTDIR\Armagetron Forums.url"
   File "armagetronad.exe"
-  CreateShortCut "$SMPROGRAMS\Armagetron Advanced\Armagetron Advanced.lnk" "$INSTDIR\armagetronad.exe"
-  CreateShortCut "$SMPROGRAMS\Armagetron Advanced\Armagetron Advanced Record.lnk" "$INSTDIR\armagetronad.exe" '--record "$DESKTOP\ArmagetronAdvancedDebugRecording.aarec"'
-  CreateShortCut "$SMPROGRAMS\Armagetron Advanced\Armagetron Advanced Playback.lnk" "$INSTDIR\armagetronad.exe" '--playback "$DESKTOP\ArmagetronAdvancedDebugRecording.aarec"'
-  CreateShortCut "$SMPROGRAMS\Armagetron Advanced\Armagetron Advanced Benchmark.lnk" "$INSTDIR\armagetronad.exe" '--benchmark --playback "$DESKTOP\ArmagetronAdvancedDebugRecording.aarec"'
-  CreateShortCut "$SMPROGRAMS\Armagetron Advanced\Armagetron Advanced User Data.lnk" "$APPDATA\Armagetron"
-  CreateShortCut "$SMPROGRAMS\Armagetron Advanced\Armagetron Advanced System Data.lnk" "$INSTDIR"
+  CreateShortCut "$SMPROGRAMS\${PRODUCT_BASENAME}\${PRODUCT_BASENAME}.lnk" "$INSTDIR\armagetronad.exe"
+  CreateShortCut "$SMPROGRAMS\${PRODUCT_BASENAME}\${PRODUCT_BASENAME} Record.lnk" "$INSTDIR\armagetronad.exe" '--record "$DESKTOP\ArmagetronAdvancedDebugRecording.aarec"'
+  CreateShortCut "$SMPROGRAMS\${PRODUCT_BASENAME}\${PRODUCT_BASENAME} Playback.lnk" "$INSTDIR\armagetronad.exe" '--playback "$DESKTOP\ArmagetronAdvancedDebugRecording.aarec"'
+  CreateShortCut "$SMPROGRAMS\${PRODUCT_BASENAME}\${PRODUCT_BASENAME} Benchmark.lnk" "$INSTDIR\armagetronad.exe" '--benchmark --playback "$DESKTOP\ArmagetronAdvancedDebugRecording.aarec"'
+  CreateShortCut "$SMPROGRAMS\${PRODUCT_BASENAME}\${PRODUCT_BASENAME} User Data.lnk" "$APPDATA\Armagetron"
+  CreateShortCut "$SMPROGRAMS\${PRODUCT_BASENAME}\${PRODUCT_BASENAME} System Data.lnk" "$INSTDIR"
   SetOutPath "$INSTDIR\config"
   File ".\config\*.cfg"
   File ".\config\*.srv"
@@ -97,10 +98,10 @@ Section "MainSection" SEC01
   File "*.txt"
   File "*.dll"
   SetOutPath "$INSTDIR\doc"
-  File ".\doc\*.html"
-  CreateShortCut "$SMPROGRAMS\Armagetron Advanced\Documentation.lnk" "$INSTDIR\doc\index.html"
+  File /nonfatal ".\doc\*.html"
+  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Documentation.lnk" "$INSTDIR\doc\index.html"
   SetOutPath "$INSTDIR\doc\net"
-  File ".\doc\net\*.html"
+  File /nonfatal ".\doc\net\*.html"
   SetOutPath "$INSTDIR"
   File "iconv.dll"
   File "jpeg.dll"
@@ -124,7 +125,7 @@ Section "MainSection" SEC01
 SectionEnd
 
 Section -AdditionalIcons
-  CreateShortCut "$SMPROGRAMS\Armagetron Advanced\Uninstall Armagetron Advanced.lnk" "$INSTDIR\uninst.exe"
+  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Uninstall ${PRODUCT_NAME}.lnk" "$INSTDIR\uninst.exe"
 SectionEnd
 
 Section -Post
@@ -174,18 +175,18 @@ Section Uninstall
   RMDir "$INSTDIR\config"
   RMDir "$INSTDIR"
 
-  Delete "$SMPROGRAMS\Armagetron Advanced\Uninstall Armagetron Advanced.lnk"
-  Delete "$SMPROGRAMS\Armagetron Advanced\Documentation.lnk"
-  Delete "$DESKTOP\Armagetron Advanced.lnk"
-  Delete "$SMPROGRAMS\Armagetron Advanced\Armagetron Advanced.lnk"
-  Delete "$SMPROGRAMS\Armagetron Advanced\Armagetron Advanced Record.lnk"
-  Delete "$SMPROGRAMS\Armagetron Advanced\Armagetron Advanced Playback.lnk"
-  Delete "$SMPROGRAMS\Armagetron Advanced\Armagetron Advanced Benchmark.lnk"
-  Delete "$SMPROGRAMS\Armagetron Advanced\Armagetron Advanced User Data.lnk"
-  Delete "$SMPROGRAMS\Armagetron Advanced\Armagetron Advanced System Data.lnk"
-  Delete "$SMPROGRAMS\Armagetron Advanced\Armagetron Forums.lnk"
+  Delete "$SMPROGRAMS\${PRODUCT_NAME}\Uninstall ${PRODUCT_NAME}.lnk"
+  Delete "$SMPROGRAMS\${PRODUCT_NAME}\Documentation.lnk"
+  Delete "$DESKTOP\${PRODUCT_NAME}.lnk"
+  Delete "$SMPROGRAMS\${PRODUCT_NAME}\${PRODUCT_NAME}.lnk"
+  Delete "$SMPROGRAMS\${PRODUCT_NAME}\${PRODUCT_NAME} Record.lnk"
+  Delete "$SMPROGRAMS\${PRODUCT_NAME}\${PRODUCT_NAME} Playback.lnk"
+  Delete "$SMPROGRAMS\${PRODUCT_NAME}\${PRODUCT_NAME} Benchmark.lnk"
+  Delete "$SMPROGRAMS\${PRODUCT_NAME}\${PRODUCT_NAME} User Data.lnk"
+  Delete "$SMPROGRAMS\${PRODUCT_NAME}\${PRODUCT_NAME} System Data.lnk"
+  Delete "$SMPROGRAMS\${PRODUCT_NAME}\Armagetron Forums.lnk"
 
-  RMDir "$SMPROGRAMS\Armagetron Advanced"
+  RMDir "$SMPROGRAMS\${PRODUCT_NAME}"
 
   DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
   DeleteRegKey HKLM "${PRODUCT_DIR_REGKEY}"

@@ -125,6 +125,19 @@ Changes since 0.2.8.3.x:
 - Added ENCODING ladderlog event, which specifies the encoding for data in
   ladderlog.txt.
 
+Changes since 0.2.8.3.1:
+- security fix: old style action commands from clients no loger cause hangs and crashes
+- security fix: oversized packets are ignored properly
+- security fix: never read one byte outside of the received buffer
+- compiler compatibility: adapted to gcc 4.60
+
+Changes since 0.2.8.3:
+- fixed temporary sound disappearance when alt-tabbing away and back
+- default subcultures are now distributed
+- enable 32 bit color depth at desktop resolution
+- no more display lists for SiS cards
+- spelling mistakes and missing German translations
+
 Changes since 0.2.8.3_rc4:
 ==========================
 - New setting: KEEP_PLAYER_SLOT allows the server to kick (preferably) spectators
