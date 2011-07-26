@@ -234,6 +234,7 @@ public:
     REAL GetAverage() const;               //!< returns the average value
     REAL GetDataVariance() const;          //!< returns the variance of the data ( average of (value-average)^2 )
     REAL GetAverageVariance() const;       //!< returns the expected variance of the returned average
+    REAL GetWeight() const;                //!< returns the current weight
     void Timestep( REAL decay );           //!< lets all values decay, so they can be replaced by new ones
     void Add( REAL value, REAL weight=1 ); //!< adds a value to the average
     void Reset();                          //!< resets average to zero

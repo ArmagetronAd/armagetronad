@@ -34,6 +34,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tConfiguration.h"
 #include "eLagCompensation.h"
 
+// #include <fstream>
+
 eTimer *se_mainGameTimer=NULL;
 
 // from nNetwork.C; used to sync time with the server
@@ -116,28 +118,50 @@ void eTimer::WriteSync(nMessage &m){
     }
 }
 
-static REAL se_timerStartFudge = 0.0;
-static tSettingItem<REAL> se_timerStartFudgeConf("TIMER_SYNC_START_FUDGE",se_timerStartFudge);
-static REAL se_timerStartFudgeStop = 2.0;
-static tSettingItem<REAL> se_timerStartFudgeStopConf("TIMER_SYNC_START_FUDGE_STOP",se_timerStartFudgeStop);
-
 void eTimer::ReadSync(nMessage &m){
     nNetObject::ReadSync(m);
 
-    bool checkDrift = true;
+    if( sn_GetNetState() != nCLIENT || m.SenderID() != 0 )
+    {
+        return;
+    }
+
+    m >> remoteCurrentTime_; // read in the remote time
+    m >> remoteSpeed_;
+    sync_ = true;
 
     //std::cerr << "Got sync:" << remote_currentTime << ":" << speed << '\n';
+}
+
+static REAL se_cullDelayEnd=3.0;        // end of extra delay cull
+static REAL se_cullDelayPerSecond=3.0;  // delay cull drop per second
+static REAL se_cullDelayMin=10.0;       // plateau of delay cull after extra 
+
+static tSettingItem< REAL > se_cullDelayEndConf( "CULL_DELAY_END", se_cullDelayEnd );
+static tSettingItem< REAL > se_cullDelayPerSecondConf( "CULL_DELAY_PER_SECOND", se_cullDelayPerSecond );
+static tSettingItem< REAL > se_cullDelayMinConf( "CULL_DELAY_MIN", se_cullDelayMin );
+
+void eTimer::ProcessSync()
+{
+    sync_ = false;
+
+    bool checkDrift = true;
 
     // determine the best estimate of the start time offset that reproduces the sent remote
     // time and its expected quality.
     REAL remoteStartTimeOffset = 0;
     REAL remoteTimeNonQuality = 0;
-    {
-        //REAL oldTime=currentTime;
-        REAL remote_currentTime, remoteSpeed;
-        m >> remote_currentTime; // read in the remote time
-        m >> remoteSpeed;
 
+    // determine ping
+    nPingAverager & pingAverager = sn_Connections[0].ping;
+    REAL ping = pingAverager.GetPing();
+    REAL pingVariance = pingAverager.GetFastAverager().GetAverageVariance();
+
+    {
+        // adapt remote time a little, we're processing syncs with a frame delay
+        REAL remote_currentTime = remoteCurrentTime_ + averageSpf_.GetAverage();
+        REAL remoteSpeed = remoteSpeed_;
+ 
         // forget about earlier syncs if the speed changed
         if ( fabs( speed - remoteSpeed ) > 10 * EPS )
         {
@@ -147,11 +171,6 @@ void eTimer::ReadSync(nMessage &m){
         }
 
         speed = remoteSpeed;
-
-        // determine ping
-        nPingAverager & averager = sn_Connections[m.SenderID()].ping;
-        // pingAverager_.Add( rawAverager.GetPing(), remote_currentTime > .01 ? remote_currentTime : .01 );
-        REAL ping = averager.GetPing();
 
         // add half our ping (see Einsteins SRT on clock syncronisation)
         REAL real_remoteTime=remote_currentTime+ping*speed*.5;
@@ -165,16 +184,8 @@ void eTimer::ReadSync(nMessage &m){
         else
             remote_currentTime=real_remoteTime;
 
-        // HACK: warp time into the future at the beginning of the round.
-        // I can't explain why this is required; without it, the timer is late.
-        if ( remote_currentTime < se_timerStartFudgeStop )
-        {
-            remote_currentTime += ping * ( se_timerStartFudgeStop - remote_currentTime ) * se_timerStartFudge;
-            checkDrift = false;
-        }
-
         // determine quality from ping variance
-        remoteTimeNonQuality = averager.GetFastAverager().GetAverageVariance();
+        remoteTimeNonQuality = pingVariance;
 
         // determine start time
         remoteStartTimeOffset = smoothedSystemTime_ - startTime_ - remote_currentTime;
@@ -214,6 +225,40 @@ void eTimer::ReadSync(nMessage &m){
     // add the variance to the non-quality, along with an offset to avoid division by zero
     remoteTimeNonQuality += 0.00001 + 4 * qualityTester_.GetAverageVariance();
 
+#ifdef DEBUG_X
+    con << "T=" << smoothedSystemTime_ << " " << lastRemoteTime_ << ", Q= " << remoteTimeNonQuality << ", P= " << ping << " +/- " << sqrt(pingVariance) << " Time offset: " << remoteStartTimeOffset << " : " << startTimeOffset_.GetAverage() << "\n";
+
+    std::ofstream plot("timesync.txt",std::ios_base::app);
+    plot << smoothedSystemTime_ << " " << remoteStartTimeOffset << " " << startTimeOffset_.GetAverage() << "\n";
+#endif
+
+    // check for unusually delayed packets, give them lower weight
+    REAL delay =  remoteStartTimeOffset - startTimeOffset_.GetAverage();
+    if( delay > 0 )
+    {
+        // fluctuations up to the ping variance are acceptable,
+        // (plus some extra factors, like a 1 ms offset and 10% of the current ping)
+        // severity will be < 1 for those
+        REAL severity = delay*delay/(.000001 + pingVariance + .01*ping*ping);
+        // but it is culled above 1
+        if( severity > 1 )
+        {
+            severity = pow(severity,.25);
+        }
+
+        REAL cullFactor = (se_cullDelayEnd-lastRemoteTime_)*se_cullDelayPerSecond;
+        if( cullFactor < 0 )
+        {
+            cullFactor = 0;
+        }
+        cullFactor += se_cullDelayMin;
+
+#ifdef DEBUG_X
+        con << "severity=" << severity << ", cull= " << cullFactor << "\n";
+#endif
+        remoteTimeNonQuality *= 1+(cullFactor-1)*severity;
+    }
+
     // add the offset to the statistics, weighted by the quality
     startTimeOffset_.Add( remoteStartTimeOffset, 1/remoteTimeNonQuality );
 }
@@ -248,8 +293,8 @@ REAL eTimer::Time()
 }
 
 void eTimer::SyncTime(){
-    // get current system time
     {
+        // get current system time and store it
         double newTime=tSysTimeFloat();
 
         static bool smooth = se_SmoothTime();
@@ -293,6 +338,13 @@ void eTimer::SyncTime(){
 
     // store and average frame times
     spf_ = timeStep;
+
+    // process sync now before an unusually large timestep messes up averageSpf_.
+    if( sync_ )
+    {
+        ProcessSync();
+    }
+
     if ( timeStep > 0 && speed > 0 )
     {
         averageSpf_.Add( timeStep );
@@ -354,6 +406,8 @@ void eTimer::Reset(REAL t){
     startTimeOffset_.Reset();
     startTimeOffset_.Add(100,EPS);
     startTimeOffset_.Add(-100,EPS);
+
+    sync_ = false;
 
     qualityTester_.Reset();
     static const REAL qual = sqrt(1/EPS);
