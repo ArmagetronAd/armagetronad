@@ -47,8 +47,9 @@ reset_socket_help UNDOCUMENTED
 simulate_receive_packet_loss_help UNDOCUMENTED
 simulate_send_packet_loss_help UNDOCUMENTED
 spawn_point_group_size_help UNDOCUMENTED
-timer_sync_start_fudge_help UNDOCUMENTED
-timer_sync_start_fudge_stop_help UNDOCUMENTED
+cull_delay_end_help  UNDOCUMENTED
+cull_delay_per_second_help  UNDOCUMENTED
+cull_delay_min_help  UNDOCUMENTED
 master_idle_help UNDOCUMENTED
 master_port_help UNDOCUMENTED
 master_query_interval_help UNDOCUMENTED

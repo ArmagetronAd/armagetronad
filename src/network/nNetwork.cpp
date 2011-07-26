@@ -4215,6 +4215,21 @@ REAL nAverager::GetAverageVariance( void ) const
         return 0;
 }
 
+// *******************************************************************************************
+// *
+// *	GetWeight
+// *
+// *******************************************************************************************
+//!
+//!		@return		the current total weight
+//!
+// *******************************************************************************************
+
+REAL nAverager::GetWeight( void ) const
+{
+    return weight_;
+}
+
 // *******************************************************************************
 // *
 // *	operator <<
@@ -4463,9 +4478,12 @@ bool nPingAverager::IsSpiking( void ) const
 
 void nPingAverager::Timestep( REAL decay )
 {
-    snail_.Timestep( decay * .02 );
-    slow_.Timestep ( decay * .2 );
-    fast_.Timestep ( decay * 2 );
+    if( snail_.GetWeight() > 100 )
+        snail_.Timestep( decay * .02 );
+    if( slow_.GetWeight() > 30 )
+        slow_.Timestep ( decay * .2 );
+    if( fast_.GetWeight() > 10 )
+        fast_.Timestep ( decay * 2 );
 }
 
 // *******************************************************************************************

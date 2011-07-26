@@ -74,6 +74,10 @@ private:
     REAL lastStartTime_;                //!< last received start time
     REAL lastRemoteTime_;               //!< last received time
 
+    bool sync_;                         //!< is a sync ready to process?
+    REAL remoteCurrentTime_, remoteSpeed_; //!< if so, the sync data
+    void ProcessSync();                 //!< processes the sync data
+
     // the current game time is always smoothedSystemTime_ - ( startTime_ + startTimeSmoothedOffset_ ).
 
     REAL spf_;               //!< last frame time

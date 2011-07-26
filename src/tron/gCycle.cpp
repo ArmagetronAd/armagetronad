@@ -5331,7 +5331,7 @@ void gCycle::SyncFromExtrapolator()
     if ( correctPosSmooth.NormSquared() > .1f )
     {
         std::cout << "Lag slide! " << correctPosSmooth << "\n";
-        resimulate_ = true;
+//        resimulate_ = true;
     }
 #endif
 
