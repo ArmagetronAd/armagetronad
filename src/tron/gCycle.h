@@ -162,7 +162,6 @@ class gTarget {
     void Timestep(REAL p_gametime);      // check for timeout
     bool Is(gCycle *p_cycle);            // check whether p_cycle is assigned target
     void AddScore();                     // grant hunter some points
-    int HuntersCount() { return m_hunters.size(); }
     
     gTarget(gCycle * p_cycle) : m_this(p_cycle), m_target(0), m_killed_counter(0), m_assignment_time(.0) {}
 public:
@@ -170,6 +169,7 @@ public:
 
     bool Set(gCycle *p_cycle);           // Set a cycle as target. Return true/false for success/failure
     void Reset();                        // Unset current target and reset counters
+    int  HuntersCount() { return m_hunters.size(); }
 
     // Try to set target automatically
     // hint: RANDOM = look for a "random" cycle, FORCE = force p_cycle as target (if possible), EXCLUDE = exclude p_cycle as suitable target
@@ -179,11 +179,12 @@ public:
     static void AutoSetCycles(vec_cycle_ptr &p_cycles, t_hint p_hint=RANDOM, gCycle *p_cycle=NULL);
 
     // _assignment_mode: 0=disable, 1/2 is enable, 1 affects the player killing your target while 2 randomly affects new target
-    static int _assignment_mode;
-    static int _base_score;
-    static int _base_score_deplete;
-    static int _max_target;
-    static REAL _timeout_delay;
+    static int assignment_mode;
+    static int base_score;
+    static int base_score_deplete;
+    static int max_target;
+    static REAL timeout_delay;
+    static REAL start_time;
 };
 
 // a complete lightcycle
@@ -207,7 +208,7 @@ class gCycle: public gCycleMovement
 
     bool dropWallRequested_; //!< flag indicating that someone requested a wall drop
 public:
-    static std::vector<gCycle *> _cycles;
+    static std::vector<gCycle *> cycles;
 
     eCoord            lastGoodPosition_;    // the location of the last known good position
 
