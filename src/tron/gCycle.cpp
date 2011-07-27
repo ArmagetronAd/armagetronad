@@ -3279,14 +3279,32 @@ void gCycle::Die( REAL time )
     }
 
     gCycleMovement::Die( time );
-
+    
     // handle cycle's target and hunters
     if (m_target_ptr.get())
     {
         // unset this cycle target
         Target().Unset();
-        // set this cycle's hunters new targets
-        gTarget::AutoSetCycles(Target().m_hunters, gTarget::EXCLUDE, this);
+
+        // check if there's still enough cycles to set target
+        int cycles_alive_counter = std::count_if(cycles.begin(), cycles.end(), std::mem_fun(&gCycle::Alive));
+        if (cycles_alive_counter<gTarget::min_cycles)
+        {
+            // unset all cycle's targets
+            for (gCycleItr itr = cycles.begin(); itr != cycles.end(); ++itr)
+            {
+                if (((*itr)->m_target_ptr.get()) && ((*itr)->Target().m_target))
+                {
+                	(*itr)->Target().Unset();
+                    tOutput out( tOutput("$cycle_target_cancel", (*itr)->Player()->GetName()) );
+                    sn_ConsoleOut( out, (*itr)->Owner() );
+                    con << (*itr)->Player()->GetName() << ": " << out;
+                }
+            }
+        } else {
+            // set this cycle's hunters new targets
+            gTarget::AutoSetCycles(Target().m_hunters, gTarget::EXCLUDE, this);
+        }
     }
     
     // reset smoothing
@@ -6682,8 +6700,6 @@ If playerB kills playerA's target, a new target must be assigned to playerA
 If playerA's target leave, a new target must be assigned to playerA
 wap's idea: make target assignment for limited time, then reassign a new target ... 
 */
-typedef std::vector<gCycle *>::iterator gCycleItr;
-
 gTarget &gCycle::Target()
 {
 	if (m_target_ptr.get()==NULL) m_target_ptr.reset(new gTarget(this));
@@ -6695,6 +6711,8 @@ int gTarget::assignment_mode = 0;
 int gTarget::base_score = 10;
 int gTarget::base_score_deplete = 2;
 int gTarget::max_target = 2;
+int gTarget::min_cycles = 3;
+REAL gTarget::max_distance = .0;
 REAL gTarget::timeout_delay = .0;
 REAL gTarget::start_time = -.5;
 
@@ -6702,6 +6720,8 @@ static tSettingItem< int > sg_TargetAssignmentModeConf( "CYCLE_TARGET_MODE", gTa
 static tSettingItem<int> sg_TargetScoreConf("CYCLE_TARGET_SCORE", gTarget::base_score);
 static tSettingItem<int> sg_TargetScoreDepleteConf("CYCLE_TARGET_SCORE_DEPLETE", gTarget::base_score_deplete);
 static tSettingItem<int> sg_TargetMaxConf("CYCLE_TARGET_MAX", gTarget::max_target);
+static tSettingItem<int> sg_TargetMinCyclesConf("CYCLE_TARGET_MIN_CYCLES", gTarget::min_cycles);
+static nSettingItem<REAL> sg_TargetMaxDistanceConf("CYCLE_TARGET_MAX_DISTANCE", gTarget::max_distance);
 static nSettingItem<REAL> sg_TargetTimeoutConf("CYCLE_TARGET_TIMEOUT", gTarget::timeout_delay);
 static nSettingItem<REAL> sg_StartTimeConf("CYCLE_TARGET_START_TIME", gTarget::start_time);
 
@@ -6721,8 +6741,8 @@ bool gTarget::Set(gCycle *p_cycle)
 	    (p_cycle==m_target) ||
 	    (!p_cycle->Player()) ||
 	    (p_cycle->Player()->CurrentTeam() == m_this->Player()->CurrentTeam()) ||
-	    (!m_this->Player()->IsHuman()) ||
-	    (m_killed_counter>=gTarget::max_target)) return false;
+//	    (!m_this->Player()->IsHuman()) ||
+	    (m_killed_counter >= gTarget::max_target)) return false;
 
     Unset(); // this unsure that is a target is already set, it is properly removed from hunters'list
     m_target = p_cycle;
@@ -6762,13 +6782,14 @@ void gTarget::Reset()
 void gTarget::Timestep(REAL p_gametime)
 {
     // if no target is set and score to be granted is still positive, try to reassign
-    if ((!m_target) && (m_this->Alive()) && (base_score > base_score_deplete*m_killed_counter)) AutoSet();
+    // if ((!m_target) && (m_this->Alive()) && (base_score > base_score_deplete*m_killed_counter)) AutoSet();
+
     // if a target is set, check for timeout
     if ((m_target) && (gTarget::timeout_delay<=0?false:(p_gametime >= (m_assignment_time + gTarget::timeout_delay))))
     {
         tOutput out( tOutput("$cycle_target_timeout", m_target->Player()->GetName()) );
         sn_ConsoleOut( out, m_this->Owner() );
-        con << out;
+        con << m_this->Player()->GetName() << ": " << out;
 
         AutoSet();
     }
@@ -6821,11 +6842,20 @@ struct IsLowestCounter : public std::binary_function<gCycle*, int, bool> {
     }
 };
 
+struct IsCloseEnough : public std::binary_function<gCycle*, gCycle*, bool> {
+    bool operator()(gCycle* lhs, gCycle* rhs) const
+    {
+        if ((!lhs) || (!rhs) || (!lhs->Player()) || (!rhs->Player())) return true;
+        return (lhs->Position()-rhs->Position()).NormSquared() <= gTarget::max_distance;
+    }
+};
+
 // Try to set target automatically
 // hint: RANDOM = look for a "random" cycle, FORCE = force p_cycle as target (if possible), EXCLUDE = exclude p_cycle as suitable target
 bool gTarget::AutoSet(t_hint p_hint, gCycle *p_cycle)
 {
-	if ((!assignment_mode) || (!m_this->Player()->IsHuman())) return false;
+//    if ((!assignment_mode) || (!m_this->Player()->IsHuman())) return false;
+    if (!assignment_mode) return false;
 	
 	if ((p_hint==FORCE) && (p_cycle)) return Set(p_cycle);
 	
@@ -6842,6 +6872,14 @@ bool gTarget::AutoSet(t_hint p_hint, gCycle *p_cycle)
  
     // no suitable target, every cycles are in the same team.
     if (!cycles.size()) return false;
+
+    // take into account distance if required
+    if (max_distance>0)
+    {
+        gCycleItr new_end = std::partition(cycles.begin(), cycles.end(), std::bind2nd(IsCloseEnough(), m_this));
+        if (new_end != cycles.begin())
+            cycles.erase(new_end, cycles.end());
+    }
 
     // sort by targeted counter ascendant and keep only less targeted cycles
     std::sort(cycles.begin(), cycles.end(), gCycle::LessHuntersCount());

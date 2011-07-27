@@ -149,6 +149,7 @@ private:
 
 // a class to manage cycle's targets
 typedef std::vector<gCycle *> vec_cycle_ptr;
+typedef std::vector<gCycle *>::iterator gCycleItr;
 class gTarget {
 	friend class gCycle; 
     gCycle * m_this;
@@ -183,6 +184,8 @@ public:
     static int base_score;
     static int base_score_deplete;
     static int max_target;
+    static int min_cycles;
+    static REAL max_distance;
     static REAL timeout_delay;
     static REAL start_time;
 };
