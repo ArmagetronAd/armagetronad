@@ -203,10 +203,46 @@ void usleep(int x)
 
 #else
 
+// if possible, use clock_gettime()
+#if HAVE_LIBRT && HAVE_TIME_H 
+#ifdef CLOCK_MONOTONIC
+#define USE_CLOCK_GETTIME
+#endif
+#endif
+
 #include <sys/time.h>
 
 void GetTime( tTime & time )
 {
+#ifdef USE_CLOCK_GETTIME
+    struct timespec res;
+    // try several clocks
+    bool success = false;
+// prefer CLOCK_MONOTONIC_RAW, but if that doesn't exist, go without _RAW
+#ifdef CLOCK_MONOTONIC_RAW
+    if( !clock_gettime( CLOCK_MONOTONIC_RAW, &res ) )
+    {
+        success = true;
+    } 
+    else
+#endif
+    {
+        if( !clock_gettime( CLOCK_MONOTONIC, &res ) )
+        {
+            success = true;
+        }
+    }
+
+    // transfer the result or go on with gettimeofday()
+    if( success )
+    {
+        time.microseconds = res.tv_nsec/1000;
+        time.seconds      = res.tv_sec;
+
+        return;
+    }
+#endif
+
     struct timeval tp;
     struct timezone tzp;
 

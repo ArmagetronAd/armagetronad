@@ -719,6 +719,14 @@ dnl AC_LANG([C])
 fi # armamain
 
 dnl *************************************************
+dnl         timer
+dnl *************************************************
+
+dnl just do the checks here, the logic for evaluating it can go into tSysTime.cpp.
+AC_CHECK_HEADERS([time.h])
+AC_CHECK_LIB([rt],[clock_gettime])
+
+dnl *************************************************
 dnl         math
 dnl *************************************************
 
