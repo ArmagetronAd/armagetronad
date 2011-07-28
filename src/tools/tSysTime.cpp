@@ -38,7 +38,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <unistd.h>
 #endif
 
-// Both implementations are stolen from Q1.
+// Both implementations for Windows and Linux were originally from the Q1 source,
+// but by now, all similarities should be gone.
+
+// set to true if the timer is strictly going upwards and without leaps
+static bool st_timerIsStrictlyMonotonic = false;
 
 //! time structure
 struct tTime
@@ -207,6 +211,8 @@ void usleep(int x)
 #if HAVE_LIBRT && HAVE_TIME_H 
 #ifdef CLOCK_MONOTONIC
 #define USE_CLOCK_GETTIME
+// for testing, z-man on Lucid doesn't have _RAW defined yet
+// #define CLOCK_MONOTONIC_RAW CLOCK_MONOTONIC
 #endif
 #endif
 
@@ -218,11 +224,13 @@ void GetTime( tTime & time )
     struct timespec res;
     // try several clocks
     bool success = false;
+    st_timerIsStrictlyMonotonic = false;
 // prefer CLOCK_MONOTONIC_RAW, but if that doesn't exist, go without _RAW
 #ifdef CLOCK_MONOTONIC_RAW
     if( !clock_gettime( CLOCK_MONOTONIC_RAW, &res ) )
     {
         success = true;
+        st_timerIsStrictlyMonotonic = true;
     } 
     else
 #endif
@@ -303,7 +311,7 @@ void tAdvanceFrameSys( tTime & start, tTime & relative )
     // detect and counter timer hiccups
     tTime newRelative = time - start;
     tTime timeStep = newRelative - relative;
-    if ( !tRecorder::IsPlayingBack() && ( timeStep.seconds < 0 || timeStep.seconds > 10 ) )
+    if ( !tRecorder::IsPlayingBack() && !st_timerIsStrictlyMonotonic && ( timeStep.seconds < 0 || timeStep.seconds > 10 ) )
     {
         static bool warn = true;
         if ( warn )
