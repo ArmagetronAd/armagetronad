@@ -2422,6 +2422,7 @@ gCycle::gCycle(eGrid *grid, const eCoord &pos,const eCoord &d,ePlayerNetID *p)
         turning(NULL),
         skew(0),skewDot(0),
         rotationFrontWheel(1,0),rotationRearWheel(1,0),heightFrontWheel(0),heightRearWheel(0),
+        m_target_mgr(this),
         currentWall(NULL),
         lastWall(NULL)
 {
@@ -2871,8 +2872,9 @@ bool gCycle::Timestep(REAL currentTime){
     // check target assignment timeout
     if (currentTime > gTarget::start_time)
     {
+        if (gTarget::assignment_mode && CheckTargetPtr() && !Target().Started())
+            gTarget::AutoSetCycles(gCycle::cycles);
         if (CheckTargetPtr()) Target().Timestep(currentTime);
-        else if (gTarget::assignment_mode) gTarget::AutoSetCycles(gCycle::cycles);
     }
 
     // check whether simulation has fallen too far behind the requested time
@@ -5220,6 +5222,7 @@ gCycle::gCycle(nMessage &m)
         spark(NULL),
         skew(0),skewDot(0),
         rotationFrontWheel(1,0),rotationRearWheel(1,0),heightFrontWheel(0),heightRearWheel(0),
+        m_target_mgr(this),
         currentWall(NULL),
         lastWall(NULL)
 {
@@ -6700,14 +6703,9 @@ If playerB kills playerA's target, a new target must be assigned to playerA
 If playerA's target leave, a new target must be assigned to playerA
 wap's idea: make target assignment for limited time, then reassign a new target ... 
 */
-gTarget &gCycle::Target()
-{
-	if (!CheckTargetPtr()) m_target_ptr.reset(new gTarget(this));
-	return *m_target_ptr;
-}
 
 // _assignment_mode: 0=disable, 1/2 is enable, 1 affects the player killing your target while 2 randomly affects new target
-int gTarget::assignment_mode = 0;
+int gTarget::assignment_mode = 1;
 int gTarget::base_score = 10;
 int gTarget::base_score_deplete = 2;
 int gTarget::max_target = 2;
@@ -6734,6 +6732,9 @@ struct gCycle::LessHuntersCount : public std::binary_function<gCycle*, gCycle*, 
 
 bool gTarget::Set(gCycle *p_cycle)
 {
+#ifdef DEBUG
+    con << "Trying to assign target " << (p_cycle && p_cycle->Player()?static_cast<const char *>(p_cycle->Player()->GetName()):"INVALID") << " to " << m_this->Player()->GetName() << "\n"; 
+#endif
 	if ((!assignment_mode) ||
 	    (!p_cycle) ||
 	    (!p_cycle->Alive()) ||
@@ -6764,6 +6765,9 @@ bool gTarget::Set(ePlayerNetID *p_player)
 void gTarget::Unset()
 {
     if ((!m_target) || (!m_this)) return;
+#ifdef DEBUG
+    con << "Trying to unset target from " << m_this->Player()->GetName() << "\n"; 
+#endif
     // first remove p_hunter from m_target's hunters' list
     if (m_target->CheckTargetPtr())
     {
@@ -6857,6 +6861,9 @@ struct IsCloseEnough : public std::binary_function<gCycle*, gCycle*, bool> {
 // hint: RANDOM = look for a "random" cycle, FORCE = force p_cycle as target (if possible), EXCLUDE = exclude p_cycle as suitable target
 bool gTarget::AutoSet(t_hint p_hint, gCycle *p_cycle)
 {
+#ifdef DEBUG
+    con << "Trying to assign target to " << m_this->Player()->GetName() << "\n"; 
+#endif
 //    if ((!assignment_mode) || (!m_this->Player()->IsHuman())) return false;
     if (!assignment_mode) return false;
 	
@@ -6902,10 +6909,14 @@ bool gTarget::AutoSet(t_hint p_hint, gCycle *p_cycle)
 // static version of autoset, to address a list of target
 void gTarget::AutoSetCycles(vec_cycle_ptr &p_cycles, t_hint p_hint, gCycle *p_cycle)
 {
+#ifdef DEBUG
+    con << "Trying to assign target to each cycles...\n"; 
+#endif
 	// well, p_cycles might be changed in this loop so let's start by a local copy
 	vec_cycle_ptr l_cycles(p_cycles);
     for (gCycleItr itr = l_cycles.begin(); itr != l_cycles.end(); ++itr)
     {
+    	(*itr)->Target().started = true;
         (*itr)->Target().AutoSet(p_hint, p_cycle);
     }
 }

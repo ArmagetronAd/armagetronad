@@ -157,6 +157,7 @@ class gTarget {
     vec_cycle_ptr m_hunters;
     int m_killed_counter;
     REAL m_assignment_time;
+    bool started;
 
     bool Set(ePlayerNetID *p_player);    // Set a player's cycle as target. Return true/false for success/failure
     void Unset();                        // Unset current target
@@ -164,14 +165,15 @@ class gTarget {
     bool Is(gCycle *p_cycle);            // check whether p_cycle is assigned target
     void AddScore();                     // grant hunter some points
     
-    gTarget(gCycle * p_cycle) : m_this(p_cycle), m_target(0), m_killed_counter(0), m_assignment_time(.0) {}
+    gTarget(gCycle * p_cycle) : m_this(p_cycle), m_target(0), m_killed_counter(0), m_assignment_time(.0), started(0) {}
 public:
     ~gTarget() { Unset(); }
 
     bool Set(gCycle *p_cycle);           // Set a cycle as target. Return true/false for success/failure
     void Reset();                        // Unset current target and reset counters
     int  HuntersCount() { return m_hunters.size(); }
-
+    bool Started() { return started; }
+    
     // Try to set target automatically
     // hint: RANDOM = look for a "random" cycle, FORCE = force p_cycle as target (if possible), EXCLUDE = exclude p_cycle as suitable target
     enum t_hint{RANDOM, FORCE, EXCLUDE};
@@ -234,11 +236,12 @@ private:
     // The goal here is to have a just-in-time construction and avoid any important memory footprint on gCycle when it's not needed.
     // The cost is the use of auto_ptr and extra check on his internal pointer whether the use of m_target requires it.
     // Side note: never made a copy of m_target as auto_ptr ownership transfer will lead to target management corruption
-    std::auto_ptr<gTarget> m_target_ptr;
+//    std::auto_ptr<gTarget> m_target_ptr;
+    gTarget m_target_mgr;
 public:
     struct LessHuntersCount;
-    gTarget &Target();
-    bool CheckTargetPtr() { return m_target_ptr.get(); }
+    gTarget &Target() { return m_target_mgr; }
+    bool CheckTargetPtr() { return true; }
 // *** special target mode (end) ***
 
 public:
