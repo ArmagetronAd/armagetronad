@@ -235,7 +235,7 @@ void eTimer::ProcessSync()
         remoteStartTimeOffset = smoothedSystemTime_ - startTime_ - remote_currentTime;
 
         // calculate drift
-        if( checkDrift )
+        if( checkDrift && !remoteStartTimeSent_ )
         {
             REAL timeDifference = remote_currentTime - lastRemoteTime_;
             REAL drift = lastStartTime_ - remoteStartTimeOffset;
@@ -313,16 +313,29 @@ void eTimer::ProcessSync()
     delay -= spf*.5;
 
     // check for bad syncs
-    if ( fabs( delay ) > spf*.5 + ping*.2 + sqrt(pingVariance)*2 )
+    // be careful with the tolerance, if bad syncs are there and averaging is more
+    // immediate, larger deviations are to be expected even in the best conditions
+    REAL toleranceFactor = 1+badSyncs_/10;
+    if( toleranceFactor > 3 )
+    {
+        toleranceFactor = 3;
+    }
+    if ( fabs( delay ) > ( spf + ping*.2 + sqrt(pingVariance)*2 )*toleranceFactor )
     {
         if( badSyncs_ < 100 )
         {
             badSyncs_++;
+#ifdef DEBUG_X
+            con << "bs " << badSyncs_ << "\n";
+#endif
         }
     }
     else if ( badSyncs_ > 0 )
     {
         --badSyncs_;
+#ifdef DEBUG_X
+        con << "bs " << badSyncs_ << "\n";
+#endif
     }
 
     // add the offset to the statistics, weighted by the quality
@@ -403,8 +416,14 @@ void eTimer::SyncTime(){
 #endif
 #endif
 
+    REAL decayFactor = 1;
+    if( badSyncs_ > 2 )
+    {
+        decayFactor *= ( badSyncs_ - 2 );
+    }
+
     // update lag compensation
-    eLag::Timestep( timeStep );
+    eLag::Timestep( timeStep*decayFactor );
 
     // store and average frame times
     spf_ = timeStep;
@@ -427,17 +446,11 @@ void eTimer::SyncTime(){
     }
 
     // let averagers decay
-    REAL decayFactor = 1;
     if ( sn_GetNetState() == nCLIENT && remoteStartTimeSent_ )
     {
         // in this mode, the time syncs are extra-reliable and stable; we can
         // use long term averages.
         decayFactor *= .1;
-    }
-
-    if( badSyncs_ > 2 )
-    {
-        decayFactor *= ( badSyncs_ - 2 );
     }
 
     startTimeOffset_.Timestep( timeStep * .1 * decayFactor );
@@ -449,10 +462,18 @@ void eTimer::SyncTime(){
     {
         startTime_ = startTimeExtrapolated_;
     }
-    else
+    else if ( sn_GetNetState() == nCLIENT )
     {
-        // we need to take the drift into account
-        startTime_ -= startTimeDrift_.GetAverage() * timeStep;
+        // we need to take the drift into account; we do so by just trying to 
+        // gently push the received and calculated remote time offset to 0.
+        static REAL driftCompensationTime = 30.0;
+        if( smoothedSystemTime_ - creationSystemTime_ > driftCompensationTime*.99 )
+        {
+            REAL drift = timeStep*lastStartTime_/driftCompensationTime;
+            startTime_ += drift;
+            startTimeExtrapolated_ += drift;
+            // startTime_ -= startTimeDrift_.GetAverage() * timeStep;
+        }
     }
 
     // smooth time offset
