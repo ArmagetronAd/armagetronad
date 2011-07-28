@@ -53,7 +53,7 @@ public:
     void pause(bool p);
 
     void SyncTime();
-    void Reset(REAL t=0);
+    void Reset(REAL t=0,bool force=false);
 
     REAL AverageFPS(){return 1/(averageSpf_.GetAverage()+EPS);}
     REAL AverageFrameTime(){return averageSpf_.GetAverage();}
@@ -62,20 +62,29 @@ public:
     bool IsSynced() const; //!< returns whether the timer is synced sufficiently well to allow rendering
 
 private:
+    void UpdateIsSynced(); //!< updates the synced flag
 private:
-    mutable double creationSystemTime_; //!< the rough system time this timer was created at
+    bool synced_;                       //!< set to true when the client timer is synced up
+    double creationSystemTime_;         //!< the rough system time this timer was created at
     double smoothedSystemTime_;         //!< the smoothed system time
     double startTime_;                  //!< when was the last game started?
+    double startTimeExtrapolated_;      //!< when was the last game started (local extrapolation)?
     nAverager startTimeOffset_;         //!< the smoothed average of this averager is added to the start time on the client
     nAverager  startTimeDrift_;         //!< drift of effective start time
     REAL startTimeSmoothedOffset_;      //!< the smoothed average of startTimeOffset_
     nAverager qualityTester_;           //!< averager that tells us about the quality of the sync messages
-    
+
+
+    // for drift calculation
     REAL lastStartTime_;                //!< last received start time
     REAL lastRemoteTime_;               //!< last received time
 
     bool sync_;                         //!< is a sync ready to process?
     REAL remoteCurrentTime_, remoteSpeed_; //!< if so, the sync data
+    double remoteStartTime_;            //!< if so, the sync data
+    bool remoteStartTimeSent_;          //!< set if the server is sending the start time
+    double lastRemoteStartTime_;        //!< last receined remote start time
+    
     void ProcessSync();                 //!< processes the sync data
 
     // the current game time is always smoothedSystemTime_ - ( startTime_ + startTimeSmoothedOffset_ ).
