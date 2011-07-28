@@ -100,8 +100,8 @@ eTimer::eTimer( Engine::TimerSync const & sync, nSenderInfo const & sender )
     remoteStartTimeSent_ = sync.has_start_time();
     remoteStartTime_ = lastRemoteStartTime_ = sync.start_time();
     
-    // assume VERY strongly the clocks are in sync
-    startTimeDrift_.Add( 0, 10000 );
+    // assume strongly the clocks are in sync
+    startTimeDrift_.Add( 0, 100 );
 }
 
 eTimer::~eTimer(){
@@ -419,6 +419,11 @@ void eTimer::SyncTime(){
     if ( sn_GetNetState() != nCLIENT || !remoteStartTimeSent_ )
     {
         startTime_ = startTimeExtrapolated_;
+    }
+    else
+    {
+        // we need to take the drift into account
+        startTime_ -= startTimeDrift_.GetAverage() * timeStep;
     }
 
     // smooth time offset
