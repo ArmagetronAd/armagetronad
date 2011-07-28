@@ -693,10 +693,10 @@ static nDescriptor BigServerDescriptor(51,nServerInfo::GetBigServerInfo,"big_ser
 static nDescriptor BigServerMasterDescriptor(54,nServerInfo::GetBigServerInfoMaster,"big_server_master", true);
 
 // request small server information from master server/broadcast
-static nDescriptor RequestSmallServerInfoDescriptor(52,nServerInfo::GiveSmallServerInfo,"small_request", true);
+nDescriptor RequestSmallServerInfoDescriptor(52,nServerInfo::GiveSmallServerInfo,"small_request", true);
 
 // request big server information from master server/broadcast
-static nDescriptor RequestBigServerInfoDescriptor(53,nServerInfo::GiveBigServerInfo,"big_request", true);
+nDescriptor RequestBigServerInfoDescriptor(53,nServerInfo::GiveBigServerInfo,"big_request", true);
 static nDescriptor RequestBigServerInfoMasterDescriptor(55,nServerInfo::GiveBigServerInfoMaster,"big_request_master", true);
 
 // used to transfer the rest of the server info (name, number of players, etc)
@@ -883,6 +883,7 @@ public:
     double lastTime_[MAX];   // log of the last times the server was pinged by this client
     int lastTimeIndex_;      // the current index in the array
     bool warned_;            // flag to avoid warning spam in the log file
+    REAL timeFactor_;        // locked time factor
 
     tString GetIP()
     {
@@ -939,24 +940,55 @@ public:
     // determines whether this client should be considered flooding
     bool FloodProtection( REAL timeFactor )
     {
+        if( warned_ && timeFactor < timeFactor_ )
+        {
+            // restore time factor
+            timeFactor = timeFactor_;
+        }
+        else
+        {
+            // store passed time factor for next time
+            timeFactor_ = timeFactor;
+        }
+
+
+
         int i;
         double now = tSysTimeFloat();
 
         bool protect = false;
         REAL diff = 0;
         int count = 0;
+        REAL tolerance = 0;
+        REAL minRelDiff = 10;
 
         // go through the different levels
-        for ( i = sn_minPingCount-1; i >= 0; --i )
+        int lowest = 0;
+
+        // only check 10 and 20 ping limit for the default timefactor
+        if( timeFactor < 1 && sn_minPingTimes[sn_minPingCount-1] > 0 )
+        {
+            // lowest = 2;
+        }
+
+        for ( i = sn_minPingCount-1; i >= lowest; --i )
         {
             // this many pings should be tracked
             count = sn_minPingCounts[i];
             diff = now - lastTime_[(lastTimeIndex_ + MAX - count) % MAX];
-            REAL tolerance = sn_minPingTimes[i]*timeFactor;
-            if ( tolerance > 0 && diff < tolerance )
+            tolerance = sn_minPingTimes[i]*timeFactor;
+            if ( tolerance > 0 )
             {
-                protect = true;
-                break;
+                if( tolerance*minRelDiff > diff )
+                {
+                    minRelDiff = diff/tolerance;
+                }
+
+                if( diff < tolerance )
+                {
+                    protect = true;
+                    break;
+                }
             }
         }
 
@@ -972,7 +1004,7 @@ public:
         }
 
         // reset warning flag
-        if ( warned_ && now - lastTime_[(lastTimeIndex_ + MAX-2 ) % MAX] > sn_minPingTimes[ sn_minPingCount-1 ] )
+        if ( warned_ && minRelDiff > 4 )
         {
             con << "Flood protection ban of " << GetIP() << " removed.\n";
             warned_ = false;
@@ -1017,16 +1049,23 @@ static nCallbackReceivedComplete sn_resetFirstInPacket( sn_ResetFirstInPacket );
 static REAL sn_minPingTimeGlobalFactor = 0.1;
 static tSettingItem< REAL > sn_minPingTimeGlobal( "PING_FLOOD_GLOBAL", sn_minPingTimeGlobalFactor );
 
+// checks for global ping flood events
+static bool GlobalPingFloodProtection()
+{
+    static nMachine server;
+
+    return sn_minPingTimeGlobalFactor > 0 && FloodProtection( server, sn_minPingTimeGlobalFactor );
+}
+
 // determines wheter the message comes from a flood attack; if so, reject it (return true)
 bool FloodProtection( nMessage const & m )
 {
-    // get the machine infos
-    nMachine & server = nMachine::GetMachine( 0 );
-    nMachine & peer   = nMachine::GetMachine( m.SenderID() );
-
     // only accept one ping per packet
     if ( !sn_firstInPacket )
     {
+        // get the machine infos
+        nMachine & peer   = nMachine::GetMachine( m.SenderID() );
+
         GetQueryMessageStats( peer ).Block();
 
         return true;
@@ -1038,11 +1077,15 @@ bool FloodProtection( nMessage const & m )
     if ( sn_minPingTimes[sn_minPingCount - 1] <= 0 )
         return false;
 
-    // and delegate
-    return FloodProtection( peer ) || ( sn_minPingTimeGlobalFactor > 0 && FloodProtection( server, sn_minPingTimeGlobalFactor ) );
+    // and delegate. Only do global check, the per-peer check has already been
+    // done earlier as the packet was received.
+    return GlobalPingFloodProtection();
 }
 
 void nServerInfo::GetSmallServerInfo(nMessage &m){
+    if ( !sn_IsMaster && sn_GetNetState() == nSERVER )
+        return;
+
     nServerInfoBase baseInfo;
     baseInfo.NetRead( m );
 
@@ -1298,6 +1341,9 @@ void nServerInfo::GiveBigServerInfoCommon(nMessage &m, const nServerInfo & info,
 
 void nServerInfo::GetBigServerInfo(nMessage &m)
 {
+    if ( !sn_IsMaster && sn_GetNetState() == nSERVER )
+        return;
+
     nServerInfo * server = GetBigServerInfoCommon( m );
 
     if (!server)
@@ -1360,7 +1406,7 @@ void nServerInfo::SetFromMaster()
 
 void nServerInfo::GetBigServerInfoMaster(nMessage &m)
 {
-    if ( sn_GetNetState() == nSERVER && FloodProtection( m ) )
+    if ( sn_GetNetState() == nSERVER )
         return;
 
     nServerInfo *server = GetBigServerInfoCommon( m );
@@ -1373,10 +1419,10 @@ void nServerInfo::GetBigServerInfoMaster(nMessage &m)
 
 void nServerInfo::GiveBigServerInfoMaster(nMessage &m)
 {
-    if ( FloodProtection( m ) )
+    if ( !sn_IsMaster )
         return;
 
-    if ( !sn_IsMaster )
+    if ( FloodProtection( m ) )
         return;
 
     // read info of desired server from message
@@ -2264,13 +2310,17 @@ void nServerInfo::RunMaster()
                     sn_Timeout[i] = tSysTimeFloat() + .2f;
             }
 
-            // defend against DOS attacks: Kill idle clients
+            // defend against DoS attacks: Kill idle clients
             if(sn_Timeout[i] < tSysTimeFloat())
+            {
+                sn_DisconnectUser(i, "$network_kill_servercomplete");
+                continue;
+            }
+            else if (!sn_Requested[i] && sn_Timeout[i] < tSysTimeFloat() + 60.0f)
+            {
                 sn_DisconnectUser(i, "$network_kill_timeout");
-
-            if (!sn_Requested[i] && sn_Timeout[i] < tSysTimeFloat() + 60.0f)
-                sn_DisconnectUser(i, "$network_kill_timeout");
-
+                continue;
+            }
         }
 
         if (sn_Transmitting[i] && sn_MessagesPending(i) < 3)

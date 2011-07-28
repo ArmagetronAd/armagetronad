@@ -389,6 +389,11 @@ ping_flood_time_20_help             Minimum time for 20 ping packets from one ma
 ping_flood_time_50_help             Minimum time for 50 ping packets from one machine to arrive.
 ping_flood_time_100_help            Minimum time for 100 ping packets from one machine to arrive.
 ping_flood_global_help              The times PING_FLOOD_TIME_X, multiplied by this value, count for all pings from all machines. Negative values disable global flood protection.
+connection_flood_sensitivity_help   The times PING_FLOOD_TIME_X, multiplied by this value, count for all incoming messages from clients not connected already. A flood here activates turtle mode. Negative values disable global flood protection.
+connection_limit_help               Maximum number of packets from unknown peers to handle at one 
+anti_spoof_help                     If set to 1, checks connecting clients for spoofed IPs. Only clients passing a connectivity test are allowed in. This is done in turtle mode automatically, but may be useful to have on at all times.
+turtle_mode_activated               Server is under heavy load. Turtle mode activated. Communication with new clients is on a budget.\n
+turtle_mode_deactivated             The high load seems to have normalized for now. Turtle mode deactivated.\n
 
 shuffle_spam_messages_per_round_help Per round, per player limit on the number of shuffle messages displayed. A negative or zero value disables this check.
 spam_protection_repeat_help         Minimum time between identical chat messages.
@@ -558,6 +563,7 @@ recording_debuglevel_help		    Level of additional information in recording file
 fast_forward_maxstep_help           Maximum recording time between rendered frames in fast forward mode
 fast_forward_maxstep_real_help      Maximum real time between rendered frames in fast forward mode
 fast_forward_maxstep_rel_help       Maximum fraction of the time left until the end of FF mode between rendered frames
+stop_recording_help                 Stops a currently running recording to save resources. Resuming is impossible.
 
 #********************************************
 #********************************************
@@ -1218,6 +1224,15 @@ input_instant_chat_help		Issues a special instant chat macro
 #********************************************
 #********************************************
 
+#********************************************
+#********************************************
+#
+#             console
+#
+#********************************************
+#********************************************
+
+console_repetition          (\1 times)\n
 
 #********************************************
 #********************************************
@@ -2649,7 +2664,7 @@ network_error			Network error.\n
 network_error_timeout		User \1 timed out.\n
 network_error_shortmessage	User \1's message was too short.\n
 network_error_overflow		User \1 is unable to keep up with the network traffic.\n
-network_killuser		Killing user \1, ping \2.\n
+network_killuser		Killing user \1, ping \2, IP \3: \4\n
 network_statistics1		Time:     \1 seconds\n
 network_statistics2		Sent:     \2 bytes in \3 packets (\4 bytes/s)\n
 network_statistics3		Received: \5 bytes in \6 packets (\7 bytes/s)\n
@@ -2682,10 +2697,11 @@ network_login_done		Done!\n
 network_kill_log            User \1 kicked, reason given to him: \2\n
 network_redirect            \n\nYou will now be redirected to the server \1:\2. You can prevent that by pressing ESC.\n
 network_kill_preface		Reason given by server:
-network_kill_maxidgrabber	It ran out of IDs; your client was the one occupying most of them for himself. The reason for this can be a bug.
+network_kill_maxidgrabber	It ran out of IDs; your client was the one occupying most of them for itself. The reason for this can be a bug.
 network_kill_maxiduser		It ran out of IDs; your client was the one occupying most of them.
 network_kill_cheater		It assumed you are cheating. If that is untrue, it is a bug you should report.
 network_kill_error			An error occurred while processing messages from your client. This usually indicates a client or server bug.
+network_kill_servercomplete	Server list transfer complete.
 network_kill_timeout		You timed out.
 network_kill_logout			You logged out regularly.
 network_kill_incompatible	You are running a version incompatible with the server.

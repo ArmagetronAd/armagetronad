@@ -82,6 +82,27 @@ bool tRecorderBase::IsRunning( void )
     return IsRecording() || IsPlayingBack();
 }
 
+// *****************************************************************************************
+// *
+// *   Stop
+// *
+// *****************************************************************************************
+//!
+//!
+// *****************************************************************************************
+
+void tRecorderBase::StopRecording( void )
+{
+    return tRecording::Stop();
+}
+static void st_StopRecording(std::istream &)
+{
+    tRecorderBase::StopRecording();
+}
+
+static tConfItemFunc snm("STOP_RECORDING",&st_StopRecording);
+
+
 // *******************************************************************************************
 // *
 // *    Record
