@@ -56,6 +56,8 @@ eTimer::eTimer():nNetObject(), startTimeSmoothedOffset_(0){
 
     smoothedSystemTime_ = tSysTimeFloat();
 
+    badSyncs_ = 0;
+
     speed = 1.0;
 
     Reset(0);
@@ -80,6 +82,9 @@ eTimer::eTimer( Engine::TimerSync const & sync, nSenderInfo const & sender )
     //con << "Creating remote eTimer.\n";
 
     smoothedSystemTime_ = tSysTimeFloat();
+
+    // start assuming bad syncs
+    badSyncs_ = 10;
 
     speed = 1.0;
 
@@ -190,9 +195,12 @@ void eTimer::ProcessSync()
     REAL ping = pingAverager.GetPing();
     REAL pingVariance = pingAverager.GetFastAverager().GetAverageVariance();
 
+    // and the average frame time
+    REAL spf = averageSpf_.GetAverage();
+
     {
         // adapt remote time a little, we're processing syncs with a frame delay
-        REAL remote_currentTime = remoteCurrentTime_ + averageSpf_.GetAverage()*remoteSpeed_;
+        REAL remote_currentTime = remoteCurrentTime_ + spf*remoteSpeed_;
         REAL remoteSpeed = remoteSpeed_;
  
         // forget about earlier syncs if the speed changed
@@ -299,6 +307,22 @@ void eTimer::ProcessSync()
         }
 #endif
         remoteTimeNonQuality *= 1+(cullFactor-1)*severity;
+    }
+
+    // compensate for frame rendering
+    delay -= spf*.5;
+
+    // check for bad syncs
+    if ( fabs( delay ) > spf*.5 + ping*.2 + sqrt(pingVariance)*2 )
+    {
+        if( badSyncs_ < 100 )
+        {
+            badSyncs_++;
+        }
+    }
+    else if ( badSyncs_ > 0 )
+    {
+        --badSyncs_;
     }
 
     // add the offset to the statistics, weighted by the quality
@@ -409,6 +433,11 @@ void eTimer::SyncTime(){
         // in this mode, the time syncs are extra-reliable and stable; we can
         // use long term averages.
         decayFactor *= .1;
+    }
+
+    if( badSyncs_ > 2 )
+    {
+        decayFactor *= ( badSyncs_ - 2 );
     }
 
     startTimeOffset_.Timestep( timeStep * .1 * decayFactor );

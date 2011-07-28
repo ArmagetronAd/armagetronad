@@ -84,6 +84,8 @@ private:
     double remoteStartTime_;            //!< if so, the sync data
     bool remoteStartTimeSent_;          //!< set if the server is sending the start time
     double lastRemoteStartTime_;        //!< last receined remote start time
+
+    int badSyncs_;                      //!< number of consecutive bad syncs received
     
     void ProcessSync();                 //!< processes the sync data
 
