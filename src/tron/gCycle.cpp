@@ -2487,7 +2487,7 @@ gCycle::~gCycle(){
     }
     
     // check target
-    if (m_target_ptr.get()) Target().Unset();
+    if (CheckTargetPtr()) Target().Unset();
 #ifdef DEBUG
     //con << "Deleted cycle.\n";
 #endif
@@ -2871,7 +2871,7 @@ bool gCycle::Timestep(REAL currentTime){
     // check target assignment timeout
     if (currentTime > gTarget::start_time)
     {
-        if (m_target_ptr.get()) Target().Timestep(currentTime);
+        if (CheckTargetPtr()) Target().Timestep(currentTime);
         else if (gTarget::assignment_mode) gTarget::AutoSetCycles(gCycle::cycles);
     }
 
@@ -3281,7 +3281,7 @@ void gCycle::Die( REAL time )
     gCycleMovement::Die( time );
     
     // handle cycle's target and hunters
-    if (m_target_ptr.get())
+    if (CheckTargetPtr())
     {
         // unset this cycle target
         Target().Unset();
@@ -3293,7 +3293,7 @@ void gCycle::Die( REAL time )
             // unset all cycle's targets
             for (gCycleItr itr = cycles.begin(); itr != cycles.end(); ++itr)
             {
-                if (((*itr)->m_target_ptr.get()) && ((*itr)->Target().m_target))
+                if (((*itr)->CheckTargetPtr()) && ((*itr)->Target().m_target))
                 {
                 	(*itr)->Target().Unset();
                     tOutput out( tOutput("$cycle_target_cancel", (*itr)->Player()->GetName()) );
@@ -3445,9 +3445,9 @@ void gCycle::KillAt( const eCoord& deathPos){
 
             if (pHunterCycle)
             {
-                if (m_target_ptr.get())
+                if (CheckTargetPtr())
                 {
-            	    if ((pHunterCycle->m_target_ptr.get()) && (pHunterCycle->Target().Is(this)))
+            	    if ((pHunterCycle->CheckTargetPtr()) && (pHunterCycle->Target().Is(this)))
             	    {
             	        // handle target scoring
             		    pHunterCycle->Target().AddScore();
@@ -6702,7 +6702,7 @@ wap's idea: make target assignment for limited time, then reassign a new target 
 */
 gTarget &gCycle::Target()
 {
-	if (m_target_ptr.get()==NULL) m_target_ptr.reset(new gTarget(this));
+	if (!CheckTargetPtr()) m_target_ptr.reset(new gTarget(this));
 	return *m_target_ptr;
 }
 
@@ -6765,9 +6765,12 @@ void gTarget::Unset()
 {
     if ((!m_target) || (!m_this)) return;
     // first remove p_hunter from m_target's hunters' list
-    vec_cycle_ptr &v(m_target->Target().m_hunters);
-    gCycleItr pos(std::find(v.begin(), v.end(), m_this));
-    if (pos!=v.end()) v.erase(pos);
+    if (m_target->CheckTargetPtr())
+    {
+        vec_cycle_ptr &v(m_target->Target().m_hunters);
+        gCycleItr pos(std::find(v.begin(), v.end(), m_this));
+        if (pos!=v.end()) v.erase(pos);
+    }
     // then clear m_target
     m_target = NULL;
 }
@@ -6812,7 +6815,7 @@ void gTarget::AddScore()
         tColoredString preyName;
         preyName << m_target->Player()->GetName();
         preyName << tColoredString::ColorString(1,1,1);
-        sg_targetKilledWriter << m_target->Player()->GetUserName() << m_this->Player()->GetName();
+        sg_targetKilledWriter << m_target->Player()->GetUserName() << m_this->Player()->GetUserName();
         sg_targetKilledWriter.write();
 
         win.SetTemplateParameter(3, preyName);

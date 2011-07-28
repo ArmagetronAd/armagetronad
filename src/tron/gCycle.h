@@ -238,6 +238,7 @@ private:
 public:
     struct LessHuntersCount;
     gTarget &Target();
+    bool CheckTargetPtr() { return m_target_ptr.get(); }
 // *** special target mode (end) ***
 
 public:
