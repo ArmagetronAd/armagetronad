@@ -466,7 +466,7 @@ void eTimer::Reset(REAL t, bool force){
 
     // reset start time
     smoothedSystemTime_ = tSysTimeFloat();
-    startTimeExtrapolated_ = smoothedSystemTime_ - t;
+    startTimeExtrapolated_ = smoothedSystemTime_ - t - startTimeSmoothedOffset_;
 
     // nothing further to do for clients on modern servers
     if( sn_GetNetState() == nCLIENT && remoteStartTimeSent_ && !force )
