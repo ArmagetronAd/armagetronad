@@ -237,6 +237,12 @@ private:
     // The cost is the use of auto_ptr and extra check on his internal pointer whether the use of m_target requires it.
     // Side note: never made a copy of m_target as auto_ptr ownership transfer will lead to target management corruption
 //    std::auto_ptr<gTarget> m_target_ptr;
+// IMPORTANT: auto_ptr has been removed as a workaround to a bug occuring in the following situation:
+//            In DEBUG mode, when some1 joined while a lonely player was inside, the round was stopped.
+//            If the player entering the server, authenticated when he join (automatically), the server crashed.
+//            gdb shows 3 threads all in thread/memory management situations. The one which leads to the crash was desalocated memory
+//            within tList and crashed in tMemManager.cpp. Looks like some weird interaction between ZThread, stl memory management
+//            and armagetron memory management.
     gTarget m_target_mgr;
 public:
     struct LessHuntersCount;

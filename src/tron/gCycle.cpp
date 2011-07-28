@@ -6705,7 +6705,7 @@ wap's idea: make target assignment for limited time, then reassign a new target 
 */
 
 // _assignment_mode: 0=disable, 1/2 is enable, 1 affects the player killing your target while 2 randomly affects new target
-int gTarget::assignment_mode = 1;
+int gTarget::assignment_mode = 0;
 int gTarget::base_score = 10;
 int gTarget::base_score_deplete = 2;
 int gTarget::max_target = 2;
