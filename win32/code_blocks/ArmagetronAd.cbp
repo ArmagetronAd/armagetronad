@@ -21,10 +21,10 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
-					<Add library="..\..\..\winlibs\build\dist\libSDL_mixer.a" />
-					<Add library="..\..\..\winlibs\build\dist\libSDL_image.a" />
-					<Add library="..\..\..\winlibs\build\dist\libSDL.a" />
-					<Add library="..\..\..\winlibs\build\dist\libFTGL.a" />
+					<Add library="..\..\..\winlibs\build\dist\SDL_mixer.dll" />
+					<Add library="..\..\..\winlibs\build\dist\SDL_image.dll" />
+					<Add library="..\..\..\winlibs\build\dist\SDL.dll" />
+					<Add library="..\..\..\winlibs\build\dist\FTGL.dll" />
 					<Add library="..\..\..\winlibs\protobuf\vsprojects\libprotobuf.a" />
 					<Add library=".\libZThread.a" />
 				</Linker>
@@ -37,15 +37,15 @@
 				<Option compiler="gcc" />
 				<Option projectResourceIncludeDirsRelation="0" />
 				<Compiler>
-					<Add option="-W" />
 					<Add option="-g" />
+					<Add option="-W" />
 					<Add option="-DDEBUG" />
 				</Compiler>
 				<Linker>
-					<Add library="..\..\..\winlibs\build\debug\libSDL_mixer.a" />
-					<Add library="..\..\..\winlibs\build\debug\libSDL_image.a" />
-					<Add library="..\..\..\winlibs\build\debug\libSDL.a" />
-					<Add library="..\..\..\winlibs\build\debug\libFTGL.a" />
+					<Add library="..\..\..\winlibs\build\debug\SDL_mixer.dll" />
+					<Add library="..\..\..\winlibs\build\debug\SDL_image.dll" />
+					<Add library="..\..\..\winlibs\build\debug\SDL.dll" />
+					<Add library="..\..\..\winlibs\build\debug\FTGL.dll" />
 					<Add library="..\..\..\winlibs\protobuf\vsprojects\libprotobuf_debug.a" />
 					<Add library=".\libZThread_debug.a" />
 				</Linker>
@@ -387,6 +387,7 @@
 		<Unit filename="..\..\src\resource\tResourceManager.h" />
 		<Unit filename="..\..\src\resource\tResourceType.cpp" />
 		<Unit filename="..\..\src\resource\tResourceType.h" />
+		<Unit filename="..\..\src\tTrueVersion.h" />
 		<Unit filename="..\..\src\thirdparty\mathexpr\example.cpp">
 			<Option compile="0" />
 			<Option link="0" />
