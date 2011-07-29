@@ -1,1142 +1,306 @@
-<?xml version="1.0"?>
-<!DOCTYPE CodeBlocks_project_file>
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_project_file>
-	<FileVersion major="1" minor="1"/>
+	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="Master"/>
-		<Option makefile="Makefile"/>
-		<Option makefile_is_custom="0"/>
-		<Option compiler="0"/>
+		<Option title="Master" />
+		<Option pch_mode="0" />
+		<Option compiler="gcc" />
 		<Build>
 			<Target title="Win32 Release">
-				<Option output="..\..\build\dist\armagetronad_master.exe"/>
-				<Option working_dir="..\..\build\dist\"/>
-				<Option object_output="..\..\build\tmp\Armagetron_Master___Win32_Release"/>
-				<Option deps_output=".deps"/>
-				<Option type="1"/>
-				<Option compiler="0"/>
-				<Option projectResourceIncludeDirsRelation="1"/>
+				<Option output="..\..\build\dist\armagetronad_master.exe" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="..\..\build\dist\" />
+				<Option object_output="..\..\build\tmp\Armagetron_Master___Win32_Release" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option projectResourceIncludeDirsRelation="1" />
 				<Compiler>
-					<Add option="-O2"/>
-					<Add option="-W"/>
-					<Add option="-DNDEBUG"/>
+					<Add option="-O2" />
+					<Add option="-W" />
+					<Add option="-DNDEBUG" />
 				</Compiler>
 				<Linker>
-					<Add option="-s"/>
-					<Add library=".\libZThread.a"/>
-					<Add library="..\..\..\winlibs\protobuf\vsprojects\libprotobuf.a"/>
+					<Add option="-s" />
+					<Add library=".\libZThread.a" />
+					<Add library="..\..\..\winlibs\protobuf\vsprojects\libprotobuf.a" />
 				</Linker>
 			</Target>
 			<Target title="Win32 Debug">
-				<Option output="..\..\build\debug\armagetronad_master.exe"/>
-				<Option working_dir="..\..\build\debug\"/>
-				<Option object_output="..\..\build\tmp\Armagetron_Master___Win32_Debug"/>
-				<Option deps_output=".deps"/>
-				<Option type="1"/>
-				<Option compiler="0"/>
-				<Option projectResourceIncludeDirsRelation="1"/>
+				<Option output="..\..\build\debug\armagetronad_master.exe" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="..\..\build\debug\" />
+				<Option object_output="..\..\build\tmp\Armagetron_Master___Win32_Debug" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option projectResourceIncludeDirsRelation="1" />
 				<Compiler>
-					<Add option="-W"/>
-					<Add option="-g"/>
-					<Add option="-D_DEBUG"/>
-					<Add option="-DDEBUG"/>
+					<Add option="-W" />
+					<Add option="-g" />
+					<Add option="-D_DEBUG" />
+					<Add option="-DDEBUG" />
 				</Compiler>
 				<Linker>
-					<Add library=".\libZThread_debug.a"/>
-					<Add library="..\..\..\winlibs\protobuf\vsprojects\libprotobuf_debug.a"/>
+					<Add library=".\libZThread_debug.a" />
+					<Add library="..\..\..\winlibs\protobuf\vsprojects\libprotobuf_debug.a" />
 				</Linker>
 			</Target>
 		</Build>
+		<VirtualTargets>
+			<Add alias="All" targets="Win32 Release;Win32 Debug;" />
+		</VirtualTargets>
 		<Compiler>
-			<Add option="-fexceptions"/>
-			<Add option="-DWIN32"/>
-			<Add option="-D_CONSOLE"/>
-			<Add option="-D_MBCS"/>
-			<Add directory="..\..\src"/>
-			<Add directory="..\..\src\protobuf"/>
-			<Add directory="..\..\src\engine"/>
-			<Add directory="..\..\src\network"/>
-			<Add directory="..\..\src\render"/>
-			<Add directory="..\..\src\tools"/>
-			<Add directory="..\..\src\ui"/>
-			<Add directory="..\..\src\win32_ded"/>
-			<Add directory="..\..\..\winlibs\ZThread\include"/>
-			<Add directory="..\..\..\winlibs\libxml2\include"/>
-			<Add directory="..\..\src\resource"/>
-			<Add directory="..\..\..\winlibs\boost\includes"/>
-			<Add directory="..\..\..\winlibs\iconv\include"/>
-			<Add directory="..\..\..\winlibs\protobuf\src"/>
-			<Add directory="..\..\src\thirdparty\utf8"/>
+			<Add option="-fexceptions" />
+			<Add option="-DWIN32" />
+			<Add option="-D_CONSOLE" />
+			<Add option="-D_MBCS" />
+			<Add directory="..\..\src" />
+			<Add directory="..\..\src\protobuf" />
+			<Add directory="..\..\src\engine" />
+			<Add directory="..\..\src\network" />
+			<Add directory="..\..\src\render" />
+			<Add directory="..\..\src\tools" />
+			<Add directory="..\..\src\ui" />
+			<Add directory="..\..\src\win32_ded" />
+			<Add directory="..\..\..\winlibs\ZThread\include" />
+			<Add directory="..\..\..\winlibs\libxml2\include" />
+			<Add directory="..\..\src\resource" />
+			<Add directory="..\..\..\winlibs\boost\includes" />
+			<Add directory="..\..\..\winlibs\iconv\include" />
+			<Add directory="..\..\..\winlibs\protobuf\src" />
+			<Add directory="..\..\src\thirdparty\utf8" />
 		</Compiler>
 		<Linker>
-			<Add library="libwsock32.a"/>
-			<Add library="..\..\..\winlibs\libxml2\lib\libxml2.lib"/>
+			<Add library="libwsock32.a" />
+			<Add library="..\..\..\winlibs\libxml2\lib\libxml2.lib" />
 		</Linker>
-		<Unit filename="..\..\src\network\master.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\network\md5.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\network\md5.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\network\nAuthentication.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\network\nAuthentication.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\network\nBinary.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\network\nBinary.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\network\nConfig.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\network\nConfig.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\network\nKrawall.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\network\nKrawall.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\network\nKrawallPrivate.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\network\nNetObject.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\network\nNetObject.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\network\nNetwork.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\network\nNetwork.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\network\nObserver.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\network\nObserver.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\network\nPriorizing.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\network\nPriorizing.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\network\nProtoBuf.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\network\nProtoBuf.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\network\nServerInfo.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\network\nServerInfo.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\network\nSimulatePing.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\network\nSocket.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\network\nSocket.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\network\nSpamProtection.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\network\nSpamProtection.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\network\nStreamMessage.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\network\nStreamMessage.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
+		<Unit filename="..\..\src\network\master.cpp" />
+		<Unit filename="..\..\src\network\md5.cpp" />
+		<Unit filename="..\..\src\network\md5.h" />
+		<Unit filename="..\..\src\network\nAuthentication.cpp" />
+		<Unit filename="..\..\src\network\nAuthentication.h" />
+		<Unit filename="..\..\src\network\nBinary.cpp" />
+		<Unit filename="..\..\src\network\nBinary.h" />
+		<Unit filename="..\..\src\network\nConfig.cpp" />
+		<Unit filename="..\..\src\network\nConfig.h" />
+		<Unit filename="..\..\src\network\nKrawall.cpp" />
+		<Unit filename="..\..\src\network\nKrawall.h" />
+		<Unit filename="..\..\src\network\nKrawallPrivate.cpp" />
+		<Unit filename="..\..\src\network\nNetObject.cpp" />
+		<Unit filename="..\..\src\network\nNetObject.h" />
+		<Unit filename="..\..\src\network\nNetwork.cpp" />
+		<Unit filename="..\..\src\network\nNetwork.h" />
+		<Unit filename="..\..\src\network\nObserver.cpp" />
+		<Unit filename="..\..\src\network\nObserver.h" />
+		<Unit filename="..\..\src\network\nPriorizing.cpp" />
+		<Unit filename="..\..\src\network\nPriorizing.h" />
+		<Unit filename="..\..\src\network\nProtoBuf.cpp" />
+		<Unit filename="..\..\src\network\nProtoBuf.h" />
+		<Unit filename="..\..\src\network\nServerInfo.cpp" />
+		<Unit filename="..\..\src\network\nServerInfo.h" />
+		<Unit filename="..\..\src\network\nSimulatePing.h" />
+		<Unit filename="..\..\src\network\nSocket.cpp" />
+		<Unit filename="..\..\src\network\nSocket.h" />
+		<Unit filename="..\..\src\network\nSpamProtection.cpp" />
+		<Unit filename="..\..\src\network\nSpamProtection.h" />
+		<Unit filename="..\..\src\network\nStreamMessage.cpp" />
+		<Unit filename="..\..\src\network\nStreamMessage.h" />
 		<Unit filename="..\..\src\protobuf\eEventNotification.pb.cc">
-			<Option compilerVar="CC"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
+			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\eEventNotification.pb.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\protobuf\eEventNotification.proto">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
+		<Unit filename="..\..\src\protobuf\eEventNotification.pb.h" />
+		<Unit filename="..\..\src\protobuf\eEventNotification.proto" />
 		<Unit filename="..\..\src\protobuf\eLagCompensation.pb.cc">
-			<Option compilerVar="CC"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
+			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\eLagCompensation.pb.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\protobuf\eLagCompensation.proto">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
+		<Unit filename="..\..\src\protobuf\eLagCompensation.pb.h" />
+		<Unit filename="..\..\src\protobuf\eLagCompensation.proto" />
 		<Unit filename="..\..\src\protobuf\eNetGameObject.pb.cc">
-			<Option compilerVar="CC"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
+			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\eNetGameObject.pb.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\protobuf\eNetGameObject.proto">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
+		<Unit filename="..\..\src\protobuf\eNetGameObject.pb.h" />
+		<Unit filename="..\..\src\protobuf\eNetGameObject.proto" />
 		<Unit filename="..\..\src\protobuf\ePlayer.pb.cc">
-			<Option compilerVar="CC"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
+			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\ePlayer.pb.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\protobuf\ePlayer.proto">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
+		<Unit filename="..\..\src\protobuf\ePlayer.pb.h" />
+		<Unit filename="..\..\src\protobuf\ePlayer.proto" />
 		<Unit filename="..\..\src\protobuf\eTeam.pb.cc">
-			<Option compilerVar="CC"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
+			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\eTeam.pb.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\protobuf\eTeam.proto">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
+		<Unit filename="..\..\src\protobuf\eTeam.pb.h" />
+		<Unit filename="..\..\src\protobuf\eTeam.proto" />
 		<Unit filename="..\..\src\protobuf\eTimer.pb.cc">
-			<Option compilerVar="CC"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
+			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\eTimer.pb.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\protobuf\eTimer.proto">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
+		<Unit filename="..\..\src\protobuf\eTimer.pb.h" />
+		<Unit filename="..\..\src\protobuf\eTimer.proto" />
 		<Unit filename="..\..\src\protobuf\eVoter.pb.cc">
-			<Option compilerVar="CC"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
+			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\eVoter.pb.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\protobuf\eVoter.proto">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
+		<Unit filename="..\..\src\protobuf\eVoter.pb.h" />
+		<Unit filename="..\..\src\protobuf\eVoter.proto" />
 		<Unit filename="..\..\src\protobuf\gAIBase.pb.cc">
-			<Option compilerVar="CC"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
+			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\gAIBase.pb.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\protobuf\gAIBase.proto">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
+		<Unit filename="..\..\src\protobuf\gAIBase.pb.h" />
+		<Unit filename="..\..\src\protobuf\gAIBase.proto" />
 		<Unit filename="..\..\src\protobuf\gCycle.pb.cc">
-			<Option compilerVar="CC"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
+			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\gCycle.pb.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\protobuf\gCycle.proto">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
+		<Unit filename="..\..\src\protobuf\gCycle.pb.h" />
+		<Unit filename="..\..\src\protobuf\gCycle.proto" />
 		<Unit filename="..\..\src\protobuf\gGame.pb.cc">
-			<Option compilerVar="CC"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
+			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\gGame.pb.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\protobuf\gGame.proto">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
+		<Unit filename="..\..\src\protobuf\gGame.pb.h" />
+		<Unit filename="..\..\src\protobuf\gGame.proto" />
 		<Unit filename="..\..\src\protobuf\gWall.pb.cc">
-			<Option compilerVar="CC"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
+			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\gWall.pb.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\protobuf\gWall.proto">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
+		<Unit filename="..\..\src\protobuf\gWall.pb.h" />
+		<Unit filename="..\..\src\protobuf\gWall.proto" />
 		<Unit filename="..\..\src\protobuf\gZone.pb.cc">
-			<Option compilerVar="CC"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
+			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\gZone.pb.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\protobuf\gZone.proto">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
+		<Unit filename="..\..\src\protobuf\gZone.pb.h" />
+		<Unit filename="..\..\src\protobuf\gZone.proto" />
 		<Unit filename="..\..\src\protobuf\nAuthentication.pb.cc">
-			<Option compilerVar="CC"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
+			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\nAuthentication.pb.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\protobuf\nAuthentication.proto">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
+		<Unit filename="..\..\src\protobuf\nAuthentication.pb.h" />
+		<Unit filename="..\..\src\protobuf\nAuthentication.proto" />
 		<Unit filename="..\..\src\protobuf\nConfig.pb.cc">
-			<Option compilerVar="CC"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
+			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\nConfig.pb.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\protobuf\nConfig.proto">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
+		<Unit filename="..\..\src\protobuf\nConfig.pb.h" />
+		<Unit filename="..\..\src\protobuf\nConfig.proto" />
 		<Unit filename="..\..\src\protobuf\nNetObject.pb.cc">
-			<Option compilerVar="CC"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
+			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\nNetObject.pb.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\protobuf\nNetObject.proto">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
+		<Unit filename="..\..\src\protobuf\nNetObject.pb.h" />
+		<Unit filename="..\..\src\protobuf\nNetObject.proto" />
 		<Unit filename="..\..\src\protobuf\nNetObjectPrivate.pb.cc">
-			<Option compilerVar="CC"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
+			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\nNetObjectPrivate.pb.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\protobuf\nNetObjectPrivate.proto">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
+		<Unit filename="..\..\src\protobuf\nNetObjectPrivate.pb.h" />
+		<Unit filename="..\..\src\protobuf\nNetObjectPrivate.proto" />
 		<Unit filename="..\..\src\protobuf\nNetwork.pb.cc">
-			<Option compilerVar="CC"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
+			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\nNetwork.pb.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\protobuf\nNetwork.proto">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
+		<Unit filename="..\..\src\protobuf\nNetwork.pb.h" />
+		<Unit filename="..\..\src\protobuf\nNetwork.proto" />
 		<Unit filename="..\..\src\protobuf\nServerInfo.pb.cc">
-			<Option compilerVar="CC"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
+			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\nServerInfo.pb.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\protobuf\nServerInfo.proto">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
+		<Unit filename="..\..\src\protobuf\nServerInfo.pb.h" />
+		<Unit filename="..\..\src\protobuf\nServerInfo.proto" />
 		<Unit filename="..\..\src\protobuf\prototype.pb.cc">
-			<Option compilerVar="CC"/>
+			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\prototype.pb.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\protobuf\prototype.proto">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
+		<Unit filename="..\..\src\protobuf\prototype.pb.h" />
+		<Unit filename="..\..\src\protobuf\prototype.proto" />
 		<Unit filename="..\..\src\protobuf\tColor.pb.cc">
-			<Option compilerVar="CC"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
+			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\tColor.pb.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\protobuf\tColor.proto">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
+		<Unit filename="..\..\src\protobuf\tColor.pb.h" />
+		<Unit filename="..\..\src\protobuf\tColor.proto" />
 		<Unit filename="..\..\src\protobuf\tCoord.pb.cc">
-			<Option compilerVar="CC"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
+			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\tCoord.pb.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\protobuf\tCoord.proto">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
+		<Unit filename="..\..\src\protobuf\tCoord.pb.h" />
+		<Unit filename="..\..\src\protobuf\tCoord.proto" />
 		<Unit filename="..\..\src\protobuf\tFunction.pb.cc">
-			<Option compilerVar="CC"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
+			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\tFunction.pb.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\protobuf\tFunction.proto">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
+		<Unit filename="..\..\src\protobuf\tFunction.pb.h" />
+		<Unit filename="..\..\src\protobuf\tFunction.proto" />
 		<Unit filename="..\..\src\protobuf\tPolynomial.pb.cc">
-			<Option compilerVar="CC"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
+			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\tPolynomial.pb.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\protobuf\tPolynomial.proto">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
+		<Unit filename="..\..\src\protobuf\tPolynomial.pb.h" />
+		<Unit filename="..\..\src\protobuf\tPolynomial.proto" />
 		<Unit filename="..\..\src\protobuf\zShape.pb.cc">
-			<Option compilerVar="CC"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
+			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\zShape.pb.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\protobuf\zShape.proto">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
+		<Unit filename="..\..\src\protobuf\zShape.pb.h" />
+		<Unit filename="..\..\src\protobuf\zShape.proto" />
 		<Unit filename="..\..\src\protobuf\zZone.pb.cc">
-			<Option compilerVar="CC"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\protobuf\zZone.pb.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\protobuf\zZone.proto">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\resource\tResource.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\resource\tResource.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\resource\tResourceManager.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\resource\tResourceManager.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\resource\tResourceType.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\resource\tResourceType.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tArray.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tArray.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tCallback.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tCallback.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tCallbackString.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tColor.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tColor.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tCommandLine.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tCommandLine.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tConfiguration.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tConfiguration.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tConsole.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tConsole.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tCrypt.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tCrypt.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tDirectories.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tDirectories.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tError.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tError.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tEventQueue.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tEventQueue.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tException.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tException.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tHeap.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tHeap.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tInitExit.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tLinkedList.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tLinkedList.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tList.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tLocale.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tLocale.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tMath.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tMemManager.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tMemManager.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tMemStack.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tMemStack.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tRandom.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tRandom.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tRecorder.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tRecorder.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tRecorderInternal.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tRecorderInternal.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tReferenceHolder.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tRing.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tRing.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tSafePTR.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tSafePTR.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tString.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tString.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tSysTime.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tSysTime.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tToDo.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tToDo.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tVersion.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tVersion.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tXmlParser.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tXmlParser.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\src\protobuf\zZone.pb.h" />
+		<Unit filename="..\..\src\protobuf\zZone.proto" />
+		<Unit filename="..\..\src\resource\tResource.cpp" />
+		<Unit filename="..\..\src\resource\tResource.h" />
+		<Unit filename="..\..\src\resource\tResourceManager.cpp" />
+		<Unit filename="..\..\src\resource\tResourceManager.h" />
+		<Unit filename="..\..\src\resource\tResourceType.cpp" />
+		<Unit filename="..\..\src\resource\tResourceType.h" />
+		<Unit filename="..\..\src\tools\tArray.cpp" />
+		<Unit filename="..\..\src\tools\tArray.h" />
+		<Unit filename="..\..\src\tools\tCallback.cpp" />
+		<Unit filename="..\..\src\tools\tCallback.h" />
+		<Unit filename="..\..\src\tools\tCallbackString.h" />
+		<Unit filename="..\..\src\tools\tColor.cpp" />
+		<Unit filename="..\..\src\tools\tColor.h" />
+		<Unit filename="..\..\src\tools\tCommandLine.cpp" />
+		<Unit filename="..\..\src\tools\tCommandLine.h" />
+		<Unit filename="..\..\src\tools\tConfiguration.cpp" />
+		<Unit filename="..\..\src\tools\tConfiguration.h" />
+		<Unit filename="..\..\src\tools\tConsole.cpp" />
+		<Unit filename="..\..\src\tools\tConsole.h" />
+		<Unit filename="..\..\src\tools\tCrypt.cpp" />
+		<Unit filename="..\..\src\tools\tCrypt.h" />
+		<Unit filename="..\..\src\tools\tDirectories.cpp" />
+		<Unit filename="..\..\src\tools\tDirectories.h" />
+		<Unit filename="..\..\src\tools\tError.cpp" />
+		<Unit filename="..\..\src\tools\tError.h" />
+		<Unit filename="..\..\src\tools\tEventQueue.cpp" />
+		<Unit filename="..\..\src\tools\tEventQueue.h" />
+		<Unit filename="..\..\src\tools\tException.cpp" />
+		<Unit filename="..\..\src\tools\tException.h" />
+		<Unit filename="..\..\src\tools\tHeap.cpp" />
+		<Unit filename="..\..\src\tools\tHeap.h" />
+		<Unit filename="..\..\src\tools\tInitExit.h" />
+		<Unit filename="..\..\src\tools\tLinkedList.cpp" />
+		<Unit filename="..\..\src\tools\tLinkedList.h" />
+		<Unit filename="..\..\src\tools\tList.h" />
+		<Unit filename="..\..\src\tools\tLocale.cpp" />
+		<Unit filename="..\..\src\tools\tLocale.h" />
+		<Unit filename="..\..\src\tools\tMath.h" />
+		<Unit filename="..\..\src\tools\tMemManager.cpp" />
+		<Unit filename="..\..\src\tools\tMemManager.h" />
+		<Unit filename="..\..\src\tools\tMemStack.cpp" />
+		<Unit filename="..\..\src\tools\tMemStack.h" />
+		<Unit filename="..\..\src\tools\tRandom.cpp" />
+		<Unit filename="..\..\src\tools\tRandom.h" />
+		<Unit filename="..\..\src\tools\tRecorder.cpp" />
+		<Unit filename="..\..\src\tools\tRecorder.h" />
+		<Unit filename="..\..\src\tools\tRecorderInternal.cpp" />
+		<Unit filename="..\..\src\tools\tRecorderInternal.h" />
+		<Unit filename="..\..\src\tools\tReferenceHolder.h" />
+		<Unit filename="..\..\src\tools\tRing.cpp" />
+		<Unit filename="..\..\src\tools\tRing.h" />
+		<Unit filename="..\..\src\tools\tSafePTR.cpp" />
+		<Unit filename="..\..\src\tools\tSafePTR.h" />
+		<Unit filename="..\..\src\tools\tString.cpp" />
+		<Unit filename="..\..\src\tools\tString.h" />
+		<Unit filename="..\..\src\tools\tSysTime.cpp" />
+		<Unit filename="..\..\src\tools\tSysTime.h" />
+		<Unit filename="..\..\src\tools\tToDo.cpp" />
+		<Unit filename="..\..\src\tools\tToDo.h" />
+		<Unit filename="..\..\src\tools\tVersion.cpp" />
+		<Unit filename="..\..\src\tools\tVersion.h" />
+		<Unit filename="..\..\src\tools\tXmlParser.cpp" />
+		<Unit filename="..\..\src\tools\tXmlParser.h" />
 		<Unit filename="..\..\src\win32\armagetron.rc">
-			<Option compilerVar="WINDRES"/>
-			<Option objectName="src\win32\armagetron.res"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
+			<Option compilerVar="WINDRES" />
 		</Unit>
-		<Unit filename="..\..\src\win32_ded\config.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
+		<Unit filename="..\..\src\win32_ded\config.h" />
 		<Unit filename="..\..\src\win32_ded\dirent.c">
-			<Option compilerVar="CC"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
+			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\win32_ded\dirent.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
+		<Unit filename="..\..\src\win32_ded\dirent.h" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
 	</Project>
 </CodeBlocks_project_file>

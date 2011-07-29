@@ -312,13 +312,6 @@ static void sg_ScreenModeMenu()
 
 
 #ifdef SDL_OPENGL
-#ifdef DIRTY
-    uMenuItemToggle sdl_t
-    (&screen_menu_mode,
-     "$screen_use_sdl_text",
-     "$screen_use_sdl_help",
-     currentScreensetting.useSDL);
-#endif // dirty
 
 #if SDL_VERSION_ATLEAST(1, 2, 10)
     uMenuItemSelection<rVSync> zvs_t
@@ -640,7 +633,7 @@ bool gMemuItemConsole::Event(SDL_Event &e){
 
 void do_con(){
     su_ClearKeys();
-        
+
     se_ChatState( ePlayerNetID::ChatFlags_Console, true );
     sr_con.SetHeight(20,false);
     se_SetShowScoresAuto(false);

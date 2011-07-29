@@ -4,7 +4,7 @@ REM This batch file recompiles the .proto files to c++ headers and object files.
 
 cd ..\src\protobuf
 
-protoc *.proto --cpp_out=.
+..\..\..\winlibs\protobuf\bin\protoc *.proto --cpp_out=.
 
 echo.
 echo.
