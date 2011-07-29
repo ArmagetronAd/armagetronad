@@ -10,9 +10,6 @@
 #define HAVE_LIBZTHREAD 1
 #define KRAWALL_SERVER 1
 
-// is now defined for code::blocks > 8 or so
-#define HAVE_ISBLANK
-
 // include common Windows header
 #include "win32/config_common.h"
 
