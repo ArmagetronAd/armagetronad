@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-  
+
 ***************************************************************************
 
 */
@@ -51,7 +51,7 @@ public:
     void ReadSync( Tools::Color const & source );  //!< reads sync data
 
     static bool VerifyColorCode( const char * c );        // Verifys it's a valid color code
-    bool VerifyColorCode( const wchar_t * c);      // Verifys it's a valid color code
+    static bool VerifyColorCode( const wchar_t * c);      // Verifys it's a valid color code
 
     // the colors are public because they are independent of each other
     REAL r_, g_, b_, a_;                    //!< Color values
