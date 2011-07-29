@@ -97,12 +97,27 @@ struct tTime
 #include "rSDL.h"
 #endif
 
+// test tick count overflow by wrapping the real tick count
+// #define TEST_TICK_COUNT
+#ifdef TEST_TICK_COUNT
+DWORD GetTickCount2()
+{
+    static DWORD first = GetTickCount();
+    return GetTickCount() - first - 10000;
+}
+#define GetTickCount GetTickCount2
+#endif
+
+
 // flag indicating whether the HPC is reliable
-static bool st_hpcReliable = true;
+static bool st_hpcReliable = false;
 
 void GetTimeInner( tTime & time )
 {
     LARGE_INTEGER mtime,frq;
+
+    // these timers are always monotonic
+    st_timerIsStrictlyMonotonic = true;
 
     // Check if high-resolution performance counter is supported
     if (!QueryPerformanceFrequency(&frq))
@@ -118,11 +133,29 @@ void GetTimeInner( tTime & time )
     }
     else
     {
+
+#ifdef SUPPORT_WIN9X
         // Nope, not supported, do it the old way.
         struct _timeb tstruct;
         _ftime( &tstruct );
         time.microseconds = tstruct.millitm*1000;
         time.seconds = tstruct.time;
+
+        // not monotonic :(
+        st_timerIsStrictlyMonotonic = false;
+#else
+        // Or, better, GetTickCount(). Be aware of overflows after two months uptime.
+        // (TickCount64 only exists on Vista and up, we don't want to go cutting compatibility off that far yet.)
+        static DWORD lastTickCount = GetTickCount();
+        DWORD tickCount = GetTickCount();
+        static int64_t tick64 = 0;
+        unsigned int tickUpdate = tickCount - lastTickCount;
+        lastTickCount = tickCount;
+        tick64 += tickUpdate;
+        int milliseconds = tick64 % 1000;
+        time.microseconds = milliseconds * 1000;
+        time.seconds = (tick64 - milliseconds)/1000;
+#endif
     }
 
     time.Normalize();
@@ -208,7 +241,7 @@ void usleep(int x)
 #else
 
 // if possible, use clock_gettime()
-#if HAVE_LIBRT && HAVE_TIME_H 
+#if HAVE_LIBRT && HAVE_TIME_H
 #ifdef CLOCK_MONOTONIC
 #define USE_CLOCK_GETTIME
 // for testing, z-man on Lucid doesn't have _RAW defined yet
@@ -231,7 +264,7 @@ void GetTime( tTime & time )
     {
         success = true;
         st_timerIsStrictlyMonotonic = true;
-    } 
+    }
     else
 #endif
     {
@@ -418,7 +451,7 @@ void tAdvanceFrame( int usecdelay )
         static tTime oldRelative = timeRelative;
         tTime timeStep = timeRelative - oldRelative;
         oldRelative = timeRelative;
-        
+
         // detect unusually large timesteps
         static REAL bigStep = 10;
         bigStep *= .99;

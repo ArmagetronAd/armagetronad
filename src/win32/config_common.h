@@ -35,6 +35,10 @@
 #define WIN32
 #endif
 
+// uncomment this line to compile a version that TRIES to be compatible
+// with Windows 9X. No guarantees.
+// #define SUPPORT_WIN9X
+
 // defines for data directories in Windows
 #ifndef DEBUG
 #define USER_DATA_DIR  "${APPDATA}/Armagetron"
