@@ -57,6 +57,7 @@ eTimer::eTimer():nNetObject(), startTimeSmoothedOffset_(0){
     smoothedSystemTime_ = tSysTimeFloat();
 
     badSyncs_ = 0;
+    drifting_ = false;
 
     speed = 1.0;
 
@@ -85,6 +86,7 @@ eTimer::eTimer( Engine::TimerSync const & sync, nSenderInfo const & sender )
 
     // start assuming bad syncs
     badSyncs_ = 10;
+    drifting_ = false;
 
     speed = 1.0;
 
@@ -105,8 +107,8 @@ eTimer::eTimer( Engine::TimerSync const & sync, nSenderInfo const & sender )
     remoteStartTimeSent_ = sync.has_start_time();
     remoteStartTime_ = lastRemoteStartTime_ = sync.start_time();
     
-    // assume strongly the clocks are in sync
-    startTimeDrift_.Add( 0, 100 );
+    // assume the clocks are in sync, speed wise
+    startTimeDrift_.Add( 0, .001 );
 }
 
 eTimer::~eTimer(){
@@ -235,20 +237,32 @@ void eTimer::ProcessSync()
         remoteStartTimeOffset = smoothedSystemTime_ - startTime_ - remote_currentTime;
 
         // calculate drift
-        if( checkDrift && !remoteStartTimeSent_ )
+        if( checkDrift )
         {
             REAL timeDifference = remote_currentTime - lastRemoteTime_;
             REAL drift = lastStartTime_ - remoteStartTimeOffset;
 
-            if ( timeDifference > 0 && timeDifference < 3 )
+            if ( timeDifference > 0 && timeDifference < 3 && fabs(drift) < 1 && remote_currentTime > 3 )
             {
-                REAL driftAverage = startTimeDrift_.GetAverage();
+                REAL driftAverage = Drift();
                 // con << "Drift: " << driftAverage << "\n";
                 REAL driftDifference = drift/timeDifference;
-                
+                // the drift difference so far is how the remote timer drifts relative to this;
+                // we need to "invert" this to get the correct compensation drift.
+                driftDifference = 1/(1-driftDifference)-1;
+
                 timeDifference = timeDifference > 1 ? 1 : timeDifference;
-                startTimeDrift_.Timestep( timeDifference * .1 );
+                startTimeDrift_.Timestep( timeDifference * .01 );
                 startTimeDrift_.Add( driftDifference + driftAverage, timeDifference );
+
+                driftAverage = startTimeDrift_.GetAverage();
+                if( !drifting_ && startTimeDrift_.GetWeight() > 20 && fabs(driftAverage) > .001 && fabs(driftAverage)*(smoothedSystemTime_ - creationSystemTime_-10) > 0.3 )
+                {
+                    drifting_ = true;
+#ifdef DEBUG
+                    con << "Timer drift of " << driftAverage*100 << "% detected. Compensating.\n";
+#endif
+                }
             }
         }
 
@@ -275,7 +289,7 @@ void eTimer::ProcessSync()
         con << "T=" << smoothedSystemTime_ << " " << lastRemoteTime_ << ", Q= " << remoteTimeNonQuality << ", P= " << ping << " +/- " << sqrt(pingVariance) << " Time offset: " << remoteStartTimeOffset << " : " << startTimeOffset_.GetAverage() << "\n";
 
         std::ofstream plot("timesync.txt",std::ios_base::app);
-        plot << smoothedSystemTime_ << " " << remoteStartTimeOffset << " " << startTimeOffset_.GetAverage() << "\n";
+        plot << smoothedSystemTime_ << " " << remoteStartTimeOffset << " " << startTimeOffset_.GetAverage() << " " << startTimeDrift_.GetAverage() << "\n";
     }
 #endif
 
@@ -320,11 +334,24 @@ void eTimer::ProcessSync()
     {
         toleranceFactor = 3;
     }
-    if ( fabs( delay ) > ( spf + ping*.2 + sqrt(pingVariance)*2 )*toleranceFactor )
+    REAL delayTolerance = ( spf + ping*.2 + sqrt(pingVariance)*2 )*toleranceFactor; 
+    if ( fabs( delay ) > delayTolerance )
     {
-        if( badSyncs_ < 100 )
+        // really bad syncs count multiple times
+        int weight = sqrt(fabs(delay)/delayTolerance);
+        if( weight > 10 )
         {
-            badSyncs_++;
+            weight = 10;
+        }
+        badSyncs_ += weight;
+
+        // clamp
+        if( badSyncs_ > 100 )
+        {
+            badSyncs_ = 100;
+        }
+        else
+        {
 #ifdef DEBUG_X
             con << "bs " << badSyncs_ << "\n";
 #endif
@@ -457,23 +484,16 @@ void eTimer::SyncTime(){
     qualityTester_  .Timestep( timeStep * .2 );
 
     // if we're not running at default speed, update the virtual start time
-    startTimeExtrapolated_ += ( 1.0 - speed - startTimeDrift_.GetAverage() ) * timeStep;
+    startTimeExtrapolated_ += ( 1.0 - speed - Drift() ) * timeStep;
     if ( sn_GetNetState() != nCLIENT || !remoteStartTimeSent_ )
     {
         startTime_ = startTimeExtrapolated_;
     }
-    else if ( sn_GetNetState() == nCLIENT )
+    else
     {
-        // we need to take the drift into account; we do so by just trying to 
-        // gently push the received and calculated remote time offset to 0.
-        static REAL driftCompensationTime = 30.0;
-        if( smoothedSystemTime_ - creationSystemTime_ > driftCompensationTime*.99 )
-        {
-            REAL drift = timeStep*lastStartTime_/driftCompensationTime;
-            startTime_ += drift;
-            startTimeExtrapolated_ += drift;
-            // startTime_ -= startTimeDrift_.GetAverage() * timeStep;
-        }
+        // we need to take the drift into account (but just the drift, the speed drift is
+        // going to get compensated by syncs)
+        startTime_ -= Drift() * timeStep;
     }
 
     // smooth time offset
@@ -580,6 +600,11 @@ void eTimer::UpdateIsSynced()
         creationSystemTime_ = smoothedSystemTime_ - 11;
         synced_ = true;
     }
+}
+
+REAL eTimer::Drift() const
+{
+    return drifting_ ? startTimeDrift_.GetAverage() : 0;
 }
 
 void eTimer::pause(bool p){
