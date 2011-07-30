@@ -164,7 +164,7 @@ void eTimer::ReadSync( Engine::TimerSync const & sync, nSenderInfo const & sende
 
 static REAL se_cullDelayEnd=3.0;        // end of extra delay cull
 static REAL se_cullDelayPerSecond=3.0;  // delay cull drop per second
-static REAL se_cullDelayMin=10.0;       // plateau of delay cull after extra 
+static REAL se_cullDelayMin=3.0;        // plateau of delay cull after extra 
 
 static tSettingItem< REAL > se_cullDelayEndConf( "CULL_DELAY_END", se_cullDelayEnd );
 static tSettingItem< REAL > se_cullDelayPerSecondConf( "CULL_DELAY_PER_SECOND", se_cullDelayPerSecond );
