@@ -63,6 +63,8 @@ public:
 
 private:
     void UpdateIsSynced(); //!< updates the synced flag
+
+    REAL Drift() const;    //!< returns the drift
 private:
     bool synced_;                       //!< set to true when the client timer is synced up
     double creationSystemTime_;         //!< the rough system time this timer was created at
@@ -71,6 +73,7 @@ private:
     double startTimeExtrapolated_;      //!< when was the last game started (local extrapolation)?
     nAverager startTimeOffset_;         //!< the smoothed average of this averager is added to the start time on the client
     nAverager  startTimeDrift_;         //!< drift of effective start time
+    bool drifting_;                     //!< set if drifting was detected, never unset
     REAL startTimeSmoothedOffset_;      //!< the smoothed average of startTimeOffset_
     nAverager qualityTester_;           //!< averager that tells us about the quality of the sync messages
 
