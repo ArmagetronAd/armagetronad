@@ -249,6 +249,34 @@ void usleep(int x)
 #endif
 #endif
 
+#ifdef MACOSX
+//#include <CoreServices/CoreServices.h>
+#include <mach/mach.h>
+#include <mach/mach_time.h>
+#include <unistd.h>
+
+void GetTime( tTime & time )
+{
+	// get the absolute time
+	uint64_t machTime = mach_absolute_time();
+	static uint64_t start = machTime;
+	machTime -= start;
+	static double machTimeToMicroseconds;
+	if ( 0 == machTime )
+	{
+		static mach_timebase_info_data_t    timebaseInfo;
+		(void) mach_timebase_info(&timebaseInfo);
+		machTimeToMicroseconds = timebaseInfo.numer*1E-3/timebaseInfo.denom;
+	}
+	
+	// convert to microseconds, carefully avoiding overflows and rounding trouble
+	uint64_t microseconds = machTime*machTimeToMicroseconds;
+	time.microseconds = microseconds % 1000000;
+	time.seconds = (microseconds - time.microseconds)/1000000;
+}
+
+#else // macosx
+
 #include <sys/time.h>
 
 void GetTime( tTime & time )
@@ -294,14 +322,14 @@ void GetTime( tTime & time )
 
     time.Normalize();
 }
+#endif // macosx
 
 //! returns true if a timer with more than millisecond accuracy is available
 bool tTimerIsAccurate()
 {
     return true; // always on unix
 }
-
-#endif
+#endif // windows
 
 static char const * recordingSection = "T";
 
