@@ -42,7 +42,7 @@ namespace Tools { class Direction; class Position; }
 class tCoord{
 public:
     REAL x,y; //!< the stored coordinates
-    explicit tCoord(REAL X=0,REAL Y=0):x(X),y(Y){}; //!< Default constructor
+    explicit tCoord(REAL X=0,REAL Y=0):x(X),y(Y){} //!< Default constructor
 
     // Calculations:
     inline bool operator==(const tCoord &a) const; //!< Are the two coordinates close enough to each other to be considered equeal?

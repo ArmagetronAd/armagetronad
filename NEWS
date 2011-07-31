@@ -10,6 +10,11 @@ Changes since 0.3.1
   is displayed.
 - New console commands OP and DEOP replicate the functionnality of chat commands /op and /deop
 - New vote: /callvote referee <player>: Elevates <player> to access level 6. /callvote demotereferee reverts.
+- Config and map rotation can be manually reset with the command
+  “RESET_ROTATION”. Rotation can automatically be reset when a START_NEW_MATCH
+  command is issued by enabling “RESET_ROTATION_ON_START_NEW_MATCH”.
+- New admin command: "SCRAMBLE". Scrambles/randomises which players are in which team.
+- New vote: /callvote scramble: Executes the SCRAMBLE command.
 
 Changes since 0.3.0
 ===================
@@ -109,7 +114,29 @@ Changes since 0.2.8.3.x:
 - Tutorial tooltips for the most important keybindings.
 - ADD_MASTER_SERVER command to announce a server to a new master server.
   Simplifies the process to list your server on a subculture.
-- Player positions logged to ladderlog with POSITIONS event.
+- Team launch positions logged to ladderlog with POSITIONS event. Disabled by
+  default.
+- New command-line option "--input" added to poll for input from a file
+  instead of stdin.
+- Added WHITELIST_ENEMIES_[IP/USERNAME] to allow players to be enemies, even
+  if they come from the same IP address and ALLOW_ENEMIES_SAME_IP is
+  disabled (which is its default setting).
+- GAME_END, NEW_MATCH, and NEW_ROUND ladderlog events include date and time.
+- Added ENCODING ladderlog event, which specifies the encoding for data in
+  ladderlog.txt.
+
+Changes since 0.2.8.3.1:
+- security fix: old style action commands from clients no loger cause hangs and crashes
+- security fix: oversized packets are ignored properly
+- security fix: never read one byte outside of the received buffer
+- compiler compatibility: adapted to gcc 4.60
+
+Changes since 0.2.8.3:
+- fixed temporary sound disappearance when alt-tabbing away and back
+- default subcultures are now distributed
+- enable 32 bit color depth at desktop resolution
+- no more display lists for SiS cards
+- spelling mistakes and missing German translations
 
 Changes since 0.2.8.3_rc4:
 ==========================

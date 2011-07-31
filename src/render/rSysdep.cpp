@@ -1437,17 +1437,16 @@ void rSysDep::SwapGL(){
     // SDL_mutexV(  sr_netLock );
     // sr_LockSDL();
 
-    // actiate motion blur (does not use the game state, so it's OK to call here )
-    bool shouldSwap = sr_MotionBlur( time, blurTarget );
-
-    sr_SwapTime().Finish( shouldSwap );
-
     if (sr_screenshotIsPlanned){
         make_screenshot();
         sr_screenshotIsPlanned=false;
     }
     else if (s_videoout)
         make_screenshot();
+    
+    // actiate motion blur (does not use the game state, so it's OK to call here )
+    bool shouldSwap = sr_MotionBlur( time, blurTarget );
+    sr_SwapTime().Finish( shouldSwap );
 
     // sr_UnlockSDL();
     // lock mutex again

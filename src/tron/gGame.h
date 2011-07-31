@@ -181,6 +181,7 @@ public:
     int limitTime;   // match time limit
     int limitRounds; // match round limit
     int limitScore;  // match score limit
+    int maxBlowout;  // max score advance
 
     int numAIs;      // number of AI players
     int minPlayers;  // minimum number of players
@@ -212,7 +213,7 @@ public:
     REAL		explosionRadius;	// the radius of the holes blewn in by an explosion
 
     gGameSettings(int a_scoreWin,
-                  int a_limitTime, int a_limitRounds, int a_limitScore,
+                  int a_limitTime, int a_limitRounds, int a_limitScore, int a_maxBlowout,
                   int a_numAIs,    int a_minPlayers,  int a_AI_IQ,
                   bool a_autoNum, bool a_autoIQ,
                   int a_speedFactor, int a_sizeFactor,

@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tConfiguration.h"
 #include "tException.h"
 #include <ctype.h>
+#include <time.h>
 #include <string>
 #include <iostream>
 #include "utf8.h"
@@ -1540,7 +1541,7 @@ tString tColoredString::RemoveColors( const char * c, bool darkonly )
     tString ret;
     int len = strlen(c);
     bool removed = false;
-    
+
     // walk through string
     while (*c!='\0'){
         // skip color codes
@@ -1555,7 +1556,7 @@ tString tColoredString::RemoveColors( const char * c, bool darkonly )
                     removed = true;
 
                 c   += 8;
-                len -= 8;	
+                len -= 8;
             }
             else if( len >= 8 )
             {
@@ -2433,7 +2434,7 @@ void tCharacterFilter::SetMap( wchar_t in1, wchar_t in2, wchar_t out)
     {
         filter[ i ] = '_';
     }
-    
+
     tASSERT( in1 <= in2 );
     for( wchar_t i = in2; i >= in1; --i )
         filter[ i ] = out;

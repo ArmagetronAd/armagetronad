@@ -411,7 +411,7 @@ class Sensor: public gSensor
                     // don't see new walls
                     if ( hitTime_ > hitOwner_->LastTime() - sg_chatBotNewWallBlindness && hitOwner_ != owned )
                     {
-                        ehit = false;
+                        ehit = NULL;
                         hit = 1E+40;
                         return false;
                     }
@@ -5338,7 +5338,7 @@ void gCycle::SyncFromExtrapolator()
     if ( correctPosSmooth.NormSquared() > .1f )
     {
         std::cout << "Lag slide! " << correctPosSmooth << "\n";
-        resimulate_ = true;
+//        resimulate_ = true;
     }
 #endif
 

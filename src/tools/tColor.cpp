@@ -147,14 +147,11 @@ tColor::tColor( const wchar_t * c )
 
 void tColor::FillFrom( const char * c )
 {
-    // check whether the passed string is too short
-    for( int i = 0; i < 8; ++i )
+    // Verify it's a valid color code
+    if( !VerifyColorCode( c ) )
     {
-        if( !c[i] )
-        {
-            r_ = g_ = b_ = 0;
-            return;
-        }
+        r_ = g_ = b_ = 0;
+        return;
     }
 
     r_ = CTR( hex_to_int( c[2] ) *16 + hex_to_int( c[3] ) );
@@ -174,14 +171,11 @@ void tColor::FillFrom( const char * c )
 
 void tColor::FillFrom( const wchar_t * c )
 {
-    // check whether the passed string is too short
-    for( int i = 0; i < 8; ++i )
+    // Verify it's a valid color code
+    if( !VerifyColorCode( c ) )
     {
-        if( !c[i] )
-        {
-            r_ = g_ = b_ = 0;
-            return;
-        }
+        r_ = g_ = b_ = 0;
+        return;
     }
 
     r_ = CTR( hex_to_int( c[2] ) *16 + hex_to_int( c[3] ) );
@@ -221,6 +215,54 @@ void tColor::ReadSync( Tools::Color const & source )
     g_ = source.g();
     b_ = source.b();
     a_ = source.a();
+}
+
+// *******************************************************************************************
+// *
+// *	VerifyColorCode
+// *
+// *******************************************************************************************
+//!
+//!		@param	c	Color code string to read the color from
+//!
+// *******************************************************************************************
+
+bool tColor::VerifyColorCode( const char * c )
+{
+    for( int i = 2; i < 8; ++i )
+    {
+        if ( !c[i] ||
+             (!(c[i] >= '0' && c[i] <= '9') &&
+              !(c[i] >= 'A' && c[i] <= 'F') &&
+              !(c[i] >= 'a' && c[i] <= 'f')
+             )
+           ) return false;
+    }
+    return true;
+}
+
+// *******************************************************************************************
+// *
+// *	VerifyColorCode
+// *
+// *******************************************************************************************
+//!
+//!		@param	c	Color code string to read the color from
+//!
+// *******************************************************************************************
+
+bool tColor::VerifyColorCode( const wchar_t * c )
+{
+    for( int i = 2; i < 8; ++i )
+    {
+        if ( !c[i] ||
+             (!(c[i] >= '0' && c[i] <= '9') &&
+              !(c[i] >= 'A' && c[i] <= 'F') &&
+              !(c[i] >= 'a' && c[i] <= 'f')
+             )
+           ) return false;
+    }
+    return true;
 }
 
 // *******************************************************************************************

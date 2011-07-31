@@ -87,6 +87,7 @@ public:
     static bool IsRecording();                          //!< returns whether there is a recording running
     static bool IsPlayingBack();                        //!< returns whether there is a playback running
     static bool IsRunning();                            //!< returns whether recording or playback are running
+    static void StopRecording();                        //!< stops recording
 };
 
 //! simple interface to recording functionality

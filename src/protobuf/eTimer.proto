@@ -30,4 +30,8 @@ message TimerSync
     optional bool legacy_sync_end = 20001;
 
     // extensions go here
+
+    // the start time, mostly constant. On the server, the game time is the
+    // current system time minus the start time.
+    optional double start_time = 4; 
 }

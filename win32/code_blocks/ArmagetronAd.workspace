@@ -1,19 +1,18 @@
-<?xml version="1.0"?>
-<!DOCTYPE CodeBlocks_workspace_file>
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_workspace_file>
 	<Workspace title="Armagetron Advanced workspace">
-		<Project filename="..\..\..\winlibs\protobuf\vsprojects\libprotobuf.cbp"/>
-		<Project filename="ZThread.cbp"/>
-		<Project filename="Dedicated.cbp" active="1"/>
-		<Project filename="Master.cbp"/>
-		<Project filename="..\..\..\winlibs\win32\code_blocks\SDL.cbp"/>
-		<Project filename="..\..\..\winlibs\win32\code_blocks\SDL_image.cbp"/>
-		<Project filename="..\..\..\winlibs\win32\code_blocks\mikmod.cbp"/>
-		<Project filename="..\..\..\winlibs\win32\code_blocks\libogg.cbp"/>
-		<Project filename="..\..\..\winlibs\win32\code_blocks\libvorbis.cbp"/>
-		<Project filename="..\..\..\winlibs\win32\code_blocks\libvorbisfile.cbp"/>
-		<Project filename="..\..\..\winlibs\win32\code_blocks\FTGL.cbp"/>
-		<Project filename="..\..\..\winlibs\win32\code_blocks\SDL_mixer.cbp"/>
-		<Project filename="ArmagetronAd.cbp"/>
+		<Project filename="../../../winlibs/protobuf/vsprojects/libprotobuf.cbp" />
+		<Project filename="ZThread.cbp" />
+		<Project filename="Dedicated.cbp" />
+		<Project filename="Master.cbp" />
+		<Project filename="../../../winlibs/win32/code_blocks/SDL.cbp" />
+		<Project filename="../../../winlibs/win32/code_blocks/SDL_image.cbp" />
+		<Project filename="../../../winlibs/win32/code_blocks/mikmod.cbp" />
+		<Project filename="../../../winlibs/win32/code_blocks/libogg.cbp" />
+		<Project filename="../../../winlibs/win32/code_blocks/libvorbis.cbp" />
+		<Project filename="../../../winlibs/win32/code_blocks/libvorbisfile.cbp" />
+		<Project filename="../../../winlibs/win32/code_blocks/FTGL.cbp" />
+		<Project filename="../../../winlibs/win32/code_blocks/SDL_mixer.cbp" />
+		<Project filename="ArmagetronAd.cbp" active="1" />
 	</Workspace>
 </CodeBlocks_workspace_file>

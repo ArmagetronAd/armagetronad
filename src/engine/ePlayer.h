@@ -136,7 +136,7 @@ public:
 
     virtual bool Act(uAction *act,REAL x);
 
-    int ID() const {return id;};
+    int ID() const {return id;}
 #ifndef DEDICATED
     void Render();
 #endif
@@ -332,7 +332,7 @@ public:
     int  TeamListID() const { return teamListID; }		// return my position in the team
     void SetShuffleWish( int pos ); 	        //!< sets a desired team position
     eTeam* FindDefaultTeam();					// find a good default team for us
-    void SetDefaultTeam();						// register me in a good default team
+    void SetDefaultTeam( bool isScrambleCommand=false );    // register me in a good default team
     void SetTeamForce(eTeam* team );           	// register me in the given team without checks
     void SetTeam(eTeam* team);          		// register me in the given team (callable on the server)
     void SetTeamWish(eTeam* team); 				// express the wish to be part of the given team (always callable)
@@ -368,6 +368,9 @@ public:
     //! returns the descriptor responsible for this class
     virtual nNetObjectDescriptorBase const & DoGetDescriptor() const;
 public:
+
+    static bool Scramble;                   // Should we scramble the teams?
+    static std::vector<ePlayerNetID*> ScramblePlayerIDs; // List of all the players to be scrambled
 
     virtual void 			NewObject(){}        				// called when we control a new object
     virtual void 			RightBeforeDeath(int triesLeft){} 	// is called right before the vehicle gets destroyed.
@@ -448,6 +451,8 @@ public:
     static bool WaitToLeaveChat(); //!< waits for players to leave chat state. Returns true if the caller should wait to proceed with whatever he wants to do.
 
     static void RemoveChatbots(); //!< removes chatbots and idling players from the game
+    static void SetScramble(); //!< Scramble the teams the next round
+    static void ScrambleTeams(); //!< scramble the teams
 
     static void CompleteRebuild(); // same as above, but rebuilds every ePlayerNetID.
     static void ClearAll(); // deletes all ePlayerNetIDs.

@@ -102,6 +102,7 @@ cycle_rubber_timebased_help		Rubber usage is based on distance travelled if this
 cycle_rubber_speed_help             Logarithmic speed of wall approximation when rubber is in effect (every second, you get closer to the wall by a factor of ~0.4^{this value})
 cycle_rubber_mindistance_help		The minimal distance rubber code keeps you from the wall in front of you
 cycle_rubber_mindistance_gap_help		If > 0, CYCLE_RUBBER_MINDISTANCE effectively is never taken to be bigger than this value times the size of any detected gaps the cylce can squeeze through. For "Open" gameplay.
+cycle_rubber_mindistance_gap_backdoor_help If > 0, CYCLE_RUBBER_MINDISTANCE effectively is never taken to be bigger than this value times the size of any detected backdoor gaps the cylce can squeeze through. For "Open" gameplay. If = 0, CYCLE_RUBBER_MINDISTANCE_GAP applies to backdoors, too.
 cycle_rubber_mindistance_gap_side_help Gap detection only sees gaps that the cycle may reach in no less than this many seconds.
 cycle_rubber_mindistance_ratio_help	Additional distance to CYCLE_RUBBER_MINDISTANCE for every length unit of the wall you have in front of you
 cycle_rubber_mindistance_reservoir_help		Additional distance if you have an empty rubber meter (gets faded out gradually as you use up all your rubber)
@@ -187,6 +188,7 @@ sp_num_ais_help			Number of AI players in single player mode
 sp_limit_score_help		End the match when a player reaches this score in single player mode
 sp_limit_rounds_help		End the match after this number of rounds in single player mode
 sp_limit_time_help		End the match after this number of minutes in single player mode
+sp_limit_advance_help   End the match in single player mode when the first team in score is this number of points ahead of the second team
 
 spawn_wingmen_back_help     Determines how much each wingman is placed backwards in a team.
 spawn_wingmen_side_help     Determines how much each wingman is placed sidewards in a team.
@@ -215,6 +217,7 @@ num_ais_help			Number of AI players
 limit_score_help		End the match when a player reaches this score	 
 limit_rounds_help		End the match after this number of rounds
 limit_time_help			End the match after this number of minutes 
+limit_advance_help      End the match when the first team in score is this number of points ahead of the second team
 
 auto_team_help          Flag indicating whether players should be put into teams automatically.
 no_spectators_allowed	Sorry, does not work with automatic team assignment.\n
@@ -396,6 +399,11 @@ ping_flood_time_20_help             Minimum time for 20 ping packets from one ma
 ping_flood_time_50_help             Minimum time for 50 ping packets from one machine to arrive.
 ping_flood_time_100_help            Minimum time for 100 ping packets from one machine to arrive.
 ping_flood_global_help              The times PING_FLOOD_TIME_X, multiplied by this value, count for all pings from all machines. Negative values disable global flood protection.
+connection_flood_sensitivity_help   The times PING_FLOOD_TIME_X, multiplied by this value, count for all incoming messages from clients not connected already. A flood here activates turtle mode. Negative values disable global flood protection.
+connection_limit_help               Maximum number of packets from unknown peers to handle at one 
+anti_spoof_help                     If set to 1, checks connecting clients for spoofed IPs. Only clients passing a connectivity test are allowed in. This is done in turtle mode automatically, but may be useful to have on at all times.
+turtle_mode_activated               Server is under heavy load. Turtle mode activated. Communication with new clients is on a budget.\n
+turtle_mode_deactivated             The high load seems to have normalized for now. Turtle mode deactivated.\n
 
 shuffle_spam_messages_per_round_help Per round, per player limit on the number of shuffle messages displayed. A negative or zero value disables this check.
 spam_protection_repeat_help         Minimum time between identical chat messages.
@@ -440,6 +448,9 @@ default_shout_player_help    1 if the default chat action for players should be 
 
 allow_enemies_same_ip_help         If set to 1, this allows two players that apparently come from the same machine to fight for points with each other.
 allow_enemies_same_client_help     If set to 1, this allows two players that play on the same client to fight for points with each other.
+whitelist_enemies_username_help    Allow players from the same IP address to be enemies if one of them is authenticated, and in this list. WHITELIST_ENEMIES_USERNAME <authenticated name1> <authenticated name2> ...
+whitelist_enemies_ip_help          Allow any players from the specified IP address to be enemies. Usage: WHITELIST_ENEMIES_IP <ip1> ...
+whitelist_enemies_success          Added \1 entries to the whitelist.
 
 allow_control_during_chat_help     If set to 1, this allows a player to issue cycle and camera control commands during chat (losing the chatbot and the yellow chat pyramid).
 
@@ -562,6 +573,7 @@ recording_debuglevel_help		    Level of additional information in recording file
 fast_forward_maxstep_help           Maximum recording time between rendered frames in fast forward mode
 fast_forward_maxstep_real_help      Maximum real time between rendered frames in fast forward mode
 fast_forward_maxstep_rel_help       Maximum fraction of the time left until the end of FF mode between rendered frames
+stop_recording_help                 Stops a currently running recording to save resources. Resuming is impossible.
 
 #********************************************
 #********************************************
@@ -620,6 +632,13 @@ camera_glance_rise_help		Position of the glance camera: how much is it moved up 
 camera_glance_back_fromspeed_help		This value is multiplied with the current speed and added to CAMERA_GLANCE_BACK.
 camera_glance_rise_fromspeed_help		This value is multiplied with the current speed and added to CAMERA_GLANCE_RISE.
 camera_glance_pitch_help	Position of the glance camera: how much does it look up/down?
+
+camera_glance_mode_help           Way the camera switches into glances. Valid settings range from 0 to 3 
+camera_glance_stacking_help       If this is set, glances stack, glance directions are relative to the current view then.
+camera_glance_return_help         If you release all glance keys and this is set, the order to glance forward directly into the direction you're driving in is issued. This can return the view back to normal faster than if you leave it up to the default camera code.
+camera_glance_return_stop_help    Cosine of the angle between driving direction and glance direction the return glance command is aborted at and control is returned to the normal (non-smart) camera.
+camera_glance_return_stop_smart_help When the smart camera is used: cosine of the angle between driving direction and glance direction the return glance command is aborted at and control is returned to the normal camera.
+camera_glance_snap_help          If the cosine between the desired and current glance direction is smaller than this, the glance snaps directly to the desired target, irrespective of CAMERA_GLANCE_MODE.
 
 camera_server_glance_back_help		Position of the server glance camera: how much is it moved back from the cycle?
 camera_server_glance_rise_help		Position of the server glance camera: how much is it moved up from the cycle?
@@ -795,11 +814,12 @@ ladderlog_write_chat_help                     Write to ladderlog: CHAT <chatter>
 ladderlog_write_death_frag_help               Write to ladderlog: DEATH_FRAG <prey> <predator>
 ladderlog_write_death_suicide_help            Write to ladderlog: DEATH_SUICIDE <player>
 ladderlog_write_death_teamkill_help           Write to ladderlog: DEATH_TEAMKILL <prey> <predator>
-ladderlog_write_game_end_help                 Write to ladderlog: GAME_END
+ladderlog_write_encoding_help                 Write to ladderlog: ENCODING <charset>. Specifies the encoding for data in ladderlog.txt.
+ladderlog_write_game_end_help                 Write to ladderlog: GAME_END <date and time>
 ladderlog_write_game_time_help                Write to ladderlog: GAME_TIME <time> (see also: GAME_TIME_INTERVAL)
 ladderlog_write_match_winner_help             Write to ladderlog: MATCH_WINNER <team> <players>
-ladderlog_write_new_match_help                Write to ladderlog: NEW_MATCH
-ladderlog_write_new_round_help                Write to ladderlog: NEW_ROUND
+ladderlog_write_new_match_help                Write to ladderlog: NEW_MATCH <date and time>
+ladderlog_write_new_round_help                Write to ladderlog: NEW_ROUND <date and time>
 ladderlog_write_num_humans_help               Write to ladderlog: NUM_HUMANS <number of humans>
 ladderlog_write_online_player_help            Write to ladderlog: ONLINE_PLAYER <name> [<ping> [<team>]]
 ladderlog_write_player_entered_help           Write to ladderlog: PLAYER_ENTERED <name> <IP> <screen name>
@@ -921,6 +941,13 @@ viewport_belongs_help		Assign this viewport to a player
 #
 #********************************************
 #********************************************
+
+rotation_type_help                      Determines when map and config rotation should occur. Possible values: (0) Do not do any rotation, (1) Rotate every round (2) Rotate every match
+map_rotation_help                       A list of map files to rotate through, with values separated by semicolons
+config_rotation_help                    A list of config files to rotate through, with values separated by semicolons
+reset_rotation_help                     Resets map and config rotation
+reset_rotation_on_start_new_match_help  If enabled, map and config rotation will be reset when a START_NEW_MATCH command is issued
+reset_rotation_message                  Map and config rotation have been reset.
 
 word_delimiters_help    Characters that count as word delimiters when skipping over words in a text input field.
 
@@ -1269,6 +1296,15 @@ input_music_volume_down_help Decreases the volume of the music
 #********************************************
 #********************************************
 
+#********************************************
+#********************************************
+#
+#             console
+#
+#********************************************
+#********************************************
+
+console_repetition          (\1 times)\n
 
 #********************************************
 #********************************************
@@ -1733,6 +1769,9 @@ vote_include_message				Including file \1. Only users of access level \2 or high
 vote_command_details_text			If accepted, the console command "\1" will be executed on the server.
 vote_command_text					Command \1
 vote_command_message				Executing command "\1".\n
+
+vote_scramble_details                           If accepted, all players will be removed from their team and assigned a new one randomly.
+vote_scramble_text                              Scramble the teams
 
 #*************************************
 #*************************************
@@ -2426,6 +2465,9 @@ gamestate_newround_goldengoal	Go (extra round; whoever gains the lead wins)!\n
 gamestate_newround_log		New Round\n
 gamestate_chat_wait         Waiting up to \2 seconds for \1 to finish chatting.\n
 
+gamestate_scramble_teams        Resetting the scores and scrambling the teams after this round.\n
+gamestate_scramble_teams_center Scrambling the teams...\n
+
 gamestate_wait_players		Waiting for real players...\n
 gamestate_wait_players_con	Waiting for real players (only spectators online)...\n
 
@@ -2440,6 +2482,7 @@ gamestate_champ_center		Match Winner: \1
 gamestate_champ_console		Overall Winner: \1 
 gamestate_champ_scorehit	with \1 points.\n
 gamestate_champ_timehit		after the timelimit of \1 minutes was hit.\n
+gamestate_champ_blowout     after getting a \1-point advantage.\n
 gamestate_champ_default		after \1 rounds.\n
 gamestate_champ_finalscores	Final Scores:\n
 
@@ -2470,6 +2513,8 @@ player_base_enemy_respawn	\1 was respawned by their enemy \2.\n
 
 player_no_longer_suspended  \1 0x77ff77is allowed to play again.\n
 player_suspended            \1 0xff7777is banned to spectator mode for \2 round(s).\n
+
+scramble_teams_too_small     The teams are too small to scramble them.\n
 
 zone_collapse_harmless      \1's zone collapses harmlessly for lack of enemy contacts.\n
 
@@ -2706,7 +2751,7 @@ network_error			Network error.\n
 network_error_timeout		User \1 timed out.\n
 network_error_shortmessage	User \1's message was too short.\n
 network_error_overflow		User \1 is unable to keep up with the network traffic.\n
-network_killuser		Killing user \1, ping \2.\n
+network_killuser		Killing user \1, ping \2, IP \3: \4\n
 network_statistics1		Time:     \1 seconds\n
 network_statistics2		Sent:     \2 bytes in \3 packets (\4 bytes/s)\n
 network_statistics3		Received: \5 bytes in \6 packets (\7 bytes/s)\n
@@ -2739,10 +2784,11 @@ network_login_done		Done!\n
 network_kill_log            User \1 kicked, reason given to him: \2\n
 network_redirect            \n\nYou will now be redirected to the server \1:\2. You can prevent that by pressing ESC.\n
 network_kill_preface		Reason given by server:
-network_kill_maxidgrabber	It ran out of IDs; your client was the one occupying most of them for himself. The reason for this can be a bug.
+network_kill_maxidgrabber	It ran out of IDs; your client was the one occupying most of them for itself. The reason for this can be a bug.
 network_kill_maxiduser		It ran out of IDs; your client was the one occupying most of them.
 network_kill_cheater		It assumed you are cheating. If that is untrue, it is a bug you should report.
 network_kill_error			An error occurred while processing messages from your client. This usually indicates a client or server bug.
+network_kill_servercomplete	Server list transfer complete.
 network_kill_timeout		You timed out.
 network_kill_logout			You logged out regularly.
 network_kill_incompatible	You are running a version incompatible with the server.

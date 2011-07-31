@@ -177,6 +177,11 @@ public:
             current_ = 0;
         }
     }
+
+    void Reset()
+    {
+        current_ = 0;
+    }
 private:
     virtual void ReadVal( std::istream &is )
     {
@@ -231,21 +236,29 @@ tCONFIG_ENUM( gRotationType );
 static gRotationType rotationtype = gROTATION_NEVER;
 static tSettingItem<gRotationType> conf_rotationtype("ROTATION_TYPE",rotationtype);
 
-// bool globalingame=false;
-tString sg_GetCurrentTime( char const * szFormat )
+void sg_ResetRotation()
 {
-    char szTemp[128];
-    time_t     now;
-    struct tm *pTime;
-    now = time(NULL);
-    pTime = localtime(&now);
-    strftime(szTemp,sizeof(szTemp),szFormat,pTime);
-    return tString(szTemp);
+    sg_mapRotation.Reset();
+    sg_configRotation.Reset();
+    if ( rotationtype != gROTATION_NEVER )
+        con << tOutput( "$reset_rotation_message" ) << '\n';
 }
+
+void sg_ResetRotation( std::istream & )
+{
+    sg_ResetRotation();
+}
+
+static tConfItemFunc sg_resetRotationConfItemFunc( "RESET_ROTATION", sg_ResetRotation );
+
+static bool sg_resetRotationOnNewMatch = false;
+static tSettingItem< bool > sg_resetRotationOnNewMatchSettingItem( "RESET_ROTATION_ON_START_NEW_MATCH", sg_resetRotationOnNewMatch );
+
+// bool globalingame=false;
 
 void sg_PrintCurrentTime( char const * szFormat )
 {
-    con << sg_GetCurrentTime(szFormat);
+    con << st_GetCurrentTime(szFormat);
 }
 
 void sg_PrintCurrentDate()
@@ -290,7 +303,7 @@ static tSettingItem<float> sggti("LADDERLOG_GAME_TIME_INTERVAL",
 #define AUTO_AI_LOSE    1
 
 gGameSettings::gGameSettings(int a_scoreWin,
-                             int a_limitTime, int a_limitRounds, int a_limitScore,
+                             int a_limitTime, int a_limitRounds, int a_limitScore, int a_maxBlowout,
                              int a_numAIs,    int a_minPlayers,  int a_AI_IQ,
                              bool a_autoNum, bool a_autoIQ,
                              int a_speedFactor, int a_sizeFactor,
@@ -299,7 +312,7 @@ gGameSettings::gGameSettings(int a_scoreWin,
                              REAL a_winZoneMinRoundTime, REAL a_winZoneMinLastDeath
                             )
         :scoreWin(a_scoreWin),
-        limitTime(a_limitTime), limitRounds(a_limitRounds), limitScore(a_limitScore),
+        limitTime(a_limitTime), limitRounds(a_limitRounds), limitScore(a_limitScore), maxBlowout(a_maxBlowout),
         numAIs(a_numAIs),       minPlayers(a_minPlayers),   AI_IQ(a_AI_IQ),
         autoNum(a_autoNum),     autoIQ(a_autoIQ),
         speedFactor(a_speedFactor), sizeFactor(a_sizeFactor),
@@ -617,7 +630,7 @@ void gGameSettings::Menu()
 }
 
 gGameSettings singlePlayer(10,
-                           30, 10, 100000,
+                           30, 10, 100000, 100000,
                            1,   0, 30,
                            true, true,
                            0  ,  -3,
@@ -625,7 +638,7 @@ gGameSettings singlePlayer(10,
                            100000, 1000000);
 
 gGameSettings multiPlayer(10,
-                          30, 10, 100,
+                          30, 10, 100, 100000,
                           0,   4, 100,
                           false, false,
                           0  ,  -3,
@@ -640,6 +653,7 @@ static tSettingItem<int> mp_sw("SCORE_WIN"   ,multiPlayer.scoreWin);
 static tSettingItem<int> mp_lt("LIMIT_TIME"  ,multiPlayer.limitTime);
 static tSettingItem<int> mp_lr("LIMIT_ROUNDS",multiPlayer.limitRounds);
 static tSettingItem<int> mp_ls("LIMIT_SCORE" ,multiPlayer.limitScore);
+static tSettingItem<int> mp_mb("LIMIT_ADVANCE" ,multiPlayer.maxBlowout);
 
 static tConfItem<int>    mp_na("NUM_AIS"     ,multiPlayer.numAIs);
 static tConfItem<int>    mp_mp("MIN_PLAYERS" ,multiPlayer.minPlayers);
@@ -673,6 +687,7 @@ static tSettingItem<int> sp_sw("SP_SCORE_WIN"   ,singlePlayer.scoreWin);
 static tSettingItem<int> sp_lt("SP_LIMIT_TIME"  ,singlePlayer.limitTime);
 static tSettingItem<int> sp_lr("SP_LIMIT_ROUNDS",singlePlayer.limitRounds);
 static tSettingItem<int> sp_ls("SP_LIMIT_SCORE" ,singlePlayer.limitScore);
+static tSettingItem<int> sp_mb("SP_LIMIT_ADVANCE" ,singlePlayer.maxBlowout);
 
 static tConfItem<int>    sp_na("SP_NUM_AIS"     ,singlePlayer.numAIs);
 static tConfItem<int>    sp_mp("SP_MIN_PLAYERS" ,singlePlayer.minPlayers);
@@ -1488,6 +1503,7 @@ static void own_game( nNetState enter_state ){
     ePlayerNetID::LogScoreDifferences();
     ePlayerNetID::UpdateSuspensions();
     ePlayerNetID::UpdateShuffleSpamTesters();
+    sg_gameEndWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
     sg_gameEndWriter.write();
     se_sendEventNotification(tString("Game end"), tString("The Game has ended"));
 
@@ -2061,10 +2077,19 @@ static void StartNewMatch(){
 }
 
 static void StartNewMatch_conf(std::istream &){
+    if ( sg_resetRotationOnNewMatch )
+        sg_ResetRotation();
     StartNewMatch();
 }
 
+static void Scramble_conf(std::istream &){
+    if (sg_currentGame) {
+        ePlayerNetID::SetScramble();
+    }
+}
+
 static tConfItemFunc snm("START_NEW_MATCH",&StartNewMatch_conf);
+static tConfItemFunc scr("SCRAMBLE",&Scramble_conf);
 
 #ifdef DEDICATED
 static void Quit_conf(std::istream &){
@@ -2782,6 +2807,10 @@ void gGame::StateUpdate(){
             {
                 update_settings( &goon );
                 ePlayerNetID::RemoveChatbots();
+                if (ePlayerNetID::Scramble) {
+                    StartNewMatch();
+                    ePlayerNetID::ScrambleTeams();
+                }
             }
 
             rViewport::Update(MAX_PLAYERS);
@@ -2792,10 +2821,13 @@ void gGame::StateUpdate(){
             ePlayerNetID::UpdateShuffleSpamTesters();
             
             se_sendEventNotification(tString("New Round"), tString("Starting a new round"));
-
+            sg_newRoundWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
             sg_newRoundWriter.write();
             if ( rounds < 0 )
+            {
+                sg_newMatchWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
                 sg_newMatchWriter.write();
+            }
 
             // kick spectators
             nMachine::KickSpectators();
@@ -3685,7 +3717,8 @@ void gGame::Analysis(REAL time){
                 if (eTeam::teams(0)->Score() >= sg_currentSettings->limitScore ||		// the score limit must be hit
                         rounds + winnerExtraRound >= sg_currentSettings->limitRounds ||     // or the round limit
                         tSysTimeFloat()>=startTime+sg_currentSettings->limitTime*60 ||      // or the time limit
-                        (active <= 1 && eTeam::teams.Len() > 1)								// or all but one players must have disconnected.
+                        (active <= 1 && eTeam::teams.Len() > 1)	||							// or all but one players must have disconnected.
+                        ( sg_currentSettings->maxBlowout && eTeam::teams.Len() > 1 && eTeam::teams(0)->Score() >= eTeam::teams(1)->Score() + sg_currentSettings->maxBlowout) // or if a team gets a dramatically high advance.
                    )
                 {
                     bool declareChampion = true;
@@ -3739,6 +3772,11 @@ void gGame::Analysis(REAL time){
                             message.SetTemplateParameter(1, sg_currentSettings->limitTime);
                             message << "$gamestate_champ_timehit";
                         }
+                        else if ( sg_currentSettings->maxBlowout && eTeam::teams(0)->Score() >= eTeam::teams(1)->Score() + sg_currentSettings->maxBlowout )
+                        {
+                            message.SetTemplateParameter(1, eTeam::teams(0)->Score() - eTeam::teams(1)->Score());
+                            message << "$gamestate_champ_blowout";
+                        }
                         else
                         {
                             message.SetTemplateParameter(1, rounds + 1);
@@ -3749,7 +3787,7 @@ void gGame::Analysis(REAL time){
                         se_SaveToScoreFile("$gamestate_champ_finalscores");
                         se_SaveToScoreFile(eTeam::Ranking( -1, false ));
                         se_SaveToScoreFile(ePlayerNetID::Ranking( -1, false ));
-                        se_SaveToScoreFile(sg_GetCurrentTime( "Time: %Y/%m/%d %H:%M:%S\n" ));
+                        se_SaveToScoreFile(st_GetCurrentTime( "Time: %Y/%m/%d %H:%M:%S\n" ));
                         se_SaveToScoreFile("\n\n");
 
                         eTeam* winningTeam = eTeam::teams(0);
@@ -3867,6 +3905,7 @@ void gGame::StartNewMatch(){
 void gGame::StartNewMatchNow(){
     if ( rounds != 0 )
     {
+        sg_newMatchWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
         sg_newMatchWriter.write();
         se_sendEventNotification(tString("New match"), tString("Starting a new match"));
     }

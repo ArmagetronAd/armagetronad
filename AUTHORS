@@ -71,6 +71,9 @@ Jonathan
 Meriton
     Replacement for the old buggy Lag-O-Meter and new camera glancing code
 
+clime
+    Tweaks to that glancing code
+
 mygal
     French translation (part)
 
@@ -94,6 +97,9 @@ Tomas Birraux
 
 Tru
     Russian translation
+
+Vitty
+    Function to randomise teams (SCRAMBLE), and other titbits
 
 External code merged in from
 ============================

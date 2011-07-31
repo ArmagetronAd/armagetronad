@@ -518,6 +518,7 @@ tString expand_home(tString const & pathname) {
 class tPathConfig: public tPath
 {
 public:
+    tPathConfig() {}
 private:
     void Paths ( tArray< tString >& paths ) const
     {
@@ -548,6 +549,7 @@ static const tPathConfig st_Config;
 class tPathData: public tPath
 {
 public:
+    tPathData() {}
 private:
     void Paths ( tArray< tString >& paths ) const
     {
@@ -569,6 +571,7 @@ static const tPathData st_Data;
 class tPathMusic: public tPath
 {
 public:
+    tPathMusic() {}
 private:
     void Paths ( tArray< tString >& paths ) const
     {
@@ -607,6 +610,7 @@ const tPathWebroot& tDirectories::Webroot()
 class tPathVar: public tPath
 {
 public:
+    tPathVar() {}
 private:
     void Paths ( tArray< tString >& paths ) const
     {
@@ -633,6 +637,7 @@ static const tPathVar st_Var;
 class tPathScreenshot: public tPath
 {
 public:
+    tPathScreenshot() {}
 private:
     void Paths ( tArray< tString >& paths ) const
     {

@@ -440,7 +440,11 @@ int  nBandwidthTaskMessage::DoEstimateSize() const
 
 #ifdef DEBUG_X
 
-static nDescriptor testDescriptor( 399, NULL, NULL, "test" );
+static void test_handler( nMessage & m )
+{
+}
+
+static nDescriptor testDescriptor( 399, test_handler, "test" );
 //static nDescriptor testDescriptor( 399, NULL, NULL, "test" );
 
 #include "nNetObject.h"
@@ -449,7 +453,7 @@ class nTestObject: public nNetObject
 {
 public:
     nTestObject( nStreamMessage& m ): nNetObject( m ){}
-    nTestObject(){};
+    nTestObject(){}
     virtual nDescriptor& CreatorDescriptor() const;
     virtual bool AcceptClientSync() const{return true;}
 };

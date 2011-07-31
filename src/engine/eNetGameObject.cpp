@@ -196,8 +196,8 @@ void eNetGameObject::ReceiveControlNet( Network::NetObjectControl const & contro
         time=se_GameTime()+1;
 
     uActionPlayer *Act=uActionPlayer::Find(act_id);
-
-    ReceiveControl(time,Act,x);
+    if ( Act )
+        ReceiveControl(time,Act,x);
 }
 
 

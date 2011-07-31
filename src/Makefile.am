@@ -73,6 +73,7 @@ libtools_a_SOURCES = ${tools_extra} tools/tVersion.cpp tools/tVersion.h tTrueVer
 	tools/tXmlParser.h tools/tXmlParser.cpp\
 	defs.h\
 	thirdparty/binreloc/prefix.c thirdparty/binreloc/prefix.h\
+	thirdparty/utf8/utf8.h\
 	tools/values/vCore.cpp tools/values/vCore.h \
 	tools/values/vParser.ypp tools/values/vParser.h \
 	tools/values/vRegistry.cpp tools/values/vRegistry.h \

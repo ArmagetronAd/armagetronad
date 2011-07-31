@@ -41,12 +41,12 @@ echo -n "Performing test installation..."
 DEST=$(pwd)/.foruninstall
 
 # test for recursion
-if echo ${DESTDIR} | grep ${DEST}; then
+if echo ${DESTDIR} | grep "\.foruninstall$"; then
    echo "Recursion detected, aborting."
    exit 0
 fi
 
-if DESTDIR=${DEST} ${MAKE} install > /dev/null; then
+if ${MAKE} DESTDIR=${DEST} install > /dev/null; then
 echo "Success!"
 else
 echo "Failure :("
