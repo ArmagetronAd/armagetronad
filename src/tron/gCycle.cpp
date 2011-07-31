@@ -6749,8 +6749,10 @@ bool gTarget::Set(gCycle *p_cycle)
     m_target = p_cycle;
     p_cycle->Target().m_hunters.push_back(m_this);
     m_assignment_time = se_GameTime();
-    tOutput out( tOutput("$cycle_target_assignment", m_target->Player()->GetName()) );
+    tOutput out( tOutput("$cycle_target_assignment", m_target->Player()->GetColoredName()) );
     sn_ConsoleOut( out, m_this->Player()->Owner() );
+    // send a console message to the player
+    sn_CenterMessage(tOutput("$cycle_target_assignment"), m_this->Player()->Owner() );
     con << m_this->Player()->GetName() << ": " << out;
     return true;
 }
