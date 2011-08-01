@@ -3295,8 +3295,7 @@ void gCycle::Die( REAL time )
         }
 
         // check if there's still enough cycles to set target
-        int cycles_alive_counter = std::count_if(cycles.begin(), cycles.end(), std::mem_fun(&gCycle::Alive));
-        if (cycles_alive_counter<gTarget::min_cycles)
+        if (AliveCounter()<gTarget::min_cycles)
         {
             // we've reached min_cycles so all targets must be disabled, unset all cycle's targets
             for (gCycleItr itr = cycles.begin(); itr != cycles.end(); ++itr)
@@ -6862,7 +6861,7 @@ bool gTarget::AutoSet(t_hint p_hint, gCycle *p_cycle)
     con << "Trying to assign target to " << m_this->Player()->GetName() << "\n";
 #endif
 //    if ((!assignment_mode) || (!m_this->Player()->IsHuman())) return false;
-    if (!assignment_mode) return false;
+    if ((!assignment_mode) || (!m_this->Alive())) return false;
 
 	if ((p_hint==FORCE) && (p_cycle)) return Set(p_cycle);
 
@@ -6909,6 +6908,9 @@ void gTarget::AutoSetCycles(vec_cycle_ptr &p_cycles, t_hint p_hint, gCycle *p_cy
 #ifdef DEBUG
     con << "Trying to assign target to each cycles...\n";
 #endif
+    // check if there's still enough cycles to set target
+    if (gCycle::AliveCounter()<gTarget::min_cycles) return;
+        
 	// well, p_cycles might be changed in this loop so let's start by a local copy
 	vec_cycle_ptr l_cycles(p_cycles);
     for (gCycleItr itr = l_cycles.begin(); itr != l_cycles.end(); ++itr)

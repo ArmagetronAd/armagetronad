@@ -184,7 +184,7 @@ public:
     {
         return !m_hunters.empty();
     }
-   void Timestep(REAL p_gametime);      // check for timeout
+    void Timestep(REAL p_gametime);      // check for timeout
     void AddScore();                     // grant hunter some points
     int  HuntersCount() { return m_hunters.size(); }
     bool Started()      { return started; }
@@ -202,7 +202,7 @@ public:
     static int base_score;         // score for 1st target
     static int base_score_deplete; // how the base_score should changed for extra targets
     static int max_target;         // max number of targets for a player
-    static int min_cycles;         // min number of cycles required to get another target (not true for the first one)
+    static int min_cycles;         // min number of cycles required to get another target
     static REAL max_distance;      // max distance to look at first for targets, if no target found, look further ...
     static REAL timeout_delay;     // max time to kill your target
     static REAL start_time;        // time of first target assignment for all cycles
@@ -230,6 +230,10 @@ class gCycle: public gCycleMovement
     bool dropWallRequested_; //!< flag indicating that someone requested a wall drop
 public:
     static std::vector<gCycle *> cycles;
+    static int AliveCounter()
+    {
+        return std::count_if(cycles.begin(), cycles.end(), std::mem_fun(&gCycle::Alive));
+    }
 
     eCoord            lastGoodPosition_;    // the location of the last known good position
 
