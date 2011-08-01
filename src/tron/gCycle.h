@@ -30,6 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 //#define USE_HEADLIGHT
 #include <vector>
+#include <algorithm>
 #include "gStuff.h"
 //#include "eSound.h"
 //#include "rTexture.h"
