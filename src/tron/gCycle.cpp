@@ -3460,7 +3460,8 @@ void gCycle::KillAt( const eCoord& deathPos){
             	        // handle target scoring
             		    pHunterCycle->Target().AddScore();
             		    // Assign pHunter a new target
-            	        pHunterCycle->Target().AutoSet(gTarget::EXCLUDE, this);
+            	        if (!pHunterCycle->Target().AutoSet(gTarget::EXCLUDE, this))
+            	            pHunterCycle->Target().Unset();
             	    }
             	    // unset this cycle target
             	    Target().Unset();
@@ -6751,7 +6752,7 @@ bool gTarget::Set(gCycle *p_cycle)
 //	    (!m_this->Player()->IsHuman()) ||
 	    (m_killed_counter >= gTarget::max_target)) return false;
 
-    Unset(); // this unsure that is a target is already set, it is properly removed from hunters'list
+    Unset(); // this unsure that if a target is already set, it is properly removed from hunters'list
     m_target = p_cycle;
     p_cycle->Target().m_hunters.push_back(m_this);
     m_assignment_time = se_GameTime();
@@ -6799,7 +6800,7 @@ void gTarget::Timestep(REAL p_gametime)
         sn_ConsoleOut( out, m_this->Owner() );
         con << m_this->Player()->GetName() << ": " << out;
 
-        AutoSet();
+        if (!AutoSet()) Unset();
     }
 }
 
@@ -6914,9 +6915,8 @@ void gTarget::AutoSetCycles(vec_cycle_ptr &p_cycles, t_hint p_hint, gCycle *p_cy
     {
     	(*itr)->Target().started = true;
         if ((*itr)->Target().AutoSet(p_hint, p_cycle))
-        {
             // target assignment failed. take care to unset target to avoid any issue
-        }
+            (*itr)->Target().Unset();
     }
 }
 
@@ -6958,7 +6958,8 @@ static void sg_setTarget(std::istream &s)
     	pTargetCycle = dynamic_cast<gCycle *>(pTarget->Object());
     if (!pTargetCycle)
     {
-    	pHunterCycle->Target().AutoSet();
+    	if (!pHunterCycle->Target().AutoSet())
+    	    pHunterCycle->Target().Unset();
     }
     pHunterCycle->Target().Set(pTargetCycle);
 }
