@@ -448,10 +448,10 @@
 			fileType = pattern.proxy;
 			isEditable = 1;
 			outputFiles = (
-				"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE).pb.cc",
-				"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE).pb.h",
+				"$(SYMROOT)/Generated/src/protobuf/$(INPUT_FILE_BASE).pb.cc",
+				"$(SYMROOT)/Generated/src/protobuf/$(INPUT_FILE_BASE).pb.h",
 			);
-			script = "/Library/Frameworks/ArmagetronAdvanced/current/bin/protoc --cpp_out=\"${DERIVED_FILES_DIR}\" --proto_path=\"${SRCROOT}/../src/protobuf\" \"${INPUT_FILE_PATH}\"\ninclude_dir=\"${SYMROOT}/Generated/src/protobuf\"\nmkdir -p \"$include_dir\"\ncp \"${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}.pb.h\" \"$include_dir\"";
+			script = "include_dir=\"${SYMROOT}/Generated/src/protobuf\"\nmkdir -p \"$include_dir\"\n/Library/Frameworks/ArmagetronAdvanced/current/bin/protoc --cpp_out=\"${include_dir}\" --proto_path=\"${SRCROOT}/../src/protobuf\" \"${INPUT_FILE_PATH}\"";
 		};
 		9B9E56620D8208E8008DD17D /* PBXBuildRule */ = {
 			isa = PBXBuildRule;
