@@ -1573,7 +1573,7 @@ void gCycle::OnNotifyNewDestination( gDestination* dest )
                 // old clients get doubly confused and produce an extra
                 // evil lag slide.
                 static nVersionFeature noConfusionFromMoveBack( 16 );
-                if( !noConfusionFromMoveBack.Supported( Owner() ) && 
+                if( !noConfusionFromMoveBack.Supported( Owner() ) &&
                     lastTime - lag < lastSyncOwnerGameTime_ )
                 {
                     lag = lastTime - lastSyncOwnerGameTime_;
@@ -2427,10 +2427,10 @@ gCycle::gCycle(eGrid *grid, const eCoord &pos,const eCoord &d,ePlayerNetID *p)
         lastWall(NULL)
 {
 	cycles.push_back(this);
-	
+
     se_cycleCreatedWriter << p->GetLogName() << pos.x << pos.y << d.x << d.y;
     se_cycleCreatedWriter.write();
-    
+
     windingNumberWrapped_ = windingNumber_ = Grid()->DirectionWinding(dirDrive);
     dirDrive = Grid()->GetDirection(windingNumberWrapped_);
     dir = dirDrive;
@@ -2451,7 +2451,7 @@ gCycle::gCycle(eGrid *grid, const eCoord &pos,const eCoord &d,ePlayerNetID *p)
 
 gCycle::~gCycle(){
 #ifdef DEBUG
-    //  con << "deleting cylce...\n";
+    con << "deleting cycle...\n";
 #endif
     // clear the destination list
 
@@ -2486,11 +2486,8 @@ gCycle::~gCycle(){
         delete wheelTex;
         delete bodyTex;
     }
-    
-    // check target
-    if (CheckTargetPtr()) Target().Unset();
 #ifdef DEBUG
-    //con << "Deleted cycle.\n";
+    con << "Deleted cycle.\n";
 #endif
     /*
       delete currentPos;
@@ -3281,21 +3278,30 @@ void gCycle::Die( REAL time )
     }
 
     gCycleMovement::Die( time );
-    
+
     // handle cycle's target and hunters
     if (CheckTargetPtr())
     {
-        // unset this cycle target
+        // keep hunters list locally
+        vec_cycle_ptr l_hunters(Target().m_hunters);
+
+        // 1st, unset this cycle target
         Target().Unset();
+
+        // 2nd, unset all cycles from hunter list, they will be reaffected below if needed ...
+        for (gCycleItr itr = l_hunters.begin(); itr != l_hunters.end(); ++itr)
+        {
+            (*itr)->Target().Unset();
+        }
 
         // check if there's still enough cycles to set target
         int cycles_alive_counter = std::count_if(cycles.begin(), cycles.end(), std::mem_fun(&gCycle::Alive));
         if (cycles_alive_counter<gTarget::min_cycles)
         {
-            // unset all cycle's targets
+            // we've reached min_cycles so all targets must be disabled, unset all cycle's targets
             for (gCycleItr itr = cycles.begin(); itr != cycles.end(); ++itr)
             {
-                if (((*itr)->CheckTargetPtr()) && ((*itr)->Target().m_target))
+                if (((*itr)->CheckTargetPtr()) && ((*itr)->Target().HasTarget()))
                 {
                 	(*itr)->Target().Unset();
                     tOutput out( tOutput("$cycle_target_cancel", (*itr)->Player()->GetName()) );
@@ -3305,10 +3311,10 @@ void gCycle::Die( REAL time )
             }
         } else {
             // set this cycle's hunters new targets
-            gTarget::AutoSetCycles(Target().m_hunters, gTarget::EXCLUDE, this);
+            gTarget::AutoSetCycles(l_hunters);
         }
     }
-    
+
     // reset smoothing
     correctPosSmooth = eCoord();
     TransferPositionCorrectionToDistanceCorrection();
@@ -3449,7 +3455,7 @@ void gCycle::KillAt( const eCoord& deathPos){
             {
                 if (CheckTargetPtr())
                 {
-            	    if ((pHunterCycle->CheckTargetPtr()) && (pHunterCycle->Target().Is(this)))
+            	    if ((pHunterCycle->CheckTargetPtr()) && (pHunterCycle->Target().HasTarget(this)))
             	    {
             	        // handle target scoring
             		    pHunterCycle->Target().AddScore();
@@ -3468,7 +3474,7 @@ void gCycle::KillAt( const eCoord& deathPos){
             	    	gTarget::AutoSetCycles(Target().m_hunters, gTarget::EXCLUDE, this);
             	    }
                 }
-                
+
                 Killed(pHunterCycle);
 
             }
@@ -3581,7 +3587,7 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
             // request a sync for everyone if this is a non-bogus wall passage, maybe not all clients know the wall is passable
             if ( ( !currentWall || ww != currentWall->Wall() ) && ( !lastWall || ww != lastWall->Wall() ) )
                 RequestSyncAll();
-            
+
             // check whether we drove through a hole in an enemy wall made by a teammate
             gPlayerWall const * w = dynamic_cast< gPlayerWall const * >( ww );
             if ( Alive() && w && score_hole )
@@ -3593,7 +3599,7 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
                     if ( holer && holer != this && holer->Player() &&
                          Player() &&
                          w->Cycle() && w->Cycle()->Player() &&
-                         holer->Player()->CurrentTeam() == Player()->CurrentTeam() &&       // holer must have been a teammate 
+                         holer->Player()->CurrentTeam() == Player()->CurrentTeam() &&       // holer must have been a teammate
                          w->Cycle()->Player()->CurrentTeam() != Player()->CurrentTeam()  // wall must have been an enemy
                         )
                     {
@@ -4068,21 +4074,21 @@ void gCycle::Killed(gCycle *pKiller, int type)
         }
     }
 }
- 
+
 void gCycle::Kill(){
     // keep this cycle alive
     tJUST_CONTROLLED_PTR< gCycle > keep( this->GetRefcount()>0 ? this : 0 );
 
     if (sn_GetNetState()!=nCLIENT){
         RequestSync(true);
- 
+
         // check if we own a flag
         if (flag_)
         {
             // tell the flag we dropped it
             flag_->OwnerDropped();
         }
-        
+
         if (Alive() && grid && GOID() >= 0 ){
             if (sg_deathShot)
             {
@@ -4336,7 +4342,7 @@ gCycleWallsDisplayListManager::gCycleWallsDisplayListManager()
 bool gCycleWallsDisplayListManager::CannotHaveList( REAL distance, gCycle const * cycle )
 {
     return
-            ( !cycle->Alive() && gCycle::WallsStayUpDelay() >= 0 && se_GameTime()-cycle->DeathTime()-gCycle::WallsStayUpDelay() > 0 ) 
+            ( !cycle->Alive() && gCycle::WallsStayUpDelay() >= 0 && se_GameTime()-cycle->DeathTime()-gCycle::WallsStayUpDelay() > 0 )
 
             ||
 
@@ -4348,7 +4354,7 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
     dir_eWall_select();
 
     glDisable(GL_CULL_FACE);
-    
+
     gNetPlayerWall * run = 0;
     // transfer walls with display list into their list
 
@@ -4365,7 +4371,7 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
         {
             // wall has expired, remove it
             if ( cycle->ThisWallsLength() > 0 && cycle->GetDistance() - cycle->MaxWallsLength() > run->EndPos() )
-                
+
             {
                 run->Remove();
             }
@@ -4435,11 +4441,11 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
             if ( run->CanHaveDisplayList() )
             {
                 run->Insert( wallsWithDisplayList_ );
-            
+
                 // clear the wall's own display list, it will no longer be needed
                 run->ClearDisplayList(0, -1);
             }
-        
+
             run = next;
         }
     }
@@ -4457,7 +4463,7 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
         // display list recording did not start; render traditionally
         run = wallsWithDisplayList_;
         while( run )
-        {   
+        {
             gNetPlayerWall * next = run->Next();
             run->Render( camera );
             run = next;
@@ -4474,7 +4480,7 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
     sr_DepthOffset(true);
     if ( rTextureGroups::TextureMode[rTextureGroups::TEX_WALL] != 0 )
         glDisable(GL_TEXTURE_2D);
-    
+
     run = wallsWithDisplayList_;
     while( run )
     {
@@ -4494,7 +4500,7 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
     sr_DepthOffset(false);
     if ( rTextureGroups::TextureMode[rTextureGroups::TEX_WALL] != 0 )
         glEnable(GL_TEXTURE_2D);
-    
+
     run = wallsWithDisplayList_;
     while( run )
     {
@@ -4650,18 +4656,18 @@ void gCycle::Render(const eCamera *cam){
                 body->Render();
 
                 wheelTex->Select();
-                
+
                 glPushMatrix();
                 glTranslatef(0,0,.73);
-                
+
                 GLfloat mr[4][4]={{rotationRearWheel.x,0,rotationRearWheel.y,0},
                                   {0,1,0,0},
                                   {-rotationRearWheel.y,0,rotationRearWheel.x,0},
                                   {0,0,0,1}};
-                
-                
+
+
                 glMultMatrixf(&mr[0][0]);
-                
+
                 rear->Render();
                 glPopMatrix();
 
@@ -4672,13 +4678,13 @@ void gCycle::Render(const eCamera *cam){
                                   {0,1,0,0},
                                   {-rotationFrontWheel.y,0,rotationFrontWheel.x,0},
                                   {0,0,0,1}};
-                
+
                 glMultMatrixf(&mf[0][0]);
 
                 front->Render();
                 glPopMatrix();
             }
-            
+
             glPopMatrix();
         }
 
@@ -5118,7 +5124,7 @@ void gCycle::SoundMix(Uint8 *dest,unsigned int len,
             else
                 turning->Mix(dest,len,viewer,rvol,lvol,1);
         }
-        
+
         if (spark)
             spark->Mix(dest,len,viewer,rvol*.5,lvol*.5,4);
     }
@@ -5227,7 +5233,7 @@ gCycle::gCycle(nMessage &m)
         lastWall(NULL)
 {
     cycles.push_back(this);
-    
+
     deathTime=0;
     lastNetWall=lastWall=currentWall=NULL;
     windingNumberWrapped_ = windingNumber_ = Grid()->DirectionWinding(dirDrive);
@@ -5441,7 +5447,7 @@ bool gCycle::Extrapolate( REAL dt )
         // test if there are real (the check for list does that) destinations left; we cannot call it finished if there are.
         gDestination* unhandledDestination = extrapolator_->GetCurrentDestination();
         ret = !unhandledDestination || !unhandledDestination->list;
-        
+
         if( !ret )
         {
             if ( unhandledDestination->gameTime < newTime - Lag() * 2 - sn_Connections[0].ping.GetPing()*2 - GetTurnDelay()*4 )
@@ -6691,17 +6697,17 @@ void gCycle::TeleportTo(eCoord dest, eCoord dir, REAL time) {
 		DropWall();
 		if ((CurrentWall()) && (CurrentWall()->NetWall())) CurrentWall()->NetWall()->RequestSync();
 	}
-	RequestSync();		
+	RequestSync();
 }
 
 // ***************************
 // *** target mode (begin) ***
 /*
-At start, assigned every players a target 
-If playerA kills his target, he wins extra points and a new target might be assigned to him 
-If playerB kills playerA's target, a new target must be assigned to playerA 
+At start, assigned every players a target
+If playerA kills his target, he wins extra points and a new target might be assigned to him
+If playerB kills playerA's target, a new target must be assigned to playerA
 If playerA's target leave, a new target must be assigned to playerA
-wap's idea: make target assignment for limited time, then reassign a new target ... 
+wap's idea: make target assignment for limited time, then reassign a new target ...
 */
 
 // _assignment_mode: 0=disable, 1/2 is enable, 1 affects the player killing your target while 2 randomly affects new target
@@ -6733,7 +6739,7 @@ struct gCycle::LessHuntersCount : public std::binary_function<gCycle*, gCycle*, 
 bool gTarget::Set(gCycle *p_cycle)
 {
 #ifdef DEBUG
-    con << "Trying to assign target " << (p_cycle && p_cycle->Player()?static_cast<const char *>(p_cycle->Player()->GetName()):"INVALID") << " to " << m_this->Player()->GetName() << "\n"; 
+    con << "Trying to assign target " << (p_cycle && p_cycle->Player()?static_cast<const char *>(p_cycle->Player()->GetName()):"INVALID") << " to " << m_this->Player()->GetName() << "\n";
 #endif
 	if ((!assignment_mode) ||
 	    (!p_cycle) ||
@@ -6768,9 +6774,9 @@ void gTarget::Unset()
 {
     if ((!m_target) || (!m_this)) return;
 #ifdef DEBUG
-    con << "Trying to unset target from " << m_this->Player()->GetName() << "\n"; 
+    con << "Trying to unset target from " << m_this->Player()->GetName() << "\n";
 #endif
-    // first remove p_hunter from m_target's hunters' list
+    // first remove m_this from m_target's hunters' list
     if (m_target->CheckTargetPtr())
     {
         vec_cycle_ptr &v(m_target->Target().m_hunters);
@@ -6779,13 +6785,6 @@ void gTarget::Unset()
     }
     // then clear m_target
     m_target = NULL;
-}
-
-void gTarget::Reset()
-{
-    m_killed_counter = 0;
-    m_assignment_time = .0;
-    Unset();
 }
 
 void gTarget::Timestep(REAL p_gametime)
@@ -6804,16 +6803,11 @@ void gTarget::Timestep(REAL p_gametime)
     }
 }
 
-bool gTarget::Is(gCycle *p_cycle)
-{
-	return p_cycle==m_target;
-}
-
 void gTarget::AddScore()
 {
 	// target mode must be enable + cycle needs a target to score
 	if ((!assignment_mode) || (!m_target)) return;
-	
+
     tOutput lose;
     tOutput win;
     if (m_this->Player())
@@ -6864,13 +6858,13 @@ struct IsCloseEnough : public std::binary_function<gCycle*, gCycle*, bool> {
 bool gTarget::AutoSet(t_hint p_hint, gCycle *p_cycle)
 {
 #ifdef DEBUG
-    con << "Trying to assign target to " << m_this->Player()->GetName() << "\n"; 
+    con << "Trying to assign target to " << m_this->Player()->GetName() << "\n";
 #endif
 //    if ((!assignment_mode) || (!m_this->Player()->IsHuman())) return false;
     if (!assignment_mode) return false;
-	
+
 	if ((p_hint==FORCE) && (p_cycle)) return Set(p_cycle);
-	
+
     std::vector<gCycle *> cycles(gCycle::cycles.begin(),gCycle::cycles.end());
 
     // exclude p_cycle is requested
@@ -6881,7 +6875,7 @@ bool gTarget::AutoSet(t_hint p_hint, gCycle *p_cycle)
     }
     // remove any cycle of this cycle's team
     cycles.erase( std::remove_if(cycles.begin(), cycles.end(), std::bind2nd(IsTargetable(), m_this)), cycles.end());
- 
+
     // no suitable target, every cycles are in the same team.
     if (!cycles.size()) return false;
 
@@ -6898,9 +6892,9 @@ bool gTarget::AutoSet(t_hint p_hint, gCycle *p_cycle)
     gCycle *first = *(cycles.begin());
     int lowest_counter = first->Target().HuntersCount();
     cycles.erase( std::remove_if(cycles.begin(), cycles.end(), not1(std::bind2nd(IsLowestCounter(), lowest_counter))), cycles.end());
- 
+
     if (cycles.size())
-    { 
+    {
         // finally, scramble vector and get the first one
         std::random_shuffle( cycles.begin(), cycles.end() );
         first = *(cycles.begin());
@@ -6908,18 +6902,21 @@ bool gTarget::AutoSet(t_hint p_hint, gCycle *p_cycle)
     return Set(first);
 }
 
-// static version of autoset, to address a list of target
+// static version of autoset, to address a list of target. This one also states targeting as started.
 void gTarget::AutoSetCycles(vec_cycle_ptr &p_cycles, t_hint p_hint, gCycle *p_cycle)
 {
 #ifdef DEBUG
-    con << "Trying to assign target to each cycles...\n"; 
+    con << "Trying to assign target to each cycles...\n";
 #endif
 	// well, p_cycles might be changed in this loop so let's start by a local copy
 	vec_cycle_ptr l_cycles(p_cycles);
     for (gCycleItr itr = l_cycles.begin(); itr != l_cycles.end(); ++itr)
     {
     	(*itr)->Target().started = true;
-        (*itr)->Target().AutoSet(p_hint, p_cycle);
+        if ((*itr)->Target().AutoSet(p_hint, p_cycle))
+        {
+            // target assignment failed. take care to unset target to avoid any issue
+        }
     }
 }
 
@@ -6933,7 +6930,7 @@ static void sg_targetReset(std::istream &s)
         (*itr)->Target().Reset();
     }
     // Then, assigns targets to all cycles.
-    gTarget::AutoSetCycles(gCycle::cycles);	
+    gTarget::AutoSetCycles(gCycle::cycles);
 }
 
 static tConfItemFunc sg_targetResetConf("CYCLE_TARGET_RESET",&sg_targetReset);
@@ -7036,10 +7033,10 @@ static void sg_TeleportPlayer(std::istream &s)
 		con << "Must be called while a grid exists!\n";
 		return;
 	}
-	
+
 	tString params;
 	params.ReadLine( s, true );
-	
+
 	// first parse the line to get the params : <player name> <message flag> <x> <y> <dirx> <diry>
 	int pos = 0; //
 	tString PlayerName = ePlayerNetID::FilterName(params.ExtractNonBlankSubString(pos));
@@ -7063,7 +7060,7 @@ static void sg_TeleportPlayer(std::istream &s)
 		xdir = ydir = 0.0;
 	}
     eCoord dir = eCoord(xdir,ydir);
-	
+
 	// prepare new coord ...
 	eCoord ppos;
 	if ((x_str == "") && (y_str == "")) {
@@ -7075,7 +7072,7 @@ static void sg_TeleportPlayer(std::istream &s)
 	gCycle *pGameObject = dynamic_cast<gCycle *>(pPlayer->Object());
 	if ((pGameObject) &&
 		(pGameObject->Alive()))
-	{		
+	{
 		if (relabs=="rel") ppos = ppos + pGameObject->Position();
 		// Jump to new position without creating walls
 		REAL time = pGameObject->LastTime();
