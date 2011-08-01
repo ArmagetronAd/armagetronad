@@ -453,28 +453,6 @@
 			);
 			script = "include_dir=\"${SYMROOT}/Generated/src/protobuf\"\nmkdir -p \"$include_dir\"\n/Library/Frameworks/ArmagetronAdvanced/current/bin/protoc --cpp_out=\"${include_dir}\" --proto_path=\"${SRCROOT}/../src/protobuf\" \"${INPUT_FILE_PATH}\"";
 		};
-		9B9E56620D8208E8008DD17D /* PBXBuildRule */ = {
-			isa = PBXBuildRule;
-			compilerSpec = com.apple.compilers.proxy.script;
-			filePatterns = "*.ypp";
-			fileType = pattern.proxy;
-			isEditable = 1;
-			outputFiles = (
-				"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE).tab.cpp",
-			);
-			script = "test -n \"${BISON}\" || BISON=bison\necho $BISON\n$BISON -o \"${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}.tab.cpp\" \"${INPUT_FILE_PATH}\"";
-		};
-		9BB5B8560D845C2500BF5F1C /* PBXBuildRule */ = {
-			isa = PBXBuildRule;
-			compilerSpec = com.apple.compilers.proxy.script;
-			filePatterns = "*.ypp";
-			fileType = pattern.proxy;
-			isEditable = 1;
-			outputFiles = (
-				"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE).tab.cpp",
-			);
-			script = "test -n \"${BISON}\" || BISON=bison\necho $BISON\n$BISON -o \"${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}.tab.cpp\" \"${INPUT_FILE_PATH}\"";
-		};
 		9BC0F61A0B517A8B0041120B /* PBXBuildRule */ = {
 			isa = PBXBuildRule;
 			compilerSpec = com.apple.compilers.proxy.script;
@@ -1696,7 +1674,6 @@
 				8CAD91B7095A459400DA0ECC /* Run script: Cleanup */,
 			);
 			buildRules = (
-				9BB5B8560D845C2500BF5F1C /* PBXBuildRule */,
 			);
 			dependencies = (
 				9B9754C20F44AC9600E41662 /* PBXTargetDependency */,
@@ -1718,7 +1695,6 @@
 				8CBA6203089F11BE007E21DC /* Run script: Cleanup */,
 			);
 			buildRules = (
-				9B9E56620D8208E8008DD17D /* PBXBuildRule */,
 				9BC0F61A0B517A8B0041120B /* PBXBuildRule */,
 			);
 			dependencies = (
