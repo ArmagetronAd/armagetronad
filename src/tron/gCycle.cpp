@@ -3286,12 +3286,12 @@ void gCycle::Die( REAL time )
         vec_cycle_ptr l_hunters(Target().m_hunters);
 
         // 1st, unset this cycle target
-        Target().Unset();
+        Target().Unset(false);
 
-        // 2nd, unset all cycles from hunter list, they will be reaffected below if needed ...
+        // 2nd, unset all cycles from hunter list silently, they will be reaffected below if needed ...
         for (gCycleItr itr = l_hunters.begin(); itr != l_hunters.end(); ++itr)
         {
-            (*itr)->Target().Unset();
+            (*itr)->Target().Unset(false);
         }
 
         // check if there's still enough cycles to set target
@@ -3302,10 +3302,7 @@ void gCycle::Die( REAL time )
             {
                 if (((*itr)->CheckTargetPtr()) && ((*itr)->Target().HasTarget()))
                 {
-                	(*itr)->Target().Unset();
-                    tOutput out( tOutput("$cycle_target_cancel", (*itr)->Player()->GetName()) );
-                    sn_ConsoleOut( out, (*itr)->Owner() );
-                    con << (*itr)->Player()->GetName() << ": " << out;
+                	(*itr)->Target().Unset(true);
                 }
             }
         } else {
@@ -3462,8 +3459,8 @@ void gCycle::KillAt( const eCoord& deathPos){
             	        if (!pHunterCycle->Target().AutoSet(gTarget::EXCLUDE, this))
             	            pHunterCycle->Target().Unset();
             	    }
-            	    // unset this cycle target
-            	    Target().Unset();
+            	    // unset this cycle target silently
+            	    Target().Unset(false);
             	    // set this cycle's hunters new targets
                     // _assignment_mode: 0=disable, 1/2 is enable
                     //   1 affects the player killing your target while 2 randomly affects new target
@@ -6751,7 +6748,7 @@ bool gTarget::Set(gCycle *p_cycle)
 //	    (!m_this->Player()->IsHuman()) ||
 	    (m_killed_counter >= gTarget::max_target)) return false;
 
-    Unset(); // this unsure that if a target is already set, it is properly removed from hunters'list
+    Unset(false); // this unsure that if a target is already set, it is properly removed from hunters'list
     m_target = p_cycle;
     p_cycle->Target().m_hunters.push_back(m_this);
     m_assignment_time = se_GameTime();
@@ -6770,7 +6767,7 @@ bool gTarget::Set(ePlayerNetID *p_player)
     return Set(cycle);
 }
 
-void gTarget::Unset()
+void gTarget::Unset(bool warn)
 {
     if ((!m_target) || (!m_this)) return;
 #ifdef DEBUG
@@ -6782,6 +6779,13 @@ void gTarget::Unset()
         vec_cycle_ptr &v(m_target->Target().m_hunters);
         gCycleItr pos(std::find(v.begin(), v.end(), m_this));
         if (pos!=v.end()) v.erase(pos);
+    }
+    // send a message to user if requested
+    if (warn)
+    {
+        tOutput out( tOutput("$cycle_target_cancel", m_target->Player()->GetName()) );
+        sn_ConsoleOut( out, m_this->Owner() );
+        con << m_this->Player()->GetName() << ": " << out;
     }
     // then clear m_target
     m_target = NULL;
@@ -6799,7 +6803,8 @@ void gTarget::Timestep(REAL p_gametime)
         sn_ConsoleOut( out, m_this->Owner() );
         con << m_this->Player()->GetName() << ": " << out;
 
-        if (!AutoSet()) Unset();
+        if (!AutoSet(EXCLUDE, m_this))
+            if (!AutoSet()) Unset();
     }
 }
 
@@ -6910,7 +6915,7 @@ void gTarget::AutoSetCycles(vec_cycle_ptr &p_cycles, t_hint p_hint, gCycle *p_cy
 #endif
     // check if there's still enough cycles to set target
     if (gCycle::AliveCounter()<gTarget::min_cycles) return;
-        
+
 	// well, p_cycles might be changed in this loop so let's start by a local copy
 	vec_cycle_ptr l_cycles(p_cycles);
     for (gCycleItr itr = l_cycles.begin(); itr != l_cycles.end(); ++itr)

@@ -166,8 +166,8 @@ public:
 
     bool Set(gCycle *p_cycle);           // Set a cycle as target. Return true/false for success/failure
     bool Set(ePlayerNetID *p_player);    // Set a player's cycle as target. Return true/false for success/failure
-    void Unset();                        // Unset current target
-    void Reset()                        // Unset current target and reset counters
+    void Unset(bool warn=true);         // Unset current target
+    void Reset()                         // Unset current target and reset counters
     {
         m_killed_counter = 0;
         m_assignment_time = .0;

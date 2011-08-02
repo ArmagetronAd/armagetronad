@@ -2,10 +2,10 @@
 #*****************************************
 #*****************************************
 #*****************************************
-# 
+#
 # Help texts for the various configuration
 # options that can be set via the console.
-# 
+#
 # The text item for a configuration item
 # with name NAME has the ID name_help.
 #
@@ -80,7 +80,7 @@ cycle_turn_memory_help          Number of pending turns a cycle will memorize ex
 cycle_delay_help		        Minimum time between turns (must be greater than 0)
 cycle_delay_bonus_help		    Extra fudge factor to CYCLE_DELAY applied on the dedicated server only.
 cycle_delay_timebased_help		Turn delays will be based on the time since the last turn if this is 1 (default) and the distance if this is 0. Intermediate values and values out of these bounds are supported as well.
-cycle_turn_speed_factor_help    Factor the speed of a lightcycle is multiplied with when turning 
+cycle_turn_speed_factor_help    Factor the speed of a lightcycle is multiplied with when turning
 cycle_delay_doublebind_bonus_help       Factor CYCLE_DELAY is multiplied with for consecutive turns in the same direction
 
 
@@ -124,7 +124,7 @@ topology_police_help				The topology police does posteriori checks to determine 
 topology_police_parallel_help		Extra topology police flag to check for walls that are put into the grid datastructure exactly parallel to each other. Requites TOPOLOGY_POLICE to be active.
 cycle_smooth_time_help				Timescale for smoothing options. Increasing this will make interpolation smoother, but less accurate. Decreasing it will make network synchronization jumpy.
 cycle_smooth_min_speed_help			Minimum speed of smooth correction relative to cycle speed.
-cycle_smooth_threshold_help			Only syncs that differ from your position by less than this amount (measured in speed) will be handled smoothly, bigger differences will be applied instantly. 
+cycle_smooth_threshold_help			Only syncs that differ from your position by less than this amount (measured in speed) will be handled smoothly, bigger differences will be applied instantly.
 cycle_max_refcount_help				Maximum allowed reference count on cycles before they self destruct. This setting is to protect against performance related DOS attacks.
 
 #********************************************
@@ -209,9 +209,9 @@ auto_ais_help			Automatically spawn AI players?
 ai_iq_help			IQ of the AI opponents
 min_players_help		Minimum number of players
 num_ais_help			Number of AI players
-limit_score_help		End the match when a player reaches this score	 
+limit_score_help		End the match when a player reaches this score
 limit_rounds_help		End the match after this number of rounds
-limit_time_help			End the match after this number of minutes 
+limit_time_help			End the match after this number of minutes
 
 auto_team_help          Flag indicating whether players should be put into teams automatically.
 auto_team_spec_spam_help    If set to 0, spectators won't be announced when joining or leaving, provided AUTO_TEAM is set to 0.
@@ -284,11 +284,11 @@ cycle_first_spawn_protection_help Set to 1 if the invulnerability and wall delay
 #********************************************
 
 # map file
-map_file_help                     File that contains the map used for playing 
+map_file_help                     File that contains the map used for playing
 map_uri_help                      DEPRECIATED - use RESOURCE_REPOSITORY_SERVER and MAP_FILE instead
-arena_axes_help                   In how many directions a cycle can turn 4 is the default, 6 is hexatron 
-resource_repository_client_help   URI the client uses to search for map files if they aren't stored locally. Better leave it alone 
-resource_repository_server_help   URI clients and the server use to search for map files if they aren't stored locally 
+arena_axes_help                   In how many directions a cycle can turn 4 is the default, 6 is hexatron
+resource_repository_client_help   URI the client uses to search for map files if they aren't stored locally. Better leave it alone
+resource_repository_server_help   URI clients and the server use to search for map files if they aren't stored locally
 
 # limits
 speed_factor_help		Speed modifier for the cycles
@@ -390,7 +390,7 @@ ping_flood_time_50_help             Minimum time for 50 ping packets from one ma
 ping_flood_time_100_help            Minimum time for 100 ping packets from one machine to arrive.
 ping_flood_global_help              The times PING_FLOOD_TIME_X, multiplied by this value, count for all pings from all machines. Negative values disable global flood protection.
 connection_flood_sensitivity_help   The times PING_FLOOD_TIME_X, multiplied by this value, count for all incoming messages from clients not connected already. A flood here activates turtle mode. Negative values disable global flood protection.
-connection_limit_help               Maximum number of packets from unknown peers to handle at one 
+connection_limit_help               Maximum number of packets from unknown peers to handle at one
 anti_spoof_help                     If set to 1, checks connecting clients for spoofed IPs. Only clients passing a connectivity test are allowed in. This is done in turtle mode automatically, but may be useful to have on at all times.
 turtle_mode_activated               Server is under heavy load. Turtle mode activated. Communication with new clients is on a budget.\n
 turtle_mode_deactivated             The high load seems to have normalized for now. Turtle mode deactivated.\n
@@ -645,7 +645,7 @@ bug_transparency_demand_help             Unsupported: use transparency instead o
 #
 #********************************************
 #********************************************
- 
+
 custom_server_name_help	Name of the server to connect to
 dedicated_idle_help		After running this time (in hours), the dedicated server takes the next chance to quit.
 dedicated_fps_help      Maximum simulation steps per second the dedicated server will perform
@@ -661,7 +661,7 @@ ping_charity_server_help Don't touch: the server says this is the maximal ping c
 big_brother_help		Did we already send the big brother information?
 server_name_help		Name of this server
 server_options_help		Short description of the options on this server
-server_ip_help          IP the server listens on 
+server_ip_help          IP the server listens on
 server_dns_help         If your server is on dynamic IP and you set up a dynamic DNS that always points to it, you can set this variable to the DNS name to help clients remember your server across IP changes.
 server_port_help		Port this server listens on
 client_port_help		Port we try to connect to
@@ -672,7 +672,7 @@ max_clients_same_ip_hard_help		Maximum number of network clients to accept from 
 max_players_same_ip_help  maximum number of players from the same IP (note that each client can legally host up to four players)
 url_help				HTTP URI associated with a server
 
-# settings compatibility 
+# settings compatibility
 
 setting_legacy_behavior_breaking_help    Default legacy behavior for settings that absolutely break the client and make play impossible. Example of an affected setting: MAP_FILE
 setting_legacy_behavior_bumpy_help     Default legacy behavior for settings that allow play on old clients in principle, but with severe limitations (cycles bouncing around, player commands not executed on time). Example: CYCLE_DELAY_TIMEBASED
@@ -693,25 +693,25 @@ white_sparks_help        Draw sparks in white (instead of cycle colors).
 keep_window_active_help  Keeps rendering active when the program window loses input focus.
 
 # hud
-show_brake_help                   Show the brake meter on the HUD? 
-show_alive_help                   Show the number of enemies and friends left on the HUD? 
-show_fastest_help                 Show the fastest player on the HUD? 
-show_hud_help                     Show the HUD? 
-show_ping_help                    Show your ping on the HUD? 
-show_rubber_help                  Show the rubber meter on the HUD? 
-show_score_help                   Show your single player scores on the HUD? 
-show_speed_help                   Show the speed meter on the HUD? 
-show_time_help                    Show the current time in the top- right corner? 
-show_time_24_help                 Show the time in 24 hour format? 
-speed_gauge_locx_help             Horizontal position of the speed meter 
-speed_gauge_locy_help             Vertical position of the speed meter 
-speed_gauge_size_help             Size of the speed meter 
-rubber_gauge_locx_help            Horizontal position of the rubber meter 
-rubber_gauge_locy_help            Vertical position of the rubber meter 
-rubber_gauge_size_help            Size of the rubber meter 
-brake_gauge_locx_help             Horizontal position of the brake meter 
-brake_gauge_locy_help             Vertical position of the brake meter 
-brake_gauge_size_help             Size of the brake meter 
+show_brake_help                   Show the brake meter on the HUD?
+show_alive_help                   Show the number of enemies and friends left on the HUD?
+show_fastest_help                 Show the fastest player on the HUD?
+show_hud_help                     Show the HUD?
+show_ping_help                    Show your ping on the HUD?
+show_rubber_help                  Show the rubber meter on the HUD?
+show_score_help                   Show your single player scores on the HUD?
+show_speed_help                   Show the speed meter on the HUD?
+show_time_help                    Show the current time in the top- right corner?
+show_time_24_help                 Show the time in 24 hour format?
+speed_gauge_locx_help             Horizontal position of the speed meter
+speed_gauge_locy_help             Vertical position of the speed meter
+speed_gauge_size_help             Size of the speed meter
+rubber_gauge_locx_help            Horizontal position of the rubber meter
+rubber_gauge_locy_help            Vertical position of the rubber meter
+rubber_gauge_size_help            Size of the rubber meter
+brake_gauge_locx_help             Horizontal position of the brake meter
+brake_gauge_locy_help             Vertical position of the brake meter
+brake_gauge_size_help             Size of the brake meter
 alive_locx_help                   Horizontal position of the alive headcount display
 alive_locy_help                   Vertical position of the alive headcount display
 alive_size_help                   Size of the alive headcount display
@@ -1034,9 +1034,9 @@ bug_color_overflow_help     Allows the player's colors to overflow and wrap arou
 #********************************************
 #
 # Key bindings; every input ITEM item gets two
-# strings: the short description string 
+# strings: the short description string
 # appearing in the configuration menus
-# (named input_item_text) and the help message 
+# (named input_item_text) and the help message
 # you see below the input configuration menu
 # when you select the input item for a longer
 # time (named input_item_help).
@@ -1297,10 +1297,10 @@ path_info_data                  Data directories (textures, moviepack, ...):
 path_info_screenshot            Screenshot directories:
 path_info_var                   Var directories:
 
-version_info_gl_intro       \n\n0xff8888System OpenGL information:0xRESETT 
-version_info_gl_vendor		\n  GL Vendor   : 
-version_info_gl_renderer	\n  GL Renderer : 
-version_info_gl_version		\n  GL Version  : 
+version_info_gl_intro       \n\n0xff8888System OpenGL information:0xRESETT
+version_info_gl_vendor		\n  GL Vendor   :
+version_info_gl_renderer	\n  GL Renderer :
+version_info_gl_version		\n  GL Version  :
 
 
 #********************************************
@@ -1643,7 +1643,7 @@ misc_initial_menu_help Restarts the first setup menu where you can select color 
 #*************************************
 #*************************************
 
-language_first_help		The language \g will use 
+language_first_help		The language \g will use
 language_second_help		Fallback language if the first language is not available
 
 language_menu_title		Language Settings
@@ -1736,7 +1736,7 @@ player_menu_help		Cycle and camera controls for player \1
 viewport_menu_title		Viewports
 viewport_menu_help		Would you like a singe player game or split the screen to allow multiplayer games?
 
-viewport_conf_text		Viewports: 
+viewport_conf_text		Viewports:
 viewport_conf_name_0		Single Player
 viewport_conf_name_1		Horizontal Split
 viewport_conf_name_2		Vertical Split
@@ -2012,7 +2012,7 @@ screen_fullscreen_text		Fullscreen:
 screen_fullscreen_help		This toggles fullscreen and window mode. As with resolution changes. You have to exit and re-enter \g or select "Apply Changes" for this to have an effect.
 
 screen_colordepth_text		Colour Depth:
-screen_colordepth_help		Choose the colour depth you want \g to run at. You have to exit and reenter \g or select "Apply Changes" for this to have an effect. 
+screen_colordepth_help		Choose the colour depth you want \g to run at. You have to exit and reenter \g or select "Apply Changes" for this to have an effect.
 
 screen_colordepth_16_text	16 Bit
 screen_colordepth_16_help	Generally considered low quality; but \g does not use many blending effects, so it looks quite OK.
@@ -2024,7 +2024,7 @@ screen_colordepth_32_text	32 Bit
 screen_colordepth_32_help	High quality.
 
 screen_zdepth_text			Z Buffer Depth:
-screen_zdepth_help			Depth of the z buffer; determines the quality of depth sorting. You have to exit and reenter \g or select "Apply Changes" for this to have an effect. 
+screen_zdepth_help			Depth of the z buffer; determines the quality of depth sorting. You have to exit and reenter \g or select "Apply Changes" for this to have an effect.
 
 screen_zdepth_16_text		16 Bit
 screen_zdepth_16_help		Not recommended, as it will not work most of the time.
@@ -2178,7 +2178,7 @@ menuitem_accept			Accept
 menuitem_accept_help		Accepts the settings in this menu and continues.
 
 input_item_help			To change, press ENTER or SPACE, then press the key/mousebutton you want to assign to this control. Moving the mouse also works.
-input_press_any_key		Press any key! 
+input_press_any_key		Press any key!
 
 menuitem_toggle_on		On
 menuitem_toggle_off		Off
@@ -2295,9 +2295,9 @@ setting_legacy_change_blocked   Setting \1 (Group: \2) can't be changed currentl
 league_message_rose		\1 rose to place \3 on the \4 because of \2.
 league_message_dropped		\1 dropped to place \3 on the \4 because of \2.
 
-league_message_greet_intro	You are 
+league_message_greet_intro	You are
 league_message_greet_sep	,
-league_message_greet_lastsep	and 
+league_message_greet_lastsep	and
 league_message_greet		number \1 of \2 on the \3
 league_message_greet_new	not on the \3
 
@@ -2305,17 +2305,17 @@ won_rounds_description		won multiplayer rounds list
 won_matches_description		won multiplayer matches list
 
 highscore_description		single player highscores
-highscore_message_entered	\1 entered the \2 list with \3 points 
-highscore_message_improved	\1 improved its personal highscore in the \2 to \3 
+highscore_message_entered	\1 entered the \2 list with \3 points
+highscore_message_improved	\1 improved its personal highscore in the \2 to \3
 highscore_message_move_top	and moved to the top!
 highscore_message_move_pos	and moved to position \4.
 highscore_message_stay_top	and stayed at the top.
 highscore_message_stay_pos	but stayed at position \4.
 
 ladder_description		ladder
-ladder_message_entered		\1 entered the \2 list with \3 points 
-ladder_message_gained		\1 gained \5 points on the \2 
-ladder_message_lost		\1 lost \5 points on the \2 
+ladder_message_entered		\1 entered the \2 list with \3 points
+ladder_message_gained		\1 gained \5 points on the \2
+ladder_message_lost		\1 lost \5 points on the \2
 ladder_message_move_top		and moved to the top!
 ladder_message_move_pos		and moved to position \4.
 ladder_message_stay_top		and stayed at the top.
@@ -2365,19 +2365,19 @@ gamestate_10minutes_warn	Ten minutes left!\n
 gamestate_set_start_center	New Set
 gamestate_set_start_console	Starting Set \1!\n
 gamestate_set_center		Set \1 Winner: \2
-gamestate_set_console		Set \1 Winner: \2 
+gamestate_set_console		Set \1 Winner: \2
 gamestate_set_scores		Set \1 Scores:\n
 
 gamestate_reset_challenge		Start Challenge Best of \1 Next Round !
 
 gamestate_champ_center		Match Winner: \1
-gamestate_champ_console		Overall Winner: \1 
+gamestate_champ_console		Overall Winner: \1
 gamestate_champ_scorehit	with \1 points.\n
 gamestate_champ_timehit		after the timelimit of \1 minutes was hit.\n
 gamestate_champ_default		after \1 rounds.\n
 gamestate_champ_finalscores	Final Scores:\n
 
-gamestate_winner_winner		Winner: 
+gamestate_winner_winner		Winner:
 gamestate_winner_ai		AI.
 gamestate_winner_humans		Humans.
 
@@ -2652,7 +2652,7 @@ network_master_downgrage		Server is outdated
 network_master_incompatible		Server is incompatible
 network_master_full			Full
 network_master_serverinfo       Version: \1\nURI    : \2\nOptions: \3\n
-network_master_players			Players: 
+network_master_players			Players:
 network_master_players_empty	Empty
 network_master_options			Options:\n
 
@@ -3044,7 +3044,7 @@ login_message_requested     User \1 requests authentication as "\2@\3".\n
 login_message_delayed       Your login process will be delayed because the server configuration makes it impossible to be processed immedeately in the background. We're sorry for the inconvenience.\n
 login_message_responded     Password request sent to user \1, username "\2", method \3, message "\4".\n
 login_message               \3\1 has been logged in as \2.\n
-login_message_byorder       Order of \1: 
+login_message_byorder       Order of \1:
 login_message_special       \4\1 has been logged in as \2 at access level "\3".\n
 logout_message              \1 has been logged out as \2.\n
 logout_message_deop         \1 has been logged out as \2 by order of \3.\n
@@ -3168,7 +3168,7 @@ balls_bounce_on_cycle_walls_help    Flag indicating whether balls can bounce off
 ball_team_mode_help                 Flag 0=ball score other team, 1=ball score only team owner
 ball_kills_help                     Flag indicating if a team owned ball can kill opposing team players
 ball_speed_decay_help               Rate at which the ball slows down
-ball_cycle_accel_boost_help         Boost Cycle gives the ball when colliding 
+ball_cycle_accel_boost_help         Boost Cycle gives the ball when colliding
 ball_autorespawn_help               Flag indicating whether balls should automatically respawn when goal is scored
 
 ## Target Zone
@@ -3205,7 +3205,7 @@ condense_conquest_output                       Zone conquest output condensed in
 cycle_target_assignment      0xff9900Your target is now \1.\n
 cycle_target_score           \1 get \2 extra points for core dumping his target \3.\n
 cycle_target_timeout         You fail core dumping your target \1 in time.\n
-cycle_target_cancel          You fail core dumping your target \1. Too few cycles left.\n
+cycle_target_cancel          Your target assignment has been cancelled by server.\n
 
 # items that should not be translated
 include english_base_notranslate.txt
