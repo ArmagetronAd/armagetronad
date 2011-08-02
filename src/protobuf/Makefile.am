@@ -46,7 +46,7 @@ libprotobuf_a_SOURCES = \
 all_protobuf_files: ${libprotobuf_a_SOURCES}
 
 distclean-local:
-	rm -f ${libprotobuf_a_SOURCES}
+	rm -f *.pb.cc *.pb.h
 
 dist-hook:
 #   copy .proto
