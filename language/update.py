@@ -82,6 +82,7 @@ class LanguageUpdater:
         # write language the outfile is in
         self.outfile.write(self.leadingComment)
         self.WriteFromDictionary( "language" )
+        self.WriteFromDictionary( "encoding" )
         self.outfile.write("\n")
 
     # read contents of translation into dictionary
