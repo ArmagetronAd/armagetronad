@@ -1330,7 +1330,7 @@ void sg_DeclareWinner( eTeam* team, char const * message )
 }
 
 void check_hs(){
-    if (sg_singlePlayer)
+    if (!sg_singlePlayer)
         if(se_PlayerNetIDs.Len()>0 && se_PlayerNetIDs(0)->IsHuman())
             highscore.Check(se_PlayerNetIDs(0),se_PlayerNetIDs(0)->Score());
 }
@@ -3420,7 +3420,7 @@ void gGame::StateUpdate(){
 
             ePlayerNetID::UpdateSuspensions();
             ePlayerNetID::UpdateShuffleSpamTesters();
-            
+
             sg_newRoundWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
             sg_newRoundWriter.write();
             if ( rounds < 0 )
@@ -5095,7 +5095,7 @@ void sg_ClientFullscreenMessage( tOutput const & title, tOutput const & message,
     con <<  title << "\n" << message << "\n";
 #endif
 
-        
+
     // continue the game
     if( sn_GetNetState() != nCLIENT )
     {
@@ -5140,10 +5140,10 @@ void sg_FullscreenMessageWait()
         bool paused = se_mainGameTimer && se_mainGameTimer->speed < .0001;
         se_PauseGameTimer(true);
         gGame::NetSyncIdle();
-        
+
         REAL waitTo = tSysTimeFloat() + sg_fullscreenMessageTimeout;
         REAL waitToMin = tSysTimeFloat() + 1.0;
-        
+
         // wait for players to see it
         bool goon = true;
         while( goon && waitTo > tSysTimeFloat() )
@@ -5152,7 +5152,7 @@ void sg_FullscreenMessageWait()
             gameloop_idle();
             if ( se_GameTime() > sg_lastChatBreakTime )
                 se_PauseGameTimer(true);
-            
+
             // give the clients a second to enter chat state
             if ( tSysTimeFloat() > waitToMin )
             {
