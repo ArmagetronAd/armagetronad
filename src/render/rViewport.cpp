@@ -66,13 +66,26 @@ void rViewport::Perspective(REAL fov,REAL nnear,REAL ffar){
     if (!sr_glOut)
         return;
 
-    // Jonathan's improved version
-    REAL aspectratio = (height * sr_screenHeight) / (width * sr_screenWidth * currentScreensetting.aspect);
-    REAL ensureverticalfov = fmax((3.0 / 5.0) * aspectratio, 1.0);
+#if 1
+    // Jonathan's improved version (fixed again)
+
+    // the true aspect ratio of the viewport. 16/9, 16/10, 4/3, 5/4 (or halves of that for splitscreen)
+    REAL aspectratio = (width * sr_screenWidth * currentScreensetting.aspect)/(height * sr_screenHeight);
+
+    // usually, fov is the horizontal fov. However, for widescreen, we want to expand the
+    // horizontal fov without distorting the image in such a way that we don't sacrifice too much of
+    // the vertical fov. For non-widescreen, the following number will be 1, for aspect ratios > 1.5 (semi-widescreen),
+    // it'll be higher.
+    REAL ensureverticalfov = fmax(aspectratio/1.5, 1.0);
+
+    // calculate the horizontal fov. For widescreen, make it extra wide.
     REAL xmul = ensureverticalfov * tan((M_PI / 360.0) * fov);
-    REAL ymul = ensureverticalfov * aspectratio * xmul;
+
+    // transfer that directly to the vertical fov.
+    REAL ymul = xmul/aspectratio;
     glMatrixMode(GL_PROJECTION);
     glFrustum(-nnear * xmul, nnear * xmul, -nnear * ymul, nnear * ymul, nnear, ffar);
+#endif
 
 #if 0 // Z-Man's old and clumsy version
     REAL ratio=currentScreensetting.aspect*(width*sr_screenWidth)/(height*sr_screenHeight);
