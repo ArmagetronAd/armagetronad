@@ -2054,7 +2054,7 @@ misc_fps_help			Toggles the display of the current FPS (frames per second) rate 
 
 #tweaks menu
 tweaks_displaylists_text	Display Lists:
-tweaks_displaylists_help	Display lists are a feature of OpenGL for rendering the same thing many times; it is normally used for the cycles and other geometry. Some implementations are broken however; if you do no see the cycles, you should disable this feature.
+tweaks_displaylists_help	Display lists are a feature of OpenGL for rendering the same thing many times. Some implementations are broken; if you do no see the cycles, you should disable this feature.
 tweaks_displaylists_off_text Off
 tweaks_displaylists_off_help Don't use display lists at all.
 tweaks_displaylists_cac_text Create and Call

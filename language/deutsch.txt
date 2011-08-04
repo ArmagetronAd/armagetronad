@@ -2056,7 +2056,7 @@ misc_fps_help                 Wenn die FPS-Anzeige aktiviert ist, wird die aktue
 
 #tweaks menu
 tweaks_displaylists_text      Display Lists:
-tweaks_displaylists_help      Display Lists sind ein OpenGL-Feature, um ein Objekt schnell oft rendern zu können; es wird normalerweise für die Vehikel verwendet. Manchmal funktioniert das aber nicht richtig: wenn die Vehikel unsichtbar sind, dann sollte dieses Feature ausgeschaltet werden.
+tweaks_displaylists_help      Display Lists sind ein OpenGL-Feature, um ein Objekt schnell oft rendern zu können. Manchmal funktioniert das aber nicht richtig: wenn die Vehikel unsichtbar sind, dann sollte dieses Feature ausgeschaltet werden.
 tweaks_displaylists_off_text  Aus
 tweaks_displaylists_off_help  Verwendet gar keine Display Lists.
 tweaks_displaylists_cac_text  Create and Call
