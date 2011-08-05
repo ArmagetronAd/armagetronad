@@ -2678,6 +2678,7 @@ sound_error_unknown           Plik \1 nie mógł być załadowany: \2
 #********************************************
 #********************************************
 
+nconfig_error_protected       Tylko serwer moze modyfikowac te wartosc. \1.\n
 nconfig_error_unknown         Otrzymano konfigurację nieznanego ustawienia \1.\n\nPRAWDOPODOBNIE POWINIENEŚ ZAKTUALIZOWAĆ ARMAGETRON ADVANCED!!!\n
 nconfig_error_nonet           Otrzymano konfigurację ustawienia \1 które nie dotyczy sieci.\n\nPRAWDOPODOBNIE POWINIENEŚ ZAKTUALIZOWAĆ ARMAGETRON ADVANCED!!!\n
 nconfig_error_ignoreold       Ignorowanie starej konfiguracji ustawienia \1.\n
