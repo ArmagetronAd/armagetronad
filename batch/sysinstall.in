@@ -33,7 +33,7 @@
 # Everything should work if you do
 # sysinstall; move ${DESTDIR} ${ROOTDIR}; ${ROOTDIR}/path/to/binary/armagetronad
 
-set -x
+# set -x
 
 # look for kde path (this script is sometimes run without it)
 for KDEDIR in /opt/kde* /opt/kde/* /usr/kde* /usr/kde/* /usr/local/kde* /usr/local/kde/*; do
