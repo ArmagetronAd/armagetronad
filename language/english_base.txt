@@ -2060,7 +2060,7 @@ tweaks_displaylists_off_help Don't use display lists at all.
 tweaks_displaylists_cac_text Create and Call
 tweaks_displaylists_cac_help Use displaylists; Create them and call them directly. This is the recommended way.
 tweaks_displaylists_cae_text Create and Execute
-tweaks_displaylists_cae_help Use displaylists; Create them let them be executed while they are filled. The expers say this is slower than Create and Call.
+tweaks_displaylists_cae_help Use displaylists; Create them and let them be executed while they are filled. The experts say this is slower than Create and Call.
 
 tweaks_infinity_text		Infinity:
 tweaks_infinity_help		Some planes (grid, sky...) have an infinite extension; if this feature is enabled, they are really drawn as infinite planes. Some OpenGL renderers do not seem to like this (all Windows versions I have seen...); disable it if the floor or sky textures are screwed up.
