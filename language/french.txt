@@ -1907,7 +1907,7 @@ config_file_write_error       N'a pas pu ecrire dans le fichier de configuration
 config_value_changed          \1 a change \2 en \3.\n
 config_error_read             erreur de lecture de \1: format non valide.\n
 config_message_info           \1 est actuellement a \2.\n
-nconfig_errror_protected      Seul le serveur peut modifier \1.\n
+nconfig_error_protected       Seul le serveur peut modifier \1.\n
 nconfig_error_unknown         Message recu du setting \1 inconnu...\n\n\n\nVOUS DEVRIEZ PROBABLEMENT METTRE ARMAGETRON A JOUR\n
 nconfig_value_changed         \1 a change \2 en \3 dans l'ordre du serveur.\n
 

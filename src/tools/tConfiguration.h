@@ -416,7 +416,7 @@ public:
                     {
                         tOutput o;
                         o.SetTemplateParameter(1, title);
-                        o << "$nconfig_errror_protected";
+                        o << "$nconfig_error_protected";
                         con << "";
                     }
                     else{
