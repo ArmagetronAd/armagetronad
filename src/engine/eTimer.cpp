@@ -242,7 +242,7 @@ void eTimer::ProcessSync()
             REAL timeDifference = remote_currentTime - lastRemoteTime_;
             REAL drift = lastStartTime_ - remoteStartTimeOffset;
 
-            if ( timeDifference > 0 && timeDifference < 3 && fabs(drift) < 1 && remote_currentTime > 3 )
+            if ( timeDifference > 0 && timeDifference < 3 && fabs(drift) < 1 && remote_currentTime > 5 && smoothedSystemTime_ - creationSystemTime_ > 10 )
             {
                 REAL driftAverage = Drift();
                 // con << "Drift: " << driftAverage << "\n";
@@ -256,7 +256,7 @@ void eTimer::ProcessSync()
                 startTimeDrift_.Add( driftDifference + driftAverage, timeDifference );
 
                 driftAverage = startTimeDrift_.GetAverage();
-                if( !drifting_ && startTimeDrift_.GetWeight() > 20 && fabs(driftAverage) > .001 && fabs(driftAverage)*(smoothedSystemTime_ - creationSystemTime_-10) > 0.3 )
+                if( !drifting_ && startTimeDrift_.GetWeight() > 20 && fabs(driftAverage) > .001 && fabs(driftAverage)*(smoothedSystemTime_ - creationSystemTime_-10) > 0.3 && badSyncs_ > 10 )
                 {
                     drifting_ = true;
 #ifdef DEBUG
