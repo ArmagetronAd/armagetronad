@@ -2057,7 +2057,10 @@ void MainMenu(bool ingame){
     //	update_settings();
 
     if (ingame)
+    {
         sr_con.SetHeight(2);
+        se_UserShowScores( false );
+    }
 
     //gLogo::SetDisplayed(true);
 
@@ -4450,6 +4453,9 @@ void sg_ClientFullscreenMessage( tOutput const & title, tOutput const & message,
     // put players into idle mode
     ePlayerNetID::SpectateAll();
     se_ChatState( ePlayerNetID::ChatFlags_Menu, true );
+
+    // remove scores
+    se_UserShowScores( false );
 
     // show message
     uMenu::Message( title, message, timeout );
