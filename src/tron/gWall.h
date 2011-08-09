@@ -95,7 +95,7 @@ public:
 
 #ifndef DEDICATED
     virtual void Render(const eCamera *cam);
-    void RenderList(bool list);
+    // void RenderList(bool list);
 #endif
 
     virtual REAL BlockHeight() const;
@@ -226,18 +226,17 @@ public:
 
 #ifndef DEDICATED
     //! should the whole wall be rendered or just the line/quad segnemts?
-    //! indivisual segments will be rendered without the glBegin/End block.
+    //! individual segments will be rendered without the glBegin/End block.
     enum gWallRenderMode
     {
         gWallRenderMode_Lines = 1,
-        gWallRenderMode_Quads = 2,
-        gWallRenderMode_All =   3
+        gWallRenderMode_Quads = 2
     };
 
-    virtual void Render(const eCamera *cam);
-    void RenderList(bool list, gWallRenderMode mode = gWallRenderMode_All );
+    // virtual void Render(const eCamera *cam);
+    void RenderList(bool list, gWallRenderMode );
     virtual void RenderNormal(const eCoord &x1,const eCoord &x2,REAL ta,REAL te,REAL r,REAL g,REAL b,REAL a, gWallRenderMode mode );
-    virtual void RenderBegin(const eCoord &x1,const eCoord &x2,REAL ta,REAL te,REAL ra,REAL rb,REAL r,REAL g,REAL b,REAL a);
+    virtual void RenderBegin(const eCoord &x1,const eCoord &x2,REAL ta,REAL te,REAL ra,REAL rb,REAL r,REAL g,REAL b,REAL a, gWallRenderMode mode );
 #endif
 
     virtual bool ActionOnQuit();
@@ -266,22 +265,17 @@ public:
 
     void Check() const;
 
-    bool HasDisplayList()
-    {
-        return displayList_.IsSet();
-    }
-
     bool CanHaveDisplayList()
     {
-        return !displayList_.IsInhibited();
+        return displayListInhibition_ == 0;
     }
 
-    //! clears the display list
+    //! clears the display list (possibility)
     void ClearDisplayList( int inhibitThis = 2, int inhibitCycle = 0 );
 private:
     tArray<gPlayerWallCoord> coords_;
 
-    rDisplayList displayList_;
+    int displayListInhibition_;
 };
 
 extern tList<gNetPlayerWall> sg_netPlayerWalls;

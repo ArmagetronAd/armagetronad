@@ -127,6 +127,13 @@ public:
     //! checks whether a wall at a certain distance can have a display list
     static bool CannotHaveList( REAL distance, gCycle const * cycle );
 
+    //! renders all walls scheduled for display list usage
+    void RenderAllWithDisplayList( eCamera const * camera, gCycle * cycle );
+
+    //! render all walls in a list
+    static void RenderAll( eCamera const * camera, gCycle * cycle, gNetPlayerWall * list );
+
+    //! render all walls
     void RenderAll( eCamera const * camera, gCycle * cycle );
     bool Walls() const
     {
