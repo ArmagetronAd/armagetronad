@@ -415,7 +415,7 @@ void gWallRim::RenderReal(const eCamera *cam){
             eCoord vec = P1-P2;
             REAL xs = vec.x*vec.x;
             REAL ys = vec.y*vec.y;
-            REAL intensity = .7 + .3 * xs/(xs+ys);
+            REAL intensity = .7 + .3 * xs/(xs+ys+1E-30);
             RenderEnd( true );
             Color(intensity, intensity, intensity);
         }
@@ -904,15 +904,14 @@ void gNetPlayerWall::RenderList(bool list, gWallRenderMode renderMode ){
             eCoord vec = P2-P1;
             REAL xs = vec.x*vec.x;
             REAL ys = vec.y*vec.y;
-            
-            if( xs+ys <= 0 )
+            REAL denom = xs+ys;
+            if( denom <= 0 )
             {
-                // std::cout << "Null wall!\n";
-                // zero length wall, why are we even here?
+                // zero length wall
                 return;
             }
 
-            REAL intensity = .7 + .3 * xs/(xs+ys);
+            REAL intensity = .7 + .3 * xs/denom;
             r *= intensity;
             g *= intensity;
             b *= intensity;
@@ -973,7 +972,7 @@ void gNetPlayerWall::RenderList(bool list, gWallRenderMode renderMode ){
                 REAL denom = pa-pe;
                 if( denom > 0 )
                 {
-                    // continue;
+                    continue;
                 }
 
                 REAL cut = (cycle_->GetDistance() - cycle_->ThisWallsLength() - pe) / denom;

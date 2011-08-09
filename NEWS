@@ -26,6 +26,9 @@ Changes since 0.2.8.3.1:
 - security fix: oversized packets are ignored properly
 - security fix: never read one byte outside of the received buffer
 - compiler compatibility: adapted to gcc 4.60
+- smaller spelling fixes
+- FOV calculations now correct for widescreen and horizontal splitscreen
+- Additional checks against illegal values passed to renderer
 
 Changes since 0.2.8.3:
 - fixed temporary sound disappearance when alt-tabbing away and back
