@@ -415,7 +415,7 @@ void gWallRim::RenderReal(const eCamera *cam){
             eCoord vec = P1-P2;
             REAL xs = vec.x*vec.x;
             REAL ys = vec.y*vec.y;
-            REAL intensity = .7 + .3 * xs/(xs+ys);
+            REAL intensity = .7 + .3 * xs/(xs+ys+1E-30);
             RenderEnd( true );
             Color(intensity, intensity, intensity);
         }
@@ -903,7 +903,14 @@ void gNetPlayerWall::RenderList(bool list, gWallRenderMode renderMode ){
             eCoord vec = P2-P1;
             REAL xs = vec.x*vec.x;
             REAL ys = vec.y*vec.y;
-            REAL intensity = .7 + .3 * xs/(xs+ys);
+            REAL denom = xs+ys;
+            if( denom <= 0 )
+            {
+                // zero length wall
+                return;
+            }
+
+            REAL intensity = .7 + .3 * xs/denom;
             r *= intensity;
             g *= intensity;
             b *= intensity;
@@ -961,7 +968,13 @@ void gNetPlayerWall::RenderList(bool list, gWallRenderMode renderMode ){
             // cut the end of the wall
             if ( bool(cycle_) && gCycle::WallsLength() > 0 )
             {
-                REAL cut = (cycle_->GetDistance() - cycle_->ThisWallsLength() - pe) / ( pa - pe );
+                REAL denom = pa - pe;
+                if( denom >= 0 )
+                {
+                    continue;
+                }
+                   
+                REAL cut = (cycle_->GetDistance() - cycle_->ThisWallsLength() - pe) / denom;
                 if ( cut < 0 )
                     continue;
                 if ( cut < 1 )
@@ -986,7 +999,13 @@ void gNetPlayerWall::RenderList(bool list, gWallRenderMode renderMode ){
                                 r,g,b,a);
                 }
                 else{
-                    REAL s=((time-gBEG_LEN)-ta)/(te-ta);
+                    REAL denom = te - ta;
+                    if( denom <= 0 )
+                    {
+                        continue;
+                    }
+
+                    REAL s=((time-gBEG_LEN)-ta)/denom;
                     eCoord pm=p1+(p2-p1)*s;
                     RenderBegin(pm,p2,
                                 ta+(te-ta)*s,te,0,
@@ -1141,7 +1160,7 @@ void gNetPlayerWall::RenderBegin(const eCoord &p1,const eCoord &pp2,REAL ta,REAL
     eCoord p2 = pp2;
 
     if (re > 1){
-        if (re > 2)
+        if (re > 2 || re <= ra )
             return;
 
         REAL ratio = (1-ra)/(re-ra);
@@ -1175,7 +1194,7 @@ void gNetPlayerWall::RenderBegin(const eCoord &p1,const eCoord &pp2,REAL ta,REAL
         sr_DepthOffset(true);
         //REAL H=h*hfrac;
 #define segs 5
-        upperlinecolor(r,g,b,a);//a*afunc(rat));
+        // upperlinecolor(r,g,b,a);//a*afunc(rat));
 
         if ( rTextureGroups::TextureMode[rTextureGroups::TEX_WALL] != 0 )
             glDisable(GL_TEXTURE_2D);
@@ -1219,6 +1238,7 @@ void gNetPlayerWall::RenderBegin(const eCoord &p1,const eCoord &pp2,REAL ta,REAL
         // top
 
         //glTexCoord2f(ta+(te-ta)*frag,hfrac*(1-hfunc(rat)));
+        glColor4f(r+cfunc(rat),g+cfunc(rat),b+cfunc(rat),a*afunc(rat));
         glTexCoord2f(ta+(te-ta)*frag,0);
         REAL H=h*hfrac*hfunc(rat);
         glVertex3f(x+H*cycle_->skew*sfunc(rat)*cycle_->dir.y,
