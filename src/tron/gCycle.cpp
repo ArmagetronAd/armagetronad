@@ -4090,7 +4090,7 @@ bool gCycleWallsDisplayListManager::CannotHaveList( REAL distance, gCycle const 
             ( cycle->ThisWallsLength() > 0 && cycle->GetDistance() - cycle->ThisWallsLength() > distance );
 }
 
-void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * cycle )
+void gCycleWallsDisplayListManager::RenderAllWithDisplayList( eCamera const * camera, gCycle * cycle )
 {
     dir_eWall_select();
 
@@ -4116,10 +4116,6 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
             {
                 run->Remove();
             }
-            else
-            {
-                run->Render( camera );
-            }
         }
         run = next;
     }
@@ -4138,21 +4134,6 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
         // yes? Ok, rebuild the list in this case, too
         displayList_.Clear(0);
     }
-    else if ( wallsWithPossibleDisplayList )
-    {
-        // oops, at least render the newcomers normally
-        run = wallList_;
-        while( run )
-        {
-            gNetPlayerWall * next = run->Next();
-            if ( run->CanHaveDisplayList() )
-            {
-                run->Render( camera );
-            }
-
-            run = next;
-        }
-    }
 
     // call display list
     if ( displayList_.Call() )
@@ -4167,7 +4148,6 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
         gNetPlayerWall * next = run->Next();
         if ( !run->CanHaveDisplayList() || ( tailExpired && wallsWithDisplayListMinDistance_ >= run->BegPos() ) )
         {
-            run->Render( camera );
             run->Insert( wallList_ );
         }
         run = next;
@@ -4199,40 +4179,45 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
     // fill display list
     rDisplayListFiller filler( displayList_ );
 
-    if ( !rDisplayList::IsRecording() )
+    if ( rDisplayList::IsRecording() )
     {
-        // display list recording did not start; render traditionally
+        wallsWithDisplayListMinDistance_ = 1E+30;
+        wallsInDisplayList_ = 0;
+
+        // bookkeeping of walls in the display list
         run = wallsWithDisplayList_;
         while( run )
-        {   
+        {
             gNetPlayerWall * next = run->Next();
-            run->Render( camera );
+            if ( run->BegPos() < wallsWithDisplayListMinDistance_ )
+            {
+                wallsWithDisplayListMinDistance_ = run->BegPos();
+            }
+            wallsInDisplayList_++;
             run = next;
         }
+    }
 
+    // render walls with display list
+    RenderAll( camera, cycle, wallsWithDisplayList_ );
+}
+
+void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * cycle, gNetPlayerWall * list )
+{
+    if( !list )
+    {
         return;
     }
 
-    wallsWithDisplayListMinDistance_ = 1E+30;
-    wallsInDisplayList_ = 0;
-
-    // render walls;
     // first, render all lines
     sr_DepthOffset(true);
     if ( rTextureGroups::TextureMode[rTextureGroups::TEX_WALL] != 0 )
         glDisable(GL_TEXTURE_2D);
     
-    run = wallsWithDisplayList_;
+    gNetPlayerWall * run = list;
     while( run )
     {
         gNetPlayerWall * next = run->Next();
-        if ( run->BegPos() < wallsWithDisplayListMinDistance_ )
-        {
-            wallsWithDisplayListMinDistance_ = run->BegPos();
-        }
-
-        wallsInDisplayList_++;
-
         run->RenderList( true, gNetPlayerWall::gWallRenderMode_Lines );
         run = next;
     }
@@ -4242,7 +4227,7 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
     if ( rTextureGroups::TextureMode[rTextureGroups::TEX_WALL] != 0 )
         glEnable(GL_TEXTURE_2D);
     
-    run = wallsWithDisplayList_;
+    run = list;
     while( run )
     {
         gNetPlayerWall * next = run->Next();
@@ -4251,6 +4236,15 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
     }
 
     RenderEnd();
+}
+
+void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * cycle )
+{
+    // render everything you can with a display list
+    RenderAllWithDisplayList( camera, cycle );
+
+    // then, render the rest
+    RenderAll( camera, cycle, wallList_ );
 }
 
 void gCycle::Render(const eCamera *cam){
