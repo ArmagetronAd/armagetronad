@@ -874,6 +874,9 @@ software_renderer_help		Is the OpenGL renderer not hardware accelerated?
 #model
 use_displaylists_help		Use display lists for rendering the cycles?
 
+#walls
+simple_trail_help           If set to 1, trails are rendered simplified for better performance.
+
 #********************************************
 #********************************************
 #
@@ -2115,6 +2118,9 @@ misc_fps_text			Show FPS:
 misc_fps_help			Toggles the display of the current FPS (frames per second) rate in the upper right corner (Needs Show HUD = On to work).
 
 #tweaks menu
+tweaks_simple_trail_text    Simple Trails:
+tweaks_simple_trail_help    If activated, cycle trails are displayed in a simplified form without the buildup after the cycle.
+
 tweaks_displaylists_text	Display Lists:
 tweaks_displaylists_help	Display lists are a feature of OpenGL for rendering the same thing many times. Some implementations are broken; if you do no see the cycles, you should disable this feature.
 tweaks_displaylists_off_text Off

@@ -447,7 +447,6 @@ static tConfItem<bool> crexp("EXPLOSION",sg_crashExplosion);
 #ifndef DEDICATED
 //extern bool png_screenshot;		// from rSysdep.cpp
 //static tConfItem<bool> pns("PNG_SCREENSHOT",png_screenshot);
-#endif
 
 static uMenuItemToggle  t32b
 (&screen_menu_detail,"$detail_text_truecolor_text",
@@ -510,6 +509,13 @@ static uMenuItemToggle cs
 (&screen_menu_prefs,"$pref_sparks_text",
  "$pref_sparks_help",
  crash_sparks);
+
+// frim gWall.cpp
+extern bool sg_simpleTrail;
+static uMenuItemToggle sgm_simpleTrail
+(&screen_menu_tweaks,"$tweaks_simple_trail_text",
+ "$tweaks_simple_trail_help"
+ ,sg_simpleTrail);
 
 static uMenuItemSelection<rDisplayListUsage> dl
 (&screen_menu_tweaks,"$tweaks_displaylists_text",
@@ -629,13 +635,7 @@ uMenuItemToggle hud2
 (&hud_prefs,"$pref_showhud_text",
  "$pref_showhud_help",subby_ShowHUD);
 
-
-
 static tConfItem<bool> WRAP("WRAP_MENU",uMenu::wrap);
-
-
-
-#ifndef DEDICATED
 
 class gMemuItemConsole: uMenuItemStringWithHistory{
 public:

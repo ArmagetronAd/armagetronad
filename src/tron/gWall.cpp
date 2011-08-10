@@ -814,6 +814,7 @@ void gPlayerWall::Split(eWall *& w1,eWall *& w2,REAL a){
 #define gCYCLE_LEN 1.5
 #define gBEG_OFFSET .25
 #define gBEG_LEN 2
+#define gBEG_LEN_GIVEUP .4
 //#define gCYCLE_LEN 3.8
 //#define gBEG_OFFSET 1
 
@@ -856,6 +857,9 @@ void gPlayerWall::RenderList(bool list)
     netWall_->RenderList( list );
 }
  */
+
+bool sg_simpleTrail = false;
+static tConfItem< bool > sgc_simpleTrail( "SIMPLE_TRAIL", sg_simpleTrail );
 
 void gNetPlayerWall::RenderList(bool list, gWallRenderMode renderMode ){
     if ( !cycle_ )
@@ -986,10 +990,28 @@ void gNetPlayerWall::RenderList(bool list, gWallRenderMode renderMode ){
                 }
             }
 
-            if (te+gBEG_LEN<=time){
+            if(sg_simpleTrail)
+            {
+                if (te+gBEG_LEN_GIVEUP <= time)
+                {
+                    RenderNormal(p1,p2,ta,te,r,g,b,a,renderMode);
+                }
+                else if( ta+gBEG_LEN_GIVEUP <= time )
+                {
+                    REAL denom = te - ta;
+                    if( denom <= 0 )
+                    {
+                        continue;
+                    }
+
+                    REAL s=((time-gBEG_LEN_GIVEUP)-ta)/denom;
+                    eCoord pm=p1+(p2-p1)*s;
+                    RenderNormal(p1,pm,ta,ta+(te-ta)*s,r,g,b,a,renderMode);
+                }
+            }
+            else if (te+gBEG_LEN<=time){
                 RenderNormal(p1,p2,ta,te,r,g,b,a,renderMode);
             }
-
             else{ // complicated
                 // can't squeeze that into a display list
                 ClearDisplayList();
