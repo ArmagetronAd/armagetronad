@@ -20,7 +20,7 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
-					<Add library=".\libZThread.a" />
+					<Add library="..\..\..\winlibs\build\dist\libZThread.a" />
 					<Add library="..\..\..\winlibs\protobuf\vsprojects\libprotobuf.a" />
 				</Linker>
 			</Target>
@@ -32,13 +32,13 @@
 				<Option compiler="gcc" />
 				<Option projectResourceIncludeDirsRelation="1" />
 				<Compiler>
-					<Add option="-W" />
 					<Add option="-g" />
+					<Add option="-W" />
 					<Add option="-D_DEBUG" />
 					<Add option="-DDEBUG" />
 				</Compiler>
 				<Linker>
-					<Add library=".\libZThread_debug.a" />
+					<Add library="..\..\..\winlibs\build\debug\libZThread.a" />
 					<Add library="..\..\..\winlibs\protobuf\vsprojects\libprotobuf_debug.a" />
 				</Linker>
 			</Target>
