@@ -2035,6 +2035,9 @@ detail_floor_mirror_ow_help	Everything that is important in the game
 detail_floor_mirror_ev_text	Everything!
 detail_floor_mirror_ev_help	(Currently no difference to "Objects and Walls".)
 
+detail_simple_trail_text    Simple Trails:
+detail_simple_trail_help    If activated, cycle trails are displayed in a simplified form without the buildup after the cycle.
+
 detail_dither_text		Dithering:
 detail_dither_help		If the colour depth of your current graphic mode does not directly allow the colour that is to be drawn, it is simulated by mixing other colours. Turning it of will improve software rendering performance on some systems; in low resolution modes, turning it off will even improve the visual quality (IMHO).
 
@@ -2118,9 +2121,6 @@ misc_fps_text			Show FPS:
 misc_fps_help			Toggles the display of the current FPS (frames per second) rate in the upper right corner (Needs Show HUD = On to work).
 
 #tweaks menu
-tweaks_simple_trail_text    Simple Trails:
-tweaks_simple_trail_help    If activated, cycle trails are displayed in a simplified form without the buildup after the cycle.
-
 tweaks_displaylists_text	Display Lists:
 tweaks_displaylists_help	Display lists are a feature of OpenGL for rendering the same thing many times. Some implementations are broken; if you do no see the cycles, you should disable this feature.
 tweaks_displaylists_off_text Off

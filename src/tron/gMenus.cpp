@@ -407,6 +407,14 @@ static uMenuItemToggle fs_dither
  "$detail_dither_help",
  sr_dither);
 
+// from gWall.cpp
+extern bool sg_simpleTrail;
+static uMenuItemToggle sgm_simpleTrail
+(&screen_menu_detail,
+ "$detail_simple_trail_text",
+ "$detail_simple_trail_help",
+ sg_simpleTrail);
+
 static uMenuItemSelection<int> mfd
 (&screen_menu_detail,
  "$detail_floor_text",
@@ -509,13 +517,6 @@ static uMenuItemToggle cs
 (&screen_menu_prefs,"$pref_sparks_text",
  "$pref_sparks_help",
  crash_sparks);
-
-// frim gWall.cpp
-extern bool sg_simpleTrail;
-static uMenuItemToggle sgm_simpleTrail
-(&screen_menu_tweaks,"$tweaks_simple_trail_text",
- "$tweaks_simple_trail_help"
- ,sg_simpleTrail);
 
 static uMenuItemSelection<rDisplayListUsage> dl
 (&screen_menu_tweaks,"$tweaks_displaylists_text",
