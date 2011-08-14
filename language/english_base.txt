@@ -898,6 +898,9 @@ software_renderer_help		Is the OpenGL renderer not hardware accelerated?
 #model
 use_displaylists_help		Use display lists for rendering the cycles?
 
+#walls
+simple_trail_help           If set to 1, trails are rendered simplified for better performance.
+
 #********************************************
 #********************************************
 #
@@ -2175,6 +2178,9 @@ detail_floor_mirror_ow_help	Everything that is important in the game
 
 detail_floor_mirror_ev_text	Everything!
 detail_floor_mirror_ev_help	(Currently no difference to "Objects and Walls".)
+
+detail_simple_trail_text    Simple Trails:
+detail_simple_trail_help    If activated, cycle trails are displayed in a simplified form without the buildup after the cycle.
 
 detail_dither_text		Dithering:
 detail_dither_help		If the colour depth of your current graphic mode does not directly allow the colour that is to be drawn, it is simulated by mixing other colours. Turning it of will improve software rendering performance on some systems; in low resolution modes, turning it off will even improve the visual quality (IMHO).

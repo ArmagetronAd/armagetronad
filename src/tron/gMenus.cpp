@@ -416,6 +416,14 @@ static uMenuItemToggle fs_dither
  "$detail_dither_help",
  sr_dither);
 
+// from gWall.cpp
+extern bool sg_simpleTrail;
+static uMenuItemToggle sgm_simpleTrail
+(&screen_menu_detail,
+ "$detail_simple_trail_text",
+ "$detail_simple_trail_help",
+ sg_simpleTrail);
+
 static uMenuItemSelection<int> mfd
 (&screen_menu_detail,
  "$detail_floor_text",
