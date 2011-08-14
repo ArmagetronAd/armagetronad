@@ -45,6 +45,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <sstream>
 #include <set>
 
+#ifndef DEDICATED
 static tConfItem<int>   tm0("TEXTURE_MODE_0",rTextureGroups::TextureMode[0]);
 static tConfItem<int>   tm1("TEXTURE_MODE_1",rTextureGroups::TextureMode[1]);
 static tConfItem<int>   tm2("TEXTURE_MODE_2",rTextureGroups::TextureMode[2]);
@@ -77,12 +78,10 @@ static tConfItemLine c_rEnd("GL_RENDERER",gl_renderer);
 static tConfItemLine c_vEnd("GL_VENDOR",gl_vendor);
 // static tConfItemLine a_ver("ARMAGETRON_VERSION",st_programVersion);
 
-#ifndef DEDICATED
 static uMenuItemStringWithHistory::history_t &sg_consoleHistory() {
     static uMenuItemStringWithHistory::history_t instance("console_history.txt");
     return instance;
 }
-#endif
 
 static int sg_consoleHistoryMaxSize=100; // size of the console history
 static tSettingItem< int > sg_consoleHistoryMaxSizeConf("HISTORY_SIZE_CONSOLE",sg_consoleHistoryMaxSize);
@@ -463,10 +462,8 @@ static tConfItem<bool> crexp("EXPLOSION",sg_crashExplosion);
 extern bool sg_crashExplosionHud;   // from gExplosion.cpp
 static tConfItem<bool> crexph("EXPLOSION_HUD",sg_crashExplosionHud);
 
-#ifndef DEDICATED
 //extern bool png_screenshot;		// from rSysdep.cpp
 //static tConfItem<bool> pns("PNG_SCREENSHOT",png_screenshot);
-#endif
 
 static uMenuItemToggle  t32b
 (&screen_menu_detail,"$detail_text_truecolor_text",
@@ -579,8 +576,6 @@ tCONFIG_ENUM( rSysDep::rSwapOptimize );
 static tConfItem< rSysDep::rSwapOptimize > swapOptimizeCI("SWAP_OPTIMIZE", rSysDep::swapOptimize_ );
 
 static tConfItem<bool> WRAP("WRAP_MENU",uMenu::wrap);
-
-#ifndef DEDICATED
 
 class gAutoCompleterConsole : public uAutoCompleter {
 public:

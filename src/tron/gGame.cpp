@@ -715,6 +715,7 @@ static tConfItem<REAL>   sp_wsu		("SP_WALLS_STAY_UP_DELAY"	,		singlePlayer.walls
 static tConfItem<REAL>   sp_wl		("SP_WALLS_LENGTH"		    ,		singlePlayer.wallsLength     );
 static tConfItem<REAL>   sp_er		("SP_EXPLOSION_RADIUS"		,		singlePlayer.explosionRadius );
 
+#ifndef DEDICATED
 static void GameSettingsMP(){
     multiPlayer.Menu();
 }
@@ -726,6 +727,7 @@ static void GameSettingsSP(){
 static void GameSettingsCurrent(){
     sg_currentSettings->Menu();
 }
+#endif
 
 static REAL sg_Timeout = 5.0f;
 static tConfItem<REAL>   sg_ctimeout("GAME_TIMEOUT"		,		sg_Timeout );
@@ -1884,6 +1886,7 @@ void net_options(){
 }
 
 void sg_HostGameMenu(){
+#ifndef DEDICATED
     uMenu net_menu("$network_host_text");
 
     sg_HostMenu = &net_menu;
@@ -1912,6 +1915,7 @@ void sg_HostGameMenu(){
     net_menu.Enter();
 
     sg_HostMenu = NULL;
+#endif
 }
 
 #ifndef DEDICATED
@@ -2022,6 +2026,7 @@ static tConfItemFunc exit_conf("EXIT",&Quit_conf);
 
 void st_PrintPathInfo(tOutput &buf);
 
+#ifndef DEDICATED
 static void PlayerLogIn()
 {
     ePlayer::LogIn();
@@ -2052,8 +2057,10 @@ void sg_DisplayVersionInfo() {
 }
 
 void sg_StartupPlayerMenu();
+#endif
 
 void MainMenu(bool ingame){
+#ifndef DEDICATED
     //	update_settings();
 
     if (ingame)
@@ -2310,6 +2317,7 @@ void MainMenu(bool ingame){
     {
         delete auth;
     }
+#endif
 }
 
 
