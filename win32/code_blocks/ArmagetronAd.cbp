@@ -26,7 +26,7 @@
 					<Add library="..\..\..\winlibs\build\dist\SDL.dll" />
 					<Add library="..\..\..\winlibs\build\dist\FTGL.dll" />
 					<Add library="..\..\..\winlibs\protobuf\vsprojects\libprotobuf.a" />
-					<Add library=".\libZThread.a" />
+					<Add library="..\..\..\winlibs\build\dist\libZThread.a" />
 				</Linker>
 			</Target>
 			<Target title="Win32 Debug">
@@ -47,7 +47,7 @@
 					<Add library="..\..\..\winlibs\build\debug\SDL.dll" />
 					<Add library="..\..\..\winlibs\build\debug\FTGL.dll" />
 					<Add library="..\..\..\winlibs\protobuf\vsprojects\libprotobuf_debug.a" />
-					<Add library=".\libZThread_debug.a" />
+					<Add library="..\..\..\winlibs\build\debug\libZThread.a" />
 				</Linker>
 			</Target>
 		</Build>
