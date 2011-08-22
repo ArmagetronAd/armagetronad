@@ -26,6 +26,9 @@ file by guru3/tank program
 
 */
 
+#ifndef ArmageTron_GSTATLIST_H
+#define ArmageTron_GSTATLIST_H
+
 #include "defs.h"
 //#include "tStatEntry.h"
 #include "tStatFile.h"
@@ -59,3 +62,5 @@ private:
     //local copy of statOutputType because a run time change would be painful
     int outputType;
 };
+
+#endif

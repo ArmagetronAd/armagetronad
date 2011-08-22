@@ -26,6 +26,9 @@ file by guru3/tank program
 
 */
 
+#ifndef ArmageTron_TSTATFILE_H
+#define ArmageTron_TSTATFILE_H
+
 //#include "tString.h"
 #include "tStatEntry.h"
 #include "tList.h"
@@ -54,3 +57,5 @@ private:
     //file descriptor
     std::fstream myFileD;
 };
+
+#endif
