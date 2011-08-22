@@ -2822,11 +2822,13 @@ bool gCycle::Timestep(REAL currentTime){
 // lets a value decay smoothly
 static void DecaySmooth( REAL& smooth, REAL relSpeed, REAL minSpeed, REAL clamp )
 {
+#ifdef DEBUG
     if ( fabs(smooth) > .01 )
     {
         int x;
         x = 1;
     }
+#endif
 
     // increase correction speed if the value is out of bounds
     if ( clamp > 0 )
@@ -2879,7 +2881,7 @@ bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
     if (!finite(skewDot))
         skewDot=0;
 
-    eCoord oldpos=pos;
+    // eCoord oldpos=pos;
 
     REAL ts=(currentTime-lastTime);
 
@@ -4964,11 +4966,13 @@ void gCycle::WriteSync(nMessage &m){
     if ( sg_verletIntegration.Supported() )
         speed = Speed();
 
+#ifdef DEBUG
     if ( speed > 15 )
     {
         int x;
         x = 0;
     }
+#endif
 
     m << speed;
     m << short( Alive() ? 1 : 0 );
@@ -5093,7 +5097,9 @@ bool gCycle::Extrapolate( REAL dt )
 {
     tASSERT( extrapolator_ );
 
+#ifdef DEBUG
     eCoord posBefore = extrapolator_->Position();
+#endif
 
     // calculate target time
     REAL newTime = extrapolator_->LastTime() + dt;
@@ -5144,7 +5150,7 @@ bool gCycle::Extrapolate( REAL dt )
 void se_SanifyDisplacement( eGameObject* base, eCoord& displacement )
 {
     eCoord base_pos = base->Position();
-    eCoord reachable_pos = base->Position() + displacement;
+    // eCoord reachable_pos = base->Position() + displacement;
 
     int timeout = 5;
     while( timeout > 0 )
@@ -5294,7 +5300,7 @@ void gCycle::ReadSync( nMessage &m )
     short sync_alive;               // is this cycle alive?
     unsigned short sync_wall=0;     // ID of wall
 
-    eCoord new_pos = pos;	// the extrapolated position
+    // eCoord new_pos = pos;	// the extrapolated position
 
     // warning: depends on the implementation of eNetGameObject::WriteSync
     // since we don't call eNetGameObject::ReadSync.

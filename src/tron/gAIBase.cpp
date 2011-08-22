@@ -2301,7 +2301,7 @@ bool gAIPlayer::EmergencySurvive( ThinkData & data, int enemyevade, int prefered
         if (character->properties[AI_ENEMY] > 7)
         {
             // would he be able to trap us if we drive straight on?
-            bool trap[2] = {false, false};
+            // bool trap[2] = {false, false};
 
             if (!isTrapped)
                 for (i = 1; i>=0; i--)
@@ -2324,7 +2324,7 @@ bool gAIPlayer::EmergencySurvive( ThinkData & data, int enemyevade, int prefered
                     if (loop)
                         if (winding * (i+i-1) < 0)
                         {
-                            trap[i] = true;
+                            // trap[i] = true;
                             REAL x = enemypos.x * (i+i-1);
                             REAL y = enemypos.y;
 

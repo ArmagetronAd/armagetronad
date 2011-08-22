@@ -276,12 +276,13 @@ void tAdvanceFrameSys( tTime & start, tTime & relative )
         relative = newRelative;
     }
 
-
+#ifdef DEBUG
     if ( relative.seconds > 20 )
     {
         int x;
         x = 0;
     }
+#endif
 }
 
 static bool s_delayedInPlayback = false;

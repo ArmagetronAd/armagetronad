@@ -309,7 +309,7 @@ static void display_hud_subby( ePlayer* player ){
         if(subby_ShowHUD){
             // static int max=0,lastmax=0;
             // static int imax=-1,lastimax=0;
-            static REAL imax=-1;
+            // static REAL imax=-1;
             char fasteststring[50];
             // REAL distance;
             static float maxmeterspeed= 50;
@@ -317,11 +317,11 @@ static void display_hud_subby( ePlayer* player ){
             static REAL max=max_player_speed;
             static tString name;
             static tString ultiname;
-            static bool  wrotefastest = false;
-            static bool wrote10 =false;
+            // static bool  wrotefastest = false;
+            // static bool wrote10 =false;
             static bool belowzero=false;
             static REAL ultimax=0;
-            static REAL timelast;
+            // static REAL timelast;
             static REAL myscore, topscore;
             // tString realname = ePlayer::PlayerConfig(0)->Name();
 
@@ -346,10 +346,10 @@ static void display_hud_subby( ePlayer* player ){
                             //  con << "testcon";
                             //  sn_CenterMessage(message);
                         }else{
-                            timelast = se_GameTime();
+                            // timelast = se_GameTime();
                             max=0;
-                            wrotefastest = false;
-                            wrote10 =false;
+                            // wrotefastest = false;
+                            // wrote10 =false;
                         }
                     }else if(se_GameTime()>0&&belowzero){
                         belowzero=false;
@@ -372,7 +372,7 @@ static void display_hud_subby( ePlayer* player ){
                         if (h->Speed()>max){
                             max =  (float) h->Speed();  // changed to float for more accuracy in reporting top speed
                             name = p->GetName();
-                            imax = i;
+                            // imax = i;
 
                         }
                         if( h->Speed()>ultimax){
