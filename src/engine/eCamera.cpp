@@ -1765,7 +1765,7 @@ void eCamera::Timestep(REAL ts){
             if ( Center() &&  wrongDirection > 0 )
             {
                 // if so, turn to the side using the last driving direction
-                newdir = newdir + Center()->LastDirection()*(wrongDirection*ts*turnSpeed*s_customTurnSpeed180);
+                newdir = newdir + Center()->LastDirection()*(wrongDirection*ts*turnSpeed*customTurnSpeed180);
             }
         }
         else
