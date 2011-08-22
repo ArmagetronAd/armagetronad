@@ -820,19 +820,21 @@ nWaitForAck::~nWaitForAck(){
 }
 
 void nWaitForAck::Ackt(unsigned short id,unsigned short peer){
+#ifdef DEBUG_X
     int success=0;
+#endif
     for(int i=sn_pendingAcks.Len()-1;i>=0;i--){
         nWaitForAck * ack = sn_pendingAcks(i);
         if (ack->message->MessageID()==id &&
                 ack->receiver==peer){
-            success=1;
-
 #ifdef DEBUG
             //      if (sn_pendingAcks(i)->message == sn_WatchMessage)
             //	st_Breakpoint();
 #endif
 
 #ifdef DEBUG_X
+            success=1;
+
             if (ack->message->descriptor>1)
                 con << "AT  " << ack->message->descriptor << '\n';
 #endif

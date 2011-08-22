@@ -109,8 +109,10 @@ static bool st_ReadEscapeSequence( char & c, std::istream & s )
 {
     char c2 = '\0';
     bool ret = st_ReadEscapeSequence( c, c2, s );
-    if ( c2 )
+    if ( c2 && s.good() )
+    {
         s.putback( c2 );
+    }
     return ret;
 }
 
@@ -123,7 +125,10 @@ void tString::ReadLine(std::istream &s, bool enableEscapeSequences ){
     while(c!='\n' && c!='\r' && isblank(c) &&  s.good() && !s.eof()){
         c=s.get();
     }
-    s.putback(c);
+    if(s.good())
+    {
+        s.putback(c);
+    }
 
     c='x';
 
@@ -269,7 +274,10 @@ std::istream & operator>> (std::istream &s,tString &x){
         // lastEscape = thisEscape;
     }
 
-    s.putback(c);
+    if(s.good())
+    {
+        s.putback(c);
+    }
     x[i]='\0';
     return s;
 }
