@@ -133,7 +133,6 @@ libengine_a_SOURCES=engine/eAdvWall.cpp engine/eAdvWall.h engine/eAuthentication
 	engine/eEventNotification.h engine/eEventNotification.cpp \
 	engine/eLagCompensation.cpp engine/eLagCompensation.h \
 	engine/eSoundMixer.h engine/eSoundMixer.cpp \
-	engine/eSound.h engine/eSound.cpp \
 	engine/eChat.cpp engine/eChat.h \
 	engine/eEventNotification.h engine/eEventNotification.cpp
 

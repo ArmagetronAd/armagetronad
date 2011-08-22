@@ -230,10 +230,10 @@ static int se_Wrap_SDL_InitSubSystem()
 }
 #endif
 
-// from eSound.cpp, old sound system
-void fill_audio(void *udata, Uint8 *stream, int len);
-
 int se_mixerFrequency;
+
+// I'm going to hell for this
+#include "eSound.cpp"
 
 void eSoundMixer::Init() {
 #ifdef HAVE_LIBSDL_MIXER

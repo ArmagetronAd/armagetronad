@@ -502,7 +502,7 @@ eLegacyWavData::~eLegacyWavData(){
 }
 
 // from eSoundMixer.cpp
-extern int se_mixerFrequency;
+// extern int se_mixerFrequency;
 
 bool eLegacyWavData::Mix(Uint8 *dest,Uint32 playlen,eAudioPos &pos,
                    REAL Rvol,REAL Lvol,REAL Speed,bool loop){
