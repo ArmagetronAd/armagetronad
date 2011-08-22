@@ -1712,15 +1712,15 @@ void nServerInfo::TellMasterAboutMe(nServerInfoBase *masterInfo)
     // don't reinitialize the network system
     nSocketResetInhibitor inhibitor;
 
-    static unsigned int lastPort = 0;
+    // static unsigned int lastPort = 0;
 
     // enter server state so we know our true port number
     sn_SetNetState(nSERVER);
-    unsigned int port = sn_GetServerPort();
+    // unsigned int port = sn_GetServerPort();
     //if (port == lastPort)
     //    return; // the master already knows about us
 
-    lastPort = port;
+    // lastPort = port;
 
     //    sn_SetNetState(nSTANDALONE);
 

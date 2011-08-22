@@ -3633,7 +3633,7 @@ void gGame::Analysis(REAL time){
     int teams_alive=0;
     // int last_alive=-1;
     int last_team_alive=-1;
-    int last_alive_and_not_disconnected=-1;
+    // int last_alive_and_not_disconnected=-1;
     int humans = 0;
     int active_humans = 0;
     int ais    = 0;
@@ -3675,7 +3675,7 @@ void gGame::Analysis(REAL time){
                             alive++;
                             if (p->IsActive())
                             {
-                                last_alive_and_not_disconnected=i;
+                                // last_alive_and_not_disconnected=i;
                                 alive_and_not_disconnected++;
                             }
                         }
