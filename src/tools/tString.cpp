@@ -365,7 +365,10 @@ void tString::ReadLine( std::istream & s, bool enableEscapeSequences, int indent
         *eatenWhitespace = whitespace;
     }
 
-    s.putback(c);
+    if(s.good())
+    {
+        s.putback(c);
+    }
     c='x';
 
     while( true )
