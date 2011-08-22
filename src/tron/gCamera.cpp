@@ -48,8 +48,10 @@ gCamera::gCamera(eGrid *grid, rViewport *view,ePlayerNetID *p,ePlayer *lp,eCamMo
 
 
 gCamera::~gCamera(){
+#ifdef DEBUG
     int x;
     x =0;
+#endif
 }
 
 eCoord gCamera::CenterCycleDir(){

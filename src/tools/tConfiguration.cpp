@@ -387,7 +387,10 @@ int tConfItemBase::EatWhitespace(std::istream &s){
             !s.eof())
         c=s.get();
 
-    s.putback(c);
+    if( s.good() )
+    {
+        s.putback(c);
+    }
 
     return c;
 }
