@@ -130,6 +130,7 @@ void test_decorators()
 
     base * p = new base;
     int * decoration = &decorator.Get( *p );
+    *decoration = 5;
     delete p;
     p = new derived;
     decoration = &decorator.Get( *p );

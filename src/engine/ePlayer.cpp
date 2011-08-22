@@ -6578,7 +6578,6 @@ void ePlayerNetID::DisplayScores()
 
         // print team ranking if there actually is a team with more than one player
         int maxPlayers = 20;
-        bool showTeam = false;
         for ( int i = eTeam::teams.Len() - 1; i >= 0; --i )
         {
             if ( eTeam::teams[i]->NumPlayers() > 1 ||
@@ -6587,7 +6586,6 @@ void ePlayerNetID::DisplayScores()
                 y = eTeam::RankingGraph(y);
                 y-=.06;
                 maxPlayers -= ( eTeam::teams.Len() > 6 ? 6 : eTeam::teams.Len() ) + 2;
-                showTeam = true;
                 break;
             }
         }

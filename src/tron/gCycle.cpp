@@ -4729,7 +4729,7 @@ void gCycle::Render2D(tCoord scale) const {
     }
     glColor4f(color_.r_, color_.g_, color_.b_, alpha);
     eCoord pos = PredictPosition(), dir = Direction();
-    tCoord p = pos;
+    // tCoord p = pos;
     glPushMatrix();
     GLfloat m[16] = {
                         scale.x * dir.x, scale.y * dir.y, 0, 0,
@@ -5381,7 +5381,6 @@ void gCycle::ReadSync( Game::CycleSync const & syncX, nSenderInfo const & sender
     SyncData sync;
 
     short sync_alive;               // is this cycle alive?
-    unsigned short sync_wall=0;     // ID of wall
 
     // eCoord new_pos = pos;	// the extrapolated position
 
@@ -5404,7 +5403,6 @@ void gCycle::ReadSync( Game::CycleSync const & syncX, nSenderInfo const & sender
     sync.speed = syncX.speed();
     sync_alive = syncX.alive();
     sync.distance = syncX.distance();
-    sync_wall = syncX.wall_id();
     if ( syncX.has_turns() )
         sync.turns = syncX.turns();
     if ( syncX.has_braking() )

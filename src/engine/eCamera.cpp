@@ -1522,8 +1522,10 @@ static int se_cameraEye2Color = 6; // 110b (BGr)
 static tSettingItem<int> sece2ca("CAMERA_EYE_2_COLOR", se_cameraEye2Color);
 static tSettingItem<int> sece2cb("CAMERA_EYE_2_COLOUR", se_cameraEye2Color);
 
+#ifdef DUNNOWHATTHISISSUPPOSEDTODO
 static float se_cameraInMaxFocusDistance = .5; //factor of the current speed
 static tSettingItem<float> secimfd("CAMERA_IN_MAX_FOCUS_DISTANCE", se_cameraInMaxFocusDistance);
+#endif
 
 #ifndef DEDICATED
 bool displaying=false;
@@ -1667,12 +1669,14 @@ void eCamera::Render(){
 			if (mirrorView_) glScalef(-1,1,1);
             vp->Perspective(fov,zNear,1E+20,-se_cameraEyeDistance/2.);
 
+#ifdef DUNNOWHATTHISISSUPPOSEDTODO
             float offset = 0;
             if(mode == CAMERA_IN) {
                 eSensor test(Center(), Center()->Position(), Center()->Direction());
                 test.detect(se_cameraInMaxFocusDistance*Center()->Speed());
                 offset = test.hit;
             }
+#endif
 
             gluLookAt(0,
                       0,

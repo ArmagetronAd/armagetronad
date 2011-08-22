@@ -1411,8 +1411,10 @@ static void sn_CheckMessage
     // they may already be expired on the receiver side.
     if ( long( lastMessageID - message->MessageIDBig() ) > 0 )
     {
+#ifdef DEBUG
         int x;
         x = 0;
+#endif
         return;
     }
     
