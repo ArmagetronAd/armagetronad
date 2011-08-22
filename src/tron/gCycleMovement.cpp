@@ -590,7 +590,7 @@ void gEnemyInfluence::AddWall( const eWall * wall, eCoord const & pos, REAL time
         // get the position of the collision point
         alpha = playerWall->Edge()->Ratio( pos );
     }
-    REAL timeBuilt = playerWall->Time( 0.5f );
+    REAL timeBuilt = playerWall->Time( alpha );
 
     AddWall( playerWall, timeBuilt - timePenalty, thisCycle );
 }
