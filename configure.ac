@@ -391,6 +391,10 @@ test $CODELEVEL -ge 2 && CXXFLAGS="$CXXFLAGS -Wpointer-arith -W -Wcast-qual -Wca
 test $CODELEVEL -ge 3 && CXXFLAGS="$CXXFLAGS -Weffc++ -Wshadow -Winline -Wfloat-equal -Wconversion"
 test $CODELEVEL -ge 4 && CXXFLAGS="$CXXFLAGS -Werror"
 
+# unused variables should be tolerated while debugging, they're sometimes just there
+# to be printed in the debugger
+test $CODELEVEL -ge 1 && test $DEBUGLEVEL -ge 1 && CXXFLAGS="$CXXFLAGS -Wno-unused-but-set-variable"
+
 dnl determine whether "games" should be put into paths: not if it was
 dnl requested with --disable-games or if "games" is already included
 dnl in the data path
