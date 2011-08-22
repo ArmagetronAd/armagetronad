@@ -47,6 +47,7 @@ class gNetPlayerWall;
 class gPlayerWall;
 class eTempEdge;
 class gJoystick;
+class eSoundPlayer;
 struct gPredictPositionData;
 
 // minimum time between two cycle turns
@@ -160,6 +161,8 @@ class gCycle: public gCycleMovement
     friend class gNetPlayerWall;
     friend class gDestination;
     friend class gCycleWallRenderer;
+
+    eSoundPlayer *engine; //!< engine sound
 
     REAL spawnTime_;    //!< time the cycle spawned at
     REAL lastTimeAnim;  //!< last time animation was simulated at
@@ -328,8 +331,8 @@ public:
 
     virtual bool RenderCockpitFixedBefore(bool primary=true);
 
-    //virtual void SoundMix(unsigned char *dest,unsigned int len,
-    //                      int viewer,REAL rvol,REAL lvol);
+    virtual void SoundMix(unsigned char *dest,unsigned int len,
+                          int viewer,REAL rvol,REAL lvol);
 #endif
 
     virtual eCoord CamPos() const;

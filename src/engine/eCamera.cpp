@@ -2421,54 +2421,53 @@ void eCamera::s_Timestep(eGrid *grid, REAL time){
 
 #ifndef DEDICATED
 
-//void eCamera::SoundMix(Uint8 *dest,unsigned int len){
-//    if (!this)
-//        return;
-//
-//    if (id>=0){
-//        eGameObject *c=Center();
-//        for(int i=grid->gameObjects.Len()-1;i>=0;i--){
-//            eGameObject *go=grid->gameObjects(i);
-//            SoundMixGameObject(dest,len,go);
-//        }
-//        if (c && c->id<0)
-//            SoundMixGameObject(dest,len,c);
-//    }
-//}
-//
-//
-//void eCamera::SoundMixGameObject(Uint8 *dest,unsigned int len,eGameObject *go){
-//    eCoord vec((go->pos-pos).Turn(dir.Conj()));
-//    REAL dist_squared=vec.NormSquared()+(z-go->z)*(z-go->z);
-//
-//    //dist_squared*=.1;
-//    if (dist_squared<1)
-//        dist_squared=1;
-//
-//    REAL dist=sqrt(dist_squared);
-//
-//#define MAXVOL .4
-//
-//    REAL l=(dist*.5+vec.y)/dist_squared;
-//    REAL r=(dist*.5-vec.y)/dist_squared;
-//
-//    if (l<0) l=0;
-//    if (r<0) r=0;
-//    if (l>MAXVOL) l=MAXVOL;
-//    if (r>MAXVOL) r=MAXVOL;
-//
-//    if (go==Center()){
-//        if (mode==CAMERA_IN || mode==CAMERA_SMART_IN)
-//            l=r=.2;
-//        else if (mode!=CAMERA_FREE){
-//            l*=.9;
-//            r*=.9;
-//        }
-//    }
-//
-//    go->SoundMix(dest,len,id,r,l);
-//}
+void eCamera::SoundMix(Uint8 *dest,unsigned int len){
+    if (!this)
+        return;
 
+    if (id>=0){
+        eGameObject *c=Center();
+        for(int i=grid->gameObjects.Len()-1;i>=0;i--){
+            eGameObject *go=grid->gameObjects(i);
+            SoundMixGameObject(dest,len,go);
+        }
+        if (c && c->id<0)
+            SoundMixGameObject(dest,len,c);
+    }
+}
+
+
+void eCamera::SoundMixGameObject(Uint8 *dest,unsigned int len,eGameObject *go){
+    eCoord vec((go->pos-pos).Turn(dir.Conj()));
+    REAL dist_squared=vec.NormSquared()+(z-go->z)*(z-go->z);
+
+    //dist_squared*=.1;
+    if (dist_squared<1)
+        dist_squared=1;
+
+    REAL dist=sqrt(dist_squared);
+
+#define MAXVOL .4
+
+    REAL l=(dist*.5+vec.y)/dist_squared;
+    REAL r=(dist*.5-vec.y)/dist_squared;
+
+    if (l<0) l=0;
+    if (r<0) r=0;
+    if (l>MAXVOL) l=MAXVOL;
+    if (r>MAXVOL) r=MAXVOL;
+
+    if (go==Center()){
+        if (mode==CAMERA_IN || mode==CAMERA_SMART_IN)
+            l=r=.2;
+        else if (mode!=CAMERA_FREE){
+            l*=.9;
+            r*=.9;
+        }
+    }
+
+    go->SoundMix(dest,len,id,r,l);
+}
 
 #endif
 

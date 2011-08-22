@@ -60,7 +60,7 @@ public:
     eAudioPos(){Reset();}
 };
 
-class eWavData: public tListItem<eWavData>{
+class eLegacyWavData: public tListItem<eLegacyWavData>{
     SDL_AudioSpec spec; // the audio format
     Uint8         *data; // the sound data
     Uint32        len;   // the data's length
@@ -70,13 +70,13 @@ class eWavData: public tListItem<eWavData>{
     bool          freeData; // manually free data or use SDL_FreeWAV?
     bool          loadError; //!< was there an error during loading?
 
-    static eWavData* s_anchor; // list anchor
+    static eLegacyWavData* s_anchor; // list anchor
 
 public:
     bool alt; // was the alternative used?
 
-    eWavData(const char * fileName,const char *alternative_file=""); // load file
-    ~eWavData();
+    eLegacyWavData(const char * fileName,const char *alternative_file=""); // load file
+    ~eLegacyWavData();
 
     void Load(); 		// really load the file
     void Unload();	// remove the file from memory
@@ -103,13 +103,13 @@ public:
 
 class eSoundPlayer{
     int id; // ID in the global players list
-    eWavData *wav; // the sound we should put out
+    eLegacyWavData *wav; // the sound we should put out
     eAudioPos pos[MAX_VIEWERS]; // the position of all viewers
     bool goon[MAX_VIEWERS];
     bool loop;
 
 public:
-    eSoundPlayer(eWavData &w,bool loop=false);
+    eSoundPlayer(eLegacyWavData &w,bool loop=false);
     ~eSoundPlayer();
 
     bool Mix(Uint8 *dest,

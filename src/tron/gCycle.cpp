@@ -42,6 +42,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "ePlayer.h"
 
 #include "eSoundMixer.h"
+#include "eSound.h"
 
 #include "eGrid.h"
 #include "eFloor.h"
@@ -2209,6 +2210,8 @@ private:
 };
 #endif
 
+static eLegacyWavData cycle_run("moviesounds/engine.wav","sound/cyclrun.wav");
+
 void gCycle::MyInitAfterCreation(){
 #ifndef DEDICATED
     joystick_ = tNEW( gJoystick( this ) );
@@ -2219,6 +2222,8 @@ void gCycle::MyInitAfterCreation(){
 // create wall renderer
 #ifndef DEDICATED
     new gCycleWallRenderer( this );
+
+    engine  = tNEW(eSoundPlayer)(cycle_run,true);
 #endif
 
     dropWallRequested_ = false;
@@ -2409,6 +2414,7 @@ void gCycle::InitAfterCreation(){
 
 gCycle::gCycle(eGrid *grid, const eCoord &pos,const eCoord &d,ePlayerNetID *p)
         :gCycleMovement(grid, pos,d,p,false),
+        engine(NULL),
         skew(0),skewDot(0),
         rotationFrontWheel(1,0),rotationRearWheel(1,0),heightFrontWheel(0),heightRearWheel(0),
         currentWall(NULL),
@@ -2438,6 +2444,8 @@ gCycle::~gCycle(){
 
     eSoundMixer* mixer = eSoundMixer::GetMixer();
     mixer->RemoveContinuous(CYCLE_MOTOR, this);
+
+    tDESTROY(engine);
 
     this->RemoveFromGame();
 
@@ -4881,12 +4889,9 @@ bool gCycle::RenderCockpitFixedBefore(bool){
     */
     return true;
 }
-#endif
 
-#if 0
 void gCycle::SoundMix(Uint8 *dest,unsigned int len,
                       int viewer,REAL rvol,REAL lvol){
-#ifndef HAdVE_LIBSDL_MIXER
     if (Alive()){
         /*
           if (!cycle_run.alt){
@@ -4898,6 +4903,7 @@ void gCycle::SoundMix(Uint8 *dest,unsigned int len,
         if (engine)
             engine->Mix(dest,len,viewer,rvol,lvol,verletSpeed_/(sg_speedCycleSound * SpeedMultiplier()));
 
+#if 0
         if (turning)
         {
             if (turn_wav.alt)
@@ -4908,8 +4914,8 @@ void gCycle::SoundMix(Uint8 *dest,unsigned int len,
         
         if (spark)
             spark->Mix(dest,len,viewer,rvol*.5,lvol*.5,4);
-    }
 #endif
+    }
 }
 #endif
 
@@ -5000,6 +5006,7 @@ void gCycle::PPDisplay(){
 // cycle network routines:
 gCycle::gCycle( Game::CycleSync const & sync, nSenderInfo const & sender )
         :gCycleMovement( sync.base(), sender ),
+        engine(NULL),
         skew(0),skewDot(0),
         rotationFrontWheel(1,0),rotationRearWheel(1,0),heightFrontWheel(0),heightRearWheel(0),
         currentWall(NULL),
