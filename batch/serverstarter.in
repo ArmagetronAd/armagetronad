@@ -12,7 +12,7 @@ echo $$ > ${PIDDIR}/@progname@-starter.pid
 cd ${VARDIR}
 
 run() {
-    ${BINDIR}/armagetronad-dedicated --configdir ${CONFIG} --userdatadir ${VARDIR} --daemon $* &
+    ${BINDIR}/@progname@ --configdir ${CONFIG} --userdatadir ${VARDIR} --daemon $* &
     jobs -p > ${PIDDIR}/@progname@.pid
     [ -s ${PIDDIR}/@progname@.pid ] || { echo "Warning: main program PID unavailable, server can't be stopped reliably."; echo $$ > ${PIDDIR}/@progname@.pid ; }
     wait
@@ -28,7 +28,7 @@ while true; do
   OLDESTSTART=${STARTDATE_LOG[1]}
   if [ ! -z "$OLDESTSTART" ]; then
       TIMESPENT=`expr ${STARTDATE} - ${OLDESTSTART}`
-      if [ TIMESPENT -lt 60 ]; then
+      if [ $TIMESPENT -lt 60 ]; then
           echo "Stopping server, it is restarting too quickly."
           rm -f ${PIDDIR}/@progname@-starter.pid
           rm -f ${PIDDIR}/@progname@.pid
