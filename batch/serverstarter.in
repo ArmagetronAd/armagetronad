@@ -27,7 +27,7 @@ while true; do
   OLDESTSTART=${STARTDATE_LOG[1]}
   if [ ! -z "$OLDESTSTART" ]; then
       TIMESPENT=`expr ${STARTDATE} - ${OLDESTSTART}`
-      if [ TIMESPENT -lt 60 ]; then
+      if [ $TIMESPENT -lt 60 ]; then
           echo "Stopping server, it is restarting too quickly."
           rm -f ${PIDDIR}/@progname@-starter.pid
           rm -f ${PIDDIR}/@progname@.pid
