@@ -670,26 +670,25 @@ if test x$enable_armathentication = xyes; then
 
 AC_LANG([C++])
 
+AC_CHECK_LIB([boost_thread],_ZNK5boost6thread6get_idEv,,[
+
 ACX_PTHREAD([
 
 LIBS="${PTHREAD_LIBS} ${LIBS}"
 CXXFLAGS="${CXXFLAGS} ${PTHREAD_CFLAGS}"
 CC="${PTHREAD_CC}"
-dnl AC_DEFINE(HAVE_PTHREAD,1,[Define if you have POSIX threads libraries and header files.])
+AC_DEFINE(HAVE_PTHREAD,1,[Define if you have POSIX threads libraries and header files.])
 
-],[
-
-AM_PATH_ZTHREAD_AA(2.3.2)
-CXXFLAGS="${CXXFLAGS} ${ZTHREAD_CXXFLAGS}"
-LIBS="${LIBS} ${ZTHREAD_LIBS}"
+],)
 
 ])
 
-fi # krawall
+
+fi # armathentication
 
 
 dnl *************************************************
-dnl         pattern buffers
+dnl         protocol buffers
 dnl *************************************************
 
 dnl check for compiler
