@@ -458,9 +458,10 @@ public:
         tASSERT ( this && refCtr_ >= 0 );
         mutex_.acquire();
         --refCtr_;
+        bool kill = (refCtr_ <= 0);
         mutex_.release();
 
-        if ( refCtr_ <= 0 )
+        if ( kill )
         {
             refCtr_ = -1000;
             delete static_cast< const T* >( this );
