@@ -272,7 +272,7 @@ public:
         ChatFlags_Chat = 1,
         ChatFlags_Away = 2,
         ChatFlags_Menu = 4,
-        ChatFlags_Console = 4
+        ChatFlags_Console = 8
     };
 
     int    pID;
