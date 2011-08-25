@@ -43,10 +43,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 //eGrid* eSoundPlayer::S_Grid = NULL;
 
-#ifdef WIN32
-#define HAVE_LIBSDL_MIXER 1
-#endif
-
 #ifndef DEDICATED
 #ifdef  HAVE_LIBSDL_MIXER
 #include <SDL_mixer.h>

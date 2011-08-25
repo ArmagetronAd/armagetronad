@@ -230,7 +230,7 @@ static int se_Wrap_SDL_InitSubSystem()
 }
 #endif
 
-int se_mixerFrequency;
+int se_mixerFrequency = 1;
 
 // I'm going to hell for this
 #include "eSound.cpp"
