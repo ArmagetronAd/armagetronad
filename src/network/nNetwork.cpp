@@ -847,7 +847,7 @@ static int sn_SynTimestamp()
 {
     static int offset = sn_GetRandomOffset();
 
-    return offset + tSysTimeFloat()/16;
+    return offset + int(tSysTimeFloat()/16);
 }
 
 // a cookie consists of two shorts, each transmitted as MessageID
