@@ -693,7 +693,7 @@ dnl         pattern buffers
 dnl *************************************************
 
 dnl check for compiler
-AC_CHECK_PROG([PROTOC],protoc,protoc,no)
+AC_CHECK_PROG([PROTOC],protoc,`which protoc`,no)
 
 AC_LANG([C++])
 

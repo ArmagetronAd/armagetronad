@@ -2,7 +2,7 @@ include $(top_srcdir)/Makefile.paths
 
 # protocol buffer rules
 %.pb: ${srcdir}/%.proto
-	protoc $< --cpp_out=./ --proto_path=${srcdir} 2>&1 | sed -e "s,^\(.*\).proto,${srcdir}/\1.proto,"
+	${PROTOC} $< --cpp_out=./ --proto_path=${srcdir} 2>&1 | sed -e "s,^\(.*\).proto,${srcdir}/\1.proto,"
 
 %.pb.cc: %.pb
 	@true
