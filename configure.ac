@@ -695,7 +695,7 @@ dnl *************************************************
 dnl check for compiler
 AC_CHECK_PROG([PROTOC],protoc,protoc,no)
 
-AC_LANG([C])
+AC_LANG([C++])
 
 dnl check for library
 AC_CHECK_LIB([protobuf],_ZN6google8protobuf7MessageD2Ev,,
