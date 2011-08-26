@@ -263,9 +263,9 @@ void sg_StartupPlayerMenu()
     // store color
     if( ! (color == leave) )
     {
-        player->rgb[0] = color.r_*15;
-        player->rgb[1] = color.g_*15;
-        player->rgb[2] = color.b_*15;
+        player->rgb[0] = int(color.r_*15);
+        player->rgb[1] = int(color.g_*15);
+        player->rgb[2] = int(color.b_*15);
     }
 
     // load keyboard layout
