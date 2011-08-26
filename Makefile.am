@@ -49,7 +49,8 @@ nobase_texture_DATA=textures/cycle_body.png textures/cycle_wheel.png textures/di
 
 nobase_sound_DATA=sound/1voicemale.ogg  sound/announcerGO.ogg  sound/expl.ogg\
 	sound/2voicemale.ogg  sound/cycle_turn.ogg   sound/grind.ogg\
-	sound/3voicemale.ogg  sound/cyclrun.ogg      sound/zone_spawn.ogg
+	sound/3voicemale.ogg  sound/cyclrun.ogg      sound/zone_spawn.ogg\
+    sound/cyclrun.wav
 
 nobase_music_DATA=music/titletrack.ogg  music/when.ogg music/doIknowyou.ogg\
 	music/fortresswalk.ogg music/default.m3u music/fortresswalk.aatrack
