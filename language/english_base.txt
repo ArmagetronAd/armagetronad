@@ -97,12 +97,12 @@ cycle_width_rubber_max_help  If the cycle_width conditions are massively violate
 
 cycle_rubber_help		Niceness factor to allow you drive really close to a wall
 cycle_rubber_time_help		    Timescale rubber is restored on.
-cycle_rubber_legacy_help		Revert to old, framerate dependant and old-clients-ripping, rubber code if old clients are present. Old means <= 0.2.7.0 here.
+cycle_rubber_legacy_help		Revert to old, framerate dependent and old-clients-ripping, rubber code if old clients are present. Old means <= 0.2.7.0 here.
 cycle_rubber_timebased_help		Rubber usage is based on distance travelled if this is 0 (default) and the time passed if this is 1. Intermediate values and values out of these bounds are supported as well.
 cycle_rubber_speed_help             Logarithmic speed of wall approximation when rubber is in effect (every second, you get closer to the wall by a factor of ~0.4^{this value})
 cycle_rubber_mindistance_help		The minimal distance rubber code keeps you from the wall in front of you
 cycle_rubber_mindistance_gap_help		If > 0, CYCLE_RUBBER_MINDISTANCE effectively is never taken to be bigger than this value times the size of any detected gaps the cycle can squeeze through. For "Open" gameplay.
-cycle_rubber_mindistance_gap_backdoor_help If > 0, CYCLE_RUBBER_MINDISTANCE effectively is never taken to be bigger than this value times the size of any detected backdoor gaps the cylce can squeeze through. For "Open" gameplay. If = 0, CYCLE_RUBBER_MINDISTANCE_GAP applies to backdoors, too.
+cycle_rubber_mindistance_gap_backdoor_help If > 0, CYCLE_RUBBER_MINDISTANCE effectively is never taken to be bigger than this value times the size of any detected backdoor gaps the cycle can squeeze through. For "Open" gameplay. If = 0, CYCLE_RUBBER_MINDISTANCE_GAP applies to backdoors, too.
 cycle_rubber_mindistance_gap_side_help Gap detection only sees gaps that the cycle may reach in no less than this many seconds.
 cycle_rubber_mindistance_ratio_help	Additional distance to CYCLE_RUBBER_MINDISTANCE for every length unit of the wall you have in front of you
 cycle_rubber_mindistance_reservoir_help		Additional distance if you have an empty rubber meter (gets faded out gradually as you use up all your rubber)
@@ -125,7 +125,7 @@ cycle_packetloss_tolerance_help     Cycle death is prevented as long as the play
 cycle_sync_ff_help 					Speed of simulation of the extrapolating sync; decrease for lower CPU load, but higher effective ping
 cycle_sync_ff_steps_help 			Number of extrapolation simulation timesteps each real timestep; increase for better accuracy
 topology_police_help				The topology police does posterior checks to determine whether game moves were legal.
-topology_police_parallel_help		Extra topology police flag to check for walls that are put into the grid datastructure exactly parallel to each other. Requites TOPOLOGY_POLICE to be active.
+topology_police_parallel_help		Extra topology police flag to check for walls that are put into the grid data-structure exactly parallel to each other. Requites TOPOLOGY_POLICE to be active.
 cycle_smooth_time_help				Timescale for smoothing options. Increasing this will make interpolation smoother, but less accurate. Decreasing it will make network synchronization jumpy.
 cycle_smooth_min_speed_help			Minimum speed of smooth correction relative to cycle speed.
 cycle_smooth_threshold_help			Only syncs that differ from your position by less than this amount (measured in speed) will be handled smoothly, bigger differences will be applied instantly. 
@@ -463,7 +463,7 @@ timebot_action_medium_help         Action to take on a medium suspicion of timeb
 timebot_action_high_help           Action to take on a high suspicion of timebottery. 0: do nothing, 1: log it, 2: message moderators, 3: message all players, 4: kick the offending player.
 timebot_action_max_help            Action to take on a very high suspicion of timebottery. 0: do nothing, 1: log it, 2: message moderators, 3: message all players, 4: kick the offending player.
 
-timebot_action_medium              \1 is showing excelent timing ability, almost too good for a human.\n
+timebot_action_medium              \1 is showing excellent timing ability, almost too good for a human.\n
 timebot_action_high                \1 is showing suspiciously superhuman timing ability.\n
 timebot_action_max                 \1 is very likely using timing assistance software.\n
 
@@ -624,7 +624,7 @@ camera_server_custom_rise_help		Position of the custom camera: how much is it mo
 camera_server_custom_back_fromspeed_help		This value is multiplied with the current speed and added to CAMERA_SERVER_CUSTOM_BACK.
 camera_server_custom_rise_fromspeed_help		This value is multiplied with the current speed and added to CAMERA_SERVER_CUSTOM_RISE.
 camera_server_custom_pitch_help		Position of the custom camera: how much does it look up/down?
-camera_server_custom_turn_speed_help Speed the server custom camera turns with. Turn values are taken from the clientside settings if this is negative.
+camera_server_custom_turn_speed_help Speed the server custom camera turns with. Turn values are taken from the client-side settings if this is negative.
 camera_server_custom_turn_speed_180_help Extra factor to CAMERA_SERVER_CUSTOM_TURN_SPEED after a quick reverse
 
 camera_glance_back_help		Position of the glance camera: how much is it moved back from the cycle?
@@ -1105,9 +1105,9 @@ input_toggle_mousegrab_help         Frees the mouse pointer or constrains it to 
 input_reload_textures_text          Reload textures
 input_reload_textures_help          Reloads all textures. Useful for content creators.
 
-input_ingame_menu_tooltip           Press \1 to access the ingame menu.
-input_ingame_menu_text              Ingame menu
-input_ingame_menu_help              Triggers the ingame menu. ESC is hardcoded to this function so you don't get trapped in the game :)
+input_ingame_menu_tooltip           Press \1 to access the in-game menu.
+input_ingame_menu_text              In-game menu
+input_ingame_menu_help              Triggers the in-game menu. ESC is hardcoded to this function so you don't get trapped in the game :)
 
 input_pause_game_text               Pause game
 input_pause_game_help               Stops the game timer or resumes it.
@@ -1595,7 +1595,7 @@ network_opts_help		Configures your network preferences.
 
 #network options
 network_opts_pingchar_text	Ping Charity:
-network_opts_pingchar_help	The maximum ping (in ms) you are willing to take over from the other players. \g will reduce their ping and increase yours, until you have equal ping or the maximum transfer set by this menuitem is hit.
+network_opts_pingchar_help	The maximum ping (in ms) you are willing to take over from the other players. \g will reduce their ping and increase yours, until you have equal ping or the maximum transfer set by this menu-item is hit.
 
 network_opts_lagometer_text	Lag-O-Meter:
 network_opts_lagometer_help	In a network game, the place where the other players may already be now (but you have not yet noticed because of the network delay) is indicated as a geometrical shape. Useful for internet play.
@@ -1647,7 +1647,7 @@ network_host_port_text		Server Port:
 network_host_port_help		The network port this server will listen on.
 
 network_host_host_text		Host Network Game
-network_host_host_help		Enter the game grid! Other players are allowed to join you via the "Connect to Server"-menuitem.
+network_host_host_help		Enter the game grid! Other players are allowed to join you via the "Connect to Server"-menu-item.
 
 bookmarks_menu              Server Bookmarks
 bookmarks_menu_help         Add, edit, and connect to your server bookmarks.
@@ -1829,7 +1829,7 @@ viewport_assign_text		Assign Viewports to Players
 viewport_assign_help		Which player's game is seen on which part of the screen?
 
 player_authenticate_text    Authentication
-player_authenticate_help    If you have a global ID, activating this menuitem will make you log in with it. You'll be prompted for a password, naturally.
+player_authenticate_help    If you have a global ID, activating this menu-item will make you log in with it. You'll be prompted for a password, naturally.
 player_authenticate_action  Authentication requests have been sent to the server. You should be prompted for a password shortly.\n
 
 #player setup
@@ -2296,7 +2296,7 @@ menuitem_exit_help		Exits this menu and returns to the previous level
 menuitem_accept			Accept
 menuitem_accept_help		Accepts the settings in this menu and continues.
 
-input_item_help			To change, press ENTER or SPACE, then press the key/mousebutton you want to assign to this control. Moving the mouse also works.
+input_item_help			To change, press ENTER or SPACE, then press the key/mouse-button you want to assign to this control. Moving the mouse also works.
 input_press_any_key		Press any key! 
 
 menuitem_toggle_on		On
@@ -2375,7 +2375,7 @@ first_setup_keys_wasd_help  Control your cycle with the ASD keys and surrounding
 first_setup_keys_zqsd       ZQSD Keys
 first_setup_keys_zqsd_help  Control your cycle with the QSD keys and surroundings, Cursor keys and rest of keyboard control camera and special actions. Good for left handed people and those used to move with ZQSD on AZERTY keyboards.
 #first_setup_keys_both       Two Handed
-#first_setup_keys_both_help  Turn and look left with your left hand, turn and look right with the right hand. Good for ambidextrous people who don't want to use the mouse in any way and never play with a second player in splitscreen.
+#first_setup_keys_both_help  Turn and look left with your left hand, turn and look right with the right hand. Good for ambidextrous people who don't want to use the mouse in any way and never play with a second player in split-screen.
 first_setup_keys_x          Traditional
 first_setup_keys_x_help     The default setup of old versions of the game. X turns right, the key left to that turns left. Recommended only for veterans.
 first_setup_keys_leave      Leave Alone
