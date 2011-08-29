@@ -148,7 +148,7 @@ test: installcheck
 # make snapshot of SVN state, tracking relevant changes in .changetag
 fingerprint: .changetag
 # easy, just do svn info, that contains all the information needed. If that fails, try other scms.
-	svn info ${top_srcdir} > $@ || svk info ${top_srcdir} > $@ || { bzr testament ${top_srcdir}; bzr info ${top_srcdir};  } > $@ || echo "unknown" > $@
+	{ bzr testament ${top_srcdir}; bzr info ${top_srcdir};  } > $@ || svn info ${top_srcdir} > $@ || svk info ${top_srcdir} > $@ || echo "unknown" > $@
 	svn info `dirname ${top_srcdir}` >> @$ || svn info `dirname ${top_srcdir}` >> $@ || echo "unknown" >> $@
 	diff $@ .changetag > /dev/null 2>&1 || { cp $@ .changetag; rm $(srcdir)/ChangeLog;  touch -t 198001010000 $(srcdir)/ChangeLog; }
 
@@ -164,7 +164,7 @@ $(srcdir)/version: $(wildcard $(srcdir)/*_version) .changetag
 $(srcdir)/ChangeLog: .changetag
 	rm -f $@
 	@echo -e "\nGenerating ChangeLog from SVN/BZR, please be patient...\n"
-	cd ${srcdir}; svn log 2>&1 > ChangeLog || bzr log --gnu-changelog 2>&1 > ChangeLog || echo "No official releasse: no changelog" > ChangeLog
+	cd ${srcdir}; bzr log --gnu-changelog 2>&1 > ChangeLog || svn log 2>&1 > ChangeLog || echo "No official releasse: no changelog" > ChangeLog
 	test -r $@ || touch $@
 
 # extra target to make before a real distribution is built
