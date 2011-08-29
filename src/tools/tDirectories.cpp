@@ -562,6 +562,16 @@ private:
         {
             paths[ pos++ ] = st_UserDataDir;
         }
+
+        // for finding data packet in 0install
+        char const * extradata = getenv("ARMAGETRONAD_EXTRADATA");
+        static bool isThere = extradata;
+        // should probably be spit like proper unix paths, colon separated
+        if( isThere )
+        {
+            static tString ed(extradata);
+            paths[ pos++ ] = ed;
+        }
     }
 };
 
