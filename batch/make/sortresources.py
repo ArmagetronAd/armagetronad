@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+from __future__ import print_function
+
 import sys, os
 
 foundModule = False
@@ -15,13 +17,13 @@ while not foundModule:
         import armabuild
         import armabuild.resource
         foundModule = True
-        print "Found armabuild!"
+        print("Found armabuild!")
     except:
         sys.path[0] = os.path.dirname(newPathSearch)
     numAttempts += 1
 
     if numAttempts > 9:
-        print "Unable to find armabuild module.  Can't continue."
+        print("Unable to find armabuild module.  Can't continue.")
         sys.exit(1)
 
 if __name__ == "__main__":

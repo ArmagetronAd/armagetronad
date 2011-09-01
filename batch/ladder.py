@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # purpose: process ladderlog.txt and generate a usefull ladder league from it
 
+from __future__ import print_function
 import math
 
 
@@ -59,7 +60,7 @@ class PairScoreDictionary:
     
     # processes scores. scores is supposed to be a list of pairs, each pair consisting of a score and player name. Scores are expected to be non-negative.
     def ReadScore_( self, scores ):
-        #print scores
+        #print(scores)
         # determine total score sum
         sum = 0
         max = 0
@@ -102,7 +103,7 @@ class PairScoreDictionary:
     def ReadLog( self, log ):
         scores = []
         for line in log:
-            # print line
+            # print(line)
             tokens = line.split()
             if tokens[0] == "ROUND_SCORE":
                 scores = scores + [(int (tokens[1]),tokens[2])]
@@ -121,7 +122,7 @@ class PairScoreDictionary:
                 except KeyError:
                     players[player] = len(players)
 
-        #print players
+        #print(players)
 
         # generate sparse player-player scoring matrix using a dictionary of dictionaries in column-row order (so normalizing it gets easier)
         matrix = {}
@@ -150,12 +151,12 @@ class PairScoreDictionary:
             if diagonal < minDiagonal: minDiagonal = diagonal
             averageDiagonal += diagonal/len(players)
 
-        print averageDiagonal   
+        print(averageDiagonal)
 
         maxDeviation = 1
         if minDiagonal < 0:
             maxDeviation = -1/minDiagonal
-        print maxDeviation
+        print(maxDeviation)
 
         # initialize score vector
         score = {}
@@ -172,7 +173,7 @@ class PairScoreDictionary:
                 except KeyError: pass
         except IOError: pass
 
-        #print matrix
+        #print(matrix)
 
         # iterate matrix multiplication
         error = 1000
@@ -188,8 +189,8 @@ class PairScoreDictionary:
                 for j in column:
                     deltascore[j] += column[j] * score[i]
 
-            #print score        
-            #print deltascore
+            #print(score)
+            #print(deltascore)
 
             # determine minimum and maximum deviation
             error = 0
@@ -197,7 +198,7 @@ class PairScoreDictionary:
                 error += abs(deltascore[i])
 
             if iter == 100:
-                print error 
+                print(error)
                 iter = 0   
             iter += 1
 
@@ -207,8 +208,8 @@ class PairScoreDictionary:
 
             NormalizeVector( score )    
         
-        #print score
-        #print players        
+        #print(score)
+        #print(players)
 
         ladder = []
         for player in players:
@@ -219,7 +220,7 @@ class PairScoreDictionary:
         ladder.sort()
         ladder.reverse()
 
-        # print ladder
+        # print(ladder)
         out = open( "newladder.txt", "w" )
         for entry in ladder:
             out.write(str(entry[0]))
@@ -230,9 +231,9 @@ class PairScoreDictionary:
 
 scoreDataBase = PairScoreDictionary()
 scoreDataBase.ReadLog( open( "ladderlog.txt" ) )
-#print "read"
+#print("read")
 ladder = scoreDataBase.GenerateLadder()
 
 for entry in ladder:
-    print entry[1], entry[0]
+    print(entry[1], entry[0])
 
