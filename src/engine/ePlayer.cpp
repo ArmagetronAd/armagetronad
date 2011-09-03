@@ -6510,11 +6510,9 @@ void se_SaveToScoreFile(const tOutput &o){
 
 void ePlayerNetID::AddScore(int points,
                             const tOutput& reasonwin,
-                            const tOutput& reasonlose)
+                            const tOutput& reasonlose,
+                            const tOutput& reasonfree)
 {
-    if (points==0)
-        return;
-
     if (se_matches < 0)
         return;
 
@@ -6530,7 +6528,14 @@ void ePlayerNetID::AddScore(int points,
     message.SetTemplateParameter(2, points > 0 ? points : -points);
 
 
-    if (points>0)
+    if(points == 0 )
+    {
+        if (reasonfree.IsEmpty())
+            return;
+        else
+            message.Append(reasonfree);
+    }
+    else if (points>0)
     {
         if (reasonwin.IsEmpty())
             message << "$player_win_default";
@@ -6546,9 +6551,12 @@ void ePlayerNetID::AddScore(int points,
     }
 
     sn_ConsoleOut(message);
-    RequestSync(true);
 
-    se_SaveToScoreFile(message);
+    if( points )
+    {
+        RequestSync(true);
+        se_SaveToScoreFile(message);
+    }
 }
 
 
@@ -8526,17 +8534,13 @@ static void Slap_conf(std::istream &s)
 
         s >> points;
 
-        if ( points == 0)
-        {
-            // oh well :)
-            sn_ConsoleOut( tOutput("$player_admin_slap_free", victim->GetColoredName() ) );
-        }
-
         tOutput win;
         tOutput lose;
+        tOutput free;
         win << "$player_admin_slap_win";
         lose << "$player_admin_slap_lose";
-        victim->AddScore( -points, win, lose );
+        free << "$player_admin_slap_free";
+        victim->AddScore( -points, win, lose, free );
     }
 }
 
