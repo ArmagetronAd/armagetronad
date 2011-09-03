@@ -3042,7 +3042,18 @@ static void se_ChatTeamLeave( ePlayerNetID * p )
     }
 
     eTeam * leftTeam = p->NextTeam();
-    if ( leftTeam )
+    p->SetTeamWish(0);
+
+    if ( se_matches < 0 ) // allow quickleaving in warmup mode
+    {
+        if( p->Object() && p->Object()->Alive() )
+        {
+            p->Object()->Kill();
+        }
+        p->UpdateTeam();
+        p->RequestSync();
+    }
+    else if ( leftTeam )
     {
         if ( !leftTeam )
             leftTeam = p->CurrentTeam();
@@ -3059,8 +3070,6 @@ static void se_ChatTeamLeave( ePlayerNetID * p )
                                     tColoredString::RemoveColors(p->GetName()) ) );
         }
     }
-
-    p->SetTeamWish(0);
 }
 
 static bool se_filterColorTeam=false;
