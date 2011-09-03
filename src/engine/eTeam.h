@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "ePlayer.h"
 #include "nNetObject.h"
 #include "tList.h"
+#include "eSpawn.h"
 #include <vector>
 
 namespace Engine{ class TeamSync; }
@@ -40,6 +41,7 @@ std::ostream & operator << ( std::ostream&, const eTeam&);
 
 template<class T> class nConfItem;
 
+extern int se_matches;
 
 class eTeam: public nNetObject{
 protected:							// protected attributes
@@ -62,6 +64,8 @@ protected:							// protected attributes
     tString	name;					// our name
 
     bool locked_;                   //!< if set, only invited players may join
+
+    eSpawnPoint * spawnPoint;
 
     static void UpdateStaticFlags();// update all internal information
 
@@ -142,6 +146,15 @@ public:												// public methods
                         const tOutput& reasonwin,
                         const tOutput& reasonlose );
 
+    eSpawnPoint * SpawnPoint() {
+        return spawnPoint;
+    }
+
+    void SetSpawnPoint(eSpawnPoint * sp)
+    {
+        spawnPoint = sp;
+    }
+
     static void ResetScoreDifferences(); //<! Resets the last stored score so ScoreDifferences takes this as a reference time
     static void LogScoreDifferences();   //<! Logs accumulated scores of all players since the last call to ResetScoreDifferences() to ladderlog.txt
     void LogScoreDifference();           //<! Logs accumulated scores since the last call to ResetScoreDifferences() to ladderlog.txt
@@ -174,6 +187,7 @@ public:												// public methods
     ePlayerNetID*	YoungestHumanPlayer(	) const;							//!< the youngest human player
     ePlayerNetID*	YoungestAIPlayer(		) const;							//!< the youngest AI player
     bool			Alive			(		) const;							//!< is any of the players currently alive?
+    bool            IsReady         (       ) const;                            //!< is the team ready to play?
 
     // color
     tShortColor const & Color() const

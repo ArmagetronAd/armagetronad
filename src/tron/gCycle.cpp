@@ -150,7 +150,7 @@ sg_cycleWallTimeConf("CYCLE_WALL_TIME",
                      14);
 
 // time after spawning during which a cycle can't be killed
-static REAL sg_cycleInvulnerableTime=0.0;
+REAL sg_cycleInvulnerableTime=0.0;
 static nSettingItemWatched<REAL>
 sg_cycleInvulnerableTimeConf("CYCLE_INVULNERABLE_TIME",
                              sg_cycleInvulnerableTime,

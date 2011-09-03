@@ -58,7 +58,9 @@ message PlayerNetIDSync
     optional string team_name       = 13;
 
     // legacy sync data end marker
-    optional bool legacy_sync_end = 20001;
+    optional bool   legacy_sync_end = 20001;
+
+    optional bool   ready           = 20;
 }
 
 // net object control message
