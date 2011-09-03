@@ -15,6 +15,15 @@ Changes since 0.3.1
   command is issued by enabling “RESET_ROTATION_ON_START_NEW_MATCH”.
 - New admin command: "SCRAMBLE". Scrambles/randomises which players are in which team.
 - New vote: /callvote scramble: Executes the SCRAMBLE command.
+- Teams now retain their spawn for later respawing
+- New warmup mode:
+    - DO_WARMUP N>0 will make the game enter warmup mode after each N matches
+    - In warmup mode, players can use the /ready command to set themselves ready and start the match
+    - Team joins/switches are done instantly
+    - By default, players respawn in warmup mode (WARMUP_RESPAWN_TIME)
+    - The game starts when each team has ready/total > WARMUP_MIN_READY(0.51)
+    - However, there should be at least WARMUP_MIN_PLAYERS(2) humans before the warmup can end
+    - Readiness state is synced to clients so that newer ones can show an icon on the scoreboard
 
 Changes since 0.3.0
 ===================
