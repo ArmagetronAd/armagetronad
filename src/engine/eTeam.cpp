@@ -1490,7 +1490,7 @@ bool eTeam::IsReady ( ) const
             ready++;
     }
     if (len)
-        return ready > len * se_minReady;
+        return ready >= len * se_minReady;
     else
         return true;
 }
