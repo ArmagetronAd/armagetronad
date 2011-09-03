@@ -154,6 +154,8 @@ static tSettingItem< int > sg_warmupRupIntervalConf("WARMUP_READYUP_INTERVAL", s
 static REAL sg_warmupRespawnTime = 1;
 static tSettingItem< REAL > sg_warmupRespawnTimeConf("WARMUP_RESPAWN_TIME", sg_warmupRespawnTime);
 
+bool sg_allReady = false;
+
 // config item for semi-colon deliminated list of maps/configs, needs semi-colon at the end
 // ie, original/map-1.0.1.xml;original/map-1.0.1.xml;
 class tSettingRotation: public tConfItemBase
@@ -2017,8 +2019,24 @@ static void Scramble_conf(std::istream &){
     }
 }
 
+static void AllReady_conf(std::istream &){
+    if( se_matches < 0 )
+    {
+        sg_allReady = !sg_allReady;
+        if( sg_allReady )
+            con << tOutput("$player_allready");
+        else
+            con << tOutput("$player_allready_not");
+    }
+    else
+    {
+        con << tOutput("$player_ready_onlywarmup");
+    }
+}
+
 static tConfItemFunc snm("START_NEW_MATCH",&StartNewMatch_conf);
 static tConfItemFunc scr("SCRAMBLE",&Scramble_conf);
+static tConfItemFunc allready_conf("ALL_READY",&AllReady_conf);
 
 #ifdef DEDICATED
 static void Quit_conf(std::istream &){
@@ -3683,26 +3701,39 @@ void gGame::Analysis(REAL time){
 
     int winnerExtraRound = ( winner != 0 || alive == 0 ) ? 1 : 0;
 
-    static bool warmupover_msg = false;
-    if( time >= 0 && se_matches < 0 && ready == eTeam::teams.Len()
-        && humans >= sg_warmupMinPlayers )
+    static short warmupover_msg = 0;
+    if( time >= 0 && se_matches < 0 && (ready == eTeam::teams.Len() || sg_allReady) )
     {
-        // Finish the round quickly
-        if( !warmupover_msg )
+        if ( humans < sg_warmupMinPlayers && warmupover_msg < 1 )
         {
-            warmupover_msg = true;
-            sn_ConsoleOut(tOutput("$warmup_finished"));
-            sn_CenterMessage(tOutput("$warmup_finished_center"));
+            warmupover_msg = 1;
+            sn_ConsoleOut(tOutput("$warmup_needmoreplayers", sg_warmupMinPlayers));
         }
-        winner = -1;
-        wintimer=-10;
-        lastdeath = time;
-        StartNewMatch();
-        se_matches = sg_doWarmup;
+        else if( humans >= sg_warmupMinPlayers && warmupover_msg < 2 )
+        {
+            warmupover_msg = 2;
+            if( sg_allReady )
+            {
+                sn_ConsoleOut(tOutput("$warmup_finished_allready"));
+                sn_CenterMessage(tOutput("$warmup_finished_center"));
+            }
+            else
+            {
+                sn_ConsoleOut(tOutput("$warmup_finished"));
+                sn_CenterMessage(tOutput("$warmup_finished_center"));
+            }
+
+            // Finish the round quickly
+            winner = -1;
+            wintimer=-10;
+            lastdeath = time;
+            StartNewMatch();
+            se_matches = sg_doWarmup;
+        }
     }
     else
     {
-        warmupover_msg = false;
+        warmupover_msg = 0;
     }
 
     // do round end stuff one second after a winner was declared

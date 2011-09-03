@@ -3368,7 +3368,7 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s, tString co
         tos << p2->GetColoredName()
             << tColoredString::ColorString( -1, -1, -1)
             << " ";
-        if ( se_matches < 0 && p2->IsHuman() )
+        if ( se_matches < 0 && p2->IsHuman() && p2->CurrentTeam() )
         {
             tos << "( ";
             if ( p2->ready )
@@ -8165,10 +8165,10 @@ void ePlayerNetID::ReceiveControlNet( Network::NetObjectControl const & controlB
                 if( se_matches < 0 )
                 {
                     // Join immediately during warmup if possible
-                    if( nextTeam != currentTeam && nextTeam->PlayerMayJoin( this )
-                            && Object() && Object()->Alive() )
+                    if( nextTeam != currentTeam && nextTeam->PlayerMayJoin( this ) )
                     {
-                        Object()->Kill();
+                        if( Object() && Object()->Alive() )
+                            Object()->Kill();
                         UpdateTeam();
                         RequestSync();
                     }

@@ -2631,7 +2631,11 @@ player_ready_onlywarmup This command only works in warmup mode.\n
 player_ready_noteam     You must be in a team to use this command.\n
 player_ready            \1 0x7fff7fis ready!\n
 player_ready_not        \1 0xff7f7fis not ready anymore.\n
+player_allready         All players marked as ready.\n
+player_allready_not     All players marked as not ready.\n
+warmup_needmoreplayers  Not starting game yet because we need at least \1 players.\n
 warmup_finished         Enough players are ready! Starting match now.\n
+warmup_finished_allready Forced all players to be ready! Starting match now.\n
 warmup_finished_center  Warmup over!
 warmup_rup_compat       0xff3333Please type /ready in chat
 
