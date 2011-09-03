@@ -3042,7 +3042,6 @@ static void se_ChatTeamLeave( ePlayerNetID * p )
     }
 
     eTeam * leftTeam = p->NextTeam();
-    p->SetTeamWish(0);
 
     if ( se_matches < 0 ) // allow quickleaving in warmup mode
     {
@@ -3050,11 +3049,14 @@ static void se_ChatTeamLeave( ePlayerNetID * p )
         {
             p->Object()->Kill();
         }
+        p->SetTeam(0);
+        p->SetTeamWish(0);
         p->UpdateTeam();
         p->RequestSync();
     }
     else if ( leftTeam )
     {
+        p->SetTeamWish(0);
         if ( !leftTeam )
             leftTeam = p->CurrentTeam();
 
@@ -8165,23 +8167,22 @@ void ePlayerNetID::ReceiveControlNet( Network::NetObjectControl const & controlB
             // announce the change
             if ( bool(nextTeam) && !redundant )
             {
-                se_TeamChangeMessage( *this );
 
                 // count it as spam if it is obnoxious
                 if ( obnoxious )
                     chatSpam_.CheckSpam( 4.0, Owner(), tOutput("$spam_teamchage") );
 
-                if( se_matches < 0 )
+                if( se_matches < 0 && nextTeam != currentTeam
+                    && nextTeam->PlayerMayJoin( this ) )
                 {
                     // Join immediately during warmup if possible
-                    if( nextTeam != currentTeam && nextTeam->PlayerMayJoin( this ) )
-                    {
-                        if( Object() && Object()->Alive() )
-                            Object()->Kill();
-                        UpdateTeam();
-                        RequestSync();
-                    }
+                    if( Object() && Object()->Alive() )
+                        Object()->Kill();
+                    UpdateTeam();
+                    RequestSync();
                 }
+                else
+                    se_TeamChangeMessage( *this );
             }
 
             break;
