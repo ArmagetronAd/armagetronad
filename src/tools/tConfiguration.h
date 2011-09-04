@@ -281,6 +281,13 @@ public:
 
     virtual ~tConfItem(){}
 
+    tConfItem<T> & SetShouldChangeFunc( ShouldChangeFuncT changeFunc )
+    
+    {
+        this->shouldChangeFunc_ = changeFunc;
+        return *this;
+    }
+
     typedef typename tTypeToConfig< T >::DUMMYREQUIRED DUMMYREQUIRED;
 
     // read without conversion
@@ -325,6 +332,10 @@ public:
             
             *target = val;
             changed = true;
+        }
+        else
+        {
+            con << tOutput("$config_value_not_changed", title, *target, val);
         }
         ExecuteCallback();    
     }
