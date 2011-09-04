@@ -291,10 +291,9 @@ public:
 
     bool renameAllowed_;     //!< specifies if the player is allowed to rename or not, does not know about votes.
 
-    nSpamProtection chatSpam_;
-    
-    eChatLastSaid lastSaid_; //!< last said information
-    eShuffleSpamTester shuffleSpam;
+    nSpamProtection & GetChatSpam();       //!< chat volume spam
+    eChatLastSaid & GetLastSaid();         //!< last said information
+    eShuffleSpamTester & GetShuffleSpam(); //!< shuffle message spam
 
     ePlayerNetID(int p=-1);
     ePlayerNetID(nMessage &m);
