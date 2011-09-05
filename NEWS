@@ -16,14 +16,20 @@ Changes since 0.3.1
 - New admin command: "SCRAMBLE". Scrambles/randomises which players are in which team.
 - New vote: /callvote scramble: Executes the SCRAMBLE command.
 - Teams now retain their spawn for later respawing
+- New ladderlog entry: PLAYER_RESPAWN <RESPAWNEE> <RESPAWNEE'S TEAM> [RESPAWNER]
 - New warmup mode:
     - DO_WARMUP N>0 will make the game enter warmup mode after each N matches
     - In warmup mode, players can use the /ready command to set themselves ready and start the match
-    - Team joins/switches are done instantly
+    - Team joins/switches/leaves(when using /teamleave) are done instantly
     - By default, players respawn in warmup mode (WARMUP_RESPAWN_TIME)
     - The game starts when each team has ready/total > WARMUP_MIN_READY(0.51)
     - However, there should be at least WARMUP_MIN_PLAYERS(2) humans before the warmup can end
     - Readiness state is synced to clients so that newer ones can show an icon on the scoreboard
+    - ALL_READY makes the game behave as if all players had readied up.
+    - New ladderlog entries:
+        - NEW_WARMUP replaces NEW_MATCH when appropriate: NEW_WARMUP <N> <TIMESTAMP>
+          with N the number of matches to be played consecutively
+        - MATCHES_LEFT <N>
 
 Changes since 0.3.0
 ===================

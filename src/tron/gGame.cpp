@@ -2789,6 +2789,8 @@ void gGame::StateUpdate(){
                     sg_newWarmupWriter << sg_doWarmup;
                     sg_newWarmupWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
                     sg_newWarmupWriter.write();
+
+                    sg_allReady = false;
                 }
                 else
                 {
