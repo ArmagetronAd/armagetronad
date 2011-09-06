@@ -1430,7 +1430,9 @@ void sg_SinglePlayerGame(){
     update_settings();
     ePlayerNetID::CompleteRebuild();
 
+    sr_SetWindowTitle(tOutput("$window_title_local"));
     own_game( nSTANDALONE );
+    sr_SetWindowTitle(tOutput("$window_title_menu"));
 }
 
 void sg_HostGame(){
@@ -1593,6 +1595,9 @@ bool ConnectToServerCore(nServerInfoBase *server)
 {
     tASSERT( server );
 
+    sr_SetWindowTitle(tOutput("$window_title_connecting",
+        tColoredString::RemoveColors(server->GetName())));
+
     ePlayerNetID::ClearAll();
 
     // revert to default settings, restore current vlaues on exit
@@ -1630,6 +1635,11 @@ bool ConnectToServerCore(nServerInfoBase *server)
     o << "$network_connecting_to_server";
     con << o;
     error = server->Connect();
+
+    if (error != nOK)
+    {
+        sr_SetWindowTitle(tOutput("$window_title_menu"));
+    }
 
     switch (error)
     {
@@ -1674,6 +1684,8 @@ bool ConnectToServerCore(nServerInfoBase *server)
             sr_con.fullscreen=false;
 
             con << tOutput("$network_syncing_gamestate");
+            sr_SetWindowTitle(tOutput("$window_title_connected",
+                tColoredString::RemoveColors(server->GetName())));
             sg_EnterGame( nCLIENT );
         }
         else{
@@ -1711,6 +1723,8 @@ bool ConnectToServerCore(nServerInfoBase *server)
     sr_con.fullscreen=false;
 
     sr_textOut=to;
+
+    sr_SetWindowTitle(tOutput("$window_title_menu"));
 
     return ret;
 }

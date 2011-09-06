@@ -48,16 +48,15 @@ static bool sg_ConnectionStress = false;
 
 enum { NUM_FAVORITES = 10 };
 
-/*
 //! favorite server information, just to connect
-gServerInfoFavorite::gServerInfoFavorite( tString const & connectionName, unsigned int port )
+gServerInfoFavorite::gServerInfoFavorite( tString const & name_, tString const & connectionName, unsigned int port )
 {
+    name = name_;
     nServerInfoBase::SetConnectionName( connectionName );
     nServerInfoBase::SetPort( port );
 }
-*/
 
-typedef nServerInfoRedirect gServerInfoFavorite;
+//typedef nServerInfoRedirect gServerInfoFavorite;
 
 //********************************************************************************
 //********************************************************************************
@@ -90,7 +89,7 @@ public:
     //! connects to the server
     void Connect()
     {
-        gServerInfoFavorite fav( address_, port_ );
+        gServerInfoFavorite fav( name_, address_, port_ );
 
         gLogo::SetDisplayed(false);
 
@@ -252,7 +251,8 @@ static void sg_AlternativeMaster( int ID )
 
     // fetch server info
     gServerFavorite & favorite = sg_masterHolder.GetFavorite(ID);
-    gServerInfoFavorite fav( favorite.address_, favorite.port_ );
+    gServerInfoFavorite fav( favorite.name_,
+        favorite.address_, favorite.port_ );
 
     // browse master info
     gServerBrowser::BrowseSpecialMaster( &fav, suffix.str().c_str() );
@@ -429,7 +429,8 @@ static void sg_TransferCustomServer()
     if ( sg_customServerName != "" )
     {
         // add custom connect server to favorites
-        gServerInfoFavorite server( sg_customServerName, sg_clientPort );
+        gServerInfoFavorite server( sg_customServerName,
+            sg_customServerName, sg_clientPort );
         gServerFavorites::AddFavorite( &server );
 
         // clear custom connect server
