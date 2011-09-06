@@ -1181,7 +1181,9 @@ void sr_SetWindowTitle(tString s)
     if(!currentScreensetting.fullscreen)
 #endif
     {
+#ifndef DEDICATED
         SDL_WM_SetCaption(s, s);
+#endif
     }
 }
 
