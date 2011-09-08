@@ -124,6 +124,7 @@ Changes since 0.2.8.3.x:
 - GAME_END, NEW_MATCH, and NEW_ROUND ladderlog events include date and time.
 - Added ENCODING ladderlog event, which specifies the encoding for data in
   ladderlog.txt.
+- "--input" now can be used more than once to read from multiple files or pipes.
 
 Changes since 0.2.8.3.1:
 - security fix: old style action commands from clients no loger cause hangs and crashes

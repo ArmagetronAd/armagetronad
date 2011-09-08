@@ -57,7 +57,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <stdio.h>
 #include <stdlib.h>
 #include <fstream>
-#include <errno.h>
 
 #include "nServerInfo.h"
 #include "nSocket.h"
@@ -81,42 +80,30 @@ static gCommandLineJumpStartAnalyzer sg_jumpStartAnalyzer;
 class gMainCommandLineAnalyzer: public tCommandLineAnalyzer
 {
 public:
-    bool     daemon_;
     bool     fullscreen_;
     bool     windowed_;
     bool     use_directx_;
     bool     dont_use_directx_;
-    tString  inputFile_;
 
     gMainCommandLineAnalyzer()
     {
-        daemon_ = false;
         windowed_ = false;
         fullscreen_ = false;
         use_directx_ = false;
         dont_use_directx_ = false;
-        inputFile_ = "";
     }
 
 
 private:
     virtual bool DoAnalyze( tCommandLineParser & parser )
     {
-        if ( parser.GetSwitch( "--daemon","-d") )
-        {
-            daemon_ = true;
-        }
-        else if ( parser.GetSwitch( "-fullscreen", "-f" ) )
+        if ( parser.GetSwitch( "-fullscreen", "-f" ) )
         {
             fullscreen_=true;
         }
         else if ( parser.GetSwitch( "-window", "-w" ) ||  parser.GetSwitch( "-windowed") )
         {
             windowed_=true;
-        }
-        else if ( parser.GetOption( inputFile_, "--input" ) )
-        {
-            daemon_ = false;
         }
 #ifdef WIN32
         else if ( parser.GetSwitch( "+directx") )
@@ -145,12 +132,6 @@ private:
         s << "+directx, -directx           : enable/disable usage of DirectX for screen\n"
         << "                               initialisation under MS Windows\n\n";
         s << "\n\nYes, I know this looks ugly. Sorry about that.\n";
-#endif
-#else
-#ifndef WIN32
-        s << "-d, --daemon                 : allow the dedicated server to run as a daemon\n"
-          << "                               (will not poll for input, unless overridden by --input)\n";
-        s << "--input <file>               : Poll for input from this file. Default is stdin\n";
 #endif
 #endif
     }
@@ -904,26 +885,6 @@ int main(int argc,char **argv){
 
             SDL_Quit();
 #else // DEDICATED
-            if (!commandLineAnalyzer.daemon_)
-            {
-                if ( commandLineAnalyzer.inputFile_.Len() > 1 )
-                {
-                    FILE *in = fopen( commandLineAnalyzer.inputFile_, "r" );
-                    if ( in )
-                    {
-                        atexit( sr_Close_stdin );
-                        fseek( in, 0, SEEK_END );
-                        sr_input = in;
-                    }
-                    else
-                    {
-                        std::cerr << "Error opening input file '" << commandLineAnalyzer.inputFile_ << "': "
-                                  << strerror( errno ) << ". Using stdin to poll for input.\n";
-                    }
-                }
-                sr_Unblock_stdin();
-            }
-
             sr_glOut=0;
 
             //  nServerInfo::TellMasterAboutMe();

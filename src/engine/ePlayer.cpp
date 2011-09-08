@@ -4529,6 +4529,11 @@ public:
     eChatLastSaid lastSaid;
 
     eMachineDecoratorSpam( nMachine & m ): nMachineDecorator( m ), chatSpam( se_chatSpamSettings ){}
+
+    virtual void OnDestroy()
+    {
+        delete this;
+    }
 };
 
 static eMachineDecoratorSpam & se_GetSpam( ePlayerNetID & p )
