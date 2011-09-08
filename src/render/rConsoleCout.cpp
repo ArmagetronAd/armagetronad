@@ -33,6 +33,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <stdio.h>
 #include <fcntl.h>
 #include <sstream>
+#include <errno.h>
 
 #if HAVE_UNISTD_H
 #include <unistd.h>
@@ -46,14 +47,91 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <signal.h>
 #endif
 
+class rInputStream
+{
+public:
+#ifdef WIN32
+    typedef HANDLE Descriptor;
+#else
+    typedef int Descriptor;
+#endif
+
+    rInputStream( rInputStream const & other )
+    {
+        descriptor_ = other.descriptor_;
+        file_ = other.file_;
+        line_in_ = other.line_in_;
+        name_ = other.name_;
+
+        other.file_ = 0;
+    }
+
+    rInputStream & operator = ( rInputStream const & other )
+    {
+        descriptor_ = other.descriptor_;
+        file_ = other.file_;
+        line_in_ = other.line_in_;
+        name_ = other.name_;
+
+        other.file_ = 0;
+
+        return * this;
+    }
+
+    rInputStream()
+    {
+        descriptor_ = 
+#ifdef WIN32
+        GetStdHandle(STD_INPUT_HANDLE);
+#else
+        fileno(stdin);
+#endif
+        file_ = NULL;
+
+        Unblock();
+    }
+
+    explicit rInputStream( Descriptor descriptor, char const * name, FILE * file = NULL )
+    : descriptor_( descriptor ), file_( file ), name_( name )
+    {
+        Unblock();
+    }
+
+    // reads from the descriptor and
+    // executes commands on newlines
+    void HandleInput();
+
+    ~rInputStream()
+    {
+        if( file_ )
+        {
+            fclose( file_ );
+            file_ = NULL;
+        }
+    }
+private:
+    void Unblock()
+    {
+#ifndef WIN32
+        int flag=fcntl(descriptor_,F_GETFL);
+        fcntl(descriptor_,F_SETFL,flag | O_NONBLOCK);
+#endif
+    }
+
+    Descriptor descriptor_;
+    mutable FILE * file_;
+    tString line_in_;
+    tString name_;
+};
+
 void rConsole::DoCenterDisplay(const tString &s,REAL timeout,REAL r,REAL g,REAL b){
     std::cout << tColoredString::RemoveColors(s) << '\n';
     DisplayAtNewline();
 }
 
-FILE *sr_input = stdin;
-static int stdin_descriptor;
 static bool unblocked = false;
+
+void sr_Unblock_stdin();
 
 static void sr_HandleSigCont( int signal )
 {
@@ -72,7 +150,7 @@ void sr_Unblock_stdin(){
 #endif
 
     unblocked = true;
-    stdin_descriptor=fileno( sr_input );
+    int stdin_descriptor=fileno( stdin );
 #ifndef WIN32
     // if (isatty(stdin_descriptor))
     {
@@ -82,36 +160,95 @@ void sr_Unblock_stdin(){
 #endif
 }
 
-
-
-#define MAXLINE 1000
-static char line_in[MAXLINE+2];
-static int currentIn=0;
+static tArray< rInputStream > sr_inputStreams;
+static bool sr_daemon;
 
 void sr_Read_stdin(){
+    static bool inited = false;
+    if( !inited )
+    {
+        inited = true;
+        if( !sr_daemon )
+        {
+            sr_Unblock_stdin();
+            sr_inputStreams[sr_inputStreams.Len()]=rInputStream();
+        }
+    }
+
+    for( int i = sr_inputStreams.Len()-1; i >= 0; --i )
+    {
+        sr_inputStreams[i].HandleInput();
+    }
+}
+
+#ifndef WIN32
+#include "tCommandLine.h"
+
+class rInputCommandLineAnalyzer: public tCommandLineAnalyzer
+{
+public:
+    virtual bool DoAnalyze( tCommandLineParser & parser )
+    {
+        tString pipe;
+        if ( parser.GetSwitch( "--daemon","-d") )
+        {
+            sr_daemon = true;
+
+            return true;
+        }
+        else if( parser.GetOption( pipe, "--input" ) )
+        {
+            FILE * f = fopen( pipe, "r" );
+            if( f )
+            {
+                sr_inputStreams[sr_inputStreams.Len()]=rInputStream( fileno(f), pipe, f );
+                fseek( f, 0, SEEK_END );
+            }
+            else
+            {
+                std::cerr << "Error opening input file '" << pipe << "': "
+                          << strerror( errno ) << ". Using stdin to poll for input.\n";
+            }
+
+            return true;
+        }
+        return false;
+    }
+
+    virtual void DoHelp( std::ostream & s )
+    {                                      //
+#ifndef WIN32
+        s << "-d, --daemon                 : allow the dedicated server to run as a daemon\n"
+          << "                               (will not poll for input, unless overridden by --input)\n";
+        s << "--input <file>               : Poll for input from this file in addition to/instead of\n"
+          <<  "                              (if -d is also given) stdin. Can be used multiple times.\n";
+#endif
+    }
+};
+
+static rInputCommandLineAnalyzer sr_analyzer;
+#endif
+
+void rInputStream::HandleInput()
+{
     // stdin commands are executed at owner level
     tCurrentAccessLevel level( tAccessLevel_Owner, true );
 
     tConfItemBase::LoadPlayback( true );
 
-    if ( !unblocked )
-    {
-        return;
-    }
 #ifdef WIN32
     //  std::cerr << "\n";
 
-    HANDLE stdinhandle = GetStdHandle(STD_INPUT_HANDLE);
     HANDLE stdouthandle = GetStdHandle(STD_OUTPUT_HANDLE);
     bool goon = true;
     while (goon)
     {
         unsigned long reallyread;
         INPUT_RECORD input;
-        bool ret=PeekConsoleInput(stdinhandle, &input, 1, &reallyread);
+        bool ret=PeekConsoleInput(descriptor_, &input, 1, &reallyread);
         if (reallyread > 0)
         {
-            bool ret=ReadConsoleInput(stdinhandle, &input, 1, &reallyread);
+            bool ret=ReadConsoleInput(descriptor_, &input, 1, &reallyread);
             if (input.EventType == KEY_EVENT)
             {
                 char key = input.Event.KeyEvent.uChar.AsciiChar;
@@ -120,21 +257,17 @@ void sr_Read_stdin(){
                 if (key && input.Event.KeyEvent.bKeyDown)
                 {
                     WriteConsole(stdouthandle, &key, 1, &written, NULL);
-                    line_in[currentIn] = key;
+                    line_in_ << key;
 
-                    if (key == 13 || currentIn>=MAXLINE-1){
-                        line_in[currentIn]='\n';
-                        line_in[currentIn+1]='\0';
-                        std::istringstream s(line_in);
+                    if (key == 13 ){
+                        line_in_<<'\n';
+                        std::istringstream s((char const *)line_in_);
                         WriteConsole(stdouthandle, "\n", 1, &written, NULL);
                         tConfItemBase::LoadAll(s, true);
-                        currentIn=0;
+                        line_="";
                     }
-                    else
-                        currentIn++;
                 }
             }
-            //		bool ret=ReadFile(stdinhandle, &line_in[currentIn], 1, &reallyread, NULL);
         }
         else
             goon = false;
@@ -142,25 +275,22 @@ void sr_Read_stdin(){
 
 
 #else
-    while ( read(stdin_descriptor,&line_in[currentIn],1)>0){
-        if (line_in[currentIn]=='\n' || currentIn>=MAXLINE-1)
+    char c;
+    while ( read(descriptor_,&c,1)>0){
+        line_in_ << c;
+        if (c=='\n')
         {
-            line_in[currentIn+1]='\0';
-            std::istringstream s(line_in);
+            std::istringstream s((char const *)line_in_);
+            if( name_.Len() > 1 )
+            {
+                con << name_ << " : " << line_in_;
+            }
             tConfItemBase::LoadAll(s, true);
-            currentIn=0;
+            line_in_="";
         }
-        else
-            currentIn++;
     }
 #endif
 }
-
-void sr_Close_stdin()
-{
-    fclose( sr_input );
-}
-
 
 void rConsole::DisplayAtNewline(){
 }
