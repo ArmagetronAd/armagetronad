@@ -264,7 +264,7 @@ void rInputStream::HandleInput()
                         std::istringstream s((char const *)line_in_);
                         WriteConsole(stdouthandle, "\n", 1, &written, NULL);
                         tConfItemBase::LoadAll(s, true);
-                        line_="";
+                        line_in_="";
                     }
                 }
             }
