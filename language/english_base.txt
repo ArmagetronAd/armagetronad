@@ -2820,6 +2820,7 @@ nconfig_error_nonet         Got conf message for  setting \1 which is not networ
 nconfig_error_ignoreold		Ignoring old conf message for setting \1.\n
 nconfig_value_changed		\1 changed from \2 to \3 on server order.\n
 
+config_accesslevel_-1       Shell
 config_accesslevel_0        Owner
 config_accesslevel_1        Administrator
 config_accesslevel_2        Moderator
@@ -2835,6 +2836,9 @@ config_accesslevel_20       Program
 
 access_level_help           Changes the access level of a configuration item to make it available to lower ranked users
 access_level_usage          usage: ACCESS_LEVEL <config command> <required minimal access level (numerical)>\n
+access_level_change         Required access level of command \1 changed to "\2".\n
+access_level_nochange_now   Cannot change access level of \1: it is currently at "\2", you only have "\3", you would steal access.\n
+access_level_nochange_later   Cannot change access level of \1 to "\2", you only have "\3" and would not be able to change it back.\n
 access_level_change         Required access level of command \1 changed to "\2".\n
 access_level_error          Required access level of command \1 is "\2", you only have "\3".\n
 

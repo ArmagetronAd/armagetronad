@@ -2532,6 +2532,9 @@ static void se_AdminAdmin( ePlayerNetID * p, std::istream & s )
     eAdminConsoleFilter consoleFilter( p->Owner() );
     try
     {
+        // forbid CASACL
+        tCasaclPreventer preventer;
+
         tConfItemBase::LoadLine(stream);
     }
     catch (tAbortLoading)
@@ -4819,6 +4822,11 @@ private:
     virtual bool Save(){
         return false;
     }
+
+    // CAN this be saved at all?
+    virtual bool CanSave(){
+        return false;
+    }
 };
 
 // changes the access level of a player
@@ -5982,10 +5990,15 @@ void se_SaveToLadderLog( tOutput const & out )
     {
         std::ofstream o;
         if ( tDirectories::Var().Open(o, "ladderlog.txt", std::ios::app) )
+        {
+            std::stringstream s;
             if(se_ladderlogDecorateTS) {
-                o << st_GetCurrentTime("%Y/%m/%d-%H:%M:%S ");
+                s << st_GetCurrentTime("%Y/%m/%d-%H:%M:%S ");
             }
-            o << out << std::endl;;
+            s << out << std::endl;
+            sr_InputForScripts( s.str().c_str() );
+            o << s.str();
+        }
     }
 }
 
