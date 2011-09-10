@@ -210,6 +210,11 @@ tConfItemBase::tConfItemMap & tConfItemBase::ConfItemMap()
     return *st_confMap;
 }
 
+tConfItemBase::tConfItemMap const & tConfItemBase::GetConfItemMap()
+{
+    return ConfItemMap();
+}
+
 static bool st_preventCasacl = false;
 
 tCasaclPreventer::tCasaclPreventer( bool prevent )
@@ -221,6 +226,12 @@ tCasaclPreventer::tCasaclPreventer( bool prevent )
 tCasaclPreventer::~tCasaclPreventer()
 {
     st_preventCasacl = previous_;
+}
+
+//! returns whether we're currently in an RINCLUDE file
+bool tCasaclPreventer::InRInclude()
+{
+    return st_preventCasacl;
 }
 
 // changes the access level of a configuration item
@@ -262,7 +273,22 @@ public:
         {
             // and change the level
             tConfItemBase * ci = (*iter).second;
-            if ( ci->requiredLevel != level )
+
+            if( ci->requiredLevel < tCurrentAccessLevel::GetAccessLevel() )
+            {
+                con << tOutput( "$access_level_nochange_now", 
+                                name, 
+                                tCurrentAccessLevel::GetName( ci->requiredLevel ),
+                                tCurrentAccessLevel::GetName( tCurrentAccessLevel::GetAccessLevel() ) );
+            }
+            else if( level < tCurrentAccessLevel::GetAccessLevel() )
+            {
+                con << tOutput( "$access_level_nochange_later", 
+                                name, 
+                                tCurrentAccessLevel::GetName( level ),
+                                tCurrentAccessLevel::GetName( tCurrentAccessLevel::GetAccessLevel() ) );
+            }
+            else if ( ci->requiredLevel != level )
             {
                 ci->requiredLevel = level;
                 if(printChange)
@@ -287,6 +313,11 @@ public:
     }
 
     virtual bool Save(){
+        return false;
+    }
+
+    // CAN this be saved at all?
+    virtual bool CanSave(){
         return false;
     }
 };
@@ -326,7 +357,7 @@ public:
         else if ( tCurrentAccessLevel::GetAccessLevel() > required )
         {
             con << tOutput( "$access_level_error",
-                            "SUDO",
+                            "CASACL",
                             tCurrentAccessLevel::GetName( required ),
                             tCurrentAccessLevel::GetName( tCurrentAccessLevel::GetAccessLevel() )
                 );
@@ -354,6 +385,11 @@ public:
     }
 
     virtual bool Save(){
+        return false;
+    }
+
+    // CAN this be saved at all?
+    virtual bool CanSave(){
         return false;
     }
 };
