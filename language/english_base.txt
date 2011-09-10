@@ -333,6 +333,11 @@ player_chat_wait_teamleader_help    Set to 1 if only team leaders, and 0 if all 
 wait_for_external_script_help Let the server wait for an external script between two rounds until the script switches this setting back to 0.
 wait_for_external_script_timeout_help If the server has been paused by WAIT_FOR_EXTERNAL_SCRIPT for more seconds than this, kickstart the game.
 
+spawn_script_help                   Spawns an external script from a scripts/ subdirectory on the data path.
+respawn_script_help                 Spawns an external script from a scripts/ subdirectory on the data path if no already running instance is found.
+kill_script_help                    Kills a script. Argument must match the SPAWN_SCRIPT argument.
+check_script_help                   Should safety checks be done on script commands? Very much recommended to leave this on.
+
 chatter_remove_time_help            Time in seconds after which a permanent chatter is removed from the game
 idle_remove_time_help               Time in seconds after which an inactive player is removed from the game
 idle_kick_time_help                 Time in seconds after which an inactive player is kicked

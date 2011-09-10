@@ -672,7 +672,7 @@ static void sr_KillScriptCommand( std::istream & s )
 }
 
 static tConfItemFunc sr_killScript( "KILL_SCRIPT", sr_KillScriptCommand );
-static tAccessLevelSetter sr_killScriptALS( sr_killScript, tAccessLevel_Shell );
+static tAccessLevelSetter sr_killScriptALS( sr_killScript, tAccessLevel_Owner );
 #endif
 
 #endif

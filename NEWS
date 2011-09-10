@@ -21,6 +21,13 @@ Changes since 0.2.8.3.x:
 - Added ENCODING ladderlog event, which specifies the encoding for data in
   ladderlog.txt.
 - "--input" now can be used more than once to read from multiple files or pipes.
+- Manage external scripts on Unix dedicated servers: SPAWN_SCRIPT always 
+  launches a script (the main script must be in the scripts subdirectory on the data
+   path), RESPAWN_SCRIPT only spawns it if a previous instance exited, KILL_SCRIPT
+  kills the script.
+  Scripts are fed the ladderlog on stdin (and need to read it) and their stdout 
+  output is interpreted as console input on the server. Environment variables 
+  are set so the script knows all about the server configuration at time of launch.
 
 Changes since 0.2.8.3.1:
 - security fix: old style action commands from clients no loger cause hangs and crashes
