@@ -1502,7 +1502,7 @@ static tConfItemLine st_wordDelimiters( "WORD_DELIMITERS", delimiters );
 //!
 // *******************************************************************************************
 
-int tString::PosWordRight( int start ) {
+int tString::PosWordRight( int start ) const {
     int nextDelimiter = strcspn( SubStr( start, Len() ), delimiters );
     int toMove = nextDelimiter;
 
@@ -1534,7 +1534,7 @@ int tString::PosWordRight( int start ) {
 //!
 // *******************************************************************************************
 
-int tString::PosWordLeft( int start ) {
+int tString::PosWordLeft( int start ) const {
     return -1 * Reverse().PosWordRight( Len() - start - 1 );
 }
 
@@ -1548,7 +1548,7 @@ int tString::PosWordLeft( int start ) {
 //!
 // *******************************************************************************************
 
-tString tString::Reverse() {
+tString tString::Reverse() const {
     tString reversed;
     for ( int index = Len() - 2; index >= 0; index-- ) {
         reversed << ( *this ) ( index );
