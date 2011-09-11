@@ -54,7 +54,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <stdio.h>
 #include <stdlib.h>
 #include <fstream>
-#include <errno.h>
 
 #include "nServerInfo.h"
 #include "nSocket.h"
@@ -68,42 +67,30 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 class gMainCommandLineAnalyzer: public tCommandLineAnalyzer
 {
 public:
-    bool     daemon_;
     bool     fullscreen_;
     bool     windowed_;
     bool     use_directx_;
     bool     dont_use_directx_;
-    tString  inputFile_;
 
     gMainCommandLineAnalyzer()
     {
-        daemon_ = false;
         windowed_ = false;
         fullscreen_ = false;
         use_directx_ = false;
         dont_use_directx_ = false;
-        inputFile_ = "";
     }
 
 
 private:
     virtual bool DoAnalyze( tCommandLineParser & parser )
     {
-        if ( parser.GetSwitch( "--daemon","-d") )
-        {
-            daemon_ = true;
-        }
-        else if ( parser.GetSwitch( "-fullscreen", "-f" ) )
+        if ( parser.GetSwitch( "-fullscreen", "-f" ) )
         {
             fullscreen_=true;
         }
         else if ( parser.GetSwitch( "-window", "-w" ) ||  parser.GetSwitch( "-windowed") )
         {
             windowed_=true;
-        }
-        else if ( parser.GetOption( inputFile_, "--input" ) )
-        {
-            daemon_ = false;
         }
 #ifdef WIN32
         else if ( parser.GetSwitch( "+directx") )
@@ -132,12 +119,6 @@ private:
         s << "+directx, -directx           : enable/disable usage of DirectX for screen\n"
         << "                               initialisation under MS Windows\n\n";
         s << "\n\nYes, I know this looks ugly. Sorry about that.\n";
-#endif
-#else
-#ifndef WIN32
-        s << "-d, --daemon                 : allow the dedicated server to run as a daemon\n"
-          << "                               (will not poll for input, unless overridden by --input)\n";
-        s << "--input <file>               : Poll for input from this file. Default is stdin\n";
 #endif
 #endif
     }
@@ -263,9 +244,9 @@ void sg_StartupPlayerMenu()
     // store color
     if( ! (color == leave) )
     {
-        player->rgb[0] = color.r_*15;
-        player->rgb[1] = color.g_*15;
-        player->rgb[2] = color.b_*15;
+        player->rgb[0] = int(color.r_*15);
+        player->rgb[1] = int(color.g_*15);
+        player->rgb[2] = int(color.b_*15);
     }
 
     // load keyboard layout
@@ -652,6 +633,10 @@ int main(int argc,char **argv){
         sg_LanguageInit();
         atexit(tLocale::Clear);
 
+        static eLadderLogWriter sg_encodingWriter( "ENCODING", true );
+        sg_encodingWriter << "latin1";
+        sg_encodingWriter.write();
+
         if ( commandLine.Execute() )
         {
             gCycle::PrivateSettings();
@@ -814,26 +799,6 @@ int main(int argc,char **argv){
             se_SoundExit();
             SDL_Quit();
 #else
-            if (!commandLineAnalyzer.daemon_)
-            {
-                if ( commandLineAnalyzer.inputFile_.Len() > 1 )
-                {
-                    FILE *in = fopen( commandLineAnalyzer.inputFile_, "r" );
-                    if ( in )
-                    {
-                        atexit( sr_Close_stdin );
-                        fseek( in, 0, SEEK_END );
-                        sr_input = in;
-                    }
-                    else
-                    {
-                        std::cerr << "Error opening input file '" << commandLineAnalyzer.inputFile_ << "': "
-                                  << strerror( errno ) << ". Using stdin to poll for input.\n";
-                    }
-                }
-                sr_Unblock_stdin();
-            }
-
             sr_glOut=0;
 
             //  nServerInfo::TellMasterAboutMe();

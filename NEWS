@@ -14,7 +14,30 @@ Changes since 0.2.8.3.x:
   default.
 - New command-line option "--input" added to poll for input from a file
   instead of stdin.
+- Added WHITELIST_ENEMIES_[IP/USERNAME] to allow players to be enemies, even
+  if they come from the same IP address and ALLOW_ENEMIES_SAME_IP is
+  disabled (which is its default setting).
 - GAME_END, NEW_MATCH, and NEW_ROUND ladderlog events include date and time.
+- Added ENCODING ladderlog event, which specifies the encoding for data in
+  ladderlog.txt.
+- "--input" now can be used more than once to read from multiple files or pipes.
+
+Changes since 0.2.8.3.1:
+- security fix: old style action commands from clients no loger cause hangs and crashes
+- security fix: oversized packets are ignored properly
+- security fix: never read one byte outside of the received buffer
+- security fix: only include .cfg files from the var subfolder
+- compiler compatibility: adapted to gcc 4.60
+- smaller spelling fixes
+- FOV calculations now correct for widescreen and horizontal splitscreen
+- Additional checks against illegal values passed to renderer
+
+Changes since 0.2.8.3:
+- fixed temporary sound disappearance when alt-tabbing away and back
+- default subcultures are now distributed
+- enable 32 bit color depth at desktop resolution
+- no more display lists for SiS cards
+- spelling mistakes and missing German translations
 
 Changes since 0.2.8.3_rc4:
 - New setting: KEEP_PLAYER_SLOT allows the server to kick (preferably) spectators

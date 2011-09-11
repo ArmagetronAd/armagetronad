@@ -210,6 +210,11 @@ tConfItemBase::tConfItemMap & tConfItemBase::ConfItemMap()
     return *st_confMap;
 }
 
+tConfItemBase::tConfItemMap const & tConfItemBase::GetConfItemMap()
+{
+    return ConfItemMap();
+}
+
 static bool st_preventCasacl = false;
 
 tCasaclPreventer::tCasaclPreventer( bool prevent )
@@ -221,6 +226,12 @@ tCasaclPreventer::tCasaclPreventer( bool prevent )
 tCasaclPreventer::~tCasaclPreventer()
 {
     st_preventCasacl = previous_;
+}
+
+//! returns whether we're currently in an RINCLUDE file
+bool tCasaclPreventer::InRInclude()
+{
+    return st_preventCasacl;
 }
 
 // changes the access level of a configuration item
@@ -262,7 +273,22 @@ public:
         {
             // and change the level
             tConfItemBase * ci = (*iter).second;
-            if ( ci->requiredLevel != level )
+
+            if( ci->requiredLevel < tCurrentAccessLevel::GetAccessLevel() )
+            {
+                con << tOutput( "$access_level_nochange_now", 
+                                name, 
+                                tCurrentAccessLevel::GetName( ci->requiredLevel ),
+                                tCurrentAccessLevel::GetName( tCurrentAccessLevel::GetAccessLevel() ) );
+            }
+            else if( level < tCurrentAccessLevel::GetAccessLevel() )
+            {
+                con << tOutput( "$access_level_nochange_later", 
+                                name, 
+                                tCurrentAccessLevel::GetName( level ),
+                                tCurrentAccessLevel::GetName( tCurrentAccessLevel::GetAccessLevel() ) );
+            }
+            else if ( ci->requiredLevel != level )
             {
                 ci->requiredLevel = level;
                 if(printChange)
@@ -287,6 +313,11 @@ public:
     }
 
     virtual bool Save(){
+        return false;
+    }
+
+    // CAN this be saved at all?
+    virtual bool CanSave(){
         return false;
     }
 };
@@ -326,7 +357,7 @@ public:
         else if ( tCurrentAccessLevel::GetAccessLevel() > required )
         {
             con << tOutput( "$access_level_error",
-                            "SUDO",
+                            "CASACL",
                             tCurrentAccessLevel::GetName( required ),
                             tCurrentAccessLevel::GetName( tCurrentAccessLevel::GetAccessLevel() )
                 );
@@ -354,6 +385,11 @@ public:
     }
 
     virtual bool Save(){
+        return false;
+    }
+
+    // CAN this be saved at all?
+    virtual bool CanSave(){
         return false;
     }
 };
@@ -450,7 +486,10 @@ int tConfItemBase::EatWhitespace(std::istream &s){
             !s.eof())
         c=s.get();
 
-    s.putback(c);
+    if( s.good() )
+    {
+        s.putback(c);
+    }
 
     return c;
 }
@@ -794,11 +833,11 @@ void tConfItemBase::LoadAll(std::ifstream &s, bool record )
 
 //! @param s        file stream to be used for reading later
 //! @param filename name of the file to open
-//! @param var      whether to look in var directory
+//! @param path     whether to look in var directory
 //! @return success flag
 bool tConfItemBase::OpenFile( std::ifstream & s, tString const & filename, SearchPath path )
 {
-    bool ret = ( ( path & Config ) && tDirectories::Config().Open(s, filename ) ) || ( ( path & Var ) && tDirectories::Var().Open(s, filename ) );
+    bool ret = ( ( path & Config ) && tDirectories::Config().Open(s, filename ) ) || ( ( path & Var ) && st_StringEndsWith(filename, ".cfg") && tDirectories::Var().Open(s, filename ) );
     
     static char const * section = "INCLUDE_VOTE";
     tRecorder::Playback( section, ret );
@@ -1067,7 +1106,7 @@ static void Include(std::istream& s, bool error )
     if ( !tRecorder::IsPlayingBack() )
     {
         // really load include file
-        if ( !Load( tDirectories::Var(), file ) )
+        if ( !st_StringEndsWith(file, ".cfg") || !Load( tDirectories::Var(), file ) )
         {
             if (!Load( tDirectories::Config(), file ) && error )
             {

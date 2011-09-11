@@ -208,7 +208,7 @@ public:
     eVoteItem( void ): creationTime_( tSysTimeFloat() ), user_( 0 ), id_( ++se_votingItemID ), menuItem_( 0 ), total_( 0 )
     {
         items_.Add( this );
-    };
+    }
 
     virtual ~eVoteItem( void );
 
@@ -301,7 +301,7 @@ public:
         con << tOutput( "$vote_new", GetDescription() );
 
         this->Evaluate();
-    };
+    }
 
     nMessage* CreateMessage( void ) const
     {
@@ -668,7 +668,7 @@ protected:
         }
 
         return true;
-    };
+    }
 
     virtual bool DoCheckValid( int senderID ){ return true; }
 
@@ -679,7 +679,7 @@ protected:
             // write our message ID
             m.Write( id_ );
         }
-    };
+    }
 
 protected:
     virtual tString DoGetDetails() const 		    // returns the detailed description of the voting item
@@ -700,7 +700,7 @@ private:
     virtual void DoFillToMessageLegacy( nMessage& m ) const
     {
         return DoFillToMessage( m );
-    };
+    }
 
     virtual nDescriptor& DoGetDescriptor() const = 0;	// returns the creation descriptor
     virtual tString DoGetDescription() const = 0;		// returns the description of the voting item
@@ -950,16 +950,16 @@ protected:
         m >> description_;
         m >> details_;
         return eVoteItem::DoFillFromMessage( m );
-    };
+    }
 
     virtual void DoFillToMessage( nMessage& m ) const
     {
         m << description_;
         m << details_;
         eVoteItem::DoFillToMessage( m );
-    };
+    }
 
-    virtual void DoExecute(){};						// called when the voting was successful
+    virtual void DoExecute(){}						// called when the voting was successful
 protected:
     virtual nDescriptor& DoGetDescriptor() const;	// returns the creation descriptor
 
@@ -1127,7 +1127,7 @@ protected:
     virtual void DoFillToMessageLegacy( nMessage& m ) const
     {
         return eVoteItemHarm::DoFillToMessage( m );
-    };
+    }
 
     virtual bool DoFillFromMessage( nMessage& m )
     {
@@ -1199,7 +1199,7 @@ protected:
         }
 
         return eVoteItem::DoCheckValid( senderID );
-    };
+    }
 
     virtual void DoFillToMessage( nMessage& m  ) const
     {
@@ -1209,7 +1209,7 @@ protected:
             m.Write( 0 );
 
         eVoteItem::DoFillToMessage( m );
-    };
+    }
 
 protected:
     virtual nDescriptor& DoGetDescriptor() const;	// returns the creation descriptor
@@ -1308,7 +1308,7 @@ protected:
         }
 
         return eVoteItemHarm::DoCheckValid( senderID );
-    };
+    }
 
     virtual void DoExecute()						// called when the voting was successful
     {
@@ -1366,7 +1366,7 @@ protected:
         Update();
 
         return ret;
-    };
+    }
 
     virtual void DoFillToMessage( nMessage& m  ) const
     {
@@ -1374,7 +1374,7 @@ protected:
         tASSERT( sn_GetNetState() != nCLIENT );
 
         eVoteItemServerControlled::DoFillToMessage( m );
-    };
+    }
 private:
     virtual void Update() //!< update description and details
     {
@@ -1481,7 +1481,7 @@ protected:
 
         // no transformation needed or transformation failed. Proceed as usual.
         return eVoteItemHarm::DoCheckValid( senderID );
-    };
+    }
 
     virtual void DoExecute()						// called when the voting was successful
     {

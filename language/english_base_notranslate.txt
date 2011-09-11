@@ -45,8 +45,9 @@ reset_socket_help UNDOCUMENTED
 simulate_receive_packet_loss_help UNDOCUMENTED
 simulate_send_packet_loss_help UNDOCUMENTED
 spawn_point_group_size_help UNDOCUMENTED
-timer_sync_start_fudge_help UNDOCUMENTED
-timer_sync_start_fudge_stop_help UNDOCUMENTED
+cull_delay_end_help  UNDOCUMENTED
+cull_delay_per_second_help  UNDOCUMENTED
+cull_delay_min_help  UNDOCUMENTED
 master_idle_help UNDOCUMENTED
 master_port_help UNDOCUMENTED
 master_query_interval_help UNDOCUMENTED
@@ -86,6 +87,9 @@ timestep_max_count_help UNDOCUMENTED
 timestep_max_help UNDOCUMENTED
 max_simulate_ahead_help UNDOCUMENTED
 predict_walls UNDOCUMENTED
+
+force_turtle_mode_help Forces turtle mode, usually only active while a server is under attack. For testing, mainly.
+record_turtle_mode_help Keep debug recording even in turtle mode. Normally, it is stopped to keep the server responsive. The begginning of an attack is recorded anyway, of course.
 
 #*************************************
 #*************************************

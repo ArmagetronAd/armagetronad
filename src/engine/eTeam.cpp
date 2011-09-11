@@ -390,16 +390,16 @@ void eTeam::Invite( ePlayerNetID * player )
 void eTeam::UnInvite( ePlayerNetID * player )
 {
     tASSERT( player );
+    size_t wasInvited = player->invitations_.erase( this );
     if ( player->CurrentTeam() == this && this->IsLocked() )
     {
         sn_ConsoleOut( tOutput( "$invite_team_kick", player->GetColoredName(), Name() ) );
         player->SetTeam(0);
     }
-    else
+    else if ( wasInvited )
     {
         sn_ConsoleOut( tOutput( "$invite_team_uninvite", player->GetColoredName(), Name() ) );
     }
-    player->invitations_.erase( this );
 }
 
 // check if a player is invited
@@ -1571,11 +1571,11 @@ void eTeam::Shuffle( int startID, int stopID )
         return;
     
     ePlayerNetID *player = players[startID];
-    eShuffleSpamTester & spam = player->shuffleSpam;
+    eShuffleSpamTester & spam = player->GetShuffleSpam();
     
     if ( spam.ShouldAnnounce() )
     {
-        sn_ConsoleOut( player->shuffleSpam.ShuffleMessage( player, startID + 1, stopID + 1 ) );
+        sn_ConsoleOut( spam.ShuffleMessage( player, startID + 1, stopID + 1 ) );
     }
 
     // simply swap the one player over all the players in between.

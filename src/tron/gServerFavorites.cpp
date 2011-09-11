@@ -86,7 +86,7 @@ public:
             , confAddress_( sg_ConfName( ID, prefix, "_ADDRESS"), address_ )
             , confPort( sg_ConfName( ID, prefix, "_PORT"), port_ )
     {
-    };
+    }
 
     //! connects to the server
     void Connect()

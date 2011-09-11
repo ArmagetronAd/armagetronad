@@ -474,6 +474,7 @@ tString expand_home(tString const & pathname) {
 class tPathConfig: public tPath
 {
 public:
+    tPathConfig() {}
 private:
     void Paths ( tArray< tString >& paths ) const
     {
@@ -505,6 +506,7 @@ static const tPathConfig st_Config;
 class tPathData: public tPath
 {
 public:
+    tPathData() {}
 private:
     void Paths ( tArray< tString >& paths ) const
     {
@@ -526,6 +528,7 @@ static const tPathData st_Data;
 class tPathVar: public tPath
 {
 public:
+    tPathVar() {}
 private:
     void Paths ( tArray< tString >& paths ) const
     {
@@ -552,6 +555,7 @@ static const tPathVar st_Var;
 class tPathScreenshot: public tPath
 {
 public:
+    tPathScreenshot() {}
 private:
     void Paths ( tArray< tString >& paths ) const
     {
@@ -1552,6 +1556,17 @@ tString tPath::GetPaths(void) const {
     for (int i = 0; i < paths.Len(); ++i) {
         if(i > 0 && paths[i - 1] == paths[i]) continue;
         ret << " - " << paths[i] << "\n";
+    }
+    return ret;
+}
+
+tString tPath::GetPaths(char const * delimiter, char const * finalizer) const {
+    tString ret;
+    tArray<tString> paths;
+    Paths(paths);
+    for (int i = 0; i < paths.Len(); ++i) {
+        ret << paths[i];
+        ret << ( (i == paths.Len() - 1) ? finalizer : delimiter );
     }
     return ret;
 }

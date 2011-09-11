@@ -172,7 +172,7 @@ public:
     nKrawall::nScrambledPassword password;
     bool save;
 
-    PasswordStorage(): save(false){};
+    PasswordStorage(): save(false){}
 };
 
 static bool operator == ( PasswordStorage const & a, PasswordStorage const & b )
@@ -359,7 +359,7 @@ void se_DeletePasswords(){
 class tConfItemPassword:public tConfItemBase{
 public:
     tConfItemPassword():tConfItemBase("PASSWORD"){}
-    ~tConfItemPassword(){};
+    ~tConfItemPassword(){}
 
     // write the complete passwords
     virtual void WriteVal(std::ostream &s){
@@ -3291,9 +3291,9 @@ void ePlayerNetID::SetShuffleWish( int pos )
 {
     tASSERT( !CurrentTeam() );
 
-    if ( shuffleSpam.ShouldAnnounce() )
+    if ( GetShuffleSpam().ShouldAnnounce() )
     {
-        sn_ConsoleOut( shuffleSpam.ShuffleMessage( this, pos+1 ) );
+        sn_ConsoleOut( GetShuffleSpam().ShuffleMessage( this, pos+1 ) );
     }
 
     teamListID = pos;
@@ -3305,7 +3305,7 @@ class eHelpTopic {
     // singleton accessor
     static std::map<tString, eHelpTopic> & GetHelpTopics();
 public:
-    eHelpTopic() {};
+    eHelpTopic() {}
     eHelpTopic(tString const &shortdesc, tString const &text) : m_shortdesc(shortdesc), m_text(text) {
     }
 
@@ -4159,7 +4159,48 @@ static int IMPOSSIBLY_LOW_SCORE=(-1 << 31);
 
 static nSpamProtectionSettings se_chatSpamSettings( 1.0f, "SPAM_PROTECTION_CHAT", tOutput("$spam_protection") );
 
-ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), timeCreated_( tSysTimeFloat() ), allowTeamChange_(false), registeredMachine_(0), pID(p),chatSpam_( se_chatSpamSettings ), lastSaid_()
+class eMachineDecoratorSpam: public nMachineDecorator
+{
+public:
+    nSpamProtection chatSpam;
+    eShuffleSpamTester shuffleSpam;
+    eChatLastSaid lastSaid;
+
+    eMachineDecoratorSpam( nMachine & m ): nMachineDecorator( m ), chatSpam( se_chatSpamSettings ){}
+
+    virtual void OnDestroy()
+    {
+        delete this;
+    }
+};
+
+static eMachineDecoratorSpam & se_GetSpam( ePlayerNetID & p )
+{
+    nMachine & machine = p.GetMachine();
+    eMachineDecoratorSpam * spam = machine.GetDecorator< eMachineDecoratorSpam >();
+    if( !spam )
+    {
+        spam = tNEW(eMachineDecoratorSpam)( machine );
+    }
+    return *spam;
+}
+
+nSpamProtection & ePlayerNetID::GetChatSpam()
+{
+    return se_GetSpam( *this ).chatSpam;
+}
+
+eChatLastSaid & ePlayerNetID::GetLastSaid()
+{
+    return se_GetSpam( *this ).lastSaid;
+}
+
+eShuffleSpamTester & ePlayerNetID::GetShuffleSpam()
+{
+    return se_GetSpam( *this ).shuffleSpam;
+}
+
+ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), timeCreated_( tSysTimeFloat() ), allowTeamChange_(false), registeredMachine_(0), pID(p)
 {
     flagOverrideChat = false;
     flagChatState = false;
@@ -4226,7 +4267,7 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), timeC
 
 
 ePlayerNetID::ePlayerNetID(nMessage &m):nNetObject(m),listID(-1), teamListID(-1), timeCreated_( tSysTimeFloat() )
-        , allowTeamChange_(false), registeredMachine_(0), chatSpam_( se_chatSpamSettings ), lastSaid_()
+        , allowTeamChange_(false), registeredMachine_(0)
 {
     flagOverrideChat = false;
     flagChatState = false;
@@ -4769,7 +4810,7 @@ protected:
 
     virtual P ReadRawVal(tString const & name, std::istream &s) const = 0;
     virtual P GetDefault() const = 0;
-    virtual void TransformName( tString & name ) const {};
+    virtual void TransformName( tString & name ) const {}
 
     virtual void ReadVal(std::istream &s)
     {
@@ -7128,11 +7169,11 @@ static void scores(){
 
 static rPerFrameTask pf(&scores);
 
-static bool force_small_cons(){
-    return show_scores;
-}
+// static bool force_small_cons(){
+//    return show_scores;
+// }
 
-static rSmallConsoleCallback sc(&force_small_cons);
+// static rSmallConsoleCallback sc(&force_small_cons);
 
 //static void cd(){
 //    show_scores = false;
@@ -7562,7 +7603,7 @@ void ePlayerNetID::ReceiveControlNet(nMessage &m)
 
                 // count it as spam if it is obnoxious
                 if ( obnoxious )
-                    chatSpam_.CheckSpam( 4.0, Owner(), tOutput("$spam_teamchage") );
+                    GetChatSpam().CheckSpam( 4.0, Owner(), tOutput("$spam_teamchage") );
             }
 
             break;
@@ -7999,7 +8040,7 @@ static tConfItemLine sg_optionsConf( "SERVER_OPTIONS", sg_options );
 class gServerInfoAdmin: public nServerInfoAdmin
 {
 public:
-    gServerInfoAdmin(){};
+    gServerInfoAdmin(){}
 
 private:
     virtual tString GetUsers() const
@@ -8653,6 +8694,77 @@ tString ePlayerNetID::GetFilteredAuthenticatedName( void ) const
 #endif
 }
 
+class eEnemiesWhitelist
+{
+public:
+    eEnemiesWhitelist() :usernames_whitelist_(), ip_addresses_whitelist_() {}
+    
+    // Returns true if the two players can be enemies.
+    // 
+    // Assumes both "a" and "b" are from the same IP address.
+    bool CanBeEnemies( const ePlayerNetID * a, const ePlayerNetID * b ) const
+    {
+        bool enemies = HasEntry( ip_addresses_whitelist_, a->GetMachine().GetIP() );
+#ifdef KRAWALL_SERVER
+        enemies |= a->IsAuthenticated() && HasEntry( usernames_whitelist_, a->GetLogName() );
+        enemies |= b->IsAuthenticated() && HasEntry( usernames_whitelist_, b->GetLogName() );
+#endif
+        return enemies;
+    }
+    
+    void AddUsernames( std::istream & s )
+    {
+        Parse( usernames_whitelist_, s );
+    }
+    
+    void AddIPAddresses( std::istream & s )
+    {
+        Parse( ip_addresses_whitelist_, s );
+    }
+protected:
+    typedef std::set< tString > StringSet;
+    
+    void Parse( StringSet & whitelist, std::istream & s )
+    {
+        int entries_count = 0;
+        while ( s.good() )
+        {
+            tString name;
+            s >> name;
+            if ( name.Len() > 1 )
+            {
+                std::pair< StringSet::iterator, bool > ret = whitelist.insert( name );
+                if ( ret.second ) entries_count++;
+            }
+        }
+        con << tOutput( "$whitelist_enemies_success", entries_count ) << '\n';
+    }
+    
+    bool HasEntry( const StringSet & whitelist, const tString & value ) const
+    {
+        return whitelist.find( value ) != whitelist.end();
+    }
+    
+    StringSet usernames_whitelist_;
+    StringSet ip_addresses_whitelist_;    
+};
+
+static eEnemiesWhitelist se_enemiesWhitelist;
+
+#ifdef KRAWALL_SERVER
+void se_WhiteListEnemiesUsername( std::istream & s )
+{
+    se_enemiesWhitelist.AddUsernames( s );
+}
+static tConfItemFunc se_whiteListEnemiesUsernameConfItemFunc( "WHITELIST_ENEMIES_USERNAME", se_WhiteListEnemiesUsername );
+#endif
+
+void se_WhiteListEnemiesIP( std::istream & s )
+{
+    se_enemiesWhitelist.AddIPAddresses( s );
+}
+static tConfItemFunc se_whiteListEnemiesIPConfItemFunc( "WHITELIST_ENEMIES_IP", se_WhiteListEnemiesIP );
+
 // allow enemies from the same IP?
 static bool se_allowEnemiesSameIP = false;
 static tSettingItem< bool > se_allowEnemiesSameIPConf( "ALLOW_ENEMIES_SAME_IP", se_allowEnemiesSameIP );
@@ -8683,7 +8795,7 @@ bool ePlayerNetID::Enemies( ePlayerNetID const * a, ePlayerNetID const * b )
         return false;
 
     // no scoring for two players from the same IP
-    if ( !se_allowEnemiesSameIP && a->Owner() != 0 && a->GetMachine() == b->GetMachine() )
+    if ( !se_allowEnemiesSameIP && a->Owner() != 0 && a->GetMachine() == b->GetMachine() && !se_enemiesWhitelist.CanBeEnemies( a, b ) )
         return false;
 
     // no scoring for two players from the same client
@@ -8880,7 +8992,7 @@ void ePlayerNetID::UpdateShuffleSpamTesters()
     for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
     {
         ePlayerNetID *p = se_PlayerNetIDs( i );
-        p->shuffleSpam.Reset();
+        p->GetShuffleSpam().Reset();
     }
 }
 
@@ -8905,7 +9017,7 @@ void ePlayerNetID::AnalyzeTiming( REAL timing )
 
 eUncannyTimingDetector::eUncannyTimingSettings::~eUncannyTimingSettings()
 {
-#ifdef DEBUG
+#ifdef DEBUG_X
 #ifdef DEDICATED
     con << "Best ratio achieved for " << timescale*1000 << "ms stat: " << bestRatio << "\n";
 #endif

@@ -1739,7 +1739,7 @@ network_error                 Erreur de reseau.\n
 network_error_timeout         Le temps de l'utilisateur \1 est ecoule.\n
 network_error_shortmessage    Le message de l'utilisateur \1 est trop court.\n
 network_error_overflow        L'utilisateur \1 ne sait pas suivre le trafic du reseau.\n
-network_killuser              Fin de l'utilisateur \1, ping \2.\n
+network_killuser              Fin de l'utilisateur \1, ping \2, IP \3: \4\n
 network_statistics1           Duree:     \1 secondes\n
 network_statistics2           Envoyes:   \2 octets dans \3 paquets (\4 octets/s)\n
 network_statistics3           Recus:     \5 octets dans \6 paquets (\7 octets/s)\n
@@ -1907,7 +1907,7 @@ config_file_write_error       N'a pas pu ecrire dans le fichier de configuration
 config_value_changed          \1 a change \2 en \3.\n
 config_error_read             erreur de lecture de \1: format non valide.\n
 config_message_info           \1 est actuellement a \2.\n
-nconfig_errror_protected      Seul le serveur peut modifier \1.\n
+nconfig_error_protected       Seul le serveur peut modifier \1.\n
 nconfig_error_unknown         Message recu du setting \1 inconnu...\n\n\n\nVOUS DEVRIEZ PROBABLEMENT METTRE ARMAGETRON A JOUR\n
 nconfig_value_changed         \1 a change \2 en \3 dans l'ordre du serveur.\n
 

@@ -87,8 +87,8 @@ static int sg_consoleHistoryMaxSize=10; // size of the console history
 static tSettingItem< int > sg_consoleHistoryMaxSizeConf("HISTORY_SIZE_CONSOLE",sg_consoleHistoryMaxSize);
 
 class ArmageTron_feature_menuitem: public uMenuItemSelection<int>{
-    void NewChoice(uSelectItem<bool> *){};
-    void NewChoice(char *,bool ){};
+    void NewChoice(uSelectItem<bool> *){}
+    void NewChoice(char *,bool ){}
 public:
     ArmageTron_feature_menuitem(uMenu *m,char const * tit,char const * help,int &targ)
             :uMenuItemSelection<int>(m,tit,help,targ){
@@ -106,13 +106,13 @@ public:
             rFEAT_ON);
     }
 
-    ~ArmageTron_feature_menuitem(){};
+    ~ArmageTron_feature_menuitem(){}
 };
 
 
 class ArmageTron_texmode_menuitem: public uMenuItemSelection<int>{
-    void NewChoice(uSelectItem<bool> *){};
-    void NewChoice(char *,bool ){};
+    void NewChoice(uSelectItem<bool> *){}
+    void NewChoice(char *,bool ){}
 public:
     ArmageTron_texmode_menuitem(uMenu *m,char const * tit,int &targ,
                                 bool font=false)
@@ -147,7 +147,7 @@ public:
     #endif
     }
 
-    ~ArmageTron_texmode_menuitem(){};
+    ~ArmageTron_texmode_menuitem(){}
 };
 
 static tConfItem<bool>    ab("ALPHA_BLEND",sr_alphaBlend);
@@ -407,6 +407,16 @@ static uMenuItemToggle fs_dither
  "$detail_dither_help",
  sr_dither);
 
+#ifndef DEDICATED
+// from gWall.cpp
+extern bool sg_simpleTrail;
+static uMenuItemToggle sgm_simpleTrail
+(&screen_menu_detail,
+ "$detail_simple_trail_text",
+ "$detail_simple_trail_help",
+ sg_simpleTrail);
+#endif
+
 static uMenuItemSelection<int> mfd
 (&screen_menu_detail,
  "$detail_floor_text",
@@ -447,7 +457,6 @@ static tConfItem<bool> crexp("EXPLOSION",sg_crashExplosion);
 #ifndef DEDICATED
 //extern bool png_screenshot;		// from rSysdep.cpp
 //static tConfItem<bool> pns("PNG_SCREENSHOT",png_screenshot);
-#endif
 
 static uMenuItemToggle  t32b
 (&screen_menu_detail,"$detail_text_truecolor_text",
@@ -629,13 +638,7 @@ uMenuItemToggle hud2
 (&hud_prefs,"$pref_showhud_text",
  "$pref_showhud_help",subby_ShowHUD);
 
-
-
 static tConfItem<bool> WRAP("WRAP_MENU",uMenu::wrap);
-
-
-
-#ifndef DEDICATED
 
 class gMemuItemConsole: uMenuItemStringWithHistory{
 public:
@@ -822,7 +825,7 @@ public:
         m->RequestSpaceBelow(.2);
     }
 
-    ~ArmageTron_color_menuitem(){};
+    ~ArmageTron_color_menuitem(){}
 
     virtual REAL SpaceRight(){return .2;}
 
