@@ -297,6 +297,40 @@ bool su_GetSDLInput(SDL_Event &tEvent,REAL &time){
     if ( ret )
         EventArchiver< tRecordingBlock >::Archive( tEvent, time, ret );
 
+#ifndef DEDICATED
+    // filter bogus events. Some keys cause key events with wrong keysyms.
+    static unsigned short blockedScancode = 0xffff;
+    static SDLKey blockedKeysym = SDLK_LAST;
+
+    if( tEvent.type == SDL_KEYDOWN )
+    {
+        // you can spot them by zero unicode; control keys are allowed to have that,
+        // but not letter and number and sign keys
+        if( tEvent.key.keysym.unicode == 0 )
+        {
+            if ( tEvent.key.keysym.sym >= SDLK_ESCAPE && 
+                 tEvent.key.keysym.sym <= SDLK_z )
+            {
+                ret = false;
+
+                blockedScancode = tEvent.key.keysym.scancode;
+                blockedKeysym = tEvent.key.keysym.sym;
+            }
+        }
+    }
+    else if ( tEvent.type == SDL_KEYUP )
+    {
+        if( blockedScancode == tEvent.key.keysym.scancode && 
+            blockedKeysym == tEvent.key.keysym.sym )
+        {
+            ret = false;
+
+            blockedScancode = 0xffff;
+            blockedKeysym = SDLK_LAST;
+        }
+    }
+#endif
+
     return ret;
 }
 

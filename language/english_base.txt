@@ -93,12 +93,12 @@ cycle_width_rubber_max_help  If the cycle_width conditions are massively violate
 
 cycle_rubber_help		Niceness factor to allow you drive really close to a wall
 cycle_rubber_time_help		    Timescale rubber is restored on.
-cycle_rubber_legacy_help		Revert to old, framerate dependant and old-clients-ripping, rubber code if old clients are present. Old means <= 0.2.7.0 here.
+cycle_rubber_legacy_help		Revert to old, framerate dependent and old-clients-ripping, rubber code if old clients are present. Old means <= 0.2.7.0 here.
 cycle_rubber_timebased_help		Rubber usage is based on distance travelled if this is 0 (default) and the time passed if this is 1. Intermediate values and values out of these bounds are supported as well.
 cycle_rubber_speed_help             Logarithmic speed of wall approximation when rubber is in effect (every second, you get closer to the wall by a factor of ~0.4^{this value})
 cycle_rubber_mindistance_help		The minimal distance rubber code keeps you from the wall in front of you
-cycle_rubber_mindistance_gap_help		If > 0, CYCLE_RUBBER_MINDISTANCE effectively is never taken to be bigger than this value times the size of any detected gaps the cylce can squeeze through. For "Open" gameplay.
-cycle_rubber_mindistance_gap_backdoor_help If > 0, CYCLE_RUBBER_MINDISTANCE effectively is never taken to be bigger than this value times the size of any detected backdoor gaps the cylce can squeeze through. For "Open" gameplay. If = 0, CYCLE_RUBBER_MINDISTANCE_GAP applies to backdoors, too.
+cycle_rubber_mindistance_gap_help		If > 0, CYCLE_RUBBER_MINDISTANCE effectively is never taken to be bigger than this value times the size of any detected gaps the cycle can squeeze through. For "Open" gameplay.
+cycle_rubber_mindistance_gap_backdoor_help If > 0, CYCLE_RUBBER_MINDISTANCE effectively is never taken to be bigger than this value times the size of any detected backdoor gaps the cycle can squeeze through. For "Open" gameplay. If = 0, CYCLE_RUBBER_MINDISTANCE_GAP applies to backdoors, too.
 cycle_rubber_mindistance_gap_side_help Gap detection only sees gaps that the cycle may reach in no less than this many seconds.
 cycle_rubber_mindistance_ratio_help	Additional distance to CYCLE_RUBBER_MINDISTANCE for every length unit of the wall you have in front of you
 cycle_rubber_mindistance_reservoir_help		Additional distance if you have an empty rubber meter (gets faded out gradually as you use up all your rubber)
@@ -120,8 +120,8 @@ cycle_time_tolerance_help			Maximum time difference of execution of turns on ser
 cycle_packetloss_tolerance_help     Cycle death is prevented as long as the player's failure to turn can be explained by the loss of this many network packets. Enabling this allows cheating.
 cycle_sync_ff_help 					Speed of simulation of the extrapolating sync; decrease for lower CPU load, but higher effective ping
 cycle_sync_ff_steps_help 			Number of extrapolation simulation timesteps each real timestep; increase for better accuracy
-topology_police_help				The topology police does posteriori checks to determine whether game moves were legal.
-topology_police_parallel_help		Extra topology police flag to check for walls that are put into the grid datastructure exactly parallel to each other. Requites TOPOLOGY_POLICE to be active.
+topology_police_help				The topology police does posterior checks to determine whether game moves were legal.
+topology_police_parallel_help		Extra topology police flag to check for walls that are put into the grid data-structure exactly parallel to each other. Requites TOPOLOGY_POLICE to be active.
 cycle_smooth_time_help				Timescale for smoothing options. Increasing this will make interpolation smoother, but less accurate. Decreasing it will make network synchronization jumpy.
 cycle_smooth_min_speed_help			Minimum speed of smooth correction relative to cycle speed.
 cycle_smooth_threshold_help			Only syncs that differ from your position by less than this amount (measured in speed) will be handled smoothly, bigger differences will be applied instantly.
@@ -136,7 +136,7 @@ cycle_max_refcount_help				Maximum allowed reference count on cycles before they
 #********************************************
 
 chatbot_always_active_help          if set to 1, the chatbot is active all of the time
-chatbot_new_wall_blindness_help     the chatbot won't see walls that were bult less than this many seconds ago
+chatbot_new_wall_blindness_help     the chatbot won't see walls that were built less than this many seconds ago
 chatbot_min_timestep_help           minimal time in seconds between chatbot thoughts
 chatbot_delay_help                  time between entering chat and chatbot activation
 chatbot_range_help                  time in seconds the bot is capable of planning ahead
@@ -405,7 +405,7 @@ spam_maxlen_help					Maximal length of chat message.
 spam_autokick_help					Spam score that causes you to get kicked instantly.
 spam_autokick_count_help			Number of spam warnings before a player gets spamkicked.
 silence_default_help				If set to 1, new players will be silenced
-enable_chat_help					If set to 0, all chat will be surpressed (if reset on the server, messages from logged in players and private/team messages are still shown)
+enable_chat_help					If set to 0, all chat will be suppressed (if reset on the server, messages from logged in players and private/team messages are still shown)
 allow_team_change_help				If set to 1, all players can change teams. If set to 0, players can only change teams if they've been specifically allowed to by ALLOW_TEAM_CHANGE_PLAYER
 
 # spam prefix settings
@@ -453,7 +453,7 @@ timebot_action_medium_help         Action to take on a medium suspicion of timeb
 timebot_action_high_help           Action to take on a high suspicion of timebottery. 0: do nothing, 1: log it, 2: message moderators, 3: message all players, 4: kick the offending player.
 timebot_action_max_help            Action to take on a very high suspicion of timebottery. 0: do nothing, 1: log it, 2: message moderators, 3: message all players, 4: kick the offending player.
 
-timebot_action_medium              \1 is showing excelent timing ability, almost too good for a human.\n
+timebot_action_medium              \1 is showing excellent timing ability, almost too good for a human.\n
 timebot_action_high                \1 is showing suspiciously superhuman timing ability.\n
 timebot_action_max                 \1 is very likely using timing assistance software.\n
 
@@ -518,7 +518,7 @@ max_votes_help                      The maximum number of total votes that can b
 votes_cancel_help                   Cancels all running polls.
 max_votes_per_voter_help            The maximum number of votes suggested by each voter that can be active at any given moment.
 voting_start_decay_help				Number of seconds after that the non-voters start to get ignored.
-voting_decay_help					One non-voter is ignored everytime this many seconds pass.
+voting_decay_help					One non-voter is ignored every time this many seconds pass.
 voting_bias_help					Add virtual voters that oppose every change.
 voting_bias_kick_help				Add virtual voters that oppose every kick vote.
 voting_bias_suspend_help			Add virtual voters that oppose every suspend vote.
@@ -613,7 +613,7 @@ camera_server_custom_rise_help		Position of the custom camera: how much is it mo
 camera_server_custom_back_fromspeed_help		This value is multiplied with the current speed and added to CAMERA_SERVER_CUSTOM_BACK.
 camera_server_custom_rise_fromspeed_help		This value is multiplied with the current speed and added to CAMERA_SERVER_CUSTOM_RISE.
 camera_server_custom_pitch_help		Position of the custom camera: how much does it look up/down?
-camera_server_custom_turn_speed_help Speed the server custom camera turns with. Turn values are taken from the clientside settings if this is negative.
+camera_server_custom_turn_speed_help Speed the server custom camera turns with. Turn values are taken from the client-side settings if this is negative.
 camera_server_custom_turn_speed_180_help Extra factor to CAMERA_SERVER_CUSTOM_TURN_SPEED after a quick reverse
 
 camera_glance_back_help		Position of the glance camera: how much is it moved back from the cycle?
@@ -650,7 +650,7 @@ custom_server_name_help	Name of the server to connect to
 dedicated_idle_help		After running this time (in hours), the dedicated server takes the next chance to quit.
 dedicated_fps_help      Maximum simulation steps per second the dedicated server will perform
 dedicated_fps_idle_factor_help Number of times per frame the server should check whether simulation can be done if no network input is coming
-talk_to_master_help		Announce this server on the internet?
+talk_to_master_help		Announce this server on the Internet?
 add_master_server_help  Announce this server to another master server. Usage: ADD_MASTER_SERVER host port(optional, default=4533).
 max_out_rate_help		Maximum network output rate
 max_in_rate_help		Maximum network input rate
@@ -677,7 +677,7 @@ url_help				HTTP URI associated with a server
 setting_legacy_behavior_breaking_help    Default legacy behavior for settings that absolutely break the client and make play impossible. Example of an affected setting: MAP_FILE
 setting_legacy_behavior_bumpy_help     Default legacy behavior for settings that allow play on old clients in principle, but with severe limitations (cycles bouncing around, player commands not executed on time). Example: CYCLE_DELAY_TIMEBASED
 setting_legacy_behavior_annoying_help Default legacy behavior for settings that only cause minor annoyances on old clients, like enemy cycles stopping for .1 seconds after each turn. Example: CYCLE_RUBBER_MINDISTANCE
-setting_legacy_behavior_cheating_help     Default legacy behavior for settings where the default behavior could be considered cheating if nondefault was set. Example: DOUBLEBIND_TIME
+setting_legacy_behavior_cheating_help     Default legacy behavior for settings where the default behavior could be considered cheating if non-default was set. Example: DOUBLEBIND_TIME
 setting_legacy_behavior_visual_help   Default legacy behavior for settings that only affect status displays and visuals, not game physics. Example: CYCLE_RUBBER_* (the client displays the rubber meter, but it's not used for anything)
 
 #********************************************
@@ -727,8 +727,8 @@ score_size_help                   Size of the score display
 cm_locy_help                      Vertical position of the center messages
 
 #floor
-grid_size_help			Distance between gridlines
-grid_size_moviepack_help	Distance between gridlines when moviepack is active
+grid_size_help			Distance between grid lines
+grid_size_moviepack_help	Distance between grid lines when moviepack is active
 floor_red_help			Floor colour
 floor_green_help		Floor colour
 floor_blue_help			Floor colour
@@ -768,7 +768,7 @@ gl_vendor_help			OpenGL system information
 alpha_blend_help		Enable alpha blending
 zone_alpha_toggle_help		This is XORd with ALPHA_BLEND to determine the way to draw zones
 zone_segments_help		How many segments the zone is formed with. Default is 11
-zone_seg_length_help	The rendered percentual of every segment. Default is .5
+zone_seg_length_help	The rendered fraction of every segment. Default is .5
 zone_bottom_help        Where to put the zone along the Z axis. Default is 0.0
 zone_height_help        The zone segments' height. Default is 5.0
 smooth_shading_help     Enable smooth shading
@@ -837,7 +837,7 @@ ladderlog_write_winzone_player_enter_help     Write to ladderlog: WINZONE_PLAYER
 ladderlog_write_zone_collapsed_help           Write to ladderlog: ZONE_COLLAPSED <zone_id> <object_id> <cx> <cy>
 ladderlog_write_zone_spawned_help             Write to ladderlog: ZONE_SPAWNED <object id> <zone_name> <cx> <cy>
 
-
+ladderlog_game_time_interval_help If non-negative, write a line with the current game time to the ladder log every n seconds.
 chat_log_help			Write machine parsable chat messages to var/chatlog.txt
 chatlog_write_team      Write /team messages to chatlog [1: on | 0:off]
 chatlog_write_pm        Write Private messages (/msg) to chatlog [1: on | 0:off]
@@ -904,6 +904,9 @@ software_renderer_help		Is the OpenGL renderer not hardware accelerated?
 #model
 use_displaylists_help		Use display lists for rendering the cycles?
 
+#walls
+simple_trail_help           If set to 1, trails are rendered simplified for better performance.
+
 #********************************************
 #********************************************
 #
@@ -948,7 +951,7 @@ message_of_day_timeout_help		Time message_of_day is displayed for in fullscreen 
 round_console_message_help	Message sent to clients after every round
 round_center_message_help	Big message sent to clients after every round
 
-password_storage_help			Determines where your passwords are stored: 1 means on harddisk (dangerous), 0 in memory and -1 means they are not stored at all.
+password_storage_help			Determines where your passwords are stored: 1 means on hard disk (dangerous), 0 in memory and -1 means they are not stored at all.
 protect_sensitive_files_help Try to protect user.cfg from read access by other users?
 admin_pass_help			Password for the basic in game admin
 
@@ -1015,7 +1018,7 @@ fullscreen_message_help     Prints a big message all over the screen, interrupti
 say_help					Dedicated server only: let the server administrator say something.
 rename_help		    Renames the given player.
 allow_rename_player_help    Gives the given player the ability to rename.
-disallow_rename_player_help Prevents the given player from renameing.
+disallow_rename_player_help Prevents the given player from rename-ing.
 
 #********************************************
 #********************************************
@@ -1087,9 +1090,9 @@ input_toggle_mousegrab_help         Frees the mouse pointer or constrains it to 
 input_reload_textures_text          Reload textures
 input_reload_textures_help          Reloads all textures. Useful for content creators.
 
-input_ingame_menu_tooltip           Press \1 to access the ingame menu.
-input_ingame_menu_text              Ingame menu
-input_ingame_menu_help              Triggers the ingame menu. ESC is hardcoded to this function so you don't get trapped in the game :)
+input_ingame_menu_tooltip           Press \1 to access the in-game menu.
+input_ingame_menu_text              In-game menu
+input_ingame_menu_help              Triggers the in-game menu. ESC is hardcoded to this function so you don't get trapped in the game :)
 
 input_pause_game_text               Pause game
 input_pause_game_help               Stops the game timer or resumes it.
@@ -1520,7 +1523,7 @@ network_opts_help		Configures your network preferences.
 
 #network options
 network_opts_pingchar_text	Ping Charity:
-network_opts_pingchar_help	The maximum ping (in ms) you are willing to take over from the other players. \g will reduce their ping and increase yours, until you have equal ping or the maximum transfer set by this menuitem is hit.
+network_opts_pingchar_help	The maximum ping (in ms) you are willing to take over from the other players. \g will reduce their ping and increase yours, until you have equal ping or the maximum transfer set by this menu-item is hit.
 
 network_opts_lagometer_text	Lag-O-Meter:
 network_opts_lagometer_help	In a network game, the place where the other players may already be now (but you have not yet noticed because of the network delay) is indicated as a geometrical shape. Useful for internet play.
@@ -1572,7 +1575,7 @@ network_host_port_text		Server Port:
 network_host_port_help		The network port this server will listen on.
 
 network_host_host_text		Host Network Game
-network_host_host_help		Enter the game grid! Other players are allowed to join you via the "Connect to Server"-menuitem.
+network_host_host_help		Enter the game grid! Other players are allowed to join you via the "Connect to Server"-menu-item.
 
 bookmarks_menu              Server Bookmarks
 bookmarks_menu_help         Add, edit, and connect to your server bookmarks.
@@ -1655,7 +1658,7 @@ language_menu_item_fist		First Language:
 language_menu_item_first_help	\g will display most text messages in this language. Use Cursor Left/Right to choose.
 
 language_menu_item_second	Second Language:
-language_menu_item_second_help	If the first language is not available for one text item, it will be displayed in the second language (or in english as final fallback).  Use Cursor Left/Right to choose.
+language_menu_item_second_help	If the first language is not available for one text item, it will be displayed in the second language (or in English as final fallback).  Use Cursor Left/Right to choose.
 
 #*************************************
 #*************************************
@@ -1750,7 +1753,7 @@ viewport_assign_text		Assign Viewports to Players
 viewport_assign_help		Which player's game is seen on which part of the screen?
 
 player_authenticate_text    Authentication
-player_authenticate_help    If you have a global ID, activating this menuitem will make you log in with it. You'll be prompted for a password, naturally.
+player_authenticate_help    If you have a global ID, activating this menu-item will make you log in with it. You'll be prompted for a password, naturally.
 player_authenticate_action  Authentication requests have been sent to the server. You should be prompted for a password shortly.\n
 
 #player setup
@@ -1795,7 +1798,7 @@ player_stealth_text		Hide Global ID:
 player_stealth_help		Usually your global ID is shown to everyone when you log in or when someone uses the /players chat command. Enabling this tells the server that you prefer to remain anonymous. The server may still show your ID to moderators and administrators on the server or even decide to ignore your request.
 
 player_spectator_text		Spectator Mode:
-player_spectator_help		In spectator mode, you do not control a cycle; you just watch the game as if you were already dead. The other players will see you on the score table and you can chat with them, but you won't be spawned at the beginng of a round.
+player_spectator_help		In spectator mode, you do not control a cycle; you just watch the game as if you were already dead. The other players will see you on the score table and you can chat with them, but you won't be spawned at the beginning of a round.
 
 player_name_team_text		Name Team after Player:
 player_name_team_help		You can set your preferred method for naming your team here: On indicates you want the team to be named after its most senior player, Off means you want a simple colour label.
@@ -1899,7 +1902,7 @@ sound_menu_text			Sound Settings
 sound_menu_help			Sound quality settings.
 
 sound_menu_sources_text		Sound Sources:
-sound_menu_sources_help		Gives the approximate number of sound sources to be mixed; setting it too low will result in important sound sources (your own engine) to be constantly turned on and off, too high values eat away too much CPU power. Six seems to be a good value for low-power CPU's.
+sound_menu_sources_help		Gives the approximate number of sound sources to be mixed; setting it too low will result in important sound sources (your own engine) to be constantly turned on and off, too high values eat away too much CPU power. Six seems to be a good value for low-power CPUs.
 
 sound_menu_quality_text		Sound Quality:
 sound_menu_quality_help		Selects the quality of the sound; currently, only 16 bit stereo modes are available.
@@ -2006,7 +2009,7 @@ window_size_text		Window Size:
 window_size_help		Selects the window size. Changes will be be applied the next time you start \g or when you select "Apply Changes" below.
 
 screen_custom_text		Custom
-screen_custom_help		Set the variables CUSTOM_SCREEN_WIDTH and CUSTOM_SCREEN_HEIGHT in artr.cfg (Windows) or ~/.ArmageTronrc (Linux) to adjust you custom screen size.
+screen_custom_help		Set the variables CUSTOM_SCREEN_WIDTH and CUSTOM_SCREEN_HEIGHT in user.cfg to adjust you custom screen size.
 
 screen_fullscreen_text		Fullscreen:
 screen_fullscreen_help		This toggles fullscreen and window mode. As with resolution changes. You have to exit and re-enter \g or select "Apply Changes" for this to have an effect.
@@ -2065,6 +2068,9 @@ detail_floor_mirror_ow_help	Everything that is important in the game
 
 detail_floor_mirror_ev_text	Everything!
 detail_floor_mirror_ev_help	(Currently no difference to "Objects and Walls".)
+
+detail_simple_trail_text    Simple Trails:
+detail_simple_trail_help    If activated, cycle trails are displayed in a simplified form without the buildup after the cycle.
 
 detail_dither_text		Dithering:
 detail_dither_help		If the colour depth of your current graphic mode does not directly allow the colour that is to be drawn, it is simulated by mixing other colours. Turning it of will improve software rendering performance on some systems; in low resolution modes, turning it off will even improve the visual quality (IMHO).
@@ -2150,13 +2156,13 @@ misc_fps_help			Toggles the display of the current FPS (frames per second) rate 
 
 #tweaks menu
 tweaks_displaylists_text	Display Lists:
-tweaks_displaylists_help	Display lists are a feature of OpenGL for rendering the same thing many times; it is normally used for the cycles and other geometry. Some implementations are broken however; if you do no see the cycles, you should disable this feature.
+tweaks_displaylists_help	Display lists are a feature of OpenGL for rendering the same thing many times. Some implementations are broken; if you do no see the cycles, you should disable this feature.
 tweaks_displaylists_off_text Off
 tweaks_displaylists_off_help Don't use display lists at all.
 tweaks_displaylists_cac_text Create and Call
 tweaks_displaylists_cac_help Use displaylists; Create them and call them directly. This is the recommended way.
 tweaks_displaylists_cae_text Create and Execute
-tweaks_displaylists_cae_help Use displaylists; Create them let them be executed while they are filled. The expers say this is slower than Create and Call.
+tweaks_displaylists_cae_help Use displaylists; Create them and let them be executed while they are filled. The experts say this is slower than Create and Call.
 
 tweaks_infinity_text		Infinity:
 tweaks_infinity_help		Some planes (grid, sky...) have an infinite extension; if this feature is enabled, they are really drawn as infinite planes. Some OpenGL renderers do not seem to like this (all Windows versions I have seen...); disable it if the floor or sky textures are screwed up.
@@ -2177,8 +2183,8 @@ menuitem_exit_help		Exits this menu and returns to the previous level
 menuitem_accept			Accept
 menuitem_accept_help		Accepts the settings in this menu and continues.
 
-input_item_help			To change, press ENTER or SPACE, then press the key/mousebutton you want to assign to this control. Moving the mouse also works.
-input_press_any_key		Press any key!
+input_item_help			To change, press ENTER or SPACE, then press the key/mouse-button you want to assign to this control. Moving the mouse also works.
+input_press_any_key		Press any key! 
 
 menuitem_toggle_on		On
 menuitem_toggle_off		Off
@@ -2256,7 +2262,7 @@ first_setup_keys_wasd_help  Control your cycle with the ASD keys and surrounding
 first_setup_keys_zqsd       ZQSD Keys
 first_setup_keys_zqsd_help  Control your cycle with the QSD keys and surroundings, Cursor keys and rest of keyboard control camera and special actions. Good for left handed people and those used to move with ZQSD on AZERTY keyboards.
 #first_setup_keys_both       Two Handed
-#first_setup_keys_both_help  Turn and look left with your left hand, turn and look right with the right hand. Good for ambidextrous people who don't want to use the mouse in any way and never play with a second player in splitscreen.
+#first_setup_keys_both_help  Turn and look left with your left hand, turn and look right with the right hand. Good for ambidextrous people who don't want to use the mouse in any way and never play with a second player in split-screen.
 first_setup_keys_x          Traditional
 first_setup_keys_x_help     The default setup of old versions of the game. X turns right, the key left to that turns left. Recommended only for veterans.
 first_setup_keys_leave      Leave Alone
@@ -2373,7 +2379,7 @@ gamestate_reset_challenge		Start Challenge Best of \1 Next Round !
 gamestate_champ_center		Match Winner: \1
 gamestate_champ_console		Overall Winner: \1
 gamestate_champ_scorehit	with \1 points.\n
-gamestate_champ_timehit		after the timelimit of \1 minutes was hit.\n
+gamestate_champ_timehit		after the time limit of \1 minutes was hit.\n
 gamestate_champ_default		after \1 rounds.\n
 gamestate_champ_finalscores	Final Scores:\n
 
@@ -2427,7 +2433,7 @@ spam_protection_prefix  SPAM PROTECTION: your messages have a common prefix: \1\
 
 spam_protection_silenceall SPAM PROTECTION: public chat is disabled.\n
 spam_protection_silenced SPAM PROTECTION: you have been silenced by the server administrator.\n
-spam_protection_silenced_default SPAM PROTECTION: you have to be given voice in order to chat publically.\n
+spam_protection_silenced_default SPAM PROTECTION: you have to be given voice in order to chat publicly.\n
 player_silenced         \10xff7777 has been silenced.\n
 player_voiced           \10x77ff77 has been given his voice back.\n
 player_allowed_teamchange \10x77ff77 has been allowed to change his team.\n
@@ -2554,7 +2560,7 @@ help_commands_chat_shortdesc Basic chat commands
 help_commands_chat_text      0x88ff88/me <message>0xffff88: Transmit an action, as in "/me is a noob."\n0x88ff88/msg <part of a nickname> <message>0xffff88: Send a private message that only a specific player can see\n0x88ff88/team <message>0xffff88: Send a message to your teammates, or to all spectators if you're not on a team
 
 help_commands_team_shortdesc Basic team management commands
-help_commands_team_text 0x88ff88/teamshuffle0xffff88: Shuffle yourself to be at the outside of your team's wingmen formation\n0x88ff88/teamshuffle <position>0xffff88: Shuffle yourself to be at a specific position\n0x88ff88/teamshuffle [+|-]<offset>0xffff88: Shuffle yourself up/down by a certain number of ranks\n0x88ff88/teamleave0xffff88: Leave your current team. Only works on some servers\n0x88ff88/teams0xffff88: Get a list of all teams with a somewhat graphic representation of their formation.\n0x88ff88/myteam0xffff88: Get the formation and memberlist of your current team
+help_commands_team_text 0x88ff88/teamshuffle0xffff88: Shuffle yourself to be at the outside of your team's wingmen formation\n0x88ff88/teamshuffle <position>0xffff88: Shuffle yourself to be at a specific position\n0x88ff88/teamshuffle [+|-]<offset>0xffff88: Shuffle yourself up/down by a certain number of ranks\n0x88ff88/teamleave0xffff88: Leave your current team. Only works on some servers\n0x88ff88/teams0xffff88: Get a list of all teams with a somewhat graphic representation of their formation.\n0x88ff88/myteam0xffff88: Get the formation and member list of your current team
 
 help_commands_pp_shortdesc Player police commands
 help_commands_pp_text 0x88ff88/players [<search>]0xffff88: Get a list of all players, along with some other information. You can also match specific users with the search argument.\n0x88ff88/admins [<access level> [<access level>]]0xffff88: Gets the list of admins. If first parameter is specified, only admins who have this exact level will be shown. If both arguments are set, all the admins in that range of access levels will be listed.\n0x88ff88/vote kick|suspend <player>0xffff88: Start a poll to kick or suspend a player
@@ -2639,7 +2645,7 @@ network_message_abortconn_inter	The server terminated our connection.
 
 network_master_timeout_retry	One of the master servers did not answer. Trying next one...\n
 network_master_timeout_title	Master servers do not answer
-network_master_timeout_inter	The master servers could not be reached and the server list could not be updated. You'll browse the old list for now.\n\nThe most likely reason for this is a problem with your network. Please check\n- that you have a working internet connection: point your web browser to www.armagetronad.net to test.\n- that your firewall, if you have one, does not block our traffic. To test whether this is your problem, disable your firewall and try again. If it then works, you should reenable the firewall, but allow Armagetron traffic specifically: Armagetron uses UDP and usually ports 4533 to 4540. Personal firewalls also have the possibility to block connections based on program names; make sure that armagetronad(.exe) is unblocked.\nIf you don't control parts of the network connection, say because you're at a public WLAN hotspot or in a company or school network, chances are the owner of the network purposefully blocks UDP traffic. You'll need to talk to the owner, then.\nA last possible, but unlikely, cause is that the master server infrastructure is currently down completely. Visit the forums at forums.armagetronad.net or the IRC channel #armagetron on irc.freenode.net to see if anyone else has this problem currently.
+network_master_timeout_inter	The master servers could not be reached and the server list could not be updated. You'll browse the old list for now.\n\nThe most likely reason for this is a problem with your network. Please check\n- that you have a working internet connection: point your web browser to www.armagetronad.net to test.\n- that your firewall, if you have one, does not block our traffic. To test whether this is your problem, disable your firewall and try again. If it then works, you should re-enable the firewall, but allow Armagetron traffic specifically: Armagetron uses UDP and usually ports 4533 to 4540. Personal firewalls also have the possibility to block connections based on program names; make sure that armagetronad(.exe) is unblocked.\nIf you don't control parts of the network connection, say because you're at a public WLAN hot spot or in a company or school network, chances are the owner of the network purposefully blocks UDP traffic. You'll need to talk to the owner, then.\nA last possible, but unlikely, cause is that the master server infrastructure is currently down completely. Visit the forums at forums.armagetronad.net or the IRC channel #armagetron on irc.freenode.net to see if anyone else has this problem currently.
 
 network_master_denied_title		Master login denied
 network_master_denied_inter		The master server denied your login attempt. That usually means it is full. Try again later.
@@ -2890,12 +2896,13 @@ config_command_other		You probably want:\n
 config_command_more		    There are more commands containing your search string that were left out to avoid flooding your terminal.\n
 config_file_write_error		Could not write configuration file!\n
 config_value_changed		\1 changed from \2 to \3.\n
+config_value_not_changed	\1 not changed from \2 to \3: the guardian function objected.\n
 config_error_read		Input error reading \1: invalid format.\n
 config_message_info		\1 is currently set to \2.\n
 config_sighup           SIGHUP received, reloading configuration.\n
 config_abort               Configuration file/stream loading aborted.\n
 
-nconfig_errror_protected	No way. Only the server can change \1.\n
+nconfig_error_protected	No way. Only the server can change \1.\n
 nconfig_error_unknown		Got conf message for unknown setting \1.\n\nYOU PROBABLY SHOULD UPGRADE ARMAGETRON ADVANCED!!!\n
 nconfig_error_nonet         Got conf message for  setting \1 which is not network aware.\n\nYOU PROBABLY SHOULD UPGRADE ARMAGETRON ADVANCED!!!\n
 nconfig_error_ignoreold		Ignoring old conf message for setting \1.\n
@@ -2919,7 +2926,7 @@ access_level_usage          usage: ACCESS_LEVEL <config command> <required minim
 access_level_change         Required access level of command \1 changed to "\2".\n
 access_level_error          Required access level of command \1 is "\2", you only have "\3".\n
 
-casacl_help                   For the duration of the rest of the configuration file  thiss directive appears in, elevate the access level.
+casacl_help                   For the duration of the rest of the configuration file  this directive appears in, elevate the access level.
 casacl_usage                  Usage: CASACL <required access level> <elevated access level>\n
 casacl_not_allowed            CASACL usage not allowed in this context.\n
 
@@ -2962,7 +2969,7 @@ login_storepw_mem_text		In memory
 login_storepw_mem_help		Password will be remembered for this session of \g.
 
 login_storepw_disk_text		On disk
-login_storepw_disk_help		Lazy: store the password on the harddisk so you won't have to retype it ever again. Although the password is stored in encrypted form, this is pretty unsafe.
+login_storepw_disk_help		Lazy: store the password on the hard disk so you won't have to retype it ever again. Although the password is stored in encrypted form, this is pretty unsafe.
 
 password_help			Password setting
 
@@ -2999,7 +3006,7 @@ access_level_play_changed      Access level required to play changed from \1 to 
 
 access_level_vote_suspend_help    Minimal access level required to issue suspend votes.
 access_level_vote_kick_help    Minimal access level required to issue kick votes.
-access_level_vote_include_help    Minimal access level required to issue inclue votes.
+access_level_vote_include_help    Minimal access level required to issue include votes.
 access_level_vote_include_execute_help    Minimal access level successful include votes will be executed at.
 access_level_vote_command_help    Minimal access level required to issue command votes.
 access_level_vote_command_execute_help    Minimal access level successful command votes will be executed at.
@@ -3041,7 +3048,7 @@ hash_method_blacklist_help  List of hash authentication methods to disable suppo
 legacy_log_names_help       If 1, the log names of unauthenticated players are kept like they were before authentication was implemented. If 0, log names are escaped so that authenticated player names look best.
 
 login_message_requested     User \1 requests authentication as "\2@\3".\n
-login_message_delayed       Your login process will be delayed because the server configuration makes it impossible to be processed immedeately in the background. We're sorry for the inconvenience.\n
+login_message_delayed       Your login process will be delayed because the server configuration makes it impossible to be processed immediately in the background. We're sorry for the inconvenience.\n
 login_message_responded     Password request sent to user \1, username "\2", method \3, message "\4".\n
 login_message               \3\1 has been logged in as \2.\n
 login_message_byorder       Order of \1:
@@ -3062,9 +3069,9 @@ login_error_invalidurl_notfound      Authentication URL \1 invalid, it was not f
 login_error_noremote                 Authentication via Global ID not available on this server.
 login_error_blacklist                Authority \1 is on this server's blacklist.
 login_error_whitelist                Authority \1 is not on this server's whitelist.
-login_error_pharm                    Server adress mismatch, \1 (sent by client) != \2 (our address). Pharming suspected. If  you are connecting from the LAN and get this error, set "TRUST_LAN" on the server (only if your LAN can be fully trusted, of course). If you are connecting from the internet, use "SERVER_DNS" to make its own real IP known to the server.
+login_error_pharm                    Server address mismatch, \1 (sent by client) != \2 (our address). Pharming suspected. If  you are connecting from the LAN and get this error, set "TRUST_LAN" on the server (only if your LAN can be fully trusted, of course). If you are connecting from the internet, use "SERVER_DNS" to make its own real IP known to the server.
 login_error_pharm_cheap              Server address trouble. Client sent unspecific server address.
-login_error_methodmismatch  The local method used for auhtentication has been modified since your password was set. In the server's config files, put all commands that define authentication methods before all local password definitions.
+login_error_methodmismatch  The local method used for authentication has been modified since your password was set. In the server's config files, put all commands that define authentication methods before all local password definitions.
 login_error_nomethod        No authentication method could be found. Your client supports \1, this server supports \2, and the authentication server supports \3.
 login_error_nomethodlist    Authentication URL \1 does not return a list of supported methods, got error code \2, content "\3".
 login_error_nomethodproperties    Authentication URL \1 does not return a list of methods properties, got error code \2, content "\3".
@@ -3077,7 +3084,7 @@ login_error_unexpected_answer Answer "\1" expected from server, but got \2 inste
 login_error_local_nouser    Local user \1 not found.
 login_error_local_password  Supplied password for local user \1 incorrect.
 
-chatcommand_requires_player  \1 requires a player username as additional paramenter.\n
+chatcommand_requires_player  \1 requires a player username as additional parameter.\n
 
 local_user_help   Adds a local user account from a name/password pair.
 local_user_syntax Usage: LOCAL_USER <user name> <password>\n

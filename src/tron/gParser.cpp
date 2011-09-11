@@ -617,7 +617,10 @@ void
 gParser::parseWall(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
 {
     ePoint *R = NULL, *sR = NULL;
-    REAL ox, oy, x, y;
+#ifdef DEBUG
+    REAL ox, oy;
+#endif
+    REAL x, y;
 
     REAL height = myxmlGetPropFloat(cur, "height");
     if ( height <= 0 )
@@ -666,7 +669,10 @@ gParser::parseWall(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
                 parseAlternativeContent(grid, cur);
             }
         }
-        cur = cur->next;	ox = x;	oy = y;
+        cur = cur->next;
+#ifdef DEBUG
+        ox = x;	oy = y;
+#endif
     }
 }
 

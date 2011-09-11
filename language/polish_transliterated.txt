@@ -2697,7 +2697,7 @@ config_sighup                 Odnawianie konfiguracji (SIGHUP).\n
 
 config_abort                 Ladowanie konfiguracji zostalo zatrzymane.\n
 
-nconfig_errror_protected      Tylko serwer moze modyfikowac te wartosc. \1.\n
+nconfig_error_protected       Tylko serwer moze modyfikowac te wartosc. \1.\n
 nconfig_error_unknown         Otrzymano konfiguracje nieznanego ustawienia \1.\n\nPRAWDOPODOBNIE POWINIENEs ZAKTUALIZOWAc ARMAGETRON ADVANCED!!!\n
 nconfig_error_nonet           Otrzymano konfiguracje ustawienia \1 ktore nie dotyczy sieci.\n\nPRAWDOPODOBNIE POWINIENEs ZAKTUALIZOWAc ARMAGETRON ADVANCED!!!\n
 nconfig_error_ignoreold       Ignorowanie starej konfiguracji ustawienia \1.\n

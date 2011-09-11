@@ -5,6 +5,19 @@
 # Author: Manuel Moos <manuel@moosnet.de>
 #
 
+# init info lifted from debian package rules
+### BEGIN INIT INFO
+# Provides:          @prognamebase@-master
+# Required-Start:    $local_fs $network
+# Required-Stop:     $local_fs $network
+# Should-Start:
+# Should-Stop:
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: @progtitle@ Master Server
+# Description:       Runs the @progtitle@ Master Server
+### END INIT INFO
+
 # set -x
 
 # program installation directory

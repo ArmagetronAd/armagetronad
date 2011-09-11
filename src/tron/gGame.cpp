@@ -2736,7 +2736,10 @@ void MainMenu(bool ingame){
     //	update_settings();
 
     if (ingame)
+    {
         sr_con.SetHeight(2);
+        se_UserShowScores( false );
+    }
 
     gLogo::SetDisplayed(true);
 
@@ -3960,9 +3963,9 @@ void gGame::Analysis(REAL time){
     int ai_alive=0;
     int human_teams=0;
     int teams_alive=0;
-    int last_alive=-1;
+    // int last_alive=-1;
     int last_team_alive=-1;
-    int last_alive_and_not_disconnected=-1;
+    // int last_alive_and_not_disconnected=-1;
     int humans = 0;
     int active_humans = 0;
     int ais    = 0;
@@ -4004,14 +4007,14 @@ void gGame::Analysis(REAL time){
                             alive++;
                             if (p->IsActive())
                             {
-                                last_alive_and_not_disconnected=i;
+                                // last_alive_and_not_disconnected=i;
                                 alive_and_not_disconnected++;
                             }
                         }
                         else
                             ai_alive++;
 
-                        last_alive=i;
+                        // last_alive=i;
                     }
                     else
                     {
@@ -4049,9 +4052,10 @@ void gGame::Analysis(REAL time){
         goon = false;
 #endif
 
-
+    /*
     if (last_alive_and_not_disconnected >= 0)
         last_alive = last_alive_and_not_disconnected;
+    */
 
     // kill all disconnected players if they are the only reason the round goes on:
     if ( alive_and_not_disconnected <= 1 && alive > alive_and_not_disconnected )
@@ -5086,6 +5090,9 @@ void sg_ClientFullscreenMessage( tOutput const & title, tOutput const & message,
     // put players into idle mode
     ePlayerNetID::SpectateAll();
     se_ChatState( ePlayerNetID::ChatFlags_Menu, true );
+
+    // remove scores
+    se_UserShowScores( false );
 
     // show message
     uMenu::Message( title, message, timeout );

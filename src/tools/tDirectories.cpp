@@ -1564,6 +1564,17 @@ tString tPath::GetPaths(void) const {
     return ret;
 }
 
+tString tPath::GetPaths(char const * delimiter, char const * finalizer) const {
+    tString ret;
+    tArray<tString> paths;
+    Paths(paths);
+    for (int i = 0; i < paths.Len(); ++i) {
+        ret << paths[i];
+        ret << ( (i == paths.Len() - 1) ? finalizer : delimiter );
+    }
+    return ret;
+}
+
 void st_PrintPathInfo(tOutput &buf) {
     tString const hcol("0xff8888");
     buf << hcol << "$path_info_user_cfg"   << "0xRESETT\n   " << tDirectories::Var().GetReadPath("user.cfg") << "\n"
