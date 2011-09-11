@@ -128,6 +128,7 @@ private:
     tString line_in_;
 };
 
+#ifndef WIN32
 // stream to and from an external script
 class rScriptStream: public rInputStream
 {
@@ -187,6 +188,7 @@ private:
     pid_t pid_;
     Descriptor outDescriptor_;
 };
+#endif
 
 void rConsole::DoCenterDisplay(const tString &s,REAL timeout,REAL r,REAL g,REAL b){
     std::cout << tColoredString::RemoveColors(s) << '\n';
@@ -205,6 +207,7 @@ static void sr_HandleSigCont( int signal )
     sr_Unblock_stdin();
 }
 
+#ifndef WIN32
 static void sr_HandleSigChild( int signal )
 {
     int stat;
@@ -212,6 +215,7 @@ static void sr_HandleSigChild( int signal )
     /*Kills all the zombie processes*/
     while(waitpid(-1, &stat, WNOHANG) > 0);
 }
+#endif
 
 void sr_Unblock_stdin(){
 #ifndef WIN32
