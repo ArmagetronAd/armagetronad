@@ -1682,6 +1682,17 @@ tString tPath::GetPaths(void) const {
     return ret;
 }
 
+tString tPath::GetPaths(char const * delimiter, char const * finalizer) const {
+    tString ret;
+    tArray<tString> paths;
+    Paths(paths);
+    for (int i = 0; i < paths.Len(); ++i) {
+        ret << paths[i];
+        ret << ( (i == paths.Len() - 1) ? finalizer : delimiter );
+    }
+    return ret;
+}
+
 extern char *st_userConfigs[];
 void st_PrintPathInfo(tOutput &buf) {
     tString const hcol("0xff8888");
