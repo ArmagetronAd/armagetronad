@@ -175,4 +175,5 @@
 /* Define to empty if `const' does not conform to ANSI C. */
 /* #undef const */
 
-#define HAVE_LIBBOOST_THREAD 1
+//#define HAVE_LIBBOOST_THREAD 1
+#define HAVE_PTHREAD 1
