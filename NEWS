@@ -2,6 +2,7 @@ Changes since 0.2.8.3.1:
 - security fix: old style action commands from clients no loger cause hangs and crashes
 - security fix: oversized packets are ignored properly
 - security fix: never read one byte outside of the received buffer
+- security fix: only include .cfg files from the var subfolder
 - compiler compatibility: adapted to gcc 4.60
 - smaller spelling fixes
 - FOV calculations now correct for widescreen and horizontal splitscreen
