@@ -44,7 +44,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //! access levels for admin interfaces; lower numeric values are better
 enum tAccessLevel
 {
-    tAccessLevel_Shell = -1,       // the server sysadmin
     tAccessLevel_Owner = 0,        // the server owner
     tAccessLevel_Admin = 1,        // one of his admins
     tAccessLevel_Moderator = 2,    // one of the moderators

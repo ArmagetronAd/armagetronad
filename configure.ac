@@ -393,7 +393,9 @@ test $CODELEVEL -ge 4 && CXXFLAGS="$CXXFLAGS -Werror"
 
 # unused variables should be tolerated while debugging, they're sometimes just there
 # to be printed in the debugger
-test $CODELEVEL -ge 1 && test $DEBUGLEVEL -ge 1 && CXXFLAGS="$CXXFLAGS -Wno-unused-but-set-variable"
+if test $CODELEVEL -ge 1 && test $DEBUGLEVEL -ge 1; then
+    AX_CXXFLAGS_GCC_OPTION(-Wno-unused-but-set-variable)
+fi
 
 dnl determine whether "games" should be put into paths: not if it was
 dnl requested with --disable-games or if "games" is already included
