@@ -2412,7 +2412,6 @@
 				OTHER_LDFLAGS = "$(SHARED_OTHER_LDFLAGS)";
 				PREBINDING = NO;
 				PRODUCT_NAME = "Armagetron Advanced";
-				SDKROOT = "";
 				STRIP_INSTALLED_PRODUCT = YES;
 				WRAPPER_EXTENSION = app;
 			};
