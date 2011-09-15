@@ -46,26 +46,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include <deque>
 
-#ifdef HAVE_LIBZTHREAD
-#include <zthread/Thread.h>
-#include <zthread/LockedQueue.h>
-//#include <zthread/ClassLockable.h>
-#include <zthread/FastMutex.h>
-#include <zthread/FastRecursiveMutex.h>
-#include <zthread/Guard.h>
-// #include <zthread/SynchronousExecutor.h>
-#include <zthread/ThreadedExecutor.h>
-typedef ZThread::ThreadedExecutor nExecutor;
-//typedef ZThread::SynchronousExecutor nExecutor;
-typedef ZThread::FastMutex nMutex;
-#define nQueue ZThread::LockedQueue
-#elif defined(HAVE_PTHREAD)
-#include "pthread-binding.h"
-typedef tPThreadMutex nMutex;
-#define nQueue tPThreadQueue
-#else
-typedef tNonMutex nMutex;
-#endif
+#include "tLockedQueue.h"
+
+#include "tThread.h"
+#include "tMutex.h"
 
 bool sn_supportRemoteLogins = false;
 
@@ -216,17 +200,8 @@ class nLoginPersistence:
 
 //! template that runs void member functions of reference countable objects
 template< class T > class nMemberFunctionRunnerTemplate
-#ifdef HAVE_LIBZTHREAD
-    : public ZThread::Runnable
-#endif
 {
 private:
-#if defined(HAVE_PTHREAD) && !defined(HAVE_LIBZTHREAD)
-    static void* DoCall( void *o ) {
-        nMemberFunctionRunnerTemplate * functionRunner = (nMemberFunctionRunnerTemplate*) o;
-        ( (functionRunner->object_)->*(functionRunner->function_) )();
-    }
-#endif
 public:
     nMemberFunctionRunnerTemplate( T & object, void (T::*function)() )
     : object_( &object ), function_( function )
@@ -239,6 +214,11 @@ public:
         (object_->*function_)();
     }
 
+    void operator () ()
+    {
+        run();
+    }
+
     //! schedule a task for execution at the next convenient break, between game rounds for example
     static void ScheduleBreak( T & object, void (T::*function)()  )
     {
@@ -248,19 +228,15 @@ public:
     //! schedule a task for execution in a background thread
     static void ScheduleBackground( T & object, void (T::*function)()  )
     {
-#if defined(HAVE_LIBZTHREAD) || defined(HAVE_PTHREAD)
-        // schedule the task into a background thread
-        if ( !tRecorder::IsRunning() )
-        {
-#if !defined(HAVE_LIBZTHREAD)
-            nMemberFunctionRunnerTemplate<T> * runner = new nMemberFunctionRunnerTemplate<T>( object, function );
-
-            pthread_t thread;
-            pthread_create(&thread, NULL, (nMemberFunctionRunnerTemplate::DoCall), (void*) runner);
-#else
-            static nExecutor executor;
-            executor.execute( ZThread::Task( new nMemberFunctionRunnerTemplate( object, function ) ) );
+        bool delays = true;
+#ifdef HAVE_THREADS
+        delays = tRecorder::IsRunning();
 #endif
+
+        // schedule the task into a background thread
+        if ( !delays )
+        {
+            boost::thread(nMemberFunctionRunnerTemplate<T>( object, function ) );
         }
         else
         {
@@ -268,23 +244,13 @@ public:
             ScheduleBreak( object, function );
 
         }
-#else
-        // do it when you can without getting interrupted.
-        ScheduleBreak( object, function );
-#endif
     }
 
     //! schedule a task for execution in the next tToDo call
     static void ScheduleForeground( T & object, void (T::*function)()  )
     {
-#if defined(HAVE_LIBZTHREAD) || defined(HAVE_PTHREAD)
         Pending().add( nMemberFunctionRunnerTemplate( object, function ) );
         st_ToDo( FinishAll );
-#else
-        // execute it immedeately
-        (object.*function)();
-#endif
-
     }
 
     // function that calls tasks scheduled for the next break
@@ -314,25 +280,32 @@ private:
     // taks for the break
     static std::deque< nMemberFunctionRunnerTemplate > pendingForBreak_;
 
-#if defined(HAVE_LIBZTHREAD) || defined(HAVE_PTHREAD)
+    typedef tLockedQueue< nMemberFunctionRunnerTemplate, boost::mutex > LockedQueue;
+
     // queue of foreground tasks
-    static nQueue< nMemberFunctionRunnerTemplate, nMutex > & Pending()
+    static LockedQueue & Pending()
     {
-        static nQueue< nMemberFunctionRunnerTemplate, nMutex > pending;
+        static LockedQueue pending;
         return pending;
     }
 
     // function that calls them
     static void FinishAll()
     {
-        // finish all pending tasks
-        while( Pending().size() > 0 )
+        try
         {
-            nMemberFunctionRunnerTemplate next = Pending().next();
-            next.run();
+            // finish all pending tasks
+            while( Pending().size() > 0 )
+            {
+                nMemberFunctionRunnerTemplate next = Pending().next();
+                next.run();
+            }
+        }
+        catch( typename LockedQueue::Empty const & e )
+        {
+            // ignore, we just read over the end. No biggie.
         }
     }
-#endif
 };
 
 template< class T >
@@ -369,7 +342,7 @@ public:
     {
         if ( block )
         {
-#if defined(HAVE_LIBZTHREAD) || defined(HAVE_PTHREAD)
+#ifdef HAVE_THREADS
             ScheduleBackground( object, function );
 #else
             ScheduleBreak( object, function );
@@ -388,7 +361,7 @@ class nLoginProcess:
     public nMachineDecorator, 
     public nKrawall::nCheckResult,
     public nKrawall::nPasswordCheckData,
-    public tReferencable< nLoginProcess, nMutex >
+    public tReferencable< nLoginProcess, boost::mutex >
 {
     // reference counting pointer 
     typedef tJUST_CONTROLLED_PTR< nLoginProcess > SelfPointer;
@@ -400,9 +373,9 @@ public:
         // install self reference to keep this object alive
         selfReference_ = this;
 
-    // inform the user about delays
-        bool delays = false;
-#if defined(HAVE_LIBZTHREAD) || defined(HAVE_PTHREAD)
+        // inform the user about delays
+        bool delays = true;
+#ifdef HAVE_THREADS
         delays = tRecorder::IsRunning();
 #endif
         if ( delays )

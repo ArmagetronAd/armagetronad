@@ -20,8 +20,8 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
-					<Add library="..\..\..\winlibs\build\dist\libZThread.a" />
 					<Add library="..\..\..\winlibs\protobuf\vsprojects\libprotobuf.a" />
+					<Add library="..\..\..\winlibs\win32\boost_libs\libboost_thread-mgw44-mt-1_47.a" />
 				</Linker>
 			</Target>
 			<Target title="Win32 Debug">
@@ -38,8 +38,8 @@
 					<Add option="-DDEBUG" />
 				</Compiler>
 				<Linker>
-					<Add library="..\..\..\winlibs\build\debug\libZThread.a" />
 					<Add library="..\..\..\winlibs\protobuf\vsprojects\libprotobuf_debug.a" />
+					<Add library="..\..\..\winlibs\win32\boost_libs\libboost_thread-mgw44-mt-d-1_47.a" />
 				</Linker>
 			</Target>
 		</Build>
@@ -71,7 +71,6 @@
 			<Add directory="..\..\..\winlibs\iconv\include" />
 			<Add directory="..\..\..\winlibs\boost\includes" />
 			<Add directory="..\..\src\resource" />
-			<Add directory="..\..\..\winlibs\ZThread\include" />
 			<Add directory="..\..\src\protobuf" />
 			<Add directory="..\..\..\winlibs\protobuf\src" />
 			<Add directory="..\..\src\thirdparty\utf8" />
@@ -370,6 +369,8 @@
 		<Unit filename="..\..\src\tools\tMemManager.h" />
 		<Unit filename="..\..\src\tools\tMemStack.cpp" />
 		<Unit filename="..\..\src\tools\tMemStack.h" />
+		<Unit filename="..\..\src\tools\tMutex.cpp" />
+		<Unit filename="..\..\src\tools\tMutex.h" />
 		<Unit filename="..\..\src\tools\tPlayList.cpp" />
 		<Unit filename="..\..\src\tools\tPlayList.h" />
 		<Unit filename="..\..\src\tools\tPolynomial.cpp" />
@@ -400,6 +401,7 @@
 		<Unit filename="..\..\src\tools\tString.h" />
 		<Unit filename="..\..\src\tools\tSysTime.cpp" />
 		<Unit filename="..\..\src\tools\tSysTime.h" />
+		<Unit filename="..\..\src\tools\tThread.h" />
 		<Unit filename="..\..\src\tools\tToDo.cpp" />
 		<Unit filename="..\..\src\tools\tToDo.h" />
 		<Unit filename="..\..\src\tools\tVersion.cpp" />
