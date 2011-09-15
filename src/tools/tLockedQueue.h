@@ -47,7 +47,7 @@ public:
         queue_.push_back(item);
     }
     
-    virtual size_t size()
+    size_t size()
     {
         boost::lock_guard< MUTEX > lock(mutex_);
         
