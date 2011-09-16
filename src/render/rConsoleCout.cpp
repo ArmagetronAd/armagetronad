@@ -460,7 +460,7 @@ static rScriptStream * sr_FindScriptStream( tString const & name )
 
 static bool sr_sanityCheckScript = true;
 static tConfItem<bool> src_sanityCheckScript( "CHECK_SCRIPT", sr_sanityCheckScript );
-static tAccessLevelSetter src_sanityCheckScriptALS( src_sanityCheckScript, tAccessLevel_Shell );
+static tAccessLevelSetter src_sanityCheckScriptALS( src_sanityCheckScript, tAccessLevel_Owner );
 
 class rEnvironment
 {
@@ -640,7 +640,7 @@ static void sr_SpawnScriptCommand( std::istream & s )
 }
 
 static tConfItemFunc sr_spawnScript( "SPAWN_SCRIPT", sr_SpawnScriptCommand );
-static tAccessLevelSetter sr_spawnScriptALS( sr_spawnScript, tAccessLevel_Shell );
+static tAccessLevelSetter sr_spawnScriptALS( sr_spawnScript, tAccessLevel_Owner );
 
 // respawns a script
 static void sr_RespawnScriptCommand( std::istream & s )
@@ -655,7 +655,7 @@ static void sr_RespawnScriptCommand( std::istream & s )
 }
 
 static tConfItemFunc sr_respawnScript( "RESPAWN_SCRIPT", sr_RespawnScriptCommand );
-static tAccessLevelSetter sr_respawnScriptALS( sr_respawnScript, tAccessLevel_Shell );
+static tAccessLevelSetter sr_respawnScriptALS( sr_respawnScript, tAccessLevel_Owner );
 
 // respawns a script
 static void sr_KillScriptCommand( std::istream & s )
