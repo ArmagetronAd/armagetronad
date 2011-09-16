@@ -13,6 +13,15 @@
 # bans everyone not from australia with Bruce appearing in their whois entry.
 # (Sorry for the silly examples.)
 
+# Whois lookup uses the whois console command, available under that name in most
+# distributions. The lookup uses the network and takes about half a second.
+
+# Basic geoip lookup uses 'geoiplookup' according to this article:
+# http://blog.rayfoo.info/2010/07/doing-geolocation-lookups-in-command-line
+# you can set GEOIP_ARG to make it use a non-default database (default only
+# lists countries). The lookup uses a local database that needs updating from time
+# to time.
+
 # greps geoip for pattern, returns true on match. All arguments are passed to grep.
 function grep_geoip()
 {
@@ -43,7 +52,7 @@ function check_range()
     fi
 
     if ! echo ${IP} | grep "^[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+$" > /dev/null 2>&1; then
-        echo "Internal error: Not a valid IP: ${IP}" 1>&2
+        echo "SAY Internal flexban BUG: Not a valid IP: ${IP}" 1>&2
         return 1
     fi
 
@@ -61,7 +70,7 @@ function ban()
     test -z "${TIME}" && TIME=60
     test -z "${REASON}" && REASON="Flexban rule match"
     echo BAN_IP ${IP} ${TIME} ${REASON}
-    echo KICK ${PLAYER}  ${REASON}
+    LASTBAN=${IP}
 
     BANME=true
 }
@@ -96,7 +105,7 @@ function check_range_core()
 # sets GEOIP to the output of geoiplookup
 function set_geoip()
 {
-    test -z "${GEOIP}" && GEOIP=$(geoiplookup ${IP})
+    test -z "${GEOIP}" && GEOIP=$(geoiplookup ${GEOIP_ARG} ${IP})
 }
 
 # sets WHOIS to the output of whois
@@ -114,10 +123,11 @@ function process_core()
 
     WHOIS=""
     GEOIP=""
+    GEOIP_ARG=""
     BANME=false
 
-   # load configuration
-   . flexban_cfg.sh
+    # load configuration, execute commands
+    . flexban_cfg.sh
 }
 
 # processes the player_entered messages
@@ -130,10 +140,11 @@ function process()
 
 # for debugging, set the path like it would be when run from the
 # game itself
-export PATH="${PATH}:$(dirname $(dirname $(dirname $0)))/config/"
-#set -x
+# export PATH="${PATH}:$(dirname $(dirname $(dirname $0)))/config/"
+# set -x
 
-# echo SAY flexban!
-grep ^PLAYER_ENTERED | process
+LASTBAN=""
+
+grep --line-buffered "^PLAYER_ENTERED" | process
 
 
