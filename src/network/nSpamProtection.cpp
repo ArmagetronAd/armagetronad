@@ -43,11 +43,20 @@ static tSettingItem<REAL> se_SAK("SPAM_AUTOKICK",
                                  se_SpamAutoKick);
 static tSettingItem<int> se_SAKC("SPAM_AUTOKICK_COUNT",
                                  se_SpamAutoKickCount);
+
+// prevent spam_maxlen from being set so low no admin can increase it back up
+static bool sn_SpamMaxLenLimit(int const & value)
+{
+    static int minlen=strlen("/admin SPAM_MAXLEN 1000");
+    return value >= minlen;
+    // yeah, if the admin also logs out and it's reallylongname@clanwiththelongestname.com, 
+    // he's screwed.
+}
 static nSettingItemWatched<int> se_SML("SPAM_MAXLEN",
                                        se_SpamMaxLen,
                                        nConfItemVersionWatcher::Group_Cheating,
                                        3 );
-static tAccessLevelSetter se_SMLAL( se_SML.GetSetting(), tAccessLevel_Owner );
+static tAccessLevelSetter se_SMLAL( se_SML.GetSetting().SetShouldChangeFunc(sn_SpamMaxLenLimit), tAccessLevel_Owner );
 
 
 nSpamProtectionSettings::nSpamProtectionSettings( REAL timeScale, char const * timeScaleConfig, const tOutput& silence )

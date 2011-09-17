@@ -5,6 +5,7 @@
 # If run without commandline options, this script assumes it's running
 # from batch/win32
 
+from __future__ import print_function
 import os, glob, shutil, sys, stat
 
 foundModule = False
@@ -19,13 +20,13 @@ while not foundModule:
     try:
         import armabuild
         foundModule = True
-        print "Found armabuild!"
+        print("Found armabuild!")
     except:
         sys.path[0] = os.path.dirname(newPathSearch)
     numAttempts += 1
 
     if numAttempts > 9:
-        print "Unable to find armabuild module.  Can't continue."
+        print("Unable to find armabuild module.  Can't continue.")
         sys.exit(1)
     
 
@@ -72,7 +73,7 @@ def CopyTree(source, destination):
         shutil.copytree(source, destination, IgnoreFiles)
     # None of the code down there works for me, but it should
     '''
-    print source, destination
+    print(source, destination)
     if os.path.exists(source):
         if(source.endswith("/") or source.endswith("\\") ):
             source = source[0:len(source)-1]
@@ -97,7 +98,7 @@ def CopyTree(source, destination):
                         stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP |
                         stat.S_IROTH | stat.S_IXOTH )
             for a in files:
-                print destination
+                print(destination)
                 CopyFile(os.path.join(root, a),
                          os.path.join(destination, destPath, a) )
                          '''

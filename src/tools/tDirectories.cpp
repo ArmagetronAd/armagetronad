@@ -562,6 +562,16 @@ private:
         {
             paths[ pos++ ] = st_UserDataDir;
         }
+
+        // for finding data packet in 0install
+        char const * extradata = getenv("ARMAGETRONAD_EXTRADATA");
+        static bool isThere = extradata;
+        // should probably be spit like proper unix paths, colon separated
+        if( isThere )
+        {
+            static tString ed(extradata);
+            paths[ pos++ ] = ed;
+        }
     }
 };
 
@@ -1668,6 +1678,17 @@ tString tPath::GetPaths(void) const {
     for (int i = 0; i < paths.Len(); ++i) {
         if(i > 0 && paths[i - 1] == paths[i]) continue;
         ret << " - " << paths[i] << "\n";
+    }
+    return ret;
+}
+
+tString tPath::GetPaths(char const * delimiter, char const * finalizer) const {
+    tString ret;
+    tArray<tString> paths;
+    Paths(paths);
+    for (int i = 0; i < paths.Len(); ++i) {
+        ret << paths[i];
+        ret << ( (i == paths.Len() - 1) ? finalizer : delimiter );
     }
     return ret;
 }

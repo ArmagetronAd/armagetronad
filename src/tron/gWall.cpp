@@ -418,7 +418,7 @@ void gWallRim::RenderReal(const eCamera *cam){
             eCoord vec = P1-P2;
             REAL xs = vec.x*vec.x;
             REAL ys = vec.y*vec.y;
-            REAL intensity = .7 + .3 * xs/(xs+ys);
+            REAL intensity = .7 + .3 * xs/(xs+ys+1E-30);
             RenderEnd( true );
             Color(intensity, intensity, intensity);
         }
@@ -817,23 +817,22 @@ void gPlayerWall::Split(eWall *& w1,eWall *& w2,REAL a){
 #define gCYCLE_LEN 1.5
 #define gBEG_OFFSET .25
 #define gBEG_LEN 2
+#define gBEG_LEN_GIVEUP .4
 //#define gCYCLE_LEN 3.8
 //#define gBEG_OFFSET 1
 
 #ifndef DEDICATED
 void gPlayerWall::Render(const eCamera *cam){
-    if (!cycle_)
-        return;
-    RenderList(true);
-}
-
-void gNetPlayerWall::Render(const eCamera *cam ){
-    if (!cycle_)
-        return;
-    RenderList(true);
+    // no direct rendering
+    tASSERT(false);
 }
 
 /*
+void gNetPlayerWall::Render(const eCamera *cam ){
+    // no direct rendering
+    tASSERT(false);
+}
+
 class gPerformanceCounter
 {
 public:
@@ -855,10 +854,15 @@ private:
 };
 */
 
+ /*
 void gPlayerWall::RenderList(bool list)
 {
     netWall_->RenderList( list );
 }
+ */
+
+bool sg_simpleTrail = false;
+static tConfItem< bool > sgc_simpleTrail( "SIMPLE_TRAIL", sg_simpleTrail );
 
 void gNetPlayerWall::RenderList(bool list, gWallRenderMode renderMode ){
     if ( !cycle_ )
@@ -876,19 +880,20 @@ void gNetPlayerWall::RenderList(bool list, gWallRenderMode renderMode ){
     // clear list if walls are vanishing
     // or if the wall end was reached
     // or this is the cycle's first wall
-    if ( gCycleWallsDisplayListManager::CannotHaveList( dbegin, cycle_ ) ||
-         this == cycle_->currentWall )
+    if ( gWallRenderMode_Lines == renderMode )
     {
-        ClearDisplayList(2);
+        if ( gCycleWallsDisplayListManager::CannotHaveList( dbegin, cycle_ ) ||
+             this == cycle_->currentWall )
+        {
+            ClearDisplayList(2);
+        }
+        else if ( displayListInhibition_ > 0  )
+        {
+            displayListInhibition_--;
+        }
     }
 
-    if ( !displayList_.Call() )
-    {   
-        //static gPerformanceCounter counter;
-        //counter.Count();
-
-        rDisplayListFiller filler( displayList_ );
-
+    {
         REAL r,g,b;
         if (cycle_){
             r=cycle_->trailColor_.r_;
@@ -905,7 +910,14 @@ void gNetPlayerWall::RenderList(bool list, gWallRenderMode renderMode ){
             eCoord vec = P2-P1;
             REAL xs = vec.x*vec.x;
             REAL ys = vec.y*vec.y;
-            REAL intensity = .7 + .3 * xs/(xs+ys);
+            REAL denom = xs+ys;
+            if( denom <= 0 )
+            {
+                // zero length wall
+                return;
+            }
+
+            REAL intensity = .7 + .3 * xs/denom;
             r *= intensity;
             g *= intensity;
             b *= intensity;
@@ -963,9 +975,16 @@ void gNetPlayerWall::RenderList(bool list, gWallRenderMode renderMode ){
             // cut the end of the wall
             if ( bool(cycle_) && gCycle::WallsLength() > 0 )
             {
-                REAL cut = (cycle_->GetDistance() - cycle_->ThisWallsLength() - pe) / ( pa - pe );
+                REAL denom = pa-pe;
+                if( denom > 0 )
+                {
+                    continue;
+                }
+
+                REAL cut = (cycle_->GetDistance() - cycle_->ThisWallsLength() - pe) / denom;
                 if ( cut < 0 )
                     continue;
+
                 if ( cut < 1 )
                 {
                     p1 = p2 + (p1-p2)*cut;
@@ -973,33 +992,55 @@ void gNetPlayerWall::RenderList(bool list, gWallRenderMode renderMode ){
                 }
             }
 
-            if (te+gBEG_LEN<=time){
-                RenderNormal(p1,p2,ta,te,r,g,b,a,renderMode);
-                sr_CheckGLError();
-            }
+            if(sg_simpleTrail)
+            {
+                if (te+gBEG_LEN_GIVEUP <= time)
+                {
+                    RenderNormal(p1,p2,ta,te,r,g,b,a,renderMode);
+                }
+                else if( ta+gBEG_LEN_GIVEUP <= time )
+                {
+                    REAL denom = te - ta;
+                    if( denom <= 0 )
+                    {
+                        continue;
+                    }
 
+                    REAL s=((time-gBEG_LEN_GIVEUP)-ta)/denom;
+                    eCoord pm=p1+(p2-p1)*s;
+                    RenderNormal(p1,pm,ta,ta+(te-ta)*s,r,g,b,a,renderMode);
+                }
+            }
+            else if (te+gBEG_LEN<=time){
+                RenderNormal(p1,p2,ta,te,r,g,b,a,renderMode);
+            }
             else{ // complicated
                 // can't squeeze that into a display list
                 ClearDisplayList();
 
                 if (ta+gBEG_LEN>=time){
-                    sr_CheckGLError();
                     RenderBegin(p1,p2,ta,te,
                                 1+(ta-time)/gBEG_LEN,
                                 1+(te-time)/gBEG_LEN,
-                                r,g,b,a);
+                                r,g,b,a,renderMode);
                     sr_CheckGLError();
                 }
-                else{
-                    sr_CheckGLError();
-                    REAL s=((time-gBEG_LEN)-ta)/(te-ta);
+                else
+                {
+                    REAL denom = te - ta;
+                    if( denom <= 0 )
+                    {
+                        continue;
+                    }
+
+                    REAL s=((time-gBEG_LEN)-ta)/denom;
                     eCoord pm=p1+(p2-p1)*s;
                     RenderBegin(pm,p2,
                                 ta+(te-ta)*s,te,0,
                                 1+(te-time)/gBEG_LEN,
-                                r,g,b,a);
-                    RenderNormal(p1,pm,ta,ta+(te-ta)*s,r,g,b,a, gWallRenderMode_All );
+                                r,g,b,a,renderMode);
                     sr_CheckGLError();
+                    RenderNormal(p1,pm,ta,ta+(te-ta)*s,r,g,b,a,renderMode);
                 }
             }
         }
@@ -1026,6 +1067,23 @@ inline bool upperlinecolor(REAL r,REAL g,REAL b, REAL a){
 
     return true;
 }
+
+#ifdef DEBUG_X
+static bool sg_renderBeginLines = true;
+static bool sg_renderBeginQuads = true;
+static bool sg_renderBulkLines = true;
+static bool sg_renderBulkQuads = true;
+
+static tSettingItem< bool > sgc_renderBeginLines( "RENDER_BEGIN_LINES", sg_renderBeginLines );
+static tSettingItem< bool > sgc_renderBeginQuads( "RENDER_BEGIN_QUADS", sg_renderBeginQuads );
+static tSettingItem< bool > sgc_renderBulkLines( "RENDER_BULK_LINES", sg_renderBulkLines );
+static tSettingItem< bool > sgc_renderBulkQuads( "RENDER_BULK_QUADS", sg_renderBulkQuads );
+#else
+static const bool sg_renderBeginLines = true;
+static const bool sg_renderBeginQuads = true;
+static const bool sg_renderBulkLines = true;
+static const bool sg_renderBulkQuads = true;
+#endif
 
 void gNetPlayerWall::RenderNormal(const eCoord &p1,const eCoord &p2,REAL ta,REAL te,REAL r,REAL g,REAL b,REAL a, gWallRenderMode mode ){
     REAL hfrac=1;
@@ -1058,34 +1116,14 @@ void gNetPlayerWall::RenderNormal(const eCoord &p1,const eCoord &p2,REAL ta,REAL
 
 
     if (hfrac>0){
-        if ( ( mode & gWallRenderMode_Lines ) ){
-
-            // draw additional upper line
-            if ( mode == gWallRenderMode_All )
-            {
-                sr_DepthOffset(true);
-                if ( rTextureGroups::TextureMode[rTextureGroups::TEX_WALL] != 0 )
-                {
-                    RenderEnd();
-                    glDisable(GL_TEXTURE_2D);
-                }
-            }
+        if ( ( mode & gWallRenderMode_Lines && sg_renderBulkLines  ) ){
 
             BeginLines();
+
             upperlinecolor(r,g,b,a);
             glVertex3f(p1.x,p1.y,h*hfrac);
             upperlinecolor(r,g,b,a);
             glVertex3f(p2.x,p2.y,h*hfrac);
-
-            // in the other modes, the caller is responsible for
-            // calling RenderEnd() and resetting the states.
-            if ( mode == gWallRenderMode_All )
-            {
-                RenderEnd();
-                sr_DepthOffset(false);
-                if ( rTextureGroups::TextureMode[rTextureGroups::TEX_WALL] != 0 )
-                    glEnable(GL_TEXTURE_2D);
-            }
         }
 
         //glColor4f(r,g,b,a);
@@ -1099,7 +1137,7 @@ void gNetPlayerWall::RenderNormal(const eCoord &p1,const eCoord &p2,REAL ta,REAL
 #else
         static const REAL extrarise = 0;
 #endif
-        if ( mode & gWallRenderMode_Quads )
+        if ( mode & gWallRenderMode_Quads && sg_renderBulkQuads )
         {
             BeginQuads();
 
@@ -1118,13 +1156,6 @@ void gNetPlayerWall::RenderNormal(const eCoord &p1,const eCoord &p2,REAL ta,REAL
             glColor3f(r,g,b);
             glTexCoord2f(te,hfrac);
             glVertex3f(p2.x,p2.y,extrarise);
-
-			// in the other modes, the caller is responsible for
-			// calling RenderEnd().
-			if ( mode == gWallRenderMode_All )
-			{
-				RenderEnd();
-			}
         }
     }
 }
@@ -1138,7 +1169,7 @@ static inline REAL sfunc(REAL x){return (x*x);}
 //static inline REAL xfunc(REAL x){return (x+x*x)/2;}
 static inline REAL xfunc(REAL x){return REAL((x*.2+x*x)/2);}
 
-void gNetPlayerWall::RenderBegin(const eCoord &p1,const eCoord &pp2,REAL ta,REAL te,REAL ra,REAL re,REAL r,REAL g,REAL b,REAL a){
+void gNetPlayerWall::RenderBegin(const eCoord &p1,const eCoord &pp2,REAL ta,REAL te,REAL ra,REAL re,REAL r,REAL g,REAL b,REAL a, gWallRenderMode mode ){
     if ( !cycle_ )
     {
         return;
@@ -1149,7 +1180,7 @@ void gNetPlayerWall::RenderBegin(const eCoord &p1,const eCoord &pp2,REAL ta,REAL
     eCoord p2 = pp2;
 
     if (re > 1){
-        if (re > 2)
+        if (re > 2 || re <= ra)
             return;
 
         REAL ratio = (1-ra)/(re-ra);
@@ -1179,63 +1210,79 @@ void gNetPlayerWall::RenderBegin(const eCoord &p1,const eCoord &pp2,REAL ta,REAL
 
     eCoord ppos=cycle_->PredictPosition() - cycle_->dir*REAL(gCYCLE_LEN);
 
+    if( !good(ppos.x) || !good(ppos.y) ||
+        !good(p1.x)   || !good(p1.y) ||
+        !good(p2.x)   || !good(p2.y) ||
+        !good(ra)   || !good(re) ||
+        !good(ta)   || !good(te) ||
+        !good(h)   || !good(hfrac) ||
+        !good(cycle_->dir.x)   || !good(cycle_->dir.y) ||
+        !good(cycle_->skew) || 
+        !good(r)   || !good(g) || !good(b) || !good(a)
+        )
+    {
+#ifdef DEBUG
+        con << "Bad wall data!\n";
+        st_Breakpoint();
+#endif
+        return;
+    }
+
+
     if ( hfrac>0 ){
-        sr_DepthOffset(true);  
+        if( mode & gWallRenderMode_Lines && sg_renderBeginLines )
+        {
         //REAL H=h*hfrac;
 #define segs 5
-        upperlinecolor(r,g,b,a);//a*afunc(rat));
+#define seginv (1/float(segs))
+            BeginLineStrip();
+            
+            // upperlinecolor(r,g,b,a);//a*afunc(rat));
 
-        if ( rTextureGroups::TextureMode[rTextureGroups::TEX_WALL] != 0 )
-            glDisable(GL_TEXTURE_2D);
-        
-        BeginLineStrip();
+            for (int i=0;i<=segs;i++){
+                REAL frag=i*seginv;
+                REAL rat=ra+frag*(re-ra);
+                REAL x=(p1.x+frag*(p2.x-p1.x))*(1-xfunc(rat))+ppos.x*xfunc(rat);
+                REAL y=(p1.y+frag*(p2.y-p1.y))*(1-xfunc(rat))+ppos.y*xfunc(rat);
+
+                REAL H=h*hfrac*hfunc(rat);
+                upperlinecolor(r,g,b,a*afunc(rat));
+                glVertex3f(x+H*cycle_->skew*sfunc(rat)*cycle_->dir.y,
+                           y-H*cycle_->skew*sfunc(rat)*cycle_->dir.x,
+                           H);//+se_cameraZ*.005);
+            }
+        }
+    }
+
+    if( mode & gWallRenderMode_Quads && sg_renderBeginQuads )
+    {
+        BeginQuadStrip();
 
         for (int i=0;i<=segs;i++){
-            REAL frag=i/float(segs);
+            REAL frag=i*seginv;
             REAL rat=ra+frag*(re-ra);
             REAL x=(p1.x+frag*(p2.x-p1.x))*(1-xfunc(rat))+ppos.x*xfunc(rat);
             REAL y=(p1.y+frag*(p2.y-p1.y))*(1-xfunc(rat))+ppos.y*xfunc(rat);
 
+            // bottom
+            glColor4f(r+cfunc(rat),g+cfunc(rat),b+cfunc(rat),a*afunc(rat));
+            glTexCoord2f(ta+(te-ta)*frag,hfrac);
+            glVertex3f(x,y,0);
+
+            // top
+            //glTexCoord2f(ta+(te-ta)*frag,hfrac*(1-hfunc(rat)));
+            glColor4f(r+cfunc(rat),g+cfunc(rat),b+cfunc(rat),a*afunc(rat));
+            glTexCoord2f(ta+(te-ta)*frag,0);
             REAL H=h*hfrac*hfunc(rat);
-            upperlinecolor(r,g,b,a*afunc(rat));
             glVertex3f(x+H*cycle_->skew*sfunc(rat)*cycle_->dir.y,
                        y-H*cycle_->skew*sfunc(rat)*cycle_->dir.x,
-                       H);//+se_cameraZ*.005);
+                       H);
         }
-        RenderEnd();
-
-        sr_DepthOffset(false);
-        if ( rTextureGroups::TextureMode[rTextureGroups::TEX_WALL] != 0 )
-            glEnable(GL_TEXTURE_2D);
     }
 
-    sr_CheckGLError();
-    BeginQuadStrip();
 
-    //REAL H=h*hfrac;
 
-    //ppos=ePlayer->pos-ePlayer->dir*gCYCLE__LEN;
-
-    for (int i=0;i<=segs;i++){
-        REAL frag=i/float(segs);
-        REAL rat=ra+frag*(re-ra);
-        REAL x=(p1.x+frag*(p2.x-p1.x))*(1-xfunc(rat))+ppos.x*xfunc(rat);
-        REAL y=(p1.y+frag*(p2.y-p1.y))*(1-xfunc(rat))+ppos.y*xfunc(rat);
-
-        // bottom
-        glColor4f(r+cfunc(rat),g+cfunc(rat),b+cfunc(rat),a*afunc(rat));
-        glTexCoord2f(ta+(te-ta)*frag,hfrac);
-        glVertex3f(x,y,0);
-
-        // top
-
-        //glTexCoord2f(ta+(te-ta)*frag,hfrac*(1-hfunc(rat)));
-        glTexCoord2f(ta+(te-ta)*frag,0);
-        REAL H=h*hfrac*hfunc(rat);
-        glVertex3f(x+H*cycle_->skew*sfunc(rat)*cycle_->dir.y,
-                   y-H*cycle_->skew*sfunc(rat)*cycle_->dir.x,
-                   H);
-    }
+    // don't mix strips of different wall segments
     RenderEnd();
     sr_CheckGLError();
 }
@@ -1325,7 +1372,7 @@ void gNetPlayerWall::ClearDisplayList( int inhibitThis, int inhibitCycle )
     {
         cycle_->displayList_.Clear( inhibitCycle );
     }
-    displayList_.Clear( inhibitThis );
+    displayListInhibition_ = inhibitThis;
 #endif
 }
 
@@ -1568,7 +1615,7 @@ void gNetPlayerWall::MyInitAfterCreation()
 
     Wall()->Remove();
 
-    displayList_.Clear(2);
+    ClearDisplayList();
 }
 
 

@@ -15,7 +15,7 @@ tUniversalVariables.h: Makefile tUniversalVariables.h.in ${top_builddir}/univers
 
 ${srcdir}/tools/tDirectories.cpp: tUniversalVariables.h
 
-EXTRA_DIST = render/rConsoleCout.cpp engine/sound/base/eChannel.h vParser.cpp
+EXTRA_DIST = render/rConsoleCout.cpp engine/sound/base/eChannel.h vParser.cpp engine/eSound.cpp engine/eSound.h
 
 dist-hook:
 	cp -R ${srcdir}/config_ide.h ${srcdir}/macosx ${srcdir}/win32 ${srcdir}/win32_ded $(distdir)
@@ -89,6 +89,9 @@ libtools_a_SOURCES = ${tools_extra} tools/tVersion.cpp tools/tVersion.h tTrueVer
 	tools/tRectangle.h tools/tRectangle.cpp \
 	tools/tPlayList.h tools/tPlayList.cpp\
 	tools/tDecorator.h tools/tDecorator.cpp\
+	tools/tMutex.h tools/tMutex.cpp\
+	tools/tThread.h\
+	tools/tLockedQueue.h\
 	tools/tCoord.h tools/tCoord.cpp\
 	tools/tValue.h tools/tValueParser.h\
 	tools/tFunction.h tools/tFunction.cpp\

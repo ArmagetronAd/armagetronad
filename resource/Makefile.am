@@ -37,6 +37,7 @@ dist-hook: linked_included.dist
 #   copy processed included resources into distribution
 	mkdir -p $(distdir)/included
 	cp -r $</* $(distdir)/included/
+	find $(distdir)/included -name "*~" -exec rm \{\} \;
 
 #	delete temporary files
 	rm -f $<

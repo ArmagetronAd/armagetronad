@@ -124,12 +124,17 @@ Changes since 0.2.8.3.x:
 - GAME_END, NEW_MATCH, and NEW_ROUND ladderlog events include date and time.
 - Added ENCODING ladderlog event, which specifies the encoding for data in
   ladderlog.txt.
+- "--input" now can be used more than once to read from multiple files or pipes.
 
 Changes since 0.2.8.3.1:
 - security fix: old style action commands from clients no loger cause hangs and crashes
 - security fix: oversized packets are ignored properly
 - security fix: never read one byte outside of the received buffer
+- security fix: only include .cfg files from the var subfolder
 - compiler compatibility: adapted to gcc 4.60
+- smaller spelling fixes
+- FOV calculations now correct for widescreen and horizontal splitscreen
+- Additional checks against illegal values passed to renderer
 
 Changes since 0.2.8.3:
 - fixed temporary sound disappearance when alt-tabbing away and back

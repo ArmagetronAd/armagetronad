@@ -686,16 +686,7 @@ static bool lowlevel_sr_InitDisplay(){
             }
         }
 
-        // MacOSX SDL 1.2.4 crashes if we SetCaption after switch to fullscreen. (fixed in 1.2.5)
-    #ifdef MACOSX
-        if(!currentScreensetting.fullscreen)
-    #endif
-        {
-            tOutput o("Armagetron Advanced");
-            tString s;
-            s << o;
-            SDL_WM_SetCaption(s, s);
-        }
+        sr_SetWindowTitle(tOutput("$window_title_menu"));
 
         sr_CompleteGLAttributes();
 
@@ -1171,6 +1162,34 @@ void sr_Activate(bool active)
     }
     #endif
     #endif
+}
+
+void sr_SetWindowTitle(tOutput o)
+{
+    tString s;
+    s << o;
+
+    sr_SetWindowTitle(s);
+}
+
+tString sr_windowTitle = tString(tOutput("Armagetron Advanced"));
+
+void sr_SetWindowTitle(tString s)
+{
+    sr_windowTitle = s;
+#ifdef MACOSX
+    if(!currentScreensetting.fullscreen)
+#endif
+    {
+#ifndef DEDICATED
+        SDL_WM_SetCaption(s, s);
+#endif
+    }
+}
+
+void sr_SetWindowTitle()
+{
+    sr_SetWindowTitle(sr_windowTitle);
 }
 
 //**************************************

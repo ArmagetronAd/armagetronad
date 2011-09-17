@@ -3,7 +3,7 @@
 *************************************************************************
 
 ArmageTron -- Just another Tron Lightcycle Game in 3D.
-Copyright (C) 2000  Manuel Moos (manuel@moosnet.de)
+Copyright (C) 2011  Armagetron Advanced Development Team
 
 **************************************************************************
 
@@ -22,40 +22,53 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   
 ***************************************************************************
-file by guru3/tank program
 
 */
 
-#ifndef ArmageTron_TSTATFILE_H
-#define ArmageTron_TSTATFILE_H
+#ifndef ArmageTron_LOCKED_QUEUE_H
+#define ArmageTron_LOCKED_QUEUE_H
 
-//#include "tString.h"
-#include "tStatEntry.h"
-#include "tList.h"
+#include "tMutex.h"
 
-#include <iostream>
-#include <fstream>
+#include <deque>
 
-class tStatFile {
+//! thread safe queue
+template< typename T, typename MUTEX >
+class tLockedQueue 
+{
 public:
-    tStatFile(tString name, tList<tStatEntry> *inList);
-    void read();
-    void write();
-    ~tStatFile();
+    //! exception thrown if next() is called on an empty queue
+    class Empty: public std::exception{};
 
+    void add(const T& item)
+    {
+        boost::lock_guard< MUTEX > lock(mutex_);
+        
+        queue_.push_back(item);
+    }
+    
+    size_t size()
+    {
+        boost::lock_guard< MUTEX > lock(mutex_);
+        
+        return queue_.size();
+    }
+    
+    T next()
+    {
+        boost::lock_guard< MUTEX > lock(mutex_);
+
+        if(queue_.size() == 0)
+            throw Empty();
+
+        T item = queue_.front();
+        queue_.pop_front();
+        
+        return item;
+    }
 private:
-    void open();
-    void flushWrites();
-    void close();
-
-    tList<tStatEntry> *theList;
-    tString fileName;
-    int betweenWrites;
-
-    tList<tStatEntry> buffer;
-
-    //file descriptor
-    std::fstream myFileD;
+    std::deque<T> queue_;
+    MUTEX mutex_;
 };
 
 #endif

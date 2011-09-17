@@ -3563,9 +3563,9 @@ void ePlayerNetID::SetShuffleWish( int pos )
 {
     tASSERT( !CurrentTeam() );
 
-    if ( shuffleSpam.ShouldAnnounce() )
+    if ( GetShuffleSpam().ShouldAnnounce() )
     {
-        sn_ConsoleOut( shuffleSpam.ShuffleMessage( this, pos+1 ) );
+        sn_ConsoleOut( GetShuffleSpam().ShuffleMessage( this, pos+1 ) );
     }
 
     teamListID = pos;
@@ -4529,7 +4529,48 @@ static nSpamProtectionSettings se_chatSpamSettings( 1.0f, "SPAM_PROTECTION_CHAT"
 bool ePlayerNetID::Scramble = false;
 std::vector<ePlayerNetID*> ePlayerNetID::ScramblePlayerIDs;
 
-ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), timeCreated_( tSysTimeFloat() ), allowTeamChange_(false), registeredMachine_(0), pID(p), chatSpam_( se_chatSpamSettings )
+class eMachineDecoratorSpam: public nMachineDecorator
+{
+public:
+    nSpamProtection chatSpam;
+    eShuffleSpamTester shuffleSpam;
+    eChatLastSaid lastSaid;
+
+    eMachineDecoratorSpam( nMachine & m ): nMachineDecorator( m ), chatSpam( se_chatSpamSettings ){}
+
+    virtual void OnDestroy()
+    {
+        delete this;
+    }
+};
+
+static eMachineDecoratorSpam & se_GetSpam( ePlayerNetID & p )
+{
+    nMachine & machine = p.GetMachine();
+    eMachineDecoratorSpam * spam = machine.GetDecorator< eMachineDecoratorSpam >();
+    if( !spam )
+    {
+        spam = tNEW(eMachineDecoratorSpam)( machine );
+    }
+    return *spam;
+}
+
+nSpamProtection & ePlayerNetID::GetChatSpam()
+{
+    return se_GetSpam( *this ).chatSpam;
+}
+
+eChatLastSaid & ePlayerNetID::GetLastSaid()
+{
+    return se_GetSpam( *this ).lastSaid;
+}
+
+eShuffleSpamTester & ePlayerNetID::GetShuffleSpam()
+{
+    return se_GetSpam( *this ).shuffleSpam;
+}
+
+ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), timeCreated_( tSysTimeFloat() ), allowTeamChange_(false), registeredMachine_(0), pID(p)
 {
     // default access level
     lastAccessLevel = tAccessLevel_Default;
@@ -6217,7 +6258,7 @@ void ePlayerNetID::ReadSync( Engine::PlayerNetIDSync const & sync, nSenderInfo c
 //! creates a netobject form sync data
 ePlayerNetID::ePlayerNetID( Engine::PlayerNetIDSync const & sync, nSenderInfo const & sender )
 : nNetObject( sync.base(), sender ),listID(-1), teamListID(-1), timeCreated_( tSysTimeFloat() )
- , allowTeamChange_(false), registeredMachine_(0), chatSpam_( se_chatSpamSettings )
+ , allowTeamChange_(false), registeredMachine_(0)
 {
     // default access level
     lastAccessLevel = tAccessLevel_Default;
@@ -6645,7 +6686,6 @@ void ePlayerNetID::DisplayScores()
 
         // print team ranking if there actually is a team with more than one player
         int maxPlayers = 20;
-        bool showTeam = false;
         for ( int i = eTeam::teams.Len() - 1; i >= 0; --i )
         {
             if ( eTeam::teams[i]->NumPlayers() > 1 ||
@@ -6654,7 +6694,6 @@ void ePlayerNetID::DisplayScores()
                 y = eTeam::RankingGraph(y);
                 y-=.06;
                 maxPlayers -= ( eTeam::teams.Len() > 6 ? 6 : eTeam::teams.Len() ) + 2;
-                showTeam = true;
                 break;
             }
         }
@@ -7662,11 +7701,11 @@ static void scores(){
 
 static rPerFrameTask pf(&scores);
 
-static bool force_small_cons(){
-    return show_scores;
-}
+// static bool force_small_cons(){
+//    return show_scores;
+// }
 
-static rSmallConsoleCallback sc(&force_small_cons);
+// static rSmallConsoleCallback sc(&force_small_cons);
 
 //static void cd(){
 //    show_scores = false;
@@ -8153,7 +8192,7 @@ void ePlayerNetID::ReceiveControlNet( Network::NetObjectControl const & controlB
 
                 // count it as spam if it is obnoxious
                 if ( obnoxious )
-                    chatSpam_.CheckSpam( 4.0, Owner(), tOutput("$spam_teamchage") );
+                    GetChatSpam().CheckSpam( 4.0, Owner(), tOutput("$spam_teamchage") );
             }
 
             break;
@@ -9526,7 +9565,7 @@ void ePlayerNetID::UpdateShuffleSpamTesters()
     for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
     {
         ePlayerNetID *p = se_PlayerNetIDs( i );
-        p->shuffleSpam.Reset();
+        p->GetShuffleSpam().Reset();
     }
 }
 

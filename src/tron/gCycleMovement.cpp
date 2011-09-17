@@ -2241,7 +2241,7 @@ bool gCycleMovement::Timestep( REAL currentTime )
                     dist_to_dest = distToWall;
             }
 
-            static bool breakp = false;
+            // static bool breakp = false;
 
             // the time left until the turn happened on the client
             // REAL timeLeft = currentDestination->GetGameTime() - lastTime;
@@ -2528,7 +2528,7 @@ bool gCycleMovement::Timestep( REAL currentTime )
 
                 while (currentDestination && currentDestination->hasBeenUsed)
                 {
-                    breakp = false;
+                    // breakp = false;
                     currentDestination = currentDestination->next;
                 }
             }
@@ -2812,10 +2812,10 @@ void gCycleMovement::OnRemoveFromGame()
 
 void gCycleMovement::CopyFrom( const gCycleMovement & other )
 {
+#ifdef DEBUG_X
     // calculate position update
     eCoord posUpdate = other.Position() - this->Position();
 
-#ifdef DEBUG_X
     // only update direction if the positions are out of sync
     REAL lag = 1;
     if ( player )
@@ -3640,7 +3640,7 @@ private:
 
 bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration )
 {
-    eCoord oldpos=pos;
+    // eCoord oldpos=pos;
     REAL lastSpeed=verletSpeed_;
 
     REAL ts=(currentTime-lastTime);

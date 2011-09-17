@@ -8,13 +8,20 @@
 # sortresources.py <path_to_seach_and_sort>
 # use sortresources.py -h to get command line option help
 
+from __future__ import print_function
+
 from xml import sax
 from xml.sax import handler
 import string
 import os.path
 import os
 import sys
-import StringIO
+from io import StringIO
+
+try:
+    from itertools import izip as zip
+except ImportError:
+    pass
 
 # parse a resource xml file and fill in data property data strucure
 def parseResource(filename, data):
@@ -80,9 +87,9 @@ def parseResource(filename, data):
 
               # fallback: return empty stream, result: no dtd checking is done.
               # Not horribly bad in this context
-              print "warning, could not find requested entity", sysid
+              print("warning, could not find requested entity", sysid)
               
-              return StringIO.StringIO("")
+              return StringIO("")
 
     # parse: create parser...
     parser = sax.make_parser()
@@ -119,15 +126,18 @@ def getCanonicalPath(path):
 
 # scan for all XML files in the directory and rename them according to the rules
 def scanDir(sourceDir, destinationDir, function):
-    def visitor( arg, dirname, names ):
+    def visitor3( dirpath, subdirectores, names ):
         for filename in names:
             if filename.endswith(".xml"):
-                path = os.path.join(dirname, filename)
+                path = os.path.join(dirpath, filename)
                 newPath = getCanonicalPath(path)
                 # call the passed function
                 function(path, os.path.join(destinationDir, newPath), newPath)
-        
-    os.path.walk(sourceDir, visitor, visitor )
+
+    def visitor( t ):
+        visitor3( t[0], t[1], t[2] )
+
+    map(visitor, os.walk(sourceDir))
 
 # move file oldFile to newFile
 def Move(oldFile, newFile, canonicalPath ):
@@ -151,7 +161,7 @@ def Print(oldFile, newFile, canonicalPath ):
         return False
 
     if doPrint:
-        print "renaming", oldFile, "->", newFile
+        print("renaming", oldFile, "->", newFile)
 
 # move file oldFile to newFile, setting apache rewrite rules to keep the file
 # fetchable from its old position
@@ -185,7 +195,7 @@ def Redirect(oldFile, newFile, canonicalPath ):
                         # nothing to do
                         return
                     else:
-                        print "Warning: There already is a different RewriteRule for", oldFile, "in place."
+                        print("Warning: There already is a different RewriteRule for", oldFile, "in place.")
         except: pass
 
         # open .htaccess file for appended writing
@@ -200,15 +210,15 @@ def Redirect(oldFile, newFile, canonicalPath ):
 
 # print usage message and exit.
 def Options( ret ):
-    print
-    print "Usage: sortresources.py [OPTIONS] <source directory> <destination directory>"
-    print "       Omitting the destination directory makes it equal to the source."
-    print "       Omitting both directories makes them the current working directory."
-    print "Options: -r add apache rewrite rules"
-    print "         -n don't do anything, just print what would be done"
-    print "         -v print non-warning status messages"
-    print "         -h print this message"
-    print
+    print()
+    print("Usage: sortresources.py [OPTIONS] <source directory> <destination directory>")
+    print("       Omitting the destination directory makes it equal to the source.")
+    print("       Omitting both directories makes them the current working directory.")
+    print("Options: -r add apache rewrite rules")
+    print("         -n don't do anything, just print what would be done")
+    print("         -v print non-warning status messages")
+    print("         -h print this message")
+    print()
     sys.exit( ret )
 
 def GetDtdVersion(dtdfile):
@@ -263,7 +273,7 @@ def main(argList):
                 if arg[1] == "v":
                     doPrint = True
                     continue
-                print "\nUnknown option:", arg
+                print("\nUnknown option:", arg)
                 Options(-1)
             else:
                 Options(-1)
@@ -273,7 +283,7 @@ def main(argList):
                 sourceDirectory = arg
             destinationDirectory = arg
     
-    # print sourceDirectory, destinationDirectory
+    # print(sourceDirectory, destinationDirectory)
 
     # do the work
     scanDir(sourceDirectory, destinationDirectory, function)

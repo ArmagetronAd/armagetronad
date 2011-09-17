@@ -230,6 +230,11 @@ static int se_Wrap_SDL_InitSubSystem()
 }
 #endif
 
+int se_mixerFrequency = 1;
+
+// I'm going to hell for this
+#include "eSound.cpp"
+
 void eSoundMixer::Init() {
 #ifdef HAVE_LIBSDL_MIXER
     bool initbase = false;
@@ -302,9 +307,9 @@ void eSoundMixer::Init() {
 
     if(rc==0) {
         // don't know what to do here
-        int a,c;
+        int c;
         Uint16 b;
-        Mix_QuerySpec(&a,&b,&c);
+        Mix_QuerySpec(&se_mixerFrequency,&b,&c);
         //std::cout << "SDL_Mixer initialized with " << c << " channels.\n";
     } else {
         //std::cout << "Couldn't initialize SDL_Mixer, disabling sound.  I'm very sorry about that, I'll try to do better next time.\n";
@@ -314,6 +319,9 @@ void eSoundMixer::Init() {
     // Register music finished callback
     Mix_VolumeMusic( musicVolume );
     Mix_HookMusicFinished( &eSoundMixer::SDLMusicFinished );
+
+    // register old school sound filler callback
+    Mix_SetPostMix( &fill_audio, NULL );
 
     // Now we're done with music and initializing sdl_mixer, we'll setup the sound
     // effect stuff

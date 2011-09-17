@@ -4,6 +4,8 @@
 # links resources from one directory to another and sorts them there
 # usage: resources <source> <destination> <path to sortresources.py>
 
+from __future__ import print_function
+
 import sys, os
 import shutil
 foundModule = False
@@ -18,13 +20,13 @@ while not foundModule:
     try:
         import armabuild
         foundModule = True
-        print "Found armabuild!"
+        print("Found armabuild!")
     except:
         sys.path[0] = os.path.dirname(newPathSearch)
     numAttempts += 1
 
     if numAttempts > 9:
-        print "Unable to find armabuild module.  Can't continue."
+        print("Unable to find armabuild module.  Can't continue.")
         sys.exit(1)
 
 from armabuild import resource
@@ -42,7 +44,7 @@ if __name__ == "__main__":
     source = sys.argv[1]
     destination = sys.argv[2]
     #sortresources = sys.argv[3]
-    print "Sorting resources from", source, "to", destination
+    print("Sorting resources from", source, "to", destination)
     if os.path.exists(source) is False:
         sys.exit(1)
 
@@ -51,9 +53,9 @@ if __name__ == "__main__":
 
     shutil.copytree(source, destination, IgnoreFiles)
 
-    print "Running sortresources"
+    print("Running sortresources")
     resource.main(["-v", destination] )
-    print "Done"
+    print("Done")
 
     if os.path.exists(os.path.join(destination, "AATeam") ) is False:
         os.mkdir(os.path.join(destination, "AATeam") )

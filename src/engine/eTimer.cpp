@@ -56,7 +56,6 @@ eTimer::eTimer():nNetObject(), startTimeSmoothedOffset_(0){
 
     smoothedSystemTime_ = tSysTimeFloat();
 
-    badSyncs_ = 0;
     drifting_ = false;
 
     speed = 1.0;
@@ -72,6 +71,9 @@ eTimer::eTimer():nNetObject(), startTimeSmoothedOffset_(0){
     averageSpf_.Reset();
     averageSpf_.Add(1/60.0,5);
 
+    remoteStartTimeOffsetClamped_ = 0;
+    remoteStartTimeOffsetSanitized_ = 0;
+
     synced_ = true;
     creationSystemTime_ = tSysTimeFloat();
 }
@@ -85,7 +87,6 @@ eTimer::eTimer( Engine::TimerSync const & sync, nSenderInfo const & sender )
     smoothedSystemTime_ = tSysTimeFloat();
 
     // start assuming bad syncs
-    badSyncs_ = 10;
     drifting_ = false;
 
     speed = 1.0;
@@ -99,16 +100,22 @@ eTimer::eTimer( Engine::TimerSync const & sync, nSenderInfo const & sender )
     averageSpf_.Reset();
     averageSpf_.Add(1/60.0,5);
 
-    synced_ = true;
+    synced_ = false;
     creationSystemTime_ = tSysTimeFloat();
 
     lastStartTime_ = lastRemoteTime_ = 0;
 
     remoteStartTimeSent_ = sync.has_start_time();
     remoteStartTime_ = lastRemoteStartTime_ = sync.start_time();
+
+    remoteStartTimeOffsetClamped_ = 0;
+    remoteStartTimeOffsetSanitized_ = 0;
     
     // assume the clocks are in sync, speed wise
     startTimeDrift_.Add( 0, .001 );
+#ifdef DEBUG_X
+    // startTimeDrift_.Add( .1, 1000 );
+#endif
 }
 
 eTimer::~eTimer(){
@@ -178,7 +185,11 @@ void eTimer::ProcessSync()
 
     // determine the best estimate of the start time offset that reproduces the sent remote
     // time and its expected quality.
-    REAL remoteStartTimeOffset = 0;
+    double remoteStartTimeOffsetMax, remoteStartTimeOffsetMin = 0;
+
+    // and our best guess for it
+    double remoteStartTimeOffset;
+
     REAL remoteTimeNonQuality = 0;
 
     // shift start time
@@ -202,7 +213,7 @@ void eTimer::ProcessSync()
 
     {
         // adapt remote time a little, we're processing syncs with a frame delay
-        REAL remote_currentTime = remoteCurrentTime_ + spf*remoteSpeed_;
+        REAL remote_currentTime = remoteCurrentTime_ + spf * remoteSpeed_;
         REAL remoteSpeed = remoteSpeed_;
  
         // forget about earlier syncs if the speed changed
@@ -210,8 +221,7 @@ void eTimer::ProcessSync()
         {
             if ( !remoteStartTimeSent_ )
             {
-                qualityTester_.Timestep( 100 );
-                startTimeOffset_.Reset();
+                ResetAveragers();
             }
             checkDrift = false;
         }
@@ -233,8 +243,23 @@ void eTimer::ProcessSync()
         // determine quality from ping variance
         remoteTimeNonQuality = pingVariance;
 
-        // determine start time
-        remoteStartTimeOffset = smoothedSystemTime_ - startTime_ - remote_currentTime;
+        // determine start time offset
+        remoteStartTimeOffsetMax = smoothedSystemTime_ - startTime_ - remote_currentTime;
+        remoteStartTimeOffsetMin = lastTime_ - startTime_ - remote_currentTime;
+
+        // bring offset in line
+        if( remoteStartTimeOffsetMax < remoteStartTimeOffsetClamped_ )
+        {
+            remoteStartTimeOffsetClamped_ = remoteStartTimeOffsetMax;
+        }
+        if( remoteStartTimeOffsetMin > remoteStartTimeOffsetClamped_ )
+        {
+            remoteStartTimeOffsetClamped_ = remoteStartTimeOffsetMin;
+        }
+
+        // add to min sample record and use the minimized one for further calculations
+        remoteStartTimeOffsetMin_.Add( remoteStartTimeOffsetClamped_ );
+        remoteStartTimeOffset = remoteStartTimeOffsetMin_.GetMin();
 
         // calculate drift
         if( checkDrift )
@@ -242,7 +267,7 @@ void eTimer::ProcessSync()
             REAL timeDifference = remote_currentTime - lastRemoteTime_;
             REAL drift = lastStartTime_ - remoteStartTimeOffset;
 
-            if ( timeDifference > 0 && timeDifference < 3 && fabs(drift) < 1 && remote_currentTime > 3 )
+            if ( timeDifference > 0 && timeDifference < 3 && fabs(drift) < .5 && remote_currentTime > 5 && smoothedSystemTime_ - creationSystemTime_ > 10 )
             {
                 REAL driftAverage = Drift();
                 // con << "Drift: " << driftAverage << "\n";
@@ -252,13 +277,24 @@ void eTimer::ProcessSync()
                 driftDifference = 1/(1-driftDifference)-1;
 
                 timeDifference = timeDifference > 1 ? 1 : timeDifference;
-                startTimeDrift_.Timestep( timeDifference * .01 );
+
+                startTimeDrift_.Timestep( timeDifference * ( drifting_ ? .01 : .001 ) );
+
                 startTimeDrift_.Add( driftDifference + driftAverage, timeDifference );
 
                 driftAverage = startTimeDrift_.GetAverage();
-                if( !drifting_ && startTimeDrift_.GetWeight() > 20 && fabs(driftAverage) > .001 && fabs(driftAverage)*(smoothedSystemTime_ - creationSystemTime_-10) > 0.3 )
+                if( driftAverage < -.0005 && smoothedSystemTime_ > 100 )
+                {
+                    con << "Big drift!\n";
+                }
+
+                if( !drifting_ && startTimeDrift_.GetWeight() > 20 && fabs(driftAverage) > .0001 && fabs(driftAverage)*(smoothedSystemTime_ - creationSystemTime_-10) > 0.1 )
                 {
                     drifting_ = true;
+
+                    // typically, drift measurements get better after compensation has been turned
+                    // on, so forget precious measurements a little.
+                    startTimeDrift_.Timestep(2);
 #ifdef DEBUG
                     con << "Timer drift of " << driftAverage*100 << "% detected. Compensating.\n";
 #endif
@@ -278,95 +314,56 @@ void eTimer::ProcessSync()
     }
 
     // try to get independend quality measure: get the variance of the received start times
-    qualityTester_.Add( remoteStartTimeOffset );
+    qualityTester_.Add( remoteStartTimeOffsetClamped_ );
 
     // add the variance to the non-quality, along with an offset to avoid division by zero
     remoteTimeNonQuality += 0.00001 + 4 * qualityTester_.GetAverageVariance();
 
+    // add the offset to the statistics, weighted by the quality
+    startTimeOffset_.Add( remoteStartTimeOffsetClamped_, 1/remoteTimeNonQuality );
+
+    // sanity check offset average.
+    {
+        REAL tolerance = spf * .25 + .001;
+        double minOffset = remoteStartTimeOffset - tolerance;
+        double maxOffset = remoteStartTimeOffsetClamped_ + tolerance;
+
+        REAL deviation = 0;
+        remoteStartTimeOffsetSanitized_ = startTimeOffset_.GetAverage(); 
+        if( remoteStartTimeOffsetSanitized_ > maxOffset )
+        {
+            deviation = remoteStartTimeOffsetSanitized_ - maxOffset;
+            remoteStartTimeOffsetSanitized_ = maxOffset;
+        }
+        else if( remoteStartTimeOffsetSanitized_ < minOffset )
+        {
+            deviation = - remoteStartTimeOffsetSanitized_ + minOffset;
+            remoteStartTimeOffsetSanitized_ = minOffset;
+        }
+
+        // if the average does not fall into expected ranges, do some extra decay
+        if( deviation > 0 )
+        {
+            REAL delta = maxOffset - minOffset;
+            if( delta > 0 )
+            {
+                deviation /= delta;
+
+                startTimeOffset_.Timestep( deviation );
+            }
+        }
+    }
+
+
 #ifdef DEBUG_X
     if ( !tRecorder::IsRecording() )
     {
-        con << "T=" << smoothedSystemTime_ << " " << lastRemoteTime_ << ", Q= " << remoteTimeNonQuality << ", P= " << ping << " +/- " << sqrt(pingVariance) << " Time offset: " << remoteStartTimeOffset << " : " << startTimeOffset_.GetAverage() << "\n";
+        con << "T=" << smoothedSystemTime_ << " " << lastRemoteTime_ << ", Q= " << remoteTimeNonQuality << ", P= " << ping << " +/- " << sqrt(pingVariance) << " Time offset: " << remoteStartTimeOffsetClamped_ << " : " << startTimeOffset_.GetAverage() << "\n";
 
         std::ofstream plot("timesync.txt",std::ios_base::app);
-        plot << smoothedSystemTime_ << " " << remoteStartTimeOffset << " " << startTimeOffset_.GetAverage() << " " << startTimeDrift_.GetAverage() << "\n";
+        plot << smoothedSystemTime_ << " " << remoteStartTimeOffsetMax << " " << remoteStartTimeOffsetClamped_ << " " << remoteStartTimeOffset << " " << startTimeOffset_.GetAverage() << " " << remoteStartTimeOffsetSanitized_ << " " << startTimeSmoothedOffset_ << " " << startTimeDrift_.GetAverage() << "\n";
     }
 #endif
-
-    // check for unusually delayed packets, give them lower weight
-    REAL delay =  remoteStartTimeOffset - startTimeOffset_.GetAverage();
-    if( delay > 0 )
-    {
-        // fluctuations up to the ping variance are acceptable,
-        // (plus some extra factors, like a 1 ms offset and 10% of the current ping)
-        // severity will be < 1 for those
-        REAL severity = delay*delay/(.000001 + pingVariance + .01*ping*ping);
-        // but it is culled above 1
-        if( severity > 1 )
-        {
-            severity = pow(severity,.25);
-        }
-
-        REAL cullFactor = (se_cullDelayEnd-lastRemoteTime_)*se_cullDelayPerSecond;
-        if( cullFactor < 0 )
-        {
-            cullFactor = 0;
-        }
-        cullFactor += se_cullDelayMin;
-
-#ifdef DEBUG_X
-        if ( !tRecorder::IsRecording() )
-        {
-            con << "severity=" << severity << ", cull= " << cullFactor << "\n";
-        }
-#endif
-        remoteTimeNonQuality *= 1+(cullFactor-1)*severity;
-    }
-
-    // compensate for frame rendering
-    delay -= spf*.5;
-
-    // check for bad syncs
-    // be careful with the tolerance, if bad syncs are there and averaging is more
-    // immediate, larger deviations are to be expected even in the best conditions
-    REAL toleranceFactor = 1+badSyncs_/10;
-    if( toleranceFactor > 3 )
-    {
-        toleranceFactor = 3;
-    }
-    REAL delayTolerance = ( spf + ping*.2 + sqrt(pingVariance)*2 )*toleranceFactor; 
-    if ( fabs( delay ) > delayTolerance )
-    {
-        // really bad syncs count multiple times
-        int weight = sqrt(fabs(delay)/delayTolerance);
-        if( weight > 10 )
-        {
-            weight = 10;
-        }
-        badSyncs_ += weight;
-
-        // clamp
-        if( badSyncs_ > 100 )
-        {
-            badSyncs_ = 100;
-        }
-        else
-        {
-#ifdef DEBUG_X
-            con << "bs " << badSyncs_ << "\n";
-#endif
-        }
-    }
-    else if ( badSyncs_ > 0 )
-    {
-        --badSyncs_;
-#ifdef DEBUG_X
-        con << "bs " << badSyncs_ << "\n";
-#endif
-    }
-
-    // add the offset to the statistics, weighted by the quality
-    startTimeOffset_.Add( remoteStartTimeOffset, 1/remoteTimeNonQuality );
 
     UpdateIsSynced();
 }
@@ -429,7 +426,6 @@ void eTimer::SyncTime(){
 
     // update timers
     REAL timeStep=smoothedSystemTime_ - lastTime_;
-    lastTime_ = smoothedSystemTime_;
 
 #ifdef DEBUG
 #ifndef DEDICATED
@@ -444,10 +440,10 @@ void eTimer::SyncTime(){
 #endif
 
     REAL decayFactor = 1;
-    if( badSyncs_ > 2 )
-    {
-        decayFactor *= ( badSyncs_ - 2 );
-    }
+    // if( badSyncs_ > 2 )
+    // {
+        // decayFactor *= ( badSyncs_ - 2 );
+    // }
 
     // update lag compensation
     eLag::Timestep( timeStep*decayFactor );
@@ -498,7 +494,7 @@ void eTimer::SyncTime(){
 
     // smooth time offset
     {
-        REAL startTimeOffset = startTimeOffset_.GetAverage();
+        double startTimeOffset = remoteStartTimeOffsetSanitized_;
 
         // correct huge deviations (compared to variance) faster
         REAL deviation = startTimeSmoothedOffset_ - startTimeOffset;
@@ -529,6 +525,26 @@ void eTimer::SyncTime(){
         RequestSync(false); // NO ack.
 #endif
     }
+
+    lastTime_ = smoothedSystemTime_;
+}
+
+void eTimer::ResetAveragers()
+{
+    startTimeSmoothedOffset_ = remoteStartTimeOffsetSanitized_;
+    remoteStartTimeOffsetClamped_ = remoteStartTimeOffsetSanitized_;
+
+    remoteStartTimeOffsetMin_.Clear();
+    remoteStartTimeOffsetMin_.Add( remoteStartTimeOffsetSanitized_ );
+
+    startTimeOffset_.Reset();
+    startTimeOffset_.Add(remoteStartTimeOffsetSanitized_ + 100,EPS);
+    startTimeOffset_.Add(remoteStartTimeOffsetSanitized_ - 100,EPS);
+
+    qualityTester_.Reset();
+    static const REAL qual = sqrt(1/EPS);
+    qualityTester_.Add(qual,EPS);
+    qualityTester_.Add(-qual,EPS);
 }
 
 void eTimer::Reset(REAL t, bool force){
@@ -537,14 +553,21 @@ void eTimer::Reset(REAL t, bool force){
 
     sync_ = false;
 
-    startTimeSmoothedOffset_ = startTimeOffset_.GetAverage();
+    // check whether a full reset is required
+    bool fullReset = force || sn_GetNetState() != nCLIENT || !remoteStartTimeSent_;
+    if( fullReset )
+    {
+        remoteStartTimeOffsetSanitized_ = 0;
+    }
+
+    startTimeSmoothedOffset_ = remoteStartTimeOffsetSanitized_;
 
     // reset start time
     smoothedSystemTime_ = tSysTimeFloat();
     startTimeExtrapolated_ = smoothedSystemTime_ - t - startTimeSmoothedOffset_;
 
     // nothing further to do for clients on modern servers
-    if( sn_GetNetState() == nCLIENT && remoteStartTimeSent_ && !force )
+    if( !fullReset )
     {
         return;
     }
@@ -553,14 +576,7 @@ void eTimer::Reset(REAL t, bool force){
     startTime_ = startTimeExtrapolated_;
 
     // reset averagers
-    startTimeOffset_.Reset();
-    startTimeOffset_.Add(100,EPS);
-    startTimeOffset_.Add(-100,EPS);
-
-    qualityTester_.Reset();
-    static const REAL qual = sqrt(1/EPS);
-    qualityTester_.Add(qual,EPS);
-    qualityTester_.Add(-qual,EPS);
+    ResetAveragers();
 
     // reset times of actions
     lastTime_ = nextSync_ = smoothedSystemTime_;
@@ -573,16 +589,16 @@ bool eTimer::IsSynced() const
 
 void eTimer::UpdateIsSynced()
 {
+    // synced status is never lost, we don't want the screen to go black during play
+    if( synced_ )
+    {
+        return;
+    }
+
     // allow non-synced status only during the first ten seconds of a connection
     if ( smoothedSystemTime_ - creationSystemTime_ > 10 || sn_GetNetState() != nCLIENT )
     {
         synced_ = true;
-        return;
-    }
-
-    // synced status is never lost, we don't want the screen to go black during play
-    if( synced_ )
-    {
         return;
     }
 

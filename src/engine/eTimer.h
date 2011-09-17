@@ -34,6 +34,50 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 namespace Engine { class TimerSync; }
 
+//! gets the mininum of the last X samples
+template< int NUM >
+class eSampleMin
+{
+public:
+    eSampleMin()
+    {
+        Clear();
+    }
+    
+    void Clear()
+    {
+        current = 0;
+        for( int i = NUM-1; i >= 0; --i )
+        {
+            samples[i] = 1E+30;
+        }
+    }
+
+    void Add( double sample )
+    {
+        samples[current] = sample;
+        current = (current+1)%NUM;
+    }
+
+    double GetMin() const
+    {
+        double ret = samples[NUM-1];
+        for( int i = NUM-2; i >= 0; --i )
+        {
+            if( samples[i] < ret )
+            {
+                ret = samples[i];
+            }
+        }
+
+        return ret;
+    }
+private:
+    double samples[NUM];
+    int  current;
+};
+
+//! timer class
 class eTimer:public nNetObject{
 public:
     REAL speed; // the time acceleration
@@ -66,6 +110,8 @@ private:
 
     REAL Drift() const;    //!< returns the drift
 private:
+    void ResetAveragers(); //!< resets the internal averagers
+
     bool synced_;                       //!< set to true when the client timer is synced up
     double creationSystemTime_;         //!< the rough system time this timer was created at
     double smoothedSystemTime_;         //!< the smoothed system time
@@ -74,22 +120,23 @@ private:
     nAverager startTimeOffset_;         //!< the smoothed average of this averager is added to the start time on the client
     nAverager  startTimeDrift_;         //!< drift of effective start time
     bool drifting_;                     //!< set if drifting was detected, never unset
-    REAL startTimeSmoothedOffset_;      //!< the smoothed average of startTimeOffset_
+    double startTimeSmoothedOffset_;    //!< the smoothed average of startTimeOffset_
     nAverager qualityTester_;           //!< averager that tells us about the quality of the sync messages
 
 
     // for drift calculation
-    REAL lastStartTime_;                //!< last received start time
-    REAL lastRemoteTime_;               //!< last received time
+    double lastStartTime_;              //!< last received start time
+    double lastRemoteTime_;             //!< last received time
 
     bool sync_;                         //!< is a sync ready to process?
-    REAL remoteCurrentTime_, remoteSpeed_; //!< if so, the sync data
+    double remoteCurrentTime_, remoteSpeed_; //!< if so, the sync data
     double remoteStartTime_;            //!< if so, the sync data
     bool remoteStartTimeSent_;          //!< set if the server is sending the start time
     double lastRemoteStartTime_;        //!< last receined remote start time
+    double remoteStartTimeOffsetClamped_; //!< the remote start time offset, sanity checked against 
+    eSampleMin<16> remoteStartTimeOffsetMin_; //!< minimal remote start time offset of the last X syncs
+    double remoteStartTimeOffsetSanitized_; //!< the remote start time offset, sanity checked against too large deviations and spikes
 
-    int badSyncs_;                      //!< number of consecutive bad syncs received
-    
     void ProcessSync();                 //!< processes the sync data
 
     // the current game time is always smoothedSystemTime_ - ( startTime_ + startTimeSmoothedOffset_ ).

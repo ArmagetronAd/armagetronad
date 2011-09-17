@@ -20,8 +20,8 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
-					<Add library=".\libZThread.a" />
 					<Add library="..\..\..\winlibs\protobuf\vsprojects\libprotobuf.a" />
+					<Add library="..\..\..\winlibs\win32\boost_libs\libboost_thread-mgw44-mt-1_47.a" />
 				</Linker>
 			</Target>
 			<Target title="Win32 Debug">
@@ -32,14 +32,14 @@
 				<Option compiler="gcc" />
 				<Option projectResourceIncludeDirsRelation="1" />
 				<Compiler>
-					<Add option="-W" />
 					<Add option="-g" />
+					<Add option="-W" />
 					<Add option="-D_DEBUG" />
 					<Add option="-DDEBUG" />
 				</Compiler>
 				<Linker>
-					<Add library=".\libZThread_debug.a" />
 					<Add library="..\..\..\winlibs\protobuf\vsprojects\libprotobuf_debug.a" />
+					<Add library="..\..\..\winlibs\win32\boost_libs\libboost_thread-mgw44-mt-d-1_47.a" />
 				</Linker>
 			</Target>
 		</Build>
@@ -59,7 +59,6 @@
 			<Add directory="..\..\src\tools" />
 			<Add directory="..\..\src\ui" />
 			<Add directory="..\..\src\win32_ded" />
-			<Add directory="..\..\..\winlibs\ZThread\include" />
 			<Add directory="..\..\..\winlibs\libxml2\include" />
 			<Add directory="..\..\src\resource" />
 			<Add directory="..\..\..\winlibs\boost\includes" />
@@ -269,6 +268,8 @@
 		<Unit filename="..\..\src\tools\tMemManager.h" />
 		<Unit filename="..\..\src\tools\tMemStack.cpp" />
 		<Unit filename="..\..\src\tools\tMemStack.h" />
+		<Unit filename="..\..\src\tools\tMutex.cpp" />
+		<Unit filename="..\..\src\tools\tMutex.h" />
 		<Unit filename="..\..\src\tools\tRandom.cpp" />
 		<Unit filename="..\..\src\tools\tRandom.h" />
 		<Unit filename="..\..\src\tools\tRecorder.cpp" />
@@ -284,6 +285,7 @@
 		<Unit filename="..\..\src\tools\tString.h" />
 		<Unit filename="..\..\src\tools\tSysTime.cpp" />
 		<Unit filename="..\..\src\tools\tSysTime.h" />
+		<Unit filename="..\..\src\tools\tThread.h" />
 		<Unit filename="..\..\src\tools\tToDo.cpp" />
 		<Unit filename="..\..\src\tools\tToDo.h" />
 		<Unit filename="..\..\src\tools\tVersion.cpp" />

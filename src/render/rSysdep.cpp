@@ -799,7 +799,7 @@ public:
         // delay
         if( opt == rSysDep::rSwap_Latency && delay_ > smallDelay )
         {
-            tDelay( delay_ * 1000 * 1000 );
+            tDelay( int(delay_ * 1000 * 1000) );
         }
     }
 protected:

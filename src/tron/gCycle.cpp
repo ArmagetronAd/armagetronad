@@ -42,6 +42,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "ePlayer.h"
 
 #include "eSoundMixer.h"
+#include "eSound.h"
 
 #include "eGrid.h"
 #include "eFloor.h"
@@ -2209,6 +2210,8 @@ private:
 };
 #endif
 
+static eLegacyWavData cycle_run("moviesounds/engine.wav","sound/cyclrun.wav");
+
 void gCycle::MyInitAfterCreation(){
 #ifndef DEDICATED
     joystick_ = tNEW( gJoystick( this ) );
@@ -2219,6 +2222,8 @@ void gCycle::MyInitAfterCreation(){
 // create wall renderer
 #ifndef DEDICATED
     new gCycleWallRenderer( this );
+
+    engine  = tNEW(eSoundPlayer)(cycle_run,true);
 #endif
 
     dropWallRequested_ = false;
@@ -2409,6 +2414,7 @@ void gCycle::InitAfterCreation(){
 
 gCycle::gCycle(eGrid *grid, const eCoord &pos,const eCoord &d,ePlayerNetID *p)
         :gCycleMovement(grid, pos,d,p,false),
+        engine(NULL),
         skew(0),skewDot(0),
         rotationFrontWheel(1,0),rotationRearWheel(1,0),heightFrontWheel(0),heightRearWheel(0),
         currentWall(NULL),
@@ -2438,6 +2444,8 @@ gCycle::~gCycle(){
 
     eSoundMixer* mixer = eSoundMixer::GetMixer();
     mixer->RemoveContinuous(CYCLE_MOTOR, this);
+
+    tDESTROY(engine);
 
     this->RemoveFromGame();
 
@@ -2826,11 +2834,13 @@ bool gCycle::Timestep(REAL currentTime){
 // lets a value decay smoothly
 static void DecaySmooth( REAL& smooth, REAL relSpeed, REAL minSpeed, REAL clamp )
 {
+#ifdef DEBUG
     if ( fabs(smooth) > .01 )
     {
         int x;
         x = 1;
     }
+#endif
 
     // increase correction speed if the value is out of bounds
     if ( clamp > 0 )
@@ -2883,7 +2893,7 @@ bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
     if (!finite(skewDot))
         skewDot=0;
 
-    eCoord oldpos=pos;
+    // eCoord oldpos=pos;
 
     // let the joystick execute delayed turns
     if ( joystick_ )
@@ -4097,7 +4107,7 @@ bool gCycleWallsDisplayListManager::CannotHaveList( REAL distance, gCycle const 
             ( cycle->ThisWallsLength() > 0 && cycle->GetDistance() - cycle->ThisWallsLength() > distance );
 }
 
-void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * cycle )
+void gCycleWallsDisplayListManager::RenderAllWithDisplayList( eCamera const * camera, gCycle * cycle )
 {
     dir_eWall_select();
 
@@ -4123,10 +4133,6 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
             {
                 run->Remove();
             }
-            else
-            {
-                run->Render( camera );
-            }
         }
         run = next;
     }
@@ -4145,21 +4151,6 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
         // yes? Ok, rebuild the list in this case, too
         displayList_.Clear(0);
     }
-    else if ( wallsWithPossibleDisplayList )
-    {
-        // oops, at least render the newcomers normally
-        run = wallList_;
-        while( run )
-        {
-            gNetPlayerWall * next = run->Next();
-            if ( run->CanHaveDisplayList() )
-            {
-                run->Render( camera );
-            }
-
-            run = next;
-        }
-    }
 
     // call display list
     if ( displayList_.Call() )
@@ -4174,7 +4165,6 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
         gNetPlayerWall * next = run->Next();
         if ( !run->CanHaveDisplayList() || ( tailExpired && wallsWithDisplayListMinDistance_ >= run->BegPos() ) )
         {
-            run->Render( camera );
             run->Insert( wallList_ );
         }
         run = next;
@@ -4206,40 +4196,45 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
     // fill display list
     rDisplayListFiller filler( displayList_ );
 
-    if ( !rDisplayList::IsRecording() )
+    if ( rDisplayList::IsRecording() )
     {
-        // display list recording did not start; render traditionally
+        wallsWithDisplayListMinDistance_ = 1E+30;
+        wallsInDisplayList_ = 0;
+
+        // bookkeeping of walls in the display list
         run = wallsWithDisplayList_;
         while( run )
-        {   
+        {
             gNetPlayerWall * next = run->Next();
-            run->Render( camera );
+            if ( run->BegPos() < wallsWithDisplayListMinDistance_ )
+            {
+                wallsWithDisplayListMinDistance_ = run->BegPos();
+            }
+            wallsInDisplayList_++;
             run = next;
         }
+    }
 
+    // render walls with display list
+    RenderAll( camera, cycle, wallsWithDisplayList_ );
+}
+
+void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * cycle, gNetPlayerWall * list )
+{
+    if( !list )
+    {
         return;
     }
 
-    wallsWithDisplayListMinDistance_ = 1E+30;
-    wallsInDisplayList_ = 0;
-
-    // render walls;
     // first, render all lines
     sr_DepthOffset(true);
     if ( rTextureGroups::TextureMode[rTextureGroups::TEX_WALL] != 0 )
         glDisable(GL_TEXTURE_2D);
     
-    run = wallsWithDisplayList_;
+    gNetPlayerWall * run = list;
     while( run )
     {
         gNetPlayerWall * next = run->Next();
-        if ( run->BegPos() < wallsWithDisplayListMinDistance_ )
-        {
-            wallsWithDisplayListMinDistance_ = run->BegPos();
-        }
-
-        wallsInDisplayList_++;
-
         run->RenderList( true, gNetPlayerWall::gWallRenderMode_Lines );
         run = next;
     }
@@ -4249,7 +4244,7 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
     if ( rTextureGroups::TextureMode[rTextureGroups::TEX_WALL] != 0 )
         glEnable(GL_TEXTURE_2D);
     
-    run = wallsWithDisplayList_;
+    run = list;
     while( run )
     {
         gNetPlayerWall * next = run->Next();
@@ -4258,6 +4253,15 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
     }
 
     RenderEnd();
+}
+
+void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * cycle )
+{
+    // render everything you can with a display list
+    RenderAllWithDisplayList( camera, cycle );
+
+    // then, render the rest
+    RenderAll( camera, cycle, wallList_ );
 }
 
 void gCycle::Render(const eCamera *cam){
@@ -4740,7 +4744,7 @@ void gCycle::Render2D(tCoord scale) const {
     }
     glColor4f(color_.r_, color_.g_, color_.b_, alpha);
     eCoord pos = PredictPosition(), dir = Direction();
-    tCoord p = pos;
+    // tCoord p = pos;
     glPushMatrix();
     GLfloat m[16] = {
                         scale.x * dir.x, scale.y * dir.y, 0, 0,
@@ -4892,12 +4896,9 @@ bool gCycle::RenderCockpitFixedBefore(bool){
     */
     return true;
 }
-#endif
 
-#if 0
 void gCycle::SoundMix(Uint8 *dest,unsigned int len,
                       int viewer,REAL rvol,REAL lvol){
-#ifndef HAdVE_LIBSDL_MIXER
     if (Alive()){
         /*
           if (!cycle_run.alt){
@@ -4909,6 +4910,7 @@ void gCycle::SoundMix(Uint8 *dest,unsigned int len,
         if (engine)
             engine->Mix(dest,len,viewer,rvol,lvol,verletSpeed_/(sg_speedCycleSound * SpeedMultiplier()));
 
+#if 0
         if (turning)
         {
             if (turn_wav.alt)
@@ -4919,8 +4921,8 @@ void gCycle::SoundMix(Uint8 *dest,unsigned int len,
         
         if (spark)
             spark->Mix(dest,len,viewer,rvol*.5,lvol*.5,4);
-    }
 #endif
+    }
 }
 #endif
 
@@ -5011,6 +5013,7 @@ void gCycle::PPDisplay(){
 // cycle network routines:
 gCycle::gCycle( Game::CycleSync const & sync, nSenderInfo const & sender )
         :gCycleMovement( sync.base(), sender ),
+        engine(NULL),
         skew(0),skewDot(0),
         rotationFrontWheel(1,0),rotationRearWheel(1,0),heightFrontWheel(0),heightRearWheel(0),
         currentWall(NULL),
@@ -5068,11 +5071,13 @@ void gCycle::WriteSync(  Game::CycleSync & sync, bool init ) const
     if ( sg_verletIntegration.Supported() )
         speed = Speed();
 
+#ifdef DEBUG
     if ( speed > 15 )
     {
         int x;
         x = 0;
     }
+#endif
 
     sync.set_speed( speed );
     sync.set_alive( Alive() );
@@ -5189,7 +5194,9 @@ bool gCycle::Extrapolate( REAL dt )
 {
     tASSERT( extrapolator_ );
 
+#ifdef DEBUG
     eCoord posBefore = extrapolator_->Position();
+#endif
 
     // calculate target time
     REAL newTime = extrapolator_->LastTime() + dt;
@@ -5240,7 +5247,7 @@ bool gCycle::Extrapolate( REAL dt )
 void se_SanifyDisplacement( eGameObject* base, eCoord& displacement )
 {
     eCoord base_pos = base->Position();
-    eCoord reachable_pos = base->Position() + displacement;
+    // eCoord reachable_pos = base->Position() + displacement;
 
     int timeout = 5;
     while( timeout > 0 )
@@ -5388,9 +5395,8 @@ void gCycle::ReadSync( Game::CycleSync const & syncX, nSenderInfo const & sender
     SyncData sync;
 
     short sync_alive;               // is this cycle alive?
-    unsigned short sync_wall=0;     // ID of wall
 
-    eCoord new_pos = pos;	// the extrapolated position
+    // eCoord new_pos = pos;	// the extrapolated position
 
     Engine::NetGameObjectSync const & baseSync = syncX.base().base();
     sync.time = baseSync.last_time();
@@ -5411,7 +5417,6 @@ void gCycle::ReadSync( Game::CycleSync const & syncX, nSenderInfo const & sender
     sync.speed = syncX.speed();
     sync_alive = syncX.alive();
     sync.distance = syncX.distance();
-    sync_wall = syncX.wall_id();
     if ( syncX.has_turns() )
         sync.turns = syncX.turns();
     if ( syncX.has_braking() )

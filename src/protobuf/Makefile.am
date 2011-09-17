@@ -2,7 +2,7 @@ include $(top_srcdir)/Makefile.paths
 
 # protocol buffer rules
 %.pb: ${srcdir}/%.proto
-	protoc $< --cpp_out=./ --proto_path=${srcdir} 2>&1 | sed -e "s,^\(.*\).proto,${srcdir}/\1.proto,"
+	${PROTOC} $< --cpp_out=./ --proto_path=${srcdir} 2>&1 | sed -e "s,^\(.*\).proto,${srcdir}/\1.proto,"
 
 %.pb.cc: %.pb
 	@true
@@ -11,42 +11,49 @@ include $(top_srcdir)/Makefile.paths
 	@true
 
 # protocol buffers. Need to be compiled first so the headers exist for the
-# other modules to include.
+# other modules to include. No need to list the headers, though, we don't
+# distribute them and they're built alongside the cc files.
 libprotobuf_a_SOURCES = \
-    tColor.pb.cc tColor.pb.h \
-    tCoord.pb.cc tCoord.pb.h \
-    tFunction.pb.cc tFunction.pb.h \
-    tPolynomial.pb.cc tPolynomial.pb.h \
-    nAuthentication.pb.cc nAuthentication.pb.h \
-    nNetwork.pb.cc nNetwork.pb.h \
-    nNetObject.pb.cc nNetObject.pb.h \
-    nNetObjectPrivate.pb.cc nNetObjectPrivate.pb.h \
-    nServerInfo.pb.cc nServerInfo.pb.h \
-    nConfig.pb.cc nConfig.pb.h \
-    eTeam.pb.cc eTeam.pb.h \
-    ePlayer.pb.cc ePlayer.pb.h \
-    eNetGameObject.pb.cc eNetGameObject.pb.h \
-    eVoter.pb.cc eVoter.pb.h \
-    eEventNotification.pb.cc eEventNotification.pb.h \
-    eLagCompensation.pb.cc eLagCompensation.pb.h \
-    eTimer.pb.cc eTimer.pb.h \
-    zZone.pb.cc zZone.pb.h \
-    zShape.pb.cc zShape.pb.h \
-    gGame.pb.cc gGame.pb.h \
-    gCycle.pb.cc gCycle.pb.h \
-    gWall.pb.cc gWall.pb.h \
-    gZone.pb.cc gZone.pb.h \
-    gWall.pb.cc gWall.pb.h \
-    gAIBase.pb.cc gAIBase.pb.h
-#    .pb.cc .pb.h \
+    tColor.pb.cc \
+    tCoord.pb.cc \
+    tFunction.pb.cc \
+    tPolynomial.pb.cc \
+    nAuthentication.pb.cc \
+    nNetwork.pb.cc \
+    nNetObject.pb.cc \
+    nNetObjectPrivate.pb.cc \
+    nServerInfo.pb.cc \
+    nConfig.pb.cc \
+    eTeam.pb.cc \
+    ePlayer.pb.cc \
+    eNetGameObject.pb.cc \
+    eVoter.pb.cc \
+    eEventNotification.pb.cc \
+    eLagCompensation.pb.cc \
+    eTimer.pb.cc \
+    zZone.pb.cc \
+    zShape.pb.cc \
+    gGame.pb.cc \
+    gCycle.pb.cc \
+    gWall.pb.cc \
+    gZone.pb.cc \
+    gWall.pb.cc \
+    gAIBase.pb.cc 
+#    .pb.cc \
 #
 
 # dependency for all automatically generated source files
 all_protobuf_files: ${libprotobuf_a_SOURCES}
 
 distclean-local:
-	rm -f ${libprotobuf_a_SOURCES}
+	rm -f *.pb.cc *.pb.h
 
+dist-hook:
+#   copy .proto
+	cp -R ${srcdir}/*.proto ${distdir}
+#   and remove the .pb.cc files. The user needs protobuf dev files installed anyway,
+#   so she has protoc available.
+	rm -f ${distdir}/*.pb.cc
 
 libprotobuf_a_CXXFLAGS  =$(AM_CXXFLAGS) -I@srcdir@ -I./
 noinst_LIBRARIES = libprotobuf.a

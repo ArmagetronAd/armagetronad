@@ -384,6 +384,12 @@ test $CODELEVEL -ge 2 && CXXFLAGS="$CXXFLAGS -Wpointer-arith -W -Wcast-qual -Wca
 test $CODELEVEL -ge 3 && CXXFLAGS="$CXXFLAGS -Weffc++ -Wshadow -Winline -Wfloat-equal -Wconversion"
 test $CODELEVEL -ge 4 && CXXFLAGS="$CXXFLAGS -Werror"
 
+# unused variables should be tolerated while debugging, they're sometimes just there
+# to be printed in the debugger
+if test $CODELEVEL -ge 1 && test $DEBUGLEVEL -ge 1; then
+    AX_CXXFLAGS_GCC_OPTION(-Wno-unused-but-set-variable)
+fi
+
 dnl determine whether "games" should be put into paths: not if it was
 dnl requested with --disable-games or if "games" is already included
 dnl in the data path
@@ -649,22 +655,21 @@ if test x$enable_armathentication = xyes; then
 
 AC_LANG([C++])
 
+AC_CHECK_LIB([boost_thread],_ZNK5boost6thread6get_idEv,,[
+
 ACX_PTHREAD([
 
 LIBS="${PTHREAD_LIBS} ${LIBS}"
 CXXFLAGS="${CXXFLAGS} ${PTHREAD_CFLAGS}"
 CC="${PTHREAD_CC}"
-dnl AC_DEFINE(HAVE_PTHREAD,1,[Define if you have POSIX threads libraries and header files.])
+AC_DEFINE(HAVE_PTHREAD,1,[Define if you have POSIX threads libraries and header files.])
 
-],[
-
-AM_PATH_ZTHREAD_AA(2.3.2)
-CXXFLAGS="${CXXFLAGS} ${ZTHREAD_CXXFLAGS}"
-LIBS="${LIBS} ${ZTHREAD_LIBS}"
+],)
 
 ])
 
-fi # krawall
+
+fi # armathentication
 
 AC_CHECK_PROG(GREP,grep,grep,false)
 
@@ -1021,13 +1026,13 @@ AC_DEFINE(ENABLE_SCRIPTING,,[scripting enabled])
 fi
 
 dnl *************************************************
-dnl         pattern buffers
+dnl         protocol buffers
 dnl *************************************************
 
 dnl check for compiler
-AC_CHECK_PROG([PROTOC],protoc,protoc,no)
+AC_CHECK_PROG([PROTOC],protoc,`which protoc`,no)
 
-AC_LANG([C])
+AC_LANG([C++])
 
 dnl check for library
 AC_CHECK_LIB([protobuf],_ZN6google8protobuf7MessageD2Ev,,

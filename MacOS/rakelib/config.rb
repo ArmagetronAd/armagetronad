@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 require "shellwords"
 require "enumerator"
 require "yaml"
@@ -43,8 +44,6 @@ class Version
       data = version_script(true)
       words = Shellwords.shellwords(data)
       make_hash(words)
-    else
-      # TODO: get version from version.h
     end
   end
 
@@ -84,7 +83,8 @@ class AA::Config
     @build_type = [top_path(".svn"), top_path(".bzr")].any? { |f| File.exists?(f) } ? :development : :release
     @program_short_name = @dedicated ? "armagetronad-dedicated" : "armagetronad"
     
-    @version_info = AA::Version.new(generated_path("version.yaml"))
+    version_path = File.exists?(top_path("version.yaml")) ? top_path("version.yaml") : generated_path("version.yaml")
+    @version_info = AA::Version.new(version_path)
   end
   
   attr_reader :top_dir

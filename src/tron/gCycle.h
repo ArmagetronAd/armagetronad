@@ -47,6 +47,7 @@ class gNetPlayerWall;
 class gPlayerWall;
 class eTempEdge;
 class gJoystick;
+class eSoundPlayer;
 struct gPredictPositionData;
 
 // minimum time between two cycle turns
@@ -127,6 +128,13 @@ public:
     //! checks whether a wall at a certain distance can have a display list
     static bool CannotHaveList( REAL distance, gCycle const * cycle );
 
+    //! renders all walls scheduled for display list usage
+    void RenderAllWithDisplayList( eCamera const * camera, gCycle * cycle );
+
+    //! render all walls in a list
+    static void RenderAll( eCamera const * camera, gCycle * cycle, gNetPlayerWall * list );
+
+    //! render all walls
     void RenderAll( eCamera const * camera, gCycle * cycle );
     bool Walls() const
     {
@@ -153,6 +161,8 @@ class gCycle: public gCycleMovement
     friend class gNetPlayerWall;
     friend class gDestination;
     friend class gCycleWallRenderer;
+
+    eSoundPlayer *engine; //!< engine sound
 
     REAL spawnTime_;    //!< time the cycle spawned at
     REAL lastTimeAnim;  //!< last time animation was simulated at
@@ -321,8 +331,8 @@ public:
 
     virtual bool RenderCockpitFixedBefore(bool primary=true);
 
-    //virtual void SoundMix(unsigned char *dest,unsigned int len,
-    //                      int viewer,REAL rvol,REAL lvol);
+    virtual void SoundMix(unsigned char *dest,unsigned int len,
+                          int viewer,REAL rvol,REAL lvol);
 #endif
 
     virtual eCoord CamPos() const;

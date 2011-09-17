@@ -36,6 +36,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "tError.h"
 
+#include "tMutex.h"
+
 class tCheckedPTRBase{
     friend class tPTRList;
     int id;
@@ -424,8 +426,8 @@ void st_ReleaseBreakpint( void const * object );
 // not thread-safe mutex
 struct tNonMutex
 {
-    void acquire(){}
-    void release(){}
+    void lock(){}
+    void unlock(){}
 };
 
 template< class T, class MUTEX = tNonMutex > class tReferencable
@@ -443,9 +445,8 @@ public:
         st_AddRefBreakpint( this );
 #endif        
         tASSERT( this && refCtr_ >= 0 );
-        mutex_.acquire();
+        boost::lock_guard< MUTEX > lock( mutex_ );
         ++refCtr_;
-        mutex_.release();
         tASSERT( this && refCtr_ >= 0 );
     }
 
@@ -456,13 +457,13 @@ public:
 #endif        
 
         tASSERT ( this && refCtr_ >= 0 );
-        mutex_.acquire();
+        boost::unique_lock< MUTEX > lock( mutex_ );
         --refCtr_;
-        mutex_.release();
 
         if ( refCtr_ <= 0 )
         {
             refCtr_ = -1000;
+            lock.unlock();
             delete static_cast< const T* >( this );
         }
     }

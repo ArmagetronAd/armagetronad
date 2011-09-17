@@ -717,6 +717,7 @@ static tConfItem<REAL>   sp_wsu		("SP_WALLS_STAY_UP_DELAY"	,		singlePlayer.walls
 static tConfItem<REAL>   sp_wl		("SP_WALLS_LENGTH"		    ,		singlePlayer.wallsLength     );
 static tConfItem<REAL>   sp_er		("SP_EXPLOSION_RADIUS"		,		singlePlayer.explosionRadius );
 
+#ifndef DEDICATED
 static void GameSettingsMP(){
     multiPlayer.Menu();
 }
@@ -728,6 +729,7 @@ static void GameSettingsSP(){
 static void GameSettingsCurrent(){
     sg_currentSettings->Menu();
 }
+#endif
 
 static REAL sg_Timeout = 5.0f;
 static tConfItem<REAL>   sg_ctimeout("GAME_TIMEOUT"		,		sg_Timeout );
@@ -1517,7 +1519,9 @@ void sg_SinglePlayerGame(){
     update_settings();
     ePlayerNetID::CompleteRebuild();
 
+    sr_SetWindowTitle(tOutput("$window_title_local"));
     own_game( nSTANDALONE );
+    sr_SetWindowTitle(tOutput("$window_title_menu"));
 }
 
 void sg_HostGame(){
@@ -1680,6 +1684,9 @@ bool ConnectToServerCore(nServerInfoBase *server)
 {
     tASSERT( server );
 
+    sr_SetWindowTitle(tOutput("$window_title_connecting",
+        tColoredString::RemoveColors(server->GetName())));
+
     ePlayerNetID::ClearAll();
 
     // revert to default settings, restore current vlaues on exit
@@ -1717,6 +1724,11 @@ bool ConnectToServerCore(nServerInfoBase *server)
     o << "$network_connecting_to_server";
     con << o;
     error = server->Connect();
+
+    if (error != nOK)
+    {
+        sr_SetWindowTitle(tOutput("$window_title_menu"));
+    }
 
     switch (error)
     {
@@ -1761,6 +1773,8 @@ bool ConnectToServerCore(nServerInfoBase *server)
             sr_con.fullscreen=false;
 
             con << tOutput("$network_syncing_gamestate");
+            sr_SetWindowTitle(tOutput("$window_title_connected",
+                tColoredString::RemoveColors(server->GetName())));
             sg_EnterGame( nCLIENT );
         }
         else{
@@ -1798,6 +1812,8 @@ bool ConnectToServerCore(nServerInfoBase *server)
     sr_con.fullscreen=false;
 
     sr_textOut=to;
+
+    sr_SetWindowTitle(tOutput("$window_title_menu"));
 
     return ret;
 }
@@ -1973,6 +1989,7 @@ void net_options(){
 }
 
 void sg_HostGameMenu(){
+#ifndef DEDICATED
     uMenu net_menu("$network_host_text");
 
     sg_HostMenu = &net_menu;
@@ -2001,6 +2018,7 @@ void sg_HostGameMenu(){
     net_menu.Enter();
 
     sg_HostMenu = NULL;
+#endif
 }
 
 #ifndef DEDICATED
@@ -2111,6 +2129,7 @@ static tConfItemFunc exit_conf("EXIT",&Quit_conf);
 
 void st_PrintPathInfo(tOutput &buf);
 
+#ifndef DEDICATED
 static void PlayerLogIn()
 {
     ePlayer::LogIn();
@@ -2141,12 +2160,17 @@ void sg_DisplayVersionInfo() {
 }
 
 void sg_StartupPlayerMenu();
+#endif
 
 void MainMenu(bool ingame){
+#ifndef DEDICATED
     //	update_settings();
 
     if (ingame)
+    {
         sr_con.SetHeight(2);
+        se_UserShowScores( false );
+    }
 
     //gLogo::SetDisplayed(true);
 
@@ -2396,6 +2420,7 @@ void MainMenu(bool ingame){
     {
         delete auth;
     }
+#endif
 }
 
 
@@ -3385,9 +3410,9 @@ void gGame::Analysis(REAL time){
     int ai_alive=0;
     int human_teams=0;
     int teams_alive=0;
-    int last_alive=-1;
+    // int last_alive=-1;
     int last_team_alive=-1;
-    int last_alive_and_not_disconnected=-1;
+    // int last_alive_and_not_disconnected=-1;
     int humans = 0;
     int active_humans = 0;
     int ais    = 0;
@@ -3429,14 +3454,14 @@ void gGame::Analysis(REAL time){
                             alive++;
                             if (p->IsActive())
                             {
-                                last_alive_and_not_disconnected=i;
+                                // last_alive_and_not_disconnected=i;
                                 alive_and_not_disconnected++;
                             }
                         }
                         else
                             ai_alive++;
 
-                        last_alive=i;
+                        // last_alive=i;
                     }
                     else
                     {
@@ -3474,9 +3499,10 @@ void gGame::Analysis(REAL time){
         goon = false;
 #endif
 
-
+    /*
     if (last_alive_and_not_disconnected >= 0)
         last_alive = last_alive_and_not_disconnected;
+    */
 
     // kill all disconnected players if they are the only reason the round goes on:
     if ( alive_and_not_disconnected <= 1 && alive > alive_and_not_disconnected )
@@ -4613,6 +4639,9 @@ void sg_ClientFullscreenMessage( tOutput const & title, tOutput const & message,
     // put players into idle mode
     ePlayerNetID::SpectateAll();
     se_ChatState( ePlayerNetID::ChatFlags_Menu, true );
+
+    // remove scores
+    se_UserShowScores( false );
 
     // show message
     uMenu::Message( title, message, timeout );

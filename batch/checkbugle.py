@@ -1,7 +1,8 @@
 #!/usr/bin/python
 
-# checks bugle trace log for OpenGL problems
+"""checks bugle trace log for OpenGL problems"""
 
+from __future__ import print_function
 import sys
 
 count = 0
@@ -13,6 +14,10 @@ setLists = {}
 usedInList = {}
 usedInBlock = {}
 usedOutBlock = {}
+
+def error(error, lineNo, *args):
+    print("Error:", error.format(*args), lineNo, file=sys.stderr)
+    exit(-1)
 
 for line in sys.stdin:
     line=line[line.find('gl'):]
@@ -38,7 +43,7 @@ for line in sys.stdin:
     lineNo=lineNo+1
     
     if False and function.find( 'List' ) >= 0 and function.find( 'Call' ) < 0:
-        print "%d (%s) (%s) (%s) (%s)" % (count, line[:-1], function, args, result)
+        print(" ".join((count, line[:-1], function, args, result)))
 
         count = count + 1
         if count > 100:
@@ -46,12 +51,12 @@ for line in sys.stdin:
 
     if function == 'glBegin':
         if inBlock:
-            print "Error: Still in block.", lineNo
+            print("Error: Still in block.", lineNo)
             exit(-1)
         inBlock = True
     elif function == 'glEnd':
         if not inBlock:
-            print "Error: Not in block.", lineNo
+            print("Error: Not in block.", lineNo)
             exit(-1)
         inBlock = False
     else:
@@ -64,29 +69,24 @@ for line in sys.stdin:
     if function == 'glGenLists':
         legalLists[result] = True
         if inList:
-            print "Error: Still in list generation.", lineNo
-            exit(-1)
+            error("Still in list generation.", lineNo)
 
     if function == 'glEndList':
         if not inList:
-            print "Error: Not in list generation.", lineNo
-            exit(-1)
+            error("Not in list generation.", lineNo)
         if inBlockAtListStart != inBlock:
-            print "Error: glBegin/glEnd mismatch in list.", lineNo
-            exit(-1)
+            error("glBegin/glEnd mismatch in list.", lineNo)
         inList=False
 
     if function == 'glNewList':
         inBlockAtListStart=inBlock
-        list=args[0:args.find(',')]
-        currentList=list
+        l=args[0:args.find(',')]
+        currentList=l
         if inList:
-            print "Error: Still in list generation.", lineNo
-            exit(-1)
-        if not legalLists[list]:
-            print "Error: list %s used, but not generated." % [list], lineNo
-            exit(-1)
-        setLists[list]=True
+            error("Still in list generation.", lineNo)
+        if not legalLists[l]:
+            error("list {} used, but not generated.", lineNo, l)
+        setLists[l]=True
         inList=True
     elif inList:
         if not function in usedInList:
@@ -94,37 +94,33 @@ for line in sys.stdin:
             #print lineNo, function
         
     if function == 'glCallList':
-        list=args
-        if not legalLists[list]:
-            print "Error: list %s used, but not generated." % [list], lineNo
-            exit(-1)
-        if inList and currentList == list:
-            print "Error: list %s used, but it's just getting generated." % [list], lineNo
-            exit(-1)
-        if not setLists[list]:
-            print "Error: list %s used, but not set." % [list], lineNo
-            exit(-1)
+        l=args
+        if not legalLists[l]:
+            error("list {} used, but not generated.", lineNo, l)
+        if inList and currentList == l:
+            error("list {} used, but it's just getting generated.", lineNo, l)
+        if not setLists[l]:
+            error("list {} used, but not set.", lineNo, l)
 
     if function == 'glDeleteLists':
-        list=args[0:args.find(',')]
-        if not legalLists[list]:
-            print "Error: list %s used, but not generated." % [list], lineNo
-            exit(-1)
-        legalLists[list]=False
-        setLists[list]=False
+        l=args[0:args.find(',')]
+        if not legalLists[l]:
+            error("list {} used, but not generated.", lineNo, l)
+        legalLists[l]=False
+        setLists[l]=False
 
-print "Used in display lists:"
+print("Used in display lists:")
 for f in usedInList:
-    print f, usedInList[f]
+    print(f, usedInList[f])
 
-print
-print "Used in glBegin/End:"
+print()
+print("Used in glBegin/End:")
 for f in usedInBlock:
-    print f, usedInBlock[f]
+    print(f, usedInBlock[f])
 
-print
-print "Used outside glBegin/End:"
+print()
+print("Used outside glBegin/End:")
 for f in usedOutBlock:
-    print f, usedOutBlock[f]
+    print(f, usedOutBlock[f])
     
     

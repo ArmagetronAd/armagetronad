@@ -11,6 +11,10 @@
 // is now defined for code::blocks > 8 or so
 #define HAVE_ISBLANK
 
+// this one is included in winlibs as static library
+#define HAVE_LIBBOOST_THREAD
+#define BOOST_THREAD_USE_LIB
+
 // and disable warnings about those calls that can't be converted. We may want to look at
 // them later, though.
 #define _CRT_SECURE_NO_DEPRECATE 1
