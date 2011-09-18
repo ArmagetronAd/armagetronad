@@ -216,10 +216,20 @@ void eTeam::UpdateProperties()
         RequestSync();
 }
 
+static eLadderLogWriter se_teamRenamedWriter("TEAM_RENAMED", true);
+static eLadderLogWriter se_teamCreateWriter("TEAM_CREATED", true);
+static eLadderLogWriter se_teamDestroyWriter("TEAM_DESTROYED", true);
+static eLadderLogWriter se_teamAddWriter("TEAM_PLAYER_ADDED", true);
+static eLadderLogWriter se_teamRemoveWriter("TEAM_PLAYER_REMOVED", true);
+
 // update name and color
 void eTeam::UpdateAppearance()
 {
+    bool empty = false;
+
     unsigned short oldr = r, oldg = g, oldb = b;
+
+    tString oldName = name;
 
     ePlayerNetID* oldest = OldestHumanPlayer();
     if ( !oldest )
@@ -307,7 +317,30 @@ void eTeam::UpdateAppearance()
         // empty team
         name = tOutput("$team_empty");
         r = g = b = 7;
+        empty = true;
     }
+    
+    tString oldNameFiltered = ePlayerNetID::FilterName(oldName);
+    tString newNameFiltered = ePlayerNetID::FilterName(name);
+    if( oldNameFiltered != newNameFiltered )
+    {
+        if( !empty && !lastEmpty_ )
+        {
+            se_teamRenamedWriter << oldNameFiltered << newNameFiltered;
+            se_teamRenamedWriter.write();
+        }
+        else if( !empty )
+        {
+            se_teamCreateWriter << newNameFiltered;
+            se_teamCreateWriter.write();
+        }
+        else if( !lastEmpty_ )
+        {
+            se_teamDestroyWriter << oldNameFiltered;
+            se_teamDestroyWriter.write();
+        }
+    }
+    lastEmpty_ = empty;
 
     if ( nSERVER == sn_GetNetState() )
         RequestSync();
@@ -948,6 +981,10 @@ void eTeam::AddPlayer    ( ePlayerNetID* player )
         */
     }
 
+
+    se_teamAddWriter << ePlayerNetID::FilterName( name ) << player->GetLogName();
+    se_teamAddWriter.write();
+
     // anounce joining if there are is more than one member now or if the team is color-named
     if ( sn_GetNetState() != nCLIENT )
     {
@@ -1017,6 +1054,9 @@ void eTeam::AddPlayerDirty   ( ePlayerNetID* player )
     }
 
     player->UpdateName();
+
+    se_teamAddWriter << ePlayerNetID::FilterName( name ) << player->GetLogName();
+    se_teamAddWriter.write();
 }
 
 // deregister a player
@@ -1039,10 +1079,16 @@ void eTeam::RemovePlayerDirty ( ePlayerNetID* player )
     players.Remove ( player, player->teamListID );
     player->currentTeam = NULL;
 
+    se_teamRemoveWriter << ePlayerNetID::FilterName( name ) << player->GetLogName();
+    se_teamRemoveWriter.write();
+
     // remove team from list
     if ( listID >= 0 && players.Len() == 0 )
     {
         teams.Remove( this, listID );
+
+        // correctly log removal
+        UpdateAppearance();
 
         // don't forget the colored team list
         if ( colorID >= 0 )
@@ -1411,6 +1457,7 @@ eTeam::eTeam()
     maxPlayersLocal = maxPlayers;
     maxImbalanceLocal = maxImbalance;
     r = g = b = 32; // initialize color so it will be updated, guaranteed
+    lastEmpty_=true;
     Update();
 }
 
@@ -1426,12 +1473,16 @@ eTeam::eTeam(nMessage &m)
     maxPlayersLocal = maxPlayers;
     maxImbalanceLocal = maxImbalance;
     r = g = b = 32; // initialize color so it will be updated, guaranteed
+    lastEmpty_=true;
     Update();
 }
 
 // destructor
 eTeam::~eTeam()
 {
+    // one last time
+    UpdateAppearance();
+
     if ( listID >= 0 )
         teams.Remove( this, listID );
 

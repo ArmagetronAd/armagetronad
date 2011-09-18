@@ -21,6 +21,12 @@ Changes since 0.2.8.3.x:
 - Added ENCODING ladderlog event, which specifies the encoding for data in
   ladderlog.txt.
 - "--input" now can be used more than once to read from multiple files or pipes.
+- new team management ladderlog messages:
+  TEAM_CREATED <team name>
+  TEAM_DESTROYED <team name>
+  TEAM_RENAMED <old team name> <new team name>
+  TEAM_PLAYER_ADDED <team name> <player>
+  TEAM_PLAYER_REMOVED <team name> <player>
 
 Changes since 0.2.8.3.1:
 - security fix: old style action commands from clients no loger cause hangs and crashes
