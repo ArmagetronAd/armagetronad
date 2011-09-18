@@ -4986,6 +4986,8 @@ void ePlayerNetID::RemoveFromGame()
     // log scores
     LogScoreDifference();
 
+    bool logLeave = false;
+
     if ( sn_GetNetState() != nCLIENT )
     {
         nameFromClient_ = nameFromServer_;
@@ -5006,9 +5008,7 @@ void ePlayerNetID::RemoveFromGame()
 
             if ( IsHuman() && sn_GetNetState() == nSERVER && NULL != sn_Connections[Owner()].socket )
             {
-                tString ladder;
-                se_playerLeftWriter << userName_ << nMachine::GetMachine(Owner()).GetIP();
-                se_playerLeftWriter.write();
+                logLeave = true;
                 tString notificationMessage(userName_);
                 notificationMessage << " left the grid";
                 se_sendEventNotification(tString("Player left"), notificationMessage);
@@ -5025,7 +5025,12 @@ void ePlayerNetID::RemoveFromGame()
     SetTeam( NULL );
     UpdateTeam();
     ControlObject( NULL );
-    // currentTeam = NULL;
+
+    if( logLeave )
+    {
+        se_playerLeftWriter << userName_ << nMachine::GetMachine(Owner()).GetIP();
+        se_playerLeftWriter.write();
+    }
 }
 
 bool ePlayerNetID::ActionOnQuit()

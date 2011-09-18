@@ -4920,6 +4920,18 @@ void nMachine::Ban( REAL time )
     // set the banning timeout to the current time plus the given time
     banned_ = tSysTimeFloat() + time;
 
+    // kick current clients
+    if( time > 0 )
+    {
+        for( int i = MAXCLIENTS-1; i > 0; --i )
+        {
+            if ( sn_Connections[i].socket && &GetMachine(i) == this )
+            {
+                sn_DisconnectUser( i, banReason_ );
+            }
+        }
+    }
+
     if ( sn_printBans )
     {
         if ( time > 0 )
