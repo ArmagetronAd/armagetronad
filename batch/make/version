@@ -84,10 +84,10 @@ fi
 
 # *TODO* once we get our superproject up on launchpad (and thus get saner branch nicks), use branch nicks for $major_version
 # Check if bzr is installed, and if the path is versionned
-bzr >/dev/null 2>&1
+bzr info ${srcdir} >/dev/null 2>&1
 # But for now, ignore it
-#if test $? -eq 0
-if test 1 -eq 0
+if test $? -eq 0
+#if test 1 -eq 0
 then
     bzr diff ${srcdir} --quiet >/dev/null 2>&1
     # Test for the return code of bzr diff (see bzr diff --help)
