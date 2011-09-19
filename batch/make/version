@@ -66,19 +66,29 @@ if test -d "${srcdir}/.svn"; then
         minor_version=""
         DATE=""
     else
+        # make revision the alpha tag
+        REVISION=`svn info ${srcdir} | grep ^Revision | sed -e 's,^Revision: ,,'`
+
         # is it a branch?
         if echo $REPOPATH | grep '^branches/' > /dev/null; then
             # echo Branch
-            major_version=`echo $REPOPATH | sed -e 's,^branches/,,'`
+            branch=`echo $REPOPATH | sed -e 's,^branches/,,'`
+            # branch 0.2.8 produces 0.2.9 versions. Confusing, yeah, but moving it
+            # in the repo is too risky.
+            if test ${branch} = "0.2.8"; then
+                major_version=${branch}
+
+                # try to get revision ID from bzr using the magic bzr-svn marker
+                # (only works this way on 0.2.8)
+                REVISION=`svn propget bzr:revision-id:v3-list-QlpoOTFBWSZTWZvbKhsAAAdRgAAQABK6798QIABURMgAAaeoNT1TxT1DQbKaeobXKiyAmlWT7Y5MkdJOtXDtB7w7DOGFBHiOBxaUIu7HQyyQSvxdyRThQkJvbKhs ${srcdir} | tail -n 4 | sed -e 's, .*,,' | grep [0-9] | tail -n 1`
+            fi
         fi
         
         # trunk or branch
 
-        # make revision the alpha tag (activate later, not in 0.2.8 branch)
-        # REVISION=`svn info ${srcdir} | grep ^Revision | sed -e 's,^Revision: ,,'`
-        # echo REVISION=$REVISION
-        # minor_version=_alpha$REVISION
-        # DATE=""
+        #echo REVISION=$REVISION
+        minor_version=_alpha_r$REVISION
+        DATE=""
     fi
 fi
 
