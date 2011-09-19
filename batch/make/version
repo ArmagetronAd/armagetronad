@@ -89,13 +89,18 @@ bzr info ${srcdir} >/dev/null 2>&1
 if test $? -eq 0
 #if test 1 -eq 0
 then
+    offset=$(( 9953 + 1 - 1332 ))
+    revno=$(( ${offset} + $(bzr revno ${srcdir}) ))
+    
+    # the code above assumes bash==sh, so have easier fallback code that produces something here
+    test -z "${revno}" && revno=`bzr revno ${srcdir}`
+
     bzr diff ${srcdir} --quiet >/dev/null 2>&1
     # Test for the return code of bzr diff (see bzr diff --help)
     if test $? -eq 0
     then
-        # If no change was made, use revision number
+        # If no change was made, use revision number (with offset to match svn revno)
         # but first check if it's tagged
-        revno=$(bzr revno ${srcdir})
         tag=$(bzr tags | grep -P "^(.*?) +${revno}$" | awk '{ print $1 }')
         if test $tag
         then
@@ -103,12 +108,12 @@ then
             DATE=_$tag
         else
             # If not, use revision number
-            DATE=_r$(bzr revno ${srcdir})
+            DATE=_r${revno}
         fi
     elif test $? -lt 3
     then
         # If a change was made, use revision number plus build date
-        DATE=_r$(bzr revno ${srcdir})_$DATE
+        DATE=_r${revno}_$DATE
     # It returns 3 if it's not versionned, so forget it
     fi
 fi
