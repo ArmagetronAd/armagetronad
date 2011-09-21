@@ -11,6 +11,13 @@ ls *.pb.cc *.pb.h || wine ../../../winlibs/protobuf/bin/protoc *.proto --cpp_out
 popd
 
 pushd code_blocks
+
+# parallel build of server and client
+for p in Dedicated.cbp ArmagetronAd.cbp; do 
+    wine "${CODEBLOCKS}" /ns /nd $p --build --target="Win32 Release" &
+done
+wait
+
 # batch build sans master
 grep -v Master.cbp < ArmagetronAd.workspace > ArmagetronAdNoMaster.workspace
 wine "C:\Program Files\CodeBlocks\codeblocks.exe" /ns /nd ArmagetronAdNoMaster.workspace --build --target="Win32 Release" || exit 1
