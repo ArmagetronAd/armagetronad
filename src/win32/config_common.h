@@ -8,9 +8,6 @@
 // for visual studio 2005: use secure template overloads of strcopy and the like
 #define _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES 1
 
-// is now defined for code::blocks > 8 or so
-#define HAVE_ISBLANK
-
 // this one is included in winlibs as static library
 #define HAVE_LIBBOOST_THREAD
 #define BOOST_THREAD_USE_LIB
@@ -33,6 +30,11 @@
 
 // disable POD initialization behavior change warning in VisualC++ 2005
 #pragma warning ( disable: 4345 )
+
+// compatibility with later mingw versions
+#if defined(__GNUC__) && __GNUC__ >= 4
+#define HAVE_ISBLANK
+#endif
 
 // Define if this is a Windows OS.
 #ifndef WIN32
