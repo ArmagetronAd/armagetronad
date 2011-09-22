@@ -12,6 +12,8 @@ popd
 
 pushd code_blocks
 
+CODEBLOCKS="C:\Program Files\CodeBlocks\codeblocks.exe"
+
 # parallel build of server and client
 for p in Dedicated.cbp ArmagetronAd.cbp; do 
     wine "${CODEBLOCKS}" /ns /nd $p --build --target="Win32 Release" &
@@ -20,7 +22,7 @@ wait
 
 # batch build sans master
 grep -v Master.cbp < ArmagetronAd.workspace > ArmagetronAdNoMaster.workspace
-wine "C:\Program Files\CodeBlocks\codeblocks.exe" /ns /nd ArmagetronAdNoMaster.workspace --build --target="Win32 Release" || exit 1
+wine "${CODEBLOCKS}" /ns /nd ArmagetronAdNoMaster.workspace --build --target="Win32 Release" || exit 1
 popd
 wait
 
