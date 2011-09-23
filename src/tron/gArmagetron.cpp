@@ -904,7 +904,11 @@ int main(int argc,char **argv){
 
         //	tLocale::Clear();
     }
-    catch( tException const & e )
+    catch ( tCleanQuit const & e )
+    {
+        return 0;
+    }
+    catch ( tException const & e )
     {
         try
         {
