@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tConfiguration.h"
 #include "tException.h"
 #include <ctype.h>
+#include <time.h>
 #include <string>
 #include <iostream>
 #include "utf8.h"
@@ -93,8 +94,10 @@ static bool st_ReadEscapeSequence( char & c, std::istream & s )
 {
     char c2 = '\0';
     bool ret = st_ReadEscapeSequence( c, c2, s );
-    if ( c2 )
+    if ( c2 && s.good() )
+    {
         s.putback( c2 );
+    }
     return ret;
 }
 
@@ -149,7 +152,10 @@ std::istream & operator>> (std::istream &s,tString &x)
         // lastEscape = thisEscape;
     }
 
-    s.putback(c);
+    if(s.good())
+    {
+        s.putback(c);
+    }
     return s;
 }
 
@@ -359,7 +365,10 @@ void tString::ReadLine( std::istream & s, bool enableEscapeSequences, int indent
         *eatenWhitespace = whitespace;
     }
 
-    s.putback(c);
+    if(s.good())
+    {
+        s.putback(c);
+    }
     c='x';
 
     while( true )
@@ -1540,7 +1549,7 @@ tString tColoredString::RemoveColors( const char * c, bool darkonly )
     tString ret;
     int len = strlen(c);
     bool removed = false;
-    
+
     // walk through string
     while (*c!='\0'){
         // skip color codes
@@ -1555,7 +1564,7 @@ tString tColoredString::RemoveColors( const char * c, bool darkonly )
                     removed = true;
 
                 c   += 8;
-                len -= 8;	
+                len -= 8;
             }
             else if( len >= 8 )
             {
@@ -2433,7 +2442,7 @@ void tCharacterFilter::SetMap( wchar_t in1, wchar_t in2, wchar_t out)
     {
         filter[ i ] = '_';
     }
-    
+
     tASSERT( in1 <= in2 );
     for( wchar_t i = in2; i >= in1; --i )
         filter[ i ] = out;

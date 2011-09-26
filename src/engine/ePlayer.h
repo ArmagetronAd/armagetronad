@@ -135,7 +135,7 @@ public:
 
     virtual bool Act(uAction *act,REAL x);
 
-    int ID() const {return id;};
+    int ID() const {return id;}
 #ifndef DEDICATED
     void Render();
 #endif
@@ -167,6 +167,60 @@ public:
 
 private:
     tAccessLevel     accessLevel;    //!< admin access level of the current user
+};
+
+//! detector for turn timing assist bots
+class eUncannyTimingDetector
+{
+public:
+    //! settings for a single analyzer
+    struct eUncannyTimingSettings
+    {
+        REAL timescale; //!< the timescale. Events are divided in two buckets, one between 0 and timescale/2, the other from timescale/2 to timescale.
+        REAL maxGoodRatio; //!< the maximal allowed recent ratio of events to land in the 'good' bucket
+        REAL goodHumanRatio; //!< the maximal observed ratio for a human
+        int  averageOverEvents; //!< number of events to average over
+        
+        mutable REAL bestRatio; //!< best ratio achieved by players during this session
+
+        eUncannyTimingSettings( REAL ts, REAL human, REAL max )
+        : timescale( ts ), maxGoodRatio( max ), goodHumanRatio(human), averageOverEvents(40)
+        , bestRatio(0)
+        {}
+
+        ~eUncannyTimingSettings();
+    };
+
+    //! single analyzer with single timescale
+    class eUncannyTimingAnalysis
+    {
+    public:
+        //! analyze a single timing event
+        REAL Analyze( REAL timing, eUncannyTimingSettings const & settings );
+        eUncannyTimingAnalysis();
+    private:
+        REAL accurateRatio; //!< ratio of events in the more accurate half
+        int turnsSoFar;     //!< number of turns accounted for so far
+    };
+
+    //! detection level of timing aid hacks
+    enum DangerLevel
+    {
+        DangerLevel_Low,    //!< about 25% of the tolerance reached
+        DangerLevel_Medium, //!< about 50% of the tolerance reached
+        DangerLevel_High,   //!< about 75% of the tolerance reached
+        DangerLevel_Max     //!< 100% of the tolerance reached, worst action triggered
+    };
+
+    eUncannyTimingDetector();
+
+    //! analzye a timing event
+    void Analyze( REAL timing, ePlayerNetID * player );
+private:
+    //! three analyzers for varying timescales
+    eUncannyTimingAnalysis fast, medium, slow;
+
+    DangerLevel dangerLevel;
 };
 
 // the class that identifies players across the network
@@ -217,6 +271,8 @@ private:
     //For improved remoteadmin
     tAccessLevel     lastAccessLevel;//!< access level at the time of the last name update
 
+    eUncannyTimingDetector uncannyTimingDetector_; //!< detector for timingbots
+
     nMachine *      registeredMachine_; //!< the machine the player is registered with
     void RegisterWithMachine();         //!< registers with a machine
     void UnregisterWithMachine();       //!< un registers with a machine
@@ -226,7 +282,7 @@ public:
         ChatFlags_Chat = 1,
         ChatFlags_Away = 2,
         ChatFlags_Menu = 4,
-        ChatFlags_Console = 4
+        ChatFlags_Console = 8
     };
 
     int    pID;
@@ -246,10 +302,9 @@ public:
 
     bool renameAllowed_;     //!< specifies if the player is allowed to rename or not, does not know about votes.
 
-    nSpamProtection chatSpam_;
-    
-    eChatLastSaid lastSaid_; //!< last said information
-    eShuffleSpamTester shuffleSpam;
+    nSpamProtection & GetChatSpam();       //!< chat volume spam
+    eChatLastSaid & GetLastSaid();         //!< last said information
+    eShuffleSpamTester & GetShuffleSpam(); //!< shuffle message spam
 
     ePlayerNetID(int p=-1);
     virtual ~ePlayerNetID();
@@ -273,8 +328,9 @@ public:
     eTeam* NextTeam()    const { return nextTeam; }		// return the team I will be next round
     eTeam* CurrentTeam() const { return currentTeam; }	// return the team I am in
     int  TeamListID() const { return teamListID; }		// return my position in the team
+    void SetShuffleWish( int pos ); 	        //!< sets a desired team position
     eTeam* FindDefaultTeam();					// find a good default team for us
-    void SetDefaultTeam();						// register me in a good default team
+    void SetDefaultTeam( bool isScrambleCommand=false );    // register me in a good default team
     void SetTeamForce(eTeam* team );           	// register me in the given team without checks
     void SetTeam(eTeam* team);          		// register me in the given team (callable on the server)
     void SetTeamWish(eTeam* team); 				// express the wish to be part of the given team (always callable)
@@ -310,6 +366,9 @@ public:
     //! returns the descriptor responsible for this class
     virtual nNetObjectDescriptorBase const & DoGetDescriptor() const;
 public:
+
+    static bool Scramble;                   // Should we scramble the teams?
+    static std::vector<ePlayerNetID*> ScramblePlayerIDs; // List of all the players to be scrambled
 
     virtual void 			NewObject(){}        				// called when we control a new object
     virtual void 			RightBeforeDeath(int triesLeft){} 	// is called right before the vehicle gets destroyed.
@@ -364,6 +423,8 @@ public:
     static void UpdateShuffleSpamTesters();    //<! Reset shuffle spam checks
     void LogScoreDifference();           //<! Logs accumulated scores since the last call to ResetScoreDifferences() to ladderlog.txt
 
+    void AnalyzeTiming( REAL timing );   //<! analzye a timing event for timebot detection
+
     static void SortByScore(); // brings the players into the right order
     static tString Ranking( int MAX=12, bool cut = true );     // returns a ranking list
 
@@ -388,6 +449,8 @@ public:
     static bool WaitToLeaveChat(); //!< waits for players to leave chat state. Returns true if the caller should wait to proceed with whatever he wants to do.
 
     static void RemoveChatbots(); //!< removes chatbots and idling players from the game
+    static void SetScramble(); //!< Scramble the teams the next round
+    static void ScrambleTeams(); //!< scramble the teams
 
     static void CompleteRebuild(); // same as above, but rebuilds every ePlayerNetID.
     static void ClearAll(); // deletes all ePlayerNetIDs.

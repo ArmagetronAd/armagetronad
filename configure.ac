@@ -230,11 +230,6 @@ AC_ARG_ENABLE(automakedefaults,
 		[enforce the default installation directories as set by automake. localstatedir=prefix/var violates the FHS, so this is off by default.]),,
 enable_automakedefaults=no enable_automakedefaults_default=yes)
 
-AC_ARG_ENABLE(dirty,
-	AC_HELP_STRING([--enable-dirty],
-		[allow dirty GL initialisation (like used with SDL 1.0) even if you have SDL 1.1 or up (default=disabled)]),,
-enable_dirty=no)
-
 AC_ARG_ENABLE(sysinstall,
 	AC_HELP_STRING([--enable-sysinstall],
 		[will install configuration files to /etc/armagetron and create a user if possible (default=enabled)]),,
@@ -392,9 +387,15 @@ if test $CODELEVEL -ge 1; then
 fi
 
 dnl test $CODELEVEL -ge 2 && CXXFLAGS="$CXXFLAGS -Wshadow -Wpointer-arith -Wfloat-equal -W -Wcast-qual -Wcast-align -Wconversion -Wunreachable-code --pedantic -Winline"
-test $CODELEVEL -ge 2 && CXXFLAGS="$CXXFLAGS -Wpointer-arith -W -Wcast-qual -Wcast-align --pedantic -Wno-unused-parameter"
+test $CODELEVEL -ge 2 && CXXFLAGS="$CXXFLAGS -Wpointer-arith -W -Wcast-qual -Wcast-align --pedantic -Wno-unused-parameter -Wno-long-long"
 test $CODELEVEL -ge 3 && CXXFLAGS="$CXXFLAGS -Weffc++ -Wshadow -Winline -Wfloat-equal -Wconversion"
 test $CODELEVEL -ge 4 && CXXFLAGS="$CXXFLAGS -Werror"
+
+# unused variables should be tolerated while debugging, they're sometimes just there
+# to be printed in the debugger
+if test $CODELEVEL -ge 1 && test $DEBUGLEVEL -ge 1; then
+    AX_CXXFLAGS_GCC_OPTION(-Wno-unused-but-set-variable)
+fi
 
 dnl determine whether "games" should be put into paths: not if it was
 dnl requested with --disable-games or if "games" is already included
@@ -650,7 +651,7 @@ AC_CHECK_LIB(xml2,xmlParseMemory,
 CPPFLAGS="$CPPFLAGS `$XML2_CONFIG --cflags`"
 LIBS="`$XML2_CONFIG --libs` $LIBS"
 AC_DEFINE(HAVE_LIBXML2, 1, [Define if you have the xml2 library (-lxml2).]),
-AC_MSG_ERROR([You need the library xml2 to compile ${progtitle}. Read the file doc/install_linux.html.])
+AC_MSG_ERROR([You need the library xml2 to compile ${progtitle}. Read the file doc/installation.txt.])
 ,`$XML2_CONFIG --libs`)
 
 AC_CHECK_FUNC(xmlParserInputBufferCreateFilenameDefault,
@@ -671,32 +672,31 @@ if test x$enable_armathentication = xyes; then
 
 AC_LANG([C++])
 
+AC_CHECK_LIB([boost_thread],_ZNK5boost6thread6get_idEv,,[
+
 ACX_PTHREAD([
 
 LIBS="${PTHREAD_LIBS} ${LIBS}"
 CXXFLAGS="${CXXFLAGS} ${PTHREAD_CFLAGS}"
 CC="${PTHREAD_CC}"
-dnl AC_DEFINE(HAVE_PTHREAD,1,[Define if you have POSIX threads libraries and header files.])
+AC_DEFINE(HAVE_PTHREAD,1,[Define if you have POSIX threads libraries and header files.])
 
-],[
-
-AM_PATH_ZTHREAD_AA(2.3.2)
-CXXFLAGS="${CXXFLAGS} ${ZTHREAD_CXXFLAGS}"
-LIBS="${LIBS} ${ZTHREAD_LIBS}"
+],)
 
 ])
 
-fi # krawall
+
+fi # armathentication
 
 
 dnl *************************************************
-dnl         pattern buffers
+dnl         protocol buffers
 dnl *************************************************
 
 dnl check for compiler
-AC_CHECK_PROG([PROTOC],protoc,protoc,no)
+AC_CHECK_PROG([PROTOC],protoc,`which protoc`,no)
 
-AC_LANG([C])
+AC_LANG([C++])
 
 dnl check for library
 AC_CHECK_LIB([protobuf],_ZN6google8protobuf7MessageD2Ev,,
@@ -722,6 +722,14 @@ AC_MSG_ERROR([[The library protobuf (Google Protocol Buffers, http://code.google
 dnl AC_LANG([C])
 
 fi # armamain
+
+dnl *************************************************
+dnl         timer
+dnl *************************************************
+
+dnl just do the checks here, the logic for evaluating it can go into tSysTime.cpp.
+AC_CHECK_HEADERS([time.h])
+AC_CHECK_LIB([rt],[clock_gettime])
 
 dnl *************************************************
 dnl         math
@@ -757,13 +765,6 @@ dnl ****************************************************
  AC_SUBST(needdata)
 else
 
-
-if test x$enable_dirty = xyes; then
-  AC_DEFINE(DIRTY,,[Define if you wish to use the old and dirty OpenGL
-  initialization method])
-fi
-
-
 dnl *************************************************
 dnl         SDL
 dnl *************************************************
@@ -778,9 +779,9 @@ fi
 CPPFLAGS="$CPPFLAGS `${SDL_CONFIG} --cflags`"
 LIBS="${SDLLIBS} $LIBS"
 
-AC_CHECK_FUNC(SDL_Init,
+AC_CHECK_FUNC(SDL_GL_SetAttribute,
 AC_DEFINE(HAVE_LIBSDL,,[Define if you have the library SDL]),
-AC_MSG_ERROR([You need the library SDL to compile ${progtitle}. Read the file doc/install_linux.html.])
+ AC_MSG_ERROR([You need the library SDL to compile ${progtitle}. Read the file doc/installation.txt.])
 ,)
 
 dnl ***************** OPTIONAL STUFF AFTER THIS POINT **********************
@@ -845,7 +846,7 @@ AC_CHECK_LIB($SYS_GL_LIB, glVertex3f,,
 AC_CHECK_LIB($SYS_GL_LIB, glBegin,,AC_MSG_ERROR([
   You need Mesa or an OpenGL-System to compile ${progtitle}.
   Maybe your libGL needs the X libraries and your system does not
-  find them? Read the file doc/install_linux.html.]),-L/usr/X11R6/lib)
+  find them? Read the file doc/installation.txt.]),-L/usr/X11R6/lib)
 )
 
 dnl check for 3DFX-MESA
@@ -864,7 +865,7 @@ dnl AC_CHECK_LIB($SYS_GLU_LIB, gluBuild2DMipmaps,,
 AC_CHECK_LIB($SYS_GLU_LIB, gluBuild3DMipmaps,,
 AC_MSG_ERROR([
 You need GLU to compile ${progtitle}; it SHOULD have come with OpenGL.
-Read the file doc/install_linux.html.]))
+Read the file doc/installation.txt.]))
 
 dnl *************************************************
 dnl         GLEW
@@ -895,7 +896,7 @@ test -z "$FREETYPE_CONFIG" && FREETYPE_CONFIG=freetype-config
 FTGL_CFLAGS="`pkg-config ftgl --cflags`"
 FTGL_LIBS="`pkg-config ftgl --libs`"
 
-FTGL_ERROR="You need the library ftgl in at least version 2.1.3~rc5 to compile Armagetron. Read the file doc/install_linux.html."
+FTGL_ERROR="You need the library ftgl in at least version 2.1.3~rc5 to compile Armagetron. Read the file doc/installation.txt."
 
 AC_CHECK_LIB(ftgl,ftglRenderGlyph,
 CPPFLAGS="$CPPFLAGS $FTGL_CFLAGS"
@@ -951,7 +952,7 @@ AC_CHECK_LIB(freetype,FT_Init_FreeType,
 CPPFLAGS="$CPPFLAGS `$FREETYPE_CONFIG --cflags`"
 LIBS="$LIBS `$FREETYPE_CONFIG --libs`"
 ,
-AC_MSG_ERROR([You need the library freetype to compile Armagetron. Read the file doc/install_linux.html.])
+AC_MSG_ERROR([You need the library freetype to compile Armagetron. Read the file doc/installation.txt.])
 )
 
 dnl FTGL again. Check for the headers. First, try the individual header.
@@ -978,8 +979,8 @@ dnl AC_MSG_WARN([C++ standard library not found. You can ignore this warning on 
 
 AC_LANG([C])
 
-AC_CHECK_LIB(z, gzread,,
-AC_MSG_ERROR([You need libz to compile ${progtitle}.]))
+dnl AC_CHECK_LIB(z, gzread,,
+dnl AC_MSG_ERROR([You need libz to compile ${progtitle}.]))
 
 AC_MSG_CHECKING(whether libpng is installed)
 if PNGLIBS=`libpng-config --libs`; then
@@ -993,11 +994,11 @@ AC_CHECK_FUNC(png_sig_cmp,
 ,
 AC_MSG_ERROR([You need libpng to compile ${progtitle}.]))
 
-AC_CHECK_LIB(jpeg, jpeg_read_header,,
-	AC_MSG_WARN([
-	libjpeg not found. Expect small graphical errors ( missing moviepack title screen ).]
-	)
-)
+dnl AC_CHECK_LIB(jpeg, jpeg_read_header,,
+dnl	AC_MSG_WARN([
+dnl	libjpeg not found. Expect small graphical errors ( missing moviepack title screen ).]
+dnl	)
+dnl )
 
 AC_CHECK_LIB(SDL_image, IMG_Load,,
 dnl AC_CHECK_LIB(IMG, main,,
@@ -1291,7 +1292,6 @@ if test "x$enable_ruby" = "xyes"; then
 echo "         Ruby include dir: $ruby_include_dir"
 echo "         Ruby lib dir: $ruby_lib_dir"
 fi
-echo "     Use dirty SDL initialization: $enable_dirty"
 echo "     Call sysinstall: $enable_sysinstall"
 if test "$enable_uninstall" = "yes" &&
    test "$external_uninstall_cmd" != ""; then

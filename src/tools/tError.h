@@ -45,7 +45,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #ifdef DEBUG
 
-typedef enum {high=0,normal,low,very_low} tLevel;
+typedef enum {tLevel_high=0,tLevel_normal,tLevel_low,tLevel_very_low} tLevel;
 typedef enum {flow=0,dump}                tChannel;
 
 extern tLevel st_debugLevel[2];
@@ -58,11 +58,11 @@ void st_NotImplemented( char const * function );
 
 #define tERR_DUMP(level,stream,stuff) if(st_debugValid(level,stream))  std::cout <<  setw(28) << __FUNCTION__  << " : " << stuff << '\n'
 
-#define tERR_FLOW() if(st_debugValid(low,flow)) std::cout  <<  std::setw(30) << __PRETTY_FUNCTION__  << '\n'
+#define tERR_FLOW() if(st_debugValid(tLevel_low,flow)) std::cout  <<  std::setw(30) << __PRETTY_FUNCTION__  << '\n'
 
-#define tERR_FLOW_HIGH() if(st_debugValid(normal,flow)) std::cout  <<  std::setw(30)  << __PRETTY_FUNCTION__  << '\n'
+#define tERR_FLOW_HIGH() if(st_debugValid(tLevel_normal,flow)) std::cout  <<  std::setw(30)  << __PRETTY_FUNCTION__  << '\n'
 
-#define tERR_FLOW_LOW() if(st_debugValid(very_low,flow)) std::cout  <<  std::setw(30) << __PRETTY_FUNCTION__  << '\n'
+#define tERR_FLOW_LOW() if(st_debugValid(tLevel_very_low,flow)) std::cout  <<  std::setw(30) << __PRETTY_FUNCTION__  << '\n'
 
 #define tASSERT( x ) { if ( !( x ) ){ char const * mess = "Assertion " #x " failed";  tERR_ERROR_INT( mess ); } }
 

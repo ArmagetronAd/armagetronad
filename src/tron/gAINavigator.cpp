@@ -137,7 +137,7 @@ bool gAINavigator::Sensor::DoExtraDetectionStuff()
         // don't see new walls
         if ( hitTime_ > hitOwner_->LastTime() - ai_.settings_.newWallBlindness && hitOwner_ != owned )
         {
-            ehit = false;
+            ehit = NULL;
             hit = 1.01;
             return false;
         }

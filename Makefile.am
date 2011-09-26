@@ -16,7 +16,7 @@ include $(top_srcdir)/Makefile.manual
 EXTRA_DIST = README-DEVELOPER README-Subversion README-SDL \
 armagetron.kdevelop armagetron.kdevelop.pcs armagetron.kdevses tron.ico \
 models sound textures bootstrap.sh music accustomdir.m4 fingerprint \
-win32
+win32 major_version
 # language/update.py
 
 # resource is included as a subdir for the purpose of keeping this makefile short and delegating
@@ -33,7 +33,7 @@ masterUninstallTasks=echo 'No tasks for the master server'
 endif
 
 languagedata=language/english_base.txt language/english_base_notranslate.txt language/american.txt language/british.txt\
-             language/deutsch.txt language/french.txt language/spanish.txt language/polish.txt
+             language/deutsch.txt language/french.txt language/spanish.txt language/polish.txt language/russian.txt
 
 nobase_dist_language_DATA=language/languages.txt.in $(languagedata) language/update.py
 
@@ -49,7 +49,8 @@ nobase_texture_DATA=textures/cycle_body.png textures/cycle_wheel.png textures/di
 
 nobase_sound_DATA=sound/1voicemale.ogg  sound/announcerGO.ogg  sound/expl.ogg\
 	sound/2voicemale.ogg  sound/cycle_turn.ogg   sound/grind.ogg\
-	sound/3voicemale.ogg  sound/cyclrun.ogg      sound/zone_spawn.ogg
+	sound/3voicemale.ogg  sound/cyclrun.ogg      sound/zone_spawn.ogg\
+    sound/cyclrun.wav
 
 nobase_music_DATA=music/titletrack.ogg  music/when.ogg music/doIknowyou.ogg\
 	music/fortresswalk.ogg music/default.m3u music/fortresswalk.aatrack
@@ -101,6 +102,10 @@ dist-hook:
 
 #   fix internal version info
 	mv $(distdir)/src/tTrueVersion.h $(distdir)/src/tFakeVersion.h
+
+#   generate yaml version info
+	echo "---" > $(distdir)/version.yaml
+	sed -e 's,^.*TRUE_ARMAGETRONAD_,,' -e 's, \+,: ,' -e 's, *\([0-9a-Z]\+\)$$, "\1",' < $(distdir)/src/tFakeVersion.h >> $(distdir)/version.yaml
 
 if USE_UNINSTALL
 

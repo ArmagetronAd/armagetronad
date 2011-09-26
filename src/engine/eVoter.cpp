@@ -116,6 +116,10 @@ static tSettingItem< int > se_vbInclude( "VOTING_BIAS_INCLUDE", se_votingBiasInc
 static int se_votingBiasCommand = 0;
 static tSettingItem< int > se_vbCommand( "VOTING_BIAS_COMMAND", se_votingBiasCommand );
 
+// the number set here always acts as additional votes against a command vote.
+static int se_votingBiasScramble = 0;
+static tSettingItem< int > se_vbScramble( "VOTING_BIAS_SCRAMBLE", se_votingBiasScramble );
+
 // voting privacy level. -2 means total disclosure, +2 total secrecy.
 static int se_votingPrivacy = 1;
 static tSettingItem< int > se_vp( "VOTING_PRIVACY", se_votingPrivacy );
@@ -150,6 +154,11 @@ static tAccessLevelSetter se_accessLevelVoteKickSILevel( se_accessLevelVoteKickS
 static tAccessLevel se_accessLevelVoteSuspend = tAccessLevel_Program;
 static tSettingItem< tAccessLevel > se_accessLevelVoteSuspendSI( "ACCESS_LEVEL_VOTE_SUSPEND", se_accessLevelVoteSuspend );
 static tAccessLevelSetter se_accessLevelVoteSuspendSILevel( se_accessLevelVoteSuspendSI, tAccessLevel_Owner );
+
+// minimal access level for scramble votes
+static tAccessLevel se_accessLevelVoteScramble = tAccessLevel_DefaultAuthenticated;
+static tSettingItem< tAccessLevel > se_accessLevelVoteScrambleSI( "ACCESS_LEVEL_VOTE_SCRAMBLE", se_accessLevelVoteScramble );
+static tAccessLevelSetter se_accessLevelVoteScrambleSILevel( se_accessLevelVoteScrambleSI, tAccessLevel_Owner );
 
 // minimal access level for referee votes
 static tAccessLevel se_accessLevelVoteReferee = tAccessLevel_Moderator;
@@ -230,7 +239,7 @@ public:
     eVoteItem( void ): creationTime_( tSysTimeFloat() ), user_( 0 ), id_( ++se_votingItemID ), menuItem_( 0 ), total_( 0 )
     {
         items_.Add( this );
-    };
+    }
 
     virtual ~eVoteItem( void );
 
@@ -324,7 +333,7 @@ public:
         con << tOutput( "$vote_new", GetDescription() );
 
         this->Evaluate();
-    };
+    }
 
     virtual nMessageBase * CreateMessage( void ) const = 0 ;
 
@@ -672,7 +681,7 @@ protected:
         }
 
         return true;
-    };
+    }
 
     virtual bool DoCheckValid( int senderID ){ return true; }
 
@@ -683,7 +692,7 @@ protected:
             // write our message ID
             item.set_vote_id( id_ );
         }
-    };
+    }
 
 protected:
     virtual tString DoGetDetails() const 		    // returns the detailed description of the voting item
@@ -936,7 +945,7 @@ public:
         description_ = item.properties().description();
         details_     = item.properties().details();
         return eVoteItem::DoFillFromMessage( item.base(), sender );
-    };
+    }
 
     void DoFillToMessage( Engine::VoteItemServerControlled & item ) const
     {
@@ -944,7 +953,7 @@ public:
         item.mutable_properties()->set_details( details_ );
 
         eVoteItem::DoFillToMessage( *item.mutable_base() );
-    };
+    }
 
     virtual nMessageBase * CreateMessage() const
     {
@@ -954,7 +963,7 @@ public:
         return m;
     }
 
-    virtual void DoExecute(){};						// called when the voting was successful
+    virtual void DoExecute(){}						// called when the voting was successful
 protected:
     virtual void Evaluate()
     {
@@ -1120,7 +1129,7 @@ protected:
     virtual nMessageBase * CreateMessageLegacy() const
     {
         return eVoteItemHarm::CreateMessage();
-    };
+    }
 
     virtual nMessageBase * CreateMessage( void ) const
     {
@@ -1188,14 +1197,14 @@ protected:
         }
 
         return eVoteItem::DoCheckValid( senderID );
-    };
+    }
 
     void DoFillToMessage( Engine::VoteItemHarm & harm ) const
     {
         harm.set_player_id( nNetObject::PointerToID( player_ ) );
 
         eVoteItem::DoFillToMessage( *harm.mutable_base() );
-    };
+    }
 
 protected:
     // get the language string prefix
@@ -1292,7 +1301,7 @@ protected:
         }
 
         return eVoteItemHarm::DoCheckValid( senderID );
-    };
+    }
 
     virtual void DoExecute()						// called when the voting was successful
     {
@@ -1355,7 +1364,7 @@ protected:
         Update();
 
         return ret;
-    };
+    }
 
     void DoFillToMessage( Engine::VoteItemHarm & harm ) const
     {
@@ -1363,7 +1372,7 @@ protected:
         tASSERT( sn_GetNetState() != nCLIENT );
 
         eVoteItemHarm::DoFillToMessage( harm );
-    };
+    }
 private:
     virtual void Update() //!< update description and details
     {
@@ -1465,7 +1474,7 @@ protected:
 
         // no transformation needed or transformation failed. Proceed as usual.
         return eVoteItemHarm::DoCheckValid( senderID );
-    };
+    }
 
     virtual void DoExecute()						// called when the voting was successful
     {
@@ -1675,7 +1684,7 @@ protected:
         return se_votingBiasCommand;
     }
 
-    virtual void DoExecute()						// called when the voting was successful
+    virtual void DoExecute()                        // called when the voting was successful
     {
         // set the access level for the following operation
         tCurrentAccessLevel accessLevel( level_, true );
@@ -1689,6 +1698,40 @@ protected:
 
     tString command_;    //!< the command to execute
     tAccessLevel level_; //!< the level to execute the file with
+};
+
+// scramble vote items
+class eVoteItemScramble: public eVoteItemServerControlled
+{
+public:
+    // constructors/destructor
+    eVoteItemScramble()
+    : eVoteItemServerControlled()
+    {
+        description_ = tOutput( "$vote_scramble_text" );
+        details_ = tOutput( "$vote_scramble_details_text" );
+
+    }
+
+    ~eVoteItemScramble()
+    {}
+protected:
+    // access level required for this kind of vote
+    virtual tAccessLevel DoGetAccessLevel() const
+    {
+        return se_accessLevelVoteScramble;
+    }
+
+    // return vote-specific extra bias
+    virtual int DoGetExtraBias() const
+    {
+        return se_votingBiasScramble;
+    }
+
+    virtual void DoExecute()                        // called when the voting was successful
+    {
+        ePlayerNetID::SetScramble();
+    }
 };
 
 class eVoteItemReferee: public eVoteItemHarmServerControlled
@@ -2305,6 +2348,10 @@ void eVoter::HandleChat( ePlayerNetID * p, std::istream & message ) //!< handles
             item = tNEW( eVoteItemCancelReferee )( toDemoteReferee );
         }
     }
+    else if ( command == "scramble" )
+    {
+        item = tNEW ( eVoteItemScramble );
+    }
     else if ( command == "command" )
     {
         tString console;
@@ -2319,7 +2366,7 @@ void eVoter::HandleChat( ePlayerNetID * p, std::istream & message ) //!< handles
     else
     {
 #if defined(DEDICATED) && defined(KRAWALL_SERVER)
-        sn_ConsoleOut( tOutput("$vote_unknown_command", command, "command, demotereferee, include, kick, referee, suspend" ), p->Owner() );
+        sn_ConsoleOut( tOutput("$vote_unknown_command", command, "command, demotereferee, include, kick, referee, suspend, scramble" ), p->Owner() );
 #else
         sn_ConsoleOut( tOutput("$vote_unknown_command", command, "kick, suspend" ), p->Owner() );
 #endif

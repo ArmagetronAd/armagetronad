@@ -26,6 +26,9 @@ file by guru3/tank program
 
 */
 
+#ifndef ArmageTron_GSTATISTICS_H
+#define ArmageTron_GSTATISTICS_H
+
 #include "gStatList.h"
 #include "tString.h"
 #include "tList.h"
@@ -47,3 +50,6 @@ private:
 
 extern gStatistics* gStats;
 //extern static int statOutputType;
+
+#endif
+

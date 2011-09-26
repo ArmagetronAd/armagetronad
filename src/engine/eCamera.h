@@ -111,6 +111,7 @@ protected:
 
     eGlanceRequest* activeGlanceRequest;
     eGlanceRequest glanceRequests[se_glances];
+    eGlanceRequest* returnGlanceRequest; // request for returning back from glance
 
     bool renderingMain_;	// flag indicating whether the current rendering process is the main process or just a mirror effect
 
@@ -200,9 +201,9 @@ public:
 
 #ifndef DEDICATED
     void Render();
-    //void SoundMix(unsigned char *dest,unsigned int len);
+    void SoundMix(unsigned char *dest,unsigned int len);
 private:
-    //void SoundMixGameObject(unsigned char *dest,unsigned int len,eGameObject *go);
+    void SoundMixGameObject(unsigned char *dest,unsigned int len,eGameObject *go);
 public:
 #endif
 

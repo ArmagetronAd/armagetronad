@@ -1,5 +1,6 @@
 Changes since 0.3.1
 ===================
+- New Low Latency or High Throughput optimizing swap/sync system.
 - Switched to utf-8 encoded strings internally and for config files.
   Language files can be either utf-8 or latin-1.
 - New command: “TOGGLE”. Cycle between 0 and 1 for a boolean config item.
@@ -9,10 +10,16 @@ Changes since 0.3.1
   is displayed.
 - New console commands OP and DEOP replicate the functionnality of chat commands /op and /deop
 - New vote: /callvote referee <player>: Elevates <player> to access level 6. /callvote demotereferee reverts.
+- Config and map rotation can be manually reset with the command
+  “RESET_ROTATION”. Rotation can automatically be reset when a START_NEW_MATCH
+  command is issued by enabling “RESET_ROTATION_ON_START_NEW_MATCH”.
+- New admin command: "SCRAMBLE". Scrambles/randomises which players are in which team.
+- New vote: /callvote scramble: Executes the SCRAMBLE command.
 
 Changes since 0.3.0
 ===================
 
+- FULL_REDIRECT_SERVER/PORT: redirection target used when the server is full.
 - The chat and console history are now remembered between restarts of arma
 - Added an incremental reverse search for the console and chat history:
   In chat or console mode press CTRL-R and start entering your search term.
@@ -94,8 +101,60 @@ Changes since 0.2.8
 - Added support for armagetronad URLs on Mac OS X and KDE -- armagetronad://<server>[:<port>]. port defaults to 4534.
 - New command-line flag: --connect <server>[:<port>]. Startup the game and connect directly to <server>.
 
+Changes since 0.2.8.3.x:
+==========================
+- Added detection and reaction code for timing assist bots
+- /shuffle now works before you actually join a team
+- Implemented /shout command and associated settings
+- Tweaks to enemy influence system.
+- Ingame menu and console now are drawn on top of a semi-transparent,
+  darkened area for increased readability.
+- New first start menu with clearer language selection and initial setup.
+- Tutorial match against one AI at slower speed.
+- Tutorial tooltips for the most important keybindings.
+- ADD_MASTER_SERVER command to announce a server to a new master server.
+  Simplifies the process to list your server on a subculture.
+- Team launch positions logged to ladderlog with POSITIONS event. Disabled by
+  default.
+- New command-line option "--input" added to poll for input from a file
+  instead of stdin.
+- Added WHITELIST_ENEMIES_[IP/USERNAME] to allow players to be enemies, even
+  if they come from the same IP address and ALLOW_ENEMIES_SAME_IP is
+  disabled (which is its default setting).
+- GAME_END, NEW_MATCH, and NEW_ROUND ladderlog events include date and time.
+- Added ENCODING ladderlog event, which specifies the encoding for data in
+  ladderlog.txt.
+- "--input" now can be used more than once to read from multiple files or pipes.
+- new team management ladderlog messages:
+  TEAM_CREATED <team name>
+  TEAM_DESTROYED <team name>
+  TEAM_RENAMED <old team name> <new team name>
+  TEAM_PLAYER_ADDED <team name> <player>
+  TEAM_PLAYER_REMOVED <team name> <player>
+
+Changes since 0.2.8.3.1:
+- security fix: old style action commands from clients no loger cause hangs and crashes
+- security fix: oversized packets are ignored properly
+- security fix: never read one byte outside of the received buffer
+- security fix: only include .cfg files from the var subfolder
+- compiler compatibility: adapted to gcc 4.60
+- smaller spelling fixes
+- FOV calculations now correct for widescreen and horizontal splitscreen
+- Additional checks against illegal values passed to renderer
+
+Changes since 0.2.8.3:
+- fixed temporary sound disappearance when alt-tabbing away and back
+- default subcultures are now distributed
+- enable 32 bit color depth at desktop resolution
+- no more display lists for SiS cards
+- spelling mistakes and missing German translations
+
 Changes since 0.2.8.3_rc4:
 ==========================
+- New setting: KEEP_PLAYER_SLOT allows the server to kick (preferably) spectators
+   if it gets full so there is always one slot open for players
+- New setting: ACCESS_LEVEL_AUTOKICK_IMMUNITY sets the access level required 
+  to be immune from such kicks (and idle autokicks, too)
 - Intercepted chat commands are now written to ladderlog.txt. Format:
   COMMAND /command-intercepted player [command arguments]
 - Increased default speed of server pinging
@@ -118,7 +177,8 @@ Changes since 0.2.8.3_rc3:
 Changes since 0.2.8.3_rc2:
 ==========================
 - Fixed crash with server polling
-- ROUND_WINNER and MATCH_WINNER logged to ladderlog
+- ROUND_WINNER and MATCH_WINNER ladderlog events now include the players of
+  the team.
 - Camera switches to user preferred camera when you die in incam mode
 - Better support for custom language files
 - Players can no longer spam chat with /shuffle messages. Added new setting

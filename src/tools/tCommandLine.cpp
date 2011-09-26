@@ -75,6 +75,7 @@ static void quitWithMessage( const char* message )
 //#define QUIT(x) { std::ostringstream s; s << x; quitWithMessage(s.str().c_str()); name_.Clear(); } exit(0)
 //#define QUIT(x) { std::ostringstream s; s << x; quitWithMessage(s.str().c_str()); name_.Clear(); } return false
 #define QUIT(x) { std::ostringstream s; s << x; quitWithMessage(s.str().c_str()); name_.Clear();}
+#define CLEAN_QUIT(x) { std::ostringstream s; s << x; quitWithMessagePrepare(s.str().c_str()); name_.Clear(); return false; }
 
 bool tCommandLineData::Analyse(int argc,char **argv)
 {
@@ -169,7 +170,7 @@ bool tCommandLineData::Analyse(int argc,char **argv)
 #endif
         else if ( parser.GetSwitch( "--version", "-v") )
         {
-            QUIT( "This is " << name_ << " version " << *programVersion_ << ".\n" );
+            CLEAN_QUIT( "This is " << name_ << " version " << *programVersion_ << ".\n" );
         }
         else if ( parser.GetSwitch( "--versioninfo") )
         {

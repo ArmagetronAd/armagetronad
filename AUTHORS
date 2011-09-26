@@ -41,9 +41,6 @@ Philippe Villeneuve ( philippeqc )
 Additional contributions from
 =============================
 
-Pippijn van Steenhoven
-    Map rotation optimization
-
 Belenus
     OpenBSD support sniplets
 
@@ -65,11 +62,17 @@ Fabrice Holbe
 hang3r
     skeleton for more accurate timer on Windows
 
+hoop
+    Zone rendering settings
+
 Jonathan
     Headlight (needs activation) and overhead map
 
 Meriton
     Replacement for the old buggy Lag-O-Meter and new camera glancing code
+
+clime
+    Tweaks to that glancing code
 
 mygal
     French translation (part)
@@ -80,6 +83,9 @@ Oscilloscope/Louven
 pavelo
     extension to the tab completion code
 
+Pippijn van Steenhoven
+    Map rotation optimization
+
 Rafal Cieslak
     Polish translation
 
@@ -89,8 +95,11 @@ tang322
 Tomas Birraux
     french accents in font
 
-hoop
-    Zone rendering settings
+Tru
+    Russian translation
+
+Vitty
+    Function to randomise teams (SCRAMBLE), and other titbits
 
 External code merged in from
 ============================

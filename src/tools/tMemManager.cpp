@@ -88,23 +88,9 @@ static CRITICAL_SECTION  mutex;
 
 static bool reported=false;
 
-#ifdef HAVE_LIBZTHREAD
-#include <zthread/FastRecursiveMutex.h>
+#include "tMutex.h"
 
-static ZThread::FastRecursiveMutex st_mutex;
-#elif defined(HAVE_PTHREAD)
-#include "pthread-binding.h"
-static tPThreadRecursiveMutex st_mutex;
-#else
-class tMockMutex
-{
-public:
-    void acquire(){};
-    void release(){};
-};
-
-static tMockMutex st_mutex;
-#endif
+static boost::recursive_mutex st_mutex;
 
 // create an object of this class while calling external functions
 // that are known to have (harmless!) leaks
@@ -122,15 +108,12 @@ tKnownExternalLeak::~tKnownExternalLeak()
 
 class tBottleNeck
 {
+private:
+    boost::lock_guard< boost::recursive_mutex > lock_;
 public:
     tBottleNeck()
+    :lock_(st_mutex)
     {
-        st_mutex.acquire();
-    }
-
-    ~tBottleNeck()
-    {
-        st_mutex.release();
     }
 };
 
@@ -644,9 +627,6 @@ bool tMemManager::SwapIf(int i,int j){
 tMemManager::~tMemManager(){
 #ifdef LEAKFINDER
     static bool warn = true;
-#ifdef HAVE_LIBZTHREAD
-    warn = false;
-#endif
 
     if (inited){
         // l???sche das ding
@@ -1306,9 +1286,7 @@ void* _cdecl operator new	(size_t size) THROW_BADALLOC{
     tAllocationInfo info( false );
 
 #ifdef LEAKFINDER
-#ifndef HAVE_LIBZTHREAD
     info.checksum = size;
-#endif
 #endif
     return tMemMan::Alloc(info, size);
 }
@@ -1377,9 +1355,7 @@ void  operator delete   (void *ptr,const char *classname,const char *file,int li
 void* operator new[]	(size_t size) THROW_BADALLOC{
     tAllocationInfo info( true );
 #ifdef LEAKFINDER
-#ifndef HAVE_LIBZTHREAD
     info.checksum = size % MAXCHECKSUM;
-#endif
 #endif
     return tMemMan::Alloc(info, size);
 }

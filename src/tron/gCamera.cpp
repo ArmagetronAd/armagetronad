@@ -38,7 +38,7 @@ void gCamera::MyInit(){
         if (sg_currentSettings->finishType==gFINISH_EXPRESS && sn_GetNetState() != nCLIENT )
             pos=CenterPos()+dir.Turn(eCoord(-2,-10)) ;
 
-    lastCenter=Center();
+    lastCenter=NULL;
 }
 
 gCamera::gCamera(eGrid *grid, rViewport *view,ePlayerNetID *p,ePlayer *lp,eCamMode m)
@@ -48,8 +48,10 @@ gCamera::gCamera(eGrid *grid, rViewport *view,ePlayerNetID *p,ePlayer *lp,eCamMo
 
 
 gCamera::~gCamera(){
+#ifdef DEBUG
     int x;
     x =0;
+#endif
 }
 
 eCoord gCamera::CenterCycleDir(){
@@ -84,11 +86,12 @@ void gCamera::Timestep(REAL ts){
                     }
                 }
             }
-            lastCenter=Center();
-
-            eSoundMixer* mixer = eSoundMixer::GetMixer();
-            mixer->SetMicrophoneOwner(Center());
         }
+
+        lastCenter=Center();
+
+        eSoundMixer* mixer = eSoundMixer::GetMixer();
+        mixer->SetMicrophoneOwner(Center());
     }
 }
 

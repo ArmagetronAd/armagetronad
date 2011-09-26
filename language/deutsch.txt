@@ -2091,7 +2091,7 @@ misc_fps_help                 Wenn die FPS-Anzeige aktiviert ist, wird die aktue
 
 #tweaks menu
 tweaks_displaylists_text      Display Lists:
-tweaks_displaylists_help      Display Lists sind ein OpenGL-Feature, um ein Objekt schnell oft rendern zu können; es wird normalerweise für die Vehikel verwendet. Manchmal funktioniert das aber nicht richtig: wenn die Vehikel unsichtbar sind, dann sollte dieses Feature ausgeschaltet werden.
+tweaks_displaylists_help      Display Lists sind ein OpenGL-Feature, um ein Objekt schnell oft rendern zu können. Manchmal funktioniert das aber nicht richtig: wenn die Vehikel unsichtbar sind, dann sollte dieses Feature ausgeschaltet werden.
 tweaks_displaylists_off_text  Aus
 tweaks_displaylists_off_help  Verwendet gar keine Display Lists.
 tweaks_displaylists_cac_text  Create and Call
@@ -2501,7 +2501,7 @@ network_error                 Netzwerkfehler.\n
 network_error_timeout         Verbindung zu Benutzer \1 verloren.\n
 network_error_shortmessage    Benutzer \1 sendet eine unzulässige (zu kurze) Nachricht.\n
 network_error_overflow        Benutzer \1 kommt mit dem Netzwerkverkehr nicht hinterher.\n
-network_killuser              Beseitige Benutzer \1, Ping \2.\n
+network_killuser              Beseitige Benutzer \1, Ping \2, IP \3: \4\n
 network_statistics1           Zeit:      \1 Sekunden\n
 network_statistics2           Gesendet:  \2 Bytes in \3 Paketen (\4 Bytes/s)\n
 network_statistics3           Empfangen: \5 Bytes in \6 Paketen (\7 Bytes/s)\n
@@ -2725,7 +2725,7 @@ config_message_info           \1 steht momentan auf \2.\n
 config_sighup                 SIGHUP erhalten, Konfigurationsdateien werden neu gelesen.\n
 config_abort                  Laden bon Konfigurationsdatei/strom abgebrochen.\n
 
-nconfig_errror_protected      Nix da. Nur der Server darf \1 ändern.\n
+nconfig_error_protected       Nix da. Nur der Server darf \1 ändern.\n
 nconfig_error_unknown         Konfigurationsänderung für die unbekannte Variable \1 erhalten.\n\n\n\nWAHRSCHEINLICH SOLLTE EINE NEUE VERSION VON ARMAGETRON INSTALLIERT WERDEN!!!!\n
 nconfig_error_nonet           Konfigurationsänderung über das Netwzerk für die Variable \1 erhalten, die jedoch keinen Netzwerksupport hat.\n\n\n\nWAHRSCHEINLICH SOLLTE EINE NEUE VERSION VON ARMAGETRON INSTALLIERT WERDEN!!!!\n
 nconfig_error_ignoreold       Veraltete Konfigurationsänderung für Einstellung \1 wird ignoriert.\n
@@ -2898,7 +2898,7 @@ login_error_invalidurl_notfound Authentifizierungs-URL \1 ungültig, wurde nicht 
 login_error_noremote          Authentifizierung via Globaler ID ist auf diesem Server nicht aktiviert. 
 login_error_blacklist         Meldeamt \1 ist auf der schwarzen Liste dieses Servers.
 login_error_whitelist         Meldeamt \1 ist nicht auf der weissen Liste dieses Servers.
-login_error_pharm             Server-Adresse passt nicht, \1 (vom Client) != \2 (Serveraddresse). Pharming möglich. Wenn du dich gerade vom LAN mit deinem eigenen Server verbindest, kannst du "TRUST_LAN" aktivieren (nur wenn sich im LAN keine Bösewichte verstecken, natürlich), oder setze "SERVER_IP", um dem Server seine korrekte Adresse mitzuteilen.
+login_error_pharm             Server-Adresse passt nicht, \1 (vom Client) != \2 (Serveraddresse). Pharming möglich. Wenn du dich gerade vom LAN mit deinem eigenen Server verbindest, kannst du "TRUST_LAN" aktivieren (nur wenn sich im LAN keine Bösewichte verstecken, natürlich). Wenn nicht, benutze "SERVER_DNS", um dem Server seine korrekte Adresse mitzuteilen.
 login_error_pharm_cheap       Ärger mit Server-Adresse. Der Client schickt eine unspeziefische Adresse.
 login_error_methodmismatch    Die lokale Methode zum Passworttest wurde zwischen dem Setzen des Passworts und jetzt verändert. In der Serverkonfiguration müssen alle zur Authentifizierungsmethode relevanten Einstellungen VOR den Passwörtern lokaler Accounts stehen.
 login_error_nomethod          Keine geeignete Authentifizierungsmethode gefunden. Der Client unterstützt \1, der Server \2, und das Meldeamt \3.

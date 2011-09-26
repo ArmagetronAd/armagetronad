@@ -2,6 +2,9 @@ src/macosx/config_common.h
 src/macosx/English.lproj/InfoPlist.strings
 MacOS/Armagetron Advanced.xcodeproj/*.mode1v3
 MacOS/Armagetron Advanced.xcodeproj/*.pbxuser
+MacOS/Armagetron Advanced.xcodeproj/.LSOverride
+MacOS/Armagetron Advanced.xcodeproj/project.xcworkspace/
+MacOS/Armagetron Advanced.xcodeproj/xcuserdata/
 MacOS/build/
 macosx_build_information.yml
 *.DS_Store

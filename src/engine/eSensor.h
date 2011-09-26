@@ -54,6 +54,7 @@ public:
     inline eSensor & SetInverseSpeed( REAL inverseSpeed );	//!< Sets the inverse speed of the sensor
     inline REAL GetInverseSpeed( void ) const;	//!< Gets the inverse speed of the sensor
     inline eSensor const & GetInverseSpeed( REAL & inverseSpeed ) const;	//!< Gets the inverse speed of the sensor
+    eGameObject const * GetOwner() const { return owned; } //!< Returns the gameobject owning this sensor
 protected:
     tCHECKED_PTR( eGameObject const ) owned;
 private:

@@ -45,6 +45,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <sstream>
 #include <set>
 
+#ifndef DEDICATED
 static tConfItem<int>   tm0("TEXTURE_MODE_0",rTextureGroups::TextureMode[0]);
 static tConfItem<int>   tm1("TEXTURE_MODE_1",rTextureGroups::TextureMode[1]);
 static tConfItem<int>   tm2("TEXTURE_MODE_2",rTextureGroups::TextureMode[2]);
@@ -77,19 +78,17 @@ static tConfItemLine c_rEnd("GL_RENDERER",gl_renderer);
 static tConfItemLine c_vEnd("GL_VENDOR",gl_vendor);
 // static tConfItemLine a_ver("ARMAGETRON_VERSION",st_programVersion);
 
-#ifndef DEDICATED
 static uMenuItemStringWithHistory::history_t &sg_consoleHistory() {
     static uMenuItemStringWithHistory::history_t instance("console_history.txt");
     return instance;
 }
-#endif
 
 static int sg_consoleHistoryMaxSize=100; // size of the console history
 static tSettingItem< int > sg_consoleHistoryMaxSizeConf("HISTORY_SIZE_CONSOLE",sg_consoleHistoryMaxSize);
 
 class ArmageTron_feature_menuitem: public uMenuItemSelection<int>{
-    void NewChoice(uSelectItem<bool> *){};
-    void NewChoice(char *,bool ){};
+    void NewChoice(uSelectItem<bool> *){}
+    void NewChoice(char *,bool ){}
 public:
     ArmageTron_feature_menuitem(uMenu *m,char const * tit,char const * help,int &targ)
             :uMenuItemSelection<int>(m,tit,help,targ){
@@ -107,13 +106,13 @@ public:
             rFEAT_ON);
     }
 
-    ~ArmageTron_feature_menuitem(){};
+    ~ArmageTron_feature_menuitem(){}
 };
 
 
 class ArmageTron_texmode_menuitem: public uMenuItemSelection<int>{
-    void NewChoice(uSelectItem<bool> *){};
-    void NewChoice(char *,bool ){};
+    void NewChoice(uSelectItem<bool> *){}
+    void NewChoice(char *,bool ){}
 public:
     ArmageTron_texmode_menuitem(uMenu *m,char const * tit,int &targ,
                                 bool font=false)
@@ -148,7 +147,7 @@ public:
     #endif
     }
 
-    ~ArmageTron_texmode_menuitem(){};
+    ~ArmageTron_texmode_menuitem(){}
 };
 
 static tConfItem<bool>    ab("ALPHA_BLEND",sr_alphaBlend);
@@ -312,13 +311,6 @@ static void sg_ScreenModeMenu()
 
 
 #ifdef SDL_OPENGL
-#ifdef DIRTY
-    uMenuItemToggle sdl_t
-    (&screen_menu_mode,
-     "$screen_use_sdl_text",
-     "$screen_use_sdl_help",
-     currentScreensetting.useSDL);
-#endif // dirty
 
 #if SDL_VERSION_ATLEAST(1, 2, 10)
     uMenuItemSelection<rVSync> zvs_t
@@ -423,6 +415,14 @@ static uMenuItemToggle fs_dither
  "$detail_dither_help",
  sr_dither);
 
+// from gWall.cpp
+extern bool sg_simpleTrail;
+static uMenuItemToggle sgm_simpleTrail
+(&screen_menu_detail,
+ "$detail_simple_trail_text",
+ "$detail_simple_trail_help",
+ sg_simpleTrail);
+
 static uMenuItemSelection<int> mfd
 (&screen_menu_detail,
  "$detail_floor_text",
@@ -462,10 +462,8 @@ static tConfItem<bool> crexp("EXPLOSION",sg_crashExplosion);
 extern bool sg_crashExplosionHud;   // from gExplosion.cpp
 static tConfItem<bool> crexph("EXPLOSION_HUD",sg_crashExplosionHud);
 
-#ifndef DEDICATED
 //extern bool png_screenshot;		// from rSysdep.cpp
 //static tConfItem<bool> pns("PNG_SCREENSHOT",png_screenshot);
-#endif
 
 static uMenuItemToggle  t32b
 (&screen_menu_detail,"$detail_text_truecolor_text",
@@ -546,38 +544,38 @@ static uMenuItemToggle infp
  "$tweaks_infinity_help"
  ,sr_infinityPlane);
 
-uMenuItemSelection<rSysDep::rSwapMode> swapMode
+uMenuItemSelection<rSysDep::rFramedropTolerance> framedropTolerance
 (&screen_menu_tweaks,
- "$swapmode_text",
- "$swapmode_help",
- rSysDep::swapMode_);
+ "$framedroptolerance_text",
+ "$framedroptolerance_help",
+ rSysDep::framedropTolerance_);
 
-static uSelectEntry<rSysDep::rSwapMode> swapMode_fastest(swapMode,"$swapmode_fastest_text","$swapmode_fastest_help",rSysDep::rSwap_Fastest);
-static uSelectEntry<rSysDep::rSwapMode> swapMode_glFlush(swapMode,"$swapmode_glflush_text","$swapmode_glflush_help",rSysDep::rSwap_glFlush);
-static uSelectEntry<rSysDep::rSwapMode> swapMode_Fence(swapMode,"$swapmode_fence_text","$swapmode_glflush_help",rSysDep::rSwap_Fence);
-static uSelectEntry<rSysDep::rSwapMode> swapMode_LateFinish(swapMode,"$swapmode_latefinish_text","$swapmode_glflush_help",rSysDep::rSwap_LateFinish);
-static uSelectEntry<rSysDep::rSwapMode> swapMode_glFinish(swapMode,"$swapmode_glfinish_text","$swapmode_glfinish_help",rSysDep::rSwap_glFinish);
+static uSelectEntry<rSysDep::rFramedropTolerance> framedropTolerance_Lenient(framedropTolerance,"$framedrop_tolerance_lenient_text","$framedrop_tolerance_lenient_help",rSysDep::rSwap_Lenient);
+static uSelectEntry<rSysDep::rFramedropTolerance> framedropTolerance_Normal(framedropTolerance,"$framedrop_tolerance_normal_text","$framedrop_tolerance_normal_help",rSysDep::rSwap_Normal);
+static uSelectEntry<rSysDep::rFramedropTolerance> framedropTolerance_Strict(framedropTolerance,"$framedrop_tolerance_strict_text","$framedrop_tolerance_strict_help",rSysDep::rSwap_Strict);
+static uSelectEntry<rSysDep::rFramedropTolerance> framedropTolerance_Draconic(framedropTolerance,"$framedrop_tolerance_draconic_text","$framedrop_tolerance_draconic_help",rSysDep::rSwap_Draconic);
 
-/*
-uMenuItemSelection<int> targetFPS
+tCONFIG_ENUM( rSysDep::rFramedropTolerance );
+
+static tConfItem< rSysDep::rFramedropTolerance > framedropToleranceCI("FRAMEDROP_TOLERANCE", rSysDep::framedropTolerance_ );
+
+uMenuItemSelection<rSysDep::rSwapOptimize> swapOptimize
 (&screen_menu_tweaks,
- "$targetfps_text",
- "$targetfps_help",
-rSysDep::swapMode_);
+ "$swapoptimize_text",
+ "$swapoptimize_help",
+ rSysDep::swapOptimize_);
 
-static uSelectEntry<rSysDep::rSwapMode> swapMode_150Hz(swapMode,"$swapmode_150hz_text","$swapmode_150hz_help",rSysDep::rSwap_150Hz);
-static uSelectEntry<rSysDep::rSwapMode> swapMode_100Hz(swapMode,"$swapmode_100hz_text","$swapmode_100hz_help",rSysDep::rSwap_100Hz);
-static uSelectEntry<rSysDep::rSwapMode> swapMode_80Hz(swapMode,"$swapmode_80hz_text","$swapmode_80hz_help",rSysDep::rSwap_80Hz);
-static uSelectEntry<rSysDep::rSwapMode> swapMode_60Hz(swapMode,"$swapmode_60hz_text","$swapmode_60hz_help",rSysDep::rSwap_60Hz);
-*/
+static uSelectEntry<rSysDep::rSwapOptimize> swapOptimize_Latency(swapOptimize,"$swapoptimize_latency_text","$swapoptimize_latency_help",rSysDep::rSwap_Latency);
+static uSelectEntry<rSysDep::rSwapOptimize> swapOptimize_Auto(swapOptimize,"$swapoptimize_auto_text","$swapoptimize_auto_help",rSysDep::rSwap_Auto);
+static uSelectEntry<rSysDep::rSwapOptimize> swapOptimize_Throughput(swapOptimize,"$swapoptimize_throughput_text","$swapoptimize_throughput_help",rSysDep::rSwap_Throughput);
+static uSelectEntry<rSysDep::rSwapOptimize> swapOptimize_ThroughputFlush(swapOptimize,"$swapoptimize_throughput_flush_text","$swapoptimize_throughput_flush_help",rSysDep::rSwap_ThroughputFlush);
+static uSelectEntry<rSysDep::rSwapOptimize> swapOptimize_ThroughputFastest(swapOptimize,"$swapoptimize_throughput_fastest_text","$swapoptimize_throughput_fastest_help",rSysDep::rSwap_ThroughputFastest);
 
-tCONFIG_ENUM( rSysDep::rSwapMode );
+tCONFIG_ENUM( rSysDep::rSwapOptimize );
 
-static tConfItem< rSysDep::rSwapMode > swapModeCI("SWAP_MODE", rSysDep::swapMode_ );
+static tConfItem< rSysDep::rSwapOptimize > swapOptimizeCI("SWAP_OPTIMIZE", rSysDep::swapOptimize_ );
 
 static tConfItem<bool> WRAP("WRAP_MENU",uMenu::wrap);
-
-#ifndef DEDICATED
 
 class gAutoCompleterConsole : public uAutoCompleter {
 public:
@@ -638,7 +636,7 @@ bool gMemuItemConsole::Event(SDL_Event &e){
 
 void do_con(){
     su_ClearKeys();
-        
+
     se_ChatState( ePlayerNetID::ChatFlags_Console, true );
     sr_con.SetHeight(20,false);
     se_SetShowScoresAuto(false);
@@ -663,7 +661,7 @@ void do_con(){
 
 void sg_ConsoleInput(){
 #ifndef DEDICATED
-    st_ToDo(&do_con);
+    st_ToDoOnce(&do_con);
 #endif
 }
 
@@ -791,7 +789,7 @@ public:
         m->RequestSpaceBelow(.2);
     }
 
-    ~ArmageTron_color_menuitem(){};
+    ~ArmageTron_color_menuitem(){}
 
     virtual REAL SpaceRight(){return .2;}
 

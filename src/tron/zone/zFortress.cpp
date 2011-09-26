@@ -711,7 +711,7 @@ void zFortressZone::OnConquest( void )
             win << "$player_win_conquest";
         }
 
-        int score = totalScore / enemies_.size();
+        int score = totalScore / (int)enemies_.size();
         for ( TeamArray::iterator iter = enemies_.begin(); iter != enemies_.end(); ++iter )
         {
             (*iter)->AddScore( score, win, tOutput() );

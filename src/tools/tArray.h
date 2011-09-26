@@ -126,13 +126,13 @@ public:
             :GrowingArrayBase(firstsize,sizeof(T),MALLOC) {
         // dump(low,flow,"con:size " << firstsize);
         Init();
-    };
+    }
 
 
     tArray(const tArray &A)
             :GrowingArrayBase(A.Len(),sizeof(T),MALLOC){
         CopyFrom(A);
-    };
+    }
 
 
     T& operator[](int i) {
@@ -149,7 +149,7 @@ public:
         //    dump(low,flow,"[" << i << "]" << "=" << ((T *)Base())[i] << '\n');
 
         return((reinterpret_cast<T *>(Base()))[i]);
-    };
+    }
 
     // Allow to READ from a const object. 
     T const& operator[](int i) const {
@@ -162,7 +162,7 @@ public:
         tASSERT( i >= 0 && i < Len() );
 
         return((reinterpret_cast<T *>(Base()))[i]);
-    };
+    }
 
     T* operator+(int i) const{
     #ifdef DEBUG
@@ -173,7 +173,7 @@ public:
     #endif
 
         return(reinterpret_cast<T *>(Base())+i);
-    };
+    }
 
     const tArray<T> &operator=(const tArray<T> &A){
 
@@ -182,7 +182,7 @@ public:
         CopyFrom(A);
 
         return *this;
-    };
+    }
 
     void RemoveAt( int index )
     {

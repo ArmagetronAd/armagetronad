@@ -49,12 +49,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     #endif
     #endif
 
-    #ifndef SDL_OPENGL
-    #ifndef DIRTY
-    #define DIRTY
-    #endif
-    #endif
-
     #ifdef DEBUG
 //#ifdef WIN32
     #define FORCE_WINDOW
@@ -68,6 +62,10 @@ tCONFIG_ENUM( rVSync );
 SDL_Surface *sr_screen=NULL; // our window
 
     #ifndef DEDICATED
+#ifndef SDL_OPENGL
+#error "need SDL 1.1"
+#endif
+
 static int default_texturemode = GL_LINEAR_MIPMAP_LINEAR;
     #endif
 
@@ -84,7 +82,7 @@ static tSettingItem<int>  at_ch("CUSTOM_SCREEN_HEIGHT"	, height[ArmageTron_Custo
 static tSettingItem<int>  at_cw("CUSTOM_SCREEN_WIDTH" 	, width	[ArmageTron_Custom]);
 static tSettingItem<REAL> at_ca("CUSTOM_SCREEN_ASPECT" , aspect[ArmageTron_Custom]);
 
-    #define MAXEMERGENCY 6
+    #define MAXEMERGENCY 5
 
 rScreenSettings lastSuccess(ArmageTron_640_480, false);
 
@@ -100,16 +98,13 @@ std::istream & operator >> ( std::istream & s, rScreenSize const & size )
 }
 */
 
-    #ifndef DEBUG
-static rScreenSettings em6(ArmageTron_320_240, false, ArmageTron_ColorDepth_16, true, false);
-static rScreenSettings em5(ArmageTron_320_240, false, ArmageTron_ColorDepth_Desktop, true, false);
-static rScreenSettings em4(ArmageTron_640_480, false,ArmageTron_ColorDepth_16);
-static rScreenSettings em3(ArmageTron_640_480, true, ArmageTron_ColorDepth_16);
-static rScreenSettings em2(ArmageTron_640_480, true, ArmageTron_ColorDepth_16, false);
+static rScreenSettings em5(ArmageTron_320_240, false, ArmageTron_ColorDepth_16, false);
+static rScreenSettings em4(ArmageTron_320_240, false, ArmageTron_ColorDepth_Desktop, false);
+static rScreenSettings em3(ArmageTron_640_480, false,ArmageTron_ColorDepth_16);
+static rScreenSettings em2(ArmageTron_640_480, true, ArmageTron_ColorDepth_16);
 static rScreenSettings em1(ArmageTron_640_480);
 
-static rScreenSettings *emergency[MAXEMERGENCY+2]={ &lastSuccess, &lastSuccess, &em1, &em2, &em3 , &em4, &em5, &em6};
-    #endif
+static rScreenSettings *emergency[MAXEMERGENCY+2]={ &lastSuccess, &lastSuccess, &em1, &em2 , &em3, &em4, &em5};
 
     #ifdef DEBUG
 rScreenSettings currentScreensetting(ArmageTron_640_480);
@@ -165,13 +160,6 @@ static tConfItem<rColorDepth> tc("COLORDEPTH",currentScreensetting.colorDepth);
 static tConfItem<rColorDepth> ltc("LAST_COLORDEPTH",lastSuccess.colorDepth);
 static tConfItem<rColorDepth> tzd("ZDEPTH",currentScreensetting.zDepth);
 static tConfItem<rColorDepth> ltzd("LAST_ZDEPTH",lastSuccess.zDepth);
-
-    #ifdef DIRTY
-    #ifdef SDL_OPENGL
-static tConfItem<bool> sdl("USE_SDL",currentScreensetting.useSDL);
-static tConfItem<bool> lsdl("LAST_USE_SDL",lastSuccess.useSDL);
-    #endif
-    #endif
 
 static tConfItem<bool> check_errors("CHECK_ERRORS",currentScreensetting.checkErrors);
 static tConfItem<bool> check_errorsl("LAST_CHECK_ERRORS",lastSuccess.checkErrors);
@@ -356,8 +344,8 @@ int rScreenSize::Compare( rScreenSize const & other ) const
 //!
 // *******************************************************************************************
 
-rScreenSettings::rScreenSettings( rResolution r, bool fs, rColorDepth cd, bool sdl, bool ce )
-        :res(r), windowSize(r), fullscreen(fs), colorDepth(cd), zDepth( ArmageTron_ColorDepth_Desktop ), useSDL(sdl), checkErrors(true), vSync( ArmageTron_VSync_Default ), aspect (1)
+rScreenSettings::rScreenSettings( rResolution r, bool fs, rColorDepth cd, bool ce )
+        :res(r), windowSize(r), fullscreen(fs), colorDepth(cd), zDepth( ArmageTron_ColorDepth_Desktop ), checkErrors(true), vSync( ArmageTron_VSync_Default ), aspect (1)
 {
     // special case for desktop resolution: window size of 640x480
     if ( r == ArmageTron_Desktop )
@@ -461,7 +449,13 @@ static void sr_SetSwapControlAuto( bool after = false )
     if ( tRecorder::IsRecording() )
     {
         // recordings are always done with VSync enabled
-        sr_SetSwapControl( 1 );
+#ifndef DEBUG        
+        sr_SetSwapControl( 1, after );
+#endif
+    }
+    else if( rSysDep::IsBenchmark() )
+    {
+        sr_SetSwapControl( 0, after );
     }
     else
     {
@@ -508,12 +502,52 @@ static bool lowlevel_sr_InitDisplay(){
     if ( res.res != ArmageTron_Invalid )
         currentScreensetting.aspect = aspect[res.res];
 
-    #ifndef DIRTY
-    currentScreensetting.useSDL = true;
-    #endif
     res.UpdateSize();
     sr_screenWidth = res.width;
     sr_screenHeight= res.height;
+
+    // desktop color depth
+    static int desktopCD_R = 5;
+    static int desktopCD_G = 5;
+    static int desktopCD_B = 5;
+    static int desktopCD   = 16;
+    // desktop resolution
+    static int sr_desktopWidth = 0, sr_desktopHeight = 0;
+
+    // determine those values
+    if ( sr_desktopWidth == 0 && !sr_screen )
+    {
+        // select sane defaults in case the following operation fails
+        sr_desktopWidth = 800;
+        sr_desktopHeight = 600;
+        
+        const SDL_VideoInfo* videoInfo     = SDL_GetVideoInfo( );
+        if( videoInfo )
+        {
+            const SDL_PixelFormat* pixelFormat = videoInfo->vfmt;
+
+            // don't accept anything less than 15 bpp, OpenGL doesn't like indexed colors.
+            if( pixelFormat && 15 <= pixelFormat->BitsPerPixel && NULL == pixelFormat->palette )
+            {
+                desktopCD    = pixelFormat->BitsPerPixel;
+                desktopCD_R  = countBits(pixelFormat->Rmask);
+                desktopCD_G  = countBits(pixelFormat->Gmask);
+                desktopCD_B  = countBits(pixelFormat->Bmask);
+            }
+
+            // the struct components we read here only exist since 
+            // SDL 1.2.10. The version check here is to safeguard against
+            // code compiled against SDL 1.2.10, but linked with an earlier
+            // version, accessing data out of bounds.
+#if SDL_VERSION_ATLEAST(1, 2, 10)
+            if( sr_DesktopScreensizeSupported() )
+            {
+                sr_desktopWidth  = videoInfo->current_w;
+                sr_desktopHeight = videoInfo->current_h;
+            }
+#endif
+        }
+    }
 
     if (!sr_screen)
     {
@@ -530,12 +564,10 @@ static bool lowlevel_sr_InitDisplay(){
             break;
         case ArmageTron_ColorDepth_Desktop:
             {
-                const SDL_VideoInfo* videoInfo     = SDL_GetVideoInfo( );
-                const SDL_PixelFormat* pixelFormat = videoInfo->vfmt;
-                fullCD         		               = pixelFormat->BitsPerPixel;
-                singleCD_R                         = countBits(pixelFormat->Rmask);
-                singleCD_G                         = countBits(pixelFormat->Gmask);
-                singleCD_B                         = countBits(pixelFormat->Bmask);
+                fullCD     = desktopCD;
+                singleCD_R = desktopCD_R;
+                singleCD_G = desktopCD_G;
+                singleCD_B = desktopCD_B;
             }
             break;
         case ArmageTron_ColorDepth_32:
@@ -554,16 +586,7 @@ static bool lowlevel_sr_InitDisplay(){
         default: break;
         }
 
-    #ifdef SDL_OPENGL
-        if (currentScreensetting.useSDL)
-        {
-            sr_SetGLAttributes( singleCD_R, singleCD_G, singleCD_B, zDepth );
-        }
-    #else
-        currentScreensetting.useSDL = false;
-    #endif
-
-
+        sr_SetGLAttributes( singleCD_R, singleCD_G, singleCD_B, zDepth );
 
         /*
           #ifdef POWERPAK_DEB
@@ -574,26 +597,15 @@ static bool lowlevel_sr_InitDisplay(){
 
         int attrib;
 
-    #ifdef SDL_OPENGL
-        if (currentScreensetting.useSDL)
+#ifndef FORCE_WINDOW
+        if (currentScreensetting.fullscreen)
         {
-            // SDL 1.1
-    #ifndef FORCE_WINDOW
-            if (currentScreensetting.fullscreen)
-                attrib=SDL_OPENGL | SDL_FULLSCREEN;
-            else
-    #endif
-                attrib=SDL_OPENGL;
+            attrib=SDL_OPENGL | SDL_FULLSCREEN;
         }
         else
-    #endif
+#endif
         {
-    #ifndef FORCE_WINDOW
-            if (currentScreensetting.fullscreen)
-                attrib=SDL_DOUBLEBUF | SDL_SWSURFACE | SDL_FULLSCREEN;
-            else
-    #endif
-                attrib=SDL_DOUBLEBUF | SDL_SWSURFACE;
+            attrib=SDL_OPENGL;
         }
 
     #ifdef FORCE_WINDOW
@@ -617,13 +629,13 @@ static bool lowlevel_sr_InitDisplay(){
                   attrib);
 
             // if not quite right
-            if (CD < fullCD){
+            if (CD < 15){
                 // check if the other fs/windowed mode is better
                 int CD_fsinv = SDL_VideoModeOK
                                (sr_screenWidth, sr_screenHeight,   fullCD,
                                 attrib^SDL_FULLSCREEN);
 
-                if (CD_fsinv > fullCD){
+                if (CD_fsinv >= 15){
                     // yes! change the mode
                     currentScreensetting.fullscreen=!currentScreensetting.fullscreen;
                     attrib ^= SDL_FULLSCREEN;
@@ -635,35 +647,7 @@ static bool lowlevel_sr_InitDisplay(){
             {
                 currentScreensetting.colorDepth = ArmageTron_ColorDepth_16;
 
-    #ifdef SDL_OPENGL
-                if (currentScreensetting.useSDL)
-                {
-                    sr_SetGLAttributes( 5, 5, 5, 16 );
-                }
-    #endif
-            }
-        }
-
-        // determine desktop resolution
-        static int sr_desktopWidth = 0, sr_desktopHeight = 0;
-        if ( sr_desktopWidth == 0 && !sr_screen )
-        {
-            // select sane defaults in case the following operation fails
-            sr_desktopWidth = 640;
-            sr_desktopHeight = 480;
-
-            if ( sr_DesktopScreensizeSupported()
-#ifdef DEBUG
-                 && currentScreensetting.fullscreen && sr_screenWidth + sr_screenHeight == 0
-#endif
-                )
-            {
-                sr_screen=SDL_SetVideoMode( 0, 0, CD, attrib );
-                if ( sr_screen )
-                {
-                    sr_desktopWidth = sr_screen->w;
-                    sr_desktopHeight = sr_screen->h;
-                }
+                sr_SetGLAttributes( 5, 5, 5, 16 );
             }
         }
 
@@ -702,26 +686,12 @@ static bool lowlevel_sr_InitDisplay(){
             }
         }
 
-        // MacOSX SDL 1.2.4 crashes if we SetCaption after switch to fullscreen. (fixed in 1.2.5)
-    #ifdef MACOSX
-        if(!currentScreensetting.fullscreen)
-    #endif
-        {
-            tOutput o("Armagetron Advanced");
-            tString s;
-            s << o;
-            SDL_WM_SetCaption(s, s);
-        }
+        sr_SetWindowTitle(tOutput("$window_title_menu"));
 
         sr_CompleteGLAttributes();
 
         SDL_EnableUNICODE(1);
     }
-
-    #ifdef DIRTY
-    if (!currentScreensetting.useSDL)
-        if(!rSysDep::InitGL()) return false;
-    #endif
 
     #ifndef DEDICATED
     gl_vendor.Clear();
@@ -729,6 +699,30 @@ static bool lowlevel_sr_InitDisplay(){
     gl_version.Clear();
     gl_extensions.Clear();
     renderer_identification.Clear();
+
+    // sanity check texture modes
+    for(int i=rTextureGroups::TEX_GROUPS-1; i>=0; --i)
+    {
+        int & texmode = rTextureGroups::TextureMode[i];
+
+        // don't do anything for deliberately disabled textures
+        if( i == rTextureGroups::TEX_FONT || texmode >= 0 )
+        {
+            // to default if the modes have been reset for some reason
+            if( texmode == 0 )
+            {
+                texmode = default_texturemode;
+            }
+            if( texmode < GL_NEAREST )
+            {
+                texmode = GL_NEAREST;
+            }
+            if( texmode > GL_LINEAR_MIPMAP_LINEAR )
+            {
+                texmode = GL_LINEAR_MIPMAP_LINEAR;
+            }
+        }
+    }
 
     gl_vendor     << reinterpret_cast<const char *>(glGetString(GL_VENDOR));
     gl_renderer   << reinterpret_cast<const char *>(glGetString(GL_RENDERER));
@@ -772,13 +766,7 @@ static bool lowlevel_sr_InitDisplay(){
     #endif
     #endif
     renderer_identification << rRenderIdCallback::RenderId() << ' ';
-    #ifdef SDL_OPENGL
     renderer_identification << "SDL 1.2\n";
-    renderer_identification << "USE_SDL=" << currentScreensetting.useSDL
-    << '\n';
-    #else
-    renderer_identification << "SDL 1.0\n";
-    #endif
     renderer_identification << "CD=" << currentScreensetting.colorDepth  << '\n';
     renderer_identification << "FS=" << currentScreensetting.fullscreen  << '\n';
     renderer_identification << "GL_VENDOR=" << gl_vendor   << '\n';
@@ -852,7 +840,11 @@ static bool lowlevel_sr_InitDisplay(){
     sr_ResetRenderState(true);
 
     rCallbackAfterScreenModeChange::Exec();
-    #endif
+
+    lastSuccess=currentScreensetting;
+    failed_attempts = 0;
+    st_SaveConfig();
+#endif
     return true;
 }
 
@@ -862,16 +854,18 @@ bool sr_InitDisplay(){
     cycleprograminited = false;
     while (failed_attempts <= MAXEMERGENCY+1)
     {
-    #ifndef DEBUG
         if (failed_attempts)
+        {
+#ifdef DEBUG
+            std::cout << "failed attempts:" << failed_attempts << "\n";
+            std::cout.flush();
+#endif
             currentScreensetting = *emergency[failed_attempts];
+        }
 
+        // prepare for crash, note failure and save config
         failed_attempts++;
         st_SaveConfig();
-
-        //      std::cout << failed_attempts << "\n";
-        //      std::cout.flush();
-    #endif
 
     #ifdef MACOSX
         // init the screen once in windowed mode
@@ -895,7 +889,6 @@ bool sr_InitDisplay(){
         sr_LockSDL();
         if (lowlevel_sr_InitDisplay())
         {
-            lastSuccess=currentScreensetting;
             sr_UnlockSDL();
             failed_attempts = 0;
             st_SaveConfig();
@@ -906,7 +899,6 @@ bool sr_InitDisplay(){
 
         if (lowlevel_sr_InitDisplay())
         {
-            lastSuccess=currentScreensetting;
             sr_UnlockSDL();
             failed_attempts = 0;
             st_SaveConfig();
@@ -936,14 +928,7 @@ void sr_ExitDisplay(){
     #ifndef DEDICATED
     rCallbackBeforeScreenModeChange::Exec();
 
-    #ifdef DIRTY
-    rSysDep::ExitGL();
-    #endif
-
     if (sr_screen){
-        failed_attempts = 0;
-        st_SaveConfig();
-
         sr_LockSDL();
         // z-man: according to man SDL_SetVideoSurface, screen should not bee freed.
         // SDL_FreeSurface(sr_screen);
@@ -1000,7 +985,6 @@ void sr_LoadDefaultConfig(){
     sr_lowerSky=false;
     sr_upperSky=false;
     sr_keepWindowActive=false;
-    rSysDep::swapMode_=rSysDep::rSwap_glFinish;
 
     if (software_renderer){
         // A software renderer! Poor soul. Set low details:
@@ -1028,12 +1012,12 @@ void sr_LoadDefaultConfig(){
         // infinity , display lists and glFlush swapping work for NVIDIA
         sr_infinityPlane=true;
         sr_useDisplayLists=rDisplayList_CAC;
-        rSysDep::swapMode_=rSysDep::rSwap_glFlush;
+        // rSysDep::swapMode_=rSysDep::rSwap_glFlush;
     }
     #ifdef MACOSX
     else if(strstr(gl_vendor,"ATI")){
         // glFlush swapping work for ATI on the mac
-        rSysDep::swapMode_=rSysDep::rSwap_glFlush;
+        // rSysDep::swapMode_=rSysDep::rSwap_glFlush;
     }
     #endif
     else if(strstr(gl_vendor,"Matrox")){
@@ -1178,6 +1162,34 @@ void sr_Activate(bool active)
     }
     #endif
     #endif
+}
+
+void sr_SetWindowTitle(tOutput o)
+{
+    tString s;
+    s << o;
+
+    sr_SetWindowTitle(s);
+}
+
+tString sr_windowTitle = tString(tOutput("Armagetron Advanced"));
+
+void sr_SetWindowTitle(tString s)
+{
+    sr_windowTitle = s;
+#ifdef MACOSX
+    if(!currentScreensetting.fullscreen)
+#endif
+    {
+#ifndef DEDICATED
+        SDL_WM_SetCaption(s, s);
+#endif
+    }
+}
+
+void sr_SetWindowTitle()
+{
+    sr_SetWindowTitle(sr_windowTitle);
 }
 
 //**************************************

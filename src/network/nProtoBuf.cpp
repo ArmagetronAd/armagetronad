@@ -626,6 +626,7 @@ void nProtoBufDescriptorBase::StreamFromDefault( nStreamMessage & in, nProtoBuf 
                 in.Read( size );
                 
                 // clear the array
+                tKnownExternalLeak l;
                 reflection->REFL_GET( ClearField, &out, field );
                 
                 switch( field->cpp_type() )
@@ -1410,8 +1411,10 @@ static void sn_CheckMessage
     // they may already be expired on the receiver side.
     if ( long( lastMessageID - message->MessageIDBig() ) > 0 )
     {
+#ifdef DEBUG
         int x;
         x = 0;
+#endif
         return;
     }
     

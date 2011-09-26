@@ -45,6 +45,7 @@ class tRecording
 
 public:
     tRecording              ()        ;   //!< default constructor
+    static void Stop        ()        ;   //!< stops recording
 
     typedef std::ostream STREAM       ;   //!< stream typedef
 protected:

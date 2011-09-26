@@ -76,7 +76,6 @@ public:
     bool				fullscreen;
     rColorDepth			colorDepth;
     rColorDepth			zDepth;
-    bool				useSDL;
     bool				checkErrors;
     rVSync              vSync;          // whether to wait for vsync
     REAL				aspect;			// aspect ratio of pixels ( width/height )
@@ -84,7 +83,6 @@ public:
     rScreenSettings(rResolution r,
                     bool fs=true,
                     rColorDepth cd=ArmageTron_ColorDepth_Desktop,
-                    bool sdl=true,
                     bool ce =true);
 };
 
@@ -197,6 +195,10 @@ void sr_LoadDefaultConfig();
 void sr_ResetRenderState(bool menu=0);
 void sr_DepthOffset(bool offset);
 void sr_Activate(bool active); // set activation staus
+
+void sr_SetWindowTitle(tOutput o);
+void sr_SetWindowTitle(tString s);
+void sr_SetWindowTitle();
 
 void sr_LockSDL();
 void sr_UnlockSDL();

@@ -74,6 +74,11 @@ IF EXIST %AA_DIR%\.svn (
 echo.
 echo.
 
+IF EXIST %AA_DIR%\.bzr (
+	bzr revno > %HELP_FILE%
+	SET /P REV= < %HELP_FILE%
+)
+
 echo %REV%
 IF NOT DEFINED REV SET REV=%DATESTAMP:~4%
 

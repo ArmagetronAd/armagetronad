@@ -33,18 +33,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 class nServerInfoBase;
 
-/*
 //! favorite server information, just to connect
-class gServerInfoFavorite: public nServerInfoBase
+class gServerInfoFavorite: public nServerInfo
 {
 public:
     // construct a server directly with connection name and port
-    gServerInfoFavorite( tString const & connectionName, unsigned int port );
+    gServerInfoFavorite( tString const & name, tString const & connectionName, unsigned int port );
     gServerInfoFavorite() {}
     void SetPort( unsigned int port ) { nServerInfoBase::SetPort( port ); }
     void SetConnectionName( tString const connectionName ) { nServerInfoBase::SetConnectionName( connectionName ); }
 };
-*/
 
 class gServerFavorites
 {

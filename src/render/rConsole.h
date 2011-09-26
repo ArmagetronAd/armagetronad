@@ -91,8 +91,6 @@ public:
 extern rConsole sr_con; // where all the output is directed to
 
 #ifdef DEDICATED
-// read from stdin
-void sr_Unblock_stdin();
 void sr_Read_stdin();
 #endif
 

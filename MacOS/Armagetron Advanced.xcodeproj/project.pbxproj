@@ -91,6 +91,7 @@
 		9B7CFE1F0EFCE74700126634 /* tResource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B7CFE130EFCE74700126634 /* tResource.cpp */; };
 		9B7CFE210EFCE74700126634 /* tResourceManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B7CFE150EFCE74700126634 /* tResourceManager.cpp */; };
 		9B7CFE230EFCE74700126634 /* tResourceType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B7CFE170EFCE74700126634 /* tResourceType.cpp */; };
+		9B82FB1313D0DE89003335AC /* libprotobuf.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B9753910F44A34A00E41662 /* libprotobuf.a */; };
 		9B83FE950B12161600878E8A /* Growl-WithInstaller.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B83FE940B12161600878E8A /* Growl-WithInstaller.framework */; };
 		9B83FF0F0B121B3100878E8A /* Growl-WithInstaller.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9B83FE940B12161600878E8A /* Growl-WithInstaller.framework */; };
 		9B9753920F44A34A00E41662 /* libprotobuf.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B9753910F44A34A00E41662 /* libprotobuf.a */; };
@@ -135,6 +136,8 @@
 		9B9755160F44B0DE00E41662 /* nBinary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B9755140F44B0DE00E41662 /* nBinary.cpp */; };
 		9B9755170F44B0DE00E41662 /* nBinary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B9755140F44B0DE00E41662 /* nBinary.cpp */; };
 		9B97553D0F44B3EC00E41662 /* libarmaprotobuf.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B97546A0F44AA2700E41662 /* libarmaprotobuf.a */; };
+		9BB084E4141C5FED009B30D0 /* tMutex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB084E1141C5FED009B30D0 /* tMutex.cpp */; };
+		9BB084E5141C5FED009B30D0 /* tMutex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB084E1141C5FED009B30D0 /* tMutex.cpp */; };
 		9BB7B4000D8246A2004FE8C3 /* config in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9BD7DAE20A2CAE0700D7033C /* config */; };
 		9BB7B4010D8246A2004FE8C3 /* language in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9BD7DAFE0A2CAE1D00D7033C /* language */; };
 		9BB7B5E10D8302FA004FE8C3 /* eAdvWall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B5A60D8302FA004FE8C3 /* eAdvWall.cpp */; };
@@ -447,32 +450,10 @@
 			fileType = pattern.proxy;
 			isEditable = 1;
 			outputFiles = (
-				"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE).pb.cc",
-				"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE).pb.h",
+				"$(SYMROOT)/Generated/src/protobuf/$(INPUT_FILE_BASE).pb.cc",
+				"$(SYMROOT)/Generated/src/protobuf/$(INPUT_FILE_BASE).pb.h",
 			);
-			script = "/Library/Frameworks/ArmagetronAdvanced/current/bin/protoc --cpp_out=\"${DERIVED_FILES_DIR}\" --proto_path=\"${SRCROOT}/../src/protobuf\" \"${INPUT_FILE_PATH}\"\ninclude_dir=\"${SYMROOT}/Generated/src/protobuf\"\nmkdir -p \"$include_dir\"\ncp \"${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}.pb.h\" \"$include_dir\"";
-		};
-		9B9E56620D8208E8008DD17D /* PBXBuildRule */ = {
-			isa = PBXBuildRule;
-			compilerSpec = com.apple.compilers.proxy.script;
-			filePatterns = "*.ypp";
-			fileType = pattern.proxy;
-			isEditable = 1;
-			outputFiles = (
-				"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE).tab.cpp",
-			);
-			script = "test -n \"${BISON}\" || BISON=bison\necho $BISON\n$BISON -o \"${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}.tab.cpp\" \"${INPUT_FILE_PATH}\"";
-		};
-		9BB5B8560D845C2500BF5F1C /* PBXBuildRule */ = {
-			isa = PBXBuildRule;
-			compilerSpec = com.apple.compilers.proxy.script;
-			filePatterns = "*.ypp";
-			fileType = pattern.proxy;
-			isEditable = 1;
-			outputFiles = (
-				"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE).tab.cpp",
-			);
-			script = "test -n \"${BISON}\" || BISON=bison\necho $BISON\n$BISON -o \"${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}.tab.cpp\" \"${INPUT_FILE_PATH}\"";
+			script = "include_dir=\"${SYMROOT}/Generated/src/protobuf\"\nmkdir -p \"$include_dir\"\n/Library/Frameworks/ArmagetronAdvanced/current/bin/protoc --cpp_out=\"${include_dir}\" --proto_path=\"${SRCROOT}/../src/protobuf\" \"${INPUT_FILE_PATH}\"";
 		};
 		9BC0F61A0B517A8B0041120B /* PBXBuildRule */ = {
 			isa = PBXBuildRule;
@@ -652,6 +633,10 @@
 		9B9755140F44B0DE00E41662 /* nBinary.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = nBinary.cpp; sourceTree = "<group>"; };
 		9B9755150F44B0DE00E41662 /* nBinary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nBinary.h; sourceTree = "<group>"; };
 		9B9E56300D81D962008DD17D /* shared.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = shared.xcconfig; sourceTree = "<group>"; };
+		9BB084E0141C5FED009B30D0 /* tLockedQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tLockedQueue.h; sourceTree = "<group>"; };
+		9BB084E1141C5FED009B30D0 /* tMutex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tMutex.cpp; sourceTree = "<group>"; };
+		9BB084E2141C5FED009B30D0 /* tMutex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tMutex.h; sourceTree = "<group>"; };
+		9BB084E3141C5FED009B30D0 /* tThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tThread.h; sourceTree = "<group>"; };
 		9BB5B9240D84604400BF5F1C /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = ../src/macosx/Info.plist; sourceTree = SOURCE_ROOT; };
 		9BB5B9270D84605700BF5F1C /* English */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = English; path = InfoPlist.strings.in; sourceTree = "<group>"; };
 		9BB7B5A60D8302FA004FE8C3 /* eAdvWall.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = eAdvWall.cpp; sourceTree = "<group>"; };
@@ -1008,6 +993,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9B82FB1313D0DE89003335AC /* libprotobuf.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1441,11 +1427,14 @@
 				9BB7B7C50D830422004FE8C3 /* tList.h */,
 				9BB7B7C60D830422004FE8C3 /* tLocale.cpp */,
 				9BB7B7C70D830422004FE8C3 /* tLocale.h */,
+				9BB084E0141C5FED009B30D0 /* tLockedQueue.h */,
 				9BB7B7C80D830422004FE8C3 /* tMath.h */,
 				9BB7B7C90D830422004FE8C3 /* tMemManager.cpp */,
 				9BB7B7CA0D830422004FE8C3 /* tMemManager.h */,
 				9BB7B7CB0D830422004FE8C3 /* tMemStack.cpp */,
 				9BB7B7CC0D830422004FE8C3 /* tMemStack.h */,
+				9BB084E1141C5FED009B30D0 /* tMutex.cpp */,
+				9BB084E2141C5FED009B30D0 /* tMutex.h */,
 				9BB7B7CD0D830422004FE8C3 /* tPlayList.cpp */,
 				9BB7B7CE0D830422004FE8C3 /* tPlayList.h */,
 				9B9754D90F44AFB700E41662 /* tPolynomial.cpp */,
@@ -1477,6 +1466,7 @@
 				9BB7B7EA0D830422004FE8C3 /* tString.h */,
 				9BB7B7EB0D830422004FE8C3 /* tSysTime.cpp */,
 				9BB7B7EC0D830422004FE8C3 /* tSysTime.h */,
+				9BB084E3141C5FED009B30D0 /* tThread.h */,
 				9BB7B7ED0D830422004FE8C3 /* tToDo.cpp */,
 				9BB7B7EE0D830422004FE8C3 /* tToDo.h */,
 				9BB7B7EF0D830422004FE8C3 /* tValue.h */,
@@ -1694,7 +1684,6 @@
 				8CAD91B7095A459400DA0ECC /* Run script: Cleanup */,
 			);
 			buildRules = (
-				9BB5B8560D845C2500BF5F1C /* PBXBuildRule */,
 			);
 			dependencies = (
 				9B9754C20F44AC9600E41662 /* PBXTargetDependency */,
@@ -1716,7 +1705,6 @@
 				8CBA6203089F11BE007E21DC /* Run script: Cleanup */,
 			);
 			buildRules = (
-				9B9E56620D8208E8008DD17D /* PBXBuildRule */,
 				9BC0F61A0B517A8B0041120B /* PBXBuildRule */,
 			);
 			dependencies = (
@@ -2057,6 +2045,7 @@
 				9B62588C0F5865410083C429 /* zFortress.cpp in Sources */,
 				9B62588D0F5865410083C429 /* zTimedZone.cpp in Sources */,
 				9B0C8B3E0F7EBA78001802CD /* eChat.cpp in Sources */,
+				9BB084E5141C5FED009B30D0 /* tMutex.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2224,6 +2213,7 @@
 				9B62588A0F5865410083C429 /* zFortress.cpp in Sources */,
 				9B62588B0F5865410083C429 /* zTimedZone.cpp in Sources */,
 				9B0C8B3D0F7EBA78001802CD /* eChat.cpp in Sources */,
+				9BB084E4141C5FED009B30D0 /* tMutex.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2434,7 +2424,6 @@
 				OTHER_LDFLAGS = "$(SHARED_OTHER_LDFLAGS)";
 				PREBINDING = NO;
 				PRODUCT_NAME = "Armagetron Advanced";
-				SDKROOT = "";
 				STRIP_INSTALLED_PRODUCT = YES;
 				WRAPPER_EXTENSION = app;
 			};
@@ -2575,7 +2564,11 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				HEADER_SEARCH_PATHS = "$(SHARED_HEADER_SEARCH_PATHS)";
 				INSTALL_PATH = /usr/local/lib;
-				LIBRARY_SEARCH_PATHS = "$(SHARED_LIBRARY_SEARCH_PATHS)";
+				LIBRARY_SEARCH_PATHS = (
+					"$(SHARED_LIBRARY_SEARCH_PATHS)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+				);
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(LOCAL_LIBRARY_DIR)/Frameworks/ArmagetronAdvanced/current\"";
 				PREBINDING = NO;
 				PRODUCT_NAME = armaprotobuf;
 			};
@@ -2592,7 +2585,11 @@
 				GCC_MODEL_TUNING = G5;
 				HEADER_SEARCH_PATHS = "$(SHARED_HEADER_SEARCH_PATHS)";
 				INSTALL_PATH = /usr/local/lib;
-				LIBRARY_SEARCH_PATHS = "$(SHARED_LIBRARY_SEARCH_PATHS)";
+				LIBRARY_SEARCH_PATHS = (
+					"$(SHARED_LIBRARY_SEARCH_PATHS)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+				);
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(LOCAL_LIBRARY_DIR)/Frameworks/ArmagetronAdvanced/current\"";
 				PREBINDING = NO;
 				PRODUCT_NAME = armaprotobuf;
 				ZERO_LINK = NO;

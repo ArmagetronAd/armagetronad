@@ -27,6 +27,9 @@ formerly gStatEntry.h
 
 */
 
+#ifndef ArmageTron_TSTATENTRY_H
+#define ArmageTron_TSTATENTRY_H
+
 #include "defs.h"
 #include "tString.h"
 
@@ -50,3 +53,5 @@ private:
     tString myName;
     REAL myValue;
 };
+
+#endif

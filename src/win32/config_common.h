@@ -8,6 +8,10 @@
 // for visual studio 2005: use secure template overloads of strcopy and the like
 #define _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES 1
 
+// this one is included in winlibs as static library
+#define HAVE_LIBBOOST_THREAD
+#define BOOST_THREAD_USE_LIB
+
 // and disable warnings about those calls that can't be converted. We may want to look at
 // them later, though.
 #define _CRT_SECURE_NO_DEPRECATE 1
@@ -27,15 +31,19 @@
 // disable POD initialization behavior change warning in VisualC++ 2005
 #pragma warning ( disable: 4345 )
 
-// activate dirty OpenGL initialization option
-#ifndef DIRTY
-#define DIRTY
+// compatibility with later mingw versions
+#if defined(__GNUC__) && __GNUC__ >= 4
+#define HAVE_ISBLANK
 #endif
 
 // Define if this is a Windows OS.
 #ifndef WIN32
 #define WIN32
 #endif
+
+// uncomment this line to compile a version that TRIES to be compatible
+// with Windows 9X. No guarantees.
+// #define SUPPORT_WIN9X
 
 // defines for data directories in Windows
 #ifndef DEBUG

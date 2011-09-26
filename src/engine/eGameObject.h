@@ -60,6 +60,8 @@ class eGameObject{
     //! called immediately after the object is created, either right after round beginning or mid-game creation
     virtual void OnBirth();
 
+    bool urgentSimulationRequested_;   //!< Flag set when a pending event needs simulation
+
 protected:
     // does a timestep and all interactions for this gameobject,
     // divided in many small steps
@@ -67,6 +69,9 @@ protected:
 
     // tells game objects how far they are allowed to exeed the given simulation time
     static REAL MaxSimulateAhead();
+
+    //! call if you need to be simulated right now
+    void RequestSimulation(){ urgentSimulationRequested_ = true; }
 
     // a list of all eGameObjects that are interesting to watch
     int interestingID;
@@ -125,7 +130,6 @@ public:
     int GOID() const {return id;}
     int InterestingID() const {return interestingID;}
     REAL LastTime() const {return lastTime;}
-    virtual REAL NextInterestingTime() const {return lastTime;} //!< the next time something interesting is going to happen with this object
 
     eGameObject(eGrid *grid, const eCoord &p,const eCoord &d, eFace *currentface, bool autodelete=1);
     virtual ~eGameObject();
@@ -203,8 +207,8 @@ public:
     virtual void RenderCockpitVirtual(bool primary=false);
 
     //sound output
-    //virtual void SoundMix(unsigned char *dest,unsigned int len,
-    //                      int viewer,REAL rvol,REAL lvol){};
+    virtual void SoundMix(unsigned char *dest,unsigned int len,
+                          int viewer,REAL rvol,REAL lvol){}
 
     // internal camera
     virtual eCoord CamDir()  const {return dir;}
@@ -267,8 +271,8 @@ private:
 class eDeath
 {
 public:
-    eDeath(){};   //!< constructor
-    ~eDeath(){};  //!< destructor
+    eDeath(){}   //!< constructor
+    ~eDeath(){}  //!< destructor
 };
 
 #endif

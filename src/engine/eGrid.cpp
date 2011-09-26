@@ -167,7 +167,7 @@ inline void eHalfEdge::Unlink()
 {
     if (point && this == point->edge)
     {
-        if (prev && prev->other && prev->other)
+        if (prev && prev->other)
             point->edge = prev->other;
         else if (other && other->next)
             point->edge = other->next;

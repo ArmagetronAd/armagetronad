@@ -157,6 +157,32 @@ static nServerInfo *CreateServerInfo()
         return tNEW(nServerInfo());
 }
 
+static void sn_AddMasterServer( std::istream &s )
+{
+    tString connectionName;
+    unsigned port = 4533;
+    
+    s >> connectionName;
+    if ( !s.eof() )
+        s >> port;
+    
+    // back up regular server list
+    nServerInfo *oldFirstServer = sn_FirstServer;
+    sn_FirstServer = NULL;
+
+    nServerInfo *newMaster = CreateServerInfo();
+    newMaster->SetConnectionName( connectionName );
+    newMaster->SetPort( port );
+    newMaster->Remove();
+    newMaster->Insert( sn_masterList );
+    
+    // restore regular server list
+    sn_FirstServer = oldFirstServer;
+    nServerInfo::TellMasterAboutMe( newMaster );    
+}
+
+static tConfItemFunc sn_addMasterServerConfItemFunc( "ADD_MASTER_SERVER", &sn_AddMasterServer );
+
 nServerInfo::nServerInfo()
         :tListItem<nServerInfo>(sn_FirstServer),
         pollID(-1),
@@ -684,10 +710,10 @@ static nProtoBufDescriptor< Network::BigServerInfo > sn_bigServerInfoDescriptor(
 static nProtoBufDescriptor< Network::BigServerInfo > sn_bigServerInfoDescriptorMaster(54,nServerInfo::GetBigServerInfoMaster, true);
 
 // request small server information from master server/broadcast
-static nProtoBufDescriptor< Network::RequestSmallServerInfo > sn_requestSmallServerInfoDescriptor(52,nServerInfo::GiveSmallServerInfo, true);
+nProtoBufDescriptor< Network::RequestSmallServerInfo > sn_requestSmallServerInfoDescriptor(52,nServerInfo::GiveSmallServerInfo, true);
 
 // request big server information from master server/broadcast
-static nProtoBufDescriptor< Network::RequestBigServerInfo > sn_requestBigServerInfoDescriptor(53,nServerInfo::GiveBigServerInfo, true);
+nProtoBufDescriptor< Network::RequestBigServerInfo > sn_requestBigServerInfoDescriptor(53,nServerInfo::GiveBigServerInfo, true);
 static nProtoBufDescriptor< Network::RequestBigServerInfoMaster > sn_requestBigServerInfoDescriptorMaster(55,nServerInfo::GiveBigServerInfoMaster, true);
 
 // used to transfer the rest of the server info (name, number of players, etc)
@@ -874,6 +900,7 @@ public:
     double lastTime_[MAX];   // log of the last times the server was pinged by this client
     int lastTimeIndex_;      // the current index in the array
     bool warned_;            // flag to avoid warning spam in the log file
+    REAL timeFactor_;        // locked time factor
 
     tString GetIP()
     {
@@ -930,24 +957,55 @@ public:
     // determines whether this client should be considered flooding
     bool FloodProtection( REAL timeFactor )
     {
+        if( warned_ && timeFactor < timeFactor_ )
+        {
+            // restore time factor
+            timeFactor = timeFactor_;
+        }
+        else
+        {
+            // store passed time factor for next time
+            timeFactor_ = timeFactor;
+        }
+
+
+
         int i;
         double now = tSysTimeFloat();
 
         bool protect = false;
         REAL diff = 0;
         int count = 0;
+        REAL tolerance = 0;
+        REAL minRelDiff = 10;
 
         // go through the different levels
-        for ( i = sn_minPingCount-1; i >= 0; --i )
+        int lowest = 0;
+
+        // only check 10 and 20 ping limit for the default timefactor
+        if( timeFactor < 1 && sn_minPingTimes[sn_minPingCount-1] > 0 )
+        {
+            // lowest = 2;
+        }
+
+        for ( i = sn_minPingCount-1; i >= lowest; --i )
         {
             // this many pings should be tracked
             count = sn_minPingCounts[i];
             diff = now - lastTime_[(lastTimeIndex_ + MAX - count) % MAX];
-            REAL tolerance = sn_minPingTimes[i]*timeFactor;
-            if ( tolerance > 0 && diff < tolerance )
+            tolerance = sn_minPingTimes[i]*timeFactor;
+            if ( tolerance > 0 )
             {
-                protect = true;
-                break;
+                if( tolerance*minRelDiff > diff )
+                {
+                    minRelDiff = diff/tolerance;
+                }
+
+                if( diff < tolerance )
+                {
+                    protect = true;
+                    break;
+                }
             }
         }
 
@@ -963,7 +1021,7 @@ public:
         }
 
         // reset warning flag
-        if ( warned_ && now - lastTime_[(lastTimeIndex_ + MAX-2 ) % MAX] > sn_minPingTimes[ sn_minPingCount-1 ] )
+        if ( warned_ && minRelDiff > 4 )
         {
             con << "Flood protection ban of " << GetIP() << " removed.\n";
             warned_ = false;
@@ -1008,16 +1066,23 @@ static nCallbackReceivedComplete sn_resetFirstInPacket( sn_ResetFirstInPacket );
 static REAL sn_minPingTimeGlobalFactor = 0.1;
 static tSettingItem< REAL > sn_minPingTimeGlobal( "PING_FLOOD_GLOBAL", sn_minPingTimeGlobalFactor );
 
+// checks for global ping flood events
+static bool GlobalPingFloodProtection()
+{
+    static nMachine server;
+
+    return sn_minPingTimeGlobalFactor > 0 && FloodProtection( server, sn_minPingTimeGlobalFactor );
+}
+
 // determines wheter the message comes from a flood attack; if so, reject it (return true)
 bool FloodProtection( int sender )
 {
-    // get the machine infos
-    nMachine & server = nMachine::GetMachine( 0 );
-    nMachine & peer   = nMachine::GetMachine( sender );
-
     // only accept one ping per packet
     if ( !sn_firstInPacket )
     {
+        // get the machine infos
+        nMachine & peer   = nMachine::GetMachine( sender );
+
         GetQueryMessageStats( peer ).Block();
 
         return true;
@@ -1029,13 +1094,17 @@ bool FloodProtection( int sender )
     if ( sn_minPingTimes[sn_minPingCount - 1] <= 0 )
         return false;
 
-    // and delegate
-    return FloodProtection( peer ) || ( sn_minPingTimeGlobalFactor > 0 && FloodProtection( server, sn_minPingTimeGlobalFactor ) );
+    // and delegate. Only do global check, the per-peer check has already been
+    // done earlier as the packet was received.
+    return GlobalPingFloodProtection();
 }
 
 void nServerInfo::GetSmallServerInfo( Network::SmallServerInfo const & info,
                                       nSenderInfo              const & sender )
 {
+    if ( !sn_IsMaster && sn_GetNetState() == nSERVER )
+        return;
+
     nServerInfoBase baseInfo;
     baseInfo.ReadSync( info.base(), sender );
 
@@ -1250,7 +1319,7 @@ nServerInfo* nServerInfo::GetBigServerInfoCommon(  Network::BigServerInfo const 
         {
             tOutput message;
             message.SetTemplateParameter(1, ToString( baseInfo ) );
-            message.SetTemplateParameter(2, sn_Connections[sender.MessageID()].socket->GetAddress().ToString() );
+            message.SetTemplateParameter(2, sn_Connections[sender.SenderID()].socket->GetAddress().ToString() );
             message << "$network_browser_unidentified";
             con << message;
         }
@@ -1287,6 +1356,9 @@ void nServerInfo::GiveBigServerInfoCommon( int receiver, const nServerInfo & inf
 void nServerInfo::GetBigServerInfo( Network::BigServerInfo const & info,
                                     nSenderInfo            const & sender )
 {
+    if ( !sn_IsMaster && sn_GetNetState() == nSERVER )
+        return;
+
     GetBigServerInfoCommon( info, sender );
 }
 
@@ -1312,6 +1384,19 @@ void nServerInfo::GiveBigServerInfo( Network::RequestBigServerInfo const & info,
     if (sn_IsMaster)
         return;
 
+    // log first polls
+    static int logPolls=10;
+    if( logPolls > 0 )
+    {
+        logPolls--;
+        tString senderName;
+        sn_GetAdr( sender.SenderID(), senderName );
+        con << tOutput(
+            logPolls > 0 ? "$network_master_pollanswer" : "$network_master_pollanswer_last", 
+            senderName
+            );
+    }
+
     // collect info
     nServerInfo me;
     me.GetFrom( sn_Connections[sender.SenderID()].socket );
@@ -1335,7 +1420,7 @@ void nServerInfo::SetFromMaster()
 void nServerInfo::GetBigServerInfoMaster( Network::BigServerInfo const & info,
                                           nSenderInfo            const & sender )
 {
-    if ( sn_GetNetState() == nSERVER && FloodProtection( sender.SenderID() ) )
+    if ( sn_GetNetState() == nSERVER )
         return;
 
     nServerInfo *server = GetBigServerInfoCommon( info, sender );
@@ -1349,10 +1434,10 @@ void nServerInfo::GetBigServerInfoMaster( Network::BigServerInfo const & info,
 void nServerInfo::GiveBigServerInfoMaster( Network::RequestBigServerInfoMaster const & info,
                                            nSenderInfo                         const & sender )
 {
-    if ( FloodProtection( sender.SenderID() ) )
+    if ( !sn_IsMaster )
         return;
 
-    if ( !sn_IsMaster )
+    if ( FloodProtection( sender.SenderID() ) )
         return;
 
     // read info of desired server from message
@@ -1747,15 +1832,15 @@ void nServerInfo::TellMasterAboutMe(nServerInfoBase *masterInfo)
     // don't reinitialize the network system
     nSocketResetInhibitor inhibitor;
 
-    static unsigned int lastPort = 0;
+    // static unsigned int lastPort = 0;
 
     // enter server state so we know our true port number
     sn_SetNetState(nSERVER);
-    unsigned int port = sn_GetServerPort();
+    // unsigned int port = sn_GetServerPort();
     //if (port == lastPort)
     //    return; // the master already knows about us
 
-    lastPort = port;
+    // lastPort = port;
 
     //    sn_SetNetState(nSTANDALONE);
 
@@ -2277,13 +2362,17 @@ void nServerInfo::RunMaster()
                     sn_Timeout[i] = tSysTimeFloat() + .2f;
             }
 
-            // defend against DOS attacks: Kill idle clients
+            // defend against DoS attacks: Kill idle clients
             if(sn_Timeout[i] < tSysTimeFloat())
+            {
+                sn_DisconnectUser(i, "$network_kill_servercomplete");
+                continue;
+            }
+            else if (!sn_Requested[i] && sn_Timeout[i] < tSysTimeFloat() + 60.0f)
+            {
                 sn_DisconnectUser(i, "$network_kill_timeout");
-
-            if (!sn_Requested[i] && sn_Timeout[i] < tSysTimeFloat() + 60.0f)
-                sn_DisconnectUser(i, "$network_kill_timeout");
-
+                continue;
+            }
         }
 
         if (sn_Transmitting[i] && sn_MessagesPending(i) < 3)
@@ -2918,7 +3007,6 @@ void nServerInfo::ReadSyncThis(  Network::BigServerInfo const & info,
             if ( !advancedInfoSetEver )
             {
                 con << "Acknowledged server: " <<  ToString( *this ) << ", name: \"" << tColoredString::RemoveColors(name) << "\"\n";
-                con << "\n";
                 Save();
             }
             else if ( name != oldName )

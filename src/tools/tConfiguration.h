@@ -81,6 +81,8 @@ class tCasaclPreventer
 public:
     tCasaclPreventer( bool prevent = true );
     ~tCasaclPreventer();
+
+    static bool InRInclude(); //!< returns whether we're currently in an RINCLUDE file
 private:
     bool previous_; //!< previous value of prevention flag
 };
@@ -124,8 +126,13 @@ protected:
     tAccessLevel requiredLevel; //!< access level required to change this setting
     tAccessLevel setLevel;      //!< access level of the user making the last change to this setting
 
+public:
+    // the map of all configuration items
     typedef std::map< tString, tConfItemBase * > tConfItemMap;
+    static tConfItemMap const & GetConfItemMap();
+protected:
     static tConfItemMap & ConfItemMap();
+public:
 
 public:
     typedef void callbackFunc(void);
@@ -183,7 +190,13 @@ public:
         return true;
     }
 
+    // should this be saved into user.cfg?
     virtual bool Save(){
+        return true;
+    }
+
+    // CAN this be saved at all?
+    virtual bool CanSave(){
         return true;
     }
 };
@@ -264,7 +277,7 @@ protected:
     T    *target;
     ShouldChangeFuncT shouldChangeFunc_;
 
-    tConfItem(T &t):tConfItemBase(""),target(&t), shouldChangeFunc_(NULL) {};
+    tConfItem(T &t):tConfItemBase(""),target(&t), shouldChangeFunc_(NULL) {}
 public:
     tConfItem(const char *title,const tOutput& help,T& t, callbackFunc *cb)
             :tConfItemBase(title,help,cb),target(&t), shouldChangeFunc_(NULL) {}
@@ -280,6 +293,13 @@ public:
             :tConfItemBase(title),target(&t),shouldChangeFunc_(changeFunc) {}
 
     virtual ~tConfItem(){}
+
+    tConfItem<T> & SetShouldChangeFunc( ShouldChangeFuncT changeFunc )
+    
+    {
+        this->shouldChangeFunc_ = changeFunc;
+        return *this;
+    }
 
     typedef typename tTypeToConfig< T >::DUMMYREQUIRED DUMMYREQUIRED;
 
@@ -326,6 +346,10 @@ public:
             *target = val;
             changed = true;
         }
+        else
+        {
+            con << tOutput("$config_value_not_changed", title, *target, val);
+        }
         ExecuteCallback();    
     }
     
@@ -354,7 +378,7 @@ public:
                     {
                         tOutput o;
                         o.SetTemplateParameter(1, title);
-                        o << "$nconfig_errror_protected";
+                        o << "$nconfig_error_protected";
                         con << "";
                     }
                     else

@@ -28,27 +28,38 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #ifndef ArmageTron_SYSDEP_H
 #define ArmageTron_SYSDEP_H
 
+//! None of the functions in this class are really system dependant any more,
+//! but they were once. This could just go into rScreen.cpp nowadays, or be
+//! renamed to rSwapControl, as buffer swaps and syncing properly and making
+//! screenshots is what happens here.
 class rSysDep
 {
 public:
-    enum rSwapMode
+    enum rSwapOptimize
     {
-        rSwap_Fastest = 0,
-        rSwap_glFlush = 1,
-        rSwap_glFinish = 2,
-        rSwap_Fence = 3,
-        rSwap_LateFinish = 4
+        rSwap_Latency = 0, // optimize for low latency
+        rSwap_Auto = 1,    // switch between latency and throughput automatically
+        rSwap_Throughput = 2, // optimize for high framerates
+        rSwap_ThroughputFlush = 3, // optimize for high framerates using glFlush to sync
+        rSwap_ThroughputFastest = 4 // don't sync OpenGL at all
+    };
+
+    // in latency mode, how careful should we be to avoid dropped frames?
+    enum rFramedropTolerance
+    {
+        rSwap_Lenient = 0, // framedrops don't worry me too much
+        rSwap_Normal = 1,  // allow some drops
+        rSwap_Strict = 2,  // try hard to avoid them
+        rSwap_Draconic = 3 // don't do anything that may cause additional drops
     };
 
 #ifndef DEDICATED
-    // graphics initialisation and cleanup:
-    static bool InitGL();
-    static void ExitGL();
+    static void SwapGL();  //!< swaps back and front buffer
+    static void ClearGL(); //!< clears the backbuffer
 
-    // buffer swap:
-    static void SwapGL();
-    static void PostSwapGL(); // call after the game logic before the first new draw command of the next frame
-    static void ClearGL(); // not really system depentent.......
+    static bool IsBenchmark(); //!< returns true if a benchmark is running
+
+    static void IsInGame(); //!< call while game content is rendered
 
     // starting and stopping of background network processing
     class rNetIdler
@@ -56,14 +67,15 @@ public:
     public:
         virtual ~rNetIdler(){};
         // only during Do(), gamestate may be modified.
-        virtual bool Wait() = 0; //!< wait for something to do, return true fi there is work
+        virtual bool Wait() = 0; //!< wait for something to do, return true if there is work
         virtual void Do() = 0;   //!< do the work.
     };
     static void StartNetSyncThread( rNetIdler * idler );
     static void StopNetSyncThread();
 #endif
 
-    static rSwapMode swapMode_;
+    static rSwapOptimize swapOptimize_;
+    static rFramedropTolerance framedropTolerance_;
 };
 
 #endif
