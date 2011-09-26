@@ -155,67 +155,6 @@ private:
 };
 #endif
 
-// a class to manage cycle's targets
-typedef std::vector<gCycle *> vec_cycle_ptr;
-typedef std::vector<gCycle *>::iterator gCycleItr;
-class gTarget {
-	friend class gCycle;
-    gCycle * m_this;
-    gCycle * m_target;
-    vec_cycle_ptr m_hunters;
-    int m_killed_counter;
-    REAL m_assignment_time;
-    bool started;
-
-public:
-    gTarget(gCycle * p_cycle) : m_this(p_cycle), m_target(0), m_killed_counter(0), m_assignment_time(.0), started(0) {}
-    ~gTarget() { Unset(); }
-
-    bool Set(gCycle *p_cycle);           // Set a cycle as target. Return true/false for success/failure
-    bool Set(ePlayerNetID *p_player);    // Set a player's cycle as target. Return true/false for success/failure
-    void Unset(bool warn=true);         // Unset current target
-    void Reset()                         // Unset current target and reset counters
-    {
-        m_killed_counter = 0;
-        m_assignment_time = .0;
-        Unset();
-    }
-    bool HasTarget()                     // check whether m_this has a target assigned
-    {
-        return !m_target;
-    }
-    bool HasTarget(gCycle *p_cycle)      // check whether p_cycle is m_this assigned target
-    {
-        return p_cycle==m_target;
-    }
-    bool IsTargeted()                    // check whether m_this is targeted
-    {
-        return !m_hunters.empty();
-    }
-    void Timestep(REAL p_gametime);      // check for timeout
-    void AddScore();                     // grant hunter some points
-    int  HuntersCount() { return m_hunters.size(); }
-    bool Started()      { return started; }
-
-    // Try to set target automatically
-    // hint: RANDOM = look for a "random" cycle, FORCE = force p_cycle as target (if possible), EXCLUDE = exclude p_cycle as suitable target
-    enum t_hint{RANDOM, FORCE, EXCLUDE};
-    bool AutoSet(t_hint p_hint=RANDOM, gCycle *p_cycle=NULL);
-    // same on a list of cycles
-    static void AutoSetCycles(vec_cycle_ptr &p_cycles, t_hint p_hint=RANDOM, gCycle *p_cycle=NULL);
-
-    // all public static members for settings
-    // assignment_mode: 0=disable, 1/2 is enable, 1 affects the player killing your target while 2 randomly affects new target
-    static int assignment_mode;
-    static int base_score;         // score for 1st target
-    static int base_score_deplete; // how the base_score should changed for extra targets
-    static int max_target;         // max number of targets for a player
-    static int min_cycles;         // min number of cycles required to get another target
-    static REAL max_distance;      // max distance to look at first for targets, if no target found, look further ...
-    static REAL timeout_delay;     // max time to kill your target
-    static REAL start_time;        // time of first target assignment for all cycles
-};
-
 // a complete lightcycle
 class gCycle: public gCycleMovement
 {
@@ -237,12 +176,6 @@ class gCycle: public gCycleMovement
 
     bool dropWallRequested_; //!< flag indicating that someone requested a wall drop
 public:
-    static std::vector<gCycle *> cycles;
-    static int AliveCounter()
-    {
-        return std::count_if(cycles.begin(), cycles.end(), std::mem_fun(&gCycle::Alive));
-    }
-
     eCoord            lastGoodPosition_;    // the location of the last known good position
 
     REAL skew,skewDot;						// leaning to the side
@@ -257,26 +190,6 @@ public:
 
     eCoord rotationFrontWheel,rotationRearWheel; 	// wheel position (rotation)
     REAL   heightFrontWheel,heightRearWheel;  		// wheel (suspension)
-
-// *** special target mode (begin) ***
-private:
-    // auto_ptr might not be the best choice here but I don't want to add extra dependencies to use boost::scoped_ptr.
-    // The goal here is to have a just-in-time construction and avoid any important memory footprint on gCycle when it's not needed.
-    // The cost is the use of auto_ptr and extra check on his internal pointer whether the use of m_target requires it.
-    // Side note: never made a copy of m_target as auto_ptr ownership transfer will lead to target management corruption
-//    std::auto_ptr<gTarget> m_target_ptr;
-// IMPORTANT: auto_ptr has been removed as a workaround to a bug occuring in the following situation:
-//            In DEBUG mode, when some1 joined while a lonely player was inside, the round was stopped.
-//            If the player entering the server, authenticated when he join (automatically), the server crashed.
-//            gdb shows 3 threads all in thread/memory management situations. The one which leads to the crash was desalocated memory
-//            within tList and crashed in tMemManager.cpp. Looks like some weird interaction between ZThread, stl memory management
-//            and armagetron memory management.
-    gTarget m_target_mgr;
-public:
-    struct LessHuntersCount;
-    gTarget &Target() { return m_target_mgr; }
-    bool CheckTargetPtr() { return true; }
-// *** special target mode (end) ***
 
 public:
     //REAL	brakingReservoir; // reservoir for braking. 1 means full, 0 is empty

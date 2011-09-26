@@ -1330,7 +1330,7 @@ void sg_DeclareWinner( eTeam* team, char const * message )
 }
 
 void check_hs(){
-    if (!sg_singlePlayer)
+    if (sg_singlePlayer)
         if(se_PlayerNetIDs.Len()>0 && se_PlayerNetIDs(0)->IsHuman())
             highscore.Check(se_PlayerNetIDs(0),se_PlayerNetIDs(0)->Score());
 }
