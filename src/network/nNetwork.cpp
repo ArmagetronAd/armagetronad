@@ -4710,14 +4710,16 @@ nMachine & nMachine::GetMachine( unsigned short userID )
         return server;
     }
 
-    tASSERT( userID <= MAXCLIENTS+1 );
-
     if( sn_GetNetState() != nSERVER )
     {
+        tASSERT(userID == 0);
+
         // invalid ID, return invalid machine (clients don't track machines)
         static nMachine invalid;
         return invalid;
     }
+
+    tASSERT( userID <= MAXCLIENTS+1 );
 
     // get address
     tVERIFY( userID <= MAXCLIENTS+1 );
