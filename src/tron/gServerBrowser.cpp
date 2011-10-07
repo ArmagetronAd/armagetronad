@@ -64,6 +64,9 @@ static tSettingItem< nServerInfo::QueryType > sg_query_type( "BROWSER_QUERY_FILT
 
 class gServerMenuItem;
 
+static nServerInfo::PrimaryKey sg_sortKey = nServerInfo::KEY_USERS;
+tCONFIG_ENUM( nServerInfo::PrimaryKey );
+static tConfItem< nServerInfo::PrimaryKey > sg_sortKeyConf( "BROWSER_SORT_KEY", sg_sortKey );
 
 class gServerInfo: public nServerInfo
 {
@@ -105,8 +108,6 @@ nServerInfo* CreateGServer()
 
 class gServerMenu: public uMenu
 {
-    int sortKey_;
-
 public:
     virtual void OnRender();
 
@@ -322,12 +323,14 @@ void gServerMenu::HandleEvent( SDL_Event event )
         switch (event.key.keysym.sym)
         {
         case(SDLK_LEFT):
-                        sortKey_ = ( sortKey_ + nServerInfo::KEY_MAX-1 ) % nServerInfo::KEY_MAX;
+                        sg_sortKey = static_cast<nServerInfo::PrimaryKey>
+                            ( ( sg_sortKey + nServerInfo::KEY_MAX-1 ) % nServerInfo::KEY_MAX );
             Update();
             return;
             break;
         case(SDLK_RIGHT):
-                        sortKey_ = ( sortKey_ + 1 ) % nServerInfo::KEY_MAX;
+                        sg_sortKey = static_cast<nServerInfo::PrimaryKey>
+                            ( ( sg_sortKey + 1 ) % nServerInfo::KEY_MAX );
             Update();
             return;
             break;
@@ -379,7 +382,7 @@ void gServerMenu::Update()
     ReverseItems();
 
     nServerInfo::CalcScoreAll();
-    nServerInfo::Sort( nServerInfo::PrimaryKey( sortKey_ ) );
+    nServerInfo::Sort( nServerInfo::PrimaryKey( sg_sortKey ) );
 
     int mi = 1;
     gServerInfo *run = gServerInfo::GetFirstServer();
@@ -461,7 +464,6 @@ void gServerMenu::Update()
 
 gServerMenu::gServerMenu(const char *title)
         : uMenu(title, false)
-        , sortKey_( nServerInfo::KEY_SCORE )
 {
     nServerInfo *run = nServerInfo::GetFirstServer();
     while (run)
@@ -522,7 +524,7 @@ void gServerMenu::Render(REAL y,
     u << normal;
     p << normal;
 
-    switch ( sortKey_ )
+    switch ( sg_sortKey )
     {
     case nServerInfo::KEY_NAME:
         sn = highlight;

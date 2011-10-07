@@ -695,6 +695,10 @@ dnl *************************************************
 
 dnl check for compiler
 AC_CHECK_PROG([PROTOC],protoc,`which protoc`,no)
+if test x$PROTOC = xno
+then
+    AC_MSG_ERROR([[The protobuf C++ compiler(Google Protocol Buffers, http://code.google.com/p/protobuf/) is required, but was not found.]])
+fi
 
 AC_LANG([C++])
 
