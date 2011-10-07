@@ -4754,6 +4754,8 @@ void ePlayerNetID::RemoveFromGame()
     // log scores
     LogScoreDifference();
 
+    bool logLeave = false;
+
     if ( sn_GetNetState() != nCLIENT )
     {
         nameFromClient_ = nameFromServer_;
@@ -4775,9 +4777,7 @@ void ePlayerNetID::RemoveFromGame()
 
             if ( IsHuman() && sn_GetNetState() == nSERVER && NULL != sn_Connections[Owner()].socket )
             {
-                tString ladder;
-                se_playerLeftWriter << userName_ << nMachine::GetMachine(Owner()).GetIP();
-                se_playerLeftWriter.write();
+                logLeave = true;
             }
         }
     }
@@ -4787,7 +4787,12 @@ void ePlayerNetID::RemoveFromGame()
     SetTeam( NULL );
     UpdateTeam();
     ControlObject( NULL );
-    // currentTeam = NULL;
+
+    if( logLeave )
+    {
+        se_playerLeftWriter << userName_ << nMachine::GetMachine(Owner()).GetIP();
+        se_playerLeftWriter.write();
+    }
 }
 
 bool ePlayerNetID::ActionOnQuit()
@@ -9259,6 +9264,11 @@ void ePlayerNetID::UpdateSuspensions() {
 
 void ePlayerNetID::UpdateShuffleSpamTesters()
 {
+    if( sn_GetNetState() != nSERVER )
+    {
+        return;
+    }
+
     for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
     {
         ePlayerNetID *p = se_PlayerNetIDs( i );

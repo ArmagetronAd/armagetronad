@@ -46,6 +46,8 @@ protected:							// protected attributes
     int lastScore_;                 //!< score from the beginning of the round
     int setsWon;					// number of sets the team has won
 
+    bool lastEmpty_;                //!< flag indicating whether the team was empty on the last call to UpdateAppearance
+
     int numHumans;					// number of human players on the team
     int numAIs;						// number of AI players on the team
 

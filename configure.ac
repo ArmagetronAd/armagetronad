@@ -324,7 +324,9 @@ test $CODELEVEL -ge 4 && CXXFLAGS="$CXXFLAGS -Werror"
 
 # unused variables should be tolerated while debugging, they're sometimes just there
 # to be printed in the debugger
-test $CODELEVEL -ge 1 && test $DEBUGLEVEL -ge 1 && CXXFLAGS="$CXXFLAGS -Wno-unused-but-set-variable"
+if test $CODELEVEL -ge 1 && test $DEBUGLEVEL -ge 1; then
+    AX_CXXFLAGS_GCC_OPTION(-Wno-unused-but-set-variable)
+fi
 
 # work arond known cause of warnings in SDL headers
 test $CODELEVEL -ge 2 && test x$build_dedicated = xtrue || CXXFLAGS="$CXXFLAGS -Wno-long-long"

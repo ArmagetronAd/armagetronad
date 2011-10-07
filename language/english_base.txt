@@ -836,7 +836,11 @@ ladderlog_write_wait_for_external_script_help Write to ladderlog: WAIT_FOR_EXTER
 ladderlog_write_winzone_player_enter_help     Write to ladderlog: WINZONE_PLAYER_ENTER <object id> <zone_name> <cx> <cy> <player> <player x> <player y> <player xdir> <player ydir> <time>
 ladderlog_write_zone_collapsed_help           Write to ladderlog: ZONE_COLLAPSED <zone_id> <object_id> <cx> <cy>
 ladderlog_write_zone_spawned_help             Write to ladderlog: ZONE_SPAWNED <object id> <zone_name> <cx> <cy>
-
+ladderlog_write_team_created_help             Write to ladderlog: TEAM_CREATED <team name>
+ladderlog_write_team_destroyed_help           Write to ladderlog: TEAM_DESTROYED <team name>
+ladderlog_write_team_renamed_help             Write to ladderlog: TEAM_RENAMED <old team name> <new team name>
+ladderlog_write_team_player_added_help        Write to ladderlog: TEAM_PLAYER_ADDED <team name> <player>
+ladderlog_write_team_player_removed_help      Write to ladderlog: TEAM_PLAYER_REMOVED <team name> <player>
 ladderlog_game_time_interval_help If non-negative, write a line with the current game time to the ladder log every n seconds.
 chat_log_help			Write machine parsable chat messages to var/chatlog.txt
 chatlog_write_team      Write /team messages to chatlog [1: on | 0:off]
