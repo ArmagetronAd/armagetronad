@@ -16,7 +16,7 @@ include $(top_srcdir)/Makefile.manual
 EXTRA_DIST = README-DEVELOPER README-Subversion README-SDL \
 armagetron.kdevelop armagetron.kdevelop.pcs armagetron.kdevses tron.ico \
 models sound textures bootstrap.sh music accustomdir.m4 fingerprint \
-win32
+win32 major_version
 # language/update.py
 
 # resource is included as a subdir for the purpose of keeping this makefile short and delegating
@@ -102,6 +102,10 @@ dist-hook:
 
 #   fix internal version info
 	mv $(distdir)/src/tTrueVersion.h $(distdir)/src/tFakeVersion.h
+
+#   generate yaml version info
+	echo "---" > $(distdir)/version.yaml
+	sed -e 's,^.*TRUE_ARMAGETRONAD_,,' -e 's, \+,: ,' -e 's, *\([0-9a-Z]\+\)$$, "\1",' < $(distdir)/src/tFakeVersion.h >> $(distdir)/version.yaml
 
 if USE_UNINSTALL
 

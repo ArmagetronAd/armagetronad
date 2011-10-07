@@ -275,8 +275,7 @@ Camview::Camview():
         posTranslationFlag(false), 
         riseFlag(false), fovFlag(false),ReadyFlag(false)
 {
-    rViewportConfiguration* viewportConfiguration = rViewportConfiguration::CurrentViewportConfiguration();
-    for ( int viewport = viewportConfiguration->num_viewports-1; viewport >= 0; --viewport )
+    for ( int viewport = MAX_VIEWPORTS-1; viewport >= 0; --viewport )
     {
     	viewports[viewport] = 0;
     	cam[viewport] = 0;

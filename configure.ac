@@ -393,7 +393,9 @@ test $CODELEVEL -ge 4 && CXXFLAGS="$CXXFLAGS -Werror"
 
 # unused variables should be tolerated while debugging, they're sometimes just there
 # to be printed in the debugger
-test $CODELEVEL -ge 1 && test $DEBUGLEVEL -ge 1 && CXXFLAGS="$CXXFLAGS -Wno-unused-but-set-variable"
+if test $CODELEVEL -ge 1 && test $DEBUGLEVEL -ge 1; then
+    AX_CXXFLAGS_GCC_OPTION(-Wno-unused-but-set-variable)
+fi
 
 dnl determine whether "games" should be put into paths: not if it was
 dnl requested with --disable-games or if "games" is already included
@@ -670,26 +672,25 @@ if test x$enable_armathentication = xyes; then
 
 AC_LANG([C++])
 
+AC_CHECK_LIB([boost_thread],_ZNK5boost6thread6get_idEv,,[
+
 ACX_PTHREAD([
 
 LIBS="${PTHREAD_LIBS} ${LIBS}"
 CXXFLAGS="${CXXFLAGS} ${PTHREAD_CFLAGS}"
 CC="${PTHREAD_CC}"
-dnl AC_DEFINE(HAVE_PTHREAD,1,[Define if you have POSIX threads libraries and header files.])
+AC_DEFINE(HAVE_PTHREAD,1,[Define if you have POSIX threads libraries and header files.])
 
-],[
-
-AM_PATH_ZTHREAD_AA(2.3.2)
-CXXFLAGS="${CXXFLAGS} ${ZTHREAD_CXXFLAGS}"
-LIBS="${LIBS} ${ZTHREAD_LIBS}"
+],)
 
 ])
 
-fi # krawall
+
+fi # armathentication
 
 
 dnl *************************************************
-dnl         pattern buffers
+dnl         protocol buffers
 dnl *************************************************
 
 dnl check for compiler

@@ -89,6 +89,9 @@ libtools_a_SOURCES = ${tools_extra} tools/tVersion.cpp tools/tVersion.h tTrueVer
 	tools/tRectangle.h tools/tRectangle.cpp \
 	tools/tPlayList.h tools/tPlayList.cpp\
 	tools/tDecorator.h tools/tDecorator.cpp\
+	tools/tMutex.h tools/tMutex.cpp\
+	tools/tThread.h\
+	tools/tLockedQueue.h\
 	tools/tCoord.h tools/tCoord.cpp\
 	tools/tValue.h tools/tValueParser.h\
 	tools/tFunction.h tools/tFunction.cpp\

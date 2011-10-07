@@ -22,7 +22,9 @@ import "rakelib/aabeta.rake"
 
 task "remove-version" do
   rm_rf(AA::CONFIG.generated_path("src", "macosx"))
-  rm_f(AA::CONFIG::version_info.version_file)
+  if AA::CONFIG.build_type == :development
+    rm_f(AA::CONFIG::version_info.version_file)
+  end
 end
 
 desc "Update version"

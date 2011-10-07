@@ -831,6 +831,11 @@ ladderlog_write_round_score_team_help         Write to ladderlog: ROUND_SCORE_TE
 ladderlog_write_round_winner_help             Write to ladderlog: ROUND_WINNER <team> <players>
 ladderlog_write_sacrifice_help                Write to ladderlog: SACRIFICE <player who used the hole> <player who created the hole> <player owning the wall the hole was made into>
 ladderlog_write_wait_for_external_script_help Write to ladderlog: WAIT_FOR_EXTERNAL_SCRIPT (see also: WAIT_FOR_EXTERNAL_SCRIPT and WAIT_FOR_EXTERNAL_SCRIPT_TIMEOUT)
+ladderlog_write_team_created_help             Write to ladderlog: TEAM_CREATED <team name>
+ladderlog_write_team_destroyed_help           Write to ladderlog: TEAM_DESTROYED <team name>
+ladderlog_write_team_renamed_help             Write to ladderlog: TEAM_RENAMED <old team name> <new team name>
+ladderlog_write_team_player_added_help        Write to ladderlog: TEAM_PLAYER_ADDED <team name> <player>
+ladderlog_write_team_player_removed_help      Write to ladderlog: TEAM_PLAYER_REMOVED <team name> <player>
 ladderlog_game_time_interval_help If non-negative, write a line with the current game time to the ladder log every n seconds.
 chat_log_help			Write machine parsable chat messages to var/chatlog.txt
 show_fps_help			Enable fps display

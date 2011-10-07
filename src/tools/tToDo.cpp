@@ -28,37 +28,24 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tToDo.h"
 #include "tArray.h"
 
-#ifdef HAVE_LIBZTHREAD
-#include <zthread/FastRecursiveMutex.h>
+#include "tMutex.h"
 
-static ZThread::FastRecursiveMutex st_mutex;
-#elif defined(HAVE_PTHREAD)
-#include "pthread-binding.h"
-static tPThreadRecursiveMutex st_mutex;
-#else
-class tMockMutex
-{
-public:
-    void acquire(){}
-    void release(){}
-};
-
-static tMockMutex st_mutex;
-#endif
+static boost::recursive_mutex st_mutex;
 
 tArray<tTODO_FUNC *> tToDos;
 
 void st_ToDo(tTODO_FUNC *td){ // postpone something
-    st_mutex.acquire();
+    boost::lock_guard< boost::recursive_mutex > lock( st_mutex );
+
     tToDos[tToDos.Len()]=td;
-    st_mutex.release();
 }
 
 // the function currently in execution
 static tTODO_FUNC * st_toDoCurrent = 0;
 
 void st_ToDoOnce(tTODO_FUNC *td){ // postpone something, avoid double entries
-    st_mutex.acquire();
+    boost::lock_guard< boost::recursive_mutex > lock( st_mutex );
+
     if( st_toDoCurrent == td )
     {
         return;
@@ -71,7 +58,6 @@ void st_ToDoOnce(tTODO_FUNC *td){ // postpone something, avoid double entries
         }
     }
     tToDos[tToDos.Len()]=td;
-    st_mutex.release();
 }
 
 // a lone (but relatively safe) function pointer for things to do triggered by signals.
@@ -83,7 +69,7 @@ void st_DoToDo(){ // do the things that have been postponed
         st_ToDo( st_toDoFromSignal );
         st_toDoFromSignal = 0;
     }
-    st_mutex.acquire();
+    boost::lock_guard< boost::recursive_mutex > lock( st_mutex );
     while (tToDos.Len()){
         tTODO_FUNC *last = st_toDoCurrent;
         tTODO_FUNC *td = tToDos[tToDos.Len()-1];
@@ -92,7 +78,6 @@ void st_DoToDo(){ // do the things that have been postponed
         (*td)();
         st_toDoCurrent = last;
     }
-    st_mutex.release();
 }
 
 void st_ToDo_Signal(tTODO_FUNC *td){ // postpone something

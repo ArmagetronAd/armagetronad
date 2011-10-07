@@ -81,6 +81,8 @@ class tCasaclPreventer
 public:
     tCasaclPreventer( bool prevent = true );
     ~tCasaclPreventer();
+
+    static bool InRInclude(); //!< returns whether we're currently in an RINCLUDE file
 private:
     bool previous_; //!< previous value of prevention flag
 };
@@ -124,8 +126,13 @@ protected:
     tAccessLevel requiredLevel; //!< access level required to change this setting
     tAccessLevel setLevel;      //!< access level of the user making the last change to this setting
 
+public:
+    // the map of all configuration items
     typedef std::map< tString, tConfItemBase * > tConfItemMap;
+    static tConfItemMap const & GetConfItemMap();
+protected:
     static tConfItemMap & ConfItemMap();
+public:
 
 public:
     typedef void callbackFunc(void);
@@ -183,7 +190,13 @@ public:
         return true;
     }
 
+    // should this be saved into user.cfg?
     virtual bool Save(){
+        return true;
+    }
+
+    // CAN this be saved at all?
+    virtual bool CanSave(){
         return true;
     }
 };

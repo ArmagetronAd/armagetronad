@@ -4710,14 +4710,16 @@ nMachine & nMachine::GetMachine( unsigned short userID )
         return server;
     }
 
-    tASSERT( userID <= MAXCLIENTS+1 );
-
     if( sn_GetNetState() != nSERVER )
     {
+        tASSERT(userID == 0);
+
         // invalid ID, return invalid machine (clients don't track machines)
         static nMachine invalid;
         return invalid;
     }
+
+    tASSERT( userID <= MAXCLIENTS+1 );
 
     // get address
     tVERIFY( userID <= MAXCLIENTS+1 );
@@ -4919,6 +4921,18 @@ void nMachine::Ban( REAL time )
 
     // set the banning timeout to the current time plus the given time
     banned_ = tSysTimeFloat() + time;
+
+    // kick current clients
+    if( time > 0 )
+    {
+        for( int i = MAXCLIENTS-1; i > 0; --i )
+        {
+            if ( sn_Connections[i].socket && &GetMachine(i) == this )
+            {
+                sn_DisconnectUser( i, banReason_ );
+            }
+        }
+    }
 
     if ( sn_printBans )
     {
