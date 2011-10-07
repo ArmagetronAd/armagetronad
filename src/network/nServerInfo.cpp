@@ -444,7 +444,7 @@ nServerInfo *nServerInfo::Prev()
 }
 
 // Sort server list
-void nServerInfo::Sort( PrimaryKey key )
+void nServerInfo::Sort( PrimaryKey key, SortHelper Helper )
 {
     // insertion sort
     nServerInfo *run = GetFirstServer();
@@ -479,14 +479,19 @@ void nServerInfo::Sort( PrimaryKey key )
                 break;
             }
 
+            signed char help = Helper(ascend) - Helper(prev);
+
             switch ( key )
             {
 
             case KEY_NAME:
-                // Unreachable servers should be displayed at the end of the list                
+                // Unreachable servers should be displayed at the end of the list
                 if ( !previousUnreachable && !ascendUnreachable )
                 {
-                    compare = prev->nameForSorting.Compare( ascend->nameForSorting, true );
+                    if( help )
+                        compare = help;
+                    else
+                        compare = prev->nameForSorting.Compare( ascend->nameForSorting, true );
                 }
                 break;
             case KEY_PING:
@@ -496,7 +501,10 @@ void nServerInfo::Sort( PrimaryKey key )
                     compare = 1;
                 break;
             case KEY_USERS:
-                compare = ascend->users - prev->users;
+                if ( ( (bool) ascend->users == (bool) prev->users ) && help )
+                    compare = help;
+                else
+                    compare = ascend->users - prev->users;
                 break;
             case KEY_SCORE:
                 if ( previousUnreachable )
@@ -2753,6 +2761,11 @@ void nServerInfoBase::ReadSync( Network::SmallServerInfoBase const & info,
 static tString net_dns("");
 
 static tConfItemLine sn_sbtip_official("SERVER_DNS", net_dns);
+
+bool SortHelperNoop(nServerInfoBase const * server)
+{
+    return false;
+}
 
 tString const & sn_GetMyDNSName()
 {

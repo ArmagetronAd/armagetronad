@@ -382,7 +382,7 @@ void gServerMenu::Update()
     ReverseItems();
 
     nServerInfo::CalcScoreAll();
-    nServerInfo::Sort( nServerInfo::PrimaryKey( sg_sortKey ) );
+    nServerInfo::Sort( nServerInfo::PrimaryKey( sg_sortKey ), &gServerFavorites::IsFavorite );
 
     int mi = 1;
     gServerInfo *run = gServerInfo::GetFirstServer();

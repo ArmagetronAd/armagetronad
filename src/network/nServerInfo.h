@@ -56,6 +56,10 @@ template< class T > class nProtoBufDescriptor;
 
 typedef nServerInfo* (sn_ServerInfoCreator)();
 
+typedef bool SortHelper(nServerInfoBase const * server);
+
+bool SortHelperNoop(nServerInfoBase const * server);
+
 //! return the DNS name of this machine, if set
 tString const & sn_GetMyDNSName();
 
@@ -202,7 +206,8 @@ public:
     };
 
     static nServerInfo *GetFirstServer();  // get the first (best) server
-    static void Sort( PrimaryKey key );    // sort the servers by score
+    static void Sort( PrimaryKey key, SortHelper helper=&SortHelperNoop );
+                                           // sort the servers by score
     static tString SortableName( const char * ); // gives a sanitized name for sorting
     static void CalcScoreAll();            // calculate the score for all servers
     static void DeleteAll(bool autosave=true);     // delete all server infos
