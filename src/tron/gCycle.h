@@ -217,6 +217,45 @@ public:
     // every frame, a bit of this variable is taken away and added to the step the cycle makes.
     REAL correctDistanceSmooth;
 
+    static void TacticalPositioning(REAL time);  // tactical positioning 
+    enum TacticalPosition
+    {
+        TP_Start = 0,
+        TP_NS = 1,
+        TP_Goal = 2,
+        TP_Defense = 3,
+        TP_Midfield = 4,
+        TP_Sumo = 5,
+        TP_Offense = 6,
+        TP_Attacking = 7,
+        TP_Count = 8
+    };
+    static const std::string TacticalPositionStr[];
+    static const std::string StateStr[];
+    TacticalPosition tactical_pos;
+    int    closest_zoneid;
+    REAL   last_time;
+    
+    class Statistics {
+    public:
+        struct Record {
+            REAL time;
+            enum {TP_Alive=0, TP_Killed, TP_TKed, TP_Suicide} state;
+            int kills;
+        };
+    private:
+        std::vector<Statistics::Record> stats;
+        std::string name;
+    public:
+        Statistics(std::string p_name):name(p_name) { Init(); }
+        ~Statistics() { Write(); }
+        void Init(); 
+        void Write();
+        Record &operator[](const int& i) { return stats[i]; }
+        Record &operator<<(Record const &in) { stats.push_back(in); }
+    };
+    Statistics tactical_stats;
+
 private:
     void TransferPositionCorrectionToDistanceCorrection();
 

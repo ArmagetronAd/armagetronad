@@ -136,7 +136,7 @@ static tSettingItem<bool> sg_svgOutputScoreDifferencesConf( "SVG_OUTPUT_LOG_SCOR
 
 // time in sec before player positioning starts
 static REAL sg_playerPositioningStartTime = 5.0;
-static tSettingItem<REAL> sg_playerPositioningStartTimeConf( "PLAYER_POSITIONING_START_TIME", sg_playerPositioningStartTime );
+static tSettingItem<REAL> sg_playerPositioningStartTimeConf( "TACTICAL_POSITION_START_TIME", sg_playerPositioningStartTime );
 
 static nSettingItemWatched<tString> conf_mapfile("MAP_FILE",mapfile, nConfItemVersionWatcher::Group_Breaking, 8 );
 
@@ -4679,8 +4679,8 @@ bool gGame::GameLoop(bool input){
         }
     } {
         static float lastTime = 1e42;
-        if((gtime > 0) && (sg_tacticalPositionInterval >= 0) && (gtime >= lastTime + sg_tacticalPositionInterval || gtime < lastTime)) {
-            ePlayerNetID::TacticalPositioning();
+        if((gtime > sg_playerPositioningStartTime) && (sg_tacticalPositionInterval >= 0) && (gtime >= lastTime + sg_tacticalPositionInterval || gtime < lastTime)) {
+            gCycle::TacticalPositioning(gtime);
             lastTime = gtime;
         }
     } {

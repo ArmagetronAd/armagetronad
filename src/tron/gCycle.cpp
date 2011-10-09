@@ -2420,6 +2420,9 @@ gCycle::gCycle(eGrid *grid, const eCoord &pos,const eCoord &d,ePlayerNetID *p)
         turning(NULL),
         skew(0),skewDot(0),
         rotationFrontWheel(1,0),rotationRearWheel(1,0),heightFrontWheel(0),heightRearWheel(0),
+        tactical_pos(TP_Start),
+        last_time(.0),
+        tactical_stats(static_cast<std::string>(p->GetUserName())),
         currentWall(NULL),
         lastWall(NULL)
 {
@@ -3331,6 +3334,7 @@ void gCycle::KillAt( const eCoord& deathPos){
         {
             sg_deathSuicideWriter << hunter->GetUserName();
             sg_deathSuicideWriter.write();
+            tactical_stats[tactical_pos].state = Statistics::Record::TP_Suicide;
 
             if ( score_suicide )
                 hunter->AddScore(score_suicide, tOutput(), "$player_lose_suicide", sg_suicideMessage );
@@ -3358,6 +3362,7 @@ void gCycle::KillAt( const eCoord& deathPos){
                 if (Player()->CurrentTeam() != hunter->CurrentTeam()) {
                     sg_deathFragWriter << Player()->GetUserName() << hunter->GetUserName();
                     sg_deathFragWriter.write();
+                    tactical_stats[tactical_pos].state = Statistics::Record::TP_Killed;
 
                     win.SetTemplateParameter(3, preyName);
                     win << "$player_win_frag";
@@ -3373,6 +3378,7 @@ void gCycle::KillAt( const eCoord& deathPos){
                 else {
                     sg_deathTeamkillWriter << Player()->GetUserName() << hunter->GetUserName();
                     sg_deathTeamkillWriter.write();
+                    tactical_stats[tactical_pos].state = Statistics::Record::TP_TKed;
 
                     tColoredString hunterName;
                     hunterName << *hunter << tColoredString::ColorString(1,1,1);
@@ -3406,6 +3412,7 @@ void gCycle::KillAt( const eCoord& deathPos){
             {
 
                 Killed(pHunterCycle);
+                ++(pHunterCycle->tactical_stats[pHunterCycle->tactical_pos].kills);
 
             }
         }
@@ -5152,6 +5159,9 @@ gCycle::gCycle(nMessage &m)
         spark(NULL),
         skew(0),skewDot(0),
         rotationFrontWheel(1,0),rotationRearWheel(1,0),heightFrontWheel(0),heightRearWheel(0),
+        tactical_pos(TP_Start),
+        last_time(.0),
+        tactical_stats(""),
         currentWall(NULL),
         lastWall(NULL)
 {
@@ -6594,6 +6604,157 @@ void gCycle::SetWallBuilding(bool build) {
 	else if (nwall&&!build) DropWall(false);
 	if (nwall) nwall->RequestSync();
 	if ((CurrentWall()) && (CurrentWall()->NetWall())) CurrentWall()->NetWall()->RequestSync();
+}
+
+// Flag to enable/diasble tactical position processing
+bool sg_TacticalPositioningEnable = false;
+static tSettingItem< bool > sg_TacticalPositioningEnableConf( "TACTICAL_POSITION_ENABLE", sg_TacticalPositioningEnable );
+
+// ratio used to set midfield between defense and offense. <= 1.0 means no midfield, n means (n-1)/(n+1) of the distance from zones center is midfield
+static REAL sg_TacticalPositioningMidfieldFactor = 3.0;
+static tSettingItem<REAL> sg_TacticalPositioningMidfieldFactorConf( "TACTICAL_POSITION_MIDFIELD_FACTOR", sg_TacticalPositioningMidfieldFactor );
+
+// ratio used to set the circle around a zone dedicated to sumo or goal position.
+REAL sg_TacticalPositioningZoneFactor = 1.5;
+static tSettingItem<REAL> sg_TacticalPositioningZoneFactorConf( "TACTICAL_POSITION_ZONE_FACTOR", sg_TacticalPositioningZoneFactor );
+
+static eLadderLogWriter sg_tacticalPositionWriter("TACTICAL_POSITION", false);
+
+const std::string gCycle::TacticalPositionStr[] = {"START", "NS", "GOAL", "DEFENSE", "MIDFIELD", "SUMO", "OFFENSE", "ATTACKING", "LAST"};
+const std::string gCycle::StateStr[] = {"ALIVE", "KILLED", "TKED", "SUICIDE"};
+
+// max distance
+inline REAL MaxDistance(eCoord c) { return (abs(c.x)>abs(c.y) ? abs(c.x) : abs(c.y)) ; }
+
+void gCycle::TacticalPositioning(REAL time) {
+    if (!sg_TacticalPositioningEnable) {
+        return;
+    }
+    eGrid *grid = eGrid::CurrentGrid();
+    for ( int i = se_PlayerNetIDs.Len()-1; i >= 0; --i ) {
+        ePlayerNetID *p = se_PlayerNetIDs(i);
+        // if this player is not active, continue with next one
+        if (!p->IsActive()||!p->Object()) continue;
+        gCycle *cycle = dynamic_cast<gCycle *>(p->Object());
+        // compute closest friend and enemy zones distances
+        const tList<eGameObject>& gameObjects = grid->GameObjects();
+        REAL cHighDist = 9999999999.0;
+        REAL closestHomeDistance = cHighDist;
+        REAL closestHomeRadius = 0;
+        REAL closestHomeMaxDist = 0;
+        REAL closestTargetDistance = cHighDist;
+        REAL closestTargetRadius = 0;
+        REAL closestTargetMaxDist = 0;
+        gBaseZoneHack *zoneHome=0, *zoneTarget=0;
+        eCoord zoneVector, homeVector, targetVector;
+        for (int j=gameObjects.Len()-1;j>=0;j--) {
+            gBaseZoneHack *zone=dynamic_cast<gBaseZoneHack *>(gameObjects(j));
+            // for all active base zone ...
+            if ( zone ) {
+                zoneVector = cycle->Position() - zone->Position();
+                REAL zoneDistance = zoneVector.Norm();
+                REAL maxDistance = MaxDistance(zoneVector);
+                if ( p->CurrentTeam() != zone->Team() ) {
+                    if (zoneDistance<closestTargetDistance) {
+                        closestTargetDistance=zoneDistance;
+                        closestTargetMaxDist=maxDistance;
+                        zoneTarget = zone;
+                        targetVector = zoneVector;
+                        closestTargetRadius = zoneTarget->GetRadius();
+                    }
+                } else {
+                    if (zoneDistance<closestHomeDistance) {
+                        closestHomeDistance=zoneDistance;
+                        closestHomeMaxDist=maxDistance;
+                        zoneHome = zone;
+                        homeVector = zoneVector;
+                        closestHomeRadius = zoneHome->GetRadius();
+                    }
+                }
+            }
+        }
+        REAL zoneDistance=cHighDist;
+        if (zoneHome && zoneTarget) {
+            zoneVector = zoneHome->Position()-zoneTarget->Position();
+            zoneDistance=zoneVector.Norm();
+            // recompute zones distances using projected position on a line between zones
+            REAL p = eCoord::F(zoneVector,targetVector)/zoneDistance;
+            closestTargetDistance = (p<.0?-p:p);
+            closestHomeDistance = zoneDistance - p;
+        }
+        // determine new position
+        tString TacPosStr("NS");
+        TacticalPosition newTacticalPos = TP_NS;
+        int newClosestZoneID = -1;
+        if ((closestHomeDistance!=cHighDist)||(closestTargetDistance!=cHighDist)) {
+            if (closestHomeDistance<closestTargetDistance)
+                newClosestZoneID = zoneHome->GOID();
+            else
+                newClosestZoneID = zoneTarget->GOID();
+        }
+        if ((closestHomeDistance==cHighDist)||(closestTargetDistance==cHighDist)) {
+            // no home base or no enemy base, round is ending or there's no zones ...
+            // keep NS as tactical position
+        } else if ((closestHomeMaxDist<=closestHomeRadius*sg_TacticalPositioningZoneFactor)
+                && (closestTargetMaxDist<=closestTargetRadius*sg_TacticalPositioningZoneFactor)) {
+            // GOALIE and ATTACKING as the same time ... it's SUMO ;)
+            newTacticalPos = TP_Sumo;
+            TacPosStr="SUMO";
+        } else if (closestHomeMaxDist<=closestHomeRadius*sg_TacticalPositioningZoneFactor) {
+            // player in home zone area
+            newTacticalPos = TP_Goal;
+            TacPosStr="";
+            TacPosStr<<tString("GOAL ")<<zoneHome->GOID();
+        } else if (closestTargetMaxDist<=closestTargetRadius*sg_TacticalPositioningZoneFactor) {
+            // player in enemy zone area
+            newTacticalPos = TP_Attacking;
+            TacPosStr="";
+            TacPosStr<<tString("ATTACKING ")<<zoneTarget->GOID();
+        } else if (closestHomeDistance>closestTargetDistance*sg_TacticalPositioningMidfieldFactor) {
+            // target is at least x times closer than home
+            newTacticalPos = TP_Offense;
+            TacPosStr="OFFENSE";
+        } else if (closestTargetDistance>closestHomeDistance*sg_TacticalPositioningMidfieldFactor) {
+            // Home is at least x times closer than target
+            newTacticalPos = TP_Defense;
+            TacPosStr="DEFENSE";
+        } else {
+            // player seems to be midfield
+            newTacticalPos = TP_Midfield;
+            TacPosStr="MIDFIELD";
+        }
+        // update time in statistics
+        cycle->tactical_stats[cycle->tactical_pos].time += time - cycle->last_time;
+        cycle->last_time = time;
+        // if position changed, send a message and store new one
+        if ((cycle->tactical_pos != newTacticalPos) || ((cycle->closest_zoneid != newClosestZoneID) && (newTacticalPos>=6))) {
+            if(sg_tacticalPositionWriter.isEnabled()) {
+                sg_tacticalPositionWriter << time << p->GetUserName() << TacPosStr;
+                sg_tacticalPositionWriter.write();
+            }
+            cycle->tactical_pos = newTacticalPos;
+            cycle->closest_zoneid = newClosestZoneID;
+        }
+    }
+}
+
+static eLadderLogWriter sg_tacticalStatisticWriter("TACTICAL_STATISTICS", false);
+
+void gCycle::Statistics::Init() {
+    static Record NullRecord = {.0, Record::TP_Alive, 0};
+    stats.clear();
+    stats.assign(TP_Count, NullRecord);
+}
+
+void gCycle::Statistics::Write() {
+    if(sg_tacticalStatisticWriter.isEnabled()) {
+		for (int i=0; i<stats.size(); i++) {
+			if (stats[i].time>.0) {
+                sg_tacticalStatisticWriter << TacticalPositionStr[i] << name << stats[i].time << StateStr[stats[i].state] << stats[i].kills;
+                sg_tacticalStatisticWriter.write();
+			}
+        }
+    }
 }
 
 void gCycle::TeleportTo(eCoord dest, eCoord dir, REAL time) {
