@@ -1794,6 +1794,13 @@ void Render(eGrid *grid, REAL time, bool swap=true){
 
 #ifndef DEDICATED
     if (sr_glOut){
+        static bool lastMoviePack=sg_MoviePack();
+        if(lastMoviePack!=sg_MoviePack())
+        {
+            lastMoviePack=sg_MoviePack();
+            rDisplayList::ClearAll();
+        }
+
         RenderAllViewports(grid);
 
         sr_ResetRenderState(true);
