@@ -1889,7 +1889,7 @@ player_red_text			Red:
 player_red_help			Lets you choose the red component of your colour.
 
 player_autologin_text		Auto Login:
-player_autologin_help		When enabled, you will automatically initiate the (usually completely optional) login procedure as soon as you enter a server.
+player_autologin_help		When enabled, you will automatically initiate the (usually completely optional) login procedure using the Global ID above as soon as you enter a server.
 
 player_stealth_text		Hide Global ID:
 player_stealth_help		Usually your global ID is shown to everyone when you log in or when someone uses the /players chat command. Enabling this tells the server that you prefer to remain anonymous. The server may still show your ID to moderators and administrators on the server or even decide to ignore your request.
