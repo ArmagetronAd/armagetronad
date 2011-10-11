@@ -114,6 +114,7 @@ cycle_rubber_delay_help     During this fraction of the cycle delay time after e
 cycle_rubber_delay_bonus_help Factor for CYCLE_RUBBER_DELAY rubber efficiency.
 cycle_ping_rubber_help		Additional niceness for high ping players
 cycle_rubber_wall_shrink_help       With finite length trails, the used rubber is multiplied with this value and the result is subtracted from the wall length.
+cycle_rubber_sync_help              Determines whether rubber is synced to clients. The default 1 makes it sync only to the owner of each cycle, a value of 0 does not sync it at all and renders rubber meters useless, a value of 2 syncs rubber of all cycles to all clients, which was the old behavior before this setting was introduced.
 cycle_brake_refill_help				Rate at which the brake reservoir refills when you are not braking
 cycle_brake_deplete_help			Rate at which the brake reservoir depletes when you are braking
 cycle_sync_interval_enemy_help		Time in seconds between server-client updates of enemy cycles

@@ -297,6 +297,9 @@ public:
     //! returns true if sync message is new (and updates 
     bool SyncIsNew( Network::NetObjectSync const & sync, nSenderInfo const & sender );
 
+    //! returns the user that the current WriteSync() messages are for
+    static int SyncedUser();
+
     //! returns the descriptor responsible for this class
     inline nNetObjectDescriptorBase const & GetDescriptor() const { return DoGetDescriptor(); }
 private:
