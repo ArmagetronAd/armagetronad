@@ -54,6 +54,8 @@ extern bool      sg_TalkToMaster;  // should this server be known on the interne
 typedef enum{gFINISH_EXPRESS,gFINISH_IMMEDIATELY,gFINISH_SPEEDUP,gFINISH_NORMAL}
 gFinishType;
 
+struct DrawReason{};
+
 #ifdef ENABLE_ZONESV2
 class zZone;
 #else
