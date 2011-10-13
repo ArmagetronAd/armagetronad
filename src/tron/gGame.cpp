@@ -2079,6 +2079,11 @@ void sg_DisplayVersionInfo() {
 }
 
 void sg_StartupPlayerMenu();
+
+static void sg_ShowWiki()
+{
+    sg_OpenURI(tOutput("$main_menu_wiki_uri"));
+}
 #endif
 
 void MainMenu(bool ingame){
@@ -2163,6 +2168,12 @@ void MainMenu(bool ingame){
     uMenuItemExit exx(&MainMenu,extitle,
                       exhelp);
 
+    uMenuItemFunction wiki
+    (&MainMenu,
+     "$main_menu_wiki_text",
+     "$main_menu_wiki_help",
+     &sg_ShowWiki);
+    
     uMenuItemFunction *return_to_main=NULL;
     if (ingame){
         if (sn_GetNetState()==nSTANDALONE)

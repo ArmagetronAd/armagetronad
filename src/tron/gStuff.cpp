@@ -33,6 +33,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tInitExit.h"
 #include "nConfig.h"
 
+#include <sstream>
+
 #include "rSDL.h"
 #include "rScreen.h"
 #ifndef DEDICATED
@@ -58,6 +60,25 @@ static nSettingItemWatched<REAL> su_doubleBindTimeoutConf( "DOUBLEBIND_TIME", su
 
 bool sg_MoviePack(){
     return sg_moviepackInstalled && sg_moviepackUse;
+}
+
+void sg_OpenURI( char const * uri )
+{
+    // bool success = false;
+#ifdef WIN32
+    // LONG r = ShellExecute(NULL, "open", uri, NULL, NULL, SW_SHOWNORMAL);
+#else
+    std::ostringstream s; // composing a command
+#ifdef MACOSX
+    s << "open " << uri;
+#else
+// general unix
+    s << "x-www-browser " << uri << "|| firefox " << uri;
+#endif
+    // execute command
+    system( s.str().c_str() );
+#endif
+    
 }
 
 //const eCoord se_zeroCoord(0,0);
