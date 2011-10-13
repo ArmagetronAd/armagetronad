@@ -2678,7 +2678,11 @@ extern REAL planned_rate_control[MAXCLIENTS+2];
 extern REAL sent_per_messid[100];
 
 static REAL lastdeath=0;
+REAL drawtime=0;
 static bool roundOver=false;   // flag set when the round winner is declared
+
+DrawReason * drawreason=NULL;
+DrawReason DrawReason_MinAlive;
 
 static void sg_VoteMenuIdle()
 {
@@ -2836,6 +2840,8 @@ void gGame::StateUpdate(){
             // con << "Creating objects...\n";
 
             lastdeath = -100;
+            drawtime = 0;
+            drawreason = NULL;
             roundOver = false;
 
             // rename players as per request
@@ -3245,6 +3251,12 @@ static bool sg_EnemyExists( int team )
 static REAL sg_winZoneRandomness = .8;
 static tSettingItem< REAL > sg_winZoneSpreadConf( "WIN_ZONE_RANDOMNESS", sg_winZoneRandomness );
 
+static int sg_minAlive = 1;
+static tSettingItem< int > sg_minAliveConf("ROUND_MIN_ALIVE", sg_minAlive);
+
+static REAL sg_minDrawTime = 5;
+static tSettingItem< REAL > sg_minDrawTimeConf("ROUND_DRAW_WARN_TIME", sg_minDrawTime);
+
 static eLadderLogWriter sg_roundWinnerWriter("ROUND_WINNER", true);
 static eLadderLogWriter sg_matchWinnerWriter("MATCH_WINNER", true);
 
@@ -3493,6 +3505,15 @@ void gGame::Analysis(REAL time){
         lastTeams=humanTeamsClamp; // update last team count
     }
 
+    if( drawreason != &DrawReason_MinAlive && (!drawtime || drawtime > time+sg_minDrawTime)
+            && alive < sg_minAlive && alive < humans && teams_alive > 1 )
+    {
+        drawreason = &DrawReason_MinAlive;
+        drawtime = time+sg_minDrawTime;
+
+        sn_ConsoleOut(tOutput("$gamestate_draw_soon", sg_minDrawTime));
+    }
+
     // who is alive?
     if ( time-lastdeath < 1.0f )
     {
@@ -3503,7 +3524,7 @@ void gGame::Analysis(REAL time){
         {
             if ( sg_currentSettings->gameType!=gFREESTYLE )
             {
-                if ( eTeam::teams.Len()>1 && teams_alive<=1 ){
+                if ( eTeam::teams.Len()>1 ){
                     winner=last_team_alive+1;
                     wintimer=time;
                 }
@@ -3514,6 +3535,11 @@ void gGame::Analysis(REAL time){
                     winner=-1;
                 wintimer=time;
             }
+        }
+        else if ( drawtime && time >= drawtime )
+        {
+            winner = -1;
+            wintimer = time;
         }
 
         const char* survivor="$player_win_survivor";
@@ -3614,6 +3640,19 @@ void gGame::Analysis(REAL time){
                         notificationMessage << " has won the round";
                         se_sendEventNotification(tString("Round winner"), notificationMessage);
                     }
+                }
+                else if ( time >= drawtime )
+                {
+                    tOutput drawmsg;
+                    drawmsg << "$gamestate_draw";
+
+                    if( drawreason = &DrawReason_MinAlive )
+                    {
+                        drawmsg << "$gamestate_draw_minalive";
+                    }
+
+                    sn_CenterMessage(tOutput("$gamestate_draw_center"));
+                    sn_ConsoleOut(drawmsg);
                 }
                 //gStatistics - highscore check
                 if (sg_singlePlayer && gStats && se_PlayerNetIDs.Len() > 0 && se_PlayerNetIDs(0)->IsHuman())

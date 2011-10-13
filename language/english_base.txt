@@ -220,6 +220,9 @@ limit_rounds_help		End the match after this number of rounds
 limit_time_help			End the match after this number of minutes 
 limit_advance_help      End the match when the first team in score is this number of points ahead of the second team
 
+round_min_alive_help    End the round in a draw if there aren't this many humans alive.
+round_draw_warn_time_help Time allotted for teams to win until round actually ends in a draw.
+
 auto_team_help          Flag indicating whether players should be put into teams automatically.
 no_spectators_allowed	Sorry, does not work with automatic team assignment.\n
 auto_team_spec_spam_help    If set to 0, spectators won't be announced when joining or leaving, provided AUTO_TEAM is set to 0.
@@ -2514,6 +2517,10 @@ gamestate_champ_finalscores	Final Scores:\n
 gamestate_winner_winner		Winner: 
 gamestate_winner_ai		AI.
 gamestate_winner_humans		Humans.
+gamestate_draw_soon         Round draw in \1 seconds!\n
+gamestate_draw_center       Round Draw!
+gamestate_draw              The round ended in a draw 
+gamestate_draw_minalive     because not enough players were alive.\n
 
 instant_win_activated		Instant win zone activated! Enter it to win the round.\n
 instant_round_end_activated	Round end zone activated! Enter it to end the round.\n
