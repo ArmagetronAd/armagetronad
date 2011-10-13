@@ -66,7 +66,7 @@ void sg_OpenURI( char const * uri )
 {
     // bool success = false;
 #ifdef WIN32
-    // LONG r = ShellExecute(NULL, "open", uri, NULL, NULL, SW_SHOWNORMAL);
+    ShellExecute(NULL, "open", uri, NULL, NULL, SW_SHOWNORMAL);
 #else
     std::ostringstream s; // composing a command
 #ifdef MACOSX
