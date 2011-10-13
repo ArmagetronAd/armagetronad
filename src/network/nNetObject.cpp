@@ -1627,6 +1627,11 @@ bool nNetObject::DoDebugPrint()
 
 static int sn_syncedUser = -1;
 
+int nNetObject::SyncedUser()
+{
+    return sn_syncedUser;
+}
+
 void nNetObject::SyncAll()
 {
 #ifdef DEBUG
