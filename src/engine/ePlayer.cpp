@@ -164,7 +164,6 @@ static tConfItemLine se_hiddenPlayerPrefixConf( "PLAYER_LIST_HIDDEN_PLAYER_PREFI
 static tConfItemFunc Rename_conf("RENAME", &ForceName);
 static tAccessLevelSetter Rename_confLevel( Rename_conf, tAccessLevel_Moderator );
 
-
 static tReferenceHolder< ePlayerNetID > se_PlayerReferences;
 
 class PasswordStorage
@@ -3043,8 +3042,21 @@ static void se_ChatTeamLeave( ePlayerNetID * p )
     }
 
     eTeam * leftTeam = p->NextTeam();
-    if ( leftTeam )
+
+    if ( se_matches < 0 ) // allow quickleaving in warmup mode
     {
+        if( p->Object() && p->Object()->Alive() )
+        {
+            p->Object()->Kill();
+        }
+        p->SetTeam(0);
+        p->SetTeamWish(0);
+        p->UpdateTeam();
+        p->RequestSync();
+    }
+    else if ( leftTeam )
+    {
+        p->SetTeamWish(0);
         if ( !leftTeam )
             leftTeam = p->CurrentTeam();
 
@@ -3060,8 +3072,6 @@ static void se_ChatTeamLeave( ePlayerNetID * p )
                                     tColoredString::RemoveColors(p->GetName()) ) );
         }
     }
-
-    p->SetTeamWish(0);
 }
 
 static bool se_filterColorTeam=false;
@@ -3278,6 +3288,13 @@ static void se_ListTeam( ePlayerNetID * receiver, eTeam * team )
     {
         tos << " " << tOutput( "$invite_team_locked_list" );
     }
+    if ( se_matches < 0 )
+    {
+        if ( team->IsReady() )
+            tos << " " << tOutput( "$team_list_ready" );
+        else
+            tos << " " << tOutput( "$team_list_not_ready" );
+    }
     tos << ":\n";
 
     // send team members
@@ -3359,6 +3376,24 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s, tString co
             tos << "  ";
         tos << p2->Owner();
         tos << ": ";
+        tos << p2->GetColoredName()
+            << tColoredString::ColorString( -1, -1, -1)
+            << " ";
+        if ( se_matches < 0 && p2->IsHuman() && p2->CurrentTeam() )
+        {
+            tos << "( ";
+            if ( p2->ready )
+            {
+                tos << tOutput("$player_list_ready")
+                    << tColoredString::ColorString( -1, -1, -1);
+            }
+            else
+            {
+                tos << tOutput("$player_list_not_ready")
+                    << tColoredString::ColorString( -1, -1, -1);
+            }
+            tos << " )";
+        }
         if ( p2->GetAccessLevel() < tAccessLevel_Default && !se_Hide( p2, receiver ) )
         {
 #ifdef KRAWALL_SERVER
@@ -3366,9 +3401,7 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s, tString co
 #else
             hidden = false;
 #endif
-            tos << p2->GetColoredName()
-                << tColoredString::ColorString( -1, -1, -1)
-                << " ( ";
+            tos << "( ";
             if ( hidden )
                 tos << se_hiddenPlayerPrefix;
 #ifdef KRAWALL_SERVER
@@ -3387,7 +3420,7 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s, tString co
         }
         else
         {
-            tos << p2->GetColoredName() << tColoredString::ColorString(1,1,1) << " ( )";
+            tos << "( )";
         }
         if ( ( p2->Owner() != 0 && tCurrentAccessLevel::GetAccessLevel() <= se_ipAccessLevel ) || ( p2->Owner() != 0 && p2->Owner() == receiver->Owner() ) )
         {
@@ -3539,7 +3572,7 @@ static void se_ChatShuffle( ePlayerNetID * p, std::istream & s )
     }
 
     if( p->CurrentTeam() )
-    {  
+    {
         // really shuffle
         p->CurrentTeam()->Shuffle( IDNow, IDWish );
         se_ListTeam( p, p->CurrentTeam() );
@@ -3563,6 +3596,32 @@ void ePlayerNetID::SetShuffleWish( int pos )
     teamListID = pos;
 }
 
+void se_Ready( ePlayerNetID * p )
+{
+    if( !p->CurrentTeam() )
+    {
+        sn_ConsoleOut(tOutput("$player_ready_noteam"), p->Owner());
+        return;
+    }
+    if( se_matches >= 0 )
+    {
+        sn_ConsoleOut(tOutput("$player_ready_onlywarmup"), p->Owner());
+        return;
+    }
+
+    p->ready = !p->ready;
+
+    p->RequestSync();
+
+    if( p->ready )
+    {
+        sn_ConsoleOut(tOutput("$player_ready", p->GetColoredName()), p->Owner());
+    }
+    else
+    {
+        sn_ConsoleOut(tOutput("$player_ready_not", p->GetColoredName()), p->Owner());
+    }
+}
 class eHelpTopic {
     tString m_shortdesc, m_text;
 
@@ -3890,6 +3949,12 @@ void se_ChatHandlerServer( unsigned short id, tColoredString const & say, nMessa
                         {
                             se_ListTeam( p, currentTeam );
                         }
+                        return;
+                    }
+                    else if (command == "/ready")
+                    {
+                        spam.lastSaidType_ = eChatMessageType_Command;
+                        se_Ready( p );
                         return;
                     }
                     else if (command == "/help") {
@@ -5905,8 +5970,10 @@ void ePlayerNetID::WriteSync( Engine::PlayerNetIDSync & sync, bool init )
 
     sync.set_favorite_number_of_players_per_team( favoriteNumberOfPlayersPerTeam );
     sync.set_name_team_after_me( nameTeamAfterMe );
-    
+
     sync.set_team_name( teamname );
+
+    sync.set_ready( ready );
 }
 
 // makes sure the passed string is not longer than the given maximum
@@ -6152,11 +6219,18 @@ void ePlayerNetID::ReadSync( Engine::PlayerNetIDSync const & sync, nSenderInfo c
     }
 
     if (sn_GetNetState()!=nSERVER)
+    {
         ping = sync.ping();
+    }
 
     {
         // read chat and spectator status
         unsigned short flags = sync.flags();
+
+        if( sync.has_ready() && (sn_GetNetState() != nSERVER || se_matches < 0 ))
+        {
+            ready = sync.ready();
+        }
 
         if (Owner() != ::sn_myNetID)
         {
@@ -6267,6 +6341,7 @@ ePlayerNetID::ePlayerNetID( Engine::PlayerNetIDSync const & sync, nSenderInfo co
     disconnected=false;
     suspended_  = 0;
     chatFlags_  =0;
+    ready       =false;
 
     color = tShortColor(15,15,15);
 
@@ -6481,9 +6556,10 @@ void se_SaveToScoreFile(const tOutput &o){
 
 void ePlayerNetID::AddScore(int points,
                             const tOutput& reasonwin,
-                            const tOutput& reasonlose)
+                            const tOutput& reasonlose,
+                            const tOutput& reasonfree)
 {
-    if (points==0)
+    if (se_matches < 0)
         return;
 
     score += points;
@@ -6498,7 +6574,14 @@ void ePlayerNetID::AddScore(int points,
     message.SetTemplateParameter(2, points > 0 ? points : -points);
 
 
-    if (points>0)
+    if(points == 0 )
+    {
+        if (reasonfree.IsEmpty())
+            return;
+        else
+            message.Append(reasonfree);
+    }
+    else if (points>0)
     {
         if (reasonwin.IsEmpty())
             message << "$player_win_default";
@@ -6514,9 +6597,12 @@ void ePlayerNetID::AddScore(int points,
     }
 
     sn_ConsoleOut(message);
-    RequestSync(true);
 
-    se_SaveToScoreFile(message);
+    if( points )
+    {
+        RequestSync(true);
+        se_SaveToScoreFile(message);
+    }
 }
 
 
@@ -6576,7 +6662,9 @@ void ePlayerNetID::SortByScore(){
 void ePlayerNetID::ResetScore(){
     int i;
     for(i=se_PlayerNetIDs.Len()-1;i>=0;i--){
-        se_PlayerNetIDs(i)->score=0;
+        ePlayerNetID * p = se_PlayerNetIDs(i);
+        p->score = 0;
+        p->ready = false;
         if (sn_GetNetState()==nSERVER)
             se_PlayerNetIDs(i)->RequestSync();
     }
@@ -6760,8 +6848,15 @@ float ePlayerNetID::RankingGraph( float y, int MAX ){
 
         for(int i=0;i<max;i++){
             ePlayerNetID *p=se_PlayerNetIDs(i);
+
+            tColoredString prefix;
             if(p->chatting_)
-                DisplayText(-.705, y, .06, "*", sr_fontScoretable, 1);
+                prefix << '*';
+            if(p->ready)
+                prefix << tColoredString::ColorString(.5,1,.5) << 'R';
+            if(prefix.Len())
+                DisplayText(-.704 - (prefix.Len() * .00075), y, .06, prefix.c_str(), sr_fontScoretable, 1);
+
             tColoredString name;
             name << *p;
             DisplayText(-.7, y, .06, name.c_str(), sr_fontScoretable, -1);
@@ -8126,11 +8221,22 @@ void ePlayerNetID::ReceiveControlNet( Network::NetObjectControl const & controlB
             // announce the change
             if ( bool(nextTeam) && !redundant )
             {
-                se_TeamChangeMessage( *this );
 
                 // count it as spam if it is obnoxious
                 if ( obnoxious )
                     GetChatSpam().CheckSpam( 4.0, Owner(), tOutput("$spam_teamchage") );
+
+                if( se_matches < 0 && nextTeam != currentTeam
+                    && nextTeam->PlayerMayJoin( this ) )
+                {
+                    // Join immediately during warmup if possible
+                    if( Object() && Object()->Alive() )
+                        Object()->Kill();
+                    UpdateTeam();
+                    RequestSync();
+                }
+                else
+                    se_TeamChangeMessage( *this );
             }
 
             break;
@@ -8474,17 +8580,13 @@ static void Slap_conf(std::istream &s)
 
         s >> points;
 
-        if ( points == 0)
-        {
-            // oh well :)
-            sn_ConsoleOut( tOutput("$player_admin_slap_free", victim->GetColoredName() ) );
-        }
-
         tOutput win;
         tOutput lose;
+        tOutput free;
         win << "$player_admin_slap_win";
         lose << "$player_admin_slap_lose";
-        victim->AddScore( -points, win, lose );
+        free << "$player_admin_slap_free";
+        victim->AddScore( -points, win, lose, free );
     }
 }
 
