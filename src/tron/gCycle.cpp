@@ -1694,12 +1694,12 @@ enum gRubberSync
     gRubberSync_All    // all clients
 };
 
-// tCONFIG_ENUM( gRubberSync );
+tCONFIG_ENUM( gRubberSync );
 
-static gRubberSync sg_cycleRubberSync = gRubberSync_All;
+static int sg_cycleRubberSync = gRubberSync_All;
 static nSettingItem<int>
 sg_cycleRubberWallSyncConf("CYCLE_RUBBER_SYNC",
-                           (int&)sg_cycleRubberSync);
+                           sg_cycleRubberSync);
 
 // how much rubber usage shortens the walls
 static REAL sg_cycleRubberWallShrink = 0;

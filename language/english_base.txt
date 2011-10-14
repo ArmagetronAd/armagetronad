@@ -1355,6 +1355,10 @@ system_settings_menu_help	Configure sound, graphics and overall appearance of \g
 main_menu_about_text		About
 main_menu_about_help		Displays information about the version of \g, the location of its config files, sites to visit and the project admins.
 
+main_menu_wiki_text	    Show Wiki
+main_menu_wiki_help		Opens the WIKI documentation in an external browser.
+main_menu_wiki_uri	    http://wiki.armagetronad.net
+
 main_menu_exit_text		Exit Game
 main_menu_exit_help		Goodbye!
 
