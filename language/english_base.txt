@@ -1014,6 +1014,8 @@ ban_list_help               Prints a list of currently banned IPs.
 unban_ip_help               Revokes the ban of the specified IP address.
 
 player_list_hidden_player_prefix_help	The prefix that is shown on hidden players' Global ID and access level when we can see it.
+player_list_ready           0x7fff7fReady
+player_list_not_ready       0xff7f7fNot ready
 player_list_search          \1: Search string "\2" matches:\n
 player_list_search_no_results \1: Search string "\2" returned no result.\n
 player_list_search_end      \1: End of search (\2 matches).\n
@@ -2487,9 +2489,11 @@ gamestate_reset_center		New Match
 gamestate_reset_console		Resetting scores and starting new match after this round.\n
 gamestate_resetnow_center	New Match
 gamestate_resetnow_console	Resetting scores...\n
+gamestate_resetnow_console_matches Resetting scores. \1 match(es) to go!\n
 gamestate_resetnow_log		New Match\n
 gamestate_newround_console	Go (round \1 of \2)!\n
 gamestate_newround_goldengoal	Go (extra round; whoever gains the lead wins)!\n
+gamestate_newround_warmup   Go (Warmup; the match will start when enough players have readied up)!\n
 gamestate_newround_log		New Round\n
 gamestate_chat_wait         Waiting up to \2 seconds for \1 to finish chatting.\n
 
@@ -2643,6 +2647,25 @@ kick_usage              Usage: KICK <user ID or name> <Reason>\n
 ban_usage               Usage: BAN <user ID or name> <time in minutes(defaults to 60)> <Reason>\n
 kickmove_usage          Usage: \1 <user ID or name> <server IP to kick to>:<server port to kick to> <Reason>\n
 
+do_warmup_help          Run warmup rounds with no points until players have readied up. Then run this many matches consecutively before the next warmup session.
+warmup_min_players_help Minimum amount of players required for the warmup to end.
+warmup_min_ready_frac_help Fraction of players per team required to ready up before the match can start.
+warmup_readyup_interval_help Interval between reminders about readying up.
+warmup_respawn_time_help Time in seconds before which players are respawned in warmup mode. -1 disables this behaviour.
+
+player_ready_onlywarmup This command only works in warmup mode.\n
+player_ready_noteam     You must be in a team to use this command.\n
+player_ready            \1 0x7fff7fis ready!\n
+player_ready_not        \1 0xff7f7fis not ready anymore.\n
+player_allready         All players marked as ready.\n
+player_allready_not     All players marked as not ready.\n
+allready_help           Makes it as if all players were ready.
+warmup_needmoreplayers  Not starting game yet because we need at least \1 players.\n
+warmup_finished         Enough players are ready! Starting match now.\n
+warmup_finished_allready Forced all players to be ready! Starting match now.\n
+warmup_finished_center  Warmup over!
+warmup_rup_compat       0xff3333Please type /ready in chat
+
 add_help_topic_help     Add a new help topic to be used with /help. Usage: ADD_HELP_TOPIC <topic> <short description> <text>
 add_help_topic_usage    Usage: ADD_HELP_TOPIC <topic> <short description> <text>\n
 add_help_topic_success  Added help topic "\1".\n
@@ -2682,7 +2705,7 @@ help_commands_misc_shortdesc Miscellaneous commands
 help_commands_misc_text 0x88ff88/help0xffff88: You just found out about this one :-)\n0x88ff88/teach <player> <topic>0xffff88: same as /help, but the the output gets sent to another player.\n0x88ff88/rtfm0xffff88: alias for /teach\n0x88ff88/command <command>0xffff88: Execute a command on your own client. Useful for instant chats
 
 help_commands_tourney_shortdesc Tourney related commands
-help_commands_tourney_text 0x88ff88/lock0xffff88: Locks your current team. Nobody can join it any more on their own. To let someone in, you need to invoke\n0x88ff88/invite <player>0xffff88: From that moment on, the player is allowed to join you. Another effect of /invite, even if your team is not locked, is that the invited player can read all of your team's /team messages. Invitations are permanent until revoked. That means a player who is invited into your team can join and leave it freely without further need to /invite him again. Players who were on the team when you /locked it are not automatically invited when they leave on their own account.\n0x88ff88/uninvite <player>0xffff88: reverses /invite. The invitation is revoked, the player can no longer join you, and if he currently is on your team, he will be thrown out.\n0x88ff88/unlock0xffff88: makes your team available for everyone to join again.
+help_commands_tourney_text 0x88ff88/lock0xffff88: Locks your current team. Nobody can join it any more on their own. To let someone in, you need to invoke\n0x88ff88/invite <player>0xffff88: From that moment on, the player is allowed to join you. Another effect of /invite, even if your team is not locked, is that the invited player can read all of your team's /team messages. Invitations are permanent until revoked. That means a player who is invited into your team can join and leave it freely without further need to /invite him again. Players who were on the team when you /locked it are not automatically invited when they leave on their own account.\n0x88ff88/uninvite <player>0xffff88: reverses /invite. The invitation is revoked, the player can no longer join you, and if he currently is on your team, he will be thrown out.\n0x88ff88/unlock0xffff88: makes your team available for everyone to join again.\n0x88ff88/ready0xffff88: Toggles your readiness state in a warmup.
 
 help_version_shortdesc  This server's version
 help_version_text       0xffff7fThis is running:\n0x7fff7f    \g \v\n0xffff7fIt was built on 0x7fff7f\d0xffff7f, from revision 0x7fff7fr\o0xffff7f(0x7fff7fz\z0xffff7f), which has revision 0x7fff7fr\l0xffff7f(0x7fff7fz\m0xffff7f) for last common ancestor with branch 0x7fff7f\p0xffff7f, which can be found at:\n0x7fff7f    \b\n0xffff7fThis revision's ID is:\n0x7fff7f    \i\n0xffff7fIt was tagged(empty if not tagged):\n0x7fff7f    \t\n0xffff7fSource changed:\n0x7fff7f    \c
@@ -2696,6 +2719,9 @@ invite_team_invite      \10xRESETT has been invited to join \2.\n
 invite_team_kick        \10xRESETT has been kicked from \2.\n
 invite_team_uninvite    \10xRESETT got his invitation to join \2 cancelled.\n
 invite_team_locked_list (locked)
+
+team_list_ready         (0x7fff7fready0xRESETT)
+team_list_not_ready     (0xff7f7fnot ready0xRESETT)
 
 msg_toomanymatches 0xff0000Too many matches found for the search term \1. Be more specific.\n
 msg_nomatch 0xff0000No matches were found that contained \1.\n

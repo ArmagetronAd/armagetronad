@@ -150,6 +150,11 @@ static tSettingItem<bool> se_allowTeamNameColorConfig("ALLOW_TEAM_NAME_COLOR", s
 static tSettingItem<bool> se_allowTeamNamePlayerConfig("ALLOW_TEAM_NAME_PLAYER", se_allowTeamNamePlayer );
 static tSettingItem<bool> se_allowTeamNameCustomConfig("ALLOW_TEAM_NAME_LEADER", se_allowTeamNameLeader );
 
+int se_matches = 0;
+
+static REAL se_minReady = 0.51;
+static tSettingItem<REAL> se_minReadyConf("WARMUP_MIN_READY_FRAC", se_minReady);
+
 // update all internal information
 void eTeam::UpdateStaticFlags()
 {
@@ -503,6 +508,9 @@ bool eTeam::IsInvited( ePlayerNetID const * player ) const
 
 void eTeam::AddScore ( int s )
 {
+    if(se_matches)
+        return;
+
     score += s;
 
     if ( nSERVER == sn_GetNetState() )
@@ -1513,6 +1521,23 @@ int eTeam::AlivePlayers ( ) const
     return ret;
 }
 
+bool eTeam::IsReady ( ) const
+{
+    int ready = 0;
+    int len = players.Len();
+    for (int i = len-1; i>=0; --i)
+    {
+        ePlayerNetID * p = players(i);
+        if ( !p->IsHuman() )
+            len--;
+        if ( p->ready )
+            ready++;
+    }
+    if (len)
+        return ready >= len * se_minReady;
+    else
+        return true;
+}
 
 // print out an understandable name in to s
 void eTeam::PrintName(tString &s) const
@@ -1593,6 +1618,7 @@ eTeam::eTeam()
     score = 0;
     lastScore_=IMPOSSIBLY_LOW_SCORE;
     locked_ = false;
+    spawnPoint = NULL;
     maxPlayersLocal = maxPlayers;
     maxImbalanceLocal = maxImbalance;
     color.r_ = color.g_ = color.b_ = 32; // initialize color so it will be updated, guaranteed

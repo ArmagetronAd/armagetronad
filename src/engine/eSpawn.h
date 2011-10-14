@@ -30,20 +30,25 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "eCoord.h"
 
-class gSpawnPoint{
-    friend class gArena;
+class eSpawnPoint{
 
+protected:
     int   id;
     eCoord location,direction;
     REAL  lastTimeUsed;
     int   numberOfUses;
 
 public:
-    gSpawnPoint(const eCoord &loc,const eCoord &dir);
-    ~gSpawnPoint(){}
+    eSpawnPoint(const eCoord &loc,const eCoord &dir);
+    ~eSpawnPoint(){}
 
     //enters valid spawn eCoordinates and direction in loc and dir
     void Spawn(eCoord &loc,eCoord &dir);
+
+    //find a suitable location for the next spawnee
+    virtual void FindPos(eCoord &loc,eCoord &dir);
+
+    REAL LastTimeUsed();
 
     // estimates the danger of spawning here (0: no problem, 10: certain death)
     REAL Danger();

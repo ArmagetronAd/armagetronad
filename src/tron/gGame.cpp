@@ -48,7 +48,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "rModel.h"
 #include "uInput.h"
 #include "ePlayer.h"
-#include "gSpawn.h"
+#include "eSpawn.h"
 #include "uInput.h"
 #include "uInputQueue.h"
 #include "nNetObject.h"
@@ -141,6 +141,20 @@ static REAL sg_waitForExternalScriptTimeout = 3;
 static tSettingItem<REAL> sg_waitForExternalScriptTimeoutConf( "WAIT_FOR_EXTERNAL_SCRIPT_TIMEOUT", sg_waitForExternalScriptTimeout );
 
 static nSettingItemWatched<tString> conf_mapfile("MAP_FILE",mapfile, nConfItemVersionWatcher::Group_Breaking, 8 );
+
+static int sg_doWarmup = 0;
+static tSettingItem< int > sg_doWarmupConf("DO_WARMUP", sg_doWarmup);
+
+static int sg_warmupMinPlayers = 2;
+static tSettingItem< int > sg_warmupMinPlayersConf("WARMUP_MIN_PLAYERS", sg_warmupMinPlayers);
+
+static int sg_warmupRupInterval = 5;
+static tSettingItem< int > sg_warmupRupIntervalConf("WARMUP_READYUP_INTERVAL", sg_warmupRupInterval);
+
+static REAL sg_warmupRespawnTime = 1;
+static tSettingItem< REAL > sg_warmupRespawnTimeConf("WARMUP_RESPAWN_TIME", sg_warmupRespawnTime);
+
+bool sg_allReady = false;
 
 // config item for semi-colon deliminated list of maps/configs, needs semi-colon at the end
 // ie, original/map-1.0.1.xml;original/map-1.0.1.xml;
@@ -1028,6 +1042,7 @@ void init_game_objects(eGrid *grid){
             team->PlayRound();
 
             gSpawnPoint *spawn = Arena.LeastDangerousSpawnPoint();
+            team->SetSpawnPoint(spawn);
             spawnPointsUsed++;
 
             // if the spawn points are grouped, make sure the last player is not in a goup of his
@@ -2016,6 +2031,7 @@ static void StartNewMatch(){
 static void StartNewMatch_conf(std::istream &){
     if ( sg_resetRotationOnNewMatch )
         sg_ResetRotation();
+    se_matches = 0;
     StartNewMatch();
 }
 
@@ -2025,8 +2041,24 @@ static void Scramble_conf(std::istream &){
     }
 }
 
+static void AllReady_conf(std::istream &){
+    if( se_matches < 0 )
+    {
+        sg_allReady = !sg_allReady;
+        if( sg_allReady )
+            con << tOutput("$player_allready");
+        else
+            con << tOutput("$player_allready_not");
+    }
+    else
+    {
+        con << tOutput("$player_ready_onlywarmup");
+    }
+}
+
 static tConfItemFunc snm("START_NEW_MATCH",&StartNewMatch_conf);
 static tConfItemFunc scr("SCRAMBLE",&Scramble_conf);
+static tConfItemFunc allready_conf("ALL_READY",&AllReady_conf);
 
 #ifdef DEDICATED
 static void Quit_conf(std::istream &){
@@ -2546,6 +2578,7 @@ void gGame::WriteSync( Game::GameSync & sync, bool init ) const
 #ifdef DEBUG
     //con << "Wrote game state " << stateNext << ".\n";
 #endif
+    sync.set_matches( se_matches );
 }
 
 void gGame::ReadSync( Game::GameSync const & sync, nSenderInfo const & sender )
@@ -2565,6 +2598,8 @@ void gGame::ReadSync( Game::GameSync const & sync, nSenderInfo const & sender )
 #ifdef DEBUG
     //con << "Read game state " << stateNext << ".\n";
 #endif
+
+    se_matches = sync.matches();
 }
 
 
@@ -2697,6 +2732,8 @@ static void sg_VoteMenuIdle()
 static eLadderLogWriter sg_newRoundWriter("NEW_ROUND", true);
 static eLadderLogWriter sg_newMatchWriter("NEW_MATCH", true);
 static eLadderLogWriter sg_waitForExternalScriptWriter("WAIT_FOR_EXTERNAL_SCRIPT", true);
+static eLadderLogWriter sg_newWarmupWriter("NEW_WARMUP", true);
+static eLadderLogWriter sg_matchesLeftWriter("MATCHES_LEFT", true);
 
 void gGame::StateUpdate(){
 
@@ -2773,8 +2810,24 @@ void gGame::StateUpdate(){
             sg_newRoundWriter.write();
             if ( rounds < 0 )
             {
-                sg_newMatchWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
-                sg_newMatchWriter.write();
+                if( se_matches <= 0)
+                {
+                    sg_newWarmupWriter << sg_doWarmup;
+                    sg_newWarmupWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
+                    sg_newWarmupWriter.write();
+
+                    sg_allReady = false;
+                }
+                else
+                {
+                    if(sg_doWarmup > 1)
+                    {
+                        sg_matchesLeftWriter << se_matches;
+                        sg_matchesLeftWriter.write();
+                    }
+                    sg_newMatchWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
+                    sg_newMatchWriter.write();
+                }
             }
 
             // kick spectators
@@ -2947,15 +3000,33 @@ void gGame::StateUpdate(){
             rITexture::LoadAll();
             SetState(GS_PLAY,GS_PLAY);
             if (sn_GetNetState()!=nCLIENT){
+                // The admin doesn't want warmup anymore! :(
+                if ( se_matches < 0 && !sg_doWarmup )
+                {
+                    StartNewMatch();
+                    rounds = -100;
+                }
+
                 if (rounds<=0){
-                    sn_ConsoleOut("$gamestate_resetnow_console");
+                    if( sg_doWarmup > 1 && se_matches > 0 )
+                        sn_ConsoleOut(tOutput("$gamestate_resetnow_console_matches", se_matches));
+                    else
+                        sn_ConsoleOut("$gamestate_resetnow_console");
+                    if( --se_matches < 0 && !sg_doWarmup )
+                    {
+                        se_matches = 0;
+                    }
                     StartNewMatchNow();
                     sn_CenterMessage("$gamestate_resetnow_center");
                     se_SaveToScoreFile("$gamestate_resetnow_log");
                 }
 
                 tOutput mess;
-                if (rounds < sg_currentSettings->limitRounds)
+                if (se_matches < 0)
+                {
+                    mess << "$gamestate_newround_warmup";
+                }
+                else if (rounds < sg_currentSettings->limitRounds)
                 {
                     mess.SetTemplateParameter(1, rounds+1);
                     mess.SetTemplateParameter(2, sg_currentSettings->limitRounds);
@@ -3078,12 +3149,8 @@ void gGame::StateUpdate(){
     }
 }
 
-// uncomment to activate respawning
-// #define RESPAWN_HACK
-
-#ifdef RESPAWN_HACK
 // Respawns cycles (crude test)
-static void sg_Respawn( REAL time, eGrid *grid, gArena & arena )
+void sg_RespawnAllAfter( REAL after, REAL time, eGrid *grid, gArena & arena, bool atSpawn )
 {
     for ( int i = se_PlayerNetIDs.Len()-1; i >= 0; --i )
     {
@@ -3094,13 +3161,14 @@ static void sg_Respawn( REAL time, eGrid *grid, gArena & arena )
 
         eGameObject *e=p->Object();
 
-        if ( ( !e || ( !e->Alive() && e->DeathTime() < time - .5 ) ) && sn_GetNetState() != nCLIENT )
+        if ( ( !e || ( !e->Alive() && e->DeathTime() < time - after ) ) && sn_GetNetState() != nCLIENT )
         {
-            sg_RespawnPlayer(grid, &arena, p);
+            sg_respawnWriter << p->GetLogName() << ePlayerNetID::FilterName(p->CurrentTeam()->Name());
+            sg_respawnWriter.write();
+            sg_RespawnPlayer(grid, &arena, p, atSpawn);
         }
     }
 }
-#endif
 
 void sg_RespawnPlayer(eGrid * grid, gArena * arena, tCoord & pos, tCoord & dir, ePlayerNetID * p) {
     eGameObject *e=p->Object();
@@ -3109,11 +3177,10 @@ void sg_RespawnPlayer(eGrid * grid, gArena * arena, tCoord & pos, tCoord & dir, 
     {
 #ifdef DEBUG
         //                std::cout << "spawning player " << pni->name << '\n';
+        sg_Timestamp();
 #endif
         gCycle * cycle = new gCycle(grid, pos, dir, p);
         p->ControlObject(cycle);
-
-        sg_Timestamp();
     }
 }
 
@@ -3127,11 +3194,10 @@ void sg_RespawnPlayer(eGrid * grid, gArena * arena, tCoord & nearPosition, ePlay
 
 #ifdef DEBUG
         //                std::cout << "spawning player " << pni->name << '\n';
+        sg_Timestamp();
 #endif
         gCycle * cycle = new gCycle(grid, pos, dir, p);
         p->ControlObject(cycle);
-
-        sg_Timestamp();
     }
 }
 
@@ -3158,14 +3224,26 @@ void sg_RespawnPlayer(eGrid * grid, gArena * arena, eGameObject * nearObject, eP
         sg_RespawnPlayer(grid, arena, p);
 }
 
-void sg_RespawnPlayer(eGrid *grid, gArena *arena, ePlayerNetID *p)
+void sg_RespawnPlayer(eGrid *grid, gArena *arena, ePlayerNetID *p, bool atSpawn)
 {
     eGameObject *e=p->Object();
 
     if ( ( !e || !e->Alive()) && sn_GetNetState() != nCLIENT )
     {
         eCoord pos,dir;
-        if ( e )
+        if ( atSpawn )
+        {
+            eSpawnPoint * spawn = p->CurrentTeam()->SpawnPoint();
+            if( !spawn )
+            {
+                spawn = arena->LeastDangerousSpawnPoint();
+                p->CurrentTeam()->SetSpawnPoint(spawn);
+            }
+            if( spawn->LastTimeUsed() + sg_cycleInvulnerableTime < se_GameTime() )
+                spawn->Clear();
+            spawn->Spawn(pos, dir);
+        }
+        else if ( e )
         {
             dir = e->Direction();
             pos = e->Position();
@@ -3181,11 +3259,10 @@ void sg_RespawnPlayer(eGrid *grid, gArena *arena, ePlayerNetID *p)
             arena->LeastDangerousSpawnPoint()->Spawn( pos, dir );
 #ifdef DEBUG
         //                std::cout << "spawning player " << pni->name << '\n';
+        sg_Timestamp();
 #endif
         gCycle * cycle = new gCycle(grid, pos, dir, p);
         p->ControlObject(cycle);
-
-        sg_Timestamp();
     }
 }
 
@@ -3208,9 +3285,12 @@ void gGame::Timestep(REAL time,bool cam){
     // no respawining while deathzone is active.
     if( !winDeathZone_ )
     {
-        sg_Respawn(time,grid,Arena);
+        sg_RespawnAllAfter(0.5, time, grid, Arena);
     }
 #endif
+
+    if( se_matches < 0 && sg_warmupRespawnTime >= 0 )
+        sg_RespawnAllAfter(sg_warmupRespawnTime, time, grid, Arena, true);
 
     // chop timestep into small, managable bits
     REAL dt = time - lastTimeTimestep;
@@ -3259,6 +3339,7 @@ static tSettingItem< REAL > sg_minDrawTimeConf("ROUND_DRAW_WARN_TIME", sg_minDra
 
 static eLadderLogWriter sg_roundWinnerWriter("ROUND_WINNER", true);
 static eLadderLogWriter sg_matchWinnerWriter("MATCH_WINNER", true);
+eLadderLogWriter sg_respawnWriter("PLAYER_RESPAWN", true);
 
 void gGame::Analysis(REAL time){
     if ( nCLIENT == sn_GetNetState() )
@@ -3282,7 +3363,7 @@ void gGame::Analysis(REAL time){
     // send timeout warnings
 
 
-    if (tSysTimeFloat()-startTime>10){
+    if (tSysTimeFloat()-startTime>10 && se_matches > 0){
         if ((startTime+sg_currentSettings->limitTime*60)-tSysTimeFloat()<10 && warning<6){
             tOutput o("$gamestate_tensecond_warn");
             sn_CenterMessage(o);
@@ -3324,14 +3405,24 @@ void gGame::Analysis(REAL time){
         }
     }
 
-    // count active players
+    // static nVersionFeature rup_banner = nVersionFeature( 21 );
+
+    // count active players and take the oportunity to
+    // send a message to people who haven't readied up yet
+    int ready_next_warn = 2;
     int active = 0;
     int i;
     for (i=se_PlayerNetIDs.Len()-1;i>=0;i--){
         ePlayerNetID *pni=se_PlayerNetIDs(i);
         if (pni->IsActive())
             active ++;
+        if (se_matches < 0 && ready_next_warn <= time
+            && !pni->ready && pni->IsHuman() && pni->CurrentTeam()
+            // && !rup_banner.Supported(pni->Owner())
+            )
+            sn_CenterMessage( tOutput("$warmup_rup_compat"), pni->Owner() );
     }
+    ready_next_warn = time + sg_warmupRupInterval;
 
     // count other statistics
     int alive_and_not_disconnected = 0;
@@ -3345,6 +3436,7 @@ void gGame::Analysis(REAL time){
     int humans = 0;
     int active_humans = 0;
     int ais    = 0;
+    int ready = 0;
     REAL deathTime=0;
 
     bool notyetloggedin = true;  // are all current users not yet logged in?
@@ -3354,6 +3446,8 @@ void gGame::Analysis(REAL time){
 
         humans += t->NumHumanPlayers();
         ais    += t->NumAIPlayers();
+        if( se_matches < 0 )
+            ready  += t->IsReady();
 
         if ( t->Alive() )
         {
@@ -3421,6 +3515,8 @@ void gGame::Analysis(REAL time){
             }
         }
     }
+
+
 
 #ifdef DEDICATED
     //activeHumans
@@ -3499,6 +3595,7 @@ void gGame::Analysis(REAL time){
                 // start a new round and match.
                 winner=-1;
                 wintimer=time;
+                se_matches=-100;
             }
         }
 
@@ -3520,7 +3617,9 @@ void gGame::Analysis(REAL time){
         holdBackNextRound = true;
     }
     else if (winner==0 && absolute_winner==0 ){
-        if ( teams_alive <= 1 )
+        if ( teams_alive <= 1 &&
+             ( se_matches >= 0 || sg_warmupRespawnTime < 0 ) // Make sure we're not automatically respawning players
+             )
         {
             if ( sg_currentSettings->gameType!=gFREESTYLE )
             {
@@ -3553,7 +3652,7 @@ void gGame::Analysis(REAL time){
             messagetype	= wishWinnerMessage;
         }
 
-        if (winner <= 0 && alive <= 0 && ai_alive <= 0 && teams_alive <= 0){
+        if (winner <= 0 && alive <= 0 && ai_alive <= 0 && teams_alive <= 0 ){
             if ( se_mainGameTimer )
                 se_mainGameTimer->speed = 1;
 
@@ -3574,7 +3673,7 @@ void gGame::Analysis(REAL time){
                     sg_currentSettings->AutoAI( eTeam::teams( last_team_alive )->NumHumanPlayers() > 0 );
 
 
-                if ( ( sg_currentSettings->scoreWin != 0 || sg_currentSettings->gameType != gFREESTYLE ) && winner > 0 )
+                if ( se_matches >= 0 && ( sg_currentSettings->scoreWin != 0 || sg_currentSettings->gameType != gFREESTYLE ) && winner > 0 )
                 {
                     // check if the win was legitimate: at least one enemy team needs to be online
                     if ( sg_EnemyExists( winner-1 ) || sg_currentSettings->gameType==gFREESTYLE )
@@ -3665,6 +3764,40 @@ void gGame::Analysis(REAL time){
 
     int winnerExtraRound = ( winner != 0 || alive == 0 ) ? 1 : 0;
 
+    static short warmupover_msg = 0;
+    if( time >= 0 && se_matches < 0 && (ready == eTeam::teams.Len() || sg_allReady) )
+    {
+        if ( humans < sg_warmupMinPlayers && warmupover_msg < 1 )
+        {
+            warmupover_msg = 1;
+            sn_ConsoleOut(tOutput("$warmup_needmoreplayers", sg_warmupMinPlayers));
+        }
+        else if( humans >= sg_warmupMinPlayers && warmupover_msg < 2 )
+        {
+            warmupover_msg = 2;
+            if( sg_allReady )
+            {
+                sn_ConsoleOut(tOutput("$warmup_finished_allready"));
+                sn_CenterMessage(tOutput("$warmup_finished_center"));
+            }
+            else
+            {
+                sn_ConsoleOut(tOutput("$warmup_finished"));
+                sn_CenterMessage(tOutput("$warmup_finished_center"));
+            }
+
+            // Finish the round quickly
+            winner = -1;
+            wintimer=-10;
+            lastdeath = time;
+            StartNewMatch();
+            se_matches = sg_doWarmup;
+        }
+    }
+    else
+    {
+        warmupover_msg = 0;
+    }
 
     // do round end stuff one second after a winner was declared
     if ( winner && !roundOver && time-lastdeath >= 2.0f )
@@ -3687,7 +3820,7 @@ void gGame::Analysis(REAL time){
     {
         holdBackNextRound = true;
     }
-    else if (absolute_winner==0 &&
+    else if (se_matches >= 0 && absolute_winner==0 &&
              sn_GetNetState()!=nCLIENT && se_PlayerNetIDs.Len()){
         ePlayerNetID::SortByScore();
         eTeam::SortByScore();
@@ -3807,7 +3940,6 @@ void gGame::Analysis(REAL time){
             }
     }
 
-
     // time to wait after last death til we start a new round
     REAL fintime=6;
 
@@ -3830,11 +3962,13 @@ void gGame::Analysis(REAL time){
         //con << "winner=" << winner << ' ';
         //con << "wintimer=" << wintimer << ' ';
         //con << "time=" << time << ' ';
-        //con << "dt=" << deathTime << '\n';
+        //con << "dt=" << deathTime << ' ';
+        //con << "ready=" << ready << '\n';
 #endif
         if (!holdBackNextRound &&
                 (
-                    ( sg_currentSettings->finishType==gFINISH_IMMEDIATELY ||
+                    ( se_matches < 0 ||
+                      sg_currentSettings->finishType==gFINISH_IMMEDIATELY ||
                       sg_currentSettings->finishType==gFINISH_EXPRESS ||
                       absolute_winner || ( teams_alive <= 1 && time-lastdeath>4.0f ) ) ||
                     ( winner && time - wintimer> 4.0f )
@@ -3876,7 +4010,8 @@ void rotate()
 
 void gGame::StartNewMatch(){
     //gStatistics - highscore check
-    if (sg_singlePlayer && gStats && se_PlayerNetIDs.Len() > 0 && se_PlayerNetIDs(0)->IsHuman())
+    if (se_matches >= 0 && sg_singlePlayer && gStats
+        && se_PlayerNetIDs.Len() > 0 && se_PlayerNetIDs(0)->IsHuman())
     {
         gStats->highscores->greater(se_PlayerNetIDs(0)->GetLogName(), se_PlayerNetIDs(0)->Score());
     }
@@ -3887,8 +4022,11 @@ void gGame::StartNewMatch(){
 void gGame::StartNewMatchNow(){
     if ( rounds != 0 )
     {
-        sg_newMatchWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
-        sg_newMatchWriter.write();
+        if( se_GameTime() < -100 )
+        {
+            sg_newMatchWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
+            sg_newMatchWriter.write();
+        }
         se_sendEventNotification(tString("New match"), tString("Starting a new match"));
     }
 

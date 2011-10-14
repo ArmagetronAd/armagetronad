@@ -150,7 +150,7 @@ sg_cycleWallTimeConf("CYCLE_WALL_TIME",
                      14);
 
 // time after spawning during which a cycle can't be killed
-static REAL sg_cycleInvulnerableTime=0.0;
+REAL sg_cycleInvulnerableTime=0.0;
 static nSettingItemWatched<REAL>
 sg_cycleInvulnerableTimeConf("CYCLE_INVULNERABLE_TIME",
                              sg_cycleInvulnerableTime,
@@ -3339,14 +3339,8 @@ void gCycle::KillAt( const eCoord& deathPos){
             notificationMessage << " commited suicide";
             se_sendEventNotification(tString("Death suicide"), notificationMessage);
 
-            if ( score_suicide )
-                hunter->AddScore(score_suicide, tOutput(), "$player_lose_suicide" );
-            else
-            {
-                tColoredString hunterName;
-                hunterName << *hunter << tColoredString::ColorString(1,1,1);
-                sn_ConsoleOut( tOutput( "$player_free_suicide", hunterName ) );
-            }
+            hunter->AddScore(score_suicide, tOutput(), "$player_lose_suicide",
+                "$player_free_suicide" );
         }
     }
     else{
@@ -3368,14 +3362,7 @@ void gCycle::KillAt( const eCoord& deathPos){
 
                     win.SetTemplateParameter(3, preyName);
                     win << "$player_win_frag";
-                    if ( score_kill != 0 )
-                        hunter->AddScore(score_kill, win, lose );
-                    else
-                    {
-                        tColoredString hunterName;
-                        hunterName << *hunter << tColoredString::ColorString(1,1,1);
-                        sn_ConsoleOut( tOutput( "$player_free_frag", hunterName, preyName ) );
-                    }
+                    hunter->AddScore(score_kill, win, lose, "$player_free_frag" );
                 }
                 else {
                     sg_deathTeamkillWriter << Player()->GetUserName() << hunter->GetUserName();
@@ -3384,9 +3371,12 @@ void gCycle::KillAt( const eCoord& deathPos){
                     notificationMessage << " teamkilled " << Player()->GetUserName();
                     se_sendEventNotification(tString("Death teamkill"), notificationMessage);
 
-                    tColoredString hunterName;
-                    hunterName << *hunter << tColoredString::ColorString(1,1,1);
-                    sn_ConsoleOut( tOutput( "$player_teamkill", hunterName, preyName ) );
+                    if( se_matches >= 0 )
+                    {
+                        tColoredString hunterName;
+                        hunterName << *hunter << tColoredString::ColorString(1,1,1);
+                        sn_ConsoleOut( tOutput( "$player_teamkill", hunterName, preyName ) );
+                    }
                 }
             }
             else
