@@ -39,7 +39,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "rScreen.h"
 #ifndef DEDICATED
 #include "rRender.h"
-
+#ifdef MACOSX
+#   include <ApplicationServices/ApplicationServices.h>
+#endif
 #endif
 
 bool pp_out=1; // or 2d-output?
@@ -67,18 +69,17 @@ void sg_OpenURI( char const * uri )
     // bool success = false;
 #ifdef WIN32
     ShellExecute(NULL, "open", uri, NULL, NULL, SW_SHOWNORMAL);
+#elif MACOSX
+    CFURLRef URL = CFURLCreateWithBytes( NULL, (UInt8 *)uri, strlen(uri), kCFStringEncodingUTF8, NULL );
+    LSOpenCFURLRef( URL, NULL );
+    CFRelease( URL );
 #else
+    // general unix
     std::ostringstream s; // composing a command
-#ifdef MACOSX
-    s << "open " << uri;
-#else
-// general unix
     s << "x-www-browser " << uri << "|| firefox " << uri;
-#endif
     // execute command
     system( s.str().c_str() );
 #endif
-    
 }
 
 //const eCoord se_zeroCoord(0,0);
