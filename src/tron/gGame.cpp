@@ -3657,7 +3657,7 @@ void gGame::Analysis(REAL time){
                     tOutput drawmsg;
                     drawmsg << "$gamestate_draw";
 
-                    if( drawreason = &DrawReason_MinAlive )
+                    if( drawreason == &DrawReason_MinAlive )
                     {
                         drawmsg << "$gamestate_draw_minalive";
                     }
