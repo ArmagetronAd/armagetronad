@@ -252,7 +252,7 @@ public:
         void Init(); 
         void Write();
         Record &operator[](const int& i) { return stats[i]; }
-        Record &operator<<(Record const &in) { stats.push_back(in); }
+        Statistics &operator<<(Record const &in) { stats.push_back(in); return *this;}
     };
     Statistics tactical_stats;
 
