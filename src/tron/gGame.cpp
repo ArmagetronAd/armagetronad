@@ -3792,7 +3792,7 @@ static void sg_Respawn( REAL time, eGrid *grid, gArena & arena )
 
         eGameObject *e=p->Object();
 
-        if ( ( (!e) || ((!e->Alive()) && (e->DeathTime() < (time - sg_respawnTime)) ) && (sn_GetNetState() != nCLIENT )))
+        if ( ( (!e) || ((!e->Alive()) && (e->DeathTime() < (time - sg_respawnTime)) && (sn_GetNetState() != nCLIENT ))))
         {
             eCoord pos,dir;
 #if 0

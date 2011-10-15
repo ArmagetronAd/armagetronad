@@ -6748,7 +6748,7 @@ void gCycle::Statistics::Init() {
 
 void gCycle::Statistics::Write() {
     if(sg_tacticalStatisticWriter.isEnabled()) {
-		for (int i=0; i<stats.size(); i++) {
+		for (unsigned int i=0; i<stats.size(); i++) {
 			if (stats[i].time>.0) {
                 sg_tacticalStatisticWriter << TacticalPositionStr[i] << name << stats[i].time << StateStr[stats[i].state] << stats[i].kills;
                 sg_tacticalStatisticWriter.write();

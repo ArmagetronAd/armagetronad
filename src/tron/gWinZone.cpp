@@ -5853,9 +5853,9 @@ static void sg_CreateZone_conf(std::istream &s)
         con << zoneRubber;
     }
     eCoord zoneJump;
-    int relJump;
+    int relJump=0;
     eCoord ndir;
-    REAL reloc;
+    REAL reloc=0;
     if(zoneTypeStr == "teleport"){
         tString  zoneJumpXStr;
         tString  zoneJumpYStr;
