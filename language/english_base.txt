@@ -1359,6 +1359,9 @@ main_menu_wiki_text	    Show Wiki
 main_menu_wiki_help		Opens the WIKI documentation in an external browser.
 main_menu_wiki_uri	    http://wiki.armagetronad.net
 
+main_help_menu_text     Help
+main_help_menu_help     Having problems or just want to look something up? Here is the place.
+
 main_menu_exit_text		Exit Game
 main_menu_exit_help		Goodbye!
 

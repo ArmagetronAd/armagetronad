@@ -2116,6 +2116,24 @@ static void sg_ShowWiki()
 {
     sg_OpenURI(tOutput("$main_menu_wiki_uri"));
 }
+
+static uMenu sg_helpMenu("$main_help_menu_text");
+
+static uMenuItemFunction sg_aboutMenuItem
+(&sg_helpMenu,
+ "$main_menu_about_text",
+ "$main_menu_about_help",
+ &sg_DisplayVersionInfo);
+
+static uMenuItemFunction sgg_wikiMenuItem 
+(&sg_helpMenu,
+ "$main_menu_wiki_text",
+ "$main_menu_wiki_help",
+ &sg_ShowWiki);
+    
+
+
+
 #endif
 
 void MainMenu(bool ingame){
@@ -2200,12 +2218,8 @@ void MainMenu(bool ingame){
     uMenuItemExit exx(&MainMenu,extitle,
                       exhelp);
 
-    uMenuItemFunction wiki
-    (&MainMenu,
-     "$main_menu_wiki_text",
-     "$main_menu_wiki_help",
-     &sg_ShowWiki);
-    
+    uMenuItemSubmenu help(&MainMenu, &sg_helpMenu, "$main_help_menu_help");
+
     uMenuItemFunction *return_to_main=NULL;
     if (ingame){
         if (sn_GetNetState()==nSTANDALONE)
@@ -2235,12 +2249,6 @@ void MainMenu(bool ingame){
                                       "$player_authenticate_help",
                                       &PlayerLogIn );
     }
-
-    uMenuItemFunction abb(&MainMenu,
-                          "$main_menu_about_text",
-                          "$main_menu_about_help",
-                          &sg_DisplayVersionInfo);
-
 
     uMenu Settings("$system_settings_menu_text");
 
