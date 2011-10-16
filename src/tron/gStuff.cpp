@@ -69,6 +69,8 @@ bool sg_OpenURI( char const * uri )
 #ifndef DEDICATED
     if( currentScreensetting.fullscreen )
     {
+        // iconify; otherwise, the screen freezes while the browser is started,
+        // and on Linux, the game gets window-ified without being noticed about it.
         SDL_WM_IconifyWindow();
     }
 #endif
