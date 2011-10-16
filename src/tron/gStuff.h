@@ -72,6 +72,9 @@ extern bool pp_tess_deb;
 //! opens an URI in the default web browser, return success
 bool sg_OpenURI( char const * uri );
 
+//! opens a directory in the default file browser, returns success
+bool sg_OpenDirectory( char const * path );
+
 // we are going to define all these classes and want to be free
 // to declare pointers to them anytime:
 

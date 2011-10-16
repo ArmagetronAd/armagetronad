@@ -1355,9 +1355,15 @@ system_settings_menu_help	Configure sound, graphics and overall appearance of \g
 main_menu_about_text		About
 main_menu_about_help		Displays information about the version of \g, the location of its config files, sites to visit and the project admins.
 
-main_menu_wiki_text	    Show Wiki
-main_menu_wiki_help		Opens the WIKI documentation in an external browser.
-main_menu_wiki_uri	    http://wiki.armagetronad.net
+help_menu_wiki_text	    Show Wiki
+help_menu_wiki_help		Opens the WIKI documentation in an external browser.
+help_menu_wiki_uri	    http://wiki.armagetronad.net
+
+help_menu_userdata_text User Data
+help_menu_userdata_help Opens the User Data directory where you can store personal modifications to the game.
+
+help_menu_systemdata_text System Data
+help_menu_systemdata_help Opens the System Data directory where you can store modifications to the game affecting all users on this machine; probably requires admin rights to modify, may get overwritten on the next upgrade, modifications may break things. It is generally recommended to treat this as read only.
 
 main_help_menu_text     Help
 main_help_menu_help     Having problems or just want to look something up? Here is the place.

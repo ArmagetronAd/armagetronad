@@ -558,10 +558,6 @@ private:
 
         paths[ pos++ ] = st_DataDir;
 
-        if ( st_UserDataDir.Len() > 1 )
-        {
-            paths[ pos++ ] = st_UserDataDir;
-        }
 
         // for finding data packet in 0install
         char const * extradata = getenv("ARMAGETRONAD_EXTRADATA");
@@ -571,6 +567,11 @@ private:
         {
             static tString ed(extradata);
             paths[ pos++ ] = ed;
+        }
+
+        if ( st_UserDataDir.Len() > 1 )
+        {
+            paths[ pos++ ] = st_UserDataDir;
         }
     }
 };
@@ -974,6 +975,16 @@ void tDirectories::SetAutoResource( const tString& dir ) {
 
 void tDirectories::SetIncludedResource( const tString& dir ) {
     st_IncludedResourceDir = dir;
+}
+
+tString const & tDirectories::GetUserData()
+{
+    return st_UserDataDir;
+}
+
+tString const & tDirectories::GetData()
+{
+    return st_DataDir;
 }
 
 /*

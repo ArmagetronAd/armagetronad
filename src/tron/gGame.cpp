@@ -2112,9 +2112,22 @@ void sg_DisplayVersionInfo() {
 
 void sg_StartupPlayerMenu();
 
+// opens the wiki
 static void sg_ShowWiki()
 {
-    sg_OpenURI(tOutput("$main_menu_wiki_uri"));
+    sg_OpenURI(tOutput("$help_menu_wiki_uri"));
+}
+
+// opens the user data directory
+static void sg_ShowUserData()
+{
+    sg_OpenDirectory(tDirectories::GetUserData());
+}
+
+// opens the system data directory
+static void sg_ShowSystemData()
+{
+    sg_OpenDirectory(tDirectories::GetData());
 }
 
 static uMenu sg_helpMenu("$main_help_menu_text");
@@ -2125,14 +2138,23 @@ static uMenuItemFunction sg_aboutMenuItem
  "$main_menu_about_help",
  &sg_DisplayVersionInfo);
 
-static uMenuItemFunction sgg_wikiMenuItem 
+static uMenuItemFunction sg_systemDataMenuItem 
 (&sg_helpMenu,
- "$main_menu_wiki_text",
- "$main_menu_wiki_help",
- &sg_ShowWiki);
+ "$help_menu_systemdata_text",
+ "$help_menu_systemdata_help",
+ &sg_ShowSystemData);
+
+static uMenuItemFunction sg_userDataMenuItem 
+(&sg_helpMenu,
+ "$help_menu_userdata_text",
+ "$help_menu_userdata_help",
+ &sg_ShowUserData);
     
-
-
+static uMenuItemFunction sg_wikiMenuItem 
+(&sg_helpMenu,
+ "$help_menu_wiki_text",
+ "$help_menu_wiki_help",
+ &sg_ShowWiki);
 
 #endif
 

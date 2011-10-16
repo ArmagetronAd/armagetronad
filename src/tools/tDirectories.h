@@ -115,6 +115,9 @@ public:
     static void SetAutoResource( const tString& dir );
     static void SetIncludedResource( const tString& dir );
 
+    static tString const & GetUserData(); //!< returns the user data directory
+    static tString const & GetData(); //!< returns the system data directory
+
     // get a list of files for a directory
     // flag: 0=files+dirs, 1=files, 2=dirs
     static void GetFiles( const tString& dir, const tString& fileSpec,
