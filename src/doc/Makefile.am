@@ -29,10 +29,10 @@ print:
 	echo $(auto_html_files_m4_dist)
 
 # install generated html files and put them directly into the distribution
-textdir=$(armadocdir)
+textdir=$(aa_datadir)/doc
 text_DATE=$(doc_txt_files)
 
-htmldir=$(armadocdir)/html
+htmldir=$(aa_datadir)/doc
 html_DATA=$(doc_html_files)
 distclean-local:
 	rm -f COPYING.txt
