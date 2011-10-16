@@ -1372,6 +1372,9 @@ help_menu_userdata_help Opens the User Data directory where you can store person
 help_menu_systemdata_text Open System Data
 help_menu_systemdata_help Opens the System Data directory where you can store modifications to the game affecting all users on this machine; probably requires admin rights to modify, may get overwritten on the next upgrade, modifications may break things. It is generally recommended to treat this as read only.
 
+help_menu_systemconfig_text Open System Configuration
+help_menu_systemconfig_help Opens the System Configuration directory where you can store modifications to the game configuration affecting all users on this machine; probably requires admin rights to modify, may get overwritten on the next upgrade, modifications may break things. It is generally recommended to treat this as read only.
+
 main_help_menu_text     Help
 main_help_menu_help     Having problems or just want to look something up? Here is the place.
 

@@ -2130,6 +2130,12 @@ static void sg_ShowSystemData()
     sg_OpenDirectory(tDirectories::GetData());
 }
 
+// opens the system configuration directory
+static void sg_ShowSystemConfig()
+{
+    sg_OpenDirectory(tDirectories::GetConfig());
+}
+
 // opens the documentation
 static void sg_ShowDocumentation()
 {
@@ -2161,6 +2167,12 @@ static uMenuItemFunction sg_aboutMenuItem
  "$main_menu_about_text",
  "$main_menu_about_help",
  &sg_DisplayVersionInfo);
+
+static uMenuItemFunction sg_systemConfigMenuItem 
+(&sg_helpMenu,
+ "$help_menu_systemconfig_text",
+ "$help_menu_systemconfig_help",
+ &sg_ShowSystemConfig);
 
 static uMenuItemFunction sg_systemDataMenuItem 
 (&sg_helpMenu,

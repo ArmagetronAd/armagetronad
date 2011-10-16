@@ -987,6 +987,11 @@ tString const & tDirectories::GetData()
     return st_DataDir;
 }
 
+tString const & tDirectories::GetConfig()
+{
+    return st_ConfigDir;
+}
+
 static tString st_BuildCWD()
 {
 #define MAX_CWD 1000
