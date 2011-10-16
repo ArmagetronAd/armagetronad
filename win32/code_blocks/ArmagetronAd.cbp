@@ -17,7 +17,6 @@
 					<Add option="-O2" />
 					<Add option="-W" />
 					<Add option="-DNDEBUG" />
-					<Add option="-DDIRTY" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
