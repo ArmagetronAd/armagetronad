@@ -1359,6 +1359,10 @@ help_menu_wiki_text	    Show Wiki
 help_menu_wiki_help		Opens the WIKI documentation in an external browser.
 help_menu_wiki_uri	    http://wiki.armagetronad.net
 
+help_menu_doc_text	    Show Documentation
+help_menu_doc_help		Opens the included HTML documentation in an external browser
+help_menu_doc_file	    index.html
+
 help_menu_irc_text	    Open IRC Chatroom
 help_menu_irc_help		Opens a web interface to our IRC chatroom where you may be lucky and catch a friendly soul willing to answer your questions.
 

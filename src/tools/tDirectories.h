@@ -118,6 +118,8 @@ public:
     static tString const & GetUserData(); //!< returns the user data directory
     static tString const & GetData(); //!< returns the system data directory
 
+    static tString const & GetCWD(); //!< returns the current working directory
+
     // get a list of files for a directory
     // flag: 0=files+dirs, 1=files, 2=dirs
     static void GetFiles( const tString& dir, const tString& fileSpec,

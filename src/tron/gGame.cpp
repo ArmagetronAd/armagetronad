@@ -2130,6 +2130,21 @@ static void sg_ShowSystemData()
     sg_OpenDirectory(tDirectories::GetData());
 }
 
+// opens the documentation
+static void sg_ShowDocumentation()
+{
+    std::ostringstream s,s2;
+    s2 << "doc/" << tOutput("$help_menu_doc_file");
+    s << "file://";
+    tString path = tDirectories::Data().GetReadPath( s2.str().c_str() );
+    if( path[0] == '.' )
+    {
+        s << tDirectories::GetCWD() << "/";
+    }
+    s << path;
+    sg_OpenURI( s.str().c_str() );
+}
+
 // opens the system data directory
 static void sg_ShowIRC()
 {
@@ -2159,17 +2174,23 @@ static uMenuItemFunction sg_userDataMenuItem
  "$help_menu_userdata_help",
  &sg_ShowUserData);
     
+static uMenuItemFunction sg_wikiMenuItem 
+(&sg_helpMenu,
+ "$help_menu_wiki_text",
+ "$help_menu_wiki_help",
+ &sg_ShowWiki);
+
 static uMenuItemFunction sg_ircMenuItem 
 (&sg_helpMenu,
  "$help_menu_irc_text",
  "$help_menu_irc_help",
  &sg_ShowIRC);
 
-static uMenuItemFunction sg_wikiMenuItem 
+static uMenuItemFunction sg_docMenuItem 
 (&sg_helpMenu,
- "$help_menu_wiki_text",
- "$help_menu_wiki_help",
- &sg_ShowWiki);
+ "$help_menu_doc_text",
+ "$help_menu_doc_help",
+ &sg_ShowDocumentation);
 
 #endif
 

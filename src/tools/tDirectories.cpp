@@ -987,6 +987,24 @@ tString const & tDirectories::GetData()
     return st_DataDir;
 }
 
+static tString st_BuildCWD()
+{
+#define MAX_CWD 1000
+
+#ifdef WIN32
+#define getcwd _getcwd
+#endif
+
+    char buffer[MAX_CWD+2];
+    return tString( getcwd( buffer, MAX_CWD ) );
+}
+
+tString const & tDirectories::GetCWD()
+{
+    static tString ret = st_BuildCWD();
+    return ret;
+}
+
 /*
  * robust glob pattern matcher
  * ozan s. yigit/dec 1994
