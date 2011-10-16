@@ -64,7 +64,7 @@ bool sg_MoviePack(){
     return sg_moviepackInstalled && sg_moviepackUse;
 }
 
-static bool sg_OpenStuff( char const * uri, char const * unixcommand )
+static bool sg_OpenStuff( char const * uri, bool tryBrowser )
 {
 #ifndef DEDICATED
     if( currentScreensetting.fullscreen )
@@ -85,7 +85,11 @@ static bool sg_OpenStuff( char const * uri, char const * unixcommand )
 #else
     // general unix
     std::ostringstream s; // composing a command
-    s << unixcommand << " " << uri << " || firefox " << uri << " &";
+    if( tryBrowser )
+    {
+        s << "x-www-browser '" << uri << "' || ";
+    }
+    s << "xdg-open '" << uri << "' || " << "firefox '" << uri << "' &";
     // execute command
     return  0 == system( s.str().c_str() );
 #endif
@@ -94,12 +98,12 @@ static bool sg_OpenStuff( char const * uri, char const * unixcommand )
 
 bool sg_OpenURI( char const * uri )
 {
-    return sg_OpenStuff( uri, "x-www-browser" );
+    return sg_OpenStuff( uri, true );
 }
 
 bool sg_OpenDirectory( char const * path )
 {
-    return sg_OpenStuff( path, "xdg-open" );
+    return sg_OpenStuff( path, false );
 }
 
 //const eCoord se_zeroCoord(0,0);
