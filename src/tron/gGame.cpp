@@ -2130,6 +2130,15 @@ static void sg_ShowSystemData()
     sg_OpenDirectory(tDirectories::GetData());
 }
 
+// opens the system data directory
+static void sg_ShowIRC()
+{
+    std::ostringstream s;
+    s << "http://webchat.freenode.net/?channels=armagetron&prompt=1&nick="
+      << ePlayer::PlayerConfig(0)->Name();
+    sg_OpenURI(s.str().c_str());
+}
+
 static uMenu sg_helpMenu("$main_help_menu_text");
 
 static uMenuItemFunction sg_aboutMenuItem
@@ -2150,6 +2159,12 @@ static uMenuItemFunction sg_userDataMenuItem
  "$help_menu_userdata_help",
  &sg_ShowUserData);
     
+static uMenuItemFunction sg_ircMenuItem 
+(&sg_helpMenu,
+ "$help_menu_irc_text",
+ "$help_menu_irc_help",
+ &sg_ShowIRC);
+
 static uMenuItemFunction sg_wikiMenuItem 
 (&sg_helpMenu,
  "$help_menu_wiki_text",
