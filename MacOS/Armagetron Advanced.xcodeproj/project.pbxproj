@@ -71,6 +71,18 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		649FF492144CBBC300AD2749 /* bugs.html.m4 in Resources */ = {isa = PBXBuildFile; fileRef = 649FF46F144CBBC300AD2749 /* bugs.html.m4 */; };
+		649FF493144CBBC300AD2749 /* changelog.html.m4 in Resources */ = {isa = PBXBuildFile; fileRef = 649FF470144CBBC300AD2749 /* changelog.html.m4 */; };
+		649FF495144CBBC300AD2749 /* compile.html.m4 in Resources */ = {isa = PBXBuildFile; fileRef = 649FF472144CBBC300AD2749 /* compile.html.m4 */; };
+		649FF496144CBBC300AD2749 /* config.html.m4 in Resources */ = {isa = PBXBuildFile; fileRef = 649FF473144CBBC300AD2749 /* config.html.m4 */; };
+		649FF497144CBBC300AD2749 /* Howto-Maps.txt in Resources */ = {isa = PBXBuildFile; fileRef = 649FF475144CBBC300AD2749 /* Howto-Maps.txt */; };
+		649FF499144CBBC300AD2749 /* faq.html.m4 in Resources */ = {isa = PBXBuildFile; fileRef = 649FF477144CBBC300AD2749 /* faq.html.m4 */; };
+		649FF49E144CBBC300AD2749 /* index.html.m4 in Resources */ = {isa = PBXBuildFile; fileRef = 649FF47C144CBBC300AD2749 /* index.html.m4 */; };
+		649FF4A0144CBBC300AD2749 /* install_macosx.html.m4 in Resources */ = {isa = PBXBuildFile; fileRef = 649FF47E144CBBC300AD2749 /* install_macosx.html.m4 */; };
+		649FF4AD144CBBC300AD2749 /* network.html.m4 in Resources */ = {isa = PBXBuildFile; fileRef = 649FF48C144CBBC300AD2749 /* network.html.m4 */; };
+		649FF4AE144CBBC300AD2749 /* readme_macosx.html.m4 in Resources */ = {isa = PBXBuildFile; fileRef = 649FF48D144CBBC300AD2749 /* readme_macosx.html.m4 */; };
+		649FF4B0144CBBC300AD2749 /* todo.html.m4 in Resources */ = {isa = PBXBuildFile; fileRef = 649FF48F144CBBC300AD2749 /* todo.html.m4 */; };
+		649FF4B1144CBBC300AD2749 /* versions.html.m4 in Resources */ = {isa = PBXBuildFile; fileRef = 649FF490144CBBC300AD2749 /* versions.html.m4 */; };
 		64C9C815144B6CB70039620E /* eSpawn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 64C9C813144B6CB60039620E /* eSpawn.cpp */; };
 		64C9C816144B6CB70039620E /* eSpawn.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 64C9C814144B6CB70039620E /* eSpawn.h */; };
 		64C9C817144B6CB70039620E /* eSpawn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 64C9C813144B6CB60039620E /* eSpawn.cpp */; };
@@ -455,9 +467,9 @@
 			fileType = pattern.proxy;
 			isEditable = 1;
 			outputFiles = (
-				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/doc/$(INPUT_FILE_BASE)",
+				"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE).ignoreme",
 			);
-			script = "mkdir -p \"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/doc/\"\n{ cat \"${INPUT_FILE_DIR}/html.mac.m4\" \"${INPUT_FILE_PATH}\"; } | m4 -I \"${INPUT_FILE_DIR}\" > \"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/doc/${INPUT_FILE_BASE}\"";
+			script = "mkdir -p \"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/doc/\"\n{ cat \"${INPUT_FILE_DIR}/html.mac.m4\" \"${INPUT_FILE_PATH}\"; } | m4 -I \"${INPUT_FILE_DIR}\" > \"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/doc/${INPUT_FILE_BASE}\"\ntouch \"${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}.ignoreme\"";
 		};
 		9B9754720F44AAD500E41662 /* PBXBuildRule */ = {
 			isa = PBXBuildRule;
@@ -588,6 +600,31 @@
 		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
+		649FF46E144CBBC300AD2749 /* artr.cfg */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = artr.cfg; path = ../src/doc/artr.cfg; sourceTree = SOURCE_ROOT; };
+		649FF46F144CBBC300AD2749 /* bugs.html.m4 */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = bugs.html.m4; path = ../src/doc/bugs.html.m4; sourceTree = SOURCE_ROOT; };
+		649FF470144CBBC300AD2749 /* changelog.html.m4 */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = changelog.html.m4; path = ../src/doc/changelog.html.m4; sourceTree = SOURCE_ROOT; };
+		649FF471144CBBC300AD2749 /* commands.html.m4 */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = commands.html.m4; path = ../src/doc/commands.html.m4; sourceTree = SOURCE_ROOT; };
+		649FF472144CBBC300AD2749 /* compile.html.m4 */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = compile.html.m4; path = ../src/doc/compile.html.m4; sourceTree = SOURCE_ROOT; };
+		649FF473144CBBC300AD2749 /* config.html.m4 */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = config.html.m4; path = ../src/doc/config.html.m4; sourceTree = SOURCE_ROOT; };
+		649FF475144CBBC300AD2749 /* Howto-Maps.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = "Howto-Maps.txt"; path = "../src/doc/Content_Creation/Howto-Maps.txt"; sourceTree = SOURCE_ROOT; };
+		649FF476144CBBC300AD2749 /* Doxyfile.in */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = Doxyfile.in; path = ../src/doc/Doxyfile.in; sourceTree = SOURCE_ROOT; };
+		649FF477144CBBC300AD2749 /* faq.html.m4 */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = faq.html.m4; path = ../src/doc/faq.html.m4; sourceTree = SOURCE_ROOT; };
+		649FF478144CBBC300AD2749 /* head.html.m4 */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = head.html.m4; path = ../src/doc/head.html.m4; sourceTree = SOURCE_ROOT; };
+		649FF479144CBBC300AD2749 /* html.m4.in */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = html.m4.in; path = ../src/doc/html.m4.in; sourceTree = SOURCE_ROOT; };
+		649FF47A144CBBC300AD2749 /* html.mac.m4 */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = html.mac.m4; path = ../src/doc/html.mac.m4; sourceTree = SOURCE_ROOT; };
+		649FF47B144CBBC300AD2749 /* HtmlMakefile */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = HtmlMakefile; path = ../src/doc/HtmlMakefile; sourceTree = SOURCE_ROOT; };
+		649FF47C144CBBC300AD2749 /* index.html.m4 */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = index.html.m4; path = ../src/doc/index.html.m4; sourceTree = SOURCE_ROOT; };
+		649FF47D144CBBC300AD2749 /* install_linux.html.m4 */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = install_linux.html.m4; path = ../src/doc/install_linux.html.m4; sourceTree = SOURCE_ROOT; };
+		649FF47E144CBBC300AD2749 /* install_macosx.html.m4 */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = install_macosx.html.m4; path = ../src/doc/install_macosx.html.m4; sourceTree = SOURCE_ROOT; };
+		649FF47F144CBBC300AD2749 /* install_result.html.m4 */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = install_result.html.m4; path = ../src/doc/install_result.html.m4; sourceTree = SOURCE_ROOT; };
+		649FF480144CBBC300AD2749 /* install_windows.html.m4 */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = install_windows.html.m4; path = ../src/doc/install_windows.html.m4; sourceTree = SOURCE_ROOT; };
+		649FF481144CBBC300AD2749 /* Makefile.am */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = Makefile.am; path = ../src/doc/Makefile.am; sourceTree = SOURCE_ROOT; };
+		649FF482144CBBC300AD2749 /* navbar.html.m4 */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = navbar.html.m4; path = ../src/doc/navbar.html.m4; sourceTree = SOURCE_ROOT; };
+		649FF48C144CBBC300AD2749 /* network.html.m4 */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = network.html.m4; path = ../src/doc/network.html.m4; sourceTree = SOURCE_ROOT; };
+		649FF48D144CBBC300AD2749 /* readme_macosx.html.m4 */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = readme_macosx.html.m4; path = ../src/doc/readme_macosx.html.m4; sourceTree = SOURCE_ROOT; };
+		649FF48E144CBBC300AD2749 /* sig.m4 */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = sig.m4; path = ../src/doc/sig.m4; sourceTree = SOURCE_ROOT; };
+		649FF48F144CBBC300AD2749 /* todo.html.m4 */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = todo.html.m4; path = ../src/doc/todo.html.m4; sourceTree = SOURCE_ROOT; };
+		649FF490144CBBC300AD2749 /* versions.html.m4 */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = versions.html.m4; path = ../src/doc/versions.html.m4; sourceTree = SOURCE_ROOT; };
 		64C9C813144B6CB60039620E /* eSpawn.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = eSpawn.cpp; sourceTree = "<group>"; };
 		64C9C814144B6CB70039620E /* eSpawn.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = eSpawn.h; sourceTree = "<group>"; };
 		64DAFC51144C979900D115F3 /* command-line_switches.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = "command-line_switches.txt"; sourceTree = "<group>"; };
@@ -1070,6 +1107,48 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		649FF46D144CBBC300AD2749 /* doc */ = {
+			isa = PBXGroup;
+			children = (
+				649FF46E144CBBC300AD2749 /* artr.cfg */,
+				649FF46F144CBBC300AD2749 /* bugs.html.m4 */,
+				649FF470144CBBC300AD2749 /* changelog.html.m4 */,
+				649FF471144CBBC300AD2749 /* commands.html.m4 */,
+				649FF472144CBBC300AD2749 /* compile.html.m4 */,
+				649FF473144CBBC300AD2749 /* config.html.m4 */,
+				649FF474144CBBC300AD2749 /* Content_Creation */,
+				649FF476144CBBC300AD2749 /* Doxyfile.in */,
+				649FF477144CBBC300AD2749 /* faq.html.m4 */,
+				649FF478144CBBC300AD2749 /* head.html.m4 */,
+				649FF479144CBBC300AD2749 /* html.m4.in */,
+				649FF47A144CBBC300AD2749 /* html.mac.m4 */,
+				649FF47B144CBBC300AD2749 /* HtmlMakefile */,
+				649FF47C144CBBC300AD2749 /* index.html.m4 */,
+				649FF47D144CBBC300AD2749 /* install_linux.html.m4 */,
+				649FF47E144CBBC300AD2749 /* install_macosx.html.m4 */,
+				649FF47F144CBBC300AD2749 /* install_result.html.m4 */,
+				649FF480144CBBC300AD2749 /* install_windows.html.m4 */,
+				649FF481144CBBC300AD2749 /* Makefile.am */,
+				649FF482144CBBC300AD2749 /* navbar.html.m4 */,
+				649FF48C144CBBC300AD2749 /* network.html.m4 */,
+				649FF48D144CBBC300AD2749 /* readme_macosx.html.m4 */,
+				649FF48E144CBBC300AD2749 /* sig.m4 */,
+				649FF48F144CBBC300AD2749 /* todo.html.m4 */,
+				649FF490144CBBC300AD2749 /* versions.html.m4 */,
+			);
+			name = doc;
+			path = ../src/doc;
+			sourceTree = SOURCE_ROOT;
+		};
+		649FF474144CBBC300AD2749 /* Content_Creation */ = {
+			isa = PBXGroup;
+			children = (
+				649FF475144CBBC300AD2749 /* Howto-Maps.txt */,
+			);
+			name = Content_Creation;
+			path = ../src/doc/Content_Creation;
+			sourceTree = SOURCE_ROOT;
+		};
 		64DAFC50144C979900D115F3 /* doc */ = {
 			isa = PBXGroup;
 			children = (
@@ -1160,6 +1239,7 @@
 		9BB7B5A30D8302DF004FE8C3 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				649FF46D144CBBC300AD2749 /* doc */,
 				9BB7BA0E0D8304E4004FE8C3 /* defs.h */,
 				9BB7B7A00D830422004FE8C3 /* tools */,
 				9BB7B68A0D830365004FE8C3 /* network */,
@@ -1807,6 +1887,18 @@
 				9BD7DB3E0A2CAE4600D7033C /* textures in Resources */,
 				9BD7DB770A2CE28500D7033C /* SDLMain.nib in Resources */,
 				9BD7DB7E0A2CE35600D7033C /* Armagetron Advanced.icns in Resources */,
+				649FF492144CBBC300AD2749 /* bugs.html.m4 in Resources */,
+				649FF493144CBBC300AD2749 /* changelog.html.m4 in Resources */,
+				649FF495144CBBC300AD2749 /* compile.html.m4 in Resources */,
+				649FF496144CBBC300AD2749 /* config.html.m4 in Resources */,
+				649FF497144CBBC300AD2749 /* Howto-Maps.txt in Resources */,
+				649FF499144CBBC300AD2749 /* faq.html.m4 in Resources */,
+				649FF49E144CBBC300AD2749 /* index.html.m4 in Resources */,
+				649FF4A0144CBBC300AD2749 /* install_macosx.html.m4 in Resources */,
+				649FF4AD144CBBC300AD2749 /* network.html.m4 in Resources */,
+				649FF4AE144CBBC300AD2749 /* readme_macosx.html.m4 in Resources */,
+				649FF4B0144CBBC300AD2749 /* todo.html.m4 in Resources */,
+				649FF4B1144CBBC300AD2749 /* versions.html.m4 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
