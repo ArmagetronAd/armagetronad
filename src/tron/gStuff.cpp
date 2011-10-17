@@ -78,10 +78,6 @@ static bool sg_OpenStuff( char const * uri, bool tryBrowser )
     // bool success = false;
 #ifdef WIN32
     ShellExecute(NULL, "open", uri, NULL, NULL, SW_SHOWNORMAL);
-#elif MACOSX
-    CFURLRef URL = CFURLCreateWithBytes( NULL, (UInt8 *)uri, strlen(uri), kCFStringEncodingUTF8, NULL );
-    LSOpenCFURLRef( URL, NULL );
-    CFRelease( URL );
 #else
     // general unix
     std::ostringstream s; // composing a command
@@ -98,12 +94,26 @@ static bool sg_OpenStuff( char const * uri, bool tryBrowser )
 
 bool sg_OpenURI( char const * uri )
 {
+#ifdef MACOSX
+    CFURLRef URL = CFURLCreateWithBytes( NULL, (UInt8 *)uri, strlen(uri), kCFStringEncodingUTF8, NULL );
+    LSOpenCFURLRef( URL, NULL );
+    CFRelease( URL );
+	return true;
+#else
     return sg_OpenStuff( uri, true );
+#endif
 }
 
 bool sg_OpenDirectory( char const * path )
 {
+#ifdef MACOSX
+	FSRef REF;
+    FSPathMakeRef( (UInt8 *)path, &REF, NULL );
+    LSOpenFSRef( &REF, NULL );
+	return true;
+#else
     return sg_OpenStuff( path, false );
+#endif
 }
 
 //const eCoord se_zeroCoord(0,0);
