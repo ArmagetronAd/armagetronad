@@ -2112,6 +2112,18 @@ void sg_DisplayVersionInfo() {
 
 void sg_StartupPlayerMenu();
 
+// makes a path absolute
+static std::string sg_AbsolutifyPath( tString const & in )
+{
+    std::ostringstream s;
+    if( in[0] == '.' )
+    {
+        s << tDirectories::GetCWD() << "/";
+    }
+    s << in;
+    return s.str();
+}
+
 // opens the wiki
 static void sg_ShowWiki()
 {
@@ -2121,19 +2133,19 @@ static void sg_ShowWiki()
 // opens the user data directory
 static void sg_ShowUserData()
 {
-    sg_OpenDirectory(tDirectories::GetUserData());
+    sg_OpenDirectory(sg_AbsolutifyPath(tDirectories::GetUserData()).c_str());
 }
 
 // opens the system data directory
 static void sg_ShowSystemData()
 {
-    sg_OpenDirectory(tDirectories::GetData());
+    sg_OpenDirectory(sg_AbsolutifyPath(tDirectories::GetData()).c_str());
 }
 
 // opens the system configuration directory
 static void sg_ShowSystemConfig()
 {
-    sg_OpenDirectory(tDirectories::GetConfig());
+    sg_OpenDirectory(sg_AbsolutifyPath(tDirectories::GetConfig()).c_str());
 }
 
 // opens the documentation
@@ -2143,11 +2155,7 @@ static void sg_ShowDocumentation()
     s2 << "doc/" << tOutput("$help_menu_doc_file");
     s << "file://";
     tString path = tDirectories::Data().GetReadPath( s2.str().c_str() );
-    if( path[0] == '.' )
-    {
-        s << tDirectories::GetCWD() << "/";
-    }
-    s << path;
+    s << sg_AbsolutifyPath(path);
     sg_OpenURI( s.str().c_str() );
 }
 
