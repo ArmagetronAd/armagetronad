@@ -75,6 +75,9 @@
 		64C9C816144B6CB70039620E /* eSpawn.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 64C9C814144B6CB70039620E /* eSpawn.h */; };
 		64C9C817144B6CB70039620E /* eSpawn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 64C9C813144B6CB60039620E /* eSpawn.cpp */; };
 		64C9C818144B6CB70039620E /* eSpawn.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 64C9C814144B6CB70039620E /* eSpawn.h */; };
+		64DAFC57144C979900D115F3 /* command-line_switches.txt in CopyFiles */ = {isa = PBXBuildFile; fileRef = 64DAFC51144C979900D115F3 /* command-line_switches.txt */; };
+		64DAFC58144C979900D115F3 /* directories.txt in CopyFiles */ = {isa = PBXBuildFile; fileRef = 64DAFC52144C979900D115F3 /* directories.txt */; };
+		64DAFC59144C979900D115F3 /* installation.txt in CopyFiles */ = {isa = PBXBuildFile; fileRef = 64DAFC53144C979900D115F3 /* installation.txt */; };
 		8CBA60B1089F00F2007E21DC /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CBA60B0089F00F2007E21DC /* OpenGL.framework */; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		9B0C8B3D0F7EBA78001802CD /* eChat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B0C8B3B0F7EBA78001802CD /* eChat.cpp */; };
@@ -445,6 +448,17 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXBuildRule section */
+		64DAFBA4144C5D9D00D115F3 /* PBXBuildRule */ = {
+			isa = PBXBuildRule;
+			compilerSpec = com.apple.compilers.proxy.script;
+			filePatterns = "*.m4";
+			fileType = pattern.proxy;
+			isEditable = 1;
+			outputFiles = (
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/doc/$(INPUT_FILE_BASE)",
+			);
+			script = "mkdir -p \"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/doc/\"\n{ cat \"${INPUT_FILE_DIR}/html.mac.m4\" \"${INPUT_FILE_PATH}\"; } | m4 -I \"${INPUT_FILE_DIR}\" > \"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/doc/${INPUT_FILE_BASE}\"";
+		};
 		9B9754720F44AAD500E41662 /* PBXBuildRule */ = {
 			isa = PBXBuildRule;
 			compilerSpec = com.apple.compilers.proxy.script;
@@ -562,6 +576,9 @@
 				9BB7B4000D8246A2004FE8C3 /* config in CopyFiles */,
 				9BB7B4010D8246A2004FE8C3 /* language in CopyFiles */,
 				64C9C818144B6CB70039620E /* eSpawn.h in CopyFiles */,
+				64DAFC57144C979900D115F3 /* command-line_switches.txt in CopyFiles */,
+				64DAFC58144C979900D115F3 /* directories.txt in CopyFiles */,
+				64DAFC59144C979900D115F3 /* installation.txt in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -573,6 +590,9 @@
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		64C9C813144B6CB60039620E /* eSpawn.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = eSpawn.cpp; sourceTree = "<group>"; };
 		64C9C814144B6CB70039620E /* eSpawn.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = eSpawn.h; sourceTree = "<group>"; };
+		64DAFC51144C979900D115F3 /* command-line_switches.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = "command-line_switches.txt"; sourceTree = "<group>"; };
+		64DAFC52144C979900D115F3 /* directories.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = directories.txt; sourceTree = "<group>"; };
+		64DAFC53144C979900D115F3 /* installation.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = installation.txt; sourceTree = "<group>"; };
 		8C11CA42095A268E007AE0EA /* armagetronad-dedicated */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "armagetronad-dedicated"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8CBA60B0089F00F2007E21DC /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = /System/Library/Frameworks/OpenGL.framework; sourceTree = "<absolute>"; };
 		8D1107320486CEB800E47090 /* Armagetron Advanced.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Armagetron Advanced.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1026,6 +1046,7 @@
 		29B97314FDCFA39411CA2CEA /* Armagetron Advanced */ = {
 			isa = PBXGroup;
 			children = (
+				64DAFC50144C979900D115F3 /* doc */,
 				9B77E6C30D8618970022FDF2 /* MacOS */,
 				9BB7B5A30D8302DF004FE8C3 /* Source */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
@@ -1048,6 +1069,17 @@
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
+		};
+		64DAFC50144C979900D115F3 /* doc */ = {
+			isa = PBXGroup;
+			children = (
+				64DAFC51144C979900D115F3 /* command-line_switches.txt */,
+				64DAFC52144C979900D115F3 /* directories.txt */,
+				64DAFC53144C979900D115F3 /* installation.txt */,
+			);
+			name = doc;
+			path = ../doc;
+			sourceTree = SOURCE_ROOT;
 		};
 		9B437BB00F2CBD9E00A10CC6 /* utf8 */ = {
 			isa = PBXGroup;
@@ -1709,6 +1741,7 @@
 				8CBA6203089F11BE007E21DC /* Run script: Cleanup */,
 			);
 			buildRules = (
+				64DAFBA4144C5D9D00D115F3 /* PBXBuildRule */,
 				9BC0F61A0B517A8B0041120B /* PBXBuildRule */,
 			);
 			dependencies = (
