@@ -987,9 +987,9 @@ tString const & tDirectories::GetData()
     return st_DataDir;
 }
 
-tString const & tDirectories::GetConfig()
+tString tDirectories::GetConfig()
 {
-    return st_ConfigDir;
+    return st_ConfigDir.Len() > 1 ? st_ConfigDir : (st_DataDir + "/config");
 }
 
 static tString st_BuildCWD()
