@@ -2139,7 +2139,13 @@ static void sg_ShowUserData()
 // opens the system data directory
 static void sg_ShowSystemData()
 {
-    sg_OpenDirectory(sg_AbsolutifyPath(tDirectories::GetData()).c_str());
+    tArray< tString > paths;
+    tDirectories::Data().GetPaths( paths );
+    // the last one is the user data
+    for( int i = paths.Len() - 2; i >= 0; --i )
+    {
+        sg_OpenDirectory(sg_AbsolutifyPath(paths[i]).c_str());
+    }
 }
 
 // opens the system configuration directory
