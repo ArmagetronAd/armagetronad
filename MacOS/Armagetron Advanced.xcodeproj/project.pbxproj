@@ -71,25 +71,8 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
-		649FF492144CBBC300AD2749 /* bugs.html.m4 in Resources */ = {isa = PBXBuildFile; fileRef = 649FF46F144CBBC300AD2749 /* bugs.html.m4 */; };
-		649FF493144CBBC300AD2749 /* changelog.html.m4 in Resources */ = {isa = PBXBuildFile; fileRef = 649FF470144CBBC300AD2749 /* changelog.html.m4 */; };
-		649FF495144CBBC300AD2749 /* compile.html.m4 in Resources */ = {isa = PBXBuildFile; fileRef = 649FF472144CBBC300AD2749 /* compile.html.m4 */; };
-		649FF496144CBBC300AD2749 /* config.html.m4 in Resources */ = {isa = PBXBuildFile; fileRef = 649FF473144CBBC300AD2749 /* config.html.m4 */; };
-		649FF497144CBBC300AD2749 /* Howto-Maps.txt in Resources */ = {isa = PBXBuildFile; fileRef = 649FF475144CBBC300AD2749 /* Howto-Maps.txt */; };
-		649FF499144CBBC300AD2749 /* faq.html.m4 in Resources */ = {isa = PBXBuildFile; fileRef = 649FF477144CBBC300AD2749 /* faq.html.m4 */; };
-		649FF49E144CBBC300AD2749 /* index.html.m4 in Resources */ = {isa = PBXBuildFile; fileRef = 649FF47C144CBBC300AD2749 /* index.html.m4 */; };
-		649FF4A0144CBBC300AD2749 /* install_macosx.html.m4 in Resources */ = {isa = PBXBuildFile; fileRef = 649FF47E144CBBC300AD2749 /* install_macosx.html.m4 */; };
-		649FF4AD144CBBC300AD2749 /* network.html.m4 in Resources */ = {isa = PBXBuildFile; fileRef = 649FF48C144CBBC300AD2749 /* network.html.m4 */; };
-		649FF4AE144CBBC300AD2749 /* readme_macosx.html.m4 in Resources */ = {isa = PBXBuildFile; fileRef = 649FF48D144CBBC300AD2749 /* readme_macosx.html.m4 */; };
-		649FF4B0144CBBC300AD2749 /* todo.html.m4 in Resources */ = {isa = PBXBuildFile; fileRef = 649FF48F144CBBC300AD2749 /* todo.html.m4 */; };
-		649FF4B1144CBBC300AD2749 /* versions.html.m4 in Resources */ = {isa = PBXBuildFile; fileRef = 649FF490144CBBC300AD2749 /* versions.html.m4 */; };
 		64C9C815144B6CB70039620E /* eSpawn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 64C9C813144B6CB60039620E /* eSpawn.cpp */; };
-		64C9C816144B6CB70039620E /* eSpawn.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 64C9C814144B6CB70039620E /* eSpawn.h */; };
 		64C9C817144B6CB70039620E /* eSpawn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 64C9C813144B6CB60039620E /* eSpawn.cpp */; };
-		64C9C818144B6CB70039620E /* eSpawn.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 64C9C814144B6CB70039620E /* eSpawn.h */; };
-		64DAFC57144C979900D115F3 /* command-line_switches.txt in CopyFiles */ = {isa = PBXBuildFile; fileRef = 64DAFC51144C979900D115F3 /* command-line_switches.txt */; };
-		64DAFC58144C979900D115F3 /* directories.txt in CopyFiles */ = {isa = PBXBuildFile; fileRef = 64DAFC52144C979900D115F3 /* directories.txt */; };
-		64DAFC59144C979900D115F3 /* installation.txt in CopyFiles */ = {isa = PBXBuildFile; fileRef = 64DAFC53144C979900D115F3 /* installation.txt */; };
 		8CBA60B1089F00F2007E21DC /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CBA60B0089F00F2007E21DC /* OpenGL.framework */; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		9B0C8B3D0F7EBA78001802CD /* eChat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B0C8B3B0F7EBA78001802CD /* eChat.cpp */; };
@@ -100,6 +83,40 @@
 		9B1ECD280F159FF800288C28 /* tVersion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B1ECD240F159FF800288C28 /* tVersion.cpp */; };
 		9B437BA20F2CBD8300A10CC6 /* tRectangle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B437BA00F2CBD8300A10CC6 /* tRectangle.cpp */; };
 		9B437BA40F2CBD8300A10CC6 /* tRectangle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B437BA00F2CBD8300A10CC6 /* tRectangle.cpp */; };
+		9B4612F4144E323A00779938 /* bugs.html.m4 in Sources */ = {isa = PBXBuildFile; fileRef = 649FF46F144CBBC300AD2749 /* bugs.html.m4 */; };
+		9B4612F5144E323A00779938 /* changelog.html.m4 in Sources */ = {isa = PBXBuildFile; fileRef = 649FF470144CBBC300AD2749 /* changelog.html.m4 */; };
+		9B4612F6144E323A00779938 /* commands.html.m4 in Sources */ = {isa = PBXBuildFile; fileRef = 649FF471144CBBC300AD2749 /* commands.html.m4 */; };
+		9B4612F7144E323A00779938 /* compile.html.m4 in Sources */ = {isa = PBXBuildFile; fileRef = 649FF472144CBBC300AD2749 /* compile.html.m4 */; };
+		9B4612F8144E323A00779938 /* config.html.m4 in Sources */ = {isa = PBXBuildFile; fileRef = 649FF473144CBBC300AD2749 /* config.html.m4 */; };
+		9B4612F9144E323A00779938 /* faq.html.m4 in Sources */ = {isa = PBXBuildFile; fileRef = 649FF477144CBBC300AD2749 /* faq.html.m4 */; };
+		9B4612FA144E323A00779938 /* head.html.m4 in Sources */ = {isa = PBXBuildFile; fileRef = 649FF478144CBBC300AD2749 /* head.html.m4 */; };
+		9B4612FD144E323A00779938 /* index.html.m4 in Sources */ = {isa = PBXBuildFile; fileRef = 649FF47C144CBBC300AD2749 /* index.html.m4 */; };
+		9B4612FE144E323A00779938 /* install_linux.html.m4 in Sources */ = {isa = PBXBuildFile; fileRef = 649FF47D144CBBC300AD2749 /* install_linux.html.m4 */; };
+		9B4612FF144E323A00779938 /* install_macosx.html.m4 in Sources */ = {isa = PBXBuildFile; fileRef = 649FF47E144CBBC300AD2749 /* install_macosx.html.m4 */; };
+		9B461300144E323A00779938 /* install_result.html.m4 in Sources */ = {isa = PBXBuildFile; fileRef = 649FF47F144CBBC300AD2749 /* install_result.html.m4 */; };
+		9B461301144E323A00779938 /* install_windows.html.m4 in Sources */ = {isa = PBXBuildFile; fileRef = 649FF480144CBBC300AD2749 /* install_windows.html.m4 */; };
+		9B461302144E323A00779938 /* navbar.html.m4 in Sources */ = {isa = PBXBuildFile; fileRef = 649FF482144CBBC300AD2749 /* navbar.html.m4 */; };
+		9B461303144E323A00779938 /* network.html.m4 in Sources */ = {isa = PBXBuildFile; fileRef = 649FF48C144CBBC300AD2749 /* network.html.m4 */; };
+		9B461304144E323A00779938 /* readme_macosx.html.m4 in Sources */ = {isa = PBXBuildFile; fileRef = 649FF48D144CBBC300AD2749 /* readme_macosx.html.m4 */; };
+		9B461306144E323A00779938 /* todo.html.m4 in Sources */ = {isa = PBXBuildFile; fileRef = 649FF48F144CBBC300AD2749 /* todo.html.m4 */; };
+		9B461307144E323A00779938 /* versions.html.m4 in Sources */ = {isa = PBXBuildFile; fileRef = 649FF490144CBBC300AD2749 /* versions.html.m4 */; };
+		9B461339144E375400779938 /* bugs.html.m4 in Sources */ = {isa = PBXBuildFile; fileRef = 649FF46F144CBBC300AD2749 /* bugs.html.m4 */; };
+		9B46133A144E375400779938 /* changelog.html.m4 in Sources */ = {isa = PBXBuildFile; fileRef = 649FF470144CBBC300AD2749 /* changelog.html.m4 */; };
+		9B46133B144E375400779938 /* commands.html.m4 in Sources */ = {isa = PBXBuildFile; fileRef = 649FF471144CBBC300AD2749 /* commands.html.m4 */; };
+		9B46133C144E375400779938 /* compile.html.m4 in Sources */ = {isa = PBXBuildFile; fileRef = 649FF472144CBBC300AD2749 /* compile.html.m4 */; };
+		9B46133D144E375400779938 /* config.html.m4 in Sources */ = {isa = PBXBuildFile; fileRef = 649FF473144CBBC300AD2749 /* config.html.m4 */; };
+		9B46133E144E375400779938 /* faq.html.m4 in Sources */ = {isa = PBXBuildFile; fileRef = 649FF477144CBBC300AD2749 /* faq.html.m4 */; };
+		9B46133F144E375400779938 /* head.html.m4 in Sources */ = {isa = PBXBuildFile; fileRef = 649FF478144CBBC300AD2749 /* head.html.m4 */; };
+		9B461340144E375400779938 /* index.html.m4 in Sources */ = {isa = PBXBuildFile; fileRef = 649FF47C144CBBC300AD2749 /* index.html.m4 */; };
+		9B461341144E375400779938 /* install_linux.html.m4 in Sources */ = {isa = PBXBuildFile; fileRef = 649FF47D144CBBC300AD2749 /* install_linux.html.m4 */; };
+		9B461342144E375400779938 /* install_macosx.html.m4 in Sources */ = {isa = PBXBuildFile; fileRef = 649FF47E144CBBC300AD2749 /* install_macosx.html.m4 */; };
+		9B461343144E375400779938 /* install_result.html.m4 in Sources */ = {isa = PBXBuildFile; fileRef = 649FF47F144CBBC300AD2749 /* install_result.html.m4 */; };
+		9B461344144E375400779938 /* install_windows.html.m4 in Sources */ = {isa = PBXBuildFile; fileRef = 649FF480144CBBC300AD2749 /* install_windows.html.m4 */; };
+		9B461345144E375400779938 /* navbar.html.m4 in Sources */ = {isa = PBXBuildFile; fileRef = 649FF482144CBBC300AD2749 /* navbar.html.m4 */; };
+		9B461346144E375400779938 /* network.html.m4 in Sources */ = {isa = PBXBuildFile; fileRef = 649FF48C144CBBC300AD2749 /* network.html.m4 */; };
+		9B461347144E375400779938 /* readme_macosx.html.m4 in Sources */ = {isa = PBXBuildFile; fileRef = 649FF48D144CBBC300AD2749 /* readme_macosx.html.m4 */; };
+		9B461348144E375400779938 /* todo.html.m4 in Sources */ = {isa = PBXBuildFile; fileRef = 649FF48F144CBBC300AD2749 /* todo.html.m4 */; };
+		9B461349144E375400779938 /* versions.html.m4 in Sources */ = {isa = PBXBuildFile; fileRef = 649FF490144CBBC300AD2749 /* versions.html.m4 */; };
 		9B62588A0F5865410083C429 /* zFortress.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B6258860F5865410083C429 /* zFortress.cpp */; };
 		9B62588B0F5865410083C429 /* zTimedZone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B6258890F5865410083C429 /* zTimedZone.cpp */; };
 		9B62588C0F5865410083C429 /* zFortress.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B6258860F5865410083C429 /* zFortress.cpp */; };
@@ -467,9 +484,20 @@
 			fileType = pattern.proxy;
 			isEditable = 1;
 			outputFiles = (
-				"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE).ignoreme",
+				"$(CONFIGURATION_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/doc/$(INPUT_FILE_BASE)",
 			);
-			script = "mkdir -p \"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/doc/\"\n{ cat \"${INPUT_FILE_DIR}/html.mac.m4\" \"${INPUT_FILE_PATH}\"; } | m4 -I \"${INPUT_FILE_DIR}\" > \"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/doc/${INPUT_FILE_BASE}\"\ntouch \"${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}.ignoreme\"";
+			script = "doc_directory=\"${CONFIGURATION_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/doc\"\nmkdir -p \"$doc_directory\"\n{ cat \"${INPUT_FILE_DIR}/html.mac.m4\" \"${INPUT_FILE_PATH}\"; } | m4 -I \"${INPUT_FILE_DIR}\" > \"${doc_directory}/${INPUT_FILE_BASE}\"";
+		};
+		9B46134A144E379000779938 /* PBXBuildRule */ = {
+			isa = PBXBuildRule;
+			compilerSpec = com.apple.compilers.proxy.script;
+			filePatterns = "*.m4";
+			fileType = pattern.proxy;
+			isEditable = 1;
+			outputFiles = (
+				"$(CONFIGURATION_BUILD_DIR)/doc/$(INPUT_FILE_BASE)",
+			);
+			script = "doc_directory=\"${CONFIGURATION_BUILD_DIR}/doc\"\nmkdir -p \"$doc_directory\"\n{ cat \"${INPUT_FILE_DIR}/html.mac.m4\" \"${INPUT_FILE_PATH}\"; } | m4 -I \"${INPUT_FILE_DIR}\" > \"${doc_directory}/${INPUT_FILE_BASE}\"";
 		};
 		9B9754720F44AAD500E41662 /* PBXBuildRule */ = {
 			isa = PBXBuildRule;
@@ -574,7 +602,6 @@
 				9BD7D9A70A2C7CCF00D7033C /* libpng.framework in Copy Frameworks */,
 				9BD7D9A80A2C7CCF00D7033C /* SDL_image.framework in Copy Frameworks */,
 				9BD7D9AA0A2C7CCF00D7033C /* SDL.framework in Copy Frameworks */,
-				64C9C816144B6CB70039620E /* eSpawn.h in Copy Frameworks */,
 			);
 			name = "Copy Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -587,10 +614,6 @@
 			files = (
 				9BB7B4000D8246A2004FE8C3 /* config in CopyFiles */,
 				9BB7B4010D8246A2004FE8C3 /* language in CopyFiles */,
-				64C9C818144B6CB70039620E /* eSpawn.h in CopyFiles */,
-				64DAFC57144C979900D115F3 /* command-line_switches.txt in CopyFiles */,
-				64DAFC58144C979900D115F3 /* directories.txt in CopyFiles */,
-				64DAFC59144C979900D115F3 /* installation.txt in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -600,25 +623,20 @@
 		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
-		649FF46E144CBBC300AD2749 /* artr.cfg */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = artr.cfg; path = ../src/doc/artr.cfg; sourceTree = SOURCE_ROOT; };
 		649FF46F144CBBC300AD2749 /* bugs.html.m4 */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = bugs.html.m4; path = ../src/doc/bugs.html.m4; sourceTree = SOURCE_ROOT; };
 		649FF470144CBBC300AD2749 /* changelog.html.m4 */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = changelog.html.m4; path = ../src/doc/changelog.html.m4; sourceTree = SOURCE_ROOT; };
 		649FF471144CBBC300AD2749 /* commands.html.m4 */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = commands.html.m4; path = ../src/doc/commands.html.m4; sourceTree = SOURCE_ROOT; };
 		649FF472144CBBC300AD2749 /* compile.html.m4 */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = compile.html.m4; path = ../src/doc/compile.html.m4; sourceTree = SOURCE_ROOT; };
 		649FF473144CBBC300AD2749 /* config.html.m4 */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = config.html.m4; path = ../src/doc/config.html.m4; sourceTree = SOURCE_ROOT; };
 		649FF475144CBBC300AD2749 /* Howto-Maps.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = "Howto-Maps.txt"; path = "../src/doc/Content_Creation/Howto-Maps.txt"; sourceTree = SOURCE_ROOT; };
-		649FF476144CBBC300AD2749 /* Doxyfile.in */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = Doxyfile.in; path = ../src/doc/Doxyfile.in; sourceTree = SOURCE_ROOT; };
 		649FF477144CBBC300AD2749 /* faq.html.m4 */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = faq.html.m4; path = ../src/doc/faq.html.m4; sourceTree = SOURCE_ROOT; };
 		649FF478144CBBC300AD2749 /* head.html.m4 */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = head.html.m4; path = ../src/doc/head.html.m4; sourceTree = SOURCE_ROOT; };
-		649FF479144CBBC300AD2749 /* html.m4.in */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = html.m4.in; path = ../src/doc/html.m4.in; sourceTree = SOURCE_ROOT; };
 		649FF47A144CBBC300AD2749 /* html.mac.m4 */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = html.mac.m4; path = ../src/doc/html.mac.m4; sourceTree = SOURCE_ROOT; };
-		649FF47B144CBBC300AD2749 /* HtmlMakefile */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = HtmlMakefile; path = ../src/doc/HtmlMakefile; sourceTree = SOURCE_ROOT; };
 		649FF47C144CBBC300AD2749 /* index.html.m4 */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = index.html.m4; path = ../src/doc/index.html.m4; sourceTree = SOURCE_ROOT; };
 		649FF47D144CBBC300AD2749 /* install_linux.html.m4 */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = install_linux.html.m4; path = ../src/doc/install_linux.html.m4; sourceTree = SOURCE_ROOT; };
 		649FF47E144CBBC300AD2749 /* install_macosx.html.m4 */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = install_macosx.html.m4; path = ../src/doc/install_macosx.html.m4; sourceTree = SOURCE_ROOT; };
 		649FF47F144CBBC300AD2749 /* install_result.html.m4 */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = install_result.html.m4; path = ../src/doc/install_result.html.m4; sourceTree = SOURCE_ROOT; };
 		649FF480144CBBC300AD2749 /* install_windows.html.m4 */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = install_windows.html.m4; path = ../src/doc/install_windows.html.m4; sourceTree = SOURCE_ROOT; };
-		649FF481144CBBC300AD2749 /* Makefile.am */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = Makefile.am; path = ../src/doc/Makefile.am; sourceTree = SOURCE_ROOT; };
 		649FF482144CBBC300AD2749 /* navbar.html.m4 */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = navbar.html.m4; path = ../src/doc/navbar.html.m4; sourceTree = SOURCE_ROOT; };
 		649FF48C144CBBC300AD2749 /* network.html.m4 */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = network.html.m4; path = ../src/doc/network.html.m4; sourceTree = SOURCE_ROOT; };
 		649FF48D144CBBC300AD2749 /* readme_macosx.html.m4 */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = readme_macosx.html.m4; path = ../src/doc/readme_macosx.html.m4; sourceTree = SOURCE_ROOT; };
@@ -642,6 +660,7 @@
 		9B437B9F0F2CBD8300A10CC6 /* tRectangle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tRectangle.h; sourceTree = "<group>"; };
 		9B437BA00F2CBD8300A10CC6 /* tRectangle.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tRectangle.cpp; sourceTree = "<group>"; };
 		9B437BB10F2CBD9E00A10CC6 /* utf8.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = utf8.h; sourceTree = "<group>"; };
+		9B461338144E36EA00779938 /* html.m4.in */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = html.m4.in; sourceTree = "<group>"; };
 		9B6258860F5865410083C429 /* zFortress.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = zFortress.cpp; sourceTree = "<group>"; };
 		9B6258870F5865410083C429 /* zFortress.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zFortress.h; sourceTree = "<group>"; };
 		9B6258880F5865410083C429 /* zTimedZone.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zTimedZone.h; sourceTree = "<group>"; };
@@ -700,7 +719,7 @@
 		9BB084E1141C5FED009B30D0 /* tMutex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tMutex.cpp; sourceTree = "<group>"; };
 		9BB084E2141C5FED009B30D0 /* tMutex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tMutex.h; sourceTree = "<group>"; };
 		9BB084E3141C5FED009B30D0 /* tThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tThread.h; sourceTree = "<group>"; };
-		9BB5B9240D84604400BF5F1C /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = Info.plist; path = ../src/macosx/Info.plist; sourceTree = SOURCE_ROOT; };
+		9BB5B9240D84604400BF5F1C /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = ../src/macosx/Info.plist; sourceTree = SOURCE_ROOT; };
 		9BB5B9270D84605700BF5F1C /* English */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = English; path = InfoPlist.strings.in; sourceTree = "<group>"; };
 		9BB7B5A60D8302FA004FE8C3 /* eAdvWall.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = eAdvWall.cpp; sourceTree = "<group>"; };
 		9BB7B5A70D8302FA004FE8C3 /* eAdvWall.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = eAdvWall.h; sourceTree = "<group>"; };
@@ -763,7 +782,7 @@
 		9BB7B6570D830321004FE8C3 /* aa_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = aa_config.h; sourceTree = "<group>"; };
 		9BB7B6580D830321004FE8C3 /* config_common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = config_common.h; sourceTree = "<group>"; };
 		9BB7B65A0D830321004FE8C3 /* aa_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = aa_config.h; sourceTree = "<group>"; };
-		9BB7B65D0D830321004FE8C3 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = Info.plist; sourceTree = "<group>"; };
+		9BB7B65D0D830321004FE8C3 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9BB7B65E0D830321004FE8C3 /* SDLMain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDLMain.h; sourceTree = "<group>"; };
 		9BB7B65F0D830321004FE8C3 /* SDLMain.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = SDLMain.mm; sourceTree = "<group>"; };
 		9BB7B6610D830322004FE8C3 /* version.h.in */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = version.h.in; sourceTree = "<group>"; };
@@ -1110,25 +1129,21 @@
 		649FF46D144CBBC300AD2749 /* doc */ = {
 			isa = PBXGroup;
 			children = (
-				649FF46E144CBBC300AD2749 /* artr.cfg */,
 				649FF46F144CBBC300AD2749 /* bugs.html.m4 */,
 				649FF470144CBBC300AD2749 /* changelog.html.m4 */,
 				649FF471144CBBC300AD2749 /* commands.html.m4 */,
 				649FF472144CBBC300AD2749 /* compile.html.m4 */,
 				649FF473144CBBC300AD2749 /* config.html.m4 */,
 				649FF474144CBBC300AD2749 /* Content_Creation */,
-				649FF476144CBBC300AD2749 /* Doxyfile.in */,
 				649FF477144CBBC300AD2749 /* faq.html.m4 */,
 				649FF478144CBBC300AD2749 /* head.html.m4 */,
-				649FF479144CBBC300AD2749 /* html.m4.in */,
+				9B461338144E36EA00779938 /* html.m4.in */,
 				649FF47A144CBBC300AD2749 /* html.mac.m4 */,
-				649FF47B144CBBC300AD2749 /* HtmlMakefile */,
 				649FF47C144CBBC300AD2749 /* index.html.m4 */,
 				649FF47D144CBBC300AD2749 /* install_linux.html.m4 */,
 				649FF47E144CBBC300AD2749 /* install_macosx.html.m4 */,
 				649FF47F144CBBC300AD2749 /* install_result.html.m4 */,
 				649FF480144CBBC300AD2749 /* install_windows.html.m4 */,
-				649FF481144CBBC300AD2749 /* Makefile.am */,
 				649FF482144CBBC300AD2749 /* navbar.html.m4 */,
 				649FF48C144CBBC300AD2749 /* network.html.m4 */,
 				649FF48D144CBBC300AD2749 /* readme_macosx.html.m4 */,
@@ -1800,6 +1815,7 @@
 				8CAD91B7095A459400DA0ECC /* Run script: Cleanup */,
 			);
 			buildRules = (
+				9B46134A144E379000779938 /* PBXBuildRule */,
 			);
 			dependencies = (
 				9B9754C20F44AC9600E41662 /* PBXTargetDependency */,
@@ -1887,18 +1903,6 @@
 				9BD7DB3E0A2CAE4600D7033C /* textures in Resources */,
 				9BD7DB770A2CE28500D7033C /* SDLMain.nib in Resources */,
 				9BD7DB7E0A2CE35600D7033C /* Armagetron Advanced.icns in Resources */,
-				649FF492144CBBC300AD2749 /* bugs.html.m4 in Resources */,
-				649FF493144CBBC300AD2749 /* changelog.html.m4 in Resources */,
-				649FF495144CBBC300AD2749 /* compile.html.m4 in Resources */,
-				649FF496144CBBC300AD2749 /* config.html.m4 in Resources */,
-				649FF497144CBBC300AD2749 /* Howto-Maps.txt in Resources */,
-				649FF499144CBBC300AD2749 /* faq.html.m4 in Resources */,
-				649FF49E144CBBC300AD2749 /* index.html.m4 in Resources */,
-				649FF4A0144CBBC300AD2749 /* install_macosx.html.m4 in Resources */,
-				649FF4AD144CBBC300AD2749 /* network.html.m4 in Resources */,
-				649FF4AE144CBBC300AD2749 /* readme_macosx.html.m4 in Resources */,
-				649FF4B0144CBBC300AD2749 /* todo.html.m4 in Resources */,
-				649FF4B1144CBBC300AD2749 /* versions.html.m4 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2020,6 +2024,23 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9B461339144E375400779938 /* bugs.html.m4 in Sources */,
+				9B46133A144E375400779938 /* changelog.html.m4 in Sources */,
+				9B46133B144E375400779938 /* commands.html.m4 in Sources */,
+				9B46133C144E375400779938 /* compile.html.m4 in Sources */,
+				9B46133D144E375400779938 /* config.html.m4 in Sources */,
+				9B46133E144E375400779938 /* faq.html.m4 in Sources */,
+				9B46133F144E375400779938 /* head.html.m4 in Sources */,
+				9B461340144E375400779938 /* index.html.m4 in Sources */,
+				9B461341144E375400779938 /* install_linux.html.m4 in Sources */,
+				9B461342144E375400779938 /* install_macosx.html.m4 in Sources */,
+				9B461343144E375400779938 /* install_result.html.m4 in Sources */,
+				9B461344144E375400779938 /* install_windows.html.m4 in Sources */,
+				9B461345144E375400779938 /* navbar.html.m4 in Sources */,
+				9B461346144E375400779938 /* network.html.m4 in Sources */,
+				9B461347144E375400779938 /* readme_macosx.html.m4 in Sources */,
+				9B461348144E375400779938 /* todo.html.m4 in Sources */,
+				9B461349144E375400779938 /* versions.html.m4 in Sources */,
 				9BB7B6160D8302FA004FE8C3 /* eAdvWall.cpp in Sources */,
 				9BB7B6180D8302FA004FE8C3 /* eAuthentication.cpp in Sources */,
 				9BB7B61A0D8302FA004FE8C3 /* eAxis.cpp in Sources */,
@@ -2182,6 +2203,23 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9B4612F4144E323A00779938 /* bugs.html.m4 in Sources */,
+				9B4612F5144E323A00779938 /* changelog.html.m4 in Sources */,
+				9B4612F6144E323A00779938 /* commands.html.m4 in Sources */,
+				9B4612F7144E323A00779938 /* compile.html.m4 in Sources */,
+				9B4612F8144E323A00779938 /* config.html.m4 in Sources */,
+				9B4612F9144E323A00779938 /* faq.html.m4 in Sources */,
+				9B4612FA144E323A00779938 /* head.html.m4 in Sources */,
+				9B4612FD144E323A00779938 /* index.html.m4 in Sources */,
+				9B4612FE144E323A00779938 /* install_linux.html.m4 in Sources */,
+				9B4612FF144E323A00779938 /* install_macosx.html.m4 in Sources */,
+				9B461300144E323A00779938 /* install_result.html.m4 in Sources */,
+				9B461301144E323A00779938 /* install_windows.html.m4 in Sources */,
+				9B461302144E323A00779938 /* navbar.html.m4 in Sources */,
+				9B461303144E323A00779938 /* network.html.m4 in Sources */,
+				9B461304144E323A00779938 /* readme_macosx.html.m4 in Sources */,
+				9B461306144E323A00779938 /* todo.html.m4 in Sources */,
+				9B461307144E323A00779938 /* versions.html.m4 in Sources */,
 				9BB7B5E10D8302FA004FE8C3 /* eAdvWall.cpp in Sources */,
 				9BB7B5E30D8302FA004FE8C3 /* eAuthentication.cpp in Sources */,
 				9BB7B5E50D8302FA004FE8C3 /* eAxis.cpp in Sources */,
