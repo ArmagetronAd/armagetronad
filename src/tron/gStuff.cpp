@@ -95,9 +95,11 @@ static bool sg_OpenStuff( char const * uri, bool tryBrowser )
 bool sg_OpenURI( char const * uri )
 {
 #ifdef MACOSX
+#ifndef DEDICATED
     CFURLRef URL = CFURLCreateWithBytes( NULL, (UInt8 *)uri, strlen(uri), kCFStringEncodingUTF8, NULL );
     LSOpenCFURLRef( URL, NULL );
     CFRelease( URL );
+#endif
 	return true;
 #else
     return sg_OpenStuff( uri, true );
@@ -107,9 +109,11 @@ bool sg_OpenURI( char const * uri )
 bool sg_OpenDirectory( char const * path )
 {
 #ifdef MACOSX
-	FSRef REF;
+#ifndef DEDICATED
+    FSRef REF;
     FSPathMakeRef( (UInt8 *)path, &REF, NULL );
     LSOpenFSRef( &REF, NULL );
+#endif
 	return true;
 #else
     return sg_OpenStuff( path, false );
