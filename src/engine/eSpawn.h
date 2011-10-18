@@ -40,7 +40,7 @@ protected:
 
 public:
     eSpawnPoint(const eCoord &loc,const eCoord &dir);
-    ~eSpawnPoint(){}
+    virtual ~eSpawnPoint(){}
 
     //enters valid spawn eCoordinates and direction in loc and dir
     void Spawn(eCoord &loc,eCoord &dir);

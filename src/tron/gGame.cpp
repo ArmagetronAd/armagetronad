@@ -3548,7 +3548,7 @@ void gGame::Analysis(REAL time){
             )
             sn_CenterMessage( tOutput("$warmup_rup_compat"), pni->Owner() );
     }
-    ready_next_warn = time + sg_warmupRupInterval;
+    ready_next_warn = int(time + sg_warmupRupInterval);
 
     // count other statistics
     int alive_and_not_disconnected = 0;
