@@ -2154,6 +2154,19 @@ static void sg_ShowSystemConfig()
     sg_OpenDirectory(sg_AbsolutifyPath(tDirectories::GetConfig()).c_str());
 }
 
+// opens the screenshot directory
+static void sg_ShowScreenshots()
+{
+    tArray< tString > paths;
+
+    // create the directory if it doesn't exist yet
+    tDirectories::Screenshot().GetWritePath( "dummy" );
+
+    tDirectories::Screenshot().GetPaths( paths );
+    // the last one is the right
+    sg_OpenDirectory(sg_AbsolutifyPath(paths[paths.Len()-1]).c_str());
+}
+
 // opens the documentation
 static void sg_ShowDocumentation()
 {
@@ -2176,26 +2189,36 @@ static void sg_ShowIRC()
 
 static uMenu sg_helpMenu("$main_help_menu_text");
 
+static uMenu sg_directoryMenu("$help_menu_directories_text");
+
 static uMenuItemFunction sg_aboutMenuItem
 (&sg_helpMenu,
  "$main_menu_about_text",
  "$main_menu_about_help",
  &sg_DisplayVersionInfo);
 
+uMenuItemSubmenu sg_directorySubmenu(&sg_helpMenu, &sg_directoryMenu, "$help_menu_directories_help");
+
 static uMenuItemFunction sg_systemConfigMenuItem 
-(&sg_helpMenu,
+(&sg_directoryMenu,
  "$help_menu_systemconfig_text",
  "$help_menu_systemconfig_help",
  &sg_ShowSystemConfig);
 
 static uMenuItemFunction sg_systemDataMenuItem 
-(&sg_helpMenu,
+(&sg_directoryMenu,
  "$help_menu_systemdata_text",
  "$help_menu_systemdata_help",
  &sg_ShowSystemData);
 
+static uMenuItemFunction sg_showScreenshotsMenuItem 
+(&sg_directoryMenu,
+ "$help_menu_screenshots_text",
+ "$help_menu_screenshots_help",
+ &sg_ShowScreenshots);
+
 static uMenuItemFunction sg_userDataMenuItem 
-(&sg_helpMenu,
+(&sg_directoryMenu,
  "$help_menu_userdata_text",
  "$help_menu_userdata_help",
  &sg_ShowUserData);

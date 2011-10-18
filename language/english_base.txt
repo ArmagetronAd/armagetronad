@@ -1366,8 +1366,14 @@ help_menu_doc_file	    index.html
 help_menu_irc_text	    Open IRC Chatroom
 help_menu_irc_help		Opens a web interface to our IRC chatroom where you may be lucky and catch a friendly soul willing to answer your questions.
 
+help_menu_directories_text Open Directories
+help_menu_directories_help Gives easy access to game data and configuration menus.
+
 help_menu_userdata_text Open User Data
 help_menu_userdata_help Opens the User Data directory where you can store personal modifications to the game.
+
+help_menu_screenshots_text Open Screenshots
+help_menu_screenshots_help Opens the directory where screenshots are stored.
 
 help_menu_systemdata_text Open System Data
 help_menu_systemdata_help Opens the System Data directory where you can store modifications to the game affecting all users on this machine; probably requires admin rights to modify, may get overwritten on the next upgrade, modifications may break things. It is generally recommended to treat this as read only.
