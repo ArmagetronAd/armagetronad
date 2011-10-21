@@ -42,28 +42,25 @@ too nervous; speed is your only resource against other players!
 SUBSECTION(Quick start)
 PARAGRAPH([
 First, you'll be confronted with the selection of your favourite language. 
-Use CURSOR LEFT/RIGHT to select, then CURSOR_DOWN to move
-to the "Accept" menu item. Then, press ENTER/RETURN three times. 
-You'll immediately be set to fight against one weak AI opponent.
+Use CURSOR UP/DOWN to select, then ENTER/RETURN to accept. Next, there is a quick
+and simplified setup screen. use CURSOR UP/DOWN to navigate the entries, CURSOR LEFT/RIGHT
+to make changes to selection items and use standard editing controls to change your name.
+If you're happy with the choices, press ENTER on any of the two 'Accept' menu items.
+You will be tossed into a training match against a single AI opponent with reduced speed
+where you can learn the keybindings.
 ])
 PARAGRAPH([
 Reading this, you probably already went through those steps. You can repeat the simplified
 setup in the menu "System Setup"/"Misc Stuff"/"Redo First Setup" and pick different languages
 in "System Setup"/"Misc Stuff"/"Language Settings".])
 
-SUBSUBSECTION([Initial keyboard layout])
+SUBSECTION([Additional keyboard layout])
 
 PARAGRAPH([
 <table>
-<tr><td>turn left      </td><td>: y,z,w</td></tr>
-<tr><td>turn right     </td><td>: x</td></tr>
-<tr><td>brake 	       </td><td>: v</td></tr>
-<tr><td>switch camera  </td><td>: c</td></tr>
-<tr><td>glance         </td><td>: cursor left/right/down</td></tr>
-<tr><td></td></tr>
 <tr><td>show scores            </td><td>: TAB</td></tr>
 <tr><td>scroll message console </td><td>: page up/down</td></tr>
-<tr><td>toggle fullscreen	   </td><td>: f</td></tr>
+<tr><td>toggle fullscreen	   </td><td>: n</td></tr>
 <tr><td></td></tr>
 <tr><td width = 200 >pauses/unpauses the game</td><td>: p</td></tr> 
 <tr><td>quit to the game menu</td><td>: q/ESC</td></tr>
