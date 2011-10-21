@@ -29,7 +29,7 @@ Just in case you do not know: this idea is best known from the Disney
 movie "Tron" from 1982. However, that's not the origin of the game idea:
 The earliest arcade game of that type was 
 ELINK(www.klov.com/B/Blockade.html,Blockade) from 1976, the first known home versions
-ELINK(www.thelogbook.com/phosphor/mattel/snafu.html,SNAFU) on the Intellivision from 1981 and
+ELINK([en.wikipedia.org/wiki/Snafu_%28video_game%29],SNAFU) on the Intellivision from 1981 and
 ELINK(www.atarihq.com/reviews/2600/surround.html,Surround) for the Atari 2600.
 ])
 
