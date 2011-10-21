@@ -46,6 +46,10 @@ Use CURSOR LEFT/RIGHT to select, then CURSOR_DOWN to move
 to the "Accept" menu item. Then, press ENTER/RETURN three times. 
 You'll immediately be set to fight against one weak AI opponent.
 ])
+PARAGRAPH([
+Reading this, you probably already went through those steps. You can repeat the simplified
+setup in the menu "System Setup"/"Misc Stuff"/"Redo First Setup" and pick different languages
+in "System Setup"/"Misc Stuff"/"Language Settings".])
 
 SUBSUBSECTION([Initial keyboard layout])
 
