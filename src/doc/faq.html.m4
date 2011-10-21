@@ -73,13 +73,7 @@ What's wrong?
 ],
 [
 You probably installed a binary version of PROGTITLE that is incompatible with your system.
-Check if you have installed all the required LINK(install_linux.html#libs
-,libraries).
-One of the ELINK(armagetron.sf.net/download_linux.html#thirdparty
-,[third party packages]) may fit better to your system. 
-Or, if you want the latest version, try installing from source.<br>
-If you installed PROGTITLE from a RPM without warnings, that RPM is broken; please
-ELINK([armagetron.sf.net/contact.html],inform me) about it.
+If you consider your system reasonably up to date, this is probably a bug you should report.
 ])
 
 ifelse(,,,[
