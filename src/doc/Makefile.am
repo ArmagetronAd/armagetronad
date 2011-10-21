@@ -30,20 +30,20 @@ print:
 
 # install generated html files and put them directly into the distribution
 textdir=$(armadocdir)
-text_DATE=$(doc_txt_files)
+text_DATA=$(doc_txt_files)
 
 htmldir=$(armadocdir)/html
 html_DATA=$(doc_html_files)
 distclean-local:
 	rm -f COPYING.txt
 
-dist-hook: htmldist-hook ${srcdir}/commands.txt ${doc_html_files}
+dist-hook: htmldist-hook ${srcdir}/commands.txt ${docfiles}
 	cp ${srcdir}/commands.txt $(distdir)
 	cp -R ${srcdir}/Content_Creation $(distdir)
 	cp -R ${doc_html_files} $(distdir)
 
 # make target for testing documentation without installing
-localtest: all Howto-Maps.txt
+localtest: all Howto-Maps.txt ${docfiles}
 
 Howto-Maps.txt:
 	ln -s ${srcdir}/Content_Creation/$@ $@

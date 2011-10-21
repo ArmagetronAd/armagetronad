@@ -18,7 +18,7 @@ SECTION(Connecting)
 SUBSECTION(LAN game )
 PARAGRAPH([
 The fastest computer in your network should
-act as the server. There, go to the network menu and hit the "LAN Game"-
+act as the server. There, go to the "Play Game"/"Multiplayer" menu and hit the "LAN Game"-
 menu item. After a second, PROGTITLE should tell you that there are no servers
 currently available, but offer a "Host Game" item. Press Return on it. In
 the following menu, you can select a name for your server and the game options.
@@ -38,7 +38,7 @@ visible in the server browser. Just hit Return on it to connect.
 SUBSECTION(Internet game)
 
 PARAGRAPH([
-An internet game works the same way; you just have to choose "Internet Game" instead of "LAN Game"
+An internet game works the same way; you just have to choose "Online Game" instead of "LAN Game"
 in the menu. Note that the number of users currently online on each server is displayed
 by the server browser, too.
 ])
@@ -52,40 +52,18 @@ with "r".
 ])
 
 PARAGRAPH([Internet server browsing would not be possible without master servers. We currently
-use four masters,
-one in Texas run by Lucifer, one in Virginia run by antix of 
-ELINK(distortgaming.com,DistortGaming)
-(Who will gladly host your game server, Armagetronad or other. Shameless plug end.)
-one run on Z-Man's old, trusty laptop-gone-router in Germany, and another one in Germany run
-by iF.
+use four masters, two run by Tank Program, two by Z-Man.
 DNS service for swapping out masters without you having to update your configuration
 is provided by Tank.])
 
 SUBSUBSECTION(Current status)
 
 PARAGRAPH([
-Current counts show about 40 active servers.
+Current counts show about 200 active servers.
 If you're not picky about your fellow players, there should be
 someone to battle against on one of those. The problems start as soon as you
 develop a preference for certain server settings, because there are quite a
 number of flavors around.
-])
-
-ifelse(,,,
-[
-PARAGRAPH([
-At the time of this writing, there are about ten dedicated servers available, so you should
-not need to start your own. Most of them will let you fight against a bunch of AIs
-while you wait for other players to join in.
-])
-
-PARAGRAPH([
-Finding an opponent to play against should not be a problem these times; nevertheless,
-there still is the ELINK(WEBBASE/meeting.html, meeting
-page). Check it out, be online when the countdown reaches zero and
-you will certainly find another player online. I'm usually playing at these times and
-specially like to be on a server that allows cockpit view only.
-])
 ])
 
 SUBSECTION(Bookmarks,bookmarks)
@@ -93,17 +71,8 @@ SUBSECTION(Bookmarks,bookmarks)
 PARAGRAPH([
 You can access and edit your server bookmarks in the "Server Bookmarks"
 submenu of the "Network Game" menu. You can add bookmarks from the server
-browser or manually add bookmarks via the "Edit Bookmarks" menu.
-])
-
-ifelse(,,,[
-SUBSECTION(Fallback)
-
-PARAGRAPH([
-If the server browser does not work for some reason (i.e. no master server
-available), you can still connect to a server if you know its network address or
-hostname and the port it runs on. The "Custom Connect" menu item in the network
-game menu serves that purpose.])
+browser or manually add bookmarks via the "Edit Bookmarks" menu. The only way to delete
+bookmarks currently is to edit out the server name of one, sorry for the inconvenience.
 ])
 
 SUBSECTION(Version Control)
@@ -173,17 +142,21 @@ the rules of the server administrator or change the server you play on.
 SUBSECTION(Chat)
 PARAGRAPH([
 Send your fellow players messages by hitting the chat key configurable in the "Player Setup" menu
-(defaults to "s"). Usually, the message will go out to all players. Servers from 0.2.8.0 on support
+(defaults to "Enter"). Usually, the message will go out to all players. Servers from 0.2.8.0 on support
 IRC style extensions: By starting your message with "/msg <playername>", you can send selected 
 players personal messages. With "/me", you can tell the others what you do; "/me falls asleep"
-will print "Walruss walls asleep" if you're Walruss.
+will print "Walruss walls asleep" if you're Walruss. "/team" sends messages to your 
+teammates only; if you're a spectator, those will be the other spectators. Some servers make
+that the default chat mode even without command prefix; on those, you may be allowed to address
+all players by using "/shout". 
 ])
 
 PARAGRAPH([
 If another player annoys you, the silencing menu comes in handy: it can be reached by
 pressing ESC, then selecting "Player Police/Silence Menu". If you're annoyed by chat in
-general, edit FILE(settings.cfg) and activate SILENCE_ALL. This has the effect that new
-players get silenced by default and have to be unsilenced if you want to hear them.
+general, edit FILE(settings.cfg) and activate SILENCE_DEFAULT (add the line SILENCE_DEFAULT 1). 
+This has the effect that new players get silenced by default and have to be unsilenced 
+if you want to hear them. If you really never want to hear chat, add the line ENABLE_CHAT 0.
 ])
 
 SUBSUBSECTION(Instant Chat)
