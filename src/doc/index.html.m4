@@ -106,10 +106,11 @@ Visit the ELINK([www.armagetronad.net/],main webpage) for up to date information
 about PROGTITLE and the latest stable builds. Check out the 
 ELINK([forums.armagetronad.net/],Forums) for keeping in touch with
 current development and venting your anger that we broke your favorite feature
-in the current release. Visit the 
+in the current release. Check the ELINK([wiki.armagetronad.net],Wiki) for community maintained documentation, the pages you're reading right now only scratch the surface. Visit the 
 ELINK(sourceforge.net/projects/armagetronad/,SourceForge project page) to get
-informed by email or RSS when a new release is out. Get the latest
-alpha and beta builds on ELINK(beta.armagetronad.net/,AABeta).
+informed by email or RSS when a new release is out. Most of our current development is managed
+on ELINK(launchpad.net/armagetronad,Launchpad). Get the latest
+snapshot builds in various flavors from ELINK(sourceforge.net/projects/armagetronad/files/snapshots/,the SourceForge file release system).
 ])
 
 SECTION(Credits:)
@@ -140,8 +141,7 @@ PARAGRAPH([
 This program is free software; you can redistribute it and/or
 modify it under the terms of the 
 LINK(COPYING.txt,GNU General Public License)
-as published by the Free Software Foundation; either version 2
-of the License, or (at your option) any later version.
+as published by the Free Software Foundation, version 2.
 ])
 
 PARAGRAPH([
