@@ -49,6 +49,10 @@ If you're happy with the choices, press ENTER on any of the two 'Accept' menu it
 You will be tossed into a training match against a single AI opponent with reduced speed
 where you can learn the keybindings.
 ])
+PARAGRAPH([
+Reading this, you probably already went through those steps. You can repeat the simplified
+setup in the menu "System Setup"/"Misc Stuff"/"Redo First Setup" and pick different languages
+in "System Setup"/"Misc Stuff"/"Language Settings".])
 
 SUBSECTION([Additional keyboard layout])
 
