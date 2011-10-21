@@ -21,7 +21,7 @@ endif
 
 $(srcdir)/commands.txt: ${top_srcdir}/language/*
 	rm -f $@
-	cd $(top_builddir)/src && $(MAKE) armagetronad_main$(EXEEXT) && cd .. && ./src/armagetronad_main$(EXEEXT) --doc --userdatadir /doesnotexist 2>&1 | sed -e "s,^\[0\] ,," | grep -v "_help$$" | grep -v "^changed" | grep -v "^Executable path: " | grep -v "^TestPath" | grep -v "^Testing data path: " | grep -v "^Testing configuration path: " | grep -v "^Closing socket" | grep -v "^Locale item" > src/doc/commands.txt || true
+	cd $(top_builddir)/src && $(MAKE) armagetronad_main$(EXEEXT) && cd .. && ./src/armagetronad_main$(EXEEXT) --vardir ./rubbish --doc 2>&1 | sed -e "s,^\[0\] ,," | grep -v "_help$$" | grep -v "^changed" | grep -v "^Executable path: " | grep -v "^TestPath" | grep -v "^Testing data path: " | grep -v "^Testing configuration path: " | grep -v "^Closing socket" | grep -v "^Locale item" > src/doc/commands.txt || true
 	test -r commands.txt || echo "Sorry, command help generation failed." > commands.txt
 	test -r $@ || mv commands.txt $@
 

@@ -171,7 +171,10 @@ will be inserted where you type. If an instant chat string ends in a backslash "
 pressing the corresponding key will not send the string immediately, but will let you
 append to it first.])
 
-SUBSECTION(Ingame Admin)
+SECTION(Authentication)
+SUBSECTION(The old way: ADMIN_PASS)
+PARAGRAPH([This paragraph applies if your server was compiled without --enable-armathentication.])
+PARAGRAPH([
 The server administrator can allow selected players to control the server settings through chat
 commands; the setting SI(ADMIN_PASS) has to be modified to a nondefault value. Whoever knows
 this value can log in by saying "/login &lt;password&gt;". After that, it's possible to issue regular
@@ -179,7 +182,27 @@ console commands by saying "/admin &lt;command&gt;" or to log out again with "/l
 <br>
 <strong>WARNING: currently, chat messages and therefore the password are sent unencrypted. This
 means that everyone with physical access to the network flow, which is, among others, anyone
-on the server's or the player's LAN, can steal the password.</strong>
+on the server's or the player's LAN, can steal the password.</strong>])
+
+SUBSECTION(The new way)
+PARAGRAPH([This paragraph applies if your server was compiled with --enable-armathentication.])
+PARAGRAPH([
+The new authentication code allows you to securely log into servers using various accounts;
+ check out the ELINK([wiki.armagetronad.net/index.php?title=HostingFAQ#Signing_in_.28Authentication.29],Wiki FAQ)
+for details.
+The quick and simple way to get an account you can use is if you sign up on the ELINK([forums.armagetronad.net],Forums);
+pick a simple username without fancy characters.
+Your Global ID (GID) associated with that account will then be "&lt;your username&gt;@forums".
+Enter that in the "Global ID" field of your "Player Setup" menu and activate "Auto Login".
+Every time you enter a server that supports authentication, you'll be prompted for your forum
+password.
+])
+PARAGRAPH([     If you administer a server with --enable-armathentication compiled in, you can
+grant yourself remote admin rights with the configuration line SI(USER_LEVEL &lt;your GID&gt; 0).
+Replace the 0 with your desired access level: 0 gives full access, 1 admin access (a few things
+like QUIT are locked, then) and 2 is moderator access, blocking most setting changes and only
+leaving commands required to moderate a server.
+])
 
 SUBSECTION(Kicking and Banning)
 PARAGRAPH([
@@ -193,8 +216,7 @@ interpreted exactly as with SI(KICK).
 PARAGRAPH([
 You can get a list of currently banned IP addresses with SI(BAN_LIST). To unban one of these,
 use SI(UNBAN_IP ip). To ban an IP address explicitly, use SI(BAN_IP ip). Bans are persistent
-when you shut down and restart the server; the data is stored in FILE(var/bans.txt) as
-IP/duration in seconds pairs.
+when you shut down and restart the server; the data is stored in FILE(var/bans.txt).
 ])
 SUBSUBSECTION([Autobanning])
 PARAGRAPH([
@@ -213,7 +235,7 @@ Sometimes, votes on important topics will be cast by players. If a vote is pendi
 will automatically pop up between rounds and remind you to vote. You can accept or reject
 a suggestion, or explicitly say you don't care about it.
 <br>
-The only thing possible to vote on are player kicks. To start a kick vote, press ESC and enter
+For example, to start a kick vote, press ESC and enter
 the "Player Police/Kick Menu" menu and select the player you want kicked. Prepare to get kicked
 yourself if you abuse the system.
 
@@ -224,19 +246,19 @@ for cycles. CI(CYCLE_SYNC_INTERVAL_SELF) determines the time between syncs to th
 a cycle itself, and CI(CYCLE_SYNC_INTERVAL_ENEMY) determines the interval for everyone else.
 ])
  
-New clients since 0.2.7.1 send the time of turn commands to the server. 
+SECTION(Advanced Topics)
+
+PARAGRAPH([New clients since 0.2.7.1 send the time of turn commands to the server. 
 This makes it possible to avoid grinding lag sliding
 (you move towards a wall, grind it shortly and turn away again, and you'll slide)
 by letting the cycle on the server turn not before the time sent by the client.
 At the low speeds before the grind, the positional command interpretion 
 is inaccurate and will usually turn the cycle too early. 
- Now, old clients don't send the command time, so this code can't work. The lag sliding is a clear disadvantage, but the earlier turn is an advantage in some situations because it makes you cover more ground, so both the new and the old players have plenty of reason to complain if they are not treated equally. Therefore, when CYCLE_FAIR_ANTILAG is set to 1 and old clients are present, this code is deactivated. 
+ Now, old clients don't send the command time, so this code can't work. The lag sliding is a clear disadvantage, but the earlier turn is an advantage in some situations because it makes you cover more ground, so both the new and the old players have plenty of reason to complain if they are not treated equally. Therefore, when CYCLE_FAIR_ANTILAG is set to 1 and old clients are present, this code is deactivated. ])
  
- When a cycle turns in free space, the server will try to follow the client's request by matching the turn position as closely as possible. Sometimes however there are large desyncs and clients sent silly turns halfway across the grid from their current position. So, for clients that send the command time, the server will execute turns only in a time window around that command time. The width of that window is determined by CYCLE_TIME_TOLERANCE. 
+PARAGRAPH([ When a cycle turns in free space, the server will try to follow the client's request by matching the turn position as closely as possible. Sometimes however there are large desyncs and clients sent silly turns halfway across the grid from their current position. So, for clients that send the command time, the server will execute turns only in a time window around that command time. The width of that window is determined by CYCLE_TIME_TOLERANCE. ])
  
- I observed that old clients ( 0.2.7.0 and earlier ) would be more likely to pass through walls when they received a sync from the server shortly before. So, if you set CYCLE_AVOID_OLDCLIENT_BAD_SYNC to 1, the server will not send those syncs. Whether this helps or makes matters worse by not sending enough syncs is unknown, that's why it is a setting. 
-
-SECTION(Technical details)
+PARAGRAPH([ I observed that old clients ( 0.2.7.0 and earlier ) would be more likely to pass through walls when they received a sync from the server shortly before. So, if you set CYCLE_AVOID_OLDCLIENT_BAD_SYNC to 1, the server will not send those syncs. Whether this helps or makes matters worse by not sending enough syncs is unknown, that's why it is a setting. ])
 
 PARAGRAPH([
 You are not limited to one player per computer;
@@ -266,7 +288,8 @@ on the PROGTITLE port.
 SECTION(The dedicated server,dedicated)
 
 PARAGRAPH([
-Following the model of Quake 1-3, there is a special binary version of
+Following the model of Quake 1-3 and NOT Modern Warfare 2,
+there is a special binary version of
 the game available for download (or compile it yourself giving the
 option OPTION(--disable-glout) to configure) that has all input/output
 features disabled. If you start it, it will read the normal configuration files and
@@ -351,16 +374,9 @@ SECTION(Spectator Mode)
 PARAGRAPH([
 In the player menu, there is the "Spectator mode" toggle; If you just
 want to watch an internet game, connect to the server with spectator
-mode enabled. Note that you will be almost completely ignored in
-spectator mode: the other players won't know you are there at all,
-you can't chat and the dedicated server will not bother to start
-a game if only spectators are online (all you are going to get is
-a black screen). Only the server administrator will get a message 
-that a client connected.
-])
-PARAGRAPH([
-Please note that this feature is unsupported; future servers may not allow
-spectating in this way.
+mode enabled, or enable it while already online and you will leave active play.
+You can also bind a key to toggling spectator mode in your player keyboard setup,
+that allows you to enter and leave quickly.
 ])
 
 SECTION(Scores)
