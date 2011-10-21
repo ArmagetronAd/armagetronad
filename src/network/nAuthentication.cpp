@@ -1067,11 +1067,14 @@ static void sn_Reset(){
     int userID = nCallbackLoginLogout::User();
 
     // kill/detach pending login process
-    nLoginProcess * process = nLoginProcess::Find( userID );
-    if ( process )
+    if( sn_GetNetState() == nSERVER )
     {
-        process->Remove();
-        process->Destroy();
+        nLoginProcess * process = nLoginProcess::Find( userID );
+        if ( process )
+        {
+            process->Remove();
+            process->Destroy();
+        }
     }
 }
 
