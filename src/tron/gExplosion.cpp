@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "gWall.h"
 #include "gCycle.h"
 #include "eGrid.h"
+#include "ePlayer.h"
 #include "tRandom.h"
 #include "tMath.h"
 
@@ -61,6 +62,17 @@ static eCoord s_explosionCoord;
 static REAL   s_explosionRadius;
 static REAL	  s_explosionTime;
 static gExplosion * s_holer = 0;
+
+static bool sg_deadlyExplosions = false;
+static tSettingItem< bool > sg_deadlyExplosionsSettingItem( "DEADLY_EXPLOSIONS", sg_deadlyExplosions );
+
+static int sg_scoreExplosionOwner = 0;
+static tSettingItem< int > sg_scoreExplosionPreySettingItem( "SCORE_EXPLOSION_OWNER", sg_scoreExplosionOwner );
+
+static int sg_scoreExplosion = 0;
+static tSettingItem< int > sg_scoreExplosionPredatorSettingItem( "SCORE_EXPLOSION", sg_scoreExplosion );
+
+static eLadderLogWriter sg_deathExplosionWriter( "DEATH_EXPLOSION", true );
 
 // blow a hole centered at s_explosionCoord with radius s_explosionRadius into wall w
 static void S_BlowHoles( eWall * w )
@@ -293,7 +305,43 @@ bool gExplosion::Timestep(REAL currentTime){
 #endif
 }
 
-void gExplosion::InteractWith(eGameObject *,REAL ,int){}
+void gExplosion::InteractWith( eGameObject *target, REAL time, int recursion )
+{
+    if ( !sg_deadlyExplosions || s_explosionRadius <= 0 || time > createTime + 0.1 )
+        return;
+    
+    gCycle* cycle = dynamic_cast< gCycle* >( target );
+    if (
+            cycle &&
+            cycle->Alive() &&
+            ( cycle->Position() - owner_->Position() ).NormSquared() < s_explosionRadius * s_explosionRadius
+        )
+    {
+        cycle->Kill();
+        
+        tColoredString cycleName, ownerName;
+        cycleName << *cycle->Player() << tColoredString::ColorString(-1,-1,-1);
+        ownerName << *owner_->Player() << tColoredString::ColorString(-1,-1,-1);
+        
+        tOutput message;
+        message.SetTemplateParameter( 1, cycleName );
+        message.SetTemplateParameter( 2, ownerName );
+        message << "$player_dead_explosion";
+        
+        sn_ConsoleOut( message );
+        
+        sg_deathExplosionWriter << cycle->Player()->GetUserName() << owner_->Player()->GetUserName();
+        sg_deathExplosionWriter.write();
+        
+        // Apply scoring
+        if ( ePlayerNetID::Enemies( owner_->Player(), cycle->Player() ) )
+        {
+            owner_->Player()->AddScore( sg_scoreExplosionOwner, tOutput(), tOutput() );
+            cycle->Player()->AddScore( sg_scoreExplosion, tOutput(), tOutput() );
+        }
+    }
+        
+}
 
 void gExplosion::PassEdge(const eWall *,REAL ,REAL ,int){}
 
