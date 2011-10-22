@@ -4996,4 +4996,13 @@ static void LoginCallback(){
 
 static nCallbackLoginLogout lc(LoginCallback);
 
+static void sg_FillServerSettings()
+{
+    nServerInfo::SettingsDigest & digest = *nCallbackFillServerInfo::ToFill();
+    
+    digest.SetFlag( nServerInfo::SettingsDigest::Flags_NondefaultMap,
+                    mapfile != DEFAULT_MAP );
+}
+
+static nCallbackFillServerInfo sg_fillServerSettings(sg_FillServerSettings);
 

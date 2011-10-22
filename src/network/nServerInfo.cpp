@@ -2548,6 +2548,91 @@ nServerInfo::Compat	nServerInfo::Compatibility() const
     return Compat_Ok;
 }
 
+nServerInfo::SettingsDigest::SettingsDigest()
+  : flags_(0)
+  ,  minPlayTimeTotal_(0)
+  ,  minPlayTimeOnline_(0)
+  ,  minPlayTimeTeam_(0)
+  ,  cycleDelay_(0)
+  ,  acceleration_(0)
+  ,  rubberWallHump_(0)
+  ,  rubberHitWallRatio_(0)
+{
+}
+
+void nServerInfo::SettingsDigest::WriteSync( Network::SettingsDigest & sync ) const
+{
+    sync.set_flags( flags_ );
+    sync.set_min_play_time_total( minPlayTimeTotal_ );
+    sync.set_min_play_time_online( minPlayTimeOnline_ );
+    sync.set_min_play_time_team( minPlayTimeTeam_ );
+    sync.set_cycle_delay( cycleDelay_ );
+    sync.set_acceleration( acceleration_ );
+    sync.set_rubber_wall_hump( rubberWallHump_ );
+    sync.set_rubber_hit_wall_ratio( rubberHitWallRatio_ );
+}
+
+void nServerInfo::SettingsDigest::ReadSync( Network::SettingsDigest const & sync )
+{
+    flags_ = sync.flags();
+    minPlayTimeTotal_ = sync.min_play_time_total();
+    minPlayTimeOnline_ = sync.min_play_time_online();
+    minPlayTimeTeam_ = sync.min_play_time_team();
+    cycleDelay_ = sync.cycle_delay();
+    acceleration_ = sync.acceleration();
+    rubberWallHump_ = sync.rubber_wall_hump();
+    rubberHitWallRatio_ = sync.rubber_hit_wall_ratio();
+}
+
+void nServerInfo::SettingsDigest::SetFlag( Flags flag, bool set )
+{
+    if( set )
+    {
+        flags_ |= flag;
+    }
+    else
+    {
+        flags_ &= ~flag;
+    }
+}
+
+bool nServerInfo::SettingsDigest::GetFlag( Flags flag ) const
+{
+    return 0 != (flags_ & flag);
+}
+
+//! callback to give other components a chance to help fill in the server info
+nServerInfo::SettingsDigest * nCallbackFillServerInfo::settings_ = NULL;
+static tCallback * sn_fillServerInfoAnchor = NULL;
+nCallbackFillServerInfo::nCallbackFillServerInfo( AA_VOIDFUNC * f )
+: tCallback( sn_fillServerInfoAnchor, f )
+{}
+
+//! fills all server infos
+void nCallbackFillServerInfo::Fill( nServerInfo::SettingsDigest * settings )
+{
+    settings_ = settings;
+    Exec( sn_fillServerInfoAnchor );
+    settings_ = NULL;
+}
+
+nServerInfo::SettingsDigest const * nCallbackCanPlayOnServer::settings_ = NULL;
+static tCallbackString * sn_canPlayOnServerAnchor = NULL;
+//! callback to give other components a chance to help fill in the server info
+
+nCallbackCanPlayOnServer::nCallbackCanPlayOnServer( STRINGRETFUNC * f )
+: tCallbackString( sn_canPlayOnServerAnchor, f )
+{
+}
+
+//! return all reasons why you can't play here
+tString nCallbackCanPlayOnServer::CantPlayReasons( nServerInfo::SettingsDigest const * settings )
+{
+    settings_ = settings;
+    tString ret = Exec( sn_canPlayOnServerAnchor );
+    settings_ = NULL;
+    return ret;
+}
 
 static nServerInfoAdmin* sn_serverInfoAdmin = NULL;
 
@@ -2894,6 +2979,8 @@ void nServerInfo::DoGetFrom( nSocket const * socket )
         url_        = str;
         userGlobalIDs_ = "";
     }
+
+    nCallbackFillServerInfo::Fill( &settings_ );
 }
 
 // *******************************************************************************************
@@ -2921,6 +3008,8 @@ void nServerInfo::WriteSyncThis( Network::BigServerInfo & info ) const
     info.set_url( url_ );
 
     info.set_global_ids( userGlobalIDs_ );
+
+    settings_.WriteSync( *info.mutable_settings() );
 }
 
 // *******************************************************************************************
@@ -2985,6 +3074,15 @@ void nServerInfo::ReadSyncThis(  Network::BigServerInfo const & info,
     else
     {
         userGlobalIDs_ = "";
+    }
+
+    if( info.has_settings() )
+    {
+        settings_.ReadSync( info.settings() );
+    }
+    else
+    {
+        settings_.flags_ = 0;
     }
 
     userNamesOneLine_.Clear();
