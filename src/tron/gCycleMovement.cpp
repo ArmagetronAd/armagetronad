@@ -35,6 +35,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tMath.h"
 
 #include "nConfig.h"
+#include "nServerInfo.h"
 
 #include "ePlayer.h"
 #include "eDebugLine.h"
@@ -47,6 +48,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "gWall.h"
 #include "gSensor.h"
 #include "gAIBase.h"
+
+#include "uInput.h"
 
 #include "tRecorder.h"
 
@@ -4431,5 +4434,50 @@ REAL GetTurnSpeedFactor(void) {
     return sg_cycleTurnSpeedFactor;
 }
 
+static void sg_FillCyclePhysics()
+{
+    // fetch base values
+    REAL speed = sg_speedCycle * gCycleMovement::SpeedMultiplier();
+    REAL rubber = sg_rubberCycle;
+    REAL maxWallAcceleration = 0;
+    REAL wallAcceleration = sg_accelerationCycleTeam * sg_accelerationCycle;
+    if ( wallAcceleration > maxWallAcceleration )
+        maxWallAcceleration = wallAcceleration;
+    wallAcceleration = sg_accelerationCycleEnemy * sg_accelerationCycle;
+    if ( wallAcceleration > maxWallAcceleration )
+        maxWallAcceleration = wallAcceleration;
+    wallAcceleration = sg_accelerationCycleRim * sg_accelerationCycle;
+    if ( wallAcceleration > maxWallAcceleration )
+        maxWallAcceleration = wallAcceleration;
+    maxWallAcceleration *= gCycleMovement::SpeedMultiplier();
 
+    REAL delay = sg_delayCycle;
+    if( su_doubleBindTimeout > delay )
+    {
+        delay = su_doubleBindTimeout;
+        if( delay > .05 )
+        {
+            delay = .05;
+        }
+    }
+
+    nServerInfo::SettingsDigest & digest = *nCallbackFillServerInfo::ToFill();
+    digest.cycleDelay_ = delay;
+    digest.acceleration_ = maxWallAcceleration/(speed+.001);
+    digest.rubberWallHump_ = rubber/(speed*delay);
+    // if humping is possible basically, check whether it's prevented or handicaped by
+    // cycle_rubber_delay
+    if( digest.rubberWallHump_ > 1 && sg_rubberCycleDelay > 0 )
+    {
+        digest.rubberWallHump_ *= sg_rubberCycleDelayBonus;
+        // but not too much.
+        if( digest.rubberWallHump_ < 1 )
+        {
+            digest.rubberWallHump_ = 1;
+        }
+    }
+    digest.rubberHitWallRatio_ = rubber/(speed*sg_rubberCycleTime);
+}
+
+static nCallbackFillServerInfo sg_fillCyclePhysics(sg_FillCyclePhysics);
 

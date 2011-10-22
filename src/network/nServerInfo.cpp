@@ -2489,6 +2489,67 @@ nServerInfo::Compat	nServerInfo::Compatibility() const
     return Compat_Ok;
 }
 
+nServerInfo::SettingsDigest::SettingsDigest()
+  : flags_(0)
+  ,  minPlayTimeTotal_(0)
+  ,  minPlayTimeOnline_(0)
+  ,  minPlayTimeTeam_(0)
+  ,  cycleDelay_(0)
+  ,  acceleration_(0)
+  ,  rubberWallHump_(0)
+  ,  rubberHitWallRatio_(0)
+{
+}
+
+void nServerInfo::SettingsDigest::SetFlag( Flags flag, bool set )
+{
+    if( set )
+    {
+        flags_ |= flag;
+    }
+    else
+    {
+        flags_ &= ~flag;
+    }
+}
+
+bool nServerInfo::SettingsDigest::GetFlag( Flags flag ) const
+{
+    return 0 != (flags_ & flag);
+}
+
+//! callback to give other components a chance to help fill in the server info
+nServerInfo::SettingsDigest * nCallbackFillServerInfo::settings_ = NULL;
+static tCallback * sn_fillServerInfoAnchor = NULL;
+nCallbackFillServerInfo::nCallbackFillServerInfo( VOIDFUNC * f )
+: tCallback( sn_fillServerInfoAnchor, f )
+{}
+
+//! fills all server infos
+void nCallbackFillServerInfo::Fill( nServerInfo::SettingsDigest * settings )
+{
+    settings_ = settings;
+    Exec( sn_fillServerInfoAnchor );
+    settings_ = NULL;
+}
+
+nServerInfo::SettingsDigest const * nCallbackCanPlayOnServer::settings_ = NULL;
+static tCallbackString * sn_canPlayOnServerAnchor = NULL;
+//! callback to give other components a chance to help fill in the server info
+
+nCallbackCanPlayOnServer::nCallbackCanPlayOnServer( STRINGRETFUNC * f )
+: tCallbackString( sn_canPlayOnServerAnchor, f )
+{
+}
+
+//! return all reasons why you can't play here
+tString nCallbackCanPlayOnServer::CantPlayReasons( nServerInfo::SettingsDigest const * settings )
+{
+    settings_ = settings;
+    tString ret = Exec( sn_canPlayOnServerAnchor );
+    settings_ = NULL;
+    return ret;
+}
 
 static nServerInfoAdmin* sn_serverInfoAdmin = NULL;
 
@@ -2852,6 +2913,8 @@ void nServerInfo::DoGetFrom( nSocket const * socket )
         url_        = str;
         userGlobalIDs_ = "";
     }
+
+    nCallbackFillServerInfo::Fill( &settings_ );
 }
 
 // *******************************************************************************************
@@ -2879,6 +2942,15 @@ void nServerInfo::NetWriteThis( nMessage & m ) const
     m << url_;
 
     m << userGlobalIDs_;
+
+    m.Write(settings_.flags_);
+    m << settings_.minPlayTimeTotal_;
+    m << settings_.minPlayTimeOnline_;
+    m << settings_.minPlayTimeTeam_;
+    m << settings_.cycleDelay_;
+    m << settings_.acceleration_;
+    m << settings_.rubberWallHump_;
+    m << settings_.rubberHitWallRatio_;
 }
 
 // *******************************************************************************************
@@ -2939,6 +3011,23 @@ void nServerInfo::NetReadThis( nMessage & m )
     else
     {
         userGlobalIDs_ = "";
+    }
+
+    if( !m.End() )
+    {
+        m.Read(settings_.flags_);
+        settings_.SetFlag(SettingsDigest::Flags_SettingsDigestSent, true);
+        m >> settings_.minPlayTimeTotal_;
+        m >> settings_.minPlayTimeOnline_;
+        m >> settings_.minPlayTimeTeam_;
+        m >> settings_.cycleDelay_;
+        m >> settings_.acceleration_;
+        m >> settings_.rubberWallHump_;
+        m >> settings_.rubberHitWallRatio_;
+    }
+    else
+    {
+        settings_.flags_ = 0;
     }
 
     userNamesOneLine_.Clear();
