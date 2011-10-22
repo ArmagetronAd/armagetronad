@@ -453,6 +453,8 @@
 		9BB7BA020D830473004FE8C3 /* uInput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B9F50D830473004FE8C3 /* uInput.cpp */; };
 		9BB7BA040D830473004FE8C3 /* uInputQueue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B9F70D830473004FE8C3 /* uInputQueue.cpp */; };
 		9BB7BA060D830473004FE8C3 /* uMenu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B9F90D830473004FE8C3 /* uMenu.cpp */; };
+		9BBF0FC4145337FE001AF053 /* SDL_mixer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BBF0FC3145337FE001AF053 /* SDL_mixer.framework */; };
+		9BBF0FCE1453381C001AF053 /* SDL_mixer.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9BBF0FC3145337FE001AF053 /* SDL_mixer.framework */; };
 		9BCBDE120D91F6D90022855B /* tColor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BCBDE110D91F6D90022855B /* tColor.cpp */; };
 		9BCBDE440D91F7F30022855B /* tColor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BCBDE110D91F6D90022855B /* tColor.cpp */; };
 		9BCBDF890D9210E10022855B /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BCBDF880D9210E10022855B /* ApplicationServices.framework */; };
@@ -598,6 +600,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				9BBF0FCE1453381C001AF053 /* SDL_mixer.framework in Copy Frameworks */,
 				9B83FF0F0B121B3100878E8A /* Growl-WithInstaller.framework in Copy Frameworks */,
 				9BD7D9A70A2C7CCF00D7033C /* libpng.framework in Copy Frameworks */,
 				9BD7D9A80A2C7CCF00D7033C /* SDL_image.framework in Copy Frameworks */,
@@ -1029,6 +1032,7 @@
 		9BB7B9F90D830473004FE8C3 /* uMenu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uMenu.cpp; sourceTree = "<group>"; };
 		9BB7B9FA0D830473004FE8C3 /* uMenu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uMenu.h; sourceTree = "<group>"; };
 		9BB7BA0E0D8304E4004FE8C3 /* defs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = defs.h; path = ../src/defs.h; sourceTree = SOURCE_ROOT; };
+		9BBF0FC3145337FE001AF053 /* SDL_mixer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_mixer.framework; path = /Library/Frameworks/ArmagetronAdvanced/current/SDL_mixer.framework; sourceTree = "<absolute>"; };
 		9BCBDE110D91F6D90022855B /* tColor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tColor.cpp; sourceTree = "<group>"; };
 		9BCBDF880D9210E10022855B /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = /System/Library/Frameworks/ApplicationServices.framework; sourceTree = "<absolute>"; };
 		9BCBE1E20D9214420022855B /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = /System/Library/Frameworks/CoreFoundation.framework; sourceTree = "<absolute>"; };
@@ -1066,6 +1070,7 @@
 				9BCBDF890D9210E10022855B /* ApplicationServices.framework in Frameworks */,
 				9BCBE1E30D9214420022855B /* CoreFoundation.framework in Frameworks */,
 				9B9753920F44A34A00E41662 /* libprotobuf.a in Frameworks */,
+				9BBF0FC4145337FE001AF053 /* SDL_mixer.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1778,6 +1783,7 @@
 				9BD7D96C0A2C7CB400D7033C /* libftgl.a */,
 				9BD7D96D0A2C7CB400D7033C /* libpng.framework */,
 				9B9753910F44A34A00E41662 /* libprotobuf.a */,
+				9BBF0FC3145337FE001AF053 /* SDL_mixer.framework */,
 				9BD7D9700A2C7CB400D7033C /* SDL.framework */,
 				9BD7D96E0A2C7CB400D7033C /* SDL_image.framework */,
 			);
