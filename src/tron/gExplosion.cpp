@@ -32,7 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "gWall.h"
 #include "gCycle.h"
 #include "eGrid.h"
-#include "ePlayer.h"
+#include "eTeam.h"
 #include "tRandom.h"
 #include "tMath.h"
 
@@ -334,7 +334,7 @@ void gExplosion::InteractWith( eGameObject *target, REAL time, int recursion )
         sg_deathExplosionWriter.write();
         
         // Apply scoring
-        if ( ePlayerNetID::Enemies( owner_->Player(), cycle->Player() ) )
+        if ( eTeam::Enemies( owner_->Team(), cycle->Player() ) )
         {
             owner_->Player()->AddScore( sg_scoreExplosionOwner, tOutput(), tOutput() );
             cycle->Player()->AddScore( sg_scoreExplosion, tOutput(), tOutput() );
