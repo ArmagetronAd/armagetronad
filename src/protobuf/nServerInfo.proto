@@ -42,6 +42,25 @@ message RequestSmallServerInfo
     optional bool legacy_message_end_marker = 20000;
 }
 
+// digest of the most important server settings
+message SettingsDigest
+{
+    optional uint32 flags = 1; // flags, defined in nServerInfo.h
+
+    optional int32 minPlayTimeTotal = 2;   // minimal total play time in minutes required to play here
+    optional int32 minPlayTimeOnline = 3;  // minimal online play time in minutes required to play here
+    optional int32 minPlayTimeTeam = 4;    // minimal team play time in minutes required to play here
+
+    optional float cycleDelay = 5;         // raw CYCLE_DELAY setting (or .05 if doublebinding is disabled)
+    optional float acceleration = 6;       // acceleration/speed
+
+    optional float rubberWallHump = 7;     // characteristic rubber number: rubber/(base speed*cycle_delay), the number of times you can hump a wall without suiciding
+    optional float rubberHitWallRatio = 8; // characteristic rubber number: maximum ratio of time spent sitting on walls to total time
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
+
 // full server info
 message BigServerInfo
 {
@@ -60,6 +79,8 @@ message BigServerInfo
     optional string url          = 9; // server homepage
     
     optional string global_ids   = 10; // global IDs of players
+
+    optional SettingsDigest settings = 11; // settings
 
     // legacy message end marker, extensions go after it
     optional bool legacy_message_end_marker = 20000;
