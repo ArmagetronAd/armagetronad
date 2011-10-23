@@ -3021,6 +3021,41 @@ void nServerInfo::WriteSyncThis( Network::BigServerInfo & info ) const
     settings_.WriteSync( *info.mutable_settings() );
 }
 
+// loads the shipped map of server setting digests. Not nearly up to date,
+// but gives basic orientation.
+typedef std::map< std::string, nServerInfo::SettingsDigest > nCacheMap;
+static nCacheMap & sn_LoadCacheMap()
+{
+    static nCacheMap map;
+    tTextFileRecorder cacheReader;
+    cacheReader.Open( tDirectories::Config(), "serverconfigcache.cfg" );
+    while( !cacheReader.EndOfFile() )
+    {
+        tString line = cacheReader.GetLine();
+        std::istringstream parse( line );
+
+        nServerInfo::SettingsDigest settings;
+        std::string key;
+        parse >> key;
+        parse >> settings.cycleDelay_;
+        parse >> settings.acceleration_;
+        parse >> settings.rubberWallHump_;
+        parse >> settings.rubberHitWallRatio_;
+        parse >> settings.wallsLength_;
+        parse >> settings.flags_;
+
+        map[key] = settings;
+    }
+
+    return map;
+}
+
+static nCacheMap const & sn_GetCacheMap()
+{
+    static nCacheMap map = sn_LoadCacheMap();
+    return map;
+}
+
 // *******************************************************************************************
 // *
 // *	ReadSyncThis
@@ -3091,7 +3126,20 @@ void nServerInfo::ReadSyncThis(  Network::BigServerInfo const & info,
     }
     else
     {
-        settings_.flags_ = 0;
+        // check cache
+        std::ostringstream key;
+        key << GetConnectionName() << ":" << GetPort();
+        nCacheMap const & map = sn_GetCacheMap();
+        nCacheMap::const_iterator i = map.find( key.str() );
+        if( i != map.end() )
+        {
+            settings_ = (*i).second;
+            settings_.SetFlag( SettingsDigest::Flags_SettingsDigestSent, true );
+        }
+        else
+        {
+            settings_.flags_ = 0;
+        }
     }
 
     userNamesOneLine_.Clear();

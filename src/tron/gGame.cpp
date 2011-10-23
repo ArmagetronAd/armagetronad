@@ -1553,6 +1553,7 @@ static bool sg_RequestedDisconnection = false;
 
 static bool sg_NetworkError( const tOutput& title, const tOutput& message, REAL timeout )
 {
+#ifndef SERVER_SURVEY
     tOutput message2 ( message );
 
     if ( sn_DenyReason.Len() > 2 )
@@ -1570,6 +1571,9 @@ static bool sg_NetworkError( const tOutput& title, const tOutput& message, REAL 
     }
 
     return tConsole::Message( title, message2, timeout );
+#else
+    return true;
+#endif
 }
 
 // revert settings to defaults in the current scope
@@ -1709,7 +1713,45 @@ bool ConnectToServerCore(nServerInfoBase *server)
             con << tOutput("$network_syncing_gamestate");
             sr_SetWindowTitle(tOutput("$window_title_connected",
                 tColoredString::RemoveColors(server->GetName())));
+#ifndef SERVER_SURVEY
             sg_EnterGame( nCLIENT );
+#else
+            // wait 3 more seconds
+            REAL endTime=tSysTimeFloat()+3;
+            while (tSysTimeFloat()<endTime && (sn_GetNetState() != nSTANDALONE))
+            {
+                tAdvanceFrame();
+                sg_Receive();
+                nNetObject::SyncAll();
+                tAdvanceFrame();
+                sn_SendPlanned();
+                st_DoToDo();
+
+#ifndef DEDICATED
+                rSysDep::SwapGL();
+                rSysDep::ClearGL();
+#endif
+
+                sn_Delay();
+            }
+            
+            sg_RequestedDisconnection = true;
+            nServerInfo::SettingsDigest settings;
+            nCallbackFillServerInfo::Fill( &settings );
+            std::ofstream o;
+            if ( tDirectories::Var().Open(o, "serversurvey.txt", std::ios::app) )
+            {
+                o << server->GetConnectionName() << ":" << server->GetPort() << " ";
+                o << settings.cycleDelay_ << " "
+                  << settings.acceleration_ << " "
+                  << settings.rubberWallHump_ << " "
+                  << settings.rubberHitWallRatio_ << " "
+                  << settings.wallsLength_ << " "
+                  << settings.flags_ << " "
+                  << "\n";
+//                o << server->GetName() << "\n";
+            }
+#endif
         }
         else{
             //con << "Timeout. Try again!\n";
@@ -4792,7 +4834,9 @@ void sg_ClientFullscreenMessage( tOutput const & title, tOutput const & message,
     se_UserShowScores( false );
 
     // show message
+#ifndef SERVER_SURVEY
     uMenu::Message( title, message, timeout );
+#endif
 
     // and print it to the console
 #ifndef DEDICATED
@@ -5005,7 +5049,13 @@ static void sg_FillServerSettings()
     digest.SetFlag( nServerInfo::SettingsDigest::Flags_TeamPlay,
                     multiPlayer.maxPlayersPerTeam > 1 );
 
+#ifndef SERVER_SURVEY
     digest.wallsLength_ = multiPlayer.wallsLength/gCycleMovement::MaximalSpeed();
+#else
+    // called on the client during server survey. use current value.
+    digest.wallsLength_ = gCycle::WallsLength()/gCycleMovement::MaximalSpeed();
+    digest.SetFlag( nServerInfo::SettingsDigest::Flags_TeamPlay, false );
+#endif
 }
 
 static nCallbackFillServerInfo sg_fillServerSettings(sg_FillServerSettings);

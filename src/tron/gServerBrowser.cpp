@@ -220,6 +220,24 @@ void gServerBrowser::BrowseSpecialMaster( nServerInfoBase * master, char const *
     nServerInfo::GetFromMaster( master, prefix );
     nServerInfo::Save();
 
+#ifdef SERVER_SURVEY
+    // connect to all servers and log stats
+    nServerInfo * info = nServerInfo::GetFirstServer();
+    {
+        std::ofstream o;
+        if ( tDirectories::Var().Open(o, "serversurvey.txt", std::ios::app) )
+        {
+            o << "New survey\n";
+        }
+    }
+    while( info )
+    {
+        ConnectToServer(info);
+        info = info->Next();
+    }
+    return;
+#endif
+
     //  gLogo::SetBig(true);
     //  gLogo::SetSpinning(false);
 
