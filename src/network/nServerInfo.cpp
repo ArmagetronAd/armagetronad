@@ -2951,6 +2951,7 @@ void nServerInfo::NetWriteThis( nMessage & m ) const
     m << settings_.acceleration_;
     m << settings_.rubberWallHump_;
     m << settings_.rubberHitWallRatio_;
+    m << settings_.wallsLength_;
 }
 
 // *******************************************************************************************
@@ -3024,6 +3025,14 @@ void nServerInfo::NetReadThis( nMessage & m )
         m >> settings_.acceleration_;
         m >> settings_.rubberWallHump_;
         m >> settings_.rubberHitWallRatio_;
+        if( !m.End() )
+        {
+            m >> settings_.wallsLength_;
+        }
+        else
+        {
+            settings_.wallsLength_ = -1;
+        }
     }
     else
     {

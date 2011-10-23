@@ -192,6 +192,7 @@ public:
         {
             Flags_AuthenticationRequired = 0x1, //!< is authentication required to play on this server?
             Flags_NondefaultMap = 0x2, //!< custom map, indicating complicated gameplay
+            Flags_TeamPlay = 0x4, //!< team play is possible
             Flags_SettingsDigestSent = 0x8000, //!< Did this server send a settings digest?
             Flags_All = 0xffff
         };
@@ -211,6 +212,7 @@ public:
         REAL acceleration_;       //!< acceleration strength (relative to base speed)
         REAL rubberWallHump_;     //!< characteristic rubber number: rubber/(base speed*cycle_delay), the number of times you can hump a wall without suiciding
         REAL rubberHitWallRatio_;  //!< characteristic rubber number: maximum ratio of time spent sitting on walls to total time
+        REAL wallsLength_;         //!< length of walls (divided by speed, so it's in seconds)
 
         SettingsDigest();
     };
