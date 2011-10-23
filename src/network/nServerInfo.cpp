@@ -2570,6 +2570,7 @@ void nServerInfo::SettingsDigest::WriteSync( Network::SettingsDigest & sync ) co
     sync.set_acceleration( acceleration_ );
     sync.set_rubber_wall_hump( rubberWallHump_ );
     sync.set_rubber_hit_wall_ratio( rubberHitWallRatio_ );
+    sync.set_walls_length( wallsLength_ );
 }
 
 void nServerInfo::SettingsDigest::ReadSync( Network::SettingsDigest const & sync )
@@ -2582,6 +2583,14 @@ void nServerInfo::SettingsDigest::ReadSync( Network::SettingsDigest const & sync
     acceleration_ = sync.acceleration();
     rubberWallHump_ = sync.rubber_wall_hump();
     rubberHitWallRatio_ = sync.rubber_hit_wall_ratio();
+    if( sync.has_walls_length() )
+    {
+        wallsLength_ = sync.walls_length();
+    }
+    else
+    {
+        wallsLength_ = 0;
+    }
 }
 
 void nServerInfo::SettingsDigest::SetFlag( Flags flag, bool set )

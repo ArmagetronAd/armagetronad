@@ -51,11 +51,12 @@ message SettingsDigest
     optional int32 min_play_time_online = 3;  // minimal online play time in minutes required to play here
     optional int32 min_play_time_team = 4;    // minimal team play time in minutes required to play here
 
-    optional float cycle_delay = 5;         // raw CYCLE_DELAY setting (or .05 if doublebinding is disabled)
-    optional float acceleration = 6;       // acceleration/speed
+    optional float cycle_delay = 5;           // raw CYCLE_DELAY setting (or .05 if doublebinding is disabled)
+    optional float acceleration = 6;          // acceleration/speed
 
-    optional float rubber_wall_hump = 7;     // characteristic rubber number: rubber/(base speed*cycle_delay), the number of times you can hump a wall without suiciding
+    optional float rubber_wall_hump = 7;      // characteristic rubber number: rubber/(base speed*cycle_delay), the number of times you can hump a wall without suiciding
     optional float rubber_hit_wall_ratio = 8; // characteristic rubber number: maximum ratio of time spent sitting on walls to total time
+    optional float walls_length = 9;          // wall length (relative to max speed, so unit is seconds)
 
     // legacy message end marker, extensions go after it
     optional bool legacy_message_end_marker = 20000;

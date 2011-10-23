@@ -5002,6 +5002,10 @@ static void sg_FillServerSettings()
     
     digest.SetFlag( nServerInfo::SettingsDigest::Flags_NondefaultMap,
                     mapfile != DEFAULT_MAP );
+    digest.SetFlag( nServerInfo::SettingsDigest::Flags_TeamPlay,
+                    multiPlayer.maxPlayersPerTeam > 1 );
+
+    digest.wallsLength_ = multiPlayer.wallsLength/gCycleMovement::MaximalSpeed();
 }
 
 static nCallbackFillServerInfo sg_fillServerSettings(sg_FillServerSettings);
