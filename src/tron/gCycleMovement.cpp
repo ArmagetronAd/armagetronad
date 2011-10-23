@@ -4439,17 +4439,7 @@ static void sg_FillCyclePhysics()
     // fetch base values
     REAL speed = sg_speedCycle * gCycleMovement::SpeedMultiplier();
     REAL rubber = sg_rubberCycle;
-    REAL maxWallAcceleration = 0;
-    REAL wallAcceleration = sg_accelerationCycleTeam * sg_accelerationCycle;
-    if ( wallAcceleration > maxWallAcceleration )
-        maxWallAcceleration = wallAcceleration;
-    wallAcceleration = sg_accelerationCycleEnemy * sg_accelerationCycle;
-    if ( wallAcceleration > maxWallAcceleration )
-        maxWallAcceleration = wallAcceleration;
-    wallAcceleration = sg_accelerationCycleRim * sg_accelerationCycle;
-    if ( wallAcceleration > maxWallAcceleration )
-        maxWallAcceleration = wallAcceleration;
-    maxWallAcceleration *= gCycleMovement::SpeedMultiplier();
+    REAL maxSpeed = gCycleMovement::MaximalSpeed();
 
     REAL delay = sg_delayCycle;
     if( su_doubleBindTimeout > delay )
@@ -4463,7 +4453,7 @@ static void sg_FillCyclePhysics()
 
     nServerInfo::SettingsDigest & digest = *nCallbackFillServerInfo::ToFill();
     digest.cycleDelay_ = delay;
-    digest.acceleration_ = maxWallAcceleration/(speed+.001);
+    digest.acceleration_ = (maxSpeed-speed)/(speed+.001);
     digest.rubberWallHump_ = rubber/(speed*delay);
     // if humping is possible basically, check whether it's prevented or handicaped by
     // cycle_rubber_delay
