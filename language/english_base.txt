@@ -167,6 +167,10 @@ score_kill_help                     Amount of points you get for killing someone
 score_suicide_help                  Amount of points you get for stupidly dying
 score_win_help                      Amount of points you get for winning a round
 score_deathzone_help                Amount of points you get for hitting the Death Zone
+score_explosion_owner_help  Points the owner of an explosion gains for destroying another enemy cycle.
+score_explosion_help        Points the enemy cycle destroyed in an explosion gains.
+deadly_explosions_help      Should cycles in the blast radius of an explosion be destroyed?
+
 
 sp_score_win_help			What you get for winning a round in single player mode
 sp_walls_stay_up_delay_help	Number of seconds the walls stay up after a player died; negative values will keep them up forever.
@@ -818,6 +822,7 @@ ladderlog_write_chat_help                     Write to ladderlog: CHAT <chatter>
 ladderlog_write_death_frag_help               Write to ladderlog: DEATH_FRAG <prey> <predator>
 ladderlog_write_death_suicide_help            Write to ladderlog: DEATH_SUICIDE <player>
 ladderlog_write_death_teamkill_help           Write to ladderlog: DEATH_TEAMKILL <prey> <predator>
+ladderlog_write_death_explosion_help          Write to ladderlog: DEATH_EXPLOSION <prey> <predator>
 ladderlog_write_encoding_help                 Write to ladderlog: ENCODING <charset>. Specifies the encoding for data in ladderlog.txt.
 ladderlog_write_game_end_help                 Write to ladderlog: GAME_END <date and time>
 ladderlog_write_game_time_help                Write to ladderlog: GAME_TIME <time> (see also: GAME_TIME_INTERVAL)
@@ -2638,6 +2643,7 @@ player_win_frag_ai		\1 got \2 points for core dumping an AI player.\n
 player_lose_frag		\1 lost \2 points since it caused a general protection fault.\n
 player_lose_rim		    \1 lost \2 points for trying to escape from the game grid.\n
 player_win_survivor		\1 was awarded \2 points for being last active team.\n
+player_dead_explosion   \1 was destroyed in the explosion made by \2.\n
 player_respawn_center_message	You've been respawned\n
 player_joins_team       \1 wants to play for \2 on the next respawn.\n
 player_joins_team_wish  \1 still wants to play for \2, but isn't currently allowed to.\n
