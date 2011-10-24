@@ -2959,6 +2959,44 @@ network_master_pollanswer_last	Answering ping poll from \1. This is the last log
 network_master_host_inet_help	This will start a network game on your computer and announce it on the internet.
 network_master_host_lan_help	This will start a network game that is only visible from your LAN.
 
+classification_0 no \1
+classification_1 ludicrously low \1
+classification_2 nano \1
+classification_3 micro \1
+classification_4 extremly low \1
+classification_5 very low \1
+classification_6 low \1
+classification_7 normal \1
+classification_8 high \1
+classification_9 very high \1
+classification_10 extremly high \1
+classification_11 mega \1
+classification_12 giga \1
+classification_13 ludicrous \1
+classification_14 infinite \1
+
+classification_wall_0 no \1
+classification_wall_1 ludicrously short \1
+classification_wall_2 nano \1
+classification_wall_3 micro \1
+classification_wall_4 extremly short \1
+classification_wall_5 very short \1
+classification_wall_6 short \1
+classification_wall_7 normal \1
+classification_wall_8 long \1
+classification_wall_9 very long \1
+classification_wall_10 extremly long \1
+classification_wall_11 mega \1
+classification_wall_12 giga \1
+classification_wall_13 ludicrously long \1
+classification_wall_14 infinite \1
+
+classification_acceleration acceleration
+classification_delay delay
+classification_rubber rubber
+classification_walls walls
+classification_teams team play
+classification_maps custom map
 
 #********************************************
 #********************************************

@@ -2610,6 +2610,13 @@ bool nServerInfo::SettingsDigest::GetFlag( Flags flag ) const
     return 0 != (flags_ & flag);
 }
 
+nServerInfo::Classification::Classification()
+{
+    canPlay_ = Play_OK;
+    description_ = "";
+}
+
+
 //! callback to give other components a chance to help fill in the server info
 nServerInfo::SettingsDigest * nCallbackFillServerInfo::settings_ = NULL;
 static tCallback * sn_fillServerInfoAnchor = NULL;
@@ -2623,24 +2630,6 @@ void nCallbackFillServerInfo::Fill( nServerInfo::SettingsDigest * settings )
     settings_ = settings;
     Exec( sn_fillServerInfoAnchor );
     settings_ = NULL;
-}
-
-nServerInfo::SettingsDigest const * nCallbackCanPlayOnServer::settings_ = NULL;
-static tCallbackString * sn_canPlayOnServerAnchor = NULL;
-//! callback to give other components a chance to help fill in the server info
-
-nCallbackCanPlayOnServer::nCallbackCanPlayOnServer( STRINGRETFUNC * f )
-: tCallbackString( sn_canPlayOnServerAnchor, f )
-{
-}
-
-//! return all reasons why you can't play here
-tString nCallbackCanPlayOnServer::CantPlayReasons( nServerInfo::SettingsDigest const * settings )
-{
-    settings_ = settings;
-    tString ret = Exec( sn_canPlayOnServerAnchor );
-    settings_ = NULL;
-    return ret;
 }
 
 static nServerInfoAdmin* sn_serverInfoAdmin = NULL;
@@ -3120,6 +3109,7 @@ void nServerInfo::ReadSyncThis(  Network::BigServerInfo const & info,
         userGlobalIDs_ = "";
     }
 
+    bool classify = true;
     if( info.has_settings() )
     {
         settings_.ReadSync( info.settings() );
@@ -3139,7 +3129,12 @@ void nServerInfo::ReadSyncThis(  Network::BigServerInfo const & info,
         else
         {
             settings_.flags_ = 0;
+            classify = false;
         }
+    }
+    if( classify && nServerInfoAdmin::GetAdmin() )
+    {
+        nServerInfoAdmin::GetAdmin()->Classify( settings_, classification_ );
     }
 
     userNamesOneLine_.Clear();

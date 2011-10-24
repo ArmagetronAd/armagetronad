@@ -692,7 +692,13 @@ void gServerMenuItem::RenderBackground()
         players << "\n" << tColoredString::ColorString(1,1,1);
         tColoredString uri;
         uri << server->Url() << tColoredString::ColorString(1,1,1);
-        players << tOutput( "$network_master_serverinfo", server->Release(), uri, server->Options() );
+        tColoredString options;
+        if( server->GetSettings().GetFlag( nServerInfo::SettingsDigest::Flags_SettingsDigestSent ) )
+        {
+            options << server->GetClassification().description_ << "\n";
+        }
+        options << server->Options();
+        players << tOutput( "$network_master_serverinfo", server->Release(), uri, options );
     }
 #endif
 }

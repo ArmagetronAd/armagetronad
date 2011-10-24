@@ -8737,6 +8737,116 @@ private:
         se_CutString( sg_url, 75 );
         return sg_url;
     }
+
+    // levels of values
+    enum Classifications
+    {
+        Classification_None,
+        Classification_LudicrouslyLow,
+        Classification_Nano,
+        Classification_Micro,
+        Classification_ExtremlyLow,
+        Classification_VeryLow,
+        Classification_Low,
+        Classification_Medium,
+        Classification_High,
+        Classification_VeryHigh,
+        Classification_ExtremlyHigh,
+        Classification_Mega,
+        Classification_Giga,
+        Classification_LudicrouslyHigh,
+        Classification_Infinite
+    };
+
+    static tString ComposeClassification( int index, char const * classification_root, char const * item )
+    {
+        std::ostringstream s;
+        s << classification_root << index;
+        return tString(tOutput( s.str().c_str(), tOutput(item) ) );
+    }
+
+    class Classifier
+    {
+    public:
+        // classifies lowerBoundX just as classificationX, any lower value as classificationX-1
+        Classifier( REAL lowerBound1, int classification1,
+                    REAL lowerBound2, int classification2 )
+        : logBound1_(log(lowerBound1))
+          , logBound2_(log(lowerBound2))
+          , classification1_( classification1 )
+          , classification2_( classification2 )
+        {
+        }
+
+        int Classify( REAL value, int invalid = Classification_None )
+        {
+            if( value <= 0 )
+            {
+                return invalid;
+            }
+            REAL a = ( log( value ) - logBound1_ )/( logBound2_ - logBound1_ );
+            REAL c = classification1_ + a * ( classification2_ - classification1_ );
+            int ret = floor( c );
+            if ( ret < Classification_LudicrouslyLow )
+                ret = Classification_LudicrouslyLow;
+            if ( ret > Classification_LudicrouslyHigh )
+                ret = Classification_LudicrouslyHigh;
+            return ret;
+        }
+    private:
+        REAL logBound1_, logBound2_;
+        REAL classification1_, classification2_;
+    };
+
+    virtual void Classify( nServerInfo::SettingsDigest const & in, 
+                           nServerInfo::Classification & out ) const
+    {
+        // various classifiers
+        static Classifier delayClassifier( .06, Classification_Medium, .12, Classification_High );
+        static Classifier accelerationClassifier( 4, Classification_Medium, 8, Classification_High );
+        static Classifier rubberHumpClassifier( 1, Classification_Medium, 100, Classification_LudicrouslyHigh );
+        static Classifier rubberWallClassifier( .015, Classification_Low, .3, Classification_LudicrouslyHigh );
+        static Classifier wallsLengthClassifier( 1, Classification_Low, 10, Classification_VeryHigh );
+        
+        // apply them
+        int delay        = delayClassifier.Classify( in.cycleDelay_ );
+        int acceleration = accelerationClassifier.Classify( in.acceleration_ );
+        int rubberHump   = rubberHumpClassifier.Classify( in.rubberWallHump_ );
+        int rubberWall   = rubberWallClassifier.Classify( in.rubberHitWallRatio_ );
+        int length       = wallsLengthClassifier.Classify( in.wallsLength_, Classification_Infinite );
+
+        // fuse rubber values into one
+        int rubber = rubberHump;
+        if( rubberWall + 1 < rubber )
+        {
+            rubber = rubberWall + 1;
+        }
+        if( rubberWall > rubber + 1 )
+        {
+            rubber = rubberWall - 1;
+        }
+        if( rubber <= Classification_Micro )
+        {
+            rubber = Classification_None;
+        }
+
+        std::ostringstream compose;
+        compose 
+        << ComposeClassification( rubber, "$classification_", "$classification_rubber" ) << ", "
+        << ComposeClassification( acceleration, "$classification_", "$classification_acceleration" ) << ", "
+        << ComposeClassification( delay, "$classification_", "$classification_delay" ) << ", "
+        << ComposeClassification( length, "$classification_wall_", "$classification_walls" );
+        if( in.GetFlag( nServerInfo::SettingsDigest::Flags_TeamPlay ) )
+        {
+            compose << ", " << tOutput( "$classification_teams" );
+        }
+        if( in.GetFlag( nServerInfo::SettingsDigest::Flags_NondefaultMap ) )
+        {
+            compose << ", " << tOutput( "$classification_maps" );
+        }
+        
+        out.description_ = compose.str();
+    }
 };
 
 static gServerInfoAdmin sg_serverAdmin;

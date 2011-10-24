@@ -233,6 +233,21 @@ public:
         SettingsDigest();
     };
 
+    struct Classification
+    {
+        Classification();
+
+        enum Play
+        {
+            Play_OK,             //!< no problem
+            Play_NotRecommended, //!< not recommended
+            PLay_Impossible      //!< can't play
+        };
+
+        Play canPlay_;        //!< can we play here?
+        tString description_; //!< classification description or reason why play is impossible
+    };
+
     // sort key selection
     enum PrimaryKey
     {
@@ -367,12 +382,23 @@ public:
     inline int GetScoreBias( void ) const;	//!< Gets score bias for this server
     inline nServerInfo const & GetScoreBias( int & scoreBias ) const;	//!< Gets score bias for this server
 
+    SettingsDigest const & GetSettings() const //!< most important settings
+    {
+        return settings_;
+    }
+
+    Classification const & GetClassification() const //!< classification according to settings
+    {
+        return classification_;
+    }
+
 protected:
     virtual const tString& DoGetName() const;   //!< returns the server's name
 
 private:
     QueryType queryType_; //!< the query type to use for this server
     SettingsDigest settings_; //!< most important settings
+    Classification classification_; //!< classification according to settings
 };
 
 //! callback to give other components a chance to help fill in the server info
@@ -387,20 +413,6 @@ public:
 
     //! fills all server infos
     static void Fill( nServerInfo::SettingsDigest * settings );
-};
-
-//! callback to give other components a chance to help fill in the server info
-class nCallbackCanPlayOnServer: public tCallbackString
-{
-    static nServerInfo::SettingsDigest const * settings_;
-public:
-    nCallbackCanPlayOnServer( STRINGRETFUNC * f );
-
-    //! the settings
-    static nServerInfo::SettingsDigest const * Settings(){ return settings_; }
-
-    //! return all reasons why you can't play here
-    static tString CantPlayReasons( nServerInfo::SettingsDigest const * settings );
 };
 
 class nServerInfoAdmin
@@ -418,6 +430,8 @@ private:
     virtual tString GetGlobalIDs()	const = 0;
     virtual tString	GetOptions()	const = 0;
     virtual tString GetUrl()		const = 0;
+    virtual void Classify( nServerInfo::SettingsDigest const & in, 
+                           nServerInfo::Classification & out ) const = 0;  //!< classifies the server according to its setting digest
 
     static nServerInfoAdmin* GetAdmin();
 };
