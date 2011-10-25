@@ -932,6 +932,8 @@ admin_pass_help			Password for the basic in game admin
 
 backward_compatibility_help	Maximum number of old protocol versions to support.
 new_feature_delay_help		Disable features that only came in during the last X protocol versions.
+min_protocol_version_help   Minimum protocol version allowed to play.
+max_protocol_version_help   If > 0, maximum protocol version allowed to play; features not supported by this version are going to be permanently disabled.
 
 # program control
 quit_help					Shuts the dedicated server down and quits.
