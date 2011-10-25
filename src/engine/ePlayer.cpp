@@ -8905,7 +8905,7 @@ private:
         if( out.sortOverride_ > 0 )
         {
             compose << tOutput( digestIsAccurate ? "$network_master_exp_recommended_long" : "$network_master_exp_recommended_long_oldserver", missingForThisLevel + out.sortOverride_*levelDistance );
-            if( digestIsAccurate )
+            // if( digestIsAccurate )
             {
                 out.noJoin_ = tOutput("$network_master_exp_recommended");
             }

@@ -602,6 +602,10 @@ void gServerMenuItem::Render(REAL x,REAL y,REAL alpha, bool selected)
         if (server->Score() < -10000)
             s = -10000;
 
+        if ( favorite_ )
+        {
+            score << "B ";
+        }
         if (server->Polling())
         {
             score << tOutput("$network_master_polling");
@@ -636,15 +640,6 @@ void gServerMenuItem::Render(REAL x,REAL y,REAL alpha, bool selected)
         }
         else
         {
-            if ( favorite_ )
-            {
-                score << "B ";
-            }
-            else
-            {
-                score << "  ";
-            }
-
             score << s;
             users << server->Users() << "/" << server->MaxUsers();
             ping  << p;

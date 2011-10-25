@@ -488,10 +488,7 @@ void nServerInfo::Sort( PrimaryKey key, SortHelper Helper )
                 // Unreachable servers should be displayed at the end of the list
                 if ( !previousUnreachable && !ascendUnreachable )
                 {
-                    if( help )
-                        compare = help;
-                    else
-                        compare = prev->nameForSorting.Compare( ascend->nameForSorting, true );
+                    compare = prev->nameForSorting.Compare( ascend->nameForSorting, true );
                 }
                 break;
             case KEY_PING:
@@ -520,13 +517,23 @@ void nServerInfo::Sort( PrimaryKey key, SortHelper Helper )
                 break;
             }
 
-            // override sorting if the servers fall into different classes
-            if( help == 0 && key != KEY_NAME )
+            // override sorting if the servers fall into different classes or the helper function
+            // wants different sorting (except for alphabetic sorting, where we don't want that,
+            // and user based sorting, where the helper function is just a bias already taken
+            // into account )
+            if( key != KEY_NAME )
             {
-                int c = prev->GetClassification().sortOverride_ - ascend->GetClassification().sortOverride_;
-                if( c != 0 )
+                if( key != KEY_USERS && help != 0 )
                 {
-                    compare = c;
+                    compare = help;
+                }
+                else
+                {
+                    int c = prev->GetClassification().sortOverride_ - ascend->GetClassification().sortOverride_;
+                    if( c != 0 )
+                    {
+                        compare = c;
+                    }
                 }
             }
 
