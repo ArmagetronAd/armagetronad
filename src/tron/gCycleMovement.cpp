@@ -4476,7 +4476,7 @@ static void sg_FillCyclePhysics()
     REAL rubber = sg_rubberCycle;
     REAL maxSpeed = gCycleMovement::MaximalSpeed();
 
-    REAL delay = sg_delayCycle;
+    REAL delay = sg_delayCycle/gCycleMovement::SpeedMultiplier();
     if( su_doubleBindTimeout > delay )
     {
         delay = su_doubleBindTimeout;
@@ -4494,7 +4494,9 @@ static void sg_FillCyclePhysics()
     // cycle_rubber_delay
     if( digest.rubberWallHump_ > 1 && sg_rubberCycleDelay > 0 )
     {
-        digest.rubberWallHump_ *= sg_rubberCycleDelayBonus;
+        REAL rubberDelayCount = sg_rubberCycleDelay > .999 ? .999 : sg_rubberCycleDelay;
+        REAL bonus = sg_rubberCycleDelayBonus > 0 ? sg_rubberCycleDelayBonus : 0;
+        digest.rubberWallHump_ *= bonus/(rubberDelayCount+bonus*(1-rubberDelayCount));
         // but not too much.
         if( digest.rubberWallHump_ < 1 )
         {
