@@ -2827,6 +2827,9 @@ network_master_denied_inter		The master server denied your login attempt. That u
 testing_version_expired_title   Version Expired
 testing_version_expired         You are running a public test version or an unsupported CVS build. The server you tried to connect to is running a much newer version and that combination is only supported for major releases. An update is probably available for you on www.armagetronad.net or beta.armagetronad.net.
 
+network_master_login_needed     Registration needed
+network_master_exp_needed       Experience needed
+network_master_exp_recommended  Experience recommended
 network_master_upgrage			Upgrade needed
 network_master_downgrage		Server is outdated
 network_master_incompatible		Server is incompatible
@@ -2835,6 +2838,11 @@ network_master_serverinfo       Version: \1\nURI    : \2\nOptions: \3\n
 network_master_players			Players: 
 network_master_players_empty	Empty
 network_master_options			Options:\n
+
+network_master_exp_recommended_long_oldserver This server uses old code and did not transmit settings; you should probably get \1 more minutes of play elsewhere first.\n
+network_master_exp_recommended_long This server uses advanced settings; you should probably get \1 more minutes of play elsewhere first.\n
+network_master_login_needed_long You need to have a global ID to play here. Get one at forums.armagetronad.net.\n
+network_master_exp_needed_long This server will not let you play until you get at least \n more minutes of play elsewhere first.\n
 
 network_connecting_to_server	Connecting to \1...\n
 network_connecting_gamestate	Waiting for gamestate...\n

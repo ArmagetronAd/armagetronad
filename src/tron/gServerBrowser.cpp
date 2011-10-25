@@ -625,6 +625,10 @@ void gServerMenuItem::Render(REAL x,REAL y,REAL alpha, bool selected)
                 break;
             }
         }
+        else if ( server->GetClassification().noJoin_.Len() > 1 )
+        {
+            score << server->GetClassification().noJoin_;
+        }
         else if ( server->Users() >= server->MaxUsers() )
         {
             score << tOutput( "$network_master_full" );
@@ -693,10 +697,7 @@ void gServerMenuItem::RenderBackground()
         tColoredString uri;
         uri << server->Url() << tColoredString::ColorString(1,1,1);
         tColoredString options;
-        if( server->GetSettings().GetFlag( nServerInfo::SettingsDigest::Flags_SettingsDigestSent ) )
-        {
-            options << server->GetClassification().description_ << "\n";
-        }
+        options << server->GetClassification().description_;
         options << server->Options();
         players << tOutput( "$network_master_serverinfo", server->Release(), uri, options );
     }

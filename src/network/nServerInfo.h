@@ -237,14 +237,8 @@ public:
     {
         Classification();
 
-        enum Play
-        {
-            Play_OK,             //!< no problem
-            Play_NotRecommended, //!< not recommended
-            PLay_Impossible      //!< can't play
-        };
-
-        Play canPlay_;        //!< can we play here?
+        int sortOverride_;    //!< values 0 get priority in sorting server lists
+        tString noJoin_;      //!< is there a reason we shouldn't join?
         tString description_; //!< classification description or reason why play is impossible
     };
 

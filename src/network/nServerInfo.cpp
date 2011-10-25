@@ -520,6 +520,16 @@ void nServerInfo::Sort( PrimaryKey key, SortHelper Helper )
                 break;
             }
 
+            // override sorting if the servers fall into different classes
+            if( help == 0 && key != KEY_NAME )
+            {
+                int c = prev->GetClassification().sortOverride_ - ascend->GetClassification().sortOverride_;
+                if( c != 0 )
+                {
+                    compare = c;
+                }
+            }
+
             if (0 == compare)
             {
                 if ( previousPolling )
@@ -2611,9 +2621,8 @@ bool nServerInfo::SettingsDigest::GetFlag( Flags flag ) const
 }
 
 nServerInfo::Classification::Classification()
+: sortOverride_(1)
 {
-    canPlay_ = Play_OK;
-    description_ = "";
 }
 
 
@@ -3109,10 +3118,10 @@ void nServerInfo::ReadSyncThis(  Network::BigServerInfo const & info,
         userGlobalIDs_ = "";
     }
 
-    bool classify = true;
     if( info.has_settings() )
     {
         settings_.ReadSync( info.settings() );
+        settings_.SetFlag( SettingsDigest::Flags_SettingsDigestSent, true );
     }
     else
     {
@@ -3129,10 +3138,9 @@ void nServerInfo::ReadSyncThis(  Network::BigServerInfo const & info,
         else
         {
             settings_.flags_ = 0;
-            classify = false;
         }
     }
-    if( classify && nServerInfoAdmin::GetAdmin() )
+    if( nServerInfoAdmin::GetAdmin() )
     {
         nServerInfoAdmin::GetAdmin()->Classify( settings_, classification_ );
     }

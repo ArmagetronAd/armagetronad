@@ -1137,6 +1137,8 @@ static const tString& se_UserName()
     return ret;
 }
 
+static char const * se_defaultGID = "@forums";
+
 ePlayer::ePlayer():cockpit(0){
     nAuthentication::SetUserPasswordCallback(&PasswordCallback);
 #ifdef KRAWALL_SERVER
@@ -1160,7 +1162,7 @@ ePlayer::ePlayer():cockpit(0){
         name << "Player " << id+1;
 
     // default global ID so logins are redirected to the forums
-    globalID = "@forums";
+    globalID = se_defaultGID;
 
 #ifndef DEDICATED
     tString confname;
@@ -8798,6 +8800,22 @@ private:
         REAL classification1_, classification2_;
     };
 
+    // adds a +1 penalty for every level value goes over the limit
+    static int Penalty( int limit, int value, int max = 3 )
+    {
+        int ret = value - limit;
+        if ( ret < 0 )
+        {
+            ret = 0;
+        }
+        else if ( ret > max )
+        {
+            ret = max;
+        }
+
+        return ret;
+    }
+
     virtual void Classify( nServerInfo::SettingsDigest const & in, 
                            nServerInfo::Classification & out ) const
     {
@@ -8830,21 +8848,117 @@ private:
             rubber = Classification_None;
         }
 
+        bool digestIsAccurate = in.GetFlag( nServerInfo::SettingsDigest::Flags_SettingsDigestSent );
+
         std::ostringstream compose;
-        compose 
-        << ComposeClassification( rubber, "$classification_", "$classification_rubber" ) << ", "
-        << ComposeClassification( acceleration, "$classification_", "$classification_acceleration" ) << ", "
-        << ComposeClassification( delay, "$classification_", "$classification_delay" ) << ", "
-        << ComposeClassification( length, "$classification_wall_", "$classification_walls" );
+        if( digestIsAccurate )
+        {
+            compose 
+            << ComposeClassification( rubber, "$classification_", "$classification_rubber" ) << ", "
+            << ComposeClassification( acceleration, "$classification_", "$classification_acceleration" ) << ", "
+            << ComposeClassification( delay, "$classification_", "$classification_delay" ) << ", "
+            << ComposeClassification( length, "$classification_wall_", "$classification_walls" );
+            if( in.GetFlag( nServerInfo::SettingsDigest::Flags_TeamPlay ) )
+            {
+                compose << ", " << tOutput( "$classification_teams" );
+            }
+            if( in.GetFlag( nServerInfo::SettingsDigest::Flags_NondefaultMap ) )
+            {
+                compose << ", " << tOutput( "$classification_maps" );
+            }
+            compose << "\n";
+        }
+
+        // determine experience level required.
+        int experienceLevel = 0;
         if( in.GetFlag( nServerInfo::SettingsDigest::Flags_TeamPlay ) )
         {
-            compose << ", " << tOutput( "$classification_teams" );
+            // team play is difficult.
+            experienceLevel+=2;
         }
         if( in.GetFlag( nServerInfo::SettingsDigest::Flags_NondefaultMap ) )
         {
-            compose << ", " << tOutput( "$classification_maps" );
+            // non default maps hint at complicated gameplay.
+            experienceLevel++;
         }
-        
+        experienceLevel += Penalty( Classification_Medium, rubber );
+        experienceLevel += Penalty( delay, Classification_Medium );
+        // low delay and high rubber usually go hand in hand, let's not overpenalize them
+        if( experienceLevel > 4 )
+        {
+            experienceLevel = 4;
+        }
+        experienceLevel += Penalty( Classification_High, acceleration, 1 );
+        experienceLevel += Penalty( length, Classification_Low, 2 );
+
+        if( !digestIsAccurate )
+        {
+            experienceLevel = 1;
+        }
+
+        // calculate the experience level the player has
+        int levelDistance = 10;
+        int experienceLevelThere = floor( se_playTimeTotal/levelDistance );
+        int missingForThisLevel = experienceLevelThere*levelDistance - se_playTimeTotal + 2;
+
+        out.sortOverride_ = experienceLevel - experienceLevelThere;
+        if( out.sortOverride_ > 0 )
+        {
+            compose << tOutput( digestIsAccurate ? "$network_master_exp_recommended_long" : "$network_master_exp_recommended_long_oldserver", missingForThisLevel + out.sortOverride_*levelDistance );
+            if( digestIsAccurate )
+            {
+                out.noJoin_ = tOutput("$network_master_exp_recommended");
+            }
+        }
+        else
+        {
+            out.sortOverride_ = 0;
+        }
+
+        // check whether a GID has been registered
+        bool registered = false;
+        for( int i = MAX_PLAYERS-1; i >= 0; --i )
+        {
+            registered |= ( ePlayer::PlayerConfig(i)->globalID != se_defaultGID && ePlayer::PlayerConfig(i)->globalID.Len() > 1 );
+        }
+
+        // find reasons why the player should not join
+        if( !registered && in.GetFlag( nServerInfo::SettingsDigest::Flags_AuthenticationRequired ) )
+        {
+            out.noJoin_ = tOutput("$network_master_login_needed");
+            compose << tOutput("$network_master_login_needed_long");
+            if( out.sortOverride_ < 1 )
+            {
+                out.sortOverride_ = 1;
+            }
+        }
+        else
+        {
+            REAL timeLacking=0;
+            if( in.minPlayTimeTotal_ - se_playTimeTotal > 0 )
+            {
+                timeLacking = in.minPlayTimeTotal_ - se_playTimeTotal;
+            }
+            if( in.minPlayTimeOnline_ - se_playTimeOnline > timeLacking )
+            {
+                timeLacking = in.minPlayTimeOnline_ - se_playTimeOnline;
+            }
+            if( in.minPlayTimeTeam_ - se_playTimeTeam > timeLacking )
+            {
+                timeLacking = in.minPlayTimeTeam_ - se_playTimeTeam;
+            }
+            if ( timeLacking > 0 )
+            {
+                out.noJoin_ = tOutput("$network_master_exp_needed");
+                compose << tOutput("$network_master_exp_needed_long", timeLacking+2 );
+                int minLevel = timeLacking/10+1;
+                if( out.sortOverride_ < minLevel )
+                {
+                    out.sortOverride_ = minLevel;
+                }
+            }
+        }
+
         out.description_ = compose.str();
     }
 };
