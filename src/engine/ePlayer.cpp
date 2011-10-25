@@ -8927,7 +8927,10 @@ private:
         {
             out.noJoin_ = tOutput("$network_master_login_needed");
             compose << tOutput("$network_master_login_needed_long");
-            if( out.sortOverride_ < 1 )
+
+            // keep servers you need authentication to play on at the bottom until
+            // the player is really experienced
+            if( out.sortOverride_ < 1 && se_playTimeOnline < 120 )
             {
                 out.sortOverride_ = 1;
             }
