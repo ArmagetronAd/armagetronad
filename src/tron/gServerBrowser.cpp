@@ -629,7 +629,7 @@ void gServerMenuItem::Render(REAL x,REAL y,REAL alpha, bool selected)
                 break;
             }
         }
-        else if ( server->GetClassification().noJoin_.Len() > 1 )
+        else if ( !favorite_ && server->GetClassification().noJoin_.Len() > 1 )
         {
             score << server->GetClassification().noJoin_;
         }
