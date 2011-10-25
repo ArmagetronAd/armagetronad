@@ -305,8 +305,21 @@ void eSoundMixer::Init() {
     rc = Mix_OpenAudio( frequency, AUDIO_S16LSB,
                         numSoundcardChannels, samples );
 
+    // try fallbacks
+    if( rc!=0 )
+    {
+        rc = Mix_OpenAudio( frequency, AUDIO_S16LSB,
+                            2, samples );
+
+        if( rc!=0 )
+        {
+            rc = Mix_OpenAudio( 22050, AUDIO_S16LSB,
+                                2, samples );
+        }
+    }
+        
     if(rc==0) {
-        // don't know what to do here
+        // success!
         int c;
         Uint16 b;
         Mix_QuerySpec(&se_mixerFrequency,&b,&c);
