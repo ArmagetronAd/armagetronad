@@ -485,11 +485,7 @@ void nServerInfo::Sort( PrimaryKey key, SortHelper Helper )
             {
 
             case KEY_NAME:
-                // Unreachable servers should be displayed at the end of the list
-                if ( !previousUnreachable && !ascendUnreachable )
-                {
-                    compare = prev->nameForSorting.Compare( ascend->nameForSorting, true );
-                }
+                compare = prev->nameForSorting.Compare( ascend->nameForSorting, true );
                 break;
             case KEY_PING:
                 if ( ascend->ping > prev->ping )
@@ -504,10 +500,6 @@ void nServerInfo::Sort( PrimaryKey key, SortHelper Helper )
                     compare = ascend->users - prev->users;
                 break;
             case KEY_SCORE:
-                if ( previousUnreachable )
-                    compare ++;
-                if ( ascendUnreachable )
-                    compare --;
                 if ( ascend->score > prev->score )
                     compare = 1;
                 else if ( ascend->score < prev->score )
@@ -521,7 +513,19 @@ void nServerInfo::Sort( PrimaryKey key, SortHelper Helper )
             // wants different sorting (except for alphabetic sorting, where we don't want that,
             // and user based sorting, where the helper function is just a bias already taken
             // into account )
-            if( key != KEY_NAME )
+            if( previousUnreachable != ascendUnreachable )
+            {
+                // but in any case, unreachable servers go to the bottom.
+                if( previousUnreachable )
+                {
+                    compare = 1;
+                }
+                else
+                {
+                    compare = -1;
+                }
+            }
+            else if( key != KEY_NAME )
             {
                 if( key != KEY_USERS && help != 0 )
                 {
