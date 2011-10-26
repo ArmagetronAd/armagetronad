@@ -76,7 +76,7 @@
 			<Add directory="..\..\src\thirdparty\utf8" />
 		</Compiler>
 		<Linker>
-			<Add library="libwsock32.a" />
+			<Add library="libws2_32.a" />
 			<Add library="..\..\..\winlibs\libxml2\lib\libxml2.lib" />
 		</Linker>
 		<Unit filename="..\..\src\engine\eAdvWall.cpp" />

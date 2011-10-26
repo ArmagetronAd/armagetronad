@@ -97,7 +97,7 @@
 			<Add library="libopengl32.a" />
 			<Add library="libglu32.a" />
 			<Add library="libshell32.a" />
-			<Add library="libwsock32.a" />
+			<Add library="libws2_32.a" />
 			<Add library="..\..\..\winlibs\SDL_image\VisualC\graphics\lib\libpng13.lib" />
 			<Add library="..\..\..\winlibs\libxml2\lib\libxml2.lib" />
 		</Linker>
