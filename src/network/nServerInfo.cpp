@@ -2755,7 +2755,8 @@ void nServerInfoBase::NetReadThis( nMessage & m )
     m >> port_;                            // get the port
     sn_ReadFiltered( m, connectionName_ ); // get the connection name
 
-    if ( ( sn_IsMaster || sn_AcceptingFromBroadcast || sn_AcceptingFromMaster ) && connectionName_.Len()>1 ) // no valid name (must come directly from the server who does not know his own address)
+    // ban us.to dns service, it's down too often
+    if ( ( ( sn_IsMaster && st_StringEndsWith( connectionName_, ".us.to" ) ) || sn_AcceptingFromBroadcast || sn_AcceptingFromMaster ) && connectionName_.Len()>1 ) // valid name (must come directly from the server who does not know his own address)
     {
         // resolve DNS
         connectionName_ = S_LocalizeName( connectionName_ );
