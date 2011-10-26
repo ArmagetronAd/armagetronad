@@ -59,6 +59,7 @@ template< class T > class nProtoBufDescriptor;
 
 typedef nServerInfo* (sn_ServerInfoCreator)();
 
+//! sort helper function: if this returns true, it pushes a server to the top of the list
 typedef bool SortHelper(nServerInfoBase const * server);
 
 bool SortHelperNoop(nServerInfoBase const * server);
@@ -252,8 +253,16 @@ public:
         KEY_MAX         // max value
     };
 
+    //! priority of the helper value
+    enum SortHelperPriority
+    {
+        PRIORITY_NONE,      // no influence
+        PRIORITY_SECONDARY, // user's sort choice has priority, the helper is secondary
+        PRIORITY_PRIMARY    // the helper function's return value is the most important
+    };
+
     static nServerInfo *GetFirstServer();  // get the first (best) server
-    static void Sort( PrimaryKey key, SortHelper helper=&SortHelperNoop );
+    static void Sort( PrimaryKey key, SortHelper helper=&SortHelperNoop, SortHelperPriority helperPriority=PRIORITY_PRIMARY );
                                            // sort the servers by score
     static tString SortableName( const char * ); // gives a sanitized name for sorting
     static void CalcScoreAll();            // calculate the score for all servers

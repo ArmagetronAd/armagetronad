@@ -714,6 +714,20 @@ setting_legacy_behavior_annoying_help Default legacy behavior for settings that 
 setting_legacy_behavior_cheating_help     Default legacy behavior for settings where the default behavior could be considered cheating if non-default was set. Example: DOUBLEBIND_TIME
 setting_legacy_behavior_visual_help   Default legacy behavior for settings that only affect status displays and visuals, not game physics. Example: CYCLE_RUBBER_* (the client displays the rubber meter, but it's not used for anything)
 
+# server browser
+
+browser_query_filter_help            query filter. Set to 0 to poll all servers, 1 to query servers with nonnegative score bias, 2 to query only those with positive bias and 3 to not query at all. Non-queried servers will appear to have ping 999; the player info comes indirectly from the master server.
+browser_queries_simultaneous_help    max. number of simultaneous query messages that are sent
+browser_query_delay_single_help      time delay between queries of the same server
+browser_query_delay_global_help      time delay between all queries
+browser_num_queries_help             number of queries per try
+browser_contactloss_help             number of failed contact attempts before a server can be considered lost
+browser_sort_key_help                current sorting key in the server browser
+browser_bookmark_priority_ping_help  priority of bookmarks for sorting by ping
+browser_bookmark_priority_users_help priority of bookmarks for sorting by users
+browser_bookmark_priority_score_help priority of bookmarks for sorting by score
+
+
 #********************************************
 #********************************************
 #

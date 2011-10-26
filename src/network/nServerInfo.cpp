@@ -444,7 +444,7 @@ nServerInfo *nServerInfo::Prev()
 }
 
 // Sort server list
-void nServerInfo::Sort( PrimaryKey key, SortHelper Helper )
+void nServerInfo::Sort( PrimaryKey key, SortHelper Helper, SortHelperPriority helperPriority )
 {
     // insertion sort
     nServerInfo *run = GetFirstServer();
@@ -494,10 +494,7 @@ void nServerInfo::Sort( PrimaryKey key, SortHelper Helper )
                     compare = 1;
                 break;
             case KEY_USERS:
-                if ( ( (bool) ascend->users == (bool) prev->users ) && help )
-                    compare = help;
-                else
-                    compare = ascend->users - prev->users;
+                compare = ascend->users - prev->users;
                 break;
             case KEY_SCORE:
                 if ( ascend->score > prev->score )
@@ -509,13 +506,9 @@ void nServerInfo::Sort( PrimaryKey key, SortHelper Helper )
                 break;
             }
 
-            // override sorting if the servers fall into different classes or the helper function
-            // wants different sorting (except for alphabetic sorting, where we don't want that,
-            // and user based sorting, where the helper function is just a bias already taken
-            // into account )
             if( previousUnreachable != ascendUnreachable )
             {
-                // but in any case, unreachable servers go to the bottom.
+                // in any case, unreachable servers go to the bottom.
                 if( previousUnreachable )
                 {
                     compare = 1;
@@ -527,20 +520,34 @@ void nServerInfo::Sort( PrimaryKey key, SortHelper Helper )
             }
             else if( key != KEY_NAME )
             {
-                if( key != KEY_USERS && help != 0 )
+                // override sorting if the servers fall into different classes
+                int c = prev->GetClassification().sortOverride_ - ascend->GetClassification().sortOverride_;
+                if( c != 0 )
                 {
-                    compare = help;
-                }
-                else
-                {
-                    int c = prev->GetClassification().sortOverride_ - ascend->GetClassification().sortOverride_;
-                    if( c != 0 )
-                    {
-                        compare = c;
-                    }
+                    compare = c;
                 }
             }
 
+            // take helper and its priority into account
+            if( help != 0 )
+            {
+                switch( helperPriority )
+                {
+                case PRIORITY_NONE:
+                    break;
+                case PRIORITY_SECONDARY:
+                    if( 0 == compare )
+                    {
+                        compare = help;
+                    }
+                    break;
+                case PRIORITY_PRIMARY:
+                    compare = help;
+                    break;
+                }
+            }
+
+            // least priority: servers that are getting polled go down
             if (0 == compare)
             {
                 if ( previousPolling )
