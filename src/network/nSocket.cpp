@@ -64,8 +64,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #else
-//#include <winsock2.h>
-//#include <ws2tcpip.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
 //#include <Ws2tcpip.h>
 //#include <Wspiapi.h>
 

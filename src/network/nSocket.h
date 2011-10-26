@@ -44,9 +44,7 @@ struct nHostInfo;
 struct addrinfo;
 struct sockaddr;
 
-#ifdef WIN32
-#include  <winsock.h>
-#else
+#ifndef WIN32
 #include <sys/socket.h>
 #include <netinet/in.h>
 #endif
