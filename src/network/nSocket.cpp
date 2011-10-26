@@ -140,6 +140,22 @@ struct nSocketType
             , type(SOCK_DGRAM)
             , protocol(IPPROTO_UDP)
     {}
+
+    bool operator == ( nSocketType const & other ) const
+    {
+        if (family != other.family)
+            return false;
+        if (type != other.type)
+            return false;
+        if (protocol != other.protocol)
+            return false;
+
+        return true;
+    }
+    bool operator !=  ( nSocketType const & other ) const
+    {
+        return !operator==(other);
+    }
 };
 
 //! all information to reach a host
@@ -148,6 +164,21 @@ struct nHostInfo
     nSocketType type;     //! type of socket to connect to
     nAddress    address;  //! raw address
     tString     name;     //! canonical hostname
+
+    bool operator == ( nHostInfo const & other ) const
+    {
+        if (type != other.type)
+            return false;
+        if (address != other.address)
+            return false;
+
+        return true;
+    }
+
+    bool operator !=  ( nHostInfo const & other ) const
+    {
+        return !operator==(other);
+    }
 };
 
 // streaming operators for addresses, socket types and host infos
@@ -504,24 +535,44 @@ bool ANET_ListenOn( nHostList const & addresses, nSocketListener::SocketArray & 
 }
 
 
-// determines addresses of hostentry and adds them to hostList
-void ANET_GetHostList( hostent const * hostentry, nHostList & hostList, int net_hostport, bool server = true )
+// determines addresses of addrinfo and adds them to hostList
+void ANET_GetHostList( addrinfo const * info, nHostList & hostList, int net_hostport, bool server = true, char const * hostname = "" )
 {
     // iterate over addresses
-    char * * addressList = hostentry->h_addr_list;
-    while (*addressList)
+    while (info)
     {
-        // prepare host info (TODO: IPV6/TCP compatibility)
-        nHostInfo info;
-        info.type.type = hostentry->h_addrtype;
-        info.name      = hostentry->h_name;
-        info.address.FromHostent( hostentry->h_length, *addressList );
-        info.address.SetPort( net_hostport );
+        // prepare host info, only interested in UDP
+        if( info->ai_addrlen <= nAddress::size && info->ai_socktype == SOCK_DGRAM )
+        {
+            nHostInfo store;
+            store.type.family   = info->ai_family;
+            store.type.type     = info->ai_socktype;
+            store.type.protocol = info->ai_protocol;
+            if( info->ai_canonname )
+            {
+                store.name = info->ai_canonname;
+            }
+            else
+            {
+                store.name = hostname;
+            }
+            store.address.FromSockAddr( info->ai_addrlen, info->ai_addr );
+            store.address.SetPort( net_hostport );
 
-        // add it to list
-        hostList.push_back( info );
+            // add it to list, avoid duplicates
+            bool skip = false;
+            for( nHostList::const_iterator i = hostList.begin(); !skip && i != hostList.end(); ++i )
+            {
+                nHostInfo const & there = *i;
+                skip |= ( store == there );
+            }
+            if( !skip )
+            {
+                hostList.push_back( store );
+            }
+        }
 
-        ++addressList; // next address
+        info = info->ai_next;
     }
 }
 
@@ -555,18 +606,18 @@ void ANET_GetHostList( char const * hostname, nHostList & hostList, int net_host
     if ( !tRecorder::Playback( sectionEnd ) )
     {
         // look up hostname
-        struct hostent *hostentry;
-        hostentry = gethostbyname (hostname);
-        if (!hostentry)
+        struct addrinfo * info = NULL;
+        int ret = getaddrinfo( hostname, NULL, NULL, &info );
+        if ( ret || !info )
         {
-#ifndef WIN32
-            con << "Error looking up " << ( hostname ? hostname : "localhost" ) << " : " << gai_strerror( h_errno ) << "\n";
-#endif
+            con << "Error looking up " << ( hostname ? hostname : "localhost" ) << " : " << gai_strerror( ret ) << "\n";
             return;
         }
-
+        
         // delegate
-        ANET_GetHostList( hostentry, hostList, net_hostport, server );
+        ANET_GetHostList(info, hostList, net_hostport, server, hostname );
+        freeaddrinfo( info );
+
     }
 
     // write addresses to recording
@@ -1145,25 +1196,14 @@ int nAddress::FromString( const char * string )
 //!
 // *******************************************************************************************
 
-/*
 void nAddress::FromAddrInfo( const addrinfo & info )
 {
-#ifdef HAVE_ADDRINFO
-    // check address size
-    tASSERT( info.ai_addrlen <= size );
-
-    // copy the address over
-    memcpy( &addr_, info.ai_addr, info.ai_addrlen );
-
-    // store length
-    addrLen_ = info.ai_addrlen;
-#endif
+    FromSockAddr( info.ai_addrlen, info.ai_addr );
 }
-*/
 
 // *******************************************************************************************
 // *
-// *   FromHostent
+// *   FromSockAddr
 // *
 // *******************************************************************************************
 //!
@@ -1172,17 +1212,17 @@ void nAddress::FromAddrInfo( const addrinfo & info )
 //!
 // *******************************************************************************************
 
-void nAddress::FromHostent( int length, const char * addr )
+void nAddress::FromSockAddr( int length, sockaddr const * addr )
 {
     // check address size
-    tASSERT( length == 4 );
+    tASSERT( length <= size );
 
     // copy the address over
-    addr_.addr   .sa_family = AF_INET;
-    addr_.addr_in.sin_addr.s_addr = *reinterpret_cast< int const * >( addr );
+    // addr_.addr   .sa_family = AF_INET;
+    memcpy( &addr_, addr, length );
 
     // store length
-    addrLen_ = sizeof( sockaddr_in );
+    addrLen_ = length;
 }
 
 // *******************************************************************************************
@@ -1211,12 +1251,12 @@ const nAddress & nAddress::GetHostname( tString & hostname ) const
     static char const * section = "HOSTBYADDR";
     if ( !tRecorder::PlaybackStrict( section, hostname ) )
     {
-        struct hostent *hostentry;
-
-        hostentry = gethostbyaddr ( reinterpret_cast< const char * >( &addr_ ), size, AF_INET);
-        if (hostentry)
+        const int hostlen=1000;
+        char host[hostlen+1];
+        int ret = getnameinfo ( &addr_.addr, addrLen_, host, hostlen, NULL, 0, 0 );
+        if (!ret)
         {
-            hostname = tString( (char *)hostentry->h_name );
+            hostname = host;
         }
     }
 
@@ -1270,16 +1310,32 @@ nAddress & nAddress::SetHostname( const char * hostname )
     static char const * section = "SINGLEHOSTNAME";
     if ( !tRecorder::PlaybackStrict( section, *this ) )
     {
-        // look up hostname ( TODO: error handling )
-        struct hostent *hostentry;
-        hostentry = gethostbyname (hostname);
-        if (hostentry)
+        struct addrinfo *res = NULL;
+        int ret = getaddrinfo( hostname, NULL, NULL, &res );
+        bool success = false;
+        if( ret )
         {
-            // store values
-            addr_.addr   .sa_family = AF_INET;
-            addr_.addr_in.sin_addr.s_addr = *(int *)hostentry->h_addr_list[0];
+            con << "Failed to resolve hostname " << hostname << ", error " << gai_strerror( ret ) << "\n";
         }
-        else
+        else if (res)
+        {
+            struct addrinfo *run = res;
+            while ( run && !success )
+            {
+                if( run->ai_family == AF_INET && run->ai_addr )
+                {
+                    // store values
+                    if( run->ai_addrlen <= size )
+                    {
+                        FromAddrInfo( *run );
+                        success = true;
+                    }
+                }
+            }
+            freeaddrinfo( res );
+        }
+
+        if( !success )
         {
             // invalidate
             *this = nAddress();

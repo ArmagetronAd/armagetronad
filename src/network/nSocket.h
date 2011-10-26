@@ -41,8 +41,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 class nScoket;
 struct nHostInfo;
-// struct addrinfo;
-struct hostentry;
+struct addrinfo;
 struct sockaddr;
 
 #ifdef WIN32
@@ -74,9 +73,9 @@ public:
     tString 			ToString    ()                   const   ; //!< turns address to complete string
     int    			 	FromString  ( const char * string )      ; //!< turns complete string into address
 
-    //  void                FromAddrInfo( const addrinfo & info )    ; //!< copy address from addrinfo
+    void                FromAddrInfo( const addrinfo & info )    ; //!< copy address from addrinfo
 
-    void                FromHostent ( int l, const char * addr ) ; //!< copy address from hostent data
+    void                FromSockAddr ( int l, sockaddr const * addr )  ; //!< copy address from hostent data
 
     nAddress & 			SetHostname	( const char * hostname )    ; //!< Sets the hostname part of the address (with DNS lookup)
     tString 			GetHostname	( void ) const               ; //!< Gets the hostname part of the address (with DNS lookup)
