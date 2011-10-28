@@ -1173,13 +1173,14 @@ void nServerInfo::GetSmallServerInfo( Network::SmallServerInfo const & info,
         run = run->Next();
     }
 
-    // second pass, look harder if no match was found. Use DNS lookup if you have to.
+    // second pass, look harder if no match was found. Use DNS lookup if it's ready.
     if(!n)
     {
         run = GetFirstServer();
         while(run && !n)
         {
-            if( run->GetAddress() == baseInfo.GetAddress() )
+            if( !run->GetAddress().DNSInProcess() && !baseInfo.GetAddress().DNSInProcess() &&
+                  run->GetAddress() == baseInfo.GetAddress()  )
                 n = run;
             run = run->Next();
         }
@@ -2258,7 +2259,7 @@ bool nServerInfo::DoQueryAll(int simultaneous)         // continue querying the 
     {
         nServerInfo* next = sn_Requesting->Next();
 
-        if (!sn_Requesting->advancedInfoSet && sn_Requesting->pollID < 0 && sn_Requesting->queried <= sn_numQueries)
+        if (!sn_Requesting->advancedInfoSet && sn_Requesting->pollID < 0 && sn_Requesting->queried <= sn_numQueries && !sn_Requesting->GetAddress().DNSInProcess() )
         {
             sn_Requesting->QueryServer();
         }
@@ -2716,7 +2717,14 @@ nServerInfoBase::~nServerInfoBase()
 
 bool nServerInfoBase::operator ==( const nServerInfoBase & other ) const
 {
-    return GetAddress().IsSet() && GetAddress() == other.GetAddress() && port_ == other.port_;
+    if( GetAddress().DNSInProcess() || other.GetAddress().DNSInProcess() )
+    {
+        return port_ == other.port_ && connectionName_ == other.connectionName_;
+    }
+    else
+    {
+        return GetAddress().IsSet() && GetAddress() == other.GetAddress() && port_ == other.port_;
+    }
 }
 
 // *******************************************************************************************
