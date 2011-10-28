@@ -3323,16 +3323,12 @@ nAddress & nServerInfoBase::AccessAddress( void ) const
         std::auto_ptr< nAddress > address( tNEW( nAddress ) );
 
         // fill it with hostname and port
-        address->SetHostname( this->GetConnectionName() );
         address->SetPort( this->GetPort() );
+        address->SetHostname( this->GetConnectionName() );
 
         this->address_ = address;
 
 #ifdef DEBUG
-        tString unresolved = ToString( *this );
-        tString resolved = this->address_->ToString();
-        if ( unresolved != resolved )
-            con << "Address of server " << unresolved << " determined to be " << resolved << "\n";
 #endif
     }
 

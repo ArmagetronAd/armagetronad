@@ -43,6 +43,7 @@ class nScoket;
 struct nHostInfo;
 struct addrinfo;
 struct sockaddr;
+class nDNSResolver;
 
 #ifndef WIN32
 #include <sys/socket.h>
@@ -63,8 +64,11 @@ union nAddressBase
 class nAddress
 {
 public:
+    nAddress ( nAddress const & other );
     nAddress();         //!< constructor
     ~nAddress();        //!< destructor
+
+    nAddress & operator = ( nAddress const & other );
 
     // these functions handle address representation in the form hostname:port
     nAddress const & 	ToString    ( tString & string ) const   ; //!< turns address to complete string
@@ -89,10 +93,18 @@ public:
 
     bool                IsSet       () const                     ; //!< returns true only if address is not INETADDR_ANY
 
+    bool                DNSInProcess() const                       //!< returns true if a DNS resolution is still in process
+    {
+        return resolver_;
+    }
+
+    void                CompleteDNS() const                       ; //!< waits for DNS resolution
+    void                AbortDNS() const                          ; //!< abort DNS resolution
+
     static int 	Compare ( const nAddress & a1, const nAddress & a2 );	//!< compares two addresses
 
-    operator struct sockaddr *      ()       { return &addr_.addr; }   //!< conversion to sockaddr
-    operator struct sockaddr const *() const { return &addr_.addr; }   //!< conversion to sockaddr
+    operator struct sockaddr *      ()       { CompleteDNS(); return &addr_.addr; }   //!< conversion to sockaddr
+    operator struct sockaddr const *() const { CompleteDNS(); return &addr_.addr; }   //!< conversion to sockaddr
 
     //! comparison operator
     bool operator == ( nAddress const & other ) const
@@ -110,8 +122,18 @@ public:
 
     unsigned int GetAddressLength( void ) const;	//!< Gets the length of the stored address
 private:
+    void                FromAddrInfoCore( const addrinfo & info )    ; //!< copy address from addrinfo without messing with backround DNS resolution
+
+    void                FromSockAddrCore ( int l, sockaddr const * addr )  ; //!< copy address from hostent data without messing with backround DNS resolution
+    nAddress const & 	ToStringCore          ( tString & string ) const   ; //!< turns address to complete string without messing with backround DNS resolution
+    void CopyFromCore ( nAddress const & other ); //!< copies other address, no messing with backround DNS resolution
+
     nAddressBase addr_;	    //!< the lowlevel network address
     unsigned int addrLen_;  //!< the length of the really stored address
+
+    mutable nDNSResolver * resolver_; //!< background DNS resolving process
+
+    friend class nDNSResolver;
 };
 
 //! wrapper for low level sockets.

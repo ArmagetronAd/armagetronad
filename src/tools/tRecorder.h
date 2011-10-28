@@ -41,6 +41,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include    "tString.h"
 #include    "tError.h"
+#include    "tMutex.h"
 
 // #include    "tRecorderInternal.h"
 
@@ -352,6 +353,56 @@ public:
 
         return *this;
     }
+};
+
+// *****************************************************************************
+// * Multithread support, allows progress of background tasks to be synced
+// *****************************************************************************
+
+//! background sync helper. Usage: create one of these per background thread
+//! (creation must happen in the main thread), and every time it neeeds to sync
+//! up to action in the main thread for recording purposes, create a
+//! tBackgroundSyncEvent for it and keep it alive while you read/write the
+//! recording.
+class tBackgroundSync
+{
+    friend class tBackgroundSyncEvent;
+public:
+    tBackgroundSync();
+private:
+    //! two mutexes to act as a lock to progress
+    boost::mutex entry_, exit_;
+    //! a lock for the entry mutex. Owned by the foreground thread.
+    boost::unique_lock< boost::mutex > entryLockForeground_;
+    //! identification number
+    int id_;
+
+    tBackgroundSync( tBackgroundSync const & );
+    tBackgroundSync & operator = ( tBackgroundSync const & );
+};
+
+//! while an object of this class exists in a background thread, it waits for the
+//! foreground task to reach a checkpoint
+class tBackgroundSyncEvent
+{
+public:
+    tBackgroundSyncEvent( tBackgroundSync & sync );
+    ~tBackgroundSyncEvent();
+    
+    //! called from the main thread to sync up
+    void Sync();
+
+    //! returns the ID of the background thread
+    int ID() const;
+private:
+    tBackgroundSyncEvent();
+    tBackgroundSyncEvent & operator = ( tBackgroundSyncEvent const & );
+
+    //! called from the main thread to sync up
+    static void Sync( tBackgroundSync & sync );
+
+    //! the sync object
+    tBackgroundSync & sync_;
 };
 
 //! typedefs for easier handling

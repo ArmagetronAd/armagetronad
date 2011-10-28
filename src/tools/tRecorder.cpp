@@ -33,6 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include    "tConfiguration.h"
 #include    "tDirectories.h"
 #include    "tRecorderInternal.h"
+#include    <vector>
 
 #undef 	INLINE_DEF
 #define INLINE_DEF
@@ -773,4 +774,160 @@ std::string tTextFileRecorder::GetLine( void )
     return std::string(line);
 }
 
+// *****************************************************************************
+// * Multithread support, allows progress of background tasks to be synced
+// *****************************************************************************
+
+tBackgroundSync::tBackgroundSync()
+: entryLockForeground_( entry_ )
+{
+    static boost::mutex mutex;
+    boost::lock_guard< boost::mutex > lock( mutex );
+    static int currentID = 0;
+    id_ = currentID++;
+}
+
+static std::vector< tBackgroundSyncEvent * > st_backgroundSyncEvents;
+static boost::mutex st_backgroundSyncEventsMutex;
+static const char * st_eventSection = "BACKGROUND_EVENT";
+static const char * st_eventSectionEnd = "BACKGROUND_EVENT_END";
+
+void st_SyncBackgroundThreads()
+{
+    if( tRecorder::IsPlayingBack() )
+    {
+        int id;
+        bool one = false;
+        while( tRecorder::Playback( st_eventSection, id ) )
+        {
+            one = true;
+            tBackgroundSyncEvent * event = NULL;
+            while( true )
+            {
+                // find ID in background events
+                {
+                    boost::lock_guard< boost::mutex > lock( st_backgroundSyncEventsMutex );
+
+                    for( std::vector< tBackgroundSyncEvent * >::iterator i = st_backgroundSyncEvents.begin(); i != st_backgroundSyncEvents.end(); ++i )
+                    {
+                        if( (*i)->ID() == id )
+                        {
+                            event = *i;
+
+                            // erase event from unordered list
+                            if( st_backgroundSyncEvents.size() > 1 )
+                            {
+                                *i = st_backgroundSyncEvents[st_backgroundSyncEvents.size()-1];
+                            }
+                            st_backgroundSyncEvents.pop_back();
+
+                            // sync event
+                            event->Sync();
+
+                            break;
+                        }
+                    }
+                }
+
+                if( event )
+                {
+                    // found, good! Get out.
+                    break;
+                }
+                else
+                {
+                    // not found yet. Wait a bit.
+                    usleep( 1000 );
+                }
+            }
+        }
+        if( one )
+        {
+            tRecorder::PlaybackStrict( st_eventSectionEnd );
+        }
+    }
+    else
+    {
+        bool oneEvent = false;
+
+        boost::lock_guard< boost::mutex > lock( st_backgroundSyncEventsMutex );
+
+        while ( st_backgroundSyncEvents.size() )
+        {
+            oneEvent = true;
+            tBackgroundSyncEvent * event = st_backgroundSyncEvents.back();
+            st_backgroundSyncEvents.pop_back();
+
+            // record the event ID
+            tRecorder::Record( st_eventSection, event->ID() );
+
+            // and let the background thread roll on
+            event->Sync();
+        }
+
+        if( oneEvent )
+        {
+            tRecorder::Record( st_eventSectionEnd );
+        }
+    }
+}
+
+tBackgroundSyncEvent::tBackgroundSyncEvent( tBackgroundSync & sync )
+: sync_( sync )
+// , exitLockBackground_( sync_.exit_ )
+{
+    // adds to sync list
+    {
+        boost::lock_guard< boost::mutex > lock( st_backgroundSyncEventsMutex );
+        sync_.exit_.lock();
+    
+        st_backgroundSyncEvents.push_back( this );
+    }
+
+    // locks the entry mutex manually, this blocks until the foreground thread releases its lock
+    sync_.entry_.lock();
+}
+
+tBackgroundSyncEvent::~tBackgroundSyncEvent()
+{
+    // unlocks entry mutex
+    sync_.entry_.unlock();
+    sync_.exit_.unlock();
+
+    // check that we're not on the list
+#ifdef DEBUG
+    boost::lock_guard< boost::mutex > lock( st_backgroundSyncEventsMutex );
+    for( std::vector< tBackgroundSyncEvent * >::iterator i = st_backgroundSyncEvents.begin(); i != st_backgroundSyncEvents.end(); ++i )
+    {
+        tASSERT( (*i) != this );
+    }
+#endif
+}
+    
+//! called from the main thread to sync up
+void tBackgroundSyncEvent::Sync()
+{
+    // call static function; *this is going to be destroyed in the background
+    // while this function runs, can't be good.
+    Sync( sync_ );
+}
+
+//! called from the main thread to sync up
+void tBackgroundSyncEvent::Sync( tBackgroundSync & s )
+{
+    // unlocks the entry mutex so background thread can continue
+    s.entryLockForeground_.unlock();
+
+    // temporarily lock exit mutex; this waits for the background task to finish
+    boost::lock_guard< boost::mutex > exitLockForeground_( s.exit_ );
+
+    // locks entry again
+    s.entryLockForeground_.lock();
+}
+
+//! returns the ID of the background thread
+int tBackgroundSyncEvent::ID() const
+{
+    return sync_.id_;
+}
 
