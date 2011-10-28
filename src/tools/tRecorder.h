@@ -369,6 +369,7 @@ class tBackgroundSync
     friend class tBackgroundSyncEvent;
 public:
     tBackgroundSync();
+    ~tBackgroundSync();
 private:
     //! two mutexes to act as a lock to progress
     boost::mutex entry_, exit_;
@@ -386,9 +387,13 @@ private:
 class tBackgroundSyncEvent
 {
 public:
-    tBackgroundSyncEvent( tBackgroundSync & sync );
+    tBackgroundSyncEvent( tBackgroundSync & sync, bool delayEntry = false );
     ~tBackgroundSyncEvent();
     
+    void Enter(); //! if the delayEntry argument to the constructor was true, this function enters the event and begins the sync
+
+    void Leave(); //! leaves sync state
+
     //! called from the main thread to sync up
     void Sync();
 
@@ -403,6 +408,9 @@ private:
 
     //! the sync object
     tBackgroundSync & sync_;
+
+    //! status flag
+    bool entered_;
 };
 
 //! typedefs for easier handling

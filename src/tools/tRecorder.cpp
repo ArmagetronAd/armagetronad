@@ -778,15 +778,6 @@ std::string tTextFileRecorder::GetLine( void )
 // * Multithread support, allows progress of background tasks to be synced
 // *****************************************************************************
 
-tBackgroundSync::tBackgroundSync()
-: entryLockForeground_( entry_ )
-{
-    static boost::mutex mutex;
-    boost::lock_guard< boost::mutex > lock( mutex );
-    static int currentID = 0;
-    id_ = currentID++;
-}
-
 static std::vector< tBackgroundSyncEvent * > st_backgroundSyncEvents;
 static boost::mutex st_backgroundSyncEventsMutex;
 static const char * st_eventSection = "BACKGROUND_EVENT";
@@ -872,10 +863,22 @@ void st_SyncBackgroundThreads()
     }
 }
 
-tBackgroundSyncEvent::tBackgroundSyncEvent( tBackgroundSync & sync )
-: sync_( sync )
-// , exitLockBackground_( sync_.exit_ )
+tBackgroundSyncEvent::tBackgroundSyncEvent( tBackgroundSync & sync, bool delayEntry )
+  : sync_( sync ), entered_( false )
 {
+    if( !delayEntry )
+    {
+        Enter();
+    }
+}
+
+//! enters critical section
+void tBackgroundSyncEvent::Enter()
+{
+    tASSERT( !entered_ );
+
+    entered_ = true;
+
     // adds to sync list
     {
         boost::lock_guard< boost::mutex > lock( st_backgroundSyncEventsMutex );
@@ -890,6 +893,19 @@ tBackgroundSyncEvent::tBackgroundSyncEvent( tBackgroundSync & sync )
 
 tBackgroundSyncEvent::~tBackgroundSyncEvent()
 {
+    if( entered_ )
+    {
+        Leave();
+    }
+}
+
+//! leaves critical section
+void tBackgroundSyncEvent::Leave()
+{
+    tASSERT( entered_ );
+
+    entered_ = false;
+
     // unlocks entry mutex
     sync_.entry_.unlock();
     sync_.exit_.unlock();
@@ -929,5 +945,40 @@ void tBackgroundSyncEvent::Sync( tBackgroundSync & s )
 int tBackgroundSyncEvent::ID() const
 {
     return sync_.id_;
+}
+
+static boost::mutex st_backgroundSyncDesConstruction;
+static int st_backgroundProcesses = 0;
+
+class tBackgroundWaiter
+{
+public:
+    ~tBackgroundWaiter()
+    {
+        // allow background processes to finish
+        while( st_backgroundProcesses > 0 )
+        {
+            usleep( 1000 );
+            st_SyncBackgroundThreads();
+        }
+    }
+};
+
+tBackgroundSync::tBackgroundSync()
+: entryLockForeground_( entry_ )
+{
+    boost::lock_guard< boost::mutex > lock( st_backgroundSyncDesConstruction );
+    static int currentID = 0;
+    id_ = currentID++;
+    st_backgroundProcesses++;
+
+    // clean up later
+    static tBackgroundWaiter waiter;
+}
+
+tBackgroundSync::~tBackgroundSync()
+{
+    boost::lock_guard< boost::mutex > lock( st_backgroundSyncDesConstruction );
+    st_backgroundProcesses--;
 }
 
