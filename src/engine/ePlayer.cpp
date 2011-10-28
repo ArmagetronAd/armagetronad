@@ -10148,9 +10148,9 @@ static void se_FillServerSettings()
 {
     nServerInfo::SettingsDigest & digest = *nCallbackFillServerInfo::ToFill();
     
-    digest.minPlayTimeTotal_ = se_minPlayTimeTotal;
-    digest.minPlayTimeOnline_ = se_minPlayTimeOnline;
-    digest.minPlayTimeTeam_ = se_minPlayTimeTeam;
+    digest.minPlayTimeTotal_ = int(se_minPlayTimeTotal);
+    digest.minPlayTimeOnline_ = int(se_minPlayTimeOnline);
+    digest.minPlayTimeTeam_ = int(se_minPlayTimeTeam);
 
     digest.SetFlag( nServerInfo::SettingsDigest::Flags_AuthenticationRequired,
 #ifdef KRAWALL_SERVER
