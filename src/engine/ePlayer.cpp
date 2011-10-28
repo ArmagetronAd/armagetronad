@@ -8788,7 +8788,7 @@ private:
             }
             REAL a = ( log( value ) - logBound1_ )/( logBound2_ - logBound1_ );
             REAL c = classification1_ + a * ( classification2_ - classification1_ );
-            int ret = floor( c );
+            int ret = int(floor( c ));
             if ( ret < Classification_LudicrouslyLow )
                 ret = Classification_LudicrouslyLow;
             if ( ret > Classification_LudicrouslyHigh )
@@ -8898,8 +8898,8 @@ private:
 
         // calculate the experience level the player has
         int levelDistance = 10;
-        int experienceLevelThere = floor( se_playTimeTotal/levelDistance );
-        int missingForThisLevel = experienceLevelThere*levelDistance - se_playTimeTotal + 2;
+        int experienceLevelThere = int(floor( se_playTimeTotal/levelDistance ));
+        int missingForThisLevel = int( experienceLevelThere*levelDistance - se_playTimeTotal + 2 );
 
         out.sortOverride_ = experienceLevel - experienceLevelThere;
         if( out.sortOverride_ > 0 )
@@ -8954,7 +8954,7 @@ private:
             {
                 out.noJoin_ = tOutput("$network_master_exp_needed");
                 compose << tOutput("$network_master_exp_needed_long", timeLacking+2 );
-                int minLevel = timeLacking/10+1;
+                int minLevel = int(timeLacking/10)+1;
                 if( out.sortOverride_ < minLevel )
                 {
                     out.sortOverride_ = minLevel;
