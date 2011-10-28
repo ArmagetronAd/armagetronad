@@ -1053,7 +1053,7 @@ class nDNSResolver: public tReferencable< nDNSResolver, boost::mutex >
 {
 public:
     nDNSResolver( nAddress & address, const char * hostname )
-    : address_( &address ), hostname_( hostname )
+    : address_( &address ), port_( address.GetPort() ), hostname_( hostname )
     {
     }
 
@@ -1066,27 +1066,28 @@ public:
     {
         tJUST_CONTROLLED_PTR< nDNSResolver > keep( this );
 
+        // sync to foreground later
+        tBackgroundSyncEvent event( sync_, true );
+
 #ifdef DEBUG
         tString resolved;
 #endif
 
         // read address from recording
         static char const * section = "SINGLEHOSTNAME";
+        
+        // address to fill
+        nAddress address;
+
         if( tRecorder::IsPlayingBack() )
         {
             // sync with foreground directly
-            tBackgroundSyncEvent event( sync_ );
+            event.Enter();
 
-            boost::lock_guard< boost::mutex > lock( addressMutex_ );
-            if( address_ )
-            {
-                nAddress address;
-                tRecorder::PlaybackStrict( section, address );
+            tRecorder::PlaybackStrict( section, address );
 #ifdef DEBUG
-                address.ToStringCore(resolved);
+            address.ToStringCore(resolved);
 #endif
-                address_->CopyFromCore( address );
-            }
         }
         else
         {
@@ -1095,61 +1096,54 @@ public:
     
             // bulk waiting work is done, the rest of the function can be
             // synced to the foreground
-            tBackgroundSyncEvent event( sync_ );
+            event.Enter();
 
-            boost::lock_guard< boost::mutex > lock( addressMutex_ );
-            if( address_ )
+            bool success = false;
+            if( ret )
             {
-                nAddress address;
-                bool success = false;
-                if( ret )
+                con << "Failed to resolve hostname " << hostname_ << ", error " << gai_strerror( ret ) << "\n";
+            }
+            else if (res)
+            {
+                struct addrinfo *run = res;
+                while ( run && !success )
                 {
-                    con << "Failed to resolve hostname " << hostname_ << ", error " << gai_strerror( ret ) << "\n";
-                }
-                else if (res)
-                {
-                    struct addrinfo *run = res;
-                    while ( run && !success )
+                    if( run->ai_family == AF_INET && run->ai_addr )
                     {
-                        if( run->ai_family == AF_INET && run->ai_addr )
+                        // store values
+                        if( run->ai_addrlen <= nAddress::size )
                         {
-                            // store values
-                            if( run->ai_addrlen <= nAddress::size )
-                            {
-                                int port = address_->GetPort();
-                                address.FromAddrInfoCore( *run );
-                                address.SetPort( port );
-#ifdef DEBUG
-                                address.ToStringCore(resolved);
-#endif
-                                success = true;
-                            }
+                            address.FromAddrInfoCore( *run );
+                            address.SetPort( port_ );
+                            success = true;
                         }
                     }
-                    freeaddrinfo( res );
                 }
-
-                if( !success )
-                {
-                    // invalidate
-                    address = nAddress();
-                }
-
-                // write address to recording
-                tRecorder::Record( section, address );
-
-                address_->CopyFromCore(address);
+                freeaddrinfo( res );
             }
+
+            // write address to recording
+            tRecorder::Record( section, address );
+
+#ifdef DEBUG
+            address.ToStringCore(resolved);
+#endif
         }
 
 #ifdef DEBUG
         if ( hostname_ != resolved )
         {
-            tBackgroundSyncEvent event( sync_ );
             // not to the console, that would cause a swap, which can be deadly from background threads
             std::cout << "Address of server " << hostname_ << " determined to be " << resolved << "\n";
         }
 #endif
+        {
+            boost::lock_guard< boost::mutex > lock( addressMutex_ );
+            if( address_ )
+            {
+                address_->CopyFromCore( address );
+            }
+        }
 
         ClearAddressCore();
     }
@@ -1187,6 +1181,9 @@ private:
 
     //! address this resolves for
     nAddress * address_;
+
+    //! port
+    int port_;
 
     //! mutex for address changes
     boost::mutex addressMutex_;
@@ -1660,6 +1657,10 @@ nAddress & nAddress::SetAddress( const char * hostname )
 
 nAddress & nAddress::SetPort( int port )
 {
+    // DNS lookups mess with the port, so we need to wait for them to complete.
+    // To avoid lookups, use SetPort() first, then SetHostname();
+    CompleteDNS();
+
     // store the port
     addr_.addr_in.sin_port = htons(port);
 
