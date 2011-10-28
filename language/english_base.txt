@@ -3301,7 +3301,6 @@ hash_method_blacklist_help  List of hash authentication methods to disable suppo
 legacy_log_names_help       If 1, the log names of unauthenticated players are kept like they were before authentication was implemented. If 0, log names are escaped so that authenticated player names look best.
 
 login_message_requested     User \1 requests authentication as "\2@\3".\n
-login_message_delayed       Your login process will be delayed because the server configuration makes it impossible to be processed immediately in the background. We're sorry for the inconvenience.\n
 login_message_responded     Password request sent to user \1, username "\2", method \3, message "\4".\n
 login_message               \3\1 has been logged in as \2.\n
 login_message_byorder       Order of \1: 

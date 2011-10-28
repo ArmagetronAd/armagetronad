@@ -960,7 +960,6 @@ void update_settings( bool const * goon )
 
                 // do tasks
                 st_DoToDo();
-                nAuthentication::OnBreak();
 
                 // kick spectators and chatbots
                 nMachine::KickSpectators();
@@ -3292,12 +3291,6 @@ void gGame::StateUpdate(){
             break;
         default:
             break;
-        }
-
-        // now would be a good time to tend for pending tasks
-        if( state != GS_PLAY )
-        {
-            nAuthentication::OnBreak();
         }
 
         if (sn_GetNetState()==nSERVER){
