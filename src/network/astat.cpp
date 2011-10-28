@@ -41,7 +41,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 class nCon:public tConsole
 {
 public:
-    virtual tConsole &Print(const tString &s){return *this;}
+    virtual tConsole &DoPrint(const tString &s){return *this;}
     nCon(){RegisterBetterConsole(this);}
 };
 
