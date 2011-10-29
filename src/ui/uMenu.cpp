@@ -1590,6 +1590,13 @@ bool uAnimationFrame::Load( std::vector< uAnimationFrame > & animation, char con
     {
         tString l;
         l.ReadLine( f );
+
+        // ignore comments
+        if( l[0]=='#' )
+        {
+            continue;
+        }
+
         std::istringstream s(l);
 
         uAnimationFrame frame;
