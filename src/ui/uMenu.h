@@ -41,11 +41,61 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #endif
 
 #include <deque>
+#include <vector>
 
 #include "defs.h"
 
 class uMenuItem;
 
+//! crude animation class
+struct uAnimationFrame
+{
+    float duration; //!< duration of the frame in seconds
+    std::vector< std::string > textures; //!< textures; they're all drawn on top of each other, with the first landing at the bottom
+    
+    // convenience constructors
+    explicit uAnimationFrame( float duration_ = 1.0f );
+    uAnimationFrame( char const * texture, float duration_ = 1.0f );
+    uAnimationFrame( char const * texture1, char const * texture2, float duration_ = 1.0f );
+    uAnimationFrame( char const * texture1, char const * texture2, char const * texture3, float duration_ = 1.0f );
+    uAnimationFrame( char const * texture1, char const * texture2, char const * texture3, char const * texture4, float duration_ = 1.0f );
+
+    //! loads an animation from a file
+    static bool Load( std::vector< uAnimationFrame > & animation, char const * filename );
+};
+
+#ifndef DEDICATED
+class tRectangle;
+class rITexture;
+
+//! animation player
+class uAnimationPlayer
+{
+public:
+    //! construct
+    uAnimationPlayer( std::vector< uAnimationFrame > const & animation );
+    ~uAnimationPlayer();
+
+    //! renders the current animation frame into a quad
+    void Render( tRectangle & drawArea );
+private:
+    void ClearTextures();
+
+    //! the animation
+    std::vector< uAnimationFrame > animation_;
+
+    //! current index into the animation
+    int current_;
+
+    //! the current textures
+    std::vector< rITexture * > textures_;
+
+    //! last time the animation changed
+    double lastChange_;
+};
+#endif
+
+//! menus themselves
 class uMenu{
     friend class uMenuItem;
 
@@ -121,7 +171,11 @@ public:
     }
 
     // print a big message and a small interpretation
-    static bool Message(const tOutput& message, const tOutput& interpretation, REAL timeout = -1);
+    static bool Message(const tOutput& message, const tOutput& interpretation, REAL timeout = -1 );
+
+    // print a big title, small description and animation
+    static bool Message(const tOutput& message, const tOutput& interpretation, REAL timeout, std::vector< uAnimationFrame > const & animation );
+    static bool Message(const tOutput& message, const tOutput& interpretation, REAL timeout, char const * animation );
 
     //! returns whether there is currently an active menu
     static bool MenuActive();

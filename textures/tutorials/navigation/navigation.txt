@@ -1,0 +1,26 @@
+1 textures/tutorials/navigation/start.png
+1 textures/tutorials/navigation/1_1.png
+1 textures/tutorials/navigation/1_2.png
+.5 textures/tutorials/navigation/1_2.png textures/tutorials/clipart/circle.png textures/tutorials/clipart/check.png
+1.5 textures/tutorials/navigation/1_2.png textures/tutorials/clipart/circle.png textures/tutorials/clipart/check.png textures/tutorials/clipart/check.png
+
+1 textures/tutorials/navigation/start.png
+1 textures/tutorials/navigation/2_1.png
+1 textures/tutorials/navigation/2_2.png
+.5 textures/tutorials/navigation/2_2.png textures/tutorials/clipart/circle.png textures/tutorials/clipart/check.png
+1.5 textures/tutorials/navigation/2_2.png textures/tutorials/clipart/circle.png textures/tutorials/clipart/check.png textures/tutorials/clipart/check.png
+
+1 textures/tutorials/navigation/start.png
+1 textures/tutorials/navigation/3_1.png
+1 textures/tutorials/navigation/3_2.png
+1 textures/tutorials/navigation/3_3.png
+1 textures/tutorials/navigation/3_4.png
+.5 textures/tutorials/navigation/3_4.png textures/tutorials/clipart/circle.png textures/tutorials/clipart/check.png
+1.5 textures/tutorials/navigation/3_4.png textures/tutorials/clipart/circle.png textures/tutorials/clipart/check.png textures/tutorials/clipart/check.png
+
+1 textures/tutorials/navigation/start.png
+1 textures/tutorials/navigation/4_1.png
+.25 textures/tutorials/navigation/4_2.png
+.5 textures/tutorials/navigation/4_3.png
+.5 textures/tutorials/navigation/4_3.png textures/tutorials/clipart/circle.png textures/tutorials/clipart/fail.png
+2.5 textures/tutorials/navigation/4_3.png textures/tutorials/clipart/circle.png textures/tutorials/clipart/fail.png textures/tutorials/clipart/fail.png

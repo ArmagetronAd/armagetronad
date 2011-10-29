@@ -53,6 +53,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //#include "tRecording.h"
 #include "tToDo.h"
 #include "tException.h"
+#include "tRectangle.h"
 #include <iterator>
 
 #include "utf8.h"
@@ -1536,13 +1537,214 @@ bool uMenu::IdleInput()
     return false;
 }
 
-// return value: false only if the user pressed ESC
-bool uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL to){
+// ***************************************
+// * uAnimation
+// ***************************************
+
+//! crude animation class
+uAnimationFrame::uAnimationFrame( float duration_ )
+: duration( duration_ )
+{
+}
+
+uAnimationFrame::uAnimationFrame( char const * texture, float duration_ )
+: duration( duration_ )
+{
+    textures.push_back( texture );
+}
+
+uAnimationFrame::uAnimationFrame( char const * texture1, char const * texture2, float duration_ )
+: duration( duration_ )
+{
+    textures.push_back( texture1 );
+    textures.push_back( texture2 );
+}
+
+uAnimationFrame::uAnimationFrame( char const * texture1, char const * texture2, char const * texture3, float duration_ )
+: duration( duration_ )
+{
+    textures.push_back( texture1 );
+    textures.push_back( texture2 );
+    textures.push_back( texture3 );
+}
+
+uAnimationFrame::uAnimationFrame( char const * texture1, char const * texture2, char const * texture3, char const * texture4, float duration_ )
+: duration( duration_ )
+{
+    textures.push_back( texture1 );
+    textures.push_back( texture2 );
+    textures.push_back( texture3 );
+    textures.push_back( texture4 );
+}
+
+//! loads an animation from a file
+bool uAnimationFrame::Load( std::vector< uAnimationFrame > & animation, char const * filename )
+{
+    std::ifstream f;
+    if( !tDirectories::Data().Open( f, filename ) )
+    {
+        return false;
+    }
+        
+    while( f.good() )
+    {
+        tString l;
+        l.ReadLine( f );
+        std::istringstream s(l);
+
+        uAnimationFrame frame;
+        s >> frame.duration;
+        if( s.eof() )
+        {
+            continue;
+        }
+        tString texture;
+        while( s.good() )
+        {
+            s >> texture;
+            frame.textures.push_back( texture );
+        }
+        if( !s.eof() )
+        {
+            return false;
+        }
+        animation.push_back( frame );
+    }
+    if( !f.eof() )
+    {
+        return false;
+    }
+
+    return true;
+}
+
+#ifndef DEDICATED
+
+// ***************************************
+// * uAnimationPlayer
+// ***************************************
+
+uAnimationPlayer::uAnimationPlayer( std::vector< uAnimationFrame > const & animation )
+: animation_( animation ), current_( -1 )
+{
+}
+
+uAnimationPlayer::~uAnimationPlayer()
+{
+    ClearTextures();
+}
+
+void uAnimationPlayer::ClearTextures()
+{
+    for( std::vector< rITexture * >::iterator iter = textures_.begin();
+         iter != textures_.end(); ++iter )
+    {
+        delete (*iter);
+    }
+
+    textures_.clear();
+}
+
+void uAnimationPlayer::Render( tRectangle & drawArea )
+{
+    // no animation? screw this.
+    if( animation_.size() == 0 )
+    {
+        return;
+    }
+
+    bool change = false;
+
+    // start from the beginning
+    if( current_ < 0 )
+    {
+        current_ = 0;
+        lastChange_ = tSysTimeFloat();
+        change = true;
+    }
+
+    // advance
+    REAL completion = ( tSysTimeFloat() - lastChange_ )/animation_[current_].duration;
+    if( completion >= 1 )
+    {
+        current_++;
+        if( current_ >= (int)animation_.size() )
+        {
+            current_ = 0;
+        }
+        lastChange_ = tSysTimeFloat();
+        change = true;
+        completion = 0;
+    }
+    if( completion < .01 )
+        completion = 0.01;
+
+    // get current frame
+    uAnimationFrame const & frame = animation_[current_];
+
+    // load textures
+    if( change )
+    {
+        ClearTextures();
+        for( std::vector< std::string >::const_iterator iter = frame.textures.begin();
+             iter != frame.textures.end(); ++iter )
+        {
+            textures_.push_back( tNEW(rFileTexture)( rTextureGroups::TEX_FONT, (*iter).c_str(), false, false, true ) );
+        }
+    }
+
+    REAL xl = drawArea.GetLow().x;
+    REAL yl = drawArea.GetLow().y;
+    REAL xh = drawArea.GetHigh().x;
+    REAL yh = drawArea.GetHigh().y;
+
+    glEnable(GL_ALPHA_TEST);
+    glDisable(GL_BLEND);
+    for( std::vector< rITexture * >::iterator iter = textures_.begin();
+         iter != textures_.end(); ++iter )
+    {
+        (*iter)->Select(true);
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,
+                        GL_NEAREST);
+
+        bool end = ( iter+1 == textures_.end() );
+        if ( end )
+        { 
+            glAlphaFunc(GL_GREATER,1-completion);
+            
+        }
+        else
+        {
+            glAlphaFunc(GL_GREATER,0);
+        }
+        
+        Color(1,1,1);
+        BeginQuads();
+        TexCoord(0,1);
+        Vertex(xl,yl);
+        TexCoord(0,0);
+        Vertex(xl,yh);
+        TexCoord(1,0);
+        Vertex(xh,yh);
+        TexCoord(1,1);
+        Vertex(xh,yl);
+        RenderEnd();
+    }
+    glAlphaFunc(GL_GREATER,0);
+}
+
+#endif
+
+// print a big title, small description and animation
+bool uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL to, std::vector< uAnimationFrame > const & animation )
+{
     bool ret = true;
 #ifdef DEDICATED
     con << message << ":\n";
     con << interpretation << '\n';
 #else
+    uAnimationPlayer player( animation );
+
     // reload textures (just in case)
     rITexture::UnloadAll();
 
@@ -1621,6 +1823,27 @@ bool uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL 
 
                 GenericBackground();
 
+                // determite best display size for animation, asuming it is 64 pixels high
+                {
+                    REAL center = .25;
+                    int middleY = sr_screenHeight * center;
+                    int maxHeight = middleY - 10;
+                    int height = 32;
+                    int scale = 1;
+                    while( scale * ( height + 1 ) < maxHeight )
+                    {
+                        scale++;
+                    }
+                    height *= scale;
+                    int width = height*2;
+                    REAL wr = 2*width/REAL(sr_screenWidth);
+                    REAL hr = 2*height/REAL(sr_screenHeight);
+                    REAL c = (center*2)-1;
+
+                    tRectangle ani = tRectangle( tCoord(-wr, c-hr), tCoord(wr, c+hr) );
+                    player.Render( ani );
+                }
+
                 REAL w=16*3/640.0;
                 REAL h=32*3/480.0;
 
@@ -1671,5 +1894,19 @@ bool uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL 
 #endif
 
     return ret;
+}
+
+bool uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL to, char const * animation )
+{
+    std::vector< uAnimationFrame > frames;
+    uAnimationFrame::Load( frames, animation );
+    return Message( message, interpretation, to, frames );
+}
+
+// return value: false only if the user pressed ESC
+bool uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL to)
+{
+    std::vector< uAnimationFrame > noAnimation;
+    return Message( message, interpretation, to, noAnimation );
 }
 
