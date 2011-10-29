@@ -34,6 +34,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tLocale.h"
 #include "nSocket.h"
 #include "tCommandLine.h"
+#include "tSysTime.h"
 
 #include <iostream>
 
@@ -47,15 +48,14 @@ public:
 
 static nCon ncon;
 
-
-
-
 void Poll()
 {
     // poll the servers
     nServerInfo::StartQueryAll();
-    while (nServerInfo::DoQueryAll(10)) usleep(1000);
-    sn_SetNetState(nSTANDALONE);
+    while (nServerInfo::DoQueryAll(10))
+    {
+        tAdvanceFrame(1000);
+    }
 
     int servers = 0, users = 0;
 
@@ -77,11 +77,12 @@ void Poll()
     << "\nusers  : " << users << "\n";
 
     nServerInfo::DeleteAll();
-
 }
 
 int main(int argc, char **argv)
 {
+    sn_SetNetState(nCLIENT);
+    
     // get the list
     //  nServerInfo::GetFromLAN();          // or rather from the local net
     //  std::cout << "LAN:\n";
