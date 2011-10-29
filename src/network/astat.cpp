@@ -63,9 +63,8 @@ void Poll()
     nServerInfo* run = nServerInfo::GetFirstServer();
     while (run)
     {
-
         std::cout << run->GetConnectionName() << "\t" << run->GetPort() << "\t"
-        << run->Users() << "\t" << run->Ping() << "\n";
+                  << run->Users() << "\t" << run->Ping() << "\n";
 
         servers += run->Reachable() ? 1 : 0;
         users += run->Users();
@@ -74,7 +73,7 @@ void Poll()
     }
 
     std::cout << "\nservers: " << servers
-    << "\nusers  : " << users << "\n";
+              << "\nusers  : " << users << "\n";
 
     nServerInfo::DeleteAll();
 }
@@ -94,7 +93,6 @@ int main(int argc, char **argv)
     tLocale::Load("languages.txt");
 
     nServerInfo::GetFromMaster();   // from the master server
-    //  std::cout << "MASTER:\n";
     Poll();
 
     tLocale::Clear();
