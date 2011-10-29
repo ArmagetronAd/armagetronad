@@ -38,16 +38,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include <iostream>
 
-// hide status messages
-class nCon:public tConsole
-{
-public:
-    virtual tConsole &DoPrint(const tString &s){return *this;}
-    nCon(){RegisterBetterConsole(this);}
-};
-
-static nCon ncon;
-
 void Poll()
 {
     // poll the servers
@@ -80,6 +70,7 @@ void Poll()
 
 int main(int argc, char **argv)
 {
+    tSuppressConsole suppressConsole;
     sn_SetNetState(nCLIENT);
     
     // get the list
