@@ -1548,6 +1548,11 @@ uActionTooltip::~uActionTooltip()
 
 bool uActionTooltip::Help( int player )
 {
+    if( rConsole::CenterDisplayBusy() )
+    {
+        return false;
+    }
+
     // find most needed tooltip
     uActionTooltip * mostWanted = NULL;
 

@@ -38,6 +38,32 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "gGame.h"
 
+// temporarily override a setting item
+class gTemporarySetting: public tReferencable< gTemporarySetting >
+{
+public:
+    gTemporarySetting( char const * setting, char const * value )
+    : confItem_( tConfItemBase::FindConfigItem( tString(setting) ) )
+    {
+        tASSERT( confItem_ );
+        std::ostringstream o;
+        confItem_->WriteVal( o );
+        backup_ = o.str();
+        
+        std::istringstream i( value );
+        confItem_->ReadVal( i );
+    }
+    
+    ~gTemporarySetting()
+    {
+        std::istringstream i( backup_ );
+        confItem_->ReadVal( i );
+    }
+private:
+    tConfItemBase * confItem_;
+    std::string backup_;
+};
+
 static gGameSettings sg_DefaultSettings()
 {
     return gGameSettings(10,
@@ -108,11 +134,6 @@ public:
 
     void CreateMenu();
 
-    // prepares
-    virtual void Prepare()
-    {
-    }
-
     // shows instructions
     virtual void Instructions()
     {
@@ -131,13 +152,20 @@ public:
         return success_;
     }
 
-    // back up settings
-    void Backup()
+    // temporarily alter a setting
+    void PushSetting( char const * setting, char const * value )
     {
+        tempSettings_.push_back( tNEW(gTemporarySetting)( setting, value ) );
     }
-    
+
     // restore settings
     void Restore()
+    {
+        tempSettings_.clear();
+    }
+
+    // prepares
+    virtual void Prepare()
     {
     }
 
@@ -159,7 +187,6 @@ public:
     virtual bool Run()
     {
         success_ = false;
-        Backup();
         Prepare();
         RunCore();
         Restore();
@@ -223,6 +250,9 @@ private:
     static gTutorial * anchor_;
     bool success_; //!< succeeded this time?
     bool finished_; //!< set when the tutorial is finished
+
+    //! temporary setting overrides go here.
+    std::vector< tJUST_CONTROLLED_PTR < gTemporarySetting > > tempSettings_;
 };
 
 gTutorial * gTutorial::anchor_ = NULL;
@@ -289,6 +319,7 @@ static void sg_RunTutorial( BOOLRETFUNC * tutorial )
 }
 */
 
+// test tutorial
 class gTutorialTest: public gTutorial
 {
 public:
@@ -299,12 +330,66 @@ public:
         settings_.numAIs = 1;
     }
 
+    // analyzes the game
     void Analysis()
     {
     }
-};
 
+    // prepares
+    virtual void Prepare()
+    {
+    }
+
+    // called on success
+    virtual void OnSuccess()
+    {
+        uMenu::Message( tOutput("$tutorial_success"),
+                        tOutput("$tutorial_success_text"), 300 );
+    }
+    
+    // called on failure
+    virtual void OnFailure()
+    {
+        uMenu::Message( tOutput("$tutorial_failure"),
+                        tOutput("$tutorial_failure_text"), 300 );
+    }
+};
 static gTutorialTest sg_tutorialTest;
+
+class gTutorialNavigation: public gTutorial
+{
+public:
+    gTutorialNavigation()
+    : gTutorial( "navigation" )
+    {
+    }
+
+    // analyzes the game
+    void Analysis()
+    {
+    }
+
+    // prepares
+    virtual void Prepare()
+    {
+        PushSetting( "MAP_FILE", "Z-Man/tutorial/navigation-0.1.0.aamap.xml" );
+    }
+
+    // called on success
+    virtual void OnSuccess()
+    {
+        uMenu::Message( tOutput("$tutorial_success"),
+                        tOutput("$tutorial_success_text"), 300 );
+    }
+    
+    // called on failure
+    virtual void OnFailure()
+    {
+        uMenu::Message( tOutput("$tutorial_failure"),
+                        tOutput("$tutorial_failure_text"), 300 );
+    }
+};
+static gTutorialNavigation sg_tutorialNavigation;
 
 //! opens the tutorial menu
 void sg_TutorialMenu()

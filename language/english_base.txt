@@ -1664,7 +1664,12 @@ window_title_tutorial       \g - Tutorial: \1
 tutorial_menu_test_text     Test
 tutorial_menu_test_help     Test Tutorial: play against one constant AI.
 tutorial_menu_test_instructions As a final test, you need to defeat a lone AI. It's pretty stupid, the best way to kill it is to set up a trap right where you start.
-tutorial_menu_test_animation textures/tutorials/navigation/navigation.txt
+tutorial_menu_test_animation textures/tutorials/test/test.txt
+
+tutorial_menu_navigation_text     Navigation
+tutorial_menu_navigation_help     Navigation Tutorial: learn to control your cycle.
+tutorial_menu_navigation_instructions Use the turn controls to reach the green winzone.
+tutorial_menu_navigation_animation textures/tutorials/navigation/navigation.txt
 
 tutorial_success            Success!
 tutorial_success_text       Well done on that. You can continue right with the next tutorial.

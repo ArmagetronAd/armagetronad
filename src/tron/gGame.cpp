@@ -3862,7 +3862,7 @@ void gGame::Analysis(REAL time){
                     }
 
                     // check if the win was legitimate: at least one enemy team needs to be online
-                    if ( sg_EnemyExists( winner-1 ) || sg_currentSettings->gameType==gFREESTYLE )
+                    if ( sg_tutorial || sg_EnemyExists( winner-1 ) || sg_currentSettings->gameType==gFREESTYLE )
                     {
 #ifdef KRAWALL_SERVER_LEAGUE
                         // send the result to the master server
