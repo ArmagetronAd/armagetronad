@@ -347,6 +347,7 @@ public:
     {
         gTutorial::Prepare();
         su_helpLevel = uActionTooltip::Level_Essential;
+        PushSetting( "COCKPIT_FILE", "Z-Man/tutorial/spartanic-0.0.1.aacockpit.xml" );
     }
 
     // called on success
@@ -382,7 +383,9 @@ public:
     virtual void Prepare()
     {
         gTutorial::Prepare();
+        PushSetting( "TEXT_OUT", "0" );
         PushSetting( "MAP_FILE", "Z-Man/tutorial/navigation-0.1.0.aamap.xml" );
+        PushSetting( "COCKPIT_FILE", "Z-Man/tutorial/empty-0.0.1.aacockpit.xml" );
         su_helpLevel = uActionTooltip::Level_Essential;
     }
 
