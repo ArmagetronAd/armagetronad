@@ -1779,7 +1779,8 @@ bool uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL 
     rSysDep::ClearGL();
     rSysDep::SwapGL();
 
-    REAL timeout = tSysTimeFloat() + to;
+    double timeout = tSysTimeFloat() + to;
+    double ignoreInput = tSysTimeFloat() + .5;
     SDL_Event tEvent;
 
     // catch some keyboard input
@@ -1822,7 +1823,16 @@ bool uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL 
                 default:
                     break;
                 }
-                break;
+                if( tSysTimeFloat() > ignoreInput )
+                {
+                    // exit on any key
+                    break;
+                }
+                else
+                {
+                    // esc may have been pressed in error
+                    ret = true;
+                }
             }
             if ( sr_glOut )
             {
@@ -1832,27 +1842,6 @@ bool uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL 
                 rSysDep::ClearGL();
 
                 GenericBackground();
-
-                // determite best display size for animation, asuming it is 64 pixels high
-                {
-                    REAL center = .25;
-                    int middleY = sr_screenHeight * center;
-                    int maxHeight = middleY - 10;
-                    int height = 32;
-                    int scale = 1;
-                    while( scale * ( height + 1 ) < maxHeight )
-                    {
-                        scale++;
-                    }
-                    height *= scale;
-                    int width = height*2;
-                    REAL wr = 2*width/REAL(sr_screenWidth);
-                    REAL hr = 2*height/REAL(sr_screenHeight);
-                    REAL c = (center*2)-1;
-
-                    tRectangle ani = tRectangle( tCoord(-wr, c-hr), tCoord(wr, c+hr) );
-                    player.Render( ani );
-                }
 
                 REAL w=16*3/640.0;
                 REAL h=32*3/480.0;
@@ -1875,6 +1864,7 @@ bool uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL 
                 w = 16/640.0;
                 h = 32/480.0;
 
+                REAL center = .4;
                 if (offset >= lines.size()) offset = lines.size() - 1;
                 {
                     rTextField c(-.8,.6, h, sr_fontError);
@@ -1882,7 +1872,33 @@ bool uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL 
 
                     for (unsigned i = offset; i < lines.size(); ++i)
                         c << lines[i] << "\n";
+
+                    center = (c.GetBottom()+1)/4;
                 }
+
+                // determite best display size for animation, asuming it is 64 pixels high
+                {
+                    int middleY = sr_screenHeight * center;
+                    int maxHeight = middleY - 10;
+                    int maxWidth = sr_screenWidth/2 - 10;
+                    int height = 32;
+                    int width = height*2;
+                    int scale = 1;
+                    while( ( scale + 1) * height + 1 < maxHeight && ( scale + 1 ) * width < maxWidth )
+                    {
+                        scale++;
+                    }
+                    height *= scale;
+                    width  *= scale;
+                    REAL wr = 2*width/REAL(sr_screenWidth);
+                    REAL hr = 2*height/REAL(sr_screenHeight);
+                    REAL c = (center*2)-1;
+
+                    tRectangle ani = tRectangle( tCoord(-wr, c-hr), tCoord(wr, c+hr) );
+                    player.Render( ani );
+                }
+
+
             }
             rSysDep::SwapGL();
             tAdvanceFrame();
