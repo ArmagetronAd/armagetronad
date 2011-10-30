@@ -1672,14 +1672,6 @@ tutorial_menu_navigation_help     Navigation Tutorial: learn to control your cyc
 tutorial_menu_navigation_instructions Use the turn controls to reach the green winzone.
 tutorial_menu_navigation_animation textures/tutorials/navigation/navigation.txt
 
-tutorial_success            Success!
-tutorial_success_text       Well done on that. You can continue right with the next tutorial.
-
-tutorial_failure            Try again!
-tutorial_failure_text       That didn't go too well, but don't worry. Read the instructions carefully and just try again.
-
-
-
 #********************************************
 #********************************************
 #

@@ -173,21 +173,18 @@ public:
     // prepares
     virtual void Prepare()
     {
+        finished_ = false;
         PushSetting( "MAP_FILE", "Anonymous/polygon/regular/square-1.0.1.aamap.xml" );
     }
 
     // called on success
     virtual void OnSuccess()
     {
-        uMenu::Message( tOutput("$tutorial_success"),
-                        tOutput("$tutorial_success_text"), 300 );
     }
     
     // called on failure
     virtual void OnFailure()
     {
-        uMenu::Message( tOutput("$tutorial_failure"),
-                        tOutput("$tutorial_failure_text"), 300 );
     }
 
     // runs the tutorial
@@ -203,8 +200,13 @@ public:
     // called from the menu
     bool Activate()
     {
-        Instructions();
-        Run();
+        success_ = false;
+        finished_ = true;
+        for( int tries = 3; finished_ && !success_ && tries > 0; --tries )
+        {
+            Instructions();
+            Run();
+        }
 
         if( finished_ )
         {
@@ -260,6 +262,8 @@ private:
 
     //! temporary setting overrides go here.
     std::vector< tJUST_CONTROLLED_PTR < gTemporarySetting > > tempSettings_;
+
+    friend class gTutorialMenuItem;
 };
 
 gTutorial * gTutorial::anchor_ = NULL;
@@ -282,21 +286,27 @@ public:
         {
             s = menu.NumItems()-1;
         }
+
+        gTutorialMenuItem * i = NULL;
         while(true)
         {
             if( s <= 0 )
             {
                 break;
             }
-            gTutorialMenuItem * i = dynamic_cast< gTutorialMenuItem * >( menu.Item( s ) );
+            i = dynamic_cast< gTutorialMenuItem * >( menu.Item( s ) );
             if( !i || !i->tutorial_.Complete() )
             {
                 break;
             }
-
+            
             s--;
         }
         menu.SetSelected( s );
+        if( i && !i->tutorial_.Complete() )
+        {
+            i->Enter();
+        }
     }
 
     virtual void Enter()
@@ -350,19 +360,6 @@ public:
         PushSetting( "COCKPIT_FILE", "Z-Man/tutorial/spartanic-0.0.1.aacockpit.xml" );
     }
 
-    // called on success
-    virtual void OnSuccess()
-    {
-        uMenu::Message( tOutput("$tutorial_success"),
-                        tOutput("$tutorial_success_text"), 300 );
-    }
-    
-    // called on failure
-    virtual void OnFailure()
-    {
-        uMenu::Message( tOutput("$tutorial_failure"),
-                        tOutput("$tutorial_failure_text"), 300 );
-    }
 };
 static gTutorialTest sg_tutorialTest;
 
@@ -387,20 +384,6 @@ public:
         PushSetting( "MAP_FILE", "Z-Man/tutorial/navigation-0.1.0.aamap.xml" );
         PushSetting( "COCKPIT_FILE", "Z-Man/tutorial/empty-0.0.1.aacockpit.xml" );
         su_helpLevel = uActionTooltip::Level_Essential;
-    }
-
-    // called on success
-    virtual void OnSuccess()
-    {
-        uMenu::Message( tOutput("$tutorial_success"),
-                        tOutput("$tutorial_success_text"), 300 );
-    }
-    
-    // called on failure
-    virtual void OnFailure()
-    {
-        uMenu::Message( tOutput("$tutorial_failure"),
-                        tOutput("$tutorial_failure_text"), 300 );
     }
 };
 static gTutorialNavigation sg_tutorialNavigation;
