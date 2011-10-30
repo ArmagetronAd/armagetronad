@@ -37,6 +37,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #ifndef DEDICATED
 
+#include "tToDo.h"
+
 #include "ePlayer.h"
 #include "gCycle.h"
 #include "eTimer.h"
@@ -48,6 +50,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "eSensor.h"
 #include <iostream>
 #include "eSoundMixer.h"
+#include "eGrid.h"
 
 #include <time.h>
 
