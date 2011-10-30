@@ -101,6 +101,8 @@ void gTutorialBase::RoundEnd( eTeam * winner )
     uMenu::quickexit = uMenu::QuickExit_Game;
 }
 
+extern uActionTooltip::Level su_helpLevel;
+
 //! tutorial class
 class gTutorial: public tListItem< gTutorial >, public gTutorialBase
 {
@@ -161,12 +163,17 @@ public:
     // restore settings
     void Restore()
     {
-        tempSettings_.clear();
+        su_helpLevel = uActionTooltip::Level_Expert;
+
+        // destroy settings in deterministic order
+        while( tempSettings_.size() )
+            tempSettings_.pop_back();
     }
 
     // prepares
     virtual void Prepare()
     {
+        PushSetting( "MAP_FILE", "Anonymous/polygon/regular/square-1.0.1.aamap.xml" );
     }
 
     // called on success
@@ -338,6 +345,8 @@ public:
     // prepares
     virtual void Prepare()
     {
+        gTutorial::Prepare();
+        su_helpLevel = uActionTooltip::Level_Essential;
     }
 
     // called on success
@@ -372,7 +381,9 @@ public:
     // prepares
     virtual void Prepare()
     {
+        gTutorial::Prepare();
         PushSetting( "MAP_FILE", "Z-Man/tutorial/navigation-0.1.0.aamap.xml" );
+        su_helpLevel = uActionTooltip::Level_Essential;
     }
 
     // called on success

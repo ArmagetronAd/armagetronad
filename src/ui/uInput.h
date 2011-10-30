@@ -99,8 +99,16 @@ public:
 class uActionTooltip: public tConfItemBase
 {
 public:
+    enum Level
+    {
+        Level_Essential, // turns
+        Level_Basic,     // speed control
+        Level_Advanced,  // glancing
+        Level_Expert     // switch camera modes, game menu, chat
+    };
+
     typedef bool VETOFUNC(int player);
-    uActionTooltip( uAction & action, int numHelp, VETOFUNC * veto = NULL );
+    uActionTooltip( Level level, uAction & action, int numHelp, VETOFUNC * veto = NULL );
     ~uActionTooltip();
 
     //! presents help to the specified player, starting counting at 1. 
@@ -118,6 +126,7 @@ private:
     tString help_;        //!< help languate item
     uAction & action_;    //!< action this belongs to
     VETOFUNC * veto_;  //!< function that can block help display
+    Level level_;      //!< level of sophistication
 };
 
 

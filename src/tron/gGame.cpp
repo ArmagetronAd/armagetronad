@@ -4281,7 +4281,7 @@ static bool ingamemenu_func(REAL x){
     return true;
 }
 static uActionGlobalFunc ingamemenu_action(&ingamemenu,&ingamemenu_func, true );
-static uActionTooltip ingamemenuTooltip( ingamemenu, 1 );
+static uActionTooltip ingamemenuTooltip( uActionTooltip::Level_Expert, ingamemenu, 1 );
 #endif // dedicated
 
 static eLadderLogWriter sg_gameTimeWriter("GAME_TIME", true);

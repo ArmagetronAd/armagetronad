@@ -1262,6 +1262,7 @@ input_glance_left_tooltip   Press \1 to glance left.
 input_glance_left_text		Glance left
 input_glance_left_help		Turns the camera temporarily to the left.
 
+input_glance_forward_tooltip Press \1 to glance forward (Hold it and make turns to see how it is useful).
 input_glance_forward_text	Glance forward
 input_glance_forward_help	Turns the camera temporarily to the front.
 

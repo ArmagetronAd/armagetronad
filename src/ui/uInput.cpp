@@ -1524,8 +1524,13 @@ static uActionGlobalFunc me(&mess_end,&messend_func);
 // tooltips
 // ********
 
-uActionTooltip::uActionTooltip( uAction & action, int numHelp, VETOFUNC * veto )
-: tConfItemBase(action.internalName + "_TOOLTIP"), action_( action ), veto_(veto)
+uActionTooltip::Level su_helpLevel = uActionTooltip::Level_Expert;
+
+uActionTooltip::uActionTooltip( Level level, uAction & action, int numHelp, VETOFUNC * veto )
+: tConfItemBase(action.internalName + "_TOOLTIP")
+  , action_( action )
+  , veto_(veto)
+  , level_( level )
 {
     help_ = tString("$input_") + action.internalName + "_tooltip";
     tToLower( help_ );
@@ -1570,7 +1575,7 @@ bool uActionTooltip::Help( int player )
         if( !action )
             continue;
         uActionTooltip * tooltip = action->GetTooltip();
-        if( !tooltip || ( tooltip->veto_ && (*tooltip->veto_)(player) ) )
+        if( !tooltip || ( tooltip->veto_ && (*tooltip->veto_)(player) ) || ( su_helpLevel < tooltip->level_ ) )
         {
             continue;
         }
