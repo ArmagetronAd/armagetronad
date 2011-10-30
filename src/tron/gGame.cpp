@@ -39,6 +39,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "eCoord.h"
 #include "eTimer.h"
 #include "gAIBase.h"
+#include "gTutorial.h"
 #include "rSysdep.h"
 #include "rFont.h"
 #include "uMenu.h"
@@ -2306,6 +2307,8 @@ void MainMenu(bool ingame){
 
     uMenuItemFunction *reset=NULL;
 
+    std::auto_ptr< uMenuItemFunction > tutorials;
+
     if (ingame && sn_GetNetState()!=nCLIENT){
         reset=new uMenuItemFunction
               (&game_menu,"$game_menu_reset_text",
@@ -2331,6 +2334,11 @@ void MainMenu(bool ingame){
     uMenuItemFunction *connect=NULL,*start=NULL,*sound=NULL;
 
     if (!ingame){
+        if( sg_TutorialsCompleted() )
+        {
+            tutorials = std::auto_ptr< uMenuItemFunction > (tNEW(uMenuItemFunction)( &game_menu, "$game_menu_tutorials_text", "$game_menu_tutorials_help", &sg_TutorialMenu ));
+        }
+
         start= new uMenuItemFunction(&game_menu,"$game_menu_start_text",
                                      "$game_menu_start_help",&sg_SinglePlayerGame);
         connect=new uMenuItemFunction
@@ -2339,6 +2347,10 @@ void MainMenu(bool ingame){
                  "$network_menu_help",
                  &net_game);
 
+        if( !sg_TutorialsCompleted() )
+        {
+            tutorials = std::auto_ptr< uMenuItemFunction > (tNEW(uMenuItemFunction)( &game_menu, "$game_menu_tutorials_text", "$game_menu_tutorials_help", &sg_TutorialMenu ));
+        }
     }
 
     tOutput title;

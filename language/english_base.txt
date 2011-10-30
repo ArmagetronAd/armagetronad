@@ -1460,6 +1460,9 @@ version_info_gl_version		\n  GL Version  :
 #********************************************
 #********************************************
 
+game_menu_tutorials_text    Tutorials
+game_menu_tutorials_help    Small training tasks to make you familiar with the basic concepts of this game.
+
 game_menu_start_text		Local Game
 game_menu_start_help		Enter the game grid! Only players configured on this computer will play.
 

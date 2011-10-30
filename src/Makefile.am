@@ -152,6 +152,7 @@ libtron_a_SOURCES=tron/gAIBase.cpp tron/gAIBase.h tron/gAICharacter.cpp tron/gAI
 	tron/gArmagetron.cpp tron/gCamera.cpp tron/gCamera.h tron/gCycle.cpp tron/gCycle.h tron/gCycleMovement.cpp\
 	tron/gJoystick.h tron/gJoystick.cpp\
 	tron/gCycleMovement.h tron/gExplosion.cpp tron/gExplosion.h tron/gGame.cpp tron/gGame.h\
+	tron/gTutorial.h tron/gTutorial.cpp\
 	tron/gLanguageMenu.cpp tron/gLanguageMenu.h tron/gLogo.cpp tron/gLogo.h\
 	tron/gMenus.cpp tron/gMenus.h tron/gParser.cpp tron/gParser.h tron/gParticles.cpp tron/gParticles.h\
 	tron/gSensor.cpp tron/gSensor.h tron/gServerBrowser.cpp tron/gServerBrowser.h tron/gSparks.cpp tron/gSparks.h\
