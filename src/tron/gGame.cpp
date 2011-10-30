@@ -913,7 +913,7 @@ int sg_NumUsers()
 #endif
 }
 
-static void sg_copySettings()
+void sg_copySettings()
 {
     eTeam::minTeams					= sg_currentSettings->minTeams;
     eTeam::maxTeams					= sg_currentSettings->maxTeams;
@@ -5064,4 +5064,24 @@ static void sg_FillServerSettings()
 }
 
 static nCallbackFillServerInfo sg_fillServerSettings(sg_FillServerSettings);
+
+void sg_TutorialGame( gGameSettings & settings, tString const & title )
+{
+    sn_SetNetState(nSTANDALONE);
+
+    update_settings();
+
+    gGameSettings oldSettings = *sg_currentSettings;
+    *sg_currentSettings = settings;
+
+    update_settings();
+
+    ePlayerNetID::CompleteRebuild();
+
+    sr_SetWindowTitle(tString(tOutput("$window_title_tutorial", title)));
+    own_game( nSTANDALONE );
+    sr_SetWindowTitle(tOutput("$window_title_menu"));
+    
+    *sg_currentSettings = oldSettings;
+}
 

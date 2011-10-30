@@ -1651,6 +1651,18 @@ game_menu_wz_mr_help		Minimum number of seconds the round has to be going on bef
 game_menu_wz_ld_text		Win Zone Min Last Death
 game_menu_wz_ld_help		Minimum number of seconds since the last death before the instant win zone is activated
 
+#********************************************
+#********************************************
+#
+#             tutorials
+#
+#********************************************
+#********************************************
+
+window_title_tutorial       \g - Tutorial: \1
+
+tutorial_menu_test_text     Test
+tutorial_menu_test_help     Test Tutorial: play against one constant AI.
 
 #********************************************
 #********************************************

@@ -188,7 +188,10 @@ void uMenu::OnEnter(){
     lastkey=tSysTimeFloat();
     static const REAL timeout=.5;
 #endif
-    selected = items.Len() - 1;
+    if( selected >= items.Len() )
+    {
+        selected = items.Len() - 1;
+    }
     while (!exitFlag && !quickexit && !exitToMain){
         st_DoToDo();
         tAdvanceFrame();
