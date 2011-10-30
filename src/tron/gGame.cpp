@@ -98,6 +98,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "gArena.h"
 gArena Arena;
 
+static gTutorialBase * sg_tutorial = NULL;
+
 #include "gGame.pb.h"
 
 #ifdef KRAWALL_SERVER
@@ -755,7 +757,8 @@ static tSettingItem<bool> sg_ttm("TALK_TO_MASTER",
 
 static bool just_connected=true;
 static bool sg_singlePlayer=0;
-static int winner=0;
+static int winner=0; // current round winner
+static tJUST_CONTROLLED_PTR< eTeam > lastWinner = NULL; // last round winner
 static int absolute_winner=0;
 static REAL lastTime_gameloop=0;
 static REAL lastTimeTimestep=0;
@@ -3533,6 +3536,11 @@ void gGame::Analysis(REAL time){
         }
     }
 
+    if( sg_tutorial )
+    {
+        sg_tutorial->Analysis();
+    }
+
     // send timeout warnings
 
 
@@ -3848,6 +3856,11 @@ void gGame::Analysis(REAL time){
 
                 if ( se_matches >= 0 && ( sg_currentSettings->scoreWin != 0 || sg_currentSettings->gameType != gFREESTYLE ) && winner > 0 )
                 {
+                    if( winner > 0 )
+                    {
+                        lastWinner = eTeam::teams(winner-1);
+                    }
+
                     // check if the win was legitimate: at least one enemy team needs to be online
                     if ( sg_EnemyExists( winner-1 ) || sg_currentSettings->gameType==gFREESTYLE )
                     {
@@ -4149,6 +4162,10 @@ void gGame::Analysis(REAL time){
            )
         {
             rounds++;
+            if( sg_tutorial )
+            {
+                sg_tutorial->RoundEnd( lastWinner );
+            }
             SetState(GS_PLAY,GS_DELETE_OBJECTS);
         }
 
@@ -4726,6 +4743,8 @@ void sg_EnterGameCleanup()
     uMenu::exitToMain = false;
 
     rModel::ClearCache();
+
+    lastWinner = NULL;
 }
 
 void sg_EnterGame( nNetState enter_state )
@@ -5065,7 +5084,7 @@ static void sg_FillServerSettings()
 
 static nCallbackFillServerInfo sg_fillServerSettings(sg_FillServerSettings);
 
-void sg_TutorialGame( gGameSettings & settings, tString const & title )
+void sg_TutorialGame( gGameSettings & settings, gTutorialBase & tutorial )
 {
     sn_SetNetState(nSTANDALONE);
 
@@ -5078,10 +5097,14 @@ void sg_TutorialGame( gGameSettings & settings, tString const & title )
 
     ePlayerNetID::CompleteRebuild();
 
-    sr_SetWindowTitle(tString(tOutput("$window_title_tutorial", title)));
+    sr_SetWindowTitle(tString(tOutput("$window_title_tutorial", tutorial.Name())));
+    sg_tutorial = &tutorial;
     own_game( nSTANDALONE );
+    sg_tutorial = NULL;
     sr_SetWindowTitle(tOutput("$window_title_menu"));
     
     *sg_currentSettings = oldSettings;
+
+    sg_StopQuickExit();
 }
 

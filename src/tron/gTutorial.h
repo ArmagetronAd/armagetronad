@@ -29,10 +29,27 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #ifndef ArmageTron_GTUTORIAL_H
 #define ArmageTron_GTUTORIAL_H
 
+class tString;
+struct gGameSettings;
+class eTeam;
+
 //! opens the tutorial menu
 void sg_TutorialMenu();
 
 //! returns whether all tutorials have been completed
 bool sg_TutorialsCompleted();
+
+class gTutorialBase
+{
+public:
+    // analyzes the game every second, sets uMenu::quickexit if 
+    // the tutorial was failed or passed
+    virtual void Analysis() = 0;
+    virtual void RoundEnd( eTeam * winner );
+    virtual tString const & Name() const = 0;
+};
+
+// defined in gGame.cpp
+void sg_TutorialGame( gGameSettings & settings, gTutorialBase & tutorial );
 
 #endif

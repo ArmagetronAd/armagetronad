@@ -38,8 +38,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "gGame.h"
 
-void sg_TutorialGame( gGameSettings & settings, tString const & title );
-
 static gGameSettings sg_DefaultSettings()
 {
     return gGameSettings(10,
@@ -71,8 +69,14 @@ static bool sg_TestMatch()
 
 class gTutorialMenuItem;
 
+void gTutorialBase::RoundEnd( eTeam * winner )
+{
+    Analysis();
+    uMenu::quickexit = uMenu::QuickExit_Game;
+}
+
 //! tutorial class
-class gTutorial: public tListItem< gTutorial >
+class gTutorial: public tListItem< gTutorial >, public gTutorialBase
 {
 public:
     gTutorial( char const * name )
@@ -81,8 +85,25 @@ public:
       , completed_( false )
       , completedConf_( tString("TUTORIAL_COMPLETE_") + tString(name).ToUpper(), completed_ )
       , name_( name )
+      , success_( false )
+      , finished_( false )
     {
         CreateMenu();
+    }
+
+    // call on success or failure during analysis
+    void End( bool success )
+    {
+        success_ = success;
+        finished_ = true;
+        uMenu::quickexit = uMenu::QuickExit_Game;
+    }
+
+    // always exit after one round
+    void RoundEnd( eTeam * winner )
+    {
+        End( winner && winner->IsHuman() );
+        Analysis();
     }
 
     void CreateMenu();
@@ -95,13 +116,19 @@ public:
     // shows instructions
     virtual void Instructions()
     {
+        uMenu::Message(
+            tOutput( (tString("$tutorial_menu_") + Name() + "_text" ).c_str()),
+            tOutput( (tString("$tutorial_menu_") + Name() + "_instructions" ).c_str()),
+            300,
+            tOutput( (tString("$tutorial_menu_") + Name() + "_animation" ).c_str() )
+            );
     }
 
     // runs the tutorial
     virtual bool RunCore()
     {
-        sg_TutorialGame( settings_, tString( tOutput( ( tString("$tutorial_menu_") + Name() + "_text" ).c_str() ) ) );
-        return true;
+        sg_TutorialGame( settings_, *this );
+        return success_;
     }
 
     // back up settings
@@ -109,27 +136,54 @@ public:
     {
     }
     
+    // restore settings
     void Restore()
     {
+    }
+
+    // called on success
+    virtual void OnSuccess()
+    {
+        uMenu::Message( tOutput("$tutorial_success"),
+                        tOutput("$tutorial_success_text"), 300 );
+    }
+    
+    // called on failure
+    virtual void OnFailure()
+    {
+        uMenu::Message( tOutput("$tutorial_failure"),
+                        tOutput("$tutorial_failure_text"), 300 );
     }
 
     // runs the tutorial
     virtual bool Run()
     {
+        success_ = false;
         Backup();
         Prepare();
-        bool ret = RunCore();
+        RunCore();
         Restore();
-        return ret;
+        return success_;
     }
 
     // called from the menu
     bool Activate()
     {
-        if( Run() )
+        Instructions();
+        Run();
+
+        if( finished_ )
         {
-            completed_ = true;
-            return true;
+            if( success_ )
+            {
+                OnSuccess();
+                completed_ = true;
+                return true;
+            }
+            else
+            {
+                OnFailure();
+            }
         }
 
         return false;
@@ -140,7 +194,7 @@ public:
         return completed_;
     }
 
-    tString const & Name() const
+    virtual tString const & Name() const
     {
         return name_;
     }
@@ -161,11 +215,14 @@ public:
 protected:
     gGameSettings settings_;
 private:
+    // succeeded ever?
     bool completed_;
     tConfItem< bool > completedConf_;
     tString name_;
     std::auto_ptr< gTutorialMenuItem > menuItem_;
     static gTutorial * anchor_;
+    bool success_; //!< succeeded this time?
+    bool finished_; //!< set when the tutorial is finished
 };
 
 gTutorial * gTutorial::anchor_ = NULL;
@@ -240,6 +297,10 @@ public:
     {
         settings_.speedFactor = -2;
         settings_.numAIs = 1;
+    }
+
+    void Analysis()
+    {
     }
 };
 
