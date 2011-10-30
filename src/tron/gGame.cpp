@@ -2495,7 +2495,7 @@ void MainMenu(bool ingame){
      "$display_settings_menu_help");
 
     uMenuItemSubmenu *gamemenuitem = NULL;
-    if (sn_GetNetState() != nCLIENT)
+    if (sn_GetNetState() != nCLIENT && !sg_tutorial)
     {
         char const * gamehelp;
         if (!ingame)
