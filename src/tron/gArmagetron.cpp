@@ -633,12 +633,12 @@ int main(int argc,char **argv){
 
     try
     {
-        tCommandLineData commandLine;
-        commandLine.programVersion_  = &st_programVersion;
+        tDefaultCommandLineAnalyzer defaultCommandLineAnalyzer;
+        tCommandLineData commandLine( st_programVersion );
 
         // analyse command line
         // tERR_MESSAGE( "Analyzing command line." );
-        if ( ! commandLine.Analyse(argc, argv) )
+        if ( !commandLine.Analyse(argc, argv) )
             return 0;
 
 
