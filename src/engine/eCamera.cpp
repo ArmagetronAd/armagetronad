@@ -477,7 +477,7 @@ void eCamera::MyInit(){
     {
         center = netPlayer->Object();
     }
-    else if ( grid->gameObjectsInteresting.Len() > 0 )
+    else if ( grid && grid->gameObjectsInteresting.Len() > 0 )
     {
         // or an arbitrary game object
         center = grid->gameObjectsInteresting[0];
@@ -512,8 +512,14 @@ void eCamera::MyInit(){
     //  foot=tNEW(eGameObject)(pos,dir,0);
     distance=0;
     lastrendertime=se_GameTime();
-	if (CameraMain()) grid->cameras.Add(this,id);
-	else grid->subcameras.Add(this,id);
+	if (CameraMain())
+    {
+        grid->cameras.Add(this,id);
+    }
+	else if( grid )
+    {
+        grid->subcameras.Add(this,id);
+    }
     //  se_ResetVisibles(id);
     smoothTurning=turning=0;
     centerPosLast=centerposLast=CenterPos();
@@ -1739,6 +1745,11 @@ void eCamera::SwitchCenter(int d){
     if (center)
         centerID = center->interestingID;
     center = NULL;
+
+    if( !grid )
+    {
+        return;
+    }
 
     if (centerID>=grid->gameObjectsInteresting.Len())
         centerID=0;
