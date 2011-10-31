@@ -37,6 +37,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "eTeam.h"
 
 #include "gGame.h"
+#include "gCycle.h"
 
 // temporarily override a setting item
 class gTemporarySetting: public tReferencable< gTemporarySetting >
@@ -158,6 +159,34 @@ public:
     void PushSetting( char const * setting, char const * value )
     {
         tempSettings_.push_back( tNEW(gTemporarySetting)( setting, value ) );
+    }
+
+    // find human team
+    eTeam & HumanTeam()
+    {
+        for( int i = eTeam::teams.Len()-1; i >= 0; --i )
+        {
+            if( eTeam::teams[i]->IsHuman() )
+            {
+                return *eTeam::teams[i];
+            }
+        }
+
+        tASSERT( false );
+        
+        static tJUST_CONTROLLED_PTR< eTeam > emergency = tNEW( eTeam );
+        return *emergency;
+    }
+
+    ePlayerNetID & HumanPlayer()
+    {
+        eTeam & team = HumanTeam();
+        return *team.OldestHumanPlayer();
+    }
+
+    gCycle * HumanCycle()
+    {
+        return dynamic_cast< gCycle * >( HumanPlayer().Object() );
     }
 
     // restore settings
@@ -362,6 +391,39 @@ public:
 
 };
 static gTutorialTest sg_tutorialTest;
+
+//! grind tutorial
+class gTutorialGrind: public gTutorial
+{
+public:
+    gTutorialGrind()
+    : gTutorial( "grind" )
+    {
+        settings_.numAIs = 1;
+    }
+
+    // analyzes the game
+    void Analysis()
+    {
+        gCycle * c = HumanCycle();
+        if( c && c->Speed() > 40 )
+        {
+            End( true );
+        }
+    }
+
+    // prepares
+    virtual void Prepare()
+    {
+        gTutorial::Prepare();
+        su_helpLevel = uActionTooltip::Level_Essential;
+        PushSetting( "MAP_FILE", "Z-Man/tutorial/grind-0.1.0.aamap.xml" );
+        PushSetting( "COCKPIT_FILE", "Z-Man/tutorial/spartanic-0.0.1.aacockpit.xml" );
+        PushSetting( "CYCLE_RUBBER", "5" );
+    }
+
+};
+static gTutorialGrind sg_tutorialGrind;
 
 // survival: survive a bit, get to the winzone
 class gTutorialSurvival: public gTutorial
