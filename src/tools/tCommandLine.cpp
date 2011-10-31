@@ -54,7 +54,7 @@ static void InformWithMessage( const char* message )
 
 static tCommandLineAnalyzer *s_commandLineAnalyzerAnchor;
 
-tCommandLineData::tCommandLineData( const tString & programVersion, tCommandLineAnalyzer *anchor )
+tCommandLineData::tCommandLineData( const tString & programVersion, tCommandLineAnalyzer *& anchor )
     :programVersion_( programVersion ), commandLineAnalyzerAnchor_( anchor )
 {
 }
@@ -329,7 +329,7 @@ tCommandLineAnalyzer::tCommandLineAnalyzer()
 {
 }
 
-tCommandLineAnalyzer::tCommandLineAnalyzer( tCommandLineAnalyzer *anchor )
+tCommandLineAnalyzer::tCommandLineAnalyzer( tCommandLineAnalyzer *& anchor )
         : tListItem< tCommandLineAnalyzer >( anchor )
 {
 }

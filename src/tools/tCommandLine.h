@@ -38,7 +38,7 @@ class tCommandLineAnalyzer;
 struct tCommandLineData
 {
     tCommandLineData( const tString & programVersion );
-    tCommandLineData( const tString & programVersion, tCommandLineAnalyzer *commandLineAnalyzerAnchor );
+    tCommandLineData( const tString & programVersion, tCommandLineAnalyzer *& commandLineAnalyzerAnchor );
     
     //!< analyse and execute the command line arguments
     bool Analyse(int argc,char **argv );
@@ -79,7 +79,7 @@ class tCommandLineAnalyzer: public tListItem< tCommandLineAnalyzer >
 {
 public:
     tCommandLineAnalyzer(); //!default constructor
-    tCommandLineAnalyzer( tCommandLineAnalyzer *anchor );
+    tCommandLineAnalyzer( tCommandLineAnalyzer *& anchor );
     ~tCommandLineAnalyzer(); //!destructor
 
     inline void Initialize( tCommandLineParser & parser ); //! Analyzes the command line
