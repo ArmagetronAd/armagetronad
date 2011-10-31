@@ -784,6 +784,9 @@ static boost::mutex st_backgroundSyncEventsMutex;
 static const char * st_eventSection = "BACKGROUND_EVENT";
 static const char * st_eventSectionEnd = "BACKGROUND_EVENT_END";
 
+static boost::mutex st_backgroundSyncDesConstruction;
+static int st_backgroundProcesses = 0;
+
 void st_SyncBackgroundThreads()
 {
     if( tRecorder::IsPlayingBack() )
@@ -924,6 +927,8 @@ void tBackgroundSyncEvent::Leave()
 //! called from the main thread to sync up
 void tBackgroundSyncEvent::Sync()
 {
+    boost::lock_guard< boost::mutex > lock( st_backgroundSyncDesConstruction );
+
     // call static function; *this is going to be destroyed in the background
     // while this function runs, can't be good.
     Sync( sync_ );
@@ -947,9 +952,6 @@ int tBackgroundSyncEvent::ID() const
 {
     return sync_.id_;
 }
-
-static boost::mutex st_backgroundSyncDesConstruction;
-static int st_backgroundProcesses = 0;
 
 class tBackgroundWaiter
 {
