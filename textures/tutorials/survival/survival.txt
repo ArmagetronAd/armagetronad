@@ -10,6 +10,7 @@
 1 textures/tutorials/survival/1_1.png
 1 textures/tutorials/survival/1_2.png
 1 textures/tutorials/survival/1_3.png
+1 textures/tutorials/survival/1_4.png
 1 textures/tutorials/survival/1_5.png
 .5 textures/tutorials/survival/1_5.png textures/tutorials/clipart/circle.png textures/tutorials/clipart/check.png
 1.5 textures/tutorials/survival/1_5.png textures/tutorials/clipart/circle.png textures/tutorials/clipart/check.png textures/tutorials/clipart/check.png
