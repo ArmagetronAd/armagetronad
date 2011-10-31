@@ -9,7 +9,7 @@
 		<World>
 			<Field>
 				<Spawn	x="20"	y="200"	xdir="0"	ydir="1"	/>
-				<Spawn	x="30"	y="50"	xdir="0"	ydir="1"	/>
+				<Spawn	x="40"	y="50"	xdir="0"	ydir="1"	/>
 			
 				<Wall>
 					<Point	x="0"	y="0"	/>
