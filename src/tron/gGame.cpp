@@ -3189,7 +3189,7 @@ void gGame::StateUpdate(){
                     rounds = -100;
                 }
 
-                if (rounds<=0){
+                if (!sg_tutorial && rounds<=0){
                     if( sg_doWarmup > 1 && se_matches > 0 )
                         sn_ConsoleOut(tOutput("$gamestate_resetnow_console_matches", se_matches));
                     else
@@ -3830,7 +3830,10 @@ void gGame::Analysis(REAL time){
             wintimer=time;
             winner = wishWinner;
             wishWinner = 0;
-            messagetype	= wishWinnerMessage;
+            if( wishWinnerMessage )
+            {
+                messagetype	= wishWinnerMessage;
+            }
         }
 
         if (winner <= 0 && alive <= 0 && ai_alive <= 0 && teams_alive <= 0 ){
@@ -3924,6 +3927,11 @@ void gGame::Analysis(REAL time){
                         tString notificationMessage( ePlayerNetID::FilterName( eTeam::teams[winner-1]->Name() ) );
                         notificationMessage << " has won the round";
                         se_sendEventNotification(tString("Round winner"), notificationMessage);
+
+                        if( sg_tutorial )
+                        {
+                            sg_tutorial->OnWin( lastWinner );
+                        }
                     }
                 }
                 else if ( time >= drawtime )
@@ -4132,6 +4140,26 @@ void gGame::Analysis(REAL time){
     if (sg_currentSettings->finishType==gFINISH_EXPRESS)
         fintime=2.5;
 
+    // quicker end of round on tutorial, plus neant slomo effect
+    if (sg_tutorial)
+    {
+        REAL slowdown = 1;
+        holdBackNextRound = false;
+        if( winner && alive > 0 )
+        {
+            if( se_mainGameTimer )
+            {
+                slowdown = 0.25;
+                fintime=2.5*slowdown;
+                se_mainGameTimer->speed = slowdown;
+            }
+        }
+        else
+        {
+            fintime=4;
+        }
+    }
+
     if (( ( winner || absolute_winner ) && wintimer+fintime < time)
             || (((alive==0 && eTeam::teams.Len()>=
 #ifndef DEDICATED
@@ -4165,6 +4193,7 @@ void gGame::Analysis(REAL time){
             if( sg_tutorial )
             {
                 sg_tutorial->RoundEnd( lastWinner );
+                goon = false;
             }
             SetState(GS_PLAY,GS_DELETE_OBJECTS);
         }

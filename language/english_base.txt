@@ -1661,6 +1661,7 @@ game_menu_wz_ld_help		Minimum number of seconds since the last death before the 
 #********************************************
 
 window_title_tutorial       \g - Tutorial: \1
+tutorial_success            Well done!
 
 tutorial_menu_test_text     Test
 tutorial_menu_test_help     Test Tutorial: play against one constant AI.

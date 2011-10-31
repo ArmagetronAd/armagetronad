@@ -68,7 +68,7 @@ private:
 static gGameSettings sg_DefaultSettings()
 {
     return gGameSettings(10,
-                         30, 10, 100000, 100000,
+                         30, 999, 100000, 100000,
                          0,   0, 30,
                          false, false,
                          0  ,  -3,
@@ -96,10 +96,12 @@ static bool sg_TestMatch()
 
 class gTutorialMenuItem;
 
+void gTutorialBase::OnWin( eTeam * winner )
+{
+}
+
 void gTutorialBase::RoundEnd( eTeam * winner )
 {
-    Analysis();
-    uMenu::quickexit = uMenu::QuickExit_Game;
 }
 
 extern uActionTooltip::Level su_helpLevel;
@@ -125,14 +127,24 @@ public:
     {
         success_ = success;
         finished_ = true;
-        uMenu::quickexit = uMenu::QuickExit_Game;
+        sg_DeclareWinner( &HumanTeam(), NULL );
     }
 
     // always exit after one round
     void RoundEnd( eTeam * winner )
     {
-        End( winner && winner->IsHuman() );
-        Analysis();
+        finished_ = true;
+    }
+
+    // always exit after one round
+    void OnWin( eTeam * winner )
+    {
+        finished_ = true;
+        if( winner && winner->IsHuman() )
+        {
+            sn_CenterMessage(tOutput("$tutorial_success"));
+            success_ = true;
+        }
     }
 
     void CreateMenu();
@@ -466,6 +478,7 @@ public:
     gTutorialNavigation()
     : gTutorial( "navigation" )
     {
+        settings_.sizeFactor += 2;
     }
 
     // analyzes the game

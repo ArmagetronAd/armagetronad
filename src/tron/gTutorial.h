@@ -45,7 +45,13 @@ public:
     // analyzes the game every second, sets uMenu::quickexit if 
     // the tutorial was failed or passed
     virtual void Analysis() = 0;
+
+    // called the moment a team won
+    virtual void OnWin( eTeam * winner );
+
+    // called when the round really ends
     virtual void RoundEnd( eTeam * winner );
+
     virtual tString const & Name() const = 0;
 };
 
