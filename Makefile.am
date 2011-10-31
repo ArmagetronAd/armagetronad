@@ -143,6 +143,7 @@ endif
 if NEEDDATA
 #   copy tutorial textures
 	cp -R ${srcdir}/textures/tutorials $(DESTDIR)$(aa_datadir)/textures/
+	find $(DESTDIR)$(aa_datadir)/textures/tutorials -name *.xcf -exec rm \{\} \;
 endif
 
 uninstall-hook:

@@ -1676,6 +1676,7 @@ tutorial_menu_navigation_animation textures/tutorials/navigation/navigation.txt
 tutorial_menu_survival_text     Survival
 tutorial_menu_survival_help     Survival Tutorial: learn to survive.
 tutorial_menu_survival_instructions Walls are deadly in \g, that includes your own trail. Your task in this tutorial is to avoid crashing in a small arena for long 30 seconds, after which a green winzone will appear. Drive into it to finish this tutorial.
+tutorial_menu_survival_animation textures/tutorials/survival/survival.txt
 
 tutorial_menu_grind_text     Grind
 tutorial_menu_grind_help     Grind Tutorial: learn to accelerate
