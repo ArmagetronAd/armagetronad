@@ -1670,7 +1670,7 @@ tutorial_menu_test_animation textures/tutorials/test/test.txt
 
 tutorial_menu_navigation_text     Navigation
 tutorial_menu_navigation_help     Navigation Tutorial: learn to control your cycle.
-tutorial_menu_navigation_instructions Use the turn controls to reach the green winzone. Get used to how the basic physics work: you will not turn smoothly, but rather in sharp angles of 90 degrees.
+tutorial_menu_navigation_instructions Use the turn controls to reach the green winzone. Get used to how the basic physics work: you will not turn smoothly, but rather in sharp angles of 90 degrees. Take your time, nothing is trying to kill you yet.
 tutorial_menu_navigation_animation textures/tutorials/navigation/navigation.txt
 
 tutorial_menu_survival_text     Survival

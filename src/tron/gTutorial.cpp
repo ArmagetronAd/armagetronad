@@ -320,7 +320,7 @@ public:
     {
     }
 
-    static void AdvanceMenu( uMenu & menu )
+    static void AdvanceMenu( uMenu & menu, bool enter = false )
     {
         int s = menu.GetSelected();
         if( s > menu.NumItems()-1 )
@@ -344,7 +344,7 @@ public:
             s--;
         }
         menu.SetSelected( s );
-        if( i && !i->tutorial_.Complete() )
+        if( i && !i->tutorial_.Complete() && enter )
         {
             i->Enter();
         }
@@ -355,7 +355,7 @@ public:
         bool success = tutorial_.Activate();
         if( success )
         {
-            AdvanceMenu( *menu );
+            AdvanceMenu( *menu, true );
         }
     }
 private:
