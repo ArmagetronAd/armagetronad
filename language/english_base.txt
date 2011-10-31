@@ -1681,6 +1681,7 @@ tutorial_menu_survival_animation textures/tutorials/survival/survival.txt
 tutorial_menu_grind_text     Grind
 tutorial_menu_grind_help     Grind Tutorial: learn to accelerate
 tutorial_menu_grind_instructions Walls are also your friend in \g. You can drive close to a cycle trail to accelerate. If you are driving so close to a wall that you see sparks fly, you're doing it right.\nFor this tutorail, we activate what we call 'rubber': think of it as a shield protecting you against crashes. This allows you to get close to the enemy trail, you do not have to worry too much about turning away too late.\nGoal of this tutorial is to reach a speed of 40 m/s or to kill the enemy AI.
+tutorial_menu_grind_animation textures/tutorials/grinding/grinding.txt
 
 #********************************************
 #********************************************
