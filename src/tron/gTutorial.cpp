@@ -432,6 +432,7 @@ public:
         PushSetting( "MAP_FILE", "Z-Man/tutorial/grind-0.1.0.aamap.xml" );
         PushSetting( "COCKPIT_FILE", "Z-Man/tutorial/spartanic-0.0.1.aacockpit.xml" );
         PushSetting( "CYCLE_RUBBER", "5" );
+        PushSetting( "TEXT_OUT", "0" );
     }
 
 };
