@@ -231,7 +231,7 @@ else
 buildmain =
 endif
 
-games_PROGRAMS = $(buildmain) $(buildthemaster)
+games_PROGRAMS = $(buildmain) $(buildthemaster) armagetronad-serverquery
 #EXTRA_PROGRAMS = armagetronad_main_master
 
 #if ENABLE_RUBY
@@ -275,6 +275,10 @@ armagetronad_main_LDADD= libtron.a libenginecore.a libengine.a libnetwork.a libu
 armagetronad_main_master_SOURCES = network/master.cpp
 armagetronad_main_master_CXXFLAGS =$(libtron_a_CXXFLAGS)
 armagetronad_main_master_LDADD=libnetwork.a libtools.a protobuf/libprotobuf.a 
+
+armagetronad_serverquery_SOURCES = serverquery/serverquery.cpp
+armagetronad_serverquery_CXXFLAGS = $(libnetwork_a_CXXFLAGS)
+armagetronad_serverquery_LDADD = libnetwork.a libtools.a protobuf/libprotobuf.a
 endif
 
 ## Note: tron/gFloor.cpp is not referenced from the outside, but required anyway. So it can't be put into
