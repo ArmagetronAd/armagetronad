@@ -56,7 +56,6 @@ namespace sq
             object["max_users"] = MaxUsers();
             object["ping"] = Ping();
             object["user_names"] = UserNames();
-            object["user_names_one_line"] = UserNamesOneLine();
             object["url"] = Url();
             object["options"] = Options();
         }
