@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <fstream>
 #include "tArray.h"
 #include "tString.h"
+#include "tCommandLine.h"
 
 class tPath
 {
@@ -144,6 +145,14 @@ public:
 
     // sort the list of files
     static void SortFiles( tArray< tString >& files );
+};
+
+class tDirectoriesCommandLineAnalyzer: public tCommandLineAnalyzer
+{
+private:
+    virtual void DoInitialize( tCommandLineParser & parser );
+    virtual bool DoAnalyze( tCommandLineParser & parser );
+    virtual void DoHelp( std::ostream & s );
 };
 
 #endif

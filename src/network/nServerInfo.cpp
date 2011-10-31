@@ -3451,3 +3451,22 @@ tString nServerInfoCharacterFilter::FilterServerName( tString const & s )
     return FilterString( tColoredString::RemoveColors( s ) );
 }
 
+nMasterLoader::nMasterLoader()
+    :realFirstServer_( sn_FirstServer )
+{
+    sn_FirstServer = NULL;
+}
+
+nMasterLoader::~nMasterLoader()
+{
+    sn_FirstServer = realFirstServer_;
+}
+
+void nMasterLoader::AddMaster( const tString & connectionName, unsigned port )
+{
+    nServerInfo *master = CreateServerInfo();
+    master->SetConnectionName( connectionName );
+    master->SetPort( port );
+    master->Remove();
+    master->Insert( sn_masterList );
+}

@@ -1615,93 +1615,89 @@ static bool ReadDir( tCommandLineParser & parser, tString & target, const char* 
     return false;
 }
 
-class tDirectoriesCommandLineAnalyzer: public tCommandLineAnalyzer
+void tDirectoriesCommandLineAnalyzer::DoInitialize( tCommandLineParser & parser )
 {
-private:
-    virtual void DoInitialize( tCommandLineParser & parser )
-    {
-        // Puts the data files in the executable's bundle
+    // Puts the data files in the executable's bundle
 #ifndef MACOSX_XCODE
-        try
+    try
+    {
+        st_pathToExecutable.Set( parser.Executable() );
+        FindDataPath();
+        FindConfigurationPath();
+    }
+    catch( tRunningInBuildDirectory )
+    {
+        // last fallback for debugging (activated only if there is data in the current directory)
+        if ( TestPath( ".", "language/languages.txt") && TestDataPath(s_topSourceDir) && TestConfigurationPath(st_DataDir + "/config") )
         {
-            st_pathToExecutable.Set( parser.Executable() );
-            FindDataPath();
-            FindConfigurationPath();
-        }
-        catch( tRunningInBuildDirectory )
-        {
-            // last fallback for debugging (activated only if there is data in the current directory)
-            if ( TestPath( ".", "language/languages.txt") && TestDataPath(s_topSourceDir) && TestConfigurationPath(st_DataDir + "/config") )
-            {
-                // we must be running the game in debug mode; set user data dir to current directory.
-                st_UserDataDir = ".";
+            // we must be running the game in debug mode; set user data dir to current directory.
+            st_UserDataDir = ".";
 
-                // the included resources are scrambled and put into the current directory as well.
-                st_IncludedResourceDir = "./resource/included";
-                return;
-            }
+            // the included resources are scrambled and put into the current directory as well.
+            st_IncludedResourceDir = "./resource/included";
+            return;
         }
+    }
 #endif // !MACOSX_XCODE
 
 
-    }
+}
 
-    virtual bool DoAnalyze( tCommandLineParser & parser )
+bool tDirectoriesCommandLineAnalyzer::DoAnalyze( tCommandLineParser & parser )
+{
+    if( ReadDir( parser, st_DataDir, "--datadir" ) ) return true;
+    if( ReadDir( parser, st_UserDataDir, "--userdatadir" ) ) return true;
+    if( ReadDir( parser, st_ConfigDir, "--configdir" ) ) return true;
+    if( ReadDir( parser, st_UserConfigDir, "--userconfigdir" ) ) return true;
+    if( ReadDir( parser, st_VarDir, "--vardir" ) ) return true;
+    if( ReadDir( parser, st_ResourceDir, "--resourcedir" ) ) return true;
+    if( ReadDir( parser, st_AutoResourceDir, "--autoresourcedir" ) ) return true;
+
+    if ( parser.GetSwitch( "--path-no-absolutecheck" ) )
     {
-        if( ReadDir( parser, st_DataDir, "--datadir" ) ) return true;
-        if( ReadDir( parser, st_UserDataDir, "--userdatadir" ) ) return true;
-        if( ReadDir( parser, st_ConfigDir, "--configdir" ) ) return true;
-        if( ReadDir( parser, st_UserConfigDir, "--userconfigdir" ) ) return true;
-        if( ReadDir( parser, st_VarDir, "--vardir" ) ) return true;
-        if( ReadDir( parser, st_ResourceDir, "--resourcedir" ) ) return true;
-        if( ReadDir( parser, st_AutoResourceDir, "--autoresourcedir" ) ) return true;
-
-        if ( parser.GetSwitch( "--path-no-absolutecheck" ) )
-        {
-            st_checkPathAbsolute = false;
-            return true;
-        }
-
-        if ( parser.GetSwitch( "--path-no-relativecheck" ) )
-        {
-            st_checkPathRelative = false;
-            return true;
-        }
-
-        if ( parser.GetSwitch( "--path-no-hiddencheck" ) )
-        {
-            st_checkPathHidden = false;
-            return true;
-        }
-
-        if ( parser.GetSwitch( "--prefix" ) )
-        {
-            std::cout << GetPrefix() << '\n';
-            throw 1;
-            return true;
-        }
-
-        return false;
+        st_checkPathAbsolute = false;
+        return true;
     }
 
-    virtual void DoHelp( std::ostream & s )
-    {                                      //
-        s << "--datadir <Directory>        : read game data (textures, sounds and texts)\n"
-        <<   "                               from this directory\n";
-        s << "--userdatadir <Directory>    : read customized game data from this directory\n";
-        s << "--configdir <Directory>      : read game configuration (.cfg-files)\n"
-        <<   "                               from this directory\n";
-        s << "--userconfigdir <Directory>  : read user game configuration from this directory\n";
-        s << "--vardir <Directory>         : save game logs and highscores in this directory\n\n";
-        s << "--resourcedir <Directory>    : look for resources in this directory\n\n";
-        s << "--autoresourcedir <Directory>: download missing resources into this directory\n\n";
-        s << "--path-no-absolutecheck      : disables security check against absolute paths\n";
-        s << "--path-no-hiddencheck        : disables security check against hidden paths\n";
-        s << "--path-no-relativecheck      : disables security check against relative paths.\n"
-        <<   "                               Not recommended, this check is really important.\n\n";
-        s << "--prefix                     : prints the prefix the game was installed to\n";
+    if ( parser.GetSwitch( "--path-no-relativecheck" ) )
+    {
+        st_checkPathRelative = false;
+        return true;
     }
-};
+
+    if ( parser.GetSwitch( "--path-no-hiddencheck" ) )
+    {
+        st_checkPathHidden = false;
+        return true;
+    }
+
+    if ( parser.GetSwitch( "--prefix" ) )
+    {
+        std::cout << GetPrefix() << '\n';
+        throw 1;
+        return true;
+    }
+
+    return false;
+}
+
+void tDirectoriesCommandLineAnalyzer::DoHelp( std::ostream & s )
+{                                      //
+    s << "--datadir <Directory>        : read game data (textures, sounds and texts)\n"
+    <<   "                               from this directory\n";
+    s << "--userdatadir <Directory>    : read customized game data from this directory\n";
+    s << "--configdir <Directory>      : read game configuration (.cfg-files)\n"
+    <<   "                               from this directory\n";
+    s << "--userconfigdir <Directory>  : read user game configuration from this directory\n";
+    s << "--vardir <Directory>         : save game logs and highscores in this directory\n\n";
+    s << "--resourcedir <Directory>    : look for resources in this directory\n\n";
+    s << "--autoresourcedir <Directory>: download missing resources into this directory\n\n";
+    s << "--path-no-absolutecheck      : disables security check against absolute paths\n";
+    s << "--path-no-hiddencheck        : disables security check against hidden paths\n";
+    s << "--path-no-relativecheck      : disables security check against relative paths.\n"
+    <<   "                               Not recommended, this check is really important.\n\n";
+    s << "--prefix                     : prints the prefix the game was installed to\n";
+}
 
 static tDirectoriesCommandLineAnalyzer analyzer;
 

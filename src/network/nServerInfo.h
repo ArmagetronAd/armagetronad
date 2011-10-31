@@ -307,7 +307,13 @@ public:
     static nServerInfo* GetMasters();              //!< get the list of master servers
     static nServerInfo* GetRandomMaster();         //!< gets a random master server
 
-    static void GetFromMaster(nServerInfoBase *masterInfo=NULL, char const * fileSuffix = NULL );  // get all the basic infos from the master server, stored in the server info file of the given suffix
+    // Get all the basic infos from the master server.
+    // 
+    // @param masterInfo If non-NULL, then this master server will be polled for data.
+    //                   Otherwise, a random master server will be selected from the defaults.
+    // @param fileSuffix A suffix used to determine the filename where master data is stored to on disk.
+    // @param shouldLoadAndSaveFiles Should master data be loaded/saved from the disk?
+    static void GetFromMaster(nServerInfoBase *masterInfo=NULL, char const * fileSuffix = NULL );
 
     static void TellMasterAboutMe(nServerInfoBase *masterInfo=NULL);  // dedicated server: tell master server about my existence
 
@@ -393,6 +399,16 @@ private:
     QueryType queryType_; //!< the query type to use for this server
     SettingsDigest settings_; //!< most important settings
     Classification classification_; //!< classification according to settings
+};
+
+class nMasterLoader
+{
+public:
+    nMasterLoader();
+    ~nMasterLoader();
+    void AddMaster( const tString & connectionName, unsigned port );
+private:
+    nServerInfo *realFirstServer_;
 };
 
 //! callback to give other components a chance to help fill in the server info
