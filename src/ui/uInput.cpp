@@ -1553,6 +1553,7 @@ uActionTooltip::~uActionTooltip()
 
 bool uActionTooltip::Help( int player )
 {
+#ifndef DEDICATED
     if( rConsole::CenterDisplayBusy() )
     {
         return false;
@@ -1618,6 +1619,7 @@ bool uActionTooltip::Help( int player )
 
         return true;
     }
+#endif
     return false;
 }
 
