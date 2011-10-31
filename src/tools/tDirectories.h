@@ -149,6 +149,9 @@ public:
 
 class tDirectoriesCommandLineAnalyzer: public tCommandLineAnalyzer
 {
+public:
+    tDirectoriesCommandLineAnalyzer() : tCommandLineAnalyzer() {}
+    tDirectoriesCommandLineAnalyzer( tCommandLineAnalyzer *& anchor ) : tCommandLineAnalyzer( anchor ) {}
 private:
     virtual void DoInitialize( tCommandLineParser & parser );
     virtual bool DoAnalyze( tCommandLineParser & parser );
