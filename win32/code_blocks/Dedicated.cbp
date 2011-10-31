@@ -474,6 +474,8 @@
 		<Unit filename="..\..\src\tron\gStuff.h" />
 		<Unit filename="..\..\src\tron\gTeam.cpp" />
 		<Unit filename="..\..\src\tron\gTeam.h" />
+		<Unit filename="..\..\src\tron\gTutorial.cpp" />
+		<Unit filename="..\..\src\tron\gTutorial.h" />
 		<Unit filename="..\..\src\tron\gWall.cpp" />
 		<Unit filename="..\..\src\tron\gWall.h" />
 		<Unit filename="..\..\src\tron\zone\shapeCircle.h" />
