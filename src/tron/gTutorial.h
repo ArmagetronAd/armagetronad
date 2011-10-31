@@ -42,6 +42,8 @@ bool sg_TutorialsCompleted();
 class gTutorialBase
 {
 public:
+    virtual ~gTutorialBase(){}
+
     // analyzes the game every second, sets uMenu::quickexit if 
     // the tutorial was failed or passed
     virtual void Analysis() = 0;

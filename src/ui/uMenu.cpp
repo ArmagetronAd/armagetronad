@@ -1878,7 +1878,7 @@ bool uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL 
 
                 // determite best display size for animation, asuming it is 64 pixels high
                 {
-                    int middleY = sr_screenHeight * center;
+                    int middleY = int( sr_screenHeight * center );
                     int maxHeight = middleY - 5 - sr_screenHeight/20;
                     int maxWidth = sr_screenWidth/2 - 10;
                     int height = 32;
