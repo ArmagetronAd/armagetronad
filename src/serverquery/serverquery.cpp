@@ -71,7 +71,7 @@ namespace sq
     {
     public:
         ServerQueryCommandLineAnalyzer(tCommandLineAnalyzer *& anchor)
-            :tCommandLineAnalyzer(anchor), listOption_(false), masterServer_(""), servers_()
+            :tCommandLineAnalyzer(anchor), listOption_(false), masterServer_(""), aggregateOption_(false), servers_()
         {
         }
         
@@ -98,6 +98,11 @@ namespace sq
             {
                 return true;
             }
+            else if (parser.GetSwitch("--aggregate", "-a"))
+            {
+                aggregateOption_ = true;
+                return true;
+            }
             else if (parser.Current()[0] != '-')
             {
                 servers_.push_back(tString(parser.Current()));
@@ -109,8 +114,10 @@ namespace sq
 
         virtual void DoHelp(std::ostream & s)
         {
+            s << "\n";
             s << "-l, --list                   : Fetches only the server list from the master server, and does not query the individual servers for advanced information.\n";
             s << "-m, --master                 : Use the specified master server. By default, the program will use one of the game-provided default master servers.\n";
+            s << "-a, --aggregate              : (TODO document this option)\n";
         }
         
         virtual bool DoExecute()
@@ -135,7 +142,10 @@ namespace sq
                 tAdvanceFrame(1000);
             }
             CheckUpdates(root, writer);
-            // std::cout << writer.write(root);
+            
+            if (aggregateOption_)
+                std::cout << writer.write(root);
+            
             return true;
         }
         
@@ -164,8 +174,14 @@ namespace sq
                 {
                     Json::Value serverToJson(Json::objectValue);
                     run->ToJson(serverToJson);
-                    std::cout << writer.write(serverToJson);
-                    root.append(serverToJson);
+                    if (aggregateOption_)
+                    {
+                        root.append(serverToJson);
+                    }
+                    else
+                    {
+                        std::cout << writer.write(serverToJson);
+                    }
                     run->Remove();
                 }
                 run = run->Next();
@@ -174,6 +190,7 @@ namespace sq
 
         bool listOption_;
         tString masterServer_;
+        bool aggregateOption_;
         std::vector< tString > servers_;
     };
 }
