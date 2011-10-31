@@ -4081,7 +4081,7 @@ void gGame::Analysis(REAL time){
                             message.SetTemplateParameter(1, sg_currentSettings->limitTime);
                             message << "$gamestate_champ_timehit";
                         }
-                        else if ( sg_currentSettings->maxBlowout && eTeam::teams(0)->Score() >= eTeam::teams(1)->Score() + sg_currentSettings->maxBlowout )
+                        else if ( sg_currentSettings->maxBlowout && eTeam::teams.Len() > 1 && eTeam::teams(0)->Score() >= eTeam::teams(1)->Score() + sg_currentSettings->maxBlowout )
                         {
                             message.SetTemplateParameter(1, eTeam::teams(0)->Score() - eTeam::teams(1)->Score());
                             message << "$gamestate_champ_blowout";
