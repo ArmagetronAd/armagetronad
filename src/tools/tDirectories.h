@@ -150,12 +150,14 @@ public:
 class tDirectoriesCommandLineAnalyzer: public tCommandLineAnalyzer
 {
 public:
-    tDirectoriesCommandLineAnalyzer() : tCommandLineAnalyzer() {}
-    tDirectoriesCommandLineAnalyzer( tCommandLineAnalyzer *& anchor ) : tCommandLineAnalyzer( anchor ) {}
+    tDirectoriesCommandLineAnalyzer() : tCommandLineAnalyzer(), enableExtraOptions_( true ) {}
+    tDirectoriesCommandLineAnalyzer( tCommandLineAnalyzer *& anchor, bool enableExtraOptions ) : tCommandLineAnalyzer( anchor ), enableExtraOptions_( enableExtraOptions ) {}
 private:
     virtual void DoInitialize( tCommandLineParser & parser );
     virtual bool DoAnalyze( tCommandLineParser & parser );
     virtual void DoHelp( std::ostream & s );
+    
+    bool enableExtraOptions_;
 };
 
 #endif
