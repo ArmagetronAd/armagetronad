@@ -363,6 +363,41 @@ public:
 };
 static gTutorialTest sg_tutorialTest;
 
+// survival: survive a bit, get to the winzone
+class gTutorialSurvival: public gTutorial
+{
+public:
+    gTutorialSurvival()
+    : gTutorial( "survival" )
+    {
+        settings_.winZoneMinRoundTime = 30;
+        settings_.winZoneMinLastDeath = 0;
+        settings_.sizeFactor -= 2;
+    }
+
+    // analyzes the game
+    void Analysis()
+    {
+    }
+
+    // prepares
+    virtual void Prepare()
+    {
+        gTutorial::Prepare();
+        PushSetting( "WIN_ZONE_RANDOMNESS", ".9" );
+        PushSetting( "WIN_ZONE_EXPANSION", "0" );
+        PushSetting( "WIN_ZONE_INITIAL_SIZE", "5" );
+        PushSetting( "WIN_ZONE_DEATHS", "0" );
+        PushSetting( "CYCLE_RUBBER", "0" );
+        PushSetting( "HIGH_RIM", "0" );
+        PushSetting( "COCKPIT_FILE", "Z-Man/tutorial/empty-0.0.1.aacockpit.xml" );
+        PushSetting( "TEXT_OUT", "0" );
+        su_helpLevel = uActionTooltip::Level_Advanced;
+    }
+};
+static gTutorialSurvival sg_tutorialSurvival;
+
+//! navigation: get to the winzone
 class gTutorialNavigation: public gTutorial
 {
 public:
@@ -381,6 +416,7 @@ public:
     {
         gTutorial::Prepare();
         PushSetting( "TEXT_OUT", "0" );
+        PushSetting( "CYCLE_RUBBER", "0" );
         PushSetting( "MAP_FILE", "Z-Man/tutorial/navigation-0.1.0.aamap.xml" );
         PushSetting( "COCKPIT_FILE", "Z-Man/tutorial/empty-0.0.1.aacockpit.xml" );
         su_helpLevel = uActionTooltip::Level_Essential;
