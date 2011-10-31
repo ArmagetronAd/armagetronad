@@ -64,8 +64,7 @@ namespace sq
     
     nServerInfo *CreateServer()
     {
-        nServerInfo *ret = tNEW(ServerInfo);
-        return ret;
+        return tNEW(ServerInfo);
     }
     
     class ServerQueryCommandLineAnalyzer : public tCommandLineAnalyzer
