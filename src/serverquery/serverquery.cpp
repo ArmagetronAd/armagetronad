@@ -2,14 +2,16 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include "json/json.h"
+#include "nNetwork.h"
 #include "nServerInfo.h"
+#include "nSocket.h"
 #include "tCommandLine.h"
+#include "tConsole.h"
 #include "tDirectories.h"
 #include "tLocale.h"
+#include "tSystime.h"
 #include "tVersion.h"
-// #include "nSocket.h"
-// #include "tConsole.h"
-// #include "nNetwork.h"
 
 namespace sq
 {
@@ -26,6 +28,44 @@ namespace sq
             connectionName = s;
             port = defaultPort;
         }
+    }
+    
+    class ServerInfo : public nServerInfo
+    {
+    public:
+        static ServerInfo *GetFirstServer()
+        {
+            return dynamic_cast< ServerInfo * >( nServerInfo::GetFirstServer() );
+        }
+
+        ServerInfo *Next()
+        {
+            return dynamic_cast< ServerInfo * >( nServerInfo::Next() );
+        }
+        
+        bool IsAdvancedInfoSet() const
+        {
+            return advancedInfoSet;
+        }
+        
+        void ToJson(Json::Value & object) const
+        {
+            object["name"] = GetName();
+            object["release"] = Release();
+            object["users"] = Users();
+            object["max_users"] = MaxUsers();
+            object["ping"] = Ping();
+            object["user_names"] = UserNames();
+            object["user_names_one_line"] = UserNamesOneLine();
+            object["url"] = Url();
+            object["options"] = Options();
+        }
+    };
+    
+    nServerInfo *CreateServer()
+    {
+        nServerInfo *ret = tNEW(ServerInfo);
+        return ret;
     }
     
     class ServerQueryCommandLineAnalyzer : public tCommandLineAnalyzer
@@ -76,21 +116,31 @@ namespace sq
         
         virtual bool DoExecute()
         {
+            Json::Value root(Json::arrayValue);
+            Json::FastWriter writer;
+            
             if (!servers_.empty())
             {
-                
+                // Create nServerInfo instances for servers
             }
             else
             {
                 LoadMasters();
-                // tSuppressConsole console;
                 nServerInfo::GetFromMaster();
             }
             
+            nServerInfo::StartQueryAll();
+            while (nServerInfo::DoQueryAll(10))
+            {
+                CheckUpdates(root, writer);
+                tAdvanceFrame(1000);
+            }
+            CheckUpdates(root, writer);
+            // std::cout << writer.write(root);
             return true;
         }
         
-        void LoadMasters()
+        void LoadMasters() const
         {
             if (masterServer_.size() > 0)
             {
@@ -105,6 +155,23 @@ namespace sq
                 nServerInfo::GetMasters();
             }
         }
+        
+        void CheckUpdates(Json::Value & root, Json::FastWriter & writer) const
+        {
+            ServerInfo *run = ServerInfo::GetFirstServer();
+            while (run)
+            {
+                if (run->IsAdvancedInfoSet())
+                {
+                    Json::Value serverToJson(Json::objectValue);
+                    run->ToJson(serverToJson);
+                    std::cout << writer.write(serverToJson);
+                    root.append(serverToJson);
+                    run->Remove();
+                }
+                run = run->Next();
+            }
+        }
 
         bool listOption_;
         tString masterServer_;
@@ -116,8 +183,6 @@ int main(int argc, char **argv)
 {
     try
     {
-        tLocale::Load("languages.txt");
-        
         tCommandLineAnalyzer *commandLineAnchor;
         tDirectoriesCommandLineAnalyzer directoryOptions(commandLineAnchor);
         sq::ServerQueryCommandLineAnalyzer options(commandLineAnchor);
@@ -126,8 +191,13 @@ int main(int argc, char **argv)
         if (!commandLine.Analyse(argc, argv))
             return 0;
             
+        tLocale::Load("languages.txt");
+        nServerInfo::SetCreator(&sq::CreateServer);
+        
         options.ReadServersFromStdin();
+        tSuppressConsole console;
         commandLine.Execute();
+        sn_BasicNetworkSystem.Shutdown();
 
         return 0;
     }
