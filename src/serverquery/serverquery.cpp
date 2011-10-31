@@ -127,7 +127,15 @@ namespace sq
             
             if (!servers_.empty())
             {
-                // Create nServerInfo instances for servers
+                for (StringVector::const_iterator it = servers_.begin(); it != servers_.end(); ++it)
+                {
+                    tString connectionName;
+                    unsigned port;
+                    ParseConnectionString(*it, connectionName, port, 4534);
+                    nServerInfo *server = CreateServer();
+                    server->SetConnectionName(connectionName);
+                    server->SetPort(port);
+                }
             }
             else
             {
@@ -165,7 +173,7 @@ namespace sq
             }
         }
         
-        void CheckUpdates(Json::Value & root, Json::FastWriter & writer) const
+        void CheckUpdates(Json::Value & root, Json::Writer & writer) const
         {
             ServerInfo *run = ServerInfo::GetFirstServer();
             while (run)
@@ -188,10 +196,12 @@ namespace sq
             }
         }
 
+        typedef std::vector< tString > StringVector;
+
         bool listOption_;
         tString masterServer_;
         bool aggregateOption_;
-        std::vector< tString > servers_;
+        StringVector servers_;
     };
 }
 
