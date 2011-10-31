@@ -1153,7 +1153,7 @@ public:
         tJUST_CONTROLLED_PTR< nDNSResolver > keep( this );
         while( true )
         {
-            usleep(1000);
+            tDelay(1000);
             st_DoToDo();
             boost::lock_guard< boost::mutex > lock( addressMutex_ );
             if( !address_ )

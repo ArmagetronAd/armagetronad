@@ -33,6 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include    "tConfiguration.h"
 #include    "tDirectories.h"
 #include    "tRecorderInternal.h"
+#include    "tSysTime.h"
 #include    <vector>
 
 #undef 	INLINE_DEF
@@ -828,7 +829,7 @@ void st_SyncBackgroundThreads()
                 else
                 {
                     // not found yet. Wait a bit.
-                    usleep( 1000 );
+                    tDelay( 1000 );
                 }
             }
         }
@@ -958,7 +959,7 @@ public:
         // allow background processes to finish
         while( st_backgroundProcesses > 0 )
         {
-            usleep( 1000 );
+            tDelay( 1000 );
             st_SyncBackgroundThreads();
         }
     }
