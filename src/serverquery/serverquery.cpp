@@ -94,7 +94,7 @@ namespace sq
     {
     public:
         ServerQueryCommandLineAnalyzer(tCommandLineAnalyzer *& anchor)
-            :tCommandLineAnalyzer(anchor), listOption_(false), masterServer_(""), aggregateOption_(false), servers_()
+            :tCommandLineAnalyzer(anchor), listOption_(false), masterServer_(""), aggregateOption_(false), prettyPrintOption_(false), servers_()
         {
         }
         
@@ -126,6 +126,12 @@ namespace sq
                 aggregateOption_ = true;
                 return true;
             }
+            else if (parser.GetSwitch("--pretty-print", "-p"))
+            {
+                prettyPrintOption_ = true;
+                aggregateOption_ = true;
+                return true;
+            }
             else if (parser.Current()[0] != '-')
             {
                 servers_.push_back(tString(parser.Current()));
@@ -141,12 +147,15 @@ namespace sq
             s << "-l, --list                   : Fetches only the server list from the master server, and does not query the individual servers for advanced information.\n";
             s << "-m, --master                 : Use the specified master server. By default, the program will use one of the game-provided default master servers.\n";
             s << "-a, --aggregate              : (TODO document this option)\n";
+            s << "-p, --pretty-print           : Create JSON output that is more human-readable. Using this option turns on --aggregate.\n";
         }
         
         virtual bool DoExecute()
         {
             Json::Value root(Json::arrayValue);
-            Json::FastWriter writer;
+            Json::StyledWriter styledWriter;
+            Json::FastWriter fastWriter;
+            Json::Writer & writer = prettyPrintOption_ ? (Json::Writer &)styledWriter : (Json::Writer &)fastWriter;
             
             if (!servers_.empty())
             {
@@ -222,6 +231,7 @@ namespace sq
         bool listOption_;
         tString masterServer_;
         bool aggregateOption_;
+        bool prettyPrintOption_;
         StringVector servers_;
     };
 }
