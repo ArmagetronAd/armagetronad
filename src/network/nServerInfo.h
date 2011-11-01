@@ -312,6 +312,7 @@ public:
     static void Save();      // save/load all server infos
     static void Save(const tPath& path, const char *filename);      // save/load all server infos
     static void Load(const tPath& path, const char *filename);
+    static int ServerCount();
 
     static nServerInfo* GetMasters();              //!< get the list of master servers
     static nServerInfo* GetRandomMaster();         //!< gets a random master server
@@ -415,7 +416,7 @@ class nMasterLoader
 public:
     nMasterLoader();
     ~nMasterLoader();
-    void AddMaster( const tString & connectionName, unsigned port );
+    nServerInfo *AddMaster( const tString & connectionName, unsigned port );
 private:
     nServerInfo *realFirstServer_;
 };

@@ -240,8 +240,10 @@ namespace sq
             
             if (servers_.empty())
             {
-                LoadMasters();
-                nServerInfo::GetFromMaster();
+                nServerInfo *master = LoadMasters();
+                std::cerr << "--> Fetching server list from " << master->GetConnectionName() << ":" << master->GetPort() << '\n';
+                nServerInfo::GetFromMaster(master);
+                std::cerr << "--> Received " << nServerInfo::ServerCount() << " servers\n";
             }
             else
             {
@@ -258,6 +260,7 @@ namespace sq
             
             if (!listOption_)
             {
+                std::cerr << "--> Querying servers for advanced information\n";
                 nServerInfo::StartQueryAll();
                 while (nServerInfo::DoQueryAll(10))
                 {
@@ -277,7 +280,7 @@ namespace sq
             return true;
         }
         
-        void LoadMasters() const
+        nServerInfo *LoadMasters() const
         {
             if (masterServer_.size() > 0)
             {
@@ -285,12 +288,10 @@ namespace sq
                 tString connectionName;
                 unsigned port;
                 ParseConnectionString(masterServer_, connectionName, port, 4533);
-                masterLoader.AddMaster(connectionName, port);
+                return masterLoader.AddMaster(connectionName, port);
             }
-            else
-            {
-                nServerInfo::GetMasters();
-            }
+            
+            return nServerInfo::GetRandomMaster();
         }
         
         void CheckUpdates(Json::Value & root, Json::Writer & writer) const
@@ -338,6 +339,7 @@ int main(int argc, char **argv)
             
         tLocale::Load("languages.txt");
         nServerInfo::SetCreator(&sq::CreateServer);
+        srand((unsigned)time(NULL));
         
         options.ReadServersFromStdin();
         tSuppressConsole console;

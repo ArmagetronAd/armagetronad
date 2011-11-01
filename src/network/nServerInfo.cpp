@@ -770,6 +770,10 @@ static bool net_Accept()
 static nCallbackAcceptPackedWithoutConnection net_acc( &net_Accept );
 
 static int sn_ServerCount = 0;
+int nServerInfo::ServerCount()
+{
+    return sn_ServerCount;
+}
 
 /*
 static void ReadServerInfo(nMessage &m, unsigned int& port, tString& connectionName, bool acceptDirect, bool acceptMaster)
@@ -3474,11 +3478,12 @@ nMasterLoader::~nMasterLoader()
     sn_FirstServer = realFirstServer_;
 }
 
-void nMasterLoader::AddMaster( const tString & connectionName, unsigned port )
+nServerInfo *nMasterLoader::AddMaster( const tString & connectionName, unsigned port )
 {
     nServerInfo *master = CreateServerInfo();
     master->SetConnectionName( connectionName );
     master->SetPort( port );
     master->Remove();
     master->Insert( sn_masterList );
+    return master;
 }
