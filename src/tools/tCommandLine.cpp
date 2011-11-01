@@ -393,6 +393,7 @@ void tCommandLineAnalyzer::DoHelp( std::ostream & s )
 
 bool tCommandLineAnalyzer::DoExecute()
 {
+    return true;
 }
 
 bool tDefaultCommandLineAnalyzer::DoAnalyze( tCommandLineParser & parser )
