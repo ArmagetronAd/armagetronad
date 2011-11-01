@@ -221,7 +221,7 @@ namespace sq
               << "-m, --master                 : Use the specified master server. By default, the\n"
               << "                               program will select a random master server from\n"
               << "                               the game-provided master.srv configuration file.\n\n"
-              << "-a, --asynchronous           : Output the collected advanced server as it\n"
+              << "-a, --asynchronous           : Output the collected server information as it\n"
               << "                               arrives. By default, the program will wait for\n"
               << "                               all queries to finish and output the information\n"
               << "                               as objects in a JSON array. Using this option\n"
