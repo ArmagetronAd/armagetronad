@@ -33,7 +33,6 @@ namespace sq
         }
     }
     
-    
     void SplitString(const tString & s, char delimeter, StringVector & xs)
     {
         std::stringstream ss(s);
