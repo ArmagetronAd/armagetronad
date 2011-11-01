@@ -44,6 +44,11 @@ namespace sq
     class ServerInfo : public nServerInfo
     {
     public:
+        ServerInfo()
+            :nServerInfo(), wasDisplayed_(false)
+        {
+        }
+        
         static ServerInfo *GetFirstServer()
         {
             return dynamic_cast< ServerInfo * >( nServerInfo::GetFirstServer() );
@@ -54,24 +59,38 @@ namespace sq
             return dynamic_cast< ServerInfo * >( nServerInfo::Next() );
         }
         
+        bool WasDisplayed() const
+        {
+            return wasDisplayed_;
+        }
+        
+        bool SetDisplayed()
+        {
+            wasDisplayed_ = true;
+        }
+        
         bool IsAdvancedInfoSet() const
         {
             return advancedInfoSet;
         }
         
-        void ToJson(Json::Value & object) const
+        void ToJson(Json::Value & object, bool encodeAllInfo) const
         {
-            object["name"] = GetName();
-            object["release"] = Release();
-            object["users"] = Users();
-            object["max_users"] = MaxUsers();
-            object["ping"] = Ping();
-            object["url"] = Url();
-            object["options"] = Options();
             object["connection_name"] = GetConnectionName();
             object["port"] = GetPort();
-            ToJsonSplit(object, "user_names", UserNames());
-            ToJsonSplit(object, "user_global_ids", UserGlobalIDs());
+            
+            if (encodeAllInfo)
+            {
+                object["name"] = GetName();
+                object["release"] = Release();
+                object["users"] = Users();
+                object["max_users"] = MaxUsers();
+                object["ping"] = Ping();
+                object["url"] = Url();
+                object["options"] = Options();
+                ToJsonSplit(object, "user_names", UserNames());
+                ToJsonSplit(object, "user_global_ids", UserGlobalIDs());
+            }
         }
         
         void ToJsonSplit(Json::Value & object, const char *key, const tString & splitString) const
@@ -85,6 +104,8 @@ namespace sq
             }
             object[key] = jsonArray;
         }
+    private:
+        bool wasDisplayed_;
     };
     
     nServerInfo *CreateServer()
@@ -192,12 +213,17 @@ namespace sq
                 nServerInfo::GetFromMaster();
             }
             
-            nServerInfo::StartQueryAll();
-            while (nServerInfo::DoQueryAll(10))
+            if (!listOption_)
             {
-                CheckUpdates(root, writer);
-                tAdvanceFrame(1000);
+                nServerInfo::StartQueryAll();
+                while (nServerInfo::DoQueryAll(10))
+                {
+                    if (!aggregateOption_)
+                        CheckUpdates(root, writer);
+                    tAdvanceFrame(1000);
+                }
             }
+            
             CheckUpdates(root, writer);
             
             if (aggregateOption_)
@@ -227,10 +253,11 @@ namespace sq
             ServerInfo *run = ServerInfo::GetFirstServer();
             while (run)
             {
-                if (run->IsAdvancedInfoSet())
+                if (!run->WasDisplayed() && run->IsAdvancedInfoSet() || listOption_)
                 {
+                    run->SetDisplayed();
                     Json::Value serverToJson(Json::objectValue);
-                    run->ToJson(serverToJson);
+                    run->ToJson(serverToJson, !listOption_);
                     if (aggregateOption_)
                     {
                         root.append(serverToJson);
@@ -238,8 +265,7 @@ namespace sq
                     else
                     {
                         std::cout << writer.write(serverToJson);
-                    }
-                    run->Remove();
+                    }                    
                 }
                 run = run->Next();
             }
