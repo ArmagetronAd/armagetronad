@@ -67,7 +67,9 @@ namespace sq
             object["max_users"] = MaxUsers();
             object["ping"] = Ping();
             object["url"] = Url();
-            object["options"] = Options();            
+            object["options"] = Options();
+            object["connection_name"] = GetConnectionName();
+            object["port"] = GetPort();
             ToJsonSplit(object, "user_names", UserNames());
             ToJsonSplit(object, "user_global_ids", UserGlobalIDs());
         }
