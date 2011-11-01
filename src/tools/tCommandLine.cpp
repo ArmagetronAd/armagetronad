@@ -55,12 +55,12 @@ static void InformWithMessage( const char* message )
 static tCommandLineAnalyzer *s_commandLineAnalyzerAnchor;
 
 tCommandLineData::tCommandLineData( const tString & programVersion, tCommandLineAnalyzer *& anchor )
-    :programVersion_( programVersion ), commandLineAnalyzerAnchor_( anchor )
+    :programVersion_( programVersion ), extraProgamUsage_(""), commandLineAnalyzerAnchor_( anchor )
 {
 }
 
 tCommandLineData::tCommandLineData( const tString & programVersion )
-    :programVersion_( programVersion ), commandLineAnalyzerAnchor_( s_commandLineAnalyzerAnchor )
+    :programVersion_( programVersion ), extraProgamUsage_(""), commandLineAnalyzerAnchor_( s_commandLineAnalyzerAnchor )
 {
 }
 
@@ -85,8 +85,8 @@ bool tCommandLineData::Analyse(int argc,char **argv)
         if ( parser.GetSwitch( "--help", "-h" ) )
         {
             std::ostringstream s;
-            s << "Usage: " << parser.ExecutableName() << " [arguments]\n"
-              << "Arguments:\n\n"
+            s << "Usage: " << parser.ExecutableName() << " [options]" << extraProgamUsage_ << '\n'
+              << "Options:\n\n"
               << "-h, --help                   : print this message\n"
               << "-v, --version                : print version number\n";
 
