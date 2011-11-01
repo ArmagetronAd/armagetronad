@@ -147,6 +147,9 @@ namespace sq
         {
             s << "\nQuery options\n"
               << "=============\n\n"
+              << "If a list of servers is provided on the command-line, then only those servers\n"
+              << "will be queried for information. This list can also be read from stdin, as a\n"
+              << "newline separated list of values.\n\n"
               << "-l, --list                   : Fetches only the server list from the master,\n"
               << "                               and does not query the individual game servers\n"
               << "                               for advanced information.\n\n"
