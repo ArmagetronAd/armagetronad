@@ -633,6 +633,8 @@ int main(int argc,char **argv){
 
     try
     {
+        // Create this command line analyzer here instead of statically
+        // so it will be the first to display in --help.
         tDefaultCommandLineAnalyzer defaultCommandLineAnalyzer;
         tCommandLineData commandLine( st_programVersion );
 

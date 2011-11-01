@@ -46,6 +46,7 @@ struct tCommandLineData
     //!< Execute command line option actions after program initialization
     bool Execute();
     
+    //<! Set the extra to be displayed when using --help
     void SetExtraProgramUsage( const char *help ) { extraProgamUsage_ = help; }
 private:
     tString programVersion_;
@@ -88,7 +89,10 @@ public:
     inline void Initialize( tCommandLineParser & parser ); //! Analyzes the command line
     inline bool Analyze( tCommandLineParser & parser );    //! Analyzes the command line option
     inline void Help( std::ostream & s );                  //! Prints option help
-    inline bool Execute();                                 //! Executes the command line option actions after program initialization
+    
+    //! Executes the command line option actions after program initialization
+    //! @return true if program execution should continue
+    inline bool Execute();
 private:
     virtual void DoInitialize( tCommandLineParser & parser );     //! Analyzes the command line option
     virtual bool DoAnalyze( tCommandLineParser & parser ) = 0;    //! Analyzes the command line option
@@ -156,11 +160,10 @@ void tCommandLineAnalyzer::Help( std::ostream & s )
 
 // *******************************************************************************************
 // *
-// *   Help
+// *   Execute
 // *
 // *******************************************************************************************
 //!
-//!        @param  s   stream to write the help to
 //!
 // *******************************************************************************************
 
