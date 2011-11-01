@@ -215,7 +215,30 @@ public:
     virtual void Prepare()
     {
         finished_ = false;
+
+        // default map
         PushSetting( "MAP_FILE", "Anonymous/polygon/regular/square-1.0.1.aamap.xml" );
+
+        // colored teams so the player is always blue here
+        PushSetting( "ALLOW_TEAM_NAME_COLOR", "1" );
+        PushSetting( "ALLOW_TEAM_NAME_PLAYER", "0" );
+
+        // one player mode
+        PushSetting( "SPECTATOR_MODE_1", "0" );
+        PushSetting( "VIEWPORT_CONF", "0" );
+        PushSetting( "VIEWPORT_TO_PLAYER_1", "0" );
+
+        // default physics, the most important ones
+        PushSetting( "CYCLE_DELAY", ".1" );
+        PushSetting( "CYCLE_RUBBER", "1" );
+        PushSetting( "CYCLE_SPEED", "30" );
+        PushSetting( "CYCLE_SOUND_SPEED", "30" );
+        PushSetting( "CYCLE_ACCEL", "10" );
+        PushSetting( "CYCLE_ACCEL_OFFSET", "2" );
+        PushSetting( "CYCLE_WALL_NEAR", "6" );
+
+        // allow custom camera
+        PushSetting( "CAMERA_FORBID_CUSTOM", "0" );
     }
 
     // called on success
@@ -384,7 +407,6 @@ public:
     gTutorialTest()
     : gTutorial( "test" )
     {
-        settings_.speedFactor = -2;
         settings_.numAIs = 1;
     }
 
@@ -397,7 +419,7 @@ public:
     virtual void Prepare()
     {
         gTutorial::Prepare();
-        su_helpLevel = uActionTooltip::Level_Essential;
+        su_helpLevel = uActionTooltip::Level_Advanced;
         PushSetting( "COCKPIT_FILE", "Z-Man/tutorial/spartanic-0.0.1.aacockpit.xml" );
     }
 
@@ -428,7 +450,7 @@ public:
     virtual void Prepare()
     {
         gTutorial::Prepare();
-        su_helpLevel = uActionTooltip::Level_Essential;
+        su_helpLevel = uActionTooltip::Level_Advanced;
         PushSetting( "MAP_FILE", "Z-Man/tutorial/grind-0.1.0.aamap.xml" );
         PushSetting( "COCKPIT_FILE", "Z-Man/tutorial/spartanic-0.0.1.aacockpit.xml" );
         PushSetting( "CYCLE_RUBBER", "5" );
