@@ -444,7 +444,7 @@ nServerInfo *nServerInfo::Prev()
 }
 
 // Sort server list
-void nServerInfo::Sort( PrimaryKey key, SortHelper Helper )
+void nServerInfo::Sort( PrimaryKey key, SortHelper Helper, SortHelperPriority helperPriority )
 {
     // insertion sort
     nServerInfo *run = GetFirstServer();
@@ -494,10 +494,7 @@ void nServerInfo::Sort( PrimaryKey key, SortHelper Helper )
                     compare = 1;
                 break;
             case KEY_USERS:
-                if ( ( (bool) ascend->users == (bool) prev->users ) && help )
-                    compare = help;
-                else
-                    compare = ascend->users - prev->users;
+                compare = ascend->users - prev->users;
                 break;
             case KEY_SCORE:
                 if ( ascend->score > prev->score )
@@ -509,13 +506,9 @@ void nServerInfo::Sort( PrimaryKey key, SortHelper Helper )
                 break;
             }
 
-            // override sorting if the servers fall into different classes or the helper function
-            // wants different sorting (except for alphabetic sorting, where we don't want that,
-            // and user based sorting, where the helper function is just a bias already taken
-            // into account )
             if( previousUnreachable != ascendUnreachable )
             {
-                // but in any case, unreachable servers go to the bottom.
+                // in any case, unreachable servers go to the bottom.
                 if( previousUnreachable )
                 {
                     compare = 1;
@@ -527,20 +520,34 @@ void nServerInfo::Sort( PrimaryKey key, SortHelper Helper )
             }
             else if( key != KEY_NAME )
             {
-                if( key != KEY_USERS && help != 0 )
+                // override sorting if the servers fall into different classes
+                int c = prev->GetClassification().sortOverride_ - ascend->GetClassification().sortOverride_;
+                if( c != 0 )
                 {
-                    compare = help;
-                }
-                else
-                {
-                    int c = prev->GetClassification().sortOverride_ - ascend->GetClassification().sortOverride_;
-                    if( c != 0 )
-                    {
-                        compare = c;
-                    }
+                    compare = c;
                 }
             }
 
+            // take helper and its priority into account
+            if( help != 0 )
+            {
+                switch( helperPriority )
+                {
+                case PRIORITY_NONE:
+                    break;
+                case PRIORITY_SECONDARY:
+                    if( 0 == compare )
+                    {
+                        compare = help;
+                    }
+                    break;
+                case PRIORITY_PRIMARY:
+                    compare = help;
+                    break;
+                }
+            }
+
+            // least priority: servers that are getting polled go down
             if (0 == compare)
             {
                 if ( previousPolling )
@@ -1166,13 +1173,14 @@ void nServerInfo::GetSmallServerInfo( Network::SmallServerInfo const & info,
         run = run->Next();
     }
 
-    // second pass, look harder if no match was found. Use DNS lookup if you have to.
+    // second pass, look harder if no match was found. Use DNS lookup if it's ready.
     if(!n)
     {
         run = GetFirstServer();
         while(run && !n)
         {
-            if( run->GetAddress() == baseInfo.GetAddress() )
+            if( !run->GetAddress().DNSInProcess() && !baseInfo.GetAddress().DNSInProcess() &&
+                  run->GetAddress() == baseInfo.GetAddress()  )
                 n = run;
             run = run->Next();
         }
@@ -2251,7 +2259,7 @@ bool nServerInfo::DoQueryAll(int simultaneous)         // continue querying the 
     {
         nServerInfo* next = sn_Requesting->Next();
 
-        if (!sn_Requesting->advancedInfoSet && sn_Requesting->pollID < 0 && sn_Requesting->queried <= sn_numQueries)
+        if (!sn_Requesting->advancedInfoSet && sn_Requesting->pollID < 0 && sn_Requesting->queried <= sn_numQueries && !sn_Requesting->GetAddress().DNSInProcess() )
         {
             sn_Requesting->QueryServer();
         }
@@ -2709,7 +2717,14 @@ nServerInfoBase::~nServerInfoBase()
 
 bool nServerInfoBase::operator ==( const nServerInfoBase & other ) const
 {
-    return GetAddress().IsSet() && GetAddress() == other.GetAddress() && port_ == other.port_;
+    if( GetAddress().DNSInProcess() || other.GetAddress().DNSInProcess() )
+    {
+        return port_ == other.port_ && connectionName_ == other.connectionName_;
+    }
+    else
+    {
+        return GetAddress().IsSet() && GetAddress() == other.GetAddress() && port_ == other.port_;
+    }
 }
 
 // *******************************************************************************************
@@ -2832,7 +2847,8 @@ void nServerInfoBase::ReadSync( Network::SmallServerInfoBase const & info,
     port_ = info.port();                                 // get the port
     sn_ReadFiltered( info.hostname(), connectionName_ ); // get the connection name
 
-    if ( ( sn_IsMaster || sn_AcceptingFromBroadcast || sn_AcceptingFromMaster ) && connectionName_.Len()>1 ) // no valid name (must come directly from the server who does not know his own address)
+    // ban us.to dns service, it's down too often
+    if ( ( ( sn_IsMaster && !connectionName_.EndsWith( ".us.to" ) ) || sn_AcceptingFromBroadcast || sn_AcceptingFromMaster ) && connectionName_.Len()>1 ) // valid name (must come directly from the server who does not know his own address)
     {
         // resolve DNS
         connectionName_ = S_LocalizeName( connectionName_ );
@@ -3316,16 +3332,12 @@ nAddress & nServerInfoBase::AccessAddress( void ) const
         std::auto_ptr< nAddress > address( tNEW( nAddress ) );
 
         // fill it with hostname and port
-        address->SetHostname( this->GetConnectionName() );
         address->SetPort( this->GetPort() );
+        address->SetHostname( this->GetConnectionName() );
 
         this->address_ = address;
 
 #ifdef DEBUG
-        tString unresolved = ToString( *this );
-        tString resolved = this->address_->ToString();
-        if ( unresolved != resolved )
-            con << "Address of server " << unresolved << " determined to be " << resolved << "\n";
 #endif
     }
 

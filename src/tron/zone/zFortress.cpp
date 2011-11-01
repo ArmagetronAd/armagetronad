@@ -322,9 +322,11 @@ bool zFortressZone::Timestep( REAL time )
     if (( ownersInside_ && sg_baseRespawn     )
      || (enemiesInside_ && sg_baseEnemyRespawn))
     {
+        /*
         eGameObject * near = NULL;
         if (shape)
             near = shape;
+        */
 
         for (int i = team->NumPlayers() - 1; i >= 0; --i)
         {

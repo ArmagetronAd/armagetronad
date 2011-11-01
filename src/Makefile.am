@@ -91,6 +91,7 @@ libtools_a_SOURCES = ${tools_extra} tools/tVersion.cpp tools/tVersion.h tTrueVer
 	tools/tDecorator.h tools/tDecorator.cpp\
 	tools/tMutex.h tools/tMutex.cpp\
 	tools/tThread.h\
+	tools/tBackgroundProcess.h\
 	tools/tLockedQueue.h\
 	tools/tCoord.h tools/tCoord.cpp\
 	tools/tValue.h tools/tValueParser.h\

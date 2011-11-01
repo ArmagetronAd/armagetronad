@@ -19,6 +19,10 @@
 // activate zones v2 support
 #define ENABLE_ZONESV2 1
 
+// required define for addrinfo based functions used in nSocket.cpp, requires Windows 2000
+// needs to be here so it is consistent across the whole project and comes before windows.h
+#define WINVER 0x0501
+
 // include of windows.h needed for consistency of silly windows #defines ( SetPort -> SetPortA, GetUserName -> GetUserNameA )
 #include  <windows.h>
 
