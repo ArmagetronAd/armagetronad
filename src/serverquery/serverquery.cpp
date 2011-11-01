@@ -96,7 +96,7 @@ namespace sq
     {
     public:
         ServerQueryCommandLineAnalyzer(tCommandLineAnalyzer *& anchor)
-            :tCommandLineAnalyzer(anchor), listOption_(false), masterServer_(""), aggregateOption_(false), prettyPrintOption_(false), servers_()
+            :tCommandLineAnalyzer(anchor), listOption_(false), aggregateOption_(false), prettyPrintOption_(false), masterServer_(""), servers_()
         {
         }
         
@@ -246,9 +246,9 @@ namespace sq
         }
 
         bool listOption_;
-        tString masterServer_;
         bool aggregateOption_;
         bool prettyPrintOption_;
+        tString masterServer_;
         StringVector servers_;
     };
 }
