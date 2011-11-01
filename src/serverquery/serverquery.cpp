@@ -167,7 +167,7 @@ namespace sq
     {
     public:
         ServerQueryCommandLineAnalyzer(tCommandLineAnalyzer *& anchor)
-            :tCommandLineAnalyzer(anchor), listOption_(false), aggregateOption_(false), prettyPrintOption_(false), masterServer_(""), servers_()
+            :tCommandLineAnalyzer(anchor), listOption_(false), asynchronousOption_(false), masterServer_(""), servers_()
         {
         }
         
@@ -194,15 +194,9 @@ namespace sq
             {
                 return true;
             }
-            else if (parser.GetSwitch("--aggregate", "-a"))
+            else if (parser.GetSwitch("--asynchronous", "-a"))
             {
-                aggregateOption_ = true;
-                return true;
-            }
-            else if (parser.GetSwitch("--pretty-print", "-p"))
-            {
-                prettyPrintOption_ = true;
-                aggregateOption_ = true;
+                asynchronousOption_ = true;
                 return true;
             }
             else if (parser.Current()[0] != '-')
@@ -227,13 +221,12 @@ namespace sq
               << "-m, --master                 : Use the specified master server. By default, the\n"
               << "                               program will select a random master server from\n"
               << "                               the game-provided master.srv configuration file.\n\n"
-              << "-a, --aggregate              : Output all of the collected advanced server\n"
-              << "                               information as objects in a JSON array. By\n"
-              << "                               default, the program will write onto one line\n"
-              << "                               the JSON object for each server, as the data is\n"
-              << "                               received.\n\n"
-              << "-p, --pretty-print           : Create JSON output that is more human-readable.\n"
-              << "                               Using this option turns on --aggregate.\n\n"
+              << "-a, --asynchronous           : Output the collected advanced server as it\n"
+              << "                               arrives. By default, the program will wait for\n"
+              << "                               all queries to finish and output the information\n"
+              << "                               as objects in a JSON array. Using this option\n"
+              << "                               will write onto one line the JSON object for\n"
+              << "                               each server, when its data is received.\n\n"
               << "Other options\n"
               << "=============\n";
         }
@@ -243,7 +236,7 @@ namespace sq
             Json::Value root(Json::arrayValue);
             Json::StyledWriter styledWriter;
             Json::FastWriter fastWriter;
-            Json::Writer & writer = prettyPrintOption_ ? (Json::Writer &)styledWriter : (Json::Writer &)fastWriter;
+            Json::Writer & writer = asynchronousOption_ ? (Json::Writer &)fastWriter : (Json::Writer &)styledWriter;
             
             if (!servers_.empty())
             {
@@ -268,7 +261,7 @@ namespace sq
                 nServerInfo::StartQueryAll();
                 while (nServerInfo::DoQueryAll(10))
                 {
-                    if (!aggregateOption_)
+                    if (asynchronousOption_)
                         CheckUpdates(root, writer);
                     // Advance time, and run postponed events (DNS queries, etc..)
                     tAdvanceFrame(1000);
@@ -278,7 +271,7 @@ namespace sq
             
             CheckUpdates(root, writer);
             
-            if (aggregateOption_)
+            if (!asynchronousOption_)
                 std::cout << writer.write(root);
             
             return true;
@@ -310,13 +303,13 @@ namespace sq
                     run->SetDisplayed();
                     Json::Value serverToJson(Json::objectValue);
                     run->ToJson(serverToJson, !listOption_);
-                    if (aggregateOption_)
+                    if (asynchronousOption_)
                     {
-                        root.append(serverToJson);
+                        std::cout << writer.write(serverToJson);
                     }
                     else
                     {
-                        std::cout << writer.write(serverToJson);
+                        root.append(serverToJson);
                     }                    
                 }
                 run = run->Next();
@@ -324,8 +317,7 @@ namespace sq
         }
 
         bool listOption_;
-        bool aggregateOption_;
-        bool prettyPrintOption_;
+        bool asynchronousOption_;
         tString masterServer_;
         StringVector servers_;
     };
