@@ -339,7 +339,7 @@ int main(int argc, char **argv)
         tDirectoriesCommandLineAnalyzer directoryOptions(commandLineAnchor, false);
         sq::ServerQueryCommandLineAnalyzer options(commandLineAnchor);
         tCommandLineData commandLine(st_programVersion, commandLineAnchor);
-        commandLine.SetExtraProgramUsage(" [server:port ...]");
+        commandLine.SetExtraProgramUsage(" [server[:port] ...]");
 
         if (!commandLine.Analyse(argc, argv))
             return 0;
