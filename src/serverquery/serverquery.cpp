@@ -40,6 +40,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tDirectories.h"
 #include "tLocale.h"
 #include "tSystime.h"
+#include "tToDo.h"
 #include "tVersion.h"
 
 namespace sq
@@ -269,7 +270,9 @@ namespace sq
                 {
                     if (!aggregateOption_)
                         CheckUpdates(root, writer);
+                    // Advance time, and run postponed events (DNS queries, etc..)
                     tAdvanceFrame(1000);
+                    st_DoToDo();
                 }
             }
             
