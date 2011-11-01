@@ -46,7 +46,7 @@ struct tCommandLineData
     //!< Execute command line option actions after program initialization
     bool Execute();
     
-    void SetExtraProgramUsage(const char *help) { extraProgamUsage_ = help; }
+    void SetExtraProgramUsage( const char *help ) { extraProgamUsage_ = help; }
 private:
     tString programVersion_;
     const char *extraProgamUsage_;
