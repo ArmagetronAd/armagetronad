@@ -34,6 +34,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "rScreen.h"
 #include "rGL.h"
 
+#include "eSound.h"
 #include "eSoundMixer.h"
 
 #include "eAdvWall.h"
@@ -54,6 +55,8 @@ static uActionTooltip se_turnLeftTooltip( uActionTooltip::Level_Essential, eGame
 
 // entry and deletion in the list of all gameObjects
 void eGameObject::AddToList(){
+    eSoundLocker locker;
+
     if ( id < 0 )
         AddRef();
 
@@ -61,6 +64,8 @@ void eGameObject::AddToList(){
     grid->gameObjects.Add(this,id);
 }
 void eGameObject::RemoveFromList(){
+    eSoundLocker locker;
+
     int oldID = id;
 
     currentFace = 0;
@@ -73,6 +78,8 @@ void eGameObject::RemoveFromList(){
 }
 
 void eGameObject::RemoveFromListsAll(){
+    eSoundLocker locker;
+
     int oldID = id;
 
     currentFace = 0;
