@@ -116,6 +116,9 @@ namespace sq
                 object["ping"] = Ping();
                 object["url"] = Url();
                 object["options"] = Options();
+                object["version_min"] = Version().Min();
+                object["version_max"] = Version().Max();
+                
                 ToJsonSplit(object, "user_names", UserNames());
                 ToJsonSplit(object, "user_global_ids", UserGlobalIDs());
             }
