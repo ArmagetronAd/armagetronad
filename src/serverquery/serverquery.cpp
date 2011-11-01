@@ -121,6 +121,24 @@ namespace sq
                 
                 ToJsonSplit(object, "user_names", UserNames());
                 ToJsonSplit(object, "user_global_ids", UserGlobalIDs());
+                
+                const nServerInfo::SettingsDigest & settings = GetSettings();
+                if (settings.GetFlag(SettingsDigest::Flags_SettingsDigestSent))
+                {
+                    Json::Value settingsObject(Json::objectValue);
+                    settingsObject["authentication_required"] = settings.GetFlag(SettingsDigest::Flags_AuthenticationRequired);
+                    settingsObject["nondefault_map"] = settings.GetFlag(SettingsDigest::Flags_NondefaultMap);
+                    settingsObject["team_play"] = settings.GetFlag(SettingsDigest::Flags_TeamPlay);
+                    settingsObject["min_play_time_total"] = settings.minPlayTimeTotal_;
+                    settingsObject["min_play_time_online"] = settings.minPlayTimeOnline_;
+                    settingsObject["min_play_time_team"] = settings.minPlayTimeTeam_;
+                    settingsObject["cycle_delay"] = settings.cycleDelay_;
+                    settingsObject["acceleration"] = settings.acceleration_;
+                    settingsObject["rubber_wall_hump"] = settings.rubberWallHump_;
+                    settingsObject["rubber_hit_wall_ratio"] = settings.rubberHitWallRatio_;
+                    settingsObject["walls_length"] = settings.wallsLength_;
+                    object["settings"] = settingsObject;
+                }
             }
         }
         
