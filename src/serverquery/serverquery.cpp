@@ -238,7 +238,12 @@ namespace sq
             Json::FastWriter fastWriter;
             Json::Writer & writer = asynchronousOption_ ? (Json::Writer &)fastWriter : (Json::Writer &)styledWriter;
             
-            if (!servers_.empty())
+            if (servers_.empty())
+            {
+                LoadMasters();
+                nServerInfo::GetFromMaster();
+            }
+            else
             {
                 for (StringVector::const_iterator it = servers_.begin(); it != servers_.end(); ++it)
                 {
@@ -249,11 +254,6 @@ namespace sq
                     server->SetConnectionName(connectionName);
                     server->SetPort(port);
                 }
-            }
-            else
-            {
-                LoadMasters();
-                nServerInfo::GetFromMaster();
             }
             
             if (!listOption_)
