@@ -234,7 +234,7 @@ endif
 
 games_PROGRAMS = $(buildmain) $(buildthemaster)
 if BUILDDEDICATED
-games_PROGRAMS += armagetronad-serverquery
+games_PROGRAMS += armagetronad-serverquery$(EXEEXT)
 endif
 #EXTRA_PROGRAMS = armagetronad_main_master
 
