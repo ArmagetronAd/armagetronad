@@ -612,12 +612,6 @@ int main(int argc,char **argv){
     //std::cout << "enter\n";
     //  net_test();
 
-#if !defined DEDICATED && !defined WIN32 && !defined MACOSX
-    // shot in the dark fix for xcb crashes. We're not using X in a multithreaded way, but
-    // SDL may be (via the sound mixer thread).
-    XInitThreads();
-#endif
-
     bool dedicatedServer = false;
 
     //  std::cout << "Running " << argv[0] << "...\n";
