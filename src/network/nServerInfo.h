@@ -363,6 +363,7 @@ public:
     int            MaxUsers()          const	{return maxUsers_;}
 
     const tString& UserNames()		const	{ return userNames_;  }
+    const tString& UserGlobalIDs()      const   { return userGlobalIDs_; }
     const tString& UserNamesOneLine()	const	{ return userNamesOneLine_;  }
     const tString& Options()			const	{ return options_;  }
     const tString& Release()			const	{ return release_;  }

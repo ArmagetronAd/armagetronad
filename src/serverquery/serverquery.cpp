@@ -1,5 +1,6 @@
 #include <fcntl.h>
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
 #include "json/json.h"
@@ -15,6 +16,8 @@
 
 namespace sq
 {
+    typedef std::vector< tString > StringVector;
+    
     void ParseConnectionString(const tString & s, tString & connectionName, unsigned & port, unsigned defaultPort)
     {
         int sepIndex = s.find(':');
@@ -28,6 +31,15 @@ namespace sq
             connectionName = s;
             port = defaultPort;
         }
+    }
+    
+    
+    void SplitString(const tString & s, char delimeter, StringVector & xs)
+    {
+        std::stringstream ss(s);
+        tString item;
+        while(std::getline(ss, item, delimeter))
+            xs.push_back(item);
     }
     
     class ServerInfo : public nServerInfo
@@ -55,9 +67,22 @@ namespace sq
             object["users"] = Users();
             object["max_users"] = MaxUsers();
             object["ping"] = Ping();
-            object["user_names"] = UserNames();
             object["url"] = Url();
-            object["options"] = Options();
+            object["options"] = Options();            
+            ToJsonSplit(object, "user_names", UserNames());
+            ToJsonSplit(object, "user_global_ids", UserGlobalIDs());
+        }
+        
+        void ToJsonSplit(Json::Value & object, const char *key, const tString & splitString) const
+        {
+            Json::Value jsonArray(Json::arrayValue);
+            StringVector xs;
+            SplitString(splitString, '\n', xs);
+            for (StringVector::const_iterator it = xs.begin(); it != xs.end(); ++it)
+            {
+                jsonArray.append(*it);
+            }
+            object[key] = jsonArray;
         }
     };
     
@@ -194,8 +219,6 @@ namespace sq
                 run = run->Next();
             }
         }
-
-        typedef std::vector< tString > StringVector;
 
         bool listOption_;
         tString masterServer_;
