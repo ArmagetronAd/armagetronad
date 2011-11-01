@@ -145,11 +145,23 @@ namespace sq
 
         virtual void DoHelp(std::ostream & s)
         {
-            s << "\n";
-            s << "-l, --list                   : Fetches only the server list from the master server, and does not query the individual servers for advanced information.\n";
-            s << "-m, --master                 : Use the specified master server. By default, the program will use one of the game-provided default master servers.\n";
-            s << "-a, --aggregate              : (TODO document this option)\n";
-            s << "-p, --pretty-print           : Create JSON output that is more human-readable. Using this option turns on --aggregate.\n";
+            s << "\nQuery options\n"
+              << "=============\n\n"
+              << "-l, --list                   : Fetches only the server list from the master,\n"
+              << "                               and does not query the individual game servers\n"
+              << "                               for advanced information.\n\n"
+              << "-m, --master                 : Use the specified master server. By default, the\n"
+              << "                               program will select a random master server from\n"
+              << "                               the game-provided master.srv configuration file.\n\n"
+              << "-a, --aggregate              : Output all of the collected advanced server\n"
+              << "                               information as objects in a JSON array. By\n"
+              << "                               default, the program will write onto one line\n"
+              << "                               the JSON object for each server, as the data is\n"
+              << "                               received.\n\n"
+              << "-p, --pretty-print           : Create JSON output that is more human-readable.\n"
+              << "                               Using this option turns on --aggregate.\n\n"
+              << "Other options\n"
+              << "=============\n";
         }
         
         virtual bool DoExecute()
