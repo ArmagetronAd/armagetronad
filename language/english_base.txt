@@ -1683,6 +1683,11 @@ tutorial_menu_grind_help     Grind Tutorial: learn to accelerate
 tutorial_menu_grind_instructions Walls are also your friend in \g. You can drive close to a cycle trail to accelerate. If you are driving so close to a wall that you see sparks fly, you're doing it right.\nFor this tutorail, we activate what we call 'rubber': think of it as a shield protecting you against crashes. This allows you to get close to the enemy trail, you do not have to worry too much about turning away too late.\nGoal of this tutorial is to reach a speed of 40 m/s or to kill the enemy AI.
 tutorial_menu_grind_animation textures/tutorials/grinding/grinding.txt
 
+tutorial_menu_conquest_text     Conquest
+tutorial_menu_conquest_help     Conquest Tutorial: learn to conquer a fortress.
+tutorial_menu_conquest_instructions The goal of the Fortress mode is to conquer the enemy zone and defend your own zone. Unlike the winzones you saw earlier, a simple touch is not enough; you have to stay inside the zone and keep defenders out for a few seconds.\nIn this excercise, you will try to attack the enemy Gold zone, your home zone is safe. You will need to find a way past the lone defender or kill it.\n\nSadly, Fortress mode is not available for local play against AIs. We don't have any good AIs for it yet.
+tutorial_menu_survival_animation textures/tutorials/conquest/conquest.txt
+
 #********************************************
 #********************************************
 #

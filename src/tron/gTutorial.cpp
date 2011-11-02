@@ -148,7 +148,7 @@ public:
     void OnWin( eTeam * winner )
     {
         finished_ = true;
-        if( winner && winner->IsHuman() )
+        if( winner && winner->OldestHumanPlayer() )
         {
             sn_CenterMessage(tOutput("$tutorial_success"));
             success_ = true;
@@ -230,6 +230,11 @@ public:
     gAIPlayer & AIPlayer()
     {
         return dynamic_cast< gAIPlayer & >( AIPlayerRaw() );
+    }
+
+    void AddPath( gAIPlayer & ai, REAL x, REAL y, bool mindless = true )
+    {
+        ai.AddToPath( tCoord( x, y ) * pow( 2, settings_.sizeFactor*.5 ) );
     }
 
     gCycle * HumanCycle()
@@ -461,6 +466,77 @@ public:
 
 };
 static gTutorialTest sg_tutorialTest;
+
+//! conquest tutorial
+class gTutorialConquest: public gTutorial
+{
+public:
+    gTutorialConquest()
+    : gTutorial( "conquest" )
+    {
+        settings_.sizeFactor = 0;
+        settings_.numAIs = 1;
+        settings_.wallsLength = 350;
+    }
+
+    // analyzes the game
+    void Analysis()
+    {
+    }
+
+    void AddSquare( gAIPlayer & ai, REAL radius )
+    {
+        REAL zoneX = 250;
+        REAL zoneY = 50;
+
+        AddPath( ai, zoneX+radius, zoneY-radius );
+        AddPath( ai, zoneX-radius, zoneY-radius );
+        AddPath( ai, zoneX-radius, zoneY+radius );
+        AddPath( ai, zoneX+radius, zoneY+radius );
+    }
+
+    // set paths
+    void AfterSpawn()
+    {
+        gAIPlayer & ai = AIPlayer();
+
+        REAL zoneX = 250;
+        REAL zoneY = 50;
+ 
+        REAL radius = settings_.wallsLength/8 + .5;
+
+        for( int i = 100; i > 0; --i )
+        {
+            AddSquare( ai, radius );
+        }
+
+        // radius-=.5;
+        // AddSquare( ai, radius );
+        // AddSquare( ai, 40 );
+        // radius = 39;
+        // AddPath( ai, zoneX+radius, zoneY+radius );
+        // radius = 40;
+        //AddPath( ai, zoneX+radius, zoneY+radius );
+        AddPath( ai, zoneX+radius, zoneY, false );
+    }
+
+    // prepares
+    virtual void Prepare()
+    {
+        gTutorial::Prepare();
+        su_helpLevel = uActionTooltip::Level_Advanced;
+        PushSetting( "MAP_FILE", "Z-Man/fortress/for_old_clients-0.1.0.aamap.xml" );
+        PushSetting( "COCKPIT_FILE", "Z-Man/tutorial/spartanic-0.0.1.aacockpit.xml" );
+        PushSetting( "FORTRESS_CONQUEST_RATE", ".3" );
+        PushSetting( "FORTRESS_DEFEND_RATE", ".25" );
+        PushSetting( "FORTRESS_CONQUEST_DECAY_RATE", ".1" );
+        PushSetting( "CYCLE_RUBBER", "5" );
+        PushSetting( "CYCLE_RUBBER_WALL_SHRINK", ".5" );
+        PushSetting( "TEXT_OUT", "0" );
+    }
+
+};
+static gTutorialConquest sg_tutorialConquest;
 
 //! grind tutorial
 class gTutorialGrind: public gTutorial

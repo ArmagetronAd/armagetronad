@@ -1447,8 +1447,8 @@ void gAIPlayer::AddToPath( eCoord const & target, bool mindless )
 
         // hard state change, avoid random changes back from it
         state = desiredState;
-        // lastPath = 10000;
-        // nextStateChange = 10000;
+        lastPath = 10000;
+        nextStateChange = 10000;
         nextTime = 0;
     }
     path.Add( target );
@@ -1777,10 +1777,6 @@ void gAIPlayer::ThinkPathGiven( ThinkData & data, bool emergency )
     int lr = 0;
     REAL mindist = 10;
 
-    // REAL fs=front.distance;
-    REAL ls=data.left.distance;
-    REAL rs=data.right.distance;
-
     // now we have found our next goal. Try to get there.
     eCoord pos    = Object()->Position();
     eCoord t      = path.CurrentPosition();
@@ -1800,15 +1796,20 @@ void gAIPlayer::ThinkPathGiven( ThinkData & data, bool emergency )
     REAL ahead = eCoord::F(t - pos, dir)
     + eCoord::F(path.CurrentOffset(), dir);
 
-    if ( ahead > 0 && !emergency )
+    if ( ahead > delay * Object()->Speed()*.1 && !emergency )
     {	  // it is still before us. just wait a while.
         mindist = ahead;
     }
     else
     { // we have passed it. Make a turn towards it.
+
+        // switch to survival mode if cut off, no questions asked
+        if( emergency && ahead > delay * Object()->Speed() && data.front.front.wallType == gSENSOR_ENEMY )
+        {
+            nextStateChange = 0;
+            SwitchToState( AI_SURVIVE, 1 );
+        }
         
-        if ( !((side > 0 && ls < 3) || (side < 0 && rs < 3))
-             && (fabs(side) > 3 || ahead < -10) )
         {
 #ifdef DEBUG
             con << "Following path...\n";
@@ -2730,7 +2731,7 @@ void gAIPlayer::RightBeforeDeath(int triesLeft) // is called right before the ve
     nextStateChange = se_GameTime() + 100;
 #else
     // switch to survival state if our victim died:
-    if ((!target || !target->Alive()) && state != AI_TRACE)
+    if ((!target || !target->Alive()) && state != AI_TRACE && state != AI_PATH_MINDLESS && state != AI_PATH_GIVEN )
         SwitchToState(AI_SURVIVE, 1);
 #endif
 

@@ -3536,9 +3536,10 @@ void gGame::Analysis(REAL time){
     // only do this expensive stuff once a second
     {
         static double nextTime = -1;
-        if ( tSysTimeFloat() > nextTime || time < -10 )
+        if ( tSysTimeFloat() > nextTime || time < -10 || wishWinner )
         {
-            nextTime = tSysTimeFloat() + 1.0;
+            // or 10 times a second during tutorials, they're lightweight.
+            nextTime = tSysTimeFloat() + ( sg_tutorial ? .1 : 1.0 );
         }
         else
         {
