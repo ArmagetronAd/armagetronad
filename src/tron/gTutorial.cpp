@@ -551,11 +551,6 @@ public:
     // analyzes the game
     void Analysis()
     {
-        gCycle * c = HumanCycle();
-        if( c && c->Speed() > 40 )
-        {
-            End( true );
-        }
     }
 
     // prepares

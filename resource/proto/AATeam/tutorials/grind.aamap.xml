@@ -18,6 +18,12 @@
 					<Point	x="50"	y="0"	/>
 					<Point	x="0"	y="0"	/>
 				</Wall>
+
+				<Zone effect="win">
+					<ShapeCircle radius="20">
+						<Point x="25" y="1300" />
+					</ShapeCircle>
+				</Zone>
 			</Field>
 		</World>
 	</Map>
