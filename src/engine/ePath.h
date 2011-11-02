@@ -51,13 +51,13 @@ public:
 
     void Clear();
 
+    void Add(const eCoord&  point);
 protected:
     tArray<eCoord> positions;
     tArray<eCoord> offsets;
     int            current;
 
     void Add(eHalfEdge     *edge);
-    void Add(const eCoord&  point);
 
 };
 

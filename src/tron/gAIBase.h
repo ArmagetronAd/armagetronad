@@ -50,6 +50,8 @@ typedef enum
 { AI_SURVIVE = 0,   // just try to stay alive
   AI_TRACE,         // trace a wall
   AI_PATH,          // follow a path to a target
+  AI_PATH_GIVEN,    // follow a predetermined path to a target, abort if danger looms
+  AI_PATH_MINDLESS, // follow a path to a target mindlessly without caring whether it's suicide
   AI_CLOSECOMBAT    // try to frag a nearby opponent
 }
 gAI_STATE;
@@ -165,6 +167,7 @@ struct ThinkData : public ThinkDataBase
     virtual void ThinkSurvive( ThinkData & data );
     virtual void ThinkTrace( ThinkData & data );
     virtual void ThinkPath( ThinkData & data );
+    virtual void ThinkPathGiven( ThinkData & data, bool emergency = false );
     virtual void ThinkCloseCombat( ThinkData & data );
 
     // emergency functions:
@@ -186,6 +189,9 @@ public:
     ~gAIPlayer();
 
     static void ClearAll(); //!< remove all AI players
+
+    // add a coordinate to the path, switch to path follow mode IN REVERSE ORDER
+    void AddToPath( eCoord const & target, bool mindless = false );
 
     // called whenever cylce a drives close to the wall of cylce b.
     // directions: aDir tells whether the wall is to the left (-1) or right(1)

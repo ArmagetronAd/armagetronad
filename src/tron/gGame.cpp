@@ -1026,6 +1026,11 @@ void init_game_objects(eGrid *grid){
                                   sg_currentSettings->minPlayers,
                                   sg_currentSettings->AI_IQ);
 
+        if( sg_tutorial )
+        {
+            sg_tutorial->BeforeSpawn();
+        }
+
         int spawnPointsUsed = 0;
         for(int t=eTeam::teams.Len()-1;t>=0;t--)
         {
@@ -1097,9 +1102,14 @@ void init_game_objects(eGrid *grid){
 
                 // se_ResetGameTimer();
                 // se_PauseGameTimer(true);
+
             }
         }
 
+        if( sg_tutorial )
+        {
+            sg_tutorial->AfterSpawn();
+        }
 
 #ifdef ALLOW_NO_TEAM
         for (int p=se_PlayerNetIDs.Len()-1;p>=0;p--){

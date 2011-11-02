@@ -38,6 +38,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "gGame.h"
 #include "gCycle.h"
+#include "gAIBase.h"
 
 // temporarily override a setting item
 class gTemporarySetting: public tReferencable< gTemporarySetting >
@@ -71,7 +72,7 @@ static gGameSettings sg_DefaultSettings()
                          30, 999, 100000, 100000,
                          0,   0, 30,
                          false, false,
-                         0  ,  -3,
+                         0  ,  -2,
                          gDUEL, gFINISH_IMMEDIATELY, 1,
                          100000, 1000000);
  
@@ -103,6 +104,13 @@ void gTutorialBase::OnWin( eTeam * winner )
 void gTutorialBase::RoundEnd( eTeam * winner )
 {
 }
+
+// called before objects are spawned
+void gTutorialBase::BeforeSpawn(){}
+
+    // called after objects are spawned
+void gTutorialBase::AfterSpawn(){}
+    
 
 extern uActionTooltip::Level su_helpLevel;
 
@@ -190,10 +198,38 @@ public:
         return *emergency;
     }
 
+    // find AI team
+    eTeam & AITeam()
+    {
+        for( int i = eTeam::teams.Len()-1; i >= 0; --i )
+        {
+            if( 0 == eTeam::teams[i]->NumHumanPlayers() )
+            {
+                return *eTeam::teams[i];
+            }
+        }
+
+        tASSERT( false );
+        
+        static tJUST_CONTROLLED_PTR< eTeam > emergency = tNEW( eTeam );
+        return *emergency;
+    }
+
     ePlayerNetID & HumanPlayer()
     {
         eTeam & team = HumanTeam();
         return *team.OldestHumanPlayer();
+    }
+
+    ePlayerNetID & AIPlayerRaw()
+    {
+        eTeam & team = AITeam();
+        return *team.OldestPlayer();
+    }
+
+    gAIPlayer & AIPlayer()
+    {
+        return dynamic_cast< gAIPlayer & >( AIPlayerRaw() );
     }
 
     gCycle * HumanCycle()
@@ -501,7 +537,7 @@ public:
     gTutorialNavigation()
     : gTutorial( "navigation" )
     {
-        settings_.sizeFactor += 2;
+        settings_.sizeFactor += 1;
     }
 
     // analyzes the game

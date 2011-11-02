@@ -48,6 +48,12 @@ public:
     // the tutorial was failed or passed
     virtual void Analysis() = 0;
 
+    // called before objects are spawned
+    virtual void BeforeSpawn();
+
+    // called after objects are spawned
+    virtual void AfterSpawn();
+    
     // called the moment a team won
     virtual void OnWin( eTeam * winner );
 
