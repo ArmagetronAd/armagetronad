@@ -8267,7 +8267,7 @@ nProtoBuf const * ePlayerNetID::ExtractControl( Network::NetObjectControl const 
 
 void ePlayerNetID::Color( REAL&a_r, REAL&a_g, REAL&a_b ) const
 {
-    if ( ( static_cast<bool>(currentTeam) ) && ( currentTeam->IsHuman() ) )
+    if ( ( static_cast<bool>(currentTeam) ) && ( ( currentTeam->IsHuman() || currentTeam->TeamNamedAfterColor() ) ) )
     {
         REAL w = 5;
         REAL r_w = 2;
