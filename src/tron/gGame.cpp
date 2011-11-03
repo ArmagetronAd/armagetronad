@@ -4161,7 +4161,7 @@ void gGame::Analysis(REAL time){
             if( se_mainGameTimer )
             {
                 slowdown = 0.25;
-                fintime=2.5*slowdown;
+                fintime=3.5*slowdown;
                 se_mainGameTimer->speed = slowdown;
             }
         }
