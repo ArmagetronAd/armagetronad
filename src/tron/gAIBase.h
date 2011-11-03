@@ -50,9 +50,9 @@ typedef enum
 { AI_SURVIVE = 0,   // just try to stay alive
   AI_TRACE,         // trace a wall
   AI_PATH,          // follow a path to a target
+  AI_CLOSECOMBAT,   // try to frag a nearby opponent
   AI_PATH_GIVEN,    // follow a predetermined path to a target, abort if danger looms
-  AI_PATH_MINDLESS, // follow a path to a target mindlessly without caring whether it's suicide
-  AI_CLOSECOMBAT    // try to frag a nearby opponent
+  AI_PATH_MINDLESS  // follow a path to a target mindlessly without caring whether it's suicide
 }
 gAI_STATE;
 

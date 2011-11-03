@@ -1785,7 +1785,8 @@ void gAIPlayer::ThinkPathGiven( ThinkData & data, bool emergency )
     REAL side = (t - pos) * dir;
     REAL delay = Object()->GetTurnDelay();
     // already aligned? Advance.
-    if( fabs( side ) < delay * Object()->Speed() )
+    REAL sideThresh = delay * Object()->Speed()*.5;
+    if( fabs( side ) < sideThresh )
     {
         path.Proceed();
         t = path.CurrentPosition();
@@ -1804,7 +1805,7 @@ void gAIPlayer::ThinkPathGiven( ThinkData & data, bool emergency )
     { // we have passed it. Make a turn towards it.
 
         // switch to survival mode if cut off, no questions asked
-        if( emergency && ahead > delay * Object()->Speed() && data.front.front.wallType == gSENSOR_ENEMY )
+        if( emergency && ahead > delay * Object()->Speed() && data.front.front.wallType == gSENSOR_ENEMY && state != AI_PATH_MINDLESS )
         {
             nextStateChange = 0;
             SwitchToState( AI_SURVIVE, 1 );
@@ -1815,6 +1816,10 @@ void gAIPlayer::ThinkPathGiven( ThinkData & data, bool emergency )
             con << "Following path...\n";
 #endif
             lr += (side > 0 ? 1 : -1);
+            if( ahead < -sideThresh*.9 )
+            {
+                path.Proceed();
+            }
         }
     }
 
@@ -2765,6 +2770,8 @@ void gAIPlayer::RightBeforeDeath(int triesLeft) // is called right before the ve
 #endif
 }
 
+gAIPlayer * sg_watchAI = 0;
+
 void gAIPlayer::NewObject()         // called when we control a new object
 {
     lastTime = 0;
@@ -2976,7 +2983,7 @@ REAL gAIPlayer::Think(){
     for (int i=gameObjects.Len()-1;i>=0;i--){
         gCycle *other=dynamic_cast<gCycle *>(gameObjects(i));
 
-        if (other && other != Object()){
+        if (other && other != Object() && other->Team() != CurrentTeam()){
             // then, enemy is realy an enemy
             eCoord otherpos=other->Position()-Object()->Position();
             REAL dist = otherpos.NormSquared();
