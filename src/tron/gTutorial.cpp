@@ -529,8 +529,9 @@ public:
 
     virtual void Enter()
     {
+        bool previousSuccess = tutorial_.Complete();
         bool success = tutorial_.Activate();
-        if( success )
+        if( success && !previousSuccess )
         {
             AdvanceMenu( *menu, true );
         }
