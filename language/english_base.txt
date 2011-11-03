@@ -1695,6 +1695,12 @@ tutorial_menu_teamstart_instructions If you play in a team, it usually is the be
 tutorial_menu_survival_animation textures/tutorials/teamstart/teamstart.txt
 tutorial_teamkill                Failure: Team Kill
 
+tutorial_menu_bullies_text     Maze
+tutorial_menu_bullies_help     Maze: two enemies have trapped you between their walls. Can you survive?
+tutorial_menu_bullies_instructions Two bullies have trapped you between their walls and are forcing you through their maze. Follow the turns they make and escape.
+tutorial_menu_survival_animation textures/tutorials/bullies/bullies.txt
+tutorial_teamkill                Failure: Team Kill
+
 #********************************************
 #********************************************
 #

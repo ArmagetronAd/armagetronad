@@ -486,6 +486,190 @@ public:
 };
 static gTutorialTest sg_tutorialTest;
 
+// test tutorial
+class gTutorialBullies: public gTutorial
+{
+public:
+    gTutorialBullies()
+    : gTutorial( "bullies" )
+    {
+        settings_.AI_IQ = 1000;
+        settings_.sizeFactor = 0;
+        settings_.numAIs = 2;
+    }
+
+    // analyzes the game
+    void Analysis()
+    {
+    }
+
+    void AfterSpawn()
+    {
+        // give AIs a head start
+        eTeam & ais = AITeam();
+        for( int i = ais.NumPlayers()-1; i >= 0; --i )
+        {
+            ePlayerNetID & ai = *ais.Player(i);
+            ai.Object()->eGameObject::Timestep( -3 );
+            ai.Object()->Timestep(0);
+        }
+
+        // create maze
+        width_ = 2;
+        currentDir_ = eCoord(0,1);
+        currentPos_ = eCoord( 0, 120 );
+        maze_.clear();
+        Maze();
+        Add(1,0);
+        ApplyMaze();
+    }
+
+    virtual void Maze()
+    {
+    }
+
+    // prepares
+    virtual void Prepare()
+    {
+        gTutorial::Prepare();
+        su_helpLevel = uActionTooltip::Level_Advanced;
+        PushSetting( "MAP_FILE", "Z-Man/tutorial/bullies-0.1.0.aamap.xml" );
+        PushSetting( "CYCLE_ACCEL", "0" );
+        // PushSetting( "COCKPIT_FILE", "Z-Man/tutorial/spartanic-0.0.1.aacockpit.xml" );
+
+        // colors
+        PushSetting( "ALLOW_TEAM_NAME_COLOR", "0" );
+        PushSetting( "ALLOW_TEAM_NAME_PLAYER", "1" );
+
+        // incam only
+        PushSetting( "CAMERA_FORBID_CUSTOM", "1" );
+        PushSetting( "CAMERA_FORBID_SERVER_CUSTOM", "1" );
+        PushSetting( "CAMERA_FORBID_IN", "0" );
+        PushSetting( "CAMERA_FORBID_SMART", "1" );
+        PushSetting( "CAMERA_FORBID_FREE", "1" );
+        PushSetting( "CAMERA_FORBID_FOLLOW", "1" );
+        PushSetting( "CAMERA_FORBID_MER", "1" );
+        
+        // create test maze to get correct size factor
+        width_ = 2;
+        currentDir_ = eCoord(0,1);
+        currentPos_ = eCoord( 0, 120 );
+        maze_.clear();
+        Maze();
+        Add(1,0);
+        
+        REAL maxRadius = 180;
+        for( std::vector< MazePoint >::iterator i = maze_.begin(); i != maze_.end(); ++i )
+        {
+            if( fabs((*i).center.x) > maxRadius )
+            {
+                maxRadius = fabs((*i).center.x);
+            }
+            if( fabs((*i).center.y) > maxRadius )
+            {
+                maxRadius = fabs((*i).center.y);
+            }
+        }
+
+        maxRadius += width_;
+
+        settings_.sizeFactor = 0;
+        while( maxRadius > 190 )
+        {
+            maxRadius*=sqrt(.5);
+            settings_.sizeFactor++;
+        }
+    }
+protected:
+    void ApplyMaze()
+    {
+        eTeam & aiTeam = AITeam();
+        gAIPlayer * ais[2] = { dynamic_cast< gAIPlayer * > ( aiTeam.Player(0) ),
+                               dynamic_cast< gAIPlayer * > ( aiTeam.Player(1) ) };
+        
+
+        if( maze_.size() )
+        {
+            MazePoint const & point = maze_.back();
+            eCoord side = point.dirBefore.Turn(0,1);
+            
+            REAL radius = ais[0]->Object()->Speed() * sg_delayCycle;
+            eCoord center = point.center + width_ * 2 * point.dirBefore;
+            ais[0]->AddToPath( center+side*(radius+width_)+point.dirBefore*radius );
+            ais[1]->AddToPath( center-side*(radius+width_)+point.dirBefore*radius );
+            ais[0]->AddToPath( center+side*(radius+width_)-point.dirBefore*radius );
+            ais[1]->AddToPath( center-side*(radius+width_)-point.dirBefore*radius );
+            ais[0]->AddToPath( center-side*(radius+width_)-point.dirBefore*radius );
+            ais[1]->AddToPath( center+side*(radius+width_)-point.dirBefore*radius );
+            ais[0]->AddToPath( center-side*(radius+width_) );
+            ais[1]->AddToPath( center+side*(radius+width_) );
+            radius = width_+10;
+            ais[0]->AddToPath( center+side*(radius+width_)+point.dirBefore*radius );
+            ais[1]->AddToPath( center-side*(radius+width_)+point.dirBefore*radius );
+            ais[0]->AddToPath( center+side*(radius+width_)-point.dirBefore*radius );
+            ais[1]->AddToPath( center-side*(radius+width_)-point.dirBefore*radius );
+            ais[0]->AddToPath( center-side*(radius+width_)-point.dirBefore*radius );
+            ais[1]->AddToPath( center+side*(radius+width_)-point.dirBefore*radius );
+            ais[0]->AddToPath( center-side*(radius+width_) );
+            ais[1]->AddToPath( center+side*(radius+width_) );
+            ais[0]->AddToPath( center-side*(width_) );
+            ais[1]->AddToPath( center+side*(width_) );
+        }
+
+        while( maze_.size() )
+        {
+            MazePoint const & point = maze_.back();
+
+            ais[0]->AddToPath( point.center+point.offset );
+            ais[1]->AddToPath( point.center-point.offset );
+
+            maze_.pop_back();
+        }
+    }
+
+    // adds a maze turn
+    void Add( int direction, REAL distance )
+    {
+        MazePoint point;
+        point.center = currentPos_;
+        eCoord newDir = currentDir_.Turn(0,direction);
+        point.offset = direction*width_*(currentDir_ - newDir);
+        point.dirBefore = currentDir_;
+        currentDir_ = newDir;
+        currentPos_ = currentPos_ + distance*newDir;
+        maze_.push_back( point );
+    }
+private:
+    // data for maze
+    eCoord currentPos_;
+    eCoord currentDir_;
+    REAL width_;
+    struct MazePoint
+    {
+        eCoord center;
+        eCoord offset;
+        eCoord dirBefore;
+    };
+    std::vector< MazePoint > maze_;
+};
+class gTutorialBullies1: public gTutorialBullies
+{
+    virtual void Maze()
+    {
+        Add( 1, 100 );
+        Add( 1, 50 );
+        Add( -1, 100 );
+        Add( -1, 100 );
+        Add( -1, 50 );
+        Add( 1, 50 );
+        //Add( -1, 30 );
+        //Add( -1, 20 );
+        //Add( -1, 20 );
+        //Add( 1, 40 );
+    }
+};
+static gTutorialBullies1 sg_tutorialBullies1;
+
 //! teamstart tutorial
 class gTutorialTeamstart: public gTutorial
 {
