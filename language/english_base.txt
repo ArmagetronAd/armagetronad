@@ -1693,13 +1693,21 @@ tutorial_menu_teamstart_text     Team Start
 tutorial_menu_teamstart_help     Team Start Tutorial: learn the standard team formation opening move
 tutorial_menu_teamstart_instructions If you play in a team, it usually is the best startup move to tightly grind each others walls. The outside players should cuddle up on the center player, the ones further outside doing so in several steps. This tutorial puts you in the most difficult position there is, the player next to the outer player. Survive the start and don't let anyone on your team die.
 tutorial_menu_survival_animation textures/tutorials/teamstart/teamstart.txt
-tutorial_teamkill                Failure: Team Kill
+
+tutorial_menu_speedkill_text     Speed Kill
+tutorial_menu_speedkill_help     Speed Kill: learn to use a speed advantage to trap an enemy
+tutorial_menu_speedkill_instructions The speed kill is the most basic way to get rid of your enemies in \g. You sneak up on them, grinding their trail, and after you overtake them, you cut them off and wrap them in your tail.\nHere, we set you up for an easy speed kill against an oblivious AI.
+tutorial_menu_survival_animation textures/tutorials/speedkill/speedkill.txt
+
+tutorial_menu_speedkilldefense_text     Speed Kill Defense
+tutorial_menu_speedkilldefense_help     Defense: learn how to defend against speed kills
+tutorial_menu_speedkilldefense_instructions Oh no! Now the situation is reversed. An enemy is grinding your tail on the right hand side and is going to cut you off in a moment. Quick, think of a counter!
+tutorial_menu_survival_animation textures/tutorials/speedkilldefense/speedkilldefense.txt
 
 tutorial_menu_bullies_text     Maze
 tutorial_menu_bullies_help     Maze: two enemies have trapped you between their walls. Can you survive?
 tutorial_menu_bullies_instructions Two bullies have trapped you between their walls and are forcing you through their maze. Follow the turns they make and escape.
 tutorial_menu_survival_animation textures/tutorials/bullies/bullies.txt
-tutorial_teamkill                Failure: Team Kill
 
 #********************************************
 #********************************************

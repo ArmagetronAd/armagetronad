@@ -244,6 +244,13 @@ public:
         return dynamic_cast< gAIPlayer & >( AIPlayerRaw() );
     }
 
+    // give a player a head start
+    void HeadStart( ePlayerNetID & p, REAL time )
+    {
+        p.Object()->eGameObject::Timestep(-time);
+        p.Object()->Timestep(0);
+    }
+
     void AddPath( gAIPlayer & ai, REAL x, REAL y, bool mindless = true )
     {
         ai.AddToPath( tCoord( x, y ) * pow( 2, settings_.sizeFactor*.5 ), mindless );
@@ -486,7 +493,7 @@ public:
 };
 static gTutorialTest sg_tutorialTest;
 
-// test tutorial
+// bullies force you into a maze
 class gTutorialBullies: public gTutorial
 {
 public:
@@ -510,8 +517,7 @@ public:
         for( int i = ais.NumPlayers()-1; i >= 0; --i )
         {
             ePlayerNetID & ai = *ais.Player(i);
-            ai.Object()->eGameObject::Timestep( -3 );
-            ai.Object()->Timestep(0);
+            HeadStart( ai, 3 );
         }
 
         // create maze
@@ -535,7 +541,7 @@ public:
         su_helpLevel = uActionTooltip::Level_Advanced;
         PushSetting( "MAP_FILE", "Z-Man/tutorial/bullies-0.1.0.aamap.xml" );
         PushSetting( "CYCLE_ACCEL", "0" );
-        // PushSetting( "COCKPIT_FILE", "Z-Man/tutorial/spartanic-0.0.1.aacockpit.xml" );
+        PushSetting( "COCKPIT_FILE", "Z-Man/tutorial/empty-0.0.1.aacockpit.xml" );
 
         // colors
         PushSetting( "ALLOW_TEAM_NAME_COLOR", "0" );
@@ -669,6 +675,101 @@ class gTutorialBullies1: public gTutorialBullies
     }
 };
 static gTutorialBullies1 sg_tutorialBullies1;
+
+// speed kills
+class gTutorialSpeedKillBase: public gTutorial
+{
+public:
+    gTutorialSpeedKillBase( char const * name )
+    : gTutorial( name )
+    {
+        settings_.sizeFactor = 0;
+        settings_.numAIs = 1;
+    }
+
+    // analyzes the game
+    void Analysis()
+    {
+        if( se_GameTime() >= 0 && se_GameTime() < 10 )
+        {
+            se_mainGameTimer->Reset(10,true);
+        }
+    }
+
+    void AfterSpawn()
+    {
+        gTutorial::AfterSpawn();
+
+        eGameObject::s_Timestep( AIPlayer().Object()->Grid(), 10, .1 );
+    }
+
+    // prepares
+    virtual void Prepare()
+    {
+        gTutorial::Prepare();
+        su_helpLevel = uActionTooltip::Level_Advanced;
+        PushSetting( "MAP_FILE", "Z-Man/tutorial/speedkill-0.1.0.aamap.xml" );
+
+        // colors
+        PushSetting( "ALLOW_TEAM_NAME_COLOR", "0" );
+        PushSetting( "ALLOW_TEAM_NAME_PLAYER", "1" );
+    }
+};
+
+// speed kill defense
+class gTutorialSpeedKillDefense: public gTutorialSpeedKillBase
+{
+public:
+    gTutorialSpeedKillDefense()
+    : gTutorialSpeedKillBase( "speedkilldefense" )
+    {
+    }
+
+    void AfterSpawn()
+    {
+        // give human a head start
+        HeadStart( HumanPlayer(), 10 );
+        HeadStart( AIPlayer(), 5 );
+        REAL y = 630;
+        AddPath( AIPlayer(), -100, y+10 ); 
+        AddPath( AIPlayer(), .1, y+10 ); 
+        AddPath( AIPlayer(), .1, 10 ); 
+        AddPath( AIPlayer(), 10, 10 ); 
+        AddPath( AIPlayer(), 10, -1 ); 
+        AddPath( AIPlayer(), -.1, -1 ); 
+        AddPath( AIPlayer(), -.1, y-10 ); 
+        AddPath( AIPlayer(), -10, y-10 ); 
+        AddPath( AIPlayer(), -10, y ); 
+        AddPath( AIPlayer(), .1, y, false ); 
+
+        gTutorialSpeedKillBase::AfterSpawn();
+    }
+};
+static gTutorialSpeedKillDefense sg_tutorialSpeedKillDefense;
+
+// speed kill
+class gTutorialSpeedKill: public gTutorialSpeedKillBase
+{
+public:
+    gTutorialSpeedKill()
+    : gTutorialSpeedKillBase( "speedkill" )
+    {
+    }
+
+    void AfterSpawn()
+    {
+        // give human a head start
+        HeadStart( AIPlayer(), 10 );
+        HeadStart( HumanPlayer(), 5 );
+
+        REAL y = 1000;
+        AddPath( AIPlayer(), -10, y ); 
+        AddPath( AIPlayer(), .1, y, false ); 
+
+        gTutorialSpeedKillBase::AfterSpawn();
+    }
+};
+static gTutorialSpeedKill sg_tutorialSpeedKill;
 
 //! teamstart tutorial
 class gTutorialTeamstart: public gTutorial
