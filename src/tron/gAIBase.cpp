@@ -1772,6 +1772,13 @@ void sg_RubberValues( ePlayerNetID const * player, REAL speed, REAL & max, REAL 
 // find the most advanced path point that is in our viewing range:
 void gAIPlayer::ThinkPathGiven( ThinkData & data, bool emergency )
 {
+    if( !path.Valid() )
+    {
+        SwitchToState( AI_SURVIVE, 1 );
+        ThinkSurvive( data );
+        return;
+    }
+
     eCoord dir = Object()->Direction();
 
     int lr = 0;
@@ -1788,7 +1795,12 @@ void gAIPlayer::ThinkPathGiven( ThinkData & data, bool emergency )
     REAL sideThresh = delay * Object()->Speed()*.5;
     if( fabs( side ) < sideThresh )
     {
-        path.Proceed();
+        if ( !path.Proceed() )
+        { 
+            SwitchToState( AI_SURVIVE, 1 );
+            ThinkSurvive( data );
+            return;
+        }
         t = path.CurrentPosition();
         side = (t - pos) * dir;
     }
@@ -1818,7 +1830,10 @@ void gAIPlayer::ThinkPathGiven( ThinkData & data, bool emergency )
             lr += (side > 0 ? 1 : -1);
             if( ahead < -sideThresh*.9 )
             {
-                path.Proceed();
+                if ( !path.Proceed() )
+                { 
+                    SwitchToState( AI_SURVIVE, 1 );
+                }
             }
         }
     }
