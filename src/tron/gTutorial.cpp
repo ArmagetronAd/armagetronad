@@ -126,6 +126,8 @@ public:
       , name_( name )
       , success_( false )
       , finished_( false )
+      , warpedAhead_( 0 )
+      , difficulty_ ( 0 )
     {
         CreateMenu();
     }
@@ -164,6 +166,32 @@ public:
             {
                 sn_CenterMessage("");
             }
+        }
+    }
+
+    // called from Analysis; if true, it is expected that SetDifficulty does something
+    // meaningful.
+    virtual bool HandlesDifficulty()
+    {
+        return false;
+    }
+
+    virtual void SetDifficulty( int difficulty )
+    {
+    }
+
+    // analyzes the game
+    virtual void Analysis()
+    {
+        // warp ahead in time
+        if( se_GameTime() >= 0 && se_GameTime() < warpedAhead_ )
+        {
+            se_mainGameTimer->Reset( warpedAhead_ );
+        }
+        if( se_GameTime() > 0 && !finished_ && !HandlesDifficulty() )
+        {
+            // make the game slower
+            se_mainGameTimer->speed = pow(.5, difficulty_*.5 );
         }
     }
 
@@ -304,6 +332,8 @@ public:
 
         // no names
         PushSetting( "FADEOUT_NAME_DELAY", "0" );
+
+        SetDifficulty( difficulty_ );
     }
 
     // called on success
@@ -331,10 +361,37 @@ public:
     {
         success_ = false;
         finished_ = true;
+        difficulty_ = 0;
+        int maxDifficulty = 3;
         for( int tries = 3; finished_ && !success_ && tries > 0; --tries )
         {
             Instructions();
             Run();
+            if( success_ )
+            {
+                // reset difficulty
+                if( difficulty_ > 0 )
+                {
+                    uMenu::Message( tOutput("$tutorial_easy_head"), tOutput("$tutorial_easy_body"), 300 );
+
+                    success_ = false;
+
+                    if( maxDifficulty > difficulty_ - 1 )
+                    {
+                        maxDifficulty = difficulty_ - 1;
+                    }
+
+                    difficulty_ = 0; 
+                    tries += 2;
+                }
+            }
+            else
+            {
+                if( difficulty_ < maxDifficulty )
+                {
+                    difficulty_++;
+                }
+            }
         }
 
         if( finished_ )
@@ -377,6 +434,28 @@ public:
         }
         return true;
     }
+
+    // warps dt seconds into the future for all game objects and AIs.
+    // to be called in AfterSpawn().
+    void TimeWarp( REAL dt )
+    {
+        REAL last = warpedAhead_;
+        warpedAhead_ += dt;
+        REAL step = 0.1;
+        while( last < warpedAhead_ - step )
+        {
+            last += step;
+            eGameObject::s_Timestep( se_PlayerNetIDs(0)->Object()->Grid(), last, 1 );
+            // simulate IAs
+            for (int i=se_PlayerNetIDs.Len()-1;i>=0;i--)
+            {
+                gAIPlayer *ai = dynamic_cast<gAIPlayer*>(se_PlayerNetIDs(i));
+                if (ai)
+                    ai->Timestep(last);
+            }
+        }
+        eGameObject::s_Timestep( se_PlayerNetIDs(0)->Object()->Grid(), warpedAhead_, 1 );
+    }
 protected:
     gGameSettings settings_;
 private:
@@ -386,11 +465,17 @@ private:
     tString name_;
     std::auto_ptr< gTutorialMenuItem > menuItem_;
     static gTutorial * anchor_;
+
 protected:
     bool success_; //!< succeeded this time?
     bool finished_; //!< set when the tutorial is finished
 
 private:
+    // seconds warped into the round
+    REAL warpedAhead_;
+    // difficulty level; 0 is normal, 1 easy,...
+    int difficulty_;
+
     //! temporary setting overrides go here.
     std::vector< tJUST_CONTROLLED_PTR < gTemporarySetting > > tempSettings_;
 
@@ -480,6 +565,7 @@ public:
     // analyzes the game
     void Analysis()
     {
+        gTutorial::Analysis();
     }
 
     // prepares
@@ -508,6 +594,7 @@ public:
     // analyzes the game
     void Analysis()
     {
+        gTutorial::Analysis();
     }
 
     void AfterSpawn()
@@ -690,17 +777,14 @@ public:
     // analyzes the game
     void Analysis()
     {
-        if( se_GameTime() >= 0 && se_GameTime() < 10 )
-        {
-            se_mainGameTimer->Reset(10,true);
-        }
+        gTutorial::Analysis();
     }
 
     void AfterSpawn()
     {
         gTutorial::AfterSpawn();
 
-        eGameObject::s_Timestep( AIPlayer().Object()->Grid(), 10, .1 );
+        TimeWarp( 10 );
     }
 
     // prepares
@@ -792,6 +876,8 @@ public:
     // analyzes the game
     void Analysis()
     {
+        gTutorial::Analysis();
+
         if( se_GameTime() > .5 && !finished_ )
         {
             eTeam & team = HumanTeam();
@@ -880,6 +966,7 @@ public:
     // analyzes the game
     void Analysis()
     {
+        gTutorial::Analysis();
     }
 
     void AddSquare( gAIPlayer & ai, REAL radius )
@@ -916,6 +1003,9 @@ public:
         // radius = 40;
         //AddPath( ai, zoneX+radius, zoneY+radius );
         AddPath( ai, zoneX+radius, zoneY, false );
+        
+        // doesn't work here, causes zone trouble.
+        // TimeWarp( 10 );
     }
 
     // prepares
@@ -949,6 +1039,7 @@ public:
     // analyzes the game
     void Analysis()
     {
+        gTutorial::Analysis();
     }
 
     // prepares
@@ -979,7 +1070,20 @@ public:
 
     // analyzes the game
     void Analysis()
+    { 
+        gTutorial::Analysis();
+    }
+
+    // called from Analysis; if true, it is expected that SetDifficulty does something
+    // meaningful.
+    virtual bool HandlesDifficulty()
     {
+        return true;
+    }
+
+    virtual void SetDifficulty( int difficulty )
+    {
+        settings_.sizeFactor = -4+difficulty;
     }
 
     // prepares
@@ -1012,6 +1116,7 @@ public:
     // analyzes the game
     void Analysis()
     {
+        gTutorial::Analysis();
     }
 
     // prepares

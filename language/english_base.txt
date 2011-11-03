@@ -1664,6 +1664,9 @@ window_title_tutorial       \g - Tutorial: \1
 tutorial_success            Well done!
 tutorial_teamkill           Failure: Team Kill
 
+tutorial_easy_head          Good Work
+tutorial_easy_body          but that just now was actually a slightly easier version of the tutorial challenge. Try the real one again now.
+
 tutorial_menu_test_text     Test
 tutorial_menu_test_help     Test Tutorial: play against one constant AI.
 tutorial_menu_test_instructions As a final test, you need to defeat a lone AI. It's pretty stupid, the best way to kill it is to set up a trap right where you start.
