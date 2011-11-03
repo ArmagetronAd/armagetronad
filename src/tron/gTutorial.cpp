@@ -439,6 +439,8 @@ public:
     // to be called in AfterSpawn().
     void TimeWarp( REAL dt )
     {
+        PushSetting( "SPARKS", "0" );
+        
         REAL last = warpedAhead_;
         warpedAhead_ += dt;
         REAL step = 0.1;
@@ -784,7 +786,7 @@ public:
     {
         gTutorial::AfterSpawn();
 
-        TimeWarp( 10 );
+        TimeWarp( 8 );
     }
 
     // prepares
