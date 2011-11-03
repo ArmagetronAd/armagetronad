@@ -1662,6 +1662,7 @@ game_menu_wz_ld_help		Minimum number of seconds since the last death before the 
 
 window_title_tutorial       \g - Tutorial: \1
 tutorial_success            Well done!
+tutorial_teamkill           Failure: Team Kill
 
 tutorial_menu_test_text     Test
 tutorial_menu_test_help     Test Tutorial: play against one constant AI.
@@ -1687,6 +1688,12 @@ tutorial_menu_conquest_text     Conquest
 tutorial_menu_conquest_help     Conquest Tutorial: learn to conquer a fortress.
 tutorial_menu_conquest_instructions The goal of the Fortress mode is to conquer the enemy zone and defend your own zone. Unlike the winzones you saw earlier, a simple touch is not enough; you have to stay inside the zone and keep defenders out for a few seconds.\nIn this excercise, you will try to attack the enemy Gold zone, your home zone is safe. You will need to find a way past the lone defender or kill it.\n\nSadly, Fortress mode is not available for local play against AIs. We don't have any good AIs for it yet.
 tutorial_menu_survival_animation textures/tutorials/conquest/conquest.txt
+
+tutorial_menu_teamstart_text     Team Start
+tutorial_menu_teamstart_help     Team Start Tutorial: learn the standard team formation opening move
+tutorial_menu_teamstart_instructions If you play in a team, it usually is the best startup move to tightly grind each others walls. The outside players should cuddle up on the center player, the ones further outside doing so in several steps. This tutorial puts you in the most difficult position there is, the player next to the outer player. Survive the start and don't let anyone on your team die.
+tutorial_menu_survival_animation textures/tutorials/teamstart/teamstart.txt
+tutorial_teamkill                Failure: Team Kill
 
 #********************************************
 #********************************************

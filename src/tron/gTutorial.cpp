@@ -144,14 +144,26 @@ public:
         finished_ = true;
     }
 
-    // always exit after one round
+    // round end result: human team must win without casualties
     void OnWin( eTeam * winner )
     {
         finished_ = true;
         if( winner && winner->OldestHumanPlayer() )
         {
-            sn_CenterMessage(tOutput("$tutorial_success"));
-            success_ = true;
+            if( winner->AlivePlayers() == winner->NumPlayers() )
+            {
+                sn_CenterMessage(tOutput("$tutorial_success"));
+                success_ = true;
+            }
+            else if( winner->OldestHumanPlayer()->Object() && winner->OldestHumanPlayer()->Object()->Alive() )
+            {
+                sn_CenterMessage(tOutput("$tutorial_teamkill"));
+                success_ = false;
+            }
+            else
+            {
+                sn_CenterMessage("");
+            }
         }
     }
 
@@ -234,7 +246,7 @@ public:
 
     void AddPath( gAIPlayer & ai, REAL x, REAL y, bool mindless = true )
     {
-        ai.AddToPath( tCoord( x, y ) * pow( 2, settings_.sizeFactor*.5 ) );
+        ai.AddToPath( tCoord( x, y ) * pow( 2, settings_.sizeFactor*.5 ), mindless );
     }
 
     gCycle * HumanCycle()
@@ -257,6 +269,8 @@ public:
     {
         finished_ = false;
 
+        sn_CenterMessage("");
+        
         // default map
         PushSetting( "MAP_FILE", "Anonymous/polygon/regular/square-1.0.1.aamap.xml" );
 
@@ -280,6 +294,9 @@ public:
 
         // allow custom camera
         PushSetting( "CAMERA_FORBID_CUSTOM", "0" );
+
+        // no names
+        PushSetting( "FADEOUT_NAME_DELAY", "0" );
     }
 
     // called on success
@@ -362,9 +379,11 @@ private:
     tString name_;
     std::auto_ptr< gTutorialMenuItem > menuItem_;
     static gTutorial * anchor_;
+protected:
     bool success_; //!< succeeded this time?
     bool finished_; //!< set when the tutorial is finished
 
+private:
     //! temporary setting overrides go here.
     std::vector< tJUST_CONTROLLED_PTR < gTemporarySetting > > tempSettings_;
 
@@ -466,6 +485,100 @@ public:
 
 };
 static gTutorialTest sg_tutorialTest;
+
+//! teamstart tutorial
+class gTutorialTeamstart: public gTutorial
+{
+public:
+    gTutorialTeamstart()
+    : gTutorial( "teamstart" )
+    {
+        settings_.sizeFactor = 0;
+        settings_.numAIs = 0;
+        settings_.maxTeams = 1;
+        settings_.minPlayersPerTeam = 6;
+        settings_.maxPlayersPerTeam = 6;
+        settings_.wallsLength = 400;
+        settings_.winZoneMinRoundTime = 3;
+        settings_.winZoneMinLastDeath = 0;
+        settings_.speedFactor = 0;
+    }
+
+    // analyzes the game
+    void Analysis()
+    {
+        if( se_GameTime() > .5 && !finished_ )
+        {
+            eTeam & team = HumanTeam();
+            if( team.AlivePlayers() < team.NumPlayers() )
+            {
+                End( false );
+            }
+        }
+    }
+
+    // set paths
+    void BeforeSpawn()
+    {
+        eTeam & team = HumanTeam();
+        team.Shuffle(0,3);
+    }
+
+    void Path( gAIPlayer & ai, int side, int level )
+    {
+        REAL SpawnX = 255;
+        REAL eps = .3*level;
+        REAL step = 10;
+        REAL s = 2.753; 
+        REAL SpawnY = 50-level*step*.4;
+
+        AddPath( ai, 500, 500 );
+        AddPath( ai, SpawnX-side*eps, 500 );
+        if( level > 0 )
+        {
+            AddPath( ai, SpawnX-side*eps, SpawnY+level*step );
+        }
+        if( level > 1 )
+        {
+            AddPath( ai, SpawnX-side*(s+eps), SpawnY+level*step );
+            AddPath( ai, SpawnX-side*(s+eps), SpawnY+(level-1)*step );
+        }
+        if( level > 2 )
+        {
+            AddPath( ai, SpawnX-side*(2*s+eps), SpawnY+(level-1)*step );
+            AddPath( ai, SpawnX-side*(2*s+eps), SpawnY+(level-2)*step );
+        }
+    }
+    
+    void AfterSpawn()
+    {
+        eTeam & team = HumanTeam();
+
+        Path( *dynamic_cast< gAIPlayer * >( team.Player( 0 ) ), 0, 0 );
+        Path( *dynamic_cast< gAIPlayer * >( team.Player( 1 ) ), 1, 1 );
+        Path( *dynamic_cast< gAIPlayer * >( team.Player( 2 ) ), -1, 1 );
+        Path( *dynamic_cast< gAIPlayer * >( team.Player( 4 ) ), -1, 2 );
+        Path( *dynamic_cast< gAIPlayer * >( team.Player( 5 ) ), 1, 3 );
+        // Path( *dynamic_cast< gAIPlayer * >( team.Player( 6 ) ), -1, 3 );
+    }
+
+    // prepares
+    virtual void Prepare()
+    {
+        gTutorial::Prepare();
+        su_helpLevel = uActionTooltip::Level_Advanced;
+        PushSetting( "COCKPIT_FILE", "Z-Man/tutorial/spartanic-0.0.1.aacockpit.xml" );
+        PushSetting( "WIN_ZONE_RANDOMNESS", "0" );
+        PushSetting( "WIN_ZONE_EXPANSION", "0" );
+        PushSetting( "WIN_ZONE_INITIAL_SIZE", "10" );
+        PushSetting( "WIN_ZONE_DEATHS", "0" );
+        PushSetting( "CYCLE_RUBBER", "5" );
+        PushSetting( "CYCLE_SPEED", "10" );
+        PushSetting( "TEXT_OUT", "0" );
+    }
+
+};
+static gTutorialTeamstart sg_tutorialTeamstart;
 
 //! conquest tutorial
 class gTutorialConquest: public gTutorial
