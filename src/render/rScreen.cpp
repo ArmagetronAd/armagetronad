@@ -455,7 +455,9 @@ static void sr_SetSwapControlAuto( bool after = false )
     }
     else if( rSysDep::IsBenchmark() )
     {
+#ifndef DEBUG        
         sr_SetSwapControl( 0, after );
+#endif
     }
     else
     {
