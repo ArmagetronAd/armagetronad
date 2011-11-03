@@ -36,6 +36,7 @@ class eHalfEdge;
 class ePath{
 public:
 #ifdef DEBUG
+    void Render();  // renders this path
     static void RenderLast();  // renders the last found path
 #endif
 
