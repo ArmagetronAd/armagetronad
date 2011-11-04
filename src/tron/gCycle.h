@@ -59,6 +59,8 @@ extern bool headlights;
 // steering help
 extern REAL sg_rubberCycle;
 
+extern REAL sg_cycleInvulnerableTime;
+
 namespace Game { class CycleSync; }
 
 // this class set is responsible for remembering which walls are too

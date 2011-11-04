@@ -15,6 +15,26 @@ Changes since 0.3.1
   command is issued by enabling “RESET_ROTATION_ON_START_NEW_MATCH”.
 - New admin command: "SCRAMBLE". Scrambles/randomises which players are in which team.
 - New vote: /callvote scramble: Executes the SCRAMBLE command.
+- Teams now retain their spawn for later respawing
+- New ladderlog entry: PLAYER_RESPAWN <RESPAWNEE> <RESPAWNEE'S TEAM> [RESPAWNER]
+- New warmup mode:
+    - DO_WARMUP N>0 will make the game enter warmup mode after each N matches
+    - In warmup mode, players can use the /ready command to set themselves ready and start the match
+    - Team joins/switches/leaves(when using /teamleave) are done instantly
+    - By default, players respawn in warmup mode (WARMUP_RESPAWN_TIME)
+    - The game starts when each team has ready/total > WARMUP_MIN_READY(0.51)
+    - However, there should be at least WARMUP_MIN_PLAYERS(2) humans before the warmup can end
+    - Readiness state is synced to clients so that newer ones can show an icon on the scoreboard
+    - ALL_READY makes the game behave as if all players had readied up.
+    - New ladderlog entries:
+        - NEW_WARMUP replaces NEW_MATCH when appropriate: NEW_WARMUP <N> <TIMESTAMP>
+          with N the number of matches to be played consecutively
+        - MATCHES_LEFT <N>
+- DEADLY_EXPLOSIONS setting. When enabled, cycles in the blast radius of an
+  explosion will be destroyed, and DEATH_EXPLOSION will be written to ladderlog.
+  Scoring can be applied with the SCORE_EXPLOSION and SCORE_EXPLOSION_OWNER
+  settings.
+
 
 Changes since 0.3.0
 ===================

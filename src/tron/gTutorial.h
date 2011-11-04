@@ -3,7 +3,8 @@
 *************************************************************************
 
 ArmageTron -- Just another Tron Lightcycle Game in 3D.
-Copyright (C) 2000  Manuel Moos (manuel@moosnet.de)
+Copyright (C) 2005  by 
+and the AA DevTeam (see the file AUTHORS(.txt) in the main source directory)
 
 **************************************************************************
 
@@ -25,32 +26,38 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 */
 
-#ifndef ArmageTron_SPAWN_H
-#define ArmageTron_SPAWN_H
+#ifndef ArmageTron_GTUTORIAL_H
+#define ArmageTron_GTUTORIAL_H
 
-#include "eCoord.h"
+class tString;
+struct gGameSettings;
+class eTeam;
 
-class gSpawnPoint{
-    friend class gArena;
+//! opens the tutorial menu
+void sg_TutorialMenu();
 
-    int   id;
-    eCoord location,direction;
-    REAL  lastTimeUsed;
-    int   numberOfUses;
+//! returns whether all tutorials have been completed
+bool sg_TutorialsCompleted();
 
+class gTutorialBase
+{
 public:
-    gSpawnPoint(const eCoord &loc,const eCoord &dir);
-    ~gSpawnPoint(){}
+    virtual ~gTutorialBase(){}
 
-    //enters valid spawn eCoordinates and direction in loc and dir
-    void Spawn(eCoord &loc,eCoord &dir);
+    // analyzes the game every second, sets uMenu::quickexit if 
+    // the tutorial was failed or passed
+    virtual void Analysis() = 0;
 
-    // estimates the danger of spawning here (0: no problem, 10: certain death)
-    REAL Danger();
+    // called the moment a team won
+    virtual void OnWin( eTeam * winner );
 
-    // mark it unused (for match start)
-    void Clear();
+    // called when the round really ends
+    virtual void RoundEnd( eTeam * winner );
+
+    virtual tString const & Name() const = 0;
 };
 
+// defined in gGame.cpp
+void sg_TutorialGame( gGameSettings & settings, gTutorialBase & tutorial );
 
 #endif

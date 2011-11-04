@@ -7,7 +7,7 @@ doc_txt_files=
 docfiles=$(doc_txt_files) $(doc_html_files)
 
 # install generated html files and put them directly into the distribution
-htmldir=$(armadocdir)/html/net
+htmldir=$(aa_datadir)/doc/net
 html_DATA=$(docfiles)
 
 dist-hook: htmldist-hook ${doc_html_files}

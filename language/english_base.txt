@@ -114,6 +114,7 @@ cycle_rubber_delay_help     During this fraction of the cycle delay time after e
 cycle_rubber_delay_bonus_help Factor for CYCLE_RUBBER_DELAY rubber efficiency.
 cycle_ping_rubber_help		Additional niceness for high ping players
 cycle_rubber_wall_shrink_help       With finite length trails, the used rubber is multiplied with this value and the result is subtracted from the wall length.
+cycle_rubber_sync_help              Determines whether rubber is synced to clients. The default 1 makes it sync only to the owner of each cycle, a value of 0 does not sync it at all and renders rubber meters useless, a value of 2 syncs rubber of all cycles to all clients, which was the old behavior before this setting was introduced.
 cycle_brake_refill_help				Rate at which the brake reservoir refills when you are not braking
 cycle_brake_deplete_help			Rate at which the brake reservoir depletes when you are braking
 cycle_sync_interval_enemy_help		Time in seconds between server-client updates of enemy cycles
@@ -166,6 +167,10 @@ score_kill_help                     Amount of points you get for killing someone
 score_suicide_help                  Amount of points you get for stupidly dying
 score_win_help                      Amount of points you get for winning a round
 score_deathzone_help                Amount of points you get for hitting the Death Zone
+score_explosion_owner_help  Points the owner of an explosion gains for destroying another enemy cycle.
+score_explosion_help        Points the enemy cycle destroyed in an explosion gains.
+deadly_explosions_help      Should cycles in the blast radius of an explosion be destroyed?
+
 
 sp_score_win_help			What you get for winning a round in single player mode
 sp_walls_stay_up_delay_help	Number of seconds the walls stay up after a player died; negative values will keep them up forever.
@@ -218,6 +223,9 @@ limit_score_help		End the match when a player reaches this score
 limit_rounds_help		End the match after this number of rounds
 limit_time_help			End the match after this number of minutes 
 limit_advance_help      End the match when the first team in score is this number of points ahead of the second team
+
+round_min_alive_help    End the round in a draw if there aren't this many humans alive.
+round_draw_warn_time_help Time allotted for teams to win until round actually ends in a draw.
 
 auto_team_help          Flag indicating whether players should be put into teams automatically.
 no_spectators_allowed	Sorry, does not work with automatic team assignment.\n
@@ -706,6 +714,20 @@ setting_legacy_behavior_annoying_help Default legacy behavior for settings that 
 setting_legacy_behavior_cheating_help     Default legacy behavior for settings where the default behavior could be considered cheating if non-default was set. Example: DOUBLEBIND_TIME
 setting_legacy_behavior_visual_help   Default legacy behavior for settings that only affect status displays and visuals, not game physics. Example: CYCLE_RUBBER_* (the client displays the rubber meter, but it's not used for anything)
 
+# server browser
+
+browser_query_filter_help            query filter. Set to 0 to poll all servers, 1 to query servers with nonnegative score bias, 2 to query only those with positive bias and 3 to not query at all. Non-queried servers will appear to have ping 999; the player info comes indirectly from the master server.
+browser_queries_simultaneous_help    max. number of simultaneous query messages that are sent
+browser_query_delay_single_help      time delay between queries of the same server
+browser_query_delay_global_help      time delay between all queries
+browser_num_queries_help             number of queries per try
+browser_contactloss_help             number of failed contact attempts before a server can be considered lost
+browser_sort_key_help                current sorting key in the server browser
+browser_bookmark_priority_ping_help  priority of bookmarks for sorting by ping
+browser_bookmark_priority_users_help priority of bookmarks for sorting by users
+browser_bookmark_priority_score_help priority of bookmarks for sorting by score
+
+
 #********************************************
 #********************************************
 #
@@ -814,6 +836,7 @@ ladderlog_write_chat_help                     Write to ladderlog: CHAT <chatter>
 ladderlog_write_death_frag_help               Write to ladderlog: DEATH_FRAG <prey> <predator>
 ladderlog_write_death_suicide_help            Write to ladderlog: DEATH_SUICIDE <player>
 ladderlog_write_death_teamkill_help           Write to ladderlog: DEATH_TEAMKILL <prey> <predator>
+ladderlog_write_death_explosion_help          Write to ladderlog: DEATH_EXPLOSION <prey> <predator>
 ladderlog_write_encoding_help                 Write to ladderlog: ENCODING <charset>. Specifies the encoding for data in ladderlog.txt.
 ladderlog_write_game_end_help                 Write to ladderlog: GAME_END <date and time>
 ladderlog_write_game_time_help                Write to ladderlog: GAME_TIME <time> (see also: GAME_TIME_INTERVAL)
@@ -974,6 +997,8 @@ admin_pass_help			Password for the basic in game admin
 
 backward_compatibility_help	Maximum number of old protocol versions to support.
 new_feature_delay_help		Disable features that only came in during the last X protocol versions.
+min_protocol_version_help   Minimum protocol version allowed to play.
+max_protocol_version_help   If > 0, maximum protocol version allowed to play; features not supported by this version are going to be permanently disabled.
 
 # program control
 quit_help					Shuts the dedicated server down and quits.
@@ -1010,6 +1035,8 @@ ban_list_help               Prints a list of currently banned IPs.
 unban_ip_help               Revokes the ban of the specified IP address.
 
 player_list_hidden_player_prefix_help	The prefix that is shown on hidden players' Global ID and access level when we can see it.
+player_list_ready           0x7fff7fReady
+player_list_not_ready       0xff7f7fNot ready
 player_list_search          \1: Search string "\2" matches:\n
 player_list_search_no_results \1: Search string "\2" returned no result.\n
 player_list_search_end      \1: End of search (\2 matches).\n
@@ -1235,6 +1262,7 @@ input_glance_left_tooltip   Press \1 to glance left.
 input_glance_left_text		Glance left
 input_glance_left_help		Turns the camera temporarily to the left.
 
+input_glance_forward_tooltip Press \1 to glance forward (Hold it and make turns to see how it is useful).
 input_glance_forward_text	Glance forward
 input_glance_forward_help	Turns the camera temporarily to the front.
 
@@ -1349,6 +1377,35 @@ system_settings_menu_help	Configure sound, graphics and overall appearance of \g
 main_menu_about_text		About
 main_menu_about_help		Displays information about the version of \g, the location of its config files, sites to visit and the project admins.
 
+help_menu_wiki_text	    Show Wiki
+help_menu_wiki_help		Opens the WIKI documentation in an external browser.
+help_menu_wiki_uri	    http://wiki.armagetronad.net
+
+help_menu_doc_text	    Show Documentation
+help_menu_doc_help		Opens the included HTML documentation in an external browser
+help_menu_doc_file	    index.html
+
+help_menu_irc_text	    Open IRC Chatroom
+help_menu_irc_help		Opens a web interface to our IRC chatroom where you may be lucky and catch a friendly soul willing to answer your questions.
+
+help_menu_directories_text Open Directories
+help_menu_directories_help Gives easy access to game data and configuration menus.
+
+help_menu_userdata_text Open User Data
+help_menu_userdata_help Opens the User Data directory where you can store personal modifications to the game.
+
+help_menu_screenshots_text Open Screenshots
+help_menu_screenshots_help Opens the directory where screenshots are stored.
+
+help_menu_systemdata_text Open System Data
+help_menu_systemdata_help Opens the System Data directory where you can store modifications to the game affecting all users on this machine; probably requires admin rights to modify, may get overwritten on the next upgrade, modifications may break things. It is generally recommended to treat this as read only.
+
+help_menu_systemconfig_text Open System Configuration
+help_menu_systemconfig_help Opens the System Configuration directory where you can store modifications to the game configuration affecting all users on this machine; probably requires admin rights to modify, may get overwritten on the next upgrade, modifications may break things. It is generally recommended to treat this as read only.
+
+main_help_menu_text     Help
+main_help_menu_help     Having problems or just want to look something up? Here is the place.
+
 main_menu_exit_text		Exit Game
 main_menu_exit_help		Goodbye!
 
@@ -1403,6 +1460,9 @@ version_info_gl_version		\n  GL Version  :
 #
 #********************************************
 #********************************************
+
+game_menu_tutorials_text    Tutorials
+game_menu_tutorials_help    Small training tasks to make you familiar with the basic concepts of this game.
 
 game_menu_start_text		Local Game
 game_menu_start_help		Enter the game grid! Only players configured on this computer will play.
@@ -1592,6 +1652,36 @@ game_menu_wz_mr_help		Minimum number of seconds the round has to be going on bef
 game_menu_wz_ld_text		Win Zone Min Last Death
 game_menu_wz_ld_help		Minimum number of seconds since the last death before the instant win zone is activated
 
+#********************************************
+#********************************************
+#
+#             tutorials
+#
+#********************************************
+#********************************************
+
+window_title_tutorial       \g - Tutorial: \1
+tutorial_success            Well done!
+
+tutorial_menu_test_text     Test
+tutorial_menu_test_help     Test Tutorial: play against one constant AI.
+tutorial_menu_test_instructions As a final test, you need to defeat a lone AI. It's pretty stupid, the best way to kill it is to set up a trap right where you start.
+tutorial_menu_test_animation textures/tutorials/test/test.txt
+
+tutorial_menu_navigation_text     Navigation
+tutorial_menu_navigation_help     Navigation Tutorial: learn to control your cycle.
+tutorial_menu_navigation_instructions Use the turn controls to reach the green winzone. Get used to how the basic physics work: you will not turn smoothly, but rather in sharp angles of 90 degrees. Take your time, nothing is trying to kill you yet.
+tutorial_menu_navigation_animation textures/tutorials/navigation/navigation.txt
+
+tutorial_menu_survival_text     Survival
+tutorial_menu_survival_help     Survival Tutorial: learn to survive.
+tutorial_menu_survival_instructions Walls are deadly in \g, that includes your own trail. Your task in this tutorial is to avoid crashing in a small arena for long 30 seconds, after which a green winzone will appear. Drive into it to finish this tutorial.
+tutorial_menu_survival_animation textures/tutorials/survival/survival.txt
+
+tutorial_menu_grind_text     Grind
+tutorial_menu_grind_help     Grind Tutorial: learn to accelerate
+tutorial_menu_grind_instructions Walls are also your friend in \g. You can drive close to a cycle trail to accelerate. If you are driving so close to a wall that you see sparks fly, you're doing it right.\nFor this tutorail, we activate what we call 'rubber': think of it as a shield protecting you against crashes. This allows you to get close to the enemy trail, you do not have to worry too much about turning away too late.\nGoal of this tutorial is to reach a speed of 40 m/s or to kill the enemy AI.
+tutorial_menu_grind_animation textures/tutorials/grinding/grinding.txt
 
 #********************************************
 #********************************************
@@ -1889,7 +1979,7 @@ player_red_text			Red:
 player_red_help			Lets you choose the red component of your colour.
 
 player_autologin_text		Auto Login:
-player_autologin_help		When enabled, you will automatically initiate the (usually completely optional) login procedure as soon as you enter a server.
+player_autologin_help		When enabled, you will automatically initiate the (usually completely optional) login procedure using the Global ID above as soon as you enter a server.
 
 player_stealth_text		Hide Global ID:
 player_stealth_help		Usually your global ID is shown to everyone when you log in or when someone uses the /players chat command. Enabling this tells the server that you prefer to remain anonymous. The server may still show your ID to moderators and administrators on the server or even decide to ignore your request.
@@ -2483,9 +2573,11 @@ gamestate_reset_center		New Match
 gamestate_reset_console		Resetting scores and starting new match after this round.\n
 gamestate_resetnow_center	New Match
 gamestate_resetnow_console	Resetting scores...\n
+gamestate_resetnow_console_matches Resetting scores. \1 match(es) to go!\n
 gamestate_resetnow_log		New Match\n
 gamestate_newround_console	Go (round \1 of \2)!\n
 gamestate_newround_goldengoal	Go (extra round; whoever gains the lead wins)!\n
+gamestate_newround_warmup   Go (Warmup; the match will start when enough players have readied up)!\n
 gamestate_newround_log		New Round\n
 gamestate_chat_wait         Waiting up to \2 seconds for \1 to finish chatting.\n
 
@@ -2513,6 +2605,10 @@ gamestate_champ_finalscores	Final Scores:\n
 gamestate_winner_winner		Winner: 
 gamestate_winner_ai		AI.
 gamestate_winner_humans		Humans.
+gamestate_draw_soon         Round draw in \1 seconds!\n
+gamestate_draw_center       Round Draw!
+gamestate_draw              The round ended in a draw 
+gamestate_draw_minalive     because not enough players were alive.\n
 
 instant_win_activated		Instant win zone activated! Enter it to win the round.\n
 instant_round_end_activated	Round end zone activated! Enter it to end the round.\n
@@ -2597,6 +2693,7 @@ player_win_frag_ai		\1 got \2 points for core dumping an AI player.\n
 player_lose_frag		\1 lost \2 points since it caused a general protection fault.\n
 player_lose_rim		    \1 lost \2 points for trying to escape from the game grid.\n
 player_win_survivor		\1 was awarded \2 points for being last active team.\n
+player_dead_explosion   \1 was destroyed in the explosion made by \2.\n
 player_respawn_center_message	You've been respawned\n
 player_joins_team       \1 wants to play for \2 on the next respawn.\n
 player_joins_team_wish  \1 still wants to play for \2, but isn't currently allowed to.\n
@@ -2634,6 +2731,25 @@ player_message_usage    Usage: PLAYER_MESSAGE <user ID or name> "<Message>"\n
 kick_usage              Usage: KICK <user ID or name> <Reason>\n
 ban_usage               Usage: BAN <user ID or name> <time in minutes(defaults to 60)> <Reason>\n
 kickmove_usage          Usage: \1 <user ID or name> <server IP to kick to>:<server port to kick to> <Reason>\n
+
+do_warmup_help          Run warmup rounds with no points until players have readied up. Then run this many matches consecutively before the next warmup session.
+warmup_min_players_help Minimum amount of players required for the warmup to end.
+warmup_min_ready_frac_help Fraction of players per team required to ready up before the match can start.
+warmup_readyup_interval_help Interval between reminders about readying up.
+warmup_respawn_time_help Time in seconds before which players are respawned in warmup mode. -1 disables this behaviour.
+
+player_ready_onlywarmup This command only works in warmup mode.\n
+player_ready_noteam     You must be in a team to use this command.\n
+player_ready            \1 0x7fff7fis ready!\n
+player_ready_not        \1 0xff7f7fis not ready anymore.\n
+player_allready         All players marked as ready.\n
+player_allready_not     All players marked as not ready.\n
+allready_help           Makes it as if all players were ready.
+warmup_needmoreplayers  Not starting game yet because we need at least \1 players.\n
+warmup_finished         Enough players are ready! Starting match now.\n
+warmup_finished_allready Forced all players to be ready! Starting match now.\n
+warmup_finished_center  Warmup over!
+warmup_rup_compat       0xff3333Please type /ready in chat
 
 add_help_topic_help     Add a new help topic to be used with /help. Usage: ADD_HELP_TOPIC <topic> <short description> <text>
 add_help_topic_usage    Usage: ADD_HELP_TOPIC <topic> <short description> <text>\n
@@ -2674,7 +2790,7 @@ help_commands_misc_shortdesc Miscellaneous commands
 help_commands_misc_text 0x88ff88/help0xffff88: You just found out about this one :-)\n0x88ff88/teach <player> <topic>0xffff88: same as /help, but the the output gets sent to another player.\n0x88ff88/rtfm0xffff88: alias for /teach\n0x88ff88/command <command>0xffff88: Execute a command on your own client. Useful for instant chats
 
 help_commands_tourney_shortdesc Tourney related commands
-help_commands_tourney_text 0x88ff88/lock0xffff88: Locks your current team. Nobody can join it any more on their own. To let someone in, you need to invoke\n0x88ff88/invite <player>0xffff88: From that moment on, the player is allowed to join you. Another effect of /invite, even if your team is not locked, is that the invited player can read all of your team's /team messages. Invitations are permanent until revoked. That means a player who is invited into your team can join and leave it freely without further need to /invite him again. Players who were on the team when you /locked it are not automatically invited when they leave on their own account.\n0x88ff88/uninvite <player>0xffff88: reverses /invite. The invitation is revoked, the player can no longer join you, and if he currently is on your team, he will be thrown out.\n0x88ff88/unlock0xffff88: makes your team available for everyone to join again.
+help_commands_tourney_text 0x88ff88/lock0xffff88: Locks your current team. Nobody can join it any more on their own. To let someone in, you need to invoke\n0x88ff88/invite <player>0xffff88: From that moment on, the player is allowed to join you. Another effect of /invite, even if your team is not locked, is that the invited player can read all of your team's /team messages. Invitations are permanent until revoked. That means a player who is invited into your team can join and leave it freely without further need to /invite him again. Players who were on the team when you /locked it are not automatically invited when they leave on their own account.\n0x88ff88/uninvite <player>0xffff88: reverses /invite. The invitation is revoked, the player can no longer join you, and if he currently is on your team, he will be thrown out.\n0x88ff88/unlock0xffff88: makes your team available for everyone to join again.\n0x88ff88/ready0xffff88: Toggles your readiness state in a warmup.
 
 help_version_shortdesc  This server's version
 help_version_text       0xffff7fThis is running:\n0x7fff7f    \g \v\n0xffff7fIt was built on 0x7fff7f\d0xffff7f, from revision 0x7fff7fr\o0xffff7f(0x7fff7fz\z0xffff7f), which has revision 0x7fff7fr\l0xffff7f(0x7fff7fz\m0xffff7f) for last common ancestor with branch 0x7fff7f\p0xffff7f, which can be found at:\n0x7fff7f    \b\n0xffff7fThis revision's ID is:\n0x7fff7f    \i\n0xffff7fIt was tagged(empty if not tagged):\n0x7fff7f    \t\n0xffff7fSource changed:\n0x7fff7f    \c
@@ -2688,6 +2804,9 @@ invite_team_invite      \10xRESETT has been invited to join \2.\n
 invite_team_kick        \10xRESETT has been kicked from \2.\n
 invite_team_uninvite    \10xRESETT got his invitation to join \2 cancelled.\n
 invite_team_locked_list (locked)
+
+team_list_ready         (0x7fff7fready0xRESETT)
+team_list_not_ready     (0xff7f7fnot ready0xRESETT)
 
 msg_toomanymatches 0xff0000Too many matches found for the search term \1. Be more specific.\n
 msg_nomatch 0xff0000No matches were found that contained \1.\n
@@ -2758,6 +2877,9 @@ network_master_denied_inter		The master server denied your login attempt. That u
 testing_version_expired_title   Version Expired
 testing_version_expired         You are running a public test version or an unsupported CVS build. The server you tried to connect to is running a much newer version and that combination is only supported for major releases. An update is probably available for you on www.armagetronad.net or beta.armagetronad.net.
 
+network_master_login_needed     Registration needed
+network_master_exp_needed       Experience needed
+network_master_exp_recommended  Experience recommended
 network_master_upgrage			Upgrade needed
 network_master_downgrage		Server is outdated
 network_master_incompatible		Server is incompatible
@@ -2766,6 +2888,11 @@ network_master_serverinfo       Version: \1\nURI    : \2\nOptions: \3\n
 network_master_players			Players: 
 network_master_players_empty	Empty
 network_master_options			Options:\n
+
+network_master_exp_recommended_long_oldserver This server uses old code and did not transmit settings; you should probably get \1 more minutes of play elsewhere first.\n
+network_master_exp_recommended_long This server uses advanced settings; you should probably get \1 more minutes of play elsewhere first.\n
+network_master_login_needed_long You need to have a global ID to play here. Get one at forums.armagetronad.net.\n
+network_master_exp_needed_long This server will not let you play until you get at least \n more minutes of play elsewhere first.\n
 
 network_connecting_to_server	Connecting to \1...\n
 network_connecting_gamestate	Waiting for gamestate...\n
@@ -2896,6 +3023,44 @@ network_master_pollanswer_last	Answering ping poll from \1. This is the last log
 network_master_host_inet_help	This will start a network game on your computer and announce it on the internet.
 network_master_host_lan_help	This will start a network game that is only visible from your LAN.
 
+classification_0 no \1
+classification_1 ludicrously low \1
+classification_2 nano \1
+classification_3 micro \1
+classification_4 extremly low \1
+classification_5 very low \1
+classification_6 low \1
+classification_7 normal \1
+classification_8 high \1
+classification_9 very high \1
+classification_10 extremly high \1
+classification_11 mega \1
+classification_12 giga \1
+classification_13 ludicrous \1
+classification_14 infinite \1
+
+classification_wall_0 no \1
+classification_wall_1 ludicrously short \1
+classification_wall_2 nano \1
+classification_wall_3 micro \1
+classification_wall_4 extremly short \1
+classification_wall_5 very short \1
+classification_wall_6 short \1
+classification_wall_7 normal \1
+classification_wall_8 long \1
+classification_wall_9 very long \1
+classification_wall_10 extremly long \1
+classification_wall_11 mega \1
+classification_wall_12 giga \1
+classification_wall_13 ludicrously long \1
+classification_wall_14 infinite \1
+
+classification_acceleration acceleration
+classification_delay delay
+classification_rubber rubber
+classification_walls walls
+classification_teams team play
+classification_maps custom map
 
 #********************************************
 #********************************************
@@ -3172,7 +3337,6 @@ hash_method_blacklist_help  List of hash authentication methods to disable suppo
 legacy_log_names_help       If 1, the log names of unauthenticated players are kept like they were before authentication was implemented. If 0, log names are escaped so that authenticated player names look best.
 
 login_message_requested     User \1 requests authentication as "\2@\3".\n
-login_message_delayed       Your login process will be delayed because the server configuration makes it impossible to be processed immediately in the background. We're sorry for the inconvenience.\n
 login_message_responded     Password request sent to user \1, username "\2", method \3, message "\4".\n
 login_message               \3\1 has been logged in as \2.\n
 login_message_byorder       Order of \1: 

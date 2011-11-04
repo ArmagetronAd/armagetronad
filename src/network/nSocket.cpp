@@ -37,6 +37,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tRandom.h"
 #include "tSysTime.h"
 #include "tRandom.h"
+#include "tBackgroundProcess.h"
+#include "tToDo.h"
 
 #include <string>
 #include <stdio.h>
@@ -64,8 +66,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #else
-//#include <winsock2.h>
-//#include <ws2tcpip.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
 //#include <Ws2tcpip.h>
 //#include <Wspiapi.h>
 
@@ -140,6 +142,22 @@ struct nSocketType
             , type(SOCK_DGRAM)
             , protocol(IPPROTO_UDP)
     {}
+
+    bool operator == ( nSocketType const & other ) const
+    {
+        if (family != other.family)
+            return false;
+        if (type != other.type)
+            return false;
+        if (protocol != other.protocol)
+            return false;
+
+        return true;
+    }
+    bool operator !=  ( nSocketType const & other ) const
+    {
+        return !operator==(other);
+    }
 };
 
 //! all information to reach a host
@@ -148,6 +166,21 @@ struct nHostInfo
     nSocketType type;     //! type of socket to connect to
     nAddress    address;  //! raw address
     tString     name;     //! canonical hostname
+
+    bool operator == ( nHostInfo const & other ) const
+    {
+        if (type != other.type)
+            return false;
+        if (address != other.address)
+            return false;
+
+        return true;
+    }
+
+    bool operator !=  ( nHostInfo const & other ) const
+    {
+        return !operator==(other);
+    }
 };
 
 // streaming operators for addresses, socket types and host infos
@@ -504,24 +537,44 @@ bool ANET_ListenOn( nHostList const & addresses, nSocketListener::SocketArray & 
 }
 
 
-// determines addresses of hostentry and adds them to hostList
-void ANET_GetHostList( hostent const * hostentry, nHostList & hostList, int net_hostport, bool server = true )
+// determines addresses of addrinfo and adds them to hostList
+void ANET_GetHostList( addrinfo const * info, nHostList & hostList, int net_hostport, bool server = true, char const * hostname = "" )
 {
     // iterate over addresses
-    char * * addressList = hostentry->h_addr_list;
-    while (*addressList)
+    while (info)
     {
-        // prepare host info (TODO: IPV6/TCP compatibility)
-        nHostInfo info;
-        info.type.type = hostentry->h_addrtype;
-        info.name      = hostentry->h_name;
-        info.address.FromHostent( hostentry->h_length, *addressList );
-        info.address.SetPort( net_hostport );
+        // prepare host info, only interested in UDP
+        if( info->ai_addrlen <= nAddress::size && info->ai_socktype == SOCK_DGRAM )
+        {
+            nHostInfo store;
+            store.type.family   = info->ai_family;
+            store.type.type     = info->ai_socktype;
+            store.type.protocol = info->ai_protocol;
+            if( info->ai_canonname )
+            {
+                store.name = info->ai_canonname;
+            }
+            else
+            {
+                store.name = hostname;
+            }
+            store.address.FromSockAddr( info->ai_addrlen, info->ai_addr );
+            store.address.SetPort( net_hostport );
 
-        // add it to list
-        hostList.push_back( info );
+            // add it to list, avoid duplicates
+            bool skip = false;
+            for( nHostList::const_iterator i = hostList.begin(); !skip && i != hostList.end(); ++i )
+            {
+                nHostInfo const & there = *i;
+                skip |= ( store == there );
+            }
+            if( !skip )
+            {
+                hostList.push_back( store );
+            }
+        }
 
-        ++addressList; // next address
+        info = info->ai_next;
     }
 }
 
@@ -555,18 +608,18 @@ void ANET_GetHostList( char const * hostname, nHostList & hostList, int net_host
     if ( !tRecorder::Playback( sectionEnd ) )
     {
         // look up hostname
-        struct hostent *hostentry;
-        hostentry = gethostbyname (hostname);
-        if (!hostentry)
+        struct addrinfo * info = NULL;
+        int ret = getaddrinfo( hostname, NULL, NULL, &info );
+        if ( ret || !info )
         {
-#ifndef WIN32
-            con << "Error looking up " << ( hostname ? hostname : "localhost" ) << " : " << gai_strerror( h_errno ) << "\n";
-#endif
+            con << "Error looking up " << ( hostname ? hostname : "localhost" ) << " : " << gai_strerror( ret ) << "\n";
             return;
         }
-
+        
         // delegate
-        ANET_GetHostList( hostentry, hostList, net_hostport, server );
+        ANET_GetHostList(info, hostList, net_hostport, server, hostname );
+        freeaddrinfo( info );
+
     }
 
     // write addresses to recording
@@ -990,6 +1043,159 @@ nSocket & nBasicNetworkSystem::AccessControlSocket( void )
 }
 
 // *******************************************************************************************
+// *
+// *	nDNSResolver
+// *
+// *******************************************************************************************
+
+//! background task for DNS resolution
+class nDNSResolver: public tReferencable< nDNSResolver, boost::mutex >
+{
+public:
+    nDNSResolver( nAddress & address, const char * hostname )
+    : address_( &address ), port_( address.GetPort() ), hostname_( hostname )
+    {
+    }
+
+    ~nDNSResolver()
+    {
+        ClearAddressCore();
+    }
+
+    void Resolve()
+    {
+        tJUST_CONTROLLED_PTR< nDNSResolver > keep( this );
+
+        // sync to foreground later
+        tBackgroundSyncEvent event( sync_, true );
+
+#ifdef DEBUG
+        tString resolved;
+#endif
+
+        // read address from recording
+        static char const * section = "SINGLEHOSTNAME";
+        
+        // address to fill
+        nAddress address;
+
+        if( tRecorder::IsPlayingBack() )
+        {
+            // sync with foreground directly
+            event.Enter();
+
+            tRecorder::PlaybackStrict( section, address );
+#ifdef DEBUG
+            address.ToStringCore(resolved);
+#endif
+        }
+        else
+        {
+            struct addrinfo *res = NULL;
+            int ret = getaddrinfo( hostname_, NULL, NULL, &res );
+    
+            // bulk waiting work is done, the rest of the function can be
+            // synced to the foreground
+            event.Enter();
+
+            bool success = false;
+            if( ret )
+            {
+                con << "Failed to resolve hostname " << hostname_ << ", error " << gai_strerror( ret ) << "\n";
+            }
+            else if (res)
+            {
+                struct addrinfo *run = res;
+                while ( run && !success )
+                {
+                    if( run->ai_family == AF_INET && run->ai_addr )
+                    {
+                        // store values
+                        if( run->ai_addrlen <= nAddress::size )
+                        {
+                            address.FromAddrInfoCore( *run );
+                            address.SetPort( port_ );
+                            success = true;
+                        }
+                    }
+                }
+                freeaddrinfo( res );
+            }
+
+            // write address to recording
+            tRecorder::Record( section, address );
+
+#ifdef DEBUG
+            address.ToStringCore(resolved);
+#endif
+        }
+
+#ifdef DEBUG
+        if ( hostname_ != resolved )
+        {
+            // not to the console, that would cause a swap, which can be deadly from background threads
+            std::cout << "Address of server " << hostname_ << " determined to be " << resolved << "\n";
+        }
+#endif
+        {
+            boost::lock_guard< boost::mutex > lock( addressMutex_ );
+            if( address_ )
+            {
+                address_->CopyFromCore( address );
+            }
+        }
+
+        ClearAddressCore();
+    }
+
+    void Wait()
+    {
+        tJUST_CONTROLLED_PTR< nDNSResolver > keep( this );
+        while( true )
+        {
+            tDelay(1000);
+            st_DoToDo();
+            boost::lock_guard< boost::mutex > lock( addressMutex_ );
+            if( !address_ )
+            {
+                return;
+            }
+        }
+    }
+
+    void ClearAddress()
+    {
+        tJUST_CONTROLLED_PTR< nDNSResolver > keep( this );
+        ClearAddressCore();
+    }
+private:
+    void ClearAddressCore()
+    {
+        boost::lock_guard< boost::mutex > lock( addressMutex_ );
+        if( address_ )
+        {
+            address_->resolver_ = NULL;
+        }
+        address_ = NULL;
+    }
+
+    //! address this resolves for
+    nAddress * address_;
+
+    //! port
+    int port_;
+
+    //! mutex for address changes
+    boost::mutex addressMutex_;
+
+    //! name to resolve
+    tString hostname_;
+
+    //! background syncing
+    tBackgroundSync sync_;
+};
+
+// *******************************************************************************************
 // *******************************************************************************************
 // *******************************************************************************************
 // *******************************************************************************************
@@ -1007,7 +1213,23 @@ nSocket & nBasicNetworkSystem::AccessControlSocket( void )
 //!
 // *******************************************************************************************
 
+nAddress::nAddress( nAddress const & other )
+: resolver_( NULL )
+{
+    *this = other;
+}
+
+// *******************************************************************************************
+// *
+// *	nAddress
+// *
+// *******************************************************************************************
+//!
+//!
+// *******************************************************************************************
+
 nAddress::nAddress( void )
+: resolver_( NULL )
 {
     // clear address data, it's only POD
     memset( &addr_, 0, size );
@@ -1030,7 +1252,26 @@ nAddress::nAddress( void )
 
 nAddress::~nAddress( void )
 {
-    // nothing to clean up
+    AbortDNS();
+}
+
+// *******************************************************************************************
+// *
+// *	nAddress
+// *
+// *******************************************************************************************
+//!
+//!
+// *******************************************************************************************
+
+nAddress & nAddress::operator = ( nAddress const & other )
+{
+    AbortDNS();
+    other.CompleteDNS();
+
+    CopyFromCore( other );
+    
+    return *this;
 }
 
 // *******************************************************************************************
@@ -1046,8 +1287,28 @@ nAddress::~nAddress( void )
 
 const nAddress & nAddress::ToString( tString & string ) const
 {
+    CompleteDNS();
+
+    ToStringCore( string );
+
+    return *this;
+}
+
+// *******************************************************************************************
+// *
+// *	ToStringCore
+// *
+// *******************************************************************************************
+//!
+//!		@param	string	the string to fill
+//!		@return		    reference to this for chaining
+//!
+// *******************************************************************************************
+
+const nAddress & nAddress::ToStringCore( tString & string ) const
+{
     if( addr_.addr_in.sin_addr.s_addr != INADDR_ANY )
-        string = ANET_AddrToString( *this );
+        string = ANET_AddrToString( &addr_.addr  );
     else
     {
         string = "*.*.*.*";
@@ -1087,6 +1348,8 @@ tString nAddress::ToString( void ) const
 
 int nAddress::FromString( const char * string )
 {
+    AbortDNS();
+
     int ha1, ha2, ha3, ha4, hp;
     int ipaddr;
 
@@ -1145,25 +1408,14 @@ int nAddress::FromString( const char * string )
 //!
 // *******************************************************************************************
 
-/*
 void nAddress::FromAddrInfo( const addrinfo & info )
 {
-#ifdef HAVE_ADDRINFO
-    // check address size
-    tASSERT( info.ai_addrlen <= size );
-
-    // copy the address over
-    memcpy( &addr_, info.ai_addr, info.ai_addrlen );
-
-    // store length
-    addrLen_ = info.ai_addrlen;
-#endif
+    FromSockAddr( info.ai_addrlen, info.ai_addr );
 }
-*/
 
 // *******************************************************************************************
 // *
-// *   FromHostent
+// *   FromSockAddr
 // *
 // *******************************************************************************************
 //!
@@ -1172,17 +1424,65 @@ void nAddress::FromAddrInfo( const addrinfo & info )
 //!
 // *******************************************************************************************
 
-void nAddress::FromHostent( int length, const char * addr )
+void nAddress::FromSockAddr( int length, sockaddr const * addr )
+{
+    AbortDNS();
+
+    FromSockAddrCore( length, addr );
+}
+
+// *******************************************************************************************
+// *
+// *	FromAddrInfo
+// *
+// *******************************************************************************************
+//!
+//!		@param	info	the addrinfo structure to copy the address from
+//!
+// *******************************************************************************************
+
+void nAddress::FromAddrInfoCore( const addrinfo & info )
+{
+    FromSockAddrCore( info.ai_addrlen, info.ai_addr );
+}
+
+// *******************************************************************************************
+// *
+// *   FromSockAddrCore
+// *
+// *******************************************************************************************
+//!
+//!        @param  l     length of address
+//!        @param  addr  pointer to address
+//!
+// *******************************************************************************************
+
+void nAddress::FromSockAddrCore( int length, sockaddr const * addr )
 {
     // check address size
-    tASSERT( length == 4 );
+    tASSERT( length <= size );
 
     // copy the address over
-    addr_.addr   .sa_family = AF_INET;
-    addr_.addr_in.sin_addr.s_addr = *reinterpret_cast< int const * >( addr );
+    // addr_.addr   .sa_family = AF_INET;
+    memcpy( &addr_, addr, length );
 
     // store length
-    addrLen_ = sizeof( sockaddr_in );
+    addrLen_ = length;
+}
+
+// *******************************************************************************************
+// *
+// *   CopyFromCore
+// *
+// *******************************************************************************************
+//!
+//!
+// *******************************************************************************************
+
+void nAddress::CopyFromCore( nAddress const & other )
+{
+    memcpy( &addr_, &other.addr_, size );
+    addrLen_ = other.addrLen_;
 }
 
 // *******************************************************************************************
@@ -1198,6 +1498,8 @@ void nAddress::FromHostent( int length, const char * addr )
 
 const nAddress & nAddress::GetHostname( tString & hostname ) const
 {
+    CompleteDNS();
+
     // initialize networking at OS level
     sn_InitOSNetworking();
 
@@ -1211,12 +1513,12 @@ const nAddress & nAddress::GetHostname( tString & hostname ) const
     static char const * section = "HOSTBYADDR";
     if ( !tRecorder::PlaybackStrict( section, hostname ) )
     {
-        struct hostent *hostentry;
-
-        hostentry = gethostbyaddr ( reinterpret_cast< const char * >( &addr_ ), size, AF_INET);
-        if (hostentry)
+        const int hostlen=1000;
+        char host[hostlen+1];
+        int ret = getnameinfo ( &addr_.addr, addrLen_, host, hostlen, NULL, 0, 0 );
+        if (!ret)
         {
-            hostname = tString( (char *)hostentry->h_name );
+            hostname = host;
         }
     }
 
@@ -1256,6 +1558,8 @@ tString nAddress::GetHostname( void ) const
 
 nAddress & nAddress::SetHostname( const char * hostname )
 {
+    AbortDNS();
+
     // initialize networking at OS level
     sn_InitOSNetworking();
 
@@ -1266,28 +1570,8 @@ nAddress & nAddress::SetHostname( const char * hostname )
         return *this;
     }
 
-    // read address from recording
-    static char const * section = "SINGLEHOSTNAME";
-    if ( !tRecorder::PlaybackStrict( section, *this ) )
-    {
-        // look up hostname ( TODO: error handling )
-        struct hostent *hostentry;
-        hostentry = gethostbyname (hostname);
-        if (hostentry)
-        {
-            // store values
-            addr_.addr   .sa_family = AF_INET;
-            addr_.addr_in.sin_addr.s_addr = *(int *)hostentry->h_addr_list[0];
-        }
-        else
-        {
-            // invalidate
-            *this = nAddress();
-        }
-    }
-
-    // write address to recording
-    tRecorder::Record( section, *this );
+    resolver_ = tNEW(nDNSResolver)( *this, hostname );
+    tMemberFunctionRunner::ScheduleBackground( *resolver_, &nDNSResolver::Resolve );
 
     return *this;
 }
@@ -1305,6 +1589,8 @@ nAddress & nAddress::SetHostname( const char * hostname )
 
 const nAddress & nAddress::GetAddress( tString & hostname ) const
 {
+    CompleteDNS();
+
     // initialize networking at OS level
     sn_InitOSNetworking();
 
@@ -1346,6 +1632,8 @@ tString nAddress::GetAddress( void ) const
 
 nAddress & nAddress::SetAddress( const char * hostname )
 {
+    AbortDNS();
+
     // initialize networking at OS level
     sn_InitOSNetworking();
 
@@ -1369,6 +1657,10 @@ nAddress & nAddress::SetAddress( const char * hostname )
 
 nAddress & nAddress::SetPort( int port )
 {
+    // DNS lookups mess with the port, so we need to wait for them to complete.
+    // To avoid lookups, use SetPort() first, then SetHostname();
+    CompleteDNS();
+
     // store the port
     addr_.addr_in.sin_port = htons(port);
 
@@ -1421,7 +1713,39 @@ const nAddress & nAddress::GetPort( int & port ) const
 
 bool nAddress::IsSet () const
 {
+    CompleteDNS();
+
     return addr_.addr_in.sin_addr.s_addr != INADDR_ANY;
+}
+
+// *******************************************************************************************
+// *
+// * CompleteDNS
+// *
+// *******************************************************************************************
+
+void nAddress::CompleteDNS() const
+{
+    tJUST_CONTROLLED_PTR< nDNSResolver > resolver( resolver_ );
+    if( resolver )
+    {
+        resolver->Wait();
+    }
+}
+
+// *******************************************************************************************
+// *
+// * AbortDNS
+// *
+// *******************************************************************************************
+
+void nAddress::AbortDNS() const
+{
+    tJUST_CONTROLLED_PTR< nDNSResolver > resolver( resolver_ );
+    if( resolver )
+    {
+        resolver->ClearAddress();
+    }
 }
 
 // *******************************************************************************************
@@ -1438,6 +1762,9 @@ bool nAddress::IsSet () const
 
 int nAddress::Compare( const nAddress & a1, const nAddress & a2 )
 {
+    a1.CompleteDNS();
+    a2.CompleteDNS();
+
     if (a1.addr_.addr.sa_family != a2.addr_.addr.sa_family)
         return -1;
 
@@ -1462,6 +1789,8 @@ int nAddress::Compare( const nAddress & a1, const nAddress & a2 )
 
 unsigned int nAddress::GetAddressLength( void ) const
 {
+    CompleteDNS();
+
     return this->addrLen_;
 }
 

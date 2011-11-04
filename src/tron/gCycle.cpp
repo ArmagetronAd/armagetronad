@@ -149,7 +149,7 @@ sg_cycleWallTimeConf("CYCLE_WALL_TIME",
                      14);
 
 // time after spawning during which a cycle can't be killed
-static REAL sg_cycleInvulnerableTime=0.0;
+REAL sg_cycleInvulnerableTime=0.0;
 static nSettingItemWatched<REAL>
 sg_cycleInvulnerableTimeConf("CYCLE_INVULNERABLE_TIME",
                              sg_cycleInvulnerableTime,
@@ -221,7 +221,7 @@ static tSettingItem<int> s_s("SCORE_SUICIDE",score_suicide);
 
 uActionPlayer gCycle::s_brake("CYCLE_BRAKE", -5);
 static uActionPlayer s_brakeToggle("CYCLE_BRAKE_TOGGLE", -5);
-static uActionTooltip sg_brakeTooltip( gCycle::s_brake, 1, &ePlayer::VetoActiveTooltip );
+static uActionTooltip sg_brakeTooltip( uActionTooltip::Level_Advanced, gCycle::s_brake, 2, &ePlayer::VetoActiveTooltip );
 
 // a class of textures where the transparent part of the
 // image is replaced by the player color
@@ -993,6 +993,21 @@ void 	gCycle::SetWallsStayUpDelay	( REAL delay )
     c_pwsud->Set( delay );
 }
 
+// who to sync rubber values to
+enum gRubberSync
+{
+    gRubberSync_None,  // nobody
+    gRubberSync_Self,  // only the owner of the cycle
+    gRubberSync_All    // all clients
+};
+
+tCONFIG_ENUM( gRubberSync );
+
+static int sg_cycleRubberSync = gRubberSync_All;
+static nSettingItem<int>
+sg_cycleRubberWallSyncConf("CYCLE_RUBBER_SYNC",
+                           sg_cycleRubberSync);
+
 // how much rubber usage shortens the walls
 REAL sg_cycleRubberWallShrink = 0;
 static nSettingItemWatched<REAL>
@@ -1000,6 +1015,31 @@ sg_cycleRubberWallShrinkConf("CYCLE_RUBBER_WALL_SHRINK",
                              sg_cycleRubberWallShrink,
                              nConfItemVersionWatcher::Group_Bumpy,
                              12);
+
+static bool sg_CycleRubberNeededOnClient( int client, int owner )
+{
+    // check if it's possible to omit rubber sync without breaking anything (except rubber meters)
+    if ( sg_cycleRubberWallShrink != 0 )
+    {
+        return true;
+    }
+
+    // check if rubber sync should be omitted
+    switch (sg_cycleRubberSync)
+    {
+    case gRubberSync_None:
+        return false;
+        break;
+    case gRubberSync_Self:
+        return client == owner;
+        break;
+    case gRubberSync_All:
+        return true;
+        break;
+    }
+
+    return true;
+}
 
 // make walls grow with distance traveled
 static REAL sg_cycleDistWallShrink = 0;
@@ -2135,6 +2175,12 @@ bool gCycle::Timestep(REAL currentTime){
     }
 #endif
 
+    // clear rubber if it's unreliable
+    if( sn_GetNetState() == nCLIENT && !sg_CycleRubberNeededOnClient( sn_myNetID, Owner() ) )
+    {
+        rubber = 0;
+    }
+
     return ret;
 }
 
@@ -2600,14 +2646,8 @@ void gCycle::KillAt( const eCoord& deathPos){
             notificationMessage << " commited suicide";
             se_sendEventNotification(tString("Death suicide"), notificationMessage);
 
-            if ( score_suicide )
-                hunter->AddScore(score_suicide, tOutput(), "$player_lose_suicide" );
-            else
-            {
-                tColoredString hunterName;
-                hunterName << *hunter << tColoredString::ColorString(1,1,1);
-                sn_ConsoleOut( tOutput( "$player_free_suicide", hunterName ) );
-            }
+            hunter->AddScore(score_suicide, tOutput(), "$player_lose_suicide",
+                "$player_free_suicide" );
         }
     }
     else{
@@ -2629,14 +2669,7 @@ void gCycle::KillAt( const eCoord& deathPos){
 
                     win.SetTemplateParameter(3, preyName);
                     win << "$player_win_frag";
-                    if ( score_kill != 0 )
-                        hunter->AddScore(score_kill, win, lose );
-                    else
-                    {
-                        tColoredString hunterName;
-                        hunterName << *hunter << tColoredString::ColorString(1,1,1);
-                        sn_ConsoleOut( tOutput( "$player_free_frag", hunterName, preyName ) );
-                    }
+                    hunter->AddScore(score_kill, win, lose, "$player_free_frag" );
                 }
                 else {
                     sg_deathTeamkillWriter << Player()->GetUserName() << hunter->GetUserName();
@@ -2645,9 +2678,12 @@ void gCycle::KillAt( const eCoord& deathPos){
                     notificationMessage << " teamkilled " << Player()->GetUserName();
                     se_sendEventNotification(tString("Death teamkill"), notificationMessage);
 
-                    tColoredString hunterName;
-                    hunterName << *hunter << tColoredString::ColorString(1,1,1);
-                    sn_ConsoleOut( tOutput( "$player_teamkill", hunterName, preyName ) );
+                    if( se_matches >= 0 )
+                    {
+                        tColoredString hunterName;
+                        hunterName << *hunter << tColoredString::ColorString(1,1,1);
+                        sn_ConsoleOut( tOutput( "$player_teamkill", hunterName, preyName ) );
+                    }
                 }
             }
             else
@@ -4398,7 +4434,11 @@ void gCycle::WriteSync(  Game::CycleSync & sync, bool init ) const
     GetLastTurnPos().WriteSync( *sync.mutable_last_turn_position() );
 
     // write rubber
-    sync.set_rubber_compressed( compressZeroOne.Write( rubber/( sg_rubberCycle + .1 ) ) );
+    if( sg_CycleRubberNeededOnClient( SyncedUser(), Owner() ) )
+    {
+        sync.set_rubber_compressed( compressZeroOne.Write( rubber/( sg_rubberCycle + .1 ) ) );
+    }
+
     sync.set_rubber_effectiveness_compressed( compressZeroOne.Write( 1/( 1 + rubberMalus ) ) );
 
     // write last clientside sync message ID
@@ -4745,18 +4785,28 @@ void gCycle::ReadSync( Game::CycleSync const & syncX, nSenderInfo const & sender
         // read rubber
         REAL preRubber, preRubberMalus;
         preRubber = compressZeroOne.Read( syncX.rubber_compressed() );
-        preRubberMalus = compressZeroOne.Read( syncX.rubber_effectiveness_compressed() );
-
-        // read last message ID
-        sync.messageID = syncX.last_message_id();
-
-        // read braking reservoir
-        sync.brakingReservoir = compressZeroOne.Read( syncX.brake_compressed() );
-        // std::cout << "sync: " << sync.brakingReservoir << ":" << sync.braking << "\n";
+        preRubberMalus = 1;
+        if( syncX.has_rubber_effectiveness_compressed() )
+        {
+            compressZeroOne.Read( syncX.rubber_effectiveness_compressed() );
+        }
 
         // undo skewing
         sync.rubber = preRubber * ( sg_rubberCycle + .1 );
         sync.rubberMalus = 1/preRubberMalus - 1;
+    }
+
+    if( syncX.has_last_message_id() )
+    {
+        // read last message ID
+        sync.messageID = syncX.last_message_id();
+    }
+
+    if( syncX.has_brake_compressed() )
+    {
+        // read braking reservoir
+        sync.brakingReservoir = compressZeroOne.Read( syncX.brake_compressed() );
+        // std::cout << "sync: " << sync.brakingReservoir << ":" << sync.braking << "\n";
 
         // extrapolation is probably safe
         canUseExtrapolatorMethod = sg_useExtrapolatorSync && lastTime > 0;

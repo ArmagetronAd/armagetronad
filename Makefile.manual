@@ -182,6 +182,7 @@ distprep:
 
 @progname@: all
 	test -r $@ || ln -sf src/armagetronad_main $@
+	ln -sf ./src/doc .
 
 DEBUGFILES=.gdbinit @progname@
 debug: $(DEBUGFILES)

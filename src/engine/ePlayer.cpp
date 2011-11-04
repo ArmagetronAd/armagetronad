@@ -164,7 +164,6 @@ static tConfItemLine se_hiddenPlayerPrefixConf( "PLAYER_LIST_HIDDEN_PLAYER_PREFI
 static tConfItemFunc Rename_conf("RENAME", &ForceName);
 static tAccessLevelSetter Rename_confLevel( Rename_conf, tAccessLevel_Moderator );
 
-
 static tReferenceHolder< ePlayerNetID > se_PlayerReferences;
 
 class PasswordStorage
@@ -1138,6 +1137,8 @@ static const tString& se_UserName()
     return ret;
 }
 
+static char const * se_defaultGID = "@forums";
+
 ePlayer::ePlayer():cockpit(0){
     nAuthentication::SetUserPasswordCallback(&PasswordCallback);
 #ifdef KRAWALL_SERVER
@@ -1161,7 +1162,7 @@ ePlayer::ePlayer():cockpit(0){
         name << "Player " << id+1;
 
     // default global ID so logins are redirected to the forums
-    globalID = "@forums";
+    globalID = se_defaultGID;
 
 #ifndef DEDICATED
     tString confname;
@@ -1202,7 +1203,7 @@ ePlayer::ePlayer():cockpit(0){
                    centerIncamOnTurn) );
 
     confname.Clear();
-    startCamera=CAMERA_SMART;
+    startCamera=CAMERA_CUSTOM;
     confname << "START_CAM_"<< id+1;
     StoreConfitem(tNEW(tConfItem<eCamMode>) (confname,
                   "$start_cam_help",
@@ -1332,6 +1333,8 @@ ePlayer::~ePlayer(){
     DeleteConfitems();
 }
 
+extern uActionTooltip::Level su_helpLevel;
+
 #ifndef DEDICATED
 void ePlayer::Render(){
     if (cam) cam->Render();
@@ -1340,7 +1343,7 @@ void ePlayer::Render(){
     double now = tSysTimeFloat();
     if( se_GameTime() > 1 && now-lastTooltip_ > 1 && !rConsole::CenterDisplayActive() )
     {
-        if( uActionTooltip::Help( ID()+1 ) || uActionTooltip::Help( 0 ) || VetoActiveTooltip(ID()+1) )
+        if( uActionTooltip::Help( ID()+1 ) || uActionTooltip::Help( 0 ) || VetoActiveTooltip(ID()+1) || su_helpLevel != uActionTooltip::Level_Expert )
             lastTooltip_ = now;
         else
             lastTooltip_ = now+60;
@@ -3043,8 +3046,21 @@ static void se_ChatTeamLeave( ePlayerNetID * p )
     }
 
     eTeam * leftTeam = p->NextTeam();
-    if ( leftTeam )
+
+    if ( se_matches < 0 ) // allow quickleaving in warmup mode
     {
+        if( p->Object() && p->Object()->Alive() )
+        {
+            p->Object()->Kill();
+        }
+        p->SetTeam(0);
+        p->SetTeamWish(0);
+        p->UpdateTeam();
+        p->RequestSync();
+    }
+    else if ( leftTeam )
+    {
+        p->SetTeamWish(0);
         if ( !leftTeam )
             leftTeam = p->CurrentTeam();
 
@@ -3060,8 +3076,6 @@ static void se_ChatTeamLeave( ePlayerNetID * p )
                                     tColoredString::RemoveColors(p->GetName()) ) );
         }
     }
-
-    p->SetTeamWish(0);
 }
 
 static bool se_filterColorTeam=false;
@@ -3278,6 +3292,13 @@ static void se_ListTeam( ePlayerNetID * receiver, eTeam * team )
     {
         tos << " " << tOutput( "$invite_team_locked_list" );
     }
+    if ( se_matches < 0 )
+    {
+        if ( team->IsReady() )
+            tos << " " << tOutput( "$team_list_ready" );
+        else
+            tos << " " << tOutput( "$team_list_not_ready" );
+    }
     tos << ":\n";
 
     // send team members
@@ -3359,6 +3380,24 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s, tString co
             tos << "  ";
         tos << p2->Owner();
         tos << ": ";
+        tos << p2->GetColoredName()
+            << tColoredString::ColorString( -1, -1, -1)
+            << " ";
+        if ( se_matches < 0 && p2->IsHuman() && p2->CurrentTeam() )
+        {
+            tos << "( ";
+            if ( p2->ready )
+            {
+                tos << tOutput("$player_list_ready")
+                    << tColoredString::ColorString( -1, -1, -1);
+            }
+            else
+            {
+                tos << tOutput("$player_list_not_ready")
+                    << tColoredString::ColorString( -1, -1, -1);
+            }
+            tos << " )";
+        }
         if ( p2->GetAccessLevel() < tAccessLevel_Default && !se_Hide( p2, receiver ) )
         {
 #ifdef KRAWALL_SERVER
@@ -3366,9 +3405,7 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s, tString co
 #else
             hidden = false;
 #endif
-            tos << p2->GetColoredName()
-                << tColoredString::ColorString( -1, -1, -1)
-                << " ( ";
+            tos << "( ";
             if ( hidden )
                 tos << se_hiddenPlayerPrefix;
 #ifdef KRAWALL_SERVER
@@ -3387,7 +3424,7 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s, tString co
         }
         else
         {
-            tos << p2->GetColoredName() << tColoredString::ColorString(1,1,1) << " ( )";
+            tos << "( )";
         }
         if ( ( p2->Owner() != 0 && tCurrentAccessLevel::GetAccessLevel() <= se_ipAccessLevel ) || ( p2->Owner() != 0 && p2->Owner() == receiver->Owner() ) )
         {
@@ -3539,7 +3576,7 @@ static void se_ChatShuffle( ePlayerNetID * p, std::istream & s )
     }
 
     if( p->CurrentTeam() )
-    {  
+    {
         // really shuffle
         p->CurrentTeam()->Shuffle( IDNow, IDWish );
         se_ListTeam( p, p->CurrentTeam() );
@@ -3563,6 +3600,32 @@ void ePlayerNetID::SetShuffleWish( int pos )
     teamListID = pos;
 }
 
+void se_Ready( ePlayerNetID * p )
+{
+    if( !p->CurrentTeam() )
+    {
+        sn_ConsoleOut(tOutput("$player_ready_noteam"), p->Owner());
+        return;
+    }
+    if( se_matches >= 0 )
+    {
+        sn_ConsoleOut(tOutput("$player_ready_onlywarmup"), p->Owner());
+        return;
+    }
+
+    p->ready = !p->ready;
+
+    p->RequestSync();
+
+    if( p->ready )
+    {
+        sn_ConsoleOut(tOutput("$player_ready", p->GetColoredName()), p->Owner());
+    }
+    else
+    {
+        sn_ConsoleOut(tOutput("$player_ready_not", p->GetColoredName()), p->Owner());
+    }
+}
 class eHelpTopic {
     tString m_shortdesc, m_text;
 
@@ -3890,6 +3953,12 @@ void se_ChatHandlerServer( unsigned short id, tColoredString const & say, nMessa
                         {
                             se_ListTeam( p, currentTeam );
                         }
+                        return;
+                    }
+                    else if (command == "/ready")
+                    {
+                        spam.lastSaidType_ = eChatMessageType_Command;
+                        se_Ready( p );
                         return;
                     }
                     else if (command == "/help") {
@@ -4489,8 +4558,8 @@ static bool se_ChatTooltipVeto(int)
     return sn_GetNetState() == nSTANDALONE;
 }
 
-uActionTooltip ePlayer::s_chatTooltip(ePlayer::s_chat, 1, &se_ChatTooltipVeto);
-uActionTooltip s_toggleSpectatorTooltip(se_toggleSpectator, 1, &se_ChatTooltipVeto);
+uActionTooltip ePlayer::s_chatTooltip(uActionTooltip::Level_Expert, ePlayer::s_chat, 1, &se_ChatTooltipVeto);
+uActionTooltip s_toggleSpectatorTooltip(uActionTooltip::Level_Expert, se_toggleSpectator, 1, &se_ChatTooltipVeto);
 
 int pingCharity = 100;
 static const int maxPingCharity = 300;
@@ -5905,8 +5974,10 @@ void ePlayerNetID::WriteSync( Engine::PlayerNetIDSync & sync, bool init )
 
     sync.set_favorite_number_of_players_per_team( favoriteNumberOfPlayersPerTeam );
     sync.set_name_team_after_me( nameTeamAfterMe );
-    
+
     sync.set_team_name( teamname );
+
+    sync.set_ready( ready );
 }
 
 // makes sure the passed string is not longer than the given maximum
@@ -6152,11 +6223,18 @@ void ePlayerNetID::ReadSync( Engine::PlayerNetIDSync const & sync, nSenderInfo c
     }
 
     if (sn_GetNetState()!=nSERVER)
+    {
         ping = sync.ping();
+    }
 
     {
         // read chat and spectator status
         unsigned short flags = sync.flags();
+
+        if( sync.has_ready() && (sn_GetNetState() != nSERVER || se_matches < 0 ))
+        {
+            ready = sync.ready();
+        }
 
         if (Owner() != ::sn_myNetID)
         {
@@ -6267,6 +6345,7 @@ ePlayerNetID::ePlayerNetID( Engine::PlayerNetIDSync const & sync, nSenderInfo co
     disconnected=false;
     suspended_  = 0;
     chatFlags_  =0;
+    ready       =false;
 
     color = tShortColor(15,15,15);
 
@@ -6481,9 +6560,10 @@ void se_SaveToScoreFile(const tOutput &o){
 
 void ePlayerNetID::AddScore(int points,
                             const tOutput& reasonwin,
-                            const tOutput& reasonlose)
+                            const tOutput& reasonlose,
+                            const tOutput& reasonfree)
 {
-    if (points==0)
+    if (se_matches < 0)
         return;
 
     score += points;
@@ -6498,7 +6578,14 @@ void ePlayerNetID::AddScore(int points,
     message.SetTemplateParameter(2, points > 0 ? points : -points);
 
 
-    if (points>0)
+    if(points == 0 )
+    {
+        if (reasonfree.IsEmpty())
+            return;
+        else
+            message.Append(reasonfree);
+    }
+    else if (points>0)
     {
         if (reasonwin.IsEmpty())
             message << "$player_win_default";
@@ -6514,9 +6601,12 @@ void ePlayerNetID::AddScore(int points,
     }
 
     sn_ConsoleOut(message);
-    RequestSync(true);
 
-    se_SaveToScoreFile(message);
+    if( points )
+    {
+        RequestSync(true);
+        se_SaveToScoreFile(message);
+    }
 }
 
 
@@ -6576,7 +6666,9 @@ void ePlayerNetID::SortByScore(){
 void ePlayerNetID::ResetScore(){
     int i;
     for(i=se_PlayerNetIDs.Len()-1;i>=0;i--){
-        se_PlayerNetIDs(i)->score=0;
+        ePlayerNetID * p = se_PlayerNetIDs(i);
+        p->score = 0;
+        p->ready = false;
         if (sn_GetNetState()==nSERVER)
             se_PlayerNetIDs(i)->RequestSync();
     }
@@ -6760,8 +6852,15 @@ float ePlayerNetID::RankingGraph( float y, int MAX ){
 
         for(int i=0;i<max;i++){
             ePlayerNetID *p=se_PlayerNetIDs(i);
+
+            tColoredString prefix;
             if(p->chatting_)
-                DisplayText(-.705, y, .06, "*", sr_fontScoretable, 1);
+                prefix << '*';
+            if(p->ready)
+                prefix << tColoredString::ColorString(.5,1,.5) << 'R';
+            if(prefix.Len())
+                DisplayText(-.704 - (prefix.Len() * .00075), y, .06, prefix.c_str(), sr_fontScoretable, 1);
+
             tColoredString name;
             name << *p;
             DisplayText(-.7, y, .06, name.c_str(), sr_fontScoretable, -1);
@@ -8126,11 +8225,22 @@ void ePlayerNetID::ReceiveControlNet( Network::NetObjectControl const & controlB
             // announce the change
             if ( bool(nextTeam) && !redundant )
             {
-                se_TeamChangeMessage( *this );
 
                 // count it as spam if it is obnoxious
                 if ( obnoxious )
                     GetChatSpam().CheckSpam( 4.0, Owner(), tOutput("$spam_teamchage") );
+
+                if( se_matches < 0 && nextTeam != currentTeam
+                    && nextTeam->PlayerMayJoin( this ) )
+                {
+                    // Join immediately during warmup if possible
+                    if( Object() && Object()->Alive() )
+                        Object()->Kill();
+                    UpdateTeam();
+                    RequestSync();
+                }
+                else
+                    se_TeamChangeMessage( *this );
             }
 
             break;
@@ -8474,17 +8584,13 @@ static void Slap_conf(std::istream &s)
 
         s >> points;
 
-        if ( points == 0)
-        {
-            // oh well :)
-            sn_ConsoleOut( tOutput("$player_admin_slap_free", victim->GetColoredName() ) );
-        }
-
         tOutput win;
         tOutput lose;
+        tOutput free;
         win << "$player_admin_slap_win";
         lose << "$player_admin_slap_lose";
-        victim->AddScore( -points, win, lose );
+        free << "$player_admin_slap_free";
+        victim->AddScore( -points, win, lose, free );
     }
 }
 
@@ -8634,6 +8740,231 @@ private:
     {
         se_CutString( sg_url, 75 );
         return sg_url;
+    }
+
+    // levels of values
+    enum Classifications
+    {
+        Classification_None,
+        Classification_LudicrouslyLow,
+        Classification_Nano,
+        Classification_Micro,
+        Classification_ExtremlyLow,
+        Classification_VeryLow,
+        Classification_Low,
+        Classification_Medium,
+        Classification_High,
+        Classification_VeryHigh,
+        Classification_ExtremlyHigh,
+        Classification_Mega,
+        Classification_Giga,
+        Classification_LudicrouslyHigh,
+        Classification_Infinite
+    };
+
+    static tString ComposeClassification( int index, char const * classification_root, char const * item )
+    {
+        std::ostringstream s;
+        s << classification_root << index;
+        return tString(tOutput( s.str().c_str(), tOutput(item) ) );
+    }
+
+    class Classifier
+    {
+    public:
+        // classifies lowerBoundX just as classificationX, any lower value as classificationX-1
+        Classifier( REAL lowerBound1, int classification1,
+                    REAL lowerBound2, int classification2 )
+        : logBound1_(log(lowerBound1))
+          , logBound2_(log(lowerBound2))
+          , classification1_( classification1 )
+          , classification2_( classification2 )
+        {
+        }
+
+        int Classify( REAL value, int invalid = Classification_None )
+        {
+            if( value <= 0 )
+            {
+                return invalid;
+            }
+            REAL a = ( log( value ) - logBound1_ )/( logBound2_ - logBound1_ );
+            REAL c = classification1_ + a * ( classification2_ - classification1_ );
+            int ret = int(floor( c ));
+            if ( ret < Classification_LudicrouslyLow )
+                ret = Classification_LudicrouslyLow;
+            if ( ret > Classification_LudicrouslyHigh )
+                ret = Classification_LudicrouslyHigh;
+            return ret;
+        }
+    private:
+        REAL logBound1_, logBound2_;
+        REAL classification1_, classification2_;
+    };
+
+    // adds a +1 penalty for every level value goes over the limit
+    static int Penalty( int limit, int value, int max = 3 )
+    {
+        int ret = value - limit;
+        if ( ret < 0 )
+        {
+            ret = 0;
+        }
+        else if ( ret > max )
+        {
+            ret = max;
+        }
+
+        return ret;
+    }
+
+    virtual void Classify( nServerInfo::SettingsDigest const & in, 
+                           nServerInfo::Classification & out ) const
+    {
+        // various classifiers
+        static Classifier delayClassifier( .06, Classification_Medium, .12, Classification_High );
+        static Classifier accelerationClassifier( 4, Classification_Medium, 8, Classification_High );
+        static Classifier rubberHumpClassifier( 1, Classification_Medium, 100, Classification_LudicrouslyHigh );
+        static Classifier rubberWallClassifier( .0015, Classification_Low, .3, Classification_LudicrouslyHigh );
+        static Classifier wallsLengthClassifier( 1, Classification_Low, 10, Classification_VeryHigh );
+        
+        // apply them
+        int delay        = delayClassifier.Classify( in.cycleDelay_ );
+        int acceleration = accelerationClassifier.Classify( in.acceleration_ );
+        int rubberHump   = rubberHumpClassifier.Classify( in.rubberWallHump_ );
+        int rubberWall   = rubberWallClassifier.Classify( in.rubberHitWallRatio_ );
+        int length       = wallsLengthClassifier.Classify( in.wallsLength_, Classification_Infinite );
+
+        // fuse rubber values into one
+        int rubber = rubberHump;
+        if( rubberWall + 1 < rubber )
+        {
+            rubber--;
+        }
+        if( rubberWall > rubber + 1 )
+        {
+            rubber = rubberWall - 1;
+        }
+        if( rubber <= Classification_Micro )
+        {
+            rubber = Classification_None;
+        }
+
+        bool digestIsAccurate = in.GetFlag( nServerInfo::SettingsDigest::Flags_SettingsDigestSent );
+
+        std::ostringstream compose;
+        if( digestIsAccurate )
+        {
+            compose 
+            << ComposeClassification( rubber, "$classification_", "$classification_rubber" ) << ", "
+            << ComposeClassification( acceleration, "$classification_", "$classification_acceleration" ) << ", "
+            << ComposeClassification( delay, "$classification_", "$classification_delay" ) << ", "
+            << ComposeClassification( length, "$classification_wall_", "$classification_walls" );
+            if( in.GetFlag( nServerInfo::SettingsDigest::Flags_TeamPlay ) )
+            {
+                compose << ", " << tOutput( "$classification_teams" );
+            }
+            if( in.GetFlag( nServerInfo::SettingsDigest::Flags_NondefaultMap ) )
+            {
+                compose << ", " << tOutput( "$classification_maps" );
+            }
+            compose << "\n";
+        }
+
+        // determine experience level required.
+        int experienceLevel = 0;
+        if( in.GetFlag( nServerInfo::SettingsDigest::Flags_TeamPlay ) )
+        {
+            // team play is difficult.
+            experienceLevel+=2;
+        }
+        if( in.GetFlag( nServerInfo::SettingsDigest::Flags_NondefaultMap ) )
+        {
+            // non default maps hint at complicated gameplay.
+            experienceLevel++;
+        }
+        experienceLevel += Penalty( Classification_Medium, rubber );
+        experienceLevel += Penalty( delay, Classification_Medium );
+        // low delay and high rubber usually go hand in hand, let's not overpenalize them
+        if( experienceLevel > 4 )
+        {
+            experienceLevel = 4;
+        }
+        experienceLevel += Penalty( Classification_High, acceleration, 1 );
+        experienceLevel += Penalty( length, Classification_Low, 2 );
+
+        if( !digestIsAccurate )
+        {
+            experienceLevel = 1;
+        }
+
+        // calculate the experience level the player has
+        int levelDistance = 10;
+        int experienceLevelThere = int(floor( se_playTimeTotal/levelDistance ));
+        int missingForThisLevel = int( experienceLevelThere*levelDistance - se_playTimeTotal + 2 );
+
+        out.sortOverride_ = experienceLevel - experienceLevelThere;
+        if( out.sortOverride_ > 0 )
+        {
+            compose << tOutput( digestIsAccurate ? "$network_master_exp_recommended_long" : "$network_master_exp_recommended_long_oldserver", missingForThisLevel + out.sortOverride_*levelDistance );
+            // if( digestIsAccurate )
+            {
+                out.noJoin_ = tOutput("$network_master_exp_recommended");
+            }
+        }
+        else
+        {
+            out.sortOverride_ = 0;
+        }
+
+        // check whether a GID has been registered
+        bool registered = false;
+        for( int i = MAX_PLAYERS-1; i >= 0; --i )
+        {
+            registered |= ( ePlayer::PlayerConfig(i)->globalID != se_defaultGID && ePlayer::PlayerConfig(i)->globalID.Len() > 1 );
+        }
+
+        // find reasons why the player should not join
+        if( !registered && in.GetFlag( nServerInfo::SettingsDigest::Flags_AuthenticationRequired ) )
+        {
+            out.noJoin_ = tOutput("$network_master_login_needed");
+            compose << tOutput("$network_master_login_needed_long");
+
+            // keep servers you need authentication to play on at the bottom until
+            // the player is really experienced
+            if( out.sortOverride_ < 1 && se_playTimeOnline < 120 )
+            {
+                out.sortOverride_ = 1;
+            }
+        }
+        else
+        {
+            REAL timeLacking=0;
+            if( in.minPlayTimeTotal_ - se_playTimeTotal > 0 )
+            {
+                timeLacking = in.minPlayTimeTotal_ - se_playTimeTotal;
+            }
+            if( in.minPlayTimeOnline_ - se_playTimeOnline > timeLacking )
+            {
+                timeLacking = in.minPlayTimeOnline_ - se_playTimeOnline;
+            }
+            if( in.minPlayTimeTeam_ - se_playTimeTeam > timeLacking )
+            {
+                timeLacking = in.minPlayTimeTeam_ - se_playTimeTeam;
+            }
+            if ( timeLacking > 0 )
+            {
+                out.noJoin_ = tOutput("$network_master_exp_needed");
+                compose << tOutput("$network_master_exp_needed_long", timeLacking+2 );
+                int minLevel = int(timeLacking/10)+1;
+                if( out.sortOverride_ < minLevel )
+                {
+                    out.sortOverride_ = minLevel;
+                }
+            }
+        }
+
+        out.description_ = compose.str();
     }
 };
 
@@ -9500,6 +9831,11 @@ void ePlayerNetID::UpdateSuspensions() {
 
 void ePlayerNetID::UpdateShuffleSpamTesters()
 {
+    if( sn_GetNetState() != nSERVER )
+    {
+        return;
+    }
+
     for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
     {
         ePlayerNetID *p = se_PlayerNetIDs( i );
@@ -9809,3 +10145,23 @@ int ePlayerNetID::GetSuspended() const
 {
     return suspended_;
 }
+
+static void se_FillServerSettings()
+{
+    nServerInfo::SettingsDigest & digest = *nCallbackFillServerInfo::ToFill();
+    
+    digest.minPlayTimeTotal_ = int(se_minPlayTimeTotal);
+    digest.minPlayTimeOnline_ = int(se_minPlayTimeOnline);
+    digest.minPlayTimeTeam_ = int(se_minPlayTimeTeam);
+
+    digest.SetFlag( nServerInfo::SettingsDigest::Flags_AuthenticationRequired,
+#ifdef KRAWALL_SERVER
+                    se_accessLevelRequiredToPlay < tAccessLevel_Program ||
+                    se_playAccessLevel < tAccessLevel_Program
+#else
+                    false
+#endif
+        );
+}
+
+static nCallbackFillServerInfo se_fillServerSettings(se_FillServerSettings);

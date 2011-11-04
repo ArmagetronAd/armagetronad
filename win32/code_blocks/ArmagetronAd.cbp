@@ -17,7 +17,6 @@
 					<Add option="-O2" />
 					<Add option="-W" />
 					<Add option="-DNDEBUG" />
-					<Add option="-DDIRTY" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -98,7 +97,7 @@
 			<Add library="libopengl32.a" />
 			<Add library="libglu32.a" />
 			<Add library="libshell32.a" />
-			<Add library="libwsock32.a" />
+			<Add library="libws2_32.a" />
 			<Add library="..\..\..\winlibs\SDL_image\VisualC\graphics\lib\libpng13.lib" />
 			<Add library="..\..\..\winlibs\libxml2\lib\libxml2.lib" />
 		</Linker>
@@ -144,6 +143,8 @@
 		<Unit filename="..\..\src\engine\eSound.h" />
 		<Unit filename="..\..\src\engine\eSoundMixer.cpp" />
 		<Unit filename="..\..\src\engine\eSoundMixer.h" />
+		<Unit filename="..\..\src\engine\eSpawn.cpp" />
+		<Unit filename="..\..\src\engine\eSpawn.h" />
 		<Unit filename="..\..\src\engine\eTeam.cpp" />
 		<Unit filename="..\..\src\engine\eTeam.h" />
 		<Unit filename="..\..\src\engine\eTess2.h" />
@@ -606,8 +607,6 @@
 		<Unit filename="..\..\src\tron\gServerFavorites.h" />
 		<Unit filename="..\..\src\tron\gSparks.cpp" />
 		<Unit filename="..\..\src\tron\gSparks.h" />
-		<Unit filename="..\..\src\tron\gSpawn.cpp" />
-		<Unit filename="..\..\src\tron\gSpawn.h" />
 		<Unit filename="..\..\src\tron\gStatList.cpp" />
 		<Unit filename="..\..\src\tron\gStatList.h" />
 		<Unit filename="..\..\src\tron\gStatistics.cpp" />
@@ -616,6 +615,8 @@
 		<Unit filename="..\..\src\tron\gStuff.h" />
 		<Unit filename="..\..\src\tron\gTeam.cpp" />
 		<Unit filename="..\..\src\tron\gTeam.h" />
+		<Unit filename="..\..\src\tron\gTutorial.cpp" />
+		<Unit filename="..\..\src\tron\gTutorial.h" />
 		<Unit filename="..\..\src\tron\gVectorExtra.h" />
 		<Unit filename="..\..\src\tron\gWall.cpp" />
 		<Unit filename="..\..\src\tron\gWall.h" />

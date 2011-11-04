@@ -135,7 +135,8 @@ void MacOSX_SetCWD(char **argv) {
 #endif
 
     // Forward events to NSApp
-    setenv("SDL_ENABLEAPPEVENTS", "1", 1);
+    // https://bugs.launchpad.net/armagetronad/+bug/510174
+    // setenv("SDL_ENABLEAPPEVENTS", "1", 1);
 
     /* Hand off to main application code */
     status = SDL_main(gArgc, gArgv);

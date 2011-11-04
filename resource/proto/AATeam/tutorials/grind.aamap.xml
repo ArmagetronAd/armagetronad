@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE Resource SYSTEM "AATeam/map-0.2.8.0_rc4.dtd">
+<Resource type="aamap" name="grind" version="0.1.0" author="Z-Man" category="tutorial">
+	<Map version="2">
+		<!-- Map to practice grinding. The poor AI will be too scared to turn.
+
+		 License: Do with it what you want.-->
+
+		<World>
+			<Field>
+				<Spawn	x="20"	y="200"	xdir="0"	ydir="1"	/>
+				<Spawn	x="40"	y="50"	xdir="0"	ydir="1"	/>
+			
+				<Wall>
+					<Point	x="0"	y="0"	/>
+					<Point	x="0"	y="5000"	/>
+					<Point	x="50"	y="5000"	/>
+					<Point	x="50"	y="0"	/>
+					<Point	x="0"	y="0"	/>
+				</Wall>
+			</Field>
+		</World>
+	</Map>
+</Resource>

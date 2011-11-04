@@ -695,6 +695,10 @@ dnl *************************************************
 
 dnl check for compiler
 AC_CHECK_PROG([PROTOC],protoc,`which protoc`,no)
+if test x$PROTOC = xno
+then
+    AC_MSG_ERROR([[The protobuf C++ compiler(Google Protocol Buffers, http://code.google.com/p/protobuf/) is required, but was not found.]])
+fi
 
 AC_LANG([C++])
 
@@ -1163,8 +1167,8 @@ AC_AA_PATH_NOSUFFIX(scriptdir,${aa_datadir}/scripts,[shell scripts],[DATADIR/scr
 AC_AA_PATH_NOSUFFIX(wwwrootdir,${aa_datadir}/www-root,[web root],[DATADIR/www-root])
 
 # documentation
-AC_AA_PATH_PREPARE(docdir)
-AC_AA_PATH(docdir,${datadir}/doc,[documentation],[DATADIR/doc])
+dnl AC_AA_PATH_PREPARE(docdir)
+dnl AC_AA_PATH(docdir,${datadir}/doc,[documentation],[DATADIR/doc])
 
 # PID files
 AC_AA_PATH_PREPARE(rundir)
@@ -1284,7 +1288,7 @@ echo ""
 echo "     Binaries will be installed in      : `eval echo ${bindir}`"
 echo "     Static data will be installed in   : `eval echo ${aa_datadir}`"
 echo "     Configuration will be installed in : `eval echo ${aa_sysconfdir}`"
-echo "     Documentation will be installed in : `eval echo ${aa_docdir}`"
+dnl echo "     Documentation will be installed in : `eval echo ${aa_docdir}`"
 test "x$enable_etc" = "xyes" && echo "     Link to configuration will go to   : /etc/${progname}"
 echo "     Build with Krawall authentication support: $enable_krawall"
 echo "     Ruby support: $enable_ruby"

@@ -50,6 +50,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "tThread.h"
 #include "tMutex.h"
+#include "tBackgroundProcess.h"
 
 bool sn_supportRemoteLogins = false;
 
@@ -198,164 +199,6 @@ class nLoginPersistence:
     bool userAuthFailedLastTime;
 };
 
-//! template that runs void member functions of reference countable objects
-template< class T > class nMemberFunctionRunnerTemplate
-{
-private:
-public:
-    nMemberFunctionRunnerTemplate( T & object, void (T::*function)() )
-    : object_( &object ), function_( function )
-    {
-    }
-
-    // runs the function
-    void run()
-    {
-        (object_->*function_)();
-    }
-
-    void operator () ()
-    {
-        run();
-    }
-
-    //! schedule a task for execution at the next convenient break, between game rounds for example
-    static void ScheduleBreak( T & object, void (T::*function)()  )
-    {
-        pendingForBreak_.push_back( nMemberFunctionRunnerTemplate( object, function ) );
-    }
-
-    //! schedule a task for execution in a background thread
-    static void ScheduleBackground( T & object, void (T::*function)()  )
-    {
-        bool delays = true;
-#ifdef HAVE_THREADS
-        delays = tRecorder::IsRunning();
-#endif
-
-        // schedule the task into a background thread
-        if ( !delays )
-        {
-            boost::thread(nMemberFunctionRunnerTemplate<T>( object, function ) );
-        }
-        else
-        {
-            // don't start threads when we're recording, just do the task at the next opportunity
-            ScheduleBreak( object, function );
-
-        }
-    }
-
-    //! schedule a task for execution in the next tToDo call
-    static void ScheduleForeground( T & object, void (T::*function)()  )
-    {
-        Pending().add( nMemberFunctionRunnerTemplate( object, function ) );
-        st_ToDo( FinishAll );
-    }
-
-    // function that calls tasks scheduled for the next break
-    static void OnBreak()
-    {
-        // finish all pending tasks
-        while( pendingForBreak_.size() > 0 )
-        {
-            // sync the network so built up auth requests don't cause connection drops so quickly
-            sn_Receive();
-            nNetObject::SyncAll();
-            tAdvanceFrame();
-            sn_SendPlanned();
-
-            nMemberFunctionRunnerTemplate & next = pendingForBreak_.front();
-            next.run();
-            pendingForBreak_.pop_front();
-        }
-    }
-private:
-    //! pointer to the object we should so something with
-    tJUST_CONTROLLED_PTR< T > object_;
-    
-    //! the function to call
-    void (T::*function_)();
-
-    // taks for the break
-    static std::deque< nMemberFunctionRunnerTemplate > pendingForBreak_;
-
-    typedef tLockedQueue< nMemberFunctionRunnerTemplate, boost::mutex > LockedQueue;
-
-    // queue of foreground tasks
-    static LockedQueue & Pending()
-    {
-        static LockedQueue pending;
-        return pending;
-    }
-
-    // function that calls them
-    static void FinishAll()
-    {
-        try
-        {
-            // finish all pending tasks
-            while( Pending().size() > 0 )
-            {
-                nMemberFunctionRunnerTemplate next = Pending().next();
-                next.run();
-            }
-        }
-        catch( typename LockedQueue::Empty const & e )
-        {
-            // ignore, we just read over the end. No biggie.
-        }
-    }
-};
-
-template< class T >
-std::deque< nMemberFunctionRunnerTemplate<T> >
-nMemberFunctionRunnerTemplate<T>::pendingForBreak_;
-
-// convenience wrapper
-class nMemberFunctionRunner
-{
-public:
-    enum ScheduleType
-    {
-        Break,
-        Foreground,
-        Background
-    };
-
-    template< class T > static void ScheduleBreak( T & object, void (T::*function)() )
-    {
-        nMemberFunctionRunnerTemplate<T>::ScheduleBreak( object, function );
-    }
-
-    template< class T > static void ScheduleBackground( T & object, void (T::*function)() )
-    {
-        nMemberFunctionRunnerTemplate<T>::ScheduleBackground( object, function );
-    }
-
-    template< class T > static void ScheduleForeground( T & object, void (T::*function)() )
-    {
-        nMemberFunctionRunnerTemplate<T>::ScheduleForeground( object, function );
-    }
-
-    template< class T > static void ScheduleMayBlock( T & object, void (T::*function)(), bool block )
-    {
-        if ( block )
-        {
-#ifdef HAVE_THREADS
-            ScheduleBackground( object, function );
-#else
-            ScheduleBreak( object, function );
-#endif
-        }
-        else
-        {
-            ScheduleForeground( object, function );
-        }
-    }
-};
-
-
 //! manager for logon processes
 class nLoginProcess: 
     public nMachineDecorator, 
@@ -365,6 +208,9 @@ class nLoginProcess:
 {
     // reference counting pointer 
     typedef tJUST_CONTROLLED_PTR< nLoginProcess > SelfPointer;
+
+    // sync up with the main thread
+    tBackgroundSync sync_;
 public:
     nLoginProcess( int userID )
     : nMachineDecorator( nMachine::GetMachine( userID ) )
@@ -372,16 +218,6 @@ public:
     {
         // install self reference to keep this object alive
         selfReference_ = this;
-
-        // inform the user about delays
-        bool delays = true;
-#ifdef HAVE_THREADS
-        delays = tRecorder::IsRunning();
-#endif
-        if ( delays )
-        {
-            sn_ConsoleOut( tOutput( "$login_message_delayed" ), userID );
-        }
     }
 
     ~nLoginProcess()
@@ -410,7 +246,7 @@ public:
 
         clientSupportedMethods = sn_Connections[user.Owner()].supportedAuthenticationMethods_;
 
-        nMemberFunctionRunner::ScheduleMayBlock( *this, &nLoginProcess::FetchInfoFromAuthority, authority != "" );
+        tMemberFunctionRunner::ScheduleBackground( *this, &nLoginProcess::FetchInfoFromAuthority );
     }
 
     // That function triggers fetching of authentication relevant data from the authentication
@@ -518,6 +354,9 @@ void nLoginProcess::FetchInfoFromAuthority()
         }
     }
 
+    // sync to foreground
+    tBackgroundSyncEvent syncEvent( sync_ );
+
     // record and playback result.
     static char const * section = "AUTH_INFO";
     tRecorder::Playback( section, ret );
@@ -543,8 +382,8 @@ void nLoginProcess::FetchInfoFromAuthority()
         return;
     }
 
-    // and go on
-    nMemberFunctionRunner::ScheduleForeground( *this, &nLoginProcess::QueryFromClient );
+    // and go on (we're still in synced state, so calling network functions is fine)
+    QueryFromClient();
 }
 
 static tSettingItem< bool > sn_supportRemoteLoginsConf( "GLOBAL_ID", sn_supportRemoteLogins );
@@ -904,7 +743,7 @@ void nLoginProcess::ProcessClientAnswer( Network::PasswordAnswer const & answer,
     sn_GetAdr( sender.SenderID(), peerAddress );
   
     // and go on
-    nMemberFunctionRunner::ScheduleMayBlock( *this, &nLoginProcess::Authorize, authority != "" );
+    tMemberFunctionRunner::ScheduleBackground( *this, &nLoginProcess::Authorize );
 }
 
 static bool sn_trustLAN = false;
@@ -989,6 +828,9 @@ bool nLoginProcess::CheckServerAddress()
 // and determines whether the client is authorized or not.
 void nLoginProcess::Authorize()
 {
+    // sync to foreground
+    tBackgroundSyncEvent syncEvent( sync_, true );
+
     if( !IsActive() )
     {
         Abort();
@@ -1014,6 +856,8 @@ void nLoginProcess::Authorize()
             nKrawall::CheckScrambledPassword( *this, *this );
         }
 
+        syncEvent.Enter();
+
         // record and playback result (required because on playback, a new
         // salt is generated and this way, a recoding does not contain ANY
         // exploitable information for password theft: the scrambled password
@@ -1035,13 +879,16 @@ void nLoginProcess::Authorize()
 // the finish task can also be triggered any time by this function:
 void nLoginProcess::Abort()
 {
-    nMemberFunctionRunner::ScheduleBackground( *this, &nLoginProcess::Finish );
+    tMemberFunctionRunner::ScheduleBackground( *this, &nLoginProcess::Finish );
 }
 
 // which, when finished, triggers the foreground task of updating the
 // game state and informing the client of the success of the operation.
 void nLoginProcess::Finish()
 {
+    // sync to foreground
+    tBackgroundSyncEvent syncEvent( sync_ );
+
     // again, userID is safe in this function
     int userID = sn_UserID( user );
     if ( !IsActive() )
@@ -1067,11 +914,14 @@ static void sn_Reset(){
     int userID = nCallbackLoginLogout::User();
 
     // kill/detach pending login process
-    nLoginProcess * process = nLoginProcess::Find( userID );
-    if ( process )
+    if( sn_GetNetState() == nSERVER )
     {
-        process->Remove();
-        process->Destroy();
+        nLoginProcess * process = nLoginProcess::Find( userID );
+        if ( process )
+        {
+            process->Remove();
+            process->Destroy();
+        }
     }
 }
 
@@ -1116,15 +966,6 @@ bool nAuthentication::RequestLogin(const tString & authority, const tString& use
 #endif
 
     return true;
-}
-
-//! call when you have some time for lengthy authentication queries to servers
-void nAuthentication::OnBreak()
-{
-#ifdef KRAWALL_SERVER
-    nMemberFunctionRunnerTemplate< nLoginProcess >::OnBreak();
-#endif
-    st_DoToDo();
 }
 
 //! returns whether a login is currently in process for the given user ID

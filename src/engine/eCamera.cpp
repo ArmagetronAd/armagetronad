@@ -218,10 +218,11 @@ uActionCamera eCamera::se_lookLeft("LOOK_LEFT",
 
 uActionCamera eCamera::se_switchView("SWITCH_VIEW", -160);
 
-uActionTooltip eCamera::se_glanceBackTooltip( eCamera::se_glance[GLANCE_FORWARD], 1 );
-uActionTooltip eCamera::se_glanceRightTooltip( eCamera::se_glance[GLANCE_RIGHT], 3 );
-uActionTooltip eCamera::se_glanceLeftTooltip( eCamera::se_glance[GLANCE_LEFT], 3 );
-uActionTooltip eCamera::se_switchViewTooltip( eCamera::se_switchView, 2 );
+uActionTooltip eCamera::se_glanceBackTooltip( uActionTooltip::Level_Advanced, eCamera::se_glance[GLANCE_BACK], 2 );
+uActionTooltip eCamera::se_glanceForwardTooltip( uActionTooltip::Level_Advanced, eCamera::se_glance[GLANCE_FORWARD], 1 );
+uActionTooltip eCamera::se_glanceRightTooltip( uActionTooltip::Level_Advanced, eCamera::se_glance[GLANCE_RIGHT], 3 );
+uActionTooltip eCamera::se_glanceLeftTooltip( uActionTooltip::Level_Advanced, eCamera::se_glance[GLANCE_LEFT], 3 );
+uActionTooltip eCamera::se_switchViewTooltip( uActionTooltip::Level_Expert, eCamera::se_switchView, 2 );
 
 
 static REAL s_startFollowX = -30, s_startFollowY = -30, s_startFollowZ = 80;
@@ -477,7 +478,7 @@ void eCamera::MyInit(){
     {
         center = netPlayer->Object();
     }
-    else if ( grid->gameObjectsInteresting.Len() > 0 )
+    else if ( grid && grid->gameObjectsInteresting.Len() > 0 )
     {
         // or an arbitrary game object
         center = grid->gameObjectsInteresting[0];
@@ -517,8 +518,14 @@ void eCamera::MyInit(){
     //  foot=tNEW(eGameObject)(pos,dir,0);
     distance=0;
     lastrendertime=se_GameTime();
-	if (CameraMain()) grid->cameras.Add(this,id);
-	else grid->subcameras.Add(this,id);
+	if (CameraMain())
+    {
+        grid->cameras.Add(this,id);
+    }
+	else if( grid )
+    {
+        grid->subcameras.Add(this,id);
+    }
     //  se_ResetVisibles(id);
     smoothTurning=turning=0;
     centerPosLast=centerposLast=CenterPos();
@@ -1744,6 +1751,11 @@ void eCamera::SwitchCenter(int d){
     if (center)
         centerID = center->interestingID;
     center = NULL;
+
+    if( !grid )
+    {
+        return;
+    }
 
     if (centerID>=grid->gameObjectsInteresting.Len())
         centerID=0;

@@ -33,6 +33,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tArray.h"
 #include "nNetwork.h"
 
+#include "tCallbackString.h"
+
 #include <iosfwd>
 #include <memory>
 
@@ -46,6 +48,7 @@ namespace Network
     class SmallServerInfoBase; 
     class SmallServerInfo; 
     class BigServerInfo; 
+    class SettingsDigest;
     class RequestSmallServerInfo; 
     class RequestBigServerInfo; 
     class RequestBigServerInfoMaster; 
@@ -55,6 +58,11 @@ class nSenderInfo;
 template< class T > class nProtoBufDescriptor;
 
 typedef nServerInfo* (sn_ServerInfoCreator)();
+
+//! sort helper function: if this returns true, it pushes a server to the top of the list
+typedef bool SortHelper(nServerInfoBase const * server);
+
+bool SortHelperNoop(nServerInfoBase const * server);
 
 //! return the DNS name of this machine, if set
 tString const & sn_GetMyDNSName();
@@ -191,6 +199,50 @@ public:
     virtual void Save(std::ostream &s) const;
     virtual void Load(std::istream &s);
 
+
+    struct SettingsDigest
+    {
+        enum Flags
+        {
+            Flags_AuthenticationRequired = 0x1, //!< is authentication required to play on this server?
+            Flags_NondefaultMap = 0x2, //!< custom map, indicating complicated gameplay
+            Flags_TeamPlay = 0x4, //!< team play is possible
+            Flags_SettingsDigestSent = 0x8000, //!< Did this server send a settings digest?
+            Flags_All = 0xffff
+        };
+
+        unsigned short flags_;      //!< flags
+
+        void SetFlag( Flags flag, bool set ); //!< sets a certain flag to a value
+        bool GetFlag( Flags flag ) const; //!< returns the value of a certain flag
+
+        void WriteSync( Network::SettingsDigest & sync ) const;
+        void ReadSync( Network::SettingsDigest const & sync );
+        
+        // play time requirements, filled by ePlayer.cpp
+        int minPlayTimeTotal_;    //!< minimum number of minutes spent playing up to now
+        int minPlayTimeOnline_;   //!< minimum number of minutes spent playing online
+        int minPlayTimeTeam_;     //!< minimum number of minutes spent playing team games
+
+        // filled by gCycleMovement.cpp
+        REAL cycleDelay_;         //!< cycle delay (max .05s if doublebinding has been disabled)
+        REAL acceleration_;       //!< acceleration strength (relative to base speed)
+        REAL rubberWallHump_;     //!< characteristic rubber number: rubber/(base speed*cycle_delay), the number of times you can hump a wall without suiciding
+        REAL rubberHitWallRatio_;  //!< characteristic rubber number: maximum ratio of time spent sitting on walls to total time
+        REAL wallsLength_;         //!< length of walls (divided by speed, so it's in seconds)
+
+        SettingsDigest();
+    };
+
+    struct Classification
+    {
+        Classification();
+
+        int sortOverride_;    //!< values 0 get priority in sorting server lists
+        tString noJoin_;      //!< is there a reason we shouldn't join?
+        tString description_; //!< classification description or reason why play is impossible
+    };
+
     // sort key selection
     enum PrimaryKey
     {
@@ -201,8 +253,17 @@ public:
         KEY_MAX         // max value
     };
 
+    //! priority of the helper value
+    enum SortHelperPriority
+    {
+        PRIORITY_NONE,      // no influence
+        PRIORITY_SECONDARY, // user's sort choice has priority, the helper is secondary
+        PRIORITY_PRIMARY    // the helper function's return value is the most important
+    };
+
     static nServerInfo *GetFirstServer();  // get the first (best) server
-    static void Sort( PrimaryKey key );    // sort the servers by score
+    static void Sort( PrimaryKey key, SortHelper helper=&SortHelperNoop, SortHelperPriority helperPriority=PRIORITY_PRIMARY );
+                                           // sort the servers by score
     static tString SortableName( const char * ); // gives a sanitized name for sorting
     static void CalcScoreAll();            // calculate the score for all servers
     static void DeleteAll(bool autosave=true);     // delete all server infos
@@ -324,13 +385,38 @@ public:
     inline int GetScoreBias( void ) const;	//!< Gets score bias for this server
     inline nServerInfo const & GetScoreBias( int & scoreBias ) const;	//!< Gets score bias for this server
 
+    SettingsDigest const & GetSettings() const //!< most important settings
+    {
+        return settings_;
+    }
+
+    Classification const & GetClassification() const //!< classification according to settings
+    {
+        return classification_;
+    }
+
 protected:
     virtual const tString& DoGetName() const;   //!< returns the server's name
 
 private:
     QueryType queryType_; //!< the query type to use for this server
+    SettingsDigest settings_; //!< most important settings
+    Classification classification_; //!< classification according to settings
 };
 
+//! callback to give other components a chance to help fill in the server info
+class nCallbackFillServerInfo: public tCallback
+{
+    static nServerInfo::SettingsDigest * settings_;
+public:
+    nCallbackFillServerInfo( AA_VOIDFUNC * f );
+
+    //! the server settings to fill
+    static nServerInfo::SettingsDigest *ToFill(){ return settings_; }
+
+    //! fills all server infos
+    static void Fill( nServerInfo::SettingsDigest * settings );
+};
 
 class nServerInfoAdmin
 {
@@ -347,6 +433,8 @@ private:
     virtual tString GetGlobalIDs()	const = 0;
     virtual tString	GetOptions()	const = 0;
     virtual tString GetUrl()		const = 0;
+    virtual void Classify( nServerInfo::SettingsDigest const & in, 
+                           nServerInfo::Classification & out ) const = 0;  //!< classifies the server according to its setting digest
 
     static nServerInfoAdmin* GetAdmin();
 };

@@ -46,6 +46,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tRandom.h"
 #include "tRecorder.h"
 #include "tCommandLine.h"
+#include "tToDo.h"
 #include "eAdvWall.h"
 #include "eGameObject.h"
 #include "uMenu.h"
@@ -399,19 +400,6 @@ static void welcome(){
 
     st_FirstUse=false;
 
-    sr_textOut = textOutBack;
-    uMenu::Message( tOutput("$welcome_message_heading"), tOutput("$welcome_message"), 300 );
-
-    // start a first single player game
-    sg_currentSettings->speedFactor = -2;
-    sg_currentSettings->autoNum = 0;
-    sr_textOut = textOutBack;
-    sg_SinglePlayerGame();
-    sg_currentSettings->autoNum = 1;
-    sg_currentSettings->speedFactor = 0;
-
-    sr_textOut = textOutBack;
-    uMenu::Message( tOutput("$welcome_message_2_heading"), tOutput("$welcome_message_2"), 300 );
 
     sr_textOut = textOutBack;
 }
@@ -469,6 +457,12 @@ void cleanup(eGrid *grid){
 }
 
 #ifndef DEDICATED
+static bool sg_active = true;
+static void sg_DelayedActivation()
+{
+    Activate( sg_active );
+}
+
 int filter(const SDL_Event *tEvent){
     // recursion avoidance
     static bool recursion = false;
@@ -530,17 +524,19 @@ int filter(const SDL_Event *tEvent){
             if(currentScreensetting.fullscreen ^ lastSuccess.fullscreen) return false;
 #endif
             int flags = SDL_APPINPUTFOCUS;
-            if ( tEvent->active.gain && tEvent->active.state & flags )
-                Activate(true);
-            if ( !tEvent->active.gain && tEvent->active.state & flags )
-                Activate(false);
+            if ( tEvent->active.state & flags )
+            {
+                // con << tSysTimeFloat() << " " << "active: " << (tEvent->active.gain ? "on" : "off") << "\n";
+                sg_active = tEvent->active.gain;
+                st_ToDo(sg_DelayedActivation);
+            }
 
             // reload GL stuff if application gets reactivated
             if ( tEvent->active.gain && tEvent->active.state & SDL_APPACTIVE )
             {
                 // just treat it like a screen mode change, gets the job done
-                rCallbackBeforeScreenModeChange::Exec();
-                rCallbackAfterScreenModeChange::Exec();
+                st_ToDo(rCallbackBeforeScreenModeChange::Exec);
+                st_ToDo(rCallbackAfterScreenModeChange::Exec);
             }
             return false;
         }

@@ -85,6 +85,9 @@ dist-hook:
 #   copy mac files
 	cp -R ${srcdir}/MacOS ${distdir}
 
+#   copy tutorial textures
+	cp -R ${srcdir}/textures/tutorials ${distdir}/textures/
+
 #	clear CVS
 	find $(distdir) -depth -name CVS -exec rm -rf \{\} \;
 
@@ -137,12 +140,23 @@ if USE_SYSINSTALL
 	DESTDIR=$(DESTDIR) ROOTDIR=$(ROOTDIR) bash $(DESTDIR)${scriptdir}/sysinstall install $(prefix)
 endif
 
+if NEEDDATA
+#   copy tutorial textures
+	cp -R ${srcdir}/textures/tutorials $(DESTDIR)$(aa_datadir)/textures/
+	find $(DESTDIR)$(aa_datadir)/textures/tutorials -name *.xcf -exec rm \{\} \;
+endif
+
 uninstall-hook:
 #	delete executable and uninstaller
 	rm -f $(DESTDIR)${bindir}/@progname@$(executable_suffix)
 
 #	delegate to special tasks
 	$(masterUninstallTasks)
+
+if NEEDDATA
+#   delete tutorial textures
+	rm -rf $(DESTDIR)$(aa_datadir)/textures/tutorials
+endif
 
 if USE_UNINSTALL
 	rm -f $(uninstall_location)

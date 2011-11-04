@@ -116,12 +116,15 @@ Section "MainSection" SEC01
   File /r ".\resource\included\*.*"
   SetOutPath "$INSTDIR\sound"
   File ".\sound\*.ogg"
+  File ".\sound\*.wav"
   SetOutPath "$INSTDIR\music"
   File ".\music\*.*"
   SetOutPath "$INSTDIR\textures"
   File ".\textures\*.png"
   File ".\textures\*.jpg"
   File ".\textures\*.ttf"
+  SetOutPath "$INSTDIR\textures\tutorials"
+  File /r ".\textures\tutorials\*.*"
 SectionEnd
 
 Section -AdditionalIcons

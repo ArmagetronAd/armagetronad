@@ -35,6 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tMath.h"
 
 #include "nConfig.h"
+#include "nServerInfo.h"
 
 #include "ePlayer.h"
 #include "eDebugLine.h"
@@ -47,6 +48,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "gWall.h"
 #include "gSensor.h"
 #include "gAIBase.h"
+
+#include "uInput.h"
 
 #include "tRecorder.h"
 
@@ -4473,3 +4476,42 @@ void gCycleMovement::AddZoneAcceleration( REAL zoneAcceleration )
 {
     totalZoneAcceleration += zoneAcceleration;
 }
+
+static void sg_FillCyclePhysics()
+{
+    // fetch base values
+    REAL speed = sg_speedCycle * gCycleMovement::SpeedMultiplier();
+    REAL rubber = sg_rubberCycle;
+    REAL maxSpeed = gCycleMovement::MaximalSpeed();
+
+    REAL delay = sg_delayCycle/gCycleMovement::SpeedMultiplier();
+    if( su_doubleBindTimeout > delay )
+    {
+        delay = su_doubleBindTimeout;
+        if( delay > .05 )
+        {
+            delay = .05;
+        }
+    }
+
+    nServerInfo::SettingsDigest & digest = *nCallbackFillServerInfo::ToFill();
+    digest.cycleDelay_ = delay;
+    digest.acceleration_ = (maxSpeed-speed)/(speed+.001);
+    digest.rubberWallHump_ = rubber/(speed*delay);
+    // if humping is possible basically, check whether it's prevented or handicaped by
+    // cycle_rubber_delay
+    if( digest.rubberWallHump_ > 1 && sg_rubberCycleDelay > 0 )
+    {
+        REAL rubberDelayCount = sg_rubberCycleDelay > .999 ? .999 : sg_rubberCycleDelay;
+        REAL bonus = sg_rubberCycleDelayBonus > 0 ? sg_rubberCycleDelayBonus : 0;
+        digest.rubberWallHump_ *= bonus/(rubberDelayCount+bonus*(1-rubberDelayCount));
+        // but not too much.
+        if( digest.rubberWallHump_ < 1 )
+        {
+            digest.rubberWallHump_ = 1;
+        }
+    }
+    digest.rubberHitWallRatio_ = rubber/(speed*sg_rubberCycleTime);
+}
+
+static nCallbackFillServerInfo sg_fillCyclePhysics(sg_FillCyclePhysics);
