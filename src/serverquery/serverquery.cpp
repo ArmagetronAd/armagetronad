@@ -39,7 +39,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tConsole.h"
 #include "tDirectories.h"
 #include "tLocale.h"
-#include "tSystime.h"
+#include "tSysTime.h"
 #include "tToDo.h"
 #include "tVersion.h"
 
