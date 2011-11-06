@@ -299,7 +299,7 @@ namespace sq
             ServerInfo *run = ServerInfo::GetFirstServer();
             while (run)
             {
-                if (!run->WasDisplayed() && run->IsAdvancedInfoSet() || listOption_)
+                if (!run->WasDisplayed() && (run->IsAdvancedInfoSet() || listOption_))
                 {
                     run->SetDisplayed();
                     Json::Value serverToJson(Json::objectValue);
