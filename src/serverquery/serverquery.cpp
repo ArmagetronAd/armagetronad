@@ -49,7 +49,7 @@ namespace sq
     
     void ParseConnectionString(const tString & s, tString & connectionName, unsigned & port, unsigned defaultPort)
     {
-        int sepIndex = s.find(':');
+        size_t sepIndex = s.find(':');
         if (sepIndex != std::string::npos)
         {
             connectionName = s.SubStr(0, sepIndex);
