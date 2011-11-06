@@ -328,7 +328,7 @@ int main(int argc, char **argv)
 {
     try
     {
-        tCommandLineAnalyzer *commandLineAnchor;
+        tCommandLineAnalyzer *commandLineAnchor = NULL;
         tDirectoriesCommandLineAnalyzer directoryOptions(commandLineAnchor, false);
         sq::ServerQueryCommandLineAnalyzer options(commandLineAnchor);
         tCommandLineData commandLine(st_programVersion, commandLineAnchor);
