@@ -93,7 +93,7 @@ namespace sq
             return wasDisplayed_;
         }
         
-        bool SetDisplayed()
+        void SetDisplayed()
         {
             wasDisplayed_ = true;
         }
