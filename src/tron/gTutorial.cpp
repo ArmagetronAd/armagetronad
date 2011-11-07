@@ -302,6 +302,8 @@ public:
     // prepares
     virtual void Prepare()
     {
+        warpedAhead_ = 0;
+
         finished_ = false;
 
         sn_CenterMessage("");
