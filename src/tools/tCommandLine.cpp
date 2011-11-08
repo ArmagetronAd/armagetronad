@@ -404,11 +404,14 @@ bool tDefaultCommandLineAnalyzer::DoAnalyze( tCommandLineParser & parser )
         docOption_ = true;
         return true;
     }
+    else 
 #endif
-    else if ( parser.GetSwitch( "--versioninfo") )
     {
-        versioninfoOption_ = true;
-        return true;
+        if ( parser.GetSwitch( "--versioninfo") )
+        {
+            versioninfoOption_ = true;
+            return true;
+        }
     }
     return false;
 }
