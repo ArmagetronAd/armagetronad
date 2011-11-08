@@ -312,11 +312,17 @@ public:
     static void Save();      // save/load all server infos
     static void Save(const tPath& path, const char *filename);      // save/load all server infos
     static void Load(const tPath& path, const char *filename);
+    static int ServerCount();
 
     static nServerInfo* GetMasters();              //!< get the list of master servers
     static nServerInfo* GetRandomMaster();         //!< gets a random master server
 
-    static void GetFromMaster(nServerInfoBase *masterInfo=NULL, char const * fileSuffix = NULL );  // get all the basic infos from the master server, stored in the server info file of the given suffix
+    // Get all the basic infos from the master server.
+    // 
+    // @param masterInfo If non-NULL, then this master server will be polled for data.
+    //                   Otherwise, a random master server will be selected from the defaults.
+    // @param fileSuffix A suffix used to determine the filename where master data is stored to on disk.
+    static void GetFromMaster(nServerInfoBase *masterInfo=NULL, char const * fileSuffix = NULL );
 
     static void TellMasterAboutMe(nServerInfoBase *masterInfo=NULL);  // dedicated server: tell master server about my existence
 
@@ -366,6 +372,7 @@ public:
     int            MaxUsers()          const	{return maxUsers_;}
 
     const tString& UserNames()		const	{ return userNames_;  }
+    const tString& UserGlobalIDs()      const   { return userGlobalIDs_; }
     const tString& UserNamesOneLine()	const	{ return userNamesOneLine_;  }
     const tString& Options()			const	{ return options_;  }
     const tString& Release()			const	{ return release_;  }
@@ -402,6 +409,16 @@ private:
     QueryType queryType_; //!< the query type to use for this server
     SettingsDigest settings_; //!< most important settings
     Classification classification_; //!< classification according to settings
+};
+
+class nMasterLoader
+{
+public:
+    nMasterLoader();
+    ~nMasterLoader();
+    nServerInfo *AddMaster( const tString & connectionName, unsigned port );
+private:
+    nServerInfo *realFirstServer_;
 };
 
 //! callback to give other components a chance to help fill in the server info

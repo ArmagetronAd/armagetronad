@@ -112,4 +112,13 @@ private:
 
 extern tConsole con;
 
+//! Silences console output for the lifetime the instance
+class tSuppressConsole : public tConsole
+{
+public:
+    tSuppressConsole() { RegisterBetterConsole( this ); }
+private:
+    virtual tConsole & DoPrint( const tString &s ) { return *this; }
+};
+
 #endif
