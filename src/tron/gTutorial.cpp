@@ -169,15 +169,9 @@ public:
         }
     }
 
-    // called from Analysis; if true, it is expected that SetDifficulty does something
-    // meaningful.
-    virtual bool HandlesDifficulty()
-    {
-        return false;
-    }
-
     virtual void SetDifficulty( int difficulty )
     {
+        settings_.speedFactor = -difficulty;
     }
 
     // analyzes the game
@@ -187,11 +181,6 @@ public:
         if( se_GameTime() >= 0 && se_GameTime() < warpedAhead_ )
         {
             se_mainGameTimer->Reset( warpedAhead_ );
-        }
-        if( se_GameTime() > 0 && !finished_ && !HandlesDifficulty() )
-        {
-            // make the game slower
-            se_mainGameTimer->speed = pow(.5, difficulty_*.5 );
         }
     }
 
@@ -219,6 +208,13 @@ public:
     void PushSetting( char const * setting, char const * value )
     {
         tempSettings_.push_back( tNEW(gTemporarySetting)( setting, value ) );
+    }
+
+    template< class T > void PushSetting( char const * setting, T const & value )
+    {
+        std::ostringstream s;
+        s << value;
+        tempSettings_.push_back( tNEW(gTemporarySetting)( setting, s.str().c_str() ) );
     }
 
     // find human team
@@ -275,7 +271,15 @@ public:
     // give a player a head start
     void HeadStart( ePlayerNetID & p, REAL time )
     {
+        REAL f = pow( .5, .5 * settings_.speedFactor );
+        time *= f;
+        f *= .1;
         p.Object()->eGameObject::Timestep(-time);
+        while(time > f)
+        {
+            time -= f;
+            p.Object()->Timestep(-time);
+        }
         p.Object()->Timestep(0);
     }
 
@@ -442,7 +446,8 @@ public:
     void TimeWarp( REAL dt )
     {
         PushSetting( "SPARKS", "0" );
-        
+        dt *= pow( .5, .5 * settings_.speedFactor );
+
         REAL last = warpedAhead_;
         warpedAhead_ += dt;
         REAL step = 0.1;
@@ -609,7 +614,7 @@ public:
         for( int i = ais.NumPlayers()-1; i >= 0; --i )
         {
             ePlayerNetID & ai = *ais.Player(i);
-            HeadStart( ai, 3 );
+            HeadStart( ai, 2 );
         }
 
         // create maze
@@ -647,6 +652,9 @@ public:
         PushSetting( "CAMERA_FORBID_FREE", "1" );
         PushSetting( "CAMERA_FORBID_FOLLOW", "1" );
         PushSetting( "CAMERA_FORBID_MER", "1" );
+
+        // no explosions
+        // PushSetting( "EXPLOSION_RADIUS", "0" );
         
         // create test maze to get correct size factor
         width_ = 2;
@@ -788,8 +796,6 @@ public:
     void AfterSpawn()
     {
         gTutorial::AfterSpawn();
-
-        TimeWarp( 8 );
     }
 
     // prepares
@@ -798,10 +804,6 @@ public:
         gTutorial::Prepare();
         su_helpLevel = uActionTooltip::Level_Advanced;
         PushSetting( "MAP_FILE", "Z-Man/tutorial/speedkill-0.1.0.aamap.xml" );
-
-        // colors
-        PushSetting( "ALLOW_TEAM_NAME_COLOR", "0" );
-        PushSetting( "ALLOW_TEAM_NAME_PLAYER", "1" );
     }
 };
 
@@ -818,8 +820,14 @@ public:
     {
         // give human a head start
         HeadStart( HumanPlayer(), 10 );
-        HeadStart( AIPlayer(), 5 );
-        REAL y = 630;
+
+        while( HumanPlayer().Object()->Position().y > AIPlayer().Object()->Position().y + 50 )
+        {
+            TimeWarp(.1);
+        }
+        
+        // HeadStart( AIPlayer(), 5 );
+        REAL y = HumanPlayer().Object()->Position().y + 50;
         AddPath( AIPlayer(), -100, y+10 ); 
         AddPath( AIPlayer(), .1, y+10 ); 
         AddPath( AIPlayer(), .1, 10 ); 
@@ -849,7 +857,12 @@ public:
     {
         // give human a head start
         HeadStart( AIPlayer(), 10 );
-        HeadStart( HumanPlayer(), 5 );
+        // HeadStart( HumanPlayer(), 3 );
+
+        while( HumanPlayer().Object()->Position().y < AIPlayer().Object()->Position().y - 50 )
+        {
+            TimeWarp(.1);
+        }
 
         REAL y = 1000;
         AddPath( AIPlayer(), -10, y ); 
@@ -936,6 +949,16 @@ public:
         Path( *dynamic_cast< gAIPlayer * >( team.Player( 4 ) ), -1, 2 );
         Path( *dynamic_cast< gAIPlayer * >( team.Player( 5 ) ), 1, 3 );
         // Path( *dynamic_cast< gAIPlayer * >( team.Player( 6 ) ), -1, 3 );
+    }
+
+    virtual void SetDifficulty( int difficulty )
+    {
+        gTutorial::SetDifficulty( difficulty );
+        REAL f = pow( .5, .5 * settings_.speedFactor );
+
+        // re-compensate for speed wingmen formation compensation
+        PushSetting( "SPAWN_WINGMEN_BACK", f*2.2 );
+        PushSetting( "SPAWN_WINGMEN_SIDE", f*2.75 );
     }
 
     // prepares
@@ -1077,13 +1100,6 @@ public:
     void Analysis()
     { 
         gTutorial::Analysis();
-    }
-
-    // called from Analysis; if true, it is expected that SetDifficulty does something
-    // meaningful.
-    virtual bool HandlesDifficulty()
-    {
-        return true;
     }
 
     virtual void SetDifficulty( int difficulty )
