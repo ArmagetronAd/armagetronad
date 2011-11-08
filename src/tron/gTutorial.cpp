@@ -599,6 +599,7 @@ public:
         settings_.AI_IQ = 1000;
         settings_.sizeFactor = 0;
         settings_.numAIs = 2;
+        settings_.explosionRadius = 0;
     }
 
     // analyzes the game
@@ -653,9 +654,6 @@ public:
         PushSetting( "CAMERA_FORBID_FOLLOW", "1" );
         PushSetting( "CAMERA_FORBID_MER", "1" );
 
-        // no explosions
-        // PushSetting( "EXPLOSION_RADIUS", "0" );
-        
         // create test maze to get correct size factor
         width_ = 2;
         currentDir_ = eCoord(0,1);
@@ -700,7 +698,7 @@ protected:
             eCoord side = point.dirBefore.Turn(0,1);
             
             REAL radius = ais[0]->Object()->Speed() * sg_delayCycle;
-            eCoord center = point.center + width_ * 2 * point.dirBefore;
+            eCoord center = point.center + width_ * 2 * point.dirBefore + side * width_ * .5;
             ais[0]->AddToPath( center+side*(radius+width_)+point.dirBefore*radius );
             ais[1]->AddToPath( center-side*(radius+width_)+point.dirBefore*radius );
             ais[0]->AddToPath( center+side*(radius+width_)-point.dirBefore*radius );
@@ -718,6 +716,7 @@ protected:
             ais[1]->AddToPath( center+side*(radius+width_)-point.dirBefore*radius );
             ais[0]->AddToPath( center-side*(radius+width_) );
             ais[1]->AddToPath( center+side*(radius+width_) );
+            center = point.center + width_ * 2 * point.dirBefore;
             ais[0]->AddToPath( center-side*(width_) );
             ais[1]->AddToPath( center+side*(width_) );
         }
