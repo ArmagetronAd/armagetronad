@@ -26,36 +26,32 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 */
 
-#ifndef		TCOMMANDLINE_H_INCLUDED
-#define		TCOMMANDLINE_H_INCLUDED
-
-// self include
-#ifndef		TCOMMANDLINE_H_INCLUDED
-#include	"tCommandLine.h"
-#endif
+#ifndef TCOMMANDLINE_H_INCLUDED
+#define	TCOMMANDLINE_H_INCLUDED
 
 #include "tString.h"
-
 #include "tLinkedList.h"
+
+class tCommandLineAnalyzer;
 
 //! entry point for command line parsing
 struct tCommandLineData
 {
-    tString* programVersion_;
-    tString  name_;
-
-    bool Analyse(int argc,char **argv ); //!< analyse the command line
-    bool Execute();                      //!< execute the parsed commands
-
-    //! constructor
-    tCommandLineData()
-            : doc_(false)
-    {
-        programVersion_ = NULL;
-    }
-
+    tCommandLineData( const tString & programVersion );
+    tCommandLineData( const tString & programVersion, tCommandLineAnalyzer *& commandLineAnalyzerAnchor );
+    
+    //!< analyse and execute the command line arguments
+    bool Analyse(int argc,char **argv );
+    
+    //!< Execute command line option actions after program initialization
+    bool Execute();
+    
+    //<! Set the extra to be displayed when using --help
+    void SetExtraProgramUsage( const char *help ) { extraProgamUsage_ = help; }
 private:
-    bool doc_; //!< flag indicating whether documentation should be printed
+    tString programVersion_;
+    const char *extraProgamUsage_;
+    tCommandLineAnalyzer *commandLineAnalyzerAnchor_;
 };
 
 //! command line data
@@ -68,6 +64,7 @@ public:
     bool End() const;                                                                     //! Tests whether the command line parsing is done
 
     const char * Executable() const;                                                      //! Returns the full path to the executable
+    const char * ExecutableName() const;                                               //! Returns the executable name
     const char * Current() const;                                                         //! Returns the current option
     void Advance();                                                                       //! Advances to the next option
 
@@ -86,15 +83,33 @@ class tCommandLineAnalyzer: public tListItem< tCommandLineAnalyzer >
 {
 public:
     tCommandLineAnalyzer(); //!default constructor
+    tCommandLineAnalyzer( tCommandLineAnalyzer *& anchor );
     ~tCommandLineAnalyzer(); //!destructor
 
     inline void Initialize( tCommandLineParser & parser ); //! Analyzes the command line
     inline bool Analyze( tCommandLineParser & parser );    //! Analyzes the command line option
     inline void Help( std::ostream & s );                  //! Prints option help
+    
+    //! Executes the command line option actions after program initialization
+    //! @return true if program execution should continue
+    inline bool Execute();
 private:
     virtual void DoInitialize( tCommandLineParser & parser );     //! Analyzes the command line option
     virtual bool DoAnalyze( tCommandLineParser & parser ) = 0;    //! Analyzes the command line option
     virtual void DoHelp( std::ostream & s ) = 0;                  //! Prints option help
+    virtual bool DoExecute();
+};
+
+class tDefaultCommandLineAnalyzer: public tCommandLineAnalyzer
+{
+public:
+    tDefaultCommandLineAnalyzer(): docOption_(false), versioninfoOption_(false) {}
+private:
+    virtual bool DoAnalyze( tCommandLineParser & parser );
+    virtual void DoHelp( std::ostream & s );
+    virtual bool DoExecute();
+    bool docOption_;
+    bool versioninfoOption_;
 };
 
 // *******************************************************************************************
@@ -141,6 +156,20 @@ bool tCommandLineAnalyzer::Analyze( tCommandLineParser & parser )
 void tCommandLineAnalyzer::Help( std::ostream & s )
 {
     DoHelp( s );
+}
+
+// *******************************************************************************************
+// *
+// *   Execute
+// *
+// *******************************************************************************************
+//!
+//!
+// *******************************************************************************************
+
+bool tCommandLineAnalyzer::Execute()
+{
+    return DoExecute();
 }
 
 #endif // TCOMMANDLINE_H_INCLUDED

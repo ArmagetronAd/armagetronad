@@ -130,6 +130,9 @@ install-exec-hook: install-uninstall
 if BUILDMAIN
 	cd  $(DESTDIR)${bindir}; mv armagetronad_main$(EXEEXT) @progname@$(executable_suffix)
 endif
+if BUILDDEDICATED
+	cd  $(DESTDIR)${bindir}; mv armagetronad-serverquery$(EXEEXT) @prognamebase@-serverquery$(executable_suffix)
+endif
 
 #	delegate to special tasks
 	$(masterInstallTasks)

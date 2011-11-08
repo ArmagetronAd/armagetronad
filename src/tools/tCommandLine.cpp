@@ -26,91 +26,51 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 */
 
-// declaration
-#ifndef		TCOMMANDLINE_H_INCLUDED
-#include	"tCommandLine.h"
-#endif
-
-#include    "tLocale.h"
-#include    "tConfiguration.h"
-#include    "tException.h"
+#include "tCommandLine.h"
+#include "tLocale.h"
+#include "tConfiguration.h"
+#include "tException.h"
 
 #ifdef WIN32
-#include    <windows.h>
-#include    <direct.h>
+#include <windows.h>
+#include <direct.h>
 #endif
 
-#undef 	INLINE_DEF
-#define INLINE_DEF
+#if !defined(WIN32) || defined(DEDICATED)
+#define HELP_AVAILABLE
+#endif
 
-static tCommandLineAnalyzer * s_commandLineAnalyzerAnchor;
-
-static void quitWithMessagePrepare( const char* message )
+static void InformWithMessage( const char* message )
 {
-#ifdef WIN32
-#ifndef DEDICATED
-#define USEBOX
-#endif
-#endif
-
-#ifdef USEBOX
+#if defined(WIN32) && !defined(DEDICATED)
     int result = MessageBox (NULL, message , "Message", MB_OK);
 #else
     std::cout << message;
 #endif
-
     tLocale::Clear();
 }
 
-static void quitWithMessage( const char* message )
+#define INFORM_HELPER(x) { std::ostringstream s; s << x; InformWithMessage(s.str().c_str()); }
+
+static tCommandLineAnalyzer *s_commandLineAnalyzerAnchor;
+
+tCommandLineData::tCommandLineData( const tString & programVersion, tCommandLineAnalyzer *& anchor )
+    :programVersion_( programVersion ), extraProgamUsage_(""), commandLineAnalyzerAnchor_( anchor )
 {
-    tLocale::Clear();
-    quitWithMessagePrepare( message );
-    throw 1;
-
-    // tGenericException( message, "Command Line Parsing Error" );
-    // exit(1);
 }
 
-//#define QUIT(x) { std::ostringstream s; s << x; quitWithMessage(s.str().c_str()); name_.Clear(); } exit(0)
-//#define QUIT(x) { std::ostringstream s; s << x; quitWithMessage(s.str().c_str()); name_.Clear(); } return false
-#define QUIT(x) { std::ostringstream s; s << x; quitWithMessage(s.str().c_str()); name_.Clear();}
-#define CLEAN_QUIT(x) { std::ostringstream s; s << x; quitWithMessagePrepare(s.str().c_str()); name_.Clear(); return false; }
+tCommandLineData::tCommandLineData( const tString & programVersion )
+    :programVersion_( programVersion ), extraProgamUsage_(""), commandLineAnalyzerAnchor_( s_commandLineAnalyzerAnchor )
+{
+}
 
 bool tCommandLineData::Analyse(int argc,char **argv)
 {
-#ifdef DEBUG_X
-#ifdef WIN32
-#define getcwd _getcwd
-#endif
-
-    char * cwd = getcwd(0,0);
-    tERR_MESSAGE( "Executable: " << argv[0] << ", CWD: " << cwd );
-    free( cwd );
-#endif
-
     tCommandLineParser parser( argc, argv );
-    {
-        tASSERT( programVersion_ );
-
-        char const * run = parser.Current();
-        while (*run)
-        {
-            if (*run == '\\' || *run == '/')
-                name_ = run+1;
-            run++;
-        }
-
-        if ( name_.Len() <= 3 )
-        {
-            name_ = "Armagetron";
-        }
-    }
-
-
+    
     // initialize third party analyzers
     {
-        tCommandLineAnalyzer * commandLineAnalyzer = s_commandLineAnalyzerAnchor;
+        tCommandLineAnalyzer * commandLineAnalyzer = commandLineAnalyzerAnchor_;
         while ( commandLineAnalyzer )
         {
             commandLineAnalyzer->Initialize( parser );
@@ -120,79 +80,37 @@ bool tCommandLineData::Analyse(int argc,char **argv)
 
     parser.Advance();
 
-    //std::cout << "config loaded\n";
-
-#ifndef WIN32   
-#define HELPAVAIL
-#endif
-#ifdef DEDICATED  
-#define HELPAVAIL
-#endif
-
     while ( !parser.End() )
     {
         if ( parser.GetSwitch( "--help", "-h" ) )
         {
-            {
-                std::ostringstream s;
-                s << "\n\nUsage: " << name_ << " [Arguments]\n\n"
-                << "Possible arguments:\n\n";
-                s << "-h, --help                   : print this message\n";
-#ifdef HELPAVAIL
-                s << "--doc                        : print documentation for all console commands\n";
-#endif
-                s << "-v, --version                : print version number\n";
-                s << "--versioninfo                : print build source information\n\n";
-
-                // ask third party analyzers
-                tCommandLineAnalyzer * commandLineAnalyzer = s_commandLineAnalyzerAnchor;
-                while ( commandLineAnalyzer )
-                {
-                    commandLineAnalyzer->Help( s );
-                    commandLineAnalyzer = commandLineAnalyzer->Next();
-                    s << "\n";
-                }
-
-                s << "\n";
-
-                name_.Clear();
-                quitWithMessagePrepare( s.str().c_str() );
-            }
-
-            return false;
-            // exit(0);
-        }
-#ifdef HELPAVAIL
-        else if ( parser.GetSwitch( "--doc") )
-        {
-            doc_ = true;
-        }
-#endif
-        else if ( parser.GetSwitch( "--version", "-v") )
-        {
-            CLEAN_QUIT( "This is " << name_ << " version " << *programVersion_ << ".\n" );
-        }
-        else if ( parser.GetSwitch( "--versioninfo") )
-        {
             std::ostringstream s;
-            s << "Program Name                 : " << st_programName << "\n";
-            s << "Version                      : " << st_programVersion << "\n";
-            s << "Parent branch                : " << st_programBranchNick << "\n";
-            s << "Parent branch's URL          : " << st_programBranchUrl << "\n";
-            s << "Tag                          : " << st_programRevTag << "\n";
-            s << "Revision number              : r" << st_programRevNo << "(z" << st_programRevZNr << ")\n";
-            s << "Revision ID                  : " << st_programRevId << "\n";
-            s << "Ancestor                     : r" << st_programBranchLca << "(z" << st_programBranchLcaZ << ")\n";
-            s << "Source changed               : " << (st_programChanged? "Yes" : "No") << "\n";
-            s << "Build date                   : " << st_programBuildDate << "\n";
+            s << "Usage: " << parser.ExecutableName() << " [options]" << extraProgamUsage_ << '\n'
+              << "Options:\n\n"
+              << "-h, --help                   : print this message\n"
+              << "-v, --version                : print version number\n";
 
-            quitWithMessagePrepare( s.str().c_str() );
+            // ask third party analyzers
+            tCommandLineAnalyzer * commandLineAnalyzer = commandLineAnalyzerAnchor_;
+            while ( commandLineAnalyzer )
+            {
+                commandLineAnalyzer->Help( s );
+                commandLineAnalyzer = commandLineAnalyzer->Next();
+                s << "\n";
+            }
+            
+            InformWithMessage( s.str().c_str() );
+            return false;
+        }
+        else if ( parser.GetSwitch( "--version", "-v" ) )
+        {
+            INFORM_HELPER( "This is " << parser.ExecutableName() << " version " << programVersion_ << ".\n" );
             return false;
         }
         else
         {
             // let the registered command line anelyzers have a go
-            tCommandLineAnalyzer * commandLineAnalyzer = s_commandLineAnalyzerAnchor;
+            tCommandLineAnalyzer * commandLineAnalyzer = commandLineAnalyzerAnchor_;
             bool success = false;
             while ( commandLineAnalyzer )
             {
@@ -200,10 +118,12 @@ bool tCommandLineData::Analyse(int argc,char **argv)
                     break;
                 commandLineAnalyzer = commandLineAnalyzer->Next();
             }
-            if ( success )
-                continue;
-
-            QUIT( "\n\nUnknown command line option " << parser.Current() << ". Type " << name_ << " -h to get a list of possible options.\n\n" );
+            
+            if ( !success )
+            {
+                INFORM_HELPER( "\nUnknown command line option or error parsing option " << parser.Current() << ". Type " << parser.ExecutableName() << " -h to get a list of possible options.\n" );
+                throw -1;
+            }
         }
     }
 
@@ -212,17 +132,15 @@ bool tCommandLineData::Analyse(int argc,char **argv)
 
 bool tCommandLineData::Execute()
 {
-    tString name;
-
-    if ( doc_ )
+    tCommandLineAnalyzer * commandLineAnalyzer = commandLineAnalyzerAnchor_;
+    while ( commandLineAnalyzer )
     {
-        std::cout << "Available console commands/config file settings:\n\n";
-        tConfItemBase::DocAll( std::cout );
-
-        return false;
-        // QUIT("\n");
+        if ( !commandLineAnalyzer->Execute() )
+        {
+            return false;
+        }
+        commandLineAnalyzer = commandLineAnalyzer->Next();
     }
-
     return true;
 }
 
@@ -285,8 +203,7 @@ bool tCommandLineParser::GetOption( tString & target, char const * option, char 
         else
         {
             index--;
-            tString name_;
-            QUIT( "  " << argument << " needs another argument.\n" );
+            INFORM_HELPER( "  " << argument << " needs another argument.\n" );
         }
     }
 
@@ -354,6 +271,19 @@ const char * tCommandLineParser::Executable( void ) const
     return argv[ 0 ];
 }
 
+const char * tCommandLineParser::ExecutableName() const
+{
+    const char *run = argv[ 0 ];
+    const char *name = run;
+    while ( *run )
+    {
+        if ( *run == '\\' || *run == '/' )
+            name = run + 1;
+        run++;
+    }
+    return name;
+}
+
 // *******************************************************************************************
 // *
 // *   Current
@@ -394,8 +324,13 @@ void tCommandLineParser::Advance( void )
 //!
 // *******************************************************************************************
 
-tCommandLineAnalyzer::tCommandLineAnalyzer( void )
+tCommandLineAnalyzer::tCommandLineAnalyzer()
         : tListItem< tCommandLineAnalyzer >( s_commandLineAnalyzerAnchor )
+{
+}
+
+tCommandLineAnalyzer::tCommandLineAnalyzer( tCommandLineAnalyzer *& anchor )
+        : tListItem< tCommandLineAnalyzer >( anchor )
 {
 }
 
@@ -456,3 +391,64 @@ void tCommandLineAnalyzer::DoHelp( std::ostream & s )
 {
 }
 
+bool tCommandLineAnalyzer::DoExecute()
+{
+    return true;
+}
+
+bool tDefaultCommandLineAnalyzer::DoAnalyze( tCommandLineParser & parser )
+{
+#ifdef HELP_AVAILABLE
+    if ( parser.GetSwitch( "--doc" ) )
+    {
+        docOption_ = true;
+        return true;
+    }
+    else 
+#endif
+    {
+        if ( parser.GetSwitch( "--versioninfo") )
+        {
+            versioninfoOption_ = true;
+            return true;
+        }
+    }
+    return false;
+}
+
+void tDefaultCommandLineAnalyzer::DoHelp( std::ostream & s )
+{
+#ifdef HELP_AVAILABLE
+    s << "--doc                        : print documentation for all console commands\n";
+#endif
+    s << "--versioninfo                : print build source information\n\n";
+}
+
+bool tDefaultCommandLineAnalyzer::DoExecute()
+{
+    if ( docOption_ )
+    {
+        std::cout << "Available console commands/config file settings:\n\n";
+        tConfItemBase::DocAll( std::cout );
+        return false;
+    }
+    else if (versioninfoOption_)
+    {
+        std::ostringstream s;
+        s << "Program Name                 : " << st_programName << "\n";
+        s << "Version                      : " << st_programVersion << "\n";
+        s << "Parent branch                : " << st_programBranchNick << "\n";
+        s << "Parent branch's URL          : " << st_programBranchUrl << "\n";
+        s << "Tag                          : " << st_programRevTag << "\n";
+        s << "Revision number              : r" << st_programRevNo << "(z" << st_programRevZNr << ")\n";
+        s << "Revision ID                  : " << st_programRevId << "\n";
+        s << "Ancestor                     : r" << st_programBranchLca << "(z" << st_programBranchLcaZ << ")\n";
+        s << "Source changed               : " << (st_programChanged? "Yes" : "No") << "\n";
+        s << "Build date                   : " << st_programBuildDate << "\n";
+
+        InformWithMessage( s.str().c_str() );
+        return false;
+    }
+    
+    return true;
+}
