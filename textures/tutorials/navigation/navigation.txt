@@ -25,5 +25,6 @@
 1.67 textures/tutorials/clipart/background.png textures/tutorials/navigation/zone.png textures/tutorials/navigation/fail1.png
 .25 textures/tutorials/clipart/background.png textures/tutorials/navigation/zone.png textures/tutorials/navigation/fail1.png textures/tutorials/navigation/fail2.png
 .25 textures/tutorials/clipart/background.png textures/tutorials/navigation/zone.png textures/tutorials/navigation/fail1.png textures/tutorials/navigation/fail2.png textures/tutorials/navigation/fail3.png
+.5 textures/tutorials/clipart/background.png textures/tutorials/navigation/zone.png textures/tutorials/navigation/fail1.png textures/tutorials/navigation/fail3.png textures/tutorials/navigation/fail3.png
 2 textures/tutorials/clipart/background.png textures/tutorials/navigation/zone.png textures/tutorials/navigation/fail1.png textures/tutorials/navigation/fail3.png textures/tutorials/clipart/circle.png textures/tutorials/clipart/fail.png
 
