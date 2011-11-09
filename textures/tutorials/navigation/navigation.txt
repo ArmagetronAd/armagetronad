@@ -6,25 +6,24 @@
 # in-frame smooth animation.
 # empty lines and lines starting with # are ignored.
 
-1 textures/tutorials/navigation/start.png
-1 textures/tutorials/navigation/1_1.png
-1 textures/tutorials/navigation/1_2.png
-2 textures/tutorials/navigation/1_2.png textures/tutorials/clipart/circle.png textures/tutorials/clipart/check.png
+#4.27 textures/tutorials/clipart/background.png textures/tutorials/navigation/zone.png textures/tutorials/navigation/direct.png
 
-1 textures/tutorials/navigation/start.png
-1 textures/tutorials/navigation/2_1.png
-1 textures/tutorials/navigation/2_2.png
-2 textures/tutorials/navigation/2_2.png textures/tutorials/clipart/circle.png textures/tutorials/clipart/check.png
 
-1 textures/tutorials/navigation/start.png
-1 textures/tutorials/navigation/3_1.png
-1 textures/tutorials/navigation/3_2.png
-1 textures/tutorials/navigation/3_3.png
-1 textures/tutorials/navigation/3_4.png
-2 textures/tutorials/navigation/3_4.png textures/tutorials/clipart/circle.png textures/tutorials/clipart/check.png
+0.25 textures/tutorials/clipart/background.png textures/tutorials/navigation/zone.png
+2.13 textures/tutorials/clipart/background.png textures/tutorials/navigation/zone.png textures/tutorials/navigation/direct.png
+1.00 textures/tutorials/clipart/background.png textures/tutorials/navigation/zone.png textures/tutorials/navigation/direct.png textures/tutorials/clipart/circle.png textures/tutorials/clipart/check.png
 
-1 textures/tutorials/navigation/start.png
-1 textures/tutorials/navigation/4_1.png
-.25 textures/tutorials/navigation/4_2.png
-.5 textures/tutorials/navigation/4_3.png
-3 textures/tutorials/navigation/4_3.png textures/tutorials/clipart/circle.png textures/tutorials/clipart/fail.png
+0.25 textures/tutorials/clipart/background.png textures/tutorials/navigation/zone.png
+2.13 textures/tutorials/clipart/background.png textures/tutorials/navigation/zone.png textures/tutorials/navigation/indirect.png
+1.00 textures/tutorials/clipart/background.png textures/tutorials/navigation/zone.png textures/tutorials/navigation/indirect.png textures/tutorials/clipart/circle.png textures/tutorials/clipart/check.png
+
+0.25 textures/tutorials/clipart/background.png textures/tutorials/navigation/zone.png
+4.27 textures/tutorials/clipart/background.png textures/tutorials/navigation/zone.png textures/tutorials/navigation/fancy.png
+1.00 textures/tutorials/clipart/background.png textures/tutorials/navigation/zone.png textures/tutorials/navigation/fancy.png textures/tutorials/clipart/circle.png textures/tutorials/clipart/check.png
+
+0.25 textures/tutorials/clipart/background.png textures/tutorials/navigation/zone.png
+1.67 textures/tutorials/clipart/background.png textures/tutorials/navigation/zone.png textures/tutorials/navigation/fail1.png
+.25 textures/tutorials/clipart/background.png textures/tutorials/navigation/zone.png textures/tutorials/navigation/fail1.png textures/tutorials/navigation/fail2.png
+.25 textures/tutorials/clipart/background.png textures/tutorials/navigation/zone.png textures/tutorials/navigation/fail1.png textures/tutorials/navigation/fail2.png textures/tutorials/navigation/fail3.png
+2 textures/tutorials/clipart/background.png textures/tutorials/navigation/zone.png textures/tutorials/navigation/fail1.png textures/tutorials/navigation/fail3.png textures/tutorials/clipart/circle.png textures/tutorials/clipart/fail.png
+
