@@ -6,30 +6,16 @@
 # in-frame smooth animation.
 # empty lines and lines starting with # are ignored.
 
-1 textures/tutorials/survival/start.png
-1 textures/tutorials/survival/1_1.png
-1 textures/tutorials/survival/1_2.png
-1 textures/tutorials/survival/1_3.png
-1 textures/tutorials/survival/1_4.png
-1 textures/tutorials/survival/1_5.png
-.5 textures/tutorials/survival/1_5.png textures/tutorials/clipart/circle.png textures/tutorials/clipart/check.png
-1.5 textures/tutorials/survival/1_5.png textures/tutorials/clipart/circle.png textures/tutorials/clipart/check.png textures/tutorials/clipart/check.png
+#1 textures/tutorials/clipart/background.png
+4.27 textures/tutorials/clipart/background.png textures/tutorials/survival/wiggle.png
+1.00 textures/tutorials/clipart/background.png textures/tutorials/survival/wiggle.png textures/tutorials/clipart/circle.png textures/tutorials/clipart/check.png
 
-1 textures/tutorials/survival/start.png
-1 textures/tutorials/survival/2_1.png
-1 textures/tutorials/survival/2_2.png
-1 textures/tutorials/survival/2_3.png
-1 textures/tutorials/survival/2_4.png
-1 textures/tutorials/survival/2_5.png
-.5 textures/tutorials/survival/2_5.png textures/tutorials/clipart/circle.png textures/tutorials/clipart/check.png
-1.5 textures/tutorials/survival/2_5.png textures/tutorials/clipart/circle.png textures/tutorials/clipart/check.png textures/tutorials/clipart/check.png
+4.27 textures/tutorials/clipart/background.png textures/tutorials/survival/spiral.png
+1.00 textures/tutorials/clipart/background.png textures/tutorials/survival/spiral.png textures/tutorials/clipart/circle.png textures/tutorials/clipart/check.png
 
-1 textures/tutorials/survival/start.png
-1 textures/tutorials/survival/3_1.png
-1 textures/tutorials/survival/3_2.png
-1 textures/tutorials/survival/3_3.png
-1 textures/tutorials/survival/3_4.png
-.25 textures/tutorials/survival/3_5.png
-.5 textures/tutorials/survival/3_6.png
-.5 textures/tutorials/survival/3_6.png textures/tutorials/clipart/circle.png textures/tutorials/clipart/fail.png
-2.5 textures/tutorials/survival/3_6.png textures/tutorials/clipart/circle.png textures/tutorials/clipart/fail.png textures/tutorials/clipart/fail.png
+4.27 textures/tutorials/clipart/background.png textures/tutorials/survival/fail1.png
+.25 textures/tutorials/clipart/background.png textures/tutorials/survival/fail1.png textures/tutorials/survival/fail2.png
+.25 textures/tutorials/clipart/background.png textures/tutorials/survival/fail1.png textures/tutorials/survival/fail2.png textures/tutorials/survival/fail3.png
+.5 textures/tutorials/clipart/background.png textures/tutorials/survival/fail1.png textures/tutorials/survival/fail3.png textures/tutorials/survival/fail3.png
+2 textures/tutorials/clipart/background.png textures/tutorials/survival/fail1.png textures/tutorials/survival/fail3.png textures/tutorials/clipart/circle.png textures/tutorials/clipart/fail.png
+
