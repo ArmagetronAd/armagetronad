@@ -956,7 +956,7 @@ bool sr_dither=true;
 bool sr_infinityPlane=false;
 bool sr_laggometer=true;
 bool sr_predictObjects=false;
-bool sr_texturesTruecolor=false;
+bool sr_texturesTruecolor=true;
 
 bool sr_textOut=false;
 bool sr_FPSOut=true;
