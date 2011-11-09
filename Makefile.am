@@ -128,7 +128,7 @@ if BUILDMAIN
 	cd  $(DESTDIR)${bindir}; mv armagetronad_main$(EXEEXT) @progname@$(executable_suffix)
 endif
 if BUILDDEDICATED
-	cd  $(DESTDIR)${bindir}; mv armagetronad-serverquery$(EXEEXT) @prognamebase@-serverquery$(executable_suffix)
+	cd  $(DESTDIR)${bindir}; mv armagetronad_serverquery$(EXEEXT) @prognamebase@-serverquery$(executable_suffix)
 endif
 
 #	delegate to special tasks
@@ -143,6 +143,9 @@ endif
 uninstall-hook:
 #	delete executable and uninstaller
 	rm -f $(DESTDIR)${bindir}/@progname@$(executable_suffix)
+if BUILDDEDICATED
+	rm -f $(DESTDIR)${bindir}/@prognamebase@-serverquery$(executable_suffix)
+endif
 
 #	delegate to special tasks
 	$(masterUninstallTasks)
