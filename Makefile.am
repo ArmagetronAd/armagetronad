@@ -77,6 +77,13 @@ nobase_texture_DATA=textures/cycle_body.png textures/cycle_wheel.png textures/di
 	textures/tutorials/speedkill/success1.png \
 	textures/tutorials/speedkill/fail_donothing.png \
 	textures/tutorials/speedkill/success3.png \
+	textures/tutorials/speedkilldefense/fail2.png \
+	textures/tutorials/speedkilldefense/fail3.png \
+	textures/tutorials/speedkilldefense/trap3.png \
+	textures/tutorials/speedkilldefense/fail1.png \
+	textures/tutorials/speedkilldefense/trap1.png \
+	textures/tutorials/speedkilldefense/trap2.png \
+	textures/tutorials/speedkilldefense/start.png \
 	textures/tutorials/conquest/success.png \
 	textures/tutorials/conquest/start.png \
 	textures/tutorials/teamstart/teamstart.txt \
@@ -84,6 +91,7 @@ nobase_texture_DATA=textures/cycle_body.png textures/cycle_wheel.png textures/di
 	textures/tutorials/survival/survival.txt \
 	textures/tutorials/navigation/navigation.txt \
 	textures/tutorials/speedkill/speedkill.txt \
+	textures/tutorials/speedkilldefense/speedkilldefense.txt \
 	textures/tutorials/conquest/conquest.txt \
 	textures/Armagetronad.ttf
 
