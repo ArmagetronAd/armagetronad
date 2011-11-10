@@ -413,6 +413,10 @@ public:
                 OnFailure();
             }
         }
+        else
+        {
+            return success_;
+        }
 
         return false;
     }
