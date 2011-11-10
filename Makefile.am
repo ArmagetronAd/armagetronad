@@ -70,13 +70,21 @@ nobase_texture_DATA=textures/cycle_body.png textures/cycle_wheel.png textures/di
 	textures/tutorials/clipart/background.png \
 	textures/tutorials/clipart/check.png \
 	textures/tutorials/clipart/circle.png \
+	textures/tutorials/speedkill/adjust3.png \
+	textures/tutorials/speedkill/adjust1.png \
+	textures/tutorials/speedkill/adjust2.png \
+	textures/tutorials/speedkill/success2.png \
+	textures/tutorials/speedkill/success1.png \
+	textures/tutorials/speedkill/fail_donothing.png \
+	textures/tutorials/speedkill/success3.png \
 	textures/tutorials/conquest/success.png \
 	textures/tutorials/conquest/start.png \
 	textures/tutorials/teamstart/teamstart.txt \
 	textures/tutorials/grinding/grinding.txt \
 	textures/tutorials/survival/survival.txt \
 	textures/tutorials/navigation/navigation.txt \
-	textures/tutorials/conquest/conquest.txt\
+	textures/tutorials/speedkill/speedkill.txt \
+	textures/tutorials/conquest/conquest.txt \
 	textures/Armagetronad.ttf
 
 nobase_sound_DATA=sound/1voicemale.ogg  sound/announcerGO.ogg  sound/expl.ogg\
