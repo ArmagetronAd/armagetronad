@@ -12,8 +12,8 @@
 1.00 textures/tutorials/clipart/background.png textures/tutorials/speedkilldefense/fail1.png textures/tutorials/speedkilldefense/fail3.png textures/tutorials/clipart/circle.png textures/tutorials/clipart/fail.png
 
 1 textures/tutorials/clipart/background.png textures/tutorials/speedkilldefense/start.png
-1.06 textures/tutorials/clipart/background.png textures/tutorials/speedkilldefense/trap1.png
-0.26 textures/tutorials/clipart/background.png textures/tutorials/speedkilldefense/trap1.png textures/tutorials/speedkilldefense/trap2.png
-0.26 textures/tutorials/clipart/background.png textures/tutorials/speedkilldefense/trap1.png textures/tutorials/speedkilldefense/trap2.png textures/tutorials/speedkilldefense/trap3.png
-2.00 textures/tutorials/clipart/background.png textures/tutorials/speedkilldefense/trap1.png textures/tutorials/speedkilldefense/trap3.png textures/tutorials/clipart/circle.png textures/tutorials/clipart/check.png
+2.12 textures/tutorials/clipart/background.png textures/tutorials/speedkilldefense/trap1.png
+0.52 textures/tutorials/clipart/background.png textures/tutorials/speedkilldefense/trap1.png textures/tutorials/speedkilldefense/trap2.png
+0.52 textures/tutorials/clipart/background.png textures/tutorials/speedkilldefense/trap1.png textures/tutorials/speedkilldefense/trap2.png textures/tutorials/speedkilldefense/trap3.png
+1.00 textures/tutorials/clipart/background.png textures/tutorials/speedkilldefense/trap1.png textures/tutorials/speedkilldefense/trap3.png textures/tutorials/clipart/circle.png textures/tutorials/clipart/check.png
 
