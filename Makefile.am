@@ -45,6 +45,38 @@ nobase_texture_DATA=textures/cycle_body.png textures/cycle_wheel.png textures/di
 	textures/floor_a.png textures/floor_b.png textures/floor.png textures/font_extra.png\
 	textures/font.png textures/font_s.png textures/icon.png textures/rim_wall.png\
 	textures/shadow.png textures/sky.png textures/title.jpg\
+	textures/tutorials/teamstart/success.png \
+	textures/tutorials/teamstart/background.png \
+	textures/tutorials/teamstart/straight.png \
+	textures/tutorials/grinding/fail2.png \
+	textures/tutorials/grinding/nogrind.png \
+	textures/tutorials/grinding/fail3.png \
+	textures/tutorials/grinding/fail1.png \
+	textures/tutorials/grinding/grind.png \
+	textures/tutorials/survival/fail2.png \
+	textures/tutorials/survival/fail3.png \
+	textures/tutorials/survival/spiral.png \
+	textures/tutorials/survival/fail1.png \
+	textures/tutorials/survival/wiggle.png \
+	textures/tutorials/navigation/fail2.png \
+	textures/tutorials/navigation/fancy.png \
+	textures/tutorials/navigation/fail3.png \
+	textures/tutorials/navigation/indirect.png \
+	textures/tutorials/navigation/fail1.png \
+	textures/tutorials/navigation/zone.png \
+	textures/tutorials/navigation/direct.png \
+	textures/tutorials/navigation/start.png \
+	textures/tutorials/clipart/fail.png \
+	textures/tutorials/clipart/background.png \
+	textures/tutorials/clipart/check.png \
+	textures/tutorials/clipart/circle.png \
+	textures/tutorials/conquest/success.png \
+	textures/tutorials/conquest/start.png \
+	textures/tutorials/teamstart/teamstart.txt \
+	textures/tutorials/grinding/grinding.txt \
+	textures/tutorials/survival/survival.txt \
+	textures/tutorials/navigation/navigation.txt \
+	textures/tutorials/conquest/conquest.txt\
 	textures/Armagetronad.ttf
 
 nobase_sound_DATA=sound/1voicemale.ogg  sound/announcerGO.ogg  sound/expl.ogg\
@@ -84,9 +116,6 @@ dist-hook-scm:
 dist-hook:
 #   copy mac files
 	cp -R ${srcdir}/MacOS ${distdir}
-
-#   copy tutorial textures
-	cp -R ${srcdir}/textures/tutorials ${distdir}/textures/
 
 #	clear CVS
 	find $(distdir) -depth -name CVS -exec rm -rf \{\} \;
@@ -143,12 +172,6 @@ if USE_SYSINSTALL
 	DESTDIR=$(DESTDIR) ROOTDIR=$(ROOTDIR) bash $(DESTDIR)${scriptdir}/sysinstall install $(prefix)
 endif
 
-if NEEDDATA
-#   copy tutorial textures
-	cp -R ${srcdir}/textures/tutorials $(DESTDIR)$(aa_datadir)/textures/
-	find $(DESTDIR)$(aa_datadir)/textures/tutorials -name *.xcf -exec rm \{\} \;
-endif
-
 uninstall-hook:
 #	delete executable and uninstaller
 	rm -f $(DESTDIR)${bindir}/@progname@$(executable_suffix)
@@ -158,11 +181,6 @@ endif
 
 #	delegate to special tasks
 	$(masterUninstallTasks)
-
-if NEEDDATA
-#   delete tutorial textures
-	rm -rf $(DESTDIR)$(aa_datadir)/textures/tutorials
-endif
 
 if USE_UNINSTALL
 	rm -f $(uninstall_location)
