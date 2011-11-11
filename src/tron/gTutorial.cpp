@@ -374,10 +374,10 @@ public:
         finished_ = true;
         difficulty_ = 0;
         int maxDifficulty = 3;
+        bool instructions = true;
         for( int tries = 3; finished_ && !success_ && tries > 0; --tries )
         {
-            bool instructions = true;
-            if( ! Instructions() )
+            if( instructions && !Instructions() )
             {
                 break;
             }
@@ -406,7 +406,7 @@ public:
                 {
                     // only give instructions again after third failure
                     instructions = false;
-                    if( tries == 0 )
+                    if( tries == 1 )
                     {
                         // then again after 5
                         tries = 5;
