@@ -6,7 +6,7 @@ INTERFACEFILES = ext/armagetronad.i ext/std/sstream.i ext/tools/tConfiguration.i
                  ext/ui/uMenu.i ext/engine/eGameObject.i ext/engine/eSensor.i	\
                  ext/tron/gSensor.i ext/defs.i ext/tron/gAIBase.i		\
                  ext/tron/gCycleMovement.i ext/tron/gCycle.i			\
-                 ext/tron/gSpawn.i ext/tron/gArena.i				\
+                 ext/engine/eSpawn.i ext/tron/gArena.i				\
                  ext/engine/eNetGameObject.i ext/network/nNetObject.i		\
                  ext/tron/zZone.i ext/tron/gGame.i
 

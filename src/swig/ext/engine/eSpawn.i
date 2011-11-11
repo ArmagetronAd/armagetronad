@@ -1,9 +1,9 @@
 %{
-#include "gSpawn.h"
+#include "eSpawn.h"
 %}
 
 
-%extend gSpawnPoint {
+%extend eSpawnPoint {
     tCoord position() {
         tCoord loc, dir;
         $self->Spawn(loc, dir);
@@ -16,8 +16,8 @@
     }
 };
 
-%rename(SpawnPoint) gSpawnPoint;
-class gSpawnPoint{
+%rename(SpawnPoint) eSpawnPoint;
+class eSpawnPoint{
     friend class gArena;
 
     int   id;
@@ -26,8 +26,8 @@ class gSpawnPoint{
     int   numberOfUses;
 
 public:
-    gSpawnPoint(const eCoord &loc,const eCoord &dir);
-    ~gSpawnPoint(){};
+    eSpawnPoint(const eCoord &loc,const eCoord &dir);
+    ~eSpawnPoint(){};
 
 %rename(spawn) Spawn;
     //enters valid spawn eCoordinates and direction in loc and dir
