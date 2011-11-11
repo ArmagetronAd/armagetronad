@@ -36,6 +36,9 @@ message GameSync
     optional bool legacy_sync_end = 20001;
 
     // extensions go here
+
+    optional sint32 matches = 3; // Number of matches left in a row.
+                                 // -1 indicates warmup.
 }
 
 // client state message

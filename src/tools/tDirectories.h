@@ -54,10 +54,16 @@ public:
     tString GetPaths(void) const; //!< Puts all paths into a tString for outputting to the user
     tString GetPaths(char const * delimiter, char const * finalizer) const; //!< Puts all paths into a tString for outputting to the user
 
+    //!< fills an array of paths. paths[0] is the one searched last.
+    void GetPaths ( tArray< tString >& paths ) const
+    {
+        Paths( paths );
+    }
+
     tPath(){}
     virtual ~tPath(){}
 protected:
-    virtual void    Paths ( tArray< tString >& paths ) const = 0;  // maximum priority is given to paths[0]
+    virtual void    Paths ( tArray< tString >& paths ) const = 0;  // paths[0] is searched last for files
 };
 
 class tPathResource: public tPath {
@@ -114,6 +120,12 @@ public:
     static void SetResource( const tString& dir );
     static void SetAutoResource( const tString& dir );
     static void SetIncludedResource( const tString& dir );
+
+    static tString const & GetData(); //!< returns the system data directory
+    static tString const & GetUserData(); //!< returns the user data directory
+    static tString GetConfig(); //!< returns the system configuration directory
+
+    static tString const & GetCWD(); //!< returns the current working directory
 
     // get a list of files for a directory
     // flag: 0=files+dirs, 1=files, 2=dirs

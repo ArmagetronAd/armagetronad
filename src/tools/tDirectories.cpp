@@ -558,10 +558,6 @@ private:
 
         paths[ pos++ ] = st_DataDir;
 
-        if ( st_UserDataDir.Len() > 1 )
-        {
-            paths[ pos++ ] = st_UserDataDir;
-        }
 
         // for finding data packet in 0install
         char const * extradata = getenv("ARMAGETRONAD_EXTRADATA");
@@ -571,6 +567,11 @@ private:
         {
             static tString ed(extradata);
             paths[ pos++ ] = ed;
+        }
+
+        if ( st_UserDataDir.Len() > 1 )
+        {
+            paths[ pos++ ] = st_UserDataDir;
         }
     }
 };
@@ -974,6 +975,39 @@ void tDirectories::SetAutoResource( const tString& dir ) {
 
 void tDirectories::SetIncludedResource( const tString& dir ) {
     st_IncludedResourceDir = dir;
+}
+
+tString const & tDirectories::GetUserData()
+{
+    return st_UserDataDir;
+}
+
+tString const & tDirectories::GetData()
+{
+    return st_DataDir;
+}
+
+tString tDirectories::GetConfig()
+{
+    return st_ConfigDir.Len() > 1 ? st_ConfigDir : (st_DataDir + "/config");
+}
+
+static tString st_BuildCWD()
+{
+#define MAX_CWD 1000
+
+#ifdef WIN32
+#define getcwd _getcwd
+#endif
+
+    char buffer[MAX_CWD+2];
+    return tString( getcwd( buffer, MAX_CWD ) );
+}
+
+tString const & tDirectories::GetCWD()
+{
+    static tString ret = st_BuildCWD();
+    return ret;
 }
 
 /*

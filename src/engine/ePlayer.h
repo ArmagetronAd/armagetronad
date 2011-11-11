@@ -70,7 +70,6 @@ extern tAccessLevel se_chatAccessLevel;
 // time between public chat requests, set to 0 to disable
 extern REAL se_chatRequestTimeout;
 
-
 // call on commands that only work on the server; quit if it returns true
 bool se_NeedsServer(char const * command, std::istream & s, bool strict = true );
 
@@ -292,6 +291,8 @@ public:
         
     tShortColor color; // our color
 
+    bool ready;
+
     unsigned short pingCharity; // max ping you are willing to take over
 
     REAL ping;
@@ -415,7 +416,7 @@ public:
     eNetGameObject *Object() const;
 
     // void SetRubber(REAL rubber2);
-    void AddScore(int points, const tOutput& reasonwin, const tOutput& reasonlose);
+    void AddScore(int points, const tOutput& reasonwin, const tOutput& reasonlose, const tOutput& reasonfree=tOutput());
     int Score()const {return score;}
     int TotalScore() const;
     static void ResetScoreDifferences(); //<! Resets the last stored score so ScoreDifferences takes this as a reference time

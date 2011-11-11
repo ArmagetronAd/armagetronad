@@ -8,9 +8,6 @@
 // for visual studio 2005: use secure template overloads of strcopy and the like
 #define _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES 1
 
-// is now defined for code::blocks > 8 or so
-#define HAVE_ISBLANK
-
 // this one is included in winlibs as static library
 #define HAVE_LIBBOOST_THREAD
 #define BOOST_THREAD_USE_LIB
@@ -21,6 +18,10 @@
 
 // activate zones v2 support
 #define ENABLE_ZONESV2 1
+
+// required define for addrinfo based functions used in nSocket.cpp, requires Windows 2000
+// needs to be here so it is consistent across the whole project and comes before windows.h
+#define WINVER 0x0501
 
 // include of windows.h needed for consistency of silly windows #defines ( SetPort -> SetPortA, GetUserName -> GetUserNameA )
 #include  <windows.h>
@@ -33,6 +34,11 @@
 
 // disable POD initialization behavior change warning in VisualC++ 2005
 #pragma warning ( disable: 4345 )
+
+// compatibility with later mingw versions
+#if defined(__GNUC__) && __GNUC__ >= 4
+#define HAVE_ISBLANK
+#endif
 
 // Define if this is a Windows OS.
 #ifndef WIN32

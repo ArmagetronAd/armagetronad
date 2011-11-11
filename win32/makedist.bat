@@ -61,6 +61,7 @@ goto :exit
 		if exist %1\resource del /S /Q %1\resource
 		mkdir %1\resource
 		xcopy %AA_DIR%\resource\proto %1\resource\included /I /E /Y /C
+		xcopy %AA_DIR%\resource\binary %1\resource\included /I /E /Y /C
 		xcopy %AA_DIR%\resource\included %1\resource\included /I /E /Y /C
 		xcopy %AA_DIR%\textures %1\textures /I /E /Y /C
 		xcopy %AA_DIR%\*.txt %1 /I /Y /C

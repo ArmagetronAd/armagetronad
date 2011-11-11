@@ -25,55 +25,38 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 */
 
-#include "gSpawn.h"
-#include "gArena.h"
-#include "gCycle.h"
+#include "eSpawn.h"
 #include "eTimer.h"
 #include "tConfiguration.h"
 
-// formation constants: how much wingmen are placed sideways and backwards
-// relative to the leader
-static REAL sg_spawnBack = 2.202896;
-static REAL sg_spawnSide = 2.75362;
-static tSettingItem< REAL > sg_spawnBackConf( "SPAWN_WINGMEN_BACK", sg_spawnBack );
-static tSettingItem< REAL > sg_spawnSideConf( "SPAWN_WINGMEN_SIDE", sg_spawnSide );
-
-gSpawnPoint::gSpawnPoint(const eCoord &loc,const eCoord &dir)
+eSpawnPoint::eSpawnPoint(const eCoord &loc,const eCoord &dir)
         :id(-1),location(loc),direction(dir),
 lastTimeUsed(se_GameTime()-1000000),numberOfUses(0){}
 
 //enters valid spawn coordinates and direction in loc and dir
-void gSpawnPoint::Spawn(eCoord &loc,eCoord &dir){
-    /*
-    if (ArmageTronTimer-lastTimeUsed>100)
-      numberOfUses=0;
-    */
-
-    int d,away;
-    if (numberOfUses%2==1){
-        d=1;
-        away=(numberOfUses+1)/2;
-    }
-    else{
-        d=-1;
-        away=numberOfUses/2;
-    }
-
-    dir=direction;
-
-    loc=location * gArena::SizeMultiplier() - dir.Turn(sg_spawnBack,-d*sg_spawnSide) * away * gCycle::SpeedMultiplier();
+void eSpawnPoint::Spawn(eCoord &loc, eCoord &dir){
+    FindPos(loc, dir);
 
     lastTimeUsed=se_GameTime();
     numberOfUses++;
+}
+void eSpawnPoint::FindPos(eCoord &loc, eCoord &dir)
+{
+    loc = location;
+    dir = direction;
+}
 
+REAL eSpawnPoint::LastTimeUsed()
+{
+    return lastTimeUsed;
 }
 
 // estimates the danger of spawning here (0: no problem, 10: certain death)
-REAL gSpawnPoint::Danger(){
+REAL eSpawnPoint::Danger(){
     return numberOfUses+(100/(se_GameTime()+10-lastTimeUsed));
 }
 
-void gSpawnPoint::Clear(){
+void eSpawnPoint::Clear(){
     lastTimeUsed=se_GameTime()-1000000;
     numberOfUses=0;
 }

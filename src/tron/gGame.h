@@ -38,6 +38,7 @@ class eGrid;
 class nServerInfo;
 class nServerInfoBase;
 class eTeam;
+class eLadderLogWriter;
 class gParser;
 class gArena;
 class ePlayerNetID;
@@ -54,6 +55,8 @@ extern bool      sg_TalkToMaster;  // should this server be known on the interne
 typedef enum{gFINISH_EXPRESS,gFINISH_IMMEDIATELY,gFINISH_SPEEDUP,gFINISH_NORMAL}
 gFinishType;
 
+struct DrawReason{};
+
 #ifdef ENABLE_ZONESV2
 class zZone;
 #else
@@ -61,6 +64,8 @@ class gZone;
 #endif
 
 //extern gFinishType sg_finishType;
+
+extern eLadderLogWriter sg_respawnWriter;
 
 class gGame:public nNetObject{
     unsigned short state;      // the gamestate we are currently in
@@ -160,12 +165,16 @@ void sg_DeclareWinner( eTeam* team, char const * message );
 void sg_FullscreenMessage(tOutput const & title, tOutput const & message,REAL timeout = 60, int client = 0); //!< Displays a message on a specific client or all clients that gets displayed on the whole screen, blocking view to the game
 void sg_ClientFullscreenMessage( tOutput const & title, tOutput const & message, REAL timeout = 60 ); //!< Displays a message locally that gets displayed on the whole screen, blocking view to the game
 
+void sg_RespawnAllAfter( REAL after, REAL time, eGrid *grid, gArena & arena,
+    bool atSpawn=false );
+
 void sg_RespawnPlayer(eGrid *, gArena *, tCoord & pos, tCoord & dir, ePlayerNetID *);
 void sg_RespawnPlayer(eGrid *, gArena *, tCoord & near, ePlayerNetID *);
 void sg_RespawnPlayer(eGrid *, gArena *, tCoord * near, ePlayerNetID *);
 void sg_RespawnPlayer(eGameObject & near, ePlayerNetID *);
-void sg_RespawnPlayer(eGrid *, gArena *, eGameObject * near, ePlayerNetID *); 
-void sg_RespawnPlayer(eGrid *grid, gArena *arena, ePlayerNetID *p);
+void sg_RespawnPlayer(eGrid *, gArena *, eGameObject * near, ePlayerNetID *);
+void sg_RespawnPlayer(eGrid *grid, gArena *arena, ePlayerNetID *p,
+    bool atSpawn=false);
 
 // HACK
 gArena * sg_GetArena();

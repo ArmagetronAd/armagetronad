@@ -326,9 +326,11 @@ bool zFortressZone::Timestep( REAL time )
     if (( ownersInside_ && sg_baseRespawn     )
      || (enemiesInside_ && sg_baseEnemyRespawn))
     {
+        /*
         eGameObject * near = NULL;
         if (shape)
             near = shape;
+        */
 
         for (int i = team->NumPlayers() - 1; i >= 0; --i)
         {
@@ -341,23 +343,29 @@ bool zFortressZone::Timestep( REAL time )
                 (pGameObject->DeathTime() < (time - 1)))))
                 continue;
 
-            sg_RespawnPlayer(grid, sg_GetArena(), near, pPlayer);
+            sg_respawnWriter.write();
+            sg_RespawnPlayer(grid, sg_GetArena(), pPlayer);
 
             // FIXME: only announce group respawns once, regardless of player count
+            sg_respawnWriter << pPlayer->GetUserName()
+                             << ePlayerNetID::FilterName(pPlayer->CurrentTeam()->Name());
             tColoredString playerName;
             playerName << *pPlayer << tColoredString::ColorString(1,1,1);
             if (ownersInside_ && sg_baseRespawn)
             {
+                sg_respawnWriter << teamPlayerName_;
                 tColoredString spawnerName;
                 spawnerName << teamPlayerName_ << tColoredString::ColorString(1,1,1);
                 sn_ConsoleOut( tOutput( "$player_base_respawn", playerName, spawnerName ) );
             }
             else
             {
+                sg_respawnWriter << enemyPlayerName_;
                 tColoredString spawnerName;
                 spawnerName << enemyPlayerName_ << tColoredString::ColorString(1,1,1);
                 sn_ConsoleOut( tOutput( "$player_base_enemy_respawn", playerName, spawnerName ) );
             }
+            sg_respawnWriter.write();
 
             // send a console message to the player
             // FIXME: maybe move to sg_RespawnPlayer ?

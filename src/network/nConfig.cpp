@@ -547,6 +547,9 @@ static char const * sn_groupName[ nConfItemVersionWatcher::Group_Max ] =
         "Visual"
     };
 
+// uncomment on Trunk as soon as it diverges from 0.4
+// #define RESERVE_FOR_0_4
+
 // mapping network version to program version
 static char const * sn_versionString[] =
     {
@@ -572,6 +575,18 @@ static char const * sn_versionString[] =
         "0.2.8.5", // 19
         "0.3.1", // 20
         "0.3.1_pb", // 21
+        // move #ifdef downwards to define new protocol versions on 0.4
+#ifdef RESERVE_FOR_0_4 
+        "0.4_reserved1", // 22
+        "0.4_reserved2", // 23
+        "0.4_reserved3", // 24
+        "0.4_reserved4", // 25
+        "0.4_reserved5", // 26
+        "0.4_reserved6", // 27
+        "0.4_reserved7", // 28
+        "0.4_reserved8", // 29
+        "0.5_alpha", // 30
+#endif
         0
     };
 

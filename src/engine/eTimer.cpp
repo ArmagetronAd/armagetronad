@@ -283,10 +283,10 @@ void eTimer::ProcessSync()
                 startTimeDrift_.Add( driftDifference + driftAverage, timeDifference );
 
                 driftAverage = startTimeDrift_.GetAverage();
-                if( driftAverage < -.0005 && smoothedSystemTime_ > 100 )
-                {
-                    con << "Big drift!\n";
-                }
+                // if( driftAverage < -.0005 && smoothedSystemTime_ > 100 )
+                // {
+                //     con << "Big drift!\n";
+                // }
 
                 if( !drifting_ && startTimeDrift_.GetWeight() > 20 && fabs(driftAverage) > .0001 && fabs(driftAverage)*(smoothedSystemTime_ - creationSystemTime_-10) > 0.1 )
                 {
