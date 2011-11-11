@@ -1867,8 +1867,9 @@ bool uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL 
                 REAL center = .4;
                 if (offset >= lines.size()) offset = lines.size() - 1;
                 {
-                    rTextField c(-.8,.6, h, sr_fontError);
+                    rTextField c(-.9,.6, h, sr_fontError);
                     c.EnableLineWrap();
+                    c.SetWidth(1.8);
 
                     for (unsigned i = offset; i < lines.size(); ++i)
                         c << lines[i] << "\n";
