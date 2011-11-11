@@ -1697,6 +1697,11 @@ tutorial_menu_teamstart_help     Team Start Tutorial: learn the standard team fo
 tutorial_menu_teamstart_instructions If you play in a team, it usually is the best startup move to tightly grind each others walls. The outside players should cuddle up on the center player, the ones further outside doing so in several steps. This tutorial puts you in the most difficult position there is, the player next to the outer player. Survive the start and don't let anyone on your team die.
 tutorial_menu_teamstart_animation textures/tutorials/teamstart/teamstart.txt
 
+tutorial_menu_doublegrind_text     Double Grind
+tutorial_menu_doublegrind_help     Double Grind Tutorial: learn the other standard team formation opening move
+tutorial_menu_doublegrind_instructions In many configurations, a modification of the standard team formation called 'double grinding' is of advantage: the two players next to the center do not grind it immediately. Instead, they go straight for a bit, then turn back, then forward again. They grind the center player twice, hence the name. This gives them extra time between two cycle trails and thus extra acceleration. Your job as a player right next to one of them is to supply that extra trail. Do not grind the center too hard or you will kill the double grinder.\nThe double grinding itself takes practice to do right and the exact timing depends a lot on the configuration, so we can't teach it here. Don't worry, it is mostly optional.
+tutorial_menu_doublegrind_animation textures/tutorials/doublegrind/doublegrind.txt
+
 tutorial_menu_speedkill_text     Speed Kill
 tutorial_menu_speedkill_help     Speed Kill: learn to use a speed advantage to trap an enemy
 tutorial_menu_speedkill_instructions The speed kill is the most basic way to get rid of your enemies in \g. You sneak up on them, grinding their trail, and after you overtake them, you cut them off and wrap them in your tail.\nHere, we set you up for an easy speed kill against an oblivious AI.

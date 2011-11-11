@@ -48,6 +48,11 @@ nobase_texture_DATA=textures/cycle_body.png textures/cycle_wheel.png textures/di
 	textures/tutorials/teamstart/success.png \
 	textures/tutorials/teamstart/background.png \
 	textures/tutorials/teamstart/straight.png \
+	textures/tutorials/doublegrind/success.png \
+	textures/tutorials/doublegrind/toohard1.png \
+	textures/tutorials/doublegrind/background.png \
+	textures/tutorials/doublegrind/toohard2.png \
+	textures/tutorials/doublegrind/toohard3.png \
 	textures/tutorials/grinding/fail2.png \
 	textures/tutorials/grinding/nogrind.png \
 	textures/tutorials/grinding/fail3.png \
@@ -87,6 +92,7 @@ nobase_texture_DATA=textures/cycle_body.png textures/cycle_wheel.png textures/di
 	textures/tutorials/conquest/success.png \
 	textures/tutorials/conquest/start.png \
 	textures/tutorials/teamstart/teamstart.txt \
+	textures/tutorials/doublegrind/doublegrind.txt \
 	textures/tutorials/grinding/grinding.txt \
 	textures/tutorials/survival/survival.txt \
 	textures/tutorials/navigation/navigation.txt \

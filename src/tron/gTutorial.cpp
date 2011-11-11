@@ -591,7 +591,6 @@ public:
     }
 
 };
-static gTutorialTest sg_tutorialTest;
 
 // bullies force you into a maze
 class gTutorialBullies: public gTutorial
@@ -777,7 +776,6 @@ class gTutorialBullies1: public gTutorialBullies
         //Add( 1, 40 );
     }
 };
-static gTutorialBullies1 sg_tutorialBullies1;
 
 // speed kills
 class gTutorialSpeedKillBase: public gTutorial
@@ -845,7 +843,6 @@ public:
         gTutorialSpeedKillBase::AfterSpawn();
     }
 };
-static gTutorialSpeedKillDefense sg_tutorialSpeedKillDefense;
 
 // speed kill
 class gTutorialSpeedKill: public gTutorialSpeedKillBase
@@ -874,14 +871,13 @@ public:
         gTutorialSpeedKillBase::AfterSpawn();
     }
 };
-static gTutorialSpeedKill sg_tutorialSpeedKill;
 
 //! teamstart tutorial
-class gTutorialTeamstart: public gTutorial
+class gTutorialTeamstartBase: public gTutorial
 {
 public:
-    gTutorialTeamstart()
-    : gTutorial( "teamstart" )
+    gTutorialTeamstartBase( char const * name )
+    : gTutorial( name )
     {
         settings_.sizeFactor = 0;
         settings_.numAIs = 0;
@@ -914,6 +910,41 @@ public:
     {
         eTeam & team = HumanTeam();
         team.Shuffle(0,3);
+    }
+
+    virtual void SetDifficulty( int difficulty )
+    {
+        gTutorial::SetDifficulty( difficulty );
+        REAL f = pow( .5, .5 * settings_.speedFactor );
+
+        // re-compensate for speed wingmen formation compensation
+        PushSetting( "SPAWN_WINGMEN_BACK", f*2.2 );
+        PushSetting( "SPAWN_WINGMEN_SIDE", f*2.75 );
+    }
+
+    // prepares
+    virtual void Prepare()
+    {
+        gTutorial::Prepare();
+        su_helpLevel = uActionTooltip::Level_Advanced;
+        PushSetting( "COCKPIT_FILE", "Z-Man/tutorial/spartanic-0.0.1.aacockpit.xml" );
+        PushSetting( "WIN_ZONE_RANDOMNESS", "0" );
+        PushSetting( "WIN_ZONE_EXPANSION", "0" );
+        PushSetting( "WIN_ZONE_INITIAL_SIZE", "10" );
+        PushSetting( "WIN_ZONE_DEATHS", "0" );
+        PushSetting( "CYCLE_RUBBER", "5" );
+        PushSetting( "CYCLE_SPEED", "10" );
+        PushSetting( "TEXT_OUT", "0" );
+    }
+};
+
+//! teamstart tutorial
+class gTutorialTeamstart: public gTutorialTeamstartBase
+{
+public:
+    gTutorialTeamstart()
+    : gTutorialTeamstartBase( "teamstart" )
+    {
     }
 
     void Path( gAIPlayer & ai, int side, int level )
@@ -953,34 +984,69 @@ public:
         Path( *dynamic_cast< gAIPlayer * >( team.Player( 5 ) ), 1, 3 );
         // Path( *dynamic_cast< gAIPlayer * >( team.Player( 6 ) ), -1, 3 );
     }
-
-    virtual void SetDifficulty( int difficulty )
-    {
-        gTutorial::SetDifficulty( difficulty );
-        REAL f = pow( .5, .5 * settings_.speedFactor );
-
-        // re-compensate for speed wingmen formation compensation
-        PushSetting( "SPAWN_WINGMEN_BACK", f*2.2 );
-        PushSetting( "SPAWN_WINGMEN_SIDE", f*2.75 );
-    }
-
-    // prepares
-    virtual void Prepare()
-    {
-        gTutorial::Prepare();
-        su_helpLevel = uActionTooltip::Level_Advanced;
-        PushSetting( "COCKPIT_FILE", "Z-Man/tutorial/spartanic-0.0.1.aacockpit.xml" );
-        PushSetting( "WIN_ZONE_RANDOMNESS", "0" );
-        PushSetting( "WIN_ZONE_EXPANSION", "0" );
-        PushSetting( "WIN_ZONE_INITIAL_SIZE", "10" );
-        PushSetting( "WIN_ZONE_DEATHS", "0" );
-        PushSetting( "CYCLE_RUBBER", "5" );
-        PushSetting( "CYCLE_SPEED", "10" );
-        PushSetting( "TEXT_OUT", "0" );
-    }
-
 };
-static gTutorialTeamstart sg_tutorialTeamstart;
+
+//! doublegrind tutorial
+class gTutorialDoublegrind: public gTutorialTeamstartBase
+{
+public:
+    gTutorialDoublegrind()
+    : gTutorialTeamstartBase( "doublegrind" )
+    {
+        //settings_.minPlayersPerTeam = 2;
+        //settings_.maxPlayersPerTeam = 2;
+    }
+
+    // set paths
+    // void BeforeSpawn()
+    //{
+        // eTeam & team = HumanTeam();
+        // team.Shuffle(0,0);
+        //}
+
+    void Path( gAIPlayer & ai, int side, int level )
+    {
+        REAL SpawnX = 255;
+        REAL eps = .3*level;
+        REAL step = 10;
+        REAL s = 2.753; 
+        REAL SpawnY = 50-level*step*.4;
+
+        AddPath( ai, 500, 500 );
+        AddPath( ai, SpawnX-side*eps, 500 );
+        if( level == 1 )
+        {
+            AddPath( ai, SpawnX+side*s, 52 );
+            AddPath( ai, SpawnX-3*side*eps, 52 );
+            AddPath( ai, SpawnX-3*side*eps, SpawnY+(level+1)*step );
+        }
+        else if( level > 0 )
+        {
+            AddPath( ai, SpawnX-side*eps, SpawnY+(level+2)*step );
+        }
+        if( level > 1 )
+        {
+            AddPath( ai, SpawnX-side*(s+eps), SpawnY+level*step );
+            AddPath( ai, SpawnX-side*(s+eps), SpawnY+(level-1)*step );
+        }
+        if( level > 2 )
+        {
+            AddPath( ai, SpawnX-side*(2*s+eps), SpawnY+(level-1)*step );
+            AddPath( ai, SpawnX-side*(2*s+eps), SpawnY+(level-2)*step );
+        }
+    }
+    
+    void AfterSpawn()
+    {
+        eTeam & team = HumanTeam();
+
+        Path( *dynamic_cast< gAIPlayer * >( team.Player( 0 ) ), 0, 0 );
+        Path( *dynamic_cast< gAIPlayer * >( team.Player( 1 ) ), 1, 1 );
+        Path( *dynamic_cast< gAIPlayer * >( team.Player( 2 ) ), -1, 1 );
+        Path( *dynamic_cast< gAIPlayer * >( team.Player( 4 ) ), -1, 2 );
+        Path( *dynamic_cast< gAIPlayer * >( team.Player( 5 ) ), 1, 3 );
+    }
+};
 
 //! conquest tutorial
 class gTutorialConquest: public gTutorial
@@ -1055,7 +1121,6 @@ public:
     }
 
 };
-static gTutorialConquest sg_tutorialConquest;
 
 //! grind tutorial
 class gTutorialGrind: public gTutorial
@@ -1085,7 +1150,6 @@ public:
     }
 
 };
-static gTutorialGrind sg_tutorialGrind;
 
 // survival: survive a bit, get to the winzone
 class gTutorialSurvival: public gTutorial
@@ -1125,7 +1189,6 @@ public:
         su_helpLevel = uActionTooltip::Level_Advanced;
     }
 };
-static gTutorialSurvival sg_tutorialSurvival;
 
 //! navigation: get to the winzone
 class gTutorialNavigation: public gTutorial
@@ -1154,7 +1217,6 @@ public:
         su_helpLevel = uActionTooltip::Level_Essential;
     }
 };
-static gTutorialNavigation sg_tutorialNavigation;
 
 //! opens the tutorial menu
 void sg_TutorialMenu()
@@ -1170,3 +1232,13 @@ bool sg_TutorialsCompleted()
     return gTutorial::AllComplete();
 }
 
+static gTutorialTest sg_tutorialTest;
+static gTutorialBullies1 sg_tutorialBullies1;
+static gTutorialDoublegrind sg_tutorialDoublegrind;
+static gTutorialTeamstart sg_tutorialTeamstart;
+static gTutorialSpeedKillDefense sg_tutorialSpeedKillDefense;
+static gTutorialSpeedKill sg_tutorialSpeedKill;
+static gTutorialConquest sg_tutorialConquest;
+static gTutorialGrind sg_tutorialGrind;
+static gTutorialSurvival sg_tutorialSurvival;
+static gTutorialNavigation sg_tutorialNavigation;
