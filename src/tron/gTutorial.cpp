@@ -341,6 +341,10 @@ public:
         // allow custom camera
         PushSetting( "CAMERA_FORBID_CUSTOM", "0" );
 
+        // make chatbot useless
+        PushSetting( "CHATBOT_MIN_TIMESTEP", "1000" );
+        PushSetting( "CHATBOT_RANGE", "0.001" );
+
         // no names
         PushSetting( "FADEOUT_NAME_DELAY", "0" );
 
@@ -633,9 +637,10 @@ public:
 class gMazeChallenge: public gChallenge
 {
 public:
-    gMazeChallenge()
-    : gChallenge( "bullies" )
+    gMazeChallenge( char const * name )
+    : gChallenge( name )
     {
+        lastWidth_ = 0;
         settings_.AI_IQ = 1000;
         settings_.sizeFactor = 0;
         settings_.numAIs = 2;
@@ -646,6 +651,12 @@ public:
     void Analysis()
     {
         gTutorial::Analysis();
+    }
+
+    // adjust width on the fly, to be called from Maze()
+    void SetWidth( REAL width )
+    {
+        width_ = width;
     }
 
     void AfterSpawn()
@@ -663,6 +674,7 @@ public:
         currentDir_ = eCoord(0,1);
         currentPos_ = eCoord( 0, 120 );
         maze_.clear();
+        lastWidth_ = .5 * pow( 2, .5*settings_.sizeFactor );
         Maze();
         Add(1,0);
         ApplyMaze();
@@ -693,6 +705,10 @@ public:
         PushSetting( "CAMERA_FORBID_FREE", "1" );
         PushSetting( "CAMERA_FORBID_FOLLOW", "1" );
         PushSetting( "CAMERA_FORBID_MER", "1" );
+
+        // no console
+        PushSetting( "TEXT_OUT", "0" );
+        
 
         // create test maze to get correct size factor
         width_ = 2;
@@ -772,13 +788,14 @@ protected:
         }
     }
 
-    // adds a maze turn
+    // adds a maze turn: turn direction, go distance
     void Add( int direction, REAL distance )
     {
         MazePoint point;
         point.center = currentPos_;
         eCoord newDir = currentDir_.Turn(0,direction);
-        point.offset = direction*width_*(currentDir_ - newDir);
+        point.offset = direction*(width_*currentDir_ - lastWidth_*newDir);
+        lastWidth_ = width_;
         point.dirBefore = currentDir_;
         currentDir_ = newDir;
         currentPos_ = currentPos_ + distance*newDir;
@@ -789,6 +806,7 @@ private:
     eCoord currentPos_;
     eCoord currentDir_;
     REAL width_;
+    REAL lastWidth_;
     struct MazePoint
     {
         eCoord center;
@@ -799,6 +817,11 @@ private:
 };
 class gMazeChallenge1: public gMazeChallenge
 {
+public:
+    gMazeChallenge1()
+    : gMazeChallenge( "bullies" ){}
+
+private:
     virtual void Maze()
     {
         Add( 1, 100 );
@@ -811,6 +834,116 @@ class gMazeChallenge1: public gMazeChallenge
         //Add( -1, 20 );
         //Add( -1, 20 );
         //Add( 1, 40 );
+    }
+};
+
+class gMazeChallengeHilbertBase: public gMazeChallenge
+{
+    int lastStraight;
+    int currentDir;
+    int lastTurn;
+    REAL distance;
+protected:
+    gMazeChallengeHilbertBase( char const * name )
+    : gMazeChallenge( name )
+    {
+        Reset();
+    }
+
+    void Reset()
+    {
+        lastTurn = 0;
+        lastStraight = currentDir = 0;
+        distance = 0;
+    }
+
+    void Execute()
+    {
+        if ( distance > 0 )
+        {
+            if( lastTurn != 0 )
+            {
+                Add(lastTurn, distance);
+            }
+            lastTurn = ( currentDir-lastStraight > 0 ) ? 1 : -1;
+            lastStraight = currentDir;
+            distance = 0;
+        }
+    }
+
+    void Turn( int dir )
+    {
+        currentDir += dir;
+    }
+
+    void Go( REAL dist )
+    {
+        if ( lastStraight != currentDir )
+        {
+            Execute();
+        }
+        distance += dist;
+    }
+
+    void HilbertMazeRec( int order, int direction, REAL len )
+    {
+        if( order == 1 )
+        {
+            Go( len );
+            Turn( direction );
+            Go( len );
+            Turn( direction );
+            Go( len );
+        }
+        else
+        {
+            HilbertMazeRec( order-1, -direction, len );
+            if( (order & 1) == 0 ) Turn( direction );
+            Go( len );
+            if( (order & 1) == 1 ) Turn( direction );
+            HilbertMazeRec( order-1, direction, len );
+            if( (order & 1) == 0 ) Turn( -direction );
+            Go( len );
+            if( (order & 1) == 0 ) Turn( -direction );
+            HilbertMazeRec( order-1, direction, len );
+            if( (order & 1) == 1 ) Turn( direction );
+            Go( len );
+            if( (order & 1) == 0 ) Turn( direction );
+            HilbertMazeRec( order-1, -direction, len );
+        }
+    }
+
+    void HilbertMaze( int order, int direction, REAL len )
+    {
+        Reset();
+        HilbertMazeRec( order, direction, len );
+        Execute();
+    }
+};
+
+class gMazeChallengeHilbert: public gMazeChallengeHilbertBase
+{
+    int order_;
+    REAL len_;
+    REAL width_;
+public:
+    gMazeChallengeHilbert( char const * name, int order, REAL len, REAL width )
+    : gMazeChallengeHilbertBase( name ), order_( order ), len_( len ), width_( width )
+    {
+    }
+
+    virtual void Maze()
+    {
+        SetWidth( width_ );
+        HilbertMaze( order_, 1, len_ );
+    }
+
+    // prepares
+    virtual void Prepare()
+    {
+        gMazeChallengeHilbertBase::Prepare();
+
+        // PushSetting( "CAMERA_FORBID_CUSTOM", "0" );
     }
 };
 
@@ -1285,6 +1418,10 @@ bool sg_TutorialsCompleted()
     return gTutorial::AllComplete();
 }
 
+static gMazeChallengeHilbert sg_challengeHilbert4("hilbert4", 4, 15, 1);
+static gMazeChallengeHilbert sg_challengeHilbert3("hilbert3", 3, 25, 1.25);
+static gMazeChallengeHilbert sg_challengeHilbert2("hilbert2", 2, 50, 1.5);
+//static gMazeChallengeHilbert sg_challengeHilbert1("hilbert1", 1,100,2);
 static gAIChallenge1 sg_tutorialTest;
 static gMazeChallenge1 sg_tutorialBullies1;
 static gTutorialCongratulations sg_tutorialCongratulations;

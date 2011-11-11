@@ -1722,6 +1722,21 @@ tutorial_menu_bullies_help     Maze: two enemies have trapped you between their 
 tutorial_menu_bullies_instructions Two bullies have trapped you between their walls and are forcing you through their maze. Follow the turns they make and escape.
 tutorial_menu_bullies_animation 
 
+tutorial_menu_hilbert2_text     Maze Challenge 2
+tutorial_menu_hilbert2_help     Maze: two enemies have trapped you between their walls. Can you survive? They follow a Hilbert Curve of order 2.
+tutorial_menu_hilbert2_instructions The two bullies have read a math book and are now torturing you with Hilbert Curves, paths that cover a whole square with arbitrary density. First, a simple order two curve.
+tutorial_menu_hilbert2_animation 
+
+tutorial_menu_hilbert3_text     Maze Challenge 3
+tutorial_menu_hilbert3_help     Maze: two enemies have trapped you between their walls. Can you survive? They follow a Hilbert Curve of order 3.
+tutorial_menu_hilbert3_instructions The two bullies now force you on to a faster Hilbert Curve of order 3. It has 62 turns.
+tutorial_menu_hilbert3_animation 
+
+tutorial_menu_hilbert4_text     Ultimate Maze Challenge
+tutorial_menu_hilbert4_help     Maze: two enemies have trapped you between their walls. Can you survive? They follow a Hilbert Curve of order 4.
+tutorial_menu_hilbert4_instructions The two bullies now force you on to an extremely fast and narrow Hilbert Curve of order 4 with a total of 254 turns.\n\nNo human can survive this.
+tutorial_menu_hilbert4_animation 
+
 #********************************************
 #********************************************
 #
