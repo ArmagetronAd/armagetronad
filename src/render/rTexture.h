@@ -64,13 +64,13 @@ public:
     ~rSurface();                                      //!< destructor
     rSurface( rSurface const & other );               //!< copy constructor
     rSurface & operator = ( rSurface const & other ); //!< copy operator
+    void CreateQuarter( rSurface const & big );       //!< scales down the given image
 protected:
     rSurface();                             //!< default constructor, not creating a real surface
     void Init();                            //!< initialize data members
     void Clear();                           //!< destroys data members
     void Create( char const * fileName, tPath const *path = &tDirectories::Data() );   //!< create surface from file
     void Create( SDL_Surface * surface );   //!< take ownership of surface
-
 private:
     // attributes
     SDL_Surface * surface_;                  //!< the surface itself
