@@ -187,9 +187,9 @@ public:
     void CreateMenu();
 
     // shows instructions
-    virtual void Instructions()
+    virtual bool Instructions()
     {
-        uMenu::Message(
+        return uMenu::Message(
             tOutput( (tString("$tutorial_menu_") + Name() + "_text" ).c_str()),
             tOutput( (tString("$tutorial_menu_") + Name() + "_instructions" ).c_str()),
             300,
@@ -371,7 +371,10 @@ public:
         int maxDifficulty = 3;
         for( int tries = 3; finished_ && !success_ && tries > 0; --tries )
         {
-            Instructions();
+            if( ! Instructions() )
+            {
+                break;
+            }
             Run();
             if( success_ )
             {
