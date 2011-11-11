@@ -3801,13 +3801,13 @@ bool gCycle::DoTurn(int d)
     if (d < -1) d = -1;
 
     if (Alive()){
-        eSoundMixer* mixer = eSoundMixer::GetMixer();
-        mixer->PushButton(CYCLE_TURN, Position());
-
         clientside_action();
 
         if ( gCycleMovement::DoTurn( d ) )
         {
+            eSoundMixer* mixer = eSoundMixer::GetMixer();
+            mixer->PushButton(CYCLE_TURN, Position());
+
             sg_ArchiveCoord( pos, 1 );
 
             skewDot+=4*d;
