@@ -992,6 +992,7 @@ void st_LoadConfig( bool printChange )
     }
 #endif
 
+    Load( data, "textures/settings_textures.cfg" );
     Load( data, "moviepack/settings.cfg" );
 
     Load( config, "autoexec.cfg" );
