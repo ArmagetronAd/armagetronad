@@ -1461,7 +1461,7 @@ version_info_gl_version		\n  GL Version  :
 #********************************************
 #********************************************
 
-game_menu_tutorials_text    Tutorials
+game_menu_tutorials_text    Tutorials and Challenges
 game_menu_tutorials_help    Small training tasks to make you familiar with the basic concepts of this game.
 
 game_menu_start_text		Local Game
@@ -1660,17 +1660,17 @@ game_menu_wz_ld_help		Minimum number of seconds since the last death before the 
 #********************************************
 #********************************************
 
-window_title_tutorial       \g - Tutorial: \1
+window_title_tutorial       \g - \1
 tutorial_success            Well done!
 tutorial_teamkill           Failure: Team Kill
 
 tutorial_easy_head          Good Work
 tutorial_easy_body          but that just now was actually a slightly easier version of the tutorial challenge. Try the real one again now.
 
-tutorial_menu_test_text     Test
-tutorial_menu_test_help     Test Tutorial: play against one constant AI.
-tutorial_menu_test_instructions As a final test, you need to defeat a lone AI. It's pretty stupid, the best way to kill it is to set up a trap right where you start.
-tutorial_menu_test_animation textures/tutorials/test/test.txt
+tutorial_menu_test_text     AI Challenge
+tutorial_menu_test_help     Play against one AI, no time limit.
+tutorial_menu_test_instructions You need to defeat a lone AI. It is pretty stupid, the best way to kill it is to set up a trap right where you start.
+tutorial_menu_test_animation 
 
 tutorial_menu_navigation_text     Navigation
 tutorial_menu_navigation_help     Navigation Tutorial: learn to control your cycle.
@@ -1712,10 +1712,15 @@ tutorial_menu_speedkilldefense_help     Defense: learn how to defend against spe
 tutorial_menu_speedkilldefense_instructions Oh no! Now the situation is reversed. An enemy is grinding your tail on the right hand side and is going to cut you off in a moment. Quick, think of a counter!
 tutorial_menu_speedkilldefense_animation textures/tutorials/speedkilldefense/speedkilldefense.txt
 
-tutorial_menu_bullies_text     Maze
+tutorial_menu_congratulations_text     Closing Words
+tutorial_menu_congratulations_help     Not everything can be taught in tutorials.
+tutorial_menu_congratulations_instructions Congratulations, you should now have completed all the essential tutorials. What follows here are optional challenges. You are now ready to enter the proper game, which is the online multiplayer component. Before you dive into that, there are a couple of things you should know about the online community and server landscape:\n\nSumo Mode: You were taught the basics of Fortress mode here; Sumo uses the same basic mechanics, only usually for single players and not teams, and the zones of several competing players are put right on top of each other. And they shrink.\n\nCapture the Flag (CTF): Some servers offer this classic game mode, with a small zone standing in as the flag and a bigger one serving as base to return the flag to.\n\nHigh Rubber: Many servers use exorbitant values for the crash protection you experienced a bit in the Grinding tutorials. This allows for complicated maneouvers on tight space, it is usually not possible to actually see the result properly. You need to learn to read your opponents' movements if you want to succeed there.\n\nOpen Play/Dogfight: Some servers have arbitrary rules of engagement in place; you are supposed to not trap your opponents, but leave them a gap to escape through, and if you are almost trapped, you are supposed to take that gap.\n\nAlso, It is best to read over the included documentation (use the Help menu to launch it in a browser). And you should definitely stick to basic game modes and close-to-default settings at first. The server browser helps you with that by hiding advanced servers from immediate view initially; you can still enter them early if you dare.
+tutorial_menu_congratulations_animation 
+
+tutorial_menu_bullies_text     Maze Challenge
 tutorial_menu_bullies_help     Maze: two enemies have trapped you between their walls. Can you survive?
 tutorial_menu_bullies_instructions Two bullies have trapped you between their walls and are forcing you through their maze. Follow the turns they make and escape.
-tutorial_menu_bullies_animation textures/tutorials/bullies/bullies.txt
+tutorial_menu_bullies_animation 
 
 #********************************************
 #********************************************

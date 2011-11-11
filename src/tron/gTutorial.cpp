@@ -132,6 +132,11 @@ public:
         CreateMenu();
     }
 
+    virtual bool IsChallenge() const
+    {
+        return false;
+    }
+
     // call on success or failure during analysis
     void End( bool success )
     {
@@ -363,7 +368,7 @@ public:
     }
 
     // called from the menu
-    bool Activate()
+    virtual bool Activate()
     {
         success_ = false;
         finished_ = true;
@@ -371,6 +376,7 @@ public:
         int maxDifficulty = 3;
         for( int tries = 3; finished_ && !success_ && tries > 0; --tries )
         {
+            bool instructions = true;
             if( ! Instructions() )
             {
                 break;
@@ -396,7 +402,18 @@ public:
             }
             else
             {
-                if( difficulty_ < maxDifficulty )
+                if( IsChallenge() )
+                {
+                    // only give instructions again after third failure
+                    instructions = false;
+                    if( tries == 0 )
+                    {
+                        // then again after 5
+                        tries = 5;
+                        instructions = true;
+                    }
+                }
+                else if( difficulty_ < maxDifficulty )
                 {
                     difficulty_++;
                 }
@@ -439,7 +456,7 @@ public:
         gTutorial * run = anchor_;
         while( run )
         {
-            if( !run->completed_ )
+            if( !run->IsChallenge() && !run->completed_ )
             {
                 return false;
             }
@@ -544,8 +561,11 @@ public:
     virtual void Enter()
     {
         bool previousSuccess = tutorial_.Complete();
+        bool totalSuccess = gTutorial::AllComplete();
         bool success = tutorial_.Activate();
-        if( success && !previousSuccess )
+        // only auto-advance on freshly completed tutorials/challenges and take
+        // a break after the last tutorial
+        if( success && !previousSuccess && totalSuccess == gTutorial::AllComplete() )
         {
             AdvanceMenu( *menu, true );
         }
@@ -569,12 +589,27 @@ static void sg_RunTutorial( BOOLRETFUNC * tutorial )
 }
 */
 
-// test tutorial
-class gTutorialTest: public gTutorial
+ // challenges: like tutorials, only not mandatory
+class gChallenge: public gTutorial
 {
 public:
-    gTutorialTest()
-    : gTutorial( "test" )
+    gChallenge( char const * name )
+    : gTutorial( name )
+    {
+    }
+
+    virtual bool IsChallenge() const
+    {
+        return true;
+    }
+};
+
+// test tutorial
+class gAIChallenge1: public gChallenge
+{
+public:
+    gAIChallenge1()
+    : gChallenge( "test" )
     {
         settings_.numAIs = 1;
     }
@@ -592,15 +627,14 @@ public:
         su_helpLevel = uActionTooltip::Level_Advanced;
         PushSetting( "COCKPIT_FILE", "Z-Man/tutorial/spartanic-0.0.1.aacockpit.xml" );
     }
-
 };
 
 // bullies force you into a maze
-class gTutorialBullies: public gTutorial
+class gMazeChallenge: public gChallenge
 {
 public:
-    gTutorialBullies()
-    : gTutorial( "bullies" )
+    gMazeChallenge()
+    : gChallenge( "bullies" )
     {
         settings_.AI_IQ = 1000;
         settings_.sizeFactor = 0;
@@ -763,7 +797,7 @@ private:
     };
     std::vector< MazePoint > maze_;
 };
-class gTutorialBullies1: public gTutorialBullies
+class gMazeChallenge1: public gMazeChallenge
 {
     virtual void Maze()
     {
@@ -1221,6 +1255,22 @@ public:
     }
 };
 
+//! closing words
+class gTutorialCongratulations: public gTutorial
+{
+public:
+    gTutorialCongratulations()
+    : gTutorial( "congratulations" )
+    {
+    }
+
+    virtual bool Run()
+    {
+        success_ = true;
+        return true;
+    }
+};
+
 //! opens the tutorial menu
 void sg_TutorialMenu()
 {
@@ -1235,8 +1285,9 @@ bool sg_TutorialsCompleted()
     return gTutorial::AllComplete();
 }
 
-static gTutorialTest sg_tutorialTest;
-static gTutorialBullies1 sg_tutorialBullies1;
+static gAIChallenge1 sg_tutorialTest;
+static gMazeChallenge1 sg_tutorialBullies1;
+static gTutorialCongratulations sg_tutorialCongratulations;
 static gTutorialDoublegrind sg_tutorialDoublegrind;
 static gTutorialTeamstart sg_tutorialTeamstart;
 static gTutorialSpeedKillDefense sg_tutorialSpeedKillDefense;
