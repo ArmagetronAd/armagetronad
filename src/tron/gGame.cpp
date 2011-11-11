@@ -5137,7 +5137,7 @@ void sg_TutorialGame( gGameSettings & settings, gTutorialBase & tutorial )
 
     ePlayerNetID::CompleteRebuild();
 
-    sr_SetWindowTitle(tString(tOutput("$window_title_tutorial", tutorial.Name())));
+    sr_SetWindowTitle(tString(tOutput("$window_title_tutorial", tOutput( (tString("$tutorial_menu_") + tutorial.Name() + "_text" ).c_str()))));
     sg_tutorial = &tutorial;
     own_game( nSTANDALONE );
     sg_tutorial = NULL;
