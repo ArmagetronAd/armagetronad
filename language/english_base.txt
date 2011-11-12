@@ -884,6 +884,7 @@ explosion_help          Enable explosions?
 wrap_menu_help			If set, you leave a menu to the top and reenter it at the bottom.
 floor_mirror_int_help   Intensity of the floor mirror effect
 color_strings_help		Generate strings that will be rendered with color effects.
+verify_color_strict_help Verify color codes before interpreting them if this is set to 1. Capital letters and anything not 0-9, a-f is not considered a color code then. If set to 0 (the in code default), out of range ascii characters are accepted and interpreted as 0.
 filter_color_strings_help		Filter color codes from strings coming in over the network.
 filter_dark_color_strings_help		Filter dark color codes from strings coming in over the network.
 filter_color_names_help		    Filter color codes from player names.

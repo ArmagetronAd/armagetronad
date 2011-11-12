@@ -28,7 +28,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tMemManager.h"
 #include "tInitExit.h"
 #include "nSimulatePing.h"
-#include "nConfig.h"
 #include "nNetwork.h"
 #include "nServerInfo.h"
 #include "tConsole.h"
@@ -304,6 +303,10 @@ static tSettingItem<int> sn_mav("MAX_PROTOCOL_VERSION",sn_maxVersion);
 
 static int sn_newFeatureDelay = 0;
 static tSettingItem<int> sn_nfd("NEW_FEATURE_DELAY",sn_newFeatureDelay);
+
+// color code strictness setting from tColor.cpp
+extern bool st_verifyColorCodeStrictly;
+static nSettingItemWatched< bool > stc_verifyColorCodeStrictly( "VERIFY_COLOR_STRICT", st_verifyColorCodeStrictly, nConfItemVersionWatcher::Group_Visual, 21 );
 
 // from nConfig.cpp. Adapt version string array there to bump protocol version.
 int sn_GetCurrentProtocolVersion();

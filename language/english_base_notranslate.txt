@@ -185,6 +185,7 @@ friend_8_help                      A friend
 friend_9_help                      A friend
 friend_10_help                     A friend
 
+verify_color_strict_override_help             Block out older clients if VERIFY_COLOR_STRICT differs from its default? 
 cycle_accel_tunnel_override_help              Block out older clients if CYCLE_ACCEL_TUNNEL differs from its default? 
 cycle_boostfactor_enemy_override_help         Block out older clients if CYCLE_BOOSTFACTOR_ENEMY differs from its default? 
 cycle_boostfactor_rim_override_help           Block out older clients if CYCLE_BOOSTFACTOR_RIM differs from its default? 
