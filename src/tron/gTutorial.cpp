@@ -917,6 +917,7 @@ protected:
     {
         Reset();
         HilbertMazeRec( order, direction, len );
+        Go( 50 );
         Execute();
     }
 };

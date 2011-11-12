@@ -1782,7 +1782,7 @@ void gAIPlayer::ThinkPathGiven( ThinkData & data, bool emergency )
     eCoord dir = Object()->Direction();
 
     int lr = 0;
-    REAL mindist = 10;
+    REAL mindist = 100;
 
     // now we have found our next goal. Try to get there.
     eCoord pos    = Object()->Position();
@@ -1809,12 +1809,16 @@ void gAIPlayer::ThinkPathGiven( ThinkData & data, bool emergency )
     REAL ahead = eCoord::F(t - pos, dir)
     + eCoord::F(path.CurrentOffset(), dir);
 
-    if ( ahead > delay * Object()->Speed()*.1 && !emergency )
+    if ( ahead > ( delay *.1 + se_AverageFrameTime() ) * Object()->Speed() && !emergency )
     {	  // it is still before us. just wait a while.
         mindist = ahead;
     }
     else
     { // we have passed it. Make a turn towards it.
+        if( fabs( side ) < mindist )
+        {
+            mindist = fabs( side );
+        }
 
         // switch to survival mode if cut off, no questions asked
         if( emergency && ahead > delay * Object()->Speed() && data.front.front.wallType == gSENSOR_ENEMY && state != AI_PATH_MINDLESS )
@@ -1863,7 +1867,7 @@ void gAIPlayer::ThinkPathGiven( ThinkData & data, bool emergency )
     }
 
     data.thinkAgain = mindist / Object()->Speed();
-    if (data.thinkAgain > .4)
+    if (data.thinkAgain > 1)
         data.thinkAgain *= .7;
 }
 
