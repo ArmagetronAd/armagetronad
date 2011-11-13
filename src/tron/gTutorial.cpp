@@ -1228,6 +1228,7 @@ public:
     {
         settings_.sizeFactor = 0;
         settings_.numAIs = 1;
+        settings_.gameType = gFREESTYLE;
         settings_.wallsLength = 350;
     }
 
