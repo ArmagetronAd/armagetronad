@@ -281,7 +281,7 @@ armagetronad_main_master_CXXFLAGS =$(libtron_a_CXXFLAGS)
 armagetronad_main_master_LDADD=libnetwork.a libtools.a protobuf/libprotobuf.a 
 
 if BUILDDEDICATED
-armagetronad_serverquery_SOURCES = serverquery/serverquery.cpp serverquery/jsoncpp.cpp
+armagetronad_serverquery_SOURCES = serverquery/serverquery.cpp serverquery/jsoncpp.cpp serverquery/json/json.h serverquery/json/json-forwards.h
 armagetronad_serverquery_CXXFLAGS = $(AM_CXXFLAGS) -I@srcdir@ -I@srcdir@/serverquery -I@srcdir@/tools -I@srcdir@/network
 armagetronad_serverquery_LDADD = libnetwork.a libtools.a protobuf/libprotobuf.a
 endif
