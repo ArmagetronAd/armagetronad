@@ -669,6 +669,8 @@ public:
             HeadStart( ai, 2 );
         }
 
+        TimeWarp( 1.5 );
+
         // create maze
         width_ = 2;
         currentDir_ = eCoord(0,1);
