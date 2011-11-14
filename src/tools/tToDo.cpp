@@ -72,14 +72,22 @@ void st_DoToDo(){ // do the things that have been postponed
         st_toDoFromSignal = 0;
     }
 
-    boost::lock_guard< boost::recursive_mutex > lock( st_mutex );
-    while (tToDos.Len()){
-        tTODO_FUNC *last = st_toDoCurrent;
-        tTODO_FUNC *td = tToDos[tToDos.Len()-1];
-        st_toDoCurrent = td;
-        tToDos.SetLen(tToDos.Len()-1);
-        (*td)();
-        st_toDoCurrent = last;
+    {
+        boost::unique_lock< boost::recursive_mutex > lock( st_mutex );
+        while (tToDos.Len()){
+            tTODO_FUNC *last = st_toDoCurrent;
+            tTODO_FUNC *td = tToDos[tToDos.Len()-1];
+            st_toDoCurrent = td;
+            tToDos.SetLen(tToDos.Len()-1);
+
+            // execute function, temporarily unlock queue in case it wants to add
+            // further items
+            lock.unlock();
+            (*td)();
+            lock.lock();
+
+            st_toDoCurrent = last;
+        }
     }
 
     st_SyncBackgroundThreads();
