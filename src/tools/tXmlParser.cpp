@@ -260,31 +260,45 @@ bool tXmlParser::LoadWithoutParsing(const char* filename, const char* uri) {
     bool success=false;
     FILE* docfd;
 
-    docfd = tResourceManager::openResource(filename, uri);
-    m_Filename = tResourceManager::locateResource(filename, uri);
+    bool forceFetch = false;
+    while(true) {
+        m_Filename = tResourceManager::locateResource(filename, uri, true, forceFetch);
+        docfd = tResourceManager::openResource(filename, uri);
 
-    if ( docfd )
-    {
-        success = ValidateXml(docfd, uri, filename);
-        fclose(docfd);
+        if ( docfd ) {
+            success = ValidateXml(docfd, uri, filename);
+            fclose(docfd);
+        }
+
+        // abort on success, repeated failure, unrecoverable failure and included resources.
+        if( success || forceFetch || !docfd || tDirectories::Resource().GetWritePath(filename) != m_Filename ) {
+            break;
+        }
+
+        con << "XML file '" << filename << "' appears to be corrupted in the cache, refetching it...\n";
+
+        // force a refetch on the second go
+        forceFetch = true;
+    }
+
+    if ( !success ) {
+        con << "Loading XML file '" << filename << "' failed!\n";
     }
 
     return success;
 }
 
 bool tXmlParser::LoadWithParsing(const char* filename, const char *uri) {
-    bool success=false;
-    FILE* docfd;
+    bool success = true;
 
-    if(!(docfd = tResourceManager::openResource(filename, uri))) {
-        con << "Loading XML file '" << filename << "' failed!\n";
-        return false;
+    // load once wihout parsing to get basic errors out of the way
+    // and the document initialized
+    if( !m_Doc ) {
+        success = LoadWithoutParsing( filename, uri );
     }
-    m_Filename = tResourceManager::locateResource(filename, uri);
 
-    success = ValidateXml(docfd, uri, filename);
-    fclose(docfd);
-    if(success) {
+    if( m_Doc && success ) {
+        // document exists, parse
         return Parse();
     } else {
         return false;

@@ -40,6 +40,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tResourceManager.h"
 
 #include <sstream>
+#include <set>
 
 #ifndef DEDICATED
 #include "rRender.h"
@@ -964,7 +965,47 @@ rResourceTexture::rResourceTexture(tResourcePath const &path, bool repx, bool re
     tex_ = new tex_t(path);
 }
 
+// verifies a resource texture, redownloads it if it is corrupted (once per session)
+static void sr_VerifyResourceTexture( tString const & resourcePath )
+{
+#ifndef DEDICATED
+    static std::set< tString > verified;
+    if( verified.find(resourcePath) == verified.end() )
+    {
+        tString filePath = tResourceManager::locateResource( resourcePath, "", false  );
+        if( filePath != "" )
+        {
+            // check read and write path
+            tString w = tDirectories::Resource().GetWritePath( filePath );
+            tString r = tDirectories::Resource().GetReadPath( filePath );
+
+            // if they're equal, that means the resource has been downloaded before. Check it
+            // by loading it once
+            if( w == r )
+            {
+                SDL_Surface * surface = IMG_Load(w);
+                if( surface )
+                {
+                    // throw result away
+                    SDL_FreeSurface( surface );
+                }
+                else
+                {
+                    // trigger a redownload
+                    tResourceManager::locateResource( resourcePath, "", true, true );
+                }
+            }
+        }
+
+        // mark as checked
+        verified.insert( resourcePath );
+    }
+#endif
+}
+
 rResourceTexture::InternalTex::InternalTex(tResourcePath const &path) : rFileTexture(rTextureGroups::TEX_OBJ, tResourceManager::locateResource(path.Path().c_str()).c_str(), true, true, true, 0), use_(1), path_(path) {
+    sr_VerifyResourceTexture( path.Path() );
+    
     textures.push_back(this);
 }
 
