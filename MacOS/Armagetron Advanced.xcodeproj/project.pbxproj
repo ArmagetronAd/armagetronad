@@ -727,7 +727,7 @@
 		9BB084E1141C5FED009B30D0 /* tMutex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tMutex.cpp; sourceTree = "<group>"; };
 		9BB084E2141C5FED009B30D0 /* tMutex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tMutex.h; sourceTree = "<group>"; };
 		9BB084E3141C5FED009B30D0 /* tThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tThread.h; sourceTree = "<group>"; };
-		9BB5B9240D84604400BF5F1C /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = Info.plist; path = ../src/macosx/Info.plist; sourceTree = SOURCE_ROOT; };
+		9BB5B9240D84604400BF5F1C /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = ../src/macosx/Info.plist; sourceTree = SOURCE_ROOT; };
 		9BB5B9270D84605700BF5F1C /* English */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = English; path = InfoPlist.strings.in; sourceTree = "<group>"; };
 		9BB7B5A60D8302FA004FE8C3 /* eAdvWall.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = eAdvWall.cpp; sourceTree = "<group>"; };
 		9BB7B5A70D8302FA004FE8C3 /* eAdvWall.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = eAdvWall.h; sourceTree = "<group>"; };
@@ -790,7 +790,7 @@
 		9BB7B6570D830321004FE8C3 /* aa_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = aa_config.h; sourceTree = "<group>"; };
 		9BB7B6580D830321004FE8C3 /* config_common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = config_common.h; sourceTree = "<group>"; };
 		9BB7B65A0D830321004FE8C3 /* aa_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = aa_config.h; sourceTree = "<group>"; };
-		9BB7B65D0D830321004FE8C3 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = Info.plist; sourceTree = "<group>"; };
+		9BB7B65D0D830321004FE8C3 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9BB7B65E0D830321004FE8C3 /* SDLMain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDLMain.h; sourceTree = "<group>"; };
 		9BB7B65F0D830321004FE8C3 /* SDLMain.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = SDLMain.mm; sourceTree = "<group>"; };
 		9BB7B6610D830322004FE8C3 /* version.h.in */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = version.h.in; sourceTree = "<group>"; };
@@ -2600,7 +2600,6 @@
 				INFOPLIST_FILE = ../src/macosx/Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = "$(SHARED_LIBRARY_SEARCH_PATHS)";
-				MACOSX_DEPLOYMENT_TARGET = "";
 				OTHER_CPLUSPLUSFLAGS = "$(SHARED_OTHER_CPLUSPLUSFLAGS)";
 				OTHER_LDFLAGS = "$(SHARED_OTHER_LDFLAGS)";
 				PREBINDING = NO;
