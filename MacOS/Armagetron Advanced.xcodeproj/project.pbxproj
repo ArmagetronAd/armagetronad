@@ -74,7 +74,6 @@
 		64C9C815144B6CB70039620E /* eSpawn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 64C9C813144B6CB60039620E /* eSpawn.cpp */; };
 		64C9C817144B6CB70039620E /* eSpawn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 64C9C813144B6CB60039620E /* eSpawn.cpp */; };
 		64F6DA55145F36F700EBDEC9 /* gTutorial.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 64F6DA53145F36F700EBDEC9 /* gTutorial.cpp */; };
-		64F6DA56145F36F700EBDEC9 /* gTutorial.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 64F6DA54145F36F700EBDEC9 /* gTutorial.h */; };
 		8CBA60B1089F00F2007E21DC /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CBA60B0089F00F2007E21DC /* OpenGL.framework */; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		9B0C8B3D0F7EBA78001802CD /* eChat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B0C8B3B0F7EBA78001802CD /* eChat.cpp */; };
@@ -607,7 +606,6 @@
 				9BD7D9A70A2C7CCF00D7033C /* libpng.framework in Copy Frameworks */,
 				9BD7D9A80A2C7CCF00D7033C /* SDL_image.framework in Copy Frameworks */,
 				9BD7D9AA0A2C7CCF00D7033C /* SDL.framework in Copy Frameworks */,
-				64F6DA56145F36F700EBDEC9 /* gTutorial.h in Copy Frameworks */,
 			);
 			name = "Copy Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
