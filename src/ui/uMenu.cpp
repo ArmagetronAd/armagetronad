@@ -190,7 +190,11 @@ void uMenu::OnEnter(){
 #endif
     if( selected >= items.Len() )
     {
-        selected = items.Len() - 1;
+        // skip to actually selectable item
+        bool wrapBack = wrap;
+        wrap = true;
+        selected = GetPrevSelectable(0);
+        wrap = wrapBack;
     }
     while (!exitFlag && !quickexit && !exitToMain){
         st_DoToDo();
