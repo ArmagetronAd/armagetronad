@@ -23,74 +23,74 @@ try:
 except ImportError:
     pass
 
+# document parser class
+class docHandler(handler.ContentHandler):
+    def __init__(self,data):
+        self.data = data
+
+        # fill in defaults
+        data.type = "unknown"
+        data.name = ""
+        data.version = "1.0"
+        data.author = "Anonymous"
+        data.category = ""
+
+    def startElement(self,name,attr):
+        # just parse the <map> tag and fill data
+        if name in("Resource","Map","Cockpit"):
+            # set type from tag name it is not already set
+            try: oldtype = self.data.type
+            except: self.data.type = name.lower()       
+
+            # read values from file    
+            if "name" in attr.getNames():
+                self.data.name     = attr.getValue("name")
+            else:
+                return #invalid element
+            if "author" in attr.getNames():
+                self.data.author   = attr.getValue("author")
+            else:
+                return #invalid element
+
+            if "type" in attr.getNames():
+                self.data.type     = attr.getValue("type")
+            if "version" in attr.getNames():
+                self.data.version  = attr.getValue("version")
+            if "category" in attr.getNames():
+                self.data.category = attr.getValue("category")
+
+# rudimentary entity resolver
+class entityResolver(object):
+      # initialize, storing a path and a data object
+      def __init__(self,path,data):
+          self.path = path
+          self.data = data
+
+      # return a stream for a given external entity
+      def resolveEntity(self,pubid,sysid):
+          path = self.path
+
+          # extract data type: the base name of the DTD
+          self.data.type = sysid.split("-")[0]
+
+          # look in current and parent directories for dtds
+          while len(path) > 0 and path != "/":
+              fullfile = os.path.join(path, sysid)
+              try:
+                  return open( fullfile )
+              except:
+                  pass
+              # go to "parent" directory
+              path = os.path.split(path)[0]
+
+          # fallback: return empty stream, result: no dtd checking is done.
+          # Not horribly bad in this context
+          print("warning, could not find requested entity", sysid)
+
+          return StringIO("")
+
 # parse a resource xml file and fill in data property data strucure
 def parseResource(filename, data):
-    # document parser class
-    class docHandler(handler.ContentHandler):
-        def __init__(self,data):
-            self.data = data
-
-            # fill in defaults
-            data.type = "unknown"
-            data.name = ""
-            data.version = "1.0"
-            data.author = "Anonymous"
-            data.category = ""
-
-        def startElement(self,name,attr):
-            # just parse the <map> tag and fill data
-            if name in("Resource","Map","Cockpit"):
-                # set type from tag name it is not already set
-                try: oldtype = self.data.type
-                except: self.data.type = name.lower()       
-
-                # read values from file    
-                if "name" in attr.getNames():
-                    self.data.name     = attr.getValue("name")
-                else:
-                    return #invalid element
-                if "author" in attr.getNames():
-                    self.data.author   = attr.getValue("author")
-                else:
-                    return #invalid element
-
-                if "type" in attr.getNames():
-                    self.data.type     = attr.getValue("type")
-                if "version" in attr.getNames():
-                    self.data.version  = attr.getValue("version")
-                if "category" in attr.getNames():
-                    self.data.category = attr.getValue("category")
-                    
-    # rudimentary entity resolver
-    class entityResolver:
-          # initialize, storing a path and a data object
-          def __init__(self,path,data):
-              self.path = path
-              self.data = data
-
-          # return a stream for a given external entity
-          def resolveEntity(self,pubid,sysid):
-              path = self.path
-
-              # extract data type: the base name of the DTD
-              self.data.type = string.split(sysid,"-")[0]
-
-              # look in current and parent directories for dtds
-              while len(path) > 0 and path != "/":
-                  fullfile = os.path.join(path, sysid)
-                  try:
-                      return open( fullfile )
-                  except:
-                      pass
-                  # go to "parent" directory
-                  path = os.path.split(path)[0]
-
-              # fallback: return empty stream, result: no dtd checking is done.
-              # Not horribly bad in this context
-              print("warning, could not find requested entity", sysid)
-              
-              return StringIO("")
-
     # parse: create parser...
     parser = sax.make_parser()
     # set it's content handler to extract the category data we want...
@@ -126,7 +126,7 @@ def getCanonicalPath(path):
 
 # scan for all XML files in the directory and rename them according to the rules
 def scanDir(sourceDir, destinationDir, function):
-    def visitor3( dirpath, subdirectores, names ):
+    def visitor(dirpath, subdirectories, names):
         for filename in names:
             if filename.endswith(".xml"):
                 path = os.path.join(dirpath, filename)
@@ -134,10 +134,8 @@ def scanDir(sourceDir, destinationDir, function):
                 # call the passed function
                 function(path, os.path.join(destinationDir, newPath), newPath)
 
-    def visitor( t ):
-        visitor3( t[0], t[1], t[2] )
-
-    map(visitor, os.walk(sourceDir))
+    for directory_info in os.walk(sourceDir):
+        visitor(*directory_info)
 
 # move file oldFile to newFile
 def Move(oldFile, newFile, canonicalPath ):
