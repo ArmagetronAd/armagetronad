@@ -128,6 +128,13 @@ protected:
     //! note: directions are represented by unit-length vectors
     static eCoord nextDirIfGlancing(eCoord const & dir, eCoord const & targetDir, REAL ts);
 
+    //! loads this camera configuration from a line
+    void Load( std::istream & s );
+
+    //! saves this camera configuration
+    void Save( std::ostream & s ) const;
+    
+
     void Bound( REAL dt ); //!< make sure the camera is inside the arena and has clear line of sight
     void Bound( REAL dt, eCoord & pos ); //!< make sure pos is inside the arena and has clear line of sight
 
@@ -155,6 +162,12 @@ public:
 
     const ePlayerNetID* Player() const;
     const ePlayer* LocalPlayer() const;
+
+    //! loads a camera configuration from a line
+    static void LoadAny(  eGrid * grid, std::istream & s );
+
+    //! saves all this cameras' configuration in a form that can be used from a config file
+    static void SaveAll(  eGrid * grid, std::ostream & s );
 
     eCamera(eGrid *grid, rViewport *vp,ePlayerNetID *owner,ePlayer *lp,eCamMode m=CAMERA_IN, bool rMain=true);
     virtual ~eCamera();

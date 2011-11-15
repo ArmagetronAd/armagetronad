@@ -227,7 +227,7 @@ uActionTooltip eCamera::se_switchViewTooltip( uActionTooltip::Level_Expert, eCam
 
 static REAL s_startFollowX = -30, s_startFollowY = -30, s_startFollowZ = 80;
 static REAL s_startSmartX = 10, s_startSmartY = 30, s_startSmartZ = 2;
-static REAL s_startFreeX =  10, s_startFreeY = -70, s_startFreeZ = 100;
+static REAL s_startFreeX =  10, s_startFreeY = -70, s_startFreeZ = 100, s_startFreeRotate = 0, s_startFreePitch = 0;
 
 static tSettingItem<REAL> s_foX("CAMERA_FOLLOW_START_X", s_startFollowX);
 static tSettingItem<REAL> s_smX("CAMERA_SMART_START_X", s_startSmartX);
@@ -240,6 +240,9 @@ static tSettingItem<REAL> s_frY("CAMERA_FREE_START_Y", s_startFreeY);
 static tSettingItem<REAL> s_foZ("CAMERA_FOLLOW_START_Z", s_startFollowZ);
 static tSettingItem<REAL> s_smZ("CAMERA_SMART_START_Z", s_startSmartZ);
 static tSettingItem<REAL> s_frZ("CAMERA_FREE_START_Z", s_startFreeZ);
+
+static tSettingItem<REAL> s_frR("CAMERA_FREE_START_ROTATE", s_startFreeRotate);
+static tSettingItem<REAL> s_frP("CAMERA_FREE_START_PITCH", s_startFreePitch);
 
 // custom camera displacement
 static REAL s_customBack = 30, s_customRise = 20, s_customBackSpeed = 0, s_customRiseSpeed = 0 , s_customPitch = -.7, s_customZoom = 0.5, s_customTurnSpeed=40, s_customTurnSpeed180 = 2;
@@ -363,6 +366,49 @@ eCoord eCamera::nextDirIfGlancing(eCoord const & dir, eCoord const & targetDir, 
     }
 }
 
+//! loads a camera configuration from a line
+void eCamera::LoadAny( eGrid * grid, std::istream & s )
+{
+    int id;
+    s >> id;
+    if( s.good() && id >= 0 && grid && id < grid->cameras.Len() )
+    {
+        // load the rest
+        grid->cameras(id)->Load( s );
+    }
+}
+
+//! loads this camera configuration from a line
+void eCamera::Load( std::istream & s )
+{
+    s >> pos.x >> pos.y >> dir.x >> dir.y >> z >> rise >> fov;
+    dir.Normalize();
+}
+
+//! saves all this cameras' configuration in a form that can be used from a config file
+void eCamera::SaveAll( eGrid * grid, std::ostream & s )
+{
+    if( !grid )
+    {
+        return;
+    }
+    for( int i = 0; i < grid->cameras.Len(); ++i )
+    {
+        s << "WARP_CAMERA " << i << " ";
+        grid->cameras(i)->Save(s);
+        s << "\n";
+    }
+}
+
+//! saves this camera configuration
+void eCamera::Save( std::ostream & s ) const
+{
+    s << " " << pos.x << " " << pos.y << " " << dir.x << " " << dir.y << " " 
+      << z << " " << rise << " " << fov;
+}
+
+// settings items exploiting these functions are in gGame.cpp, only there they have good
+// access to the grid.
 
 // pointer holding the last player watched actively
 static nObserverPtr< ePlayerNetID > se_watchedPlayer[ MAX_PLAYERS ];
@@ -568,6 +614,17 @@ void eCamera::MyInit(){
         if (dist<.001) dist=1;
         dir=dir*(1/dist);
         rise=(CenterZ()-z)/dist;
+    }
+
+    // modify rotation and pitch
+    if( mode == CAMERA_FREE )
+    {
+        if( s_startFreePitch != 0 )
+        {
+            rise = s_startFreePitch;
+        }
+        REAL rot = s_startFreeRotate*M_PI/180;
+        dir = dir.Turn( cosf(rot), sinf(rot) );
     }
 
     activeGlanceRequest=NULL;

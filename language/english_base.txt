@@ -616,6 +616,11 @@ camera_smart_glance_custom_text Custom Glance
 camera_free_start_x_help	Start position of the free camera
 camera_free_start_y_help	Start position of the free camera
 camera_free_start_z_help	Start position of the free camera
+camera_free_start_rotate_help Start rotation of the free camera (relative to looking at the initially watched cycle)
+camera_free_start_pitch_help Start pitch of the free camera (if 0, it will tilt to look at the cycle)
+
+save_cameras_help           Prints commands that restore the current camera positions later.
+warp_camera_help            Instantly changes the position of one camera. Format: WARP_CAMERA camera_id posx posy dirx diry height pitch fov.
 
 camera_custom_back_help		Position of the custom camera: how much is it moved back from the cycle?
 camera_custom_rise_help		Position of the custom camera: how much is it moved up from the cycle?

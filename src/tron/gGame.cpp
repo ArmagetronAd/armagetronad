@@ -5151,3 +5151,23 @@ void sg_TutorialGame( gGameSettings & settings, gTutorialBase & tutorial )
     sg_StopQuickExit();
 }
 
+static void sg_WarpCamera( std::istream & s )
+{
+    if( sg_currentGame && sg_currentGame->Grid() )
+    {
+        eCamera::LoadAny( sg_currentGame->Grid(), s );
+    }
+}
+
+static void sg_SaveCameras( std::istream & )
+{
+    if( sg_currentGame && sg_currentGame->Grid() )
+    {
+        std::ostringstream s;
+        eCamera::SaveAll( sg_currentGame->Grid(), s );
+        con << s.str();
+    }
+}
+
+static tConfItemFunc sgc_warpCamera( "WARP_CAMERA", &sg_WarpCamera );
+static tConfItemFunc sgc_saveCameras( "SAVE_CAMERAS", &sg_SaveCameras );
