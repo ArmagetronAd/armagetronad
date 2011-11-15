@@ -599,13 +599,36 @@ class gChallenge: public gTutorial
 public:
     gChallenge( char const * name )
     : gTutorial( name )
+    , firstRun_( true )
     {
+    }
+
+    // analyzes the game
+    virtual void Analysis()
+    {
+        gTutorial::Analysis();
+
+        // skip countdown on repeat runs
+        REAL minTime = -.999;
+        if( !firstRun_ && se_GameTime() < minTime )
+        {
+            se_mainGameTimer->Reset( minTime );
+        }
+    }
+
+    virtual bool RunCore()
+    {
+        bool ret = gTutorial::RunCore();
+        firstRun_ = false;
+        return ret;
     }
 
     virtual bool IsChallenge() const
     {
         return true;
     }
+private:
+    bool firstRun_;
 };
 
 // test tutorial
@@ -650,7 +673,7 @@ public:
     // analyzes the game
     void Analysis()
     {
-        gTutorial::Analysis();
+        gChallenge::Analysis();
     }
 
     // adjust width on the fly, to be called from Maze()
