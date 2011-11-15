@@ -3066,6 +3066,9 @@ void gGame::StateUpdate(){
         case GS_CREATE_GRID:
             // sr_con.autoDisplayAtNewline=true;
 
+            // throw out old surfaces
+            rSurfaceCache::CycleCache();
+
             sg_ParseMap( aParser );
 
             sn_Statistics();

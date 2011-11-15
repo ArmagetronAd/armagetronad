@@ -379,14 +379,106 @@ void rSurface::CopyFrom( rSurface const & other )
 {
 #ifndef DEDICATED
     tASSERT( 0 == surface_ );
-    tASSERT( other.surface_ );
+    if( other.surface_ )
+    {
+        // copy surface
+        surface_ = SDL_ConvertSurface(other.surface_, other.surface_->format, SDL_SWSURFACE);
 
-    // copy surface
-    surface_ = SDL_ConvertSurface(other.surface_, other.surface_->format, SDL_SWSURFACE);
-
-    // copy flags
-    format_ = other.format_;
+        // copy flags
+        format_ = other.format_;
+    }
 #endif
+}
+
+// surface cache
+typedef std::pair< tString, tPath const * > rSurfaceCacheKey;
+
+struct rSurfaceCacheValue
+{
+    rSurface surface;
+    bool used;
+
+    rSurfaceCacheValue()
+    : used( true )
+    {}
+};
+
+typedef std::map< rSurfaceCacheKey, rSurfaceCacheValue > rSurfaceCacheMap;
+static rSurfaceCacheMap sr_surfaceCacheMap;
+
+// ******************************************************************************************
+// *
+// *	GetSurface
+// *
+// ******************************************************************************************
+//!
+//!		@param	fileName the file name of the surface relative to the given path
+//!     @param  path     search path
+//!
+// ******************************************************************************************
+rSurface const * rSurfaceCache::GetSurface( char const * fileName, tPath const *path )
+{
+    rSurfaceCacheKey key( tString( fileName ), path );
+    // bool inCache = ( sr_surfaceCacheMap.find(key) != sr_surfaceCacheMap.end() );
+
+    rSurfaceCacheValue & val = sr_surfaceCacheMap[ key ];
+    if( !val.surface.GetSurface() )
+    {
+        // first time, load
+        val.surface.Create( fileName, path );
+    }
+
+    if( !val.surface.GetSurface() )
+    {
+        // previous error, don't retry
+        return NULL;
+    }
+
+    // mark as used and return
+    val.used = true;
+    return &val.surface;
+}
+
+// ******************************************************************************************
+// *
+// *	CycleCache
+// *
+// ******************************************************************************************
+//!
+//!
+// ******************************************************************************************
+void rSurfaceCache::CycleCache()
+{
+    for( rSurfaceCacheMap::iterator i = sr_surfaceCacheMap.begin(); i != sr_surfaceCacheMap.end();  )
+    {
+        rSurfaceCacheMap::iterator next = i;
+        next++;
+
+        rSurfaceCacheValue & value = (*i).second;
+        if( !value.used )
+        {
+            sr_surfaceCacheMap.erase( i );
+        }
+        else
+        {
+            value.used = false;
+        }
+
+        i = next;
+    }
+}
+
+// ******************************************************************************************
+// *
+// *	ClearCache
+// *
+// ******************************************************************************************
+//!
+//!
+// ******************************************************************************************
+void rSurfaceCache::ClearCache()
+{
+    sr_surfaceCacheMap.clear();
 }
 
 // ******************************************************************************************
@@ -418,6 +510,7 @@ void rITexture::UnloadAll( void )
     {
         s_textures_(i)->Unload();
     }
+    rSurfaceCache::ClearCache();
 }
 
 // ******************************************************************************************
@@ -564,7 +657,7 @@ static int sr_GetMaxTextureSize()
 //!
 // ******************************************************************************************
 
-void rISurfaceTexture::Upload( rSurface & surface )
+void rISurfaceTexture::Upload( rSurface const & surface )
 {
 #ifndef DEDICATED
     sr_LockSDL();
@@ -852,10 +945,10 @@ void rFileTexture::OnSelect()
 {
 #ifndef DEDICATED
     // std::cerr << "loading texture " << fileName_ << "\n";
-    rSurface surface( fileName_, path_ );
-    if ( surface.GetSurface() )
+    rSurface const * surface = rSurfaceCache::GetSurface( fileName_, path_ );
+    if ( surface )
     {
-        this->Upload( surface );
+        this->Upload( *surface );
     }
     else if (s_reportErrors_)
     {
@@ -983,13 +1076,8 @@ static void sr_VerifyResourceTexture( tString const & resourcePath )
             // by loading it once
             if( w == r )
             {
-                SDL_Surface * surface = IMG_Load(w);
-                if( surface )
-                {
-                    // throw result away
-                    SDL_FreeSurface( surface );
-                }
-                else
+                rSurface const * surface = rSurfaceCache::GetSurface( filePath, &tDirectories::Resource() );
+                if( !surface )
                 {
                     // trigger a redownload
                     tResourceManager::locateResource( resourcePath, "", true, true );
