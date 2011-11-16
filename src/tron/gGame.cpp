@@ -4546,7 +4546,7 @@ bool gGame::GameLoop(bool input){
         // activate team menu if auto-join is off
         if( !sg_PlayersJoined() )
         {
-            gTeam::TeamMenu();
+            gTeam::TeamMenu(true);
         }
     }
 

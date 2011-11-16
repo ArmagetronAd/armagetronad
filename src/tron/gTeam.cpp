@@ -240,11 +240,13 @@ public:
 class gMenuItemPlayer: public uMenuItem
 {
     ePlayerNetID* player;
+    bool defaultSpectate_;
 public:
     gMenuItemPlayer(uMenu *M,ePlayerNetID* p,
-                    const tOutput& help)
+                    const tOutput& help, bool defaultSpectate )
             : uMenuItem( M, help ),
-            player ( p )
+              player ( p ),
+              defaultSpectate_( defaultSpectate )
     {
     }
 
@@ -261,7 +263,8 @@ public:
         uMenu playerMenu( title );
         tArray<uMenuItem*> items;
 
-        if ( !player->IsSpectating() || player->NextTeam() != NULL)
+        bool spectatorMenu = !player->IsSpectating() || player->NextTeam() != NULL;
+        if (spectatorMenu && !defaultSpectate_)
         {
             items[ items.Len() ] = tNEW( gMenuItemSpectate ) ( &playerMenu, player );
         }
@@ -304,6 +307,11 @@ public:
             items[ items.Len() ] = tNEW( gMenuItemNewTeam ) ( &playerMenu, player );
         }
 
+        if (spectatorMenu && defaultSpectate_)
+        {
+            items[ items.Len() ] = tNEW( gMenuItemSpectate ) ( &playerMenu, player );
+        }
+
         items[items.Len()] = tNEW ( gMenuItemSpacer ) ( &playerMenu );
         items[items.Len()] = tNEW ( gMenuItemStatus ) ( &playerMenu, player, false);
         items[items.Len()] = tNEW ( gMenuItemStatus ) ( &playerMenu, player, true);
@@ -317,11 +325,13 @@ public:
     }
 };
 
-
-
+void gTeam::TeamMenu()
+{
+    TeamMenu( false );
+}
 
 // bring up the team selection menu
-void gTeam::TeamMenu()
+void gTeam::TeamMenu(bool defaultSpectate)
 {
     int i;
 
@@ -338,7 +348,7 @@ void gTeam::TeamMenu()
             help << "$team_menu_player_help";
             ePlayerNetID* pni = player->netPlayer;
             if ( pni )
-                items[ items.Len() ] = tNEW( gMenuItemPlayer ) ( &Menu, pni, help );
+                items[ items.Len() ] = tNEW( gMenuItemPlayer ) ( &Menu, pni, help, defaultSpectate );
         }
     }
 
