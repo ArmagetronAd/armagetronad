@@ -293,7 +293,8 @@ bool tXmlParser::LoadWithParsing(const char* filename, const char *uri) {
 
     // load once wihout parsing to get basic errors out of the way
     // and the document initialized
-    if( !m_Doc ) {
+    if( !m_Doc || m_Filename != tResourceManager::locateResource(filename, uri) )
+    {
         success = LoadWithoutParsing( filename, uri );
     }
 
