@@ -30,7 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "ePlayer.h"
 #include "eTeam.h"
 
-static tString se_TeamMenu_Team_Ok("0xffffff");
+static tString se_TeamMenu_Team_Ok("0xRESETT");
 static tString se_TeamMenu_Team_Full("0xaaaaaa");
 static tConfItem<tString> se_TeamMenu_Team_Ok_Cfg("TEAM_MENU_COLOR_TEAM_OK",
         "$team_menu_color_team_ok_help",
