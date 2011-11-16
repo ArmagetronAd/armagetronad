@@ -6415,6 +6415,12 @@ void ePlayerNetID::ClearObject(){
 
 void ePlayerNetID::Greet(){
     if (!greeted){
+        greeted=true;
+        if( Owner() == sn_myNetID )
+        {
+            return;
+        }
+
         tOutput o;
         o.SetTemplateParameter(1, GetName() );
         o.SetTemplateParameter(2, st_programVersion);
@@ -6426,7 +6432,6 @@ void ePlayerNetID::Greet(){
         s << "\n";
         //std::cout << s;
         sn_ConsoleOut(s,Owner());
-        greeted=true;
     }
 }
 
