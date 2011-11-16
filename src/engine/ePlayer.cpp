@@ -4642,7 +4642,7 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), timeC
 
     color.r_ = color.g_ = color.b_ = 15;
 
-    greeted             = true;
+    greeted             = false;
     chatting_           = false;
     spectating_         = false;
     stealth_            = false;
@@ -6327,6 +6327,11 @@ void ePlayerNetID::ReadSync( Engine::PlayerNetIDSync const & sync, nSenderInfo c
         SetDefaultTeam();
 
         RequestSync();
+    }
+
+    if( sn_GetNetState() == nCLIENT )
+    {
+        greeted = true;
     }
 }
 

@@ -4329,6 +4329,47 @@ static uActionTooltip ingamemenuTooltip( uActionTooltip::Level_Expert, ingamemen
 
 static eLadderLogWriter sg_gameTimeWriter("GAME_TIME", true);
 
+// checks whether all players have been fully synced with the server
+static bool sg_PlayersSynced()
+{
+    for (int pi = MAX_PLAYERS-1; pi >= 0; --pi )
+    {
+        ePlayer * p = ePlayer::PlayerConfig(pi);
+        if ( !p )
+            continue;
+        ePlayerNetID * np = p->netPlayer;
+        if ( !np )
+            continue;
+        if( !np->IsGreeted() )
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+// checks whether players properly joined the game; if sg_PlayersSynced returns true and this false,
+/// auto-join is off.
+static bool sg_PlayersJoined()
+{
+    for (int pi = MAX_PLAYERS-1; pi >= 0; --pi )
+    {
+        ePlayer * p = ePlayer::PlayerConfig(pi);
+        if ( !p )
+            continue;
+        ePlayerNetID * np = p->netPlayer;
+        if ( !np )
+            continue;
+        if( !np->IsSpectating() && !np->CurrentTeam() && !np->NextTeam() )
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 bool gGame::GameLoop(bool input){
     nNetState netstate = sn_GetNetState();
 
@@ -4465,6 +4506,8 @@ bool gGame::GameLoop(bool input){
 
     bool synced = se_mainGameTimer && ( se_mainGameTimer->IsSynced() || ( stateNext >= GS_DELETE_OBJECTS || stateNext <= GS_CREATE_GRID ) );
 
+    static bool playersSynced = false;
+
     if  (!synced)
     {
         // see if there is a game object owned by this client, if so, declare emergency sync
@@ -4472,10 +4515,10 @@ bool gGame::GameLoop(bool input){
         {
             ePlayer * p = ePlayer::PlayerConfig(pi);
             if ( !p )
-                break;
+                continue;
             ePlayerNetID * np = p->netPlayer;
             if ( !np )
-                break;
+                continue;
             if ( np->Object() )
             {
                 synced = true;
@@ -4487,11 +4530,24 @@ bool gGame::GameLoop(bool input){
     {
         // synced finally. Send our player info over so we can join the game.
         ePlayerNetID::Update();
+        playersSynced = false;
 
         // and trigger the scheduled auto-logons.
         ePlayer::SendAuthNames();
 
         synced_ = true;
+    }
+
+    // check for players to get synced back
+    if( !playersSynced && sg_PlayersSynced() )
+    {
+        playersSynced = true;
+
+        // activate team menu if auto-join is off
+        if( !sg_PlayersJoined() )
+        {
+            gTeam::TeamMenu();
+        }
     }
 
     static float lastTime = 1e42;

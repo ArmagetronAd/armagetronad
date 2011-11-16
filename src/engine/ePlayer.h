@@ -254,7 +254,7 @@ private:
 
     int favoriteNumberOfPlayersPerTeam;		// join team if number of players on it is less than this; create new team otherwise
     bool nameTeamAfterMe; 					// player prefers to call his team after his name
-    bool greeted;        					// did the server already greet him?
+    bool greeted;        					// did the server already greet him? (On the client: was the first sync back already received?)
     bool disconnected;   					// did he disconnect from the game?
 
     static void SwapPlayersNo(int a,int b); // swaps the players a and b
@@ -400,7 +400,8 @@ public:
     void SetSilenced( bool silenced ) { silenced_ = silenced; }
     bool& AccessSilenced( void ) { return silenced_; }
 
-    bool IsSuspended ( void ) { return suspended_ > 0; }
+    bool IsSuspended ( void ) const { return suspended_ > 0; }
+    bool IsGreeted() const { return greeted; }
 
     eVoter * GetVoter() const {return voter_;}     // returns our voter
     void CreateVoter();						// create our voter or find it
