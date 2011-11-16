@@ -575,9 +575,9 @@ static char const * sn_versionString[] =
         "0.2.8.5", // 19
         "0.3.1", // 20
         "0.3.1_pb", // 21
+        "0.4_auto_team", // 22
         // move #ifdef downwards to define new protocol versions on 0.4
 #ifdef RESERVE_FOR_0_4 
-        "0.4_reserved1", // 22
         "0.4_reserved2", // 23
         "0.4_reserved3", // 24
         "0.4_reserved4", // 25

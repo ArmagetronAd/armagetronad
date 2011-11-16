@@ -168,6 +168,8 @@ public:
     }
 };
 
+extern nVersionFeature se_defaultTeamWish;
+
 class gMenuItemAutoSelect: public uMenuItem
 {
     ePlayerNetID* 	player;
@@ -185,7 +187,8 @@ public:
 
     virtual void Enter()
     {
-        player->SetDefaultTeam();
+        SetSpectator( player, false );
+        player->SetDefaultTeamWish();
         menu->Exit();
     }
 };
@@ -272,6 +275,17 @@ public:
                 items[ items.Len() ] = tNEW( gMenuItemPlayerTeam ) ( &playerMenu, player, team, false );
             }
         }
+
+        bool newTeam = player->IsSpectating() ||
+        !( player->NextTeam() && player->NextTeam()->NumHumanPlayers() == 1 &&
+           player->CurrentTeam() && player->CurrentTeam()->NumHumanPlayers() == 1 );
+
+        if( newTeam && se_defaultTeamWish.Supported() )
+        {
+            items[ items.Len() ] = tNEW( gMenuItemNewTeam ) ( &playerMenu, player );
+        }
+
+
         // second pass add teams who probably can be joined
         // Note: these will appear above the unjoinable ones.
         for ( int i = 0; i<eTeam::teams.Len(); i++ )
@@ -281,10 +295,11 @@ public:
                 items[ items.Len() ] = tNEW( gMenuItemPlayerTeam ) ( &playerMenu, player, team, true );
         }
 
-        if ( player->IsSpectating() ||
-            !( player->NextTeam() && player->NextTeam()->NumHumanPlayers() == 1 &&
-               player->CurrentTeam() && player->CurrentTeam()->NumHumanPlayers() == 1 )
-        )
+        if( se_defaultTeamWish.Supported() )
+        {
+            items[items.Len()] = tNEW ( gMenuItemAutoSelect ) ( &playerMenu, player );
+        }
+        else if( newTeam )
         {
             items[ items.Len() ] = tNEW( gMenuItemNewTeam ) ( &playerMenu, player );
         }

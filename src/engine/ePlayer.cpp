@@ -8114,7 +8114,24 @@ void ePlayerNetID::CreateNewTeam()
 
 const unsigned short TEAMCHANGE = 0;
 const unsigned short NEW_TEAM   = 1;
+const unsigned short AUTO_TEAM  = 2;
 
+// AUTO_TEAM is only available since 0.4_alpha
+nVersionFeature se_defaultTeamWish(22);
+
+// express the with to put a new player into a default team
+void ePlayerNetID::SetDefaultTeamWish()
+{
+    if ( nCLIENT ==  sn_GetNetState() )
+    {
+        Engine::PlayerNetIDControl & control = *BroadcastControl().MutableExtension( Engine::player_control );
+
+        control.set_type( AUTO_TEAM );
+    }
+    else
+        // create a new team if possible otherwise spectate
+        SetDefaultTeam();
+}
 
 // express the wish to be part of the given team (always callable)
 void ePlayerNetID::SetTeamWish(eTeam* newTeam)
@@ -8193,6 +8210,15 @@ void ePlayerNetID::ReceiveControlNet( Network::NetObjectControl const & controlB
 
     switch (messageType)
     {
+    case AUTO_TEAM:
+        {
+            if (NextTeam()==NULL)
+            {
+                SetDefaultTeam(true);
+            }
+
+            break;
+        }
     case NEW_TEAM:
         {
             // create a new team if possible otherwise spectate or...
