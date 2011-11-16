@@ -1175,6 +1175,7 @@ input_mess_end_help					Scrolls to the end of the messages to show the most rece
 #********************************************
 #********************************************
 
+input_cockpit_key_1_tooltip         Press \1 to cycle through map modes.
 input_cockpit_key_1_text			Cockpit key 1
 input_cockpit_key_2_text			Cockpit key 2
 input_cockpit_key_3_text			Cockpit key 3

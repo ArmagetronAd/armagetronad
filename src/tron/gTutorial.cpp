@@ -349,6 +349,8 @@ public:
         PushSetting( "FADEOUT_NAME_DELAY", "0" );
 
         SetDifficulty( difficulty_ );
+
+        su_helpLevel = uActionTooltip::Level_Advanced;
     }
 
     // called on success
