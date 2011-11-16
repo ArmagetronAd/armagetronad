@@ -1203,6 +1203,7 @@ void tMemManBase::Check(){
     EnterCriticalSection(&mutex);
 #endif
 
+    tBottleNeck neck;
     for (int i=MAX_SIZE;i>=0;i--)
         memman[i].Check();
 
