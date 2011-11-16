@@ -2779,7 +2779,7 @@ void gGame::ReadSync( Game::GameSync const & sync, nSenderInfo const & sender )
 
     unsigned short newState = sync.state();
 
-#ifdef DEBUG
+#ifdef DEBUG_X
     con << "Read gamestate " << newState << ".\n";
 #endif
 

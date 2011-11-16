@@ -4085,7 +4085,9 @@ void ePlayerNetID::Chat(const tString &s_orig)
                     std::stringstream s(static_cast< char const * >( params ) );
                     tConfItemBase::LoadAll(s);
                 }
+#ifdef DEBUG
                 std::cout << "console selected\n";
+#endif
             } else
                 se_DisplayChatLocally( this, s );
 
