@@ -1327,8 +1327,10 @@ void nMessageBase::BroadCast(bool ack)
 //  Basic communication classes: login
 // **********************************************
 
+// flags indicating ongoing login result
 static bool login_failed=false;
 static bool login_succeeded=false;
+static bool sn_expired=true;
 
 // salt value sent as past login tokens. They are returned by
 // the server as you sent them, and make sure you only accept
@@ -1434,7 +1436,6 @@ static void sn_LoginAcceptedHandler( Network::LoginAccepted const & accepted, nS
 #ifndef NOEXPIRE
 #ifndef DEDICATED
             // last checked to be compatible with 0.3.1_pb from trunk.
-            // It's ulikely this branch will introduce more bugs/network code revisions, so we're fine accepting all 
             int lastCheckedTrunkVersion = 21;
 
             // start of trunk as seen from this branch
@@ -1442,6 +1443,12 @@ static void sn_LoginAcceptedHandler( Network::LoginAccepted const & accepted, nS
 
             // maximal allowed version from this branch
             int maxVersionThisBranch = sn_currentProtocolVersion + 1;
+
+            // in case we forget to update lastCheckedTrunkVersion
+            if( lastCheckedTrunkVersion < maxVersionThisBranch )
+            {
+                lastCheckedTrunkVersion = maxVersionThisBranch;
+            }
 
             // expiration for public beta versions
             if ( !sn_AcceptingFromMaster &&
@@ -1451,7 +1458,11 @@ static void sn_LoginAcceptedHandler( Network::LoginAccepted const & accepted, nS
                      )
                 )
             {
-                throw tGenericException( tOutput("$testing_version_expired"), tOutput("$testing_version_expired_title" ) );
+                sn_expired=true;
+                login_failed=true;
+                login_succeeded=false;
+                sn_SetNetState(nSTANDALONE);
+                return;
             }
 #endif
 #endif
@@ -2994,20 +3005,16 @@ nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket
 {
     if ( loginType == Login_All )
     {
-        nConnectError ret = nABORT;
-        if ( sn_GetNetState() != nCLIENT )
-        {
-            // ret = sn_Connect( server, Login_Protobuf, socket );
-        }
-        if ( sn_GetNetState() != nCLIENT )
+        nConnectError ret = nTIMEOUT;
+        if ( sn_GetNetState() != nCLIENT && ret == nTIMEOUT )
         {
             ret = sn_Connect( server, Login_Post0252, socket );
         }
-        if ( sn_GetNetState() != nCLIENT )
+        if ( sn_GetNetState() != nCLIENT && ret == nTIMEOUT )
         {
             sn_Connect( server, Login_Protobuf, socket );
         }
-        if ( sn_GetNetState() != nCLIENT )
+        if ( sn_GetNetState() != nCLIENT && ret == nTIMEOUT )
         {
             ret = sn_Connect( server, Login_Pre0252, socket );
         }
@@ -3016,6 +3023,7 @@ nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket
     }
 
     sn_DenyReason = "";
+    sn_expired = false;
 
     // reset redirection
     sn_redirectTo.release();
@@ -3156,7 +3164,12 @@ nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket
             return nABORT;
         }
     }
-    if (login_failed)
+    if( sn_expired )
+    {
+        con.Message( tOutput("$testing_version_expired_title" ), tOutput("$testing_version_expired") );
+        return nABORT;
+    }
+    else if (login_failed)
     {
         con << tOutput("$network_login_failed");
         sn_SetNetState(nSTANDALONE);
