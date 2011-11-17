@@ -283,7 +283,7 @@ public:
         !( player->NextTeam() && player->NextTeam()->NumHumanPlayers() == 1 &&
            player->CurrentTeam() && player->CurrentTeam()->NumHumanPlayers() == 1 );
 
-        if( newTeam && se_defaultTeamWish.Supported() )
+        if( newTeam && se_defaultTeamWish.Supported(0) )
         {
             items[ items.Len() ] = tNEW( gMenuItemNewTeam ) ( &playerMenu, player );
         }
