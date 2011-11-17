@@ -383,13 +383,6 @@ public:
             return false;
         }
 
-        // spawn spectator voters
-        for ( i = MAXCLIENTS; i > 0; --i )
-        {
-            if ( sn_Connections[ i ].socket )
-                eVoter::GetVoter( i );
-        }
-
         // enough voters online?
         if ( eVoter::voters_.Len() < se_minVoters || eVoter::voters_.Len() < 2 )
         {
@@ -2090,24 +2083,35 @@ eVoter* eVoter::GetVoter( int ID, bool complain )			// find or create the voter 
 #endif
 
     // see if there is a real player on the specified ID
-    if ( !se_allowVotingSpectator )
+    bool spectator = false;
+    bool player = false;
+    for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
     {
-        bool player = false;
-        for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
+        ePlayerNetID* p = se_PlayerNetIDs(i);
+        if ( p->Owner() == ID )
         {
-            ePlayerNetID* p = se_PlayerNetIDs(i);
-            if ( p->Owner() == ID && p->CurrentTeam() )
-                player = true;
-        }
-        if (!player)
-        {
-            if ( complain )
+            if( p->CurrentTeam() )
             {
-                tOutput message("$vote_disabled_spectator");
-                sn_ConsoleOut( message, ID );
+                player = true;
             }
-            return NULL;
+            spectator = true;
         }
+    }
+
+    if( !spectator )
+    {
+        // no support for old style, playerless spectators any more
+        return NULL;
+    }
+
+    if ( !se_allowVotingSpectator && !player )
+    {
+        if ( complain )
+        {
+            tOutput message("$vote_disabled_spectator");
+            sn_ConsoleOut( message, ID );
+        }
+        return NULL;
     }
 
     // get machine from network subsystem

@@ -8000,6 +8000,12 @@ void ePlayerNetID::UpdateTeam()
     }
 
     UpdateTeamForce();
+
+    // create voter
+    if( !GetVoter() )
+    {
+        CreateVoter();
+    }
 }
 
 void ePlayerNetID::UpdateTeamForce()
