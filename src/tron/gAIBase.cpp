@@ -2793,7 +2793,7 @@ gAIPlayer * sg_watchAI = 0;
 
 void gAIPlayer::NewObject()         // called when we control a new object
 {
-    lastTime = 0;
+    lastTime = se_GameTime();
     lastPath = 0;
     lastChangeAttempt = 0;
     lazySideChange = 0;
@@ -2801,8 +2801,8 @@ void gAIPlayer::NewObject()         // called when we control a new object
 
     if (character)
     {
-        nextTime        = character->properties[AI_STARTSTRAIGHT] * gArena::SizeMultiplier()/gCycleMovement::SpeedMultiplier();
-        nextStateChange = character->properties[AI_STATECHANGE];
+        nextTime        = lastTime + character->properties[AI_STARTSTRAIGHT] * gArena::SizeMultiplier()/gCycleMovement::SpeedMultiplier();
+        nextStateChange = lastTime + character->properties[AI_STATECHANGE];
         state           = (gAI_STATE)character->properties[AI_STARTSTATE];
     }
     else
