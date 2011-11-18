@@ -8869,7 +8869,7 @@ private:
         static Classifier delayClassifier( .06, Classification_Medium, .12, Classification_High );
         static Classifier accelerationClassifier( 4, Classification_Medium, 8, Classification_High );
         static Classifier rubberHumpClassifier( 1, Classification_Medium, 100, Classification_LudicrouslyHigh );
-        static Classifier rubberWallClassifier( .0015, Classification_Low, .3, Classification_LudicrouslyHigh );
+        static Classifier rubberWallClassifier( 0.015, Classification_Medium, .3, Classification_LudicrouslyHigh );
         static Classifier wallsLengthClassifier( 1, Classification_Low, 10, Classification_VeryHigh );
         
         // apply them
