@@ -1674,11 +1674,6 @@ tutorial_teamkill           Failure: Team Kill
 tutorial_easy_head          Good Work
 tutorial_easy_body          but that just now was actually a slightly easier version of the tutorial challenge. Try the real one again now.
 
-tutorial_menu_test_text     AI Challenge
-tutorial_menu_test_help     Play against one AI, no time limit.
-tutorial_menu_test_instructions You need to defeat a lone AI. It is pretty stupid, the best way to kill it is to set up a trap right where you start.
-tutorial_menu_test_animation 
-
 tutorial_menu_navigation_text     Navigation
 tutorial_menu_navigation_help     Navigation Tutorial: learn to control your cycle.
 tutorial_menu_navigation_instructions Use the turn controls to reach the green winzone. Get used to how the basic physics work: you will not turn smoothly, but rather in sharp angles of 90 degrees. Take your time, nothing is trying to kill you yet.
@@ -1722,7 +1717,6 @@ tutorial_menu_speedkilldefense_animation textures/tutorials/speedkilldefense/spe
 tutorial_menu_congratulations_text     Closing Words
 tutorial_menu_congratulations_help     Not everything can be taught in tutorials.
 tutorial_menu_congratulations_instructions Congratulations, you should now have completed all the essential tutorials. What follows here are optional challenges. You are now ready to enter the proper game, which is the online multiplayer component. Before you dive into that, there are a couple of things you should know about the online community and server landscape:\n\nYou can scroll this and other messages of this kind up and down using the cursor up and down keys.\n\nSumo Mode: You were taught the basics of Fortress mode here; Sumo uses the same basic mechanics, only usually for single players and not teams, and the zones of several competing players are put right on top of each other. And they shrink.\n\nCapture the Flag (CTF): Some servers offer this classic game mode, with a small zone standing in as the flag and a bigger one serving as base to return the flag to.\n\nHigh Rubber: Many servers use exorbitant values for the crash protection you experienced a bit in the Grinding tutorials. This allows for complicated maneouvers on tight space, it is usually not possible to actually see the result properly. You need to learn to read your opponents' movements if you want to succeed there.\n\nOpen Play/Dogfight: Some servers have arbitrary rules of engagement in place; you are supposed to not trap your opponents, but leave them a gap to escape through, and if you are almost trapped, you are supposed to take that gap.\n\nAlso, It is best to read over the included documentation (use the Help menu to launch it in a browser). And you should definitely stick to basic game modes and close-to-default settings at first. The server browser helps you with that by hiding advanced servers from immediate view initially; you can still enter them early if you dare.
-tutorial_menu_congratulations_animation 
 
 tutorial_menu_bullies_text     Maze Challenge
 tutorial_menu_bullies_help     Maze: two enemies have trapped you between their walls. Can you survive?
@@ -1732,17 +1726,46 @@ tutorial_menu_bullies_animation
 tutorial_menu_hilbert2_text     Maze Challenge 2
 tutorial_menu_hilbert2_help     Maze: two enemies have trapped you between their walls. Can you survive? They follow a Hilbert Curve of order 2.
 tutorial_menu_hilbert2_instructions The two bullies have read a math book and are now torturing you with Hilbert Curves, paths that cover a whole square with arbitrary density. First, a simple order two curve.
-tutorial_menu_hilbert2_animation 
 
 tutorial_menu_hilbert3_text     Maze Challenge 3
 tutorial_menu_hilbert3_help     Maze: two enemies have trapped you between their walls. Can you survive? They follow a Hilbert Curve of order 3.
 tutorial_menu_hilbert3_instructions The two bullies now force you on to a faster Hilbert Curve of order 3.
-tutorial_menu_hilbert3_animation 
 
 tutorial_menu_hilbert4_text     Ultimate Maze Challenge
 tutorial_menu_hilbert4_help     Maze: two enemies have trapped you between their walls. Can you survive? They follow a Hilbert Curve of order 4.
 tutorial_menu_hilbert4_instructions The two bullies now force you on to an extremely fast and narrow Hilbert Curve of order 4.\n\nNo human can survive this.
-tutorial_menu_hilbert4_animation 
+
+tutorial_menu_ai1_text     AI Fight
+tutorial_menu_ai1_help     Play against one AI, no time limit.
+tutorial_menu_ai1_instructions As the final tutorial, we test your skills against a lone AI. It is pretty stupid, the best way to kill it is to set up a trap right where you start. If your trap fails, use a speed kill, but watch out for sudden turns it is going to make.
+
+tutorial_ai_timeout        Failure: Timeout
+tutorial_ai_extratime      Extra Time
+
+tutorial_menu_ai2_text     AI Challenge 2
+tutorial_menu_ai2_help     Play against two AIs, no time limit.
+tutorial_menu_ai2_instructions You need to defeat two sligtly smarter AIs.
+
+tutorial_menu_ai3_text     AI Challenge 3
+tutorial_menu_ai3_help     Play against three AIs, no time limit.
+tutorial_menu_ai3_instructions You need to defeat three AIs.
+
+tutorial_menu_ai4_text     AI Challenge 4
+tutorial_menu_ai4_help     Kill AIs, beat the ticking clock.
+tutorial_menu_ai4_instructions From now on, the AIs respawn endlessly. There is a time limit, extended every time you manage to kill one.\n\nHere, you need to score four kills without getting killed yourself.
+
+tutorial_menu_ai5_text     AI Challenge 5
+tutorial_menu_ai5_help     Kill AIs, beat the ticking clock.
+tutorial_menu_ai5_instructions Score six kills.
+
+tutorial_menu_ai6_text     AI Challenge 5
+tutorial_menu_ai6_help     Kill AIs, beat the ticking clock.
+tutorial_menu_ai6_instructions Score eight kills.
+
+tutorial_menu_ai7_text     AI Challenge 7
+tutorial_menu_ai7_help     Kill AIs, beat the ticking clock.
+tutorial_menu_ai7_instructions Score ten kills.
+
 
 #********************************************
 #********************************************

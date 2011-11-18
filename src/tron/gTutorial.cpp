@@ -40,6 +40,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "gCycle.h"
 #include "gAIBase.h"
 
+#include "rConsole.h"
+
 // temporarily override a setting item
 class gTemporarySetting: public tReferencable< gTemporarySetting >
 {
@@ -151,12 +153,29 @@ public:
         finished_ = true;
     }
 
+    // called sometime after End(false), right after a winner would have been declared
+    // return true if special action was taken
+    virtual bool OnUnspecifiedNonWin()
+    {
+        return false;
+    }
+
     // round end result: human team must win without casualties
     void OnWin( eTeam * winner )
     {
+        bool failed = finished_ && !success_;
+
         finished_ = true;
         if( winner && winner->OldestHumanPlayer() )
         {
+            if ( failed )
+            {
+                if( OnUnspecifiedNonWin() )
+                {
+                    return;
+                }
+            }
+
             if( winner->AlivePlayers() == winner->NumPlayers() )
             {
                 sn_CenterMessage(tOutput("$tutorial_success"));
@@ -166,6 +185,10 @@ public:
             {
                 sn_CenterMessage(tOutput("$tutorial_teamkill"));
                 success_ = false;
+            }
+            else if( winner->OldestHumanPlayer()->Object() && !winner->OldestHumanPlayer()->Object()->Alive() )
+            {
+                sn_CenterMessage("");
             }
             else
             {
@@ -633,28 +656,183 @@ private:
     bool firstRun_;
 };
 
-// test tutorial
-class gAIChallenge1: public gChallenge
+// AI challenges
+class gAIChallenge: public gChallenge
 {
+    // timeout values
+    int initial_;       // initial time
+    int bonusPerKill_;  // time awarded for each kill
+    int killLimit_;     // total kills required to advance
+
+    int timeOffset_;    // offset to time calculation, used to keep time left limited
+
+protected:
+    int scoreKill_;    // score awarded per kill
+    int maxTime_;      // maximal time on the clock left
 public:
-    gAIChallenge1()
-    : gChallenge( "test" )
+    gAIChallenge( char const * name, int initial, int bonusPerKill, int killLimit )
+    : gChallenge( name )
+      , initial_( initial )
+      , bonusPerKill_( bonusPerKill )
+      , killLimit_( killLimit )
+      , scoreKill_( 2 )
+      , maxTime_( initial+bonusPerKill )
     {
-        settings_.numAIs = 1;
+        // settings_.gameType = gFREESTYLE;
+        settings_.scoreWin = 0;
+
+        if( maxTime_ < 60 )
+        {
+            maxTime_ = 60;
+        }
+    }
+
+    virtual void BeforeSpawn()
+    {
+        gChallenge::BeforeSpawn();
+        gAIPlayer::SetNumberOfAIs( settings_.numAIs, settings_.minPlayers, settings_.AI_IQ, 10 );
+
+        // lowering player score so he gets the first spawn point
+        // HumanTeam().AddScore(-1);
+        // eTeam::SortByScore();
+    }
+
+    virtual void AfterSpawn()
+    {
+        gChallenge::AfterSpawn();
+        
+        // HumanTeam().AddScore(1);
+
+        timeOffset_ = 0;
+    }
+
+    virtual bool OnUnspecifiedNonWin()
+    {
+        con.CenterDisplay( tString( tOutput("$tutorial_ai_timeout") ), 2 );
+
+        return true;
     }
 
     // analyzes the game
     void Analysis()
     {
-        gTutorial::Analysis();
+        gChallenge::Analysis();
+
+        if( finished_ )
+        {
+            return;
+        }
+
+        if( HumanTeam().Score() >= scoreKill_ * killLimit_ )
+        {
+            End( true );
+        }
+
+        if( initial_ == 0 )
+        {
+            if( AITeam().AlivePlayers() == 0 )
+            {
+                End( true );
+            }
+
+            return;
+        }
+
+        sg_RespawnAllAfter( 5, false );
+
+        if( se_GameTime() > 1  )
+        {
+            static int lastTimeLeft = -1, lastBonus = -1;
+            int bonus = (HumanTeam().Score()/scoreKill_) * bonusPerKill_;
+            int timeLeft = -se_GameTime() + bonus + initial_ + timeOffset_;
+            static int skipNumbers = 0;
+            if( bonus != lastBonus )
+            {
+                lastBonus = bonus;
+                if( bonus != 0 )
+                {
+                    con.CenterDisplay( tString( tOutput("$tutorial_ai_extratime") ), 1 );
+                    skipNumbers = 3;
+                }
+            }
+
+            if( timeLeft != lastTimeLeft )
+            {
+                if( timeLeft > maxTime_ )
+                {
+                    timeOffset_ += maxTime_ - timeLeft;
+                    timeLeft = maxTime_;
+                }
+
+                lastTimeLeft = timeLeft;
+                if( timeLeft <= 0 )
+                {
+                    End( false );
+                }
+                else if ( --skipNumbers <= 0 )
+                {
+                    skipNumbers = 0;
+                    std::ostringstream s;
+                    s << timeLeft;
+                    con.CenterDisplay( s.str(), 1.5 );
+                }
+            }
+        }
     }
 
     // prepares
     virtual void Prepare()
     {
-        gTutorial::Prepare();
-        su_helpLevel = uActionTooltip::Level_Advanced;
-        PushSetting( "COCKPIT_FILE", "Z-Man/tutorial/spartanic-0.0.1.aacockpit.xml" );
+        gChallenge::Prepare();
+        su_helpLevel = uActionTooltip::Level_Expert;
+
+        // colors
+        PushSetting( "ALLOW_TEAM_NAME_COLOR", "0" );
+        PushSetting( "ALLOW_TEAM_NAME_PLAYER", "1" );
+
+        // invulnerability
+        PushSetting( "CYCLE_INVULNERABLE_TIME", "2" );
+        PushSetting( "CYCLE_WALL_TIME", "3" );
+
+        // scoring
+        PushSetting( "SCORE_KILL", scoreKill_ );
+        PushSetting( "SCORE_DIE", "0" );
+        PushSetting( "SCORE_SUICIDE", "0" );
+    }
+};
+
+// AI challenges with given paramenters
+class gAIChallengeFixed: public gAIChallenge
+{
+public:
+    gAIChallengeFixed( char const * name, int num, int IQ, int size, int limitInitial, int bonusPerKill )
+    : gAIChallenge( name, limitInitial, bonusPerKill, num )
+    {
+        settings_.numAIs = num > 3 ? 3 : num;
+        settings_.AI_IQ = IQ;
+        settings_.sizeFactor = size;
+        settings_.wallsLength = 400;
+    }
+
+    // prepares
+    virtual void Prepare()
+    {
+        gAIChallenge::Prepare();
+    }
+};
+
+// AI tutorial: just one AI
+class gAITutorial: public gAIChallengeFixed
+{
+public:
+    gAITutorial()
+    : gAIChallengeFixed( "ai1", 1, 0, -2, 0, 0 )
+    {
+    }
+    
+    virtual bool IsChallenge() const
+    {
+        return false;
     }
 };
 
@@ -842,6 +1020,7 @@ private:
     };
     std::vector< MazePoint > maze_;
 };
+
 class gMazeChallenge1: public gMazeChallenge
 {
 public:
@@ -1448,12 +1627,20 @@ bool sg_TutorialsCompleted()
 }
 
 static gMazeChallengeHilbert sg_challengeHilbert4("hilbert4", 4, 15, 1);
+// these guys are actually quite tough
+// static gAIChallengeFixed sg_AIChallenge4("ai4", 4, 90, -2, 60, 30);
+static gAIChallengeFixed sg_AIChallenge7("ai7", 10, 100, -2, 60, 30);
+static gAIChallengeFixed sg_AIChallenge6("ai6", 8, 80, -2, 60, 30);
+static gAIChallengeFixed sg_AIChallenge5("ai5", 6, 60, -2, 60, 30);
+static gAIChallengeFixed sg_AIChallenge4("ai4", 4, 50, -2, 60, 30);
+static gAIChallengeFixed sg_AIChallenge3("ai3", 3, 30, -2, 0, 0);
 static gMazeChallengeHilbert sg_challengeHilbert3("hilbert3", 3, 25, 1.25);
+static gAIChallengeFixed sg_AIChallenge2("ai2", 2, 25, -2, 0, 0);
 static gMazeChallengeHilbert sg_challengeHilbert2("hilbert2", 2, 50, 1.5);
 //static gMazeChallengeHilbert sg_challengeHilbert1("hilbert1", 1,100,2);
-static gAIChallenge1 sg_tutorialTest;
 static gMazeChallenge1 sg_tutorialBullies1;
 static gTutorialCongratulations sg_tutorialCongratulations;
+static gAITutorial sg_tutorialTest;
 static gTutorialDoublegrind sg_tutorialDoublegrind;
 static gTutorialTeamstart sg_tutorialTeamstart;
 static gTutorialSpeedKillDefense sg_tutorialSpeedKillDefense;

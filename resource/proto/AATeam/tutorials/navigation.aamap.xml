@@ -6,12 +6,6 @@
 		     Converted to XML by philippeqc.
 		     Turned into a fortress map by z-man.
 		 
-		 To make this compatible with old clients, you need to set WIN_ZONE_INITIAL_SIZE to
-		 40 * exp(ln(2) * SIZE_FACTOR/2) (that's 40 for SIZE_FACTOR=0)
-		 and WIN_ZONE_EXPANSION to 0.
-		 For compatibility with 0.2.8_beta1/2, you need to copy the
-		 map over square-1.0.1.aamap.xml instead of changing MAP_FILE.
-
 		 License: Do with it what you want.-->
 
 		<World>
