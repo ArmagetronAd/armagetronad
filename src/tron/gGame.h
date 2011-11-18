@@ -165,6 +165,7 @@ void sg_ClientFullscreenMessage( tOutput const & title, tOutput const & message,
 
 void sg_RespawnAllAfter( REAL after, REAL time, eGrid *grid, gArena & arena,
     bool atSpawn=false );
+void sg_RespawnAllAfter( REAL after, bool atSpawn=false );
 
 void sg_RespawnPlayer(eGrid *, gArena *, tCoord & pos, tCoord & dir, ePlayerNetID *);
 void sg_RespawnPlayer(eGrid *, gArena *, tCoord & near, ePlayerNetID *);

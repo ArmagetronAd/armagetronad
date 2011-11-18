@@ -3359,6 +3359,14 @@ void sg_RespawnAllAfter( REAL after, REAL time, eGrid *grid, gArena & arena, boo
     }
 }
 
+void sg_RespawnAllAfter( REAL after, bool atSpawn )
+{
+    eGrid * grid = sg_currentGame->Grid();
+    gArena & arena = Arena;
+
+    sg_RespawnAllAfter( after, se_GameTime(), grid, arena, atSpawn );
+}
+
 void sg_RespawnPlayer(eGrid * grid, gArena * arena, tCoord & pos, tCoord & dir, ePlayerNetID * p) {
     eGameObject *e=p->Object();
 
@@ -3381,12 +3389,7 @@ void sg_RespawnPlayer(eGrid * grid, gArena * arena, tCoord & nearPosition, ePlay
         tCoord pos,dir;
         arena->ClosestSpawnPoint(nearPosition)->Spawn( pos, dir );
 
-#ifdef DEBUG
-        //                std::cout << "spawning player " << pni->name << '\n';
-        sg_Timestamp();
-#endif
-        gCycle * cycle = new gCycle(grid, pos, dir, p);
-        p->ControlObject(cycle);
+        sg_RespawnPlayer(grid, arena, pos, dir,  p);
     }
 }
 
@@ -3446,12 +3449,8 @@ void sg_RespawnPlayer(eGrid *grid, gArena *arena, ePlayerNetID *p, bool atSpawn)
         }
         else
             arena->LeastDangerousSpawnPoint()->Spawn( pos, dir );
-#ifdef DEBUG
-        //                std::cout << "spawning player " << pni->name << '\n';
-        sg_Timestamp();
-#endif
-        gCycle * cycle = new gCycle(grid, pos, dir, p);
-        p->ControlObject(cycle);
+
+        sg_RespawnPlayer(grid, arena, pos, dir, p);
     }
 }
 
