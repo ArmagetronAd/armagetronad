@@ -1754,7 +1754,9 @@ static gMazeChallengeHilbert sg_challengeHilbert2("hilbert2", 2, 50, 1.5);
 //static gMazeChallengeHilbert sg_challengeHilbert1("hilbert1", 1,100,2);
 static gShowcaseBrakeBoost sg_showcaseBrakeBoost;
 static gMazeChallenge1 sg_tutorialBullies1;
+
 static gTutorialCongratulations sg_tutorialCongratulations;
+
 static gAITutorial sg_tutorialTest;
 static gTutorialDoublegrind sg_tutorialDoublegrind;
 static gTutorialTeamstart sg_tutorialTeamstart;

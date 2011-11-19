@@ -1062,6 +1062,41 @@ public:
         ClearAddressCore();
     }
 
+    //! prints console output on the next st_ToDo call
+    class ForegroundPrinter
+    {
+    public:
+        ForegroundPrinter()
+        {
+            printer_ = tNEW( Printer );
+        }
+
+        ~ForegroundPrinter()
+        {
+            tMemberFunctionRunner::ScheduleForeground( *printer_, &Printer::Print );
+        }
+
+        template < typename T >
+        ForegroundPrinter & operator << ( T t )
+        {
+            printer_->s << t;
+            return *this;
+        }
+    private:
+        class Printer: public tReferencable< Printer >
+        {
+        public:
+            std::ostringstream s;
+
+            void Print()
+            {
+                con << s.str();
+            }
+        };
+
+        tJUST_CONTROLLED_PTR< Printer > printer_;
+    };
+
     void Resolve()
     {
         tJUST_CONTROLLED_PTR< nDNSResolver > keep( this );
@@ -1101,7 +1136,7 @@ public:
             bool success = false;
             if( ret )
             {
-                con << "Failed to resolve hostname " << hostname_ << ", error " << gai_strerror( ret ) << "\n";
+                ForegroundPrinter() << "Failed to resolve hostname " << hostname_ << ", error " << gai_strerror( ret ) << "\n";
             }
             else if (res)
             {
@@ -1134,7 +1169,7 @@ public:
         if ( hostname_ != resolved )
         {
             // not to the console, that would cause a swap, which can be deadly from background threads
-            std::cout << "Address of server " << hostname_ << " determined to be " << resolved << "\n";
+            ForegroundPrinter() << "Address of server " << hostname_ << " determined to be " << resolved << "\n";
         }
 #endif
         {
