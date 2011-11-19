@@ -1015,12 +1015,12 @@ public:
             HeadStart( ai, 2 );
         }
 
-        TimeWarp( 1.5 );
+        TimeWarp( 0.5 );
 
         // create maze
         width_ = 2;
         currentDir_ = eCoord(0,1);
-        currentPos_ = eCoord( 0, 120 );
+        currentPos_ = eCoord( 0, 60 );
         maze_.clear();
         lastWidth_ = .5 * pow( 2, .5*settings_.sizeFactor );
         Maze();
@@ -1137,9 +1137,30 @@ protected:
         }
     }
 
-    // adds a maze turn: turn direction, go distance
-    void Add( int direction, REAL distance )
+    void Go( REAL distance )
     {
+        currentPos_ = currentPos_ + distance*currentDir_;
+    }
+
+    void Turn( int direction )
+    {
+        if( direction == 0 )
+        {
+            return;
+        }
+        if( direction > 1 )
+        {
+            Turn( direction-1 );
+            Go( width_*2 );
+            direction = 1;
+        }
+        if( direction < -1 )
+        {
+            Turn( direction+1 );
+            Go( width_*2 );
+            direction = -1;
+        }
+
         MazePoint point;
         point.center = currentPos_;
         eCoord newDir = currentDir_.Turn(0,direction);
@@ -1147,8 +1168,14 @@ protected:
         lastWidth_ = width_;
         point.dirBefore = currentDir_;
         currentDir_ = newDir;
-        currentPos_ = currentPos_ + distance*newDir;
         maze_.push_back( point );
+    }
+
+    // adds a maze turn: turn direction, go distance
+    void Add( int direction, REAL distance )
+    {
+        Turn( direction );
+        Go( distance );
     }
 private:
     // data for maze
@@ -1189,50 +1216,10 @@ private:
 
 class gMazeChallengeHilbertBase: public gMazeChallenge
 {
-    int lastStraight;
-    int currentDir;
-    int lastTurn;
-    REAL distance;
 protected:
     gMazeChallengeHilbertBase( char const * name )
     : gMazeChallenge( name )
     {
-        Reset();
-    }
-
-    void Reset()
-    {
-        lastTurn = 0;
-        lastStraight = currentDir = 0;
-        distance = 0;
-    }
-
-    void Execute()
-    {
-        if ( distance > 0 )
-        {
-            if( lastTurn != 0 )
-            {
-                Add(lastTurn, distance);
-            }
-            lastTurn = ( currentDir-lastStraight > 0 ) ? 1 : -1;
-            lastStraight = currentDir;
-            distance = 0;
-        }
-    }
-
-    void Turn( int dir )
-    {
-        currentDir += dir;
-    }
-
-    void Go( REAL dist )
-    {
-        if ( lastStraight != currentDir )
-        {
-            Execute();
-        }
-        distance += dist;
     }
 
     void HilbertMazeRec( int order, int direction, REAL len )
@@ -1265,10 +1252,8 @@ protected:
 
     void HilbertMaze( int order, int direction, REAL len )
     {
-        Reset();
         HilbertMazeRec( order, direction, len );
         Go( 50 );
-        Execute();
     }
 };
 
@@ -1293,6 +1278,67 @@ public:
     virtual void Prepare()
     {
         gMazeChallengeHilbertBase::Prepare();
+
+        // PushSetting( "CAMERA_FORBID_CUSTOM", "0" );
+    }
+};
+
+class gMazeChallengeDragonBase: public gMazeChallenge
+{
+    int lastTurn_;
+protected:
+    gMazeChallengeDragonBase( char const * name )
+    : gMazeChallenge( name )
+    {
+    }
+
+    void DragonMazeRec( int order, int direction, REAL len )
+    {
+        if( order == 0 )
+        {
+            Go( len );
+        }
+        else
+        {
+            DragonMazeRec( order-1, -1, len );
+            if( lastTurn_ == direction )
+            {
+                Turn( direction );
+            }
+            lastTurn_ = direction;
+            DragonMazeRec( order-1, 1, len );
+        }
+    }
+
+    void DragonMaze( int order, int direction, REAL len )
+    {
+        lastTurn_ = 0;
+        DragonMazeRec( order, direction, len );
+        Go( 50 );
+    }
+};
+
+class gMazeChallengeDragon: public gMazeChallengeDragonBase
+{
+    int order_;
+    REAL len_;
+    REAL width_;
+public:
+    gMazeChallengeDragon( char const * name, int order, REAL len, REAL width )
+    : gMazeChallengeDragonBase( name ), order_( order ), len_( len ), width_( width )
+    {
+    }
+
+    virtual void Maze()
+    {
+        SetWidth( width_ );
+        DragonMaze( order_, 1, len_ );
+    }
+
+    // prepares
+    virtual void Prepare()
+    {
+        gMazeChallengeDragonBase::Prepare();
 
         // PushSetting( "CAMERA_FORBID_CUSTOM", "0" );
     }
@@ -1780,17 +1826,22 @@ static gMazeChallengeHilbert sg_challengeHilbert4("hilbert4", 4, 15, 1);
 // these guys are actually quite tough
 // static gAIChallengeFixed sg_AIChallenge4("ai4", 4, 90, -2, 60, 30);
 static gAIChallengeFixed sg_AIChallenge7("ai7", 10, 100, -2, 60, 30);
+static gMazeChallengeDragon sg_challengeDragon5("dragon5", 9, 20, 1.25);
 static gAIChallengeFixed sg_AIChallenge6("ai6", 8, 80, -2, 60, 30);
 static gShowcaseOpen sg_showcaseOpen;
 static gAIChallengeFixed sg_AIChallenge5("ai5", 6, 60, -2, 60, 30);
+static gMazeChallengeDragon sg_challengeDragon4("dragon4", 8, 25, 1.5);
 static gShowcaseMap sg_showcaseMap;
 static gAIChallengeFixed sg_AIChallenge4("ai4", 4, 50, -2, 60, 30);
 static gShowcaseAxes sg_showcaseAxes;
+static gMazeChallengeDragon sg_challengeDragon3("dragon3", 7, 25, 1.5);
 static gAIChallengeFixed sg_AIChallenge3("ai3", 3, 30, -2, 0, 0);
 static gShowcaseTurbo sg_showcaseTurbo;
 static gMazeChallengeHilbert sg_challengeHilbert3("hilbert3", 3, 25, 1.25);
 static gAIChallengeFixed sg_AIChallenge2("ai2", 2, 25, -2, 0, 0);
+static gMazeChallengeDragon sg_challengeDragon2("dragon2", 6, 30, 1.5);
 static gShowcaseHighRubber sg_showcaseHighRubber;
+static gMazeChallengeDragon sg_challengeDragon1("dragon1", 5, 40, 1.5);
 static gMazeChallengeHilbert sg_challengeHilbert2("hilbert2", 2, 50, 1.5);
 //static gMazeChallengeHilbert sg_challengeHilbert1("hilbert1", 1,100,2);
 static gShowcaseBrakeBoost sg_showcaseBrakeBoost;
