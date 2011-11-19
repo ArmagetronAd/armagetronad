@@ -355,9 +355,10 @@ public:
         // default physics, the most important ones
         PushSetting( "CYCLE_DELAY", ".1" );
         PushSetting( "CYCLE_RUBBER", "1" );
-        PushSetting( "CYCLE_SPEED", "30" );
+        PushSetting( "CYCLE_SPEED", "20" );
+        PushSetting( "CYCLE_START_SPEED", "20" );
         PushSetting( "CYCLE_SOUND_SPEED", "30" );
-        PushSetting( "CYCLE_ACCEL", "10" );
+        PushSetting( "CYCLE_ACCEL", "15" );
         PushSetting( "CYCLE_ACCEL_OFFSET", "2" );
         PushSetting( "CYCLE_WALL_NEAR", "6" );
 
@@ -798,6 +799,9 @@ public:
         PushSetting( "SCORE_KILL", scoreKill_ );
         PushSetting( "SCORE_DIE", "0" );
         PushSetting( "SCORE_SUICIDE", "0" );
+        
+        // map
+        PushSetting( "MAP_FILE", "Z-Man/tutorial/ai_challenge-0.1.0.aamap.xml" );
     }
 };
 
@@ -828,11 +832,20 @@ public:
     gAITutorial()
     : gAIChallengeFixed( "ai1", 1, 0, -2, 0, 0 )
     {
+        settings_.sizeFactor--;
     }
     
     virtual bool IsChallenge() const
     {
         return false;
+    }
+
+    virtual void Prepare()
+    {
+        gAIChallengeFixed::Prepare();
+
+        // back to default map
+        PushSetting( "MAP_FILE", "Anonymous/polygon/regular/square-1.0.1.aamap.xml" );
     }
 };
 
@@ -896,6 +909,7 @@ public:
         su_helpLevel = uActionTooltip::Level_Advanced;
         PushSetting( "MAP_FILE", "Z-Man/tutorial/bullies-0.1.0.aamap.xml" );
         PushSetting( "CYCLE_ACCEL", "0" );
+        PushSetting( "CYCLE_SPEED", "30" );
         PushSetting( "COCKPIT_FILE", "Z-Man/tutorial/empty-0.0.1.aacockpit.xml" );
 
         // colors
@@ -1310,7 +1324,9 @@ public:
         PushSetting( "WIN_ZONE_INITIAL_SIZE", "10" );
         PushSetting( "WIN_ZONE_DEATHS", "0" );
         PushSetting( "CYCLE_RUBBER", "5" );
-        PushSetting( "CYCLE_SPEED", "10" );
+        PushSetting( "CYCLE_SPEED", "15" );
+        PushSetting( "CYCLE_ACCEL", "10" );
+        PushSetting( "CYCLE_START_SPEED", "15" );
         PushSetting( "TEXT_OUT", "0" );
     }
 };
@@ -1494,6 +1510,7 @@ public:
         PushSetting( "FORTRESS_DEFEND_RATE", ".25" );
         PushSetting( "FORTRESS_CONQUEST_DECAY_RATE", ".1" );
         PushSetting( "CYCLE_RUBBER", "5" );
+        PushSetting( "CYCLE_START_SPEED", "40" );
         PushSetting( "CYCLE_RUBBER_WALL_SHRINK", ".5" );
         PushSetting( "TEXT_OUT", "0" );
     }
@@ -1508,6 +1525,7 @@ public:
     : gTutorial( "grind" )
     {
         settings_.numAIs = 1;
+        settings_.sizeFactor -= 1;
     }
 
     // analyzes the game
@@ -1532,13 +1550,15 @@ public:
 // survival: survive a bit, get to the winzone
 class gTutorialSurvival: public gTutorial
 {
+    int baseSizeFactor;
 public:
     gTutorialSurvival()
     : gTutorial( "survival" )
     {
         settings_.winZoneMinRoundTime = 30;
         settings_.winZoneMinLastDeath = 0;
-        settings_.sizeFactor -= 2;
+        settings_.sizeFactor = -5;
+        baseSizeFactor = settings_.sizeFactor;
     }
 
     // analyzes the game
@@ -1549,7 +1569,7 @@ public:
 
     virtual void SetDifficulty( int difficulty )
     {
-        settings_.sizeFactor = -4+difficulty;
+        settings_.sizeFactor = baseSizeFactor+difficulty;
     }
 
     // prepares
@@ -1575,7 +1595,7 @@ public:
     gTutorialNavigation()
     : gTutorial( "navigation" )
     {
-        settings_.sizeFactor += 1;
+        // settings_.sizeFactor += 1;
     }
 
     // analyzes the game
