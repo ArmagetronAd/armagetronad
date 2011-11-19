@@ -8947,6 +8947,7 @@ private:
         int experienceLevelThere = int(floor( se_playTimeTotal/levelDistance ));
         int missingForThisLevel = int( experienceLevelThere*levelDistance - se_playTimeTotal + 2 );
 
+        out.noJoin_ = "";
         out.sortOverride_ = experienceLevel - experienceLevelThere;
         if( out.sortOverride_ > 0 )
         {
