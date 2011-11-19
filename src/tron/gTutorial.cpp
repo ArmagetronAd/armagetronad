@@ -871,6 +871,45 @@ public:
     }
 };
 
+// more than 4 directions
+class gShowcaseAxes: public gAIChallengeFixed
+{
+public:
+    gShowcaseAxes()
+    : gAIChallengeFixed( "axes", 3, 60, -1, 0, 0 )
+    {
+    }
+    
+    virtual void Prepare()
+    {
+        gAIChallengeFixed::Prepare();
+
+        // 8 axis
+        PushSetting( "ARENA_AXES", "8" );
+
+        // the AIs suck, so make it easier for them
+        PushSetting( "CYCLE_RUBBER", "5" );
+        PushSetting( "CYCLE_DELAY", ".03" );
+    }
+};
+
+// maps
+class gShowcaseMap: public gAIChallengeFixed
+{
+public:
+    gShowcaseMap()
+    : gAIChallengeFixed( "map", 3, 100, -1, 0, 0 )
+    {
+    }
+    
+    virtual void Prepare()
+    {
+        gAIChallengeFixed::Prepare();
+
+        PushSetting( "MAP_FILE", "Z-Man/tutorial/map-0.1.0.aamap.xml" );
+    }
+};
+
 // high rubber showcase
 class gShowcaseHighRubber: public gAIChallengeFixed
 {
@@ -1744,9 +1783,11 @@ static gAIChallengeFixed sg_AIChallenge7("ai7", 10, 100, -2, 60, 30);
 static gAIChallengeFixed sg_AIChallenge6("ai6", 8, 80, -2, 60, 30);
 static gShowcaseOpen sg_showcaseOpen;
 static gAIChallengeFixed sg_AIChallenge5("ai5", 6, 60, -2, 60, 30);
+static gShowcaseMap sg_showcaseMap;
 static gAIChallengeFixed sg_AIChallenge4("ai4", 4, 50, -2, 60, 30);
-static gShowcaseTurbo sg_showcaseTurbo;
+static gShowcaseAxes sg_showcaseAxes;
 static gAIChallengeFixed sg_AIChallenge3("ai3", 3, 30, -2, 0, 0);
+static gShowcaseTurbo sg_showcaseTurbo;
 static gMazeChallengeHilbert sg_challengeHilbert3("hilbert3", 3, 25, 1.25);
 static gAIChallengeFixed sg_AIChallenge2("ai2", 2, 25, -2, 0, 0);
 static gShowcaseHighRubber sg_showcaseHighRubber;

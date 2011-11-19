@@ -1782,6 +1782,13 @@ tutorial_menu_turbo_text         Showcase: High Speed
 tutorial_menu_turbo_help         Prepares you for some of the weird settings out there.
 tutorial_menu_turbo_instructions Some servers will have you racing at ludicrous speed or, which is the same from a gameplay perspective, confined to a very small arena.\n\nSurvive. The AIs will probably suicide within seconds.
 
+tutorial_menu_map_text         Showcase: Maps
+tutorial_menu_map_help         Prepares you for some of the weird settings out there.
+tutorial_menu_map_instructions Not all battles are fought on rectangular arenas. Some have obstacles, passages and traps. This is one of them.\n\nGet the AIs.
+
+tutorial_menu_axes_text         Showcase: Betrayal
+tutorial_menu_axes_help         Prepares you for some of the weird settings out there.
+tutorial_menu_axes_instructions When we said you can only make 90 degree turns, we lied. In this showcase, you make 45 degree turns.\n\nSurvive the AIs. Interestingly, the easiest way to do so is to let them try and trap you and fail miserably.
 
 #********************************************
 #********************************************
