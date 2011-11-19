@@ -1716,7 +1716,7 @@ tutorial_menu_speedkilldefense_animation textures/tutorials/speedkilldefense/spe
 
 tutorial_menu_congratulations_text     Closing Words
 tutorial_menu_congratulations_help     Not everything can be taught in tutorials.
-tutorial_menu_congratulations_instructions Congratulations, you should now have completed all the essential tutorials. What follows here are optional challenges. You are now ready to enter the proper game, which is the online multiplayer component. Before you dive into that, there are a couple of things you should know about the online community and server landscape:\n\nYou can scroll this and other messages of this kind up and down using the cursor up and down keys.\n\nSumo Mode: You were taught the basics of Fortress mode here; Sumo uses the same basic mechanics, only usually for single players and not teams, and the zones of several competing players are put right on top of each other. And they shrink.\n\nCapture the Flag (CTF): Some servers offer this classic game mode, with a small zone standing in as the flag and a bigger one serving as base to return the flag to.\n\nHigh Rubber: Many servers use exorbitant values for the crash protection you experienced a bit in the Grinding tutorials. This allows for complicated maneouvers on tight space, it is usually not possible to actually see the result properly. You need to learn to read your opponents' movements if you want to succeed there.\n\nOpen Play/Dogfight: Some servers have arbitrary rules of engagement in place; you are supposed to not trap your opponents, but leave them a gap to escape through, and if you are almost trapped, you are supposed to take that gap.\n\nAlso, It is best to read over the included documentation (use the Help menu to launch it in a browser). And you should definitely stick to basic game modes and close-to-default settings at first. The server browser helps you with that by hiding advanced servers from immediate view initially; you can still enter them early if you dare.
+tutorial_menu_congratulations_instructions Congratulations, you should now have completed all the essential tutorials. What follows here are optional challenges. You are now ready to enter the proper game, which is the online multiplayer component. Before you dive into that, there are a couple of things you should know about the online community and server landscape:\n\nYou can scroll this and other messages of this kind up and down using the cursor up and down keys.\n\nSumo Mode: You were taught the basics of Fortress mode here; Sumo uses the same basic mechanics, only usually for single players and not teams, and the zones of several competing players are put right on top of each other. And they shrink.\n\nCapture the Flag (CTF): Some servers offer this classic game mode, with a small zone standing in as the flag and a bigger one serving as base to return the flag to.\n\nAlso, It is best to read over the included documentation (use the Help menu to launch it in a browser). And you should definitely stick to basic game modes and close-to-default settings at first. The server browser helps you with that by hiding advanced servers from immediate view initially; you can still enter them early if you dare.
 
 tutorial_menu_bullies_text     Maze Challenge
 tutorial_menu_bullies_help     Maze: two enemies have trapped you between their walls. Can you survive?
@@ -1758,13 +1758,29 @@ tutorial_menu_ai5_text     AI Challenge 5
 tutorial_menu_ai5_help     Kill AIs, beat the ticking clock.
 tutorial_menu_ai5_instructions Score six kills.
 
-tutorial_menu_ai6_text     AI Challenge 5
+tutorial_menu_ai6_text     AI Challenge 6
 tutorial_menu_ai6_help     Kill AIs, beat the ticking clock.
 tutorial_menu_ai6_instructions Score eight kills.
 
 tutorial_menu_ai7_text     AI Challenge 7
 tutorial_menu_ai7_help     Kill AIs, beat the ticking clock.
 tutorial_menu_ai7_instructions Score ten kills.
+
+tutorial_menu_highrubber_text         Showcase: High Rubber
+tutorial_menu_highrubber_help         Prepares you for some of the weird settings out there.
+tutorial_menu_highrubber_instructions Some servers ramp up the rubber setting (you do remember, right? The thing protecting you from crashes?) really high and also reduce the delay between cycle turns. On those servers, it may be helpful (but not required if you have quick fingers) if you 'doublebind': go to your input configuration and bind the turn commands to two keys, then press those at the same time during the game. You will make an instant 180 degree turn. Other human players you meet on high rubber servers will usually do tight moves close to walls in tiny corridors; it's impossible to read these and find a way out after they are built, so you need to watch the players themselves.\n\nAs always, kill all AIs.
+
+tutorial_menu_brakeboost_text         Showcase: Brake Boost
+tutorial_menu_brakeboost_help         Prepares you for some of the weird settings out there.
+tutorial_menu_brakeboost_instructions One of the strengths of \g are the various gameplay configurations it allows. These showcases prepare you for a little bit of the insanity you will encounter online.\n\nFirst, a simple one: The brake can be reconfigured to act as a speed boost. Use it to obliterate the AIs.
+
+tutorial_menu_open_text         Showcase: Open Play
+tutorial_menu_open_help         Prepares you for some of the weird settings out there.
+tutorial_menu_open_instructions This challenge has you playing in a high rubber environment where you cannot grind too tightly; you are forced to leave a gap. If someone wants to follow you, though, they will always be able to squeeze through that gap. Naturally, this makes it very hard to kill someone properly.\n\nTry do do so anyway, eliminate the AIs.\n\n\nSome servers you find online enforce this style of play not via settings used here, but by policy. You are expected to voluntarily leave a gap for trapped players to try and escape through.
+
+tutorial_menu_turbo_text         Showcase: High Speed
+tutorial_menu_turbo_help         Prepares you for some of the weird settings out there.
+tutorial_menu_turbo_instructions Some servers will have you racing at ludicrous speed or, which is the same from a gameplay perspective, confined to a very small arena.\n\nSurvive. The AIs will probably suicide within seconds.
 
 
 #********************************************

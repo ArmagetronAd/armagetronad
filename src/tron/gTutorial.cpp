@@ -835,9 +835,8 @@ class gAITutorial: public gAIChallengeFixed
 {
 public:
     gAITutorial()
-    : gAIChallengeFixed( "ai1", 1, 0, -2, 0, 0 )
+    : gAIChallengeFixed( "ai1", 1, 0, -3, 0, 0 )
     {
-        settings_.sizeFactor--;
     }
     
     virtual bool IsChallenge() const
@@ -851,6 +850,93 @@ public:
 
         // back to default map
         PushSetting( "MAP_FILE", "Anonymous/polygon/regular/square-1.0.1.aamap.xml" );
+    }
+};
+
+// brake boost showcase
+class gShowcaseBrakeBoost: public gAIChallengeFixed
+{
+public:
+    gShowcaseBrakeBoost()
+    : gAIChallengeFixed( "brakeboost", 3, 0, -1, 0, 0 )
+    {
+    }
+    
+    virtual void Prepare()
+    {
+        gAIChallengeFixed::Prepare();
+
+        // brake = boost
+        PushSetting( "CYCLE_BRAKE", "-30" );
+    }
+};
+
+// high rubber showcase
+class gShowcaseHighRubber: public gAIChallengeFixed
+{
+public:
+    gShowcaseHighRubber()
+    : gAIChallengeFixed( "highrubber", 3, 50, -1, 0, 0 )
+    {
+    }
+    
+    virtual void Prepare()
+    {
+        gAIChallengeFixed::Prepare();
+
+        // basic high rubber
+        PushSetting( "CYCLE_RUBBER", "15" );
+        PushSetting( "CYCLE_DELAY", ".01" );
+    }
+};
+
+// open play showcase
+class gShowcaseTurbo: public gAIChallengeFixed
+{
+public:
+    gShowcaseTurbo()
+    : gAIChallengeFixed( "turbo", 3, 0, -1, 0, 0 )
+    {
+    }
+    
+    virtual void Prepare()
+    {
+        gAIChallengeFixed::Prepare();
+
+        // very high speed
+        PushSetting( "CYCLE_SPEED", "200" );
+        PushSetting( "CYCLE_START_SPEED", "200" );
+        PushSetting( "CYCLE_ACCEL", "200" );
+        PushSetting( "CYCLE_DELAY", ".05" );
+
+        PushSetting( "HIGH_RIM", "0" );
+
+        // back to default map
+        PushSetting( "MAP_FILE", "Anonymous/polygon/regular/square-1.0.1.aamap.xml" );
+    }
+};
+
+// open play showcase
+class gShowcaseOpen: public gAIChallengeFixed
+{
+public:
+    gShowcaseOpen()
+    : gAIChallengeFixed( "open", 2, 40, -1, 0, 0 )
+    {
+    }
+    
+    virtual void Prepare()
+    {
+        gAIChallengeFixed::Prepare();
+
+        // basic high rubber
+        PushSetting( "CYCLE_RUBBER", "15" );
+        PushSetting( "CYCLE_DELAY", ".01" );
+
+        // mindistance for open play
+        PushSetting( "CYCLE_RUBBER_MINDISTANCE", ".5" );
+        PushSetting( "CYCLE_RUBBER_MINDISTANCE_GAP", ".5" );
+        PushSetting( "CYCLE_RUBBER_MINADJUST", ".2" );
     }
 };
 
@@ -1656,13 +1742,17 @@ static gMazeChallengeHilbert sg_challengeHilbert4("hilbert4", 4, 15, 1);
 // static gAIChallengeFixed sg_AIChallenge4("ai4", 4, 90, -2, 60, 30);
 static gAIChallengeFixed sg_AIChallenge7("ai7", 10, 100, -2, 60, 30);
 static gAIChallengeFixed sg_AIChallenge6("ai6", 8, 80, -2, 60, 30);
+static gShowcaseOpen sg_showcaseOpen;
 static gAIChallengeFixed sg_AIChallenge5("ai5", 6, 60, -2, 60, 30);
 static gAIChallengeFixed sg_AIChallenge4("ai4", 4, 50, -2, 60, 30);
+static gShowcaseTurbo sg_showcaseTurbo;
 static gAIChallengeFixed sg_AIChallenge3("ai3", 3, 30, -2, 0, 0);
 static gMazeChallengeHilbert sg_challengeHilbert3("hilbert3", 3, 25, 1.25);
 static gAIChallengeFixed sg_AIChallenge2("ai2", 2, 25, -2, 0, 0);
+static gShowcaseHighRubber sg_showcaseHighRubber;
 static gMazeChallengeHilbert sg_challengeHilbert2("hilbert2", 2, 50, 1.5);
 //static gMazeChallengeHilbert sg_challengeHilbert1("hilbert1", 1,100,2);
+static gShowcaseBrakeBoost sg_showcaseBrakeBoost;
 static gMazeChallenge1 sg_tutorialBullies1;
 static gTutorialCongratulations sg_tutorialCongratulations;
 static gAITutorial sg_tutorialTest;
