@@ -128,6 +128,7 @@ public:
       , name_( name )
       , success_( false )
       , finished_( false )
+      , roundEndReached_( false )
       , warpedAhead_( 0 )
       , difficulty_ ( 0 )
     {
@@ -150,6 +151,7 @@ public:
     // always exit after one round
     void RoundEnd( eTeam * winner )
     {
+        roundEndReached_ = true;
         finished_ = true;
     }
 
@@ -228,6 +230,7 @@ public:
     // runs the tutorial
     virtual bool RunCore()
     {
+        roundEndReached_ = false;
         sg_TutorialGame( settings_, *this );
         return success_;
     }
@@ -402,10 +405,11 @@ public:
     {
         success_ = false;
         finished_ = true;
+        roundEndReached_ = true;
         difficulty_ = 0;
         int maxDifficulty = 3;
         bool instructions = true;
-        for( int tries = 3; finished_ && !success_ && tries > 0; --tries )
+        for( int tries = 3; roundEndReached_ && finished_ && !success_ && tries > 0; --tries )
         {
             if( instructions && !Instructions() )
             {
@@ -532,6 +536,7 @@ private:
 protected:
     bool success_; //!< succeeded this time?
     bool finished_; //!< set when the tutorial is finished
+    bool roundEndReached_; //!< has the real end of the round been reached properly?
 
 private:
     // seconds warped into the round
