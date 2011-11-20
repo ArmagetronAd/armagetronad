@@ -886,6 +886,9 @@ void init_game_grid(eGrid *grid, gParser *aParser){
         // let settings in the map file be executed with the rights of the person
         // who set the map
         tCurrentAccessLevel level( conf_mapfile.GetSetting().GetSetLevel(), true );
+        
+        // and disallow CASACL and script spawning just in case
+        tCasaclPreventer preventer;
 
         Arena.PrepareGrid(grid, aParser);
     }
