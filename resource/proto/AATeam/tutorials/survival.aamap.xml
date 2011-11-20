@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE Resource SYSTEM "AATeam/map-0.2.8.0_rc4.dtd">
-<Resource type="aamap" name="navigation" version="0.1.0" author="Z-Man" category="tutorial">
+<Resource type="aamap" name="survival" version="0.1.0" author="Z-Man" category="tutorial">
 	<Map version="2">
 		<!-- The original square map, technically created by z-man.
 		     Converted to XML by philippeqc.
-		     Turned into a navigation tutorial map by z-man.
+		     Turned into a survival map by z-man.
 		 
 		 License: Do with it what you want.-->
 
 		<World>
 			<Field>
-				<Spawn	x="50"	y="50"	xdir="0"	ydir="1"	/>
+				<Spawn	x="10"	y="10"	xdir="0"	ydir="1"	/>
 			
 				<Wall>
 					<Point	x="0"	y="0"	/>
@@ -19,12 +19,6 @@
 					<Point	x="500"	y="0"	/>
 					<Point	x="0"	y="0"	/>
 				</Wall>
-
-				<Zone effect="win">
-					<ShapeCircle radius="40">
-						<Point x="300" y="300" />
-					</ShapeCircle>
-				</Zone>
 			</Field>
 		</World>
 	</Map>

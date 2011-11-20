@@ -1755,6 +1755,22 @@ tutorial_menu_dragon5_text     Maze Challenge: Dragon 9
 tutorial_menu_dragon5_help     Maze: two enemies have trapped you between their walls. Can you survive? They follow a Simplified Dragon Curve of order 9.
 tutorial_menu_dragon5_instructions The two bullies now force you on to a simplified Dragon Curve of order 9.
 
+tutorial_menu_survival1_text     Survival Challenge 1
+tutorial_menu_survival1_help     Survive for a given time.
+tutorial_menu_survival1_instructions You are in a bit of a sticky situation. Your brakes are offline and your engine is overloading; your bike is accelerating exponentially. Slow it down by making many turns and survive until the countdown for the emergency shutdown runs out.\n\nDoublebinding is disabled for this challenge.
+
+tutorial_menu_survival2_text     Survival Challenge 2
+tutorial_menu_survival2_help     Survive for a given time.
+tutorial_menu_survival2_instructions Yes, we really mean that your cycle is accelerating exponentially. In the strict mathematical sense. The really, really bad sense. It's doing that faster now. Luckily, you have more room, too.
+
+tutorial_menu_survival3_text     Survival Challenge 3
+tutorial_menu_survival3_help     Survive for a given time.
+tutorial_menu_survival3_instructions Even faster acceleration, the same room and you need to survive longer.
+
+tutorial_menu_survival4_text     Survival Challenge 4
+tutorial_menu_survival4_help     Survive for a given time.
+tutorial_menu_survival4_instructions Even faster acceleration, the same room and you need to survive longer.\n\nGood luck. On an unrelated note, We are not liable for any peripherals you break while playing \g.
+
 tutorial_menu_ai1_text     AI Fight
 tutorial_menu_ai1_help     Play against one AI, no time limit.
 tutorial_menu_ai1_instructions As the final tutorial, we test your skills against a lone AI. It is pretty stupid, the best way to kill it is to set up a trap right where you start. If your trap fails, use a speed kill, but watch out for sudden turns it is going to make.
