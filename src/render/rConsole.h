@@ -94,6 +94,9 @@ extern rConsole sr_con; // where all the output is directed to
 void sr_Read_stdin();
 #endif
 
+// passes ladderlog output to external scripts
+void sr_InputForScripts( char const * input );
+
 class rForceTextCallback:public tCallbackOr{
 public:
     rForceTextCallback(BOOLRETFUNC *f);
