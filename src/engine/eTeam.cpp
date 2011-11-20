@@ -422,42 +422,17 @@ void eTeam::Invite( ePlayerNetID * player )
 // revoke an invitation
 void eTeam::UnInvite( ePlayerNetID * player )
 {
-    static bool WasKicked = false;
     tASSERT( player );
-    if ( player->CurrentTeam() != this )
+    size_t wasInvited = player->invitations_.erase( this );
+    if ( player->CurrentTeam() == this && this->IsLocked() )
     {
-        if ( IsInvited( player ) )
-        {
-            WasKicked = false;
-            sn_ConsoleOut( tOutput( "$invite_team_uninvite", player->GetColoredName(), Name() ) );
-        }
+        sn_ConsoleOut( tOutput( "$invite_team_kick", player->GetColoredName(), Name() ) );
+        player->SetTeam(0);
     }
-    else if ( player->CurrentTeam() == this )
+    else if ( wasInvited )
     {
-        if ( this->IsLocked() )
-        {
-            if ( !WasKicked )
-            {
-                WasKicked = true;
-                sn_ConsoleOut( tOutput( "$invite_team_kick", player->GetColoredName(), Name() ) );
-                player->SetTeam(0);
-            }
-/*
-            // Missing localization for "$invite_team_already_kicked" and "$invite_team_not_locked"
-            else if ( WasKicked )
-            {
-                sn_ConsoleOut( tOutput( "$invite_team_already_kicked", player->GetColoredName(), Name() ) );
-*/
-            }
-/*
-        }
-        else if ( !this->IsLocked() )
-        {
-            sn_ConsoleOut( tOutput( "$invite_team_not_locked", player->GetColoredName(), Name() ) );
-        }
-*/
+        sn_ConsoleOut( tOutput( "$invite_team_uninvite", player->GetColoredName(), Name() ) );
     }
-    player->invitations_.erase( this );
 }
 
 // check if a player is invited
