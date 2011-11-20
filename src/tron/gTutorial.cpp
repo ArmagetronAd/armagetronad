@@ -427,6 +427,10 @@ public:
                 break;
             }
             Run();
+            if( !roundEndReached_ )
+            {
+                break;
+            }
             if( success_ )
             {
                 // reset difficulty
@@ -471,7 +475,7 @@ public:
             {
                 OnSuccess();
                 completed_ = true;
-                return true;
+                return roundEndReached_;
             }
             else
             {
@@ -480,7 +484,7 @@ public:
         }
         else
         {
-            return success_;
+            return success_ && roundEndReached_;
         }
 
         return false;
