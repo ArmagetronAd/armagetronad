@@ -861,7 +861,16 @@ bool ProcessKey(float i, int num) {
     return ret;
 }
 
-bool cCockpit::ProcessKey1(float i) { return ProcessKey(i, 1); }
+bool cCockpit::ProcessKey1(float i)
+{ 
+    bool ret = ProcessKey(i, 1); 
+    if (!ret && i > 0 )
+    {
+        sc_key1Tooltip.Count(0);
+    }
+    return ret;
+}
+
 bool cCockpit::ProcessKey2(float i) { return ProcessKey(i, 2); }
 bool cCockpit::ProcessKey3(float i) { return ProcessKey(i, 3); }
 bool cCockpit::ProcessKey4(float i) { return ProcessKey(i, 4); }

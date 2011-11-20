@@ -1632,6 +1632,18 @@ void uActionTooltip::Count( int player )
     }
 }
 
+//! call to show the tooltip one more time
+void uActionTooltip::ShowAgain()
+{
+    for( int i = uMAX_PLAYERS; i >= 0; --i )
+    {
+        if( 0 == activationsLeft_[i] )
+        {
+            activationsLeft_[i] = 1;
+        }
+    }
+}
+
 void uActionTooltip::WriteVal(std::ostream & s )
 {
     for( int i = 0; i <= uMAX_PLAYERS; ++i )
