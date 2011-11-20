@@ -574,6 +574,16 @@ public:
     {
     }
 
+    virtual void Render(REAL x,REAL y,REAL alpha,bool selected)
+    {
+        if( tutorial_.Complete() )
+        {
+            alpha *= .5;
+        }
+        uMenuItemAction::Render( x, y, alpha, selected );
+    }
+
+
     static void AdvanceMenu( uMenu & menu, bool enter = false )
     {
         int s = menu.GetSelected();
