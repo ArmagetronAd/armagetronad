@@ -195,8 +195,8 @@ public:
     REAL          CameraZ  () const {return z;}
     REAL          CameraRise  () const {return rise;}
 
-    void SetCameraDir(eCoord &pDir) {dir = pDir;}
-    void SetCameraPos(eCoord &pPos) {pos = pPos;}
+    void SetCameraDir(eCoord const& pDir) {dir = pDir;}
+    void SetCameraPos(eCoord const& pPos) {pos = pPos;}
     void SetCameraZ  (REAL pZ) {z = pZ;}
     void SetCameraRise  (REAL pRise) {rise = pRise;}
 

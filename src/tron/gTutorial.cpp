@@ -1038,9 +1038,36 @@ public:
     }
 
     // analyzes the game
-    void Analysis()
+    virtual void Analysis()
     {
         gChallenge::Analysis();
+    }
+
+    virtual void OnWin( eTeam * winner )
+    {
+        gChallenge::OnWin( winner );
+
+        if( winner && winner->OldestHumanPlayer() )
+        {
+            // let camera pan over maze
+            PushSetting( "CAMERA_FORBID_SMART", "0" );
+
+            eCamera * cam = ePlayer::PlayerConfig(0)->cam;
+            if( !cam )
+            {
+                return;
+            }
+
+            eCoord pos = cam->CenterPos();
+            cam->SetCamMode( CAMERA_SMART );
+            for( int i = 100; i >= 0; --i )
+            {
+                cam->Timestep(.1);
+                cam->SetCameraPos( pos * (-1) );
+                cam->SetCameraZ( pos.Norm()*.5 );
+            }
+            cam->SetCamMode( CAMERA_FREE );
+        }
     }
 
     // adjust width on the fly, to be called from Maze()
