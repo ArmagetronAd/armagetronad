@@ -1761,7 +1761,7 @@ tutorial_menu_survival1_instructions You are in a bit of a sticky situation. You
 
 tutorial_menu_survival2_text     Survival Challenge 2
 tutorial_menu_survival2_help     Survive for a given time.
-tutorial_menu_survival2_instructions Yes, we really mean that your cycle is accelerating exponentially. In the strict mathematical sense. The really, really bad sense. It's doing that faster now.\n\nGood luck. On an unrelated note, We are not liable for any peripherals you break while playing \g.
+tutorial_menu_survival2_instructions Yes, we really mean that your cycle is accelerating exponentially. In the strict mathematical sense. The really, really bad sense. It's doing that faster now.\n\nGood luck. On an unrelated note, We are not liable for any peripherals you break while playing \g. Or fingers, for that matter.
 
 tutorial_menu_survival3_text     Survival Challenge 3
 tutorial_menu_survival3_help     Survive for a given time.
@@ -1801,6 +1801,10 @@ tutorial_menu_ai6_instructions Score eight kills.
 tutorial_menu_ai7_text     AI Challenge 7
 tutorial_menu_ai7_help     Kill AIs, beat the ticking clock.
 tutorial_menu_ai7_instructions Score ten kills.
+
+tutorial_menu_ai8_text     AI Challenge 8
+tutorial_menu_ai8_help     Kill AIs, beat the ticking clock.
+tutorial_menu_ai8_instructions Score fifteen kills.
 
 tutorial_menu_highrubber_text         Showcase: High Rubber
 tutorial_menu_highrubber_help         Prepares you for some of the weird settings out there.
