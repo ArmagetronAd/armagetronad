@@ -371,7 +371,7 @@ public:
         PushSetting( "CYCLE_RUBBER", "1" );
         PushSetting( "CYCLE_SPEED", "20" );
         PushSetting( "CYCLE_START_SPEED", "20" );
-        PushSetting( "CYCLE_SOUND_SPEED", "30" );
+        PushSetting( "CYCLE_SOUND_SPEED", "20" );
         PushSetting( "CYCLE_ACCEL", "15" );
         PushSetting( "CYCLE_ACCEL_OFFSET", "2" );
         PushSetting( "CYCLE_WALL_NEAR", "6" );
@@ -578,7 +578,7 @@ public:
     {
         if( tutorial_.Complete() )
         {
-            alpha *= .5;
+            alpha *= selected ? .75 : .5;
         }
         uMenuItemAction::Render( x, y, alpha, selected );
     }
@@ -987,6 +987,7 @@ public:
 
         // very high speed
         PushSetting( "CYCLE_SPEED", "200" );
+        PushSetting( "CYCLE_SOUND_SPEED", "200" );
         PushSetting( "CYCLE_START_SPEED", "200" );
         PushSetting( "CYCLE_ACCEL", "200" );
         PushSetting( "CYCLE_DELAY", ".05" );
@@ -1978,24 +1979,26 @@ bool sg_TutorialsCompleted()
     return gTutorial::AllComplete();
 }
 
+// ok, that's one too many.
+// static gMazeChallengeDragon sg_challengeDragon5("dragon5", 9, 15, 1.1);
+
 static gMazeChallengeHilbert sg_challengeHilbert4("hilbert4", 4, 15, 1);
 static gAIChallengeFixed sg_AIChallenge8("ai8", 15, 100, -2, 60, 20);
 static gChallengeSurvivalWithEnemies sg_challengeSurvival4("survival4", 60, -5, -.1, 3 );
 static gAIChallengeFixed sg_AIChallenge7("ai7", 10, 100, -2, 60, 30);
-static gMazeChallengeDragon sg_challengeDragon5("dragon5", 9, 20, 1.25);
+static gMazeChallengeDragon sg_challengeDragon4("dragon4", 8, 17, 1.25);
 static gShowcaseOpen sg_showcaseOpen;
 static gChallengeSurvival sg_challengeSurvival3("survival3", 60, -6, .05 );
-static gShowcaseMap sg_showcaseMap;
-static gAIChallengeFixed sg_AIChallenge6("ai6", 8, 80, -2, 60, 30);
-static gMazeChallengeDragon sg_challengeDragon4("dragon4", 8, 25, 1.25);
 static gShowcaseAxes sg_showcaseAxes;
-static gMazeChallengeDragon sg_challengeDragon3("dragon3", 7, 25, 1.25);
+static gAIChallengeFixed sg_AIChallenge6("ai6", 8, 80, -2, 60, 30);
+static gShowcaseMap sg_showcaseMap;
+static gMazeChallengeDragon sg_challengeDragon3("dragon3", 7, 20, 1.25);
 static gShowcaseTurbo sg_showcaseTurbo;
 static gChallengeSurvival sg_challengeSurvival2("survival2", 60, -5, .2 );
 static gAIChallengeFixed sg_AIChallenge5("ai5", 6, 60, -2, 60, 30);
 static gMazeChallengeHilbert sg_challengeHilbert3("hilbert3", 3, 25, 1.25);
 static gAIChallengeFixed sg_AIChallenge4("ai4", 4, 50, -2, 60, 30);
-static gMazeChallengeDragon sg_challengeDragon2("dragon2", 6, 30, 1.3);
+static gMazeChallengeDragon sg_challengeDragon2("dragon2", 6, 25, 1.3);
 static gShowcaseHighRubber sg_showcaseHighRubber;
 static gMazeChallengeDragon sg_challengeDragon1("dragon1", 5, 40, 1.4);
 static gShowcaseBrakeBoost sg_showcaseBrakeBoost;
