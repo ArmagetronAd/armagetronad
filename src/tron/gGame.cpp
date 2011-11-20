@@ -1316,6 +1316,17 @@ void s_Timestep(eGrid *grid, REAL time,bool cam){
     if (cam)
         eCamera::s_Timestep(grid, time);
 
+    if (sn_GetNetState()!=nCLIENT)
+    {
+        // simulate IAs
+        for (int i=se_PlayerNetIDs.Len()-1;i>=0;i--)
+        {
+            gAIPlayer *ai = dynamic_cast<gAIPlayer*>(se_PlayerNetIDs(i));
+            if (ai && think)
+                ai->Timestep(time);
+        }
+    }
+
     lastTimeTimestep=time;
 }
 
@@ -3462,7 +3473,7 @@ gArena * sg_GetArena() {
 }
 
 
-static REAL sg_timestepMax = .2;
+REAL sg_timestepMax = .2;
 static tSettingItem<REAL> sg_timestepMaxConf( "TIMESTEP_MAX", sg_timestepMax );
 static int sg_timestepMaxCount = 10;
 static tSettingItem<int> sg_timestepMaxCountConf( "TIMESTEP_MAX_COUNT", sg_timestepMaxCount );
@@ -4596,14 +4607,6 @@ bool gGame::GameLoop(bool input){
 
         if (sn_GetNetState()!=nCLIENT)
         {
-            // simulate IAs
-            for (int i=se_PlayerNetIDs.Len()-1;i>=0;i--)
-            {
-                gAIPlayer *ai = dynamic_cast<gAIPlayer*>(se_PlayerNetIDs(i));
-                if (ai && think)
-                    ai->Timestep(gtime);
-            }
-
             Analysis(gtime);
 
             // wait for chatting players

@@ -1055,6 +1055,7 @@ public:
         {
             // let camera pan over maze
             PushSetting( "CAMERA_FORBID_SMART", "0" );
+            PushSetting( "CAMERA_FORBID_FREE", "0" );
 
             eCamera * cam = ePlayer::PlayerConfig(0)->cam;
             if( !cam )
@@ -1132,8 +1133,10 @@ public:
 
         // no console
         PushSetting( "TEXT_OUT", "0" );
-        
 
+        // AIs are really timing sensitive here
+        PushSetting( "TIMESTEP_MAX", ".01" );
+        
         // create test maze to get correct size factor
         width_ = 2;
         currentDir_ = eCoord(0,1);

@@ -149,17 +149,29 @@ REAL Random()
     }
 }
 
+// from gGame.cpp
+extern REAL sg_timestepMax;
+static REAL sg_FrameTime()
+{
+    REAL ret = se_AverageFrameTime();
+    if( ret > sg_timestepMax )
+    {
+        ret = sg_timestepMax;
+    }
+
+    return ret;
+}
+
 static REAL Delay()
 {
     REAL delay = sg_delayCycle * .9f;
 
-    REAL fd    = se_AverageFrameTime()*1.5f;
+    REAL fd    = sg_FrameTime()*1.5f;
     if ( fd > delay)
         delay = fd;
 
     return delay;
 }
-
 
 
 static gAICharacter* BestIQ( int iq )
@@ -1809,7 +1821,7 @@ void gAIPlayer::ThinkPathGiven( ThinkData & data, bool emergency )
     REAL ahead = eCoord::F(t - pos, dir)
     + eCoord::F(path.CurrentOffset(), dir);
 
-    if ( ahead > ( delay *.1 + se_AverageFrameTime() ) * Object()->Speed() && !emergency )
+    if ( ahead > ( delay *.1 + sg_FrameTime() ) * Object()->Speed() && !emergency )
     {	  // it is still before us. just wait a while.
         mindist = ahead;
     }
