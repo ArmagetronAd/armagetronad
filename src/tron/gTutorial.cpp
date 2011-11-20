@@ -675,8 +675,14 @@ public:
         gTutorial::Prepare();
 
         // back to player color
-        PushSetting( "ALLOW_TEAM_NAME_COLOR", "1" );
+        PushSetting( "ALLOW_TEAM_NAME_COLOR", "0" );
         PushSetting( "ALLOW_TEAM_NAME_PLAYER", "1" );
+    }
+
+    virtual bool Activate()
+    {
+        firstRun_ = true;
+        return gTutorial::Activate();
     }
 private:
     bool firstRun_;
@@ -1396,13 +1402,17 @@ public:
         if( timeLeft != lastTimeLeft )
         {
             lastTimeLeft = timeLeft;
-            if( timeLeft <= 0 )
+            if( timeLeft == 0 )
+            {
+                PushSetting( "CYCLE_SPEED_DECAY_ABOVE", ".5" );
+                PushSetting( "CYCLE_SPEED", ".0001" );
+                PushSetting( "CYCLE_SPEED_MIN", ".01" );
+            }
+            else if ( timeLeft <= -2 )
             {
                 End( true );
-                PushSetting( "CYCLE_SPEED_DECAY_ABOVE", "1" );
-                PushSetting( "CYCLE_MIN_SPEED", ".01" );
             }
-            else
+            else if ( timeLeft > 0 )
             {
                 std::ostringstream s;
                 s << timeLeft;
@@ -1420,7 +1430,7 @@ public:
         // PushSetting( "WIN_ZONE_EXPANSION", "0" );
         // PushSetting( "WIN_ZONE_INITIAL_SIZE", "5000" );
         // PushSetting( "WIN_ZONE_DEATHS", "0" );
-        PushSetting( "CYCLE_RUBBER", "0" );
+        // PushSetting( "CYCLE_RUBBER", "0" );
         PushSetting( "HIGH_RIM", "0" );
 
         PushSetting( "CYCLE_SPEED_DECAY_ABOVE", -speedIncrease_ );
@@ -1433,6 +1443,41 @@ public:
         PushSetting( "CYCLE_BRAKE", "0" );
 
         PushSetting( "MAP_FILE", "Z-Man/tutorial/survival-0.1.0.aamap.xml" );
+    }
+};
+
+// survival with nasty enemies
+class gChallengeSurvivalWithEnemies: public gChallengeSurvival
+{
+public:
+    gChallengeSurvivalWithEnemies( char const * name, int time, int size, REAL speedIncrease, int enemies )
+    :gChallengeSurvival( name, time, size, speedIncrease )
+    {
+        settings_.minPlayers = 1+enemies;
+        settings_.AI_IQ = 1000;
+    }
+
+    virtual void Analysis()
+    {
+        gChallengeSurvival::Analysis();
+
+        if( HumanPlayer().Object() && HumanPlayer().Object()->Alive() )
+        {
+            sg_RespawnAllAfter( 1, false );
+        }
+    }
+
+    virtual void Prepare()
+    {
+        gChallengeSurvival::Prepare();
+
+        // invulnerability
+        PushSetting( "CYCLE_INVULNERABLE_TIME", "1" );
+        PushSetting( "CYCLE_WALL_TIME", "2" );
+
+        // extra acceleration from enemy walls
+        PushSetting( "CYCLE_ACCEL_ENEMY", "4" );
+        PushSetting( "CYCLE_ACCEL_TEAM", "4" );
     }
 };
 
@@ -1849,7 +1894,7 @@ public:
         PushSetting( "WIN_ZONE_EXPANSION", "0" );
         PushSetting( "WIN_ZONE_INITIAL_SIZE", "5" );
         PushSetting( "WIN_ZONE_DEATHS", "0" );
-        PushSetting( "CYCLE_RUBBER", "0" );
+        // PushSetting( "CYCLE_RUBBER", "0" );
         PushSetting( "HIGH_RIM", "0" );
         PushSetting( "COCKPIT_FILE", "Z-Man/tutorial/empty-0.0.1.aacockpit.xml" );
         PushSetting( "MAP_FILE", "Z-Man/tutorial/survival-0.1.0.aamap.xml" );
@@ -1919,12 +1964,12 @@ bool sg_TutorialsCompleted()
 static gMazeChallengeHilbert sg_challengeHilbert4("hilbert4", 4, 15, 1);
 // these guys are actually quite tough
 // static gAIChallengeFixed sg_AIChallenge4("ai4", 4, 90, -2, 60, 30);
-static gChallengeSurvival sg_challengeSurvival4("survival4", 120, -4, .2 );
+static gChallengeSurvivalWithEnemies sg_challengeSurvival4("survival4", 60, -5, -.1, 3 );
 static gAIChallengeFixed sg_AIChallenge7("ai7", 10, 100, -2, 60, 30);
 static gMazeChallengeDragon sg_challengeDragon5("dragon5", 9, 20, 1.25);
 static gAIChallengeFixed sg_AIChallenge6("ai6", 8, 80, -2, 60, 30);
 static gShowcaseOpen sg_showcaseOpen;
-static gChallengeSurvival sg_challengeSurvival3("survival3", 90, -4, .2 );
+static gChallengeSurvival sg_challengeSurvival3("survival3", 60, -6, .05 );
 static gAIChallengeFixed sg_AIChallenge5("ai5", 6, 60, -2, 60, 30);
 static gMazeChallengeDragon sg_challengeDragon4("dragon4", 8, 25, 1.5);
 static gShowcaseMap sg_showcaseMap;
@@ -1932,7 +1977,7 @@ static gAIChallengeFixed sg_AIChallenge4("ai4", 4, 50, -2, 60, 30);
 static gMazeChallengeDragon sg_challengeDragon3("dragon3", 7, 25, 1.5);
 static gShowcaseAxes sg_showcaseAxes;
 static gAIChallengeFixed sg_AIChallenge3("ai3", 3, 30, -2, 0, 0);
-static gChallengeSurvival sg_challengeSurvival2("survival2", 60, -4, .1 );
+static gChallengeSurvival sg_challengeSurvival2("survival2", 60, -5, .2 );
 static gMazeChallengeHilbert sg_challengeHilbert3("hilbert3", 3, 25, 1.25);
 static gShowcaseTurbo sg_showcaseTurbo;
 static gMazeChallengeDragon sg_challengeDragon2("dragon2", 6, 30, 1.5);

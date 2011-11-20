@@ -10,7 +10,25 @@
 
 		<World>
 			<Field>
-				<Spawn	x="10"	y="10"	xdir="0"	ydir="1"	/>
+				<Spawn	x="15"	y="10"	xdir="0"	ydir="1"	/>
+				<Spawn	x="485"	y="490"	xdir="0"	ydir="-1"	/>
+				<Spawn	x="490"	y="15"	xdir="-1"	ydir="0"	/>
+				<Spawn	x="10"	y="485"	xdir="1"	ydir="0"	/>
+
+				<Spawn	x="250"	y="250"	xdir="1"	ydir="0"	/>
+				<Spawn	x="250"	y="250"	xdir="-1"	ydir="0"	/>
+				<Spawn	x="250"	y="250"	xdir="0"	ydir="1"	/>
+				<Spawn	x="250"	y="250"	xdir="0"	ydir="-1"	/>
+
+				<Spawn	x="251"	y="251"	xdir="1"	ydir="0"	/>
+				<Spawn	x="249"	y="251"	xdir="-1"	ydir="0"	/>
+				<Spawn	x="251"	y="251"	xdir="0"	ydir="1"	/>
+				<Spawn	x="251"	y="249"	xdir="0"	ydir="-1"	/>
+
+				<Spawn	x="251"	y="249"	xdir="1"	ydir="0"	/>
+				<Spawn	x="249"	y="249"	xdir="-1"	ydir="0"	/>
+				<Spawn	x="249"	y="251"	xdir="0"	ydir="1"	/>
+				<Spawn	x="249"	y="249"	xdir="0"	ydir="-1"	/>
 			
 				<Wall>
 					<Point	x="0"	y="0"	/>

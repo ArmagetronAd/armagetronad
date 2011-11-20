@@ -1761,15 +1761,15 @@ tutorial_menu_survival1_instructions You are in a bit of a sticky situation. You
 
 tutorial_menu_survival2_text     Survival Challenge 2
 tutorial_menu_survival2_help     Survive for a given time.
-tutorial_menu_survival2_instructions Yes, we really mean that your cycle is accelerating exponentially. In the strict mathematical sense. The really, really bad sense. It's doing that faster now. Luckily, you have more room, too.
+tutorial_menu_survival2_instructions Yes, we really mean that your cycle is accelerating exponentially. In the strict mathematical sense. The really, really bad sense. It's doing that faster now.\n\nGood luck. On an unrelated note, We are not liable for any peripherals you break while playing \g.
 
 tutorial_menu_survival3_text     Survival Challenge 3
 tutorial_menu_survival3_help     Survive for a given time.
-tutorial_menu_survival3_instructions Even faster acceleration, the same room and you need to survive longer.
+tutorial_menu_survival3_instructions The good news: your engines are ine a slightly better state this time.\nThe bad news: you have even less room than before.
 
 tutorial_menu_survival4_text     Survival Challenge 4
 tutorial_menu_survival4_help     Survive for a given time.
-tutorial_menu_survival4_instructions Even faster acceleration, the same room and you need to survive longer.\n\nGood luck. On an unrelated note, We are not liable for any peripherals you break while playing \g.
+tutorial_menu_survival4_instructions Your engines are perfectly fine this time, but there are three ininitely respawning AIs in the arena, cramping your style. And their walls give you extra acceleration.
 
 tutorial_menu_ai1_text     AI Fight
 tutorial_menu_ai1_help     Play against one AI, no time limit.
