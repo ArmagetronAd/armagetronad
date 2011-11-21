@@ -192,6 +192,8 @@ class tCasaclPreventer
 public:
     tCasaclPreventer( bool prevent = true );
     ~tCasaclPreventer();
+
+    static bool InRInclude(); //!< returns whether we're currently in an RINCLUDE file
 private:
     bool previous_; //!< previous value of prevention flag
 };
@@ -236,12 +238,16 @@ protected:
     tAccessLevel requiredLevel; //!< access level required to change this setting
     tAccessLevel setLevel;      //!< access level of the user making the last change to this setting
 
+public:
+    // the map of all configuration items
     typedef std::map< tString, tConfItemBase * > tConfItemMap;
+    static tConfItemMap const & GetConfItemMap();
+protected:
     static tConfItemMap & ConfItemMap();
+public:
 
     // static tConfItemBase* s_ConfItemAnchor;
     //static tConfItemBase* Anchor(){return dynamic_cast<tConfItemBase *>(s_ConfItemAnchor);}
-public:
     static bool printChange; //!< if set, setting changes are printed to the console and, if printErrors is set as well, suggestions of typo fixes are given.
     static bool printErrors; //!< if set, unknown settings are pointed out.
 
@@ -285,7 +291,13 @@ public:
         return true;
     }
 
+    // should this be saved into user.cfg?
     virtual bool Save(){
+        return true;
+    }
+
+    // CAN this be saved at all?
+    virtual bool CanSave(){
         return true;
     }
 };
@@ -368,6 +380,13 @@ public:
 
     virtual ~tConfItem(){}
 
+    tConfItem<T> & SetShouldChangeFunc( ShouldChangeFuncT changeFunc )
+    
+    {
+        this->shouldChangeFunc_ = changeFunc;
+        return *this;
+    }
+
     typedef typename tTypeToConfig< T >::DUMMYREQUIRED DUMMYREQUIRED;
 
     // read without conversion
@@ -416,7 +435,7 @@ public:
                     {
                         tOutput o;
                         o.SetTemplateParameter(1, title);
-                        o << "$nconfig_errror_protected";
+                        o << "$nconfig_error_protected";
                         con << "";
                     }
                     else{
@@ -434,6 +453,10 @@ public:
 
                             *target = dummy;
                             changed = true;
+                        }
+                        else
+                        {
+                            con << tOutput("$config_value_not_changed", title, *target, dummy);
                         }
                     }
                 }

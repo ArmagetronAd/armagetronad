@@ -1313,6 +1313,9 @@ void init_game_grid(eGrid *grid, gParser *aParser){
         // let settings in the map file be executed with the rights of the person
         // who set the map
         tCurrentAccessLevel level( conf_mapfile.GetSetting().GetSetLevel(), true );
+        
+        // and disallow CASACL and script spawning just in case
+        tCasaclPreventer preventer;
 
         Arena.PrepareGrid(grid, aParser);
     }
@@ -1791,6 +1794,13 @@ void Render(eGrid *grid, REAL time, bool swap=true){
 
 #ifndef DEDICATED
     if (sr_glOut){
+        static bool lastMoviePack=sg_MoviePack();
+        if(lastMoviePack!=sg_MoviePack())
+        {
+            lastMoviePack=sg_MoviePack();
+            rDisplayList::ClearAll();
+        }
+
         RenderAllViewports(grid);
 
         sr_ResetRenderState(true);
@@ -2485,7 +2495,10 @@ void MainMenu(bool ingame){
     //	update_settings();
 
     if (ingame)
+    {
         sr_con.SetHeight(2);
+        se_UserShowScores( false );
+    }
 
     gLogo::SetDisplayed(true);
 
@@ -3666,9 +3679,9 @@ void gGame::Analysis(REAL time){
     int ai_alive=0;
     int human_teams=0;
     int teams_alive=0;
-    int last_alive=-1;
+    // int last_alive=-1;
     int last_team_alive=-1;
-    int last_alive_and_not_disconnected=-1;
+    // int last_alive_and_not_disconnected=-1;
     int humans = 0;
     int active_humans = 0;
     int ais    = 0;
@@ -3710,14 +3723,14 @@ void gGame::Analysis(REAL time){
                             alive++;
                             if (p->IsActive())
                             {
-                                last_alive_and_not_disconnected=i;
+                                // last_alive_and_not_disconnected=i;
                                 alive_and_not_disconnected++;
                             }
                         }
                         else
                             ai_alive++;
 
-                        last_alive=i;
+                        // last_alive=i;
                     }
                     else
                     {
@@ -3755,9 +3768,10 @@ void gGame::Analysis(REAL time){
         goon = false;
 #endif
 
-
+    /*
     if (last_alive_and_not_disconnected >= 0)
         last_alive = last_alive_and_not_disconnected;
+    */
 
     // kill all disconnected players if they are the only reason the round goes on:
     if ( alive_and_not_disconnected <= 1 && alive > alive_and_not_disconnected )
@@ -4716,6 +4730,9 @@ void sg_ClientFullscreenMessage( tOutput const & title, tOutput const & message,
     ePlayerNetID::SpectateAll();
     se_ChatState( ePlayerNetID::ChatFlags_Menu, true );
 
+    // remove scores
+    se_UserShowScores( false );
+
     // show message
     uMenu::Message( title, message, timeout );
 
@@ -4918,4 +4935,17 @@ static void LoginCallback(){
 
 static nCallbackLoginLogout lc(LoginCallback);
 
+static void sg_FillServerSettings()
+{
+    nServerInfo::SettingsDigest & digest = *nCallbackFillServerInfo::ToFill();
+    
+    digest.SetFlag( nServerInfo::SettingsDigest::Flags_NondefaultMap,
+                    mapfile != DEFAULT_MAP );
+    digest.SetFlag( nServerInfo::SettingsDigest::Flags_TeamPlay,
+                    multiPlayer.maxPlayersPerTeam > 1 );
+
+    digest.wallsLength_ = multiPlayer.wallsLength/gCycleMovement::MaximalSpeed();
+}
+
+static nCallbackFillServerInfo sg_fillServerSettings(sg_FillServerSettings);
 

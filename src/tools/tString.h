@@ -120,12 +120,12 @@ public:
     //! strips all whitespace from a string
     tString StripWhitespace( void ) const;
 
-    int PosWordRight(int start);                //! Computes the position of the next delimiter relative to start
-    int PosWordLeft(int start);                 //! Computes the position of the previous delimiter relative to start
+    int PosWordRight(int start) const;          //! Computes the position of the next delimiter relative to start
+    int PosWordLeft(int start) const;           //! Computes the position of the previous delimiter relative to start
     int RemoveWordRight(int start);             //! Remove word right according to the delimiters
     int RemoveWordLeft(int start);              //! Remove word left according to the delimiters
     void RemoveSubStr(int start, int length);   //! Remove a substring, in-place
-    tString Reverse();                          //! Reverses strings
+    tString Reverse() const;                    //! Reverses strings
 
     //! Truncate a string
     tString Truncate( int truncateAt ) const;

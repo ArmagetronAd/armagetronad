@@ -91,12 +91,11 @@ public:
 extern rConsole sr_con; // where all the output is directed to
 
 #ifdef DEDICATED
-// read from sr_input
-extern FILE *sr_input;
-void sr_Unblock_stdin();
 void sr_Read_stdin();
-void sr_Close_stdin();
 #endif
+
+// passes ladderlog output to external scripts
+void sr_InputForScripts( char const * input );
 
 class rForceTextCallback:public tCallbackOr{
 public:

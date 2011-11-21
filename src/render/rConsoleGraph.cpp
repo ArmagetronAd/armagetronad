@@ -231,6 +231,10 @@ bool rConsole::CenterDisplayActive()
     return tSysTimeFloat() - center_fadetime < 1.5;
 }
 
+// passes ladderlog output to external scripts (do nothing here)
+void sr_InputForScripts( char const * input )
+{}
+
 #else
 #include "rConsoleCout.cpp"
 #endif

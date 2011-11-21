@@ -66,36 +66,48 @@ if test -d "${srcdir}/.svn"; then
         minor_version=""
         DATE=""
     else
+        # make revision the alpha tag
+        REVISION=`svn info ${srcdir} | grep ^Revision | sed -e 's,^Revision: ,,'`
+
         # is it a branch?
         if echo $REPOPATH | grep '^branches/' > /dev/null; then
             # echo Branch
-            major_version=`echo $REPOPATH | sed -e 's,^branches/,,'`
+            branch=`echo $REPOPATH | sed -e 's,^branches/,,'`
+            # branch 0.2.8 produces 0.2.9 versions. Confusing, yeah, but moving it
+            # in the repo is too risky.
+            if test ${branch} = "0.2.8"; then
+                # try to get revision ID from bzr using the magic bzr-svn marker
+                # (only works this way on 0.2.8)
+                REVISION=`svn propget bzr:revision-id:v3-list-QlpoOTFBWSZTWZvbKhsAAAdRgAAQABK6798QIABURMgAAaeoNT1TxT1DQbKaeobXKiyAmlWT7Y5MkdJOtXDtB7w7DOGFBHiOBxaUIu7HQyyQSvxdyRThQkJvbKhs ${srcdir} | tail -n 4 | sed -e 's, .*,,' | grep [0-9] | tail -n 1`
+            else
+                major_version=${branch}
+            fi
         fi
         
         # trunk or branch
 
-        # make revision the alpha tag (activate later, not in 0.2.8 branch)
-        # REVISION=`svn info ${srcdir} | grep ^Revision | sed -e 's,^Revision: ,,'`
-        # echo REVISION=$REVISION
-        # minor_version=_alpha$REVISION
-        # DATE=""
+        #echo REVISION=$REVISION
+        minor_version=_alpha_r$REVISION
+        DATE=""
     fi
 fi
 
 # *TODO* once we get our superproject up on launchpad (and thus get saner branch nicks), use branch nicks for $major_version
 # Check if bzr is installed, and if the path is versionned
-bzr >/dev/null 2>&1
+bzr info ${srcdir} >/dev/null 2>&1
 # But for now, ignore it
-#if test $? -eq 0
-if test 1 -eq 0
+if test $? -eq 0
+#if test 1 -eq 0
 then
+    # get revno
+    revno=`bzr revno ${srcdir}`
+
     bzr diff ${srcdir} --quiet >/dev/null 2>&1
     # Test for the return code of bzr diff (see bzr diff --help)
     if test $? -eq 0
     then
-        # If no change was made, use revision number
+        # If no change was made, use revision number (with offset to match svn revno)
         # but first check if it's tagged
-        revno=$(bzr revno ${srcdir})
         tag=$(bzr tags | grep -P "^(.*?) +${revno}$" | awk '{ print $1 }')
         if test $tag
         then
@@ -103,12 +115,12 @@ then
             DATE=_$tag
         else
             # If not, use revision number
-            DATE=_r$(bzr revno ${srcdir})
+            DATE=_r${revno}
         fi
     elif test $? -lt 3
     then
         # If a change was made, use revision number plus build date
-        DATE=_r$(bzr revno ${srcdir})_$DATE
+        DATE=_r${revno}_$DATE
     # It returns 3 if it's not versionned, so forget it
     fi
 fi

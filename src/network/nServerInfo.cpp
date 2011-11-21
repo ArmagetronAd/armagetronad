@@ -693,10 +693,10 @@ static nDescriptor BigServerDescriptor(51,nServerInfo::GetBigServerInfo,"big_ser
 static nDescriptor BigServerMasterDescriptor(54,nServerInfo::GetBigServerInfoMaster,"big_server_master", true);
 
 // request small server information from master server/broadcast
-static nDescriptor RequestSmallServerInfoDescriptor(52,nServerInfo::GiveSmallServerInfo,"small_request", true);
+nDescriptor RequestSmallServerInfoDescriptor(52,nServerInfo::GiveSmallServerInfo,"small_request", true);
 
 // request big server information from master server/broadcast
-static nDescriptor RequestBigServerInfoDescriptor(53,nServerInfo::GiveBigServerInfo,"big_request", true);
+nDescriptor RequestBigServerInfoDescriptor(53,nServerInfo::GiveBigServerInfo,"big_request", true);
 static nDescriptor RequestBigServerInfoMasterDescriptor(55,nServerInfo::GiveBigServerInfoMaster,"big_request_master", true);
 
 // used to transfer the rest of the server info (name, number of players, etc)
@@ -883,6 +883,7 @@ public:
     double lastTime_[MAX];   // log of the last times the server was pinged by this client
     int lastTimeIndex_;      // the current index in the array
     bool warned_;            // flag to avoid warning spam in the log file
+    REAL timeFactor_;        // locked time factor
 
     tString GetIP()
     {
@@ -939,24 +940,55 @@ public:
     // determines whether this client should be considered flooding
     bool FloodProtection( REAL timeFactor )
     {
+        if( warned_ && timeFactor < timeFactor_ )
+        {
+            // restore time factor
+            timeFactor = timeFactor_;
+        }
+        else
+        {
+            // store passed time factor for next time
+            timeFactor_ = timeFactor;
+        }
+
+
+
         int i;
         double now = tSysTimeFloat();
 
         bool protect = false;
         REAL diff = 0;
         int count = 0;
+        REAL tolerance = 0;
+        REAL minRelDiff = 10;
 
         // go through the different levels
-        for ( i = sn_minPingCount-1; i >= 0; --i )
+        int lowest = 0;
+
+        // only check 10 and 20 ping limit for the default timefactor
+        if( timeFactor < 1 && sn_minPingTimes[sn_minPingCount-1] > 0 )
+        {
+            // lowest = 2;
+        }
+
+        for ( i = sn_minPingCount-1; i >= lowest; --i )
         {
             // this many pings should be tracked
             count = sn_minPingCounts[i];
             diff = now - lastTime_[(lastTimeIndex_ + MAX - count) % MAX];
-            REAL tolerance = sn_minPingTimes[i]*timeFactor;
-            if ( tolerance > 0 && diff < tolerance )
+            tolerance = sn_minPingTimes[i]*timeFactor;
+            if ( tolerance > 0 )
             {
-                protect = true;
-                break;
+                if( tolerance*minRelDiff > diff )
+                {
+                    minRelDiff = diff/tolerance;
+                }
+
+                if( diff < tolerance )
+                {
+                    protect = true;
+                    break;
+                }
             }
         }
 
@@ -972,7 +1004,7 @@ public:
         }
 
         // reset warning flag
-        if ( warned_ && now - lastTime_[(lastTimeIndex_ + MAX-2 ) % MAX] > sn_minPingTimes[ sn_minPingCount-1 ] )
+        if ( warned_ && minRelDiff > 4 )
         {
             con << "Flood protection ban of " << GetIP() << " removed.\n";
             warned_ = false;
@@ -1017,16 +1049,23 @@ static nCallbackReceivedComplete sn_resetFirstInPacket( sn_ResetFirstInPacket );
 static REAL sn_minPingTimeGlobalFactor = 0.1;
 static tSettingItem< REAL > sn_minPingTimeGlobal( "PING_FLOOD_GLOBAL", sn_minPingTimeGlobalFactor );
 
+// checks for global ping flood events
+static bool GlobalPingFloodProtection()
+{
+    static nMachine server;
+
+    return sn_minPingTimeGlobalFactor > 0 && FloodProtection( server, sn_minPingTimeGlobalFactor );
+}
+
 // determines wheter the message comes from a flood attack; if so, reject it (return true)
 bool FloodProtection( nMessage const & m )
 {
-    // get the machine infos
-    nMachine & server = nMachine::GetMachine( 0 );
-    nMachine & peer   = nMachine::GetMachine( m.SenderID() );
-
     // only accept one ping per packet
     if ( !sn_firstInPacket )
     {
+        // get the machine infos
+        nMachine & peer   = nMachine::GetMachine( m.SenderID() );
+
         GetQueryMessageStats( peer ).Block();
 
         return true;
@@ -1038,11 +1077,15 @@ bool FloodProtection( nMessage const & m )
     if ( sn_minPingTimes[sn_minPingCount - 1] <= 0 )
         return false;
 
-    // and delegate
-    return FloodProtection( peer ) || ( sn_minPingTimeGlobalFactor > 0 && FloodProtection( server, sn_minPingTimeGlobalFactor ) );
+    // and delegate. Only do global check, the per-peer check has already been
+    // done earlier as the packet was received.
+    return GlobalPingFloodProtection();
 }
 
 void nServerInfo::GetSmallServerInfo(nMessage &m){
+    if ( !sn_IsMaster && sn_GetNetState() == nSERVER )
+        return;
+
     nServerInfoBase baseInfo;
     baseInfo.NetRead( m );
 
@@ -1298,6 +1341,9 @@ void nServerInfo::GiveBigServerInfoCommon(nMessage &m, const nServerInfo & info,
 
 void nServerInfo::GetBigServerInfo(nMessage &m)
 {
+    if ( !sn_IsMaster && sn_GetNetState() == nSERVER )
+        return;
+
     nServerInfo * server = GetBigServerInfoCommon( m );
 
     if (!server)
@@ -1360,7 +1406,7 @@ void nServerInfo::SetFromMaster()
 
 void nServerInfo::GetBigServerInfoMaster(nMessage &m)
 {
-    if ( sn_GetNetState() == nSERVER && FloodProtection( m ) )
+    if ( sn_GetNetState() == nSERVER )
         return;
 
     nServerInfo *server = GetBigServerInfoCommon( m );
@@ -1373,10 +1419,10 @@ void nServerInfo::GetBigServerInfoMaster(nMessage &m)
 
 void nServerInfo::GiveBigServerInfoMaster(nMessage &m)
 {
-    if ( FloodProtection( m ) )
+    if ( !sn_IsMaster )
         return;
 
-    if ( !sn_IsMaster )
+    if ( FloodProtection( m ) )
         return;
 
     // read info of desired server from message
@@ -1745,15 +1791,15 @@ void nServerInfo::TellMasterAboutMe(nServerInfoBase *masterInfo)
     // don't reinitialize the network system
     nSocketResetInhibitor inhibitor;
 
-    static unsigned int lastPort = 0;
+    // static unsigned int lastPort = 0;
 
     // enter server state so we know our true port number
     sn_SetNetState(nSERVER);
-    unsigned int port = sn_GetServerPort();
+    // unsigned int port = sn_GetServerPort();
     //if (port == lastPort)
     //    return; // the master already knows about us
 
-    lastPort = port;
+    // lastPort = port;
 
     //    sn_SetNetState(nSTANDALONE);
 
@@ -2264,13 +2310,17 @@ void nServerInfo::RunMaster()
                     sn_Timeout[i] = tSysTimeFloat() + .2f;
             }
 
-            // defend against DOS attacks: Kill idle clients
+            // defend against DoS attacks: Kill idle clients
             if(sn_Timeout[i] < tSysTimeFloat())
+            {
+                sn_DisconnectUser(i, "$network_kill_servercomplete");
+                continue;
+            }
+            else if (!sn_Requested[i] && sn_Timeout[i] < tSysTimeFloat() + 60.0f)
+            {
                 sn_DisconnectUser(i, "$network_kill_timeout");
-
-            if (!sn_Requested[i] && sn_Timeout[i] < tSysTimeFloat() + 60.0f)
-                sn_DisconnectUser(i, "$network_kill_timeout");
-
+                continue;
+            }
         }
 
         if (sn_Transmitting[i] && sn_MessagesPending(i) < 3)
@@ -2439,6 +2489,67 @@ nServerInfo::Compat	nServerInfo::Compatibility() const
     return Compat_Ok;
 }
 
+nServerInfo::SettingsDigest::SettingsDigest()
+  : flags_(0)
+  ,  minPlayTimeTotal_(0)
+  ,  minPlayTimeOnline_(0)
+  ,  minPlayTimeTeam_(0)
+  ,  cycleDelay_(0)
+  ,  acceleration_(0)
+  ,  rubberWallHump_(0)
+  ,  rubberHitWallRatio_(0)
+{
+}
+
+void nServerInfo::SettingsDigest::SetFlag( Flags flag, bool set )
+{
+    if( set )
+    {
+        flags_ |= flag;
+    }
+    else
+    {
+        flags_ &= ~flag;
+    }
+}
+
+bool nServerInfo::SettingsDigest::GetFlag( Flags flag ) const
+{
+    return 0 != (flags_ & flag);
+}
+
+//! callback to give other components a chance to help fill in the server info
+nServerInfo::SettingsDigest * nCallbackFillServerInfo::settings_ = NULL;
+static tCallback * sn_fillServerInfoAnchor = NULL;
+nCallbackFillServerInfo::nCallbackFillServerInfo( VOIDFUNC * f )
+: tCallback( sn_fillServerInfoAnchor, f )
+{}
+
+//! fills all server infos
+void nCallbackFillServerInfo::Fill( nServerInfo::SettingsDigest * settings )
+{
+    settings_ = settings;
+    Exec( sn_fillServerInfoAnchor );
+    settings_ = NULL;
+}
+
+nServerInfo::SettingsDigest const * nCallbackCanPlayOnServer::settings_ = NULL;
+static tCallbackString * sn_canPlayOnServerAnchor = NULL;
+//! callback to give other components a chance to help fill in the server info
+
+nCallbackCanPlayOnServer::nCallbackCanPlayOnServer( STRINGRETFUNC * f )
+: tCallbackString( sn_canPlayOnServerAnchor, f )
+{
+}
+
+//! return all reasons why you can't play here
+tString nCallbackCanPlayOnServer::CantPlayReasons( nServerInfo::SettingsDigest const * settings )
+{
+    settings_ = settings;
+    tString ret = Exec( sn_canPlayOnServerAnchor );
+    settings_ = NULL;
+    return ret;
+}
 
 static nServerInfoAdmin* sn_serverInfoAdmin = NULL;
 
@@ -2644,7 +2755,8 @@ void nServerInfoBase::NetReadThis( nMessage & m )
     m >> port_;                            // get the port
     sn_ReadFiltered( m, connectionName_ ); // get the connection name
 
-    if ( ( sn_IsMaster || sn_AcceptingFromBroadcast || sn_AcceptingFromMaster ) && connectionName_.Len()>1 ) // no valid name (must come directly from the server who does not know his own address)
+    // ban us.to dns service, it's down too often
+    if ( ( ( sn_IsMaster && !st_StringEndsWith( connectionName_, ".us.to" ) ) || sn_AcceptingFromBroadcast || sn_AcceptingFromMaster ) && connectionName_.Len()>1 ) // valid name (must come directly from the server who does not know his own address)
     {
         // resolve DNS
         connectionName_ = S_LocalizeName( connectionName_ );
@@ -2802,6 +2914,8 @@ void nServerInfo::DoGetFrom( nSocket const * socket )
         url_        = str;
         userGlobalIDs_ = "";
     }
+
+    nCallbackFillServerInfo::Fill( &settings_ );
 }
 
 // *******************************************************************************************
@@ -2829,6 +2943,16 @@ void nServerInfo::NetWriteThis( nMessage & m ) const
     m << url_;
 
     m << userGlobalIDs_;
+
+    m.Write(settings_.flags_);
+    m << settings_.minPlayTimeTotal_;
+    m << settings_.minPlayTimeOnline_;
+    m << settings_.minPlayTimeTeam_;
+    m << settings_.cycleDelay_;
+    m << settings_.acceleration_;
+    m << settings_.rubberWallHump_;
+    m << settings_.rubberHitWallRatio_;
+    m << settings_.wallsLength_;
 }
 
 // *******************************************************************************************
@@ -2889,6 +3013,31 @@ void nServerInfo::NetReadThis( nMessage & m )
     else
     {
         userGlobalIDs_ = "";
+    }
+
+    if( !m.End() )
+    {
+        m.Read(settings_.flags_);
+        settings_.SetFlag(SettingsDigest::Flags_SettingsDigestSent, true);
+        m >> settings_.minPlayTimeTotal_;
+        m >> settings_.minPlayTimeOnline_;
+        m >> settings_.minPlayTimeTeam_;
+        m >> settings_.cycleDelay_;
+        m >> settings_.acceleration_;
+        m >> settings_.rubberWallHump_;
+        m >> settings_.rubberHitWallRatio_;
+        if( !m.End() )
+        {
+            m >> settings_.wallsLength_;
+        }
+        else
+        {
+            settings_.wallsLength_ = -1;
+        }
+    }
+    else
+    {
+        settings_.flags_ = 0;
     }
 
     userNamesOneLine_.Clear();

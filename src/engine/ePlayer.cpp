@@ -2535,6 +2535,9 @@ static void se_AdminAdmin( ePlayerNetID * p, std::istream & s )
     eAdminConsoleFilter consoleFilter( p->Owner() );
     try
     {
+        // forbid CASACL
+        tCasaclPreventer preventer;
+
         tConfItemBase::LoadLine(stream);
     }
     catch (tAbortLoading)
@@ -2579,18 +2582,42 @@ static void handle_chat_admin_commands( ePlayerNetID * p, tString const & comman
     }
     else if ( command == "/invite" )
     {
+        spam.factor_ = 0.4;
+        if( spam.Block() )
+        {
+            return;
+        }
+
         se_Invite( command, p, s, &eTeam::Invite );
     }
     else if ( command == "/uninvite" )
     {
+        spam.factor_ = 0.4;
+        if( spam.Block() )
+        {
+            return;
+        }
+
         se_Invite( command, p, s, &eTeam::UnInvite );
     }
     else if ( command == "/lock" )
     {
+        spam.factor_ = 0.4;
+        if( spam.Block() )
+        {
+            return;
+        }
+
         se_Lock( command, p, s, true );
     }
     else if ( command == "/unlock" )
     {
+        spam.factor_ = 0.4;
+        if( spam.Block() )
+        {
+            return;
+        }
+
         se_Lock( command, p, s, false );
     }
 #endif
@@ -3291,9 +3318,9 @@ void ePlayerNetID::SetShuffleWish( int pos )
 {
     tASSERT( !CurrentTeam() );
 
-    if ( shuffleSpam.ShouldAnnounce() )
+    if ( GetShuffleSpam().ShouldAnnounce() )
     {
-        sn_ConsoleOut( shuffleSpam.ShuffleMessage( this, pos+1 ) );
+        sn_ConsoleOut( GetShuffleSpam().ShuffleMessage( this, pos+1 ) );
     }
 
     teamListID = pos;
@@ -4159,7 +4186,48 @@ static int IMPOSSIBLY_LOW_SCORE=(-1 << 31);
 
 static nSpamProtectionSettings se_chatSpamSettings( 1.0f, "SPAM_PROTECTION_CHAT", tOutput("$spam_protection") );
 
-ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), timeCreated_( tSysTimeFloat() ), allowTeamChange_(false), registeredMachine_(0), pID(p),chatSpam_( se_chatSpamSettings ), lastSaid_()
+class eMachineDecoratorSpam: public nMachineDecorator
+{
+public:
+    nSpamProtection chatSpam;
+    eShuffleSpamTester shuffleSpam;
+    eChatLastSaid lastSaid;
+
+    eMachineDecoratorSpam( nMachine & m ): nMachineDecorator( m ), chatSpam( se_chatSpamSettings ){}
+
+    virtual void OnDestroy()
+    {
+        delete this;
+    }
+};
+
+static eMachineDecoratorSpam & se_GetSpam( ePlayerNetID & p )
+{
+    nMachine & machine = p.GetMachine();
+    eMachineDecoratorSpam * spam = machine.GetDecorator< eMachineDecoratorSpam >();
+    if( !spam )
+    {
+        spam = tNEW(eMachineDecoratorSpam)( machine );
+    }
+    return *spam;
+}
+
+nSpamProtection & ePlayerNetID::GetChatSpam()
+{
+    return se_GetSpam( *this ).chatSpam;
+}
+
+eChatLastSaid & ePlayerNetID::GetLastSaid()
+{
+    return se_GetSpam( *this ).lastSaid;
+}
+
+eShuffleSpamTester & ePlayerNetID::GetShuffleSpam()
+{
+    return se_GetSpam( *this ).shuffleSpam;
+}
+
+ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), timeCreated_( tSysTimeFloat() ), allowTeamChange_(false), registeredMachine_(0), pID(p)
 {
     flagOverrideChat = false;
     flagChatState = false;
@@ -4226,7 +4294,7 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), timeC
 
 
 ePlayerNetID::ePlayerNetID(nMessage &m):nNetObject(m),listID(-1), teamListID(-1), timeCreated_( tSysTimeFloat() )
-        , allowTeamChange_(false), registeredMachine_(0), chatSpam_( se_chatSpamSettings ), lastSaid_()
+        , allowTeamChange_(false), registeredMachine_(0)
 {
     flagOverrideChat = false;
     flagChatState = false;
@@ -4624,6 +4692,8 @@ void ePlayerNetID::RemoveFromGame()
     // log scores
     LogScoreDifference();
 
+    bool logLeave = false;
+
     if ( sn_GetNetState() != nCLIENT )
     {
         nameFromClient_ = nameFromServer_;
@@ -4645,9 +4715,7 @@ void ePlayerNetID::RemoveFromGame()
 
             if ( IsHuman() && sn_GetNetState() == nSERVER && NULL != sn_Connections[Owner()].socket )
             {
-                tString ladder;
-                se_playerLeftWriter << userName_ << nMachine::GetMachine(Owner()).GetIP();
-                se_playerLeftWriter.write();
+                logLeave = true;
             }
         }
     }
@@ -4657,7 +4725,12 @@ void ePlayerNetID::RemoveFromGame()
     SetTeam( NULL );
     UpdateTeam();
     ControlObject( NULL );
-    // currentTeam = NULL;
+
+    if( logLeave )
+    {
+        se_playerLeftWriter << userName_ << nMachine::GetMachine(Owner()).GetIP();
+        se_playerLeftWriter.write();
+    }
 }
 
 bool ePlayerNetID::ActionOnQuit()
@@ -4806,6 +4879,11 @@ private:
     }
 
     virtual bool Save(){
+        return false;
+    }
+
+    // CAN this be saved at all?
+    virtual bool CanSave(){
         return false;
     }
 };
@@ -5998,10 +6076,15 @@ void se_SaveToLadderLog( tOutput const & out )
     {
         std::ofstream o;
         if ( tDirectories::Var().Open(o, "ladderlog.txt", std::ios::app) )
+        {
+            std::stringstream s;
             if(se_ladderlogDecorateTS) {
-                o << st_GetCurrentTime("%Y/%m/%d-%H:%M:%S ");
+                s << st_GetCurrentTime("%Y/%m/%d-%H:%M:%S ");
             }
-            o << out << std::endl;;
+            s << out << std::endl;
+            sr_InputForScripts( s.str().c_str() );
+            o << s.str();
+        }
     }
 }
 
@@ -7128,11 +7211,11 @@ static void scores(){
 
 static rPerFrameTask pf(&scores);
 
-static bool force_small_cons(){
-    return show_scores;
-}
+// static bool force_small_cons(){
+//    return show_scores;
+// }
 
-static rSmallConsoleCallback sc(&force_small_cons);
+// static rSmallConsoleCallback sc(&force_small_cons);
 
 //static void cd(){
 //    show_scores = false;
@@ -7562,7 +7645,7 @@ void ePlayerNetID::ReceiveControlNet(nMessage &m)
 
                 // count it as spam if it is obnoxious
                 if ( obnoxious )
-                    chatSpam_.CheckSpam( 4.0, Owner(), tOutput("$spam_teamchage") );
+                    GetChatSpam().CheckSpam( 4.0, Owner(), tOutput("$spam_teamchage") );
             }
 
             break;
@@ -8948,10 +9031,15 @@ void ePlayerNetID::UpdateSuspensions() {
 
 void ePlayerNetID::UpdateShuffleSpamTesters()
 {
+    if( sn_GetNetState() != nSERVER )
+    {
+        return;
+    }
+
     for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
     {
         ePlayerNetID *p = se_PlayerNetIDs( i );
-        p->shuffleSpam.Reset();
+        p->GetShuffleSpam().Reset();
     }
 }
 
@@ -8976,7 +9064,7 @@ void ePlayerNetID::AnalyzeTiming( REAL timing )
 
 eUncannyTimingDetector::eUncannyTimingSettings::~eUncannyTimingSettings()
 {
-#ifdef DEBUG
+#ifdef DEBUG_X
 #ifdef DEDICATED
     con << "Best ratio achieved for " << timescale*1000 << "ms stat: " << bestRatio << "\n";
 #endif
@@ -9257,3 +9345,23 @@ int ePlayerNetID::GetSuspended() const
 {
     return suspended_;
 }
+
+static void se_FillServerSettings()
+{
+    nServerInfo::SettingsDigest & digest = *nCallbackFillServerInfo::ToFill();
+    
+    digest.minPlayTimeTotal_ = int(se_minPlayTimeTotal);
+    digest.minPlayTimeOnline_ = int(se_minPlayTimeOnline);
+    digest.minPlayTimeTeam_ = int(se_minPlayTimeTeam);
+
+    digest.SetFlag( nServerInfo::SettingsDigest::Flags_AuthenticationRequired,
+#ifdef KRAWALL_SERVER
+                    se_accessLevelRequiredToPlay < tAccessLevel_Program ||
+                    se_playAccessLevel < tAccessLevel_Program
+#else
+                    false
+#endif
+        );
+}
+
+static nCallbackFillServerInfo se_fillServerSettings(se_FillServerSettings);

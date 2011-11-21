@@ -35,6 +35,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tMath.h"
 
 #include "nConfig.h"
+#include "nServerInfo.h"
 
 #include "ePlayer.h"
 #include "eDebugLine.h"
@@ -47,6 +48,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "gWall.h"
 #include "gSensor.h"
 #include "gAIBase.h"
+
+#include "uInput.h"
 
 #include "tRecorder.h"
 
@@ -2216,7 +2219,7 @@ bool gCycleMovement::Timestep( REAL currentTime )
                     dist_to_dest = distToWall;
             }
 
-            static bool breakp = false;
+            // static bool breakp = false;
 
             // the time left until the turn happened on the client
             // REAL timeLeft = currentDestination->GetGameTime() - lastTime;
@@ -2503,7 +2506,7 @@ bool gCycleMovement::Timestep( REAL currentTime )
 
                 while (currentDestination && currentDestination->hasBeenUsed)
                 {
-                    breakp = false;
+                    // breakp = false;
                     currentDestination = currentDestination->next;
                 }
             }
@@ -2785,10 +2788,10 @@ void gCycleMovement::OnRemoveFromGame()
 
 void gCycleMovement::CopyFrom( const gCycleMovement & other )
 {
+#ifdef DEBUG_X
     // calculate position update
     eCoord posUpdate = other.Position() - this->Position();
 
-#ifdef DEBUG_X
     // only update direction if the positions are out of sync
     REAL lag = 1;
     if ( player )
@@ -3611,7 +3614,7 @@ private:
 
 bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration )
 {
-    eCoord oldpos=pos;
+    // eCoord oldpos=pos;
     REAL lastSpeed=verletSpeed_;
 
     REAL ts=(currentTime-lastTime);
@@ -4431,5 +4434,42 @@ REAL GetTurnSpeedFactor(void) {
     return sg_cycleTurnSpeedFactor;
 }
 
+static void sg_FillCyclePhysics()
+{
+    // fetch base values
+    REAL speed = sg_speedCycle * gCycleMovement::SpeedMultiplier();
+    REAL rubber = sg_rubberCycle;
+    REAL maxSpeed = gCycleMovement::MaximalSpeed();
 
+    REAL delay = sg_delayCycle/gCycleMovement::SpeedMultiplier();
+    if( su_doubleBindTimeout > delay )
+    {
+        delay = su_doubleBindTimeout;
+        if( delay > .05 )
+        {
+            delay = .05;
+        }
+    }
+
+    nServerInfo::SettingsDigest & digest = *nCallbackFillServerInfo::ToFill();
+    digest.cycleDelay_ = delay;
+    digest.acceleration_ = (maxSpeed-speed)/(speed+.001);
+    digest.rubberWallHump_ = rubber/(speed*delay);
+    // if humping is possible basically, check whether it's prevented or handicaped by
+    // cycle_rubber_delay
+    if( digest.rubberWallHump_ > 1 && sg_rubberCycleDelay > 0 )
+    {
+        REAL rubberDelayCount = sg_rubberCycleDelay > .999 ? .999 : sg_rubberCycleDelay;
+        REAL bonus = sg_rubberCycleDelayBonus > 0 ? sg_rubberCycleDelayBonus : 0;
+        digest.rubberWallHump_ *= bonus/(rubberDelayCount+bonus*(1-rubberDelayCount));
+        // but not too much.
+        if( digest.rubberWallHump_ < 1 )
+        {
+            digest.rubberWallHump_ = 1;
+        }
+    }
+    digest.rubberHitWallRatio_ = rubber/(speed*sg_rubberCycleTime);
+}
+
+static nCallbackFillServerInfo sg_fillCyclePhysics(sg_FillCyclePhysics);
 

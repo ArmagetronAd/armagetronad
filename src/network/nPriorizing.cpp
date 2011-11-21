@@ -435,7 +435,11 @@ int  nBandwidthTaskMessage::DoEstimateSize() const
 
 #ifdef DEBUG
 
-static nDescriptor testDescriptor( 399, NULL, NULL, "test" );
+static void test_handler( nMessage & m )
+{
+}
+
+static nDescriptor testDescriptor( 399, test_handler, "test" );
 //static nDescriptor testDescriptor( 399, NULL, NULL, "test" );
 
 #include "nNetObject.h"
