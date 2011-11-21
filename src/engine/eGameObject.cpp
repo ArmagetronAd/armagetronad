@@ -888,6 +888,9 @@ void eGameObject::RenderAll(eGrid *grid, const eCamera *cam){
                 // but the small flickering error is to be tolerated, especially
                 // since alpha blended game objects tend to gently fade in.
                 int firstAlphaID = firstAlpha->id;
+
+                eSoundLocker locker;
+	       
                 grid->gameObjects.Remove(firstAlpha,firstAlpha->id);
                 grid->gameObjects.Add(firstAlpha,firstAlpha->id);
                 grid->gameObjects.Remove(object,object->id);

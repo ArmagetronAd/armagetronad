@@ -1454,6 +1454,9 @@ void init_game_grid(eGrid *grid, gParser *aParser){
         // let settings in the map file be executed with the rights of the person
         // who set the map
         tCurrentAccessLevel level( conf_mapfile.GetSetting().GetSetLevel(), true );
+        
+        // and disallow CASACL and script spawning just in case
+        tCasaclPreventer preventer;
 
         Arena.PrepareGrid(grid, aParser);
     }
@@ -1970,6 +1973,13 @@ void Render(eGrid *grid, REAL time, bool swap=true){
 
 #ifndef DEDICATED
     if (sr_glOut){
+        static bool lastMoviePack=sg_MoviePack();
+        if(lastMoviePack!=sg_MoviePack())
+        {
+            lastMoviePack=sg_MoviePack();
+            rDisplayList::ClearAll();
+        }
+
         RenderAllViewports(grid);
 
         sr_ResetRenderState(true);
@@ -5295,4 +5305,18 @@ static void LoginCallback(){
 }
 
 static nCallbackLoginLogout lc(LoginCallback);
+
+static void sg_FillServerSettings()
+{
+    nServerInfo::SettingsDigest & digest = *nCallbackFillServerInfo::ToFill();
+    
+    digest.SetFlag( nServerInfo::SettingsDigest::Flags_NondefaultMap,
+                    mapfile != DEFAULT_MAP );
+    digest.SetFlag( nServerInfo::SettingsDigest::Flags_TeamPlay,
+                    multiPlayer.maxPlayersPerTeam > 1 );
+
+    digest.wallsLength_ = multiPlayer.wallsLength/gCycleMovement::MaximalSpeed();
+}
+
+static nCallbackFillServerInfo sg_fillServerSettings(sg_FillServerSettings);
 

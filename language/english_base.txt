@@ -333,6 +333,11 @@ player_chat_wait_teamleader_help    Set to 1 if only team leaders, and 0 if all 
 wait_for_external_script_help Let the server wait for an external script between two rounds until the script switches this setting back to 0.
 wait_for_external_script_timeout_help If the server has been paused by WAIT_FOR_EXTERNAL_SCRIPT for more seconds than this, kickstart the game.
 
+spawn_script_help                   Spawns an external script from a scripts/ subdirectory on the data path.
+respawn_script_help                 Spawns an external script from a scripts/ subdirectory on the data path if no already running instance is found.
+kill_script_help                    Kills a script. Argument must match the SPAWN_SCRIPT argument.
+check_script_help                   Should safety checks be done on script commands? Very much recommended to leave this on.
+
 chatter_remove_time_help            Time in seconds after which a permanent chatter is removed from the game
 idle_remove_time_help               Time in seconds after which an inactive player is removed from the game
 idle_kick_time_help                 Time in seconds after which an inactive player is kicked
@@ -961,6 +966,8 @@ admin_pass_help			Password for the basic in game admin
 
 backward_compatibility_help	Maximum number of old protocol versions to support.
 new_feature_delay_help		Disable features that only came in during the last X protocol versions.
+min_protocol_version_help   Minimum protocol version allowed to play.
+max_protocol_version_help   If > 0, maximum protocol version allowed to play; features not supported by this version are going to be permanently disabled.
 
 # program control
 quit_help					Shuts the dedicated server down and quits.
@@ -1796,7 +1803,7 @@ player_red_text			Red:
 player_red_help			Lets you choose the red component of your colour.
 
 player_autologin_text		Auto Login:
-player_autologin_help		When enabled, you will automatically initiate the (usually completely optional) login procedure as soon as you enter a server.
+player_autologin_help		When enabled, you will automatically initiate the (usually completely optional) login procedure using the Global ID above as soon as you enter a server.
 
 player_stealth_text		Hide Global ID:
 player_stealth_help		Usually your global ID is shown to everyone when you log in or when someone uses the /players chat command. Enabling this tells the server that you prefer to remain anonymous. The server may still show your ID to moderators and administrators on the server or even decide to ignore your request.
@@ -2912,6 +2919,7 @@ nconfig_error_nonet         Got conf message for  setting \1 which is not networ
 nconfig_error_ignoreold		Ignoring old conf message for setting \1.\n
 nconfig_value_changed		\1 changed from \2 to \3 on server order.\n
 
+config_accesslevel_-1       Shell
 config_accesslevel_0        Owner
 config_accesslevel_1        Administrator
 config_accesslevel_2        Moderator
@@ -2927,6 +2935,9 @@ config_accesslevel_20       Program
 
 access_level_help           Changes the access level of a configuration item to make it available to lower ranked users
 access_level_usage          usage: ACCESS_LEVEL <config command> <required minimal access level (numerical)>\n
+access_level_change         Required access level of command \1 changed to "\2".\n
+access_level_nochange_now   Cannot change access level of \1: it is currently at "\2", you only have "\3", you would steal access.\n
+access_level_nochange_later   Cannot change access level of \1 to "\2", you only have "\3" and would not be able to change it back.\n
 access_level_change         Required access level of command \1 changed to "\2".\n
 access_level_error          Required access level of command \1 is "\2", you only have "\3".\n
 

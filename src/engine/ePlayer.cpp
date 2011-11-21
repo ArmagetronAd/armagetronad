@@ -2576,6 +2576,9 @@ static void se_AdminAdmin( ePlayerNetID * p, std::istream & s )
     eAdminConsoleFilter consoleFilter( p->Owner() );
     try
     {
+        // forbid CASACL
+        tCasaclPreventer preventer;
+
         tConfItemBase::LoadLine(stream);
     }
     catch (tAbortLoading)
@@ -2622,18 +2625,42 @@ static void handle_chat_admin_commands( ePlayerNetID * p, tString const & comman
     }
     else if ( command == "/invite" )
     {
+        spam.factor_ = 0.4;
+        if( spam.Block() )
+        {
+            return;
+        }
+
         se_Invite( command, p, s, &eTeam::Invite );
     }
     else if ( command == "/uninvite" )
     {
+        spam.factor_ = 0.4;
+        if( spam.Block() )
+        {
+            return;
+        }
+
         se_Invite( command, p, s, &eTeam::UnInvite );
     }
     else if ( command == "/lock" )
     {
+        spam.factor_ = 0.4;
+        if( spam.Block() )
+        {
+            return;
+        }
+
         se_Lock( command, p, s, true );
     }
     else if ( command == "/unlock" )
     {
+        spam.factor_ = 0.4;
+        if( spam.Block() )
+        {
+            return;
+        }
+
         se_Lock( command, p, s, false );
     }
 #endif
@@ -4932,6 +4959,11 @@ private:
     virtual bool Save(){
         return false;
     }
+
+    // CAN this be saved at all?
+    virtual bool CanSave(){
+        return false;
+    }
 };
 
 // changes the access level of a player
@@ -6124,10 +6156,15 @@ void se_SaveToLadderLog( tOutput const & out )
     {
         std::ofstream o;
         if ( tDirectories::Var().Open(o, "ladderlog.txt", std::ios::app) )
+        {
+            std::stringstream s;
             if(se_ladderlogDecorateTS) {
-                o << st_GetCurrentTime("%Y/%m/%d-%H:%M:%S ");
+                s << st_GetCurrentTime("%Y/%m/%d-%H:%M:%S ");
             }
-            o << out << std::endl;;
+            s << out << std::endl;
+            sr_InputForScripts( s.str().c_str() );
+            o << s.str();
+        }
     }
 }
 
@@ -9452,6 +9489,7 @@ int ePlayerNetID::GetSuspended() const
     return suspended_;
 }
 
+
 static void sg_AddScorePlayer(std::istream &s)
 {
         tString params;
@@ -9640,4 +9678,23 @@ static void se_ChatSubstitute( ePlayerNetID * p, std::istream & s )
 }
 #endif
 
+static void se_FillServerSettings()
+{
+    nServerInfo::SettingsDigest & digest = *nCallbackFillServerInfo::ToFill();
+    
+    digest.minPlayTimeTotal_ = int(se_minPlayTimeTotal);
+    digest.minPlayTimeOnline_ = int(se_minPlayTimeOnline);
+    digest.minPlayTimeTeam_ = int(se_minPlayTimeTeam);
+
+    digest.SetFlag( nServerInfo::SettingsDigest::Flags_AuthenticationRequired,
+#ifdef KRAWALL_SERVER
+                    se_accessLevelRequiredToPlay < tAccessLevel_Program ||
+                    se_playAccessLevel < tAccessLevel_Program
+#else
+                    false
+#endif
+        );
+}
+
+static nCallbackFillServerInfo se_fillServerSettings(se_FillServerSettings);
 
