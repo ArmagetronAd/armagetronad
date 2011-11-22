@@ -790,7 +790,7 @@ public:
         {
             static int lastTimeLeft = -1, lastBonus = -1;
             int bonus = (HumanTeam().Score()/scoreKill_) * bonusPerKill_;
-            int timeLeft = -se_GameTime() + bonus + initial_ + timeOffset_;
+            int timeLeft = int(-se_GameTime() + bonus + initial_ + timeOffset_);
             static int skipNumbers = 0;
             if( bonus != lastBonus )
             {
