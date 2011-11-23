@@ -514,6 +514,20 @@ public:
         return true;
     }
 
+    static bool AllIncomplete()
+    {
+        gTutorial * run = anchor_;
+        while( run )
+        {
+            if( run->completed_ )
+            {
+                return false;
+            }
+            run = run->Next();
+        }
+        return true;
+    }
+
     // warps dt seconds into the future for all game objects and AIs.
     // to be called in AfterSpawn().
     void TimeWarp( REAL dt )
@@ -2003,7 +2017,12 @@ public:
 void sg_TutorialMenu()
 {
     static uMenu & menu = sg_tutorialMenu;
-    gTutorialMenuItem::AdvanceMenu( menu );
+    bool firstRun = gTutorial::AllIncomplete();
+    if( firstRun )
+    {
+        menu.SetSelected(menu.NumItems()-1);
+    }
+    gTutorialMenuItem::AdvanceMenu( menu, firstRun );
     menu.Enter();
 }
 
