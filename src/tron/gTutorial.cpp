@@ -1674,6 +1674,7 @@ public:
 //! teamstart tutorial
 class gTutorialTeamstartBase: public gTutorial
 {
+    REAL starty_; // start position of player
 public:
     gTutorialTeamstartBase( char const * name )
     : gTutorial( name )
@@ -1694,6 +1695,7 @@ public:
     {
         gTutorial::Analysis();
 
+        // no team kills
         if( se_GameTime() > .5 && !finished_ )
         {
             eTeam & team = HumanTeam();
@@ -1702,13 +1704,43 @@ public:
                 End( false );
             }
         }
+
+        // no backdoor
+        eGameObject *o = HumanPlayer().Object();
+        if( o && o->Position().y < starty_ - .5 )
+        {
+            End( false );
+        }
     }
 
+    // called sometime after End(false), right after a winner would have been declared
+    // return true if special action was taken
+    virtual bool OnUnspecifiedNonWin()
+    {
+        eTeam & team = HumanTeam();
+        if( team.AlivePlayers() == team.NumPlayers() )
+        {
+            sn_CenterMessage(tOutput("$tutorial_fail_backdoor"));
+            return true;
+        }
+
+        return false;
+    }
+    
     // set paths
     void BeforeSpawn()
     {
+        gTutorial::BeforeSpawn();
+
         eTeam & team = HumanTeam();
         team.Shuffle(0,3);
+    }
+
+    void AfterSpawn()
+    {
+        gTutorial::AfterSpawn();
+
+        starty_ = HumanPlayer().Object()->Position().y;
     }
 
     virtual void SetDifficulty( int difficulty )
@@ -1776,6 +1808,8 @@ public:
     
     void AfterSpawn()
     {
+        gTutorialTeamstartBase::AfterSpawn();
+
         eTeam & team = HumanTeam();
 
         Path( *dynamic_cast< gAIPlayer * >( team.Player( 0 ) ), 0, 0 );

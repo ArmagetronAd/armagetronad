@@ -1707,6 +1707,7 @@ tutorial_menu_teamstart_text     Team Start
 tutorial_menu_teamstart_help     Team Start Tutorial: learn the standard team formation opening move
 tutorial_menu_teamstart_instructions If you play in a team, it usually is the best startup move to tightly grind each others walls. The outside players should cuddle up on the center player, the ones further outside doing so in several steps. This tutorial puts you in the most difficult position there is, the player next to the outer player. Survive the start and don't let anyone on your team die.\nSpeed is reduced for this tutorial, rubber (remember, the thing protecting you from crashes) is unusually high.
 tutorial_menu_teamstart_animation textures/tutorials/teamstart/teamstart.txt
+tutorial_fail_backdoor            Failure: Follow the other cycles.
 
 tutorial_menu_doublegrind_text     Double Grind
 tutorial_menu_doublegrind_help     Double Grind Tutorial: learn the other standard team formation opening move
