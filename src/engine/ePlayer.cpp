@@ -4423,7 +4423,7 @@ bool ePlayer::Act(uAction *act,REAL x){
         return true;
     }
     else if (!se_chatter && s_chat==*reinterpret_cast<uActionPlayer *>(act)){
-        if(x>0) {
+        if(x>0 && sn_GetNetState() != nSTANDALONE ) {
             chat( this );
         }
         return true;
