@@ -142,7 +142,7 @@ test: installcheck
 
 # initial rule for source change tag (make it really old)
 .changetag:
-	touch -t 7001010101 $@
+	touch -t 9001010101 $@
 
 # make snapshot of SVN state, tracking relevant changes in .changetag
 fingerprint: .changetag
