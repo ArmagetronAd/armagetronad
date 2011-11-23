@@ -1677,7 +1677,7 @@ tutorial_success            Well done!
 tutorial_teamkill           Failure: Team Kill
 
 tutorial_easy_head          Good Work
-tutorial_easy_body          but what you completed just now was a slightly easier version of the tutorial challenge. Try the real one again now.v
+tutorial_easy_body          but what you completed just now was a slightly easier version of the tutorial challenge. Try the real one again now.
 
 tutorial_menu_navigation_text     Navigation
 tutorial_menu_navigation_help     Navigation Tutorial: learn to control your cycle.

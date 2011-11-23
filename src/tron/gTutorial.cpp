@@ -552,6 +552,11 @@ public:
         }
         eGameObject::s_Timestep( se_PlayerNetIDs(0)->Object()->Grid(), warpedAhead_, 1 );
     }
+
+    REAL WarpedAhead() const
+    {
+        return warpedAhead_;
+    }
 protected:
     gGameSettings settings_;
 private:
@@ -1585,6 +1590,17 @@ public:
     gTutorialSpeedKillDefense()
     : gTutorialSpeedKillBase( "speedkilldefense" )
     {
+    }
+
+    void Analysis()
+    {
+        gTutorialSpeedKillBase::Analysis();
+
+        // survival is enough
+        if( se_GameTime() > WarpedAhead() + 15 && HumanPlayer().Object() && HumanPlayer().Object()->Alive() )
+        {
+            End(true);
+        }
     }
 
     void AfterSpawn()
