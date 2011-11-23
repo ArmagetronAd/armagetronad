@@ -1698,6 +1698,10 @@ tutorial_menu_conquest_text     Conquest
 tutorial_menu_conquest_help     Conquest Tutorial: learn to conquer a fortress.
 tutorial_menu_conquest_instructions The goal of the Fortress mode is to conquer the enemy zone and defend your own zone. Unlike the winzones you saw earlier, a simple touch is not enough; you have to stay inside the zone and keep defenders out for a few seconds.\nIn this excercise, you will try to attack the enemy Gold zone, your home zone is safe. You will need to find a way past the lone defender or kill it.\n\nSadly, Fortress mode is not available for local play against AIs. We don't have any good AIs for it yet.
 tutorial_menu_conquest_animation textures/tutorials/conquest/conquest.txt
+tutorial_conquest_ai_retreated   The defending AI has retreated. Take the gold zone!
+tutorial_conquest_ai_killed      The defending AI has been killed. Take the gold zone!
+tutorial_conquest_ai_go          Drive into the gold zone and stay inside for a bit.
+tutorial_conquest_ai_gap         Break into the enemy defenses. Aim for the gap!
 
 tutorial_menu_teamstart_text     Team Start
 tutorial_menu_teamstart_help     Team Start Tutorial: learn the standard team formation opening move

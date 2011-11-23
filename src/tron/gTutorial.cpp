@@ -264,7 +264,7 @@ public:
     {
         for( int i = eTeam::teams.Len()-1; i >= 0; --i )
         {
-            if( eTeam::teams[i]->IsHuman() )
+            if( eTeam::teams[i]->IsHuman() && eTeam::teams[i]->OldestHumanPlayer() )
             {
                 return *eTeam::teams[i];
             }
@@ -1650,9 +1650,22 @@ public:
             TimeWarp(.1);
         }
 
-        REAL y = 1000;
-        AddPath( AIPlayer(), -10, y ); 
-        AddPath( AIPlayer(), .1, y, false ); 
+        // get the spot where the human overtakes AI
+        REAL hy = HumanPlayer().Object()->Position().y;
+        REAL ay = AIPlayer().Object()->Position().y;
+        REAL hs = HumanPlayer().Object()->Speed();
+        REAL as = AIPlayer().Object()->Speed();
+        REAL time = (ay-hy)/(hs-as);
+
+        REAL y = hy+hs*time;
+        AddPath( AIPlayer(), 50, y-100 ); 
+        AddPath( AIPlayer(), 5, y-100 ); 
+        AddPath( AIPlayer(), 5, y ); 
+        AddPath( AIPlayer(), .1, y ); 
+
+        // REAL y = 1000;
+        // AddPath( AIPlayer(), -10, y ); 
+        // AddPath( AIPlayer(), .1, y, false ); 
 
         gTutorialSpeedKillBase::AfterSpawn();
     }
@@ -1839,6 +1852,8 @@ public:
 //! conquest tutorial
 class gTutorialConquest: public gTutorial
 {
+    REAL lastHint_;
+    int hintType_;
 public:
     gTutorialConquest()
     : gTutorial( "conquest" )
@@ -1849,10 +1864,45 @@ public:
         settings_.wallsLength = 350;
     }
 
+    void Hint( char const * a, char const * b )
+    {
+        sn_CenterMessage( tOutput( hintType_ ? b : a ) );
+
+        hintType_++;
+        if( hintType_ > 1 )
+            hintType_ = 0;
+    }
+
     // analyzes the game
     void Analysis()
     {
         gTutorial::Analysis();
+
+        if( !finished_ && !success_ && se_GameTime() > lastHint_ )
+        {
+            lastHint_ = se_GameTime() + 8;
+            if( HumanPlayer().Object() && HumanPlayer().Object()->Alive() )
+            {
+                // human still alive
+                if ( !(AIPlayer().Object() && AIPlayer().Object()->Alive()) )
+                {
+                    // AI was killed
+                    Hint( "$tutorial_conquest_ai_killed", "$tutorial_conquest_ai_go" );
+                }
+                else if( (AIPlayer().Object()->Position() - tCoord( 250, 50 )).Norm() > 100 )
+                {
+                    // AI retreated
+                    Hint( "$tutorial_conquest_ai_retreated", "$tutorial_conquest_ai_go" );
+                }
+                else if( AIPlayer().GetState() == AI_PATH_GIVEN && se_GameTime() > 30 )
+                {
+                    // aim for the gap. Don't be obnoxious about it.
+                    hintType_ = 0;
+                    sn_CenterMessage( tOutput( "$tutorial_conquest_ai_gap" ) );
+                    lastHint_ = se_GameTime() + 15;
+                }
+            }
+        }
     }
 
     void AddSquare( gAIPlayer & ai, REAL radius )
@@ -1869,6 +1919,9 @@ public:
     // set paths
     void AfterSpawn()
     {
+        lastHint_ = 10;
+        hintType_ = 0;
+
         gAIPlayer & ai = AIPlayer();
 
         REAL zoneX = 250;

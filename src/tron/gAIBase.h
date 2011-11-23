@@ -150,6 +150,7 @@ public:
         }
     };
 
+    gAI_STATE GetState() const { return state; }      // the current mode of operation
 protected:
 struct ThinkData : public ThinkDataBase
     {
