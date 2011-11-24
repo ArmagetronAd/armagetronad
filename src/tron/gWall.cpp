@@ -159,7 +159,7 @@ bool gWallRim::RunsParallelPassive( eWall* newWall )
 }
 
 // from display.C
-extern REAL lower_height,upper_height;
+extern REAL se_lowerSkyHeight,se_upperSkyHeight;
 
 #ifndef DEDICATED
 
@@ -198,9 +198,9 @@ static void gWallRim_helper(eCoord p1,eCoord p2,REAL tBeg,REAL tEnd,REAL h,
     }
 
 
-    if (h>lower_height){
-        if (sr_upperSky && !sg_MoviePack() && h>upper_height) h=upper_height;
-        else if (sr_lowerSky || sg_MoviePack()) h=lower_height;
+    if (h>se_lowerSkyHeight){
+        if (sr_upperSky && !sg_MoviePack() && h>se_upperSkyHeight) h=se_upperSkyHeight;
+        else if (sr_lowerSky || sg_MoviePack()) h=se_lowerSkyHeight;
     }
 
     BeginQuads();

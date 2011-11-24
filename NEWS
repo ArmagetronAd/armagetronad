@@ -42,6 +42,10 @@ Changes since 0.3.1
 - New camera settings: CAMERA_FREE_START_PITCH/ROTATE adjust direction of free camera
 - New camera commands: WARP_CAMERA warps one camera to a specified setup,
   SAVE_CAMERAS prints the commands to restore the current configuration.
+- Upper sky can now be loaded from moviepack/upper_sky.png resp. textures/upper_sky.png;
+  if they do not exist, the floor is used, as previously. New settings
+  UPPER_SKY_RED, _GREEN, _BLUE, _SCALE and _HEIGHT as well as LOWER_SKY_HEIGHT
+  control the look.
 
 Changes since 0.3.0
 ===================
