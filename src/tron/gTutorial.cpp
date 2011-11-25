@@ -418,9 +418,9 @@ public:
         finished_ = true;
         roundEndReached_ = true;
         difficulty_ = 0;
-        int maxDifficulty = 3;
         bool instructions = true;
-        for( int tries = 3; roundEndReached_ && finished_ && !success_ && tries > 0; --tries )
+        bool secondGo = false;
+        for( int tries = 0; roundEndReached_ && finished_ && !success_; tries ++ )
         {
             if( instructions && !Instructions() )
             {
@@ -434,19 +434,15 @@ public:
             if( success_ )
             {
                 // reset difficulty
-                if( difficulty_ > 0 )
+                if( difficulty_ > 0 && !secondGo )
                 {
                     uMenu::Message( tOutput("$tutorial_easy_head"), tOutput("$tutorial_easy_body"), 300 );
+                    secondGo = true;
+                    tries = 0;
 
                     success_ = false;
 
-                    if( maxDifficulty > difficulty_ - 1 )
-                    {
-                        maxDifficulty = difficulty_ - 1;
-                    }
-
                     difficulty_ = 0; 
-                    tries += 2;
                 }
             }
             else
@@ -455,15 +451,16 @@ public:
                 {
                     // only give instructions again after third failure
                     instructions = false;
-                    if( tries == 1 )
+                    if( tries >= 3 )
                     {
                         // then again after 5
-                        tries = 5;
+                        tries = -2;
                         instructions = true;
                     }
                 }
-                else if( difficulty_ < maxDifficulty )
+                else if( ( !secondGo || ( (tries % 3) == 2) ) && difficulty_ < 4 )
                 {
+                    // decrease difficulty (every third time in the second iteration)
                     difficulty_++;
                 }
             }
