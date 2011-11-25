@@ -360,6 +360,7 @@ public:
         // colored teams so the player is always blue here
         PushSetting( "ALLOW_TEAM_NAME_COLOR", "1" );
         PushSetting( "ALLOW_TEAM_NAME_PLAYER", "0" );
+        PushSetting( "ALLOW_TEAM_NAME_LEADER", "0" );
 
         // one player mode
         PushSetting( "SPECTATOR_MODE_1", "0" );
@@ -707,6 +708,7 @@ public:
         // back to player color
         PushSetting( "ALLOW_TEAM_NAME_COLOR", "0" );
         PushSetting( "ALLOW_TEAM_NAME_PLAYER", "1" );
+        PushSetting( "ALLOW_TEAM_NAME_LEADER", "1" );
     }
 
     virtual bool Activate()
@@ -847,10 +849,6 @@ public:
     {
         gChallenge::Prepare();
         su_helpLevel = uActionTooltip::Level_Expert;
-
-        // colors
-        PushSetting( "ALLOW_TEAM_NAME_COLOR", "0" );
-        PushSetting( "ALLOW_TEAM_NAME_PLAYER", "1" );
 
         // invulnerability
         PushSetting( "CYCLE_INVULNERABLE_TIME", "2" );
@@ -1097,8 +1095,18 @@ public:
         width_ = width;
     }
 
+    void BeforeSpawn()
+    {
+        gChallenge::BeforeSpawn();
+
+        AITeam().OldestPlayer()->SetTeamname(tOutput("$tutorial_menu_bullies_teamname"));
+        AITeam().Update();
+    }
+
     void AfterSpawn()
     {
+        gChallenge::AfterSpawn();
+
         // give AIs a head start
         eTeam & ais = AITeam();
         for( int i = ais.NumPlayers()-1; i >= 0; --i )
@@ -1127,16 +1135,13 @@ public:
     // prepares
     virtual void Prepare()
     {
-        gTutorial::Prepare();
+        gChallenge::Prepare();
+
         su_helpLevel = uActionTooltip::Level_Advanced;
         PushSetting( "MAP_FILE", "Z-Man/tutorial/bullies-0.1.0.aamap.xml" );
         PushSetting( "CYCLE_ACCEL", "0" );
         PushSetting( "CYCLE_SPEED", "30" );
         PushSetting( "COCKPIT_FILE", "Z-Man/tutorial/empty-0.0.1.aacockpit.xml" );
-
-        // colors
-        PushSetting( "ALLOW_TEAM_NAME_COLOR", "0" );
-        PushSetting( "ALLOW_TEAM_NAME_PLAYER", "1" );
 
         // incam only
         PushSetting( "CAMERA_FORBID_CUSTOM", "1" );

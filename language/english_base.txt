@@ -1741,6 +1741,7 @@ tutorial_menu_bullies_text     Maze Challenge
 tutorial_menu_bullies_help     Maze: two enemies have trapped you between their walls. Can you survive?
 tutorial_menu_bullies_instructions Two bullies have trapped you between their walls and are forcing you through their maze. Follow the turns they make and escape.
 tutorial_menu_bullies_animation 
+tutorial_menu_bullies_teamname Bullies
 
 tutorial_menu_hilbert2_text     Maze Challenge: Hilbert 2
 tutorial_menu_hilbert2_help     Maze: two enemies have trapped you between their walls. Can you survive? They follow a Hilbert Curve of order 2.
