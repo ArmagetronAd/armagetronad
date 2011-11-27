@@ -1143,10 +1143,21 @@ protected:
 
         double time = tSysTimeFloat();
 
-        // check whether the issuer is allowed to start a vote
-        if ( sender && player_ && player_->GetTimeCreated() + se_votingMaturity > time )
+        // get the oldest player from the sending client
+        double timeCreated = time;
+        for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
         {
-            REAL timeLeft = player_->GetTimeCreated() + se_votingMaturity - time;
+            ePlayerNetID * senderPlayer = se_PlayerNetIDs(i);
+            if( senderPlayer->Owner() == senderID && senderPlayer->GetTimeCreated() < timeCreated )
+            {
+                timeCreated = senderPlayer->GetTimeCreated();
+            }
+        }
+
+        // check whether the issuer is allowed to start a vote
+        if ( sender && player_ && timeCreated + se_votingMaturity > time )
+        {
+            REAL timeLeft = timeCreated + se_votingMaturity - time;
             tOutput message( "$vote_maturity", timeLeft );
             sn_ConsoleOut( message, senderID );
             return false;

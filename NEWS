@@ -169,6 +169,7 @@ Changes since 0.2.8.3.x:
   Scripts are fed the ladderlog on stdin (and need to read it) and their stdout 
   output is interpreted as console input on the server. Environment variables 
   are set so the script knows all about the server configuration at time of launch.
+- Authentication is now enabled by default.
 
 Changes since 0.2.8.3.1:
 - security fix: old style action commands from clients no loger cause hangs and crashes

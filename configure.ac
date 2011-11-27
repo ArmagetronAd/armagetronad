@@ -214,7 +214,7 @@ enable_fortress=$enable_zonesv2)
 
 AC_ARG_ENABLE(authentication,
     AC_HELP_STRING([--enable-authentication],
-		[enable server side code for the krawall style user authentication (default=disabled)]),
+		[enable server side code for the krawall style user authentication (default=enabled)]),
     [case "${enableval}" in
        yes) enable_armathentication=yes
 	   	;;
