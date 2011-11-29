@@ -222,8 +222,7 @@ uActionTooltip eCamera::se_glanceBackTooltip( uActionTooltip::Level_Advanced, eC
 uActionTooltip eCamera::se_glanceForwardTooltip( uActionTooltip::Level_Advanced, eCamera::se_glance[GLANCE_FORWARD], 1 );
 uActionTooltip eCamera::se_glanceRightTooltip( uActionTooltip::Level_Advanced, eCamera::se_glance[GLANCE_RIGHT], 3 );
 uActionTooltip eCamera::se_glanceLeftTooltip( uActionTooltip::Level_Advanced, eCamera::se_glance[GLANCE_LEFT], 3 );
-uActionTooltip eCamera::se_switchViewTooltip( uActionTooltip::Level_Expert, eCamera::se_switchView, 2 );
-
+uActionTooltip eCamera::se_switchViewTooltip( uActionTooltip::Level_Advanced, eCamera::se_switchView, 2 );
 
 static REAL s_startFollowX = -30, s_startFollowY = -30, s_startFollowZ = 80;
 static REAL s_startSmartX = 10, s_startSmartY = 30, s_startSmartZ = 2;

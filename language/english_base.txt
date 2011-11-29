@@ -1271,15 +1271,15 @@ input_zoom_out_help		Shows more of the scene, but with less details.
 input_zoom_in_text		Zoom in
 input_zoom_in_help		Reduces the field of vision and reveals more details on faraway objects.
 
-input_glance_back_tooltip   Press \1 to glance back.
+input_glance_back_tooltip   Press and hold \1 to glance back.
 input_glance_back_text		Glance back
 input_glance_back_help		Turns the camera temporarily backwards.
 
-input_glance_right_tooltip   Press \1 to glance right.
+input_glance_right_tooltip  Press and hold \1 to glance right.
 input_glance_right_text		Glance right
 input_glance_right_help		Turns the camera temporarily to the right.
 
-input_glance_left_tooltip   Press \1 to glance left.
+input_glance_left_tooltip   Press and hold \1 to glance left.
 input_glance_left_text		Glance left
 input_glance_left_help		Turns the camera temporarily to the left.
 
@@ -1794,6 +1794,10 @@ tutorial_menu_survival4_instructions Your engines are perfectly fine this time, 
 tutorial_menu_ai1_text     AI Fight
 tutorial_menu_ai1_help     Play against one AI, no time limit.
 tutorial_menu_ai1_instructions As the final tutorial, we test your skills against a lone AI. It is pretty stupid, the best way to kill it is to set up a trap right where you start. If your trap fails, use a speed kill, but watch out for sudden turns it is going to make.
+
+tutorial_menu_controls_text     Advanced Controls
+tutorial_menu_controls_help     Learn the rest of the control scheme.
+tutorial_menu_controls_instructions Turning left and right is all well and good, but there are a couple of other input options you may want to use occasionally. This tutorial demonstrates them to you in a risk-free environment.\n\nFollow the onscreen prompts.
 
 tutorial_ai_timeout        Failure: Timeout
 tutorial_ai_extratime      Extra Time

@@ -103,8 +103,8 @@ public:
     {
         Level_Essential, // turns
         Level_Basic,     // speed control
-        Level_Advanced,  // glancing
-        Level_Expert     // switch camera modes, game menu, chat
+        Level_Advanced,  // glancing, camera modes
+        Level_Expert     // game menu, chat
     };
 
     typedef bool VETOFUNC(int player);

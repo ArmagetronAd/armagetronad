@@ -849,7 +849,7 @@ static uActionGlobalFunc ck2(&cockpitKey2, &cCockpit::ProcessKey2, true);
 static uActionGlobalFunc ck3(&cockpitKey3, &cCockpit::ProcessKey3, true);
 static uActionGlobalFunc ck4(&cockpitKey4, &cCockpit::ProcessKey4, true);
 static uActionGlobalFunc ck5(&cockpitKey5, &cCockpit::ProcessKey5, true);
-uActionTooltip sc_key1Tooltip(uActionTooltip::Level_Expert, cockpitKey1, 1);
+uActionTooltip sc_key1Tooltip(uActionTooltip::Level_Advanced, cockpitKey1, 1);
 
 bool ProcessKey(float i, int num) {
     bool ret = false;

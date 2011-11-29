@@ -389,7 +389,7 @@ public:
 
         SetDifficulty( difficulty_ );
 
-        su_helpLevel = uActionTooltip::Level_Advanced;
+        su_helpLevel = uActionTooltip::Level_Essential;
     }
 
     // called on success
@@ -709,6 +709,9 @@ public:
         PushSetting( "ALLOW_TEAM_NAME_COLOR", "0" );
         PushSetting( "ALLOW_TEAM_NAME_PLAYER", "1" );
         PushSetting( "ALLOW_TEAM_NAME_LEADER", "1" );
+
+        // full controls
+        su_helpLevel = uActionTooltip::Level_Expert;
     }
 
     virtual bool Activate()
@@ -848,7 +851,6 @@ public:
     virtual void Prepare()
     {
         gChallenge::Prepare();
-        su_helpLevel = uActionTooltip::Level_Expert;
 
         // invulnerability
         PushSetting( "CYCLE_INVULNERABLE_TIME", "2" );
@@ -872,6 +874,10 @@ public:
     : gAIChallenge( name, limitInitial, bonusPerKill, num )
     {
         settings_.numAIs = num > 3 ? 3 : num;
+        if( num > 3 )
+        {
+            settings_.gameType = gFREESTYLE;
+        }
         settings_.AI_IQ = IQ;
         settings_.sizeFactor = size;
         settings_.wallsLength = 400;
@@ -1137,7 +1143,6 @@ public:
     {
         gChallenge::Prepare();
 
-        su_helpLevel = uActionTooltip::Level_Advanced;
         PushSetting( "MAP_FILE", "Z-Man/tutorial/bullies-0.1.0.aamap.xml" );
         PushSetting( "CYCLE_ACCEL", "0" );
         PushSetting( "CYCLE_SPEED", "30" );
@@ -1580,7 +1585,6 @@ public:
     virtual void Prepare()
     {
         gTutorial::Prepare();
-        su_helpLevel = uActionTooltip::Level_Advanced;
         PushSetting( "MAP_FILE", "Z-Man/tutorial/speedkill-0.1.0.aamap.xml" );
     }
 };
@@ -1759,7 +1763,6 @@ public:
     virtual void Prepare()
     {
         gTutorial::Prepare();
-        su_helpLevel = uActionTooltip::Level_Advanced;
         PushSetting( "COCKPIT_FILE", "Z-Man/tutorial/spartanic-0.0.1.aacockpit.xml" );
         PushSetting( "WIN_ZONE_RANDOMNESS", "0" );
         PushSetting( "WIN_ZONE_EXPANSION", "0" );
@@ -1832,6 +1835,11 @@ public:
     {
         //settings_.minPlayersPerTeam = 2;
         //settings_.maxPlayersPerTeam = 2;
+    }
+
+    virtual bool IsChallenge() const
+    {
+        return true;
     }
 
     // set paths
@@ -1987,7 +1995,6 @@ public:
     virtual void Prepare()
     {
         gTutorial::Prepare();
-        su_helpLevel = uActionTooltip::Level_Advanced;
         PushSetting( "MAP_FILE", "Z-Man/fortress/for_old_clients-0.1.0.aamap.xml" );
         PushSetting( "COCKPIT_FILE", "Z-Man/tutorial/spartanic-0.0.1.aacockpit.xml" );
         PushSetting( "FORTRESS_CONQUEST_RATE", ".3" );
@@ -2022,7 +2029,6 @@ public:
     virtual void Prepare()
     {
         gTutorial::Prepare();
-        su_helpLevel = uActionTooltip::Level_Advanced;
         PushSetting( "MAP_FILE", "Z-Man/tutorial/grind-0.1.0.aamap.xml" );
         PushSetting( "COCKPIT_FILE", "Z-Man/tutorial/spartanic-0.0.1.aacockpit.xml" );
         PushSetting( "CYCLE_RUBBER", "5" );
@@ -2042,6 +2048,7 @@ public:
         settings_.winZoneMinRoundTime = 30;
         settings_.winZoneMinLastDeath = 0;
         settings_.sizeFactor = -5;
+        settings_.gameType = gFREESTYLE;
         baseSizeFactor = settings_.sizeFactor;
     }
 
@@ -2070,7 +2077,58 @@ public:
         PushSetting( "COCKPIT_FILE", "Z-Man/tutorial/empty-0.0.1.aacockpit.xml" );
         PushSetting( "MAP_FILE", "Z-Man/tutorial/survival-0.1.0.aamap.xml" );
         PushSetting( "TEXT_OUT", "0" );
+    }
+};
+
+// input: learn the rest of teh controls
+class gTutorialControls: public gTutorial
+{
+public:
+    gTutorialControls()
+    : gTutorial( "controls" )
+    {
+        settings_.sizeFactor = 2;
+        settings_.wallsLength = 50;
+    }
+
+    // analyzes the game
+    void Analysis()
+    { 
+        gTutorial::Analysis();
+
+        static double next = tSysTimeFloat() + 5;
+
+        sg_RespawnAllAfter( 0, false );
+
+        // check if there are unfinished tooltips
+        if( tSysTimeFloat() > next && !rConsole::CenterDisplayActive() )
+        {
+            next = tSysTimeFloat() + 10;
+            if ( !uActionTooltip::Help(1) && !uActionTooltip::Help(0) )
+            {
+                End(true);
+            }
+        }
+    }
+
+    // prepares
+    virtual void Prepare()
+    {
+        gTutorial::Prepare();
+        PushSetting( "TEXT_OUT", "0" );
+        PushSetting( "COCKPIT_FILE", "Anonymous/standard-0.0.1.aacockpit.xml" );
         su_helpLevel = uActionTooltip::Level_Advanced;
+
+        // find all advanced action tooltips and make them activate at least once
+        tConfItemBase::tConfItemMap const & map = tConfItemBase::GetConfItemMap();
+        for( tConfItemBase::tConfItemMap::const_iterator i = map.begin(); i != map.end(); ++i )
+        {
+            uActionTooltip * u = dynamic_cast< uActionTooltip * >( (*i).second );
+            if( u )
+            {
+                u->ShowAgain();
+            }
+        }
     }
 };
 
@@ -2163,13 +2221,14 @@ static gShowcaseBrakeBoost sg_showcaseBrakeBoost;
 static gMazeChallengeHilbert sg_challengeHilbert2("hilbert2", 2, 50, 1.5);
 static gAIChallengeFixed sg_AIChallenge3("ai3", 3, 30, -2, 0, 0);
 static gChallengeSurvival sg_challengeSurvival1("survival1", 30, -5, .05 );
+static gTutorialDoublegrind sg_tutorialDoublegrind;
 static gAIChallengeFixed sg_AIChallenge2("ai2", 2, 25, -2, 0, 0);
 static gMazeChallenge1 sg_tutorialBullies1;
 
 static gTutorialCongratulations sg_tutorialCongratulations;
 
 static gAITutorial sg_tutorialTest;
-static gTutorialDoublegrind sg_tutorialDoublegrind;
+static gTutorialControls sg_tutorialControls;
 static gTutorialTeamstart sg_tutorialTeamstart;
 static gTutorialSpeedKillDefense sg_tutorialSpeedKillDefense;
 static gTutorialSpeedKill sg_tutorialSpeedKill;
