@@ -1845,8 +1845,23 @@ bool uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL 
 
                 rSysDep::ClearGL();
 
-                GenericBackground();
+                // GenericBackground();
+                static rFileTexture background( rTextureGroups::TEX_FONT, "textures/message_background.png" );
+                background.Select();
 
+                Color(1,1,1);
+
+                BeginQuads();
+                TexCoord(0,0);
+                Vertex(-1,1);
+                TexCoord(1,0);
+                Vertex(1,1);
+                TexCoord(1,1);
+                Vertex(1,-1);
+                TexCoord(0,1);
+                Vertex(-1,-1);
+                RenderEnd();
+                
                 REAL w=16*3/640.0;
                 REAL h=32*3/480.0;
 
