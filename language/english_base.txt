@@ -1795,12 +1795,12 @@ tutorial_menu_ai1_text     AI Fight
 tutorial_menu_ai1_help     Play against one AI, no time limit.
 tutorial_menu_ai1_instructions As the final tutorial, we test your skills against a lone AI. It is pretty stupid, the best way to kill it is to set up a trap right where you start. If your trap fails, use a speed kill, but watch out for sudden turns it is going to make.
 
-tutorial_menu_controls_text     Advanced Controls
-tutorial_menu_controls_help     Learn the rest of the control scheme.
-tutorial_menu_controls_instructions Turning left and right is all well and good, but there are a couple of other input options you may want to use occasionally. This tutorial demonstrates them to you in a risk-free environment.\n\nFollow the onscreen prompts.
-
 tutorial_ai_timeout        Failure: Timeout
 tutorial_ai_extratime      Extra Time
+
+tutorial_menu_controls_text     Advanced Controls
+tutorial_menu_controls_help     Learn the rest of the control scheme.
+tutorial_menu_controls_instructions Turning left and right is all well and good, but there are a couple of other input options you may want to use occasionally. This tutorial demonstrates them to you in a risk-free environment.\n\nFollow the onscreen prompts. You'll finish it quicker if you experiment with the commands you learn.
 
 tutorial_menu_ai2_text     AI Challenge 2
 tutorial_menu_ai2_help     Play against two AIs, no time limit.
