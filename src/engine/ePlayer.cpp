@@ -1628,7 +1628,7 @@ static void se_DisplayChatLocallyClient( ePlayerNetID* p, const tString& message
         if ( se_silenceEnemies && !sentFromTeamMember )
             return;
         
-        if (!p->Object() || !p->Object()->Alive())
+        if ( p->CurrentTeam() && ( !p->Object() || !p->Object()->Alive() ) )
             con << tOutput("$dead_console_decoration");
         
         con << actualMessage << "\n";
