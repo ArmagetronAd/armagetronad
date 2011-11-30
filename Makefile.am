@@ -46,6 +46,7 @@ nobase_texture_DATA=textures/cycle_body.png textures/cycle_wheel.png textures/di
 	textures/font.png textures/font_s.png textures/icon.png textures/rim_wall.png\
 	textures/shadow.png textures/sky.png textures/title.jpg\
 	textures/settings_textures.cfg \
+	textures/message_background.png \
 	textures/tutorials/teamstart/success.png \
 	textures/tutorials/teamstart/background.png \
 	textures/tutorials/teamstart/straight.png \
