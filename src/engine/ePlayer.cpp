@@ -6905,7 +6905,7 @@ float ePlayerNetID::RankingGraph( float y, int MAX ){
             tColoredString prefix;
             if(p->chatting_)
                 prefix << '*';
-            if(p->ready)
+            if(se_matches < 0 && p->ready)
                 prefix << tColoredString::ColorString(.5,1,.5) << 'R';
             if(prefix.Len())
                 DisplayText(-.704 - (prefix.Len() * .00075), y, .06, prefix.c_str(), sr_fontScoretable, 1);
