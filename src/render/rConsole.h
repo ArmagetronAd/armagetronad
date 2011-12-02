@@ -79,9 +79,6 @@ public:
     //! moves to the end, showing the last lines
     void End(int last);
 
-    //! check whether a center display has recently been issued
-    static bool CenterDisplayBusy();
-
     virtual void DoCenterDisplay(const tString &s,REAL timeout=2,REAL r=1,REAL g=1,REAL b=1);
 
     virtual tString ColorString(REAL r, REAL g, REAL b) const;

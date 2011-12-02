@@ -230,11 +230,6 @@ void CenterDisplay(const tString &s,REAL timeout,REAL r,REAL g,REAL b){
     center_b=b;
 }
 
-bool rConsole::CenterDisplayBusy()
-{
-    return tSysTimeFloat() - center_fadetime < 1;
-}
-
 void rConsole::DoCenterDisplay(const tString &s,REAL timeout,REAL r,REAL g,REAL b){
     rCenterDisplayCallback::CenterDisplay();
 

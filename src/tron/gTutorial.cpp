@@ -53,6 +53,22 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "rConsole.h"
 
+void gTutorialBase::OnWin( eTeam * winner )
+{
+}
+
+void gTutorialBase::RoundEnd( eTeam * winner )
+{
+}
+
+// called before objects are spawned
+void gTutorialBase::BeforeSpawn(){}
+
+    // called after objects are spawned
+void gTutorialBase::AfterSpawn(){}
+    
+#ifndef DEDICATED
+
 // temporarily override a setting item
 class gTemporarySetting: public tReferencable< gTemporarySetting >
 {
@@ -109,21 +125,6 @@ static bool sg_TestMatch()
 */
 
 class gTutorialMenuItem;
-
-void gTutorialBase::OnWin( eTeam * winner )
-{
-}
-
-void gTutorialBase::RoundEnd( eTeam * winner )
-{
-}
-
-// called before objects are spawned
-void gTutorialBase::BeforeSpawn(){}
-
-    // called after objects are spawned
-void gTutorialBase::AfterSpawn(){}
-    
 
 extern uActionTooltip::Level su_helpLevel;
 
@@ -2236,3 +2237,5 @@ static gTutorialConquest sg_tutorialConquest;
 static gTutorialGrind sg_tutorialGrind;
 static gTutorialSurvival sg_tutorialSurvival;
 static gTutorialNavigation sg_tutorialNavigation;
+
+#endif // DEDICATED

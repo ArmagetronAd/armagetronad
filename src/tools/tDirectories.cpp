@@ -183,6 +183,15 @@ static tString st_UserDataDir(expand_home_c(USER_DATA_DIR));    // directory for
 static tString st_UserDataDir(expand_home_c("~/." PROGDIR));    // directory for game data
 #endif
 
+// load data from unbranded configuration directory on branded builds in Linux
+#if !defined DEDICATED && !defined MACOSX && !defined LEGACY_USER_DATA_DIR && !defined DEBUG
+#define LEGACY_USER_DATA_DIR "~/.armagetronad"
+#endif
+
+#ifdef LEGACY_USER_DATA_DIR
+static tString st_LegacyUserDataDir(expand_home_c(LEGACY_USER_DATA_DIR));    // directory for game data (old location)
+#endif
+
 #ifdef CONFIG_DIR
 static tString st_ConfigDir(expand_home_c(CONFIG_DIR));  // directory for static configuration files
 #else
@@ -532,6 +541,13 @@ private:
             paths[ pos++ ] = st_ConfigDir;
         }
 
+#ifdef LEGACY_USER_DATA_DIR
+        if ( st_LegacyUserDataDir.Len() > 1 )
+        {
+            paths[ pos++ ] = st_LegacyUserDataDir + "/config";
+        }
+#endif
+
         if ( st_UserDataDir.Len() > 1 )
         {
             paths[ pos++ ] = st_UserDataDir + "/config";
@@ -568,6 +584,13 @@ private:
             static tString ed(extradata);
             paths[ pos++ ] = ed;
         }
+
+#ifdef LEGACY_USER_DATA_DIR
+        if ( st_LegacyUserDataDir.Len() > 1 )
+        {
+            paths[ pos++ ] = st_LegacyUserDataDir;
+        }
+#endif
 
         if ( st_UserDataDir.Len() > 1 )
         {
@@ -629,6 +652,13 @@ private:
         int pos = 0;
 
         paths[ pos++ ] = st_DataDir + "/var";
+
+#ifdef LEGACY_USER_DATA_DIR
+        if ( st_LegacyUserDataDir.Len() > 1 )
+        {
+            paths[ pos++ ] = st_LegacyUserDataDir + "/var";
+        }
+#endif
 
         if ( st_UserDataDir.Len() > 1 )
         {
@@ -1624,6 +1654,14 @@ void tDirectoriesCommandLineAnalyzer::DoInitialize( tCommandLineParser & parser 
         st_pathToExecutable.Set( parser.Executable() );
         FindDataPath();
         FindConfigurationPath();
+
+#ifdef LEGACY_USER_DATA_DIR
+        // blank out legacy user data dir if it matches the real user data dir
+        if ( st_UserDataDir == st_LegacyUserDataDir )
+        {
+            st_LegacyUserDataDir = "";
+        }
+#endif
     }
     catch( tRunningInBuildDirectory )
     {
@@ -1635,12 +1673,14 @@ void tDirectoriesCommandLineAnalyzer::DoInitialize( tCommandLineParser & parser 
 
             // the included resources are scrambled and put into the current directory as well.
             st_IncludedResourceDir = "./resource/included";
+
+#ifdef LEGACY_USER_DATA_DIR
+            st_LegacyUserDataDir = "";
+#endif
             return;
         }
     }
 #endif // !MACOSX_XCODE
-
-
 }
 
 bool tDirectoriesCommandLineAnalyzer::DoAnalyze( tCommandLineParser & parser )

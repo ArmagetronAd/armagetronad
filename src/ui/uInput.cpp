@@ -1554,7 +1554,7 @@ uActionTooltip::~uActionTooltip()
 bool uActionTooltip::Help( int player )
 {
 #ifndef DEDICATED
-    if( rConsole::CenterDisplayBusy() )
+    if( rConsole::CenterDisplayActive() )
     {
         return false;
     }

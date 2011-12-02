@@ -132,6 +132,18 @@ dist-hook-scm:
 	-e "s/  progtitle=.*/  progtitle='@progtitle@'/" \
 	< @srcdir@/configure.ac > $(distdir)/configure.ac
 
+#   rebrand Windows config directories
+	sed	-e "s,/Armagetron,/@progtitle@," \
+	< @srcdir@/src/win32/aa_config.h > $(distdir)/src/win32/aa_config.h
+	sed	-e "s,/ArmagetronDedicated,/@progtitle@@progtitle_server@," \
+	< @srcdir@/src/win32_ded/aa_config.h > $(distdir)/src/win32_ded/aa_config.h
+
+#   rebrand OSX config directories
+	sed	-e "s,/Armagetron Advanced,/@progtitle@," \
+	< @srcdir@/src/macosx/client/aa_config.h > $(distdir)/src/macosx/client/aa_config.h
+	sed	-e "s,/Armagetron Advanced Dedicated,/@progtitle@@progtitle_server@," \
+	< @srcdir@/src/macosx/dedicated/aa_config.h > $(distdir)/src/macosx/dedicated/aa_config.h
+
 #   regenerate dependant files so they no longer reference to the file "version" which will be removed
 	cp @srcdir@/bootstrap.sh $(distdir)
 	cd $(distdir); rm -f aa_config.h.in version; sh ./bootstrap.sh

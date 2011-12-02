@@ -33,11 +33,15 @@ class tString;
 struct gGameSettings;
 class eTeam;
 
+#ifndef DEDICATED
+
 //! opens the tutorial menu
 void sg_TutorialMenu();
 
 //! returns whether all tutorials have been completed
 bool sg_TutorialsCompleted();
+
+#endif // DEDICATED
 
 class gTutorialBase
 {

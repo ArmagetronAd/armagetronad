@@ -190,6 +190,11 @@ private:
 };
 #endif
 
+bool rConsole::CenterDisplayActive()
+{
+    return false;
+}
+
 void rConsole::DoCenterDisplay(const tString &s,REAL timeout,REAL r,REAL g,REAL b){
     std::cout << tColoredString::RemoveColors(s) << '\n';
     DisplayAtNewline();
