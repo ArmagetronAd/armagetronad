@@ -30,6 +30,11 @@ Changes since 0.3.1
         - NEW_WARMUP replaces NEW_MATCH when appropriate: NEW_WARMUP <N> <TIMESTAMP>
           with N the number of matches to be played consecutively
         - MATCHES_LEFT <N>
+- DEADLY_EXPLOSIONS setting. When enabled, cycles in the blast radius of an
+  explosion will be destroyed, and DEATH_EXPLOSION will be written to ladderlog.
+  Scoring can be applied with the SCORE_EXPLOSION and SCORE_EXPLOSION_OWNER
+  settings.
+
 
 Changes since 0.3.0
 ===================

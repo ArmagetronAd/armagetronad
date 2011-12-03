@@ -444,7 +444,7 @@ nServerInfo *nServerInfo::Prev()
 }
 
 // Sort server list
-void nServerInfo::Sort( PrimaryKey key, SortHelper Helper )
+void nServerInfo::Sort( PrimaryKey key, SortHelper Helper, SortHelperPriority helperPriority )
 {
     // insertion sort
     nServerInfo *run = GetFirstServer();
@@ -485,14 +485,7 @@ void nServerInfo::Sort( PrimaryKey key, SortHelper Helper )
             {
 
             case KEY_NAME:
-                // Unreachable servers should be displayed at the end of the list
-                if ( !previousUnreachable && !ascendUnreachable )
-                {
-                    if( help )
-                        compare = help;
-                    else
-                        compare = prev->nameForSorting.Compare( ascend->nameForSorting, true );
-                }
+                compare = prev->nameForSorting.Compare( ascend->nameForSorting, true );
                 break;
             case KEY_PING:
                 if ( ascend->ping > prev->ping )
@@ -501,16 +494,9 @@ void nServerInfo::Sort( PrimaryKey key, SortHelper Helper )
                     compare = 1;
                 break;
             case KEY_USERS:
-                if ( ( (bool) ascend->users == (bool) prev->users ) && help )
-                    compare = help;
-                else
-                    compare = ascend->users - prev->users;
+                compare = ascend->users - prev->users;
                 break;
             case KEY_SCORE:
-                if ( previousUnreachable )
-                    compare ++;
-                if ( ascendUnreachable )
-                    compare --;
                 if ( ascend->score > prev->score )
                     compare = 1;
                 else if ( ascend->score < prev->score )
@@ -520,6 +506,48 @@ void nServerInfo::Sort( PrimaryKey key, SortHelper Helper )
                 break;
             }
 
+            if( previousUnreachable != ascendUnreachable )
+            {
+                // in any case, unreachable servers go to the bottom.
+                if( previousUnreachable )
+                {
+                    compare = 1;
+                }
+                else
+                {
+                    compare = -1;
+                }
+            }
+            else if( key != KEY_NAME )
+            {
+                // override sorting if the servers fall into different classes
+                int c = prev->GetClassification().sortOverride_ - ascend->GetClassification().sortOverride_;
+                if( c != 0 )
+                {
+                    compare = c;
+                }
+            }
+
+            // take helper and its priority into account
+            if( help != 0 )
+            {
+                switch( helperPriority )
+                {
+                case PRIORITY_NONE:
+                    break;
+                case PRIORITY_SECONDARY:
+                    if( 0 == compare )
+                    {
+                        compare = help;
+                    }
+                    break;
+                case PRIORITY_PRIMARY:
+                    compare = help;
+                    break;
+                }
+            }
+
+            // least priority: servers that are getting polled go down
             if (0 == compare)
             {
                 if ( previousPolling )
@@ -1145,13 +1173,14 @@ void nServerInfo::GetSmallServerInfo( Network::SmallServerInfo const & info,
         run = run->Next();
     }
 
-    // second pass, look harder if no match was found. Use DNS lookup if you have to.
+    // second pass, look harder if no match was found. Use DNS lookup if it's ready.
     if(!n)
     {
         run = GetFirstServer();
         while(run && !n)
         {
-            if( run->GetAddress() == baseInfo.GetAddress() )
+            if( !run->GetAddress().DNSInProcess() && !baseInfo.GetAddress().DNSInProcess() &&
+                  run->GetAddress() == baseInfo.GetAddress()  )
                 n = run;
             run = run->Next();
         }
@@ -2230,7 +2259,7 @@ bool nServerInfo::DoQueryAll(int simultaneous)         // continue querying the 
     {
         nServerInfo* next = sn_Requesting->Next();
 
-        if (!sn_Requesting->advancedInfoSet && sn_Requesting->pollID < 0 && sn_Requesting->queried <= sn_numQueries)
+        if (!sn_Requesting->advancedInfoSet && sn_Requesting->pollID < 0 && sn_Requesting->queried <= sn_numQueries && !sn_Requesting->GetAddress().DNSInProcess() )
         {
             sn_Requesting->QueryServer();
         }
@@ -2548,6 +2577,88 @@ nServerInfo::Compat	nServerInfo::Compatibility() const
     return Compat_Ok;
 }
 
+nServerInfo::SettingsDigest::SettingsDigest()
+  : flags_(0)
+  ,  minPlayTimeTotal_(0)
+  ,  minPlayTimeOnline_(0)
+  ,  minPlayTimeTeam_(0)
+  ,  cycleDelay_(0)
+  ,  acceleration_(0)
+  ,  rubberWallHump_(0)
+  ,  rubberHitWallRatio_(0)
+{
+}
+
+void nServerInfo::SettingsDigest::WriteSync( Network::SettingsDigest & sync ) const
+{
+    sync.set_flags( flags_ );
+    sync.set_min_play_time_total( minPlayTimeTotal_ );
+    sync.set_min_play_time_online( minPlayTimeOnline_ );
+    sync.set_min_play_time_team( minPlayTimeTeam_ );
+    sync.set_cycle_delay( cycleDelay_ );
+    sync.set_acceleration( acceleration_ );
+    sync.set_rubber_wall_hump( rubberWallHump_ );
+    sync.set_rubber_hit_wall_ratio( rubberHitWallRatio_ );
+    sync.set_walls_length( wallsLength_ );
+}
+
+void nServerInfo::SettingsDigest::ReadSync( Network::SettingsDigest const & sync )
+{
+    flags_ = sync.flags();
+    minPlayTimeTotal_ = sync.min_play_time_total();
+    minPlayTimeOnline_ = sync.min_play_time_online();
+    minPlayTimeTeam_ = sync.min_play_time_team();
+    cycleDelay_ = sync.cycle_delay();
+    acceleration_ = sync.acceleration();
+    rubberWallHump_ = sync.rubber_wall_hump();
+    rubberHitWallRatio_ = sync.rubber_hit_wall_ratio();
+    if( sync.has_walls_length() )
+    {
+        wallsLength_ = sync.walls_length();
+    }
+    else
+    {
+        wallsLength_ = 0;
+    }
+}
+
+void nServerInfo::SettingsDigest::SetFlag( Flags flag, bool set )
+{
+    if( set )
+    {
+        flags_ |= flag;
+    }
+    else
+    {
+        flags_ &= ~flag;
+    }
+}
+
+bool nServerInfo::SettingsDigest::GetFlag( Flags flag ) const
+{
+    return 0 != (flags_ & flag);
+}
+
+nServerInfo::Classification::Classification()
+: sortOverride_(1)
+{
+}
+
+
+//! callback to give other components a chance to help fill in the server info
+nServerInfo::SettingsDigest * nCallbackFillServerInfo::settings_ = NULL;
+static tCallback * sn_fillServerInfoAnchor = NULL;
+nCallbackFillServerInfo::nCallbackFillServerInfo( AA_VOIDFUNC * f )
+: tCallback( sn_fillServerInfoAnchor, f )
+{}
+
+//! fills all server infos
+void nCallbackFillServerInfo::Fill( nServerInfo::SettingsDigest * settings )
+{
+    settings_ = settings;
+    Exec( sn_fillServerInfoAnchor );
+    settings_ = NULL;
+}
 
 static nServerInfoAdmin* sn_serverInfoAdmin = NULL;
 
@@ -2606,7 +2717,14 @@ nServerInfoBase::~nServerInfoBase()
 
 bool nServerInfoBase::operator ==( const nServerInfoBase & other ) const
 {
-    return GetAddress().IsSet() && GetAddress() == other.GetAddress() && port_ == other.port_;
+    if( GetAddress().DNSInProcess() || other.GetAddress().DNSInProcess() )
+    {
+        return port_ == other.port_ && connectionName_ == other.connectionName_;
+    }
+    else
+    {
+        return GetAddress().IsSet() && GetAddress() == other.GetAddress() && port_ == other.port_;
+    }
 }
 
 // *******************************************************************************************
@@ -2729,7 +2847,8 @@ void nServerInfoBase::ReadSync( Network::SmallServerInfoBase const & info,
     port_ = info.port();                                 // get the port
     sn_ReadFiltered( info.hostname(), connectionName_ ); // get the connection name
 
-    if ( ( sn_IsMaster || sn_AcceptingFromBroadcast || sn_AcceptingFromMaster ) && connectionName_.Len()>1 ) // no valid name (must come directly from the server who does not know his own address)
+    // ban us.to dns service, it's down too often
+    if ( ( ( sn_IsMaster && !connectionName_.EndsWith( ".us.to" ) ) || sn_AcceptingFromBroadcast || sn_AcceptingFromMaster ) && connectionName_.Len()>1 ) // valid name (must come directly from the server who does not know his own address)
     {
         // resolve DNS
         connectionName_ = S_LocalizeName( connectionName_ );
@@ -2894,6 +3013,8 @@ void nServerInfo::DoGetFrom( nSocket const * socket )
         url_        = str;
         userGlobalIDs_ = "";
     }
+
+    nCallbackFillServerInfo::Fill( &settings_ );
 }
 
 // *******************************************************************************************
@@ -2921,6 +3042,43 @@ void nServerInfo::WriteSyncThis( Network::BigServerInfo & info ) const
     info.set_url( url_ );
 
     info.set_global_ids( userGlobalIDs_ );
+
+    settings_.WriteSync( *info.mutable_settings() );
+}
+
+// loads the shipped map of server setting digests. Not nearly up to date,
+// but gives basic orientation.
+typedef std::map< std::string, nServerInfo::SettingsDigest > nCacheMap;
+static nCacheMap & sn_LoadCacheMap()
+{
+    static nCacheMap map;
+    tTextFileRecorder cacheReader;
+    cacheReader.Open( tDirectories::Config(), "serverconfigcache.cfg" );
+    while( !cacheReader.EndOfFile() )
+    {
+        tString line = cacheReader.GetLine();
+        std::istringstream parse( line );
+
+        nServerInfo::SettingsDigest settings;
+        std::string key;
+        parse >> key;
+        parse >> settings.cycleDelay_;
+        parse >> settings.acceleration_;
+        parse >> settings.rubberWallHump_;
+        parse >> settings.rubberHitWallRatio_;
+        parse >> settings.wallsLength_;
+        parse >> settings.flags_;
+
+        map[key] = settings;
+    }
+
+    return map;
+}
+
+static nCacheMap const & sn_GetCacheMap()
+{
+    static nCacheMap map = sn_LoadCacheMap();
+    return map;
 }
 
 // *******************************************************************************************
@@ -2985,6 +3143,33 @@ void nServerInfo::ReadSyncThis(  Network::BigServerInfo const & info,
     else
     {
         userGlobalIDs_ = "";
+    }
+
+    if( info.has_settings() )
+    {
+        settings_.ReadSync( info.settings() );
+        settings_.SetFlag( SettingsDigest::Flags_SettingsDigestSent, true );
+    }
+    else
+    {
+        // check cache
+        std::ostringstream key;
+        key << GetConnectionName() << ":" << GetPort();
+        nCacheMap const & map = sn_GetCacheMap();
+        nCacheMap::const_iterator i = map.find( key.str() );
+        if( i != map.end() )
+        {
+            settings_ = (*i).second;
+            settings_.SetFlag( SettingsDigest::Flags_SettingsDigestSent, true );
+        }
+        else
+        {
+            settings_.flags_ = 0;
+        }
+    }
+    if( nServerInfoAdmin::GetAdmin() )
+    {
+        nServerInfoAdmin::GetAdmin()->Classify( settings_, classification_ );
     }
 
     userNamesOneLine_.Clear();
@@ -3147,16 +3332,12 @@ nAddress & nServerInfoBase::AccessAddress( void ) const
         std::auto_ptr< nAddress > address( tNEW( nAddress ) );
 
         // fill it with hostname and port
-        address->SetHostname( this->GetConnectionName() );
         address->SetPort( this->GetPort() );
+        address->SetHostname( this->GetConnectionName() );
 
         this->address_ = address;
 
 #ifdef DEBUG
-        tString unresolved = ToString( *this );
-        tString resolved = this->address_->ToString();
-        if ( unresolved != resolved )
-            con << "Address of server " << unresolved << " determined to be " << resolved << "\n";
 #endif
     }
 

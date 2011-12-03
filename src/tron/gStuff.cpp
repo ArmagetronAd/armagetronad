@@ -64,11 +64,13 @@ bool sg_MoviePack(){
     return sg_moviepackInstalled && sg_moviepackUse;
 }
 
-bool sg_OpenURI( char const * uri )
+static bool sg_OpenStuff( char const * uri, bool tryBrowser )
 {
 #ifndef DEDICATED
     if( currentScreensetting.fullscreen )
     {
+        // iconify; otherwise, the screen freezes while the browser is started,
+        // and on Linux, the game gets window-ified without being noticed about it.
         SDL_WM_IconifyWindow();
     }
 #endif
@@ -76,18 +78,46 @@ bool sg_OpenURI( char const * uri )
     // bool success = false;
 #ifdef WIN32
     ShellExecute(NULL, "open", uri, NULL, NULL, SW_SHOWNORMAL);
-#elif MACOSX
-    CFURLRef URL = CFURLCreateWithBytes( NULL, (UInt8 *)uri, strlen(uri), kCFStringEncodingUTF8, NULL );
-    LSOpenCFURLRef( URL, NULL );
-    CFRelease( URL );
 #else
     // general unix
     std::ostringstream s; // composing a command
-    s << "x-www-browser " << uri << " || firefox " << uri << " &";
+    if( tryBrowser )
+    {
+        s << "x-www-browser '" << uri << "' || ";
+    }
+    s << "xdg-open '" << uri << "' || " << "firefox '" << uri << "' &";
     // execute command
     return  0 == system( s.str().c_str() );
 #endif
     return true;
+}
+
+bool sg_OpenURI( char const * uri )
+{
+#ifdef MACOSX
+#ifndef DEDICATED
+    CFURLRef URL = CFURLCreateWithBytes( NULL, (UInt8 *)uri, strlen(uri), kCFStringEncodingUTF8, NULL );
+    LSOpenCFURLRef( URL, NULL );
+    CFRelease( URL );
+#endif
+	return true;
+#else
+    return sg_OpenStuff( uri, true );
+#endif
+}
+
+bool sg_OpenDirectory( char const * path )
+{
+#ifdef MACOSX
+#ifndef DEDICATED
+    FSRef REF;
+    FSPathMakeRef( (UInt8 *)path, &REF, NULL );
+    LSOpenFSRef( &REF, NULL );
+#endif
+	return true;
+#else
+    return sg_OpenStuff( path, false );
+#endif
 }
 
 //const eCoord se_zeroCoord(0,0);

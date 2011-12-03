@@ -16,10 +16,10 @@ define(MI,<li><strong>$1</strong> ($2)</li>)
 
 SUBSUBSECTION(Main Menu)
 <ul>
-MI(Game,start and setup a game)
+MI(Play Game,start and setup a game)
 <ul>
+MI(Multiplayer,Connects to or creates a network game)
 MI(Local Game,Starts a local game)
-MI(Network Game,Connects to or creates a network game)
 MI(Game Setup,Sets your favourite single player game mode: number of AI opponents, game speed, arena size)
 </ul>
 MI(Player Setup,Player customisation: [keyboard input, camera setup, multiplayer
@@ -32,6 +32,7 @@ MI(Camera Input Configuration,keyboard and mouse setup for camera controls)
 MI(Camera Setup,camera mode options)
 MI(Instant Chat,things you can say with one keystroke)
 </ul>
+MI(Viewports,selects the splitscreen mode)
 MI(Assign Viewports To Players,which player sees himself on which part of
 the screen)
 </ul>
@@ -45,6 +46,7 @@ MI(Detail Settings,things that affect visual quality and depend on your
 system's OpenGL power)
 MI(Performance Tweaks,[settings that increase graphics speed, but
 may not work on your system])
+MI(Load Defaults,[Reverts critical settings to default values we believe to be safe.])
 </ul>
 MI(Sound Settings,sound quality)
 MI(Misc Stuff,things that did not fit anywhere else: [Moviepack, console text
@@ -52,6 +54,7 @@ output, menu wrap option and global keyboard configuration])
 <ul>
 MI(Global Keyboard Configuration,[keyboard setup for player-independent functions (console, scores)])
 MI(Language settings,[Choose the language of PROGTITLE here])
+MI(Redo First Setup,[Repeats the simple setup you saw when first starting the game])
 </ul>
 </ul>
 </ul>
@@ -135,10 +138,14 @@ compilers and operating systems.
 SUBSECTION(Protect Your Passwords)
 PARAGRAPH([
 Since all network traffic is logged and the ingame admin password is currently sent unencrypred,
-it is not a good idea to publish server recordings where you or anyone else logs in as admin.
+it is not a good idea to publish server recordings where you or anyone else logs in as admin using the old SI(ADMIN_PASS) method.
 The same holds for a client session recording where you log in anywhere; remember that all your
-keypresses are recorded without exception.
+keypresses are recorded almost without exception.
 ])
+PARAGRAPH([
+Everything surrounding the new account based authentication is safe, though. Keypresses in the pasword entry form are not recorded and passwords stored in your user.cfg are not copied over, either.
+])
+
 SUBSECTION(Primary Use: Bug Reports)
 PARAGRAPH([
 Sometimes, when you report a bug, the team may ask you do send a recording of
@@ -174,7 +181,7 @@ PARAGRAPH([
 Take a look at the files
 FILE(settings.cfg) and FILE(settings_dedicated.cfg) for the dedicated server
 (best save all your changes to 
-FILE(autoexec.cfg) if you don't want the next
+FILE(autoexec.cfg) or FILE(settings_custom.cfg) if you don't want the next
 release of PROGTITLE to overwrite them). They contain a lot of settings
 inaccessible from the menu system. All relevant settings are synced from the
 server to the connected clients.

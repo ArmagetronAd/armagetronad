@@ -63,12 +63,15 @@ void st_ToDoOnce(tTODO_FUNC *td){ // postpone something, avoid double entries
 // a lone (but relatively safe) function pointer for things to do triggered by signals.
 static tTODO_FUNC * st_toDoFromSignal = 0;
 
+void st_SyncBackgroundThreads();
+
 void st_DoToDo(){ // do the things that have been postponed
     if ( st_toDoFromSignal )
     {
         st_ToDo( st_toDoFromSignal );
         st_toDoFromSignal = 0;
     }
+
     boost::lock_guard< boost::recursive_mutex > lock( st_mutex );
     while (tToDos.Len()){
         tTODO_FUNC *last = st_toDoCurrent;
@@ -78,6 +81,8 @@ void st_DoToDo(){ // do the things that have been postponed
         (*td)();
         st_toDoCurrent = last;
     }
+
+    st_SyncBackgroundThreads();
 }
 
 void st_ToDo_Signal(tTODO_FUNC *td){ // postpone something

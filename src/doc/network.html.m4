@@ -18,7 +18,7 @@ SECTION(Connecting)
 SUBSECTION(LAN game )
 PARAGRAPH([
 The fastest computer in your network should
-act as the server. There, go to the network menu and hit the "LAN Game"-
+act as the server. There, go to the "Play Game"/"Multiplayer" menu and hit the "LAN Game"-
 menu item. After a second, PROGTITLE should tell you that there are no servers
 currently available, but offer a "Host Game" item. Press Return on it. In
 the following menu, you can select a name for your server and the game options.
@@ -38,7 +38,7 @@ visible in the server browser. Just hit Return on it to connect.
 SUBSECTION(Internet game)
 
 PARAGRAPH([
-An internet game works the same way; you just have to choose "Internet Game" instead of "LAN Game"
+An internet game works the same way; you just have to choose "Online Game" instead of "LAN Game"
 in the menu. Note that the number of users currently online on each server is displayed
 by the server browser, too.
 ])
@@ -52,40 +52,18 @@ with "r".
 ])
 
 PARAGRAPH([Internet server browsing would not be possible without master servers. We currently
-use four masters,
-one in Texas run by Lucifer, one in Virginia run by antix of 
-ELINK(distortgaming.com,DistortGaming)
-(Who will gladly host your game server, Armagetronad or other. Shameless plug end.)
-one run on Z-Man's old, trusty laptop-gone-router in Germany, and another one in Germany run
-by iF.
+use four masters, two run by Tank Program, two by Z-Man.
 DNS service for swapping out masters without you having to update your configuration
 is provided by Tank.])
 
 SUBSUBSECTION(Current status)
 
 PARAGRAPH([
-Current counts show about 40 active servers.
+Current counts show about 200 active servers.
 If you're not picky about your fellow players, there should be
 someone to battle against on one of those. The problems start as soon as you
 develop a preference for certain server settings, because there are quite a
 number of flavors around.
-])
-
-ifelse(,,,
-[
-PARAGRAPH([
-At the time of this writing, there are about ten dedicated servers available, so you should
-not need to start your own. Most of them will let you fight against a bunch of AIs
-while you wait for other players to join in.
-])
-
-PARAGRAPH([
-Finding an opponent to play against should not be a problem these times; nevertheless,
-there still is the ELINK(WEBBASE/meeting.html, meeting
-page). Check it out, be online when the countdown reaches zero and
-you will certainly find another player online. I'm usually playing at these times and
-specially like to be on a server that allows cockpit view only.
-])
 ])
 
 SUBSECTION(Bookmarks,bookmarks)
@@ -93,17 +71,8 @@ SUBSECTION(Bookmarks,bookmarks)
 PARAGRAPH([
 You can access and edit your server bookmarks in the "Server Bookmarks"
 submenu of the "Network Game" menu. You can add bookmarks from the server
-browser or manually add bookmarks via the "Edit Bookmarks" menu.
-])
-
-ifelse(,,,[
-SUBSECTION(Fallback)
-
-PARAGRAPH([
-If the server browser does not work for some reason (i.e. no master server
-available), you can still connect to a server if you know its network address or
-hostname and the port it runs on. The "Custom Connect" menu item in the network
-game menu serves that purpose.])
+browser or manually add bookmarks via the "Edit Bookmarks" menu. The only way to delete
+bookmarks currently is to edit out the server name of one, sorry for the inconvenience.
 ])
 
 SUBSECTION(Version Control)
@@ -173,17 +142,21 @@ the rules of the server administrator or change the server you play on.
 SUBSECTION(Chat)
 PARAGRAPH([
 Send your fellow players messages by hitting the chat key configurable in the "Player Setup" menu
-(defaults to "s"). Usually, the message will go out to all players. Servers from 0.2.8.0 on support
+(defaults to "Enter"). Usually, the message will go out to all players. Servers from 0.2.8.0 on support
 IRC style extensions: By starting your message with "/msg <playername>", you can send selected 
 players personal messages. With "/me", you can tell the others what you do; "/me falls asleep"
-will print "Walruss walls asleep" if you're Walruss.
+will print "Walruss walls asleep" if you're Walruss. "/team" sends messages to your 
+teammates only; if you're a spectator, those will be the other spectators. Some servers make
+that the default chat mode even without command prefix; on those, you may be allowed to address
+all players by using "/shout". 
 ])
 
 PARAGRAPH([
 If another player annoys you, the silencing menu comes in handy: it can be reached by
 pressing ESC, then selecting "Player Police/Silence Menu". If you're annoyed by chat in
-general, edit FILE(settings.cfg) and activate SILENCE_ALL. This has the effect that new
-players get silenced by default and have to be unsilenced if you want to hear them.
+general, edit FILE(settings.cfg) and activate SILENCE_DEFAULT (add the line SILENCE_DEFAULT 1). 
+This has the effect that new players get silenced by default and have to be unsilenced 
+if you want to hear them. If you really never want to hear chat, add the line ENABLE_CHAT 0.
 ])
 
 SUBSUBSECTION(Instant Chat)
@@ -198,7 +171,10 @@ will be inserted where you type. If an instant chat string ends in a backslash "
 pressing the corresponding key will not send the string immediately, but will let you
 append to it first.])
 
-SUBSECTION(Ingame Admin)
+SECTION(Authentication)
+SUBSECTION(The old way: ADMIN_PASS)
+PARAGRAPH([This paragraph applies if your server was compiled without --enable-armathentication.])
+PARAGRAPH([
 The server administrator can allow selected players to control the server settings through chat
 commands; the setting SI(ADMIN_PASS) has to be modified to a nondefault value. Whoever knows
 this value can log in by saying "/login &lt;password&gt;". After that, it's possible to issue regular
@@ -206,7 +182,27 @@ console commands by saying "/admin &lt;command&gt;" or to log out again with "/l
 <br>
 <strong>WARNING: currently, chat messages and therefore the password are sent unencrypted. This
 means that everyone with physical access to the network flow, which is, among others, anyone
-on the server's or the player's LAN, can steal the password.</strong>
+on the server's or the player's LAN, can steal the password.</strong>])
+
+SUBSECTION(The new way)
+PARAGRAPH([This paragraph applies if your server was compiled with --enable-armathentication.])
+PARAGRAPH([
+The new authentication code allows you to securely log into servers using various accounts;
+ check out the ELINK([wiki.armagetronad.net/index.php?title=HostingFAQ#Signing_in_.28Authentication.29],Wiki FAQ)
+for details.
+The quick and simple way to get an account you can use is if you sign up on the ELINK([forums.armagetronad.net],Forums);
+pick a simple username without fancy characters.
+Your Global ID (GID) associated with that account will then be "&lt;your username&gt;@forums".
+Enter that in the "Global ID" field of your "Player Setup" menu and activate "Auto Login".
+Every time you enter a server that supports authentication, you'll be prompted for your forum
+password.
+])
+PARAGRAPH([     If you administer a server with --enable-armathentication compiled in, you can
+grant yourself remote admin rights with the configuration line SI(USER_LEVEL &lt;your GID&gt; 0).
+Replace the 0 with your desired access level: 0 gives full access, 1 admin access (a few things
+like QUIT are locked, then) and 2 is moderator access, blocking most setting changes and only
+leaving commands required to moderate a server.
+])
 
 SUBSECTION(Kicking and Banning)
 PARAGRAPH([
@@ -220,8 +216,7 @@ interpreted exactly as with SI(KICK).
 PARAGRAPH([
 You can get a list of currently banned IP addresses with SI(BAN_LIST). To unban one of these,
 use SI(UNBAN_IP ip). To ban an IP address explicitly, use SI(BAN_IP ip). Bans are persistent
-when you shut down and restart the server; the data is stored in FILE(var/bans.txt) as
-IP/duration in seconds pairs.
+when you shut down and restart the server; the data is stored in FILE(var/bans.txt).
 ])
 SUBSUBSECTION([Autobanning])
 PARAGRAPH([
@@ -240,7 +235,7 @@ Sometimes, votes on important topics will be cast by players. If a vote is pendi
 will automatically pop up between rounds and remind you to vote. You can accept or reject
 a suggestion, or explicitly say you don't care about it.
 <br>
-The only thing possible to vote on are player kicks. To start a kick vote, press ESC and enter
+For example, to start a kick vote, press ESC and enter
 the "Player Police/Kick Menu" menu and select the player you want kicked. Prepare to get kicked
 yourself if you abuse the system.
 
@@ -251,19 +246,19 @@ for cycles. CI(CYCLE_SYNC_INTERVAL_SELF) determines the time between syncs to th
 a cycle itself, and CI(CYCLE_SYNC_INTERVAL_ENEMY) determines the interval for everyone else.
 ])
  
-New clients since 0.2.7.1 send the time of turn commands to the server. 
+SECTION(Advanced Topics)
+
+PARAGRAPH([New clients since 0.2.7.1 send the time of turn commands to the server. 
 This makes it possible to avoid grinding lag sliding
 (you move towards a wall, grind it shortly and turn away again, and you'll slide)
 by letting the cycle on the server turn not before the time sent by the client.
 At the low speeds before the grind, the positional command interpretion 
 is inaccurate and will usually turn the cycle too early. 
- Now, old clients don't send the command time, so this code can't work. The lag sliding is a clear disadvantage, but the earlier turn is an advantage in some situations because it makes you cover more ground, so both the new and the old players have plenty of reason to complain if they are not treated equally. Therefore, when CYCLE_FAIR_ANTILAG is set to 1 and old clients are present, this code is deactivated. 
+ Now, old clients don't send the command time, so this code can't work. The lag sliding is a clear disadvantage, but the earlier turn is an advantage in some situations because it makes you cover more ground, so both the new and the old players have plenty of reason to complain if they are not treated equally. Therefore, when CYCLE_FAIR_ANTILAG is set to 1 and old clients are present, this code is deactivated. ])
  
- When a cycle turns in free space, the server will try to follow the client's request by matching the turn position as closely as possible. Sometimes however there are large desyncs and clients sent silly turns halfway across the grid from their current position. So, for clients that send the command time, the server will execute turns only in a time window around that command time. The width of that window is determined by CYCLE_TIME_TOLERANCE. 
+PARAGRAPH([ When a cycle turns in free space, the server will try to follow the client's request by matching the turn position as closely as possible. Sometimes however there are large desyncs and clients sent silly turns halfway across the grid from their current position. So, for clients that send the command time, the server will execute turns only in a time window around that command time. The width of that window is determined by CYCLE_TIME_TOLERANCE. ])
  
- I observed that old clients ( 0.2.7.0 and earlier ) would be more likely to pass through walls when they received a sync from the server shortly before. So, if you set CYCLE_AVOID_OLDCLIENT_BAD_SYNC to 1, the server will not send those syncs. Whether this helps or makes matters worse by not sending enough syncs is unknown, that's why it is a setting. 
-
-SECTION(Technical details)
+PARAGRAPH([ I observed that old clients ( 0.2.7.0 and earlier ) would be more likely to pass through walls when they received a sync from the server shortly before. So, if you set CYCLE_AVOID_OLDCLIENT_BAD_SYNC to 1, the server will not send those syncs. Whether this helps or makes matters worse by not sending enough syncs is unknown, that's why it is a setting. ])
 
 PARAGRAPH([
 You are not limited to one player per computer;
@@ -293,7 +288,8 @@ on the PROGTITLE port.
 SECTION(The dedicated server,dedicated)
 
 PARAGRAPH([
-Following the model of Quake 1-3, there is a special binary version of
+Following the model of Quake 1-3 and NOT Modern Warfare 2,
+there is a special binary version of
 the game available for download (or compile it yourself giving the
 option OPTION(--disable-glout) to configure) that has all input/output
 features disabled. If you start it, it will read the normal configuration files and
@@ -378,16 +374,9 @@ SECTION(Spectator Mode)
 PARAGRAPH([
 In the player menu, there is the "Spectator mode" toggle; If you just
 want to watch an internet game, connect to the server with spectator
-mode enabled. Note that you will be almost completely ignored in
-spectator mode: the other players won't know you are there at all,
-you can't chat and the dedicated server will not bother to start
-a game if only spectators are online (all you are going to get is
-a black screen). Only the server administrator will get a message 
-that a client connected.
-])
-PARAGRAPH([
-Please note that this feature is unsupported; future servers may not allow
-spectating in this way.
+mode enabled, or enable it while already online and you will leave active play.
+You can also bind a key to toggling spectator mode in your player keyboard setup,
+that allows you to enter and leave quickly.
 ])
 
 SECTION(Scores)

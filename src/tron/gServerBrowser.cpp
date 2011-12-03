@@ -220,6 +220,24 @@ void gServerBrowser::BrowseSpecialMaster( nServerInfoBase * master, char const *
     nServerInfo::GetFromMaster( master, prefix );
     nServerInfo::Save();
 
+#ifdef SERVER_SURVEY
+    // connect to all servers and log stats
+    nServerInfo * info = nServerInfo::GetFirstServer();
+    {
+        std::ofstream o;
+        if ( tDirectories::Var().Open(o, "serversurvey.txt", std::ios::app) )
+        {
+            o << "New survey\n";
+        }
+    }
+    while( info )
+    {
+        ConnectToServer(info);
+        info = info->Next();
+    }
+    return;
+#endif
+
     //  gLogo::SetBig(true);
     //  gLogo::SetSpinning(false);
 
@@ -362,6 +380,22 @@ void gServerMenu::OnRender()
     }
 }
 
+// priority of bookmarks in sorting
+static nServerInfo::SortHelperPriority sg_bookmarkPriority[nServerInfo::KEY_MAX]=
+{
+    nServerInfo::PRIORITY_NONE,
+    nServerInfo::PRIORITY_PRIMARY,
+    nServerInfo::PRIORITY_SECONDARY,
+    nServerInfo::PRIORITY_PRIMARY
+};
+
+tCONFIG_ENUM( nServerInfo::SortHelperPriority );
+static tSettingItem< nServerInfo::SortHelperPriority > sgc_bookmarkPriorityName( "BROWSER_BOOKMARK_PRIORITY_NAME", sg_bookmarkPriority[nServerInfo::KEY_NAME] );
+static tSettingItem< nServerInfo::SortHelperPriority > sgc_bookmarkPriorityPing( "BROWSER_BOOKMARK_PRIORITY_PING", sg_bookmarkPriority[nServerInfo::KEY_PING] );
+static tSettingItem< nServerInfo::SortHelperPriority > sgc_bookmarkPriorityUsers( "BROWSER_BOOKMARK_PRIORITY_USERS", sg_bookmarkPriority[nServerInfo::KEY_USERS] );
+static tSettingItem< nServerInfo::SortHelperPriority > sgc_bookmarkPriorityScore( "BROWSER_BOOKMARK_PRIORITY_SCORE", sg_bookmarkPriority[nServerInfo::KEY_SCORE] );
+
+
 void gServerMenu::Update()
 {
     // get currently selected server
@@ -382,7 +416,7 @@ void gServerMenu::Update()
     ReverseItems();
 
     nServerInfo::CalcScoreAll();
-    nServerInfo::Sort( nServerInfo::PrimaryKey( sg_sortKey ), &gServerFavorites::IsFavorite );
+    nServerInfo::Sort( nServerInfo::PrimaryKey( sg_sortKey ), &gServerFavorites::IsFavorite, sg_bookmarkPriority[sg_sortKey] );
 
     int mi = 1;
     gServerInfo *run = gServerInfo::GetFirstServer();
@@ -584,6 +618,10 @@ void gServerMenuItem::Render(REAL x,REAL y,REAL alpha, bool selected)
         if (server->Score() < -10000)
             s = -10000;
 
+        if ( favorite_ )
+        {
+            score << "B ";
+        }
         if (server->Polling())
         {
             score << tOutput("$network_master_polling");
@@ -607,6 +645,10 @@ void gServerMenuItem::Render(REAL x,REAL y,REAL alpha, bool selected)
                 break;
             }
         }
+        else if ( !favorite_ && server->GetClassification().noJoin_.Len() > 1 )
+        {
+            score << server->GetClassification().noJoin_;
+        }
         else if ( server->Users() >= server->MaxUsers() )
         {
             score << tOutput( "$network_master_full" );
@@ -614,15 +656,6 @@ void gServerMenuItem::Render(REAL x,REAL y,REAL alpha, bool selected)
         }
         else
         {
-            if ( favorite_ )
-            {
-                score << "B ";
-            }
-            else
-            {
-                score << "  ";
-            }
-
             score << s;
             users << server->Users() << "/" << server->MaxUsers();
             ping  << p;
@@ -674,7 +707,10 @@ void gServerMenuItem::RenderBackground()
         players << "\n" << tColoredString::ColorString(1,1,1);
         tColoredString uri;
         uri << server->Url() << tColoredString::ColorString(1,1,1);
-        players << tOutput( "$network_master_serverinfo", server->Release(), uri, server->Options() );
+        tColoredString options;
+        options << server->GetClassification().description_;
+        options << server->Options();
+        players << tOutput( "$network_master_serverinfo", server->Release(), uri, options );
     }
 #endif
 }

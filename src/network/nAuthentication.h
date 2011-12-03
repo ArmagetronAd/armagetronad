@@ -56,9 +56,6 @@ public:
     //! on the server: request user authentification from login slot
     static bool RequestLogin(const tString& authority, const tString& username, nNetObject & user, const tOutput& message );
 
-    //! call when you have some time for lengthy authentication queries to servers
-    static void OnBreak();
-
     //! returns whether a login is currently in process for the given user
     static bool LoginInProcess(nNetObject * user);
 };

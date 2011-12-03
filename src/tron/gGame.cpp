@@ -960,7 +960,6 @@ void update_settings( bool const * goon )
 
                 // do tasks
                 st_DoToDo();
-                nAuthentication::OnBreak();
 
                 // kick spectators and chatbots
                 nMachine::KickSpectators();
@@ -1553,6 +1552,7 @@ static bool sg_RequestedDisconnection = false;
 
 static bool sg_NetworkError( const tOutput& title, const tOutput& message, REAL timeout )
 {
+#ifndef SERVER_SURVEY
     tOutput message2 ( message );
 
     if ( sn_DenyReason.Len() > 2 )
@@ -1570,6 +1570,9 @@ static bool sg_NetworkError( const tOutput& title, const tOutput& message, REAL 
     }
 
     return tConsole::Message( title, message2, timeout );
+#else
+    return true;
+#endif
 }
 
 // revert settings to defaults in the current scope
@@ -1709,7 +1712,45 @@ bool ConnectToServerCore(nServerInfoBase *server)
             con << tOutput("$network_syncing_gamestate");
             sr_SetWindowTitle(tOutput("$window_title_connected",
                 tColoredString::RemoveColors(server->GetName())));
+#ifndef SERVER_SURVEY
             sg_EnterGame( nCLIENT );
+#else
+            // wait 3 more seconds
+            REAL endTime=tSysTimeFloat()+3;
+            while (tSysTimeFloat()<endTime && (sn_GetNetState() != nSTANDALONE))
+            {
+                tAdvanceFrame();
+                sg_Receive();
+                nNetObject::SyncAll();
+                tAdvanceFrame();
+                sn_SendPlanned();
+                st_DoToDo();
+
+#ifndef DEDICATED
+                rSysDep::SwapGL();
+                rSysDep::ClearGL();
+#endif
+
+                sn_Delay();
+            }
+            
+            sg_RequestedDisconnection = true;
+            nServerInfo::SettingsDigest settings;
+            nCallbackFillServerInfo::Fill( &settings );
+            std::ofstream o;
+            if ( tDirectories::Var().Open(o, "serversurvey.txt", std::ios::app) )
+            {
+                o << server->GetConnectionName() << ":" << server->GetPort() << " ";
+                o << settings.cycleDelay_ << " "
+                  << settings.acceleration_ << " "
+                  << settings.rubberWallHump_ << " "
+                  << settings.rubberHitWallRatio_ << " "
+                  << settings.wallsLength_ << " "
+                  << settings.flags_ << " "
+                  << "\n";
+//                o << server->GetName() << "\n";
+            }
+#endif
         }
         else{
             //con << "Timeout. Try again!\n";
@@ -2112,10 +2153,135 @@ void sg_DisplayVersionInfo() {
 
 void sg_StartupPlayerMenu();
 
+// makes a path absolute
+static std::string sg_AbsolutifyPath( tString const & in )
+{
+    std::ostringstream s;
+    if( in[0] == '.' )
+    {
+        s << tDirectories::GetCWD() << "/";
+    }
+    s << in;
+    return s.str();
+}
+
+// opens the wiki
 static void sg_ShowWiki()
 {
-    sg_OpenURI(tOutput("$main_menu_wiki_uri"));
+    sg_OpenURI(tOutput("$help_menu_wiki_uri"));
 }
+
+// opens the user data directory
+static void sg_ShowUserData()
+{
+    sg_OpenDirectory(sg_AbsolutifyPath(tDirectories::GetUserData()).c_str());
+}
+
+// opens the system data directory
+static void sg_ShowSystemData()
+{
+    tArray< tString > paths;
+    tDirectories::Data().GetPaths( paths );
+    // the last one is the user data
+    for( int i = paths.Len() - 2; i >= 0; --i )
+    {
+        sg_OpenDirectory(sg_AbsolutifyPath(paths[i]).c_str());
+    }
+}
+
+// opens the system configuration directory
+static void sg_ShowSystemConfig()
+{
+    sg_OpenDirectory(sg_AbsolutifyPath(tDirectories::GetConfig()).c_str());
+}
+
+// opens the screenshot directory
+static void sg_ShowScreenshots()
+{
+    tArray< tString > paths;
+
+    // create the directory if it doesn't exist yet
+    tDirectories::Screenshot().GetWritePath( "dummy" );
+
+    tDirectories::Screenshot().GetPaths( paths );
+    // the last one is the right
+    sg_OpenDirectory(sg_AbsolutifyPath(paths[paths.Len()-1]).c_str());
+}
+
+// opens the documentation
+static void sg_ShowDocumentation()
+{
+    std::ostringstream s,s2;
+    s2 << "doc/" << tOutput("$help_menu_doc_file");
+    s << "file://";
+    tString path = tDirectories::Data().GetReadPath( s2.str().c_str() );
+    s << sg_AbsolutifyPath(path);
+    sg_OpenURI( s.str().c_str() );
+}
+
+// opens the system data directory
+static void sg_ShowIRC()
+{
+    std::ostringstream s;
+    s << "http://webchat.freenode.net/?channels=armagetron&prompt=1&nick="
+      << ePlayer::PlayerConfig(0)->Name();
+    sg_OpenURI(s.str().c_str());
+}
+
+static uMenu sg_helpMenu("$main_help_menu_text");
+
+static uMenu sg_directoryMenu("$help_menu_directories_text");
+
+static uMenuItemFunction sg_aboutMenuItem
+(&sg_helpMenu,
+ "$main_menu_about_text",
+ "$main_menu_about_help",
+ &sg_DisplayVersionInfo);
+
+uMenuItemSubmenu sg_directorySubmenu(&sg_helpMenu, &sg_directoryMenu, "$help_menu_directories_help");
+
+static uMenuItemFunction sg_systemConfigMenuItem 
+(&sg_directoryMenu,
+ "$help_menu_systemconfig_text",
+ "$help_menu_systemconfig_help",
+ &sg_ShowSystemConfig);
+
+static uMenuItemFunction sg_systemDataMenuItem 
+(&sg_directoryMenu,
+ "$help_menu_systemdata_text",
+ "$help_menu_systemdata_help",
+ &sg_ShowSystemData);
+
+static uMenuItemFunction sg_showScreenshotsMenuItem 
+(&sg_directoryMenu,
+ "$help_menu_screenshots_text",
+ "$help_menu_screenshots_help",
+ &sg_ShowScreenshots);
+
+static uMenuItemFunction sg_userDataMenuItem 
+(&sg_directoryMenu,
+ "$help_menu_userdata_text",
+ "$help_menu_userdata_help",
+ &sg_ShowUserData);
+    
+static uMenuItemFunction sg_ircMenuItem 
+(&sg_helpMenu,
+ "$help_menu_irc_text",
+ "$help_menu_irc_help",
+ &sg_ShowIRC);
+
+static uMenuItemFunction sg_wikiMenuItem 
+(&sg_helpMenu,
+ "$help_menu_wiki_text",
+ "$help_menu_wiki_help",
+ &sg_ShowWiki);
+
+static uMenuItemFunction sg_docMenuItem 
+(&sg_helpMenu,
+ "$help_menu_doc_text",
+ "$help_menu_doc_help",
+ &sg_ShowDocumentation);
+
 #endif
 
 void MainMenu(bool ingame){
@@ -2200,12 +2366,8 @@ void MainMenu(bool ingame){
     uMenuItemExit exx(&MainMenu,extitle,
                       exhelp);
 
-    uMenuItemFunction wiki
-    (&MainMenu,
-     "$main_menu_wiki_text",
-     "$main_menu_wiki_help",
-     &sg_ShowWiki);
-    
+    uMenuItemSubmenu help(&MainMenu, &sg_helpMenu, "$main_help_menu_help");
+
     uMenuItemFunction *return_to_main=NULL;
     if (ingame){
         if (sn_GetNetState()==nSTANDALONE)
@@ -2235,12 +2397,6 @@ void MainMenu(bool ingame){
                                       "$player_authenticate_help",
                                       &PlayerLogIn );
     }
-
-    uMenuItemFunction abb(&MainMenu,
-                          "$main_menu_about_text",
-                          "$main_menu_about_help",
-                          &sg_DisplayVersionInfo);
-
 
     uMenu Settings("$system_settings_menu_text");
 
@@ -3137,12 +3293,6 @@ void gGame::StateUpdate(){
             break;
         }
 
-        // now would be a good time to tend for pending tasks
-        if( state != GS_PLAY )
-        {
-            nAuthentication::OnBreak();
-        }
-
         if (sn_GetNetState()==nSERVER){
             NetSyncIdle();
             RequestSync();
@@ -3433,7 +3583,7 @@ void gGame::Analysis(REAL time){
             )
             sn_CenterMessage( tOutput("$warmup_rup_compat"), pni->Owner() );
     }
-    ready_next_warn = time + sg_warmupRupInterval;
+    ready_next_warn = int(time + sg_warmupRupInterval);
 
     // count other statistics
     int alive_and_not_disconnected = 0;
@@ -4677,7 +4827,9 @@ void sg_ClientFullscreenMessage( tOutput const & title, tOutput const & message,
     se_UserShowScores( false );
 
     // show message
+#ifndef SERVER_SURVEY
     uMenu::Message( title, message, timeout );
+#endif
 
     // and print it to the console
 #ifndef DEDICATED
@@ -4881,4 +5033,23 @@ static void LoginCallback(){
 
 static nCallbackLoginLogout lc(LoginCallback);
 
+static void sg_FillServerSettings()
+{
+    nServerInfo::SettingsDigest & digest = *nCallbackFillServerInfo::ToFill();
+    
+    digest.SetFlag( nServerInfo::SettingsDigest::Flags_NondefaultMap,
+                    mapfile != DEFAULT_MAP );
+    digest.SetFlag( nServerInfo::SettingsDigest::Flags_TeamPlay,
+                    multiPlayer.maxPlayersPerTeam > 1 );
+
+#ifndef SERVER_SURVEY
+    digest.wallsLength_ = multiPlayer.wallsLength/gCycleMovement::MaximalSpeed();
+#else
+    // called on the client during server survey. use current value.
+    digest.wallsLength_ = gCycle::WallsLength()/gCycleMovement::MaximalSpeed();
+    digest.SetFlag( nServerInfo::SettingsDigest::Flags_TeamPlay, false );
+#endif
+}
+
+static nCallbackFillServerInfo sg_fillServerSettings(sg_FillServerSettings);
 

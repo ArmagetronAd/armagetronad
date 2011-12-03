@@ -1137,6 +1137,8 @@ static const tString& se_UserName()
     return ret;
 }
 
+static char const * se_defaultGID = "@forums";
+
 ePlayer::ePlayer():cockpit(0){
     nAuthentication::SetUserPasswordCallback(&PasswordCallback);
 #ifdef KRAWALL_SERVER
@@ -1160,7 +1162,7 @@ ePlayer::ePlayer():cockpit(0){
         name << "Player " << id+1;
 
     // default global ID so logins are redirected to the forums
-    globalID = "@forums";
+    globalID = se_defaultGID;
 
 #ifndef DEDICATED
     tString confname;
@@ -8737,6 +8739,231 @@ private:
         se_CutString( sg_url, 75 );
         return sg_url;
     }
+
+    // levels of values
+    enum Classifications
+    {
+        Classification_None,
+        Classification_LudicrouslyLow,
+        Classification_Nano,
+        Classification_Micro,
+        Classification_ExtremlyLow,
+        Classification_VeryLow,
+        Classification_Low,
+        Classification_Medium,
+        Classification_High,
+        Classification_VeryHigh,
+        Classification_ExtremlyHigh,
+        Classification_Mega,
+        Classification_Giga,
+        Classification_LudicrouslyHigh,
+        Classification_Infinite
+    };
+
+    static tString ComposeClassification( int index, char const * classification_root, char const * item )
+    {
+        std::ostringstream s;
+        s << classification_root << index;
+        return tString(tOutput( s.str().c_str(), tOutput(item) ) );
+    }
+
+    class Classifier
+    {
+    public:
+        // classifies lowerBoundX just as classificationX, any lower value as classificationX-1
+        Classifier( REAL lowerBound1, int classification1,
+                    REAL lowerBound2, int classification2 )
+        : logBound1_(log(lowerBound1))
+          , logBound2_(log(lowerBound2))
+          , classification1_( classification1 )
+          , classification2_( classification2 )
+        {
+        }
+
+        int Classify( REAL value, int invalid = Classification_None )
+        {
+            if( value <= 0 )
+            {
+                return invalid;
+            }
+            REAL a = ( log( value ) - logBound1_ )/( logBound2_ - logBound1_ );
+            REAL c = classification1_ + a * ( classification2_ - classification1_ );
+            int ret = floor( c );
+            if ( ret < Classification_LudicrouslyLow )
+                ret = Classification_LudicrouslyLow;
+            if ( ret > Classification_LudicrouslyHigh )
+                ret = Classification_LudicrouslyHigh;
+            return ret;
+        }
+    private:
+        REAL logBound1_, logBound2_;
+        REAL classification1_, classification2_;
+    };
+
+    // adds a +1 penalty for every level value goes over the limit
+    static int Penalty( int limit, int value, int max = 3 )
+    {
+        int ret = value - limit;
+        if ( ret < 0 )
+        {
+            ret = 0;
+        }
+        else if ( ret > max )
+        {
+            ret = max;
+        }
+
+        return ret;
+    }
+
+    virtual void Classify( nServerInfo::SettingsDigest const & in, 
+                           nServerInfo::Classification & out ) const
+    {
+        // various classifiers
+        static Classifier delayClassifier( .06, Classification_Medium, .12, Classification_High );
+        static Classifier accelerationClassifier( 4, Classification_Medium, 8, Classification_High );
+        static Classifier rubberHumpClassifier( 1, Classification_Medium, 100, Classification_LudicrouslyHigh );
+        static Classifier rubberWallClassifier( .0015, Classification_Low, .3, Classification_LudicrouslyHigh );
+        static Classifier wallsLengthClassifier( 1, Classification_Low, 10, Classification_VeryHigh );
+        
+        // apply them
+        int delay        = delayClassifier.Classify( in.cycleDelay_ );
+        int acceleration = accelerationClassifier.Classify( in.acceleration_ );
+        int rubberHump   = rubberHumpClassifier.Classify( in.rubberWallHump_ );
+        int rubberWall   = rubberWallClassifier.Classify( in.rubberHitWallRatio_ );
+        int length       = wallsLengthClassifier.Classify( in.wallsLength_, Classification_Infinite );
+
+        // fuse rubber values into one
+        int rubber = rubberHump;
+        if( rubberWall + 1 < rubber )
+        {
+            rubber--;
+        }
+        if( rubberWall > rubber + 1 )
+        {
+            rubber = rubberWall - 1;
+        }
+        if( rubber <= Classification_Micro )
+        {
+            rubber = Classification_None;
+        }
+
+        bool digestIsAccurate = in.GetFlag( nServerInfo::SettingsDigest::Flags_SettingsDigestSent );
+
+        std::ostringstream compose;
+        if( digestIsAccurate )
+        {
+            compose 
+            << ComposeClassification( rubber, "$classification_", "$classification_rubber" ) << ", "
+            << ComposeClassification( acceleration, "$classification_", "$classification_acceleration" ) << ", "
+            << ComposeClassification( delay, "$classification_", "$classification_delay" ) << ", "
+            << ComposeClassification( length, "$classification_wall_", "$classification_walls" );
+            if( in.GetFlag( nServerInfo::SettingsDigest::Flags_TeamPlay ) )
+            {
+                compose << ", " << tOutput( "$classification_teams" );
+            }
+            if( in.GetFlag( nServerInfo::SettingsDigest::Flags_NondefaultMap ) )
+            {
+                compose << ", " << tOutput( "$classification_maps" );
+            }
+            compose << "\n";
+        }
+
+        // determine experience level required.
+        int experienceLevel = 0;
+        if( in.GetFlag( nServerInfo::SettingsDigest::Flags_TeamPlay ) )
+        {
+            // team play is difficult.
+            experienceLevel+=2;
+        }
+        if( in.GetFlag( nServerInfo::SettingsDigest::Flags_NondefaultMap ) )
+        {
+            // non default maps hint at complicated gameplay.
+            experienceLevel++;
+        }
+        experienceLevel += Penalty( Classification_Medium, rubber );
+        experienceLevel += Penalty( delay, Classification_Medium );
+        // low delay and high rubber usually go hand in hand, let's not overpenalize them
+        if( experienceLevel > 4 )
+        {
+            experienceLevel = 4;
+        }
+        experienceLevel += Penalty( Classification_High, acceleration, 1 );
+        experienceLevel += Penalty( length, Classification_Low, 2 );
+
+        if( !digestIsAccurate )
+        {
+            experienceLevel = 1;
+        }
+
+        // calculate the experience level the player has
+        int levelDistance = 10;
+        int experienceLevelThere = floor( se_playTimeTotal/levelDistance );
+        int missingForThisLevel = experienceLevelThere*levelDistance - se_playTimeTotal + 2;
+
+        out.sortOverride_ = experienceLevel - experienceLevelThere;
+        if( out.sortOverride_ > 0 )
+        {
+            compose << tOutput( digestIsAccurate ? "$network_master_exp_recommended_long" : "$network_master_exp_recommended_long_oldserver", missingForThisLevel + out.sortOverride_*levelDistance );
+            // if( digestIsAccurate )
+            {
+                out.noJoin_ = tOutput("$network_master_exp_recommended");
+            }
+        }
+        else
+        {
+            out.sortOverride_ = 0;
+        }
+
+        // check whether a GID has been registered
+        bool registered = false;
+        for( int i = MAX_PLAYERS-1; i >= 0; --i )
+        {
+            registered |= ( ePlayer::PlayerConfig(i)->globalID != se_defaultGID && ePlayer::PlayerConfig(i)->globalID.Len() > 1 );
+        }
+
+        // find reasons why the player should not join
+        if( !registered && in.GetFlag( nServerInfo::SettingsDigest::Flags_AuthenticationRequired ) )
+        {
+            out.noJoin_ = tOutput("$network_master_login_needed");
+            compose << tOutput("$network_master_login_needed_long");
+
+            // keep servers you need authentication to play on at the bottom until
+            // the player is really experienced
+            if( out.sortOverride_ < 1 && se_playTimeOnline < 120 )
+            {
+                out.sortOverride_ = 1;
+            }
+        }
+        else
+        {
+            REAL timeLacking=0;
+            if( in.minPlayTimeTotal_ - se_playTimeTotal > 0 )
+            {
+                timeLacking = in.minPlayTimeTotal_ - se_playTimeTotal;
+            }
+            if( in.minPlayTimeOnline_ - se_playTimeOnline > timeLacking )
+            {
+                timeLacking = in.minPlayTimeOnline_ - se_playTimeOnline;
+            }
+            if( in.minPlayTimeTeam_ - se_playTimeTeam > timeLacking )
+            {
+                timeLacking = in.minPlayTimeTeam_ - se_playTimeTeam;
+            }
+            if ( timeLacking > 0 )
+            {
+                out.noJoin_ = tOutput("$network_master_exp_needed");
+                compose << tOutput("$network_master_exp_needed_long", timeLacking+2 );
+                int minLevel = timeLacking/10+1;
+                if( out.sortOverride_ < minLevel )
+                {
+                    out.sortOverride_ = minLevel;
+                }
+            }
+        }
+
+        out.description_ = compose.str();
+    }
 };
 
 static gServerInfoAdmin sg_serverAdmin;
@@ -9916,3 +10143,23 @@ int ePlayerNetID::GetSuspended() const
 {
     return suspended_;
 }
+
+static void se_FillServerSettings()
+{
+    nServerInfo::SettingsDigest & digest = *nCallbackFillServerInfo::ToFill();
+    
+    digest.minPlayTimeTotal_ = int(se_minPlayTimeTotal);
+    digest.minPlayTimeOnline_ = int(se_minPlayTimeOnline);
+    digest.minPlayTimeTeam_ = int(se_minPlayTimeTeam);
+
+    digest.SetFlag( nServerInfo::SettingsDigest::Flags_AuthenticationRequired,
+#ifdef KRAWALL_SERVER
+                    se_accessLevelRequiredToPlay < tAccessLevel_Program ||
+                    se_playAccessLevel < tAccessLevel_Program
+#else
+                    false
+#endif
+        );
+}
+
+static nCallbackFillServerInfo se_fillServerSettings(se_FillServerSettings);
