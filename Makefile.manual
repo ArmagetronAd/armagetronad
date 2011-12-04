@@ -162,7 +162,6 @@ $(srcdir)/version: $(wildcard $(srcdir)/*_version) .changetag
 
 # Keep the changelog up to date as well (triggered by make dist only)
 $(srcdir)/ChangeLog: .changetag
-	rm -f $@
 	@echo -e "\nGenerating ChangeLog from SVN/BZR, please be patient...\n"
 	cd ${srcdir}; bzr log --gnu-changelog 2>&1 > ChangeLog || svn log 2>&1 > ChangeLog || echo "No official releasse: no changelog" > ChangeLog
 	test -r $@ || touch $@
