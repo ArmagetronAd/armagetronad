@@ -2778,8 +2778,8 @@ gamestate_winner_ai		AI.
 gamestate_winner_humans		Humans.
 gamestate_draw_soon         Round draw in \1 seconds!\n
 gamestate_draw_center       Round Draw!
-gamestate_draw              The round ended in a draw 
-gamestate_draw_minalive     because not enough players were alive.\n
+gamestate_draw_default      The round ended in a draw.\n
+gamestate_draw_minalive     The round ended in a draw, because not enough players were alive.\n
 
 instant_win_activated		Instant win zone activated! Enter it to win the round.\n
 instant_round_end_activated	Round end zone activated! Enter it to end the round.\n

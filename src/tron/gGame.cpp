@@ -3964,11 +3964,13 @@ void gGame::Analysis(REAL time){
                 else if ( time >= drawtime )
                 {
                     tOutput drawmsg;
-                    drawmsg << "$gamestate_draw";
-
                     if( drawreason == &DrawReason_MinAlive )
                     {
                         drawmsg << "$gamestate_draw_minalive";
+                    }
+                    else
+                    {
+                        drawmsg << "$gamestate_draw_default";
                     }
 
                     sn_CenterMessage(tOutput("$gamestate_draw_center"));
