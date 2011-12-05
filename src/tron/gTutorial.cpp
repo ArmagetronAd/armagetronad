@@ -424,7 +424,6 @@ public:
         roundEndReached_ = true;
         difficulty_ = 0;
         bool instructions = true;
-        bool secondGo = false;
         for( int tries = 0; roundEndReached_ && finished_ && !success_; tries ++ )
         {
             if( instructions && !Instructions() )
@@ -436,21 +435,7 @@ public:
             {
                 break;
             }
-            if( success_ )
-            {
-                // reset difficulty
-                if( difficulty_ > 0 && !secondGo )
-                {
-                    uMenu::Message( tOutput("$tutorial_easy_head"), tOutput("$tutorial_easy_body"), 300 );
-                    secondGo = true;
-                    tries = 0;
-
-                    success_ = false;
-
-                    difficulty_ = 0; 
-                }
-            }
-            else
+            if( !success_ )
             {
                 if( IsChallenge() )
                 {
@@ -463,7 +448,7 @@ public:
                         instructions = true;
                     }
                 }
-                else if( ( !secondGo || ( (tries % 3) == 2) ) && difficulty_ < 4 )
+                else if( ( (tries % 3) == 2) && difficulty_ < 4 )
                 {
                     // decrease difficulty (every third time in the second iteration)
                     difficulty_++;
