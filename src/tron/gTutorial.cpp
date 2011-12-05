@@ -368,6 +368,9 @@ public:
         PushSetting( "VIEWPORT_CONF", "0" );
         PushSetting( "VIEWPORT_TO_PLAYER_1", "0" );
 
+        // AIs are really timing sensitive here
+        PushSetting( "TIMESTEP_MAX", ".01" );
+        
         // default physics, the most important ones
         PushSetting( "CYCLE_DELAY", ".1" );
         PushSetting( "CYCLE_RUBBER", "1" );
@@ -1161,9 +1164,6 @@ public:
         // no console
         PushSetting( "TEXT_OUT", "0" );
 
-        // AIs are really timing sensitive here
-        PushSetting( "TIMESTEP_MAX", ".01" );
-        
         // create test maze to get correct size factor
         width_ = 2;
         currentDir_ = eCoord(0,1);
@@ -1922,6 +1922,37 @@ public:
     void Analysis()
     {
         gTutorial::Analysis();
+
+        // fast forward the setup
+        static REAL yMin = 500;
+        if( se_GameTime() > 0 && HumanPlayer().Object() && HumanPlayer().Object()->Alive() )
+        {
+            if( HumanPlayer().Object()->Position().y < yMin )
+            {
+                yMin = HumanPlayer().Object()->Position().y;
+            }
+            REAL yThresh = 150;
+            if ( se_GameTime() < 20 &&  yMin > yThresh )
+            {
+                REAL timeLeft = (yMin - yThresh)/HumanPlayer().Object()->Speed();
+                if( timeLeft > 1 )
+                {
+                    se_mainGameTimer->speed = 10;
+                }
+                else
+                {
+                    se_mainGameTimer->speed = timeLeft*9+1;
+                }
+            }
+            else
+            {
+                se_mainGameTimer->speed = 1;
+            }
+        }
+        else
+        {
+            yMin = 500;
+        }
 
         if( !finished_ && !success_ && se_GameTime() > lastHint_ )
         {
