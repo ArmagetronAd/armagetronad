@@ -21,7 +21,7 @@
 
 				<Zone effect="win">
 					<ShapeCircle radius="20">
-						<Point x="25" y="1300" />
+						<Point x="25" y="900" />
 					</ShapeCircle>
 				</Zone>
 			</Field>
