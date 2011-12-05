@@ -1697,7 +1697,7 @@ tutorial_menu_survival_animation textures/tutorials/survival/survival.txt
 
 tutorial_menu_grind_text     Grind
 tutorial_menu_grind_help     Grind Tutorial: learn to accelerate
-tutorial_menu_grind_instructions Walls are also your friend in \g. You can drive close to a cycle trail to accelerate. If you are driving so close to a wall that you see sparks fly, you're doing it right.\nUse that to beat the enemy AI in a race to the winzone up ahead.\nFor this tutorial, we activate what we call 'rubber': think of it as a shield protecting you against crashes. This allows you to get close to the enemy trail, you do not have to worry too much about turning away late.
+tutorial_menu_grind_instructions Walls are also your friend in \g. You can drive close to a cycle trail to accelerate. If you are driving so close to a wall that you see sparks fly, you're doing it right.\nUse that to beat the enemy AI in a race to the winzone up ahead.
 tutorial_menu_grind_animation textures/tutorials/grinding/grinding.txt
 
 tutorial_menu_conquest_text     Conquest
@@ -1711,7 +1711,7 @@ tutorial_conquest_ai_gap         Break into the enemy defenses. Aim for the gap!
 
 tutorial_menu_teamstart_text     Team Start
 tutorial_menu_teamstart_help     Team Start Tutorial: learn the standard team formation opening move
-tutorial_menu_teamstart_instructions If you play in a team, it usually is the best startup move to tightly grind each others walls. The outside players should cuddle up on the center player, the ones further outside doing so in several steps. This tutorial puts you in the most difficult position there is, the player next to the outer player. Survive the start and don't let anyone on your team die.\nSpeed is reduced for this tutorial, rubber (remember, the thing protecting you from crashes) is unusually high.
+tutorial_menu_teamstart_instructions If you play in a team, it usually is the best startup move to tightly grind each others walls. The outside players should cuddle up on the center player, the ones further outside doing so in several steps. This tutorial puts you in the most difficult position there is, the player next to the outer player. Survive the start and don't let anyone on your team die.
 tutorial_menu_teamstart_animation textures/tutorials/teamstart/teamstart.txt
 tutorial_fail_backdoor            Failure: Follow the other cycles.
 
@@ -1722,7 +1722,7 @@ tutorial_menu_doublegrind_animation textures/tutorials/doublegrind/doublegrind.t
 
 tutorial_menu_speedkill_text     Speed Kill
 tutorial_menu_speedkill_help     Speed Kill: learn to use a speed advantage to trap an enemy
-tutorial_menu_speedkill_instructions The speed kill is the most basic way to get rid of your enemies in \g. You sneak up on them, grinding their trail, and after you overtake them, you cut them off and wrap them in your tail.\nHere, we set you up for an easy speed kill against an oblivious AI. Rubber values are back to normal, so be careful with your grinds.
+tutorial_menu_speedkill_instructions The speed kill is the most basic way to get rid of your enemies in \g. You sneak up on them, grinding their trail, and after you overtake them, you cut them off and wrap them in your tail.\nHere, we set you up for an easy speed kill against an oblivious AI.
 tutorial_menu_speedkill_animation textures/tutorials/speedkill/speedkill.txt
 
 tutorial_menu_speedkilldefense_text     Speed Kill Defense
@@ -1790,7 +1790,7 @@ tutorial_menu_survival4_instructions Your engines are perfectly fine this time, 
 
 tutorial_menu_ai1_text     AI Fight
 tutorial_menu_ai1_help     Play against one AI, no time limit.
-tutorial_menu_ai1_instructions As the final tutorial, we test your skills against a lone AI. It is pretty stupid, the best way to kill it is to set up a trap right where you start. If your trap fails, use a speed kill, but watch out for sudden turns it is going to make.
+tutorial_menu_ai1_instructions As the final tutorial, we test your skills against a lone AI.\n\nTraining wheels are off for this fight, touching walls is as deadly as it should be.
 
 tutorial_ai_timeout        Failure: Timeout
 tutorial_ai_extratime      Extra Time
@@ -1829,7 +1829,7 @@ tutorial_menu_ai8_instructions Score fifteen kills.
 
 tutorial_menu_highrubber_text         Showcase: High Rubber
 tutorial_menu_highrubber_help         Prepares you for some of the weird settings out there.
-tutorial_menu_highrubber_instructions Some servers ramp up the rubber setting (you do remember, right? The thing protecting you from crashes?) really high and also reduce the delay between cycle turns. On those servers, it may be helpful (but not required if you have quick fingers) if you 'doublebind': go to your input configuration and bind the turn commands to two keys, then press those at the same time during the game. You will make an instant 180 degree turn. Other human players you meet on high rubber servers will usually do tight moves close to walls in tiny corridors; it's impossible to read these and find a way out after they are built, so you need to watch the players themselves.\n\nAs always, kill all AIs.
+tutorial_menu_highrubber_instructions Remember how in the early tutorials, you could touch walls without exlpoding immediately? We call this 'rubber' for historical reasons. Some servers ramp up that rubber setting really high and also reduce the delay between cycle turns so it gets harder to die.\n\nOther human players you meet on high rubber servers will usually do tight moves close to walls in tiny corridors; it's impossible to read these and find a way out after they are built, so you need to watch the players themselves.\n\nIt may be helpful (but not required if you have quick fingers) if you 'doublebind': go to your input configuration and bind the turn commands to two keys, then press those at the same time during the game. You will make an instant 180 degree turn.\n\nAs always, kill all AIs.
 
 tutorial_menu_brakeboost_text         Showcase: Brake Boost
 tutorial_menu_brakeboost_help         Prepares you for some of the weird settings out there.

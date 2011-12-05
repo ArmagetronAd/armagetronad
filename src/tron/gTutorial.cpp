@@ -373,13 +373,15 @@ public:
         
         // default physics, the most important ones
         PushSetting( "CYCLE_DELAY", ".1" );
-        PushSetting( "CYCLE_RUBBER", "1" );
         PushSetting( "CYCLE_SPEED", "20" );
         PushSetting( "CYCLE_START_SPEED", "20" );
         PushSetting( "CYCLE_SOUND_SPEED", "20" );
         PushSetting( "CYCLE_ACCEL", "15" );
         PushSetting( "CYCLE_ACCEL_OFFSET", "2" );
         PushSetting( "CYCLE_WALL_NEAR", "6" );
+
+        // ok, that's not the default, but good for tutorials and consistency
+        PushSetting( "CYCLE_RUBBER", "5" );
 
         // allow custom camera
         PushSetting( "CAMERA_FORBID_CUSTOM", "0" );
@@ -698,6 +700,9 @@ public:
         PushSetting( "ALLOW_TEAM_NAME_COLOR", "0" );
         PushSetting( "ALLOW_TEAM_NAME_PLAYER", "1" );
         PushSetting( "ALLOW_TEAM_NAME_LEADER", "1" );
+
+        // low rubber
+        PushSetting( "CYCLE_RUBBER", "1" );
 
         // full controls
         su_helpLevel = uActionTooltip::Level_Expert;
@@ -1572,6 +1577,7 @@ public:
     {
         gTutorial::Prepare();
         PushSetting( "MAP_FILE", "Z-Man/tutorial/speedkill-0.1.0.aamap.xml" );
+        PushSetting( "TEXT_OUT", "0" );
     }
 };
 
@@ -1754,7 +1760,6 @@ public:
         PushSetting( "WIN_ZONE_EXPANSION", "0" );
         PushSetting( "WIN_ZONE_INITIAL_SIZE", "10" );
         PushSetting( "WIN_ZONE_DEATHS", "0" );
-        PushSetting( "CYCLE_RUBBER", "5" );
         PushSetting( "CYCLE_SPEED", "15" );
         PushSetting( "CYCLE_ACCEL", "10" );
         PushSetting( "CYCLE_START_SPEED", "15" );
@@ -2017,7 +2022,6 @@ public:
         PushSetting( "FORTRESS_CONQUEST_RATE", ".3" );
         PushSetting( "FORTRESS_DEFEND_RATE", ".25" );
         PushSetting( "FORTRESS_CONQUEST_DECAY_RATE", ".1" );
-        PushSetting( "CYCLE_RUBBER", "5" );
         PushSetting( "CYCLE_START_SPEED", "40" );
         PushSetting( "CYCLE_RUBBER_WALL_SHRINK", ".5" );
         PushSetting( "TEXT_OUT", "0" );
@@ -2048,7 +2052,6 @@ public:
         gTutorial::Prepare();
         PushSetting( "MAP_FILE", "Z-Man/tutorial/grind-0.1.0.aamap.xml" );
         PushSetting( "COCKPIT_FILE", "Z-Man/tutorial/spartanic-0.0.1.aacockpit.xml" );
-        PushSetting( "CYCLE_RUBBER", "5" );
         PushSetting( "TEXT_OUT", "0" );
     }
 
@@ -2157,6 +2160,7 @@ public:
     : gTutorial( "navigation" )
     {
         // settings_.sizeFactor += 1;
+        settings_.wallsLength = 400;
     }
 
     // analyzes the game
@@ -2170,7 +2174,6 @@ public:
     {
         gTutorial::Prepare();
         PushSetting( "TEXT_OUT", "0" );
-        PushSetting( "CYCLE_RUBBER", "0" );
         PushSetting( "MAP_FILE", "Z-Man/tutorial/navigation-0.1.0.aamap.xml" );
         PushSetting( "COCKPIT_FILE", "Z-Man/tutorial/empty-0.0.1.aacockpit.xml" );
         su_helpLevel = uActionTooltip::Level_Essential;
