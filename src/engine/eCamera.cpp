@@ -1684,6 +1684,7 @@ void eCamera::Render(){
 		if (mirrorView_) glScalef(-1,1,1);
         vp->Perspective(fov,zNear,1E+20,se_cameraEyeDistance/2.);
 
+        glMatrixMode(GL_MODELVIEW);
         gluLookAt(0,
                   0,
                   0,
@@ -1696,7 +1697,6 @@ void eCamera::Render(){
                   1);
 
         glTranslatef(-pos.x,-pos.y,-z);
-        glMatrixMode(GL_MODELVIEW);
 
         bool draw_center=((CenterPos()-pos).NormSquared()>1 ||
                           fabs(CenterZ() - z)>1);
@@ -1741,6 +1741,7 @@ void eCamera::Render(){
             }
 #endif
 
+            glMatrixMode(GL_MODELVIEW);
             gluLookAt(0,
                       0,
                       0,
@@ -1753,7 +1754,6 @@ void eCamera::Render(){
                       1);
 
             glTranslatef(-pos.x,-pos.y,-z);
-            glMatrixMode(GL_MODELVIEW);
 
             draw_center=((CenterPos()-pos).NormSquared()>1 ||
                          fabs(CenterZ() - z)>1);
