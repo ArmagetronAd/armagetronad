@@ -3810,8 +3810,10 @@ void gGame::Analysis(REAL time){
         lastTeams=humanTeamsClamp; // update last team count
     }
 
-    if( drawreason != &DrawReason_MinAlive && (!drawtime || drawtime > time+sg_minDrawTime)
-            && alive < sg_minAlive && alive < humans && teams_alive > 1 )
+    if( sg_currentSettings->gameType!=gFREESTYLE
+            && drawreason != &DrawReason_MinAlive && (!drawtime || drawtime > time+sg_minDrawTime)
+            && alive < sg_minAlive && alive < humans && teams_alive > 1
+            )
     {
         drawreason = &DrawReason_MinAlive;
         drawtime = time+sg_minDrawTime;
@@ -3961,7 +3963,7 @@ void gGame::Analysis(REAL time){
                         }
                     }
                 }
-                else if ( time >= drawtime )
+                else if ( time >= drawtime && sg_currentSettings->gameType!=gFREESTYLE )
                 {
                     tOutput drawmsg;
                     if( drawreason == &DrawReason_MinAlive )
