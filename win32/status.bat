@@ -8,7 +8,6 @@ SET MY_ERROR=
 echo +-------------------------------------------------------
 echo ^| Status report                                       
 echo +-------------------------------------------------------
-call :test %1\freetype6.dll "check for missing files"
 call :test %1\FTGL.dll "check for missing files"
 call :test %1\iconv.dll "check for missing files"
 call :test %1\jpeg.dll "check for missing files"
