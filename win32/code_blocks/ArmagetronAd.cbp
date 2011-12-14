@@ -84,7 +84,8 @@
 			<Add directory="..\..\..\winlibs\SDL_mixer" />
 			<Add directory="..\..\..\winlibs\libxml2\include" />
 			<Add directory="..\..\..\winlibs\iconv\include" />
-			<Add directory="..\..\..\winlibs\FTGL\include" />
+			<Add directory="..\..\..\winlibs\FTGL\src\FTGL" />
+			<Add directory="..\..\..\winlibs\FTGL\src" />
 			<Add directory="..\..\..\winlibs\FTGL\win32\freetype\include" />
 			<Add directory="..\..\..\winlibs\FTGL\win32\freetype\include\freetype2" />
 			<Add directory="..\..\..\winlibs\boost\includes" />
