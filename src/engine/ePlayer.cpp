@@ -6247,7 +6247,7 @@ void ePlayerNetID::ReadSync( Engine::PlayerNetIDSync const & sync, nSenderInfo c
         // filter
         se_OptionalNameFilters( remoteName );
 
-        se_CutString( remoteName, 16 );
+        se_CutString( remoteName, MAX_NAME_LENGTH );
     }
 
     // directly apply name changes sent from the server, they are safe.
@@ -9573,7 +9573,7 @@ ePlayerNetID & ePlayerNetID::ForceName( tString const & name )
 
         this->nameFromAdmin_ = name;
         this->nameFromAdmin_.NetFilter();
-        se_CutString( this->nameFromAdmin_, 16 );
+        se_CutString( this->nameFromAdmin_, MAX_NAME_LENGTH );
 
         // crappiest line ever :-/
         newName << tColoredString::ColorString( color.r_/15.0, color.g_/15.0, color.b_/15.0 ) << this->nameFromAdmin_ << tColoredString::ColorString( -1, -1, -1 );
