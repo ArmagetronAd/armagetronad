@@ -1609,7 +1609,7 @@ tString MasterFile( char const * suffix )
     return tString( filename.str().c_str() );
 }
 
-void nServerInfo::GetFromMaster(nServerInfoBase *masterInfo, char const * fileSuffix )
+nServerInfoBase *nServerInfo::GetFromMaster(nServerInfoBase *masterInfo, char const * fileSuffix, bool loadKnownServers )
 {
     sn_AcceptingFromMaster = true;
 
@@ -1626,16 +1626,19 @@ void nServerInfo::GetFromMaster(nServerInfoBase *masterInfo, char const * fileSu
     }
 
     if (!masterInfo)
-        return;
+        return NULL;
 
     DeleteAll();
 
     // load all the servers we know
-    Load( tDirectories::Var(), MasterFile( fileSuffix ) );
-
-    // delete unreachable servers
-    DeleteUnreachable();
-
+    if ( loadKnownServers )
+    {
+        Load( tDirectories::Var(), MasterFile( fileSuffix ) );
+        
+        // delete unreachable servers
+        DeleteUnreachable();        
+    }
+    
     // find the latest server we know about
     unsigned int latest=0;
     nServerInfo *run = GetFirstServer();
@@ -1683,7 +1686,7 @@ void nServerInfo::GetFromMaster(nServerInfoBase *masterInfo, char const * fileSu
         break;
     case nABORT:
     {
-        return;
+        return NULL;
     }
     case nTIMEOUT:
         // delete the master and select a new one
@@ -1700,20 +1703,16 @@ void nServerInfo::GetFromMaster(nServerInfoBase *masterInfo, char const * fileSu
         if ( masterInfo )
         {
             con << tOutput( "$network_master_timeout_retry" );
-            GetFromMaster();
+            return GetFromMaster( NULL, fileSuffix, loadKnownServers );
         }
         else
         {
             tConsole::Message("$network_master_timeout_title", "$network_master_timeout_inter", 3600);
         }
-        return;
-        break;
-
+        return NULL;
     case nDENIED:
         tConsole::Message("$network_master_denied_title", "$network_master_denied_inter", 20);
-        return;
-        break;
-
+        return NULL;
     }
 
 
@@ -1781,6 +1780,7 @@ void nServerInfo::GetFromMaster(nServerInfoBase *masterInfo, char const * fileSu
     sn_AcceptingFromMaster = false;
 
     tAdvanceFrame();
+    return masterInfo;
 }
 
 void nServerInfo::GetFromLAN(unsigned int pollBeginPort, unsigned int pollEndPort)
