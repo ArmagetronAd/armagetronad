@@ -1950,7 +1950,7 @@ screen_custom_text            Benutzerdefiniert
 screen_custom_help            Setze die Variablen CUSTOM_SCREEN_WIDTH und CUSTOM_SCREEN_HEIGHT in user.cfg, um eine eigene Auflösung zu definieren (z.B. für breite Bildschirme)
 
 screen_fullscreen_text        Vollbild:
-screen_fullscreen_help        Schaltet zwischen Vollbildmodus (Ein) und Fenstermodus (Aus) um. Auf einigen Systemen läuft \g leider nicht im Vollbild. Zum übernehmen muss \g neugestartet oder auf Aktivieren geklickt werden.
+screen_fullscreen_help        Schaltet zwischen Vollbildmodus (Ein) und Fenstermodus (Aus) um. Auf einigen Systemen läuft \g leider nicht im Vollbild. Zum übernehmen muss \g neugestartet oder auf Aktivieren geklickt werden. Im Menu "System konfigurieren/Verschiedenes/Globale Tastatursteuerung" kann man eine Taste wählen, die jederzeit zwischen Vollbild und Fenstermodus wechselt.
 
 screen_colordepth_text        Farbtiefe:
 screen_colordepth_help        Die Farbtiefe bestimmt die Bildqualität.

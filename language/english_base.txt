@@ -2381,7 +2381,7 @@ screen_custom_text		Custom
 screen_custom_help		Set the variables CUSTOM_SCREEN_WIDTH and CUSTOM_SCREEN_HEIGHT in user.cfg to adjust you custom screen size.
 
 screen_fullscreen_text		Fullscreen:
-screen_fullscreen_help		This toggles fullscreen and window mode. As with resolution changes. You have to exit and re-enter \g or select "Apply Changes" for this to have an effect.
+screen_fullscreen_help		This toggles fullscreen and window mode. As with resolution changes. You have to exit and re-enter \g or select "Apply Changes" for this to have an effect. You can bind a key to toggle this at any time in System Setup/Misc Stuff/Global Keyboard Configuration.
 
 screen_colordepth_text		Colour Depth:
 screen_colordepth_help		Choose the colour depth you want \g to run at. You have to exit and reenter \g or select "Apply Changes" for this to have an effect. 
