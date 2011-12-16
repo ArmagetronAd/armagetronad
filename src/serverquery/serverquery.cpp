@@ -167,7 +167,7 @@ namespace sq
     {
     public:
         ServerQueryCommandLineAnalyzer(tCommandLineAnalyzer *& anchor)
-            :tCommandLineAnalyzer(anchor), listOption_(false), asynchronousOption_(false), freshOption_(false), masterServer_(""), servers_()
+            :tCommandLineAnalyzer(anchor), listOption_(false), asynchronousOption_(false), freshOption_(false), masterServer_(""), servers_(), exitStatus_(0)
         {
         }
         
@@ -181,6 +181,11 @@ namespace sq
             {
                 servers_.push_back(server);
             }
+        }
+        
+        int ExitStatus() const
+        {
+            return exitStatus_;
         }
     private:
         virtual bool DoAnalyze(tCommandLineParser & parser)
@@ -220,6 +225,8 @@ namespace sq
               << "If a list of servers is provided on the command-line, then only those servers\n"
               << "will be queried for information. This list can also be read from stdin, as a\n"
               << "newline separated list of values.\n\n"
+              << "The program's exit status will be 1 if there is an error fetching the server\n"
+              << "list from the master.\n\n"
               << "-l, --list                   : Fetches only the server list from the master,\n"
               << "                               and does not query the individual game servers\n"
               << "                               for advanced information.\n\n"
@@ -232,7 +239,8 @@ namespace sq
               << "                               as objects in a JSON array. Using this option\n"
               << "                               will write onto one line the JSON object for\n"
               << "                               each server, when its data is received.\n\n"
-              << "-f, --fresh                  : Do not preload the server list from the cache on disk.\n\n"
+              << "-f, --fresh                  : Do not preload the server list from the cache on\n"
+              << "                               disk.\n\n"
               << "Other options\n"
               << "=============\n";
         }
@@ -249,11 +257,15 @@ namespace sq
                 tString fileSuffix = LoadMasters();
                 std::cerr << "--> Fetching master server list\n";
                 nServerInfoBase *master = nServerInfo::GetFromMaster( NULL, fileSuffix.c_str(), !freshOption_);
-                
                 if (master)
+                {
                     std::cerr << "--> Received " << nServerInfo::ServerCount() << " servers from " << master->GetConnectionName() << ":" << master->GetPort() << "\n";
+                }
                 else
+                {
+                    exitStatus_ = 1;
                     std::cerr << "--> Received 0 servers, because none of the master servers could be successfully contacted\n";
+                }
             }
             else
             {
@@ -341,6 +353,7 @@ namespace sq
         bool freshOption_;
         tString masterServer_;
         StringVector servers_;
+        int exitStatus_;
     };
 }
 
@@ -366,7 +379,7 @@ int main(int argc, char **argv)
         commandLine.Execute();
         sn_BasicNetworkSystem.Shutdown();
 
-        return 0;
+        return options.ExitStatus();
     }
     catch (...)
     {
