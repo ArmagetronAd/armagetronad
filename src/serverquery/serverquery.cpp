@@ -167,7 +167,7 @@ namespace sq
     {
     public:
         ServerQueryCommandLineAnalyzer(tCommandLineAnalyzer *& anchor)
-            :tCommandLineAnalyzer(anchor), listOption_(false), asynchronousOption_(false), freshOption_(false), masterServer_(""), servers_(), exitStatus_(0)
+            :tCommandLineAnalyzer(anchor), listOption_(false), asynchronousOption_(false), freshOption_(false), silentOption_(false), masterServer_(""), servers_(), exitStatus_(0)
         {
         }
         
@@ -209,6 +209,11 @@ namespace sq
                 freshOption_ = true;
                 return true;
             }
+            else if (parser.GetSwitch("--silent", "-s"))
+            {
+                silentOption_ = true;
+                return true;
+            }
             else if (parser.Current()[0] != '-')
             {
                 servers_.push_back(tString(parser.Current()));
@@ -241,6 +246,7 @@ namespace sq
               << "                               each server, when its data is received.\n\n"
               << "-f, --fresh                  : Do not preload the server list from the cache on\n"
               << "                               disk.\n\n"
+              << "-s, --silent                 : Do not output any logging information.\n\n"
               << "Other options\n"
               << "=============\n";
         }
@@ -251,20 +257,22 @@ namespace sq
             Json::StyledWriter styledWriter;
             Json::FastWriter fastWriter;
             Json::Writer & writer = asynchronousOption_ ? (Json::Writer &)fastWriter : (Json::Writer &)styledWriter;
+            std::ostringstream silentStream;
+            std::ostream & log = silentOption_ ? (std::ostream &)silentStream : std::cerr;
             
             if (servers_.empty())
             {
                 tString fileSuffix = LoadMasters();
-                std::cerr << "--> Fetching master server list\n";
+                log << "--> Fetching master server list\n";
                 nServerInfoBase *master = nServerInfo::GetFromMaster( NULL, fileSuffix.c_str(), !freshOption_);
                 if (master)
                 {
-                    std::cerr << "--> Received " << nServerInfo::ServerCount() << " servers from " << master->GetConnectionName() << ":" << master->GetPort() << "\n";
+                    log << "--> Received " << nServerInfo::ServerCount() << " servers from " << master->GetConnectionName() << ":" << master->GetPort() << "\n";
                 }
                 else
                 {
                     exitStatus_ = 1;
-                    std::cerr << "--> Received 0 servers, because none of the master servers could be successfully contacted\n";
+                    log << "--> Received 0 servers, because none of the master servers could be successfully contacted\n";
                 }
             }
             else
@@ -282,7 +290,7 @@ namespace sq
             
             if (!listOption_)
             {
-                std::cerr << "--> Querying servers for advanced information\n";
+                log << "--> Querying servers for advanced information\n";
                 nServerInfo::StartQueryAll();
                 while (nServerInfo::DoQueryAll(10))
                 {
@@ -351,6 +359,7 @@ namespace sq
         bool listOption_;
         bool asynchronousOption_;
         bool freshOption_;
+        bool silentOption_;
         tString masterServer_;
         StringVector servers_;
         int exitStatus_;
