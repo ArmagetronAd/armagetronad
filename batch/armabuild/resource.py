@@ -8,15 +8,17 @@
 # sortresources.py <path_to_seach_and_sort>
 # use sortresources.py -h to get command line option help
 
-from __future__ import print_function
-
 from xml import sax
 from xml.sax import handler
 import string
 import os.path
 import os
 import sys
-from io import StringIO
+
+try:
+    from io import StringIO
+except ImportError:
+    from StringIO import StringIO
 
 try:
     from itertools import izip as zip
@@ -85,7 +87,7 @@ class entityResolver(object):
 
           # fallback: return empty stream, result: no dtd checking is done.
           # Not horribly bad in this context
-          print("warning, could not find requested entity", sysid)
+          print("warning, could not find requested entity " + sysid)
 
           return StringIO("")
 
@@ -159,7 +161,7 @@ def Print(oldFile, newFile, canonicalPath ):
         return False
 
     if doPrint:
-        print("renaming", oldFile, "->", newFile)
+        print("renaming " + oldFile + " -> " + newFile)
 
 # move file oldFile to newFile, setting apache rewrite rules to keep the file
 # fetchable from its old position
@@ -193,7 +195,7 @@ def Redirect(oldFile, newFile, canonicalPath ):
                         # nothing to do
                         return
                     else:
-                        print("Warning: There already is a different RewriteRule for", oldFile, "in place.")
+                        print("Warning: There already is a different RewriteRule for " + oldFile + " in place.")
         except: pass
 
         # open .htaccess file for appended writing
@@ -208,7 +210,7 @@ def Redirect(oldFile, newFile, canonicalPath ):
 
 # print usage message and exit.
 def Options( ret ):
-    print()
+    print("")
     print("Usage: sortresources.py [OPTIONS] <source directory> <destination directory>")
     print("       Omitting the destination directory makes it equal to the source.")
     print("       Omitting both directories makes them the current working directory.")
@@ -216,7 +218,7 @@ def Options( ret ):
     print("         -n don't do anything, just print what would be done")
     print("         -v print non-warning status messages")
     print("         -h print this message")
-    print()
+    print("")
     sys.exit( ret )
 
 def GetDtdVersion(dtdfile):
@@ -271,7 +273,7 @@ def main(argList):
                 if arg[1] == "v":
                     doPrint = True
                     continue
-                print("\nUnknown option:", arg)
+                print("\nUnknown option: " + arg)
                 Options(-1)
             else:
                 Options(-1)
