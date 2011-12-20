@@ -2482,7 +2482,7 @@ network_master_denied_title   Verbindung zum Master-Server abgelehnt
 network_master_denied_inter   Der Master-Server lässt keine Verbindung zu sich aufbauen. Vermutlich greifen gerade zu viele Benutzer auf ihn zu.\nWir versuchen es mal mit der alten Liste...
 
 testing_version_expired_title Version abgelaufen
-testing_version_expired       Dies ist eine Testversion, und der Server verwendet eine viel neuere Version. Aufgrund unkalkulierbarer Risiken müssen wir leider den Verbindungsaufbau abbrechen. Wahscheinlich gibt es aber bereits eine neuere Testversion auf www.armagetronad.net oder beta.armagetronad.net zum Herunterladen.
+testing_version_expired       Dies ist eine Testversion, und der Server verwendet eine viel neuere Version. Kompatibilität kann nicht garantiert werden.
 
 network_master_upgrage        Zu neue Version
 network_master_downgrage      Zu alte Version

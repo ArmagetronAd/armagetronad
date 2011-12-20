@@ -3043,7 +3043,7 @@ network_master_denied_title		Master login denied
 network_master_denied_inter		The master server denied your login attempt. That usually means it is full. Try again later.
 
 testing_version_expired_title   Version Expired
-testing_version_expired         You are running a public test version or an unsupported CVS build. The server you tried to connect to is running a much newer version and that combination is only supported for major releases. An update is probably available for you on www.armagetronad.net.
+testing_version_expired         You are running a public test version and the server you tried to connect to is running a much newer version and that combination is only supported for major releases. Proceed at your own risk.
 
 network_master_login_needed     Registration needed
 network_master_exp_needed       Experience needed
