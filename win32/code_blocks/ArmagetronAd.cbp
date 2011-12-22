@@ -615,6 +615,8 @@
 		<Unit filename="..\..\src\tron\gStuff.h" />
 		<Unit filename="..\..\src\tron\gTeam.cpp" />
 		<Unit filename="..\..\src\tron\gTeam.h" />
+		<Unit filename="..\..\src\tron\gTutorial.cpp" />
+		<Unit filename="..\..\src\tron\gTutorial.h" />
 		<Unit filename="..\..\src\tron\gVectorExtra.h" />
 		<Unit filename="..\..\src\tron\gWall.cpp" />
 		<Unit filename="..\..\src\tron\gWall.h" />
@@ -623,6 +625,8 @@
 		<Unit filename="..\..\src\tron\zone\zEffectGroup.h" />
 		<Unit filename="..\..\src\tron\zone\zEffector.cpp" />
 		<Unit filename="..\..\src\tron\zone\zEffector.h" />
+		<Unit filename="..\..\src\tron\zone\zFortress.cpp" />
+		<Unit filename="..\..\src\tron\zone\zFortress.h" />
 		<Unit filename="..\..\src\tron\zone\zMisc.h" />
 		<Unit filename="..\..\src\tron\zone\zMonitor.cpp" />
 		<Unit filename="..\..\src\tron\zone\zMonitor.h" />

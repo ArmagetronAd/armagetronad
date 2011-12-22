@@ -222,7 +222,7 @@ static tSettingItem<int> s_s("SCORE_SUICIDE",score_suicide);
 
 uActionPlayer gCycle::s_brake("CYCLE_BRAKE", -5);
 static uActionPlayer s_brakeToggle("CYCLE_BRAKE_TOGGLE", -5);
-static uActionTooltip sg_brakeTooltip( gCycle::s_brake, 1, &ePlayer::VetoActiveTooltip );
+uActionTooltip sg_brakeTooltip( uActionTooltip::Level_Advanced, gCycle::s_brake, 2, &ePlayer::VetoActiveTooltip );
 
 // a class of textures where the transparent part of the
 // image is replaced by the player color
@@ -3808,13 +3808,13 @@ bool gCycle::DoTurn(int d)
     if (d < -1) d = -1;
 
     if (Alive()){
-        eSoundMixer* mixer = eSoundMixer::GetMixer();
-        mixer->PushButton(CYCLE_TURN, Position());
-
         clientside_action();
 
         if ( gCycleMovement::DoTurn( d ) )
         {
+            eSoundMixer* mixer = eSoundMixer::GetMixer();
+            mixer->PushButton(CYCLE_TURN, Position());
+
             sg_ArchiveCoord( pos, 1 );
 
             skewDot+=4*d;

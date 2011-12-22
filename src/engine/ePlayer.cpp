@@ -1203,7 +1203,7 @@ ePlayer::ePlayer():cockpit(0){
                    centerIncamOnTurn) );
 
     confname.Clear();
-    startCamera=CAMERA_SMART;
+    startCamera=CAMERA_CUSTOM;
     confname << "START_CAM_"<< id+1;
     StoreConfitem(tNEW(tConfItem<eCamMode>) (confname,
                   "$start_cam_help",
@@ -1333,6 +1333,8 @@ ePlayer::~ePlayer(){
     DeleteConfitems();
 }
 
+extern uActionTooltip::Level su_helpLevel;
+
 #ifndef DEDICATED
 void ePlayer::Render(){
     if (cam) cam->Render();
@@ -1341,7 +1343,7 @@ void ePlayer::Render(){
     double now = tSysTimeFloat();
     if( se_GameTime() > 1 && now-lastTooltip_ > 1 && !rConsole::CenterDisplayActive() )
     {
-        if( uActionTooltip::Help( ID()+1 ) || uActionTooltip::Help( 0 ) || VetoActiveTooltip(ID()+1) )
+        if( uActionTooltip::Help( ID()+1 ) || uActionTooltip::Help( 0 ) || VetoActiveTooltip(ID()+1) || su_helpLevel != uActionTooltip::Level_Expert )
             lastTooltip_ = now;
         else
             lastTooltip_ = now+60;
@@ -1627,7 +1629,7 @@ static void se_DisplayChatLocallyClient( ePlayerNetID* p, const tString& message
         if ( se_silenceEnemies && !sentFromTeamMember )
             return;
         
-        if (!p->Object() || !p->Object()->Alive())
+        if ( p->CurrentTeam() && ( !p->Object() || !p->Object()->Alive() ) )
             con << tOutput("$dead_console_decoration");
         
         con << actualMessage << "\n";
@@ -2806,6 +2808,9 @@ static void se_AdminAdmin( ePlayerNetID * p, std::istream & s )
     eAdminConsoleFilter consoleFilter( p->Owner() );
     try
     {
+        // forbid CASACL
+        tCasaclPreventer preventer;
+
         tConfItemBase::LoadLine(stream);
     }
     catch (tAbortLoading)
@@ -2853,18 +2858,42 @@ static void handle_chat_admin_commands( ePlayerNetID * p, tString const & comman
     }
     else if ( command == "/invite" )
     {
+        spam.factor_ = 0.4;
+        if( spam.Block() )
+        {
+            return;
+        }
+
         se_Invite( command, p, s, &eTeam::Invite );
     }
     else if ( command == "/uninvite" )
     {
+        spam.factor_ = 0.4;
+        if( spam.Block() )
+        {
+            return;
+        }
+
         se_Invite( command, p, s, &eTeam::UnInvite );
     }
     else if ( command == "/lock" )
     {
+        spam.factor_ = 0.4;
+        if( spam.Block() )
+        {
+            return;
+        }
+
         se_Lock( command, p, s, true );
     }
     else if ( command == "/unlock" )
     {
+        spam.factor_ = 0.4;
+        if( spam.Block() )
+        {
+            return;
+        }
+
         se_Lock( command, p, s, false );
     }
 #endif
@@ -4091,7 +4120,9 @@ void ePlayerNetID::Chat(const tString &s_orig)
                     std::stringstream s(static_cast< char const * >( params ) );
                     tConfItemBase::LoadAll(s);
                 }
+#ifdef DEBUG
                 std::cout << "console selected\n";
+#endif
             } else
                 se_DisplayChatLocally( this, s );
 
@@ -4400,7 +4431,7 @@ bool ePlayer::Act(uAction *act,REAL x){
         return true;
     }
     else if (!se_chatter && s_chat==*reinterpret_cast<uActionPlayer *>(act)){
-        if(x>0) {
+        if(x>0 && sn_GetNetState() != nSTANDALONE ) {
             chat( this );
         }
         return true;
@@ -4564,8 +4595,8 @@ static bool se_ChatTooltipVeto(int)
     return sn_GetNetState() == nSTANDALONE;
 }
 
-uActionTooltip ePlayer::s_chatTooltip(ePlayer::s_chat, 1, &se_ChatTooltipVeto);
-uActionTooltip s_toggleSpectatorTooltip(se_toggleSpectator, 1, &se_ChatTooltipVeto);
+uActionTooltip ePlayer::s_chatTooltip(uActionTooltip::Level_Expert, ePlayer::s_chat, 1, &se_ChatTooltipVeto);
+uActionTooltip s_toggleSpectatorTooltip(uActionTooltip::Level_Expert, se_toggleSpectator, 1, &se_ChatTooltipVeto);
 
 int pingCharity = 100;
 static const int maxPingCharity = 300;
@@ -4648,7 +4679,7 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), timeC
 
     color.r_ = color.g_ = color.b_ = 15;
 
-    greeted             = true;
+    greeted             = false;
     chatting_           = false;
     spectating_         = false;
     stealth_            = false;
@@ -5249,6 +5280,11 @@ private:
     }
 
     virtual bool Save(){
+        return false;
+    }
+
+    // CAN this be saved at all?
+    virtual bool CanSave(){
         return false;
     }
 };
@@ -6329,6 +6365,11 @@ void ePlayerNetID::ReadSync( Engine::PlayerNetIDSync const & sync, nSenderInfo c
 
         RequestSync();
     }
+
+    if( sn_GetNetState() == nCLIENT )
+    {
+        greeted = true;
+    }
 }
 
 //! creates a netobject form sync data
@@ -6411,6 +6452,12 @@ void ePlayerNetID::ClearObject(){
 
 void ePlayerNetID::Greet(){
     if (!greeted){
+        greeted=true;
+        if( Owner() == sn_myNetID )
+        {
+            return;
+        }
+
         tOutput o;
         o.SetTemplateParameter(1, GetName() );
         o.SetTemplateParameter(2, st_programVersion);
@@ -6422,7 +6469,6 @@ void ePlayerNetID::Greet(){
         s << "\n";
         //std::cout << s;
         sn_ConsoleOut(s,Owner());
-        greeted=true;
     }
 }
 
@@ -6451,10 +6497,15 @@ void se_SaveToLadderLog( tOutput const & out )
     {
         std::ofstream o;
         if ( tDirectories::Var().Open(o, "ladderlog.txt", std::ios::app) )
+        {
+            std::stringstream s;
             if(se_ladderlogDecorateTS) {
-                o << st_GetCurrentTime("%Y/%m/%d-%H:%M:%S ");
+                s << st_GetCurrentTime("%Y/%m/%d-%H:%M:%S ");
             }
-            o << out << std::endl;;
+            s << out << std::endl;
+            sr_InputForScripts( s.str().c_str() );
+            o << s.str();
+        }
     }
 }
 
@@ -6916,7 +6967,7 @@ float ePlayerNetID::RankingGraph( float y, int MAX ){
             tColoredString prefix;
             if(p->chatting_)
                 prefix << '*';
-            if(p->ready)
+            if(se_matches < 0 && p->ready)
                 prefix << tColoredString::ColorString(.5,1,.5) << 'R';
             if(prefix.Len())
                 DisplayText(-.704 - (prefix.Len() * .00075), y, .06, prefix.c_str(), sr_fontScoretable, 1);
@@ -8048,6 +8099,12 @@ void ePlayerNetID::UpdateTeam()
     }
 
     UpdateTeamForce();
+
+    // create voter
+    if( !GetVoter() )
+    {
+        CreateVoter();
+    }
 }
 
 void ePlayerNetID::UpdateTeamForce()
@@ -8164,7 +8221,24 @@ void ePlayerNetID::CreateNewTeam()
 
 const unsigned short TEAMCHANGE = 0;
 const unsigned short NEW_TEAM   = 1;
+const unsigned short AUTO_TEAM  = 2;
 
+// AUTO_TEAM is only available since 0.4_alpha
+nVersionFeature se_defaultTeamWish(22);
+
+// express the with to put a new player into a default team
+void ePlayerNetID::SetDefaultTeamWish()
+{
+    if ( nCLIENT ==  sn_GetNetState() )
+    {
+        Engine::PlayerNetIDControl & control = *BroadcastControl().MutableExtension( Engine::player_control );
+
+        control.set_type( AUTO_TEAM );
+    }
+    else
+        // create a new team if possible otherwise spectate
+        SetDefaultTeam();
+}
 
 // express the wish to be part of the given team (always callable)
 void ePlayerNetID::SetTeamWish(eTeam* newTeam)
@@ -8243,6 +8317,15 @@ void ePlayerNetID::ReceiveControlNet( Network::NetObjectControl const & controlB
 
     switch (messageType)
     {
+    case AUTO_TEAM:
+        {
+            if (NextTeam()==NULL)
+            {
+                SetDefaultTeam(true);
+            }
+
+            break;
+        }
     case NEW_TEAM:
         {
             // create a new team if possible otherwise spectate or...
@@ -8327,7 +8410,7 @@ nProtoBuf const * ePlayerNetID::ExtractControl( Network::NetObjectControl const 
 
 void ePlayerNetID::Color( REAL&a_r, REAL&a_g, REAL&a_b ) const
 {
-    if ( ( static_cast<bool>(currentTeam) ) && ( currentTeam->IsHuman() ) )
+    if ( ( static_cast<bool>(currentTeam) ) && ( ( currentTeam->IsHuman() || currentTeam->TeamNamedAfterColor() ) ) )
     {
         REAL w = 5;
         REAL r_w = 2;
@@ -8885,7 +8968,7 @@ private:
         static Classifier delayClassifier( .06, Classification_Medium, .12, Classification_High );
         static Classifier accelerationClassifier( 4, Classification_Medium, 8, Classification_High );
         static Classifier rubberHumpClassifier( 1, Classification_Medium, 100, Classification_LudicrouslyHigh );
-        static Classifier rubberWallClassifier( .0015, Classification_Low, .3, Classification_LudicrouslyHigh );
+        static Classifier rubberWallClassifier( 0.015, Classification_Medium, .3, Classification_LudicrouslyHigh );
         static Classifier wallsLengthClassifier( 1, Classification_Low, 10, Classification_VeryHigh );
         
         // apply them
@@ -8963,6 +9046,7 @@ private:
         int experienceLevelThere = floor( se_playTimeTotal/levelDistance );
         int missingForThisLevel = experienceLevelThere*levelDistance - se_playTimeTotal + 2;
 
+        out.noJoin_ = "";
         out.sortOverride_ = experienceLevel - experienceLevelThere;
         if( out.sortOverride_ > 0 )
         {

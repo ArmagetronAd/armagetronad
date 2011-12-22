@@ -56,8 +56,6 @@ gServerInfoFavorite::gServerInfoFavorite( tString const & name_, tString const &
     nServerInfoBase::SetPort( port );
 }
 
-//typedef nServerInfoRedirect gServerInfoFavorite;
-
 //********************************************************************************
 //********************************************************************************
 
@@ -251,8 +249,7 @@ static void sg_AlternativeMaster( int ID )
 
     // fetch server info
     gServerFavorite & favorite = sg_masterHolder.GetFavorite(ID);
-    gServerInfoFavorite fav( favorite.name_,
-        favorite.address_, favorite.port_ );
+    nServerInfoRedirect fav( favorite.address_, favorite.port_ );
 
     // browse master info
     gServerBrowser::BrowseSpecialMaster( &fav, suffix.str().c_str() );

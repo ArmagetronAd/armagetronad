@@ -38,7 +38,9 @@ EOF
 
 # do an installation
 echo -n "Performing test installation..."
-DEST=$(pwd)/.foruninstall
+P=$(mktemp -t armagetronad-test-install.XXX)
+rm -f ${P}
+DEST=${P}.${PROGNAME}.foruninstall
 
 # test for recursion
 if echo ${DESTDIR} | grep "\.foruninstall$"; then

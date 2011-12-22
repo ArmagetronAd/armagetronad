@@ -163,7 +163,9 @@ void eChannel::Update() {
                 m_Delayed = false;
                 LoopSound(m_Sound);
                 Set3d(m_Home->Position(), m_Owner->Position(), m_Home->Direction());
+#ifdef DEBUG
                 std::cout << "Starting delayed effect\n";
+#endif
             }
         } else {
             if(!m_Home || !m_Owner) {

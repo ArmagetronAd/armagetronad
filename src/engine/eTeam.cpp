@@ -286,22 +286,19 @@ void eTeam::UpdateAppearance()
             // let oldest own the team
             if ( players.Len() > 1 )
             {
-                if ( oldest->IsHuman() )
+                // did the player set a custom teamname ?
+                if (se_allowTeamNameLeader && oldest->teamname.Len()>1)
                 {
-                    // did the player set a custom teamname ?
-                    if (se_allowTeamNameLeader && oldest->teamname.Len()>1)
-                    {
-                        // Use player's custom teamname
-                        updateName = oldest->teamname;
-                    }
-                    else
-                    {
-                        // name team after first/oldest player
-                        tOutput newname;
-                        newname.SetTemplateParameter( 1, oldest->GetName() );
-                        newname << "$team_owned_by";
-                        updateName = newname;
-                    }
+                    // Use player's custom teamname
+                    updateName = oldest->teamname;
+                }
+                else if ( oldest->IsHuman() )
+                {
+                    // name team after first/oldest player
+                    tOutput newname;
+                    newname.SetTemplateParameter( 1, oldest->GetName() );
+                    newname << "$team_owned_by";
+                    updateName = newname;
                 }
                 else
                 {
@@ -1335,7 +1332,7 @@ ePlayerNetID*	eTeam::OldestPlayer	(		) const
 {
     ePlayerNetID* ret = NULL;
 
-    for (int i= players.Len(); i>=0; i--)
+    for (int i= players.Len()-1; i>=0; i--)
     {
         ePlayerNetID* p = players(i);
         if (!ret || ret->timeJoinedTeam > p->timeJoinedTeam || se_centerPlayerIsBoss )

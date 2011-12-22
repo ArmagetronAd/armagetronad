@@ -30,7 +30,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "defs.h"
 #include "tLinkedList.h"
-#include "tScripting.h"
 
 class tCallback:public tListItem<tCallback>{
     AA_VOIDFUNC *func;
@@ -38,17 +37,6 @@ public:
     tCallback(tCallback*& anchor, AA_VOIDFUNC *f);
     static void Exec(tCallback *anchor);
 };
-
-#ifdef ENABLE_SCRIPTING
-class tCallbackScripting : public tListItem<tCallbackScripting> {
-    tScripting::proc_type block;
-//protected:
-//    static tScripting::value_type ExecProtect(tScripting::value_type);
-public:
-    tCallbackScripting(tCallbackScripting *& anchor);
-    static void Exec(tCallbackScripting *anchor);
-};
-#endif // ENABLE_SCRIPTING
 
 class tCallbackAnd:public tListItem<tCallbackAnd>{
     BOOLRETFUNC *func;

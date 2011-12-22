@@ -49,13 +49,8 @@
 // with Windows 9X. No guarantees.
 // #define SUPPORT_WIN9X
 
-// defines for data directories in Windows
-#ifndef DEBUG
-#define USER_DATA_DIR  "${APPDATA}/Armagetron"
-#define SCREENSHOT_DIR "${MYPICTURES}/Armagetron"
-#else
-#define USER_DATA_DIR  "."
-#endif
+// defines for old data directories in Windows
+#define LEGACY_USER_DATA_DIR  "${APPDATA}/Armagetron"
 
 // for now, no joystick support in Windows
 // #define NOJOYSTICK 1

@@ -37,6 +37,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #ifndef DEDICATED
 
+#include "tToDo.h"
+
 #include "ePlayer.h"
 #include "gCycle.h"
 #include "eTimer.h"
@@ -48,6 +50,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "eSensor.h"
 #include <iostream>
 #include "eSoundMixer.h"
+#include "eGrid.h"
 
 #include <time.h>
 
@@ -846,6 +849,7 @@ static uActionGlobalFunc ck2(&cockpitKey2, &cCockpit::ProcessKey2, true);
 static uActionGlobalFunc ck3(&cockpitKey3, &cCockpit::ProcessKey3, true);
 static uActionGlobalFunc ck4(&cockpitKey4, &cCockpit::ProcessKey4, true);
 static uActionGlobalFunc ck5(&cockpitKey5, &cCockpit::ProcessKey5, true);
+uActionTooltip sc_key1Tooltip(uActionTooltip::Level_Advanced, cockpitKey1, 1);
 
 bool ProcessKey(float i, int num) {
     bool ret = false;
@@ -857,7 +861,16 @@ bool ProcessKey(float i, int num) {
     return ret;
 }
 
-bool cCockpit::ProcessKey1(float i) { return ProcessKey(i, 1); }
+bool cCockpit::ProcessKey1(float i)
+{ 
+    bool ret = ProcessKey(i, 1); 
+    if (!ret && i > 0 )
+    {
+        sc_key1Tooltip.Count(0);
+    }
+    return ret;
+}
+
 bool cCockpit::ProcessKey2(float i) { return ProcessKey(i, 2); }
 bool cCockpit::ProcessKey3(float i) { return ProcessKey(i, 3); }
 bool cCockpit::ProcessKey4(float i) { return ProcessKey(i, 4); }

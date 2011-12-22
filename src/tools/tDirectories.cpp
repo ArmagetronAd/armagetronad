@@ -183,6 +183,15 @@ static tString st_UserDataDir(expand_home_c(USER_DATA_DIR));    // directory for
 static tString st_UserDataDir(expand_home_c("~/." PROGDIR));    // directory for game data
 #endif
 
+// load data from unbranded configuration directory on branded builds in Linux
+#if !defined DEDICATED && !defined MACOSX && !defined LEGACY_USER_DATA_DIR && !defined DEBUG
+#define LEGACY_USER_DATA_DIR "~/.armagetronad"
+#endif
+
+#ifdef LEGACY_USER_DATA_DIR
+static tString st_LegacyUserDataDir(expand_home_c(LEGACY_USER_DATA_DIR));    // directory for game data (old location)
+#endif
+
 #ifdef CONFIG_DIR
 static tString st_ConfigDir(expand_home_c(CONFIG_DIR));  // directory for static configuration files
 #else
@@ -532,6 +541,13 @@ private:
             paths[ pos++ ] = st_ConfigDir;
         }
 
+#ifdef LEGACY_USER_DATA_DIR
+        if ( st_LegacyUserDataDir.Len() > 1 )
+        {
+            paths[ pos++ ] = st_LegacyUserDataDir + "/config";
+        }
+#endif
+
         if ( st_UserDataDir.Len() > 1 )
         {
             paths[ pos++ ] = st_UserDataDir + "/config";
@@ -568,6 +584,13 @@ private:
             static tString ed(extradata);
             paths[ pos++ ] = ed;
         }
+
+#ifdef LEGACY_USER_DATA_DIR
+        if ( st_LegacyUserDataDir.Len() > 1 )
+        {
+            paths[ pos++ ] = st_LegacyUserDataDir;
+        }
+#endif
 
         if ( st_UserDataDir.Len() > 1 )
         {
@@ -629,6 +652,13 @@ private:
         int pos = 0;
 
         paths[ pos++ ] = st_DataDir + "/var";
+
+#ifdef LEGACY_USER_DATA_DIR
+        if ( st_LegacyUserDataDir.Len() > 1 )
+        {
+            paths[ pos++ ] = st_LegacyUserDataDir + "/var";
+        }
+#endif
 
         if ( st_UserDataDir.Len() > 1 )
         {
@@ -1615,44 +1645,54 @@ static bool ReadDir( tCommandLineParser & parser, tString & target, const char* 
     return false;
 }
 
-class tDirectoriesCommandLineAnalyzer: public tCommandLineAnalyzer
+void tDirectoriesCommandLineAnalyzer::DoInitialize( tCommandLineParser & parser )
 {
-private:
-    virtual void DoInitialize( tCommandLineParser & parser )
-    {
-        // Puts the data files in the executable's bundle
+    // Puts the data files in the executable's bundle
 #ifndef MACOSX_XCODE
-        try
-        {
-            st_pathToExecutable.Set( parser.Executable() );
-            FindDataPath();
-            FindConfigurationPath();
-        }
-        catch( tRunningInBuildDirectory )
-        {
-            // last fallback for debugging (activated only if there is data in the current directory)
-            if ( TestPath( ".", "language/languages.txt") && TestDataPath(s_topSourceDir) && TestConfigurationPath(st_DataDir + "/config") )
-            {
-                // we must be running the game in debug mode; set user data dir to current directory.
-                st_UserDataDir = ".";
-
-                // the included resources are scrambled and put into the current directory as well.
-                st_IncludedResourceDir = "./resource/included";
-                return;
-            }
-        }
-#endif // !MACOSX_XCODE
-
-
-    }
-
-    virtual bool DoAnalyze( tCommandLineParser & parser )
+    try
     {
-        if( ReadDir( parser, st_DataDir, "--datadir" ) ) return true;
-        if( ReadDir( parser, st_UserDataDir, "--userdatadir" ) ) return true;
-        if( ReadDir( parser, st_ConfigDir, "--configdir" ) ) return true;
-        if( ReadDir( parser, st_UserConfigDir, "--userconfigdir" ) ) return true;
-        if( ReadDir( parser, st_VarDir, "--vardir" ) ) return true;
+        st_pathToExecutable.Set( parser.Executable() );
+        FindDataPath();
+        FindConfigurationPath();
+
+#ifdef LEGACY_USER_DATA_DIR
+        // blank out legacy user data dir if it matches the real user data dir
+        if ( st_UserDataDir == st_LegacyUserDataDir )
+        {
+            st_LegacyUserDataDir = "";
+        }
+#endif
+    }
+    catch( tRunningInBuildDirectory )
+    {
+        // last fallback for debugging (activated only if there is data in the current directory)
+        if ( TestPath( ".", "language/languages.txt") && TestDataPath(s_topSourceDir) && TestConfigurationPath(st_DataDir + "/config") )
+        {
+            // we must be running the game in debug mode; set user data dir to current directory.
+            st_UserDataDir = ".";
+
+            // the included resources are scrambled and put into the current directory as well.
+            st_IncludedResourceDir = "./resource/included";
+
+#ifdef LEGACY_USER_DATA_DIR
+            st_LegacyUserDataDir = "";
+#endif
+            return;
+        }
+    }
+#endif // !MACOSX_XCODE
+}
+
+bool tDirectoriesCommandLineAnalyzer::DoAnalyze( tCommandLineParser & parser )
+{
+    if( ReadDir( parser, st_DataDir, "--datadir" ) ) return true;
+    if( ReadDir( parser, st_UserDataDir, "--userdatadir" ) ) return true;
+    if( ReadDir( parser, st_ConfigDir, "--configdir" ) ) return true;
+    if( ReadDir( parser, st_UserConfigDir, "--userconfigdir" ) ) return true;
+    if( ReadDir( parser, st_VarDir, "--vardir" ) ) return true;
+    
+    if ( enableExtraOptions_ )
+    {
         if( ReadDir( parser, st_ResourceDir, "--resourcedir" ) ) return true;
         if( ReadDir( parser, st_AutoResourceDir, "--autoresourcedir" ) ) return true;
 
@@ -1680,20 +1720,24 @@ private:
             throw 1;
             return true;
         }
-
-        return false;
     }
 
-    virtual void DoHelp( std::ostream & s )
-    {                                      //
-        s << "--datadir <Directory>        : read game data (textures, sounds and texts)\n"
-        <<   "                               from this directory\n";
-        s << "--userdatadir <Directory>    : read customized game data from this directory\n";
-        s << "--configdir <Directory>      : read game configuration (.cfg-files)\n"
-        <<   "                               from this directory\n";
-        s << "--userconfigdir <Directory>  : read user game configuration from this directory\n";
-        s << "--vardir <Directory>         : save game logs and highscores in this directory\n\n";
-        s << "--resourcedir <Directory>    : look for resources in this directory\n\n";
+    return false;
+}
+
+void tDirectoriesCommandLineAnalyzer::DoHelp( std::ostream & s )
+{                                      //
+    s << "--datadir <Directory>        : read game data (textures, sounds and texts)\n"
+    <<   "                               from this directory\n";
+    s << "--userdatadir <Directory>    : read customized game data from this directory\n";
+    s << "--configdir <Directory>      : read game configuration (.cfg-files)\n"
+    <<   "                               from this directory\n";
+    s << "--userconfigdir <Directory>  : read user game configuration from this directory\n";
+    s << "--vardir <Directory>         : save game logs and highscores in this directory\n";
+    
+    if ( enableExtraOptions_ )
+    {
+        s << "\n--resourcedir <Directory>    : look for resources in this directory\n\n";
         s << "--autoresourcedir <Directory>: download missing resources into this directory\n\n";
         s << "--path-no-absolutecheck      : disables security check against absolute paths\n";
         s << "--path-no-hiddencheck        : disables security check against hidden paths\n";
@@ -1701,7 +1745,7 @@ private:
         <<   "                               Not recommended, this check is really important.\n\n";
         s << "--prefix                     : prints the prefix the game was installed to\n";
     }
-};
+}
 
 static tDirectoriesCommandLineAnalyzer analyzer;
 

@@ -36,6 +36,7 @@ class eHalfEdge;
 class ePath{
 public:
 #ifdef DEBUG
+    void Render();  // renders this path
     static void RenderLast();  // renders the last found path
 #endif
 
@@ -51,13 +52,13 @@ public:
 
     void Clear();
 
+    void Add(const eCoord&  point);
 protected:
     tArray<eCoord> positions;
     tArray<eCoord> offsets;
     int            current;
 
     void Add(eHalfEdge     *edge);
-    void Add(const eCoord&  point);
 
 };
 

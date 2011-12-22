@@ -43,8 +43,64 @@ if NEEDDATA
 # install media data only when it is needed
 nobase_texture_DATA=textures/cycle_body.png textures/cycle_wheel.png textures/dir_wall.png\
 	textures/floor_a.png textures/floor_b.png textures/floor.png textures/font_extra.png\
-	textures/font.png textures/font_s.png textures/icon.png textures/KGN_logo.png textures/rim_wall.png\
+	textures/font.png textures/font_s.png textures/icon.png textures/rim_wall.png\
 	textures/shadow.png textures/sky.png textures/title.jpg\
+	textures/settings_textures.cfg \
+	textures/message_background.png \
+	textures/tutorials/teamstart/success.png \
+	textures/tutorials/teamstart/background.png \
+	textures/tutorials/teamstart/straight.png \
+	textures/tutorials/doublegrind/success.png \
+	textures/tutorials/doublegrind/toohard1.png \
+	textures/tutorials/doublegrind/background.png \
+	textures/tutorials/doublegrind/toohard2.png \
+	textures/tutorials/doublegrind/toohard3.png \
+	textures/tutorials/grinding/fail2.png \
+	textures/tutorials/grinding/nogrind.png \
+	textures/tutorials/grinding/fail3.png \
+	textures/tutorials/grinding/fail1.png \
+	textures/tutorials/grinding/grind.png \
+	textures/tutorials/survival/fail2.png \
+	textures/tutorials/survival/fail3.png \
+	textures/tutorials/survival/spiral.png \
+	textures/tutorials/survival/fail1.png \
+	textures/tutorials/survival/wiggle.png \
+	textures/tutorials/navigation/fail2.png \
+	textures/tutorials/navigation/fancy.png \
+	textures/tutorials/navigation/fail3.png \
+	textures/tutorials/navigation/indirect.png \
+	textures/tutorials/navigation/fail1.png \
+	textures/tutorials/navigation/zone.png \
+	textures/tutorials/navigation/direct.png \
+	textures/tutorials/navigation/start.png \
+	textures/tutorials/clipart/fail.png \
+	textures/tutorials/clipart/background.png \
+	textures/tutorials/clipart/check.png \
+	textures/tutorials/clipart/circle.png \
+	textures/tutorials/speedkill/adjust3.png \
+	textures/tutorials/speedkill/adjust1.png \
+	textures/tutorials/speedkill/adjust2.png \
+	textures/tutorials/speedkill/success2.png \
+	textures/tutorials/speedkill/success1.png \
+	textures/tutorials/speedkill/fail_donothing.png \
+	textures/tutorials/speedkill/success3.png \
+	textures/tutorials/speedkilldefense/fail2.png \
+	textures/tutorials/speedkilldefense/fail3.png \
+	textures/tutorials/speedkilldefense/trap3.png \
+	textures/tutorials/speedkilldefense/fail1.png \
+	textures/tutorials/speedkilldefense/trap1.png \
+	textures/tutorials/speedkilldefense/trap2.png \
+	textures/tutorials/speedkilldefense/start.png \
+	textures/tutorials/conquest/success.png \
+	textures/tutorials/conquest/start.png \
+	textures/tutorials/teamstart/teamstart.txt \
+	textures/tutorials/doublegrind/doublegrind.txt \
+	textures/tutorials/grinding/grinding.txt \
+	textures/tutorials/survival/survival.txt \
+	textures/tutorials/navigation/navigation.txt \
+	textures/tutorials/speedkill/speedkill.txt \
+	textures/tutorials/speedkilldefense/speedkilldefense.txt \
+	textures/tutorials/conquest/conquest.txt \
 	textures/Armagetronad.ttf
 
 nobase_sound_DATA=sound/1voicemale.ogg  sound/announcerGO.ogg  sound/expl.ogg\
@@ -75,6 +131,18 @@ dist-hook-scm:
 	-e "s/  progname=.*/  progname='@prognamebase@'/" \
 	-e "s/  progtitle=.*/  progtitle='@progtitle@'/" \
 	< @srcdir@/configure.ac > $(distdir)/configure.ac
+
+#   rebrand Windows config directories
+	sed	-e "s,/Armagetron,/@progtitle@," \
+	< @srcdir@/src/win32/aa_config.h > $(distdir)/src/win32/aa_config.h
+	sed	-e "s,/ArmagetronDedicated,/@progtitle@@progtitle_server@," \
+	< @srcdir@/src/win32_ded/aa_config.h > $(distdir)/src/win32_ded/aa_config.h
+
+#   rebrand OSX config directories
+	sed	-e "s,/Armagetron Advanced,/@progtitle@," \
+	< @srcdir@/src/macosx/client/aa_config.h > $(distdir)/src/macosx/client/aa_config.h
+	sed	-e "s,/Armagetron Advanced Dedicated,/@progtitle@@progtitle_server@," \
+	< @srcdir@/src/macosx/dedicated/aa_config.h > $(distdir)/src/macosx/dedicated/aa_config.h
 
 #   regenerate dependant files so they no longer reference to the file "version" which will be removed
 	cp @srcdir@/bootstrap.sh $(distdir)
@@ -127,6 +195,9 @@ install-exec-hook: install-uninstall
 if BUILDMAIN
 	cd  $(DESTDIR)${bindir}; mv armagetronad_main$(EXEEXT) @progname@$(executable_suffix)
 endif
+if BUILDDEDICATED
+	cd  $(DESTDIR)${bindir}; mv armagetronad_serverquery$(EXEEXT) @prognamebase@-serverquery$(executable_suffix)
+endif
 
 #	delegate to special tasks
 	$(masterInstallTasks)
@@ -140,6 +211,9 @@ endif
 uninstall-hook:
 #	delete executable and uninstaller
 	rm -f $(DESTDIR)${bindir}/@progname@$(executable_suffix)
+if BUILDDEDICATED
+	rm -f $(DESTDIR)${bindir}/@prognamebase@-serverquery$(executable_suffix)
+endif
 
 #	delegate to special tasks
 	$(masterUninstallTasks)

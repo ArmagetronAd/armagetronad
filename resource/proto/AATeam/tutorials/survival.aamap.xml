@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE Resource SYSTEM "AATeam/map-0.2.8.0_rc4.dtd">
+<Resource type="aamap" name="survival" version="0.1.0" author="Z-Man" category="tutorial">
+	<Map version="2">
+		<!-- The original square map, technically created by z-man.
+		     Converted to XML by philippeqc.
+		     Turned into a survival map by z-man.
+		 
+		 License: Do with it what you want.-->
+
+		<World>
+			<Field>
+				<Spawn	x="15"	y="10"	xdir="0"	ydir="1"	/>
+				<Spawn	x="485"	y="490"	xdir="0"	ydir="-1"	/>
+				<Spawn	x="490"	y="15"	xdir="-1"	ydir="0"	/>
+				<Spawn	x="10"	y="485"	xdir="1"	ydir="0"	/>
+
+				<Spawn	x="250"	y="250"	xdir="1"	ydir="0"	/>
+				<Spawn	x="250"	y="250"	xdir="-1"	ydir="0"	/>
+				<Spawn	x="250"	y="250"	xdir="0"	ydir="1"	/>
+				<Spawn	x="250"	y="250"	xdir="0"	ydir="-1"	/>
+
+				<Spawn	x="251"	y="251"	xdir="1"	ydir="0"	/>
+				<Spawn	x="249"	y="251"	xdir="-1"	ydir="0"	/>
+				<Spawn	x="251"	y="251"	xdir="0"	ydir="1"	/>
+				<Spawn	x="251"	y="249"	xdir="0"	ydir="-1"	/>
+
+				<Spawn	x="251"	y="249"	xdir="1"	ydir="0"	/>
+				<Spawn	x="249"	y="249"	xdir="-1"	ydir="0"	/>
+				<Spawn	x="249"	y="251"	xdir="0"	ydir="1"	/>
+				<Spawn	x="249"	y="249"	xdir="0"	ydir="-1"	/>
+			
+				<Wall>
+					<Point	x="0"	y="0"	/>
+					<Point	x="0"	y="500"	/>
+					<Point	x="500"	y="500"	/>
+					<Point	x="500"	y="0"	/>
+					<Point	x="0"	y="0"	/>
+				</Wall>
+			</Field>
+		</World>
+	</Map>
+</Resource>

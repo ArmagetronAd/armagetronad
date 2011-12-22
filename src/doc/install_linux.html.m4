@@ -73,7 +73,7 @@ Please ELINK(armagetron.sf.net/contact.html,report it) if this procedure gives y
 resolve; the goal is to make it work on as many systems as possible.
 ])
 
-ifelse(,,,
+ifelse(,,
 SUBSECTION(Binary RPM,rpm)
 PARAGRAPH([
 Type CMDLINE(rpm -i filename.rpm) The RPM build is quite untested, so it may be

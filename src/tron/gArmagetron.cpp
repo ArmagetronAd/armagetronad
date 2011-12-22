@@ -400,19 +400,6 @@ static void welcome(){
 
     st_FirstUse=false;
 
-    sr_textOut = textOutBack;
-    uMenu::Message( tOutput("$welcome_message_heading"), tOutput("$welcome_message"), 300 );
-
-    // start a first single player game
-    sg_currentSettings->speedFactor = -2;
-    sg_currentSettings->autoNum = 0;
-    sr_textOut = textOutBack;
-    sg_SinglePlayerGame();
-    sg_currentSettings->autoNum = 1;
-    sg_currentSettings->speedFactor = 0;
-
-    sr_textOut = textOutBack;
-    uMenu::Message( tOutput("$welcome_message_2_heading"), tOutput("$welcome_message_2"), 300 );
 
     sr_textOut = textOutBack;
 }
@@ -633,12 +620,14 @@ int main(int argc,char **argv){
 
     try
     {
-        tCommandLineData commandLine;
-        commandLine.programVersion_  = &st_programVersion;
+        // Create this command line analyzer here instead of statically
+        // so it will be the first to display in --help.
+        tDefaultCommandLineAnalyzer defaultCommandLineAnalyzer;
+        tCommandLineData commandLine( st_programVersion );
 
         // analyse command line
         // tERR_MESSAGE( "Analyzing command line." );
-        if ( ! commandLine.Analyse(argc, argv) )
+        if ( !commandLine.Analyse(argc, argv) )
             return 0;
 
 

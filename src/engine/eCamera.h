@@ -67,7 +67,7 @@ protected:
     se_moveLeft,se_moveRight,se_moveUp,se_moveDown,se_moveForward,se_moveBack,
     se_zoomIn,se_zoomOut, se_switchView;
     static uGlanceAction se_glance[se_glances];
-    static uActionTooltip se_glanceLeftTooltip, se_glanceRightTooltip, se_glanceBackTooltip, se_switchViewTooltip;
+    static uActionTooltip se_glanceLeftTooltip, se_glanceRightTooltip, se_glanceBackTooltip, se_glanceForwardTooltip, se_switchViewTooltip;
 
     int id;
     //  tCHECKED_PTR(eGameObject) foot;
@@ -128,6 +128,13 @@ protected:
     //! note: directions are represented by unit-length vectors
     static eCoord nextDirIfGlancing(eCoord const & dir, eCoord const & targetDir, REAL ts);
 
+    //! loads this camera configuration from a line
+    void Load( std::istream & s );
+
+    //! saves this camera configuration
+    void Save( std::ostream & s ) const;
+    
+
     void Bound( REAL dt ); //!< make sure the camera is inside the arena and has clear line of sight
     void Bound( REAL dt, eCoord & pos ); //!< make sure pos is inside the arena and has clear line of sight
 
@@ -156,6 +163,12 @@ public:
     const ePlayerNetID* Player() const;
     const ePlayer* LocalPlayer() const;
 
+    //! loads a camera configuration from a line
+    static void LoadAny(  eGrid * grid, std::istream & s );
+
+    //! saves all this cameras' configuration in a form that can be used from a config file
+    static void SaveAll(  eGrid * grid, std::ostream & s );
+
     eCamera(eGrid *grid, rViewport *vp,ePlayerNetID *owner,ePlayer *lp,eCamMode m=CAMERA_IN, bool rMain=true);
     virtual ~eCamera();
 
@@ -182,8 +195,8 @@ public:
     REAL          CameraZ  () const {return z;}
     REAL          CameraRise  () const {return rise;}
 
-    void SetCameraDir(eCoord &pDir) {dir = pDir;}
-    void SetCameraPos(eCoord &pPos) {pos = pPos;}
+    void SetCameraDir(eCoord const& pDir) {dir = pDir;}
+    void SetCameraPos(eCoord const& pPos) {pos = pPos;}
     void SetCameraZ  (REAL pZ) {z = pZ;}
     void SetCameraRise  (REAL pRise) {rise = pRise;}
 

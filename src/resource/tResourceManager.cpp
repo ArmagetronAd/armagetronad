@@ -202,10 +202,12 @@ parameter is required.
 Parameters:
 uri: The full uri to obtain the ressource
 filename: The filename to use for the local ressource
-Return a file handle to the ressource
+fullPath: determines the type of the return path
+forceFetch: if true, existence in the cache is ignored
+Return the path to the resource, relative to resources if fullPath is false, absolute or relative to the working directory otherwise.
 NOTE: There must be *at least* one directory level, even if it is ./
 */
-tString tResourceManager::locateResource(const char *file, const char *uri, bool fullPath) {
+tString tResourceManager::locateResource(const char *file, const char *uri, bool fullPath, bool forceFetch) {
     tString filepath, a_uri = tString(), savepath, resourcepath;
     int rv;
 
@@ -252,23 +254,30 @@ tString tResourceManager::locateResource(const char *file, const char *uri, bool
         con << tOutput( "$resource_abs_path" );
         return (tString) NULL;
     }
+
+    if( !forceFetch )
+    {
+        // Do we have this file locally ?
+        filepath = tDirectories::Resource().GetReadPath(file);
+
+        if (filepath != "")
+        {
+            if ( NULL != to_free )
+                free( to_free );
+            if ( fullPath )
+                return filepath;
+            else
+                return resourcepath;
+        }
+
+        con << tOutput( "$resource_not_cached", file );
+    }
+
+    // determine place to save the resource
     savepath = tDirectories::Resource().GetWritePath(file);
     if (savepath == "") {
         con << tOutput( "$resource_no_writepath" );
         return (tString) NULL;
-    }
-
-    // Do we have this file locally ?
-    filepath = tDirectories::Resource().GetReadPath(file);
-
-    if (filepath != "")
-    {
-        if ( NULL != to_free )
-            free( to_free );
-        if ( fullPath )
-            return filepath;
-        else
-            return resourcepath;
     }
 
     // Some sort of File not found
@@ -281,8 +290,6 @@ tString tResourceManager::locateResource(const char *file, const char *uri, bool
 
     if ( AccessRepoClient().Len() > 2 && AccessRepoClient() != AccessRepoServer() )
         a_uri << AccessRepoClient() << file << ';';
-
-    con << tOutput( "$resource_not_cached", file );
 
     rv = myFetch((const char *)a_uri, file, (const char *)savepath);
 

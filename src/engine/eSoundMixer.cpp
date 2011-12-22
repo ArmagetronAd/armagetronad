@@ -249,10 +249,14 @@ void eSoundMixer::Init() {
     tString musFile;
 
     musFile = vpath.GetReadPath( titleTrack );
+#ifdef DEBUG
     std::cout << titleTrack << "\n";
+#endif
     m_TitleTrack = new eMusicTrack(musFile, true);
     musFile = vpath.GetReadPath( guiTrack );
+#ifdef DEBUG
     std::cout << guiTrack << "\n";
+#endif
     m_GuiTrack = new eMusicTrack(musFile, true);
 
     //m_GuiTrack->Loop();
@@ -456,13 +460,17 @@ void eSoundMixer::PushButton( int soundEffect, eCoord location ) {
 
 void eSoundMixer::PlayContinuous(int soundEffect, eGameObject* owner) {
 #ifdef HAVE_LIBSDL_MIXER
+#ifdef DEBUG
     std::cout << "Playcontinuous: " << SoundEffectString[soundEffect] << "\n";
+#endif
     if (!m_active) return;
     return;
 
     int theChannel = FirstAvailableChannel();
     if( theChannel < 0 || m_Channels[theChannel].isBusy()) {
+#ifdef DEBUG
         std::cout << "Can't loop, sorry.\n";
+#endif
         return;
     }
 
@@ -479,7 +487,9 @@ void eSoundMixer::RemoveContinuous(int soundEffect, eGameObject* owner) {
     for(std::deque<eChannel>::iterator i = m_Channels.begin(); i != m_Channels.end(); ++i) {
         if ((*i).GetOwner() == owner) {
             (*i).StopSound();
+#ifdef DEBUG
             std::cout << "removed continuous sound\n";
+#endif
         }
     }
 #endif

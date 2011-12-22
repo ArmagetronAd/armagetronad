@@ -1,0 +1,13 @@
+# each line is an animation frame.
+# the format is <frame duration> <list of texture files>.
+# the textures are displayed with the first in the background and the last in the foreground.
+# during the frame duration, the alpha test threshold for the last texture is continuously lowered
+# from 1 to 0. This makes translucent elements of the texture pop in and allows limited
+# in-frame smooth animation.
+# empty lines and lines starting with # are ignored.
+
+4.27 textures/tutorials/teamstart/background.png textures/tutorials/teamstart/success.png
+1.00 textures/tutorials/teamstart/background.png textures/tutorials/teamstart/success.png textures/tutorials/clipart/circle.png textures/tutorials/clipart/check.png
+
+4.27 textures/tutorials/teamstart/background.png textures/tutorials/teamstart/straight.png
+1.00 textures/tutorials/teamstart/background.png textures/tutorials/teamstart/straight.png textures/tutorials/clipart/circle.png textures/tutorials/clipart/fail.png

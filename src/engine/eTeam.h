@@ -112,7 +112,9 @@ public:												// public methods
     static tString Ranking( int MAX = 6, bool cut = true );				// return ranking information
     static float RankingGraph( float y, int MAX = 6 );				// print ranking information
 
-    bool			NameTeamAfterColor ( bool wish );	// inquire or set the ability to use a color as a team name
+    bool			NameTeamAfterColor ( bool wish );	// set the ability to use a color as a team name, return status
+
+    bool			TeamNamedAfterColor () const { return colorID >= 0; } //!< returns whether the team is currently named after a color
 
     void 			AddPlayer   	( ePlayerNetID* player );				// register a player
     void 			AddPlayerDirty 	( ePlayerNetID* player );				// register a player without calling UpdateProperties

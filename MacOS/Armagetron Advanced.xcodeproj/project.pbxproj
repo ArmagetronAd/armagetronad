@@ -73,6 +73,7 @@
 /* Begin PBXBuildFile section */
 		64C9C815144B6CB70039620E /* eSpawn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 64C9C813144B6CB60039620E /* eSpawn.cpp */; };
 		64C9C817144B6CB70039620E /* eSpawn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 64C9C813144B6CB60039620E /* eSpawn.cpp */; };
+		64F6DA55145F36F700EBDEC9 /* gTutorial.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 64F6DA53145F36F700EBDEC9 /* gTutorial.cpp */; };
 		8CBA60B1089F00F2007E21DC /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CBA60B0089F00F2007E21DC /* OpenGL.framework */; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		9B0C8B3D0F7EBA78001802CD /* eChat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B0C8B3B0F7EBA78001802CD /* eChat.cpp */; };
@@ -651,6 +652,8 @@
 		64DAFC51144C979900D115F3 /* command-line_switches.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = "command-line_switches.txt"; sourceTree = "<group>"; };
 		64DAFC52144C979900D115F3 /* directories.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = directories.txt; sourceTree = "<group>"; };
 		64DAFC53144C979900D115F3 /* installation.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = installation.txt; sourceTree = "<group>"; };
+		64F6DA53145F36F700EBDEC9 /* gTutorial.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = gTutorial.cpp; sourceTree = "<group>"; };
+		64F6DA54145F36F700EBDEC9 /* gTutorial.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = gTutorial.h; sourceTree = "<group>"; };
 		8C11CA42095A268E007AE0EA /* armagetronad-dedicated */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "armagetronad-dedicated"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8CBA60B0089F00F2007E21DC /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = /System/Library/Frameworks/OpenGL.framework; sourceTree = "<absolute>"; };
 		8D1107320486CEB800E47090 /* Armagetron Advanced.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Armagetron Advanced.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1701,6 +1704,8 @@
 				9BB7B9250D830448004FE8C3 /* gStuff.h */,
 				9BB7B9260D830448004FE8C3 /* gTeam.cpp */,
 				9BB7B9270D830448004FE8C3 /* gTeam.h */,
+				64F6DA53145F36F700EBDEC9 /* gTutorial.cpp */,
+				64F6DA54145F36F700EBDEC9 /* gTutorial.h */,
 				9BB7B9280D830448004FE8C3 /* gVectorExtra.h */,
 				9BB7B9290D830448004FE8C3 /* gWall.cpp */,
 				9BB7B92A0D830448004FE8C3 /* gWall.h */,
@@ -2387,6 +2392,7 @@
 				9B0C8B3D0F7EBA78001802CD /* eChat.cpp in Sources */,
 				9BB084E4141C5FED009B30D0 /* tMutex.cpp in Sources */,
 				64C9C815144B6CB70039620E /* eSpawn.cpp in Sources */,
+				64F6DA55145F36F700EBDEC9 /* gTutorial.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2592,7 +2598,6 @@
 				INFOPLIST_FILE = ../src/macosx/Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = "$(SHARED_LIBRARY_SEARCH_PATHS)";
-				MACOSX_DEPLOYMENT_TARGET = "";
 				OTHER_CPLUSPLUSFLAGS = "$(SHARED_OTHER_CPLUSPLUSFLAGS)";
 				OTHER_LDFLAGS = "$(SHARED_OTHER_LDFLAGS)";
 				PREBINDING = NO;

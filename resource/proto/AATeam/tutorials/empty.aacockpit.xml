@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+<!DOCTYPE Resource SYSTEM "cockpit.dtd">
+
+<!-- Lean uncluttered cockpit -->
+
+<Resource type="aacockpit" name="empty" version="0.0.1" author="Z-Man" category="tutorial">
+    <Cockpit version="0.0.1">
+
+        <Label camera="^in" viewport="top">
+        </Label>
+
+    </Cockpit>
+</Resource>

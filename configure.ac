@@ -214,7 +214,7 @@ enable_fortress=$enable_zonesv2)
 
 AC_ARG_ENABLE(authentication,
     AC_HELP_STRING([--enable-authentication],
-		[enable server side code for the krawall style user authentication (default=disabled)]),
+		[enable server side code for the krawall style user authentication (default=enabled)]),
     [case "${enableval}" in
        yes) enable_armathentication=yes
 	   	;;
@@ -1029,37 +1029,12 @@ dnl *************************************************
 dnl         protocol buffers
 dnl *************************************************
 
-dnl check for compiler
-AC_CHECK_PROG([PROTOC],protoc,`which protoc`,no)
-if test x$PROTOC = xno
-then
-    AC_MSG_ERROR([[The protobuf C++ compiler(Google Protocol Buffers, http://code.google.com/p/protobuf/) is required, but was not found.]])
-fi
-
-AC_LANG([C++])
-
-dnl check for library
-AC_CHECK_LIB([protobuf],_ZN6google8protobuf7MessageD2Ev,,
-[
-	AC_CHECK_LIB([protobuf],_ZN6google8protobuf7ClosureD2Ev,
-		AC_MSG_WARN([[The library protobuf (Google Protobuf Buffers) has a broken dependency on library pthread on your system.]])
-		AC_DEFINE_UNQUOTED(HAVE_LIBPROTOBUF)
-		LIBS="-lprotobuf -lpthread $LIBS"
-	,
-AC_MSG_ERROR([[The library protobuf (Google Protocol Buffers, http://code.google.com/p/protobuf/) is required, but was not found.]])
-	,[-lpthread]
-	)
-]
-)
-
-AC_LANG([C++])
-
-dnl check for header
-AC_CHECK_HEADERS([google/protobuf/message.h],,
-AC_MSG_ERROR([[The library protobuf (Google Protocol Buffers, http://code.google.com/p/protobuf/) is required with all development files, but was not found.]])
-)
-
-dnl AC_LANG([C])
+# Check whether required modules/libraries/tools are available
+PKG_CHECK_MODULES([protobuf], [protobuf >= 2.2.0])
+AC_PATH_PROG(PROTOC, protoc, [AC_MSG_ERROR([protoc not found])])
+AC_DEFINE(HAVE_LIBPROTOBUF,1,[protocol buffer library detected])
+CPPFLAGS="$protobuf_CFLAGS $CPPFLAGS"
+LIBS="$protobuf_LIBS $LIBS"
 
 fi # armamain
 

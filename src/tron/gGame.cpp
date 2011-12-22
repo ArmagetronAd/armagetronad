@@ -39,6 +39,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "eCoord.h"
 #include "eTimer.h"
 #include "gAIBase.h"
+#include "gTutorial.h"
 #include "rSysdep.h"
 #include "rFont.h"
 #include "uMenu.h"
@@ -98,6 +99,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "gArena.h"
 gArena Arena;
+
+static gTutorialBase * sg_tutorial = NULL;
 
 #include "gGame.pb.h"
 
@@ -843,7 +846,8 @@ void delayedCommands::Run(REAL currentTime) {
 
 static bool just_connected=true;
 static bool sg_singlePlayer=0;
-static int winner=0;
+static int winner=0; // current round winner
+static tJUST_CONTROLLED_PTR< eTeam > lastWinner = NULL; // last round winner
 static int absolute_winner=0;
 static REAL lastTime_gameloop=0;
 static REAL lastTimeTimestep=0;
@@ -971,6 +975,9 @@ void init_game_grid(eGrid *grid, gParser *aParser){
         // let settings in the map file be executed with the rights of the person
         // who set the map
         tCurrentAccessLevel level( conf_mapfile.GetSetting().GetSetLevel(), true );
+        
+        // and disallow CASACL and script spawning just in case
+        tCasaclPreventer preventer;
 
         Arena.PrepareGrid(grid, aParser);
     }
@@ -1001,7 +1008,7 @@ int sg_NumUsers()
 #endif
 }
 
-static void sg_copySettings()
+void sg_copySettings()
 {
     eTeam::minTeams					= sg_currentSettings->minTeams;
     eTeam::maxTeams					= sg_currentSettings->maxTeams;
@@ -1111,6 +1118,11 @@ void init_game_objects(eGrid *grid){
                                   sg_currentSettings->minPlayers,
                                   sg_currentSettings->AI_IQ);
 
+        if( sg_tutorial )
+        {
+            sg_tutorial->BeforeSpawn();
+        }
+
         int spawnPointsUsed = 0;
         for(int t=eTeam::teams.Len()-1;t>=0;t--)
         {
@@ -1182,9 +1194,14 @@ void init_game_objects(eGrid *grid){
 
                 // se_ResetGameTimer();
                 // se_PauseGameTimer(true);
+
             }
         }
 
+        if( sg_tutorial )
+        {
+            sg_tutorial->AfterSpawn();
+        }
 
 #ifdef ALLOW_NO_TEAM
         for (int p=se_PlayerNetIDs.Len()-1;p>=0;p--){
@@ -1387,6 +1404,17 @@ void s_Timestep(eGrid *grid, REAL time,bool cam){
 
     if (cam)
         eCamera::s_Timestep(grid, time);
+
+    if (sn_GetNetState()!=nCLIENT)
+    {
+        // simulate IAs
+        for (int i=se_PlayerNetIDs.Len()-1;i>=0;i--)
+        {
+            gAIPlayer *ai = dynamic_cast<gAIPlayer*>(se_PlayerNetIDs(i));
+            if (ai && think)
+                ai->Timestep(time);
+        }
+    }
 
     lastTimeTimestep=time;
 }
@@ -2395,6 +2423,8 @@ void MainMenu(bool ingame){
 
     uMenuItemFunction *reset=NULL;
 
+    std::auto_ptr< uMenuItemFunction > tutorials;
+
     if (ingame && sn_GetNetState()!=nCLIENT){
         reset=new uMenuItemFunction
               (&game_menu,"$game_menu_reset_text",
@@ -2420,6 +2450,11 @@ void MainMenu(bool ingame){
     uMenuItemFunction *connect=NULL,*start=NULL,*sound=NULL;
 
     if (!ingame){
+        if( sg_TutorialsCompleted() )
+        {
+            tutorials = std::auto_ptr< uMenuItemFunction > (tNEW(uMenuItemFunction)( &game_menu, "$game_menu_tutorials_text", "$game_menu_tutorials_help", &sg_TutorialMenu ));
+        }
+
         start= new uMenuItemFunction(&game_menu,"$game_menu_start_text",
                                      "$game_menu_start_help",&sg_SinglePlayerGame);
         connect=new uMenuItemFunction
@@ -2428,6 +2463,10 @@ void MainMenu(bool ingame){
                  "$network_menu_help",
                  &net_game);
 
+        if( !sg_TutorialsCompleted() )
+        {
+            tutorials = std::auto_ptr< uMenuItemFunction > (tNEW(uMenuItemFunction)( &game_menu, "$game_menu_tutorials_text", "$game_menu_tutorials_help", &sg_TutorialMenu ));
+        }
     }
 
     tOutput title;
@@ -2569,7 +2608,7 @@ void MainMenu(bool ingame){
      "$display_settings_menu_help");
 
     uMenuItemSubmenu *gamemenuitem = NULL;
-    if (sn_GetNetState() != nCLIENT)
+    if (sn_GetNetState() != nCLIENT && !sg_tutorial)
     {
         char const * gamehelp;
         if (!ingame)
@@ -2843,7 +2882,7 @@ void gGame::ReadSync( Game::GameSync const & sync, nSenderInfo const & sender )
 
     unsigned short newState = sync.state();
 
-#ifdef DEBUG
+#ifdef DEBUG_X
     con << "Read gamestate " << newState << ".\n";
 #endif
 
@@ -3130,6 +3169,9 @@ void gGame::StateUpdate(){
         case GS_CREATE_GRID:
             // sr_con.autoDisplayAtNewline=true;
 
+            // throw out old surfaces
+            rSurfaceCache::CycleCache();
+
             sg_ParseMap( aParser );
 
             sn_Statistics();
@@ -3263,7 +3305,7 @@ void gGame::StateUpdate(){
                     rounds = -100;
                 }
 
-                if (rounds<=0){
+                if (!sg_tutorial && rounds<=0){
                     if( sg_doWarmup > 1 && se_matches > 0 )
                         sn_ConsoleOut(tOutput("$gamestate_resetnow_console_matches", se_matches));
                     else
@@ -3422,6 +3464,14 @@ void sg_RespawnAllAfter( REAL after, REAL time, eGrid *grid, gArena & arena, boo
     }
 }
 
+void sg_RespawnAllAfter( REAL after, bool atSpawn )
+{
+    eGrid * grid = sg_currentGame->Grid();
+    gArena & arena = Arena;
+
+    sg_RespawnAllAfter( after, se_GameTime(), grid, arena, atSpawn );
+}
+
 void sg_RespawnPlayer(eGrid * grid, gArena * arena, tCoord & pos, tCoord & dir, ePlayerNetID * p) {
     eGameObject *e=p->Object();
 
@@ -3444,12 +3494,7 @@ void sg_RespawnPlayer(eGrid * grid, gArena * arena, tCoord & nearPosition, ePlay
         tCoord pos,dir;
         arena->ClosestSpawnPoint(nearPosition)->Spawn( pos, dir );
 
-#ifdef DEBUG
-        //                std::cout << "spawning player " << pni->name << '\n';
-        sg_Timestamp();
-#endif
-        gCycle * cycle = new gCycle(grid, pos, dir, p);
-        p->ControlObject(cycle);
+        sg_RespawnPlayer(grid, arena, pos, dir,  p);
     }
 }
 
@@ -3509,12 +3554,8 @@ void sg_RespawnPlayer(eGrid *grid, gArena *arena, ePlayerNetID *p, bool atSpawn)
         }
         else
             arena->LeastDangerousSpawnPoint()->Spawn( pos, dir );
-#ifdef DEBUG
-        //                std::cout << "spawning player " << pni->name << '\n';
-        sg_Timestamp();
-#endif
-        gCycle * cycle = new gCycle(grid, pos, dir, p);
-        p->ControlObject(cycle);
+
+        sg_RespawnPlayer(grid, arena, pos, dir, p);
     }
 }
 
@@ -3523,7 +3564,7 @@ gArena * sg_GetArena() {
 }
 
 
-static REAL sg_timestepMax = .2;
+REAL sg_timestepMax = .2;
 static tSettingItem<REAL> sg_timestepMaxConf( "TIMESTEP_MAX", sg_timestepMax );
 static int sg_timestepMaxCount = 10;
 static tSettingItem<int> sg_timestepMaxCountConf( "TIMESTEP_MAX_COUNT", sg_timestepMaxCount );
@@ -3602,14 +3643,20 @@ void gGame::Analysis(REAL time){
     // only do this expensive stuff once a second
     {
         static double nextTime = -1;
-        if ( tSysTimeFloat() > nextTime || time < -10 )
+        if ( tSysTimeFloat() > nextTime || time < -10 || wishWinner )
         {
-            nextTime = tSysTimeFloat() + 1.0;
+            // or 10 times a second during tutorials, they're lightweight.
+            nextTime = tSysTimeFloat() + ( sg_tutorial ? .1 : 1.0 );
         }
         else
         {
             return;
         }
+    }
+
+    if( sg_tutorial )
+    {
+        sg_tutorial->Analysis();
     }
 
     // send timeout warnings
@@ -3854,8 +3901,10 @@ void gGame::Analysis(REAL time){
         lastTeams=humanTeamsClamp; // update last team count
     }
 
-    if( drawreason != &DrawReason_MinAlive && (!drawtime || drawtime > time+sg_minDrawTime)
-            && alive < sg_minAlive && alive < humans && teams_alive > 1 )
+    if( sg_currentSettings->gameType!=gFREESTYLE
+            && drawreason != &DrawReason_MinAlive && (!drawtime || drawtime > time+sg_minDrawTime)
+            && alive < sg_minAlive && alive < humans && teams_alive > 1
+            )
     {
         drawreason = &DrawReason_MinAlive;
         drawtime = time+sg_minDrawTime;
@@ -3901,7 +3950,10 @@ void gGame::Analysis(REAL time){
             wintimer=time;
             winner = wishWinner;
             wishWinner = 0;
-            messagetype	= wishWinnerMessage;
+            if( wishWinnerMessage )
+            {
+                messagetype	= wishWinnerMessage;
+            }
         }
 
         if (winner <= 0 && alive <= 0 && ai_alive <= 0 && teams_alive <= 0 ){
@@ -3927,8 +3979,13 @@ void gGame::Analysis(REAL time){
 
                 if ( se_matches >= 0 && ( sg_currentSettings->scoreWin != 0 || sg_currentSettings->gameType != gFREESTYLE ) && winner > 0 )
                 {
+                    if( winner > 0 )
+                    {
+                        lastWinner = eTeam::teams(winner-1);
+                    }
+
                     // check if the win was legitimate: at least one enemy team needs to be online
-                    if ( sg_EnemyExists( winner-1 ) || sg_currentSettings->gameType==gFREESTYLE )
+                    if ( sg_tutorial || sg_EnemyExists( winner-1 ) || sg_currentSettings->gameType==gFREESTYLE )
                     {
 #ifdef KRAWALL_SERVER_LEAGUE
                         // send the result to the master server
@@ -3990,16 +4047,23 @@ void gGame::Analysis(REAL time){
                         tString notificationMessage( ePlayerNetID::FilterName( eTeam::teams[winner-1]->Name() ) );
                         notificationMessage << " has won the round";
                         se_sendEventNotification(tString("Round winner"), notificationMessage);
+
+                        if( sg_tutorial )
+                        {
+                            sg_tutorial->OnWin( lastWinner );
+                        }
                     }
                 }
-                else if ( time >= drawtime )
+                else if ( time >= drawtime && sg_currentSettings->gameType!=gFREESTYLE )
                 {
                     tOutput drawmsg;
-                    drawmsg << "$gamestate_draw";
-
                     if( drawreason == &DrawReason_MinAlive )
                     {
                         drawmsg << "$gamestate_draw_minalive";
+                    }
+                    else
+                    {
+                        drawmsg << "$gamestate_draw_default";
                     }
 
                     sn_CenterMessage(tOutput("$gamestate_draw_center"));
@@ -4139,7 +4203,7 @@ void gGame::Analysis(REAL time){
                             message.SetTemplateParameter(1, sg_currentSettings->limitTime);
                             message << "$gamestate_champ_timehit";
                         }
-                        else if ( sg_currentSettings->maxBlowout && eTeam::teams(0)->Score() >= eTeam::teams(1)->Score() + sg_currentSettings->maxBlowout )
+                        else if ( sg_currentSettings->maxBlowout && eTeam::teams.Len() > 1 && eTeam::teams(0)->Score() >= eTeam::teams(1)->Score() + sg_currentSettings->maxBlowout )
                         {
                             message.SetTemplateParameter(1, eTeam::teams(0)->Score() - eTeam::teams(1)->Score());
                             message << "$gamestate_champ_blowout";
@@ -4198,6 +4262,26 @@ void gGame::Analysis(REAL time){
     if (sg_currentSettings->finishType==gFINISH_EXPRESS)
         fintime=2.5;
 
+    // quicker end of round on tutorial, plus neant slomo effect
+    if (sg_tutorial)
+    {
+        REAL slowdown = 1;
+        holdBackNextRound = false;
+        if( winner && alive > 0 )
+        {
+            if( se_mainGameTimer )
+            {
+                slowdown = 0.25;
+                fintime=3.5*slowdown;
+                se_mainGameTimer->speed = slowdown;
+            }
+        }
+        else
+        {
+            fintime=4;
+        }
+    }
+
     if (( ( winner || absolute_winner ) && wintimer+fintime < time)
             || (((alive==0 && eTeam::teams.Len()>=
 #ifndef DEDICATED
@@ -4228,6 +4312,11 @@ void gGame::Analysis(REAL time){
            )
         {
             rounds++;
+            if( sg_tutorial )
+            {
+                sg_tutorial->RoundEnd( lastWinner );
+                goon = false;
+            }
             SetState(GS_PLAY,GS_DELETE_OBJECTS);
         }
 
@@ -4343,10 +4432,51 @@ static bool ingamemenu_func(REAL x){
     return true;
 }
 static uActionGlobalFunc ingamemenu_action(&ingamemenu,&ingamemenu_func, true );
-static uActionTooltip ingamemenuTooltip( ingamemenu, 1 );
+static uActionTooltip ingamemenuTooltip( uActionTooltip::Level_Expert, ingamemenu, 1 );
 #endif // dedicated
 
 static eLadderLogWriter sg_gameTimeWriter("GAME_TIME", true);
+
+// checks whether all players have been fully synced with the server
+static bool sg_PlayersSynced()
+{
+    for (int pi = MAX_PLAYERS-1; pi >= 0; --pi )
+    {
+        ePlayer * p = ePlayer::PlayerConfig(pi);
+        if ( !p )
+            continue;
+        ePlayerNetID * np = p->netPlayer;
+        if ( !np )
+            continue;
+        if( !np->IsGreeted() )
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+// checks whether players properly joined the game; if sg_PlayersSynced returns true and this false,
+/// auto-join is off.
+static bool sg_PlayersJoined()
+{
+    for (int pi = MAX_PLAYERS-1; pi >= 0; --pi )
+    {
+        ePlayer * p = ePlayer::PlayerConfig(pi);
+        if ( !p )
+            continue;
+        ePlayerNetID * np = p->netPlayer;
+        if ( !np )
+            continue;
+        if( !np->IsSpectating() && !np->CurrentTeam() && !np->NextTeam() )
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
 
 bool gGame::GameLoop(bool input){
     nNetState netstate = sn_GetNetState();
@@ -4484,6 +4614,8 @@ bool gGame::GameLoop(bool input){
 
     bool synced = se_mainGameTimer && ( se_mainGameTimer->IsSynced() || ( stateNext >= GS_DELETE_OBJECTS || stateNext <= GS_CREATE_GRID ) );
 
+    static bool playersSynced = false;
+
     if  (!synced)
     {
         // see if there is a game object owned by this client, if so, declare emergency sync
@@ -4491,10 +4623,10 @@ bool gGame::GameLoop(bool input){
         {
             ePlayer * p = ePlayer::PlayerConfig(pi);
             if ( !p )
-                break;
+                continue;
             ePlayerNetID * np = p->netPlayer;
             if ( !np )
-                break;
+                continue;
             if ( np->Object() )
             {
                 synced = true;
@@ -4506,11 +4638,24 @@ bool gGame::GameLoop(bool input){
     {
         // synced finally. Send our player info over so we can join the game.
         ePlayerNetID::Update();
+        playersSynced = false;
 
         // and trigger the scheduled auto-logons.
         ePlayer::SendAuthNames();
 
         synced_ = true;
+    }
+
+    // check for players to get synced back
+    if( !playersSynced && sg_PlayersSynced() )
+    {
+        playersSynced = true;
+
+        // activate team menu if auto-join is off
+        if( !sg_PlayersJoined() )
+        {
+            gTeam::TeamMenu(true);
+        }
     }
 
     delayedCommands::Run(gtime);
@@ -4559,14 +4704,6 @@ bool gGame::GameLoop(bool input){
 
         if (sn_GetNetState()!=nCLIENT)
         {
-            // simulate IAs
-            for (int i=se_PlayerNetIDs.Len()-1;i>=0;i--)
-            {
-                gAIPlayer *ai = dynamic_cast<gAIPlayer*>(se_PlayerNetIDs(i));
-                if (ai && think)
-                    ai->Timestep(gtime);
-            }
-
             Analysis(gtime);
 
             // wait for chatting players
@@ -4877,6 +5014,8 @@ void sg_EnterGameCleanup()
     uMenu::exitToMain = false;
 
     rModel::ClearCache();
+
+    lastWinner = NULL;
 }
 
 void sg_EnterGame( nNetState enter_state )
@@ -5216,3 +5355,47 @@ static void sg_FillServerSettings()
 
 static nCallbackFillServerInfo sg_fillServerSettings(sg_FillServerSettings);
 
+void sg_TutorialGame( gGameSettings & settings, gTutorialBase & tutorial )
+{
+    sn_SetNetState(nSTANDALONE);
+
+    update_settings();
+
+    gGameSettings oldSettings = *sg_currentSettings;
+    *sg_currentSettings = settings;
+
+    update_settings();
+
+    ePlayerNetID::CompleteRebuild();
+
+    sr_SetWindowTitle(tString(tOutput("$window_title_tutorial", tOutput( (tString("$tutorial_menu_") + tutorial.Name() + "_text" ).c_str()))));
+    sg_tutorial = &tutorial;
+    own_game( nSTANDALONE );
+    sg_tutorial = NULL;
+    sr_SetWindowTitle(tOutput("$window_title_menu"));
+    
+    *sg_currentSettings = oldSettings;
+
+    sg_StopQuickExit();
+}
+
+static void sg_WarpCamera( std::istream & s )
+{
+    if( sg_currentGame && sg_currentGame->Grid() )
+    {
+        eCamera::LoadAny( sg_currentGame->Grid(), s );
+    }
+}
+
+static void sg_SaveCameras( std::istream & )
+{
+    if( sg_currentGame && sg_currentGame->Grid() )
+    {
+        std::ostringstream s;
+        eCamera::SaveAll( sg_currentGame->Grid(), s );
+        con << s.str();
+    }
+}
+
+static tConfItemFunc sgc_warpCamera( "WARP_CAMERA", &sg_WarpCamera );
+static tConfItemFunc sgc_saveCameras( "SAVE_CAMERAS", &sg_SaveCameras );

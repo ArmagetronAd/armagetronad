@@ -34,7 +34,18 @@ Changes since 0.3.1
   explosion will be destroyed, and DEATH_EXPLOSION will be written to ladderlog.
   Scoring can be applied with the SCORE_EXPLOSION and SCORE_EXPLOSION_OWNER
   settings.
-
+- New helper program armagetronad-serverquery. Fetches the master list and
+  advanced server information, and outputs it in a JSON format. Only available
+  in dedicated server builds.
+- Tutorials and Challenges
+- Resource corruption can be detected in some cases and triggers a redownload.
+- New camera settings: CAMERA_FREE_START_PITCH/ROTATE adjust direction of free camera
+- New camera commands: WARP_CAMERA warps one camera to a specified setup,
+  SAVE_CAMERAS prints the commands to restore the current configuration.
+- Upper sky can now be loaded from moviepack/upper_sky.png resp. textures/upper_sky.png;
+  if they do not exist, the floor is used, as previously. New settings
+  UPPER_SKY_RED, _GREEN, _BLUE, _SCALE and _HEIGHT as well as LOWER_SKY_HEIGHT
+  control the look.
 
 Changes since 0.3.0
 ===================
@@ -145,6 +156,20 @@ Changes since 0.2.8.3.x:
 - Added ENCODING ladderlog event, which specifies the encoding for data in
   ladderlog.txt.
 - "--input" now can be used more than once to read from multiple files or pipes.
+- new team management ladderlog messages:
+  TEAM_CREATED <team name>
+  TEAM_DESTROYED <team name>
+  TEAM_RENAMED <old team name> <new team name>
+  TEAM_PLAYER_ADDED <team name> <player>
+  TEAM_PLAYER_REMOVED <team name> <player>
+- Manage external scripts on Unix dedicated servers: SPAWN_SCRIPT always 
+  launches a script (the main script must be in the scripts subdirectory on the data
+   path), RESPAWN_SCRIPT only spawns it if a previous instance exited, KILL_SCRIPT
+  kills the script.
+  Scripts are fed the ladderlog on stdin (and need to read it) and their stdout 
+  output is interpreted as console input on the server. Environment variables 
+  are set so the script knows all about the server configuration at time of launch.
+- Authentication is now enabled by default.
 
 Changes since 0.2.8.3.1:
 - security fix: old style action commands from clients no loger cause hangs and crashes

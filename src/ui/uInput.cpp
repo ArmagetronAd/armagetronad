@@ -1524,8 +1524,13 @@ static uActionGlobalFunc me(&mess_end,&messend_func);
 // tooltips
 // ********
 
-uActionTooltip::uActionTooltip( uAction & action, int numHelp, VETOFUNC * veto )
-: tConfItemBase(action.internalName + "_TOOLTIP"), action_( action ), veto_(veto)
+uActionTooltip::Level su_helpLevel = uActionTooltip::Level_Expert;
+
+uActionTooltip::uActionTooltip( Level level, uAction & action, int numHelp, VETOFUNC * veto )
+: tConfItemBase(action.internalName + "_TOOLTIP")
+  , action_( action )
+  , veto_(veto)
+  , level_( level )
 {
     help_ = tString("$input_") + action.internalName + "_tooltip";
     tToLower( help_ );
@@ -1548,6 +1553,12 @@ uActionTooltip::~uActionTooltip()
 
 bool uActionTooltip::Help( int player )
 {
+#ifndef DEDICATED
+    if( rConsole::CenterDisplayActive() )
+    {
+        return false;
+    }
+
     // find most needed tooltip
     uActionTooltip * mostWanted = NULL;
 
@@ -1565,7 +1576,7 @@ bool uActionTooltip::Help( int player )
         if( !action )
             continue;
         uActionTooltip * tooltip = action->GetTooltip();
-        if( !tooltip || ( tooltip->veto_ && (*tooltip->veto_)(player) ) )
+        if( !tooltip || ( tooltip->veto_ && (*tooltip->veto_)(player) ) || ( su_helpLevel < tooltip->level_ ) )
         {
             continue;
         }
@@ -1608,6 +1619,7 @@ bool uActionTooltip::Help( int player )
 
         return true;
     }
+#endif
     return false;
 }
 
@@ -1617,6 +1629,18 @@ void uActionTooltip::Count( int player )
     {
         activationsLeft_[player]--;
         Help(player);
+    }
+}
+
+//! call to show the tooltip one more time
+void uActionTooltip::ShowAgain()
+{
+    for( int i = uMAX_PLAYERS; i >= 0; --i )
+    {
+        if( 0 == activationsLeft_[i] )
+        {
+            activationsLeft_[i] = 1;
+        }
     }
 }
 

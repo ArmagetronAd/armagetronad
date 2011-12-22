@@ -123,6 +123,8 @@ Section "MainSection" SEC01
   File ".\textures\*.png"
   File ".\textures\*.jpg"
   File ".\textures\*.ttf"
+  SetOutPath "$INSTDIR\textures\tutorials"
+  File /r ".\textures\tutorials\*.*"
 SectionEnd
 
 Section -AdditionalIcons

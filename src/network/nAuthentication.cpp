@@ -879,16 +879,13 @@ void nLoginProcess::Authorize()
 // the finish task can also be triggered any time by this function:
 void nLoginProcess::Abort()
 {
-    tMemberFunctionRunner::ScheduleBackground( *this, &nLoginProcess::Finish );
+    tMemberFunctionRunner::ScheduleForeground( *this, &nLoginProcess::Finish );
 }
 
 // which, when finished, triggers the foreground task of updating the
 // game state and informing the client of the success of the operation.
 void nLoginProcess::Finish()
 {
-    // sync to foreground
-    tBackgroundSyncEvent syncEvent( sync_ );
-
     // again, userID is safe in this function
     int userID = sn_UserID( user );
     if ( !IsActive() )

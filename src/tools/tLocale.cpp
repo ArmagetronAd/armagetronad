@@ -518,7 +518,7 @@ void tLocaleItem::Load(const char *file, bool complete)  // load the language de
                     char c = pre(i);
                     if (c != '\\')
                         r->translation += c;
-                    else if (i < pre.Size())
+                    else if (i < pre.Size()-1)
                         switch (pre(i+1))
                         {
                         case 'n':

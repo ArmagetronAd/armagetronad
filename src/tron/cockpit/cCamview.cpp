@@ -284,18 +284,20 @@ Camview::Camview():
 
 Camview::~Camview()
 {
-    /*
     rViewportConfiguration* viewportConfiguration = rViewportConfiguration::CurrentViewportConfiguration();
     for ( int viewport = viewportConfiguration->num_viewports-1; viewport >= 0; --viewport )
     {
     	// suppress references
-    	viewports[viewport]->SetRootViewport(0);
-    	// suppress widget cams and viewports
-    	delete cam[viewport];
-    	delete viewports[viewport];
-    	cam[viewport] = 0;
-    	viewports[viewport] = 0;
-	}*/
+        if( viewports[viewport] )
+        {
+            viewports[viewport]->SetRootViewport(0);
+            // suppress widget cams and viewports
+            delete cam[viewport];
+            delete viewports[viewport];
+            cam[viewport] = 0;
+            viewports[viewport] = 0;
+        }
+	}
 }
 
 }

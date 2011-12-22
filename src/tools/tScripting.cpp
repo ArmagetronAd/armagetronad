@@ -2,6 +2,18 @@
 
 #ifdef ENABLE_SCRIPTING
 
+tCallbackScripting::tCallbackScripting(tCallbackScripting *& anchor)
+        :tListItem<tCallbackScripting>(anchor), block(tScripting::GetInstance().GetProcRef(""))
+{
+}
+
+void tCallbackScripting::Exec(tCallbackScripting *anchor) {
+    if (anchor) {
+        tScripting::GetInstance().Exec(anchor->block, NULL);
+        Exec(anchor->Next());
+    }
+}
+
 #ifdef WITH_RUBY 
 #ifdef MACOSX_XCODE
 #   include "AARuby.h"

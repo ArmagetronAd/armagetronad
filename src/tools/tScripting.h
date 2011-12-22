@@ -180,6 +180,17 @@ public:
 
     virtual bool Save() {return false;}
 };
+
+class tCallbackScripting : public tListItem<tCallbackScripting> {
+    tScripting::proc_type block;
+//protected:
+//    static tScripting::value_type ExecProtect(tScripting::value_type);
+public:
+    tCallbackScripting(tCallbackScripting *& anchor);
+    static void Exec(tCallbackScripting *anchor);
+};
+
+
 #endif // ENABLE_SCRIPTING
 
 #endif // ! _TSCRIPTING_H_

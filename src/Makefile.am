@@ -99,7 +99,6 @@ libtools_a_SOURCES = ${tools_extra} tools/tVersion.cpp tools/tVersion.h tTrueVer
 	tools/tPolynomial.h tools/tPolynomial.cpp\
 	tools/tPolynomialMarshaler.h tools/tPolynomialMarshaler.cpp \
 	tools/tPolynomialWithBase.h tools/tPolynomialWithBase.cpp \
-	tools/tScripting.h tools/tScripting.cpp \
 	tools/tDict.h \
 	resource/tResource.h resource/tResource.cpp resource/tResourceType.h resource/tResourceType.cpp\
 	tools/tMemManager.cpp tools/tMemManager.h
@@ -152,6 +151,7 @@ libtron_a_SOURCES=tron/gAIBase.cpp tron/gAIBase.h tron/gAICharacter.cpp tron/gAI
 	tron/gArmagetron.cpp tron/gCamera.cpp tron/gCamera.h tron/gCycle.cpp tron/gCycle.h tron/gCycleMovement.cpp\
 	tron/gJoystick.h tron/gJoystick.cpp\
 	tron/gCycleMovement.h tron/gExplosion.cpp tron/gExplosion.h tron/gGame.cpp tron/gGame.h\
+	tron/gTutorial.h tron/gTutorial.cpp\
 	tron/gLanguageMenu.cpp tron/gLanguageMenu.h tron/gLogo.cpp tron/gLogo.h\
 	tron/gMenus.cpp tron/gMenus.h tron/gParser.cpp tron/gParser.h tron/gParticles.cpp tron/gParticles.h\
 	tron/gSensor.cpp tron/gSensor.h tron/gServerBrowser.cpp tron/gServerBrowser.h tron/gSparks.cpp tron/gSparks.h\
@@ -233,10 +233,14 @@ buildmain =
 endif
 
 games_PROGRAMS = $(buildmain) $(buildthemaster)
+if BUILDDEDICATED
+games_PROGRAMS += armagetronad_serverquery$(EXEEXT)
+endif
 #EXTRA_PROGRAMS = armagetronad_main_master
 
 if ENABLE_SCRIPTING
-scripting_sources = ${top_builddir}/src/swig/ext/armagetronad_wrap.cxx
+scripting_sources = ${top_builddir}/src/swig/ext/armagetronad_wrap.cxx \
+	${top_builddir}/src/tools/tScripting.h ${top_builddir}/src/tools/tScripting.cpp
 lib_scripting_wrap_a_SOURCES    = $(scripting_sources)
 lib_scripting_wrap_a_CXXFLAGS   = $(libtron_a_CXXFLAGS) -w
 else
@@ -269,11 +273,17 @@ armagetronad_main_SOURCES = \
 	$(INCLUDED_MODULE_SOURCES)
 armagetronad_main_CXXFLAGS =$(libtron_a_CXXFLAGS)
 armagetronad_main_LDADD= libtron.a libenginecore.a libengine.a libnetwork.a libui.a librender.a libtools.a protobuf/libprotobuf.a thirdparty/mathexpr/libmathexpr.a ${extralibs} lib_scripting_wrap.a
-# armagetronad_main_LDFLAGS=
+#armagetronad_main_LDFLAGS=
 
 armagetronad_main_master_SOURCES = network/master.cpp
 armagetronad_main_master_CXXFLAGS =$(libtron_a_CXXFLAGS)
 armagetronad_main_master_LDADD=libnetwork.a libtools.a protobuf/libprotobuf.a 
+
+if BUILDDEDICATED
+armagetronad_serverquery_SOURCES = serverquery/serverquery.cpp serverquery/jsoncpp.cpp serverquery/json/json.h serverquery/json/json-forwards.h
+armagetronad_serverquery_CXXFLAGS = $(AM_CXXFLAGS) -I@srcdir@ -I@srcdir@/serverquery -I@srcdir@/tools -I@srcdir@/network
+armagetronad_serverquery_LDADD = libnetwork.a libtools.a protobuf/libprotobuf.a
+endif
 endif
 
 ## Note: tron/gFloor.cpp is not referenced from the outside, but required anyway. So it can't be put into
