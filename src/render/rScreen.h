@@ -31,7 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tString.h"
 #include "tCallback.h"
 #include "tCallbackString.h"
-#include "tScripting.h"
+#include "scripting/sScripting.h"
 
 typedef enum {
     ArmageTron_Desktop=0,ArmageTron_320_200,ArmageTron_Min=ArmageTron_320_200, ArmageTron_320_240,ArmageTron_400_300,

@@ -42,7 +42,7 @@ class gParserState;
 #include "tXmlParser.h"
 
 #ifdef ENABLE_SCRIPTING
-#include "tScripting.h"
+#include "scripting/sScripting.h"
 #endif
 
 class gParserState;

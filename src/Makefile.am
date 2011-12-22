@@ -240,7 +240,7 @@ endif
 
 if ENABLE_SCRIPTING
 scripting_sources = ${top_builddir}/src/swig/ext/armagetronad_wrap.cxx \
-	${top_builddir}/src/tools/tScripting.h ${top_builddir}/src/tools/tScripting.cpp
+	${top_builddir}/src/tools/scripting/sScripting.h ${top_builddir}/src/tools/scripting/sScripting.cpp
 lib_scripting_wrap_a_SOURCES    = $(scripting_sources)
 lib_scripting_wrap_a_CXXFLAGS   = $(libtron_a_CXXFLAGS) -w
 else

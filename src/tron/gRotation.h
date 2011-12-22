@@ -32,7 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tLinkedList.h"
 
 #ifdef ENABLE_SCRIPTING
-#include "tScripting.h"
+#include "scripting/sScripting.h"
 class gRoundEventScripting : public tCallbackScripting {
 public:
     gRoundEventScripting();

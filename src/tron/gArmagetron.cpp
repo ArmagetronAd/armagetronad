@@ -61,7 +61,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "nServerInfo.h"
 #include "nSocket.h"
-#include "tScripting.h"
+#include "scripting/sScripting.h"
 #ifndef DEDICATED
 #include "rRender.h"
 #include "rSDL.h"

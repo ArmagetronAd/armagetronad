@@ -1,4 +1,4 @@
-#include "tScripting.h"
+#include "scripting/sScripting.h"
 
 #ifdef ENABLE_SCRIPTING
 

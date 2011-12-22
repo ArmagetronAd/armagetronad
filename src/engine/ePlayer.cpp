@@ -59,7 +59,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "nNetwork.h"
 #include "nProtoBuf.h"
 #include <time.h>
-#include "tScripting.h"
 
 #include "ePlayer.pb.h"
 
