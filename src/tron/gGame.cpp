@@ -3571,7 +3571,7 @@ void gGame::Analysis(REAL time){
     // send timeout warnings
 
 
-    if (tSysTimeFloat()-startTime>10 && se_matches > 0){
+    if (tSysTimeFloat()-startTime>10 && se_matches >= 0){
         if ((startTime+sg_currentSettings->limitTime*60)-tSysTimeFloat()<10 && warning<6){
             tOutput o("$gamestate_tensecond_warn");
             sn_CenterMessage(o);
