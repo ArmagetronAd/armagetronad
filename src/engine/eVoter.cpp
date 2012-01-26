@@ -1163,6 +1163,14 @@ protected:
             }
         }
 
+        // don't let the player call a vote if s/he is silenced.
+        if ( player_->IsSilenced() )
+        {
+            tOutput message("$vote_silenced");
+            sn_ConsoleOut( message, player_->Owner() );
+            return false;
+        }
+
         // check whether the issuer is allowed to start a vote
         if ( sender && player_ && timeCreated + se_votingMaturity > time )
         {
@@ -1731,7 +1739,7 @@ protected:
 // **************************************************************************************
 
 
-// menu item to silence selected players
+// menu item to kick selected players
 class eMenuItemKick: public uMenuItemAction
 {
 public:
@@ -2162,6 +2170,14 @@ void eVoter::HandleChat( ePlayerNetID * p, std::istream & message ) //!< handles
 
     if ( !p )
     {
+        return;
+    }
+
+    // don't let the player call a vote if s/he is silenced.
+    if ( p->IsSilenced() )
+    {
+        tOutput message("$vote_silenced");
+        sn_ConsoleOut( message, p->Owner() );
         return;
     }
 

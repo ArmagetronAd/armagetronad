@@ -8392,6 +8392,13 @@ bool ePlayerNetID::IsAllowedToRename ( void )
         con << message;
         return false;
     }
+    // don't let the player rename if s/he is silenced.
+    if ( this->IsSilenced() )
+    {
+        tOutput message("$player_rename_silenced");
+        sn_ConsoleOut( message, Owner() );
+        return false;
+    }
     // disallow name changes if there was a kick vote recently
     if ( !( !bool(this->voter_) || voter_->AllowNameChange() || nameFromServer_.Len() <= 1 ) && nameFromServer_ != nameFromClient_ )
     {
