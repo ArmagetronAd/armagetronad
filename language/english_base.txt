@@ -863,7 +863,7 @@ ladderlog_write_match_winner_help             Write to ladderlog: MATCH_WINNER <
 ladderlog_write_new_match_help                Write to ladderlog: NEW_MATCH <date and time>
 ladderlog_write_new_round_help                Write to ladderlog: NEW_ROUND <date and time>
 ladderlog_write_num_humans_help               Write to ladderlog: NUM_HUMANS <number of humans>
-ladderlog_write_online_player_help            Write to ladderlog: ONLINE_PLAYER <name> [<ping> [<team>]]
+ladderlog_write_online_player_help            Write to ladderlog: ONLINE_PLAYER <name> [<ping> <team> <access level>]
 ladderlog_write_player_entered_help           Write to ladderlog: PLAYER_ENTERED <name> <IP> <screen name>
 ladderlog_write_player_left_help              Write to ladderlog: PLAYER_LEFT <name> <IP>
 ladderlog_write_player_renamed_help           Write to ladderlog: PLAYER_RENAMED <old name> <new name> <ip> <screen name>
