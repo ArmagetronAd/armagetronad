@@ -2401,6 +2401,8 @@ spam_protection_prefix  SPAM PROTECTION: your messages have a common prefix: \1\
 spam_protection_silenceall SPAM PROTECTION: public chat is disabled.\n
 spam_protection_silenced SPAM PROTECTION: you have been silenced by the server administrator.\n
 spam_protection_silenced_default SPAM PROTECTION: you have to be given voice in order to chat publicly.\n
+vote_silenced You are not allowed to call a new vote while you are silenced.\n
+player_rename_silenced You are not allowed to rename while you are silenced.\n
 player_silenced         \10xff7777 has been silenced.\n
 player_voiced           \10x77ff77 has been given his voice back.\n
 player_allowed_teamchange \10x77ff77 has been allowed to change his team.\n
