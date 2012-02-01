@@ -74,6 +74,9 @@ static tSettingItem< int > sg_scoreExplosionPredatorSettingItem( "SCORE_EXPLOSIO
 
 static eLadderLogWriter sg_deathExplosionWriter( "DEATH_EXPLOSION", true );
 
+static float sg_explosionSpeedFactor = 0;
+static tSettingItem< float > sg_explosionSpeedFactorSettingItem( "EXPLOSION_RADIUS_SPEED_FACTOR", sg_explosionSpeedFactor );
+
 // blow a hole centered at s_explosionCoord with radius s_explosionRadius into wall w
 static void S_BlowHoles( eWall * w )
 {
@@ -222,7 +225,12 @@ bool gExplosion::Timestep(REAL currentTime){
 
         s_explosionCoord  = pos;
         REAL factor = expansion / REAL( expansionSteps );
-        s_explosionRadius = gCycle::ExplosionRadius() * sqrt(factor);
+
+        REAL radius = gCycle::ExplosionRadius() + this->GetOwner()->Speed() * ( sg_explosionSpeedFactor / 100 );
+        if ( radius < 0 )
+            radius = 0;
+        s_explosionRadius = radius * sqrt(factor);
+        //s_explosionRadius = gCycle::ExplosionRadius() * sqrt(factor);
         s_explosionTime = currentTime;
         s_holer = this;
 
@@ -232,6 +240,7 @@ bool gExplosion::Timestep(REAL currentTime){
                                        s_explosionCoord,
                                        s_explosionRadius,
                                        this->CurrentFace() );
+
         }
 
         s_holer = 0;
@@ -365,7 +374,12 @@ void gExplosion::OnNewWall( eWall* w )
         {
             // e is a already completed explosion
             s_explosionCoord  = e->pos;
-            s_explosionRadius = gCycle::ExplosionRadius();
+
+            REAL radius = gCycle::ExplosionRadius() + e->GetOwner()->Speed() * ( sg_explosionSpeedFactor / 100 );
+            if ( radius < 0 )
+                radius = 0;
+            s_explosionRadius = radius;
+            //s_explosionRadius = gCycle::ExplosionRadius();
             s_explosionTime = e->createTime;
 
             S_BlowHoles( w );
