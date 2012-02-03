@@ -158,8 +158,9 @@ gExplosion::gExplosion(eGrid *grid, const eCoord &pos,REAL time, gRealColor& col
         createTime(time),
         expansion(0),
         listID(-1),
-        owner_(owner) 
+        owner_(owner)
 {
+    radius_ = gCycle::ExplosionRadius() + owner_->Speed() * ( sg_explosionSpeedFactor / 100 );
     eSoundMixer* mixer = eSoundMixer::GetMixer();
     mixer->PushButton(CYCLE_EXPLOSION, pos);
     //std::cout << "explosion sound effect\n";
@@ -169,7 +170,7 @@ gExplosion::gExplosion(eGrid *grid, const eCoord &pos,REAL time, gRealColor& col
     explosion_r = color.r_;
     explosion_g = color.g_;
     explosion_b = color.b_;
-    //std::cout << "about to do sg_Explosions.Add\n";
+    //std::cout << "about to do sg_Explosions.Add ### Holer: " << owner_->Player()->GetUserName() << " Size: " << radius_ << "\n";
     sg_Explosions.Add( this, listID );
     z=0;
     //std::cout << "explosion constructed\n";
@@ -225,12 +226,7 @@ bool gExplosion::Timestep(REAL currentTime){
 
         s_explosionCoord  = pos;
         REAL factor = expansion / REAL( expansionSteps );
-
-        REAL radius = gCycle::ExplosionRadius() + this->GetOwner()->Speed() * ( sg_explosionSpeedFactor / 100 );
-        if ( radius < 0 )
-            radius = 0;
-        s_explosionRadius = radius * sqrt(factor);
-        //s_explosionRadius = gCycle::ExplosionRadius() * sqrt(factor);
+        s_explosionRadius = this->GetRadius() * sqrt(factor);
         s_explosionTime = currentTime;
         s_holer = this;
 
@@ -374,12 +370,7 @@ void gExplosion::OnNewWall( eWall* w )
         {
             // e is a already completed explosion
             s_explosionCoord  = e->pos;
-
-            REAL radius = gCycle::ExplosionRadius() + e->GetOwner()->Speed() * ( sg_explosionSpeedFactor / 100 );
-            if ( radius < 0 )
-                radius = 0;
-            s_explosionRadius = radius;
-            //s_explosionRadius = gCycle::ExplosionRadius();
+            s_explosionRadius = e->GetRadius();
             s_explosionTime = e->createTime;
 
             S_BlowHoles( w );
