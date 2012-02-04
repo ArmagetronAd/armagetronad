@@ -3011,7 +3011,7 @@ login_error_unknown         Unknown error code \1 returned, content "\2".
 login_error_invalidclaim    Authority "\1" can't claim you to be "\2"!
 login_error_unexpected_answer Answer "\1" expected from server, but got \2 instead.
 
-login_error_local_nouser    Local user \1 not found.
+login_error_local_nouser    Local user \1 not found. Try "/login \1@forums" instead.
 login_error_local_password  Supplied password for local user \1 incorrect.
 
 chatcommand_requires_player  \1 requires a player username as additional parameter.\n
