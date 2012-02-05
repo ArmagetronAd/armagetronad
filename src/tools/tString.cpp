@@ -1136,6 +1136,21 @@ tString tString::Truncate( int truncateAt ) const
     return SubStr( 0, truncateAt ) + "...";
 }
 
+// *******************************************************************************************
+// *
+// *	FromUnknown
+// *
+// *******************************************************************************************
+//!
+//!    @param      source       Source string of unknown format
+//!    @return     A new string that is valid utf8
+//!
+// *******************************************************************************************
+tString tString::FromUnknown( char const * source )
+{
+    return tString( source );
+}
+
 // *******************************************************************************
 // *
 // *	operator []
