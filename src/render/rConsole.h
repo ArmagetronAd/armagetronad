@@ -37,6 +37,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 extern REAL rCWIDTH_CON;
 extern REAL rCHEIGHT_CON;
 
+extern float sr_chatLayer;
+
 class rConsole:public tConsole{
     tArray<tString> lines;
 
