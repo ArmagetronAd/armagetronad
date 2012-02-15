@@ -2865,7 +2865,7 @@ login_error_unknown           Unbekannter Fehlercode \1 erhalten, Inhalt "\2".
 login_error_invalidclaim      Meldeamt "\1" Versucht vergeblich, dich als "\2" auszugeben.
 login_error_unexpected_answer Antwort "\2" vom Server erwartet, stattdessen \2 erhalten.
 
-login_error_local_nouser      Lokalen Benutzer \1 nicht gefunden.
+login_error_local_nouser      Lokalen Benutzer \1 nicht gefunden. Versuche "/login \1@forums".
 login_error_local_password    Passwort für lokalen Benutzer \1 falsch.
 
 chatcommand_requires_player   \1 benötigt einen Benutzernamen als zusätzliches Argument.\n

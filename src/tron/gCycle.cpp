@@ -227,8 +227,8 @@ static tSettingItem<int> s_s("SCORE_SUICIDE",score_suicide);
 
 // input control
 
-uActionPlayer gCycle::s_brake("CYCLE_BRAKE", -5);
-static uActionPlayer s_brakeToggle("CYCLE_BRAKE_TOGGLE", -5);
+uActionPlayer gCycle::s_brake("CYCLE_BRAKE", -9);
+static uActionPlayer s_brakeToggle("CYCLE_BRAKE_TOGGLE", -9);
 static uActionTooltip sg_brakeTooltip( gCycle::s_brake, 1, &ePlayer::VetoActiveTooltip );
 
 static eWavData cycle_run("moviesounds/engine.wav","sound/cyclrun.wav");

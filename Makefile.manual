@@ -142,7 +142,7 @@ test: installcheck
 
 # initial rule for source change tag (make it really old)
 .changetag:
-	touch -t 7001010101 $@
+	touch -t 9001010101 $@
 
 # make snapshot of SVN state, tracking relevant changes in .changetag
 fingerprint: .changetag
@@ -162,7 +162,6 @@ $(srcdir)/version: $(wildcard $(srcdir)/*_version) .changetag
 # Keep the changelog up to date as well (triggered by make dist only)
 $(srcdir)/ChangeLog: .changetag
 	touch $@
-	rm -f $@
 	@echo -e "\nGenerating ChangeLog from SVN/BZR, please be patient...\n"
 	cd ${srcdir}; svn log 2>&1 > ChangeLog || bzr log --gnu-changelog 2>&1 > ChangeLog || echo "No official releasse: no changelog" > ChangeLog
 	test -r $@ || touch $@

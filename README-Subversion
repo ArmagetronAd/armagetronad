@@ -10,6 +10,10 @@ parent_directory:
 To use the sources from Subversion, you need to have additional tools installed: on all operating systems, you'll need Python (www.python.org). On Unix, you also need all autotools (autoconf and automake, check with your distribution).
 To build tarball distributions, you also need a 'svn' command line tool that can generate ChangeLogs.
 
+The instructions also apply if you're using BZR to fetch the sources;
+there, 'modules' are just individual branches named
+0.2.8-<modulename>-work.
+
 ****************
 * Unix vanilla *
 ****************
@@ -41,6 +45,8 @@ If you're in a hurry, just run "make" there.
 ****************
 * KDevelop 3.0 *
 ****************
+
+(No longer supported)
 
 First, you need to bootstrap. Execute: sh ./bootstrap.sh
 Run 'kdevelop' if you haven't done so already.
@@ -84,9 +90,18 @@ be download from the the Sourceforge project page:
 
 https://sf.net/project/showfiles.php?group_id=110997&package_id=266788
 
+*******************
+* Windows + Mingw *
+*******************
+
+Supported via the Code::Blocks IDE. Go fetch the build_codeblocks
+module and follow the instructions in its README.txt.
+
 *********************
 * Windows + VisualC *
 *********************
+
+(No longer supported.)
 
 You'll need to check out the additional module build_visualc parallel to this module. In it, you'll find a README describing how to proceed; you'll need to download some libraries and put them in the right place.
 
@@ -96,11 +111,7 @@ You'll need to check out the additional module build_visualc parallel to this mo
 
 Not supported yet.
 
-*******************
-* Windows + Mingw *
-*******************
 
-Not supported yet.
 
 
 

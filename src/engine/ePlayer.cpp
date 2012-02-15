@@ -4049,7 +4049,7 @@ static void chat( ePlayer * chatter )
 static bool se_allowControlDuringChat = false;
 static nSettingItem<bool> se_allowControlDuringChatConf("ALLOW_CONTROL_DURING_CHAT",se_allowControlDuringChat);
 
-uActionPlayer se_toggleSpectator("TOGGLE_SPECTATOR", 0);
+uActionPlayer se_toggleSpectator("TOGGLE_SPECTATOR", -7);
 
 bool ePlayer::Act(uAction *act,REAL x){
     eGameObject *object=NULL;
@@ -4194,7 +4194,7 @@ void ePlayer::Init(){
         tOutput help;
         help.SetTemplateParameter(1, i+1);
         help << "$input_instant_chat_help";
-        ePlayer::se_instantChatAction[i]=tNEW(uActionPlayer) (id, desc, help);
+        ePlayer::se_instantChatAction[i]=tNEW(uActionPlayer) (id, desc, help, 100);
         //,desc,       "Issues a special instant chat macro.");
     }
 
@@ -4221,7 +4221,7 @@ void ePlayer::Exit(){
     se_Players = NULL;
 }
 
-uActionPlayer ePlayer::s_chat("CHAT");
+uActionPlayer ePlayer::s_chat("CHAT",-8);
 
 // only display chat in multiplayer games
 static bool se_ChatTooltipVeto(int)
@@ -6625,7 +6625,7 @@ static int se_ColorDistance( int a[3], int b[3] )
     return distance;
 }
 
-bool se_randomizeColor = true;
+bool se_randomizeColor = false;
 static tSettingItem< bool > se_randomizeColorConf( "PLAYER_RANDOM_COLOR", se_randomizeColor );
 
 static void se_RandomizeColor( ePlayer * l, ePlayerNetID * p )
@@ -8578,6 +8578,13 @@ bool ePlayerNetID::IsAllowedToRename ( void )
         tOutput message( "$player_rename_rejected_admin", nameFromServer_, nameFromClient_ );
         se_SecretConsoleOut( message, this, &ePlayerNetID::HasRenameCapability, this );
         con << message;
+        return false;
+    }
+    // don't let the player rename if s/he is silenced.
+    if ( this->IsSilenced() )
+    {
+        tOutput message("$player_rename_silenced");
+        sn_ConsoleOut( message, Owner() );
         return false;
     }
     // disallow name changes if there was a kick vote recently
