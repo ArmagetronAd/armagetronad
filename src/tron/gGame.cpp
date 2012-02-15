@@ -4453,10 +4453,6 @@ void gGame::StartNewMatch(){
 }
 
 void gGame::StartNewMatchNow(){
-    if ( rounds != 0 ) {
-        sg_newMatchWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
-        sg_newMatchWriter.write();
-	}
     rounds=0;
     warning=0;
     startTime=tSysTimeFloat()-10;
