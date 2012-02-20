@@ -135,7 +135,7 @@ public:
     gTutorial( char const * name )
     : tListItem< gTutorial >( anchor_ )
       , settings_( sg_DefaultSettings() )
-      , completed_( false )
+      , completed_( true )
       , completedConf_( tString("TUTORIAL_COMPLETE_") + tString(name).ToUpper(), completed_ )
       , name_( name )
       , success_( false )
@@ -517,6 +517,19 @@ public:
         return true;
     }
 
+    static void SetAll( bool completed, bool includeChallenges )
+    {
+        gTutorial * run = anchor_;
+        while( run )
+        {
+            if( includeChallenges || !run->IsChallenge() )
+            {
+                run->completed_ = completed;
+            }
+            run = run->Next();
+        }
+    }
+
     // warps dt seconds into the future for all game objects and AIs.
     // to be called in AfterSpawn().
     void TimeWarp( REAL dt )
@@ -546,6 +559,7 @@ public:
     {
         return warpedAhead_;
     }
+
 protected:
     gGameSettings settings_;
 private:
@@ -574,6 +588,20 @@ private:
 };
 
 gTutorial * gTutorial::anchor_ = NULL;
+
+static void sg_MarkAllAsComplete( std::istream & )
+{
+    gTutorial::SetAll( true, false );
+}
+
+static tConfItemFunc sg_markAllAsComplete( "TUTORIAL_COMPLETE_ALL", sg_MarkAllAsComplete );
+
+static void sg_MarkAllAsIncomplete( std::istream & )
+{
+    gTutorial::SetAll( false, true );
+}
+
+static tConfItemFunc sg_markAllAsIncomplete( "TUTORIAL_INCOMPLETE_ALL", sg_MarkAllAsIncomplete );
 
 class gTutorialMenuItem: public uMenuItemAction
 {

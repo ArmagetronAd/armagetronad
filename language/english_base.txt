@@ -1856,6 +1856,9 @@ tutorial_menu_axes_text         Showcase: Betrayal
 tutorial_menu_axes_help         Prepares you for some of the weird settings out there.
 tutorial_menu_axes_instructions When we said you can only make 90 degree turns, we lied. In this showcase, you make 45 degree turns.\n\nSurvive the AIs. Interestingly, the easiest way to do so is to let them try and trap you and fail miserably.
 
+tutorial_complete_all_help      Marks all tutorials as completed.
+tutorial_incomplete_all_help    Marks all tutorials and challenges as not completed.
+
 #********************************************
 #********************************************
 #

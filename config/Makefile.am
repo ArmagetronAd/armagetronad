@@ -7,6 +7,7 @@ nobase_config_DATA=default.cfg master.srv settings.cfg\
 	settings_dedicated.cfg aiplayers.cfg rc.config\
 	subcultures.srv\
 	settings_visual.cfg\
+	uphillbothways.cfg\
 	serverconfigcache.cfg\
     settings_authentication.cfg\
 	keys_cursor.cfg   keys_wasd.cfg  keys_zqsd.cfg\
