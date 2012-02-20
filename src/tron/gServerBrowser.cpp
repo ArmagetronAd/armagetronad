@@ -129,6 +129,9 @@ public:
 class gBrowserMenuItem: public uMenuItem
 {
 protected:
+    bool displayHelp_;
+    REAL helpAlpha_;
+    
     gBrowserMenuItem(uMenu *M,const tOutput &help): uMenuItem( M, help )
     {
     }
@@ -137,6 +140,13 @@ protected:
     virtual bool Event( SDL_Event& event );
 
     virtual void RenderBackground();
+
+    virtual bool DisplayHelp( bool display, REAL y, REAL alpha )
+    {
+        helpAlpha_ = alpha;
+        displayHelp_ = display;
+        return false;
+    }
 };
 
 class gServerMenuItem: public gBrowserMenuItem
@@ -683,17 +693,21 @@ void gServerMenuItem::Render(REAL x,REAL y,REAL alpha, bool selected)
 #endif
 }
 
+static REAL sg_menuBottom    = -.9;
+static REAL sg_requestBottom = -.9;
 
 void gServerMenuItem::RenderBackground()
 {
 #ifndef DEDICATED
+    REAL helpTopReal = sg_requestBottom*shrink + displace - .05;;
+
     gBrowserMenuItem::RenderBackground();
 
+    rTextField::SetDefaultColor( tColor(1,1,1) );
+
+    rTextField players( -.9, helpTopReal, text_width, text_height );
     if ( server )
     {
-        rTextField::SetDefaultColor( tColor(1,1,1) );
-
-        rTextField players( -.9, -.3, text_width, text_height );
         players << tOutput( "$network_master_players" );
         if ( server->UserNamesOneLine().Len() > 2 )
             players << server->UserNamesOneLine();
@@ -704,6 +718,28 @@ void gServerMenuItem::RenderBackground()
         uri << server->Url() << tColoredString::ColorString(1,1,1);
         players << tOutput( "$network_master_serverinfo", server->Release(), uri, server->Options() );
     }
+
+    if( displayHelp_ )
+    {
+        players << "\n";
+        players.SetColor(tColor(1,1,1,helpAlpha_));
+        players << Help();
+    }
+
+    REAL helpSpace = players.GetTop() - players.GetBottom();
+    REAL helpTop = -.85 + helpSpace;
+    REAL helpTopScaled = ( helpTop - displace )/shrink;
+    REAL helpTopMax = .25;
+    REAL helpTopMin = -.9;
+    if( helpTopScaled > helpTopMax )
+    {
+        helpTopScaled = helpTopMax;
+    }
+    if( helpTopScaled < helpTopMin )
+    {
+        helpTopScaled = helpTopMin;
+    }
+    sg_requestBottom = helpTopScaled;
 #endif
 }
 
@@ -808,6 +844,24 @@ bool gServerMenuItem::Event( SDL_Event& event )
 
 void gBrowserMenuItem::RenderBackground()
 {
+    if( menu )
+    {
+        double now = tSysTimeFloat();
+        static double lastTime = now;
+        if( sg_menuBottom > sg_requestBottom )
+        {
+            sg_menuBottom -= now - lastTime;
+        }
+        lastTime = now;
+        if( sg_menuBottom < sg_requestBottom )
+        {
+            sg_menuBottom = sg_requestBottom;
+        }
+
+        menu->SetBot( sg_menuBottom );
+        sg_requestBottom = -.9;
+    }
+
     sn_Receive();
     sn_SendPlanned();
 
