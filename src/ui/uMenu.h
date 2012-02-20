@@ -232,7 +232,13 @@ public:
             menu->items.Remove(this,idnum);
     }
 
-virtual tString Help(){return tString(helpText);}
+    //! called when the menu item is selected, the incoming parameter says
+    //! whether help should be displayed, the function returns true if 
+    //! the menu code itself should handle the display or whether the menu item
+    //! does that.
+    virtual bool DisplayHelp( bool display, REAL y, REAL alpha ){return display;}
+
+    virtual tString Help(){return tString(helpText);}
     // displays the menuitem at position x,y. set selected to true
     // if the item is currently under the cursor
     virtual void Render(REAL ,REAL ,REAL =1,bool =0){}

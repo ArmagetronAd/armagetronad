@@ -350,21 +350,27 @@ void uMenu::OnEnter(){
             if (YPos(menuentries-1)>menuTop && (int(tSysTimeFloat())+1)%2)
                 arrow(.9,menuTop,1,.05);
 
-            if (tSysTimeFloat()-lastkey>timeout){
-                disphelp=true;
+            REAL helpAlpha = tSysTimeFloat()-lastkey-timeout;
+            if( helpAlpha > 1 )
+            {
+                helpAlpha = 1;
+            }
+            
+            disphelp = helpAlpha > 0;
+            if ( items[selected]->DisplayHelp( disphelp, menuBot, helpAlpha ) )
+            {
                 if (sr_alphaBlend)
-                    glColor4f(1,.8,.8,tSysTimeFloat()-lastkey-timeout);
+                    glColor4f(1,.8,.8, helpAlpha );
                 else
-                    Color(tSysTimeFloat()-lastkey-timeout,
-                          .8*(tSysTimeFloat()-lastkey-timeout),
-                          .8*(tSysTimeFloat()-lastkey-timeout));
+                    Color(helpAlpha,
+                          .8*helpAlpha,
+                          .8*helpAlpha);
 
                 rTextField c(-.95f,menuBot-.04f,rCHEIGHT_NORMAL, sr_fontMenu);
                 c.SetWidth(1.9f-items[selected]->SpaceRight());
                 c.EnableLineWrap();
                 c << items[selected]->Help();
             }
-            else disphelp=false;
         }
         else
 #endif
