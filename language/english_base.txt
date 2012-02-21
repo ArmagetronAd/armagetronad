@@ -209,9 +209,9 @@ auto_ais_help			Automatically spawn AI players?
 ai_iq_help			IQ of the AI opponents
 min_players_help		Minimum number of players
 num_ais_help			Number of AI players
-limit_score_help		End the match when a player reaches this score
+limit_score_help		End the match when a player reaches this score	 
 limit_rounds_help		End the match after this number of rounds
-limit_time_help			End the match after this number of minutes
+limit_time_help			End the match after this number of minutes 
 
 auto_team_help          Flag indicating whether players should be put into teams automatically.
 auto_team_spec_spam_help    If set to 0, spectators won't be announced when joining or leaving, provided AUTO_TEAM is set to 0.
@@ -284,11 +284,11 @@ cycle_first_spawn_protection_help Set to 1 if the invulnerability and wall delay
 #********************************************
 
 # map file
-map_file_help                     File that contains the map used for playing
-map_uri_help                      DEPRECIATED - use RESOURCE_REPOSITORY_SERVER and MAP_FILE instead
-arena_axes_help                   In how many directions a cycle can turn 4 is the default, 6 is hexatron
-resource_repository_client_help   URI the client uses to search for map files if they aren't stored locally. Better leave it alone
-resource_repository_server_help   URI clients and the server use to search for map files if they aren't stored locally
+map_file_help                     File that contains the map used for playing 
+map_uri_help                      DEPRECIATED - use RESOURCE_REPOSITORY_SERVER and MAP_FILE instead 
+arena_axes_help                   In how many directions a cycle can turn 4 is the default, 6 is hexatron 
+resource_repository_client_help   URI the client uses to search for map files if they aren't stored locally. Better leave it alone 
+resource_repository_server_help   URI clients and the server use to search for map files if they aren't stored locally 
 
 # limits
 speed_factor_help		Speed modifier for the cycles
@@ -395,7 +395,7 @@ ping_flood_time_50_help             Minimum time for 50 ping packets from one ma
 ping_flood_time_100_help            Minimum time for 100 ping packets from one machine to arrive.
 ping_flood_global_help              The times PING_FLOOD_TIME_X, multiplied by this value, count for all pings from all machines. Negative values disable global flood protection.
 connection_flood_sensitivity_help   The times PING_FLOOD_TIME_X, multiplied by this value, count for all incoming messages from clients not connected already. A flood here activates turtle mode. Negative values disable global flood protection.
-connection_limit_help               Maximum number of packets from unknown peers to handle at one
+connection_limit_help               Maximum number of packets from unknown peers to handle at one 
 anti_spoof_help                     If set to 1, checks connecting clients for spoofed IPs. Only clients passing a connectivity test are allowed in. This is done in turtle mode automatically, but may be useful to have on at all times.
 turtle_mode_activated               Server is under heavy load. Turtle mode activated. Communication with new clients is on a budget.\n
 turtle_mode_deactivated             The high load seems to have normalized for now. Turtle mode deactivated.\n
@@ -698,25 +698,25 @@ white_sparks_help        Draw sparks in white (instead of cycle colors).
 keep_window_active_help  Keeps rendering active when the program window loses input focus.
 
 # hud
-show_brake_help                   Show the brake meter on the HUD?
-show_alive_help                   Show the number of enemies and friends left on the HUD?
-show_fastest_help                 Show the fastest player on the HUD?
-show_hud_help                     Show the HUD?
-show_ping_help                    Show your ping on the HUD?
-show_rubber_help                  Show the rubber meter on the HUD?
-show_score_help                   Show your single player scores on the HUD?
-show_speed_help                   Show the speed meter on the HUD?
-show_time_help                    Show the current time in the top- right corner?
-show_time_24_help                 Show the time in 24 hour format?
-speed_gauge_locx_help             Horizontal position of the speed meter
-speed_gauge_locy_help             Vertical position of the speed meter
-speed_gauge_size_help             Size of the speed meter
-rubber_gauge_locx_help            Horizontal position of the rubber meter
-rubber_gauge_locy_help            Vertical position of the rubber meter
-rubber_gauge_size_help            Size of the rubber meter
-brake_gauge_locx_help             Horizontal position of the brake meter
-brake_gauge_locy_help             Vertical position of the brake meter
-brake_gauge_size_help             Size of the brake meter
+show_brake_help                   Show the brake meter on the HUD? 
+show_alive_help                   Show the number of enemies and friends left on the HUD? 
+show_fastest_help                 Show the fastest player on the HUD? 
+show_hud_help                     Show the HUD? 
+show_ping_help                    Show your ping on the HUD? 
+show_rubber_help                  Show the rubber meter on the HUD? 
+show_score_help                   Show your single player scores on the HUD? 
+show_speed_help                   Show the speed meter on the HUD? 
+show_time_help                    Show the current time in the top- right corner? 
+show_time_24_help                 Show the time in 24 hour format? 
+speed_gauge_locx_help             Horizontal position of the speed meter 
+speed_gauge_locy_help             Vertical position of the speed meter 
+speed_gauge_size_help             Size of the speed meter 
+rubber_gauge_locx_help            Horizontal position of the rubber meter 
+rubber_gauge_locy_help            Vertical position of the rubber meter 
+rubber_gauge_size_help            Size of the rubber meter 
+brake_gauge_locx_help             Horizontal position of the brake meter 
+brake_gauge_locy_help             Vertical position of the brake meter 
+brake_gauge_size_help             Size of the brake meter 
 alive_locx_help                   Horizontal position of the alive headcount display
 alive_locy_help                   Vertical position of the alive headcount display
 alive_size_help                   Size of the alive headcount display
@@ -1311,10 +1311,10 @@ path_info_data                  Data directories (textures, moviepack, ...):
 path_info_screenshot            Screenshot directories:
 path_info_var                   Var directories:
 
-version_info_gl_intro       \n\n0xff8888System OpenGL information:0xRESETT
-version_info_gl_vendor		\n  GL Vendor   :
-version_info_gl_renderer	\n  GL Renderer :
-version_info_gl_version		\n  GL Version  :
+version_info_gl_intro       \n\n0xff8888System OpenGL information:0xRESETT 
+version_info_gl_vendor		\n  GL Vendor   : 
+version_info_gl_renderer	\n  GL Renderer : 
+version_info_gl_version		\n  GL Version  : 
 
 
 #********************************************
@@ -1750,7 +1750,7 @@ player_menu_help		Cycle and camera controls for player \1
 viewport_menu_title		Viewports
 viewport_menu_help		Would you like a singe player game or split the screen to allow multiplayer games?
 
-viewport_conf_text		Viewports:
+viewport_conf_text		Viewports: 
 viewport_conf_name_0		Single Player
 viewport_conf_name_1		Horizontal Split
 viewport_conf_name_2		Vertical Split
@@ -2312,9 +2312,9 @@ setting_legacy_change_blocked   Setting \1 (Group: \2) can't be changed currentl
 league_message_rose		\1 rose to place \3 on the \4 because of \2.
 league_message_dropped		\1 dropped to place \3 on the \4 because of \2.
 
-league_message_greet_intro	You are
+league_message_greet_intro	You are 
 league_message_greet_sep	,
-league_message_greet_lastsep	and
+league_message_greet_lastsep	and 
 league_message_greet		number \1 of \2 on the \3
 league_message_greet_new	not on the \3
 
@@ -2331,8 +2331,8 @@ highscore_message_stay_pos	but stayed at position \4.
 
 ladder_description		ladder
 ladder_message_entered		\1 entered the \2 list with \3 points
-ladder_message_gained		\1 gained \5 points on the \2
-ladder_message_lost		\1 lost \5 points on the \2
+ladder_message_gained		\1 gained \5 points on the \2 
+ladder_message_lost		\1 lost \5 points on the \2 
 ladder_message_move_top		and moved to the top!
 ladder_message_move_pos		and moved to position \4.
 ladder_message_stay_top		and stayed at the top.
@@ -2388,13 +2388,13 @@ gamestate_set_scores		Set \1 Scores:\n
 gamestate_reset_challenge		Start Challenge Best of \1 Next Round !
 
 gamestate_champ_center		Match Winner: \1
-gamestate_champ_console		Overall Winner: \1
+gamestate_champ_console		Overall Winner: \1 
 gamestate_champ_scorehit	with \1 points.\n
 gamestate_champ_timehit		after the time limit of \1 minutes was hit.\n
 gamestate_champ_default		after \1 rounds.\n
 gamestate_champ_finalscores	Final Scores:\n
 
-gamestate_winner_winner		Winner:
+gamestate_winner_winner		Winner: 
 gamestate_winner_ai		AI.
 gamestate_winner_humans		Humans.
 
