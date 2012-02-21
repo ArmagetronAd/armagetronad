@@ -3167,9 +3167,9 @@ nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket
     if( sn_expired )
     {
         con.Message( tOutput("$testing_version_expired_title" ), tOutput("$testing_version_expired") );
-        return nABORT;
     }
-    else if (login_failed)
+
+    if (login_failed)
     {
         con << tOutput("$network_login_failed");
         sn_SetNetState(nSTANDALONE);

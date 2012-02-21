@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tInitExit.h"
 #include "gWall.h"
 #include "gCycle.h"
+#include "nConfig.h"
 #include "eGrid.h"
 #include "eTeam.h"
 #include "tRandom.h"
@@ -73,6 +74,9 @@ static int sg_scoreExplosion = 0;
 static tSettingItem< int > sg_scoreExplosionPredatorSettingItem( "SCORE_EXPLOSION", sg_scoreExplosion );
 
 static eLadderLogWriter sg_deathExplosionWriter( "DEATH_EXPLOSION", true );
+
+static REAL sg_explosionSpeedFactor = 0;
+static nSettingItemWatched< REAL > sg_explosionSpeedFactorSettingItem( "EXPLOSION_RADIUS_SPEED_FACTOR", sg_explosionSpeedFactor, nConfItemVersionWatcher::Group_Bumpy, 22 );
 
 // blow a hole centered at s_explosionCoord with radius s_explosionRadius into wall w
 static void S_BlowHoles( eWall * w )
@@ -155,8 +159,9 @@ gExplosion::gExplosion(eGrid *grid, const eCoord &pos,REAL time, gRealColor& col
         createTime(time),
         expansion(0),
         listID(-1),
-        owner_(owner) 
+        owner_(owner)
 {
+    radius_ = gCycle::ExplosionRadius() + owner_->Speed() * sg_explosionSpeedFactor;
     eSoundMixer* mixer = eSoundMixer::GetMixer();
     mixer->PushButton(CYCLE_EXPLOSION, pos);
     //std::cout << "explosion sound effect\n";
@@ -166,7 +171,7 @@ gExplosion::gExplosion(eGrid *grid, const eCoord &pos,REAL time, gRealColor& col
     explosion_r = color.r_;
     explosion_g = color.g_;
     explosion_b = color.b_;
-    //std::cout << "about to do sg_Explosions.Add\n";
+    //std::cout << "about to do sg_Explosions.Add ### Holer: " << owner_->Player()->GetUserName() << " Size: " << radius_ << "\n";
     sg_Explosions.Add( this, listID );
     z=0;
     //std::cout << "explosion constructed\n";
@@ -222,7 +227,7 @@ bool gExplosion::Timestep(REAL currentTime){
 
         s_explosionCoord  = pos;
         REAL factor = expansion / REAL( expansionSteps );
-        s_explosionRadius = gCycle::ExplosionRadius() * sqrt(factor);
+        s_explosionRadius = this->GetRadius() * sqrt(factor);
         s_explosionTime = currentTime;
         s_holer = this;
 
@@ -232,6 +237,7 @@ bool gExplosion::Timestep(REAL currentTime){
                                        s_explosionCoord,
                                        s_explosionRadius,
                                        this->CurrentFace() );
+
         }
 
         s_holer = 0;
@@ -365,7 +371,7 @@ void gExplosion::OnNewWall( eWall* w )
         {
             // e is a already completed explosion
             s_explosionCoord  = e->pos;
-            s_explosionRadius = gCycle::ExplosionRadius();
+            s_explosionRadius = e->GetRadius();
             s_explosionTime = e->createTime;
 
             S_BlowHoles( w );

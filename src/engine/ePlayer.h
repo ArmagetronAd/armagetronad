@@ -237,6 +237,7 @@ class ePlayerNetID: public nNetObject, public eAccessLevelHolder{
     // access level. lower numeric values are better.
 public:
     typedef std::set< eTeam * > eTeamSet;
+    static const int MAX_NAME_LENGTH = 15;
 private:
 
     int listID;                          // ID in the list of all players

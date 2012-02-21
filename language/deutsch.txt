@@ -1950,7 +1950,7 @@ screen_custom_text            Benutzerdefiniert
 screen_custom_help            Setze die Variablen CUSTOM_SCREEN_WIDTH und CUSTOM_SCREEN_HEIGHT in user.cfg, um eine eigene Auflösung zu definieren (z.B. für breite Bildschirme)
 
 screen_fullscreen_text        Vollbild:
-screen_fullscreen_help        Schaltet zwischen Vollbildmodus (Ein) und Fenstermodus (Aus) um. Auf einigen Systemen läuft \g leider nicht im Vollbild. Zum übernehmen muss \g neugestartet oder auf Aktivieren geklickt werden.
+screen_fullscreen_help        Schaltet zwischen Vollbildmodus (Ein) und Fenstermodus (Aus) um. Auf einigen Systemen läuft \g leider nicht im Vollbild. Zum übernehmen muss \g neugestartet oder auf Aktivieren geklickt werden. Im Menu "System konfigurieren/Verschiedenes/Globale Tastatursteuerung" kann man eine Taste wählen, die jederzeit zwischen Vollbild und Fenstermodus wechselt.
 
 screen_colordepth_text        Farbtiefe:
 screen_colordepth_help        Die Farbtiefe bestimmt die Bildqualität.
@@ -2482,7 +2482,7 @@ network_master_denied_title   Verbindung zum Master-Server abgelehnt
 network_master_denied_inter   Der Master-Server lässt keine Verbindung zu sich aufbauen. Vermutlich greifen gerade zu viele Benutzer auf ihn zu.\nWir versuchen es mal mit der alten Liste...
 
 testing_version_expired_title Version abgelaufen
-testing_version_expired       Dies ist eine Testversion, und der Server verwendet eine viel neuere Version. Aufgrund unkalkulierbarer Risiken müssen wir leider den Verbindungsaufbau abbrechen. Wahscheinlich gibt es aber bereits eine neuere Testversion auf www.armagetronad.net oder beta.armagetronad.net zum Herunterladen.
+testing_version_expired       Dies ist eine Testversion, und der Server verwendet eine viel neuere Version. Kompatibilität kann nicht garantiert werden.
 
 network_master_upgrage        Zu neue Version
 network_master_downgrage      Zu alte Version
@@ -2910,7 +2910,7 @@ login_error_unknown           Unbekannter Fehlercode \1 erhalten, Inhalt "\2".
 login_error_invalidclaim      Meldeamt "\1" Versucht vergeblich, dich als "\2" auszugeben.
 login_error_unexpected_answer Antwort "\2" vom Server erwartet, stattdessen \2 erhalten.
 
-login_error_local_nouser      Lokalen Benutzer \1 nicht gefunden.
+login_error_local_nouser      Lokalen Benutzer \1 nicht gefunden. Versuche "/login \1@forums".
 login_error_local_password    Passwort für lokalen Benutzer \1 falsch.
 
 chatcommand_requires_player   \1 benötigt einen Benutzernamen als zusätzliches Argument.\n

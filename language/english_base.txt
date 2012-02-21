@@ -201,6 +201,7 @@ spawn_wingmen_side_help     Determines how much each wingman is placed sidewards
 walls_stay_up_delay_help	Number of seconds the walls stay up after a player died; negative values will keep them up forever.
 walls_length_help		Length of the cycle walls in meters; negative values will make the walls infinite.
 explosion_radius_help		Blast radius of the cycle explosions
+explosion_radius_speed_factor_help  Positive values will increase EXPLOSION_RADIUS the faster the cycle is, negative value will decrease it.
 team_balance_on_quit_help	Balance teams on player quit?
 team_balance_with_ais_help	Balance teams with AI players?
 team_max_imbalance_help	Maximum allowed team imbalance
@@ -838,6 +839,7 @@ text_out_help			Enable console text output
 console_columns_help    Number of characters in each line of console output
 console_rows_help       Number of lines of console output without user intervention
 console_rows_max_help   Number of lines of console output when scrolling back
+chat_layer_help         Opacity of the console and menu background: 0 for fully transparent, 1 for fully opaque.
 console_indent_help     Number of spaces each continuation of a wrapped console line is indented by
 console_decorate_id_help			Decorates every line of console output with the client ID
 console_decorate_ip_help			Decorates every line of console output with the client IP
@@ -859,14 +861,17 @@ ladderlog_write_death_explosion_help          Write to ladderlog: DEATH_EXPLOSIO
 ladderlog_write_encoding_help                 Write to ladderlog: ENCODING <charset>. Specifies the encoding for data in ladderlog.txt.
 ladderlog_write_game_end_help                 Write to ladderlog: GAME_END <date and time>
 ladderlog_write_game_time_help                Write to ladderlog: GAME_TIME <time> (see also: GAME_TIME_INTERVAL)
+ladderlog_write_matches_left_help             Write to ladderlog: MATCHES_LEFT <n>
 ladderlog_write_match_winner_help             Write to ladderlog: MATCH_WINNER <team> <players>
 ladderlog_write_new_match_help                Write to ladderlog: NEW_MATCH <date and time>
 ladderlog_write_new_round_help                Write to ladderlog: NEW_ROUND <date and time>
+ladderlog_write_new_warmup_help               Write to ladderlog: NEW_WARMUP <n> <date and time>. <n> is the number of matches to be played consecutively.
 ladderlog_write_num_humans_help               Write to ladderlog: NUM_HUMANS <number of humans>
-ladderlog_write_online_player_help            Write to ladderlog: ONLINE_PLAYER <name> [<ping> [<team>]]
+ladderlog_write_online_player_help            Write to ladderlog: ONLINE_PLAYER <name> [<ping> <team> <access level>]
 ladderlog_write_player_entered_help           Write to ladderlog: PLAYER_ENTERED <name> <IP> <screen name>
 ladderlog_write_player_left_help              Write to ladderlog: PLAYER_LEFT <name> <IP>
 ladderlog_write_player_renamed_help           Write to ladderlog: PLAYER_RENAMED <old name> <new name> <ip> <screen name>
+ladderlog_write_player_respawn_help           Write to ladderlog: PLAYER_RESPAWN <respawnee> <respawnee's team> [respawner]
 ladderlog_write_positions_help                Write to ladderlog: POSITIONS <team> <player1 player2 ...>
 ladderlog_write_round_score_help              Write to ladderlog: ROUND_SCORE <score difference> <player> [<team>]
 ladderlog_write_round_score_team_help         Write to ladderlog: ROUND_SCORE_TEAM <score difference> <team>
@@ -2376,7 +2381,7 @@ screen_custom_text		Custom
 screen_custom_help		Set the variables CUSTOM_SCREEN_WIDTH and CUSTOM_SCREEN_HEIGHT in user.cfg to adjust you custom screen size.
 
 screen_fullscreen_text		Fullscreen:
-screen_fullscreen_help		This toggles fullscreen and window mode. As with resolution changes. You have to exit and re-enter \g or select "Apply Changes" for this to have an effect.
+screen_fullscreen_help		This toggles fullscreen and window mode. As with resolution changes. You have to exit and re-enter \g or select "Apply Changes" for this to have an effect. You can bind a key to toggle this at any time in System Setup/Misc Stuff/Global Keyboard Configuration.
 
 screen_colordepth_text		Colour Depth:
 screen_colordepth_help		Choose the colour depth you want \g to run at. You have to exit and reenter \g or select "Apply Changes" for this to have an effect. 
@@ -2822,6 +2827,8 @@ spam_protection_prefix  SPAM PROTECTION: your messages have a common prefix: \1\
 spam_protection_silenceall SPAM PROTECTION: public chat is disabled.\n
 spam_protection_silenced SPAM PROTECTION: you have been silenced by the server administrator.\n
 spam_protection_silenced_default SPAM PROTECTION: you have to be given voice in order to chat publicly.\n
+vote_silenced You are not allowed to call a new vote while you are silenced.\n
+player_rename_silenced You are not allowed to rename while you are silenced.\n
 player_silenced         \10xff7777 has been silenced.\n
 player_silenced_local   \10xff7777 has been locally silenced.\n
 player_voiced           \10x77ff77 has been given his voice back.\n
@@ -3038,7 +3045,7 @@ network_master_denied_title		Master login denied
 network_master_denied_inter		The master server denied your login attempt. That usually means it is full. Try again later.
 
 testing_version_expired_title   Version Expired
-testing_version_expired         You are running a public test version or an unsupported CVS build. The server you tried to connect to is running a much newer version and that combination is only supported for major releases. An update is probably available for you on www.armagetronad.net.
+testing_version_expired         You are running a public test version and the server you tried to connect to is running a much newer version and that combination is only supported for major releases. Proceed at your own risk.
 
 network_master_login_needed     Registration needed
 network_master_exp_needed       Experience needed
@@ -3382,9 +3389,9 @@ authority_level_help             Changes the access level for all users from the
 authority_level_usage            usage: AUTHORITY_LEVEL <authority> <new access level (numerical)>\n
 authority_level_change           Access level of users from authority \1 changed to "\2".\n
 
-toggle_help                 Cycle between 0 and 1 for a boolean config item. Example: TOGGLE PREDICT_OBJECTS\n
+toggle_help                 Cycle between 0 and 1 for a boolean and locally changeable config item. Example: TOGGLE PREDICT_OBJECTS\n
 toggle_usage_error          TOGGLE requires a config item name. Usage: TOGGLE config_item\n
-toggle_invalid_config_item  TOGGLE requires a boolean config item, and \1 is not.\n
+toggle_invalid_config_item  TOGGLE requires a boolean and locally changeable config item, and \1 is not.\n
 
 #*************************************
 #*************************************
@@ -3536,7 +3543,7 @@ login_error_unknown         Unknown error code \1 returned, content "\2".
 login_error_invalidclaim    Authority "\1" can't claim you to be "\2"!
 login_error_unexpected_answer Answer "\1" expected from server, but got \2 instead.
 
-login_error_local_nouser    Local user \1 not found.
+login_error_local_nouser    Local user \1 not found. Try "/login \1@forums" instead.
 login_error_local_password  Supplied password for local user \1 incorrect.
 
 chatcommand_requires_player  \1 requires a player username as additional parameter.\n

@@ -69,6 +69,16 @@ public:
         return owner_;
     }
 
+    REAL GetRadius() const
+    {
+        return radius_;
+    }
+
+    REAL CreationTime() const 
+    {
+        return createTime;
+    }
+
 protected:
     virtual void OnRemoveFromGame(); // called last when the object is removed from the game
 
@@ -90,7 +100,7 @@ private:
     int 		listID;
 
     tJUST_CONTROLLED_PTR< gCycle > owner_; // the owner/victim of the explosion
-public:
-    REAL CreationTime() { return createTime; }
+
+    REAL radius_;
 };
 #endif

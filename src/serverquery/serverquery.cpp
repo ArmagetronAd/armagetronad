@@ -167,7 +167,7 @@ namespace sq
     {
     public:
         ServerQueryCommandLineAnalyzer(tCommandLineAnalyzer *& anchor)
-            :tCommandLineAnalyzer(anchor), listOption_(false), asynchronousOption_(false), masterServer_(""), servers_()
+            :tCommandLineAnalyzer(anchor), listOption_(false), asynchronousOption_(false), freshOption_(false), silentOption_(false), masterServer_(""), servers_(), exitStatus_(0)
         {
         }
         
@@ -181,6 +181,11 @@ namespace sq
             {
                 servers_.push_back(server);
             }
+        }
+        
+        int ExitStatus() const
+        {
+            return exitStatus_;
         }
     private:
         virtual bool DoAnalyze(tCommandLineParser & parser)
@@ -199,6 +204,16 @@ namespace sq
                 asynchronousOption_ = true;
                 return true;
             }
+            else if (parser.GetSwitch("--fresh", "-f"))
+            {
+                freshOption_ = true;
+                return true;
+            }
+            else if (parser.GetSwitch("--silent", "-s"))
+            {
+                silentOption_ = true;
+                return true;
+            }
             else if (parser.Current()[0] != '-')
             {
                 servers_.push_back(tString(parser.Current()));
@@ -215,6 +230,8 @@ namespace sq
               << "If a list of servers is provided on the command-line, then only those servers\n"
               << "will be queried for information. This list can also be read from stdin, as a\n"
               << "newline separated list of values.\n\n"
+              << "The program's exit status will be 1 if there is an error fetching the server\n"
+              << "list from the master.\n\n"
               << "-l, --list                   : Fetches only the server list from the master,\n"
               << "                               and does not query the individual game servers\n"
               << "                               for advanced information.\n\n"
@@ -227,6 +244,9 @@ namespace sq
               << "                               as objects in a JSON array. Using this option\n"
               << "                               will write onto one line the JSON object for\n"
               << "                               each server, when its data is received.\n\n"
+              << "-f, --fresh                  : Do not preload the server list from the cache on\n"
+              << "                               disk.\n\n"
+              << "-s, --silent                 : Do not output any logging information.\n\n"
               << "Other options\n"
               << "=============\n";
         }
@@ -237,13 +257,23 @@ namespace sq
             Json::StyledWriter styledWriter;
             Json::FastWriter fastWriter;
             Json::Writer & writer = asynchronousOption_ ? (Json::Writer &)fastWriter : (Json::Writer &)styledWriter;
+            std::ostringstream silentStream;
+            std::ostream & log = silentOption_ ? (std::ostream &)silentStream : std::cerr;
             
             if (servers_.empty())
             {
-                nServerInfo *master = LoadMasters();
-                std::cerr << "--> Fetching server list from " << master->GetConnectionName() << ":" << master->GetPort() << '\n';
-                nServerInfo::GetFromMaster(master);
-                std::cerr << "--> Received " << nServerInfo::ServerCount() << " servers\n";
+                tString fileSuffix = LoadMasters();
+                log << "--> Fetching master server list\n";
+                nServerInfoBase *master = nServerInfo::GetFromMaster( NULL, fileSuffix.c_str(), !freshOption_);
+                if (master)
+                {
+                    log << "--> Received " << nServerInfo::ServerCount() << " servers from " << master->GetConnectionName() << ":" << master->GetPort() << "\n";
+                }
+                else
+                {
+                    exitStatus_ = 1;
+                    log << "--> Received 0 servers, because none of the master servers could be successfully contacted\n";
+                }
             }
             else
             {
@@ -260,7 +290,7 @@ namespace sq
             
             if (!listOption_)
             {
-                std::cerr << "--> Querying servers for advanced information\n";
+                log << "--> Querying servers for advanced information\n";
                 nServerInfo::StartQueryAll();
                 while (nServerInfo::DoQueryAll(10))
                 {
@@ -280,18 +310,27 @@ namespace sq
             return true;
         }
         
-        nServerInfo *LoadMasters() const
+        tString LoadMasters() const
         {
+            std::stringstream fileSuffix;
+            fileSuffix << "_serverquery";
+            
             if (masterServer_.size() > 0)
             {
                 nMasterLoader masterLoader;
                 tString connectionName;
                 unsigned port;
                 ParseConnectionString(masterServer_, connectionName, port, 4533);
-                return masterLoader.AddMaster(connectionName, port);
+                masterLoader.AddMaster(connectionName, port);
+                
+                fileSuffix << "_" << connectionName << "_" << port;
+            }
+            else
+            {
+                nServerInfo::GetMasters();
             }
             
-            return nServerInfo::GetRandomMaster();
+            return fileSuffix.str();
         }
         
         void CheckUpdates(Json::Value & root, Json::Writer & writer) const
@@ -319,8 +358,11 @@ namespace sq
 
         bool listOption_;
         bool asynchronousOption_;
+        bool freshOption_;
+        bool silentOption_;
         tString masterServer_;
         StringVector servers_;
+        int exitStatus_;
     };
 }
 
@@ -346,7 +388,7 @@ int main(int argc, char **argv)
         commandLine.Execute();
         sn_BasicNetworkSystem.Shutdown();
 
-        return 0;
+        return options.ExitStatus();
     }
     catch (...)
     {

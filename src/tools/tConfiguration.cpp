@@ -78,7 +78,7 @@ static void st_ToggleConfigItem( std::istream & s )
     }
     
     tConfItem< bool > *confItem = dynamic_cast< tConfItem< bool > * >( base );
-    if ( confItem )
+    if ( confItem && confItem->Writable() )
     {
         confItem->SetVal( !*confItem->GetTarget() );
     }

@@ -230,7 +230,7 @@ void sg_StartupPlayerMenu()
     uMenuItemString n(&firstSetup,
                       "$player_name_text",
                       "$player_name_help",
-                      player->name, 16);
+                      player->name, ePlayerNetID::MAX_NAME_LENGTH);
     
     uMenuItemExit e(&firstSetup, "$menuitem_accept", "$menuitem_accept_help");
     

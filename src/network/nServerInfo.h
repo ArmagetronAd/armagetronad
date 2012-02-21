@@ -322,7 +322,8 @@ public:
     // @param masterInfo If non-NULL, then this master server will be polled for data.
     //                   Otherwise, a random master server will be selected from the defaults.
     // @param fileSuffix A suffix used to determine the filename where master data is stored to on disk.
-    static void GetFromMaster(nServerInfoBase *masterInfo=NULL, char const * fileSuffix = NULL );
+    // @param loadKnownServers Preload known servers from the cache on disk.
+    static nServerInfoBase *GetFromMaster(nServerInfoBase *masterInfo=NULL, char const * fileSuffix = NULL, bool loadKnownServers=true );
 
     static void TellMasterAboutMe(nServerInfoBase *masterInfo=NULL);  // dedicated server: tell master server about my existence
 

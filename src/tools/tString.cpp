@@ -1136,6 +1136,32 @@ tString tString::Truncate( int truncateAt ) const
     return SubStr( 0, truncateAt ) + "...";
 }
 
+// *******************************************************************************************
+// *
+// *	FromUnknown
+// *
+// *******************************************************************************************
+//!
+//!    @param      source       Source string of unknown format
+//!    @return     A new string that is valid utf8
+//!
+// *******************************************************************************************
+tString tString::FromUnknown( char const * source )
+{
+    std::string ret( source );
+
+    // if the string already is utf8, just return it
+    if( utf8::is_valid( ret.begin(), ret.end() ) )
+    {
+        return ret;
+    }
+    else
+    {
+        // convert it
+        return st_Latin1ToUTF8( ret );
+    }
+}
+
 // *******************************************************************************
 // *
 // *	operator []

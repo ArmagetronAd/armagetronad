@@ -10,6 +10,7 @@ your system, because you apparently already managed to check out one :)
 directory and check out module X from the same repository where you got this
 module from, so that the parent directory looks like this::
 
+
 	parent_directory:
 	    armagetronad:
 	        README-Subversion and other files
@@ -22,6 +23,9 @@ Unix, you also need all autotools (autoconf and automake, check with your
 distribution). To build tarball distributions, you also need a 'svn' command
 line tool that can generate ChangeLogs.
 
+The instructions also apply if you're using BZR to fetch the sources;
+there, 'modules' are just individual branches named
+0.2.8-<modulename>-work.
 
 Unix vanilla
 =============
@@ -56,6 +60,8 @@ hurry, just run "make" there.
 KDevelop 3.0
 ============
 
+(No longer supported)
+
 1. First, you need to bootstrap. Execute: sh ./bootstrap.sh
 2. Run 'kdevelop' if you haven't done so already.
 3. From the Project menu, choose Open Project. Select 'armagetron.kdevelop' 
@@ -80,9 +86,7 @@ https://sf.net/project/showfiles.php?group_id=110997&package_id=266788
 
 Aditional Required Software
 ---------------------------
-
 If you are running Mac OS X 10.5 then nothing else is required.
-
 If you are running 10.4 then you must install:
 
 * rake: macports name rb-rake. http://rake.rubyforge.org
@@ -91,19 +95,8 @@ If you are running 10.4 then you must install:
 You must also add a user-defined setting in Xcode, BISON. Its value should
 be the path of the newly installed bison.
 
+*******************
+* Windows + Mingw *
+*******************
 
-Windows + VisualC
-=================
-You'll need to check out the additional module build_visualc parallel to this
-module. In it, you'll find a README describing how to proceed; you'll need to
-download some libraries and put them in the right place.
-
-Windows + Cygwin
-================
-
-Not supported yet.
-
-Windows + Mingw
-===============
-
-Not supported yet.
+Supported via the Code::Blocks IDE. Specific instructions are in win32/README.txt.

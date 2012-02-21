@@ -80,6 +80,9 @@ static tConfItem<int> sr_columnsConf("CONSOLE_COLUMNS",sr_columns);
 static int sr_indent = 3;
 static tConfItem<int> sr_indentConf("CONSOLE_INDENT",sr_indent);
 
+float sr_chatLayer = 0.5;
+static tConfItem<float> sr_chatLayerConf("CHAT_LAYER",sr_chatLayer);
+
 void rConsole::Render(){
     if( sr_alreadyDisplayed )
     {
@@ -180,10 +183,10 @@ void rConsole::Render(){
             out.EnableLineWrap();
             out.SetIndent(sr_indent);
 
-            if( sr_alphaBlend && predictBottom < out.GetTop() )
+            if( sr_alphaBlend && sr_chatLayer > 0 && predictBottom < out.GetTop() )
             {
                 RenderEnd();
-                glColor4f(0, 0, 0, .5f);
+                glColor4f(0, 0, 0, sr_chatLayer);
                 glRectf(-1,predictBottom-.4*out.GetCHeight(),1,1);
             }
 

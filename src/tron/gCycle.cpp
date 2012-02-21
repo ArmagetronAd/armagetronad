@@ -220,8 +220,8 @@ static tSettingItem<int> s_s("SCORE_SUICIDE",score_suicide);
 
 // input control
 
-uActionPlayer gCycle::s_brake("CYCLE_BRAKE", -5);
-static uActionPlayer s_brakeToggle("CYCLE_BRAKE_TOGGLE", -5);
+uActionPlayer gCycle::s_brake("CYCLE_BRAKE", -9);
+static uActionPlayer s_brakeToggle("CYCLE_BRAKE_TOGGLE", -9);
 uActionTooltip sg_brakeTooltip( uActionTooltip::Level_Advanced, gCycle::s_brake, 2, &ePlayer::VetoActiveTooltip );
 
 // a class of textures where the transparent part of the

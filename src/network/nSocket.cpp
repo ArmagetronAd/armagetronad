@@ -612,7 +612,7 @@ void ANET_GetHostList( char const * hostname, nHostList & hostList, int net_host
         int ret = getaddrinfo( hostname, NULL, NULL, &info );
         if ( ret || !info )
         {
-            con << "Error looking up " << ( hostname ? hostname : "localhost" ) << " : " << gai_strerror( ret ) << "\n";
+            con << "Error looking up " << ( hostname ? hostname : "localhost" ) << " : " << tString::FromUnknown( gai_strerror( ret ) ) << "\n";
             return;
         }
         
@@ -1136,7 +1136,7 @@ public:
             bool success = false;
             if( ret )
             {
-                ForegroundPrinter() << "Failed to resolve hostname " << hostname_ << ", error " << gai_strerror( ret ) << "\n";
+                ForegroundPrinter() << "Failed to resolve hostname " << hostname_ << ", error " << tString::FromUnknown( gai_strerror( ret ) ) << "\n";
             }
             else if (res)
             {

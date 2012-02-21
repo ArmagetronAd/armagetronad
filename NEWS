@@ -17,6 +17,7 @@ Changes since 0.3.1
 - New vote: /callvote scramble: Executes the SCRAMBLE command.
 - Teams now retain their spawn for later respawing
 - New ladderlog entry: PLAYER_RESPAWN <RESPAWNEE> <RESPAWNEE'S TEAM> [RESPAWNER]
+- The ONLINE_PLAYER ladderlog entry now includes the access level of the player.
 - New warmup mode:
     - DO_WARMUP N>0 will make the game enter warmup mode after each N matches
     - In warmup mode, players can use the /ready command to set themselves ready and start the match
