@@ -241,6 +241,15 @@ endif
 if ENABLE_SCRIPTING
 scripting_sources = ${top_builddir}/src/swig/ext/armagetronad_wrap.cxx \
 	${top_builddir}/src/tools/scripting/sScripting.h ${top_builddir}/src/tools/scripting/sScripting.cpp
+
+if WITH_PYTHON
+    scripting_sources += ${top_builddir}/src/tools/scripting/sPython.cpp
+else
+  if WITH_RUBY
+    scripting_sources += ${top_builddir}/src/tools/scripting/sRuby.cpp
+  endif
+endif
+
 lib_scripting_wrap_a_SOURCES    = $(scripting_sources)
 lib_scripting_wrap_a_CXXFLAGS   = $(libtron_a_CXXFLAGS) -w
 else

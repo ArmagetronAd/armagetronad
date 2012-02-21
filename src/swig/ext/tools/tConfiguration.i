@@ -70,7 +70,7 @@ public:
 %rename(ConfItemScript) tConfItemScript;
 class tConfItemScript:public tConfItemBase{
 public:
-    tConfItemScript(const char *title, tScripting::proc_type proc);
+    tConfItemScript(const char *title, sCallable::ptr proc);
     virtual ~tConfItemScript();
 
     virtual void ReadVal(std::istream &s);

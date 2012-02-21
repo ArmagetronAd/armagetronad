@@ -357,25 +357,24 @@ zEffectorScripting::readXML(tXmlParser::node const & node)
 {
     if (node.HasProp("scriptName"))
     {
-        callback = tScripting::GetInstance().GetProcRef(node.GetProp("scriptName"));
+        callback = sScripting::GetInstance()->GetProcRef(node.GetProp("scriptName"));
     }
 }
 
 void zEffectorScripting::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
     if (!callback) return;
-    args data, tmp;
+    sArgs::ptr tmp;
     gVectorExtra<ePlayerNetID *>::iterator iter;
     for(iter = d_calculatedTargets.begin();
             iter != d_calculatedTargets.end();
             ++iter)
     {
-        data << (*iter)->GetUserName();
+        *tmp << (*iter)->GetUserName();
     }
-    tmp << data;
-    tScripting::GetInstance().Exec(callback, &tmp);
-    tmp.clear();
-    data.clear();
+    *callback << tmp;
+    callback->Call();
+    tmp->Clear();
 }
 #endif
 

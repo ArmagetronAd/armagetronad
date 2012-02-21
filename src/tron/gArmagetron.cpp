@@ -709,7 +709,7 @@ int main(int argc,char **argv){
         ePlayer::Init();
 
 #ifdef ENABLE_SCRIPTING
-        tScripting::GetInstance().InitializeInterpreter();
+        sScripting::GetInstance()->InitializeInterpreter();
 #endif
 
         // tERR_MESSAGE( "Loading configuration." );
@@ -832,8 +832,8 @@ int main(int argc,char **argv){
 
 #ifdef ENABLE_SCRIPTING      
                     try {
-                        // tScripting::GetInstance().Load(tDirectories::Data(), "scripts/menu.rb");
-                        // tScripting::GetInstance().Load(tDirectories::Data(), "scripts/ai.rb");
+                        // sScripting::GetInstance()->Load(tDirectories::Data(), "scripts/menu.rb");
+                        // sScripting::GetInstance()->Load(tDirectories::Data(), "scripts/ai.rb");
                     }
                     catch (std::runtime_error & e) {
                         std::cerr << e.what() << '\n';
@@ -891,7 +891,7 @@ int main(int argc,char **argv){
         ePlayer::Exit();
 
 #ifdef ENABLE_SCRIPTING
-        tScripting::GetInstance().CleanupInterpreter();
+        sScripting::GetInstance()->CleanupInterpreter();
 #endif
 
         //	tLocale::Clear();

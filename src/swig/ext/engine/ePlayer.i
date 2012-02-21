@@ -212,17 +212,17 @@ public:
     static void setAll(bool enabled); //!< enable or disable all writers
     // bind a procedure from scripting language to this ladder log writer.
 %rename(set_callback) setCallback;
-    void setCallback(tScripting::proc_type proc);
+    void setCallback(sCallable::ptr proc);
     // remove a procedure from scripting language previously binded to this ladder log writer.
 %rename(unset_callback) unsetCallback;
-    void unsetCallback(tScripting::proc_type proc);
+    void unsetCallback(sCallable::ptr proc);
 };
 
 //! chat command
 %rename(ChatCommand) eChatCommand;
 class eChatCommand {
 public:
-    eChatCommand(const char *ID, tScripting::proc_type proc, tAccessLevel level);
+    eChatCommand(const char *ID, sCallable::ptr proc, tAccessLevel level);
     ~eChatCommand();
 %rename(set_access_level) setAccessLevel;
     void setAccessLevel(tAccessLevel level);

@@ -294,6 +294,8 @@ protected:
 #ifdef ENABLE_SCRIPTING
 class zEffectorScripting : public zEffector
 {
+protected:
+    sCallable::ptr callback;
 public:
     static zEffector* create() { return new zEffectorScripting(); };
     zEffectorScripting():zEffector() { }; //<! Constructor
@@ -306,8 +308,6 @@ public:
     void readXML(tXmlParser::node const &);
 
     virtual void effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets);
-protected:
-    tScripting::proc_type callback;
 };
 #endif
 

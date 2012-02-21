@@ -6540,6 +6540,10 @@ eLadderLogWriter::eLadderLogWriter(char const *ID, bool enabledByDefault) :
     enabled)),
     cache(id) {
     writers().insert(std::pair<std::string,eLadderLogWriter*>(std::string(ID),this));
+#ifdef ENABLE_SCRIPTING
+    data = sScripting::GetInstance()->CreateArgs();
+#endif
+
 }
 
 eLadderLogWriter::~eLadderLogWriter() {
@@ -6562,17 +6566,14 @@ void eLadderLogWriter::write() {
     if(enabled) {
         se_SaveToLadderLog(cache);
 #ifdef ENABLE_SCRIPTING
-        args tmp;
-        tmp << data;
-        for(std::vector<tScripting::proc_type>::iterator it = callbacks.begin(); it < callbacks.end(); it++)
-            tScripting::GetInstance().Exec(*it, &tmp);
-        tmp.clear();
+        for(std::vector<sCallable::ptr>::iterator it = callbacks.begin(); it < callbacks.end(); it++) {
+            **it << data;
+            (*it)->Call();
+        }
+        data->Clear();
 #endif
     }
     cache = id;
-#ifdef ENABLE_SCRIPTING
-    data.clear();
-#endif
 }
 
 void eLadderLogWriter::setAll(bool enabled) {
@@ -6609,7 +6610,7 @@ std::map<std::string, eChatCommand *> &eChatCommand::chatCommands() {
     return list;
 }
 
-eChatCommand::eChatCommand(const char *ID, tScripting::proc_type proc, tAccessLevel level) :
+eChatCommand::eChatCommand(const char *ID, sCallable::ptr proc, tAccessLevel level) :
     id(ID), callback(proc), accessLevel(level)
 {
     con << "add " << ID << " chat command !\n";
@@ -6631,10 +6632,7 @@ void eChatCommand::run(ePlayerNetID * admin, tString say, char const * command) 
         sn_ConsoleOut( tOutput( "$access_level_op_denied", command ), admin->Owner() );
         return;
     }
-    args tmp;
-    tmp << admin->GetUserName() << say;
-    tScripting::GetInstance().Exec(callback, &tmp);
-    tmp.clear();
+    callback->Call(admin->GetUserName(), say);
 }
 
 eChatCommand *eChatCommand::getChatCommand(char const *ID) {

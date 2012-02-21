@@ -50,6 +50,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include <set>
 #include <map>
+#include <vector>
+#include <boost/shared_ptr.hpp>
 #include <algorithm>
 #include <utility>
 #include "eChat.h"
@@ -567,8 +569,8 @@ class eLadderLogWriter {
     tSettingItem<bool> *conf;
     tColoredString cache;
 #ifdef ENABLE_SCRIPTING
-    std::vector<tScripting::proc_type> callbacks;
-    args data;
+    std::vector<sCallable::ptr> callbacks;
+    sArgs::ptr data;
 #endif
 public:
     eLadderLogWriter(char const *ID, bool enabledByDefault);
@@ -579,7 +581,7 @@ public:
         if(enabled) {
             cache << ' ' << s;
 #ifdef ENABLE_SCRIPTING
-	    data << s;
+	    *data << s;
 #endif
         }
         return *this;
@@ -592,9 +594,9 @@ public:
     static void setAll(bool enabled); //!< enable or disable all writers
 #ifdef ENABLE_SCRIPTING
     // bind a procedure from scripting language to this ladder log writer.
-    void setCallback(tScripting::proc_type proc) { callbacks.push_back(proc); }
+    void setCallback(sCallable::ptr proc) { callbacks.push_back(proc); }
     // remove a procedure from scripting language previously binded to this ladder log writer.
-    void unsetCallback(tScripting::proc_type proc) {callbacks.erase(std::find(callbacks.begin(),callbacks.end(),proc));}
+    void unsetCallback(sCallable::ptr proc) {callbacks.erase(std::find(callbacks.begin(),callbacks.end(), proc));}
     // clear all callback (for scripting reinit)
     static void clearCallbacks() {
         for(std::map<std::string, eLadderLogWriter *>::iterator it = writers().begin(); it != writers().end(); ++it)
@@ -608,11 +610,11 @@ public:
 class eChatCommand {
     static std::map<std::string, eChatCommand *> &chatCommands();
     tString id;
-    tScripting::proc_type callback;
+    sCallable::ptr callback;
     // access level a user has to have to be able to run this chat command 
     tAccessLevel accessLevel;
 public:
-    eChatCommand(const char *ID, tScripting::proc_type proc, tAccessLevel level);
+    eChatCommand(const char *ID, sCallable::ptr proc, tAccessLevel level);
     ~eChatCommand();
     void setAccessLevel(tAccessLevel level);
     void run(ePlayerNetID * admin, tString say, char const * command);
