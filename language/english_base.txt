@@ -802,14 +802,17 @@ ladderlog_write_basezone_conquerer_team_help  Write to ladderlog: BASEZONE_CONQU
 ladderlog_write_chat_help                     Write to ladderlog: CHAT <chatter> [/me] <chat string>
 ladderlog_write_command_help                  Write to ladderlog: COMMAND <player> <ip> <auth level> <command> <options>
 ladderlog_write_death_basezone_conquered_help Write to ladderlog: DEATH_BASEZONE_CONQUERED <player> [NO_ENEMIES]
+ladderlog_write_death_deathshot_help          Write to ladderlog: DEATH_DEATHSHOT <prey> <predator>
 ladderlog_write_death_deathzone_help          Write to ladderlog: DEATH_DEATHZONE <player>
 ladderlog_write_death_frag_help               Write to ladderlog: DEATH_FRAG <prey> <predator>
-ladderlog_write_death_rubberzone_help         Write to ladderlog: DEATH_RUBBERZONE <player>
+ladderlog_write_death_rubberzone_help         Write to ladderlog: DEATH_RUBBERZONE <player>   
+ladderlog_write_death_self_destruct_help      Write to ladderlog: DEATH_SELF_DESTRUCT <prey> <predator>
 ladderlog_write_death_shot_frag_help          Write to ladderlog: DEATH_SHOT_FRAG <prey> <predator>
 ladderlog_write_death_shot_suicide_help       Write to ladderlog: DEATH_SHOT_SUICIDE <player>
 ladderlog_write_death_shot_teamkill_help      Write to ladderlog: DEATH_SHOT_TEAMKILL <prey> <predator>
 ladderlog_write_death_suicide_help            Write to ladderlog: DEATH_SUICIDE <player>
 ladderlog_write_death_teamkill_help           Write to ladderlog: DEATH_TEAMKILL <prey> <predator>
+ladderlog_write_death_zombiezone_help         Write to ladderlog: DEATH_ZOMBIEZONE <prey> [predator]
 ladderlog_write_flag_conquest_round_win_help  Write to ladderlog: FLAG_CONQUEST_ROUND_WIN <player> <flag team>
 ladderlog_write_flag_drop_help                Write to ladderlog: FLAG_DROP <player> <flag team>
 ladderlog_write_flag_held_help                Write to ladderlog: FLAG_HELD <player>

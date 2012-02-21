@@ -1658,6 +1658,10 @@ static eLadderLogWriter sg_deathShotFragWriter("DEATH_SHOT_FRAG", true);
 static eLadderLogWriter sg_deathShotSuicideWriter("DEATH_SHOT_SUICIDE", true);
 static eLadderLogWriter sg_deathShotTeamkillWriter("DEATH_SHOT_TEAMKILL", true);
 static eLadderLogWriter sg_deathDeathZoneWriter("DEATH_DEATHZONE", true);
+static eLadderLogWriter sg_deathZombieZoneWriter("DEATH_ZOMBIEZONE", true);
+static eLadderLogWriter sg_deathDeathShotWriter("DEATH_DEATHSHOT", true);
+static eLadderLogWriter sg_deathDeathSelfDestructWriter("DEATH_SELF_DESTRUCT", true);
+
 void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
 {
     if (!dynamicCreation_ || ( deathZoneType == TYPE_NORMAL && !team ) )
@@ -1737,25 +1741,37 @@ void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
 
                 if (prey->CurrentTeam() != team)
                 {
-                    sg_deathShotFragWriter << prey->GetUserName() << hunter->GetUserName();
-                    sg_deathShotFragWriter.write();
-                    char const *pWinString = "$player_win_shot";
-                    char const *pFreeString = "$player_free_shot";
-                    int score = score_shot;
-                    if (deathZoneType == TYPE_DEATH_SHOT)
+                    char const *pWinString = NULL;
+                    char const *pFreeString = NULL;
+                    int score = 0;
+                    if (deathZoneType == TYPE_SHOT)
                     {
+                        sg_deathShotFragWriter << prey->GetUserName() << hunter->GetUserName();
+                        sg_deathShotFragWriter.write();
+                        pWinString = "$player_win_shot";
+                        pFreeString = "$player_free_shot";
+                        score = score_shot;
+                    }
+                    else if (deathZoneType == TYPE_DEATH_SHOT)
+                    {
+                        sg_deathDeathShotWriter << prey->GetUserName() << hunter->GetUserName();
+                        sg_deathDeathShotWriter.write();
                         pWinString = "$player_win_death_shot";
                         pFreeString = "$player_free_death_shot";
                         score = score_death_shot;
                     }
                     else if (deathZoneType == TYPE_SELF_DESTRUCT)
                     {
+                        sg_deathDeathSelfDestructWriter << prey->GetUserName() << hunter->GetUserName();
+                        sg_deathDeathSelfDestructWriter.write();
                         pWinString = "$player_win_self_destruct";
                         pFreeString = "$player_free_self_destruct";
                         score = score_self_destruct;
                     }
                     else if (deathZoneType == TYPE_ZOMBIE_ZONE)
                     {
+                        sg_deathZombieZoneWriter << prey->GetUserName() << hunter->GetUserName();
+                        sg_deathZombieZoneWriter.write();
                         if (target == pSeekingCycle_)
                         {
                             pWinString = "$player_win_zombie_zone_revenge";
@@ -1779,7 +1795,7 @@ void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
                         win << pWinString;
                         hunter->AddScore(score, win, lose);
                     }
-                    else
+                    else if (pFreeString != NULL)
                     {
                         tColoredString hunterName;
                         hunterName << *hunter << tColoredString::ColorString(1,1,1);
@@ -1794,12 +1810,14 @@ void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
                         //Don't kill team
                         return;
                     }
-
-                    sg_deathShotTeamkillWriter << prey->GetUserName() << hunter->GetUserName();
-                    sg_deathShotTeamkillWriter.write();
-                    tColoredString hunterName;
-                    hunterName << *hunter << tColoredString::ColorString(1,1,1);
-                    sn_ConsoleOut( tOutput( "$player_teamkill", hunterName, preyName ) );
+                    if (deathZoneType == TYPE_SHOT)
+                    {
+                        sg_deathShotTeamkillWriter << prey->GetUserName() << hunter->GetUserName();
+                        sg_deathShotTeamkillWriter.write();
+                        tColoredString hunterName;
+                        hunterName << *hunter << tColoredString::ColorString(1,1,1);
+                        sn_ConsoleOut( tOutput( "$player_teamkill", hunterName, preyName ) );
+                    }
                 }
 
                 target->Killed(pOwnerCycle); //???make this player so it isn't NULL if dead?
@@ -1811,6 +1829,8 @@ void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
         {
             if(deathZoneType == TYPE_ZOMBIE_ZONE)
             {
+                sg_deathZombieZoneWriter << target->Player()->GetUserName();
+                sg_deathZombieZoneWriter.write();
                 target->Player()->AddScore(score_zombie_zone, tOutput(), "$player_lose_suicide");
             }
             else
