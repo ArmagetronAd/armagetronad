@@ -58,13 +58,11 @@ public:
 
 // getters
     virtual int                 GetInt() const = 0;
-    virtual bool                GetBool() const = 0;
     virtual REAL                GetReal() const = 0;
     virtual const char *        GetString() const = 0;
 
 // setters
     virtual void Set(const int &i) = 0;
-    virtual void Set(const bool &b) = 0;
     virtual void Set(const REAL &r) = 0;
     virtual void Set(const char* s) = 0;
     void Set(const tString &s) { this->Set(s.c_str()); }
@@ -72,7 +70,6 @@ public:
 
 // checkers
     virtual const bool IsInt() = 0;
-    virtual const bool IsBool() = 0;
     virtual const bool IsReal() = 0;
     virtual const bool IsString() = 0;
 
@@ -97,7 +94,6 @@ public:
 
     // add parameters for a future call
     virtual sArgs & operator<< (int const & i) = 0;
-    virtual sArgs & operator<< (bool const & b) = 0;
     virtual sArgs & operator<< (REAL const & r) = 0;
     virtual sArgs & operator<< (tOutput const & x) = 0;
     virtual sArgs & operator<< (tString const & x) = 0;
@@ -113,7 +109,6 @@ public:
 
     // add parameters for a future call
     virtual sCallable & operator<< (int const & i) = 0;
-    virtual sCallable & operator<< (bool const & b) = 0;
     virtual sCallable & operator<< (REAL const & r) = 0;
     virtual sCallable & operator<< (tOutput const & x) = 0;
     virtual sCallable & operator<< (tString const & x) = 0;
@@ -173,7 +168,7 @@ public:
 class tConfItemScript:public tConfItemBase{
     sCallable::ptr callback;
 public:
-    tConfItemScript(const char *title, sCallable::ptr proc):tConfItemBase(title),callback(proc){}
+    tConfItemScript(const char *title, sCallable::ptr proc): tConfItemBase(title), callback(proc) {}
     virtual ~tConfItemScript() {}
 
     virtual void ReadVal(std::istream &s)

@@ -24,18 +24,6 @@ $(swig_all): ${INTERFACEFILES}
 	$(SWIG) -c++ -ruby -autorename $(swig_all_include) -o $@ $<
 endif
 
-if WITH_PHP
-$(swig_all): ${INTERFACEFILES}
-	mkdir -p `dirname ${@}`
-	$(SWIG) -c++ -php $(swig_all_include) -o $@ $<
-endif
-
-if WITH_LUA
-$(swig_all): ${INTERFACEFILES}
-	mkdir -p `dirname ${@}`
-	$(SWIG) -c++ -lua $(swig_all_include) -o $@ $<
-endif
-
 if WITH_PYTHON
 $(swig_all): ${INTERFACEFILES}
 	mkdir -p `dirname ${@}`

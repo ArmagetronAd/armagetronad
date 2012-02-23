@@ -57,6 +57,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <iconv.h>
 #include <errno.h>
 
+
 //! like strnlen, but that's nonstandard :-(
 //! also replaces the equally nonstandard wcsnlen.
 static size_t my_strnlen(FTGL_CHAR const * c, size_t i) {
@@ -72,6 +73,7 @@ static size_t my_strnlen(FTGL_CHAR const * c, size_t i) {
 #define my_strncmp strncmp
 #else
 #define my_strncmp wcsncmp
+#include <iterator>
 
 // conversion functions utf8->wstring
 wchar_t sr_utf8216(tString::const_iterator &c, tString::const_iterator const &end) {
@@ -573,9 +575,22 @@ rTextField & rTextField::StringOutput(const FTGL_CHAR * c, ColorMode colorMode)
                 }
             }
             FTGL_STRING str(c, nextSpace);
-            //TODO: fix for non-utf8 rendering, too
 #ifdef FTGL_HAS_UTF8
             str = tColoredString::RemoveColors(str.c_str());
+#else
+            {
+                // Oh my this is wasteful: get the string back to utf8
+                tString str_in_utf8;
+                std::back_insert_iterator< std::string > inserter( str_in_utf8 );
+                for( unsigned int i = 0; i < str.size(); ++i )
+                {
+                    inserter = utf8::append( str[i], inserter );
+                }
+                // remove colors there
+                str_in_utf8 = tColoredString::RemoveColors(str_in_utf8.c_str());
+                // and convert back
+                sr_utf8216( str_in_utf8, str );
+            }
 #endif
             float wordWidth = sr_Font.GetWidth(str, cheight);
 

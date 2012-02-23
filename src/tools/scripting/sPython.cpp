@@ -49,19 +49,16 @@ public:
 
 // getters
     virtual int                 GetInt() const;
-    virtual bool                GetBool() const;
     virtual REAL                GetReal() const;
     virtual const char *        GetString() const;
 
 // setters
     virtual void Set(const int &i);
-    virtual void Set(const bool &b);
     virtual void Set(const REAL &r);
     virtual void Set(const char* s);
 
 // checkers
     virtual const bool IsInt();
-    virtual const bool IsBool();
     virtual const bool IsReal();
     virtual const bool IsString();
 
@@ -89,10 +86,6 @@ int sDataPython::GetInt() const {
     return (m_data ? PyInt_AS_LONG(m_data) : 0);
 }
 
-bool sDataPython::GetBool() const {
-    return (m_data ? PyInt_AS_LONG(m_data) : false);
-}
-
 REAL sDataPython::GetReal() const {
     return (m_data ? PyFloat_AS_DOUBLE(m_data) : .0);
 }
@@ -107,13 +100,6 @@ void sDataPython::Set(const int &i) {
     Py_XDECREF(m_data);
     // set the new value
     m_data = PyInt_FromLong(i);
-}
-
-void sDataPython::Set(const bool &b) {
-    // release existing data if needed
-    Py_XDECREF(m_data);
-    // set the new value
-    m_data = PyBool_FromLong(b);
 }
 
 void sDataPython::Set(const REAL &r) {
@@ -137,10 +123,6 @@ void sDataPython::Set(const char* s) {
 // checkers
 const bool sDataPython::IsInt() {
     return (!m_data && PyInt_Check(m_data));
-}
-
-const bool sDataPython::IsBool() {
-    return (!m_data && PyBool_Check(m_data));
 }
 
 const bool sDataPython::IsReal() {
@@ -189,7 +171,6 @@ public:
 
     // add parameters for a future call
     virtual sArgs & operator<< (int const & i);
-    virtual sArgs & operator<< (bool const & b);
     virtual sArgs & operator<< (REAL const & r);
     virtual sArgs & operator<< (tOutput const & x);
     virtual sArgs & operator<< (tString const & x);
@@ -197,7 +178,11 @@ public:
 
 // ugly get/set on raw PyObject *
     PyObject * Get() const { return m_data; }
-    void Set(const sArgsPython & p_args) { Py_XDECREF(m_data); m_data = p_args.Get(); Py_INCREF(m_data); }
+    void Set(const sArgsPython & p_args) {
+        Py_XDECREF(m_data);
+        m_data = p_args.Get();
+        if (m_data) Py_INCREF(m_data);
+    }
 };
 
 PyObject* sArgsPython::ExistsOrCreate() {
@@ -221,19 +206,6 @@ sArgs & sArgsPython::operator<< (int const & i) {
     }
     sDataPython item; // no need to DECREF as sDataPython is RAII
     item.Set(i);
-    if (item.Get()) {
-        PyList_Append(m_data, item.Get());
-    }
-    return *this;
-}
-
-sArgs & sArgsPython::operator<< (bool const & b) {
-    // does the list exist ? If not, let's try to create it. If it fails, return ...
-    if (!ExistsOrCreate()) {
-        return *this;
-    }
-    sDataPython item; // no need to DECREF as sDataPython is RAII
-    item.Set(b);
     if (item.Get()) {
         PyList_Append(m_data, item.Get());
     }
@@ -306,7 +278,6 @@ public:
 
     // add parameters for a future call
     virtual sCallable & operator<< (int const & i);
-    virtual sCallable & operator<< (bool const & b);
     virtual sCallable & operator<< (REAL const & r);
     virtual sCallable & operator<< (tOutput const & x);
     virtual sCallable & operator<< (tString const & x);
@@ -322,11 +293,6 @@ public:
 
 sCallable & sCallablePython::operator<< (int const & i) {
     m_args << i;
-    return *this;
-}
-
-sCallable & sCallablePython::operator<< (bool const & b) {
-    m_args << b;
     return *this;
 }
 
@@ -352,6 +318,13 @@ sCallable & sCallablePython::operator<< (sData const & d) {
 
 sCallable & sCallablePython::operator<< (sArgs const & d) {
     const sArgsPython * py_d = dynamic_cast<const sArgsPython *>(&d);
+    // if provided args is not python args or is empty,
+    // just clear current callable args and return
+    if ((!py_d) || (!py_d->Get())) {
+        m_args.Clear();
+        return *this;
+    }
+    // otherwise, replace current callable args
     m_args.Set(*py_d);
     return *this;
 }
@@ -367,8 +340,13 @@ void sCallablePython::Call() {
 
     sDataPython params, result;
     tCurrentAccessLevel elevator( tAccessLevel_Owner, true );
-    params.Set(PyList_AsTuple(m_args.Get()));
-    result.Set(PyEval_CallObject(m_callable, params.Get()));
+    // Handle properly the case where args is empty.
+    if (m_args.Get()) {
+        params.Set(PyList_AsTuple(m_args.Get()));
+    } else {
+        params.Set(PyTuple_New(0));
+    }
+        result.Set(PyEval_CallObject(m_callable, params.Get()));
     if(PyErr_Occurred()) PyErr_Print();
 }
 
@@ -471,6 +449,10 @@ sData::ptr sScriptingPython::CreateData() const
 sArgs::ptr sScriptingPython::CreateArgs() const
 {
     return sArgs::ptr(new sArgsPython);
+}
+
+sCallable::ptr CreateCallablePython(PyObject * input) {
+    return boost::shared_ptr<sCallable>(new sCallablePython(input));
 }
 
 #endif

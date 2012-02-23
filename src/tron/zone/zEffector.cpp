@@ -372,7 +372,7 @@ void zEffectorScripting::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTarget
     {
         *tmp << (*iter)->GetUserName();
     }
-    *callback << tmp;
+    *callback << *tmp;
     callback->Call();
     tmp->Clear();
 }

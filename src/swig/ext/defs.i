@@ -1,9 +1,15 @@
+%{
+#if defined(SWIGPYTHON)
+#include "scripting/sScripting.h"
+extern sCallable::ptr CreateCallablePython(PyObject * input); 
+#endif
+%}
+
 typedef float REAL;
 
 #if defined(SWIGPYTHON)
-  %typemap(in) sScripting::proc_type "$1 = (PyObject*)$input;"
-#else
-  #warning no "in" typemap defined
+%typemap(in) sCallable::ptr {
+    $1 = CreateCallablePython($input);
+}
 #endif
-
 
