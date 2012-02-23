@@ -492,7 +492,7 @@ unsigned short next_free(){
                 tAdvanceFrame(1000000);
 
                 // check for user abort, but just make it time out faster
-                if ( tConsole::Idle() )
+                if ( tConsole::Idle(false) )
                 {
                     timeout -= 10;
                 }
@@ -1165,7 +1165,7 @@ nNetObject *nNetObject::Object(int i){
     { // wait until it is spawned
 
         // check for user abort, but just make it time out faster
-        if ( tConsole::Idle() )
+        if ( tConsole::Idle(false) )
         {
             timeout -= 10;
         }
@@ -1975,7 +1975,7 @@ void sn_Sync(REAL timeout,bool sync_sn_netObjects, bool otherEnd){
                 sn_SendPlanned();
 
                 // check for user abort, but just make it time out faster
-                if ( tConsole::Idle() )
+                if ( tConsole::Idle(false) )
                 {
                     endTime -= 10;
                     timeout *= .5;
@@ -2018,7 +2018,7 @@ void sn_Sync(REAL timeout,bool sync_sn_netObjects, bool otherEnd){
             }
 
             // check for user abort, but just make it time out faster
-            if ( tConsole::Idle() )
+            if ( tConsole::Idle(false) )
             {
                 endTime -= 10;
             }
