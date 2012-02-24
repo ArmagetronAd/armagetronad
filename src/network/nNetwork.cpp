@@ -3204,7 +3204,7 @@ nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket
         sn_SendPlanned();
 
         // check for user abort
-        if ( tConsole::Idle() )
+        if ( tConsole::Idle(true) )
         {
             con << tOutput("$network_login_failed_abort");
             sn_SetNetState(nSTANDALONE);
