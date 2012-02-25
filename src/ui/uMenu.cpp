@@ -503,6 +503,10 @@ int uMenu::GetPrevSelectable(int start)
     return start;
 }
 
+#ifndef DEDICATED
+static bool s_idleBackground = false;
+#endif
+
 // select the menu item above "start"
 int uMenu::GetNextSelectable(int start)
 {
@@ -531,6 +535,8 @@ void uMenu::GenericBackground(REAL top){
 #ifndef DEDICATED
     if (idle)
     {
+        s_idleBackground = true;
+
         try
         {
             // throw tGenericException("test"); // (test exception throw to see if error handling works right)
@@ -574,10 +580,13 @@ void uMenu::GenericBackground(REAL top){
         }
         catch ( ... )
         {
+            s_idleBackground = false;
+
             // the idle background function is broken. Disable it and rethrow.
             idle = 0;
             throw;
         }
+        s_idleBackground = false;
     }
     else if (sr_glOut){
         uCallbackMenuBackground::MenuBackground();
@@ -1521,12 +1530,20 @@ void uCallbackMenuBackground::MenuBackground(){
 }
 
 // poll input, return true if ESC was pressed
-bool uMenu::IdleInput()
+bool uMenu::IdleInput( bool processInput )
 {
 #ifndef DEDICATED
+    if( !processInput )
+    {
+        sr_LockSDL();
+        SDL_PumpEvents();
+        sr_UnlockSDL();
+        return uMenu::quickexit != uMenu::QuickExit_Off;
+    }
+
     SDL_Event event;
     uInputProcessGuard inputProcessGuard;
-    while (su_GetSDLInput(event))
+    while (!s_idleBackground && su_GetSDLInput(event))
     {   
         switch (event.type)
         {
@@ -1545,6 +1562,8 @@ bool uMenu::IdleInput()
             break;
         }
     }   
+
+    return uMenu::quickexit != uMenu::QuickExit_Off;
 #endif
 
     return false;

@@ -397,7 +397,7 @@ bool rInputStream::HandleInput()
     // 0 return on lenRead means end of file,
     // -1 means an error unless errno has these specific values,
     // in which case there is just no data currently.
-    return lenRead != 0 && ( errno == EAGAIN || errno == EWOULDBLOCK );
+    return ( lenRead == -1 && ( errno == EAGAIN || errno == EWOULDBLOCK ) ) || ( lenRead == 0 && file_ );
 #endif
 }
 
