@@ -822,6 +822,7 @@ ladderlog_write_team_player_added_help        Write to ladderlog: TEAM_PLAYER_AD
 ladderlog_write_team_player_removed_help      Write to ladderlog: TEAM_PLAYER_REMOVED <team name> <player>
 ladderlog_game_time_interval_help If non-negative, write a line with the current game time to the ladder log every n seconds.
 chat_log_help			Write machine parsable chat messages to var/chatlog.txt
+console_log_help		Write all console messages to var/consolelog.txt
 show_fps_help			Enable fps display
 floor_mirror_help		Floor mirror mode
 floor_detail_help		Floor detail settings
