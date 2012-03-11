@@ -335,6 +335,7 @@ wait_for_external_script_timeout_help If the server has been paused by WAIT_FOR_
 
 spawn_script_help                   Spawns an external script from a scripts/ subdirectory on the data path.
 respawn_script_help                 Spawns an external script from a scripts/ subdirectory on the data path if no already running instance is found.
+force_respawn_script_help           Spawns an external script from a scripts/ subdirectory on the data path after killing the other possibly running instance.
 kill_script_help                    Kills a script. Argument must match the SPAWN_SCRIPT argument.
 check_script_help                   Should safety checks be done on script commands? Very much recommended to leave this on.
 
@@ -854,6 +855,7 @@ chat_log_help			Write machine parsable chat messages to var/chatlog.txt
 chatlog_write_team      Write /team messages to chatlog [1: on | 0:off]
 chatlog_write_pm        Write Private messages (/msg) to chatlog [1: on | 0:off]
 CHATLOG_WRITE_TEAM  CHATLOG_WRITE_PM
+console_log_help		Write all console messages to var/consolelog.txt
 show_fps_help			Enable fps display
 floor_mirror_help		Floor mirror mode
 floor_detail_help		Floor detail settings

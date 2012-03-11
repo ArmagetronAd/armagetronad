@@ -69,6 +69,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "eVoter.h"
 #include "tRecorder.h"
 #include "gSvgOutput.h"
+#include "rScreen.h"
 
 #include "gParser.h"
 #include "tResourceManager.h"
@@ -5054,7 +5055,10 @@ void Activate(bool act){
 
     sr_Activate( act );
 
-    sg_SoundPause( !act, true );
+    if (!sr_keepWindowActive || act)
+    {
+        sg_SoundPause( !act, true );
+    }
 
     if ( !tRecorder::IsRunning() )
     {
