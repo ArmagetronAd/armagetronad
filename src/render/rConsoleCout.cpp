@@ -657,22 +657,40 @@ static void sr_RespawnScriptCommand( std::istream & s )
 static tConfItemFunc sr_respawnScript( "RESPAWN_SCRIPT", sr_RespawnScriptCommand );
 static tAccessLevelSetter sr_respawnScriptALS( sr_respawnScript, tAccessLevel_Owner );
 
-// respawns a script
-static void sr_KillScriptCommand( std::istream & s )
+static void sr_KillScript( tString const & command, bool shouldWarn=true )
 {
-    tString command;
-    command.ReadLine(s);
-    
     rScriptStream * stream = sr_FindScriptStream( command );
     if( stream )
     {
         con << "Killing script \'" << command << "\'.\n";
         stream->Close();
     }
-    else
+    else if ( shouldWarn )
     {
         con << "No script named \'" << command << "\' running.\n";
     }
+}
+
+// force respawn a script
+static void sr_ForceRespawnScriptCommand( std::istream & s )
+{
+    tString command;
+    command.ReadLine(s);
+    
+    sr_KillScript( command, false );
+    sr_SpawnScript( command );
+}
+
+static tConfItemFunc sr_forceRespawnScript( "FORCE_RESPAWN_SCRIPT", sr_ForceRespawnScriptCommand );
+static tAccessLevelSetter sr_forceRespawnScriptALS( sr_forceRespawnScript, tAccessLevel_Owner );
+
+// kills a script
+static void sr_KillScriptCommand( std::istream & s )
+{
+    tString command;
+    command.ReadLine(s);
+    
+    sr_KillScript( command );
 }
 
 static tConfItemFunc sr_killScript( "KILL_SCRIPT", sr_KillScriptCommand );
