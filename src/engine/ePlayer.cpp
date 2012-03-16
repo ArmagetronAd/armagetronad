@@ -2064,9 +2064,9 @@ static tAccessLevel se_adminAccessLevel = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_adminAccessLevelConf( "ACCESS_LEVEL_ADMIN", se_adminAccessLevel );
 static tAccessLevelSetter se_adminAccessLevelConfLevel( se_adminAccessLevelConf, tAccessLevel_Owner );
 
+static eLadderLogWriter se_commandWriter( "COMMAND", true );
+
 void handle_command_intercept( ePlayerNetID *p, tString const & command, std::istream & s, tString const & say ) {
-    static eLadderLogWriter se_commandWriter( "COMMAND", true );
-    
     tString commandArguments;
     commandArguments.ReadLine( s );
     
