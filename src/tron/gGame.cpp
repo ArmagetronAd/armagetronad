@@ -4774,6 +4774,11 @@ static nDescriptor sg_clientFullscreenMessage(312,sg_ClientFullscreenMessage,"cl
 
 void sg_FullscreenMessageWait()
 {
+    if( sn_GetNetState() != nSERVER )
+    {
+        return;
+    }
+
     // wait for the clients to have seen the message
     {
         // stop the game
