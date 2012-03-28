@@ -124,6 +124,9 @@ void GLmeter_subby(float value,float max, float locx, float locy, float size, co
     }
 }
 
+static REAL sg_hudCacheThreshold=.0001;
+static tSettingItem< REAL > sg_minDropIntervalConf( "HUD_CACHE_THRESHOLD", sg_hudCacheThreshold );
+
 class gGLMeter
 {
 public:
@@ -139,7 +142,7 @@ public:
         REAL change = rel - oldRel_;
 
         // see if the gauge change is enough to warrant an update
-        if ( change * change * ( time - oldTime_ ) > .000001 || time < oldTime_ )
+        if ( change * change * ( time - oldTime_ ) > sg_hudCacheThreshold*sg_hudCacheThreshold || time < oldTime_ )
         {
             list_.Clear();
         }

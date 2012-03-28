@@ -731,6 +731,7 @@ score_locx_help                   Horizontal position of the score display
 score_locy_help                   Vertical position of the score display
 score_size_help                   Size of the score display
 cm_locy_help                      Vertical position of the center messages
+hud_cache_threshold_help          Update threshold for HUD gauges, only in effect when display lists are activated: if the relative change times the amount of time since the last update is bigger than this, the gauge gets updated.
 
 #floor
 grid_size_help			Distance between grid lines
