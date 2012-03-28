@@ -2176,7 +2176,7 @@ void sg_DisplayVersionInfo() {
     versionInfo << "$version_info_gl_version";
     versionInfo << gl_version;
 
-    sg_FullscreenMessage("$version_info_title", versionInfo, 1000);
+    sg_ClientFullscreenMessage("$version_info_title", versionInfo, 1000);
 }
 
 void sg_StartupPlayerMenu();
@@ -5015,6 +5015,11 @@ static nProtoBufDescriptor< Game::FullscreenMessage > sg_fullscreenMessageDescri
 
 void sg_FullscreenMessageWait()
 {
+    if( sn_GetNetState() != nSERVER )
+    {
+        return;
+    }
+
     // wait for the clients to have seen the message
     {
         // stop the game

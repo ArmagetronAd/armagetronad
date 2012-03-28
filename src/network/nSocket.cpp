@@ -2997,35 +2997,36 @@ bool nBasicNetworkSystem::Select( REAL dt )
         if ( controlSocket_.GetSocket() < 0 )
         {
             tDelay( int( dt * 1000000 ) );
-            return false;
         }
-
-        fd_set rfds; // set of sockets to wathc
-        struct timeval tv; // time value to pass to select()
-
-        FD_ZERO( &rfds );
-
-        // watch the control socket
-        FD_SET( controlSocket_.GetSocket(), &rfds );
-        // con << "Watching " << controlSocket_.GetSocket();
-
-        int max = controlSocket_.GetSocket();
-
-        // watch listening sockets
-        for( nSocketListener::SocketArray::const_iterator iter = listener_.GetSockets().begin(); iter != listener_.GetSockets().end(); ++iter )
+        else
         {
-            FD_SET( (*iter).GetSocket(), &rfds );
-            if ( (*iter).GetSocket() > max )
-                max = (*iter).GetSocket();
-            // con << ", " << (*iter).GetSocket();
+            fd_set rfds; // set of sockets to watch
+            struct timeval tv; // time value to pass to select()
+
+            FD_ZERO( &rfds );
+
+            // watch the control socket
+            FD_SET( controlSocket_.GetSocket(), &rfds );
+            // con << "Watching " << controlSocket_.GetSocket();
+
+            int max = controlSocket_.GetSocket();
+
+            // watch listening sockets
+            for( nSocketListener::SocketArray::const_iterator iter = listener_.GetSockets().begin(); iter != listener_.GetSockets().end(); ++iter )
+            {
+                FD_SET( (*iter).GetSocket(), &rfds );
+                if ( (*iter).GetSocket() > max )
+                    max = (*iter).GetSocket();
+                // con << ", " << (*iter).GetSocket();
+            }
+
+            // set time
+            tv.tv_sec  = static_cast< long int >( dt );
+            tv.tv_usec = static_cast< long int >( (dt-tv.tv_sec)*1000000 );
+
+            // delegate to system select
+            retval = select(max+1, &rfds, NULL, NULL, &tv);
         }
-
-        // set time
-        tv.tv_sec  = static_cast< long int >( dt );
-        tv.tv_usec = static_cast< long int >( (dt-tv.tv_sec)*1000000 );
-
-        // delegate to system select
-        retval = select(max+1, &rfds, NULL, NULL, &tv);
     }
     tRecorder::Record( section, retval );
 
