@@ -127,11 +127,11 @@ private:
 
 static gMainCommandLineAnalyzer commandLineAnalyzer;
 
-static bool use_directx=true;
+extern bool sr_useDirectX; // rScreen.cpp
 #ifdef WIN32
 static tConfItem<bool> udx("USE_DIRECTX","makes use of the DirectX input "
                            "fuctions; causes some graphic cards to fail to work (VooDoo 3,...)",
-                           use_directx);
+                           sr_useDirectX);
 #endif
 
 extern void exit_game_objects(eGrid *grid);
@@ -633,9 +633,9 @@ int main(int argc,char **argv){
         if ( commandLineAnalyzer.windowed_ )
             currentScreensetting.fullscreen   = false;
         if ( commandLineAnalyzer.use_directx_ )
-            use_directx                       = true;
+            sr_useDirectX                       = true;
         if ( commandLineAnalyzer.dont_use_directx_ )
-            use_directx                       = false;
+            sr_useDirectX                       = false;
 
         gAICharacter::LoadAll(tString( "aiplayers.cfg" ) );
 
@@ -705,7 +705,7 @@ int main(int argc,char **argv){
 #ifdef WIN32
             // disable DirectX by default; it causes problems with some boards.
             if (!getenv( "SDL_VIDEODRIVER") ) {
-                if (use_directx) {
+                if (sr_useDirectX) {
                     sg_PutEnv( "SDL_VIDEODRIVER=directx" );
                 }
                 else

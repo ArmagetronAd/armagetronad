@@ -385,6 +385,10 @@ static int countBits(unsigned int count)
 }
 #endif
 
+// flag indicating whether directX is supposed to be used for input (defaults to false, crashes on my Win7)
+bool sr_useDirectX = false;
+static bool use_directx_back = false;
+
 static bool lowlevel_sr_InitDisplay(){
 #ifndef DEDICATED
     rScreenSize & res = currentScreensetting.fullscreen ? currentScreensetting.res : currentScreensetting.windowSize;
@@ -813,6 +817,7 @@ static bool lowlevel_sr_InitDisplay(){
 
     lastSuccess=currentScreensetting;
     failed_attempts = 0;
+    sr_useDirectX = use_directx_back;
     st_SaveConfig();
 #endif
     return true;
@@ -821,6 +826,8 @@ static bool lowlevel_sr_InitDisplay(){
 bool cycleprograminited = false;
 
 bool sr_InitDisplay(){
+    use_directx_back = sr_useDirectX;
+
     cycleprograminited = false;
     while (failed_attempts <= MAXEMERGENCY+1)
     {
@@ -831,6 +838,8 @@ bool sr_InitDisplay(){
             std::cout.flush();
 #endif
             currentScreensetting = *emergency[failed_attempts];
+
+            sr_useDirectX = false;
         }
 
         // prepare for crash, note failure and save config
