@@ -140,12 +140,16 @@ private:
 
 static gMainCommandLineAnalyzer commandLineAnalyzer;
 
+// flag indicating whether directX is supposed to be used for input (defaults to false, crashes on my Win7)
+static bool sr_useDirectX = false;
+/*
 extern bool sr_useDirectX; // rScreen.cpp
 #ifdef WIN32
 static tConfItem<bool> udx("USE_DIRECTX","makes use of the DirectX input "
                            "fuctions; causes some graphic cards to fail to work (VooDoo 3,...)",
                            sr_useDirectX);
 #endif
+*/
 
 extern void exit_game_objects(eGrid *grid);
 
