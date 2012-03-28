@@ -704,8 +704,14 @@ int main(int argc,char **argv){
 
 #ifdef WIN32
             // disable DirectX by default; it causes problems with some boards.
-            if (!use_directx && !getenv( "SDL_VIDEODRIVER") ) {
-                sg_PutEnv( "SDL_VIDEODRIVER=windib" );
+            if (!getenv( "SDL_VIDEODRIVER") ) {
+                if (use_directx) {
+                    sg_PutEnv( "SDL_VIDEODRIVER=directx" );
+                }
+                else
+                {
+                    sg_PutEnv( "SDL_VIDEODRIVER=windib" );
+                }
             }
 #endif
 
