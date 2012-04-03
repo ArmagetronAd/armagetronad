@@ -83,3 +83,6 @@ src/tFakeVersion.h
 config/settings_custom.cfg
 config/server_info.cfg
 src/armagetronad-serverquery
+./rubbish
+__pycache__
+./src/armagetronad_serverquery
