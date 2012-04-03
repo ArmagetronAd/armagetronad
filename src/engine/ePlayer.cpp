@@ -4085,7 +4085,14 @@ void ePlayerNetID::Chat(const tString &s_orig)
         {
         case nCLIENT:
         {
-            se_ChatMessageForServer( this, s )->BroadCast();
+            if( s_orig.StartsWith( "/ready") )
+            {
+                se_Ready( this );
+            }
+            else
+            {
+                se_ChatMessageForServer( this, s )->BroadCast();
+            }
             break;
         }
         case nSERVER:
