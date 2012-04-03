@@ -3963,7 +3963,7 @@ void gGame::Analysis(REAL time){
                         }
                     }
                 }
-                else if ( time >= drawtime && sg_currentSettings->gameType!=gFREESTYLE )
+                else if ( time >= drawtime && sg_currentSettings->gameType!=gFREESTYLE && se_matches >= 0 )
                 {
                     tOutput drawmsg;
                     if( drawreason == &DrawReason_MinAlive )
