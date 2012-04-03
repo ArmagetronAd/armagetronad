@@ -32,6 +32,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tRecorder.h"
 #include "tDirectories.h"
 
+#include <map>
+
 #include <stdio.h>
 #include <fcntl.h>
 #include <sstream>
@@ -482,6 +484,15 @@ public:
     {
     }
 
+    void AddAll( const std::map< tString, tString > & m )
+    {
+        std::map< tString, tString >::const_iterator it = m.begin();
+        for ( ; it != m.end(); ++it )
+        {
+            Add( it->first, it->second );
+        }
+    }
+
     void Add( char const * var, tString const & value )
     {
         strings_[strings_.Len()] = tString(var) + "=" + value;
@@ -495,6 +506,20 @@ private:
     tArray< char const * > envp_;
     tArray< tString > strings_;
 };
+
+static std::map< tString, tString > sr_globalScriptEnv;
+
+static void sr_ScriptEnv( std::istream & s )
+{
+    tString key, value;
+    s >> key;
+    s >> value;
+    sr_globalScriptEnv[key] = value;
+}
+
+static tConfItemFunc sr_scriptEnvConf( "SCRIPT_ENV", sr_ScriptEnv );
+static tAccessLevelSetter sr_scriptEnvALS( sr_scriptEnvConf, tAccessLevel_Owner );
+
 
 static void sr_SpawnScript( tString const & command )
 {
@@ -600,6 +625,9 @@ static void sr_SpawnScript( tString const & command )
         env.AddPath( "ARMAGETRONAD_PATH_VAR", tDirectories::Var() );
         env.AddPath( "ARMAGETRONAD_PATH_SCREENSHOT", tDirectories::Screenshot() );
         env.AddPath( "ARMAGETRONAD_PATH_RESOURCE", tDirectories::Resource() );
+        
+        // add user-specified variables
+        env.AddAll( sr_globalScriptEnv );
 
         // add all settings
         tConfItemBase::tConfItemMap const & confItemMap = tConfItemBase::GetConfItemMap();
