@@ -181,6 +181,7 @@ static rGLFence & sr_GetFence()
 #endif // DEDICATED
 
 bool sr_screenshotIsPlanned=false;
+tString sr_screenshotName("screenshot");
 static bool   s_videoout    =false;
 static int    s_videooutDest=fileno(stdout);
 
@@ -239,9 +240,8 @@ static void SDL_SavePNG(SDL_Surface *image, tString filename){
 
 static void make_screenshot(){
 #ifndef DEDICATED
-    // screenshot count
-    static int number=0;
-    number++;
+    // duplicate count (if we already took a screenshot the same second/with the same name)
+    int number=0;
 
     SDL_Surface *image;
     SDL_Surface *temp;
@@ -276,8 +276,11 @@ static void make_screenshot(){
         while ( !done )
         {
             // generate filename
-            tString fileName("screenshot_");
-            fileName << number;
+            tString fileName(sr_screenshotName);
+            if(number)
+            {
+                fileName << '_' << number;
+            }
             if (png_screenshot)
                 fileName << ".png";
             else
