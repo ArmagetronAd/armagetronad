@@ -78,4 +78,6 @@ public:
     static rFramedropTolerance framedropTolerance_;
 };
 
+extern tString sr_screenshotName;
+
 #endif

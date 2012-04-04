@@ -44,6 +44,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include <sstream>
 #include <set>
+#include <ctime>
 
 #ifndef DEDICATED
 static tConfItem<int>   tm0("TEXTURE_MODE_0",rTextureGroups::TextureMode[0]);
@@ -1117,9 +1118,18 @@ static uActionGlobal screenshot( "SCREENSHOT" );
 
 static uActionGlobal togglefullscreen( "TOGGLE_FULLSCREEN" );
 
+static const char* sg_defaultScreenshotName = "%Y-%m-%d_%H-%M-%S";
 static bool screenshot_func(REAL x){
     if (x>0){
 #ifndef DEDICATED
+        time_t rawtime;
+        char rawname[30];
+        time( &rawtime );
+        strftime(
+            rawname, 29,
+            sg_defaultScreenshotName, localtime( &rawtime )
+            );
+        sr_screenshotName = rawname;
         sr_screenshotIsPlanned=true;
 #endif
     }
