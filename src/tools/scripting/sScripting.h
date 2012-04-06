@@ -69,9 +69,9 @@ public:
     void Set(const tOutput &s) { this->Set((const char *)s); }
 
 // checkers
-    virtual const bool IsInt() = 0;
-    virtual const bool IsReal() = 0;
-    virtual const bool IsString() = 0;
+    virtual bool IsInt() = 0;
+    virtual bool IsReal() = 0;
+    virtual bool IsString() = 0;
 
 // copy and assignment
     virtual void Copy(const sData & source) = 0;

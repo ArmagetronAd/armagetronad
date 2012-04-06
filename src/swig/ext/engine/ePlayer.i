@@ -18,7 +18,7 @@
 };
 
 %rename(PlayerConf) ePlayer;
-class ePlayer: public uPlayerPrototype {
+class ePlayer {
 public:
 %rename(name) Name;
     virtual const char *Name() const;

@@ -1,12 +1,24 @@
 %module armagetronad
 
+%ignore operator<<;
+%ignore operator==;
+%ignore operator!=;
+%ignore tCoord::operator=;
+
 %include "stl.i"
 %include "defs.i"
 %include "std/sstream.i"
+
+#if defined(SWIGRUBY)
+%include "ruby.i"
+#elif defined(SWIGPYTHON)
+%include "python.i"
+#endif
+
 %include "tools/tCoord.i"
 %include "tools/tColor.i"
 %include "tools/tString.i"
-%include "tools/tDirectories.i"
+//%include "tools/tDirectories.i"
 %include "tools/tLocale.i"
 %include "tools/tConfiguration.i"
 %include "tools/tArray.i"
