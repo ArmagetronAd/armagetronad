@@ -1118,7 +1118,10 @@ static uActionGlobal screenshot( "SCREENSHOT" );
 
 static uActionGlobal togglefullscreen( "TOGGLE_FULLSCREEN" );
 
+#ifndef DEDICATED
 static const char* sg_defaultScreenshotName = "%Y-%m-%d_%H-%M-%S";
+#endif
+
 static bool screenshot_func(REAL x){
     if (x>0){
 #ifndef DEDICATED
