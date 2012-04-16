@@ -28,6 +28,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #ifndef ArmageTron_SYSDEP_H
 #define ArmageTron_SYSDEP_H
 
+class tString;
+
 //! None of the functions in this class are really system dependant any more,
 //! but they were once. This could just go into rScreen.cpp nowadays, or be
 //! renamed to rSwapControl, as buffer swaps and syncing properly and making
