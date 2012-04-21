@@ -1193,6 +1193,19 @@ void sg_DeclareWinner( eTeam* team, char const * message )
     }
 }
 
+static void sg_DeclareRoundWinner(std::istream &s)
+{
+    ePlayerNetID *winningPlayer = ePlayerNetID::ReadPlayer(s);
+    if(!winningPlayer)
+    {
+        return;
+    }
+    static const char* message="$player_win_command";
+    sg_DeclareWinner( winningPlayer->CurrentTeam(), message );
+}
+
+static tConfItemFunc sg_DeclareRoundWinner_conf("DECLARE_ROUND_WINNER",&sg_DeclareRoundWinner);
+
 void check_hs(){
     if (sg_singlePlayer)
         if(se_PlayerNetIDs.Len()>0 && se_PlayerNetIDs(0)->IsHuman())
