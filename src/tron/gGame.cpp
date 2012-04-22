@@ -775,6 +775,18 @@ void sg_DeclareWinner( eTeam* team, char const * message )
     }
 }
 
+static void sg_DeclareRoundWinner(std::istream &s)
+{
+    ePlayerNetID *winningPlayer = ePlayerNetID::ReadPlayer(s);
+    if(!winningPlayer)
+    {
+        return;
+    }
+    static const char* message="$player_win_command";
+    sg_DeclareWinner( winningPlayer->CurrentTeam(), message );
+}
+
+static tConfItemFunc sg_DeclareRoundWinner_conf("DECLARE_ROUND_WINNER",&sg_DeclareRoundWinner);
 
 static tCONTROLLED_PTR(gGame) sg_currentGame;
 

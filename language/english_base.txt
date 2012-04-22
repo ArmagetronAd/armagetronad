@@ -2805,6 +2805,8 @@ player_win_conquest_specific \1 was awarded \2 points for conquering \3's base.\
 player_kill_collapse        \1 was eradicated by its collapsing zone.\n
 player_win_hole             \1 got \2 points for a sacrifice for the good of the team.\n
 player_lose_hole            0xffff00ZOMG! 0xff7f00HOLER!!1!!0xRESETT \1 lost \2 points for being a cheap ass lamer.\n
+player_win_command			\1 was awarded \2 points for winning the round.\n
+declare_round_winner_help		Declare the winner of the current round and end the round. Usage: DECLARE_ROUND_WINNER <player>
 
 player_base_respawn		\1 was respawned by \2.\n
 player_base_enemy_respawn	\1 was respawned by their enemy \2.\n

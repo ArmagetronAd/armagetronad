@@ -443,6 +443,8 @@ public:
     void GreetHighscores(tString &s); // tell him his positions in the
     // highscore lists (defined in game.cpp)
 
+    static ePlayerNetID * ReadPlayer( std::istream & s ); //!< reads a player from the stream
+
     static void Update();           // creates ePlayerNetIDs for new players
     // and destroys those of players that have left
 

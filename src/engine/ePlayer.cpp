@@ -8613,7 +8613,7 @@ static void se_BanConf(std::istream &s)
 static tConfItemFunc se_banConf("BAN",&se_BanConf);
 static tAccessLevelSetter se_banConfLevel( se_banConf, tAccessLevel_Moderator );
 
-static ePlayerNetID * ReadPlayer( std::istream & s )
+ePlayerNetID * ePlayerNetID::ReadPlayer( std::istream & s )
 {
     // read name of player to be returned
     tString name;
@@ -8641,6 +8641,11 @@ static ePlayerNetID * ReadPlayer( std::istream & s )
     } catch ( tGenericException ) {}
 
     return ePlayerNetID::FindPlayerByName( name );
+}
+
+static ePlayerNetID * ReadPlayer( std::istream & s )
+{
+    return ePlayerNetID::ReadPlayer( s );
 }
 
 static void Kill_conf(std::istream &s)
