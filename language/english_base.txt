@@ -2839,7 +2839,6 @@ nconfig_error_nonet         Got conf message for  setting \1 which is not networ
 nconfig_error_ignoreold		Ignoring old conf message for setting \1.\n
 nconfig_value_changed		\1 changed from \2 to \3 on server order.\n
 
-config_accesslevel_-1       Shell
 config_accesslevel_0        Owner
 config_accesslevel_1        Administrator
 config_accesslevel_2        Moderator
