@@ -1268,9 +1268,12 @@ echo "     Log files will be kept in          : `eval echo ${logdir}`"
 echo "     Add user to run server             : $enable_useradd"
 echo ""
 fi
+if test x$build_regular = xtrue ;
+then
 echo "     Sound support: $enable_sound"
 echo "     Particle System support: $enable_particles"
 echo "     Joystick support: $enable_joystick"
+fi
 zones_info="NO"
 if test x$enable_zonesv2 = xyes; then
 	zones_info="Basic"
