@@ -695,6 +695,24 @@ static void sr_KillScriptCommand( std::istream & s )
 
 static tConfItemFunc sr_killScript( "KILL_SCRIPT", sr_KillScriptCommand );
 static tAccessLevelSetter sr_killScriptALS( sr_killScript, tAccessLevel_Owner );
-#endif
 
-#endif
+void sr_ListScriptsCommand( std::istream & s )
+{
+    int numberScripts = 0;
+    for( int i = sr_inputStreams.Len()-1; i >= 0; --i )
+    {
+        rScriptStream * script = dynamic_cast< rScriptStream * >( (rStream*)sr_inputStreams[i] );
+        if( script )
+        {
+            numberScripts++;
+            con << "Script: " << script->GetName() << '\n';
+        }
+    }
+    if (!numberScripts)
+        con << "No scripts are currently running.\n";
+}
+static tConfItemFunc sr_listScripts( "LIST_SCRIPTS", sr_ListScriptsCommand );
+static tAccessLevelSetter sr_listScriptALS( sr_listScripts, tAccessLevel_Owner );
+
+#endif /* KRAWALL_SERVER */
+#endif /* HAVE_UNISTD_H */

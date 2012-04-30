@@ -29,7 +29,7 @@ Changes since 0.2.8.3.x:
   TEAM_PLAYER_REMOVED <team name> <player>
 - Manage external scripts on Unix dedicated servers. New commands: 
   SPAWN_SCRIPT, RESPAWN_SCRIPT, FORCE_RESPAWN_SCRIPT, KILL_SCRIPT,
-  CHECK_SCRIPT.
+  CHECK_SCRIPT, LIST_SCRIPTS.
 - Authentication is now enabled by default.
 
 Changes since 0.2.8.3.1:
