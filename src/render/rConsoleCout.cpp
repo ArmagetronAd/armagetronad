@@ -215,7 +215,7 @@ static void sr_HandleSigChild( int signal )
     int stat;
  
     /*Kills all the zombie processes*/
-    while(waitpid(-1, &stat, WNOHANG) > 0);
+    while(waitpid(-1, &stat, WNOHANG) > 0) {}
 }
 #endif
 
