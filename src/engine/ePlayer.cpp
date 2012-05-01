@@ -9513,10 +9513,12 @@ static void sg_AddScorePlayer(std::istream &s)
         ScoreStr = params.ExtractNonBlankSubString(pos);
         int pScore = atoi(ScoreStr);
         tString pMessage = params.SubStr(pos+1);
-        pMessage << "\n";
-
-        // Add score to team pTeam then send a message
-        pPlayer->AddScore(pScore,pMessage,pMessage);
+        if(pMessage.Len()<=1){
+            pPlayer->AddScore(pScore,pMessage,pMessage,false);
+        }else{
+            pMessage << "\n";
+            pPlayer->AddScore(pScore,pMessage,pMessage);
+        }
 }
 
 static tConfItemFunc sg_AddScorePlayer_conf("ADD_SCORE_PLAYER",&sg_AddScorePlayer);
