@@ -52,6 +52,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <sys/wait.h>
 #endif
 
+#ifdef TOP_SOURCE_DIR
+#include "nTrueVersion.h"
+#endif
+
+#ifndef TRUE_ARMAGETRONAD_VERSION
+#define TRUE_ARMAGETRONAD_VERSION VERSION
+#endif
+
 class rStream: public tReferencable< rStream >
 {
     rStream( rStream const & other );
@@ -625,6 +633,9 @@ static void sr_SpawnScript( tString const & command )
         env.AddPath( "ARMAGETRONAD_PATH_VAR", tDirectories::Var() );
         env.AddPath( "ARMAGETRONAD_PATH_SCREENSHOT", tDirectories::Screenshot() );
         env.AddPath( "ARMAGETRONAD_PATH_RESOURCE", tDirectories::Resource() );
+        
+        // add other data
+        env.Add( "ARMAGETRONAD_VERSION", tString( TRUE_ARMAGETRONAD_VERSION ) );
         
         // add user-specified variables
         env.AddAll( sr_globalScriptEnv );
