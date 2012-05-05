@@ -86,3 +86,6 @@ src/armagetronad-serverquery
 ./rubbish
 __pycache__
 ./src/armagetronad_serverquery
+src/armagetronad_main_master
+src/doc/COPYING.txt
+rubbish

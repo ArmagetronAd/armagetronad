@@ -355,6 +355,8 @@ respawn_script_help                 Spawns an external script from a scripts/ su
 force_respawn_script_help           Spawns an external script from a scripts/ subdirectory on the data path after killing the other possibly running instance.
 kill_script_help                    Kills a script. Argument must match the SPAWN_SCRIPT argument.
 check_script_help                   Should safety checks be done on script commands? Very much recommended to leave this on.
+list_scripts_help                   Lists active scripts.
+script_env_help                     Set custom environment variables for scripts. Usage: SCRIPT_ENV <variable name> <value>
 
 chatter_remove_time_help            Time in seconds after which a permanent chatter is removed from the game
 idle_remove_time_help               Time in seconds after which an inactive player is removed from the game
