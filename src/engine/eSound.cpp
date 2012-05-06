@@ -168,6 +168,7 @@ void se_SoundInit()
     if (!sound_is_there && sound_quality!=SOUND_OFF)
     {
         SDL_AudioSpec desired;
+        memset( &desired, 0, sizeof( SDL_AudioSpec ) );
 
         switch (sound_quality)
         {
