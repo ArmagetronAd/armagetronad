@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tConfiguration.h"
 #include "tRecorder.h"
 #include "tDirectories.h"
+#include "tVersion.h"
 
 #include <map>
 
@@ -630,6 +631,9 @@ static void sr_SpawnScript( tString const & command )
         env.AddPath( "ARMAGETRONAD_PATH_VAR", tDirectories::Var() );
         env.AddPath( "ARMAGETRONAD_PATH_SCREENSHOT", tDirectories::Screenshot() );
         env.AddPath( "ARMAGETRONAD_PATH_RESOURCE", tDirectories::Resource() );
+        
+        // add other data
+        env.Add( "ARMAGETRONAD_VERSION", st_programVersion );
         
         // add user-specified variables
         env.AddAll( sr_globalScriptEnv );
