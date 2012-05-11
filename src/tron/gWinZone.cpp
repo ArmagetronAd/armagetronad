@@ -5789,7 +5789,9 @@ static void sg_CreateZone_conf(std::istream &s)
 
     tString params;
     params.ReadLine( s, true );
-
+    //retrieve the size multiplier once, using it a lot
+    float sizeMultiplier = gArena::SizeMultiplier();
+    
     // first parse the line to get the params : <win|death> <x> <y> <size> <growth>
     eTeam *zoneTeam=NULL;
     int pos = 0;                 //
@@ -5853,7 +5855,7 @@ static void sg_CreateZone_conf(std::istream &s)
             x = params.ExtractNonBlankSubString(pos);
             if(x == "Z" || x == "z" || x == "") break;
             y = params.ExtractNonBlankSubString(pos);
-            route.push_back(eCoord(atof(x), atof(y)));
+            route.push_back(eCoord(atof(x)*sizeMultiplier, atof(y)*sizeMultiplier));
         }
     }
     else
@@ -5881,7 +5883,7 @@ static void sg_CreateZone_conf(std::istream &s)
         tString  zoneJumpYStr;
         zoneJumpXStr = params.ExtractNonBlankSubString(pos);
         zoneJumpYStr = params.ExtractNonBlankSubString(pos);
-        zoneJump = eCoord(atof(zoneJumpXStr),atof(zoneJumpYStr));
+        zoneJump = eCoord(atof(zoneJumpXStr)*sizeMultiplier,atof(zoneJumpYStr)*sizeMultiplier);
         tString zoneRelAbsStr = params.ExtractNonBlankSubString(pos);
         if (zoneRelAbsStr=="") zoneRelAbsStr="rel";
         if (zoneRelAbsStr=="rel") relJump=1;
@@ -5894,7 +5896,7 @@ static void sg_CreateZone_conf(std::istream &s)
         REAL ydir = atof(ydir_str);
         if (xdir_str == "") xdir = 0.0;
         if (ydir_str == "") ydir = 0.0;
-        ndir = eCoord(xdir,ydir);
+        ndir = eCoord(xdir*sizeMultiplier,ydir*sizeMultiplier);
         const tString reloc_str = params.ExtractNonBlankSubString(pos);
         reloc = atof(reloc_str);
         if (reloc_str == "") reloc = 1.0;
@@ -5906,11 +5908,11 @@ static void sg_CreateZone_conf(std::istream &s)
     const tString targetRadiusStr = params.ExtractNonBlankSubString(pos);
 
     // second convert params ( to do : check validity).
-    eCoord zonePos = route.empty() ? eCoord(atof(zonePosXStr),atof(zonePosYStr)) : route.front();
-    const REAL zoneSize = atof(zoneSizeStr);
-    const REAL zoneGrowth = atof(zoneGrowthStr);
+    eCoord zonePos = route.empty() ? eCoord(atof(zonePosXStr)*sizeMultiplier,atof(zonePosYStr)*sizeMultiplier) : route.front();
+    const REAL zoneSize = atof(zoneSizeStr)*sizeMultiplier;
+    const REAL zoneGrowth = atof(zoneGrowthStr)*sizeMultiplier;
     //const REAL zoneRubber = atof(zoneRubberStr);
-    eCoord zoneDir = eCoord(atof(zoneDirXStr),atof(zoneDirYStr));
+    eCoord zoneDir = eCoord(atof(zoneDirXStr)*sizeMultiplier,atof(zoneDirYStr)*sizeMultiplier);
     gRealColor zoneColor;
     bool setColorFlag = false;
     if ((zoneRedStr!="")&&(zoneGreenStr!="")&&(zoneBlueStr!=""))
@@ -6091,7 +6093,7 @@ static void sg_CreateZone_conf(std::istream &s)
             "instead of <x> <y> one can write: L <x1> <y1> <x2> <y2> [...] Z\n";
         return;
     }
-        REAL targetRadius = atof(targetRadiusStr);
+        REAL targetRadius = atof(targetRadiusStr)*sizeMultiplier;
         bool zoneInteractiveBool =false;
         if (zoneInteractive=="true"){
             zoneInteractiveBool=true;
@@ -6173,9 +6175,9 @@ static void sg_SetZoneRadius(std::istream &s)
             zone->SetReferenceTime();
             // set new radius and speed to reach it ...
             if (speed==0)
-                zone->SetRadiusSmoothly( radius );
+                zone->SetRadiusSmoothly( radius*gArena::SizeMultiplier() );
             else
-                zone->SetRadiusSmoothly( radius, speed );
+                zone->SetRadiusSmoothly( radius*gArena::SizeMultiplier(), speed *gArena::SizeMultiplier());
             zone->RequestSync();
         }
         zone_id=gZone::FindNext(object_id_str, zone_id);
@@ -6198,12 +6200,13 @@ static void sg_SetZoneRoute(std::istream &s)
     speedstr = params.ExtractNonBlankSubString(pos);
     REAL speed = atof(speedstr);*/
     tString x,y;
+    float sizeMultiplier=gArena::SizeMultiplier();
     while(true)
     {
         x = params.ExtractNonBlankSubString(pos);
         if(x == "") break;
         y = params.ExtractNonBlankSubString(pos);
-        route.push_back(eCoord(atof(x), atof(y)));
+        route.push_back(eCoord(atof(x)*sizeMultiplier, atof(y)*sizeMultiplier));
     }
 
     // first check for the name
@@ -6258,7 +6261,7 @@ static void sg_SetZoneSpeed(std::istream &s)
     //        const tString mode_str = params.ExtractNonBlankSubString(pos);
     tString speedstr;
     speedstr = params.ExtractNonBlankSubString(pos);
-    REAL speed = atof(speedstr);
+    REAL speed = atof(speedstr)*gArena::SizeMultiplier();
 
     // first check for the name
     int zone_id;
@@ -6347,7 +6350,7 @@ static void sg_SetZoneExpansion(std::istream &s)
     int pos = 0;                 //
     const tString object_id_str = params.ExtractNonBlankSubString(pos);
     const tString expansion_str = params.ExtractNonBlankSubString(pos);
-    REAL expansion = atof(expansion_str);
+    REAL expansion = atof(expansion_str)*gArena::SizeMultiplier();
 
     // first check for the name
     int zone_id;
