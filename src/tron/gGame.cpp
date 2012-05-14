@@ -1455,7 +1455,7 @@ void init_game_grid(eGrid *grid, gParser *aParser){
         // let settings in the map file be executed with the rights of the person
         // who set the map
         tCurrentAccessLevel level( conf_mapfile.GetSetting().GetSetLevel(), true );
-        
+
         // and disallow CASACL and script spawning just in case
         tCasaclPreventer preventer;
 
@@ -5309,7 +5309,7 @@ static nCallbackLoginLogout lc(LoginCallback);
 static void sg_FillServerSettings()
 {
     nServerInfo::SettingsDigest & digest = *nCallbackFillServerInfo::ToFill();
-    
+
     digest.SetFlag( nServerInfo::SettingsDigest::Flags_NondefaultMap,
                     mapfile != DEFAULT_MAP );
     digest.SetFlag( nServerInfo::SettingsDigest::Flags_TeamPlay,
@@ -5320,3 +5320,20 @@ static void sg_FillServerSettings()
 
 static nCallbackFillServerInfo sg_fillServerSettings(sg_FillServerSettings);
 
+static void sg_DeclareRoundWinner(std::istream &s)
+{
+	tString params;
+    params.ReadLine( s, true );
+    int pos = 0;
+    ePlayerNetID *winningPlayer = 0;
+    tString targetPlayer = params.ExtractNonBlankSubString(pos);
+    winningPlayer = ePlayerNetID::FindPlayerByName(targetPlayer, NULL);
+    if(!winningPlayer)
+        {
+            return;
+        }
+    static const char* message="$player_win_command";
+    sg_DeclareWinner( winningPlayer->CurrentTeam(), message );
+}
+
+static tConfItemFunc sg_DeclareRoundWinner_conf("DECLARE_ROUND_WINNER",&sg_DeclareRoundWinner);
