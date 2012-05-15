@@ -2411,7 +2411,8 @@ player_admin_kill			\1 0xRESETTwas smitten by an administrator.\n
 player_admin_slap_free			\1 0xRESETThas been slapped by an administrator.\n
 player_admin_slap_win			\1 has been hugged by an administrator and got \2 points.\n
 player_admin_slap_lose			\1 has been slapped by an administrator and lost \2 points.\n
-slap_help                   Slaps the given player by penalizing him with the specified amount of points. Be smart and you may be able to hug your users, too ;)
+give_points_help                   Slaps the given player by granting them with the specified amount of points. Be smart and you may be able to hug your users, too ;)
+take_points_help          Slaps the given player by punishing them with the specified amound of points. Be careful or you will lose a of points :P
 player_win_instant			\1 was awarded \2 points for hitting the instant win zone.\n
 player_win_conquest			\1 was awarded \2 points for conquering the enemy base.\n
 player_win_conquest2			\1 was awarded \2 points for conquering \3's base.\n

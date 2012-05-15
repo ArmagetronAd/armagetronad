@@ -2905,7 +2905,7 @@ static void se_ChatShout( ePlayerNetID * p, tString const & say, eChatSpamTester
     {
         se_BroadcastChat( p, say );
         se_DisplayChatLocally( p, say);
-        
+
         tString s;
         s << p->GetUserName() << ' ' << say;
         se_SaveToChatLog(s);
@@ -2917,7 +2917,7 @@ static void se_ChatShout( ePlayerNetID * p, std::istream & s, eChatSpamTester & 
     // parse string
     tString say;
     say.ReadLine( s );
-    
+
     // delegate
     se_ChatShout( p, say, spam );
 }
@@ -3371,7 +3371,7 @@ static void se_ChatShuffle( ePlayerNetID * p, std::istream & s )
     }
 
     if( p->CurrentTeam() )
-    {  
+    {
         // really shuffle
         p->CurrentTeam()->Shuffle( IDNow, IDWish );
         se_ListTeam( p, p->CurrentTeam() );
@@ -4584,13 +4584,13 @@ static void se_KickUnworthy()
     {
         // NULL players are actually more worthy here now
         ePlayerNetID * player = mostWorthy[i];
-        if( ( i != userToSpare && sn_Connections[i].socket ) && 
+        if( ( i != userToSpare && sn_Connections[i].socket ) &&
             // don't kick players with immune access level
-            !( player && se_autokickImmunity >= player->GetAccessLevel() ) && 
+            !( player && se_autokickImmunity >= player->GetAccessLevel() ) &&
             // give players one round to sign in
-            !( player && nAuthentication::LoginInProcess(player) && player->GetTimeCreated() >= lastRoundBegin ) && 
+            !( player && nAuthentication::LoginInProcess(player) && player->GetTimeCreated() >= lastRoundBegin ) &&
             ( !mostUnworthyUser || se_comparePlayerWorth( mostWorthy[mostUnworthyUser], mostWorthy[i], -1 ) > 0 ) )
-        {   
+        {
             mostUnworthyUser = i;
         }
     }
@@ -4608,17 +4608,17 @@ static void se_KickUnworthy()
         {
             name = "?";
         }
-        
+
         con << tOutput( "$network_kill_unworthy_log", name, banForMinutes );
         if( banForMinutes > 1 )
         {
-            nMachine::GetMachine( mostUnworthyUser ).Ban( banForMinutes*60, 
-                                                          tString( 
+            nMachine::GetMachine( mostUnworthyUser ).Ban( banForMinutes*60,
+                                                          tString(
                                                               tOutput( "$network_kill_unworthy_banreason" ) ) );
             sn_DisconnectUser( mostUnworthyUser, tOutput( "$network_kill_unworthy_ban", banForMinutes ) );
         }
         else
-        {   
+        {
             sn_DisconnectUser( mostUnworthyUser, tOutput( "$network_kill_unworthy" ) );
         }
     }
@@ -4648,7 +4648,7 @@ static void se_PlayerLoginLogoutCallback()
 
     // always keep one slot free
     if( nCallbackLoginLogout::Login() )
-    { 
+    {
         se_kickUnworthySpare=nCallbackLoginLogout::User();
         st_ToDo( se_KickUnworthy );
     }
@@ -6303,7 +6303,7 @@ void ePlayerNetID::AddScore(int points,
         else
             message.Append(reasonlose);
     }
-    
+
     if (shouldPrint)
         sn_ConsoleOut(message);
     RequestSync(true);
@@ -7043,7 +7043,7 @@ void ePlayerNetID::Update(){
         }
     }
     se_prejoinShuffles.clear();
-             
+
 
     // get rid of deleted netobjects
     nNetObject::ClearAllDeleted();
@@ -8083,9 +8083,9 @@ static void Kill_conf(std::istream &s)
 static tConfItemFunc kill_conf("KILL",&Kill_conf);
 static tAccessLevelSetter se_killConfLevel( kill_conf, tAccessLevel_Moderator );
 
-static void Slap_conf(std::istream &s)
+static void GivePoints_conf(std::istream &s)
 {
-    if ( se_NeedsServer( "SLAP", s, false ) )
+    if ( se_NeedsServer( "GIVE_POINTS", s, false ) )
     {
         return;
     }
@@ -8103,16 +8103,51 @@ static void Slap_conf(std::istream &s)
             // oh well :)
             sn_ConsoleOut( tOutput("$player_admin_slap_free", victim->GetColoredName() ) );
         }
-
-        tOutput win;
-        tOutput lose;
-        win << "$player_admin_slap_win";
-        lose << "$player_admin_slap_lose";
-        victim->AddScore( -points, win, lose );
+        else
+        {
+            tOutput win;
+            //tOutput lose;
+            win << "$player_admin_slap_win";
+            //lose << "$player_admin_slap_lose";
+            victim->AddScore( points, win, "" );
+        }
     }
 }
 
-static tConfItemFunc slap_conf("SLAP", &Slap_conf);
+static tConfItemFunc givepoint_conf("GIVE_POINTS", &GivePoints_conf);
+
+static void TakePoints_conf(std::istream &s)
+{
+    if ( se_NeedsServer( "TAKE_POINTS", s, false ) )
+    {
+        return;
+    }
+
+    ePlayerNetID * victim = ReadPlayer( s );
+
+    if ( victim )
+    {
+        int points = 1;
+
+        s >> points;
+
+        if ( points == 0)
+        {
+            // oh well :)
+            sn_ConsoleOut( tOutput("$player_admin_slap_free", victim->GetColoredName() ) );
+        }
+        else
+        {
+            //tOutput win;
+            tOutput lose;
+            //win << "$player_admin_slap_win";
+            lose << "$player_admin_slap_lose";
+            victim->AddScore( -points, "", loss );
+        }
+    }
+}
+
+static tConfItemFunc takepoint_conf("TAKE_POINTS", &TakePoints_conf);
 
 static int se_suspendDefault = 5;
 static tSettingItem< int > se_suspendDefaultConf( "SUSPEND_DEFAULT_ROUNDS", se_suspendDefault );
@@ -8872,9 +8907,9 @@ class eEnemiesWhitelist
 {
 public:
     eEnemiesWhitelist() :usernames_whitelist_(), ip_addresses_whitelist_() {}
-    
+
     // Returns true if the two players can be enemies.
-    // 
+    //
     // Assumes both "a" and "b" are from the same IP address.
     bool CanBeEnemies( const ePlayerNetID * a, const ePlayerNetID * b ) const
     {
@@ -8885,19 +8920,19 @@ public:
 #endif
         return enemies;
     }
-    
+
     void AddUsernames( std::istream & s )
     {
         Parse( usernames_whitelist_, s );
     }
-    
+
     void AddIPAddresses( std::istream & s )
     {
         Parse( ip_addresses_whitelist_, s );
     }
 protected:
     typedef std::set< tString > StringSet;
-    
+
     void Parse( StringSet & whitelist, std::istream & s )
     {
         int entries_count = 0;
@@ -8913,14 +8948,14 @@ protected:
         }
         con << tOutput( "$whitelist_enemies_success", entries_count ) << '\n';
     }
-    
+
     bool HasEntry( const StringSet & whitelist, const tString & value ) const
     {
         return whitelist.find( value ) != whitelist.end();
     }
-    
+
     StringSet usernames_whitelist_;
-    StringSet ip_addresses_whitelist_;    
+    StringSet ip_addresses_whitelist_;
 };
 
 static eEnemiesWhitelist se_enemiesWhitelist;
@@ -9230,7 +9265,7 @@ REAL eUncannyTimingDetector::eUncannyTimingAnalysis::Analyze( REAL timing, eUnca
         {
             turnsSoFar++;
         }
-        
+
         // don't rate failed timings too much. The user may not even have
         // attempted to time something.
         if( timing < 0 )
@@ -9250,7 +9285,7 @@ REAL eUncannyTimingDetector::eUncannyTimingAnalysis::Analyze( REAL timing, eUnca
     }
 
     REAL ratio = accurateRatio/(1-accurateRatio);
-    
+
     // keep stats
     if (ratio > settings.bestRatio)
     {
@@ -9294,7 +9329,7 @@ all grinds:
 [0] Best ratio achieved for 125ms stat: 2.09805
 [0] Best ratio achieved for 62.5ms stat: 2.32939
 [0] Best ratio achieved for 31.25ms stat: 1
-tst proper, enemies only: 
+tst proper, enemies only:
 [0] Best ratio achieved for 125ms stat: 5.60549
 [0] Best ratio achieved for 62.5ms stat: 1.01227
 [0] Best ratio achieved for 31.25ms stat: 0.681035
@@ -9308,7 +9343,7 @@ ladle41, hamar and partner team actions included:
 [0] Best ratio achieved for 31.25ms stat: 0.90623
 */
 
-static eUncannyTimingDetector::eUncannyTimingSettings 
+static eUncannyTimingDetector::eUncannyTimingSettings
 se_uncannyTimingSettingsFast(1/32.0, 1, 1.5),
 se_uncannyTimingSettingsMedium(1/16.0, 2, 4);
 // se_uncannyTimingSettingsSlow(1/8.0, 7, 15);
@@ -9690,7 +9725,7 @@ static void se_ChatSubstitute( ePlayerNetID * p, std::istream & s )
 static void se_FillServerSettings()
 {
     nServerInfo::SettingsDigest & digest = *nCallbackFillServerInfo::ToFill();
-    
+
     digest.minPlayTimeTotal_ = int(se_minPlayTimeTotal);
     digest.minPlayTimeOnline_ = int(se_minPlayTimeOnline);
     digest.minPlayTimeTeam_ = int(se_minPlayTimeTeam);

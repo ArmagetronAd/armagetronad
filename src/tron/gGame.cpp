@@ -5337,3 +5337,19 @@ static void sg_DeclareRoundWinner(std::istream &s)
 }
 
 static tConfItemFunc sg_DeclareRoundWinner_conf("DECLARE_ROUND_WINNER",&sg_DeclareRoundWinner);
+
+static void sg_KillAllPlayers(std::istream &s)
+{
+    if (se_PlayerNetIDs.Len()>0){
+        int max = se_PlayerNetIDs.Len();
+        for(int i=0;i<max;i++){
+            ePlayerNetID *p=se_PlayerNetIDs(i);
+            if (p->IsActive() && p->Object() && p->Object()->Alive() )
+            {
+                p->Object()->Kill();
+            }
+        }
+    }
+}
+
+static tConfItemFunc sg_KillAllPlayers_conf("KILL_ALL", &sg_KillAllPlayers);
