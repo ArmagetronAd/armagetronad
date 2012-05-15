@@ -6543,6 +6543,11 @@ void ePlayerNetID::RankingLadderLog() {
                 ++num_humans;
             }
         }
+        else
+        {
+            se_onlinePlayerWriter << "";
+        }
+        se_onlinePlayerWriter << p->GetAccessLevel();
         se_onlinePlayerWriter.write();
     }
     se_numHumansWriter << num_humans;
