@@ -344,6 +344,12 @@ idle_remove_time_help               Time in seconds after which an inactive play
 idle_kick_time_help                 Time in seconds after which an inactive player is kicked
 keep_player_slot_help               If set to 1, every time the server gets full, an unworthy spectator is kicked.
 
+respawn_time_help                   Seconds greater than 0 makes sure any dead player will be respawned within that time of them being dead. Default: -1\n
+respawn_player_help                 Respawns a player that had been killed.\nUSAGE: RESPAWN_PLAYER <player> <xpos> <ypos> <xdir> <ydir>.\n
+respawn_all_help                    Respawns all players that were killed in the round. USAGE: RESPAWN_ALL 1. Default: 0(must remain!).\n 
+
+kill_all_help                       Kills everyone on the grid.\n     
+
 #********************************************
 #********************************************
 #
@@ -366,6 +372,12 @@ fav_num_per_team_player_help	The favourite number of players per team for this p
 spectator_mode_help		Sets spectator mode for this player
 auto_incam_help			Automatically switch to internal camera in a maze
 camwobble_help			Lets the internal camera move with your cycle
+
+speak_as_admin      Allows you to speak as admin. Displays Admin: [message]
+speak_to_enemies    Allows you to speak to enemies. Displays Admin --> Enemies: [message]
+speak_to_everyone   Allows you to speak to everyone. Displays Admin --> Everyone: [message]
+
+announce_help      Use like a public announcement. Displays Announcement: [message]
 
 color_b_help			Cycle and wall colour, blue component.
 color_g_help			Cycle and wall colour, green component.
@@ -2411,8 +2423,8 @@ player_admin_kill			\1 0xRESETTwas smitten by an administrator.\n
 player_admin_slap_free			\1 0xRESETThas been slapped by an administrator.\n
 player_admin_slap_win			\1 has been hugged by an administrator and got \2 points.\n
 player_admin_slap_lose			\1 has been slapped by an administrator and lost \2 points.\n
-give_points_help                   Slaps the given player by granting them with the specified amount of points. Be smart and you may be able to hug your users, too ;)
-take_points_help          Slaps the given player by punishing them with the specified amound of points. Be careful or you will lose a of points :P
+give_points_help                   Slaps the given player by granting them with the specified amount of points. Be smart and you may be able to hug your users, too ;) \n
+take_points_help          Slaps the given player by punishing them with the specified amound of points. Be careful or you will lose a of points :P \n
 player_win_instant			\1 was awarded \2 points for hitting the instant win zone.\n
 player_win_conquest			\1 was awarded \2 points for conquering the enemy base.\n
 player_win_conquest2			\1 was awarded \2 points for conquering \3's base.\n
@@ -2425,7 +2437,7 @@ player_kill_collapse        \1 was eradicated by its collapsing zone.\n
 player_win_hole             \1 got \2 points for a sacrifice for the good of the team.\n
 player_lose_hole            0xffff00ZOMG! 0xff7f00HOLER!!1!!0xRESETT \1 lost \2 points for being a cheap ass lamer.\n
 player_win_command          \1 was declared the winner of the round!\n
-declare_round_winner_help  Declares round winner. USAGE: DECLARE_ROUND_WINNER player
+declare_round_winner_help  Declares round winner. USAGE: DECLARE_ROUND_WINNER player.\n
 
 player_no_longer_suspended  \1 0x77ff77is allowed to play again.\n
 player_suspended            \1 0xff7777is banned to spectator mode for \2 round(s).\n

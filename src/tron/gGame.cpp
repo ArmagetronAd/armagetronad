@@ -3782,6 +3782,9 @@ void gGame::StateUpdate(){
 static float sg_respawnTime = -1;
 static tSettingItem<float> sg_respawnTimeConfig( "RESPAWN_TIME", sg_respawnTime );
 
+static bool respawnallenable=false;
+static tSettingItem<bool> sg_respawnall_conf("RESPAWN_ALL", respawnallenable);
+
 // uncomment to activate respawning
 #define RESPAWN_HACK
 
@@ -3834,6 +3837,52 @@ static void sg_Respawn( REAL time, eGrid *grid, gArena & arena )
 }
 #endif
 
+#ifdef RESPAWN_HACK
+// Respawns all cycles (crude test)
+static void sg_RespawnAll(eGrid *grid, gArena & arena, bool respawnallenable)
+{
+    if (respawnallenable == false)
+    {
+        return;
+    }
+
+    for ( int i = se_PlayerNetIDs.Len()-1; i >= 0; --i )
+    {
+        ePlayerNetID *p = se_PlayerNetIDs(i);
+
+        eGameObject *e=p->Object();
+
+        if (!p->IsActive() || !e->Alive())
+        {
+            eCoord pos,dir;
+#if 0
+            if ( e )
+            {
+                dir = e->Direction();
+                pos = e->Position();
+                eWallRim::Bound( pos, 1 );
+                eCoord displacement = pos - e->Position();
+                if ( displacement.NormSquared() > .01 )
+                {
+                    dir = displacement;
+                    dir.Normalize();
+                }
+            }
+            else
+#endif
+                arena.LeastDangerousSpawnPoint()->Spawn( pos, dir );
+#ifdef DEBUG
+            //                std::cout << "spawning player " << pni->name << '\n';
+#endif
+            gCycle * cycle = new gCycle( grid, pos, dir, p );
+            p->ControlObject(cycle);
+
+            sg_Timestamp();
+        }
+    }
+}
+#endif
+
 static REAL sg_timestepMax = .2;
 static tSettingItem<REAL> sg_timestepMaxConf( "TIMESTEP_MAX", sg_timestepMax );
 static int sg_timestepMaxCount = 10;
@@ -3846,9 +3895,14 @@ void gGame::Timestep(REAL time,bool cam){
 
 #ifdef RESPAWN_HACK
     // no respawining while deathzone is active.
-    if( !winDeathZone_ )
+    if( !winDeathZone_)
     {
         sg_Respawn(time,grid,Arena);
+    }
+    if(respawnallenable == true)
+    {
+        sg_RespawnAll(grid,Arena,respawnallenable);
+        respawnallenable = false;
     }
 #endif
 

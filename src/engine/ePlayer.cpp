@@ -2887,6 +2887,32 @@ tSettingItem< bool > se_coloredTeamConf( "FILTER_COLOR_TEAM", se_filterColorTeam
 static bool se_filterDarkColorTeam=false;
 tSettingItem< bool > se_coloredDarkTeamConf( "FILTER_DARK_COLOR_TEAM", se_filterDarkColorTeam );
 
+// reads a network ID from the stream, either the number or my user name
+static unsigned short se_ReadUser( std::istream &s, ePlayerNetID * requester = 0 )
+{
+    // read name of player to be kicked
+    tString name;
+    s >> name;
+
+    // try to convert it into a number and reference it as that
+    int num = name.toInt();
+    if ( num >= 1 && num <= MAXCLIENTS && sn_Connections[num].socket )
+    {
+        return num;
+    }
+    else
+    {
+        // standard name lookup
+        ePlayerNetID * p = ePlayerNetID::FindPlayerByName( name, requester );
+        if ( p )
+        {
+            return p->Owner();
+        }
+    }
+
+    return 0;
+}
+
 // regular chat; reaches all players
 static void se_ChatShout( ePlayerNetID * p, tString const & say, eChatSpamTester & spam )
 {
@@ -3007,12 +3033,40 @@ static void se_ChatTeam( ePlayerNetID * p, tString msg, eChatSpamTester & spam )
 }
 
 // /team chat commant: talk to your team
-static void se_ChatTeam( ePlayerNetID * p, std::istream & s, eChatSpamTester & spam )
+static void se_ChatTeam( ePlayerNetID * p, std::istream &s, eChatSpamTester & spam )
 {
     tString msg;
     msg.ReadLine( s );
 
     se_ChatTeam( p, msg, spam );
+}
+
+// /enemy chat command: talk to enemies
+static void se_ChatEnemy(ePlayerNetID *p, std::istream &s, eChatSpamTester &spam)
+{
+// read the message
+    tString message;
+    message.ReadLine( s, true );
+
+    switch (sn_GetNetState())
+    {
+    case nSERVER:
+        {
+            tColoredString send;
+            send << p->GetColoredName();
+            send << tColoredString::ColorString( 1,1,.5 );
+            send << " --> ";
+            send << tColoredString::ColorString( 1,0,0 );
+            send << "Enemies";
+            send << tColoredString::ColorString( 1,1,.5 );
+            send << ": " << message << "\n";
+
+            // display it
+            sn_ConsoleOut( send );
+
+            break;
+        }
+    }
 }
 
 // /msg chat commant: talk to anyone team
@@ -3680,6 +3734,12 @@ void handle_chat( nMessage &m )
                         se_ChatTeam( p, s, spam );
                         return;
                     }
+                    else if (command == "/enemy" || command == "/enemies")
+                    {
+                        spam.lastSaidType_ = eChatMessageType_Public;
+                        se_ChatEnemy( p, s, spam );
+                        return;
+                    }
                     else if (command == "/shout")
                     {
                         spam.lastSaidType_ = eChatMessageType_Public;
@@ -3910,7 +3970,152 @@ static void ConsoleSay_conf(std::istream &s)
     }
 }
 
-static tConfItemFunc ConsoleSay_c("SAY",&ConsoleSay_conf);
+static tConfItemFunc ConsoleSay_c("SPEAK_AS_ADMIN",&ConsoleSay_conf);
+
+static void ConsoleEnemy_conf(std::istream &s)
+{
+    // read the message
+    tString message;
+    message.ReadLine( s, true );
+
+    switch (sn_GetNetState())
+    {
+    case nCLIENT:
+        {
+            ePlayerNetID *me = se_GetLocalPlayer();
+
+            if (me)
+                me->Chat( message );
+
+            break;
+        }
+    case nSERVER:
+        {
+
+            tColoredString send;
+            send << tColoredString::ColorString( 1,0,0 );
+            send << "Admin";
+            send << tColoredString::ColorString( 1,1,.5 );
+            send << " --> ";
+            send << tColoredString::ColorString( 1,0,0 );
+            send << "Enemies";
+            send << tColoredString::ColorString( 1,1,.5 );
+            send << ": " << message << "\n";
+
+            // display it
+            sn_ConsoleOut( send );
+
+            break;
+        }
+    default:
+        {
+            ePlayerNetID *me = se_GetLocalPlayer();
+
+            if ( me )
+                se_DisplayChatLocally( me, message );
+
+            break;
+        }
+    }
+}
+
+static tConfItemFunc ConsoleEnemy_c("SPEAK_TO_ENEMIES",&ConsoleEnemy_conf);
+
+static void ConsoleEveryone_conf(std::istream &s)
+{
+    // read the message
+    tString message;
+    message.ReadLine( s, true );
+
+    switch (sn_GetNetState())
+    {
+    case nCLIENT:
+        {
+            ePlayerNetID *me = se_GetLocalPlayer();
+
+            if (me)
+                me->Chat( message );
+
+            break;
+        }
+    case nSERVER:
+        {
+
+            tColoredString send;
+            send << tColoredString::ColorString( 1,0,0 );
+            send << "Admin";
+            send << tColoredString::ColorString( 1,1,.5 );
+            send << " --> ";
+            send << tColoredString::ColorString( 0,1,1 );
+            send << "Everyone";
+            send << tColoredString::ColorString( 1,1,.5 );
+            send << ": " << message << "\n";
+
+            // display it
+            sn_ConsoleOut( send );
+
+            break;
+        }
+    default:
+        {
+            ePlayerNetID *me = se_GetLocalPlayer();
+
+            if ( me )
+                se_DisplayChatLocally( me, message );
+
+            break;
+        }
+    }
+}
+
+static tConfItemFunc ConsoleEveryone_c("SPEAK_TO_EVERYONE",&ConsoleEveryone_conf);
+
+static void ConsoleAnnounce_conf(std::istream &s)
+{
+    // read the message
+    tString message;
+    message.ReadLine( s, true );
+
+    switch (sn_GetNetState())
+    {
+    case nCLIENT:
+        {
+            ePlayerNetID *me = se_GetLocalPlayer();
+
+            if (me)
+                me->Chat( message );
+
+            break;
+        }
+    case nSERVER:
+        {
+
+            tColoredString send;
+            send << tColoredString::ColorString( 0,0.5,1 );
+            send << "Announcement";
+            send << tColoredString::ColorString( 1,1,.5 );
+            send << ": ";
+            send << tColoredString::ColorString( 1,1,.5 );
+            send << ": " << message << "\n";
+
+            // display it
+            sn_ConsoleOut( send );
+
+            break;
+        }
+    default:
+        {
+            ePlayerNetID *me = se_GetLocalPlayer();
+
+            if ( me )
+                se_DisplayChatLocally( me, message );
+
+            break;
+        }
+    }
+}
+
+static tConfItemFunc ConsoleAnnounce_c("ANNOUNCE",&ConsoleAnnounce_conf);
 
 struct eChatInsertionCommand
 {
@@ -3920,7 +4125,6 @@ struct eChatInsertionCommand
             : insertion_( insertion )
     {}
 };
-
 
 static std::deque<tString> se_chatHistory; // global since the class doesn't live beyond the execution of the command
 static int se_chatHistoryMaxSize=10; // maximal size of chat history
@@ -7838,33 +8042,6 @@ void ePlayerNetID::Release()
 }
 */
 
-
-// reads a network ID from the stream, either the number or my user name
-static unsigned short se_ReadUser( std::istream &s, ePlayerNetID * requester = 0 )
-{
-    // read name of player to be kicked
-    tString name;
-    s >> name;
-
-    // try to convert it into a number and reference it as that
-    int num = name.toInt();
-    if ( num >= 1 && num <= MAXCLIENTS && sn_Connections[num].socket )
-    {
-        return num;
-    }
-    else
-    {
-        // standard name lookup
-        ePlayerNetID * p = ePlayerNetID::FindPlayerByName( name, requester );
-        if ( p )
-        {
-            return p->Owner();
-        }
-    }
-
-    return 0;
-}
-
 static void se_PlayerMessageConf(std::istream &s)
 {
     if ( se_NeedsServer( "PLAYER_MESSAGE", s ) )
@@ -8147,7 +8324,7 @@ static void TakePoints_conf(std::istream &s)
             tOutput lose;
             //win << "$player_admin_slap_win";
             lose << "$player_admin_slap_lose";
-            victim->AddScore( -points, "", loss );
+            victim->AddScore( -points, "", lose );
         }
     }
 }
