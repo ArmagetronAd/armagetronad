@@ -1261,7 +1261,7 @@ console_repetition          (\1 times)\n
 #********************************************
 #********************************************
 
-main_menu_text			\g v\1
+main_menu_text			Armagetron Advanced sty+ct+ap r768
 
 game_menu_text			Play Game
 game_menu_main_help		Game configuration and launch.
@@ -2423,6 +2423,8 @@ player_win_conquest_specific \1 was awarded \2 points for conquering \3's base.\
 player_kill_collapse        \1 was eradicated by its collapsing zone.\n
 player_win_hole             \1 got \2 points for a sacrifice for the good of the team.\n
 player_lose_hole            0xffff00ZOMG! 0xff7f00HOLER!!1!!0xRESETT \1 lost \2 points for being a cheap ass lamer.\n
+player_win_command          \1 was declared the winner of the round!\n
+declare_round_winner_help  Declares round winner. USAGE: DECLARE_ROUND_WINNER player
 
 player_no_longer_suspended  \1 0x77ff77is allowed to play again.\n
 player_suspended            \1 0xff7777is banned to spectator mode for \2 round(s).\n
