@@ -4409,7 +4409,7 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
     sr_DepthOffset(true);
     if ( rTextureGroups::TextureMode[rTextureGroups::TEX_WALL] != 0 )
         glDisable(GL_TEXTURE_2D);
-    
+
     gNetPlayerWall * run = list;
     while( run )
     {
@@ -4422,7 +4422,7 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
     sr_DepthOffset(false);
     if ( rTextureGroups::TextureMode[rTextureGroups::TEX_WALL] != 0 )
         glEnable(GL_TEXTURE_2D);
-    
+
     run = list;
     while( run )
     {
@@ -6805,8 +6805,8 @@ static void sg_RespawnPlayer(std::istream &s)
         if(!pPlayer) {
             return;
         }
-        const tString message_str = params.ExtractNonBlankSubString(pos);
-        int message = atoi(message_str);
+        //const tString message_str = params.ExtractNonBlankSubString(pos);
+        //int message = atoi(message_str);
         const tString x_str = params.ExtractNonBlankSubString(pos);
         REAL x = atof(x_str);
         const tString y_str = params.ExtractNonBlankSubString(pos);
@@ -6831,13 +6831,14 @@ static void sg_RespawnPlayer(std::istream &s)
             gCycle *pCycle = new gCycle(grid, ppos, pdir, pPlayer);
             pPlayer->ControlObject(pCycle);
 
-            if (message) {
+            /*if (message) {
                 tColoredString playerName;
                 playerName << *pPlayer << tColoredString::ColorString(1,1,1);
 
                 // send a console message to the player
                 sn_CenterMessage(tOutput("$player_respawn_center_message"), pPlayer->Owner());
             }
+            */
         }
 }
 
