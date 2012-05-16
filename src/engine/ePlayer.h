@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -28,7 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef ArmageTron_PLAYER_H
 #define ArmageTron_PLAYER_H
 
-#ifndef MAX_INSTANT_CHAT 
+#ifndef MAX_INSTANT_CHAT
 #define MAX_INSTANT_CHAT 25
 #endif
 
@@ -170,7 +170,7 @@ public:
         REAL maxGoodRatio; //!< the maximal allowed recent ratio of events to land in the 'good' bucket
         REAL goodHumanRatio; //!< the maximal observed ratio for a human
         int  averageOverEvents; //!< number of events to average over
-        
+
         mutable REAL bestRatio; //!< best ratio achieved by players during this session
 
         eUncannyTimingSettings( REAL ts, REAL human, REAL max )
@@ -330,7 +330,7 @@ public:
     eTeam* NextTeam()    const { return nextTeam; }				// return the team I will be next round
     eTeam* CurrentTeam() const { return currentTeam; }		// return the team I am in
     int  TeamListID() const { return teamListID; }		// return my position in the team
-    int  ListID() const { return listID; }              // return my position in the player's list 
+    int  ListID() const { return listID; }              // return my position in the player's list
     void SetShuffleWish( int pos ); 	                 //!< sets a desired team position
 
     void FindDefaultTeam();									// look for a good default team for us
@@ -371,7 +371,7 @@ public:
     // suspend the player from playing, forcing him to spectate
     void Suspend( int rounds = 5 );
 #ifdef KRAWALL_SERVER
-    void Authenticate( tString const & authName, 
+    void Authenticate( tString const & authName,
                        tAccessLevel accessLevel = tAccessLevel_Authenticated,
                        ePlayerNetID const * admin = 0 );    //!< make the authentification valid
     void DeAuthenticate( ePlayerNetID const * admin = 0 );  //!< make the authentification invalid
@@ -444,7 +444,7 @@ public:
     void GetScoreFromDisconnectedCopy(); // get the player's data from the previous login
 
     void Chat(const tString &s);
-    
+
     nTimeAbsolute GetTimeCreated() const { return timeCreated_; }
 
     virtual void Color( REAL&r, REAL&g, REAL&b ) const;
@@ -513,7 +513,7 @@ public:
     ePlayerNetID & SetName( tString const & name ); //!< Sets this player's name. Sets processed names (colored, username, nameFromCLient) as well.
     ePlayerNetID & SetName( char    const * name ); //!< Sets this player's name. Sets processed names (colored, username, nameFromCLient) as well.
     ePlayerNetID & SetName( tString const & name , bool force ); //!< Sets this player's name. Sets processed names (colored, username, nameFromCLient) as well.
-    ePlayerNetID & ForceName( tString const & name ); //!< Forces this player's name. Forces processed names (colored, username, nameFromCLient) as well.    
+    ePlayerNetID & ForceName( tString const & name ); //!< Forces this player's name. Forces processed names (colored, username, nameFromCLient) as well.
 
     inline ePlayerNetID & SetUserName( tString const & userName );  //!< Sets this player's name, cleared for system logs. Use for writing to files or comparing with admin input. The other names stay unaffected.
 

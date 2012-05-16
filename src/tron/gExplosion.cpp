@@ -61,8 +61,8 @@ static REAL   s_explosionRadius;
 static REAL	  s_explosionTime;
 static gExplosion * s_holer = 0;
 
-static REAL sg_explosionSpeedFactor = 0;
-static nSettingItemWatched< REAL > sg_explosionSpeedFactorSettingItem( "EXPLOSION_RADIUS_SPEED_FACTOR", sg_explosionSpeedFactor, nConfItemVersionWatcher::Group_Bumpy, 22 );
+//static REAL sg_explosionSpeedFactor = 0;
+//static nSettingItemWatched< REAL > sg_explosionSpeedFactorSettingItem( "EXPLOSION_RADIUS_SPEED_FACTOR", sg_explosionSpeedFactor, nConfItemVersionWatcher::Group_Bumpy, 22 );
 
 // blow a hole centered at s_explosionCoord with radius s_explosionRadius into wall w
 static void S_BlowHoles( eWall * w )
@@ -148,7 +148,7 @@ gExplosion::gExplosion(eGrid *grid, const eCoord &pos,REAL time, gRealColor& col
         listID(-1),
         owner_(owner)
 {
-    radius_ = gCycle::ExplosionRadius() + owner_->Speed() * sg_explosionSpeedFactor;
+    radius_ = gCycle::ExplosionRadius() + owner_->Speed();// * sg_explosionSpeedFactor;
     holeAccountedFor_ = false;
 
     lastTime = time;
@@ -222,8 +222,8 @@ bool gExplosion::Timestep(REAL currentTime){
 
         s_explosionCoord  = pos;
         REAL factor = expansion / REAL( expansionSteps );
-        //s_explosionRadius = ((radius_==0)?gCycle::ExplosionRadius():radius_) * sqrt(factor);
-        s_explosionRadius = this->GetRadius() * sqrt(factor);
+        s_explosionRadius = ((radius_==0)?gCycle::ExplosionRadius():radius_) * sqrt(factor);
+        //s_explosionRadius = this->GetRadius() * sqrt(factor);
         s_explosionTime = currentTime;
         s_holer = this;
 

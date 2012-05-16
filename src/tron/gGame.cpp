@@ -3782,8 +3782,13 @@ void gGame::StateUpdate(){
 static float sg_respawnTime = -1;
 static tSettingItem<float> sg_respawnTimeConfig( "RESPAWN_TIME", sg_respawnTime );
 
-static bool respawnallenable=false;
-static tSettingItem<bool> sg_respawnall_conf("RESPAWN_ALL", respawnallenable);
+static bool respawn_all=false;
+
+static void respawnallenable(std::istream &s)
+{
+    respawn_all = true;
+}
+static tConfItemFunc sg_respawnall_conf("RESPAWN_ALL", respawnallenable);
 
 // uncomment to activate respawning
 #define RESPAWN_HACK
@@ -3839,9 +3844,9 @@ static void sg_Respawn( REAL time, eGrid *grid, gArena & arena )
 
 #ifdef RESPAWN_HACK
 // Respawns all cycles (crude test)
-static void sg_RespawnAll(eGrid *grid, gArena & arena, bool respawnallenable)
+static void sg_RespawnAll(eGrid *grid, gArena & arena, bool respawn_all)
 {
-    if (respawnallenable == false)
+    if (respawn_all == false)
     {
         return;
     }
@@ -3899,10 +3904,10 @@ void gGame::Timestep(REAL time,bool cam){
     {
         sg_Respawn(time,grid,Arena);
     }
-    if(respawnallenable == true)
+    if(respawn_all == true)
     {
-        sg_RespawnAll(grid,Arena,respawnallenable);
-        respawnallenable = false;
+        sg_RespawnAll(grid,Arena,respawn_all);
+        respawn_all = false;
     }
 #endif
 

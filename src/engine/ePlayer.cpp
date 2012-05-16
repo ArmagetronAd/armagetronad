@@ -159,6 +159,12 @@ static tSettingItem< bool > se_chatLogWritePMConf( "CHATLOG_WRITE_PM", se_chatLo
 static bool se_chatLogWriteTeam = false;
 static tSettingItem< bool > se_chatLogWriteTeamConf( "CHATLOG_WRITE_TEAM", se_chatLogWriteTeam );
 
+static bool se_chatLogWriteEnemy = false;
+static tSettingItem< bool > se_ChatLogWriteEnemyConf("CHATLOG_WRITE_ENEMY", se_chatLogWriteEnemy);
+
+static bool se_chatLogWritePlayer = false;
+static tSettingItem< bool > se_ChatLogWritePlayerConf("CHATLOG_WRITE_PLAYER", se_chatLogWritePlayer);
+
 static bool se_enableChat = true;    //flag indicating whether chat should be allowed at all (logged in players can always chat)
 static tSettingItem< bool > se_enaChat("ENABLE_CHAT", se_enableChat);
 
@@ -1032,7 +1038,6 @@ void ePlayerNetID::PoliceMenu()
 
     uMenuItemFunction kick( &menu, "$player_police_kick_text", "$player_police_kick_help", eVoter::KickMenu );
     uMenuItemFunction silence( &menu, "$player_police_silence_text", "$player_police_silence_help", ePlayerNetID::SilenceMenu );
-
     menu.Enter();
 }
 
@@ -2539,6 +2544,9 @@ static void se_AdminLogout( ePlayerNetID * p, char const * command )
 
 static eLadderLogWriter se_adminCommandWriter("ADMIN_COMMAND", false);
 
+static bool sr_adminLog = false;
+static tConfItem<bool> sr_consoleLogConf("ADMIN_LOG", sr_adminLog);
+
 // access level a user has to have to be able to see what's being typed at /admin
 static tAccessLevel se_consoleSpyAccessLevel = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_consoleSpyAccessLevelConf( "ACCESS_LEVEL_SPY_CONSOLE", se_consoleSpyAccessLevel );
@@ -2566,6 +2574,13 @@ static void se_AdminAdmin( ePlayerNetID * p, std::istream & s )
     if ((p->GetAccessLevel() <= cLevel) && (cLevel >= 0)){
         se_adminCommandWriter << p->GetUserName() << nMachine::GetMachine(p->Owner()).GetIP() << p->GetAccessLevel() << str;
         se_adminCommandWriter.write();
+    }
+    if (sr_adminLog == true)
+    {
+        std::ofstream o;
+        if ( tDirectories::Var().Open(o, "adminlog.txt", std::ios::app) ) {
+            o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << p->GetUserName() << " " << p->GetAccessLevel() << " " << str << "\n";
+        }
     }
     tColoredString msg;
     msg << tColoredString::ColorString(1,0,0) << "Remote admin command" << tColoredString::ColorString(-1,-1,-1) << " by " << tColoredString::ColorString(1,1,.5) << p->GetUserName() << tColoredString::ColorString(-1,-1,-1) << ": " << tColoredString::ColorString(.5,.5,1) << str << "\n";
@@ -3065,6 +3080,61 @@ static void se_ChatEnemy(ePlayerNetID *p, std::istream &s, eChatSpamTester &spam
             sn_ConsoleOut( send );
 
             break;
+
+            //add /enemy to chatlog
+            if (se_chatLogWriteEnemy){
+                tString str;
+                str << p->GetUserName() << " /enemy " << message;
+                se_SaveToChatLog(str);
+            }
+        }
+    }
+}
+
+// /player chat commant: talk to the given player's name
+static void se_ChatPlayer( ePlayerNetID * p, std::istream & s, eChatSpamTester & spam )
+{
+    // odd, the refactored original did not check for silence. Probably by design.
+    if ( /* IsSilencedWithWarning(player) || */ spam.Block() )
+    {
+        return;
+    }
+    // Check for player
+    ePlayerNetID * receiver =  se_FindPlayerInChatCommand( p, "/player", s );
+
+    if ( receiver ) {
+        // extract rest of message: it is the true message to send
+        std::ws(s);
+
+        // read the rest of the message
+        tString msg_core;
+        msg_core.ReadLine(s);
+        switch (sn_GetNetState())
+        {
+            case nSERVER:
+            {
+
+                // build chat string
+                tColoredString send;
+                send << p->GetColoredName();
+                send << tColoredString::ColorString( 1,1,.5 );
+                send << ": ";
+                send << receiver->GetColoredName();
+                send << tColoredString::ColorString( 1,1,.5 );
+                send << ": " << msg_core << "\n";
+
+                // display it
+                sn_ConsoleOut( send );
+
+                break;
+
+                //send /player to chatlog
+                if (se_chatLogWritePlayer ){
+                    tString str;
+                    str << p->GetUserName() << " /player " << receiver->GetUserName() << " " << msg_core;
+                    se_SaveToChatLog(str);
+                }
+            }
         }
     }
 }
@@ -3740,16 +3810,17 @@ void handle_chat( nMessage &m )
                         se_ChatEnemy( p, s, spam );
                         return;
                     }
+                    else if (command == "/player")
+                    {
+                        spam.lastSaidType_ = eChatMessageType_Public;
+                        se_ChatPlayer( p, s, spam );
+                        return;
+                    }
                     else if (command == "/shout")
                     {
                         spam.lastSaidType_ = eChatMessageType_Public;
                         spam.say_ = spam.say_.SubStr(7); // cut /shout prefix
                         se_ChatShout( p, s, spam );
-                        return;
-                    }
-                    else if (command == "/msg" ) {
-                        spam.lastSaidType_ = eChatMessageType_Private;
-                        se_ChatMsg( p, s, spam );
                         return;
                     }
                     else if (command == "/drop")
@@ -8389,9 +8460,32 @@ static void Silence_conf(std::istream &s)
 static tConfItemFunc silence_conf("SILENCE",&Silence_conf);
 static tAccessLevelSetter se_silenceConfLevel( silence_conf, tAccessLevel_Moderator );
 
+static void SilenceAll_conf(std::istream &s)
+{
+    if ( se_NeedsServer( "SILENCE_ALL", s ) )
+    {
+        return;
+    }
+
+    if (se_PlayerNetIDs.Len()>0){
+        int max = se_PlayerNetIDs.Len();
+        for(int i=0;i<max;i++){
+            ePlayerNetID *p=se_PlayerNetIDs(i);
+            if ( p && !p->IsSilenced() )
+            {
+                sn_ConsoleOut( tOutput( "$player_silenced_all") );
+                p->SetSilenced( true );
+            }
+        }
+    }
+}
+
+static tConfItemFunc silenceall_conf("SILENCE_ALL",&SilenceAll_conf);
+static tAccessLevelSetter se_silenceallConfLevel( silenceall_conf, tAccessLevel_Moderator );
+
 static void Voice_conf(std::istream &s)
 {
-    if ( se_NeedsServer( "VOICE", s ) )
+    if ( se_NeedsServer( "VOICE", s ) || se_NeedsServer( "UNSILENCE", s ))
     {
         return;
     }
@@ -8408,6 +8502,30 @@ static tConfItemFunc voice_conf("VOICE",&Voice_conf);
 static tAccessLevelSetter se_voiceConfLevel( voice_conf, tAccessLevel_Moderator );
 static tConfItemFunc unsilence_conf("UNSILENCE",&Voice_conf);
 static tAccessLevelSetter se_unsilenceConfLevel( unsilence_conf, tAccessLevel_Moderator );
+
+static void VoiceAll(std::istream &s)
+{
+    if ( se_NeedsServer( "VOICE_ALL", s ) || se_NeedsServer( "UNSILENCE_ALL", s ))
+    {
+        return;
+    }
+    if (se_PlayerNetIDs.Len()>0){
+        int max = se_PlayerNetIDs.Len();
+        for(int i=0;i<max;i++){
+            ePlayerNetID *p=se_PlayerNetIDs(i);
+            if ( p && p->IsSilenced() )
+            {
+                sn_ConsoleOut( tOutput( "$player_voiced_all") );
+                p->SetSilenced( false );
+            }
+        }
+    }
+}
+
+static tConfItemFunc voiceall_conf("VOICE_ALL",&VoiceAll);
+static tAccessLevelSetter se_voiceallConfLevel( voiceall_conf, tAccessLevel_Moderator );
+static tConfItemFunc unsilenceall_conf("UNSILENCE_ALL",&VoiceAll);
+static tAccessLevelSetter se_unsilenceallConfLevel( unsilenceall_conf, tAccessLevel_Moderator );
 
 static tString sg_url;
 static tSettingItem< tString > sg_urlConf( "URL", sg_url );

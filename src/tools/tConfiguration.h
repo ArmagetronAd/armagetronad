@@ -382,7 +382,7 @@ public:
     virtual ~tConfItem(){}
 
     tConfItem<T> & SetShouldChangeFunc( ShouldChangeFuncT changeFunc )
-    
+
     {
         this->shouldChangeFunc_ = changeFunc;
         return *this;
