@@ -191,6 +191,7 @@ spawn_wingmen_side_help     Determines how much each wingman is placed sidewards
 walls_stay_up_delay_help	Number of seconds the walls stay up after a player died; negative values will keep them up forever.
 walls_length_help		Length of the cycle walls in meters; negative values will make the walls infinite.
 explosion_radius_help		Blast radius of the cycle explosions
+explosion_radius_speed_factor_help  Positive values will increase EXPLOSION_RADIUS the faster the cycle is, negative value will decrease it.
 team_balance_on_quit_help	Balance teams on player quit?
 team_balance_with_ais_help	Balance teams with AI players?
 team_max_imbalance_help	Maximum allowed team imbalance

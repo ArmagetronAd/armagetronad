@@ -67,6 +67,10 @@ public:
     {
         return owner_;
     }
+    REAL GetRadius() const
+    {
+        return radius_;
+    }
 
 protected:
     virtual void OnRemoveFromGame(); // called last when the object is removed from the game

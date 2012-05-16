@@ -61,6 +61,9 @@ static REAL   s_explosionRadius;
 static REAL	  s_explosionTime;
 static gExplosion * s_holer = 0;
 
+static REAL sg_explosionSpeedFactor = 0;
+static nSettingItemWatched< REAL > sg_explosionSpeedFactorSettingItem( "EXPLOSION_RADIUS_SPEED_FACTOR", sg_explosionSpeedFactor, nConfItemVersionWatcher::Group_Bumpy, 22 );
+
 // blow a hole centered at s_explosionCoord with radius s_explosionRadius into wall w
 static void S_BlowHoles( eWall * w )
 {
@@ -143,8 +146,9 @@ gExplosion::gExplosion(eGrid *grid, const eCoord &pos,REAL time, gRealColor& col
         createTime(time),
         expansion(0),
         listID(-1),
-        owner_(owner) 
+        owner_(owner)
 {
+    radius_ = gCycle::ExplosionRadius() + owner_->Speed() * sg_explosionSpeedFactor;
     holeAccountedFor_ = false;
 
     lastTime = time;
@@ -218,7 +222,8 @@ bool gExplosion::Timestep(REAL currentTime){
 
         s_explosionCoord  = pos;
         REAL factor = expansion / REAL( expansionSteps );
-        s_explosionRadius = ((radius_==0)?gCycle::ExplosionRadius():radius_) * sqrt(factor);
+        //s_explosionRadius = ((radius_==0)?gCycle::ExplosionRadius():radius_) * sqrt(factor);
+        s_explosionRadius = this->GetRadius() * sqrt(factor);
         s_explosionTime = currentTime;
         s_holer = this;
 
@@ -243,7 +248,7 @@ bool gExplosion::Timestep(REAL currentTime){
     	{
     		expansion = currentExpansion;
     		REAL time = createTime + 5.0f;
-    		
+
     		const tList<eGameObject>& gameObjects = this->Grid()->GameObjects();
     		for ( int i = gameObjects.Len() - 1; i>=0; --i )
     		{
@@ -435,7 +440,7 @@ void gExplosion::DrawSvg(std::ofstream &f) {
     f << "<!-- Explosion -->\n<path stroke-width='.8' stroke='" << gSvgColor(explosion_r, explosion_g, explosion_b) << "' opacity='" << fade << "' d='";
 
     for(int i=expvec.Len()-1;i>=0;i--){
-        f << "\n\tM" 
+        f << "\n\tM"
           <<  pos.x+a1*expvec[i].x[0] << ','
           << -pos.y-a1*expvec[i].x[1] << ' '
           <<  pos.x+e*expvec[i].x[0] << ','
