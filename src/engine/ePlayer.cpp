@@ -8336,6 +8336,39 @@ static void Kill_conf(std::istream &s)
 static tConfItemFunc kill_conf("KILL",&Kill_conf);
 static tAccessLevelSetter se_killConfLevel( kill_conf, tAccessLevel_Moderator );
 
+static void Slap_conf(std::istream &s)
+{
+    if ( se_NeedsServer( "SLAP", s, false ) )
+    {
+        return;
+    }
+
+    ePlayerNetID * victim = ReadPlayer( s );
+
+    if ( victim )
+    {
+        int points = 1;
+
+        s >> points;
+
+        if ( points == 0)
+        {
+            // oh well :)
+            sn_ConsoleOut( tOutput("$player_admin_slap_free", victim->GetColoredName() ) );
+        }
+        else
+        {
+            tOutput win;
+            tOutput lose;
+            win << "$player_admin_slap_win";
+            lose << "$player_admin_slap_lose";
+            victim->AddScore( points, win, lose );
+        }
+    }
+}
+
+static tConfItemFunc slap_conf("SLAP", &Slap_conf);
+
 static void GivePoints_conf(std::istream &s)
 {
     if ( se_NeedsServer( "GIVE_POINTS", s, false ) )
