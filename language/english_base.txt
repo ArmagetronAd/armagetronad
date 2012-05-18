@@ -343,6 +343,7 @@ check_script_help                   Should safety checks be done on script comma
 chatter_remove_time_help            Time in seconds after which a permanent chatter is removed from the game
 idle_remove_time_help               Time in seconds after which an inactive player is removed from the game
 idle_kick_time_help                 Time in seconds after which an inactive player is kicked
+idle_kick_exempt_help               Exempt the access_level from being idle kicked. USAGE: IDLE_KICK_EXEMPT [access_level]
 keep_player_slot_help               If set to 1, every time the server gets full, an unworthy spectator is kicked.
 
 respawn_time_help                   Seconds greater than 0 makes sure any dead player will be respawned within that time of them being dead. Default: -1\n

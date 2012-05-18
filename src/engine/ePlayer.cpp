@@ -7457,6 +7457,10 @@ static tSettingItem< REAL > se_idleRemoveTimeConf( "IDLE_REMOVE_TIME", se_idleRe
 static REAL se_idleKickTime = 0;
 static tSettingItem< REAL > se_idleKickTimeConf( "IDLE_KICK_TIME", se_idleKickTime );
 
+// access level where users on level or above are exempt from idle_kick_time
+static REAL se_idleKickExempt = 0;
+static tSettingItem< REAL > se_idleKickExemptConf( "IDLE_KICK_EXEMPT", se_idleKickExempt );
+
 //removes chatbots and idling players from the game
 void ePlayerNetID::RemoveChatbots()
 {
@@ -7509,7 +7513,7 @@ void ePlayerNetID::RemoveChatbots()
             }
 
             // kick idle players (Removes player from list, this must be the last operation of the loop)
-            if ( se_idleKickTime > 0 && se_idleKickTime < p->LastActivity() - roundTime && se_autokickImmunity < p->GetAccessLevel() )
+            if ( se_idleKickTime > 0 && se_idleKickTime < p->LastActivity() - roundTime && se_autokickImmunity < p->GetAccessLevel() && p->GetAccessLevel() > se_idleKickExempt)
             {
                 sn_KickUser( p->Owner(), tOutput( "$network_kill_idle" ) );
 
