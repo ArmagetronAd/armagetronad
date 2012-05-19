@@ -643,7 +643,7 @@ gParser::parseWall(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
                 ePolyLine P('L',eCoord(x, y) * sizeMultiplier);
                 se_unsplittedRimWalls.push_back(P);
 			}
-			
+
             // TODO-Alt:
             // if this function returns a point, use it in the wall. Otherwise, ignore what comes out.
             endElementAlternative(grid, cur, keyword);

@@ -642,12 +642,12 @@ static void S_ZoneWallIntersect(eWall *pWall)
         }
     }
 }
-    
+
 
 gZone & gZone::SetOwner(ePlayerNetID *pOwner)
 {
     pOwner_ = pOwner;
-    if (pOwner) 
+    if (pOwner)
         team = pOwner->CurrentTeam();
     else
         team = NULL;
@@ -1455,14 +1455,21 @@ void gWinZoneHack::OnEnter( gCycle * target, REAL time )
 gDeathZoneHack::gDeathZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreation, eTeam * teamowner )
 :gZone( grid, pos, dynamicCreation )
 {
-    deathZoneType = TYPE_NORMAL;
     pLastShotCollision = NULL;
 
     color_.r = 1.0f;
     color_.g = 0.0f;
     color_.b = 0.0f;
 
-    if (teamowner!=NULL) team = teamowner;
+    if (teamowner!=NULL)
+    {
+        team = teamowner;
+        deathZoneType = TYPE_TEAM;
+    }
+    else
+    {
+        deathZoneType = TYPE_NORMAL;
+    }
 
     grid->AddGameObjectInteresting(this);
 }
@@ -1508,6 +1515,8 @@ gDeathZoneHack::~gDeathZoneHack( void )
 
 static int score_deathzone=-1;
 static tSettingItem<int> s_dz("SCORE_DEATHZONE",score_deathzone);
+static int score_deathzone_team=-1;
+static tSettingItem<int> s_dz_team("SCORE_DEATHZONE_TEAM",score_deathzone_team);
 
 void gDeathZoneHack::OnVanish( void )
 {
@@ -1658,6 +1667,7 @@ static eLadderLogWriter sg_deathShotFragWriter("DEATH_SHOT_FRAG", true);
 static eLadderLogWriter sg_deathShotSuicideWriter("DEATH_SHOT_SUICIDE", true);
 static eLadderLogWriter sg_deathShotTeamkillWriter("DEATH_SHOT_TEAMKILL", true);
 static eLadderLogWriter sg_deathDeathZoneWriter("DEATH_DEATHZONE", true);
+static eLadderLogWriter sg_deathDeathZoneTeamWriter("DEATH_DEATHZONE_TEAM", false);
 static eLadderLogWriter sg_deathZombieZoneWriter("DEATH_ZOMBIEZONE", true);
 static eLadderLogWriter sg_deathDeathShotWriter("DEATH_DEATHSHOT", true);
 static eLadderLogWriter sg_deathDeathSelfDestructWriter("DEATH_SELF_DESTRUCT", true);
@@ -1667,7 +1677,7 @@ void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
     if (!dynamicCreation_ || ( deathZoneType == TYPE_NORMAL && !team ) )
     {
         target->Player()->AddScore(score_deathzone, tOutput(), "$player_lose_deathzone");
-    target->Kill();
+        target->Kill();
         sg_deathDeathZoneWriter << target->Player()->GetUserName();
         sg_deathDeathZoneWriter.write();
     }
@@ -1679,13 +1689,23 @@ void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
     }
 
         // check normal death zone linked to a team ...
-        if (team && deathZoneType == TYPE_NORMAL)
+        if (team && deathZoneType == TYPE_TEAM)
         {
             if ((!target) || (!target->Player()))
             {
                 return;
             }
-            if (target->Player()->CurrentTeam() == team) return;
+            if (target->Player()->CurrentTeam() == team)
+            {
+                return;
+            }
+            else
+            {
+                target->Player()->AddScore(score_deathzone_team, "", "player_lose_deathzone_team");
+                target->Kill();
+                sg_deathDeathZoneTeamWriter << ePlayerNetID::FilterName( team->Name() ) << target->Player()->GetUserName();
+                sg_deathDeathZoneTeamWriter.write();
+            }
         }
 
         //Validate the owner player ID
@@ -1833,11 +1853,6 @@ void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
                 sg_deathZombieZoneWriter.write();
                 target->Player()->AddScore(score_zombie_zone, tOutput(), "$player_lose_suicide");
             }
-            else
-            {
-            target->Player()->AddScore(score_die, tOutput(), "$player_lose_frag");
-            }
-            target->Kill();
         }
 
         if (((deathZoneType == TYPE_ZOMBIE_ZONE) && ((!pSeekingCycle_) || (sg_zombieZoneVanish))) ||
@@ -2264,7 +2279,7 @@ static tSettingItem<bool> sg_baseEnemyKillConfig ("BASE_ENEMY_KILL", sg_baseEnem
 static int sg_scoreFlag=1;
 static tSettingItem<int> sg_scoreFlagConfig("SCORE_FLAG", sg_scoreFlag);
 
-// flag indicating whether the goal is to bring flag in player home base or enemy base to score. true=home base / false=enemy base 
+// flag indicating whether the goal is to bring flag in player home base or enemy base to score. true=home base / false=enemy base
 static bool sg_scoreFlagHomeBase=true;
 static tSettingItem<bool> sg_scoreFlagHomeBaseConfig("SCORE_FLAG_HOME_BASE", sg_scoreFlagHomeBase);
 
@@ -2485,7 +2500,7 @@ bool gBaseZoneHack::Timestep( REAL time )
                         tColoredString spawnerName;
                         spawnerName << teamPlayer_->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
                         sn_ConsoleOut( tOutput( "$player_base_respawn", playerName, spawnerName ) );
-                        
+
                         sg_baseRespawnWriter << teamPlayer_->Player()->GetLogName() << pPlayer->GetLogName();
                         sg_baseRespawnWriter.write();
                     }
@@ -2494,7 +2509,7 @@ bool gBaseZoneHack::Timestep( REAL time )
                         tColoredString spawnerName;
                         spawnerName << enemyPlayer_->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
                         sn_ConsoleOut( tOutput( "$player_base_enemy_respawn", playerName, spawnerName ) );
-                        
+
                         sg_baseEnemyRespawnWriter << enemyPlayer_->Player()->GetLogName() << pPlayer->GetLogName();
                         sg_baseEnemyRespawnWriter.write();
                     }
@@ -2758,7 +2773,7 @@ void gBaseZoneHack::OnConquest( void )
         {
             //sg_basezoneConquererTeamWriter << ePlayerNetID::FilterName((*iter)->Name()) << score;
             //sg_basezoneConquererTeamWriter.write();
-            
+
             if (sg_condenseConquestOutput){
                 (*iter)->AddScore( score);
                 if(tCount==0){
@@ -2797,7 +2812,7 @@ void gBaseZoneHack::OnConquest( void )
             se_SaveToScoreFile(message);
         }
     }
-    
+
     //write basezoneConquererTeam msg regardless of whether a score is given
         if(  enemies_.size() > 0)
         {
@@ -3202,7 +3217,7 @@ void gBaseZoneHack::OnEnter( gCycle * target, REAL time )
                 // player has scored a flag capture
                 sg_flagScoreWriter << target->Player()->GetUserName() << ePlayerNetID::FilterName( otherTeam->Name() );
                 sg_flagScoreWriter.write();
-                
+
                 tOutput lose;
                 tOutput win;
                 int score = sg_scoreFlag;
@@ -3217,7 +3232,7 @@ void gBaseZoneHack::OnEnter( gCycle * target, REAL time )
 
                     sg_flagConquestRoundWinWriter << target->Player()->GetUserName() << ePlayerNetID::FilterName( otherTeam->Name() );
                     sg_flagConquestRoundWinWriter.write();
-                    
+
                     static const char*message="$player_win_flag";
                     sg_DeclareWinner( otherTeam, message );
                 }
@@ -3292,7 +3307,7 @@ void gBaseZoneHack::OnEnter( gZone * target, REAL time )
                             tColoredString spawnerName;
                             spawnerName << teamPlayer_->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
                             sn_ConsoleOut( tOutput( "$player_base_respawn", playerName, spawnerName ) );
-                            
+
                             sg_baseRespawnWriter << teamPlayer_->Player()->GetLogName() << pPlayer->GetLogName();
                             sg_baseRespawnWriter.write();
                         }
@@ -3301,7 +3316,7 @@ void gBaseZoneHack::OnEnter( gZone * target, REAL time )
                             tColoredString spawnerName;
                             spawnerName << enemyPlayer_->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
                             sn_ConsoleOut( tOutput( "$player_base_enemy_respawn", playerName, spawnerName ) );
-                            
+
                             sg_baseEnemyRespawnWriter << enemyPlayer_->Player()->GetLogName() << pPlayer->GetLogName();
                             sg_baseEnemyRespawnWriter.write();
                         }
@@ -3454,7 +3469,7 @@ bool gSumoZoneHack::Timestep( REAL time )
                     zoneColor.g = Zone->Team()->G()/15.0;
                     zoneColor.b = Zone->Team()->B()/15.0;
                     setColorFlag = true;
-                    
+
                     CreateZone(Zone, zoneSize, zoneGrowth, zoneDir, setColorFlag, zoneColor, zoneInteractive, targetRadius, route, zoneNameStr);
                 }
             }
@@ -4499,7 +4514,7 @@ bool gFlagZoneHack::Timestep( REAL time )
                 sg_flagTimeoutWriter << ePlayerNetID::FilterName( team->Name() );
             }
             sg_flagTimeoutWriter.write();
-            
+
             tColoredString playerName;
             playerName << *player << tColoredString::ColorString(1,1,1);
             sn_ConsoleOut( tOutput( "$player_flag_timeout", playerName ) );
@@ -4710,7 +4725,7 @@ void gFlagZoneHack::OnEnter( gCycle * target, REAL time )
 
             sg_flagReturnWriter << target->Player()->GetUserName();
             sg_flagReturnWriter.write();
-            
+
             tColoredString playerName;
             playerName << *target->Player() << tColoredString::ColorString(1,1,1);
             sn_ConsoleOut( tOutput( "$player_flag_return", playerName ) );
@@ -5791,7 +5806,7 @@ static void sg_CreateZone_conf(std::istream &s)
     params.ReadLine( s, true );
     //retrieve the size multiplier once, using it a lot
     float sizeMultiplier = gArena::SizeMultiplier();
-    
+
     // first parse the line to get the params : <win|death> <x> <y> <size> <growth>
     eTeam *zoneTeam=NULL;
     int pos = 0;                 //

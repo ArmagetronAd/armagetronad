@@ -162,6 +162,7 @@ score_kill_help			What you get for killing someone
 score_suicide_help		What you get for stupidly dying
 score_win_help			What you get for winning a round
 score_deathzone_help		What you get for hitting the Death Zone
+score_deathzone_team_help   What you get for hitting a team Death Zone
 
 sp_score_win_help			What you get for winning a round in single player mode
 sp_walls_stay_up_delay_help	Number of seconds the walls stay up after a player died; negative values will keep them up forever.
@@ -817,6 +818,7 @@ ladderlog_write_command_help                  Write to ladderlog: COMMAND <playe
 ladderlog_write_death_basezone_conquered_help Write to ladderlog: DEATH_BASEZONE_CONQUERED <player> [NO_ENEMIES]
 ladderlog_write_death_deathshot_help          Write to ladderlog: DEATH_DEATHSHOT <prey> <predator>
 ladderlog_write_death_deathzone_help          Write to ladderlog: DEATH_DEATHZONE <player>
+ladderlog_write_death_deathzone_team_help     Write to ladderlog: DEATH_DEATHZONE_TEAM <team> <player>
 ladderlog_write_death_frag_help               Write to ladderlog: DEATH_FRAG <prey> <predator>
 ladderlog_write_death_rubberzone_help         Write to ladderlog: DEATH_RUBBERZONE <player>   
 ladderlog_write_death_self_destruct_help      Write to ladderlog: DEATH_SELF_DESTRUCT <prey> <predator>
@@ -2499,6 +2501,7 @@ player_koh_score        \1 Wins \2 points for being The King of the Hill\n
 player_lose_default		\1 lost \2 points for a very strange reason.\n
 player_lose_suicide		\1 committed suicide and lost \2 points.\n
 player_lose_deathzone	\1 exploded on a deathzone and lost \2 points.\n
+player_lose_deathzone_team \1 exploded on a team deathzone and lost \2 points.\n
 player_lose_rubberzone	\1 exploded on a rubberzone and lost \2 points.\n
 player_free_suicide		\1 committed suicide.\n
 player_win_frag			\1 core dumped \3 for \2 points.\n

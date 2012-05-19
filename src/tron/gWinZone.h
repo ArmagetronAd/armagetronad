@@ -156,7 +156,7 @@ protected:
     tFunction radius_;           //!< time dependence of radius
     tFunction rotationSpeed_;    //!< the zone's rotation speed
     eCoord    rotation_;         //!< the current rotation state
-    
+
     std::vector<eCoord> route_;
     unsigned int lastCoord_;
     REAL nextUpdate_;
@@ -216,6 +216,7 @@ class gDeathZoneHack: public gZone
 		enum
 		{
 			TYPE_NORMAL,
+			TYPE_TEAM,
 			TYPE_SHOT,
 			TYPE_DEATH_SHOT,
 			TYPE_SELF_DESTRUCT,
@@ -317,12 +318,12 @@ class gBaseZoneHack: public gZone
 								 //!< time spend in the zone
 		REAL conquerer_[MAXCLIENTS+1];
 		int enemiesInside_;		 //!< count of enemies currently inside the zone
-								 
+
         gCycle *enemyPlayer_;     //!< the first enemy player that was inside us
 
 		int ownersInside_;		 //!< count of owners currently inside the zone
 		gCycle *teamPlayer_;     //!< the first team player that was inside us
-        
+
 
 		bool onlySurvivor_;		 //!< flag set if this zone is the only survivor
 
@@ -537,11 +538,11 @@ class gTeleportZoneHack: public gZone
 		virtual void OnVanish();
 		//!< reacts on objects inside the zone
 		virtual void OnEnter( gCycle *target, REAL time );
-	
+
 	eCoord jump;
 	eCoord ndir;
 	int relative; // 0=absolute ie map basis, 1=relative to cycle with map basis, 2=relative to cycle with cycle basis
-	REAL reloc;   // add extra jump to pretend to cross the zone 
+	REAL reloc;   // add extra jump to pretend to cross the zone
 };
 
 class gBlastZoneHack: public gZone
@@ -552,9 +553,9 @@ class gBlastZoneHack: public gZone
 		//!< network constructor
 		gBlastZoneHack(nMessage &m);
 		~gBlastZoneHack();		 //!< destructor
-		
+
 	protected:
-		
+
 	private:
 		//!< simulates behaviour up to currentTime
 		virtual bool Timestep(REAL currentTime);
