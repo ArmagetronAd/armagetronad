@@ -27,13 +27,10 @@ Changes since 0.2.8.3.x:
   TEAM_RENAMED <old team name> <new team name>
   TEAM_PLAYER_ADDED <team name> <player>
   TEAM_PLAYER_REMOVED <team name> <player>
-- Manage external scripts on Unix dedicated servers: SPAWN_SCRIPT always 
-  launches a script (the main script must be in the scripts subdirectory on the data
-   path), RESPAWN_SCRIPT only spawns it if a previous instance exited, KILL_SCRIPT
-  kills the script.
-  Scripts are fed the ladderlog on stdin (and need to read it) and their stdout 
-  output is interpreted as console input on the server. Environment variables 
-  are set so the script knows all about the server configuration at time of launch.
+- Manage external scripts on Unix dedicated servers. New commands: 
+  SPAWN_SCRIPT, RESPAWN_SCRIPT, FORCE_RESPAWN_SCRIPT, KILL_SCRIPT,
+  CHECK_SCRIPT, LIST_SCRIPTS, SCRIPT_ENV.
+- Authentication is now enabled by default.
 
 Changes since 0.2.8.3.1:
 - security fix: old style action commands from clients no loger cause hangs and crashes

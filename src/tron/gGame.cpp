@@ -68,6 +68,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "gWinZone.h"
 #include "eVoter.h"
 #include "tRecorder.h"
+#include "rScreen.h"
 
 #include "gParser.h"
 #include "tResourceManager.h"
@@ -1191,6 +1192,19 @@ void sg_DeclareWinner( eTeam* team, char const * message )
         wishWinnerMessage = message;
     }
 }
+
+static void sg_DeclareRoundWinner(std::istream &s)
+{
+    ePlayerNetID *winningPlayer = ePlayerNetID::ReadPlayer(s);
+    if(!winningPlayer)
+    {
+        return;
+    }
+    static const char* message="$player_win_command";
+    sg_DeclareWinner( winningPlayer->CurrentTeam(), message );
+}
+
+static tConfItemFunc sg_DeclareRoundWinner_conf("DECLARE_ROUND_WINNER",&sg_DeclareRoundWinner);
 
 void check_hs(){
     if (sg_singlePlayer)
@@ -2486,7 +2500,7 @@ void sg_DisplayVersionInfo() {
     versionInfo << "$version_info_gl_version";
     versionInfo << gl_version;
 
-    sg_FullscreenMessage("$version_info_title", versionInfo, 1000);
+    sg_ClientFullscreenMessage("$version_info_title", versionInfo, 1000);
 }
 
 void sg_StartupPlayerMenu();
@@ -4687,7 +4701,10 @@ void Activate(bool act){
 
     sr_Activate( act );
 
-    sg_SoundPause( !act, true );
+    if (!sr_keepWindowActive || act)
+    {
+        sg_SoundPause( !act, true );
+    }
 
     if ( !tRecorder::IsRunning() )
     {
@@ -4780,6 +4797,11 @@ static nDescriptor sg_clientFullscreenMessage(312,sg_ClientFullscreenMessage,"cl
 
 void sg_FullscreenMessageWait()
 {
+    if( sn_GetNetState() != nSERVER )
+    {
+        return;
+    }
+
     // wait for the clients to have seen the message
     {
         // stop the game

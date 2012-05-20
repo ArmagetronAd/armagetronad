@@ -36,6 +36,7 @@ nTrueVersion.h: $(wildcard $(top_srcdir)/*_version) $(wildcard $(top_srcdir)/.sv
 	fi
 
 ${srcdir}/network/nNetwork.cpp: nTrueVersion.h
+${srcdir}/render/rConsoleGraph.cpp: nTrueVersion.h
 
 # library file listings
 

@@ -2067,9 +2067,9 @@ static tAccessLevel se_adminAccessLevel = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_adminAccessLevelConf( "ACCESS_LEVEL_ADMIN", se_adminAccessLevel );
 static tAccessLevelSetter se_adminAccessLevelConfLevel( se_adminAccessLevelConf, tAccessLevel_Owner );
 
+static eLadderLogWriter se_commandWriter( "COMMAND", true );
+
 void handle_command_intercept( ePlayerNetID *p, tString const & command, std::istream & s, tString const & say ) {
-    static eLadderLogWriter se_commandWriter( "COMMAND", true );
-    
     tString commandArguments;
     commandArguments.ReadLine( s );
     
@@ -3977,7 +3977,7 @@ static void chat( ePlayer * chatter )
 static bool se_allowControlDuringChat = false;
 static nSettingItem<bool> se_allowControlDuringChatConf("ALLOW_CONTROL_DURING_CHAT",se_allowControlDuringChat);
 
-uActionPlayer se_toggleSpectator("TOGGLE_SPECTATOR", 0);
+uActionPlayer se_toggleSpectator("TOGGLE_SPECTATOR", -7);
 
 bool ePlayer::Act(uAction *act,REAL x){
     eGameObject *object=NULL;
@@ -4122,7 +4122,7 @@ void ePlayer::Init(){
         tOutput help;
         help.SetTemplateParameter(1, i+1);
         help << "$input_instant_chat_help";
-        ePlayer::se_instantChatAction[i]=tNEW(uActionPlayer) (id, desc, help);
+        ePlayer::se_instantChatAction[i]=tNEW(uActionPlayer) (id, desc, help, 100);
         //,desc,       "Issues a special instant chat macro.");
     }
 
@@ -4149,7 +4149,7 @@ void ePlayer::Exit(){
     se_Players = NULL;
 }
 
-uActionPlayer ePlayer::s_chat("CHAT");
+uActionPlayer ePlayer::s_chat("CHAT",-8);
 
 // only display chat in multiplayer games
 static bool se_ChatTooltipVeto(int)
@@ -6518,7 +6518,7 @@ static int se_ColorDistance( int a[3], int b[3] )
     return distance;
 }
 
-bool se_randomizeColor = true;
+bool se_randomizeColor = false;
 static tSettingItem< bool > se_randomizeColorConf( "PLAYER_RANDOM_COLOR", se_randomizeColor );
 
 static void se_RandomizeColor( ePlayer * l, ePlayerNetID * p )
@@ -7918,7 +7918,7 @@ static void se_BanConf(std::istream &s)
 static tConfItemFunc se_banConf("BAN",&se_BanConf);
 static tAccessLevelSetter se_banConfLevel( se_banConf, tAccessLevel_Moderator );
 
-static ePlayerNetID * ReadPlayer( std::istream & s )
+ePlayerNetID * ePlayerNetID::ReadPlayer( std::istream & s )
 {
     // read name of player to be returned
     tString name;
@@ -7941,6 +7941,11 @@ static ePlayerNetID * ReadPlayer( std::istream & s )
     }
 
     return ePlayerNetID::FindPlayerByName( name );
+}
+
+static ePlayerNetID * ReadPlayer( std::istream & s )
+{
+    return ePlayerNetID::ReadPlayer( s );
 }
 
 static void Kill_conf(std::istream &s)
@@ -8455,11 +8460,18 @@ bool ePlayerNetID::IsAllowedToRename ( void )
         con << message;
         return false;
     }
+    // don't let the player rename if s/he is silenced.
+    if ( this->IsSilenced() )
+    {
+        tOutput message("$player_rename_silenced");
+        sn_ConsoleOut( message, Owner() );
+        return false;
+    }
     // disallow name changes if there was a kick vote recently
     if ( !( !bool(this->voter_) || voter_->AllowNameChange() || nameFromServer_.Len() <= 1 ) && nameFromServer_ != nameFromClient_ )
     {
         // inform victim to avoid complaints
-        tOutput message( "$player_rename_rejected_kickvote", nameFromServer_, nameFromClient_ );
+        tOutput message( "$player_rename_rejected_votekick", nameFromServer_, nameFromClient_ );
         sn_ConsoleOut( message, Owner() );
         con << message;
         return false;

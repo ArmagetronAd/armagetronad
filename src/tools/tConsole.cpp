@@ -303,10 +303,10 @@ void tConsole::RegisterIdleCallback(IdleCallback *a_callback)
     s_idleCallback = a_callback;
 }
 
-bool tConsole::Idle(){
+bool tConsole::Idle( bool processInput ){
     if (s_idleCallback)
     {
-        return (*s_idleCallback)();
+        return (*s_idleCallback)( processInput );
     }
     else
     {

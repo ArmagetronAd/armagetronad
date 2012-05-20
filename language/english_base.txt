@@ -335,8 +335,11 @@ wait_for_external_script_timeout_help If the server has been paused by WAIT_FOR_
 
 spawn_script_help                   Spawns an external script from a scripts/ subdirectory on the data path.
 respawn_script_help                 Spawns an external script from a scripts/ subdirectory on the data path if no already running instance is found.
+force_respawn_script_help           Spawns an external script from a scripts/ subdirectory on the data path after killing the other possibly running instance.
 kill_script_help                    Kills a script. Argument must match the SPAWN_SCRIPT argument.
 check_script_help                   Should safety checks be done on script commands? Very much recommended to leave this on.
+list_scripts_help                   Lists active scripts.
+script_env_help                     Set custom environment variables for scripts. Usage: SCRIPT_ENV <variable name> <value>
 
 chatter_remove_time_help            Time in seconds after which a permanent chatter is removed from the game
 idle_remove_time_help               Time in seconds after which an inactive player is removed from the game
@@ -730,6 +733,7 @@ score_locx_help                   Horizontal position of the score display
 score_locy_help                   Vertical position of the score display
 score_size_help                   Size of the score display
 cm_locy_help                      Vertical position of the center messages
+hud_cache_threshold_help          Update threshold for HUD gauges, only in effect when display lists are activated: if the relative change times the amount of time since the last update is bigger than this, the gauge gets updated.
 
 #floor
 grid_size_help			Distance between grid lines
@@ -822,6 +826,7 @@ ladderlog_write_team_player_added_help        Write to ladderlog: TEAM_PLAYER_AD
 ladderlog_write_team_player_removed_help      Write to ladderlog: TEAM_PLAYER_REMOVED <team name> <player>
 ladderlog_game_time_interval_help If non-negative, write a line with the current game time to the ladder log every n seconds.
 chat_log_help			Write machine parsable chat messages to var/chatlog.txt
+console_log_help		Write all console messages to var/consolelog.txt
 show_fps_help			Enable fps display
 floor_mirror_help		Floor mirror mode
 floor_detail_help		Floor detail settings
@@ -1513,7 +1518,7 @@ network_opts_axesindicator_text	Axes Indicator:
 network_opts_axesindicator_help	The axes indicator is meant to show the directions the cycle can turn to as lines going out from the cycle. Good on servers with changing configs so you know what to expect before you turn.
 
 network_opts_predict_text	Prediction:
-network_opts_predict_help	In a network game, this extrapolates the cycles' movement. Leaving it disabled makes the graphics smoother, enabling it gives yo a better image of the actual situation. I leave it disabled; the Lag-O-Meter is a good substitute for prediction. This is always disabled in server mode.
+network_opts_predict_help	In a network game, this extrapolates the cycles' movement. Leaving it disabled makes the graphics smoother, enabling it gives you a better image of the actual situation. I leave it disabled; the Lag-O-Meter is a good substitute for prediction. This is always disabled in server mode.
 
 network_opts_inrate_text	Input Rate:
 network_opts_inrate_help	The maximum number of kilobytes your network can receive per second. 3 for 28.8k modems, 7 for 56k modems, 8 for ISDN, more for cable modems, (A)DSL and LAN.
@@ -2374,6 +2379,8 @@ player_win_conquest_specific \1 was awarded \2 points for conquering \3's base.\
 player_kill_collapse        \1 was eradicated by its collapsing zone.\n
 player_win_hole             \1 got \2 points for a sacrifice for the good of the team.\n
 player_lose_hole            0xffff00ZOMG! 0xff7f00HOLER!!1!!0xRESETT \1 lost \2 points for being a cheap ass lamer.\n
+player_win_command			\1 was awarded \2 points for winning the round.\n
+declare_round_winner_help		Declare the winner of the current round and end the round. Usage: DECLARE_ROUND_WINNER <player>
 
 player_no_longer_suspended  \1 0x77ff77is allowed to play again.\n
 player_suspended            \1 0xff7777is banned to spectator mode for \2 round(s).\n
@@ -2401,6 +2408,8 @@ spam_protection_prefix  SPAM PROTECTION: your messages have a common prefix: \1\
 spam_protection_silenceall SPAM PROTECTION: public chat is disabled.\n
 spam_protection_silenced SPAM PROTECTION: you have been silenced by the server administrator.\n
 spam_protection_silenced_default SPAM PROTECTION: you have to be given voice in order to chat publicly.\n
+vote_silenced You are not allowed to call a new vote while you are silenced.\n
+player_rename_silenced You are not allowed to rename while you are silenced.\n
 player_silenced         \10xff7777 has been silenced.\n
 player_voiced           \10x77ff77 has been given his voice back.\n
 player_allowed_teamchange \10x77ff77 has been allowed to change his team.\n
@@ -2867,7 +2876,6 @@ nconfig_error_nonet         Got conf message for  setting \1 which is not networ
 nconfig_error_ignoreold		Ignoring old conf message for setting \1.\n
 nconfig_value_changed		\1 changed from \2 to \3 on server order.\n
 
-config_accesslevel_-1       Shell
 config_accesslevel_0        Owner
 config_accesslevel_1        Administrator
 config_accesslevel_2        Moderator
@@ -3044,7 +3052,7 @@ login_error_unknown         Unknown error code \1 returned, content "\2".
 login_error_invalidclaim    Authority "\1" can't claim you to be "\2"!
 login_error_unexpected_answer Answer "\1" expected from server, but got \2 instead.
 
-login_error_local_nouser    Local user \1 not found.
+login_error_local_nouser    Local user \1 not found. Try "/login \1@forums" instead.
 login_error_local_password  Supplied password for local user \1 incorrect.
 
 chatcommand_requires_player  \1 requires a player username as additional parameter.\n

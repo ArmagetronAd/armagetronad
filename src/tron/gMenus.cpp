@@ -280,7 +280,7 @@ public:
                 else
                     s << tOutput("$screen_size_desktop");
 
-                res_men.NewChoice( s.str().c_str(), help, size );
+                res_men.NewChoice( s.str().c_str(), "", size );
             }
 
 #endif
