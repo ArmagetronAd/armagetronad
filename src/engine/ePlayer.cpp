@@ -2083,9 +2083,9 @@ static tAccessLevel se_adminAccessLevel = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_adminAccessLevelConf( "ACCESS_LEVEL_ADMIN", se_adminAccessLevel );
 static tAccessLevelSetter se_adminAccessLevelConfLevel( se_adminAccessLevelConf, tAccessLevel_Owner );
 
-void handle_command_intercept( ePlayerNetID *p, tString const & command, std::istream & s, tString const & say ) {
-    static eLadderLogWriter se_commandWriter( "COMMAND", true );
+static eLadderLogWriter se_commandWriter( "COMMAND", true );
 
+void handle_command_intercept( ePlayerNetID *p, tString const & command, std::istream & s, tString const & say ) {
     tString commandArguments;
     commandArguments.ReadLine( s );
 
@@ -2697,6 +2697,10 @@ static eTeam * se_GetManagedTeam( ePlayerNetID * admin )
 static bool se_silenceDead = false;
 static tSettingItem<bool> se_silenceDeadConf("SILENCE_DEAD", se_silenceDead);
 
+
+// help message printed out to whoever asks for it
+static tString se_helpMessage("");
+static tConfItemLine se_helpMessageConf("HELP_MESSAGE",se_helpMessage);
 
 // time during which no repeaded chat messages are printed
 REAL se_alreadySaidTimeout=5.0;
@@ -3713,6 +3717,13 @@ void handle_chat( nMessage &m )
                     else if (command == "/vote" || command == "/callvote") {
                         spam.lastSaidType_ = eChatMessageType_Command;
                         eVoter::HandleChat( p, s );
+                        return;
+                    }
+                    else if (command == "/help")
+                    {
+                        spam.lastSaidType_ = eChatMessageType_Command;
+                        sn_ConsoleOut(se_helpMessage + "\n", p->Owner());
+                        se_DisplayChatLocally(p, say);
                         return;
                     }
                     else if (command == "/teams") {
@@ -8026,8 +8037,7 @@ static void se_BanConf(std::istream &s)
 static tConfItemFunc se_banConf("BAN",&se_BanConf);
 static tAccessLevelSetter se_banConfLevel( se_banConf, tAccessLevel_Moderator );
 
-
-static ePlayerNetID * ReadPlayer( std::istream & s )
+ePlayerNetID * ePlayerNetID::ReadPlayer( std::istream & s )
 {
     // read name of player to be returned
     tString name;
@@ -8056,6 +8066,10 @@ static bool se_enableAdminKillMessage = true;
 static tSettingItem< bool > se_enableAdminKillMessageConf( "ADMIN_KILL_MESSAGE", se_enableAdminKillMessage );
 
 static eLadderLogWriter se_playerKilledWriter("PLAYER_KILLED", true);
+static ePlayerNetID * ReadPlayer( std::istream & s )
+{
+    return ePlayerNetID::ReadPlayer( s );
+}
 
 static void Kill_conf(std::istream &s)
 {
@@ -9706,4 +9720,3 @@ static void se_FillServerSettings()
 }
 
 static nCallbackFillServerInfo se_fillServerSettings(se_FillServerSettings);
-

@@ -1330,6 +1330,19 @@ void sg_DeclareWinner( eTeam* team, char const * message )
     }
 }
 
+static void sg_DeclareRoundWinner(std::istream &s)
+{
+    ePlayerNetID *winningPlayer = ePlayerNetID::ReadPlayer(s);
+    if(!winningPlayer)
+    {
+        return;
+    }
+    static const char* message="$player_win_command";
+    sg_DeclareWinner( winningPlayer->CurrentTeam(), message );
+}
+
+static tConfItemFunc sg_DeclareRoundWinner_conf("DECLARE_ROUND_WINNER",&sg_DeclareRoundWinner);
+
 void check_hs(){
     if (sg_singlePlayer)
         if(se_PlayerNetIDs.Len()>0 && se_PlayerNetIDs(0)->IsHuman())
@@ -2738,7 +2751,7 @@ void sg_DisplayVersionInfo() {
     versionInfo << "$version_info_gl_version";
     versionInfo << gl_version;
 
-    sg_FullscreenMessage("$version_info_title", versionInfo, 1000);
+    sg_ClientFullscreenMessage("$version_info_title", versionInfo, 1000);
 }
 
 void sg_StartupPlayerMenu();
@@ -3803,7 +3816,7 @@ static void sg_Respawn( REAL time, eGrid *grid, gArena & arena )
 
         eGameObject *e=p->Object();
 
-        if ( ( (!e) || ((!e->Alive()) && (e->DeathTime() < (time - sg_respawnTime)) && (sn_GetNetState() != nCLIENT ))))
+        if ( ( (!e) || ((!e->Alive()) && (e->DeathTime() < (time - sg_respawnTime)) ) && (sn_GetNetState() != nCLIENT )))
         {
             eCoord pos,dir;
 #if 0
@@ -5151,6 +5164,11 @@ static nDescriptor sg_clientFullscreenMessage(312,sg_ClientFullscreenMessage,"cl
 
 void sg_FullscreenMessageWait()
 {
+    if( sn_GetNetState() != nSERVER )
+    {
+        return;
+    }
+
     // wait for the clients to have seen the message
     {
         // stop the game

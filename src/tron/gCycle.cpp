@@ -3410,10 +3410,7 @@ void gCycle::KillAt( const eCoord& deathPos){
 
             if (pHunterCycle)
             {
-
                 Killed(pHunterCycle);
-                ++(pHunterCycle->tactical_stats[pHunterCycle->tactical_pos].kills);
-
             }
         }
         //	if (prey->player && (prey->player->CurrentTeam() != hunter->player->CurrentTeam()))
@@ -5192,6 +5189,7 @@ gCycle::gCycle(nMessage &m)
     lastTimeAnim = lastTime = -EPS;
 
     nextSync = nextSyncOwner = -1;
+
     flag_ = NULL;
     lastSyncOwnerGameTime_ = 0;
 }
@@ -6899,5 +6897,6 @@ static void sg_TeleportPlayer(std::istream &s)
 }
 
 static tConfItemFunc sg_TeleportPlayer_conf("TELEPORT_PLAYER",&sg_TeleportPlayer);
+
 
 

@@ -32,6 +32,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tRecorder.h"
 #include "tDirectories.h"
 
+#include <map>
+
 #include <stdio.h>
 #include <fcntl.h>
 #include <sstream>
@@ -48,6 +50,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #else
 #include <signal.h>
 #include <sys/wait.h>
+#endif
+
+#ifdef TOP_SOURCE_DIR
+#include "nTrueVersion.h"
+#endif
+
+#ifndef TRUE_ARMAGETRONAD_VERSION
+#define TRUE_ARMAGETRONAD_VERSION VERSION
 #endif
 
 class rStream: public tReferencable< rStream >
@@ -213,7 +223,7 @@ static void sr_HandleSigChild( int signal )
     int stat;
  
     /*Kills all the zombie processes*/
-    while(waitpid(-1, &stat, WNOHANG) > 0);
+    while(waitpid(-1, &stat, WNOHANG) > 0) {}
 }
 #endif
 
@@ -482,6 +492,15 @@ public:
     {
     }
 
+    void AddAll( const std::map< tString, tString > & m )
+    {
+        std::map< tString, tString >::const_iterator it = m.begin();
+        for ( ; it != m.end(); ++it )
+        {
+            Add( it->first, it->second );
+        }
+    }
+
     void Add( char const * var, tString const & value )
     {
         strings_[strings_.Len()] = tString(var) + "=" + value;
@@ -495,6 +514,20 @@ private:
     tArray< char const * > envp_;
     tArray< tString > strings_;
 };
+
+static std::map< tString, tString > sr_globalScriptEnv;
+
+static void sr_ScriptEnv( std::istream & s )
+{
+    tString key, value;
+    s >> key;
+    s >> value;
+    sr_globalScriptEnv[key] = value;
+}
+
+static tConfItemFunc sr_scriptEnvConf( "SCRIPT_ENV", sr_ScriptEnv );
+static tAccessLevelSetter sr_scriptEnvALS( sr_scriptEnvConf, tAccessLevel_Owner );
+
 
 static void sr_SpawnScript( tString const & command )
 {
@@ -600,6 +633,12 @@ static void sr_SpawnScript( tString const & command )
         env.AddPath( "ARMAGETRONAD_PATH_VAR", tDirectories::Var() );
         env.AddPath( "ARMAGETRONAD_PATH_SCREENSHOT", tDirectories::Screenshot() );
         env.AddPath( "ARMAGETRONAD_PATH_RESOURCE", tDirectories::Resource() );
+        
+        // add other data
+        env.Add( "ARMAGETRONAD_VERSION", tString( TRUE_ARMAGETRONAD_VERSION ) );
+        
+        // add user-specified variables
+        env.AddAll( sr_globalScriptEnv );
 
         // add all settings
         tConfItemBase::tConfItemMap const & confItemMap = tConfItemBase::GetConfItemMap();
@@ -695,6 +734,24 @@ static void sr_KillScriptCommand( std::istream & s )
 
 static tConfItemFunc sr_killScript( "KILL_SCRIPT", sr_KillScriptCommand );
 static tAccessLevelSetter sr_killScriptALS( sr_killScript, tAccessLevel_Owner );
-#endif
 
-#endif
+void sr_ListScriptsCommand( std::istream & s )
+{
+    int numberScripts = 0;
+    for( int i = sr_inputStreams.Len()-1; i >= 0; --i )
+    {
+        rScriptStream * script = dynamic_cast< rScriptStream * >( (rStream*)sr_inputStreams[i] );
+        if( script )
+        {
+            numberScripts++;
+            con << "Script: " << script->GetName() << '\n';
+        }
+    }
+    if (!numberScripts)
+        con << "No scripts are currently running.\n";
+}
+static tConfItemFunc sr_listScripts( "LIST_SCRIPTS", sr_ListScriptsCommand );
+static tAccessLevelSetter sr_listScriptALS( sr_listScripts, tAccessLevel_Owner );
+
+#endif /* KRAWALL_SERVER */
+#endif /* HAVE_UNISTD_H */
