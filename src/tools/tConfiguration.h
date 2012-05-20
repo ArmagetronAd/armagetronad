@@ -261,6 +261,7 @@ public:
 
     tAccessLevel GetRequiredLevel() const { return requiredLevel; }
     tAccessLevel GetSetLevel() const { return setLevel; }
+    void         SetSetLevel( tAccessLevel level ) { setLevel = level; }
 
     static int EatWhitespace(std::istream &s); // eat whitespace from stream; return: first non-whitespace char
 
@@ -527,6 +528,9 @@ public:
 
     virtual bool Save();
 };
+
+// includes a single configuration file by name, searches in var and config directories
+void st_Include( tString const & file );
 
 void st_LoadConfig();
 void st_SaveConfig();

@@ -83,6 +83,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <time.h>
 #include <map>
 
+#include "gRotation.h"
 #include "nSocket.h"
 
 #ifdef KRAWALL_SERVER
@@ -140,6 +141,116 @@ static REAL sg_playerPositioningStartTime = 5.0;
 static tSettingItem<REAL> sg_playerPositioningStartTimeConf( "TACTICAL_POSITION_START_TIME", sg_playerPositioningStartTime );
 
 static nSettingItemWatched<tString> conf_mapfile("MAP_FILE",mapfile, nConfItemVersionWatcher::Group_Breaking, 8 );
+
+// config item for semi-colon deliminated list of maps/configs, needs semi-colon at the end
+// ie, original/map-1.0.1.xml;original/map-1.0.1.xml;
+class tSettingRotation: public tConfItemBase
+{
+public:
+    tSettingRotation( char const * name )
+    : tConfItemBase( name ),
+      current_(0)
+    {
+    }
+
+    // the number of items
+    int Size() const
+    {
+        return items_.Len();
+    }
+
+    // returns the current value
+    tString const & Current() const
+    {
+        tASSERT( Size() > 0 && current_ >= 0 && current_ < Size() );
+
+        return items_[current_];
+    }
+
+    // rotates
+    void Rotate()
+    {
+        if ( ++current_ >= items_.Len() )
+        {
+            current_ = 0;
+        }
+    }
+
+    void Reset()
+    {
+        current_ = 0;
+    }
+private:
+    virtual void ReadVal( std::istream &is )
+    {
+        tString mapsT;
+        mapsT.ReadLine (is);
+        items_.SetLen (0);
+
+        int strpos = 0;
+        int nextsemicolon = mapsT.StrPos(";");
+
+        if (nextsemicolon != -1)
+        {
+            do
+            {
+                tString const &map = mapsT.SubStr(strpos, nextsemicolon - strpos);
+
+                strpos = nextsemicolon + 1;
+                nextsemicolon = mapsT.StrPos(strpos, ";");
+
+                items_.Insert(map);
+            }
+            while ((nextsemicolon = mapsT.StrPos(strpos, ";")) != -1);
+        }
+
+        // make sure the current value is correct
+        if ( current_ >= items_.Len() )
+        {
+            current_ = 0;
+        }
+    }
+
+    virtual void WriteVal(std::ostream &s){}
+    virtual bool Writable(){return false;}
+    virtual bool Save(){return false;}
+
+    tArray<tString> items_; // the various values the rotating config can take
+    int current_;           // the index of the current
+};
+
+static tSettingRotation sg_mapRotation("MAP_ROTATION");
+static tSettingRotation sg_configRotation("CONFIG_ROTATION");
+
+enum gRotationType
+{
+    gROTATION_NEVER = 0,
+    gROTATION_ROUND = 1,
+    gROTATION_MATCH = 2
+};
+
+tCONFIG_ENUM( gRotationType );
+
+static gRotationType rotationtype = gROTATION_NEVER;
+static tSettingItem<gRotationType> conf_rotationtype("ROTATION_TYPE",rotationtype);
+
+void sg_ResetRotation()
+{
+    sg_mapRotation.Reset();
+    sg_configRotation.Reset();
+    if ( rotationtype != gROTATION_NEVER )
+        con << tOutput( "$reset_rotation_message" ) << '\n';
+}
+
+void sg_ResetRotation( std::istream & )
+{
+    sg_ResetRotation();
+}
+
+static tConfItemFunc sg_resetRotationConfItemFunc( "RESET_ROTATION", sg_ResetRotation );
+
+static bool sg_resetRotationOnNewMatch = false;
+static tSettingItem< bool > sg_resetRotationOnNewMatchSettingItem( "RESET_ROTATION_ON_START_NEW_MATCH", sg_resetRotationOnNewMatch );
 
 // enable/disable sound, supporting two different pause reasons:
 // if fromActivity is set, the pause comes from losing input focus.
@@ -3423,6 +3534,11 @@ void gGame::StateUpdate(){
             // log scores before players get renamed
             ePlayerNetID::LogScoreDifferences();
 
+            // rotate, if rotate is once per round
+            if ( rotationtype == gROTATION_ROUND )
+                rotate();
+            gRotation::HandleNewRound();
+
             // transfer game settings
             if ( nCLIENT != sn_GetNetState() )
             {
@@ -4450,6 +4566,12 @@ void gGame::Analysis(REAL time){
                         if ( se_mainGameTimer )
                             se_mainGameTimer->speed = 1;
 
+                        //check for map rotation, new match...
+                        if ( rotationtype == gROTATION_MATCH )
+                            rotate();
+
+                        gRotation::HandleNewMatch();
+
                         StartNewMatch();
                     }
                 }
@@ -4505,6 +4627,24 @@ void gGame::Analysis(REAL time){
     }
 }
 
+void rotate()
+{
+    if ( sg_mapRotation.Size() > 0 )
+    {
+        conf_mapfile.Set( sg_mapRotation.Current() );
+        conf_mapfile.GetSetting().SetSetLevel( sg_mapRotation.GetSetLevel() );
+        sg_mapRotation.Rotate();
+    }
+
+    if ( sg_configRotation.Size() > 0 )
+    {
+        // transfer
+        tCurrentAccessLevel level( sg_configRotation.GetSetLevel(), true );
+
+        st_Include( sg_configRotation.Current() );
+        sg_configRotation.Rotate();
+    }
+}
 
 void gGame::StartNewMatch(){
     check_hs();

@@ -276,15 +276,15 @@ public:
 
             if( ci->requiredLevel < tCurrentAccessLevel::GetAccessLevel() )
             {
-                con << tOutput( "$access_level_nochange_now", 
-                                name, 
+                con << tOutput( "$access_level_nochange_now",
+                                name,
                                 tCurrentAccessLevel::GetName( ci->requiredLevel ),
                                 tCurrentAccessLevel::GetName( tCurrentAccessLevel::GetAccessLevel() ) );
             }
             else if( level < tCurrentAccessLevel::GetAccessLevel() )
             {
-                con << tOutput( "$access_level_nochange_later", 
-                                name, 
+                con << tOutput( "$access_level_nochange_later",
+                                name,
                                 tCurrentAccessLevel::GetName( level ),
                                 tCurrentAccessLevel::GetName( tCurrentAccessLevel::GetAccessLevel() ) );
             }
@@ -856,7 +856,7 @@ void tConfItemBase::LoadAll(std::ifstream &s, bool record )
 bool tConfItemBase::OpenFile( std::ifstream & s, tString const & filename, SearchPath path )
 {
     bool ret = ( ( path & Config ) && tDirectories::Config().Open(s, filename ) ) || ( ( path & Var ) && st_StringEndsWith(filename, ".cfg") && tDirectories::Var().Open(s, filename ) );
-    
+
     static char const * section = "INCLUDE_VOTE";
     tRecorder::Playback( section, ret );
     tRecorder::Record( section, ret );
@@ -1108,6 +1108,37 @@ void tConfItemFunc::ReadVal(std::istream &s){(*f)(s);}
 void tConfItemFunc::WriteVal(std::ostream &){}
 
 bool tConfItemFunc::Save(){return false;}
+
+void st_Include( tString const & file )
+{
+    // refuse to load illegal paths
+    if( !tPath::IsValidPath( file ) )
+        return;
+
+    if ( !tRecorder::IsPlayingBack() )
+    {
+        // really load include file
+        if ( !file.EndsWith(".cfg") || !Load( tDirectories::Var(), file ) )
+        {
+            if (!Load( tDirectories::Config(), file ) && tConfItemBase::printErrors )
+            {
+                con << tOutput( "$config_include_not_found", file );
+            }
+        }
+    }
+    else
+    {
+        // just read configuration, and don't forget to reset the config level
+        tCurrentAccessLevel levelResetter;
+        tConfItemBase::LoadPlayback();
+    }
+
+    // mark section
+    char const * section = "INCLUDE_END";
+    tRecorder::Record( section );
+    tRecorder::PlaybackStrict( section );
+
+}
 
 static void Include(std::istream& s, bool error )
 {

@@ -472,6 +472,7 @@ class gTargetZoneHack: public gZone
 		int zoneScoreDeplete_;	 //!< value to substract from score each time a player enter the zone
 		REAL timeFirstEntry_;	 //!< game time of the first player entering the zone
 		REAL targetEmptyTime_;	 //!< game time of the last points granted ...
+		REAL winzoneEmptyTeam_;  //!< game time of the last points granted .
 		//! possible states
 		enum State
 		{

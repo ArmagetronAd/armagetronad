@@ -287,7 +287,10 @@ cycle_first_spawn_protection_help Set to 1 if the invulnerability and wall delay
 
 # map file
 map_file_help                     File that contains the map used for playing 
-map_uri_help                      DEPRECIATED - use RESOURCE_REPOSITORY_SERVER and MAP_FILE instead 
+map_uri_help                      DEPRECIATED - use RESOURCE_REPOSITORY_SERVER and MAP_FILE instead
+map_rotation_help                 List of maps for rotation. USAGE: MAP_ROTATION map1.xml;map2.xml;
+config_rotation_help              List of config files for rotation. Usage: CONFIG_ROTATION config1.cfg;config2.cfg;
+rotation_type_help                0: No rotation, 1: Per round, 2: Per Match 
 arena_axes_help                   In how many directions a cycle can turn 4 is the default, 6 is hexatron 
 resource_repository_client_help   URI the client uses to search for map files if they aren't stored locally. Better leave it alone 
 resource_repository_server_help   URI clients and the server use to search for map files if they aren't stored locally 

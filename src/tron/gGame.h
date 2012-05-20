@@ -187,5 +187,7 @@ public:
 
 extern gGameSettings* sg_currentSettings;
 
+void rotate();
+
 #endif
 

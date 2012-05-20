@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -151,6 +151,12 @@ public:
         return((reinterpret_cast<T *>(Base()))[i]);
     }
 
+    // Allow to READ from a const object.
+    T const& operator[](int i) const {
+        tASSERT( i >= 0 && i < Len() );
+
+        return((reinterpret_cast<T *>(Base()))[i]);
+    };
 
     T& operator()(int i) const{
         tASSERT( i >= 0 && i < Len() );
@@ -171,8 +177,8 @@ public:
 
     const tArray<T> &operator=(const tArray<T> &A){
 
-        SetLen(A.Len());
         Clear();
+        SetLen(A.Len());
         CopyFrom(A);
 
         return *this;

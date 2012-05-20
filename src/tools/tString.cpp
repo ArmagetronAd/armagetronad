@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -301,13 +301,13 @@ public:
     {
         // basic stuff
         Test( "abc", "abc" );
-        
+
         // quoted
         Test( "'abc'", "abc" );
 
         // escaped
         Test( "\\'a\\\"b", "'a\"b" );
-        
+
         // chained backslashes
         Test( "\\\\", "\\" );
         Test( "\\\\\\\\", "\\\\" );
@@ -429,7 +429,18 @@ bool tString::StartsWith( const tString & other ) const
     return true;
 }
 
-int tString::StrPos( const tString &tofind ) const
+// *******************************************************************************
+// *
+// *	StrPos
+// *
+// *******************************************************************************
+//!
+//!		@param	tofind	the string to find
+//!		@return		    position of the start of the string or negative if not found
+//!
+// *******************************************************************************
+
+int tString::StrPos( const tString & tofind ) const
 {
     if (tofind.Len() > Len()) {
         return -1;
@@ -449,8 +460,45 @@ int tString::StrPos( const tString &tofind ) const
     return -1;
 }
 
-int tString::StrPos( const char * tofind ) const {
+int tString::StrPos( int start, const tString & tofind ) const
+{
+    if (tofind.Len() > Len()) {
+        return -1;
+    }
+    for (int i = start; i<Len()-1; i++) {
+        if ((*this)(i) == tofind(0)) {
+            bool found = true;
+            for (int j=0; j<tofind.Len()-1; j++) {
+                if ((*this)(i+j) != tofind(j))
+                    found = false;
+            }
+            if (found == true)
+                return i;
+        }
+    }
+
+    return -1;
+}
+
+// *******************************************************************************
+// *
+// *	StrPos
+// *
+// *******************************************************************************
+//!
+//!		@param	tofind	the string to find
+//!		@return		    position of the start of the string or negative if not found
+//!
+// *******************************************************************************
+
+int tString::StrPos( const CHAR * tofind ) const
+{
     return StrPos( tString ( tofind ) );
+}
+
+int tString::StrPos( int start, const CHAR * tofind ) const
+{
+    return StrPos( start, tString ( tofind ) );
 }
 
 tString tString::SubStr( const int start, int len) const
@@ -516,6 +564,42 @@ int tString::toInt() const {
 bool tString::StartsWith( const char * other ) const
 {
     return StartsWith( tString( other ) );
+}
+
+// *******************************************************************************************
+// *
+// *   EndsWith
+// *
+// *******************************************************************************************
+//!
+//!        @param  other  the string to compare the end with
+//!        @return        true if this ends with other
+//!
+// *******************************************************************************************
+
+bool tString::EndsWith(const tString & other ) const
+{
+    if (other.Len() > Len()) {
+        return false;
+    }
+    tString thisString = Reverse();
+    tString otherString(other);
+    otherString = otherString.Reverse();
+
+    // Haha, just use StartsWith to do the comparison :)
+    return thisString.StartsWith(otherString);
+    //return true;
+}
+
+// *******************************************************************************************
+//!
+//!        @param  other  the string to compare the end with
+//!        @return        true if this ends with other
+//!
+// *******************************************************************************************
+
+bool tString::EndsWith( const char* other) const {
+    return EndsWith( tString(other) );
 }
 
 /*
@@ -684,7 +768,7 @@ tString & tString::operator+=(const tString &s)
 //static int   st_TempStringLength = 1000;
 #endif
 
-// static int	 
+// static int
 
 class tTempStringCleanup
 {
@@ -1134,7 +1218,7 @@ tString tColoredString::RemoveColors( const char * c, bool darkonly )
     tString ret;
     int len = strlen(c);
     bool removed = false;
-    
+
     // walk through string
     while (*c!='\0'){
         // skip color codes
@@ -1149,7 +1233,7 @@ tString tColoredString::RemoveColors( const char * c, bool darkonly )
                     removed = true;
 
                 c   += 8;
-                len -= 8;	
+                len -= 8;
             }
             else if( len >= 8 )
             {
@@ -1170,9 +1254,9 @@ tString tColoredString::RemoveColors( const char * c, bool darkonly )
             len--;
         }
     }
-    
+
     // st_Breakpoint();
-    
+
     return removed ? RemoveColors( ret, darkonly ) : ret;
 }
 
@@ -1405,7 +1489,7 @@ void tColoredString::RemoveHex( void )
     //    newS.RemoveHex();
     //    }
     //    }
-    //    } 
+    //    }
     //this = newS; */
 }
 
@@ -1721,7 +1805,7 @@ bool tIsInList( tString const & list_, tString const & item )
         }
 
         // check whether the match is a true list match
-        if ( 
+        if (
             ( pos == 0 || list[pos-1] == ',' || isblank(list[pos-1]) )
             &&
             ( pos + item.Len() >= list.Len() || list[pos+item.Len()-1] == ',' || isblank(list[pos+item.Len()-1]) )
@@ -1735,7 +1819,7 @@ bool tIsInList( tString const & list_, tString const & item )
             list = list.SubStr( pos + 1 );
         }
     }
-    
+
     return false;
 }
 
