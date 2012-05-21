@@ -1681,32 +1681,31 @@ void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
         sg_deathDeathZoneWriter << target->Player()->GetUserName();
         sg_deathDeathZoneWriter.write();
     }
+    // check normal death zone linked to a team ...
+    else if (team && deathZoneType == TYPE_TEAM)
+    {
+        if ((!target) || (!target->Player()))
+        {
+            return;
+        }
+        if (target->Player()->CurrentTeam() == team)
+        {
+            return;
+        }
+        else
+        {
+            target->Player()->AddScore(score_deathzone_team, "", "player_lose_deathzone_team");
+            target->Kill();
+            sg_deathDeathZoneTeamWriter << ePlayerNetID::FilterName( team->Name() ) << target->Player()->GetUserName();
+            sg_deathDeathZoneTeamWriter.write();
+        }
+    }
     else
     {
         if ( !target->Vulnerable() && !sg_shotKillInvulnerable ) {
             //Checks to see if their cycle is invulnerable, don't kill invulnerable players
             return;
     }
-
-        // check normal death zone linked to a team ...
-        if (team && deathZoneType == TYPE_TEAM)
-        {
-            if ((!target) || (!target->Player()))
-            {
-                return;
-            }
-            if (target->Player()->CurrentTeam() == team)
-            {
-                return;
-            }
-            else
-            {
-                target->Player()->AddScore(score_deathzone_team, "", "player_lose_deathzone_team");
-                target->Kill();
-                sg_deathDeathZoneTeamWriter << ePlayerNetID::FilterName( team->Name() ) << target->Player()->GetUserName();
-                sg_deathDeathZoneTeamWriter.write();
-            }
-        }
 
         //Validate the owner player ID
         pOwner_ = validatePlayer(pOwner_);
