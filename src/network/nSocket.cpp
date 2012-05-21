@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -47,7 +47,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <vector>
 
 #ifndef WIN32
-#include <arpa/inet.h> 
+#include <arpa/inet.h>
 #include <netinet/in_systm.h>
 #include <netinet/in.h>
 #include <netinet/ip.h>
@@ -84,7 +84,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define ESHUTDOWN WSAESHUTDOWN
 #define EMSGSIZE WSAEMSGSIZE
 #define ETIMEDOUT WSAETIMEDOUT
-#define ENETUNREACH WSAENETUNREACH 
+#define ENETUNREACH WSAENETUNREACH
 #define close closesocket
 #define snprintf _snprintf
 #endif
@@ -870,14 +870,14 @@ nSocketListener const & nBasicNetworkSystem::GetListener( void ) const
 
 /*
 // *******************************************************************************************
-// *	
+// *
 // *	GetListener
-// *	
+// *
 // *******************************************************************************************
-//!		
+//!
 //!		@param	listener	listening sockets to fill
 //!		@return		A reference to this to allow chaining
-//!		
+//!
 // *******************************************************************************************
 
 nBasicNetworkSystem const & nBasicNetworkSystem::GetListener( nSocketListener & listener ) const
@@ -887,14 +887,14 @@ nBasicNetworkSystem const & nBasicNetworkSystem::GetListener( nSocketListener & 
 }
 
 // *******************************************************************************************
-// *	
+// *
 // *	SetListener
-// *	
+// *
 // *******************************************************************************************
-//!		
+//!
 //!		@param	listener	listening sockets to set
 //!		@return		A reference to this to allow chaining
-//!		
+//!
 // *******************************************************************************************
 
 nBasicNetworkSystem & nBasicNetworkSystem::SetListener( nSocketListener const & listener )
@@ -937,14 +937,14 @@ nSocket const & nBasicNetworkSystem::GetControlSocket( void ) const
 
 /*
 // *******************************************************************************************
-// *	
+// *
 // *	GetControlSocket
-// *	
+// *
 // *******************************************************************************************
-//!		
+//!
 //!		@param	controlSocket	network control socket to fill
 //!		@return		A reference to this to allow chaining
-//!		
+//!
 // *******************************************************************************************
 
 nBasicNetworkSystem const & nBasicNetworkSystem::GetControlSocket( nSocket & controlSocket ) const
@@ -954,14 +954,14 @@ nBasicNetworkSystem const & nBasicNetworkSystem::GetControlSocket( nSocket & con
 }
 
 // *******************************************************************************************
-// *	
+// *
 // *	SetControlSocket
-// *	
+// *
 // *******************************************************************************************
-//!		
+//!
 //!		@param	controlSocket	network control socket to set
 //!		@return		A reference to this to allow chaining
-//!		
+//!
 // *******************************************************************************************
 
 nBasicNetworkSystem & nBasicNetworkSystem::SetControlSocket( nSocket const & controlSocket )
@@ -1527,7 +1527,7 @@ int nSocket::Create( void )
     char tos = IPTOS_LOWDELAY;
 
     setsockopt( socket_, IPPROTO_IP, IP_TOS, &tos, sizeof(char) );
-#endif    
+#endif
 
     // unblock it
     bool _true = true;
@@ -2628,35 +2628,37 @@ bool nBasicNetworkSystem::Select( REAL dt )
         if ( controlSocket_.GetSocket() < 0 )
         {
             tDelay( int( dt * 1000000 ) );
-            return false;
         }
-
-        fd_set rfds; // set of sockets to wathc
-        struct timeval tv; // time value to pass to select()
-
-        FD_ZERO( &rfds );
-
-        // watch the control socket
-        FD_SET( controlSocket_.GetSocket(), &rfds );
-        // con << "Watching " << controlSocket_.GetSocket();
-
-        int max = controlSocket_.GetSocket();
-
-        // watch listening sockets
-        for( nSocketListener::SocketArray::const_iterator iter = listener_.GetSockets().begin(); iter != listener_.GetSockets().end(); ++iter )
+        else
         {
-            FD_SET( (*iter).GetSocket(), &rfds );
-            if ( (*iter).GetSocket() > max )
-                max = (*iter).GetSocket();
-            // con << ", " << (*iter).GetSocket();
+            fd_set rfds; // set of sockets to watch
+            struct timeval tv; // time value to pass to select()
+
+            FD_ZERO( &rfds );
+
+            // watch the control socket
+            FD_SET( controlSocket_.GetSocket(), &rfds );
+            // con << "Watching " << controlSocket_.GetSocket();
+
+            int max = controlSocket_.GetSocket();
+
+            // watch listening sockets
+            for( nSocketListener::SocketArray::const_iterator iter = listener_.GetSockets().begin(); iter != listener_.GetSockets().end(); ++iter )
+            {
+                FD_SET( (*iter).GetSocket(), &rfds );
+                if ( (*iter).GetSocket() > max )
+                    max = (*iter).GetSocket();
+                // con << ", " << (*iter).GetSocket();
+            }
+
+            // set time
+            tv.tv_sec  = static_cast< long int >( dt );
+            tv.tv_usec = static_cast< long int >( (dt-tv.tv_sec)*1000000 );
+
+            // delegate to system select
+            retval = select(max+1, &rfds, NULL, NULL, &tv);
         }
 
-        // set time
-        tv.tv_sec  = static_cast< long int >( dt );
-        tv.tv_usec = static_cast< long int >( (dt-tv.tv_sec)*1000000 );
-
-        // delegate to system select
-        retval = select(max+1, &rfds, NULL, NULL, &tv);
     }
     tRecorder::Record( section, retval );
 

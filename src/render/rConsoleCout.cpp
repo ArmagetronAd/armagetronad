@@ -32,6 +32,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tRecorder.h"
 #include "tDirectories.h"
 
+#include <map>
+
 #include <stdio.h>
 #include <fcntl.h>
 #include <sstream>
@@ -49,6 +51,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <signal.h>
 #include <sys/wait.h>
 #endif
+
+#ifdef TOP_SOURCE_DIR
+ #include "nTrueVersion.h"
+ #endif
+
+ #ifndef TRUE_ARMAGETRONAD_VERSION
+ #define TRUE_ARMAGETRONAD_VERSION VERSION
+ #endif
 
 class rStream: public tReferencable< rStream >
 {
@@ -77,7 +87,7 @@ public:
 
     rInputStream()
     {
-        descriptor_ = 
+        descriptor_ =
 #ifdef WIN32
         GetStdHandle(STD_INPUT_HANDLE);
 #else
@@ -190,6 +200,7 @@ private:
 };
 #endif
 
+
 void rConsole::DoCenterDisplay(const tString &s,REAL timeout,REAL r,REAL g,REAL b){
     std::cout << tColoredString::RemoveColors(s) << '\n';
     DisplayAtNewline();
@@ -211,9 +222,9 @@ static void sr_HandleSigCont( int signal )
 static void sr_HandleSigChild( int signal )
 {
     int stat;
- 
+
     /*Kills all the zombie processes*/
-    while(waitpid(-1, &stat, WNOHANG) > 0);
+    while(waitpid(-1, &stat, WNOHANG) > 0) {}
 }
 #endif
 
@@ -399,6 +410,7 @@ bool rInputStream::HandleInput()
 void rConsole::DisplayAtNewline(){
 }
 
+
 #ifdef HAVE_UNISTD_H
 
 #define READ 0
@@ -454,7 +466,7 @@ static rScriptStream * sr_FindScriptStream( tString const & name )
             return script;
         }
     }
-    
+
     return NULL;
 }
 
@@ -482,6 +494,14 @@ public:
     {
     }
 
+    void AddAll( const std::map< tString, tString > & m )
+    {
+        std::map< tString, tString >::const_iterator it = m.begin();
+        for ( ; it != m.end(); ++it )
+        {
+            Add( it->first, it->second );
+        }
+    }
     void Add( char const * var, tString const & value )
     {
         strings_[strings_.Len()] = tString(var) + "=" + value;
@@ -496,9 +516,22 @@ private:
     tArray< tString > strings_;
 };
 
+static std::map< tString, tString > sr_globalScriptEnv;
+
+static void sr_ScriptEnv( std::istream & s )
+{
+    tString key, value;
+    s >> key;
+    s >> value;
+    sr_globalScriptEnv[key] = value;
+}
+
+static tConfItemFunc sr_scriptEnvConf( "SCRIPT_ENV", sr_ScriptEnv );
+static tAccessLevelSetter sr_scriptEnvALS( sr_scriptEnvConf, tAccessLevel_Owner );
+
 static void sr_SpawnScript( tString const & command )
 {
-    // yes, rincludes are the one bit where CASACL is forbidden. And Maps, which 
+    // yes, rincludes are the one bit where CASACL is forbidden. And Maps, which
     // are equivalent to RINCLUDES.
     // change that assumption and hopefully, the name of this
     // function will tip you off something needs to be changed here.
@@ -584,8 +617,8 @@ static void sr_SpawnScript( tString const & command )
 
         rEnvironment env;
         tString newPath=
-        tDirectories::Data().GetPaths("/scripts:","/scripts:") + 
-        tDirectories::Config().GetPaths(":",":") + 
+        tDirectories::Data().GetPaths("/scripts:","/scripts:") +
+        tDirectories::Config().GetPaths(":",":") +
         getenv("PATH");
         env.Add( "PATH", newPath );
 
@@ -601,6 +634,12 @@ static void sr_SpawnScript( tString const & command )
         env.AddPath( "ARMAGETRONAD_PATH_SCREENSHOT", tDirectories::Screenshot() );
         env.AddPath( "ARMAGETRONAD_PATH_RESOURCE", tDirectories::Resource() );
 
+        // add other data
+        env.Add( "ARMAGETRONAD_VERSION", tString( TRUE_ARMAGETRONAD_VERSION ) );
+
+        // add user-specified variables
+        env.AddAll( sr_globalScriptEnv );
+
         // add all settings
         tConfItemBase::tConfItemMap const & confItemMap = tConfItemBase::GetConfItemMap();
         for( tConfItemBase::tConfItemMap::const_iterator iter = confItemMap.begin();
@@ -611,7 +650,7 @@ static void sr_SpawnScript( tString const & command )
                 // yeah, well, password storage. Not really an issue, unlikely to be
                 // set on the server anyway, the script can read the config directly
                 // just as well, but we don't want script authors ot freak out when they
-                // notice it in the environment. 
+                // notice it in the environment.
                 continue;
             }
 
@@ -635,7 +674,7 @@ static void sr_SpawnScriptCommand( std::istream & s )
 {
     tString command;
     command.ReadLine(s);
-    
+
     sr_SpawnScript( command );
 }
 
@@ -647,7 +686,7 @@ static void sr_RespawnScriptCommand( std::istream & s )
 {
     tString command;
     command.ReadLine(s);
-    
+
     if( !sr_FindScriptStream( command ) )
     {
         sr_SpawnScript( command );
@@ -676,7 +715,7 @@ static void sr_ForceRespawnScriptCommand( std::istream & s )
 {
     tString command;
     command.ReadLine(s);
-    
+
     sr_KillScript( command, false );
     sr_SpawnScript( command );
 }
@@ -689,12 +728,30 @@ static void sr_KillScriptCommand( std::istream & s )
 {
     tString command;
     command.ReadLine(s);
-    
+
     sr_KillScript( command );
 }
 
 static tConfItemFunc sr_killScript( "KILL_SCRIPT", sr_KillScriptCommand );
 static tAccessLevelSetter sr_killScriptALS( sr_killScript, tAccessLevel_Owner );
-#endif
 
-#endif
+void sr_ListScriptsCommand( std::istream & s )
+{
+    int numberScripts = 0;
+    for( int i = sr_inputStreams.Len()-1; i >= 0; --i )
+    {
+        rScriptStream * script = dynamic_cast< rScriptStream * >( (rStream*)sr_inputStreams[i] );
+        if( script )
+        {
+            numberScripts++;
+            con << "Script: " << script->GetName() << '\n';
+        }
+    }
+    if (!numberScripts)
+        con << "No scripts are currently running.\n";
+}
+static tConfItemFunc sr_listScripts( "LIST_SCRIPTS", sr_ListScriptsCommand );
+static tAccessLevelSetter sr_listScriptALS( sr_listScripts, tAccessLevel_Owner );
+
+#endif /* KRAWALL_SERVER */
+#endif /* HAVE_UNISTD_H */

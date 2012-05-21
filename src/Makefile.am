@@ -36,6 +36,7 @@ nTrueVersion.h: $(wildcard $(top_srcdir)/*_version) $(wildcard $(top_srcdir)/.sv
 	fi
 
 ${srcdir}/network/nNetwork.cpp: nTrueVersion.h
+${srcdir}/render/rConsoleGraph.cpp: nTrueVersion.h
 
 # library file listings
 
@@ -108,7 +109,8 @@ libtron_a_SOURCES=tron/gAIBase.cpp tron/gAIBase.h tron/gAICharacter.cpp tron/gAI
 	tron/gWall.h tron/gWinZone.cpp tron/gWinZone.h\
 	tron/gSvgOutput.h tron/gSvgOutput.cpp\
 	tron/gFriends.h tron/gFriends.cpp\
-	tron/gServerFavorites.h tron/gServerFavorites.cpp
+	tron/gServerFavorites.h tron/gServerFavorites.cpp\
+  tron/gRotation.h tron/gRotation.cpp\
 
 libui_a_SOURCES=ui/uInput.cpp ui/uInput.h ui/uInputQueue.cpp ui/uInputQueue.h ui/uMenu.cpp ui/uMenu.h
 endif

@@ -191,7 +191,7 @@ void rConsole::Render(){
                 lastTimeout=Time;
                 currentTop+=(over+1)/2;
             }
-           
+
             // check for mispredictions of console height
             lastBottom = out.GetBottom();
             if( fabs(predictBottom - lastBottom) > .0001 )

@@ -3412,8 +3412,6 @@ void gCycle::KillAt( const eCoord& deathPos){
             {
 
                 Killed(pHunterCycle);
-                ++(pHunterCycle->tactical_stats[pHunterCycle->tactical_pos].kills);
-
             }
         }
         //	if (prey->player && (prey->player->CurrentTeam() != hunter->player->CurrentTeam()))

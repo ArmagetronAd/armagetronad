@@ -127,11 +127,11 @@ private:
 
 static gMainCommandLineAnalyzer commandLineAnalyzer;
 
-static bool use_directx=true;
+extern bool sr_useDirectX; // rScreen.cpp
 #ifdef WIN32
 static tConfItem<bool> udx("USE_DIRECTX","makes use of the DirectX input "
                            "fuctions; causes some graphic cards to fail to work (VooDoo 3,...)",
-                           use_directx);
+                           sr_useDirectX);
 #endif
 
 extern void exit_game_objects(eGrid *grid);
@@ -150,9 +150,9 @@ void sg_StartupPlayerMenu()
 {
     uMenu firstSetup("$first_setup", false);
     firstSetup.SetBot(-.2);
-    
+
     uMenuItemExit e2(&firstSetup, "$menuitem_accept", "$menuitem_accept_help");
-    
+
     ePlayer * player = ePlayer::PlayerConfig(0);
     tASSERT( player );
 
@@ -187,7 +187,7 @@ void sg_StartupPlayerMenu()
     uMenuItemSelection<tColor> c(&firstSetup,
                                  "$first_setup_color",
                                  "$first_setup_color_help",
-                                 color);   
+                                 color);
 
     if ( !st_FirstUse )
     {
@@ -205,7 +205,7 @@ void sg_StartupPlayerMenu()
     c.NewChoice( "$first_setup_color_cyan", "", tColor(0,1,1) );
     c.NewChoice( "$first_setup_color_white", "", tColor(1,1,1) );
     c.NewChoice( "$first_setup_color_dark", "", tColor(0,0,0) );
-    
+
     if ( st_FirstUse )
     {
         for(int i=tRandomizer::GetInstance().Get(4); i>=0; --i)
@@ -218,9 +218,9 @@ void sg_StartupPlayerMenu()
                       "$player_name_text",
                       "$player_name_help",
                       player->name, 16);
-    
+
     uMenuItemExit e(&firstSetup, "$menuitem_accept", "$menuitem_accept_help");
-    
+
     firstSetup.Enter();
 
     // apply network rates
@@ -398,18 +398,18 @@ void cleanup(eGrid *grid){
           if (playerConfig[i])
           destroy(playerConfig[i]->cam);
           }
-          
-          
+
+
           gNetPlayerWall::Clear();
 
           eFace::Clear();
           eEdge::Clear();
           ePoint::Clear();
-          
+
           eFace::Clear();
           eEdge::Clear();
           ePoint::Clear();
-          
+
           eGameObject::DeleteAll();
 
 
@@ -633,9 +633,9 @@ int main(int argc,char **argv){
         if ( commandLineAnalyzer.windowed_ )
             currentScreensetting.fullscreen   = false;
         if ( commandLineAnalyzer.use_directx_ )
-            use_directx                       = true;
+            sr_useDirectX                       = true;
         if ( commandLineAnalyzer.dont_use_directx_ )
-            use_directx                       = false;
+            sr_useDirectX                       = false;
 
         gAICharacter::LoadAll(tString( "aiplayers.cfg" ) );
 
@@ -704,8 +704,14 @@ int main(int argc,char **argv){
 
 #ifdef WIN32
             // disable DirectX by default; it causes problems with some boards.
-            if (!use_directx && !getenv( "SDL_VIDEODRIVER") ) {
-                sg_PutEnv( "SDL_VIDEODRIVER=windib" );
+            if (!getenv( "SDL_VIDEODRIVER") ) {
+                if (sr_useDirectX) {
+                    sg_PutEnv( "SDL_VIDEODRIVER=directx" );
+                }
+                else
+                {
+                    sg_PutEnv( "SDL_VIDEODRIVER=windib" );
+                }
             }
 #endif
 
