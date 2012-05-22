@@ -8485,6 +8485,28 @@ static void UnSuspend_conf(std::istream &s )
 static tConfItemFunc suspend_conf("SUSPEND",&Suspend_conf);
 static tAccessLevelSetter se_suspendConfLevel( suspend_conf, tAccessLevel_Moderator );
 
+static void SuspendList_conf(std::istream &s)
+{
+    ePlayerNetID * receiver=0;
+    tColoredString send;
+
+    if (se_PlayerNetIDs.Len()>0){
+        int max = se_PlayerNetIDs.Len();
+        for(int i=0;i<max;i++){
+            ePlayerNetID *p=se_PlayerNetIDs(i);
+            if (p && p->IsSuspended())
+            {
+                send << p->GetColoredName() << tColoredString::ColorString( 1,1,.5 ) << ", ";
+            }
+        }
+        send << "\n";
+        sn_ConsoleOut( send, receiver->Owner() );
+    }
+}
+
+static tConfItemFunc suspendlist_conf("SUSPEND_LIST", &SuspendList_conf);
+static tAccessLevelSetter se_suspendlistConfLevel( suspendlist_conf, tAccessLevel_Moderator );
+
 static tConfItemFunc unsuspend_conf("UNSUSPEND",&UnSuspend_conf);
 static tAccessLevelSetter se_unsuspendConfLevel( unsuspend_conf, tAccessLevel_Moderator );
 
@@ -10088,3 +10110,88 @@ static void se_FillServerSettings()
 
 static nCallbackFillServerInfo se_fillServerSettings(se_FillServerSettings);
 
+static void sg_KillChatters(std::istream &s)
+{
+    if (se_PlayerNetIDs.Len()>0){
+        int max = se_PlayerNetIDs.Len();
+        for(int i=0;i<max;i++){
+            ePlayerNetID *p=se_PlayerNetIDs(i);
+            if (p && p->IsChatting())
+            {
+                p->Object()->Kill();
+            }
+        }
+        sn_ConsoleOut( tOutput( "$player_chatter_die") );
+    }
+}
+
+static tConfItemFunc sg_KillChatters_conf("CHATTERS_KILL", sg_KillChatters);
+
+static void sg_SilenceChatters(std::istream &s)
+{
+    if (se_PlayerNetIDs.Len()>0){
+        int max = se_PlayerNetIDs.Len();
+        for(int i=0;i<max;i++){
+            ePlayerNetID *p=se_PlayerNetIDs(i);
+            if (p && p->IsChatting())
+            {
+                p->SetSilenced(true);
+            }
+        }
+        sn_ConsoleOut( tOutput( "$player_chatter_silence") );
+    }
+}
+
+static tConfItemFunc sg_SilenceChatters_conf("CHATTERS_SILENCE", sg_SilenceChatters);
+
+static void SuspendChatter_conf_base(std::istream &s, int rounds )
+{
+    if ( se_NeedsServer( "CHATTERS_SUSPEND", s, false ) )
+    {
+        return;
+    }
+
+    if ( rounds > 0 )
+    {
+        s >> rounds;
+    }
+    if (se_PlayerNetIDs.Len()>0){
+        int max = se_PlayerNetIDs.Len();
+        for(int i=0;i<max;i++){
+            ePlayerNetID *p=se_PlayerNetIDs(i);
+            if (p && p->IsChatting())
+            {
+                p->Suspend(rounds);
+            }
+        }
+        sn_ConsoleOut( tOutput( "$player_chatter_suspend_success", rounds) );
+    }
+}
+
+static void SuspendChatters_conf(std::istream &s )
+{
+    SuspendChatter_conf_base( s, se_suspendDefault );
+}
+
+static tConfItemFunc sg_SuspendChatters_conf("CHATTERS_SUSPEND", SuspendChatters_conf);
+
+static void sg_ListChatters(std::istream &s)
+{
+    ePlayerNetID * receiver=0;
+    tColoredString send;
+
+    if (se_PlayerNetIDs.Len()>0){
+        int max = se_PlayerNetIDs.Len();
+        for(int i=0;i<max;i++){
+            ePlayerNetID *p=se_PlayerNetIDs(i);
+            if (p && p->IsChatting())
+            {
+                send << p->GetColoredName() << tColoredString::ColorString( 1,1,.5 ) << ", ";
+            }
+        }
+        send << "\n";
+        sn_ConsoleOut( send, receiver->Owner() );
+    }
+}
+
+static tConfItemFunc sg_ListChatters_conf("CHATTERS_LIST", sg_ListChatters);

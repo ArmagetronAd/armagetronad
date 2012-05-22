@@ -3479,7 +3479,7 @@ static eLadderLogWriter sg_newSetWriter("NEW_SET", true);
 static eLadderLogWriter sg_newMatchWriter("NEW_MATCH", true);
 static eLadderLogWriter sg_waitForExternalScriptWriter("WAIT_FOR_EXTERNAL_SCRIPT", true);
 static eLadderLogWriter sg_nextRoundWriter("NEXT_ROUND", false);
-static  eLadderLogWriter sg_roundCommencingWriter("ROUND_COMMENCING", false);
+static eLadderLogWriter sg_roundCommencingWriter("ROUND_COMMENCING", false);
 static SvgOutput sg_svgOutput;
 
 void gGame::StateUpdate(){
@@ -3973,7 +3973,7 @@ static void sg_RespawnAll(eGrid *grid, gArena & arena, bool respawn_all)
 
         eGameObject *e=p->Object();
 
-        if (!p->IsActive() || !e->Alive())
+        if ((p && !p->IsActive()) || (!e || !e->Alive()))
         {
             eCoord pos,dir;
 #if 0

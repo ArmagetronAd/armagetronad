@@ -488,7 +488,15 @@ bool restrictMaxClients( int const &newValue )
     {
         tOutput o;
         o.SetTemplateParameter(1, MAXCLIENTS);
-        o << "$max_clients_limit";
+        o << "$max_clients_high";
+        con << o << '\n';
+        return false;
+    }
+    else if (newValue <= 0)
+    {
+        tOutput o;
+        o.SetTemplateParameter(1, MAXCLIENTS);
+        o << "$max_clients_low";
         con << o << '\n';
         return false;
     }
@@ -659,7 +667,7 @@ static int sn_SynTimestamp()
 // to the server inside ONE ack message by a real, non-spoofed client.
 struct nCookie
 {
-    unsigned short first; 
+    unsigned short first;
     unsigned short second;
 
     nCookie(): first(0), second(0){}
@@ -729,7 +737,7 @@ void ack_handler(nMessage &m){
                 nMachine::GetMachine( m.SenderID() ).Validate();
             }
         }
-            
+
         return;
     }
 
@@ -787,7 +795,7 @@ nWaitForAck::nWaitForAck(nMessage* m,int rec)
 
     timeout=sn_GetTimeout( rec );
 
-#ifdef nSIMULATE_PING 
+#ifdef nSIMULATE_PING
    timeSendAgain=::netTime + nSIMULATE_PING;
 #ifndef WIN32
     tRandomizer & randomizer = tReproducibleRandomizer::GetInstance();
@@ -1189,7 +1197,7 @@ nMessage& nMessage::ReadRaw(tString &s )
         s[len-1] = 0;
         for(int i=0;i<len;i+=2){
             Read(w);
-            
+
             // carefully reverse the signed
             // encoding logic
             signed char lo = w & 0xff;
@@ -1226,7 +1234,7 @@ nMessage& nMessage::operator >> (tColoredString &s )
     if ( sn_filterColorStrings )
         s = tColoredString::RemoveColors( s, false );
     else if ( sn_filterDarkColorStrings )
-        s = tColoredString::RemoveColors( s, true );	
+        s = tColoredString::RemoveColors( s, true );
 
     return *this;
 }
@@ -1621,7 +1629,7 @@ void login_accept_handler(nMessage &m){
 #ifndef NOEXPIRE
 #ifndef DEDICATED
             // last checked to be compatible with 0.3.1_pb from trunk.
-            // It's ulikely this branch will introduce more bugs/network code revisions, so we're fine accepting all 
+            // It's ulikely this branch will introduce more bugs/network code revisions, so we're fine accepting all
             int lastCheckedTrunkVersion = 21;
 
             // start of trunk as seen from this branch
@@ -1645,7 +1653,7 @@ void login_accept_handler(nMessage &m){
         }
         else
             sn_Connections[0].version = nVersion( 0, 0);
-        
+
         // read my public IP
         if ( !m.End() )
         {
@@ -1671,7 +1679,7 @@ void login_accept_handler(nMessage &m){
             static const char * section = "LOGIN_SALT";
             tRecorder::Playback( section, compare );
             tRecorder::Record( section, compare );
-            
+
             if ( compare != 0 )
             {
                 nReadError( false );
@@ -1840,7 +1848,7 @@ public:
             if( !turtleMode )
             {
                 // report
-                sn_ConsoleOut( tOutput("$turtle_mode_activated") ); 
+                sn_ConsoleOut( tOutput("$turtle_mode_activated") );
 
                 // stop recording
                 if( !sn_recordTurtleMode && tRecorder::IsRecording() )
@@ -1852,7 +1860,7 @@ public:
             turtleMode = true;
             setThisFrame = true;
             lastTurtleModeTime = tSysTimeFloat();
-            
+
         }
     }
 
@@ -1864,7 +1872,7 @@ public:
             if( turtleMode && !sn_forceTurtleMode )
             {
                 // report
-                sn_ConsoleOut( tOutput("$turtle_mode_deactivated") ); 
+                sn_ConsoleOut( tOutput("$turtle_mode_deactivated") );
             }
 
             turtleMode = sn_forceTurtleMode;
@@ -1882,7 +1890,7 @@ static inline bool GlobalConnectionFloodProtection( REAL extraFactor = 1.0f )
     {
         sn_turtleMode.SetTurtleMode();
     }
-    
+
     return sn_turtleMode;
 }
 
@@ -1895,7 +1903,7 @@ bool IndividualConnectionFloodProtection( nMachine * machine, int peer,  REAL ex
     {
         machine = &nMachine::GetMachine( peer );
     }
-    
+
     // check individual flood protection (be lenient in turtle mode, login responses may have trouble getting through an attack)
     return FloodProtection( *machine, ( sn_turtleMode ? .2 : 1 ) * extraFactor );
 }
@@ -2429,7 +2437,7 @@ void nMessage::Send(int peer,REAL priority,bool ack){
     if (!ack)
         messageIDBig_ = 0;
 #endif
-    
+
     // don't send messages to unsupported peers or in non-networked mode
     if( peer > MAXCLIENTS+1 || sn_GetNetState() == nSTANDALONE )
     {
@@ -2668,8 +2676,8 @@ static void rec_peer(unsigned int peer){
                             {
                                 // Hah. Nice trick. Won't work, though.
                             }
-                            else if( !sn_turtleMode && 
-                                     ( descriptor == RequestSmallServerInfoDescriptor.ID() || 
+                            else if( !sn_turtleMode &&
+                                     ( descriptor == RequestSmallServerInfoDescriptor.ID() ||
                                        descriptor == RequestBigServerInfoDescriptor.ID() ) )
                             {
                                 // Pings. Let them in unless we're under real attack.
@@ -3168,10 +3176,10 @@ nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket
 
     // write our version
     (*mess) << sn_MyVersion();
-    
+
     // write our supported authentication methods
     (*mess) << nKrawall::nMethod::SupportedMethods();
-    
+
     // write a random salt
     nKrawall::RandomSalt( loginSalt );
     nKrawall::WriteScrambledPassword( loginSalt, *mess );
@@ -3813,7 +3821,7 @@ void nCallbackLoginLogout::UserLoggedIn(int u){
     login = true;
     user = u;
     Exec(s_loginoutAnchor);
-    
+
     login = loginBack;
     user = userBack;
 }
@@ -3825,7 +3833,7 @@ void nCallbackLoginLogout::UserLoggedOut(int u){
     login = false;
     user = u;
     Exec(s_loginoutAnchor);
-    
+
     login = loginBack;
     user = userBack;
 }

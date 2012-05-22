@@ -1388,7 +1388,7 @@ static tString AddPrefix( const char * suffix )
 */
 
 #ifndef MACOSX
-#ifndef WIN32 
+#ifndef WIN32
 static tString st_RelocatePath( tString const & original )
 {
     // fetch prefix as it was compiled in
@@ -1408,7 +1408,7 @@ static tString st_RelocatePath( tString const & original )
         return original;
     }
 }
-#endif //!WIN32 
+#endif //!WIN32
 #endif //!MACOSX
 
 // tries to find the path to the data files, given the location of the executable

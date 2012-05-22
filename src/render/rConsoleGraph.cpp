@@ -59,7 +59,6 @@ static void sr_ConsolePerFrame(){
 
 static rPerFrameTask console_pf(&sr_ConsolePerFrame);
 
-
 void rConsole::DisplayAtNewline(){
     bool sw=autoDisplayAtSwap;
     autoDisplayAtSwap=true;
@@ -230,6 +229,7 @@ bool rConsole::CenterDisplayActive()
 {
     return tSysTimeFloat() - center_fadetime < 1.5;
 }
+
 
 // passes ladderlog output to external scripts (do nothing here)
 void sr_InputForScripts( char const * input )

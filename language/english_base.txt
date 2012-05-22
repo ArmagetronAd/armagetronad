@@ -288,12 +288,17 @@ cycle_first_spawn_protection_help Set to 1 if the invulnerability and wall delay
 # map file
 map_file_help                     File that contains the map used for playing 
 map_uri_help                      DEPRECIATED - use RESOURCE_REPOSITORY_SERVER and MAP_FILE instead
-map_rotation_help                 List of maps for rotation. USAGE: MAP_ROTATION map1.xml;map2.xml;
-config_rotation_help              List of config files for rotation. Usage: CONFIG_ROTATION config1.cfg;config2.cfg;
-rotation_type_help                0: No rotation, 1: Per round, 2: Per Match 
 arena_axes_help                   In how many directions a cycle can turn 4 is the default, 6 is hexatron 
 resource_repository_client_help   URI the client uses to search for map files if they aren't stored locally. Better leave it alone 
-resource_repository_server_help   URI clients and the server use to search for map files if they aren't stored locally 
+resource_repository_server_help   URI clients and the server use to search for map files if they aren't stored locally
+
+# rotation
+rotation_type_help                      Determines when map and config rotation should occur. Possible values: (0) Do not do any rotation, (1) Rotate every round (2) Rotate every match
+map_rotation_help                       A list of map files to rotate through, with values separated by semicolons
+config_rotation_help                    A list of config files to rotate through, with values separated by semicolons
+reset_rotation_help                     Resets map and config rotation
+reset_rotation_on_start_new_match_help  If enabled, map and config rotation will be reset when a START_NEW_MATCH command is issued
+reset_rotation_message                  Map and config rotation have been reset. 
 
 # limits
 speed_factor_help		Speed modifier for the cycles
@@ -690,7 +695,8 @@ server_dns_help         If your server is on dynamic IP and you set up a dynamic
 server_port_help		Port this server listens on
 client_port_help		Port we try to connect to
 max_clients_help		Maximum number of network clients to accept
-max_clients_limit       Warning: MAX_CLIENTS can not be be greater than \1. Setting not changed.
+max_clients_high       Warning: MAX_CLIENTS can not be greater than \1. Setting not changed.
+max_clients_low        Warning: MAX_CLIENTS can not be lower than \1. Setting not changed.
 max_clients_same_ip_soft_help		Maximum number of network clients to accept from the same IP; more logins will get kicked when the server is full
 max_clients_same_ip_hard_help		Maximum number of network clients to accept from the same IP; more logins will be ignored
 max_players_same_ip_help  maximum number of players from the same IP (note that each client can legally host up to four players)
@@ -1005,7 +1011,7 @@ only_works_on_server        The console command \1 only works on the server. You
 players_help                Prints list of currently active players
 teams_help                  Get a list of all teams with a somewhat graphic representation of their formation. Same as saying /teams
 kill_help                   Kill a specific player (as warning before a kick)
-kill_all_help               Kills everyone on the grid. 
+kill_all_help               Kills everyone on the grid.
 silence_help                Silence a specific player so he can't use public chat any more (/msg and /team still work)
 silence_all_help            Silence everyone present in the server.
 unsilence_help              Reverts a SILENCE command
@@ -1061,6 +1067,16 @@ say_help					Dedicated server only: let the server administrator say something.
 rename_help		    Renames the given player.
 allow_rename_player_help    Gives the given player the ability to rename.
 disallow_rename_player_help Prevents the given player from rename-ing.
+
+# chatters commands
+chatters_kill_help                  All players in chat mode are killed by an administrator.\n
+chatters_silence_help               All players in chat mode are silenced by an administrator.\n
+chatters_suspend_help               All players in chat mode are suspended for this-many rounds by an administrator.\n
+chatters_list_help                  All players in chat mode are listed.\n
+
+player_chatter_die                  All players that were in chat mode are killed by an administrator.\n
+player_chatter_silence              All players that were in chat mode are silence by an administrator.\n
+player_chatter_suspend_success      All players that were in chat mode are suspended by an administrator for \1 rounds.\n 
 
 #********************************************
 #********************************************
