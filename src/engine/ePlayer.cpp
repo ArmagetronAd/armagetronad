@@ -3819,6 +3819,12 @@ void handle_chat( nMessage &m )
                         se_ChatPlayer( p, s, spam );
                         return;
                     }
+                    else if (command == "/msg")
+                    {
+                        spam.lastSaidType_ = eChatMessageType_Private;
+                        se_ChatMsg( p, s, spam );
+                        return;
+                    }
                     else if (command == "/shout")
                     {
                         spam.lastSaidType_ = eChatMessageType_Public;

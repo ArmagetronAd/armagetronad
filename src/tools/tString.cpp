@@ -491,12 +491,12 @@ int tString::StrPos( int start, const tString & tofind ) const
 //!
 // *******************************************************************************
 
-int tString::StrPos( const CHAR * tofind ) const
+int tString::StrPos( const char * tofind ) const
 {
     return StrPos( tString ( tofind ) );
 }
 
-int tString::StrPos( int start, const CHAR * tofind ) const
+int tString::StrPos( int start, const char * tofind ) const
 {
     return StrPos( start, tString ( tofind ) );
 }

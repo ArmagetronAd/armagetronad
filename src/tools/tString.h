@@ -99,7 +99,7 @@ public:
     void SetPos( int len, bool cut );
 
     bool EndsWith( const tString & other) const;    //!< determines whether this string ends with the argument string
-    bool EndsWith( const CHAR* other) const;        //!< determines whether this string ends with the argument string
+    bool EndsWith( const char * other) const;        //!< determines whether this string ends with the argument string
 
     //! determines whether this string starts with the argument string
     bool StartsWith( const tString & other ) const;
@@ -108,8 +108,8 @@ public:
     //Get the position of a substring within a string...
     int StrPos( const tString &tofind ) const;      //!< Get the position of a substring within this string.
     int StrPos( int start, const tString &tofind ) const; //!< Get the position of a substring within this string.
-    int StrPos( const CHAR * tofind ) const;        //!< Get the position of a substring within this string.
-    int StrPos( int start, const CHAR * tofind ) const; //!< Get the position of a substring within this string.
+    int StrPos( const char * tofind ) const;        //!< Get the position of a substring within this string.
+    int StrPos( int start, const char * tofind ) const; //!< Get the position of a substring within this string.
 
     //Get a substring within a string...
     tString SubStr( const int start, int len) const;
