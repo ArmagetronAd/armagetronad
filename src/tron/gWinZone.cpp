@@ -58,6 +58,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <time.h>
 #include <algorithm>
 
+static bool sg_SwapWinDeath = false;
+static tSettingItem<bool> sg_SwitchWinDeathColorCONF("SWAP_WINZONE_DEATHZONE_COLORS", sg_SwapWinDeath);
+
 static int sg_zoneAlphaToggle = 0;
 static tSettingItem<int> sg_zoneAlphaToggleConf( "ZONE_ALPHA_TOGGLE", sg_zoneAlphaToggle );
 
@@ -1356,6 +1359,33 @@ bool gZone::RendersAlpha() const
     return sr_alphaBlend ? !sg_zoneAlphaToggle : sg_zoneAlphaToggle;
 }
 
+// *******************************************************************************
+// *
+// *    Win Zone Color Commands
+// *    Death Zone Color Commands
+// *
+// *******************************************************************************
+//!
+//!     @return True if alpha blending is used
+//!
+// *******************************************************************************
+static int sg_ColorWinZoneRed = 0;
+static tSettingItem<int> sg_ColorWinZoneRedCONF("COLOR_WINZONE_RED", sg_ColorWinZoneRed);
+
+static int sg_ColorWinZoneBlue = 0;
+static tSettingItem<int> sg_ColorWinZoneBlueCONF("COLOR_WINZONE_BLUE", sg_ColorWinZoneBlue);
+
+static int sg_ColorWinZoneGreen = 15;
+static tSettingItem<int> sg_ColorWinZoneGreenCONF("COLOR_WINZONE_GREEN", sg_ColorWinZoneGreen);
+
+static int sg_ColorDeathZoneRed = 15;
+static tSettingItem<int> sg_ColorDeathZoneRedCONF("COLOR_DEATHZONE_RED", sg_ColorDeathZoneRed);
+
+static int sg_ColorDeathZoneBlue = 0;
+static tSettingItem<int> sg_ColorDeathZoneBlueCONF("COLOR_DEATHZONE_BLUE", sg_ColorDeathZoneBlue);
+
+static int sg_ColorDeathZoneGreen = 0;
+static tSettingItem<int> sg_ColorDeathZoneGreenCONF("COLOR_DEATHZONE_GREEN", sg_ColorDeathZoneGreen);
 
 // *******************************************************************************
 // *
@@ -1371,9 +1401,18 @@ bool gZone::RendersAlpha() const
 gWinZoneHack::gWinZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreation )
 :gZone( grid, pos, dynamicCreation )
 {
-    color_.r = 0.0f;
-    color_.g = 1.0f;
-    color_.b = 0.0f;
+    if (sg_SwapWinDeath == false)
+    {
+        color_.r = sg_ColorWinZoneRed / 15.0f;//0.0f;
+        color_.b = sg_ColorWinZoneBlue / 15.0f;//1.0f;
+        color_.g = sg_ColorWinZoneGreen / 15.0f;//0.0f;
+    }
+    else
+    {
+        color_.r = sg_ColorDeathZoneRed / 15.0f;//1.0f;
+        color_.b = sg_ColorDeathZoneBlue / 15.0f;//0.0f;
+        color_.g = sg_ColorDeathZoneGreen / 15.0f;//0.0f;
+    }
 }
 
 
@@ -1457,9 +1496,18 @@ gDeathZoneHack::gDeathZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCr
 {
     pLastShotCollision = NULL;
 
-    color_.r = 1.0f;
-    color_.g = 0.0f;
-    color_.b = 0.0f;
+    if (sg_SwapWinDeath == false)
+    {
+        color_.r = sg_ColorDeathZoneRed / 15.0f;//1.0f;
+        color_.b = sg_ColorDeathZoneBlue / 15.0f;//0.0f;
+        color_.g = sg_ColorDeathZoneGreen / 15.0f;//0.0f;
+    }
+    else
+    {
+        color_.r = sg_ColorWinZoneRed / 15.0f;//0.0f;
+        color_.b = sg_ColorWinZoneBlue / 15.0f;//1.0f;
+        color_.g = sg_ColorWinZoneGreen / 15.0f;//0.0f;
+    }
 
     if (teamowner!=NULL)
     {

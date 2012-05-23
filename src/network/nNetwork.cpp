@@ -495,7 +495,7 @@ bool restrictMaxClients( int const &newValue )
     else if (newValue <= 0)
     {
         tOutput o;
-        o.SetTemplateParameter(1, MAXCLIENTS);
+        o.SetTemplateParameter(1, newValue);
         o << "$max_clients_low";
         con << o << '\n';
         return false;

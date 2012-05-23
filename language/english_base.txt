@@ -332,6 +332,8 @@ win_zone_initial_size_help			Initial size of the instant win zone
 win_zone_deaths_help	            A value of 1 turns it into a death zone.
 win_zone_randomness_help            Randomness factor of the initial win zone position. 0 fixes it at the arena center, 1 spreads the zone all over it.
 
+swap_winzone_deathzone_colors_help          0:Default, original colors and 1:Swap, swaps their colors with each other.
+
 game_timeout_help					Base timeout for game state synchronisation; gives approximately the maximum time between rounds.
 last_chat_break_time_help           Last round time a player in chat mode is able to pause the timer
 extra_round_time_help               Length of an extra pause at the beginning of the round
@@ -696,7 +698,7 @@ server_port_help		Port this server listens on
 client_port_help		Port we try to connect to
 max_clients_help		Maximum number of network clients to accept
 max_clients_high       Warning: MAX_CLIENTS can not be greater than \1. Setting not changed.
-max_clients_low        Warning: MAX_CLIENTS can not be lower than \1. Setting not changed.
+max_clients_low        Warning: MAX_CLIENTS of \1 cannot be lower than 1. Setting not changed.
 max_clients_same_ip_soft_help		Maximum number of network clients to accept from the same IP; more logins will get kicked when the server is full
 max_clients_same_ip_hard_help		Maximum number of network clients to accept from the same IP; more logins will be ignored
 max_players_same_ip_help  maximum number of players from the same IP (note that each client can legally host up to four players)
@@ -921,6 +923,14 @@ filter_dark_color_team_help	Filter dark color codes from /team messages.
 zone_alpha_help             Transparency factor for zone rendering. 1.0 gives full strength.
 zone_alpha_server_help      Transparency factor for zone rendering, controlled by the server. 1.0 gives full strength.
 
+color_winzone_red_help      Default: 0, red portion of the zone's color 
+color_winzone_blue_help     Default: 0, blue portion of the zone's color
+color_winzone_green_help    Default: 15, green portion of the zone's color
+
+color_deathzone_red_help    Default: 15, red portion of the zone's color
+color_deathzone_blue_help   Default: 0, blue portion of the zone's color
+color_deathzone_green_help  Default: 0, green portion of the zone's color
+
 #screen mode
 custom_screen_height_help	Custom screen size
 custom_screen_width_help	Custom screen size
@@ -1069,10 +1079,10 @@ allow_rename_player_help    Gives the given player the ability to rename.
 disallow_rename_player_help Prevents the given player from rename-ing.
 
 # chatters commands
-chatters_kill_help                  All players in chat mode are killed by an administrator.\n
-chatters_silence_help               All players in chat mode are silenced by an administrator.\n
-chatters_suspend_help               All players in chat mode are suspended for this-many rounds by an administrator.\n
-chatters_list_help                  All players in chat mode are listed.\n
+chatters_kill_help                  All players in chat mode are killed by an administrator.
+chatters_silence_help               All players in chat mode are silenced by an administrator.
+chatters_suspend_help               All players in chat mode are suspended for this-many rounds by an administrator.
+chatters_list_help                  All players in chat mode are listed.
 
 player_chatter_die                  All players that were in chat mode are killed by an administrator.\n
 player_chatter_silence              All players that were in chat mode are silence by an administrator.\n
