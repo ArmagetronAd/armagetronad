@@ -688,8 +688,4 @@ tFunction & tFunction::SetSlope( REAL const & slope )
 	this->slope_ = slope;
 	return *this;
 }
-
-extern int sg_ColorDeathZoneRed;
-extern int sg_ColorDeathZoneBlue;
-extern int sg_ColorDeathZoneGreen;
 #endif

@@ -1394,22 +1394,22 @@ void gZone::Vanish( REAL factor )
 //!     @return True if alpha blending is used
 //!
 // *******************************************************************************
-int sg_ColorWinZoneRed = 0;
+static int sg_ColorWinZoneRed = 0;
 static tSettingItem<int> sg_ColorWinZoneRedCONF("COLOR_WINZONE_RED", sg_ColorWinZoneRed);
 
-int sg_ColorWinZoneBlue = 0;
+static int sg_ColorWinZoneBlue = 0;
 static tSettingItem<int> sg_ColorWinZoneBlueCONF("COLOR_WINZONE_BLUE", sg_ColorWinZoneBlue);
 
-int sg_ColorWinZoneGreen = 15;
+static int sg_ColorWinZoneGreen = 15;
 static tSettingItem<int> sg_ColorWinZoneGreenCONF("COLOR_WINZONE_GREEN", sg_ColorWinZoneGreen);
 
-int sg_ColorDeathZoneRed = 15;
+static int sg_ColorDeathZoneRed = 15;
 static tSettingItem<int> sg_ColorDeathZoneRedCONF("COLOR_DEATHZONE_RED", sg_ColorDeathZoneRed);
 
-int sg_ColorDeathZoneBlue = 0;
+static int sg_ColorDeathZoneBlue = 0;
 static tSettingItem<int> sg_ColorDeathZoneBlueCONF("COLOR_DEATHZONE_BLUE", sg_ColorDeathZoneBlue);
 
-int sg_ColorDeathZoneGreen = 0;
+static int sg_ColorDeathZoneGreen = 0;
 static tSettingItem<int> sg_ColorDeathZoneGreenCONF("COLOR_DEATHZONE_GREEN", sg_ColorDeathZoneGreen);
 
 // *******************************************************************************
@@ -6069,18 +6069,6 @@ static void sg_CreateZone_conf(std::istream &s)
             zoneColor.g += (1.0 - zoneColor.g) / 1.8;
             zoneColor.b += (1.0 - zoneColor.b) / 1.8;
             setColorFlag = true;
-        }
-        else
-        {
-            if (!zoneNameStr)
-            {
-                tString name_line = tString("dz");
-
-                int pos = 0;                 //
-                const tString object_id_str = name_line.ExtractNonBlankSubString(pos);
-
-                zoneNameStr = object_id_str;
-            }
         }
     }
     else if ( zoneTypeStr=="win")

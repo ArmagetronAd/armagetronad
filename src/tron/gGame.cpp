@@ -4016,17 +4016,6 @@ static REAL sg_timestepMax = .2;
 static tSettingItem<REAL> sg_timestepMaxConf( "TIMESTEP_MAX", sg_timestepMax );
 static int sg_timestepMaxCount = 10;
 static tSettingItem<int> sg_timestepMaxCountConf( "TIMESTEP_MAX_COUNT", sg_timestepMaxCount );
-static bool sg_SetZonesFlash = false;
-static tSettingItem<bool> sg_SetZonesFlashConf("SET_ZONES_FLASH", sg_SetZonesFlash);
-static bool sg_RandomDeathColors = false;
-static tSettingItem<bool> sg_RandomDeathColorsConf("RANDOM_DZ_COLORS", sg_RandomDeathColors);
-
-static int flash_color_r;
-static int flash_color_b;
-static int flash_color_g;
-static int dz_color_r;
-static int dz_color_b;
-static int dz_color_g;
 
 void gGame::Timestep(REAL time,bool cam){
 #ifdef DEBUG
@@ -4046,93 +4035,6 @@ void gGame::Timestep(REAL time,bool cam){
         respawn_all = false;
     }
 #endif
-
-    if (sg_SetZonesFlash == true)
-    {
-        tRandomizer & randomizer = tRandomizer::GetInstance();
-        flash_color_r = randomizer.Get(15);
-        flash_color_b = randomizer.Get(15);
-        flash_color_g = randomizer.Get(15);
-        const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
-        int num_gameObjects = gameObjects.Size();
-        gRealColor zoneColor;
-        for(int j=0;j < num_gameObjects; j++)
-        {
-            // get the zone ...
-            //gZone *zone=dynamic_cast<gZone *>(gameObjects(zone_id));
-            gZone *zone=dynamic_cast<gZone *>(gameObjects(j));
-            if (zone)
-            {
-                zone->SetReferenceTime();
-                zoneColor.r = flash_color_r / 15.0f;
-                zoneColor.b = flash_color_b / 15.0f;
-                zoneColor.g = flash_color_g / 15.0f;
-                zone->SetColor(zoneColor);
-                zone->RequestSync();
-            }
-            //zone_id=gZone::FindNext("", zone_id);
-        }
-    }
-
-    if (sg_RandomDeathColors == true)
-    {
-        tRandomizer & randomizer = tRandomizer::GetInstance();
-        dz_color_r = randomizer.Get(15);
-        dz_color_b = randomizer.Get(15);
-        dz_color_g = randomizer.Get(15);
-
-        tString params = tString("dz");
-
-        int pos = 0;
-        const tString object_id_str = params.ExtractNonBlankSubString(pos);
-
-        int zone_id;
-        zone_id=gZone::FindFirst(object_id_str);
-
-        gRealColor zoneColor;
-        const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
-        while (zone_id!=-1)
-        {
-            // get the zone ...
-            gZone *zone=dynamic_cast<gZone *>(gameObjects(zone_id));
-            if (zone)
-            {
-                zone->SetReferenceTime();
-                zoneColor.r = dz_color_r / 15.0f;
-                zoneColor.b = dz_color_b / 15.0f;
-                zoneColor.g = dz_color_g / 15.0f;
-                zone->SetColor(zoneColor);
-                zone->RequestSync();
-            }
-            zone_id=gZone::FindNext(object_id_str, zone_id);
-        }
-    }
-
-        tString params = tString("dz");
-
-        int pos = 0;
-        const tString object_id_str = params.ExtractNonBlankSubString(pos);
-
-        int zone_id;
-        zone_id=gZone::FindFirst(object_id_str);
-
-        gRealColor zoneColor;
-        const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
-        while (zone_id!=-1)
-        {
-            // get the zone ...
-            gZone *zone=dynamic_cast<gZone *>(gameObjects(zone_id));
-            if (zone)
-            {
-                zone->SetReferenceTime();
-                zoneColor.r = sg_ColorDeathZoneRed / 15.0f;
-                zoneColor.b = sg_ColorDeathZoneBlue / 15.0f;
-                zoneColor.g = sg_ColorDeathZoneGreen / 15.0f;
-                zone->SetColor(zoneColor);
-                zone->RequestSync();
-            }
-            zone_id=gZone::FindNext(object_id_str, zone_id);
-        }
 
     // chop timestep into small, managable bits
     REAL dt = time - lastTimeTimestep;
