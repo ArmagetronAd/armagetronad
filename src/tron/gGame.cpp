@@ -71,6 +71,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "gSvgOutput.h"
 #include "rScreen.h"
 
+//HACK RACE
+#include "gRace.h"
+
 #include "gParser.h"
 #include "tResourceManager.h"
 #include "nAuthentication.h"
@@ -3602,6 +3605,13 @@ void gGame::StateUpdate(){
         case GS_CREATE_GRID:
             // sr_con.autoDisplayAtNewline=true;
 
+            //HACK RACE begin
+            if ( sg_RaceTimerEnabled )
+            {
+                gRace::Reset();
+            }
+            //HACK RACE end
+
             sg_ParseMap( aParser );
 
             sn_Statistics();
@@ -4006,6 +4016,17 @@ static REAL sg_timestepMax = .2;
 static tSettingItem<REAL> sg_timestepMaxConf( "TIMESTEP_MAX", sg_timestepMax );
 static int sg_timestepMaxCount = 10;
 static tSettingItem<int> sg_timestepMaxCountConf( "TIMESTEP_MAX_COUNT", sg_timestepMaxCount );
+static bool sg_SetZonesFlash = false;
+static tSettingItem<bool> sg_SetZonesFlashConf("SET_ZONES_FLASH", sg_SetZonesFlash);
+static bool sg_RandomDeathColors = false;
+static tSettingItem<bool> sg_RandomDeathColorsConf("RANDOM_DZ_COLORS", sg_RandomDeathColors);
+
+static int flash_color_r;
+static int flash_color_b;
+static int flash_color_g;
+static int dz_color_r;
+static int dz_color_b;
+static int dz_color_g;
 
 void gGame::Timestep(REAL time,bool cam){
 #ifdef DEBUG
@@ -4025,6 +4046,94 @@ void gGame::Timestep(REAL time,bool cam){
         respawn_all = false;
     }
 #endif
+
+    if (sg_SetZonesFlash == true)
+    {
+        tRandomizer & randomizer = tRandomizer::GetInstance();
+        flash_color_r = randomizer.Get(15);
+        flash_color_b = randomizer.Get(15);
+        flash_color_g = randomizer.Get(15);
+        const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
+        int num_gameObjects = gameObjects.Size();
+        gRealColor zoneColor;
+        for(int j=0;j < num_gameObjects; j++)
+        {
+            // get the zone ...
+            //gZone *zone=dynamic_cast<gZone *>(gameObjects(zone_id));
+            gZone *zone=dynamic_cast<gZone *>(gameObjects(j));
+            if (zone)
+            {
+                zone->SetReferenceTime();
+                zoneColor.r = flash_color_r / 15.0f;
+                zoneColor.b = flash_color_b / 15.0f;
+                zoneColor.g = flash_color_g / 15.0f;
+                zone->SetColor(zoneColor);
+                zone->RequestSync();
+            }
+            //zone_id=gZone::FindNext("", zone_id);
+        }
+    }
+
+    if (sg_RandomDeathColors == true)
+    {
+        tRandomizer & randomizer = tRandomizer::GetInstance();
+        dz_color_r = randomizer.Get(15);
+        dz_color_b = randomizer.Get(15);
+        dz_color_g = randomizer.Get(15);
+
+        tString params = tString("dz");
+
+        int pos = 0;
+        const tString object_id_str = params.ExtractNonBlankSubString(pos);
+
+        int zone_id;
+        zone_id=gZone::FindFirst(object_id_str);
+
+        gRealColor zoneColor;
+        const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
+        while (zone_id!=-1)
+        {
+            // get the zone ...
+            gZone *zone=dynamic_cast<gZone *>(gameObjects(zone_id));
+            if (zone)
+            {
+                zone->SetReferenceTime();
+                zoneColor.r = dz_color_r / 15.0f;
+                zoneColor.b = dz_color_b / 15.0f;
+                zoneColor.g = dz_color_g / 15.0f;
+                zone->SetColor(zoneColor);
+                zone->RequestSync();
+            }
+            zone_id=gZone::FindNext(object_id_str, zone_id);
+        }
+    }
+
+        tString params = tString("dz");
+
+        int pos = 0;
+        const tString object_id_str = params.ExtractNonBlankSubString(pos);
+
+        int zone_id;
+        zone_id=gZone::FindFirst(object_id_str);
+
+        gRealColor zoneColor;
+        const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
+        while (zone_id!=-1)
+        {
+            // get the zone ...
+            gZone *zone=dynamic_cast<gZone *>(gameObjects(zone_id));
+            if (zone)
+            {
+                zone->SetReferenceTime();
+                zoneColor.r = sg_ColorDeathZoneRed / 15.0f;
+                zoneColor.b = sg_ColorDeathZoneBlue / 15.0f;
+                zoneColor.g = sg_ColorDeathZoneGreen / 15.0f;
+                zone->SetColor(zoneColor);
+                zone->RequestSync();
+            }
+            zone_id=gZone::FindNext(object_id_str, zone_id);
+        }
+
     // chop timestep into small, managable bits
     REAL dt = time - lastTimeTimestep;
     if ( dt < 0 )
@@ -4309,6 +4418,34 @@ void gGame::Analysis(REAL time){
         lastTeams=humanTeamsClamp; // update last team count
     }
 
+    //HACK RACE begin
+
+    if ( sg_RaceTimerEnabled )
+    {
+        gRace::Sync( alive, ai_alive, sg_NumHumans() );
+        if ( !gRace::Done() )
+            return;
+        else                                    // time to close the round
+        {
+            eTeam * team = gRace::Winner();
+
+            if ( team != NULL )
+            {
+                static const char* message="$player_win_race";
+                sg_DeclareWinner( team, message );
+            }
+            else
+            {
+                if ( alive > 0 )
+                {
+                    //TODO
+                    sg_DeclareWinner( NULL, 0 );
+                }
+            }
+        }
+    }
+    //HACK RACE end
+
     // who is alive?
     if ( time-lastdeath < 1.0f )
     {
@@ -4409,6 +4546,11 @@ void gGame::Analysis(REAL time){
                         sg_roundWinnerWriter << ePlayerNetID::FilterName( eTeam::teams[winner-1]->Name() );
                         eTeam::WritePlayers( sg_roundWinnerWriter, eTeam::teams[winner-1] );
                         sg_roundWinnerWriter.write();
+
+                        //HACK RACE begin
+                        if ( sg_RaceTimerEnabled )
+                            gRace::End();
+                        //HACK RACE end
                     }
                 }
                 check_hs();

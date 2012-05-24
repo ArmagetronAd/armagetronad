@@ -105,6 +105,8 @@ public:
     gZone &         SetRotationAcceleration( REAL rotationAcceleration );	        //!< Sets the current acceleration of the rotation
     REAL            GetRotationAcceleration( void ) const;	                        //!< Gets the current acceleration of the rotation
     gZone const &   GetRotationAcceleration( REAL & rotationAcceleration ) const;	//!< Gets the current acceleration of the rotation
+    //HACK RACE
+    void            Vanish				(REAL factor);		//!< let the zone vanish
     gZone &         SetWallInteract     (bool wallInteract) {wallInteract_=wallInteract; return *this;}
     gZone &         SetWallBouncesLeft  (int wallBouncesLeft) {wallBouncesLeft_=wallBouncesLeft; return *this;}
 
@@ -686,4 +688,8 @@ tFunction & tFunction::SetSlope( REAL const & slope )
 	this->slope_ = slope;
 	return *this;
 }
+
+extern int sg_ColorDeathZoneRed;
+extern int sg_ColorDeathZoneBlue;
+extern int sg_ColorDeathZoneGreen;
 #endif

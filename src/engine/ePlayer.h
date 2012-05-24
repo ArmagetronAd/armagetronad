@@ -467,6 +467,10 @@ public:
     bool IsAllowedToRename ( void );                             //!< tells if the user can rename or not, takes care about everything
     void AllowRename( bool allow );                              //!< Allows a player to rename (or not)
 
+    //HACK RACE
+    bool raceArrived;
+    REAL raceTime;
+
     static bool HasRenameCapability ( ePlayerNetID const *, ePlayerNetID const * admin ); //!< Checks if the admin can use the RENAME command. Used in IsAllowedToRename()
 
 private:
@@ -536,6 +540,7 @@ void se_ChatState( ePlayerNetID::ChatFlags flag, bool cs);
 
 void se_SaveToScoreFile( tOutput const & out );  //!< writes something to scorelog.txt
 void se_SaveToChatLog( tOutput const & out );  //!< writes something to chatlog.txt (if enabled) and/or ladderlog
+void se_SaveToLadderLog( tOutput const & out );  //!< writes something to ladderlog.txt
 
 //! create a global instance of this to write stuff to ladderlog.txt
 class eLadderLogWriter {

@@ -163,6 +163,7 @@ score_suicide_help		What you get for stupidly dying
 score_win_help			What you get for winning a round
 score_deathzone_help		What you get for hitting the Death Zone
 score_deathzone_team_help   What you get for hitting a team Death Zone
+score_race_help			What you get for reaching the win zone in a race
 
 sp_score_win_help			What you get for winning a round in single player mode
 sp_walls_stay_up_delay_help	Number of seconds the walls stay up after a player died; negative values will keep them up forever.
@@ -923,6 +924,7 @@ filter_dark_color_team_help	Filter dark color codes from /team messages.
 zone_alpha_help             Transparency factor for zone rendering. 1.0 gives full strength.
 zone_alpha_server_help      Transparency factor for zone rendering, controlled by the server. 1.0 gives full strength.
 
+#color winzone and deathzone commands
 color_winzone_red_help      Default: 0, red portion of the zone's color 
 color_winzone_blue_help     Default: 0, blue portion of the zone's color
 color_winzone_green_help    Default: 15, green portion of the zone's color
@@ -930,6 +932,9 @@ color_winzone_green_help    Default: 15, green portion of the zone's color
 color_deathzone_red_help    Default: 15, red portion of the zone's color
 color_deathzone_blue_help   Default: 0, blue portion of the zone's color
 color_deathzone_green_help  Default: 0, green portion of the zone's color
+
+set_zones_flash             All zones on the field will start flashing with random colors. WARNING: This will cause eye problems. Be carefull!
+random_dz_colors            All deathzones on field will start flashing with random colors. WARNING: This will cause eye problems. Be carefull!
 
 #screen mode
 custom_screen_height_help	Custom screen size
@@ -1086,7 +1091,9 @@ chatters_list_help                  All players in chat mode are listed.
 
 player_chatter_die                  All players that were in chat mode are killed by an administrator.\n
 player_chatter_silence              All players that were in chat mode are silence by an administrator.\n
-player_chatter_suspend_success      All players that were in chat mode are suspended by an administrator for \1 rounds.\n 
+player_chatter_suspend_success      All players that were in chat mode are suspended by an administrator for \1 rounds.\n
+
+ 
 
 #********************************************
 #********************************************
@@ -2466,6 +2473,7 @@ player_admin_slap_lose			\1 has been slapped by an administrator and lost \2 poi
 give_points_help                   Slaps the given player by granting them with the specified amount of points. Be smart and you may be able to hug your users, too ;) \n
 take_points_help          Slaps the given player by punishing them with the specified amound of points. Be careful or you will lose a of points :P \n
 player_win_instant			\1 was awarded \2 points for hitting the instant win zone.\n
+player_win_race			\1 was awarded \2 points for winning the race.\n
 player_win_conquest			\1 was awarded \2 points for conquering the enemy base.\n
 player_win_conquest2			\1 was awarded \2 points for conquering \3's base.\n
 players_win_conquest			\1 where awarded \2 points for conquering \3's base.\n
@@ -3197,6 +3205,12 @@ md5_prefix_help               Extra hash prefix for local accounts used to scram
 md5_suffix_help               Extra hash suffix for local accounts used to scramble the password
 
 global_id_help                If set to 1, Global IDs (Armathentication) will be enabled on this server.
+
+# RACE SETTINGS AND ANIMUSON MODS
+race_timer_enabled_help		           (0 = Disable, 1 = Enable) race timer
+race_end_delay_help		               Number of seconds to give players to finish after target reached
+player_reach_race		                 \1 reached the finish line for \2 points.\n
+player_racetimerenabled_restrict     The console command RACE_TIMER_ENABLED only works on the server. You probably want to say "/admin RACE_TIMER_ENABLED".\n
 
 access_level_substitute_denied  Required access level to substitute is "\1", you only have "\2".\n
 substitute_message_usage        Usage: /substitute <user out ID or name> <user in ID or name>\n

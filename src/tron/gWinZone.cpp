@@ -55,6 +55,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "gArena.h"
 #include "tRandom.h"
 
+//HACK RACE
+#include "gRace.h"
+
 #include <time.h>
 #include <algorithm>
 
@@ -1359,6 +1362,28 @@ bool gZone::RendersAlpha() const
     return sr_alphaBlend ? !sg_zoneAlphaToggle : sg_zoneAlphaToggle;
 }
 
+//HACK RACE begin
+// *******************************************************************************
+// *
+// *	Vanish
+// *
+// *******************************************************************************
+//!
+//!		@param	factor vanishing speed factor
+//!
+// *******************************************************************************
+
+void gZone::Vanish( REAL factor )
+{
+    if ( GetExpansionSpeed() >= 0 )
+    {
+        SetReferenceTime();
+        SetExpansionSpeed( -GetRadius() * factor );
+        RequestSync();
+    }
+}
+//HACK RACE end
+
 // *******************************************************************************
 // *
 // *    Win Zone Color Commands
@@ -1369,22 +1394,22 @@ bool gZone::RendersAlpha() const
 //!     @return True if alpha blending is used
 //!
 // *******************************************************************************
-static int sg_ColorWinZoneRed = 0;
+int sg_ColorWinZoneRed = 0;
 static tSettingItem<int> sg_ColorWinZoneRedCONF("COLOR_WINZONE_RED", sg_ColorWinZoneRed);
 
-static int sg_ColorWinZoneBlue = 0;
+int sg_ColorWinZoneBlue = 0;
 static tSettingItem<int> sg_ColorWinZoneBlueCONF("COLOR_WINZONE_BLUE", sg_ColorWinZoneBlue);
 
-static int sg_ColorWinZoneGreen = 15;
+int sg_ColorWinZoneGreen = 15;
 static tSettingItem<int> sg_ColorWinZoneGreenCONF("COLOR_WINZONE_GREEN", sg_ColorWinZoneGreen);
 
-static int sg_ColorDeathZoneRed = 15;
+int sg_ColorDeathZoneRed = 15;
 static tSettingItem<int> sg_ColorDeathZoneRedCONF("COLOR_DEATHZONE_RED", sg_ColorDeathZoneRed);
 
-static int sg_ColorDeathZoneBlue = 0;
+int sg_ColorDeathZoneBlue = 0;
 static tSettingItem<int> sg_ColorDeathZoneBlueCONF("COLOR_DEATHZONE_BLUE", sg_ColorDeathZoneBlue);
 
-static int sg_ColorDeathZoneGreen = 0;
+int sg_ColorDeathZoneGreen = 0;
 static tSettingItem<int> sg_ColorDeathZoneGreenCONF("COLOR_DEATHZONE_GREEN", sg_ColorDeathZoneGreen);
 
 // *******************************************************************************
@@ -1413,6 +1438,9 @@ gWinZoneHack::gWinZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreati
         color_.b = sg_ColorDeathZoneBlue / 15.0f;//0.0f;
         color_.g = sg_ColorDeathZoneGreen / 15.0f;//0.0f;
     }
+
+    //HACK RACE
+    gRace::NewZone( this );
 }
 
 
@@ -1462,9 +1490,18 @@ static eLadderLogWriter sg_winzonePlayerEnterWriter("WINZONE_PLAYER_ENTER", fals
 
 void gWinZoneHack::OnEnter( gCycle * target, REAL time )
 {
-    static const char* message="$player_win_instant";
-    sg_DeclareWinner( target->Player()->CurrentTeam(), message );
+    //HACK RACE begin
+    if ( sg_RaceTimerEnabled ) {
+        gRace::ZoneHit( target->Player() );
+    }
+    else {
+        static const char* message="$player_win_instant";
+        sg_DeclareWinner( target->Player()->CurrentTeam(), message );
+        Vanish( 0.5 );
+    }
+    //HACK RACE end
 
+/*
     // let zone vanish
     if ( GetExpansionSpeed() >= 0 )
     {
@@ -1472,6 +1509,7 @@ void gWinZoneHack::OnEnter( gCycle * target, REAL time )
         SetExpansionSpeed( -GetRadius()*.5 );
         RequestSync();
     }
+*/
 
     // message in edlog
     if ((!target) && (!target->Player())) return;
@@ -1517,6 +1555,7 @@ gDeathZoneHack::gDeathZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCr
     else
     {
         deathZoneType = TYPE_NORMAL;
+        name_ = "dz";
     }
 
     grid->AddGameObjectInteresting(this);
@@ -6031,6 +6070,18 @@ static void sg_CreateZone_conf(std::istream &s)
             zoneColor.b += (1.0 - zoneColor.b) / 1.8;
             setColorFlag = true;
         }
+        else
+        {
+            if (!zoneNameStr)
+            {
+                tString name_line = tString("dz");
+
+                int pos = 0;                 //
+                const tString object_id_str = name_line.ExtractNonBlankSubString(pos);
+
+                zoneNameStr = object_id_str;
+            }
+        }
     }
     else if ( zoneTypeStr=="win")
     {
@@ -6198,8 +6249,8 @@ static void sg_CollapseZone(std::istream &s)
             zone->RequestSync();
             sg_collapsezoneWriter << zone_id << object_id_str << zone->GetPosition().x << zone->GetPosition().y;
             sg_collapsezoneWriter.write();
-            zone_id=gZone::FindNext(object_id_str, zone_id);
         }
+        zone_id=gZone::FindNext(object_id_str, zone_id);
     }
 }
 

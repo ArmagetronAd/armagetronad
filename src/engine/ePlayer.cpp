@@ -4611,6 +4611,9 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), timeC
 
     loginWanted = false;
 
+    //HACK
+    raceArrived = false;
+
 
     if (p>=0){
         ePlayer *P = ePlayer::PlayerConfig(p);
@@ -4683,6 +4686,9 @@ ePlayerNetID::ePlayerNetID(nMessage &m):nNetObject(m),listID(-1), teamListID(-1)
     lastSync=tSysTimeFloat();
 
     loginWanted = false;
+
+    //HACK
+    raceArrived = false;
 
     score=0;
     lastScore_=IMPOSSIBLY_LOW_SCORE;
