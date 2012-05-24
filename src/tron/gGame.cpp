@@ -3976,7 +3976,6 @@ static void sg_RespawnAll(eGrid *grid, gArena & arena, bool respawn_all)
         if ((p && !p->IsActive()) || (!e || !e->Alive()))
         {
             eCoord pos,dir;
-#if 0
             if ( e )
             {
                 dir = e->Direction();
@@ -3990,7 +3989,6 @@ static void sg_RespawnAll(eGrid *grid, gArena & arena, bool respawn_all)
                 }
             }
             else
-#endif
                 arena.LeastDangerousSpawnPoint()->Spawn( pos, dir );
 #ifdef DEBUG
             //                std::cout << "spawning player " << pni->name << '\n';
@@ -4020,13 +4018,13 @@ void gGame::Timestep(REAL time,bool cam){
     {
         sg_Respawn(time,grid,Arena);
     }
+    // if respawn_all command is activated
     if(respawn_all == true)
     {
         sg_RespawnAll(grid,Arena,respawn_all);
         respawn_all = false;
     }
 #endif
-
     // chop timestep into small, managable bits
     REAL dt = time - lastTimeTimestep;
     if ( dt < 0 )

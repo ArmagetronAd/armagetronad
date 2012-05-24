@@ -8547,10 +8547,10 @@ static void SilenceAll_conf(std::istream &s)
             ePlayerNetID *p=se_PlayerNetIDs(i);
             if ( p && !p->IsSilenced() )
             {
-                sn_ConsoleOut( tOutput( "$player_silenced_all") );
                 p->SetSilenced( true );
             }
         }
+        sn_ConsoleOut( tOutput( "$player_silenced_all") );
     }
 }
 
@@ -8589,10 +8589,10 @@ static void VoiceAll(std::istream &s)
             ePlayerNetID *p=se_PlayerNetIDs(i);
             if ( p && p->IsSilenced() )
             {
-                sn_ConsoleOut( tOutput( "$player_voiced_all") );
                 p->SetSilenced( false );
             }
         }
+        sn_ConsoleOut( tOutput( "$player_voiced_all") );
     }
 }
 

@@ -209,7 +209,7 @@ int gZone::FindFirst(tString name)
         {
             if (zone->name_ == name)
             {
-                return j;
+                return j;\
             }
         }
     }
@@ -6181,8 +6181,9 @@ static void sg_CollapseZone(std::istream &s)
     zone_id=gZone::FindFirst(object_id_str);
     if (zone_id==-1)
     {
+        /*
         zone_id = atoi(object_id_str);
-        if (zone_id==0 && object_id_str!="0") return;
+        if (zone_id==0 && object_id_str!="0")*/ return;
     }
 
     const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
@@ -6222,9 +6223,9 @@ static void sg_SetZoneRadius(std::istream &s)
     int zone_id;
     zone_id=gZone::FindFirst(object_id_str);
     if (zone_id==-1)
-    {
+    {/*
         zone_id = atoi(object_id_str);
-        if (zone_id==0 && object_id_str!="0") return;
+        if (zone_id==0 && object_id_str!="0")*/ return;
     }
 
     const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
@@ -6276,8 +6277,9 @@ static void sg_SetZoneRoute(std::istream &s)
     zone_id=gZone::FindFirst(object_id_str);
     if (zone_id==-1)
     {
+        /*
         zone_id = atoi(object_id_str);
-        if (zone_id==0 && object_id_str!="0") return;
+        if (zone_id==0 && object_id_str!="0")*/ return;
     }
 
     const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
@@ -6330,8 +6332,9 @@ static void sg_SetZoneSpeed(std::istream &s)
     zone_id=gZone::FindFirst(object_id_str);
     if (zone_id==-1)
     {
+        /*
         zone_id = atoi(object_id_str);
-        if (zone_id==0 && object_id_str!="0") return;
+        if (zone_id==0 && object_id_str!="0")*/ return;
     }
 
     const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
@@ -6379,8 +6382,9 @@ static void sg_SetZoneColor(std::istream &s)
     zone_id=gZone::FindFirst(object_id_str);
     if (zone_id==-1)
     {
+        /*
         zone_id = atoi(object_id_str);
-        if (zone_id==0 && object_id_str!="0") return;
+        if (zone_id==0 && object_id_str!="0")*/ return;
     }
 
     const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
@@ -6419,8 +6423,9 @@ static void sg_SetZoneExpansion(std::istream &s)
     zone_id=gZone::FindFirst(object_id_str);
     if (zone_id==-1)
     {
+        /*
         zone_id = atoi(object_id_str);
-        if (zone_id==0 && object_id_str!="0") return;
+        if (zone_id==0 && object_id_str!="0")*/ return;
     }
 
     const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
