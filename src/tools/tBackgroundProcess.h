@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #ifndef     TBACKGROUNDPROCESS_H_INCLUDED
 #define     TBACKGROUNDPROCESS_H_INCLUDED
 
+#include "tToDo.h"
 #include "tThread.h"
 #include "tLockedQueue.h"
 

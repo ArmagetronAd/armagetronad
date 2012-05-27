@@ -833,21 +833,21 @@ dnl *************************************************
 if test $SYS_GL_LIB && echo $LIBS | grep -v "\-lGL" > /dev/null; then
 
 dnl AC_CHECK_LIB($SYS_GL_LIB, glEnd,,
+AC_CHECK_LIB(X11,XOpenDisplay,
+ LIBS="-lX11 -L/usr/X11R6/lib $LIBS"
+ AC_DEFINE(HAVE_LIBX11, 1, [Define if you have the X11 library (-lX11).])
+ ,
+ AC_MSG_WARN([
+ Standard X11 library needed by OpenGL not found.
+ ]),-L/usr/X11R6/lib)
 
 AC_CHECK_LIB($SYS_GL_LIB, glVertex3f,,
  AC_MSG_RESULT([OpenGL not found. Maybe it needs X11 to compile? Checking that...])
- AC_CHECK_LIB(X11,XOpenDisplay,
-  LIBS="-lX11 -L/usr/X11R6/lib $LIBS"
-  AC_DEFINE(HAVE_LIBX11, 1, [Define if you have the X11 library (-lX11).])
-  ,
-  AC_MSG_WARN([
-  Standard X11 library needed by OpenGL not found.
-  ]),-L/usr/X11R6/lib)
  AC_CHECK_LIB(Xext,XextFindDisplay,-L/usr/X11R6/lib)
-  AC_CHECK_LIB(Xt,XtFree,-L/usr/X11R6/lib)
+ AC_CHECK_LIB(Xt,XtFree,-L/usr/X11R6/lib)
  AC_CHECK_LIB(Xi,XOpenDevice,-L/usr/X11R6/lib)
  AC_CHECK_LIB(Xmu,XmuDrawLogo,-L/usr/X11R6/lib)
-AC_CHECK_LIB($SYS_GL_LIB, glBegin,,AC_MSG_ERROR([
+ AC_CHECK_LIB($SYS_GL_LIB, glBegin,,AC_MSG_ERROR([
   You need Mesa or an OpenGL-System to compile ${progtitle}.
   Maybe your libGL needs the X libraries and your system does not
   find them? Read the file doc/installation.txt.]),-L/usr/X11R6/lib)
