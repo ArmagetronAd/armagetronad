@@ -1440,7 +1440,7 @@ gWinZoneHack::gWinZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreati
     }
 
     //HACK RACE
-    gRace::NewZone( this );
+    gRace::NewWinZone( this );
 }
 
 
@@ -1559,6 +1559,7 @@ gDeathZoneHack::gDeathZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCr
     }
 
     grid->AddGameObjectInteresting(this);
+    gRace::NewDeathZone( this );
 }
 
 

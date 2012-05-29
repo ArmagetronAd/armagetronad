@@ -33,25 +33,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <string>
 
 bool sg_RaceTimerEnabled = false;
-bool restrictRaceTimerEnabled( bool const &newValue )
-{
-    if (sn_GetNetState() == nSERVER )
-    {
-        return true;
-    }
-    else
-    {
-        sn_ConsoleOut(tOutput( "$player_racetimerenabled_restrict"), 0);
-        return false;
-    }
-}
-static tSettingItem<bool> sg_RaceTimerEnabledConf( "RACE_TIMER_ENABLED", sg_RaceTimerEnabled, restrictRaceTimerEnabled );
+static tSettingItem<bool> sg_RaceTimerEnabledConf( "RACE_TIMER_ENABLED", sg_RaceTimerEnabled );
 
 int sg_RaceEndDelay = 25;
 static tSettingItem<int> sg_RaceEndDelayConf( "RACE_END_DELAY", sg_RaceEndDelay );
 
 int sg_scoreRaceComplete = 5;
+int RacingScore = sg_scoreRaceComplete;
 static tSettingItem<int> sg_scoreRaceCompleteConf( "SCORE_RACE", sg_scoreRaceComplete );
+
+int sg_scoreRaceDeplete = 1;
+static tSettingItem<int> sg_scoreRaceDepleteConf( "RACE_SCORE_DEPLETE", sg_scoreRaceDeplete);
 
 
 
@@ -59,6 +51,7 @@ static tSettingItem<int> sg_scoreRaceCompleteConf( "SCORE_RACE", sg_scoreRaceCom
 //! STATIC VARIABLES
 std::multimap <REAL, gRace::Goal>  gRace::goals_;
 std::vector <gWinZoneHack*> gRace::winZones_;
+std::vector <gDeathZoneHack*> gRace::deathZones_;
 
 bool gRace::firstArrived_ = false;
 int  gRace::countDown_ = -1;
@@ -80,7 +73,8 @@ void gRace::ZoneHit( ePlayerNetID * player )
 
         tOutput win, lose;
         win << "$player_reach_race";
-        player->AddScore( sg_scoreRaceComplete, win, lose );
+        player->AddScore( RacingScore, win, lose );
+        RacingScore -= sg_scoreRaceDeplete;
     }
 }
 
@@ -137,9 +131,17 @@ void gRace::Sync( int alive, int ai_alive, int humans )
     {
         for ( int i = 0; i < winZones_.size(); i ++)
         {
-            winZones_[i]->Vanish( 1.0 );
+            winZones_[i]->Vanish( 0.5 );
         }
         winZones_.clear();
+    }
+    if ( roundFinished_ && !deathZones_.empty())
+    {
+        for (int j = 0; j < deathZones_.size(); j++)
+        {
+            deathZones_[j]->Vanish( 0.5 );
+        }
+        deathZones_.clear();
     }
 }
 
@@ -160,11 +162,16 @@ void gRace::AddGoal( REAL & time, const tColoredString & colName, const tString 
 }
 
 //! NEW ZONE
-void gRace::NewZone( gWinZoneHack * winZone )
+void gRace::NewWinZone( gWinZoneHack * winZone )
 {
     winZones_.push_back( winZone );
 }
 
+//! NEW DEATH ZONE
+void gRace::NewDeathZone( gDeathZoneHack * deathZone)
+{
+    deathZones_.push_back(deathZone);
+}
 //! RESET
 void gRace::Reset()
 {
@@ -172,8 +179,10 @@ void gRace::Reset()
     countDown_ = -1;
     roundFinished_ = false;
     winnerDeclared_ = false;
+    RacingScore = sg_scoreRaceComplete;
 
     winZones_.clear();
+    deathZones_.clear();
     goals_.clear();
 
     std::ofstream o;

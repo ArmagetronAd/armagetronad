@@ -42,7 +42,8 @@ public:
     static void     ZoneHit     ( ePlayerNetID * player );                      //!> called when a cycle hits a win zone
     static void     Sync        ( int alive, int ai_alive, int humans );        //!> update race state, called every second
     static bool     Done        ();                                             //!> returns true whether round time is over
-    static void     NewZone     ( gWinZoneHack * winZone );                     //!> handle all win zones to let them vanish
+    static void     NewWinZone     ( gWinZoneHack * winZone );                  //!> handle all win zones to let them vanish
+    static void     NewDeathZone    ( gDeathZoneHack * deathZone);              //!> handle all death zones to let them vanish
     static void     Reset       ();                                             //!> reset time and values
     static void     End         ();                                             //!> print time results
 
@@ -62,6 +63,7 @@ private:
 
     static std::multimap <REAL, Goal>   goals_;
     static std::vector <gWinZoneHack*>  winZones_;
+    static std::vector <gDeathZoneHack*> deathZones_;
 
     static bool                         firstArrived_;
     static int                          countDown_;
