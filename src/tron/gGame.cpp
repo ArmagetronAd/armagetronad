@@ -171,11 +171,62 @@ public:
     }
 
     // rotates
-    void Rotate()
+    void OrderedRotate()
     {
         if ( ++current_ >= items_.Len() )
         {
             current_ = 0;
+        }
+        /*
+        tString CurrentMap(items_[current_]);
+        tColoredString ColoredMapString;
+
+        int linenum = CurrentMap.StrPos(0, "/");
+        ColoredMapString << tColoredString::ColorString( 0.5,1,.5 );
+        ColoredMapString << "Map path is: ";
+        ColoredMapString << tColoredString::ColorString( 0,0.5,1 );
+        ColoredMapString << items_[current_];
+        ColoredMapString << "\n";
+        ColoredMapString << tColoredString::ColorString( 0.5,1,.5 );
+        ColoredMapString << "Map made by: ";
+        ColoredMapString << tColoredString::ColorString( 0,0.5,1 );
+        ColoredMapString << CurrentMap.SubStr(0, linenum);
+        ColoredMapString << "\n";
+
+        sn_ConsoleOut(ColoredMapString);
+        */
+    }
+
+    void RandomRotate()
+    {
+        tRandomizer & randamizer = tRandomizer::GetInstance();
+        bool goodnumber = false;
+        while (goodnumber == false)
+        {
+            int random_ = randamizer.Get(items_.Len());
+            if ((random_ < items_.Len()) || (random_ >= 0))
+            {
+                current_ = random_;
+                /*
+                tString CurrentMap(items_[current_]);
+                tColoredString ColoredMapString;
+
+                int linenum = CurrentMap.StrPos(0, "/");
+                ColoredMapString << tColoredString::ColorString( 0.5,1,.5 );
+                ColoredMapString << "Map path is: ";
+                ColoredMapString << tColoredString::ColorString( 0,0.5,1 );
+                ColoredMapString << items_[current_];
+                ColoredMapString << "\n";
+                ColoredMapString << tColoredString::ColorString( 0.5,1,.5 );
+                ColoredMapString << "Map made by: ";
+                ColoredMapString << tColoredString::ColorString( 0,0.5,1 );
+                ColoredMapString << CurrentMap.SubStr(0, linenum);
+                ColoredMapString << "\n";
+
+                sn_ConsoleOut(ColoredMapString);
+                */
+                goodnumber = true;
+            }
         }
     }
 
@@ -228,8 +279,10 @@ static tSettingRotation sg_configRotation("CONFIG_ROTATION");
 enum gRotationType
 {
     gROTATION_NEVER = 0,
-    gROTATION_ROUND = 1,
-    gROTATION_MATCH = 2
+    gROTATION_ORDERED_ROUND = 1,
+    gROTATION_ORDERED_MATCH = 2,
+    gROTATION_RANDOM_ROUND = 3,
+    gROTATION_RANDOM_MATCH = 4
 };
 
 tCONFIG_ENUM( gRotationType );
@@ -3485,6 +3538,8 @@ static eLadderLogWriter sg_nextRoundWriter("NEXT_ROUND", false);
 static eLadderLogWriter sg_roundCommencingWriter("ROUND_COMMENCING", false);
 static SvgOutput sg_svgOutput;
 
+static eLadderLogWriter sg_currentMapWriter("CURRENT_MAP", false);
+
 void gGame::StateUpdate(){
 
     //	if (state==GS_CREATED)
@@ -3538,8 +3593,10 @@ void gGame::StateUpdate(){
             ePlayerNetID::LogScoreDifferences();
 
             // rotate, if rotate is once per round
-            if ( rotationtype == gROTATION_ROUND )
-                rotate();
+            if ( rotationtype == gROTATION_ORDERED_ROUND )
+                Orderedrotate();
+            else if (rotationtype == gROTATION_RANDOM_ROUND)
+                Randomrotate();
             gRotation::HandleNewRound();
 
             // transfer game settings
@@ -3593,6 +3650,9 @@ void gGame::StateUpdate(){
                     conf_mapfile.Set( lastMapfile );
                 }
             }
+
+            sg_currentMapWriter << mapfile;
+            sg_currentMapWriter.write();
 
             nConfItemBase::s_SendConfig(false);
             // wait extra long for the clients to delete the grid; they really need to be
@@ -4609,8 +4669,10 @@ void gGame::Analysis(REAL time){
                             se_mainGameTimer->speed = 1;
 
                         //check for map rotation, new match...
-                        if ( rotationtype == gROTATION_MATCH )
-                            rotate();
+                        if ( rotationtype == gROTATION_ORDERED_MATCH )
+                            Orderedrotate();
+                        else if ( rotationtype == gROTATION_RANDOM_MATCH)
+                            Randomrotate();
 
                         gRotation::HandleNewMatch();
 
@@ -4669,13 +4731,13 @@ void gGame::Analysis(REAL time){
     }
 }
 
-void rotate()
+void Orderedrotate()
 {
     if ( sg_mapRotation.Size() > 0 )
     {
         conf_mapfile.Set( sg_mapRotation.Current() );
         conf_mapfile.GetSetting().SetSetLevel( sg_mapRotation.GetSetLevel() );
-        sg_mapRotation.Rotate();
+        sg_mapRotation.OrderedRotate();
     }
 
     if ( sg_configRotation.Size() > 0 )
@@ -4684,7 +4746,26 @@ void rotate()
         tCurrentAccessLevel level( sg_configRotation.GetSetLevel(), true );
 
         st_Include( sg_configRotation.Current() );
-        sg_configRotation.Rotate();
+        sg_configRotation.OrderedRotate();
+    }
+}
+
+void Randomrotate()
+{
+    if ( sg_mapRotation.Size() > 0 )
+    {
+        conf_mapfile.Set( sg_mapRotation.Current() );
+        conf_mapfile.GetSetting().SetSetLevel( sg_mapRotation.GetSetLevel() );
+        sg_mapRotation.RandomRotate();
+    }
+
+    if ( sg_configRotation.Size() > 0 )
+    {
+        // transfer
+        tCurrentAccessLevel level( sg_configRotation.GetSetLevel(), true );
+
+        st_Include( sg_configRotation.Current() );
+        sg_configRotation.RandomRotate();
     }
 }
 

@@ -3,6 +3,8 @@
 #define ArmageTron_PARSER_H
 
 #include "defs.h"
+#include "tString.h"
+
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 
@@ -16,12 +18,12 @@ class gXMLCharReturn;
 class gSpawnPoint;
 
 /*
-Note to the reader: In the full World idea, the parser should, 
+Note to the reader: In the full World idea, the parser should,
 when called, create a full world structure, from the Empire down,
 and just return a pointer to it(He, whats to forbit a server from
-running 2 independant games?). 
+running 2 independant games?).
 
-Due to the limitations of the current code, it is best to have a 
+Due to the limitations of the current code, it is best to have a
 pointer to the gGame, the gArena and the gGrid.
 
 */
@@ -41,7 +43,7 @@ public:
     gParser(gArena *anArena, eGrid *aGrid);
     //    gParser(const gGame *aGame, gArena *anArena, tControlledPTR<eGrid> aGrid);
     /*Sorry, I just cant figure when you'd want to load without
-      validating, or revalidate a document. So I joined both 
+      validating, or revalidate a document. So I joined both
       toghether */
     ~gParser();
 
@@ -55,6 +57,7 @@ protected:
     float myxmlGetPropFloat(xmlNodePtr cur, const char *name);
     bool myxmlGetPropBool(xmlNodePtr cur, const char *name);
     void myxmlGetDirection(xmlNodePtr cur, float &x, float &y);
+    tString myxmlGetPropString(xmlNodePtr cur, const char *name);
 
     //    bool isElement(const xmlChar *elementName, const xmlChar *searchedElement);
     bool isElement(const xmlChar *elementName, const xmlChar *searchedElement, const xmlChar * keyword = NULL);

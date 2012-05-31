@@ -1555,7 +1555,6 @@ gDeathZoneHack::gDeathZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCr
     else
     {
         deathZoneType = TYPE_NORMAL;
-        name_ = "dz";
     }
 
     grid->AddGameObjectInteresting(this);
@@ -5783,8 +5782,8 @@ gBlastZoneHack::gBlastZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCr
 :gZone( grid, pos, dynamicCreation )
 {
     color_.r = 0.0f;
-    color_.g = 1.0f;
-    color_.b = 0.0f;
+    color_.g = 0.5f;
+    color_.b = 1.0f;
 
     grid->AddGameObjectInteresting(this);
 
@@ -5855,9 +5854,21 @@ bool gBlastZoneHack::Timestep( REAL time )
 //!
 // *******************************************************************************
 
+static int sg_BlastZoneScore = -1;
+static tSettingItem<int> sg_BlastZoneScoreConf("SCORE_BLASTZONE", sg_BlastZoneScore);
+static eLadderLogWriter sg_deathDeathBlastZoneWriter("BLASTZONE_PLAYER_ENTER", false);
+
 void gBlastZoneHack::OnEnter( gCycle * target, REAL time )
 {
     target->SetWallBuilding(false);
+    target->Player()->Object()->Kill();
+
+    tOutput lose;
+    lose << "$player_blastzone_score";
+    target->Player()->AddScore( sg_BlastZoneScore, "", lose);
+
+    sg_deathDeathBlastZoneWriter << target->Player()->GetUserName();
+    sg_deathDeathBlastZoneWriter.write();
 }
 
 

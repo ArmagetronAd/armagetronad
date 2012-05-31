@@ -551,6 +551,7 @@ class gTeleportZoneHack: public gZone
 class gBlastZoneHack: public gZone
 	{
 	public:
+
 		//!< local constructor
 		gBlastZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false );
 		//!< network constructor

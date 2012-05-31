@@ -26,6 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
 #include "gRace.h"
+#include "gGame.h"
 #include "eTimer.h"
 #include "tString.h"
 #include "tDirectories.h"
@@ -45,9 +46,6 @@ static tSettingItem<int> sg_scoreRaceCompleteConf( "SCORE_RACE", sg_scoreRaceCom
 int sg_scoreRaceDeplete = 1;
 static tSettingItem<int> sg_scoreRaceDepleteConf( "RACE_SCORE_DEPLETE", sg_scoreRaceDeplete);
 
-
-
-
 //! STATIC VARIABLES
 std::multimap <REAL, gRace::Goal>  gRace::goals_;
 std::vector <gWinZoneHack*> gRace::winZones_;
@@ -57,7 +55,6 @@ bool gRace::firstArrived_ = false;
 int  gRace::countDown_ = -1;
 bool gRace::roundFinished_ = false;
 bool gRace::winnerDeclared_ = false;
-
 
 //! ZONE HIT
 void gRace::ZoneHit( ePlayerNetID * player )

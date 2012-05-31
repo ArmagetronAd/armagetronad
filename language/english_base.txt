@@ -164,6 +164,7 @@ score_win_help			What you get for winning a round
 score_deathzone_help		What you get for hitting the Death Zone
 score_deathzone_team_help   What you get for hitting a team Death Zone
 score_race_help			What you get for reaching the win zone in a race
+score_blastzone_help    What you get for hitting the Blast Zone
 
 sp_score_win_help			What you get for winning a round in single player mode
 sp_walls_stay_up_delay_help	Number of seconds the walls stay up after a player died; negative values will keep them up forever.
@@ -212,9 +213,9 @@ auto_ais_help			Automatically spawn AI players?
 ai_iq_help			IQ of the AI opponents
 min_players_help		Minimum number of players
 num_ais_help			Number of AI players
-limit_score_help		End the match when a player reaches this score	 
+limit_score_help		End the match when a player reaches this score
 limit_rounds_help		End the match after this number of rounds
-limit_time_help			End the match after this number of minutes 
+limit_time_help			End the match after this number of minutes
 
 auto_team_help          Flag indicating whether players should be put into teams automatically.
 auto_team_spec_spam_help    If set to 0, spectators won't be announced when joining or leaving, provided AUTO_TEAM is set to 0.
@@ -287,19 +288,19 @@ cycle_first_spawn_protection_help Set to 1 if the invulnerability and wall delay
 #********************************************
 
 # map file
-map_file_help                     File that contains the map used for playing 
+map_file_help                     File that contains the map used for playing
 map_uri_help                      DEPRECIATED - use RESOURCE_REPOSITORY_SERVER and MAP_FILE instead
-arena_axes_help                   In how many directions a cycle can turn 4 is the default, 6 is hexatron 
-resource_repository_client_help   URI the client uses to search for map files if they aren't stored locally. Better leave it alone 
+arena_axes_help                   In how many directions a cycle can turn 4 is the default, 6 is hexatron
+resource_repository_client_help   URI the client uses to search for map files if they aren't stored locally. Better leave it alone
 resource_repository_server_help   URI clients and the server use to search for map files if they aren't stored locally
 
 # rotation
-rotation_type_help                      Determines when map and config rotation should occur. Possible values: (0) Do not do any rotation, (1) Rotate every round (2) Rotate every match
+rotation_type_help                      Determines when map and config rotation should occur. Possible values: (0) Do not do any rotation, (1) Ordered Rotate every round, (2) Ordered Rotate every match, (3) Random Rotate every round, (4) Random Rotate every match
 map_rotation_help                       A list of map files to rotate through, with values separated by semicolons
 config_rotation_help                    A list of config files to rotate through, with values separated by semicolons
 reset_rotation_help                     Resets map and config rotation
 reset_rotation_on_start_new_match_help  If enabled, map and config rotation will be reset when a START_NEW_MATCH command is issued
-reset_rotation_message                  Map and config rotation have been reset. 
+reset_rotation_message                  Map and config rotation have been reset.
 
 # limits
 speed_factor_help		Speed modifier for the cycles
@@ -333,7 +334,7 @@ win_zone_initial_size_help			Initial size of the instant win zone
 win_zone_deaths_help	            A value of 1 turns it into a death zone.
 win_zone_randomness_help            Randomness factor of the initial win zone position. 0 fixes it at the arena center, 1 spreads the zone all over it.
 
-swap_winzone_deathzone_colors_help          0:Default, original colors and 1:Swap, swaps their colors with each other.
+swap_winzone_deathzone_colors_help  0:Default, original colors and 1:Swap, swaps their colors with each other.
 
 game_timeout_help					Base timeout for game state synchronisation; gives approximately the maximum time between rounds.
 last_chat_break_time_help           Last round time a player in chat mode is able to pause the timer
@@ -362,7 +363,7 @@ keep_player_slot_help               If set to 1, every time the server gets full
 
 respawn_time_help                   Seconds greater than 0 makes sure any dead player will be respawned within that time of them being dead. Default: -1\n
 respawn_player_help                 Respawns a player that had been killed.\nUSAGE: RESPAWN_PLAYER <player> <xpos> <ypos> <xdir> <ydir>.\n
-respawn_all_help                    Respawns all players that were killed during the round at a random spot.\n     
+respawn_all_help                    Respawns all players that were killed during the round at a random spot.\n
 
 #********************************************
 #********************************************
@@ -422,7 +423,7 @@ ping_flood_time_50_help             Minimum time for 50 ping packets from one ma
 ping_flood_time_100_help            Minimum time for 100 ping packets from one machine to arrive.
 ping_flood_global_help              The times PING_FLOOD_TIME_X, multiplied by this value, count for all pings from all machines. Negative values disable global flood protection.
 connection_flood_sensitivity_help   The times PING_FLOOD_TIME_X, multiplied by this value, count for all incoming messages from clients not connected already. A flood here activates turtle mode. Negative values disable global flood protection.
-connection_limit_help               Maximum number of packets from unknown peers to handle at one 
+connection_limit_help               Maximum number of packets from unknown peers to handle at one
 anti_spoof_help                     If set to 1, checks connecting clients for spoofed IPs. Only clients passing a connectivity test are allowed in. This is done in turtle mode automatically, but may be useful to have on at all times.
 turtle_mode_activated               Server is under heavy load. Turtle mode activated. Communication with new clients is on a budget.\n
 turtle_mode_deactivated             The high load seems to have normalized for now. Turtle mode deactivated.\n
@@ -726,25 +727,25 @@ white_sparks_help        Draw sparks in white (instead of cycle colors).
 keep_window_active_help  Keeps rendering active when the program window loses input focus.
 
 # hud
-show_brake_help                   Show the brake meter on the HUD? 
-show_alive_help                   Show the number of enemies and friends left on the HUD? 
-show_fastest_help                 Show the fastest player on the HUD? 
-show_hud_help                     Show the HUD? 
-show_ping_help                    Show your ping on the HUD? 
-show_rubber_help                  Show the rubber meter on the HUD? 
-show_score_help                   Show your single player scores on the HUD? 
-show_speed_help                   Show the speed meter on the HUD? 
-show_time_help                    Show the current time in the top- right corner? 
-show_time_24_help                 Show the time in 24 hour format? 
-speed_gauge_locx_help             Horizontal position of the speed meter 
-speed_gauge_locy_help             Vertical position of the speed meter 
-speed_gauge_size_help             Size of the speed meter 
-rubber_gauge_locx_help            Horizontal position of the rubber meter 
-rubber_gauge_locy_help            Vertical position of the rubber meter 
-rubber_gauge_size_help            Size of the rubber meter 
-brake_gauge_locx_help             Horizontal position of the brake meter 
-brake_gauge_locy_help             Vertical position of the brake meter 
-brake_gauge_size_help             Size of the brake meter 
+show_brake_help                   Show the brake meter on the HUD?
+show_alive_help                   Show the number of enemies and friends left on the HUD?
+show_fastest_help                 Show the fastest player on the HUD?
+show_hud_help                     Show the HUD?
+show_ping_help                    Show your ping on the HUD?
+show_rubber_help                  Show the rubber meter on the HUD?
+show_score_help                   Show your single player scores on the HUD?
+show_speed_help                   Show the speed meter on the HUD?
+show_time_help                    Show the current time in the top- right corner?
+show_time_24_help                 Show the time in 24 hour format?
+speed_gauge_locx_help             Horizontal position of the speed meter
+speed_gauge_locy_help             Vertical position of the speed meter
+speed_gauge_size_help             Size of the speed meter
+rubber_gauge_locx_help            Horizontal position of the rubber meter
+rubber_gauge_locy_help            Vertical position of the rubber meter
+rubber_gauge_size_help            Size of the rubber meter
+brake_gauge_locx_help             Horizontal position of the brake meter
+brake_gauge_locy_help             Vertical position of the brake meter
+brake_gauge_size_help             Size of the brake meter
 alive_locx_help                   Horizontal position of the alive headcount display
 alive_locy_help                   Vertical position of the alive headcount display
 alive_size_help                   Size of the alive headcount display
@@ -831,11 +832,12 @@ ladderlog_write_basezone_conquerer_team_help  Write to ladderlog: BASEZONE_CONQU
 ladderlog_write_chat_help                     Write to ladderlog: CHAT <chatter> [/me] <chat string>
 ladderlog_write_command_help                  Write to ladderlog: COMMAND <player> <ip> <auth level> <command> <options>
 ladderlog_write_death_basezone_conquered_help Write to ladderlog: DEATH_BASEZONE_CONQUERED <player> [NO_ENEMIES]
+ladderlog_write_blastzone_player_enter_help   Write to ladderlog: DEATH_BLASTZONE_PLAYER_ENTER <player>
 ladderlog_write_death_deathshot_help          Write to ladderlog: DEATH_DEATHSHOT <prey> <predator>
 ladderlog_write_death_deathzone_help          Write to ladderlog: DEATH_DEATHZONE <player>
 ladderlog_write_death_deathzone_team_help     Write to ladderlog: DEATH_DEATHZONE_TEAM <team> <player>
 ladderlog_write_death_frag_help               Write to ladderlog: DEATH_FRAG <prey> <predator>
-ladderlog_write_death_rubberzone_help         Write to ladderlog: DEATH_RUBBERZONE <player>   
+ladderlog_write_death_rubberzone_help         Write to ladderlog: DEATH_RUBBERZONE <player>
 ladderlog_write_death_self_destruct_help      Write to ladderlog: DEATH_SELF_DESTRUCT <prey> <predator>
 ladderlog_write_death_shot_frag_help          Write to ladderlog: DEATH_SHOT_FRAG <prey> <predator>
 ladderlog_write_death_shot_suicide_help       Write to ladderlog: DEATH_SHOT_SUICIDE <player>
@@ -925,7 +927,7 @@ zone_alpha_help             Transparency factor for zone rendering. 1.0 gives fu
 zone_alpha_server_help      Transparency factor for zone rendering, controlled by the server. 1.0 gives full strength.
 
 #color winzone and deathzone commands
-color_winzone_red_help      Default: 0, red portion of the zone's color 
+color_winzone_red_help      Default: 0, red portion of the zone's color
 color_winzone_blue_help     Default: 0, blue portion of the zone's color
 color_winzone_green_help    Default: 15, green portion of the zone's color
 
@@ -1093,7 +1095,7 @@ player_chatter_die                  All players that were in chat mode are kille
 player_chatter_silence              All players that were in chat mode are silence by an administrator.\n
 player_chatter_suspend_success      All players that were in chat mode are suspended by an administrator for \1 rounds.\n
 
- 
+
 
 #********************************************
 #********************************************
@@ -1375,10 +1377,10 @@ path_info_data                  Data directories (textures, moviepack, ...):
 path_info_screenshot            Screenshot directories:
 path_info_var                   Var directories:
 
-version_info_gl_intro       \n\n0xff8888System OpenGL information:0xRESETT 
-version_info_gl_vendor		\n  GL Vendor   : 
-version_info_gl_renderer	\n  GL Renderer : 
-version_info_gl_version		\n  GL Version  : 
+version_info_gl_intro       \n\n0xff8888System OpenGL information:0xRESETT
+version_info_gl_vendor		\n  GL Vendor   :
+version_info_gl_renderer	\n  GL Renderer :
+version_info_gl_version		\n  GL Version  :
 
 
 #********************************************
@@ -1814,7 +1816,7 @@ player_menu_help		Cycle and camera controls for player \1
 viewport_menu_title		Viewports
 viewport_menu_help		Would you like a singe player game or split the screen to allow multiplayer games?
 
-viewport_conf_text		Viewports: 
+viewport_conf_text		Viewports:
 viewport_conf_name_0		Single Player
 viewport_conf_name_1		Horizontal Split
 viewport_conf_name_2		Vertical Split
@@ -2259,7 +2261,7 @@ menuitem_accept			Accept
 menuitem_accept_help		Accepts the settings in this menu and continues.
 
 input_item_help			To change, press ENTER or SPACE, then press the key/mouse-button you want to assign to this control. Moving the mouse also works.
-input_press_any_key		Press any key! 
+input_press_any_key		Press any key!
 
 menuitem_toggle_on		On
 menuitem_toggle_off		Off
@@ -2376,9 +2378,9 @@ setting_legacy_change_blocked   Setting \1 (Group: \2) can't be changed currentl
 league_message_rose		\1 rose to place \3 on the \4 because of \2.
 league_message_dropped		\1 dropped to place \3 on the \4 because of \2.
 
-league_message_greet_intro	You are 
+league_message_greet_intro	You are
 league_message_greet_sep	,
-league_message_greet_lastsep	and 
+league_message_greet_lastsep	and
 league_message_greet		number \1 of \2 on the \3
 league_message_greet_new	not on the \3
 
@@ -2395,8 +2397,8 @@ highscore_message_stay_pos	but stayed at position \4.
 
 ladder_description		ladder
 ladder_message_entered		\1 entered the \2 list with \3 points
-ladder_message_gained		\1 gained \5 points on the \2 
-ladder_message_lost		\1 lost \5 points on the \2 
+ladder_message_gained		\1 gained \5 points on the \2
+ladder_message_lost		\1 lost \5 points on the \2
 ladder_message_move_top		and moved to the top!
 ladder_message_move_pos		and moved to position \4.
 ladder_message_stay_top		and stayed at the top.
@@ -2452,13 +2454,13 @@ gamestate_set_scores		Set \1 Scores:\n
 gamestate_reset_challenge		Start Challenge Best of \1 Next Round !
 
 gamestate_champ_center		Match Winner: \1
-gamestate_champ_console		Overall Winner: \1 
+gamestate_champ_console		Overall Winner: \1
 gamestate_champ_scorehit	with \1 points.\n
 gamestate_champ_timehit		after the time limit of \1 minutes was hit.\n
 gamestate_champ_default		after \1 rounds.\n
 gamestate_champ_finalscores	Final Scores:\n
 
-gamestate_winner_winner		Winner: 
+gamestate_winner_winner		Winner:
 gamestate_winner_ai		AI.
 gamestate_winner_humans		Humans.
 
@@ -2486,6 +2488,8 @@ player_win_hole             \1 got \2 points for a sacrifice for the good of the
 player_lose_hole            0xffff00ZOMG! 0xff7f00HOLER!!1!!0xRESETT \1 lost \2 points for being a cheap ass lamer.\n
 player_win_command          \1 was declared the winner of the round!\n
 declare_round_winner_help  Declares round winner. USAGE: DECLARE_ROUND_WINNER [player].\n
+
+player_blastzone_score      \1 exploded on a blastzone and lost \2 points.\n
 
 player_no_longer_suspended  \1 0x77ff77is allowed to play again.\n
 player_suspended            \1 0xff7777is banned to spectator mode for \2 round(s).\n

@@ -195,7 +195,8 @@ extern gGameSettings* sg_currentSettings;
 // Race timer hack
 extern bool sg_RaceTimerEnabled;
 
-void rotate();
+void Orderedrotate();
+void Randomrotate();
 
 #endif
 
