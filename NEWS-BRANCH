@@ -1,0 +1,23 @@
+Changes since 0.2.8_sty+ct+ap_r766
+- Added Rotating maps/config files (Random and Ordered rotation)
+- Added Race settings
+- Added SCORE_BLASTZONE (Not related to SELF_DESTRUCT_ commands)
+- Added new DTD: blast (available only in Lover-Boy/0.2.8.3.1_sty+ct+ap.dtd)
+- Blast Zones now kill people (not related to SELF_DESTRUCT_ commands)
+- Added Color deathzones and winzones commands:
+  COLOR_DEATHZONE_(RED/BLUE/GREEN)
+  COLOR_WINZONE_(RED/BLUE/GREEN)
+- Added CHATTERS_ commands to deal with people in chat modes
+- Added ladderlog commands:
+  CURRENT_MAP [map_path]
+  DEATH_DEATHZONE_TEAM [team] [prey]
+- Added score command: SCORE_DEATHZONE_TEAM
+- added chat command: /enemy
+- ladderlog command: ONLINE_PLAYERS now includes their login level
+- Added: RESPAWN_ALL, KILL_ALL, (UN)SILENCE_ALL
+- Modified Say into: SPEAK_AS_ADMIN
+- Added: SPEAK_TO_ENEMIES, SPEAK_TO_EVERYONE, ANNOUNCE
+- Modified RESPAWN_PLAYER and removed [messageflag] for easier handle
+- Fixed problems with SET_ZONE_, COLLAPSE_ZONE commands
+- Added: fman's DECLARE_ROUND_WINNER
+  
