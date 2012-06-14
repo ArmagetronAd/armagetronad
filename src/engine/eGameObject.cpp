@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -500,7 +500,7 @@ void eGameObject::FindCurrentFace(){
 #ifdef DEBUG
         con << "Attempting to get a current face, but object is not in game.\n";
         st_Breakpoint();
-#endif        
+#endif
         return;
     }
 
@@ -529,11 +529,11 @@ void eGameObject::FindCurrentFace(){
             }
             eCoord centerToPos = -center*(1/3.0);
             center = pos - centerToPos;
-  
+
             // find a position that lies just inside the current triange
             REAL centerInsideness = currentFace->Insideness(center);
             eCoord inside;
-            
+
             if( centerInsideness < 0 )
             {
                 // this should not happen! but will, if the triangle has wrong orientation.
@@ -643,7 +643,7 @@ void eGameObject::Render(const eCamera *){}
 
 //! draws it in a svg file
 void eGameObject::DrawSvg(std::ofstream &f) {}
-    
+
 // *******************************************************************************
 // *
 // *	RendersAlpha
@@ -814,7 +814,7 @@ void eGameObject::TimestepThisWrapper(eGrid * grid, REAL currentTime, eGameObjec
 #endif
 
     // check for teleports out of arena bounds
-    if (!eWallRim::IsBound(c->pos,-20))
+    if (!eWallRim::IsBound(c->pos,-1))
     {
         se_maxSimulateAheadLeft = 0;
 
@@ -866,7 +866,7 @@ eGameObject *displayed_gameobject = 0;
 void eGameObject::RenderAll(eGrid *grid, const eCamera *cam){
     //if (!sr_glOut)
     //    return;
-    
+
     // first, we need to render all the non-alpha blended objects.
     // if we encounter non-alpha blended objects after alpha blended objects
     // have already been rendered, we need to re-sort them to the back.
@@ -890,17 +890,17 @@ void eGameObject::RenderAll(eGrid *grid, const eCamera *cam){
                 int firstAlphaID = firstAlpha->id;
 
                 eSoundLocker locker;
-	       
+
                 grid->gameObjects.Remove(firstAlpha,firstAlpha->id);
                 grid->gameObjects.Add(firstAlpha,firstAlpha->id);
                 grid->gameObjects.Remove(object,object->id);
                 grid->gameObjects.Add(object,object->id);
-                
+
                 // the first alpha blended object no longer is the first. Look for
                 // a replacement, only one object is a candidate.
                 firstAlpha = 0;
                 if ( firstAlphaID > 0 )
-                {   
+                {
                     firstAlpha = grid->gameObjects(firstAlphaID - 1);
                     tASSERT( firstAlpha->RendersAlpha() );
                 }

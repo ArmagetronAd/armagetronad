@@ -3536,6 +3536,8 @@ static eLadderLogWriter sg_newMatchWriter("NEW_MATCH", true);
 static eLadderLogWriter sg_waitForExternalScriptWriter("WAIT_FOR_EXTERNAL_SCRIPT", true);
 static eLadderLogWriter sg_nextRoundWriter("NEXT_ROUND", false);
 static eLadderLogWriter sg_roundCommencingWriter("ROUND_COMMENCING", false);
+static eLadderLogWriter sg_roundEndedWriter("ROUND_ENDED", true);
+static eLadderLogWriter sg_matchEndedWriter("MATCH_ENDED", true);
 static SvgOutput sg_svgOutput;
 
 static eLadderLogWriter sg_currentMapWriter("CURRENT_MAP", false);
@@ -3936,6 +3938,18 @@ void gGame::StateUpdate(){
             st_ToDo( sg_VoteMenuIdle );
             nNetObject::ClearAllDeleted();
             SetState(GS_DELETE_GRID,GS_TRANSFER_SETTINGS);
+
+            if ( rounds < 0 )
+            {
+                sg_matchEndedWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
+                sg_matchEndedWriter.write();
+            }
+            else
+            {
+               sg_roundEndedWriter <<  st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
+               sg_roundEndedWriter.write();
+            }
+
             break;
         default:
             break;
