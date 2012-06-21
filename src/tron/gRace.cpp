@@ -306,9 +306,9 @@ void gRaceScores::Write()
                 for (int i=0; i < raceName.Len(); i++)
                 {
                     w << raceName[i] << " " << raceScore[i] << " " << raceTime[i] << "\n";
-                    tString message;
+                    /*tString message;
                     message << raceName[i] << " " << raceScore[i] << " " << raceTime[i] << "\n";
-                    sn_ConsoleOut(message);
+                    sn_ConsoleOut(message);*/
                 }
             }
             /*
