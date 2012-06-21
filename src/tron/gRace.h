@@ -71,10 +71,29 @@ private:
     static bool                         winnerDeclared_;
 };
 
+class gRaceScores
+{
+public:
+    static void Add(const tString UserName, int WinScore, tString reachTime);
+    static void Reset();
+    static void Read();
+    static void Write();
 
+    static void Sort();
+    static bool InOrder(int i, int j);
+
+private:
+    static tArray<tString> raceName;
+    static tArray<int> raceScore;
+    static tArray<tString> raceTime;
+
+    static void Switch(int i, int j);
+};
 
 extern bool sg_RaceTimerEnabled;
 extern int sg_RaceEndDelay;
+
+extern tString sg_currentMap;
 
 #endif
 

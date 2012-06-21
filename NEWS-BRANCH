@@ -1,3 +1,25 @@
+Changes in 0.2.9-sty+ct+ap_r793
+- Added ladderlog.txt command: SHUTDOWN
+  This command is outputed once the server has been shutdown using the EXIT/QUIT
+  commands.
+- Added RACE_SCORE_TYME [0|1|2]
+  This command allows for your racing scores to be sorted in whatever way:
+  0 - No sorting
+  1 - Sort by best score
+  2 - Sort by best time
+- Racing highscores and best times will be logged in /var/race_scores/map_name-version.aamap.xml.txt
+  I found it a lot easier to deal with using the maps full name and then dealing with it from there.
+  You can use your scripts to input in the ladderlog command CURRENT_MAP and use that to do whatever
+  that you need it to do.
+
+Changes in 0.2.9_sty+ct+ap_r792
+- Added ladderlog.txt commands:
+  ROUND_ENDED
+  MATCH_ENDED
+- Foster McLane adjusted the outside bounds of the arena so as to make sure fools
+  don't try to force themselves outside the arena walls any furthur than 1 meter
+  of the perimeter.
+
 Changes since 0.2.8_sty+ct+ap_r766
 - Added Rotating maps/config files (Random and Ordered rotation)
 - Added Race settings

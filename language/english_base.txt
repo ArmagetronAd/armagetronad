@@ -868,6 +868,7 @@ ladderlog_write_round_score_help              Write to ladderlog: ROUND_SCORE <s
 ladderlog_write_round_score_team_help         Write to ladderlog: ROUND_SCORE_TEAM <score difference> <team>
 ladderlog_write_round_winner_help             Write to ladderlog: ROUND_WINNER <team> <players>
 ladderlog_write_sacrifice_help                Write to ladderlog: SACRIFICE <player who used the hole> <player who created the hole> <player owning the wall the hole was made into>
+ladderlog_write_shutdown_help                 Write to ladderlog: SHUTDOWN <time> when the server has been shut down using exit/quit commands
 ladderlog_write_targetzone_conquered_help     Write to ladderlog: TARGETZONE_CONQUERED <object_id> <zone_name> <cx> <cy> [<player> [<team>]]
 ladderlog_write_targetzone_player_left_help   Write to ladderlog: TARGETZONE_PLAYER_LEFT <object_id> <zone_name> <cx> <cy> <player> <player x> <player y> <player xdir> <player ydir>
 ladderlog_write_targetzone_player_enter_help  Write to ladderlog: TARGETZONE_PLAYER_ENTER <object_id> <zone_name> <cx> <cy> <player> <player x> <player y> <player xdir> <player ydir> <time>
@@ -3213,6 +3214,8 @@ global_id_help                If set to 1, Global IDs (Armathentication) will be
 # RACE SETTINGS AND ANIMUSON MODS
 race_timer_enabled_help		           (0 = Disable, 1 = Enable) race timer
 race_end_delay_help		               Number of seconds to give players to finish after target reached
+race_score_deplete_help              Number the score depletes by everytime a player enters the win zone.
+race_score_type_help		0-No sorting; 1-Sort by best score; 2-sort by best time
 player_reach_race		                 \1 reached the finish line for \2 points.\n
 player_racetimerenabled_restrict     The console command RACE_TIMER_ENABLED only works on the server. You probably want to say "/admin RACE_TIMER_ENABLED".\n
 

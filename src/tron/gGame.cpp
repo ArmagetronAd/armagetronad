@@ -125,7 +125,7 @@ static tString mapuri("0");
 static nSettingItem<tString> conf_mapuri("MAP_URI",mapuri);
 
 #define DEFAULT_MAP "Anonymous/polygon/regular/square-1.0.1.aamap.xml"
-static tString mapfile(DEFAULT_MAP);
+tString mapfile(DEFAULT_MAP);
 
 static bool sg_waitForExternalScript = false;
 static tSettingItem< bool > sg_waitForExternalScriptConf( "WAIT_FOR_EXTERNAL_SCRIPT", sg_waitForExternalScript );
@@ -2859,6 +2859,8 @@ static void EndChallenge_conf(std::istream &s){
 
 static tConfItemFunc sec("END_CHALLENGE",&EndChallenge_conf);
 
+static eLadderLogWriter sg_Shutdown("SHUTDOWN", true);
+
 #ifdef DEDICATED
 static void Quit_conf(std::istream &){
 
@@ -2871,6 +2873,10 @@ static void Quit_conf(std::istream &){
     tRecorder::Playback("END");
     tRecorder::Record("END");
     uMenu::quickexit = uMenu::QuickExit_Total;
+
+    // write to ladderlog.txt the time of server shutting down
+    sg_Shutdown << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
+    sg_Shutdown.write();
 }
 
 static tConfItemFunc quit_conf("QUIT",&Quit_conf);
@@ -3655,6 +3661,8 @@ void gGame::StateUpdate(){
 
             sg_currentMapWriter << mapfile;
             sg_currentMapWriter.write();
+
+            sg_currentMap = mapfile;
 
             nConfItemBase::s_SendConfig(false);
             // wait extra long for the clients to delete the grid; they really need to be

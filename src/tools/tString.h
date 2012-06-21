@@ -119,6 +119,10 @@ public:
     int toInt( const int pos ) const;
     int toInt() const;
 
+    //toReal for REAL types
+    REAL toReal( const REAL pos) const;
+    REAL toReal() const;
+
     //! compares two strings alphanumerically
     static int CompareAlphaNumerical( const tString& a, const tString &b);
 
