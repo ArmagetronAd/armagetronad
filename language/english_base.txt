@@ -3211,13 +3211,12 @@ md5_suffix_help               Extra hash suffix for local accounts used to scram
 
 global_id_help                If set to 1, Global IDs (Armathentication) will be enabled on this server.
 
-# RACE SETTINGS AND ANIMUSON MODS
+# RACE SETTINGS / ANIMUSON MODS / LOVER$BOY's ADDITIONS
 race_timer_enabled_help		           (0 = Disable, 1 = Enable) race timer
 race_end_delay_help		               Number of seconds to give players to finish after target reached
 race_score_deplete_help              Number the score depletes by everytime a player enters the win zone.
-race_score_type_help		0-No sorting; 1-Sort by best score; 2-sort by best time
-player_reach_race		                 \1 reached the finish line for \2 points.\n
-player_racetimerenabled_restrict     The console command RACE_TIMER_ENABLED only works on the server. You probably want to say "/admin RACE_TIMER_ENABLED".\n
+race_score_type_help		             0-No sorting; 1-Sort by best score; 2-sort by best time.
+player_reach_race		                 \1 finished with \2 points in \3 seconds.\n
 
 access_level_substitute_denied  Required access level to substitute is "\1", you only have "\2".\n
 substitute_message_usage        Usage: /substitute <user out ID or name> <user in ID or name>\n

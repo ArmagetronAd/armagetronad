@@ -71,7 +71,7 @@ tCONFIG_ENUM( gRaceScoreType );
 static gRaceScoreType racescoretype = gRACESCORE_NO_SORTING;
 static tSettingItem<gRaceScoreType> conf_raceScoretype("RACE_SCORE_TYPE",racescoretype);
 
-/* will be used later...
+/* will be used later... no idea when...
 bool restrictlocation(tString const &newValue)
 {
     if (newValue == "") return false;
@@ -139,8 +139,8 @@ void gRaceScores::Switch(int i, int j)
 
 bool gRaceScores::InOrder(int i,int j)
 {
-    if (gRACESCORE_BEST_SCORE) return (raceTime[i] <= raceTime[j]);
-    else if (gRACESCORE_BEST_TIME) return (raceScore[i] >= raceScore[j]);
+    if (racescoretype == gRACESCORE_BEST_TIME) return (raceTime[i] <= raceTime[j]);
+    else if (racescoretype == gRACESCORE_BEST_SCORE) return (raceScore[i] >= raceScore[j]);
 }
 
 void gRaceScores::Sort()
@@ -222,7 +222,7 @@ void gRaceScores::Read()
     tString Input("");
     //if (sg_raceloglocation == "" || sg_raceloglocation == "NULL")
     //{
-        tString line, lines;
+        tString line, lines, linet;
         Input << "race_scores/" << CurrentMapName;
         tTextFileRecorder r(tDirectories::Var(), Input);
         int i = 0;
@@ -235,6 +235,7 @@ void gRaceScores::Read()
             lines = line;
             lines.ReadLine(s, true);
             //sn_ConsoleOut(lines);
+            linenum = 0;
             while (linenum != -1)
             {
                 rlinenum = linenum;
@@ -253,9 +254,9 @@ void gRaceScores::Read()
                 raceTime[i] = lines.SubStr(rlinenum, (lines.Len() - (rlinenum+1)));
                 /* For testing
                 tString Message;
-                Message << "\n" << raceName[i] << " " << raceScore[i] << " " << raceTime[i] << "\n";
+                Message << raceName[i] << " " << raceScore[i] << " " << raceTime[i] << "\n";
                 sn_ConsoleOut(Message);
-                */
+                //*/
             }
             i++;
         }
@@ -264,15 +265,18 @@ void gRaceScores::Read()
     {
         tString line("");
         Input << sg_raceloglocation << "/" << CurrentMapName;
-        tTextFileRecorder r(tDirectories::Var(), CurrentMapName);
+        //tTextFileRecorder r(tDirectories::Var(), CurrentMapName);
         //if ( tDirectories::Var().Open(r, Input, std::ios::in) ) {
+        std::ifstream r;
         int i = 0;
-        while (!r.EndOfFile())
+        while (!r.eof())
         {
-            std::stringstream s(r.GetLine());
-            s >> line;
-            line << "\n";
-            sn_ConsoleOut(line);
+            //std::stringstream s(r.GetLine());
+            std::string s;
+            getline(r, s);
+            line << s;
+            //line << "\n";
+            //sn_ConsoleOut(line);
         }
     }*/
 }
@@ -281,7 +285,7 @@ void gRaceScores::Write()
 {
     tString Output("");
 
-    if (!gRACESCORE_NO_SORTING) gRaceScores::Sort();
+    if (racescoretype != gRACESCORE_NO_SORTING) gRaceScores::Sort();
     /*
     linenum = 0;
     while (linenum != -1)
@@ -306,9 +310,9 @@ void gRaceScores::Write()
                 for (int i=0; i < raceName.Len(); i++)
                 {
                     w << raceName[i] << " " << raceScore[i] << " " << raceTime[i] << "\n";
-                    /*tString message;
+                    tString message;
                     message << raceName[i] << " " << raceScore[i] << " " << raceTime[i] << "\n";
-                    sn_ConsoleOut(message);*/
+                    sn_ConsoleOut(message);
                 }
             }
             /*
@@ -379,30 +383,16 @@ void gRace::ZoneHit( ePlayerNetID * player )
         {
             firstArrived_ = true;
             gRaceScores::Read();
-
-            tString CurrentMapStr(sg_currentMap);
-            int linenum, rlinenum;
-            linenum = 0;
-            while(linenum != -1)
-            {
-                rlinenum = linenum;
-                linenum = CurrentMapStr.StrPos(linenum+1, "/");
-
-                if (linenum == -1)
-                {
-                    CurrentMapName = CurrentMapStr.SubStr(rlinenum+1, (CurrentMapStr.Len() - (rlinenum+1)));
-                    CurrentMapName << ".txt";
-                }
-            }
         }
 
         tString reachTime("");
         reachTime << time;
         gRaceScores::Add(player->GetUserName(), RacingScore, reachTime);
 
-        /*tOutput win, lose;
-        win << "$player_reach_race";*/
+        tOutput win; //, lose;
+        //win << "$player_reach_race";*/
 
+        /*
         tColoredString ColoredString;
         ColoredString << player->GetColoredName();
         ColoredString << tColoredString::ColorString( 1,1,1 );
@@ -412,7 +402,14 @@ void gRace::ZoneHit( ePlayerNetID * player )
         ColoredString << tColoredString::ColorString( 1,1,1 );
         ColoredString << " points in ";
         ColoredString << time << " seconds\n";
-        player->AddScore( RacingScore, ColoredString, "" );
+        */
+
+        win.SetTemplateParameter(1, player->GetColoredName() );
+        win.SetTemplateParameter(2, RacingScore);
+        win.SetTemplateParameter(3, player->raceTime);
+        win << "$player_reach_race";
+
+        player->AddScore( RacingScore, win, "" );
         if (RacingScore > 1) RacingScore -= sg_scoreRaceDeplete;
     }
 }
@@ -457,7 +454,7 @@ void gRace::Sync( int alive, int ai_alive, int humans )
                 countDown_ --;
 
                 tOutput message;
-                message << countDown_ << "                    ";
+                message << "0xff7777" << countDown_ << "                    ";
                 sn_CenterMessage( message );
             }
         }
