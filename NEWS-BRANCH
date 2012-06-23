@@ -1,3 +1,13 @@
+Changes in 0.2.9-sty+ct+ap_r796
+- Added RACE_HIGHSCORES_LOCATION command
+  This command is to tell the game where the scores will be located and read from.
+  Default value is NULL. When it's NULL (need to be capital), the game automatically refers back to the /var/ directory.
+  
+Changes in 0.2.9-sty+ct+ap_r795
+- Fixed the problems occuring with RACE_SCORE_TYPE.
+  I accidently put them in reverse order:
+    When it's meant to sort by score, it sorts by time and vice-versa.     
+
 Changes in 0.2.9-sty+ct+ap_r793
 - Added ladderlog.txt command: SHUTDOWN
   This command is outputed once the server has been shutdown using the EXIT/QUIT
