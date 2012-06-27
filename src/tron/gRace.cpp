@@ -308,8 +308,8 @@ void gRaceScores::Read()
                     raceRealName[i] = lines.SubStr(rlinenum, (lines.Len() - rlinenum));
                 }
                 //Message << rlinenum << " " << (lines.Len() - rlinenum) << "\n";
-                Message << raceUserName[i] << " " << raceScore[i] << " " << raceTime[i] << " " << raceRealName[i] << "\n";
-                sn_ConsoleOut(Message);
+                //Message << raceUserName[i] << " " << raceScore[i] << " " << raceTime[i] << " " << raceRealName[i] << "\n";
+                //sn_ConsoleOut(Message);
                 //*/
                 line = "";
                 lines = "";
