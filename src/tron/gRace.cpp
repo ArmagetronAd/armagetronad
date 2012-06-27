@@ -35,8 +35,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "eAdvWall.h"
 #include "gSpawn.h"
 
-#define RACE_TRYOUTS 3
-
 #include <string>
 
 //! STRIP SPACES
@@ -85,7 +83,7 @@ bool restrictlocation(tString const &newValue)
 static tString sg_raceloglocation("NULL");
 static tSettingItem<tString> sg_raceLogLocationConf("RACE_HIGHSCORES_LOCATION", sg_raceloglocation, &restrictlocation);
 
-int sg_raceTryoutsNumber = RACE_TRYOUTS;
+int sg_raceTryoutsNumber = 5;
 bool restrictRaceTryouts(int const &newValue)
 {
     if (newValue == 0 || newValue >= 0) return true;
@@ -94,14 +92,6 @@ bool restrictRaceTryouts(int const &newValue)
         tOutput o;
         o.SetTemplateParameter(1, 0);
         o << "$race_tryouts_lower";
-        con << o << "\n";
-        return false;
-    }
-    else if (newValue > RACE_TRYOUTS)
-    {
-        tOutput o;
-        o.SetTemplateParameter(1, newValue);
-        o << "$race_tryouts_higher";
         con << o << "\n";
         return false;
     }
@@ -155,7 +145,7 @@ bool gRace::winnerDeclared_ = false;
 
 tArray<tString> gRaceScores::raceName;
 tArray<int> gRaceScores::raceScore;
-tArray<tString> gRaceScores::raceTime;
+tArray<REAL> gRaceScores::raceTime;
 
 void gRaceScores::Switch(int i, int j)
 {
@@ -177,7 +167,7 @@ void gRaceScores::Sort()
             Switch(j,j-1);
 }
 
-void gRaceScores::Add(const tString UserName, int WinScore, tString reachTime)
+void gRaceScores::Add(const tString UserName, int WinScore, REAL reachTime)
 {
     int i, j;
     bool found;
@@ -273,12 +263,11 @@ void gRaceScores::Read()
                 linenum = 0;
                 rlinenum = linenum;
                 linenum = lines.StrPos(linenum, " ");
-                int Score = lines.SubStr(rlinenum, linenum).toInt();
-                raceScore[i] = Score;
+                raceScore[i] = atoi(lines.SubStr(rlinenum, linenum));
 
                 rlinenum = linenum+1;
                 linenum = lines.StrPos(linenum+1, " ");
-                raceTime[i] = lines.SubStr(rlinenum, (lines.Len() - (rlinenum+1)));
+                raceTime[i] = atof(lines.SubStr(rlinenum, (lines.Len() - (rlinenum+1))));
                 /* For testing
                 tString Message;
                 Message << raceName[i] << " " << raceScore[i] << " " << raceTime[i] << "\n";
@@ -322,11 +311,11 @@ void gRaceScores::Read()
 
                     rlinenum = linenum+1;
                     linenum = line.StrPos(rlinenum, " ");
-                    raceScore[i] = line.SubStr(rlinenum, linenum).toInt();
+                    raceScore[i] = atoi(line.SubStr(rlinenum, linenum));
 
                     rlinenum = linenum+1;
                     linenum = line.StrPos(rlinenum, " ");
-                    raceTime[i] = line.SubStr(rlinenum, (line.Len() - rlinenum));
+                    raceTime[i] = atof(line.SubStr(rlinenum, (line.Len() - rlinenum)));
 
                     /*line << "\n";
                     sn_ConsoleOut(line);*/
@@ -442,10 +431,10 @@ void gRace::ZoneHit( ePlayerNetID * player )
         {
             firstArrived_ = true;
             gRaceScores::Read();
+            //player->SetRubber(player, 100);
         }
 
-        tString reachTime("");
-        reachTime << time;
+        REAL reachTime = time;
         gRaceScores::Add(player->GetUserName(), RacingScore, reachTime);
 
         tOutput win; //, lose;

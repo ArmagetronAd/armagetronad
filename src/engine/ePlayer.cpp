@@ -6564,7 +6564,14 @@ void se_SaveToScoreFile(const tOutput &o){
 }
 #endif
 
-// void ePlayerNetID::SetRubber(REAL rubber2) {rubberstatus = rubber2;}
+/* this doesn't work. Will be put to use later.
+void ePlayerNetID::SetRubber(ePlayerNetID *player, REAL rubber)
+{
+    gCycle * target;
+    target->SetPlayer(player);
+    target->SetRubber(rubber);
+}
+*/
 
 void ePlayerNetID::AddScore(int points,
                             const tOutput& reasonwin,

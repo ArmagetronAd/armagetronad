@@ -75,7 +75,7 @@ private:
 class gRaceScores
 {
 public:
-    static void Add(const tString UserName, int WinScore, tString reachTime);       //!> Adds the score and replace the time if lower than before
+    static void Add(const tString UserName, int WinScore, REAL reachTime);       //!> Adds the score and replace the time if lower than before
     static void Reset();                                                            //!> Resets all name, score, fields for the current map
     static void Read();                                                             //!> Reads in the data in the current map; name, score, time
     static void Write();                                                            //!> Writes the stored data to the current map's txt file
@@ -86,7 +86,7 @@ public:
 private:
     static tArray<tString> raceName;
     static tArray<int> raceScore;
-    static tArray<tString> raceTime;
+    static tArray<REAL> raceTime;
 
     static void Switch(int i, int j);
 };

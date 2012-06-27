@@ -550,22 +550,6 @@ int tString::toInt() const {
     return toInt(0);
 }
 
-REAL tString::toReal( REAL pos) const {
-    REAL ret = 0;
-    REAL digit = 0;
-    while ( pos < Len() && digit >= 0 && digit <= 9 )
-    {
-        ret = ret*10 + digit;
-        digit = (*this)(pos) - '0';
-        pos++;
-    }
-    return ret;
-}
-
-REAL tString::toReal() const {
-    return toReal(0);
-}
-
 // *******************************************************************************************
 // *
 // *   StartsWith
