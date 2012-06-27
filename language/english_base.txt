@@ -3217,6 +3217,10 @@ race_end_delay_help		               Number of seconds to give players to finish 
 race_score_deplete_help              Number the score depletes by everytime a player enters the win zone.
 race_score_type_help		             0-No sorting; 1-Sort by best score; 2-sort by best time.
 race_highscores_location_help        The location to save and read your scores. EXAMPLE: /home/loverboy/armagetronad/racing/var\nPlease don't add the / at the end. The game does it for you.
+race_tryouts_help                    The number of times a player can play in the same map after dying. It reduces over time.
+race_tryouts_high                    Warning: RACE_TRYOUTS can not be higher than \1. Setting not changed.
+race_tryouts_low                     Warning: RACE_TRYOUTS can not be lower than \1. Setting not changed.
+race_tries_left                      You only have \1 tries left to finish this map.\n
 player_reach_race		                 \1 0xfafafafinished with \2 points in \3 seconds.\n
 
 access_level_substitute_denied  Required access level to substitute is "\1", you only have "\2".\n

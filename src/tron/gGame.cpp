@@ -4406,7 +4406,7 @@ void gGame::Analysis(REAL time){
 
     if ( sg_RaceTimerEnabled )
     {
-        gRace::Sync( alive, ai_alive, sg_NumHumans() );
+        gRace::Sync( alive, ai_alive, sg_NumHumans(), grid, Arena );
         if ( !gRace::Done() )
             return;
         else                                    // time to close the round

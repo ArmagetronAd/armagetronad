@@ -6854,7 +6854,7 @@ static void sg_TeleportPlayer(std::istream &s)
 	tString params;
 	params.ReadLine( s, true );
 
-	// first parse the line to get the params : <player name> <message flag> <x> <y> <dirx> <diry>
+	// first parse the line to get the params : <player name> <x> <y> <dirx> <diry>
 	int pos = 0; //
 	tString PlayerName = ePlayerNetID::FilterName(params.ExtractNonBlankSubString(pos));
 	ePlayerNetID *pPlayer = 0;

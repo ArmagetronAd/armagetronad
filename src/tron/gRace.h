@@ -31,6 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "defs.h"
 #include "ePlayer.h"
 #include "gWinZone.h"
+#include "gArena.h"
 
 #include <vector>
 #include <map>
@@ -39,16 +40,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 class gRace {
 
 public:
-    static void     ZoneHit     ( ePlayerNetID * player );                      //!> called when a cycle hits a win zone
-    static void     Sync        ( int alive, int ai_alive, int humans );        //!> update race state, called every second
-    static bool     Done        ();                                             //!> returns true whether round time is over
-    static void     NewWinZone     ( gWinZoneHack * winZone );                  //!> handle all win zones to let them vanish
-    static void     NewDeathZone    ( gDeathZoneHack * deathZone);              //!> handle all death zones to let them vanish
-    static void     Reset       ();                                             //!> reset time and values
-    static void     End         ();                                             //!> print time results
+    static void     ZoneHit     ( ePlayerNetID * player );                                              //!> called when a cycle hits a win zone
+    static void     Sync        ( int alive, int ai_alive, int humans, eGrid *Grid, gArena & Arena );        //!> update race state, called every second
+    static bool     Done        ();                                                                     //!> returns true whether round time is over
+    static void     NewWinZone     ( gWinZoneHack * winZone );                                          //!> handle all win zones to let them vanish
+    static void     NewDeathZone    ( gDeathZoneHack * deathZone);                                      //!> handle all death zones to let them vanish
+    static void     Reset       ();                                                                     //!> reset time and values
+    static void     End         ();                                                                     //!> print time results
 
-    static eTeam *  Winner      ();                                             //!> returns the race winner
-    static void     playerLeft  ( ePlayerNetID * player );                      //!> remove player if stored in goals_
+    static eTeam *  Winner      ();                                                                     //!> returns the race winner
+    static void     playerLeft  ( ePlayerNetID * player );                                              //!> remove player if stored in goals_
 
 private:
     static void AddGoal( REAL & time, const tColoredString & colName, const tString & name/*, const tString & authName */);      //!> store player's time
@@ -74,12 +75,12 @@ private:
 class gRaceScores
 {
 public:
-    static void Add(const tString UserName, int WinScore, tString reachTime);
-    static void Reset();
-    static void Read();
-    static void Write();
+    static void Add(const tString UserName, int WinScore, tString reachTime);       //!> Adds the score and replace the time if lower than before
+    static void Reset();                                                            //!> Resets all name, score, fields for the current map
+    static void Read();                                                             //!> Reads in the data in the current map; name, score, time
+    static void Write();                                                            //!> Writes the stored data to the current map's txt file
 
-    static void Sort();
+    static void Sort();                                                             //!> Sorts out by ordering Score (Highest - Lowest) and Time (Lowest - Highest)
     static bool InOrder(int i, int j);
 
 private:
@@ -92,6 +93,7 @@ private:
 
 extern bool sg_RaceTimerEnabled;
 extern int sg_RaceEndDelay;
+extern int sg_raceTryoutsNumber;
 
 extern tString sg_currentMap;
 

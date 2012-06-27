@@ -25,12 +25,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
+#include "gArena.h"
 #include "gRace.h"
 #include "gGame.h"
 #include "eTimer.h"
 #include "tString.h"
 #include "tDirectories.h"
 #include "tRecorder.h"
+#include "eAdvWall.h"
+#include "gSpawn.h"
+
+#define RACE_TRYOUTS 3
 
 #include <string>
 
@@ -80,6 +85,28 @@ bool restrictlocation(tString const &newValue)
 static tString sg_raceloglocation("NULL");
 static tSettingItem<tString> sg_raceLogLocationConf("RACE_HIGHSCORES_LOCATION", sg_raceloglocation, &restrictlocation);
 
+int sg_raceTryoutsNumber = RACE_TRYOUTS;
+bool restrictRaceTryouts(int const &newValue)
+{
+    if (newValue == 0 || newValue >= 0) return true;
+    else if (newValue < 0)
+    {
+        tOutput o;
+        o.SetTemplateParameter(1, 0);
+        o << "$race_tryouts_lower";
+        con << o << "\n";
+        return false;
+    }
+    else if (newValue > RACE_TRYOUTS)
+    {
+        tOutput o;
+        o.SetTemplateParameter(1, newValue);
+        o << "$race_tryouts_higher";
+        con << o << "\n";
+        return false;
+    }
+}
+static tSettingItem<int> sg_raceTryoutsNumberConf("RACE_TRYOUTS", sg_raceTryoutsNumber, &restrictRaceTryouts);
 
 tString sg_currentMap("");
 static tString CurrentMapName("");
@@ -447,9 +474,45 @@ void gRace::ZoneHit( ePlayerNetID * player )
 }
 
 //! SYNC
-void gRace::Sync( int alive, int ai_alive, int humans )
+void gRace::Sync( int alive, int ai_alive, int humans, eGrid *Grid, gArena & Arena)
 {
-    if ( alive == 0 )                                   // close the round if no human is alive
+    for (int i = 0; i < se_PlayerNetIDs.Len(); i++)
+    {
+        ePlayerNetID * p = se_PlayerNetIDs[i];
+        if ( (p->raceArrived == false) && (p->raceTryouts > 0) && (!p->Object()->Alive()) && (roundFinished_ == false))
+        {
+            eCoord pos,dir;
+            /*if ( p->Object() )
+            {
+                dir = p->Object()->Direction();
+                pos = p->Object()->Position();
+                eWallRim::Bound( pos, 1 );
+                eCoord displacement = pos - p->Object()->Position();
+                if ( displacement.NormSquared() > .01 )
+                {
+                    dir = displacement;
+                    dir.Normalize();
+                }
+            }
+
+            else*/
+                Arena.LeastDangerousSpawnPoint()->Spawn( pos, dir );
+
+            gCycle * Cycle = new gCycle( Grid, pos, dir, p );
+            p->ControlObject(Cycle);
+
+            p->raceTryouts--;
+
+            tOutput o;
+            o.SetTemplateParameter(1, p->raceTryouts);
+            o << "$race_tries_left";
+            sn_ConsoleOut(o, p->Owner());
+
+            alive++;
+        }
+    }
+
+    if ( alive == 0 ) // close the round if no human is alive
         roundFinished_ = true;
 
     if ( firstArrived_ || ( alive == 1 && ai_alive == 0 && humans > 1 ))     // start counter when someone arrives or when only 1 is alive but not alone
@@ -645,8 +708,9 @@ eTeam * gRace::Winner()
         if ( p->raceArrived )
         {
             p->raceArrived = false;
+            p->raceTryouts = sg_raceTryoutsNumber;
 
-            AddGoal( p->raceTime, p->GetColoredName(), p->GetName()/*, p->GetRawAuthenticatedName() */);
+            AddGoal( p->raceTime, p->GetColoredName(), p->GetName() /*, p->GetRawAuthenticatedName() */);
 
             if ( p->raceTime < bestTime || bestTime == 0 )
             {

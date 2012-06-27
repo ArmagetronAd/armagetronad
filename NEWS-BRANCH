@@ -1,3 +1,8 @@
+Changes in 0.2.9-sty+ct+ap_r797
+- Added RACE_TRYOUTS
+  This enables players to play for this many amounts during a round if they die.
+  It depletes everytime they die.
+    
 Changes in 0.2.9-sty+ct+ap_r796
 - Added RACE_HIGHSCORES_LOCATION command
   This command is to tell the game where the scores will be located and read from.

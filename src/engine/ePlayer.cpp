@@ -60,6 +60,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "eGrid.h"
 #include <time.h>
 
+//!RACE FILE
+#include "../tron/gRace.h"
+
 int se_lastSaidMaxEntries = 8;
 
 // call on commands that only work on the server; quit if it returns true
@@ -4613,6 +4616,7 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), timeC
 
     //HACK
     raceArrived = false;
+    raceTryouts = sg_raceTryoutsNumber;
 
 
     if (p>=0){
@@ -4689,6 +4693,7 @@ ePlayerNetID::ePlayerNetID(nMessage &m):nNetObject(m),listID(-1), teamListID(-1)
 
     //HACK
     raceArrived = false;
+    raceTryouts = sg_raceTryoutsNumber;
 
     score=0;
     lastScore_=IMPOSSIBLY_LOW_SCORE;
