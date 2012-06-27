@@ -470,7 +470,7 @@ public:
     //HACK RACE
     bool raceArrived;
     REAL raceTime;
-    int raceTryouts;
+    //int raceTryouts;
 
     static bool HasRenameCapability ( ePlayerNetID const *, ePlayerNetID const * admin ); //!< Checks if the admin can use the RENAME command. Used in IsAllowedToRename()
 

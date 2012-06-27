@@ -83,6 +83,7 @@ bool restrictlocation(tString const &newValue)
 static tString sg_raceloglocation("NULL");
 static tSettingItem<tString> sg_raceLogLocationConf("RACE_HIGHSCORES_LOCATION", sg_raceloglocation, &restrictlocation);
 
+/* Causes the game to crash if a player enters in middle of round.
 int sg_raceTryoutsNumber = 5;
 bool restrictRaceTryouts(int const &newValue)
 {
@@ -97,6 +98,7 @@ bool restrictRaceTryouts(int const &newValue)
     }
 }
 static tSettingItem<int> sg_raceTryoutsNumberConf("RACE_TRYOUTS", sg_raceTryoutsNumber, &restrictRaceTryouts);
+*/
 
 tString sg_currentMap("");
 static tString CurrentMapName("");
@@ -465,6 +467,7 @@ void gRace::ZoneHit( ePlayerNetID * player )
 //! SYNC
 void gRace::Sync( int alive, int ai_alive, int humans, eGrid *Grid, gArena & Arena)
 {
+    /* RACE_TRYOUTS code
     for (int i = 0; i < se_PlayerNetIDs.Len(); i++)
     {
         ePlayerNetID * p = se_PlayerNetIDs[i];
@@ -484,7 +487,7 @@ void gRace::Sync( int alive, int ai_alive, int humans, eGrid *Grid, gArena & Are
                 }
             }
 
-            else*/
+            else*
                 Arena.LeastDangerousSpawnPoint()->Spawn( pos, dir );
 
             gCycle * Cycle = new gCycle( Grid, pos, dir, p );
@@ -500,6 +503,7 @@ void gRace::Sync( int alive, int ai_alive, int humans, eGrid *Grid, gArena & Are
             alive++;
         }
     }
+    */
 
     if ( alive == 0 ) // close the round if no human is alive
         roundFinished_ = true;
@@ -697,7 +701,7 @@ eTeam * gRace::Winner()
         if ( p->raceArrived )
         {
             p->raceArrived = false;
-            p->raceTryouts = sg_raceTryoutsNumber;
+            //p->raceTryouts = sg_raceTryoutsNumber;
 
             AddGoal( p->raceTime, p->GetColoredName(), p->GetName() /*, p->GetRawAuthenticatedName() */);
 

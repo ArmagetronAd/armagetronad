@@ -4616,7 +4616,7 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), timeC
 
     //HACK
     raceArrived = false;
-    raceTryouts = sg_raceTryoutsNumber;
+    //raceTryouts = sg_raceTryoutsNumber;
 
 
     if (p>=0){
@@ -4693,7 +4693,7 @@ ePlayerNetID::ePlayerNetID(nMessage &m):nNetObject(m),listID(-1), teamListID(-1)
 
     //HACK
     raceArrived = false;
-    raceTryouts = sg_raceTryoutsNumber;
+    //raceTryouts = sg_raceTryoutsNumber;
 
     score=0;
     lastScore_=IMPOSSIBLY_LOW_SCORE;
