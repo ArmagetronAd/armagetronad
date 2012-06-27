@@ -1,3 +1,10 @@
+Changes in 0.2.9-sty+ct+ap_r800
+- Recording racing scores and best time, now it also records your player names
+  OUTPUT: [ranked_name] [high_scores] [best_time] [player_name]
+- In previous versions, players enter the race ladder only when they enter the winzone.
+  Now they can enter the ladder even without reaching the winzone. Though, please try
+  and reach it :P
+
 Changes in 0.2.9-sty+ct+ap_r797
 - Added RACE_TRYOUTS
   This enables players to play for this many amounts during a round if they die.

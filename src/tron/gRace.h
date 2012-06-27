@@ -75,16 +75,18 @@ private:
 class gRaceScores
 {
 public:
-    static void Add(const tString UserName, int WinScore, REAL reachTime);       //!> Adds the score and replace the time if lower than before
-    static void Reset();                                                            //!> Resets all name, score, fields for the current map
-    static void Read();                                                             //!> Reads in the data in the current map; name, score, time
-    static void Write();                                                            //!> Writes the stored data to the current map's txt file
+    static void Add(tString RealName, tString UserName,
+                    int WinScore, REAL reachTime, bool arrived);    //!> Adds the score and replace the time if lower than before
+    static void Reset();                                            //!> Resets all name, score, fields for the current map
+    static void Read();                                             //!> Reads in the data in the current map; name, score, time
+    static void Write();                                            //!> Writes the stored data to the current map's txt file
 
-    static void Sort();                                                             //!> Sorts out by ordering Score (Highest - Lowest) and Time (Lowest - Highest)
+    static void Sort();                                             //!> Sorts out by ordering Score (Highest - Lowest) and Time (Lowest - Highest)
     static bool InOrder(int i, int j);
 
 private:
-    static tArray<tString> raceName;
+    static tArray<tString> raceRealName;
+    static tArray<tString> raceUserName;
     static tArray<int> raceScore;
     static tArray<REAL> raceTime;
 
