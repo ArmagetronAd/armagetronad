@@ -199,7 +199,7 @@ void gRaceScores::Add(tString RealName, tString UserName, int WinScore, REAL rea
         if (raceTime[i] == 0) raceTime[i] = reachTime;
         if (reachTime < raceTime[i] && reachTime != 0) raceTime[i] = reachTime;
 
-        // Test to see if the scores are actually being recorded in the arrays
+        /* Test to see if the scores are actually being recorded in the arrays
         tString message;
         message << raceRealName[i] << " " << raceScore[i] << " " << raceTime[i] << "\n";
         sn_ConsoleOut(message);
