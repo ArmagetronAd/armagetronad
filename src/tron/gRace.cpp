@@ -197,13 +197,13 @@ void gRaceScores::Add(tString RealName, tString UserName, int WinScore, REAL rea
         raceRealName[i] = RealName;
         raceScore[i] += WinScore;
         if (raceTime[i] == 0) raceTime[i] = reachTime;
-        if (reachTime < raceTime[i]) raceTime[i] = reachTime;
+        if (reachTime < raceTime[i] && reachTime != 0) raceTime[i] = reachTime;
 
-        /* Test to see if the scores are actually being recorded in the arrays
+        // Test to see if the scores are actually being recorded in the arrays
         tString message;
-        message << raceName[i] << " " << raceScore[i] << " " << raceTime[i] << "\n";
+        message << raceRealName[i] << " " << raceScore[i] << " " << raceTime[i] << "\n";
         sn_ConsoleOut(message);
-        */
+        //*/
     }
     else
     {
@@ -472,7 +472,7 @@ void gRace::ZoneHit( ePlayerNetID * player )
             //player->SetRubber(player, 100);
         }
 
-        REAL reachTime = time;
+        REAL reachTime = player->raceTime;
         gRaceScores::Add(player->GetName() , player->GetUserName(), RacingScore, reachTime, true);
 
         tOutput win; //, lose;
@@ -756,7 +756,7 @@ eTeam * gRace::Winner()
 
         if ( p->raceArrived )
         {
-            p->raceArrived = false;
+            //p->raceArrived = false;
             //p->raceTryouts = sg_raceTryoutsNumber;
 
             AddGoal( p->raceTime, p->GetColoredName(), p->GetName() /*, p->GetRawAuthenticatedName() */);
