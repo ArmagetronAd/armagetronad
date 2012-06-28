@@ -196,14 +196,8 @@ void gRaceScores::Add(tString RealName, tString UserName, int WinScore, REAL rea
     {
         raceRealName[i] = RealName;
         raceScore[i] += WinScore;
-        if (arrived == true)
-        {
-            if (reachTime < raceTime[i]) raceTime[i] = reachTime;
-        }
-        else if (arrived == false)
-        {
-            if (raceTime[i] == 0) raceTime[i] = reachTime;
-        }
+        if (raceTime[i] == 0) raceTime[i] = reachTime;
+        if (reachTime < raceTime[i]) raceTime[i] = reachTime;
 
         /* Test to see if the scores are actually being recorded in the arrays
         tString message;
