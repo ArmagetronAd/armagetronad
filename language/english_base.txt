@@ -2623,7 +2623,7 @@ player_noshuffle        Your shuffling wish has no effect.\n
 player_shuffle_error    /shuffle expects a number as argument; an explicit sign (+/-) will change your position by the indicated number of steps, no sign will shuffle you to the given position.\n
 
 player_message_help     Sends a message to a specified player.
-player_message_usage    Usage: PLAYER_MESSAGE <user ID or name> "<Message>"\n
+player_message_usage    Usage: PLAYER_MESSAGE <player name> <Message>\n
 kick_usage              Usage: KICK <user ID or name> <Reason>\n
 ban_usage               Usage: BAN <user ID or name> <time in minutes(defaults to 60)> <Reason>\n
 kickmove_usage          Usage: \1 <user ID or name> <server IP to kick to>:<server port to kick to> <Reason>\n

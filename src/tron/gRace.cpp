@@ -252,7 +252,7 @@ void gRaceScores::Read()
     tString Input("");
     if (sg_raceloglocation == "" || sg_raceloglocation == "NULL")
     {
-        tString line, lines, linet;
+        tString line, lines;
         tString Message;
         Input << "race_scores/" << CurrentMapName;
         tTextFileRecorder r(tDirectories::Var(), Input);
@@ -603,6 +603,19 @@ void gRace::Sync( int alive, int ai_alive, int humans, eGrid *Grid, gArena & Are
         }
         deathZones_.clear();
     }
+
+    if (roundFinished_ == true)
+    {
+        for (int x=0; x < se_PlayerNetIDs.Len(); x++)
+        {
+            ePlayerNetID *p = se_PlayerNetIDs[x];
+            if (!p->raceArrived)
+            {
+                gRaceScores::Add(p->GetName(), p->GetUserName(), 0, 0, false);
+                p->raceArrived = true;
+            }
+        }
+    }
 }
 
 //! DONE
@@ -635,19 +648,6 @@ void gRace::NewDeathZone( gDeathZoneHack * deathZone)
 //! RESET
 void gRace::Reset()
 {
-    if (roundFinished_ == true)
-    {
-        for (int x=0; x < se_PlayerNetIDs.Len(); x++)
-        {
-            ePlayerNetID *p = se_PlayerNetIDs[x];
-            if (!p->raceArrived)
-            {
-                gRaceScores::Add(p->GetName(), p->GetUserName(), 0, 0, false);
-                p->raceArrived = true;
-            }
-        }
-    }
-
     firstArrived_ = false;
     countDown_ = -1;
     roundFinished_ = false;
@@ -667,6 +667,7 @@ void gRace::Reset()
     std::ofstream o;
     if ( tDirectories::Var().Open( o, "race_temp.txt" ) )
         o << "";
+
     gRaceScores::Write();
     gRaceScores::Reset();
     gRaceScores::Read();

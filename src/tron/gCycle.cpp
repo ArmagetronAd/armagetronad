@@ -6535,11 +6535,11 @@ void gCycle::ProcessShoot(bool deathShot)
 
                 if (sg_shotExplosion == 1)
                 {
-                    new gExplosion(grid, pos, lastTime, color_, 0 );
+                    new gExplosion(grid, pos, lastTime, color_, this );
                 }
                 else if (sg_shotExplosion >= 2)
                 {
-                    new gExplosion(grid, shotPos, lastTime, color_, 0 );
+                    new gExplosion(grid, shotPos, lastTime, color_, this );
                 }
             }
             else
@@ -6576,7 +6576,7 @@ void gCycle::ProcessShoot(bool deathShot)
 
                         if (sg_megashotExplosion >= 2)
                         {
-                            new gExplosion(grid, shotPos, lastTime, color_, 0 );
+                            new gExplosion(grid, shotPos, lastTime, color_, this );
                         }
 
                         tempDirection = tempDirection.Turn(a, b);
@@ -6586,7 +6586,7 @@ void gCycle::ProcessShoot(bool deathShot)
                 if ((sg_megashotExplosion == 1) ||
                     (sg_megashotExplosion >= 3))
                 {
-                    new gExplosion(grid, pos, lastTime, color_, 0 );
+                    new gExplosion(grid, pos, lastTime, color_, this );
                 }
             }
         }

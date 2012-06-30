@@ -8153,21 +8153,25 @@ static void se_PlayerMessageConf(std::istream &s)
         return;
     }
 
-    int receiver = se_ReadUser( s );
+    tString PlayerName, Message;
 
-    tColoredString msg;
-    s >> msg;
+    s >> PlayerName;
+    ePlayerNetID *receiver = ePlayerNetID::FindPlayerByName(PlayerName);
 
-    if ( receiver <= 0 || s.good() )
+    if (!receiver)
     {
         con << tOutput("$player_message_usage");
         return;
     }
+    //int receiver = se_ReadUser( s );
 
-    msg << '\n';
+    tColoredString msg;
+    Message.ReadLine(s, true);
+    msg << Message;
+    msg << "\n";
 
     sn_ConsoleOut(msg, 0);
-    sn_ConsoleOut(msg, receiver);
+    sn_ConsoleOut(msg, receiver->Owner());
 }
 
 static tConfItemFunc se_PlayerMessage_c("PLAYER_MESSAGE", &se_PlayerMessageConf);

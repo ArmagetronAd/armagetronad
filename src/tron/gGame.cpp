@@ -3542,8 +3542,6 @@ static eLadderLogWriter sg_newMatchWriter("NEW_MATCH", true);
 static eLadderLogWriter sg_waitForExternalScriptWriter("WAIT_FOR_EXTERNAL_SCRIPT", true);
 static eLadderLogWriter sg_nextRoundWriter("NEXT_ROUND", false);
 static eLadderLogWriter sg_roundCommencingWriter("ROUND_COMMENCING", false);
-static eLadderLogWriter sg_roundEndedWriter("ROUND_ENDED", true);
-static eLadderLogWriter sg_matchEndedWriter("MATCH_ENDED", true);
 static SvgOutput sg_svgOutput;
 
 static eLadderLogWriter sg_currentMapWriter("CURRENT_MAP", false);
@@ -3605,6 +3603,7 @@ void gGame::StateUpdate(){
                 Orderedrotate();
             else if (rotationtype == gROTATION_RANDOM_ROUND)
                 Randomrotate();
+
             gRotation::HandleNewRound();
 
             // transfer game settings
@@ -3887,6 +3886,10 @@ void gGame::StateUpdate(){
                 sg_roundCommencingWriter << (rounds <= 0 ? 1 : rounds+1) << sg_currentSettings->limitRounds;
                 sg_roundCommencingWriter.write();
 
+/*                tOutput Message;
+                Message << "The rounds: " << rounds << "\n";
+                sn_ConsoleOut(Message);
+*/
                 // wait for external script to end its work if needed
                 REAL timeout = tSysTimeFloat() + sg_waitForExternalScriptTimeout;
                 if ( sg_waitForExternalScript )
@@ -3946,17 +3949,6 @@ void gGame::StateUpdate(){
             st_ToDo( sg_VoteMenuIdle );
             nNetObject::ClearAllDeleted();
             SetState(GS_DELETE_GRID,GS_TRANSFER_SETTINGS);
-
-            if ( rounds < 0 )
-            {
-                sg_matchEndedWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
-                sg_matchEndedWriter.write();
-            }
-            else
-            {
-               sg_roundEndedWriter <<  st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
-               sg_roundEndedWriter.write();
-            }
 
             break;
         default:
@@ -4160,6 +4152,9 @@ static tSettingItem< REAL > sg_winZoneSpreadConf( "WIN_ZONE_RANDOMNESS", sg_winZ
 static eLadderLogWriter sg_roundWinnerWriter("ROUND_WINNER", true);
 static eLadderLogWriter sg_setWinnerWriter("SET_WINNER", true);
 static eLadderLogWriter sg_matchWinnerWriter("MATCH_WINNER", true);
+
+static eLadderLogWriter sg_roundEndedWriter("ROUND_ENDED", true);
+static eLadderLogWriter sg_matchEndedWriter("MATCH_ENDED", true);
 
 void gGame::Analysis(REAL time){
     if ( nCLIENT == sn_GetNetState() )
@@ -4531,6 +4526,9 @@ void gGame::Analysis(REAL time){
                         eTeam::WritePlayers( sg_roundWinnerWriter, eTeam::teams[winner-1] );
                         sg_roundWinnerWriter.write();
 
+                        sg_roundEndedWriter <<  st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
+                        sg_roundEndedWriter.write();
+
                         //HACK RACE begin
                         if ( sg_RaceTimerEnabled )
                             gRace::End();
@@ -4634,6 +4632,9 @@ void gGame::Analysis(REAL time){
 	                        sg_matchWinnerWriter << ePlayerNetID::FilterName( eTeam::teams[0]->Name() );
                             eTeam::WritePlayers( sg_matchWinnerWriter, eTeam::teams[0] );
                             sg_matchWinnerWriter.write();
+
+                            sg_matchEndedWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
+                            sg_matchEndedWriter.write();
 
 	                        message.SetTemplateParameter(1, name);
 	                        message << "$gamestate_champ_console";
