@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -136,7 +136,6 @@ public:
     virtual eCoord LastDirection()const{return dir;}
     virtual REAL DeathTime()const{return deathTime;}
     virtual REAL  Speed()const{return 20;}
-
     // position after FPS dependant extrapolation
     virtual eCoord PredictPosition() const {return pos;}
 

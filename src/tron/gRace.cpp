@@ -230,6 +230,8 @@ void gRaceScores::Add(tString RealName, tString UserName, int WinScore, REAL rea
             i++;
         }
     }
+
+    gRaceScores::Write();
 }
 
 void gRaceScores::Read()

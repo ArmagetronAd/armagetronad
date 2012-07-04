@@ -119,6 +119,9 @@ void eAccessLevelHolder::SetAccessLevel( tAccessLevel level )
 tCONFIG_ENUM( eCamMode );
 
 tList<ePlayerNetID> se_PlayerNetIDs;
+
+// for later prepar
+tList<gCycle> se_CycleIDs;
 static ePlayer* se_Players = NULL;
 
 // tracking play time (in minutes). These times are tracked on the client and yes, you can "cheat" and increase them to get access to servers you are not ready for.

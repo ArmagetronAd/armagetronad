@@ -3,7 +3,7 @@
 *************************************************************************
 
 ArmageTron -- Just another Tron Lightcycle Game in 3D.
-Copyright (C) 2004  Armagetron Advanced Team (http://sourceforge.net/projects/armagetronad/) 
+Copyright (C) 2004  Armagetron Advanced Team (http://sourceforge.net/projects/armagetronad/)
 
 **************************************************************************
 
@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -1620,7 +1620,7 @@ static REAL sg_BuildTime( eSensor const & sensor )
         // get the position of the collision point
         alpha = playerWall->Edge()->Ratio( sensor.before_hit );
     }
-    
+
     return playerWall->Time( alpha );
 }
 */
@@ -1926,9 +1926,9 @@ REAL gCycleMovement::GetMaxSpaceAhead( REAL maxReport ) const
                             // or backdoor.
                             gapFactor = sg_rubberCycleMinDistanceGapBackdoor;
                         }
-                            
+
                         if ( gapFactor > 0 )
-                        { 
+                        {
                             if( gapFactor > 1 )
                             {
                                 // larger that 1 gap factors just increase the minimal stop distance.
@@ -2211,7 +2211,7 @@ bool gCycleMovement::Timestep( REAL currentTime )
 
                 // don't drive into a wall, turn before getting too close
                 REAL lookahead = ( fabs(ts * avgspeed)+fabs(dist_to_dest) ) * 2;
- 
+
                 distToWall = GetMaxSpaceAhead( lookahead );
 
                 // don't turn after passing a wall, if timing allows
@@ -2415,7 +2415,7 @@ bool gCycleMovement::Timestep( REAL currentTime )
                              con << "gCycle::Timestep: Could not completely reach destination.\n";
                              breakp = true;
                          }
-                #endif			
+                #endif
                 */
 
                 // con << "Turn: " << lastTime << ", " << dist_to_dest << ", " << currentDestination->position << ", " << pos << "\n";
@@ -2451,8 +2451,8 @@ bool gCycleMovement::Timestep( REAL currentTime )
                     }
 
                     /*
-                      con << "turning alon " << currentDestination->position << "," 
-                      << currentDestination->direction << "," 
+                      con << "turning alon " << currentDestination->position << ","
+                      << currentDestination->direction << ","
                       << currentDestination->distance << "\n";
                     */
                 }
@@ -2484,8 +2484,8 @@ bool gCycleMovement::Timestep( REAL currentTime )
                         ++turns;
                     }
                     /*
-                      con << "turning to   " << currentDestination->position << "," 
-                      << currentDestination->direction << "," 
+                      con << "turning to   " << currentDestination->position << ","
+                      << currentDestination->direction << ","
                       << currentDestination->distance << "\n";
                     */
 
@@ -2633,7 +2633,7 @@ bool gCycleMovement::Timestep( REAL currentTime )
     // if we get here and turns are left pending within our reach,
     // request the function gets called again right away.
     if( !vetoSimulationRequest &&
-        ( currentDestination || 
+        ( currentDestination ||
           ( !pendingTurns.empty() && GetNextTurn( pendingTurns.front() < currentTime + MaxSimulateAhead() ) )
             )
         )
@@ -2748,7 +2748,7 @@ void gCycleMovement::RequestSync(bool ack)
 {
     // no more syncs when you're dead
     if ( !Alive() )
-    { 
+    {
        return;
     }
 
@@ -3124,7 +3124,7 @@ void gCycleMovement::CalculateAcceleration()
                         }
                     }
                 }
-                
+
 
                 // enemyInfluence.AddSensor( rear, 1 );
                 REAL wallAcceleration=SpeedMultiplier() * sg_accelerationCycle * ((1/(rear.hit+sg_accelerationCycleOffs))
@@ -3385,7 +3385,7 @@ bool gCycleMovement::DoTurn( int dir )
 
                 // add space left after rubber ran out
                 timing += GetMaxSpaceAhead( maxSpaceMaxCast_ )/(verletSpeed_ + 1E-10);
-                
+
                 // and report
                 // player->AnalyzeTiming( timing );
                 */

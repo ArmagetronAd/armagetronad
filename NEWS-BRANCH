@@ -1,3 +1,8 @@
+Changes n 0.2.9-sty+ct+ap_806
+- Placed ROUND_ENDED and MATCH_ENDED in a better location
+- PLAYER_MESSAGE doesn't require the " " to enclose the message
+- The race scores, times will be written as the player reaches the winzone or dies.
+
 Changes in 0.2.9-sty+ct+ap_r800
 - Recording racing scores and best time, now it also records your player names
   OUTPUT: [ranked_name] [high_scores] [best_time] [player_name]

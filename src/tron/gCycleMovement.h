@@ -3,7 +3,7 @@
 *************************************************************************
 
 ArmageTron -- Just another Tron Lightcycle Game in 3D.
-Copyright (C) 2004  Armagetron Advanced Team (http://sourceforge.net/projects/armagetronad/) 
+Copyright (C) 2004  Armagetron Advanced Team (http://sourceforge.net/projects/armagetronad/)
 
 **************************************************************************
 
@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -141,6 +141,9 @@ public:
 
     void RequestSync(bool ack=true);     //!< request a sync
     void RequestSync(int user,bool ack); //!< only for a single user
+
+    //void SetSpeed(REAL speed);
+    REAL            verletSpeed_;               //!< object speed according to verlet (speed of half a frame ago)
 protected:
     //! data from sync message
     struct SyncData
@@ -211,7 +214,7 @@ protected:
     REAL            acceleration;               //!< current acceleration
 
     REAL            lastTimestep_;              //!< the length of the last timestep
-    REAL            verletSpeed_;               //!< object speed according to verlet (speed of half a frame ago)
+
 
     REAL            distance;                   //!< the distance traveled so far
     // REAL         wallContDistance;           //!< distance at which the walls will start to build up ( negative if the wall is already building )
@@ -222,7 +225,7 @@ protected:
 
     unsigned short  turns;                      //!< the number of turns taken so far
     unsigned short  braking;                    //!< flag indicating status of brakes ( on/off )
-    
+
     bool            uncannyTimingToReport_;     //!< flag indicating whether we have uncanny timing to report from the last turn
 
     int             windingNumber_;             //!< number that gets increased on every right turn and decreased on every left turn ( used by the AI )
