@@ -191,6 +191,7 @@ sp_ai_iq_help			IQ of the AI opponents in single player mode
 sp_min_players_help		Minimum number of players in single player mode
 sp_num_ais_help			Number of AI players in single player mode
 sp_limit_score_help		End the match when a player reaches this score in single player mode
+limit_score_min_lead_help	Only consider LIMIT_SCORE when this lead is achieved by the winning team in single player mode
 sp_limit_rounds_help		End the match after this number of rounds in single player mode
 sp_limit_time_help		End the match after this number of minutes in single player mode
 sp_limit_advance_help   End the match in single player mode when the first team in score is this number of points ahead of the second team
@@ -221,6 +222,7 @@ ai_iq_help			IQ of the AI opponents
 min_players_help		Minimum number of players
 num_ais_help			Number of AI players
 limit_score_help		End the match when a player reaches this score	 
+limit_score_min_lead_help	Only consider LIMIT_SCORE when this lead is achieved by the winning team
 limit_rounds_help		End the match after this number of rounds
 limit_time_help			End the match after this number of minutes 
 limit_advance_help      End the match when the first team in score is this number of points ahead of the second team
