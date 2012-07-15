@@ -966,7 +966,8 @@ void gBaseZoneHack::OnVanish( void )
     CheckSurvivor();
 
     // kill the closest owners of the zone
-    if ( currentState_ != State_Safe && ( enemies_.size() > 0 || sg_defendRate < 0 ) )
+    if ( currentState_ != State_Safe
+        && ( enemies_.size() > 0 || sg_defendRate < 0 || sg_conquestTimeout < 0 ) )
     {
         int kills = int( sg_onConquestKillRatio * team->NumPlayers() );
         kills = kills > sg_onConquestKillMin ? kills : sg_onConquestKillMin;

@@ -102,7 +102,7 @@ fortress_conquest_decay_rate_help Rate a fortress zone "recovers" from being con
 fortress_conquest_rate_help       Rate a fortress zone gets conquered with for each enemy in it 
 fortress_defend_rate_help         Rate a fortress zone "recovers" for each defending player 
 fortress_collapse_speed_help      Speed a fortress zone collapses with
-fortress_conquest_timeout_help    time without enemy contact that makes a fortress zone collapse harmlessly
+fortress_conquest_timeout_help    Time without enemy contact that makes a fortress zone collapse harmlessly. A negative value implies the zone never harmlessly collapses in any case.
 
 # should not actually be documented, rather hidden
 bookmark_0_address_help           Server address of the 1st server bookmark 
