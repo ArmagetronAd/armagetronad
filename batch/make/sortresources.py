@@ -1,4 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+
+# This module contains functions used to build resources
+
 # sorts resources by their included name and version information
 # usage: call from the directory containing the resources or
 # call
@@ -11,73 +14,85 @@ import string
 import os.path
 import os
 import sys
-import StringIO
+
+try:
+    from io import StringIO
+except ImportError:
+    from StringIO import StringIO
+
+try:
+    from itertools import izip as zip
+except ImportError:
+    pass
+
+# document parser class
+class docHandler(handler.ContentHandler):
+    def __init__(self,data):
+        self.data = data
+
+        # fill in defaults
+        data.type = "unknown"
+        data.name = ""
+        data.version = "1.0"
+        data.author = "Anonymous"
+        data.category = ""
+
+    def startElement(self,name,attr):
+        # just parse the <map> tag and fill data
+        if name in("Resource","Map","Cockpit"):
+            # set type from tag name it is not already set
+            try: oldtype = self.data.type
+            except: self.data.type = name.lower()       
+
+            # read values from file    
+            if "name" in attr.getNames():
+                self.data.name     = attr.getValue("name")
+            else:
+                return #invalid element
+            if "author" in attr.getNames():
+                self.data.author   = attr.getValue("author")
+            else:
+                return #invalid element
+
+            if "type" in attr.getNames():
+                self.data.type     = attr.getValue("type")
+            if "version" in attr.getNames():
+                self.data.version  = attr.getValue("version")
+            if "category" in attr.getNames():
+                self.data.category = attr.getValue("category")
+
+# rudimentary entity resolver
+class entityResolver(object):
+      # initialize, storing a path and a data object
+      def __init__(self,path,data):
+          self.path = path
+          self.data = data
+
+      # return a stream for a given external entity
+      def resolveEntity(self,pubid,sysid):
+          path = self.path
+
+          # extract data type: the base name of the DTD
+          self.data.type = sysid.split("-")[0]
+
+          # look in current and parent directories for dtds
+          while len(path) > 0 and path != "/":
+              fullfile = os.path.join(path, sysid)
+              try:
+                  return open( fullfile )
+              except:
+                  pass
+              # go to "parent" directory
+              path = os.path.split(path)[0]
+
+          # fallback: return empty stream, result: no dtd checking is done.
+          # Not horribly bad in this context
+          print("warning, could not find requested entity " + sysid)
+
+          return StringIO("")
 
 # parse a resource xml file and fill in data property data strucure
 def parseResource(filename, data):
-    # document parser class
-    class docHandler(handler.ContentHandler):
-        def __init__(self,data):
-            self.data = data
-
-            # fill in defaults
-            data.type = "unknown"
-            data.name = ""
-            data.version = "1.0"
-            data.author = "Anonymous"
-            data.category = ""
-
-        def startElement(self,name,attr):
-            # just parse the <map> tag and fill data
-            if name in("Resource","Map"):
-                # set type from tag name it is not already set
-                try: oldtype = self.data.type
-                except: self.data.type = name.lower()       
-
-                # read values from file    
-                if "name" in attr.getNames():
-                    self.data.name     = attr.getValue("name")
-                else:
-                    return #invalid element
-                if "author" in attr.getNames():
-                    self.data.author   = attr.getValue("author")
-                else:
-                    return #invalid element
-
-                if "type" in attr.getNames():
-                    self.data.type     = attr.getValue("type")
-                if "version" in attr.getNames():
-                    self.data.version  = attr.getValue("version")
-                if "category" in attr.getNames():
-                    self.data.category = attr.getValue("category")
-                    
-    # rudimentary entity resolver
-    class entityResolver:
-          # initialize, storing a path and a data object
-          def __init__(self,path,data):
-              self.path = path
-              self.data = data
-
-          # return a stream for a given external entity
-          def resolveEntity(self,pubid,sysid):
-              path = self.path
-
-              # extract data type: the base name of the DTD
-              self.data.type = string.split(sysid,"-")[0]
-
-              # look in current and parent directories for dtds
-              while len(path) > 0:
-                  fullfile = os.path.join(path, sysid)
-                  try:    return open( fullfile )
-                  except: pass
-                  # go to "parent" directory
-                  path = os.path.split(path)[0]
-
-              # fallback: return empty stream, result: no dtd checking is done.
-              # Not horribly bad in this context
-              print "warning, could not find requested entity", sysid
-              return StringIO.StringIO("")
-
     # parse: create parser...
     parser = sax.make_parser()
     # set it's content handler to extract the category data we want...
@@ -92,6 +107,8 @@ def parseResource(filename, data):
     try: 
          if data.type == "map":
             data.type = "aamap"
+         if data.type == "cockpit":
+            data.type = "aacockpit"
     except: pass
 
 # take the parsed data and trandsform it into a filename
@@ -111,15 +128,16 @@ def getCanonicalPath(path):
 
 # scan for all XML files in the directory and rename them according to the rules
 def scanDir(sourceDir, destinationDir, function):
-    def visitor( arg, dirname, names ):
-        for file in names:
-            if len(file) > 4 and file[-4:] == ".xml":
-                path = os.path.join(dirname,file)
+    def visitor(dirpath, subdirectories, names):
+        for filename in names:
+            if filename.endswith(".xml"):
+                path = os.path.join(dirpath, filename)
                 newPath = getCanonicalPath(path)
                 # call the passed function
                 function(path, os.path.join(destinationDir, newPath), newPath)
-        
-    os.path.walk(sourceDir, visitor, visitor )
+
+    for directory_info in os.walk(sourceDir):
+        visitor(*directory_info)
 
 # move file oldFile to newFile
 def Move(oldFile, newFile, canonicalPath ):
@@ -143,7 +161,7 @@ def Print(oldFile, newFile, canonicalPath ):
         return False
 
     if doPrint:
-        print "renaming", oldFile, "->", newFile
+        print("renaming " + oldFile + " -> " + newFile)
 
 # move file oldFile to newFile, setting apache rewrite rules to keep the file
 # fetchable from its old position
@@ -177,7 +195,7 @@ def Redirect(oldFile, newFile, canonicalPath ):
                         # nothing to do
                         return
                     else:
-                        print "Warning: There already is a different RewriteRule for", oldFile, "in place."
+                        print("Warning: There already is a different RewriteRule for " + oldFile + " in place.")
         except: pass
 
         # open .htaccess file for appended writing
@@ -192,18 +210,44 @@ def Redirect(oldFile, newFile, canonicalPath ):
 
 # print usage message and exit.
 def Options( ret ):
-    print
-    print "Usage: sortresources.py [OPTIONS] <source directory> <destination directory>"
-    print "       Omitting the destination directory makes it equal to the source."
-    print "       Omitting both directories makes them the current working directory."
-    print "Options: -r add apache rewrite rules"
-    print "         -n don't do anything, just print what would be done"
-    print "         -v print non-warning status messages"
-    print "         -h print this message"
-    print
+    print("")
+    print("Usage: sortresources.py [OPTIONS] <source directory> <destination directory>")
+    print("       Omitting the destination directory makes it equal to the source.")
+    print("       Omitting both directories makes them the current working directory.")
+    print("Options: -r add apache rewrite rules")
+    print("         -n don't do anything, just print what would be done")
+    print("         -v print non-warning status messages")
+    print("         -h print this message")
+    print("")
     sys.exit( ret )
-    
-if __name__ == "__main__":
+
+def GetDtdVersion(dtdfile):
+    dtdfileObj = open(dtdfile)
+
+    for line in dtdfileObj:
+        line = line.strip()
+        
+        if line.startswith("<!-- version="):
+            varList = line.split('"')
+            
+            # the version should be the second item in the list
+            dtdfileObj.close()
+
+            return varList[1]
+    return ""
+
+def CopyDtd(source, destination, dtdVersion):
+    sourceObj = open(source, "r")
+    destObj = open(destination, "w")
+
+    for line in sourceObj:
+        line = line.replace("resource.dtd", dtdVersion)
+        destObj.write(line)
+
+    sourceObj.close()
+    destObj.close()
+
+def main(argList):
     destinationDirectory = "."
     sourceDirectory = "."
     function  = Move
@@ -212,9 +256,9 @@ if __name__ == "__main__":
     doPrint = False
 
     # parse arguments
-    for arg in sys.argv[1:]:
+    for arg in argList:
         # parse options
-        if arg[0] == "-":
+        if len(arg)>0 and arg[0] == "-":
             if len(arg) > 1:
                 if arg[1] == "h":
                     Options( 0 )
@@ -229,7 +273,7 @@ if __name__ == "__main__":
                 if arg[1] == "v":
                     doPrint = True
                     continue
-                print "\nUnknown option:", arg
+                print("\nUnknown option: " + arg)
                 Options(-1)
             else:
                 Options(-1)
@@ -239,7 +283,7 @@ if __name__ == "__main__":
                 sourceDirectory = arg
             destinationDirectory = arg
     
-    # print sourceDirectory, destinationDirectory
+    # print(sourceDirectory, destinationDirectory)
 
     # do the work
     scanDir(sourceDirectory, destinationDirectory, function)
