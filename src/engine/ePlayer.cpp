@@ -7646,14 +7646,18 @@ void ePlayerNetID::RemoveChatbots()
             // see to it that the player has or has not a team.
             if ( shouldHaveTeam )
             {
-                if ( !p->CurrentTeam() && !ePlayerNetID::Scramble )
+                if ( !p->CurrentTeam() )
                 {
                     p->SetDefaultTeam();
                 }
 
-                if (ePlayerNetID::Scramble)
+                // Don't let players be scrambled in and out of spectator mode,
+                // so only on-the-grid players get scrambled.
+                // TODO: find out what happens if someone tries to join a team
+                // in the meantime
+                if (ePlayerNetID::Scramble && p->CurrentTeam() )
                 {
-                    if ( p->CurrentTeam() ) p->SetTeam(NULL);
+                    p->SetTeam(NULL);
                     ScramblePlayerIDs.push_back(p);
                 }
             }
@@ -7690,13 +7694,24 @@ void ePlayerNetID::SetScramble()
     if ( nCLIENT == sn_GetNetState() )
         return;
 
-    if (eTeam::maxPlayers > 1 && se_PlayerNetIDs.Len() > 2)
+    if( eTeam::maxPlayers < 2 || se_PlayerNetIDs.Len() <= 2 )
     {
-        ePlayerNetID::Scramble = true;
-        sn_ConsoleOut("$gamestate_scramble_teams");
-    } else {
         sn_ConsoleOut("$scramble_teams_too_small");
+        return;
     }
+
+    // make sure no teams are locked
+    for( int i = eTeam::teams.Len() - 1; i >= 0; i-- )  
+    {
+        if( eTeam::teams(i)->Locked() )
+        {
+            sn_ConsoleOut("$scramble_teams_locked");
+            return;
+        }
+    }
+
+    ePlayerNetID::Scramble = true;
+    sn_ConsoleOut("$gamestate_scramble_teams");
 }
 
 //Scramble up the teams
