@@ -112,6 +112,10 @@ static tSettingItem< REAL > sg_onConquestKillRationConfig( "FORTRESS_CONQUERED_K
 static int sg_onConquestScore = 0;
 static tSettingItem< int > sg_onConquestConquestScoreConfig( "FORTRESS_CONQUERED_SCORE", sg_onConquestScore );
 
+// Score factor if zone is conquered but no enemies inside the zone when it collapses.
+static REAL sg_onConquestEmptyScoreFactor = .5;
+static tSettingItem< REAL > sg_onConquestEmptyScoreFactorConfig( "FORTRESS_CONQUERED_EMPTY_SCORE_FACTOR", sg_onConquestEmptyScoreFactor );
+
 // flag indicating whether the team conquering the first zone wins (good for one on one matches)
 static int sg_onConquestWin = 1;
 static tSettingItem< int > sg_onConquestConquestWinConfig( "FORTRESS_CONQUERED_WIN", sg_onConquestWin );
@@ -488,10 +492,11 @@ void zFortressZone::OnConquest( void )
     }
     }
 
-    // calculate score. If nobody really was inside the zone any more, half it.
+    // calculate score. If nobody really was inside the zone any more, multiply by factor.
+    // TODO: set message for when factor is less than 0; default is "lost X points for a very strange reason".
     int totalScore = sg_onConquestScore;
     if ( 0 == enemiesInside_ )
-        totalScore /= 2;
+        totalScore *= sg_onConquestEmptyScoreFactor;
 
     // eliminate dead enemies
     TeamArray enemiesAlive;
