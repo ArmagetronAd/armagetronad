@@ -98,8 +98,7 @@ private:
 static gGameSettings sg_DefaultSettings()
 {
     return gGameSettings(10,
-                         30, 999, 100000,
-                         0, 100000,
+                         30, 999, 100000, 100000,
                          0,   0, 30,
                          false, false,
                          0  ,  -2,
