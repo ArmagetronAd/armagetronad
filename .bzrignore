@@ -45,7 +45,7 @@ batch/sysinstall
 config/Makefile
 config/aiplayers.cfg
 config/rc.config
-desktop/armagetronad.desktop
+desktop/armagetronad-armagetronad.desktop
 language/languages.txt
 resource/included/
 resource/automatic/
@@ -89,3 +89,5 @@ __pycache__
 src/armagetronad_main_master
 src/doc/COPYING.txt
 rubbish
+desktop/armagetronad-armagetronad-handler.desktop
+desktop/armagetronad-link.xml

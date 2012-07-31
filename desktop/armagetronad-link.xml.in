@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<mime-info xmlns='http://www.freedesktop.org/standards/shared-mime-info'>
+  <mime-type type="x-scheme-handler/armagetronad">
+    <comment>@progtitle@ server link</comment>
+  </mime-type>
+</mime-info>
