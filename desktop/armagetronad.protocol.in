@@ -10,4 +10,4 @@ writing=false
 makedir=false
 deleting=false
 URIMode=rawuri
-Icon=@progname@.png
+Icon=armagetronad-@prognamebase@

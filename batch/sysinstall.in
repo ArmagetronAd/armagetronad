@@ -306,9 +306,26 @@ if test @enable_desktop@ = yes; then
             true # echo no rebranding
         else
             for f in large small medium; do mv ${DESTDIR}${DESKTOPSOURCE}/icons/$f/armagetronad.png ${DESTDIR}${DESKTOPSOURCE}/icons/$f/@prognamebase@.png; done
-            mv ${DESTDIR}${DESKTOPSOURCE}/armagetronad.desktop ${DESTDIR}${DESKTOPSOURCE}/@prognamebase@.desktop
+            for suffix in .desktop -handler.desktop;
+            do
+                mv ${DESTDIR}${DESKTOPSOURCE}/armagetronad-armagetronad${suffix} ${DESTDIR}${DESKTOPSOURCE}/armagetronad-@prognamebase@${suffix}
+            done
         fi
     fi
+
+    # add standard icons
+    for icontype in "16 small" "32 medium" "48 large"
+    do
+        set -- $icontype
+        xdg-icon-resource install --mode system --size $1 ${DESTDIR}${DESKTOPSOURCE}/icons/$2/@prognamebase@.png armagetronad-@prognamebase@
+    done
+
+    # add standard menu entry
+    xdg-desktop-menu install --mode system ${DESTDIR}${DESKTOPSOURCE}/armagetronad-@prognamebase@.desktop
+
+    # add standard filetype and association for armagetronad:// links
+    xdg-mime install --mode system ${DESTDIR}${DESKTOPSOURCE}/armagetronad-link.xml
+    xdg-desktop-menu install --mode system ${DESTDIR}${DESKTOPSOURCE}/armagetronad-@prognamebase@-handler.desktop
 
     # add KDE icons and desktop link
     if kde-config --install icon > /dev/null 2>&1; then
