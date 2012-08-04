@@ -37,6 +37,8 @@ class LanguageUpdater:
         stripped = line.expandtabs(4).lstrip()
         if len(stripped) > 0 and stripped[0] != '#':
             pair = stripped.split(" ",1)
+            if len(pair) < 2:
+                return False
             pair[1] = pair[1].lstrip()
             return pair
         else:
