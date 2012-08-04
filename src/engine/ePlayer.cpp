@@ -8864,7 +8864,10 @@ private:
     {
         std::ostringstream s;
         s << classification_root << index;
-        return tString(tOutput( s.str().c_str(), tOutput(item) ) );
+        return tString(tOutput( s.str().c_str(), 
+                                tOutput((char const *)(tString(item) + "_1")),
+                                tOutput((char const *)(tString(item) + "_2")),
+                                tOutput((char const *)(tString(item) + "_3")) ) );
     }
 
     class Classifier
@@ -8957,7 +8960,7 @@ private:
             << ComposeClassification( rubber, "$classification_", "$classification_rubber" ) << ", "
             << ComposeClassification( acceleration, "$classification_", "$classification_acceleration" ) << ", "
             << ComposeClassification( delay, "$classification_", "$classification_delay" ) << ", "
-            << ComposeClassification( length, "$classification_wall_", "$classification_walls" );
+            << ComposeClassification( length, "$classification_", "$classification_walls" );
             if( in.GetFlag( nServerInfo::SettingsDigest::Flags_TeamPlay ) )
             {
                 compose << ", " << tOutput( "$classification_teams" );

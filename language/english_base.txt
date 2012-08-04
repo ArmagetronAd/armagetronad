@@ -419,7 +419,7 @@ ping_flood_time_50_help             Minimum time for 50 ping packets from one ma
 ping_flood_time_100_help            Minimum time for 100 ping packets from one machine to arrive.
 ping_flood_global_help              The times PING_FLOOD_TIME_X, multiplied by this value, count for all pings from all machines. Negative values disable global flood protection.
 connection_flood_sensitivity_help   The times PING_FLOOD_TIME_X, multiplied by this value, count for all incoming messages from clients not connected already. A flood here activates turtle mode. Negative values disable global flood protection.
-connection_limit_help               Maximum number of packets from unknown peers to handle at one 
+connection_limit_help               Maximum number of packets from unknown peers to handle in one run of the main loop; further messages are ignored.
 anti_spoof_help                     If set to 1, checks connecting clients for spoofed IPs. Only clients passing a connectivity test are allowed in. This is done in turtle mode automatically, but may be useful to have on at all times.
 turtle_mode_activated               Server is under heavy load. Turtle mode activated. Communication with new clients is on a budget.\n
 turtle_mode_deactivated             The high load seems to have normalized for now. Turtle mode deactivated.\n
@@ -3210,41 +3210,35 @@ network_master_host_inet_help	This will start a network game on your computer an
 network_master_host_lan_help	This will start a network game that is only visible from your LAN.
 
 classification_0 no \1
-classification_1 ludicrously low \1
+classification_1 ludicrously \2
 classification_2 nano \1
 classification_3 micro \1
-classification_4 extremly low \1
-classification_5 very low \1
-classification_6 low \1
+classification_4 extremly \2
+classification_5 very \2
+classification_6 \2
 classification_7 normal \1
-classification_8 high \1
-classification_9 very high \1
-classification_10 extremly high \1
+classification_8 \3
+classification_9 very \3
+classification_10 extremly \3
 classification_11 mega \1
 classification_12 giga \1
-classification_13 ludicrous \1
+classification_13 ludicrouly \3
 classification_14 infinite \1
 
-classification_wall_0 no \1
-classification_wall_1 ludicrously short \1
-classification_wall_2 nano \1
-classification_wall_3 micro \1
-classification_wall_4 extremly short \1
-classification_wall_5 very short \1
-classification_wall_6 short \1
-classification_wall_7 normal \1
-classification_wall_8 long \1
-classification_wall_9 very long \1
-classification_wall_10 extremly long \1
-classification_wall_11 mega \1
-classification_wall_12 giga \1
-classification_wall_13 ludicrously long \1
-classification_wall_14 infinite \1
-
-classification_acceleration acceleration
-classification_delay delay
-classification_rubber rubber
-classification_walls walls
+# The _1, _2 and _3 strings are inserted into the strings above as \1, \2 and \3.
+# Translations can use that to form grammatically correct combinations.
+classification_acceleration_1 acceleration
+classification_acceleration_2 low acceleration
+classification_acceleration_3 high acceleration
+classification_delay_1 delay
+classification_delay_2 low delay
+classification_delay_3 high delay
+classification_rubber_1 rubber
+classification_rubber_2 low rubber
+classification_rubber_3 high rubber
+classification_walls_1 walls
+classification_walls_2 short walls
+classification_walls_3 long walls
 classification_teams team play
 classification_maps custom map
 
