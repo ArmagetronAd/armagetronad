@@ -532,15 +532,17 @@ void eTeam::SetScore ( int s )
 
 void eTeam::AddScore(int points,
                      const tOutput& reasonwin,
-                     const tOutput& reasonlose)
+                     const tOutput& reasonlose,
+                     const tOutput& reasonfree)
 {
-    if (points==0)
+    if(se_matches < 0){
         return;
+    }
 
     // delegate to player if this is a one-player team
     if ( players.Len() == 1 && maxPlayersLocal == 1 )
     {
-        players[0]->AddScore( points, reasonwin, reasonlose );
+        players[0]->AddScore( points, reasonwin, reasonlose, reasonfree );
         return;
     }
 
@@ -550,6 +552,13 @@ void eTeam::AddScore(int points,
     message.SetTemplateParameter(1, GetColoredName());
     message.SetTemplateParameter(2, points > 0 ? points : -points);
 
+    if (!points)
+    {
+        if (reasonfree.IsEmpty())
+            return;
+        else
+            message.Append(reasonfree);
+    }
     if (points>0)
     {
         if (reasonwin.IsEmpty())
@@ -566,9 +575,12 @@ void eTeam::AddScore(int points,
     }
 
     sn_ConsoleOut(message);
-    RequestSync(true);
 
-    se_SaveToScoreFile(message);
+    if( points )
+    {
+        RequestSync(true);
+        se_SaveToScoreFile(message);
+    }
 }
 
 // *******************************************************************************
