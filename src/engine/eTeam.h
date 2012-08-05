@@ -148,7 +148,8 @@ public:												// public methods
 
     void 			AddScore		( int points,
                         const tOutput& reasonwin,
-                        const tOutput& reasonlose );
+                        const tOutput& reasonlose,
+                        const tOutput& reasonfree=tOutput());
 
     eSpawnPoint * SpawnPoint() {
         return spawnPoint;
