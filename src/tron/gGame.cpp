@@ -4072,6 +4072,7 @@ void gGame::Analysis(REAL time){
                     || ( eTeam::teams(0)->Score() > eTeam::teams(1)->Score() && sg_EnemyExists(0))){
                 // only then we can have a true winner:
                 if (
+                        (
                         // the score limit is hit
                         eTeam::teams(0)->Score() >= sg_currentSettings->limitScore
                             // and the minimum lead is achieved (unless only one team is present)
@@ -4079,6 +4080,7 @@ void gGame::Analysis(REAL time){
                                  || eTeam::teams(0)->Score()
                                     >= sg_currentSettings->limitScoreMinLead + eTeam::teams(1)->Score()
                             )
+                        )
                         || // or the round limit
                         rounds + winnerExtraRound >= sg_currentSettings->limitRounds
                         || // the the time limit
