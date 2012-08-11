@@ -33,6 +33,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tError.h"
 #include "tVersion.h"
 
+extern const tString st_internalEncoding;
+
 class tLocaleItem;
 class tOutputItemBase;
 

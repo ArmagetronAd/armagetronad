@@ -64,6 +64,8 @@ tColoredString st_Latin1ToUTF8( tString const & s )
     }
 }
 
+const tString st_internalEncoding("utf-8");
+
 class tLocaleSubItem; // identifies a single string in a single language
 
 static tArray<tString> st_TemplateParameters;

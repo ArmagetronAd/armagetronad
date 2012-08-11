@@ -752,7 +752,7 @@ int main(int argc,char **argv){
         atexit(tLocale::Clear);
 
         static eLadderLogWriter sg_encodingWriter( "ENCODING", true );
-        sg_encodingWriter << "utf-8";
+        sg_encodingWriter << st_internalEncoding;
         sg_encodingWriter.write();
 
         if ( commandLine.Execute() )
