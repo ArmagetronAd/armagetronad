@@ -130,6 +130,7 @@ bool gRace::roundFinished_ = false;
 bool gRace::winnerDeclared_ = false;
 int gRace::finishPlace_ = 0;
 REAL gRace::firstFinishTime_ = 0;
+tString gRace::firstToArive_;
 
 tList<gRaceScores> sn_RaceScores;
 
@@ -404,14 +405,17 @@ void gRaceScores::OutputTopTen()
     for (int a=0; a < sn_RaceScores.Len(); a++)
     {
         gRaceScores *rS = sn_RaceScores[a];
-        ePlayerNetID *p = ePlayerNetID::FindPlayerByName(rS->user_name);
-        if (p)
+        for (int b=0; b < se_PlayerNetIDs.Len(); b++)
         {
-            tOutput Message;
-            Message.SetTemplateParameter(1, rank);
-            Message.SetTemplateParameter(2, rS->time);
-            Message << "$player_message_race_rank";
-            sn_ConsoleOut(Message, p->Owner());
+            ePlayerNetID *p = se_PlayerNetIDs[b];
+            if (p && (p->GetUserName() == rS->user_name))
+            {
+                tOutput Message;
+                Message.SetTemplateParameter(1, rank);
+                Message.SetTemplateParameter(2, rS->time);
+                Message << "$player_message_race_rank";
+                sn_ConsoleOut(Message, p->Owner());
+            }
         }
         rank++;
     }
@@ -499,6 +503,7 @@ void gRace::ZoneHit( ePlayerNetID * player )
         {
             firstArrived_ = true;
             firstFinishTime_ = player->raceTime;
+            firstToArive_ = player->GetUserName();
         }
 
         REAL reachTime = player->raceTime;
@@ -665,6 +670,7 @@ void gRace::Reset()
     winnerDeclared_ = false;
     finishPlace_ = 0;
     firstFinishTime_ = 0;
+    firstToArive_ = "";
     RacingScore = sg_scoreRaceComplete;
 
     winZones_.clear();
@@ -762,24 +768,27 @@ eTeam * gRace::Winner()
         return NULL;
 
     eTeam * winner = NULL;
-    REAL bestTime = 0;
+    //REAL bestTime = firstFinishTime_;
 
     for ( int i = 0; i < se_PlayerNetIDs.Len(); i ++ )
     {
         ePlayerNetID * p = se_PlayerNetIDs[i];
 
-        if ( p->raceArrived )
+        if ( firstToArive_ == p->GetUserName() && p->raceArrived )
         {
             //p->raceArrived = false;
             //p->raceTryouts = sg_raceTryoutsNumber;
 
-            AddGoal( p->raceTime, p->GetColoredName(), p->GetName() /*, p->GetRawAuthenticatedName() */);
+            //AddGoal( p->raceTime, p->GetColoredName(), p->GetName() /*, p->GetRawAuthenticatedName() */);
 
-            if ( p->raceTime < bestTime || bestTime == 0 )
+            /*if ( p->raceTime < bestTime || bestTime == 0 )
             {
                 bestTime = p->raceTime;
                 winner = p->CurrentTeam();
-            }
+            }*/
+
+            winner = p->CurrentTeam();
+            break;
         }
     }
     winnerDeclared_ = true;

@@ -72,6 +72,7 @@ private:
     static bool                         winnerDeclared_;
     static int                          finishPlace_;
     static REAL                         firstFinishTime_;
+    static tString                      firstToArive_;
 };
 
 class gRaceScores
