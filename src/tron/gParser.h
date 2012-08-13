@@ -94,5 +94,7 @@ protected:
     float sizeMultiplier;
 };
 
+extern tString mapName;
+
 #endif //ArmageTron_PARSER_H
 

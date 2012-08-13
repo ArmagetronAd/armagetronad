@@ -319,7 +319,7 @@ void eTeam::UpdateAppearance()
         r = g = b = 7;
         empty = true;
     }
-    
+
     tString oldNameFiltered = ePlayerNetID::FilterName(oldName);
     tString newNameFiltered = ePlayerNetID::FilterName(name);
     if( oldNameFiltered != newNameFiltered )
@@ -672,6 +672,7 @@ tString eTeam::Ranking( int MAX, bool cut ){
     tColoredString ret;
 
     if (teams.Len()>0){
+        ret.SetPos(2, cut);
         ret << tColoredString::ColorString(1,.5,.5);
         ret << tOutput("$team_scoretable_name");
         ret << tColoredString::ColorString(1,1,1);
@@ -687,6 +688,7 @@ tString eTeam::Ranking( int MAX, bool cut ){
         for (int i=0;i<max;i++){
             tColoredString line;
             eTeam *t = teams(i);
+            line.SetPos(2, cut);
             line << ColorString(t);
             tString name = t->Name();
             //name.RemoveHex();
@@ -963,7 +965,7 @@ void eTeam::WriteLaunchPositions()
     for ( int i = teams.Len() - 1; i >= 0; --i )
     {
         eTeam *team = teams(i);
-        
+
         // AI teams are boring.
         if ( !team->IsHuman() )
             continue;
@@ -1337,9 +1339,9 @@ ePlayerNetID*	eTeam::OldestHumanPlayer(		) const
     if ( !ret )
     {
         // nobody? Darn. Look for a player that has this team set as next team.
-        
+
         for (int i= se_PlayerNetIDs.Len()-1; i>=0; i--)
-        {   
+        {
             ePlayerNetID* p = se_PlayerNetIDs(i);
             if ( p->NextTeam() == this && p->IsHuman() && ( !ret || ret->timeJoinedTeam > p->timeJoinedTeam || se_centerPlayerIsBoss ) )
             {
@@ -1692,10 +1694,10 @@ void eTeam::Shuffle( int startID, int stopID )
 
     if ( startID == stopID )
         return;
-    
+
     ePlayerNetID *player = players[startID];
     eShuffleSpamTester & spam = player->GetShuffleSpam();
-    
+
     if ( spam.ShouldAnnounce() )
     {
         sn_ConsoleOut( spam.ShuffleMessage( player, startID + 1, stopID + 1 ) );
@@ -1712,7 +1714,7 @@ void eTeam::Shuffle( int startID, int stopID )
         SwapPlayers( players[startID], players[startID-1] );
         startID--;
     }
-    
+
     spam.Shuffle();
 }
 

@@ -3601,6 +3601,16 @@ private:
     bool & guard_;
 };
 
+static bool sg_cycleRubberDepleteSelf = true;
+static bool sg_cycleRubberDepleteTeam = true;
+static bool sg_cycleRubberDepleteEnemy = true;
+static bool sg_cycleRubberDepleteRim = true;
+
+static tSettingItem<bool> sg_cycleRubberDepleteSelfConf("CYCLE_RUBBER_DEPLETE_SELF", sg_cycleRubberDepleteSelf);
+static tSettingItem<bool> sg_cycleRubberDepleteEnemyConf("CYCLE_RUBBER_DEPLETE_ENEMY", sg_cycleRubberDepleteEnemy);
+static tSettingItem<bool> sg_cycleRubberDepleteTeamConf("CYCLE_RUBBER_DEPLETE_TEAM", sg_cycleRubberDepleteTeam);
+static tSettingItem<bool> sg_cycleRubberDepleteRimConf("CYCLE_RUBBER_DEPLETE_RIM", sg_cycleRubberDepleteRim);
+
 // *******************************************************************************************
 // *
 // *	TimestepCore
@@ -3940,7 +3950,42 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
             }
 
             // update rubber usage
-            rubber += rubberneeded / rubberEffectiveness;
+            gPlayerWall *pWall = maxSpaceHit_->playerWall;
+            if (pWall)
+            {
+                gCycle *cycle = pWall->Cycle();
+                if (cycle == this)
+                {
+                    if (sg_cycleRubberDepleteSelf)
+                    {
+                        rubber += rubberneeded / rubberEffectiveness;
+                    }
+                }
+                else
+                {
+                    if (cycle->Team() != this->Team())
+                    {
+                        if (sg_cycleRubberDepleteEnemy)
+                        {
+                            rubber += rubberneeded / rubberEffectiveness;
+                        }
+                    }
+                    else
+                    {
+                        if (sg_cycleRubberDepleteTeam)
+                        {
+                            rubber += rubberneeded / rubberEffectiveness;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                if (sg_cycleRubberDepleteRim)
+                {
+                    rubber += rubberneeded / rubberEffectiveness;
+                }
+            }
 
             numTries = int((sg_rubberCycleTime * ( rubber_granted - rubber ) - 1 )/(sg_rubberCycleTime * step*1.5 + 1));
             int numTriesSpace = int(space*10/verletSpeed_);

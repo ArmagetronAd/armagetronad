@@ -4401,7 +4401,7 @@ void gGame::Analysis(REAL time){
 
     if ( sg_RaceTimerEnabled )
     {
-        gRace::Sync( alive, ai_alive, sg_NumHumans(), grid, Arena );
+        gRace::Sync( alive, ai_alive, sg_NumHumans() );
         if ( !gRace::Done() )
             return;
         else                                    // time to close the round
@@ -4635,6 +4635,9 @@ void gGame::Analysis(REAL time){
 
                             sg_matchEndedWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
                             sg_matchEndedWriter.write();
+
+                            if (sg_RaceTimerEnabled)
+                                gRaceScores::OutputTopTen();
 
 	                        message.SetTemplateParameter(1, name);
 	                        message << "$gamestate_champ_console";

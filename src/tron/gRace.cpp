@@ -25,7 +25,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
-#include "gArena.h"
 #include "gRace.h"
 #include "gGame.h"
 #include "eTimer.h"
@@ -33,7 +32,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tDirectories.h"
 #include "tRecorder.h"
 #include "eAdvWall.h"
-#include "gSpawn.h"
+#include "gParser.h"
 
 #include <string>
 
@@ -63,6 +62,9 @@ static tSettingItem<int> sg_scoreRaceCompleteConf( "SCORE_RACE", sg_scoreRaceCom
 int sg_scoreRaceDeplete = 1;
 static tSettingItem<int> sg_scoreRaceDepleteConf( "RACE_SCORE_DEPLETE", sg_scoreRaceDeplete);
 
+bool sg_raceLogTime = false;
+static tSettingItem<bool> sg_raceLogTimeConf("RACE_LOG_TIME", sg_raceLogTime);
+
 enum gRaceScoreType
 {
     gRACESCORE_NO_SORTING = 0,
@@ -72,33 +74,15 @@ enum gRaceScoreType
 tCONFIG_ENUM( gRaceScoreType );
 
 static gRaceScoreType racescoretype = gRACESCORE_NO_SORTING;
-static tSettingItem<gRaceScoreType> conf_raceScoretype("RACE_SCORE_TYPE",racescoretype);
-
-// will be used later... no idea when...
-bool restrictlocation(tString const &newValue)
+bool restrictScoreSortTypes(const gRaceScoreType &newValue)
 {
-    if (newValue == "") return false;
-    else return true;
-}
-static tString sg_raceloglocation("NULL");
-static tSettingItem<tString> sg_raceLogLocationConf("RACE_HIGHSCORES_LOCATION", sg_raceloglocation, &restrictlocation);
-
-/* Causes the game to crash if a player enters in middle of round.
-int sg_raceTryoutsNumber = 5;
-bool restrictRaceTryouts(int const &newValue)
-{
-    if (newValue == 0 || newValue >= 0) return true;
-    else if (newValue < 0)
+    if ((newValue > gRACESCORE_BEST_TIME) || (newValue < gRACESCORE_NO_SORTING))
     {
-        tOutput o;
-        o.SetTemplateParameter(1, 0);
-        o << "$race_tryouts_lower";
-        con << o << "\n";
         return false;
     }
+    return true;
 }
-static tSettingItem<int> sg_raceTryoutsNumberConf("RACE_TRYOUTS", sg_raceTryoutsNumber, &restrictRaceTryouts);
-*/
+static tSettingItem<gRaceScoreType> conf_raceScoretype("RACE_SCORE_TYPE",racescoretype, &restrictScoreSortTypes);
 
 tString sg_currentMap("");
 static tString CurrentMapName("");
@@ -144,94 +128,92 @@ bool gRace::firstArrived_ = false;
 int  gRace::countDown_ = -1;
 bool gRace::roundFinished_ = false;
 bool gRace::winnerDeclared_ = false;
+int gRace::finishPlace_ = 0;
+REAL gRace::firstFinishTime_ = 0;
 
-tArray<tString> gRaceScores::raceRealName;
-tArray<tString> gRaceScores::raceUserName;
-tArray<int> gRaceScores::raceScore;
-tArray<REAL> gRaceScores::raceTime;
+tList<gRaceScores> sn_RaceScores;
+
+gRaceScores::gRaceScores(tString UserName)
+{
+    this->user_name = UserName;
+
+    sn_RaceScores.Insert(this);
+}
+
+gRaceScores * gRaceScores::GetPlayer(tString name)
+{
+    for (int i=0; i < sn_RaceScores.Len(); i++)
+    {
+        gRaceScores *rS = sn_RaceScores[i];
+        if (rS->user_name == name)
+            return rS;
+    }
+}
+
+bool gRaceScores::CheckPlayer(tString name)
+{
+    for (int i=0; i < sn_RaceScores.Len(); i++)
+    {
+        gRaceScores *rS = sn_RaceScores[i];
+        if (rS->user_name == name)
+            return true;
+    }
+    return false;
+}
 
 void gRaceScores::Switch(int i, int j)
 {
-    Swap(raceUserName[i], raceUserName[j]);
-    Swap(raceScore[i], raceScore[j]);
-    Swap(raceTime[i], raceTime[j]);
-    Swap(raceRealName[i], raceRealName[j]);
+    Swap(sn_RaceScores[i], sn_RaceScores[j]);
 }
 
 bool gRaceScores::InOrder(int i,int j)
 {
+    gRaceScores *rSP = sn_RaceScores[i];
+    gRaceScores *rSR = sn_RaceScores[j];
     if (racescoretype == gRACESCORE_BEST_TIME)
     {
-        if (raceTime[i] == 0) return false;
-        if (raceTime[j] == 0) return true;
-        else return (raceTime[i] <= raceTime[j]);
+        if (rSP->time == 0) return false;
+        if (rSR->time == 0) return true;
+        else return (rSP->time <= rSR->time);
     }
-    else if (racescoretype == gRACESCORE_BEST_SCORE) return (raceScore[i] >= raceScore[j]);
+    else if (racescoretype == gRACESCORE_BEST_SCORE) return (rSP->score >= rSR->score);
 }
 
 void gRaceScores::Sort()
 {
-    for(int i=1;i<raceUserName.Len();i++)
+    for(int i=1;i<sn_RaceScores.Len();i++)
         for(int j=i;j>=1 && !InOrder(j-1,j);j--)
             Switch(j,j-1);
 }
 
-void gRaceScores::Add(tString RealName, tString UserName, int WinScore, REAL reachTime, bool arrived)
+void gRaceScores::Add(tString UserName, tString RealName, int WinScore, REAL reachTime)
 {
-    int i, j;
-    bool found;
-    found = false;
-    i = 0;
-    j = raceUserName.Len();
-    while(i < j)
+    if (CheckPlayer(UserName))
     {
-        if (raceUserName[i] == UserName)
+        gRaceScores *rS = GetPlayer(UserName);
+        rS->real_name = RealName;
+        rS->score += WinScore;
+        if (((reachTime < rS->time) && reachTime != 0) || (rS->time == 0 && reachTime != 0))
         {
-            found = true;
-            break;
-        }
-        i++;
-    }
-    if (found == true)
-    {
-        raceRealName[i] = RealName;
-        raceScore[i] += WinScore;
-        if (raceTime[i] == 0) raceTime[i] = reachTime;
-        if (reachTime < raceTime[i] && reachTime != 0) raceTime[i] = reachTime;
+            rS->time = reachTime;
+            tOutput newTime;
+            newTime.SetTemplateParameter(1, reachTime);
+            newTime << "$player_personal_best_reach_time";
 
-        /* Test to see if the scores are actually being recorded in the arrays
-        tString message;
-        message << raceRealName[i] << " " << raceScore[i] << " " << raceTime[i] << "\n";
-        sn_ConsoleOut(message);
-        //*/
+            ePlayerNetID *p = ePlayerNetID::FindPlayerByName(UserName);
+            if (p)
+            {
+                sn_ConsoleOut(newTime, p->Owner());
+            }
+        }
     }
     else
     {
-        raceUserName.Insert(UserName);
-        i = 0;
-        j = raceUserName.Len();
-        while(i < j)
-        {
-            if (raceUserName[i] == UserName)
-            {
-                raceRealName[i] = RealName;
-                raceScore[i] = WinScore;
-                if (arrived == true) raceTime[i] = reachTime;
-                else if (arrived == false) raceTime[i] = 0;
-
-                /* Test to see if the scores are actually being recorded in the arrays
-                tString message;
-                message << raceUserName[i] << " " << raceScore[i] << " " << raceTime[i] << "\n";
-                sn_ConsoleOut(message);
-                */
-
-                break;
-            }
-            i++;
-        }
+        gRaceScores *rS = new gRaceScores(UserName);
+        rS->real_name = RealName;
+        rS->score = WinScore;
+        rS->time = reachTime;
     }
-
-    gRaceScores::Write();
 }
 
 void gRaceScores::Read()
@@ -251,127 +233,64 @@ void gRaceScores::Read()
         }
     }
 
-    tString Input("");
-    if (sg_raceloglocation == "" || sg_raceloglocation == "NULL")
-    {
-        tString line, lines;
-        tString Message;
-        Input << "race_scores/" << CurrentMapName;
-        tTextFileRecorder r(tDirectories::Var(), Input);
-        int i = 0;
-        linenum = 0;
-        while (!r.EndOfFile())
+    tString Input, params;
+    Input << "race_scores/" << CurrentMapName;
+    //tTextFileRecorder r(tDirectories::Var(), Input);
+    std::ifstream r;
+    if ( tDirectories::Var().Open(r, Input) ) {
+        while (!r.eof())
         {
-            std::stringstream s(r.GetLine());
+            //std::stringstream s(r.getline());
 
-            s >> line;
-            lines = line;
-            lines.ReadLine(s, true);
-            //sn_ConsoleOut(lines);
-            if (line != "" && lines != "")
+            std::string sayLine;
+            std::getline(r, sayLine);
+            std::istringstream s(sayLine);
+
+            params.ReadLine(s, true);
+
+            if (params != "")
             {
-                linenum = 0;
-                rlinenum = linenum;
-                linenum = line.StrPos(linenum, " ");
-                raceUserName[i] = line.SubStr(rlinenum, linenum);
-                //sn_ConsoleOut(line);
-
-                linenum = 0;
-                rlinenum = linenum;
-                linenum = lines.StrPos(linenum, " ");
-                raceScore[i] = atoi(lines.SubStr(rlinenum, linenum));
-                //Message << "Race Score point: " << linenum << "\n";
-
-                rlinenum = linenum+1;
-                linenum = lines.StrPos(rlinenum, " ");
-                if (linenum == -1)
+                int rLin = 0, pLin = 0;
+                int iCount = 1;
+                gRaceScores *rS = NULL;
+                while (pLin != -1)
                 {
-                    raceTime[i] = atof(lines.SubStr(rlinenum, (lines.Len() - rlinenum)));
-                }
-                else
-                {
-                    raceTime[i] = atof(lines.SubStr(rlinenum, linenum));
-                }
-                //Message << "Time Secto point: " << linenum << "\n";
-
-                if (linenum == -1)
-                {
-                    raceRealName[i] = "";
-                }
-                else
-                {
-                    rlinenum = linenum+1;
-                    raceRealName[i] = lines.SubStr(rlinenum, (lines.Len() - rlinenum));
-                }
-                //Message << rlinenum << " " << (lines.Len() - rlinenum) << "\n";
-                //Message << raceUserName[i] << " " << raceScore[i] << " " << raceTime[i] << " " << raceRealName[i] << "\n";
-                //sn_ConsoleOut(Message);
-                //*/
-                line = "";
-                lines = "";
-                /*Message = "";
-                Message << line << "" << lines << "\n";
-                Message << raceUserName[i] << " " << raceScore[i] << " " << raceTime[i] << " " << raceRealName[i] << "\n";
-                sn_ConsoleOut(Message);*/
-            }
-            i++;
-        }
-    }
-    else
-    {
-        tString line("");
-        Input << sg_raceloglocation << "/" << CurrentMapName;
-        //tTextFileRecorder r(tDirectories::Var(), CurrentMapName);
-        //if ( tDirectories::Var().Open(r, Input, std::ios::in) ) {
-        std::ifstream r;
-        r.clear();
-        r.open(Input);
-        int i = 0;
-        if (r.is_open())
-        {
-            while (!r.eof())
-            {
-                //std::stringstream s(r.GetLine());
-                std::string s;
-                getline(r, s);
-                line << s;
-                if (line != "")
-                {
-                    /*linenum = 0;
-                    linenum = line.StrPos(0, "\n");
-                    line = line.SubStr(0, linenum);
-                    tString message;
-                    message << linenum;
-                    sn_ConsoleOut(message);*/
-
-                    linenum = 0;
-                    rlinenum = linenum;
-                    linenum = line.StrPos(rlinenum, " ");
-                    raceUserName[i] = line.SubStr(rlinenum, linenum);
-
-                    rlinenum = linenum+1;
-                    linenum = line.StrPos(rlinenum, " ");
-                    raceScore[i] = atoi(line.SubStr(rlinenum, linenum));
-
-                    rlinenum = linenum+1;
-                    linenum = line.StrPos(rlinenum, " ");
-                    raceTime[i] = atof(line.SubStr(rlinenum, (line.Len() - rlinenum)));
-
-                    /*line << "\n";
-                    sn_ConsoleOut(line);*/
-                    line = "";
-
-                    i++;
+                    rLin = pLin + 1;
+                    pLin = params.StrPos(rLin, " ");
+                    if (iCount == 1)
+                    {
+                        tString name = params.SubStr(0, pLin);
+                        if (!CheckPlayer(name))
+                        {
+                            rS = new gRaceScores(name);
+                        }
+                        else
+                        {
+                            rS = GetPlayer(name);
+                        }
+                    }
+                    else if (iCount == 2)
+                    {
+                        rS->score = atoi(params.SubStr(rLin, pLin));
+                    }
+                    else if (iCount == 3)
+                    {
+                        rS->time = atof(params.SubStr(rLin, pLin));
+                    }
+                    else if (iCount == 4)
+                    {
+                        rS->real_name = params.SubStr(rLin, (params.Len() - rLin));
+                    }
+                    iCount++;
                 }
             }
-            r.close();
         }
     }
 }
 
 void gRaceScores::Write()
 {
-    tString Output("");
+    tString Output;
 
     if (racescoretype != gRACESCORE_NO_SORTING) gRaceScores::Sort();
     /*
@@ -387,76 +306,184 @@ void gRaceScores::Write()
     }
     linenum = Output.StrPos(0, "\n");
     Output = Output.SubStr(0, linenum);*/
-    if (sg_raceloglocation == "" || sg_raceloglocation == "NULL" || sg_raceloglocation == NULL)
-    {
-        Output << /*tDirectories::Var().GetPaths()*/"race_scores/" << CurrentMapName;
 
-        if (raceUserName.Len() > 0)
-        {
-            std::ofstream w;
-            if ( tDirectories::Var().Open(w, Output) ) {
-                for (int i=0; i < raceUserName.Len(); i++)
-                {
-                    w << raceUserName[i] << " " << raceScore[i] << " " << raceTime[i] << " " << raceRealName[i] << "\n";
-                    /*tString message;
-                    message << raceUserName[i] << " " << raceScore[i] << " " << raceTime[i] << "\n";
-                    sn_ConsoleOut(message);*/
-                }
-            }
-            /*
-            if (w.is_open())
+    Output << /*tDirectories::Var().GetPaths()*/"race_scores/" << CurrentMapName;
+
+    if (sn_RaceScores.Len() > 0)
+    {
+        std::ofstream w;
+        if ( tDirectories::Var().Open(w, Output) ) {
+            for (int i=0; i < sn_RaceScores.Len(); i++)
             {
-                for (int i=0; i < raceName.Len(); i++)
-                {
-                    w << raceName[i] << " " << raceScore[i] << " " << raceTime[i] << "\n";
-                }
-                w.close();
+                gRaceScores *rS = sn_RaceScores[i];
+                w << rS->user_name << " " << rS->score << " " << rS->time << " " << rS->real_name << "\n";
             }
-            else sn_ConsoleOut(Output);
-            */
         }
     }
-    else
-    {
-        Output << sg_raceloglocation << "/" << CurrentMapName;
-        if (raceUserName.Len() > 0)
-        {
-            std::ofstream w;
-            w.open(Output);
-            if (w.is_open())
-            {
-                for (int i=0; i < raceUserName.Len(); i++)
-                {
-                    if (raceUserName[i] != "") w << raceUserName[i] << " " << raceScore[i] << " " << raceTime[i] << " " << raceRealName[i] << "\n";
-                }
-                w.close();
-            }
-            else
-            {
-                Output << " cannot be accessed or doesn't exist. Please check if this is the correct path.\n";
-                sn_ConsoleOut(Output);
-            }
-        }
-    }//*/
 }
 
 void gRaceScores::Reset()
 {
-    /*
-    if (raceName.Len() > 0)
+    for (int i=0; i < sn_RaceScores.Len(); i++)
     {
-        for (int i=0; i < (raceName.Len()-1); i++)
+        gRaceScores *rS = sn_RaceScores[i];
+        sn_RaceScores.RemoveAt(i);
+        delete rS;
+    }
+}
+
+void gRaceScores::OutputTopTen()
+{
+    Sort();
+
+    tColoredString Output;
+
+    tColoredString barLine;
+    barLine << "0xa00060";
+    for (int a=0; a < 59; a++)
+    {
+        barLine << "#";
+    }
+
+    Output << barLine << "\n";
+
+    int iCount = 0;
+    if (sn_RaceScores.Len() >= 10)
+    {
+        iCount = 10;
+        Output << "0xffff77Top 10 time records.\n";
+    }
+    else
+    {
+        iCount = sn_RaceScores.Len();
+        Output << "0xffff77Top " << iCount << " time records available.\n";
+    }
+
+    Output << barLine << "\n";
+
+    tColoredString line;
+    line << "0xa00060# 0xff6622RANK";
+    line.SetPos(10, false);
+    line << "0xa00060# 0xff6622PLAYER";
+    line.SetPos(30, false);
+    line << "0xa00060# 0xff6622SCORE";
+    line.SetPos(47, false);
+    line << "0xa00060# 0xff6622BEST TIME";
+    line.SetPos(59, false);
+    line << "0xa00060#";
+    line << "\n";
+
+    Output << line;
+    Output << barLine << "\n";
+
+    int rank = 1;
+    for (int i=0; i < iCount; i++)
+    {
+        gRaceScores *rS = sn_RaceScores[i];
+        tColoredString ret;
+        ret << "0xa00060# 0xffff77" << rank;
+        ret.SetPos(10, false);
+        ret << "0xa00060# 0xe0a0ff" << rS->real_name;
+        ret.SetPos(30, false);
+        ret << "0xa00060# 0x80ffff" << rS->score;
+        ret.SetPos(47, false);
+        ret << "0xa00060# 0x80ffff" << rS->time;
+        ret.SetPos(59, false);
+        ret << "0xa00060#";
+
+        Output << ret << "\n";
+
+        rank++;
+    }
+
+    Output << "0xff6622Current Map: 0x00ff44" << sg_currentMap << "\n";
+    Output << barLine << "\n";
+    sn_ConsoleOut(Output);
+
+    rank = 1;
+    for (int a=0; a < sn_RaceScores.Len(); a++)
+    {
+        gRaceScores *rS = sn_RaceScores[a];
+        ePlayerNetID *p = ePlayerNetID::FindPlayerByName(rS->user_name);
+        if (p)
         {
-            raceName.RemoveAt(i);
-            raceScore.RemoveAt(i);
-            raceTime.RemoveAt(i);
+            tOutput Message;
+            Message.SetTemplateParameter(1, rank);
+            Message.SetTemplateParameter(2, rS->time);
+            Message << "$player_message_race_rank";
+            sn_ConsoleOut(Message, p->Owner());
+        }
+        rank++;
+    }
+}
+
+void gRaceScores::RaceCommands(ePlayerNetID *p, std::istream &s, tString command)
+{
+    tString params;
+    if (command == "!race")
+    {
+        params.ReadLine(s, true);
+        int pos = 0;
+
+        tString argument;
+        argument = params.ExtractNonBlankSubString(pos);
+        if (argument == "stats")
+        {
+            Sort();
+            tColoredString Output;
+
+            tColoredString barLine;
+            barLine << "0xa00060";
+            for (int a=0; a < 59; a++)
+            {
+                barLine << "#";
+            }
+
+            Output << barLine << "\n";
+
+            tColoredString line;
+            line << "0xa00060# 0xff6622RANK";
+            line.SetPos(10, false);
+            line << "0xa00060# 0xff6622PLAYER";
+            line.SetPos(30, false);
+            line << "0xa00060# 0xff6622SCORE";
+            line.SetPos(47, false);
+            line << "0xa00060# 0xff6622BEST TIME";
+            line.SetPos(59, false);
+            line << "0xa00060#";
+            line << "\n";
+
+            Output << line;
+            Output << barLine << "\n";
+
+            int rank = 1;
+            for (int i=0; i < sn_RaceScores.Len(); i++)
+            {
+                gRaceScores *rS = sn_RaceScores[i];
+                if (rS->user_name == p->GetUserName())
+                {
+                    tColoredString ret;
+                    ret << "0xa00060# 0xffff77" << rank;
+                    ret.SetPos(10, false);
+                    ret << "0xa00060# 0xe0a0ff" << rS->real_name;
+                    ret.SetPos(30, false);
+                    ret << "0xa00060# 0x80ffff" << rS->score;
+                    ret.SetPos(47, false);
+                    ret << "0xa00060# 0x80ffff" << rS->time;
+                    ret.SetPos(59, false);
+                    ret << "0xa00060#";
+
+                    Output << ret << "\n";
+
+                    break;
+                }
+                rank++;
+            }
+            Output << "0xff6622Current Map: 0x00ff44" << sg_currentMap << "\n";
+            Output << barLine << "\n";
+            sn_ConsoleOut(Output, p->Owner());
         }
     }
-    */
-    raceUserName = NULL;
-    raceScore = NULL;
-    raceTime = NULL;
-    raceRealName = NULL;
 }
 
 //! ZONE HIT
@@ -471,11 +498,11 @@ void gRace::ZoneHit( ePlayerNetID * player )
         if ( !firstArrived_ )
         {
             firstArrived_ = true;
-            //player->SetRubber(player, 100);
+            firstFinishTime_ = player->raceTime;
         }
 
         REAL reachTime = player->raceTime;
-        gRaceScores::Add(player->GetName() , player->GetUserName(), RacingScore, reachTime, true);
+        gRaceScores::Add(player->GetUserName(), player->GetName() , RacingScore, reachTime);
 
         tOutput win; //, lose;
         //win << "$player_reach_race";*/
@@ -492,57 +519,39 @@ void gRace::ZoneHit( ePlayerNetID * player )
         ColoredString << time << " seconds\n";
         */
 
-        win.SetTemplateParameter(1, player->GetColoredName() );
-        win.SetTemplateParameter(2, RacingScore);
-        win.SetTemplateParameter(3, player->raceTime);
-        win << "$player_reach_race";
+        finishPlace_++;
+        if (!sg_raceLogTime)
+        {
+            win.SetTemplateParameter(1, player->GetColoredName() );
+            win.SetTemplateParameter(2, RacingScore);
+            win.SetTemplateParameter(3, player->raceTime);
+            win << "$player_reach_race";
+        }
+        else
+        {
+            if (finishPlace_ == 1)
+            {
+                win.SetTemplateParameter(1, player->GetColoredName());
+                win.SetTemplateParameter(2, reachTime);
+                win << "$player_reach_race_first";
+            }
+            else
+            {
+                win.SetTemplateParameter(1, player->GetColoredName());
+                win.SetTemplateParameter(2, finishPlace_);
+                win.SetTemplateParameter(3, (reachTime - firstFinishTime_));
+                win << "$player_reach_race_time";
+            }
+        }
 
         player->AddScore( RacingScore, win, "" );
-        if (RacingScore > 1) RacingScore -= sg_scoreRaceDeplete;
+        if (RacingScore >= 2) RacingScore -= sg_scoreRaceDeplete;
     }
 }
 
 //! SYNC
-void gRace::Sync( int alive, int ai_alive, int humans, eGrid *Grid, gArena & Arena)
+void gRace::Sync( int alive, int ai_alive, int humans)
 {
-    /* RACE_TRYOUTS code
-    for (int i = 0; i < se_PlayerNetIDs.Len(); i++)
-    {
-        ePlayerNetID * p = se_PlayerNetIDs[i];
-        if ( (p->raceArrived == false) && (p->raceTryouts > 0) && (!p->Object()->Alive()) && (roundFinished_ == false))
-        {
-            eCoord pos,dir;
-            /*if ( p->Object() )
-            {
-                dir = p->Object()->Direction();
-                pos = p->Object()->Position();
-                eWallRim::Bound( pos, 1 );
-                eCoord displacement = pos - p->Object()->Position();
-                if ( displacement.NormSquared() > .01 )
-                {
-                    dir = displacement;
-                    dir.Normalize();
-                }
-            }
-
-            else*
-                Arena.LeastDangerousSpawnPoint()->Spawn( pos, dir );
-
-            gCycle * Cycle = new gCycle( Grid, pos, dir, p );
-            p->ControlObject(Cycle);
-
-            p->raceTryouts--;
-
-            tOutput o;
-            o.SetTemplateParameter(1, p->raceTryouts);
-            o << "$race_tries_left";
-            sn_ConsoleOut(o, p->Owner());
-
-            alive++;
-        }
-    }
-    */
-
     if ( alive == 0 ) // close the round if no human is alive
         roundFinished_ = true;
 
@@ -606,14 +615,14 @@ void gRace::Sync( int alive, int ai_alive, int humans, eGrid *Grid, gArena & Are
         deathZones_.clear();
     }
 
-    if (roundFinished_ == true)
+    if (roundFinished_)
     {
         for (int x=0; x < se_PlayerNetIDs.Len(); x++)
         {
             ePlayerNetID *p = se_PlayerNetIDs[x];
-            if (!p->raceArrived)
+            if (!p->raceArrived && p->IsHuman())
             {
-                gRaceScores::Add(p->GetName(), p->GetUserName(), 0, 0, false);
+                gRaceScores::Add(p->GetUserName(), p->GetName(), 0, 0);
                 p->raceArrived = true;
             }
         }
@@ -654,6 +663,8 @@ void gRace::Reset()
     countDown_ = -1;
     roundFinished_ = false;
     winnerDeclared_ = false;
+    finishPlace_ = 0;
+    firstFinishTime_ = 0;
     RacingScore = sg_scoreRaceComplete;
 
     winZones_.clear();

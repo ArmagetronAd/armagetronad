@@ -1,4 +1,19 @@
-Changes n 0.2.9-sty+ct+ap_806
+Changes in 0.2.9-sty+ct+ap_808
+- Racing script has been coded again for as better and flexible recording of score and time
+- Racing now displays best time or best score depending on RACE_SORT_TYPE
+- Added new command:
+  CYCLE_RUBBER_DEPLETE_SELF   Enabled, it will reduce rubber like normal when you hit your own tail
+  CYCLE_RUBBER_DEPLETE_ENEMY  Enabled, it will reduce rubber like normal when you hit enemy's tail
+  CYCLE_RUBBER_DEPLETE_TEAM   Enabled, it will reduce rubber like normal when you hit team's tail
+  CYCLE_RUBBER_DEPLETE_RIM    Enabled, it will reduce rubber like normal when you hit the rim wall
+  All of the above commands are proved to work but after a certain acceleration, they loose affect and
+  people will be killed instantly.
+- New Chat command for racing: !race
+  If you use !race stats, then it wil display your rank, score and best time for that map
+- Taking the example of the chat symbol from the TRUNK version, the * before the player's name
+  when they are chatting has been added. 
+
+Changes in 0.2.9-sty+ct+ap_806
 - Placed ROUND_ENDED and MATCH_ENDED in a better location
 - PLAYER_MESSAGE doesn't require the " " to enclose the message
 - The race scores, times will be written as the player reaches the winzone or dies.

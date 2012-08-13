@@ -40,16 +40,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 class gRace {
 
 public:
-    static void     ZoneHit     ( ePlayerNetID * player );                                              //!> called when a cycle hits a win zone
-    static void     Sync        ( int alive, int ai_alive, int humans, eGrid *Grid, gArena & Arena );        //!> update race state, called every second
-    static bool     Done        ();                                                                     //!> returns true whether round time is over
-    static void     NewWinZone     ( gWinZoneHack * winZone );                                          //!> handle all win zones to let them vanish
-    static void     NewDeathZone    ( gDeathZoneHack * deathZone);                                      //!> handle all death zones to let them vanish
-    static void     Reset       ();                                                                     //!> reset time and values
-    static void     End         ();                                                                     //!> print time results
+    static void     ZoneHit     ( ePlayerNetID * player );                      //!> called when a cycle hits a win zone
+    static void     Sync        ( int alive, int ai_alive, int humans );        //!> update race state, called every second
+    static bool     Done        ();                                             //!> returns true whether round time is over
+    static void     NewWinZone     ( gWinZoneHack * winZone );                  //!> handle all win zones to let them vanish
+    static void     NewDeathZone    ( gDeathZoneHack * deathZone);              //!> handle all death zones to let them vanish
+    static void     Reset       ();                                             //!> reset time and values
+    static void     End         ();                                             //!> print time results
 
-    static eTeam *  Winner      ();                                                                     //!> returns the race winner
-    static void     playerLeft  ( ePlayerNetID * player );                                              //!> remove player if stored in goals_
+    static eTeam *  Winner      ();                                             //!> returns the race winner
+    static void     playerLeft  ( ePlayerNetID * player );                      //!> remove player if stored in goals_
 
 private:
     static void AddGoal( REAL & time, const tColoredString & colName, const tString & name/*, const tString & authName */);      //!> store player's time
@@ -70,27 +70,34 @@ private:
     static int                          countDown_;
     static bool                         roundFinished_;
     static bool                         winnerDeclared_;
+    static int                          finishPlace_;
+    static REAL                         firstFinishTime_;
 };
 
 class gRaceScores
 {
 public:
-    static void Add(tString RealName, tString UserName,
-                    int WinScore, REAL reachTime, bool arrived);    //!> Adds the score and replace the time if lower than before
-    static void Reset();                                            //!> Resets all name, score, fields for the current map
-    static void Read();                                             //!> Reads in the data in the current map; name, score, time
-    static void Write();                                            //!> Writes the stored data to the current map's txt file
+    gRaceScores(tString UserName);
+    static gRaceScores * GetPlayer(tString name);
+    static bool CheckPlayer(tString name);                                                  //!> Checks if that log name exists within the list
+    static void Add(tString UserName, tString RealName, int WinScore, REAL reachTime);      //!> Adds the score and replace the time if lower than before
+    static void Read();                                                                     //!> Reads in the data in the current map; name, score, time
+    static void Write();                                                                    //!> Writes the stored data to the current map's txt file
+    static void Reset();                                                                    //!> Resets the scores for the next map
 
-    static void Sort();                                             //!> Sorts out by ordering Score (Highest - Lowest) and Time (Lowest - Highest)
-    static bool InOrder(int i, int j);
+    static void RaceCommands(ePlayerNetID *p, std::istream &s, tString command);    //!> the commands to be used only in racing
 
-private:
-    static tArray<tString> raceRealName;
-    static tArray<tString> raceUserName;
-    static tArray<int> raceScore;
-    static tArray<REAL> raceTime;
+    static void OutputTopTen();
 
-    static void Switch(int i, int j);
+public:
+    tString user_name;      // logged name
+    tString real_name;      // screen name
+    int     score;          // best score
+    REAL    time;           // best time
+
+    static void Switch(int i, int j);                                                       //!> Switches the i and j
+    static void Sort();                                                                     //!> Sorts out by ordering Score (Highest - Lowest) and Time (Lowest - Highest)
+    static bool InOrder(int i, int j);                                                      //!> Checks if they are in order
 };
 
 extern bool sg_RaceTimerEnabled;

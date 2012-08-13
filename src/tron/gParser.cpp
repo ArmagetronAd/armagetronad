@@ -45,6 +45,9 @@
 #endif
 
 // lean auto-deleting wrapper class for xmlChar * return values the user has to clean after use
+
+tString mapName;
+
 class gXMLCharReturn
 {
 public:
@@ -1251,6 +1254,7 @@ gParser::LoadAndValidateMapXML(char const * uri, FILE* docfd, char const * fileP
                                         tString( (char const *)myxmlGetProp(root, "type") ) + ".xml";
 
                 tString pureFilePath( filePath );
+                mapName = tString( (char const *)myxmlGetProp(root, "name") );
                 int paren = pureFilePath.StrPos( "(" );
                 if ( paren > 0 )
                 {

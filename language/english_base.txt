@@ -3216,12 +3216,16 @@ race_timer_enabled_help		           (0 = Disable, 1 = Enable) race timer
 race_end_delay_help		               Number of seconds to give players to finish after target reached
 race_score_deplete_help              Number the score depletes by everytime a player enters the win zone.
 race_score_type_help		             0-No sorting; 1-Sort by best score; 2-sort by best time.
-race_highscores_location_help        The location to save and read your scores. EXAMPLE: /home/loverboy/armagetronad/racing/var\nPlease don't add the / at the end. The game does it for you.
 race_tryouts_help                    The number of times a player can play in the same map after dying. It reduces over time.
 race_tryouts_high                    Warning: RACE_TRYOUTS can not be higher than \1. Setting not changed.
 race_tryouts_low                     Warning: RACE_TRYOUTS can not be lower than \1. Setting not changed.
 race_tries_left                      You only have \1 tries left to finish this map.\n
-player_reach_race		                 \1 0xfafafafinished with \2 points in \3 seconds.\n
+race_log_time_help                   If enabled, it displays the reached time and the position of arrival.
+player_reach_race		                 \1 0xfffffffinished with \2 points in \3 seconds.\n
+player_reach_race_first              \1 0xfffffffinished 1st in \2 seconds.\n
+player_reach_race_time               \2| \1 0xfffffffinished \3 s behind 1st.\n
+player_personal_best_reach_time      New personal record! You new time record is \1 seconds.\n
+player_message_race_rank             Your rank is \1 with a time of \2.\n 
 
 access_level_substitute_denied  Required access level to substitute is "\1", you only have "\2".\n
 substitute_message_usage        Usage: /substitute <user out ID or name> <user in ID or name>\n
@@ -3318,6 +3322,14 @@ cycle_target_assignment      0xff9900Your target is now \1.\n
 cycle_target_score           \1 get \2 extra points for core dumping his target \3.\n
 cycle_target_timeout         You fail core dumping your target \1 in time.\n
 cycle_target_cancel          Your target assignment has been cancelled by server.\n
+
+## LOVER$BOY's ADDITIONS ##
+cycle_rubber_deplete_self_help              Default 1; 0 - Players will not lose rubber for hitting their tails | Bug Detected
+cycle_rubber_deplete_enemy_help             Default 1; 0 - Players will not lose rubber for hitting enemy's tails | Bug Detected
+cycle_rubber_deplete_team_help              Default 1; 0 - Players will not lose rubber for hitting their team's tails | Bug Detected
+cycle_rubber_deplete_rim_help               Default 1; 0 - Players will not lose rubber for hitting the rim walls of the arena | Bug Detected 
+
+
 
 # items that should not be translated
 include english_base_notranslate.txt

@@ -3896,6 +3896,31 @@ void handle_chat( nMessage &m )
                     }
 #endif
             }
+            else if (say.StartsWith("!race"))
+            {
+                if (!sg_RaceTimerEnabled)
+                {
+                    tString message;
+                    message << "0xff7777RACE_TIMER_ENABLED must be enabled to use this command.\n";
+                    sn_ConsoleOut(message, p->Owner());
+                    return;
+                }
+
+                std::string sayStr(say);
+                std::istringstream s(sayStr);
+
+                tString command;
+                s >> command;
+
+                // filter to lowercase
+                tToLower( command );
+
+                tConfItemBase::EatWhitespace(s);
+
+                gRaceScores::RaceCommands(p, s, command);
+
+                return;
+            }
 
             // well, that leaves only regular, boring chat.
             eShoutDefault shout = se_GetManagedTeam( p ) ? se_shoutPlayer : se_shoutSpectator;
@@ -6748,6 +6773,7 @@ tString ePlayerNetID::Ranking( int MAX, bool cut ){
     tColoredString ret;
 
     if (se_PlayerNetIDs.Len()>0){
+        ret.SetPos(2, cut);
         ret << tColoredString::ColorString(1,.5,.5);
         ret << tOutput("$player_scoretable_name");
         ret << tColoredString::ColorString(-1,-1,-1);
@@ -6784,6 +6810,9 @@ tString ePlayerNetID::Ranking( int MAX, bool cut ){
             // line << tColoredString::ColorString( p->r/15.0, p->g/15.0, p->b/15.0 ) << name << tColoredString::ColorString(1,1,1);
 
             // however, using the streaming operator is a lot cleaner. The example is left, as it really can be usefull in some situations.
+            if (p->IsChatting())
+                line << "*";
+            line.SetPos(2, cut);
             line << *p;
             line.SetPos(17, false );
             if ( p->Object() && p->Object()->Alive() )
