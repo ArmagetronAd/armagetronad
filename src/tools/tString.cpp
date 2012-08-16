@@ -1879,3 +1879,38 @@ bool st_StringEndsWith( tString const & test, char const * end )
 {
     return st_StringEndsWith( test, tString( end ) );
 }
+
+// **********************************************************************
+// *
+// *	Contains
+// *
+// **********************************************************************
+//!
+//!    @param      tofind       The string to search for within the stored string
+//!    @return     true         Returns true if the string is found
+//!
+// **********************************************************************
+
+bool tString::Contains(const tString & tofind)
+{
+    // if the length of tofind longer than the string, quit it!
+    if (tofind.Len() > Len())
+        return false;
+
+    // the total legnth of tofind, minus the 1 extra garbage
+    int strCount = tofind.Len() - 1;
+
+    for (int i=0; i < Len(); i++)
+    {
+        // strip the string to the length of tofind
+        tString isThis = this->SubStr(i, strCount);
+
+        // if that stripped string matches, good!
+        if (isThis == tofind)
+        {
+            return true;
+        }
+    }
+    // if they don't match at all, too bad!
+    return false;
+}

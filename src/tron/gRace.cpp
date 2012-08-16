@@ -341,7 +341,7 @@ void gRaceScores::OutputTopTen()
 
     tColoredString barLine;
     barLine << "0xa00060";
-    for (int a=0; a < 59; a++)
+    for (int a=0; a < 63; a++)
     {
         barLine << "#";
     }
@@ -370,7 +370,7 @@ void gRaceScores::OutputTopTen()
     line << "0xa00060# 0xff6622SCORE";
     line.SetPos(47, false);
     line << "0xa00060# 0xff6622BEST TIME";
-    line.SetPos(59, false);
+    line.SetPos(63, false);
     line << "0xa00060#";
     line << "\n";
 
@@ -389,7 +389,7 @@ void gRaceScores::OutputTopTen()
         ret << "0xa00060# 0x80ffff" << rS->score;
         ret.SetPos(47, false);
         ret << "0xa00060# 0x80ffff" << rS->time;
-        ret.SetPos(59, false);
+        ret.SetPos(63, false);
         ret << "0xa00060#";
 
         Output << ret << "\n";
@@ -433,59 +433,129 @@ void gRaceScores::RaceCommands(ePlayerNetID *p, std::istream &s, tString command
         argument = params.ExtractNonBlankSubString(pos);
         if (argument == "stats")
         {
-            Sort();
-            tColoredString Output;
-
-            tColoredString barLine;
-            barLine << "0xa00060";
-            for (int a=0; a < 59; a++)
+            tString extraArg;
+            extraArg = params.ExtractNonBlankSubString(pos);
+            if (extraArg == "")
             {
-                barLine << "#";
-            }
+                Sort();
+                tColoredString Output;
 
-            Output << barLine << "\n";
-
-            tColoredString line;
-            line << "0xa00060# 0xff6622RANK";
-            line.SetPos(10, false);
-            line << "0xa00060# 0xff6622PLAYER";
-            line.SetPos(30, false);
-            line << "0xa00060# 0xff6622SCORE";
-            line.SetPos(47, false);
-            line << "0xa00060# 0xff6622BEST TIME";
-            line.SetPos(59, false);
-            line << "0xa00060#";
-            line << "\n";
-
-            Output << line;
-            Output << barLine << "\n";
-
-            int rank = 1;
-            for (int i=0; i < sn_RaceScores.Len(); i++)
-            {
-                gRaceScores *rS = sn_RaceScores[i];
-                if (rS->user_name == p->GetUserName())
+                tColoredString barLine;
+                barLine << "0xa00060";
+                for (int a=0; a < 63; a++)
                 {
-                    tColoredString ret;
-                    ret << "0xa00060# 0xffff77" << rank;
-                    ret.SetPos(10, false);
-                    ret << "0xa00060# 0xe0a0ff" << rS->real_name;
-                    ret.SetPos(30, false);
-                    ret << "0xa00060# 0x80ffff" << rS->score;
-                    ret.SetPos(47, false);
-                    ret << "0xa00060# 0x80ffff" << rS->time;
-                    ret.SetPos(59, false);
-                    ret << "0xa00060#";
-
-                    Output << ret << "\n";
-
-                    break;
+                    barLine << "#";
                 }
-                rank++;
+
+                Output << barLine << "\n";
+
+                tColoredString line;
+                line << "0xa00060# 0xff6622RANK";
+                line.SetPos(10, false);
+                line << "0xa00060# 0xff6622PLAYER";
+                line.SetPos(30, false);
+                line << "0xa00060# 0xff6622SCORE";
+                line.SetPos(47, false);
+                line << "0xa00060# 0xff6622BEST TIME";
+                line.SetPos(63, false);
+                line << "0xa00060#";
+                line << "\n";
+
+                Output << line;
+                Output << barLine << "\n";
+
+                int rank = 1;
+                for (int i=0; i < sn_RaceScores.Len(); i++)
+                {
+                    gRaceScores *rS = sn_RaceScores[i];
+                    if (rS->user_name == p->GetUserName())
+                    {
+                        tColoredString ret;
+                        ret << "0xa00060# 0xffff77" << rank;
+                        ret.SetPos(10, false);
+                        ret << "0xa00060# 0xe0a0ff" << rS->real_name;
+                        ret.SetPos(30, false);
+                        ret << "0xa00060# 0x80ffff" << rS->score;
+                        ret.SetPos(47, false);
+                        ret << "0xa00060# 0x80ffff" << rS->time;
+                        ret.SetPos(63, false);
+                        ret << "0xa00060#";
+
+                        Output << ret << "\n";
+
+                        break;
+                    }
+                    rank++;
+                }
+                Output << "0xff6622Current Map: 0x00ff44" << sg_currentMap << "\n";
+                Output << barLine << "\n";
+                sn_ConsoleOut(Output, p->Owner());
             }
-            Output << "0xff6622Current Map: 0x00ff44" << sg_currentMap << "\n";
-            Output << barLine << "\n";
-            sn_ConsoleOut(Output, p->Owner());
+            else
+            {
+                Sort();
+                tColoredString Output;
+
+                tColoredString barLine;
+                barLine << "0xa00060";
+                for (int a=0; a < 63; a++)
+                {
+                    barLine << "#";
+                }
+
+                int rank = 1;
+                int matches = 0;
+                for (int i=0; i < sn_RaceScores.Len(); i++)
+                {
+                    gRaceScores *rS = sn_RaceScores[i];
+                    if (rS)
+                    {
+                        Output << barLine << "\n";
+                        Output << "0xffff77Records under search name 0x22ffaa" << extraArg << " .\n";
+                        Output << barLine << "\n";
+
+                        tColoredString line;
+                        line << "0xa00060# 0xff6622RANK";
+                        line.SetPos(10, false);
+                        line << "0xa00060# 0xff6622PLAYER";
+                        line.SetPos(30, false);
+                        line << "0xa00060# 0xff6622SCORE";
+                        line.SetPos(47, false);
+                        line << "0xa00060# 0xff6622BEST TIME";
+                        line.SetPos(63, false);
+                        line << "0xa00060#";
+                        line << "\n";
+
+                        Output << line;
+                        Output << barLine << "\n";
+
+                        tString nametoSearch = ePlayerNetID::FilterName(extraArg);
+                        tString searchSource = ePlayerNetID::FilterName(rS->real_name);
+                        if (searchSource.Contains(nametoSearch))
+                        {
+                            tColoredString ret;
+                            ret << "0xa00060# 0xffff77" << rank;
+                            ret.SetPos(10, false);
+                            ret << "0xa00060# 0xe0a0ff" << rS->real_name;
+                            ret.SetPos(30, false);
+                            ret << "0xa00060# 0x80ffff" << rS->score;
+                            ret.SetPos(47, false);
+                            ret << "0xa00060# 0x80ffff" << rS->time;
+                            ret.SetPos(63, false);
+                            ret << "0xa00060#";
+
+                            Output << ret << "\n";
+
+                            matches++;
+                        }
+                        rank++;
+                    }
+                }
+                Output << "0xff6622Current Map: 0x00ff44" << sg_currentMap << "\n";
+                Output << "0x2e96b8 " << matches << "0x9b2c83matches are found for 0x39b22a" << extraArg << "\n";
+                Output << barLine << "\n";
+                sn_ConsoleOut(Output, p->Owner());
+            }
         }
     }
 }
@@ -795,4 +865,3 @@ eTeam * gRace::Winner()
 
     return winner;
 }
-

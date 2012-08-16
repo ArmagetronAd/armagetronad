@@ -123,6 +123,9 @@ public:
     REAL toReal( const REAL pos) const;
     REAL toReal() const;
 
+    //! confirms whether the tofind exists within the current string
+    bool Contains(const tString & tfind);
+
     //! compares two strings alphanumerically
     static int CompareAlphaNumerical( const tString& a, const tString &b);
 
