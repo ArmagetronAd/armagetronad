@@ -199,6 +199,9 @@ extern tString sg_currentMap;
 
 void Orderedrotate();
 void Randomrotate();
+void QueRotate();
+
+extern void sg_AddQueingItems(ePlayerNetID *p, std::istream &s, tString command);
 
 #endif
 

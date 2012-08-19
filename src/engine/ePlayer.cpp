@@ -57,6 +57,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "nNetwork.h"
 #include "../tron/gCycle.h"
 #include "../tron/gWinZone.h"
+#include "../tron/gGame.h"
 #include "eGrid.h"
 #include <time.h>
 
@@ -3882,6 +3883,12 @@ void handle_chat( nMessage &m )
                         se_DisplayChatLocally(p, say);
                         return;
                     }
+                    // the commands below (mp and cq) are the ones to use for add/remove/list items in the queing list
+                    else if ((command == "/mq") || (command == "/cq"))
+                    {
+                        sg_AddQueingItems(p, s, command);
+                        return;
+                    }
 #ifdef DEDICATED
                     else  if ( command == "/rtfm" || command == "/teach" )
                     {
@@ -6811,7 +6818,7 @@ tString ePlayerNetID::Ranking( int MAX, bool cut ){
 
             // however, using the streaming operator is a lot cleaner. The example is left, as it really can be usefull in some situations.
             if (p->IsChatting())
-                line << "*";
+                line << '*';
             line.SetPos(2, cut);
             line << *p;
             line.SetPos(17, false );

@@ -94,7 +94,10 @@ protected:
     float sizeMultiplier;
 };
 
-extern tString mapName;
+extern tString pz_mapName;
+extern tString pz_mapAuthor;
+extern tString pz_mapVersion;
+extern tString pz_mapCategory;
 
 #endif //ArmageTron_PARSER_H
 

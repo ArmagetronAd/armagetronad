@@ -1,3 +1,41 @@
+Changes in 0.2.9-sty+ct+ap_811
+- Added new commands:
+  * MAP_QUEING        Store and load maps in a que every round until empty. The maps must exist in MAP_ROTATION
+  * CONFIG_QUEING     Store and load configs in a que every round until empty. The configs must exist in CONFIG_ROTATION
+     # While the que is not empty, the normal rotation will pause.
+     # Once empty, the rotation will resume from last pause point.
+     # If the rotation is set to rotate per round and this ended half-way through the round, then you'll be stuck
+       in the same map before the rotation changes the map unless you choose to manually MAP_FILE author/category/...
+     # You can only add one map/config to the queing system each time you use it
+  * CONFIG_ROTATION_TYPE        What type of loading will the CONFIG_ROTATION files use? 0-INCLUDE or 1-RINCLUDE? Default: 0
+  * RESET_MAP_QUEING            Clears all entries in the list of maps
+  * RESET_CONFIG_QUEING         Clears all entries in the list of configs
+  * ACCESS_LEVEL_QUE_MAPS       The level required for any player to use /mq add & remove    
+  * ACCESS_LEVEL_QUE_CONFIGS    The level required for any player to use /cq add & remove
+  * SHOT_BASE_RESPAWN           If enabled, when you shoot at your team base, your teammates will be revived
+  * SHOT_BASE_ENEMY_RESPAWN     If enabled, when you shoot at your enemy team's base, your enemies will be revived          
+- Chat commands:
+  * /mq - Map Queing; /cq - Config Queing;
+    Their arguments are as follows:
+    1. list/ls       - Lists the items that are in the que currently.
+    2. add [item]    - Adds a new item specified by [item]. It does not make a new copy of the existing item in the que.
+    3. remove [item] - Removes a item that already exists in the que as specified by [item].
+  * !race stats [player_name]
+    The new argument's explanations:
+    1. [player_name] - This is where you enter a player's name to search for in the racing records.  
+- Fixed Commited:
+  * Fixed the variables with the ball and base zone commands   
+    + Base zone commands:
+      - FORTRESS_SURVIVE_WIN - Changed fron int to bool. Easier to handle.
+      - FORTRESS_CONQUER_WIN - Changed from int to bool.
+    + Ball zone commands:
+      - BALL_KILL       - Changed from int to bool.
+      - BALL_TEAM_MODE  - Changed from int to bool. Easier to handle.
+  * Fixed the saving racing map records. Now they will save in var directory as:
+    .../var/race_scores/author/category/...
+    This seems to be a lot better handler than the earlier code as two maps with similar names from different
+    authors did cause a glitch in the records.                
+
 Changes in 0.2.9-sty+ct+ap_808
 - Racing script has been coded again for as better and flexible recording of score and time
 - Racing now displays best time or best score depending on RACE_SORT_TYPE

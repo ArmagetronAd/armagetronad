@@ -79,14 +79,14 @@ static nSettingItem< REAL > sg_initialSizeConf( "WIN_ZONE_INITIAL_SIZE", sg_init
 static int sg_ballsInteract = 0;
 static tSettingItem<int> sg_ballsInteractConf( "BALLS_INTERACT", sg_ballsInteract );
 
-static int sg_cycleWallsInteract = 0;
-static tSettingItem<int> sg_cycleWallsInteractConf( "BALLS_BOUNCE_ON_CYCLE_WALLS", sg_cycleWallsInteract );
+static bool sg_cycleWallsInteract = 0;
+static tSettingItem<bool> sg_cycleWallsInteractConf( "BALLS_BOUNCE_ON_CYCLE_WALLS", sg_cycleWallsInteract );
 
-static int sg_ballTeamMode = 0;  //0=ball score other team, 1=ball score only team owner ...
-static tSettingItem<int> sg_ballTeamModeConfig( "BALL_TEAM_MODE", sg_ballTeamMode );
+static bool sg_ballTeamMode = 0;  //0=ball score other team, 1=ball score only team owner ...
+static tSettingItem<bool> sg_ballTeamModeConfig( "BALL_TEAM_MODE", sg_ballTeamMode );
 
-static int sg_ballKiller = 0;    //1=ball kill other team players ...
-static tSettingItem<int> sg_ballKillerConfig( "BALL_KILLS", sg_ballKiller );
+static bool sg_ballKiller = 0;    //1=ball kill other team players ...
+static tSettingItem<bool> sg_ballKillerConfig( "BALL_KILLS", sg_ballKiller );
 
 static REAL sg_ballSpeedDecay = 0;
 static tSettingItem<REAL> sg_ballSpeedDecayConf( "BALL_SPEED_DECAY", sg_ballSpeedDecay );
@@ -94,8 +94,8 @@ static tSettingItem<REAL> sg_ballSpeedDecayConf( "BALL_SPEED_DECAY", sg_ballSpee
 static REAL sg_ballCycleBoost = 0;
 static tSettingItem<REAL> sg_ballCycleBoostConf( "BALL_CYCLE_ACCEL_BOOST", sg_ballCycleBoost );
 
-static int sg_ballAutoRespawn = 1;
-static tSettingItem<int> sg_ballAutoRespawnConf( "BALL_AUTORESPAWN", sg_ballAutoRespawn );
+static bool sg_ballAutoRespawn = 1;
+static tSettingItem<bool> sg_ballAutoRespawnConf( "BALL_AUTORESPAWN", sg_ballAutoRespawn );
 
 static int sg_zoneSegments = 11;
 static tSettingItem<int> sg_zoneSegmentsConf( "ZONE_SEGMENTS", sg_zoneSegments );
@@ -2343,8 +2343,8 @@ static int sg_onConquestScore = 0;
 static tSettingItem< int > sg_onConquestConquestScoreConfig( "FORTRESS_CONQUERED_SCORE", sg_onConquestScore );
 
 // flag indicating whether the team conquering the first zone wins (good for one on one matches)
-static int sg_onConquestWin = 1;
-static tSettingItem< int > sg_onConquestConquestWinConfig( "FORTRESS_CONQUERED_WIN", sg_onConquestWin );
+static bool sg_onConquestWin = true;
+static tSettingItem< bool > sg_onConquestConquestWinConfig( "FORTRESS_CONQUERED_WIN", sg_onConquestWin );
 
 // maximal number of base zones ownable by a team
 static int sg_baseZonesPerTeam = 0;
@@ -2920,8 +2920,8 @@ void gBaseZoneHack::OnConquest( void )
 
 
 // if this flag is enabled, the last team with a non-conquered zone wins the round.
-static int sg_onSurviveWin = 1;
-static tSettingItem< int > sg_onSurviveWinConfig( "FORTRESS_SURVIVE_WIN", sg_onSurviveWin );
+static bool sg_onSurviveWin = true;
+static tSettingItem< bool > sg_onSurviveWinConfig( "FORTRESS_SURVIVE_WIN", sg_onSurviveWin );
 
 // *******************************************************************************
 // *
@@ -3327,6 +3327,17 @@ void gBaseZoneHack::OnEnter( gCycle * target, REAL time )
     }
 }
 
+// flag indicating whether base will respawn team if a team player's shot enters it
+static bool sg_shotbaseRespawn = false;
+static tSettingItem<bool> sg_shotBaseRespawnConfig ("SHOT_BASE_RESPAWN", sg_shotbaseRespawn);
+
+// flag indicating whether base will respawn team if an enemy player's shot enters it
+static bool sg_shotbaseEnemyRespawn = false;
+static tSettingItem<bool> sg_shotBaseEnemyRespawnConfig ("SHOT_BASE_ENEMY_RESPAWN", sg_shotbaseEnemyRespawn);
+
+static int sg_scoreShotBase = 0;
+static tSettingItem<int> sg_scoreShotBaseConf("SCORE_SHOT_BASE", sg_scoreShotBase);
+
 
 // *******************************************************************************
 // *
@@ -3344,11 +3355,10 @@ void gBaseZoneHack::OnEnter( gZone * target, REAL time )
                                  //it already hit the zone.
     if(currentState_ == State_Conquering || currentState_ == State_Conquered) return;
     gBallZoneHack *ball = dynamic_cast<gBallZoneHack *>(target);
-    if (!ball) return;
 
     // check ball team mode
-    int toScore;
-    if (!team || !target ) toScore = 1;
+    bool toScore;
+    if (!team || !target ) toScore = true;
     else if (sg_ballTeamMode) toScore = target->Team() == team ? 1 : 0;
     else toScore = target->Team() == team ? 0 : 1;
 
@@ -3466,6 +3476,64 @@ void gBaseZoneHack::OnEnter( gZone * target, REAL time )
                 // don't end the round, just respawn the ball at the original location
                 ball->GoHome();
             }
+        }
+    }
+
+    gDeathZoneHack *deathZone = dynamic_cast<gDeathZoneHack *>(target);
+    if (deathZone)
+    {
+        if (deathZone->GetType() == gDeathZoneHack::TYPE_SHOT)
+        {
+            ePlayerNetID *shotOwner = deathZone->GetOwner();
+            if (shotOwner && (((shotOwner->CurrentTeam() == team) && sg_shotbaseRespawn) || ((shotOwner->CurrentTeam() != team) && sg_shotbaseEnemyRespawn)))
+            {
+                gSpawnPoint *pSpawn = Arena.ClosestSpawnPoint(GetPosition());
+
+                if (pSpawn)
+                {
+                    for (int i = team->NumPlayers() - 1; i >= 0; --i)
+                    {
+                        ePlayerNetID *pPlayer = team->Player(i);
+
+                        eGameObject *pGameObject = pPlayer->Object();
+
+                        if ((!pGameObject) ||
+                            ((!pGameObject->Alive()) &&
+                            (pGameObject->DeathTime() < (time - 1))))
+                        {
+                            lastRespawnRemindTime_ = time - sg_baseRespawnRemindTime - 1;
+
+                            eCoord pos, dir;
+
+                            pSpawn->Spawn(pos, dir);
+
+                            gCycle *pCycle = new gCycle(grid, pos, dir, pPlayer);
+                            pPlayer->ControlObject(pCycle);
+
+                            tColoredString playerName;
+                            playerName << *pPlayer << tColoredString::ColorString(1,1,1);
+
+                            if (shotOwner->CurrentTeam() == team)
+                            {
+                                tColoredString spawnerName;
+                                spawnerName << shotOwner->GetColoredName() << tColoredString::ColorString(1,1,1);
+                                sn_ConsoleOut( tOutput( "$player_base_respawn", playerName, spawnerName ) );
+                            }
+                            else
+                            {
+                                tColoredString spawnerName;
+                                spawnerName << shotOwner->GetColoredName() << tColoredString::ColorString(1,1,1);
+                                sn_ConsoleOut( tOutput( "$player_base_enemy_respawn", playerName, spawnerName ) );
+                            }
+                        }
+                    }
+                }
+            }
+            tOutput win;
+            win.SetTemplateParameter(1, shotOwner->GetName());
+            win.SetTemplateParameter(3, team->Name());
+            win << "$player_shot_base";
+            shotOwner->AddScore(sg_scoreShotBase, win, "");
         }
     }
 }

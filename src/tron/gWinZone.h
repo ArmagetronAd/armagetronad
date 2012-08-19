@@ -114,7 +114,7 @@ public:
     gRealColor &    GetColor            () {return color_;}             //!< Gets the current color
     gZone &         GetColor            (gRealColor & color) {color = color_; return *this;}    //!< Gets the current color
     gZone &         SetOwner            (ePlayerNetID *pOwner); //!< Sets the current owner
-    ePlayerNetID *  GetOwner            () {return pOwner_;}  //!< Sets the current owner
+    ePlayerNetID *  GetOwner            () {return pOwner_;}  //!< Gets the current owner
     gZone &         SetSeekingCycle     (gCycle *pCycle) {if (pCycle) {seeking_ = true;} else {seeking_ = false;} pSeekingCycle_ = pCycle; return *this;}  //!< Sets the current seeking cycle
     gCycle *        GetSeekingCycle     () {return pSeekingCycle_;}  //!< Sets the current seeking cycle
     gZone &         SetTargetRadius     (REAL radius) {targetRadius_ = radius; return *this;}      //!< Sets the target radius

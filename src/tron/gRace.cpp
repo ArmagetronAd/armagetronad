@@ -173,8 +173,8 @@ bool gRaceScores::InOrder(int i,int j)
     gRaceScores *rSR = sn_RaceScores[j];
     if (racescoretype == gRACESCORE_BEST_TIME)
     {
-        if (rSP->time == 0) return false;
-        if (rSR->time == 0) return true;
+        if (rSP->time == -1) return false;
+        if (rSR->time == -1) return true;
         else return (rSP->time <= rSR->time);
     }
     else if (racescoretype == gRACESCORE_BEST_SCORE) return (rSP->score >= rSR->score);
@@ -194,7 +194,7 @@ void gRaceScores::Add(tString UserName, tString RealName, int WinScore, REAL rea
         gRaceScores *rS = GetPlayer(UserName);
         rS->real_name = RealName;
         rS->score += WinScore;
-        if (((reachTime < rS->time) && reachTime != 0) || (rS->time == 0 && reachTime != 0))
+        if (((reachTime < rS->time) && reachTime != -1) || (rS->time == -1 && reachTime != -1))
         {
             rS->time = reachTime;
             tOutput newTime;
@@ -214,13 +214,20 @@ void gRaceScores::Add(tString UserName, tString RealName, int WinScore, REAL rea
         rS->real_name = RealName;
         rS->score = WinScore;
         rS->time = reachTime;
+        if (reachTime != -1)
+        {
+            tOutput newTime;
+            newTime.SetTemplateParameter(1, reachTime);
+            newTime << "$player_personal_best_reach_time";
+        }
     }
 }
 
 void gRaceScores::Read()
 {
     tString CurrentMapStr(sg_currentMap);
-    int linenum, rlinenum;
+    tString CurrentMapName;
+    /*int linenum, rlinenum;
     linenum = 0;
     while(linenum != -1)
     {
@@ -232,10 +239,11 @@ void gRaceScores::Read()
             CurrentMapName = CurrentMapStr.SubStr(rlinenum+1, (CurrentMapStr.Len() - (rlinenum+1)));
             CurrentMapName << ".txt";
         }
-    }
+    }*/
 
     tString Input, params;
-    Input << "race_scores/" << CurrentMapName;
+    //Input << "race_scores/" << CurrentMapName;
+    Input << "race_scores/" << sg_currentMap << ".txt";
     //tTextFileRecorder r(tDirectories::Var(), Input);
     std::ifstream r;
     if ( tDirectories::Var().Open(r, Input) ) {
@@ -308,7 +316,8 @@ void gRaceScores::Write()
     linenum = Output.StrPos(0, "\n");
     Output = Output.SubStr(0, linenum);*/
 
-    Output << /*tDirectories::Var().GetPaths()*/"race_scores/" << CurrentMapName;
+    //Output << /*tDirectories::Var().GetPaths()*/"race_scores/" << CurrentMapName;
+    Output << /*tDirectories::Var().GetPaths()*/"race_scores/" << sg_currentMap << ".txt";
 
     if (sn_RaceScores.Len() > 0)
     {
@@ -429,12 +438,10 @@ void gRaceScores::RaceCommands(ePlayerNetID *p, std::istream &s, tString command
         params.ReadLine(s, true);
         int pos = 0;
 
-        tString argument;
-        argument = params.ExtractNonBlankSubString(pos);
+        tString argument = params.ExtractNonBlankSubString(pos);
         if (argument == "stats")
         {
-            tString extraArg;
-            extraArg = params.ExtractNonBlankSubString(pos);
+            tString extraArg = params.ExtractNonBlankSubString(pos);
             if (extraArg == "")
             {
                 Sort();
@@ -496,64 +503,57 @@ void gRaceScores::RaceCommands(ePlayerNetID *p, std::istream &s, tString command
                 Sort();
                 tColoredString Output;
 
-                tColoredString barLine;
-                barLine << "0xa00060";
-                for (int a=0; a < 63; a++)
-                {
-                    barLine << "#";
-                }
-
-                int rank = 1;
-                int matches = 0;
+                tArray<gRaceScores *> searchList;
                 for (int i=0; i < sn_RaceScores.Len(); i++)
                 {
                     gRaceScores *rS = sn_RaceScores[i];
                     if (rS)
                     {
-                        Output << barLine << "\n";
-                        Output << "0xffff77Records under search name 0x22ffaa" << extraArg << " .\n";
-                        Output << barLine << "\n";
-
-                        tColoredString line;
-                        line << "0xa00060# 0xff6622RANK";
-                        line.SetPos(10, false);
-                        line << "0xa00060# 0xff6622PLAYER";
-                        line.SetPos(30, false);
-                        line << "0xa00060# 0xff6622SCORE";
-                        line.SetPos(47, false);
-                        line << "0xa00060# 0xff6622BEST TIME";
-                        line.SetPos(63, false);
-                        line << "0xa00060#";
-                        line << "\n";
-
-                        Output << line;
-                        Output << barLine << "\n";
-
                         tString nametoSearch = ePlayerNetID::FilterName(extraArg);
                         tString searchSource = ePlayerNetID::FilterName(rS->real_name);
                         if (searchSource.Contains(nametoSearch))
                         {
-                            tColoredString ret;
-                            ret << "0xa00060# 0xffff77" << rank;
-                            ret.SetPos(10, false);
-                            ret << "0xa00060# 0xe0a0ff" << rS->real_name;
-                            ret.SetPos(30, false);
-                            ret << "0xa00060# 0x80ffff" << rS->score;
-                            ret.SetPos(47, false);
-                            ret << "0xa00060# 0x80ffff" << rS->time;
-                            ret.SetPos(63, false);
-                            ret << "0xa00060#";
-
-                            Output << ret << "\n";
-
-                            matches++;
+                            searchList.Insert(rS);
+                        }
+                    }
+                }
+                if (searchList.Len() == 1)
+                {
+                    tOutput SendMessage;
+                    int rank = 1;
+                    gRaceScores *rS = searchList[0];
+                    for (int i=0; i < sn_RaceScores.Len(); i++)
+                    {
+                        gRaceScores *rSR = sn_RaceScores[i];
+                        if (rSR->user_name == rS->user_name)
+                        {
+                            SendMessage.SetTemplateParameter(1, rS->real_name);
+                            SendMessage.SetTemplateParameter(2, rank);
+                            SendMessage.SetTemplateParameter(3, rS->time);
+                            SendMessage << "$player_race_record_search_found";
+                            sn_ConsoleOut(SendMessage, p->Owner());
+                            break;
                         }
                         rank++;
                     }
                 }
+                else if (searchList.Len() == 0)
+                {
+                    tOutput SendMessage;
+                    SendMessage.SetTemplateParameter(1, extraArg);
+                    SendMessage << "$player_race_record_search_not_found";
+                    sn_ConsoleOut(SendMessage, p->Owner());
+                    return;
+                }
+                else
+                {
+                    tOutput SendMessage;
+                    SendMessage.SetTemplateParameter(1, extraArg);
+                    SendMessage << "$player_race_record_search_many_found";
+                    sn_ConsoleOut(SendMessage, p->Owner());
+                    return;
+                }
                 Output << "0xff6622Current Map: 0x00ff44" << sg_currentMap << "\n";
-                Output << "0x2e96b8 " << matches << "0x9b2c83matches are found for 0x39b22a" << extraArg << "\n";
-                Output << barLine << "\n";
                 sn_ConsoleOut(Output, p->Owner());
             }
         }
@@ -697,7 +697,7 @@ void gRace::Sync( int alive, int ai_alive, int humans)
             ePlayerNetID *p = se_PlayerNetIDs[x];
             if (!p->raceArrived && p->IsHuman())
             {
-                gRaceScores::Add(p->GetUserName(), p->GetName(), 0, 0);
+                gRaceScores::Add(p->GetUserName(), p->GetName(), 0, -1);
                 p->raceArrived = true;
             }
         }
@@ -757,7 +757,7 @@ void gRace::Reset()
     if ( tDirectories::Var().Open( o, "race_temp.txt" ) )
         o << "";
 
-    gRaceScores::Write();
+    //gRaceScores::Write();
     gRaceScores::Reset();
     gRaceScores::Read();
 }
