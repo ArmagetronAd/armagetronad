@@ -91,6 +91,7 @@ protected:
         GrowingArrayBase::Swap( other );
     }
 
+public:
     void Clear(){
         int i;
         for(i=Size()-1;i>=0;i--){
@@ -100,7 +101,7 @@ protected:
         Delete(MALLOC);
     }
 
-
+protected:
     void CopyFrom(const tArray &A){
         int i;
         for(i=Len()-1;i>=0;i--)

@@ -334,11 +334,12 @@ void gRaceScores::Write()
 
 void gRaceScores::Reset()
 {
-    for (int i=0; i < sn_RaceScores.Len(); i++)
+    for(int i=0; i < sn_RaceScores.Len(); i++)
     {
         gRaceScores *rS = sn_RaceScores[i];
         sn_RaceScores.RemoveAt(i);
         delete rS;
+        i -= 1;
     }
 }
 
