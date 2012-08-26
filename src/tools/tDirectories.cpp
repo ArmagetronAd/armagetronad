@@ -180,16 +180,21 @@ static tString st_MusicDir(".");    // directory for game music
 #ifdef USER_DATA_DIR
 static tString st_UserDataDir(expand_home_c(USER_DATA_DIR));    // directory for game data
 #else
-static tString st_UserDataDir(expand_home_c("~/." PROGDIR));    // directory for game data
+static tString st_UserDataDir(expand_home_c("${XDG_DATA_HOME}/" PROGDIR));    // directory for game data
 #endif
 
 // load data from unbranded configuration directory on branded builds in Linux
 #if !defined DEDICATED && !defined MACOSX && !defined LEGACY_USER_DATA_DIR && !defined DEBUG
 #define LEGACY_USER_DATA_DIR "~/.armagetronad"
+#define LEGACY_USER_DATA_DIR2 "~/." PROGDIR
 #endif
 
 #ifdef LEGACY_USER_DATA_DIR
 static tString st_LegacyUserDataDir(expand_home_c(LEGACY_USER_DATA_DIR));    // directory for game data (old location)
+#endif
+
+#ifdef LEGACY_USER_DATA_DIR2
+static tString st_LegacyUserDataDir2(expand_home_c(LEGACY_USER_DATA_DIR2));    // directory for game data
 #endif
 
 #ifdef CONFIG_DIR
@@ -207,13 +212,13 @@ static tString st_ScriptDir("");  // directory for scripts
 #ifdef USER_CONFIG_DIR
 static tString st_UserConfigDir(expand_home_c(USER_CONFIG_DIR));  // directory for static configuration files
 #else
-static tString st_UserConfigDir("");  // directory for static configuration files
+static tString st_UserConfigDir(expand_home_c("${XDG_CONFIG_HOME}/" PROGDIR));  // directory for static configuration files
 #endif
 
 #ifdef VAR_DIR
 static tString st_VarDir(expand_home_c(VAR_DIR));     // directory for dynamic logs and highscores
 #else
-static tString st_VarDir("");     // directory for dynamic logs and highscores
+static tString st_VarDir(expand_home_c("${XDG_DATA_HOME}/" PROGDIR "/var"));     // directory for dynamic logs and highscores
 #endif
 
 #ifdef DEDICATED
@@ -471,17 +476,37 @@ char *eh_getdir(const char *da, size_t *len) {
                 ret = strdup(path);
         }
 # else
-        // fall back to default for HOME
-        if (!strcmp(type, "HOME")) {
+
+        if (type)
+        {
             struct passwd *pw;
 
             if (user[0] == '\0') // Current user
                 pw = getpwuid(getuid());
             else
                 pw = getpwnam(user);
-            if (pw)
-                ret = strdup(pw->pw_dir);
-            // struct passwd seems to do some really freaky stuff and doesn't like freeing? can someone confirm this?
+
+            if(pw)
+            {
+                if (!strcmp(type, "XDG_CONFIG_HOME"))
+                {
+                    char const * xdg_config = getenv("XDG_CONFIG_HOME");
+                    tString config(xdg_config ? xdg_config : tString(pw->pw_dir) + "/.config");
+                    ret = strdup( config );
+                }
+                else if (!strcmp(type, "XDG_DATA_HOME"))
+                {
+                    char const * xdg_data = getenv("XDG_DATA_HOME");
+                    tString data(xdg_data ? xdg_data : tString(pw->pw_dir) + "/.local/share");
+                    ret = strdup( data );
+                }
+
+                // fall back to default for HOME
+                if (!strcmp(type, "HOME"))
+                {
+                    ret = strdup(pw->pw_dir);
+                }
+            }
         }
 # endif
         // TODO: fall back to hardcoded stuff in some cases?
@@ -548,6 +573,13 @@ private:
         }
 #endif
 
+#ifdef LEGACY_USER_DATA_DIR2
+        if ( st_LegacyUserDataDir2.Len() > 1 )
+        {
+            paths[ pos++ ] = st_LegacyUserDataDir2 + "/config";
+        }
+#endif
+
         if ( st_UserDataDir.Len() > 1 )
         {
             paths[ pos++ ] = st_UserDataDir + "/config";
@@ -589,6 +621,13 @@ private:
         if ( st_LegacyUserDataDir.Len() > 1 )
         {
             paths[ pos++ ] = st_LegacyUserDataDir;
+        }
+#endif
+
+#ifdef LEGACY_USER_DATA_DIR2
+        if ( st_LegacyUserDataDir2.Len() > 1 )
+        {
+            paths[ pos++ ] = st_LegacyUserDataDir2;
         }
 #endif
 
@@ -657,6 +696,13 @@ private:
         if ( st_LegacyUserDataDir.Len() > 1 )
         {
             paths[ pos++ ] = st_LegacyUserDataDir + "/var";
+        }
+#endif
+
+#ifdef LEGACY_USER_DATA_DIR2
+        if ( st_LegacyUserDataDir2.Len() > 1 )
+        {
+            paths[ pos++ ] = st_LegacyUserDataDir2 + "/var";
         }
 #endif
 
@@ -1667,6 +1713,21 @@ void tDirectoriesCommandLineAnalyzer::DoInitialize( tCommandLineParser & parser 
             st_LegacyUserDataDir = "";
         }
 #endif
+
+#ifdef LEGACY_USER_DATA_DIR2
+        // blank out legacy user data dir if it matches the real user data dir
+        if ( st_UserDataDir == st_LegacyUserDataDir2 )
+        {
+            st_LegacyUserDataDir2 = "";
+        }
+#ifdef LEGACY_USER_DATA_DIR
+        // blank out legacy user data dir if it matches the other legacy user data dir
+        if ( st_LegacyUserDataDir == st_LegacyUserDataDir2 )
+        {
+            st_LegacyUserDataDir2 = "";
+        }
+#endif
+#endif
     }
     catch( tRunningInBuildDirectory )
     {
@@ -1675,12 +1736,17 @@ void tDirectoriesCommandLineAnalyzer::DoInitialize( tCommandLineParser & parser 
         {
             // we must be running the game in debug mode; set user data dir to current directory.
             st_UserDataDir = ".";
+            st_VarDir = "var";
+            st_UserConfigDir = "userconfig";
 
             // the included resources are scrambled and put into the current directory as well.
             st_IncludedResourceDir = "./resource/included";
 
 #ifdef LEGACY_USER_DATA_DIR
             st_LegacyUserDataDir = "";
+#endif
+#ifdef LEGACY_USER_DATA_DIR2
+            st_LegacyUserDataDir2 = "";
 #endif
             return;
         }

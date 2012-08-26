@@ -47,6 +47,14 @@ Changes since 0.3.1
   if they do not exist, the floor is used, as previously. New settings
   UPPER_SKY_RED, _GREEN, _BLUE, _SCALE and _HEIGHT as well as LOWER_SKY_HEIGHT
   control the look.
+- Conforming partly to FreeDesktop standards on Unix
+  (http://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html) :
+  UserDataDir defaults to $XDG_DATA_HOME/.armagetronad,
+  VarDir to $XDG_DATA_HOME/.armagetronad/var and
+  UserConfigDir to $XDG_CONFIG_HOME/.armagetronad.
+- user*.cfg now resides in UserConfigDir.
+- Configuration files, with the exception of legacy user*.cfg files, are no longer
+  read from the var directory.
 
 Changes since 0.3.0
 ===================
