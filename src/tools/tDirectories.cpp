@@ -551,7 +551,10 @@ tString expand_home(tString const & pathname) {
         r = pathname;
 
 #ifdef DEBUG
-    printf("changed %s to %s\n", (const char *)pathname, (const char *)r);
+    if(strcmp(pathname, r))
+    {
+        printf("changed %s to %s\n", (const char *)pathname, (const char *)r);
+    }
 #endif
     return r;
 }
