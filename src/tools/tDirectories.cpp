@@ -189,8 +189,7 @@ static tString st_MusicDir(expand_home_c(DATA_DIR));    // directory for game mu
 #define USER_DATA_DIR "~/." PROGDIR
 #endif
 #endif
-static tString st_UserDataDirDefault(expand_home_c(USER_DATA_DIR));
-static tString st_UserDataDir(st_UserDataDirDefault);    // directory for game data
+static tString st_UserDataDir(expand_home_c(USER_DATA_DIR));    // directory for game data
 
 // load data from unbranded configuration directory on branded builds in Linux
 #if !defined DEDICATED && !defined MACOSX && !defined LEGACY_USER_DATA_DIR && !defined DEBUG
@@ -223,8 +222,7 @@ static tString st_ScriptDir(expand_home_c(SCRIPT_DIR));  // directory for script
 #define USER_CONFIG_DIR ""
 #endif
 #endif
-static tString st_UserConfigDirDefault(expand_home_c(USER_CONFIG_DIR));
-static tString st_UserConfigDir(st_UserConfigDirDefault);  // directory for static configuration files
+static tString st_UserConfigDir(expand_home_c(USER_CONFIG_DIR));  // directory for static configuration files
 
 #ifndef VAR_DIR
 #define VAR_DIR ""
@@ -241,8 +239,7 @@ static tString st_WwwDir(expand_home_c(WWWROOTDIR));     // directory for dynami
 #ifndef RESOURCE_DIR
 #define RESOURCE_DIR ""
 #endif
-static tString st_ResourceDirDefault(expand_home_c(RESOURCE_DIR));
-static tString st_ResourceDir(st_ResourceDirDefault);
+static tString st_ResourceDir(expand_home_c(RESOURCE_DIR));
 
 #ifndef AUTORESOURCE_DIR
 #define AUTORESOURCE_DIR ""
@@ -1743,15 +1740,12 @@ void tDirectoriesCommandLineAnalyzer::DoInitialize( tCommandLineParser & parser 
         // last fallback for debugging (activated only if there is data in the current directory)
         if ( TestPath( ".", "language/languages.txt") && TestDataPath(s_topSourceDir) && TestConfigurationPath(st_DataDir + "/config") )
         {
-            // we must be running the game in debug mode; set user data dir to current directory if they are at default values
-            if(st_UserDataDir == st_UserDataDirDefault)
-                st_UserDataDir = ".";
-            if(st_UserConfigDir == st_UserConfigDirDefault)
-                st_UserConfigDir = "userconfig";
+            // we must be running the game in debug mode; set user data dir to current directory.
+            st_UserDataDir = ".";
+            st_UserConfigDir = "userconfig";
 
             // the included resources are scrambled and put into the current directory as well.
-            if(st_IncludedResourceDir = st_ResourceDirDefault)
-                st_IncludedResourceDir = "./resource/included";
+            st_IncludedResourceDir = "./resource/included";
 
 #ifdef LEGACY_USER_DATA_DIR
             st_LegacyUserDataDir = "";
