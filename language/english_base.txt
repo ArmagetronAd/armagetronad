@@ -1426,6 +1426,9 @@ help_menu_directories_help Gives easy access to game data and configuration menu
 help_menu_userdata_text Open User Data
 help_menu_userdata_help Opens the User Data directory where you can store personal modifications to the game.
 
+help_menu_userconfig_text Open User Configuration
+help_menu_userconfig_help Opens the User Configuration directory where your personal configuration is kept and system configuration files can be overridden in.
+
 help_menu_screenshots_text Open Screenshots
 help_menu_screenshots_help Opens the directory where screenshots are stored.
 

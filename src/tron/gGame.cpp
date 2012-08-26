@@ -2223,6 +2223,12 @@ static void sg_ShowUserData()
     sg_OpenDirectory(sg_AbsolutifyPath(tDirectories::GetUserData()).c_str());
 }
 
+// opens the user config directory
+static void sg_ShowUserConfig()
+{
+    sg_OpenDirectory(sg_AbsolutifyPath(tDirectories::GetUserConfig()).c_str());
+}
+
 // opens the system data directory
 static void sg_ShowSystemData()
 {
@@ -2304,12 +2310,18 @@ static uMenuItemFunction sg_showScreenshotsMenuItem
  "$help_menu_screenshots_help",
  &sg_ShowScreenshots);
 
+static uMenuItemFunction sg_userConfigMenuItem 
+(&sg_directoryMenu,
+ "$help_menu_userconfig_text",
+ "$help_menu_userconfig_help",
+ &sg_ShowUserConfig);
+    
 static uMenuItemFunction sg_userDataMenuItem 
 (&sg_directoryMenu,
  "$help_menu_userdata_text",
  "$help_menu_userdata_help",
  &sg_ShowUserData);
-    
+
 static uMenuItemFunction sg_ircMenuItem 
 (&sg_helpMenu,
  "$help_menu_irc_text",
