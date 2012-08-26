@@ -165,23 +165,24 @@ tString expand_home(const tString & pathname);
 
 #define expand_home_c(c) expand_home(tString(c))
 
-#ifdef DATA_DIR
+#ifndef DATA_DIR
+#define DATA_DIR "."
+#endif
 static tString st_DataDir(expand_home_c(DATA_DIR));    // directory for game data
-#else
-static tString st_DataDir(".");    // directory for game data
-#endif
 
-#ifdef MUSIC_DIR
+#ifndef MUSIC_DIR
+#define MUSIC_DIR "."
+#endif
 static tString st_MusicDir(expand_home_c(DATA_DIR));    // directory for game music
-#else
-static tString st_MusicDir(".");    // directory for game music
-#endif
 
-#ifdef USER_DATA_DIR
-static tString st_UserDataDir(expand_home_c(USER_DATA_DIR));    // directory for game data
+#ifndef USER_DATA_DIR
+#ifdef LINUX
+#define USER_DATA_DIR "${XDG_DATA_HOME}/" PROGDIR
 #else
-static tString st_UserDataDir(expand_home_c("${XDG_DATA_HOME}/" PROGDIR));    // directory for game data
+#define USER_DATA_DIR "~/." PROGDIR
 #endif
+#endif
+static tString st_UserDataDir(expand_home_c(USER_DATA_DIR));    // directory for game data
 
 // load data from unbranded configuration directory on branded builds in Linux
 #if !defined DEDICATED && !defined MACOSX && !defined LEGACY_USER_DATA_DIR && !defined DEBUG
@@ -197,61 +198,60 @@ static tString st_LegacyUserDataDir(expand_home_c(LEGACY_USER_DATA_DIR));    // 
 static tString st_LegacyUserDataDir2(expand_home_c(LEGACY_USER_DATA_DIR2));    // directory for game data
 #endif
 
-#ifdef CONFIG_DIR
+#ifndef CONFIG_DIR
+#define CONFIG_DIR ""
+#endif
 static tString st_ConfigDir(expand_home_c(CONFIG_DIR));  // directory for static configuration files
-#else
-static tString st_ConfigDir("");  // directory for static configuration files
-#endif
 
-#ifdef SCRIPT_DIR
+#ifndef SCRIPT_DIR
+#define SCRIPT_DIR ""
+#endif
 static tString st_ScriptDir(expand_home_c(SCRIPT_DIR));  // directory for scripts
-#else
-static tString st_ScriptDir("");  // directory for scripts
-#endif
 
-#ifdef USER_CONFIG_DIR
+#ifndef USER_CONFIG_DIR
+#ifdef LINUX
+#define USER_CONFIG_DIR "${XDG_CONFIG_HOME}/" PROGDIR
+#else
+#define USER_CONFIG_DIR ""
+#endif
+#endif
 static tString st_UserConfigDir(expand_home_c(USER_CONFIG_DIR));  // directory for static configuration files
-#else
-static tString st_UserConfigDir(expand_home_c("${XDG_CONFIG_HOME}/" PROGDIR));  // directory for static configuration files
-#endif
 
-#ifdef VAR_DIR
-static tString st_VarDir(expand_home_c(VAR_DIR));     // directory for dynamic logs and highscores
+#ifndef VAR_DIR
+#ifdef LINUX
+#define VAR_DIR "${XDG_DATA_HOME}/" PROGDIR "/var"
 #else
-static tString st_VarDir(expand_home_c("${XDG_DATA_HOME}/" PROGDIR "/var"));     // directory for dynamic logs and highscores
+#define VAR_DIR ""
 #endif
+#endif
+static tString st_VarDir(expand_home_c(VAR_DIR));     // directory for dynamic logs and highscores
 
 #ifdef DEDICATED
-#ifdef WWWROOTDIR
+#ifndef WWWROOTDIR
+#define WWWROOTDIR ""
+#endif
 static tString st_WwwDir(expand_home_c(WWWROOTDIR));     // directory for dynamic logs and highscores
-#else
-static tString st_WwwDir("");     // directory for dynamic logs and highscores
-#endif
 #endif
 
-#ifdef RESOURCE_DIR
+#ifndef RESOURCE_DIR
+#define RESOURCE_DIR ""
+#endif
 static tString st_ResourceDir(expand_home_c(RESOURCE_DIR));
-#else
-static tString st_ResourceDir("");
-#endif
 
-#ifdef AUTORESOURCE_DIR
+#ifndef AUTORESOURCE_DIR
+#define AUTORESOURCE_DIR ""
+#endif
 static tString st_AutoResourceDir(expand_home_c(AUTORESOURCE_DIR));
-#else
-static tString st_AutoResourceDir("");
-#endif
 
-#ifdef INCLUDEDRESOURCE_DIR
+#ifndef INCLUDEDRESOURCE_DIR
+#define INCLUDEDRESOURCE_DIR ""
+#endif
 static tString st_IncludedResourceDir(expand_home_c(INCLUDEDRESOURCE_DIR));
-#else
-static tString st_IncludedResourceDir("");
-#endif
 
-#ifdef SCREENSHOT_DIR
-static tString st_ScreenshotDir(expand_home_c(SCREENSHOT_DIR));
-#else
-static tString st_ScreenshotDir("");
+#ifndef SCREENSHOT_DIR
+#define SCREENSHOT_DIR ""
 #endif
+static tString st_ScreenshotDir(expand_home_c(SCREENSHOT_DIR));
 
 // checks whether a character is a path delimiter
 static bool st_IsPathDelimiter( char c )
