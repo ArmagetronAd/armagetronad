@@ -125,6 +125,7 @@ public:
     static tString const & GetData(); //!< returns the system data directory
     static tString const & GetUserData(); //!< returns the user data directory
     static tString GetConfig(); //!< returns the system configuration directory
+    static tString GetUserConfig(); //!< returns the user configuration directory
 
     static tString const & GetCWD(); //!< returns the current working directory
 

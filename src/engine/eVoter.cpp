@@ -1623,7 +1623,7 @@ protected:
 
     bool Open( std::ifstream & s, int userToNotify )
     {
-        bool ret = tConfItemBase::OpenFile( s, file_, tConfItemBase::All );
+        bool ret = tConfItemBase::OpenFile( s, file_ );
 
         if ( ret )
         {

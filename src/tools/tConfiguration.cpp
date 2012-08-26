@@ -818,9 +818,9 @@ void tConfItemBase::LoadAll(std::ifstream &s, bool record )
 //! @param filename name of the file to open
 //! @param path     whether to look in var directory
 //! @return success flag
-bool tConfItemBase::OpenFile( std::ifstream & s, tString const & filename, SearchPath path )
+bool tConfItemBase::OpenFile( std::ifstream & s, tString const & filename )
 {
-    bool ret = ( ( path & Config ) && tDirectories::Config().Open(s, filename ) ) || ( ( path & Var ) && filename.EndsWith(".cfg") && tDirectories::Var().Open(s, filename ) );
+    bool ret = tDirectories::Config().Open(s, filename );
     
     static char const * section = "INCLUDE_VOTE";
     tRecorder::Playback( section, ret );
@@ -941,16 +941,14 @@ char const * st_userConfigsLatin1[] = { "user_3_1.cfg", "user_3_0.cfg", "user.cf
 
 static void st_InstallSigHupHandler();
 
-static bool st_LoadUserConfigs( char const * const * userConfig, bool latin1 )
+static bool st_LoadUserConfigs( char const * const * userConfig, bool latin1, tPath const & path )
 {
-    const tPath& var = tDirectories::Var();
-
     st_loadAsLatin1 = latin1;
 
     // load the first available user configuration file
     while ( *userConfig )
     { 
-        if ( Load( var, *userConfig ) )
+        if ( Load( path, *userConfig ) )
         {
             st_loadAsLatin1 = false;
             return true;
@@ -962,6 +960,13 @@ static bool st_LoadUserConfigs( char const * const * userConfig, bool latin1 )
     return false;
 }
 
+static bool st_LoadUserConfigs( char const * const * userConfig, bool latin1 )
+{
+    return 
+    st_LoadUserConfigs( userConfig, latin1, tDirectories::Config() ) ||
+    st_LoadUserConfigs( userConfig, latin1, tDirectories::Var() );
+}
+
 void st_LoadConfig( bool printChange )
 {
     // default include files are executed at owner level
@@ -969,7 +974,6 @@ void st_LoadConfig( bool printChange )
 
     st_InstallSigHupHandler();
 
-    const tPath& var = tDirectories::Var();
     const tPath& config = tDirectories::Config();
     const tPath& data = tDirectories::Data();
 
@@ -996,7 +1000,6 @@ void st_LoadConfig( bool printChange )
     Load( data, "moviepack/settings.cfg" );
 
     Load( config, "autoexec.cfg" );
-    Load( var, "autoexec.cfg" );
 
     // load configuration from playback
     tConfItemBase::LoadPlayback();
@@ -1014,7 +1017,7 @@ void st_SaveConfig()
     }
 
     std::ofstream s;
-    if ( tDirectories::Var().Open( s, st_userConfigs[0], std::ios::out, true ) )
+    if ( tDirectories::Config().Open( s, st_userConfigs[0], std::ios::out, true ) )
     {
         tConfItemBase::SaveAll(s);
     }
@@ -1112,12 +1115,9 @@ void st_Include( tString const & file )
     if ( !tRecorder::IsPlayingBack() )
     {
         // really load include file
-        if ( !file.EndsWith(".cfg") || !Load( tDirectories::Var(), file ) )
+        if (!Load( tDirectories::Config(), file ) && tConfItemBase::printErrors )
         {
-            if (!Load( tDirectories::Config(), file ) && tConfItemBase::printErrors )
-            {
-                con << tOutput( "$config_include_not_found", file );
-            }
+            con << tOutput( "$config_include_not_found", file );
         }
     }
     else

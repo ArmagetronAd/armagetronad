@@ -271,7 +271,7 @@ void sg_StartupPlayerMenu()
     if( keyboardTemplate.Len() > 1 )
     {
         std::ifstream s;
-        if( tConfItemBase::OpenFile( s, keyboardTemplate, tConfItemBase::Config ) )
+        if( tConfItemBase::OpenFile( s, keyboardTemplate ) )
         {
             tCurrentAccessLevel level( tAccessLevel_Owner, true );
             tConfItemBase::ReadFile( s );

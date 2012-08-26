@@ -1022,6 +1022,11 @@ tString tDirectories::GetConfig()
     return st_ConfigDir.Len() > 1 ? st_ConfigDir : (st_DataDir + "/config");
 }
 
+tString tDirectories::GetUserConfig()
+{
+    return st_UserConfigDir.Len() > 1 ? st_UserConfigDir : (st_UserDataDir + "/config");
+}
+
 static tString st_BuildCWD()
 {
 #define MAX_CWD 1000

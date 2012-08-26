@@ -3312,12 +3312,7 @@ void gGame::StateUpdate(){
 
                     // load contents of everytime.cfg for real
                     static const tString everytime("everytime.cfg");
-                    if ( tConfItemBase::OpenFile(s, everytime, tConfItemBase::Config ) )
-                        tConfItemBase::ReadFile(s);
-
-                    s.close();
-
-                    if ( tConfItemBase::OpenFile(s, everytime, tConfItemBase::Var ) )
+                    if ( tConfItemBase::OpenFile(s, everytime) )
                         tConfItemBase::ReadFile(s);
                 }
             }
