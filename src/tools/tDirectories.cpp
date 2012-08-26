@@ -175,8 +175,15 @@ static tString st_DataDir(expand_home_c(DATA_DIR));    // directory for game dat
 #endif
 static tString st_MusicDir(expand_home_c(DATA_DIR));    // directory for game music
 
+// use XDG directories?
+#ifndef WIN32
+#ifndef MACOSX
+#define USE_XDG
+#endif
+#endif
+
 #ifndef USER_DATA_DIR
-#ifdef LINUX
+#ifdef USE_XDG
 #define USER_DATA_DIR "${XDG_DATA_HOME}/" PROGDIR
 #else
 #define USER_DATA_DIR "~/." PROGDIR
@@ -209,7 +216,7 @@ static tString st_ConfigDir(expand_home_c(CONFIG_DIR));  // directory for static
 static tString st_ScriptDir(expand_home_c(SCRIPT_DIR));  // directory for scripts
 
 #ifndef USER_CONFIG_DIR
-#ifdef LINUX
+#ifdef USE_XDG
 #define USER_CONFIG_DIR "${XDG_CONFIG_HOME}/" PROGDIR
 #else
 #define USER_CONFIG_DIR ""
@@ -218,7 +225,7 @@ static tString st_ScriptDir(expand_home_c(SCRIPT_DIR));  // directory for script
 static tString st_UserConfigDir(expand_home_c(USER_CONFIG_DIR));  // directory for static configuration files
 
 #ifndef VAR_DIR
-#ifdef LINUX
+#ifdef USE_XDG
 #define VAR_DIR "${XDG_DATA_HOME}/" PROGDIR "/var"
 #else
 #define VAR_DIR ""
