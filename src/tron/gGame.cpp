@@ -4241,6 +4241,8 @@ static eLadderLogWriter sg_roundCommencingWriter("ROUND_COMMENCING", false);
 static SvgOutput sg_svgOutput;
 
 static eLadderLogWriter sg_currentMapWriter("CURRENT_MAP", false);
+static bool sg_displayMapDetails = false;
+static tSettingItem<bool> sg_displayMapDetailsConf("DISPLAY_MAP_DETAILS", sg_displayMapDetails);
 
 void gGame::StateUpdate(){
 
@@ -4556,6 +4558,15 @@ void gGame::StateUpdate(){
                 sn_ConsoleOut(mess);
 
                 se_SaveToScoreFile("$gamestate_newround_log");
+
+                if (sg_displayMapDetails)
+                {
+                    tColoredString Output;
+                    Output << "0xff6622Map Name   : 0x999999" << pz_mapName << "\n";
+                    Output << "0xff6622Map Author : 0x999999" << pz_mapAuthor << "\n";
+                    Output << "0xff6622Map Version: 0x999999" << pz_mapVersion << "\n";
+                    sn_ConsoleOut(Output);
+                }
             }
             //con << ePlayerNetID::Ranking();
 
@@ -5119,7 +5130,9 @@ void gGame::Analysis(REAL time){
 
             if ( team != NULL )
             {
-                static const char* message="$player_win_race";
+                tOutput message;
+                message.SetTemplateParameter(2, sg_scoreRaceComplete);
+                message << "$player_win_race";
                 sg_DeclareWinner( team, message );
             }
             else
