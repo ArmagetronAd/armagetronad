@@ -52,7 +52,10 @@ REAL sz_zoneFloorScalePercent = 1.0f;
 static tSettingItem<REAL> sz_zoneFloorScalePercentConf( "ZONE_FLOOR_SCALE_PERCENT", sz_zoneFloorScalePercent );
 
 REAL sz_zoneProximityDistance = -1.0f;
-static tSettingItem<REAL> sz_zoneProximityDistanceConf( "ZONE_HEIGHT_PROXIMITY_DISTANCE", sz_zoneProximityDistance );
+static tSettingItem<REAL> sz_zoneProximityDistanceConf( "ZONE_PROXIMITY_DISTANCE", sz_zoneProximityDistance );
+
+REAL sz_zoneProximityOffset = 0.0f;
+static tSettingItem<REAL> sz_zoneProximityOffsetConf( "ZONE_PROXIMITY_OFFSET", sz_zoneProximityOffset );
 
 #else
 #include "gWinZone.h"
@@ -70,7 +73,8 @@ extern REAL sg_zoneAlpha, sg_zoneAlphaServer;
 #define sz_zoneAlphaServer sg_zoneAlphaServer
 #define sz_zoneSegSteps          sg_zoneSegSteps
 #define sz_zoneFloorScalePercent sg_zoneFloorScalePercent
-#define sz_zoneProximityFactor   sg_zoneProximityFactor
+#define sz_zoneProximityDistance sg_zoneProximityDistance
+#define sz_zoneProximityOffset   sg_zoneProximityOffset
 #endif
 
 #define lasttime_ lastTime
@@ -88,6 +92,7 @@ zShape::zShape( eGrid* grid, zZone * zone )
         segsteps_(),
         floorscalepct_(),
         proximitydistance_(),
+        proximityoffset_(),
         color_(),
         createdtime_(0.0),
         referencetime_(0.0)
@@ -112,6 +117,7 @@ zShape::zShape( Zone::ShapeSync const & sync, nSenderInfo const & sender )
         segsteps_(),
         floorscalepct_(),
         proximitydistance_(),
+        proximityoffset_(),
         color_(),
         referencetime_(0.0)
 {
@@ -162,6 +168,7 @@ void zShape::WriteSync( Zone::ShapeSync & sync, bool init ) const
     segsteps_.WriteSync( *sync.mutable_segment_steps() );
     floorscalepct_.WriteSync( *sync.mutable_floor_scale_pct() );
     proximitydistance_.WriteSync( *sync.mutable_proximity_distance() );
+    proximityoffset_.WriteSync( *sync.mutable_proximity_offset() );
     color_.WriteSync( *sync.mutable_color() );
 }
 
@@ -188,6 +195,8 @@ void zShape::ReadSync( Zone::ShapeSync const & sync, nSenderInfo const & sender 
         floorscalepct_.ReadSync( sync.floor_scale_pct() );
     if (sync.has_proximity_distance())
         proximitydistance_.ReadSync( sync.proximity_distance() );
+    if (sync.has_proximity_offset())
+        proximityoffset_.ReadSync( sync.proximity_offset() );
     color_.ReadSync( sync.color() );
 
     // old servers don't send alpha values; replace them by the server controlled alpha setting
@@ -359,6 +368,12 @@ REAL zShape::GetEffectiveProximityDistance() const {
     return sz_zoneProximityDistance;
 }
 
+REAL zShape::GetEffectiveProximityOffset() const {
+    if (proximityoffset_.Len())
+        return int( proximityoffset_.evaluate(lastTime) );
+    return sz_zoneProximityOffset;
+}
+
 void zShape::animate( REAL time ) {
     // Is this needed as the items are already animated?
 }
@@ -508,12 +523,21 @@ void zShapeCircle::Render(const eCamera * cam )
     const int sg_steps = GetEffectiveSegmentSteps(); //<=0 ? 1 : sz_zoneSegSteps;
     const REAL sg_floor_radius_pct = GetEffectiveFloorScalePct();
     const REAL sg_proximity_distance = GetEffectiveProximityDistance();
+    const REAL sg_proximity_offset = GetEffectiveProximityOffset();
     const REAL seglen = 2 * M_PI / sg_segments * GetEffectiveSegmentLength();
-    
-    REAL height_mult = (sg_proximity_distance<.0 || !cam->Center()) ? 1.0 :
-                       ((cam->Center()->Position()-Position()).Norm()-effectiveRadius)/sg_proximity_distance;
-    height_mult = (height_mult<0?.0:(height_mult>1.0?1.0:height_mult));
-    
+
+    REAL height_mult;
+    if (cam->Center() && sg_proximity_distance>=.0) {
+        REAL dist = (cam->Center()->Position()-Position()).Norm()-effectiveRadius;
+        if (sg_proximity_distance==sg_proximity_offset) {
+            height_mult = dist>sg_proximity_distance?1.0:0.0;
+        } else {
+            height_mult = (dist-sg_proximity_offset)/(sg_proximity_distance-sg_proximity_offset);
+            height_mult = (height_mult<0?.0:(height_mult>1.0?1.0:height_mult));
+        }
+    } else {
+        height_mult = 1.0;
+    }
     const REAL bot = GetEffectiveBottom();
     const REAL top = bot + GetEffectiveHeight()*height_mult;
 

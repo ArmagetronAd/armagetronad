@@ -86,6 +86,7 @@ public:
     int GetEffectiveSegmentSteps() const;
     REAL GetEffectiveFloorScalePct() const;
     REAL GetEffectiveProximityDistance() const;
+    REAL GetEffectiveProximityOffset() const;
 
     bool Timestep( REAL time );
     virtual void setReferenceTime(REAL time);
@@ -114,6 +115,7 @@ protected:
     tPolynomial segsteps_; //!< Number of steps to draw each segment making up the zone
     tPolynomial floorscalepct_; //!< percentage of zone's size used to outline zone on the floor
     tPolynomial proximitydistance_; //!< distance from which zone's height start to shrink
+    tPolynomial proximityoffset_; //!< offset distance from the zone border where the height reach 0 
     rColor color_;
 
     void setCreatedTime(REAL time);

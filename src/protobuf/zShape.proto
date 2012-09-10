@@ -49,6 +49,7 @@ message ShapeSync
     optional Tools.PolynomialSync segment_steps = 14;
     optional Tools.PolynomialSync floor_scale_pct = 15;
     optional Tools.PolynomialSync proximity_distance = 16;
+    optional Tools.PolynomialSync proximity_offset = 17;
 }
 
 // sync message for circles
