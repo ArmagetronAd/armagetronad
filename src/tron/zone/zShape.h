@@ -83,6 +83,9 @@ public:
     void SetRotationAcceleration(REAL r);
     int GetEffectiveSegments() const;
     REAL GetEffectiveSegmentLength() const;
+    int GetEffectiveSegmentSteps() const;
+    REAL GetEffectiveFloorScalePct() const;
+    REAL GetEffectiveProximityDistance() const;
 
     bool Timestep( REAL time );
     virtual void setReferenceTime(REAL time);
@@ -108,6 +111,9 @@ protected:
     tPolynomial rotation2; //!< Rotate the contour around the position at this rate.
     tPolynomial segments_; //!< Number of segments to make up the zone
     tPolynomial seglength_; //!< Length of each segment making up the zone
+    tPolynomial segsteps_; //!< Number of steps to draw each segment making up the zone
+    tPolynomial floorscalepct_; //!< percentage of zone's size used to outline zone on the floor
+    tPolynomial proximitydistance_; //!< distance from which zone's height start to shrink
     rColor color_;
 
     void setCreatedTime(REAL time);
