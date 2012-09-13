@@ -65,15 +65,12 @@ public:
     void setColorNow(const rColor &c);
 
     virtual tCoord Position() const;
-  tFunction getPosX() {return posx_;};
-  tFunction getPosY() {return posy_;};
+    tFunction getPosX() {return posx_;};
+    tFunction getPosY() {return posy_;};
     tPolynomial getRotation2() { return rotation2; };
     REAL GetCurrentScale() const;
-  tFunction getScale() {return scale_;};
-  rColor getColor() {return color_;};
-
-    REAL GetEffectiveBottom() const;
-    REAL GetEffectiveHeight() const;
+    tFunction getScale() {return scale_;};
+    rColor getColor() {return color_;};
 
     //! shortcut rotation functions
     tCoord GetRotation() const;
@@ -81,12 +78,25 @@ public:
     void SetRotationSpeed(REAL r);
     REAL GetRotationAcceleration();
     void SetRotationAcceleration(REAL r);
-    int GetEffectiveSegments() const;
+
+    // Get/Set visual settings
+    REAL GetEffectiveBottom() const;
+    REAL GetEffectiveHeight() const;
+    int  GetEffectiveSegments() const;
     REAL GetEffectiveSegmentLength() const;
-    int GetEffectiveSegmentSteps() const;
+    int  GetEffectiveSegmentSteps() const;
     REAL GetEffectiveFloorScalePct() const;
     REAL GetEffectiveProximityDistance() const;
     REAL GetEffectiveProximityOffset() const;
+
+    void SetBottom(const tPolynomial & r);
+    void SetHeight(const tPolynomial & r);
+    void SetSegments(const tPolynomial & r);
+    void SetSegmentLength(const tPolynomial & r);
+    void SetSegmentSteps(const tPolynomial & r);
+    void SetFloorScalePct(const tPolynomial & r);
+    void SetProximityDistance(const tPolynomial & r);
+    void SetProximityOffset(const tPolynomial & r);
 
     bool Timestep( REAL time );
     virtual void setReferenceTime(REAL time);

@@ -182,9 +182,10 @@ void zShape::ReadSync( Zone::ShapeSync const & sync, nSenderInfo const & sender 
     if (sync.has_pos_z_bottom())
         bottom_.ReadSync( sync.pos_z_bottom() );
     scale_.ReadSync( sync.scale() );
+    rotation2.ReadSync( sync.rotation2() );
+    color_.ReadSync( sync.color() );
     if (sync.has_height())
         height_.ReadSync( sync.height() );
-    rotation2.ReadSync( sync.rotation2() );
     if (sync.has_segments())
         segments_.ReadSync( sync.segments() );
     if (sync.has_segment_length())
@@ -197,7 +198,6 @@ void zShape::ReadSync( Zone::ShapeSync const & sync, nSenderInfo const & sender 
         proximitydistance_.ReadSync( sync.proximity_distance() );
     if (sync.has_proximity_offset())
         proximityoffset_.ReadSync( sync.proximity_offset() );
-    color_.ReadSync( sync.color() );
 
     // old servers don't send alpha values; replace them by the server controlled alpha setting
     if( !sync.color().has_a() )
@@ -299,18 +299,6 @@ REAL zShape::GetCurrentScale() const {
     return scale_.Evaluate(lasttime_ - referencetime_);
 }
 
-REAL zShape::GetEffectiveBottom() const {
-    if (bottom_.Len())
-        return bottom_.evaluate(lastTime);
-    return sz_zoneBottom;
-}
-
-REAL zShape::GetEffectiveHeight() const {
-    if (height_.Len())
-        return height_.evaluate(lastTime);
-    return sz_zoneHeight;
-}
-
 tCoord zShape::GetRotation() const {
     REAL currAngle = rotation2.evaluate(lasttime_);
     tCoord rot( cos(currAngle), sin(currAngle) );
@@ -337,6 +325,18 @@ void zShape::SetRotationAcceleration(REAL r) {
     setRotation2(r2);
 }
 
+REAL zShape::GetEffectiveBottom() const {
+    if (bottom_.Len())
+        return bottom_.evaluate(lastTime);
+    return sz_zoneBottom;
+}
+
+REAL zShape::GetEffectiveHeight() const {
+    if (height_.Len())
+        return height_.evaluate(lastTime);
+    return sz_zoneHeight;
+}
+
 int zShape::GetEffectiveSegments() const {
     if (segments_.Len())
         return int( segments_.evaluate(lastTime) );
@@ -345,7 +345,7 @@ int zShape::GetEffectiveSegments() const {
 
 REAL zShape::GetEffectiveSegmentLength() const {
     if (seglength_.Len())
-        return int( seglength_.evaluate(lastTime) );
+        return seglength_.evaluate(lastTime);
     return sz_zoneSegLength;
 }
 
@@ -358,21 +358,30 @@ int zShape::GetEffectiveSegmentSteps() const {
 
 REAL zShape::GetEffectiveFloorScalePct() const {
     if (floorscalepct_.Len())
-        return int( floorscalepct_.evaluate(lastTime) );
+        return floorscalepct_.evaluate(lastTime);
     return sz_zoneFloorScalePercent;
 }
 
 REAL zShape::GetEffectiveProximityDistance() const {
     if (proximitydistance_.Len())
-        return int( proximitydistance_.evaluate(lastTime) );
+        return proximitydistance_.evaluate(lastTime);
     return sz_zoneProximityDistance;
 }
 
 REAL zShape::GetEffectiveProximityOffset() const {
     if (proximityoffset_.Len())
-        return int( proximityoffset_.evaluate(lastTime) );
+        return proximityoffset_.evaluate(lastTime);
     return sz_zoneProximityOffset;
 }
+
+void zShape::SetBottom(const tPolynomial & r) { bottom_=r; }
+void zShape::SetHeight(const tPolynomial & r) { height_=r; }
+void zShape::SetSegments(const tPolynomial & r) { segments_=r; }
+void zShape::SetSegmentLength(const tPolynomial & r) { seglength_=r; }
+void zShape::SetSegmentSteps(const tPolynomial & r) { segsteps_=r; }
+void zShape::SetFloorScalePct(const tPolynomial & r) { floorscalepct_=r; }
+void zShape::SetProximityDistance(const tPolynomial & r) { proximitydistance_=r; }
+void zShape::SetProximityOffset(const tPolynomial & r) { proximityoffset_=r; }
 
 void zShape::animate( REAL time ) {
     // Is this needed as the items are already animated?
