@@ -36,7 +36,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 extern const tString st_internalEncoding;
 
 class tLocaleItem;
-class tOutputItemBase;
 
 //! transform a string from latin1 to utf8 unicode
 tColoredString st_Latin1ToUTF8( tString const & s );
@@ -65,6 +64,24 @@ public:
     }
 };
 
+class tOutputItemBase: public tListItem<tOutputItemBase>
+{
+public:
+    tOutputItemBase(tOutput& o);
+    virtual ~tOutputItemBase();
+    virtual void Print(tString& target) const = 0;
+    virtual void Clone(tOutput& o)      const = 0;
+};
+
+class tOutputItemTemplate: public tOutputItemBase
+{
+    int       num;
+    tString   parameter;
+public:
+    tOutputItemTemplate(tOutput& o, int n, const char *p);
+    virtual void Print(tString& target) const;
+    virtual void Clone(tOutput& o)      const;
+};
 
 // flexible output unit: the output string is generated on the fly from
 // the components.
@@ -99,9 +116,14 @@ public:
     void AddSpace();                     // adds a simple space
 
     // set a template parameter at this position of the output string
-    tOutput & SetTemplateParameter(int num, const char *parameter);
-    tOutput & SetTemplateParameter(int num, int         parameter);
-    tOutput & SetTemplateParameter(int num, float       parameter);
+    template<typename T> tOutput & SetTemplateParameter(int num, T const& parameter)
+    {
+        tString p;
+        p << parameter;
+        tNEW(tOutputItemTemplate)(*this, num, p);
+
+        return *this;
+    }
 
     // delete all elements
     void Clear();
@@ -170,15 +192,6 @@ public:
     bool IsEmpty()const {
         return !anchor;
     }
-};
-
-class tOutputItemBase: public tListItem<tOutputItemBase>
-{
-public:
-    tOutputItemBase(tOutput& o);
-    virtual ~tOutputItemBase();
-    virtual void Print(tString& target) const = 0;
-    virtual void Clone(tOutput& o)      const = 0;
 };
 
 

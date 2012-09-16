@@ -586,17 +586,6 @@ public:
 };
 
 
-class tOutputItemTemplate: public tOutputItemBase
-{
-    int       num;
-    tString   parameter;
-public:
-    tOutputItemTemplate(tOutput& o, int n, const char *p);
-    virtual void Print(tString& target) const;
-    virtual void Clone(tOutput& o)      const;
-};
-
-
 tOutput::tOutput(): anchor(0){}
 tOutput::~tOutput()
 {
@@ -694,32 +683,6 @@ void tOutput::AddLocale(const char *x)
 {
     tNEW(tOutputItemLocale)(*this, tLocale::Find(x));
 }
-
-
-tOutput & tOutput::SetTemplateParameter(int num, const char *parameter)
-{
-    tNEW(tOutputItemTemplate)(*this, num, parameter);
-    return *this;
-}
-
-tOutput &  tOutput::SetTemplateParameter(int num, int parameter)
-{
-    tString p;
-    p << parameter;
-    tNEW(tOutputItemTemplate)(*this, num, p);
-
-    return *this;
-}
-
-tOutput & tOutput::SetTemplateParameter(int num, float parameter)
-{
-    tString p;
-    p << parameter;
-    tNEW(tOutputItemTemplate)(*this, num, p);
-
-    return *this;
-}
-
 
 tOutput::tOutput(const std::string & x)
         :anchor(NULL)
