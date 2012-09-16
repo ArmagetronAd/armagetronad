@@ -6575,7 +6575,8 @@ void ePlayerNetID::GridPosLadderLog() {
                 se_playerGridPosWriter << p->GetUserName() << p->Object()->Position().x << p->Object()->Position().y << p->Object()->Direction().x << p->Object()->Direction().y;
                 if (p->Object() && p->Object()->Team())
                     se_playerGridPosWriter << FilterName(p->Object()->Team()->Name());
-                else se_playerGridPosWriter << " ";
+                else
+                    se_playerGridPosWriter << "";
                 se_playerGridPosWriter.write();
             }
         }
