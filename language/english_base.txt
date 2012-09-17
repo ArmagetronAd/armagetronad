@@ -830,6 +830,8 @@ ladderlog_write_base_respawn_help             Write to ladderlog: BASE_RESPAWN <
 ladderlog_write_basezone_conquered_help       Write to ladderlog: BASEZONE_CONQUERED <team> <cx> <cy>
 ladderlog_write_basezone_conquerer_help       Write to ladderlog: BASEZONE_CONQUERER <player> <% of zone>
 ladderlog_write_basezone_conquerer_team_help  Write to ladderlog: BASEZONE_CONQUERER_TEAM <team> <score>
+ladderlog_write_cycle_created_help            Write to ladderlog: CYCLE_CREATED [auth_name] [posx] [poxy] [dirx] [diry]
+ladderlog_write_cycle_destroyed_help          Write to ladderlog: CYCLE_DESTROYED [auth_name] [posx] [posy] [dirx] [diry] [team_name]
 ladderlog_write_chat_help                     Write to ladderlog: CHAT <chatter> [/me] <chat string>
 ladderlog_write_command_help                  Write to ladderlog: COMMAND <player> <ip> <auth level> <command> <options>
 ladderlog_write_death_basezone_conquered_help Write to ladderlog: DEATH_BASEZONE_CONQUERED <player> [NO_ENEMIES]
@@ -861,7 +863,10 @@ ladderlog_write_new_match_help                Write to ladderlog: NEW_MATCH <dat
 ladderlog_write_new_round_help                Write to ladderlog: NEW_ROUND <date and time>
 ladderlog_write_num_humans_help               Write to ladderlog: NUM_HUMANS <number of humans>
 ladderlog_write_online_player_help            Write to ladderlog: ONLINE_PLAYER <name> [<ping> <team> <access_level>]
-ladderlog_write_player_entered_help           Write to ladderlog: PLAYER_ENTERED <name> <IP> <screen name>
+ladderlog_write_player_ai_entered_help        Write to ladderlog: PLAYER_AI_ENTERED <name> <screen name>
+ladderlog_Write_player_ai_left_help           Write to ladderlog: PLAYER_AI_LEFT <name>
+ladderlog_write_player_entered_grid_help      Write to ladderlog: PLAYER_ENTERED_GRID <name> <IP> <screen name>
+ladderlog_write_player_entered_spectator_help Write to ladderlog: PLAYER_ENTERED_SPECTATOR <name> <IP> <screen name>
 ladderlog_write_player_left_help              Write to ladderlog: PLAYER_LEFT <name> <IP>
 ladderlog_write_player_renamed_help           Write to ladderlog: PLAYER_RENAMED <old name> <new name> <ip> <screen name>
 ladderlog_write_positions_help                Write to ladderlog: POSITIONS <team> <player1 player2 ...>

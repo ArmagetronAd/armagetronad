@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -44,6 +44,9 @@ public:
 
     REAL    Get()                                   ;   //!< returns a random float in the interval [0,1)
     int     Get( int max )                          ;   //!< returns a random integer in the interval [0,max)
+
+    // extra additions
+    int     Get(int min, int max)                   ;   //!< returns a random integer between min and max - 1
 
     static tRandomizer & GetInstance()              ;   //!< returns the standard randomizer
 protected:

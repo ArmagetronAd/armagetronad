@@ -4010,6 +4010,8 @@ void gCycle::Killed(gCycle *pKiller, int type)
     }
 }
 
+static eLadderLogWriter se_cycleDestroyedWriter("CYCLE_DESTROYED", false);
+
 void gCycle::Kill(){
     // keep this cycle alive
     tJUST_CONTROLLED_PTR< gCycle > keep( this->GetRefcount()>0 ? this : 0 );
@@ -4040,6 +4042,9 @@ void gCycle::Kill(){
             Die( lastTime );
             tNEW(gExplosion)(grid, pos,lastTime, color_, this );
             //	 eEdge::SeethroughHasChanged();
+
+            se_cycleDestroyedWriter << this->Player()->GetUserName() << this->Position().x << this->Position().y << this->Direction().x << this->Direction().y << ePlayerNetID::FilterName(this->Team()->Name());
+            se_cycleDestroyedWriter.write();
 
             if ( currentWall )
             {

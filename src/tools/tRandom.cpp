@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -92,6 +92,26 @@ int tRandomizer::Get( int max )
     tASSERT( ret < max );
 
     return ret;
+}
+
+// *******************************************************************************************
+// *
+// *	Get
+// *
+// *******************************************************************************************
+//!
+//!		@param	max	upper limit of the return value
+//!		@param	min	upper limit of the return value
+//!		@return		random integer value between min and max - 1
+//!
+// *******************************************************************************************
+
+int tRandomizer::Get(int min, int max)
+{
+    int range = (max - min);
+    int rnd = min + int((range * rand()) / (RAND_MAX + 1.0));
+
+    return rnd;
 }
 
 // *******************************************************************************************

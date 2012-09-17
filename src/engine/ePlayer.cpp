@@ -5088,6 +5088,7 @@ static void player_removed_from_game_handler(nMessage &m)
 static nDescriptor player_removed_from_game(202,&player_removed_from_game_handler,"player_removed_from_game");
 
 static eLadderLogWriter se_playerLeftWriter("PLAYER_LEFT", true);
+static eLadderLogWriter se_playerAILeftWriter("PLAYER_AI_LEFT", true);
 
 void ePlayerNetID::RemoveFromGame()
 {
@@ -5136,10 +5137,15 @@ void ePlayerNetID::RemoveFromGame()
     UpdateTeam();
     ControlObject( NULL );
 
-    if( logLeave )
+    if( IsHuman() )
     {
         se_playerLeftWriter << userName_ << nMachine::GetMachine(Owner()).GetIP();
         se_playerLeftWriter.write();
+    }
+    else
+    {
+        se_playerAILeftWriter << userName_;
+        se_playerAILeftWriter.write();
     }
 }
 
@@ -6818,7 +6824,7 @@ tString ePlayerNetID::Ranking( int MAX, bool cut ){
 
             // however, using the streaming operator is a lot cleaner. The example is left, as it really can be usefull in some situations.
             if (p->IsChatting())
-                line << '*';
+                line << tColoredString::ColorString(-1,-1,-1) << "*";
             line.SetPos(2, cut);
             line << *p;
             line.SetPos(17, false );
@@ -8733,7 +8739,9 @@ private:
 
 static gServerInfoAdmin sg_serverAdmin;
 
-static eLadderLogWriter se_playerEnteredWriter("PLAYER_ENTERED", true);
+static eLadderLogWriter se_playerEnteredGridWriter("PLAYER_ENTERED_GRID", true);
+static eLadderLogWriter se_playerEnteredSpectatorWriter("PLAYER_ENTERED_SPECTATOR", true);
+static eLadderLogWriter se_playerAIEnteredWriter("PLAYER_AI_ENTERED", true);
 static eLadderLogWriter se_playerRenamedWriter("PLAYER_RENAMED", true);
 
 class eNameMessenger
@@ -8773,17 +8781,27 @@ public:
         {
             if ( player_.IsHuman() )
             {
-                se_playerEnteredWriter << logName << nMachine::GetMachine(player_.Owner()).GetIP() << screenName;
-                se_playerEnteredWriter.write();
-
                 player_.Greet();
 
                 // print spectating join message (regular join messages are handled by eTeam)
                 if ( ( player_.IsSpectating() || player_.IsSuspended() || !se_assignTeamAutomatically ) && ( se_assignTeamAutomatically || se_specSpam ) )
                 {
+                    se_playerEnteredSpectatorWriter << logName << nMachine::GetMachine(player_.Owner()).GetIP() << screenName;
+                    se_playerEnteredSpectatorWriter.write();
+
                     mess << "$player_entered_spectator";
                     sn_ConsoleOut(mess);
                 }
+                else
+                {
+                    se_playerEnteredGridWriter << logName << nMachine::GetMachine(player_.Owner()).GetIP() << screenName;
+                    se_playerEnteredGridWriter.write();
+                }
+            }
+            else
+            {
+                se_playerAIEnteredWriter << logName << screenName;
+                se_playerAIEnteredWriter.write();
             }
         }
         else if ( logName != oldLogName_ || screenName != oldScreenName_ )

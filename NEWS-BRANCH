@@ -1,4 +1,15 @@
-Changes in 0.2.9-sty+ct+ap_811
+Changes in 0.2.9-sty+ct+ap_r812
+- Fixed the coloring problem with the * icon when players are either in chat mode or idle
+- Added new ladderlog command:
+  * LADDERLOG_WRITE_CYCLE_DESTROYED   Output: CYCLE_DESTROYED [auth_name] [posX] [posY] [dirX] [dirY] [team]
+  * LADDERLog_WRITE_PLAYER_ENTERED_GRID         Writes when a player entered server to play on the grid
+  * LADDERLOG_WRITE_PLAYER_ENTERED_SPECTATOR    Writes when a player entered server as a spectator
+    Both PLAYER_ENTERED_[GRID/SPECTRTOR] were derived from PLAYER_ENTERED ladderlog command so that we can
+    be more specific as to which way the player entered the server.
+  * LADDERLOG_WRITE_PLAYER_AI_ENTERED           Writes when a ai entered the grid
+  * LADDERLOG_WRITE_PLAYER_AI_LEFT              Writes when a ai left the grid       
+
+Changes in 0.2.9-sty+ct+ap_r811
 - Added new commands:
   * MAP_QUEING        Store and load maps in a que every round until empty. The maps must exist in MAP_ROTATION
   * CONFIG_QUEING     Store and load configs in a que every round until empty. The configs must exist in CONFIG_ROTATION
@@ -36,7 +47,7 @@ Changes in 0.2.9-sty+ct+ap_811
     This seems to be a lot better handler than the earlier code as two maps with similar names from different
     authors did cause a glitch in the records.                
 
-Changes in 0.2.9-sty+ct+ap_808
+Changes in 0.2.9-sty+ct+ap_r808
 - Racing script has been coded again for as better and flexible recording of score and time
 - Racing now displays best time or best score depending on RACE_SORT_TYPE
 - Added new command:
@@ -51,7 +62,7 @@ Changes in 0.2.9-sty+ct+ap_808
 - Taking the example of the chat symbol from the TRUNK version, the * before the player's name
   when they are chatting has been added. 
 
-Changes in 0.2.9-sty+ct+ap_806
+Changes in 0.2.9-sty+ct+ap_r806
 - Placed ROUND_ENDED and MATCH_ENDED in a better location
 - PLAYER_MESSAGE doesn't require the " " to enclose the message
 - The race scores, times will be written as the player reaches the winzone or dies.
