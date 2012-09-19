@@ -169,6 +169,37 @@ private:
 };
 
 // **********************************************************************
+// nSenderInfo
+// **********************************************************************
+
+//! extra information about the sender of a message
+struct nSenderInfo
+{
+public:
+    //! reference to the message, it contains all info
+    nMessageBase const & envelope;
+    
+    int SenderID() const
+    {
+        return envelope.SenderID();
+    }
+    
+    int MessageIDBig() const
+    {
+        return envelope.MessageIDBig();
+    }
+    
+    unsigned short MessageID() const
+    {
+        return envelope.MessageID();
+    }
+    
+    explicit nSenderInfo( nMessageBase const & e )
+    : envelope( e )
+    {}
+};
+
+// **********************************************************************
 // nProtoBufMessage
 // **********************************************************************
 
@@ -259,37 +290,6 @@ private:
 
 template< class PROTOBUF >
 PROTOBUF nProtoBufMessage< PROTOBUF >::workProtoBuf_;
-
-// **********************************************************************
-// nSenderInfo
-// **********************************************************************
-
-//! extra information about the sender of a message
-struct nSenderInfo
-{
-public:
-    //! reference to the message, it contains all info
-    nMessageBase const & envelope;
-
-    int SenderID() const
-    {
-        return envelope.SenderID();
-    }
-
-    int MessageIDBig() const
-    {
-        return envelope.MessageIDBig();
-    }
-
-    unsigned short MessageID() const
-    {
-        return envelope.MessageID();
-    }
-
-    explicit nSenderInfo( nMessageBase const & e )
-    : envelope( e )
-    {}
-};
 
 // **********************************************************************
 // nMessageTranslatorBase

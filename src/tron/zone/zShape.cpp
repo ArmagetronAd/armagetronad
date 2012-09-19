@@ -71,10 +71,6 @@ extern REAL sg_zoneAlpha, sg_zoneAlphaServer;
 #define sz_initialSize     sg_initialSize
 #define sz_zoneAlpha       sg_zoneAlpha
 #define sz_zoneAlphaServer sg_zoneAlphaServer
-#define sz_zoneSegSteps          sg_zoneSegSteps
-#define sz_zoneFloorScalePercent sg_zoneFloorScalePercent
-#define sz_zoneProximityDistance sg_zoneProximityDistance
-#define sz_zoneProximityOffset   sg_zoneProximityOffset
 #endif
 
 #define lasttime_ lastTime
