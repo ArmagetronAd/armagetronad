@@ -2573,6 +2573,34 @@ tweaks_displaylists_cae_help Use displaylists; Create them and let them be execu
 tweaks_infinity_text		Infinity:
 tweaks_infinity_help		Some planes (grid, sky...) have an infinite extension; if this feature is enabled, they are really drawn as infinite planes. Some OpenGL renderers do not seem to like this (all Windows versions I have seen...); disable it if the floor or sky textures are screwed up.
 
+detail_zone_style_text          Zone rendering mode
+detail_zone_style_help          Select how zones should be rendered
+detail_zone_style_vertical_text Vertical
+detail_zone_style_vertical_help Classic vertical rectangles
+detail_zone_style_flat_text     Flat
+detail_zone_style_flat_help     On floor trapezoids
+detail_zone_style_combined_text Combined
+detail_zone_style_combined_help Combination of vertical and flat rendering
+detail_zone_style_custom_text   Custom
+detail_zone_style_custom_help   Custom submenu. Press enter to access custom menu.
+
+zone_style_custom_menu          Custom zone rendering mode
+zone_style_segments_text        Number of segments
+zone_style_segments_help        number of rectangles forming the zone
+zone_style_segment_steps_text   Number of steps
+zone_style_segment_steps_help   Number of steps for each segments
+zone_style_segment_length_text  Segment length
+zone_style_segment_length_help  Size (in percent) of each segments. 1 means segments will be contiguous
+zone_style_bottom_text          Bottom
+zone_style_bottom_help          Bottom position for vertical rendering
+zone_style_height_text          Height
+zone_style_height_help          height for vertical rendering
+zone_style_floor_scale_pct_text Floor scale percent
+zone_style_floor_scale_pct_help Percentage of zone radius/size for flat rendering
+zone_style_proximity_distance_text Proximity max distance
+zone_style_proximity_distance_help Distance from which zone's height start to shrink
+zone_style_proximity_offset_text   Proximity min distance
+zone_style_proximity_offset_help   Distance to which zone's height will be 0
 
 #********************************************
 #********************************************

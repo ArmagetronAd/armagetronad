@@ -393,6 +393,92 @@ static void sg_ScreenModeMenu()
 }
 
 
+#define gZONE_STYLE_VERT 0
+#define gZONE_STYLE_FLAT 1
+#define gZONE_STYLE_COMB 2
+#define gZONE_STYLE_CUST 3
+static int sg_zoneStyle;
+
+void zone_style_on_select(int const& val) {
+    // default include files are executed at owner level
+    tCurrentAccessLevel level( tAccessLevel_Owner, true );
+
+    // hardcoded includes
+    switch (val) {
+        case gZONE_STYLE_VERT:
+            st_Include(tString("zonestyle_vertical.cfg"));
+            break;
+        case gZONE_STYLE_FLAT:
+            st_Include(tString("zonestyle_flat.cfg"));
+            break;
+        case gZONE_STYLE_COMB:
+            st_Include(tString("zonestyle_combined.cfg"));
+    }
+}
+
+extern int  sz_zoneSegments;
+extern int  sz_zoneSegSteps;
+extern REAL sz_zoneSegLength;
+extern REAL sz_zoneBottom;
+extern REAL sz_zoneHeight;
+extern REAL sz_zoneFloorScalePercent;
+extern REAL sz_zoneProximityDistance;
+extern REAL sz_zoneProximityOffset;
+
+void zone_style_on_enter(int const& val) {
+    if (val!=gZONE_STYLE_CUST) return;
+    uMenu customMenu("$zone_style_custom_menu");
+    uMenuItemReal cm8(&customMenu,
+                      "$zone_style_proximity_offset_text",
+                      "$zone_style_proximity_offset_help",
+                      sz_zoneProximityOffset, (REAL)0, (REAL)100, (REAL)1 );
+    uMenuItemReal cm7(&customMenu,
+                      "$zone_style_proximity_distance_text",
+                      "$zone_style_proximity_distance_help",
+                      sz_zoneProximityDistance, (REAL)-1, (REAL)100, (REAL)1 );
+    uMenuItemReal cm6(&customMenu,
+                      "$zone_style_floor_scale_pct_text",
+                      "$zone_style_floor_scale_pct_help",
+                      sz_zoneFloorScalePercent, (REAL)0, (REAL)1, (REAL).05 );
+    uMenuItemReal cm5(&customMenu,
+                      "$zone_style_height_text",
+                      "$zone_style_height_help",
+                      sz_zoneHeight, (REAL)0, (REAL)20, (REAL)1 );
+    uMenuItemReal cm4(&customMenu,
+                      "$zone_style_bottom_text",
+                      "$zone_style_bottom_help",
+                      sz_zoneBottom, (REAL)0, (REAL)10, (REAL)1 );
+    uMenuItemReal cm3(&customMenu,
+                      "$zone_style_segment_length_text",
+                      "$zone_style_segment_length_help",
+                      sz_zoneSegLength, (REAL)0, (REAL)1, (REAL).05 );
+    uMenuItemInt  cm2(&customMenu,
+                      "$zone_style_segment_steps_text",
+                      "$zone_style_segment_steps_help",
+                      sz_zoneSegSteps, 1, 16, 1);
+    uMenuItemInt  cm1(&customMenu,
+                      "$zone_style_segments_text",
+                      "$zone_style_segments_help",
+                      sz_zoneSegments, 2, 20, 1);
+    customMenu.SetCenter(.3);
+    customMenu.Enter();
+}
+
+static uMenuItemSelection<int> mzm
+(&screen_menu_detail,
+ "$detail_zone_style_text",
+ "$detail_zone_style_help",
+ sg_zoneStyle, &zone_style_on_select, &zone_style_on_enter);
+static uSelectEntry<int> mzm0(mzm,"$detail_zone_style_vertical_text",
+                              "$detail_zone_style_vertical_help", gZONE_STYLE_VERT);
+static uSelectEntry<int> mzm1(mzm,"$detail_zone_style_flat_text",
+                              "$detail_zone_style_flat_help", gZONE_STYLE_FLAT);
+static uSelectEntry<int> mzm2(mzm,"$detail_zone_style_combined_text",
+                              "$detail_zone_style_combined_help", gZONE_STYLE_COMB);
+static uSelectEntry<int> mzm3(mzm,"$detail_zone_style_custom_text",
+                              "$detail_zone_style_custom_help", gZONE_STYLE_CUST);
+
+
 static uMenuItemSelection<int> mfm
 (&screen_menu_detail,
  "$detail_floor_mirror_text",

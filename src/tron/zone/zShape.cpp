@@ -570,15 +570,23 @@ void zShapeCircle::Render(const eCamera * cam )
                 
                 // classic zone
                 glVertex3f(sa, ca, bot);
-                glVertex3f(sa, ca, top);
-                glVertex3f(sb, cb, top);
+                if (top!=bot) {
+                    glVertex3f(sa, ca, top);
+                    glVertex3f(sb, cb, top);
+                }
                 glVertex3f(sb, cb, bot);
                 
                 if ( useAlpha )
                 {
+                    if (bot!=.0) {
+                        RenderEnd();
+                        BeginTriangleFan();
+                        glVertex3f(sa, ca, 0);
+                        glVertex3f(sb, cb, 0);
+                    }
                     // floor zone
-                    glVertex3f(sb*sg_floor_radius_pct, cb*sg_floor_radius_pct, bot);
-                    glVertex3f(sa*sg_floor_radius_pct, ca*sg_floor_radius_pct, bot);
+                    glVertex3f(sb*sg_floor_radius_pct, cb*sg_floor_radius_pct, 0);
+                    glVertex3f(sa*sg_floor_radius_pct, ca*sg_floor_radius_pct, 0);
                     RenderEnd();
                     BeginTriangleFan();
                 } else {

@@ -317,18 +317,21 @@ protected:
     tOutput               	title;
     int                   	select;
     T *                   	target;
+    typedef void (*TFUNCPTR)(T const&);
+    TFUNCPTR                    onselect;
+    TFUNCPTR                    onenter;
 public:
 #ifdef SLOPPYLOCALE
     uMenuItemSelection(uMenu *m,
                        const char* tit,const char *help,
-                       T &targ)
-            :uMenuItem(m,help),title(tit),select(0),target(&targ){}
+                       T &targ, TFUNCPTR onsel=0, TFUNCPTR onent=0)
+            :uMenuItem(m,help),title(tit),select(0),target(&targ),onselect(onsel),onenter(onent){}
 #endif
 
     uMenuItemSelection(uMenu *m,
                        const tOutput &tit,const tOutput &help,
-                       T &targ)
-            :uMenuItem(m,help),title(tit),select(0),target(&targ){}
+                       T &targ, TFUNCPTR onsel=0, TFUNCPTR onent=0)
+            :uMenuItem(m,help),title(tit),select(0),target(&targ),onselect(onsel),onenter(onent){}
 
     ~uMenuItemSelection(){
         Clear();
@@ -360,6 +363,11 @@ public:
             select=0;
         if (choices.Len())
             *target=choices(select)->value;
+        if (onselect) onselect(*target);
+    }
+
+    virtual void Enter(){
+        if (onenter) onenter(*target);
     }
 
     virtual void Render(REAL x,REAL y,REAL alpha=1,bool selected=0){
