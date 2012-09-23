@@ -1759,3 +1759,20 @@ tColoredString eTeam::GetColoredName(void) const
         << Name()
         << tColoredString::ColorString(-1, -1, -1);
 }
+
+eTeam * eTeam::FindTeamByName(tString const &name)
+{
+    for(int i=0;i < teams.Len(); i++)
+    {
+        eTeam *team = teams(i);
+
+        tString search_for = ePlayerNetID::FilterName(name);
+        tString searching_in = ePlayerNetID::FilterName(team->Name());
+
+        if (searching_in.Contains(search_for))
+        {
+            return team;
+        }
+    }
+    return false;
+}

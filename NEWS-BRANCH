@@ -1,4 +1,10 @@
-Changes in 0.2.9-sty+ct+ap_r812
+Changes in 0.2.9-sty+ct+ap_r815
+- Did a few changes on finding a team in gParser.h
+- Now you can have Teleport zones inside the map
+- In <ShapeCircle> you can also have <Color r="" b="" g="" /> with <Point ... />
+- These new changes are available in Lover-Boy/map-0.2.8.3.1_sty+ct+ap_v1.1.dtd
+
+Changes in 0.2.9-sty+ct+ap_r814
 - Fixed the coloring problem with the * icon when players are either in chat mode or idle
 - Added new ladderlog command:
   * LADDERLOG_WRITE_CYCLE_DESTROYED   Output: CYCLE_DESTROYED [auth_name] [posX] [posY] [dirX] [dirY] [team]

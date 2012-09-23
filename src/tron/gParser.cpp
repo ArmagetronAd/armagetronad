@@ -489,7 +489,7 @@ gParser::parseSpawn(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
 }
 
 bool
-gParser::parseShapeCircle(eGrid *grid, xmlNodePtr cur, float &x, float &y, float &radius, float& growth, const xmlChar * keyword)
+gParser::parseShapeCircle(eGrid *grid, xmlNodePtr cur, eCoord &zonePos, float &radius, float& growth, const xmlChar * keyword, gRealColor &zoneColor, bool &colorsExist)
 {
     radius = myxmlGetPropFloat(cur, "radius");
     growth = myxmlGetPropFloat(cur, "growth");
@@ -497,12 +497,30 @@ gParser::parseShapeCircle(eGrid *grid, xmlNodePtr cur, float &x, float &y, float
     cur = cur->xmlChildrenNode;
     while( cur != NULL) {
         if (!xmlStrcmp(cur->name, (const xmlChar *)"text") || !xmlStrcmp(cur->name, (const xmlChar *)"comment")) {}
-        else if (isElement(cur->name, (const xmlChar *)"Point", keyword)) {
-            x = myxmlGetPropFloat(cur, "x");
-            y = myxmlGetPropFloat(cur, "y");
+        else if (isElement(cur->name, (const xmlChar *)"Point", keyword))
+        {
+            float x = myxmlGetPropFloat(cur, "x");
+            float y = myxmlGetPropFloat(cur, "y");
 
-            endElementAlternative(grid, cur, keyword);
-            return true;
+            zonePos = eCoord(x * sizeMultiplier, y * sizeMultiplier);
+
+            //endElementAlternative(grid, cur, keyword);
+            //return true;
+        }
+        else if (isElement(cur->name, (const xmlChar *)"Color", keyword))
+        {
+            REAL r = myxmlGetPropFloat(cur, "r");
+            REAL g = myxmlGetPropFloat(cur, "g");
+            REAL b = myxmlGetPropFloat(cur, "b");
+
+            zoneColor.r = r / 15.0;
+            zoneColor.g = g / 15.0;
+            zoneColor.b = b / 15.0;
+
+            colorsExist = true;
+
+            //endElementAlternative(grid, cur, keyword);
+            //return true;
         }
         else if (isElement(cur->name, (const xmlChar *)"Alternative", keyword)) {
             if (isValidAlternative(cur, keyword)) {
@@ -511,21 +529,25 @@ gParser::parseShapeCircle(eGrid *grid, xmlNodePtr cur, float &x, float &y, float
         }
         cur = cur->next;
     }
+
     return false;
 }
 
 void
 gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
 {
-    float x, y, radius, growth;
+    float radius, growth;
+    eCoord zonePos;
     bool shapeFound = false;
     gZone * zone = NULL;
     xmlNodePtr shape = cur->xmlChildrenNode;
+    gRealColor zoneColor;
+    bool colorsExist = false;
 
     while(shape != NULL && shapeFound==false) {
         if (!xmlStrcmp(cur->name, (const xmlChar *)"text") || !xmlStrcmp(cur->name, (const xmlChar *)"comment")) {}
         else if (isElement(shape->name, (const xmlChar *)"ShapeCircle", keyword)) {
-            shapeFound = parseShapeCircle(grid, shape, x, y, radius, growth, keyword);
+            shapeFound = parseShapeCircle(grid, shape, zonePos, radius, growth, keyword, zoneColor, colorsExist);
         }
         else if (isElement(cur->name, (const xmlChar *)"Alternative", keyword)) {
             if (isValidAlternative(cur, keyword)) {
@@ -535,132 +557,145 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
         shape = shape->next;
     }
 
+
+    // This is to ensure "zoneColor" doesn't get changed due to the zone's default color or team effect
+    gRealColor storeColors_;
+    if (colorsExist) storeColors_ = zoneColor;
+
     int pos = 0;
     tString zoneNamestr = myxmlGetPropString(cur, "name");
-    gRealColor ZoneColor;
 
     if (sn_GetNetState() != nCLIENT )
     {
         if (!xmlStrcmp(myxmlGetProp(cur, "effect").GetXML(), (const xmlChar *)"win")) {
-            zone = tNEW( gWinZoneHack) ( grid, eCoord(x*sizeMultiplier,y*sizeMultiplier) );
+            zone = tNEW( gWinZoneHack) ( grid, zonePos );
         }
         else if (!xmlStrcmp(myxmlGetProp(cur, "effect").GetXML(), (const xmlChar *)"death")) {
             tString zoneTeamStr = myxmlGetPropString(cur, "team");
-            eTeam *zoneTeam=NULL;
-            gRealColor zoneColor;
-            for (int i = eTeam::teams.Len() - 1; i>=0; --i) {
-                tString teamName = eTeam::teams(i)->Name();
-                if (zoneTeamStr==ePlayerNetID::FilterName(teamName)) {
-                    zoneTeam = eTeam::teams(i);
-                    break;
-                }
-            }
+            eTeam *zoneTeam = eTeam::FindTeamByName(zoneTeamStr);
 
-            if (zoneTeam) {
-                zoneColor.r = zoneTeam->R()/15.0;
-                zoneColor.g = zoneTeam->G()/15.0;
-                zoneColor.b = zoneTeam->B()/15.0;
-
-                zone = tNEW( gDeathZoneHack) ( grid, eCoord(x*sizeMultiplier,y*sizeMultiplier), true, zoneTeam );
-                zone->SetColor(zoneColor);
-            }
-            else {
-                zone = tNEW( gDeathZoneHack) ( grid, eCoord(x*sizeMultiplier,y*sizeMultiplier) );
-            }
-        }
-        else if (!xmlStrcmp(myxmlGetProp(cur, "effect").GetXML(), (const xmlChar *)"fortress")) {
-            tString zoneTeamStr = myxmlGetPropString(cur, "team").ExtractNonBlankSubString(pos);
-            eTeam *zoneTeam=NULL;
-            gRealColor zoneColor;
-            for (int i = eTeam::teams.Len() - 1; i>=0; --i) {
-                tString teamName = eTeam::teams(i)->Name();
-                if (zoneTeamStr==ePlayerNetID::FilterName(teamName)) {
-                    zoneTeam = eTeam::teams(i);
-                    break;
-                }
-            }
-
-            if (zoneTeam) {
-                zoneColor.r = zoneTeam->R()/15.0;
-                zoneColor.g = zoneTeam->G()/15.0;
-                zoneColor.b = zoneTeam->B()/15.0;
-
-                zone = tNEW( gBaseZoneHack) ( grid, eCoord(x*sizeMultiplier,y*sizeMultiplier), true, zoneTeam );
-                zone->SetColor(zoneColor);
-            }
-            else {
-                zone = tNEW( gBaseZoneHack) ( grid, eCoord(x*sizeMultiplier,y*sizeMultiplier) );
-            }
-        }
-        else if (!xmlStrcmp(myxmlGetProp(cur, "effect").GetXML(), (const xmlChar *)"sumo")) {
-            zone = tNEW( gSumoZoneHack) ( grid, eCoord(x*sizeMultiplier,y*sizeMultiplier) );
-        }
-        else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"flag")) {
-            tString zoneTeamStr = myxmlGetPropString(cur, "team").ExtractNonBlankSubString(pos);
-            eTeam *zoneTeam=NULL;
-            gRealColor zoneColor;
-            for (int i = eTeam::teams.Len() - 1; i>=0; --i) {
-                tString teamName = eTeam::teams(i)->Name();
-                if (zoneTeamStr==ePlayerNetID::FilterName(teamName)) {
-                    zoneTeam = eTeam::teams(i);
-                    break;
-                }
-            }
-
-            if (zoneTeam) {
-                zoneColor.r = zoneTeam->R()/15.0;
-                zoneColor.g = zoneTeam->G()/15.0;
-                zoneColor.b = zoneTeam->B()/15.0;
-
-                zone = tNEW( gFlagZoneHack) ( grid, eCoord(x*sizeMultiplier,y*sizeMultiplier), true, zoneTeam );
-                zone->SetColor(zoneColor);
-            }
-            else {
-                zone = tNEW( gFlagZoneHack) ( grid, eCoord(x*sizeMultiplier,y*sizeMultiplier) );
-            }
-        }
-        else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"ball")) {
-            tString zoneTeamStr = myxmlGetPropString(cur, "team").ExtractNonBlankSubString(pos);
-            eTeam *zoneTeam=NULL;
-            gRealColor zoneColor;
-            for (int i = eTeam::teams.Len() - 1; i>=0; --i)
-            {
-                tString teamName = eTeam::teams(i)->Name();
-                if (zoneTeamStr==ePlayerNetID::FilterName(teamName))
-                {
-                    zoneTeam = eTeam::teams(i);
-                    break;
-                }
-            }
-
-            if (zoneTeam)
+            if (zoneTeam && (zoneTeamStr != ""))
             {
                 zoneColor.r = zoneTeam->R()/15.0;
                 zoneColor.g = zoneTeam->G()/15.0;
                 zoneColor.b = zoneTeam->B()/15.0;
 
-                zone = tNEW( gBallZoneHack) ( grid, eCoord(x*sizeMultiplier,y*sizeMultiplier), true, zoneTeam );
+                zone = tNEW( gDeathZoneHack) ( grid, zonePos, true, zoneTeam );
                 zone->SetColor(zoneColor);
             }
             else
             {
-                zone = tNEW( gBallZoneHack) ( grid, eCoord(x*sizeMultiplier,y*sizeMultiplier) );
+                zone = tNEW( gDeathZoneHack) ( grid, zonePos );
+            }
+        }
+        else if (!xmlStrcmp(myxmlGetProp(cur, "effect").GetXML(), (const xmlChar *)"fortress")) {
+            tString zoneTeamStr = myxmlGetPropString(cur, "team");
+            eTeam *zoneTeam = eTeam::FindTeamByName(zoneTeamStr);
+
+            if (zoneTeam && (zoneTeamStr != ""))
+            {
+                zoneColor.r = zoneTeam->R()/15.0;
+                zoneColor.g = zoneTeam->G()/15.0;
+                zoneColor.b = zoneTeam->B()/15.0;
+
+                zone = tNEW( gBaseZoneHack) ( grid, zonePos, true, zoneTeam );
+                zone->SetColor(zoneColor);
+            }
+            else
+            {
+                zone = tNEW( gBaseZoneHack) ( grid, zonePos );
+            }
+        }
+        else if (!xmlStrcmp(myxmlGetProp(cur, "effect").GetXML(), (const xmlChar *)"sumo")) {
+            zone = tNEW( gSumoZoneHack) ( grid, zonePos );
+        }
+        else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"flag")) {
+            tString zoneTeamStr = myxmlGetPropString(cur, "team");
+            eTeam *zoneTeam = eTeam::FindTeamByName(zoneTeamStr);
+
+            if (zoneTeam && (zoneTeamStr != ""))
+            {
+                zoneColor.r = zoneTeam->R()/15.0;
+                zoneColor.g = zoneTeam->G()/15.0;
+                zoneColor.b = zoneTeam->B()/15.0;
+
+                zone = tNEW( gFlagZoneHack) ( grid, zonePos, true, zoneTeam );
+                zone->SetColor(zoneColor);
+            }
+            else
+            {
+                zone = tNEW( gFlagZoneHack) ( grid, zonePos );
+            }
+        }
+        else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"ball")) {
+            tString zoneTeamStr = myxmlGetPropString(cur, "team");
+            eTeam *zoneTeam = eTeam::FindTeamByName(zoneTeamStr);
+
+            if (zoneTeam && (zoneTeamStr != ""))
+            {
+                zoneColor.r = zoneTeam->R()/15.0;
+                zoneColor.g = zoneTeam->G()/15.0;
+                zoneColor.b = zoneTeam->B()/15.0;
+
+                zone = tNEW( gBallZoneHack) ( grid, zonePos, true, zoneTeam );
+                zone->SetColor(zoneColor);
+            }
+            else
+            {
+                zone = tNEW( gBallZoneHack) ( grid, zonePos );
             }
         }
         else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"target")) {
-            zone = tNEW( gTargetZoneHack) ( grid, eCoord(x*sizeMultiplier,y*sizeMultiplier) );
+            zone = tNEW( gTargetZoneHack) ( grid, zonePos );
         }
         else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"blast")) {
-            zone = tNEW( gBlastZoneHack) ( grid, eCoord(x*sizeMultiplier,y*sizeMultiplier) );
+            zone = tNEW( gBlastZoneHack) ( grid, zonePos );
         }
         else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *) "effect"), (const xmlChar *)"rubber")) {
             REAL rubberVal = myxmlGetPropFloat(cur, "rubberVal");
             if (rubberVal != 0.0 ){
-                gRubberZoneHack *rZone= tNEW(gRubberZoneHack(grid, eCoord(x*sizeMultiplier,y*sizeMultiplier), false ));
+                gRubberZoneHack *rZone= tNEW(gRubberZoneHack(grid, zonePos, false ));
                 rZone->SetRubber(rubberVal);
                 zone = rZone;
             }
 
+        }
+        else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *) "effect"), (const xmlChar *)"teleport"))
+        {
+            tString  zoneJumpXStr;
+            tString  zoneJumpYStr;
+            eCoord zoneJump;
+            int relJump=0;
+            eCoord ndir;
+            REAL reloc=0;
+
+            zoneJumpXStr = myxmlGetPropString(cur, "destX");
+            zoneJumpYStr = myxmlGetPropString(cur, "destY");
+            zoneJump = eCoord(atof(zoneJumpXStr)*sizeMultiplier,atof(zoneJumpYStr)*sizeMultiplier);
+
+            tString zoneRelAbsStr = myxmlGetPropString(cur, "modes");
+
+            if (zoneRelAbsStr=="") zoneRelAbsStr="rel";
+            if (zoneRelAbsStr=="rel") relJump=1;
+            else if (zoneRelAbsStr=="cycle") relJump=2;
+            else relJump = 0;
+
+            const tString xdir_str = myxmlGetPropString(cur, "dirX");
+            REAL xdir = atof(xdir_str);
+            const tString ydir_str = myxmlGetPropString(cur, "dirY");
+            REAL ydir = atof(ydir_str);
+            if (xdir_str == "") xdir = 0.0;
+            if (ydir_str == "") ydir = 0.0;
+            ndir = eCoord(xdir*sizeMultiplier,ydir*sizeMultiplier);
+            const tString reloc_str = myxmlGetPropString(cur, "reloc");
+            reloc = atof(reloc_str);
+            if (reloc_str == "") reloc = 1.0;
+
+            gTeleportZoneHack *tZone = new gTeleportZoneHack(grid, zonePos, true);
+            tZone->SetJump(zoneJump,relJump);
+            tZone->SetNewDir(ndir);
+            tZone->SetReloc(reloc);
+            zone = tZone;
         }
 
         // leaving zone undeleted is no memory leak here, the gid takes control of it
@@ -671,7 +706,7 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
             zone->SetRotationSpeed( .3f );
             zone->RequestSync();
             if (zoneNamestr) zone->SetName(zoneNamestr);
-            //zone->SetColor();
+            if (colorsExist) zone->SetColor(storeColors_);
         }
     }
 }

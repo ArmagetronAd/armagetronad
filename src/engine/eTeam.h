@@ -60,7 +60,7 @@ protected:							// protected attributes
 
     unsigned short r,g,b;			// team color
     tString	name;					// our name
-    
+
     int position_;                  // last spawn position
 
     bool locked_;                   //!< if set, only invited players may join
@@ -85,9 +85,9 @@ public:							// public configuration options
     void UpdateAppearance();		// update name and color
     void Update();					// update all properties
 
-    void SetPosition( int position ); // sets the last team spawn position - 0 being first spawn 
+    void SetPosition( int position ); // sets the last team spawn position - 0 being first spawn
     int GetPosition() const;          // returns the position
-    
+
     void SetLocked( bool locked );  // sets the lock status (whether invitations are required)
     bool IsLocked() const;          // returns the lock status
 
@@ -99,14 +99,14 @@ public:							// public configuration options
     static bool Enemies( eTeam const * team1, eTeam const * team2 ); //!< determines whether two teams are enemies
 
     static void Enforce( int minTeams, int maxTeams, int maxImbalance );
-    
+
     static void WritePlayers( eLadderLogWriter & writer, const eTeam *team );
     static void WriteLaunchPositions(); // Logs player positions to ladderlog.txt
 public:												// public methods
     static void	EnforceConstraints();					// make sure the limits on team number and such are met
 
     static void SortByScore();							// brings the teams into the right order
-    
+
     static void SortByPosition();							// brings the teams into the right spawn
 
     static void SwapTeamsNo(int a,int b);             	// swaps the teams a and b
@@ -153,7 +153,7 @@ public:												// public methods
     static void		ResetAllSets	(		);
 
 	static bool ongoingChallenge;		 // a challenge is currently underway, block any new challenge request
-	
+
     static void ResetScoreDifferences(); //<! Resets the last stored score so ScoreDifferences takes this as a reference time
     static void LogScoreDifferences();   //<! Logs accumulated scores of all players since the last call to ResetScoreDifferences() to ladderlog.txt
     void LogScoreDifference();           //<! Logs accumulated scores since the last call to ResetScoreDifferences() to ladderlog.txt
@@ -218,6 +218,8 @@ public:												// public methods
     virtual bool AcceptClientSync() const	{
         return false;
     }
+
+    static eTeam * FindTeamByName( tString const & name );
 
     // con/desstruction
     eTeam();											// default constructor
