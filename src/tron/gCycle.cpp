@@ -150,11 +150,7 @@ static nSettingItem<REAL> c_ss("CYCLE_SOUND_SPEED",
 
 // time after spawning it takes the cycle to start building a wall
 static REAL sg_cycleWallTime=0.0;
-static nSettingItemWatched<REAL>
-sg_cycleWallTimeConf("CYCLE_WALL_TIME",
-                     sg_cycleWallTime,
-                     nConfItemVersionWatcher::Group_Bumpy,
-                     12);
+static tSettingItem<REAL> sg_cycleWallTimeConf("CYCLE_WALL_TIME", sg_cycleWallTime);
 
 // time after spawning during which a cycle can't be killed
 static REAL sg_cycleInvulnerableTime=0.0;
@@ -3045,7 +3041,12 @@ bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
             {
                 // start building wall
                 REAL startBuildWallAt = spawnTime_ + sg_cycleWallTime;
-                if ( !currentWall && currentTime > startBuildWallAt  )
+                if (sg_cycleWallTime < 0)
+                {
+                    // stop building wall
+                    currentWall = NULL;
+                }
+                else //( !currentWall && currentTime > startBuildWallAt  )
                 {
                     // simulate right to the spot where the wall should begin
                     if ( currentTime < startBuildWallAt )
@@ -3879,8 +3880,18 @@ void gCycle::DropWall( bool buildNew )
         currentWall=NULL;
     }
 
-    if ( buildNew && lastTime >= spawnTime_ + sg_cycleWallTime )
-        currentWall=new gNetPlayerWall(this,pos,dirDrive,lastTime,distance);
+    if (sg_cycleWallTime < 0)
+    {
+        // don't build wall
+    }
+    else
+    {
+        if (lastTime >= (spawnTime_ + sg_cycleWallTime))
+        {
+            currentWall = new gNetPlayerWall(this, pos, dirDrive, lastTime, distance);
+        }
+    }
+
 
     // grid datastructures change on inserting a wall, better recheck
     // all game objects. Temporarily override this cycle's driving direction.
@@ -5483,27 +5494,32 @@ void gCycle::SyncFromExtrapolator()
     // delegate
     CopyFrom( *extrapolator_ );
 
-    // adjust current wall (not essential, don't do it for the first wall)
-    if ( currentWall && currentWall->tBeg > spawnTime_ + sg_cycleWallTime + .01f )
+    // make sure setting is or above zero
+    if (sg_cycleWallTime >= 0)
     {
-        // update start position
-        currentWall->beg = extrapolator_->GetLastTurnPos();
-
-        // set begin distance as well
-        REAL dBeg = extrapolator_->GetDistance() - eCoord::F( extrapolator_->Direction(), extrapolator_->Position() - extrapolator_->GetLastTurnPos() );
-
-        currentWall->dbegin = dBeg;
-        currentWall->coords_[0].Pos = dBeg;
-
-        // and care for consistency
-        int i;
-        for ( i = currentWall->coords_.Len() -1 ; i>=0; --i )
+        // adjust current wall (not essential, don't do it for the first wall)
+        if ( currentWall && (currentWall->tBeg > (spawnTime_ + sg_cycleWallTime + .01f) ) )
         {
-            gPlayerWallCoord & coord = currentWall->coords_( i );
-            if ( coord.Pos <= dBeg )
-                coord.Pos = dBeg;
+            // update start position
+            currentWall->beg = extrapolator_->GetLastTurnPos();
+
+            // set begin distance as well
+            REAL dBeg = extrapolator_->GetDistance() - eCoord::F( extrapolator_->Direction(), extrapolator_->Position() - extrapolator_->GetLastTurnPos() );
+
+            currentWall->dbegin = dBeg;
+            currentWall->coords_[0].Pos = dBeg;
+
+            // and care for consistency
+            int i;
+            for ( i = currentWall->coords_.Len() -1 ; i>=0; --i )
+            {
+                gPlayerWallCoord & coord = currentWall->coords_( i );
+                if ( coord.Pos <= dBeg )
+                    coord.Pos = dBeg;
+            }
         }
     }
+
 
     // transfer last turn position
     lastTurnPos_ = extrapolator_->GetLastTurnPos();
@@ -6037,9 +6053,10 @@ void gCycle::SyncEnemy ( const eCoord& )
         correctDistanceSmooth=0;
 
         REAL startBuildWallAt = spawnTime_ + sg_cycleWallTime;
-        if ( crossTime > startBuildWallAt )
-            currentWall=new gNetPlayerWall
-                        (this,crossPos,lastSyncMessage_.dir,crossTime,crossDist);
+        if (crossTime >= startBuildWallAt)
+        {
+            currentWall = new gNetPlayerWall(this, crossPos, lastSyncMessage_.dir, crossTime, crossDist);
+        }
 
         turned = true;
 

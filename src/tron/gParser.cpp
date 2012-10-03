@@ -489,7 +489,7 @@ gParser::parseSpawn(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
 }
 
 bool
-gParser::parseShapeCircle(eGrid *grid, xmlNodePtr cur, eCoord &zonePos, float &radius, float& growth, const xmlChar * keyword, gRealColor &zoneColor, bool &colorsExist)
+gParser::parseShapeCircle(eGrid *grid, xmlNodePtr cur, eCoord &zonePos, float &radius, float& growth, const xmlChar * keyword, gRealColor &zoneColor, bool &colorsExist, eCoord &zoneDir)
 {
     radius = myxmlGetPropFloat(cur, "radius");
     growth = myxmlGetPropFloat(cur, "growth");
@@ -522,6 +522,13 @@ gParser::parseShapeCircle(eGrid *grid, xmlNodePtr cur, eCoord &zonePos, float &r
             //endElementAlternative(grid, cur, keyword);
             //return true;
         }
+        else if (isElement(cur->name, (const xmlChar *)"Move", keyword))
+        {
+            REAL xDir = myxmlGetPropFloat(cur, "xdir");
+            REAL yDir = myxmlGetPropFloat(cur, "ydir");
+
+            zoneDir = eCoord(xDir * sizeMultiplier, yDir * sizeMultiplier);
+        }
         else if (isElement(cur->name, (const xmlChar *)"Alternative", keyword)) {
             if (isValidAlternative(cur, keyword)) {
                 parseAlternativeContent(grid, cur);
@@ -543,11 +550,12 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
     xmlNodePtr shape = cur->xmlChildrenNode;
     gRealColor zoneColor;
     bool colorsExist = false;
+    eCoord zoneDir;
 
     while(shape != NULL && shapeFound==false) {
         if (!xmlStrcmp(cur->name, (const xmlChar *)"text") || !xmlStrcmp(cur->name, (const xmlChar *)"comment")) {}
         else if (isElement(shape->name, (const xmlChar *)"ShapeCircle", keyword)) {
-            shapeFound = parseShapeCircle(grid, shape, zonePos, radius, growth, keyword, zoneColor, colorsExist);
+            shapeFound = parseShapeCircle(grid, shape, zonePos, radius, growth, keyword, zoneColor, colorsExist, zoneDir);
         }
         else if (isElement(cur->name, (const xmlChar *)"Alternative", keyword)) {
             if (isValidAlternative(cur, keyword)) {
@@ -697,6 +705,14 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
             tZone->SetReloc(reloc);
             zone = tZone;
         }
+        else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *) "effect"), (const xmlChar *)"burst"))
+        {
+            REAL cycle_burst_speed = myxmlGetPropFloat(cur, "speed");
+            gBurstZoneHack *bZone = new gBurstZoneHack(grid, zonePos, true);
+            bZone->SetBurstSpeed(cycle_burst_speed);
+
+            zone = bZone;
+        }
 
         // leaving zone undeleted is no memory leak here, the gid takes control of it
         if ( zone )
@@ -707,6 +723,7 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
             zone->RequestSync();
             if (zoneNamestr) zone->SetName(zoneNamestr);
             if (colorsExist) zone->SetColor(storeColors_);
+            zone->SetVelocity(zoneDir);
         }
     }
 }

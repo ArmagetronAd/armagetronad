@@ -276,7 +276,7 @@ cycle_dist_wall_shrink_offset_help Distance offset in wall length calculation. S
 # respawn relevant settings (no server supports respawning yet, but the client is prepared)
 cycle_blink_frequency_help        Frequency in Hz an invulnerable cycle blinks with.
 cycle_invulnerable_time_help      Time in seconds a cycle is invulnerable after a respawn.
-cycle_wall_time_help              Time in seconds a cycle does not make a wall after a respawn.
+cycle_wall_time_help              Time in seconds a cycle does not make a wall after a respawn. Values below 0 disable wall building.
 cycle_first_spawn_protection_help Set to 1 if the invulnerability and wall delay should already be active on the initial spawn at the beginning of a round.
 
 #********************************************

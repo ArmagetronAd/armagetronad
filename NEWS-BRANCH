@@ -1,3 +1,18 @@
+Changes in 0.2.9-sty+ct+ap_r816
+Fixed commands:
+- CYCLE_WALL_TIME
+  * Previously this command was not functional for unknown reasons
+  * Now however it is fully operational with an extra addition.
+  * Values below 0 will make sure players won't start building tails.
+  * If this value is changed during the round to something above 0, the tails will start building.
+  * That being said, it also depend on the game's current time. Meaning that the tails
+    will start building once the game time reaches or moves over that given time value.
+New Features:
+- Zone types can now contain "burst" which increases a players speed like a booster. SPAWN_ZONE also contains this.
+  In turn negative values could also slow down players' cycles. Never tested it but it's worth a shot!
+- Move is now available which enables Zones to move in the set directions like xdir and ydir
+- Usage of this can be found in Lover-Boy/example-1.0.0.aamap.xml 
+
 Changes in 0.2.9-sty+ct+ap_r815
 - Did a few changes on finding a team in gParser.h
 - Now you can have Teleport zones inside the map

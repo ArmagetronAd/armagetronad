@@ -76,7 +76,7 @@ protected:
     void parseZone(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
     void parseWall(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
 
-    bool parseShapeCircle(eGrid *grid, xmlNodePtr cur, eCoord &zonePos, float &radius, float &growth, const xmlChar * keyword, gRealColor &zoneColor, bool &colorsExist);
+    bool parseShapeCircle(eGrid *grid, xmlNodePtr cur, eCoord &zonePos, float &radius, float &growth, const xmlChar * keyword, gRealColor &zoneColor, bool &colorsExist, eCoord &zoneDir);
 
     void parseField(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
     void parseWorld(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword = NULL);

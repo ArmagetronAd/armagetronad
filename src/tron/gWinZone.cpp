@@ -5950,6 +5950,109 @@ void gBlastZoneHack::OnVanish( void )
 {
 }
 
+// *******************************************************************************
+// *
+// *    gBurstZoneHack
+// *
+// *******************************************************************************
+//!
+//!     @param  grid Grid to put the zone into
+//!     @param  pos  Position to spawn the zone at
+//!
+// *******************************************************************************
+
+gBurstZoneHack::gBurstZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreation)
+:gZone( grid, pos, dynamicCreation )
+{
+    color_.r = 0.0f;
+    color_.g = 1.5f;
+    color_.b = 1.0f;
+
+    grid->AddGameObjectInteresting(this);
+
+    SetExpansionSpeed(0);
+    SetRotationSpeed( .3f );
+    RequestSync();
+}
+
+
+// *******************************************************************************
+// *
+// *    gBurstZoneHack
+// *
+// *******************************************************************************
+//!
+//!     @param  m Message to read creation data from
+//!     @param  null
+//!
+// *******************************************************************************
+
+gBurstZoneHack::gBurstZoneHack( nMessage & m )
+: gZone( m )
+{
+}
+
+
+// *******************************************************************************
+// *
+// *    ~gBurstZoneHack
+// *
+// *******************************************************************************
+//!
+//!
+// *******************************************************************************
+
+gBurstZoneHack::~gBurstZoneHack( void )
+{
+}
+
+
+// *******************************************************************************
+// *
+// *    Timestep
+// *
+// *******************************************************************************
+//!
+//!     @param  time    the current time
+//!
+// *******************************************************************************
+
+bool gBurstZoneHack::Timestep( REAL time )
+{
+    // delegate
+    bool returnStatus = gZone::Timestep( time );
+
+    return (returnStatus);
+}
+
+
+// *******************************************************************************
+// *
+// *    OnEnter
+// *
+// *******************************************************************************
+//!
+//!     @param  target  the cycle that has been found inside the zone
+//!     @param  time    the current time
+//!
+// *******************************************************************************
+
+void gBurstZoneHack::OnEnter( gCycle * target, REAL time )
+{
+    target->verletSpeed_ += target->verletSpeed_ + burstSpeed_;
+}
+
+// *******************************************************************************
+// *
+// *    OnVanish
+// *
+// *******************************************************************************
+
+void gBurstZoneHack::OnVanish( void )
+{
+    this->RemoveFromListsAll();
+}
+
 
 
 // *******************************************************************************
@@ -6000,6 +6103,12 @@ static void sg_CreateZone_conf(std::istream &s)
                 break;
             }
         }
+    }
+
+    REAL cycleBurstSpeed = 0;
+    if (zoneTypeStr == "burst")
+    {
+        cycleBurstSpeed = atof(params.ExtractNonBlankSubString(pos));
     }
 
     ePlayerNetID *zonePlayer = 0;
@@ -6260,11 +6369,19 @@ static void sg_CreateZone_conf(std::istream &s)
     else if (zoneTypeStr=="koh"){
         Zone = tNEW( gKOHZoneHack( grid, zonePos, true ) );
     }
+    else if (zoneTypeStr == "burst")
+    {
+        gBurstZoneHack *bZone = new gBurstZoneHack(grid, zonePos, true);
+        bZone->SetBurstSpeed(cycleBurstSpeed);
+
+        Zone = bZone;
+    }
     else
     {
         usage:
         con << "Usage:\n"
             "SPAWN_ZONE <win|death|ball|target|blast|koh> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
+            "SPAWN_ZONE burst <speed> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
             "SPAWN_ZONE rubber <x> <y> <size> <growth> <xdir> <ydir> <rubber> <interactive> <r> <g> <b> <target_size> \n"
             "SPAWN_ZONE teleport <x> <y> <size> <growth> <xdir> <ydir> <xjump> <yjump> <rel|abs> <interactive> <r> <g> <b> <target_size> \n"
             "SPAWN_ZONE <fortress|flag|deathTeam|ballTeam> <team> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
