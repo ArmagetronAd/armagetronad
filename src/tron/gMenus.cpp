@@ -465,7 +465,7 @@ void zone_style_on_enter(int const& val) {
 }
 
 static uMenuItemSelection<int> mzm
-(&screen_menu_detail,
+(&screen_menu_prefs,
  "$detail_zone_style_text",
  "$detail_zone_style_help",
  sg_zoneStyle, &zone_style_on_select, &zone_style_on_enter);

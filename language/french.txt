@@ -1489,7 +1489,7 @@ tweaks_displaylists_help      Les liste d'affichage sont une propriete d'OpenGL 
 tweaks_infinity_text          Infini:
 tweaks_infinity_help          Quelques plans ( ciel, sol, etc. ) ont une prolongation infinie. Si ceci est active, ils sont vraiment dessines en tant que plans infinis. Quelques rendus d'OpenGL ne semble pas trop apprecier ceci ( toutes les versions de Windows que j'ai vu ). Le desactiver si les textures du sol et/ou du ciel sont deformees
 
-detail_zone_style_text          Mode de Rendu des Zones
+detail_zone_style_text          Mode de Rendu des Zones:
 detail_zone_style_help          Defini comment sont dessinées les zones
 detail_zone_style_vertical_text Vertical
 detail_zone_style_vertical_help Rendu vertical classique

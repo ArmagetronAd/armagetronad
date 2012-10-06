@@ -2573,7 +2573,8 @@ tweaks_displaylists_cae_help Use displaylists; Create them and let them be execu
 tweaks_infinity_text		Infinity:
 tweaks_infinity_help		Some planes (grid, sky...) have an infinite extension; if this feature is enabled, they are really drawn as infinite planes. Some OpenGL renderers do not seem to like this (all Windows versions I have seen...); disable it if the floor or sky textures are screwed up.
 
-detail_zone_style_text          Zone rendering mode
+# not in the detail menu any more, but in the preferences menu
+detail_zone_style_text          Zone rendering mode:
 detail_zone_style_help          Select how zones should be rendered
 detail_zone_style_vertical_text Vertical
 detail_zone_style_vertical_help Classic vertical rectangles
