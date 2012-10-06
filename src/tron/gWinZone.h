@@ -176,6 +176,36 @@ private:
     virtual void OnEnter( gCycle *target, REAL time ); //!< reacts on objects inside the zone
     virtual void OnEnter( gZone *target, REAL time );  //!< reacts on objects inside the zone
 
+    virtual void OnExit( gCycle *target, REAL time );   //!< reacts to objects leaving the zone
+    virtual void OnExit( gZone *target, REAL time );    //!< reacts to objects leaving the zone
+
+    tArray<gCycle *> cycesInside_;
+    void AddPlayerInteraction(gCycle *cycle) { cycesInside_.Insert(cycle); }
+    void RemovePlayerInteraction(gCycle *cycle)
+    {
+        for(int i=0; i < cycesInside_.Len(); i++)
+        {
+            gCycle *p = cycesInside_[i];
+            if (p && (p == cycle))
+            {
+                cycesInside_.RemoveAt(i);
+                break;
+            }
+        }
+    }
+    bool isInside(gCycle *cycle)
+    {
+        for(int i=0; i < cycesInside_.Len(); i++)
+        {
+            gCycle *p = cycesInside_[i];
+            if (p && (p == cycle))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     virtual nDescriptor& CreatorDescriptor() const; //!< returns the descriptor to recreate this object over the network
 
     REAL Radius() const;           //!< returns the current radius
@@ -459,6 +489,7 @@ class gTargetZoneHack: public gZone
 		virtual void OnVanish(); //!< called when the zone vanishes
 								 //!< reacts on objects inside the zone
 		virtual void OnEnter( gCycle *target, REAL time );
+		virtual void OnExit( gCycle *target, REAL time );   //!< reacts to objects leaving zone
 
 								 //!< count check zone on grid
 		static int TargetZoneCounter_;
@@ -483,9 +514,10 @@ class gTargetZoneHack: public gZone
 			State_Conquered		 //!< conquered
 		};
 		State currentState_;	 //!< the current state
-		tString OnEnterCmd, OnVanishCmd; //!< commands to be parse when the first player enter the target and when the target vanish
+		tString OnEnterCmd, OnExitCmd, OnVanishCmd; //!< commands to be parse when the first player enter the target and when the target vanish
 	public:
 		void SetOnEnterCmd(tString &cmd, tString &mode) {if (mode=="add") OnEnterCmd << "\n" << cmd; else OnEnterCmd = cmd;};
+		void SetOnExitCmd(tString &cmd, tString &mode) {if (mode=="add") OnExitCmd << "\n" << cmd; else OnExitCmd = cmd;};
 		void SetOnVanishCmd(tString &cmd, tString &mode) {if (mode=="add") OnVanishCmd << "\n" << cmd; else OnVanishCmd = cmd;};
 };
 class gKOHZoneHack: public gZone

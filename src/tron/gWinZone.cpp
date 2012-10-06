@@ -974,6 +974,19 @@ void gZone::InteractWith( eGameObject * target, REAL time, int recursion )
             if ( prey->Player() && prey->Alive() )
             {
                 OnEnter( prey, time );
+                if (!isInside(prey)) // make sure this cycle isn't in zone already
+                {
+                    //  if not, then add them to the list
+                    AddPlayerInteraction(prey);
+                }
+            }
+        }
+        else
+        {
+            if (isInside(prey)) // make sure this cycle already is within the zone
+            {
+                OnExit(prey, time); // call the OnExit event
+                RemovePlayerInteraction(prey);  // remove them from the list
             }
         }
     }
@@ -1147,6 +1160,36 @@ void gZone::OnEnter( gCycle * target, REAL time )
 // *******************************************************************************
 
 void gZone::OnEnter( gZone * target, REAL time )
+{
+}
+
+// *******************************************************************************
+// *
+// *    OnExit
+// *
+// *******************************************************************************
+//!
+//!     @param  target  the cycle that has left the zone
+//!     @param  time    the current time
+//!
+// *******************************************************************************
+
+void gZone::OnExit( gCycle *target, REAL time )
+{
+}
+
+// *******************************************************************************
+// *
+// *    OnExit
+// *
+// *******************************************************************************
+//!
+//!     @param  target  the zone that has left the zone
+//!     @param  time    the current time
+//!
+// *******************************************************************************
+
+void gZone::OnExit( gZone *target, REAL time )
 {
 }
 
@@ -5180,12 +5223,20 @@ static void sg_SetTargetCmd(std::istream &s)
         gTargetZoneHack *zone=dynamic_cast<gTargetZoneHack *>(gameObjects(zone_id));
         if (zone)
         {
-            if (event_str=="onenter") {
+            if (event_str == "onenter")
+            {
                 zone->SetOnEnterCmd(cmd_str, mode_str);
                 con << "Zone " << zone->GOID() << " command onenter '" << cmd_str << "'\n";
-            } else if (event_str=="onvanish") {
+            }
+            else if (event_str == "onvanish")
+            {
                 zone->SetOnVanishCmd(cmd_str, mode_str);
                 con << "Zone " << zone->GOID() << " command onvanish '" << cmd_str << "'\n";
+            }
+            else if (event_str == "onexit")
+            {
+                zone->SetOnExitCmd(cmd_str, mode_str);
+                con << "Zone " << zone->GOID() << " command onexit '" << cmd_str << "'\n";
             }
             zone_id=gZone::FindNext(object_id_str, zone_id);
         }
@@ -5452,6 +5503,24 @@ void gTargetZoneHack::OnEnter( gCycle * target, REAL time )
     }
 }
 
+// *******************************************************************************
+// *
+// *    OnExit
+// *
+// *******************************************************************************
+//!
+//!     @param  target  the cycle that has left the zone
+//!     @param  time    the current time
+//!
+// *******************************************************************************
+
+void gTargetZoneHack::OnExit(gCycle *target, REAL time)
+{
+    //send on exit commands
+    std::istringstream stream(&OnExitCmd(0));
+    tCurrentAccessLevel elevator( sg_SetTargetCmd_conf.GetRequiredLevel(), true );
+    tConfItemBase::LoadAll(stream);
+}
 
 // *******************************************************************************
 // *
@@ -6039,7 +6108,7 @@ bool gBurstZoneHack::Timestep( REAL time )
 
 void gBurstZoneHack::OnEnter( gCycle * target, REAL time )
 {
-    target->verletSpeed_ += target->verletSpeed_ + burstSpeed_;
+    target->verletSpeed_ += burstSpeed_;
 }
 
 // *******************************************************************************
