@@ -782,6 +782,10 @@ rim_wall_stretch_x_help Extension of the rim wall texture in the horizontal dire
 rim_wall_stretch_y_help Extension of the rim wall texture in the vertical direction
 rim_wall_wrap_y_help    Set to 1 if the rim wall texture should repeat in the vertical direction
 
+rim_wall_red_help        Red portion of rim walls when using no textures. Any value between 0 and 1.
+rim_wall_green_help      Green portion of rim walls when using no textures. Any value between 0 and 1.
+rim_wall_blue_help       Blue portion of rim walls when using no textures. Any value between 0 and 1.
+
 #moviepack settings
 moviepack_floor_red_help	Floor colour
 moviepack_floor_green_help	Floor colour
