@@ -89,8 +89,10 @@ static const cbpair cbarray[] = {
                                     cbpair(tString("current_seconds")     , &cCockpit::cb_CurrentTimeSeconds),
                                     cbpair(tString("current_score")       , &cCockpit::cb_CurrentScore),
                                     cbpair(tString("top_score")           , &cCockpit::cb_TopScore),
+                                    cbpair(tString("top_other_score")     , &cCockpit::cb_TopOtherScore),
                                     cbpair(tString("current_score_team")  , &cCockpit::cb_CurrentScoreTeam),
                                     cbpair(tString("top_score_team")      , &cCockpit::cb_TopScoreTeam),
+                                    cbpair(tString("top_other_score_team"), &cCockpit::cb_TopOtherScoreTeam),
                                     cbpair(tString("fastest_speed")       , &cCockpit::cb_FastestSpeed),
                                     cbpair(tString("fastest_name")        , &cCockpit::cb_FastestName),
                                     cbpair(tString("fastest_speed_round") , &cCockpit::cb_FastestSpeedRound),
@@ -215,28 +217,24 @@ tValue::BasePtr cCockpit::cb_CurrentBrakingReservoir(void) {
 tValue::BasePtr cCockpit::cb_AliveEnemies(void){
     if(m_Type == VIEWPORT_TOP) return tValue::BasePtr(new tValue::Base());
     int aliveenemies=0;
+    eTeam *curr = GetCurrentOrFocusedPlayer()->CurrentTeam();
     unsigned short int max = se_PlayerNetIDs.Len();
-    if(m_ViewportPlayer)
-    {
-        for(unsigned short int i=0;i<max;i++){
-            ePlayerNetID *p=se_PlayerNetIDs(i);
-            if(p->Object() && p->Object()->Alive() && p->CurrentTeam() != m_ViewportPlayer->CurrentTeam())
-                aliveenemies++;
-        }
+    for(unsigned short int i=0;i<max;i++){
+        ePlayerNetID *p=se_PlayerNetIDs(i);
+        if(p->Object() && p->Object()->Alive() && p->CurrentTeam() != curr)
+            aliveenemies++;
     }
     return tValue::BasePtr(new tValue::Int(aliveenemies));
 }
 tValue::BasePtr cCockpit::cb_AliveTeammates(void){
     if(m_Type == VIEWPORT_TOP) return tValue::BasePtr(new tValue::Base());
     int alivemates=0;
+    eTeam *curr = GetCurrentOrFocusedPlayer()->CurrentTeam();
     unsigned short int max = se_PlayerNetIDs.Len();
-    if(m_ViewportPlayer)
-    {
-        for(unsigned short int i=0;i<max;i++){
-            ePlayerNetID *p=se_PlayerNetIDs(i);
-            if(p->Object() && p->Object()->Alive() && p->CurrentTeam() == m_ViewportPlayer->CurrentTeam())
-                alivemates++;
-        }
+    for(unsigned short int i=0;i<max;i++){
+        ePlayerNetID *p=se_PlayerNetIDs(i);
+        if(p->Object() && p->Object()->Alive() && p->CurrentTeam() == curr)
+            alivemates++;
     }
     return tValue::BasePtr(new tValue::Int(alivemates));
 }
@@ -310,18 +308,26 @@ int stc_topScore;
 
 tValue::BasePtr cCockpit::cb_CurrentScore(void){
     if(m_Type == VIEWPORT_TOP) return tValue::BasePtr(new tValue::Base());
-    return tValue::BasePtr(new tValue::Int(m_ViewportPlayer->TotalScore()));
+    return tValue::BasePtr(new tValue::Int(GetCurrentOrFocusedPlayer()->TotalScore()));
 }
 tValue::BasePtr cCockpit::cb_TopScore(void){
     return tValue::BasePtr(new tValue::Int(stc_topScore));
 }
+tValue::BasePtr cCockpit::cb_TopOtherScore(void){
+    int top = 0;
+    ePlayerNetID *curr = GetCurrentOrFocusedPlayer();
+    for(int i = se_PlayerNetIDs.Len() - 1;i >= 0; i--){
+        ePlayerNetID *p = se_PlayerNetIDs(i);
+        if(p != curr && p->Score() > top){
+            top = p->Score();
+        }
+    }
+    return tValue::BasePtr(new tValue::Int(top));
+}
 
 tValue::BasePtr cCockpit::cb_CurrentScoreTeam(void){
     if(m_Type == VIEWPORT_TOP) return tValue::BasePtr(new tValue::Base());
-    if(m_ViewportPlayer->CurrentTeam() == 0) {
-        return tValue::BasePtr(new tValue::Base());
-    }
-    return tValue::BasePtr(new tValue::Int(m_ViewportPlayer->CurrentTeam()->Score()));
+    return tValue::BasePtr(new tValue::Int(GetCurrentOrFocusedPlayer()->CurrentTeam()->Score()));
 }
 tValue::BasePtr cCockpit::cb_TopScoreTeam(void){
     int max = 0;
@@ -330,6 +336,17 @@ tValue::BasePtr cCockpit::cb_TopScoreTeam(void){
         if(t->Score() > max) max = t->Score();
     }
     return tValue::BasePtr(new tValue::Int(max));
+}
+tValue::BasePtr cCockpit::cb_TopOtherScoreTeam(void){
+    int top = 0;
+    eTeam *curr = GetCurrentOrFocusedPlayer()->CurrentTeam();
+    for(int i = eTeam::teams.Len() - 1;i >= 0; i--){
+        eTeam *t = eTeam::teams(i);
+        if(t != curr && t->Score() > top){
+            top = t->Score();
+        }
+    }
+    return tValue::BasePtr(new tValue::Int(top));
 }
 
 static void stc_updateFastest() {
@@ -907,5 +924,13 @@ gCycle* cCockpit::GetFocusCycle(void) {
 
 ePlayer *cCockpit::GetPlayer() {
     return m_Player;
+}
+
+ePlayerNetID *cCockpit::GetCurrentOrFocusedPlayer() {
+    if(m_ViewportPlayer->CurrentTeam()){
+        return m_ViewportPlayer;
+    } else {
+        return m_FocusPlayer;
+    }
 }
 #endif

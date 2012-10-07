@@ -110,6 +110,8 @@ public:
 
     ePlayer *GetPlayer(); //!< The player the viewport belongs to
     gCycle *GetFocusCycle(void); //!< the cycle that's being followed in the current view
+
+    ePlayerNetID *GetCurrentOrFocusedPlayer(); //!< If the viewport player has a team, the viewport player, else the currently focused player
 private:
     static cCockpit* _instance; //!< Stores a pointer to the current instance of the cockpit
 
@@ -154,8 +156,10 @@ public:
 
     tValue::BasePtr cb_CurrentScore(void);            //!< Gets the viewport owner's score
     tValue::BasePtr cb_TopScore(void);                //!< Gets the top personal score
-    tValue::BasePtr cb_CurrentScoreTeam(void);            //!< Gets the viewport owner's team's score
-    tValue::BasePtr cb_TopScoreTeam(void);                //!< Gets the top team score
+    tValue::BasePtr cb_TopOtherScore(void);           //!< Gets the top personal score of someone else
+    tValue::BasePtr cb_CurrentScoreTeam(void);        //!< Gets the viewport owner's team's score
+    tValue::BasePtr cb_TopScoreTeam(void);            //!< Gets the top team score
+    tValue::BasePtr cb_TopOtherScoreTeam(void);       //!< Gets the top team score, but not the player's own
     tValue::BasePtr cb_FastestSpeed(void);            //!< Gets the speed of the player who's currently the fastest in m/s
     tValue::BasePtr cb_FastestName(void);             //!< Gets the name of the player who's currently the fastest
     tValue::BasePtr cb_FastestSpeedRound(void);            //!< Gets the speed of the player who's been the fastest during the round in m/s
