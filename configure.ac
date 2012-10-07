@@ -672,7 +672,12 @@ if test x$enable_armathentication = xyes; then
 
 AC_LANG([C++])
 
-AC_CHECK_LIB([boost_thread],_ZNK5boost6thread6get_idEv,,[
+AC_CHECK_LIB([boost_thread],_ZNK5boost6thread6get_idEv,[
+
+AC_CHECK_LIB([boost_system], _ZN5boost6system15system_categoryEv)
+LIBS="-lboost_thread ${LIBS}"
+
+],[
 
 ACX_PTHREAD([
 
@@ -681,7 +686,7 @@ CXXFLAGS="${CXXFLAGS} ${PTHREAD_CFLAGS}"
 CC="${PTHREAD_CC}"
 AC_DEFINE(HAVE_PTHREAD,1,[Define if you have POSIX threads libraries and header files.])
 
-],)
+])
 
 ])
 
