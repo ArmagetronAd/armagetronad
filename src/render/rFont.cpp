@@ -163,8 +163,13 @@ void sr_utf8216(tString const &in, std::wstring &out) {
 int sr_fontType = sr_fontTexture;
 static tConfItem< int > sr_fontTypeConf( "FONT_TYPE", sr_fontType, &sr_ReloadFont);
 
+bool restrictLineHeight( float const &newValue )
+{
+    return newValue > 0;
+}
+
 float sr_lineHeight = 1.;
-static tConfItem< float > sr_lineHeightconf( "LINE_HEIGHT", sr_lineHeight);
+static tConfItem< float > sr_lineHeightconf( "LINE_HEIGHT", sr_lineHeight, &restrictLineHeight );
 
 class rFontContainer : std::map<int, FTFont *> {
     FTFont &New(int size);
