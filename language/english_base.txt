@@ -859,10 +859,11 @@ ladderlog_write_all_help Set all the LADDER_LOG_WRITE_* settings to the same val
 ladderlog_write_all_usage Usage: LADDER_LOG_WRITE_ALL 1|0
 ladderlog_write_all_enabled Enabled full ladderlog output.
 ladderlog_write_all_disabled Disabled ladderlog output.
-ladderlog_write_authority_blurb_help          Write to ladderlog: AUTHORITY_BLURB <name> <value>
+ladderlog_write_authority_blurb_help          Write to ladderlog: AUTHORITY_BLURB <blurb> <player> <text>
 ladderlog_write_basezone_conquered_help       Write to ladderlog: BASEZONE_CONQUERED <team> <cx> <cy>
 ladderlog_write_basezone_conquerer_help       Write to ladderlog: BASEZONE_CONQUERER <player>
 ladderlog_write_chat_help                     Write to ladderlog: CHAT <chatter> [/me] <chat string>
+ladderlog_write_command_help                  Write to ladderlog: COMMAND <command> <player> <text>
 ladderlog_write_death_frag_help               Write to ladderlog: DEATH_FRAG <prey> <predator>
 ladderlog_write_death_suicide_help            Write to ladderlog: DEATH_SUICIDE <player>
 ladderlog_write_death_teamkill_help           Write to ladderlog: DEATH_TEAMKILL <prey> <predator>
