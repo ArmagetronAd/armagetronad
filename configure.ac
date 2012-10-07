@@ -677,6 +677,8 @@ AC_CHECK_LIB([boost_thread],_ZNK5boost6thread6get_idEv,[
 AC_CHECK_LIB([boost_system], _ZN5boost6system15system_categoryEv)
 LIBS="-lboost_thread ${LIBS}"
 
+AC_DEFINE(HAVE_LIBBOOST_THREAD,1,[Define if you have boost_thread libraries and header files.])
+
 ],[
 
 ACX_PTHREAD([
