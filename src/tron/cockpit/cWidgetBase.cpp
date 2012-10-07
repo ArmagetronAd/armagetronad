@@ -162,10 +162,16 @@ tValue::Base *WithDataFunctions::ProcessMath(tXmlParser::node cur) {
                 if (cur.GetProp("type") == "quotient")
                     val = new tValue::Divide(lvalue, rvalue);
                 else
-                {
-                    tERR_WARN("Type '" + cur.GetProp("type") + "' unknown!");
-                    val = new tValue::Add(lvalue, rvalue);
-                }
+                    if (cur.GetProp("type") == "power")
+                        val = new tValue::Power(lvalue, rvalue);
+                    else
+                        if (cur.GetProp("type") == "root")
+                            val = new tValue::Root(lvalue, rvalue);
+                        else
+                        {
+                            tERR_WARN("Type '" + cur.GetProp("type") + "' unknown!");
+                            val = new tValue::Add(lvalue, rvalue);
+                        }
     ProcessDataTags(cur, *val);
     return val;
 }
