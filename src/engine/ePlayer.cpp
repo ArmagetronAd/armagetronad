@@ -4667,7 +4667,7 @@ eShuffleSpamTester & ePlayerNetID::GetShuffleSpam()
     return se_GetSpam( *this ).shuffleSpam;
 }
 
-ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), timeCreated_( tSysTimeFloat() ), allowTeamChange_(false), registeredMachine_(0), pID(p)
+ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), timeCreated_( tSysTimeFloat() ), allowTeamChange_(false), registeredMachine_(0), pID(p), ready(false)
 {
     // default access level
     lastAccessLevel = tAccessLevel_Default;
@@ -6272,7 +6272,9 @@ void ePlayerNetID::ReadSync( Engine::PlayerNetIDSync const & sync, nSenderInfo c
         // read chat and spectator status
         unsigned short flags = sync.flags();
 
-        if( sync.has_ready() && (sn_GetNetState() != nSERVER || se_matches < 0 ))
+        if( sync.has_ready() && (
+                sn_GetNetState() != nSERVER
+                || se_matches < 0 && CurrentTeam()))
         {
             ready = sync.ready();
         }
