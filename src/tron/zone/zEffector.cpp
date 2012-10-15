@@ -173,6 +173,8 @@ zEffectorManager::Register(std::string const & type, std::string const & desc, X
 
 static zEffectorRegistration regWin("win", "", zEffectorWin::create);
 
+static eLadderLogWriter sg_winZoneWriter("WINZONE_PLAYER_ENTER", true);
+
 void zEffectorWin::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
     // BOP
@@ -184,6 +186,8 @@ void zEffectorWin::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
             iter != d_calculatedTargets.end();
             ++iter)
     {
+        sg_winZoneWriter << (*iter)->GetUserName();
+        sg_winZoneWriter.write();
         sg_DeclareWinner((*iter)->CurrentTeam(), message );
     }
 }
@@ -199,6 +203,8 @@ static tSettingItem<int> sz_dz("SCORE_DEATHZONE",sz_score_deathzone);
 
 static zEffectorRegistration regDeath("death", "", zEffectorDeath::create);
 
+static eLadderLogWriter sg_deathZoneWriter("DEATH_DEATHZONE", true);
+
 void zEffectorDeath::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
     gVectorExtra<ePlayerNetID *>::iterator iter;
@@ -207,6 +213,8 @@ void zEffectorDeath::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
             ++iter)
     {
         (*iter)->AddScore(sz_score_deathzone, tOutput(), "$player_lose_suicide");
+        sg_deathZoneWriter << (*iter)->GetUserName();
+        sg_deathZoneWriter.write();
         (*iter)->Object()->Kill();
     }
 }

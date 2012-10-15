@@ -893,6 +893,8 @@ ladderlog_write_team_destroyed_help           Write to ladderlog: TEAM_DESTROYED
 ladderlog_write_team_renamed_help             Write to ladderlog: TEAM_RENAMED <old team name> <new team name>
 ladderlog_write_team_player_added_help        Write to ladderlog: TEAM_PLAYER_ADDED <team name> <player>
 ladderlog_write_team_player_removed_help      Write to ladderlog: TEAM_PLAYER_REMOVED <team name> <player>
+ladderlog_write_death_deathzone_help          Write to ladderlog: DEATH_DEATHZONE <player>
+ladderlog_write_winzone_player_enter_help     Write to ladderlog: WINZONE_PLAYER_ENTER <player>
 ladderlog_game_time_interval_help If non-negative, write a line with the current game time to the ladder log every n seconds.
 chat_log_help			Write machine parsable chat messages to var/chatlog.txt
 console_log_help		Write all console messages to var/consolelog.txt

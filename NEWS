@@ -16,7 +16,10 @@ Changes since 0.3.1
 - New admin command: "SCRAMBLE". Scrambles/randomises which players are in which team.
 - New vote: /callvote scramble: Executes the SCRAMBLE command.
 - Teams now retain their spawn for later respawing
-- New ladderlog entry: PLAYER_RESPAWN <RESPAWNEE> <RESPAWNEE'S TEAM> [RESPAWNER]
+- New ladderlog entries:
+	- PLAYER_RESPAWN <RESPAWNEE> <RESPAWNEE'S TEAM> [RESPAWNER]
+	- DEATH_DEATHZONE <player>
+	- WINZONE_PLAYER_ENTER <player>
 - The ONLINE_PLAYER ladderlog entry now includes the access level of the player.
 - New warmup mode:
     - DO_WARMUP N>0 will make the game enter warmup mode after each N matches
