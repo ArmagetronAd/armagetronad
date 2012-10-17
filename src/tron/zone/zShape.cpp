@@ -577,6 +577,7 @@ void zShapeCircle::Render(const eCamera * cam )
                     if (bot!=.0) {
                         RenderEnd();
                         BeginTriangleFan();
+                        color.Apply();
                         glVertex3f(sa, ca, 0);
                         glVertex3f(sb, cb, 0);
                     }
