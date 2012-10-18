@@ -132,6 +132,10 @@ static tSettingItem<bool> sg_baseRespawnConfig ("BASE_RESPAWN", sg_baseRespawn);
 static bool sg_baseEnemyRespawn = false;
 static tSettingItem<bool> sg_baseEnemyRespawnConfig ("BASE_ENEMY_RESPAWN", sg_baseEnemyRespawn);
 
+//condense fort zone conquered output into one line for multiple winers.
+static bool sg_condenseConquestOutput = false;
+static tSettingItem<bool> sg_condenseConquestOutputConfig("CONDENSE_CONQUEST_OUTPUT", sg_condenseConquestOutput);
+
 void zFortressZone::setupVisuals(gParser::State_t & state)
 {
     REAL tpR[] = {.0f, .3f};
@@ -524,9 +528,64 @@ void zFortressZone::OnConquest( void )
         }
 
         int score = totalScore / (int)enemies_.size();
+        int tCount = 0;
+        tColoredString TeamOutputNames;
+        tColoredString lastTeam;
         for ( TeamArray::iterator iter = enemies_.begin(); iter != enemies_.end(); ++iter )
         {
-            (*iter)->AddScore( score, win, tOutput() );
+            if ( sg_condenseConquestOutput )
+            {
+                (*iter)->AddScore( score);
+
+                if ( tCount == 0 )
+                {
+                    lastTeam = (*iter)->GetColoredName();
+                }
+                else if ( tCount == 1 )
+                {
+                    TeamOutputNames << lastTeam;
+                    lastTeam = (*iter)->GetColoredName();
+                }
+                else
+                {
+                    TeamOutputNames << tColoredString::ColorString(1,1,1) << ", " << lastTeam;
+                    lastTeam = (*iter)->GetColoredName();
+                }
+
+                tCount++;
+            }
+            else
+            {
+                (*iter)->AddScore( score, win, tOutput() );
+            }
+        }
+
+        if ( sg_condenseConquestOutput )
+        {
+            if ( tCount == 1 )
+            {
+                TeamOutputNames << tColoredString::ColorString(1,1,1) << lastTeam;
+            }
+            else
+            {
+                TeamOutputNames << tColoredString::ColorString(1,1,1) << " and " << lastTeam;
+            }
+
+            tOutput message;
+            message.SetTemplateParameter(1, TeamOutputNames);
+            message.SetTemplateParameter(2, score > 0 ? score : -score);
+            message.SetTemplateParameter(3, team->GetColoredName());
+            if ( tCount == 1 )
+            {
+                message << "$player_win_conquest_specific";
+            }
+            else
+            {
+                message << "$players_win_condense_conquest";
+            }
+
+            sn_ConsoleOut(message);
+            RequestSync(true);
         }
     }
 
@@ -536,7 +595,6 @@ void zFortressZone::OnConquest( void )
         static const char* message="$player_win_conquest";
         sg_DeclareWinner( enemies_[0], message );
     }
-
     CheckSurvivor();
 }
 
