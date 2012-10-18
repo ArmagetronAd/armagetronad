@@ -58,6 +58,8 @@ Changes since 0.3.1
 - user*.cfg now resides in UserConfigDir.
 - Configuration files, with the exception of legacy user*.cfg files, are no longer
   read from the var directory.
+- New command CONDENSE_CONQUEST_OUTPUT. If set to 1 the zone conquering output gets condensed into 1 line like:
+  Team 1, Team 2 and Team 3 where awarded 20 Points for conquering Team 4's base
 
 Changes since 0.3.0
 ===================
