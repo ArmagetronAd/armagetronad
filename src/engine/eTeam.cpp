@@ -505,7 +505,7 @@ bool eTeam::IsInvited( ePlayerNetID const * player ) const
 
 void eTeam::AddScore ( int s )
 {
-    if(se_matches)
+    if(se_matches < 0)
         return;
 
     score += s;
@@ -550,7 +550,7 @@ void eTeam::AddScore(int points,
 
     tOutput message;
     message.SetTemplateParameter(1, GetColoredName());
-    message.SetTemplateParameter(2, points > 0 ? points : -points);
+    message.SetTemplateParameter(2, abs(points));
 
     if (!points)
     {

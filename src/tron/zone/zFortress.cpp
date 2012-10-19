@@ -541,7 +541,7 @@ void zFortressZone::OnConquest( void )
         {
             tOutput message;
             message.SetTemplateParameter(1, enemies_);
-            message.SetTemplateParameter(2, score > 0 ? score : -score);
+            message.SetTemplateParameter(2, abs(score));
             if( team )
             {
                 message.SetTemplateParameter(3, team->GetColoredName());

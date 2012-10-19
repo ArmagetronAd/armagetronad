@@ -6633,7 +6633,7 @@ void ePlayerNetID::AddScore(int points,
 
     tOutput message;
     message.SetTemplateParameter(1, name);
-    message.SetTemplateParameter(2, points > 0 ? points : -points);
+    message.SetTemplateParameter(2, abs(points));
 
 
     if(points == 0 )
