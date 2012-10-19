@@ -452,6 +452,11 @@ void zFortressZone::OnVanish( void )
     }
 }
 
+static bool sz_sortTeams(eTeam* a, eTeam* b)
+{
+    return a->GetLogName() < b->GetLogName();
+}
+
 // *******************************************************************************
 // *
 // *	OnConquest
@@ -480,16 +485,16 @@ void zFortressZone::OnConquest( void )
     }
     if (shape)
     {
-    for(int i = se_PlayerNetIDs.Len()-1; i >=0; --i) {
-        ePlayerNetID *player = se_PlayerNetIDs(i);
-        if(!player) {
-            continue;
+        for(int i = se_PlayerNetIDs.Len()-1; i >=0; --i) {
+            ePlayerNetID *player = se_PlayerNetIDs(i);
+            if(!player) {
+                continue;
+            }
+            if (shape->isInteracting(player->Object())) {
+                sg_basezoneConquererWriter << player->GetUserName();
+                sg_basezoneConquererWriter.write();
+            }
         }
-        if (shape->isInteracting(player->Object())) {
-            sg_basezoneConquererWriter << player->GetUserName();
-            sg_basezoneConquererWriter.write();
-        }
-    }
     }
 
     // calculate score. If nobody really was inside the zone any more, multiply by factor.
@@ -524,21 +529,14 @@ void zFortressZone::OnConquest( void )
         }
 
         int score = totalScore / (int)enemies_.size();
-        bool condenseOutput = enemies_.size() > 1;
-        for ( TeamArray::iterator iter = enemies_.begin(); iter != enemies_.end(); ++iter )
+        if(enemies_.size() > 1)
         {
-            if ( condenseOutput )
+            sort(enemies_.begin(), enemies_.end(), sz_sortTeams);
+            for ( TeamArray::iterator iter = enemies_.begin(); iter != enemies_.end(); ++iter )
             {
-                (*iter)->AddScore( score);
+                    (*iter)->AddScore( score);
             }
-            else
-            {
-                (*iter)->AddScore( score, win, tOutput() );
-            }
-        }
 
-        if ( condenseOutput )
-        {
             tOutput message;
             message.SetTemplateParameter(1, enemies_);
             message.SetTemplateParameter(2, abs(score));
@@ -553,6 +551,10 @@ void zFortressZone::OnConquest( void )
             }
 
             sn_ConsoleOut(message);
+            }
+        else
+        {
+            (*enemies_.begin())->AddScore(score, win, tOutput());
         }
     }
 

@@ -347,14 +347,13 @@ void eTeam::UpdateAppearance()
         color.r_ = color.g_ = color.b_ = 7;
         empty = true;
     }
-    
-    tString oldNameFiltered = ePlayerNetID::FilterName(oldName);
+
     tString newNameFiltered = ePlayerNetID::FilterName(name);
-    if( oldNameFiltered != newNameFiltered )
+    if( logName != newNameFiltered )
     {
         if( !empty && !lastEmpty_ )
         {
-            se_teamRenamedWriter << oldNameFiltered << newNameFiltered;
+            se_teamRenamedWriter << logName << newNameFiltered;
             se_teamRenamedWriter.write();
         }
         else if( !empty )
@@ -364,9 +363,10 @@ void eTeam::UpdateAppearance()
         }
         else if( !lastEmpty_ )
         {
-            se_teamDestroyWriter << oldNameFiltered;
+            se_teamDestroyWriter << logName;
             se_teamDestroyWriter.write();
         }
+        logName = newNameFiltered;
     }
     lastEmpty_ = empty;
 
@@ -638,7 +638,7 @@ void eTeam::LogScoreDifference( void )
         tString ret;
         int scoreDifference = score - lastScore_;
         lastScore_ = IMPOSSIBLY_LOW_SCORE;
-        se_roundScoreTeamWriter << scoreDifference << ePlayerNetID::FilterName( Name() );
+        se_roundScoreTeamWriter << scoreDifference << logName;
         se_roundScoreTeamWriter.write();
     }
 }
@@ -1046,7 +1046,7 @@ void eTeam::WriteLaunchPositions()
         if ( !team->IsHuman() )
             continue;
 
-        se_positionWriter << ePlayerNetID::FilterName( team->Name() );
+        se_positionWriter << team->GetLogName();
         for ( int j = 0; j < team->players.Len(); j++ )
             se_positionWriter << team->players( j )->GetLogName();
         se_positionWriter.write();
@@ -1128,7 +1128,7 @@ void eTeam::AddPlayer    ( ePlayerNetID* player )
     }
 
 
-    se_teamAddWriter << ePlayerNetID::FilterName( name ) << player->GetLogName();
+    se_teamAddWriter << logName << player->GetLogName();
     se_teamAddWriter.write();
 
     // anounce joining if there are is more than one member now or if the team is color-named
@@ -1201,7 +1201,7 @@ void eTeam::AddPlayerDirty   ( ePlayerNetID* player )
 
     player->UpdateName();
 
-    se_teamAddWriter << ePlayerNetID::FilterName( name ) << player->GetLogName();
+    se_teamAddWriter << logName << player->GetLogName();
     se_teamAddWriter.write();
 }
 
@@ -1225,7 +1225,7 @@ void eTeam::RemovePlayerDirty ( ePlayerNetID* player )
     players.Remove ( player, player->teamListID );
     player->currentTeam = NULL;
 
-    se_teamRemoveWriter << ePlayerNetID::FilterName( name ) << player->GetLogName();
+    se_teamRemoveWriter << logName << player->GetLogName();
     se_teamRemoveWriter.write();
 
     // remove team from list

@@ -64,6 +64,7 @@ protected:							// protected attributes
 
     tShortColor color;	            // team color
     tString	name;					// our name
+    tString logName;                // our name for logs, sorting and admin UI
 
     bool locked_;                   //!< if set, only invited players may join
 
@@ -215,6 +216,7 @@ public:												// public methods
     }
 
     tColoredString GetColoredName(void) const;
+    const tString& GetLogName() const { return logName; }
 
     virtual void PrintName(tString &s) const;					// print out an understandable name in to s
 
