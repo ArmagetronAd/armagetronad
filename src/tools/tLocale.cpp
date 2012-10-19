@@ -528,6 +528,11 @@ void tLocaleItem::Load(const char *file, bool complete)  // load the language de
                             i++;
                             break;
 
+                        case ' ':
+                            r->translation += ' ';
+                            i++;
+                            break;
+
                         case '1':
                         case '2':
                         case '3':

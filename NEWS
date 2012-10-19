@@ -58,6 +58,9 @@ Changes since 0.3.1
 - user*.cfg now resides in UserConfigDir.
 - Configuration files, with the exception of legacy user*.cfg files, are no longer
   read from the var directory.
+- Added support for streaming tArrays, lists and vectors to tStrings, producing text
+  looking a bit like this entry.
+- There is now only one score message per zone conquest instead of one per conquerer.
 
 Changes since 0.3.0
 ===================

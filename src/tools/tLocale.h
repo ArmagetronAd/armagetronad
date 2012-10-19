@@ -33,6 +33,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tError.h"
 #include "tVersion.h"
 
+#include <vector>
+#include <list>
+
 extern const tString st_internalEncoding;
 
 class tLocaleItem;
@@ -241,5 +244,61 @@ std::ostream& operator<< (std::ostream& s, const tLocaleItem& o);
 //std::stringstream& operator<<(std::stringstream& s, const tLocaleItem &t);
 tString& operator<< (tString& s, const tLocaleItem& o);
 
+//! Print lists nicely (Carrots, Apples and Tomatoes)
+template<class T>
+tString& operator<< (tString& s, const tArray<T>& arr)
+{
+    int len = arr.Len() - 1;
+    for(int i = 0; i <= len; i++)
+    {
+        if(i && i == len)
+        {
+            s << tOutput("$and");
+        }
+        else if(i)
+        {
+            s << tOutput("$separator");
+        }
+        s << *(arr(i));
+    }
+    return s;
+}
+
+template<class T>
+tString& operator<< (tString& s, const std::vector<T>& arr)
+{
+    int len = arr.size() - 1;
+    for(int i = 0; i <= len; i++)
+    {
+        if(i)
+        {
+            if(i == len)
+                s << tOutput("$and");
+            else
+                s << tOutput("$separator");
+        }
+        s << *(arr[i]);
+    }
+    return s;
+}
+
+template<class T>
+tString& operator<< (tString& s, const std::list<T>& arr)
+{
+    T last = *(arr.rend());
+    std
+    for(typename std::list<T>::const_iterator it = arr.begin(); it != arr.end(); ++it)
+    {
+        if(it != arr.begin())
+        {
+            if((*it) == last)
+                s << tOutput("$and");
+            else
+                s << tOutput("$separator");
+        }
+        s << **it;
+    }
+    return s;
+}
 
 #endif

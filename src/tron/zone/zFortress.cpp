@@ -524,9 +524,35 @@ void zFortressZone::OnConquest( void )
         }
 
         int score = totalScore / (int)enemies_.size();
+        bool condenseOutput = enemies_.size() > 1;
         for ( TeamArray::iterator iter = enemies_.begin(); iter != enemies_.end(); ++iter )
         {
-            (*iter)->AddScore( score, win, tOutput() );
+            if ( condenseOutput )
+            {
+                (*iter)->AddScore( score);
+            }
+            else
+            {
+                (*iter)->AddScore( score, win, tOutput() );
+            }
+        }
+
+        if ( condenseOutput )
+        {
+            tOutput message;
+            message.SetTemplateParameter(1, enemies_);
+            message.SetTemplateParameter(2, score > 0 ? score : -score);
+            if( team )
+            {
+                message.SetTemplateParameter(3, team->GetColoredName());
+                message << "$players_win_conquest_specific";
+            }
+            else
+            {
+                message << "$players_win_conquest";
+            }
+
+            sn_ConsoleOut(message);
         }
     }
 
