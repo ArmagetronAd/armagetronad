@@ -285,8 +285,7 @@ tString& operator<< (tString& s, const std::vector<T>& arr)
 template<class T>
 tString& operator<< (tString& s, const std::list<T>& arr)
 {
-    T last = *(arr.rend());
-    std
+    T last = *(arr.rbegin());
     for(typename std::list<T>::const_iterator it = arr.begin(); it != arr.end(); ++it)
     {
         if(it != arr.begin())
