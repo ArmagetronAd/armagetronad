@@ -65,7 +65,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "gAICharacter.h"
 #include "tDirectories.h"
 #include "gTeam.h"
-#include "eLadderLog.h"
 #ifdef ENABLE_ZONESV2
 #include "zone/zTimedZone.h"
 #include "zone/zZone.h"
@@ -86,7 +85,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "gRotation.h"
 #include "cockpit/cCockpit.h"
-#include "eWarmup.h"
 
 #include <math.h>
 #include <stdlib.h>
@@ -129,8 +127,6 @@ static gTutorialBase * sg_tutorial = NULL;
 tCONFIG_ENUM( gGameType );
 tCONFIG_ENUM( gFinishType );
 
-static tCONTROLLED_PTR(gGame) sg_currentGame;
-
 // extra round pause time
 static REAL sg_extraRoundTime = 0.0f;
 static tSettingItem<REAL> sg_extraRoundTimeConf( "EXTRA_ROUND_TIME", sg_extraRoundTime );
@@ -149,6 +145,9 @@ static tSettingItem<REAL> sg_waitForExternalScriptTimeoutConf( "WAIT_FOR_EXTERNA
 
 static nSettingItemWatched<tString> conf_mapfile("MAP_FILE",mapfile, nConfItemVersionWatcher::Group_Breaking, 8 );
 
+static int sg_doWarmup = 0;
+static tSettingItem< int > sg_doWarmupConf("DO_WARMUP", sg_doWarmup);
+
 static int sg_warmupMinPlayers = 2;
 static tSettingItem< int > sg_warmupMinPlayersConf("WARMUP_MIN_PLAYERS", sg_warmupMinPlayers);
 
@@ -157,21 +156,6 @@ static tSettingItem< int > sg_warmupRupIntervalConf("WARMUP_READYUP_INTERVAL", s
 
 static REAL sg_warmupRespawnTime = 1;
 static tSettingItem< REAL > sg_warmupRespawnTimeConf("WARMUP_RESPAWN_TIME", sg_warmupRespawnTime);
-
-void se_DoWarmup( std::istream & s )
-{
-    int matches = 0;
-    if ( !s.eof() )
-        s >> matches;
-    if ( sn_GetNetState() != nCLIENT )
-    {
-        se_warmup.DoWarmup( matches );
-        if ( sg_currentGame )
-            sg_currentGame->RequestSync();
-    }
-}
-
-static tConfItemFunc doWarmupConfItemFunc( "DO_WARMUP", se_DoWarmup );
 
 bool sg_allReady = false;
 
@@ -775,6 +759,93 @@ bool sg_TalkToMaster = true;
 static tSettingItem<bool> sg_ttm("TALK_TO_MASTER",
                                  sg_TalkToMaster);
 
+// *************************
+// ***   delayed commands
+// *************************
+
+class delayedCommands {
+private:
+        static std::map<int, std::set<std::string> > cmd_map;
+        // compute key for std::multimap
+        static int Key(REAL time) {return int(ceil(time*10));};
+public:
+        // clear all delayed commands
+        static void Clear() {
+                cmd_map.clear();
+                con << "Clearing delayed commands ...\n";
+        };
+        // add new delayed commands
+        static void Add(REAL time, std::string cmd, int interval) {
+                std::stringstream store;
+                store << interval << " " << cmd;
+                cmd_map[Key(time)].insert(store.str());
+        };
+        // check, run and remove delayed commands
+        static void Run(REAL currentTime);
+};
+
+std::map<int, std::set<std::string> > delayedCommands::cmd_map;
+
+static void sg_AddDelayedCmd(std::istream &s)
+{
+        // first parse the line to get the param : delay or interval
+        // if the param start by an r then it means we have the interval
+        // if the param start by a +, assume that it's a delay relative to current game time ...
+        int interval=0;
+        tString delay_str;
+        s >> delay_str;
+        if (delay_str.SubStr(0,1)=="r") {
+                interval = atoi(delay_str.SubStr(1));
+                s >> delay_str;
+        }
+        REAL delay = atof(delay_str);
+        if (delay_str.SubStr(0,1)=="+") {
+                REAL gt = se_GameTime();
+                delay += gt;
+        }
+        // this will make sure it using the command if  start time has passed
+        if ((interval > 0) && (se_GameTime() > delay)){
+                REAL ogt = se_GameTime() - delay;
+                int disposition = (ogt/interval)+1;
+                delay = disposition*interval+delay;
+        }
+        tString cmd_str;
+        cmd_str.ReadLine( s, true );
+        if (cmd_str.length()==0) return;
+
+        // add extracted command
+        delayedCommands::Add(delay,cmd_str,interval);
+        //con << "DELAY_COMMAND " << delay << " "<< interval<<" &" << cmd_str.str() << "&\n";
+}
+
+static tConfItemFunc sg_AddDelayedCmd_conf("DELAY_COMMAND",&sg_AddDelayedCmd);
+static tAccessLevelSetter sg_AddDelayedCmdConfLevel( sg_AddDelayedCmd_conf, tAccessLevel_Owner );
+
+void delayedCommands::Run(REAL currentTime) {
+        if (cmd_map.empty()) return;
+        std::map<int, std::set<std::string> >::iterator it = cmd_map.begin();
+        while ((it != cmd_map.end())&&(it->first<=Key(currentTime))) {
+                if (it->first>Key(currentTime-1.0)) {
+                        std::set<std::string>::iterator sit (it->second.begin()), send(it->second.end());
+                        for(;sit!=send;++sit) {
+                                std::istringstream stream(*sit);
+                                int interval;
+                                stream >> interval;
+                                tCurrentAccessLevel elevator( sg_AddDelayedCmd_conf.GetRequiredLevel(), true );
+                                tConfItemBase::LoadAll(stream); // run command if it's not too old, otherwise, just skip it ...
+                                if (interval>0) {
+                                        cmd_map[Key(currentTime+interval)].insert(stream.str());
+                                }
+                        }
+                }
+                cmd_map.erase(it++); // erase current and get next iterator
+        }
+}
+
+// *****************************
+// ***   end delayed commands
+// *****************************
+
 #define PREPARE_TIME 4
 
 static bool just_connected=true;
@@ -809,6 +880,8 @@ static void sg_DeclareRoundWinner(std::istream &s)
 }
 
 static tConfItemFunc sg_DeclareRoundWinner_conf("DECLARE_ROUND_WINNER",&sg_DeclareRoundWinner);
+
+static tCONTROLLED_PTR(gGame) sg_currentGame;
 
 
 
@@ -1007,9 +1080,6 @@ void update_settings( bool const * goon )
                 // wait for network messages
                 sn_BasicNetworkSystem.Select( 0.1f );
                 gGame::NetSyncIdle();
-
-                // Rename players
-                ePlayerNetID::Update();
 
                 // handle console input
                 sr_Read_stdin();
@@ -1487,7 +1557,7 @@ static void cp(){
 }
 #endif
 
-static eLadderLogWriter sg_gameEndWriter( "GAME_END", true, "time_string+" );
+static eLadderLogWriter sg_gameEndWriter("GAME_END", true);
 
 static void own_game( nNetState enter_state ){
     tNEW(gGame);
@@ -1868,7 +1938,7 @@ void ConnectToServer(nServerInfoBase *server)
     // check for redirection
     while( okToRedirect )
     {
-        auto redirectTo = sn_GetRedirectTo();
+        std::auto_ptr< nServerInfoBase > redirectTo( sn_GetRedirectTo() );
 
         // abort loop
         if ( !(&(*redirectTo)) )
@@ -2135,7 +2205,7 @@ static void StartNewMatch(){
 static void StartNewMatch_conf(std::istream &){
     if ( sg_resetRotationOnNewMatch )
         sg_ResetRotation();
-    se_warmup.StartNewMatchUserInitiated();
+    se_matches = 0;
     StartNewMatch();
 }
 
@@ -2146,7 +2216,7 @@ static void Scramble_conf(std::istream &){
 }
 
 static void AllReady_conf(std::istream &){
-    if( se_warmup.IsWarmupMode() )
+    if( se_matches < 0 )
     {
         sg_allReady = !sg_allReady;
         if( sg_allReady )
@@ -2381,7 +2451,7 @@ void MainMenu(bool ingame){
 
     uMenuItemFunction *reset=NULL;
 
-    std::unique_ptr< uMenuItemFunction > tutorials;
+    std::auto_ptr< uMenuItemFunction > tutorials;
 
     if (ingame && sn_GetNetState()!=nCLIENT){
         reset=new uMenuItemFunction
@@ -2410,7 +2480,7 @@ void MainMenu(bool ingame){
     if (!ingame){
         if( sg_TutorialsCompleted() )
         {
-            tutorials.reset( tNEW(uMenuItemFunction)( &game_menu, "$game_menu_tutorials_text", "$game_menu_tutorials_help", &sg_TutorialMenu ) );
+            tutorials = std::auto_ptr< uMenuItemFunction > (tNEW(uMenuItemFunction)( &game_menu, "$game_menu_tutorials_text", "$game_menu_tutorials_help", &sg_TutorialMenu ));
         }
 
         start= new uMenuItemFunction(&game_menu,"$game_menu_start_text",
@@ -2423,7 +2493,7 @@ void MainMenu(bool ingame){
 
         if( !sg_TutorialsCompleted() )
         {
-            tutorials.reset( tNEW(uMenuItemFunction)( &game_menu, "$game_menu_tutorials_text", "$game_menu_tutorials_help", &sg_TutorialMenu ) );
+            tutorials = std::auto_ptr< uMenuItemFunction > (tNEW(uMenuItemFunction)( &game_menu, "$game_menu_tutorials_text", "$game_menu_tutorials_help", &sg_TutorialMenu ));
         }
     }
 
@@ -2831,7 +2901,7 @@ void gGame::WriteSync( Game::GameSync & sync, bool init ) const
 #ifdef DEBUG
     //con << "Wrote game state " << stateNext << ".\n";
 #endif
-    sync.set_matches( se_warmup.MatchesLeft() );
+    sync.set_matches( se_matches );
 }
 
 void gGame::ReadSync( Game::GameSync const & sync, nSenderInfo const & sender )
@@ -2852,7 +2922,7 @@ void gGame::ReadSync( Game::GameSync const & sync, nSenderInfo const & sender )
     //con << "Read game state " << stateNext << ".\n";
 #endif
 
-    se_warmup.SetMatchesLeft( sync.matches() );
+    se_matches = sync.matches();
 }
 
 
@@ -2982,11 +3052,11 @@ static void sg_VoteMenuIdle()
     }
 }
 
-static eLadderLogWriter sg_newRoundWriter( "NEW_ROUND", true, "time_string+" );
-static eLadderLogWriter sg_newMatchWriter( "NEW_MATCH", true, "time_string+" );
-static eLadderLogWriter sg_waitForExternalScriptWriter( "WAIT_FOR_EXTERNAL_SCRIPT", true, "" );
-static eLadderLogWriter sg_newWarmupWriter( "NEW_WARMUP", true, "number_matches:int time_string+" );
-static eLadderLogWriter sg_matchesLeftWriter( "MATCHES_LEFT", true, "number_matches:int" );
+static eLadderLogWriter sg_newRoundWriter("NEW_ROUND", true);
+static eLadderLogWriter sg_newMatchWriter("NEW_MATCH", true);
+static eLadderLogWriter sg_waitForExternalScriptWriter("WAIT_FOR_EXTERNAL_SCRIPT", true);
+static eLadderLogWriter sg_newWarmupWriter("NEW_WARMUP", true);
+static eLadderLogWriter sg_matchesLeftWriter("MATCHES_LEFT", true);
 
 void gGame::StateUpdate(){
 
@@ -3063,25 +3133,19 @@ void gGame::StateUpdate(){
             sg_newRoundWriter.write();
             if ( rounds < 0 )
             {
-                se_warmup.MatchCanStart();
-
-                if ( WarmupTeamsAreReady() )
+                if( se_matches <= 0)
                 {
-                    se_warmup.MatchStarted();
-                    sg_allReady = false;
-                }
-
-                if( se_warmup.IsWarmupMode() )
-                {
-                    sg_newWarmupWriter << se_warmup.MatchesToPlay();
+                    sg_newWarmupWriter << sg_doWarmup;
                     sg_newWarmupWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
                     sg_newWarmupWriter.write();
+
+                    sg_allReady = false;
                 }
                 else
                 {
-                    if ( se_warmup.IsPickupGame() )
+                    if(sg_doWarmup > 1)
                     {
-                        sg_matchesLeftWriter << se_warmup.MatchesLeft();
+                        sg_matchesLeftWriter << se_matches;
                         sg_matchesLeftWriter.write();
                     }
                     sg_newMatchWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
@@ -3165,7 +3229,8 @@ void gGame::StateUpdate(){
 
             init_game_objects(grid);
 
-            eTeam::WriteOnlinePlayers();
+            ePlayerNetID::RankingLadderLog();
+            eTeam::WriteLaunchPositions();
 
             // do round begin stuff
             {
@@ -3261,20 +3326,29 @@ void gGame::StateUpdate(){
             rITexture::LoadAll();
             SetState(GS_PLAY,GS_PLAY);
             if (sn_GetNetState()!=nCLIENT){
-                if (!sg_tutorial && rounds<=0)
+                // The admin doesn't want warmup anymore! :(
+                if ( se_matches < 0 && !sg_doWarmup )
                 {
-                    if( se_warmup.IsPickupGame() && se_warmup.MatchesLeft() > 0 )
-                        sn_ConsoleOut(tOutput("$gamestate_resetnow_console_matches", se_warmup.MatchesLeft()));
+                    StartNewMatch();
+                    rounds = -100;
+                }
+
+                if (!sg_tutorial && rounds<=0){
+                    if( sg_doWarmup > 1 && se_matches > 0 )
+                        sn_ConsoleOut(tOutput("$gamestate_resetnow_console_matches", se_matches));
                     else
                         sn_ConsoleOut("$gamestate_resetnow_console");
-
+                    if( --se_matches < 0 && !sg_doWarmup )
+                    {
+                        se_matches = 0;
+                    }
                     StartNewMatchNow();
                     sn_CenterMessage("$gamestate_resetnow_center");
                     se_SaveToScoreFile("$gamestate_resetnow_log");
                 }
 
                 tOutput mess;
-                if ( se_warmup.IsWarmupMode() )
+                if (se_matches < 0)
                 {
                     mess << "$gamestate_newround_warmup";
                 }
@@ -3312,6 +3386,8 @@ void gGame::StateUpdate(){
                     goon = 0;
 
                 Analysis(0);
+
+                delayedCommands::Clear();
 
                 // wait for external script to end its work if needed
                 REAL timeout = tSysTimeFloat() + sg_waitForExternalScriptTimeout;
@@ -3397,14 +3473,14 @@ void sg_RespawnAllAfter( REAL after, REAL time, eGrid *grid, gArena & arena, boo
     {
         ePlayerNetID *p = se_PlayerNetIDs(i);
 
-        if ( !p->CanRespawn() )
+        if ( !p->CurrentTeam() )
             continue;
 
         eGameObject *e=p->Object();
 
         if ( ( !e || ( !e->Alive() && e->DeathTime() < time - after ) ) && sn_GetNetState() != nCLIENT )
         {
-            sg_respawnWriter << p->GetLogName() << p->CurrentTeam()->GetLogName() << "";
+            sg_respawnWriter << p->GetLogName() << ePlayerNetID::FilterName(p->CurrentTeam()->Name());
             sg_respawnWriter.write();
             sg_RespawnPlayer(grid, &arena, p, atSpawn);
         }
@@ -3522,14 +3598,14 @@ void gGame::Timestep(REAL time,bool cam){
 #endif
 
 #ifdef RESPAWN_HACK
-    // Only respawn when the round is in play mode and while the deathzone is not active.
-    if( state == GS_PLAY && time > 0 && winner == 0 && !winDeathZone_ )
+    // no respawining while deathzone is active.
+    if( !winDeathZone_ )
     {
         sg_RespawnAllAfter(0.5, time, grid, Arena);
     }
 #endif
 
-    if( se_warmup.IsWarmupMode() && sg_warmupRespawnTime >= 0 )
+    if( se_matches < 0 && sg_warmupRespawnTime >= 0 )
         sg_RespawnAllAfter(sg_warmupRespawnTime, time, grid, Arena, true);
 
     // chop timestep into small, managable bits
@@ -3577,24 +3653,9 @@ static tSettingItem< int > sg_minAliveConf("ROUND_MIN_ALIVE", sg_minAlive);
 static REAL sg_minDrawTime = 5;
 static tSettingItem< REAL > sg_minDrawTimeConf("ROUND_DRAW_WARN_TIME", sg_minDrawTime);
 
-static eLadderLogWriter sg_roundWinnerWriter( "ROUND_WINNER", true, "team players:list+" );
-static eLadderLogWriter sg_matchWinnerWriter( "MATCH_WINNER", true, "team players:list+" );
-eLadderLogWriter sg_respawnWriter( "PLAYER_RESPAWN", true, "player team respawner_team" );
-
-bool gGame::WarmupTeamsAreReady() const
-{
-    if ( !se_warmup.IsWarmupMode() || sg_allReady )
-        return true;
-
-    int numberTeams = eTeam::teams.Len();
-    int teamsReady = 0;
-    for ( int i = eTeam::teams.Len() - 1; i >= 0; i-- )
-    {
-        if( eTeam::teams( i )->IsReady() )
-            teamsReady++;
-    }
-    return numberTeams == teamsReady;
-}
+static eLadderLogWriter sg_roundWinnerWriter("ROUND_WINNER", true);
+static eLadderLogWriter sg_matchWinnerWriter("MATCH_WINNER", true);
+eLadderLogWriter sg_respawnWriter("PLAYER_RESPAWN", true);
 
 void gGame::Analysis(REAL time){
     if ( nCLIENT == sn_GetNetState() )
@@ -3624,7 +3685,7 @@ void gGame::Analysis(REAL time){
     // send timeout warnings
 
 
-    if (tSysTimeFloat()-startTime>10 && !se_warmup.IsWarmupMode() ){
+    if (tSysTimeFloat()-startTime>10 && se_matches >= 0){
         if ((startTime+sg_currentSettings->limitTime*60)-tSysTimeFloat()<10 && warning<6){
             tOutput o("$gamestate_tensecond_warn");
             sn_CenterMessage(o);
@@ -3677,7 +3738,7 @@ void gGame::Analysis(REAL time){
         ePlayerNetID *pni=se_PlayerNetIDs(i);
         if (pni->IsActive())
             active ++;
-        if ( se_warmup.IsWarmupMode() && !se_warmup.WasReset() && !sg_allReady && ready_next_warn <= time
+        if (se_matches < 0 && ready_next_warn <= time
             && !pni->ready && pni->IsHuman() && pni->CurrentTeam()
             // && !rup_banner.Supported(pni->Owner())
             )
@@ -3697,6 +3758,7 @@ void gGame::Analysis(REAL time){
     int humans = 0;
     int active_humans = 0;
     int ais    = 0;
+    int ready = 0;
     REAL deathTime=0;
 
     bool notyetloggedin = true;  // are all current users not yet logged in?
@@ -3706,6 +3768,8 @@ void gGame::Analysis(REAL time){
 
         humans += t->NumHumanPlayers();
         ais    += t->NumAIPlayers();
+        if( se_matches < 0 )
+            ready  += t->IsReady();
 
         if ( t->Alive() )
         {
@@ -3853,7 +3917,7 @@ void gGame::Analysis(REAL time){
                 // start a new round and match.
                 winner=-1;
                 wintimer=time;
-                se_warmup.Reset();
+                se_matches=-100;
             }
         }
 
@@ -3862,7 +3926,7 @@ void gGame::Analysis(REAL time){
 
     if( sg_currentSettings->gameType!=gFREESTYLE
             && drawreason != &DrawReason_MinAlive && (!drawtime || drawtime > time+sg_minDrawTime)
-            && alive > 0 && alive < sg_minAlive && alive < humans && teams_alive > 1
+            && alive < sg_minAlive && alive < humans && teams_alive > 1
             )
     {
         drawreason = &DrawReason_MinAlive;
@@ -3878,7 +3942,7 @@ void gGame::Analysis(REAL time){
     }
     else if (winner==0 && absolute_winner==0 ){
         if ( teams_alive <= 1 &&
-             ( !se_warmup.IsWarmupMode() || sg_warmupRespawnTime < 0 ) // Make sure we're not automatically respawning players
+             ( se_matches >= 0 || sg_warmupRespawnTime < 0 ) // Make sure we're not automatically respawning players
              )
         {
             if ( sg_currentSettings->gameType!=gFREESTYLE )
@@ -3936,7 +4000,7 @@ void gGame::Analysis(REAL time){
                     sg_currentSettings->AutoAI( eTeam::teams( last_team_alive )->NumHumanPlayers() > 0 );
 
 
-                if ( !se_warmup.IsWarmupMode() && ( sg_currentSettings->scoreWin != 0 || sg_currentSettings->gameType != gFREESTYLE ) && winner > 0 )
+                if ( se_matches >= 0 && ( sg_currentSettings->scoreWin != 0 || sg_currentSettings->gameType != gFREESTYLE ) && winner > 0 )
                 {
                     if( winner > 0 )
                     {
@@ -4000,10 +4064,10 @@ void gGame::Analysis(REAL time){
                             se_SaveToScoreFile(message);
                         }
 
-                        sg_roundWinnerWriter << eTeam::teams[winner-1]->GetLogName();
+                        sg_roundWinnerWriter << ePlayerNetID::FilterName( eTeam::teams[winner-1]->Name() );
                         eTeam::WritePlayers( sg_roundWinnerWriter, eTeam::teams[winner-1] );
                         sg_roundWinnerWriter.write();
-                        tString notificationMessage( eTeam::teams[winner-1]->GetLogName() );
+                        tString notificationMessage( ePlayerNetID::FilterName( eTeam::teams[winner-1]->Name() ) );
                         notificationMessage << " has won the round";
                         se_sendEventNotification(tString("Round winner"), notificationMessage);
 
@@ -4013,7 +4077,7 @@ void gGame::Analysis(REAL time){
                         }
                     }
                 }
-                else if ( time >= drawtime && sg_currentSettings->gameType!=gFREESTYLE && !se_warmup.IsWarmupMode() )
+                else if ( time >= drawtime && sg_currentSettings->gameType!=gFREESTYLE && se_matches >= 0 )
                 {
                     tOutput drawmsg;
                     if( drawreason == &DrawReason_MinAlive )
@@ -4040,7 +4104,7 @@ void gGame::Analysis(REAL time){
     int winnerExtraRound = ( winner != 0 || alive == 0 ) ? 1 : 0;
 
     static short warmupover_msg = 0;
-    if ( time >= 0 && se_warmup.IsWarmupMode() && WarmupTeamsAreReady() )
+    if( time >= 0 && se_matches < 0 && (ready == eTeam::teams.Len() || sg_allReady) )
     {
         if ( humans < sg_warmupMinPlayers && warmupover_msg < 1 )
         {
@@ -4059,10 +4123,6 @@ void gGame::Analysis(REAL time){
             {
                 sn_ConsoleOut(tOutput("$warmup_finished"));
                 sn_CenterMessage(tOutput("$warmup_finished_center"));
-
-                // Ensure that no player can cancel the match start by changing their status
-                // to "not ready".
-                sg_allReady = true;
             }
 
             // Finish the round quickly
@@ -4070,6 +4130,7 @@ void gGame::Analysis(REAL time){
             wintimer=-10;
             lastdeath = time;
             StartNewMatch();
+            se_matches = sg_doWarmup;
         }
     }
     else
@@ -4098,7 +4159,7 @@ void gGame::Analysis(REAL time){
     {
         holdBackNextRound = true;
     }
-    else if (!se_warmup.IsWarmupMode() && absolute_winner==0 &&
+    else if (se_matches >= 0 && absolute_winner==0 &&
              sn_GetNetState()!=nCLIENT && se_PlayerNetIDs.Len()){
         ePlayerNetID::SortByScore();
         eTeam::SortByScore();
@@ -4155,10 +4216,10 @@ void gGame::Analysis(REAL time){
                         name << eTeam::teams[0]->Name();
                         name << tColoredString::ColorString(1,1,1);
 
-                        sg_matchWinnerWriter << eTeam::teams[0]->GetLogName();
+                        sg_matchWinnerWriter << ePlayerNetID::FilterName( eTeam::teams[0]->Name() );
                         eTeam::WritePlayers( sg_matchWinnerWriter, eTeam::teams[0] );
                         sg_matchWinnerWriter.write();
-                        tString notificationMessage( eTeam::teams[0]->GetLogName() );
+                        tString notificationMessage( ePlayerNetID::FilterName( eTeam::teams[0]->Name() ) );
                         notificationMessage << " has won the match";
                         se_sendEventNotification(tString("Match winner"), notificationMessage);
 
@@ -4273,10 +4334,11 @@ void gGame::Analysis(REAL time){
         //con << "wintimer=" << wintimer << ' ';
         //con << "time=" << time << ' ';
         //con << "dt=" << deathTime << ' ';
+        //con << "ready=" << ready << '\n';
 #endif
         if (!holdBackNextRound &&
                 (
-                    ( se_warmup.IsWarmupMode() ||
+                    ( se_matches < 0 ||
                       sg_currentSettings->finishType==gFINISH_IMMEDIATELY ||
                       sg_currentSettings->finishType==gFINISH_EXPRESS ||
                       absolute_winner || ( teams_alive <= 1 && time-lastdeath>4.0f ) ) ||
@@ -4324,7 +4386,7 @@ void rotate()
 
 void gGame::StartNewMatch(){
     //gStatistics - highscore check
-    if (!se_warmup.IsWarmupMode() && sg_singlePlayer && gStats
+    if (se_matches >= 0 && sg_singlePlayer && gStats
         && se_PlayerNetIDs.Len() > 0 && se_PlayerNetIDs(0)->IsHuman())
     {
         gStats->highscores->greater(se_PlayerNetIDs(0)->GetLogName(), se_PlayerNetIDs(0)->Score());
@@ -4408,7 +4470,7 @@ static uActionGlobalFunc ingamemenu_action(&ingamemenu,&ingamemenu_func, true );
 static uActionTooltip ingamemenuTooltip( uActionTooltip::Level_Expert, ingamemenu, 1 );
 #endif // dedicated
 
-static eLadderLogWriter sg_gameTimeWriter( "GAME_TIME", true, "time:float" );
+static eLadderLogWriter sg_gameTimeWriter("GAME_TIME", true);
 
 // checks whether all players have been fully synced with the server
 static bool sg_PlayersSynced()
@@ -4585,11 +4647,6 @@ bool gGame::GameLoop(bool input){
     sg_Receive();
     sn_SendPlanned();
 
-    if ( netstate != sn_GetNetState() )
-    {
-        return false;
-    }
-
     bool synced = se_mainGameTimer && ( se_mainGameTimer->IsSynced() || ( stateNext >= GS_DELETE_OBJECTS || stateNext <= GS_CREATE_GRID ) );
 
     static bool playersSynced = false;
@@ -4635,6 +4692,8 @@ bool gGame::GameLoop(bool input){
             gTeam::TeamMenu(true);
         }
     }
+
+    delayedCommands::Run(gtime);
 
     static float lastTime = 1e42;
 
@@ -4885,7 +4944,7 @@ void sg_EnterGameCore( nNetState enter_state ){
         // do the regular simulation
         tAdvanceFrame();
 
-        goon=GameLoop() && sn_GetNetState() == enter_state;
+        goon=GameLoop();
 
         st_DoToDo();
     }
