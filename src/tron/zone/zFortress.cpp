@@ -515,7 +515,7 @@ void zFortressZone::OnConquest( void )
 
     // add score for successful conquest, divided equally between the teams that are
     // inside the zone
-    if ( totalScore && enemies_.size() > 0 )
+    if ( totalScore && enemies_.size() > 0 && se_matches >= 0 )
     {
         tOutput win;
         if ( team )
