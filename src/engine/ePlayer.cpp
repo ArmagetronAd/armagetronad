@@ -6274,7 +6274,7 @@ void ePlayerNetID::ReadSync( Engine::PlayerNetIDSync const & sync, nSenderInfo c
 
         if( sync.has_ready() && (
                 sn_GetNetState() != nSERVER
-                || se_matches < 0 && CurrentTeam()))
+                || (se_matches < 0 && CurrentTeam())))
         {
             ready = sync.ready();
         }
