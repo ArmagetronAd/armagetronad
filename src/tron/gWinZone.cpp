@@ -5337,7 +5337,6 @@ gTargetZoneHack::~gTargetZoneHack( void )
 
 static eLadderLogWriter sg_targetzoneTimeoutWriter("TARGETZONE_TIMEOUT", false);
 static eLadderLogWriter sg_targetzoneConqueredWriter("TARGETZONE_CONQUERED", false);
-static eLadderLogWriter sg_targetzonePlayerLeftWriter("TARGETZONE_PLAYER_LEFT", false);
 
 bool gTargetZoneHack::Timestep( REAL time )
 {
@@ -5373,28 +5372,6 @@ bool gTargetZoneHack::Timestep( REAL time )
             }
         }
         sg_targetzoneConqueredWriter.write();
-    }
-
-    for (int i=0; i<MAXCLIENTS; i++)
-    {
-        if (playersFlags[i]==2)
-        {
-            ePlayerNetID* p = se_PlayerNetIDs(i);
-            if (p)
-            {
-                gCycle* prey = dynamic_cast< gCycle* >( p->Object() );
-                if ( prey )
-                {
-                    REAL r = this->GetRadius();
-                    if (!prey->Alive() || (( prey->Position() - this->Position() ).NormSquared() >= r*r))
-                    {
-                        sg_targetzonePlayerLeftWriter << this->GOID() << name_ << GetPosition().x << GetPosition().y << p->GetUserName() << p->Object()->Position().x << p->Object()->Position().y << p->Object()->Direction().x << p->Object()->Direction().y ;
-                        sg_targetzonePlayerLeftWriter.write();
-                        playersFlags[i] = 1;
-                    }
-                } else playersFlags[i] = 1;
-            } else playersFlags[i] = 1;
-        }
     }
 
     // manage rotation speed
@@ -5514,12 +5491,21 @@ void gTargetZoneHack::OnEnter( gCycle * target, REAL time )
 //!
 // *******************************************************************************
 
+static eLadderLogWriter sg_targetzonePlayerLeftWriter("TARGETZONE_PLAYER_LEFT", false);
+
 void gTargetZoneHack::OnExit(gCycle *target, REAL time)
 {
     //send on exit commands
     std::istringstream stream(&OnExitCmd(0));
     tCurrentAccessLevel elevator( sg_SetTargetCmd_conf.GetRequiredLevel(), true );
     tConfItemBase::LoadAll(stream);
+
+    ePlayerNetID *p = target->Player();
+    if (p)
+    {
+        sg_targetzonePlayerLeftWriter << this->GOID() << name_ << GetPosition().x << GetPosition().y << p->GetUserName() << p->Object()->Position().x << p->Object()->Position().y << p->Object()->Direction().x << p->Object()->Direction().y ;
+        sg_targetzonePlayerLeftWriter.write();
+    }
 }
 
 // *******************************************************************************
@@ -6122,7 +6108,136 @@ void gBurstZoneHack::OnVanish( void )
     this->RemoveFromListsAll();
 }
 
+// *******************************************************************************
+// *
+// *    gObjectZoneHack
+// *
+// *******************************************************************************
+//!
+//!     @param  grid Grid to put the zone into
+//!     @param  pos  Position to spawn the zone at
+//!
+// *******************************************************************************
 
+gObjectZoneHack::gObjectZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreation)
+:gZone( grid, pos, dynamicCreation )
+{
+    color_.r = 1.0f;
+    color_.g = 0.0f;
+    color_.b = 0.5f;
+
+    grid->AddGameObjectInteresting(this);
+
+    SetExpansionSpeed(0);
+    SetRotationSpeed( .3f );
+    RequestSync();
+}
+
+
+// *******************************************************************************
+// *
+// *    gObjectZoneHack
+// *
+// *******************************************************************************
+//!
+//!     @param  m Message to read creation data from
+//!     @param  null
+//!
+// *******************************************************************************
+
+gObjectZoneHack::gObjectZoneHack( nMessage & m )
+: gZone( m )
+{
+}
+
+
+// *******************************************************************************
+// *
+// *    ~gObjectZoneHack
+// *
+// *******************************************************************************
+//!
+//!
+// *******************************************************************************
+
+gObjectZoneHack::~gObjectZoneHack( void )
+{
+}
+
+
+// *******************************************************************************
+// *
+// *    Timestep
+// *
+// *******************************************************************************
+//!
+//!     @param  time    the current time
+//!
+// *******************************************************************************
+
+bool gObjectZoneHack::Timestep( REAL time )
+{
+    // delegate
+    bool returnStatus = gZone::Timestep( time );
+
+    return (returnStatus);
+}
+
+
+// *******************************************************************************
+// *
+// *    OnEnter
+// *
+// *******************************************************************************
+//!
+//!     @param  target  the cycle that has been found inside the zone
+//!     @param  time    the current time
+//!
+// *******************************************************************************
+
+static eLadderLogWriter sg_objectZonePlayerEntered("OBJECTZONE_PLAYER_ENTERED", false);
+void gObjectZoneHack::OnEnter( gCycle * target, REAL time )
+{
+    ePlayerNetID *p = target->Player();
+    if (p)
+    {
+        sg_objectZonePlayerEntered << name_ << Position().x << Position().y << p->GetUserName() << target->Position().x << target->Position().y << target->Direction().x << target->Direction().y << se_GameTime();
+        sg_objectZonePlayerEntered.write();
+    }
+}
+
+// *******************************************************************************
+// *
+// *    OnExit
+// *
+// *******************************************************************************
+//!
+//!     @param  target  the cycle that has left the zone
+//!     @param  time    the current time
+//!
+// *******************************************************************************
+
+static eLadderLogWriter sg_objectZonePlayerLeft("OBJECTZONE_PLAYER_LEFT", false);
+void gObjectZoneHack::OnExit( gCycle * target, REAL time )
+{
+    ePlayerNetID *p = target->Player();
+    if (p)
+    {
+        sg_objectZonePlayerLeft << name_ << Position().x << Position().y << p->GetUserName() << target->Position().x << target->Position().y << target->Direction().x << target->Direction().y << se_GameTime();
+        sg_objectZonePlayerLeft.write();
+    }
+}
+
+// *******************************************************************************
+// *
+// *    OnVanish
+// *
+// *******************************************************************************
+
+void gObjectZoneHack::OnVanish( void )
+{
+    this->RemoveFromListsAll();
+}
 
 // *******************************************************************************
 // *
@@ -6431,6 +6546,10 @@ static void sg_CreateZone_conf(std::istream &s)
     {
         Zone = tNEW( gTargetZoneHack( grid, zonePos, true ) );
     }
+    else if ( zoneTypeStr=="object" )
+    {
+        Zone = tNEW( gObjectZoneHack( grid, zonePos, true ) );
+    }
     else if ( zoneTypeStr=="blast" )
     {
         Zone = tNEW( gBlastZoneHack( grid, zonePos, true ) );
@@ -6449,7 +6568,7 @@ static void sg_CreateZone_conf(std::istream &s)
     {
         usage:
         con << "Usage:\n"
-            "SPAWN_ZONE <win|death|ball|target|blast|koh> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
+            "SPAWN_ZONE <win|death|ball|target|blast|koh|object> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
             "SPAWN_ZONE burst <speed> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
             "SPAWN_ZONE rubber <x> <y> <size> <growth> <xdir> <ydir> <rubber> <interactive> <r> <g> <b> <target_size> \n"
             "SPAWN_ZONE teleport <x> <y> <size> <growth> <xdir> <ydir> <xjump> <yjump> <rel|abs> <interactive> <r> <g> <b> <target_size> \n"

@@ -619,6 +619,23 @@ class gBurstZoneHack: public gZone
         virtual void OnEnter(gCycle *target, REAL time);
 };
 
+class gObjectZoneHack: public gZone
+{
+    public:
+        gObjectZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false);
+        gObjectZoneHack(nMessage &m);
+        ~gObjectZoneHack();
+
+        virtual void OnExit(gCycle *target, REAL time);
+
+    protected:
+
+    private:
+        virtual bool Timestep(REAL currentTime);
+        virtual void OnVanish();
+        virtual void OnEnter(gCycle *target, REAL time);
+};
+
 //! creates a win or death zone (according to configuration) at the specified position
 gZone * sg_CreateWinDeathZone( eGrid * grid, const eCoord & pos );
 

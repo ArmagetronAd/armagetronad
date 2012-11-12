@@ -5137,7 +5137,7 @@ void ePlayerNetID::RemoveFromGame()
     UpdateTeam();
     ControlObject( NULL );
 
-    if( IsHuman() )
+    if( this->IsHuman() )
     {
         se_playerLeftWriter << userName_ << nMachine::GetMachine(Owner()).GetIP();
         se_playerLeftWriter.write();
@@ -6869,6 +6869,7 @@ tString ePlayerNetID::Ranking( int MAX, bool cut ){
 }
 
 static eLadderLogWriter se_onlinePlayerWriter("ONLINE_PLAYER", false);
+static eLadderLogWriter se_playerColoredNameWriter("PLAYER_COLORED_NAME", false);
 static eLadderLogWriter se_numHumansWriter("NUM_HUMANS", false);
 
 void ePlayerNetID::RankingLadderLog() {
@@ -6901,6 +6902,18 @@ void ePlayerNetID::RankingLadderLog() {
     }
     se_numHumansWriter << num_humans;
     se_numHumansWriter.write();
+
+    for(int i = 0; i < max; i++)
+    {
+        ePlayerNetID *p = se_PlayerNetIDs[i];
+        if (p)
+        {
+            tColoredString colouredName;
+            colouredName << p->GetColoredName();
+            se_playerColoredNameWriter << p->GetUserName() << colouredName;
+            se_playerColoredNameWriter.write();
+        }
+    }
 }
 
 static eLadderLogWriter se_playerGridPosWriter("PLAYER_GRIDPOS", false);
@@ -8744,6 +8757,7 @@ static eLadderLogWriter se_playerEnteredSpectatorWriter("PLAYER_ENTERED_SPECTATO
 static eLadderLogWriter se_playerAIEnteredWriter("PLAYER_AI_ENTERED", true);
 static eLadderLogWriter se_playerRenamedWriter("PLAYER_RENAMED", true);
 
+
 class eNameMessenger
 {
 public:
@@ -8791,17 +8805,35 @@ public:
 
                     mess << "$player_entered_spectator";
                     sn_ConsoleOut(mess);
+
+                    tColoredString colouredName;
+                    colouredName << player_.GetColoredName();
+                    se_playerColoredNameWriter << player_.GetUserName() << colouredName;
+                    se_playerColoredNameWriter.write();
+
                 }
                 else
                 {
                     se_playerEnteredGridWriter << logName << nMachine::GetMachine(player_.Owner()).GetIP() << screenName;
                     se_playerEnteredGridWriter.write();
+
+                    tColoredString colouredName;
+                    colouredName << player_.GetColoredName();
+                    se_playerColoredNameWriter << player_.GetUserName() << colouredName;
+                    se_playerColoredNameWriter.write();
+
                 }
             }
             else
             {
                 se_playerAIEnteredWriter << logName << screenName;
                 se_playerAIEnteredWriter.write();
+
+                tColoredString colouredName;
+                colouredName << player_.GetColoredName();
+                se_playerColoredNameWriter << player_.GetUserName() << colouredName;
+                se_playerColoredNameWriter.write();
+
             }
         }
         else if ( logName != oldLogName_ || screenName != oldScreenName_ )
@@ -8830,6 +8862,11 @@ public:
                     mess << "$player_renamed";
                 }
                 sn_ConsoleOut(mess);
+
+                tColoredString colouredName;
+                colouredName << player_.GetColoredName();
+                se_playerColoredNameWriter << player_.GetUserName() << colouredName;
+                se_playerColoredNameWriter.write();
             }
         }
     }

@@ -659,6 +659,9 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
         else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"blast")) {
             zone = tNEW( gBlastZoneHack) ( grid, zonePos );
         }
+        else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"object")) {
+            zone = tNEW( gObjectZoneHack) ( grid, zonePos );
+        }
         else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *) "effect"), (const xmlChar *)"rubber")) {
             REAL rubberVal = myxmlGetPropFloat(cur, "rubberVal");
             if (rubberVal != 0.0 ){

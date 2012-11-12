@@ -2422,7 +2422,7 @@ gCycle::gCycle(eGrid *grid, const eCoord &pos,const eCoord &d,ePlayerNetID *p)
         currentWall(NULL),
         lastWall(NULL)
 {
-    se_cycleCreatedWriter << p->GetLogName() << pos.x << pos.y << d.x << d.y;
+    se_cycleCreatedWriter << p->GetLogName() << pos.x << pos.y << d.x << d.y << ePlayerNetID::FilterName(Team()->Name()) << se_GameTime();
     se_cycleCreatedWriter.write();
 
     windingNumberWrapped_ = windingNumber_ = Grid()->DirectionWinding(dirDrive);
@@ -4054,7 +4054,7 @@ void gCycle::Kill(){
             tNEW(gExplosion)(grid, pos,lastTime, color_, this );
             //	 eEdge::SeethroughHasChanged();
 
-            se_cycleDestroyedWriter << this->Player()->GetUserName() << this->Position().x << this->Position().y << this->Direction().x << this->Direction().y << ePlayerNetID::FilterName(this->Team()->Name());
+            se_cycleDestroyedWriter << Player()->GetUserName() << Position().x << Position().y << Direction().x << Direction().y << ePlayerNetID::FilterName(Team()->Name()) << se_GameTime();
             se_cycleDestroyedWriter.write();
 
             if ( currentWall )

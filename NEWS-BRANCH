@@ -1,3 +1,21 @@
+Changes in 0.2.9-sty+ct+ap_r818
+New ladderlog.txt commands:
+  * LADDERLOG_WRITE_AI_POSITIONS        # If enabled, ai player's team positions will be written to ladderlog
+  * LADDERLOG_WRITE_PLAYER_COLORED_NAME # Output: PLAYER_COLORED_NAME log_name players_colored_screen_name  
+  * LADDERLOG_WRITE_ROUND_STARTED       # Output: ROUND_STARTED time
+  * LADDERLOG_WRITE_TEAM_COLORED_NAME   # Output: TEAM_COLORED_NAME team_name colored_screen_name
+  * LADDERLOG_WRITE_OBJECTZONE_PLAYER_ENTERED # Output: PLAYER_ENTERED zone_name zone_xpos zone_ypos player_login player_posx player_posy player_dirx player_diry time
+  * LADDERLOG_WRITE_OBJECTZONE_PLAYER_LEFT # Output: PLAYER_LEFT zone_name zone_xpos zone_ypos player_login player_posx player_posy player_dirx player_diry time        
+Added features:
+  * CYCLE_CREATED now includes team_names # Output: CYCLE_CREATED log_name posx posy dirx diry team_name
+  * TEAM_CREATED now includes the screen_name of the team # Output: TEAM_CREATED name screen_name
+  * TEAM_RENAMED now includes the screen_name of the tema # Output: TEAM_RENAMED old_name new_name new_screen_name      
+New commands:
+  * LIST_ALL_COMMANDS # This is mainly based to output all available commands to commands_list.txt in the /var/ directory
+New features:
+  * New zone: object zone # This is mainly used to check when players entered this zone and then left.
+    This feature has been added to SPAWN_ZONE.    
+
 Changes in 0.2.9-sty+ct+ap_r816
 Fixed commands:
 - CYCLE_WALL_TIME

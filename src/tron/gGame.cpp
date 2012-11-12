@@ -4240,6 +4240,8 @@ static eLadderLogWriter sg_nextRoundWriter("NEXT_ROUND", false);
 static eLadderLogWriter sg_roundCommencingWriter("ROUND_COMMENCING", false);
 static SvgOutput sg_svgOutput;
 
+bool sg_roundStartingChecker = true;
+
 static eLadderLogWriter sg_currentMapWriter("CURRENT_MAP", false);
 static bool sg_displayMapDetails = false;
 static tSettingItem<bool> sg_displayMapDetailsConf("DISPLAY_MAP_DETAILS", sg_displayMapDetails);
@@ -4599,6 +4601,8 @@ void gGame::StateUpdate(){
 
                 sg_roundCommencingWriter << (rounds <= 0 ? 1 : rounds+1) << sg_currentSettings->limitRounds;
                 sg_roundCommencingWriter.write();
+
+                sg_roundStartingChecker = true;
 
 /*                tOutput Message;
                 Message << "The rounds: " << rounds << "\n";
@@ -5665,6 +5669,7 @@ static uActionTooltip ingamemenuTooltip( ingamemenu, 1 );
 #endif // dedicated
 
 static eLadderLogWriter sg_gameTimeWriter("GAME_TIME", true);
+static eLadderLogWriter sg_roundStartedWriter("ROUND_STARTED", true);
 
 bool gGame::GameLoop(bool input){
     nNetState netstate = sn_GetNetState();
@@ -5816,7 +5821,15 @@ bool gGame::GameLoop(bool input){
 
         synced_ = true;
     }
+
 	delayedCommands::Run(gtime);
+	if (sg_roundStartingChecker)
+	{
+        sg_roundStartedWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
+        sg_roundStartedWriter.write();
+        sg_roundStartingChecker = false;
+	}
+
     {
         static float lastTime = 1e42;
         if(sg_gameTimeInterval >= 0 && (gtime >= lastTime + sg_gameTimeInterval || gtime < lastTime)) {

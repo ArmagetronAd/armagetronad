@@ -221,6 +221,7 @@ static eLadderLogWriter se_teamCreateWriter("TEAM_CREATED", true);
 static eLadderLogWriter se_teamDestroyWriter("TEAM_DESTROYED", true);
 static eLadderLogWriter se_teamAddWriter("TEAM_PLAYER_ADDED", true);
 static eLadderLogWriter se_teamRemoveWriter("TEAM_PLAYER_REMOVED", true);
+static eLadderLogWriter se_teamColoredName("TEAM_COLORED_NAME", false);
 
 // update name and color
 void eTeam::UpdateAppearance()
@@ -326,13 +327,23 @@ void eTeam::UpdateAppearance()
     {
         if( !empty && !lastEmpty_ )
         {
-            se_teamRenamedWriter << oldNameFiltered << newNameFiltered;
+            se_teamRenamedWriter << oldNameFiltered << newNameFiltered << Name();
             se_teamRenamedWriter.write();
+
+            tColoredString coloredName;
+            coloredName << GetColoredName();
+            se_teamColoredName << ePlayerNetID::FilterName(this->Name()) << coloredName;
+            se_teamColoredName.write();
         }
         else if( !empty )
         {
-            se_teamCreateWriter << newNameFiltered;
+            se_teamCreateWriter << newNameFiltered << Name();
             se_teamCreateWriter.write();
+
+            tColoredString coloredName;
+            coloredName << GetColoredName();
+            se_teamColoredName << ePlayerNetID::FilterName(this->Name()) << coloredName;
+            se_teamColoredName.write();
         }
         else if( !lastEmpty_ )
         {
@@ -959,6 +970,8 @@ void eTeam::WritePlayers( eLadderLogWriter & writer, const eTeam *team )
     }
 }
 
+static bool sg_positionWriteAis = false;
+static tSettingItem<bool> sg_positionWriterAisConf("LADDERLOG_WRITE_AI_POSITIONS", sg_positionWriteAis);
 static eLadderLogWriter se_positionWriter( "POSITIONS", false );
 void eTeam::WriteLaunchPositions()
 {
@@ -966,9 +979,7 @@ void eTeam::WriteLaunchPositions()
     {
         eTeam *team = teams(i);
 
-        // AI teams are boring.
-        if ( !team->IsHuman() )
-            continue;
+        if (!sg_positionWriteAis && !team->IsHuman()) continue;
 
         se_positionWriter << ePlayerNetID::FilterName( team->Name() );
         for ( int j = 0; j < team->players.Len(); j++ )

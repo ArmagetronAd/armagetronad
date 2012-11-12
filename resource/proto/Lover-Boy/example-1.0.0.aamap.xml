@@ -36,7 +36,7 @@
 				<Zone effect="teleport" destX="400" destY="20" modes="abs">
 					<ShapeCircle radius="10">
 						<Point x="100" y="200" />
-						<Color r="15" g="10" />
+						<Color r="15" g="15" />
 					</ShapeCircle>
 				</Zone>
 				
@@ -45,6 +45,13 @@
 						<Point x="20" y="200" />
 						<Color b="10" r="10" />
 						<Move xdir="10" ydir="10" />
+					</ShapeCircle>
+				</Zone>
+				
+				<Zone effect="object">
+					<ShapeCircle radius="10">
+						<Point x="200" y="20" />
+						<Color r="15" g="6" b="8" />
 					</ShapeCircle>
 				</Zone>
 			</Field>

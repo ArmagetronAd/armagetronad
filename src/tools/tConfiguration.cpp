@@ -613,6 +613,46 @@ void tConfItemBase::LoadLine(std::istream &s){
     //  std::cout << line << " lines read.\n";
 }
 
+// writes the list of all commands and their help to commands_list.txt in the var directory
+void tConfItemBase::WriteAllToFile()
+{
+    tConfItemMap & confmap = ConfItemMap();
+    int sim_maxlen = -1;
+
+    for(tConfItemMap::iterator iter = confmap.begin(); iter != confmap.end() ; ++iter)
+    {
+        tConfItemBase * ci = (*iter).second;
+        if (static_cast<int>(strlen(ci->title)) > sim_maxlen)
+            sim_maxlen = strlen(ci->title);
+    }
+
+    std::ofstream w;
+    tString file("commands_list.txt");
+    if ( tDirectories::Var().Open(w, file))
+    {
+        for(tConfItemMap::iterator iter = confmap.begin(); iter != confmap.end() ; ++iter)
+        {
+            tConfItemBase * ci = (*iter).second;
+            tString help ( ci->help );
+
+            tString mess;
+            mess << ci->title;
+            //mess << " " << ci->changeFunc;
+            mess.SetPos( sim_maxlen+2, false );
+            mess << "# ";
+            mess << help;
+            mess << "\n";
+            w << mess;
+        }
+    }
+}
+
+static void sg_ListAllCommands(std::istream &s)
+{
+    tConfItemBase::WriteAllToFile();
+}
+static tConfItemFunc sg_ListAllCommandsConf("LIST_ALL_COMMANDS", &sg_ListAllCommands);
+
 int tConfItemBase::AccessLevel(std::istream &s){
     if(!s.eof() && s.good()){
         tString name;
