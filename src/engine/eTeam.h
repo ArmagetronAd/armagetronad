@@ -210,6 +210,7 @@ public:												// public methods
 
 private:
     void 	 		RemovePlayerDirty( ePlayerNetID* player );				// just remove a player from the player list, no messages, no balancing
+    void LogScoreDifference( const tString & teamName );
 };
 
 #endif
