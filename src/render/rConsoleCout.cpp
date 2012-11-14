@@ -31,6 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tConfiguration.h"
 #include "tRecorder.h"
 #include "tDirectories.h"
+#include "tLocale.h"
 
 #include <map>
 
@@ -635,6 +636,7 @@ static void sr_SpawnScript( tString const & command )
         env.AddPath( "ARMAGETRONAD_PATH_RESOURCE", tDirectories::Resource() );
 
         // add other data
+        env.Add("ARMAGETRONAD_ENCODING", st_internalEncoding);
         env.Add( "ARMAGETRONAD_VERSION", tString( TRUE_ARMAGETRONAD_VERSION ) );
 
         // add user-specified variables

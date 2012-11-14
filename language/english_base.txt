@@ -823,7 +823,7 @@ ladderlog_write_all_usage Usage: LADDER_LOG_WRITE_ALL 1|0
 ladderlog_write_all_enabled Enabled full ladderlog output.
 ladderlog_write_all_disabled Disabled ladderlog output.
 ladderlog_write_admin_command _help           Write to ladderlog: ADMIN_COMMAND <name> <setting>
-ladderlog_write_authority_blurb_help          Write to ladderlog: AUTHORITY_BLURB <name> <value>
+ladderlog_write_authority_blurb_help          Write to ladderlog: AUTHORITY_BLURB <name> <value> <text>
 ladderlog_write_ball_vanish_help              Write to ladderlog: BALL_VANISH <object id> <zone_name> <cx> <cy>
 ladderlog_write_base_enemy_respawn_help       Write to ladderlog: BASE_ENEMY_RESPAWN  <spawner> <spawned>
 ladderlog_write_base_respawn_help             Write to ladderlog: BASE_RESPAWN <spawner> <spawned>
