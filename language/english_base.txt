@@ -2485,7 +2485,7 @@ player_win_instant			\1 was awarded \2 points for hitting the instant win zone.\
 player_win_race			\1 was awarded \2 points for winning the race.\n
 player_win_conquest			\1 was awarded \2 points for conquering the enemy base.\n
 player_win_conquest2			\1 was awarded \2 points for conquering \3's base.\n
-players_win_conquest			\1 where awarded \2 points for conquering \3's base.\n
+players_win_conquest			\1 were awarded \2 points for conquering \3's base.\n
 player_win_flag			\1 was awarded \2 points for capturing the enemies flag.\n
 player_win_held_fortress	\1 was awarded \2 points for holding the base.\n
 player_lose_held_fortress	\1 lost \2 points for being too defensive.\n

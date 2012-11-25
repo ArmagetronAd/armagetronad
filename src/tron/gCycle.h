@@ -168,6 +168,7 @@ class gCycle: public gCycleMovement
     eSoundPlayer *spark;
 
     REAL spawnTime_;    //!< time the cycle spawned at
+    REAL creationTime_; //!< time the cycle spawned/created
     REAL lastTimeAnim;  //!< last time animation was simulated at
     REAL timeCameIntoView;
 
@@ -217,7 +218,7 @@ public:
     // every frame, a bit of this variable is taken away and added to the step the cycle makes.
     REAL correctDistanceSmooth;
 
-    static void TacticalPositioning(REAL time);  // tactical positioning 
+    static void TacticalPositioning(REAL time);  // tactical positioning
     enum TacticalPosition
     {
         TP_Start = 0,
@@ -235,7 +236,7 @@ public:
     TacticalPosition tactical_pos;
     int    closest_zoneid;
     REAL   last_time;
-    
+
     class Statistics {
     public:
         struct Record {
@@ -249,7 +250,7 @@ public:
     public:
         Statistics(std::string p_name):name(p_name) { Init(); }
         ~Statistics() { Write(); }
-        void Init(); 
+        void Init();
         void Write();
         Record &operator[](const int& i) { return stats[i]; }
         Statistics &operator<<(Record const &in) { stats.push_back(in); return *this;}
