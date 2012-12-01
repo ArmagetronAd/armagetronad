@@ -66,8 +66,10 @@ public:
 
     void RemoveAllSpawn();
 
-private:
+public:
     tList<gSpawnPoint> spawnPoints; //!< the list of active spawn points
 };
+
+extern gArena Arena;
 
 #endif

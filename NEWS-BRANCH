@@ -1,3 +1,19 @@
+Changes in 0.2.9-sty+ct+ap_r822
+New race commands:
+  * RACE_LOG_UNFINISHED         # Should the players that have not finished that map be recorded as well?
+  * RACE_CHANCES                # Chances player has of playing in the map after death.
+                                # Adjusting this during round is a bad idea... will not affect the already
+                                # playing cycles on grid.  
+  * RACE_FINISH_KILL            # Should the player be killed soon after crossing the finsih line?
+  // Ranks are below
+  * RACE_NUM_RANKS_SHOW_START   # The number of ranks to display at the beginning of round
+  * RACE_NUM_RANKS_SHOW_END     # The number of ranks to display at the end of round
+  * RACE_RANKS_SHOW_START       # 0-disable, 1-From top, 2-around your rank! Default 1.
+  * RACE_RANKS_SHOW_END         # 0-disable, 1-From top, 2-around your rank! Default 2.
+  * RACE_SMART_TIMER            # 0-uses default settings for timer, 1-uses the ranks to measure the timer.
+Modifications:
+  * placed "extern gArena *Arena" in "gArena.h" instead.                   
+
 Changes in 0.2.9-sty+ct+ap_r818
 New ladderlog.txt commands:
   * LADDERLOG_WRITE_AI_POSITIONS        # If enabled, ai player's team positions will be written to ladderlog

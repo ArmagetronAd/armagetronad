@@ -52,6 +52,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "gArena.h"
 #include "gWinZone.h"
 
+#include "gRace.h"
+
 #include "tMath.h"
 #include <stdlib.h>
 #include <fstream>
@@ -2429,6 +2431,9 @@ gCycle::gCycle(eGrid *grid, const eCoord &pos,const eCoord &d,ePlayerNetID *p)
     windingNumberWrapped_ = windingNumber_ = Grid()->DirectionWinding(dirDrive);
     dirDrive = Grid()->GetDirection(windingNumberWrapped_);
     dir = dirDrive;
+
+    if (!gRacePlayer::PlayerExists(Player()))
+        gRacePlayer *rPlayer = new gRacePlayer(Player());
 
     deathTime=0;
 

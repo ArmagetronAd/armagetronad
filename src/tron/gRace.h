@@ -86,9 +86,8 @@ public:
     static void Write();                                                                    //!> Writes the stored data to the current map's txt file
     static void Reset();                                                                    //!> Resets the scores for the next map
 
-    static void RaceCommands(ePlayerNetID *p, std::istream &s, tString command);    //!> the commands to be used only in racing
-
-    static void OutputTopTen();
+    static void OutputStart();      //!< the ranks to display at start of round
+    static void OutputEnd();        //!< the ranks to display at end of round
 
 public:
     tString user_name;      // logged name
@@ -99,6 +98,41 @@ public:
     static void Switch(int i, int j);                                                       //!> Switches the i and j
     static void Sort();                                                                     //!> Sorts out by ordering Score (Highest - Lowest) and Time (Lowest - Highest)
     static bool InOrder(int i, int j);                                                      //!> Checks if they are in order
+};
+
+class gRacePlayer
+{
+    public:
+        gRacePlayer(ePlayerNetID *p);
+        static bool PlayerExists(ePlayerNetID *p);
+
+        void NewCycle(gCycle *bike) {cycle = bike;}
+        void DropChances(int dropValue)
+        {
+            int diff = chances - dropValue;
+            if (diff >= chances)
+            {
+                chances--;
+            }
+            else
+            {
+                chances = 0;
+            }
+        }
+
+    private:
+        ePlayerNetID *player;
+        gCycle *cycle;
+        eCoord position;
+        eCoord direction;
+        int chances;
+
+    public:
+        ePlayerNetID    *Player()const{return player;}                  //!<  player's user
+        eNetGameObject  *Cycle()const{return cycle;}                    //!<  player's cycle
+        eCoord          SpawnPosition()const{return position;}          //!<  spawn position
+        eCoord          SpawnDirection()const{return direction;}        //!<  spawn direction
+        int             Chances()const{return chances;}                 //!<  player's chances to spawn to race one again
 };
 
 extern bool sg_RaceTimerEnabled;

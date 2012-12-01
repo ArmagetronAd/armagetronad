@@ -3231,7 +3231,15 @@ player_personal_best_reach_time       New personal record! Your new time record 
 player_message_race_rank              Your rank is \1 with a time of \2.\n
 player_race_record_search_found       \1 is ranked \2 with a best time of \3 seconds.\n
 player_race_record_search_not_found   0xff0000The search term \1 couldn't be found in the racing records.\n
-player_race_record_search_many_found  0xff0000The search term \1 has found many matches. Be more specific.\n 
+player_race_record_search_many_found  0xff0000The search term \1 has found many matches. Be more specific.\n
+
+race_ranks_personal_message Your current position for 
+race_rank_title_message Top \1 players for 
+race_rank_title_name Ranks
+race_rank_title_player_name Players
+race_rank_title_score_name Scores
+race_rank_title_time_name Times
+race_rank_border # 
 
 access_level_substitute_denied  Required access level to substitute is "\1", you only have "\2".\n
 substitute_message_usage        Usage: /substitute <user out ID or name> <user in ID or name>\n

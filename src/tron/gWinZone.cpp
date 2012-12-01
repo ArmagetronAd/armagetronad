@@ -2462,12 +2462,8 @@ void gBaseZoneHack::CountZonesOfTeam( eGrid const * grid, eTeam * otherTeam, int
 static int sg_onSurviveScore = 0;
 static tSettingItem< int > sg_onSurviveConquestScoreConfig( "FORTRESS_HELD_SCORE", sg_onSurviveScore );
 
-extern gArena Arena;
-
 static REAL sg_collapseSpeed = .5;
 static tSettingItem< REAL > sg_collapseSpeedConfig( "FORTRESS_COLLAPSE_SPEED", sg_collapseSpeed );
-
-extern gArena Arena;
 
 // *******************************************************************************
 // *

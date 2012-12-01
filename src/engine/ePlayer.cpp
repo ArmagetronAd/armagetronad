@@ -3924,8 +3924,6 @@ void handle_chat( nMessage &m )
 
                 tConfItemBase::EatWhitespace(s);
 
-                gRaceScores::RaceCommands(p, s, command);
-
                 return;
             }
 

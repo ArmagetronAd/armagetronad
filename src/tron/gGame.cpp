@@ -4241,6 +4241,7 @@ static eLadderLogWriter sg_roundCommencingWriter("ROUND_COMMENCING", false);
 static SvgOutput sg_svgOutput;
 
 bool sg_roundStartingChecker = true;
+bool sg_raceRanksOutput = true;
 
 static eLadderLogWriter sg_currentMapWriter("CURRENT_MAP", false);
 static bool sg_displayMapDetails = false;
@@ -4602,8 +4603,6 @@ void gGame::StateUpdate(){
                 sg_roundCommencingWriter << (rounds <= 0 ? 1 : rounds+1) << sg_currentSettings->limitRounds;
                 sg_roundCommencingWriter.write();
 
-                sg_roundStartingChecker = true;
-
 /*                tOutput Message;
                 Message << "The rounds: " << rounds << "\n";
                 sn_ConsoleOut(Message);
@@ -4642,6 +4641,9 @@ void gGame::StateUpdate(){
                 }
             }
 #endif
+
+            sg_roundStartingChecker = true;
+
             // pings should not count as much in the between-round phase
             nPingAverager::SetWeight(1E-20);
 
@@ -5132,12 +5134,9 @@ void gGame::Analysis(REAL time){
         {
             eTeam * team = gRace::Winner();
 
-            if ( team != NULL )
+            if (team)
             {
-                tOutput message;
-                message.SetTemplateParameter(2, sg_scoreRaceComplete);
-                message << "$player_win_race";
-                sg_DeclareWinner( team, message );
+                sg_DeclareWinner( team, 0 );
             }
             else
             {
@@ -5146,6 +5145,11 @@ void gGame::Analysis(REAL time){
                     //TODO
                     sg_DeclareWinner( NULL, 0 );
                 }
+            }
+            if (sg_raceRanksOutput)
+            {
+                gRaceScores::OutputEnd();
+                sg_raceRanksOutput = false;
             }
         }
     }
@@ -5227,8 +5231,8 @@ void gGame::Analysis(REAL time){
 #endif
 
                         // scoring
-                        eTeam::teams[winner-1]->AddScore
-                        (sg_currentSettings->scoreWin,messagetype, tOutput());
+                        if (sg_RaceTimerEnabled) eTeam::teams[winner-1]->AddScore(sg_scoreRaceComplete,messagetype, tOutput());
+                        else eTeam::teams[winner-1]->AddScore(sg_currentSettings->scoreWin,messagetype, tOutput());
                         if (!sg_singlePlayer &&
                                 eTeam::teams(winner-1)->NumHumanPlayers() >= 1 &&
                                 eTeam::teams(winner-1)->NumPlayers() >= 1 )
@@ -5255,10 +5259,8 @@ void gGame::Analysis(REAL time){
                         sg_roundEndedWriter <<  st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
                         sg_roundEndedWriter.write();
 
-                        //HACK RACE begin
-                        if ( sg_RaceTimerEnabled )
+                        if (sg_RaceTimerEnabled)
                             gRace::End();
-                        //HACK RACE end
                     }
                 }
                 check_hs();
@@ -5361,9 +5363,6 @@ void gGame::Analysis(REAL time){
 
                             sg_matchEndedWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
                             sg_matchEndedWriter.write();
-
-                            if (sg_RaceTimerEnabled)
-                                gRaceScores::OutputTopTen();
 
 	                        message.SetTemplateParameter(1, name);
 	                        message << "$gamestate_champ_console";
@@ -5827,6 +5826,12 @@ bool gGame::GameLoop(bool input){
 	{
         sg_roundStartedWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
         sg_roundStartedWriter.write();
+
+        if (sg_RaceTimerEnabled)
+        {
+            gRaceScores::OutputStart();
+            sg_raceRanksOutput = true;
+        }
         sg_roundStartingChecker = false;
 	}
 
