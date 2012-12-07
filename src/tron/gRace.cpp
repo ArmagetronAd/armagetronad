@@ -34,7 +34,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "eAdvWall.h"
 #include "gParser.h"
 
-#include "gArena.h"
 #include "eGrid.h"
 
 #include <string>
@@ -959,17 +958,16 @@ void gRaceScores::OutputEnd()
 //! Racing player's things
 gRacePlayer::gRacePlayer(ePlayerNetID *p)
 {
-    this->player = p;
-
     if (p && p->Object())
     {
-        this->cycle = dynamic_cast<gCycle *>(p->Object());
+        this->player_ = p;
+        this->cycle_ = dynamic_cast<gCycle *>(p->Object());
 
-        this->position = Cycle()->Position();
-        this->direction = Cycle()->Direction();
+        this->position_ = Cycle()->Position();
+        this->direction_ = Cycle()->Direction();
     }
 
-    this->chances = sg_raceChances;
+    this->chances_ = sg_raceChances;
 
     sn_RacePlayers.Insert(this);
 }
@@ -982,6 +980,19 @@ bool gRacePlayer::PlayerExists(ePlayerNetID *p)
         if (rPlayer && (rPlayer->Player() == p))
         {
             return true;
+        }
+    }
+    return false;
+}
+
+gRacePlayer * gRacePlayer::GetPlayer(ePlayerNetID *p)
+{
+    for(int i = 0; i < sn_RacePlayers.Len(); i++)
+    {
+        gRacePlayer *rPlayer = sn_RacePlayers[i];
+        if (rPlayer && (rPlayer->Player() == p))
+        {
+            return rPlayer;
         }
     }
     return false;
@@ -1048,9 +1059,8 @@ void gRace::ZoneHit( ePlayerNetID * player )
 
         player->AddScore( RacingScore, win, "" );
         if (RacingScore >= 2) RacingScore -= sg_scoreRaceDeplete;
-
-        if (sg_raceFinishKill) player->Object()->Kill();
     }
+    if (sg_raceFinishKill) player->Object()->Kill();
 }
 
 //! SYNC
@@ -1064,14 +1074,15 @@ void gRace::Sync( int alive, int ai_alive, int humans)
             for(int a=0; a < sn_RacePlayers.Len(); a++)
             {
                 gRacePlayer *rPlayer = sn_RacePlayers[a];
-                if (rPlayer && !rPlayer->Cycle())
+                if (rPlayer && (rPlayer->Cycle() == NULL) && (rPlayer->Player() != NULL))
                 {
                     if ((rPlayer->Chances() > 0) && (rPlayer->Chances() <= sg_raceChances))
                     {
-                        gCycle *cycle = new gCycle(grid, rPlayer->Cycle()->Position(), rPlayer->Cycle()->Direction());
+                        //gRacePlayer::CreateNewCycle(rPlayer);
+                        gCycle *cycle = new gCycle(grid, rPlayer->SpawnPosition(), rPlayer->SpawnDirection(), rPlayer->Player());
                         rPlayer->NewCycle(cycle);
                         rPlayer->Player()->ControlObject(cycle);
-                        rPlayer->DropChances(1);    //  decrease chances by this many values
+                        rPlayer->DropChances();    //  decrease chances by this many values
                         alive += 1;
                     }
                 }

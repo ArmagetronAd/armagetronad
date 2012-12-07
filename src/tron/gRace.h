@@ -36,7 +36,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <vector>
 #include <map>
 
-
 class gRace {
 
 public:
@@ -103,36 +102,48 @@ public:
 class gRacePlayer
 {
     public:
-        gRacePlayer(ePlayerNetID *p);
-        static bool PlayerExists(ePlayerNetID *p);
+        gRacePlayer(ePlayerNetID *p);                       //!<    create new instance
+        static bool PlayerExists(ePlayerNetID *p);          //!<    checks if player's race data exists
+        static gRacePlayer * GetPlayer(ePlayerNetID *p);    //!<    gets that player's race data
 
-        void NewCycle(gCycle *bike) {cycle = bike;}
-        void DropChances(int dropValue)
+        void NewCycle(gCycle *bike)                         //!<    create a new cycle
         {
-            int diff = chances - dropValue;
-            if (diff >= chances)
+            if (bike)
+                cycle_ = bike;
+        }
+
+        //!  if the player dies, their cycle's data is erased
+        void DestroyCycle() { if (cycle_) cycle_ = NULL; }
+
+        //! if the player leaves the game, erase their data
+        void ErasePlayer() { if (player_) player_ = NULL; }
+
+        //!  drops the number of chances left
+        void DropChances()
+        {
+            if (chances_ > 0)
             {
-                chances--;
+                chances_--;
             }
             else
             {
-                chances = 0;
+                chances_ = 0;
             }
         }
 
     private:
-        ePlayerNetID *player;
-        gCycle *cycle;
-        eCoord position;
-        eCoord direction;
-        int chances;
+        ePlayerNetID *player_;
+        gCycle *cycle_;
+        eCoord position_;
+        eCoord direction_;
+        int chances_;
 
     public:
-        ePlayerNetID    *Player()const{return player;}                  //!<  player's user
-        eNetGameObject  *Cycle()const{return cycle;}                    //!<  player's cycle
-        eCoord          SpawnPosition()const{return position;}          //!<  spawn position
-        eCoord          SpawnDirection()const{return direction;}        //!<  spawn direction
-        int             Chances()const{return chances;}                 //!<  player's chances to spawn to race one again
+        ePlayerNetID    *Player()const{ return player_; }                  //!<  player's user
+        eNetGameObject  *Cycle()const{ return cycle_; }                    //!<  player's cycle
+        eCoord          SpawnPosition()const{ return position_; }          //!<  spawn position
+        eCoord          SpawnDirection()const{ return direction_; }        //!<  spawn direction
+        int             Chances()const{ return chances_; }                 //!<  player's chances to spawn to race one again
 };
 
 extern bool sg_RaceTimerEnabled;

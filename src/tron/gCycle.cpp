@@ -4068,6 +4068,15 @@ void gCycle::Kill(){
             se_cycleDestroyedWriter << Player()->GetUserName() << Position().x << Position().y << Direction().x << Direction().y << ePlayerNetID::FilterName(Team()->Name()) << se_GameTime();
             se_cycleDestroyedWriter.write();
 
+            if (gRacePlayer::PlayerExists(Player()))
+            {
+                gRacePlayer *rPlayer = gRacePlayer::GetPlayer(Player());
+                if (rPlayer)
+                {
+                    rPlayer->DestroyCycle();
+                }
+            }
+
             if ( currentWall )
             {
                 // z-man: updating the wall so it reflects exactly the position of death looks like
@@ -6858,8 +6867,7 @@ static void sg_RespawnPlayer(std::istream &s)
 
         // let's respawn now ...
         eGameObject *pGameObject = pPlayer->Object();
-        if ((!pGameObject) ||
-            (!(pGameObject->Alive()) ))
+        if ((!pGameObject) || (!(pGameObject->Alive()) ))
         {
             gCycle *pCycle = new gCycle(grid, ppos, pdir, pPlayer);
             pPlayer->ControlObject(pCycle);

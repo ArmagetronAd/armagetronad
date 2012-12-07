@@ -5145,6 +5145,15 @@ void ePlayerNetID::RemoveFromGame()
         se_playerAILeftWriter << userName_;
         se_playerAILeftWriter.write();
     }
+
+    if (gRacePlayer::PlayerExists(this))
+    {
+        gRacePlayer *rPlayer = gRacePlayer::GetPlayer(this);
+        if (rPlayer)
+        {
+            rPlayer->ErasePlayer();
+        }
+    }
 }
 
 bool ePlayerNetID::ActionOnQuit()

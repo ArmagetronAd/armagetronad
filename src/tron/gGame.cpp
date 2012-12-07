@@ -5131,7 +5131,7 @@ void gGame::Analysis(REAL time){
             return;
         else                                    // time to close the round
         {
-            eTeam * team = gRace::Winner();
+            eTeam *team = gRace::Winner();
 
             if (team)
             {
