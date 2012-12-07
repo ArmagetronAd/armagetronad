@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -581,6 +581,7 @@ static tConfItem<bool> showbm("SHOW_BRAKE",subby_ShowBrakeMeter);
 static tConfItem<bool> showrm("SHOW_RUBBER",subby_ShowRubberMeter);
 static tConfItem<bool> showtim("SHOW_TIME",showTime);
 static tConfItem<bool> show24("SHOW_TIME_24",show24hour);
+static tConfItem<bool> showpos("SHOW_POSITION",showPosition);
 
 static tConfItem<REAL> scorex("SCORE_LOCX",subby_ScoreLocX);
 static tConfItem<REAL> scorey("SCORE_LOCY",subby_ScoreLocY);
@@ -597,6 +598,10 @@ static tConfItem<REAL> aes("ALIVE_SIZE",subby_AlivePeopleSize);
 static tConfItem<REAL> px("PING_LOCX",subby_PingLocX);
 static tConfItem<REAL> py("PING_LOCY",subby_PingLocY);
 static tConfItem<REAL> ps("PING_SIZE",subby_PingSize);
+
+static tConfItem<REAL> positionx("POSITION_LOCX",subby_CoordLocX);
+static tConfItem<REAL> positiony("POSITION_LOCY",subby_CoordLoxY);
+static tConfItem<REAL> positions("POSITION_SIZE",subby_CoordSize);
 
 uMenuItemToggle hud3
 (&hud_prefs,"$pref_showfastest_text",
@@ -675,7 +680,7 @@ public:
 
 void do_con(){
     su_ClearKeys();
-        
+
     se_ChatState( ePlayerNetID::ChatFlags_Console, true );
     sr_con.SetHeight(20,false);
     se_SetShowScoresAuto(false);

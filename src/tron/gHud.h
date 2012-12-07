@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -38,4 +38,6 @@ extern REAL subby_AlivePeopleLocX, subby_AlivePeopleLocY, subby_AlivePeopleSize;
 extern REAL subby_PingLocX, subby_PingLocY, subby_PingSize;
 extern bool showTime;
 extern bool show24hour;
+extern bool showPosition;
+extern REAL subby_CoordLocX, subby_CoordLoxY, subby_CoordSize;
 #endif

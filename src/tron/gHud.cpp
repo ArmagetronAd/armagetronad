@@ -60,6 +60,9 @@ REAL subby_FastestLocX=-0.0, subby_FastestLocY=-0.95, subby_FastestSize =.12;
 REAL subby_AlivePeopleLocX=.45, subby_AlivePeopleLocY=-0.95, subby_AlivePeopleSize =.13;
 REAL subby_PingLocX=.80, subby_PingLocY=-0.95, subby_PingSize =.13;
 
+bool showPosition = true;
+REAL subby_CoordLocX = -0.557, subby_CoordLoxY = -0.75, subby_CoordSize = 0.13;
+
 REAL max_player_speed=0;
 
 #ifndef DEDICATED
@@ -494,6 +497,20 @@ static void display_hud_subby( ePlayer* player ){
                                 ping << "0xfefefe" << message;
                             }
                         }
+#ifdef DEBUG
+                        if (showPosition)
+                        {
+                            tString output;
+                            float posX = h->Position().x;
+                            float posY = h->Position().y;
+                            output << "Position X: " << posX << "\n";
+                            output << "Position Y: " << posY;
+                            int length = output.Len();
+                            float size = subby_CoordSize;
+                            rTextField location(subby_CoordLocX-((.15*size*(length-1.5))/2.0),subby_CoordLoxY,.15*size,.3*size);
+                            location << output;
+                        }
+#endif
                     }
                 }
             }

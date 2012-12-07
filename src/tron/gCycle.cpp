@@ -2433,7 +2433,7 @@ gCycle::gCycle(eGrid *grid, const eCoord &pos,const eCoord &d,ePlayerNetID *p)
     dir = dirDrive;
 
     if (!gRacePlayer::PlayerExists(Player()))
-        gRacePlayer *rPlayer = new gRacePlayer(Player());
+        new gRacePlayer(Player());
 
     deathTime=0;
 

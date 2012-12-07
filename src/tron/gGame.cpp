@@ -4241,7 +4241,6 @@ static eLadderLogWriter sg_roundCommencingWriter("ROUND_COMMENCING", false);
 static SvgOutput sg_svgOutput;
 
 bool sg_roundStartingChecker = true;
-bool sg_raceRanksOutput = true;
 
 static eLadderLogWriter sg_currentMapWriter("CURRENT_MAP", false);
 static bool sg_displayMapDetails = false;
@@ -5136,21 +5135,19 @@ void gGame::Analysis(REAL time){
 
             if (team)
             {
-                sg_DeclareWinner( team, 0 );
+                tOutput message;
+                message.SetTemplateParameter(2, sg_scoreRaceComplete);
+                message << "$player_win_race";
+                sg_DeclareWinner( team, message );
             }
-            else
+/*          else
             {
                 if ( alive > 0 )
                 {
                     //TODO
                     sg_DeclareWinner( NULL, 0 );
                 }
-            }
-            if (sg_raceRanksOutput)
-            {
-                gRaceScores::OutputEnd();
-                sg_raceRanksOutput = false;
-            }
+            }*/
         }
     }
     //HACK RACE end
@@ -5259,8 +5256,8 @@ void gGame::Analysis(REAL time){
                         sg_roundEndedWriter <<  st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
                         sg_roundEndedWriter.write();
 
-                        if (sg_RaceTimerEnabled)
-                            gRace::End();
+                        /*if (sg_RaceTimerEnabled)
+                            gRace::End();*/
                     }
                 }
                 check_hs();
@@ -5830,7 +5827,6 @@ bool gGame::GameLoop(bool input){
         if (sg_RaceTimerEnabled)
         {
             gRaceScores::OutputStart();
-            sg_raceRanksOutput = true;
         }
         sg_roundStartingChecker = false;
 	}
