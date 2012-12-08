@@ -155,6 +155,8 @@ int gRace::finishPlace_ = 0;
 REAL gRace::firstFinishTime_ = 0;
 tString gRace::firstToArive_;
 
+bool sg_raceOutputSent = false;
+
 tList<gRaceScores> sn_RaceScores;
 tList<gRacePlayer> sn_RacePlayers;
 
@@ -1230,6 +1232,12 @@ void gRace::Sync( int alive, int ai_alive, int humans)
             }
         }
     }
+
+    if (roundFinished_ && !sg_raceOutputSent)
+    {
+        gRaceScores::OutputEnd();
+        sg_raceOutputSent = true;
+    }
 }
 
 //! DONE
@@ -1271,6 +1279,8 @@ void gRace::Reset()
     firstFinishTime_ = 0;
     firstToArive_ = "";
     RacingScore = sg_scoreRaceComplete;
+
+    sg_raceOutputSent = false;
 
     winZones_.clear();
     deathZones_.clear();
