@@ -4241,6 +4241,7 @@ static eLadderLogWriter sg_roundCommencingWriter("ROUND_COMMENCING", false);
 static SvgOutput sg_svgOutput;
 
 bool sg_roundStartingChecker = true;
+bool sg_raceOutputSent = false;
 
 static eLadderLogWriter sg_currentMapWriter("CURRENT_MAP", false);
 static bool sg_displayMapDetails = false;
@@ -5148,6 +5149,12 @@ void gGame::Analysis(REAL time){
                     sg_DeclareWinner( NULL, 0 );
                 }
             }*/
+
+            if (sg_raceOutputSent)
+            {
+                gRaceScores::OutputEnd();
+                sg_raceOutputSent = false;
+            }
         }
     }
     //HACK RACE end
@@ -5827,6 +5834,7 @@ bool gGame::GameLoop(bool input){
         if (sg_RaceTimerEnabled)
         {
             gRaceScores::OutputStart();
+            sg_raceOutputSent = true;
         }
         sg_roundStartingChecker = false;
 	}
