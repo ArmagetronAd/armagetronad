@@ -71,10 +71,28 @@ static tSettingItem<bool> sg_raceSmartTimerConf("RACE_SMART_TIMER", sg_raceSmart
 
 int sg_scoreRaceComplete = 10;
 int RacingScore = sg_scoreRaceComplete;
-static tSettingItem<int> sg_scoreRaceCompleteConf( "SCORE_RACE", sg_scoreRaceComplete );
+bool restrictRaceScore(int const &newValue)
+{
+    if (newValue >= 1)
+    {
+        RacingScore = newValue;
+    }
+    else RacingScore = 1;
+
+    return true;
+}
+static tSettingItem<int> sg_scoreRaceCompleteConf( "SCORE_RACE", sg_scoreRaceComplete, &restrictRaceScore);
+
+int sg_scoreRaceFinish = 10;
+static tSettingItem<int> sg_scoreRaceFinishConf("SCORE_RACE_FINISH", sg_scoreRaceFinish);
 
 int sg_scoreRaceDeplete = 1;
 static tSettingItem<int> sg_scoreRaceDepleteConf( "RACE_SCORE_DEPLETE", sg_scoreRaceDeplete);
+
+//! 0   -   if the player should receive points depending on SCORE_RACE_FINISH
+//! 1   -   if the player should receive points depending on RACE_SCORE_DEPLETE
+bool sg_racePointsType = true;
+static tSettingItem<bool> sg_racePointsTypeConf("RACE_POINTS_TYPE", sg_racePointsType);
 
 bool sg_raceLogTime = false;
 static tSettingItem<bool> sg_raceLogTimeConf("RACE_LOG_TIME", sg_raceLogTime);
@@ -213,12 +231,11 @@ void gRaceScores::Sort()
             Switch(j,j-1);
 }
 
-void gRaceScores::Add(tString UserName, tString RealName, int WinScore, REAL reachTime)
+void gRaceScores::Add(tString UserName, int WinScore, REAL reachTime)
 {
     if (CheckPlayer(UserName))
     {
         gRaceScores *rS = GetPlayer(UserName);
-        rS->real_name = RealName;
         rS->score += WinScore;
         if (((reachTime < rS->time) && reachTime != -1) || (rS->time == -1 && reachTime != -1))
         {
@@ -237,7 +254,6 @@ void gRaceScores::Add(tString UserName, tString RealName, int WinScore, REAL rea
     else
     {
         gRaceScores *rS = new gRaceScores(UserName);
-        rS->real_name = RealName;
         rS->score = WinScore;
         rS->time = reachTime;
         if (reachTime != -1)
@@ -312,10 +328,6 @@ void gRaceScores::Read()
                     {
                         rS->time = atof(params.SubStr(rLin, pLin));
                     }
-                    else if (iCount == 4)
-                    {
-                        rS->real_name = params.SubStr(rLin, (params.Len() - rLin));
-                    }
                     iCount++;
                 }
             }
@@ -352,7 +364,7 @@ void gRaceScores::Write()
             for (int i=0; i < sn_RaceScores.Len(); i++)
             {
                 gRaceScores *rS = sn_RaceScores[i];
-                w << rS->user_name << " " << rS->score << " " << rS->time << " " << rS->real_name << "\n";
+                w << rS->user_name << " " << rS->score << " " << rS->time << "\n";
             }
         }
     }
@@ -1017,7 +1029,7 @@ void gRace::ZoneHit( ePlayerNetID * player )
         }
 
         REAL reachTime = player->raceTime;
-        gRaceScores::Add(player->GetUserName(), player->GetName() , RacingScore, reachTime);
+        gRaceScores::Add(player->GetUserName(), RacingScore, reachTime);
 
         tOutput win; //, lose;
         //win << "$player_reach_race";*/
@@ -1059,8 +1071,15 @@ void gRace::ZoneHit( ePlayerNetID * player )
             }
         }
 
-        player->AddScore( RacingScore, win, "" );
-        if (RacingScore >= 2) RacingScore -= sg_scoreRaceDeplete;
+        if (!sg_racePointsType)
+        {
+            player->AddScore( sg_scoreRaceFinish, win, "" );
+        }
+        else
+        {
+            player->AddScore( RacingScore, win, "" );
+            if (RacingScore >= 2) RacingScore -= sg_scoreRaceDeplete;
+        }
     }
     if (sg_raceFinishKill) player->Object()->Kill();
 }
@@ -1189,7 +1208,16 @@ void gRace::Sync( int alive, int ai_alive, int humans)
                 {
                     roundFinished_ = true;
                     countDown_ = -1;
-                    sn_CenterMessage("");
+
+                    if (!firstArrived_)
+                    {
+                        for(int i = 0; i < se_PlayerNetIDs.Len(); i++)
+                        {
+                            ePlayerNetID *p = se_PlayerNetIDs[i];
+                            if (p && (p->Object() != NULL))
+                                p->Object()->Kill();
+                        }
+                    }
                 }
                 else
                 {
@@ -1227,7 +1255,7 @@ void gRace::Sync( int alive, int ai_alive, int humans)
             ePlayerNetID *p = se_PlayerNetIDs[x];
             if (!p->raceArrived && p->IsHuman())
             {
-                gRaceScores::Add(p->GetUserName(), p->GetName(), 0, -1);
+                gRaceScores::Add(p->GetUserName(),0, -1);
                 p->raceArrived = true;
             }
         }

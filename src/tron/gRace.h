@@ -79,18 +79,17 @@ class gRaceScores
 public:
     gRaceScores(tString UserName);
     static gRaceScores * GetPlayer(tString name);
-    static bool CheckPlayer(tString name);                                                  //!> Checks if that log name exists within the list
-    static void Add(tString UserName, tString RealName, int WinScore, REAL reachTime);      //!> Adds the score and replace the time if lower than before
-    static void Read();                                                                     //!> Reads in the data in the current map; name, score, time
-    static void Write();                                                                    //!> Writes the stored data to the current map's txt file
-    static void Reset();                                                                    //!> Resets the scores for the next map
+    static bool CheckPlayer(tString name);                                //!> Checks if that log name exists within the list
+    static void Add(tString UserName, int WinScore, REAL reachTime);      //!> Adds the score and replace the time if lower than before
+    static void Read();                                                   //!> Reads in the data in the current map; name, score, time
+    static void Write();                                                  //!> Writes the stored data to the current map's txt file
+    static void Reset();                                                  //!> Resets the scores for the next map
 
     static void OutputStart();      //!< the ranks to display at start of round
     static void OutputEnd();        //!< the ranks to display at end of round
 
 public:
     tString user_name;      // logged name
-    tString real_name;      // screen name
     int     score;          // best score
     REAL    time;           // best time
 

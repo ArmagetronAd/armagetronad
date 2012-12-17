@@ -127,6 +127,11 @@ cycle_smooth_min_speed_help			Minimum speed of smooth correction relative to cyc
 cycle_smooth_threshold_help			Only syncs that differ from your position by less than this amount (measured in speed) will be handled smoothly, bigger differences will be applied instantly.
 cycle_max_refcount_help				Maximum allowed reference count on cycles before they self destruct. This setting is to protect against performance related DOS attacks.
 
+cycle_rubber_deplete_self_help   (0, 1) If set to 1, player's rubber will decrease by hitting their own tails.
+cycle_rubber_deplete_team_help   (0, 1) If set to 1, player's rubber will decrease by hitting their team tails.
+cycle_rubber_deplete_enemy_help  (0, 1) If set to 1, player's rubber will decrease by hitting their enemy's tails.
+cycle_rubber_deplete_rim_help    (0, 1) If set to 1, player's rubber will decrease by hitting the boundray walls.
+
 #********************************************
 #********************************************
 #
@@ -3216,30 +3221,7 @@ ban_user_list_help            Gives a list of banned users.
 md5_prefix_help               Extra hash prefix for local accounts used to scramble the password
 md5_suffix_help               Extra hash suffix for local accounts used to scramble the password
 
-global_id_help                If set to 1, Global IDs (Armathentication) will be enabled on this server.
-
-# RACE SETTINGS / ANIMUSON MODS / LOVER$BOY's ADDITIONS
-race_timer_enabled_help		            (0 = Disable, 1 = Enable) race timer. Don't change during round.
-race_end_delay_help		                Number of seconds to give players to finish after target reached
-race_score_deplete_help               Number the score depletes by everytime a player enters the win zone.
-race_score_type_help		              0-No sorting; 1-Sort by best score; 2-sort by best time.
-race_log_time_help                    If enabled, it displays the reached time and the position of arrival.
-player_reach_race		                  \1 0xfffffffinished with \2 points in \3 seconds.\n
-player_reach_race_first               \1 0xfffffffinished 1st in \2 seconds.\n
-player_reach_race_time                \2| \1 0xfffffffinished \3 s behind 1st.\n
-player_personal_best_reach_time       New personal record! Your new time record is \1 seconds.\n
-player_message_race_rank              Your rank is \1 with a time of \2.\n
-player_race_record_search_found       \1 is ranked \2 with a best time of \3 seconds.\n
-player_race_record_search_not_found   0xff0000The search term \1 couldn't be found in the racing records.\n
-player_race_record_search_many_found  0xff0000The search term \1 has found many matches. Be more specific.\n
-
-race_ranks_personal_message Your current position for 
-race_rank_title_message Top \1 players for 
-race_rank_title_name Ranks
-race_rank_title_player_name Players
-race_rank_title_score_name Scores
-race_rank_title_time_name Times
-race_rank_border # 
+global_id_help                If set to 1, Global IDs (Armathentication) will be enabled on this server. 
 
 access_level_substitute_denied  Required access level to substitute is "\1", you only have "\2".\n
 substitute_message_usage        Usage: /substitute <user out ID or name> <user in ID or name>\n
@@ -3359,6 +3341,31 @@ config_queing_que_file_not_found    0xff0000Search term \1 couldn't be found in 
 config_queing_found_toomanyfiles    0xff0000Search term \1 found many matches in CONFIG_ROTATION. Be more specific.\n
 config_queing_is_empty              Config que is now empty. Normal rotation will resume from next round or match.\n
 config_queing_required_level        Config queing command \2 requires level is \1. You do not have that access level.\n
+
+# RACE SETTINGS / ANIMUSON MODS / LOVER$BOY's ADDITIONS
+race_timer_enabled_help		            (0 = Disable, 1 = Enable) race timer. Don't change during round.
+race_end_delay_help		                Number of seconds to give players to finish after target reached
+race_score_deplete_help               Number the score depletes by everytime a player enters the win zone.
+race_score_type_help		              0-No sorting; 1-Sort by best score; 2-sort by best time.
+race_log_time_help                    If enabled, it displays the reached time and the position of arrival.
+race_finish_kill_help                 If set to 1, kill the players as soon as they cross the finish line.
+race_points_type_help                 0 - Gain points by SCORE_RACE_FINISH, 1 - Gain points by RACE_SCORE_DEPLETE.
+player_reach_race		                  \1 0xfffffffinished with \2 points in \3 seconds.\n
+player_reach_race_first               \1 0xfffffffinished 1st in \2 seconds.\n
+player_reach_race_time                \2| \1 0xfffffffinished \3 s behind 1st.\n
+player_personal_best_reach_time       New personal record! Your new time record is \1 seconds.\n
+player_message_race_rank              Your rank is \1 with a time of \2.\n
+player_race_record_search_found       \1 is ranked \2 with a best time of \3 seconds.\n
+player_race_record_search_not_found   0xff0000The search term \1 couldn't be found in the racing records.\n
+player_race_record_search_many_found  0xff0000The search term \1 has found many matches. Be more specific.\n
+
+race_ranks_personal_message Your current position for 
+race_rank_title_message Top \1 players for 
+race_rank_title_name Ranks
+race_rank_title_player_name Players
+race_rank_title_score_name Scores
+race_rank_title_time_name Times
+race_rank_border #
 
 access_level_que_maps_help        Sets the access level required to use chat commands /mq add & remove.
 access_level_que_configs_help     Sets the access level required to use chat commands /cq add & remove.
