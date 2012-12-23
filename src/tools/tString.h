@@ -132,6 +132,11 @@ public:
     //! strips all whitespace from a string
     tString StripWhitespace( void ) const;
 
+    //! Converts the string to lowercase
+    tString ToLower(void) const;
+    //! Converts the string to uppercase
+    tString ToUpper(void) const;
+
     int PosWordRight(int start) const;          //! Computes the position of the next delimiter relative to start
     int PosWordLeft(int start) const;           //! Computes the position of the previous delimiter relative to start
     int RemoveWordRight(int start);             //! Remove word right according to the delimiters

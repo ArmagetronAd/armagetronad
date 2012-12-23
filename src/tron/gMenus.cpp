@@ -1040,6 +1040,11 @@ void sg_PlayerMenu(int Player){
                       "$player_name_help",
                       p->name, 16);
 
+    uMenuItemString tn(&playerMenu,
+                      "$player_teamname_text",
+                      "$player_teamname_help",
+                      p->teamname, 16);
+
     playerMenu.Enter();
 
     for(i=MAX_INSTANT_CHAT-1; i>=0; i--)

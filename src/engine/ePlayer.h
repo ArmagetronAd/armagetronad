@@ -91,6 +91,7 @@ public:
     tString    name;                 // the player's screen name
     tString    globalID;             // the global ID of the player in user@authority form
     // REAL	   rubberstatus;
+    tString     teamname;
     bool       centerIncamOnTurn;
     bool       wobbleIncam;
     bool       autoSwitchIncam;
@@ -121,6 +122,7 @@ public:
     virtual ~ePlayer();
 
     virtual const char *Name() const{return name;}
+    virtual const char *Teamname() const{return teamname;}
 
     virtual bool Act(uAction *act,REAL x);
 
@@ -287,6 +289,7 @@ public:
 
     int    pID;
     // REAL	rubberstatus;
+    tString teamname;
     tArray<tString> lastSaid;
     tArray<nTimeRolling> lastSaidTimes;
     //	void SetLastSaid(tString ls);
@@ -326,17 +329,19 @@ public:
     // team management
     bool TeamChangeAllowed( bool informPlayer = false ) const; //!< is this player allowed to change teams?
     void SetTeamChangeAllowed(bool allowed) {allowTeamChange_ = allowed;} //!< set if this player should always be allowed to change teams
-    eTeam* NextTeam()    const { return nextTeam; }				// return the team I will be next round
-    eTeam* CurrentTeam() const { return currentTeam; }		// return the team I am in
+    eTeam * NextTeam()    const { return nextTeam; }				// return the team I will be next round
+    eTeam * CurrentTeam() const { return currentTeam; }		// return the team I am in
     int  TeamListID() const { return teamListID; }		// return my position in the team
     int  ListID() const { return listID; }              // return my position in the player's list
     void SetShuffleWish( int pos ); 	                 //!< sets a desired team position
 
-    void FindDefaultTeam();									// look for a good default team for us
-    void SetTeamForce(eTeam* team );                 	// register me in the given team without checks
-    void SetTeam(eTeam* team);          	// register me in the given team (callable on the server)
+    eTeam * FindDefaultTeam();                                   // find a good default team for us
+    void SetDefaultTeam();                                              // register me in a good default team
+    void SetTeamForce(eTeam* team );            // register me in the given team without checks
+    void SetTeam(eTeam* team);                  // register me in the given team (callable on the server)
     void SetTeamWish(eTeam* team); 				// express the wish to be part of the given team (always callable)
-    void UpdateTeamForce();							// update team membership without checks
+    void SetTeamname(const char *);             // set teamname to be used for my own team
+    void UpdateTeamForce();						// update team membership without checks
     void UpdateTeam();							// update team membership
 
     eTeamSet const & GetInvitations() const ;   //!< teams this player is invited to

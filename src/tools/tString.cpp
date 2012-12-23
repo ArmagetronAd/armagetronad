@@ -1570,6 +1570,28 @@ tString tString::StripWhitespace( void ) const
     return toReturn;
 }
 
+//! @return a string where all characters are converted to lowercase. "Hello World!" -> "hello world!"
+tString tString::ToLower(void) const
+{
+    tString ret(*this);
+    for( int i = ret.Len()-2; i >= 0; --i )
+    {
+        ret[i] = tolower( ret[i] );
+    }
+    return ret;
+}
+
+//! @return a string where all characters are converted to uppercase. "Hello World!" -> "HELLO WORLD!"
+tString tString::ToUpper(void) const
+{
+    tString ret(*this);
+    for( int i = ret.Len()-2; i >= 0; --i )
+    {
+        ret[i] = toupper( ret[i] );
+    }
+    return ret;
+}
+
 
 
 //static const char delimiters[] = "`~!@#$%^&*()-=_+[]\\{}|;':\",./<>? ";

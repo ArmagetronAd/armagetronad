@@ -647,6 +647,25 @@ void tConfItemBase::WriteAllToFile()
     }
 }
 
+tString tConfItemBase::FindConfigItem(tString name)
+{
+    tConfItemMap & confmap = ConfItemMap();
+    for(tConfItemMap::iterator iter = confmap.begin(); iter != confmap.end() ; ++iter)
+    {
+        tConfItemBase * ci = (*iter).second;
+        tString command;
+        command << ci->title.ToLower();
+        if (command.Contains(name.ToLower()))
+        {
+            if (command.StartsWith(name.ToLower()))
+            {
+                return ci->title;
+            }
+        }
+    }
+    return tString("");
+}
+
 static void sg_ListAllCommands(std::istream &s)
 {
     tConfItemBase::WriteAllToFile();

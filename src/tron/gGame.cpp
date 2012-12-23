@@ -408,7 +408,7 @@ class tSettingMapQueing: public tConfItemBase
                 {
                     tOutput Output;
                     Output.SetTemplateParameter(1, item);
-                    Output << "$map_queing_file_not_found";
+                    Output << "$map_queuing_file_not_found";
                     sn_ConsoleOut(Output);
                 }
                 else

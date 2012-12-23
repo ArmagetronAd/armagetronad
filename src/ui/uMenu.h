@@ -4,7 +4,7 @@
 
 ArmageTron -- Just another Tron Lightcycle Game in 3D.
 Copyright (C) 2000  Manuel Moos (manuel@moosnet.de)
-Copyright (C) 2004  Armagetron Advanced Team (http://sourceforge.net/projects/armagetronad/) 
+Copyright (C) 2004  Armagetron Advanced Team (http://sourceforge.net/projects/armagetronad/)
 
 **************************************************************************
 
@@ -21,7 +21,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -67,7 +67,7 @@ protected:
     REAL YPos(int num);
 public:
     static bool          wrap;
-    
+
     // different quick exit types
     enum QuickExit
     {
@@ -135,6 +135,10 @@ protected:
     //! marks the menu for exit
     virtual void OnExit();
 
+    int GetNextSelectable(int start);
+    int GetPrevSelectable(int start);
+
+
     //! called every frame before the menu is rendered
     virtual void OnRender();
 };
@@ -175,7 +179,7 @@ public:
     }
 
     //! called when the menu item is selected, the incoming parameter says
-    //! whether help should be displayed, the function returns true if 
+    //! whether help should be displayed, the function returns true if
     //! the menu code itself should handle the display or whether the menu item
     //! does that.
     virtual bool DisplayHelp( bool display, REAL y, REAL alpha ){return display;}
@@ -202,6 +206,8 @@ public:
     virtual REAL SpaceRight(){return 0;}
 
     int GetID(){return idnum;}
+
+    virtual bool IsSelectable(){return true;};
 
 protected:
     void SetColor( bool selected, REAL alpha );            //!< Sets the color of text output for this menuitem

@@ -127,11 +127,6 @@ cycle_smooth_min_speed_help			Minimum speed of smooth correction relative to cyc
 cycle_smooth_threshold_help			Only syncs that differ from your position by less than this amount (measured in speed) will be handled smoothly, bigger differences will be applied instantly.
 cycle_max_refcount_help				Maximum allowed reference count on cycles before they self destruct. This setting is to protect against performance related DOS attacks.
 
-cycle_rubber_deplete_self_help   (0, 1) If set to 1, player's rubber will decrease by hitting their own tails.
-cycle_rubber_deplete_team_help   (0, 1) If set to 1, player's rubber will decrease by hitting their team tails.
-cycle_rubber_deplete_enemy_help  (0, 1) If set to 1, player's rubber will decrease by hitting their enemy's tails.
-cycle_rubber_deplete_rim_help    (0, 1) If set to 1, player's rubber will decrease by hitting the boundray walls.
-
 #********************************************
 #********************************************
 #
@@ -367,9 +362,9 @@ idle_kick_time_help                 Time in seconds after which an inactive play
 idle_kick_exempt_help               Exempt the access_level from being idle kicked. USAGE: IDLE_KICK_EXEMPT [access_level]
 keep_player_slot_help               If set to 1, every time the server gets full, an unworthy spectator is kicked.
 
-respawn_time_help                   Seconds greater than 0 makes sure any dead player will be respawned within that time of them being dead. Default: -1\n
-respawn_player_help                 Respawns a player that had been killed.\nUSAGE: RESPAWN_PLAYER <player> <xpos> <ypos> <xdir> <ydir>.\n
-respawn_all_help                    Respawns all players that were killed during the round at a random spot.\n
+respawn_time_help                   Seconds greater than 0 makes sure any dead player will be respawned within that time of them being dead. Default: -1.
+respawn_player_help                 Respawns a player that had been killed.\nUSAGE: RESPAWN_PLAYER <player> <xpos> <ypos> <xdir> <ydir>.
+respawn_all_help                    Respawns all players that were killed during the round at a random spot.
 
 #********************************************
 #********************************************
@@ -380,6 +375,7 @@ respawn_all_help                    Respawns all players that were killed during
 #********************************************
 
 player_name_confitem_help	Player name
+player_teamname_confitem_help   Team name
 player_user_confitem_help	Global player ID
 auto_login_confitem_help	Should this player automatically request authentication?
 hide_identity_confitem_help Should this player hide his ID?
@@ -1850,6 +1846,9 @@ player_authenticate_action  Authentication requests have been sent to the server
 player_name_text		Name:
 player_name_help		The ... in "Winner: ... ". Use cursor <left>/<right>, delete, backspace and all the other keys.
 
+player_teamname_text    Teamname:
+player_teamname_help    Use cursor <left>/<right>, delete, backspace and all the other keys.
+
 player_global_id_text		Global ID:
 player_global_id_help		If you have one, enter your global player ID here. If you have an account on the forums at forums.armagetronad.net, your ID will be your account name, followed by "@forums". Accounts on other community sites may give you a different ID.
 
@@ -1953,6 +1952,9 @@ player_camera_autoin_help	On: the smartcam switches to internal camera if you ar
 # team menu
 team_menu_title			Team Menu
 team_menu_help			Let the players change their teams or created new teams
+
+team_menu_info_current_team     Current team: \1
+team_menu_info_next_team        Next team: \1
 
 team_menu_player_title		Choose team for \1
 team_menu_player_help		Let this player make team related decisions
@@ -2499,7 +2501,7 @@ player_kill_collapse        \1 was eradicated by its collapsing zone.\n
 player_win_hole             \1 got \2 points for a sacrifice for the good of the team.\n
 player_lose_hole            0xffff00ZOMG! 0xff7f00HOLER!!1!!0xRESETT \1 lost \2 points for being a cheap ass lamer.\n
 player_win_command          \1 was declared the winner of the round!\n
-declare_round_winner_help  Declares round winner. USAGE: DECLARE_ROUND_WINNER [player].\n
+declare_round_winner_help  Declares round winner. USAGE: DECLARE_ROUND_WINNER [player].
 
 player_blastzone_score      \1 exploded on a blastzone and lost \2 points.\n
 
@@ -2545,6 +2547,7 @@ player_left_spectator    0xff7f7fSpectator \1 0xff7f7fleft.\n
 player_left_game		\1 was discarded with \2 points.\n
 player_leaving_game		\1 0xff7f7fleft the game.\n
 player_renamed			\2 renamed to \1.\n
+player_renamed_teamname \2 changed teamname to \1.\n
 player_got_renamed		\2 has been renamed to \1.\n
 player_will_be_renamed		\2 will be renamed to \1.\n
 player_rename_rejected_votekick  \1 0xffffffis not allowed to rename to \2 0xffffffright now to avoid confusion with kick votes.\n
@@ -2581,6 +2584,7 @@ player_creates_team		\1 founded \2.\n
 player_nocreate_team		\1 cannot currently create a new team.\n
 player_nojoin_team		\1 cannot currently join \2.\n
 player_not_on_team      You are not on a team.\n
+team_renamed                    \1 renamed it's team to \2.\n
 player_team_message     Teammates
 player_spectator_message Spectators
 no_real_teams           No teams with more than one player.\n
@@ -3221,7 +3225,30 @@ ban_user_list_help            Gives a list of banned users.
 md5_prefix_help               Extra hash prefix for local accounts used to scramble the password
 md5_suffix_help               Extra hash suffix for local accounts used to scramble the password
 
-global_id_help                If set to 1, Global IDs (Armathentication) will be enabled on this server. 
+global_id_help                If set to 1, Global IDs (Armathentication) will be enabled on this server.
+
+# RACE SETTINGS / ANIMUSON MODS / LOVER$BOY's ADDITIONS
+race_timer_enabled_help		            (0 = Disable, 1 = Enable) race timer. Don't change during round.
+race_end_delay_help		                Number of seconds to give players to finish after target reached
+race_score_deplete_help               Number the score depletes by everytime a player enters the win zone.
+race_score_type_help		              0-No sorting; 1-Sort by best score; 2-sort by best time.
+race_log_time_help                    If enabled, it displays the reached time and the position of arrival.
+player_reach_race		                  \1 0xfffffffinished with \2 points in \3 seconds.\n
+player_reach_race_first               \1 0xfffffffinished 1st in \2 seconds.\n
+player_reach_race_time                \2| \1 0xfffffffinished \3 s behind 1st.\n
+player_personal_best_reach_time       New personal record! Your new time record is \1 seconds.\n
+player_message_race_rank              Your rank is \1 with a time of \2.\n
+player_race_record_search_found       \1 is ranked \2 with a best time of \3 seconds.\n
+player_race_record_search_not_found   0xff0000The search term \1 couldn't be found in the racing records.\n
+player_race_record_search_many_found  0xff0000The search term \1 has found many matches. Be more specific.\n
+
+race_ranks_personal_message Your current position for 
+race_rank_title_message Top \1 players for 
+race_rank_title_name Ranks
+race_rank_title_player_name Players
+race_rank_title_score_name Scores
+race_rank_title_time_name Times
+race_rank_border # 
 
 access_level_substitute_denied  Required access level to substitute is "\1", you only have "\2".\n
 substitute_message_usage        Usage: /substitute <user out ID or name> <user in ID or name>\n
@@ -3322,50 +3349,25 @@ cycle_target_timeout         You fail core dumping your target \1 in time.\n
 cycle_target_cancel          Your target assignment has been cancelled by server.\n
 
 ## MAP/CONFIG _QUEING commands and helping hints - LOVER$BOY's additions
-map_queing_help                     Stores map that exists in MAP_ROTATION. Stops rotation temporarly to complete the listed maps.
-map_queing_stored_file_found        Map file \1 has already been stored in list in \2 order. This addition has been ignored.\n
-map_queing_file_stored              Map file \1 has successfully been added to the que..\n
-map_queing_file_removed             Map file \1 has successfully been removed from the que by \2.\n 
-map_queing_file_not_found           0xff0000Search term \1 couldn't be found in MAP_ROTATION.\n
-map_queing_que_file_not_found       0xff0000Search term \1 couldn't be found in the MAP_QUEING.\n
-map_queing_found_toomanyfiles       0xff0000Search term \1 found many matches in MAP_ROTATION. Be more specific.\n
-map_queing_is_empty                 Map que is now empty. Normal rotation will resume from next round or match.\n
-map_queing_required_level           Map queing command \2 requires level is \1. You do not have that access level.\n         
+map_queueing_help                   Stores map that exist in MAP_ROTATION. Stops rotation temporarly to complete the listed maps.
+map_queueing_stored_file_found        Map file \1 has already been stored in list in \2 order. This addition has been ignored.\n
+map_queueing_file_stored              Map file \1 has successfully been added to the que..\n
+map_queueing_file_removed             Map file \1 has successfully been removed from the que by \2.\n 
+map_queueing_file_not_found           0xff0000Search term \1 couldn't be found in MAP_ROTATION.\n
+map_queueing_que_file_not_found       0xff0000Search term \1 couldn't be found in the MAP_QUEUEING.\n
+map_queueing_found_toomanyfiles       0xff0000Search term \1 found many matches in MAP_ROTATION. Be more specific.\n
+map_queueing_is_empty                 Map que is now empty. Normal rotation will resume from next round or match.\n
+map_queueing_required_level           Map queing command \2 requires level is \1. You do not have that access level.\n         
 
-config_queing_help                  Stores config that exists in CONFIG_ROTATION. Stops rotation temporarly to complete the listed maps.
-config_queing_stored_file_found     Config file \1 has already been stored in list in \2 order. This addition has been ignored.\n
-config_queing_file_stored           Config file \1 has successfully been added to the que.\n
-config_queing_file_removed          Config file \1 has successfully been removed from the que by \2.\n
-config_queing_file_not_found        0xff0000Search term \1 couldn't be found in the CONFIG_ROTATION.\n
-config_queing_que_file_not_found    0xff0000Search term \1 couldn't be found in the CONFIG_QUEING.\n
-config_queing_found_toomanyfiles    0xff0000Search term \1 found many matches in CONFIG_ROTATION. Be more specific.\n
-config_queing_is_empty              Config que is now empty. Normal rotation will resume from next round or match.\n
-config_queing_required_level        Config queing command \2 requires level is \1. You do not have that access level.\n
-
-# RACE SETTINGS / ANIMUSON MODS / LOVER$BOY's ADDITIONS
-race_timer_enabled_help		            (0 = Disable, 1 = Enable) race timer. Don't change during round.
-race_end_delay_help		                Number of seconds to give players to finish after target reached
-race_score_deplete_help               Number the score depletes by everytime a player enters the win zone.
-race_score_type_help		              0-No sorting; 1-Sort by best score; 2-sort by best time.
-race_log_time_help                    If enabled, it displays the reached time and the position of arrival.
-race_finish_kill_help                 If set to 1, kill the players as soon as they cross the finish line.
-race_points_type_help                 0 - Gain points by SCORE_RACE_FINISH, 1 - Gain points by RACE_SCORE_DEPLETE.
-player_reach_race		                  \1 0xfffffffinished with \2 points in \3 seconds.\n
-player_reach_race_first               \1 0xfffffffinished 1st in \2 seconds.\n
-player_reach_race_time                \2| \1 0xfffffffinished \3 s behind 1st.\n
-player_personal_best_reach_time       New personal record! Your new time record is \1 seconds.\n
-player_message_race_rank              Your rank is \1 with a time of \2.\n
-player_race_record_search_found       \1 is ranked \2 with a best time of \3 seconds.\n
-player_race_record_search_not_found   0xff0000The search term \1 couldn't be found in the racing records.\n
-player_race_record_search_many_found  0xff0000The search term \1 has found many matches. Be more specific.\n
-
-race_ranks_personal_message Your current position for 
-race_rank_title_message Top \1 players for 
-race_rank_title_name Ranks
-race_rank_title_player_name Players
-race_rank_title_score_name Scores
-race_rank_title_time_name Times
-race_rank_border #
+config_queueing_help                  Stores config that exists in CONFIG_ROTATION. Stops rotation temporarly to complete the listed maps.
+config_queueing_stored_file_found     Config file \1 has already been stored in list in \2 order. This addition has been ignored.\n
+config_queueing_file_stored           Config file \1 has successfully been added to the que.\n
+config_queueing_file_removed          Config file \1 has successfully been removed from the que by \2.\n
+config_queueing_file_not_found        0xff0000Search term \1 couldn't be found in the CONFIG_ROTATION.\n
+config_queueing_que_file_not_found    0xff0000Search term \1 couldn't be found in the CONFIG_QUEUEING.\n
+config_queueing_found_toomanyfiles    0xff0000Search term \1 found many matches in CONFIG_ROTATION. Be more specific.\n
+config_queueing_is_empty              Config que is now empty. Normal rotation will resume from next round or match.\n
+config_queueing_required_level        Config queing command \2 requires level is \1. You do not have that access level.\n
 
 access_level_que_maps_help        Sets the access level required to use chat commands /mq add & remove.
 access_level_que_configs_help     Sets the access level required to use chat commands /cq add & remove.

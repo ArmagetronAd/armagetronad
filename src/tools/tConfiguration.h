@@ -273,6 +273,7 @@ public:
     static void DocAll(std::ostream &s);
     static int AccessLevel(std::istream &s); //! Returns access level needed for command -1 if command not found
     static void WriteAllToFile();
+    static tString FindConfigItem(tString name);
 
     // helper functions for files (use these, they manage recording and playback properly)
     enum SearchPath

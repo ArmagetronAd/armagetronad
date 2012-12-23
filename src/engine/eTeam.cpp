@@ -238,7 +238,7 @@ void eTeam::UpdateAppearance()
         oldest = OldestAIPlayer();
     }
 
-    // vote on team name: color or leader?
+    /*// vote on team name: color or leader?
     int voteName = 0;
 
     int i;
@@ -251,7 +251,9 @@ void eTeam::UpdateAppearance()
     bool nameTeamColor = players.Len() > 1 && ( voteName * 2 < players.Len() || !oldest );
 
     if ( !IsHuman() )
-        nameTeamColor = false;
+        nameTeamColor = false;*/
+    bool nameTeamColor = players.Len() > 1 && (!oldest || oldest->teamname.Len()<=1 || !oldest->nameTeamAfterMe);
+
     if ( !se_allowTeamNameColor )
         nameTeamColor = false;
     if ( !se_allowTeamNamePlayer )
@@ -259,6 +261,7 @@ void eTeam::UpdateAppearance()
 
     nameTeamColor = NameTeamAfterColor ( nameTeamColor );
 
+    tString updateName;
     if ( oldest )
     {
         if ( nameTeamColor )
@@ -267,7 +270,8 @@ void eTeam::UpdateAppearance()
             tOutput newname;
             newname << &se_team_name[ colorID ][0];
 
-            name = newname;
+            //name = newname;
+            updateName = newname;
 
             r = se_team_rgb[colorID][0];
             g = se_team_rgb[colorID][1];
@@ -275,28 +279,44 @@ void eTeam::UpdateAppearance()
         }
         else
         {
-            // let oldest player own a human team
-            if ( IsHuman() )
+            // let oldest own the team
+            if ( players.Len() > 1 )
             {
-                if ( players.Len() > 1 )
+                if ( oldest->IsHuman() )
                 {
-                    if ( sn_GetNetState() != nSERVER )
-                        oldest->UpdateName();
-                    tOutput newname;
-                    newname.SetTemplateParameter( 1, oldest->GetName() );
-                    newname << "$team_owned_by";
-
-                    name = newname;
+                    // did the player set a custom teamname ?
+                    if (oldest->teamname.Len()>1)
+                    {
+                        // Use player's custom teamname
+                        updateName = oldest->teamname;
+                    }
+                    else
+                    {
+                        // name team after first/oldest player
+                        tOutput newname;
+                        newname.SetTemplateParameter( 1, oldest->GetName() );
+                        newname << "$team_owned_by";
+                        updateName = newname;
+                    }
                 }
                 else
                 {
-                    name = oldest->GetName();
+                    // name team after oldest bot
+                    tOutput newname;
+                    newname.SetTemplateParameter( 1, oldest->GetName() );
+                    newname << "$team_ai";
+                    updateName = newname;
                 }
             }
             else
             {
-                // it's the AI team
-                name = tOutput("$team_ai");
+                // did the player set a custom teamname ?
+                if (oldest->teamname.Len()>1)
+                    // use custom teamname
+                    updateName = oldest->teamname;
+                else
+                    // use player name as teamname
+                    updateName = oldest->GetUserName();
             }
 
             r = oldest->r;
@@ -306,7 +326,7 @@ void eTeam::UpdateAppearance()
             // update colored player names
             if ( sn_GetNetState() != nSERVER )
             {
-                for ( i = players.Len()-1; i>=0; --i )
+                for ( int i = players.Len()-1; i>=0; --i )
                 {
                     players(i)->UpdateName();
                 }
@@ -319,6 +339,31 @@ void eTeam::UpdateAppearance()
         name = tOutput("$team_empty");
         r = g = b = 7;
         empty = true;
+    }
+
+    // if the name has been changed then update it
+    if (name!=updateName)
+    {
+        // only display a message if
+        // the oldest player changed the name of the team
+        // the server also sets the teamname sometimes
+        if(sn_GetNetState()!=nCLIENT && oldest)
+        {
+            tOutput message;
+            tColoredString name;
+            name << *oldest;
+            name << tColoredString::ColorString(1,1,1);
+            message.SetTemplateParameter(1, name);
+
+            tColoredString resetColor;
+            resetColor << tColoredString::ColorString(r,g,b);
+            resetColor << updateName;
+            resetColor << tColoredString::ColorString(1,1,1);
+            message.SetTemplateParameter(2, resetColor);
+            message << "$team_renamed";
+            sn_ConsoleOut(message);
+        }
+        name = updateName;
     }
 
     tString oldNameFiltered = ePlayerNetID::FilterName(oldName);
@@ -1226,7 +1271,10 @@ void eTeam::RemovePlayer ( ePlayerNetID* player )
 // see if the given player may join this team
 bool eTeam::PlayerMayJoin( const ePlayerNetID* player ) const
 {
-    int i;
+    //int i;
+        // a player who is already on the team can "join" the team
+    if (player->currentTeam==this)
+        return true;
 
     // AI players are always allowed to join, the logic that tries to put the AI into
     // this team is responsible for checking
@@ -1255,7 +1303,7 @@ bool eTeam::PlayerMayJoin( const ePlayerNetID* player ) const
             minP = 10000;
     }
 
-    for ( i = teams.Len()-1; i>=0; --i )
+    for ( int i = teams.Len()-1; i>=0; --i )
     {
         eTeam *t = teams(i);
 
@@ -1288,7 +1336,7 @@ bool eTeam::PlayerMayJoin( const ePlayerNetID* player ) const
             for ( std::set< eTeam const * >::iterator iter = swapTargets.begin(); iter != swapTargets.end(); ++iter )
             {
                 eTeam const * team = *iter;
-                for ( i = team->players.Len()-1; i>=0; --i )
+                for ( int i = team->players.Len()-1; i>=0; --i )
                 {
                     ePlayerNetID * otherPlayer = team->players(i);
                     eTeam * swapTeam = otherPlayer->NextTeam();

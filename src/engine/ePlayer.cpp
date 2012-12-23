@@ -1165,6 +1165,12 @@ ePlayer::ePlayer(){
                                        name));
 
     confname.Clear();
+    confname << "TEAMNAME_"<< id+1;
+    StoreConfitem(tNEW(tConfItemLine) (confname,
+                                        "$team_name_confitem_help",
+                                        teamname));
+
+    confname.Clear();
     confname << "USER_"<< id+1;
     StoreConfitem(tNEW(tConfItemLine) (confname,
                                        "$player_user_confitem_help",
@@ -3791,6 +3797,11 @@ void handle_chat( nMessage &m )
                         se_ChatMe( p, s, spam );
                         return;
                     }
+                    else if (command == "/teamname") {
+                        tString teamname(((const char*)say)+6);
+                        p->SetTeamname(teamname);
+                        return;
+                    }
                     else if (command == "/teamleave") {
                         spam.lastSaidType_ = eChatMessageType_Command;
                         se_ChatTeamLeave( p );
@@ -4271,6 +4282,73 @@ public:
             MyMenu()->Exit();
             return true;
         }
+        else if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_TAB)
+        {
+            if (*content != "")
+            {
+                tString chattext;
+                chattext << *content;
+
+                if (chattext.StartsWith("/"))
+                {
+                    int pos = 0;
+                    tString command = chattext.ExtractNonBlankSubString(pos);
+                    if ((command != "") && ((command == "/msg") || (command == "/shout")))
+                    {
+                        tString player_name = chattext.ExtractNonBlankSubString(pos);
+                        for(int i = 0; i < se_PlayerNetIDs.Len(); i++)
+                        {
+                            ePlayerNetID *p = se_PlayerNetIDs[i];
+                            if (p)
+                            {
+                                tString filtered_name = ePlayerNetID::FilterName(p->GetName());
+                                tString filtered_search = ePlayerNetID::FilterName(player_name);
+                                if (filtered_name.Contains(filtered_search))
+                                {
+                                    *content = "";
+                                    if (command == "/msg")
+                                        *content << "/msg " << p->GetName() + " ";
+                                    else if (command == "/shout")
+                                        *content << "/shout " << p->GetName() + " ";
+                                    cursorPos = p->GetName().Len() * 2;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    else if ((command != "") && (command == "/admin"))
+                    {
+                        tString command_name = ePlayerNetID::FilterName(chattext.ExtractNonBlankSubString(pos));
+                        tString found_command = tConfItemBase::FindConfigItem(command_name.ToLower());
+                        if (found_command != "")
+                        {
+                            *content = "";
+                            *content << "/admin " << found_command + " ";
+                            cursorPos = found_command.Len() * 2;
+                        }
+                    }
+                }
+                else
+                {
+                    for(int i = 0; i < se_PlayerNetIDs.Len(); i++)
+                    {
+                        ePlayerNetID *p = se_PlayerNetIDs[i];
+                        if (p)
+                        {
+                            tString filtered_name = ePlayerNetID::FilterName(p->GetName());
+                            tString filtered_search = ePlayerNetID::FilterName(chattext);
+                            if (filtered_name.Contains(filtered_search))
+                            {
+                                *content = "";
+                                *content = p->GetName() + ": ";
+                                cursorPos = p->GetName().Len() * 2;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
         else if (e.type==SDL_KEYDOWN &&
                  uActionGlobal::IsBreakingGlobalBind(e.key.keysym.sym))
         {
@@ -4656,6 +4734,7 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), timeC
         ePlayer *P = ePlayer::PlayerConfig(p);
         if (P){
             SetName( P->Name() );
+            teamname = P->Teamname();
             r=   P->rgb[0];
             g=   P->rgb[1];
             b=   P->rgb[2];
@@ -4713,6 +4792,7 @@ ePlayerNetID::ePlayerNetID(nMessage &m):nNetObject(m),listID(-1), teamListID(-1)
     r = g = b = 15;
 
     nameTeamAfterMe = false;
+    teamname = "";
 
     substitute          = NULL;
 
@@ -6038,6 +6118,7 @@ void ePlayerNetID::WriteSync(nMessage &m){
 
     m << favoriteNumberOfPlayersPerTeam;
     m << nameTeamAfterMe;
+    m << teamname;
 }
 
 extern float sg_flagDropTime;
@@ -6356,6 +6437,7 @@ void ePlayerNetID::ReadSync(nMessage &m){
             {
                 if ( newCurrentTeam )
                 {
+                    // automatically removed player from currentTeam
                     newCurrentTeam->AddPlayerDirty( this );
                     newCurrentTeam->UpdateProperties();
                 }
@@ -6364,7 +6446,7 @@ void ePlayerNetID::ReadSync(nMessage &m){
                     currentTeam->RemovePlayer( this );
                 }
             }
-
+            // update nextTeam
             nextTeam = newNextTeam;
 
             // update properties of the old current team in all cases
@@ -6382,6 +6464,11 @@ void ePlayerNetID::ReadSync(nMessage &m){
 
         m >> favoriteNumberOfPlayersPerTeam;
         m >> nameTeamAfterMe;
+    }
+
+    if (!m.End())
+    {
+        m >> teamname;
     }
     // con << "Player info updated.\n";
 
@@ -6406,7 +6493,8 @@ void ePlayerNetID::ReadSync(nMessage &m){
 #ifndef KRAWALL_SERVER
         GetScoreFromDisconnectedCopy();
 #endif
-        FindDefaultTeam();
+        //FindDefaultTeam();
+        SetDefaultTeam();
 
         RequestSync();
     }
@@ -7133,7 +7221,8 @@ void ePlayerNetID::Update(){
                 lastTime = tSysTimeFloat();
 
                 p=tNEW(ePlayerNetID) (i);
-                p->FindDefaultTeam();
+                //p->FindDefaultTeam();
+                p->SetDefaultTeam();
                 p->RequestSync();
             }
 
@@ -7164,6 +7253,7 @@ void ePlayerNetID::Update(){
 
                 sg_ClampPingCharity();
                 p->pingCharity=::pingCharity;
+                p->SetTeamname(local_p->Teamname());
 
                 // update spectator status
                 bool spectate = local_p->spectate;
@@ -7340,7 +7430,8 @@ void ePlayerNetID::Update(){
                     tJUST_CONTROLLED_PTR< eTeam > wish = player->NextTeam();
                     bool assignBack = se_assignTeamAutomatically;
                     se_assignTeamAutomatically = true;
-                    player->FindDefaultTeam();
+                    //player->FindDefaultTeam();
+                    player->SetDefaultTeam();
                     se_assignTeamAutomatically = assignBack;
                     player->SetTeamForce( wish );
 
@@ -7594,7 +7685,8 @@ void ePlayerNetID::RemoveChatbots()
             {
                 if ( !p->CurrentTeam() )
                 {
-                    p->FindDefaultTeam();
+                    //p->FindDefaultTeam();
+                    p->SetDefaultTeam();
                 }
             }
             else
@@ -7827,13 +7919,13 @@ bool ePlayerNetID::TeamChangeAllowed( bool informPlayer ) const {
 }
 
 // put a new player into a default team
-void ePlayerNetID::FindDefaultTeam( )
+void ePlayerNetID::SetDefaultTeam( )
 {
     // only the server should do this, the client does not have the full information on how to do do it right.
     if ( sn_GetNetState() == nCLIENT || !se_assignTeamAutomatically || spectating_ || !TeamChangeAllowed() )
         return;
 
-    static bool recursion = false;
+    /*static bool recursion = false;
     if ( recursion )
     {
         return;
@@ -7845,7 +7937,23 @@ void ePlayerNetID::FindDefaultTeam( )
         return;
     }
 
-    recursion = true;
+    recursion = true;*/
+
+    eTeam * defaultTeam = FindDefaultTeam();
+    if (defaultTeam)
+    SetTeamWish(defaultTeam);
+    if ( eTeam::NewTeamAllowed() )
+    CreateNewTeamWish();
+}
+
+// put a new player into a default team
+eTeam * ePlayerNetID::FindDefaultTeam( )
+{
+    //    if ( !IsHuman() )
+    //    {
+    //        SetTeam( NULL );
+    //        return;
+    //    }
 
     // find the team with the least number of players on it
     eTeam *min = NULL;
@@ -7861,13 +7969,19 @@ void ePlayerNetID::FindDefaultTeam( )
             min->PlayerMayJoin( this ) &&
             ( !eTeam::NewTeamAllowed() || ( min->NumHumanPlayers() > 0 && min->NumHumanPlayers() < favoriteNumberOfPlayersPerTeam ) )
        )
-        SetTeamWish( min );             // join the team
+        /*SetTeamWish( min );             // join the team
     else if ( eTeam::NewTeamAllowed() )
         CreateNewTeamWish();            // create a new team
 
     // yes, if all teams are full and no team creation is allowed, the player stays without team and will not be spawned.
 
-    recursion = false;
+    recursion = false;*/
+    {
+        // return the team
+        return min;
+    }
+    // return NULL to indicate no team was found => "create a new team" (?)
+    return NULL;
 }
 
 // register me in the given team (callable on the server)
@@ -7893,11 +8007,26 @@ void ePlayerNetID::SetTeam( eTeam* newTeam )
     }
 }
 
+// set teamname to be used for my own team
+void ePlayerNetID::SetTeamname(const char* newTeamname)
+{
+    teamname = newTeamname;
+    if (bool(currentTeam) && currentTeam->OldestHumanPlayer() &&
+        currentTeam->OldestHumanPlayer()->ID()==ID())
+    {
+        currentTeam->UpdateAppearance();
+    }
+}
+
 // register me in the given team (callable on the server)
 void ePlayerNetID::SetTeamForce( eTeam* newTeam )
 {
     // check if the team change is legal
-    tASSERT ( !newTeam || nCLIENT !=  sn_GetNetState() );
+    //tASSERT ( !newTeam || nCLIENT !=  sn_GetNetState() );
+
+#ifdef DEBUG
+    std::cout << "DEBUG: Player:" << this->GetName() << " SetTeamForce:" << ((newTeam)?(const char*)newTeam->Name():"NULL") << "\n";
+#endif
 
     nextTeam = newTeam;
 }
@@ -8014,7 +8143,8 @@ void ePlayerNetID::CreateNewTeam()
         {
             bool assignBack = se_assignTeamAutomatically;
             se_assignTeamAutomatically = true;
-            FindDefaultTeam();
+            //FindDefaultTeam();
+            SetDefaultTeam();
             se_assignTeamAutomatically = assignBack;
         }
 
@@ -8045,6 +8175,9 @@ const unsigned short NEW_TEAM   = 1;
 // express the wish to be part of the given team (always callable)
 void ePlayerNetID::SetTeamWish(eTeam* newTeam)
 {
+    if (NextTeam()==newTeam)
+        return;
+
     if ( nCLIENT ==  sn_GetNetState() && Owner() == sn_myNetID )
     {
         nMessage* m = NewControlMessage();
@@ -8053,6 +8186,9 @@ void ePlayerNetID::SetTeamWish(eTeam* newTeam)
         (*m) << newTeam;
 
         m->BroadCast();
+
+        // update local client data, should be ok (dangerous?, why?)
+        SetTeamForce( newTeam );
     }
     else
     {

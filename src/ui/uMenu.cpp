@@ -175,6 +175,9 @@ void uMenu::OnEnter(){
     static const REAL timeout=.5;
 #endif
 
+    // inverted logic (0 = last item! prev(0) = top most item)
+    selected = GetPrevSelectable(0);
+
     while (!exitFlag && !quickexit && !exitToMain){
         st_DoToDo();
         tAdvanceFrame();
@@ -330,7 +333,7 @@ void uMenu::OnEnter(){
             {
                 helpAlpha = 1;
             }
-            
+
             disphelp = helpAlpha > 0;
             if ( items[selected]->DisplayHelp( disphelp, menuBot, helpAlpha ) )
             {
@@ -384,28 +387,29 @@ void uMenu::HandleEvent( SDL_Event event )
                 break;
 
             case(SDLK_UP):
-                            lastkey=tSysTimeFloat();
-                selected++;
+                lastkey=tSysTimeFloat();
+                /*selected++;
                 if (selected>=items.Len())
                 {
                     if (wrap)
                         selected=0;
                     else
                         selected=items.Len()-1;
-                }
+                }*/
+                selected = GetNextSelectable(selected);
                 break;
 
             case(SDLK_DOWN):
                             lastkey=tSysTimeFloat();
-                selected--;
+                /*selected--;
                 if (selected<0)
                 {
                     if (wrap)
                         selected=items.Len()-1;
                     else
                         selected=0;
-                }
-
+                }*/
+                selected = GetPrevSelectable(selected);
                 break;
 
             case(SDLK_LEFT):
@@ -469,6 +473,48 @@ void uMenu::HandleEvent( SDL_Event event )
 
     su_inMenu = true;
 #endif
+}
+
+int uMenu::GetPrevSelectable(int start)
+{
+    int prev = start-1;
+    while (prev!=start)
+    {
+        if (prev<0)
+        {
+            if (wrap)
+                prev = items.Len()-1;
+            else
+                break;
+        }
+        if (items[prev]->IsSelectable())
+        {
+            return prev;
+        }
+        prev--;
+    }
+    return -1;
+}
+
+int uMenu::GetNextSelectable(int start)
+{
+    int next = start+1;
+    while (next!=start)
+    {
+        if (next>=items.Len())
+        {
+            if (this->wrap)
+                next = 0;
+            else
+                break;
+        }
+        if (items[next]->IsSelectable())
+        {
+            return next;
+        }
+        next++;
+    }
+    return -1;
 }
 
 #ifndef DEDICATED
@@ -589,7 +635,7 @@ void uMenuItem::DisplayText(REAL x,REAL y,const char *text,
         REAL tw = text_width;
         REAL th = text_height;
 
-        
+
 #if 0
         // the function that is called takes care of that
         REAL availw = 1.9f;
@@ -1167,7 +1213,7 @@ bool uMenu::IdleInput( bool processInput )
     SDL_Event event;
     uInputProcessGuard inputProcessGuard;
     while (!s_idleBackground && su_GetSDLInput(event))
-    {   
+    {
         switch (event.type)
         {
         case SDL_KEYDOWN:
@@ -1180,11 +1226,11 @@ bool uMenu::IdleInput( bool processInput )
                 break;
             default:
                 break;
-            }   
+            }
         default:
             break;
         }
-    }   
+    }
 
     return uMenu::quickexit != uMenu::QuickExit_Off;
 #endif
