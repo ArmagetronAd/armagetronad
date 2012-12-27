@@ -9,6 +9,8 @@
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 
+#include <vector>
+
 class eGrid;
 class gArena;
 class eCoord;
@@ -76,7 +78,8 @@ protected:
     void parseZone(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
     void parseWall(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
 
-    bool parseShapeCircle(eGrid *grid, xmlNodePtr cur, eCoord &zonePos, float &radius, float &growth, const xmlChar * keyword, gRealColor &zoneColor, bool &colorsExist, eCoord &zoneDir);
+    bool parseShapeCircle(eGrid *grid, xmlNodePtr cur, eCoord &zonePos, float &radius, float &growth, const xmlChar * keyword, gRealColor &zoneColor, bool &colorsExist, eCoord &zoneDir, bool &zoneInteract, std::vector<eCoord> &route);
+    void parseTeleportZone(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, eCoord &zoneJump, tString &zoneRelAbsStr, int &relJump, eCoord &ndir, REAL &reloc);
 
     void parseField(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
     void parseWorld(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword = NULL);

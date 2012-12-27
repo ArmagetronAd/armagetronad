@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -36,6 +36,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "nNetObject.h"
 #include "nSocket.h"
 #include "nServerInfo.h"
+#include "tDirectories.h"
 
 #include <memory>
 #include <string>
@@ -200,7 +201,7 @@ static int sn_UserID( nNetObject * o )
 class nLoginProcess;
 
 //! persistent information between login processes
-class nLoginPersistence: 
+class nLoginPersistence:
     public nMachineDecorator
 {
     friend class nLoginProcess;
@@ -222,7 +223,7 @@ class nLoginPersistence:
 
         return *ret;
     }
-    
+
     virtual void OnDestroy()
     {
         delete this;
@@ -324,7 +325,7 @@ public:
 private:
     //! pointer to the object we should so something with
     tJUST_CONTROLLED_PTR< T > object_;
-    
+
     //! the function to call
     void (T::*function_)();
 
@@ -401,13 +402,13 @@ public:
 
 
 //! manager for logon processes
-class nLoginProcess: 
-    public nMachineDecorator, 
+class nLoginProcess:
+    public nMachineDecorator,
     public nKrawall::nCheckResult,
     public nKrawall::nPasswordCheckData,
     public tReferencable< nLoginProcess, nMutex >
 {
-    // reference counting pointer 
+    // reference counting pointer
     typedef tJUST_CONTROLLED_PTR< nLoginProcess > SelfPointer;
 public:
     nLoginProcess( int userID )
@@ -467,14 +468,14 @@ public:
         // prepare failure report
         this->success = false;
         this->error = error;
-        
+
         Abort();
-        
+
         return false;
     }
 
-    // that function again triggers the following foreground action that queries 
-    // the credentials from the client. This object then goes to sleep, 
+    // that function again triggers the following foreground action that queries
+    // the credentials from the client. This object then goes to sleep,
     // waiting for a client answer or logout, whichever comes first.
     void QueryFromClient();
 
@@ -496,7 +497,7 @@ public:
     void Abort();
 private:
     // helper functions
-    
+
     // fetches info from remote authority
     bool FetchInfoFromAuthorityRemote();
 
@@ -522,7 +523,7 @@ private:
 
     //! address of socket receiving the login message
     nAddress serverSocketAddress;
-    
+
     //! address of login message sender
     tString peerAddress;
 
@@ -540,7 +541,7 @@ void nLoginProcess::FetchInfoFromAuthority()
     method.method = "bmd5";
     method.prefix = "";
     method.suffix = "";
-    
+
     if( !IsActive() )
     {
         Abort();
@@ -607,6 +608,8 @@ static bool sn_IsLegalSpecialChar( char c )
         return false;
     }
 }
+
+tString loginErrorLogFile("errors/login_error.txt");
 
 // fetches info from remote authority
 bool nLoginProcess::FetchInfoFromAuthorityRemote()
@@ -675,6 +678,13 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
                     }
                     else if ( !sn_IsLegalSpecialChar(c) )
                     {
+                        std::ofstream o;
+                        if (tDirectories::Var().Open(o, loginErrorLogFile, std::ios::app))
+                        {
+                            o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << " | Error: \n";
+                            o << tOutput( "$login_error_invalidurl_illegal_hostname", authority ) << "\n";
+                            o << "===========================================================\n\n";
+                        }
                         return ReportAuthorityError( tOutput( "$login_error_invalidurl_illegal_hostname", authority ) );
                     }
                 }
@@ -687,6 +697,13 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
                     }
                     else if ( !isdigit( c ) )
                     {
+                        std::ofstream o;
+                        if (tDirectories::Var().Open(o, loginErrorLogFile, std::ios::app))
+                        {
+                            o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << " | Error: \n";
+                            o << tOutput( "$login_error_invalidurl_illegal_port", authority ) << "\n";
+                            o << "===========================================================\n\n";
+                        }
                         return ReportAuthorityError( tOutput( "$login_error_invalidurl_illegal_port", authority ) );
                     }
                     else
@@ -701,6 +718,13 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
                     {
                         if ( slash )
                         {
+                            std::ofstream o;
+                            if (tDirectories::Var().Open(o, loginErrorLogFile, std::ios::app))
+                            {
+                                o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << " | Error: \n";
+                                o << tOutput( "$login_error_invalidurl_slash", authority ) << "\n";
+                                o << "===========================================================\n\n";
+                            }
                             return ReportAuthorityError( tOutput( "$login_error_invalidurl_slash", authority ) );
                         }
 
@@ -710,6 +734,13 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
                     {
                         if (!isalnum(c) && c != '.' && c != '~' && !sn_IsLegalSpecialChar(c) )
                         {
+                            std::ofstream o;
+                            if (tDirectories::Var().Open(o, loginErrorLogFile, std::ios::app))
+                            {
+                                o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << " | Error: \n";
+                                o << tOutput( "$login_error_invalidurl_illegal_path", authority ) << "\n";
+                                o << "===========================================================\n\n";
+                            }
                             return ReportAuthorityError( tOutput( "$login_error_invalidurl_illegal_path", authority )  );
                         }
 
@@ -734,15 +765,36 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
             }
             if ( slash )
             {
+                std::ofstream o;
+                if (tDirectories::Var().Open(o, loginErrorLogFile, std::ios::app))
+                {
+                    o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << " | Error: \n";
+                    o << tOutput( "$login_error_invalidurl_slash", authority ) << "\n";
+                    o << "===========================================================\n\n";
+                }
                 return ReportAuthorityError( tOutput( "$login_error_invalidurl_slash", authority ) );
             }
             if ( port == 80 )
             {
+                std::ofstream o;
+                if (tDirectories::Var().Open(o, loginErrorLogFile, std::ios::app))
+                {
+                    o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << " | Error: \n";
+                    o << tOutput( "$login_error_invalidurl_defaultport", authority ) << "\n";
+                    o << "===========================================================\n\n";
+                }
                 return ReportAuthorityError( tOutput( "$login_error_invalidurl_defaultport", authority ) );
             }
 
             if ( rawIP )
             {
+                std::ofstream o;
+                if (tDirectories::Var().Open(o, loginErrorLogFile, std::ios::app))
+                {
+                    o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << " | Error: \n";
+                    o << tOutput( "$login_error_invalidurl_rawip", authority ) << "\n";
+                    o << "===========================================================\n\n";
+                }
                 return ReportAuthorityError( tOutput( "$login_error_invalidurl_rawip", authority ) );
             }
 
@@ -790,9 +842,16 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
 
         if ( rc == -1 )
         {
+            std::ofstream o;
+            if (tDirectories::Var().Open(o, loginErrorLogFile, std::ios::app))
+            {
+                o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << " | Error: \n";
+                o << tOutput( "$login_error_invalidurl_notfound", authority ) << "\n";
+                o << "===========================================================\n\n";
+            }
             return ReportAuthorityError( tOutput( "$login_error_invalidurl_notfound", authority ) );
         }
-         
+
         tString id;
         answer >> id;
         tToLower(id);
@@ -804,27 +863,34 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
 
         if ( rc != 200 || id != "methods" )
         {
+            std::ofstream o;
+            if (tDirectories::Var().Open(o, loginErrorLogFile, std::ios::app))
+            {
+                o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << " | Error: \n";
+                o << tOutput( "$login_error_nomethodlist", authority, rc, id + " " + methods ) << "\n";
+                o << "===========================================================\n\n";
+            }
             return ReportAuthorityError( tOutput( "$login_error_nomethodlist", authority, rc, id + " " + methods ) );
         }
-       
 
-        method.method = nKrawall::nMethod::BestMethod( 
+
+        method.method = nKrawall::nMethod::BestMethod(
             methods,
             clientSupportedMethods
             );
-        
+
         // check whether a method can be found
         if ( method.method.Len() <= 1 )
         {
             return ReportAuthorityError(
-                tOutput( "$login_error_nomethod", 
+                tOutput( "$login_error_nomethod",
                          clientSupportedMethods,
                          nKrawall::nMethod::SupportedMethods(),
                          methods )
                 );
         }
     }
-        
+
     // fetch md5 prefix and suffix
     {
         std::ostringstream query;
@@ -832,22 +898,35 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
         query << "&method=" << nKrawall::EncodeString( method.method );
         std::ostringstream data;
         int rc = nKrawall::FetchURL( fullAuthority, query.str().c_str(), data );
-        
+
         if ( rc != 200 )
         {
             if ( rc == -1 )
             {
+                std::ofstream o;
+                if (tDirectories::Var().Open(o, loginErrorLogFile, std::ios::app))
+                {
+                    o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << " | Error: \n";
+                    o << tOutput( "$login_error_invalidurl_notfound", authority ) << "\n";
+                    o << "===========================================================\n\n";
+                }
                 return ReportAuthorityError( tOutput( "$login_error_invalidurl_notfound", authority ) );
             }
-            
+            std::ofstream o;
+            if (tDirectories::Var().Open(o, loginErrorLogFile, std::ios::app))
+            {
+                o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << " | Error: \n";
+                o << tOutput( "$login_error_nomethodproperties", authority, rc, data.str().c_str() ) << "\n";
+                o << "===========================================================\n\n";
+            }
             return ReportAuthorityError( tOutput( "$login_error_nomethodproperties", authority, rc, data.str().c_str() ) );
         }
-        
+
         // read the properties
         std::istringstream read( data.str() );
         method = nKrawall::nMethod( static_cast< char const * >( method.method ), read );
     }
-    
+
     return true;
 }
 
@@ -855,25 +934,25 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
 bool nLoginProcess::FetchInfoFromAuthorityLocal()
 {
     // try yo find a better method
-    if ( !nKrawall::nMethod::BestLocalMethod( 
+    if ( !nKrawall::nMethod::BestLocalMethod(
              clientSupportedMethods,
              method
              )
         )
     {
         return ReportAuthorityError(
-            tOutput( "$login_error_nomethod", 
+            tOutput( "$login_error_nomethod",
                      clientSupportedMethods,
                      nKrawall::nMethod::SupportedMethods(),
                      nKrawall::nMethod::SupportedMethods() )
             );
     }
-    
+
     return true;
 }
 
-// that function again triggers the following foreground action that queries 
-// the credentials from the client. This object then goes to sleep, 
+// that function again triggers the following foreground action that queries
+// the credentials from the client. This object then goes to sleep,
 // waiting for a client answer or logout, whichever comes first.
 void nLoginProcess::QueryFromClient()
 {
@@ -885,19 +964,19 @@ void nLoginProcess::QueryFromClient()
 
     // create a random salt value
     nKrawall::RandomSalt(salt);
-    
+
     // send the salt value and the username to the
     nMessage *m = tNEW(nMessage)(::nPasswordRequest);
     nKrawall::WriteSalt(salt, *m);
     *m << username;
     *m << static_cast<tString>(message);
     *m << nLoginPersistence::Find( userID ).userAuthFailedLastTime;
-    
+
     // write method info
     *m << method.method;
     *m << method.prefix;
     *m << method.suffix;
-    
+
     m->Send(userID);
 
     // well, then we wait for the answer.
@@ -908,7 +987,7 @@ void nLoginProcess::QueryFromClient()
 void nLoginProcess::ProcessClientAnswer( nMessage & m )
 {
     success = false;
-    
+
     // read password and username from remote
     nKrawall::ReadScrambledPassword(m, hash);
 
@@ -935,7 +1014,7 @@ void nLoginProcess::ProcessClientAnswer( nMessage & m )
     else
     {
         serverAddress = sn_GetMyAddress();
-        
+
         if ( method.method != "bmd5" )
         {
             con << "WARNING, client did not send the server address. Password checks may fail.\n";
@@ -956,7 +1035,7 @@ void nLoginProcess::ProcessClientAnswer( nMessage & m )
 
     // store peer address
     sn_GetAdr( m.SenderID(), peerAddress );
-  
+
     // and go on
     nMemberFunctionRunner::ScheduleMayBlock( *this, &nLoginProcess::Authorize, authority != "" );
 }
@@ -1017,7 +1096,7 @@ bool nLoginProcess::CheckServerAddress()
         // after all, that's the point of setting SERVER_DNS :)
         nAddress address;
         address.SetHostname( sn_GetMyDNSName() );
-        
+
         address.SetPort( serverSocketAddress.GetPort() );
 
         // transform back to string
@@ -1051,7 +1130,7 @@ void nLoginProcess::Authorize()
     if ( aborted )
     {
         success = false;
-        
+
         error = tOutput("$login_error_aborted");
     }
     else
@@ -1082,7 +1161,7 @@ void nLoginProcess::Authorize()
         tRecorder::Record( section, authority );
         tRecorder::Record( section, error );
     }
-    
+
     Abort();
 }
 
@@ -1103,13 +1182,13 @@ void nLoginProcess::Finish()
 
     // decorate console with correct sender ID
     nCurrentSenderID currentSender( userID );
-    
+
     // store success for next time
     nLoginPersistence::Find( userID ).userAuthFailedLastTime = !success;
 
     // remove this decorator from public view
     Remove();
-    
+
     if (S_LoginResultCallback)
         (*S_LoginResultCallback)( *this );
 
@@ -1135,7 +1214,7 @@ static void sn_Reset(){
 static nCallbackLoginLogout reset(&sn_Reset);
 
 #endif // KRAWALL_SERVER
-    
+
 void nAuthentication::HandlePasswordAnswer(nMessage& m)
 {
 #ifdef KRAWALL_SERVER
@@ -1149,7 +1228,7 @@ void nAuthentication::HandlePasswordAnswer(nMessage& m)
     }
 #endif
 }
-        
+
 // on the server: request user authentification from login slot
 bool nAuthentication::RequestLogin(const tString & authority, const tString& username, nNetObject & user, const tOutput& message )
 {

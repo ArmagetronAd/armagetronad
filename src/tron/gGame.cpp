@@ -332,10 +332,10 @@ static tConfItemFunc sg_resetRotationConfItemFunc( "RESET_ROTATION", sg_ResetRot
 static bool sg_resetRotationOnNewMatch = false;
 static tSettingItem< bool > sg_resetRotationOnNewMatchSettingItem( "RESET_ROTATION_ON_START_NEW_MATCH", sg_resetRotationOnNewMatch );
 
-class tSettingMapQueing: public tConfItemBase
+class tSettingMapqueueing: public tConfItemBase
 {
     public:
-        tSettingMapQueing( char const * name )
+        tSettingMapqueueing( char const * name )
         : tConfItemBase( name )
         {
         }
@@ -425,7 +425,7 @@ class tSettingMapQueing: public tConfItemBase
                                 tOutput Output;
                                 Output.SetTemplateParameter(1, mapName);
                                 Output.SetTemplateParameter(2, j+1);
-                                Output << "$map_queing_stored_file_found";
+                                Output << "$map_queueing_stored_file_found";
                                 sn_ConsoleOut(Output);
                                 found = true;
                                 break;
@@ -436,7 +436,7 @@ class tSettingMapQueing: public tConfItemBase
                             items_.Insert(mapName);
                             tOutput Output;
                             Output.SetTemplateParameter(1, mapName);
-                            Output << "$map_queing_file_stored";
+                            Output << "$map_queueing_file_stored";
                             sn_ConsoleOut(Output);
                         }
                     }
@@ -444,7 +444,7 @@ class tSettingMapQueing: public tConfItemBase
                     {
                         tOutput Output;
                         Output.SetTemplateParameter(1, item);
-                        Output << "$map_queing_found_toomanyfiles";
+                        Output << "$map_queueing_found_toomanyfiles";
                         sn_ConsoleOut(Output);
                     }
                 }
@@ -465,10 +465,10 @@ class tSettingMapQueing: public tConfItemBase
         int current_;
 };
 
-class tSettingConfQueing: public tConfItemBase
+class tSettingConfqueueing: public tConfItemBase
 {
     public:
-        tSettingConfQueing( char const * name )
+        tSettingConfqueueing( char const * name )
         : tConfItemBase( name )
         {
         }
@@ -541,7 +541,7 @@ class tSettingConfQueing: public tConfItemBase
                 {
                     tOutput Output;
                     Output.SetTemplateParameter(1, item);
-                    Output << "$config_queing_file_not_found";
+                    Output << "$config_queueing_file_not_found";
                     sn_ConsoleOut(Output);
                 }
                 else
@@ -558,7 +558,7 @@ class tSettingConfQueing: public tConfItemBase
                                 tOutput Output;
                                 Output.SetTemplateParameter(1, configName);
                                 Output.SetTemplateParameter(2, j+1);
-                                Output << "$config_queing_stored_file_found";
+                                Output << "$config_queueing_stored_file_found";
                                 sn_ConsoleOut(Output);
                                 found = true;
                                 break;
@@ -569,7 +569,7 @@ class tSettingConfQueing: public tConfItemBase
                             items_.Insert(configName);
                             tOutput Output;
                             Output.SetTemplateParameter(1, configName);
-                            Output << "config_queing_file_stored";
+                            Output << "config_queueing_file_stored";
                             sn_ConsoleOut(Output);
                         }
                     }
@@ -577,7 +577,7 @@ class tSettingConfQueing: public tConfItemBase
                     {
                         tOutput Output;
                         Output.SetTemplateParameter(1, item);
-                        Output << "$config_queing_found_toomanyfiles";
+                        Output << "$config_queueing_found_toomanyfiles";
                         sn_ConsoleOut(Output);
                     }
                 }
@@ -598,36 +598,36 @@ class tSettingConfQueing: public tConfItemBase
         int current_;
 };
 
-static tSettingMapQueing sg_mapQueing("MAP_QUEING");
-static tSettingConfQueing sg_configQueing("CONFIG_QUEING");
+static tSettingMapqueueing sg_mapqueueing("MAP_QUEUEING");
+static tSettingConfqueueing sg_configqueueing("CONFIG_QUEUEING");
 
-void sg_ResetMapQueing( std::istream &s)
+void sg_ResetMapqueueing( std::istream &s)
 {
-    for (int i=0; i < sg_mapQueing.Size(); i++)
+    for (int i=0; i < sg_mapqueueing.Size(); i++)
     {
-        sg_mapQueing.Remove(i);
+        sg_mapqueueing.Remove(i);
     }
 }
-static tConfItemFunc sg_resetMapQueingConf( "RESET_MAP_QUEING", &sg_ResetMapQueing );
+static tConfItemFunc sg_resetMapqueueingConf( "RESET_MAP_QUEUEING", &sg_ResetMapqueueing );
 
-void sg_ResetConfigQueing( std::istream &s )
+void sg_ResetConfigqueueing( std::istream &s )
 {
-    for (int i=0; i < sg_configQueing.Size(); i++)
+    for (int i=0; i < sg_configqueueing.Size(); i++)
     {
-        sg_configQueing.Remove(i);
+        sg_configqueueing.Remove(i);
     }
 }
-static tConfItemFunc sg_ResetConfigQueingConf( "RESET_CONFIG_QUEING", &sg_ResetConfigQueing );
+static tConfItemFunc sg_ResetConfigqueueingConf( "RESET_CONFIG_QUEUEING", &sg_ResetConfigqueueing );
 
 // minimal access level to add items to the map list
-static tAccessLevel se_mapQueingAccessLevel = tAccessLevel_Program;
-static tSettingItem< tAccessLevel > se_mapQueingAccessLevelConf( "ACCESS_LEVEL_QUE_MAPS", se_mapQueingAccessLevel );
+static tAccessLevel se_mapqueueingAccessLevel = tAccessLevel_Program;
+static tSettingItem< tAccessLevel > se_mapqueueingAccessLevelConf( "ACCESS_LEVEL_QUEUE_MAPS", se_mapqueueingAccessLevel );
 
 // minimal access level to add items to the config list
-static tAccessLevel se_configQueingAccessLevel = tAccessLevel_Program;
-static tSettingItem< tAccessLevel > se_configQueingAccessLevelConf( "ACCESS_LEVEL_QUE_CONFIGS", se_configQueingAccessLevel );
+static tAccessLevel se_configqueueingAccessLevel = tAccessLevel_Program;
+static tSettingItem< tAccessLevel > se_configqueueingAccessLevelConf( "ACCESS_LEVEL_QUEUE_CONFIGS", se_configqueueingAccessLevel );
 
-void sg_AddQueingItems(ePlayerNetID *p, std::istream &s, tString command)
+void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
 {
     tString params;
     int pos = 0;
@@ -640,32 +640,32 @@ void sg_AddQueingItems(ePlayerNetID *p, std::istream &s, tString command)
         {
             tColoredString Output;
             Output << "0xaaffffList of maps in the que by order:\n";
-            if (sg_mapQueing.Size() > 0)
+            if (sg_mapqueueing.Size() > 0)
             {
-                for (int i=0; i < sg_mapQueing.Size(); i++)
+                for (int i=0; i < sg_mapqueueing.Size(); i++)
                 {
                     if (i == 0)
                     {
-                        tString name = sg_mapQueing.Get(i);
+                        tString name = sg_mapqueueing.Get(i);
                         Output << "0xffaa00" << name;
                     }
                     else
                     {
-                        tString name = sg_mapQueing.Get(i);
+                        tString name = sg_mapqueueing.Get(i);
                         Output << "0x00aaff, " << "0xffaa00" << name;
                     }
                 }
             }
             else
             {
-                Output << "0xddff00There are no items currently in the map queing system.";
+                Output << "0xddff00There are no items currently in the map queueing system.";
             }
             Output << "\n";
             sn_ConsoleOut(Output, p->Owner());
         }
         else if (argument == "add")
         {
-            if (p->GetAccessLevel() <= se_mapQueingAccessLevel)
+            if (p->GetAccessLevel() <= se_mapqueueingAccessLevel)
             {
                 tString items = params.ExtractNonBlankSubString(pos);
                 if (items != "")
@@ -691,7 +691,7 @@ void sg_AddQueingItems(ePlayerNetID *p, std::istream &s, tString command)
                     {
                         tOutput Output;
                         Output.SetTemplateParameter(1, item);
-                        Output << "$map_queing_file_not_found";
+                        Output << "$map_queueing_file_not_found";
                         sn_ConsoleOut(Output);
                     }
                     else
@@ -700,15 +700,15 @@ void sg_AddQueingItems(ePlayerNetID *p, std::istream &s, tString command)
                         {
                             bool found = false;
                             tString mapName = searchFindings[0];
-                            for (int j=0; j < sg_mapQueing.Size(); j++)
+                            for (int j=0; j < sg_mapqueueing.Size(); j++)
                             {
-                                tString item_name = sg_mapQueing.Get(j);
+                                tString item_name = sg_mapqueueing.Get(j);
                                 if (item_name == mapName)
                                 {
                                     tOutput Output;
                                     Output.SetTemplateParameter(1, mapName);
                                     Output.SetTemplateParameter(2, j+1);
-                                    Output << "$map_queing_stored_file_found";
+                                    Output << "$map_queueing_stored_file_found";
                                     sn_ConsoleOut(Output);
                                     found = true;
                                     break;
@@ -716,10 +716,10 @@ void sg_AddQueingItems(ePlayerNetID *p, std::istream &s, tString command)
                             }
                             if (!found)
                             {
-                                sg_mapQueing.Insert(mapName);
+                                sg_mapqueueing.Insert(mapName);
                                 tOutput Output;
                                 Output.SetTemplateParameter(1, mapName);
-                                Output << "$map_queing_file_stored";
+                                Output << "$map_queueing_file_stored";
                                 sn_ConsoleOut(Output);
                             }
                         }
@@ -727,7 +727,7 @@ void sg_AddQueingItems(ePlayerNetID *p, std::istream &s, tString command)
                         {
                             tOutput Output;
                             Output.SetTemplateParameter(1, item);
-                            Output << "$map_queing_found_toomanyfiles";
+                            Output << "$map_queueing_found_toomanyfiles";
                             sn_ConsoleOut(Output);
                         }
                     }
@@ -738,15 +738,15 @@ void sg_AddQueingItems(ePlayerNetID *p, std::istream &s, tString command)
             else
             {
                 tOutput Output;
-                Output.SetTemplateParameter(1, tCurrentAccessLevel::GetName(se_mapQueingAccessLevel));
+                Output.SetTemplateParameter(1, tCurrentAccessLevel::GetName(se_mapqueueingAccessLevel));
                 Output.SetTemplateParameter(2, argument);
-                Output << "$config_queing_required_level";
+                Output << "$config_queueing_required_level";
                 sn_ConsoleOut(Output, p->Owner());
             }
         }
         else if (argument == "remove")
         {
-            if (p->GetAccessLevel() <= se_mapQueingAccessLevel)
+            if (p->GetAccessLevel() <= se_mapqueueingAccessLevel)
             {
                 tString items = params.ExtractNonBlankSubString(pos);
                 if (items != "")
@@ -755,9 +755,9 @@ void sg_AddQueingItems(ePlayerNetID *p, std::istream &s, tString command)
                     tString item = items;
                     bool mapFound = false;
                     tArray<tString> searchFindings;
-                    for (int i=0; i < sg_mapQueing.Size(); i++)
+                    for (int i=0; i < sg_mapqueueing.Size(); i++)
                     {
-                        tString name = sg_mapQueing.Get(i);
+                        tString name = sg_mapqueueing.Get(i);
 
                         tString filteredName, filteredSearch;
                         filteredName = ePlayerNetID::FilterName(name);
@@ -772,7 +772,7 @@ void sg_AddQueingItems(ePlayerNetID *p, std::istream &s, tString command)
                     {
                         tOutput Output;
                         Output.SetTemplateParameter(1, item);
-                        Output << "$map_queing_que_file_not_found";
+                        Output << "$map_queueing_que_file_not_found";
                         sn_ConsoleOut(Output, p->Owner());
                     }
                     else
@@ -780,16 +780,16 @@ void sg_AddQueingItems(ePlayerNetID *p, std::istream &s, tString command)
                         if (searchFindings.Len() == 1)
                         {
                             tString mapName = searchFindings[0];
-                            for (int j=0; j < sg_mapQueing.Size(); j++)
+                            for (int j=0; j < sg_mapqueueing.Size(); j++)
                             {
-                                tString item_name =  sg_mapQueing.Get(j);
+                                tString item_name =  sg_mapqueueing.Get(j);
                                 if (item_name == mapName)
                                 {
-                                    sg_mapQueing.Remove(j);
+                                    sg_mapqueueing.Remove(j);
                                     tOutput Output;
                                     Output.SetTemplateParameter(1, mapName);
                                     Output.SetTemplateParameter(2, p->GetName());
-                                    Output << "$map_queing_file_removed";
+                                    Output << "$map_queueing_file_removed";
                                     sn_ConsoleOut(Output);
                                     break;
                                 }
@@ -799,7 +799,7 @@ void sg_AddQueingItems(ePlayerNetID *p, std::istream &s, tString command)
                         {
                             tOutput Output;
                             Output.SetTemplateParameter(1, item);
-                            Output << "$map_queing_found_toomanyfiles";
+                            Output << "$map_queueing_found_toomanyfiles";
                             sn_ConsoleOut(Output, p->Owner());
                         }
                     }
@@ -810,9 +810,9 @@ void sg_AddQueingItems(ePlayerNetID *p, std::istream &s, tString command)
             else
             {
                 tOutput Output;
-                Output.SetTemplateParameter(1, tCurrentAccessLevel::GetName(se_mapQueingAccessLevel));
+                Output.SetTemplateParameter(1, tCurrentAccessLevel::GetName(se_mapqueueingAccessLevel));
                 Output.SetTemplateParameter(2, argument);
-                Output << "$config_queing_required_level";
+                Output << "$config_queueing_required_level";
                 sn_ConsoleOut(Output, p->Owner());
             }
         }
@@ -824,32 +824,32 @@ void sg_AddQueingItems(ePlayerNetID *p, std::istream &s, tString command)
         {
             tColoredString Output;
             Output << "0xaaffffList of configs in the que by order:\n";
-            if (sg_configQueing.Size() > 0)
+            if (sg_configqueueing.Size() > 0)
             {
-                for (int i=0; i < sg_configQueing.Size(); i++)
+                for (int i=0; i < sg_configqueueing.Size(); i++)
                 {
                     if (i == 0)
                     {
-                        tString name = sg_configQueing.Get(i);
+                        tString name = sg_configqueueing.Get(i);
                         Output << "0xffaa00" << name;
                     }
                     else
                     {
-                        tString name = sg_configQueing.Get(i);
+                        tString name = sg_configqueueing.Get(i);
                         Output << "0x00aaff, " << "0xffaa00" << name;
                     }
                 }
             }
             else
             {
-                Output << "0xddff00There are no items in the config queing system.";
+                Output << "0xddff00There are no items in the config queueing system.";
             }
             Output << "\n";
             sn_ConsoleOut(Output, p->Owner());
         }
         else if (argument == "add")
         {
-            if (p->GetAccessLevel() <= se_configQueingAccessLevel)
+            if (p->GetAccessLevel() <= se_configqueueingAccessLevel)
             {
                 tString items = params.ExtractNonBlankSubString(pos);
                 if (items != "")
@@ -875,7 +875,7 @@ void sg_AddQueingItems(ePlayerNetID *p, std::istream &s, tString command)
                     {
                         tOutput Output;
                         Output.SetTemplateParameter(1, item);
-                        Output << "$config_queing_file_not_found";
+                        Output << "$config_queueing_file_not_found";
                         sn_ConsoleOut(Output, p->Owner());
                     }
                     else
@@ -884,15 +884,15 @@ void sg_AddQueingItems(ePlayerNetID *p, std::istream &s, tString command)
                         {
                             bool found = false;
                             tString configName = searchFindings[0];
-                            for (int j=0; j < sg_configQueing.Size(); j++)
+                            for (int j=0; j < sg_configqueueing.Size(); j++)
                             {
-                                tString item_name =  sg_configQueing.Get(j);
+                                tString item_name =  sg_configqueueing.Get(j);
                                 if (item_name == configName)
                                 {
                                     tOutput Output;
                                     Output.SetTemplateParameter(1, configName);
                                     Output.SetTemplateParameter(2, j+1);
-                                    Output << "$config_queing_stored_file_found";
+                                    Output << "$config_queueing_stored_file_found";
                                     sn_ConsoleOut(Output, p->Owner());
                                     found = true;
                                     break;
@@ -900,11 +900,11 @@ void sg_AddQueingItems(ePlayerNetID *p, std::istream &s, tString command)
                             }
                             if (!found)
                             {
-                                sg_mapQueing.Insert(configName);
+                                sg_mapqueueing.Insert(configName);
                                 tOutput Output;
                                 Output.SetTemplateParameter(1, configName);
                                 Output.SetTemplateParameter(2, p->GetName());
-                                Output << "config_queing_file_stored";
+                                Output << "config_queueing_file_stored";
                                 sn_ConsoleOut(Output, p->Owner());
                             }
                         }
@@ -912,7 +912,7 @@ void sg_AddQueingItems(ePlayerNetID *p, std::istream &s, tString command)
                         {
                             tOutput Output;
                             Output.SetTemplateParameter(1, item);
-                            Output << "$config_queing_found_toomanyfiles";
+                            Output << "$config_queueing_found_toomanyfiles";
                             sn_ConsoleOut(Output, p->Owner());
                         }
                     }
@@ -923,15 +923,15 @@ void sg_AddQueingItems(ePlayerNetID *p, std::istream &s, tString command)
             else
             {
                 tOutput Output;
-                Output.SetTemplateParameter(1, tCurrentAccessLevel::GetName(se_configQueingAccessLevel));
+                Output.SetTemplateParameter(1, tCurrentAccessLevel::GetName(se_configqueueingAccessLevel));
                 Output.SetTemplateParameter(2, argument);
-                Output << "$config_queing_required_level";
+                Output << "$config_queueing_required_level";
                 sn_ConsoleOut(Output, p->Owner());
             }
         }
         else if (argument == "remove")
         {
-            if (p->GetAccessLevel() <= se_configQueingAccessLevel)
+            if (p->GetAccessLevel() <= se_configqueueingAccessLevel)
             {
                 tString items = params.ExtractNonBlankSubString(pos);
                 if (items != "")
@@ -940,9 +940,9 @@ void sg_AddQueingItems(ePlayerNetID *p, std::istream &s, tString command)
                     tString item = items;
                     bool configFound = false;
                     tArray<tString> searchFindings;
-                    for (int i=0; i < sg_configQueing.Size(); i++)
+                    for (int i=0; i < sg_configqueueing.Size(); i++)
                     {
-                        tString name = sg_configQueing.Get(i);
+                        tString name = sg_configqueueing.Get(i);
 
                         tString filteredName, filteredSearch;
                         filteredName = ePlayerNetID::FilterName(name);
@@ -957,7 +957,7 @@ void sg_AddQueingItems(ePlayerNetID *p, std::istream &s, tString command)
                     {
                         tOutput Output;
                         Output.SetTemplateParameter(1, item);
-                        Output << "$config_queing_que_file_not_found";
+                        Output << "$config_queueing_que_file_not_found";
                         sn_ConsoleOut(Output, p->Owner());
                     }
                     else
@@ -965,16 +965,16 @@ void sg_AddQueingItems(ePlayerNetID *p, std::istream &s, tString command)
                         if (searchFindings.Len() == 1)
                         {
                             tString configName = searchFindings[0];
-                            for (int j=0; j < sg_configQueing.Size(); j++)
+                            for (int j=0; j < sg_configqueueing.Size(); j++)
                             {
-                                tString item_name =  sg_configQueing.Get(j);
+                                tString item_name =  sg_configqueueing.Get(j);
                                 if (item_name == configName)
                                 {
-                                    sg_configQueing.Remove(j);
+                                    sg_configqueueing.Remove(j);
                                     tOutput Output;
                                     Output.SetTemplateParameter(1, configName);
                                     Output.SetTemplateParameter(2, p->GetName());
-                                    Output << "$config_queing_file_removed";
+                                    Output << "$config_queueing_file_removed";
                                     sn_ConsoleOut(Output);
                                     break;
                                 }
@@ -984,7 +984,7 @@ void sg_AddQueingItems(ePlayerNetID *p, std::istream &s, tString command)
                         {
                             tOutput Output;
                             Output.SetTemplateParameter(1, item);
-                            Output << "$config_queing_found_toomanyfiles";
+                            Output << "$config_queueing_found_toomanyfiles";
                             sn_ConsoleOut(Output, p->Owner());
                         }
                     }
@@ -995,9 +995,9 @@ void sg_AddQueingItems(ePlayerNetID *p, std::istream &s, tString command)
             else
             {
                 tOutput Output;
-                Output.SetTemplateParameter(1, tCurrentAccessLevel::GetName(se_configQueingAccessLevel));
+                Output.SetTemplateParameter(1, tCurrentAccessLevel::GetName(se_configqueueingAccessLevel));
                 Output.SetTemplateParameter(2, argument);
-                Output << "$config_queing_required_level";
+                Output << "$config_queueing_required_level";
                 sn_ConsoleOut(Output, p->Owner());
             }
         }
@@ -2086,6 +2086,12 @@ public:
 };
 
 std::map<int, std::set<std::string> > delayedCommands::cmd_map;
+
+static void sg_ClearDelayedCmd(std::istream &s)
+{
+    delayedCommands::Clear();
+}
+static tConfItemFunc sg_ClearDelayedCmd_conf("DELAY_COMMAND_CLEAR",&sg_ClearDelayedCmd);
 
 static void sg_AddDelayedCmd(std::istream &s)
 {
@@ -4298,7 +4304,7 @@ void gGame::StateUpdate(){
             // log scores before players get renamed
             ePlayerNetID::LogScoreDifferences();
 
-            if ((sg_mapQueing.Size() == 0) && (sg_configQueing.Size() == 0))
+            if ((sg_mapqueueing.Size() == 0) && (sg_configqueueing.Size() == 0))
             {
                 // rotate, if rotate is once per round
                 if ( rotationtype == gROTATION_ORDERED_ROUND )
@@ -4713,7 +4719,8 @@ static void respawnallenable(std::istream &s)
 {
     respawn_all = true;
 }
-static tConfItemFunc sg_respawnall_conf("RESPAWN_ALL", respawnallenable);
+static tConfItemFunc sg_respawnall_conf("RESPAWN_ALL", &respawnallenable);
+static tAccessLevelSetter sg_respawnallConfLevel( sg_respawnall_conf, tAccessLevel_Moderator );
 
 // uncomment to activate respawning
 #define RESPAWN_HACK
@@ -4756,7 +4763,7 @@ static void sg_Respawn( REAL time, eGrid *grid, gArena & arena )
 #endif
                 arena.LeastDangerousSpawnPoint()->Spawn( pos, dir );
 #ifdef DEBUG
-            //                std::cout << "spawning player " << pni->name << '\n';
+            //                std::cout << "spawning player " << pni->name << "\n";
 #endif
             gCycle * cycle = new gCycle( grid, pos, dir, p );
             p->ControlObject(cycle);
@@ -4780,6 +4787,10 @@ static void sg_RespawnAll(eGrid *grid, gArena & arena, bool respawn_all)
     {
         ePlayerNetID *p = se_PlayerNetIDs(i);
 
+        //  don't spawn spectators
+        if ( !p->CurrentTeam() )
+            continue;
+
         eGameObject *e=p->Object();
 
         if ((p && !p->IsActive()) || (!e || !e->Alive()))
@@ -4800,7 +4811,7 @@ static void sg_RespawnAll(eGrid *grid, gArena & arena, bool respawn_all)
             else
                 arena.LeastDangerousSpawnPoint()->Spawn( pos, dir );
 #ifdef DEBUG
-            //                std::cout << "spawning player " << pni->name << '\n';
+            //                std::cout << "spawning player " << pni->name << "\n";
 #endif
             gCycle * cycle = new gCycle( grid, pos, dir, p );
             p->ControlObject(cycle);
@@ -5416,7 +5427,7 @@ void gGame::Analysis(REAL time){
                         if ( se_mainGameTimer )
                             se_mainGameTimer->speed = 1;
 
-                        if ((sg_mapQueing.Size() == 0) || (sg_configQueing.Size() == 0))
+                        if ((sg_mapqueueing.Size() == 0) || (sg_configqueueing.Size() == 0))
                         {
                             //check for map rotation, new match...
                             if ( rotationtype == gROTATION_ORDERED_MATCH )
@@ -5552,43 +5563,43 @@ void Randomrotate()
 
 void QueRotate()
 {
-    if (sg_mapQueing.Size() > 0)
+    if (sg_mapqueueing.Size() > 0)
     {
-        conf_mapfile.Set(sg_mapQueing.Current());
-        conf_mapfile.GetSetting().SetSetLevel( sg_mapQueing.GetSetLevel() );
-        sg_mapQueing.Remove(sg_mapQueing.CurrentID());
-        if (sg_mapQueing.Size() == 0)
+        conf_mapfile.Set(sg_mapqueueing.Current());
+        conf_mapfile.GetSetting().SetSetLevel( sg_mapqueueing.GetSetLevel() );
+        sg_mapqueueing.Remove(sg_mapqueueing.CurrentID());
+        if (sg_mapqueueing.Size() == 0)
         {
             tOutput Output;
-            Output << "$map_queing_is_empty";
+            Output << "$map_queueing_is_empty";
             sn_ConsoleOut(Output);
         }
     }
-    if (sg_configQueing.Size() > 0)
+    if (sg_configqueueing.Size() > 0)
     {
-        tCurrentAccessLevel level(sg_configQueing.GetSetLevel(), true );
+        tCurrentAccessLevel level(sg_configqueueing.GetSetLevel(), true );
         if (sg_configRotationType == 0)
         {
-            st_Include(sg_configQueing.Current());
-            sg_configQueing.Remove(sg_configQueing.CurrentID());
-            if (sg_configQueing.Size() == 0)
+            st_Include(sg_configqueueing.Current());
+            sg_configqueueing.Remove(sg_configqueueing.CurrentID());
+            if (sg_configqueueing.Size() == 0)
             {
                 tOutput Output;
-                Output << "$config_queing_is_empty";
+                Output << "$config_queueing_is_empty";
                 sn_ConsoleOut(Output);
             }
         }
         else if (sg_configRotationType == 1)
         {
-            tString rclcl = tResourceManager::locateResource(NULL, sg_configQueing.Current());
-            sg_configQueing.Remove(sg_configQueing.CurrentID());
+            tString rclcl = tResourceManager::locateResource(NULL, sg_configqueueing.Current());
+            sg_configqueueing.Remove(sg_configqueueing.CurrentID());
             if ( rclcl ) {
                 std::ifstream rc(rclcl);
                 tConfItemBase::LoadAll(rc, false );
                 return;
             }
 
-            con << tOutput( "$config_rinclude_not_found", sg_configQueing.Current() );
+            con << tOutput( "$config_rinclude_not_found", sg_configqueueing.Current() );
         }
     }
 }
@@ -6523,3 +6534,32 @@ static void sg_KillAllPlayers(std::istream &s)
 }
 
 static tConfItemFunc sg_KillAllPlayers_conf("KILL_ALL", &sg_KillAllPlayers);
+
+static void sg_CustomMessage(std::istream &s)
+{
+    tString msg;
+    int pos = 0;
+    msg.ReadLine(s);
+
+    if (msg.Filter() == "")
+        return;
+
+    std::ostringstream str;
+    tString language_string_command = msg.ExtractNonBlankSubString(pos).Filter();
+    str << "$" << language_string_command;
+
+    tOutput output;
+    int templateNum = 0;
+    tString templateString = msg.ExtractNonBlankSubString(pos);
+
+    while(templateString.Filter() != "")
+    {
+        templateNum += 1;
+        output.SetTemplateParameter(templateNum, templateString);
+        templateString = msg.ExtractNonBlankSubString(pos);
+    }
+    output << str.str().c_str();
+
+    sn_ConsoleOut(tColoredString(output));
+}
+static tConfItemFunc sg_CustomMessageConf("CUSTOM_MESSAGE", &sg_CustomMessage);

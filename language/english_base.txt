@@ -165,6 +165,9 @@ score_deathzone_help		What you get for hitting the Death Zone
 score_deathzone_team_help   What you get for hitting a team Death Zone
 score_race_help			What you get for reaching the win zone in a race
 score_blastzone_help    What you get for hitting the Blast Zone
+score_explosion_owner_help  Points the owner of an explosion gains for destroying another enemy cycle.
+score_explosion_help        Points the enemy cycle destroyed in an explosion gains.
+deadly_explosions_help      Should cycles in the blast radius of an explosion be destroyed?
 
 sp_score_win_help			What you get for winning a round in single player mode
 sp_walls_stay_up_delay_help	Number of seconds the walls stay up after a player died; negative values will keep them up forever.
@@ -585,6 +588,7 @@ vote_rejected_voting_suspended		    Voting has been suspended by the Administrat
 
 fadeout_name_delay_help				Time the player names are shown. Set to 0 if you don't want to show them at all or -1 if you want to show them always.
 show_own_name_help					  Should your name be displayed above your cycle on your screen?
+dead_console_decoration       *DEAD* 
 
 #********************************************
 #********************************************
@@ -846,6 +850,7 @@ ladderlog_write_death_self_destruct_help      Write to ladderlog: DEATH_SELF_DES
 ladderlog_write_death_shot_frag_help          Write to ladderlog: DEATH_SHOT_FRAG <prey> <predator>
 ladderlog_write_death_shot_suicide_help       Write to ladderlog: DEATH_SHOT_SUICIDE <player>
 ladderlog_write_death_shot_teamkill_help      Write to ladderlog: DEATH_SHOT_TEAMKILL <prey> <predator>
+ladderlog_write_death_explosion_help          Write to ladderlog: DEATH_EXPLOSION <prey> <predator>
 ladderlog_write_death_suicide_help            Write to ladderlog: DEATH_SUICIDE <player>
 ladderlog_write_death_teamkill_help           Write to ladderlog: DEATH_TEAMKILL <prey> <predator>
 ladderlog_write_death_zombiezone_help         Write to ladderlog: DEATH_ZOMBIEZONE <prey> [predator]
@@ -1092,6 +1097,8 @@ say_help					Dedicated server only: let the server administrator say something.
 rename_help		    Renames the given player.
 allow_rename_player_help    Gives the given player the ability to rename.
 disallow_rename_player_help Prevents the given player from rename-ing.
+
+silence_enemies_help        When enabled, chat sent from enemies is not displayed on your client if you are alive. If you are dead all chat is displayed.
 
 # chatters commands
 chatters_kill_help                  All players in chat mode are killed by an administrator.
@@ -2565,6 +2572,7 @@ player_lose_rubberzone	\1 exploded on a rubberzone and lost \2 points.\n
 player_free_suicide		\1 committed suicide.\n
 player_win_frag			\1 core dumped \3 for \2 points.\n
 player_win_survive		\1 got \2 points for surviving.\n
+player_dead_explosion   \1 was destroyed in the explosion made by \2.\n
 player_free_frag		\1 core dumped \2.\n
 player_teamkill			\1 core dumped teammate \2! Boo! No points for that!\n
 player_win_frag_ai		\1 got \2 points for core dumping an AI player.\n
@@ -2604,7 +2612,7 @@ player_free_zombie_zone		Zombie \1 ate \2 for their yummy brains.\n
 player_free_zombie_zone_die	\1 killed zombie \2, no brains for them.\n
 player_score_goal		\1 scored a goal for \2 points!  Great ball handling!\n
 player_score_own_goal		\1 scored on themselves.  Boo!\n
-player_shot_base        \1 received \2 points for shooting at \3's base.\n 
+player_shot_base        \1 received \2 points for shooting at \3's base.\n
 
 player_flag_timeout		\1 lost the flag because they held it too long...\n
 player_flag_return		\1 returned the flag, well done!\n
@@ -3242,13 +3250,13 @@ player_race_record_search_found       \1 is ranked \2 with a best time of \3 sec
 player_race_record_search_not_found   0xff0000The search term \1 couldn't be found in the racing records.\n
 player_race_record_search_many_found  0xff0000The search term \1 has found many matches. Be more specific.\n
 
-race_ranks_personal_message Your current position for 
-race_rank_title_message Top \1 players for 
+race_ranks_personal_message Your current position for
+race_rank_title_message Top \1 players for
 race_rank_title_name Ranks
 race_rank_title_player_name Players
 race_rank_title_score_name Scores
 race_rank_title_time_name Times
-race_rank_border # 
+race_rank_border #
 
 access_level_substitute_denied  Required access level to substitute is "\1", you only have "\2".\n
 substitute_message_usage        Usage: /substitute <user out ID or name> <user in ID or name>\n
@@ -3348,16 +3356,16 @@ cycle_target_score           \1 get \2 extra points for core dumping his target 
 cycle_target_timeout         You fail core dumping your target \1 in time.\n
 cycle_target_cancel          Your target assignment has been cancelled by server.\n
 
-## MAP/CONFIG _QUEING commands and helping hints - LOVER$BOY's additions
-map_queueing_help                   Stores map that exist in MAP_ROTATION. Stops rotation temporarly to complete the listed maps.
+## MAP/CONFIG _queueing commands and helping hints - LOVER$BOY's additions
+map_queueing_help                     Stores map that exist in MAP_ROTATION. Stops rotation temporarly to complete the listed maps.
 map_queueing_stored_file_found        Map file \1 has already been stored in list in \2 order. This addition has been ignored.\n
 map_queueing_file_stored              Map file \1 has successfully been added to the que..\n
-map_queueing_file_removed             Map file \1 has successfully been removed from the que by \2.\n 
+map_queueing_file_removed             Map file \1 has successfully been removed from the que by \2.\n
 map_queueing_file_not_found           0xff0000Search term \1 couldn't be found in MAP_ROTATION.\n
 map_queueing_que_file_not_found       0xff0000Search term \1 couldn't be found in the MAP_QUEUEING.\n
 map_queueing_found_toomanyfiles       0xff0000Search term \1 found many matches in MAP_ROTATION. Be more specific.\n
-map_queueing_is_empty                 Map que is now empty. Normal rotation will resume from next round or match.\n
-map_queueing_required_level           Map queing command \2 requires level is \1. You do not have that access level.\n         
+map_queueing_is_empty                 Map queue is now empty. Normal rotation will resume from next round or match.\n
+map_queueing_required_level           Map queueing command \2 requires level is \1. You do not have that access level.\n
 
 config_queueing_help                  Stores config that exists in CONFIG_ROTATION. Stops rotation temporarly to complete the listed maps.
 config_queueing_stored_file_found     Config file \1 has already been stored in list in \2 order. This addition has been ignored.\n
@@ -3366,11 +3374,11 @@ config_queueing_file_removed          Config file \1 has successfully been remov
 config_queueing_file_not_found        0xff0000Search term \1 couldn't be found in the CONFIG_ROTATION.\n
 config_queueing_que_file_not_found    0xff0000Search term \1 couldn't be found in the CONFIG_QUEUEING.\n
 config_queueing_found_toomanyfiles    0xff0000Search term \1 found many matches in CONFIG_ROTATION. Be more specific.\n
-config_queueing_is_empty              Config que is now empty. Normal rotation will resume from next round or match.\n
-config_queueing_required_level        Config queing command \2 requires level is \1. You do not have that access level.\n
+config_queueing_is_empty              Config queue is now empty. Normal rotation will resume from next round or match.\n
+config_queueing_required_level        Config queueing command \2 requires level is \1. You do not have that access level.\n
 
-access_level_que_maps_help        Sets the access level required to use chat commands /mq add & remove.
-access_level_que_configs_help     Sets the access level required to use chat commands /cq add & remove.
+access_level_queue_maps_help        Sets the access level required to use chat commands /mq add & remove.
+access_level_queue_configs_help     Sets the access level required to use chat commands /cq add & remove.
 
 # items that should not be translated
 include english_base_notranslate.txt

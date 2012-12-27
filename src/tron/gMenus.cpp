@@ -645,6 +645,51 @@ uMenuItemToggle hud2
 
 static tConfItem<bool> WRAP("WRAP_MENU",uMenu::wrap);
 
+static bool ConTabCompletition(tString &strString, int &curserPos)
+{
+    int lengthCounter = 0;
+    bool tabworked = false;
+    tString new_string;
+    int pos = 0;
+    tString command_name = strString.ExtractNonBlankSubString(pos);
+
+    while(command_name.Filter() != "")
+    {
+        lengthCounter += strlen(command_name);
+
+        if (lengthCounter == curserPos)
+        {
+            tString found_command = tConfItemBase::FindConfigItem(command_name.Filter());
+            if (found_command != "")
+            {
+                new_string << found_command + " ";
+
+                tabworked = true;
+            }
+        }
+        else
+        {
+            if  (lengthCounter < strlen(strString))
+                new_string << command_name << " ";
+            else
+                new_string << command_name;
+        }
+
+        lengthCounter += 1;
+        command_name = strString.ExtractNonBlankSubString(pos);
+    }
+
+    if (tabworked)
+    {
+        strString = new_string;
+        curserPos = new_string.Filter().Len();
+
+        return true;
+    }
+
+    return false;
+}
+
 class gMemuItemConsole: uMenuItemStringWithHistory{
 public:
     gMemuItemConsole(uMenu *M,tString &c):
@@ -669,6 +714,19 @@ public:
 
             MyMenu()->Exit();
             return true;
+        }
+        else if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_TAB)
+        {
+            if (*content != "")
+            {
+                tString strString;
+                strString << *content;
+
+                if (ConTabCompletition(strString, cursorPos))
+                {
+                    *content = strString;
+                }
+            }
         }
         else if (e.type==SDL_KEYDOWN &&
                  uActionGlobal::IsBreakingGlobalBind(e.key.keysym.sym))

@@ -34,6 +34,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <time.h>
 #include <string>
 #include <iostream>
+#include "ePlayer.h"
 
 tString::tString(){
     operator[](0)='\0';
@@ -1592,7 +1593,17 @@ tString tString::ToUpper(void) const
     return ret;
 }
 
+//! @returns filtered string and with all of its all characters in lowercased string
+tString tString::Filter() const
+{
+    tString in(*this);
+    tString out;
+    out = tColoredString::RemoveColors( in );
 
+    out = ePlayerNetID::FilterName(in);
+
+    return out;
+}
 
 //static const char delimiters[] = "`~!@#$%^&*()-=_+[]\\{}|;':\",./<>? ";
 static tString delimiters("!?.:;_()-, ");

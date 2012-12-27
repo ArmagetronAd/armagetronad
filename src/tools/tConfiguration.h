@@ -155,6 +155,7 @@ private:
 //! access levels for admin interfaces; lower numeric values are better
 enum tAccessLevel
 {
+    tAccessLevel_Hoster = -1,      // the server hoster
     tAccessLevel_Owner = 0,        // the server owner
     tAccessLevel_Admin = 1,        // one of his admins
     tAccessLevel_Moderator = 2,    // one of the moderators
@@ -233,6 +234,7 @@ class tConfItemBase
 protected:
     const tString title;
     const tOutput help;
+    class tString value;
     bool changed;
 
     tAccessLevel requiredLevel; //!< access level required to change this setting
@@ -253,10 +255,17 @@ public:
 
     tConfItemBase(const char *title, const tOutput& help);
     tConfItemBase(const char *title);
+
     virtual ~tConfItemBase();
 
     tString const & GetTitle() const {
         return title;
+    }
+
+    void SetValue(tString newValue)
+    {
+        value = "";
+        value << newValue;
     }
 
     tAccessLevel GetRequiredLevel() const { return requiredLevel; }
@@ -273,7 +282,7 @@ public:
     static void DocAll(std::ostream &s);
     static int AccessLevel(std::istream &s); //! Returns access level needed for command -1 if command not found
     static void WriteAllToFile();
-    static tString FindConfigItem(tString name);
+    static tString FindConfigItem(tString name);    //! Returns the config name of the searching string name
 
     // helper functions for files (use these, they manage recording and playback properly)
     enum SearchPath
@@ -374,13 +383,52 @@ protected:
     tConfItem(T &t):tConfItemBase(""),target(&t), shouldChangeFunc_(NULL) {}
 public:
     tConfItem(const char *title,const tOutput& help,T& t)
-            :tConfItemBase(title,help),target(&t), shouldChangeFunc_(NULL) {}
+            :tConfItemBase(title,help),target(&t), shouldChangeFunc_(NULL) {
+                tConfItemMap & confmap = ConfItemMap();
+                for(tConfItemMap::iterator iter = confmap.begin(); iter != confmap.end() ; ++iter)
+                {
+                    tConfItemBase * ci = (*iter).second;
+                    if (ci->GetTitle() == title)
+                    {
+                        tString newValue;
+                        newValue << *target;
+                        ci->SetValue(newValue);
+                        break;
+                    }
+                }
+            }
 
     tConfItem(const char *title,T& t)
-            :tConfItemBase(title),target(&t), shouldChangeFunc_(NULL) {}
+            :tConfItemBase(title),target(&t), shouldChangeFunc_(NULL) {
+                tConfItemMap & confmap = ConfItemMap();
+                for(tConfItemMap::iterator iter = confmap.begin(); iter != confmap.end() ; ++iter)
+                {
+                    tConfItemBase * ci = (*iter).second;
+                    if (ci->GetTitle() == title)
+                    {
+                        tString newValue;
+                        newValue << *target;
+                        ci->SetValue(newValue);
+                        break;
+                    }
+                }
+            }
 
     tConfItem(const char*title, T& t, ShouldChangeFuncT changeFunc)
-            :tConfItemBase(title),target(&t),shouldChangeFunc_(changeFunc) {}
+            :tConfItemBase(title),target(&t),shouldChangeFunc_(changeFunc) {
+                tConfItemMap & confmap = ConfItemMap();
+                for(tConfItemMap::iterator iter = confmap.begin(); iter != confmap.end() ; ++iter)
+                {
+                    tConfItemBase * ci = (*iter).second;
+                    if (ci->GetTitle() == title)
+                    {
+                        tString newValue;
+                        newValue << *target;
+                        ci->SetValue(newValue);
+                        break;
+                    }
+                }
+            }
 
     virtual ~tConfItem(){}
 

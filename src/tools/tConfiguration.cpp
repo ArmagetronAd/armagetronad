@@ -636,8 +636,8 @@ void tConfItemBase::WriteAllToFile()
             tString help ( ci->help );
 
             tString mess;
-            mess << ci->title;
-            //mess << " " << ci->changeFunc;
+            mess << ci->title << " ";
+            mess << ci->value;
             mess.SetPos( sim_maxlen+2, false );
             mess << "# ";
             mess << help;

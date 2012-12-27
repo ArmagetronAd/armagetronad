@@ -1,3 +1,128 @@
+===========================
+Changes from r823 - r829
+===========================
+Corrections & Improvements:
+  * Due to a spelling mistake of mine, I spelt queueing wrong. I fixed it now.
+    - MAP_QUEUEING, CONFIG_QUEUEING
+    - Language strings to queueing, all fixed!
+  * Improved the setup of the tab completion. Added feature for tab completion for "Con: ".
+  * Added *DEAD* tag for dead players (not spectators). Can only be displayed for those using our client.
+  * Added "Merging dlh's deadly explosion branch." r1166 from armagetronad branch, commit by Manuel Moos(Z-Man).      
+        
+New Race Commands:
+  * SCORE_RACE_FINISH   # Points playes will be awarded for crossing the finish line
+  ------------------------------------------------------------------------------  
+  * RACE_POINTS_TYPE    # if set to 0, players receive points depending on SCORE_RACE_FINISH  
+                        # if set to 1, players receive points depending on RACE_SCORE_DEPLETE
+  ------------------------------------------------------------------------------
+
+New Commands:
+  * CUSTOM_MESSAGE      # Calls upon the string located within your language file
+                        # Execute: CUSTOM_MESSAGE hello_world
+                        # If "hello_world" exists within the language file, it loads the string
+                        # Inside Language File: hello_world Hello World!\n
+                        # The output will be displayed on the client's screen as
+                        # Hello World!
+                        
+                        # Example 1:
+                        # Execute: CUSTOM_MESSAGE player_reach_race
+                        # Output Similar to: 1 finished with 10 points in  seconds
+                        
+                        # Example 2:
+                        # Execute: CUSTOM_MESSAGE player_reach_race lover$boy 5 15.5432
+                        # Output : lover$boy finished with 5 points in 15.5432 seconds
+                        
+                        # This command not only loads in the language string command, it also replaces those
+                        # \1, \2, \3 indicators. In example 2 you see those indicators as:
+                        # Language String Command: player_reach_race \1 0xfffffffinished with \2 points in \3 seconds.\n
+                        # \1 = lover$boy | \2 = 5 | \3 = 15.5432
+                        # So to speak, it looks like this: CUSTOM_MESSAGE player_reach_race \1 \2 \3 ...
+                        # They can go on depending on your choosing of calling this command
+                         
+  ------------------------------------------------------------------------------  
+  * SAY                 # This command used to exist but I removed it because I had a secret reason.
+                        # Read bellow command to know why
+  ------------------------------------------------------------------------------
+  * ADMIN_NAME          # The name of admin in chat string
+                        # When you normally type SAY I am admin!
+                        # Output will be "Admin: I am admin!"
+                        # With ADMIN_NAME, you can change that displaying name to whichever you like.
+                        # Example: ADMIN_NAME LOVER$BOY
+                        # Execute: SAY I am the one and only LOVER$BOY!
+                        # Output : "LOVER$BOY: I am the one and only LOVER$BOY!"
+  ------------------------------------------------------------------------------
+  * DELAY_COMMAND_CLEAR # Clears all stored commands in DELAY_COMMAND
+  ------------------------------------------------------------------------------
+  * SILENCE_ENEMIES     # When enabled, chat sent from enemies is not displayed on your client
+                        # if you are alive. If you are dead all chat is displayed.
+  ------------------------------------------------------------------------------
+  Merging dlh's deadly explosion branch:
+  * DEADLY_EXPLOSIONS     # If set to 1, cycles in the blast radius of an explosion be destroyed
+  * SCORE_EXPLOSION_OWNER # Points the owner of an explosion gains for destroying another enemy cycle.
+  * SCORE_EXPLOSION       # Points the enemy cycle destroyed in an explosion gains.
+  ------------------------------------------------------------------------------
+  * DISPLAY_SCORES_DURING_CHAT   # Tabbing during chat gets annoying when the scores keep appearing and
+                                 # disappearing. This command works individually and is enabled right now
+                                 # but you can choose to disable it and have a good time tabbing names
+                                 # without having to worry about appearing score board.        
+  ------------------------------------------------------------------------------
+
+New DTD Features:
+  * Official Stable DTD Release: Lover-Boy/map-0.2.9_styctap_v1.0.dtd
+  * Eaxmple Map: Lover-Boy/example-1.0.0.aamap.aamap.xml
+  - Features:
+    * Element: Move now has "interact" & "route" attributes.
+               - interact - if true, zones will bounce of walls and the oppsite for false
+               - route    - the route the zone follows. This was taken from SPAWN_ZONE
+                            In SPAWN_ZONE to have route, you do L x1 y1 x2 y2 Z but here
+                            you place it as:
+                            <Move xdir="20" route="x# y# x# y# x# y# x# y#" />
+                            Replacing the x# and y# with points of the route for the zone to follow.
+                            
+    * Element: Teleport, to be used mainly with <Zone effect="teleport">
+               - Moved all the attributes belonging to teleportation to Teleport Element.
+               - List include:
+                 + destX  # The destination x point cycle will be teleported to
+                 + destY  # The destination y point cycle will be teleported to
+                 + dirX   # The x direction cycle will be driving in after teleporting
+                 + dirY   # The y direction cycle will be driving in after teleporting
+                 + modes  # Helps to calculate how the teleporting should work 
+                 + reloc  # Should the cycle teleport or something?  
+    
+New Error Log:
+  * Any errors detected in Resource will be stored in your ".../var/errors/resource_errors.txt"
+  * Any errors detected in Logging will be stored in your ".../var/errors/login_errors.txt"
+
+Nea Features:
+  * TEAMNAME_1-4        # Customizable team names now available. Although they don't work in most servers.
+                        # If you ever enter a 0.3 server, then this will be quite handy, especially in:
+                        # Adventures of Tron - Advanced Racing server
+  ------------------------------------------------------------------------------
+  * Tab Completiiton    # This is a feature only reserved for 0.4 but a new system to work
+                        # nicely with the 0.2.8 version of the client has been programmed.
+                        # How it works is... simply type in a name (player or command) and hit tab
+                        # and it should auto complete it for you. Quite good but lazy at the same time.
+          -----------------------------------------------------------
+          - Player Name : How?
+                          In chat, simply type some part of a name and hit tab and it should automatically
+                          get the most closest matching string of it. If it doesn't auto-fill, then there
+                          couldn't be any match to be found.
+                          
+                          Used by?
+                          {normal} /msg /shout
+                          {normal} - clean text, without chat commands
+          -----------------------------------------------------------
+          - Command Name: How?
+                          In chat, type /admin and then a command and hit tab. Command will fill with the
+                          matching beggining command.
+                          
+                          Used by?
+                          {normal} /admin
+                          {normal} - clean text in "Con: "    
+  ------------------------------------------------------------------------------        
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 Changes in 0.2.9-sty+ct+ap_r822
 New race commands:
   * RACE_LOG_UNFINISHED         # Should the players that have not finished that map be recorded as well?

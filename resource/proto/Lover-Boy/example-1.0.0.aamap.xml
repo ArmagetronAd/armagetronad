@@ -1,13 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- <!DOCTYPE Resource SYSTEM "AATeam/map-0.2.8.0_rc4.dtd"> -->
-<!DOCTYPE Resource SYSTEM "Lover-Boy/map-0.2.8.3.1_sty+ct+ap_v1.2.dtd">
+<!DOCTYPE Resource SYSTEM "Lover-Boy/map-0.2.9_styctap_v1.0.dtd">
 <Resource type="aamap" name="example" version="1.0.0" author="Lover-Boy" category="">
-	<Map version="0.2.8_sty+ct+ap">
-		<!-- The original square map, technically created by z-man.
-	         Converted to XML by philippeqc.
-	         License: Public Domain. Do with it what you want.
-        -->
-
+	<Map version="0.2.9_styctap">
 		<World>
 			<Field>
 				<Spawn	x="255"	y="50"	xdir="0"	ydir="1"	/>
@@ -33,10 +27,11 @@
 					<Point	x="0"	y="0"	/>
 				</Wall>
 				
-				<Zone effect="teleport" destX="400" destY="20" modes="abs">
+				<Zone effect="teleport">
 					<ShapeCircle radius="10">
 						<Point x="100" y="200" />
 						<Color r="15" g="15" />
+            <Teleport destX="400" destY="20" modes="abs" />
 					</ShapeCircle>
 				</Zone>
 				
@@ -44,16 +39,24 @@
 					<ShapeCircle radius="10">
 						<Point x="20" y="200" />
 						<Color b="10" r="10" />
-						<Move xdir="10" ydir="10" />
+						<Move xdir="10" ydir="0" />
 					</ShapeCircle>
 				</Zone>
 				
 				<Zone effect="object">
 					<ShapeCircle radius="10">
-						<Point x="200" y="20" />
+						<Point x="-30" y="60" />
 						<Color r="15" g="6" b="8" />
 					</ShapeCircle>
 				</Zone>
+        
+				<Zone effect="object">
+					<ShapeCircle radius="10">
+						<Point x="100" y="100" />
+						<Color r="10" g="0" b="15" />
+            <Move xdir="10" ydir="10" route="100 400 400 100 400 400 100 100" />
+					</ShapeCircle>
+				</Zone>        
 			</Field>
 		</World>
 	</Map>

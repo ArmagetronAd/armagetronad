@@ -22,6 +22,8 @@ tString tResourceManager::resRepoServer("http://resource.armagetronad.net/resour
 tString tResourceManager::resRepoClient("http://resource.armagetronad.net/resource/");
 static tSettingItem<tString> conf_res_repo("RESOURCE_REPOSITORY_CLIENT", tResourceManager::resRepoClient);
 
+tString resourceErrorLogFile("errors/resource_error.txt");
+
 static int myHTTPFetch(const char *URI, const char *filename, const char *savepath)
 {
     void *ctxt = NULL;
@@ -34,18 +36,41 @@ static int myHTTPFetch(const char *URI, const char *filename, const char *savepa
 
     ctxt = xmlNanoHTTPOpen(URI, NULL);
     if (ctxt == NULL) {
+        std::ofstream o;
+        if (tDirectories::Var().Open(o, resourceErrorLogFile, std::ios::app))
+        {
+            o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << " | Error: \n";
+            o << tOutput( "$resource_fetcherror_noconnect", URI ) << "\n";
+            o << "===========================================================\n\n";
+        }
         con << tOutput( "$resource_fetcherror_noconnect", URI );
         return 1;
     }
 
-    if ( (rc = xmlNanoHTTPReturnCode(ctxt)) != 200 ) {
+    if ( (rc = xmlNanoHTTPReturnCode(ctxt)) != 200 )
+    {
+        std::ofstream o;
+        if (tDirectories::Var().Open(o, resourceErrorLogFile, std::ios::app))
+        {
+            o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << " | Error: \n";
+            o << tOutput( rc == 404 ? "$resource_fetcherror_404" : "$resource_fetcherror", rc ) << "\n";
+            o << "===========================================================\n\n";
+        }
         con << tOutput( rc == 404 ? "$resource_fetcherror_404" : "$resource_fetcherror", rc );
         return 2;
     }
 
     fd = fopen(savepath, "w");
-    if (fd < 0) {
+    if (fd < 0)
+    {
         xmlNanoHTTPClose(ctxt);
+        std::ofstream o;
+        if (tDirectories::Var().Open(o, resourceErrorLogFile, std::ios::app))
+        {
+            o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << " | Error: \n";
+            o << tOutput( "$resource_no_write", savepath ) << "\n";
+            o << "===========================================================\n\n";
+        }
         con << tOutput( "$resource_no_write", savepath );
         return 3;
     }
@@ -144,16 +169,40 @@ tString tResourceManager::locateResource(const char *uri, const char *file) {
         }
     }
     // Validate paths and determine detination savepath
-    if (!file || file[0] == '\0') {
+    if (!file || file[0] == '\0')
+    {
+        std::ofstream o;
+        if (tDirectories::Var().Open(o, resourceErrorLogFile, std::ios::app))
+        {
+            o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << " | Error: \n";
+            o << tOutput( "$resource_no_filename" ) << "\n";
+            o << "===========================================================\n\n";
+        }
         con << tOutput( "$resource_no_filename" );
         return (tString) NULL;
     }
-    if (file[0] == '/' || file[0] == '\\') {
+    if (file[0] == '/' || file[0] == '\\')
+    {
+        std::ofstream o;
+        if (tDirectories::Var().Open(o, resourceErrorLogFile, std::ios::app))
+        {
+            o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << " | Error: \n";
+            o << tOutput( "$resource_abs_path" ) << "\n";
+            o << "===========================================================\n\n";
+        }
         con << tOutput( "$resource_abs_path" );
         return (tString) NULL;
     }
     savepath = tDirectories::Resource().GetWritePath(file);
-    if (savepath == "") {
+    if (savepath == "")
+    {
+        std::ofstream o;
+        if (tDirectories::Var().Open(o, resourceErrorLogFile, std::ios::app))
+        {
+            o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << " | Error: \n";
+            o << tOutput( "$resource_abs_path" ) << "\n";
+            o << "===========================================================\n\n";
+        }
         con << tOutput( "$resource_no_writepath" );
         return (tString) NULL;
     }

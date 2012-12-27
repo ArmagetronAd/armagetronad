@@ -489,7 +489,7 @@ gParser::parseSpawn(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
 }
 
 bool
-gParser::parseShapeCircle(eGrid *grid, xmlNodePtr cur, eCoord &zonePos, float &radius, float& growth, const xmlChar * keyword, gRealColor &zoneColor, bool &colorsExist, eCoord &zoneDir)
+gParser::parseShapeCircle(eGrid *grid, xmlNodePtr cur, eCoord &zonePos, float &radius, float& growth, const xmlChar * keyword, gRealColor &zoneColor, bool &colorsExist, eCoord &zoneDir, bool &zoneInteract, std::vector<eCoord> &route)
 {
     radius = myxmlGetPropFloat(cur, "radius");
     growth = myxmlGetPropFloat(cur, "growth");
@@ -526,8 +526,27 @@ gParser::parseShapeCircle(eGrid *grid, xmlNodePtr cur, eCoord &zonePos, float &r
         {
             REAL xDir = myxmlGetPropFloat(cur, "xdir");
             REAL yDir = myxmlGetPropFloat(cur, "ydir");
+            tString zoneInteractSet = myxmlGetPropString(cur, "interact");
+
+            if (zoneInteractSet.ToLower() == "true")
+                zoneInteract = true;
+            else
+                zoneInteract = false;
 
             zoneDir = eCoord(xDir * sizeMultiplier, yDir * sizeMultiplier);
+
+            tString zoneRoute = myxmlGetPropString(cur, "route");
+            if (zoneRoute.Filter() != "")
+            {
+                int pos = 0;
+                tString x = zoneRoute.ExtractNonBlankSubString(pos);
+                while(x.Filter() != "")
+                {
+                    tString y = zoneRoute.ExtractNonBlankSubString(pos);
+                    route.push_back( eCoord(atof(x) * sizeMultiplier, atof(y) * sizeMultiplier) );
+                    x = zoneRoute.ExtractNonBlankSubString(pos);
+                }
+            }
         }
         else if (isElement(cur->name, (const xmlChar *)"Alternative", keyword)) {
             if (isValidAlternative(cur, keyword)) {
@@ -538,6 +557,39 @@ gParser::parseShapeCircle(eGrid *grid, xmlNodePtr cur, eCoord &zonePos, float &r
     }
 
     return false;
+}
+
+void gParser::parseTeleportZone(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, eCoord &zoneJump, tString &zoneRelAbsStr, int &relJump, eCoord &ndir, REAL &reloc)
+{
+    cur = cur->xmlChildrenNode;
+    while( cur != NULL)
+    {
+        if (!xmlStrcmp(cur->name, (const xmlChar *)"text") || !xmlStrcmp(cur->name, (const xmlChar *)"comment")) {}
+        else if (isElement(cur->name, (const xmlChar *)"Teleport", keyword))
+        {
+            tString zoneJumpXStr = myxmlGetPropString(cur, "destX");
+            tString zoneJumpYStr = myxmlGetPropString(cur, "destY");
+            zoneJump = eCoord(atof(zoneJumpXStr)*sizeMultiplier,atof(zoneJumpYStr)*sizeMultiplier);
+
+            zoneRelAbsStr = myxmlGetPropString(cur, "modes");
+
+            if (zoneRelAbsStr == "") zoneRelAbsStr = "rel";
+            if (zoneRelAbsStr == "rel") relJump = 1;
+            else if (zoneRelAbsStr == "cycle") relJump = 2;
+            else relJump = 0;
+
+            tString xdir_str = myxmlGetPropString(cur, "dirX");
+            tString ydir_str = myxmlGetPropString(cur, "dirY");
+            if (xdir_str.Filter() == "") xdir_str = "0.0";
+            if (ydir_str.Filter() == "") ydir_str = "0.0";
+            ndir = eCoord(atof(xdir_str)*sizeMultiplier, atof(ydir_str)*sizeMultiplier);
+
+            tString reloc_str = myxmlGetPropString(cur, "reloc");
+            reloc = atof(reloc_str);
+            if (reloc_str == "") reloc = 1.0;
+        }
+        cur = cur->next;
+    }
 }
 
 void
@@ -551,15 +603,28 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
     gRealColor zoneColor;
     bool colorsExist = false;
     eCoord zoneDir;
+    bool zoneInteract = false;
+    std::vector<eCoord> route;
+
+    //  teleport stuff BEGIN
+    eCoord zoneJump;
+    int relJump = 0;
+    eCoord ndir;
+    REAL reloc = 0;
+    tString zoneRelAbsStr;
+    //  teleport stuff END
 
     while(shape != NULL && shapeFound==false) {
         if (!xmlStrcmp(cur->name, (const xmlChar *)"text") || !xmlStrcmp(cur->name, (const xmlChar *)"comment")) {}
-        else if (isElement(shape->name, (const xmlChar *)"ShapeCircle", keyword)) {
-            shapeFound = parseShapeCircle(grid, shape, zonePos, radius, growth, keyword, zoneColor, colorsExist, zoneDir);
+        else if (isElement(shape->name, (const xmlChar *)"ShapeCircle", keyword))
+        {
+            shapeFound = parseShapeCircle(grid, shape, zonePos, radius, growth, keyword, zoneColor, colorsExist, zoneDir, zoneInteract, route);
+            parseTeleportZone(grid, shape, keyword, zoneJump, zoneRelAbsStr, relJump, ndir, reloc);
         }
-        else if (isElement(cur->name, (const xmlChar *)"Alternative", keyword)) {
+        else if (isElement(cur->name, (const xmlChar *)"Alternative", keyword))
+        {
             if (isValidAlternative(cur, keyword)) {
-                parseAlternativeContent(grid, cur);
+                parseAlternativeContent(grid, shape);
             }
         }
         shape = shape->next;
@@ -673,35 +738,6 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
         }
         else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *) "effect"), (const xmlChar *)"teleport"))
         {
-            tString  zoneJumpXStr;
-            tString  zoneJumpYStr;
-            eCoord zoneJump;
-            int relJump=0;
-            eCoord ndir;
-            REAL reloc=0;
-
-            zoneJumpXStr = myxmlGetPropString(cur, "destX");
-            zoneJumpYStr = myxmlGetPropString(cur, "destY");
-            zoneJump = eCoord(atof(zoneJumpXStr)*sizeMultiplier,atof(zoneJumpYStr)*sizeMultiplier);
-
-            tString zoneRelAbsStr = myxmlGetPropString(cur, "modes");
-
-            if (zoneRelAbsStr=="") zoneRelAbsStr="rel";
-            if (zoneRelAbsStr=="rel") relJump=1;
-            else if (zoneRelAbsStr=="cycle") relJump=2;
-            else relJump = 0;
-
-            const tString xdir_str = myxmlGetPropString(cur, "dirX");
-            REAL xdir = atof(xdir_str);
-            const tString ydir_str = myxmlGetPropString(cur, "dirY");
-            REAL ydir = atof(ydir_str);
-            if (xdir_str == "") xdir = 0.0;
-            if (ydir_str == "") ydir = 0.0;
-            ndir = eCoord(xdir*sizeMultiplier,ydir*sizeMultiplier);
-            const tString reloc_str = myxmlGetPropString(cur, "reloc");
-            reloc = atof(reloc_str);
-            if (reloc_str == "") reloc = 1.0;
-
             gTeleportZoneHack *tZone = new gTeleportZoneHack(grid, zonePos, true);
             tZone->SetJump(zoneJump,relJump);
             tZone->SetNewDir(ndir);
@@ -727,6 +763,19 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
             if (zoneNamestr) zone->SetName(zoneNamestr);
             if (colorsExist) zone->SetColor(storeColors_);
             zone->SetVelocity(zoneDir);
+            if (zoneInteract)
+            {
+                zone->SetWallInteract(true);
+                zone->SetWallBouncesLeft(-1);
+            }
+            if(!route.empty())
+            {
+                zone->SetPosition(route.front());
+                for(std::vector<eCoord>::const_iterator iter = route.begin(); iter != route.end(); ++iter)
+                {
+                    zone->AddWaypoint(*iter);
+                }
+            }
         }
     }
 }
