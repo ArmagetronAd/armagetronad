@@ -124,7 +124,8 @@ public:
     REAL toReal() const;
 
     //! confirms whether the tofind exists within the current string
-    bool Contains(const tString & tfind);
+    bool Contains(tString tofind);
+    bool Contains(const char *tofind);
 
     //! compares two strings alphanumerically
     static int CompareAlphaNumerical( const tString& a, const tString &b);
@@ -139,6 +140,9 @@ public:
 
     //! Filters string and returns all characters in lowercased string
     tString Filter() const;
+
+    //! Add slashes and returns string
+    tString AddSlashes() const;
 
     int PosWordRight(int start) const;          //! Computes the position of the next delimiter relative to start
     int PosWordLeft(int start) const;           //! Computes the position of the previous delimiter relative to start

@@ -1924,7 +1924,7 @@ bool st_StringEndsWith( tString const & test, char const * end )
 //!
 // **********************************************************************
 
-bool tString::Contains(const tString & tofind)
+bool tString::Contains(tString tofind)
 {
     // if the length of tofind longer than the string, quit it!
     if (tofind.Len() > Len())
@@ -1947,3 +1947,8 @@ bool tString::Contains(const tString & tofind)
     // if they don't match at all, too bad!
     return false;
 }
+
+ bool tString::Contains(const char *tofind)
+ {
+     return Contains(tString(tofind));
+ }

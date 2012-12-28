@@ -4472,7 +4472,7 @@ static bool ChatTabCompletition(tString &strString, int &curserPos)
         tString search_string;
         search_string.ReadLine(s);
 
-        if ((command.Filter() != "") && ((command == "/msg") || (command == "/shout")))
+        if ((command.Filter() != "") && ((command == "/msg") || ((command == "/shout") || (command == "/team"))))
         {
             //  con << "Command found!\n";
             for(int i = 0; i < se_PlayerNetIDs.Len(); i++)
@@ -4504,7 +4504,7 @@ static bool ChatTabCompletition(tString &strString, int &curserPos)
                             if (filtered_name.Contains(filtered_search))
                             {
                                 //  con << "Player found!\n";
-                                if (first && (command == "/shout"))
+                                if (first && ((command == "/shout") || (command == "/team")))
                                     new_string << p->GetName() + ": ";
                                 else
                                     new_string << p->GetName() + " ";

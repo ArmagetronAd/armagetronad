@@ -234,7 +234,7 @@ class tConfItemBase
 protected:
     const tString title;
     const tOutput help;
-    class tString value;
+    //  class tString value;
     bool changed;
 
     tAccessLevel requiredLevel; //!< access level required to change this setting
@@ -262,11 +262,11 @@ public:
         return title;
     }
 
-    void SetValue(tString newValue)
+    /*void SetValue(tString newValue)
     {
         value = "";
         value << newValue;
-    }
+    }*/
 
     tAccessLevel GetRequiredLevel() const { return requiredLevel; }
     tAccessLevel GetSetLevel() const { return setLevel; }
@@ -384,7 +384,7 @@ protected:
 public:
     tConfItem(const char *title,const tOutput& help,T& t)
             :tConfItemBase(title,help),target(&t), shouldChangeFunc_(NULL) {
-                tConfItemMap & confmap = ConfItemMap();
+                /*tConfItemMap & confmap = ConfItemMap();
                 for(tConfItemMap::iterator iter = confmap.begin(); iter != confmap.end() ; ++iter)
                 {
                     tConfItemBase * ci = (*iter).second;
@@ -395,12 +395,12 @@ public:
                         ci->SetValue(newValue);
                         break;
                     }
-                }
+                }*/
             }
 
     tConfItem(const char *title,T& t)
             :tConfItemBase(title),target(&t), shouldChangeFunc_(NULL) {
-                tConfItemMap & confmap = ConfItemMap();
+                /*tConfItemMap & confmap = ConfItemMap();
                 for(tConfItemMap::iterator iter = confmap.begin(); iter != confmap.end() ; ++iter)
                 {
                     tConfItemBase * ci = (*iter).second;
@@ -411,12 +411,12 @@ public:
                         ci->SetValue(newValue);
                         break;
                     }
-                }
+                }*/
             }
 
     tConfItem(const char*title, T& t, ShouldChangeFuncT changeFunc)
             :tConfItemBase(title),target(&t),shouldChangeFunc_(changeFunc) {
-                tConfItemMap & confmap = ConfItemMap();
+                /*tConfItemMap & confmap = ConfItemMap();
                 for(tConfItemMap::iterator iter = confmap.begin(); iter != confmap.end() ; ++iter)
                 {
                     tConfItemBase * ci = (*iter).second;
@@ -427,7 +427,7 @@ public:
                         ci->SetValue(newValue);
                         break;
                     }
-                }
+                }*/
             }
 
     virtual ~tConfItem(){}

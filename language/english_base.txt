@@ -2921,6 +2921,13 @@ resource_abs_path           ERROR: Absolute filename, the server is trying to ov
 resource_no_writepath       ERROR: Cannot determine path to write resource to.\n
 resource_no_write           ERROR: Cannot open \1 for writing.\n
 
+resource_download_notvalid  ERROR: \1 is not a valid file to download.\n
+resource_download_failed    ERROR: Unable to download \1.\n
+resource_resorting_backup   Have no choice, resorting to using back up list.\n
+resource_backup_trying      Resource Host about to try: \1.\n
+resource_backup_file404     ERROR: Couldn't find file \2 in host \1.\n
+resource_backup_notconnect  ERROR: Cannot connect to \1 repository.\n
+
 #********************************************
 #********************************************
 #
