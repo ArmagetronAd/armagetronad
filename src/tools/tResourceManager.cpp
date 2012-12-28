@@ -148,6 +148,9 @@ static bool resourceBackupHTTPFetch(std::ofstream &o, const char *filename, cons
                                 testCounter++;
                             if (strString.Contains(tString("<Field")))
                                 testCounter++;
+
+                            if ((testCounter > 0) && (testCounter == 4))
+                                break;
                         }
                     }
                     //  others can download without checking
@@ -207,8 +210,6 @@ static bool resourceHTTPFetch(const char *URI, const char *filename, const char 
     FILE* fd;
     int rc;
 
-    con << tOutput( "$resource_downloading", URI );
-
     std::ofstream o;
     if (tDirectories::Var().Open(o, resourceErrorLogFile, std::ios::app))
     {
@@ -254,6 +255,9 @@ static bool resourceHTTPFetch(const char *URI, const char *filename, const char 
                             testCounter++;
                         if (strString.Contains(tString("<Field")))
                             testCounter++;
+
+                        if ((testCounter > 0) && (testCounter == 4))
+                            break;
                     }
                 }
                 //  others can download without checking
@@ -327,7 +331,7 @@ static int myHTTPFetch(const char *URI, const char *filename, const char *savepa
     FILE* fd;
     int len, rc;
 
-    con << tOutput( "$resource_downloading", URI );
+    //con << tOutput( "$resource_downloading", URI );
     // con << "Downloading " << URI << "...\n";
 
     ctxt = xmlNanoHTTPOpen(URI, NULL);
@@ -392,26 +396,35 @@ static int myFetch(const char *URIs, const char *filename, const char *savepath)
     const char *r = URIs, *p, *n;
     char *u;
     size_t len;
-    bool rv = -1;
+    bool rv = false;
     // r = unprocessed data		p = end-of-item + 1		u = item
     // n = to-be r				len = length of item	savepath = result filepath
 
-    while (r[0] != '\0') {
+    while (r[0] != '\0')
+    {
         while (r[0] == ' ') ++r;			// skip spaces at the start of the item
+
         p = strchr(r, ';');
-        if ( !p )
+        if (!p)
             p = strchr(r, '\0');
+
         n = (p[0] == '\0') ? p : (p + 1);	// next item starts after the semicolon
+
         // NOTE: skip semicolons, *NOT* nulls
         while (p[-1] == ' ') --p;			// skip spaces at the end of the item
+
         len = (size_t)(p - r);
-        if (len > 0) {						// skip this for null-length items
+        if (len > 0)
+        {						// skip this for null-length items
             u = (char*)malloc((len + 1) * sizeof(char));
             strncpy(u, r, len);
             u[len] = '\0';					// u now contains the individual URI
+
             //rv = myHTTPFetch(u, filename, savepath);	// TODO: handle other protocols?
             rv = resourceHTTPFetch(u, filename, savepath);
+
             free(u);
+
             if (rv) return true;		// If successful, return the file retrieved
         }
         r = n;								// move onto the next item
@@ -435,7 +448,7 @@ NOTE: There must be *at least* one directory level, even if it is ./
 */
 tString tResourceManager::locateResource(const char *uri, const char *file) {
     tString filepath, a_uri = tString(), savepath;
-    bool rv;
+    bool rv = false;
 
     char * to_free = NULL; // string to delete later
 
