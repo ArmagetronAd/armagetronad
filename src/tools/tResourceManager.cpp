@@ -9,82 +9,11 @@
 
 #include <libxml/nanohttp.h>
 
-#include "tConfiguration.h"
 #include "tDirectories.h"
 #include "tResourceManager.h"
 #include "tString.h"
 
-class tSettingResource: public tConfItemBase
-{
-public:
-    tSettingResource( char const * name )
-    : tConfItemBase( name ),
-      current_(0)
-    {
-    }
-
-    // the number of items
-    int Size() const
-    {
-        return items_.Len();
-    }
-
-    // returns the current value
-    tString Current() const
-    {
-        tASSERT( Size() > 0 && current_ >= 0 && current_ < Size() );
-
-        return items_[current_];
-    }
-
-void Reset()
-    {
-        current_ = 0;
-    }
-
-    tString Get(int itemID) const
-    {
-        return items_[itemID];
-    }
-private:
-    virtual void ReadVal( std::istream &is )
-    {
-        tString mapsT;
-        mapsT.ReadLine (is);
-        items_.SetLen (0);
-
-        int strpos = 0;
-        int nextsemicolon = mapsT.StrPos(";");
-
-        if (nextsemicolon != -1)
-        {
-            do
-            {
-                tString const &map = mapsT.SubStr(strpos, nextsemicolon - strpos);
-
-                strpos = nextsemicolon + 1;
-                nextsemicolon = mapsT.StrPos(strpos, ";");
-
-                items_.Insert(map);
-            }
-            while ((nextsemicolon = mapsT.StrPos(strpos, ";")) != -1);
-        }
-
-        // make sure the current value is correct
-        if ( current_ >= items_.Len() )
-        {
-            current_ = 0;
-        }
-    }
-
-    virtual void WriteVal(std::ostream &s){}
-    virtual bool Writable(){return false;}
-    virtual bool Save(){return false;}
-
-    tArray<tString> items_; // the various values the rotating config can take
-    int current_;           // the index of the current
-};
-
+//  stores the list of resource repository hosts
 static tSettingResource sg_resourceRepositoryBackups("RESOURCE_REPOSITORY_BACKUPS");
 
 // server determined resource repository
@@ -156,6 +85,7 @@ static bool resourceBackupHTTPFetch(std::ofstream &o, const char *filename, cons
                     //  others can download without checking
                     else testCounter = 4;
 
+                    //  used up. Better to close now and reopen again.
                     xmlNanoHTTPClose(ctxt);
 
                     //  if those four elements exist
@@ -190,6 +120,11 @@ static bool resourceBackupHTTPFetch(std::ofstream &o, const char *filename, cons
                             con << tOutput( "$resource_no_write", savepath );
                         }
                     }
+                    else
+                    {
+                        o << tOutput( "$resource_download_notvalid", filename ) << "\n";
+                        con << tOutput( "$resource_download_notvalid", filename );
+                    }
                 }
             }
             else
@@ -223,12 +158,13 @@ static bool resourceHTTPFetch(const char *URI, const char *filename, const char 
                 o << tOutput( rc == 404 ? "$resource_fetcherror_404" : "$resource_fetcherror", rc );
                 con << tOutput( rc == 404 ? "$resource_fetcherror_404" : "$resource_fetcherror", rc );
 
-                //  try back up resource to try and download map
+                //  try back up resource to try and download file
                 if (!resourceBackupHTTPFetch(o, filename, savepath))
                 {
                     o << tOutput("$resource_download_failed", filename);
                     con << tOutput("$resource_download_failed", filename);
                 }
+                else return true;
             }
             else
             {
@@ -263,6 +199,7 @@ static bool resourceHTTPFetch(const char *URI, const char *filename, const char 
                 //  others can download without checking
                 else testCounter = 4;
 
+                //  used up. Better to close now and reopen again.
                 xmlNanoHTTPClose(ctxt);
 
                 //  if those four elements exist
@@ -303,9 +240,15 @@ static bool resourceHTTPFetch(const char *URI, const char *filename, const char 
                     xmlNanoHTTPClose(ctxt);
                     o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << " | Error: \n";
                     o << tOutput( "$resource_download_notvalid", filename ) << "\n";
+                    con << tOutput( "$resource_download_notvalid", filename );
 
-                    //  try back up resource to load map
-                    return resourceBackupHTTPFetch(o, filename, savepath);
+                    //  try back up resource to try and download file
+                    if (!resourceBackupHTTPFetch(o, filename, savepath))
+                    {
+                        o << tOutput("$resource_download_failed", filename);
+                        con << tOutput("$resource_download_failed", filename);
+                    }
+                    else return true;
                 }
             }
         }
@@ -316,8 +259,13 @@ static bool resourceHTTPFetch(const char *URI, const char *filename, const char 
             o << tOutput( "$resource_fetcherror_noconnect", URI );
             con << tOutput( "$resource_fetcherror_noconnect", URI );
 
-            //  try back up resource to load file
-            resourceBackupHTTPFetch(o, filename, savepath);
+                //  try back up resource to try and download file
+                if (!resourceBackupHTTPFetch(o, filename, savepath))
+                {
+                    o << tOutput("$resource_download_failed", filename);
+                    con << tOutput("$resource_download_failed", filename);
+                }
+                else return true;
         }
         o << "===========================================================\n\n";
         return false;

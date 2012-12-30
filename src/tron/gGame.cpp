@@ -4248,9 +4248,28 @@ static SvgOutput sg_svgOutput;
 
 bool sg_roundStartingChecker = true;
 
+// **********************************************************************
+// *
+// *	Map Display Settings
+// *
+// **********************************************************************
+
 static eLadderLogWriter sg_currentMapWriter("CURRENT_MAP", false);
+
 static bool sg_displayMapDetails = false;
 static tSettingItem<bool> sg_displayMapDetailsConf("DISPLAY_MAP_DETAILS", sg_displayMapDetails);
+
+static bool sg_displayMapName = true;
+static tSettingItem<bool> sg_displayMapNameConf("DISPLAY_MAP_NAME", sg_displayMapName);
+
+static bool sg_displayMapAuthor = true;
+static tSettingItem<bool> sg_displayMapAuthorConf("DISPLAY_MAP_AUTHOR", sg_displayMapAuthor);
+
+static bool sg_displayMapVersion = true;
+static tSettingItem<bool> sg_displayMapVersionConf("DISPLAY_MAP_VERSION", sg_displayMapVersion);
+
+static bool sg_displayMapAxes = true;
+static tSettingItem<bool> sg_displayMapAxesConf("DISPLAY_MAP_AXES", sg_displayMapAxes);
 
 void gGame::StateUpdate(){
 
@@ -4570,9 +4589,15 @@ void gGame::StateUpdate(){
                 if (sg_displayMapDetails)
                 {
                     tColoredString Output;
-                    Output << "0xff6622Map Name   : 0x999999" << pz_mapName << "\n";
-                    Output << "0xff6622Map Author : 0x999999" << pz_mapAuthor << "\n";
-                    Output << "0xff6622Map Version: 0x999999" << pz_mapVersion << "\n";
+                    if (sg_displayMapName)
+                        Output << tOutput("$display_map_name", pz_mapName);
+                    if (sg_displayMapAuthor)
+                        Output << tOutput("$display_map_author", pz_mapAuthor);
+                    if (sg_displayMapVersion)
+                        Output << tOutput("$display_map_version", pz_mapVersion);
+                    if (sg_displayMapAxes)
+                        Output << tOutput("$display_map_axes", pz_mapAxes);
+
                     sn_ConsoleOut(Output);
                 }
             }
@@ -4599,6 +4624,7 @@ void gGame::StateUpdate(){
                 Analysis(0);
 
                 delayedCommands::Clear();
+                gZone::ClearDelay();
 
                 // log scores before players get renamed
                 //ePlayerNetID::LogScoreDifferences();
@@ -5830,6 +5856,7 @@ bool gGame::GameLoop(bool input){
     }
 
 	delayedCommands::Run(gtime);
+	gZone::Timesteps(gtime);
 	if (sg_roundStartingChecker)
 	{
         sg_roundStartedWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");

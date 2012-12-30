@@ -1,4 +1,25 @@
 ===========================
+Changes in r831
+===========================
+Corrections & Improvements:
+  * Due to dissatisfaction, FILTER_COLOR_STRINGS & FILTER_DARK_COLOR_STRINGS has
+    been modified so that it works in local display as well. May not be necessary
+    but it didn't work during debug state or any other.
+  * Added ENABLE_MATES_CASING because of a personal choice thinking. It is clear
+    the use of irregular letters in name causes some hassle for server but this
+    personal choice setting will be good for those prefered to search for mates
+    who use that kind of name.    
+
+New Commands:
+  * HIGHLIGHT_NAME      # If set to 1, your name will get highlited in string.
+  * ENABLE_MATES_CASING # If set to 0, mates casing will be ignored.
+
+New DTD Features:
+  New Version: map-0.2.9_styctap_v1.1.dtd 
+  * rotate  # the speed at which the zone rotates. Works with <ShapeCircle ...>
+  * delay   # the number of seconds to wait before the zone can actually appear on the grid
+      
+===========================
 Changes from r823 - r829
 ===========================
 Corrections & Improvements:

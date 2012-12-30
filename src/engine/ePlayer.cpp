@@ -1513,6 +1513,9 @@ void ePlayer::LogIn()
     }
 }
 
+static bool se_highlightMyName = false;
+static tConfItem<bool> se_highlightMyNameConf("HIGHLIGHT_NAME", se_highlightMyName);
+
 static void se_DisplayChatLocally( ePlayerNetID* p, const tString& say )
 {
 #ifdef DEBUG_X
@@ -1522,6 +1525,18 @@ static void se_DisplayChatLocally( ePlayerNetID* p, const tString& say )
     }
 #endif
 
+    tColoredString actualMessage(say);
+    if (sn_filterColorStrings || sn_filterDarkColorStrings)
+    {
+        actualMessage.NetFilter();
+        actualMessage.RemoveTrailingColor();
+
+        if (sn_filterColorStrings)
+            actualMessage = tColoredString::RemoveColors(actualMessage, false);
+        else if (sn_filterDarkColorStrings)
+            actualMessage = tColoredString::RemoveColors(actualMessage, true);
+    }
+
     if ( p && !p->IsSilenced() && se_enableChat )
     {
         //tColoredString say2( say );
@@ -1529,20 +1544,40 @@ static void se_DisplayChatLocally( ePlayerNetID* p, const tString& say )
         tColoredString message;
         message << *p;
         message << tColoredString::ColorString(1,1,.5);
-        message << ": " << say << '\n';
+        if (se_highlightMyName && (actualMessage.Contains(p->GetName())))
+        {
+            tString strOld = p->GetName();
+            tColoredString strReplace;
+            strReplace << p->GetColoredName() << tColoredString::ColorString(1,1,.5);
+
+            message << ": " << actualMessage.Replace(strOld, strReplace) << "\n";
+        }
+        else
+            message << ": " << actualMessage << "\n";
 
         con << message;
     }
 }
 
 static bool se_silenceEnemies = false;
-static tSettingItem< bool > se_silenceEnemiesConf( "SILENCE_ENEMIES", se_silenceEnemies );
+static tConfItem<bool> se_silenceEnemiesConf( "SILENCE_ENEMIES", se_silenceEnemies );
 
 static void se_DisplayChatLocallyClient( ePlayerNetID* p, const tString& message )
 {
     if ( p && !p->IsSilenced() && se_enableChat )
     {
-        tString actualMessage(message);
+        tColoredString actualMessage(message);
+        if (sn_filterColorStrings || sn_filterDarkColorStrings)
+        {
+            actualMessage.NetFilter();
+            actualMessage.RemoveTrailingColor();
+
+            if (sn_filterColorStrings)
+                actualMessage = tColoredString::RemoveColors(actualMessage, false);
+            else if (sn_filterDarkColorStrings)
+                actualMessage = tColoredString::RemoveColors(actualMessage, true);
+        }
+
         bool sentFromTeamMember = false;
         if(se_silenceEnemies)
         {
@@ -1574,6 +1609,15 @@ static void se_DisplayChatLocallyClient( ePlayerNetID* p, const tString& message
 
         if ( p->CurrentTeam() && ( !p->Object() || !p->Object()->Alive() ) )
             con << tOutput("$dead_console_decoration");
+
+        if (se_highlightMyName && actualMessage.Contains(p->GetName()))
+        {
+            tString strOld = p->GetName();
+            tColoredString strReplace;
+            strReplace << p->GetColoredName() << tColoredString::ColorString(1,1,.5);
+
+            actualMessage = actualMessage.Replace(strOld, strReplace);
+        }
 
         con << actualMessage << "\n";
     }

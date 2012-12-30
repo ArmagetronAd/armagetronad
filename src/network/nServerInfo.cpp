@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -155,11 +155,11 @@ static void sn_AddMasterServer( std::istream &s )
 {
     tString connectionName;
     unsigned port = 4533;
-    
+
     s >> connectionName;
     if ( !s.eof() )
         s >> port;
-    
+
     // back up regular server list
     nServerInfo *oldFirstServer = sn_FirstServer;
     sn_FirstServer = NULL;
@@ -169,10 +169,10 @@ static void sn_AddMasterServer( std::istream &s )
     newMaster->SetPort( port );
     newMaster->Remove();
     newMaster->Insert( sn_masterList );
-    
+
     // restore regular server list
     sn_FirstServer = oldFirstServer;
-    nServerInfo::TellMasterAboutMe( newMaster );    
+    nServerInfo::TellMasterAboutMe( newMaster );
 }
 
 static tConfItemFunc sn_addMasterServerConfItemFunc( "ADD_MASTER_SERVER", &sn_AddMasterServer );
@@ -403,7 +403,7 @@ void nServerInfo::Load(std::istream &s)
                 con << "Warning: unknown tag " << id << " found in server config file.\n";
                 warnedAboutUnknownOptions = true;
             }
-        }            
+        }
     }
 
     queried = 0;
@@ -604,15 +604,15 @@ static void CheckDuplicate( nServerInfo * server )
     {
         if (run != server && *run == *server)
             IsDouble = true;
-        
+
         run = run->Next();
     }
-    
+
     if (IsDouble)
     {
 #ifdef DEBUG
         con << "Deleting duplicate server " << server->GetName() << "\n";
-#endif  
+#endif
         delete server;
     }
 }
@@ -661,7 +661,7 @@ void nServerInfo::Load(const tPath& path, const char *filename)
 
             // record server
             tRecorder::Record( section, *server );
-            
+
             // preemptively resolve DNS
             server->GetAddress();
 
@@ -1379,7 +1379,7 @@ void nServerInfo::GiveBigServerInfo(nMessage &m)
         tString sender;
         sn_GetAdr( m.SenderID(), sender );
         con << tOutput(
-            logPolls > 0 ? "$network_master_pollanswer" : "$network_master_pollanswer_last", 
+            logPolls > 0 ? "$network_master_pollanswer" : "$network_master_pollanswer_last",
             sender
             );
     }
@@ -1451,7 +1451,7 @@ void nServerInfo::GiveExtraServerInfo(nMessage &m)
 {
 	if (sn_IsMaster)
 		Cheater(m.SenderID());
-  
+
 	unsigned short extraType;
 	WriteMyInfo(m);
 	m >> extraType;
@@ -1530,7 +1530,7 @@ void nServerInfo::GetExtraServerInfo(nMessage &m)
 bool nServerInfo::QueryExtraInfo()
 {
 	static float lastTime = 0.0f;
-	static const float Interval	
+	static const float Interval
 }
 
 RequestExtraServerInfoDescriptor

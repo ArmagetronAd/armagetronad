@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-  
+
 ***************************************************************************
 
 */
@@ -30,6 +30,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 static bool sg_enableFriends = false;
 static tConfItem< bool > sg_enableFriendsConf( "ENABLE_FRIENDS", sg_enableFriends );
+
+//  enabling this will cause friend's names to be case sensitive
+static bool sg_enableFriendsCasing = true;
+static tConfItem< bool > sg_enableFriendsCasingConf("ENABLE_FRIENDS_CASING", sg_enableFriendsCasing);
 
 static gFriends sg_friends;
 
@@ -64,6 +68,11 @@ void gFriends::FriendsMenu( void )
 bool getFriendsEnabled()
 {
 	return sg_enableFriends;
+}
+
+bool getFriendsCasingEnabled()
+{
+    return sg_enableFriendsCasing;
 }
 
 void FriendsToggle()

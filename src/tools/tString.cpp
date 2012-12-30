@@ -1939,7 +1939,7 @@ bool tString::Contains(tString tofind)
         tString isThis = this->SubStr(i, strCount);
 
         // if that stripped string matches, good!
-        if (isThis == tofind)
+        if (isThis.Filter() == tofind.Filter())
         {
             return true;
         }
@@ -1948,7 +1948,171 @@ bool tString::Contains(tString tofind)
     return false;
 }
 
- bool tString::Contains(const char *tofind)
- {
-     return Contains(tString(tofind));
- }
+bool tString::Contains(const char *tofind)
+{
+    return Contains(tString(tofind));
+}
+
+// **********************************************************************
+// *
+// *	RemoveWord
+// *
+// **********************************************************************
+//!
+//!    @param      find_word       The word to remove from the string
+//!    @return     newLine         Returns string without "find_word"
+//!
+// **********************************************************************
+
+tString tString::RemoveWord(tString find_word)
+{
+    tString ret(*this);
+    tString newLine;
+
+    if (find_word.Len() > ret.Len())
+        return tString("");
+    else if (find_word == "")
+        return ret;
+
+    int count_word = find_word.Len() - 1;
+    int this_word = ret.Len();
+
+    for(int i = 0; i < this_word; i++)
+    {
+        tString putWordTogether;
+        for(int j = 0; j < count_word; j++)
+        {
+            putWordTogether << ret[i+j];
+        }
+
+        if (putWordTogether == find_word)
+            i += count_word - 1;
+        else newLine << ret[i];
+    }
+
+    return newLine;
+}
+
+tString tString::RemoveWord(const char *find_word)
+{
+    return RemoveWord(tString(find_word));
+}
+
+tString tString::RemoveWord(char find_word)
+{
+    return RemoveWord(tString((const char*)find_word));
+}
+
+
+// **********************************************************************
+// *
+// *	Split
+// *
+// **********************************************************************
+//!
+//!    @param      del_word       The expression to exclude when splitting string
+//!    @return     arrayString    Returns string in array before and after "del_word"
+//!
+// **********************************************************************
+
+tArray<tString> tString::Split(tString del_word)
+{
+    tString ret(*this);
+    tArray<tString> arrayString;
+
+    if (del_word.Len() > ret.Len())
+        return NULL;
+    else if (del_word == "")
+    {
+        arrayString[0] = ret;
+        return arrayString;
+    }
+
+    int count_word = del_word.Len() - 1;
+    int this_word = ret.Len();
+    int arrayKey = 0;
+
+    for(int i = 0; i < this_word; i++)
+    {
+        tString putWordTogether;
+        for(int j = 0; j < count_word; j++)
+        {
+            putWordTogether << ret[i+j];
+        }
+
+        if (putWordTogether == del_word)
+        {
+            i += count_word - 1;
+            arrayKey++;
+        }
+        else arrayString[arrayKey] << ret[i];
+    }
+
+    return arrayString;
+}
+
+tArray<tString> tString::Split(const char *del_word)
+{
+    return Split(tString(del_word));
+}
+
+tArray<tString> tString::Split(char del_word)
+{
+    return Split(tString((const char*)del_word));
+}
+
+// **********************************************************************
+// *
+// *	Replace
+// *
+// **********************************************************************
+//!
+//!    @param      old_word       The word to search up
+//!    @param      new_word       Word to replace with the old one with
+//!    @return     strString    Returns string
+//!
+// **********************************************************************
+
+tString tString::Replace(tString old_word, tString new_word)
+{
+    tString ret(*this);
+    tString strString;
+
+    if (old_word.Len() > ret.Len())
+        return tString("");
+    else if (old_word == "")
+        return ret;
+
+    int count_word = old_word.Len() - 1;
+    int count_new = new_word.Len() - 1;
+    int this_word = ret.Len();
+
+    for(int i = 0; i < this_word; i++)
+    {
+        tString putWordTogether;
+        for(int j = 0; j < count_word; j++)
+        {
+            putWordTogether << ret[i + j];
+        }
+
+        if (putWordTogether.Filter() == old_word.Filter())
+        {
+            strString << new_word;
+            i += count_word - 1;
+        }
+        else
+            strString << ret[i];
+    }
+
+    return strString;
+}
+
+tString tString::Replace(const char *old_word, const char *new_word)
+{
+    return Replace(tString(old_word), tString(new_word));
+}
+
+tString tString::Replace(char old_word, char new_word)
+{
+    return Replace(tString((const char*)old_word), tString((const char*)new_word));
+}

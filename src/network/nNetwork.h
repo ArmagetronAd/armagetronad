@@ -1065,6 +1065,8 @@ nMachine & nMachine::SetDecorators( nMachineDecorator * decorators )
     return *this;
 }
 
+extern bool sn_filterColorStrings, sn_filterDarkColorStrings;
+
 #endif
 
 

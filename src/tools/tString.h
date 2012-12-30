@@ -141,15 +141,26 @@ public:
     //! Filters string and returns all characters in lowercased string
     tString Filter() const;
 
-    //! Add slashes and returns string
-    tString AddSlashes() const;
-
     int PosWordRight(int start) const;          //! Computes the position of the next delimiter relative to start
     int PosWordLeft(int start) const;           //! Computes the position of the previous delimiter relative to start
     int RemoveWordRight(int start);             //! Remove word right according to the delimiters
     int RemoveWordLeft(int start);              //! Remove word left according to the delimiters
     void RemoveSubStr(int start, int length);   //! Remove a substring, in-place
     tString Reverse() const;                    //! Reverses strings
+
+    //  removes that word from the string if it exists
+    tString RemoveWord(tString find_word);
+    tString RemoveWord(const char *find_word);
+    tString RemoveWord(char find_word);
+
+    //  splits string intoarrays
+    tArray<tString> Split(tString del_word);
+    tArray<tString> Split(const char *del_word);
+    tArray<tString> Split(char del_word);
+
+    tString Replace(tString old_word, tString new_word);
+    tString Replace(const char *old_word, const char *new_word);
+    tString Replace(char old_word, char new_word);
 
     tString ExtractNonBlankSubString( int &pos ) const; //!< Extract non blank char sequence starting at pos
 

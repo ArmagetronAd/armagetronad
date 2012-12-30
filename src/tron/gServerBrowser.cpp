@@ -131,7 +131,7 @@ class gBrowserMenuItem: public uMenuItem
 protected:
     bool displayHelp_;
     REAL helpAlpha_;
-    
+
     gBrowserMenuItem(uMenu *M,const tOutput &help): uMenuItem( M, help )
     {
     }
@@ -404,11 +404,28 @@ void gServerMenu::Update()
 			tString* friends = getFriends();
 			for (i = MAX_FRIENDS; i>=0; i--)
 			{
-				if (run->Users() > 0 && friends[i].Len() > 1 && userNames.StrPos(friends[i]) >= 0)
-				{
-					oneFound = true;
-					run->show = true;
-				}
+			    tString friends_name;
+			    if (getFriendsCasingEnabled)
+                    friends_name = friends[i];
+                else
+                    friends_name  = friends[i].Filter();
+
+                if (getFriendsCasingEnabled)
+                {
+                    if (run->Users() > 0 && friends_name.Len() > 1 && userNames.StrPos(friends_name) >= 0)
+                    {
+                        oneFound = true;
+                        run->show = true;
+                    }
+                }
+                else
+                {
+                    if (run->Users() > 0 && friends_name.Len() > 1 && userNames.Filter().StrPos(friends_name) >= 0)
+                    {
+                        oneFound = true;
+                        run->show = true;
+                    }
+                }
 			}
 		}
         run = run->Next();

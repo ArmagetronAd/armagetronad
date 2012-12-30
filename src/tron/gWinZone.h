@@ -80,7 +80,7 @@ nMessage & operator >> ( nMessage & m, tFunction & f );
 class gZone: public eNetGameObject
 {
 public:
-    gZone(eGrid *grid, const eCoord &pos, bool dynamicCreation = false); //!< local constructor
+    gZone(eGrid *grid, const eCoord &pos, bool dynamicCreation = false, bool delayCreation = false); //!< local constructor
     gZone(nMessage &m);                    //!< network constructor
     ~gZone();                              //!< destructor
 
@@ -127,6 +127,10 @@ public:
     void                SetName(tString name) {name_ = name;}
     static int          FindFirst(tString name);
     static int          FindNext(tString name, int prev_pos);
+
+    static void Timesteps(REAL currentTime);
+    static void AddDelay(REAL delayTime, gZone *Zone);
+    static void ClearDelay();
 
 protected:
     bool wallInteract_;
@@ -206,6 +210,8 @@ private:
         return false;
     }
 
+    static std::map<REAL, std::set<gZone*> > delayedZones_;
+
     virtual nDescriptor& CreatorDescriptor() const; //!< returns the descriptor to recreate this object over the network
 
     REAL Radius() const;           //!< returns the current radius
@@ -229,7 +235,7 @@ class gWinZoneHack: public gZone
 {
 	public:
 								 //!< local constructor
-		gWinZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false);
+		gWinZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false, bool delayCreation = false);
 								 //!< network constructor
 		gWinZoneHack(nMessage &m);
 		~gWinZoneHack();		 //!< destructor
@@ -258,7 +264,7 @@ class gDeathZoneHack: public gZone
 		};
 
 								 //!< local constructor
-		gDeathZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false, eTeam * teamowner = NULL );
+		gDeathZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false, eTeam * teamowner = NULL, bool delayCreation = false );
 								 //!< network constructor
 		gDeathZoneHack(nMessage &m);
 		~gDeathZoneHack();		 //!< destructor
@@ -289,7 +295,7 @@ class gRubberZoneHack: public gZone
 	public:
 
 								 //!< local constructor
-		gRubberZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false);
+		gRubberZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false, bool delayCreation = false);
 								 //!< network constructor
 		gRubberZoneHack(nMessage &m);
 		~gRubberZoneHack();		 //!< destructor
@@ -316,7 +322,7 @@ class gBaseZoneHack: public gZone
 {
 	public:
 								 //!< local constructor
-		gBaseZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false, eTeam * teamowner = NULL );
+		gBaseZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false, eTeam * teamowner = NULL, bool delayCreation = false );
 								 //!< network constructor
 		gBaseZoneHack(nMessage &m);
 		~gBaseZoneHack();		 //!< destructor
@@ -386,7 +392,7 @@ class gSumoZoneHack: public gZone
 {
 	public:
 								 //!< local constructor
-		gSumoZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false);
+		gSumoZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false, bool delayCreation = false);
 								 //!< network constructor
 		gSumoZoneHack(nMessage &m);
 		~gSumoZoneHack();		 //!< destructor
@@ -410,7 +416,7 @@ class gBallZoneHack: public gZone
 {
 	public:
 								 //!< local constructor
-		gBallZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false, eTeam * teamowner = NULL );
+		gBallZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false, eTeam * teamowner = NULL, bool delayCreation = false );
 								 //!< network constructor
 		gBallZoneHack(nMessage &m);
 		~gBallZoneHack();		 //!< destructor
@@ -438,7 +444,7 @@ class gFlagZoneHack: public gZone
 {
 public:
 								 //!< local constructor
-		gFlagZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false, eTeam * teamowner = NULL );
+		gFlagZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false, eTeam * teamowner = NULL, bool delayCreation = false );
     gFlagZoneHack(nMessage &m);                                  //!< network constructor
     ~gFlagZoneHack();                                            //!< destructor
 
@@ -476,7 +482,7 @@ class gTargetZoneHack: public gZone
 {
 	public:
 								 //!< local constructor
-		gTargetZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false );
+		gTargetZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false, bool delayCreation = false );
 								 //!< network constructor
 		gTargetZoneHack(nMessage &m);
 		~gTargetZoneHack();		 //!< destructor
@@ -524,7 +530,7 @@ class gKOHZoneHack: public gZone
 {
 	public:
 								 //!< local constructor
-		gKOHZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false );
+		gKOHZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false, bool delayCreation = false );
 								 //!< network constructor
 		gKOHZoneHack(nMessage &m);
 		~gKOHZoneHack();		 //!< destructor
@@ -551,7 +557,7 @@ class gTeleportZoneHack: public gZone
 {
 	public:
 								 //!< local constructor
-		gTeleportZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false );
+		gTeleportZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false, bool delayCreation = false );
 								 //!< network constructor
 		gTeleportZoneHack(nMessage &m);
 		~gTeleportZoneHack();		 //!< destructor
@@ -585,7 +591,7 @@ class gBlastZoneHack: public gZone
 	public:
 
 		//!< local constructor
-		gBlastZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false );
+		gBlastZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false, bool delayCreation = false );
 		//!< network constructor
 		gBlastZoneHack(nMessage &m);
 		~gBlastZoneHack();		 //!< destructor
@@ -603,7 +609,7 @@ class gBlastZoneHack: public gZone
 class gBurstZoneHack: public gZone
 {
     public:
-        gBurstZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false);
+        gBurstZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false, bool delayCreation = false);
         gBurstZoneHack(nMessage &m);
         ~gBurstZoneHack();
 
@@ -622,7 +628,7 @@ class gBurstZoneHack: public gZone
 class gObjectZoneHack: public gZone
 {
     public:
-        gObjectZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false);
+        gObjectZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false, bool delayCreation = false);
         gObjectZoneHack(nMessage &m);
         ~gObjectZoneHack();
 

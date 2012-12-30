@@ -78,7 +78,7 @@ protected:
     void parseZone(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
     void parseWall(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
 
-    bool parseShapeCircle(eGrid *grid, xmlNodePtr cur, eCoord &zonePos, float &radius, float &growth, const xmlChar * keyword, gRealColor &zoneColor, bool &colorsExist, eCoord &zoneDir, bool &zoneInteract, std::vector<eCoord> &route);
+    bool parseShapeCircle(eGrid *grid, xmlNodePtr cur, eCoord &zonePos, float &radius, float &growth, float &rotate, const xmlChar * keyword, gRealColor &zoneColor, bool &colorsExist, eCoord &zoneDir, bool &zoneInteract, std::vector<eCoord> &route);
     void parseTeleportZone(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, eCoord &zoneJump, tString &zoneRelAbsStr, int &relJump, eCoord &ndir, REAL &reloc);
 
     void parseField(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
@@ -98,10 +98,7 @@ protected:
     float sizeMultiplier;
 };
 
-extern tString pz_mapName;
-extern tString pz_mapAuthor;
-extern tString pz_mapVersion;
-extern tString pz_mapCategory;
+extern tString pz_mapName, pz_mapAuthor, pz_mapVersion, pz_mapCategory, pz_mapAxes;
 
 #endif //ArmageTron_PARSER_H
 
