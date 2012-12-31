@@ -52,6 +52,7 @@ void gFriends::FriendsMenu( void )
 {
     uMenu net_menu("$friends_menu");
 
+    uMenuItemToggle friends_casing (&net_menu, "$friends_casing", "$friends_casing_help", sg_enableFriendsCasing);
 	uMenuItemToggle friends_enable (&net_menu, "$friends_enable", "$friends_enable_help", sg_enableFriends);
 
 	tString name;

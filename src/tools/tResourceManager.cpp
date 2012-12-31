@@ -9,9 +9,14 @@
 
 #include <libxml/nanohttp.h>
 
+#include <windows.h>
+#include <wininet.h>
+
 #include "tDirectories.h"
 #include "tResourceManager.h"
 #include "tString.h"
+
+#include "ePlayer.h"
 
 //  stores the list of resource repository hosts
 static tSettingResource sg_resourceRepositoryBackups("RESOURCE_REPOSITORY_BACKUPS");
@@ -23,6 +28,151 @@ tString tResourceManager::resRepoServer("http://resource.armagetronad.net/resour
 // client determined resource repository
 tString tResourceManager::resRepoClient("http://resource.armagetronad.net/resource/");
 static tSettingItem<tString> conf_res_repo("RESOURCE_REPOSITORY_CLIENT", tResourceManager::resRepoClient);
+
+static void st_resourceRepositoryCheck(std::istream &s)
+{
+    tString filename;
+    filename.ReadLine(s);
+
+    //  don't do it if the check string is blank
+    if (filename.Filter() == "") return;
+
+    char c;
+    tString outputLine;
+    ePlayerNetID *receiver = 0;
+
+    if (sg_resourceRepositoryBackups.Size() > 0)
+    {
+        int maxlen = 0;
+        for(int a = 0; a < sg_resourceRepositoryBackups.Size(); a++)
+        {
+            tString strString = sg_resourceRepositoryBackups.Get(a);
+            if (maxlen < strString.Len())
+                maxlen = strString.Len();
+        }
+
+        outputLine << tOutput("$resource_check", filename);
+        for(int i = 0; i < sg_resourceRepositoryBackups.Size(); i++)
+        {
+            tString output;
+            tString resourceHost = sg_resourceRepositoryBackups.Get(i);
+
+            output << tOutput("$resource_check_host", resourceHost);
+            output.SetPos(maxlen + 1, false);
+            output << tOutput("$resource_check_seperator") << " ";
+
+            //  gotta remove the following or won't work
+            if (resourceHost.Contains("http://"))
+                resourceHost = resourceHost.RemoveWord("http://");
+            else if (resourceHost.Contains("https://"))
+                resourceHost = resourceHost.RemoveWord("ftp://");
+            else if (resourceHost = resourceHost.RemoveWord("ftp://"))
+                resourceHost = resourceHost.RemoveWord("ftp://");
+
+            //  get the list of paths in url
+            tArray<tString> resourcePaths = resourceHost.Split("/");
+            bool first = false;
+            tString strUrlPath;
+            for(int j = 0; j < resourcePaths.Len(); j++)
+            {
+                if (!first)
+                    resourceHost = resourcePaths[i];
+                else
+                    strUrlPath << "/" << resourcePaths[i];
+            }
+            strUrlPath << "/" << filename;
+
+            HINTERNET hSession = InternetOpen("MyAgent",INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
+            HINTERNET hConnect = InternetConnect(hSession, resourcePaths[0], INTERNET_DEFAULT_HTTP_PORT, NULL, NULL, INTERNET_SERVICE_HTTP, 0, 0);
+            if (hConnect)
+            {
+                HINTERNET hFile = HttpOpenRequest(hConnect, NULL, strUrlPath, NULL, NULL, NULL, 0, 0);
+                if (HttpSendRequest(hFile, NULL, 0, NULL, 0))
+                {
+                    output << tOutput("$resource_check_filefound");
+                }
+                else
+                {
+                    output << tOutput("$resource_check_filenotfound");
+                }
+                InternetCloseHandle(hFile);
+            }
+            else
+            {
+                output << tOutput("$resource_check_hostfail");
+            }
+            InternetCloseHandle(hSession);
+            InternetCloseHandle(hConnect);
+
+            outputLine << output;
+        }
+
+        //  send output of the data to file located in .../var/
+        std::ofstream o;
+        if (tDirectories::Var().Open(o, "repositorylog.txt"))
+            o << outputLine;
+
+        sn_ConsoleOut(outputLine, receiver->Owner());   //  set it to the one calling this function
+    }
+
+
+    //! Below is the old method, above is the new method.
+    //! New method requires "-lwininet" included in linker options
+    /*void *ctxt = NULL;
+    tString outputLine;
+    ePlayerNetID *receiver = 0;
+
+    int maxlen = 0;
+    for(int a = 0; a < sg_resourceRepositoryBackups.Size(); a++)
+    {
+        tString strString = sg_resourceRepositoryBackups.Get(a);
+        if (maxlen < strString.Len())
+            maxlen = strString.Len();
+    }
+
+    if (sg_resourceRepositoryBackups.Size() > 0)
+    {
+        std::ofstream o;
+        if (tDirectories::Var().Open(o, "repositorylog.txt"))
+        {
+            outputLine << tOutput("$resource_check", filename);
+            for(int i = 0; i < sg_resourceRepositoryBackups.Size(); i++)
+            {
+                tString output;
+                tString resourceHost = sg_resourceRepositoryBackups.Get(i);
+
+                output << tOutput("$resource_check_host", resourceHost);
+                output.SetPos(maxlen + 1, false);
+                output << tOutput("$resource_check_seperator") << " ";
+
+                tString strUrl;
+                strUrl << resourceHost << filename;
+
+                const char *newURL = strUrl;
+                ctxt = xmlNanoHTTPOpen(newURL, NULL);
+                if (ctxt)
+                {
+                    int rc;
+                    if ( (rc = xmlNanoHTTPReturnCode(ctxt)) != 200 )
+                    {
+                        output << tOutput("$resource_check_filenotfound");
+                    }
+                    else
+                    {
+                        output << tOutput("$resource_check_filefound");
+                    }
+                }
+                else output << tOutput("$resource_check_hostfail");
+                outputLine << output;
+            }
+            sg_resourceRepositoryBackups.Reset();           //  reset current key of the list back to 0
+
+            o << outputLine;
+            sn_ConsoleOut(outputLine, receiver->Owner());   //  set it to the one calling this function
+        }
+    }*/
+}
+static tConfItemFunc st_resourceRepositoryCheckConf("RESOURCE_REPOSITORY_CHECK", &st_resourceRepositoryCheck);
 
 tString resourceErrorLogFile("errors/resource_error.txt");
 
@@ -55,75 +205,85 @@ static bool resourceBackupHTTPFetch(std::ofstream &o, const char *filename, cons
                 }
                 else
                 {
-                    int marlen = 10000;
-                    int testCounter = 0;
-                    char *tbuf = (char*)malloc(marlen);
-                    int len;
-                    tString fileType;
-                    fileType << filename;
-
-                    if (fileType.Contains("xml") && fileType.EndsWith(".aamap.xml"))
+                    fd = fopen(savepath, "w");
+                    if (fd)
                     {
-                        while( (len = xmlNanoHTTPRead(ctxt, tbuf, marlen)) > 0 )
+                        con << tOutput( "$resource_downloading", strURL );
+
+                        int maxlen = 10000;
+                        buf = (char*)malloc(maxlen);
+                        int rLen;
+
+                        while( (rLen = xmlNanoHTTPRead(ctxt, buf, maxlen)) > 0 )
                         {
-                            //testing to check this is a valid map
-                            tString strString;
-                            strString << tbuf;
-                            if (strString.Contains(tString("<?xml")))
-                                testCounter++;
-                            if (strString.Contains(tString("<Resource")))
-                                testCounter++;
-                            if (strString.Contains(tString("<World")))
-                                testCounter++;
-                            if (strString.Contains(tString("<Field")))
-                                testCounter++;
+                            Ignore( fwrite(buf, rLen, 1, fd) );
+                        }
+                        free(buf);
+
+                        xmlNanoHTTPClose(ctxt);
+                        fclose(fd);
+
+                        tString fileType;
+                        fileType << filename;
+                        if (fileType.Contains("xml") && fileType.EndsWith(".aamap.xml"))
+                        {
+                            int testCounter = 0;
+                            std::ifstream r;
+                            if (tDirectories::Resource().Open(r, fileType))
+                            {
+                                while(!r.eof())
+                                {
+                                    tString params;
+                                    std::string sayLine;
+                                    std::getline(r, sayLine);
+                                    std::istringstream s(sayLine);
+
+                                    params.ReadLine(s);
+
+                                    if (params.Contains(tString("<?xml")))
+                                        testCounter++;
+                                    if (params.Contains(tString("<Resource")))
+                                        testCounter++;
+                                    if (params.Contains(tString("<World")))
+                                        testCounter++;
+                                    if (params.Contains(tString("<Field")))
+                                        testCounter++;
+
+                                    if ((testCounter > 0) && (testCounter == 4))
+                                        break;
+                                }
+                            }
+                            r.close();
 
                             if ((testCounter > 0) && (testCounter == 4))
-                                break;
-                        }
-                    }
-                    //  others can download without checking
-                    else testCounter = 4;
-
-                    //  used up. Better to close now and reopen again.
-                    xmlNanoHTTPClose(ctxt);
-
-                    //  if those four elements exist
-                    if ((testCounter > 0) && (testCounter == 4))
-                    {
-                        fd = fopen(savepath, "w");
-                        if (fd)
-                        {
-                            con << tOutput( "$resource_downloading", strURL );
-
-                            int maxlen = 10000;
-                            buf = (char*)malloc(maxlen);
-                            int rLen;
-                            ctxt = xmlNanoHTTPOpen(newURL, NULL);
-
-                            while( (rLen = xmlNanoHTTPRead(ctxt, buf, maxlen)) > 0 )
                             {
-                                Ignore( fwrite(buf, rLen, 1, fd) );
+                                con << "OK\n";
+                                sg_resourceRepositoryBackups.Reset();
+                                return true;
                             }
-                            free(buf);
+                            else
+                            {
+                                o << tOutput( "$resource_download_notvalid", filename ) << "\n";
+                                con << tOutput( "$resource_download_notvalid", filename );
 
-                            xmlNanoHTTPClose(ctxt);
-                            fclose(fd);
-
-                            con << "OK\n";
-                            return true;
+                                if (_unlink(savepath) == 0)
+                                {
+                                    con << "Unable to delete file. We got a problem now!\n";
+                                }
+                            }
                         }
                         else
                         {
-                            xmlNanoHTTPClose(ctxt);
-                            o << tOutput( "$resource_no_write", savepath );
-                            con << tOutput( "$resource_no_write", savepath );
+                            con << "OK\n";
+                            sg_resourceRepositoryBackups.Reset();
+                            return true;
                         }
                     }
                     else
                     {
-                        o << tOutput( "$resource_download_notvalid", filename ) << "\n";
-                        con << tOutput( "$resource_download_notvalid", filename );
+                        xmlNanoHTTPClose(ctxt);
+                        o << tOutput( "$resource_no_write", savepath );
+                        con << tOutput( "$resource_no_write", savepath );
                     }
                 }
             }
@@ -168,87 +328,98 @@ static bool resourceHTTPFetch(const char *URI, const char *filename, const char 
             }
             else
             {
-                int marlen = 10000;
-                int testCounter = 0;
-                char *tbuf = (char*)malloc(marlen);
-                int len;
-                tString fileType;
-                fileType << filename;
-
-                if (fileType.Contains("xml") && fileType.EndsWith(".aamap.xml"))
+                fd = fopen(savepath, "w");
+                if (fd)
                 {
-                    //  this checking is only for the maps only.
-                    while( (len = xmlNanoHTTPRead(ctxt, tbuf, marlen)) > 0 )
+                    con << tOutput( "$resource_downloading", URI );
+
+                    int maxlen = 10000;
+                    buf = (char*)malloc(maxlen);
+                    int rLen;
+
+                    while( (rLen = xmlNanoHTTPRead(ctxt, buf, maxlen)) > 0 )
                     {
-                        //testing to check this is a valid map
-                        tString strString;
-                        strString << tbuf;
-                        if (strString.Contains(tString("<?xml")))
-                            testCounter++;
-                        if (strString.Contains(tString("<Resource")))
-                            testCounter++;
-                        if (strString.Contains(tString("<World")))
-                            testCounter++;
-                        if (strString.Contains(tString("<Field")))
-                            testCounter++;
+                        Ignore( fwrite(buf, rLen, 1, fd) );
+                    }
+                    free(buf);
+
+                    xmlNanoHTTPClose(ctxt);
+                    fclose(fd);
+
+                    tString fileType;
+                    fileType << filename;
+                    if (fileType.Contains("xml") && fileType.EndsWith(".aamap.xml"))
+                    {
+                        int testCounter = 0;
+                        std::ifstream r;
+                        if (tDirectories::Resource().Open(r, fileType))
+                        {
+                            while(!r.eof())
+                            {
+                                tString params;
+                                std::string sayLine;
+                                std::getline(r, sayLine);
+                                std::istringstream s(sayLine);
+
+                                params.ReadLine(s);
+
+                                if (params.Contains(tString("<?xml")))
+                                    testCounter++;
+                                if (params.Contains(tString("<Resource")))
+                                    testCounter++;
+                                if (params.Contains(tString("<World")))
+                                    testCounter++;
+                                if (params.Contains(tString("<Field")))
+                                    testCounter++;
+
+                                if ((testCounter > 0) && (testCounter == 4))
+                                    break;
+                            }
+                        }
+                        r.close();
 
                         if ((testCounter > 0) && (testCounter == 4))
-                            break;
-                    }
-                }
-                //  others can download without checking
-                else testCounter = 4;
-
-                //  used up. Better to close now and reopen again.
-                xmlNanoHTTPClose(ctxt);
-
-                //  if those four elements exist
-                if ((testCounter > 0) && (testCounter == 4))
-                {
-                    fd = fopen(savepath, "w");
-                    if (fd)
-                    {
-                        con << tOutput( "$resource_downloading", URI );
-
-                        int maxlen = 10000;
-                        buf = (char*)malloc(maxlen);
-                        int rLen;
-                        ctxt = xmlNanoHTTPOpen(URI, NULL);
-
-                        while( (rLen = xmlNanoHTTPRead(ctxt, buf, maxlen)) > 0 )
                         {
-                            Ignore( fwrite(buf, rLen, 1, fd) );
+                            con << "OK\n";
+                            sg_resourceRepositoryBackups.Reset();
+                            return true;
                         }
-                        free(buf);
+                        else
+                        {
+                            o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << " | Error: \n";
+                            o << tOutput( "$resource_download_notvalid", filename ) << "\n";
+                            con << tOutput( "$resource_download_notvalid", filename );
 
-                        xmlNanoHTTPClose(ctxt);
-                        fclose(fd);
+                            if (_unlink(savepath) == 0)
+                            {
+                                con << "Unable to delete file!\n";
+                            }
 
-                        con << "OK\n";
-                        return true;
+                            //  try back up resource to try and download file
+                            if (!resourceBackupHTTPFetch(o, filename, savepath))
+                            {
+                                o << tOutput("$resource_download_failed", filename);
+                                con << tOutput("$resource_download_failed", filename);
+                            }
+                            else return true;
+                        }
                     }
                     else
                     {
-                        xmlNanoHTTPClose(ctxt);
-                        o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << " | Error: \n";
-                        o << tOutput( "$resource_no_write", savepath ) << "\n";
-                        con << tOutput( "$resource_no_write", savepath );
+                        con << "OK\n";
+                        sg_resourceRepositoryBackups.Reset();
+                        return true;
                     }
+
+                    con << "OK\n";
+                    return true;
                 }
                 else
                 {
                     xmlNanoHTTPClose(ctxt);
                     o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << " | Error: \n";
-                    o << tOutput( "$resource_download_notvalid", filename ) << "\n";
-                    con << tOutput( "$resource_download_notvalid", filename );
-
-                    //  try back up resource to try and download file
-                    if (!resourceBackupHTTPFetch(o, filename, savepath))
-                    {
-                        o << tOutput("$resource_download_failed", filename);
-                        con << tOutput("$resource_download_failed", filename);
-                    }
-                    else return true;
+                    o << tOutput( "$resource_no_write", savepath ) << "\n";
+                    con << tOutput( "$resource_no_write", savepath );
                 }
             }
         }

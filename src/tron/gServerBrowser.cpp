@@ -393,6 +393,7 @@ void gServerMenu::Update()
     int mi = 1;
     gServerInfo *run = gServerInfo::GetFirstServer();
 	bool oneFound = false; //so we can display all if none were found
+
     while (run)
     {
 		//check friend filter
@@ -401,32 +402,38 @@ void gServerMenu::Update()
 			run->show = false;
 			int i;
 			tString userNames = run->UserNames();
+			tArray<tString> userNamesList = userNames.Split("\n");
 			tString* friends = getFriends();
-			for (i = MAX_FRIENDS; i>=0; i--)
-			{
-			    tString friends_name;
-			    if (getFriendsCasingEnabled)
-                    friends_name = friends[i];
-                else
-                    friends_name  = friends[i].Filter();
+            for (i = MAX_FRIENDS; i>=0; i--)
+            {
+                tString friendName;
+                friendName << friends[i];
+                if (!getFriendsCasingEnabled)
+                    friendName = friendName.ToLower();
 
-                if (getFriendsCasingEnabled)
+                if (friendName.Filter() == "")
+                    continue;
+
+                if (run->Users() > 0 && friendName.Len() > 1 && userNamesList.Len() > 0)
                 {
-                    if (run->Users() > 0 && friends_name.Len() > 1 && userNames.StrPos(friends_name) >= 0)
+                    for(int j = 0; j < userNamesList.Len(); j++)
                     {
-                        oneFound = true;
-                        run->show = true;
+                        tString userNames;
+                        userNames << userNamesList[j];
+                        if (!getFriendsCasingEnabled)
+                            userNames = userNames.ToLower();
+
+                        if (userNames.Filter() != "")
+                        {
+                            if (userNames.Contains(friendName))
+                            {
+                                oneFound = true;
+                                run->show = true;
+                            }
+                        }
                     }
                 }
-                else
-                {
-                    if (run->Users() > 0 && friends_name.Len() > 1 && userNames.Filter().StrPos(friends_name) >= 0)
-                    {
-                        oneFound = true;
-                        run->show = true;
-                    }
-                }
-			}
+            }
 		}
         run = run->Next();
 	}

@@ -1,4 +1,38 @@
 ===========================
+Changes in r834
+===========================
+Corrections & Improvements:
+  * Previously the command "ENABLE_MATES_CASING" has been added.
+    What was not implemented was the menu toogle for it. In this update
+    the menu toogle option has been added. So, in your clients, when you enter
+    "Mates" menu, you will see the option Mates Casing On/Off
+  
+  * Did not notice the bug caused by the mates casing in client when filtering
+    mates. Fixed it now and works smoothly.
+  
+  * Took out FILTER_COLOR_STRINGS & FILTER_DARK_COLOR_STRINGS from local display
+    Reason was simple, I only found that a strange problem but seriously, the
+    real stuff works in the main framework of the server chats.
+  
+  * Improved the function of the resource system. Not the file will be downloaded
+    and if it's a map file, it will be checked. If it does have the necessary pointer,
+    then it'll stay nad be parsed by the "real" system. If it's not a valid map file,
+    then it will automatically be deleted.
+
+New Command:
+  * RESOURCE_REPOSITORY_CHECK   # Type in the MAP_FILE string here and it will be
+                                # checked through the backup host list and display
+                                # whether that file does exist in that host or not.
+                                
+                                # WARNING: During the execution of this command,
+                                # server/client will freeze for a couple of seconds.
+                                # I'm telling you, that is not a bug! It's merely
+                                # connection timing and that's causing the delay in loading.
+                                
+                                # It is advisable to perform this command when there aren't
+                                # any players currently playing in your server or client.     
+
+===========================
 Changes in r832
 ===========================
 Corrections & Improvements:

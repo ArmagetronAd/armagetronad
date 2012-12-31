@@ -948,6 +948,7 @@ void gZone::Timesteps(REAL currentTime)
                 gZone *Zone = *sit;
                 if (Zone)
                 {
+                    Zone->createTime_ = currentTime;
                     Zone->AddToList();
                     grid->AddGameObjectInteresting(Zone);
                     Zone->RequestSync();

@@ -1058,12 +1058,18 @@ void ePlayerNetID::SilenceMenu()
     delete[] items;
 }
 
+static bool se_silenceEnemies = false;
+static tConfItem<bool> se_silenceEnemiesConf( "SILENCE_ENEMIES", se_silenceEnemies );
+
 void ePlayerNetID::PoliceMenu()
 {
     uMenu menu( "$player_police_text" );
 
+    uMenuItemToggle silenceenemies(&menu, "$player_police_silence_enemies_enable", "$player_police_silence_enemies_help", se_silenceEnemies);
+
     uMenuItemFunction kick( &menu, "$player_police_kick_text", "$player_police_kick_help", eVoter::KickMenu );
     uMenuItemFunction silence( &menu, "$player_police_silence_text", "$player_police_silence_help", ePlayerNetID::SilenceMenu );
+
     menu.Enter();
 }
 
@@ -1526,16 +1532,6 @@ static void se_DisplayChatLocally( ePlayerNetID* p, const tString& say )
 #endif
 
     tColoredString actualMessage(say);
-    if (sn_filterColorStrings || sn_filterDarkColorStrings)
-    {
-        actualMessage.NetFilter();
-        actualMessage.RemoveTrailingColor();
-
-        if (sn_filterColorStrings)
-            actualMessage = tColoredString::RemoveColors(actualMessage, false);
-        else if (sn_filterDarkColorStrings)
-            actualMessage = tColoredString::RemoveColors(actualMessage, true);
-    }
 
     if ( p && !p->IsSilenced() && se_enableChat )
     {
@@ -1559,24 +1555,11 @@ static void se_DisplayChatLocally( ePlayerNetID* p, const tString& say )
     }
 }
 
-static bool se_silenceEnemies = false;
-static tConfItem<bool> se_silenceEnemiesConf( "SILENCE_ENEMIES", se_silenceEnemies );
-
 static void se_DisplayChatLocallyClient( ePlayerNetID* p, const tString& message )
 {
     if ( p && !p->IsSilenced() && se_enableChat )
     {
         tColoredString actualMessage(message);
-        if (sn_filterColorStrings || sn_filterDarkColorStrings)
-        {
-            actualMessage.NetFilter();
-            actualMessage.RemoveTrailingColor();
-
-            if (sn_filterColorStrings)
-                actualMessage = tColoredString::RemoveColors(actualMessage, false);
-            else if (sn_filterDarkColorStrings)
-                actualMessage = tColoredString::RemoveColors(actualMessage, true);
-        }
 
         bool sentFromTeamMember = false;
         if(se_silenceEnemies)

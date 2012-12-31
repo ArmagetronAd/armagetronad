@@ -1698,6 +1698,8 @@ masters_menu_edit_connect_help	Opens a master server like server browser special
 
 friends_menu				Mates
 friends_menu_help			Edit your mates.
+friends_casing				Mates Casing
+friends_casing_help			Turn on/off mates casing.
 friends_enable				Mates Enabled
 friends_enable_help			Turn on/off mates filtering.
 enable_friends_help			Turn on/off mates filtering.
@@ -1766,6 +1768,9 @@ player_police_help					Allows you to silence other players or issue a kick vote
 player_police_silence_text			Silence Menu
 player_police_silence_help			Allows you to silence spamming players locally
 
+player_police_silence_enemies_help		If enabled, you can only view team messages while alive
+player_police_silence_enemies_enable		Silence Enemies
+
 silence_player_help					If activated, all chat messages from this player will be omitted.
 silence_player_text					Silence \1
 
@@ -1782,7 +1787,8 @@ suspend_player_text					Suspend \1
 vote_include_details_text			If accepted, the file \1 will be included as a configuration file.
 vote_include_text					Include \1
 vote_include_error					Include file \1 not found or not readable.\n
-vote_include_message				Including file \1. Only users of access level \2 or higher will receive the output.\n
+vote_include_message				Including file \1. Only users of access level \2 or higher will re
+ceive the output.\n
 
 vote_command_details_text			If accepted, the console command "\1" will be executed on the server.
 vote_command_text					Command \1
@@ -2921,12 +2927,21 @@ resource_abs_path           ERROR: Absolute filename, the server is trying to ov
 resource_no_writepath       ERROR: Cannot determine path to write resource to.\n
 resource_no_write           ERROR: Cannot open \1 for writing.\n
 
-resource_download_notvalid  ERROR: \1 is not a valid file to download.\n
+resource_repository_backup_help  List of backup hosts to use when the current repository host fails to function.
+resource_download_notvalid  ERROR: \1 is not a valid file to download.\n\n
 resource_download_failed    ERROR: Unable to download \1.\n
 resource_resorting_backup   Have no choice, resorting to using back up list.\n
-resource_backup_trying      Resource Host about to try: \1.\n
+resource_backup_trying      Resource Host about to try: \1.\n\n
 resource_backup_file404     ERROR: Couldn't find file \2 in host \1.\n
-resource_backup_notconnect  ERROR: Cannot connect to \1 repository.\n
+resource_backup_notconnect  ERROR: Cannot connect to \1 repository.\n\n
+
+resource_repository_check_help  Using this command, you can check whether that file exists in the backup hosts
+resource_check              Repository status for file: \1:\n
+resource_check_host         \1
+resource_check_seperator    |
+resource_check_hostfail     Cannot connect.\n
+resource_check_filenotfound File not found.\n
+resource_check_filefound    File exists!\n
 
 #********************************************
 #********************************************
@@ -3242,7 +3257,13 @@ md5_suffix_help               Extra hash suffix for local accounts used to scram
 
 global_id_help                If set to 1, Global IDs (Armathentication) will be enabled on this server.
 
-# RACE SETTINGS / ANIMUSON MODS / LOVER$BOY's ADDITIONS
+#*************************************
+#*************************************
+#
+#    Racing messages
+#
+#*************************************
+#*************************************
 race_timer_enabled_help		            (0 = Disable, 1 = Enable) race timer. Don't change during round.
 race_end_delay_help		                Number of seconds to give players to finish after target reached
 race_score_deplete_help               Number the score depletes by everytime a player enters the win zone.
@@ -3264,6 +3285,25 @@ race_rank_title_player_name Players
 race_rank_title_score_name Scores
 race_rank_title_time_name Times
 race_rank_border #
+
+#*************************************
+#*************************************
+#
+#    Map details messages
+#
+#*************************************
+#*************************************
+
+display_map_details_help      Display the map's details for everyone to view.
+display_map_name_help         If set to 1, displays the map's name.
+display_map_author_help       If set to 1, displays the map's author.
+display_map_version_help      If set to 1, displays the map's version.
+display_map_axes_help         If set to 1, displays the map's axes.
+
+display_map_name          0xff6622Map Name   : 0x999999\1\n
+display_map_author        0xff6622Map Author : 0x999999\1\n
+display_map_version       0xff6622Map Version: 0x999999\1\n
+display_map_axes          0xff6622Map Axes   : 0x999999\1\n
 
 access_level_substitute_denied  Required access level to substitute is "\1", you only have "\2".\n
 substitute_message_usage        Usage: /substitute <user out ID or name> <user in ID or name>\n

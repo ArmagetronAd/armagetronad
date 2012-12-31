@@ -2900,10 +2900,10 @@ void nServerInfo::DoGetFrom( nSocket const * socket )
 
     if ( nServerInfoAdmin::GetAdmin() )
     {
-        userNames_  = nServerInfoAdmin::GetAdmin()->GetUsers();
+        userNames_      = nServerInfoAdmin::GetAdmin()->GetUsers();
         userGlobalIDs_  = nServerInfoAdmin::GetAdmin()->GetGlobalIDs();
-        options_    = nServerInfoAdmin::GetAdmin()->GetOptions();
-        url_        = nServerInfoAdmin::GetAdmin()->GetUrl();
+        options_        = nServerInfoAdmin::GetAdmin()->GetOptions();
+        url_            = nServerInfoAdmin::GetAdmin()->GetUrl();
     }
     else
     {
