@@ -348,7 +348,7 @@ REAL zShape::GetEffectiveSegmentLength() const {
 int zShape::GetEffectiveSegmentSteps() const {
     int ret=sz_zoneSegSteps;
     if (segsteps_.Len())
-        ret = segsteps_.evaluate(lastTime);
+        ret = (int)segsteps_.evaluate(lastTime);
     return ret<=0?1:ret;
 }
 

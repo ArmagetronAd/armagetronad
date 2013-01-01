@@ -501,7 +501,7 @@ void zFortressZone::OnConquest( void )
     // TODO: set message for when factor is less than 0; default is "lost X points for a very strange reason".
     int totalScore = sg_onConquestScore;
     if ( 0 == enemiesInside_ )
-        totalScore *= sg_onConquestEmptyScoreFactor;
+        totalScore = int(totalScore * sg_onConquestEmptyScoreFactor);
 
     // eliminate dead enemies
     TeamArray enemiesAlive;

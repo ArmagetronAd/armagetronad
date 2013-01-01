@@ -200,7 +200,7 @@ tValue::BasePtr cCockpit::cb_CurrentAcceleration(void) {
 }
 tValue::BasePtr cCockpit::cb_CurrentPing(void) {
     if(m_Type == VIEWPORT_TOP) return tValue::BasePtr(new tValue::Base());
-    return tValue::BasePtr(new tValue::Int(m_ViewportPlayer->ping*1000));
+    return tValue::BasePtr(new tValue::Int((int)m_ViewportPlayer->ping*1000));
 }
 tValue::BasePtr cCockpit::cb_CurrentSpeed(void) {
     if(m_Type == VIEWPORT_TOP) return tValue::BasePtr(new tValue::Base());
