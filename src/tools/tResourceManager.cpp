@@ -76,9 +76,12 @@ static void st_resourceRepositoryCheck(std::istream &s)
             for(int j = 0; j < resourcePaths.Len(); j++)
             {
                 if (!first)
-                    resourceHost = resourcePaths[i];
+                {
+                    resourceHost = resourcePaths[j];
+                    first = true;
+                }
                 else
-                    strUrlPath << "/" << resourcePaths[i];
+                    strUrlPath << "/" << resourcePaths[j];
             }
             strUrlPath << "/" << filename;
 

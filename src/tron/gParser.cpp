@@ -655,7 +655,8 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
     if (sn_GetNetState() != nCLIENT )
     {
         if (!xmlStrcmp(myxmlGetProp(cur, "effect").GetXML(), (const xmlChar *)"win")) {
-            zone = tNEW( gWinZoneHack) ( grid, zonePos );
+            gWinZoneHack *wZone = new gWinZoneHack( grid, zonePos, false, delayZoneCreation);
+            zone = wZone;
         }
         else if (!xmlStrcmp(myxmlGetProp(cur, "effect").GetXML(), (const xmlChar *)"death")) {
             tString zoneTeamStr = myxmlGetPropString(cur, "team");
@@ -667,12 +668,14 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
                 zoneColor.g = zoneTeam->G()/15.0;
                 zoneColor.b = zoneTeam->B()/15.0;
 
-                zone = tNEW( gDeathZoneHack) ( grid, zonePos, true, zoneTeam, delayZoneCreation );
-                zone->SetColor(zoneColor);
+                gDeathZoneHack *dZone = new gDeathZoneHack( grid, zonePos, true, zoneTeam, delayZoneCreation );
+                dZone->SetColor(zoneColor);
+                zone = dZone;
             }
             else
             {
-                zone = tNEW( gDeathZoneHack) ( grid, zonePos, true, NULL, delayZoneCreation );
+                gDeathZoneHack *dZone = new gDeathZoneHack( grid, zonePos, false, NULL, delayZoneCreation );
+                zone = dZone;
             }
         }
         else if (!xmlStrcmp(myxmlGetProp(cur, "effect").GetXML(), (const xmlChar *)"fortress")) {
@@ -685,16 +688,19 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
                 zoneColor.g = zoneTeam->G()/15.0;
                 zoneColor.b = zoneTeam->B()/15.0;
 
-                zone = tNEW( gBaseZoneHack) ( grid, zonePos, true, zoneTeam, delayZoneCreation );
-                zone->SetColor(zoneColor);
+                gBaseZoneHack *bZone = new gBaseZoneHack( grid, zonePos, true, zoneTeam, delayZoneCreation );
+                bZone->SetColor(zoneColor);
+                zone = bZone;
             }
             else
             {
-                zone = tNEW( gBaseZoneHack) ( grid, zonePos, true, NULL, delayZoneCreation );
+                gBaseZoneHack *bZone = new gBaseZoneHack( grid, zonePos, false, NULL, delayZoneCreation );
+                zone = bZone;
             }
         }
         else if (!xmlStrcmp(myxmlGetProp(cur, "effect").GetXML(), (const xmlChar *)"sumo")) {
-            zone = tNEW( gSumoZoneHack) ( grid, zonePos );
+            gSumoZoneHack *sZone = new gSumoZoneHack( grid, zonePos, false, delayZoneCreation);
+            zone = sZone;
         }
         else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"flag")) {
             tString zoneTeamStr = myxmlGetPropString(cur, "team");
@@ -706,12 +712,14 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
                 zoneColor.g = zoneTeam->G()/15.0;
                 zoneColor.b = zoneTeam->B()/15.0;
 
-                zone = tNEW( gFlagZoneHack) ( grid, zonePos, true, zoneTeam, delayZoneCreation );
-                zone->SetColor(zoneColor);
+                gFlagZoneHack *fZone = new gFlagZoneHack( grid, zonePos, true, zoneTeam, delayZoneCreation );
+                fZone->SetColor(zoneColor);
+                zone = fZone;
             }
             else
             {
-                zone = tNEW( gFlagZoneHack) ( grid, zonePos, true, NULL, delayZoneCreation );
+                gFlagZoneHack *fZone = new gFlagZoneHack( grid, zonePos, false, NULL, delayZoneCreation );
+                zone = fZone;
             }
         }
         else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"ball")) {
@@ -724,27 +732,32 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
                 zoneColor.g = zoneTeam->G()/15.0;
                 zoneColor.b = zoneTeam->B()/15.0;
 
-                zone = tNEW( gBallZoneHack) ( grid, zonePos, true, zoneTeam, delayZoneCreation );
-                zone->SetColor(zoneColor);
+                gBallZoneHack *bZone = new gBallZoneHack( grid, zonePos, true, zoneTeam, delayZoneCreation );
+                bZone->SetColor(zoneColor);
+                zone = bZone;
             }
             else
             {
-                zone = tNEW( gBallZoneHack) ( grid, zonePos, true, NULL, delayZoneCreation );
+                gBallZoneHack *bZone = new gBallZoneHack( grid, zonePos, false, NULL, delayZoneCreation );
+                zone = bZone;
             }
         }
         else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"target")) {
-            zone = tNEW( gTargetZoneHack) ( grid, zonePos, true, delayZoneCreation);
+            gTargetZoneHack *tZone = new gTargetZoneHack( grid, zonePos, false, delayZoneCreation);
+            zone = tZone;
         }
         else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"blast")) {
-            zone = tNEW( gBlastZoneHack) ( grid, zonePos, true, delayZoneCreation );
+            gBlastZoneHack *bZone = new gBlastZoneHack( grid, zonePos, false, delayZoneCreation );
+            zone = bZone;
         }
         else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"object")) {
-            zone = tNEW( gObjectZoneHack) ( grid, zonePos, true, delayZoneCreation );
+            gObjectZoneHack *oZone = new gObjectZoneHack(grid, zonePos, false, delayZoneCreation );
+            zone = oZone;
         }
         else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *) "effect"), (const xmlChar *)"rubber")) {
             REAL rubberVal = myxmlGetPropFloat(cur, "rubberVal");
             if (rubberVal != 0.0 ){
-                gRubberZoneHack *rZone= tNEW(gRubberZoneHack(grid, zonePos, false, delayZoneCreation ));
+                gRubberZoneHack *rZone = new gRubberZoneHack(grid, zonePos, false, delayZoneCreation );
                 rZone->SetRubber(rubberVal);
                 zone = rZone;
             }
@@ -752,7 +765,7 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
         }
         else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *) "effect"), (const xmlChar *)"teleport"))
         {
-            gTeleportZoneHack *tZone = new gTeleportZoneHack(grid, zonePos, true, delayZoneCreation);
+            gTeleportZoneHack *tZone = new gTeleportZoneHack(grid, zonePos, false, delayZoneCreation);
             tZone->SetJump(zoneJump,relJump);
             tZone->SetNewDir(ndir);
             tZone->SetReloc(reloc);
@@ -761,7 +774,7 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
         else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *) "effect"), (const xmlChar *)"burst"))
         {
             REAL cycle_burst_speed = myxmlGetPropFloat(cur, "speed");
-            gBurstZoneHack *bZone = new gBurstZoneHack(grid, zonePos, true, delayZoneCreation);
+            gBurstZoneHack *bZone = new gBurstZoneHack(grid, zonePos, false, delayZoneCreation);
             bZone->SetBurstSpeed(cycle_burst_speed);
 
             zone = bZone;

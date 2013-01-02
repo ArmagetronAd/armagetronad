@@ -938,7 +938,7 @@ void gZone::Timesteps(REAL currentTime)
     if (!grid) return;
 
     std::map<REAL, std::set<gZone*> >::iterator it = delayedZones_.begin();
-    while ((it != delayedZones_.end()) && (it->first <= currentTime))
+    while ((it != delayedZones_.end()) && (currentTime >= it->first))
     {
         if (currentTime >= it->first)
         {
@@ -948,10 +948,8 @@ void gZone::Timesteps(REAL currentTime)
                 gZone *Zone = *sit;
                 if (Zone)
                 {
-                    Zone->createTime_ = currentTime;
                     Zone->AddToList();
                     grid->AddGameObjectInteresting(Zone);
-                    Zone->RequestSync();
                 }
             }
         }
@@ -968,6 +966,12 @@ void gZone::ClearDelay()
 {
     delayedZones_.clear();
 }
+
+static void sg_zoneDelayClear(std::istream &s)
+{
+    gZone::ClearDelay();
+}
+static tConfItemFunc sg_zoneDelayClearConf("ZONE_DELAY_CLEAR", &sg_zoneDelayClear);
 
 
 gZone &gZone::AddWaypoint(eCoord const &point)
@@ -2345,7 +2349,7 @@ void gRubberZoneHack::OnEnter( gCycle * target, REAL time )
 // *******************************************************************************
 
 gBaseZoneHack::gBaseZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreation, eTeam * teamowner, bool delayCreation )
-:gZone( grid, pos, dynamicCreation), onlySurvivor_( false ), currentState_( State_Safe )
+:gZone( grid, pos, dynamicCreation, delayCreation), onlySurvivor_( false ), currentState_( State_Safe )
 {
     enemiesInside_ = ownersInside_ = 0;
     conquered_ = 0;
