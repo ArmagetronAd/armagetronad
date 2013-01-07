@@ -363,6 +363,7 @@ void eTeam::UpdateAppearance()
         }
         else if( !lastEmpty_ )
         {
+            LogScoreDifference();
             se_teamDestroyWriter << logName;
             se_teamDestroyWriter.write();
         }
@@ -633,12 +634,17 @@ static eLadderLogWriter se_roundScoreTeamWriter("ROUND_SCORE_TEAM", true);
 
 void eTeam::LogScoreDifference( void )
 {
+    LogScoreDifference( logName );
+}
+
+void eTeam::LogScoreDifference( const tString & teamName )
+{
     if ( lastScore_ > IMPOSSIBLY_LOW_SCORE && IsHuman() )
     {
         tString ret;
         int scoreDifference = score - lastScore_;
         lastScore_ = IMPOSSIBLY_LOW_SCORE;
-        se_roundScoreTeamWriter << scoreDifference << logName;
+        se_roundScoreTeamWriter << scoreDifference << teamName;
         se_roundScoreTeamWriter.write();
     }
 }
