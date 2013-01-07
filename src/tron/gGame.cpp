@@ -3734,6 +3734,10 @@ void MainMenu(bool ingame){
                           "$main_menu_about_help",
                           &sg_DisplayVersionInfo);
 
+    new uMenuItemFunction(&MainMenu,
+                           "$special_setup_menu_text",
+                            "$special_setup_menu_help",
+                             &sg_SpecialMenu);
 
     uMenu Settings("$system_settings_menu_text");
 

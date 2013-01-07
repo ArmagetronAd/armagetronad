@@ -1939,7 +1939,7 @@ bool tString::Contains(tString tofind)
         tString isThis = this->SubStr(i, strCount);
 
         // if that stripped string matches, good!
-        if (isThis.Filter() == tofind.Filter())
+        if (isThis == tofind)
         {
             return true;
         }

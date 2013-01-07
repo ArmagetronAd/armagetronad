@@ -1,4 +1,67 @@
 ===========================
+Changes in r836 | Soccer Update
+===========================
+Corrections & Improvements:
+  * Teamname: Now this item appears AFTER Player name:. Did not notice the difference in "Jumbo Package" update.
+  * Soccer Zones now available
+  * Enabling a command now allows players / ai to avoid zones. It's not fully tested but currently is functional.
+  * Added command for tab completion which asks for player's to enable it if they wish to use it.
+
+New Command:
+  * CYCLE_ZONES_AVOID     # If set to 1, cycles will try to avoid the zones.
+                          # This command is still in testing so it won't work all the time.
+                          # For human players it activates only when they are in chat mode.
+                          # For AI Players, it is always active.
+  * TAB_COMPLETION        # If set to 1, the tab completion of names or commands will be enabled.
+                          # A personal setting if you want to use it or not.  
+                          # Check "Jumbo Package" revision on how to use that feature.  
+New Features:
+  * Soccer Zones
+    # Description:  
+    # This is a latest addition to the list of already amazing features filled in this game.
+    # Socker is like the real-life game style, you use the sockerball to shoot it into an
+    # opponent's goal to score points
+    #
+    # Commands are:
+    # * SOCCER_GOAL_KILL_ENEMIES 0        # If set to 1, enemies entering other team's goal will be killed.
+    # * SOCCER_GOAL_SCORE 1               # Number of points scoring team gains for shooting the socc`er ball through the other team's goal.
+    #  
+    # * SOCCER_GOAL_RESPAWN_ALLIES 1      # If set to 1, team mates will respawn after entering their own goal
+    # * SOCCER_GOAL_RESPAWN_ENEMIES 1     # If set to 1, enemies will respawn if the other team enters their goal
+    #  
+    # * SOCCER_BALL_FIRST_WIN 0           # If set to 1, first goal made by a team will be declared the winners of that round.
+    # * SOCCER_BALL_SHOTS_WIN 0           # If set > 0, the number of times the ball must enter other team's
+    #                                     # goal. Sending the ball in their own goal does not count.
+    #                                     # Once these many shots have been accounted for, the round winner
+    #                                     # will be decided by the team with the leading score.
+    #                                     # Comparing the score between the shooting team and the team owner
+    #                                     # of the goal.
+    # * SOCCER_BALL_SLOWDOWN 1            # If set to 1, soccer balls slow down.
+    # * SOCCER_BALL_SLOWDOWN_SPEED 0.07   # If SOCCER_BALL_SLOWDOWN is set to 1, then the soccer ball will
+    #                                     # slow down depending on the value set for this command.
+    #                                     # Cannot have values over 1 or less than 0.
+    #
+    # Ladderlog commands:
+    # * SOCCER_BALL_PLAYER_ENTERED        # Write to ladderlog: SOCCER_BALL_PLAYER_ENTERED [auth_name] [team]
+    # * SOCCER_GOAL_PLAYER_ENTERED        # Write to ladderlog: SOCCER_GOAL_PLAYER_ENTERED [player_auth_name] [player_team] [team owner of the goal]
+    #
+    # DTD & Map:
+    # soccergoal & soccerball effetcs can be found in the latest DTD
+    # DTD File: map-0.2.9_styctap_v1.2.dtd
+    # Map File: Lover-Boy/soccer-1.0.0.aamap.xml
+    # Settings: examples/crazy/soccer.cfg
+
+New Menu Items:
+  * Special Setup
+    # Description:
+    # In this special special setup menu, you will find a few new additions to the game and they will be easier to
+    # access from here, rather than to go to the trouble of using Con: COMMAND_...
+    #
+    # List:
+    # * Highlight Name    # If it's on, then your name will get highlited in strings.
+    # * Tab Completion    # If it's on, the tab completion will be enabled.
+
+===========================
 Changes in r834
 ===========================
 Corrections & Improvements:
@@ -54,7 +117,7 @@ New DTD Features:
   * delay   # the number of seconds to wait before the zone can actually appear on the grid
       
 ===========================
-Changes from r823 - r829
+Changes from r823 - r829 | Jumbo Package
 ===========================
 Corrections & Improvements:
   * Due to a spelling mistake of mine, I spelt queueing wrong. I fixed it now.

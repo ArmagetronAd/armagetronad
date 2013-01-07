@@ -92,7 +92,7 @@ protected:
     eCoord dir;               // direction
     REAL  z;									// and height (currently unused)
 
-    tJUST_CONTROLLED_PTR< eTeam > team;       		 				// the team we belong to
+    eTeam *team;       		 				// the team we belong to
 
     tJUST_CONTROLLED_PTR<eFace> currentFace;  // the eFace pos it is currently
     tCHECKED_PTR(eGrid) grid;         // the game grid we are on
@@ -104,12 +104,12 @@ public:
     //! sets the value reported by GetMaxLazyLag()
     static void SetMaxLazyLag( REAL lag );
 
-    eTeam* Team() const { return team; }
+    eTeam *Team() const { return team; }
 
     static uActionPlayer se_turnLeft,se_turnRight;
 
-    eGrid* Grid()        const { return grid;        }
-    eFace* CurrentFace() const { return currentFace; }
+    eGrid *Grid()        const { return grid;        }
+    eFace *CurrentFace() const { return currentFace; }
 
     virtual void AddRef()  = 0;          //!< adds a reference
     virtual void Release() = 0;         //!< removes a reference

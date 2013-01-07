@@ -839,6 +839,7 @@ ladderlog_write_cycle_created_help            Write to ladderlog: CYCLE_CREATED 
 ladderlog_write_cycle_destroyed_help          Write to ladderlog: CYCLE_DESTROYED [auth_name] [posx] [posy] [dirx] [diry] [team_name]
 ladderlog_write_chat_help                     Write to ladderlog: CHAT <chatter> [/me] <chat string>
 ladderlog_write_command_help                  Write to ladderlog: COMMAND <player> <ip> <auth level> <command> <options>
+ladderlog_write_current_map_help              Write to ladderlog: CURRENT_MAP [MAP_FILE]
 ladderlog_write_death_basezone_conquered_help Write to ladderlog: DEATH_BASEZONE_CONQUERED <player> [NO_ENEMIES]
 ladderlog_write_blastzone_player_enter_help   Write to ladderlog: DEATH_BLASTZONE_PLAYER_ENTER <player>
 ladderlog_write_death_deathshot_help          Write to ladderlog: DEATH_DEATHSHOT <prey> <predator>
@@ -881,6 +882,8 @@ ladderlog_write_round_score_team_help         Write to ladderlog: ROUND_SCORE_TE
 ladderlog_write_round_winner_help             Write to ladderlog: ROUND_WINNER <team> <players>
 ladderlog_write_sacrifice_help                Write to ladderlog: SACRIFICE <player who used the hole> <player who created the hole> <player owning the wall the hole was made into>
 ladderlog_write_shutdown_help                 Write to ladderlog: SHUTDOWN <time> when the server has been shut down using exit/quit commands
+ladderlog_write_soccer_ball_player_entered_help Write to ladderlog: SOCCER_BALL_PLAYER_ENTERED [player_auth_name] [team]
+ladderlog_write_soccer_goal_player_entered_help Write to ladderlog: SOCCER_GOAL_PLAYER_ENTERED [player_auth_name] [player_team] [team owner of the goal] 
 ladderlog_write_targetzone_conquered_help     Write to ladderlog: TARGETZONE_CONQUERED <object_id> <zone_name> <cx> <cy> [<player> [<team>]]
 ladderlog_write_targetzone_player_left_help   Write to ladderlog: TARGETZONE_PLAYER_LEFT <object_id> <zone_name> <cx> <cy> <player> <player x> <player y> <player xdir> <player ydir>
 ladderlog_write_targetzone_player_enter_help  Write to ladderlog: TARGETZONE_PLAYER_ENTER <object_id> <zone_name> <cx> <cy> <player> <player x> <player y> <player xdir> <player ydir> <time>
@@ -1328,6 +1331,23 @@ input_instant_chat_help		Issues a special instant chat macro
 #********************************************
 
 console_repetition          (\1 times)\n
+
+#********************************************
+#********************************************
+#
+#        special setup menu
+#
+#********************************************
+#********************************************
+
+special_setup_menu_text	Special Setup
+special_setup_menu_help	Configure settings to change features of game.
+
+highlight_name_menu_text Highlight Name
+highlight_name_menu_help If enabled, if your name is in chats, it will get highlited. Disabled will leave the chat string alone.
+
+tab_completion_menu_text Tab Completion
+tab_completion_menu_help If enabled, after typing someone's initial name, hit tab and it should automatically fill their name in your string. When it's disabled, it won't do it. This applies to all tab completion features avilable.
 
 #********************************************
 #********************************************
@@ -3381,6 +3401,22 @@ koh_score_time_help                 The interval that KOH_SCORE is added
 
 ## rubberzone
 score_rubberzone_help               Score player is given for dieing on a rubber zone.
+
+## soccer goal|ball zone
+soccer_goal_enemy_entered           \1 0xRESETTwas killed for entering \20xRESETT's goal.\n
+soccer_goal_self                    0xff7777TEAM \1 0xRESETThit the ball into their own goal. Boo-Hoo! No points!\n
+soccer_goal_score                   \1 0xRESETTwon \3 points for scoring in \20xRESETT's team goal.\n
+soccer_winner                       \1 0xRESETTwon the soccer round.\n                       
+
+soccer_goal_score_help              The points the team get for scoring a goal.
+soccer_goal_kill_enemies_help       If set to 1, enemy players entering other team's base will get killed.
+soccer_goal_respawn_allies_help     If set to 1, teammates entering their own goal will respawn dead teammates.
+soccer_goal_respawn_enemies_help    If set to 1, players entering opponent's goal will respawn enemy dead players.
+
+soccer_ball_first_win_help          If set to 1, first team to shot the ball into other team's goal wubs the round.
+soccer_ball_shots_win_help          If set to > 0, the number of times the ball must enter other team's goal. Sending the ball in their own goal does not count.
+soccer_ball_slowdown_help           If set to 1, soccer balls will slow down.
+soccer_ball_slowdown_time_help      # If SOCCER_BALL_SLOWDOWN is set to 1, then the soccer ball will slow down depending on the value set for this command.
 
 ## Other sty commands
 base_respawn_help                   Flag indicating whether a base will respawn team if a team player enters it

@@ -57,6 +57,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 //HACK RACE
 #include "gRace.h"
+#include "gParser.h"
 
 #include <time.h>
 #include <algorithm>
@@ -679,6 +680,22 @@ void gZone::BounceOffPoint(eCoord dest, eCoord collide)
     RequestSync();
 }
 
+// *******************************************************************************
+// *
+// *    Collapse
+// *
+// *******************************************************************************
+
+void gZone::Collapse()
+{
+    OnVanish();
+    destroyed_ = true;
+    SetReferenceTime();
+    SetExpansionSpeed(-GetRadius());
+    SetRadius(0);
+    RequestSync();
+}
+
 
 // *******************************************************************************
 // *
@@ -835,12 +852,18 @@ bool gZone::Timestep( REAL time )
                     } else
                     {
                         //Don't allow going outside, kill it
-                        destroyed_ = true;
-                        OnVanish();
-                        SetReferenceTime();
-                        SetExpansionSpeed(-1);
-                        SetRadius(0);
-                        RequestSync();
+                        Collapse();
+                        return false;
+                    }
+
+                    gSoccerZoneHack *thisSockerBall = dynamic_cast<gSoccerZoneHack *>(this);
+                    if (thisSockerBall && (thisSockerBall->GetType() == gSoccerZoneHack::gSoccer_BALL))
+                    {
+                        thisSockerBall->GoHome();
+                    }
+                    else
+                    {
+                        Collapse();
                         return false;
                     }
                 }
@@ -994,6 +1017,94 @@ void gZone::OnVanish( void )
 {
 }
 
+// *******************************************************************************
+// *
+// *    TriggerAvoidZone
+// *
+// *******************************************************************************
+//!
+//!     @param  target        the other game object
+//!     @param  zone          the zone player is getting near
+//!     @param  time          the current time
+//!
+// *******************************************************************************
+
+bool sg_cyclesZonesAvoid = false;
+static tSettingItem<bool> sg_cyclesZonesAvoidConf("CYCLE_ZONES_AVOID", sg_cyclesZonesAvoid);
+
+REAL sg_cycleZonesApproch = 50.0;
+static tSettingItem<REAL>sg_cycleZoneApprochConf("CYCLE_ZONES_APPROCH", sg_cycleZonesApproch);
+
+static void TriggerAvoidZone(gCycle *target, gZone *Zone, REAL currentTime)
+{
+    //  don't execute if players won't want to avoid zones
+    if (!sg_cyclesZonesAvoid)
+        return;
+
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid) return;
+
+    ePlayerNetID *player = target->Player();
+    if ((player->IsChatting()) && (player->IsActive()) || (!player->IsHuman()))
+    {
+        REAL tarX = target->Position().x;
+        REAL tarY = target->Position().y;
+        REAL zonX = Zone->Position().x;
+        REAL zonY = Zone->Position().y;
+
+        REAL tarDirX = target->Direction().x;
+        REAL tarDirY = target->Direction().y;
+
+        if ((tarX == zonX) || (tarY == zonY))
+        {
+            target->Act(&gCycle::se_turnRight, 1);
+        }
+
+        if (tarDirX >= 0)
+        {
+            if (tarX < zonX)
+            {
+                if (tarY < zonY)
+                    target->Act(&gCycle::se_turnRight, 1);
+                else
+                    target->Act(&gCycle::se_turnLeft, 1);
+            }
+        }
+        else if (tarDirX <= -0.01)
+        {
+            if (tarX > zonX)
+            {
+                if (tarY < zonY)
+                    target->Act(&gCycle::se_turnLeft, 1);
+                else
+                    target->Act(&gCycle::se_turnRight, 1);
+            }
+        }
+        if (tarDirY >= 0)
+        {
+            if (tarY < zonY)
+            {
+                if (tarX < zonX)
+                    target->Act(&gCycle::se_turnLeft, 1);
+                else
+                    target->Act(&gCycle::se_turnRight, 1);
+            }
+        }
+        else if (tarDirY <= -0.01)
+        {
+            if (tarY > zonY)
+            {
+                if (tarX < zonX)
+                    target->Act(&gCycle::se_turnRight, 1);
+                else
+                    target->Act(&gCycle::se_turnLeft, 1);
+            }
+        }
+    }
+
+    //  if all fails, cycle will enter the zone
+}
+
 
 // *******************************************************************************
 // *
@@ -1013,7 +1124,12 @@ void gZone::InteractWith( eGameObject * target, REAL time, int recursion )
     if ( prey )
     {
         REAL r = this->Radius();
-        if ( ( prey->Position() - this->Position() ).NormSquared() < r*r )
+        if (((prey->Position() - this->Position()).NormSquared() > r*r) && ((prey->Position() - this->Position()).NormSquared() < ((r*r) + (sg_cycleZonesApproch * 2))))
+        {
+            TriggerAvoidZone(prey, this, time);
+            OnNear(prey, time);
+        }
+        else if ( ( prey->Position() - this->Position() ).NormSquared() < r*r )
         {
             if ( prey->Player() && prey->Alive() )
             {
@@ -1171,6 +1287,20 @@ void gZone::InteractWith( eGameObject * target, REAL time, int recursion )
                     }
                 }
             }
+
+            gSoccerZoneHack *tarZone = dynamic_cast<gSoccerZoneHack *>(target);
+            if (tarZone)
+            {
+                gSoccerZoneHack *tisZone = dynamic_cast<gSoccerZoneHack *>(this);
+                if (tisZone)
+                {
+                    REAL distance = this->Radius() + tarZone->GetRadius();
+                    if ((tarZone->Position() - this->Position() ).NormSquared() < (distance * distance))
+                    {
+                        tisZone->OnEnter(tarZone, time);
+                    }
+                }
+            }
         }
     }
 }
@@ -1237,6 +1367,35 @@ void gZone::OnExit( gZone *target, REAL time )
 {
 }
 
+// *******************************************************************************
+// *
+// *    OnNear
+// *
+// *******************************************************************************
+//!
+//!     @param  target  the cycle that is near the zone
+//!     @param  time    the current time
+//!
+// *******************************************************************************
+
+void gZone::OnNear( gCycle *target, REAL time )
+{
+}
+
+// *******************************************************************************
+// *
+// *    OnNear
+// *
+// *******************************************************************************
+//!
+//!     @param  target  the zone that is near the zone
+//!     @param  time    the current time
+//!
+// *******************************************************************************
+
+void gZone::OnNear( gZone *target, REAL time )
+{
+}
 
 // *******************************************************************************
 // *
@@ -6288,6 +6447,631 @@ void gObjectZoneHack::OnVanish( void )
 {
     this->RemoveFromListsAll();
 }
+
+// *******************************************************************************
+// *
+// *    gSoccerZoneHack::CheckTeamAssignment
+// *
+// *******************************************************************************
+
+bool gSoccerZoneHack::CheckTeamAssignment()
+{
+    // find the closest player
+    if ( !team )
+    {
+        teamDistance_ = 0;
+        const tList<eGameObject>& gameObjects = Grid()->GameObjects();
+        gCycle *closest = NULL;
+        REAL closestDistance = 0;
+        for (int i=gameObjects.Len()-1;i>=0;i--)
+        {
+            gCycle *other = dynamic_cast<gCycle *>(gameObjects[i]);
+
+            if (other)
+            {
+                eTeam *otherTeam = other->Player()->CurrentTeam();
+                eCoord otherpos = other->Position() - Position();
+                REAL distance = otherpos.NormSquared();
+                if (!closest || (distance < closestDistance))
+                {
+                    closest = other;
+                    closestDistance = distance;
+                }
+            }
+        }
+
+        if (closest)
+        {
+            // take over team and color
+            team = closest->Player()->CurrentTeam();
+            color_.r = team->R()/15.0;
+            color_.g = team->G()/15.0;
+            color_.b = team->B()/15.0;
+            teamDistance_ = closestDistance;
+
+            RequestSync();
+        }
+
+        // if this zone does not belong to a team, return false.
+        if (!team)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+// *******************************************************************************
+// *
+// *    gSoccerZoneHack
+// *
+// *******************************************************************************
+//!
+//!     @param  grid Grid to put the zone into
+//!     @param  pos  Position to spawn the zone at
+//!
+// *******************************************************************************
+
+//  this is for the soccer ball
+gSoccerZoneHack::gSoccerZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreation, bool delayCreation)
+:gZone( grid, pos, dynamicCreation, delayCreation)
+{
+    color_.r = 1.0f;
+    color_.g = 0.5f;
+    color_.b = 0.5f;
+
+    originalPosition_ = pos;
+    originalVelocity_ = eCoord(0,0);
+
+    init_ = false;
+    ballShots_ = 0;
+
+    if (!delayCreation)
+        grid->AddGameObjectInteresting(this);
+
+    zoneType = 1;
+    team = NULL;
+
+    SetWallInteract(true);
+    SetWallBouncesLeft(-1);
+
+    SetExpansionSpeed(0);
+    SetRotationSpeed( .3f );
+    RequestSync();
+}
+
+//  this is for the soccer goal
+gSoccerZoneHack::gSoccerZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreation, eTeam *teamowner, bool delayCreation)
+:gZone( grid, pos, dynamicCreation, delayCreation)
+{
+    color_.r = 1.0f;
+    color_.g = 0.5f;
+    color_.b = 0.5f;
+
+    originalPosition_ = pos;
+    originalVelocity_ = eCoord(0,0);
+
+    init_ = false;
+    ballShots_ = 0;
+
+    if (!delayCreation)
+        grid->AddGameObjectInteresting(this);
+
+    if (teamowner)
+    {
+        team = teamowner;
+        color_.r = team->R() / 15;
+        color_.g = team->G() / 15;
+        color_.b = team->B() / 15;
+    }
+    else
+        CheckTeamAssignment();
+
+    SetExpansionSpeed(0);
+    SetRotationSpeed( .3f );
+    RequestSync();
+}
+
+
+// *******************************************************************************
+// *
+// *    gSoccerZoneHack
+// *
+// *******************************************************************************
+//!
+//!     @param  m Message to read creation data from
+//!     @param  null
+//!
+// *******************************************************************************
+
+gSoccerZoneHack::gSoccerZoneHack( nMessage & m )
+: gZone( m )
+{
+}
+
+
+// *******************************************************************************
+// *
+// *    ~gSoccerZoneHack
+// *
+// *******************************************************************************
+//!
+//!
+// *******************************************************************************
+
+gSoccerZoneHack::~gSoccerZoneHack( void )
+{
+}
+
+
+// *******************************************************************************
+// *
+// *    Timestep
+// *
+// *******************************************************************************
+//!
+//!     @param  time    the current time
+//!
+// *******************************************************************************
+
+bool sg_soccerBallSlowdown = true;
+static tSettingItem<bool> sg_soccerBallSlowdownConf("SOCCER_BALL_SLOWDOWN", sg_soccerBallSlowdown);
+
+REAL sg_soccerBallSlowdownSpeed = 0.07;
+bool restrictBallSlowdownSpeed(const REAL &newValue)
+{
+    //  if values are less than 0 or greater than 1, no good!
+    if ((newValue <= 0) || (newValue >= 1))
+            return false;
+
+    //  if values are in between 0 and 1, good!
+    return true;
+}
+static tSettingItem<REAL> sg_soccerBallSlowdownSpeedConf("SOCCER_BALL_SLOWDOWN_SPEED", sg_soccerBallSlowdownSpeed, &restrictBallSlowdownSpeed);
+
+bool gSoccerZoneHack::Timestep( REAL time )
+{
+    // delegate
+    bool returnStatus = gZone::Timestep( time );
+
+    if ((zoneType == gSoccer_GOAL) && !team)
+        CheckTeamAssignment();
+
+    if (!init_)
+    {
+        originalVelocity_ = GetVelocity();
+
+        //  less than 0.1 seconds due to unknown reasons...
+        //  making sure original radius is found to be greater than 0
+        if ((time < 0.1) && (GetRadius() > 0))
+            originalRadius_ = GetRadius();
+        else
+            //  installazation success!
+            init_ = true;
+    }
+
+    //  for slowing down the soccer ball
+    if ((zoneType == gSoccer_BALL) && sg_soccerBallSlowdown && (GetVelocity() != eCoord(0,0)))
+    {
+        //  store the current speed for setup
+        eCoord currentVelocity = GetVelocity();
+
+        //  get the values working with decreasing the velocity speed
+        if (currentVelocity.x < 0)
+            currentVelocity.x += sg_soccerBallSlowdownSpeed;
+        else if (currentVelocity.x > 0)
+            currentVelocity.x -= sg_soccerBallSlowdownSpeed;
+
+        if (currentVelocity.y < 0)
+            currentVelocity.y += sg_soccerBallSlowdownSpeed;
+        else if (currentVelocity.y > 0)
+            currentVelocity.y -= sg_soccerBallSlowdownSpeed;
+
+        if (((currentVelocity.x > -1) && (currentVelocity.x < 0)) || ((currentVelocity.x > 0) && (currentVelocity.x < 1)))
+            currentVelocity.x = 0;
+
+        if (((currentVelocity.y > -1) && (currentVelocity.y < 0)) || ((currentVelocity.y > 0) && (currentVelocity.y < 1)))
+            currentVelocity.y = 0;
+
+        //  set new velocity
+        SetVelocity(currentVelocity);
+    }
+
+    return (returnStatus);
+}
+
+// *******************************************************************************
+// *
+// *    GoHome
+// *
+// *******************************************************************************
+
+void gSoccerZoneHack::GoHome()
+{
+    //  clear last team to hit the soccer ball
+    lastTeamIn_ = NULL;
+
+    //  send soccer ball back to it's oriignal place on the grid
+    SetReferenceTime();
+    SetPosition(originalPosition_);
+    SetVelocity(originalVelocity_);
+    SetRadius(originalRadius_);
+    RequestSync();
+}
+
+
+// *******************************************************************************
+// *
+// *    OnEnter
+// *
+// *******************************************************************************
+//!
+//!     @param  target  the cycle that has been found inside the zone
+//!     @param  time    the current time
+//!
+// *******************************************************************************
+
+bool sg_soccerGoalKillEnemies = false;
+static tSettingItem<bool> sg_soccerGoalKillEnemiesConf("SOCCER_GOAL_KILL_ENEMIES", sg_soccerGoalKillEnemies);
+
+bool sg_soccerGoalRespawnAllies = true;
+static tSettingItem<bool> sg_soccerGoalRespawnAlliesConf("SOCCER_GOAL_RESPAWN_ALLIES", sg_soccerGoalRespawnAllies);
+
+bool sg_soccerGoalRespawnEnemies = true;
+static tSettingItem<bool> sg_soccerGoalRespawnEnemiesConf("SOCCER_GOAL_RESPAWN_ENEMIES", sg_soccerGoalRespawnEnemies);
+
+static eLadderLogWriter sg_soccerBallPlayerEntered("SOCCER_BALL_PLAYER_ENTERED", false);
+static eLadderLogWriter sg_soccerGoalPlayerEntered("SOCCER_GOAL_PLAYER_ENTERED", false);
+
+void gSoccerZoneHack::OnEnter( gCycle *target, REAL time )
+{
+    if (!team && (zoneType == gSoccer_BALL))
+    {
+        //  calculate the bounce off. Source: gBallZoneHack
+        eCoord p2 = target->Position();
+        eCoord v2 = target->Direction()*target->Speed();
+
+        REAL r1 = this->GetRadius();
+        REAL r2 = target->Player()->ping/.2;                             // the cycle "radius". accomidates for higher ping players
+        REAL R = r1 + r2;
+        eCoord p1 = this->Position();
+        eCoord dp = p2 - p1;
+        REAL c = dp.NormSquared() - R * R;
+        // first find the real time and position of the impact ...
+        eCoord v1 = this->GetVelocity();
+        eCoord dv = v2 - v1;
+        REAL a = dv.NormSquared();
+        REAL b = 2*(dp.x*dv.x+dp.y*dv.y);
+        REAL delta = b*b-4*a*c;
+        if (delta<0) return;         // no t. it can't be, an impact just occured ...
+        delta = sqrt(delta);
+        REAL t1 = (-b-delta)/(2*a);
+        REAL t2 = (-b+delta)/(2*a);
+        REAL t = 0;
+        if ((t1>0) && (t2>0)) return;// can't be, again ...
+        if (t1>0) t = t2;
+        else if (t2>0) t = t1;
+        else if (t1>t2) t = t1;
+        else t = t2;
+
+        // if a wall impact happens too close, just skip cycle bouncing for now ...
+        if (t < lastImpactTime_ - time) return;
+
+        // now that we have the time, get the positions ...
+        eCoord p1c = p1+v1*t;
+        eCoord p2c = p2+v2*t;
+        // now compute the impact : new velocities and new correct positions ...
+        eCoord base = (p2c-p1c);
+        base.Normalize();
+        eCoord new_v1 = base*-target->Speed();
+        eCoord new_p1 = p1c + new_v1*(-t+0.01);
+        new_v1 = new_v1*(1+sg_ballCycleBoost*target->GetAcceleration()/100);
+
+        SetPosition(new_p1);
+        SetVelocity(new_v1);
+
+        //  set last player to hit the zone
+        lastTeamIn_ = target->Team();
+
+        sg_soccerBallPlayerEntered << target->Player()->GetUserName() << target->Team()->Name().Filter();
+        sg_soccerBallPlayerEntered.write();
+
+    }
+    else if (team && (zoneType == gSoccer_GOAL))
+    {
+        if (sg_soccerGoalKillEnemies)
+        {
+            if (target && (team != target->Team()))
+            {
+                sn_ConsoleOut(tOutput("$soccer_goal_enemy_entered", target->Player()->GetColoredName(), Team()->GetColoredName()));
+                target->Kill();
+            }
+        }
+        else
+        {
+            if (sg_soccerGoalRespawnAllies && (team == target->Team()))
+            {
+                gSpawnPoint *pSpawn = Arena.ClosestSpawnPoint(GetPosition());
+                if (pSpawn)
+                {
+                    for(int i = 0; i < Team()->NumPlayers(); i++)
+                    {
+                        ePlayerNetID *p = Team()->Player(i);
+                        if (p)
+                        {
+                            gCycle *cycle = dynamic_cast<gCycle *>(p->Object());
+                            if (!cycle || (!cycle->Alive()))
+                            {
+                                eCoord cyclePos, cycleDir;
+                                pSpawn->Spawn(cyclePos, cycleDir);
+
+                                gCycle *newCycle = new gCycle(Grid(), cyclePos, cycleDir, p);
+                                p->ControlObject(newCycle);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        sg_soccerGoalPlayerEntered << target->Player()->GetUserName() << target->Team()->Name().Filter() << Team()->Name().Filter();
+        sg_soccerGoalPlayerEntered.write();
+    }
+}
+
+int sg_soccerGoalScore = 1;
+static tSettingItem<int> sg_soccerGoalScoreConf("SOCCER_GOAL_SCORE", sg_soccerGoalScore);
+
+bool sg_soccerBallFirstWin = false;
+static tSettingItem<bool> sg_soccerBallFirstWinConf("SOCCER_BALL_FIRST_WIN", sg_soccerBallFirstWin);
+
+int sg_soccerBallShotsWin = 0;
+static tSettingItem<int> sg_soccerBallShotsWinConf("SOCCER_BALL_SHOTS_WIN", sg_soccerBallShotsWin);
+
+void gSoccerZoneHack::OnEnter( gSoccerZoneHack *target, REAL time )
+{
+    //  check if the zone entering the goal is actually a soccer ball
+    if ((GetType() == gSoccer_GOAL) && (target->GetType() == gSoccer_BALL) && target->lastTeamIn_)
+    {
+        if (target->lastTeamIn_ == team)
+        {
+            sn_ConsoleOut(tOutput("$soccer_goal_self", Team()->GetColoredName()));
+
+            //  time to return ball to home
+            target->GoHome();
+        }
+        else
+        {
+            //  increase the number of times the ball entered other team's goal
+            target->ballShots_++;
+
+            target->lastTeamIn_->AddScore(sg_soccerGoalScore, tOutput("$soccer_goal_score", target->lastTeamIn_->GetColoredName(), Team()->GetColoredName(), sg_soccerGoalScore), tOutput());
+            if (sg_soccerBallFirstWin && (target->ballShots_ == 1))
+            {
+                sg_DeclareWinner(target->lastTeamIn_, tOutput("$soccer_winner"));
+
+                //  ball must vanish after having a winner
+                target->Collapse();
+            }
+            else if ((sg_soccerBallShotsWin > 0) && (target->ballShots_ >= sg_soccerBallShotsWin))
+            {
+                eTeam *thisTeam = team;                     //  the team owner of the goal
+                eTeam *shotTeam = target->lastTeamIn_;      //  the last team to hit the ball
+
+                if (thisTeam && shotTeam)
+                {
+                    //  ensure the team score's are compared
+                    if (shotTeam->Score() < thisTeam->Score())
+                        sg_DeclareWinner(thisTeam, tOutput("$soccer_winner"));
+                    else
+                        sg_DeclareWinner(shotTeam, tOutput("$soccer_winner"));
+
+                    //  ball must vanish after having a winner
+                    target->Collapse();
+                }
+            }
+            else
+            {
+                //  return soccer ball home
+                target->GoHome();
+            }
+        }
+    }
+}
+
+// *******************************************************************************
+// *
+// *    OnVanish
+// *
+// *******************************************************************************
+
+void gSoccerZoneHack::OnVanish( void )
+{
+    //  respawn soccer ball that suddenly disappears
+    if (zoneType == gSoccer_BALL)
+    {
+        GoHome();
+    }
+    else
+        this->RemoveFromListsAll();
+}
+
+// *******************************************************************************
+// *
+// *    SpawnSoccer
+// *
+// *******************************************************************************
+
+static void sg_SpawnSoccer(std::istream &s)
+{
+    eGrid *grid = eGrid::CurrentGrid();
+    if(!grid)
+        return;
+
+    tString params;
+    params.ReadLine(s, true);
+
+    if (params.Filter() == "")
+    {
+        goto usage;
+        return;
+    }
+    else
+    {
+        float sizeMultiplier = gArena::SizeMultiplier();
+        float radius, growth;
+        tString name, type, team;
+        std::vector<eCoord> route;
+        int pos = 0;
+        gZone *Zone;
+
+        name = params.ExtractNonBlankSubString(pos);
+        if (name.ToLower() == "n")
+        {
+            name = params.ExtractNonBlankSubString(pos);
+            type = params.ExtractNonBlankSubString(pos);
+        }
+        else
+        {
+            type = name;
+            name = "";
+        }
+
+        if (type.ToLower() == "soccerball")
+        {
+            //  good...
+        }
+        else if (type.ToLower() == "soccergoal")
+        {
+            //  good...
+            team = params.ExtractNonBlankSubString(pos);
+        }
+        else
+        {
+            //  terrible...
+            goto usage;
+            return;
+        }
+
+        tString zonePosXStr = params.ExtractNonBlankSubString(pos);
+        tString zonePosYStr;
+
+        if(zonePosXStr.ToLower() == "l")
+        {
+            tString x,y;
+            while(true)
+            {
+                x = params.ExtractNonBlankSubString(pos);
+                if(x.ToLower() == "z" || x.Filter() == "") break;
+                y = params.ExtractNonBlankSubString(pos);
+                route.push_back(eCoord(atof(x)*sizeMultiplier, atof(y)*sizeMultiplier));
+            }
+        }
+        else
+        {
+            zonePosYStr = params.ExtractNonBlankSubString(pos);
+        }
+
+        const tString zoneSizeStr       = params.ExtractNonBlankSubString(pos);
+        const tString zoneGrowthStr     = params.ExtractNonBlankSubString(pos);
+        const tString zoneDirXStr       = params.ExtractNonBlankSubString(pos);
+        const tString zoneDirYStr       = params.ExtractNonBlankSubString(pos);
+        const tString zoneInteractive   = params.ExtractNonBlankSubString(pos);
+        const tString zoneRedStr        = params.ExtractNonBlankSubString(pos);
+        const tString zoneGreenStr      = params.ExtractNonBlankSubString(pos);
+        const tString zoneBlueStr       = params.ExtractNonBlankSubString(pos);
+        const tString targetRadiusStr   = params.ExtractNonBlankSubString(pos);
+
+        eCoord zonePos          = route.empty() ? eCoord(atof(zonePosXStr)*sizeMultiplier,atof(zonePosYStr)*sizeMultiplier) : route.front();
+        const REAL zoneSize     = atof(zoneSizeStr)*sizeMultiplier;
+        const REAL zoneGrowth   = atof(zoneGrowthStr)*sizeMultiplier;
+
+        eCoord zoneDir = eCoord(atof(zoneDirXStr)*sizeMultiplier,atof(zoneDirYStr)*sizeMultiplier);
+        gRealColor zoneColor;
+        bool setColorFlag = false;
+        if ((zoneRedStr.Filter() != "") && (zoneGreenStr.Filter() != "") && (zoneBlueStr.Filter() != ""))
+        {
+            zoneColor.r = atof(zoneRedStr);
+            zoneColor.g = atof(zoneGreenStr);
+            zoneColor.b = atof(zoneBlueStr);
+            setColorFlag = true;
+        }
+
+        eTeam *zoneTeam;
+        if (team.ToLower() == "no_team")
+        {
+            //REAL teamDistance_ = 0;
+            const tList<eGameObject>& gameObjects = grid->GameObjects();
+            gCycle *closest = 0;
+            REAL closestDistance = 0;
+            for (int i=gameObjects.Len()-1;i>=0;i--)
+            {
+                gCycle *other=dynamic_cast<gCycle *>(gameObjects[i]);
+
+                if (other)
+                {
+                    //eTeam * otherTeam = other->Player()->CurrentTeam();
+                    eCoord otherpos = other->Position() - zonePos;
+                    REAL distance = otherpos.NormSquared();
+                    if ( !closest || distance < closestDistance )
+                    {
+                        closest = other;
+                        closestDistance = distance;
+                    }
+                }
+            }
+
+            if ( closest )
+            {
+                // take over team
+                zoneTeam = closest->Player()->CurrentTeam();
+            }
+        }
+        else if (team.Filter() != "")
+        {
+            zoneTeam = eTeam::FindTeamByName(team);
+        }
+
+        //  time to create the zone
+        if (type.ToLower() == "soccerball")
+        {
+            gSoccerZoneHack *sZone = new gSoccerZoneHack(grid, zonePos, false, false);
+            sZone->SetType(gSoccerZoneHack::gSoccer_BALL);
+
+            Zone = sZone;
+        }
+        else if (type.ToLower() == "soccergoal")
+        {
+            gSoccerZoneHack *sZone = new gSoccerZoneHack(grid, zonePos, false, zoneTeam, false);
+            sZone->SetType(gSoccerZoneHack::gSoccer_GOAL);
+
+            Zone = sZone;
+        }
+
+        REAL targetRadius = atof(targetRadiusStr)*sizeMultiplier;
+        bool zoneInteractiveBool = false;
+        if (zoneInteractive.ToLower() == "true")
+            zoneInteractiveBool = true;
+
+        CreateZone(Zone, zoneSize, zoneGrowth, zoneDir, setColorFlag, zoneColor, zoneInteractiveBool, targetRadius, route, name);
+        return;
+    }
+
+    usage:
+    {
+        tString usageMem;
+        ePlayerNetID *rec = 0;  //  get the caller to send the message
+
+        usageMem << "Usage:\n"
+                    "SPAWN_SOCCER <soccerball> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
+                    "SPAWN_SOCCER <soccergoal> <team> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
+                    "Instead of <x> <y> one can write: L <x1> <y1> <x2> <y2> [...] Z\n"
+                    "To give the zone a name, SPAWN_SOCCER n <name> ...\n";
+
+        sn_ConsoleOut(usageMem, rec->Owner());
+    }
+}
+static tConfItemFunc sg_SpawnSoccerConf("SPAWN_SOCCER", &sg_SpawnSoccer);
 
 // *******************************************************************************
 // *

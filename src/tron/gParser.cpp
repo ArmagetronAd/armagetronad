@@ -779,6 +779,37 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
 
             zone = bZone;
         }
+        else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *) "effect"), (const xmlChar *)"soccerball"))
+        {
+            //  this is for the socker ball
+            gSoccerZoneHack *sZone = new gSoccerZoneHack(grid, zonePos, false, delayZoneCreation);
+            sZone->SetType(gSoccerZoneHack::gSoccer_BALL);
+
+            zone = sZone;
+        }
+        else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *) "effect"), (const xmlChar *)"soccergoal"))
+        {
+            //  this is for the socker goal
+            tString zoneTeamStr = myxmlGetPropString(cur, "team");
+            eTeam *zoneTeam = eTeam::FindTeamByName(zoneTeamStr);
+
+            if (zoneTeam && (zoneTeamStr != ""))
+            {
+                zoneColor.r = zoneTeam->R()/15.0;
+                zoneColor.g = zoneTeam->G()/15.0;
+                zoneColor.b = zoneTeam->B()/15.0;
+
+                gSoccerZoneHack *sZone = new gSoccerZoneHack(grid, zonePos, false, zoneTeam, delayZoneCreation);
+                sZone->SetType(gSoccerZoneHack::gSoccer_GOAL);
+                zone = sZone;
+            }
+            else
+            {
+                gSoccerZoneHack *sZone = new gSoccerZoneHack( grid, zonePos, false, NULL, delayZoneCreation );
+                sZone->SetType(gSoccerZoneHack::gSoccer_GOAL);
+                zone = sZone;
+            }
+        }
 
         // leaving zone undeleted is no memory leak here, the gid takes control of it
         if ( zone )

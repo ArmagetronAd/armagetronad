@@ -132,6 +132,8 @@ public:
     static void AddDelay(REAL delayTime, gZone *Zone);
     static void ClearDelay();
 
+    virtual void Collapse();    //  have the zone disappear instantly
+
 protected:
     bool wallInteract_;
     int wallBouncesLeft_;
@@ -182,6 +184,9 @@ private:
 
     virtual void OnExit( gCycle *target, REAL time );   //!< reacts to objects leaving the zone
     virtual void OnExit( gZone *target, REAL time );    //!< reacts to objects leaving the zone
+
+    virtual void OnNear( gCycle *target, REAL time );   //!< reacts to objects near the zone
+    virtual void OnNear( gZone *target, REAL time );    //!< reacts to objects near the zone
 
     tArray<gCycle *> cycesInside_;
     void AddPlayerInteraction(gCycle *cycle) { cycesInside_.Insert(cycle); }
@@ -635,6 +640,49 @@ class gObjectZoneHack: public gZone
         virtual void OnExit(gCycle *target, REAL time);
 
     protected:
+
+    private:
+        virtual bool Timestep(REAL currentTime);
+        virtual void OnVanish();
+        virtual void OnEnter(gCycle *target, REAL time);
+};
+
+class gSoccerZoneHack: public gZone
+{
+    public:
+        enum
+        {
+            gSoccer_GOAL,
+            gSoccer_BALL
+        };
+
+        gSoccerZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false, bool delayCreation = false);
+        gSoccerZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false, eTeam *team = NULL, bool delayCreation = false);
+        gSoccerZoneHack(nMessage &m);
+        ~gSoccerZoneHack();
+
+		void SetType(int settype) {zoneType = settype;}     //  set the type of the zone
+		int GetType() {return (zoneType);}                  //  get the type of the zone
+
+		bool CheckTeamAssignment();         //  check if the soccer goal zonehas been assigned a team owner
+
+		virtual void OnEnter(gSoccerZoneHack *target, REAL time);
+
+		//  if it's a ball, go home after either dying or hitting a goal
+		void GoHome();
+
+    protected:
+        int zoneType;
+        REAL teamDistance_;
+
+        bool init_;
+        eCoord originalPosition_;   //  the initial spawned position of the zone
+        eCoord originalVelocity_;   //  the initial spawned velocity of the zone
+        REAL originalRadius_;       //  the initial spawned radius of the zone
+
+        eTeam *lastTeamIn_;     //  store the last player's team to enter the zone
+
+        int ballShots_;     //  number of times ball has entered goals
 
     private:
         virtual bool Timestep(REAL currentTime);

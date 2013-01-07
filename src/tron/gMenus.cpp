@@ -454,6 +454,18 @@ static tConfItem<bool> wsp("WHITE_SPARKS",white_sparks);
 extern bool sg_crashExplosion;   // from gExplosion.cpp
 static tConfItem<bool> crexp("EXPLOSION",sg_crashExplosion);
 
+// both from ePlayer.cpp
+static tConfItem<bool> se_highlightMyNameConf("HIGHLIGHT_NAME", se_highlightMyName);
+static tConfItem<bool> se_tabCompletionConf("TAB_COMPLETION", se_tabCompletion);
+
+void sg_SpecialMenu()
+{
+    uMenu menu("$special_setup_menu_text");
+
+    new uMenuItemToggle(&menu, "$tab_completion_menu_text", "$tab_completion_menu_help", se_tabCompletion);
+    new uMenuItemToggle(&menu, "$highlight_name_menu_text", "$highlight_name_menu_help", se_highlightMyName);    menu.Enter();
+}
+
 #ifndef DEDICATED
 //extern bool png_screenshot;		// from rSysdep.cpp
 //static tConfItem<bool> pns("PNG_SCREENSHOT",png_screenshot);
@@ -717,7 +729,7 @@ public:
         }
         else if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_TAB)
         {
-            if (*content != "")
+            if ((*content != "") && se_tabCompletion)
             {
                 tString strString;
                 strString << *content;
@@ -1093,15 +1105,15 @@ void sg_PlayerMenu(int Player){
     cam_s.NewChoice("$player_camera_initial_ext_text","$player_camera_initial_ext_help",CAMERA_FOLLOW);
     cam_s.NewChoice("$player_camera_initial_free_text","$player_camera_initial_free_help",CAMERA_FREE);
 
-    uMenuItemString n(&playerMenu,
-                      "$player_name_text",
-                      "$player_name_help",
-                      p->name, 16);
-
     uMenuItemString tn(&playerMenu,
                       "$player_teamname_text",
                       "$player_teamname_help",
                       p->teamname, 16);
+
+    uMenuItemString n(&playerMenu,
+                      "$player_name_text",
+                      "$player_name_help",
+                      p->name, 16);
 
     playerMenu.Enter();
 

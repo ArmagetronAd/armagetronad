@@ -1519,8 +1519,7 @@ void ePlayer::LogIn()
     }
 }
 
-static bool se_highlightMyName = false;
-static tConfItem<bool> se_highlightMyNameConf("HIGHLIGHT_NAME", se_highlightMyName);
+bool se_highlightMyName = false;
 
 static void se_DisplayChatLocally( ePlayerNetID* p, const tString& say )
 {
@@ -4485,6 +4484,8 @@ struct eChatInsertionCommand
     {}
 };
 
+bool se_tabCompletion = true;
+
 //! The tab completion function for in-chat mode
 //! @returns whether text has completed or not
 static bool ChatTabCompletition(tString &strString, int &curserPos)
@@ -4743,7 +4744,7 @@ public:
         }
         else if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_TAB)
         {
-            if (*content != "")
+            if ((*content != "") && se_tabCompletion)
             {
                 tString chattext;
                 chattext << *content;

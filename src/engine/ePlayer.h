@@ -781,5 +781,7 @@ ePlayerNetID & ePlayerNetID::SetUserName( tString const & userName )
     return *this;
 }
 
+extern bool se_highlightMyName, se_tabCompletion;
+
 #endif
 
