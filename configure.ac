@@ -76,6 +76,20 @@ have_lzma=false
     AC_DEFINE_UNQUOTED(MAXCLIENTS,${withval},maximal number of clients)
 ])
 
+AC_ARG_WITH([os-x-toolkit],
+	[AC_HELP_STRING([--with-os-x-toolkit=DIR],
+		[build using the OS X toolkit. See README-Subversion for more information.])],
+	dnl Additionally check for an environment variable, so the user doesn't need to specify the directory every time they configure.
+	[os_x_toolkit="$withval"],
+	[os_x_toolkit=])
+
+if test -n "$os_x_toolkit"; then
+	dnl TODO make architectures that will be built configurable.
+	CXXFLAGS="-arch i386 -arch x86_64 -Xarch_i386 -L${os_x_toolkit}/i386/lib -Xarch_x86_64 -L${os_x_toolkit}/x86_64/lib $CXXFLAGS"
+	CPPFLAGS="-F${os_x_toolkit}/Frameworks -Xarch_i386 -I${os_x_toolkit}/i386/include -Xarch_x86_64 -I${os_x_toolkit}/x86_64/include $CPPFLAGS"
+	PATH="${os_x_toolkit}/bin:$PATH"
+fi
+
 AC_ARG_ENABLE(dedicated,
      AC_HELP_STRING([--enable-dedicated],
 		[enables dedicated server; otherwise, compile a client (default=disabled)]),
@@ -804,6 +818,7 @@ dnl *************************************************
 dnl         Sound
 dnl *************************************************
 
+dnl TODO Fix for OS X toolkit support--need to link using "-framework SDL_mixer".
 if test x$enable_sound = xyes; then
 	dnl first do the regular sdl define
  	AC_DEFINE(HAVE_SDL_FOR_SOUND, 1,  [Define if you have SDL_sound, which is part of the core SDL])
