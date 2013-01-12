@@ -88,6 +88,7 @@ if test -n "$os_x_toolkit"; then
 	CXXFLAGS="-arch i386 -arch x86_64 -Xarch_i386 -L${os_x_toolkit}/i386/lib -Xarch_x86_64 -L${os_x_toolkit}/x86_64/lib $CXXFLAGS"
 	CPPFLAGS="-F${os_x_toolkit}/Frameworks -Xarch_i386 -I${os_x_toolkit}/i386/include -Xarch_x86_64 -I${os_x_toolkit}/x86_64/include $CPPFLAGS"
 	PATH="${os_x_toolkit}/bin:$PATH"
+	PROTOC="${os_x_toolkit}/i386/bin/protoc"
 fi
 
 AC_ARG_ENABLE(dedicated,
