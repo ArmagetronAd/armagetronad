@@ -34,7 +34,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <time.h>
 #include <string>
 #include <iostream>
-#include "ePlayer.h"
 
 tString::tString(){
     operator[](0)='\0';
@@ -1364,38 +1363,74 @@ public:
         filter[0]=0;
 
         // map all unknown characters to underscores
-        for (i=255; i>=0; --i)
+        for (i=255; i>0; --i)
         {
             filter[i] = '_';
         }
 
         // leave ASCII characters as they are
-        // for (i=127; i>=32; --i)
-        // no, leave all ISO Latin 1 characters as they are
-        for (i=255; i>=32; --i)
+        for (i=126; i>32; --i)
         {
             filter[i] = i;
         }
-
-        // map return and tab to space
-        SetMap('\n',' ');
-        SetMap('\t',' ');
+        // but convert uppercase characters to lowercase
+        for (i='Z'; i>='A'; --i)
+        {
+            filter[i] = i + ('a' - 'A');
+        }
 
         //! map umlauts and stuff to their base characters
-        /*
-        SetMap(0xc0,0xc5,'A');
-        SetMap(0xd1,0xd6,'O');
-        SetMap(0xd9,0xdD,'U');
+        SetMap(0xc0,0xc5,'a');
+        SetMap(0xd1,0xd6,'o');
+        SetMap(0xd9,0xdD,'u');
         SetMap(0xdf,'s');
         SetMap(0xe0,0xe5,'a');
         SetMap(0xe8,0xeb,'e');
         SetMap(0xec,0xef,'i');
         SetMap(0xf0,0xf6,'o');
         SetMap(0xf9,0xfc,'u');
-        */
 
-        //!todo: map weird chars
-        // make this data driven.
+        // ok, some of those are a bit questionable, but still better than _...
+        SetMap(161,'!');
+        SetMap(162,'c');
+        SetMap(163,'l');
+        SetMap(165,'y');
+        SetMap(166,'|');
+        SetMap(167,'s');
+        SetMap(168,'"');
+        SetMap(169,'c');
+        SetMap(170,'a');
+        SetMap(171,'"');
+        SetMap(172,'!');
+        SetMap(174,'r');
+        SetMap(176,'o');
+        SetMap(177,'+');
+        SetMap(178,'2');
+        SetMap(179,'3');
+        SetMap(182,'p');
+        SetMap(183,'.');
+        SetMap(185,'1');
+        SetMap(187,'"');
+        SetMap(198,'a');
+        SetMap(199,'c');
+        SetMap(208,'d');
+        SetMap(209,'n');
+        SetMap(215,'x');
+        SetMap(216,'o');
+        SetMap(221,'y');
+        SetMap(222,'p');
+        SetMap(231,'c');
+        SetMap(241,'n');
+        SetMap(247,'/');
+        SetMap(248,'o');
+        SetMap(253,'y');
+        SetMap(254,'p');
+        SetMap(255,'y');
+
+        //map 0 to o because they look similar
+        SetMap('0','o');
+
+        // TODO: make this data driven.
     }
 
     char Filter( unsigned char in )
@@ -1419,7 +1454,6 @@ private:
 
     char filter[256];
 };
-
 
 // *******************************************************************************************
 // *
@@ -1593,14 +1627,54 @@ tString tString::ToUpper(void) const
     return ret;
 }
 
+static bool st_IsUnderscore( char c )
+{
+    return c == '_';
+}
+
+// function prototype for character testing functions
+typedef bool TestSCharacter( char c );
+
+// strips characters matching a test beginnings and ends of names
+static void st_StripMatchingEnds( tString & stripper, TestSCharacter & beginTester, TestSCharacter & endTester )
+{
+    int len = stripper.Len() - 1;
+    int first = 0, last = len;
+
+    // eat whitespace from beginnig and end
+    while ( first < len && beginTester( stripper[first] ) ) ++first;
+    while ( last > 0 && ( !stripper[last] || endTester(stripper[last] ) ) ) --last;
+
+    // strip everything?
+    if ( first > last )
+    {
+        stripper = "";
+        return;
+    }
+
+    // strip
+    if ( first > 0 || last < stripper.Len() - 1 )
+        stripper = stripper.SubStr( first, last + 1 - first );
+}
+
 //! @returns filtered string and with all of its all characters in lowercased string
 tString tString::Filter() const
 {
     tString in(*this);
     tString out;
     out = tColoredString::RemoveColors( in );
+    static tCharacterFilter filter;
 
-    out = ePlayerNetID::FilterName(in);
+    // filter out illegal characters
+    for (int i = out.Len()-1; i>=0; --i )
+    {
+        char & c = out[i];
+
+        c = filter.Filter( c );
+    }
+
+    // strip leading and trailing unknown characters
+    st_StripMatchingEnds( out, st_IsUnderscore, st_IsUnderscore );
 
     return out;
 }
@@ -1998,11 +2072,6 @@ tString tString::RemoveWord(const char *find_word)
     return RemoveWord(tString(find_word));
 }
 
-tString tString::RemoveWord(char find_word)
-{
-    return RemoveWord(tString((const char*)find_word));
-}
-
 
 // **********************************************************************
 // *
@@ -2056,11 +2125,6 @@ tArray<tString> tString::Split(const char *del_word)
     return Split(tString(del_word));
 }
 
-tArray<tString> tString::Split(char del_word)
-{
-    return Split(tString((const char*)del_word));
-}
-
 // **********************************************************************
 // *
 // *	Replace
@@ -2110,9 +2174,4 @@ tString tString::Replace(tString old_word, tString new_word)
 tString tString::Replace(const char *old_word, const char *new_word)
 {
     return Replace(tString(old_word), tString(new_word));
-}
-
-tString tString::Replace(char old_word, char new_word)
-{
-    return Replace(tString((const char*)old_word), tString((const char*)new_word));
 }

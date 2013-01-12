@@ -6576,8 +6576,8 @@ static void sg_CustomMessage(std::istream &s)
         return;
 
     std::ostringstream str;
-    tString language_string_command = msg.ExtractNonBlankSubString(pos).Filter();
-    str << "$" << language_string_command;
+    tString language_string_command = msg.ExtractNonBlankSubString(pos);
+    str << "$" << language_string_command.Filter();
 
     tOutput output;
     int templateNum = 0;
@@ -6594,3 +6594,40 @@ static void sg_CustomMessage(std::istream &s)
     sn_ConsoleOut(tColoredString(output));
 }
 static tConfItemFunc sg_CustomMessageConf("CUSTOM_MESSAGE", &sg_CustomMessage);
+
+static void sg_CustomPlayerMessage(std::istream &s)
+{
+    tString msg;
+    int pos = 0;
+    msg.ReadLine(s);
+
+    if (msg.Filter() == "")
+        return;
+
+    ePlayerNetID *receiver, *sender = 0;
+    tString player_name = msg.ExtractNonBlankSubString(pos);
+    receiver = ePlayerNetID::FindPlayerByName(player_name);
+
+    if (receiver)
+    {
+        std::ostringstream str;
+        tString language_string_command = msg.ExtractNonBlankSubString(pos);
+        str << "$" << language_string_command.Filter();
+
+        tOutput output;
+        int templateNum = 0;
+        tString templateString = msg.ExtractNonBlankSubString(pos);
+
+        while(templateString.Filter() != "")
+        {
+            templateNum += 1;
+            output.SetTemplateParameter(templateNum, templateString);
+            templateString = msg.ExtractNonBlankSubString(pos);
+        }
+        output << str.str().c_str();
+
+        sn_ConsoleOut(tColoredString(output), receiver->Owner());
+        sn_ConsoleOut(tColoredString(output), sender->Owner());
+    }
+}
+static tConfItemFunc sg_CustomPlayerMessageConf("CUSTOM_PLAYER_MESSAGE", &sg_CustomPlayerMessage);

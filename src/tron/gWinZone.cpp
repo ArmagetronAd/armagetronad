@@ -1734,16 +1734,24 @@ gWinZoneHack::~gWinZoneHack( void )
 
 static eLadderLogWriter sg_winzonePlayerEnterWriter("WINZONE_PLAYER_ENTER", false);
 
+bool sg_winZonePlayerEnteredWin = true;
+static tSettingItem<bool> sg_winZonePlayerEnteredWinConf("WINZONE_PLAYER_ENTER_WIN", sg_winZonePlayerEnteredWin);
+
 void gWinZoneHack::OnEnter( gCycle * target, REAL time )
 {
     //HACK RACE begin
-    if ( sg_RaceTimerEnabled ) {
+    if ( sg_RaceTimerEnabled )
+    {
         gRace::ZoneHit( target->Player() );
     }
-    else {
-        static const char* message="$player_win_instant";
-        sg_DeclareWinner( target->Player()->CurrentTeam(), message );
-        Vanish( 0.5 );
+    else
+    {
+        if (sg_winZonePlayerEnteredWin)
+        {
+            static const char* message="$player_win_instant";
+            sg_DeclareWinner( target->Player()->CurrentTeam(), message );
+            Vanish( 0.5 );
+        }
     }
     //HACK RACE end
 
@@ -1760,7 +1768,7 @@ void gWinZoneHack::OnEnter( gCycle * target, REAL time )
     // message in edlog
     if ((!target) && (!target->Player())) return;
     sg_winzonePlayerEnterWriter << this->GOID() << name_ << GetPosition().x << GetPosition().y << target->Player()->GetUserName() << target->Player()->Object()->Position().x << target->Player()->Object()->Position().y << target->Player()->Object()->Direction().x << target->Player()->Object()->Direction().y << time;
-        sg_winzonePlayerEnterWriter.write();
+    sg_winzonePlayerEnterWriter.write();
 }
 
 

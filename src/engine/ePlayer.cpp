@@ -7517,7 +7517,7 @@ void ePlayerNetID::GridPosLadderLog()
             ePlayerNetID *p=se_PlayerNetIDs(i);
             if (p->IsActive() && p->currentTeam && p->Object() && p->Object()->Alive() )
             {
-                se_playerGridPosWriter << p->GetUserName() << p->Object()->Position().x << p->Object()->Position().y << p->Object()->Direction().x << p->Object()->Direction().y;
+                se_playerGridPosWriter << p->GetUserName() << p->Object()->Position().x << p->Object()->Position().y << p->Object()->Direction().x << p->Object()->Direction().y << p->Object()->Speed();
                 if (p->Object() && p->Object()->Team())
                     se_playerGridPosWriter << FilterName(p->Object()->Team()->Name());
                 else se_playerGridPosWriter << " ";

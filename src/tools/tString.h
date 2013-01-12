@@ -151,16 +151,13 @@ public:
     //  removes that word from the string if it exists
     tString RemoveWord(tString find_word);
     tString RemoveWord(const char *find_word);
-    tString RemoveWord(char find_word);
 
     //  splits string intoarrays
     tArray<tString> Split(tString del_word);
     tArray<tString> Split(const char *del_word);
-    tArray<tString> Split(char del_word);
 
     tString Replace(tString old_word, tString new_word);
     tString Replace(const char *old_word, const char *new_word);
-    tString Replace(char old_word, char new_word);
 
     tString ExtractNonBlankSubString( int &pos ) const; //!< Extract non blank char sequence starting at pos
 
