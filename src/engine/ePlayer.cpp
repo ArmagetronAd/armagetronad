@@ -7469,6 +7469,9 @@ void ePlayerNetID::RankingLadderLog()
         // add player color to the message
         se_onlinePlayerWriter << p->r << p->g << p->b;
 
+        // add the player's access level to the message
+        se_onlinePlayerWriter << p->GetAccessLevel();
+
         if(p->IsActive())
         {
             se_onlinePlayerWriter << p->ping;
@@ -7482,7 +7485,6 @@ void ePlayerNetID::RankingLadderLog()
         {
             se_onlinePlayerWriter << "";
         }
-        se_onlinePlayerWriter << p->GetAccessLevel();
         se_onlinePlayerWriter.write();
     }
     se_numHumansWriter << num_humans;

@@ -597,6 +597,8 @@ void gParser::parseTeleportZone(eGrid *grid, xmlNodePtr cur, const xmlChar * key
     }
 }
 
+static eLadderLogWriter sg_createzoneWriter("ZONE_CREATED", true);
+
 void
 gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
 {
@@ -839,6 +841,9 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
                 //  add the zone's creation delay to the list
                 gZone::AddDelay(zoneDelayCreation, zone);
             }
+
+            sg_createzoneWriter << zone->GOID() << zoneNamestr << zone->GetPosition().x << zone->GetPosition().y;
+            sg_createzoneWriter.write();
         }
     }
 }

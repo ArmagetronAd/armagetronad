@@ -126,7 +126,6 @@ static bool sg_raceFinishKill = false;
 static tSettingItem<bool> sg_raceFinishKillConf("RACE_FINISH_KILL", sg_raceFinishKill);
 
 tString sg_currentMap("");
-static tString CurrentMapName("");
 
 /* to check the correct map name
 static void sg_currentMapLoad(std::istream &s)

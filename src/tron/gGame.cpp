@@ -6631,3 +6631,19 @@ static void sg_CustomPlayerMessage(std::istream &s)
     }
 }
 static tConfItemFunc sg_CustomPlayerMessageConf("CUSTOM_PLAYER_MESSAGE", &sg_CustomPlayerMessage);
+
+static void sg_getCurrentMap(std::istream &s)
+{
+    ePlayerNetID *receiver = 0;
+
+    if (sg_currentMap != "")
+    {
+        //  send the ladderlog string
+        sg_currentMapWriter << sg_currentMap;
+        sg_currentMapWriter.write();
+
+        //  send the message to the caller
+        sn_ConsoleOut(sg_currentMap, receiver->Owner());
+    }
+}
+static tConfItemFunc sg_getCurrentMapConf("GET_CURRENT_MAP", &sg_getCurrentMap);
