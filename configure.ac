@@ -101,7 +101,7 @@ if test -n "$os_x_toolkit"; then
 	PATH="${os_x_toolkit}/bin:$PATH"
 	PROTOC="${os_x_toolkit}/i386/bin/protoc"
 	
-	FTGL_CFLAGS="-Xarch_i386 -I${os_x_toolkit}/i386/include/FTGL -Xarch_i386 -I${os_x_toolkit}/x86_64/include/FTGL"
+	FTGL_CFLAGS="-Xarch_i386 -I${os_x_toolkit}/i386/include/FTGL -Xarch_i386 -I${os_x_toolkit}/i386/include/freetype2 -Xarch_x86_64 -I${os_x_toolkit}/x86_64/include/FTGL -Xarch_x86_64 -I${os_x_toolkit}/x86_64/include/freetype2"
 	FTGL_LIBS="-lftgl -lfreetype -lz -lbz2"
 fi
 
