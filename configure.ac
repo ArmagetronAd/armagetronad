@@ -901,6 +901,8 @@ AC_MSG_ERROR([
 You need GLU to compile ${progtitle}; it SHOULD have come with OpenGL.
 Read the file doc/installation.txt.]))
 
+fi
+
 dnl *************************************************
 dnl         GLEW
 dnl *************************************************
@@ -1000,9 +1002,6 @@ AC_TRY_COMPILE([#include <FTGLPixmapFont.h>],return 0,[AC_MSG_RESULT([no, not ch
 AC_CHECK_HEADERS(ftgl.h)]
 )
 CXXFLAGS="$CXXFLAGS_SAVE"
-
-# end of dedicated server if/else
-fi
 
 dnl *************************************************
 dnl         Other Stuff
