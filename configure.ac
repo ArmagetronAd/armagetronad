@@ -83,6 +83,9 @@ AC_ARG_WITH([os-x-toolkit],
 	[os_x_toolkit="$withval"],
 	[os_x_toolkit=])
 
+FTGL_CFLAGS=
+FTGL_LIBS=
+
 if test -n "$os_x_toolkit"; then
 	dnl TODO make architectures that will be built configurable.
 	
@@ -95,6 +98,9 @@ if test -n "$os_x_toolkit"; then
 	
 	PATH="${os_x_toolkit}/bin:$PATH"
 	PROTOC="${os_x_toolkit}/i386/bin/protoc"
+	
+	FTGL_CFLAGS="-Xarch_i386 -I${os_x_toolkit}/i386/include/FTGL -Xarch_i386 -I${os_x_toolkit}/x86_64/include/FTGL"
+	FTGL_LIBS="-lftgl -lfreetype -lz -lbz2"
 fi
 
 AC_ARG_ENABLE(dedicated,
@@ -929,8 +935,10 @@ AC_LANG([C++])
 
 test -z "$FREETYPE_CONFIG" && FREETYPE_CONFIG=freetype-config
 
-FTGL_CFLAGS="`pkg-config ftgl --cflags`"
-FTGL_LIBS="`pkg-config ftgl --libs`"
+if test -z "$os_x_toolkit"; then
+	FTGL_CFLAGS="`pkg-config ftgl --cflags`"
+	FTGL_LIBS="`pkg-config ftgl --libs`"
+fi
 
 FTGL_ERROR="You need the library ftgl in at least version 2.1.3~rc5 to compile Armagetron. Read the file doc/installation.txt."
 
@@ -944,37 +952,40 @@ $FTGL_LIBS
 
 USE_FTGL=yes
 
-# `pkg-config ftgl --cflags` doesn't reliably give the include path to FTGL itself, we are on our own finding the includes in some cases.
-# look for FTGL headers in default system header locations and the prefixes of the libraries that do have a -config script
-FTGL_HEADERS="/usr/include/FTGL /usr/local/include/FTGL `$FREETYPE_CONFIG --prefix`/include/FTGL `$SDL_CONFIG --prefix`/include/FTGL `$XML2_CONFIG --prefix/`include/FTGL ${prefix}/include/FTGL "
+if test -z "$os_x_toolkit"; then
 
-AC_ARG_WITH(ftgl,
-    AC_HELP_STRING([--with-ftgl],
-        [use FTGL for rendering (default=enabled, which is currently required), the argument is the location of the FTGL headers]),
-    if test "${withval}" = yes -o "${withval}" = no; then
-        USE_FTGL="${withval}"
-    else
-        FTGL_HEADERS=${withval}
-    fi
-)
+	# `pkg-config ftgl --cflags` doesn't reliably give the include path to FTGL itself, we are on our own finding the includes in some cases.
+	# look for FTGL headers in default system header locations and the prefixes of the libraries that do have a -config script
+	FTGL_HEADERS="/usr/include/FTGL /usr/local/include/FTGL `$FREETYPE_CONFIG --prefix`/include/FTGL `$SDL_CONFIG --prefix`/include/FTGL `$XML2_CONFIG --prefix/`include/FTGL ${prefix}/include/FTGL "
 
-# candidates are collected, walk through them
-if test -z "`echo $FTGL_CFLAGS | grep FTGL`"; then
-    found=false
-    AC_MSG_CHECKING(for location of FTGL includes)
-    for candidate in ${FTGL_HEADERS}; do
-        if test -r ${candidate}/FTGL.h || test -r ${candidate}/ftgl.h; then
-            AC_MSG_RESULT(${candidate})
-                CPPFLAGS="$CPPFLAGS -I${candidate}"
-                found=true
-                break
-            fi
-    done
+	AC_ARG_WITH(ftgl,
+	    AC_HELP_STRING([--with-ftgl],
+	        [use FTGL for rendering (default=enabled, which is currently required), the argument is the location of the FTGL headers]),
+	    if test "${withval}" = yes -o "${withval}" = no; then
+	        USE_FTGL="${withval}"
+	    else
+	        FTGL_HEADERS=${withval}
+	    fi
+	)
 
-    if test ${found} = false; then
-        AC_MSG_RESULT([not found])
-        AC_MSG_ERROR([FTGL headers not found on your system. Please pass the correct location via --with-ftgl=<path to FTGL include directory>.])
-    fi
+	# candidates are collected, walk through them
+	if test -z "`echo $FTGL_CFLAGS | grep FTGL`"; then
+	    found=false
+	    AC_MSG_CHECKING(for location of FTGL includes)
+	    for candidate in ${FTGL_HEADERS}; do
+	        if test -r ${candidate}/FTGL.h || test -r ${candidate}/ftgl.h; then
+	            AC_MSG_RESULT(${candidate})
+	                CPPFLAGS="$CPPFLAGS -I${candidate}"
+	                found=true
+	                break
+	            fi
+	    done
+
+	    if test ${found} = false; then
+	        AC_MSG_RESULT([not found])
+	        AC_MSG_ERROR([FTGL headers not found on your system. Please pass the correct location via --with-ftgl=<path to FTGL include directory>.])
+	    fi
+	fi
 fi
 
 dnl *************************************************
