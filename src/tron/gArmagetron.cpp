@@ -71,7 +71,7 @@ static gCommandLineJumpStartAnalyzer sg_jumpStartAnalyzer;
 #endif
 
 #ifndef DEDICATED
-#ifdef MACOSX
+#ifdef MACOSX_XCODE
 #include "AAURLHandler.h"
 #include "version.h"
 #endif
@@ -347,7 +347,7 @@ static void welcome(){
         }
 #endif
 
-#ifdef MACOSX
+#ifdef MACOSX_XCODE
         StartAAURLHandler( showSplash );
 #endif
         tRecorder::Record( splashSection, showSplash );

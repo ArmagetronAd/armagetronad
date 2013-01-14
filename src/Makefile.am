@@ -265,7 +265,10 @@ endif
 if BUILDDEDICATED
 extralibs=
 else
-extralibs= thirdparty/particles/libparticles.a thirdparty/scrap/libscrap.a
+extralibs= thirdparty/particles/libparticles.a
+if !OS_X_TOOLKIT
+	extralibs += thirdparty/scrap/libscrap.a
+endif
 endif
 
 armagetronad_main_SOURCES = \
