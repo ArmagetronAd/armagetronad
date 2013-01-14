@@ -86,6 +86,8 @@ AC_ARG_WITH([os-x-toolkit],
 FTGL_CFLAGS=
 FTGL_LIBS=
 
+AM_CONDITIONAL([OS_X_TOOLKIT], test -n "${os_x_toolkit}")
+
 if test -n "$os_x_toolkit"; then
 	dnl TODO make architectures that will be built configurable.
 	
