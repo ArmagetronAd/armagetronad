@@ -1363,74 +1363,38 @@ public:
         filter[0]=0;
 
         // map all unknown characters to underscores
-        for (i=255; i>0; --i)
+        for (i=255; i>=0; --i)
         {
             filter[i] = '_';
         }
 
         // leave ASCII characters as they are
-        for (i=126; i>32; --i)
+        // for (i=127; i>=32; --i)
+        // no, leave all ISO Latin 1 characters as they are
+        for (i=255; i>=32; --i)
         {
             filter[i] = i;
         }
-        // but convert uppercase characters to lowercase
-        for (i='Z'; i>='A'; --i)
-        {
-            filter[i] = i + ('a' - 'A');
-        }
+
+        // map return and tab to space
+        SetMap('\n',' ');
+        SetMap('\t',' ');
 
         //! map umlauts and stuff to their base characters
-        SetMap(0xc0,0xc5,'a');
-        SetMap(0xd1,0xd6,'o');
-        SetMap(0xd9,0xdD,'u');
+        /*
+        SetMap(0xc0,0xc5,'A');
+        SetMap(0xd1,0xd6,'O');
+        SetMap(0xd9,0xdD,'U');
         SetMap(0xdf,'s');
         SetMap(0xe0,0xe5,'a');
         SetMap(0xe8,0xeb,'e');
         SetMap(0xec,0xef,'i');
         SetMap(0xf0,0xf6,'o');
         SetMap(0xf9,0xfc,'u');
+        */
 
-        // ok, some of those are a bit questionable, but still better than _...
-        SetMap(161,'!');
-        SetMap(162,'c');
-        SetMap(163,'l');
-        SetMap(165,'y');
-        SetMap(166,'|');
-        SetMap(167,'s');
-        SetMap(168,'"');
-        SetMap(169,'c');
-        SetMap(170,'a');
-        SetMap(171,'"');
-        SetMap(172,'!');
-        SetMap(174,'r');
-        SetMap(176,'o');
-        SetMap(177,'+');
-        SetMap(178,'2');
-        SetMap(179,'3');
-        SetMap(182,'p');
-        SetMap(183,'.');
-        SetMap(185,'1');
-        SetMap(187,'"');
-        SetMap(198,'a');
-        SetMap(199,'c');
-        SetMap(208,'d');
-        SetMap(209,'n');
-        SetMap(215,'x');
-        SetMap(216,'o');
-        SetMap(221,'y');
-        SetMap(222,'p');
-        SetMap(231,'c');
-        SetMap(241,'n');
-        SetMap(247,'/');
-        SetMap(248,'o');
-        SetMap(253,'y');
-        SetMap(254,'p');
-        SetMap(255,'y');
-
-        //map 0 to o because they look similar
-        SetMap('0','o');
-
-        // TODO: make this data driven.
+        //!todo: map weird chars
+        // make this data driven.
     }
 
     char Filter( unsigned char in )
@@ -1627,6 +1591,108 @@ tString tString::ToUpper(void) const
     return ret;
 }
 
+//  filtering all strings
+class tStringFilter
+{
+public:
+    tStringFilter()
+    {
+        int i;
+        filter[0]=0;
+
+        // map all unknown characters to underscores
+        for (i=255; i>0; --i)
+        {
+            filter[i] = '_';
+        }
+
+        // leave ASCII characters as they are
+        for (i=126; i>32; --i)
+        {
+            filter[i] = i;
+        }
+        // but convert uppercase characters to lowercase
+        for (i='Z'; i>='A'; --i)
+        {
+            filter[i] = i + ('a' - 'A');
+        }
+
+        //! map umlauts and stuff to their base characters
+        SetMap(0xc0,0xc5,'a');
+        SetMap(0xd1,0xd6,'o');
+        SetMap(0xd9,0xdD,'u');
+        SetMap(0xdf,'s');
+        SetMap(0xe0,0xe5,'a');
+        SetMap(0xe8,0xeb,'e');
+        SetMap(0xec,0xef,'i');
+        SetMap(0xf0,0xf6,'o');
+        SetMap(0xf9,0xfc,'u');
+
+        // ok, some of those are a bit questionable, but still better than _...
+        SetMap(161,'!');
+        SetMap(162,'c');
+        SetMap(163,'l');
+        SetMap(165,'y');
+        SetMap(166,'|');
+        SetMap(167,'s');
+        SetMap(168,'"');
+        SetMap(169,'c');
+        SetMap(170,'a');
+        SetMap(171,'"');
+        SetMap(172,'!');
+        SetMap(174,'r');
+        SetMap(176,'o');
+        SetMap(177,'+');
+        SetMap(178,'2');
+        SetMap(179,'3');
+        SetMap(182,'p');
+        SetMap(183,'.');
+        SetMap(185,'1');
+        SetMap(187,'"');
+        SetMap(198,'a');
+        SetMap(199,'c');
+        SetMap(208,'d');
+        SetMap(209,'n');
+        SetMap(215,'x');
+        SetMap(216,'o');
+        SetMap(221,'y');
+        SetMap(222,'p');
+        SetMap(231,'c');
+        SetMap(241,'n');
+        SetMap(247,'/');
+        SetMap(248,'o');
+        SetMap(253,'y');
+        SetMap(254,'p');
+        SetMap(255,'y');
+
+        //map 0 to o because they look similar
+        SetMap('0','o');
+
+        // TODO: make this data driven.
+    }
+
+    char Filter( unsigned char in )
+    {
+        return filter[ static_cast< unsigned int >( in )];
+    }
+private:
+    void SetMap( int in1, int in2, unsigned char out)
+    {
+        tASSERT( in2 <= 0xff );
+        tASSERT( 0 <= in1 );
+        tASSERT( in1 < in2 );
+        for( int i = in2; i >= in1; --i )
+            filter[ i ] = out;
+    }
+
+    void SetMap( unsigned char in, unsigned char out)
+    {
+        filter[ static_cast< unsigned int >( in ) ] = out;
+    }
+
+    char filter[256];
+};
+
 static bool st_IsUnderscore( char c )
 {
     return c == '_';
@@ -1663,7 +1729,7 @@ tString tString::Filter() const
     tString in(*this);
     tString out;
     out = tColoredString::RemoveColors( in );
-    static tCharacterFilter filter;
+    static tStringFilter filter;
 
     // filter out illegal characters
     for (int i = out.Len()-1; i>=0; --i )
