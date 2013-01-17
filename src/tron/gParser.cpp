@@ -842,7 +842,7 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
                 gZone::AddDelay(zoneDelayCreation, zone);
             }
 
-            sg_createzoneWriter << zone->GOID() << zoneNamestr << zone->GetPosition().x << zone->GetPosition().y;
+            sg_createzoneWriter << zone->GOID() << zoneNamestr << zone->GetPosition().x << zone->GetPosition().y << zone->GetVelocity().x << zone->GetVelocity().y;
             sg_createzoneWriter.write();
         }
     }

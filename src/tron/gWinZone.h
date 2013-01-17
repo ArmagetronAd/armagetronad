@@ -154,7 +154,7 @@ protected:
     REAL fallSpeed_;
     REAL lastSeekTime_;
 
-    tString         name_;
+    tString name_;
     gRealColor color_;           //!< the zone's color
     REAL createTime_;            //!< the time the zone was created at
 
@@ -638,6 +638,8 @@ class gObjectZoneHack: public gZone
         ~gObjectZoneHack();
 
         virtual void OnExit(gCycle *target, REAL time);
+
+        virtual void OnEnter(gZone *target, REAL time);
 
     protected:
 

@@ -507,7 +507,7 @@ static void CreateZone(gZone *Zone, const REAL zoneSize, const REAL zoneGrowth, 
     }
     Zone->RequestSync();
 
-    sg_spawnzoneWriter << Zone->GOID() << zoneNameStr << Zone->GetPosition().x << Zone->GetPosition().y;
+    sg_spawnzoneWriter << Zone->GOID() << zoneNameStr << Zone->GetPosition().x << Zone->GetPosition().y << Zone->GetVelocity().x << Zone->GetVelocity().y;
     sg_spawnzoneWriter.write();
 }
 
@@ -1301,6 +1301,20 @@ void gZone::InteractWith( eGameObject * target, REAL time, int recursion )
                     }
                 }
             }
+
+            gObjectZoneHack *randomZone = dynamic_cast<gObjectZoneHack *>(target);
+            if (randomZone)
+            {
+                gZone *objZone = this;
+                if (objZone)
+                {
+                    REAL distance = this->Radius() + randomZone->GetRadius();
+                    if ((randomZone->Position() - this->Position() ).NormSquared() < (distance * distance))
+                    {
+                        objZone->OnEnter(tarZone, time);
+                    }
+                }
+            }
         }
     }
 }
@@ -1891,6 +1905,9 @@ static tSettingItem<int> s_score_zombie_zone("SCORE_ZOMBIE_ZONE",score_zombie_zo
 static bool sg_shotKillSelf = false;
 static tSettingItem<bool> conf_shotKillSelf ("SHOT_KILL_SELF", sg_shotKillSelf);
 
+static bool sg_shotKillEnemies = true;
+static tSettingItem<bool> conf_shotKillEnemies ("SHOT_KILL_ENEMIES", sg_shotKillEnemies);
+
 static bool sg_shotKillVanish = true;
 static tSettingItem<bool> conf_shotKillVanish ("SHOT_KILL_VANISH", sg_shotKillVanish);
 
@@ -2047,7 +2064,7 @@ void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
         if ( !target->Vulnerable() && !sg_shotKillInvulnerable ) {
             //Checks to see if their cycle is invulnerable, don't kill invulnerable players
             return;
-    }
+        }
 
         //Validate the owner player ID
         pOwner_ = validatePlayer(pOwner_);
@@ -2087,6 +2104,9 @@ void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
             }
             else
             {
+                if (!sg_shotKillEnemies)
+                    return;
+
                 //The cycle may have been deleted since...  I think this is OK because Player() returns a checked pointer
 
                 //Another player entered a shot, find ownership
@@ -2198,7 +2218,8 @@ void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
 
         if (((deathZoneType == TYPE_ZOMBIE_ZONE) && ((!pSeekingCycle_) || (sg_zombieZoneVanish))) ||
             ((deathZoneType == TYPE_SELF_DESTRUCT) && (sg_selfDestructVanish)) ||
-            ((deathZoneType < TYPE_SELF_DESTRUCT) && (sg_shotKillVanish)))
+            ((deathZoneType < TYPE_SELF_DESTRUCT) && (sg_shotKillVanish)) ||
+            ((deathZoneType == TYPE_SHOT && sg_shotKillEnemies)))
         {
 #if 0
             SetReferenceTime();
@@ -6413,13 +6434,24 @@ bool gObjectZoneHack::Timestep( REAL time )
 // *******************************************************************************
 
 static eLadderLogWriter sg_objectZonePlayerEntered("OBJECTZONE_PLAYER_ENTERED", false);
+static eLadderLogWriter sg_objectZoneZoneEntered("OBJECTZONE_ZONE_ENTERED", false);
 void gObjectZoneHack::OnEnter( gCycle * target, REAL time )
 {
     ePlayerNetID *p = target->Player();
     if (p)
     {
-        sg_objectZonePlayerEntered << name_ << Position().x << Position().y << p->GetUserName() << target->Position().x << target->Position().y << target->Direction().x << target->Direction().y << se_GameTime();
+        sg_objectZonePlayerEntered << GOID() << name_ << Position().x << Position().y << p->GetUserName() << target->Position().x << target->Position().y << target->Direction().x << target->Direction().y << se_GameTime();
         sg_objectZonePlayerEntered.write();
+    }
+}
+
+//  for when zones enter this object zone
+void gObjectZoneHack::OnEnter(gZone *target, REAL time)
+{
+    if (target)
+    {
+        sg_objectZoneZoneEntered << GOID() << name_ << target->GOID() << target->GetName() << target->GetPosition().x << target->GetPosition().y << target->GetVelocity().x << target->GetVelocity().y << se_GameTime();
+        sg_objectZoneZoneEntered.write();
     }
 }
 
@@ -6440,7 +6472,12 @@ void gObjectZoneHack::OnExit( gCycle * target, REAL time )
     ePlayerNetID *p = target->Player();
     if (p)
     {
-        sg_objectZonePlayerLeft << name_ << Position().x << Position().y << p->GetUserName() << target->Position().x << target->Position().y << target->Direction().x << target->Direction().y << se_GameTime();
+        if (name_)
+            sg_objectZonePlayerEntered << name_;
+        else
+            sg_objectZonePlayerEntered << " ";
+
+        sg_objectZonePlayerEntered << Position().x << Position().y << p->GetUserName() << target->Position().x << target->Position().y << target->Direction().x << target->Direction().y << se_GameTime();
         sg_objectZonePlayerLeft.write();
     }
 }
@@ -7459,9 +7496,7 @@ static void sg_CollapseZone(std::istream &s)
         gZone *zone=dynamic_cast<gZone *>(gameObjects(zone_id));
         if (zone)
         {
-            zone->SetReferenceTime();
-            zone->SetExpansionSpeed( -zone->GetRadius()*.5 );
-            zone->RequestSync();
+            zone->Vanish(0.5);
             sg_collapsezoneWriter << zone_id << object_id_str << zone->GetPosition().x << zone->GetPosition().y;
             sg_collapsezoneWriter.write();
         }
@@ -7471,6 +7506,91 @@ static void sg_CollapseZone(std::istream &s)
 
 static tConfItemFunc sg_CollapseZone_conf("COLLAPSE_ZONE",&sg_CollapseZone);
 
+static void sg_DestroyZone(std::istream &s)
+{
+    tString params;
+    params.ReadLine( s, true );
+
+    // first parse the line to get the param : object_id
+    int pos = 0;                 //
+    const tString object_id_str = params.ExtractNonBlankSubString(pos);
+    // first check for the name
+    int zone_id;
+    zone_id=gZone::FindFirst(object_id_str);
+    if (zone_id==-1)
+    {
+        /*
+        zone_id = atoi(object_id_str);
+        if (zone_id==0 && object_id_str!="0")*/ return;
+    }
+
+    const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
+    while (zone_id!=-1)
+    {
+        // get the zone ...
+        gZone *zone=dynamic_cast<gZone *>(gameObjects(zone_id));
+        if (zone)
+        {
+            zone->Collapse();
+            sg_collapsezoneWriter << zone_id << object_id_str << zone->GetPosition().x << zone->GetPosition().y;
+            sg_collapsezoneWriter.write();
+        }
+        zone_id=gZone::FindNext(object_id_str, zone_id);
+    }
+}
+static tConfItemFunc sg_DestroyZoneConf("DESTROY_ZONE", &sg_DestroyZone);
+
+static void sg_CollapseZoneID(std::istream &s)
+{
+    tString params;
+    params.ReadLine(s);
+
+    if (params.Filter() == "")
+        return;
+
+    int pos = 0;                 //
+    tString object_id_str = params.ExtractNonBlankSubString(pos);
+
+    int zoneID = atoi(object_id_str);
+
+    const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
+    for(int i = 0; i < gameObjects.Len(); i++)
+    {
+        gZone *Zone = dynamic_cast<gZone *>(gameObjects[i]);
+        if (Zone)
+        {
+            if (Zone->GOID() == zoneID)
+                Zone->Vanish(0.5);
+        }
+    }
+}
+static tConfItemFunc sg_CollapseZoneIDConf("COLLAPSE_ZONE_ID", sg_CollapseZoneID);
+
+static void sg_DestroyZoneID(std::istream &s)
+{
+    tString params;
+    params.ReadLine(s);
+
+    if (params.Filter() == "")
+        return;
+
+    int pos = 0;                 //
+    tString object_id_str = params.ExtractNonBlankSubString(pos);
+
+    int zoneID = atoi(object_id_str);
+
+    const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
+    for(int i = 0; i < gameObjects.Len(); i++)
+    {
+        gZone *Zone = dynamic_cast<gZone *>(gameObjects[i]);
+        if (Zone)
+        {
+            if (Zone->GOID() == zoneID)
+                Zone->Collapse();
+        }
+    }
+}
+static tConfItemFunc sg_DestroyZoneIDConf("DESTROY_ZONE_ID", sg_DestroyZoneID);
 
 static void sg_SetZoneRadius(std::istream &s)
 {

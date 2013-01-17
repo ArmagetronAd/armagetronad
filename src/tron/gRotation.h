@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-  
+
 ***************************************************************************
 
 */
@@ -30,6 +30,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "tCallback.h"
 #include "tLinkedList.h"
+#include "tString.h"
+#include "tRandom.h"
 
 #ifdef HAVE_LIBRUBY
 class gRoundEventRuby : public tCallbackRuby {
@@ -49,10 +51,68 @@ class gRotation
 {
 public:
     gRotation() {}
-    virtual ~gRotation() {}
+
+    // the number of items
+    int Size()
+    {
+        return items_.Len();
+    }
+
+    // returns the current value
+    tString Current()
+    {
+        tASSERT( Size() > 0 && current_ >= 0 && current_ < Size() );
+
+        return items_[current_];
+    }
+
+    // rotates
+    void OrderedRotate()
+    {
+        if ( ++current_ >= items_.Len() )
+        {
+            current_ = 0;
+        }
+    }
+
+    void RandomRotate()
+    {
+        tRandomizer & randamizer = tRandomizer::GetInstance();
+        bool goodnumber = false;
+        while (goodnumber == false)
+        {
+            int random_ = randamizer.Get(items_.Len());
+            if ((random_ < items_.Len()) || (random_ >= 0))
+            {
+                current_ = random_;
+                goodnumber = true;
+            }
+        }
+    }
+
+    void Reset()
+    {
+        current_ = 0;
+    }
+
+    tString Get(int itemID) const
+    {
+        return items_[itemID];
+    }
+
+    void Add(tString map_name)
+    {
+        items_.Insert(map_name);
+    }
+
+private:
+
+    tArray<tString> items_; // the various values the rotating config can take
+    int current_;           // the index of the current
+
+public:
     static void HandleNewRound();
     static void HandleNewMatch();
 };
-
 
 #endif

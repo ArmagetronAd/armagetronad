@@ -1,4 +1,20 @@
 ===========================
+Changes in r840
+===========================
+Corrections & Improvements
+    * Improved the code for MAP_ROTATION and CONFIG_ROTATION
+
+Ladderlog commands:
+    * OBJECT_PLAYER_ENTER   # [zone_id] [zone_name] [zone_position_x] [zone_position_y] [player_name] [player_position_x] [player_position_y] [player_direction_x] [player_direction_y] [game_time]
+    * OBJECT_ZONE_ENTER     # [zone_id] [zone_name] [target_id] [target_name] [target_position_x] [target_position_y] [target_direction_x] [target_direction_y] [game_time]
+    * ZONE_SHOT_RELEASED    # [0-shot|1-deathshot] [id] [player_name] [zone_position_x] [zone_position_y] [zone_direction_x] [zone_direction_y]
+
+New Commands:
+    * DESTROY_ZONE          # Works like COLLAPSE_ZONE but causes the zone to disappear instantly
+    * COLLAPSE_ZONE_ID      # Collapses zones with the matching id
+    * DESTROY_ZONE_ID       # Similar to COLLAPSE_ZONE_ID but causes the zone to disappear instantly                
+
+===========================
 Changes in r836 | Soccer Update
 ===========================
 Corrections & Improvements:

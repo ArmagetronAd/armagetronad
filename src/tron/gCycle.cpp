@@ -6464,6 +6464,8 @@ static tSettingItem<int> conf_megashotDirections ("MEGA_SHOT_DIR", sg_megashotDi
 static int sg_megashotExplosion = 1;
 static tSettingItem<int> conf_megashotExplosion ("MEGA_SHOT_EXPLOSION", sg_megashotExplosion);
 
+static eLadderLogWriter sg_ZoneShotReleased("ZONE_SHOT_RELEASED", false);
+
 #define FIX_BRAKE_BUG
 
 void gCycle::ProcessShoot(bool deathShot)
@@ -6577,6 +6579,10 @@ void gCycle::ProcessShoot(bool deathShot)
                 pZone->SetOwner(Player());
                 pZone->SetType(type);
 
+                //  write to laddderlog
+                sg_ZoneShotReleased << deathShot << pZone->GOID() << Player()->GetUserName() << pZone->GetPosition().x << pZone->GetPosition().y << pZone->GetVelocity().x << pZone->GetVelocity().y;
+                sg_ZoneShotReleased.write();
+
                 if (sg_shotExplosion == 1)
                 {
                     new gExplosion(grid, pos, lastTime, color_, this );
@@ -6617,6 +6623,10 @@ void gCycle::ProcessShoot(bool deathShot)
                         pZone->SetColor(shotColor);
                         pZone->SetOwner(Player());
                         pZone->SetType(type);
+
+                        //  write to laddderlog
+                        sg_ZoneShotReleased << deathShot << pZone->GOID() << Player()->GetUserName() << pZone->GetPosition().x << pZone->GetPosition().y << pZone->GetVelocity().x << pZone->GetVelocity().y;
+                        sg_ZoneShotReleased.write();
 
                         if (sg_megashotExplosion >= 2)
                         {

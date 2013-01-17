@@ -145,141 +145,64 @@ static tSettingItem<REAL> sg_playerPositioningStartTimeConf( "TACTICAL_POSITION_
 
 static nSettingItemWatched<tString> conf_mapfile("MAP_FILE",mapfile, nConfItemVersionWatcher::Group_Breaking, 8 );
 
+gRotation *mapRotation = new gRotation;
+gRotation *configRotation = new gRotation;
+
 // config item for semi-colon deliminated list of maps/configs, needs semi-colon at the end
 // ie, original/map-1.0.1.xml;original/map-1.0.1.xml;
-class tSettingRotation: public tConfItemBase
+static void sg_mapRotation(std::istream &s)
 {
-public:
-    tSettingRotation( char const * name )
-    : tConfItemBase( name ),
-      current_(0)
-    {
-    }
+    tString mapsT;
+    mapsT.ReadLine(s);
 
-    // the number of items
-    int Size() const
-    {
-        return items_.Len();
-    }
+    if (mapsT.Filter() == "")
+        return;
 
-    // returns the current value
-    tString Current() const
-    {
-        tASSERT( Size() > 0 && current_ >= 0 && current_ < Size() );
+    int strpos = 0;
+    int nextsemicolon = mapsT.StrPos(";");
 
-        return items_[current_];
-    }
-
-    // rotates
-    void OrderedRotate()
+    if (nextsemicolon != -1)
     {
-        if ( ++current_ >= items_.Len() )
+        do
         {
-            current_ = 0;
+            tString const &map = mapsT.SubStr(strpos, nextsemicolon - strpos);
+
+            strpos = nextsemicolon + 1;
+            nextsemicolon = mapsT.StrPos(strpos, ";");
+
+            mapRotation->Add(map);
         }
-        /*
-        tString CurrentMap(items_[current_]);
-        tColoredString ColoredMapString;
-
-        int linenum = CurrentMap.StrPos(0, "/");
-        ColoredMapString << tColoredString::ColorString( 0.5,1,.5 );
-        ColoredMapString << "Map path is: ";
-        ColoredMapString << tColoredString::ColorString( 0,0.5,1 );
-        ColoredMapString << items_[current_];
-        ColoredMapString << "\n";
-        ColoredMapString << tColoredString::ColorString( 0.5,1,.5 );
-        ColoredMapString << "Map made by: ";
-        ColoredMapString << tColoredString::ColorString( 0,0.5,1 );
-        ColoredMapString << CurrentMap.SubStr(0, linenum);
-        ColoredMapString << "\n";
-
-        sn_ConsoleOut(ColoredMapString);
-        */
+        while ((nextsemicolon = mapsT.StrPos(strpos, ";")) != -1);
     }
+}
+static tConfItemFunc sg_mapRotationConf("MAP_ROTATION", &sg_mapRotation);
 
-    void RandomRotate()
+static void sg_configRotation(std::istream &s)
+{
+    tString mapsT;
+    mapsT.ReadLine(s);
+
+    if (mapsT.Filter() == "")
+        return;
+
+    int strpos = 0;
+    int nextsemicolon = mapsT.StrPos(";");
+
+    if (nextsemicolon != -1)
     {
-        tRandomizer & randamizer = tRandomizer::GetInstance();
-        bool goodnumber = false;
-        while (goodnumber == false)
+        do
         {
-            int random_ = randamizer.Get(items_.Len());
-            if ((random_ < items_.Len()) || (random_ >= 0))
-            {
-                current_ = random_;
-                /*
-                tString CurrentMap(items_[current_]);
-                tColoredString ColoredMapString;
+            tString const &map = mapsT.SubStr(strpos, nextsemicolon - strpos);
 
-                int linenum = CurrentMap.StrPos(0, "/");
-                ColoredMapString << tColoredString::ColorString( 0.5,1,.5 );
-                ColoredMapString << "Map path is: ";
-                ColoredMapString << tColoredString::ColorString( 0,0.5,1 );
-                ColoredMapString << items_[current_];
-                ColoredMapString << "\n";
-                ColoredMapString << tColoredString::ColorString( 0.5,1,.5 );
-                ColoredMapString << "Map made by: ";
-                ColoredMapString << tColoredString::ColorString( 0,0.5,1 );
-                ColoredMapString << CurrentMap.SubStr(0, linenum);
-                ColoredMapString << "\n";
+            strpos = nextsemicolon + 1;
+            nextsemicolon = mapsT.StrPos(strpos, ";");
 
-                sn_ConsoleOut(ColoredMapString);
-                */
-                goodnumber = true;
-            }
+            configRotation->Add(map);
         }
+        while ((nextsemicolon = mapsT.StrPos(strpos, ";")) != -1);
     }
-
-    void Reset()
-    {
-        current_ = 0;
-    }
-
-    tString Get(int itemID) const
-    {
-        return items_[itemID];
-    }
-private:
-    virtual void ReadVal( std::istream &is )
-    {
-        tString mapsT;
-        mapsT.ReadLine (is);
-        items_.SetLen (0);
-
-        int strpos = 0;
-        int nextsemicolon = mapsT.StrPos(";");
-
-        if (nextsemicolon != -1)
-        {
-            do
-            {
-                tString const &map = mapsT.SubStr(strpos, nextsemicolon - strpos);
-
-                strpos = nextsemicolon + 1;
-                nextsemicolon = mapsT.StrPos(strpos, ";");
-
-                items_.Insert(map);
-            }
-            while ((nextsemicolon = mapsT.StrPos(strpos, ";")) != -1);
-        }
-
-        // make sure the current value is correct
-        if ( current_ >= items_.Len() )
-        {
-            current_ = 0;
-        }
-    }
-
-    virtual void WriteVal(std::ostream &s){}
-    virtual bool Writable(){return false;}
-    virtual bool Save(){return false;}
-
-    tArray<tString> items_; // the various values the rotating config can take
-    int current_;           // the index of the current
-};
-
-static tSettingRotation sg_mapRotation("MAP_ROTATION");
-static tSettingRotation sg_configRotation("CONFIG_ROTATION");
+}
+static tConfItemFunc sg_configRotationConf("CONFIG_ROTATION", sg_configRotation);
 
 static int sg_configRotationType = 0;
 bool restrictConfigRotationTypes(const int &newValue)
@@ -316,8 +239,8 @@ static tSettingItem<gRotationType> conf_rotationtype("ROTATION_TYPE", rotationty
 
 void sg_ResetRotation()
 {
-    sg_mapRotation.Reset();
-    sg_configRotation.Reset();
+    mapRotation->Reset();
+    configRotation->Reset();
     if ( rotationtype != gROTATION_NEVER )
         con << tOutput( "$reset_rotation_message" ) << '\n';
 }
@@ -391,9 +314,9 @@ class tSettingMapqueueing: public tConfItemBase
                 tString item = items;
                 bool mapFound = false;
                 tArray<tString> searchFindings;
-                for (int i=0; i < sg_mapRotation.Size(); i++)
+                for (int i=0; i < mapRotation->Size(); i++)
                 {
-                    tString name = sg_mapRotation.Get(i);
+                    tString name = mapRotation->Get(i);
 
                     tString filteredName, filteredSearch;
                     filteredName = ePlayerNetID::FilterName(name);
@@ -524,9 +447,9 @@ class tSettingConfqueueing: public tConfItemBase
                 tString item = items;
                 bool configFound = false;
                 tArray<tString> searchFindings;
-                for (int i=0; i < sg_configRotation.Size(); i++)
+                for (int i=0; i < configRotation->Size(); i++)
                 {
-                    tString name = sg_configRotation.Get(i);
+                    tString name = configRotation->Get(i);
 
                     tString filteredName, filteredSearch;
                     filteredName = ePlayerNetID::FilterName(name);
@@ -674,9 +597,9 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
                     tString item = items;
                     bool mapFound = false;
                     tArray<tString> searchFindings;
-                    for (int i=0; i < sg_mapRotation.Size(); i++)
+                    for (int i=0; i < mapRotation->Size(); i++)
                     {
-                        tString name = sg_mapRotation.Get(i);
+                        tString name = mapRotation->Get(i);
 
                         tString filteredName, filteredSearch;
                         filteredName = ePlayerNetID::FilterName(name);
@@ -858,9 +781,9 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
                     tString item = items;
                     bool mapFound = false;
                     tArray<tString> searchFindings;
-                    for (int i=0; i < sg_configRotation.Size(); i++)
+                    for (int i=0; i < configRotation->Size(); i++)
                     {
-                        tString name = sg_configRotation.Get(i);
+                        tString name = configRotation->Get(i);
 
                         tString filteredName, filteredSearch;
                         filteredName = ePlayerNetID::FilterName(name);
@@ -5525,68 +5448,68 @@ void gGame::Analysis(REAL time){
 
 void Orderedrotate()
 {
-    if ( sg_mapRotation.Size() > 0 )
+    if ( mapRotation->Size() > 0 )
     {
-        conf_mapfile.Set( sg_mapRotation.Current() );
-        conf_mapfile.GetSetting().SetSetLevel( sg_mapRotation.GetSetLevel() );
-        sg_mapRotation.OrderedRotate();
+        conf_mapfile.Set( mapRotation->Current() );
+        conf_mapfile.GetSetting().SetSetLevel( tAccessLevel_Owner );
+        mapRotation->OrderedRotate();
     }
 
-    if ( sg_configRotation.Size() > 0 )
+    if ( configRotation->Size() > 0 )
     {
         // transfer
-        tCurrentAccessLevel level( sg_configRotation.GetSetLevel(), true );
+        tCurrentAccessLevel level( tAccessLevel_Owner, true );
 
         if (sg_configRotationType == 0)
         {
-            st_Include( sg_configRotation.Current() );
-            sg_configRotation.OrderedRotate();
+            st_Include( configRotation->Current() );
+            configRotation->OrderedRotate();
         }
         else if (sg_configRotationType == 1)
         {
-            tString rclcl = tResourceManager::locateResource(NULL, sg_configRotation.Current());
+            tString rclcl = tResourceManager::locateResource(NULL, configRotation->Current());
             if ( rclcl ) {
                 std::ifstream rc(rclcl);
                 tConfItemBase::LoadAll(rc, false );
-                sg_configRotation.OrderedRotate();
+                configRotation->OrderedRotate();
                 return;
             }
 
-            con << tOutput( "$config_rinclude_not_found", sg_configRotation.Current() );
+            con << tOutput( "$config_rinclude_not_found", configRotation->Current() );
         }
     }
 }
 
 void Randomrotate()
 {
-    if ( sg_mapRotation.Size() > 0 )
+    if ( mapRotation->Size() > 0 )
     {
-        conf_mapfile.Set( sg_mapRotation.Current() );
-        conf_mapfile.GetSetting().SetSetLevel( sg_mapRotation.GetSetLevel() );
-        sg_mapRotation.RandomRotate();
+        conf_mapfile.Set( mapRotation->Current() );
+        conf_mapfile.GetSetting().SetSetLevel( tAccessLevel_Owner );
+        mapRotation->RandomRotate();
     }
 
-    if ( sg_configRotation.Size() > 0 )
+    if ( configRotation->Size() > 0 )
     {
         // transfer
-        tCurrentAccessLevel level( sg_configRotation.GetSetLevel(), true );
+        tCurrentAccessLevel level( tAccessLevel_Owner, true );
 
         if (sg_configRotationType == 0)
         {
-            st_Include( sg_configRotation.Current() );
-            sg_configRotation.RandomRotate();
+            st_Include( configRotation->Current() );
+            configRotation->RandomRotate();
         }
         else if (sg_configRotationType == 1)
         {
-            tString rclcl = tResourceManager::locateResource(NULL, sg_configRotation.Current());
+            tString rclcl = tResourceManager::locateResource(NULL, configRotation->Current());
             if ( rclcl ) {
                 std::ifstream rc(rclcl);
                 tConfItemBase::LoadAll(rc, false );
-                sg_configRotation.RandomRotate();
+                configRotation->RandomRotate();
                 return;
             }
 
-            con << tOutput( "$config_rinclude_not_found", sg_configRotation.Current() );
+            con << tOutput( "$config_rinclude_not_found", configRotation->Current() );
         }
     }
 }
@@ -6636,14 +6559,14 @@ static void sg_getCurrentMap(std::istream &s)
 {
     ePlayerNetID *receiver = 0;
 
-    if (sg_currentMap != "")
+    if (mapfile != "")
     {
         //  send the ladderlog string
-        sg_currentMapWriter << sg_currentMap;
+        sg_currentMapWriter << mapfile;
         sg_currentMapWriter.write();
 
         //  send the message to the caller
-        sn_ConsoleOut(sg_currentMap, receiver->Owner());
+        sn_ConsoleOut(mapfile, receiver->Owner());
     }
 }
 static tConfItemFunc sg_getCurrentMapConf("GET_CURRENT_MAP", &sg_getCurrentMap);

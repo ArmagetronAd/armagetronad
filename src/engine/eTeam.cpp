@@ -1839,5 +1839,5 @@ eTeam * eTeam::FindTeamByName(tString const &name)
             return team;
         }
     }
-    return false;
+    return NULL;
 }
