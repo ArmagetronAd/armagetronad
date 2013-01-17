@@ -194,6 +194,11 @@ friend_8_help                      A friend
 friend_9_help                      A friend
 friend_10_help                     A friend
 
+map_rotation_lists_cleared         Map rotation lists has been cleared\n
+map_rotation_add_error             Error while trying to add map \1 for round \2\n
+map_rotation_map_added             Map \1 added for round \2\n
+map_rotation_apply                 Applying map rotation\n 
+
 cycle_accel_tunnel_override_help              Block out older clients if CYCLE_ACCEL_TUNNEL differs from its default? 
 cycle_boostfactor_enemy_override_help         Block out older clients if CYCLE_BOOSTFACTOR_ENEMY differs from its default? 
 cycle_boostfactor_rim_override_help           Block out older clients if CYCLE_BOOSTFACTOR_RIM differs from its default? 

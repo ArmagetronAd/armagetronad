@@ -82,6 +82,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <ctype.h>
 #include <time.h>
 #include <map>
+#include <list>
+#include <vector>
+#include <iterator>
+#include <algorithm>
 
 #include "nSocket.h"
 
@@ -1307,6 +1311,110 @@ void delayedCommands::Run(REAL currentTime) {
 
 // *****************************
 // ***   end delayed commands
+// *****************************
+
+// *****************************
+// ***   map rotation
+// *****************************
+
+static int sg_mapRotationMode = 0;
+static tSettingItem<int> sg_mapRotationModeConf( "MAP_ROTATION_MODE", sg_mapRotationMode );
+
+typedef std::list<std::string> mapRotationList_t;
+typedef std::vector<mapRotationList_t> mapRotationVecLists_t;
+static mapRotationVecLists_t sg_mapRotationVecLists;        // main list
+static mapRotationVecLists_t sg_mapRotationVecListsCurrent; // current working list
+
+// Clear all map rotation lists
+static void sg_MapRotationClear(std::istream &s) {
+    mapRotationVecLists_t().swap(sg_mapRotationVecLists);
+    mapRotationVecLists_t().swap(sg_mapRotationVecListsCurrent);
+    tOutput msg("$map_rotation_lists_cleared");
+    sn_ConsoleOut(msg);
+}
+
+static tConfItemFunc sg_MapRotationClearConf("MAP_ROTATION_CLEAR",&sg_MapRotationClear);
+static tAccessLevelSetter sg_MapRotationClearConfLevel( sg_MapRotationClearConf, tAccessLevel_Owner );
+
+// Add a new entry into rotation lists
+static void sg_MapRotationAdd(std::istream &s) {
+    // first parse parameters. We are expecting a string and an optional integer
+    std::string map_filename;
+    int round=1;
+    s >> map_filename;
+    if (!s.eof()) s >> round;
+
+    // check if parsing was correct
+    if (s.bad() || s.fail() || map_filename.empty()) {
+        tOutput msg("$map_rotation_add_error", map_filename.c_str(), round);
+        sn_ConsoleOut(msg);
+        return;
+    }
+
+    // check parameters validity
+    if (round<=0) round=1;
+
+    // add map filename without any control, they will be done when we'll try to apply rotation
+    if (sg_mapRotationVecLists.size()<round) {
+        sg_mapRotationVecLists.insert(sg_mapRotationVecLists.end(),
+                                      round-sg_mapRotationVecLists.size(),
+                                      mapRotationList_t());
+    }
+    sg_mapRotationVecLists.at(round-1).push_back(map_filename);
+    // also reset current rotation lists ...
+    mapRotationVecLists_t().swap(sg_mapRotationVecListsCurrent);
+    sg_mapRotationVecListsCurrent.reserve( sg_mapRotationVecLists.size() );
+    std::copy(sg_mapRotationVecLists.begin(),
+              sg_mapRotationVecLists.end(),
+              std::back_inserter(sg_mapRotationVecListsCurrent));
+    tOutput msg("$map_rotation_map_added", map_filename.c_str(), round);
+    sn_ConsoleOut(msg);
+}
+
+static tConfItemFunc sg_MapRotationAddConf("MAP_ROTATION_ADD",&sg_MapRotationAdd);
+static tAccessLevelSetter sg_MapRotationAddConfLevel( sg_MapRotationAddConf, tAccessLevel_Owner );
+
+// Set mapfile setting according to current map rotation lists
+static void sg_MapRotationApply(int round) {
+    int size = sg_mapRotationVecListsCurrent.size();
+    if (size<=0) return; // no rotation if there's no lists
+
+    bool random = sg_mapRotationMode==1?true:false;
+    int index = ((round%size)?round%size:size)-1; // if there's more rounds than rotation lists, just start again... 
+    if (sg_mapRotationMode==2) {
+        if (size==1) {
+            index=0;
+            random = round>sg_mapRotationVecLists.at(0).size()?true:false;
+        } else {
+            if (round>size) index = rand()%size; 
+            random = true;
+        }
+    }
+
+    mapRotationList_t &list = sg_mapRotationVecListsCurrent.at(index);
+    if (list.size()<=0) return; // no rotation list is empty
+
+    tOutput msg("$map_rotation_apply");
+    sn_ConsoleOut(msg);
+
+    //let's pick an entry from the list
+    mapRotationList_t::iterator it = list.begin();
+    if (random) { // random pick
+        std::advance(it,rand()%list.size()); 
+    }
+    // select picked map 
+    tCurrentAccessLevel level( tAccessLevel_Owner, true );
+    std::stringstream command;
+    command << "map_file " << *it;
+    tConfItemBase::LoadLine(command);
+    // remove picked map from current list and reload it if it bocomes empty
+    list.erase(it);
+    if (list.empty())
+        list = sg_mapRotationVecLists.at(index);
+}
+
+// *****************************
+// ***   end map rotation
 // *****************************
 
 #define PREPARE_TIME 4
@@ -3174,6 +3282,17 @@ static void sg_ParseMap ( gParser * aParser, tString mapfile )
             errorMessage << "$map_file_load_failure_default";
             throw tGenericException( errorMessage, errorTitle );
         }
+    } else if(sn_GetNetState()!=nCLIENT) {
+        // default include files are executed at owner level
+        std::stringstream command;
+        std::string filename = std::string(mapfile);
+        int pos = filename.find(".aamap.xml",filename.length()-10);
+        if (pos!=std::string::npos) {
+            filename.replace(pos,10,".cfg");
+            command << "rinclude " << filename;
+            tCurrentAccessLevel level( tAccessLevel_Owner, true );
+            tConfItemBase::LoadLine(command);
+        }
     }
 
     if (mapFD)
@@ -3465,6 +3584,9 @@ void gGame::StateUpdate(){
 
             // delete game objects again (in case new ones were spawned)
             exit_game_objects(grid);
+
+            // apply map rotation
+            sg_MapRotationApply(rounds<=0?1:rounds+1);
 
             // if the map has changed on the server side, verify it
             static tString lastMapfile( DEFAULT_MAP );
