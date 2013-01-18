@@ -74,6 +74,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "gParser.h"
 #include "tResourceManager.h"
 #include "nAuthentication.h"
+#include "tLuaScript.h"
 
 #include <math.h>
 #include <stdlib.h>
@@ -3719,6 +3720,8 @@ void gGame::StateUpdate(){
                     sn_BasicNetworkSystem.Select( 0.1f );
                     gGame::NetSyncIdle();
                 }
+
+                LuaState::Restart();
 
                 {
                     // default include files are executed at owner level
