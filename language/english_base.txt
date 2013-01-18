@@ -300,8 +300,10 @@ resource_repository_server_help   URI clients and the server use to search for m
 # rotation
 rotation_type_help                      Determines when map and config rotation should occur. Possible values: (0) Do not do any rotation, (1) Ordered Rotate every round, (2) Ordered Rotate every match, (3) Random Rotate every round, (4) Random Rotate every match
 map_rotation_help                       A list of map files to rotate through, with values separated by semicolons
+map_rotation_list                       List of maps current in rotation:\n
 config_rotation_help                    A list of config files to rotate through, with values separated by semicolons
 config_rotation_type_help               How will the CONFIG_ROTATION files load? 0-INCLUDE or 1-RINCLUDE?; Default: 0
+config_rotation_list                       List of configs current in rotation:\n
 reset_rotation_help                     Resets map and config rotation
 reset_rotation_on_start_new_match_help  If enabled, map and config rotation will be reset when a START_NEW_MATCH command is issued
 reset_rotation_message                  Map and config rotation have been reset.

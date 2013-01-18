@@ -6455,6 +6455,147 @@ void gObjectZoneHack::OnEnter(gZone *target, REAL time)
     }
 }
 
+static eLadderLogWriter sg_ObjectZoneSpawned("OBJECTZONE_SPAWNED", false);
+
+static void sg_SpawnObjectZone(std::istream &s)
+{
+    eGrid *grid = eGrid::CurrentGrid();
+    if(!grid)
+        return;
+
+    tString params;
+    params.ReadLine(s, true);
+
+    if (params.Filter() == "")
+    {
+        goto usage;
+        return;
+    }
+    else
+    {
+        float sizeMultiplier = gArena::SizeMultiplier();
+        float radius, growth;
+        tString name;
+        std::vector<eCoord> route;
+        int pos = 0;
+
+        name = params.ExtractNonBlankSubString(pos);
+
+        tString zonePosXStr;
+        tString zonePosYStr;
+
+        if (name.ToLower() == "n")
+        {
+            name = params.ExtractNonBlankSubString(pos);
+            zonePosXStr = params.ExtractNonBlankSubString(pos);
+        }
+        else
+        {
+            zonePosXStr = name;
+            name  = "";
+        }
+
+        if(zonePosXStr.ToLower() == "l")
+        {
+            tString x,y;
+            while(true)
+            {
+                x = params.ExtractNonBlankSubString(pos);
+                if(x.ToLower() == "z" || x.Filter() == "") break;
+                y = params.ExtractNonBlankSubString(pos);
+                route.push_back(eCoord(atof(x)*sizeMultiplier, atof(y)*sizeMultiplier));
+            }
+        }
+        else
+        {
+            zonePosYStr = params.ExtractNonBlankSubString(pos);
+        }
+
+        const tString zoneSizeStr       = params.ExtractNonBlankSubString(pos);
+        const tString zoneGrowthStr     = params.ExtractNonBlankSubString(pos);
+        const tString zoneDirXStr       = params.ExtractNonBlankSubString(pos);
+        const tString zoneDirYStr       = params.ExtractNonBlankSubString(pos);
+        const tString zoneInteractive   = params.ExtractNonBlankSubString(pos);
+        const tString zoneRedStr        = params.ExtractNonBlankSubString(pos);
+        const tString zoneGreenStr      = params.ExtractNonBlankSubString(pos);
+        const tString zoneBlueStr       = params.ExtractNonBlankSubString(pos);
+        const tString targetRadiusStr   = params.ExtractNonBlankSubString(pos);
+
+        eCoord zonePos          = route.empty() ? eCoord(atof(zonePosXStr)*sizeMultiplier,atof(zonePosYStr)*sizeMultiplier) : route.front();
+        const REAL zoneSize     = atof(zoneSizeStr)*sizeMultiplier;
+        const REAL zoneGrowth   = atof(zoneGrowthStr)*sizeMultiplier;
+
+        eCoord zoneDir = eCoord(atof(zoneDirXStr)*sizeMultiplier,atof(zoneDirYStr)*sizeMultiplier);
+        gRealColor zoneColor;
+        bool setColorFlag = false;
+        if ((zoneRedStr.Filter() != "") && (zoneGreenStr.Filter() != "") && (zoneBlueStr.Filter() != ""))
+        {
+            zoneColor.r = atof(zoneRedStr);
+            zoneColor.g = atof(zoneGreenStr);
+            zoneColor.b = atof(zoneBlueStr);
+            setColorFlag = true;
+        }
+
+        REAL targetRadius = atof(targetRadiusStr)*sizeMultiplier;
+        bool zoneInteractiveBool = false;
+        if (zoneInteractive.ToLower() == "true")
+            zoneInteractiveBool = true;
+
+        gObjectZoneHack *oZone = new gObjectZoneHack(grid, zonePos);
+        oZone->SetRadius(zoneSize);
+        oZone->SetExpansionSpeed(zoneGrowth);
+        oZone->SetVelocity(zoneDir);
+
+        if (setColorFlag)
+        {
+            zoneColor.r = (zoneColor.r>1.0)?1.0:zoneColor.r;
+            zoneColor.g = (zoneColor.g>1.0)?1.0:zoneColor.g;
+            zoneColor.b = (zoneColor.b>1.0)?1.0:zoneColor.b;
+            oZone->SetColor(zoneColor);
+        }
+
+        if (zoneInteractiveBool)
+        {
+            oZone->SetWallBouncesLeft(-1);
+            oZone->SetWallInteract(zoneInteractiveBool);
+        }
+
+        oZone->SetTargetRadius(targetRadius);
+
+        oZone->SetReferenceTime();
+        oZone->SetRotationSpeed( .3f );
+
+        if(!route.empty())
+        {
+            oZone->SetPosition(route.front());
+            for(std::vector<eCoord>::const_iterator iter = route.begin(); iter != route.end(); ++iter)
+            {
+                oZone->AddWaypoint(*iter);
+            }
+        }
+        oZone->SetName(name);
+        oZone->RequestSync();
+
+        sg_ObjectZoneSpawned << oZone->GOID() << oZone->GetName() << oZone->GetPosition().x << oZone->GetPosition().y << oZone->GetVelocity().x << oZone->GetVelocity().y;
+
+        return;
+    }
+
+    usage:
+    {
+        tString usageMem;
+        ePlayerNetID *rec = 0;  //  get the caller to send the message
+
+        usageMem << "Usage:\n"
+                    "SPAWN_OBJECT_ZONE <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
+                    "Instead of <x> <y> one can write: L <x1> <y1> <x2> <y2> [...] Z\n"
+                    "To give the zone a name, SPAWN_OBJECT_ZONE n <name> ...\n";
+
+        sn_ConsoleOut(usageMem, rec->Owner());
+    }
+}
+static tConfItemFunc sg_SpawnObjectZoneConf("SPAWN_OBJECT_ZONE", &sg_SpawnObjectZone);
+
 // *******************************************************************************
 // *
 // *    OnExit
@@ -7425,10 +7566,6 @@ static void sg_CreateZone_conf(std::istream &s)
     {
         Zone = tNEW( gTargetZoneHack( grid, zonePos, true ) );
     }
-    else if ( zoneTypeStr=="object" )
-    {
-        Zone = tNEW( gObjectZoneHack( grid, zonePos, true ) );
-    }
     else if ( zoneTypeStr=="blast" )
     {
         Zone = tNEW( gBlastZoneHack( grid, zonePos, true ) );
@@ -7447,7 +7584,7 @@ static void sg_CreateZone_conf(std::istream &s)
     {
         usage:
         con << "Usage:\n"
-            "SPAWN_ZONE <win|death|ball|target|blast|koh|object> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
+            "SPAWN_ZONE <win|death|ball|target|blast|koh> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
             "SPAWN_ZONE burst <speed> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
             "SPAWN_ZONE rubber <x> <y> <size> <growth> <xdir> <ydir> <rubber> <interactive> <r> <g> <b> <target_size> \n"
             "SPAWN_ZONE teleport <x> <y> <size> <growth> <xdir> <ydir> <xjump> <yjump> <rel|abs> <interactive> <r> <g> <b> <target_size> \n"

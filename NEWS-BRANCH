@@ -1,4 +1,18 @@
 ===========================
+Changes in r841
+===========================
+Corrections & Improvements:
+    * Improved the method used for MAP_ROTATION and CONFIG_ROTATION
+    * Added chat commands: "/mr" and "/cr" to display maps and configs in rotation.
+
+New Command:
+    * SPAWN_OBJECT_ZONE     # [x] [y] [growth] [radius] [xdir] [ydir] [interact] [r] [g] [b] [target_radius]
+                            # This command is similar to SPAWN_ZONE but creates a Object zone instead.
+
+New ladderlog command:
+    * OBJECTZONE_SPAWNED    # Writes to ladderlog: OBJECTZONE_SPAWNED [id] [name] [x] [y] [xdir] [ydir]
+
+===========================
 Changes in r840
 ===========================
 Corrections & Improvements

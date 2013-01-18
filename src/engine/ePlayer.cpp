@@ -4067,10 +4067,16 @@ void handle_chat( nMessage &m )
                         se_DisplayChatLocally(p, say);
                         return;
                     }
-                // the commands below (mp and cq) are the ones to use for add/remove/list items in the queueing list
+                    // the commands below (mp and cq) are the ones to use for add/remove/list items in the queueing list
                     else if ((command == "/mq") || (command == "/cq"))
                     {
                         sg_AddqueueingItems(p, s, command);
+                        return;
+                    }
+                    //  commands below are for displaying items in map rotation (mr) or config rotation (cr)
+                    else if ((command == "/mr") || (command == "/cr"))
+                    {
+                        sg_DisplayRotationList(p, s, command);
                         return;
                     }
 #ifdef DEDICATED

@@ -145,8 +145,8 @@ static tSettingItem<REAL> sg_playerPositioningStartTimeConf( "TACTICAL_POSITION_
 
 static nSettingItemWatched<tString> conf_mapfile("MAP_FILE",mapfile, nConfItemVersionWatcher::Group_Breaking, 8 );
 
-gRotation *mapRotation = new gRotation;
-gRotation *configRotation = new gRotation;
+gRotation *mapRotation = new gRotation();
+gRotation *configRotation = new gRotation();
 
 // config item for semi-colon deliminated list of maps/configs, needs semi-colon at the end
 // ie, original/map-1.0.1.xml;original/map-1.0.1.xml;
@@ -158,6 +158,10 @@ static void sg_mapRotation(std::istream &s)
     if (mapsT.Filter() == "")
         return;
 
+    //  clear previous map cache in rotation
+    mapRotation->Clear();
+
+    /*
     int strpos = 0;
     int nextsemicolon = mapsT.StrPos(";");
 
@@ -174,35 +178,97 @@ static void sg_mapRotation(std::istream &s)
         }
         while ((nextsemicolon = mapsT.StrPos(strpos, ";")) != -1);
     }
+    */
+
+    tArray<tString> mapFiles = mapsT.Split(";");
+    for(int i = 0; i < mapFiles.Len(); i++)
+    {
+        tString map = mapFiles[i];
+
+        if (map.Filter() != "")
+            mapRotation->Add(map);
+    }
 }
 static tConfItemFunc sg_mapRotationConf("MAP_ROTATION", &sg_mapRotation);
 
 static void sg_configRotation(std::istream &s)
 {
-    tString mapsT;
-    mapsT.ReadLine(s);
+    tString configsT;
+    configsT.ReadLine(s);
 
-    if (mapsT.Filter() == "")
+    if (configsT.Filter() == "")
         return;
 
-    int strpos = 0;
-    int nextsemicolon = mapsT.StrPos(";");
+    //  clear previous config cache in rotation
+    configRotation->Clear();
+
+    /*int strpos = 0;
+    int nextsemicolon = configsT.StrPos(";");
 
     if (nextsemicolon != -1)
     {
         do
         {
-            tString const &map = mapsT.SubStr(strpos, nextsemicolon - strpos);
+            tString const &map = configsT.SubStr(strpos, nextsemicolon - strpos);
 
             strpos = nextsemicolon + 1;
-            nextsemicolon = mapsT.StrPos(strpos, ";");
+            nextsemicolon = configsT.StrPos(strpos, ";");
 
             configRotation->Add(map);
         }
-        while ((nextsemicolon = mapsT.StrPos(strpos, ";")) != -1);
+        while ((nextsemicolon = configsT.StrPos(strpos, ";")) != -1);
+    }*/
+
+    tArray<tString> configFiles = configsT.Split(";");
+    for(int i = 0; i < configFiles.Len(); i++)
+    {
+        tString config = configFiles[i];
+
+        if (config.Filter() != "")
+            configRotation->Add(config);
     }
 }
 static tConfItemFunc sg_configRotationConf("CONFIG_ROTATION", sg_configRotation);
+
+void sg_DisplayRotationList(ePlayerNetID *p, std::istream &s, tString command)
+{
+    if (p)
+    {
+        tColoredString output;
+
+        if (command == "/mr")
+        {
+            output << tOutput("$map_rotation_list");
+
+            if (mapRotation->Size() > 0)
+            {
+                for(int i = 0; i < mapRotation->Size(); i++)
+                {
+                    output << "0xff5500";
+                    output << mapRotation->Get(i);
+                    output << tColoredString::ColorString(1, 1, 1) << ", ";
+                }
+            }
+        }
+        else if (command == "/cr")
+        {
+            output << tOutput("$config_rotation_list");
+
+            if (configRotation->Size() > 0)
+            {
+                for(int i = 0; i < configRotation->Size(); i++)
+                {
+                    output << "0xff5500";
+                    output << configRotation->Get(i);
+                    output << tColoredString::ColorString(1, 1, 1) << ", ";
+                }
+            }
+        }
+
+        output << "\n";
+        sn_ConsoleOut(output, p->Owner());
+    }
+}
 
 static int sg_configRotationType = 0;
 bool restrictConfigRotationTypes(const int &newValue)

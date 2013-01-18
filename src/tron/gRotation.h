@@ -95,6 +95,15 @@ public:
         current_ = 0;
     }
 
+    void Clear()
+    {
+        for(int i = 0; i < items_.Len(); i++)
+        {
+            items_.RemoveAt(i);
+            i--;
+        }
+    }
+
     tString Get(int itemID) const
     {
         return items_[itemID];
