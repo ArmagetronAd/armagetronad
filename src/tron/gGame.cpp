@@ -186,7 +186,9 @@ static void sg_mapRotation(std::istream &s)
         tString map = mapFiles[i];
 
         if (map.Filter() != "")
+        {
             mapRotation->Add(map);
+        }
     }
 }
 static tConfItemFunc sg_mapRotationConf("MAP_ROTATION", &sg_mapRotation);

@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tLinkedList.h"
 #include "tString.h"
 #include "tRandom.h"
+#include "tConsole.h"
 
 #ifdef HAVE_LIBRUBY
 class gRoundEventRuby : public tCallbackRuby {
@@ -50,7 +51,11 @@ public:
 class gRotation
 {
 public:
-    gRotation() {}
+    gRotation()
+    {
+        items_.SetLen(0);
+        current_ = 0;
+    }
 
     // the number of items
     int Size()
@@ -61,7 +66,7 @@ public:
     // returns the current value
     tString Current()
     {
-        tASSERT( Size() > 0 && current_ >= 0 && current_ < Size() );
+        //tASSERT( Size() > 0 && current_ >= 0 && current_ < Size() );
 
         return items_[current_];
     }
@@ -97,11 +102,18 @@ public:
 
     void Clear()
     {
-        for(int i = 0; i < items_.Len(); i++)
+        if (items_.Len() > 0)
         {
-            items_.RemoveAt(i);
-            i--;
+            for(int i = 0; i < items_.Len(); i++)
+            {
+                items_.RemoveAt(i);
+                i--;
+            }
         }
+
+        items_.RemoveAt(0);
+        items_.SetLen(0);
+        current_ = 0;
     }
 
     tString Get(int itemID) const
@@ -111,7 +123,8 @@ public:
 
     void Add(tString map_name)
     {
-        items_.Insert(map_name);
+        if (map_name.Filter() != "")
+            items_.Insert(map_name);
     }
 
 private:
