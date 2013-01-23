@@ -5648,13 +5648,7 @@ void ePlayerNetID::RemoveFromGame()
         }
     }
 
-    se_PlayerNetIDs.Remove(this, listID);
-    SetTeamWish( NULL );
-    SetTeam( NULL );
-    UpdateTeam();
-    ControlObject( NULL );
-
-    if( this->IsHuman() )
+    if( IsHuman() )
     {
         se_playerLeftWriter << userName_ << nMachine::GetMachine(Owner()).GetIP();
         se_playerLeftWriter.write();
@@ -5664,6 +5658,12 @@ void ePlayerNetID::RemoveFromGame()
         se_playerAILeftWriter << userName_;
         se_playerAILeftWriter.write();
     }
+
+    se_PlayerNetIDs.Remove(this, listID);
+    SetTeamWish( NULL );
+    SetTeam( NULL );
+    UpdateTeam();
+    ControlObject( NULL );
 
     if (gRacePlayer::PlayerExists(this))
     {

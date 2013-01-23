@@ -1746,7 +1746,7 @@ gWinZoneHack::~gWinZoneHack( void )
 //!
 // *******************************************************************************
 
-static eLadderLogWriter sg_winzonePlayerEnterWriter("WINZONE_PLAYER_ENTER", false);
+static eLadderLogWriter sg_winzonePlayerEnterWriter("WINZONE_PLAYER_ENTER", true);
 
 bool sg_winZonePlayerEnteredWin = true;
 static tSettingItem<bool> sg_winZonePlayerEnteredWinConf("WINZONE_PLAYER_ENTER_WIN", sg_winZonePlayerEnteredWin);
@@ -1781,7 +1781,8 @@ void gWinZoneHack::OnEnter( gCycle * target, REAL time )
 
     // message in edlog
     if ((!target) && (!target->Player())) return;
-    sg_winzonePlayerEnterWriter << this->GOID() << name_ << GetPosition().x << GetPosition().y << target->Player()->GetUserName() << target->Player()->Object()->Position().x << target->Player()->Object()->Position().y << target->Player()->Object()->Direction().x << target->Player()->Object()->Direction().y << time;
+
+    sg_winzonePlayerEnterWriter << target->Player()->GetUserName() << target->Position().x << target->Position().y << target->Direction().x << target->Direction().y << time;
     sg_winzonePlayerEnterWriter.write();
 }
 

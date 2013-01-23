@@ -4242,6 +4242,7 @@ static eLadderLogWriter sg_roundCommencingWriter("ROUND_COMMENCING", false);
 static SvgOutput sg_svgOutput;
 
 bool sg_roundStartingChecker = true;
+static eLadderLogWriter sg_roundEndedWriter("ROUND_ENDED", true);
 
 // **********************************************************************
 // *
@@ -4667,6 +4668,11 @@ void gGame::StateUpdate(){
                 }
             }
 #endif
+            if (!sg_roundStartingChecker)
+            {
+                sg_roundEndedWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
+                sg_roundEndedWriter.write();
+            }
 
             sg_roundStartingChecker = true;
 
@@ -4910,7 +4916,6 @@ static eLadderLogWriter sg_roundWinnerWriter("ROUND_WINNER", true);
 static eLadderLogWriter sg_setWinnerWriter("SET_WINNER", true);
 static eLadderLogWriter sg_matchWinnerWriter("MATCH_WINNER", true);
 
-static eLadderLogWriter sg_roundEndedWriter("ROUND_ENDED", true);
 static eLadderLogWriter sg_matchEndedWriter("MATCH_ENDED", true);
 
 void gGame::Analysis(REAL time){
@@ -5285,9 +5290,6 @@ void gGame::Analysis(REAL time){
                         eTeam::WritePlayers( sg_roundWinnerWriter, eTeam::teams[winner-1] );
                         sg_roundWinnerWriter.write();
 
-                        sg_roundEndedWriter <<  st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
-                        sg_roundEndedWriter.write();
-
                         /*if (sg_RaceTimerEnabled)
                             gRace::End();*/
                     }
@@ -5390,9 +5392,6 @@ void gGame::Analysis(REAL time){
                             eTeam::WritePlayers( sg_matchWinnerWriter, eTeam::teams[0] );
                             sg_matchWinnerWriter.write();
 
-                            sg_matchEndedWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
-                            sg_matchEndedWriter.write();
-
 	                        message.SetTemplateParameter(1, name);
 	                        message << "$gamestate_champ_console";
 						}
@@ -5456,6 +5455,9 @@ void gGame::Analysis(REAL time){
                             else if ( rotationtype == gROTATION_RANDOM_MATCH)
                                 Randomrotate();
                         }
+
+                        sg_matchEndedWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
+                        sg_matchEndedWriter.write();
 
                         gRotation::HandleNewMatch();
 
