@@ -3239,7 +3239,7 @@ private:
     }
 };
 
-static void sg_ParseMap ( gParser * aParser, tString mapfile )
+static void sg_ParseMap ( gParser * aParser, tString mapfile, bool verify )
 {
     FILE* mapFD = NULL;
 
@@ -3282,15 +3282,17 @@ static void sg_ParseMap ( gParser * aParser, tString mapfile )
             errorMessage << "$map_file_load_failure_default";
             throw tGenericException( errorMessage, errorTitle );
         }
-    } else if(sn_GetNetState()!=nCLIENT) {
-        // default include files are executed at owner level
+    } else if(sn_GetNetState()!=nCLIENT && verify) {
+        // if map has been loaded succefully, and this is during setting tranfer...
+        // map config file is executed at accesslevel of the one who set the map
+        tCurrentAccessLevel level( conf_mapfile.GetSetting().GetSetLevel(), true );
         std::stringstream command;
         std::string filename = std::string(mapfile);
         int pos = filename.find(".aamap.xml",filename.length()-10);
         if (pos!=std::string::npos) {
             filename.replace(pos,10,".cfg");
+            std::cout << "rinclude " << filename << std::endl;
             command << "rinclude " << filename;
-            tCurrentAccessLevel level( tAccessLevel_Owner, true );
             tConfItemBase::LoadLine(command);
         }
     }
@@ -3299,15 +3301,15 @@ static void sg_ParseMap ( gParser * aParser, tString mapfile )
         fclose(mapFD);
 }
 
-static void sg_ParseMap ( gParser * aParser )
+static void sg_ParseMap ( gParser * aParser, bool verify=false )
 {
-    sg_ParseMap(aParser, mapfile);
+    sg_ParseMap(aParser, mapfile, verify);
 }
 
 void gGame::Verify()
 {
     // test map and load map settings
-    sg_ParseMap( aParser );
+    sg_ParseMap( aParser, true );
     init_game_grid(grid, aParser);
     Arena.LeastDangerousSpawnPoint();
     exit_game_grid(grid);
@@ -3555,13 +3557,6 @@ void gGame::StateUpdate(){
             // log scores before players get renamed
             ePlayerNetID::LogScoreDifferences();
 
-            // transfer game settings
-            if ( nCLIENT != sn_GetNetState() )
-            {
-                update_settings( &goon );
-                ePlayerNetID::RemoveChatbots();
-            }
-
             rViewport::Update(MAX_PLAYERS);
 
             ePlayerNetID::UpdateSuspensions();
@@ -3608,6 +3603,13 @@ void gGame::StateUpdate(){
                     con << tOutput( "$map_file_reverting", lastMapfile );
                     conf_mapfile.Set( lastMapfile );
                 }
+            }
+
+            // transfer game settings
+            if ( nCLIENT != sn_GetNetState() )
+            {
+                update_settings( &goon );
+                ePlayerNetID::RemoveChatbots();
             }
 
             nConfItemBase::s_SendConfig(false);
