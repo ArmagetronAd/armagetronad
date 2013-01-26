@@ -121,6 +121,13 @@ AC_ARG_ENABLE(glout,
        *) AC_MSG_ERROR(bad value ${enableval} for --enable-glout) ;;
      esac],)
 
+# check if we want to use luajit instead of lua
+luaJIT=no
+AC_ARG_ENABLE(luajit, [  --enable-luajit		enable luajit instead of lua],
+	[OPTIONAL_FLAGS="$OPTIONAL_FLAGS -D__LUAJIT__"]
+	luaJIT=yes
+)
+
 # consistency check of the three build flags	 
 test x$armamain = xfalse && build_dedicated=false build_regular=false
 test x$build_dedicated = xfalse && test x$build_regular = xfalse && armamain=false
@@ -373,6 +380,12 @@ AC_PROG_CXX
 AC_PROG_CXXCPP
 dnl AC_OBJEXT
 
+dnl AX_CXX_COMPILE_STDCXX_0X
+dnl if test "x$ax_cv_cxx_compile_cxx0x_cxx" = "xyes" -a \
+dnl   "x$squid_host_os" != "xmingw" ; then
+dnl   CXXFLAGS="$CXXFLAGS -std=c++0x"
+dnl fi
+
 dnl Make:
 dnl AC_PROG_MAKE_SET
 
@@ -467,6 +480,37 @@ GENERICUNIX
 )
 
 SDL_CONFIG_DEFAULT=sdl-config
+
+dnl *************************************************
+dnl      LUA
+dnl *************************************************
+
+# check for Lua
+if test "$luaJIT" = "yes" ; then
+	PKG_CHECK_MODULES(LUA, luajit, , [
+		AC_CHECK_HEADERS([luajit-2.0/lua.hpp], ,[AC_MSG_ERROR("LuaJIT header not found.")])
+		AC_CHECK_LIB(luajit, main, , [
+			AC_CHECK_LIB(luajit-5.1, main, , [AC_MSG_ERROR("Linking against LuaJIT library failed.")])
+		])
+	])
+else
+	PKG_CHECK_MODULES(LUA, lua5.1 >= 5.1, , [
+		AC_CHECK_HEADERS([lua.h], , [
+			OPTIONAL_FLAGS="$OPTIONAL_FLAGS -D__ALT_LUA_PATH__"
+			AC_CHECK_HEADERS([lua5.1/lua.h], , [AC_MSG_ERROR("Lua header not found.")])
+		])
+		AC_CHECK_LIB(lua, main, , [
+			AC_CHECK_LIB(lua5.1, main, , [AC_MSG_ERROR("Linking against Lua library failed.")])
+		])
+	])
+fi
+
+AC_SUBST(OPTIONAL_FLAGS)
+AC_SUBST(LUA_CFLAGS)
+AC_SUBST(LUA_LIBS)
+
+CXXFLAGS="${CXXFLAGS} ${LUA_CFLAGS} ${OPTIONAL_FLAGS}"
+LIBS="${LIBS} ${LUA_LIBS}"
 
 dnl *************************************************
 dnl GL AND  MATHLIB SELECTION ( SYSTEM DEPENDANT)

@@ -43,6 +43,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "eNetGameObject.h"
 #include "tCallbackString.h"
 #include "nSpamProtection.h"
+#include "tLuaScript.h"
 
 #include <set>
 #include <list>
@@ -545,21 +546,49 @@ class eLadderLogWriter {
     bool enabled;
     tSettingItem<bool> *conf;
     tColoredString cache;
+
+    int nb_params;
+    int top;
+    std::vector<int> luaRefs;
 public:
     eLadderLogWriter(char const *ID, bool enabledByDefault);
     ~eLadderLogWriter();
     //! append a field to the current message. Spaces are added automatically.
+    // an almost useless non template version for strings to avoid wrong type propagation into PushData
+    // all string types like char[] will work...
+    eLadderLogWriter &operator<< (const char* s) {
+        if(enabled) {
+            cache << ' ' << s;
+        }
+        if (luaRefs.size()) {
+            if (!nb_params) top=lua_gettop(LuaState::Instance);
+            PushData<const char *>(LuaState::Instance, s);
+            nb_params++;
+        }
+        return *this;
+    }
     template<typename T> eLadderLogWriter &operator<<(T const &s) {
         if(enabled) {
             cache << ' ' << s;
         }
+        if (luaRefs.size()) {
+            if (!nb_params) top=lua_gettop(LuaState::Instance);
+            PushData<T>(LuaState::Instance, s);
+            nb_params++;
+        }
         return *this;
     }
+
     void write(); //!< send to ladderlog and clear message
 
     bool isEnabled() { return enabled; } //!< check this if you're going to make expensive calculations for ladderlog output
 
     static void setAll(bool enabled); //!< enable or disable all writers
+
+    // Lua References
+    void clearLuaRefs();
+    static void clearAllLuaRefs();
+    static void addLuaRef(char const * id , int p_ref);
 };
 
 tColoredString & operator << (tColoredString &s,const ePlayer &p);

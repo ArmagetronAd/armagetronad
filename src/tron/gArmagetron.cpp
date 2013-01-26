@@ -51,6 +51,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "gLanguageMenu.h"
 #include "gAICharacter.h"
 #include "gCycle.h"
+#include "tLuaScript.h"
 //#include <unistd>
 #include <stdio.h>
 #include <stdlib.h>
@@ -645,6 +646,9 @@ int main(int argc,char **argv){
         static eLadderLogWriter sg_encodingWriter( "ENCODING", true );
         sg_encodingWriter << st_internalEncoding;
         sg_encodingWriter.write();
+
+        // Restart scripting to force loading everytime.lua once
+        LuaState::Restart();
 
         if ( commandLine.Execute() )
         {

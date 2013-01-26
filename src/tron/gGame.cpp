@@ -74,6 +74,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "gParser.h"
 #include "tResourceManager.h"
 #include "nAuthentication.h"
+#include "tLuaScript.h"
 
 #include <math.h>
 #include <stdlib.h>
@@ -3294,6 +3295,13 @@ static void sg_ParseMap ( gParser * aParser, tString mapfile, bool verify )
             command << "rinclude " << filename;
             tConfItemBase::LoadLine(command);
         }
+        // load map lua file
+        filename = std::string(mapfile);
+        pos = filename.find(".aamap.xml",filename.length()-10);
+        if (pos!=std::string::npos) {
+            filename.replace(pos,10,".lua");
+            LuaState::Instance->LoadRemote(filename);
+        }
     }
 
     if (mapFD)
@@ -3849,6 +3857,9 @@ void gGame::StateUpdate(){
                     sn_BasicNetworkSystem.Select( 0.1f );
                     gGame::NetSyncIdle();
                 }
+
+                eLadderLogWriter::clearAllLuaRefs();
+                LuaState::Restart();
 
                 {
                     // default include files are executed at owner level

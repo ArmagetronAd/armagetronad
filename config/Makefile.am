@@ -15,6 +15,7 @@ nobase_config_DATA=default.cfg master.srv settings.cfg\
 	examples/cvs_test/fortress_physics.cfg examples/cvs_test/fortress_scoring.cfg\
 	examples/cvs_test/fortress_politics.cfg\
 	examples/cvs_test/fortress_complete.cfg examples/cvs_test/sumo_complete.cfg\
-	examples/teamsumo.cfg
+	examples/teamsumo.cfg\
+        create_sandbox.lua
 
 EXTRA_DIST=${nobase_config_DATA}

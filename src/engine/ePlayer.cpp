@@ -6209,7 +6209,8 @@ eLadderLogWriter::eLadderLogWriter(char const *ID, bool enabledByDefault) :
     enabled(enabledByDefault),
     conf(new tSettingItem<bool>(&(tString("LADDERLOG_WRITE_") + id)(0),
     enabled)),
-    cache(id) {
+    cache(id),
+    nb_params(0) {
     writers().push_back(this);
 }
 
@@ -6228,6 +6229,21 @@ void eLadderLogWriter::write() {
         se_SaveToLadderLog(cache);
     }
     cache = id;
+    // run lua binding if any
+    if (luaRefs.size()) {
+        tCurrentAccessLevel elevator( tAccessLevel_Owner, true );
+        std::vector<int>::iterator end = luaRefs.end();
+        for(std::vector<int>::iterator iter = luaRefs.begin(); iter != end; ++iter) {
+            lua_rawgeti(LuaState::Instance, LUA_REGISTRYINDEX, *iter);
+            // start by copying all function parameters to allow multiple calls
+            for(int i=top+1; i<top+nb_params+1; ++i) {
+                lua_pushvalue(LuaState::Instance, i);
+            }
+            LuaState::Instance.SandboxedExec(nb_params, 0);
+        }
+        lua_settop(LuaState::Instance, top);
+        nb_params=0;
+    }
 }
 
 void eLadderLogWriter::setAll(bool enabled) {
@@ -6235,6 +6251,34 @@ void eLadderLogWriter::setAll(bool enabled) {
     std::list<eLadderLogWriter *>::iterator end = list.end();
     for(std::list<eLadderLogWriter *>::iterator iter = list.begin(); iter != end; ++iter) {
         (*iter)->enabled = enabled;
+    }
+}
+
+void eLadderLogWriter::clearLuaRefs() {
+    std::vector<int>::iterator end = luaRefs.end();
+    for(std::vector<int>::iterator iter = luaRefs.begin(); iter != end; ++iter) {
+        luaL_unref(LuaState::Instance, LUA_REGISTRYINDEX, *iter);
+    }
+    luaRefs.clear(); 
+}
+
+void eLadderLogWriter::clearAllLuaRefs() {
+    std::list<eLadderLogWriter *> list = writers();
+    std::list<eLadderLogWriter *>::iterator end = list.end();
+    for(std::list<eLadderLogWriter *>::iterator iter = list.begin(); iter != end; ++iter) {
+        (*iter)->clearLuaRefs();
+    }
+}
+
+void eLadderLogWriter::addLuaRef(char const * id, int p_ref) {
+    std::list<eLadderLogWriter *> list = writers();
+    std::list<eLadderLogWriter *>::iterator end = list.end();
+    // too lazy to write a predicate :/
+    for(std::list<eLadderLogWriter *>::iterator iter = list.begin(); iter != end; ++iter) {
+        if (!strcmp((*iter)->id, id)) {
+            (*iter)->luaRefs.push_back(p_ref);
+            return;
+        }
     }
 }
 
@@ -6258,6 +6302,20 @@ static void LadderLogWriteAll(std::istream &s) {
 }
 
 static tConfItemFunc LadderLogWriteAllConf("LADDERLOG_WRITE_ALL", &LadderLogWriteAll);
+
+// Bind a lua function to a ladderlog event
+int LuaAddLadderLogWriterBinding(lua_State* L) {
+    if (lua_gettop(L) != 2 || !lua_isstring(L, -2) || !lua_isfunction(L,-1)) {
+        luaL_where(L, 1);
+        lua_pushstring(L, "RUNTIME ERROR: This function requires a string and a function parameters!");
+        lua_pushboolean(L, false);
+        return 1;
+    }
+    int ref = luaL_ref(L, LUA_REGISTRYINDEX);
+    eLadderLogWriter::addLuaRef(lua_tostring(L, -1), ref);
+    lua_pushboolean(L, true);
+    return 1;
+}
 
 void se_SaveToScoreFile(const tOutput &o){
     tString s(o);

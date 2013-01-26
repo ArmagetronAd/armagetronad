@@ -64,7 +64,8 @@ libtools_a_SOURCES=	${tools_extra} tools/tArray.cpp tools/tArray.h tools/tCallba
 	tools/tRandom.cpp tools/tRandom.h\
 	defs.h\
     thirdparty/binreloc/prefix.c thirdparty/binreloc/prefix.h\
-	tools/tMemManager.cpp tools/tMemManager.h
+	tools/tMemManager.cpp tools/tMemManager.h\
+	tools/tLuaScript.cpp tools/tLuaScript.h
 
 #tools/tCommandLine.cpp tools/tCommandLine.h
 libnetwork_a_SOURCES=network/md5.cpp network/md5.h network/nAuthentication.cpp\
