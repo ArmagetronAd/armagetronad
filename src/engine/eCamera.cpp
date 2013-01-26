@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU Geeneral Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -612,9 +612,11 @@ bool eCamera::Act(uActionCamera *Act,REAL x){
     pos=pos+dir*mf*.25+dir.Turn(eCoord(0,ml*.25));
 
     fov/=zi;
-    if (fov>120) fov=120;
+    //if (fov>120) fov=120;
+    if (fov>160 && zi < 1) fov=160;
 
-    if (fov<30) fov=30;
+    //if (fov<30) fov=30;
+    if (fov<30 && zi > 1) fov=30;
 
 
     switch(mode){
@@ -1200,7 +1202,7 @@ void eCamera::Bound( REAL dt, eCoord & pos )
       z=upper_height-3.0001;
 
       if (
-    	(se_BlackSky() || (sr_lowerSky && !sr_upperSky))&& 
+    	(se_BlackSky() || (sr_lowerSky && !sr_upperSky))&&
     	z>lower_height-3)
     	z=lower_height-3.0001;
     */
@@ -1405,11 +1407,11 @@ void eCamera::Render(){
           gluLookAt(pos.x,
              pos.y,
              z,
-             
+
              pos.x+dir.x,
              pos.y+dir.y,
              z+rise,
-             
+
              top.x,top.y,
              1);
         */
@@ -2013,8 +2015,8 @@ void eCamera::Timestep(REAL ts){
         /*
         case CAMERA_FOLLOW:{
            // meriton's camera hack starts here
-        #define mercamxydist 10 
-        #define mercamz 5 
+        #define mercamxydist 10
+        #define mercamz 5
            eCoord t = pos - centerpos;
 
            t=t*(mercamxydist/sqrt(t.NormSquared()));
