@@ -3291,7 +3291,6 @@ static void sg_ParseMap ( gParser * aParser, tString mapfile, bool verify )
         int pos = filename.find(".aamap.xml",filename.length()-10);
         if (pos!=std::string::npos) {
             filename.replace(pos,10,".cfg");
-            std::cout << "rinclude " << filename << std::endl;
             command << "rinclude " << filename;
             tConfItemBase::LoadLine(command);
         }
@@ -3552,6 +3551,13 @@ void gGame::StateUpdate(){
         case GS_TRANSFER_SETTINGS:
             // sr_con.autoDisplayAtNewline=true;
 
+            // transfer game settings
+            if ( nCLIENT != sn_GetNetState() )
+            {
+                update_settings( &goon );
+                ePlayerNetID::RemoveChatbots();
+            }
+
             ePlayerNetID::ApplySubstitutions();
 
             // log scores before players get renamed
@@ -3605,12 +3611,12 @@ void gGame::StateUpdate(){
                 }
             }
 
-            // transfer game settings
-            if ( nCLIENT != sn_GetNetState() )
-            {
-                update_settings( &goon );
-                ePlayerNetID::RemoveChatbots();
-            }
+            if (sg_singlePlayer)
+                sg_currentSettings = &singlePlayer;
+            else
+                sg_currentSettings = &multiPlayer;
+
+            sg_copySettings();
 
             nConfItemBase::s_SendConfig(false);
             // wait extra long for the clients to delete the grid; they really need to be
