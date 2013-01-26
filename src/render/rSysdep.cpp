@@ -226,7 +226,7 @@ static void SDL_SavePNG(SDL_Surface *image, tString filename){
 
     for (i = 0; i < sr_screenHeight; i++) {
         row_ptrs[i] = (png_byte *)image->pixels + (sr_screenHeight - i - 1)
-                      * SCREENSHOT_BYTES_PER_PIXEL * sr_screenWidth;
+                      * image->pitch;
     }
 
     png_write_image(png_ptr, row_ptrs);
@@ -259,10 +259,10 @@ static void make_screenshot(){
     // turn image around
     for (idx = 0; idx < sr_screenHeight; idx++)
     {
-        memcpy(reinterpret_cast<char *>(temp->pixels) + 3 * sr_screenWidth * idx,
-               reinterpret_cast<char *>(image->pixels)+ 3
-               * sr_screenWidth*(sr_screenHeight - idx-1),
-               3*sr_screenWidth);
+        memcpy(reinterpret_cast<char *>(temp->pixels) + temp->pitch * idx,
+               reinterpret_cast<char *>(image->pixels)
+               + image->pitch*(sr_screenHeight - idx-1),
+               3*sr_screenWidth); // Optionally, use the pitch of either surface here
     }
 
     if (s_videoout)

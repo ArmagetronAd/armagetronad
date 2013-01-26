@@ -1071,7 +1071,7 @@ void sg_PlayerMenu(int Player){
     (&camera_menu,
      "$player_camera_fov_text",
      "$player_camera_fov_help",
-     p->startFOV,30,120,5);
+     p->startFOV,30,160,5);
 
     uMenuItemSelection<eCamMode> cam_s
     (&camera_menu,
