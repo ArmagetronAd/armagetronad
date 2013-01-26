@@ -656,9 +656,10 @@ static uJoystickInput & su_GetJoystickInput()
 static uJoystick * su_GetJoystick( int id )
 {
     uJoystickInput & joysticks = su_GetJoystickInput();
-    tASSERT( id >= 0 && id < (int)joysticks.joysticks.size() );
-
-    return joysticks.joysticks[id];
+    if(id >= 0 && id < (int)joysticks.joysticks.size() )
+        return joysticks.joysticks[id];
+    else
+        return NULL;
 }
 
 void su_JoystickInit()
@@ -887,6 +888,7 @@ static void su_TransformEvent( SDL_Event & e, std::vector< uTransformEventInfo >
     case SDL_JOYAXISMOTION:
         {
             uJoystick * joystick = su_GetJoystick( e.jaxis.which );
+            if(!joystick) break;
             int dir = e.jaxis.value > 0 ? 1 : 0;
 
             info.push_back( uTransformEventInfo(
@@ -900,15 +902,20 @@ static void su_TransformEvent( SDL_Event & e, std::vector< uTransformEventInfo >
         }
     case SDL_JOYBUTTONDOWN:
     case SDL_JOYBUTTONUP:
+    {
+        uJoystick * joystick = su_GetJoystick( e.jbutton.which );
+        if(!joystick) break;
         info.push_back( uTransformEventInfo(
-                            su_GetJoystick( e.jbutton.which )->GetButton( e.jbutton.button ),
+                            joystick->GetButton( e.jbutton.button ),
                             ( e.type == SDL_JOYBUTTONDOWN ) ? 1 : 0 ) );
-        break;
+    }
+    break;
     case SDL_JOYHATMOTION:
         {
             info.reserve(4);
 
             uJoystick * joystick = su_GetJoystick( e.jhat.which );
+            if(!joystick) break;
             int hat = e.jhat.hat;
             int hatDirection = e.jhat.value;
 
@@ -995,10 +1002,12 @@ static void su_TransformEvent( SDL_Event & e, std::vector< uTransformEventInfo >
         break;
     case SDL_JOYBALLMOTION:
         {
+            uJoystick * joystick = su_GetJoystick( e.jball.which );
+            if(!joystick) break;
+
+            int ball = e.jball.ball;
             info.reserve(4);
 
-            uJoystick * joystick = su_GetJoystick( e.jball.which );
-            int ball = e.jball.ball;
 
             REAL xrel=e.jball.xrel;
             if (xrel > 0) // right
