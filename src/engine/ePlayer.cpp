@@ -6609,6 +6609,7 @@ void ePlayerNetID::RankingLadderLog() {
             se_onlinePlayerWriter << p->ping;
             if(p->currentTeam) {
                 se_onlinePlayerWriter << FilterName(p->currentTeam->Name());
+                se_onlinePlayerWriter << p->GetName();
                 ++num_humans;
             }
         }
