@@ -1765,7 +1765,18 @@ void eCamera::Timestep(REAL ts){
             if ( Center() &&  wrongDirection > 0 )
             {
                 // if so, turn to the side using the last driving direction
-                newdir = newdir + Center()->LastDirection()*(wrongDirection*ts*turnSpeed*customTurnSpeed180);
+                eCoord normedLastDir = Center()->LastDirection();
+                REAL wrongWrongDirection = -eCoord::F(cycleDir, normedLastDir);
+                if( wrongWrongDirection > 0)
+                {
+                    normedLastDir = normedLastDir + cycleDir * (wrongWrongDirection/cycleDir.NormSquared());
+                    REAL n = normedLastDir.NormSquared();
+                    if(n > 0)
+                    {
+                        normedLastDir *= 1/sqrt(n);
+                    }
+                }
+                newdir = newdir + normedLastDir*(wrongDirection*ts*turnSpeed*customTurnSpeed180);
             }
         }
         else
