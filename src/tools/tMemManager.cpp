@@ -90,7 +90,7 @@ static bool reported=false;
 
 #include "tMutex.h"
 
-static boost::recursive_mutex st_mutex;
+typedef boost::recursive_mutex MUTEX;
 
 // create an object of this class while calling external functions
 // that are known to have (harmless!) leaks
@@ -106,13 +106,34 @@ tKnownExternalLeak::~tKnownExternalLeak()
     st_knownExternalLeak--;
 }
 
+static bool inited=true;
+
+static MUTEX & st_CreateMutex()
+{
+    inited = false;
+    static MUTEX mutex;
+    inited = true;
+
+#ifdef WIN32
+    InitializeCriticalSection(&mutex);
+#endif
+
+    return mutex;
+}
+
+static MUTEX & st_Mutex()
+{
+    static MUTEX & mutex = st_CreateMutex();
+    return mutex;
+}
+
 class tBottleNeck
 {
 private:
     boost::lock_guard< boost::recursive_mutex > lock_;
 public:
     tBottleNeck()
-    :lock_(st_mutex)
+    :lock_(st_Mutex())
     {
     }
 };
@@ -256,8 +277,6 @@ private:
 
     int semaphore;
 };
-
-static bool inited=false;
 
 #ifdef LEAKFINDER
 #include <fstream>
@@ -687,11 +706,6 @@ tMemManager::tMemManager(int s,int bs):size(s),blocksize(s){
 
     tBottleNeck neck;
 
-#ifdef WIN32
-    if (!inited)
-        InitializeCriticalSection(&mutex);
-#endif
-
     inited = true;
 }
 
@@ -737,11 +751,6 @@ tMemManager::tMemManager(int s):size(s){//,blocks(1000),full_blocks(1000){
         std::ofstream lw(leakname);
         lw << "\n\n";
     }
-#endif
-
-#ifdef WIN32
-    if (!inited)
-        InitializeCriticalSection(&mutex);
 #endif
 
     inited = true;
@@ -962,7 +971,9 @@ void tMemManager::Check(){
 #define MAX_SIZE 109
 
 
-static tMemManager memman[MAX_SIZE+1]={
+static tMemManager & st_MemMan(int id)
+{
+    static tMemManager memman[MAX_SIZE+1]={
                                           tMemManager(0),
                                           tMemManager(4),
                                           tMemManager(8),
@@ -1073,7 +1084,12 @@ static tMemManager memman[MAX_SIZE+1]={
                                           tMemManager(428),
                                           tMemManager(432),
                                           tMemManager(436)
-                                      };
+    };
+
+    tASSERT(id >= 0 && id <= MAX_SIZE);
+    return memman[id];
+}
+
 
 
 void tMemManager::Dispose(tAllocationInfo const & info, void *p, bool keep){
@@ -1086,7 +1102,7 @@ void tMemManager::Dispose(tAllocationInfo const & info, void *p, bool keep){
 #ifndef DOUBLEFREEFINDER
     if (inited && block){
         tBottleNeck neck;
-        memman[size >> 2].complete_Dispose(block);
+        st_MemMan(size >> 2).complete_Dispose(block);
 #ifdef WIN32
         LeaveCriticalSection(&mutex);
 #endif
@@ -1136,7 +1152,7 @@ void *tMemMan::Alloc(tAllocationInfo const & info, size_t s){
     if (inited && s < (MAX_SIZE << 2))
     {
         tBottleNeck neck;
-        ret=memman[((s+3)>>2)].Alloc( info );
+        ret=st_MemMan(((s+3)>>2)).Alloc( info );
     }
     else
     {
@@ -1205,7 +1221,7 @@ void tMemManBase::Check(){
 
     tBottleNeck neck;
     for (int i=MAX_SIZE;i>=0;i--)
-        memman[i].Check();
+        st_MemMan(i).Check();
 
 #ifdef WIN32
     LeaveCriticalSection(&mutex);
