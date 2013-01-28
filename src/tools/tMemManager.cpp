@@ -94,7 +94,7 @@ typedef boost::recursive_mutex MUTEX;
 
 // create an object of this class while calling external functions
 // that are known to have (harmless!) leaks
-static int st_knownExternalLeak = 0;
+static int st_knownExternalLeak = 1;
 
 tKnownExternalLeak::tKnownExternalLeak()
 {
@@ -105,6 +105,22 @@ tKnownExternalLeak::~tKnownExternalLeak()
 {
     st_knownExternalLeak--;
 }
+
+// have some of those around as static objects so we know when our code starts
+// allocating
+tKnownExternalLeakBegins::tKnownExternalLeakBegins()
+{
+    static bool st_firstKnownExternalLeak = true;
+
+    // our code begins here. Leaks start counting.
+    if(st_firstKnownExternalLeak)
+    {
+        st_firstKnownExternalLeak = false;
+        st_knownExternalLeak--;
+    }
+}
+static tKnownExternalLeakBegins st_knownLeaksBegin;
+
 
 static bool inited=true;
 

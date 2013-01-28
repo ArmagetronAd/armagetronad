@@ -81,6 +81,21 @@ public:
     ~tKnownExternalLeak();
 };
 
+// have some of those around as static objects so we know when our code starts
+// allocating
+class tKnownExternalLeakBegins
+{
+public:
+    tKnownExternalLeakBegins();
+};
+
+namespace
+{
+    // these cause tKnownExternalLeakBegins() to be called from the static
+    // initializers of every single of our source files. Should do it.
+    static tKnownExternalLeakBegins s_knownLeaksBegin;
+}
+
 #ifndef DONTUSEMEMMANAGER
 
 #ifndef NO_MALLOC_REPLACEMENT
