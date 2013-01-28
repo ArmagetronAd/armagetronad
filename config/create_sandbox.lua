@@ -8,6 +8,8 @@ local whitelist = {
     "print",
     "string",
     "table",
+    "tostring",
+    "type",
 -- armagetron functions
     "loadline",
     "add_ladderlog_event"
@@ -33,6 +35,7 @@ for k,v in pairs(whitelist) do
                 s=s[w]
         end
     end
+    sandbox_env["_G"]=sandbox_env
 end
 
 print("LUA: Sandbox environnement created!")
