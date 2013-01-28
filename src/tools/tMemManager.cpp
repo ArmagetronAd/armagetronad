@@ -106,6 +106,8 @@ tKnownExternalLeak::~tKnownExternalLeak()
     st_knownExternalLeak--;
 }
 
+#ifndef DONTUSEMEMMANAGER
+#ifdef DEBUG
 // have some of those around as static objects so we know when our code starts
 // allocating
 tKnownExternalLeakBegins::tKnownExternalLeakBegins()
@@ -120,7 +122,8 @@ tKnownExternalLeakBegins::tKnownExternalLeakBegins()
     }
 }
 static tKnownExternalLeakBegins st_knownLeaksBegin;
-
+#endif
+#endif
 
 static bool inited=true;
 

@@ -81,6 +81,8 @@ public:
     ~tKnownExternalLeak();
 };
 
+#ifndef DONTUSEMEMMANAGER
+#ifdef DEBUG
 // have some of those around as static objects so we know when our code starts
 // allocating
 class tKnownExternalLeakBegins
@@ -95,8 +97,7 @@ namespace
     // initializers of every single of our source files. Should do it.
     static tKnownExternalLeakBegins s_knownLeaksBegin;
 }
-
-#ifndef DONTUSEMEMMANAGER
+#endif
 
 #ifndef NO_MALLOC_REPLACEMENT
 
