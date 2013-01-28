@@ -127,14 +127,14 @@ static bool inited=true;
 static MUTEX & st_CreateMutex()
 {
     inited = false;
-    static MUTEX mutex;
+    static MUTEX newMutex;
     inited = true;
 
 #ifdef WIN32
     InitializeCriticalSection(&mutex);
 #endif
 
-    return mutex;
+    return newMutex;
 }
 
 static MUTEX & st_Mutex()

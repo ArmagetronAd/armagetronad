@@ -51,9 +51,6 @@ tools_extra=
 endif
 
 INCLUDED_MODULE_SOURCES=
-
-# Note: tMemManager.cpp must be last to avoid false leak reports (sorry for
-# the fragile dependency on undefined behaviour of the linker...)
 libtools_a_SOURCES = ${tools_extra} tools/tVersion.cpp tools/tVersion.h tTrueVersion.h\
 	tools/tArray.cpp tools/tArray.h \
 	tools/tCallback.cpp tools/tCallback.h tools/tCallbackString.h tools/tColor.cpp tools/tColor.h\
