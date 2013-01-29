@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */ // LoadLibrary
@@ -41,7 +41,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 
 #ifdef WIN32
-#ifdef _MSC_VER 
+#ifdef _MSC_VER
 #include <windows.h>
 #include <winuser.h>
 #ifdef _DEBUG
@@ -89,10 +89,12 @@ static bool reported=false;
 #ifdef HAVE_LIBZTHREAD
 #include <zthread/FastRecursiveMutex.h>
 
-static ZThread::FastRecursiveMutex st_mutex;
+//static ZThread::FastRecursiveMutex st_mutex;
+typedef ZThread::FastRecursiveMutex MUTEX;
 #elif defined(HAVE_PTHREAD)
 #include "pthread-binding.h"
-static tPThreadRecursiveMutex st_mutex;
+//static tPThreadRecursiveMutex st_mutex;
+typedef tPThreadRecursiveMutex MUTEX;
 #else
 class tMockMutex
 {
@@ -100,21 +102,47 @@ public:
     void acquire(){}
     void release(){}
 };
-
+/*
 static tMockMutex st_mutex;
 #endif
+*/
+typedef tMockMutex MUTEX;
+#endif
+
+static bool inited=true;
+
+static MUTEX & st_CreateMutex()
+{
+    inited = false;
+    static MUTEX newMutex;
+    inited = true;
+
+#ifdef WIN32
+    InitializeCriticalSection(&mutex);
+#endif
+
+    return newMutex;
+}
+
+static MUTEX & st_Mutex()
+{
+    static MUTEX & mutex = st_CreateMutex();
+    return mutex;
+}
 
 class tBottleNeck
 {
 public:
     tBottleNeck()
     {
-        st_mutex.acquire();
+        //st_mutex.acquire();
+        st_Mutex().acquire();
     }
 
     ~tBottleNeck()
     {
-        st_mutex.release();
+        //st_mutex.release();
+        st_Mutex().release();
     }
 };
 
@@ -171,9 +199,9 @@ struct tAllocationInfo
     bool array;
 #endif
 
-    tAllocationInfo( bool 
+    tAllocationInfo( bool
 #ifdef LEAKFINDER
-                     array_ 
+                     array_
 #endif
         )
 #ifdef LEAKFINDER
@@ -252,7 +280,7 @@ private:
     int semaphore;
 };
 
-static bool inited=false;
+//static bool inited=false;
 
 #ifdef LEAKFINDER
 #include <fstream>
@@ -675,12 +703,12 @@ tMemManager::tMemManager(int s,int bs):size(s),blocksize(s){
     semaphore = 1;
 
     tBottleNeck neck;
-
+/*
 #ifdef WIN32
     if (!inited)
         InitializeCriticalSection(&mutex);
 #endif
-
+*/
     inited = true;
 }
 
@@ -727,12 +755,12 @@ tMemManager::tMemManager(int s):size(s){//,blocks(1000),full_blocks(1000){
         lw << "\n\n";
     }
 #endif
-
+/*
 #ifdef WIN32
     if (!inited)
         InitializeCriticalSection(&mutex);
 #endif
-
+*/
     inited = true;
 }
 
@@ -951,7 +979,9 @@ void tMemManager::Check(){
 #define MAX_SIZE 109
 
 
-static tMemManager memman[MAX_SIZE+1]={
+static tMemManager & st_MemMan(int id)
+{
+    static tMemManager memman[MAX_SIZE+1]={
                                           tMemManager(0),
                                           tMemManager(4),
                                           tMemManager(8),
@@ -1062,7 +1092,11 @@ static tMemManager memman[MAX_SIZE+1]={
                                           tMemManager(428),
                                           tMemManager(432),
                                           tMemManager(436)
-                                      };
+    };
+
+    tASSERT(id >= 0 && id <= MAX_SIZE);
+    return memman[id];
+}
 
 
 void tMemManager::Dispose(tAllocationInfo const & info, void *p, bool keep){
@@ -1075,7 +1109,8 @@ void tMemManager::Dispose(tAllocationInfo const & info, void *p, bool keep){
 #ifndef DOUBLEFREEFINDER
     if (inited && block){
         tBottleNeck neck;
-        memman[size >> 2].complete_Dispose(block);
+        //memman[size >> 2].complete_Dispose(block);
+        st_MemMan(size >> 2).complete_Dispose(block);
 #ifdef WIN32
         LeaveCriticalSection(&mutex);
 #endif
@@ -1124,7 +1159,8 @@ void *tMemMan::Alloc(tAllocationInfo const & info, size_t s){
     if (inited && s < (MAX_SIZE << 2))
     {
         tBottleNeck neck;
-        ret=memman[((s+3)>>2)].Alloc( info );
+        //ret=memman[((s+3)>>2)].Alloc( info );
+        ret=st_MemMan(((s+3)>>2)).Alloc( info );
     }
     else
     {
@@ -1192,7 +1228,8 @@ void tMemManBase::Check(){
 #endif
 
     for (int i=MAX_SIZE;i>=0;i--)
-        memman[i].Check();
+        //memman[i].Check();
+        st_MemMan(i).Check();
 
 #ifdef WIN32
     LeaveCriticalSection(&mutex);
@@ -1200,15 +1237,15 @@ void tMemManBase::Check(){
 }
 
 /*
-	void* operator new	(unsigned int size) {	
+	void* operator new	(unsigned int size) {
 		//return zmalloc.Malloc (size, "UNKNOWN", "zMemory.cpp", 49);
         // return malloc(size);
         return tMemManager::AllocDefault(size);
 	};
-	void  operator delete(void *ptr) {	
+	void  operator delete(void *ptr) {
 		if (ptr) tMemManager::Dispose(ptr);
-        // zmalloc.Free(ptr);							 
-	}; 
+        // zmalloc.Free(ptr);
+	};
 */
 
 #ifdef NEW
@@ -1241,9 +1278,9 @@ void * operator new(
     line=l;
 
     checksum =
-#ifndef PROFILER 
+#ifndef PROFILER
         size +
-#endif 
+#endif
         line * 19671;
 
     int c=1379;
@@ -1295,7 +1332,7 @@ void  operator delete(void *ptr,bool keep) THROW_NOTHING{
             tMemMan::DisposeButKeep(info, ptr);
         else
             tMemMan::Dispose(info, ptr);
-        
+
     }
 }
 
@@ -1309,9 +1346,9 @@ void* operator new	(size_t size,const char *classn,const char *file,int l) THROW
     info.line=l;
 
     info.checksum =
-#ifndef PROFILER 
+#ifndef PROFILER
         size +
-#endif 
+#endif
         info.line * 19671;
 
     int c=1379;
@@ -1368,11 +1405,11 @@ void* operator new[]	(size_t size,const char *classn,const char *file,int l)  TH
     info.line=l;
 
     info.checksum =
-#ifndef PROFILER 
+#ifndef PROFILER
     size +
-#endif 
+#endif
     info.line * 19671;
-    
+
     int c=1379;
     while (*file){
         info.checksum = (info.checksum + (*file)*c) % MAXCHECKSUM;
@@ -1384,7 +1421,7 @@ void* operator new[]	(size_t size,const char *classn,const char *file,int l)  TH
         c             = (c * 79                ) % MAXCHECKSUM;
         classn++;
     }
-    
+
 #ifdef PROFILER
     while (checksum_filename[info.checksum] && (checksum_filename[info.checksum] != info.filename || checksum_line[info.checksum] != info.line))
     info.checksum = (info.checksum+1) % MAXCHECKSUM;
@@ -1495,7 +1532,7 @@ void  tMemManBase::Profile(){
             if (!cn)
                 cn = "XXX";
 
-            PRINT(checksum_blocks[cs], checksum_bytes[cs],cn, fn , checksum_line[cs], cs);     
+            PRINT(checksum_blocks[cs], checksum_bytes[cs],cn, fn , checksum_line[cs], cs);
             total_blocks += checksum_blocks[cs];
             total_bytes += checksum_bytes[cs];
         }

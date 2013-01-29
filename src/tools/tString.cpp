@@ -2241,3 +2241,24 @@ tString tString::Replace(const char *old_word, const char *new_word)
 {
     return Replace(tString(old_word), tString(new_word));
 }
+
+// **********************************************************************
+// *
+// *	IsNumeric
+// *
+// **********************************************************************
+//!
+//!    @return     Returns true if string contains numeric values
+//!
+// **********************************************************************
+bool tString::IsNumeric()
+{
+    tString ret(*this);
+
+    for(int i = 0; i < ret.Len(); i++)
+    {
+        if (!isdigit(ret[i]))
+            return false;
+    }
+    return true;
+}

@@ -163,17 +163,11 @@ static tSettingItem< bool > se_specSpamConf( "AUTO_TEAM_SPEC_SPAM", se_specSpam 
 static bool se_allowTeamChanges = true;
 static tSettingItem< bool > se_allowTeamChangesConf( "ALLOW_TEAM_CHANGE", se_allowTeamChanges );
 
-static bool se_chatLogWritePM = false;
-static tSettingItem< bool > se_chatLogWritePMConf( "CHATLOG_WRITE_PM", se_chatLogWritePM );
-
 static bool se_chatLogWriteTeam = false;
 static tSettingItem< bool > se_chatLogWriteTeamConf( "CHATLOG_WRITE_TEAM", se_chatLogWriteTeam );
 
 static bool se_chatLogWriteEnemy = false;
 static tSettingItem< bool > se_ChatLogWriteEnemyConf("CHATLOG_WRITE_ENEMY", se_chatLogWriteEnemy);
-
-static bool se_chatLogWritePlayer = false;
-static tSettingItem< bool > se_ChatLogWritePlayerConf("CHATLOG_WRITE_PLAYER", se_chatLogWritePlayer);
 
 static bool se_enableChat = true;    //flag indicating whether chat should be allowed at all (logged in players can always chat)
 static tSettingItem< bool > se_enaChat("ENABLE_CHAT", se_enableChat);
@@ -3228,52 +3222,63 @@ static void se_ChatEnemy(ePlayerNetID *p, std::istream &s, eChatSpamTester &spam
     }
 }
 
-// /player chat commant: talk to the given player's name
+/**
+ * Let's just leave it at default at moderators level.
+ * This way only moderators or lower level users can view chat messages from this person.
+ * Meaning so, the sending must be a moderator or lower level user (lower level have higher powers).
+ */
+static int se_accessLevelViewChats = 2;
+static tSettingItem<int> se_accessLevelViewChatsConf("ACCESS_LEVEL_VIEW_CHATS", se_accessLevelViewChats);
+
+// /chat commant: talk to the people with the same or lower(better) access level
 static void se_ChatPlayer( ePlayerNetID * p, std::istream & s, eChatSpamTester & spam )
 {
     // odd, the refactored original did not check for silence. Probably by design.
-    if ( /* IsSilencedWithWarning(player) || */ spam.Block() )
-    {
-        return;
-    }
-    // Check for player
-    ePlayerNetID * receiver =  se_FindPlayerInChatCommand( p, "/player", s );
+    if ( /* IsSilencedWithWarning(player) || */ spam.Block() ) return;
 
-    if ( receiver )
+    if (p && (p->GetAccessLevel() <= se_accessLevelViewChats))
     {
-        // extract rest of message: it is the true message to send
-        std::ws(s);
-
         // read the rest of the message
         tString msg_core;
         msg_core.ReadLine(s);
-        switch (sn_GetNetState())
+
+        if (sn_GetNetState() == nSERVER)
         {
-        case nSERVER:
-        {
-
-            // build chat string
-            tColoredString send;
-            send << p->GetColoredName();
-            send << tColoredString::ColorString( 1,1,.5 );
-            send << ": ";
-            send << receiver->GetColoredName();
-            send << tColoredString::ColorString( 1,1,.5 );
-            send << ": " << msg_core << "\n";
-
-            // display it
-            sn_ConsoleOut( send );
-
-            break;
-
-            //send /player to chatlog
-            if (se_chatLogWritePlayer )
+            for(int i = 0; i < se_PlayerNetIDs.Len(); i++)
             {
-                tString str;
-                str << p->GetUserName() << " /player " << receiver->GetUserName() << " " << msg_core;
-                se_SaveToChatLog(str);
+                ePlayerNetID *receiver = se_PlayerNetIDs[i];
+                if (receiver)
+                {
+                    /**
+                     *  Ensure that this message will only be sent to players
+                        with similar access level as the sender.
+                     */
+                    if (receiver->GetAccessLevel() <= se_accessLevelViewChats)
+                    {
+                        // build chat string
+                        tColoredString sendOther;
+                        std::ostringstream str;
+
+                        sendOther << tColoredString::ColorString( 1,1,.5 );
+                        sendOther << "*";
+
+                        //  get access level name and add it before rest of information
+                        str << "$config_accesslevel_" << receiver->GetAccessLevel();
+                        sendOther << str.str().c_str();
+
+                        sendOther << tColoredString::ColorString( 1,1,.5 );
+                        sendOther << "* ";
+                        sendOther << p->GetColoredName();
+                        sendOther << tColoredString::ColorString( 1,1,.5 );
+                        sendOther << ": ";
+                        sendOther << tColoredString::ColorString( 1,0,0 );
+                        sendOther << msg_core << "\n";
+
+                        // display it to the player with equal access level
+                        sn_ConsoleOut(sendOther, receiver->Owner());
+                    }
+                }
             }
-        }
         }
     }
 }
@@ -3325,14 +3330,6 @@ static void se_ChatMsg( ePlayerNetID * p, std::istream & s, eChatSpamTester & sp
                 {
                     se_SendPrivateMessage( p, receiver, admin, msg_core );
                 }
-            }
-
-            //send /msg to chatlog
-            if (se_chatLogWritePM )
-            {
-                tString str;
-                str << p->GetUserName() << " /msg " << receiver->GetUserName() << " " << msg_core;
-                se_SaveToChatLog(str);
             }
         }
     }
@@ -3998,7 +3995,7 @@ void handle_chat( nMessage &m )
                         se_ChatEnemy( p, s, spam );
                         return;
                     }
-                    else if (command == "/player")
+                    else if (command == "/chat")
                     {
                         spam.lastSaidType_ = eChatMessageType_Public;
                         se_ChatPlayer( p, s, spam );
@@ -5153,7 +5150,10 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), timeC
     stealth_            = false;
     chatFlags_          = 0;
     disconnected        = false;
-    suspended_          = 0;
+
+    suspended_          = false;
+    roundsSuspended_    = 0;
+    suspendReason_      = "";
 
     substitute          = NULL;
 
@@ -5219,10 +5219,13 @@ ePlayerNetID::ePlayerNetID(nMessage &m):nNetObject(m),listID(-1), teamListID(-1)
 
     greeted     =false;
     chatting_   =false;
-    spectating_ =false;
+
+    suspended_          = false;
+    roundsSuspended_    = 0;
+    suspendReason_      = "";
+
     stealth_    =false;
     disconnected=false;
-    suspended_  = 0;
     chatFlags_  =0;
 
     r = g = b = 15;
@@ -5530,7 +5533,7 @@ void ePlayerNetID::MyInitAfterCreation()
         // get suspension count
         if ( GetVoter() )
         {
-            suspended_ = GetVoter()->suspended_;
+            roundsSuspended_ = GetVoter()->suspended_;
             silenced_ = GetVoter()->silenced_;
         }
     }
@@ -8410,12 +8413,11 @@ bool ePlayerNetID::TeamChangeAllowed( bool informPlayer ) const
         return false;
     }
 
-    int suspended = GetSuspended();
-    if ( suspended > 0 )
+    if (IsSuspended())
     {
         if ( informPlayer )
         {
-            sn_ConsoleOut(tOutput("$player_teamchanges_suspended", suspended ), Owner());
+            sn_ConsoleOut(tOutput("$player_teamchanges_suspended", RoundsSuspended()), Owner());
         }
         return false;
     }
@@ -9210,16 +9212,44 @@ static void Suspend_conf_base(std::istream &s, int rounds )
         return;
     }
 
-    ePlayerNetID * p = ReadPlayer( s );
+    tString msg;
+    int pos = 0;
+    msg.ReadLine(s);
 
-    if ( rounds > 0 )
+    tString player          = msg.ExtractNonBlankSubString(pos);
+    tString suspendRounds   = msg.ExtractNonBlankSubString(pos);
+    tString reason          = msg.ExtractNonBlankSubString(pos);
+
+    if (suspendRounds.Filter() != "")
     {
-        s >> rounds;
+        //  check that second field really has numeric values (numeric + letters are not good)
+        if (suspendRounds.IsNumeric())
+            rounds = atoi(suspendRounds);
+        else
+        {
+            rounds = se_suspendDefault;
+            reason = suspendRounds << " " << reason;
+        }
+    }
+    else
+    {
+        rounds = se_suspendDefault;
+        reason = suspendRounds << " " << reason;
     }
 
-    if ( p )
+    while (reason.Filter() != "")
     {
-        p->Suspend( rounds );
+        reason << " " << msg.ExtractNonBlankSubString(pos);
+    }
+
+    ePlayerNetID *p = ePlayerNetID::FindPlayerByName(player);
+
+    if (p)
+    {
+        if (reason.Filter() != "")
+            p->Suspend( rounds, reason );
+        else
+            p->Suspend( rounds );
     }
 }
 
@@ -9239,30 +9269,44 @@ static tAccessLevelSetter se_suspendConfLevel( suspend_conf, tAccessLevel_Modera
 
 static void SuspendList_conf(std::istream &s)
 {
-    ePlayerNetID * receiver=0;
-    tColoredString send;
+    ePlayerNetID *receiver = 0;
+
+    sn_ConsoleOut("List of currently suspended players:\n", receiver->Owner() );
 
     if (se_PlayerNetIDs.Len()>0)
     {
-        int max = se_PlayerNetIDs.Len();
-        for(int i=0; i<max; i++)
+        for(int i = 0; i < se_PlayerNetIDs.Len(); i++)
         {
-            ePlayerNetID *p=se_PlayerNetIDs(i);
-            if (p && p->IsSuspended())
+            ePlayerNetID *p = se_PlayerNetIDs[i];
+            if (p)
             {
-                send << p->GetColoredName() << tColoredString::ColorString( 1,1,.5 ) << ", ";
+                //  let's ensure this person is actually suspended
+                if (p->IsSuspended())
+                {
+                    tColoredString send;
+                    send << tColoredString::ColorString( 1,1,.5 );
+                    send << "( ";
+                    send << p->GetColoredName();
+                    send << tColoredString::ColorString( 1,1,.5 );
+                    send << " | " << p->RoundsSuspended() << " rounds | ";
+
+                    //  making sure if there really was a reason for suspension.
+                    if (p->ReasonSuspended().Filter() != "")
+                        send << p->ReasonSuspended();
+                    //  if not, then let's tell them that
+                    else
+                        send << "UNKNOWN_REASON";
+
+                    send << " )\n";
+                    sn_ConsoleOut( send, receiver->Owner() );
+                }
             }
         }
-        send << "\n";
-        sn_ConsoleOut( send, receiver->Owner() );
     }
 }
 
 static tConfItemFunc suspendlist_conf("SUSPEND_LIST", &SuspendList_conf);
 static tAccessLevelSetter se_suspendlistConfLevel( suspendlist_conf, tAccessLevel_Moderator );
-
-static tConfItemFunc unsuspend_conf("UNSUSPEND",&UnSuspend_conf);
-static tAccessLevelSetter se_unsuspendConfLevel( unsuspend_conf, tAccessLevel_Moderator );
 
 static void Silence_conf(std::istream &s)
 {
@@ -10212,7 +10256,7 @@ void ePlayerNetID::UnregisterWithMachine( void )
         // store suspension count
         if ( GetVoter() )
         {
-            GetVoter()->suspended_ = suspended_;
+            GetVoter()->suspended_ = roundsSuspended_;
             GetVoter()->silenced_ = silenced_;
         }
 
@@ -10286,33 +10330,37 @@ void ePlayerNetID::ResetScoreDifferences( void )
 //!
 // *******************************************************************************
 
-void ePlayerNetID::Suspend( int rounds )
+void ePlayerNetID::Suspend( int rounds, tString reason )
 {
     if ( rounds < 0 )
     {
         rounds = 0;
     }
 
-    int & suspended = AccessSuspended();
-
-    if ( suspended == rounds )
+    if ( RoundsSuspended() == rounds )
     {
         return;
     }
 
-    suspended = rounds;
+    roundsSuspended_ = rounds;
 
-    if ( suspended == 0 )
+    if ( roundsSuspended_ == 0 )
     {
         sn_ConsoleOut( tOutput( "$player_no_longer_suspended", GetColoredName() ) );
         FindDefaultTeam();
+
+        suspended_ = false;
+        suspendReason_ = "";
     }
     else
     {
-        sn_ConsoleOut( tOutput( "$player_suspended", GetColoredName(), suspended ) );
+        sn_ConsoleOut( tOutput( "$player_suspended", GetColoredName(), roundsSuspended_ ) );
         SetTeam( NULL );
         if ( Object() && Object()->Alive() )
             Object()->Kill();
+
+        suspended_ = true;
+        suspendReason_= reason;
     }
 }
 
@@ -10359,12 +10407,10 @@ void ePlayerNetID::UpdateSuspensions()
 {
     for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
     {
-        ePlayerNetID* p = se_PlayerNetIDs(i);
-
-        int suspended = p->GetSuspended();
+        ePlayerNetID* p = se_PlayerNetIDs[i];
 
         // update suspension count
-        if ( suspended > 0 )
+        if (p->IsSuspended())
         {
             if ( p->CurrentTeam() && !p->NextTeam() )
             {
@@ -10372,7 +10418,7 @@ void ePlayerNetID::UpdateSuspensions()
             }
             else
             {
-                p->Suspend( suspended - 1 );
+                p->Suspend( p->RoundsSuspended() - 1 );
             }
         }
     }
@@ -10685,19 +10731,6 @@ static tConfItemFunc se_allowTeamChangesPlayerConf("ALLOW_TEAM_CHANGE_PLAYER", &
 static tConfItemFunc se_disallowTeamChangesPlayerConf("DISALLOW_TEAM_CHANGE_PLAYER", &se_disallowTeamChangesPlayer);
 static tAccessLevelSetter se_atcConfLevel( se_allowTeamChangesPlayerConf, tAccessLevel_TeamLeader );
 static tAccessLevelSetter se_dtcConfLevel( se_disallowTeamChangesPlayerConf, tAccessLevel_TeamLeader );
-
-//! accesses the suspension count
-int & ePlayerNetID::AccessSuspended()
-{
-    return suspended_;
-}
-
-//! returns the suspension count
-int ePlayerNetID::GetSuspended() const
-{
-    return suspended_;
-}
-
 
 static void sg_AddScorePlayer(std::istream &s)
 {

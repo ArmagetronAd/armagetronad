@@ -1,4 +1,46 @@
 ===========================
+Changes in r847
+===========================
+Corrections:
+    * Fixed up the updating problem from previous entry from sty+ct in gGame.cpp
+
+Improvements:
+    * 0.2.8-armagetronad-work
+        * Using singleton pattern to make memory manager report leaks reliably again without a ton of false positives. - Z-Man.
+    * Improved SUSPEND_LIST where the output will appear as:
+        List of suspended players:
+        ( player_username | rounds_suspended | suspended_reason )
+
+Additions:
+    * SUSPEND command now uses different approch to how it suspends players.
+        *  First field would always be the player's name, the play you want to suspend.
+        *  Second field would be the number of rounds, if this contains words, then it won't be registered.
+        *  Third field would be for the reason as to why suspend this person
+    * Removed UNSPUSPEND because you can unsuspend a player simply by doing:
+        SUSPEND [player_name] 0
+        * The 0 value will automatically cause the player to unsuspend.
+    * Added /chat command for chats.
+        # This command works similar to an access level chat system that only the
+          players with the access level or lower (lower is better) can view that message.
+        # I got this idea after vitnessing some hopeless people using /admin # message to
+          message each other. That's so silly as /admin is only for changing settings and nothing more.
+        # Output *{ACCESS_LEVEL_NAME}* [screen_name]: [message]
+    * Added comand: "ACCESS_LEVEL_VIEW_CHATS"
+        # This command is the access level for "/chat" above.
+        # Using this command, you can set it to some access level value.
+        # If players, sending message, have access level equal to this or lower, then the 
+          message is sent. Equally, players will also receive the sent message.
+
+Removed:
+    * CHATLOG_WRITE_PM
+        # I simply think this should not be allowed because personal messages should
+          be personal messages.
+        # Having this command allows for players to do some
+          really bad things.
+        # Such as abusing powers and if players are exchanging some details that fall
+          in the wrong hands. That's just no good at all. 
+
+===========================
 Changes in r841
 ===========================
 Corrections & Improvements:

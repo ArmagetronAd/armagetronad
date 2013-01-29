@@ -115,11 +115,11 @@ public:												// public methods
 
     bool			NameTeamAfterColor ( bool wish );	// inquire or set the ability to use a color as a team name
 
-    void 			AddPlayer   	( ePlayerNetID* player );				// register a player
-    void 			AddPlayerDirty 	( ePlayerNetID* player );				// register a player without calling UpdateProperties
-    void 	 		RemovePlayer	( ePlayerNetID* player );				// deregister a player
+    void 			AddPlayer   	( ePlayerNetID* player );		// register a player
+    void 			AddPlayerDirty 	( ePlayerNetID* player );		// register a player without calling UpdateProperties
+    void 	 		RemovePlayer	( ePlayerNetID* player );		// deregister a player
     virtual bool	PlayerMayJoin	( const ePlayerNetID* player ) const;		// see if the given player may join this team
-    static bool 	NewTeamAllowed	();											// is it allowed to create a new team?
+    static bool 	NewTeamAllowed	();								// is it allowed to create a new team?
 
     static void     SwapPlayers     ( ePlayerNetID* player1, ePlayerNetID *player2 ); //!< swaps the team positions of the two players (same team or not)
 

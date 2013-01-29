@@ -228,8 +228,11 @@ private:
     int listID;                          // ID in the list of all players
     int teamListID;                      // ID in the list of the team
 
-    bool							silenced_;		// flag indicating whether the player has been silenced
-    int                             suspended_;     //! number of rounds the player is currently suspended from playing
+    bool							silenced_;		    // flag indicating whether the player has been silenced
+
+    int                             roundsSuspended_;   // number of rounds the player is currently suspended from playing
+    bool                            suspended_;         // flag indicating whether the player has been suspended
+    tString                         suspendReason_;     // what was the reason for suspending this person...?
 
     nTimeAbsolute                   timeCreated_;   // the time the player was created
     nTimeAbsolute					timeJoinedTeam; // the time the player joined the team he is in now
@@ -329,8 +332,8 @@ public:
     // team management
     bool TeamChangeAllowed( bool informPlayer = false ) const; //!< is this player allowed to change teams?
     void SetTeamChangeAllowed(bool allowed) {allowTeamChange_ = allowed;} //!< set if this player should always be allowed to change teams
-    eTeam * NextTeam()    const { return nextTeam; }				// return the team I will be next round
-    eTeam * CurrentTeam() const { return currentTeam; }		// return the team I am in
+    eTeam *NextTeam()    const { return nextTeam; }				// return the team I will be next round
+    eTeam *CurrentTeam() const { return currentTeam; }		// return the team I am in
     int  TeamListID() const { return teamListID; }		// return my position in the team
     int  ListID() const { return listID; }              // return my position in the player's list
     void SetShuffleWish( int pos ); 	                 //!< sets a desired team position
@@ -373,7 +376,7 @@ public:
     void Greet();
 
     // suspend the player from playing, forcing him to spectate
-    void Suspend( int rounds = 5 );
+    void Suspend( int rounds = 5, tString reason = tString(""));
 #ifdef KRAWALL_SERVER
     void Authenticate( tString const & authName,
                        tAccessLevel accessLevel = tAccessLevel_Authenticated,
@@ -390,7 +393,11 @@ public:
     void SetSilenced( bool silenced ) { silenced_ = silenced; }
     bool& AccessSilenced( void ) { return silenced_; }
 
-    bool IsSuspended ( void ) { return suspended_ > 0; }
+    bool IsSuspended ( void ) { return suspended_; }
+    bool IsSuspended ( void ) const { return suspended_; }
+    int RoundsSuspended() { return roundsSuspended_; }
+    int RoundsSuspended() const { return roundsSuspended_; }
+    tString ReasonSuspended() { return suspendReason_; }
 
     eVoter * GetVoter() const {return voter_;}     // returns our voter
     void CreateVoter();						// create our voter or find it
@@ -531,12 +538,6 @@ public:
 private:
     inline ePlayerNetID & SetNameFromClient( tColoredString const & nameFromClient );   //!< Sets this player's name as the client wants it to be. Avoid using it when possilbe.
     inline ePlayerNetID & SetColoredName( tColoredString const & coloredName ); //!< Sets this player's name, cleared by the server. Use this for onscreen screen display.
-
-    //! accesses the suspension count
-    int & AccessSuspended();
-
-    //! returns the suspension count
-    int GetSuspended() const;
 };
 
 extern tList<ePlayerNetID> se_PlayerNetIDs;

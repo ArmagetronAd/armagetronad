@@ -123,6 +123,8 @@ public:
     REAL toReal( const REAL pos) const;
     REAL toReal() const;
 
+    bool IsNumeric();
+
     //! confirms whether the tofind exists within the current string
     bool Contains(tString tofind);
     bool Contains(const char *tofind);

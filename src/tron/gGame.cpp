@@ -4314,7 +4314,11 @@ void gGame::StateUpdate(){
         case GS_TRANSFER_SETTINGS:
             // sr_con.autoDisplayAtNewline=true;
 
-            //  let's make the rotation working (checking with queue as well)
+            ePlayerNetID::ApplySubstitutions();
+
+            // log scores before players get renamed
+            ePlayerNetID::LogScoreDifferences();
+
             if ((sg_mapqueueing.Size() == 0) && (sg_configqueueing.Size() == 0))
             {
                 // rotate, if rotate is once per round
@@ -4323,10 +4327,7 @@ void gGame::StateUpdate(){
                 else if (rotationtype == gROTATION_RANDOM_ROUND)
                     Randomrotate();
             }
-            else
-            {
-                QueRotate();
-            }
+            else QueRotate();
 
             gRotation::HandleNewRound();
 
@@ -4336,18 +4337,6 @@ void gGame::StateUpdate(){
                 update_settings( &goon );
                 ePlayerNetID::RemoveChatbots();
             }
-
-            ePlayerNetID::ApplySubstitutions();
-
-            // log scores before players get renamed
-            ePlayerNetID::LogScoreDifferences();
-
-            if (sg_singlePlayer)
-                sg_currentSettings = &singlePlayer;
-            else
-                sg_currentSettings = &multiPlayer;
-
-            sg_copySettings();
 
             rViewport::Update(MAX_PLAYERS);
 
