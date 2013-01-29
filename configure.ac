@@ -90,19 +90,20 @@ AM_CONDITIONAL([OS_X_TOOLKIT], test -n "${os_x_toolkit}")
 
 if test -n "$os_x_toolkit"; then
 	dnl TODO make architectures that will be built configurable.
+	arch="x86_64"
 	
 	dnl Set up general library and header directories for normal libraries
-	LDFLAGS="-arch i386 -arch x86_64 -Xarch_i386 -L${os_x_toolkit}/i386/lib -Xarch_x86_64 -L${os_x_toolkit}/x86_64/lib $LDFLAGS -F${os_x_toolkit}/Frameworks"
+	LDFLAGS="-arch ${arch} -L${os_x_toolkit}/${arch}/lib $LDFLAGS -F${os_x_toolkit}/Frameworks"
 	CXXFLAGS="$LDFLAGS $CXXFLAGS"
-	CPPFLAGS="-F${os_x_toolkit}/Frameworks -Xarch_i386 -I${os_x_toolkit}/i386/include -Xarch_x86_64 -I${os_x_toolkit}/x86_64/include $CPPFLAGS"
+	CPPFLAGS="-F${os_x_toolkit}/Frameworks -I${os_x_toolkit}/${arch}/include $CPPFLAGS"
 	
 	dnl Set up header directories for frameworks
 	CPPFLAGS="-I${os_x_toolkit}/Frameworks/SDL.framework/Headers -I${os_x_toolkit}/Frameworks/SDL_mixer.framework/Headers -I${os_x_toolkit}/Frameworks/SDL_image.framework/Headers $CPPFLAGS"
 	
 	PATH="${os_x_toolkit}/bin:$PATH"
-	PROTOC="${os_x_toolkit}/i386/bin/protoc"
+	PROTOC="${os_x_toolkit}/${arch}/bin/protoc"
 	
-	FTGL_CFLAGS="-Xarch_i386 -I${os_x_toolkit}/i386/include/FTGL -Xarch_i386 -I${os_x_toolkit}/i386/include/freetype2 -Xarch_x86_64 -I${os_x_toolkit}/x86_64/include/FTGL -Xarch_x86_64 -I${os_x_toolkit}/x86_64/include/freetype2"
+	FTGL_CFLAGS="-I${os_x_toolkit}/${arch}/include/FTGL -I${os_x_toolkit}/${arch}/include/freetype2"
 	FTGL_LIBS="-lftgl -lfreetype -lz -lbz2"
 fi
 
