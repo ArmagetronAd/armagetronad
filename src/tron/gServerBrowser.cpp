@@ -392,7 +392,7 @@ void gServerMenu::Update()
 			int i;
 			tString userNames = run->UserNames();
 			tString* friends = getFriends();
-			for (i = MAX_FRIENDS; i>=0; i--)
+			for (i = MAX_FRIENDS-1; i>=0; i--)
 			{
 				if (run->Users() > 0 && friends[i].Len() > 1 && userNames.StrPos(friends[i]) >= 0)
 				{
