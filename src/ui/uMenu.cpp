@@ -33,7 +33,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #       include "AAPaste.h"
 #       include <CoreFoundation/CoreFoundation.h>
 #   elif !defined(MACOSX)
-#       error "wtf are we doing in here"
 #       include "scrap.h"
 #   endif
 #endif
