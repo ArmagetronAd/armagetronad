@@ -173,6 +173,10 @@ libtron_a_SOURCES=tron/gAIBase.cpp tron/gAIBase.h tron/gAICharacter.cpp tron/gAI
 	tron/cockpit/cRectangle.h tron/cockpit/cRectangle.cpp\
 	tron/gFriends.h tron/gFriends.cpp
 
+if OS_X_TOOLKIT
+libtron_a_SOURCES += macosx/SDLMain.mm macosx/SDLMain.h
+endif
+
 if BUILDZONESV2
 libtron_a_SOURCES +=\
 	tron/zone/zZone.cpp        tron/zone/zZone.h\
@@ -212,6 +216,10 @@ librender_a_CXXFLAGS =$(libtools_a_CXXFLAGS)  -I@srcdir@/render
 libui_a_CXXFLAGS     =$(librender_a_CXXFLAGS) -I@srcdir@/ui -I@srcdir@/thirdparty/shttpd -I@srcdir@/thirdparty/scrap
 libengine_a_CXXFLAGS =$(libui_a_CXXFLAGS)     -I@srcdir@/network -I@srcdir@/engine -I@srcdir@/engine/sound
 libtron_a_CXXFLAGS   =$(libengine_a_CXXFLAGS) -I@srcdir@/thirdparty/particles -I@srcdir@/tron -I@srcdir@/tron/cockpit
+
+if OS_X_TOOLKIT
+libtron_a_OBJCXXFLAGS =$(libtron_a_CXXFLAGS)
+endif
 
 # core engine files can get compiled with optimization turned on for more painless debugging
 # on weak computers

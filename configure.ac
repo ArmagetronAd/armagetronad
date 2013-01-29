@@ -470,6 +470,11 @@ AC_PROG_CXX
 AC_PROG_CXXCPP
 dnl AC_OBJEXT
 
+if test -n "$os_x_toolkit"; then
+	AC_PROG_OBJCXX
+	AC_PROG_OBJCXXCPP
+fi
+
 dnl Make:
 dnl AC_PROG_MAKE_SET
 
