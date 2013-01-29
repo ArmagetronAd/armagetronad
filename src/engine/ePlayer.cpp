@@ -8736,6 +8736,39 @@ static tAccessLevelSetter se_suspendConfLevel( suspend_conf, tAccessLevel_Modera
 static tConfItemFunc unsuspend_conf("UNSUSPEND",&UnSuspend_conf);
 static tAccessLevelSetter se_unsuspendConfLevel( unsuspend_conf, tAccessLevel_Moderator );
 
+static void SuspendList_conf(std::istream &s)
+{
+    ePlayerNetID *receiver = 0;
+
+    sn_ConsoleOut("List of currently suspended players:\n", receiver->Owner() );
+
+    if (se_PlayerNetIDs.Len()>0)
+    {
+        for(int i = 0; i < se_PlayerNetIDs.Len(); i++)
+        {
+            ePlayerNetID *p = se_PlayerNetIDs[i];
+            if (p)
+            {
+                //  let's ensure this person is actually suspended
+                if (p->IsSuspended())
+                {
+                    tColoredString send;
+                    send << tColoredString::ColorString( 1,1,.5 );
+                    send << "( ";
+                    send << p->GetColoredName();
+                    send << tColoredString::ColorString( 1,1,.5 );
+                    send << " | " << p->RoundsSuspended() << " rounds )\n";
+
+                    sn_ConsoleOut( send, receiver->Owner() );
+                }
+            }
+        }
+    }
+}
+
+static tConfItemFunc suspendlist_conf("SUSPEND_LIST", &SuspendList_conf);
+static tAccessLevelSetter se_suspendlistConfLevel( suspendlist_conf, tAccessLevel_Moderator );
+
 static void Silence_conf(std::istream &s)
 {
     ePlayerNetID * p = ReadPlayer( s );

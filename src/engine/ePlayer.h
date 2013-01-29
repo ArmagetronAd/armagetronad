@@ -403,6 +403,7 @@ public:
     bool& AccessSilenced( void ) { return silenced_; }
 
     bool IsSuspended ( void ) const { return suspended_ > 0; }
+    int  RoundsSuspended ( void ) const { return suspended_; }
     bool IsGreeted() const { return greeted; }
 
     eVoter * GetVoter() const {return voter_;}     // returns our voter
