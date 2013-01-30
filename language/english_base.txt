@@ -829,7 +829,7 @@ ladderlog_write_all_help Set all the LADDER_LOG_WRITE_* settings to the same val
 ladderlog_write_all_usage Usage: LADDER_LOG_WRITE_ALL 1|0
 ladderlog_write_all_enabled Enabled full ladderlog output.
 ladderlog_write_all_disabled Disabled ladderlog output.
-ladderlog_write_admin_command _help           Write to ladderlog: ADMIN_COMMAND <name> <setting>
+ladderlog_write_admin_command_help            Write to ladderlog: ADMIN_COMMAND <name> <setting>
 ladderlog_write_authority_blurb_help          Write to ladderlog: AUTHORITY_BLURB <name> <value> <text>
 ladderlog_write_ball_vanish_help              Write to ladderlog: BALL_VANISH <object id> <zone_name> <cx> <cy>
 ladderlog_write_base_enemy_respawn_help       Write to ladderlog: BASE_ENEMY_RESPAWN  <spawner> <spawned>
@@ -3470,3 +3470,157 @@ include english_base_notranslate.txt
 
 # Room for lost settings in translation files:
 
+access_level_substitute_help        Required access level to switch with another player.
+access_level_view_chats_help        Players with access level equal to or lower than this are able to see messages sent from the same access leveled player.
+access_level_vote_challenge_help    UNDOCUMENTED
+add_score_player_help               Give/Take points for that player. Usage: ADD_SCORE_PLAYER [name] [points] [message].
+add_score_team_help                 Give/Take points for that team. Usage: ADD_SCORE_PLAYER [name] [points] [message].
+admin_kill_message_help             If set to 1, announce when players get killed due to the command "KILL"
+admin_name_help                     The name to speak as when using the command "SAY".
+auto_substitution_help              If set to 1, players will be substituted when leaving.
+chat_tooltip_help                   UNDOCUMENTED
+collapse_zone_id_help               Collapse the zone by the given ID.
+condense_conquest_output_help       Condense fort zone conquered output into one line for multiple wiiners.
+custom_message_help                 Send custom message using language string commands. Have spaces between each parameter.\nUsage: CUSTOM_MESSAGE ${language_string} param1 param2 param3 ...
+custom_player_message_help          Send custom message to player using language string commands. Have spaces between each parameter.\nUsage: CUSTOM_MESSAGE_PLAYER [player] ${language_string} param1 param2 param3 ...
+cycle_brake_tooltip_help            UNDOCUMENTED
+cycle_explosion_radius_help         Radious of the explosion when a cycle gets destroyed.
+cycle_rubber_deplete_enemy_help     If set to 1, rubber depletes for players when hitting enemys' tails.
+cycle_rubber_deplete_rim_help       If set to 1, rubber depletes for players when hitting rim walls.
+cycle_rubber_deplete_self_help      If set to 1, rubber depletes for players when hitting their own tails.
+cycle_rubber_deplete_team_help      If set to 1, rubber depletes for players when hitting their teams' tails.
+cycle_turn_left_tooltip_help        UNDOCUMENTED
+cycle_turn_right_tooltip_help       UNDOCUMENTED
+cycle_walls_length_help             The length of the tails, automatically sets current wall length to the given length during round.
+cycle_walls_stay_up_delay_help      The number of seconds the tails remain on the field after their owner is dead.
+cycle_zones_approch_help            The distance a cycle can approch the zone without trigging the OnNear() event.
+cycle_zones_avoid_help              If set to 1, cycles will do their best at avoiding the zone. Is slightly buggy but works often.
+death_shot_help                     If set to 1, killed players will release a death shot if they had been about to shoot.
+delay_command_help                  A command to execute at given time. Usage: DELAY_COMMAND [time] [command] [parameters] ...
+delay_command_clear_help            Clears all delayed command from cache.
+destroy_zone_help                   Destroy, simply meaning: causes the zone with the given name to disappear instantly.
+destroy_zone_id_help                Destroy, simply meaning: causes the zone with the given id to disappear instantly.
+display_scores_during_chat_help     If set to 1, score board will appear during chat when we hit the "TAB" button on our keyboard.
+enable_friends_casing_help          If set to 1, matching friends will appear. If set to 0, no matter what casing it is, names with our friends will appear.
+end_challenge_help                  UNDOCUMENTED
+get_current_map_help                Displays the current map players are playing in.
+glance_back_tooltip_help            UNDOCUMENTED
+glance_left_tooltip_help            UNDOCUMENTED
+glance_right_tooltip_help           UNDOCUMENTED
+grid_position_interval_help         The time between previous "player_gridpos" output to the next.
+help_message_help                   A help message sent to those calling it. Works through "/help" as well.
+highlight_name_help                 If set to 1, when your name appears in messages, it gets highlithed for you to notice.
+ladderlog_write_admin_login_help                    Write to ladderlog: ADMIN_LOGIN [login_name] [ip_address]
+ladderlog_write_admin_logout_help                   Write to ladderlog: ADMIN_LOGOUT [login_name] [ip_address]
+ladderlog_write_ai_positions_help                   If set to 1, the team positions for AI Teams will output under "POSITIONS"
+ladderlog_write_end_challenge_help                  Write to ladderlog: END_CHALLENGE [time]
+ladderlog_write_invalid_command_help                Write to ladderlog: INVALID_COMMAND [command] [player_username] [ip_address] [access_level] [params]
+ladderlog_write_match_ended_help                    Write to ladderlog: MATCH_ENDED [time]
+ladderlog_write_match_score_help                    Write to ladderlog: MATCH_SCORE [player_score] [player_username] [team_name]
+ladderlog_write_match_score_team_help               Write to ladderlog: MATCH_SCORE_TEAM [team_score] [team_name] [sets_won]
+ladderlog_write_new_set_help                        Write to ladderlog: NEW_SET [current_set] [time]
+ladderlog_write_next_round_help                     Write to ladderlog: NEXT_ROUND [next_round_number] [total_rounds] [map_file] [center_message]
+ladderlog_write_objectzone_player_entered_help      Write to ladderlog: OBJECTZONE_PLAYER_ENTERED [zone_id] [zone_name] [zone_pos_x] [zone_pos_y] [player_name] [player_pos_x] [player_pos_y] [player_direction_x] [player_direction_y] [game_time]
+ladderlog_write_objectzone_player_left_help         Write to ladderlog: OBJECTZONE_PLAYER_LEFT [zone_id] [zone_name] [zone_pos_x] [zone_pos_y] [player_name] [player_pos_x] [player_pos_y] [player_direction_x] [player_direction_y] [game_time]
+ladderlog_write_objectzone_spawned_help             Write to ladderlog: OBJECTZONE_SPAWNED [id] [name] [pos_x] [pos_y] [xdir] [ydir]
+ladderlog_write_objectzone_zone_entered_help        Write to ladderlog: OBJECT_ZONE_ENTER [zone_id] [zone_name] [target_id] [target_name] [target_pos_x] [target_pos_y] [target_dir_x] [target_dir_y] [game_time]
+ladderlog_write_player_ai_left_help                 Write to ladderlog: PLAYER_AI_LEFT [ai_name]
+ladderlog_write_player_colored_name_help            Write to ladderlog: PLAYER_COLORED_NAME [player_useranme] [player_colored_name]
+ladderlog_write_player_gridpos_help                 Write to ladderlog: PLAYER_GRIDPOS [player_username] [pos_x] [pos_y] [dir_x] [dir_y] [cycle_speed] [team]
+ladderlog_write_player_killed_help                  Write to ladderlog: PLAYER_KILLED [player_username] [ip_address] [pos_x] [pos_y] [dir_x] [dir_y]
+ladderlog_write_round_commencing_help               Write to ladderlog: ROUND_COMMENCING [current_round] [total_rounds]
+ladderlog_write_round_ended_help                    Write to ladderlog: ROUND_ENDED [time]
+ladderlog_write_round_started_help                  Write to ladderlog: ROUND_STARTED [time]
+ladderlog_write_set_winner_help                     Write to ladderlog: SET_WINNER [team_name]
+ladderlog_write_spawn_position_team_help            Write to ladderlog: SPAWN_POSITION_TEAM [team_name] [new_position]
+ladderlog_write_start_challenge_help                Write to ladderlog: START_CHALLENGE [time]
+ladderlog_write_svg_created_help                    Write to ladderlog: SVG_CREATED
+ladderlog_write_tactical_position_help              Write to ladderlog: TACTICAL_POSITION [time] [name] [tact_pos]
+ladderlog_write_tactical_statistics_help            Write to ladderlog: TACTICAL_STATISTICS [tact_pos] [name] [time] [state] [kills]
+ladderlog_write_team_colored_name_help              Write to ladderlog: TEAM_COLORED_NAME [team_name] [team_colored_name]
+ladderlog_write_voter_help                          Write to ladderlog: VOTER [player_name] [0-against|1-for] [description]
+ladderlog_write_vote_created_help                   Write to ladderlog: VOTE_CREATED [suggestor] [description]
+ladderlog_write_zone_created_help                   Write to ladderlog: ZONE_CREATED [id] [name] [xpos] [ypos] [xdir] [ydir]
+ladderlog_write_zone_shot_released_help             Write to ladderlog: ZONE_SHOT_RELEASED [0-shot|1-deathshot] [id] [player_name] [zone_pos_x] [zone_pos_y] [zone_dir_x] [zone_dir_y]
+ladder_highscore_output_help              If set to >1, high scores will be announced to all players.
+legacy_ladderlog_command_help             If set to 1, COMMAND will output similar things to INVALID_COMMAND.
+limit_sets_help                           Set the match set limit. Teams winning more sets win the match.
+list_all_commands_help                    One execution and all commands are stored in ./var/commands_list.txt
+mega_shot_dir_help                        The number of shots released after full brake release (depending on MEGA_SHOT_THRESH value).
+mega_shot_explosion_help                  If set to 1>, explosions occur when a mega shot is released.
+mega_shot_mult_help                       The boost for the mega shot after being released.
+mega_shot_thresh_help                     The amount of braking to do before ready to shoot mega shot. If set >1, mega shot is disabled. SHOT_THRESH needs to be enabled for this to work.
+race_chances_help                         The number of chances player get to play again in the same round after death. Depletes each time you use it up and resets for next round.
+race_finish_kill_help                     If set to 1, players crossing the finish line will get killed.  
+race_log_unfinished_help                  It set to 1, logs in the players that have not yet finished that racing course. Time values will be set to -1.
+race_num_ranks_show_end_help              The number of ranks to display at the end of round.
+race_num_ranks_show_start_help            The number of ranks to display at the start of round.
+race_points_type_help                     If set to 0, players receive points depending on SCORE_RACE_FINISH. if set to 1, players receive points depending on RACE_SCORE_DEPLETE.
+race_ranks_show_end_help                  If set to 1, ranks will appear at the start of the round.
+race_ranks_show_start_help                If set to 1, ranks will appear at the end of the round.
+race_smart_timer_help                     If set to 1, timer is decided depending on the top 3 racing ranks.
+reset_config_queueing_help                Reset config queueing.
+reset_map_queueing_help                   Reset map queueing.
+resource_repository_backups_help          Contains list of resource repository if the main resource fails to work.
+score_diff_win_help                       The number of points after SCORE_WIN to declare round winner.
+score_flag_home_base_help                 Points to get for returning your flag home.
+score_race_finish_help                    Points players get awarded for crossing the finish line.
+score_shot_base_help                      Points player's team receives for shooting at a base.
+self_destruct_help                        If set to 1, once a player gets killed, a large zone will appear at the spot and kill inside of it.
+self_destruct_fall_help                   The speed at which zone's radius falls after increasing.
+self_destruct_radius_help                 The initial radius of the destruct zone.
+self_destruct_rise_help                   The speed at which zone's radius increases initially. 
+self_destruct_rot_help                    The speed at which the zone rotates.
+set_ai_position_help                      Set the route at which the ai player should follow. Usage: SET_AI_POSITION [name] [x1] [y1] [x2] [y2] ...
+set_player_team_help                      Forcably place the selected player into the given team. Usage: SET_PLAYER_TEAM [name] [team]
+shot_base_enemy_respawn_help              If a shot enters into an enemy's base, respawn their dead team mates.
+shot_base_respawn_help                    If a shot enters into their own base, respawn their dead team mates.
+shot_discard_time_help                    Time, in seconds, to wait before ready to shoot.
+shot_explosion_help                       If set to 1>, explosions take place after every normal shot.
+shot_kill_enemies_help                    If set to 1, player's shot kills enemies for entering into it.
+shot_radius_max_help                      The maximum radius of the shot zone.
+shot_radius_min_help                      The minimum radius of the shot zone.
+shot_rot_max_help                         The maximum rotation of the shot zone.
+shot_rot_min_help                         The minimum rotation of the shot zone.
+shot_seek_update_time_help                The interval in which the shot seeking is updated.
+shot_start_dist_help                      The distance from which the shot is released from the owner's bike.
+shot_thresh_help                          The amount of braking necessary to make a shot. If >1, shooting is disabled.
+shot_velocity_mult_help                   The velocity at which the shot's velocity multiplies after being released.
+silence_dead_help                         Silence all the players that have died.
+soccer_ball_slowdown_speed_help           The speed at which the ball show slow down at.
+spawn_alternate_help                      If set to 1, switch positions each round.
+spawn_explosion_help                      Spawns an explosion. Usage: SPAWN_EXPLOSION [x] [y] [radius] [r] [g] [b].
+spawn_object_zone_help                    Spawns an object zone. Usage: SPAWN_OBJECT_ZONE [x] [y] [growth] [radius] [xdir] [ydir] [interact] [r] [g] [b] [target_radius]
+spawn_soccer_help                         Spawns a soccer zone. 
+spawn_winners_first_help                  If set to 1, winners from previous round will be spawned first in the next round.
+spawn_wrap_help                           Number of spawns after which to start wrapping new spawns at the beginning.
+speak_as_admin_help                       Let's you speak as admin. Output:= Admin: {message}
+speak_to_enemies_help                     Let's you speak as admin to enemies. Output:= Admin --> Enemies: {message}
+speak_to_everyone_help                    Let's you speak as admin to everyone. Output:= Admin --> Everyone: {message}
+sp_limit_sets_help                        Set the match set limit in single player mode. Teams winning more sets win the match.
+sp_score_diff_win_help                    The number of points after SP_SCORE_WIN to declare round winner
+start_challenge_help                      UNDOCUMENTED
+suicide_message_help                      If set to 1, announce when player kills themselves.
+suspend_list_help                         One execution and it displays the list of currently suspended players.
+svg_cycle_walls_glow_help                 UNDOCUMENTED
+svg_output_log_score_differences_help     UNDOCUMENTED
+svg_output_timing_help                    UNDOCUMENTED
+svg_transparent_background_help           UNDOCUMENTED
+switch_view_tooltip_help                  UNDOCUMENTED
+tab_completion_help                       If set to 1, tab completion is enabled and you can use it to auto complete names and commands.
+tactical_position_enable_help             UNDOCUMENTED
+tactical_position_interval_help           UNDOCUMENTED
+tactical_position_midfield_factor_help    UNDOCUMENTED
+tactical_position_start_time_help         UNDOCUMENTED
+tactical_position_zone_factor_help        UNDOCUMENTED
+teleport_player_help                      Teleports player to a new location. Usage: TELEPORT_PLAYER [player] [xpos] [ypos] [xdir] [ydir]
+toggle_spectator_tooltip_help             UNDOCUMENTED
+voting_bias_challenge_help                Vote-specific extra bias
+winzone_player_enter_win_help             If set to 1, first player to enter the winzone will win the round.
+zombie_zone_help                          If set to 1, zombie zones are enabled.
+zombie_zone_fall_help                     How quickly should a zombie zone shrink in size?
+zombie_zone_radius_help                   The initial radius of a zombie zone.
+zombie_zone_rise_help                     How quickly should a zombie zone rise initially?
+zombie_zone_rot_help                      The speed at which the zombie zone rotates.
+zombie_zone_speed_help                    The speed at which the zombie zone moves as it chases after players.
+zone_delay_clear_help                     Clears all delayed zones from cache.
