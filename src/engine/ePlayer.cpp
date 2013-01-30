@@ -9218,7 +9218,7 @@ static void Suspend_conf_base(std::istream &s, int rounds )
 
     tString player          = msg.ExtractNonBlankSubString(pos);
     tString suspendRounds   = msg.ExtractNonBlankSubString(pos);
-    tString reason          = msg.ExtractNonBlankSubString(pos);
+    tString reason;
 
     if (suspendRounds.Filter() != "")
     {
@@ -9228,19 +9228,17 @@ static void Suspend_conf_base(std::istream &s, int rounds )
         else
         {
             rounds = se_suspendDefault;
-            reason = suspendRounds << " " << reason;
+            reason = suspendRounds;
         }
     }
     else
     {
         rounds = se_suspendDefault;
-        reason = suspendRounds << " " << reason;
+        reason = suspendRounds;
     }
 
-    while (reason.Filter() != "")
-    {
-        reason << " " << msg.ExtractNonBlankSubString(pos);
-    }
+    //  get the rest (should be blank if there isn't anymore to read)
+    reason << msg.SubStr(pos + 1);
 
     ePlayerNetID *p = ePlayerNetID::FindPlayerByName(player);
 

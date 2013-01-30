@@ -6614,12 +6614,7 @@ void gObjectZoneHack::OnExit( gCycle * target, REAL time )
     ePlayerNetID *p = target->Player();
     if (p)
     {
-        if (name_)
-            sg_objectZonePlayerEntered << name_;
-        else
-            sg_objectZonePlayerEntered << " ";
-
-        sg_objectZonePlayerEntered << Position().x << Position().y << p->GetUserName() << target->Position().x << target->Position().y << target->Direction().x << target->Direction().y << se_GameTime();
+        sg_objectZonePlayerEntered << GOID() << name_ << Position().x << Position().y << p->GetUserName() << target->Position().x << target->Position().y << target->Direction().x << target->Direction().y << se_GameTime();
         sg_objectZonePlayerLeft.write();
     }
 }

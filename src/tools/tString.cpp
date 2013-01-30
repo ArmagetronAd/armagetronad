@@ -2255,10 +2255,17 @@ bool tString::IsNumeric()
 {
     tString ret(*this);
 
+    //  return false when string is blank
+    if (ret.Filter() == "")
+        return false;
+
     for(int i = 0; i < ret.Len(); i++)
     {
+        //  return false if current character in string is not a number
         if (!isdigit(ret[i]))
             return false;
     }
+
+    //  looks like everything worked out. Good!
     return true;
 }
