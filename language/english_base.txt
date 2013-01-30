@@ -1988,6 +1988,7 @@ friends_menu_help			Edit your mates.
 friends_enable				Mates Enabled
 friends_enable_help			Turn on/off mates filtering.
 enable_friends_help			Turn on/off mates filtering.
+enable_friends_casing_help	Turn on/off case sensitivity of mates filtering. 1 is on, 0 off.
 friend_word					Mate
 friend_help					If a server has this name on its players list, it will show when filtering is on.
 

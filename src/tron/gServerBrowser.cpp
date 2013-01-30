@@ -435,18 +435,25 @@ void gServerMenu::Update()
     int mi = 1;
     gServerInfo *run = gServerInfo::GetFirstServer();
     bool oneFound = false; //so we can display all if none were found
+    
+    tString filteredFriends[MAX_FRIENDS];
+    tString* friends = getFriends();
+    int i;
+    for (i = MAX_FRIENDS-1; i>=0; i--)
+    {
+        filteredFriends[i] = sg_enableFriendsCasing ? friends[i] : friends[i].ToLower();
+    }
+
     while (run)
     {
         //check friend filter
         if (getFriendsEnabled())
         {
             run->show = false;
-            int i;
-            tString userNames = run->UserNames();
-            tString* friends = getFriends();
+            tString userNames = sg_enableFriendsCasing ? run->UserNames() : run->UserNames().ToLower();
             for (i = MAX_FRIENDS-1; i>=0; i--)
             {
-                if (run->Users() > 0 && friends[i].Len() > 1 && userNames.StrPos(friends[i]) >= 0)
+                if (run->Users() > 0 && friends[i].Len() > 1 && userNames.StrPos(filteredFriends[i]) >= 0)
                 {
                     oneFound = true;
                     run->show = true;
