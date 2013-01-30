@@ -68,6 +68,10 @@ static nServerInfo::PrimaryKey sg_sortKey = nServerInfo::KEY_USERS;
 tCONFIG_ENUM( nServerInfo::PrimaryKey );
 static tConfItem< nServerInfo::PrimaryKey > sg_sortKeyConf( "BROWSER_SORT_KEY", sg_sortKey );
 
+//  enabling this will cause friend's names to be case sensitive
+static bool sg_enableFriendsCasing = true;
+static tConfItem< bool > sg_enableFriendsCasingConf("ENABLE_FRIENDS_CASING", sg_enableFriendsCasing);
+
 class gServerInfo: public nServerInfo
 {
 public:
