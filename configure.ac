@@ -105,6 +105,11 @@ if test -n "$os_x_toolkit"; then
 	
 	FTGL_CFLAGS="-I${os_x_toolkit}/${arch}/include/FTGL -I${os_x_toolkit}/${arch}/include/freetype2"
 	FTGL_LIBS="-lftgl -lfreetype -lz -lbz2"
+	
+	dnl TODO rename MACOSX_XCODE => OS_X_TOOLKIT
+	AC_DEFINE([MACOSX_XCODE], 1, [Define if compiling using the OS X toolkit.])
+	AC_DEFINE([USER_DATA_DIR], ["~/Library/Application Support/Armagetron Advanced"], [TODO document])
+	AC_DEFINE([SCREENSHOT_DIR], ["~/Library/Application Support/Armagetron Advanced/screenshots"], [TODO document])
 fi
 
 AC_ARG_ENABLE(dedicated,

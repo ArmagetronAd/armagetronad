@@ -12,10 +12,10 @@
 #include "tError.h"
 #include "tConfiguration.h"
 #include "uMenu.h"
-#ifdef MACOSX_XCODE
-#include "AAURLHandler.h"
-#include "AAGrowlPlugin.h"
-#endif
+// #ifdef MACOSX_XCODE
+// #include "AAURLHandler.h"
+// #include "AAGrowlPlugin.h"
+// #endif
 
 /* Use this flag to determine whether we use SDLMain.nib or not */
 #define		SDL_USE_NIB_FILE	1
@@ -195,11 +195,11 @@ void MacOSX_SetCWD(char **argv) {
 int main (int argc, const char *argv[])
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-#ifdef MACOSX_XCODE
-    AAGrowlPlugin *growl = [[AAGrowlPlugin alloc] init];
-    [growl startGrowling];
-    SetupAAURLHandler();
-#endif
+// #ifdef MACOSX_XCODE
+//     AAGrowlPlugin *growl = [[AAGrowlPlugin alloc] init];
+//     [growl startGrowling];
+//     SetupAAURLHandler();
+// #endif
 
     /* This is passed if we are launched by double-clicking */
     if ( argc >= 2 && strncmp (argv[1], "-psn", 4) == 0 )
@@ -230,10 +230,10 @@ int main (int argc, const char *argv[])
 #else
     CustomApplicationMain (argc, argv);
 #endif
-#ifdef MACOSX_XCODE
-    CleanupAAURLHandler();
-    [growl release];
-#endif
+// #ifdef MACOSX_XCODE
+//     CleanupAAURLHandler();
+//     [growl release];
+// #endif
     [pool release];
     return 0;
 }

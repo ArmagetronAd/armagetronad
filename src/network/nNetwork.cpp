@@ -57,9 +57,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "nStreamMessage.h"
 
-#ifdef MACOSX_XCODE
-#include "version.h"
-#endif // MACOSX_XCODE
+// #ifdef MACOSX_XCODE
+// #include "version.h"
+// #endif // MACOSX_XCODE
 
 // my IP address. Master server/game server hopefully tell me a correct one.
 static tString sn_myAddress ("*.*.*.*:*");
