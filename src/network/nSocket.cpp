@@ -52,13 +52,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #ifndef WIN32
 #include <arpa/inet.h>
-
-#ifndef MACOSX
-#   include <netinet/ip.h>
-#else
-#   define IPTOS_LOWDELAY 0x10 // http://www.tcpdump.org/cgi-bin/cvsweb/tcpdump/ip.h?rev=1.11
-#endif
-
+#include <netinet/ip.h>
 #include <netinet/in_systm.h>
 #include <netinet/in.h>
 #include <netdb.h>
