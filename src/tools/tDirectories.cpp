@@ -1742,7 +1742,7 @@ void tDirectoriesCommandLineAnalyzer::DoInitialize( tCommandLineParser & parser 
         {
             // we must be running the game in debug mode; set user data dir to current directory.
             st_UserDataDir = ".";
-            st_UserConfigDir = "userconfig";
+            st_UserConfigDir = "./userconfig";
 
             // the included resources are scrambled and put into the current directory as well.
             st_IncludedResourceDir = "./resource/included";
@@ -1850,7 +1850,11 @@ tString tPath::GetPaths(char const * delimiter, char const * finalizer) const {
 extern char *st_userConfigs[];
 void st_PrintPathInfo(tOutput &buf) {
     tString const hcol("0xff8888");
-    buf << hcol << "$path_info_user_cfg"   << "0xRESETT\n   " << tDirectories::Var().GetReadPath("user_3_1_utf8.cfg") << "\n"
+    const char * userCfg = "user_3_1_utf8.cfg";
+    string uc = tDirectories::Config().GetReadPath(userCfg);
+    if(uc.size() <= 1)
+        uc = tDirectories::Var().GetReadPath(userCfg);
+    buf << hcol << "$path_info_user_cfg"   << "0xRESETT\n   " << uc << "\n"
     << hcol << "$path_info_config"     << "0xRESETT\n" << tDirectories::Config().GetPaths()
     << hcol << "$path_info_resource"   << "0xRESETT\n" << tDirectories::Resource().GetPaths()
     << hcol << "$path_info_data"       << "0xRESETT\n" << tDirectories::Data().GetPaths()
