@@ -193,10 +193,10 @@ endif
 install-exec-hook: install-uninstall
 #	rename executable to armagetronad-VERSION and link to armagetronad
 if BUILDMAIN
-	cd  $(DESTDIR)${bindir}; mv armagetronad_main$(EXEEXT) @progname@$(executable_suffix)
+	cd  "$(DESTDIR)${bindir}"; mv armagetronad_main$(EXEEXT) @progname@$(executable_suffix)
 endif
 if BUILDDEDICATED
-	cd  $(DESTDIR)${bindir}; mv armagetronad_serverquery$(EXEEXT) @prognamebase@-serverquery$(executable_suffix)
+	cd  "$(DESTDIR)${bindir}"; mv armagetronad_serverquery$(EXEEXT) @prognamebase@-serverquery$(executable_suffix)
 endif
 
 #	delegate to special tasks
@@ -205,7 +205,7 @@ endif
 install-data-hook:
 #	install systemwide files
 if USE_SYSINSTALL
-	DESTDIR=$(DESTDIR) ROOTDIR=$(ROOTDIR) bash $(DESTDIR)${scriptdir}/sysinstall install $(prefix)
+	DESTDIR=$(DESTDIR) ROOTDIR=$(ROOTDIR) bash "$(DESTDIR)${scriptdir}/sysinstall" install "$(prefix)"
 endif
 
 uninstall-hook:
