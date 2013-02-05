@@ -75,17 +75,9 @@ static NSString *getApplicationName(void)
 /* Set the working directory to the .app's parent directory */
 - (void) setupWorkingDirectory:(BOOL)shouldChdir
 {
-    if (shouldChdir)
-    {
-        char parentdir[MAXPATHLEN];
-        CFURLRef url = CFBundleCopyBundleURL(CFBundleGetMainBundle());
-        CFURLRef url2 = CFURLCreateCopyDeletingLastPathComponent(0, url);
-        if (CFURLGetFileSystemRepresentation(url2, 1, (UInt8 *)parentdir, MAXPATHLEN)) {
-            chdir(parentdir);   /* chdir to the binary app's parent */
-        }
-        CFRelease(url);
-        CFRelease(url2);
-    }
+    // When running from the build directory, this will be the absolute path of the build directory.
+    // When running as a package .app, this will be the Resource directory in the application package.
+    chdir([[[NSBundle mainBundle] resourcePath] UTF8String]);
 }
 
 #if SDL_USE_NIB_FILE

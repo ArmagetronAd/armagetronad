@@ -48,13 +48,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #endif
 
 // include definition for top source directory
-#ifndef MACOSX_XCODE
 #ifdef TOP_SOURCE_DIR
 static const char * s_topSourceDir = TOP_SOURCE_DIR;
 #else
 static const char * s_topSourceDir = ".";
 #endif
-#endif // !MACOSX_XCODE
 
 // program name definition
 #ifndef PROGNAME
@@ -1653,8 +1651,7 @@ static tString st_RelocatePath( tString const & original )
 // tries to find the path to the data files, given the location of the executable
 static void FindDataPath()
 {
-#ifndef MACOSX_XCODE
-#ifdef WIN32
+#if defined(MACOSX_XCODE) || defined(WIN32)
     // look for data in the same directory as the executable
     if ( TestDataPath(GetParent(st_pathToExecutable.Get(), 1) ) ) return;
 #else
@@ -1670,7 +1667,6 @@ static void FindDataPath()
 #ifdef DEBUG_PATH
     tERR_MESSAGE("Could not determine path to data files. Using defaults or command line arguments.\n");
 #endif
-#endif // !MACOSX_XCODE
 }
 
 // tries to find the path to the configuration files, given the location of the executable
@@ -1680,12 +1676,21 @@ static void FindConfigurationPath()
 #ifndef WIN32
     if ( TestConfigurationPath( st_RelocatePath( tString( AA_SYSCONFDIR ) ) ) ) return;
 #endif
+#endif
 
     // look for configuration where the data is
-    if ( TestConfigurationPath(st_DataDir + "/config") ) return;
+    if ( TestConfigurationPath(st_DataDir + "/config") )
+    {
+        return;
+    }
+#ifdef MACOSX_XCODE
+    else if ( TestPath( st_DataDir, "Makefile" ) )
+    {
+        throw tRunningInBuildDirectory();
+    }
+#endif
 
     tERR_WARN("Could not determine path to configuration files. Using defaults or command line arguments.\n");
-#endif // !MACOSX_XCODE
 }
 
 // tries to read a direcory type argument from the command line parser; result is written
@@ -1705,7 +1710,6 @@ static bool ReadDir( tCommandLineParser & parser, tString & target, const char* 
 void tDirectoriesCommandLineAnalyzer::DoInitialize( tCommandLineParser & parser )
 {
     // Puts the data files in the executable's bundle
-#ifndef MACOSX_XCODE
     try
     {
         st_pathToExecutable.Set( parser.Executable() );
@@ -1756,7 +1760,6 @@ void tDirectoriesCommandLineAnalyzer::DoInitialize( tCommandLineParser & parser 
             return;
         }
     }
-#endif // !MACOSX_XCODE
 }
 
 bool tDirectoriesCommandLineAnalyzer::DoAnalyze( tCommandLineParser & parser )
