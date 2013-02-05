@@ -11,31 +11,21 @@
 #include <sys/param.h> /* for MAXPATHLEN */
 #include <unistd.h>
 
+/* Use this flag to determine whether we use SDLMain.nib or not */
+#define		SDL_USE_NIB_FILE	0
+
+/* Use this flag to determine whether we use CPS (docking) or not */
+#define      SDL_USE_CPS     1
+#ifdef SDL_USE_CPS
+#import <ApplicationServices/ApplicationServices.h>
+#endif /* SDL_USE_CPS */
+
 /* For some reaon, Apple removed setAppleMenu from the headers in 10.4,
  but the method still is there and works. To avoid warnings, we declare
  it ourselves here. */
 @interface NSApplication(SDL_Missing_Methods)
 - (void)setAppleMenu:(NSMenu *)menu;
 @end
-
-/* Use this flag to determine whether we use SDLMain.nib or not */
-#define		SDL_USE_NIB_FILE	0
-
-/* Use this flag to determine whether we use CPS (docking) or not */
-// #define      SDL_USE_CPS     1
-#ifdef SDL_USE_CPS
-/* Portions of CPS.h */
-typedef struct CPSProcessSerNum
-{
-	UInt32		lo;
-	UInt32		hi;
-} CPSProcessSerNum;
-
-extern OSErr	CPSGetCurrentProcess( CPSProcessSerNum *psn);
-extern OSErr 	CPSEnableForegroundOperation( CPSProcessSerNum *psn, UInt32 _arg2, UInt32 _arg3, UInt32 _arg4, UInt32 _arg5);
-extern OSErr	CPSSetFrontProcess( CPSProcessSerNum *psn);
-
-#endif /* SDL_USE_CPS */
 
 static int    gArgc;
 static char  **gArgv;
@@ -206,13 +196,10 @@ static void CustomApplicationMain (int argc, char **argv)
     
 #ifdef SDL_USE_CPS
     {
-        CPSProcessSerNum PSN;
-        /* Tell the dock about us */
-        if (!CPSGetCurrentProcess(&PSN))
-            if (!CPSEnableForegroundOperation(&PSN,0x03,0x3C,0x2C,0x1103))
-                if (!CPSSetFrontProcess(&PSN))
-                    [NSApplication sharedApplication];
-    }
+        ProcessSerialNumber psn = {0, kCurrentProcess};
+        TransformProcessType(&psn, kProcessTransformToForegroundApplication);
+        SetFrontProcess(&psn);
+    }    
 #endif /* SDL_USE_CPS */
 
     /* Set up the menubar */
@@ -361,7 +348,6 @@ int main (int argc, char **argv)
     NSURL *executableURL = [NSURL fileURLWithPath:[NSString stringWithCString:argv[0] encoding:NSUTF8StringEncoding]];
     CFDictionaryRef dictionary = CFBundleCopyInfoDictionaryForURL((CFURLRef)executableURL);
     CFRelease(dictionary);
-    NSLog(@"Icon file = %@", [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIconFile"]);
     // AAGrowlPlugin *growl = [[AAGrowlPlugin alloc] init];
     // [growl startGrowling];
     // SetupAAURLHandler();
