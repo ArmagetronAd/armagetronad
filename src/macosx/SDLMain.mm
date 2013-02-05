@@ -76,7 +76,7 @@ static NSString *getApplicationName(void)
 - (void) setupWorkingDirectory:(BOOL)shouldChdir
 {
     // When running from the build directory, this will be the absolute path of the build directory.
-    // When running as a package .app, this will be the Resource directory in the application package.
+    // When running as a packaged .app, this will be the Resource directory in the application package.
     chdir([[[NSBundle mainBundle] resourcePath] UTF8String]);
 }
 
