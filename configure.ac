@@ -1178,7 +1178,7 @@ if test "x$enable_automakedefaults" = "xno"; then
     if test "x${bindir}" = "x\${exec_prefix}/bin" && test "x$enable_games" = "xyes"; then
         for alt in bin/games games games/bin; do
             AC_MSG_CHECKING([alternative binary path ${realexecprefix}/${alt}])
-            if test -d ${realexecprefix}/${alt} && echo ${PATH} | grep ${realexecprefix}/${alt} > /dev/null; then
+            if test -d "${realexecprefix}/${alt}" && echo ${PATH} | grep "${realexecprefix}/${alt}" > /dev/null; then
                 bindir=\${exec_prefix}/${alt}
                 AC_MSG_RESULT(possible)
             else
