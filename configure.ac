@@ -93,7 +93,7 @@ if test -n "$os_x_toolkit"; then
 	arch="x86_64"
 	
 	dnl Set up general library and header directories for normal libraries
-	LDFLAGS="-arch ${arch} -L${os_x_toolkit}/${arch}/lib $LDFLAGS -F${os_x_toolkit}/Frameworks"
+	LDFLAGS="-arch ${arch} -L${os_x_toolkit}/${arch}/lib -F${os_x_toolkit}/Frameworks $LDFLAGS"
 	CXXFLAGS="$LDFLAGS $CXXFLAGS"
 	CPPFLAGS="-F${os_x_toolkit}/Frameworks -I${os_x_toolkit}/${arch}/include $CPPFLAGS"
 	
@@ -110,6 +110,8 @@ if test -n "$os_x_toolkit"; then
 	AC_DEFINE([MACOSX_XCODE], 1, [Define if compiling using the OS X toolkit.])
 	AC_DEFINE([USER_DATA_DIR], ["~/Library/Application Support/Armagetron Advanced"], [TODO document])
 	AC_DEFINE([SCREENSHOT_DIR], ["~/Library/Application Support/Armagetron Advanced/screenshots"], [TODO document])
+	
+	AC_PREFIX_DEFAULT(["`pwd`/MacOS/Armagetron Advanced.app/Contents/Resources"])
 fi
 
 AC_ARG_ENABLE(dedicated,
