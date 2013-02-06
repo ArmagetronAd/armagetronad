@@ -207,6 +207,15 @@ install-data-hook:
 if USE_SYSINSTALL
 	DESTDIR=$(DESTDIR) ROOTDIR=$(ROOTDIR) bash "$(DESTDIR)${scriptdir}/sysinstall" install "$(prefix)"
 endif
+if OS_X_TOOLKIT
+	for dir in `ls "$(DESTDIR)${aa_datadir}"`; do \
+		test -L "$(DESTDIR)${prefix}/$$dir" || ln -s "$(DESTDIR)${aa_datadir}/$$dir" "$(DESTDIR)${prefix}/$$dir"; \
+	done
+	test -L "$(DESTDIR)${prefix}/config" || ln -s "$(DESTDIR)${aa_sysconfdir}" "$(DESTDIR)${prefix}/config"
+	mkdir -p "$(DESTDIR)${prefix}/../MacOS"
+#   TODO use progtitle (requires substituting variables in Info.plist)
+	test -L "$(DESTDIR)${prefix}/../MacOS/Armagetron Advanced" || ln -s "$(DESTDIR)${bindir}/@progname@${executable_suffix}" "$(DESTDIR)${prefix}/../MacOS/Armagetron Advanced"
+endif
 
 uninstall-hook:
 #	delete executable and uninstaller

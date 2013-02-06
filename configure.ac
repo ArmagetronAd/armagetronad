@@ -64,6 +64,7 @@ AC_ARG_VAR(APBUILD_CXX2,[Autopackage ABI 2 C++ compiler.])
 AC_ARG_VAR(APBUILD_CC,[Autopackage C compiler.])
 AC_ARG_VAR(CXX_ABI,[Autopackage C++ ABI version.])
 AC_ARG_VAR(APBUILD_STATIC,[Autopackage static libraries.])
+AC_ARG_VAR(ARMAGETRONAD_OS_X_TOOLKIT, [TODO document])
 
 dnl a modern autoconf is required to process this
 AC_PREREQ(2.50)
@@ -77,33 +78,39 @@ have_lzma=false
 ])
 
 AC_ARG_WITH([os-x-toolkit],
-	[AC_HELP_STRING([--with-os-x-toolkit=DIR],
+	[AC_HELP_STRING([--with-os-x-toolkit@<:@=DIR@:>@],
 		[build using the OS X toolkit. See README-Subversion for more information.])],
-	dnl Additionally check for an environment variable, so the user doesn't need to specify the directory every time they configure.
-	[os_x_toolkit="$withval"],
-	[os_x_toolkit=])
+	[
+		if test "x$withval" != "xyes"; then
+			ARMAGETRONAD_OS_X_TOOLKIT="$withval"
+		fi
+		if test -z "${ARMAGETRONAD_OS_X_TOOLKIT}"; then
+			AC_MSG_ERROR([An OS X toolkit directory was not specified.])
+		fi
+	],
+	[ARMAGETRONAD_OS_X_TOOLKIT=])
 
 FTGL_CFLAGS=
 FTGL_LIBS=
 
-AM_CONDITIONAL([OS_X_TOOLKIT], test -n "${os_x_toolkit}")
+AM_CONDITIONAL([OS_X_TOOLKIT], test -n "${ARMAGETRONAD_OS_X_TOOLKIT}")
 
-if test -n "$os_x_toolkit"; then
+if test -n "$ARMAGETRONAD_OS_X_TOOLKIT"; then
 	dnl TODO make architectures that will be built configurable.
 	arch="x86_64"
 	
 	dnl Set up general library and header directories for normal libraries
-	LDFLAGS="-arch ${arch} -L${os_x_toolkit}/${arch}/lib -F${os_x_toolkit}/Frameworks $LDFLAGS"
+	LDFLAGS="-arch ${arch} -L${ARMAGETRONAD_OS_X_TOOLKIT}/${arch}/lib -F${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks $LDFLAGS"
 	CXXFLAGS="$LDFLAGS $CXXFLAGS"
-	CPPFLAGS="-F${os_x_toolkit}/Frameworks -I${os_x_toolkit}/${arch}/include $CPPFLAGS"
+	CPPFLAGS="-F${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks -I${ARMAGETRONAD_OS_X_TOOLKIT}/${arch}/include $CPPFLAGS"
 	
 	dnl Set up header directories for frameworks
-	CPPFLAGS="-I${os_x_toolkit}/Frameworks/SDL.framework/Headers -I${os_x_toolkit}/Frameworks/SDL_mixer.framework/Headers -I${os_x_toolkit}/Frameworks/SDL_image.framework/Headers $CPPFLAGS"
+	CPPFLAGS="-I${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks/SDL.framework/Headers -I${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks/SDL_mixer.framework/Headers -I${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks/SDL_image.framework/Headers $CPPFLAGS"
 	
-	PATH="${os_x_toolkit}/bin:$PATH"
-	PROTOC="${os_x_toolkit}/${arch}/bin/protoc"
+	PATH="${ARMAGETRONAD_OS_X_TOOLKIT}/bin:$PATH"
+	PROTOC="${ARMAGETRONAD_OS_X_TOOLKIT}/${arch}/bin/protoc"
 	
-	FTGL_CFLAGS="-I${os_x_toolkit}/${arch}/include/FTGL -I${os_x_toolkit}/${arch}/include/freetype2"
+	FTGL_CFLAGS="-I${ARMAGETRONAD_OS_X_TOOLKIT}/${arch}/include/FTGL -I${ARMAGETRONAD_OS_X_TOOLKIT}/${arch}/include/freetype2"
 	FTGL_LIBS="-lftgl -lfreetype -lz -lbz2"
 	
 	dnl TODO rename MACOSX_XCODE => OS_X_TOOLKIT
@@ -477,7 +484,7 @@ AC_PROG_CXX
 AC_PROG_CXXCPP
 dnl AC_OBJEXT
 
-if test -n "$os_x_toolkit"; then
+if test -n "$ARMAGETRONAD_OS_X_TOOLKIT"; then
 	AC_PROG_OBJCXX
 	AC_PROG_OBJCXXCPP
 fi
@@ -950,7 +957,7 @@ AC_LANG([C++])
 
 test -z "$FREETYPE_CONFIG" && FREETYPE_CONFIG=freetype-config
 
-if test -z "$os_x_toolkit"; then
+if test -z "$ARMAGETRONAD_OS_X_TOOLKIT"; then
 	FTGL_CFLAGS="`pkg-config ftgl --cflags`"
 	FTGL_LIBS="`pkg-config ftgl --libs`"
 fi
@@ -967,7 +974,7 @@ $FTGL_LIBS
 
 USE_FTGL=yes
 
-if test -z "$os_x_toolkit"; then
+if test -z "$ARMAGETRONAD_OS_X_TOOLKIT"; then
 
 	# `pkg-config ftgl --cflags` doesn't reliably give the include path to FTGL itself, we are on our own finding the includes in some cases.
 	# look for FTGL headers in default system header locations and the prefixes of the libraries that do have a -config script
