@@ -287,12 +287,6 @@ armagetronad_main_CXXFLAGS =$(libtron_a_CXXFLAGS)
 armagetronad_main_LDADD= libtron.a libenginecore.a libengine.a libnetwork.a libui.a librender.a libtools.a protobuf/libprotobuf.a thirdparty/mathexpr/libmathexpr.a ${extralibs}
 #  librubywrap.a
 
-if !BUILDDEDICATED
-if OS_X_TOOLKIT
-armagetronad_main_LDFLAGS= -sectcreate __TEXT __info_plist "${top_srcdir}/src/macosx/Info.plist"
-endif
-endif
-
 armagetronad_main_master_SOURCES = network/master.cpp
 armagetronad_main_master_CXXFLAGS =$(libtron_a_CXXFLAGS)
 armagetronad_main_master_LDADD=libnetwork.a libtools.a protobuf/libprotobuf.a 

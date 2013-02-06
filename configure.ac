@@ -1308,6 +1308,7 @@ desktop/armagetronad-armagetronad.desktop
 desktop/armagetronad-armagetronad-handler.desktop
 desktop/armagetronad-link.xml
 desktop/armagetronad.protocol
+desktop/os-x/Info.plist
 )
 
 # m4_define(FULLEVAL,stage1=`eval echo $1`; stage2

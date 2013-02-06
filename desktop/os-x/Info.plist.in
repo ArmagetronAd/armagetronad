@@ -9,11 +9,20 @@
   	  <string>Armagetron Advanced</string>
   	  
   	<key>CFBundleIconFile</key>
-  	  <string>Armagetron Advanced.icns</string>
+  	  <string>desktop/os-x/armagetronad.icns</string>
   	  
   	<key>CFBundleIdentifier</key>
   	  <string>com.sf.armagetronad</string>
-  	  
+
+	<key>CFBundleGetInfoString</key>
+	  <string>@progtitle@ @version@, © The Armagetron Advanced Developer Team, 2003, 2013</string>
+
+	<key>NSHumanReadableCopyright</key>
+	  <string>© The Armagetron Advanced Developer Team, 2003, 2013</string>
+	
+	<key>CFBundleShortVersionString</key>
+	  <string>@version@</string>
+
   	<key>CFBundleInfoDictionaryVersion</key>
   	  <string>6.0</string>
   	  
@@ -26,13 +35,7 @@
   	<key>CFBundleSignature</key>
   	  <string>Arma</string>
   	  
-  	<key>NSMainNibFile</key>
-  	  <string>SDLMain</string>
-  	  
-  	<key>NSPrincipalClass</key>
-  	  <string>NSApplication</string>
-  	  
-	  <key>CFBundleURLTypes</key>
+	<key>CFBundleURLTypes</key>
   	<array>
   		<dict>
   			<key>CFBundleURLName</key>

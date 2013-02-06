@@ -211,6 +211,7 @@ if OS_X_TOOLKIT
 	${top_srcdir}/batch/make/symlink-relative "$(DESTDIR)${prefix}" --files-in-directory "$(DESTDIR)${aa_datadir}" --file-with-name "$(DESTDIR)${aa_sysconfdir}" config
 #   TODO use progtitle (requires substituting variables in Info.plist)
 	${top_srcdir}/batch/make/symlink-relative "$(DESTDIR)${prefix}/../MacOS" --file-with-name "$(DESTDIR)${bindir}/@progname@${executable_suffix}" "Armagetron Advanced"
+	${top_srcdir}/batch/make/symlink-relative "$(DESTDIR)${prefix}/.." --file "$(DESTDIR)${aa_datadir}/desktop/os-x/Info.plist"
 
 	rm -rf "$(DESTDIR)${prefix}/../Frameworks"
 	cp -R "${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks" "$(DESTDIR)${prefix}/.."

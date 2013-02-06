@@ -336,10 +336,6 @@ int main (int argc, char **argv)
 {
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
 #ifdef MACOSX_XCODE
-    // Load embedded Info.plist. See <https://developer.apple.com/library/mac/#documentation/CoreFoundation/Reference/CFBundleRef>.
-    NSURL *executableURL = [NSURL fileURLWithPath:[NSString stringWithCString:argv[0] encoding:NSUTF8StringEncoding]];
-    CFDictionaryRef dictionary = CFBundleCopyInfoDictionaryForURL((CFURLRef)executableURL);
-    CFRelease(dictionary);
     // AAGrowlPlugin *growl = [[AAGrowlPlugin alloc] init];
     // [growl startGrowling];
     // SetupAAURLHandler();
