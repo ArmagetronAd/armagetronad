@@ -208,13 +208,15 @@ if USE_SYSINSTALL
 	DESTDIR=$(DESTDIR) ROOTDIR=$(ROOTDIR) bash "$(DESTDIR)${scriptdir}/sysinstall" install "$(prefix)"
 endif
 if OS_X_TOOLKIT
-	for dir in `ls "$(DESTDIR)${aa_datadir}"`; do \
-		test -L "$(DESTDIR)${prefix}/$$dir" || ln -s "$(DESTDIR)${aa_datadir}/$$dir" "$(DESTDIR)${prefix}/$$dir"; \
-	done
-	test -L "$(DESTDIR)${prefix}/config" || ln -s "$(DESTDIR)${aa_sysconfdir}" "$(DESTDIR)${prefix}/config"
-	mkdir -p "$(DESTDIR)${prefix}/../MacOS"
+	${top_srcdir}/batch/make/symlink-relative "$(DESTDIR)${prefix}" --files-in-directory "$(DESTDIR)${aa_datadir}" --file-with-name "$(DESTDIR)${aa_sysconfdir}" config
 #   TODO use progtitle (requires substituting variables in Info.plist)
-	test -L "$(DESTDIR)${prefix}/../MacOS/Armagetron Advanced" || ln -s "$(DESTDIR)${bindir}/@progname@${executable_suffix}" "$(DESTDIR)${prefix}/../MacOS/Armagetron Advanced"
+	${top_srcdir}/batch/make/symlink-relative "$(DESTDIR)${prefix}/../MacOS" --file-with-name "$(DESTDIR)${bindir}/@progname@${executable_suffix}" "Armagetron Advanced"
+
+	rm -rf "$(DESTDIR)${prefix}/../Frameworks"
+	cp -R "${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks" "$(DESTDIR)${prefix}/.."
+	
+	install_name_tool -delete_rpath "${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks" "$(DESTDIR)${prefix}/../MacOS/Armagetron Advanced" > /dev/null 2>&1 || true
+	install_name_tool -add_rpath "@executable_path/../../Frameworks" "$(DESTDIR)${prefix}/../MacOS/Armagetron Advanced"
 endif
 
 uninstall-hook:

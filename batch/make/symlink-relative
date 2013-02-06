@@ -1,0 +1,80 @@
+#!/usr/bin/env python
+
+"""Usage: symlink-relative [-h] <base-directory> [<action> ...]
+
+Creates relative symbolic links in <base-directory> that target the source specified by each <action>.
+
+Actions
+=======
+
+--file <file>
+    Creates a relative symbolic link that targets <file>.
+
+--files-in-directory <directory>
+    Creates a relative symbolic link that targets each file in <directory>.
+    
+--file-with-name <file> <name>
+    Creates a relative symbolic link called <name> that targets <file>.
+"""
+
+import optparse
+import os
+import os.path
+import sys
+
+def symlink_file_with_name(base_directory, path, name):
+    base_directory = os.path.abspath(base_directory)
+    path = os.path.abspath(path)
+    try:
+        os.makedirs(base_directory)
+    except os.error, e:
+        pass
+    
+    old_dir = os.getcwd()
+    try:
+        os.chdir(base_directory)
+        if os.path.exists(name):
+            os.unlink(name)
+        os.symlink(os.path.relpath(path, base_directory), name)
+    finally:
+        os.chdir(old_dir)
+
+def symlink_file(base_directory, path):
+    symlink_file_with_name(base_directory, path, os.path.basename(path))
+
+def symlink_files_in_directory(base_directory, path):
+    for f in os.listdir(path):
+        symlink_file(base_directory, os.path.join(path, f))
+
+def help(option, opt, value, parser):
+    print(__doc__)
+    sys.exit(0)
+
+def main():
+    parser = optparse.OptionParser(add_help_option=False)
+    
+    # The auto-generated help string does not correctly handle nargs > 1, so we
+    # implement the help flag ourselves.
+    parser.add_option("-h", "--help", action="callback", callback=help)
+    parser.add_option("--file", action="append")
+    parser.add_option("--files-in-directory", action="append")
+    parser.add_option("--file-with-name", action="append", nargs=2)
+
+    (options, args) = parser.parse_args()
+    if len(args) != 1:
+        print("Error: no base directory specified. See --help for usage.")
+        sys.exit(1)
+    
+    base_directory = args[0]
+    
+    for path in (options.file or []):
+        symlink_file(base_directory, path)
+    
+    for path in (options.files_in_directory or []):
+        symlink_files_in_directory(base_directory, path)
+    
+    for path, name in (options.file_with_name or []):
+        symlink_file_with_name(base_directory, path, name)
+
+if __name__ == "__main__":
+    main()
