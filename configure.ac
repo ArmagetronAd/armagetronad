@@ -278,7 +278,13 @@ enable_automakedefaults=no enable_automakedefaults_default=yes)
 AC_ARG_ENABLE(sysinstall,
 	AC_HELP_STRING([--enable-sysinstall],
 		[will install configuration files to /etc/armagetron and create a user if possible (default=enabled)]),,
-enable_sysinstall=yes)
+[
+if test -n "$ARMAGETRONAD_OS_X_TOOLKIT"; then
+	enable_sysinstall=no
+else
+	enable_sysinstall=yes
+fi
+])
 
 AC_ARG_ENABLE(useradd,
 	AC_HELP_STRING([--enable-useradd],
@@ -332,7 +338,13 @@ else
 	enable_uninstall=yes
 	external_uninstall_cmd=$enableval
 fi,
-enable_uninstall=yes)
+[
+if test -n "$ARMAGETRONAD_OS_X_TOOLKIT"; then
+	enable_uninstall=no
+else
+	enable_uninstall=yes
+fi
+])
 AC_SUBST(external_uninstall_cmd)
 
 AC_ARG_ENABLE(multiver,
