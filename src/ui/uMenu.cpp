@@ -30,8 +30,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #ifndef DEDICATED
 #   ifdef MACOSX_XCODE
-// #       include "AAPaste.h"
-// #       include <CoreFoundation/CoreFoundation.h>
+#       include "uOSXPaste.h"
+#       include <CoreFoundation/CoreFoundation.h>
 #   elif !defined(MACOSX)
 #       include "scrap.h"
 #   endif
@@ -962,23 +962,23 @@ bool uMenuItemString::Event(SDL_Event &e){
         //        c.sym = SDLK_DOWN;
     }
 #ifdef MACOSX_XCODE
-    // else if (c.sym == SDLK_v && mod & KMOD_META) {
-    //     CFDataRef data;
-    //     if (AAPastePasteboardData(data)) {
-    //         const UInt8 *bytes = CFDataGetBytePtr(data);
-    //         CFIndex bytesLength = CFDataGetLength(data);
-    //         
-    //         for (int i = 0; i < bytesLength; i++) {
-    //             if (!InsertChar(bytes[i], false))
-    //                 break;
-    //         }
-    //         
-    //         CFRelease(data);
-    //     }
-    //     else {
-    //         ret = false;
-    //     }
-    // }
+    else if (c.sym == SDLK_v && mod & KMOD_META) {
+        CFDataRef data;
+        if (su_OSXPastePasteboardData(data)) {
+            const UInt8 *bytes = CFDataGetBytePtr(data);
+            CFIndex bytesLength = CFDataGetLength(data);
+            
+            for (int i = 0; i < bytesLength; i++) {
+                if (!InsertChar(bytes[i], false))
+                    break;
+            }
+            
+            CFRelease(data);
+        }
+        else {
+            ret = false;
+        }
+    }
 #elif !defined(MACOSX)
     else if (c.sym == SDLK_v && mod & KMOD_CTRL) {
         char *scrap = 0;

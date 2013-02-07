@@ -70,12 +70,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 static gCommandLineJumpStartAnalyzer sg_jumpStartAnalyzer;
 #endif
 
-// #ifndef DEDICATED
-// #ifdef MACOSX_XCODE
-// #include "AAURLHandler.h"
-// #include "version.h"
-// #endif
-// #endif
+#ifndef DEDICATED
+#ifdef MACOSX_XCODE
+#include "gOSXURLHandler.h"
+#endif
+#endif
 
 // data structure for command line parsing
 class gMainCommandLineAnalyzer: public tCommandLineAnalyzer
@@ -347,9 +346,9 @@ static void welcome(){
         }
 #endif
 
-// #ifdef MACOSX_XCODE
-//         StartAAURLHandler( showSplash );
-// #endif
+#ifdef MACOSX_XCODE
+        sg_StartAAURLHandler( showSplash );
+#endif
         tRecorder::Record( splashSection, showSplash );
 
         if ( showSplash )

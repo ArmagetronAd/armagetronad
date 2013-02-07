@@ -174,7 +174,7 @@ libtron_a_SOURCES=tron/gAIBase.cpp tron/gAIBase.h tron/gAICharacter.cpp tron/gAI
 	tron/gFriends.h tron/gFriends.cpp
 
 if OS_X_TOOLKIT
-libtron_a_SOURCES += macosx/SDLMain.mm macosx/SDLMain.h
+libtron_a_SOURCES += tron/gOSXSDLMain.mm tron/gOSXSDLMain.h tron/gOSXURLHandler.mm tron/gOSXURLHandler.h
 endif
 
 if BUILDZONESV2
@@ -203,6 +203,10 @@ libtron_a_SOURCES +=\
 endif
 
 libui_a_SOURCES=ui/uInput.cpp ui/uInput.h ui/uInputQueue.cpp ui/uInputQueue.h ui/uMenu.cpp ui/uMenu.h
+
+if OS_X_TOOLKIT
+libui_a_SOURCES += ui/uOSXPaste.cpp ui/uOSXPaste.cpp
+endif
 endif
 
 # library include dependency structure. Watch out, don't create circular include dependencies.

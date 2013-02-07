@@ -7,7 +7,8 @@
 
 #include "aa_config.h"
 #include "SDL.h"
-#include "SDLMain.h"
+#include "gOSXSDLMain.h"
+#include "gOSXURLHandler.h"
 #include <sys/param.h> /* for MAXPATHLEN */
 #include <unistd.h>
 
@@ -336,9 +337,7 @@ int main (int argc, char **argv)
 {
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
 #ifdef MACOSX_XCODE
-    // AAGrowlPlugin *growl = [[AAGrowlPlugin alloc] init];
-    // [growl startGrowling];
-    // SetupAAURLHandler();
+    sg_SetupAAURLHandler();
 #endif
     
     /* Copy the arguments into a global variable */

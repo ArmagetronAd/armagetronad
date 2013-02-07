@@ -26,16 +26,18 @@
  
  */
 
-#ifndef ArmagetronAdvanced_AAURLHandler_H
-#define ArmagetronAdvanced_AAURLHandler_H
+#ifndef UOSXPASTE_H_UWMZJ35S
+#define UOSXPASTE_H_UWMZJ35S
 
-//! 1) Call before we pass off to Armagetron's main()
-void SetupAAURLHandler();
+#include <CoreFoundation/CoreFoundation.h>
 
-//! 2) Call after everything is initialized.
-void StartAAURLHandler( bool & showSplash );
+//! Get the pasteboard text for Mac OS X.
+//! 
+//! @param outData the data from the pasteboard. Caller is responsible for
+//!                calling CFRelease() on param. Be sure to check the return
+//!                value of this function before doing so...
+//! @return true if the pasteboard data was retrieved, otherwise false
+//!
+bool su_OSXPastePasteboardData(CFDataRef &outData);
 
-//! 3) Call before exiting
-void CleanupAAURLHandler();
-
-#endif
+#endif /* end of include guard: UOSXPASTE_H_UWMZJ35S */

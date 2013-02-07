@@ -26,18 +26,16 @@
  
  */
 
-#ifndef ArmageTron_AAPaste_H
-#define ArmageTron_AAPaste_H
+#ifndef GOSXURLHANDLER_H_W7Q4H24J
+#define GOSXURLHANDLER_H_W7Q4H24J
 
-#include <CoreFoundation/CoreFoundation.h>
+//! 1) Call before we pass off to Armagetron's main()
+void sg_SetupAAURLHandler();
 
-//! Get the pasteboard text for Mac OS X.
-//! 
-//! @param outData the data from the pasteboard. Caller is responsible for
-//!                calling CFRelease() on param. Be sure to check the return
-//!                value of this function before doing so...
-//! @return true if the pasteboard data was retrieved, otherwise false
-//!
-bool AAPastePasteboardData(CFDataRef &outData);
+//! 2) Call after everything is initialized.
+void sg_StartAAURLHandler( bool & showSplash );
 
-#endif
+//! 3) Call before exiting
+void sg_CleanupAAURLHandler();
+
+#endif /* end of include guard: GOSXURLHANDLER_H_W7Q4H24J */
