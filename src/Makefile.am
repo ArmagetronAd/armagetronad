@@ -222,7 +222,12 @@ libengine_a_CXXFLAGS =$(libui_a_CXXFLAGS)     -I@srcdir@/network -I@srcdir@/engi
 libtron_a_CXXFLAGS   =$(libengine_a_CXXFLAGS) -I@srcdir@/thirdparty/particles -I@srcdir@/tron -I@srcdir@/tron/cockpit
 
 if OS_X_TOOLKIT
-libtron_a_OBJCXXFLAGS =$(libtron_a_CXXFLAGS)
+libtools_a_OBJCXXFLAGS  =$(libtools_a_CXXFLAGS)
+libnetwork_a_OBJCXXFLAGS=$(libnetwork_a_CXXFLAGS)
+librender_a_OBJCXXFLAGS =$(librender_a_CXXFLAGS)
+libui_a_OBJCXXFLAGS     =$(libui_a_CXXFLAGS)
+libengine_a_OBJCXXFLAGS =$(libengine_a_CXXFLAGS)
+libtron_a_OBJCXXFLAGS   =$(libtron_a_CXXFLAGS)
 endif
 
 # core engine files can get compiled with optimization turned on for more painless debugging

@@ -54,6 +54,7 @@ AC_ARG_VAR(XML2_CONFIG,[Configuration script of libxml2 to use, defaults to xml2
 AC_ARG_VAR(SDL_CONFIG,[Configuration script of SDL to use, defaults to sdl-config])
 AC_ARG_VAR(FREETYPE_CONFIG,[Configuration script of freetype to use, defaults to freetype-config])
 AC_ARG_VAR(CXXFLAGS,Flags passed to the C++ compiler)
+AC_ARG_VAR(OBJCXXFLAGS,Flags passed to the Obj-C++ compiler)
 AC_ARG_VAR(DEBUGLEVEL,[Debug level for developers, normal users can safely ignore it. Accepted values go from 0 to 5. See README-DEVELOPER for details.])
 AC_ARG_VAR(CODELEVEL,[Code checking strictness level for developers, normal users can safely ignore it. Accepted values go from 0 to 4. See README-DEVELOPER for details.])
 AC_ARG_VAR(docstyle,[Documentation style for cross-building of documentation. Possible values: unix, web and windows.])
@@ -97,7 +98,7 @@ AM_CONDITIONAL([OS_X_TOOLKIT], test -n "${ARMAGETRONAD_OS_X_TOOLKIT}")
 
 if test -n "$ARMAGETRONAD_OS_X_TOOLKIT"; then
 	dnl TODO make architectures that will be built configurable.
-	arch="x86_64"
+	arch="i386"
 	
 	dnl Set up general library and header directories for normal libraries
 	LDFLAGS="-arch ${arch} -L${ARMAGETRONAD_OS_X_TOOLKIT}/${arch}/lib -F${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks $LDFLAGS"
@@ -106,6 +107,11 @@ if test -n "$ARMAGETRONAD_OS_X_TOOLKIT"; then
 	
 	dnl Set up header directories for frameworks
 	CPPFLAGS="-I${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks/SDL.framework/Headers -I${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks/SDL_mixer.framework/Headers -I${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks/SDL_image.framework/Headers $CPPFLAGS"
+	
+	OBJCXXFLAGS="$CXXFLAGS $OBJCXXFLAGS"
+	OBJCPPFLAGS="$CPPFLAGS $OBJCPPFLAGS"
+	
+	CFLAGS="$CPPFLAGS $CXXFLAGS $CFLAGS"
 	
 	PATH="${ARMAGETRONAD_OS_X_TOOLKIT}/bin:$PATH"
 	PROTOC="${ARMAGETRONAD_OS_X_TOOLKIT}/${arch}/bin/protoc"
@@ -1295,8 +1301,12 @@ CXXFLAGS="`echo ${CXXFLAGS} | sed -e 's,-Werror,,g' | sed -e 's,--pedantic,,g'`"
 dnl CXX flags for our own hand-written files. Can be pedantic.
 AC_SUBST(CXXFLAGS_OURFILES)
 
+export CFLAGS
 export CPPFLAGS
 export CXXFLAGS
+export OBJCPPFLAGS
+export OBJCXXFLAGS
+
 export LIBS
 
 AC_OUTPUT(src/Makefile
@@ -1396,13 +1406,15 @@ echo "     Debug level : $DEBUGLEVEL"
 echo "     Code level  : $CODELEVEL"
 echo "     CPPFLAGS    : $CPPFLAGS"
 echo "     CXXFLAGS    : $CXXFLAGS"
+dnl echo "     OBJCPPFLAGS : $OBJCPPFLAGS"
+dnl echo "     OBJCXXFLAGS : $OBJCXXFLAGS"
 echo "     LIBS        : $LIBS"
 
 # print warning about behavior deviating from automake's defaults
 SWITCHES=""
 test "x$OUTSIDE_OF_PREFIX" = "xyes" && SWITCHES=" --enable-automakedefaults"
 test "x$enable_useradd_default" = "xyes" && OUTSIDE_OF_PREFIX=yes SWITCHES="${SWITCHES} --disable-useradd"
-test "x$enable_etc_default" = "xyes" && OUTSIDE_OF_PREFIX=yes SWITCHES="${SWITCHES} --disable-etc"
+test "x$enable_etc_default" = "xyes" && test "x$enable_sysinstall" = "xyes" && OUTSIDE_OF_PREFIX=yes SWITCHES="${SWITCHES} --disable-etc"
 test x$build_dedicated = xtrue -o x$armamaster = xtrue && test "x$enable_initscripts_default" = "xyes" && echo "${initdir}" | grep '^/etc/' > /dev/null && OUTSIDE_OF_PREFIX=yes SWITCHES="${SWITCHES} --disable-initscripts"
 if test "x$OUTSIDE_OF_PREFIX" = "xyes"; then
     echo ""
@@ -1417,5 +1429,6 @@ fi
 
 # print warnings about missing optional libraries that cause feature reduction
 if test ${have_glew} = false; then
+	echo ""
     echo "Warning: GLEW library (http://glew.sourceforge.net/) not found or not functional. Advanced graphics effects will be disabled. Ok, we don't have that many of them anyway, so this waring is safe to ignore for now."
 fi
