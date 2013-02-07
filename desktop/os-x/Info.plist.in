@@ -6,13 +6,13 @@
   	  <string>English</string>
   	  
   	<key>CFBundleExecutable</key>
-  	  <string>Armagetron Advanced</string>
+  	  <string>@progtitle@</string>
   	  
   	<key>CFBundleIconFile</key>
   	  <string>desktop/os-x/armagetronad.icns</string>
   	  
   	<key>CFBundleIdentifier</key>
-  	  <string>com.sf.armagetronad</string>
+  	  <string>org.armagetronad.@progname@</string>
 
 	<key>CFBundleGetInfoString</key>
 	  <string>@progtitle@ @version@, © The Armagetron Advanced Developer Team, 2003, 2013</string>
@@ -27,7 +27,7 @@
   	  <string>6.0</string>
   	  
   	<key>CFBundleName</key>
-  	  <string>Armagetron Advanced</string>
+  	  <string>@progtitle@</string>
   	  
   	<key>CFBundlePackageType</key>
   	  <string>APPL</string>

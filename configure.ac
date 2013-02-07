@@ -115,10 +115,6 @@ if test -n "$ARMAGETRONAD_OS_X_TOOLKIT"; then
 	
 	dnl TODO rename MACOSX_XCODE => OS_X_TOOLKIT
 	AC_DEFINE([MACOSX_XCODE], 1, [Define if compiling using the OS X toolkit.])
-	AC_DEFINE([USER_DATA_DIR], ["~/Library/Application Support/Armagetron Advanced"], [TODO document])
-	AC_DEFINE([SCREENSHOT_DIR], ["~/Library/Application Support/Armagetron Advanced/screenshots"], [TODO document])
-	
-	AC_PREFIX_DEFAULT(["`pwd`/MacOS/Armagetron Advanced.app/Contents/Resources"])
 fi
 
 AC_ARG_ENABLE(dedicated,
@@ -555,6 +551,11 @@ prognamebase=$progname
 AC_SUBST(progtitle)
 AC_SUBST(progname)
 AC_SUBST(prognamebase)
+
+AS_IF([test -n "$ARMAGETRONAD_OS_X_TOOLKIT"],
+	AC_PREFIX_DEFAULT("`pwd`/${progtitle}.app/Contents/Resources")
+	AC_DEFINE_UNQUOTED([USER_DATA_DIR], ["~/Library/Application Support/${progtitle}"], [TODO document])
+	AC_DEFINE_UNQUOTED([SCREENSHOT_DIR], ["~/Library/Application Support/${progtitle}/screenshots"], [TODO document]))
 
 AM_CONDITIONAL(USE_SYSINSTALL, test "$enable_sysinstall" = "yes")
 AM_CONDITIONAL(USE_UNINSTALL, test "$enable_uninstall" = "yes")
