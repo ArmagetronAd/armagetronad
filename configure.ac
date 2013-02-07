@@ -66,6 +66,7 @@ AC_ARG_VAR(APBUILD_CC,[Autopackage C compiler.])
 AC_ARG_VAR(CXX_ABI,[Autopackage C++ ABI version.])
 AC_ARG_VAR(APBUILD_STATIC,[Autopackage static libraries.])
 AC_ARG_VAR(ARMAGETRONAD_OS_X_TOOLKIT, [TODO document])
+AC_ARG_VAR(arch, [TODO document])
 
 dnl a modern autoconf is required to process this
 AC_PREREQ(2.50)
@@ -83,7 +84,9 @@ AC_ARG_WITH([os-x-toolkit],
 		[build using the OS X toolkit. See README-Subversion for more information.])],
 	[
 		if test "x$withval" != "xyes"; then
-			ARMAGETRONAD_OS_X_TOOLKIT="$withval"
+			ARMAGETRONAD_OS_X_TOOLKIT="${withval}/libraries"
+		elif test -n "$ARMAGETRONAD_OS_X_TOOLKIT"; then
+			ARMAGETRONAD_OS_X_TOOLKIT="${ARMAGETRONAD_OS_X_TOOLKIT}/libraries"
 		fi
 		if test -z "${ARMAGETRONAD_OS_X_TOOLKIT}"; then
 			AC_MSG_ERROR([An OS X toolkit directory was not specified.])
@@ -97,8 +100,7 @@ FTGL_LIBS=
 AM_CONDITIONAL([OS_X_TOOLKIT], test -n "${ARMAGETRONAD_OS_X_TOOLKIT}")
 
 if test -n "$ARMAGETRONAD_OS_X_TOOLKIT"; then
-	dnl TODO make architectures that will be built configurable.
-	arch="i386"
+	test -z "${arch}" && arch=`arch`
 	
 	dnl Set up general library and header directories for normal libraries
 	LDFLAGS="-arch ${arch} -L${ARMAGETRONAD_OS_X_TOOLKIT}/${arch}/lib -F${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks $LDFLAGS"
@@ -110,7 +112,6 @@ if test -n "$ARMAGETRONAD_OS_X_TOOLKIT"; then
 	
 	OBJCXXFLAGS="$CXXFLAGS $OBJCXXFLAGS"
 	OBJCPPFLAGS="$CPPFLAGS $OBJCPPFLAGS"
-	
 	CFLAGS="$CPPFLAGS $CXXFLAGS $CFLAGS"
 	
 	PATH="${ARMAGETRONAD_OS_X_TOOLKIT}/bin:$PATH"
@@ -872,7 +873,6 @@ dnl *************************************************
 dnl         Sound
 dnl *************************************************
 
-dnl TODO Fix for OS X toolkit support--need to link using "-framework SDL_mixer".
 if test x$enable_sound = xyes; then
 	dnl first do the regular sdl define
  	AC_DEFINE(HAVE_SDL_FOR_SOUND, 1,  [Define if you have SDL_sound, which is part of the core SDL])
