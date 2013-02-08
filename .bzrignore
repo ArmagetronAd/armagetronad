@@ -1,4 +1,7 @@
 *.DS_Store
+Armagetron Advanced Dedicated
+Armagetron Advanced.app
+desktop/os-x/Info.plist
 .gdbinit
 batch/rcd_config
 batch/rcd_server
