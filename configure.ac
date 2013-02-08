@@ -64,8 +64,8 @@ AC_ARG_VAR(APBUILD_CXX2,[Autopackage ABI 2 C++ compiler.])
 AC_ARG_VAR(APBUILD_CC,[Autopackage C compiler.])
 AC_ARG_VAR(CXX_ABI,[Autopackage C++ ABI version.])
 AC_ARG_VAR(APBUILD_STATIC,[Autopackage static libraries.])
-AC_ARG_VAR(ARMAGETRONAD_OS_X_TOOLKIT, [TODO document])
-AC_ARG_VAR(arch, [TODO document])
+AC_ARG_VAR(ARMAGETRONAD_OS_X_TOOLKIT, [Path to the OS X toolkit directory.])
+AC_ARG_VAR(arch, [Only applicable when building using the OS X toolkit. Specifies which architecture to build for.])
 
 dnl a modern autoconf is required to process this
 AC_PREREQ(2.50)

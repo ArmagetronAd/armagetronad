@@ -70,30 +70,23 @@ KDevelop 3.0
 
 If all goes smoothly, you can now edit Armagetron Advanced and run it.
 
-Mac OS X
-========
+OS X
+====
 
-The Mac OS project is located in the armagetronad/MacOS/ directory.
+You will need to install:
 
-Armagetron Advanced.xcodeproj will only open in Xcode >= 2.4. It has these targets:
-* Armagetron Advanced -- The client
-* Armagetron Advanced Dedicated -- Dedicated Server
-  
-All required libraries required to build Armagetron Advanced for Mac OS X may
-be download from the the Sourceforge project page:
+* Xcode and Command Line Tools
+* Automake and autoconf
+* The OS X toolkit <https://code.launchpad.net/~dlh/armagetronad/os-x-toolkit>
 
-https://sf.net/project/showfiles.php?group_id=110997&package_id=266788
+Follow the Unix vanilla instructions for how to build the game. You will need to
+use the --with-os-x-toolkit configure option. This option needs the OS X toolkit
+directory to be provided, either as an argument to the configure option or by the
+ARMAGETRONAD_OS_X_TOOLKIT environment variable.
 
-Aditional Required Software
----------------------------
-If you are running Mac OS X 10.5 then nothing else is required.
-If you are running 10.4 then you must install:
-
-* rake: macports name rb-rake. http://rake.rubyforge.org
-* bison: macports name bison. http://www.gnu.org/software/bison
-
-You must also add a user-defined setting in Xcode, BISON. Its value should
-be the path of the newly installed bison.
+Call "make install" to create a stand-alone .app (for the client), or a stand-alone
+directory (for the dedicated server). The installed game will be created in the
+build directory.
 
 *******************
 * Windows + Mingw *
