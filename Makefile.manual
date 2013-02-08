@@ -183,7 +183,9 @@ distprep:
 	test -r $@ || ln -sf src/armagetronad_main $@
 	ln -sf ./src/doc .
 if OS_X_TOOLKIT
+if !BUILDDEDICATED
 	install_name_tool -add_rpath "${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks" $@ > /dev/null 2>&1 || true
+endif
 endif
 
 DEBUGFILES=.gdbinit @progname@

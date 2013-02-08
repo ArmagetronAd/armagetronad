@@ -209,6 +209,7 @@ if USE_SYSINSTALL
 endif
 if OS_X_TOOLKIT
 	${top_srcdir}/batch/make/symlink-relative "$(DESTDIR)${prefix}" --files-in-directory "$(DESTDIR)${aa_datadir}" --file-with-name "$(DESTDIR)${aa_sysconfdir}" config
+if !BUILDDEDICATED
 	${top_srcdir}/batch/make/symlink-relative "$(DESTDIR)${prefix}/../MacOS" --file-with-name "$(DESTDIR)${bindir}/@progname@${executable_suffix}" "@progtitle@"
 	${top_srcdir}/batch/make/symlink-relative "$(DESTDIR)${prefix}/.." --file "$(DESTDIR)${aa_datadir}/desktop/os-x/Info.plist"
 
@@ -217,6 +218,7 @@ if OS_X_TOOLKIT
 	
 	install_name_tool -delete_rpath "${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks" "$(DESTDIR)${prefix}/../MacOS/@progtitle@" > /dev/null 2>&1 || true
 	install_name_tool -add_rpath "@executable_path/../../Frameworks" "$(DESTDIR)${prefix}/../MacOS/@progtitle@"
+endif
 endif
 
 uninstall-hook:

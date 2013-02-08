@@ -54,7 +54,6 @@ AC_ARG_VAR(XML2_CONFIG,[Configuration script of libxml2 to use, defaults to xml2
 AC_ARG_VAR(SDL_CONFIG,[Configuration script of SDL to use, defaults to sdl-config])
 AC_ARG_VAR(FREETYPE_CONFIG,[Configuration script of freetype to use, defaults to freetype-config])
 AC_ARG_VAR(CXXFLAGS,Flags passed to the C++ compiler)
-AC_ARG_VAR(OBJCXXFLAGS,Flags passed to the Obj-C++ compiler)
 AC_ARG_VAR(DEBUGLEVEL,[Debug level for developers, normal users can safely ignore it. Accepted values go from 0 to 5. See README-DEVELOPER for details.])
 AC_ARG_VAR(CODELEVEL,[Code checking strictness level for developers, normal users can safely ignore it. Accepted values go from 0 to 4. See README-DEVELOPER for details.])
 AC_ARG_VAR(docstyle,[Documentation style for cross-building of documentation. Possible values: unix, web and windows.])
@@ -72,57 +71,17 @@ dnl a modern autoconf is required to process this
 AC_PREREQ(2.50)
 
 build_regular=true
-
+default_enable_sysinstall=yes
+default_enable_uninstall=yes
 have_lzma=false
-    AC_ARG_WITH(maxclients, AC_HELP_STRING([--with-maxclients],[sets the hardcoded limit for the number of connected clients (default: 16 for clients and 32 for dedicated servers)]),
-[ 
-    AC_DEFINE_UNQUOTED(MAXCLIENTS,${withval},maximal number of clients)
-])
-
-AC_ARG_WITH([os-x-toolkit],
-	[AC_HELP_STRING([--with-os-x-toolkit@<:@=DIR@:>@],
-		[build using the OS X toolkit. See README-Subversion for more information.])],
-	[
-		if test "x$withval" != "xyes"; then
-			ARMAGETRONAD_OS_X_TOOLKIT="${withval}/libraries"
-		elif test -n "$ARMAGETRONAD_OS_X_TOOLKIT"; then
-			ARMAGETRONAD_OS_X_TOOLKIT="${ARMAGETRONAD_OS_X_TOOLKIT}/libraries"
-		fi
-		if test -z "${ARMAGETRONAD_OS_X_TOOLKIT}"; then
-			AC_MSG_ERROR([An OS X toolkit directory was not specified.])
-		fi
-	],
-	[ARMAGETRONAD_OS_X_TOOLKIT=])
 
 FTGL_CFLAGS=
 FTGL_LIBS=
 
-AM_CONDITIONAL([OS_X_TOOLKIT], test -n "${ARMAGETRONAD_OS_X_TOOLKIT}")
-
-if test -n "$ARMAGETRONAD_OS_X_TOOLKIT"; then
-	test -z "${arch}" && arch=`arch`
-	
-	dnl Set up general library and header directories for normal libraries
-	LDFLAGS="-arch ${arch} -L${ARMAGETRONAD_OS_X_TOOLKIT}/${arch}/lib -F${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks $LDFLAGS"
-	CXXFLAGS="$LDFLAGS $CXXFLAGS"
-	CPPFLAGS="-F${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks -I${ARMAGETRONAD_OS_X_TOOLKIT}/${arch}/include $CPPFLAGS"
-	
-	dnl Set up header directories for frameworks
-	CPPFLAGS="-I${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks/SDL.framework/Headers -I${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks/SDL_mixer.framework/Headers -I${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks/SDL_image.framework/Headers $CPPFLAGS"
-	
-	OBJCXXFLAGS="$CXXFLAGS $OBJCXXFLAGS"
-	OBJCPPFLAGS="$CPPFLAGS $OBJCPPFLAGS"
-	CFLAGS="$CPPFLAGS $CXXFLAGS $CFLAGS"
-	
-	PATH="${ARMAGETRONAD_OS_X_TOOLKIT}/bin:$PATH"
-	PROTOC="${ARMAGETRONAD_OS_X_TOOLKIT}/${arch}/bin/protoc"
-	
-	FTGL_CFLAGS="-I${ARMAGETRONAD_OS_X_TOOLKIT}/${arch}/include/FTGL -I${ARMAGETRONAD_OS_X_TOOLKIT}/${arch}/include/freetype2"
-	FTGL_LIBS="-lftgl -lfreetype -lz -lbz2"
-	
-	dnl TODO rename MACOSX_XCODE => OS_X_TOOLKIT
-	AC_DEFINE([MACOSX_XCODE], 1, [Define if compiling using the OS X toolkit.])
-fi
+AC_ARG_WITH(maxclients, AC_HELP_STRING([--with-maxclients],[sets the hardcoded limit for the number of connected clients (default: 16 for clients and 32 for dedicated servers)]),
+[ 
+    AC_DEFINE_UNQUOTED(MAXCLIENTS,${withval},maximal number of clients)
+])
 
 AC_ARG_ENABLE(dedicated,
      AC_HELP_STRING([--enable-dedicated],
@@ -199,6 +158,50 @@ AC_SUBST(progtitle_serverorclient)
 AC_SUBST(progtitle_server)
 AC_SUBST(build_dedicated)
 AC_SUBST(build_regular)
+
+AC_ARG_WITH([os-x-toolkit],
+	[AC_HELP_STRING([--with-os-x-toolkit@<:@=DIR@:>@],
+		[build using the OS X toolkit. See README-Subversion for more information.])],
+	[
+		if test "x$withval" != "xyes"; then
+			ARMAGETRONAD_OS_X_TOOLKIT="${withval}/libraries"
+		elif test -n "$ARMAGETRONAD_OS_X_TOOLKIT"; then
+			ARMAGETRONAD_OS_X_TOOLKIT="${ARMAGETRONAD_OS_X_TOOLKIT}/libraries"
+		fi
+		if test -z "${ARMAGETRONAD_OS_X_TOOLKIT}"; then
+			AC_MSG_ERROR([An OS X toolkit directory was not specified.])
+		fi
+	],
+	[ARMAGETRONAD_OS_X_TOOLKIT=])
+
+AM_CONDITIONAL([OS_X_TOOLKIT], test -n "${ARMAGETRONAD_OS_X_TOOLKIT}")
+
+if test -n "$ARMAGETRONAD_OS_X_TOOLKIT"; then
+	test -z "${arch}" && arch=`arch`
+	
+	if test "x$build_regular" = "xtrue"; then
+		LDFLAGS="-F${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks $LDFLAGS"
+		CPPFLAGS="-F${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks -I${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks/SDL.framework/Headers -I${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks/SDL_mixer.framework/Headers -I${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks/SDL_image.framework/Headers $CPPFLAGS"
+		FTGL_CFLAGS="-I${ARMAGETRONAD_OS_X_TOOLKIT}/${arch}/include/FTGL -I${ARMAGETRONAD_OS_X_TOOLKIT}/${arch}/include/freetype2"
+		FTGL_LIBS="-lftgl -lfreetype -lz -lbz2"
+	fi
+	LDFLAGS="-arch ${arch} -L${ARMAGETRONAD_OS_X_TOOLKIT}/${arch}/lib $LDFLAGS"
+	CXXFLAGS="$LDFLAGS $CXXFLAGS"
+	CPPFLAGS="-I${ARMAGETRONAD_OS_X_TOOLKIT}/${arch}/include $CPPFLAGS"
+	
+	OBJCXXFLAGS="$CXXFLAGS $OBJCXXFLAGS"
+	OBJCPPFLAGS="$CPPFLAGS $OBJCPPFLAGS"
+	CFLAGS="$CPPFLAGS $CXXFLAGS $CFLAGS"
+	
+	PATH="${ARMAGETRONAD_OS_X_TOOLKIT}/bin:$PATH"
+	PROTOC="${ARMAGETRONAD_OS_X_TOOLKIT}/${arch}/bin/protoc"
+		
+	dnl TODO rename MACOSX_XCODE => OS_X_TOOLKIT
+	AC_DEFINE([MACOSX_XCODE], 1, [Define if compiling using the OS X toolkit.])
+	
+	default_enable_sysinstall=no
+	default_enable_uninstall=no
+fi
 
 AC_ARG_ENABLE(memmanager,
 	AC_HELP_STRING([--enable-memmanager],
@@ -281,13 +284,7 @@ enable_automakedefaults=no enable_automakedefaults_default=yes)
 AC_ARG_ENABLE(sysinstall,
 	AC_HELP_STRING([--enable-sysinstall],
 		[will install configuration files to /etc/armagetron and create a user if possible (default=enabled)]),,
-[
-if test -n "$ARMAGETRONAD_OS_X_TOOLKIT"; then
-	enable_sysinstall=no
-else
-	enable_sysinstall=yes
-fi
-])
+		enable_sysinstall=$default_enable_sysinstall)
 
 AC_ARG_ENABLE(useradd,
 	AC_HELP_STRING([--enable-useradd],
@@ -341,13 +338,7 @@ else
 	enable_uninstall=yes
 	external_uninstall_cmd=$enableval
 fi,
-[
-if test -n "$ARMAGETRONAD_OS_X_TOOLKIT"; then
-	enable_uninstall=no
-else
-	enable_uninstall=yes
-fi
-])
+enable_uninstall=$default_enable_uninstall)
 AC_SUBST(external_uninstall_cmd)
 
 AC_ARG_ENABLE(multiver,
@@ -559,10 +550,15 @@ AC_SUBST(progtitle)
 AC_SUBST(progname)
 AC_SUBST(prognamebase)
 
-AS_IF([test -n "$ARMAGETRONAD_OS_X_TOOLKIT"],
-	AC_PREFIX_DEFAULT("`pwd`/${progtitle}.app/Contents/Resources")
+if test -n "$ARMAGETRONAD_OS_X_TOOLKIT"; then
+	if test "x$build_regular" = "xtrue"; then
+		prefix="`pwd`/${progtitle}.app/Contents/Resources"
+		AC_DEFINE_UNQUOTED([SCREENSHOT_DIR], ["~/Library/Application Support/${progtitle}/screenshots"], [TODO document])
+	else
+		prefix="`pwd`/${progtitle}"
+	fi
 	AC_DEFINE_UNQUOTED([USER_DATA_DIR], ["~/Library/Application Support/${progtitle}"], [TODO document])
-	AC_DEFINE_UNQUOTED([SCREENSHOT_DIR], ["~/Library/Application Support/${progtitle}/screenshots"], [TODO document]))
+fi
 
 AM_CONDITIONAL(USE_SYSINSTALL, test "$enable_sysinstall" = "yes")
 AM_CONDITIONAL(USE_UNINSTALL, test "$enable_uninstall" = "yes")
@@ -1349,11 +1345,13 @@ echo ""
 if test x$build_dedicated = xtrue -o x$armamaster = xtrue ;
 then
 echo "     Build with Armathentication support (server): $enable_armathentication"
-echo "     Init scripts will be installed in  : $initdir"
 echo "     Dynamic data will be kept in       : `eval echo ${aa_localstatedir}`"
 echo "     PID files will be kept in          : `eval echo ${rundir}`"
 echo "     Log files will be kept in          : `eval echo ${logdir}`"
+if test "x$enable_sysinstall" = "xyes"; then
+echo "     Init scripts will be installed in  : $initdir"
 echo "     Add user to run server             : $enable_useradd"
+fi
 echo ""
 fi
 if test x$build_regular = xtrue ;
@@ -1380,7 +1378,9 @@ echo "     Binaries will be installed in      : `eval echo ${bindir}`"
 echo "     Static data will be installed in   : `eval echo ${aa_datadir}`"
 echo "     Configuration will be installed in : `eval echo ${aa_sysconfdir}`"
 dnl echo "     Documentation will be installed in : `eval echo ${aa_docdir}`"
-test "x$enable_etc" = "xyes" && echo "     Link to configuration will go to   : /etc/${progname}"
+if test "x$enable_sysinstall" = "xyes" -a "x$enable_etc" = "xyes"; then
+echo "     Link to configuration will go to   : /etc/${progname}"
+fi
 echo "     Build with Krawall authentication support: $enable_krawall"
 echo "     Ruby support: $enable_ruby"
 if test "x$enable_ruby" = "xyes"; then
@@ -1406,16 +1406,16 @@ echo "     Debug level : $DEBUGLEVEL"
 echo "     Code level  : $CODELEVEL"
 echo "     CPPFLAGS    : $CPPFLAGS"
 echo "     CXXFLAGS    : $CXXFLAGS"
-dnl echo "     OBJCPPFLAGS : $OBJCPPFLAGS"
-dnl echo "     OBJCXXFLAGS : $OBJCXXFLAGS"
 echo "     LIBS        : $LIBS"
 
 # print warning about behavior deviating from automake's defaults
 SWITCHES=""
 test "x$OUTSIDE_OF_PREFIX" = "xyes" && SWITCHES=" --enable-automakedefaults"
-test "x$enable_useradd_default" = "xyes" && OUTSIDE_OF_PREFIX=yes SWITCHES="${SWITCHES} --disable-useradd"
-test "x$enable_etc_default" = "xyes" && test "x$enable_sysinstall" = "xyes" && OUTSIDE_OF_PREFIX=yes SWITCHES="${SWITCHES} --disable-etc"
-test x$build_dedicated = xtrue -o x$armamaster = xtrue && test "x$enable_initscripts_default" = "xyes" && echo "${initdir}" | grep '^/etc/' > /dev/null && OUTSIDE_OF_PREFIX=yes SWITCHES="${SWITCHES} --disable-initscripts"
+if test "x$enable_sysinstall" = "xyes"; then
+	test "x$enable_useradd_default" = "xyes" && OUTSIDE_OF_PREFIX=yes SWITCHES="${SWITCHES} --disable-useradd"
+	test "x$enable_etc_default" = "xyes" && OUTSIDE_OF_PREFIX=yes SWITCHES="${SWITCHES} --disable-etc"
+	test x$build_dedicated = xtrue -o x$armamaster = xtrue && test "x$enable_initscripts_default" = "xyes" && echo "${initdir}" | grep '^/etc/' > /dev/null && OUTSIDE_OF_PREFIX=yes SWITCHES="${SWITCHES} --disable-initscripts"
+fi
 if test "x$OUTSIDE_OF_PREFIX" = "xyes"; then
     echo ""
     echo "Warning: The configure script decided that, to better work on your system,"
