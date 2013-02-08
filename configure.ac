@@ -73,6 +73,7 @@ AC_PREREQ(2.50)
 build_regular=true
 default_enable_sysinstall=yes
 default_enable_uninstall=yes
+enable_automakedefaults_actual_default=no
 have_lzma=false
 
 FTGL_CFLAGS=
@@ -201,6 +202,7 @@ if test -n "$ARMAGETRONAD_OS_X_TOOLKIT"; then
 	
 	default_enable_sysinstall=no
 	default_enable_uninstall=no
+	enable_automakedefaults_actual_default=yes
 fi
 
 AC_ARG_ENABLE(memmanager,
@@ -279,7 +281,7 @@ dnl end alias group
 AC_ARG_ENABLE(automakedefaults,
 	AC_HELP_STRING([--enable-automakedefaults],
 		[enforce the default installation directories as set by automake. localstatedir=prefix/var violates the FHS, so this is off by default.]),,
-enable_automakedefaults=no enable_automakedefaults_default=yes)
+enable_automakedefaults=$enable_automakedefaults_actual_default enable_automakedefaults_default=yes)
 
 AC_ARG_ENABLE(sysinstall,
 	AC_HELP_STRING([--enable-sysinstall],
@@ -553,11 +555,12 @@ AC_SUBST(prognamebase)
 if test -n "$ARMAGETRONAD_OS_X_TOOLKIT"; then
 	if test "x$build_regular" = "xtrue"; then
 		prefix="`pwd`/${progtitle}.app/Contents/Resources"
+		AC_DEFINE_UNQUOTED([USER_DATA_DIR], ["~/Library/Application Support/${progtitle}"], [TODO document])
 		AC_DEFINE_UNQUOTED([SCREENSHOT_DIR], ["~/Library/Application Support/${progtitle}/screenshots"], [TODO document])
 	else
-		prefix="`pwd`/${progtitle}"
+		prefix="`pwd`/${progtitle} Dedicated"
+		AC_DEFINE_UNQUOTED([USER_DATA_DIR], ["~/Library/Application Support/${progtitle} Dedicated"], [TODO document])
 	fi
-	AC_DEFINE_UNQUOTED([USER_DATA_DIR], ["~/Library/Application Support/${progtitle}"], [TODO document])
 fi
 
 AM_CONDITIONAL(USE_SYSINSTALL, test "$enable_sysinstall" = "yes")
@@ -1150,11 +1153,11 @@ AC_DEFINE_UNQUOTED(TOP_SOURCE_DIR,"${srcdir}", [Define the top source directory]
 AC_DEFINE_UNQUOTED(PROGNAME,"${progname}", [Define the short progam name (with possible -dedicated suffix)])
 AC_DEFINE_UNQUOTED(PROGNAMEBASE,"${prognamebase}", [Define the short progam name])
 
-realprefix=${prefix}
-test x${realprefix} = xNONE && realprefix=${ac_default_prefix}
+realprefix="${prefix}"
+test "x${realprefix}" = xNONE && realprefix="${ac_default_prefix}"
 AC_DEFINE_UNQUOTED(PREFIX,"${realprefix}",[Define to the compiled in prefix where most game directories will be children of])
-realexecprefix=${exec_prefix}
-test x${realexecprefix} = xNONE && realexecprefix=${realprefix}
+realexecprefix="${exec_prefix}"
+test "x${realexecprefix}" = xNONE && realexecprefix="${realprefix}"
 
 AM_CONDITIONAL(NEEDDATA, test "$needdata" = "yes" )
 AM_CONDITIONAL(USE_SDLMIXER, test "$enable_sound" = "yes" )
