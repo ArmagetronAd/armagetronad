@@ -138,21 +138,12 @@ dist-hook-scm:
 	sed	-e "s,/ArmagetronDedicated,/@progtitle@@progtitle_server@," \
 	< @srcdir@/src/win32_ded/aa_config.h > $(distdir)/src/win32_ded/aa_config.h
 
-#   rebrand OSX config directories
-	sed	-e "s,/Armagetron Advanced,/@progtitle@," \
-	< @srcdir@/src/macosx/client/aa_config.h > $(distdir)/src/macosx/client/aa_config.h
-	sed	-e "s,/Armagetron Advanced Dedicated,/@progtitle@@progtitle_server@," \
-	< @srcdir@/src/macosx/dedicated/aa_config.h > $(distdir)/src/macosx/dedicated/aa_config.h
-
 #   regenerate dependant files so they no longer reference to the file "version" which will be removed
 	cp @srcdir@/bootstrap.sh $(distdir)
 	cd $(distdir); rm -f aa_config.h.in version; sh ./bootstrap.sh
 	rm -rf $(distdir)/autom4te.cache
 
 dist-hook:
-#   copy mac files
-	cp -R ${srcdir}/MacOS ${distdir}
-
 #	clear CVS
 	find $(distdir) -depth -name CVS -exec rm -rf \{\} \;
 
