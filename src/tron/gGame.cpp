@@ -4383,7 +4383,7 @@ void gGame::StateUpdate(){
                 }
             }
 
-            sg_currentMapWriter << mapfile;
+            sg_currentMapWriter << sg_currentSettings->sizeFactor << mapfile;
             sg_currentMapWriter.write();
 
             sg_currentMap = mapfile;
@@ -6629,11 +6629,13 @@ static void sg_getCurrentMap(std::istream &s)
     if (mapfile != "")
     {
         //  send the ladderlog string
-        sg_currentMapWriter << mapfile;
+        sg_currentMapWriter << sg_currentSettings->sizeFactor << mapfile;
         sg_currentMapWriter.write();
 
         //  send the message to the caller
-        sn_ConsoleOut(mapfile, receiver->Owner());
+        tString message;
+        message << "Currently the loaded map is: " << mapfile << "\n";
+        sn_ConsoleOut(message, receiver->Owner());
     }
 }
 static tConfItemFunc sg_getCurrentMapConf("GET_CURRENT_MAP", &sg_getCurrentMap);

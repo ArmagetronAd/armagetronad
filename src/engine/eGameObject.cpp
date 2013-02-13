@@ -779,6 +779,19 @@ void eGameObject::SetMaxLazyLag( REAL lag )
     se_lazyLag = lag;
 }
 
+REAL se_arenaBoundary = -20;
+bool restrictArenaBoundry(const REAL &newValue)
+{
+    //  we cannot have the boundry limit be greater than -1
+    if (newValue > -1) return false;
+
+    return true;
+}
+static tSettingItem<REAL> se_arenaBoundaryConf("ARENA_BOUNDARY", se_arenaBoundary);
+
+bool se_arenaBoundaryKill = true;
+static tSettingItem<bool> se_arenaBoundaryKillConf("ARENA_BOUNDARY_KILL", se_arenaBoundaryKill);
+
 void eGameObject::TimestepThisWrapper(eGrid * grid, REAL currentTime, eGameObject *c, REAL minTimestep )
 {
     su_FetchAndStoreSDLInput();
@@ -814,11 +827,13 @@ void eGameObject::TimestepThisWrapper(eGrid * grid, REAL currentTime, eGameObjec
 #endif
 
     // check for teleports out of arena bounds
-    if (!eWallRim::IsBound(c->pos,-1))
+    if (!eWallRim::IsBound(c->pos, se_arenaBoundary))
     {
         se_maxSimulateAheadLeft = 0;
 
-        c->Kill();
+        if (se_arenaBoundaryKill)
+            c->Kill();
+
         return;
     }
 

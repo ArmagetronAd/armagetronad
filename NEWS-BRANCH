@@ -1,4 +1,23 @@
 ===========================
+Changes in r850
+===========================
+Corrections:
+    * Fixed the team name update for players after logging in.
+      Reason: The error seemed to be occuring due to the custom teamname setup
+              taking in their logged in username and not their actual name.
+    * Updating a few thigns in the english_base.txt
+
+Improvements:
+    * LADDERLOG_WRITE_CURRENT_MAP
+        # Original: CURRENT_MAP <map_file>
+        # New Work: CURRENT_MAP <size_factor> <map_file>
+
+Additions:
+    New Commands:
+        * ARENA_BOUNDARY       # This is the distance players can travel outside the arena boundary.
+        * ARENA_BOUNDARY_KILL  # If set to 1, Players beyond the ARENA_BOUNDARY will be killed.      
+
+===========================
 Changes in r847
 ===========================
 Corrections:

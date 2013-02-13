@@ -638,10 +638,11 @@ void tConfItemBase::WriteAllToFile()
             tString mess;
             mess << ci->title << " ";
             //  mess << ci->value;
-            mess.SetPos( sim_maxlen+2, false );
-            mess << "# ";
+            //mess.SetPos( sim_maxlen+2, false );
+            mess << " # ";
             mess << help;
             mess << "\n";
+
             w << mess;
         }
     }

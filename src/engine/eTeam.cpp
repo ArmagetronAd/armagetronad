@@ -316,7 +316,7 @@ void eTeam::UpdateAppearance()
                     updateName = oldest->teamname;
                 else
                     // use player name as teamname
-                    updateName = oldest->GetUserName();
+                    updateName = oldest->GetName();
             }
 
             r = oldest->r;

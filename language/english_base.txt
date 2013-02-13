@@ -2424,7 +2424,7 @@ setting_legacy_change_blocked   Setting \1 (Group: \2) can't be changed currentl
 #********************************************
 #********************************************
 
-league_message_rose		\1 rose to place \3 on the \4 because of \2.
+league_message_rose		    \1 rose to place \3 on the \4 because of \2.
 league_message_dropped		\1 dropped to place \3 on the \4 because of \2.
 
 league_message_greet_intro	You are
@@ -2444,10 +2444,10 @@ highscore_message_move_pos	and moved to position \4.
 highscore_message_stay_top	and stayed at the top.
 highscore_message_stay_pos	but stayed at position \4.
 
-ladder_description		ladder
+ladder_description		    ladder
 ladder_message_entered		\1 entered the \2 list with \3 points
 ladder_message_gained		\1 gained \5 points on the \2
-ladder_message_lost		\1 lost \5 points on the \2
+ladder_message_lost		    \1 lost \5 points on the \2
 ladder_message_move_top		and moved to the top!
 ladder_message_move_pos		and moved to position \4.
 ladder_message_stay_top		and stayed at the top.
@@ -2517,33 +2517,33 @@ instant_win_activated		Instant win zone activated! Enter it to win the round.\n
 instant_round_end_activated	Round end zone activated! Enter it to end the round.\n
 instant_death_activated		Death zone activated! Avoid it!\n
 
-player_admin_kill			\1 0xRESETTwas smitten by an administrator.\n
-player_admin_slap_free			\1 0xRESETThas been slapped by an administrator.\n
-player_admin_slap_win			\1 has been hugged by an administrator and got \2 points.\n
-player_admin_slap_lose			\1 has been slapped by an administrator and lost \2 points.\n
-give_points_help                   Slaps the given player by granting them with the specified amount of points. Be smart and you may be able to hug your users, too ;) \n
-take_points_help          Slaps the given player by punishing them with the specified amound of points. Be careful or you will lose a of points :P \n
-player_win_instant			\1 was awarded \2 points for hitting the instant win zone.\n
-player_win_race			\1 was awarded \2 points for winning the race.\n
-player_win_conquest			\1 was awarded \2 points for conquering the enemy base.\n
-player_win_conquest2			\1 was awarded \2 points for conquering \3's base.\n
-players_win_conquest			\1 were awarded \2 points for conquering \3's base.\n
-player_win_flag			\1 was awarded \2 points for capturing the enemies flag.\n
-player_win_held_fortress	\1 was awarded \2 points for holding the base.\n
-player_lose_held_fortress	\1 lost \2 points for being too defensive.\n
-player_win_conquest_specific \1 was awarded \2 points for conquering \3's base.\n
-player_kill_collapse        \1 was eradicated by its collapsing zone.\n
-player_win_hole             \1 got \2 points for a sacrifice for the good of the team.\n
-player_lose_hole            0xffff00ZOMG! 0xff7f00HOLER!!1!!0xRESETT \1 lost \2 points for being a cheap ass lamer.\n
-player_win_command          \1 was declared the winner of the round!\n
-declare_round_winner_help  Declares round winner. USAGE: DECLARE_ROUND_WINNER [player].
+player_admin_kill			  \1 0xRESETTwas smitten by an administrator.\n
+player_admin_slap_free		  \1 0xRESETThas been slapped by an administrator.\n
+player_admin_slap_win		  \1 has been hugged by an administrator and got \2 points.\n
+player_admin_slap_lose		  \1 has been slapped by an administrator and lost \2 points.\n
+give_points_help              Slaps the given player by granting them with the specified amount of points. Be smart and you may be able to hug your users, too ;) \n
+take_points_help              Slaps the given player by punishing them with the specified amound of points. Be careful or you will lose a of points :P \n
+player_win_instant			  \1 was awarded \2 points for hitting the instant win zone.\n
+player_win_race			      \1 was awarded \2 points for winning the race.\n
+player_win_conquest			  \1 was awarded \2 points for conquering the enemy base.\n
+player_win_conquest2		  \1 was awarded \2 points for conquering \3's base.\n
+players_win_conquest		  \1 were awarded \2 points for conquering \3's base.\n
+player_win_flag			      \1 was awarded \2 points for capturing the enemies flag.\n
+player_win_held_fortress	  \1 was awarded \2 points for holding the base.\n
+player_lose_held_fortress	  \1 lost \2 points for being too defensive.\n
+player_win_conquest_specific  \1 was awarded \2 points for conquering \3's base.\n
+player_kill_collapse          \1 was eradicated by its collapsing zone.\n
+player_win_hole               \1 got \2 points for a sacrifice for the good of the team.\n
+player_lose_hole              0xffff00ZOMG! 0xff7f00HOLER!!1!!0xRESETT \1 lost \2 points for being a cheap ass lamer.\n
+player_win_command            \1 was declared the winner of the round!\n
+declare_round_winner_help     Declares round winner. USAGE: DECLARE_ROUND_WINNER [player].
 
-player_blastzone_score      \1 exploded on a blastzone and lost \2 points.\n
+player_blastzone_score        \1 exploded on a blastzone and lost \2 points.\n
 
-player_no_longer_suspended  \1 0x77ff77is allowed to play again.\n
-player_suspended            \1 0xff7777is banned to spectator mode for \2 round(s).\n
+player_no_longer_suspended    \1 0x77ff77is allowed to play again.\n
+player_suspended              \1 0xff7777is banned to spectator mode for \2 round(s).\n
 
-zone_collapse_harmless      \1's zone collapses harmlessly for lack of enemy contacts.\n
+zone_collapse_harmless        \1's zone collapses harmlessly for lack of enemy contacts.\n
 
 #********************************************
 #********************************************
@@ -2568,101 +2568,101 @@ spam_protection_silenced SPAM PROTECTION: you have been silenced by the server a
 spam_protection_silenced_default SPAM PROTECTION: you have to be given voice in order to chat publicly.\n
 vote_silenced You are not allowed to call a new vote while you are silenced.\n
 player_rename_silenced You are not allowed to rename while you are silenced.\n
-player_silenced         \10xff7777 has been silenced.\n
-player_silenced_all     Everyone's voices have been shut!\n
-player_voiced           \10x77ff77 has been given his voice back.\n
-player_voiced_all       Everyone's voices have now given back to them!\n
-player_allowed_teamchange \10x77ff77 has been allowed to change his team.\n
-player_disallowed_teamchange \10xff7777 cannot change teams anymore.\n
-vote_spam_protection	VOTE SPAM PROTECTION: you are disallowed from issuing votes for the next \1 seconds.\n
-chat_title_text			Say:
-player_entered_game		\1 0x7fff7fentered the game.\n
-player_entered_spectator \1 0x7fff7fentered as spectator.\n
-player_left_spectator    0xff7f7fSpectator \1 0xff7f7fleft.\n
-player_left_game		\1 was discarded with \2 points.\n
-player_leaving_game		\1 0xff7f7fleft the game.\n
-player_renamed			\2 renamed to \1.\n
-player_renamed_teamname \2 changed teamname to \1.\n
-player_got_renamed		\2 has been renamed to \1.\n
-player_will_be_renamed		\2 will be renamed to \1.\n
+player_silenced                  \10xff7777 has been silenced.\n
+player_silenced_all              Everyone's voices have been shut!\n
+player_voiced                    \10x77ff77 has been given his voice back.\n
+player_voiced_all                Everyone's voices have now given back to them!\n
+player_allowed_teamchange        \10x77ff77 has been allowed to change his team.\n
+player_disallowed_teamchange     \10xff7777 cannot change teams anymore.\n
+vote_spam_protection	         VOTE SPAM PROTECTION: you are disallowed from issuing votes for the next \1 seconds.\n
+chat_title_text			         Say:
+player_entered_game		         \1 0x7fff7fentered the game.\n
+player_entered_spectator         \1 0x7fff7fentered as spectator.\n
+player_left_spectator            0xff7f7fSpectator \1 0xff7f7fleft.\n
+player_left_game		         \1 was discarded with \2 points.\n
+player_leaving_game		         \1 0xff7f7fleft the game.\n
+player_renamed			         \2 renamed to \1.\n
+player_renamed_teamname          \2 changed teamname to \1.\n
+player_got_renamed		         \2 has been renamed to \1.\n
+player_will_be_renamed		     \2 will be renamed to \1.\n
 player_rename_rejected_votekick  \1 0xffffffis not allowed to rename to \2 0xffffffright now to avoid confusion with kick votes.\n
-player_rename_rejected_admin    \1 0xffffffis not allowed to rename to \20xffffff, as its name was locked by the administrator.\n
-player_allowed_rename		\1 0x7fff7fis allowed to rename again.\n
-player_disallowed_rename	\1 0xff7f7fis not allowed to rename anymore.\n
-player_welcome			\n\nWelcome \1! This server is running version \2.\n
-player_win_default		\1 got \2 points for a very strange reason.\n
-player_koh_score        \1 Wins \2 points for being The King of the Hill\n
-player_lose_default		\1 lost \2 points for a very strange reason.\n
-player_lose_suicide		\1 committed suicide and lost \2 points.\n
-player_lose_deathzone	\1 exploded on a deathzone and lost \2 points.\n
-player_lose_deathzone_team \1 exploded on a team deathzone and lost \2 points.\n
-player_lose_rubberzone	\1 exploded on a rubberzone and lost \2 points.\n
-player_free_suicide		\1 committed suicide.\n
-player_win_frag			\1 core dumped \3 for \2 points.\n
-player_win_survive		\1 got \2 points for surviving.\n
-player_dead_explosion   \1 was destroyed in the explosion made by \2.\n
-player_free_frag		\1 core dumped \2.\n
-player_teamkill			\1 core dumped teammate \2! Boo! No points for that!\n
-player_win_frag_ai		\1 got \2 points for core dumping an AI player.\n
-player_lose_frag		\1 lost \2 points since it caused a general protection fault.\n
-player_lose_rim		    \1 lost \2 points for trying to escape from the game grid.\n
-player_win_survivor		\1 was awarded \2 points for being last active team.\n
-player_joins_team       \1 wants to play for \2 on the next respawn.\n
-player_joins_team_wish  \1 still wants to play for \2, but isn't currently allowed to.\n
-player_joins_team_noex  \1 wants to play for a team that ceased to exist, ignoring request.\n
-player_leave_team_wish  \1 wants to leave \2 on the next respawn.\n
-player_leave_game_wish  \1 does not want to play next round.\n
-player_joins_team_start \1 0x7fff7fplays for \2.\n
-#player_joins_team_now   \1 0x7fff7fnow plays for \2.\n
-player_changes_team     \1 0x7f7fffswitches from \3 to \2.\n
-player_leaves_team		\1 0xff7f7fleft \2.\n
-player_creates_team		\1 founded \2.\n
-player_nocreate_team		\1 cannot currently create a new team.\n
-player_nojoin_team		\1 cannot currently join \2.\n
-player_not_on_team      You are not on a team.\n
-team_renamed                    \1 renamed it's team to \2.\n
-player_team_message     Teammates
-player_spectator_message Spectators
-no_real_teams           No teams with more than one player.\n
-player_topologypolice	Order from Topology Police: \1
-player_win_shot			\1 shot \3 for \2 points.\n
-player_free_shot		\1 shot \2.\n
-player_shot_suicide		\1 shot itself in the foot and lost \2 points.\n
-player_free_shot_suicide	\1 shot itself in the foot.\n
-player_win_death_shot		\1 got \3 with a death shot for \2 points.\n
-player_free_death_shot		\1 got \2 with a death shot.\n
-player_win_self_destruct	\1 self destructed and blasted \3 for \2 points.\n
-player_free_self_destruct	\1 self destructed and blasted \2.\n
-player_win_zombie_zone_revenge	Zombie \1 ate \3 for revenge, brains, and \2 points.\n
-player_free_zombie_zone_revenge	Zombie \1 ate \2 for revenge and brains.\n
-player_win_zombie_zone		Zombie \1 ate \3 for \2 points and yummy brains.\n
-player_free_zombie_zone		Zombie \1 ate \2 for their yummy brains.\n
-player_free_zombie_zone_die	\1 killed zombie \2, no brains for them.\n
-player_score_goal		\1 scored a goal for \2 points!  Great ball handling!\n
-player_score_own_goal		\1 scored on themselves.  Boo!\n
-player_shot_base        \1 received \2 points for shooting at \3's base.\n
+player_rename_rejected_admin     \1 0xffffffis not allowed to rename to \20xffffff, as its name was locked by the administrator.\n
+player_allowed_rename		     \1 0x7fff7fis allowed to rename again.\n
+player_disallowed_rename	     \1 0xff7f7fis not allowed to rename anymore.\n
+player_welcome			         \n\nWelcome \1! This server is running version \2.\n
+player_win_default		         \1 got \2 points for a very strange reason.\n
+player_koh_score                 \1 Wins \2 points for being The King of the Hill\n
+player_lose_default		         \1 lost \2 points for a very strange reason.\n
+player_lose_suicide		         \1 committed suicide and lost \2 points.\n
+player_lose_deathzone	         \1 exploded on a deathzone and lost \2 points.\n
+player_lose_deathzone_team       \1 exploded on a team deathzone and lost \2 points.\n
+player_lose_rubberzone	         \1 exploded on a rubberzone and lost \2 points.\n
+player_free_suicide		         \1 committed suicide.\n
+player_win_frag			         \1 core dumped \3 for \2 points.\n
+player_win_survive		         \1 got \2 points for surviving.\n
+player_dead_explosion            \1 was destroyed in the explosion made by \2.\n
+player_free_frag		         \1 core dumped \2.\n
+player_teamkill			         \1 core dumped teammate \2! Boo! No points for that!\n
+player_win_frag_ai		         \1 got \2 points for core dumping an AI player.\n
+player_lose_frag		         \1 lost \2 points since it caused a general protection fault.\n
+player_lose_rim		             \1 lost \2 points for trying to escape from the game grid.\n
+player_win_survivor		         \1 was awarded \2 points for being last active team.\n
+player_joins_team                \1 wants to play for \2 on the next respawn.\n
+player_joins_team_wish           \1 still wants to play for \2, but isn't currently allowed to.\n
+player_joins_team_noex           \1 wants to play for a team that ceased to exist, ignoring request.\n
+player_leave_team_wish           \1 wants to leave \2 on the next respawn.\n
+player_leave_game_wish           \1 does not want to play next round.\n
+player_joins_team_start          \1 0x7fff7fplays for \2.\n
+#player_joins_team_now           \1 0x7fff7fnow plays for \2.\n
+player_changes_team              \1 0x7f7fffswitches from \3 to \2.\n
+player_leaves_team		         \1 0xff7f7fleft \2.\n
+player_creates_team		         \1 founded \2.\n
+player_nocreate_team		     \1 cannot currently create a new team.\n
+player_nojoin_team		         \1 cannot currently join \2.\n
+player_not_on_team               You are not on a team.\n
+team_renamed                     \1 renamed it's team to \2.\n
+player_team_message              Teammates
+player_spectator_message         Spectators
+no_real_teams                    No teams with more than one player.\n
+player_topologypolice	         Order from Topology Police: \1
+player_win_shot			         \1 shot \3 for \2 points.\n
+player_free_shot		         \1 shot \2.\n
+player_shot_suicide		         \1 shot itself in the foot and lost \2 points.\n
+player_free_shot_suicide	     \1 shot itself in the foot.\n
+player_win_death_shot		     \1 got \3 with a death shot for \2 points.\n
+player_free_death_shot		     \1 got \2 with a death shot.\n
+player_win_self_destruct	     \1 self destructed and blasted \3 for \2 points.\n
+player_free_self_destruct	     \1 self destructed and blasted \2.\n
+player_win_zombie_zone_revenge	 Zombie \1 ate \3 for revenge, brains, and \2 points.\n
+player_free_zombie_zone_revenge	 Zombie \1 ate \2 for revenge and brains.\n
+player_win_zombie_zone		     Zombie \1 ate \3 for \2 points and yummy brains.\n
+player_free_zombie_zone		     Zombie \1 ate \2 for their yummy brains.\n
+player_free_zombie_zone_die	     \1 killed zombie \2, no brains for them.\n
+player_score_goal		         \1 scored a goal for \2 points!  Great ball handling!\n
+player_score_own_goal		     \1 scored on themselves.  Boo!\n
+player_shot_base                 \1 received \2 points for shooting at \3's base.\n
 
-player_flag_timeout		\1 lost the flag because they held it too long...\n
-player_flag_return		\1 returned the flag, well done!\n
-player_flag_take		\1 stole the flag, get them!\n
-player_flag_drop		\1 dropped the flag, get it!\n
-player_flag_score		\1 took the flag home for \2 points, nice flag handling!\n
-player_flag_cant_score		\1 took the flag home, but their flag isn't back yet. Get it!\n
-player_flag_hold_score_win	\1 got \2 points for holding the flag!\n
-player_flag_hold_score_lose	\1 lost \2 points for holding the flag!\n
-min_flags_home              minimum number of flags that must be home in order for flag to be captured
+player_flag_timeout		         \1 lost the flag because they held it too long...\n
+player_flag_return		         \1 returned the flag, well done!\n
+player_flag_take		         \1 stole the flag, get them!\n
+player_flag_drop		         \1 dropped the flag, get it!\n
+player_flag_score		         \1 took the flag home for \2 points, nice flag handling!\n
+player_flag_cant_score		     \1 took the flag home, but their flag isn't back yet. Get it!\n
+player_flag_hold_score_win	     \1 got \2 points for holding the flag!\n
+player_flag_hold_score_lose	     \1 lost\2 points for holding the flag!\n
+min_flags_home                   minimum number of flags that must be home in order for flag to be captured
 
-player_target_score_win         \1 got \2 points for entering a target.\n
-player_target_score_lose        \1 lost \2 points for entering a target.\n
-player_target_win_conquest      \1 win round for being the first to get the last target.\n
+player_target_score_win          \1 got \2 points for entering a target.\n
+player_target_score_lose         \1 lost \2 points for entering a target.\n
+player_target_win_conquest       \1 win round for being the first to get the last target.\n
 
-player_base_respawn		\1 was respawned by \2.\n
-player_base_enemy_respawn	\1 was respawned by their enemy \2.\n
-player_base_enemy_kill		\1 forgot which team they're on...\n
+player_base_respawn		         \1 was respawned by \2.\n
+player_base_enemy_respawn	     \1 was respawned by their enemy \2.\n
+player_base_enemy_kill		     \1 forgot which team they're on...\n
 
 player_respawn_center_message	You've been respawned\n
 
-player_base_respawn_reminder	0xff4444Reminder: 0xffffffRespawn 0x44ff44\1 0xffffffteammates by hitting your base.\n
+player_base_respawn_reminder	    0xff4444Reminder: 0xffffffRespawn 0x44ff44\1 0xffffffteammates by hitting your base.\n
 player_base_respawn_reminder_alone	0xff4444Reminder (Last Player): 0xffffffRespawn 0x44ff44\1 0xffffffteammates by hitting your base.\n
 
 msg_deadsilenced		Chat discarded, the dead cannot speak...\n
@@ -3624,3 +3624,6 @@ zombie_zone_rise_help                     How quickly should a zombie zone rise 
 zombie_zone_rot_help                      The speed at which the zombie zone rotates.
 zombie_zone_speed_help                    The speed at which the zombie zone moves as it chases after players.
 zone_delay_clear_help                     Clears all delayed zones from cache.
+
+arena_boundary_help                       This is the distance players can travel outside the arena boundary.
+arena_boundary_kill_help                  If set to 1, Players beyond the ARENA_BOUNDARY will be killed. 
