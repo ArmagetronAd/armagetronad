@@ -1478,25 +1478,102 @@ static tString GetParent( char const * child, int levels )
 {
     tString ret( child );
 
-    // strip last two path segments
+// TODO Add windows support for this behavior.
+#ifndef WIN32    
+    if ( ret == "." )
+    {
+        ret = "";
+    }
+    // If it's a relative path, ensure it starts with "./"
+    else if ( ret.compare( 0, 1, "/" ) != 0 && ret.compare( 0, 2, "./" ) != 0 )
+    {
+        ret = "./" + ret;
+    }
+    bool isRelative = ret.compare( 0, 1, "/" ) != 0;
+#endif
+
+    // strip the requested number of path segments
     int toStrip = levels;
     int stripCurrent = ret.Size()-1;
     while (stripCurrent >= 0 && toStrip > 0)
     {
-        char & c = ret[ stripCurrent ];
+        const char & c = ret[ stripCurrent ];
         // count separators
         if (c == '/' || c == '\\' || c == ':')
             --toStrip;
-        c=0;
         --stripCurrent;
     }
+    ret.erase( stripCurrent + 1 );
 
-#ifdef DEBUG_PATH
-    std::cout << "Parent: " << ret << "\n";
+// TODO Add windows support for this behavior.
+#ifndef WIN32    
+    if ( toStrip && isRelative )
+    {
+        // No more path segments to strip, but we still need to go down more levels
+        tString moreLevels;
+        for (int i = 0; i < toStrip; i++)
+        {
+            // We don't want the path to end with a "/"
+            if (i > 0)
+                moreLevels += "/";
+            moreLevels += "..";
+        }
+        ret = moreLevels + ret;
+    }
+    else if ( ret == "" )
+    {
+        ret = isRelative ? "." : "/";
+    }
 #endif
 
-    return tString(static_cast<char const *>(ret));
+#ifdef DEBUG_PATH
+    std::cout << "Parent (levels=" << levels << "): " << ret << "\n";
+#endif
+    return ret;
 }
+
+#if 0
+struct TestGetParent
+{
+    TestGetParent()
+    {
+        std::cout << "== Testing GetParent()\n";
+
+        Test("./path/to/file", 1, "./path/to");
+        Test("./path/to/file", 2, "./path");
+        Test("./path/to/file", 3, ".");
+        Test("./path/to/file", 4, "..");
+        Test("./path/to/file", 5, "../..");
+        
+        Test( "path/to/file", 1, "./path/to" );
+        Test( "path/to/file", 2, "./path" );
+        Test( "path/to/file", 3, "." );
+        Test( "path/to/file", 4, ".." );
+        Test( "path/to/file", 5, "../.." );
+        
+        Test("/path/to/file", 1, "/path/to");
+        Test("/path/to/file", 2, "/path");
+        Test("/path/to/file", 3, "/");
+        Test("/path/to/file", 4, "/");
+        
+        Test( ".", 1, ".." );
+        Test( ".", 2, "../.." ),
+        Test( ".", 3, "../../.." ),
+
+        exit(0);
+    }
+    void Test( char const *path, int levels, char const *expectedPath )
+    {
+        tString gotPath = GetParent( path, levels );
+        if ( gotPath != expectedPath )
+        {
+            std::cout << "TEST FAILURE\npath=" << path << " levels=" << levels << '\n';
+            std::cout << "Got '" << gotPath << "', but expected '" << expectedPath << "'\n\n";
+        }
+    }
+};
+static TestGetParent st_getParentTests;
+#endif
 
 //! Class holding our best guess of the path to the binary executable
 class tPathToExecutable
@@ -1651,9 +1728,15 @@ static tString st_RelocatePath( tString const & original )
 // tries to find the path to the data files, given the location of the executable
 static void FindDataPath()
 {
-#if defined(MACOSX_XCODE) || defined(WIN32)
+#if defined(WIN32)
     // look for data in the same directory as the executable
     if ( TestDataPath(GetParent(st_pathToExecutable.Get(), 1) ) ) return;
+#elif defined(MACOSX_XCODE)
+#ifdef DEDICATED
+    if ( TestDataPath( GetParent( st_pathToExecutable.Get(), 2 ) ) ) return;
+#else
+    if ( TestDataPath( "." ) ) return;
+#endif
 #else
     // try to use path substitution
     if ( TestDataPath( st_RelocatePath( tString(AA_DATADIR ) ) ) ) return;
