@@ -3286,12 +3286,12 @@ global_id_help                If set to 1, Global IDs (Armathentication) will be
 #
 #*************************************
 #*************************************
-race_timer_enabled_help		            (0 = Disable, 1 = Enable) race timer. Don't change during round.
-race_end_delay_help		                Number of seconds to give players to finish after target reached
+race_timer_enabled_help		          (0 = Disable, 1 = Enable) race timer. Don't change during round.
+race_end_delay_help		              Number of seconds to give players to finish after target reached
 race_score_deplete_help               Number the score depletes by everytime a player enters the win zone.
-race_score_type_help		              0-No sorting; 1-Sort by best score; 2-sort by best time.
+race_score_type_help		          0-No sorting; 1-Sort by best score; 2-sort by best time.
 race_log_time_help                    If enabled, it displays the reached time and the position of arrival.
-player_reach_race		                  \1 0xfffffffinished with \2 points in \3 seconds.\n
+player_reach_race		              \1 0xfffffffinished with \2 points in \3 seconds.\n
 player_reach_race_first               \1 0xfffffffinished 1st in \2 seconds.\n
 player_reach_race_time                \2| \1 0xfffffffinished \3 s behind 1st.\n
 player_personal_best_reach_time       New personal record! Your new time record is \1 seconds.\n
@@ -3300,11 +3300,10 @@ player_race_record_search_found       \1 is ranked \2 with a best time of \3 sec
 player_race_record_search_not_found   0xff0000The search term \1 couldn't be found in the racing records.\n
 player_race_record_search_many_found  0xff0000The search term \1 has found many matches. Be more specific.\n
 
-race_ranks_personal_message Your current position for
-race_rank_title_message Top \1 players for
+race_ranks_personal_message Your current position for 0xffdd00
+race_rank_title_message Top \1 players for 0xffdd00
 race_rank_title_name Ranks
 race_rank_title_player_name Players
-race_rank_title_score_name Scores
 race_rank_title_time_name Times
 race_rank_border #
 

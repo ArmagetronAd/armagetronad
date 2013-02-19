@@ -207,7 +207,7 @@ void gRaceScores::Add(gRacePlayer *racePlayer)
             rS->time_ = racePlayer->Time();
             tOutput newtime_;
             newtime_.SetTemplateParameter(1, racePlayer->Time());
-            newtime_ << "$player_personal_best_reach_time_";
+            newtime_ << "$player_personal_best_reach_time";
 
             sn_ConsoleOut(newtime_, racePlayer->Player()->Owner());
         }
@@ -220,7 +220,7 @@ void gRaceScores::Add(gRacePlayer *racePlayer)
         {
             tOutput newtime_;
             newtime_.SetTemplateParameter(1, racePlayer->Time());
-            newtime_ << "$player_personal_best_reach_time_";
+            newtime_ << "$player_personal_best_reach_time";
 
             sn_ConsoleOut(newtime_, racePlayer->Player()->Owner());
         }
