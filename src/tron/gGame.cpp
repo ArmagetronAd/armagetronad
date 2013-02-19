@@ -4406,6 +4406,9 @@ void gGame::StateUpdate(){
             }
             //HACK RACE end
 
+            //  reset ingame timer
+            gGameSpawnTimer::Reset();
+
             sg_ParseMap( aParser );
 
             sn_Statistics();
@@ -4959,6 +4962,16 @@ static void sg_TimerResume(std::istream &s)
     }
 }
 static tConfItemFunc sg_TimerResumeConf("TIMER_RESUME", &sg_TimerResume);
+
+static void sg_TimerReset(std::istream &s)
+{
+    gGameSpawnTimer::SetTimerActive(false);
+    gGameSpawnTimer::SetLaunchTime(0);
+    gGameSpawnTimer::SetTargetTime(0);
+
+    gGameSpawnTimer::SetCountdown(0);
+}
+static tConfItemFunc sg_TimerResetConf("TIMER_RESET", &sg_TimerReset);
 
 void gGameSpawnTimer::Sync(int alive, int ai_alive, int humans)
 {

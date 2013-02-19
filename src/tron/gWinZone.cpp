@@ -1811,7 +1811,7 @@ gDeathZoneHack::gDeathZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCr
 {
     pLastShotCollision = NULL;
 
-    if (sg_deathZoneRandomColors)
+    if (!sg_deathZoneRandomColors)
     {
         if (sg_SwapWinDeath == false)
         {
