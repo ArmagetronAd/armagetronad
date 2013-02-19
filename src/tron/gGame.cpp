@@ -4953,7 +4953,7 @@ static tConfItemFunc sg_TimerStopConf("TIMER_STOP", &sg_TimerStop);
 
 static void sg_TimerResume(std::istream &s)
 {
-    if (!gGameSpawnTimer::Active())
+    if (!gGameSpawnTimer::Active() && (gGameSpawnTimer::GetLaunchTime() != 0) && (gGameSpawnTimer::GetTargetTime() != 0) && (gGameSpawnTimer::GetCountdown() != 0))
     {
         gGameSpawnTimer::SetTimerActive(true);
     }

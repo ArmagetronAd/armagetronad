@@ -1803,22 +1803,39 @@ void gWinZoneHack::OnEnter( gCycle * target, REAL time )
 REAL sg_deathzoneRotation = 0.3f;
 static tSettingItem<REAL> sg_deathzoneRotationConf("DEATHZONE_ROTATION", sg_deathzoneRotation);
 
+bool sg_deathZoneRandomColors = false;
+static tSettingItem<bool> sg_deathZoneRandomColorsConf("DEATHZONE_RANDOM_COLORS", sg_deathZoneRandomColors);
+
 gDeathZoneHack::gDeathZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreation, eTeam * teamowner, bool delayCreation )
 :gZone( grid, pos, dynamicCreation, delayCreation )
 {
     pLastShotCollision = NULL;
 
-    if (sg_SwapWinDeath == false)
+    if (sg_deathZoneRandomColors)
     {
-        color_.r = sg_ColorDeathZoneRed / 15.0f;//1.0f;
-        color_.b = sg_ColorDeathZoneBlue / 15.0f;//0.0f;
-        color_.g = sg_ColorDeathZoneGreen / 15.0f;//0.0f;
+        if (sg_SwapWinDeath == false)
+        {
+            color_.r = sg_ColorDeathZoneRed / 15.0f;//1.0f;
+            color_.b = sg_ColorDeathZoneBlue / 15.0f;//0.0f;
+            color_.g = sg_ColorDeathZoneGreen / 15.0f;//0.0f;
+        }
+        else
+        {
+            color_.r = sg_ColorWinZoneRed / 15.0f;//0.0f;
+            color_.b = sg_ColorWinZoneBlue / 15.0f;//1.0f;
+            color_.g = sg_ColorWinZoneGreen / 15.0f;//0.0f;
+        }
     }
     else
     {
-        color_.r = sg_ColorWinZoneRed / 15.0f;//0.0f;
-        color_.b = sg_ColorWinZoneBlue / 15.0f;//1.0f;
-        color_.g = sg_ColorWinZoneGreen / 15.0f;//0.0f;
+        tRandomizer &randomizer = tRandomizer::GetInstance();
+        REAL colorR = randomizer.Get(15) / 15.0f;
+        REAL colorG = randomizer.Get(15) / 15.0f;
+        REAL colorB = randomizer.Get(15) / 15.0f;
+
+        color_.r = colorR;
+        color_.b = colorG;
+        color_.g = colorB;
     }
 
     if (teamowner!=NULL)
