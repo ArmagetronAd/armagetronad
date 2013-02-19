@@ -52,7 +52,7 @@ static void ReplaceSpaces( std::string & str )
 }
 
 bool sg_RaceTimerEnabled = false;
-bool restrictRaceTimer(bool const &newValue)
+/*bool restrictRacetime_r(bool const &newValue)
 {
     eGrid *grid = eGrid::CurrentGrid();
     if (grid)
@@ -60,8 +60,8 @@ bool restrictRaceTimer(bool const &newValue)
         return false;
     }
     return true;
-}
-static tSettingItem<bool> sg_RaceTimerEnabledConf( "RACE_TIMER_ENABLED", sg_RaceTimerEnabled, &restrictRaceTimer);
+}*/
+static tSettingItem<bool> sg_RaceTimerEnabledConf( "RACE_TIMER_ENABLED", sg_RaceTimerEnabled/*, &restrictRacetime_r*/);
 
 int sg_RaceEndDelay = 60;
 static tSettingItem<int> sg_RaceEndDelayConf( "RACE_END_DELAY", sg_RaceEndDelay );
@@ -77,7 +77,11 @@ bool restrictRaceScore(int const &newValue)
     {
         RacingScore = newValue;
     }
-    else RacingScore = 1;
+    else
+    {
+        RacingScore = 1;
+        return false;
+    }
 
     return true;
 }
@@ -104,14 +108,14 @@ enum gRaceScoreType
 {
     gRACESCORE_NO_SORTING = 0,
     gRACESCORE_BEST_SCORE = 1,
-    gRACESCORE_BEST_TIME = 2
+    gRACESCORE_BEST_time_ = 2
 };
 tCONFIG_ENUM( gRaceScoreType );
 
 static gRaceScoreType racescoretype = gRACESCORE_NO_SORTING;
 bool restrictScoreSortTypes(const gRaceScoreType &newValue)
 {
-    if ((newValue > gRACESCORE_BEST_TIME) || (newValue < gRACESCORE_NO_SORTING))
+    if ((newValue > gRACESCORE_BEST_time_) || (newValue < gRACESCORE_NO_SORTING))
     {
         return false;
     }
@@ -127,43 +131,7 @@ static tSettingItem<bool> sg_raceFinishKillConf("RACE_FINISH_KILL", sg_raceFinis
 
 tString sg_currentMap("");
 
-/* to check the correct map name
-static void sg_currentMapLoad(std::istream &s)
-{
-    tString CurrentMapStr(sg_currentMap);
-    tString ClrString("");
-    int linenum, rlinenum;
-    linenum = 0;
-    while(linenum != -1)
-    {
-        rlinenum = linenum;
-        linenum = CurrentMapStr.StrPos(linenum+1, "/");
-
-        /* used for testing to get the map name only
-        ClrString << "Current number is " << linenum << "\n";
-        sn_ConsoleOut(ClrString);
-
-
-        if (linenum == -1)
-        {
-            ClrString << "Current map name ";
-            ClrString << CurrentMapStr.SubStr(rlinenum+1, (CurrentMapStr.Len() - rlinenum+1));
-            CurrentMapName = CurrentMapStr.SubStr(rlinenum+1, (CurrentMapStr.Len() - rlinenum+1));
-            CurrentMapName << ".txt";
-            ClrString << "\n";
-            sn_ConsoleOut(ClrString);
-        }
-    }
-}
-//! GET CURRENT MAP NAME ONLY
-static tConfItemFunc sg_currentMapConf("MAP_NAME", &sg_currentMapLoad);
-*/
-
 //! STATIC VARIABLES
-std::multimap <REAL, gRace::Goal>  gRace::goals_;
-std::vector <gWinZoneHack*> gRace::winZones_;
-std::vector <gDeathZoneHack*> gRace::deathZones_;
-
 bool gRace::firstArrived_ = false;
 int  gRace::countDown_ = -1;
 bool gRace::roundFinished_ = false;
@@ -174,32 +142,34 @@ tString gRace::firstToArive_;
 
 bool sg_raceOutputSent = false;
 
-tList<gRaceScores> sn_RaceScores;
-tList<gRacePlayer> sn_RacePlayers;
+tList<gRaceScores> sg_RaceScores;
+tList<gRacePlayer> sg_RacePlayers;
+tList<gRacePlayer> sg_RaceFinished;
 
 gRaceScores::gRaceScores(tString UserName)
 {
-    this->user_name = UserName;
+    this->userName_ = UserName;
 
-    sn_RaceScores.Insert(this);
+    sg_RaceScores.Insert(this);
 }
 
-gRaceScores * gRaceScores::GetPlayer(tString name)
+gRaceScores *gRaceScores::GetPlayer(tString name)
 {
-    for (int i=0; i < sn_RaceScores.Len(); i++)
+    for (int i=0; i < sg_RaceScores.Len(); i++)
     {
-        gRaceScores *rS = sn_RaceScores[i];
-        if (rS->user_name == name)
+        gRaceScores *rS = sg_RaceScores[i];
+        if (rS->userName_ == name)
             return rS;
     }
+    return NULL;
 }
 
 bool gRaceScores::CheckPlayer(tString name)
 {
-    for (int i=0; i < sn_RaceScores.Len(); i++)
+    for (int i=0; i < sg_RaceScores.Len(); i++)
     {
-        gRaceScores *rS = sn_RaceScores[i];
-        if (rS->user_name == name)
+        gRaceScores *rS = sg_RaceScores[i];
+        if (rS->userName_ == name)
             return true;
     }
     return false;
@@ -207,87 +177,63 @@ bool gRaceScores::CheckPlayer(tString name)
 
 void gRaceScores::Switch(int i, int j)
 {
-    Swap(sn_RaceScores[i], sn_RaceScores[j]);
+    Swap(sg_RaceScores[i], sg_RaceScores[j]);
 }
 
 bool gRaceScores::InOrder(int i,int j)
 {
-    gRaceScores *rSP = sn_RaceScores[i];
-    gRaceScores *rSR = sn_RaceScores[j];
-    if (racescoretype == gRACESCORE_BEST_TIME)
-    {
-        if (rSP->time == -1) return false;
-        if (rSR->time == -1) return true;
-        else return (rSP->time <= rSR->time);
-    }
-    else if (racescoretype == gRACESCORE_BEST_SCORE) return (rSP->score >= rSR->score);
+    gRaceScores *rSP = sg_RaceScores[i];
+    gRaceScores *rSR = sg_RaceScores[j];
+
+    if (rSP->time_ == -1) return false;
+    if (rSR->time_ == -1) return true;
+    else return (rSP->time_ < rSR->time_);
 }
 
 void gRaceScores::Sort()
 {
-    for(int i=1;i<sn_RaceScores.Len();i++)
+    for(int i=1;i<sg_RaceScores.Len();i++)
         for(int j=i;j>=1 && !InOrder(j-1,j);j--)
             Switch(j,j-1);
 }
 
-void gRaceScores::Add(tString UserName, int WinScore, REAL reachTime)
+void gRaceScores::Add(gRacePlayer *racePlayer)
 {
-    if (CheckPlayer(UserName))
+    if (CheckPlayer(racePlayer->Player()->GetUserName()))
     {
-        gRaceScores *rS = GetPlayer(UserName);
-        rS->score += WinScore;
-        if (((reachTime < rS->time) && reachTime != -1) || (rS->time == -1 && reachTime != -1))
+        gRaceScores *rS = GetPlayer(racePlayer->Player()->GetUserName());
+        if (((racePlayer->Time() < rS->time_) && racePlayer->Time() != -1) || (rS->time_ == -1 && racePlayer->Time() != -1))
         {
-            rS->time = reachTime;
-            tOutput newTime;
-            newTime.SetTemplateParameter(1, reachTime);
-            newTime << "$player_personal_best_reach_time";
+            rS->time_ = racePlayer->Time();
+            tOutput newtime_;
+            newtime_.SetTemplateParameter(1, racePlayer->Time());
+            newtime_ << "$player_personal_best_reach_time_";
 
-            ePlayerNetID *p = ePlayerNetID::FindPlayerByName(UserName);
-            if (p)
-            {
-                sn_ConsoleOut(newTime, p->Owner());
-            }
+            sn_ConsoleOut(newtime_, racePlayer->Player()->Owner());
         }
     }
     else
     {
-        gRaceScores *rS = new gRaceScores(UserName);
-        rS->score = WinScore;
-        rS->time = reachTime;
-        if (reachTime != -1)
+        gRaceScores *rS = new gRaceScores(racePlayer->Player()->GetUserName());
+        rS->time_ = racePlayer->Time();
+        if (racePlayer->Time() != -1)
         {
-            tOutput newTime;
-            newTime.SetTemplateParameter(1, reachTime);
-            newTime << "$player_personal_best_reach_time";
+            tOutput newtime_;
+            newtime_.SetTemplateParameter(1, racePlayer->Time());
+            newtime_ << "$player_personal_best_reach_time_";
+
+            sn_ConsoleOut(newtime_, racePlayer->Player()->Owner());
         }
     }
 }
 
 void gRaceScores::Read()
 {
-    tString CurrentMapStr(sg_currentMap);
-    tString CurrentMapName;
-    /*int linenum, rlinenum;
-    linenum = 0;
-    while(linenum != -1)
-    {
-        rlinenum = linenum;
-        linenum = CurrentMapStr.StrPos(linenum+1, "/");
-
-        if (linenum == -1)
-        {
-            CurrentMapName = CurrentMapStr.SubStr(rlinenum+1, (CurrentMapStr.Len() - (rlinenum+1)));
-            CurrentMapName << ".txt";
-        }
-    }*/
-
-    tString Input, params;
-    //Input << "race_scores/" << CurrentMapName;
+    tString Input;
     Input << "race_scores/" << sg_currentMap << ".txt";
-    //tTextFileRecorder r(tDirectories::Var(), Input);
     std::ifstream r;
-    if ( tDirectories::Var().Open(r, Input) ) {
+    if (tDirectories::Var().Open(r, Input))
+    {
         while (!r.eof())
         {
             //std::stringstream s(r.getline());
@@ -295,40 +241,26 @@ void gRaceScores::Read()
             std::string sayLine;
             std::getline(r, sayLine);
             std::istringstream s(sayLine);
+            tString params;
 
-            params.ReadLine(s, true);
+            params.ReadLine(s);
+            int pos = 0;
 
-            if (params != "")
+            if (params.Filter() != "")
             {
-                int rLin = 0, pLin = 0;
-                int iCount = 1;
                 gRaceScores *rS = NULL;
-                while (pLin != -1)
+
+                tString name = params.ExtractNonBlankSubString(pos);
+                if (!CheckPlayer(name))
                 {
-                    rLin = pLin + 1;
-                    pLin = params.StrPos(rLin, " ");
-                    if (iCount == 1)
-                    {
-                        tString name = params.SubStr(0, pLin);
-                        if (!CheckPlayer(name))
-                        {
-                            rS = new gRaceScores(name);
-                        }
-                        else
-                        {
-                            rS = GetPlayer(name);
-                        }
-                    }
-                    else if (iCount == 2)
-                    {
-                        rS->score = atoi(params.SubStr(rLin, pLin));
-                    }
-                    else if (iCount == 3)
-                    {
-                        rS->time = atof(params.SubStr(rLin, pLin));
-                    }
-                    iCount++;
+                    rS = new gRaceScores(name);
                 }
+                else
+                {
+                    rS = GetPlayer(name);
+                }
+
+                rS->time_ = atof(params.ExtractNonBlankSubString(pos));
             }
         }
     }
@@ -338,32 +270,22 @@ void gRaceScores::Write()
 {
     tString Output;
 
-    if (racescoretype != gRACESCORE_NO_SORTING) gRaceScores::Sort();
-    /*
-    linenum = 0;
-    while (linenum != -1)
-    {
-        rlinenum = linenum;
-        linenum = tDirectories::Var().GetPaths().StrPos(linenum+1, " - ");
-        if (linenum == -1)
-        {
-            Output = tDirectories::Var().GetPaths().SubStr(rlinenum+3, (tDirectories::Var().GetPaths().Len() - (rlinenum+3)));
-        }
-    }
-    linenum = Output.StrPos(0, "\n");
-    Output = Output.SubStr(0, linenum);*/
+    gRaceScores::Sort();
 
-    //Output << /*tDirectories::Var().GetPaths()*/"race_scores/" << CurrentMapName;
-    Output << /*tDirectories::Var().GetPaths()*/"race_scores/" << sg_currentMap << ".txt";
+    Output << "race_scores/" << sg_currentMap << ".txt";
 
-    if (sn_RaceScores.Len() > 0)
+    if (sg_RaceScores.Len() > 0)
     {
         std::ofstream w;
-        if ( tDirectories::Var().Open(w, Output) ) {
-            for (int i=0; i < sn_RaceScores.Len(); i++)
+        if (tDirectories::Var().Open(w, Output))
+        {
+            for (int i=0; i < sg_RaceScores.Len(); i++)
             {
-                gRaceScores *rS = sn_RaceScores[i];
-                w << rS->user_name << " " << rS->score << " " << rS->time << "\n";
+                gRaceScores *rS = sg_RaceScores[i];
+                if (rS)
+                {
+                    w << rS->userName_ << " " << rS->time_ << "\n";
+                }
             }
         }
     }
@@ -371,13 +293,12 @@ void gRaceScores::Write()
 
 void gRaceScores::Reset()
 {
-    for(int i=0; i < sn_RaceScores.Len(); i++)
+    for(int i = 0; i < sg_RaceScores.Len(); i++)
     {
-        gRaceScores *rS = sn_RaceScores[i];
-        sn_RaceScores.RemoveAt(i);
+        gRaceScores *rS = sg_RaceScores[i];
         delete rS;
-        i -= 1;
     }
+    sg_RaceScores.Clear();
 }
 
 static int sg_raceNumRanksShowStart = 3;
@@ -405,20 +326,19 @@ void gRaceScores::OutputStart()
     tColoredString mess, header;
     tArray<tColoredString> ranksList;
 
-    if (sn_RaceScores.Len() > 0)
+    if (sg_RaceScores.Len() > 0)
     {
         int rank        = 0;
         int ranksPos    = 0;
         int playerPos   = 16;
-        int scoresPos   = 0;
-        int timesPos    = 0;
+        int time_sPos    = 0;
 
         if (sg_raceRankShowStart == 1)
         {
-            if (sn_RaceScores.Len() >= sg_raceNumRanksShowStart)
+            if (sg_RaceScores.Len() >= sg_raceNumRanksShowStart)
             {
                 tString ranksPosStr, ranksTitle;
-                ranksPosStr << sn_RaceScores.Len();
+                ranksPosStr << sg_RaceScores.Len();
                 ranksTitle << tOutput("$race_rank_title_name");
                 if (ranksTitle.Len() > ranksPosStr.Len())
                 {
@@ -427,31 +347,25 @@ void gRaceScores::OutputStart()
 
                 for(int a = 0; a < sg_raceNumRanksShowStart; a++)
                 {
-                    gRaceScores *rScores = sn_RaceScores[a];
+                    gRaceScores *rScores = sg_RaceScores[a];
                     if (rScores)
                     {
-                        tString scorePos, timePos, scoreTitle, timeTitle;
-                        scorePos << rScores->score;
-                        timePos << rScores->time;
-                        scoreTitle << tOutput("$race_rank_title_score_name");
-                        timeTitle << tOutput("$race_rank_title_time_name");
+                        tString time_Pos, time_Title;
+                        time_Pos << rScores->time_;
+                        time_Title << tOutput("$race_rank_title_time_name");
 
-                        if (scoreTitle.Len() > scorePos.Len()) scoresPos = scoreTitle.Len();
-                        else if (scorePos.Len() > scoresPos) scoresPos = scorePos.Len();
-
-                        if (timeTitle.Len() > scorePos.Len()) timesPos = timeTitle.Len();
-                        else if (timePos.Len() > timesPos) timesPos = timePos.Len();
+                        if (time_Title.Len() > ranksPos) time_sPos = time_Title.Len();
+                        else if (time_Pos.Len() > time_sPos) time_sPos = time_Pos.Len();
                     }
                 }
 
-                ranksPos    += 5;
-                playerPos   += 4;
-                scoresPos   += 4;
-                timesPos    += 6;
+                ranksPos  += 5;
+                playerPos += 4;
+                time_sPos += 6;
 
                 for(int b = 0;b < sg_raceNumRanksShowStart; b++)
                 {
-                    gRaceScores *rScores = sn_RaceScores[b];
+                    gRaceScores *rScores = sg_RaceScores[b];
                     if (rScores)
                     {
                         rank++;
@@ -459,20 +373,18 @@ void gRaceScores::OutputStart()
                         tColoredString line;
                         tString strippedName;
                         bool isStripped = false;
-                        if (rScores->user_name.Len() > playerPos)
+                        if (rScores->userName_.Len() > playerPos)
                         {
-                            strippedName << rScores->user_name.SubStr(0, playerPos - 1);
+                            strippedName << rScores->userName_.SubStr(0, playerPos - 1);
                             isStripped = true;
                         }
 
                         line << " " << tOutput("$race_rank_border") << " " << (rank);
                         line.SetPos(ranksPos, false);
-                        line << " " << tOutput("$race_rank_border") << " " << rScores->user_name.SubStr(0, 15);
+                        line << " " << tOutput("$race_rank_border") << " " << rScores->userName_.SubStr(0, 15);
                         line.SetPos(ranksPos + playerPos, false);
-                        line << " " << tOutput("$race_rank_border") << " " << rScores->score;
-                        line.SetPos(ranksPos + playerPos + scoresPos, false);
-                        line << " " << tOutput("$race_rank_border") << " " << rScores->time;
-                        line.SetPos(ranksPos + playerPos + scoresPos + timesPos, false);
+                        line << " " << tOutput("$race_rank_border") << " " << rScores->time_;
+                        line.SetPos(ranksPos + playerPos + time_sPos, false);
                         line << " " << tOutput("$race_rank_border") << "\n";
                         ranksList.Insert(line);
                     }
@@ -481,7 +393,7 @@ void gRaceScores::OutputStart()
             else
             {
                 tString ranksPosStr, ranksTitle;
-                ranksPosStr << sn_RaceScores.Len();
+                ranksPosStr << sg_RaceScores.Len();
                 ranksTitle << tOutput("$race_rank_title_name");
 
                 if (ranksTitle.Len() > ranksPosStr.Len())
@@ -489,33 +401,27 @@ void gRaceScores::OutputStart()
                     ranksPos = ranksTitle.Len();
                 } else ranksPos = ranksPosStr.Len();
 
-                for(int a = 0; a < sn_RaceScores.Len(); a++)
+                for(int a = 0; a < sg_RaceScores.Len(); a++)
                 {
-                    gRaceScores *rScores = sn_RaceScores[a];
+                    gRaceScores *rScores = sg_RaceScores[a];
                     if (rScores)
                     {
-                        tString scorePos, timePos, scoreTitle, timeTitle;
-                        scorePos << rScores->score;
-                        timePos << rScores->time;
-                        scoreTitle << tOutput("$race_rank_title_score_name");
-                        timeTitle << tOutput("$race_rank_title_time_name");
+                        tString time_Pos, time_Title;
+                        time_Pos << rScores->time_;
+                        time_Title << tOutput("$race_rank_title_time_name");
 
-                        if (scoreTitle.Len() > scorePos.Len()) scoresPos = scoreTitle.Len();
-                        else if (scorePos.Len() > scoresPos) scoresPos = scorePos.Len();
-
-                        if (timeTitle.Len() > scorePos.Len()) timesPos = timeTitle.Len();
-                        else if (timePos.Len() > timesPos) timesPos = timePos.Len();
+                        if (time_Title.Len() > time_Pos.Len()) time_sPos = time_Title.Len();
+                        else if (time_Pos.Len() > time_sPos) time_sPos = time_Pos.Len();
                     }
                 }
 
-                ranksPos    += 5;
-                playerPos   += 4;
-                scoresPos   += 4;
-                timesPos    += 6;
+                ranksPos  += 5;
+                playerPos += 4;
+                time_sPos += 6;
 
-                for(int b = 0;b < sn_RaceScores.Len(); b++)
+                for(int b = 0;b < sg_RaceScores.Len(); b++)
                 {
-                    gRaceScores *rScores = sn_RaceScores[b];
+                    gRaceScores *rScores = sg_RaceScores[b];
                     if (rScores)
                     {
                         rank++;
@@ -524,12 +430,10 @@ void gRaceScores::OutputStart()
 
                         line << " " << tOutput("$race_rank_border") << " " << (rank);
                         line.SetPos(ranksPos, false);
-                        line << " " << tOutput("$race_rank_border") << " " << rScores->user_name.SubStr(0, 15);
+                        line << " " << tOutput("$race_rank_border") << " " << rScores->userName_.SubStr(0, 15);
                         line.SetPos(ranksPos + playerPos, false);
-                        line << " " << tOutput("$race_rank_border") << " " << rScores->score;
-                        line.SetPos(ranksPos + playerPos + scoresPos, false);
-                        line << " " << tOutput("$race_rank_border") << " " << rScores->time;
-                        line.SetPos(ranksPos + playerPos + scoresPos + timesPos, false);
+                        line << " " << tOutput("$race_rank_border") << " " << rScores->time_;
+                        line.SetPos(ranksPos + playerPos + time_sPos, false);
                         line << " " << tOutput("$race_rank_border") << "\n";
                         ranksList.Insert(line);
                     }
@@ -540,10 +444,8 @@ void gRaceScores::OutputStart()
             header.SetPos(ranksPos, false);
             header << " " << tOutput("$race_rank_border") << " " << tOutput("$race_rank_title_player_name");
             header.SetPos(ranksPos + playerPos, false);
-            header << " " << tOutput("$race_rank_border") << " " << tOutput("$race_rank_title_score_name");
-            header.SetPos(ranksPos + playerPos + scoresPos, false);
             header << " " << tOutput("$race_rank_border") << " " << tOutput("$race_rank_title_time_name");
-            header.SetPos(ranksPos + playerPos + scoresPos + timesPos, false);
+            header.SetPos(ranksPos + playerPos + time_sPos, false);
             header << " " << tOutput("$race_rank_border") << "\n";
 
             mess << tOutput("$race_rank_title_message", rank) << pz_mapName << "\n";
@@ -559,20 +461,19 @@ void gRaceScores::OutputStart()
             int rank        = 0;
             int ranksPos    = 0;
             int playerPos   = 16;
-            int scoresPos   = 0;
-            int timesPos    = 0;
+            int time_sPos    = 0;
 
             for(int i = 0; i < se_PlayerNetIDs.Len(); i++)
             {
                 ePlayerNetID *p = se_PlayerNetIDs[i];
                 if (p && (p->IsHuman()))
                 {
-                    for(int j = 0; j < sn_RaceScores.Len(); j++)
+                    for(int j = 0; j < sg_RaceScores.Len(); j++)
                     {
-                        gRaceScores *rScores = sn_RaceScores[j];
+                        gRaceScores *rScores = sg_RaceScores[j];
                         if (rScores)
                         {
-                            if (rScores->user_name == p->GetUserName())
+                            if (rScores->userName_ == p->GetUserName())
                             {
                                 tColoredString mess, line, header;
 
@@ -580,7 +481,7 @@ void gRaceScores::OutputStart()
                                 mess << tOutput("$race_ranks_personal_message") << pz_mapName << "\n";
 
                                 tString ranksPosStr, ranksTitle;
-                                ranksPosStr << sn_RaceScores.Len();
+                                ranksPosStr << sg_RaceScores.Len();
                                 ranksTitle << tOutput("$race_rank_title_name");
 
                                 if (ranksTitle.Len() > ranksPosStr.Len())
@@ -588,52 +489,42 @@ void gRaceScores::OutputStart()
                                     ranksPos = ranksTitle.Len();
                                 } else ranksPos = ranksPosStr.Len();
 
-                                for(int a = 0; a < sn_RaceScores.Len(); a++)
+                                for(int a = 0; a < sg_RaceScores.Len(); a++)
                                 {
-                                    gRaceScores *rScores = sn_RaceScores[a];
+                                    gRaceScores *rScores = sg_RaceScores[a];
                                     if (rScores)
                                     {
-                                        tString scorePos, timePos, scoreTitle, timeTitle;
-                                        scorePos << rScores->score;
-                                        timePos << rScores->time;
-                                        scoreTitle << tOutput("$race_rank_title_score_name");
-                                        timeTitle << tOutput("$race_rank_title_time_name");
+                                        tString time_Pos, time_Title;
+                                        time_Pos << rScores->time_;
+                                        time_Title << tOutput("$race_rank_title_time_name");
 
-                                        if (scoreTitle.Len() > scorePos.Len()) scoresPos = scoreTitle.Len();
-                                        else if (scorePos.Len() > scoresPos) scoresPos = scorePos.Len();
-
-                                        if (timeTitle.Len() > scorePos.Len()) timesPos = timeTitle.Len();
-                                        else if (timePos.Len() > timesPos) timesPos = timePos.Len();
+                                        if (time_Title.Len() > time_Pos.Len()) time_sPos = time_Title.Len();
+                                        else if (time_Pos.Len() > time_sPos) time_sPos = time_Pos.Len();
                                     }
                                 }
 
-                                ranksPos    += 5;
-                                playerPos   += 4;
-                                scoresPos   += 4;
-                                timesPos    += 6;
+                                ranksPos  += 5;
+                                playerPos += 4;
+                                time_sPos += 6;
 
                                 header << " " << tOutput("$race_rank_border") << " " << tOutput("$race_rank_title_name");
                                 header.SetPos(ranksPos, false);
                                 header << " " << tOutput("$race_rank_border") << " " << tOutput("$race_rank_title_player_name");
                                 header.SetPos(ranksPos + playerPos, false);
-                                header << " " << tOutput("$race_rank_border") << " " << tOutput("$race_rank_title_score_name");
-                                header.SetPos(ranksPos + playerPos + scoresPos, false);
                                 header << " " << tOutput("$race_rank_border") << " " << tOutput("$race_rank_title_time_name");
-                                header.SetPos(ranksPos + playerPos + scoresPos + timesPos, false);
+                                header.SetPos(ranksPos + playerPos + time_sPos, false);
                                 header << " " << tOutput("$race_rank_border") << "\n";
                                 mess << header;
 
                                 if ((j - 1) >= 0)
                                 {
-                                    gRaceScores *prev = sn_RaceScores[j - 1];
+                                    gRaceScores *prev = sg_RaceScores[j - 1];
                                     line << " " << tColoredString::ColorString( 0, 0.5, 1 ) << tOutput("$race_rank_border") << " " << tColoredString::ColorString( 0, 0.5, 1 ) << (rank - 1);
                                     line.SetPos(ranksPos, false);
-                                    line << " " << tColoredString::ColorString( 0, 0.5, 1 ) << tOutput("$race_rank_border") << " " << tColoredString::ColorString( 0, 0.5, 1 ) << prev->user_name.SubStr(0, 15);
+                                    line << " " << tColoredString::ColorString( 0, 0.5, 1 ) << tOutput("$race_rank_border") << " " << tColoredString::ColorString( 0, 0.5, 1 ) << prev->userName_.SubStr(0, 15);
                                     line.SetPos(ranksPos + playerPos, false);
-                                    line << " " << tColoredString::ColorString( 0, 0.5, 1 ) << tOutput("$race_rank_border") << " " << tColoredString::ColorString( 0, 0.5, 1 ) << prev->score;
-                                    line.SetPos(ranksPos + playerPos + scoresPos, false);
-                                    line << " " << tColoredString::ColorString( 0, 0.5, 1 ) << tOutput("$race_rank_border") << " " << tColoredString::ColorString( 0, 0.5, 1 ) << prev->time;
-                                    line.SetPos(ranksPos + playerPos + scoresPos + timesPos, false);
+                                    line << " " << tColoredString::ColorString( 0, 0.5, 1 ) << tOutput("$race_rank_border") << " " << tColoredString::ColorString( 0, 0.5, 1 ) << prev->time_;
+                                    line.SetPos(ranksPos + playerPos + time_sPos, false);
                                     line << " " << tColoredString::ColorString( 0, 0.5, 1 ) << tOutput("$race_rank_border") << tColoredString::ColorString( 1,1,1 ) << "\n";
                                     mess << line;
                                     line = "";
@@ -641,27 +532,23 @@ void gRaceScores::OutputStart()
 
                                 line << " " << tColoredString::ColorString( 1,1,0.5 ) << tOutput("$race_rank_border") << " " << tColoredString::ColorString( 1,1,.5 ) << (rank);
                                 line.SetPos(ranksPos, false);
-                                line << " " << tColoredString::ColorString( 1,1,0.5 ) << tOutput("$race_rank_border") << " " << tColoredString::ColorString( 1,1,.5 ) << rScores->user_name.SubStr(0, 15);
+                                line << " " << tColoredString::ColorString( 1,1,0.5 ) << tOutput("$race_rank_border") << " " << tColoredString::ColorString( 1,1,.5 ) << rScores->userName_.SubStr(0, 15);
                                 line.SetPos(ranksPos + playerPos, false);
-                                line << " " << tColoredString::ColorString( 1,1,0.5 ) << tOutput("$race_rank_border") << " " << tColoredString::ColorString( 1,1,.5 ) << rScores->score;
-                                line.SetPos(ranksPos + playerPos + scoresPos, false);
-                                line << " " << tColoredString::ColorString( 1,1,0.5 ) << tOutput("$race_rank_border") << " " << tColoredString::ColorString( 1,1,.5 ) << rScores->time;
-                                line.SetPos(ranksPos + playerPos + scoresPos + timesPos, false);
+                                line << " " << tColoredString::ColorString( 1,1,0.5 ) << tOutput("$race_rank_border") << " " << tColoredString::ColorString( 1,1,.5 ) << rScores->time_;
+                                line.SetPos(ranksPos + playerPos + time_sPos, false);
                                 line << " " << tColoredString::ColorString( 1,1,0.5 ) << tOutput("$race_rank_border") << tColoredString::ColorString( 1,1,1 ) << "\n";
                                 mess << line;
                                 line = "";
 
-                                if ((j + 1) <= (sn_RaceScores.Len() - 1))
+                                if ((j + 1) <= (sg_RaceScores.Len() - 1))
                                 {
-                                    gRaceScores *next = sn_RaceScores[j + 1];
+                                    gRaceScores *next = sg_RaceScores[j + 1];
                                     line << " " << tColoredString::ColorString( 0, 0.5, 1 ) << tOutput("$race_rank_border") << " " << tColoredString::ColorString( 0, 0.5, 1 ) << (rank + 1);
                                     line.SetPos(ranksPos, false);
-                                    line << " " << tColoredString::ColorString( 0, 0.5, 1 ) << tOutput("$race_rank_border") << " " << tColoredString::ColorString( 0, 0.5, 1 ) << next->user_name.SubStr(0, 15);
+                                    line << " " << tColoredString::ColorString( 0, 0.5, 1 ) << tOutput("$race_rank_border") << " " << tColoredString::ColorString( 0, 0.5, 1 ) << next->userName_.SubStr(0, 15);
                                     line.SetPos(ranksPos + playerPos, false);
-                                    line << " " << tColoredString::ColorString( 0, 0.5, 1 ) << tOutput("$race_rank_border") << " " << tColoredString::ColorString( 0, 0.5, 1 ) << next->score;
-                                    line.SetPos(ranksPos + playerPos + scoresPos, false);
-                                    line << " " << tColoredString::ColorString( 0, 0.5, 1 ) << tOutput("$race_rank_border") << " " << tColoredString::ColorString( 0, 0.5, 1 ) << next->time;
-                                    line.SetPos(ranksPos + playerPos + scoresPos + timesPos, false);
+                                    line << " " << tColoredString::ColorString( 0, 0.5, 1 ) << tOutput("$race_rank_border") << " " << tColoredString::ColorString( 0, 0.5, 1 ) << next->time_;
+                                    line.SetPos(ranksPos + playerPos + time_sPos, false);
                                     line << " " << tColoredString::ColorString( 0, 0.5, 1 ) << tOutput("$race_rank_border") << tColoredString::ColorString( 1,1,1 ) << "\n";
                                     mess << line;
                                     line = "";
@@ -687,20 +574,19 @@ void gRaceScores::OutputEnd()
     tColoredString mess, header;
     tArray<tColoredString> ranksList;
 
-    if (sn_RaceScores.Len() > 0)
+    if (sg_RaceScores.Len() > 0)
     {
         if (sg_raceRankShowEnd == 1)
         {
             int rank        = 0;
             int ranksPos    = 0;
             int playerPos   = 16;
-            int scoresPos   = 0;
-            int timesPos    = 0;
+            int time_sPos    = 0;
 
-             if (sn_RaceScores.Len() >= sg_raceNumRanksShowEnd)
+             if (sg_RaceScores.Len() >= sg_raceNumRanksShowEnd)
              {
                 tString ranksPosStr, ranksTitle;
-                ranksPosStr << sn_RaceScores.Len();
+                ranksPosStr << sg_RaceScores.Len();
                 ranksTitle << tOutput("$race_rank_title_name");
                 if (ranksTitle.Len() > ranksPosStr.Len())
                 {
@@ -709,31 +595,25 @@ void gRaceScores::OutputEnd()
 
                 for(int a = 0; a < sg_raceNumRanksShowEnd; a++)
                 {
-                    gRaceScores *rScores = sn_RaceScores[a];
+                    gRaceScores *rScores = sg_RaceScores[a];
                     if (rScores)
                     {
-                        tString scorePos, timePos, scoreTitle, timeTitle;
-                        scorePos << rScores->score;
-                        timePos << rScores->time;
-                        scoreTitle << tOutput("$race_rank_title_score_name");
-                        timeTitle << tOutput("$race_rank_title_time_name");
+                        tString time_Pos, time_Title;
+                        time_Pos << rScores->time_;
+                        time_Title << tOutput("$race_rank_title_time_name");
 
-                        if (scoreTitle.Len() > scorePos.Len()) scoresPos = scoreTitle.Len();
-                        else if (scorePos.Len() > scoresPos) scoresPos = scorePos.Len();
-
-                        if (timeTitle.Len() > scorePos.Len()) timesPos = timeTitle.Len();
-                        else if (timePos.Len() > timesPos) timesPos = timePos.Len();
+                        if (time_Title.Len() > time_Pos.Len()) time_sPos = time_Title.Len();
+                        else if (time_Pos.Len() > time_sPos) time_sPos = time_Pos.Len();
                     }
                 }
 
-                ranksPos    += 5;
-                playerPos   += 4;
-                scoresPos   += 4;
-                timesPos    += 6;
+                ranksPos  += 5;
+                playerPos += 4;
+                time_sPos += 6;
 
                 for(int b = 0;b < sg_raceNumRanksShowEnd; b++)
                 {
-                    gRaceScores *rScores = sn_RaceScores[b];
+                    gRaceScores *rScores = sg_RaceScores[b];
                     if (rScores)
                     {
                         rank++;
@@ -741,20 +621,18 @@ void gRaceScores::OutputEnd()
                         tColoredString line;
                         tString strippedName;
                         bool isStripped = false;
-                        if (rScores->user_name.Len() > playerPos)
+                        if (rScores->userName_.Len() > playerPos)
                         {
-                            strippedName << rScores->user_name.SubStr(0, playerPos - 1);
+                            strippedName << rScores->userName_.SubStr(0, playerPos - 1);
                             isStripped = true;
                         }
 
                         line << " " << tOutput("$race_rank_border") << " " << (rank);
                         line.SetPos(ranksPos, false);
-                        line << " " << tOutput("$race_rank_border") << " " << rScores->user_name.SubStr(0, 15);
+                        line << " " << tOutput("$race_rank_border") << " " << rScores->userName_.SubStr(0, 15);
                         line.SetPos(ranksPos + playerPos, false);
-                        line << " " << tOutput("$race_rank_border") << " " << rScores->score;
-                        line.SetPos(ranksPos + playerPos + scoresPos, false);
-                        line << " " << tOutput("$race_rank_border") << " " << rScores->time;
-                        line.SetPos(ranksPos + playerPos + scoresPos + timesPos, false);
+                        line << " " << tOutput("$race_rank_border") << " " << rScores->time_;
+                        line.SetPos(ranksPos + playerPos + time_sPos, false);
                         line << " " << tOutput("$race_rank_border") << "\n";
                         ranksList.Insert(line);
                     }
@@ -763,7 +641,7 @@ void gRaceScores::OutputEnd()
             else
             {
                 tString ranksPosStr, ranksTitle;
-                ranksPosStr << sn_RaceScores.Len();
+                ranksPosStr << sg_RaceScores.Len();
                 ranksTitle << tOutput("$race_rank_title_name");
 
                 if (ranksTitle.Len() > ranksPosStr.Len())
@@ -771,33 +649,27 @@ void gRaceScores::OutputEnd()
                     ranksPos = ranksTitle.Len();
                 } else ranksPos = ranksPosStr.Len();
 
-                for(int a = 0; a < sn_RaceScores.Len(); a++)
+                for(int a = 0; a < sg_RaceScores.Len(); a++)
                 {
-                    gRaceScores *rScores = sn_RaceScores[a];
+                    gRaceScores *rScores = sg_RaceScores[a];
                     if (rScores)
                     {
-                        tString scorePos, timePos, scoreTitle, timeTitle;
-                        scorePos << rScores->score;
-                        timePos << rScores->time;
-                        scoreTitle << tOutput("$race_rank_title_score_name");
-                        timeTitle << tOutput("$race_rank_title_time_name");
+                        tString time_Pos, time_Title;
+                        time_Pos << rScores->time_;
+                        time_Title << tOutput("$race_rank_title_time_name");
 
-                        if (scoreTitle.Len() > scorePos.Len()) scoresPos = scoreTitle.Len();
-                        else if (scorePos.Len() > scoresPos) scoresPos = scorePos.Len();
-
-                        if (timeTitle.Len() > scorePos.Len()) timesPos = timeTitle.Len();
-                        else if (timePos.Len() > timesPos) timesPos = timePos.Len();
+                        if (time_Title.Len() > time_Pos.Len()) time_sPos = time_Title.Len();
+                        else if (time_Pos.Len() > time_sPos) time_sPos = time_Pos.Len();
                     }
                 }
 
-                ranksPos    += 5;
-                playerPos   += 4;
-                scoresPos   += 4;
-                timesPos    += 6;
+                ranksPos  += 5;
+                playerPos += 4;
+                time_sPos += 6;
 
-                for(int b = 0;b < sn_RaceScores.Len(); b++)
+                for(int b = 0;b < sg_RaceScores.Len(); b++)
                 {
-                    gRaceScores *rScores = sn_RaceScores[b];
+                    gRaceScores *rScores = sg_RaceScores[b];
                     if (rScores)
                     {
                         rank++;
@@ -805,20 +677,18 @@ void gRaceScores::OutputEnd()
                         tColoredString line;
                         tString strippedName;
                         bool isStripped = false;
-                        if (rScores->user_name.Len() > playerPos)
+                        if (rScores->userName_.Len() > playerPos)
                         {
-                            strippedName << rScores->user_name.SubStr(0, playerPos - 1);
+                            strippedName << rScores->userName_.SubStr(0, playerPos - 1);
                             isStripped = true;
                         }
 
                         line << " " << tOutput("$race_rank_border") << " " << (rank);
                         line.SetPos(ranksPos, false);
-                        line << " " << tOutput("$race_rank_border") << " " << rScores->user_name.SubStr(0, 15);
+                        line << " " << tOutput("$race_rank_border") << " " << rScores->userName_.SubStr(0, 15);
                         line.SetPos(ranksPos + playerPos, false);
-                        line << " " << tOutput("$race_rank_border") << " " << rScores->score;
-                        line.SetPos(ranksPos + playerPos + scoresPos, false);
-                        line << " " << tOutput("$race_rank_border") << " " << rScores->time;
-                        line.SetPos(ranksPos + playerPos + scoresPos + timesPos, false);
+                        line << " " << tOutput("$race_rank_border") << " " << rScores->time_;
+                        line.SetPos(ranksPos + playerPos + time_sPos, false);
                         line << " " << tOutput("$race_rank_border") << "\n";
                         ranksList.Insert(line);
                     }
@@ -829,11 +699,9 @@ void gRaceScores::OutputEnd()
             header.SetPos(ranksPos, false);
             header << " " << tOutput("$race_rank_border") << " " << tOutput("$race_rank_title_player_name");
             header.SetPos(ranksPos + playerPos, false);
-            header << " " << tOutput("$race_rank_border") << " " << tOutput("$race_rank_title_score_name");
-            header.SetPos(ranksPos + playerPos + scoresPos, false);
             header << " " << tOutput("$race_rank_border") << " " << tOutput("$race_rank_title_time_name");
-            header.SetPos(ranksPos + playerPos + scoresPos + timesPos, false);
-            header << " " << tOutput("$race_rank_border") << "\n";
+            header.SetPos(ranksPos + playerPos + time_sPos, false);
+            header << " " << tOutput("$race_rank_bordser") << "\n";
 
             mess << tOutput("$race_rank_title_message", rank) << pz_mapName << "\n";
             mess << header;
@@ -848,20 +716,19 @@ void gRaceScores::OutputEnd()
             int rank        = 0;
             int ranksPos    = 0;
             int playerPos   = 16;
-            int scoresPos   = 0;
-            int timesPos    = 0;
+            int time_sPos    = 0;
 
             for(int i = 0; i < se_PlayerNetIDs.Len(); i++)
             {
                 ePlayerNetID *p = se_PlayerNetIDs[i];
                 if (p && (p->IsHuman()))
                 {
-                    for(int j = 0; j < sn_RaceScores.Len(); j++)
+                    for(int j = 0; j < sg_RaceScores.Len(); j++)
                     {
-                        gRaceScores *rScores = sn_RaceScores[j];
+                        gRaceScores *rScores = sg_RaceScores[j];
                         if (rScores)
                         {
-                            if (rScores->user_name == p->GetUserName())
+                            if (rScores->userName_ == p->GetUserName())
                             {
                                 tColoredString mess, line, header;
 
@@ -869,7 +736,7 @@ void gRaceScores::OutputEnd()
                                 mess << tOutput("$race_ranks_personal_message") << pz_mapName << "\n";
 
                                 tString ranksPosStr, ranksTitle;
-                                ranksPosStr << sn_RaceScores.Len();
+                                ranksPosStr << sg_RaceScores.Len();
                                 ranksTitle << tOutput("$race_rank_title_name");
 
                                 if (ranksTitle.Len() > ranksPosStr.Len())
@@ -877,52 +744,42 @@ void gRaceScores::OutputEnd()
                                     ranksPos = ranksTitle.Len();
                                 } else ranksPos = ranksPosStr.Len();
 
-                                for(int a = 0; a < sn_RaceScores.Len(); a++)
+                                for(int a = 0; a < sg_RaceScores.Len(); a++)
                                 {
-                                    gRaceScores *rScores = sn_RaceScores[a];
+                                    gRaceScores *rScores = sg_RaceScores[a];
                                     if (rScores)
                                     {
-                                        tString scorePos, timePos, scoreTitle, timeTitle;
-                                        scorePos << rScores->score;
-                                        timePos << rScores->time;
-                                        scoreTitle << tOutput("$race_rank_title_score_name");
-                                        timeTitle << tOutput("$race_rank_title_time_name");
+                                        tString time_Pos, time_Title;
+                                        time_Pos << rScores->time_;
+                                        time_Title << tOutput("$race_rank_title_time_name");
 
-                                        if (scoreTitle.Len() > scorePos.Len()) scoresPos = scoreTitle.Len();
-                                        else if (scorePos.Len() > scoresPos) scoresPos = scorePos.Len();
-
-                                        if (timeTitle.Len() > scorePos.Len()) timesPos = timeTitle.Len();
-                                        else if (timePos.Len() > timesPos) timesPos = timePos.Len();
+                                        if (time_Title.Len() > time_Pos.Len()) time_sPos = time_Title.Len();
+                                        else if (time_Pos.Len() > time_sPos) time_sPos = time_Pos.Len();
                                     }
                                 }
 
-                                ranksPos    += 5;
-                                playerPos   += 4;
-                                scoresPos   += 4;
-                                timesPos    += 6;
+                                ranksPos  += 5;
+                                playerPos += 4;
+                                time_sPos += 6;
 
                                 header << " " << tOutput("$race_rank_border") << " " << tOutput("$race_rank_title_name");
                                 header.SetPos(ranksPos, false);
                                 header << " " << tOutput("$race_rank_border") << " " << tOutput("$race_rank_title_player_name");
                                 header.SetPos(ranksPos + playerPos, false);
-                                header << " " << tOutput("$race_rank_border") << " " << tOutput("$race_rank_title_score_name");
-                                header.SetPos(ranksPos + playerPos + scoresPos, false);
                                 header << " " << tOutput("$race_rank_border") << " " << tOutput("$race_rank_title_time_name");
-                                header.SetPos(ranksPos + playerPos + scoresPos + timesPos, false);
+                                header.SetPos(ranksPos + playerPos + time_sPos, false);
                                 header << " " << tOutput("$race_rank_border") << "\n";
                                 mess << header;
 
                                 if ((j - 1) >= 0)
                                 {
-                                    gRaceScores *prev = sn_RaceScores[j - 1];
+                                    gRaceScores *prev = sg_RaceScores[j - 1];
                                     line << " " << tColoredString::ColorString( 0, 0.5, 1 ) << tOutput("$race_rank_border") << " " << tColoredString::ColorString( 0, 0.5, 1 ) << (rank - 1);
                                     line.SetPos(ranksPos, false);
-                                    line << " " << tColoredString::ColorString( 0, 0.5, 1 ) << tOutput("$race_rank_border") << " " << tColoredString::ColorString( 0, 0.5, 1 ) << prev->user_name.SubStr(0, 15);
+                                    line << " " << tColoredString::ColorString( 0, 0.5, 1 ) << tOutput("$race_rank_border") << " " << tColoredString::ColorString( 0, 0.5, 1 ) << prev->userName_.SubStr(0, 15);
                                     line.SetPos(ranksPos + playerPos, false);
-                                    line << " " << tColoredString::ColorString( 0, 0.5, 1 ) << tOutput("$race_rank_border") << " " << tColoredString::ColorString( 0, 0.5, 1 ) << prev->score;
-                                    line.SetPos(ranksPos + playerPos + scoresPos, false);
-                                    line << " " << tColoredString::ColorString( 0, 0.5, 1 ) << tOutput("$race_rank_border") << " " << tColoredString::ColorString( 0, 0.5, 1 ) << prev->time;
-                                    line.SetPos(ranksPos + playerPos + scoresPos + timesPos, false);
+                                    line << " " << tColoredString::ColorString( 0, 0.5, 1 ) << tOutput("$race_rank_border") << " " << tColoredString::ColorString( 0, 0.5, 1 ) << prev->time_;
+                                    line.SetPos(ranksPos + playerPos + time_sPos, false);
                                     line << " " << tColoredString::ColorString( 0, 0.5, 1 ) << tOutput("$race_rank_border") << tColoredString::ColorString( 1,1,1 ) << "\n";
                                     mess << line;
                                     line = "";
@@ -930,27 +787,23 @@ void gRaceScores::OutputEnd()
 
                                 line << " " << tColoredString::ColorString( 1,1,0.5 ) << tOutput("$race_rank_border") << " " << tColoredString::ColorString( 1,1,.5 ) << (rank);
                                 line.SetPos(ranksPos, false);
-                                line << " " << tColoredString::ColorString( 1,1,0.5 ) << tOutput("$race_rank_border") << " " << tColoredString::ColorString( 1,1,.5 ) << rScores->user_name.SubStr(0, 15);
+                                line << " " << tColoredString::ColorString( 1,1,0.5 ) << tOutput("$race_rank_border") << " " << tColoredString::ColorString( 1,1,.5 ) << rScores->userName_.SubStr(0, 15);
                                 line.SetPos(ranksPos + playerPos, false);
-                                line << " " << tColoredString::ColorString( 1,1,0.5 ) << tOutput("$race_rank_border") << " " << tColoredString::ColorString( 1,1,.5 ) << rScores->score;
-                                line.SetPos(ranksPos + playerPos + scoresPos, false);
-                                line << " " << tColoredString::ColorString( 1,1,0.5 ) << tOutput("$race_rank_border") << " " << tColoredString::ColorString( 1,1,.5 ) << rScores->time;
-                                line.SetPos(ranksPos + playerPos + scoresPos + timesPos, false);
+                                line << " " << tColoredString::ColorString( 1,1,0.5 ) << tOutput("$race_rank_border") << " " << tColoredString::ColorString( 1,1,.5 ) << rScores->time_;
+                                line.SetPos(ranksPos + playerPos + time_sPos, false);
                                 line << " " << tColoredString::ColorString( 1,1,0.5 ) << tOutput("$race_rank_border") << tColoredString::ColorString( 1,1,1 ) << "\n";
                                 mess << line;
                                 line = "";
 
-                                if ((j + 1) <= (sn_RaceScores.Len() - 1))
+                                if ((j + 1) <= (sg_RaceScores.Len() - 1))
                                 {
-                                    gRaceScores *next = sn_RaceScores[j + 1];
+                                    gRaceScores *next = sg_RaceScores[j + 1];
                                     line << " " << tColoredString::ColorString( 0, 0.5, 1 ) << tOutput("$race_rank_border") << " " << tColoredString::ColorString( 0, 0.5, 1 ) << (rank + 1);
                                     line.SetPos(ranksPos, false);
-                                    line << " " << tColoredString::ColorString( 0, 0.5, 1 ) << tOutput("$race_rank_border") << " " << tColoredString::ColorString( 0, 0.5, 1 ) << next->user_name.SubStr(0, 15);
+                                    line << " " << tColoredString::ColorString( 0, 0.5, 1 ) << tOutput("$race_rank_border") << " " << tColoredString::ColorString( 0, 0.5, 1 ) << next->userName_.SubStr(0, 15);
                                     line.SetPos(ranksPos + playerPos, false);
-                                    line << " " << tColoredString::ColorString( 0, 0.5, 1 ) << tOutput("$race_rank_border") << " " << tColoredString::ColorString( 0, 0.5, 1 ) << next->score;
-                                    line.SetPos(ranksPos + playerPos + scoresPos, false);
-                                    line << " " << tColoredString::ColorString( 0, 0.5, 1 ) << tOutput("$race_rank_border") << " " << tColoredString::ColorString( 0, 0.5, 1 ) << next->time;
-                                    line.SetPos(ranksPos + playerPos + scoresPos + timesPos, false);
+                                    line << " " << tColoredString::ColorString( 0, 0.5, 1 ) << tOutput("$race_rank_border") << " " << tColoredString::ColorString( 0, 0.5, 1 ) << next->time_;
+                                    line.SetPos(ranksPos + playerPos + time_sPos, false);
                                     line << " " << tColoredString::ColorString( 0, 0.5, 1 ) << tOutput("$race_rank_border") << tColoredString::ColorString( 1,1,1 ) << "\n";
                                     mess << line;
                                     line = "";
@@ -969,88 +822,108 @@ void gRaceScores::OutputEnd()
 }
 
 //! Racing player's things
-gRacePlayer::gRacePlayer(ePlayerNetID *p)
+gRacePlayer::gRacePlayer(ePlayerNetID *player)
 {
-    if (p && p->Object())
-    {
-        this->player_ = p;
-        this->cycle_ = dynamic_cast<gCycle *>(p->Object());
+    this->player_ = player;
 
-        this->position_ = Cycle()->Position();
-        this->direction_ = Cycle()->Direction();
-    }
+    this->time_  = -1;
+    this->score_ = 0;
 
     this->chances_ = sg_raceChances;
 
-    sn_RacePlayers.Insert(this);
+    sg_RacePlayers.Insert(this);
 }
 
-bool gRacePlayer::PlayerExists(ePlayerNetID *p)
+bool gRacePlayer::PlayerExists(tString username)
 {
-    for(int i = 0; i < sn_RacePlayers.Len(); i++)
+    if (sg_RacePlayers.Len() > 0)
     {
-        gRacePlayer *rPlayer = sn_RacePlayers[i];
-        if (rPlayer && (rPlayer->Player() == p))
+        for(int i = 0; i < sg_RacePlayers.Len(); i++)
         {
-            return true;
+            gRacePlayer *rPlayer = sg_RacePlayers[i];
+            if (rPlayer)
+            {
+                if (rPlayer->Player()->GetUserName() == username)
+                    return true;
+            }
         }
     }
     return false;
 }
 
-gRacePlayer * gRacePlayer::GetPlayer(ePlayerNetID *p)
+gRacePlayer *gRacePlayer::GetPlayer(tString username)
 {
-    for(int i = 0; i < sn_RacePlayers.Len(); i++)
+    if (sg_RacePlayers.Len() > 0)
     {
-        gRacePlayer *rPlayer = sn_RacePlayers[i];
-        if (rPlayer && (rPlayer->Player() == p))
+        for(int i = 0; i < sg_RacePlayers.Len(); i++)
         {
-            return rPlayer;
+            gRacePlayer *rPlayer = sg_RacePlayers[i];
+            if (rPlayer)
+            {
+                if (rPlayer->Player()->GetUserName() == username)
+                    return rPlayer;
+            }
         }
     }
-    return false;
+    return NULL;
+}
+
+void gRacePlayer::ErasePlayer()
+{
+    for(int i = 0; i < sg_RacePlayers.Len(); i++)
+    {
+        gRacePlayer *rPlayer = sg_RacePlayers[i];
+        if (rPlayer && (rPlayer == this))
+        {
+            sg_RacePlayers.RemoveAt(i);
+            break;
+        }
+    }
+
+    delete this;
 }
 
 //! ZONE HIT
-void gRace::ZoneHit( ePlayerNetID * player )
+void gRace::ZoneHit( ePlayerNetID *player )
 {
-    if ( player && !player->raceArrived && !roundFinished_ && player->Object() != NULL &&  player->Object()->Alive() )
+    gRacePlayer *racePlayer = NULL;
+    for(int playerID = 0; playerID < sg_RacePlayers.Len(); playerID++)
     {
-        REAL time = se_GameTime();
-        player->raceArrived = true;
-        player->raceTime = time;
+        gRacePlayer *fetchPlayer = sg_RacePlayers[playerID];
+        if (fetchPlayer && (fetchPlayer->Player() == player))
+        {
+            racePlayer = fetchPlayer;
+            break;
+        }
+    }
 
-        if ( !firstArrived_ )
+    if (player && racePlayer && !racePlayer->Finished() && !roundFinished_ && player->Object() && player->Object()->Alive())
+    {
+        REAL reachtime_ = se_GameTime();
+
+        if (!firstArrived_)
         {
             firstArrived_ = true;
-            firstFinishTime_ = player->raceTime;
+            firstFinishTime_ = reachtime_;
             firstToArive_ = player->GetUserName();
         }
 
-        REAL reachTime = player->raceTime;
-        gRaceScores::Add(player->GetUserName(), RacingScore, reachTime);
+        sg_RaceFinished.Insert(racePlayer);
+
+        racePlayer->SetFinished(true);
+        racePlayer->SetTime(reachtime_);
+        racePlayer->SetScore(RacingScore);
+
+        gRaceScores::Add(racePlayer);
 
         tOutput win; //, lose;
-        //win << "$player_reach_race";*/
-
-        /*
-        tColoredString ColoredString;
-        ColoredString << player->GetColoredName();
-        ColoredString << tColoredString::ColorString( 1,1,1 );
-        ColoredString << " finished with ";
-        ColoredString << tColoredString::ColorString( 0,1,1 );
-        ColoredString << RacingScore;
-        ColoredString << tColoredString::ColorString( 1,1,1 );
-        ColoredString << " points in ";
-        ColoredString << time << " seconds\n";
-        */
 
         finishPlace_++;
         if (!sg_raceLogTime)
         {
             win.SetTemplateParameter(1, player->GetColoredName() );
-            win.SetTemplateParameter(2, RacingScore);
-            win.SetTemplateParameter(3, player->raceTime);
+            win.SetTemplateParameter(2, racePlayer->Score());
+            win.SetTemplateParameter(3, racePlayer->Time());
             win << "$player_reach_race";
         }
         else
@@ -1058,132 +931,131 @@ void gRace::ZoneHit( ePlayerNetID * player )
             if (finishPlace_ == 1)
             {
                 win.SetTemplateParameter(1, player->GetColoredName());
-                win.SetTemplateParameter(2, reachTime);
+                win.SetTemplateParameter(2, racePlayer->Time());
                 win << "$player_reach_race_first";
             }
             else
             {
                 win.SetTemplateParameter(1, player->GetColoredName());
                 win.SetTemplateParameter(2, finishPlace_);
-                win.SetTemplateParameter(3, (reachTime - firstFinishTime_));
-                win << "$player_reach_race_time";
+                win.SetTemplateParameter(3, (racePlayer->Time() - firstFinishTime_));
+                win << "$player_reach_race_time_";
             }
         }
 
         if (!sg_racePointsType)
         {
-            player->AddScore( sg_scoreRaceFinish, win, "" );
+            player->AddScore( sg_scoreRaceFinish, win, tOutput() );
         }
         else
         {
-            player->AddScore( RacingScore, win, "" );
+            player->AddScore( RacingScore, win, tOutput() );
             if (RacingScore >= 2) RacingScore -= sg_scoreRaceDeplete;
         }
+
+        if (sg_raceFinishKill)
+            player->Object()->Kill();
     }
-    if (sg_raceFinishKill) player->Object()->Kill();
 }
 
 //! SYNC
 void gRace::Sync( int alive, int ai_alive, int humans)
 {
-    if (!roundFinished_ && (sg_raceChances > 0) )
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid) return;
+
+    //  ceck chances and ensure players respawn
+    if (!roundFinished_ && (sg_raceChances > 0))
     {
-        eGrid *grid = eGrid::CurrentGrid();
         if (grid)
         {
-            for(int a=0; a < sn_RacePlayers.Len(); a++)
+            for(int a = 0; a < sg_RacePlayers.Len(); a++)
             {
-                gRacePlayer *rPlayer = sn_RacePlayers[a];
-                if (rPlayer && (rPlayer->Cycle() == NULL) && (rPlayer->Player() != NULL))
+                gRacePlayer *rPlayer = sg_RacePlayers[a];
+                if (rPlayer)
                 {
-                    if ((rPlayer->Chances() > 0) && (rPlayer->Chances() <= sg_raceChances))
+                    if ((rPlayer->Cycle()) && (rPlayer->Player()))
                     {
-                        //gRacePlayer::CreateNewCycle(rPlayer);
-                        gCycle *cycle = new gCycle(grid, rPlayer->SpawnPosition(), rPlayer->SpawnDirection(), rPlayer->Player());
-                        rPlayer->NewCycle(cycle);
-                        rPlayer->Player()->ControlObject(cycle);
-                        rPlayer->DropChances();    //  decrease chances by this many values
-                        alive += 1;
+                        if ((rPlayer->Chances() > 0) && (rPlayer->Chances() <= sg_raceChances))
+                        {
+                            //gRacePlayer::CreateNewCycle(rPlayer);
+                            gCycle *cycle = new gCycle(grid, rPlayer->SpawnPosition(), rPlayer->SpawnDirection(), rPlayer->Player());
+                            rPlayer->NewCycle(cycle);
+                            rPlayer->Player()->ControlObject(cycle);
+                            rPlayer->DropChances();    //  decrease chances by this many values
+                            alive += 1;
+                        }
                     }
                 }
             }
         }
     }
 
-    if ( alive == 0 ) // close the round if no human is alive
+    // close the round if no human is alive
+    if ( alive == 0 )
         roundFinished_ = true;
 
-    if ( firstArrived_ || ( alive == 1 && ai_alive == 0 && humans > 1 ))     // start counter when someone arrives or when only 1 is alive but not alone
+    // start counter when someone arrives or when only 1 is alive but not alone
+    if ( firstArrived_ || ( alive == 1 && ai_alive == 0 && humans > 1 ))
     {
-        int arrivedAlive = 0;
-        for ( int i = 0; i < se_PlayerNetIDs.Len(); i ++ )          // count who reached the end and is alive
-        {
-            ePlayerNetID * p = se_PlayerNetIDs[i];
-            if ( ( p->raceArrived /*|| p->GetRawAuthenticatedName() == ""*/) && p->IsHuman() && p->Object() != NULL )
-            {
-                if ( p->Object()->Alive() )
-                    arrivedAlive ++;
-            }
-        }
-
-
-
-        if ( arrivedAlive == alive )                // close the round when all alive humans are arrived
+        // close the round when all alive humans have arrived
+        if ( sg_RaceFinished.Len() == alive )
             roundFinished_ = true;
 
-        if ( sg_RaceEndDelay < 0 )                  // freestyle mode
+        // freestyle mode
+        if ( sg_RaceEndDelay < 0 )
         {
             if ( sg_RaceEndDelay < -1 )
                 sg_RaceEndDelay = -1;
         }
-        else                                        // countdown mode
+        // countdown mode
+        else
         {
             if (sg_raceSmartTimer)
             {
                 if (!roundFinished_)
                 {
-                    if (sn_RaceScores.Len() == 0)
+                    if (sg_RaceScores.Len() == 0)
                     {
-                        if ( countDown_ < 0 )                  // not started yet
+                        // not started yet
+                        if ( countDown_ < 0 )
                             countDown_ = sg_RaceEndDelay + 1;
-                        else if ( countDown_ == 0 )
-                            roundFinished_ = true;
                     }
-                    if (sn_RaceScores.Len() == 1)
+                    if (sg_RaceScores.Len() == 1)
                     {
-                        gRaceScores *rScores = sn_RaceScores[0];
+                        gRaceScores *rScores = sg_RaceScores[0];
                         if (rScores)
                         {
                             if (countDown_ < 0)
                             {
-                                int timer = ceil(rScores->time);
+                                int timer = ceil(rScores->Time());
                                 countDown_ = ceil(timer * 1.2) + 1;
                             }
                         }
                     }
-                    else if (sn_RaceScores.Len() == 2)
+                    else if (sg_RaceScores.Len() == 2)
                     {
-                        gRaceScores *one = sn_RaceScores[0];
-                        gRaceScores *two = sn_RaceScores[1];
+                        gRaceScores *one = sg_RaceScores[0];
+                        gRaceScores *two = sg_RaceScores[1];
                         if (one && two)
                         {
                             if (countDown_ < 0)
                             {
-                                int timer = ceil((one->time + two->time) / 2);
+                                int timer = ceil((one->Time() + two->Time()) / 2);
                                 countDown_ = ceil(timer * 1.2) + 1;
                             }
                         }
                     }
-                    else if (sn_RaceScores.Len() >= 3)
+                    else if (sg_RaceScores.Len() >= 3)
                     {
-                        gRaceScores *one = sn_RaceScores[0];
-                        gRaceScores *two = sn_RaceScores[1];
-                        gRaceScores *tre = sn_RaceScores[2];
+                        gRaceScores *one = sg_RaceScores[0];
+                        gRaceScores *two = sg_RaceScores[1];
+                        gRaceScores *tre = sg_RaceScores[2];
                         if (one && two && tre)
                         {
                             if (countDown_ < 0)
                             {
-                                int timer = ceil((one->time + two->time + tre->time) / 3);
+                                int timer = ceil((one->Time() + two->Time() + tre->Time()) / 3);
                                 countDown_ = ceil(timer * 1.2) + 1;
                             }
                         }
@@ -1192,15 +1064,18 @@ void gRace::Sync( int alive, int ai_alive, int humans)
             }
             else
             {
-                if ( countDown_ < 0 )                   // not started yet
+                // not started yet
+                if ( countDown_ < 0 )
                     countDown_ = sg_RaceEndDelay + 1;
 
+                // countdown reached the end, close the round
                 else if ( countDown_ == 0 )
                     roundFinished_ = true;
             }
 
             if ( !roundFinished_ )
             {
+                // countdown working
                 countDown_ --;
 
                 if ( countDown_ == 0 )
@@ -1213,7 +1088,7 @@ void gRace::Sync( int alive, int ai_alive, int humans)
                         for(int i = 0; i < se_PlayerNetIDs.Len(); i++)
                         {
                             ePlayerNetID *p = se_PlayerNetIDs[i];
-                            if (p && (p->Object() != NULL))
+                            if (p && p->Object() && p->Object()->Alive())
                                 p->Object()->Kill();
                         }
                     }
@@ -1221,41 +1096,43 @@ void gRace::Sync( int alive, int ai_alive, int humans)
                 else
                 {
                     tOutput message;
-                    message << "0xff7777" << countDown_ << "                    ";
+                    message << "$timer_countdown" << "                    ";
                     sn_CenterMessage( message );
                 }
             }
         }
     }
 
-    if ( roundFinished_ && !winZones_.empty() )
+    //  once the round has finished, collapse all active zones
+    if (roundFinished_)
     {
-        for ( int i = 0; i < winZones_.size(); i ++)
+        const tList<eGameObject>& gameObjects = grid->GameObjects();
+        for (int i = 0; i < gameObjects.Len(); i++)
         {
-            gWinZoneHack *winZone = winZones_[i];
-            if (winZone) winZone->Vanish( 0.5 );
+            gZone *Zone = dynamic_cast<gZone *>(gameObjects[i]);
+            if (Zone)
+            {
+                //  0.5 fot smooth collapse
+                Zone->Vanish(0.5f);
+            }
         }
-        winZones_.clear();
-    }
-    if ( roundFinished_ && !deathZones_.empty())
-    {
-        for (int j = 0; j < deathZones_.size(); j++)
-        {
-            gDeathZoneHack *deathZone = deathZones_[j];
-            if (deathZone) deathZone->Vanish( 0.5 );
-        }
-        deathZones_.clear();
     }
 
+    //  checks whether server should log the unfinished players
     if (roundFinished_ && sg_raceLogUnfinished)
     {
-        for (int x=0; x < se_PlayerNetIDs.Len(); x++)
+        //  if so, let's get to work
+        for (int x = 0; x < sg_RacePlayers.Len(); x++)
         {
-            ePlayerNetID *p = se_PlayerNetIDs[x];
-            if (!p->raceArrived && p->IsHuman())
+            gRacePlayer *racePlayer = sg_RacePlayers[x];
+            if (racePlayer)
             {
-                gRaceScores::Add(p->GetUserName(),0, -1);
-                p->raceArrived = true;
+                if (!racePlayer->Finished())
+                {
+                    //  log the players by time at -1
+                    gRaceScores::Add(racePlayer);
+                    racePlayer->SetFinished(true);
+                }
             }
         }
     }
@@ -1273,28 +1150,6 @@ bool gRace::Done()
     return roundFinished_;
 }
 
-//! ADD GOAL
-void gRace::AddGoal( REAL & time, const tColoredString & colName, const tString & name/*, const tString & authName */)
-{
-    Goal goal;
-    goal.colName = colName;
-    goal.name = name;
-//    goal.authName = authName;
-    goals_.insert ( std::pair<REAL, Goal> ( time, goal ) );
-}
-
-//! NEW WIN ZONE
-void gRace::NewWinZone( gWinZoneHack * winZone )
-{
-    winZones_.push_back( winZone );
-}
-
-//! NEW DEATH ZONE
-void gRace::NewDeathZone( gDeathZoneHack * deathZone)
-{
-    deathZones_.push_back(deathZone);
-}
-
 //! RESET
 void gRace::Reset()
 {
@@ -1305,47 +1160,36 @@ void gRace::Reset()
     finishPlace_ = 0;
     firstFinishTime_ = 0;
     firstToArive_ = "";
+
     RacingScore = sg_scoreRaceComplete;
 
     sg_raceOutputSent = false;
 
-    winZones_.clear();
-    deathZones_.clear();
-    goals_.clear();
-
-    //  reset all race stats
-    for (int i=0; i < se_PlayerNetIDs.Len(); i++)
-    {
-        ePlayerNetID *p = se_PlayerNetIDs[i];
-        if (p->raceArrived) p->raceArrived = false;
-    }
-
     //  reset race players list
-    for(int b=0; b < sn_RacePlayers.Len(); b++)
+    for(int b = 0; b < sg_RacePlayers.Len(); b++)
     {
-        gRacePlayer *rPlayer = sn_RacePlayers[b];
+        gRacePlayer *rPlayer = sg_RacePlayers[b];
         if (rPlayer)
         {
-            delete rPlayer;
-            sn_RacePlayers.RemoveAt(b);
-            b--;
+            rPlayer->SetTime(-1);
+            rPlayer->SetScore(0);
+            rPlayer->SetFinished(false);
+            rPlayer->DestroyCycle();
         }
     }
 
-    std::ofstream o;
-    if ( tDirectories::Var().Open( o, "race_temp.txt" ) )
-        o << "";
+    sg_RaceFinished.Clear();
 
     //gRaceScores::Write();
     gRaceScores::Reset();
     gRaceScores::Read();
 }
 
-//! TIME TO STRING
-static tString sg_TimeToString ( REAL time )
+//! time_ TO STRING
+static tString sg_time_ToString ( REAL time_ )
 {
-    int seconds = time;
-    REAL ms = time - seconds;
+    int seconds = time_;
+    REAL ms = time_ - seconds;
     int minutes = seconds / 60;
     seconds = seconds % 60;
 
@@ -1365,83 +1209,15 @@ static tString sg_TimeToString ( REAL time )
     return ret;
 }
 
-//! END
-void gRace::End()
+eTeam *gRace::Winner()
 {
-    if ( goals_.empty() )
-        return;
-
-    tString raceTemp( "" );
-
-    std::multimap<REAL, Goal>::iterator it;
-
-    for ( it = goals_.begin(); it != goals_.end(); it ++ )      // print times
+    if (sg_RaceFinished.Len() > 0)
     {
-        REAL time = it->first;
-        std::string colName ( it->second.colName );
-        std::string name ( it->second.name );
-        //std::string authName ( it->second.authName );
-        int len = name.size();
-
-        // replace spaces with '\_' for race_temp.txt
-        std::string tempName = name;
-        ReplaceSpaces( tempName );
-        std::string tempColName = colName;
-        ReplaceSpaces( tempColName );
-        //std::string tempAuthName = authName;
-
-        raceTemp << tempName << " " << time << " " << tempColName /*<< " " << tempAuthName*/ << "\n";
-
-        //print time results immediately
-        /*for ( int i = 0; i < 16 - len; i ++ )
-            message << " ";
-        message << colName << "0xRESETT: " << sg_TimeToString( time ) << "\n";
-        */
-	//sn_ConsoleOut( "COLLAPSE_ZONE\n" );
-    }
-    //sn_ConsoleOut( message );
-
-    std::ofstream o;
-    if ( tDirectories::Var().Open( o, "race_temp.txt" ) )
-        o << raceTemp;
-
-    tOutput ladderLog;
-    ladderLog << "RACE_DONE\n";
-    se_SaveToLadderLog( ladderLog );
-}
-
-//! WINNER
-eTeam * gRace::Winner()
-{
-    if ( winnerDeclared_ )
-        return NULL;
-
-    eTeam * winner = NULL;
-    //REAL bestTime = firstFinishTime_;
-
-    for ( int i = 0; i < se_PlayerNetIDs.Len(); i ++ )
-    {
-        ePlayerNetID * p = se_PlayerNetIDs[i];
-
-        if ( firstToArive_ == p->GetUserName() && p->raceArrived )
+        gRacePlayer *racePlayer = sg_RaceFinished[0];
+        if (racePlayer)
         {
-            //p->raceArrived = false;
-            //p->raceTryouts = sg_raceTryoutsNumber;
-
-            //AddGoal( p->raceTime, p->GetColoredName(), p->GetName() /*, p->GetRawAuthenticatedName() */);
-
-            /*if ( p->raceTime < bestTime || bestTime == 0 )
-            {
-                bestTime = p->raceTime;
-                winner = p->CurrentTeam();
-            }*/
-
-            winner = p->CurrentTeam();
-            sn_ConsoleOut(tOutput("$player_win_race", p->GetColoredName(), sg_scoreRaceComplete));
-            break;
+            return racePlayer->Player()->CurrentTeam();
         }
     }
-    winnerDeclared_ = true;
-
-    return winner;
+    return NULL;
 }

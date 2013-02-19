@@ -1,4 +1,28 @@
 ===========================
+Changes in r851
+===========================
+Improvements:
+    * Moved Zone's rotation setting to better location.
+    * Improved upon the racing framework. Now it only takes in times and disregards scores.    
+
+Additions:
+    New Comaands:
+        * TIMER Settings
+            * TIMER_START <seconds>  # Starts a ingame timer, giving players <seconds> to do something
+                                       before getting killed.
+            * TIMER_STOP             # Perfectly stops the ingame timer.
+            * TIMER_RESUME           # If the timer was previously stopped, it resumes from where it last stopped.
+        * TARGETZONE_COLOR_ Settings
+            * TARGETZONE_COLOR_R     # Red portion of the target zone's color.
+            * TARGETZONE_COLOR_G     # Green portion of the target zone's color.
+            * TARGETZONE_COLOR_B     # Blue portion of the target zone's color.
+        * DEATHZONE_ROTATION         # The speed at which the death zones rotate.
+
+Languages:
+    New Language String:
+        * timer_countdown     # This is the countdown ingame timer uses to output the remianing time
+
+===========================
 Changes in r850
 ===========================
 Corrections:

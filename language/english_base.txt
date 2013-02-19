@@ -3626,4 +3626,6 @@ zombie_zone_speed_help                    The speed at which the zombie zone mov
 zone_delay_clear_help                     Clears all delayed zones from cache.
 
 arena_boundary_help                       This is the distance players can travel outside the arena boundary.
-arena_boundary_kill_help                  If set to 1, Players beyond the ARENA_BOUNDARY will be killed. 
+arena_boundary_kill_help                  If set to 1, Players beyond the ARENA_BOUNDARY will be killed.
+
+timer_countdown     0xff7777\1 

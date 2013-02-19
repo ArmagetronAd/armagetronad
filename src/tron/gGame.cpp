@@ -4915,6 +4915,108 @@ static eLadderLogWriter sg_matchWinnerWriter("MATCH_WINNER", true);
 
 static eLadderLogWriter sg_matchEndedWriter("MATCH_ENDED", true);
 
+// *******************************************************************************
+// *
+// *    gGameSpawnTimer
+// *
+// *******************************************************************************
+
+REAL gGameSpawnTimer::launchTime_ = 0.0;
+REAL gGameSpawnTimer::targetTime_ = 0.0;
+bool gGameSpawnTimer::timerActive = false;
+int gGameSpawnTimer::countDown_ = 0;
+
+static void sg_TimerStart(std::istream &s)
+{
+    tString params;
+    params.ReadLine(s);
+
+    int seconds = atoi(params);
+
+    if (seconds <= 0)
+        return;
+
+    gGameSpawnTimer::SetTimerActive(true);
+    gGameSpawnTimer::SetLaunchTime(se_GameTime());
+    gGameSpawnTimer::SetTargetTime(se_GameTime() + seconds);
+
+    gGameSpawnTimer::SetCountdown(seconds + 1);
+}
+static tConfItemFunc sg_TimerStartConf("TIMER_START", &sg_TimerStart);
+
+static void sg_TimerStop(std::istream &s)
+{
+    if (gGameSpawnTimer::Active())
+        gGameSpawnTimer::SetTimerActive(false);
+}
+static tConfItemFunc sg_TimerStopConf("TIMER_STOP", &sg_TimerStop);
+
+static void sg_TimerResume(std::istream &s)
+{
+    if (!gGameSpawnTimer::Active())
+    {
+        gGameSpawnTimer::SetTimerActive(true);
+    }
+}
+static tConfItemFunc sg_TimerResumeConf("TIMER_RESUME", &sg_TimerResume);
+
+void gGameSpawnTimer::Sync(int alive, int ai_alive, int humans)
+{
+    if ((alive == 0) && (ai_alive == 0))
+    {
+        timerActive = false;
+    }
+    else if ((alive == 0) && (ai_alive > 0))
+    {
+        //  kill all active players
+        for(int i = 0; i < se_PlayerNetIDs.Len(); i++)
+        {
+            ePlayerNetID *p = se_PlayerNetIDs[i];
+            if (p && p->Object())
+            {
+                p->Object()->Kill();
+            }
+        }
+
+        timerActive = false;
+        return;
+    }
+
+    //  do countdown
+    countDown_--;
+
+    if (countDown_ == 0)
+    {
+        //  kill all active players
+        for(int i = 0; i < se_PlayerNetIDs.Len(); i++)
+        {
+            ePlayerNetID *p = se_PlayerNetIDs[i];
+            if (p && p->Object())
+            {
+                p->Object()->Kill();
+            }
+        }
+
+        timerActive = false;
+    }
+    else
+    {
+        tOutput message;
+        message.SetTemplateParameter(1, countDown_);
+        message << "$timer_countdown" << "                    ";
+        sn_CenterMessage( message );
+    }
+}
+
+//  reset the spawned timer
+void gGameSpawnTimer::Reset()
+{
+    launchTime_ = 0.0;
+    targetTime_ = 0.0;
+    timerActive = false;
+    countDown_  = 0;
+}
+
 void gGame::Analysis(REAL time){
     if ( nCLIENT == sn_GetNetState() )
         return;
@@ -5154,6 +5256,13 @@ void gGame::Analysis(REAL time){
         }
 
         lastTeams=humanTeamsClamp; // update last team count
+    }
+
+    //! Do the count down of timer
+    if (gGameSpawnTimer::Active())
+    {
+        gGameSpawnTimer::Sync(alive, ai_alive, sg_NumHumans());
+        return;
     }
 
     //HACK RACE begin

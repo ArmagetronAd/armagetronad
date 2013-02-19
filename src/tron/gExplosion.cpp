@@ -160,7 +160,11 @@ gExplosion::gExplosion(eGrid *grid, const eCoord &pos,REAL time, gRealColor& col
         listID(-1),
         owner_(owner)
 {
-    radius_ = gCycle::ExplosionRadius() + owner_->Speed();// * sg_explosionSpeedFactor;
+    if (owner_)
+        radius_ = gCycle::ExplosionRadius() + owner_->Speed();// * sg_explosionSpeedFactor;
+    else
+        radius_ = gCycle::ExplosionRadius();
+
     holeAccountedFor_ = false;
 
     lastTime = time;

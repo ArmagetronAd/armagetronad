@@ -276,6 +276,10 @@ gZone::gZone( eGrid * grid, const eCoord & pos, bool dynamicCreation, bool delay
 
     color_.r = color_.g = color_.b = 1.0f;
 
+    //  speed at which zone rotates
+    SetRotationSpeed( 0.3f );
+    SetRotationAcceleration( 0.0f );
+
     //??? Look at doing this in the shot or wherever it is created...
     //??? or changing dynamic creation to disableAlpha or something
     if (dynamicCreation)
@@ -401,7 +405,7 @@ void gZone::WriteSync( nMessage & m )
     m << radius_;
 
     // write rotation speed
-    m << rotationSpeed_;
+    //m << rotationSpeed_;
 }
 
 
@@ -449,7 +453,7 @@ void gZone::ReadSync( nMessage & m )
     }
 
     // read rotation speed
-    if (!m.End())
+    /*if (!m.End())
     {
         m >> rotationSpeed_;
     }
@@ -458,7 +462,7 @@ void gZone::ReadSync( nMessage & m )
         // set fixed values
         SetRotationSpeed( .3f );
         SetRotationAcceleration( 0.0f );
-    }
+    }*/
 }
 
 // *******************************************************************************
@@ -467,7 +471,7 @@ void gZone::ReadSync( nMessage & m )
 // *
 // *******************************************************************************
 
-static eLadderLogWriter sg_spawnzoneWriter("ZONE_SPAWNED", true);
+static eLadderLogWriter sg_spawnzoneWriter("ZONE_SPAWNED", false);
 
 static void CreateZone(gZone *Zone, const REAL zoneSize, const REAL zoneGrowth, eCoord zoneDir, bool setColorFlag, gRealColor zoneColor, bool zoneInteractive, REAL targetRadius, std::vector<eCoord> route, tString zoneNameStr){
     static_cast<eGameObject*>(Zone)->Timestep( se_GameTime() );
@@ -1639,6 +1643,7 @@ void gZone::Vanish( REAL factor )
     {
         SetReferenceTime();
         SetExpansionSpeed( -GetRadius() * factor );
+        SetTargetRadius(0);
         RequestSync();
     }
 }
@@ -1698,9 +1703,6 @@ gWinZoneHack::gWinZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreati
         color_.b = sg_ColorDeathZoneBlue / 15.0f;//0.0f;
         color_.g = sg_ColorDeathZoneGreen / 15.0f;//0.0f;
     }
-
-    //HACK RACE
-    gRace::NewWinZone( this );
 }
 
 
@@ -1798,6 +1800,9 @@ void gWinZoneHack::OnEnter( gCycle * target, REAL time )
 //!
 // *******************************************************************************
 
+REAL sg_deathzoneRotation = 0.3f;
+static tSettingItem<REAL> sg_deathzoneRotationConf("DEATHZONE_ROTATION", sg_deathzoneRotation);
+
 gDeathZoneHack::gDeathZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreation, eTeam * teamowner, bool delayCreation )
 :gZone( grid, pos, dynamicCreation, delayCreation )
 {
@@ -1826,9 +1831,10 @@ gDeathZoneHack::gDeathZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCr
         deathZoneType = TYPE_NORMAL;
     }
 
+    SetRotationSpeed(sg_deathzoneRotation);
+
     if (!delayCreation)
         grid->AddGameObjectInteresting(this);
-    gRace::NewDeathZone( this );
 }
 
 
@@ -1842,6 +1848,8 @@ gDeathZoneHack::gDeathZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCr
 //!     @param  null
 //!
 // *******************************************************************************
+
+
 
 gDeathZoneHack::gDeathZoneHack( nMessage & m )
 : gZone( m )
@@ -5488,12 +5496,24 @@ static tConfItemFunc sg_SetTargetCmd_conf("SET_TARGET_COMMAND",&sg_SetTargetCmd)
 //!
 // *******************************************************************************
 
+//  target zone color settings
+REAL sg_targetZoneColorR = 0;
+REAL sg_targetZoneColorG = 15;
+REAL sg_targetZoneColorB = 0;
+static tSettingItem<REAL> sg_targetZoneColorRConf("TARGETZONE_COLOR_R", sg_targetZoneColorR);
+static tSettingItem<REAL> sg_targetZoneColorGConf("TARGETZONE_COLOR_G", sg_targetZoneColorG);
+static tSettingItem<REAL> sg_targetZoneColorBConf("TARGETZONE_COLOR_B", sg_targetZoneColorB);
+
 gTargetZoneHack::gTargetZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreation, bool delayCreation)
 :gZone( grid, pos, dynamicCreation, delayCreation)
 {
-    color_.r = 0.0f;
-    color_.g = 1.0f;
-    color_.b = 0.0f;
+    //color_.r = 0.0f;
+    //color_.g = 1.0f;
+    //color_.b = 0.0f;
+
+    color_.r = sg_targetZoneColorR / 15.0f;
+    color_.g = sg_targetZoneColorG / 15.0f;
+    color_.b = sg_targetZoneColorB / 15.0f;
 
     TargetZoneCounter_++;
     winnerTime_ = -1;
@@ -5663,6 +5683,12 @@ void gTargetZoneHack::OnEnter( gCycle * target, REAL time )
         (currentState_ == State_Conquered))
     {
         return;
+    }
+
+    //HACK RACE begin
+    if ( sg_RaceTimerEnabled )
+    {
+        gRace::ZoneHit( target->Player() );
     }
 
     // keep first player in memory, if it's the last zone, he is the winner ...
@@ -7105,7 +7131,7 @@ static void sg_SpawnSoccer(std::istream &s)
         tString name, type, team;
         std::vector<eCoord> route;
         int pos = 0;
-        gZone *Zone;
+        gZone *Zone = NULL;
 
         name = params.ExtractNonBlankSubString(pos);
         if (name.ToLower() == "n")
@@ -7179,7 +7205,7 @@ static void sg_SpawnSoccer(std::istream &s)
             setColorFlag = true;
         }
 
-        eTeam *zoneTeam;
+        eTeam *zoneTeam = NULL;
         if (team.ToLower() == "no_team")
         {
             //REAL teamDistance_ = 0;

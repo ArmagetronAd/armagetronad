@@ -5159,10 +5159,6 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), timeC
 
     loginWanted = false;
 
-    //HACK
-    raceArrived = false;
-    //raceTryouts = sg_raceTryoutsNumber;
-
 
     if (p>=0)
     {
@@ -5184,6 +5180,11 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), timeC
 
     se_PlayerNetIDs.Add(this,listID);
     object=NULL;
+
+    if (!gRacePlayer::PlayerExists(GetUserName()))
+    {
+        gRacePlayer *racePlayer = new gRacePlayer(this);
+    }
 
     /*
       if(sn_GetNetState()!=nSERVER)
@@ -5242,10 +5243,6 @@ ePlayerNetID::ePlayerNetID(nMessage &m):nNetObject(m),listID(-1), teamListID(-1)
     lastSync=tSysTimeFloat();
 
     loginWanted = false;
-
-    //HACK
-    raceArrived = false;
-    //raceTryouts = sg_raceTryoutsNumber;
 
     score=0;
     lastScore_=IMPOSSIBLY_LOW_SCORE;
@@ -5662,20 +5659,20 @@ void ePlayerNetID::RemoveFromGame()
         se_playerAILeftWriter.write();
     }
 
-    se_PlayerNetIDs.Remove(this, listID);
-    SetTeamWish( NULL );
-    SetTeam( NULL );
-    UpdateTeam();
-    ControlObject( NULL );
-
-    if (gRacePlayer::PlayerExists(this))
+    if (gRacePlayer::PlayerExists(GetUserName()))
     {
-        gRacePlayer *rPlayer = gRacePlayer::GetPlayer(this);
+        gRacePlayer *rPlayer = gRacePlayer::GetPlayer(GetUserName());
         if (rPlayer)
         {
             rPlayer->ErasePlayer();
         }
     }
+
+    se_PlayerNetIDs.Remove(this, listID);
+    SetTeamWish( NULL );
+    SetTeam( NULL );
+    UpdateTeam();
+    ControlObject( NULL );
 }
 
 bool ePlayerNetID::ActionOnQuit()
@@ -8882,6 +8879,7 @@ static void se_PlayerMessageConf(std::istream &s)
 
     s >> PlayerName;
     ePlayerNetID *receiver = ePlayerNetID::FindPlayerByName(PlayerName);
+    ePlayerNetID *sender = 0;
 
     if (!receiver)
     {
@@ -8891,11 +8889,11 @@ static void se_PlayerMessageConf(std::istream &s)
     //int receiver = se_ReadUser( s );
 
     tColoredString msg;
-    Message.ReadLine(s, true);
+    Message.ReadLine(s);
     msg << Message;
     msg << "\n";
 
-    sn_ConsoleOut(msg, 0);
+    sn_ConsoleOut(msg, sender->Owner());
     sn_ConsoleOut(msg, receiver->Owner());
 }
 

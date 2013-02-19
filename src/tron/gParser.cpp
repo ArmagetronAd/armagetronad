@@ -597,7 +597,7 @@ void gParser::parseTeleportZone(eGrid *grid, xmlNodePtr cur, const xmlChar * key
     }
 }
 
-static eLadderLogWriter sg_createzoneWriter("ZONE_CREATED", true);
+static eLadderLogWriter sg_createzoneWriter("ZONE_CREATED", false);
 
 void
 gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
@@ -818,16 +818,25 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
         {
             zone->SetRadius( radius*sizeMultiplier );
             zone->SetExpansionSpeed( growth*sizeMultiplier );
-            zone->SetRotationSpeed(rotate);
-            zone->RequestSync();
+
+            if (rotate != 0.3f)
+            {
+                if (rotate > 0)
+                    zone->SetRotationSpeed(rotate);
+            }
+
             if (zoneNamestr) zone->SetName(zoneNamestr);
+
             if (colorsExist) zone->SetColor(storeColors_);
+
             zone->SetVelocity(zoneDir);
+
             if (zoneInteract)
             {
                 zone->SetWallInteract(true);
                 zone->SetWallBouncesLeft(-1);
             }
+
             if(!route.empty())
             {
                 zone->SetPosition(route.front());
@@ -836,11 +845,14 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
                     zone->AddWaypoint(*iter);
                 }
             }
+
             if (zoneDelayCreation > 0)
             {
                 //  add the zone's creation delay to the list
                 gZone::AddDelay(zoneDelayCreation, zone);
             }
+
+            zone->RequestSync();
 
             sg_createzoneWriter << zone->GOID() << zoneNamestr << zone->GetPosition().x << zone->GetPosition().y << zone->GetVelocity().x << zone->GetVelocity().y;
             sg_createzoneWriter.write();

@@ -479,11 +479,6 @@ public:
     bool IsAllowedToRename ( void );                             //!< tells if the user can rename or not, takes care about everything
     void AllowRename( bool allow );                              //!< Allows a player to rename (or not)
 
-    //HACK RACE
-    bool raceArrived;
-    REAL raceTime;
-    //int raceTryouts;
-
     static bool HasRenameCapability ( ePlayerNetID const *, ePlayerNetID const * admin ); //!< Checks if the admin can use the RENAME command. Used in IsAllowedToRename()
 
 private:

@@ -2432,9 +2432,6 @@ gCycle::gCycle(eGrid *grid, const eCoord &pos,const eCoord &d,ePlayerNetID *p)
     dirDrive = Grid()->GetDirection(windingNumberWrapped_);
     dir = dirDrive;
 
-    if (!gRacePlayer::PlayerExists(Player()))
-        new gRacePlayer(Player());
-
     deathTime=0;
 
     lastNetWall=lastWall=currentWall=NULL;
@@ -2447,6 +2444,12 @@ gCycle::gCycle(eGrid *grid, const eCoord &pos,const eCoord &d,ePlayerNetID *p)
     sg_ArchiveReal( this->verletSpeed_, 1 );
 
     flag_ = NULL;
+
+    gRacePlayer *racePlayer = gRacePlayer::GetPlayer(Player()->GetUserName());
+    if (racePlayer)
+    {
+        racePlayer->NewCycle(this);
+    }
 }
 
 gCycle::~gCycle(){
@@ -4068,9 +4071,9 @@ void gCycle::Kill(){
             se_cycleDestroyedWriter << Player()->GetUserName() << Position().x << Position().y << Direction().x << Direction().y << ePlayerNetID::FilterName(Team()->Name()) << se_GameTime();
             se_cycleDestroyedWriter.write();
 
-            if (gRacePlayer::PlayerExists(Player()))
+            if (gRacePlayer::PlayerExists(Player()->GetUserName()))
             {
-                gRacePlayer *rPlayer = gRacePlayer::GetPlayer(Player());
+                gRacePlayer *rPlayer = gRacePlayer::GetPlayer(Player()->GetUserName());
                 if (rPlayer)
                 {
                     rPlayer->DestroyCycle();

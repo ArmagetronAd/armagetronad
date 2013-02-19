@@ -190,6 +190,30 @@ public:
     void Menu();
 };
 
+class gGameSpawnTimer
+{
+    public:
+        static void Reset();
+        static void Sync(int alive, int ai_alive, int humns);
+        static bool Active() { return timerActive; }
+
+        static REAL GetLaunchTime() { return launchTime_; }
+        static REAL GetTargetTime() { return targetTime_; }
+        static void SetLaunchTime(REAL time) { launchTime_ = time; }
+        static void SetTargetTime(REAL time) { targetTime_ = time; }
+
+        static void SetCountdown(int countdown) { countDown_ = countdown; }
+        static int  GetCountdown() { return countDown_; }
+
+        static void SetTimerActive(bool active) { timerActive = active; }
+
+    private:
+        static REAL launchTime_;    //!<    time the timer hs launched at
+        static REAL targetTime_;    //!<    time the timer will finish at
+        static bool timerActive;    //!<    flag if the timer is finished
+        static int countDown_;      //!<    the countdown to initiate
+};
+
 extern gGameSettings* sg_currentSettings;
 
 // Race timer hack
