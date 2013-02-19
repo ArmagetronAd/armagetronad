@@ -1096,6 +1096,7 @@ void gRace::Sync( int alive, int ai_alive, int humans)
                 else
                 {
                     tOutput message;
+                    message.SetTemplateParameter(1, countDown_);
                     message << "$timer_countdown" << "                    ";
                     sn_CenterMessage( message );
                 }
