@@ -4101,7 +4101,7 @@ void handle_chat( nMessage &m )
 
                 params.ReadLine(s);
 
-                tString chat_command = params.ExtractNonBlankSubString(pos).Filter();
+                tString chat_command = params.ExtractNonBlankSubString(pos).ToLower();
 
                 if (chat_command == "!race")
                 {
@@ -4114,10 +4114,14 @@ void handle_chat( nMessage &m )
                     }
 
                     tString command = params.ExtractNonBlankSubString(pos).ToLower();
+                    tString restStr = params.SubStr(pos + 1);
 
-                    tConfItemBase::EatWhitespace(s);
+                    std::string sayRestStr(restStr);
+                    std::istringstream str(sayRestStr);
 
-                    gRace::RaceChat(p, command, s);
+                    tConfItemBase::EatWhitespace(str);
+
+                    gRace::RaceChat(p, command, str);
 
                     return;
                 }

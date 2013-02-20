@@ -1315,7 +1315,7 @@ void gZone::InteractWith( eGameObject * target, REAL time, int recursion )
                     REAL distance = this->Radius() + randomZone->GetRadius();
                     if ((randomZone->Position() - this->Position() ).NormSquared() < (distance * distance))
                     {
-                        objZone->OnEnter(tarZone, time);
+                        objZone->OnEnter(randomZone, time);
                     }
                 }
             }

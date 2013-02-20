@@ -199,17 +199,21 @@ void gRaceScores::Sort()
 
 void gRaceScores::Add(gRacePlayer *racePlayer)
 {
+    bool timeChanged = false;
+
     if (CheckPlayer(racePlayer->Player()->GetUserName()))
     {
         gRaceScores *rS = GetPlayer(racePlayer->Player()->GetUserName());
         if (((racePlayer->Time() < rS->time_) && racePlayer->Time() != -1) || (rS->time_ == -1 && racePlayer->Time() != -1))
         {
             rS->time_ = racePlayer->Time();
-            tOutput newtime_;
-            newtime_.SetTemplateParameter(1, racePlayer->Time());
-            newtime_ << "$player_personal_best_reach_time";
+            tOutput newtime;
+            newtime.SetTemplateParameter(1, racePlayer->Time());
+            newtime << "$player_personal_best_reach_time";
 
-            sn_ConsoleOut(newtime_, racePlayer->Player()->Owner());
+            sn_ConsoleOut(newtime, racePlayer->Player()->Owner());
+
+            timeChanged = true;
         }
     }
     else
@@ -218,11 +222,34 @@ void gRaceScores::Add(gRacePlayer *racePlayer)
         rS->time_ = racePlayer->Time();
         if (racePlayer->Time() != -1)
         {
-            tOutput newtime_;
-            newtime_.SetTemplateParameter(1, racePlayer->Time());
-            newtime_ << "$player_personal_best_reach_time";
+            tOutput newtime;
+            newtime.SetTemplateParameter(1, racePlayer->Time());
+            newtime << "$player_personal_best_reach_time";
 
-            sn_ConsoleOut(newtime_, racePlayer->Player()->Owner());
+            sn_ConsoleOut(newtime, racePlayer->Player()->Owner());
+
+            timeChanged = true;
+        }
+    }
+
+    //  ensure that times really have changed for this to take effect
+    if (timeChanged)
+    {
+        //  sort out ranks once player get better time
+        Sort();
+
+        //  get top player from that list
+        gRaceScores *firstRanker = sg_RaceScores[0];
+
+        //  check if it's the same player
+        if (firstRanker->Name() == racePlayer->Player()->GetUserName())
+        {
+            tOutput bestTime;
+            bestTime.SetTemplateParameter(1, racePlayer->Player()->GetColoredName());
+            bestTime.SetTemplateParameter(2, firstRanker->Time());
+            bestTime << "$player_hold_best_time";
+
+            sn_ConsoleOut(bestTime);
         }
     }
 }
@@ -1342,6 +1369,14 @@ void gRace::RaceChat(ePlayerNetID *player, tString command, std::istream &s)
             tOutput message;
             message << "0x66ff22!race ls           0x0055ff: Lists all of those who have already crossed the finish line.\n";
             message << "0x66ff22!race stats <name> 0x0055ff: Lists the current stats of players by <name>. Leave it blank to view your own stats.\n";
+            sn_ConsoleOut(message, player->Owner());
+        }
+        else
+        {
+            tOutput message;
+            message << "0xffdd00You seem to not know how this works. Check this out!\n";
+            message << "0x66ff22!race help 0x0055ff: Lists all available commands for racing.\n";
+            sn_ConsoleOut(message, player->Owner());
         }
     }
 }

@@ -3297,11 +3297,12 @@ race_score_deplete_help               Number the score depletes by everytime a p
 race_score_type_help		          0-No sorting; 1-Sort by best score; 2-sort by best time.
 race_log_time_help                    If enabled, it displays the reached time and the position of arrival.
 
-player_reach_race		              \1 0xfffffffinished with \2 points in \3 seconds.\n
+player_reach_race		                  \1 0xfffffffinished with \2 points in \3 seconds.\n
 player_reach_race_first               \1 0xfffffffinished 1st in \2 seconds.\n
 player_reach_race_time                \2| \1 0xfffffffinished in \3 ( \4 s behind 1st ).\n
 
 player_personal_best_reach_time       New personal record! Your new time record is \1 seconds.\n
+player_hold_best_time                 Congratulations to \1 0xRESETTf holding the best time of \2 seconds here.\n
 
 player_race_stats_self      Your rank is \1 with a time of \2.\n
 player_race_stats_other     Player: \1 0xRESETTis at rank is 0xffff77\2 0xRESETTwith a time of 0xffff77\30xRESETT.\n

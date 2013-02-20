@@ -2254,7 +2254,7 @@ tString tString::Replace(const char *old_word, const char *new_word)
 bool tString::IsNumeric()
 {
     tString ret(*this);
-    char numericValues[] {1, 2, 4, 5, 6, 7, 8, 9, 0};
+    tString numericValues("124567890");
 
     //  return false when string is blank
     if (ret.Filter() == "")
@@ -2263,8 +2263,11 @@ bool tString::IsNumeric()
     for(int i = 0; i < ret.Len(); i++)
     {
         //  return false if current character in string is not a number
-        if (!isdigit(ret[i]))
-            return false;
+        for(int id = 0; id < numericValues.Len(); id++)
+        {
+            if (ret[i] != numericValues[id])
+                return false;
+        }
     }
 
     //  looks like everything worked out. Good!

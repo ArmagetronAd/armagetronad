@@ -5350,9 +5350,8 @@ void gGame::Analysis(REAL time){
 
     if ( sg_RaceTimerEnabled )
     {
-        gRace::Sync( alive, ai_alive, sg_NumHumans() );
         if ( !gRace::Done() )
-            return;
+            gRace::Sync( alive, ai_alive, sg_NumHumans() );
         else                                    // time to close the round
         {
             eTeam *team = gRace::Winner();
@@ -5364,14 +5363,6 @@ void gGame::Analysis(REAL time){
                 message << "$player_win_race";
                 sg_DeclareWinner( team, message );
             }
-/*          else
-            {
-                if ( alive > 0 )
-                {
-                    //TODO
-                    sg_DeclareWinner( NULL, 0 );
-                }
-            }*/
         }
     }
     //HACK RACE end
