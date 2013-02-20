@@ -750,7 +750,7 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
                                 Output.SetTemplateParameter(1, mapName);
                                 Output.SetTemplateParameter(2, p->GetColoredName());
                                 Output << "$map_queueing_file_stored";
-                                sn_ConsoleOut(Output, p->Owner());
+                                sn_ConsoleOut(Output);
                             }
                         }
                         else
@@ -818,7 +818,7 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
                                     sg_mapqueueing.Remove(j);
                                     tOutput Output;
                                     Output.SetTemplateParameter(1, mapName);
-                                    Output.SetTemplateParameter(2, p->GetName());
+                                    Output.SetTemplateParameter(2, p->GetColoredName());
                                     Output << "$map_queueing_file_removed";
                                     sn_ConsoleOut(Output);
                                     break;
