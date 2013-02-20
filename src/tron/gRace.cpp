@@ -886,16 +886,7 @@ void gRacePlayer::ErasePlayer()
 //! ZONE HIT
 void gRace::ZoneHit( ePlayerNetID *player )
 {
-    gRacePlayer *racePlayer = NULL;
-    for(int playerID = 0; playerID < sg_RacePlayers.Len(); playerID++)
-    {
-        gRacePlayer *fetchPlayer = sg_RacePlayers[playerID];
-        if (fetchPlayer && (fetchPlayer->Player() == player))
-        {
-            racePlayer = fetchPlayer;
-            break;
-        }
-    }
+    gRacePlayer *racePlayer = gRacePlayer::GetPlayer(player->GetUserName());
 
     if (player && racePlayer && !racePlayer->Finished() && !roundFinished_ && player->Object() && player->Object()->Alive())
     {
@@ -938,8 +929,9 @@ void gRace::ZoneHit( ePlayerNetID *player )
             {
                 win.SetTemplateParameter(1, player->GetColoredName());
                 win.SetTemplateParameter(2, finishPlace_);
-                win.SetTemplateParameter(3, (racePlayer->Time() - firstFinishTime_));
-                win << "$player_reach_race_time_";
+                win.SetTemplateParameter(3, racePlayer->Time());
+                win.SetTemplateParameter(4, (racePlayer->Time() - firstFinishTime_));
+                win << "$player_reach_race_time";
             }
         }
 
@@ -1221,4 +1213,135 @@ eTeam *gRace::Winner()
         }
     }
     return NULL;
+}
+
+void gRace::RaceChat(ePlayerNetID *player, tString command, std::istream &s)
+{
+    if (player)
+    {
+        tString params;
+        int pos = 0;
+
+        params.ReadLine(s);
+
+        //  check on their stats
+        if (command == "stats")
+        {
+            //  sort out the records
+            gRaceScores::Sort();
+
+            if(params.Filter() == "")
+            {
+                gRaceScores *selScores = NULL;
+                int rank = 1;
+                for(int i = 0; i < sg_RaceScores.Len(); i++)
+                {
+                    gRaceScores *rScores = sg_RaceScores[i];
+                    if (rScores)
+                    {
+                        rank++;
+                        if (rScores->Name() == player->GetUserName())
+                        {
+                            selScores = rScores;
+                            break;
+                        }
+                    }
+                }
+
+                if (selScores)
+                {
+                    tOutput message;
+                    message.SetTemplateParameter(1, rank);
+                    message.SetTemplateParameter(2, selScores->Time());
+                    message << "$player_race_stats_self";
+
+                    sn_ConsoleOut(message, player->Owner());
+                }
+            }
+            else
+            {
+                tString player_name = params.ExtractNonBlankSubString(pos);
+                if (sg_RaceScores.Len() > 0)
+                {
+                    gRaceScores *selScores = NULL;
+                    int rank = 1;
+                    for(int i = 0; i < sg_RaceScores.Len(); i++)
+                    {
+                        gRaceScores *rScores = sg_RaceScores[i];
+                        if (rScores)
+                        {
+                            rank++;
+                            if (rScores->Name().Contains(player_name.Filter()))
+                            {
+                                selScores = rScores;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (selScores)
+                    {
+                        tOutput message;
+                        message.SetTemplateParameter(1, selScores->Name());
+                        message.SetTemplateParameter(2, rank);
+                        message.SetTemplateParameter(3, selScores->Time());
+                        message << "$player_race_stats_other";
+
+                        sn_ConsoleOut(message, player->Owner());
+                    }
+                }
+            }
+        }
+        else if ((command == "ls") || (command == "list"))
+        {
+            tOutput amount, arrive;
+            if (sg_RaceFinished.Len() > 0)
+            {
+                int max = 0;
+
+                if (sg_RaceFinished.Len() >= 10)
+                    max = 10;
+                else
+                    max = sg_RaceFinished.Len();
+
+                //  display only the maximum allowed
+                for(int i = 0; i < max; i++)
+                {
+                    gRacePlayer *racePlayer = sg_RaceFinished[i];
+                    if (racePlayer)
+                    {
+                        tOutput message;
+                        message.SetTemplateParameter(1, racePlayer->Player()->GetUserName());
+                        message.SetTemplateParameter(2, racePlayer->Time());
+                        message.SetTemplateParameter(3, racePlayer->Time() - firstFinishTime_);
+                        message << "$race_finished_list_display";
+
+                        sn_ConsoleOut(message, player->Owner());
+                    }
+                }
+
+                //  message about displaying the allowed number of finished players
+                arrive.SetTemplateParameter(1, max);
+                arrive << "$race_finished_list_arrive";
+                sn_ConsoleOut(arrive, player->Owner());
+
+                //  message about the total number of players finished crossing the map
+                amount.SetTemplateParameter(1, sg_RaceFinished.Len());
+                amount << "$race_finished_list_amount";
+                sn_ConsoleOut(amount, player->Owner());
+            }
+            else
+            {
+                tOutput message;
+                message << "$race_finished_list_nobody";
+                sn_ConsoleOut(message, player->Owner());
+            }
+        }
+        else if (command == "help")
+        {
+            tOutput message;
+            message << "0x66ff22!race ls           0x0055ff: Lists all of those who have already crossed the finish line.\n";
+            message << "0x66ff22!race stats <name> 0x0055ff: Lists the current stats of players by <name>. Leave it blank to view your own stats.\n";
+        }
+    }
 }

@@ -4091,28 +4091,36 @@ void handle_chat( nMessage &m )
                     }
 #endif
             }
-            else if (say.StartsWith("!race"))
+            else
             {
-                if (!sg_RaceTimerEnabled)
-                {
-                    tString message;
-                    message << "0xff7777RACE_TIMER_ENABLED must be enabled to use this command.\n";
-                    sn_ConsoleOut(message, p->Owner());
-                    return;
-                }
+                tString params;
+                int pos = 0;
 
                 std::string sayStr(say);
                 std::istringstream s(sayStr);
 
-                tString command;
-                s >> command;
+                params.ReadLine(s);
 
-                // filter to lowercase
-                tToLower( command );
+                tString chat_command = params.ExtractNonBlankSubString(pos).Filter();
 
-                tConfItemBase::EatWhitespace(s);
+                if (chat_command == "!race")
+                {
+                    if (!sg_RaceTimerEnabled)
+                    {
+                        tString message;
+                        message << "0xff7777RACE_TIMER_ENABLED must be enabled to use this command.\n";
+                        sn_ConsoleOut(message, p->Owner());
+                        return;
+                    }
 
-                return;
+                    tString command = params.ExtractNonBlankSubString(pos).ToLower();
+
+                    tConfItemBase::EatWhitespace(s);
+
+                    gRace::RaceChat(p, command, s);
+
+                    return;
+                }
             }
 
             // well, that leaves only regular, boring chat.

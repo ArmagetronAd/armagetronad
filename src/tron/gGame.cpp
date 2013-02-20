@@ -236,39 +236,77 @@ void sg_DisplayRotationList(ePlayerNetID *p, std::istream &s, tString command)
 {
     if (p)
     {
-        tColoredString output;
+        int max = 10;
+        int showing = 0;
+
+        tString params;
+        int pos = 0;
+        params.ReadLine(s);
+
+        int showAmount = 0;
+        tString amount = params.ExtractNonBlankSubString(pos);
+        if (amount.Filter() != "") showAmount = atoi(amount);
 
         if (command == "/mr")
         {
-            output << tOutput("$map_rotation_list");
+            sn_ConsoleOut(tOutput("$map_rotation_list"));
 
             if (mapRotation->Size() > 0)
             {
-                for(int i = 0; i < mapRotation->Size(); i++)
+                if (mapRotation->Size() < max) max = mapRotation->Size();
+
+                for(int i = showAmount; i < max; i++)
                 {
-                    output << "0xff5500";
+                    tColoredString output;
+                    output << "+ 0xff5500";
                     output << mapRotation->Get(i);
-                    output << tColoredString::ColorString(1, 1, 1) << ", ";
+                    output << tColoredString::ColorString(1, 1, 1) << "\n";
+                    sn_ConsoleOut(output, p->Owner());
+
+                    showing++;
+                }
+
+                if (showAmount <= mapRotation->Size())
+                {
+                    tOutput show;
+                    show.SetTemplateParameter(1, showing);
+                    show.SetTemplateParameter(2, mapRotation->Size());
+
+                    show << "$map_rotation_list_show";
+                    sn_ConsoleOut(show);
                 }
             }
         }
         else if (command == "/cr")
         {
-            output << tOutput("$config_rotation_list");
+            sn_ConsoleOut(tOutput("$config_rotation_list"));
 
             if (configRotation->Size() > 0)
             {
-                for(int i = 0; i < configRotation->Size(); i++)
+                if (configRotation->Size() < max) max = configRotation->Size();
+
+                for(int i = showAmount; i < max; i++)
                 {
-                    output << "0xff5500";
+                    tColoredString output;
+                    output << "+ 0xff5500";
                     output << configRotation->Get(i);
-                    output << tColoredString::ColorString(1, 1, 1) << ", ";
+                    output << tColoredString::ColorString(1, 1, 1) << "\n";
+                    sn_ConsoleOut(output, p->Owner());
+
+                    showing++;
+                }
+
+                if (showAmount < configRotation->Size())
+                {
+                    tOutput show;
+                    show.SetTemplateParameter(1, showing);
+                    show.SetTemplateParameter(2, configRotation->Size());
+
+                    show << "$config_rotation_list_show";
+                    sn_ConsoleOut(show);
                 }
             }
         }
-
-        output << "\n";
-        sn_ConsoleOut(output, p->Owner());
     }
 }
 
@@ -683,7 +721,7 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
                         tOutput Output;
                         Output.SetTemplateParameter(1, item);
                         Output << "$map_queueing_file_not_found";
-                        sn_ConsoleOut(Output);
+                        sn_ConsoleOut(Output, p->Owner());
                     }
                     else
                     {
@@ -710,8 +748,9 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
                                 sg_mapqueueing.Insert(mapName);
                                 tOutput Output;
                                 Output.SetTemplateParameter(1, mapName);
+                                Output.SetTemplateParameter(2, p->GetColoredName());
                                 Output << "$map_queueing_file_stored";
-                                sn_ConsoleOut(Output);
+                                sn_ConsoleOut(Output, p->Owner());
                             }
                         }
                         else
@@ -719,7 +758,7 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
                             tOutput Output;
                             Output.SetTemplateParameter(1, item);
                             Output << "$map_queueing_found_toomanyfiles";
-                            sn_ConsoleOut(Output);
+                            sn_ConsoleOut(Output, p->Owner());
                         }
                     }
                     for (int i=0; i < searchFindings.Len(); i++)
@@ -731,7 +770,7 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
                 tOutput Output;
                 Output.SetTemplateParameter(1, tCurrentAccessLevel::GetName(se_mapqueueingAccessLevel));
                 Output.SetTemplateParameter(2, argument);
-                Output << "$config_queueing_required_level";
+                Output << "$map_queueing_required_level";
                 sn_ConsoleOut(Output, p->Owner());
             }
         }
@@ -803,7 +842,7 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
                 tOutput Output;
                 Output.SetTemplateParameter(1, tCurrentAccessLevel::GetName(se_mapqueueingAccessLevel));
                 Output.SetTemplateParameter(2, argument);
-                Output << "$config_queueing_required_level";
+                Output << "$map_queueing_required_level";
                 sn_ConsoleOut(Output, p->Owner());
             }
         }
@@ -894,9 +933,9 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
                                 sg_mapqueueing.Insert(configName);
                                 tOutput Output;
                                 Output.SetTemplateParameter(1, configName);
-                                Output.SetTemplateParameter(2, p->GetName());
+                                Output.SetTemplateParameter(2, p->GetColoredName());
                                 Output << "config_queueing_file_stored";
-                                sn_ConsoleOut(Output, p->Owner());
+                                sn_ConsoleOut(Output);
                             }
                         }
                         else
@@ -3001,8 +3040,24 @@ void sg_HostGame(){
 static tString sg_roundCenterMessage("");
 static tConfItemLine sn_roundCM_ci("ROUND_CENTER_MESSAGE",sg_roundCenterMessage);
 
-static tString sg_roundConsoleMessage("");
-static tConfItemLine sn_roundCcM1_ci("ROUND_CONSOLE_MESSAGE",sg_roundConsoleMessage);
+tArray<tString> sg_RoundConsoleMessages;
+static void sg_RoundConsoleMessage(std::istream &s)
+{
+    tString params;
+    params.ReadLine(s, true);
+    params = params + "\n";
+
+    sg_RoundConsoleMessages.Insert(params);
+}
+static tConfItemFunc sn_roundCcM1_ci("ROUND_CONSOLE_MESSAGE", &sg_RoundConsoleMessage);
+
+static void sg_RoundConsoleMessageClear(std::istream &s)
+{
+    sg_RoundConsoleMessages.Clear();
+}
+static tConfItemFunc sn_roundCcM1_clear("ROUND_CONSOLE_MESSAGE_CLEAR", &sg_RoundConsoleMessageClear);
+
+
 
 static bool sg_RequestedDisconnection = false;
 
@@ -4296,7 +4351,9 @@ void gGame::StateUpdate(){
         case GS_DELETE_GRID:
             // sr_con.autoDisplayAtNewline=true;
 
+#ifdef DEBUG
             con << tOutput("$gamestate_deleting_grid");
+#endif
             //				sn_ConsoleOut(sg_roundCenterMessage + "\n");
             sn_CenterMessage(sg_roundCenterMessage);
 
@@ -4414,7 +4471,9 @@ void gGame::StateUpdate(){
             sn_Statistics();
             sg_Timestamp();
 
+#ifdef DEBUG
             con << tOutput("$gamestate_creating_grid");
+#endif
 
             tAdvanceFrame();
 
@@ -4571,8 +4630,13 @@ void gGame::StateUpdate(){
                     mess.SetTemplateParameter(2, sg_currentSettings->limitRounds);
                     mess << "$gamestate_newround_console";
 
-                    if (strlen(sg_roundConsoleMessage) > 2)
-                        sn_ConsoleOut(sg_roundConsoleMessage + "\n");
+                    if (sg_RoundConsoleMessages.Len() > 0)
+                    {
+                        for(int roundConsoleID = 0; roundConsoleID < sg_RoundConsoleMessages.Len(); roundConsoleID++)
+                        {
+                            sn_ConsoleOut(sg_RoundConsoleMessages[roundConsoleID]);
+                        }
+                    }
 				    sg_nextRoundWriter << rounds+1 << sg_currentSettings->limitRounds << mapfile << sg_roundCenterMessage;
 				    sg_nextRoundWriter.write();
                 }
@@ -4702,7 +4766,11 @@ void gGame::StateUpdate(){
                 gRaceScores::Write();
             }
             //HACK RACE end
+
+#ifdef DEBUG
             con << tOutput("$gamestate_deleting_objects");
+#endif
+
             exit_game_objects(grid);
             st_ToDo( sg_VoteMenuIdle );
             nNetObject::ClearAllDeleted();

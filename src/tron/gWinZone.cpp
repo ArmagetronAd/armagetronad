@@ -405,7 +405,7 @@ void gZone::WriteSync( nMessage & m )
     m << radius_;
 
     // write rotation speed
-    //m << rotationSpeed_;
+    m << rotationSpeed_;
 }
 
 
@@ -453,7 +453,7 @@ void gZone::ReadSync( nMessage & m )
     }
 
     // read rotation speed
-    /*if (!m.End())
+    if (!m.End())
     {
         m >> rotationSpeed_;
     }
@@ -462,7 +462,7 @@ void gZone::ReadSync( nMessage & m )
         // set fixed values
         SetRotationSpeed( .3f );
         SetRotationAcceleration( 0.0f );
-    }*/
+    }
 }
 
 // *******************************************************************************

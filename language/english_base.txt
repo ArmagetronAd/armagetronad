@@ -300,10 +300,15 @@ resource_repository_server_help   URI clients and the server use to search for m
 # rotation
 rotation_type_help                      Determines when map and config rotation should occur. Possible values: (0) Do not do any rotation, (1) Ordered Rotate every round, (2) Ordered Rotate every match, (3) Random Rotate every round, (4) Random Rotate every match
 map_rotation_help                       A list of map files to rotate through, with values separated by semicolons
-map_rotation_list                       List of maps current in rotation:\n
+map_rotation_list                       List of maps currently in rotation:\n
+map_rotation_list_show                  Showing \1 maps out of \2 in rotation:\n
+map_rotation_list_total                 
+
 config_rotation_help                    A list of config files to rotate through, with values separated by semicolons
 config_rotation_type_help               How will the CONFIG_ROTATION files load? 0-INCLUDE or 1-RINCLUDE?; Default: 0
-config_rotation_list                       List of configs current in rotation:\n
+config_rotation_list                    List of configs currently in rotation:\n
+config_rotation_list_show               Showing \1 cofigs out of \2m in rotation:\n
+
 reset_rotation_help                     Resets map and config rotation
 reset_rotation_on_start_new_match_help  If enabled, map and config rotation will be reset when a START_NEW_MATCH command is issued
 reset_rotation_message                  Map and config rotation have been reset.
@@ -1025,7 +1030,7 @@ armagetron_version_help		your version of \g
 message_of_day_help		Message sent to clients on connection, if supported by the client, it will be displayed fullscreen
 title_of_day_help		If fullscreen display is supported, this will be the title above message_of_day
 message_of_day_timeout_help		Time message_of_day is displayed for in fullscreen mode
-round_console_message_help	Message sent to clients after every round
+round_console_message_help	Message sent to clients after every round. Each time this is used, the message is stored and executed at round start.
 round_center_message_help	Big message sent to clients after every round
 
 password_storage_help			Determines where your passwords are stored: 1 means on hard disk (dangerous), 0 in memory and -1 means they are not stored at all.
@@ -3291,17 +3296,27 @@ race_end_delay_help		              Number of seconds to give players to finish a
 race_score_deplete_help               Number the score depletes by everytime a player enters the win zone.
 race_score_type_help		          0-No sorting; 1-Sort by best score; 2-sort by best time.
 race_log_time_help                    If enabled, it displays the reached time and the position of arrival.
+
 player_reach_race		              \1 0xfffffffinished with \2 points in \3 seconds.\n
 player_reach_race_first               \1 0xfffffffinished 1st in \2 seconds.\n
-player_reach_race_time                \2| \1 0xfffffffinished \3 s behind 1st.\n
+player_reach_race_time                \2| \1 0xfffffffinished in \3 ( \4 s behind 1st ).\n
+
 player_personal_best_reach_time       New personal record! Your new time record is \1 seconds.\n
-player_message_race_rank              Your rank is \1 with a time of \2.\n
+
+player_race_stats_self      Your rank is \1 with a time of \2.\n
+player_race_stats_other     Player: \1 0xRESETTis at rank is 0xffff77\2 0xRESETTwith a time of 0xffff77\30xRESETT.\n
+
 player_race_record_search_found       \1 is ranked \2 with a best time of \3 seconds.\n
 player_race_record_search_not_found   0xff0000The search term \1 couldn't be found in the racing records.\n
 player_race_record_search_many_found  0xff0000The search term \1 has found many matches. Be more specific.\n
 
+race_finished_list_nobody   No one seemed to have crossed the finish line.\n
+race_finished_list_arrive   Displaying only \1 players that have crossed the finish line.\n
+race_finished_list_amount   A total of \1 players have crossed the finish line.\n
+race_finished_list_display  + \1 0xRESETTfinished in 0xffff77\2 0xRESETT( 0xffff77\4 0xRESETTbehind 1st ).\n
+
 race_ranks_personal_message Your current position for 0xffdd00
-race_rank_title_message Top \1 players for 0xffdd00
+race_rank_title_message Top \1 players for
 race_rank_title_name Ranks
 race_rank_title_player_name Players
 race_rank_title_time_name Times
@@ -3442,9 +3457,9 @@ cycle_target_cancel          Your target assignment has been cancelled by server
 
 ## MAP/CONFIG _queueing commands and helping hints - LOVER$BOY's additions
 map_queueing_help                     Stores map that exist in MAP_ROTATION. Stops rotation temporarly to complete the listed maps.
-map_queueing_stored_file_found        Map file \1 has already been stored in list in \2 order. This addition has been ignored.\n
-map_queueing_file_stored              Map file \1 has successfully been added to the que..\n
-map_queueing_file_removed             Map file \1 has successfully been removed from the que by \2.\n
+map_queueing_stored_file_found        Map \1 has already been stored in list in \2 order. This addition has been ignored.\n
+map_queueing_file_stored              Map \1 has successfully been added to the que by \2.\n
+map_queueing_file_removed             Map \1 has successfully been removed from the que by \2.\n
 map_queueing_file_not_found           0xff0000Search term \1 couldn't be found in MAP_ROTATION.\n
 map_queueing_que_file_not_found       0xff0000Search term \1 couldn't be found in the MAP_QUEUEING.\n
 map_queueing_found_toomanyfiles       0xff0000Search term \1 found many matches in MAP_ROTATION. Be more specific.\n
@@ -3452,9 +3467,9 @@ map_queueing_is_empty                 Map queue is now empty. Normal rotation wi
 map_queueing_required_level           Map queueing command \2 requires level is \1. You do not have that access level.\n
 
 config_queueing_help                  Stores config that exists in CONFIG_ROTATION. Stops rotation temporarly to complete the listed maps.
-config_queueing_stored_file_found     Config file \1 has already been stored in list in \2 order. This addition has been ignored.\n
-config_queueing_file_stored           Config file \1 has successfully been added to the que.\n
-config_queueing_file_removed          Config file \1 has successfully been removed from the que by \2.\n
+config_queueing_stored_file_found     Config \1 has already been stored in list in \2 order. This addition has been ignored.\n
+config_queueing_file_stored           Config \1 has successfully been added to the que by \2.\n
+config_queueing_file_removed          Config \1 has successfully been removed from the que by \2.\n
 config_queueing_file_not_found        0xff0000Search term \1 couldn't be found in the CONFIG_ROTATION.\n
 config_queueing_que_file_not_found    0xff0000Search term \1 couldn't be found in the CONFIG_QUEUEING.\n
 config_queueing_found_toomanyfiles    0xff0000Search term \1 found many matches in CONFIG_ROTATION. Be more specific.\n

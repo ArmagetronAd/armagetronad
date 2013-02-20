@@ -106,6 +106,8 @@ class gRace
         static bool Done();                                             //!> returns true whether round time is over
         static void Reset();                                            //!> reset time and values
 
+        static void RaceChat(ePlayerNetID *player, tString command, std::istream &s);
+
         //!> returns the race winner
         static eTeam *Winner();
 
