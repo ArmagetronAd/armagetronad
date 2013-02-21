@@ -249,61 +249,61 @@ void sg_DisplayRotationList(ePlayerNetID *p, std::istream &s, tString command)
 
         if (command == "/mr")
         {
-            sn_ConsoleOut(tOutput("$map_rotation_list"));
+            sn_ConsoleOut(tOutput("$map_rotation_list"), p->Owner());
 
             if (mapRotation->Size() > 0)
             {
                 if (mapRotation->Size() < max) max = mapRotation->Size();
 
-                for(int i = showAmount; i < max; i++)
-                {
-                    tColoredString output;
-                    output << "+ 0xff5500";
-                    output << mapRotation->Get(i);
-                    output << tColoredString::ColorString(1, 1, 1) << "\n";
-                    sn_ConsoleOut(output, p->Owner());
-
-                    showing++;
-                }
-
                 if (showAmount <= mapRotation->Size())
                 {
+                    for(int i = 0; i < max; i++)
+                    {
+                        tColoredString output;
+                        output << "+ 0xff5500";
+                        output << mapRotation->Get(showAmount + i);
+                        output << tColoredString::ColorString(1, 1, 1) << "\n";
+                        sn_ConsoleOut(output, p->Owner());
+
+                        showing++;
+                    }
+
                     tOutput show;
                     show.SetTemplateParameter(1, showing);
                     show.SetTemplateParameter(2, mapRotation->Size());
 
                     show << "$map_rotation_list_show";
-                    sn_ConsoleOut(show);
+                    sn_ConsoleOut(show, p->Owner());
                 }
             }
         }
         else if (command == "/cr")
         {
-            sn_ConsoleOut(tOutput("$config_rotation_list"));
+            sn_ConsoleOut(tOutput("$config_rotation_list"), p->Owner());
 
             if (configRotation->Size() > 0)
             {
                 if (configRotation->Size() < max) max = configRotation->Size();
 
-                for(int i = showAmount; i < max; i++)
-                {
-                    tColoredString output;
-                    output << "+ 0xff5500";
-                    output << configRotation->Get(i);
-                    output << tColoredString::ColorString(1, 1, 1) << "\n";
-                    sn_ConsoleOut(output, p->Owner());
-
-                    showing++;
-                }
-
                 if (showAmount < configRotation->Size())
                 {
+                    for(int i = 0; i < max; i++)
+                    {
+                        tColoredString output;
+                        output << "+ 0xff5500";
+                        output << configRotation->Get(showAmount + i);
+                        output << tColoredString::ColorString(1, 1, 1) << "\n";
+                        sn_ConsoleOut(output, p->Owner());
+
+                        showing++;
+                    }
+
                     tOutput show;
                     show.SetTemplateParameter(1, showing);
                     show.SetTemplateParameter(2, configRotation->Size());
 
                     show << "$config_rotation_list_show";
-                    sn_ConsoleOut(show);
+                    sn_ConsoleOut(show, p->Owner());
                 }
             }
         }
@@ -5351,7 +5351,10 @@ void gGame::Analysis(REAL time){
     if ( sg_RaceTimerEnabled )
     {
         if ( !gRace::Done() )
+        {
             gRace::Sync( alive, ai_alive, sg_NumHumans() );
+            return;
+        }
         else                                    // time to close the round
         {
             eTeam *team = gRace::Winner();
