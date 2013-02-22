@@ -150,6 +150,8 @@ gRaceScores::gRaceScores(tString UserName)
 {
     this->userName_ = UserName;
 
+    this->played_ = 0;
+
     sg_RaceScores.Insert(this);
 }
 
@@ -197,14 +199,15 @@ void gRaceScores::Sort()
             Switch(j,j-1);
 }
 
-void gRaceScores::Add(gRacePlayer *racePlayer)
+void gRaceScores::Add(gRacePlayer *racePlayer, bool finished)
 {
     bool timeChanged = false;
+    gRaceScores *rS = NULL;
 
     if (CheckPlayer(racePlayer->Player()->GetUserName()))
     {
-        gRaceScores *rS = GetPlayer(racePlayer->Player()->GetUserName());
-        if (((racePlayer->Time() < rS->time_) && racePlayer->Time() != -1) || (rS->time_ == -1 && racePlayer->Time() != -1))
+        rS = GetPlayer(racePlayer->Player()->GetUserName());
+        if (((racePlayer->Time() < rS->Time()) && racePlayer->Time() != -1) || (rS->Time() == -1 && racePlayer->Time() != -1))
         {
             rS->time_ = racePlayer->Time();
             tOutput newtime;
@@ -218,7 +221,7 @@ void gRaceScores::Add(gRacePlayer *racePlayer)
     }
     else
     {
-        gRaceScores *rS = new gRaceScores(racePlayer->Player()->GetUserName());
+        rS = new gRaceScores(racePlayer->Player()->GetUserName());
         rS->time_ = racePlayer->Time();
         if (racePlayer->Time() != -1)
         {
@@ -232,6 +235,9 @@ void gRaceScores::Add(gRacePlayer *racePlayer)
         }
     }
 
+    //  increment finished times when they crossed the zone
+    if (finished) rS->SetPlayed(rS->Played() + 1);
+
     //  ensure that times really have changed for this to take effect
     if (timeChanged)
     {
@@ -242,7 +248,7 @@ void gRaceScores::Add(gRacePlayer *racePlayer)
         gRaceScores *firstRanker = sg_RaceScores[0];
 
         //  check if it's the same player
-        if (firstRanker->Name() == racePlayer->Player()->GetUserName())
+        if (firstRanker == rS)
         {
             tOutput bestTime;
             bestTime.SetTemplateParameter(1, racePlayer->Player()->GetColoredName());
@@ -288,6 +294,10 @@ void gRaceScores::Read()
                 }
 
                 rS->time_ = atof(params.ExtractNonBlankSubString(pos));
+
+                tString playedFor = params.ExtractNonBlankSubString(pos);
+                if (playedFor.Filter() != "")
+                    rS->played_ = atoi(playedFor);
             }
         }
     }
@@ -297,7 +307,7 @@ void gRaceScores::Write()
 {
     tString Output;
 
-    gRaceScores::Sort();
+    Sort();
 
     Output << "race_scores/" << sg_currentMap << ".txt";
 
@@ -311,7 +321,7 @@ void gRaceScores::Write()
                 gRaceScores *rS = sg_RaceScores[i];
                 if (rS)
                 {
-                    w << rS->userName_ << " " << rS->time_ << "\n";
+                    w << rS->userName_ << " " << rS->time_ << " " << rS->played_ << "\n";
                 }
             }
         }
@@ -902,6 +912,19 @@ void gRacePlayer::ErasePlayer()
         gRacePlayer *rPlayer = sg_RacePlayers[i];
         if (rPlayer && (rPlayer == this))
         {
+            if (rPlayer->Finished())
+            {
+                for(int j = 0; j < sg_RaceFinished.Len(); j++)
+                {
+                    gRacePlayer *finishedPlayer = sg_RaceFinished[j];
+                    if (finishedPlayer && (finishedPlayer == this))
+                    {
+                        sg_RaceFinished.RemoveAt(j);
+                        break;
+                    }
+                }
+            }
+
             sg_RacePlayers.RemoveAt(i);
             break;
         }
@@ -983,7 +1006,7 @@ void gRace::Sync( int alive, int ai_alive, int humans)
     eGrid *grid = eGrid::CurrentGrid();
     if (!grid) return;
 
-    //  ceck chances and ensure players respawn
+    //  check chances and ensure players respawn
     if (!roundFinished_ && (sg_raceChances > 0))
     {
         if (grid)
@@ -993,7 +1016,7 @@ void gRace::Sync( int alive, int ai_alive, int humans)
                 gRacePlayer *rPlayer = sg_RacePlayers[a];
                 if (rPlayer)
                 {
-                    if ((rPlayer->Cycle()) && (rPlayer->Player()))
+                    if ((rPlayer->Cycle()) && rPlayer->Player())
                     {
                         if ((rPlayer->Chances() > 0) && (rPlayer->Chances() <= sg_raceChances))
                         {
@@ -1015,7 +1038,7 @@ void gRace::Sync( int alive, int ai_alive, int humans)
         roundFinished_ = true;
 
     // start counter when someone arrives or when only 1 is alive but not alone
-    if ( firstArrived_ || ( alive == 1 && ai_alive == 0 && humans > 1 ))
+    if (!roundFinished_ && ( firstArrived_ || ( alive == 1 && ai_alive == 0 && humans > 1 )))
     {
         // close the round when all alive humans have arrived
         if ( sg_RaceFinished.Len() == alive )
@@ -1086,10 +1109,6 @@ void gRace::Sync( int alive, int ai_alive, int humans)
                 // not started yet
                 if ( countDown_ < 0 )
                     countDown_ = sg_RaceEndDelay + 1;
-
-                // countdown reached the end, close the round
-                else if ( countDown_ == 0 )
-                    roundFinished_ = true;
             }
 
             if ( !roundFinished_ )
@@ -1097,10 +1116,9 @@ void gRace::Sync( int alive, int ai_alive, int humans)
                 // countdown working
                 countDown_ --;
 
-                if ( countDown_ == 0 )
+                if ( countDown_ >= 0 )
                 {
                     roundFinished_ = true;
-                    countDown_ = -1;
 
                     if (!firstArrived_)
                     {
@@ -1150,7 +1168,7 @@ void gRace::Sync( int alive, int ai_alive, int humans)
                 if (!racePlayer->Finished())
                 {
                     //  log the players by time at -1
-                    gRaceScores::Add(racePlayer);
+                    gRaceScores::Add(racePlayer, false);
                     racePlayer->SetFinished(true);
                 }
             }

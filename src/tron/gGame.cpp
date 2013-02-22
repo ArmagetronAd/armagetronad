@@ -259,9 +259,11 @@ void sg_DisplayRotationList(ePlayerNetID *p, std::istream &s, tString command)
                 {
                     for(int i = 0; i < max; i++)
                     {
+                        int rotID = showAmount + i;
+
                         tColoredString output;
-                        output << "+ 0xff5500";
-                        output << mapRotation->Get(showAmount + i);
+                        output << rotID << ") 0xff5500";
+                        output << mapRotation->Get(rotID);
                         output << tColoredString::ColorString(1, 1, 1) << "\n";
                         sn_ConsoleOut(output, p->Owner());
 
@@ -289,9 +291,11 @@ void sg_DisplayRotationList(ePlayerNetID *p, std::istream &s, tString command)
                 {
                     for(int i = 0; i < max; i++)
                     {
+                        int rotID = showAmount + i;
+
                         tColoredString output;
-                        output << "+ 0xff5500";
-                        output << configRotation->Get(showAmount + i);
+                        output << rotID << ") 0xff5500";
+                        output << configRotation->Get(rotID);
                         output << tColoredString::ColorString(1, 1, 1) << "\n";
                         sn_ConsoleOut(output, p->Owner());
 
@@ -5362,6 +5366,7 @@ void gGame::Analysis(REAL time){
             if (team)
             {
                 tOutput message;
+                message.SetTemplateParameter(1, team->GetColoredName());
                 message.SetTemplateParameter(2, sg_scoreRaceComplete);
                 message << "$player_win_race";
                 sg_DeclareWinner( team, message );

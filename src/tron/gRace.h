@@ -134,7 +134,7 @@ class gRaceScores
         static bool CheckPlayer(tString name);
 
         //!> Adds the score and replace the time if lower than before
-        static void Add(gRacePlayer *racePlayer);
+        static void Add(gRacePlayer *racePlayer, bool finished = true);
 
         //!> Reads in the data in the current map; name, score, time
         static void Read();
@@ -152,13 +152,16 @@ class gRaceScores
 
         tString Name() { return userName_; }
         REAL Time() { return time_; }
+        int Played() { return played_; }
 
         void SetName(tString name) { userName_ = name; }
         void SetTime(REAL newTime) { time_ = newTime; }
+        void SetPlayed(int newPlayed) { played_ = newPlayed; }
 
     private:
         tString userName_;      // logged name
         REAL    time_;          // best time
+        int     played_;        // number of times finished map
 
         static void Switch(int i, int j);                                                       //!> Switches the i and j
         static bool InOrder(int i, int j);                                                      //!> Checks if they are in order
