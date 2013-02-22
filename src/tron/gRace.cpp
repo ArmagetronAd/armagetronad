@@ -1116,9 +1116,10 @@ void gRace::Sync( int alive, int ai_alive, int humans)
                 // countdown working
                 countDown_ --;
 
-                if ( countDown_ >= 0 )
+                if ( countDown_ < 0 )
                 {
                     roundFinished_ = true;
+                    countDown_ = -1;
 
                     if (!firstArrived_)
                     {
