@@ -9,6 +9,8 @@
 #include "SDL.h"
 #include "gOSXSDLMain.h"
 #include "gOSXURLHandler.h"
+
+#include <asl.h>
 #include <sys/param.h> /* for MAXPATHLEN */
 #include <unistd.h>
 
@@ -325,7 +327,40 @@ static void CustomApplicationMain (int argc, char **argv)
 
 @end
 
+class ASLRedirect
+{
+public:
+    ASLRedirect()
+        :client_( NULL )
+    {
+    }
 
+    void Register()
+    {
+        client_ = asl_open( NULL, "com.apple.console", 0 );
+        aslmsg msg = asl_new( ASL_TYPE_MSG );
+        asl_set(msg, ASL_KEY_READ_UID, "-1"); // Allow any user read access, so that message will show in Console.app
+        asl_log_descriptor( client_, msg, ASL_LEVEL_NOTICE, STDOUT_FILENO, ASL_LOG_DESCRIPTOR_WRITE );
+        asl_log_descriptor( client_, msg, ASL_LEVEL_NOTICE, STDERR_FILENO, ASL_LOG_DESCRIPTOR_WRITE );
+        asl_free( msg );
+    }
+
+    ~ASLRedirect()
+    {
+        if ( client_ )
+            asl_close( client_ );
+    }
+private:
+    aslclient client_;
+};
+
+// When compiling with DEBUG defined there are a few objects that are statically
+// initialized and output some messages in their destructor to stdout/stderr.
+// It's difficult to correctly define the order of construction (and thus
+// destruction), so we lose those messages. It's not too much of an issue,
+// because when debugging you're not launching the application with the
+// Finder--the messages aren't redirected in that situation.
+static ASLRedirect sg_aslRedirect;
 
 #ifdef main
 #  undef main
@@ -336,9 +371,7 @@ static void CustomApplicationMain (int argc, char **argv)
 int main (int argc, char **argv)
 {
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
-#ifdef MACOSX_XCODE
     sg_SetupAAURLHandler();
-#endif
     
     /* Copy the arguments into a global variable */
     /* This is passed if we are launched by double-clicking */
@@ -357,6 +390,9 @@ int main (int argc, char **argv)
         gFinderLaunch = NO;
     }
 
+    if ( gFinderLaunch )
+        sg_aslRedirect.Register();
+    
 #if SDL_USE_NIB_FILE
     NSApplicationMain (argc, argv);
 #else
