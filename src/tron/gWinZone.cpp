@@ -1709,7 +1709,7 @@ void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
                 }
                 else
                 {
-                    sg_deathShotSuicideWriter << *target->Player()->GetUserName();
+                    sg_deathShotSuicideWriter << target->Player()->GetUserName();
                     sg_deathShotSuicideWriter.write();
                     if (!score_shot_suicide)
                     {
