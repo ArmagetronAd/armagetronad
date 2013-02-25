@@ -473,7 +473,7 @@ void gZone::ReadSync( nMessage & m )
 
 static eLadderLogWriter sg_spawnzoneWriter("ZONE_SPAWNED", false);
 
-static void CreateZone(gZone *Zone, const REAL zoneSize, const REAL zoneGrowth, eCoord zoneDir, bool setColorFlag, gRealColor zoneColor, bool zoneInteractive, REAL targetRadius, std::vector<eCoord> route, tString zoneNameStr){
+static void CreateZone(tString zoneEffect, gZone *Zone, const REAL zoneSize, const REAL zoneGrowth, eCoord zoneDir, bool setColorFlag, gRealColor zoneColor, bool zoneInteractive, REAL targetRadius, std::vector<eCoord> route, tString zoneNameStr){
     static_cast<eGameObject*>(Zone)->Timestep( se_GameTime() );
     Zone->SetReferenceTime();
     Zone->SetRadius( zoneSize );
@@ -511,7 +511,7 @@ static void CreateZone(gZone *Zone, const REAL zoneSize, const REAL zoneGrowth, 
     }
     Zone->RequestSync();
 
-    sg_spawnzoneWriter << Zone->GOID() << zoneNameStr << Zone->GetPosition().x << Zone->GetPosition().y << Zone->GetVelocity().x << Zone->GetVelocity().y;
+    sg_spawnzoneWriter << zoneEffect << Zone->GOID() << zoneNameStr << Zone->GetPosition().x << Zone->GetPosition().y << Zone->GetVelocity().x << Zone->GetVelocity().y;
     sg_spawnzoneWriter.write();
 }
 
@@ -1800,9 +1800,6 @@ void gWinZoneHack::OnEnter( gCycle * target, REAL time )
 //!
 // *******************************************************************************
 
-REAL sg_deathzoneRotation = 0.3f;
-static tSettingItem<REAL> sg_deathzoneRotationConf("DEATHZONE_ROTATION", sg_deathzoneRotation);
-
 bool sg_deathZoneRandomColors = false;
 static tSettingItem<bool> sg_deathZoneRandomColorsConf("DEATHZONE_RANDOM_COLORS", sg_deathZoneRandomColors);
 
@@ -1829,9 +1826,9 @@ gDeathZoneHack::gDeathZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCr
     else
     {
         tRandomizer &randomizer = tRandomizer::GetInstance();
-        REAL colorR = randomizer.Get(15) / 15.0f;
-        REAL colorG = randomizer.Get(15) / 15.0f;
-        REAL colorB = randomizer.Get(15) / 15.0f;
+        REAL colorR = randomizer.Get(16) / 15.0f;
+        REAL colorG = randomizer.Get(16) / 15.0f;
+        REAL colorB = randomizer.Get(16) / 15.0f;
 
         color_.r = colorR;
         color_.b = colorG;
@@ -1847,8 +1844,6 @@ gDeathZoneHack::gDeathZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCr
     {
         deathZoneType = TYPE_NORMAL;
     }
-
-    SetRotationSpeed(sg_deathzoneRotation);
 
     if (!delayCreation)
         grid->AddGameObjectInteresting(this);
@@ -2113,7 +2108,7 @@ void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
                 }
                 else
                 {
-                    sg_deathShotSuicideWriter << *target->Player()->GetUserName();
+                    sg_deathShotSuicideWriter << target->Player()->GetUserName();
                     sg_deathShotSuicideWriter.write();
                     if (!score_shot_suicide)
                     {
@@ -3923,7 +3918,7 @@ bool gSumoZoneHack::Timestep( REAL time )
                     zoneColor.b = Zone->Team()->B()/15.0;
                     setColorFlag = true;
 
-                    CreateZone(Zone, zoneSize, zoneGrowth, zoneDir, setColorFlag, zoneColor, zoneInteractive, targetRadius, route, zoneNameStr);
+                    CreateZone(tString("sumo"), Zone, zoneSize, zoneGrowth, zoneDir, setColorFlag, zoneColor, zoneInteractive, targetRadius, route, zoneNameStr);
                 }
             }
         }
@@ -7278,7 +7273,7 @@ static void sg_SpawnSoccer(std::istream &s)
         if (zoneInteractive.ToLower() == "true")
             zoneInteractiveBool = true;
 
-        CreateZone(Zone, zoneSize, zoneGrowth, zoneDir, setColorFlag, zoneColor, zoneInteractiveBool, targetRadius, route, name);
+        CreateZone(tString("soccerball"), Zone, zoneSize, zoneGrowth, zoneDir, setColorFlag, zoneColor, zoneInteractiveBool, targetRadius, route, name);
         return;
     }
 
@@ -7639,7 +7634,7 @@ static void sg_CreateZone_conf(std::istream &s)
         if (zoneInteractive=="true"){
             zoneInteractiveBool=true;
         }
-        CreateZone(Zone, zoneSize, zoneGrowth, zoneDir, setColorFlag, zoneColor, zoneInteractiveBool, targetRadius, route, zoneNameStr);
+        CreateZone(zoneTypeStr, Zone, zoneSize, zoneGrowth, zoneDir, setColorFlag, zoneColor, zoneInteractiveBool, targetRadius, route, zoneNameStr);
 }
 
 

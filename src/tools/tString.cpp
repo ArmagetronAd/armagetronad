@@ -2262,12 +2262,15 @@ bool tString::IsNumeric()
 
     for(int i = 0; i < ret.Len(); i++)
     {
+        bool found = false;
         //  return false if current character in string is not a number
         for(int id = 0; id < numericValues.Len(); id++)
         {
-            if (ret[i] != numericValues[id])
-                return false;
+            if (ret[i] == numericValues[id])
+                found = true;
         }
+
+        if (!found) return false;
     }
 
     //  looks like everything worked out. Good!

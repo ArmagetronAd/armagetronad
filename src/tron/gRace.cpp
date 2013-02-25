@@ -104,25 +104,6 @@ static tSettingItem<bool> sg_raceLogTimeConf("RACE_LOG_TIME", sg_raceLogTime);
 bool sg_raceLogUnfinished = false;
 static tSettingItem<bool> sg_raceLogUnfinishedConf("RACE_LOG_UNFINISHED", sg_raceLogUnfinished);
 
-enum gRaceScoreType
-{
-    gRACESCORE_NO_SORTING = 0,
-    gRACESCORE_BEST_SCORE = 1,
-    gRACESCORE_BEST_time_ = 2
-};
-tCONFIG_ENUM( gRaceScoreType );
-
-static gRaceScoreType racescoretype = gRACESCORE_NO_SORTING;
-bool restrictScoreSortTypes(const gRaceScoreType &newValue)
-{
-    if ((newValue > gRACESCORE_BEST_time_) || (newValue < gRACESCORE_NO_SORTING))
-    {
-        return false;
-    }
-    return true;
-}
-static tSettingItem<gRaceScoreType> conf_raceScoretype("RACE_SCORE_TYPE",racescoretype, &restrictScoreSortTypes);
-
 static int sg_raceChances = 0;
 static tSettingItem<int> sg_raceChancesConf("RACE_CHANCES", sg_raceChances);
 
@@ -740,7 +721,7 @@ void gRaceScores::OutputEnd()
             header.SetPos(ranksPos + playerPos + time_sPos, false);
             header << " " << tOutput("$race_rank_bordser") << "\n";
 
-            mess << tOutput("$race_rank_title_message", rank) << pz_mapName << "\n";
+            mess << tOutput("$race_rank_title_message", rank) << " " << pz_mapName << "\n";
             mess << header;
             for(int j = 0; j < ranksList.Len(); j++)
             {

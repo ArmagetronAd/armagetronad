@@ -253,10 +253,11 @@ void sg_DisplayRotationList(ePlayerNetID *p, std::istream &s, tString command)
 
             if (mapRotation->Size() > 0)
             {
-                if (mapRotation->Size() < max) max = mapRotation->Size();
-
-                if (showAmount <= mapRotation->Size())
+                if (showAmount < mapRotation->Size())
                 {
+                    if (mapRotation->Size() < max) max = mapRotation->Size();
+                    if ((mapRotation->Size() - showAmount) < max) max = mapRotation->Size() - showAmount;
+
                     for(int i = 0; i < max; i++)
                     {
                         int rotID = showAmount + i;
@@ -285,10 +286,11 @@ void sg_DisplayRotationList(ePlayerNetID *p, std::istream &s, tString command)
 
             if (configRotation->Size() > 0)
             {
-                if (configRotation->Size() < max) max = configRotation->Size();
-
                 if (showAmount < configRotation->Size())
                 {
+                    if (configRotation->Size() < max) max = configRotation->Size();
+                    if ((configRotation->Size() - showAmount) < max) max = configRotation->Size() - showAmount;
+
                     for(int i = 0; i < max; i++)
                     {
                         int rotID = showAmount + i;
