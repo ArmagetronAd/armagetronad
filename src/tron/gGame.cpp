@@ -249,34 +249,37 @@ void sg_DisplayRotationList(ePlayerNetID *p, std::istream &s, tString command)
 
         if (command == "/mr")
         {
-            sn_ConsoleOut(tOutput("$map_rotation_list"), p->Owner());
-
             if (mapRotation->Size() > 0)
             {
-                if (showAmount < mapRotation->Size())
+                if (showAmount <= (mapRotation->Size() - 1))
                 {
                     if (mapRotation->Size() < max) max = mapRotation->Size();
-                    if ((mapRotation->Size() - showAmount) < max) max = mapRotation->Size() - showAmount;
+                    if (((mapRotation->Size() - 1) - showAmount) < max) (max = mapRotation->Size() - 1) - showAmount;
 
-                    for(int i = 0; i < max; i++)
+                    if (max > 0)
                     {
-                        int rotID = showAmount + i;
+                        sn_ConsoleOut(tOutput("$map_rotation_list"), p->Owner());
 
-                        tColoredString output;
-                        output << rotID << ") 0xff5500";
-                        output << mapRotation->Get(rotID);
-                        output << tColoredString::ColorString(1, 1, 1) << "\n";
-                        sn_ConsoleOut(output, p->Owner());
+                        for(int i = 0; i < max; i++)
+                        {
+                            int rotID = showAmount + i;
 
-                        showing++;
+                            tColoredString output;
+                            output << rotID << ") 0xff5500";
+                            output << mapRotation->Get(rotID);
+                            output << tColoredString::ColorString(1, 1, 1) << "\n";
+                            sn_ConsoleOut(output, p->Owner());
+
+                            showing++;
+                        }
+
+                        tOutput show;
+                        show.SetTemplateParameter(1, showing);
+                        show.SetTemplateParameter(2, mapRotation->Size());
+
+                        show << "$map_rotation_list_show";
+                        sn_ConsoleOut(show, p->Owner());
                     }
-
-                    tOutput show;
-                    show.SetTemplateParameter(1, showing);
-                    show.SetTemplateParameter(2, mapRotation->Size());
-
-                    show << "$map_rotation_list_show";
-                    sn_ConsoleOut(show, p->Owner());
                 }
             }
         }
@@ -286,30 +289,33 @@ void sg_DisplayRotationList(ePlayerNetID *p, std::istream &s, tString command)
 
             if (configRotation->Size() > 0)
             {
-                if (showAmount < configRotation->Size())
+                if (showAmount <= (configRotation->Size() - 1))
                 {
                     if (configRotation->Size() < max) max = configRotation->Size();
-                    if ((configRotation->Size() - showAmount) < max) max = configRotation->Size() - showAmount;
+                    if (((configRotation->Size() - 1) - showAmount) < max) max = (configRotation->Size() - 1) - showAmount;
 
-                    for(int i = 0; i < max; i++)
+                    if (max > 0)
                     {
-                        int rotID = showAmount + i;
+                        for(int i = 0; i < max; i++)
+                        {
+                            int rotID = showAmount + i;
 
-                        tColoredString output;
-                        output << rotID << ") 0xff5500";
-                        output << configRotation->Get(rotID);
-                        output << tColoredString::ColorString(1, 1, 1) << "\n";
-                        sn_ConsoleOut(output, p->Owner());
+                            tColoredString output;
+                            output << rotID << ") 0xff5500";
+                            output << configRotation->Get(rotID);
+                            output << tColoredString::ColorString(1, 1, 1) << "\n";
+                            sn_ConsoleOut(output, p->Owner());
 
-                        showing++;
+                            showing++;
+                        }
+
+                        tOutput show;
+                        show.SetTemplateParameter(1, showing);
+                        show.SetTemplateParameter(2, configRotation->Size());
+
+                        show << "$config_rotation_list_show";
+                        sn_ConsoleOut(show, p->Owner());
                     }
-
-                    tOutput show;
-                    show.SetTemplateParameter(1, showing);
-                    show.SetTemplateParameter(2, configRotation->Size());
-
-                    show << "$config_rotation_list_show";
-                    sn_ConsoleOut(show, p->Owner());
                 }
             }
         }
