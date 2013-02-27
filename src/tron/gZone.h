@@ -25,8 +25,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
-#ifndef ArmageTron_WinZone_H
-#define ArmageTron_WinZone_H
+#ifndef ArmageTron_Zone_H
+#define ArmageTron_Zone_H
 
 #include "eNetGameObject.h"
 
@@ -251,6 +251,30 @@ class gWinZoneHack: public gZone
 		virtual void OnEnter( gCycle *target, REAL time );
 };
 
+class gPongZoneHack: public gZone
+{
+    public:
+
+        gPongZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false, bool delayCreation = false);
+        gPongZoneHack(nMessage &m);
+        ~gPongZoneHack();
+
+        void SetTeamOwner(eTeam *newTeam) { pongTeamOwner_ = newTeam; }
+        eTeam *GetTeamOwner() { return pongTeamOwner_; }
+
+        void SetLasOwner(gCycle *newCycle) { pongLastOwner_ = newCycle; }
+        gCycle *GetLastOwner() { return pongLastOwner_; }
+
+    protected:
+        gCycle *pongLastOwner_;
+        eTeam *pongTeamOwner_;
+
+    private:
+        virtual bool Timestep(REAL currentTime);
+        virtual void OnVanish();
+        virtual void OnEnter(gCycle *target, REAL time);
+};
+
 //! death zone: kills players who enter
 class gDeathZoneHack: public gZone
 {
@@ -282,6 +306,7 @@ class gDeathZoneHack: public gZone
 
 								 //!< reacts on objects inside the zone
 		virtual void OnEnter( gDeathZoneHack *target, REAL time );
+		virtual void OnEnter( gPongZoneHack *target, REAL time );
 
 	protected:
 		virtual void OnVanish(); //!< called when the zone vanishes

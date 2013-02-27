@@ -245,6 +245,8 @@ void gRaceScores::Read()
 {
     tString Input;
     Input << "race_scores/" << sg_currentMap << ".txt";
+    sn_ConsoleOut(tOutput("$race_ranks_loading", sg_currentMap));
+
     std::ifstream r;
     if (tDirectories::Var().Open(r, Input))
     {
@@ -291,6 +293,7 @@ void gRaceScores::Write()
     Sort();
 
     Output << "race_scores/" << sg_currentMap << ".txt";
+    sn_ConsoleOut(tOutput("$race_ranks_saving", sg_currentMap));
 
     if (sg_RaceScores.Len() > 0)
     {

@@ -30,7 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "defs.h"
 #include "ePlayer.h"
-#include "gWinZone.h"
+#include "gZone.h"
 #include "gArena.h"
 
 class gRacePlayer

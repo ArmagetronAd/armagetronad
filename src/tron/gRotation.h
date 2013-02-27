@@ -127,10 +127,17 @@ public:
             items_.Insert(map_name);
     }
 
+    //!< This is for the rotation loading limit
+    static void AddCounter() { counter_ ++; }
+    static void ResetCounter() { counter_ = 0; }
+    static int Counter() { return counter_; }
+
 private:
 
     tArray<tString> items_; // the various values the rotating config can take
     int current_;           // the index of the current
+
+    static int counter_;
 
 public:
     static void HandleNewRound();

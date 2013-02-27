@@ -17,7 +17,7 @@
 #include "eTess2.h"
 #include "gWall.h"
 #include "gArena.h"
-#include "gWinZone.h"
+#include "gZone.h"
 #include "gSpawn.h"
 #include "tMemManager.h"
 #include "tResourceManager.h"

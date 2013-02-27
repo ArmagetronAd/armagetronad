@@ -1,4 +1,31 @@
 ===========================
+Changes in r864
+===========================
+Corrections:
+    * gWinZone => gZone # Better name than the previous name
+    * Fixed rotation listing for /mr <start_id> bug!    
+
+Improvements:
+    * Soccer Style:
+      Previously the soccer ball zone was able to move and do what it was meant to.
+      The only drawback was the sync. Due to unknown reasons the ball didn't sync
+        very well with the server. It was must surprising even to track the ball
+        and find out where it had gone of to.
+
+Additions:
+    * PingPong Style | An Idea inspired by the pingpong game I played as a child:
+      # Does nothing yet... #
+      + PINGPONG_ENABLED    # If set to 1, pingpong mode will be activated!
+      + PINGPONG_POINTS     # Points received each second for keeping the pingpong
+                            # ball from entering the deathly deaht zone.
+      + PINGPONG_BALLS      # Number of pingpong balls given to each player.
+    * Commands:
+      = ROTATION_TYPE       # Set to 5 to activate ROTATION_MAX.    
+      = ROTATION_MAX        # If set to >0 and rotation is enabled, current rotation item 
+                            # will remain the same until till ROTATION_MAX. After which,
+                            # the rotation will activate ORDERLY type and change map/config.    
+
+===========================
 Changes in r852
 ===========================
 Additions:

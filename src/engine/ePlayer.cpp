@@ -56,7 +56,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "nConfig.h"
 #include "nNetwork.h"
 #include "../tron/gCycle.h"
-#include "../tron/gWinZone.h"
+#include "../tron/gZone.h"
 #include "../tron/gGame.h"
 #include "eGrid.h"
 #include <time.h>

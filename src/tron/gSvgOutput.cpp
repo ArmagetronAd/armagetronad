@@ -25,7 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 */
 #include "nConfig.h"
-#include "gWinZone.h"
+#include "gZone.h"
 #include "eRectangle.h"
 #include "ePlayer.h"
 #include "eTimer.h"
@@ -185,7 +185,7 @@ void SvgOutput::Create() {
     svgFile << "'/>\n<!-- End of Rim Walls -->\n\n";
     // keep the current file offset
     afterRimWallsPos = svgFile.tellp();
-    // add player walls and other game objects 
+    // add player walls and other game objects
     if(sg_cycleWallsGlow) {
         svgFile << "<g filter='url(#wallsFilter)'>\n";
     }

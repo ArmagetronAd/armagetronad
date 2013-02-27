@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE Resource SYSTEM "Lover-Boy/map-0.2.9_styctap_v1.2.dtd">
+<Resource type="aamap" name="soccer" version="1.0.0" author="Lover-Boy" category="">
+	<Map version="0.2.9_styctap">
+  <World>
+   <Field>
+   <Axes number="8"/>
+   
+   <Spawn x="592" y="-192" xdir="0" ydir="-1"/>
+   <Spawn x="592" y="-592" xdir="0" ydir="1"/>
+   
+   <Zone effect="soccergoal">
+    <ShapeCircle radius="30">
+     <Point x="592" y="-128"/>
+    </ShapeCircle>
+   </Zone>
+   <Zone effect="soccergoal">
+    <ShapeCircle radius="30">
+     <Point x="592" y="-656"/>
+    </ShapeCircle>
+   </Zone>
+   <Zone effect="soccerball">
+    <ShapeCircle radius="8">
+     <Point x="592" y="-384"/>
+    </ShapeCircle>
+   </Zone>
+   
+   <Wall height="50">
+    <Point x="448" y="-128"/>
+    <Point x="448" y="-656"/>
+    <Point x="736" y="-656"/>
+    <Point x="736" y="-128"/>
+    <Point x="448" y="-128"/>
+   </Wall>
+   
+   </Field>
+  </World>
+ </Map>
+</Resource>

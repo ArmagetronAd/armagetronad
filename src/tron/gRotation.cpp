@@ -27,6 +27,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "gRotation.h"
 
+int gRotation::counter_ = 0;
+
 void gRotation::HandleNewRound() {
 #ifdef HAVE_LIBRUBY
     gRoundEventRuby::DoRoundEvents();

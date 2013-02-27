@@ -3317,7 +3317,10 @@ race_finished_list_amount   A total of \1 players have crossed the finish line.\
 race_finished_list_display  + \1 0xRESETTfinished in 0xffff77\2 0xRESETT( 0xffff77\4 0xRESETTbehind 1st ).\n
 
 race_ranks_personal_message Your current position for 0xffdd00
-race_rank_title_message Top \1 players for
+race_ranks_loading  Loading Racing Ranks for 0xffdd00\1.\n
+race_ranks_saving Saving Racing Ranks for 0xffdd00\1.\n
+
+race_rank_title_message Top \1 players for 0xffdd00
 race_rank_title_name Ranks
 race_rank_title_player_name Players
 race_rank_title_time_name Times

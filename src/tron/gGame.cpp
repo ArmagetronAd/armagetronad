@@ -65,7 +65,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "gAICharacter.h"
 #include "tDirectories.h"
 #include "gTeam.h"
-#include "gWinZone.h"
+#include "gZone.h"
 #include "eVoter.h"
 #include "tRecorder.h"
 #include "gSvgOutput.h"
@@ -254,7 +254,7 @@ void sg_DisplayRotationList(ePlayerNetID *p, std::istream &s, tString command)
                 if (showAmount <= (mapRotation->Size() - 1))
                 {
                     if (mapRotation->Size() < max) max = mapRotation->Size();
-                    if (((mapRotation->Size() - 1) - showAmount) < max) (max = mapRotation->Size() - 1) - showAmount;
+                    if (((mapRotation->Size() - 1) - showAmount) < max) max = (mapRotation->Size() - 1) - showAmount;
 
                     if (max > 0)
                     {
@@ -339,7 +339,8 @@ enum gRotationType
     gROTATION_ORDERED_ROUND = 1,
     gROTATION_ORDERED_MATCH = 2,
     gROTATION_RANDOM_ROUND = 3,
-    gROTATION_RANDOM_MATCH = 4
+    gROTATION_RANDOM_MATCH = 4,
+    gROTATION_COUNTER = 5
 };
 
 tCONFIG_ENUM( gRotationType );
@@ -347,7 +348,7 @@ tCONFIG_ENUM( gRotationType );
 static gRotationType rotationtype = gROTATION_NEVER;
 bool restrictRotatiobType(const gRotationType &newValue)
 {
-    if ((newValue < gROTATION_NEVER) || (newValue > gROTATION_RANDOM_MATCH))
+    if ((newValue < gROTATION_NEVER) || (newValue > gROTATION_COUNTER))
     {
         return false;
     }
@@ -372,6 +373,15 @@ static tConfItemFunc sg_resetRotationConfItemFunc( "RESET_ROTATION", sg_ResetRot
 
 static bool sg_resetRotationOnNewMatch = false;
 static tSettingItem< bool > sg_resetRotationOnNewMatchSettingItem( "RESET_ROTATION_ON_START_NEW_MATCH", sg_resetRotationOnNewMatch );
+
+int sg_rotationMax = sg_currentSettings->limitRounds;
+bool restrictRotationMax(const int &newValue)
+{
+    if (newValue <= 0) return false;
+
+    return true;
+}
+static tSettingItem<int> sg_rotationMaxConf("ROTATION_MAX", sg_rotationMax);
 
 class tSettingMapqueueing: public tConfItemBase
 {
@@ -4395,6 +4405,21 @@ void gGame::StateUpdate(){
                     Orderedrotate();
                 else if (rotationtype == gROTATION_RANDOM_ROUND)
                     Randomrotate();
+                // rotate depending on how many times map remains the same per round/match
+                else if (rotationtype == gROTATION_COUNTER)
+                {
+                    //  add rotation counter
+                    gRotation::AddCounter();
+
+                    if (gRotation::Counter() > sg_rotationMax)
+                    {
+                        //  rotate orderly
+                        Orderedrotate();
+
+                        //  reset rotation counter
+                        gRotation::ResetCounter();
+                    }
+                }
             }
             else QueRotate();
 
@@ -5055,6 +5080,9 @@ static tConfItemFunc sg_TimerResetConf("TIMER_RESET", &sg_TimerReset);
 
 void gGameSpawnTimer::Sync(int alive, int ai_alive, int humans)
 {
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid) return;
+
     if ((alive == 0) && (ai_alive == 0))
     {
         timerActive = false;
@@ -5068,6 +5096,18 @@ void gGameSpawnTimer::Sync(int alive, int ai_alive, int humans)
             if (p && p->Object())
             {
                 p->Object()->Kill();
+            }
+        }
+
+        //  vanish all zones
+        const tList<eGameObject>& gameObjects = grid->GameObjects();
+        for (int i = 0; i < gameObjects.Len(); i++)
+        {
+            gZone *Zone = dynamic_cast<gZone *>(gameObjects[i]);
+            if (Zone)
+            {
+                //  0.5 fot smooth collapse
+                Zone->Vanish(0.5f);
             }
         }
 
@@ -5087,6 +5127,18 @@ void gGameSpawnTimer::Sync(int alive, int ai_alive, int humans)
             if (p && p->Object())
             {
                 p->Object()->Kill();
+            }
+        }
+
+        //  vanish all zones
+        const tList<eGameObject>& gameObjects = grid->GameObjects();
+        for (int i = 0; i < gameObjects.Len(); i++)
+        {
+            gZone *Zone = dynamic_cast<gZone *>(gameObjects[i]);
+            if (Zone)
+            {
+                //  0.5 fot smooth collapse
+                Zone->Vanish(0.5f);
             }
         }
 
@@ -5351,7 +5403,9 @@ void gGame::Analysis(REAL time){
         lastTeams=humanTeamsClamp; // update last team count
     }
 
-    //! Do the count down of timer
+    //!
+
+    //! Do the count down with ingame timer
     if (gGameSpawnTimer::Active())
     {
         gGameSpawnTimer::Sync(alive, ai_alive, sg_NumHumans());

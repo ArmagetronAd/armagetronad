@@ -27,7 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "rSDL.h"
 
-#include "gWinZone.h"
+#include "gZone.h"
 #include "eFloor.h"
 #include "eTimer.h"
 #include "eGrid.h"
@@ -1186,6 +1186,14 @@ void gZone::InteractWith( eGameObject * target, REAL time, int recursion )
                         {
                             pDeathZone->pLastShotCollision = NULL;
                         }
+                    }
+                }
+                else
+                {
+                    gPongZoneHack *pongZone = dynamic_cast<gPongZoneHack *>(target);
+                    if (pongZone)
+                    {
+                        pThisDeathZone->OnEnter(pongZone, time);
                     }
                 }
             }
@@ -6746,6 +6754,8 @@ gSoccerZoneHack::gSoccerZoneHack( eGrid * grid, const eCoord & pos, bool dynamic
     init_ = false;
     ballShots_ = 0;
 
+    teamDistance_ = 0;
+
     if (!delayCreation)
         grid->AddGameObjectInteresting(this);
 
@@ -6773,6 +6783,8 @@ gSoccerZoneHack::gSoccerZoneHack( eGrid * grid, const eCoord & pos, bool dynamic
 
     init_ = false;
     ballShots_ = 0;
+
+    teamDistance_ = 0;
 
     if (!delayCreation)
         grid->AddGameObjectInteresting(this);
@@ -6895,6 +6907,8 @@ bool gSoccerZoneHack::Timestep( REAL time )
 
         //  set new velocity
         SetVelocity(currentVelocity);
+
+        RequestSync();
     }
 
     return (returnStatus);
@@ -6989,6 +7003,8 @@ void gSoccerZoneHack::OnEnter( gCycle *target, REAL time )
 
         SetPosition(new_p1);
         SetVelocity(new_v1);
+
+        RequestSync();
 
         //  set last player to hit the zone
         lastTeamIn_ = target->Team();
@@ -7292,6 +7308,180 @@ static void sg_SpawnSoccer(std::istream &s)
     }
 }
 static tConfItemFunc sg_SpawnSoccerConf("SPAWN_SOCCER", &sg_SpawnSoccer);
+
+// *******************************************************************************
+// *
+// *    gSoccerZoneHack
+// *
+// *******************************************************************************
+//!
+//!     @param  grid Grid to put the zone into
+//!     @param  pos  Position to spawn the zone at
+//!
+// *******************************************************************************
+
+gPongZoneHack::gPongZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreation, bool delayCreation)
+:gZone( grid, pos, dynamicCreation, delayCreation)
+{
+    color_.r = 1.0f;
+    color_.g = 0.0f;
+    color_.b = 0.0f;
+
+    if (!delayCreation)
+        grid->AddGameObjectInteresting(this);
+
+    SetExpansionSpeed(0);
+    SetRotationSpeed( .3f );
+    RequestSync();
+}
+
+
+// *******************************************************************************
+// *
+// *    gPongZoneHack
+// *
+// *******************************************************************************
+//!
+//!     @param  m Message to read creation data from
+//!     @param  null
+//!
+// *******************************************************************************
+
+gPongZoneHack::gPongZoneHack( nMessage & m )
+: gZone( m )
+{
+}
+
+
+// *******************************************************************************
+// *
+// *    ~gPongZoneHack
+// *
+// *******************************************************************************
+//!
+//!
+// *******************************************************************************
+
+gPongZoneHack::~gPongZoneHack( void )
+{
+}
+
+
+// *******************************************************************************
+// *
+// *    Timestep
+// *
+// *******************************************************************************
+//!
+//!     @param  time    the current time
+//!
+// *******************************************************************************
+
+bool gPongZoneHack::Timestep( REAL time )
+{
+    bool returnStatus = gZone::Timestep( time );
+
+    RequestSync();
+
+    return returnStatus;
+}
+
+// *******************************************************************************
+// *
+// *    OnEnter
+// *
+// *******************************************************************************
+//!
+//!     @param  target  the cycle that has been found inside the zone
+//!     @param  time    the current time
+//!
+// *******************************************************************************
+
+void gPongZoneHack::OnEnter( gCycle *target, REAL time )
+{
+    //  ensure only team players can touch the ping ball
+    if (target && (target->Team() == Team()))
+    {
+        //  calculate the bounce off. Source: gBallZoneHack
+        eCoord p2 = target->Position();
+        eCoord v2 = target->Direction()*target->Speed();
+
+        REAL r1 = this->GetRadius();
+        REAL r2 = target->Player()->ping/.2;                             // the cycle "radius". accomidates for higher ping players
+        REAL R = r1 + r2;
+        eCoord p1 = this->Position();
+        eCoord dp = p2 - p1;
+        REAL c = dp.NormSquared() - R * R;
+        // first find the real time and position of the impact ...
+        eCoord v1 = this->GetVelocity();
+        eCoord dv = v2 - v1;
+        REAL a = dv.NormSquared();
+        REAL b = 2*(dp.x*dv.x+dp.y*dv.y);
+        REAL delta = b*b-4*a*c;
+        if (delta<0) return;         // no t. it can't be, an impact just occured ...
+        delta = sqrt(delta);
+        REAL t1 = (-b-delta)/(2*a);
+        REAL t2 = (-b+delta)/(2*a);
+        REAL t = 0;
+        if ((t1>0) && (t2>0)) return;// can't be, again ...
+        if (t1>0) t = t2;
+        else if (t2>0) t = t1;
+        else if (t1>t2) t = t1;
+        else t = t2;
+
+        // if a wall impact happens too close, just skip cycle bouncing for now ...
+        if (t < lastImpactTime_ - time) return;
+
+        // now that we have the time, get the positions ...
+        eCoord p1c = p1+v1*t;
+        eCoord p2c = p2+v2*t;
+        // now compute the impact : new velocities and new correct positions ...
+        eCoord base = (p2c-p1c);
+        base.Normalize();
+        eCoord new_v1 = base*-target->Speed();
+        eCoord new_p1 = p1c + new_v1*(-t+0.01);
+        new_v1 = new_v1*(1+sg_ballCycleBoost*target->GetAcceleration()/100);
+
+        SetPosition(new_p1);
+        SetVelocity(new_v1);
+
+        RequestSync();
+    }
+}
+
+void gDeathZoneHack::OnEnter(gPongZoneHack *target, REAL time)
+{
+    if ((deathZoneType == TYPE_NORMAL) && target->Team())
+    {
+        target->Collapse();
+
+        for(int i = 0; i < se_PlayerNetIDs.Len(); i++)
+        {
+            ePlayerNetID *p = se_PlayerNetIDs[i];
+            if (p && p->Object())
+            {
+                if (p->CurrentTeam())
+                {
+                    if (p->CurrentTeam() == target->Team())
+                    {
+                        p->Object()->Kill();
+                    }
+                }
+            }
+        }
+    }
+}
+
+// *******************************************************************************
+// *
+// *    OnVanish
+// *
+// *******************************************************************************
+
+void gPongZoneHack::OnVanish( void )
+{
+    this->RemoveFromListsAll();
+}
 
 // *******************************************************************************
 // *
