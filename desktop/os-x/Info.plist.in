@@ -46,5 +46,8 @@
   			</array>
   		</dict>
   	</array>
+  	
+  	<key>LSMinimumSystemVersion</key>
+    <string>@os_x_minimum_system_version@</string>
   </dict>
 </plist>

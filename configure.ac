@@ -222,6 +222,7 @@ AC_ARG_WITH([os-x-version-min],
 
 if test -n "$ARMAGETRONAD_OS_X_TOOLKIT"; then
 	test -z "${os_x_arch}" && os_x_arch=`arch`
+	AC_SUBST(os_x_minimum_system_version, `$srcdir/batch/make/os-x-minimum-system-version $os_x_version_min`)
 	
 	if test "x$build_regular" = "xtrue"; then
 		LDFLAGS="-F${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks $LDFLAGS"
@@ -607,7 +608,7 @@ if test -n "$ARMAGETRONAD_OS_X_TOOLKIT"; then
 		
 		dnl Added in OS X 10.8
     	AC_CHECK_FUNC([asl_log_descriptor],
-    	    [AC_DEFINE([HAVE_HAVE_ASL_LOG_DESCRIPTOR], 1, [Define if you have asl_log_descriptor])])
+    	    [AC_DEFINE([HAVE_ASL_LOG_DESCRIPTOR], 1, [Define if you have asl_log_descriptor])])
 	else
 		prefix="`pwd`/${progtitle} Dedicated"
 		AC_DEFINE_UNQUOTED([USER_DATA_DIR], ["~/Library/Application Support/${progtitle} Dedicated"], [TODO document])
