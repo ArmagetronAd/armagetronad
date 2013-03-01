@@ -65,7 +65,6 @@ AC_ARG_VAR(APBUILD_CC,[Autopackage C compiler.])
 AC_ARG_VAR(CXX_ABI,[Autopackage C++ ABI version.])
 AC_ARG_VAR(APBUILD_STATIC,[Autopackage static libraries.])
 AC_ARG_VAR(ARMAGETRONAD_OS_X_TOOLKIT, [Path to the OS X toolkit directory.])
-AC_ARG_VAR(arch, [Only applicable when building using the OS X toolkit. Specifies which architecture to build for.])
 
 dnl a modern autoconf is required to process this
 AC_PREREQ(2.50)
@@ -164,38 +163,86 @@ AC_ARG_WITH([os-x-toolkit],
 	[AC_HELP_STRING([--with-os-x-toolkit@<:@=DIR@:>@],
 		[build using the OS X toolkit. See README-Subversion for more information.])],
 	[
-		if test "x$withval" != "xyes"; then
-			ARMAGETRONAD_OS_X_TOOLKIT="${withval}/libraries"
-		elif test -n "$ARMAGETRONAD_OS_X_TOOLKIT"; then
-			ARMAGETRONAD_OS_X_TOOLKIT="${ARMAGETRONAD_OS_X_TOOLKIT}/libraries"
-		fi
-		if test -z "${ARMAGETRONAD_OS_X_TOOLKIT}"; then
-			AC_MSG_ERROR([An OS X toolkit directory was not specified.])
+	    if test "x$withval" != "xno"; then
+    		if test "x$withval" != "xyes"; then
+    			ARMAGETRONAD_OS_X_TOOLKIT="${withval}/libraries"
+    		elif test -n "$ARMAGETRONAD_OS_X_TOOLKIT"; then
+    			ARMAGETRONAD_OS_X_TOOLKIT="${ARMAGETRONAD_OS_X_TOOLKIT}/libraries"
+    		fi
+    		if test -z "${ARMAGETRONAD_OS_X_TOOLKIT}"; then
+    			AC_MSG_ERROR([An OS X toolkit directory was not specified.])
+    		fi
 		fi
 	],
 	[ARMAGETRONAD_OS_X_TOOLKIT=])
 
 AM_CONDITIONAL([OS_X_TOOLKIT], test -n "${ARMAGETRONAD_OS_X_TOOLKIT}")
 
+AC_ARG_WITH([os-x-arch],
+    [AC_HELP_STRING([--with-os-x-arch=ARCH],
+        [specifies which architecture to build for when using the OS X toolkit.])],
+    [
+        if test "x$withval" != "xno"; then
+            if test "x$withval" != "xyes"; then
+                os_x_arch="$withval"
+            else
+                AC_MSG_ERROR([An OS X arch was not specified.])
+            fi
+        fi
+    ],
+    [os_x_arch=])
+
+AC_ARG_WITH([os-x-sdk],
+    [AC_HELP_STRING([--with-os-x-sdk=DIR],
+        [specifies which SDK to use when using the OS X toolkit.])],
+    [
+        if test "x$withval" != "xno"; then
+            if test "x$withval" != "xyes"; then
+                os_x_sdk="$withval"
+            else
+                AC_MSG_ERROR([An OS X SDK was not specified.])
+            fi
+        fi
+    ],
+    [os_x_sdk=])
+    
+AC_ARG_WITH([os-x-version-min],
+    [AC_HELP_STRING([--with-os-x-version-min=VERSION],
+        [specifies the deployment target to use when using the OS X toolkit.])],
+    [
+        if test "x$withval" != "xno"; then
+            if test "x$withval" != "xyes"; then
+                os_x_version_min="$withval"
+            else
+                AC_MSG_ERROR([An OS X deployment target was not specified.])
+            fi
+        fi
+    ],
+    [os_x_version_min=])
+
 if test -n "$ARMAGETRONAD_OS_X_TOOLKIT"; then
-	test -z "${arch}" && arch=`arch`
+	test -z "${os_x_arch}" && os_x_arch=`arch`
 	
 	if test "x$build_regular" = "xtrue"; then
 		LDFLAGS="-F${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks $LDFLAGS"
 		CPPFLAGS="-F${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks -I${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks/SDL.framework/Headers -I${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks/SDL_mixer.framework/Headers -I${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks/SDL_image.framework/Headers $CPPFLAGS"
-		FTGL_CFLAGS="-I${ARMAGETRONAD_OS_X_TOOLKIT}/${arch}/include/FTGL -I${ARMAGETRONAD_OS_X_TOOLKIT}/${arch}/include/freetype2"
+		FTGL_CFLAGS="-I${ARMAGETRONAD_OS_X_TOOLKIT}/${os_x_arch}/include/FTGL -I${ARMAGETRONAD_OS_X_TOOLKIT}/${os_x_arch}/include/freetype2"
 		FTGL_LIBS="-lftgl -lfreetype -lz -lbz2"
 	fi
-	LDFLAGS="-arch ${arch} -L${ARMAGETRONAD_OS_X_TOOLKIT}/${arch}/lib $LDFLAGS"
+	
+	LDFLAGS="-arch ${os_x_arch} -L${ARMAGETRONAD_OS_X_TOOLKIT}/${os_x_arch}/lib $LDFLAGS"
+	test -n "$os_x_sdk" && LDFLAGS="-isysroot $os_x_sdk $LDFLAGS"
+	test -n "$os_x_version_min" && LDFLAGS="-mmacosx-version-min=$os_x_version_min $LDFLAGS"
+	
 	CXXFLAGS="$LDFLAGS $CXXFLAGS"
-	CPPFLAGS="-isystem ${ARMAGETRONAD_OS_X_TOOLKIT}/${arch}/include $CPPFLAGS"
+	CPPFLAGS="-isystem ${ARMAGETRONAD_OS_X_TOOLKIT}/${os_x_arch}/include $CPPFLAGS"
 	
 	OBJCXXFLAGS="$CXXFLAGS $OBJCXXFLAGS"
 	OBJCPPFLAGS="$CPPFLAGS $OBJCPPFLAGS"
 	CFLAGS="$CPPFLAGS $CXXFLAGS $CFLAGS"
 	
 	PATH="${ARMAGETRONAD_OS_X_TOOLKIT}/bin:$PATH"
-	PROTOC="${ARMAGETRONAD_OS_X_TOOLKIT}/${arch}/bin/protoc"
+	PROTOC="${ARMAGETRONAD_OS_X_TOOLKIT}/${os_x_arch}/bin/protoc"
 		
 	dnl TODO rename MACOSX_XCODE => OS_X_TOOLKIT
 	AC_DEFINE([MACOSX_XCODE], 1, [Define if compiling using the OS X toolkit.])
