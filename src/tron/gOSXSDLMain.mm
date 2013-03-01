@@ -327,6 +327,8 @@ static void CustomApplicationMain (int argc, char **argv)
 
 @end
 
+// TODO Ideally we should check for this at runtime
+#ifdef HAVE_ASL_LOG_DESCRIPTOR
 class ASLRedirect
 {
 public:
@@ -361,6 +363,7 @@ private:
 // because when debugging you're not launching the application with the
 // Finder--the messages aren't redirected in that situation.
 static ASLRedirect sg_aslRedirect;
+#endif
 
 #ifdef main
 #  undef main
@@ -390,8 +393,10 @@ int main (int argc, char **argv)
         gFinderLaunch = NO;
     }
 
+#ifdef HAVE_ASL_LOG_DESCRIPTOR
     if ( gFinderLaunch )
         sg_aslRedirect.Register();
+#endif
     
 #if SDL_USE_NIB_FILE
     NSApplicationMain (argc, argv);

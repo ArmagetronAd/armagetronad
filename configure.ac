@@ -604,6 +604,10 @@ if test -n "$ARMAGETRONAD_OS_X_TOOLKIT"; then
 		prefix="`pwd`/${progtitle}.app/Contents/Resources"
 		AC_DEFINE_UNQUOTED([USER_DATA_DIR], ["~/Library/Application Support/${progtitle}"], [TODO document])
 		AC_DEFINE_UNQUOTED([SCREENSHOT_DIR], ["~/Library/Application Support/${progtitle}/screenshots"], [TODO document])
+		
+		dnl Added in OS X 10.8
+    	AC_CHECK_FUNC([asl_log_descriptor],
+    	    [AC_DEFINE([HAVE_HAVE_ASL_LOG_DESCRIPTOR], 1, [Define if you have asl_log_descriptor])])
 	else
 		prefix="`pwd`/${progtitle} Dedicated"
 		AC_DEFINE_UNQUOTED([USER_DATA_DIR], ["~/Library/Application Support/${progtitle} Dedicated"], [TODO document])
