@@ -11,6 +11,7 @@
 #include "gOSXURLHandler.h"
 
 #include <asl.h>
+#include <dlfcn.h>
 #include <sys/param.h> /* for MAXPATHLEN */
 #include <unistd.h>
 
@@ -327,8 +328,10 @@ static void CustomApplicationMain (int argc, char **argv)
 
 @end
 
-// TODO Ideally we should check for this at runtime
-#ifdef HAVE_ASL_LOG_DESCRIPTOR
+#ifndef ASL_LOG_DESCRIPTOR_WRITE
+#define ASL_LOG_DESCRIPTOR_WRITE 2
+#endif
+
 class ASLRedirect
 {
 public:
@@ -339,12 +342,19 @@ public:
 
     void Register()
     {
-        client_ = asl_open( NULL, "com.apple.console", 0 );
-        aslmsg msg = asl_new( ASL_TYPE_MSG );
-        asl_set(msg, ASL_KEY_READ_UID, "-1"); // Allow any user read access, so that message will show in Console.app
-        asl_log_descriptor( client_, msg, ASL_LEVEL_NOTICE, STDOUT_FILENO, ASL_LOG_DESCRIPTOR_WRITE );
-        asl_log_descriptor( client_, msg, ASL_LEVEL_NOTICE, STDERR_FILENO, ASL_LOG_DESCRIPTOR_WRITE );
-        asl_free( msg );
+        // asl_log_descriptor() was added in OS X 10.8. Also in 10.8 messages are
+        // not automatically redirected to ASL, so this doubles as a check to see
+        // if we should implement that behavior.
+        log_descriptor_func log_descriptor = (log_descriptor_func)dlsym( RTLD_NEXT, "asl_log_descriptor" );
+        if ( log_descriptor )
+        {
+            client_ = asl_open( NULL, "com.apple.console", 0 );
+            aslmsg msg = asl_new( ASL_TYPE_MSG );
+            asl_set(msg, ASL_KEY_READ_UID, "-1"); // Allow any user read access, so that message will show in Console.app
+            log_descriptor( client_, msg, ASL_LEVEL_NOTICE, STDOUT_FILENO, ASL_LOG_DESCRIPTOR_WRITE );
+            log_descriptor( client_, msg, ASL_LEVEL_NOTICE, STDERR_FILENO, ASL_LOG_DESCRIPTOR_WRITE );
+            asl_free( msg );
+        }
     }
 
     ~ASLRedirect()
@@ -353,6 +363,7 @@ public:
             asl_close( client_ );
     }
 private:
+    typedef int (*log_descriptor_func)(aslclient, aslmsg, int, int, uint32_t);
     aslclient client_;
 };
 
@@ -363,7 +374,6 @@ private:
 // because when debugging you're not launching the application with the
 // Finder--the messages aren't redirected in that situation.
 static ASLRedirect sg_aslRedirect;
-#endif
 
 #ifdef main
 #  undef main
@@ -393,10 +403,8 @@ int main (int argc, char **argv)
         gFinderLaunch = NO;
     }
 
-#ifdef HAVE_ASL_LOG_DESCRIPTOR
     if ( gFinderLaunch )
         sg_aslRedirect.Register();
-#endif
     
 #if SDL_USE_NIB_FILE
     NSApplicationMain (argc, argv);
