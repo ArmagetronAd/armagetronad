@@ -88,6 +88,8 @@ Call "make install" to create a stand-alone .app (for the client), or a stand-al
 directory (for the dedicated server). The installed game will be created in the
 build directory.
 
+Other useful flags: --with-os-x-arch, --with-os-x-sdk, --with-os-x-version-min
+
 *******************
 * Windows + Mingw *
 *******************
