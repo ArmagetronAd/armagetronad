@@ -55,7 +55,8 @@ EXTRA_DIST=\
 	make/copyresources.py\
 	make/sortresources\
 	make/regenerate_fingerprint\
-	make/symlink-relative
+	make/symlink-relative\
+	make/os-x-minimum-system-version
 
 # The command for building scripts
 buildscript = sed -f ${top_builddir}/universal_variable_values_sed\
