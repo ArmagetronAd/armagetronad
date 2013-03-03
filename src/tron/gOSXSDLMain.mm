@@ -13,6 +13,7 @@
 #include <asl.h>
 #include <dlfcn.h>
 #include <sys/param.h> /* for MAXPATHLEN */
+#include <sstream>
 #include <unistd.h>
 
 /* Use this flag to determine whether we use SDLMain.nib or not */
@@ -350,7 +351,11 @@ public:
         {
             client_ = asl_open( NULL, "com.apple.console", 0 );
             aslmsg msg = asl_new( ASL_TYPE_MSG );
-            asl_set(msg, ASL_KEY_READ_UID, "-1"); // Allow any user read access, so that message will show in Console.app
+            
+            // Allow messages to be viewable in Console.app
+            asl_set( msg, ASL_KEY_READ_UID, ToStr( getuid() ) );
+            asl_set( msg, ASL_KEY_READ_GID, ToStr( getgid() ) );
+            
             log_descriptor( client_, msg, ASL_LEVEL_NOTICE, STDOUT_FILENO, ASL_LOG_DESCRIPTOR_WRITE );
             log_descriptor( client_, msg, ASL_LEVEL_NOTICE, STDERR_FILENO, ASL_LOG_DESCRIPTOR_WRITE );
             asl_free( msg );
@@ -363,6 +368,13 @@ public:
             asl_close( client_ );
     }
 private:
+    template< typename T > static const char *ToStr( T i )
+    {
+        std::stringstream ss;
+        ss << i;
+        return ss.str().c_str();
+    }
+    
     typedef int (*log_descriptor_func)(aslclient, aslmsg, int, int, uint32_t);
     aslclient client_;
 };
