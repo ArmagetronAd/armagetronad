@@ -1036,7 +1036,7 @@ void gZone::OnVanish( void )
 bool sg_cyclesZonesAvoid = false;
 static tSettingItem<bool> sg_cyclesZonesAvoidConf("CYCLE_ZONES_AVOID", sg_cyclesZonesAvoid);
 
-REAL sg_cycleZonesApproch = 50.0;
+REAL sg_cycleZonesApproch = 100.0;
 static tSettingItem<REAL>sg_cycleZoneApprochConf("CYCLE_ZONES_APPROCH", sg_cycleZonesApproch);
 
 static void TriggerAvoidZone(gCycle *target, gZone *Zone, REAL currentTime)
@@ -6908,7 +6908,7 @@ bool gSoccerZoneHack::Timestep( REAL time )
         //  set new velocity
         SetVelocity(currentVelocity);
 
-        RequestSync();
+        //RequestSync();
     }
 
     return (returnStatus);

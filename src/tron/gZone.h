@@ -262,7 +262,7 @@ class gPongZoneHack: public gZone
         void SetTeamOwner(eTeam *newTeam) { pongTeamOwner_ = newTeam; }
         eTeam *GetTeamOwner() { return pongTeamOwner_; }
 
-        void SetLasOwner(gCycle *newCycle) { pongLastOwner_ = newCycle; }
+        void SetLastOwner(gCycle *newCycle) { pongLastOwner_ = newCycle; }
         gCycle *GetLastOwner() { return pongLastOwner_; }
 
     protected:

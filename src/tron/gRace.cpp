@@ -1022,7 +1022,7 @@ void gRace::Sync( int alive, int ai_alive, int humans)
         roundFinished_ = true;
 
     // start counter when someone arrives or when only 1 is alive but not alone
-    if (!roundFinished_ && ( firstArrived_ || ( alive == 1 && ai_alive == 0 && humans > 1 )))
+    if ( firstArrived_ || ( alive == 1 && ai_alive == 0 && humans > 1 ) )
     {
         // close the round when all alive humans have arrived
         if ( sg_RaceFinished.Len() == alive )
@@ -1037,62 +1037,62 @@ void gRace::Sync( int alive, int ai_alive, int humans)
         // countdown mode
         else
         {
-            if (sg_raceSmartTimer)
+            //  get countdown working when countdown hasn't started yet
+            if ( countDown_ < 0 )
             {
-                if (!roundFinished_)
+                if (sg_raceSmartTimer)
                 {
-                    if (sg_RaceScores.Len() == 0)
+                    if (!roundFinished_)
                     {
-                        // not started yet
-                        if ( countDown_ < 0 )
+                        if (sg_RaceScores.Len() == 0)
+                        {
                             countDown_ = sg_RaceEndDelay + 1;
-                    }
-                    if (sg_RaceScores.Len() == 1)
-                    {
-                        gRaceScores *rScores = sg_RaceScores[0];
-                        if (rScores)
+                        }
+                        if (sg_RaceScores.Len() == 1)
                         {
-                            if (countDown_ < 0)
+                            gRaceScores *rScores = sg_RaceScores[0];
+                            if (rScores)
                             {
-                                int timer = ceil(rScores->Time());
-                                countDown_ = ceil(timer * 1.2) + 1;
+                                if (countDown_ < 0)
+                                {
+                                    int timer = ceil(rScores->Time());
+                                    countDown_ = ceil(timer * 1.2) + 1;
+                                }
                             }
                         }
-                    }
-                    else if (sg_RaceScores.Len() == 2)
-                    {
-                        gRaceScores *one = sg_RaceScores[0];
-                        gRaceScores *two = sg_RaceScores[1];
-                        if (one && two)
+                        else if (sg_RaceScores.Len() == 2)
                         {
-                            if (countDown_ < 0)
+                            gRaceScores *one = sg_RaceScores[0];
+                            gRaceScores *two = sg_RaceScores[1];
+                            if (one && two)
                             {
-                                int timer = ceil((one->Time() + two->Time()) / 2);
-                                countDown_ = ceil(timer * 1.2) + 1;
+                                if (countDown_ < 0)
+                                {
+                                    int timer = ceil((one->Time() + two->Time()) / 2);
+                                    countDown_ = ceil(timer * 1.2) + 1;
+                                }
                             }
                         }
-                    }
-                    else if (sg_RaceScores.Len() >= 3)
-                    {
-                        gRaceScores *one = sg_RaceScores[0];
-                        gRaceScores *two = sg_RaceScores[1];
-                        gRaceScores *tre = sg_RaceScores[2];
-                        if (one && two && tre)
+                        else if (sg_RaceScores.Len() >= 3)
                         {
-                            if (countDown_ < 0)
+                            gRaceScores *one = sg_RaceScores[0];
+                            gRaceScores *two = sg_RaceScores[1];
+                            gRaceScores *tre = sg_RaceScores[2];
+                            if (one && two && tre)
                             {
-                                int timer = ceil((one->Time() + two->Time() + tre->Time()) / 3);
-                                countDown_ = ceil(timer * 1.2) + 1;
+                                if (countDown_ < 0)
+                                {
+                                    int timer = ceil((one->Time() + two->Time() + tre->Time()) / 3);
+                                    countDown_ = ceil(timer * 1.2) + 1;
+                                }
                             }
                         }
                     }
                 }
-            }
-            else
-            {
-                // not started yet
-                if ( countDown_ < 0 )
+                else
+                {
                     countDown_ = sg_RaceEndDelay + 1;
+                }
             }
 
             if ( !roundFinished_ )
@@ -1107,6 +1107,7 @@ void gRace::Sync( int alive, int ai_alive, int humans)
 
                     if (!firstArrived_)
                     {
+                        //  kill all players that haven't finished yet
                         for(int i = 0; i < se_PlayerNetIDs.Len(); i++)
                         {
                             ePlayerNetID *p = se_PlayerNetIDs[i];
