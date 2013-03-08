@@ -2969,6 +2969,14 @@ static void own_game( nNetState enter_state ){
 
     sg_currentGame=NULL;
     se_KillGameTimer();
+
+    //! Send to /var/online_players.txt
+    std::ofstream o;
+    if (tDirectories::Var().Open(o, "online_players.txt"))
+    {
+        o << "Nobody Online.\n";
+    }
+    o.close();
 }
 
 void sg_SinglePlayerGame(){
@@ -3047,6 +3055,34 @@ void sg_HostGame(){
         }
     }
     cp();
+
+    //! Send to /var/online_players.txt
+    std::ofstream o;
+    if (tDirectories::Var().Open(o, "online_players.txt"))
+    {
+        if (se_PlayerNetIDs.Len() > 0)
+        {
+            o << sg_currentMap << "\n";
+            for(int pID = 0; pID < se_PlayerNetIDs.Len(); pID++)
+            {
+                ePlayerNetID *p = se_PlayerNetIDs[pID];
+                if (p)
+                {
+                    o << p->GetUserName() << " ";
+                    if (p->Object() && p->Object()->Alive())
+                        o << "1 ";
+                    else
+                        o << "0 ";
+                    o << (p->ping * 1000) << " ";
+                    o << p->Score() << " ";
+                    o << p->GetAccessLevel() << " ";
+                    o <<p->GetName() << "\n";
+                }
+            }
+        }
+        else o << "Nobody Online.\n";
+    }
+    o.close();
 
     if (!uMenu::quickexit)
 #endif
@@ -5403,7 +5439,33 @@ void gGame::Analysis(REAL time){
         lastTeams=humanTeamsClamp; // update last team count
     }
 
-    //!
+    //! Send to /var/online_players.txt
+    std::ofstream o;
+    if (tDirectories::Var().Open(o, "online_players.txt"))
+    {
+        if (se_PlayerNetIDs.Len() > 0)
+        {
+            o << sg_currentMap << "\n";
+            for(int pID = 0; pID < se_PlayerNetIDs.Len(); pID++)
+            {
+                ePlayerNetID *p = se_PlayerNetIDs[pID];
+                if (p)
+                {
+                    o << p->GetUserName() << " ";
+                    if (p->Object() && p->Object()->Alive())
+                        o << "1 ";
+                    else
+                        o << "0 ";
+                    o << (p->ping * 1000) << " ";
+                    o << p->Score() << " ";
+                    o << p->GetAccessLevel() << " ";
+                    o <<p->GetName() << "\n";
+                }
+            }
+        }
+        else o << "Nobody Online.\n";
+    }
+    o.close();
 
     //! Do the count down with ingame timer
     if (gGameSpawnTimer::Active())

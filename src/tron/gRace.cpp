@@ -284,6 +284,7 @@ void gRaceScores::Read()
             }
         }
     }
+    r.close();
 }
 
 void gRaceScores::Write()
@@ -309,6 +310,7 @@ void gRaceScores::Write()
                 }
             }
         }
+        w.close();
     }
 }
 
