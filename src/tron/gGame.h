@@ -227,6 +227,7 @@ void QueRotate();
 
 extern void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command);
 extern void sg_DisplayRotationList(ePlayerNetID *p, std::istream &s, tString command);
+extern void sg_OutputOnlinePlayers();
 
 #endif
 

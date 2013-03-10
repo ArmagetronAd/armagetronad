@@ -5192,7 +5192,10 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), timeC
 
     se_PlayerNetIDs.Add(this,listID);
     object=NULL;
+
     gRacePlayer *racePlayer = new gRacePlayer(this);
+
+    //sg_OutputOnlinePlayers();
 
     /*
       if(sn_GetNetState()!=nSERVER)
@@ -5247,7 +5250,11 @@ ePlayerNetID::ePlayerNetID(nMessage &m):nNetObject(m),listID(-1), teamListID(-1)
     pID=-1;
     se_PlayerNetIDs.Add(this,listID);
     object=NULL;
+
     gRacePlayer *racePlayer = new gRacePlayer(this);
+
+    //sg_OutputOnlinePlayers();
+
     ping=sn_Connections[m.SenderID()].ping;
     lastSync=tSysTimeFloat();
 
