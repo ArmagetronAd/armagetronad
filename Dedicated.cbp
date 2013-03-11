@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="Dedicated" />
+		<Option pch_mode="0" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Win32 Release">
+				<Option output="..\dist\armagetronad_dedicated.exe" prefix_auto="0" extension_auto="0" />
+				<Option object_output="tmp\Armagetron_Dedicated___Win32_Release" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option projectResourceIncludeDirsRelation="1" />
+				<Compiler>
+					<Add option="-O2" />
+					<Add option="-W" />
+					<Add option="-DNDEBUG" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add library=".\libZThread.a" />
+				</Linker>
+			</Target>
+			<Target title="Win32 Debug">
+				<Option output="..\debug\armagetronad_dedicated.exe" prefix_auto="0" extension_auto="0" />
+				<Option object_output="tmp\Armagetron_Dedicated___Win32_Debug" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option projectResourceIncludeDirsRelation="1" />
+				<Compiler>
+					<Add option="-W" />
+					<Add option="-g" />
+					<Add option="-D_DEBUG" />
+					<Add option="-DDEBUG" />
+				</Compiler>
+				<Linker>
+					<Add library=".\libZThread_debug.a" />
+				</Linker>
+			</Target>
+		</Build>
+		<VirtualTargets>
+			<Add alias="All" targets="Win32 Release;Win32 Debug;" />
+		</VirtualTargets>
+		<Compiler>
+			<Add option="-fexceptions" />
+			<Add option="-DWIN32" />
+			<Add option="-D_CONSOLE" />
+			<Add option="-D_MBCS" />
+			<Add option="-DDONTUSEMEMMANAGER" />
+			<Add directory="src" />
+			<Add directory="src\engine" />
+			<Add directory="src\network" />
+			<Add directory="src\render" />
+			<Add directory="src\tools" />
+			<Add directory="src\ui" />
+			<Add directory="src\win32_ded" />
+			<Add directory="..\winlibs\libxml2\include" />
+			<Add directory="..\winlibs\iconv\include" />
+			<Add directory="..\winlibs\ZThread\include" />
+		</Compiler>
+		<Linker>
+			<Add library="libwsock32.a" />
+			<Add library="..\winlibs\libxml2\lib\libxml2.lib" />
+		</Linker>
+		<Unit filename="armagetron.rc">
+			<Option compilerVar="WINDRES" />
+		</Unit>
+		<Unit filename="src\engine\eAdvWall.cpp" />
+		<Unit filename="src\engine\eAdvWall.h" />
+		<Unit filename="src\engine\eAuthentication.cpp" />
+		<Unit filename="src\engine\eAuthentication.h" />
+		<Unit filename="src\engine\eAxis.cpp" />
+		<Unit filename="src\engine\eAxis.h" />
+		<Unit filename="src\engine\eCamera.cpp" />
+		<Unit filename="src\engine\eCamera.h" />
+		<Unit filename="src\engine\eChat.cpp" />
+		<Unit filename="src\engine\eChat.h" />
+		<Unit filename="src\engine\eCoord.h" />
+		<Unit filename="src\engine\eDebugLine.cpp" />
+		<Unit filename="src\engine\eDebugLine.h" />
+		<Unit filename="src\engine\eDisplay.cpp" />
+		<Unit filename="src\engine\eFloor.cpp" />
+		<Unit filename="src\engine\eFloor.h" />
+		<Unit filename="src\engine\eGameObject.cpp" />
+		<Unit filename="src\engine\eGameObject.h" />
+		<Unit filename="src\engine\eGrid.cpp" />
+		<Unit filename="src\engine\eGrid.h" />
+		<Unit filename="src\engine\eKrawall.cpp" />
+		<Unit filename="src\engine\eKrawall.h" />
+		<Unit filename="src\engine\eLagCompensation.cpp" />
+		<Unit filename="src\engine\eLagCompensation.h" />
+		<Unit filename="src\engine\eNetGameObject.cpp" />
+		<Unit filename="src\engine\eNetGameObject.h" />
+		<Unit filename="src\engine\ePath.cpp" />
+		<Unit filename="src\engine\ePath.h" />
+		<Unit filename="src\engine\ePlayer.cpp" />
+		<Unit filename="src\engine\ePlayer.h" />
+		<Unit filename="src\engine\eRectangle.cpp" />
+		<Unit filename="src\engine\eRectangle.h" />
+		<Unit filename="src\engine\eSensor.cpp" />
+		<Unit filename="src\engine\eSensor.h" />
+		<Unit filename="src\engine\eSound.cpp" />
+		<Unit filename="src\engine\eSound.h" />
+		<Unit filename="src\engine\eTeam.cpp" />
+		<Unit filename="src\engine\eTeam.h" />
+		<Unit filename="src\engine\eTess2.h" />
+		<Unit filename="src\engine\eTimer.cpp" />
+		<Unit filename="src\engine\eTimer.h" />
+		<Unit filename="src\engine\eVoter.cpp" />
+		<Unit filename="src\engine\eVoter.h" />
+		<Unit filename="src\engine\eWall.cpp" />
+		<Unit filename="src\engine\eWall.h" />
+		<Unit filename="src\network\md5.cpp" />
+		<Unit filename="src\network\md5.h" />
+		<Unit filename="src\network\nAuthentication.cpp" />
+		<Unit filename="src\network\nAuthentication.h" />
+		<Unit filename="src\network\nConfig.cpp" />
+		<Unit filename="src\network\nConfig.h" />
+		<Unit filename="src\network\nKrawall.cpp" />
+		<Unit filename="src\network\nKrawall.h" />
+		<Unit filename="src\network\nKrawallPrivate.cpp" />
+		<Unit filename="src\network\nNetObject.cpp" />
+		<Unit filename="src\network\nNetObject.h" />
+		<Unit filename="src\network\nNetwork.cpp" />
+		<Unit filename="src\network\nNetwork.h" />
+		<Unit filename="src\network\nObserver.cpp" />
+		<Unit filename="src\network\nObserver.h" />
+		<Unit filename="src\network\nPriorizing.cpp" />
+		<Unit filename="src\network\nPriorizing.h" />
+		<Unit filename="src\network\nServerInfo.cpp" />
+		<Unit filename="src\network\nServerInfo.h" />
+		<Unit filename="src\network\nSimulatePing.h" />
+		<Unit filename="src\network\nSocket.cpp" />
+		<Unit filename="src\network\nSocket.h" />
+		<Unit filename="src\network\nSpamProtection.cpp" />
+		<Unit filename="src\network\nSpamProtection.h" />
+		<Unit filename="src\render\rConsole.cpp" />
+		<Unit filename="src\render\rConsole.h" />
+		<Unit filename="src\render\rConsoleCout.cpp" />
+		<Unit filename="src\render\rDisplayList.cpp" />
+		<Unit filename="src\render\rDisplayList.h" />
+		<Unit filename="src\render\rFont.cpp" />
+		<Unit filename="src\render\rFont.h" />
+		<Unit filename="src\render\rGL.cpp" />
+		<Unit filename="src\render\rGL.h" />
+		<Unit filename="src\render\rGLRender.cpp" />
+		<Unit filename="src\render\rModel.cpp" />
+		<Unit filename="src\render\rModel.h" />
+		<Unit filename="src\render\rRender.cpp" />
+		<Unit filename="src\render\rRender.h" />
+		<Unit filename="src\render\rSDL.h" />
+		<Unit filename="src\render\rScreen.cpp" />
+		<Unit filename="src\render\rScreen.h" />
+		<Unit filename="src\render\rSysdep.cpp" />
+		<Unit filename="src\render\rSysdep.h" />
+		<Unit filename="src\render\rTexture.cpp" />
+		<Unit filename="src\render\rTexture.h" />
+		<Unit filename="src\render\rViewport.cpp" />
+		<Unit filename="src\render\rViewport.h" />
+		<Unit filename="src\tools\tArray.cpp" />
+		<Unit filename="src\tools\tArray.h" />
+		<Unit filename="src\tools\tCallback.cpp" />
+		<Unit filename="src\tools\tCallback.h" />
+		<Unit filename="src\tools\tCallbackString.h" />
+		<Unit filename="src\tools\tColor.cpp" />
+		<Unit filename="src\tools\tColor.h" />
+		<Unit filename="src\tools\tCommandLine.cpp" />
+		<Unit filename="src\tools\tCommandLine.h" />
+		<Unit filename="src\tools\tConfiguration.cpp" />
+		<Unit filename="src\tools\tConfiguration.h" />
+		<Unit filename="src\tools\tConsole.cpp" />
+		<Unit filename="src\tools\tConsole.h" />
+		<Unit filename="src\tools\tCrypt.cpp" />
+		<Unit filename="src\tools\tCrypt.h" />
+		<Unit filename="src\tools\tDirectories.cpp" />
+		<Unit filename="src\tools\tDirectories.h" />
+		<Unit filename="src\tools\tError.cpp" />
+		<Unit filename="src\tools\tError.h" />
+		<Unit filename="src\tools\tEventQueue.cpp" />
+		<Unit filename="src\tools\tEventQueue.h" />
+		<Unit filename="src\tools\tException.cpp" />
+		<Unit filename="src\tools\tException.h" />
+		<Unit filename="src\tools\tHeap.cpp" />
+		<Unit filename="src\tools\tHeap.h" />
+		<Unit filename="src\tools\tInitExit.h" />
+		<Unit filename="src\tools\tLinkedList.cpp" />
+		<Unit filename="src\tools\tLinkedList.h" />
+		<Unit filename="src\tools\tList.h" />
+		<Unit filename="src\tools\tLocale.cpp" />
+		<Unit filename="src\tools\tLocale.h" />
+		<Unit filename="src\tools\tMath.h" />
+		<Unit filename="src\tools\tMemManager.cpp" />
+		<Unit filename="src\tools\tMemManager.h" />
+		<Unit filename="src\tools\tMemStack.cpp" />
+		<Unit filename="src\tools\tMemStack.h" />
+		<Unit filename="src\tools\tRandom.cpp" />
+		<Unit filename="src\tools\tRandom.h" />
+		<Unit filename="src\tools\tRecorder.cpp" />
+		<Unit filename="src\tools\tRecorder.h" />
+		<Unit filename="src\tools\tRecorderInternal.cpp" />
+		<Unit filename="src\tools\tRecorderInternal.h" />
+		<Unit filename="src\tools\tReferenceHolder.h" />
+		<Unit filename="src\tools\tResourceManager.cpp" />
+		<Unit filename="src\tools\tResourceManager.h" />
+		<Unit filename="src\tools\tRing.cpp" />
+		<Unit filename="src\tools\tRing.h" />
+		<Unit filename="src\tools\tSafePTR.cpp" />
+		<Unit filename="src\tools\tSafePTR.h" />
+		<Unit filename="src\tools\tString.cpp" />
+		<Unit filename="src\tools\tString.h" />
+		<Unit filename="src\tools\tSysTime.cpp" />
+		<Unit filename="src\tools\tSysTime.h" />
+		<Unit filename="src\tools\tToDo.cpp" />
+		<Unit filename="src\tools\tToDo.h" />
+		<Unit filename="src\tron\gAIBase.cpp" />
+		<Unit filename="src\tron\gAIBase.h" />
+		<Unit filename="src\tron\gAICharacter.cpp" />
+		<Unit filename="src\tron\gAICharacter.h" />
+		<Unit filename="src\tron\gArena.cpp" />
+		<Unit filename="src\tron\gArena.h" />
+		<Unit filename="src\tron\gArmagetron.cpp" />
+		<Unit filename="src\tron\gCamera.cpp" />
+		<Unit filename="src\tron\gCamera.h" />
+		<Unit filename="src\tron\gCycle.cpp" />
+		<Unit filename="src\tron\gCycle.h" />
+		<Unit filename="src\tron\gCycleMovement.cpp" />
+		<Unit filename="src\tron\gCycleMovement.h" />
+		<Unit filename="src\tron\gExplosion.cpp" />
+		<Unit filename="src\tron\gExplosion.h" />
+		<Unit filename="src\tron\gFloor.cpp" />
+		<Unit filename="src\tron\gFriends.cpp" />
+		<Unit filename="src\tron\gFriends.h" />
+		<Unit filename="src\tron\gGame.cpp" />
+		<Unit filename="src\tron\gGame.h" />
+		<Unit filename="src\tron\gHud.cpp" />
+		<Unit filename="src\tron\gHud.h">
+			<Option target="Armagetron - Win32 Release" />
+			<Option target="Armagetron - Win32 Debug" />
+			<Option target="Armagetron - Win32 Profile" />
+		</Unit>
+		<Unit filename="src\tron\gLanguageMenu.cpp" />
+		<Unit filename="src\tron\gLanguageMenu.h" />
+		<Unit filename="src\tron\gLogo.cpp" />
+		<Unit filename="src\tron\gLogo.h" />
+		<Unit filename="src\tron\gMenus.cpp" />
+		<Unit filename="src\tron\gMenus.h" />
+		<Unit filename="src\tron\gParser.cpp" />
+		<Unit filename="src\tron\gRace.cpp" />
+		<Unit filename="src\tron\gRace.h" />
+		<Unit filename="src\tron\gRotation.cpp" />
+		<Unit filename="src\tron\gRotation.h" />
+		<Unit filename="src\tron\gSensor.cpp" />
+		<Unit filename="src\tron\gSensor.h" />
+		<Unit filename="src\tron\gServerBrowser.cpp" />
+		<Unit filename="src\tron\gServerBrowser.h" />
+		<Unit filename="src\tron\gServerFavorites.cpp" />
+		<Unit filename="src\tron\gServerFavorites.h" />
+		<Unit filename="src\tron\gSparks.cpp" />
+		<Unit filename="src\tron\gSparks.h" />
+		<Unit filename="src\tron\gSpawn.cpp" />
+		<Unit filename="src\tron\gSpawn.h" />
+		<Unit filename="src\tron\gStuff.cpp" />
+		<Unit filename="src\tron\gStuff.h" />
+		<Unit filename="src\tron\gSvgOutput.cpp" />
+		<Unit filename="src\tron\gSvgOutput.h" />
+		<Unit filename="src\tron\gTeam.cpp" />
+		<Unit filename="src\tron\gTeam.h" />
+		<Unit filename="src\tron\gWall.cpp" />
+		<Unit filename="src\tron\gWall.h" />
+		<Unit filename="src\tron\gZone.cpp" />
+		<Unit filename="src\tron\gZone.h" />
+		<Unit filename="src\ui\uInput.cpp" />
+		<Unit filename="src\ui\uInput.h" />
+		<Unit filename="src\ui\uInputQueue.cpp" />
+		<Unit filename="src\ui\uInputQueue.h" />
+		<Unit filename="src\ui\uMenu.cpp" />
+		<Unit filename="src\ui\uMenu.h" />
+		<Unit filename="src\win32_ded\config.h" />
+		<Unit filename="src\win32_ded\dirent.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src\win32_ded\dirent.h" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="mikmod" />
+		<Option pch_mode="0" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Win32 Release">
+				<Option output="..\dist\libmikmod.a" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="" />
+				<Option object_output="tmp\mikmod___Win32_Release" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Option projectResourceIncludeDirsRelation="2" />
+				<Compiler>
+					<Add option="-O2" />
+					<Add option="-W" />
+					<Add option="-DNDEBUG" />
+				</Compiler>
+			</Target>
+			<Target title="Win32 Debug">
+				<Option output="..\debug\libmikmod.a" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="" />
+				<Option object_output="tmp\mikmod___Win32_Debug" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Option projectResourceIncludeDirsRelation="2" />
+				<Compiler>
+					<Add option="-W" />
+					<Add option="-D_DEBUG" />
+				</Compiler>
+			</Target>
+		</Build>
+		<VirtualTargets>
+			<Add alias="All" targets="Win32 Release;Win32 Debug;" />
+		</VirtualTargets>
+		<Compiler>
+			<Add option="-fexceptions" />
+			<Add option="-DWIN32" />
+			<Add option="-D_WINDOWS" />
+			<Add directory="..\winlibs\SDL_mixer\mikmod" />
+		</Compiler>
+		<Unit filename="..\winlibs\SDL_mixer\mikmod\drv_nos.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\winlibs\SDL_mixer\mikmod\drv_sdl.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\winlibs\SDL_mixer\mikmod\load_it.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\winlibs\SDL_mixer\mikmod\load_mod.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\winlibs\SDL_mixer\mikmod\load_s3m.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\winlibs\SDL_mixer\mikmod\load_xm.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\winlibs\SDL_mixer\mikmod\mdreg.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\winlibs\SDL_mixer\mikmod\mdriver.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\winlibs\SDL_mixer\mikmod\mikmod.h" />
+		<Unit filename="..\winlibs\SDL_mixer\mikmod\mikmod_build.h" />
+		<Unit filename="..\winlibs\SDL_mixer\mikmod\mikmod_internals.h" />
+		<Unit filename="..\winlibs\SDL_mixer\mikmod\mloader.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\winlibs\SDL_mixer\mikmod\mlreg.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\winlibs\SDL_mixer\mikmod\mlutil.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\winlibs\SDL_mixer\mikmod\mmalloc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\winlibs\SDL_mixer\mikmod\mmerror.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\winlibs\SDL_mixer\mikmod\mmio.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\winlibs\SDL_mixer\mikmod\mplayer.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\winlibs\SDL_mixer\mikmod\munitrk.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\winlibs\SDL_mixer\mikmod\mwav.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\winlibs\SDL_mixer\mikmod\npertab.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\winlibs\SDL_mixer\mikmod\sloader.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\winlibs\SDL_mixer\mikmod\virtch.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\winlibs\SDL_mixer\mikmod\virtch2.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\winlibs\SDL_mixer\mikmod\virtch_common.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
