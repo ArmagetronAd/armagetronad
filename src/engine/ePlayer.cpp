@@ -64,6 +64,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //!RACE FILE
 #include "../tron/gRace.h"
 
+#include "../tron/gRotation.h"
+
 int se_lastSaidMaxEntries = 8;
 
 // call on commands that only work on the server; quit if it returns true
@@ -5195,6 +5197,14 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), timeC
 
     gRacePlayer *racePlayer = new gRacePlayer(this);
 
+    if (!gQueuePlayers::PlayerExists(this))
+        new gQueuePlayers(this);
+    else
+    {
+        gQueuePlayers *qPlayer = gQueuePlayers::GetData(this);
+        qPlayer->SetOwner(this);
+    }
+
     //sg_OutputOnlinePlayers();
 
     /*
@@ -5252,6 +5262,14 @@ ePlayerNetID::ePlayerNetID(nMessage &m):nNetObject(m),listID(-1), teamListID(-1)
     object=NULL;
 
     gRacePlayer *racePlayer = new gRacePlayer(this);
+
+    if (!gQueuePlayers::PlayerExists(this))
+        new gQueuePlayers(this);
+    else
+    {
+        gQueuePlayers *qPlayer = gQueuePlayers::GetData(this);
+        qPlayer->SetOwner(this);
+    }
 
     //sg_OutputOnlinePlayers();
 
@@ -5683,6 +5701,9 @@ void ePlayerNetID::RemoveFromGame()
             rPlayer->ErasePlayer();
         }
     }
+
+    gQueuePlayers *qPlayer = gQueuePlayers::GetData(this);
+    if (qPlayer) qPlayer->RemovePlayer();
 
     se_PlayerNetIDs.Remove(this, listID);
     SetTeamWish( NULL );

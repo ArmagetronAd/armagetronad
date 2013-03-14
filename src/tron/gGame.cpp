@@ -710,9 +710,9 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
             else
             {
                 Output << "0xddff00There are no items currently in the map queueing system.";
+                Output << "\n";
+                sn_ConsoleOut(Output, p->Owner());
             }
-            Output << "\n";
-            sn_ConsoleOut(Output, p->Owner());
         }
         else if (argument == "add")
         {
@@ -749,6 +749,9 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
                     {
                         if (searchFindings.Len() == 1)
                         {
+                            if (!gQueuePlayers::CanQueue(p))
+                                return;
+
                             bool found = false;
                             tString mapName = searchFindings[0];
                             for (int j=0; j < sg_mapqueueing.Size(); j++)
@@ -934,6 +937,9 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
                     {
                         if (searchFindings.Len() == 1)
                         {
+                            if (!gQueuePlayers::CanQueue(p))
+                                return;
+
                             bool found = false;
                             tString configName = searchFindings[0];
                             for (int j=0; j < sg_configqueueing.Size(); j++)
@@ -952,7 +958,7 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
                             }
                             if (!found)
                             {
-                                sg_mapqueueing.Insert(configName);
+                                sg_configqueueing.Insert(configName);
                                 tOutput Output;
                                 Output.SetTemplateParameter(1, configName);
                                 Output.SetTemplateParameter(2, p->GetColoredName());
@@ -4171,11 +4177,13 @@ gGame::gGame(){
     if (sn_GetNetState()!=nCLIENT)
         RequestSync();
     Init();
+    queueActive = false;
 }
 
 gGame::gGame(nMessage &m):nNetObject(m){
     synced_ = false;
     Init();
+    queueActive = false;
 }
 
 
@@ -4437,30 +4445,73 @@ void gGame::StateUpdate(){
 
             if ((sg_mapqueueing.Size() == 0) && (sg_configqueueing.Size() == 0))
             {
-                // rotate, if rotate is once per round
-                if ( rotationtype == gROTATION_ORDERED_ROUND )
-                    Orderedrotate();
-                else if (rotationtype == gROTATION_RANDOM_ROUND)
-                    Randomrotate();
-                // rotate depending on how many times map remains the same per round/match
-                else if (rotationtype == gROTATION_COUNTER)
+                //  resume normal rotation once queue is no longer active
+                if (!queueActive)
                 {
-                    //  add rotation counter
-                    gRotation::AddCounter();
-
-                    if (gRotation::Counter() > sg_rotationMax)
-                    {
-                        //  rotate orderly
+                    // rotate, if rotate is once per round
+                    if ( rotationtype == gROTATION_ORDERED_ROUND )
                         Orderedrotate();
+                    else if (rotationtype == gROTATION_RANDOM_ROUND)
+                        Randomrotate();
+                    // rotate depending on how many times map remains the same per round/match
+                    else if (rotationtype == gROTATION_COUNTER)
+                    {
+                        //  add rotation counter
+                        gRotation::AddCounter();
 
-                        //  reset rotation counter
-                        gRotation::ResetCounter();
+                        if (gRotation::Counter() > sg_rotationMax)
+                        {
+                            //  rotate orderly
+                            Orderedrotate();
+
+                            //  reset rotation counter
+                            gRotation::ResetCounter();
+                        }
                     }
                 }
+                else
+                {
+                    //!  reload where rotation last leftoff due to queue
+
+                    if (mapRotation->Size() > 0)
+                    {
+                        conf_mapfile.Set( mapRotation->Current() );
+                        conf_mapfile.GetSetting().SetSetLevel( tAccessLevel_Owner );
+                    }
+
+                    if (configRotation->Size() > 0)
+                    {
+                        tCurrentAccessLevel level( tAccessLevel_Owner, true );
+
+                        if (sg_configRotationType == 0)
+                        {
+                            st_Include( configRotation->Current() );
+                        }
+                        else if (sg_configRotationType == 1)
+                        {
+                            tString rclcl = tResourceManager::locateResource(NULL, configRotation->Current());
+                            if ( rclcl ) {
+                                std::ifstream rc(rclcl);
+                                tConfItemBase::LoadAll(rc, false );
+                                return;
+                            }
+
+                            con << tOutput( "$config_rinclude_not_found", configRotation->Current() );
+                        }
+                    }
+
+                    queueActive = false;
+                }
             }
-            else QueRotate();
+            else
+            {
+                queueActive = true;
+                QueRotate();
+            }
 
             gRotation::HandleNewRound();
+
+            gQueuePlayers::Reset();
 
             // transfer game settings
             if ( nCLIENT != sn_GetNetState() )
@@ -5446,6 +5497,9 @@ void gGame::Analysis(REAL time){
     //! Send to /var/online_players.txt
     sg_OutputOnlinePlayers();
 
+    //  get the queue data working
+    gQueuePlayers::Timestep(time);
+
     //! Do the count down with ingame timer
     if (gGameSpawnTimer::Active())
     {
@@ -6403,6 +6457,7 @@ void sg_EnterGameCore( nNetState enter_state ){
     }
 
     gHighscoresBase::LoadAll();
+    gQueuePlayers::Load();
 
     uMenu::SetIdle(gameloop_idle);
     sr_con.autoDisplayAtSwap=true;
@@ -6450,6 +6505,7 @@ void sg_EnterGameCore( nNetState enter_state ){
 void sg_EnterGameCleanup()
 {
     gHighscoresBase::SaveAll();
+    gQueuePlayers::Save();
     //HACK RACE begin
     if ( sg_RaceTimerEnabled )
     {

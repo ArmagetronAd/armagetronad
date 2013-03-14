@@ -31,8 +31,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tCallback.h"
 #include "tLinkedList.h"
 #include "tString.h"
+#include "tArray.h"
+#include "tList.h"
 #include "tRandom.h"
-#include "tConsole.h"
+#include "ePlayer.h"
 
 #ifdef HAVE_LIBRUBY
 class gRoundEventRuby : public tCallbackRuby {
@@ -142,6 +144,57 @@ private:
 public:
     static void HandleNewRound();
     static void HandleNewMatch();
+};
+
+class gQueuePlayers
+{
+    public:
+        gQueuePlayers(ePlayerNetID *player);
+        gQueuePlayers(tString name);
+
+        tString Name() { return name_; }
+        ePlayerNetID *Player() { return owner_; }
+        void SetOwner(ePlayerNetID *p) { owner_ = p; }
+
+        void RemovePlayer();
+
+        REAL PlayedTime() { return played_; }
+        REAL RefillTime() { return refill_; }
+        void SetPlayedTime(REAL newValue) { played_ = newValue; }
+        void SetRefillTime(REAL newValue) { refill_ = newValue; }
+
+        int Queues() { return queues_; }
+        int QueueDefault() { return queuesDefault; }
+
+        void SetQueue(int newValue) { if (queues_ > 0) queues_ = newValue; }
+
+        static bool PlayerExists(ePlayerNetID *player);
+        static bool PlayerExists(tString name);
+        static gQueuePlayers *GetData(ePlayerNetID *player);
+        static gQueuePlayers *GetData(tString name);
+
+        static bool Timestep(REAL time);
+
+        static void Save();
+        static void Reset();
+        static void Load();
+
+        static bool CanQueue(ePlayerNetID *p);
+
+        //!< Holds list of queue players
+        static tList<gQueuePlayers> queuePlayers;
+
+    private:
+        tString name_;          //!< Name of the owner
+        ePlayerNetID *owner_;   //!< Owner of this queue data
+
+        REAL played_;   //!< Time player has played in server
+        REAL refill_;   //!< Time player has to play to refill their queue
+
+        int queues_;        //!< The amount they still have to use the queue feature
+        int queuesDefault;  //!< The amount they origially had
+
+        REAL lastTime_;
 };
 
 #endif

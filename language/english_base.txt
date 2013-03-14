@@ -3483,6 +3483,23 @@ config_queueing_required_level        Config queueing command \2 requires level 
 access_level_queue_maps_help        Sets the access level required to use chat commands /mq add & remove.
 access_level_queue_configs_help     Sets the access level required to use chat commands /cq add & remove.
 
+#*************************************
+#*************************************
+#
+#    Queue details messages
+#
+#*************************************
+#*************************************
+queue_limit_help           This is the amount that players can use up for queueing maps or configs.
+queue_limit_excempt_help   Access level equal to or below this do not have queue limit.
+queue_limit_enabled        Should the people have limits when queueing?
+queue_increment_help       If set to >0, players will get their queues increased during refill by this amount.
+queue_refill_time_help     How long each time should players refill take? This is measured in hours.
+queue_refill_active_help   Should players be in server to have their queue refill active?
+
+queue_limit_reached        You have reached your queueing limit allowed to use. Next refill is in \1 minutes.\n
+queue_refill_waiting       You still have to wait \1 minutes for your queueing limit to refill.\n
+
 # items that should not be translated
 include english_base_notranslate.txt
 
@@ -3653,4 +3670,6 @@ timer_resume_help   If the timer was previously stopped, it resumes from where i
 timer_reset_help    Resets the ingame timer back to default.
 
 deathzone_random_colors_help    Default: 0; If set to 1, deathzones will have their colors by randomness.
+
+
  

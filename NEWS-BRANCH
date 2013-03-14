@@ -1,4 +1,22 @@
 ===========================
+Changes in r870 | Queueing Limitations
+===========================
+
+Corrections:
+    * Originally rotation used to rotate items causing things to change without warning.
+      Now rotation will resume from where it stopped at by reloading the original stuff.         
+
+Additions:
+    * Added limitations to the queueing feature due to limitless overuse. >:(
+    * Commands:
+      + QUEUE_LIMIT           # This is the amount that players can use up for queueing maps or configs.
+      + QUEUE_LIMIT_EXCEMPT   # Access level equal to or below this do not have queue limit.
+      + QUEUE_LIMIT_ENABLED   # Should the people have limits when queueing?
+      + QUEUE_INCREMENT       # If set to >0, players will get their queues increased during refill by this amount.
+      + QUEUE_REFILL_TIME     # How long each time should players refill take? This is measured in hours.
+      + QUEUE_REFILL_ACTOVE   # Should players be in server to have their queue refill active?     
+
+===========================
 Changes in r864
 ===========================
 Corrections:

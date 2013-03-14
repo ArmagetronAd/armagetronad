@@ -73,6 +73,8 @@ class gGame:public nNetObject{
 
     gParser *aParser;
 
+    bool queueActive;
+
 public:
     gGame();
     gGame(nMessage &m);
