@@ -106,7 +106,10 @@ gQueuePlayers::gQueuePlayers(ePlayerNetID *player)
     this->played_ = 0;
     this->refill_ = -1;
 
-    this->queues_ = sg_queueLimit;
+    this->queuesDefault = sg_queueLimit;
+    this->queues_ = this->queuesDefault;
+
+    this->lastTime_ = se_GameTime();
 
     queuePlayers.Insert(this);
 }
@@ -119,8 +122,8 @@ gQueuePlayers::gQueuePlayers(tString name)
     this->played_ = 0;
     this->refill_ = 0;
 
-    this->queues_ = sg_queueLimit;
     this->queuesDefault = sg_queueLimit;
+    this->queues_ = this->queuesDefault;
 
     this->lastTime_ = se_GameTime();
 
@@ -218,8 +221,18 @@ void gQueuePlayers::RemovePlayer()
 
 bool gQueuePlayers::Timestep(REAL time)
 {
-    if ((queuePlayers.Len() > 0) &&(sg_queueLimitEnabled))
+    if ((queuePlayers.Len() > 0) && sg_queueLimitEnabled)
     {
+        for(int i = 0; i < queuePlayers.Len(); i++)
+        {
+            gQueuePlayers *qPlayer = queuePlayers[i];
+            if (qPlayer)
+            {
+                if (qPlayer->Player() && (qPlayer->Name() == ""))
+                    qPlayer->name_ = qPlayer->Player()->GetUserName();
+            }
+        }
+
         for(int i = 0; i < queuePlayers.Len(); i++)
         {
             gQueuePlayers *qPlayer = queuePlayers[i];
@@ -335,10 +348,18 @@ bool gQueuePlayers::CanQueue(ePlayerNetID *p)
 {
     if (sg_queueLimitEnabled)
     {
-        gQueuePlayers *qPlayer = gQueuePlayers::GetData(p);
-        if (!qPlayer) return false;
+        gQueuePlayers *qPlayer = NULL;
+        if (!gQueuePlayers::PlayerExists(p))
+            qPlayer = new gQueuePlayers(p);
+        else
+        {
+            qPlayer = gQueuePlayers::GetData(p);
+            qPlayer->SetOwner(p);
+        }
 
         if (p->GetAccessLevel() <= sg_queueLimitExcempt ) return true;
+
+        if (!qPlayer) return false;
 
         if (qPlayer->Queues() == 0)
         {
@@ -352,12 +373,12 @@ bool gQueuePlayers::CanQueue(ePlayerNetID *p)
 
         if (qPlayer->Queues() > 0)
         {
-            qPlayer->SetQueue(qPlayer->Queues() - 1);
+            qPlayer->queues_ --;
 
             if (qPlayer->Queues() == 0)
             {
                 REAL refillTime = 60 * sg_queueRefillTime;
-                qPlayer->SetRefillTime((qPlayer->PlayedTime() / 60) + refillTime);
+                qPlayer->refill_ = (qPlayer->PlayedTime() / 60) + refillTime;
 
                 tOutput warning;
                 warning.SetTemplateParameter(1, refillTime);

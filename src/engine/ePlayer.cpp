@@ -5197,14 +5197,6 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), timeC
 
     gRacePlayer *racePlayer = new gRacePlayer(this);
 
-    if (!gQueuePlayers::PlayerExists(this))
-        new gQueuePlayers(this);
-    else
-    {
-        gQueuePlayers *qPlayer = gQueuePlayers::GetData(this);
-        qPlayer->SetOwner(this);
-    }
-
     //sg_OutputOnlinePlayers();
 
     /*
@@ -5262,14 +5254,6 @@ ePlayerNetID::ePlayerNetID(nMessage &m):nNetObject(m),listID(-1), teamListID(-1)
     object=NULL;
 
     gRacePlayer *racePlayer = new gRacePlayer(this);
-
-    if (!gQueuePlayers::PlayerExists(this))
-        new gQueuePlayers(this);
-    else
-    {
-        gQueuePlayers *qPlayer = gQueuePlayers::GetData(this);
-        qPlayer->SetOwner(this);
-    }
 
     //sg_OutputOnlinePlayers();
 
