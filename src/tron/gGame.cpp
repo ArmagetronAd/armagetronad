@@ -4511,8 +4511,6 @@ void gGame::StateUpdate(){
 
             gRotation::HandleNewRound();
 
-            gQueuePlayers::Reset();
-
             // transfer game settings
             if ( nCLIENT != sn_GetNetState() )
             {
@@ -4587,6 +4585,8 @@ void gGame::StateUpdate(){
                 gRace::Reset();
             }
             //HACK RACE end
+
+            gQueuePlayers::Reset();
 
             //  reset ingame timer
             gGameSpawnTimer::Reset();

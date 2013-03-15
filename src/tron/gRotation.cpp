@@ -101,7 +101,7 @@ static tSettingItem<bool> sg_queueRefillActiveConf("QUEUE_REFILL_ACTIVE", sg_que
 gQueuePlayers::gQueuePlayers(ePlayerNetID *player)
 {
     this->name_ = player->GetUserName();
-    this->owner_ = player;
+    this->owner_ = NULL;
 
     this->played_ = 0;
     this->refill_ = -1;
@@ -139,16 +139,8 @@ bool gQueuePlayers::PlayerExists(ePlayerNetID *player)
             gQueuePlayers * qPlayer = queuePlayers[i];
             if (qPlayer)
             {
-                if (qPlayer->Player())
-                {
-                    if (qPlayer->Player() == player)
+                if (qPlayer->Name() == player->GetUserName())
                         return true;
-                }
-                else
-                {
-                    if (qPlayer->Name() == player->GetUserName())
-                        return true;
-                }
             }
         }
     }
@@ -181,16 +173,8 @@ gQueuePlayers *gQueuePlayers::GetData(ePlayerNetID *player)
             gQueuePlayers * qPlayer = queuePlayers[i];
             if (qPlayer)
             {
-                if (qPlayer->Player())
-                {
-                    if (qPlayer->Player() == player)
+                if (qPlayer->Name() == player->GetUserName())
                         return qPlayer;
-                }
-                else
-                {
-                    if (qPlayer->Name() == player->GetUserName())
-                        return qPlayer;
-                }
             }
         }
     }
@@ -241,7 +225,7 @@ bool gQueuePlayers::Timestep(REAL time)
                 // account for play time
                 REAL tick = time - qPlayer->lastTime_;
 
-                if (qPlayer->Player() || !sg_queueRefillActive)
+                if ((qPlayer->Player() && sg_queueRefillActive) || !sg_queueRefillActive)
                 {
                     qPlayer->played_ += tick;
 
@@ -340,7 +324,7 @@ void gQueuePlayers::Reset()
     {
         gQueuePlayers *qPlayer = queuePlayers[i];
         if (qPlayer)
-            qPlayer->lastTime_ = -1;
+            qPlayer->lastTime_ = -se_GameTime();
     }
 }
 
@@ -348,16 +332,14 @@ bool gQueuePlayers::CanQueue(ePlayerNetID *p)
 {
     if (sg_queueLimitEnabled)
     {
+        if (p->GetAccessLevel() <= sg_queueLimitExcempt ) return true;
+
         gQueuePlayers *qPlayer = NULL;
         if (!gQueuePlayers::PlayerExists(p))
             qPlayer = new gQueuePlayers(p);
         else
-        {
             qPlayer = gQueuePlayers::GetData(p);
-            qPlayer->SetOwner(p);
-        }
-
-        if (p->GetAccessLevel() <= sg_queueLimitExcempt ) return true;
+        qPlayer->SetOwner(p);
 
         if (!qPlayer) return false;
 
