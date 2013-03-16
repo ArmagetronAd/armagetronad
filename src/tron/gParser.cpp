@@ -493,11 +493,11 @@ gParser::parseSpawn(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
 }
 
 bool
-gParser::parseShapeCircle(eGrid *grid, xmlNodePtr cur, eCoord &zonePos, float &radius, float& growth, float &rotate, const xmlChar * keyword, gRealColor &zoneColor, bool &colorsExist, eCoord &zoneDir, bool &zoneInteract, std::vector<eCoord> &route)
+gParser::parseShapeCircle(eGrid *grid, xmlNodePtr cur, eCoord &zonePos, float &radius, float& growth, tString &rotate, const xmlChar * keyword, gRealColor &zoneColor, bool &colorsExist, eCoord &zoneDir, bool &zoneInteract, std::vector<eCoord> &route)
 {
     radius = myxmlGetPropFloat(cur, "radius");
     growth = myxmlGetPropFloat(cur, "growth");
-    rotate = myxmlGetPropFloat(cur, "rotate");
+    rotate = myxmlGetPropString(cur, "rotate");
 
     cur = cur->xmlChildrenNode;
     while( cur != NULL) {
@@ -602,7 +602,8 @@ static eLadderLogWriter sg_createzoneWriter("ZONE_CREATED", false);
 void
 gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
 {
-    float radius, growth, rotate;
+    float radius, growth;
+    tString rotate;
     eCoord zonePos;
     bool shapeFound = false;
     gZone * zone = NULL;
@@ -837,10 +838,13 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
             zone->SetRadius( radius*sizeMultiplier );
             zone->SetExpansionSpeed( growth*sizeMultiplier );
 
-            if (rotate != 0.3f)
+            if (rotate.Filter() != "")
             {
-                if (rotate > 0)
-                    zone->SetRotationSpeed(rotate);
+                REAL zoneRotate = atof(rotate);
+                if (zoneRotate != 0.3f)
+                {
+                    zone->SetRotationSpeed(zoneRotate);
+                }
             }
 
             if (zoneNamestr) zone->SetName(zoneNamestr);

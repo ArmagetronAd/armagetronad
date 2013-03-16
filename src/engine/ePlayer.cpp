@@ -5687,7 +5687,7 @@ void ePlayerNetID::RemoveFromGame()
     }
 
     gQueuePlayers *qPlayer = gQueuePlayers::GetData(this);
-    qPlayer->RemovePlayer();
+    if (qPlayer) qPlayer->RemovePlayer();
 
     se_PlayerNetIDs.Remove(this, listID);
     SetTeamWish( NULL );
