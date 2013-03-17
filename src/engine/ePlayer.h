@@ -469,6 +469,10 @@ public:
     void BeNotLoggedIn() { SetAccessLevel( tAccessLevel_Program ); }
     tAccessLevel GetLastAccessLevel() const { return lastAccessLevel; }
 
+    //Login Checker
+    bool HasLoggedIn() { return hasLoggedIn_; }
+    void SetLoggedIn(bool newValue) { hasLoggedIn_ = newValue; }
+
     void DropFlag();
 
     static ePlayerNetID * FindPlayerByName( tString const & name, ePlayerNetID * requester = 0, bool print=true ); //!< finds a player by name using lax name matching. Reports errors to the console or to the requesting player.
@@ -492,6 +496,10 @@ private:
 #ifdef KRAWALL_SERVER
     tString         rawAuthenticatedName_;  //!< the raw authenticated name in user@authority form.
 #endif
+    //! Race Hack
+    tString         authenticatedname;
+
+    bool            hasLoggedIn_;
 
     REAL            wait_;                  //!< time in seconds WaitToLeaveChat() will wait for this player
 
@@ -522,6 +530,10 @@ public:
     tString const & GetRawAuthenticatedName( void ) const{ return rawAuthenticatedName_; }	//!< Gets the raw, unescaped authentication name
     void SetRawAuthenticatedName( tString const & name ){ if ( !IsAuthenticated()) rawAuthenticatedName_ = name; }	//!< Sets the raw, unescaped authentication name
 #endif
+
+    //! Race Hack
+    tString GetAuthenticatedName() { return authenticatedname; }
+    void SetAuthenticatedName(tString name) { authenticatedname = name; }
 
     ePlayerNetID & SetName( tString const & name ); //!< Sets this player's name. Sets processed names (colored, username, nameFromCLient) as well.
     ePlayerNetID & SetName( char    const * name ); //!< Sets this player's name. Sets processed names (colored, username, nameFromCLient) as well.

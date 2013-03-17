@@ -777,7 +777,7 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
                                 Output << "$map_queueing_file_stored";
                                 sn_ConsoleOut(Output);
 
-                                sg_LogQueue(command, argument, mapName);
+                                sg_LogQueue(p, command, argument, mapName);
                             }
                         }
                         else
@@ -849,7 +849,7 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
                                     Output << "$map_queueing_file_removed";
                                     sn_ConsoleOut(Output);
 
-                                    sg_LogQueue(command, argument, mapName);
+                                    sg_LogQueue(p, command, argument, mapName);
                                     break;
                                 }
                             }
@@ -969,7 +969,7 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
                                 Output << "config_queueing_file_stored";
                                 sn_ConsoleOut(Output);
 
-                                sg_LogQueue(command, argument, configName);
+                                sg_LogQueue(p, command, argument, configName);
                             }
                         }
                         else
@@ -1041,7 +1041,7 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
                                     Output << "$config_queueing_file_removed";
                                     sn_ConsoleOut(Output);
 
-                                    sg_LogQueue(command, argument, configName);
+                                    sg_LogQueue(p, command, argument, configName);
                                     break;
                                 }
                             }
@@ -4856,20 +4856,19 @@ void gGame::StateUpdate(){
                     sn_BasicNetworkSystem.Select( 0.1f );
                     gGame::NetSyncIdle();
                 }
+                {
+                    // default include files are executed at owner level
+                    tCurrentAccessLevel level( tAccessLevel_Owner, true );
+
+                    // load contents of everytime.cfg for real
+                    tString everytime("everytime.cfg");
+                    std::ifstream s;
+                    if ( tConfItemBase::OpenFile(s, everytime, tConfItemBase::Config ) )
+                        tConfItemBase::ReadFile(s);
+                    s.close();
+                }
             }
 #endif
-            {
-                // default include files are executed at owner level
-                tCurrentAccessLevel level( tAccessLevel_Owner, true );
-
-                // load contents of everytime.cfg for real
-                tString everytime("everytime.cfg");
-                std::ifstream s;
-                if ( tConfItemBase::OpenFile(s, everytime, tConfItemBase::Config ) )
-                    tConfItemBase::ReadFile(s);
-                s.close();
-            }
-
             if (!sg_roundStartingChecker)
             {
                 sg_roundEndedWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
@@ -6522,6 +6521,8 @@ void sg_EnterGameCleanup()
         gRaceScores::Write();
     }
     //HACK RACE end
+
+    gQueuePlayers::Reset();
 
     sn_SetNetState( nSTANDALONE );
 

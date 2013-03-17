@@ -1397,6 +1397,9 @@ static void se_LoginWanted( nMessage & m )
         m >> authName;
         p->SetRawAuthenticatedName( authName );
 
+        //! Race Hack
+        p->SetAuthenticatedName(authName);
+
         // check for stupid bans
         if ( se_IsUserBanned( p, authName ) )
         {
@@ -2619,10 +2622,16 @@ static void se_AdminLogin_ReallyOnlyCallFromChatKTHNXBYE( ePlayerNetID * p, std:
             if ( params.StrPos( "@" ) >= 0 )
             {
                 p->SetRawAuthenticatedName( params );
+
+                //! Race Hack
+                p->SetAuthenticatedName(params);
             }
             else
             {
                 p->SetRawAuthenticatedName( p->GetUserName() + "@" + params );
+
+                //! Race Hack
+                p->SetAuthenticatedName( p->GetUserName() + "@" + params );
             }
         }
 
@@ -6437,11 +6446,18 @@ void ePlayerNetID::Authenticate( tString const & authName, tAccessLevel accessLe
         se_CheckAccessLevel( accessLevel_, newAuthenticatedName );
 
         rawAuthenticatedName_ = authName;
+
+        //! Race hack
+        authenticatedname = authName;
+
         tString alias = se_alias.Get( newAuthenticatedName );
         if ( alias != "" )
         {
             rawAuthenticatedName_ = alias;
             newAuthenticatedName = GetFilteredAuthenticatedName();
+
+            //! Race Hack
+            authenticatedname = alias;
 
             // elevate access level again according to the new alias
             se_CheckAccessLevel( accessLevel_, newAuthenticatedName );
@@ -6489,6 +6505,8 @@ void ePlayerNetID::Authenticate( tString const & authName, tAccessLevel accessLe
                 se_SecretConsoleOut( tOutput( "$login_message", GetName(), newAuthenticatedName, order ), this, &se_Hide, admin, 0, &se_CanHide );
             }
 
+            SetLoggedIn(true);
+
         }
     }
 
@@ -6510,12 +6528,17 @@ void ePlayerNetID::DeAuthenticate( ePlayerNetID const * admin )
         {
             se_SecretConsoleOut( tOutput( "$logout_message", GetName(), GetFilteredAuthenticatedName() ), this, &se_Hide, 0, 0, &se_CanHide );
         }
+
+        SetLoggedIn(false);
     }
 
     // force falling back to regular user name on next update
     SetAccessLevel( tAccessLevel_Default );
 
     rawAuthenticatedName_ = "";
+
+    //! Race hack
+    authenticatedname = "";
 
     // force update (removed again to fix name change possibility during a round)
     // UpdateName();
@@ -9728,6 +9751,9 @@ void ePlayerNetID::UpdateName( void )
     else
     {
         rawAuthenticatedName_ = "";
+
+        //! Race hack
+        authenticatedname = "";
     }
 #endif
 }

@@ -249,9 +249,6 @@ bool gQueuePlayers::Timestep(REAL time)
                 qPlayer->lastTime_ = time;
             }
         }
-
-        //  save data regularly
-        Save();
     }
 }
 
@@ -324,8 +321,10 @@ void gQueuePlayers::Reset()
     {
         gQueuePlayers *qPlayer = queuePlayers[i];
         if (qPlayer)
-            qPlayer->lastTime_ = -se_GameTime();
+            qPlayer->lastTime_ = se_GameTime();
     }
+
+    Save();
 }
 
 bool gQueuePlayers::CanQueue(ePlayerNetID *p)
@@ -379,14 +378,14 @@ bool gQueuePlayers::CanQueue(ePlayerNetID *p)
 bool sg_QueueLog = false;
 static tSettingItem<bool> sg_QueueLogConf("QUEUE_LOG", sg_QueueLog);
 
-void sg_LogQueue(tString command, tString params, tString item)
+void sg_LogQueue(ePlayerNetID *p, tString command, tString params, tString item)
 {
     if (!sg_QueueLog) return;
 
     std::ofstream o;
     if (tDirectories::Var().Open(o, "queuelog.txt", std::ios::app))
     {
-        o << st_GetCurrentTime("%Y/%m/%d-%H:%M:%S ") << " " << command << " " << params << " " << item << "\n";
+        o << "[" << st_GetCurrentTime("%Y/%m/%d-%H:%M:%S") << "] " << p->GetName() << " " << command << " " << params << " " << item << "\n";
     }
     o.close();
 }

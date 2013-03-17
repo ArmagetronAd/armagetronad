@@ -188,9 +188,15 @@ void gRaceScores::Add(gRacePlayer *racePlayer, bool finished)
     bool timeChanged = false;
     gRaceScores *racingPlayer = NULL;
 
-    if (CheckPlayer(racePlayer->Player()->GetUserName()))
+    tString username;
+    if (racePlayer->Player()->GetAuthenticatedName().Len() > 1)
+        username = racePlayer->Player()->GetAuthenticatedName();
+    else
+        username = racePlayer->Player()->GetUserName();
+
+    if (CheckPlayer(username))
     {
-        racingPlayer = GetPlayer(racePlayer->Player()->GetUserName());
+        racingPlayer = GetPlayer(username);
         if (((racePlayer->Time() < racingPlayer->Time()) && racePlayer->Time() != -1) || (racingPlayer->Time() == -1 && racePlayer->Time() != -1))
         {
             racingPlayer->time_ = racePlayer->Time();
@@ -205,7 +211,7 @@ void gRaceScores::Add(gRacePlayer *racePlayer, bool finished)
     }
     else
     {
-        racingPlayer = new gRaceScores(racePlayer->Player()->GetUserName());
+        racingPlayer = new gRaceScores(username);
         racingPlayer->time_ = racePlayer->Time();
         if (racePlayer->Time() != -1)
         {
@@ -499,7 +505,7 @@ void gRaceScores::OutputStart()
                         gRaceScores *rScores = sg_RaceScores[j];
                         if (rScores)
                         {
-                            if (rScores->userName_ == p->GetUserName())
+                            if ((rScores->userName_ == p->GetUserName()) || (rScores->userName_ == p->GetAuthenticatedName()))
                             {
                                 tColoredString mess, line, header;
 
@@ -754,7 +760,7 @@ void gRaceScores::OutputEnd()
                         gRaceScores *rScores = sg_RaceScores[j];
                         if (rScores)
                         {
-                            if (rScores->userName_ == p->GetUserName())
+                            if ((rScores->userName_ == p->GetUserName()) || (rScores->userName_ == p->GetAuthenticatedName()))
                             {
                                 tColoredString mess, line, header;
 
@@ -869,6 +875,9 @@ bool gRacePlayer::PlayerExists(tString username)
             gRacePlayer *rPlayer = sg_RacePlayers[i];
             if (rPlayer)
             {
+                if (rPlayer->Player()->GetAuthenticatedName() == username)
+                    return true;
+
                 if (rPlayer->Player()->GetUserName() == username)
                     return true;
             }
@@ -886,6 +895,9 @@ gRacePlayer *gRacePlayer::GetPlayer(tString username)
             gRacePlayer *rPlayer = sg_RacePlayers[i];
             if (rPlayer)
             {
+                if (rPlayer->Player()->GetAuthenticatedName() == username)
+                    return rPlayer;
+
                 if (rPlayer->Player()->GetUserName() == username)
                     return rPlayer;
             }
@@ -925,7 +937,13 @@ void gRacePlayer::ErasePlayer()
 //! ZONE HIT
 void gRace::ZoneHit( ePlayerNetID *player )
 {
-    gRacePlayer *racePlayer = gRacePlayer::GetPlayer(player->GetUserName());
+    tString player_username;
+    if (player->GetAuthenticatedName().Len() > 1)
+        player_username = player->GetAuthenticatedName();
+    else
+        player_username = player->GetUserName();
+
+    gRacePlayer *racePlayer = gRacePlayer::GetPlayer(player_username);
 
     if (player && racePlayer && !racePlayer->Finished() && !roundFinished_ && player->Object() && player->Object()->Alive())
     {
@@ -935,7 +953,7 @@ void gRace::ZoneHit( ePlayerNetID *player )
         {
             firstArrived_ = true;
             firstFinishTime_ = reachtime_;
-            firstToArive_ = player->GetUserName();
+            firstToArive_ = player_username;
         }
 
         sg_RaceFinished.Insert(racePlayer);
@@ -946,7 +964,7 @@ void gRace::ZoneHit( ePlayerNetID *player )
 
         //  if enabled, ensure that only logged in players will get registered in the ranks
         //  if disabled, all players will get logged in race records and their time of finishing
-        if ((sg_raceLogLogin && racePlayer->Player()->IsLoggedIn()) || (!sg_raceLogLogin))
+        if ((sg_raceLogLogin && racePlayer->Player()->HasLoggedIn()) || (!sg_raceLogLogin))
         {
             //  ensure that punished players cannot be ranked
             if (racePlayer->Player()->GetAccessLevel() == tAccessLevel_Punished)
@@ -1063,58 +1081,49 @@ void gRace::Sync( int alive, int ai_alive, int humans)
         // countdown mode
         else
         {
-            if (sg_raceSmartTimer)
+            if (countDown_ < 0)
             {
-                if (sg_RaceScores.Len() == 0)
+                if (sg_raceSmartTimer)
                 {
-                    if (countDown_ < 0)
+                    if (sg_RaceScores.Len() == 0)
                     {
                         countDown_ = sg_RaceEndDelay + 1;
                     }
-                }
-                if (sg_RaceScores.Len() == 1)
-                {
-                    gRaceScores *rScores = sg_RaceScores[0];
-                    if (rScores)
+                    if (sg_RaceScores.Len() == 1)
                     {
-                        if (countDown_ < 0)
+                        gRaceScores *rScores = sg_RaceScores[0];
+                        if (rScores)
                         {
                             int timer = ceil(rScores->Time());
                             countDown_ = ceil(timer * 1.2) + 1;
                         }
                     }
-                }
-                else if (sg_RaceScores.Len() == 2)
-                {
-                    gRaceScores *one = sg_RaceScores[0];
-                    gRaceScores *two = sg_RaceScores[1];
-                    if (one && two)
+                    else if (sg_RaceScores.Len() == 2)
                     {
-                        if (countDown_ < 0)
+                        gRaceScores *one = sg_RaceScores[0];
+                        gRaceScores *two = sg_RaceScores[1];
+                        if (one && two)
                         {
                             int timer = ceil((one->Time() + two->Time()) / 2);
                             countDown_ = ceil(timer * 1.2) + 1;
                         }
                     }
-                }
-                else if (sg_RaceScores.Len() >= 3)
-                {
-                    gRaceScores *one = sg_RaceScores[0];
-                    gRaceScores *two = sg_RaceScores[1];
-                    gRaceScores *tre = sg_RaceScores[2];
-                    if (one && two && tre)
+                    else if (sg_RaceScores.Len() >= 3)
                     {
-                        if (countDown_ < 0)
+                        gRaceScores *one = sg_RaceScores[0];
+                        gRaceScores *two = sg_RaceScores[1];
+                        gRaceScores *tre = sg_RaceScores[2];
+                        if (one && two && tre)
                         {
                             int timer = ceil((one->Time() + two->Time() + tre->Time()) / 3);
                             countDown_ = ceil(timer * 1.2) + 1;
                         }
                     }
                 }
-            }
-            else
-            {
-                countDown_ = sg_RaceEndDelay + 1;
+                else
+                {
+                    countDown_ = sg_RaceEndDelay + 1;
+                }
             }
 
             if ( !roundFinished_ )
@@ -1159,7 +1168,7 @@ void gRace::Sync( int alive, int ai_alive, int humans)
             if (Zone)
             {
                 //  0.5 fot smooth collapse
-                Zone->Vanish(0.5f);
+                Zone->Vanish(0.5);
             }
         }
     }
