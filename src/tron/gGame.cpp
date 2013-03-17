@@ -776,6 +776,8 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
                                 Output.SetTemplateParameter(2, p->GetColoredName());
                                 Output << "$map_queueing_file_stored";
                                 sn_ConsoleOut(Output);
+
+                                sg_LogQueue(command, argument, mapName);
                             }
                         }
                         else
@@ -846,6 +848,8 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
                                     Output.SetTemplateParameter(2, p->GetColoredName());
                                     Output << "$map_queueing_file_removed";
                                     sn_ConsoleOut(Output);
+
+                                    sg_LogQueue(command, argument, mapName);
                                     break;
                                 }
                             }
@@ -964,6 +968,8 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
                                 Output.SetTemplateParameter(2, p->GetColoredName());
                                 Output << "config_queueing_file_stored";
                                 sn_ConsoleOut(Output);
+
+                                sg_LogQueue(command, argument, configName);
                             }
                         }
                         else
@@ -1034,6 +1040,8 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
                                     Output.SetTemplateParameter(2, p->GetName());
                                     Output << "$config_queueing_file_removed";
                                     sn_ConsoleOut(Output);
+
+                                    sg_LogQueue(command, argument, configName);
                                     break;
                                 }
                             }
@@ -4475,17 +4483,24 @@ void gGame::StateUpdate(){
 
                     if (mapRotation->Size() > 0)
                     {
-                        conf_mapfile.Set( mapRotation->Current() );
-                        conf_mapfile.GetSetting().SetSetLevel( tAccessLevel_Owner );
+                        if ((mapRotation->ID() > 0) && (mapRotation->ID() < mapRotation->Size()))
+                        {
+                            conf_mapfile.Set( mapRotation->Get(mapRotation->ID() - 1) );
+                            conf_mapfile.GetSetting().SetSetLevel( tAccessLevel_Owner );
+                        }
                     }
 
                     if (configRotation->Size() > 0)
                     {
                         tCurrentAccessLevel level( tAccessLevel_Owner, true );
 
+                        int newID = configRotation->ID();
+                        if ((configRotation->ID() > 0) && (configRotation->ID() < configRotation->Size()))
+                            newID = configRotation->ID() - 1;
+
                         if (sg_configRotationType == 0)
                         {
-                            st_Include( configRotation->Current() );
+                            st_Include( configRotation->Get(newID) );
                         }
                         else if (sg_configRotationType == 1)
                         {
@@ -4496,7 +4511,7 @@ void gGame::StateUpdate(){
                                 return;
                             }
 
-                            con << tOutput( "$config_rinclude_not_found", configRotation->Current() );
+                            con << tOutput( "$config_rinclude_not_found", configRotation->Get(newID) );
                         }
                     }
 
@@ -4841,25 +4856,20 @@ void gGame::StateUpdate(){
                     sn_BasicNetworkSystem.Select( 0.1f );
                     gGame::NetSyncIdle();
                 }
-
-                {
-                    // default include files are executed at owner level
-                    tCurrentAccessLevel level( tAccessLevel_Owner, true );
-
-                    std::ifstream s;
-
-                    // load contents of everytime.cfg for real
-                    static const tString everytime("everytime.cfg");
-                    if ( tConfItemBase::OpenFile(s, everytime, tConfItemBase::Config ) )
-                        tConfItemBase::ReadFile(s);
-
-                    s.close();
-
-                    if ( tConfItemBase::OpenFile(s, everytime, tConfItemBase::Var ) )
-                        tConfItemBase::ReadFile(s);
-                }
             }
 #endif
+            {
+                // default include files are executed at owner level
+                tCurrentAccessLevel level( tAccessLevel_Owner, true );
+
+                // load contents of everytime.cfg for real
+                tString everytime("everytime.cfg");
+                std::ifstream s;
+                if ( tConfItemBase::OpenFile(s, everytime, tConfItemBase::Config ) )
+                    tConfItemBase::ReadFile(s);
+                s.close();
+            }
+
             if (!sg_roundStartingChecker)
             {
                 sg_roundEndedWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");

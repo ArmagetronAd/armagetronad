@@ -129,6 +129,8 @@ public:
             items_.Insert(map_name);
     }
 
+    int ID() { return current_;}
+
     //!< This is for the rotation loading limit
     static void AddCounter() { counter_ ++; }
     static void ResetCounter() { counter_ = 0; }
@@ -196,5 +198,7 @@ class gQueuePlayers
 
         REAL lastTime_;
 };
+
+extern void sg_LogQueue(tString command, tString params, tString item);
 
 #endif

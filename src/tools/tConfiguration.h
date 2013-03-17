@@ -184,7 +184,8 @@ enum tAccessLevel
     tAccessLevel_24 = 24,          // reserved
     tAccessLevel_25 = 25,          // reserved
     tAccessLevel_Invalid = 255,    // completely invalid level
-    tAccessLevel_Default = 20
+    tAccessLevel_Default = 20,
+    tAccessLevel_Punished = 21
 };
 
 //! class to temporarily allow/forbid the use of casacl

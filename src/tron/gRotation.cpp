@@ -332,6 +332,10 @@ bool gQueuePlayers::CanQueue(ePlayerNetID *p)
 {
     if (sg_queueLimitEnabled)
     {
+        //  they can queue if queue limit is off
+        if (!sg_queueLimitEnabled) return true;
+
+        //  allow access level of players from excempted to queue
         if (p->GetAccessLevel() <= sg_queueLimitExcempt ) return true;
 
         gQueuePlayers *qPlayer = NULL;
@@ -370,4 +374,19 @@ bool gQueuePlayers::CanQueue(ePlayerNetID *p)
         }
     }
     return true;
+}
+
+bool sg_QueueLog = false;
+static tSettingItem<bool> sg_QueueLogConf("QUEUE_LOG", sg_QueueLog);
+
+void sg_LogQueue(tString command, tString params, tString item)
+{
+    if (!sg_QueueLog) return;
+
+    std::ofstream o;
+    if (tDirectories::Var().Open(o, "queuelog.txt", std::ios::app))
+    {
+        o << st_GetCurrentTime("%Y/%m/%d-%H:%M:%S ") << " " << command << " " << params << " " << item << "\n";
+    }
+    o.close();
 }

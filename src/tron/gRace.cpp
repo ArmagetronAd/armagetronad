@@ -110,6 +110,9 @@ static tSettingItem<int> sg_raceChancesConf("RACE_CHANCES", sg_raceChances);
 static bool sg_raceFinishKill = false;
 static tSettingItem<bool> sg_raceFinishKillConf("RACE_FINISH_KILL", sg_raceFinishKill);
 
+static bool sg_raceLogLogin = true;
+static tSettingItem<bool> sg_raceLogLoginConf("RACE_LOG_LOGIN", sg_raceLogLogin);
+
 tString sg_currentMap("");
 
 //! STATIC VARIABLES
@@ -183,14 +186,14 @@ void gRaceScores::Sort()
 void gRaceScores::Add(gRacePlayer *racePlayer, bool finished)
 {
     bool timeChanged = false;
-    gRaceScores *rS = NULL;
+    gRaceScores *racingPlayer = NULL;
 
     if (CheckPlayer(racePlayer->Player()->GetUserName()))
     {
-        rS = GetPlayer(racePlayer->Player()->GetUserName());
-        if (((racePlayer->Time() < rS->Time()) && racePlayer->Time() != -1) || (rS->Time() == -1 && racePlayer->Time() != -1))
+        racingPlayer = GetPlayer(racePlayer->Player()->GetUserName());
+        if (((racePlayer->Time() < racingPlayer->Time()) && racePlayer->Time() != -1) || (racingPlayer->Time() == -1 && racePlayer->Time() != -1))
         {
-            rS->time_ = racePlayer->Time();
+            racingPlayer->time_ = racePlayer->Time();
             tOutput newtime;
             newtime.SetTemplateParameter(1, racePlayer->Time());
             newtime << "$player_personal_best_reach_time";
@@ -202,8 +205,8 @@ void gRaceScores::Add(gRacePlayer *racePlayer, bool finished)
     }
     else
     {
-        rS = new gRaceScores(racePlayer->Player()->GetUserName());
-        rS->time_ = racePlayer->Time();
+        racingPlayer = new gRaceScores(racePlayer->Player()->GetUserName());
+        racingPlayer->time_ = racePlayer->Time();
         if (racePlayer->Time() != -1)
         {
             tOutput newtime;
@@ -217,7 +220,7 @@ void gRaceScores::Add(gRacePlayer *racePlayer, bool finished)
     }
 
     //  increment finished times when they crossed the zone
-    if (finished) rS->SetPlayed(rS->Played() + 1);
+    if (finished) racingPlayer->SetPlayed(racingPlayer->Played() + 1);
 
     //  ensure that times really have changed for this to take effect
     if (timeChanged)
@@ -229,7 +232,7 @@ void gRaceScores::Add(gRacePlayer *racePlayer, bool finished)
         gRaceScores *firstRanker = sg_RaceScores[0];
 
         //  check if it's the same player
-        if (firstRanker == rS)
+        if (firstRanker == racingPlayer)
         {
             tOutput bestTime;
             bestTime.SetTemplateParameter(1, racePlayer->Player()->GetColoredName());
@@ -941,7 +944,28 @@ void gRace::ZoneHit( ePlayerNetID *player )
         racePlayer->SetTime(reachtime_);
         racePlayer->SetScore(RacingScore);
 
-        gRaceScores::Add(racePlayer);
+        //  if enabled, ensure that only logged in players will get registered in the ranks
+        //  if disabled, all players will get logged in race records and their time of finishing
+        if ((sg_raceLogLogin && racePlayer->Player()->IsLoggedIn()) || (!sg_raceLogLogin))
+        {
+            //  ensure that punished players cannot be ranked
+            if (racePlayer->Player()->GetAccessLevel() == tAccessLevel_Punished)
+            {
+                sn_ConsoleOut(tOutput("$race_nolog", racePlayer->Player()->GetName()), racePlayer->Player()->Owner());
+            }
+            else
+            {
+                gRaceScores::Add(racePlayer);
+            }
+        }
+        else
+        {
+            if (sg_raceLogLogin)
+            {
+                sn_ConsoleOut(tOutput("$race_login_required"), racePlayer->Player()->Owner());
+            }
+        }
+
 
         tOutput win; //, lose;
 

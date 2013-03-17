@@ -3083,6 +3083,7 @@ config_accesslevel_16       Fallen from Grace
 config_accesslevel_17       Shunned
 config_accesslevel_19       Authenticated
 config_accesslevel_20       Program
+config_accesslevel_21       Punished
 
 access_level_help           Changes the access level of a configuration item to make it available to lower ranked users
 access_level_usage          usage: ACCESS_LEVEL <config command> <required minimal access level (numerical)>\n
@@ -3315,6 +3316,9 @@ race_finished_list_nobody   No one seemed to have crossed the finish line.\n
 race_finished_list_arrive   Displaying only \1 players that have crossed the finish line.\n
 race_finished_list_amount   A total of \1 players have crossed the finish line.\n
 race_finished_list_display  + \1 0xRESETTfinished in 0xffff77\2 0xRESETT( 0xffff77\4 0xRESETTbehind 1st ).\n
+
+race_login_required     You don't seem to be logged in. Your finish time will not be saved.\n
+race_nolog              You might have finished the map but your time will not be saved as punishment.\n
 
 race_ranks_personal_message Your current position for 0xffdd00
 race_ranks_loading  Loading Racing Ranks for 0xffdd00\1.\n
