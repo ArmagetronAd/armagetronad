@@ -138,21 +138,12 @@ dist-hook-scm:
 	sed	-e "s,/ArmagetronDedicated,/@progtitle@@progtitle_server@," \
 	< @srcdir@/src/win32_ded/aa_config.h > $(distdir)/src/win32_ded/aa_config.h
 
-#   rebrand OSX config directories
-	sed	-e "s,/Armagetron Advanced,/@progtitle@," \
-	< @srcdir@/src/macosx/client/aa_config.h > $(distdir)/src/macosx/client/aa_config.h
-	sed	-e "s,/Armagetron Advanced Dedicated,/@progtitle@@progtitle_server@," \
-	< @srcdir@/src/macosx/dedicated/aa_config.h > $(distdir)/src/macosx/dedicated/aa_config.h
-
 #   regenerate dependant files so they no longer reference to the file "version" which will be removed
 	cp @srcdir@/bootstrap.sh $(distdir)
 	cd $(distdir); rm -f aa_config.h.in version; sh ./bootstrap.sh
 	rm -rf $(distdir)/autom4te.cache
 
 dist-hook:
-#   copy mac files
-	cp -R ${srcdir}/MacOS ${distdir}
-
 #	clear CVS
 	find $(distdir) -depth -name CVS -exec rm -rf \{\} \;
 
@@ -193,10 +184,10 @@ endif
 install-exec-hook: install-uninstall
 #	rename executable to armagetronad-VERSION and link to armagetronad
 if BUILDMAIN
-	cd  $(DESTDIR)${bindir}; mv armagetronad_main$(EXEEXT) @progname@$(executable_suffix)
+	cd  "$(DESTDIR)${bindir}"; mv armagetronad_main$(EXEEXT) @progname@$(executable_suffix)
 endif
 if BUILDDEDICATED
-	cd  $(DESTDIR)${bindir}; mv armagetronad_serverquery$(EXEEXT) @prognamebase@-serverquery$(executable_suffix)
+	cd  "$(DESTDIR)${bindir}"; mv armagetronad_serverquery$(EXEEXT) @prognamebase@-serverquery$(executable_suffix)
 endif
 
 #	delegate to special tasks
@@ -205,7 +196,20 @@ endif
 install-data-hook:
 #	install systemwide files
 if USE_SYSINSTALL
-	DESTDIR=$(DESTDIR) ROOTDIR=$(ROOTDIR) bash $(DESTDIR)${scriptdir}/sysinstall install $(prefix)
+	DESTDIR=$(DESTDIR) ROOTDIR=$(ROOTDIR) bash "$(DESTDIR)${scriptdir}/sysinstall" install "$(prefix)"
+endif
+if OS_X_TOOLKIT
+	${top_srcdir}/batch/make/symlink-relative "$(DESTDIR)${prefix}" --files-in-directory "$(DESTDIR)${aa_datadir}" --file-with-name "$(DESTDIR)${aa_sysconfdir}" config
+if !BUILDDEDICATED
+	${top_srcdir}/batch/make/symlink-relative "$(DESTDIR)${prefix}/../MacOS" --file-with-name "$(DESTDIR)${bindir}/@progname@${executable_suffix}" "@progtitle@"
+	${top_srcdir}/batch/make/symlink-relative "$(DESTDIR)${prefix}/.." --file "$(DESTDIR)${aa_datadir}/desktop/os-x/Info.plist"
+
+	rm -rf "$(DESTDIR)${prefix}/../Frameworks"
+	cp -R "${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks" "$(DESTDIR)${prefix}/.."
+	
+	install_name_tool -delete_rpath "${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks" "$(DESTDIR)${prefix}/../MacOS/@progtitle@" > /dev/null 2>&1 || true
+	install_name_tool -add_rpath "@executable_path/../../Frameworks" "$(DESTDIR)${prefix}/../MacOS/@progtitle@"
+endif
 endif
 
 uninstall-hook:

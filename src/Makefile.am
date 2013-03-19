@@ -18,10 +18,10 @@ ${srcdir}/tools/tDirectories.cpp: tUniversalVariables.h
 EXTRA_DIST = render/rConsoleCout.cpp engine/sound/base/eChannel.h vParser.cpp engine/eSound.cpp engine/eSound.h
 
 dist-hook:
-	cp -R ${srcdir}/config_ide.h ${srcdir}/macosx ${srcdir}/win32 ${srcdir}/win32_ded $(distdir)
+	cp -R ${srcdir}/config_ide.h ${srcdir}/win32 ${srcdir}/win32_ded $(distdir)
 
-#   adapt versions in Mac and Windows header files
-	for f in macosx/version.h.in config_ide.h; do\
+#   adapt versions in Windows header files
+	for f in config_ide.h; do\
 		chmod 644 ${distdir}/$$f;\
 		sed -e "s,#define VERSION.*$$,#define VERSION \"${VERSION}\"," < ${srcdir}/$$f > ${distdir}/$$f;\
 	done
@@ -196,6 +196,14 @@ libtron_a_SOURCES +=\
 endif
 
 libui_a_SOURCES=ui/uInput.cpp ui/uInput.h ui/uInputQueue.cpp ui/uInputQueue.h ui/uMenu.cpp ui/uMenu.h
+
+if OS_X_TOOLKIT
+if !BUILDDEDICATED
+libtron_a_SOURCES += tron/gOSXSDLMain.mm tron/gOSXSDLMain.h tron/gOSXURLHandler.mm tron/gOSXURLHandler.h
+libui_a_SOURCES += ui/uOSXPaste.cpp ui/uOSXPaste.cpp
+endif
+endif
+
 endif
 
 # library include dependency structure. Watch out, don't create circular include dependencies.
@@ -209,6 +217,15 @@ librender_a_CXXFLAGS =$(libtools_a_CXXFLAGS)  -I@srcdir@/render
 libui_a_CXXFLAGS     =$(librender_a_CXXFLAGS) -I@srcdir@/ui -I@srcdir@/thirdparty/shttpd -I@srcdir@/thirdparty/scrap
 libengine_a_CXXFLAGS =$(libui_a_CXXFLAGS)     -I@srcdir@/network -I@srcdir@/engine -I@srcdir@/engine/sound
 libtron_a_CXXFLAGS   =$(libengine_a_CXXFLAGS) -I@srcdir@/thirdparty/particles -I@srcdir@/tron -I@srcdir@/tron/cockpit
+
+if OS_X_TOOLKIT
+libtools_a_OBJCXXFLAGS  =$(libtools_a_CXXFLAGS)
+libnetwork_a_OBJCXXFLAGS=$(libnetwork_a_CXXFLAGS)
+librender_a_OBJCXXFLAGS =$(librender_a_CXXFLAGS)
+libui_a_OBJCXXFLAGS     =$(libui_a_CXXFLAGS)
+libengine_a_OBJCXXFLAGS =$(libengine_a_CXXFLAGS)
+libtron_a_OBJCXXFLAGS   =$(libtron_a_CXXFLAGS)
+endif
 
 # core engine files can get compiled with optimization turned on for more painless debugging
 # on weak computers
@@ -262,7 +279,10 @@ endif
 if BUILDDEDICATED
 extralibs=
 else
-extralibs= thirdparty/particles/libparticles.a thirdparty/scrap/libscrap.a
+extralibs= thirdparty/particles/libparticles.a
+if !OS_X_TOOLKIT
+	extralibs += thirdparty/scrap/libscrap.a
+endif
 endif
 
 armagetronad_main_SOURCES = \
@@ -272,7 +292,6 @@ armagetronad_main_SOURCES = \
 armagetronad_main_CXXFLAGS =$(libtron_a_CXXFLAGS)
 armagetronad_main_LDADD= libtron.a libenginecore.a libengine.a libnetwork.a libui.a librender.a libtools.a protobuf/libprotobuf.a thirdparty/mathexpr/libmathexpr.a ${extralibs}
 #  librubywrap.a
-# armagetronad_main_LDFLAGS=
 
 armagetronad_main_master_SOURCES = network/master.cpp
 armagetronad_main_master_CXXFLAGS =$(libtron_a_CXXFLAGS)

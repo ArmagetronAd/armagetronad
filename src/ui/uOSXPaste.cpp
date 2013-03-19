@@ -27,9 +27,9 @@
  */
 
 #include <ApplicationServices/ApplicationServices.h>
-#include "AAPaste.h"
+#include "uOSXPaste.h"
 
-bool AAPastePasteboardData(CFDataRef &outData) {
+bool su_OSXPastePasteboardData(CFDataRef &outData) {
     static const CFStringRef plainTextFlavor = CFSTR("public.utf8-plain-text");
     
     OSStatus status;

@@ -1,7 +1,0 @@
-//
-// Prefix header for all source files of the 'Armagetron Advanced' target in the 'Armagetron Advanced' project
-//
-
-#ifdef __OBJC__
-    #import <Cocoa/Cocoa.h>
-#endif

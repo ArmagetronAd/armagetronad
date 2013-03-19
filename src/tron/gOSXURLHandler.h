@@ -3,7 +3,7 @@
  *************************************************************************
  
  ArmageTron -- Just another Tron Lightcycle Game in 3D.
- Copyright (C) 2005  by 
+ Copyright (C) 2005  by Daniel Harple
  and the AA DevTeam (see the file AUTHORS(.txt) in the main source directory)
  
  **************************************************************************
@@ -26,17 +26,16 @@
  
  */
 
-#include "AAGrowlBridge.h"
-#include "AAGrowlPlugin.h"
-#include "tString.h"
+#ifndef GOSXURLHANDLER_H_W7Q4H24J
+#define GOSXURLHANDLER_H_W7Q4H24J
 
-void Growl(tString title, tString message)
-{
-    NSString *nstitle, *nsmessage;
-    nstitle = [[NSString alloc] initWithCString:title.c_str()];
-    nsmessage = [[NSString alloc] initWithCString:message.c_str()];
-    [AAGrowlPlugin growl:nstitle message:nsmessage];
-    [nstitle release];
-    [nsmessage release];
-}
+//! 1) Call before we pass off to Armagetron's main()
+void sg_SetupAAURLHandler();
 
+//! 2) Call after everything is initialized.
+void sg_StartAAURLHandler( bool & showSplash );
+
+//! 3) Call before exiting
+void sg_CleanupAAURLHandler();
+
+#endif /* end of include guard: GOSXURLHANDLER_H_W7Q4H24J */

@@ -26,10 +26,11 @@
  
  */
 
-#include "AAURLHandler.h"
+#include "gOSXURLHandler.h"
 #include "tString.h"
 #include "nServerInfo.h"
 #include "gCommandLineJumpStart.h"
+#import <Cocoa/Cocoa.h>
 
 @interface AAURLHandler : NSObject
 {
@@ -115,17 +116,17 @@ void ret_to_MainMenu();
 
 AAURLHandler *urlhandler;
 
-void SetupAAURLHandler()
+void sg_SetupAAURLHandler()
 {
     urlhandler = [[AAURLHandler alloc] init];
 }
 
-void StartAAURLHandler( bool & showSplash )
+void sg_StartAAURLHandler( bool & showSplash )
 {
     [urlhandler setShouldConnect:YES showSplash:&showSplash];
 }
 
-void CleanupAAURLHandler()
+void sg_CleanupAAURLHandler()
 {
     [urlhandler release];
 }

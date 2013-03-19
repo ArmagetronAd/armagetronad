@@ -29,10 +29,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "aa_config.h"
 
 #ifndef DEDICATED
-#   ifdef MACOSX
-#       include "AAPaste.h"
+#   ifdef MACOSX_XCODE
+#       include "uOSXPaste.h"
 #       include <CoreFoundation/CoreFoundation.h>
-#   else
+#   elif !defined(MACOSX)
 #       include "scrap.h"
 #   endif
 #endif
@@ -961,10 +961,10 @@ bool uMenuItemString::Event(SDL_Event &e){
         ret = false;
         //        c.sym = SDLK_DOWN;
     }
-#ifdef MACOSX
+#ifdef MACOSX_XCODE
     else if (c.sym == SDLK_v && mod & KMOD_META) {
         CFDataRef data;
-        if (AAPastePasteboardData(data)) {
+        if (su_OSXPastePasteboardData(data)) {
             const UInt8 *bytes = CFDataGetBytePtr(data);
             CFIndex bytesLength = CFDataGetLength(data);
             
@@ -979,7 +979,7 @@ bool uMenuItemString::Event(SDL_Event &e){
             ret = false;
         }
     }
-#else
+#elif !defined(MACOSX)
     else if (c.sym == SDLK_v && mod & KMOD_CTRL) {
         char *scrap = 0;
         int scraplen;

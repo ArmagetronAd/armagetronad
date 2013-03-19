@@ -6,19 +6,28 @@
   	  <string>English</string>
   	  
   	<key>CFBundleExecutable</key>
-  	  <string>Armagetron Advanced</string>
+  	  <string>@progtitle@</string>
   	  
   	<key>CFBundleIconFile</key>
-  	  <string>Armagetron Advanced.icns</string>
+  	  <string>desktop/os-x/armagetronad.icns</string>
   	  
   	<key>CFBundleIdentifier</key>
-  	  <string>com.sf.armagetronad</string>
-  	  
+  	  <string>org.armagetronad.@progname@</string>
+
+	<key>CFBundleGetInfoString</key>
+	  <string>@progtitle@ @version@, © The Armagetron Advanced Developer Team, 2003, 2013</string>
+
+	<key>NSHumanReadableCopyright</key>
+	  <string>© The Armagetron Advanced Developer Team, 2003, 2013</string>
+	
+	<key>CFBundleShortVersionString</key>
+	  <string>@version@</string>
+
   	<key>CFBundleInfoDictionaryVersion</key>
   	  <string>6.0</string>
   	  
   	<key>CFBundleName</key>
-  	  <string>Armagetron Advanced</string>
+  	  <string>@progtitle@</string>
   	  
   	<key>CFBundlePackageType</key>
   	  <string>APPL</string>
@@ -26,13 +35,7 @@
   	<key>CFBundleSignature</key>
   	  <string>Arma</string>
   	  
-  	<key>NSMainNibFile</key>
-  	  <string>SDLMain</string>
-  	  
-  	<key>NSPrincipalClass</key>
-  	  <string>NSApplication</string>
-  	  
-	  <key>CFBundleURLTypes</key>
+	<key>CFBundleURLTypes</key>
   	<array>
   		<dict>
   			<key>CFBundleURLName</key>
@@ -43,5 +46,8 @@
   			</array>
   		</dict>
   	</array>
+  	
+  	<key>LSMinimumSystemVersion</key>
+    <string>@os_x_minimum_system_version@</string>
   </dict>
 </plist>

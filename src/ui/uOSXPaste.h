@@ -3,7 +3,7 @@
  *************************************************************************
  
  ArmageTron -- Just another Tron Lightcycle Game in 3D.
- Copyright (C) 2005  by 
+ Copyright (C) 2005  by Daniel Harple
  and the AA DevTeam (see the file AUTHORS(.txt) in the main source directory)
  
  **************************************************************************
@@ -26,11 +26,18 @@
  
  */
 
-#ifndef __AAGrowlBridge_H__
-#define __AAGrowlBridge_H__
+#ifndef UOSXPASTE_H_UWMZJ35S
+#define UOSXPASTE_H_UWMZJ35S
 
-class tString;
+#include <CoreFoundation/CoreFoundation.h>
 
-void Growl(tString title, tString message);
+//! Get the pasteboard text for Mac OS X.
+//! 
+//! @param outData the data from the pasteboard. Caller is responsible for
+//!                calling CFRelease() on param. Be sure to check the return
+//!                value of this function before doing so...
+//! @return true if the pasteboard data was retrieved, otherwise false
+//!
+bool su_OSXPastePasteboardData(CFDataRef &outData);
 
-#endif // __AAGrowlBridge_H__
+#endif /* end of include guard: UOSXPASTE_H_UWMZJ35S */
