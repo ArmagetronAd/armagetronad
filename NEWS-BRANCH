@@ -1,4 +1,15 @@
 ===========================
+Changes in r876
+===========================
+Improvements:
+    * Noticing the trouble with un/suspend, I readded unsuspend and made it easier to handle.
+    * Ladderlog events for PLAYER_ENTERED/RENAMED/LEFT now also include the player's id before their log name.
+
+Additions:
+    * KILL_ID           # Kills the player with that id.
+    * PLAYER_ID_MESSAGE # Send the personal message to that player by the specified id.
+
+===========================
 Changes in r870 | Queueing Limitations
 ===========================
 

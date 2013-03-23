@@ -236,13 +236,14 @@ bool gQueuePlayers::Timestep(REAL time)
                         {
                             //  increase their default queue limit by this amount
                             qPlayer->queuesDefault += sg_queueIncrement;
+
+                            //  create the new time for the next time to refill
+                            qPlayer->refill_ = (qPlayer->played_ / 60) + (60 * sg_queueRefillTime);
                         }
 
                         //  refill queues with their original amount
-                        qPlayer->queues_ = qPlayer->queuesDefault;
-
-                        //  create the new time for the next time to refill
-                        qPlayer->refill_ = (qPlayer->played_ / 60) + (60 * sg_queueRefillTime);
+                        if (qPlayer->queues_ == 0)
+                            qPlayer->queues_ = qPlayer->queuesDefault;
                     }
                 }
 
@@ -331,9 +332,6 @@ bool gQueuePlayers::CanQueue(ePlayerNetID *p)
 {
     if (sg_queueLimitEnabled)
     {
-        //  they can queue if queue limit is off
-        if (!sg_queueLimitEnabled) return true;
-
         //  allow access level of players from excempted to queue
         if (p->GetAccessLevel() <= sg_queueLimitExcempt ) return true;
 
@@ -385,7 +383,7 @@ void sg_LogQueue(ePlayerNetID *p, tString command, tString params, tString item)
     std::ofstream o;
     if (tDirectories::Var().Open(o, "queuelog.txt", std::ios::app))
     {
-        o << "[" << st_GetCurrentTime("%Y/%m/%d-%H:%M:%S") << "] " << p->GetName() << " " << command << " " << params << " " << item << "\n";
+        o << "[" << st_GetCurrentTime("%Y/%m/%d-%H:%M:%S") << "] " << p->GetName() << " | " << command << " " << params << " " << item << "\n";
     }
     o.close();
 }
