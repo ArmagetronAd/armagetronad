@@ -7,7 +7,7 @@ else
 if BUILDREGULAR
 SUBDIRS=particles mathexpr
 if !OS_X_TOOLKIT
-	SUBDIRS += scrap
+SUBDIRS += scrap
 endif
 endif
 endif

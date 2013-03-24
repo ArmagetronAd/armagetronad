@@ -281,7 +281,7 @@ extralibs=
 else
 extralibs= thirdparty/particles/libparticles.a
 if !OS_X_TOOLKIT
-	extralibs += thirdparty/scrap/libscrap.a
+extralibs += thirdparty/scrap/libscrap.a
 endif
 endif
 
