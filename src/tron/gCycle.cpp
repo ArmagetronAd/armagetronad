@@ -2425,7 +2425,7 @@ gCycle::gCycle(eGrid *grid, const eCoord &pos,const eCoord &d,ePlayerNetID *p)
         currentWall(NULL),
         lastWall(NULL)
 {
-    se_cycleCreatedWriter << p->GetLogName() << pos.x << pos.y << d.x << d.y << ePlayerNetID::FilterName(Team()->Name()) << se_GameTime();
+    se_cycleCreatedWriter << p->GetLogName() << pos.x << pos.y << d.x << d.y << Team()->Name().Filter() << se_GameTime();
     se_cycleCreatedWriter.write();
 
     windingNumberWrapped_ = windingNumber_ = Grid()->DirectionWinding(dirDrive);
@@ -3053,7 +3053,7 @@ bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
                 {
                     //  stop building wall
                     if (currentWall)
-                        currentWall = NULL;
+                        DropWall(false);
                 }
                 else
                 {
@@ -4480,6 +4480,9 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
     RenderAll( camera, cycle, wallList_ );
 }
 
+bool sg_HideCycles = false;
+static tConfItem<bool> sg_HideCyclesConf("HIDE_CYCLES", sg_HideCycles);
+
 void gCycle::Render(const eCamera *cam){
     /*
     // for use when there's rendering problems on one specific occasion
@@ -4490,6 +4493,38 @@ void gCycle::Render(const eCamera *cam){
         st_Breakpoint();
     }
     */
+
+    //  check whether to display or not
+    bool displayCycle = true;
+    ePlayerNetID *p = NULL;
+    for(int i = 0; i < se_PlayerNetIDs.Len(); i++)
+    {
+        ePlayerNetID *pl = se_PlayerNetIDs[i];
+        if (pl)
+        {
+            if (pl->Owner() == sn_myNetID)
+            {
+                p = pl;
+                break;
+            }
+        }
+    }
+
+    if (p)
+    {
+        if (p->IsSpectating())
+        {
+            displayCycle = true;
+        }
+        else if (!p->IsSpectating() && p->IsActive() && p->Object() && p->Object()->Alive())
+        {
+            if (sg_HideCycles)
+            {
+                if ((Player() != p) || (!Player()->IsHuman()))
+                    displayCycle = false;
+            }
+        }
+    }
 
     // are we blinking from invulnerability?
     bool blinking = false;
@@ -4601,7 +4636,7 @@ void gCycle::Render(const eCamera *cam){
         if (mp){
 
             ModelMatrix();
-            if ( !blinking )
+            if ( !blinking && displayCycle)
             {
                 glPushMatrix();
                 customTexture->Select();
@@ -4618,7 +4653,7 @@ void gCycle::Render(const eCamera *cam){
 
             ModelMatrix();
 
-            if ( !blinking )
+            if ( !blinking && displayCycle)
             {
                 bodyTex->Select();
                 body->Render();
@@ -4837,7 +4872,7 @@ void gCycle::Render(const eCamera *cam){
 
         glEnable(GL_CULL_FACE);
 
-        if(!blinking && sr_floorDetail>rFLOOR_GRID && rTextureGroups::TextureMode[rTextureGroups::TEX_FLOOR]>0 && sr_alphaBlend){
+        if(!blinking && displayCycle && sr_floorDetail>rFLOOR_GRID && rTextureGroups::TextureMode[rTextureGroups::TEX_FLOOR]>0 && sr_alphaBlend){
             glColor3f(0,0,0);
             cycle_shad.Select();
             BeginQuads();
@@ -4954,11 +4989,11 @@ void gCycle::Render(const eCamera *cam){
 
 static REAL fadeOutNameAfter = 5.0f;	/* 0: never show, < 0 always show */
 //static int fadeOutNameMode = 1;			// 0: never show, 1: show for fadeOutNameAfter, 2: always show
-static bool showOwnName = 0;			// show name on own cycle?
+static bool showOwnName = false;		// show name on own cycle?
 
-static tSettingItem< bool > sg_showOwnName( "SHOW_OWN_NAME", showOwnName );
+static tConfItem< bool > sg_showOwnName( "SHOW_OWN_NAME", showOwnName );
 //static tSettingItem< int > sg_fadeOutNameMode( "FADEOUT_NAME_MODE", showOwnName )
-static tSettingItem< REAL > sg_fadeOutNameAfter( "FADEOUT_NAME_DELAY", fadeOutNameAfter );
+static tConfItem< REAL > sg_fadeOutNameAfter( "FADEOUT_NAME_DELAY", fadeOutNameAfter );
 
 
 void gCycle::RenderName( const eCamera* cam ) {
@@ -5541,6 +5576,7 @@ void gCycle::SyncFromExtrapolator()
             }
         }
     }
+    else currentWall = NULL;
 
 
     // transfer last turn position

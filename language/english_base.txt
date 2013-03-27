@@ -3303,10 +3303,15 @@ player_reach_race_first               \1 0xfffffffinished 1st in \2 seconds.\n
 player_reach_race_time                \2| \1 0xfffffffinished in \3 ( \4 s behind 1st ).\n
 
 player_personal_best_reach_time       New personal record! Your new time record is \1 seconds.\n
-player_hold_best_time                 Congratulations to \1 0xRESETTf holding the best time of \2 seconds here.\n
+
+race_player_hold_best_time            Congratulations to \1 0xRESETT holding the best time of \2 seconds here.\n
+race_player_hold_same_rank            \10xRESETT finished \3 seconds slower but remained at rank \4.\n
+race_player_hold_faster_time          \10xRESETT finished \3 seconds faster but remained at rank \4.\n
+race_player_hold_faster_rank          \10xRESETT finished \3 seconds faster and rose to rank \4.\n
+race_player_hold_slower_rank          \10xRESETT finished \3 seconds slower and dropped to rank \4.\n
 
 player_race_stats_self      Your rank is \1 with a time of \2.\n
-player_race_stats_other     Player: \1 0xRESETTis at rank is 0xffff77\2 0xRESETTwith a time of 0xffff77\30xRESETT.\n
+player_race_stats_other     Player: \1 0xRESETTis at rank 0xffff77\2 0xRESETTwith a time of 0xffff77\30xRESETT.\n
 
 player_race_record_search_found       \1 is ranked \2 with a best time of \3 seconds.\n
 player_race_record_search_not_found   0xff0000The search term \1 couldn't be found in the racing records.\n
@@ -3329,6 +3334,9 @@ race_rank_title_name Ranks
 race_rank_title_player_name Players
 race_rank_title_time_name Times
 race_rank_border #
+
+race_records_manual_load   Racing records have been manually loaded by \1.
+race_records_manual_save   Racing records have been manually saved by \1.
 
 #*************************************
 #*************************************
@@ -3674,6 +3682,8 @@ timer_resume_help   If the timer was previously stopped, it resumes from where i
 timer_reset_help    Resets the ingame timer back to default.
 
 deathzone_random_colors_help    Default: 0; If set to 1, deathzones will have their colors by randomness.
+
+hide_cycles_help    Default 0; 1- Cycles become invisible except for your cycle. All cycles display when spectating or dead.
 
 
  

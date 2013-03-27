@@ -2254,7 +2254,7 @@ tString tString::Replace(const char *old_word, const char *new_word)
 bool tString::IsNumeric()
 {
     tString ret(*this);
-    tString numericValues("124567890");
+    tString numericValues("124567890ef");
 
     //  return false when string is blank
     if (ret.Filter() == "")

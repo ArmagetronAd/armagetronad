@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -192,7 +192,7 @@ static tAccessLevel se_GetAccessLevel( int userID )
     for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
     {
         ePlayerNetID* p = se_PlayerNetIDs(i);
-        
+
         if ( p->Owner() == userID )
         {
             if( p->GetAccessLevel() < ret )
@@ -201,7 +201,7 @@ static tAccessLevel se_GetAccessLevel( int userID )
             }
         }
     }
-    
+
     return ret;
 }
 
@@ -274,7 +274,7 @@ public:
             }
             sg_voteCreatedWriter << suggestor_->LadderName( user_ ) << GetDescription();
             sg_voteCreatedWriter.write();
-            
+
             // create messages for old and new clients
             tJUST_CONTROLLED_PTR< nMessage > retNew = this->CreateMessage();
             tJUST_CONTROLLED_PTR< nMessage > retLegacy = this->CreateMessageLegacy();
@@ -286,7 +286,7 @@ public:
             for ( int i = MAXCLIENTS; i > 0; --i )
             {
                 eVoter * voter = eVoter::GetVoter( i );
-                if ( sn_Connections[ i ].socket && i != exceptTo && 0 != voter && 
+                if ( sn_Connections[ i ].socket && i != exceptTo && 0 != voter &&
                      sentTo.find(voter) == sentTo.end() )
                 {
 
@@ -663,7 +663,7 @@ public:
                                   tCurrentAccessLevel::GetName( accessLevel ),
                                   tCurrentAccessLevel::GetName( required ) ),
                           senderID );
-            
+
             return false;
         }
 
@@ -750,7 +750,7 @@ void se_CancelAllVotes( bool announce )
     }
 
     tList< eVoteItem > const & items = eVoteItem::GetItems();
-    
+
     while ( items.Len() )
     {
         delete items(0);
@@ -763,7 +763,7 @@ void se_CancelAllVotes( std::istream & )
 }
 
 static tConfItemFunc se_cancelAllVotes_conf( "VOTES_CANCEL", &se_CancelAllVotes );
-
+static tAccessLevelSetter se_cancelAllVotes_confLevel( se_cancelAllVotes_conf, tAccessLevel_Moderator );
 
 
 
@@ -806,7 +806,8 @@ void se_UnSuspendVotes( std::istream & s )
 
 static tConfItemFunc se_suspendVotes_conf( "VOTES_SUSPEND", &se_SuspendVotes );
 static tConfItemFunc se_unSuspendVotes_conf( "VOTES_UNSUSPEND", &se_UnSuspendVotes );
-
+static tAccessLevelSetter se_suspendVotes_confLevel( se_suspendVotes_conf, tAccessLevel_Moderator );
+static tAccessLevelSetter se_unsuspendVotes_confLevel( se_unSuspendVotes_conf, tAccessLevel_Moderator );
 
 static nDescriptor vote_handler(230,eVoteItem::GetControlMessage,"vote cast");
 
@@ -1368,7 +1369,7 @@ protected:
                     kick = true;
                 }
             }
-            
+
             // if no user could be kicked, notify at least the machine that
             // somebody would have been kicked.
             if ( !kick )
@@ -1498,7 +1499,7 @@ protected:
         {
             // try to transfor the vote to a suspension
             eVoteItem * item = tNEW ( eVoteItemSuspend )( p );
-            
+
             // let item check its validity
             if ( !item->CheckValid( senderID ) )
             {
@@ -1620,7 +1621,7 @@ private:
         }
     }
 
-    tAccessLevel level_;     // the access level required 
+    tAccessLevel level_;     // the access level required
     tColoredString message_; // the console message for the remote administrator
 };
 
@@ -1676,7 +1677,7 @@ protected:
     }
 
     virtual bool DoCheckValid( int senderID )
-    { 
+    {
         std::ifstream s;
         return ( Open( s, senderID ) && eVoteItemServerControlled::DoCheckValid( senderID ) );
     }
@@ -1779,7 +1780,7 @@ protected:
     	}
         return eVoteItemServerControlled::DoCheckValid( senderID );
     }
-    
+
     // access level required for this kind of vote
     virtual tAccessLevel DoGetAccessLevel() const
     {
@@ -1800,7 +1801,7 @@ protected:
     	str << "START_CHALLENGE " << setsToWin_ << "\n";
     	tConfItemBase::LoadLine(str);
     }
-	
+
 	int setsToWin_;
 	static int challengeRequest_;
 };
@@ -1910,7 +1911,7 @@ void eVoter::OnDestroy( void )
 // *******************************************************************************
 //!
 //! @return the last change to players on this voter in seconds
-//! 
+//!
 // *******************************************************************************
 
 REAL eVoter::Age() const
@@ -2230,7 +2231,7 @@ tString eVoter::LadderName( int senderID ) const
     for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
     {
         ePlayerNetID* p = se_PlayerNetIDs(i);
-        
+
         if ( p->Owner() == senderID )
         {
             name = p->GetUserName();

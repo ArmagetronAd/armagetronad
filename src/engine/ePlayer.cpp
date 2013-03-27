@@ -4534,7 +4534,7 @@ static bool ChatTabCompletition(tString &strString, int &curserPos)
                 ePlayerNetID *p = se_PlayerNetIDs[i];
                 if (p)
                 {
-                    int lengthCounter = strlen(command) + 1;
+                    unsigned int lengthCounter = strlen(command) + 1;
                     bool tabworked = false;
                     bool first = true;
                     tString new_string;
@@ -9380,6 +9380,45 @@ static tConfItemFunc Unsuspend_conf("UNSUSPEND",&UnSuspend_conf);
 static tAccessLevelSetter se_suspendConfLevel( suspend_conf, tAccessLevel_Moderator );
 static tAccessLevelSetter se_unsuspendConfLevel( Unsuspend_conf, tAccessLevel_Moderator );
 
+static void Suspend_All_Base(int rounds)
+{
+    if ( sn_GetNetState() == nCLIENT )
+    {
+        return;
+    }
+
+    for (int i = 0; i < se_PlayerNetIDs.Len(); i++)
+    {
+        ePlayerNetID *p = se_PlayerNetIDs[i];
+        if (p)
+        {
+            p->Suspend(rounds);
+        }
+    }
+}
+
+static void SuspendAll_conf(std::istream &s )
+{
+    tString params, roundsStr;
+    int rounds = se_suspendDefault;
+
+    s >> roundsStr;
+    if ((roundsStr.Filter() != "") && (roundsStr.IsNumeric()))
+        rounds = atoi(roundsStr);
+
+    Suspend_All_Base(rounds);
+}
+
+static void UnSuspendAll_conf(std::istream &s )
+{
+    Suspend_All_Base(0);
+}
+
+static tConfItemFunc suspendall_conf("SUSPEND_ALL",&SuspendAll_conf);
+static tConfItemFunc Unsuspendall_conf("UNSUSPEND_ALL",&UnSuspendAll_conf);
+static tAccessLevelSetter se_suspendallConfLevel( suspendall_conf, tAccessLevel_Moderator );
+static tAccessLevelSetter se_unsuspendallConfLevel( Unsuspendall_conf, tAccessLevel_Moderator );
+
 static void SuspendList_conf(std::istream &s)
 {
     ePlayerNetID *receiver = 0;
@@ -10190,13 +10229,16 @@ ePlayerNetID & ePlayerNetID::ForceName( tString const & name )
 // Set an admin command for it
 void ForceName ( std::istream & s )
 {
-    ePlayerNetID * p;
-    p = ReadPlayer( s );
-    if ( p )
+    ePlayerNetID * p = NULL;
+    tString playername, newname;
+
+    s >> playername;
+    p = ePlayerNetID::FindPlayerByName(playername);
+    if (p)
     {
-        tString newname;
-        newname.ReadLine( s );
-        p->ForceName ( newname );
+        s >> newname;
+        if (newname.Filter() != "")
+            p->ForceName ( newname );
     }
 }
 // the tConfItemFunc is defined in ePlayer.h
@@ -10215,7 +10257,7 @@ tString ePlayerNetID::GetFilteredAuthenticatedName( void ) const
 #ifdef KRAWALL_SERVER
     return tString( se_EscapeName( GetRawAuthenticatedName() ).c_str() );
 #else
-    return tString("");
+    return tString( se_EscapeName( GetAuthenticatedName() ).c_str() );
 #endif
 }
 

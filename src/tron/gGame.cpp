@@ -4601,10 +4601,11 @@ void gGame::StateUpdate(){
             }
             //HACK RACE end
 
-            gQueuePlayers::Reset();
-
             //  reset ingame timer
             gGameSpawnTimer::Reset();
+
+            // reset queue stuff
+            gQueuePlayers::Reset();
 
             sg_ParseMap( aParser );
 
@@ -6215,6 +6216,7 @@ bool gGame::GameLoop(bool input){
         {
             gRaceScores::OutputStart();
         }
+
         sg_roundStartingChecker = false;
 	}
 

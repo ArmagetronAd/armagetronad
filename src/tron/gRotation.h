@@ -35,6 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tList.h"
 #include "tRandom.h"
 #include "ePlayer.h"
+#include "eTimer.h"
 
 #ifdef HAVE_LIBRUBY
 class gRoundEventRuby : public tCallbackRuby {
@@ -178,7 +179,7 @@ class gQueuePlayers
         static bool Timestep(REAL time);
 
         static void Save();
-        static void Reset();
+        static void Reset(REAL time = se_GameTime());
         static void Load();
 
         static bool CanQueue(ePlayerNetID *p);

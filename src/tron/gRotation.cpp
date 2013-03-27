@@ -27,7 +27,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "gRotation.h"
 #include "gGame.h"
-#include "eTimer.h"
 #include "tConfiguration.h"
 #include "tDirectories.h"
 #include "tRecorder.h"
@@ -227,7 +226,8 @@ bool gQueuePlayers::Timestep(REAL time)
 
                 if ((qPlayer->Player() && sg_queueRefillActive) || !sg_queueRefillActive)
                 {
-                    qPlayer->played_ += tick;
+                    //qPlayer->played_ += tick;
+                    qPlayer->played_ += 0.35f;
 
                     if ((qPlayer->played_ / 60) >= qPlayer->refill_)
                     {
@@ -316,13 +316,13 @@ void gQueuePlayers::Load()
     r.close();
 }
 
-void gQueuePlayers::Reset()
+void gQueuePlayers::Reset(REAL time)
 {
     for (int i = 0; i < queuePlayers.Len(); i++)
     {
         gQueuePlayers *qPlayer = queuePlayers[i];
         if (qPlayer)
-            qPlayer->lastTime_ = se_GameTime();
+            qPlayer->lastTime_ = time;
     }
 
     Save();

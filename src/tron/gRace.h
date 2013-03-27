@@ -148,23 +148,27 @@ class gRaceScores
         static void OutputStart();      //!< the ranks to display at start of round
         static void OutputEnd();        //!< the ranks to display at end of round
 
-        static void Sort();                                                                     //!> Sorts out by ordering Score (Highest - Lowest) and Time (Lowest - Highest)
+        //!> Sorts out by ordering Score (Highest - Lowest) and Time (Lowest - Highest)
+        static void Sort();
 
         tString Name() { return userName_; }
         REAL Time() { return time_; }
         int Played() { return played_; }
+        int Rank() { return rank_; }
 
         void SetName(tString name) { userName_ = name; }
         void SetTime(REAL newTime) { time_ = newTime; }
         void SetPlayed(int newPlayed) { played_ = newPlayed; }
+        void SetRank(int newRank) { rank_ = newRank; }
 
     private:
         tString userName_;      // logged name
         REAL    time_;          // best time
         int     played_;        // number of times finished map
+        int     rank_;          // number rank player is on the leaderboard
 
-        static void Switch(int i, int j);                                                       //!> Switches the i and j
-        static bool InOrder(int i, int j);                                                      //!> Checks if they are in order
+        static void Switch(int i, int j);   //!> Switches the i and j
+        static bool InOrder(int i, int j);  //!> Checks if they are in order
 };
 
 extern bool sg_RaceTimerEnabled;

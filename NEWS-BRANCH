@@ -1,4 +1,31 @@
 ===========================
+Changes in r877 | Plasma Update
+===========================
+Improvements:
+    * Able to hide other cycles but that only applies to client side of the command.
+    * Racing: Now displays what rank and how much slower or faster and rank they have improved.
+    * Racing: Records with time -1 will display as "UNDONE" which means that player has not finished that map.
+    * Using !race save/load will forcefully save/load records.
+    * Queue: Tick increases by 0.35 everytime the function is called into action.               
+
+Additions:
+    * SUSPEND_ALL     # Using this command, everyone will get suspended by SUSPEND_DEFAULT_ROUNDS.
+    * UNSUSPEND_ALL   # Unsuspends all players, whether suspended or not.
+    * HIDE_CYCLES     # If set to 1, other cycles virtually disappear while you are alive.
+                      # When you are dead or spectating, all cycles are visible.          
+
+Modifications:
+    * RENAME command now doesn't allow for name change if the name set is blank.
+    * Gave moderations for the following commands:
+        + VOTES_CANCEL
+        + VOTES_SUSPEND
+        + VOTES_UNSUSPEND
+    * Following commands are comverted into client side
+        + SHOW_OWN_NAME
+        + FADEOUT_NAME_DELAY
+                    
+
+===========================
 Changes in r876
 ===========================
 Improvements:
