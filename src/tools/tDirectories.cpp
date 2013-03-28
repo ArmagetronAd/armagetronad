@@ -1737,7 +1737,7 @@ static void FindDataPath()
 #ifdef DEDICATED
     if ( TestDataPath( GetParent( st_pathToExecutable.Get(), 2 ) ) ) return;
 #else
-    if ( TestDataPath( "." ) ) return;
+    if ( TestDataPath( GetParent( st_pathToExecutable.Get(), 2 ) + "/Resources" ) ) return;
 #endif
 #else
     // try to use path substitution

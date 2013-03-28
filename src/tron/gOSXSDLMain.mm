@@ -77,14 +77,6 @@ static NSString *getApplicationName(void)
 /* The main class of the application, the application's delegate */
 @implementation SDLMain
 
-/* Set the working directory to the .app's parent directory */
-- (void) setupWorkingDirectory:(BOOL)shouldChdir
-{
-    // When running from the build directory, this will be the absolute path of the build directory.
-    // When running as a packaged .app, this will be the Resource directory in the application package.
-    chdir([[[NSBundle mainBundle] resourcePath] UTF8String]);
-}
-
 #if SDL_USE_NIB_FILE
 
 /* Fix menu to contain the real app name instead of "SDL App" */
@@ -271,9 +263,6 @@ static void CustomApplicationMain (int argc, char **argv)
 - (void) applicationDidFinishLaunching: (NSNotification *) note
 {
     int status;
-
-    /* Set the working directory to the .app's parent directory */
-    [self setupWorkingDirectory:gFinderLaunch];
 
 #if SDL_USE_NIB_FILE
     /* Set the main menu to contain the real app name instead of "SDL App" */
