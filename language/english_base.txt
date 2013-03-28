@@ -3305,10 +3305,11 @@ player_reach_race_time                \2| \1 0xfffffffinished in \3 ( \4 s behin
 player_personal_best_reach_time       New personal record! Your new time record is \1 seconds.\n
 
 race_player_hold_best_time            Congratulations to \1 0xRESETT holding the best time of \2 seconds here.\n
-race_player_hold_same_rank            \10xRESETT finished \3 seconds slower but remained at rank \4.\n
-race_player_hold_faster_time          \10xRESETT finished \3 seconds faster but remained at rank \4.\n
-race_player_hold_faster_rank          \10xRESETT finished \3 seconds faster and rose to rank \4.\n
-race_player_hold_slower_rank          \10xRESETT finished \3 seconds slower and dropped to rank \4.\n
+race_player_hold_same_rank            \1 finished \3 seconds slower but remained at rank \4.\n
+race_player_hold_faster_time          \1 finished \3 seconds faster but remained at rank \4.\n
+race_player_hold_faster_rank          \1 finished \3 seconds faster and rose to rank \4.\n
+race_player_hold_slower_rank          \1 finished \3 seconds slower and dropped to rank \4.\n
+race_player_hold_new_time             \1 finished in \2 seconds and was placed in rank \3.\n
 
 player_race_stats_self      Your rank is \1 with a time of \2.\n
 player_race_stats_other     Player: \1 0xRESETTis at rank 0xffff77\2 0xRESETTwith a time of 0xffff77\30xRESETT.\n

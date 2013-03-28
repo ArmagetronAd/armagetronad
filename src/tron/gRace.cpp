@@ -197,6 +197,7 @@ void gRaceScores::Add(gRacePlayer *racePlayer, bool finished)
 {
     bool timeChanged = false;
     REAL timeDiff = 0;
+    bool newRacer = false;
     gRaceScores *racingPlayer = NULL;
 
     tString username;
@@ -242,6 +243,7 @@ void gRaceScores::Add(gRacePlayer *racePlayer, bool finished)
 
             timeChanged = true;
         }
+        newRacer = true;
     }
 
     //  increment finished times when they crossed the zone
@@ -274,29 +276,39 @@ void gRaceScores::Add(gRacePlayer *racePlayer, bool finished)
             //  tell everyone whether the player got better or worse
             tOutput rankMsg;
 
-            if (prevRank == racingPlayer->Rank())
+            if (newRacer)
             {
                 rankMsg.SetTemplateParameter(1, racePlayer->Player()->GetName());
                 rankMsg.SetTemplateParameter(2, racePlayer->Time());
-                rankMsg.SetTemplateParameter(3, timeDiff - racePlayer->Time());
                 rankMsg.SetTemplateParameter(4, racingPlayer->Rank());
-                rankMsg << "$race_player_hold_faster_time";
+                rankMsg << "$race_player_hold_new_time";
             }
-            else if (prevRank > racingPlayer->Rank())
+            else
             {
-                rankMsg.SetTemplateParameter(1, racePlayer->Player()->GetName());
-                rankMsg.SetTemplateParameter(2, racePlayer->Time());
-                rankMsg.SetTemplateParameter(3, timeDiff - racePlayer->Time());
-                rankMsg.SetTemplateParameter(4, racingPlayer->Rank());
-                rankMsg << "$race_player_hold_faster_rank";
-            }
-            else if (prevRank < racingPlayer->Rank())
-            {
-                rankMsg.SetTemplateParameter(1, racePlayer->Player()->GetName());
-                rankMsg.SetTemplateParameter(2, racePlayer->Time());
-                rankMsg.SetTemplateParameter(3, racePlayer->Time() - timeDiff);
-                rankMsg.SetTemplateParameter(4, racingPlayer->Rank());
-                rankMsg << "$race_player_hold_slower_rank";
+                if (prevRank == racingPlayer->Rank())
+                {
+                    rankMsg.SetTemplateParameter(1, racePlayer->Player()->GetName());
+                    rankMsg.SetTemplateParameter(2, racePlayer->Time());
+                    rankMsg.SetTemplateParameter(3, timeDiff - racePlayer->Time());
+                    rankMsg.SetTemplateParameter(4, racingPlayer->Rank());
+                    rankMsg << "$race_player_hold_faster_time";
+                }
+                else if (prevRank > racingPlayer->Rank())
+                {
+                    rankMsg.SetTemplateParameter(1, racePlayer->Player()->GetName());
+                    rankMsg.SetTemplateParameter(2, racePlayer->Time());
+                    rankMsg.SetTemplateParameter(3, timeDiff - racePlayer->Time());
+                    rankMsg.SetTemplateParameter(4, racingPlayer->Rank());
+                    rankMsg << "$race_player_hold_faster_rank";
+                }
+                else if (prevRank < racingPlayer->Rank())
+                {
+                    rankMsg.SetTemplateParameter(1, racePlayer->Player()->GetName());
+                    rankMsg.SetTemplateParameter(2, racePlayer->Time());
+                    rankMsg.SetTemplateParameter(3, racePlayer->Time() - timeDiff);
+                    rankMsg.SetTemplateParameter(4, racingPlayer->Rank());
+                    rankMsg << "$race_player_hold_slower_rank";
+                }
             }
 
             sn_ConsoleOut(rankMsg);
