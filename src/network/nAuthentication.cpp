@@ -611,6 +611,17 @@ static bool sn_IsLegalSpecialChar( char c )
 
 tString loginErrorLogFile("errors/login_error.txt");
 
+//  shorthand code BEGIN
+bool sn_CustomShorthandEnabled = false;
+static tSettingItem<bool> sn_CustomShorthandEnabledConf("CUSTOM_SHORTHAND_ENABLED", sn_CustomShorthandEnabled);
+
+tString sn_CustomShorthand("");
+static tSettingItem<tString> sn_CustomShorthandConf("CUSTOM_SHORTHAND", sn_CustomShorthand);
+
+tString sn_CustomShorthandConnection("");
+static tSettingItem<tString> sn_CustomShorthandConnectionConf("CUSTOM_SHORTHAND_CONNECTION", sn_CustomShorthandConnection);
+//  shorthand code END
+
 // fetches info from remote authority
 bool nLoginProcess::FetchInfoFromAuthorityRemote()
 {
@@ -835,6 +846,13 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
         {
             return ReportAuthorityError( tOutput( "$login_error_whitelist", authority ) );
         }
+
+        //  shorthand code BEGIN
+        if ((authority == sn_CustomShorthand.Filter()) && sn_CustomShorthandEnabled)
+        {
+            fullAuthority = sn_CustomShorthandConnection;
+        }
+        //  shorthand code END
 
         // try yo find a better method, fetch method list
         std::stringstream answer;

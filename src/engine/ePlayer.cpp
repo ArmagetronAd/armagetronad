@@ -2648,6 +2648,20 @@ static void se_AdminLogin_ReallyOnlyCallFromChatKTHNXBYE( ePlayerNetID * p, std:
 #endif
 }
 
+//  handy command to get load login stuff for players
+static void se_Login_Call(std::istream &s)
+{
+    tString params;
+    s >> params;
+
+    ePlayerNetID *player = ePlayerNetID::FindPlayerByName(params);
+    if (!player) return;
+
+    se_AdminLogin_ReallyOnlyCallFromChatKTHNXBYE(player, s);
+}
+static tConfItemFunc se_Login_Conf("LOGIN", &se_Login_Call);
+static tAccessLevelSetter se_Login_ConfLevel( se_Login_Conf, tAccessLevel_Moderator );
+
 // log out
 static void se_AdminLogout( ePlayerNetID * p, char const * command )
 {
@@ -2671,6 +2685,19 @@ static void se_AdminLogout( ePlayerNetID * p, char const * command )
     p->BeNotLoggedIn();
 #endif
 }
+
+static void se_Logout_Call(std::istream &s)
+{
+    tString params;
+    s >> params;
+
+    ePlayerNetID *player = ePlayerNetID::FindPlayerByName(params);
+    if (!player) return;
+
+    se_AdminLogout(player, "LOGOUT");
+}
+static tConfItemFunc se_Logout_Conf("LOGOUT", &se_Logout_Call);
+static tAccessLevelSetter se_Logout_ConfLevel( se_Logout_Conf, tAccessLevel_Moderator );
 
 static eLadderLogWriter se_adminCommandWriter("ADMIN_COMMAND", false);
 
@@ -4276,37 +4303,39 @@ static void ConsoleSay_conf(std::istream &s)
 
     switch (sn_GetNetState())
     {
-    case nCLIENT:
-    {
-        ePlayerNetID *me = se_GetLocalPlayer();
+        case nCLIENT:
+        {
+            ePlayerNetID *me = se_GetLocalPlayer();
 
-        if (me)
-            me->Chat( message );
+            if (me)
+                me->Chat( message );
 
-        break;
-    }
-    case nSERVER:
-    {
-        tColoredString send;
-        send << tColoredString::ColorString( 1,0,0 );
-        send << sg_AdminName;
-        send << tColoredString::ColorString( 1,1,.5 );
-        send << ": " << message << "\n";
+            break;
+        }
+        case nSERVER:
+        {
+            tColoredString send;
+            send << tColoredString::ColorString( 1,0,0 );
+            send << sg_AdminName;
+            send << tColoredString::ColorString( 1,1,.5 );
+            send << ": " << message << "\n";
 
-        // display it
-        sn_ConsoleOut( send );
+            // display it
+            sn_ConsoleOut( send );
 
-        break;
-    }
-    default:
-    {
-        ePlayerNetID *me = se_GetLocalPlayer();
+            se_SaveToChatLog(sg_AdminName + " " + message);
 
-        if ( me )
-            se_DisplayChatLocally( me, message );
+            break;
+        }
+        default:
+        {
+            ePlayerNetID *me = se_GetLocalPlayer();
 
-        break;
-    }
+            if ( me )
+                se_DisplayChatLocally( me, message );
+
+            break;
+        }
     }
 }
 

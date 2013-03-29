@@ -463,7 +463,9 @@ void sg_SpecialMenu()
     uMenu menu("$special_setup_menu_text");
 
     new uMenuItemToggle(&menu, "$tab_completion_menu_text", "$tab_completion_menu_help", se_tabCompletion);
-    new uMenuItemToggle(&menu, "$highlight_name_menu_text", "$highlight_name_menu_help", se_highlightMyName);    menu.Enter();
+    new uMenuItemToggle(&menu, "$highlight_name_menu_text", "$highlight_name_menu_help", se_highlightMyName);
+
+    menu.Enter();
 }
 
 #ifndef DEDICATED

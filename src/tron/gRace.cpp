@@ -280,7 +280,7 @@ void gRaceScores::Add(gRacePlayer *racePlayer, bool finished)
             {
                 rankMsg.SetTemplateParameter(1, racePlayer->Player()->GetName());
                 rankMsg.SetTemplateParameter(2, racePlayer->Time());
-                rankMsg.SetTemplateParameter(4, racingPlayer->Rank());
+                rankMsg.SetTemplateParameter(3, racingPlayer->Rank());
                 rankMsg << "$race_player_hold_new_time";
             }
             else

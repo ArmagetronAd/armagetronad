@@ -4991,9 +4991,12 @@ static REAL fadeOutNameAfter = 5.0f;	/* 0: never show, < 0 always show */
 //static int fadeOutNameMode = 1;			// 0: never show, 1: show for fadeOutNameAfter, 2: always show
 static bool showOwnName = false;		// show name on own cycle?
 
-static tConfItem< bool > sg_showOwnName( "SHOW_OWN_NAME", showOwnName );
-//static tSettingItem< int > sg_fadeOutNameMode( "FADEOUT_NAME_MODE", showOwnName )
-static tConfItem< REAL > sg_fadeOutNameAfter( "FADEOUT_NAME_DELAY", fadeOutNameAfter );
+static tSettingItem< bool > sg_showOwnName( "SHOW_OWN_NAME", showOwnName );
+static tSettingItem< REAL > sg_fadeOutNameAfter( "FADEOUT_NAME_DELAY", fadeOutNameAfter );
+
+// show colored names on cycles?
+static bool sg_displayColoredNameOverCycles = true;
+static tSettingItem< bool > sg_displayColoredNameOverCyclesCfg( "DISPLAY_COLORED_NAMES_OVER_CYCLES", sg_displayColoredNameOverCycles );
 
 
 void gCycle::RenderName( const eCamera* cam ) {
@@ -5048,13 +5051,14 @@ void gCycle::RenderName( const eCamera* cam ) {
 
     /* it is visible */
 
+    bool doname = true;
     if (fadeOutNameAfter > 0) {
         REAL now = tSysTimeFloat();
         if (timeCameIntoView == 0)
             timeCameIntoView = now;
 
         if (now - timeCameIntoView > fadeOutNameAfter) {
-            return;
+            doname = false;
         } else if (now - timeCameIntoView > fadeOutNameAfter - 1) {
             /* start to fade out */
             alpha = 0.75 - (now - timeCameIntoView -
@@ -5070,8 +5074,18 @@ void gCycle::RenderName( const eCamera* cam ) {
     glPushMatrix();
     glLoadIdentity();
 
-    glColor4f(1, 1, 1, alpha);
-    DisplayText(xp, yp, rCWIDTH_NORMAL, rCHEIGHT_NORMAL, this->player->GetName(), 0, 0);
+    /*glColor4f(1, 1, 1, alpha);
+    DisplayText(xp, yp, rCWIDTH_NORMAL, rCHEIGHT_NORMAL, this->player->GetName(), 0, 0);*/
+    glTranslatef(xp, yp, 0.);
+    if(doname) {
+        glColor4f(1, 1, 1, alpha);
+        tColoredString name;
+        if(sg_displayColoredNameOverCycles)
+            name << this->player->GetColoredName();
+        else
+            name << this->player->GetName();
+        DisplayText(0, 0, rCWIDTH_NORMAL, rCHEIGHT_NORMAL, name, 0, 0);
+    }
 
     ProjMatrix();
     glPopMatrix();
