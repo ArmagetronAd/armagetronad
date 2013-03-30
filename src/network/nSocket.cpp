@@ -1120,8 +1120,10 @@ public:
         }
         else
         {
-            struct addrinfo *res = NULL;
-            int ret = getaddrinfo( hostname_, NULL, NULL, &res );
+            struct addrinfo *res = NULL, hints;
+            memset( &hints, 0, sizeof( hints ) );
+            hints.ai_family = AF_INET;
+            int ret = getaddrinfo( hostname_, NULL, &hints, &res );
     
             // bulk waiting work is done, the rest of the function can be
             // synced to the foreground
