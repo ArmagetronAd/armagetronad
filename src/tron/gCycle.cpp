@@ -4995,8 +4995,8 @@ static tSettingItem< bool > sg_showOwnName( "SHOW_OWN_NAME", showOwnName );
 static tSettingItem< REAL > sg_fadeOutNameAfter( "FADEOUT_NAME_DELAY", fadeOutNameAfter );
 
 // show colored names on cycles?
-static bool sg_displayColoredNameOverCycles = true;
-static tSettingItem< bool > sg_displayColoredNameOverCyclesCfg( "DISPLAY_COLORED_NAMES_OVER_CYCLES", sg_displayColoredNameOverCycles );
+static bool sg_showColoredName = true;
+static tSettingItem< bool > sg_showColoredNameConf( "SHOW_COLORED_NAMES", sg_showColoredName );
 
 
 void gCycle::RenderName( const eCamera* cam ) {
@@ -5080,7 +5080,7 @@ void gCycle::RenderName( const eCamera* cam ) {
     if(doname) {
         glColor4f(1, 1, 1, alpha);
         tColoredString name;
-        if(sg_displayColoredNameOverCycles)
+        if(sg_showColoredName)
             name << this->player->GetColoredName();
         else
             name << this->player->GetName();

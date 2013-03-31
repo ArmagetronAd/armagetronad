@@ -200,16 +200,20 @@ void eTeam::UpdateProperties()
 
         // on the client, don't count players who already expressed their wish
         // to leave a team as active players.
-        if ( sn_GetNetState() != nCLIENT || player->nextTeam == this )
+        //if ( sn_GetNetState() != nCLIENT || player->nextTeam == this )
+        if ( player->IsHuman() )
         {
-            if ( player->IsHuman() )
+            /*if ( player->IsHuman() )
             {
                 if ( player->IsActive() )
                     ++numHumans;
             }
             else
-                ++numAIs;
+                ++numAIs;*/
+            ++numHumans;
         }
+        else
+            ++numAIs;
     }
 
     if ( nSERVER == sn_GetNetState() )

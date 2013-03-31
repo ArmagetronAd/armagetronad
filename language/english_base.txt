@@ -3686,5 +3686,12 @@ deathzone_random_colors_help    Default: 0; If set to 1, deathzones will have th
 
 hide_cycles_help    Default 0; 1- Cycles become invisible except for your cycle. All cycles display when spectating or dead.
 
+suspend_all_help    Suspends all active players by the SUSPEND_DEFAULT_ROUNDS or <rounds> specified.\nUsage: SUSPEND_ALL <rounds>.
+unsuspend_all_help  Unsuspends all players that were suspended.
 
- 
+login_help    Using this command you can prompt/login the selected player under the <name> with the given <username>.\nUsage: LOGIN <name> <username>.
+logout_help   Using the given <name>, find the player and logs them out if they already logged in.\nUsage: LOGOUT <name>.
+
+custom_shorthand_enabled_help     If set to 1 and CUSTOM_SHORTHAND is found, then CUSTOM_SHORTHAND_CONNECTION will be used to connect.
+custom_shorthand_help             The custom authority to trigger when a player tries to login.
+custom_shorthand_connection_help  The link to connect to when using custom shorthand. Do not include "http://".

@@ -1,4 +1,30 @@
 ===========================
+Changes in r880
+===========================
+Improvements:
+    * Added missing language commands to english_base.txt
+    * Fix team member count sometimes being incorrect on the client.
+      A player's wish to join a different team isn't always accepted by the server.         
+
+Additions:
+    * SHOW_COLORED_NAMES  # If set to 1, colored names appear over cycles.
+
+===========================
+Changes in r879 | Forgot to inform about this.
+===========================        
+Additions:
+    * LOGIN <name> <username>  # Using this command you can prompt/login the 
+                               # selected player under the <name> with the 
+                               # given <username>.
+    * LOGOUT <name>            # Using the given <name>, find the player and
+                               # logs them out if they already logged in.
+    * Custom Shorthand commands:
+        !- CUSTOM_SORTHAND_ENABLED <0|1>      # If set to 1 and CUSTOM_SHORTHAND is found,
+                                              # then CUSTOM_SHORTHAND_CONNECTION will be used to connect.
+        !- CUSTOM_SHORTHAND <authority>       # The custom authority to trigger when a player tries to login.
+        !- CUSTOM_SHORTHAND_CONNECTION <link> # The link to connect to when using custom shorthand. Do not include http://
+
+===========================
 Changes in r877 | Plasma Update
 ===========================
 Improvements:
@@ -9,10 +35,10 @@ Improvements:
     * Queue: Tick increases by 0.35 everytime the function is called into action.               
 
 Additions:
-    * SUSPEND_ALL     # Using this command, everyone will get suspended by SUSPEND_DEFAULT_ROUNDS.
-    * UNSUSPEND_ALL   # Unsuspends all players, whether suspended or not.
-    * HIDE_CYCLES     # If set to 1, other cycles virtually disappear while you are alive.
-                      # When you are dead or spectating, all cycles are visible.          
+    * SUSPEND_ALL         # Using this command, everyone will get suspended by SUSPEND_DEFAULT_ROUNDS.
+    * UNSUSPEND_ALL       # Unsuspends all players, whether suspended or not.
+    * HIDE_CYCLES         # If set to 1, other cycles virtually disappear while you are alive.
+                          # When you are dead or spectating, all cycles are visible.
 
 Modifications:
     * RENAME command now doesn't allow for name change if the name set is blank.
