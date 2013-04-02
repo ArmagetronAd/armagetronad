@@ -1304,24 +1304,24 @@ void gZone::InteractWith( eGameObject * target, REAL time, int recursion )
             if (tarZone)
             {
                 gSoccerZoneHack *tisZone = dynamic_cast<gSoccerZoneHack *>(this);
-                if (tisZone)
+                if (tisZone && (tarZone != tisZone))
                 {
-                    REAL distance = this->Radius() + tarZone->GetRadius();
-                    if ((tarZone->Position() - this->Position() ).NormSquared() < (distance * distance))
+                    REAL distance = tisZone->Radius() + tarZone->GetRadius();
+                    if ((tarZone->Position() - tisZone->Position() ).NormSquared() < (distance * distance))
                     {
                         tisZone->OnEnter(tarZone, time);
                     }
                 }
             }
 
-            gObjectZoneHack *randomZone = dynamic_cast<gObjectZoneHack *>(target);
+            gZone *randomZone = dynamic_cast<gZone *>(target);
             if (randomZone)
             {
-                gZone *objZone = this;
-                if (objZone)
+                gObjectZoneHack *objZone = dynamic_cast<gObjectZoneHack *>(this);
+                if (objZone && (objZone != randomZone))
                 {
-                    REAL distance = this->Radius() + randomZone->GetRadius();
-                    if ((randomZone->Position() - this->Position() ).NormSquared() < (distance * distance))
+                    REAL distance = objZone->Radius() + randomZone->GetRadius();
+                    if ((randomZone->Position() - objZone->Position() ).NormSquared() < (distance * distance))
                     {
                         objZone->OnEnter(randomZone, time);
                     }

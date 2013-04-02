@@ -6916,6 +6916,7 @@ static void sg_KillAllPlayers(std::istream &s)
 }
 
 static tConfItemFunc sg_KillAllPlayers_conf("KILL_ALL", &sg_KillAllPlayers);
+static tAccessLevelSetter sg_KillAllPlayers_confLevel( sg_KillAllPlayers_conf, tAccessLevel_Moderator );
 
 static void sg_CustomMessage(std::istream &s)
 {

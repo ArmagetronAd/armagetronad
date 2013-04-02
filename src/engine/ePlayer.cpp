@@ -5704,14 +5704,14 @@ void ePlayerNetID::RemoveFromGame()
         }
     }
 
-    if( IsHuman() )
+    if( logLeave )
     {
-        se_playerLeftWriter << Owner() << userName_ << nMachine::GetMachine(Owner()).GetIP();
+        se_playerLeftWriter << userName_ << nMachine::GetMachine(Owner()).GetIP();
         se_playerLeftWriter.write();
     }
     else
     {
-        se_playerAILeftWriter << Owner() << userName_;
+        se_playerAILeftWriter << userName_;
         se_playerAILeftWriter.write();
     }
 
@@ -7598,9 +7598,10 @@ void ePlayerNetID::GridPosLadderLog()
             ePlayerNetID *p=se_PlayerNetIDs(i);
             if (p->IsActive() && p->currentTeam && p->Object() && p->Object()->Alive() )
             {
-                se_playerGridPosWriter << p->GetUserName() << p->Object()->Position().x << p->Object()->Position().y << p->Object()->Direction().x << p->Object()->Direction().y << p->Object()->Speed();
-                if (p->Object() && p->Object()->Team())
-                    se_playerGridPosWriter << FilterName(p->Object()->Team()->Name());
+                gCycle *pCycle = dynamic_cast<gCycle *>(p->Object());
+                se_playerGridPosWriter << p->GetUserName() << pCycle->Position().x << pCycle->Position().y << pCycle->Direction().x << pCycle->Direction().y << pCycle->verletSpeed_;
+                if (pCycle && pCycle->Team())
+                    se_playerGridPosWriter << FilterName(pCycle->Team()->Name());
                 else se_playerGridPosWriter << " ";
                 se_playerGridPosWriter.write();
             }
@@ -8972,51 +8973,6 @@ static void se_PlayerMessageConf(std::istream &s)
 static tConfItemFunc se_PlayerMessage_c("PLAYER_MESSAGE", &se_PlayerMessageConf);
 static tAccessLevelSetter se_messConfLevel( se_PlayerMessage_c, tAccessLevel_Moderator );
 
-static void se_PlayerIDMessage(std::istream &s)
-{
-    if ( se_NeedsServer( "PLAYER_ID_MESSAGE", s ) )
-    {
-        return;
-    }
-
-    tString PlayerID, Message;
-
-    s >> PlayerID;
-    ePlayerNetID *receiver = NULL;
-    ePlayerNetID *sender = 0;
-    int pID = atoi(PlayerID);
-
-    for(int i = 0; i < se_PlayerNetIDs.Len(); i++)
-    {
-        ePlayerNetID *p = se_PlayerNetIDs[i];
-        if (p)
-        {
-            if (p->Owner() == pID)
-            {
-                receiver = p;
-                break;
-            }
-        }
-    }
-
-    if (!receiver)
-    {
-        con << tOutput("$player_id_message_usage");
-        return;
-    }
-    //int receiver = se_ReadUser( s );
-
-    tColoredString msg;
-    Message.ReadLine(s);
-    msg << Message;
-    msg << "\n";
-
-    sn_ConsoleOut(msg, sender->Owner());
-    sn_ConsoleOut(msg, receiver->Owner());
-}
-static tConfItemFunc se_PlayerIDMessage_c("PLAYER_ID_MESSAGE", &se_PlayerIDMessage);
-static tAccessLevelSetter se_messIDConfLevel( se_PlayerIDMessage_c, tAccessLevel_Moderator );
-
 static tString se_defaultKickReason("");
 static tConfItemLine se_defaultKickReasonConf( "DEFAULT_KICK_REASON", se_defaultKickReason );
 
@@ -9217,52 +9173,6 @@ static void Kill_conf(std::istream &s)
 
 static tConfItemFunc kill_conf("KILL",&Kill_conf);
 static tAccessLevelSetter se_killConfLevel( kill_conf, tAccessLevel_Moderator );
-
-static void KillID_conf(std::istream &s)
-{
-    if ( se_NeedsServer( "KILL_ID", s, false ) )
-    {
-        return;
-    }
-
-    tString params;
-    s >> params;
-
-    if (params.Filter() == "") return;
-    int pID = atoi(params);
-
-    ePlayerNetID *p = NULL;
-    for(int i = 0; i < se_PlayerNetIDs.Len(); i++)
-    {
-        ePlayerNetID *player = se_PlayerNetIDs[i];
-        if (player)
-        {
-            if (player->Owner() == pID)
-            {
-                p = player;
-                break;
-            }
-        }
-    }
-
-    if (!p) return;
-
-    if ( p && p->Object() && p->Object()->Alive() )
-    {
-        if (se_enableAdminKillMessage)
-        {
-            sn_ConsoleOut( tOutput( "$player_admin_kill", p->GetColoredName() ) );
-        }
-
-        se_playerKilledWriter << p->GetUserName() << nMachine::GetMachine(p->Owner()).GetIP() << p->Object()->Position().x << p->Object()->Position().y << p->Object()->Direction().x << p->Object()->Direction().y;
-        se_playerKilledWriter.write();
-        p->Object()->Kill();
-
-
-    }
-}
-static tConfItemFunc killID_conf("KILL_ID",&KillID_conf);
-static tAccessLevelSetter se_killIDConfLevel( killID_conf, tAccessLevel_Moderator );
 
 static void Slap_conf(std::istream &s)
 {
@@ -9697,7 +9607,7 @@ public:
                 // print spectating join message (regular join messages are handled by eTeam)
                 if ( ( player_.IsSpectating() || player_.IsSuspended() || !se_assignTeamAutomatically ) && ( se_assignTeamAutomatically || se_specSpam ) )
                 {
-                    se_playerEnteredSpectatorWriter << player_.Owner() << logName << nMachine::GetMachine(player_.Owner()).GetIP() << screenName;
+                    se_playerEnteredSpectatorWriter << logName << nMachine::GetMachine(player_.Owner()).GetIP() << screenName;
                     se_playerEnteredSpectatorWriter.write();
 
                     mess << "$player_entered_spectator";
@@ -9705,13 +9615,13 @@ public:
                 }
                 else
                 {
-                    se_playerEnteredGridWriter << player_.Owner() << logName << nMachine::GetMachine(player_.Owner()).GetIP() << screenName;
+                    se_playerEnteredGridWriter << logName << nMachine::GetMachine(player_.Owner()).GetIP() << screenName;
                     se_playerEnteredGridWriter.write();
                 }
 
                 tColoredString colouredName;
                 colouredName << player_.GetColoredName();
-                se_playerColoredNameWriter << player_.Owner() << player_.GetUserName() << colouredName;
+                se_playerColoredNameWriter << player_.GetUserName() << colouredName;
                 se_playerColoredNameWriter.write();
             }
             else
@@ -9721,13 +9631,13 @@ public:
 
                 tColoredString colouredName;
                 colouredName << player_.GetColoredName();
-                se_playerColoredNameWriter << player_.Owner() << player_.GetUserName() << colouredName;
+                se_playerColoredNameWriter << player_.GetUserName() << colouredName;
                 se_playerColoredNameWriter.write();
             }
         }
         else if ( logName != oldLogName_ || screenName != oldScreenName_ )
         {
-            se_playerRenamedWriter << player_.Owner() << oldLogName_ << logName << nMachine::GetMachine(player_.Owner()).GetIP();
+            se_playerRenamedWriter << oldLogName_ << logName << nMachine::GetMachine(player_.Owner()).GetIP();
 #ifdef KRAWALL_SERVER
             se_playerRenamedWriter << (player_.IsAuthenticated()?1:0);
 #else
@@ -11158,6 +11068,7 @@ static void sg_KillChatters(std::istream &s)
 }
 
 static tConfItemFunc sg_KillChatters_conf("CHATTERS_KILL", sg_KillChatters);
+static tAccessLevelSetter sg_KillChatters_conflevel( sg_KillChatters_conf, tAccessLevel_Moderator );
 
 static void sg_SilenceChatters(std::istream &s)
 {
@@ -11177,6 +11088,7 @@ static void sg_SilenceChatters(std::istream &s)
 }
 
 static tConfItemFunc sg_SilenceChatters_conf("CHATTERS_SILENCE", sg_SilenceChatters);
+static tAccessLevelSetter sg_SilenceChatters_conflevel( sg_SilenceChatters_conf, tAccessLevel_Moderator );
 
 static void SuspendChatter_conf_base(std::istream &s, int rounds )
 {
@@ -11210,6 +11122,7 @@ static void SuspendChatters_conf(std::istream &s )
 }
 
 static tConfItemFunc sg_SuspendChatters_conf("CHATTERS_SUSPEND", SuspendChatters_conf);
+static tAccessLevelSetter sg_SuspendChatters_conflevel( sg_SuspendChatters_conf, tAccessLevel_Moderator );
 
 static void sg_ListChatters(std::istream &s)
 {
@@ -11233,3 +11146,4 @@ static void sg_ListChatters(std::istream &s)
 }
 
 static tConfItemFunc sg_ListChatters_conf("CHATTERS_LIST", sg_ListChatters);
+static tAccessLevelSetter sg_ListChatters_confLevel( sg_ListChatters_conf, tAccessLevel_Moderator );

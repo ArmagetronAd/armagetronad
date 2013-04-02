@@ -4516,7 +4516,7 @@ void gCycle::Render(const eCamera *cam){
         {
             displayCycle = true;
         }
-        else if (!p->IsSpectating() && p->IsActive() && p->Object() && p->Object()->Alive())
+        else if (!p->IsSpectating() && p->Object() && p->Object()->Alive())
         {
             if (sg_HideCycles)
             {
