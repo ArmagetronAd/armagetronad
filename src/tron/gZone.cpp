@@ -6665,7 +6665,7 @@ void gObjectZoneHack::OnExit( gCycle * target, REAL time )
     ePlayerNetID *p = target->Player();
     if (p)
     {
-        sg_objectZonePlayerEntered << GOID() << name_ << Position().x << Position().y << p->GetUserName() << target->Position().x << target->Position().y << target->Direction().x << target->Direction().y << se_GameTime();
+        sg_objectZonePlayerLeft << GOID() << name_ << Position().x << Position().y << p->GetUserName() << target->Position().x << target->Position().y << target->Direction().x << target->Direction().y << se_GameTime();
         sg_objectZonePlayerLeft.write();
     }
 }
@@ -7926,7 +7926,12 @@ static void sg_CollapseZoneID(std::istream &s)
         if (Zone)
         {
             if (Zone->GOID() == zoneID)
+            {
                 Zone->Vanish(0.5);
+
+                sg_collapsezoneWriter << zoneID << object_id_str << Zone->GetPosition().x << Zone->GetPosition().y;
+                sg_collapsezoneWriter.write();
+            }
         }
     }
 }
@@ -7952,11 +7957,44 @@ static void sg_DestroyZoneID(std::istream &s)
         if (Zone)
         {
             if (Zone->GOID() == zoneID)
+            {
                 Zone->Collapse();
+
+                sg_collapsezoneWriter << zoneID << object_id_str << Zone->GetPosition().x << Zone->GetPosition().y;
+                sg_collapsezoneWriter.write();
+            }
         }
     }
 }
 static tConfItemFunc sg_DestroyZoneIDConf("DESTROY_ZONE_ID", sg_DestroyZoneID);
+
+static void sg_CollapseAll(std::istream &s)
+{
+    const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
+    for(int i = 0; i < gameObjects.Len(); i++)
+    {
+        gZone *Zone = dynamic_cast<gZone *>(gameObjects[i]);
+        if (Zone)
+        {
+            Zone->Vanish(0.5);
+        }
+    }
+}
+static tConfItemFunc sg_CollapseAllConf("COLLAPSE_ALL", sg_CollapseAll);
+
+static void sg_DestroyAll(std::istream &s)
+{
+    const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
+    for(int i = 0; i < gameObjects.Len(); i++)
+    {
+        gZone *Zone = dynamic_cast<gZone *>(gameObjects[i]);
+        if (Zone)
+        {
+            Zone->Collapse();
+        }
+    }
+}
+static tConfItemFunc sg_DestroyAllConf("DESTROY_ALL", sg_DestroyAll);
 
 static void sg_SetZoneRadius(std::istream &s)
 {

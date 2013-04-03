@@ -5704,7 +5704,7 @@ void ePlayerNetID::RemoveFromGame()
         }
     }
 
-    if( logLeave )
+    if( IsHuman() )
     {
         se_playerLeftWriter << userName_ << nMachine::GetMachine(Owner()).GetIP();
         se_playerLeftWriter.write();

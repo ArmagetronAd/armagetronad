@@ -3695,3 +3695,6 @@ logout_help   Using the given <name>, find the player and logs them out if they 
 custom_shorthand_enabled_help     If set to 1 and CUSTOM_SHORTHAND is found, then CUSTOM_SHORTHAND_CONNECTION will be used to connect.
 custom_shorthand_help             The custom authority to trigger when a player tries to login.
 custom_shorthand_connection_help  The link to connect to when using custom shorthand. Do not include "http://".
+
+collapse_all_help   Causes all zones to vanish smoothly.
+destroy_all_htlp    Causes all zones to vanish instantly.
