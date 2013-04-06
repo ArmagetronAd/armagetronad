@@ -543,6 +543,9 @@ dnl AC_OBJEXT
 if test -n "$ARMAGETRONAD_OS_X_TOOLKIT"; then
 	AC_PROG_OBJCXX
 	AC_PROG_OBJCXXCPP
+else
+    am__fastdepOBJCXX_TRUE=
+    am__fastdepOBJCXX_FALSE='#'
 fi
 
 dnl Make:
