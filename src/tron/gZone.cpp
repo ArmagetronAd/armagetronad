@@ -276,10 +276,6 @@ gZone::gZone( eGrid * grid, const eCoord & pos, bool dynamicCreation, bool delay
 
     color_.r = color_.g = color_.b = 1.0f;
 
-    //  speed at which zone rotates
-    SetRotationSpeed( 0.3f );
-    SetRotationAcceleration( 0.0f );
-
     //??? Look at doing this in the shot or wherever it is created...
     //??? or changing dynamic creation to disableAlpha or something
     if (dynamicCreation)
@@ -405,7 +401,7 @@ void gZone::WriteSync( nMessage & m )
     m << radius_;
 
     // write rotation speed
-    //m << rotationSpeed_;
+    m << rotationSpeed_;
 }
 
 
@@ -453,7 +449,7 @@ void gZone::ReadSync( nMessage & m )
     }
 
     // read rotation speed
-    /*if (!m.End())
+    if (!m.End())
     {
         m >> rotationSpeed_;
     }
@@ -462,7 +458,7 @@ void gZone::ReadSync( nMessage & m )
         // set fixed values
         SetRotationSpeed( .3f );
         SetRotationAcceleration( 0.0f );
-    }*/
+    }
 }
 
 // *******************************************************************************
@@ -1811,9 +1807,6 @@ void gWinZoneHack::OnEnter( gCycle * target, REAL time )
 bool sg_deathZoneRandomColors = false;
 static tSettingItem<bool> sg_deathZoneRandomColorsConf("DEATHZONE_RANDOM_COLORS", sg_deathZoneRandomColors);
 
-REAL sg_deathZoneRotation = 0.3;
-static tSettingItem<REAL> sg_deathZoneRotationConf("DEATHZONE_ROTATION", sg_deathZoneRotation);
-
 gDeathZoneHack::gDeathZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreation, eTeam * teamowner, bool delayCreation )
 :gZone( grid, pos, dynamicCreation, delayCreation )
 {
@@ -1855,8 +1848,6 @@ gDeathZoneHack::gDeathZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCr
     {
         deathZoneType = TYPE_NORMAL;
     }
-
-    SetRotationSpeed(sg_deathZoneRotation);
 
     if (!delayCreation)
         grid->AddGameObjectInteresting(this);

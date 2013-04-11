@@ -1,4 +1,16 @@
 ===========================
+Changes in r884
+===========================
+Removed:
+    * DEATHZONE_ROTATION  # Command was not working and so there is no point in having it.
+
+Improvements:
+    * Implemented the colors in name length limit. The code checks the player for any color
+      codes after filteration (if filter is enabled, colors will be removed). IF colors exist
+      in their name, then their colors will get removed and the code checks the length of their
+      name. IF length of that name is less than 16, then those colors will be accepted into server.        
+
+===========================
 Changes in r883
 ===========================
 Improvements:

@@ -203,6 +203,8 @@ public:
 
     void RemoveHex();                                       //!< ?
 
+    static bool HasColors( const char *c );    //!< Checks whether the string contains any string or not.
+
     //! Creates a color string inserter
     inline static tColoredStringProxy ColorString( REAL r,REAL g,REAL b )
     {

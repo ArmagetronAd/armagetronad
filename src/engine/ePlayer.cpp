@@ -6889,7 +6889,22 @@ void ePlayerNetID::ReadSync(nMessage &m)
         // filter
         se_OptionalNameFilters( remoteName );
 
-        se_CutString( remoteName, 16 );
+        //  check whether player's display name has colors in it
+        if (tColoredString::HasColors(remoteName))
+        {
+            //  remove all colors from name
+            tString colorlessName = tColoredString::RemoveColors(remoteName, false);
+
+            //  check if the colorless name's length is longer than the limited length
+            if (colorlessName.Len() > 16)
+            {
+                se_CutString( remoteName, 16 );
+            }
+        }
+        else
+        {
+            se_CutString( remoteName, 16 );
+        }
     }
 
     // directly apply name changes sent from the server, they are safe.
@@ -7449,15 +7464,15 @@ tString ePlayerNetID::Ranking( int MAX, bool cut )
         ret << tColoredString::ColorString(1,.5,.5);
         ret << tOutput("$player_scoretable_name");
         ret << tColoredString::ColorString(-1,-1,-1);
-        ret.SetPos(17, cut );
+        ret.SetPos(19, cut );
         ret << tOutput("$player_scoretable_alive");
-        ret.SetPos(24, cut );
+        ret.SetPos(26, cut );
         ret << tOutput("$player_scoretable_score");
-        ret.SetPos(31, cut );
+        ret.SetPos(33, cut );
         ret << tOutput("$player_scoretable_ping");
-        ret.SetPos(37, cut );
+        ret.SetPos(39, cut );
         ret << tOutput("$player_scoretable_team");
-        ret.SetPos(53, cut );
+        ret.SetPos(56, cut );
         ret << "\n";
 
         int max = se_PlayerNetIDs.Len();
@@ -7487,7 +7502,7 @@ tString ePlayerNetID::Ranking( int MAX, bool cut )
                 line << tColoredString::ColorString(-1,-1,-1) << "*";
             line.SetPos(2, cut);
             line << *p;
-            line.SetPos(17, false );
+            line.SetPos(19, false );
             if ( p->Object() && p->Object()->Alive() )
             {
                 line << tColoredString::ColorString(0,1,0) << tOutput("$player_scoretable_alive_yes") << tColoredString::ColorString(-1,-1,-1);
@@ -7496,21 +7511,21 @@ tString ePlayerNetID::Ranking( int MAX, bool cut )
             {
                 line << tColoredString::ColorString(1,0,0) << tOutput("$player_scoretable_alive_no") << tColoredString::ColorString(-1,-1,-1);
             }
-            line.SetPos(24, cut );
+            line.SetPos(26, cut );
             line << p->score;
 
             if (p->IsActive())
             {
-                line.SetPos(31, cut );
+                line.SetPos(33, cut );
                 //line << "ping goes here";
                 line << int(p->ping*1000);
-                line.SetPos(37, cut );
+                line.SetPos(39, cut );
                 if ( p->currentTeam )
                 {
                     //tString teamtemp = p->currentTeam->Name();
                     //teamtemp.RemoveHex();
                     line << tColoredString::RemoveColors(p->currentTeam->Name());
-                    line.SetPos(53, cut );
+                    line.SetPos(56, cut );
                 }
             }
             else
