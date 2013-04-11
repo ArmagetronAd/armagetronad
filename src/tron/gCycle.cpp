@@ -4496,33 +4496,11 @@ void gCycle::Render(const eCamera *cam){
 
     //  check whether to display or not
     bool displayCycle = true;
-    ePlayerNetID *p = NULL;
-    for(int i = 0; i < se_PlayerNetIDs.Len(); i++)
+    if (sg_HideCycles && cam->Player()->Object())
     {
-        ePlayerNetID *pl = se_PlayerNetIDs[i];
-        if (pl)
+        if ((cam->Player()->Object()->Alive()) && (cam->Player() != this->Player()))
         {
-            if (pl->Owner() == sn_myNetID)
-            {
-                p = pl;
-                break;
-            }
-        }
-    }
-
-    if (p)
-    {
-        if (p->IsSpectating())
-        {
-            displayCycle = true;
-        }
-        else if (!p->IsSpectating() && p->Object() && p->Object()->Alive())
-        {
-            if (sg_HideCycles)
-            {
-                if ((Player() != p) || (!Player()->IsHuman()))
-                    displayCycle = false;
-            }
+            displayCycle = false;
         }
     }
 

@@ -1,4 +1,18 @@
 ===========================
+Changes in r883
+===========================
+Improvements:
+    * Racing: Using different method to load/save map records. Previously
+              overwritten or transfer to wrong maps occured. Hopefully it's fixed now.
+    * Added other protocol versions of clients/servers to the code. nConfig.cpp is it.
+
+Additions:
+    * Forgot to mention these previously.
+    * New Commands:
+        + COLLAPSE_ALL  # Causes all zones on grid to disappear smoothly.
+        + DESTROY_ALL   # Causes all zones on grid to disappear instantly.
+
+===========================
 Changes in r880
 ===========================
 Improvements:
@@ -19,7 +33,7 @@ Additions:
     * LOGOUT <name>            # Using the given <name>, find the player and
                                # logs them out if they already logged in.
     * Custom Shorthand commands:
-        !- CUSTOM_SORTHAND_ENABLED <0|1>      # If set to 1 and CUSTOM_SHORTHAND is found,
+        !- CUSTOM_SHORTHAND_ENABLED <0|1>     # If set to 1 and CUSTOM_SHORTHAND is found,
                                               # then CUSTOM_SHORTHAND_CONNECTION will be used to connect.
         !- CUSTOM_SHORTHAND <authority>       # The custom authority to trigger when a player tries to login.
         !- CUSTOM_SHORTHAND_CONNECTION <link> # The link to connect to when using custom shorthand. Do not include http://

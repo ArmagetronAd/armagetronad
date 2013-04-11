@@ -333,8 +333,9 @@ void gRaceScores::Add(gRacePlayer *racePlayer, bool finished)
 
 void gRaceScores::Read()
 {
-    tString Input;
-    Input << "race_scores/" << sg_currentMap << ".txt";
+    tString Input, mapFile;
+    mapFile << pz_mapAuthor << "/" << pz_mapCategory << "/" << pz_mapName << "-" << pz_mapVersion << ".aamap.xml";
+    Input << "race_scores/" << mapFile << ".txt";
     sn_ConsoleOut(tOutput("$race_ranks_loading", pz_mapName));
 
     //  clear old records if they exist to make way for the new
@@ -383,11 +384,12 @@ void gRaceScores::Read()
 
 void gRaceScores::Write()
 {
-    tString Output;
+    tString Output, mapFile;
 
     Sort();
 
-    Output << "race_scores/" << sg_currentMap << ".txt";
+    mapFile << pz_mapAuthor << "/" << pz_mapCategory << "/" << pz_mapName << "-" << pz_mapVersion << ".aamap.xml";
+    Output << "race_scores/" << mapFile << ".txt";
     sn_ConsoleOut(tOutput("$race_ranks_saving", pz_mapName));
 
     if (sg_RaceScores.Len() > 0)
