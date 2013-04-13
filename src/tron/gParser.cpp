@@ -493,11 +493,12 @@ gParser::parseSpawn(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
 }
 
 bool
-gParser::parseShapeCircle(eGrid *grid, xmlNodePtr cur, eCoord &zonePos, float &radius, float& growth, tString &rotate, const xmlChar * keyword, gRealColor &zoneColor, bool &colorsExist, eCoord &zoneDir, bool &zoneInteract, std::vector<eCoord> &route)
+gParser::parseShapeCircle(eGrid *grid, xmlNodePtr cur, eCoord &zonePos, float &radius, float& growth, tString &rotate, bool &canRotate, const xmlChar * keyword, gRealColor &zoneColor, bool &colorsExist, eCoord &zoneDir, bool &zoneInteract, std::vector<eCoord> &route)
 {
     radius = myxmlGetPropFloat(cur, "radius");
     growth = myxmlGetPropFloat(cur, "growth");
     rotate = myxmlGetPropString(cur, "rotate");
+    if (rotate.Filter() != "") canRotate = true;
 
     cur = cur->xmlChildrenNode;
     while( cur != NULL) {
@@ -604,6 +605,7 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
 {
     float radius, growth;
     tString rotate;
+    bool canRotate = false;;
     eCoord zonePos;
     bool shapeFound = false;
     gZone * zone = NULL;
@@ -627,7 +629,7 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
         if (!xmlStrcmp(cur->name, (const xmlChar *)"text") || !xmlStrcmp(cur->name, (const xmlChar *)"comment")) {}
         else if (isElement(shape->name, (const xmlChar *)"ShapeCircle", keyword))
         {
-            shapeFound = parseShapeCircle(grid, shape, zonePos, radius, growth, rotate, keyword, zoneColor, colorsExist, zoneDir, zoneInteract, route);
+            shapeFound = parseShapeCircle(grid, shape, zonePos, radius, growth, rotate, canRotate, keyword, zoneColor, colorsExist, zoneDir, zoneInteract, route);
 
             //  parse for teleport data
             parseTeleportZone(grid, shape, keyword, zoneJump, zoneRelAbsStr, relJump, ndir, reloc);
@@ -838,12 +840,26 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
             zone->SetRadius( radius*sizeMultiplier );
             zone->SetExpansionSpeed( growth*sizeMultiplier );
 
-            if (rotate.Filter() != "")
+            if (canRotate)
             {
-                REAL zoneRotate = atof(rotate);
-                if (zoneRotate != 0.3f)
+                //  check whether this is deathzone or not (since deathzone has it's own rotation)
+                gDeathZoneHack *gDeathZone = dynamic_cast<gDeathZoneHack *>(zone);
+                if (!gDeathZone)
                 {
+                    REAL zoneRotate = atof(rotate);
                     zone->SetRotationSpeed(zoneRotate);
+                }
+                else
+                {
+                    if (sg_deathZoneRotation)
+                    {
+                        zone->SetRotationSpeed(sg_deathZoneRotationSpeed);
+                    }
+                    else
+                    {
+                        REAL zoneRotate = atof(rotate);
+                        zone->SetRotationSpeed(zoneRotate);
+                    }
                 }
             }
 

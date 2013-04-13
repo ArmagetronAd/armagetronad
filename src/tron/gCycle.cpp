@@ -4504,6 +4504,8 @@ void gCycle::Render(const eCamera *cam){
         }
     }
 
+    if (!displayCycle) return;
+
     // are we blinking from invulnerability?
     bool blinking = false;
     if ( lastTime > spawnTime_ && !Vulnerable() )

@@ -144,6 +144,7 @@ protected:
     eCoord newImpactVelocity_;
 
     bool dynamicCreation_;  //??? remove
+    bool delayCreation_;
     tJUST_CONTROLLED_PTR< ePlayerNetID > pOwner_;
     tJUST_CONTROLLED_PTR< gCycle > pSeekingCycle_;       //!< cycle owner of this zone
     bool seeking_;
@@ -838,4 +839,8 @@ tFunction & tFunction::SetSlope( REAL const & slope )
 	this->slope_ = slope;
 	return *this;
 }
+
+extern bool sg_deathZoneRotation;
+extern REAL sg_deathZoneRotationSpeed;
+
 #endif

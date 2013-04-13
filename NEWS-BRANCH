@@ -1,4 +1,21 @@
 ===========================
+Changes in r885
+===========================
+Improvements:
+    * Added missing language strings in english_base.txt
+    * Zones rotation now work fine.
+    * HIDE_CYCLES now completely causes other cycles to vanish while your playing.
+      This also ensures that your the only player you can see (unless your using
+      hud map from 0.4 trunk version).            
+
+Additions:
+    * Readded DEATHZONE_ROTATION but made it into a trigger command. Enabling that
+      will let you set the rotation of all spawning deathzones.
+    * Added DEATHZONE_ROTATION_SPEED which is the speed at which the deathzone spins.
+    * Added SET_ZONE_ROTATION which is like all SET_ZONE_* commands. Give the name of the zone
+      and set the speed at which that zone should spin at.            
+
+===========================
 Changes in r884
 ===========================
 Removed:

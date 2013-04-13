@@ -213,7 +213,7 @@ int gZone::FindFirst(tString name)
         {
             if (zone->name_ == name)
             {
-                return j;\
+                return j;
             }
         }
     }
@@ -262,6 +262,7 @@ gZone::gZone( eGrid * grid, const eCoord & pos, bool dynamicCreation, bool delay
 
     destroyed_ = false;
     dynamicCreation_ = dynamicCreation;
+    delayCreation_ = delayCreation;
     wallInteract_ = false;
     wallBouncesLeft_ = 0;
     targetRadius_ = 0;
@@ -275,6 +276,10 @@ gZone::gZone( eGrid * grid, const eCoord & pos, bool dynamicCreation, bool delay
     name_ = tString("");
 
     color_.r = color_.g = color_.b = 1.0f;
+
+    // set fixed values
+    SetRotationSpeed( .3f );
+    SetRotationAcceleration( 0.0f );
 
     //??? Look at doing this in the shot or wherever it is created...
     //??? or changing dynamic creation to disableAlpha or something
@@ -314,6 +319,7 @@ gZone::gZone( nMessage & m )
 {
     destroyed_ = false;
     dynamicCreation_ = false;
+    delayCreation_ = false;
     wallInteract_ = false;
     wallBouncesLeft_ = 0;
     lastImpactTime_ = 0;
@@ -333,8 +339,13 @@ gZone::gZone( nMessage & m )
     // initialize color to white, ReadSync will fill in the true value if available
     color_.r = color_.g = color_.b = 1.0f;
 
+    // set fixed values
+    SetRotationSpeed( .3f );
+    SetRotationAcceleration( 0.0f );
+
     // add to game grid
-    this->AddToList();
+    if(!delayCreation_)
+        this->AddToList();
 
     // initialize position functions
     SetPosition( pos );
@@ -1807,6 +1818,12 @@ void gWinZoneHack::OnEnter( gCycle * target, REAL time )
 bool sg_deathZoneRandomColors = false;
 static tSettingItem<bool> sg_deathZoneRandomColorsConf("DEATHZONE_RANDOM_COLORS", sg_deathZoneRandomColors);
 
+bool sg_deathZoneRotation = false;
+static tSettingItem<bool> sg_deathZoneRotationConf("DEATHZONE_ROTATION", sg_deathZoneRotation);
+
+REAL sg_deathZoneRotationSpeed = 0.3f;
+static tSettingItem<REAL> sg_deathZoneRotationSpeedConf("DEATHZONE_ROTATION_SPEED", sg_deathZoneRotationSpeed);
+
 gDeathZoneHack::gDeathZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreation, eTeam * teamowner, bool delayCreation )
 :gZone( grid, pos, dynamicCreation, delayCreation )
 {
@@ -1838,6 +1855,9 @@ gDeathZoneHack::gDeathZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCr
         color_.b = colorG;
         color_.g = colorB;
     }
+
+    if (sg_deathZoneRotation)
+        SetRotationSpeed(sg_deathZoneRotationSpeed);
 
     if (teamowner!=NULL)
     {
@@ -1872,6 +1892,9 @@ gDeathZoneHack::gDeathZoneHack( nMessage & m )
 {
     deathZoneType = TYPE_NORMAL;
     pLastShotCollision = NULL;
+
+    if (sg_deathZoneRotation)
+        SetRotationSpeed(sg_deathZoneRotationSpeed);
 }
 
 
@@ -8226,3 +8249,39 @@ static void sg_SetZoneExpansion(std::istream &s)
 
 static tConfItemFunc sg_SetZoneExpansion_conf("SET_ZONE_EXPANSION",&sg_SetZoneExpansion);
 
+static void sg_SetZoneRotation(std::istream &s)
+{
+    tString params;
+    params.ReadLine( s, true );
+
+    // parse the line to get the param : object_id, expansion
+    int pos = 0;                 //
+    const tString object_id_str = params.ExtractNonBlankSubString(pos);
+    const tString rotation_str = params.ExtractNonBlankSubString(pos);
+    REAL rotation = atof(rotation_str);
+
+    // first check for the name
+    int zone_id;
+    zone_id=gZone::FindFirst(object_id_str);
+    if (zone_id==-1)
+    {
+        /*
+        zone_id = atoi(object_id_str);
+        if (zone_id==0 && object_id_str!="0")*/ return;
+    }
+
+    const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
+    while (zone_id!=-1)
+    {
+        // get the zone ...
+        gZone *zone=dynamic_cast<gZone *>(gameObjects(zone_id));
+        if (zone)
+        {
+            zone->SetRotationSpeed(rotation);
+            zone->RequestSync();
+        }
+        zone_id=gZone::FindNext(object_id_str, zone_id);
+    }
+}
+
+static tConfItemFunc sg_SetZoneRotation_conf("SET_ZONE_ROTATION",&sg_SetZoneRotation);

@@ -1,0 +1,5 @@
+This is the list of to-do things planned ahead. More will be added as ideas stream in.
+
+= SET_ZONE_ID_* command to use when using zone_id instead of zone_name.
+= Add HIDE_CYCLES to menu under "Special Setup" since many don't know the proper use of console commands.
+= Create /chat for the use of moderators, admins and higher access level (level < 2) players. 

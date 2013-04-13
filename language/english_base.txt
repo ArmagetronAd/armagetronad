@@ -313,6 +313,8 @@ reset_rotation_help                     Resets map and config rotation
 reset_rotation_on_start_new_match_help  If enabled, map and config rotation will be reset when a START_NEW_MATCH command is issued
 reset_rotation_message                  Map and config rotation have been reset.
 
+rotation_max_help    The maximum number of rounds the currently loaded map should remain before new map should be selected and loaded.
+
 # limits
 speed_factor_help		Speed modifier for the cycles
 sp_speed_factor_help		Speed modifier for the cycles
@@ -595,6 +597,7 @@ vote_rejected_voting_suspended		    Voting has been suspended by the Administrat
 
 fadeout_name_delay_help				Time the player names are shown. Set to 0 if you don't want to show them at all or -1 if you want to show them always.
 show_own_name_help					  Should your name be displayed above your cycle on your screen?
+show_colored_name_help        Should names appear to be colored above the cycles that players control?
 dead_console_decoration       *DEAD* 
 
 #********************************************
@@ -1031,6 +1034,7 @@ message_of_day_help		Message sent to clients on connection, if supported by the 
 title_of_day_help		If fullscreen display is supported, this will be the title above message_of_day
 message_of_day_timeout_help		Time message_of_day is displayed for in fullscreen mode
 round_console_message_help	Message sent to clients after every round. Each time this is used, the message is stored and executed at round start.
+round_console_message_clear_help  Clear all messages stored in the console message.
 round_center_message_help	Big message sent to clients after every round
 
 password_storage_help			Determines where your passwords are stored: 1 means on hard disk (dangerous), 0 in memory and -1 means they are not stored at all.
@@ -2526,6 +2530,7 @@ player_admin_kill			  \1 0xRESETTwas smitten by an administrator.\n
 player_admin_slap_free		  \1 0xRESETThas been slapped by an administrator.\n
 player_admin_slap_win		  \1 has been hugged by an administrator and got \2 points.\n
 player_admin_slap_lose		  \1 has been slapped by an administrator and lost \2 points.\n
+slap_help                     Slaps the given player by causing their to gain/lose score points.
 give_points_help              Slaps the given player by granting them with the specified amount of points. Be smart and you may be able to hug your users, too ;) \n
 take_points_help              Slaps the given player by punishing them with the specified amound of points. Be careful or you will lose a of points :P \n
 player_win_instant			  \1 was awarded \2 points for hitting the instant win zone.\n
@@ -3292,11 +3297,12 @@ global_id_help                If set to 1, Global IDs (Armathentication) will be
 #
 #*************************************
 #*************************************
-race_timer_enabled_help		          (0 = Disable, 1 = Enable) race timer. Don't change during round.
+race_timer_enabled_help		          0 = Disable, 1 = Enable) race timer. Don't change during round.
 race_end_delay_help		              Number of seconds to give players to finish after target reached
-race_score_deplete_help               Number the score depletes by everytime a player enters the win zone.
-race_score_type_help		          0-No sorting; 1-Sort by best score; 2-sort by best time.
-race_log_time_help                    If enabled, it displays the reached time and the position of arrival.
+race_score_deplete_help             Number the score depletes by everytime a player enters the win zone.
+race_score_type_help		            0-No sorting; 1-Sort by best score; 2-sort by best time.
+race_log_time_help                  If enabled, it displays the reached time and the position of arrival.
+race_log_login_help                 If enabled, it will only log the time records of players that have logged in.
 
 player_reach_race		                  \1 0xfffffffinished with \2 points in \3 seconds.\n
 player_reach_race_first               \1 0xfffffffinished 1st in \2 seconds.\n
@@ -3465,6 +3471,7 @@ set_zone_position_help                         change a zones position
 set_zone_speed_help                            change a zones speed
 set_zone_color_help                            Change the color of a zone
 set_zone_expansion_help                        Change the Expansion rate of a zone
+set_zone_rotation_help                         Change the rotation speed of a zone
 condense_conquest_output                       Zone conquest output condensed into one line
 
 cycle_target_assignment      0xff9900Your target is now \1.\n
@@ -3505,12 +3512,15 @@ access_level_queue_configs_help     Sets the access level required to use chat c
 #*************************************
 queue_limit_help           This is the amount that players can use up for queueing maps or configs.
 queue_limit_excempt_help   Access level equal to or below this do not have queue limit.
-queue_limit_enabled        Should the people have limits when queueing?
+queue_limit_enabled_help   Should the people have limits when queueing?
+queue_limit_reached        You have reached your queueing limit allowed to use. Next refill is in \1 minutes.\n
+
+queue_log_help             If set to 1, players queueing maps/configs will get written to queuelog.txt
+
 queue_increment_help       If set to >0, players will get their queues increased during refill by this amount.
+
 queue_refill_time_help     How long each time should players refill take? This is measured in hours.
 queue_refill_active_help   Should players be in server to have their queue refill active?
-
-queue_limit_reached        You have reached your queueing limit allowed to use. Next refill is in \1 minutes.\n
 queue_refill_waiting       You still have to wait \1 minutes for your queueing limit to refill.\n
 
 # items that should not be translated
@@ -3697,4 +3707,19 @@ custom_shorthand_help             The custom authority to trigger when a player 
 custom_shorthand_connection_help  The link to connect to when using custom shorthand. Do not include "http://".
 
 collapse_all_help   Causes all zones to vanish smoothly.
-destroy_all_htlp    Causes all zones to vanish instantly.
+destroy_all_help    Causes all zones to vanish instantly.
+
+deathzone_rotation_help         If set to 1, DEATHZONE_ROTATION_SPEED will be used for the speed of deathzones.
+deathzone_rotation_speed_help   The speed at which the rotation of the deathzones. Negative values cause it to spin in the other way.
+
+show_position_help      If set to 1, the current location the player is at will be displayed on screen.
+position_locx_help      The location along the horizontal axes to display.
+position_locy_help      The location along the vertical axes to display.
+position_size_help      The size of the position to display.
+
+targetzone_color_r_help   The red portion of the target zone's color.
+targetzone_color_g_help   The green portion of the target zone's color.
+targetzone_color_b_help   The blue portion of the target zone's color.
+
+
+
