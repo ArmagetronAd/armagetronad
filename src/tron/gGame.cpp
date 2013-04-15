@@ -4581,8 +4581,6 @@ void gGame::StateUpdate(){
             sg_currentMapWriter << sg_currentSettings->sizeFactor << mapfile;
             sg_currentMapWriter.write();
 
-            sg_currentMap = mapfile;
-
             nConfItemBase::s_SendConfig(false);
             // wait extra long for the clients to delete the grid; they really need to be
             // synced this time
@@ -4593,6 +4591,8 @@ void gGame::StateUpdate(){
 
         case GS_CREATE_GRID:
             // sr_con.autoDisplayAtNewline=true;
+
+            sg_currentMap = mapfile;
 
             //HACK RACE begin
             if ( sg_RaceTimerEnabled )

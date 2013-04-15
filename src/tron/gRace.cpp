@@ -124,6 +124,8 @@ int gRace::finishPlace_ = 0;
 REAL gRace::firstFinishTime_ = 0;
 tString gRace::firstToArive_;
 
+tString gRaceScores::mapFile_ = tString("");
+
 bool sg_raceOutputSent = false;
 
 tList<gRaceScores> sg_RaceScores;
@@ -333,10 +335,12 @@ void gRaceScores::Add(gRacePlayer *racePlayer, bool finished)
 
 void gRaceScores::Read()
 {
-    tString Input, mapFile;
-    mapFile << pz_mapAuthor << "/" << pz_mapCategory << "/" << pz_mapName << "-" << pz_mapVersion << ".aamap.xml";
-    Input << "race_scores/" << mapFile << ".txt";
+    tString Input;
+    //mapFile << pz_mapAuthor << "/" << pz_mapCategory << "/" << pz_mapName << "-" << pz_mapVersion << ".aamap.xml";
+    Input << "race_scores/" << sg_currentMap << ".txt";
     sn_ConsoleOut(tOutput("$race_ranks_loading", pz_mapName));
+
+    mapFile_ = sg_currentMap;
 
     //  clear old records if they exist to make way for the new
     if (sg_RaceScores.Len() > 0)
@@ -384,12 +388,12 @@ void gRaceScores::Read()
 
 void gRaceScores::Write()
 {
-    tString Output, mapFile;
+    tString Output;
 
     Sort();
 
-    mapFile << pz_mapAuthor << "/" << pz_mapCategory << "/" << pz_mapName << "-" << pz_mapVersion << ".aamap.xml";
-    Output << "race_scores/" << mapFile << ".txt";
+    //mapFile << pz_mapAuthor << "/" << pz_mapCategory << "/" << pz_mapName << "-" << pz_mapVersion << ".aamap.xml";
+    Output << "race_scores/" << mapFile_ << ".txt";
     sn_ConsoleOut(tOutput("$race_ranks_saving", pz_mapName));
 
     if (sg_RaceScores.Len() > 0)

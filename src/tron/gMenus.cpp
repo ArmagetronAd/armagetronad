@@ -462,6 +462,8 @@ void sg_SpecialMenu()
 {
     uMenu menu("$special_setup_menu_text");
 
+    //new uMenuItemToggle(&menu, "$hide_cycles_walls_menu_text", "$hide_cycles_walls_menu_help", sg_HideCyclesWalls);
+    //new uMenuItemToggle(&menu, "$hide_cycles_menu_text", "$hide_cycles_menu_help", sg_HideCycles);
     new uMenuItemToggle(&menu, "$tab_completion_menu_text", "$tab_completion_menu_help", se_tabCompletion);
     new uMenuItemToggle(&menu, "$highlight_name_menu_text", "$highlight_name_menu_help", se_highlightMyName);
 

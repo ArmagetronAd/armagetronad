@@ -454,7 +454,7 @@ void gWallRim::RenderReal(const eCamera *cam){
         }
 
         //eWall::Render_helper(edge,(p1->x+p1->y)/SCALE,(p2->x+p2->y)/SCALE,40,height);
-            
+
         if ( transparency )
             glEnable( GL_DEPTH_TEST );
     }
@@ -1139,15 +1139,15 @@ void gNetPlayerWall::RenderNormal(const eCoord &p1,const eCoord &p2,REAL ta,REAL
             glColor4f(r,g,b,1);
             glTexCoord2f(ta,hfrac);
             glVertex3f(p1.x,p1.y,extrarise);
-            
+
             glColor4f(r,g,b,1);
             glTexCoord2f(ta,0);
             glVertex3f(p1.x,p1.y,extrarise + h*hfrac);
-            
+
             glColor4f(r,g,b,1);
             glTexCoord2f(te,0);
             glVertex3f(p2.x,p2.y,extrarise + h*hfrac);
-            
+
             glColor4f(r,g,b,1);
             glTexCoord2f(te,hfrac);
             glVertex3f(p2.x,p2.y,extrarise);
@@ -1212,7 +1212,7 @@ void gNetPlayerWall::RenderBegin(const eCoord &p1,const eCoord &pp2,REAL ta,REAL
         !good(ta)   || !good(te) ||
         !good(h)   || !good(hfrac) ||
         !good(cycle_->dir.x)   || !good(cycle_->dir.y) ||
-        !good(cycle_->skew) || 
+        !good(cycle_->skew) ||
         !good(r)   || !good(g) || !good(b) || !good(a)
         )
     {
@@ -1231,7 +1231,7 @@ void gNetPlayerWall::RenderBegin(const eCoord &p1,const eCoord &pp2,REAL ta,REAL
 #define segs 5
 #define seginv (1/float(segs))
             BeginLineStrip();
-            
+
             // upperlinecolor(r,g,b,a);//a*afunc(rat));
 
             for (int i=0;i<=segs;i++){

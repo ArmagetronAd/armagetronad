@@ -4435,6 +4435,9 @@ void gCycleWallsDisplayListManager::RenderAllWithDisplayList( eCamera const * ca
     RenderAll( camera, cycle, wallsWithDisplayList_ );
 }
 
+bool sg_HideCyclesWalls = false;
+static tConfItem<bool> sg_HideCyclesWallsConf("HIDE_CYCLES_WALLS", sg_HideCyclesWalls);
+
 void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * cycle, gNetPlayerWall * list )
 {
     if( !list )
@@ -4451,6 +4454,15 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
     while( run )
     {
         gNetPlayerWall * next = run->Next();
+
+        if (sg_HideCyclesWalls && camera->Player()->Object())
+        {
+            if ((camera->Player()->Object()->Alive()) && (camera->Player() != run->Cycle()->Player()))
+            {
+                run = next;
+                continue;
+            }
+        }
         run->RenderList( true, gNetPlayerWall::gWallRenderMode_Lines );
         run = next;
     }
@@ -4464,6 +4476,14 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
     while( run )
     {
         gNetPlayerWall * next = run->Next();
+        if (sg_HideCyclesWalls && camera->Player()->Object())
+        {
+            if ((camera->Player()->Object()->Alive()) && (camera->Player() != run->Cycle()->Player()))
+            {
+                run = next;
+                continue;
+            }
+        }
         run->RenderList( true, gNetPlayerWall::gWallRenderMode_Quads );
         run = next;
     }
@@ -6986,3 +7006,22 @@ static void sg_TeleportPlayer(std::istream &s)
 static tConfItemFunc sg_TeleportPlayer_conf("TELEPORT_PLAYER",&sg_TeleportPlayer);
 
 
+static void sg_setCycleSpeed(std::istream &s)
+{
+    tString playerStr, speedStr;
+    s >> playerStr;
+
+    ePlayerNetID *player = ePlayerNetID::FindPlayerByName(playerStr);
+
+    if (player)
+    {
+        gCycle *pCycle = dynamic_cast<gCycle *>(player->Object());
+        if (pCycle && pCycle->Alive())
+        {
+            s >> speedStr;
+
+            pCycle->verletSpeed_ = atof(speedStr);
+        }
+    }
+}
+static tConfItemFunc sg_setCycleSpeedConf("SET_CYCLE_SPEED", sg_setCycleSpeed);

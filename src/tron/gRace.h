@@ -167,6 +167,8 @@ class gRaceScores
         int     played_;        // number of times finished map
         int     rank_;          // number rank player is on the leaderboard
 
+        static tString mapFile_;
+
         static void Switch(int i, int j);   //!> Switches the i and j
         static bool InOrder(int i, int j);  //!> Checks if they are in order
 };

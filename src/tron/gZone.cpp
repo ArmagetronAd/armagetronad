@@ -204,6 +204,8 @@ inline void gZone::SetFunctionNow( tFunction & f, REAL value ) const
 int gZone::FindFirst(tString name)
 {
     eGrid *grid = eGrid::CurrentGrid();
+    if (!grid) return -1;
+
     const tList<eGameObject>& gameObjects = grid->GameObjects();
     for (int j=gameObjects.Len()-1;j>=0;j--)
     {
@@ -225,6 +227,8 @@ int gZone::FindFirst(tString name)
 int gZone::FindNext(tString name, int prev_pos)
 {
     eGrid *grid = eGrid::CurrentGrid();
+    if (!grid) return -1;
+
     const tList<eGameObject>& gameObjects = grid->GameObjects();
     for (int j=prev_pos-1;j>=0;j--)
     {
@@ -7860,16 +7864,18 @@ static void sg_CollapseZone(std::istream &s)
     int pos = 0;                 //
     const tString object_id_str = params.ExtractNonBlankSubString(pos);
     // first check for the name
-    int zone_id;
+    int zone_id = -1;
     zone_id=gZone::FindFirst(object_id_str);
     if (zone_id==-1)
     {
-        /*
         zone_id = atoi(object_id_str);
-        if (zone_id==0 && object_id_str!="0")*/ return;
+        if (zone_id==0 && object_id_str!="0") return;
     }
 
-    const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid) return;
+
+    const tList<eGameObject>& gameObjects = grid->GameObjects();
     while (zone_id!=-1)
     {
         // get the zone ...
@@ -7895,16 +7901,18 @@ static void sg_DestroyZone(std::istream &s)
     int pos = 0;                 //
     const tString object_id_str = params.ExtractNonBlankSubString(pos);
     // first check for the name
-    int zone_id;
+    int zone_id = -1;
     zone_id=gZone::FindFirst(object_id_str);
     if (zone_id==-1)
     {
-        /*
         zone_id = atoi(object_id_str);
-        if (zone_id==0 && object_id_str!="0")*/ return;
+        if (zone_id==0 && object_id_str!="0") return;
     }
 
-    const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid) return;
+
+    const tList<eGameObject>& gameObjects = grid->GameObjects();
     while (zone_id!=-1)
     {
         // get the zone ...
@@ -7933,7 +7941,10 @@ static void sg_CollapseZoneID(std::istream &s)
 
     int zoneID = atoi(object_id_str);
 
-    const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid) return;
+
+    const tList<eGameObject>& gameObjects = grid->GameObjects();
     for(int i = 0; i < gameObjects.Len(); i++)
     {
         gZone *Zone = dynamic_cast<gZone *>(gameObjects[i]);
@@ -7964,7 +7975,10 @@ static void sg_DestroyZoneID(std::istream &s)
 
     int zoneID = atoi(object_id_str);
 
-    const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid) return;
+
+    const tList<eGameObject>& gameObjects = grid->GameObjects();
     for(int i = 0; i < gameObjects.Len(); i++)
     {
         gZone *Zone = dynamic_cast<gZone *>(gameObjects[i]);
@@ -7984,7 +7998,10 @@ static tConfItemFunc sg_DestroyZoneIDConf("DESTROY_ZONE_ID", sg_DestroyZoneID);
 
 static void sg_CollapseAll(std::istream &s)
 {
-    const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid) return;
+
+    const tList<eGameObject>& gameObjects = grid->GameObjects();
     for(int i = 0; i < gameObjects.Len(); i++)
     {
         gZone *Zone = dynamic_cast<gZone *>(gameObjects[i]);
@@ -7998,7 +8015,10 @@ static tConfItemFunc sg_CollapseAllConf("COLLAPSE_ALL", sg_CollapseAll);
 
 static void sg_DestroyAll(std::istream &s)
 {
-    const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid) return;
+
+    const tList<eGameObject>& gameObjects = grid->GameObjects();
     for(int i = 0; i < gameObjects.Len(); i++)
     {
         gZone *Zone = dynamic_cast<gZone *>(gameObjects[i]);
@@ -8024,15 +8044,18 @@ static void sg_SetZoneRadius(std::istream &s)
     REAL speed = atof(speed_str);
 
     // first check for the name
-    int zone_id;
+    int zone_id = -1;
     zone_id=gZone::FindFirst(object_id_str);
     if (zone_id==-1)
-    {/*
-        zone_id = atoi(object_id_str);
+    {
+        /*zone_id = atoi(object_id_str);
         if (zone_id==0 && object_id_str!="0")*/ return;
     }
 
-    const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid) return;
+
+    const tList<eGameObject>& gameObjects = grid->GameObjects();
     while (zone_id!=-1)
     {
         // get the zone ...
@@ -8077,16 +8100,18 @@ static void sg_SetZoneRoute(std::istream &s)
     }
 
     // first check for the name
-    int zone_id;
+    int zone_id = -1;
     zone_id=gZone::FindFirst(object_id_str);
     if (zone_id==-1)
     {
-        /*
-        zone_id = atoi(object_id_str);
+        /*zone_id = atoi(object_id_str);
         if (zone_id==0 && object_id_str!="0")*/ return;
     }
 
-    const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid) return;
+
+    const tList<eGameObject>& gameObjects = grid->GameObjects();
     while (zone_id!=-1)
     {
         // get the zone ...
@@ -8132,16 +8157,18 @@ static void sg_SetZoneSpeed(std::istream &s)
     REAL speed = atof(speedstr)*gArena::SizeMultiplier();
 
     // first check for the name
-    int zone_id;
+    int zone_id = -1;
     zone_id=gZone::FindFirst(object_id_str);
     if (zone_id==-1)
     {
-        /*
-        zone_id = atoi(object_id_str);
+        /*zone_id = atoi(object_id_str);
         if (zone_id==0 && object_id_str!="0")*/ return;
     }
 
-    const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid) return;
+
+    const tList<eGameObject>& gameObjects = grid->GameObjects();
     while (zone_id!=-1)
     {
         // get the zone ...
@@ -8182,16 +8209,18 @@ static void sg_SetZoneColor(std::istream &s)
     zoneColor.b = atof(zoneBlueStr);
 
     // first check for the name
-    int zone_id;
+    int zone_id = -1;
     zone_id=gZone::FindFirst(object_id_str);
     if (zone_id==-1)
     {
-        /*
-        zone_id = atoi(object_id_str);
+        /*zone_id = atoi(object_id_str);
         if (zone_id==0 && object_id_str!="0")*/ return;
     }
 
-    const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid) return;
+
+    const tList<eGameObject>& gameObjects = grid->GameObjects();
     while (zone_id!=-1)
     {
         // get the zone ...
@@ -8223,16 +8252,18 @@ static void sg_SetZoneExpansion(std::istream &s)
     REAL expansion = atof(expansion_str)*gArena::SizeMultiplier();
 
     // first check for the name
-    int zone_id;
+    int zone_id = -1;
     zone_id=gZone::FindFirst(object_id_str);
     if (zone_id==-1)
     {
-        /*
-        zone_id = atoi(object_id_str);
+        /*zone_id = atoi(object_id_str);
         if (zone_id==0 && object_id_str!="0")*/ return;
     }
 
-    const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid) return;
+
+    const tList<eGameObject>& gameObjects = grid->GameObjects();
     while (zone_id!=-1)
     {
         // get the zone ...
@@ -8261,16 +8292,18 @@ static void sg_SetZoneRotation(std::istream &s)
     REAL rotation = atof(rotation_str);
 
     // first check for the name
-    int zone_id;
+    int zone_id = -1;
     zone_id=gZone::FindFirst(object_id_str);
     if (zone_id==-1)
     {
-        /*
-        zone_id = atoi(object_id_str);
+        /*zone_id = atoi(object_id_str);
         if (zone_id==0 && object_id_str!="0")*/ return;
     }
 
-    const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid) return;
+
+    const tList<eGameObject>& gameObjects = grid->GameObjects();
     while (zone_id!=-1)
     {
         // get the zone ...
@@ -8283,5 +8316,274 @@ static void sg_SetZoneRotation(std::istream &s)
         zone_id=gZone::FindNext(object_id_str, zone_id);
     }
 }
+static tConfItemFunc sg_SetZoneRotationConf("SET_ZONE_ROTATION", &sg_SetZoneRotation);
 
-static tConfItemFunc sg_SetZoneRotation_conf("SET_ZONE_ROTATION",&sg_SetZoneRotation);
+static void sg_SetZoneIdRadius(std::istream &s)
+{
+    tString params;
+    params.ReadLine( s, true );
+
+    // parse the line to get the param : object_id, radius, speed
+    int pos = 0;                 //
+    const tString object_id_str = params.ExtractNonBlankSubString(pos);
+    const tString radius_str = params.ExtractNonBlankSubString(pos);
+    int radius = atoi(radius_str);
+    const tString speed_str = params.ExtractNonBlankSubString(pos);
+    REAL speed = atof(speed_str);
+
+    // first check for the name
+    int zone_id = atoi(object_id_str);
+    if (zone_id <= -1)
+    {
+        /*zone_id = atoi(object_id_str);
+        if (zone_id==0 && object_id_str!="0")*/ return;
+    }
+
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid) return;
+
+    const tList<eGameObject>& gameObjects = grid->GameObjects();
+    if (zone_id > gameObjects.Len()) return;
+
+    // get the zone ...
+    gZone *zone=dynamic_cast<gZone *>(gameObjects(zone_id));
+    if (zone)
+    {
+        zone->SetReferenceTime();
+        // set new radius and speed to reach it ...
+        if (speed==0)
+            zone->SetRadiusSmoothly( radius*gArena::SizeMultiplier() );
+        else
+            zone->SetRadiusSmoothly( radius*gArena::SizeMultiplier(), speed *gArena::SizeMultiplier());
+        zone->RequestSync();
+    }
+}
+
+static tConfItemFunc sg_SetZoneIdRadius_conf("SET_ZONE_ID_RADIUS",&sg_SetZoneIdRadius);
+
+static void sg_SetZoneIdRoute(std::istream &s)
+{
+    tString params;
+    params.ReadLine( s, true );
+
+    // parse the line to get the param : object_id, positions ...
+    int pos = 0;                 //
+    const tString object_id_str = params.ExtractNonBlankSubString(pos);
+    //        const tString mode_str = params.ExtractNonBlankSubString(pos);
+    std::vector<eCoord> route;
+/*  tString speedstr;
+    speedstr = params.ExtractNonBlankSubString(pos);
+    REAL speed = atof(speedstr);*/
+    tString x,y;
+    float sizeMultiplier=gArena::SizeMultiplier();
+    while(true)
+    {
+        x = params.ExtractNonBlankSubString(pos);
+        if(x == "") break;
+        y = params.ExtractNonBlankSubString(pos);
+        route.push_back(eCoord(atof(x)*sizeMultiplier, atof(y)*sizeMultiplier));
+    }
+
+    // first check for the name
+    int zone_id = atoi(object_id_str);
+    if (zone_id <= -1)
+    {
+        /*zone_id = atoi(object_id_str);
+        if (zone_id==0 && object_id_str!="0")*/ return;
+    }
+
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid) return;
+
+    const tList<eGameObject>& gameObjects = grid->GameObjects();
+    if (zone_id > gameObjects.Len()) return;
+
+    // get the zone ...
+    gZone *zone=dynamic_cast<gZone *>(gameObjects(zone_id));
+    if (zone)
+    {
+        zone->SetReferenceTime();
+        eCoord zoneDir = eCoord(0,0);
+        if(!route.empty())
+        {
+            eCoord curPos = zone->GetPosition();
+            zone->AddWaypoint(curPos);
+            zoneDir = route.front();
+            for(std::vector<eCoord>::const_iterator iter = route.begin(); iter != route.end(); ++iter)
+            {
+                zone->AddWaypoint(*iter + curPos);
+            }
+        }
+/*          REAL magnitude = zoneDir.Norm();
+        if (speed<=0) speed = magnitude;
+        if (magnitude!=0.0) zoneDir.Normalize();
+        zoneDir*=speed;*/
+        zone->SetVelocity(zoneDir);
+        zone->RequestSync();
+    }
+}
+
+static tConfItemFunc sg_SetZoneIdRoute_conf("SET_ZONE_ID_POSITION",&sg_SetZoneIdRoute);
+
+static void sg_SetZoneIdSpeed(std::istream &s)
+{
+    tString params;
+    params.ReadLine( s, true );
+
+    // parse the line to get the param : object_id, speed ...
+    int pos = 0;                 //
+    const tString object_id_str = params.ExtractNonBlankSubString(pos);
+    //        const tString mode_str = params.ExtractNonBlankSubString(pos);
+    tString speedstr;
+    speedstr = params.ExtractNonBlankSubString(pos);
+    REAL speed = atof(speedstr)*gArena::SizeMultiplier();
+
+    // first check for the name
+    int zone_id = atoi(object_id_str);
+    if (zone_id <= -1)
+    {
+        /*zone_id = atoi(object_id_str);
+        if (zone_id==0 && object_id_str!="0")*/ return;
+    }
+
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid) return;
+
+    const tList<eGameObject>& gameObjects = grid->GameObjects();
+    if (zone_id > gameObjects.Len()) return;
+
+    // get the zone ...
+    gZone *zone=dynamic_cast<gZone *>(gameObjects(zone_id));
+    if (zone)
+    {
+        zone->SetReferenceTime();
+        eCoord zoneDir = zone->GetVelocity();
+        REAL magnitude = zoneDir.Norm();
+        if (speed<=0) speed = magnitude;
+        if (magnitude!=0.0) zoneDir.Normalize();
+        zoneDir*=speed;
+        zone->SetVelocity(zoneDir);
+        zone->RequestSync();
+    }
+}
+
+static tConfItemFunc sg_SetZoneIdSpeed_conf("SET_ZONE_ID_SPEED",&sg_SetZoneIdSpeed);
+
+static void sg_SetZoneIdColor(std::istream &s)
+{
+    tString params;
+    params.ReadLine( s, true );
+
+    // parse the line to get the param : object_id, r, g, b ...
+    int pos = 0;                 //
+    const tString object_id_str = params.ExtractNonBlankSubString(pos);
+    //        const tString mode_str = params.ExtractNonBlankSubString(pos);
+    const tString zoneRedStr = params.ExtractNonBlankSubString(pos);
+    const tString zoneGreenStr = params.ExtractNonBlankSubString(pos);
+    const tString zoneBlueStr = params.ExtractNonBlankSubString(pos);
+    gRealColor zoneColor;
+    if ((zoneRedStr=="")||(zoneGreenStr=="")||(zoneBlueStr=="")) return;
+    zoneColor.r = atof(zoneRedStr);
+    zoneColor.g = atof(zoneGreenStr);
+    zoneColor.b = atof(zoneBlueStr);
+
+    // first check for the name
+    int zone_id = atoi(object_id_str);
+    if (zone_id <= -1)
+    {
+        /*zone_id = atoi(object_id_str);
+        if (zone_id==0 && object_id_str!="0")*/ return;
+    }
+
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid) return;
+
+    const tList<eGameObject>& gameObjects = grid->GameObjects();
+    if (zone_id > gameObjects.Len()) return;
+
+    // get the zone ...
+    gZone *zone=dynamic_cast<gZone *>(gameObjects(zone_id));
+    if (zone)
+    {
+        zone->SetReferenceTime();
+        zoneColor.r = (zoneColor.r>1.0)?1.0:zoneColor.r;
+        zoneColor.g = (zoneColor.g>1.0)?1.0:zoneColor.g;
+        zoneColor.b = (zoneColor.b>1.0)?1.0:zoneColor.b;
+        zone->SetColor(zoneColor);
+        zone->RequestSync();
+    }
+}
+
+static tConfItemFunc sg_SetZoneIdColor_conf("SET_ZONE_ID_COLOR",&sg_SetZoneIdColor);
+
+static void sg_SetZoneIdExpansion(std::istream &s)
+{
+    tString params;
+    params.ReadLine( s, true );
+
+    // parse the line to get the param : object_id, expansion
+    int pos = 0;                 //
+    const tString object_id_str = params.ExtractNonBlankSubString(pos);
+    const tString expansion_str = params.ExtractNonBlankSubString(pos);
+    REAL expansion = atof(expansion_str)*gArena::SizeMultiplier();
+
+    // first check for the name
+    int zone_id = atoi(object_id_str);
+    if (zone_id <= -1)
+    {
+        /*zone_id = atoi(object_id_str);
+        if (zone_id==0 && object_id_str!="0")*/ return;
+    }
+
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid) return;
+
+    const tList<eGameObject>& gameObjects = grid->GameObjects();
+    if (zone_id > gameObjects.Len()) return;
+
+    // get the zone ...
+    gZone *zone=dynamic_cast<gZone *>(gameObjects(zone_id));
+    if (zone)
+    {
+        zone->SetReferenceTime();
+        zone->SetExpansionSpeed( expansion );
+        zone->RequestSync();
+    }
+}
+
+static tConfItemFunc sg_SetZoneIdExpansion_conf("SET_ZONE_ID_EXPANSION",&sg_SetZoneIdExpansion);
+
+static void sg_SetZoneIdRotation(std::istream &s)
+{
+    tString params;
+    params.ReadLine( s, true );
+
+    // parse the line to get the param : object_id, expansion
+    int pos = 0;                 //
+    const tString object_id_str = params.ExtractNonBlankSubString(pos);
+    const tString rotation_str = params.ExtractNonBlankSubString(pos);
+    REAL rotation = atof(rotation_str);
+
+    // first check for the name
+    int zone_id = atoi(object_id_str);
+    if (zone_id <= -1)
+    {
+        /*zone_id = atoi(object_id_str);
+        if (zone_id==0 && object_id_str!="0")*/ return;
+    }
+
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid) return;
+
+    const tList<eGameObject>& gameObjects = grid->GameObjects();
+    if (zone_id > gameObjects.Len()) return;
+
+    // get the zone ...
+    gZone *zone=dynamic_cast<gZone *>(gameObjects(zone_id));
+    if (zone)
+    {
+        zone->SetRotationSpeed(rotation);
+        zone->RequestSync();
+    }
+}
+static tConfItemFunc sg_SetZoneIdRotationConf("SET_ZONE_ID_ROTATION", &sg_SetZoneIdRotation);

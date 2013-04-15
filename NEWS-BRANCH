@@ -1,4 +1,16 @@
 ===========================
+Changes in r887
+===========================
+Improvements:
+    * Fixed the slight problem occuring due to queue load during map.
+    * Better SET_ZONE_* command code.    
+
+Additions:
+    * HIDE_CYCLES_WALLS  # Hides walls of other cycles except the users while they are alive.
+    * SET_ZONE_ROTATION  # Set the speed at which a zone should turn at.
+    * Added SET_ZONE_ID_* commands as foretold in NEWS-TODO.        
+
+===========================
 Changes in r885
 ===========================
 Improvements:
