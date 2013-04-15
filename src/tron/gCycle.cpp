@@ -152,7 +152,7 @@ static nSettingItem<REAL> c_ss("CYCLE_SOUND_SPEED",
 
 // time after spawning it takes the cycle to start building a wall
 static REAL sg_cycleWallTime = 0.0;
-static tSettingItem<REAL> sg_cycleWallTimeConf("CYCLE_WALL_TIME", sg_cycleWallTime);
+static nSettingItemWatched<REAL> sg_cycleWallTimeConf("CYCLE_WALL_TIME", sg_cycleWallTime, nConfItemVersionWatcher::Group_Bumpy, 12);
 
 // time after spawning during which a cycle can't be killed
 static REAL sg_cycleInvulnerableTime=0.0;
@@ -2369,7 +2369,7 @@ void gCycle::MyInitAfterCreation(){
     spawnTime_=lastTimeAnim=lastTime;
     creationTime_ = lastTime;
     // set spawn time to infinite past if this is the first spawn
-    if ( sg_cycleFirstSpawnProtection && spawnTime_ <= 1.0 )
+    if ( !sg_cycleFirstSpawnProtection && spawnTime_ <= 1.0 )
     {
         spawnTime_ = -1E+20;
     }
@@ -3049,34 +3049,21 @@ bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
             try
             {
                 // start building wall
-                if (sg_cycleWallTime < 0)
+                REAL startBuildWallAt = spawnTime_ + sg_cycleWallTime;
+                if ( !currentWall && currentTime > startBuildWallAt  )
                 {
-                    //  stop building wall
-                    if (currentWall)
-                        DropWall(false);
-                }
-                else
-                {
-                    REAL startBuildWallAt = creationTime_ + sg_cycleWallTime;
-                    if ( !currentWall && currentTime >= startBuildWallAt  )
-                    {
-                        // simulate right to the spot where the wall should begin
-                        if ( currentTime < startBuildWallAt )
-                            if ( gCycleMovement::TimestepCore( startBuildWallAt, calculateAcceleration ) )
-                                return true;
-                        calculateAcceleration = true;
+                    // simulate right to the spot where the wall should begin
+                    if ( currentTime < startBuildWallAt )
+                        if ( gCycleMovement::TimestepCore( startBuildWallAt, calculateAcceleration ) )
+                            return true;
+                    calculateAcceleration = true;
 
-                        // build the wall, modifying the spawn time to make sure it happens
-                        REAL lastSpawn = spawnTime_;
-                        spawnTime_ += -1E+20;
-                        DropWall();
-                        spawnTime_ = lastSpawn;
-                        lastTurnPos_ = pos; // hack last turn position to generate good wall
-                    }
-                    else if (currentWall && (currentTime < startBuildWallAt))
-                    {
-                        DropWall(false);
-                    }
+                    // build the wall, modifying the spawn time to make sure it happens
+                    REAL lastSpawn = spawnTime_;
+                    spawnTime_ += -1E+20;
+                    DropWall();
+                    spawnTime_ = lastSpawn;
+                    lastTurnPos_ = pos; // hack last turn position to generate good wall
                 }
 
                 // simulate rest of frame
@@ -3897,15 +3884,8 @@ void gCycle::DropWall( bool buildNew )
         currentWall=NULL;
     }
 
-    if (sg_cycleWallTime >= 0)
-    {
-        REAL startBuildingWallAt = creationTime_ + sg_cycleWallTime;
-        if ( buildNew && (lastTime >= startBuildingWallAt))
-        {
-            currentWall = new gNetPlayerWall(this, pos, dirDrive, lastTime, distance);
-        }
-    }
-
+    if ( buildNew && lastTime >= spawnTime_ + sg_cycleWallTime )
+        currentWall=new gNetPlayerWall(this,pos,dirDrive,lastTime,distance);
 
     // grid datastructures change on inserting a wall, better recheck
     // all game objects. Temporarily override this cycle's driving direction.
@@ -5569,7 +5549,7 @@ void gCycle::SyncFromExtrapolator()
     if (sg_cycleWallTime >= 0)
     {
         // adjust current wall (not essential, don't do it for the first wall)
-        if ( currentWall && (currentWall->tBeg > (creationTime_ + sg_cycleWallTime + .01f) ) )
+        if ( currentWall && (currentWall->tBeg > (spawnTime_ + sg_cycleWallTime + .01f) ) )
         {
             // update start position
             currentWall->beg = extrapolator_->GetLastTurnPos();
@@ -6124,14 +6104,10 @@ void gCycle::SyncEnemy ( const eCoord& )
         distance = lastSyncMessage_.distance;
         correctDistanceSmooth=0;
 
-        if (sg_cycleWallTime >= 0)
-        {
-            REAL startBuildWallAt = creationTime_ + sg_cycleWallTime;
-            if ( crossTime > startBuildWallAt )
-            {
-                currentWall = new gNetPlayerWall(this, crossPos, lastSyncMessage_.dir, crossTime, crossDist);
-            }
-        }
+        REAL startBuildWallAt = spawnTime_ + sg_cycleWallTime;
+        if ( crossTime > startBuildWallAt )
+            currentWall=new gNetPlayerWall
+                        (this,crossPos,lastSyncMessage_.dir,crossTime,crossDist);
 
         turned = true;
 
