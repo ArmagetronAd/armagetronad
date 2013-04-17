@@ -17,7 +17,6 @@ More will be added as ideas stream in. In the meantime, this will work as a remi
  * S    * Create /chat for the use of moderators, admins and higher access level (level < 2) players (private chat).
  * WUSC * Change the rubber a player has.
  * S    * Set the transpancy value of a zone using console commands.
- * UBSC * A better code for CYCLE_WALL_TIME command for the spawn time of cycle tails.
 
 === Underwork ===
  * EC * Add HIDE_CYCLES_WALLS to menu under "Special Setup". | Error during server build.
@@ -29,3 +28,4 @@ More will be added as ideas stream in. In the meantime, this will work as a remi
  * PS * Add SET_ZONE_ID_* commands code so it uses zone_id.  (SET_ZONE_ID_*)
  * PS * Change the speed at which a player is travelling at. (SET_CYCLE_SPEED)
  * PC * Cause cycle walls to disappear.                      (HIDE_CYCLES_WALLS)
+ * SC * A better code for CYCLE_WALL_TIME command for the spawn time of cycle tails. 
