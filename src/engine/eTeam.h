@@ -51,8 +51,6 @@ protected:							// protected attributes
     int numHumans;					// number of human players on the team
     int numAIs;						// number of AI players on the team
 
-    tList<ePlayerNetID> players;    // players in this team
-
     int maxPlayersLocal;			// maximum number of players allowed in this team
     int maxImbalanceLocal;			// maximum imbalance allowed here
 
@@ -77,6 +75,7 @@ public:							// public configuration options
     static bool enforceRulesOnQuit; // if the quitting of one player unbalances the teams, enforce the rules by redistributing
 
     static tList<eTeam> teams;		//  list of all teams
+    tList<ePlayerNetID> players;    // players in this team
 
     int RoundsPlayed() const;       //!< number of rounds played (updated right after spawning, so it includes the current round)
     void PlayRound();               //!< increase round counter

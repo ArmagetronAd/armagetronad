@@ -57,7 +57,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 //HACK RACE
 #include "gRace.h"
+
 #include "gParser.h"
+#include "gPingPong.h"
 
 #include <time.h>
 #include <algorithm>
@@ -1777,7 +1779,7 @@ void gWinZoneHack::OnEnter( gCycle * target, REAL time )
     //HACK RACE begin
     if ( sg_RaceTimerEnabled )
     {
-        gRace::ZoneHit( target->Player() );
+        gRace::ZoneHit( target->Player(), time );
     }
     else
     {
@@ -4781,6 +4783,8 @@ gFlagZoneHack::gFlagZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCrea
     ownerDroppedTime_ = 0;
     lastHoldScoreTime_ = -1;
     positionUpdatePending_ = false;
+    passingTheFlag_ = false;
+    passingOwner_ = NULL;
 
     SetExpansionSpeed(0);
     SetRotationSpeed( .3f );
@@ -4815,6 +4819,8 @@ gFlagZoneHack::gFlagZoneHack( nMessage & m )
     ownerDroppedTime_ = 0;
     lastHoldScoreTime_ = -1;
     positionUpdatePending_ = false;
+    passingTheFlag_ = false;
+    passingOwner_ = NULL;
 }
 
 
@@ -4885,6 +4891,9 @@ static tSettingItem<float> sg_flagColorGConfig( "FLAG_COLOR_G", sg_flagColorG );
 
 static float sg_flagColorB = -1;
 static tSettingItem<float> sg_flagColorBConfig( "FLAG_COLOR_B", sg_flagColorB );
+
+REAL sg_flagPassSpeed = 30;
+static tSettingItem<REAL> sg_flagPassSpeedConf("FLAG_PASS_SPEED", sg_flagPassSpeed);
 
 // *******************************************************************************
 // *
@@ -5132,6 +5141,53 @@ bool gFlagZoneHack::Timestep( REAL time )
         }
     }
 
+    if (passingTheFlag_)
+    {
+        if (passingOwner_ && !owner_)
+        {
+            if (passingOwner_->Alive())
+            {
+                //Calculate new direction
+                eCoord newDir = passingOwner_->Position() - GetPosition();
+                newDir.Normalize();
+
+                SetReferenceTime();
+
+                //  take in the speed of the flag speed command + the person who is going to receive the flag
+                int newSpeed = sg_flagPassSpeed;/* + passingOwner_->verletSpeed_;*/
+                SetVelocity(newDir * newSpeed);
+
+                RequestSync();
+            }
+            else
+            {
+                SetReferenceTime();
+                SetVelocity(se_zeroCoord);
+                SetRadius(originalRadius_);
+                SetExpansionSpeed(0);
+                RequestSync();
+                positionUpdatePending_ = true;
+
+                passingTheFlag_ = false;
+                passingOwner_ = NULL;
+                passerOwner_ = NULL;
+            }
+        }
+        else if(!passingOwner_)
+        {
+            SetReferenceTime();
+            SetVelocity(se_zeroCoord);
+            SetRadius(originalRadius_);
+            SetExpansionSpeed(0);
+            RequestSync();
+            positionUpdatePending_ = true;
+
+            passingTheFlag_ = false;
+            passingOwner_ = NULL;
+            passerOwner_ = NULL;
+        }
+    }
+
     // delegate
     bool returnStatus = gZone::Timestep( time );
 
@@ -5203,6 +5259,8 @@ void gFlagZoneHack::OnEnter( gCycle * target, REAL time )
             // go home
             GoHome();
 
+            PassFailed(target);
+
             sg_flagReturnWriter << target->Player()->GetUserName();
             sg_flagReturnWriter.write();
 
@@ -5223,6 +5281,8 @@ void gFlagZoneHack::OnEnter( gCycle * target, REAL time )
 
         blinkUpdateTime_ = -1000;
         blinkTrackUpdateTime_ = -1000;
+
+        PassComplete(target);
 
         // diminish the flag and put it at the original location
         SetReferenceTime();
@@ -5437,6 +5497,332 @@ void gFlagZoneHack::OwnerDropped()
 
             // remove the owner
             RemoveOwner();
+        }
+    }
+}
+
+// *******************************************************************************
+// *
+// *    PassTheFlag
+// *
+// *******************************************************************************
+
+void gFlagZoneHack::PassComplete(gCycle *target)
+{
+    //  finish passing the flag
+    if (passingTheFlag_ && passingOwner_ && passerOwner_)
+    {
+        tOutput message;
+
+        tColoredString playerName, passingName;
+        passingName << passerOwner_->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
+        playerName << target->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
+
+        if (target == passingOwner_)
+        {
+            message.SetTemplateParameter(1, playerName);
+            message.SetTemplateParameter(2, passingName);
+            message << "$flag_pass_complete_same";
+        }
+        else
+        {
+            message.SetTemplateParameter(1, passingName);
+            message.SetTemplateParameter(2, playerName);
+            message << "$flag_pass_complete_diff";
+        }
+        sn_ConsoleOut(message);
+    }
+
+    passingTheFlag_ = false;
+    passingOwner_ = NULL;
+    passerOwner_ = NULL;
+}
+
+void gFlagZoneHack::PassFailed(gCycle *target)
+{
+    //  finish passing the flag
+    if (passingTheFlag_ && passingOwner_ && passerOwner_)
+    {
+        tOutput message;
+
+        tColoredString playerName, passingName;
+        passingName << passerOwner_->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
+        playerName << target->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
+
+        message.SetTemplateParameter(1, passingName);
+        message.SetTemplateParameter(2, playerName);
+        message << "$flag_pass_failed";
+        sn_ConsoleOut(message);
+    }
+
+    passingTheFlag_ = false;
+    passingOwner_ = NULL;
+    passerOwner_ = NULL;
+}
+
+enum gFlagPassMode
+{
+    gFLAGPASS_DISABLE = 0,  //! Disable passing the flag to team members
+    gFLAGPASS_CLOSEST = 1,  //! Picks a team member close to the passing player
+    gFLAGPASS_FURTHEST = 2, //! Picks a team member furthur to the passing player
+    gFLAGPASS_DISTANCE = 3, //! Picks a team member within the distance specified
+    gFLAGPASS_PERSON = 4    //! Picks a team member by the given name
+};
+tCONFIG_ENUM( gFlagPassMode );
+
+gFlagPassMode sg_flagPassMode = gFLAGPASS_DISABLE;
+bool restrictFlagPassMode(const gFlagPassMode &newValue)
+{
+    if ((newValue < gFLAGPASS_DISABLE) || (newValue > gFLAGPASS_PERSON)) return false;
+    return true;
+}
+static tSettingItem<gFlagPassMode> sg_flagPassModeConf("FLAG_PASS_MODE", sg_flagPassMode, &restrictFlagPassMode);
+
+REAL sg_flagPassDistance = 5.0;
+bool restrictFlagPassDistance(const REAL &newValue)
+{
+    if (newValue < 0) return false;
+    return true;
+}
+static tSettingItem<REAL> sg_flagPassDistanceConf("FLAG_PASS_DISTANCE", sg_flagPassDistance, &restrictFlagPassDistance);
+
+void gFlagZoneHack::PassTheFlag(tString name)
+{
+    if (owner_)
+    {
+        if (sg_flagPassMode == gFLAGPASS_DISABLE) return;
+
+        int alive = 0;
+        for (int i = 0; i < owner_->Team()->players.Len(); i++)
+        {
+            ePlayerNetID *p = owner_->Team()->players[i];
+            if (p && (p != owner_->Player()))
+            {
+                gCycle *pCycle = dynamic_cast<gCycle *>(p->Object());
+
+                if (pCycle && pCycle->Alive())
+                {
+                    alive++;
+                }
+            }
+        }
+
+        //  if no member is alive other than yourself, don't pass the flag
+        if (alive == 0) return;
+
+        //  check the modes of each
+        gCycle *passOwner = NULL;
+        if (sg_flagPassMode == gFLAGPASS_CLOSEST)
+        {
+            REAL closestDistance = 0;
+            for (int i = 0; i < owner_->Team()->players.Len(); i++)
+            {
+                ePlayerNetID *p = owner_->Team()->players[i];
+                if (p && (p != owner_->Player()))
+                {
+                    gCycle *pCycle = dynamic_cast<gCycle *>(p->Object());
+
+                    if (pCycle && pCycle->Alive())
+                    {
+                        eCoord otherpos = pCycle->Position() - owner_->Position();
+                        REAL distance = otherpos.NormSquared();
+                        if (!passOwner || (distance < closestDistance))
+                        {
+                            passOwner = pCycle;
+                            closestDistance = distance;
+                        }
+                    }
+                }
+            }
+
+            if (passOwner)
+            {
+                // put the flag to move towards new owner
+                SetReferenceTime();
+                SetVelocity(passOwner->Direction() * owner_->verletSpeed_);
+                SetPosition(owner_->Position());
+                SetRadius(originalRadius_);
+                SetExpansionSpeed(0);
+                RequestSync();
+                positionUpdatePending_ = true;
+
+                //  announce the passing activation
+                tOutput message;
+
+                tColoredString playerName, passingName;
+                passingName << owner_->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
+                playerName << passOwner->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
+
+                message.SetTemplateParameter(1, passingName);
+                message.SetTemplateParameter(2, playerName);
+                message << "$flag_pass_active";
+                sn_ConsoleOut(message);
+
+                //  set the passing owner (one to receive the flag)
+                passingTheFlag_ = true;
+                passingOwner_ = passOwner;
+                passerOwner_ = owner_;
+
+                // remove the current owner
+                RemoveOwner();
+            }
+        }
+        else if (sg_flagPassMode == gFLAGPASS_FURTHEST)
+        {
+            REAL furthestDistance = 0;
+            for (int i = 0; i < owner_->Team()->players.Len(); i++)
+            {
+                ePlayerNetID *p = owner_->Team()->players[i];
+                if (p && (p != owner_->Player()))
+                {
+                    gCycle *pCycle = dynamic_cast<gCycle *>(p->Object());
+
+                    if (pCycle && pCycle->Alive())
+                    {
+                        eCoord otherpos = pCycle->Position() - owner_->Position();
+                        REAL distance = otherpos.NormSquared();
+                        if (!passOwner || (distance > furthestDistance))
+                        {
+                            passOwner = pCycle;
+                            furthestDistance = distance;
+                        }
+                    }
+                }
+            }
+
+            if (passOwner)
+            {
+                // put the flag to move towards new owner
+                SetReferenceTime();
+                SetVelocity(passOwner->Direction() * owner_->verletSpeed_);
+                SetPosition(owner_->Position());
+                SetRadius(originalRadius_);
+                SetExpansionSpeed(0);
+                RequestSync();
+                positionUpdatePending_ = true;
+
+                //  announce the passing activation
+                tOutput message;
+
+                tColoredString playerName, passingName;
+                passingName << owner_->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
+                playerName << passOwner->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
+
+                message.SetTemplateParameter(1, passingName);
+                message.SetTemplateParameter(2, playerName);
+                message << "$flag_pass_active";
+                sn_ConsoleOut(message);
+
+                //  set the passing owner
+                passingTheFlag_ = true;
+                passingOwner_ = passOwner;
+                passerOwner_ = owner_;
+
+                // remove the current owner
+                RemoveOwner();
+            }
+        }
+        else if (sg_flagPassMode == gFLAGPASS_DISTANCE)
+        {
+            REAL furthestDistance = 0;
+            for (int i = 0; i < owner_->Team()->players.Len(); i++)
+            {
+                ePlayerNetID *p = owner_->Team()->players[i];
+                if (p && (p != owner_->Player()))
+                {
+                    gCycle *pCycle = dynamic_cast<gCycle *>(p->Object());
+
+                    if (pCycle && pCycle->Alive())
+                    {
+                        eCoord otherpos = pCycle->Position() - owner_->Position();
+                        REAL distance = otherpos.NormSquared();
+                        if (!passOwner || (distance > furthestDistance))
+                        {
+                            passOwner = pCycle;
+                            furthestDistance = distance;
+                        }
+
+                        //  if distance is over the specified flag distance, break out of the function
+                        if (furthestDistance >= sg_flagPassDistance) break;
+                    }
+                }
+            }
+
+            if (passOwner)
+            {
+                // put the flag to move towards new owner
+                SetReferenceTime();
+                SetVelocity(passOwner->Direction() * owner_->verletSpeed_);
+                SetPosition(owner_->Position());
+                SetRadius(originalRadius_);
+                SetExpansionSpeed(0);
+                RequestSync();
+                positionUpdatePending_ = true;
+
+                //  announce the passing activation
+                tOutput message;
+
+                tColoredString playerName, passingName;
+                passingName << owner_->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
+                playerName << passOwner->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
+
+                message.SetTemplateParameter(1, passingName);
+                message.SetTemplateParameter(2, playerName);
+                message << "$flag_pass_active";
+                sn_ConsoleOut(message);
+
+                //  set the passing owner
+                passingTheFlag_ = true;
+                passingOwner_ = passOwner;
+                passerOwner_ = owner_;
+
+                // remove the current owner
+                RemoveOwner();
+            }
+        }
+        else if (sg_flagPassMode == gFLAGPASS_PERSON)
+        {
+            if (name.Filter() == "") return;
+
+            ePlayerNetID *p = ePlayerNetID::FindPlayerByName(name);
+            if (!p) return;
+
+            //  make sure that only the same team member will be allowed to get the pass of the flag
+            if (p->CurrentTeam() != owner_->Team()) return;
+
+            passOwner = dynamic_cast<gCycle *>(p->Object());
+
+            if (passOwner)
+            {
+                // put the flag to move towards new owner
+                SetReferenceTime();
+                SetVelocity(passOwner->Direction() * owner_->verletSpeed_);
+                SetPosition(owner_->Position());
+                SetRadius(originalRadius_);
+                SetExpansionSpeed(0);
+                RequestSync();
+                positionUpdatePending_ = true;
+
+                //  announce the passing activation
+                tOutput message;
+
+                tColoredString playerName, passingName;
+                passingName << owner_->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
+                playerName << passOwner->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
+
+                message.SetTemplateParameter(1, passingName);
+                message.SetTemplateParameter(2, playerName);
+                message << "$flag_pass_active";
+                sn_ConsoleOut(message);
+
+                //  set the passing owner
+                passingTheFlag_ = true;
+                passingOwner_ = passOwner;
+                passerOwner_ = owner_;
+
+                // remove the current owner
+                RemoveOwner();
+            }
         }
     }
 }
@@ -5731,7 +6117,7 @@ void gTargetZoneHack::OnEnter( gCycle * target, REAL time )
     //HACK RACE begin
     if ( sg_RaceTimerEnabled )
     {
-        gRace::ZoneHit( target->Player() );
+        gRace::ZoneHit( target->Player(), time );
     }
 
     // keep first player in memory, if it's the last zone, he is the winner ...
@@ -6890,7 +7276,7 @@ bool gSoccerZoneHack::Timestep( REAL time )
     bool returnStatus = gZone::Timestep( time );
 
     if ((zoneType == gSoccer_GOAL) && !team)
-        CheckTeamAssignment();
+        if (!CheckTeamAssignment()) return true;;
 
     if (!init_)
     {
@@ -7334,7 +7720,7 @@ static tConfItemFunc sg_SpawnSoccerConf("SPAWN_SOCCER", &sg_SpawnSoccer);
 
 // *******************************************************************************
 // *
-// *    gSoccerZoneHack
+// *    gPongZoneHack
 // *
 // *******************************************************************************
 //!
@@ -7343,12 +7729,19 @@ static tConfItemFunc sg_SpawnSoccerConf("SPAWN_SOCCER", &sg_SpawnSoccer);
 //!
 // *******************************************************************************
 
-gPongZoneHack::gPongZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreation, bool delayCreation)
+gPongZoneHack::gPongZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreation, eTeam *teamOwner, bool delayCreation)
 :gZone( grid, pos, dynamicCreation, delayCreation)
 {
-    color_.r = 1.0f;
-    color_.g = 0.0f;
-    color_.b = 0.0f;
+    color_.r = 0.0f;
+    color_.g = 1.0f;
+    color_.b = 1.0f;
+
+    if (teamOwner)
+        team = teamOwner;
+
+    init_ = false;
+    teamDistance_ = 0;
+    pongLastOwner_ = NULL;
 
     if (!delayCreation)
         grid->AddGameObjectInteresting(this);
@@ -7389,6 +7782,144 @@ gPongZoneHack::~gPongZoneHack( void )
 {
 }
 
+// *******************************************************************************
+// *
+// *   CheckTeamAssignment
+// *
+// *******************************************************************************
+//!
+//! @return true if a team is assigned, false if not
+//!
+// *******************************************************************************
+
+/*
+bool gSoccerZoneHack::CheckTeamAssignment()
+{
+    // find the closest player
+    if ( !team )
+    {
+        teamDistance_ = 0;
+        const tList<eGameObject>& gameObjects = Grid()->GameObjects();
+        gCycle *closest = NULL;
+        REAL closestDistance = 0;
+        for (int i=gameObjects.Len()-1;i>=0;i--)
+        {
+            gCycle *other = dynamic_cast<gCycle *>(gameObjects[i]);
+
+            if (other)
+            {
+                eTeam *otherTeam = other->Player()->CurrentTeam();
+                eCoord otherpos = other->Position() - Position();
+                REAL distance = otherpos.NormSquared();
+                if (!closest || (distance < closestDistance))
+                {
+                    closest = other;
+                    closestDistance = distance;
+                }
+            }
+        }
+
+        if (closest)
+        {
+            // take over team and color
+            team = closest->Player()->CurrentTeam();
+            color_.r = team->R()/15.0;
+            color_.g = team->G()/15.0;
+            color_.b = team->B()/15.0;
+            teamDistance_ = closestDistance;
+
+            RequestSync();
+        }
+
+        // if this zone does not belong to a team, return false.
+        if (!team)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+*/
+
+bool gPongZoneHack::CheckTeamAssignment()
+{
+    // determine the owning team: the one that has a player spawned closest
+    // find the closest player
+    if ( !team )
+    {
+        teamDistance_ = 0;
+        const tList<eGameObject>& gameObjects = Grid()->GameObjects();
+        gCycle *closest = NULL;
+        REAL closestDistance = 0;
+        for (int i = 0; i < gameObjects.Len(); i++)
+        {
+            gCycle *other = dynamic_cast<gCycle *>(gameObjects[i]);
+
+            if (other)
+            {
+                eTeam *otherTeam = other->Team();
+                eCoord otherpos = other->Position() - Position();
+                REAL distance = otherpos.NormSquared();
+                if (!closest || (distance < closestDistance))
+                {
+                    closest = other;
+                    closestDistance = distance;
+                }
+            }
+        }
+
+        if (closest)
+        {
+            // take over team and color
+            team = closest->Team();
+            color_.r = team->R()/15.0;
+            color_.g = team->G()/15.0;
+            color_.b = team->B()/15.0;
+            teamDistance_ = closestDistance;
+
+            RequestSync();
+        }
+
+        // if this zone does not belong to a team, return false.
+        if (!team)
+        {
+            return false;
+        }
+
+        // check other zones owned by the same team. Discard the one farthest away
+        // if the max count is exceeded
+        if ( team && sg_PingPong->team_balls > 0 )
+        {
+            gPongZoneHack *farthest = NULL;
+            int count = 0;
+
+            // check whether other zones are already registered to that team
+            for (int j = 0;j < gameObjects.Len(); j++)
+            {
+                gPongZoneHack *otherZone=dynamic_cast<gPongZoneHack *>(gameObjects[j]);
+
+                if (otherZone)
+                {
+                    if (team == otherZone->Team() )
+                    {
+                        count++;
+                        if ( !farthest || otherZone->teamDistance_ > farthest->teamDistance_ )
+                            farthest = otherZone;
+                    }
+                }
+            }
+
+            // discard team of farthest zone
+            if ( count > sg_PingPong->team_balls )
+            {
+                farthest->team = NULL;
+                farthest->RemoveFromGame();
+            }
+        }
+    }
+    return true;
+}
+
 
 // *******************************************************************************
 // *
@@ -7402,9 +7933,18 @@ gPongZoneHack::~gPongZoneHack( void )
 
 bool gPongZoneHack::Timestep( REAL time )
 {
-    bool returnStatus = gZone::Timestep( time );
+    if (!sg_PingPong->enabled) Collapse();
 
-    RequestSync();
+    if (!init_)
+    {
+        init_ = true;
+
+        if (!team)
+            /*if (!*/CheckTeamAssignment();//)
+                //Collapse();
+    }
+
+    bool returnStatus = gZone::Timestep( time );
 
     return returnStatus;
 }
@@ -7463,29 +8003,33 @@ void gPongZoneHack::OnEnter( gCycle *target, REAL time )
         base.Normalize();
         eCoord new_v1 = base*-target->Speed();
         eCoord new_p1 = p1c + new_v1*(-t+0.01);
-        new_v1 = new_v1*(1+sg_ballCycleBoost*target->GetAcceleration()/100);
+        new_v1 = new_v1*(1+sg_PingPong->bounce_speed);
 
         SetPosition(new_p1);
         SetVelocity(new_v1);
 
         RequestSync();
+
+        pongLastOwner_ = target;
     }
 }
 
 void gDeathZoneHack::OnEnter(gPongZoneHack *target, REAL time)
 {
+    if (!sg_PingPong->enabled) return;
+
     if ((deathZoneType == TYPE_NORMAL) && target->Team())
     {
         target->Collapse();
 
-        for(int i = 0; i < se_PlayerNetIDs.Len(); i++)
+        if (sg_PingPong->collapse_kill)
         {
-            ePlayerNetID *p = se_PlayerNetIDs[i];
-            if (p && p->Object())
+            for(int i = 0; i < target->Team()->players.Len(); i++)
             {
-                if (p->CurrentTeam())
+                ePlayerNetID *p = target->Team()->players[i];
+                if (p && p->Object())
                 {
-                    if (p->CurrentTeam() == target->Team())
+                    if (p->CurrentTeam())
                     {
                         p->Object()->Kill();
                     }

@@ -4058,6 +4058,12 @@ void handle_chat( nMessage &m )
                         p->DropFlag();
                         return;
                     }
+                    else if (command == "/pass")
+                    {
+                        spam.lastSaidType_= eChatMessageType_Command;
+                        p->PassFlag(s);
+                        return;
+                    }
                     else if (command == "/players" || command == "/listplayers")
                     {
                         spam.lastSaidType_= eChatMessageType_Command;
@@ -6655,6 +6661,22 @@ void ePlayerNetID::DropFlag()
         if (cycle->flag_)
         {
             cycle->flag_->OwnerDropped();
+        }
+    }
+}
+
+void ePlayerNetID::PassFlag(std::istream &s)
+{
+    gCycle *cycle = dynamic_cast<gCycle *>(object);
+
+    if (cycle)
+    {
+        if (cycle->flag_)
+        {
+            tString name;
+            s >> name;
+
+            cycle->flag_->PassTheFlag(name);
         }
     }
 }

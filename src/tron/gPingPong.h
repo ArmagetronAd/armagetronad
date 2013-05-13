@@ -40,11 +40,13 @@ class gPingPong
         gPingPong();
 
         bool enabled;
+        bool collapse_kill;
 
         int points;
-        int balls;
+        int team_balls;
 
-        tList<ePlayerNetID> players;
+        REAL bounce_speed;
+        REAL launch_speed;
     protected:
     private:
 };

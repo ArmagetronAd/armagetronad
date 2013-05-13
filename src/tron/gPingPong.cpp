@@ -41,11 +41,18 @@ gPingPong::gPingPong()
     this->enabled = false;
 
     this->points = 1;
-    this->balls = 1;
+    this->team_balls = 1;
+
+    this->collapse_kill = false;
+
+    this->bounce_speed = 30;
+    this->launch_speed = 30;
 }
 
 gPingPong *sg_PingPong = new gPingPong();
 
 static tSettingItem<bool> sg_PingPongEnabled("PINGPONG_ENABLED", sg_PingPong->enabled);
 static tSettingItem<int> sg_PingPongPoints("PINGPONG_POINTS", sg_PingPong->points);
-static tSettingItem<int> sg_PingPongBalls("PINGPONG_BALLS", sg_PingPong->balls);
+static tSettingItem<int> sg_PingPongTeamBalls("PINGPONG_TEAM_BALLS", sg_PingPong->team_balls);
+static tSettingItem<bool> sg_PingPongDeathKill("PINGPONG_DEATH_KILL", sg_PingPong->collapse_kill);
+static tSettingItem<REAL> sg_PingPongBounceSpeed("PINGPONG_BOUNCE_SPEED", sg_PingPong->bounce_speed);

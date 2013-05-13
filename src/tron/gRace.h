@@ -30,8 +30,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "defs.h"
 #include "ePlayer.h"
-#include "gZone.h"
 #include "gArena.h"
+#include "gCycle.h"
 
 class gRacePlayer
 {
@@ -101,7 +101,7 @@ class gRacePlayer
 class gRace
 {
     public:
-        static void ZoneHit( ePlayerNetID *player );                    //!> called when a cycle hits a win zone
+        static void ZoneHit( ePlayerNetID *player, REAL time );         //!> called when a cycle hits a win zone
         static void Sync( int alive, int ai_alive, int humans );        //!> update race state, called every second
         static bool Done();                                             //!> returns true whether round time is over
         static void Reset();                                            //!> reset time and values

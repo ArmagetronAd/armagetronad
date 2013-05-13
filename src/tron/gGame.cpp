@@ -74,6 +74,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //HACK RACE
 #include "gRace.h"
 
+#include "gPingPong.h"
+
 #include "gParser.h"
 #include "tResourceManager.h"
 #include "nAuthentication.h"
@@ -5515,6 +5517,15 @@ void gGame::Analysis(REAL time){
     {
         gGameSpawnTimer::Sync(alive, ai_alive, sg_NumHumans());
         return;
+    }
+
+    if (sg_PingPong->enabled && (time > 0))
+    {
+        tOutput message;
+        int countdown = ceil(time);
+        message.SetTemplateParameter(1, countdown);
+        message << "$timer_countdown" << "                    ";
+        sn_CenterMessage( message );
     }
 
     //HACK RACE begin

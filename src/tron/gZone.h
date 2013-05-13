@@ -256,24 +256,26 @@ class gPongZoneHack: public gZone
 {
     public:
 
-        gPongZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false, bool delayCreation = false);
+        gPongZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false, eTeam *teamOwner = NULL, bool delayCreation = false);
         gPongZoneHack(nMessage &m);
         ~gPongZoneHack();
-
-        void SetTeamOwner(eTeam *newTeam) { pongTeamOwner_ = newTeam; }
-        eTeam *GetTeamOwner() { return pongTeamOwner_; }
 
         void SetLastOwner(gCycle *newCycle) { pongLastOwner_ = newCycle; }
         gCycle *GetLastOwner() { return pongLastOwner_; }
 
+        bool CheckTeamAssignment(); //!< Check if this zone is assigned to a team, if not, try to assign one.
+
     protected:
         gCycle *pongLastOwner_;
-        eTeam *pongTeamOwner_;
+
+        bool init_;
 
     private:
         virtual bool Timestep(REAL currentTime);
         virtual void OnVanish();
         virtual void OnEnter(gCycle *target, REAL time);
+
+		REAL teamDistance_;		 //!< distance to the closest member of the owning team
 };
 
 //! death zone: kills players who enter
@@ -475,18 +477,22 @@ class gFlagZoneHack: public gZone
 {
 public:
 								 //!< local constructor
-		gFlagZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false, eTeam * teamowner = NULL, bool delayCreation = false );
+    gFlagZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false, eTeam * teamowner = NULL, bool delayCreation = false );
     gFlagZoneHack(nMessage &m);                                  //!< network constructor
     ~gFlagZoneHack();                                            //!< destructor
 
     void SetTeam(tJUST_CONTROLLED_PTR< eTeam > team) { this->team = team; }
-    eTeam* Team(){return team;}
+    eTeam *Team(){return team;}
     void WarnFlagNotHome();
     bool IsHome();
     void GoHome();
     void RemoveOwner();
     void OwnerDropped();
-    gCycle* Owner(){return owner_;}
+    gCycle *Owner(){return owner_;}
+
+    void PassTheFlag(tString name = tString(""));
+    void PassComplete(gCycle *target);
+    void PassFailed(gCycle *target);
 
 protected:
     bool init_;
@@ -503,6 +509,9 @@ protected:
     REAL ownerDroppedTime_;
     REAL lastHoldScoreTime_;
     bool positionUpdatePending_;
+    bool passingTheFlag_;
+    gCycle *passingOwner_;
+    gCycle *passerOwner_;
 
 private:
     virtual bool Timestep(REAL currentTime);     //!< simulates behaviour up to currentTime

@@ -474,6 +474,7 @@ public:
     void SetLoggedIn(bool newValue) { hasLoggedIn_ = newValue; }
 
     void DropFlag();
+    void PassFlag(std::istream &s);
 
     static ePlayerNetID * FindPlayerByName( tString const & name, ePlayerNetID * requester = 0, bool print=true ); //!< finds a player by name using lax name matching. Reports errors to the console or to the requesting player.
 

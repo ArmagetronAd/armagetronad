@@ -34,6 +34,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "eAdvWall.h"
 #include "gParser.h"
 
+#include "gZone.h"
+
 #include "eGrid.h"
 
 #include <string>
@@ -203,7 +205,7 @@ void gRaceScores::Add(gRacePlayer *racePlayer, bool finished)
     gRaceScores *racingPlayer = NULL;
 
     tString username;
-    if (racePlayer->Player()->GetAuthenticatedName().Len() > 1)
+    if (racePlayer->Player()->HasLoggedIn() && (racePlayer->Player()->GetAuthenticatedName().Len() > 1))
         username = racePlayer->Player()->GetAuthenticatedName();
     else
         username = racePlayer->Player()->GetUserName();
@@ -217,7 +219,7 @@ void gRaceScores::Add(gRacePlayer *racePlayer, bool finished)
         {
             timeDiff = racingPlayer->time_;
 
-            if (((racePlayer->Time() < racingPlayer->Time()) && racePlayer->Time() != -1) || (racingPlayer->Time() == -1 && racePlayer->Time() != -1))
+            if (((racePlayer->Time() < racingPlayer->Time()) && racePlayer->Time() > 0) || (racingPlayer->Time() <= 0 && racePlayer->Time() > 0))
             {
                 racingPlayer->time_ = racePlayer->Time();
                 tOutput newtime;
@@ -233,9 +235,10 @@ void gRaceScores::Add(gRacePlayer *racePlayer, bool finished)
     else
     {
         racingPlayer = new gRaceScores(username);
-        timeDiff = racingPlayer->time_;
         racingPlayer->time_ = racePlayer->Time();
-        if (racePlayer->Time() != -1)
+        timeDiff = racingPlayer->time_;
+
+        if (racePlayer->Time() > 0)
         {
             tOutput newtime;
             newtime.SetTemplateParameter(1, racePlayer->Time());
@@ -599,7 +602,7 @@ void gRaceScores::OutputStart()
                         gRaceScores *rScores = sg_RaceScores[j];
                         if (rScores)
                         {
-                            if ((rScores->userName_ == p->GetUserName()) || (rScores->userName_ == p->GetAuthenticatedName()))
+                            if ((rScores->userName_ == p->GetUserName()) || (p->HasLoggedIn() && (rScores->userName_ == p->GetAuthenticatedName())))
                             {
                                 tColoredString mess, line, header;
 
@@ -869,7 +872,7 @@ void gRaceScores::OutputEnd()
                         gRaceScores *rScores = sg_RaceScores[j];
                         if (rScores)
                         {
-                            if ((rScores->userName_ == p->GetUserName()) || (rScores->userName_ == p->GetAuthenticatedName()))
+                            if ((rScores->userName_ == p->GetUserName()) || (p->HasLoggedIn() && (rScores->userName_ == p->GetAuthenticatedName())))
                             {
                                 tColoredString mess, line, header;
 
@@ -993,7 +996,7 @@ bool gRacePlayer::PlayerExists(tString username)
             gRacePlayer *rPlayer = sg_RacePlayers[i];
             if (rPlayer && rPlayer->Player())
             {
-                if (rPlayer->Player()->GetAuthenticatedName() == username)
+                if (rPlayer->Player()->HasLoggedIn() && (rPlayer->Player()->GetAuthenticatedName() == username))
                     return true;
 
                 if (rPlayer->Player()->GetUserName() == username)
@@ -1013,7 +1016,7 @@ gRacePlayer *gRacePlayer::GetPlayer(tString username)
             gRacePlayer *rPlayer = sg_RacePlayers[i];
             if (rPlayer && rPlayer->Player())
             {
-                if (rPlayer->Player()->GetAuthenticatedName() == username)
+                if (rPlayer->Player()->HasLoggedIn() && (rPlayer->Player()->GetAuthenticatedName() == username))
                     return rPlayer;
 
                 if (rPlayer->Player()->GetUserName() == username)
@@ -1053,10 +1056,10 @@ void gRacePlayer::ErasePlayer()
 }
 
 //! ZONE HIT
-void gRace::ZoneHit( ePlayerNetID *player )
+void gRace::ZoneHit( ePlayerNetID *player, REAL time )
 {
     tString player_username;
-    if (player->GetAuthenticatedName().Len() > 1)
+    if (player->HasLoggedIn() && (player->GetAuthenticatedName().Len() > 1))
         player_username = player->GetAuthenticatedName();
     else
         player_username = player->GetUserName();
@@ -1065,11 +1068,10 @@ void gRace::ZoneHit( ePlayerNetID *player )
 
     if (player && racePlayer && !racePlayer->Finished() && !roundFinished_ && player->Object() && player->Object()->Alive())
     {
-        REAL reachtime_ = se_GameTime();
+        REAL reachtime_ = time;
 
         if (!firstArrived_)
         {
-            firstArrived_ = true;
             firstFinishTime_ = reachtime_;
             firstToArive_ = player->GetName();
         }
@@ -1115,11 +1117,13 @@ void gRace::ZoneHit( ePlayerNetID *player )
         }
         else
         {
-            if (finishPlace_ == 1)
+            if (!firstArrived_)
             {
                 win.SetTemplateParameter(1, player->GetColoredName());
                 win.SetTemplateParameter(2, racePlayer->Time());
                 win << "$player_reach_race_first";
+
+                firstArrived_ = true;
             }
             else
             {
@@ -1280,6 +1284,7 @@ void gRace::Sync( int alive, int ai_alive, int humans)
     //  once the round has finished, collapse all active zones
     if (roundFinished_)
     {
+        //  vanish all zones
         const tList<eGameObject>& gameObjects = grid->GameObjects();
         for (int i = 0; i < gameObjects.Len(); i++)
         {
@@ -1287,11 +1292,10 @@ void gRace::Sync( int alive, int ai_alive, int humans)
             if (Zone)
             {
                 //  0.5 fot smooth collapse
-                Zone->Vanish(0.5);
+                Zone->Vanish(0.5f);
             }
         }
     }
-
     //  checks whether server should log the unfinished players
     if (roundFinished_ && sg_raceLogUnfinished)
     {
