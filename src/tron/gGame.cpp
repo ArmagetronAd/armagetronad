@@ -4374,6 +4374,8 @@ static eLadderLogWriter sg_roundCommencingWriter("ROUND_COMMENCING", false);
 static SvgOutput sg_svgOutput;
 
 bool sg_roundStartingChecker = true;
+bool sg_roundfinishedchecker = false;
+static eLadderLogWriter sg_roundFinishedWriter("ROUND_FINISHED", true);
 static eLadderLogWriter sg_roundEndedWriter("ROUND_ENDED", true);
 
 // **********************************************************************
@@ -4879,6 +4881,7 @@ void gGame::StateUpdate(){
             }
 
             sg_roundStartingChecker = true;
+            sg_roundfinishedchecker = false;
 
             // pings should not count as much in the between-round phase
             nPingAverager::SetWeight(1E-20);
@@ -5527,6 +5530,31 @@ void gGame::Analysis(REAL time){
         message << "$timer_countdown" << "                    ";
         sn_CenterMessage( message );
     }
+
+    //SMALL HACK BEGIN
+    if (sg_currentSettings->gameType == gFREESTYLE)
+    {
+        int everyone_alive = ai_alive + alive;
+        if ((everyone_alive == 0) && (!sg_roundfinishedchecker))
+        {
+            sg_roundFinishedWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
+            sg_roundFinishedWriter.write();
+
+            sg_roundfinishedchecker = true;
+        }
+    }
+    else if (sg_currentSettings->gameType == gDUEL)
+    {
+        int everyone_alive = ai_alive + alive;
+        if ((everyone_alive <= 1) && (!sg_roundfinishedchecker))
+        {
+            sg_roundFinishedWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
+            sg_roundFinishedWriter.write();
+
+            sg_roundfinishedchecker = true;
+        }
+    }
+    //SMALL HACK END
 
     //HACK RACE begin
 
@@ -7012,3 +7040,33 @@ static void sg_getCurrentMap(std::istream &s)
     }
 }
 static tConfItemFunc sg_getCurrentMapConf("GET_CURRENT_MAP", &sg_getCurrentMap);
+
+static void sg_ladderlogClear(std::istream &s)
+{
+    std::ofstream o;
+    if ( tDirectories::Var().Open(o, "ladderlog.txt") )
+    {
+        o << "\n";
+    }
+}
+static tConfItemFunc sg_ladderlogClearConf("CLEAR_LADDERLOG", &sg_ladderlogClear);
+
+static void sg_chatlogClear(std::istream &s)
+{
+    std::ofstream o;
+    if ( tDirectories::Var().Open(o, "chatlog.txt") )
+    {
+        o << "\n";
+    }
+}
+static tConfItemFunc sg_chatlogClearConf("CLEAR_CHATLOG", &sg_chatlogClear);
+
+static void sg_scorelogClear(std::istream &s)
+{
+    std::ofstream o;
+    if ( tDirectories::Var().Open(o, "scorelog.txt") )
+    {
+        o << "\n";
+    }
+}
+static tConfItemFunc sg_scorelogClearConf("CLEAR_SCORELOG", &sg_scorelogClear);

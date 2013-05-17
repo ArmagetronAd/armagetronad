@@ -7032,7 +7032,7 @@ static void sg_SpawnObjectZone(std::istream &s)
         oZone->SetName(name);
         oZone->RequestSync();
 
-        sg_ObjectZoneSpawned << oZone->GOID() << oZone->GetName() << oZone->GetPosition().x << oZone->GetPosition().y << oZone->GetVelocity().x << oZone->GetVelocity().y;
+        sg_ObjectZoneSpawned << oZone->GOID() << oZone->GetName() << oZone->GetPosition().x << oZone->GetPosition().y << oZone->GetVelocity().x << oZone->GetVelocity().y << se_GameTime();
 
         return;
     }
@@ -7043,14 +7043,14 @@ static void sg_SpawnObjectZone(std::istream &s)
         ePlayerNetID *rec = 0;  //  get the caller to send the message
 
         usageMem << "Usage:\n"
-                    "SPAWN_OBJECT_ZONE <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
+                    "SPAWN_OBJECTZONE <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
                     "Instead of <x> <y> one can write: L <x1> <y1> <x2> <y2> [...] Z\n"
-                    "To give the zone a name, SPAWN_OBJECT_ZONE n <name> ...\n";
+                    "To give the zone a name, SPAWN_OBJECTZONE n <name> ...\n";
 
         sn_ConsoleOut(usageMem, rec->Owner());
     }
 }
-static tConfItemFunc sg_SpawnObjectZoneConf("SPAWN_OBJECT_ZONE", &sg_SpawnObjectZone);
+static tConfItemFunc sg_SpawnObjectZoneConf("SPAWN_OBJECTZONE", &sg_SpawnObjectZone);
 
 // *******************************************************************************
 // *
