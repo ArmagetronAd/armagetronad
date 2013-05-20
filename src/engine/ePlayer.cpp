@@ -7588,6 +7588,9 @@ void ePlayerNetID::RankingLadderLog()
         // add the player's access level to the message
         se_onlinePlayerWriter << p->GetAccessLevel();
 
+        // write out if they logged in or not
+        se_onlinePlayerWriter << (p->HasLoggedIn()?1:0);
+
         if(p->IsActive())
         {
             se_onlinePlayerWriter << p->ping;

@@ -128,11 +128,15 @@ public:
     static int          FindFirst(tString name);
     static int          FindNext(tString name, int prev_pos);
 
+    tString             GetEffect() {return effect_;}
+    void                SetEffect(tString newEffect) {effect_ = newEffect;}
+
     static void Timesteps(REAL currentTime);
     static void AddDelay(REAL delayTime, gZone *Zone);
     static void ClearDelay();
 
     virtual void Collapse();    //  have the zone disappear instantly
+    static void GridPosLadderLog(); //  gridpos ladderlog for the zones
 
 protected:
     bool wallInteract_;
@@ -156,6 +160,7 @@ protected:
     REAL lastSeekTime_;
 
     tString name_;
+    tString effect_;
     gRealColor color_;           //!< the zone's color
     REAL createTime_;            //!< the time the zone was created at
 

@@ -280,6 +280,7 @@ gZone::gZone( eGrid * grid, const eCoord & pos, bool dynamicCreation, bool delay
     pSeekingCycle_ = NULL;
     seeking_ = false;            //??? change this to a game object, allow seeking any
     name_ = tString("");
+    effect_ = tString("");
 
     color_.r = color_.g = color_.b = 1.0f;
 
@@ -337,6 +338,7 @@ gZone::gZone( nMessage & m )
     pSeekingCycle_ = NULL;
     seeking_ = false;
     name_ = tString("");
+    effect_ = tString("");
 
     // read creation time
     m >> createTime_;
@@ -522,6 +524,9 @@ static void CreateZone(tString zoneEffect, gZone *Zone, const REAL zoneSize, con
     if(thisSumoZone){
         thisSumoZone->SetUnspawnedState();
     }
+
+    Zone->SetEffect(zoneEffect);
+
     Zone->RequestSync();
 
     sg_spawnzoneWriter << zoneEffect << Zone->GOID() << zoneNameStr << Zone->GetPosition().x << Zone->GetPosition().y << Zone->GetVelocity().x << Zone->GetVelocity().y;
@@ -968,56 +973,6 @@ bool gZone::Timestep( REAL time )
     }
 
     return false;
-}
-
-std::map<REAL, std::set<gZone*> > gZone::delayedZones_;
-void gZone::Timesteps(REAL currentTime)
-{
-    if (delayedZones_.empty()) return;
-    eGrid *grid = eGrid::CurrentGrid();
-    if (!grid) return;
-
-    std::map<REAL, std::set<gZone*> >::iterator it = delayedZones_.begin();
-    while ((it != delayedZones_.end()) && (currentTime >= it->first))
-    {
-        if (currentTime >= it->first)
-        {
-            std::set<gZone*>::iterator sit (it->second.begin()), send(it->second.end());
-            for(; sit != send; ++sit)
-            {
-                gZone *Zone = *sit;
-                if (Zone)
-                {
-                    Zone->AddToList();
-                    grid->AddGameObjectInteresting(Zone);
-                }
-            }
-        }
-        delayedZones_.erase(it++);
-    }
-}
-
-void gZone::AddDelay(REAL delayTime, gZone *Zone)
-{
-    delayedZones_[delayTime].insert(Zone);
-}
-
-void gZone::ClearDelay()
-{
-    delayedZones_.clear();
-}
-
-static void sg_zoneDelayClear(std::istream &s)
-{
-    gZone::ClearDelay();
-}
-static tConfItemFunc sg_zoneDelayClearConf("ZONE_DELAY_CLEAR", &sg_zoneDelayClear);
-
-
-gZone &gZone::AddWaypoint(eCoord const &point)
-{
-    route_.push_back(point);
-    return *this;
 }
 
 
@@ -8396,6 +8351,83 @@ static void sg_CreateZone_conf(std::istream &s)
 
 
 static tConfItemFunc sg_CreateZone_c("SPAWN_ZONE",&sg_CreateZone_conf);
+
+std::map<REAL, std::set<gZone*> > gZone::delayedZones_;
+void gZone::Timesteps(REAL currentTime)
+{
+    if (delayedZones_.empty()) return;
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid) return;
+
+    std::map<REAL, std::set<gZone*> >::iterator it = delayedZones_.begin();
+    while ((it != delayedZones_.end()) && (currentTime >= it->first))
+    {
+        if (currentTime >= it->first)
+        {
+            std::set<gZone*>::iterator sit (it->second.begin()), send(it->second.end());
+            for(; sit != send; ++sit)
+            {
+                gZone *Zone = *sit;
+                if (Zone)
+                {
+                    Zone->AddToList();
+                    grid->AddGameObjectInteresting(Zone);
+                }
+            }
+        }
+        delayedZones_.erase(it++);
+    }
+}
+
+void gZone::AddDelay(REAL delayTime, gZone *Zone)
+{
+    delayedZones_[delayTime].insert(Zone);
+}
+
+void gZone::ClearDelay()
+{
+    delayedZones_.clear();
+}
+
+static void sg_zoneDelayClear(std::istream &s)
+{
+    gZone::ClearDelay();
+}
+static tConfItemFunc sg_zoneDelayClearConf("ZONE_DELAY_CLEAR", &sg_zoneDelayClear);
+
+
+gZone &gZone::AddWaypoint(eCoord const &point)
+{
+    route_.push_back(point);
+    return *this;
+}
+
+static eLadderLogWriter sg_zoneGridPosWriter("ZONE_GRIDPOS", false);
+void gZone::GridPosLadderLog()
+{
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid) return;
+
+    if (!sg_zoneGridPosWriter.isEnabled())
+    {
+        return;
+    }
+
+    const tList<eGameObject>& gameObjects = grid->GameObjects();
+    for (int i = 0; i < gameObjects.Len(); i++)
+    {
+        gZone *zone = dynamic_cast<gZone *>(gameObjects[i]);
+        if (zone)
+        {
+            sg_zoneGridPosWriter << zone->GetEffect() << zone->GOID() << zone->GetName();
+            sg_zoneGridPosWriter << zone->GetRadius() << zone->GetExpansionSpeed();
+            sg_zoneGridPosWriter << zone->Position().x << zone->Position().y << zone->GetVelocity().x << zone->GetVelocity().y;
+            sg_zoneGridPosWriter << zone->color_.r << zone->color_.g << zone->color_.b;
+
+            sg_zoneGridPosWriter.write();
+        }
+    }
+}
 
 static eLadderLogWriter sg_collapsezoneWriter("ZONE_COLLAPSED", false);
 
