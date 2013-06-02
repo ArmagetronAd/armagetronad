@@ -447,6 +447,106 @@ void nKrawall::CheckScrambledPassword( nCheckResultBase & result,
     }
 }
 
+tString sn_CustomShorthand("");
+static tSettingItem<tString> sn_CustomShorthandConf("CUSTOM_SHORTHAND", sn_CustomShorthand);
+
+tString sn_CustomShorthandConnection("");
+static tSettingItem<tString> sn_CustomShorthandConnectionConf("CUSTOM_SHORTHAND_CONNECTION", sn_CustomShorthandConnection);
+
+/*tString sn_CustomShorthandUser("username");
+static tSettingItem<tString> sn_CustomShorthandUserConf("CUSTOM_SHORTHAND_USER", sn_CustomShorthandUser);
+
+tString sn_CustomShorthandPass("password");
+static tSettingItem<tString> sn_CustomShorthandPassConf("CUSTOM_SHORTHAND_PASS", sn_CustomShorthandPass);*/
+
+int nKrawall::CustomShorthandExecute(int userID, tString authority, tString &fullAuthority, tOutput & error)
+{
+    //sn_ConsoleOut("Connection to" + authority + "\n");
+    if (authority == sn_CustomShorthand.Filter())
+    {
+        /*
+        //! Coder: LOVER$BOY
+        //! Status: Complete
+        //! Description:
+        //!   This code was meant for allowing only registered custom shorthands to be used.
+        //!       It's not ready yet but will be once permission is obtained either through
+        //!       Z-Man or Tank Program. Until then, this will remain commented.
+
+        //  compose real URL
+        std::ostringstream fullURL;
+        fullURL << "http://shorthands.vertrex.tk/?query=check&authority=" << authority;
+
+        const tString username(sn_CustomShorthandUser), password(sn_CustomShorthandPass);
+        fullURL << "&user=" << username;
+        fullURL << "&pass=" << password;
+
+        //  fetch URL
+        void * ctxt = xmlNanoHTTPOpen( fullURL.str().c_str(), NULL);
+        if (ctxt == NULL)
+        {
+            error.SetTemplateParameter(1, "http://shorthands.vertrex.tk/");
+            error << "$shorthands_error_invalidurl";
+
+            return -1;
+        }
+
+        //  read in website response code
+        int rc = xmlNanoHTTPReturnCode(ctxt);
+
+        std::stringstream scontent;
+        int maxlen = 10000;
+        char buf[1000];
+        buf[0] = 0;
+        unsigned int len = 1;
+        while ( len > 0 && maxlen > 0)
+        {
+            int max = sizeof(buf);
+            if ( max > maxlen )
+                max = maxlen;
+            len = xmlNanoHTTPRead( ctxt, &buf, max );
+            scontent.write( buf, len );
+            maxlen -= len;
+        }
+
+        tString content;
+
+        if (rc != 200)
+        {
+            xmlNanoHTTPClose(ctxt);
+
+            content.ReadLine(scontent);
+
+            error.SetTemplateParameter(1, authority);
+            error.SetTemplateParameter(2, rc);
+            error.SetTemplateParameter(3, content);
+            error << "$shorthands_error_unknown";
+
+            return -1;
+        }
+
+        scontent >> content;
+        if (content.Trim().ToLower() == "password_ok")
+        {
+            xmlNanoHTTPClose(ctxt);
+        */
+            //  good, put full authority with the custom connection of shorthand
+            fullAuthority = sn_CustomShorthandConnection;
+            return 1;
+        /*}
+        else
+        {
+            xmlNanoHTTPClose(ctxt);
+
+            error.SetTemplateParameter(1, authority);
+            error.SetTemplateParameter(2, content);
+            error << "$shorthands_error_different";
+        }*/
+    }
+
+    return 0;
+}
+//  shorthand code END
+
 int nKrawall::FetchURL( tString const & authority, char const * query, std::ostream & target, int maxlen )
 {
     // compose real URL

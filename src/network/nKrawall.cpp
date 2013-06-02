@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 Although it is already included in the GPL, let me clarify:
@@ -59,7 +59,7 @@ static tConfItemLine sn_methodBlacklistConf( "HASH_METHOD_BLACKLIST", sn_methodB
 
 static void sn_GetSupportedMethods( std::vector< tString > & toFill )
 {
-    char const * protocols[] = { 
+    char const * protocols[] = {
         "md5",
         "bmd5",
         0
@@ -82,7 +82,7 @@ static bool sn_IsSupportedMethod( tString const & method )
 {
     std::vector< tString > methods;
     sn_GetSupportedMethods( methods);
-    
+
     for( std::vector< tString >::iterator iter = methods.begin(); iter != methods.end(); ++iter )
     {
         if ( method == *iter )
@@ -94,14 +94,14 @@ static bool sn_IsSupportedMethod( tString const & method )
     return false;
 }
 
-// supported authentication methods of this client in a comma separated list 
+// supported authentication methods of this client in a comma separated list
 tString nKrawall::nMethod::SupportedMethods()
 {
     std::ostringstream s;
 
     std::vector< tString > methods;
     sn_GetSupportedMethods( methods);
-    
+
     bool first = false;
     for( std::vector< tString >::iterator iter = methods.begin(); iter != methods.end(); ++iter )
     {
@@ -127,7 +127,7 @@ static bool sn_BothHave( tString const & a, tString const & b, tString const & m
 tString nKrawall::nMethod::BestMethod( tString const & a, tString const & b )
 {
     tString ret;
-    
+
     // iterate through methods, starting from best, and return the first that fits
     std::vector< tString > methods;
     sn_GetSupportedMethods( methods);
@@ -154,7 +154,7 @@ bool nKrawall::nMethod::BestLocalMethod( tString const & supportedOnClient, nMet
             result = **run;
             return true;
         }
-        
+
         ++run;
     }
 
@@ -244,7 +244,7 @@ void nKrawall::nMethod::ScrambleWithSalt( nScrambleInfo const & info, nScrambled
 nKrawall::nMethod::nMethod( char const * method_, std::istream & properties )
 {
     method = method_;
-    
+
     while ( !properties.eof() )
     {
         tString property;
@@ -490,8 +490,8 @@ void nKrawall::RandomSalt(nSalt& salt)
 //! split a fully qualified user name in authority and username part
 void nKrawall::SplitUserName( tString const & original, tString & username, tString & authority )
 {
-    std::ostringstream filter; 
-    
+    std::ostringstream filter;
+
     for( int i = original.Len()-2; i >=0 ; --i )
     {
         if ( original[i] == '@' )
@@ -501,7 +501,7 @@ void nKrawall::SplitUserName( tString const & original, tString & username, tStr
                 return;
         }
     }
-    
+
     username = original;
     authority = "";
 }

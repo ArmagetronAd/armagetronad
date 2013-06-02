@@ -473,7 +473,8 @@ public:
     // put the message into the send heap
     void Send(int peer,REAL priority=0,bool ack=true);
 
-    void Write(const unsigned short &x){
+    void Write(const unsigned short &x)
+    {
         data[data.Len()]=x;
     }
 

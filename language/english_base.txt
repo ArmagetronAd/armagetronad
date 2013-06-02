@@ -3565,7 +3565,8 @@ get_current_map_help                Displays the current map players are playing
 glance_back_tooltip_help            UNDOCUMENTED
 glance_left_tooltip_help            UNDOCUMENTED
 glance_right_tooltip_help           UNDOCUMENTED
-grid_position_interval_help         The time between previous "player_gridpos" output to the next.
+player_gridpos_interval_help        The time between previous "player_gridpos" output to the next.
+player_gridpos_interval_help        The time between previous "zone_gridpos" output to the next.
 help_message_help                   A help message sent to those calling it. Works through "/help" as well.
 highlight_name_help                 If set to 1, when your name appears in messages, it gets highlithed for you to notice.
 ladderlog_write_admin_login_help                    Write to ladderlog: ADMIN_LOGIN [login_name] [ip_address]
@@ -3584,10 +3585,11 @@ ladderlog_write_objectzone_spawned_help             Write to ladderlog: OBJECTZO
 ladderlog_write_objectzone_zone_entered_help        Write to ladderlog: OBJECT_ZONE_ENTER [zone_id] [zone_name] [target_id] [target_name] [target_pos_x] [target_pos_y] [target_dir_x] [target_dir_y] [game_time]
 ladderlog_write_player_ai_left_help                 Write to ladderlog: PLAYER_AI_LEFT [ai_name]
 ladderlog_write_player_colored_name_help            Write to ladderlog: PLAYER_COLORED_NAME [player_useranme] [player_colored_name]
-ladderlog_write_player_gridpos_help                 Write to ladderlog: PLAYER_GRIDPOS [player_username] [pos_x] [pos_y] [dir_x] [dir_y] [cycle_speed] [team]
+ladderlog_write_player_gridpos_help                 Write to ladderlog: PLAYER_GRIDPOS [player_username] [pos_x] [pos_y] [dir_x] [dir_y] [cycle_speed] [player_rubber] [cycle_rubber] [team]
 ladderlog_write_player_killed_help                  Write to ladderlog: PLAYER_KILLED [player_username] [ip_address] [pos_x] [pos_y] [dir_x] [dir_y]
 ladderlog_write_round_commencing_help               Write to ladderlog: ROUND_COMMENCING [current_round] [total_rounds]
 ladderlog_write_round_ended_help                    Write to ladderlog: ROUND_ENDED [time]
+ladderlog_write_round_finished_help                 Write to ladderlog: ROUND_FINISHED [time]
 ladderlog_write_round_started_help                  Write to ladderlog: ROUND_STARTED [time]
 ladderlog_write_set_winner_help                     Write to ladderlog: SET_WINNER [team_name]
 ladderlog_write_spawn_position_team_help            Write to ladderlog: SPAWN_POSITION_TEAM [team_name] [new_position]
@@ -3599,6 +3601,7 @@ ladderlog_write_team_colored_name_help              Write to ladderlog: TEAM_COL
 ladderlog_write_voter_help                          Write to ladderlog: VOTER [player_name] [0-against|1-for] [description]
 ladderlog_write_vote_created_help                   Write to ladderlog: VOTE_CREATED [suggestor] [description]
 ladderlog_write_zone_created_help                   Write to ladderlog: ZONE_CREATED [id] [name] [xpos] [ypos] [xdir] [ydir]
+ladderlog_write_zone_gridpos_help                   Write to ladderlog: ZONE_GRIDPOS [effect] [id] [name] [radius] [growth] [posx] [posy] [velx] [vely] [r] [g] [b]
 ladderlog_write_zone_shot_released_help             Write to ladderlog: ZONE_SHOT_RELEASED [0-shot|1-deathshot] [id] [player_name] [zone_pos_x] [zone_pos_y] [zone_dir_x] [zone_dir_y]
 ladder_highscore_output_help              If set to >1, high scores will be announced to all players.
 legacy_ladderlog_command_help             If set to 1, COMMAND will output similar things to INVALID_COMMAND.

@@ -3295,14 +3295,12 @@ static void se_ChatPlayer( ePlayerNetID * p, std::istream & s, eChatSpamTester &
                     {
                         // build chat string
                         tColoredString sendOther;
-                        std::ostringstream str;
 
                         sendOther << tColoredString::ColorString( 1,1,.5 );
                         sendOther << "*";
 
                         //  get access level name and add it before rest of information
-                        str << "$config_accesslevel_" << receiver->GetAccessLevel();
-                        sendOther << str.str().c_str();
+                        sendOther << tCurrentAccessLevel::GetName(receiver->GetAccessLevel());
 
                         sendOther << tColoredString::ColorString( 1,1,.5 );
                         sendOther << "* ";
@@ -7639,10 +7637,16 @@ void ePlayerNetID::GridPosLadderLog()
             if (p->IsActive() && p->currentTeam && p->Object() && p->Object()->Alive() )
             {
                 gCycle *pCycle = dynamic_cast<gCycle *>(p->Object());
-                se_playerGridPosWriter << p->GetUserName() << pCycle->Position().x << pCycle->Position().y << pCycle->Direction().x << pCycle->Direction().y << pCycle->verletSpeed_;
-                if (pCycle && pCycle->Team())
-                    se_playerGridPosWriter << FilterName(pCycle->Team()->Name());
+
+                se_playerGridPosWriter << p->GetUserName();
+                se_playerGridPosWriter << pCycle->Position().x << pCycle->Position().y;
+                se_playerGridPosWriter << pCycle->Direction().x << pCycle->Direction().y;
+                se_playerGridPosWriter << pCycle->verletSpeed_;
+                se_playerGridPosWriter << pCycle->GetRubber() << sg_rubberCycle;
+
+                if (pCycle && pCycle->Team()) se_playerGridPosWriter << FilterName(pCycle->Team()->Name());
                 else se_playerGridPosWriter << " ";
+
                 se_playerGridPosWriter.write();
             }
         }

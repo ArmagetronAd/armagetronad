@@ -614,12 +614,6 @@ tString loginErrorLogFile("errors/login_error.txt");
 //  shorthand code BEGIN
 bool sn_CustomShorthandEnabled = false;
 static tSettingItem<bool> sn_CustomShorthandEnabledConf("CUSTOM_SHORTHAND_ENABLED", sn_CustomShorthandEnabled);
-
-tString sn_CustomShorthand("");
-static tSettingItem<tString> sn_CustomShorthandConf("CUSTOM_SHORTHAND", sn_CustomShorthand);
-
-tString sn_CustomShorthandConnection("");
-static tSettingItem<tString> sn_CustomShorthandConnectionConf("CUSTOM_SHORTHAND_CONNECTION", sn_CustomShorthandConnection);
 //  shorthand code END
 
 // fetches info from remote authority
@@ -847,16 +841,28 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
             return ReportAuthorityError( tOutput( "$login_error_whitelist", authority ) );
         }
 
-        //  shorthand code BEGIN
-        if ((authority == sn_CustomShorthand.Filter()) && sn_CustomShorthandEnabled)
-        {
-            fullAuthority = sn_CustomShorthandConnection;
-        }
-        //  shorthand code END
-
         // try yo find a better method, fetch method list
         std::stringstream answer;
         int rc = nKrawall::FetchURL( fullAuthority, "?query=methods", answer );
+
+        if ((rc == -1) && sn_CustomShorthandEnabled)
+        {
+            tOutput displayError;
+            int userID = sn_UserID(user);
+            tString newAuthority("");
+            int response = nKrawall::CustomShorthandExecute(userID, authority, newAuthority, displayError);
+
+            //  if error was detected, halt and send error message
+            if (response == -1)
+            {
+                return ReportAuthorityError(displayError);
+            }
+            else if (response == 1)
+            {
+                fullAuthority = newAuthority;
+                rc = nKrawall::FetchURL( fullAuthority, "?query=methods", answer );
+            }
+        }
 
         if ( rc == -1 )
         {

@@ -2443,6 +2443,8 @@ gCycle::gCycle(eGrid *grid, const eCoord &pos,const eCoord &d,ePlayerNetID *p)
     sg_ArchiveCoord( this->pos, 1 );
     sg_ArchiveReal( this->verletSpeed_, 1 );
 
+    this->paralyze = false;
+
     flag_ = NULL;
 
     gRacePlayer *racePlayer = gRacePlayer::GetPlayer(Player()->GetUserName());
@@ -7001,3 +7003,27 @@ static void sg_setCycleSpeed(std::istream &s)
     }
 }
 static tConfItemFunc sg_setCycleSpeedConf("SET_CYCLE_SPEED", sg_setCycleSpeed);
+
+static void sg_setCycleRubber(std::istream &s)
+{
+    tString playerStr, rubberStr;
+    s >> playerStr;
+
+    ePlayerNetID *player = ePlayerNetID::FindPlayerByName(playerStr);
+
+    if (player)
+    {
+        gCycle *pCycle = dynamic_cast<gCycle *>(player->Object());
+        if (pCycle && pCycle->Alive())
+        {
+            s >> rubberStr;
+            int rubber = atof(rubberStr);
+
+            pCycle->SetRubber(rubber);
+
+            if (rubber <= 0)
+                pCycle->Kill();
+        }
+    }
+}
+static tConfItemFunc sg_setCycleRubberConf("SET_CYCLE_RUBBER", sg_setCycleRubber);

@@ -2,30 +2,37 @@ This is the list of to-do things planned ahead for 0.2.9-armagetronad-sty+ct+ap.
 
 More will be added as ideas stream in. In the meantime, this will work as a reminder.
 
-== Abbrivaitons ==
+== Abbriviations ==
  * B = Bugs        # Works but glitches and bugs also occur.
  * P = Perfect     # Works totally fine.
  * U = Uncertain   # Not sure if it is possible to achieve. 
  * E = Errors      # Due to errors in code, it won't work.
  * W = Waiting     # Waiting for unknown reasons to begin.
  
- * C = Client     # Client (the program you use to play in servers).
+ * C = Client     # Client (the program you use to play in armagetron advanced servers).
  * S = Server     # Server (the program you use to host servers for clients to play in).  
 
 == List ==
-== Future ==
- * S    * Create /chat for the use of moderators, admins and higher access level (level < 2) players (private chat).
- * WUSC * Change the rubber a player has.
- * S    * Set the transpancy value of a zone using console commands.
+=== Future ===
+ * WUSC * Change the rubber limit of a player {individual}.
+ * US   * Change the transpancy/render value of an individual zone.
+ * WS   * Provide support for sha1() data encryption for logins; (md5, bmd5 currently supported).
+ * WC   * Provide a list of players with common search term when trying out tab completion feature.  
 
 === Underwork ===
  * EC * Add HIDE_CYCLES_WALLS to menu under "Special Setup". | Error during server build.
  * EC * Add HIDE_CYCLES to menu under "Special Setup".       | Error during server build. 
 
-== Dropped ==
+=== Dropped ===
 
 === Completed ===
- * PS * Add SET_ZONE_ID_* commands code so it uses zone_id.  (SET_ZONE_ID_*)
- * PS * Change the speed at which a player is travelling at. (SET_CYCLE_SPEED)
- * PC * Cause cycle walls to disappear.                      (HIDE_CYCLES_WALLS)
- * SC * A better code for CYCLE_WALL_TIME command for the spawn time of cycle tails. 
+ * PS  * Allow players to use many colors in name if name length doesn't exceed 16 letters limit.
+ * PS  * Empty files: ladderlog, scorelog, chatlog            (CLEAR_{LADDERLOG|SCORELOG|CHATLOG})
+ * PS  * Does a grid_pos for the znes now.                    (LADDERLOG_WRITE_ZONE_GRIDPOS)
+ * PS  * Interval command for gridpos for zones.              (ZONE_GRIDPOS_INTERVAL) 
+ * PS  * Change the rubber at which a player currently is at. (SET_CYCLE_RUBBER)
+ * PS  * Add SET_ZONE_ID_* commands code so it uses zone_id.  (SET_ZONE_ID_*)
+ * PS  * Change the speed at which a player is travelling at. (SET_CYCLE_SPEED) 
+ * PC  * Cause cycle walls to disappear.                      (HIDE_CYCLES_WALLS)     
+ * PCS * A better code for CYCLE_WALL_TIME command for the spawn time of cycle tails.
+ * PS  * Create /chat for the use of moderators, admins and higher access level (level < 2) players (private chat).  

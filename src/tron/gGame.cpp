@@ -75,6 +75,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "gRace.h"
 
 #include "gPingPong.h"
+#include "sha1.h"
 
 #include "gParser.h"
 #include "tResourceManager.h"
@@ -1961,9 +1962,13 @@ static float sg_tacticalPositionInterval=5;
 static tSettingItem<float> sgtpi("TACTICAL_POSITION_INTERVAL",
                                  sg_tacticalPositionInterval);
 
-static float sg_gridPosInterval=1;
-static tSettingItem<float> sggpi("GRID_POSITION_INTERVAL",
-                                 sg_gridPosInterval);
+static float sg_playerGridPosInterval=1;
+static tSettingItem<float> sggpi("PLAYER_GRIDPOS_INTERVAL",
+                                 sg_playerGridPosInterval);
+
+static float sg_zoneGridPosInterval=1;
+static tSettingItem<float> sggzi("ZONE_GRIDPOS_INTERVAL",
+                                 sg_zoneGridPosInterval);
 
 
 class ladder: public highscores<REAL>{
@@ -6126,7 +6131,12 @@ bool gGame::GameLoop(bool input){
         static int lastcountdown=0;
         int cd=int(floor(-time))+1;
         if (cd>=0 && cd<PREPARE_TIME && cd!=lastcountdown && se_mainGameTimer && se_mainGameTimer->IsSynced() ){
-		    if (cd==1) ePlayerNetID::GridPosLadderLog();
+		    if (cd==1)
+            {
+                ePlayerNetID::GridPosLadderLog();
+                gZone::GridPosLadderLog();
+            }
+
             lastcountdown=cd;
             tString s;
             s << cd;
@@ -6280,8 +6290,14 @@ bool gGame::GameLoop(bool input){
         }
     } {
         static float lastTime = 1e42;
-        if((sg_gridPosInterval >= 0) && (gtime > sg_gridPosInterval) && (gtime >= lastTime + sg_gridPosInterval + 1 || gtime < lastTime)) {
+        if((sg_playerGridPosInterval >= 0) && (gtime > sg_playerGridPosInterval) && (gtime >= lastTime + sg_playerGridPosInterval + 1 || gtime < lastTime)) {
             ePlayerNetID::GridPosLadderLog();
+            lastTime = gtime;
+        }
+    } {
+        static float lastTime = 1e42;
+        if((sg_zoneGridPosInterval >= 0) && (gtime > sg_zoneGridPosInterval) && (gtime >= lastTime + sg_zoneGridPosInterval + 1 || gtime < lastTime)) {
+            gZone::GridPosLadderLog();
             lastTime = gtime;
         }
     } {
@@ -7048,6 +7064,7 @@ static void sg_ladderlogClear(std::istream &s)
     {
         o << "\n";
     }
+    o.close();
 }
 static tConfItemFunc sg_ladderlogClearConf("CLEAR_LADDERLOG", &sg_ladderlogClear);
 
@@ -7058,6 +7075,7 @@ static void sg_chatlogClear(std::istream &s)
     {
         o << "\n";
     }
+    o.close();
 }
 static tConfItemFunc sg_chatlogClearConf("CLEAR_CHATLOG", &sg_chatlogClear);
 
@@ -7068,5 +7086,6 @@ static void sg_scorelogClear(std::istream &s)
     {
         o << "\n";
     }
+    o.close();
 }
 static tConfItemFunc sg_scorelogClearConf("CLEAR_SCORELOG", &sg_scorelogClear);

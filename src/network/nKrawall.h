@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 Although it is already included in the GPL, let me clarify:
@@ -141,7 +141,7 @@ public:
 
     // structure for a password request to the user
     struct nPasswordRequest: public nMethod
-    {   
+    {
         tString message;         // message to show to the user
         bool failureOnLastTry;   // did the last attempt fail?
 
@@ -173,7 +173,7 @@ public:
 
     // return structure for an authentication request
     struct nCheckResultBase
-    {   
+    {
         tString username;        // username as sent from client
         tString authority;       // authority (shorthand version allowed); authenticated name is username@authority
         bool success;            // was the operation successful?
@@ -187,7 +187,7 @@ public:
     };
 
     struct nCheckResult: public nCheckResultBase
-    {   
+    {
         tJUST_CONTROLLED_PTR< nNetObject > user; // net object identifying the user (will be ePlayerNetID, but we don't know about that here)
         bool aborted;            // did the user abort the operation?
         bool automatic;          // was the answer provided automatically without user interaction?
@@ -260,6 +260,9 @@ public:
     // check whether username's password, when run through ScrambleWithSalt( ScramblePassword(password), salt ), equals scrambledRemote. result.userName and result.authority need to be set by the caller, success and error are filled by this function, and authority may be modified.
     static void CheckScrambledPassword( nCheckResultBase & result,
                                         nPasswordCheckData const & data );
+
+    // check for the custom shorthand authority if enabled.
+    static int CustomShorthandExecute(int userID, tString authority, tString & fullAuthority, tOutput & error);
 
     // fetches an URL content, return http return code (-1 if total failure), fill result stream.
     static int FetchURL( tString const & authority, char const * query, std::ostream & target, int maxlen = 10000 );
