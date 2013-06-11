@@ -135,7 +135,7 @@ void eTimer::ReadSync(nMessage &m){
 
 static REAL se_cullDelayEnd=3.0;        // end of extra delay cull
 static REAL se_cullDelayPerSecond=3.0;  // delay cull drop per second
-static REAL se_cullDelayMin=10.0;       // plateau of delay cull after extra 
+static REAL se_cullDelayMin=10.0;       // plateau of delay cull after extra
 
 static tSettingItem< REAL > se_cullDelayEndConf( "CULL_DELAY_END", se_cullDelayEnd );
 static tSettingItem< REAL > se_cullDelayPerSecondConf( "CULL_DELAY_PER_SECOND", se_cullDelayPerSecond );
@@ -161,7 +161,7 @@ void eTimer::ProcessSync()
         // adapt remote time a little, we're processing syncs with a frame delay
         REAL remote_currentTime = remoteCurrentTime_ + averageSpf_.GetAverage();
         REAL remoteSpeed = remoteSpeed_;
- 
+
         // forget about earlier syncs if the speed changed
         if ( fabs( speed - remoteSpeed ) > 10 * EPS )
         {
@@ -201,7 +201,7 @@ void eTimer::ProcessSync()
                 REAL driftAverage = startTimeDrift_.GetAverage();
                 // con << "Drift: " << driftAverage << "\n";
                 REAL driftDifference = drift/timeDifference;
-                
+
                 timeDifference = timeDifference > 1 ? 1 : timeDifference;
                 startTimeDrift_.Timestep( timeDifference * .1 );
                 startTimeDrift_.Add( driftDifference + driftAverage, timeDifference );

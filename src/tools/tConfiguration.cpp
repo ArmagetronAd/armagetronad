@@ -630,6 +630,11 @@ void tConfItemBase::WriteAllToFile()
     tString file("commands_list.txt");
     if ( tDirectories::Var().Open(w, file))
     {
+        /*w << "{| border=\"2\" cellspacing=\"0\" cellpadding=\"4\" rules=\"all\" style=\"margin:1em 1em 1em 0; border:solid 1px #AAAAAA; border-collapse:collapse; background-color:#F9F9F9; font-size:95%; empty-cells:show;\"\n";
+        w << "!Command\n";
+        w << "!Meaning\n";
+        w << "!Default\n";
+        w << "|-\n";*/
         for(tConfItemMap::iterator iter = confmap.begin(); iter != confmap.end() ; ++iter)
         {
             tConfItemBase * ci = (*iter).second;
@@ -644,8 +649,12 @@ void tConfItemBase::WriteAllToFile()
             mess << "\n";
 
             w << mess;
+            /*w << "| " << ci->title << " || " << help << "\n";
+            w << "|-\n";*/
         }
+        //w << "}}\n";
     }
+    w.close();
 }
 
 tString tConfItemBase::FindConfigItem(tString name)
@@ -1030,6 +1039,29 @@ static tExtraConfigCommandLineAnalyzer s_extraAnalyzer;
 
 static void st_InstallSigHupHandler();
 
+static tString st_customConfigLine = tString("");
+static tSettingItem<tString> st_customConfigLineConf("CUSTOM_CONFIGS", st_customConfigLine);
+
+//  CUSTOM_CONFIGS config1.cfg;config2.cfg;
+void st_LoadCustomConfigs()
+{
+    if (st_customConfigLine.Filter() != "")
+    {
+        tArray<tString> configs = st_customConfigLine.Split(";");
+        if (configs.Len() > 0)
+        {
+            for(int i = 0; i < configs.Len(); i++)
+            {
+                tString config = configs[i];
+
+                Load(tDirectories::Config(), config);
+                Load(tDirectories::Var(), config);
+                Load(tDirectories::Resource(), config);
+            }
+        }
+    }
+}
+
 void st_LoadConfig( bool printChange )
 {
     // default include files are executed at owner level
@@ -1066,12 +1098,20 @@ void st_LoadConfig( bool printChange )
     Load( config, "autoexec.cfg" );
     Load( var, "autoexec.cfg" );
 
+    st_LoadCustomConfigs();
+
     // load configuration from playback
     tConfItemBase::LoadPlayback();
     st_settingsFromRecording = tRecorder::IsPlayingBack();
 
     tConfItemBase::printChange=true;
 }
+
+static void st_ReLoadConfig(std::istream &s)
+{
+    st_LoadConfig(false);
+}
+static tConfItemFunc st_ReLoadConfigConf("RELOAD_CONFIG", &st_ReLoadConfig);
 
 void st_SaveConfig()
 {
@@ -1272,3 +1312,5 @@ static tConfItemFunc st_Dummy10("SIMULATE_RECEIVE_PACKET_LOSS", &st_Dummy);
 static tConfItemFunc st_Dummy11("SIMULATE_SEND_PACKET_LOSS", &st_Dummy);
 #endif
 
+tAccessLevel st_DefaultOwnerLevel = tAccessLevel_Owner;
+static tSettingItem<tAccessLevel> st_DefaultOwnerLevelConf("DEFAULT_EXECUTION_LEVEL", st_DefaultOwnerLevel);

@@ -4,7 +4,7 @@
 
 ArmageTron -- Just another Tron Lightcycle Game in 3D.
 Copyright (C) 2000  Manuel Moos (manuel@moosnet.de)
-Copyright (C) 2004  Armagetron Advanced Team (http://sourceforge.net/projects/armagetronad/) 
+Copyright (C) 2004  Armagetron Advanced Team (http://sourceforge.net/projects/armagetronad/)
 
 **************************************************************************
 
@@ -21,7 +21,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -34,6 +34,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include    "tLocale.h"
 #include    "tConfiguration.h"
 #include    "tException.h"
+#include    "tDirectories.h"
 
 #ifdef WIN32
 #include    <windows.h>
@@ -122,10 +123,10 @@ bool tCommandLineData::Analyse(int argc,char **argv)
 
     //std::cout << "config loaded\n";
 
-#ifndef WIN32   
+#ifndef WIN32
 #define HELPAVAIL
 #endif
-#ifdef DEDICATED  
+#ifdef DEDICATED
 #define HELPAVAIL
 #endif
 
@@ -135,6 +136,7 @@ bool tCommandLineData::Analyse(int argc,char **argv)
         {
             {
                 std::ostringstream s;
+                tString str;
                 s << "\n\nUsage: " << name_ << " [Arguments]\n\n"
                 << "Possible arguments:\n\n";
                 s << "-h, --help                   : print this message\n";

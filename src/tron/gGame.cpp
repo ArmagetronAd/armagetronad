@@ -75,7 +75,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "gRace.h"
 
 #include "gPingPong.h"
-#include "sha1.h"
 
 #include "gParser.h"
 #include "tResourceManager.h"
@@ -148,11 +147,15 @@ static tSettingItem<REAL> sg_playerPositioningStartTimeConf( "TACTICAL_POSITION_
 
 static nSettingItemWatched<tString> conf_mapfile("MAP_FILE",mapfile, nConfItemVersionWatcher::Group_Breaking, 8 );
 
-gRotation *mapRotation = new gRotation();
+gRotation *mapRotation    = new gRotation();
 gRotation *configRotation = new gRotation();
 
+gRotationRound *mapRoundRotation    = new gRotationRound();
+gRotationRound *configRoundRotation = new gRotationRound();
+
 // config item for semi-colon deliminated list of maps/configs, needs semi-colon at the end
-// ie, original/map-1.0.1.xml;original/map-1.0.1.xml;
+// ie, original/map-1.0.1.xml|round1;original/map-1.0.1.xml|round2;
+// |round is optional to add
 static void sg_mapRotation(std::istream &s)
 {
     tString mapsT;
@@ -163,6 +166,7 @@ static void sg_mapRotation(std::istream &s)
 
     //  clear previous map cache in rotation
     mapRotation->Clear();
+    mapRoundRotation->Clear();
 
     /*
     int strpos = 0;
@@ -187,14 +191,186 @@ static void sg_mapRotation(std::istream &s)
     for(int i = 0; i < mapFiles.Len(); i++)
     {
         tString map = mapFiles[i];
+        tArray<tString> mapsParams = map.Split("|");
 
         if (map.Filter() != "")
         {
-            mapRotation->Add(map);
+            gRotationItem *gRotItem = NULL;
+            if (mapsParams.Len() >= 2)
+                gRotItem = new gRotationItem(mapsParams[0], atoi(mapsParams[1]));
+            else
+                gRotItem = new gRotationItem(mapsParams[0], i);
+            mapRotation->Add(gRotItem);
+        }
+    }
+
+    for(int j = 0; j < mapRotation->Size(); j++)
+    {
+        gRotationItem *gRotItem = mapRotation->Get(j);
+        if (gRotItem)
+        {
+            gRotationRoundSelection *roundSelection = NULL;
+
+            //! Check for round existance in records
+            if (!mapRoundRotation->Check(gRotItem->Round()))
+            {
+                roundSelection = new gRotationRoundSelection(gRotItem->Round());
+                mapRoundRotation->Add(roundSelection);
+            }
+            else
+            {
+                roundSelection = mapRoundRotation->Get(gRotItem->Round());
+            }
+
+            if (roundSelection)
+            {
+                roundSelection->Add(gRotItem);
+            }
         }
     }
 }
 static tConfItemFunc sg_mapRotationConf("MAP_ROTATION", &sg_mapRotation);
+
+static void sg_mapRotationAdd(std::istream &s)
+{
+    tString params, mapStr, roundStr;
+    params.ReadLine(s);
+    int pos = 0;
+
+    //  don't continue unless the params aren't empty
+    if (params.Filter() == "") return;
+
+    mapStr   = params.ExtractNonBlankSubString(pos);
+    roundStr = params.ExtractNonBlankSubString(pos);
+
+    if (mapStr.Filter() == "") return;
+    if (roundStr.Filter() == "") return;
+
+    //  check whether map already exists within rotation
+    for(int i = 0; i < mapRotation->Size(); i++)
+    {
+        gRotationItem *gRotItemSelect = mapRotation->Get(i);
+        if (gRotItemSelect)
+        {
+            if (mapStr == gRotItemSelect->Name()) return;
+        }
+    }
+
+    gRotationItem *gRotItem = new gRotationItem(mapStr, atoi(roundStr));
+    mapRotation->Add(gRotItem);
+
+    //  adding new addition to the round selection list
+    gRotationRoundSelection *roundSelection = NULL;
+
+    //! Check for round existance in records
+    if (!mapRoundRotation->Check(gRotItem->Round()))
+    {
+        roundSelection = new gRotationRoundSelection(gRotItem->Round());
+        mapRoundRotation->Add(roundSelection);
+    }
+    else
+    {
+        roundSelection = mapRoundRotation->Get(gRotItem->Round());
+    }
+
+    if (roundSelection)
+    {
+        roundSelection->Add(gRotItem);
+    }
+}
+static tConfItemFunc sg_mapRotationAddConf("MAP_ROTATION_ADD", &sg_mapRotationAdd);
+
+static void sg_mapRotationSet(std::istream &s)
+{
+    tString params, mapStr, roundStr;
+    params.ReadLine(s);
+    int pos = 0;
+
+    //  don't continue unless the params aren't empty
+    if (params.Filter() == "") return;
+
+    mapStr   = params.ExtractNonBlankSubString(pos);
+    roundStr = params.ExtractNonBlankSubString(pos);
+
+    if (mapStr.Filter() == "") return;
+    if (roundStr.Filter() == "") return;
+
+    //  check whether map already exists within rotation
+    for(int i = 0; i < mapRotation->Size(); i++)
+    {
+        gRotationItem *gRotItemSelect = mapRotation->Get(i);
+        if (gRotItemSelect)
+        {
+            if (mapStr == gRotItemSelect->Name())
+            {
+                gRotationRoundSelection *roundSelectionOld = mapRoundRotation->Get(gRotItemSelect->Round());
+                if (roundSelectionOld)
+                {
+                    roundSelectionOld->Remove(gRotItemSelect);
+                }
+
+                //  set the new round value
+                gRotItemSelect->SetRound(atoi(roundStr));
+
+                gRotationRoundSelection *roundSelectionNew = NULL;
+                //! Check for round existance in records
+                if (!mapRoundRotation->Check(gRotItemSelect->Round()))
+                {
+                    roundSelectionNew = new gRotationRoundSelection(gRotItemSelect->Round());
+                    mapRoundRotation->Add(roundSelectionNew);
+                }
+                else
+                {
+                    roundSelectionNew = mapRoundRotation->Get(gRotItemSelect->Round());
+                }
+
+                if (roundSelectionNew)
+                {
+                    roundSelectionNew->Add(gRotItemSelect);
+                }
+                break;
+            }
+        }
+    }
+}
+static tConfItemFunc sg_mapRotationSetConf("MAP_ROTATION_SET", &sg_mapRotationSet);
+
+static void sg_mapRotationRemove(std::istream &s)
+{
+    tString params, mapStr;
+    params.ReadLine(s);
+    int pos = 0;
+
+    //  don't continue unless the params aren't empty
+    if (params.Filter() == "") return;
+
+    mapStr = params.ExtractNonBlankSubString(pos);
+
+    if (mapStr.Filter() == "") return;
+
+    //  check whether map already exists within rotation
+    for(int i = 0; i < mapRotation->Size(); i++)
+    {
+        gRotationItem *gRotItemSelect = mapRotation->Get(i);
+        if (gRotItemSelect)
+        {
+            if (mapStr == gRotItemSelect->Name())
+            {
+                gRotationRoundSelection *roundSelection = mapRoundRotation->Get(gRotItemSelect->Round());
+                if (roundSelection)
+                {
+                    roundSelection->Remove(gRotItemSelect);
+                }
+
+                mapRotation->Remove(gRotItemSelect);
+
+                delete gRotItemSelect;
+                break;
+            }
+        }
+    }
+}
+static tConfItemFunc sg_mapRotationRemoveConf("MAP_ROTATION_REMOVE", &sg_mapRotationRemove);
 
 static void sg_configRotation(std::istream &s)
 {
@@ -206,6 +382,7 @@ static void sg_configRotation(std::istream &s)
 
     //  clear previous config cache in rotation
     configRotation->Clear();
+    configRoundRotation->Clear();
 
     /*int strpos = 0;
     int nextsemicolon = configsT.StrPos(";");
@@ -230,10 +407,179 @@ static void sg_configRotation(std::istream &s)
         tString config = configFiles[i];
 
         if (config.Filter() != "")
-            configRotation->Add(config);
+        {
+            gRotationItem *gRotItem = new gRotationItem(config, i);
+            configRotation->Add(gRotItem);
+        }
+    }
+
+    for(int j = 0; j < configRotation->Size(); j++)
+    {
+        gRotationItem *gRotItem = configRotation->Get(j);
+        if (gRotItem)
+        {
+            gRotationRoundSelection *roundSelection = NULL;
+
+            //! Check for round existance in records
+            if (!configRoundRotation->Check(gRotItem->Round()))
+            {
+                roundSelection = new gRotationRoundSelection(gRotItem->Round());
+                configRoundRotation->Add(roundSelection);
+            }
+            else
+            {
+                roundSelection = configRoundRotation->Get(gRotItem->Round());
+            }
+
+            if (roundSelection)
+            {
+                roundSelection->Add(gRotItem);
+            }
+        }
     }
 }
 static tConfItemFunc sg_configRotationConf("CONFIG_ROTATION", sg_configRotation);
+
+static void sg_configRotationAdd(std::istream &s)
+{
+    tString params, configStr, roundStr;
+    params.ReadLine(s);
+    int pos = 0;
+
+    //  don't continue unless the params aren't empty
+    if (params.Filter() == "") return;
+
+    configStr   = params.ExtractNonBlankSubString(pos);
+    roundStr = params.ExtractNonBlankSubString(pos);
+
+    if (configStr.Filter() == "") return;
+    if (roundStr.Filter() == "") return;
+
+    //  check whether map already exists within rotation
+    for(int i = 0; i < configRotation->Size(); i++)
+    {
+        gRotationItem *gRotItemSelect = configRotation->Get(i);
+        if (gRotItemSelect)
+        {
+            if (configStr == gRotItemSelect->Name()) return;
+        }
+    }
+
+    gRotationItem *gRotItem = new gRotationItem(configStr, atoi(roundStr));
+    configRotation->Add(gRotItem);
+
+    //  adding new addition to the round selection list
+    gRotationRoundSelection *roundSelection = NULL;
+
+    //! Check for round existance in records
+    if (!configRoundRotation->Check(gRotItem->Round()))
+    {
+        roundSelection = new gRotationRoundSelection(gRotItem->Round());
+        configRoundRotation->Add(roundSelection);
+    }
+    else
+    {
+        roundSelection = configRoundRotation->Get(gRotItem->Round());
+    }
+
+    if (roundSelection)
+    {
+        roundSelection->Add(gRotItem);
+    }
+}
+static tConfItemFunc sg_configRotationAddConf("CONFIG_ROTATION_ADD", &sg_configRotationAdd);
+
+static void sg_configRotationSet(std::istream &s)
+{
+    tString params, configStr, roundStr;
+    params.ReadLine(s);
+    int pos = 0;
+
+    //  don't continue unless the params aren't empty
+    if (params.Filter() == "") return;
+
+    configStr   = params.ExtractNonBlankSubString(pos);
+    roundStr = params.ExtractNonBlankSubString(pos);
+
+    if (configStr.Filter() == "") return;
+    if (roundStr.Filter() == "") return;
+
+    //  check whether map already exists within rotation
+    for(int i = 0; i < configRotation->Size(); i++)
+    {
+        gRotationItem *gRotItemSelect = configRotation->Get(i);
+        if (gRotItemSelect)
+        {
+            if (configStr == gRotItemSelect->Name())
+            {
+                gRotationRoundSelection *roundSelectionOld = configRoundRotation->Get(gRotItemSelect->Round());
+                if (roundSelectionOld)
+                {
+                    roundSelectionOld->Remove(gRotItemSelect);
+                }
+
+                //  set the new round value
+                gRotItemSelect->SetRound(atoi(roundStr));
+
+                gRotationRoundSelection *roundSelectionNew = NULL;
+                //! Check for round existance in records
+                if (!configRoundRotation->Check(gRotItemSelect->Round()))
+                {
+                    roundSelectionNew = new gRotationRoundSelection(gRotItemSelect->Round());
+                    configRoundRotation->Add(roundSelectionNew);
+                }
+                else
+                {
+                    roundSelectionNew = configRoundRotation->Get(gRotItemSelect->Round());
+                }
+
+                if (roundSelectionNew)
+                {
+                    roundSelectionNew->Add(gRotItemSelect);
+                }
+                break;
+            }
+        }
+    }
+}
+static tConfItemFunc sg_configRotationSetConf("CONFIG_ROTATION_SET", &sg_configRotationSet);
+
+static void sg_configRotationRemove(std::istream &s)
+{
+    tString params, configStr;
+    params.ReadLine(s);
+    int pos = 0;
+
+    //  don't continue unless the params aren't empty
+    if (params.Filter() == "") return;
+
+    configStr = params.ExtractNonBlankSubString(pos);
+
+    if (configStr.Filter() == "") return;
+
+    //  check whether map already exists within rotation
+    for(int i = 0; i < configRotation->Size(); i++)
+    {
+        gRotationItem *gRotItemSelect = configRotation->Get(i);
+        if (gRotItemSelect)
+        {
+            if (configStr == gRotItemSelect->Name())
+            {
+                gRotationRoundSelection *roundSelection = mapRoundRotation->Get(gRotItemSelect->Round());
+                if (roundSelection)
+                {
+                    roundSelection->Remove(gRotItemSelect);
+                }
+
+                configRotation->Remove(gRotItemSelect);
+
+                delete gRotItemSelect;
+                break;
+            }
+        }
+    }
+}
+static tConfItemFunc sg_configRotationRemoveConf("CONFIG_ROTATION_REMOVE", &sg_configRotationRemove);
 
 void sg_DisplayRotationList(ePlayerNetID *p, std::istream &s, tString command)
 {
@@ -266,14 +612,17 @@ void sg_DisplayRotationList(ePlayerNetID *p, std::istream &s, tString command)
                         for(int i = 0; i < max; i++)
                         {
                             int rotID = showAmount + i;
+                            gRotationItem *mapRotItem = mapRotation->Get(rotID);
+                            if (mapRotItem)
+                            {
+                                tColoredString output;
+                                output << rotID << ") 0xff5500";
+                                output << mapRotItem->Name();
+                                output << tColoredString::ColorString(1, 1, 1) << "\n";
+                                sn_ConsoleOut(output, p->Owner());
 
-                            tColoredString output;
-                            output << rotID << ") 0xff5500";
-                            output << mapRotation->Get(rotID);
-                            output << tColoredString::ColorString(1, 1, 1) << "\n";
-                            sn_ConsoleOut(output, p->Owner());
-
-                            showing++;
+                                showing++;
+                            }
                         }
 
                         tOutput show;
@@ -302,14 +651,17 @@ void sg_DisplayRotationList(ePlayerNetID *p, std::istream &s, tString command)
                         for(int i = 0; i < max; i++)
                         {
                             int rotID = showAmount + i;
+                            gRotationItem *configRotItem = configRotation->Get(rotID);
+                            if (configRotItem)
+                            {
+                                tColoredString output;
+                                output << rotID << ") 0xff5500";
+                                output << configRotItem->Name();
+                                output << tColoredString::ColorString(1, 1, 1) << "\n";
+                                sn_ConsoleOut(output, p->Owner());
 
-                            tColoredString output;
-                            output << rotID << ") 0xff5500";
-                            output << configRotation->Get(rotID);
-                            output << tColoredString::ColorString(1, 1, 1) << "\n";
-                            sn_ConsoleOut(output, p->Owner());
-
-                            showing++;
+                                showing++;
+                            }
                         }
 
                         tOutput show;
@@ -343,7 +695,8 @@ enum gRotationType
     gROTATION_ORDERED_MATCH = 2,
     gROTATION_RANDOM_ROUND = 3,
     gROTATION_RANDOM_MATCH = 4,
-    gROTATION_COUNTER = 5
+    gROTATION_COUNTER = 5,
+    gROTATION_ROUND = 6
 };
 
 tCONFIG_ENUM( gRotationType );
@@ -351,7 +704,7 @@ tCONFIG_ENUM( gRotationType );
 static gRotationType rotationtype = gROTATION_NEVER;
 bool restrictRotatiobType(const gRotationType &newValue)
 {
-    if ((newValue < gROTATION_NEVER) || (newValue > gROTATION_COUNTER))
+    if ((newValue < gROTATION_NEVER) || (newValue > gROTATION_ROUND))
     {
         return false;
     }
@@ -442,20 +795,22 @@ class tSettingMapqueueing: public tConfItemBase
             if (items != "")
             {
                 int pos = 0;
-                tString item = items;
+                tString item = items.ExtractNonBlankSubString(pos);
                 bool mapFound = false;
                 tArray<tString> searchFindings;
                 for (int i=0; i < mapRotation->Size(); i++)
                 {
-                    tString name = mapRotation->Get(i);
-
-                    tString filteredName, filteredSearch;
-                    filteredName = ePlayerNetID::FilterName(name);
-                    filteredSearch = ePlayerNetID::FilterName(item);
-                    if (filteredName.Contains(filteredSearch))
+                    gRotationItem *mapRotItem = mapRotation->Get(i);
+                    if (mapRotItem)
                     {
-                        mapFound = true;
-                        searchFindings.Insert(name);
+                        tString filteredName, filteredSearch;
+                        filteredName = ePlayerNetID::FilterName(mapRotItem->Name());
+                        filteredSearch = ePlayerNetID::FilterName(item);
+                        if (filteredName.Contains(filteredSearch))
+                        {
+                            mapFound = true;
+                            searchFindings.Insert(mapRotItem->Name());
+                        }
                     }
                 }
                 if (!mapFound)
@@ -575,20 +930,22 @@ class tSettingConfqueueing: public tConfItemBase
             if (items != "")
             {
                 int pos = 0;
-                tString item = items;
+                tString item = items.ExtractNonBlankSubString(pos);;
                 bool configFound = false;
                 tArray<tString> searchFindings;
                 for (int i=0; i < configRotation->Size(); i++)
                 {
-                    tString name = configRotation->Get(i);
-
-                    tString filteredName, filteredSearch;
-                    filteredName = ePlayerNetID::FilterName(name);
-                    filteredSearch = ePlayerNetID::FilterName(item);
-                    if (filteredName.Contains(filteredSearch))
+                    gRotationItem *configRotItem = configRotation->Get(i);
+                    if (configRotItem)
                     {
-                        configFound = true;
-                        searchFindings.Insert(name);
+                        tString filteredName, filteredSearch;
+                        filteredName = ePlayerNetID::FilterName(configRotItem->Name());
+                        filteredSearch = ePlayerNetID::FilterName(item);
+                        if (filteredName.Contains(filteredSearch))
+                        {
+                            configFound = true;
+                            searchFindings.Insert(configRotItem->Name());
+                        }
                     }
                 }
                 if (!configFound)
@@ -730,15 +1087,17 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
                     tArray<tString> searchFindings;
                     for (int i=0; i < mapRotation->Size(); i++)
                     {
-                        tString name = mapRotation->Get(i);
-
-                        tString filteredName, filteredSearch;
-                        filteredName = ePlayerNetID::FilterName(name);
-                        filteredSearch = ePlayerNetID::FilterName(item);
-                        if (filteredName.Contains(filteredSearch))
+                        gRotationItem *mapRotItem = mapRotation->Get(i);
+                        if (mapRotItem)
                         {
-                            mapFound = true;
-                            searchFindings.Insert(name);
+                            tString filteredName, filteredSearch;
+                            filteredName = ePlayerNetID::FilterName(mapRotItem->Name());
+                            filteredSearch = ePlayerNetID::FilterName(item);
+                            if (filteredName.Contains(filteredSearch))
+                            {
+                                mapFound = true;
+                                searchFindings.Insert(mapRotItem->Name());
+                            }
                         }
                     }
                     if (!mapFound)
@@ -817,15 +1176,17 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
                     tArray<tString> searchFindings;
                     for (int i=0; i < sg_mapqueueing.Size(); i++)
                     {
-                        tString name = sg_mapqueueing.Get(i);
-
-                        tString filteredName, filteredSearch;
-                        filteredName = ePlayerNetID::FilterName(name);
-                        filteredSearch = ePlayerNetID::FilterName(item);
-                        if (filteredName.Contains(filteredSearch))
+                        gRotationItem *mapRotItem = mapRotation->Get(i);
+                        if (mapRotItem)
                         {
-                            mapFound = true;
-                            searchFindings.Insert(name);
+                            tString filteredName, filteredSearch;
+                            filteredName = ePlayerNetID::FilterName(mapRotItem->Name());
+                            filteredSearch = ePlayerNetID::FilterName(item);
+                            if (filteredName.Contains(filteredSearch))
+                            {
+                                mapFound = true;
+                                searchFindings.Insert(mapRotItem->Name());
+                            }
                         }
                     }
                     if (!mapFound)
@@ -922,15 +1283,17 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
                     tArray<tString> searchFindings;
                     for (int i=0; i < configRotation->Size(); i++)
                     {
-                        tString name = configRotation->Get(i);
-
-                        tString filteredName, filteredSearch;
-                        filteredName = ePlayerNetID::FilterName(name);
-                        filteredSearch = ePlayerNetID::FilterName(item);
-                        if (filteredName.Contains(filteredSearch))
+                        gRotationItem *configRotItem = configRotation->Get(i);
+                        if (configRotItem)
                         {
-                            mapFound = true;
-                            searchFindings.Insert(name);
+                            tString filteredName, filteredSearch;
+                            filteredName = ePlayerNetID::FilterName(configRotItem->Name());
+                            filteredSearch = ePlayerNetID::FilterName(item);
+                            if (filteredName.Contains(filteredSearch))
+                            {
+                                mapFound = true;
+                                searchFindings.Insert(configRotItem->Name());
+                            }
                         }
                     }
                     if (!mapFound)
@@ -1009,15 +1372,17 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
                     tArray<tString> searchFindings;
                     for (int i=0; i < sg_configqueueing.Size(); i++)
                     {
-                        tString name = sg_configqueueing.Get(i);
-
-                        tString filteredName, filteredSearch;
-                        filteredName = ePlayerNetID::FilterName(name);
-                        filteredSearch = ePlayerNetID::FilterName(item);
-                        if (filteredName.Contains(filteredSearch))
+                        gRotationItem *configRotItem = configRotation->Get(i);
+                        if (configRotItem)
                         {
-                            configFound = true;
-                            searchFindings.Insert(name);
+                            tString filteredName, filteredSearch;
+                            filteredName = ePlayerNetID::FilterName(configRotItem->Name());
+                            filteredSearch = ePlayerNetID::FilterName(item);
+                            if (filteredName.Contains(filteredSearch))
+                            {
+                                configFound = true;
+                                searchFindings.Insert(configRotItem->Name());
+                            }
                         }
                     }
                     if (!configFound)
@@ -4485,6 +4850,53 @@ void gGame::StateUpdate(){
                             gRotation::ResetCounter();
                         }
                     }
+                    else if (rotationtype == gROTATION_ROUND)
+                    {
+                        //  load in the map for that round
+                        gRotationRoundSelection *mapRoundSelection = mapRoundRotation->Get(rounds);
+                        if (mapRoundSelection)
+                        {
+                            gRotationItem *mapRotItem = mapRoundSelection->Current();
+                            if (mapRotItem)
+                            {
+                                conf_mapfile.Set( mapRotItem->Name() );
+                                conf_mapfile.GetSetting().SetSetLevel( tAccessLevel_Owner );
+                            }
+
+                            //  finish off by rotating list
+                            mapRoundSelection->Rotate();
+                        }
+
+                        //  load in the config for that round
+                        gRotationRoundSelection *configRoundSelection = configRoundRotation->Get(rounds);
+                        if (configRoundSelection)
+                        {
+                            if (sg_configRotationType == 0)
+                            {
+                                gRotationItem *configRotItem = configRoundSelection->Current();
+                                if (configRotItem)
+                                    st_Include( configRotItem->Name() );
+                            }
+                            else if (sg_configRotationType == 1)
+                            {
+                                gRotationItem *configRotItem = configRoundSelection->Current();
+                                if (configRotItem)
+                                {
+                                    tString rclcl = tResourceManager::locateResource(NULL, configRotItem->Name());
+                                    if ( rclcl ) {
+                                        std::ifstream rc(rclcl);
+                                        tConfItemBase::LoadAll(rc, false );
+                                        return;
+                                    }
+
+                                    con << tOutput( "$config_rinclude_not_found", configRotItem->Name());
+                                }
+                            }
+
+                            //  finish off by rotating list
+                            configRoundSelection->Rotate();
+                        }
+                    }
                 }
                 else
                 {
@@ -4494,8 +4906,12 @@ void gGame::StateUpdate(){
                     {
                         if ((mapRotation->ID() > 0) && (mapRotation->ID() < mapRotation->Size()))
                         {
-                            conf_mapfile.Set( mapRotation->Get(mapRotation->ID() - 1) );
-                            conf_mapfile.GetSetting().SetSetLevel( tAccessLevel_Owner );
+                            gRotationItem *mapRotItem =mapRotation->Get(mapRotation->ID() - 1);
+                            if (mapRotItem)
+                            {
+                                conf_mapfile.Set( mapRotItem->Name() );
+                                conf_mapfile.GetSetting().SetSetLevel( tAccessLevel_Owner );
+                            }
                         }
                     }
 
@@ -4509,18 +4925,24 @@ void gGame::StateUpdate(){
 
                         if (sg_configRotationType == 0)
                         {
-                            st_Include( configRotation->Get(newID) );
+                            gRotationItem *configRotItem = configRotation->Get(newID);
+                            if (configRotItem)
+                                st_Include( configRotItem->Name() );
                         }
                         else if (sg_configRotationType == 1)
                         {
-                            tString rclcl = tResourceManager::locateResource(NULL, configRotation->Current());
-                            if ( rclcl ) {
-                                std::ifstream rc(rclcl);
-                                tConfItemBase::LoadAll(rc, false );
-                                return;
-                            }
+                            gRotationItem *configRotItem = configRotation->Get(newID);
+                            if (configRotItem)
+                            {
+                                tString rclcl = tResourceManager::locateResource(NULL, configRotItem->Name());
+                                if ( rclcl ) {
+                                    std::ifstream rc(rclcl);
+                                    tConfItemBase::LoadAll(rc, false );
+                                    return;
+                                }
 
-                            con << tOutput( "$config_rinclude_not_found", configRotation->Get(newID) );
+                                con << tOutput( "$config_rinclude_not_found", configRotItem->Name());
+                            }
                         }
                     }
 
@@ -5917,8 +6339,12 @@ void Orderedrotate()
 {
     if ( mapRotation->Size() > 0 )
     {
-        conf_mapfile.Set( mapRotation->Current() );
-        conf_mapfile.GetSetting().SetSetLevel( tAccessLevel_Owner );
+        gRotationItem *mapRotItem = mapRotation->Current();
+        if (mapRotItem)
+        {
+            conf_mapfile.Set( mapRotItem->Name() );
+            conf_mapfile.GetSetting().SetSetLevel( tAccessLevel_Owner );
+        }
         mapRotation->OrderedRotate();
     }
 
@@ -5929,20 +6355,27 @@ void Orderedrotate()
 
         if (sg_configRotationType == 0)
         {
-            st_Include( configRotation->Current() );
+            gRotationItem *configRotItem = configRotation->Current();
+            if (configRotItem)
+                st_Include( configRotItem->Name() );
+
             configRotation->OrderedRotate();
         }
         else if (sg_configRotationType == 1)
         {
-            tString rclcl = tResourceManager::locateResource(NULL, configRotation->Current());
-            if ( rclcl ) {
-                std::ifstream rc(rclcl);
-                tConfItemBase::LoadAll(rc, false );
-                configRotation->OrderedRotate();
-                return;
-            }
+            gRotationItem *configRotItem = configRotation->Current();
+            if (configRotItem)
+            {
+                tString rclcl = tResourceManager::locateResource(NULL, configRotItem->Name());
+                if ( rclcl ) {
+                    std::ifstream rc(rclcl);
+                    tConfItemBase::LoadAll(rc, false );
+                    return;
+                }
 
-            con << tOutput( "$config_rinclude_not_found", configRotation->Current() );
+                con << tOutput( "$config_rinclude_not_found", configRotItem->Name() );
+            }
+            configRotation->OrderedRotate();
         }
     }
 }
@@ -5951,8 +6384,12 @@ void Randomrotate()
 {
     if ( mapRotation->Size() > 0 )
     {
-        conf_mapfile.Set( mapRotation->Current() );
-        conf_mapfile.GetSetting().SetSetLevel( tAccessLevel_Owner );
+        gRotationItem *mapRotItem = mapRotation->Current();
+        if (mapRotItem)
+        {
+            conf_mapfile.Set( mapRotItem->Name() );
+            conf_mapfile.GetSetting().SetSetLevel( tAccessLevel_Owner );
+        }
         mapRotation->RandomRotate();
     }
 
@@ -5963,20 +6400,27 @@ void Randomrotate()
 
         if (sg_configRotationType == 0)
         {
-            st_Include( configRotation->Current() );
+            gRotationItem *configRotItem = configRotation->Current();
+            if (configRotItem)
+                st_Include( configRotItem->Name() );
+
             configRotation->RandomRotate();
         }
         else if (sg_configRotationType == 1)
         {
-            tString rclcl = tResourceManager::locateResource(NULL, configRotation->Current());
-            if ( rclcl ) {
-                std::ifstream rc(rclcl);
-                tConfItemBase::LoadAll(rc, false );
-                configRotation->RandomRotate();
-                return;
-            }
+            gRotationItem *configRotItem = configRotation->Current();
+            if (configRotItem)
+            {
+                tString rclcl = tResourceManager::locateResource(NULL, configRotItem->Name());
+                if ( rclcl ) {
+                    std::ifstream rc(rclcl);
+                    tConfItemBase::LoadAll(rc, false );
+                    return;
+                }
 
-            con << tOutput( "$config_rinclude_not_found", configRotation->Current() );
+                con << tOutput( "$config_rinclude_not_found", configRotItem->Name() );
+            }
+            configRotation->RandomRotate();
         }
     }
 }

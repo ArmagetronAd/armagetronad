@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -31,7 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 static REAL se_SpamProtection = 4.0f;	// degree of spam protection
 static REAL se_SpamPenalty	  = 0.0f;	// silence penalty when found guilty of spamming
-static int  se_SpamAutoKickCount  = 3;	// minimal number of 
+static int  se_SpamAutoKickCount  = 3;	// minimal number of
 static REAL se_SpamAutoKick	  = 20.0f;	// spam value that causes someone to get instantly kicked.
 int			se_SpamMaxLen	  = 80;		// maximal length of chat message
 
@@ -49,7 +49,7 @@ static bool sn_SpamMaxLenLimit(int const & value)
 {
     static int minlen=strlen("/admin SPAM_MAXLEN 1000");
     return value >= minlen;
-    // yeah, if the admin also logs out and it's reallylongname@clanwiththelongestname.com, 
+    // yeah, if the admin also logs out and it's reallylongname@clanwiththelongestname.com,
     // he's screwed.
 }
 static nSettingItemWatched<int> se_SML("SPAM_MAXLEN",

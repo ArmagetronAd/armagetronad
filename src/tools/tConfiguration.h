@@ -587,6 +587,7 @@ void st_LoadConfig();
 void st_SaveConfig();
 
 extern bool st_FirstUse;
+extern tAccessLevel st_DefaultOwnerLevel;
 
 #endif
 

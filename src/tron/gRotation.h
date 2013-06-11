@@ -51,6 +51,189 @@ public:
 };
 #endif // HAVE_LIBRUBY
 
+class gRotationItem
+{
+    public:
+        gRotationItem(tString name, int round)
+        {
+            this->name_ = name;
+            this->round_ = round;
+        }
+
+        tString Name() { return name_; }
+        int Round()    { return round_; }
+
+        void SetName(tString name) { name_ = name; }
+        void SetRound(int round)   { round_ = round; }
+
+    private:
+        tString name_;
+        int round_;
+};
+
+class gRotationRoundSelection
+{
+    public:
+        gRotationRoundSelection(int round)
+        {
+            this->round_   = round;
+            this->current_ = 0;
+        }
+
+        int Round() { return round_; }
+
+        int Size()
+        {
+            return items_.Len();
+        }
+
+        // returns the current value
+        gRotationItem *Current()
+        {
+            //tASSERT( Size() > 0 && current_ >= 0 && current_ < Size() );
+            return items_[current_];
+        }
+
+        void Reset()
+        {
+            current_ = 0;
+        }
+
+        void Clear()
+        {
+            /*if (items_.Len() > 0)
+            {
+                for(int i = 0; i < items_.Len(); i++)
+                {
+                    items_.RemoveAt(i);
+                    i--;
+                }
+            }
+
+            items_.RemoveAt(0);*/
+            items_.Clear();
+
+            items_.SetLen(0);
+            current_ = 0;
+        }
+
+        gRotationItem *Get(int itemID) const
+        {
+            if ((itemID >= 0) && (itemID < items_.Len()))
+                return items_[itemID];
+            else
+                return NULL;
+        }
+
+        void Add(gRotationItem *reesourceItem)
+        {
+            if (reesourceItem->Name().Filter() != "")
+            {
+                items_.Insert(reesourceItem);
+            }
+        }
+
+        void Remove(gRotationItem *reesourceItem)
+        {
+            for(int i = 0; i < items_.Len(); i++)
+            {
+                gRotationItem *rotItem = items_[i];
+                if (rotItem)
+                {
+                    if (rotItem == reesourceItem)
+                    {
+                        items_.RemoveAt(i);
+                        break;
+                    }
+                }
+            }
+        }
+
+        int ID() { return current_;}
+
+        //!< This is for the rotation loading limit
+        void Rotate()
+        {
+            if ( ++current_ >= items_.Len() )
+            {
+                current_ = 0;
+            }
+        }
+
+    private:
+        tList<gRotationItem> items_; // the various values the rotating config can take
+        int current_;                // the index of the current
+        int round_;                  // round of which items should be loaded in
+};
+
+class gRotationRound
+{
+    public:
+        gRotationRound()
+        {
+            roundsList_.SetLen(0);
+        }
+
+        tList<gRotationRoundSelection> roundsList_;
+
+        void Add(gRotationRoundSelection *roundSelection)
+        {
+            roundsList_.Insert(roundSelection);
+        }
+
+        void Clear()
+        {
+            /*if (roundsList_.Len() > 0)
+            {
+                for(int i = 0; i < roundsList_.Len(); i++)
+                {
+                    roundsList_.RemoveAt(i);
+                    i--;
+                }
+            }
+
+            roundsList_.RemoveAt(0);*/
+            roundsList_.Clear();
+
+            roundsList_.SetLen(0);
+        }
+
+        //!< Global functions for checking
+        bool Check(int round)
+        {
+            if (roundsList_.Len() > 0)
+            {
+                for(int i = 0; i < roundsList_.Len(); i++)
+                {
+                    gRotationRoundSelection *roundSel = roundsList_[i];
+                    if (roundSel)
+                    {
+                        if (roundSel->Round() == round)
+                            return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        gRotationRoundSelection *Get(int round)
+        {
+            if (roundsList_.Len() > 0)
+            {
+                for(int i = 0; i < roundsList_.Len(); i++)
+                {
+                    gRotationRoundSelection *roundSel = roundsList_[i];
+                    if (roundSel)
+                    {
+                        if (roundSel->Round() == round)
+                            return roundSel;
+                    }
+                }
+            }
+            return NULL;
+        }
+};
+
 class gRotation
 {
 public:
@@ -67,7 +250,7 @@ public:
     }
 
     // returns the current value
-    tString Current()
+    gRotationItem *Current()
     {
         //tASSERT( Size() > 0 && current_ >= 0 && current_ < Size() );
 
@@ -105,7 +288,7 @@ public:
 
     void Clear()
     {
-        if (items_.Len() > 0)
+        /*if (items_.Len() > 0)
         {
             for(int i = 0; i < items_.Len(); i++)
             {
@@ -114,20 +297,43 @@ public:
             }
         }
 
-        items_.RemoveAt(0);
+        items_.RemoveAt(0);*/
+        items_.Clear();
+
         items_.SetLen(0);
         current_ = 0;
     }
 
-    tString Get(int itemID) const
+    gRotationItem *Get(int itemID) const
     {
-        return items_[itemID];
+        if ((itemID >= 0) && (itemID < items_.Len()))
+            return items_[itemID];
+        else
+            return NULL;
     }
 
-    void Add(tString map_name)
+    void Add(gRotationItem *resourceItem)
     {
-        if (map_name.Filter() != "")
-            items_.Insert(map_name);
+        if (resourceItem->Name().Filter() != "")
+        {
+            items_.Insert(resourceItem);
+        }
+    }
+
+    void Remove(gRotationItem *resourceItem)
+    {
+        for(int i = 0; i < items_.Len(); i++)
+        {
+            gRotationItem *rotItem = items_[i];
+            if (rotItem)
+            {
+                if (rotItem == resourceItem)
+                {
+                    items_.RemoveAt(i);
+                    break;
+                }
+            }
+        }
     }
 
     int ID() { return current_;}
@@ -139,7 +345,7 @@ public:
 
 private:
 
-    tArray<tString> items_; // the various values the rotating config can take
+    tList<gRotationItem> items_; // the various values the rotating config can take
     int current_;           // the index of the current
 
     static int counter_;
