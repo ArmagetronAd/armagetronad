@@ -3306,8 +3306,7 @@ static void se_ChatPlayer( ePlayerNetID * p, std::istream & s, eChatSpamTester &
                         sendOther << "* ";
                         sendOther << p->GetColoredName();
                         sendOther << tColoredString::ColorString( 1,1,.5 );
-                        sendOther << ": ";
-                        sendOther << tColoredString::ColorString( 1,0,0 );
+                        sendOther << ": 0x66ffff";
                         sendOther << msg_core << "\n";
 
                         // display it to the player with equal access level

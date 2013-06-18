@@ -7827,9 +7827,9 @@ bool gPongZoneHack::CheckTeamAssignment()
         {
             // take over team and color
             team = closest->Team();
-            color_.r = team->R()/15.0;
-            color_.g = team->G()/15.0;
-            color_.b = team->B()/15.0;
+            color_.r = team->R();
+            color_.g = team->G();
+            color_.b = team->B();
             teamDistance_ = closestDistance;
 
             RequestSync();
