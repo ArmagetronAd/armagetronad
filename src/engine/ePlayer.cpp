@@ -3300,7 +3300,7 @@ static void se_ChatPlayer( ePlayerNetID * p, std::istream & s, eChatSpamTester &
                         sendOther << "*";
 
                         //  get access level name and add it before rest of information
-                        sendOther << tCurrentAccessLevel::GetName(receiver->GetAccessLevel());
+                        sendOther << tCurrentAccessLevel::GetName(receiver->GetAccessLevel()));
 
                         sendOther << tColoredString::ColorString( 1,1,.5 );
                         sendOther << "* ";

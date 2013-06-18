@@ -9,6 +9,7 @@
 
 #include <libxml/nanohttp.h>
 
+#include "tConfiguration.h"
 #include "tDirectories.h"
 #include "tResourceManager.h"
 #include "tString.h"
@@ -21,8 +22,6 @@ tString tResourceManager::resRepoServer("http://resource.armagetronad.net/resour
 tString tResourceManager::resRepoClient("http://resource.armagetronad.net/resource/");
 static tSettingItem<tString> conf_res_repo("RESOURCE_REPOSITORY_CLIENT", tResourceManager::resRepoClient);
 
-tString resourceErrorLogFile("errors/resource_error.txt");
-
 static int myHTTPFetch(const char *URI, const char *filename, const char *savepath)
 {
     void *ctxt = NULL;
@@ -30,46 +29,23 @@ static int myHTTPFetch(const char *URI, const char *filename, const char *savepa
     FILE* fd;
     int len, rc;
 
-    //con << tOutput( "$resource_downloading", URI );
+    con << tOutput( "$resource_downloading", URI );
     // con << "Downloading " << URI << "...\n";
 
     ctxt = xmlNanoHTTPOpen(URI, NULL);
     if (ctxt == NULL) {
-        std::ofstream o;
-        if (tDirectories::Var().Open(o, resourceErrorLogFile, std::ios::app))
-        {
-            o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << " | Error: \n";
-            o << tOutput( "$resource_fetcherror_noconnect", URI ) << "\n";
-            o << "===========================================================\n\n";
-        }
         con << tOutput( "$resource_fetcherror_noconnect", URI );
         return 1;
     }
 
-    if ( (rc = xmlNanoHTTPReturnCode(ctxt)) != 200 )
-    {
-        std::ofstream o;
-        if (tDirectories::Var().Open(o, resourceErrorLogFile, std::ios::app))
-        {
-            o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << " | Error: \n";
-            o << tOutput( rc == 404 ? "$resource_fetcherror_404" : "$resource_fetcherror", rc ) << "\n";
-            o << "===========================================================\n\n";
-        }
+    if ( (rc = xmlNanoHTTPReturnCode(ctxt)) != 200 ) {
         con << tOutput( rc == 404 ? "$resource_fetcherror_404" : "$resource_fetcherror", rc );
         return 2;
     }
 
     fd = fopen(savepath, "w");
-    if (fd < 0)
-    {
+    if (fd < 0) {
         xmlNanoHTTPClose(ctxt);
-        std::ofstream o;
-        if (tDirectories::Var().Open(o, resourceErrorLogFile, std::ios::app))
-        {
-            o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << " | Error: \n";
-            o << tOutput( "$resource_no_write", savepath ) << "\n";
-            o << "===========================================================\n\n";
-        }
         con << tOutput( "$resource_no_write", savepath );
         return 3;
     }
@@ -95,35 +71,26 @@ static int myFetch(const char *URIs, const char *filename, const char *savepath)
     const char *r = URIs, *p, *n;
     char *u;
     size_t len;
-    bool rv = false;
+    int rv = -1;
     // r = unprocessed data		p = end-of-item + 1		u = item
     // n = to-be r				len = length of item	savepath = result filepath
 
-    while (r[0] != '\0')
-    {
+    while (r[0] != '\0') {
         while (r[0] == ' ') ++r;			// skip spaces at the start of the item
-
         p = strchr(r, ';');
-        if (!p)
+        if ( !p )
             p = strchr(r, '\0');
-
         n = (p[0] == '\0') ? p : (p + 1);	// next item starts after the semicolon
-
         // NOTE: skip semicolons, *NOT* nulls
         while (p[-1] == ' ') --p;			// skip spaces at the end of the item
-
         len = (size_t)(p - r);
-        if (len > 0)
-        {						// skip this for null-length items
+        if (len > 0) {						// skip this for null-length items
             u = (char*)malloc((len + 1) * sizeof(char));
             strncpy(u, r, len);
             u[len] = '\0';					// u now contains the individual URI
-
             rv = myHTTPFetch(u, filename, savepath);	// TODO: handle other protocols?
-
             free(u);
-
-            if (rv) return true;		// If successful, return the file retrieved
+            if (rv == 0) return 0;		// If successful, return the file retrieved
         }
         r = n;								// move onto the next item
     }
@@ -146,7 +113,7 @@ NOTE: There must be *at least* one directory level, even if it is ./
 */
 tString tResourceManager::locateResource(const char *uri, const char *file) {
     tString filepath, a_uri = tString(), savepath;
-    bool rv = false;
+    int rv;
 
     char * to_free = NULL; // string to delete later
 
@@ -177,40 +144,16 @@ tString tResourceManager::locateResource(const char *uri, const char *file) {
         }
     }
     // Validate paths and determine detination savepath
-    if (!file || file[0] == '\0')
-    {
-        std::ofstream o;
-        if (tDirectories::Var().Open(o, resourceErrorLogFile, std::ios::app))
-        {
-            o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << " | Error: \n";
-            o << tOutput( "$resource_no_filename" ) << "\n";
-            o << "===========================================================\n\n";
-        }
+    if (!file || file[0] == '\0') {
         con << tOutput( "$resource_no_filename" );
         return (tString) NULL;
     }
-    if (file[0] == '/' || file[0] == '\\')
-    {
-        std::ofstream o;
-        if (tDirectories::Var().Open(o, resourceErrorLogFile, std::ios::app))
-        {
-            o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << " | Error: \n";
-            o << tOutput( "$resource_abs_path" ) << "\n";
-            o << "===========================================================\n\n";
-        }
+    if (file[0] == '/' || file[0] == '\\') {
         con << tOutput( "$resource_abs_path" );
         return (tString) NULL;
     }
     savepath = tDirectories::Resource().GetWritePath(file);
-    if (savepath == "")
-    {
-        std::ofstream o;
-        if (tDirectories::Var().Open(o, resourceErrorLogFile, std::ios::app))
-        {
-            o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << " | Error: \n";
-            o << tOutput( "$resource_abs_path" ) << "\n";
-            o << "===========================================================\n\n";
-        }
+    if (savepath == "") {
         con << tOutput( "$resource_no_writepath" );
         return (tString) NULL;
     }
@@ -231,10 +174,10 @@ tString tResourceManager::locateResource(const char *uri, const char *file) {
 
     // add repositories to uri
     if ( resRepoServer.Len() > 2 )
-        a_uri << /*"http://vertrex.tk/aa/resource/rescue.php?resource=" <<*/ resRepoServer << /*"&file=" <<*/ file << ';';
+        a_uri << resRepoServer << file << ';';
 
     if ( resRepoClient.Len() > 2 && resRepoClient != resRepoServer )
-        a_uri << /*"http://vertrex.tk/aa/resource/rescue.php?resource=" <<*/ resRepoClient << /*"&file=" <<*/ file << ';';
+        a_uri << resRepoClient << file << ';';
 
     con << tOutput( "$resource_not_cached", file );
 
@@ -243,7 +186,7 @@ tString tResourceManager::locateResource(const char *uri, const char *file) {
     if ( NULL != to_free )
         free( to_free );
 
-    if (!rv)
+    if (rv)
         return (tString) NULL;
     return savepath;
 }
@@ -275,4 +218,3 @@ static void RInclude(std::istream& s)
 }
 
 static tConfItemFunc s_RInclude("RINCLUDE",  &RInclude);
-
