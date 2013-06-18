@@ -613,6 +613,26 @@ void tConfItemBase::LoadLine(std::istream &s){
     //  std::cout << line << " lines read.\n";
 }
 
+tString tConfItemBase::FindConfigItem(tString name)
+{
+    tConfItemMap & confmap = ConfItemMap();
+    for(tConfItemMap::iterator iter = confmap.begin(); iter != confmap.end() ; ++iter)
+    {
+        tConfItemBase * ci = (*iter).second;
+        tString command;
+        command << ci->title.ToLower();
+        if (command.Contains(name.ToLower()))
+        {
+            if (command.StartsWith(name.ToLower()))
+            {
+                return ci->title;
+            }
+        }
+    }
+    return tString("");
+}
+
+/** LISTING BEGIN **/
 // writes the list of all commands and their help to commands_list.txt in the var directory
 void tConfItemBase::WriteAllToFile()
 {
@@ -657,30 +677,41 @@ void tConfItemBase::WriteAllToFile()
     w.close();
 }
 
-tString tConfItemBase::FindConfigItem(tString name)
-{
-    tConfItemMap & confmap = ConfItemMap();
-    for(tConfItemMap::iterator iter = confmap.begin(); iter != confmap.end() ; ++iter)
-    {
-        tConfItemBase * ci = (*iter).second;
-        tString command;
-        command << ci->title.ToLower();
-        if (command.Contains(name.ToLower()))
-        {
-            if (command.StartsWith(name.ToLower()))
-            {
-                return ci->title;
-            }
-        }
-    }
-    return tString("");
-}
-
 static void sg_ListAllCommands(std::istream &s)
 {
     tConfItemBase::WriteAllToFile();
 }
 static tConfItemFunc sg_ListAllCommandsConf("LIST_ALL_COMMANDS", &sg_ListAllCommands);
+
+/** LISTING END **/
+
+/** SET ALL ACCESS_LEVEL BEGIN **/
+void tConfItemBase::SetAllAccessLevel(int newLevel)
+{
+    tConfItemMap & confmap = ConfItemMap();
+    tAccessLevel level = static_cast< tAccessLevel >( newLevel );
+
+    for(tConfItemMap::iterator iter = confmap.begin(); iter != confmap.end() ; ++iter)
+    {
+        tConfItemBase * ci = (*iter).second;
+        ci->requiredLevel = level;
+    }
+
+    tString message;
+    message << "All access levels of commands have been changed to " << tCurrentAccessLevel::GetName(level) << "!\n";
+    con << message;
+}
+
+static void st_SetCommandsAccessLevel(std::istream &s)
+{
+    tString levelStr;
+    s >> levelStr;
+
+    int newLevel = atoi(levelStr);
+    tConfItemBase::SetAllAccessLevel(newLevel);
+}
+static tConfItemFunc st_SetCommandsAccessLevelConf("SET_COMMANDS_ACCESSLEVEL", &st_SetCommandsAccessLevel);
+/** SET ALL ACCESS_LEVEL END **/
 
 int tConfItemBase::AccessLevel(std::istream &s){
     if(!s.eof() && s.good()){
@@ -1061,6 +1092,11 @@ void st_LoadCustomConfigs()
         }
     }
 }
+static void st_LoadCustomConfigsStr(std::istream &s)
+{
+    st_LoadCustomConfigs();
+}
+static tConfItemFunc st_LoadCustomConfigsConf("LOAD_CUSTOM_CONFIGS", &st_LoadCustomConfigsStr);
 
 void st_LoadConfig( bool printChange )
 {

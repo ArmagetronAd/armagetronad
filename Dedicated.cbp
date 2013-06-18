@@ -246,6 +246,8 @@
 		<Unit filename="src\tron\gMenus.cpp" />
 		<Unit filename="src\tron\gMenus.h" />
 		<Unit filename="src\tron\gParser.cpp" />
+		<Unit filename="src\tron\gPingPong.cpp" />
+		<Unit filename="src\tron\gPingPong.h" />
 		<Unit filename="src\tron\gRace.cpp" />
 		<Unit filename="src\tron\gRace.h" />
 		<Unit filename="src\tron\gRotation.cpp" />

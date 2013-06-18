@@ -284,6 +284,7 @@ public:
     static int AccessLevel(std::istream &s); //! Returns access level needed for command -1 if command not found
     static void WriteAllToFile();
     static tString FindConfigItem(tString name);    //! Returns the config name of the searching string name
+    static void SetAllAccessLevel(int newLevel);
 
     // helper functions for files (use these, they manage recording and playback properly)
     enum SearchPath
