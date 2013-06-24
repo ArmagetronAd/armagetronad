@@ -418,6 +418,11 @@ tString tAbortLoading::DoGetDescription() const
     return tString(tOutput( "$abort_loading_description", command_ ));
 }
 
+tAccessLevel st_DefaultOwnerLevel = tAccessLevel_Owner;
+tAccessLevel st_DefaultExecuteLevel = tAccessLevel_Admin;
+static tSettingItem<tAccessLevel> st_DefaultOwnerLevelConf("DEFAULT_OWNER_LEVEL", st_DefaultOwnerLevel);
+static tSettingItem<tAccessLevel> st_DefaultExecuteLevelConf("DEFAULT_EXECUTION_LEVEL", st_DefaultExecuteLevel);
+
 tConfItemBase::tConfItemBase(const char *t)
         :id(-1),title(t),
 changed(false){
@@ -435,8 +440,8 @@ changed(false){
 
     confmap[title] = this;
 
-    requiredLevel = tAccessLevel_Admin;
-    setLevel      = tAccessLevel_Owner;
+    requiredLevel = st_DefaultExecuteLevel;
+    setLevel      = st_DefaultOwnerLevel;
 }
 
 tConfItemBase::tConfItemBase(const char *t, const tOutput& h)
@@ -449,8 +454,8 @@ changed(false){
 
     confmap[title] = this;
 
-    requiredLevel = tAccessLevel_Admin;
-    setLevel      = tAccessLevel_Owner;
+    requiredLevel = st_DefaultExecuteLevel;
+    setLevel      = st_DefaultOwnerLevel;
 }
 
 tConfItemBase::~tConfItemBase()
@@ -1148,6 +1153,7 @@ static void st_ReLoadConfig(std::istream &s)
     st_LoadConfig(false);
 }
 static tConfItemFunc st_ReLoadConfigConf("RELOAD_CONFIG", &st_ReLoadConfig);
+static tAccessLevelSetter st_ReLoadConfigConfLevel( st_ReLoadConfigConf, tAccessLevel_Moderator );
 
 void st_SaveConfig()
 {
@@ -1347,6 +1353,3 @@ static tConfItemFunc st_Dummy9("FLOOR_MIRROR_INT", &st_Dummy);
 static tConfItemFunc st_Dummy10("SIMULATE_RECEIVE_PACKET_LOSS", &st_Dummy);
 static tConfItemFunc st_Dummy11("SIMULATE_SEND_PACKET_LOSS", &st_Dummy);
 #endif
-
-tAccessLevel st_DefaultOwnerLevel = tAccessLevel_Owner;
-static tSettingItem<tAccessLevel> st_DefaultOwnerLevelConf("DEFAULT_EXECUTION_LEVEL", st_DefaultOwnerLevel);
