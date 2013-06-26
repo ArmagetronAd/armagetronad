@@ -338,6 +338,11 @@ public:
 
     int ID() { return current_;}
 
+    void SetID(int newID)
+    {
+        current_ = newID;
+    }
+
     //!< This is for the rotation loading limit
     static void AddCounter() { counter_ ++; }
     static void ResetCounter() { counter_ = 0; }

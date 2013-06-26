@@ -153,6 +153,41 @@ gRotation *configRotation = new gRotation();
 gRotationRound *mapRoundRotation    = new gRotationRound();
 gRotationRound *configRoundRotation = new gRotationRound();
 
+int sg_configRotationType = 0;
+bool restrictConfigRotationTypes(const int &newValue)
+{
+    if ((newValue < 0) || newValue > 1)
+    {
+        return false;
+    }
+    return true;
+}
+static tSettingItem<int> sg_configRotationTypeConf("CONFIG_ROTATION_TYPE", sg_configRotationType, &restrictConfigRotationTypes);
+
+enum gRotationType
+{
+    gROTATION_NEVER = 0,
+    gROTATION_ORDERED_ROUND = 1,
+    gROTATION_ORDERED_MATCH = 2,
+    gROTATION_RANDOM_ROUND = 3,
+    gROTATION_RANDOM_MATCH = 4,
+    gROTATION_COUNTER = 5,
+    gROTATION_ROUND = 6
+};
+
+tCONFIG_ENUM( gRotationType );
+
+static gRotationType rotationtype = gROTATION_NEVER;
+bool restrictRotatiobType(const gRotationType &newValue)
+{
+    if ((newValue < gROTATION_NEVER) || (newValue > gROTATION_ROUND))
+    {
+        return false;
+    }
+    return true;
+}
+static tSettingItem<gRotationType> conf_rotationtype("ROTATION_TYPE", rotationtype, &restrictRotatiobType);
+
 // config item for semi-colon deliminated list of maps/configs, needs semi-colon at the end
 // ie, original/map-1.0.1.xml|round1;original/map-1.0.1.xml|round2;
 // |round is optional to add
@@ -334,6 +369,27 @@ static void sg_mapRotationSet(std::istream &s)
     }
 }
 static tConfItemFunc sg_mapRotationSetConf("MAP_ROTATION_SET", &sg_mapRotationSet);
+
+static void sg_mapRotationLoad(std::istream &s)
+{
+    int map_id = 0;
+    s >> map_id;
+
+    if ((map_id > 0) && (map_id < mapRotation->Size()))
+    {
+        gRotationItem *gRotItem = mapRotation->Get(map_id);
+        if (gRotItem)
+        {
+            //  load in the map for that round
+            conf_mapfile.Set( gRotItem->Name() );
+            conf_mapfile.GetSetting().SetSetLevel( tAccessLevel_Owner );
+
+            mapRotation->SetID(map_id);
+        }
+    }
+}
+static tConfItemFunc sg_mapRotationLoadConf("MAP_ROTATION_LOAD", &sg_mapRotationLoad);
+static tAccessLevelSetter sg_mapRotationLoadConfLvl(sg_mapRotationLoadConf, tAccessLevel_Moderator);
 
 static void sg_mapRotationRemove(std::istream &s)
 {
@@ -544,6 +600,39 @@ static void sg_configRotationSet(std::istream &s)
 }
 static tConfItemFunc sg_configRotationSetConf("CONFIG_ROTATION_SET", &sg_configRotationSet);
 
+static void sg_configRotationLoad(std::istream &s)
+{
+    int config_id = 0;
+    s >> config_id;
+
+    if ((config_id > 0) && (config_id < configRotation->Size()))
+    {
+        gRotationItem *gRotItem = configRotation->Get(config_id);
+        if (gRotItem)
+        {
+            if (sg_configRotationType == 0)
+            {
+                st_Include( gRotItem->Name() );
+            }
+            else if (sg_configRotationType == 1)
+            {
+                tString rclcl = tResourceManager::locateResource(NULL, gRotItem->Name());
+                if ( rclcl ) {
+                    std::ifstream rc(rclcl);
+                    tConfItemBase::LoadAll(rc, false );
+                    return;
+                }
+
+                con << tOutput( "$config_rinclude_not_found", gRotItem->Name());
+            }
+
+            configRotation->SetID(config_id);
+        }
+    }
+}
+static tConfItemFunc sg_configRotationLoadConf("CONFIG_ROTATION_LOAD", &sg_configRotationLoad);
+static tAccessLevelSetter sg_configRotationLoadConfLvl(sg_configRotationLoadConf, tAccessLevel_Moderator);
+
 static void sg_configRotationRemove(std::istream &s)
 {
     tString params, configStr;
@@ -600,10 +689,10 @@ void sg_DisplayRotationList(ePlayerNetID *p, std::istream &s, tString command)
         {
             if (mapRotation->Size() > 0)
             {
-                if (showAmount <= (mapRotation->Size() - 1))
+                if (showAmount < mapRotation->Size())
                 {
                     if (mapRotation->Size() < max) max = mapRotation->Size();
-                    if (((mapRotation->Size() - 1) - showAmount) < max) max = (mapRotation->Size() - 1) - showAmount;
+                    if ((mapRotation->Size() - showAmount) < max) max = mapRotation->Size() - showAmount;
 
                     if (max > 0)
                     {
@@ -641,10 +730,10 @@ void sg_DisplayRotationList(ePlayerNetID *p, std::istream &s, tString command)
 
             if (configRotation->Size() > 0)
             {
-                if (showAmount <= (configRotation->Size() - 1))
+                if (showAmount < configRotation->Size())
                 {
                     if (configRotation->Size() < max) max = configRotation->Size();
-                    if (((configRotation->Size() - 1) - showAmount) < max) max = (configRotation->Size() - 1) - showAmount;
+                    if ((configRotation->Size() - showAmount) < max) max = configRotation->Size() - showAmount;
 
                     if (max > 0)
                     {
@@ -676,41 +765,6 @@ void sg_DisplayRotationList(ePlayerNetID *p, std::istream &s, tString command)
         }
     }
 }
-
-static int sg_configRotationType = 0;
-bool restrictConfigRotationTypes(const int &newValue)
-{
-    if ((newValue < 0) || newValue > 1)
-    {
-        return false;
-    }
-    return true;
-}
-static tSettingItem<int> sg_configRotationTypeConf("CONFIG_ROTATION_TYPE", sg_configRotationType, &restrictConfigRotationTypes);
-
-enum gRotationType
-{
-    gROTATION_NEVER = 0,
-    gROTATION_ORDERED_ROUND = 1,
-    gROTATION_ORDERED_MATCH = 2,
-    gROTATION_RANDOM_ROUND = 3,
-    gROTATION_RANDOM_MATCH = 4,
-    gROTATION_COUNTER = 5,
-    gROTATION_ROUND = 6
-};
-
-tCONFIG_ENUM( gRotationType );
-
-static gRotationType rotationtype = gROTATION_NEVER;
-bool restrictRotatiobType(const gRotationType &newValue)
-{
-    if ((newValue < gROTATION_NEVER) || (newValue > gROTATION_ROUND))
-    {
-        return false;
-    }
-    return true;
-}
-static tSettingItem<gRotationType> conf_rotationtype("ROTATION_TYPE", rotationtype, &restrictRotatiobType);
 
 void sg_ResetRotation()
 {
