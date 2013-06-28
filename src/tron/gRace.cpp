@@ -409,7 +409,8 @@ void gRaceScores::Write()
                 gRaceScores *rS = sg_RaceScores[i];
                 if (rS)
                 {
-                    w << rS->userName_ << " " << rS->time_ << " " << rS->played_ << "\n";
+                    if (rS->time_ != 0)
+                        w << rS->userName_ << " " << rS->time_ << " " << rS->played_ << "\n";
                 }
             }
         }
@@ -487,7 +488,7 @@ void gRaceScores::OutputStart()
 
                 ranksPos  += 5;
                 playerPos += 4;
-                time_sPos += 8;
+                time_sPos += 5;
 
                 for(int b = 0;b < sg_raceNumRanksShowStart; b++)
                 {
@@ -546,7 +547,7 @@ void gRaceScores::OutputStart()
 
                 ranksPos  += 5;
                 playerPos += 4;
-                time_sPos += 8;
+                time_sPos += 5;
 
                 for(int b = 0;b < sg_RaceScores.Len(); b++)
                 {
@@ -634,7 +635,7 @@ void gRaceScores::OutputStart()
 
                                 ranksPos  += 5;
                                 playerPos += 4;
-                                time_sPos += 8;
+                                time_sPos += 5;
 
                                 header << " " << tOutput("$race_rank_border") << " " << tOutput("$race_rank_title_name");
                                 header.SetPos(ranksPos, false);
@@ -747,7 +748,7 @@ void gRaceScores::OutputEnd()
 
                 ranksPos  += 5;
                 playerPos += 4;
-                time_sPos += 8;
+                time_sPos += 5;
 
                 for(int b = 0;b < sg_raceNumRanksShowEnd; b++)
                 {
@@ -806,7 +807,7 @@ void gRaceScores::OutputEnd()
 
                 ranksPos  += 5;
                 playerPos += 4;
-                time_sPos += 8;
+                time_sPos += 5;
 
                 for(int b = 0;b < sg_RaceScores.Len(); b++)
                 {
@@ -904,7 +905,7 @@ void gRaceScores::OutputEnd()
 
                                 ranksPos  += 5;
                                 playerPos += 4;
-                                time_sPos += 8;
+                                time_sPos += 5;
 
                                 header << " " << tOutput("$race_rank_border") << " " << tOutput("$race_rank_title_name");
                                 header.SetPos(ranksPos, false);
@@ -1110,7 +1111,7 @@ void gRace::ZoneHit( ePlayerNetID *player, REAL time )
         finishPlace_++;
         if (!sg_raceLogTime)
         {
-            win.SetTemplateParameter(1, player->GetColoredName() );
+            win.SetTemplateParameter(1, player->GetName() );
             win.SetTemplateParameter(2, racePlayer->Score());
             win.SetTemplateParameter(3, racePlayer->Time());
             win << "$player_reach_race";
@@ -1119,7 +1120,7 @@ void gRace::ZoneHit( ePlayerNetID *player, REAL time )
         {
             if (!firstArrived_)
             {
-                win.SetTemplateParameter(1, player->GetColoredName());
+                win.SetTemplateParameter(1, player->GetName());
                 win.SetTemplateParameter(2, racePlayer->Time());
                 win << "$player_reach_race_first";
 
@@ -1127,7 +1128,7 @@ void gRace::ZoneHit( ePlayerNetID *player, REAL time )
             }
             else
             {
-                win.SetTemplateParameter(1, player->GetColoredName());
+                win.SetTemplateParameter(1, player->GetName());
                 win.SetTemplateParameter(2, finishPlace_);
                 win.SetTemplateParameter(3, racePlayer->Time());
                 win.SetTemplateParameter(4, (racePlayer->Time() - firstFinishTime_));

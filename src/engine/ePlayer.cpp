@@ -9006,7 +9006,7 @@ static void se_PlayerMessageConf(std::istream &s)
     //int receiver = se_ReadUser( s );
 
     tColoredString msg;
-    Message.ReadLine(s);
+    Message.ReadLine(s, true);
     msg << Message;
     msg << "\n";
 
