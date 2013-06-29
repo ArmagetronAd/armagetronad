@@ -3932,6 +3932,11 @@ static void se_Rtfm( tString const &command, ePlayerNetID *p, std::istream &s, e
 void se_ListAdmins( ePlayerNetID *, std::istream &s, tString command );
 #endif
 
+tString customInvalidCommands("");
+static tSettingItem<tString> customInvalidCommandsConf("CUSTOM_INVALID_COMMANDS", customInvalidCommands);
+
+static eLadderLogWriter se_customInvalidCommandWriter("CUSTOM_INVALID_COMMAND", false);
+
 void handle_chat( nMessage &m )
 {
     nTimeRolling currentTime = tSysTimeFloat();
@@ -4134,15 +4139,11 @@ void handle_chat( nMessage &m )
             }
             else
             {
-                tString params;
-                int pos = 0;
-
                 std::string sayStr(say);
                 std::istringstream s(sayStr);
 
-                params.ReadLine(s);
-
-                tString chat_command = params.ExtractNonBlankSubString(pos).ToLower();
+                tString chat_command;
+                s >> chat_command;
 
                 if (chat_command == "!race")
                 {
@@ -4154,17 +4155,36 @@ void handle_chat( nMessage &m )
                         return;
                     }
 
-                    tString command = params.ExtractNonBlankSubString(pos).ToLower();
-                    tString restStr = params.SubStr(pos + 1);
+                    tString command;
+                    s >> command;
 
-                    std::string sayRestStr(restStr);
-                    std::istringstream str(sayRestStr);
-
-                    tConfItemBase::EatWhitespace(str);
-
-                    gRace::RaceChat(p, command, str);
+                    gRace::RaceChat(p, command, s);
 
                     return;
+                }
+                else
+                {
+                    if (customInvalidCommands.Filter() != "")
+                    {
+                        tArray<tString>invalidCommands = customInvalidCommands.Split(";");
+                        if (invalidCommands.Len() > 0)
+                        {
+                            for(int i = 0; i < invalidCommands.Len(); i++)
+                            {
+                                tString cmdExt = invalidCommands[i];
+                                if (chat_command.StartsWith(cmdExt.ToLower()))
+                                {
+                                    tString params;
+                                    params.ReadLine(s);
+
+                                    se_customInvalidCommandWriter << chat_command << p->GetUserName() << nMachine::GetMachine(p->Owner()).GetIP() << p->GetAccessLevel() << params;
+                                    se_customInvalidCommandWriter.write();
+
+                                    return;
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
@@ -7218,9 +7238,12 @@ eLadderLogWriter::~eLadderLogWriter()
     list.erase(std::find_if(list.begin(), list.end(), std::bind2nd(std::equal_to<eLadderLogWriter *>(), this)));
 }
 
+static bool se_ladderlogEnabled = true;
+static tSettingItem<bool> se_ladderlogEnabledConf("LADDERLOG_ENABLED", se_ladderlogEnabled);
+
 void eLadderLogWriter::write()
 {
-    if(enabled)
+    if(enabled && se_ladderlogEnabled)
     {
         se_SaveToLadderLog(cache);
     }
