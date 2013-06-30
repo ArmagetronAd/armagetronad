@@ -3513,8 +3513,8 @@ access_level_queue_configs_help     Sets the access level required to use chat c
 queue_limit_help           This is the amount that players can use up for queueing maps or configs.
 queue_limit_excempt_help   Access level equal to or below this do not have queue limit.
 queue_limit_enabled_help   Should the people have limits when queueing?
-queue_limit_reached        You have reached your queueing limit allowed to use. Next refill is in \1 minutes.\n
-
+queue_limit_reached        You have reached your queueing limit allowed to use. Next refill is in \1 seconds.\n
+queue_max_help             The maximum queues allowed due to the increase in their slots.
 queue_log_help             If set to 1, players queueing maps/configs will get written to queuelog.txt
 
 queue_increment_help       If set to >0, players will get their queues increased during refill by this amount.

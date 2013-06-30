@@ -353,7 +353,7 @@ bool gQueuePlayers::CanQueue(ePlayerNetID *p)
         if (qPlayer->Queues() == 0)
         {
             tOutput warning;
-            warning.SetTemplateParameter(1, (qPlayer->RefillTime() - (qPlayer->PlayedTime() / 60)));
+            warning.SetTemplateParameter(1, (qPlayer->RefillTime() - (qPlayer->PlayedTime())));
             warning << "$queue_refill_waiting";
             sn_ConsoleOut(warning, p->Owner());
 
@@ -366,8 +366,8 @@ bool gQueuePlayers::CanQueue(ePlayerNetID *p)
 
             if (qPlayer->Queues() == 0)
             {
-                REAL refillTime = 60 * sg_queueRefillTime;
-                qPlayer->refill_ = (qPlayer->PlayedTime() / 60) + refillTime;
+                REAL refillTime = sg_queueRefillTime;
+                qPlayer->refill_ = qPlayer->PlayedTime() + refillTime;
 
                 tOutput warning;
                 warning.SetTemplateParameter(1, refillTime);
