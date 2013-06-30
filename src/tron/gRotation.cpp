@@ -97,6 +97,9 @@ static tSettingItem<REAL> sg_queueRefillTimeConf("QUEUE_REFILL_TIME", sg_queueRe
 bool sg_queueRefillActive = true;
 static tSettingItem<bool> sg_queueRefillActiveConf("QUEUE_REFILL_ACTIVE", sg_queueRefillActive);
 
+static int sg_queueMax = 30;
+static tSettingItem<int> sg_queueMaxConf("QUEUE_MAX", sg_queueMax);
+
 gQueuePlayers::gQueuePlayers(ePlayerNetID *player)
 {
     this->name_ = player->GetUserName();
@@ -229,16 +232,19 @@ bool gQueuePlayers::Timestep(REAL time)
                     //qPlayer->played_ += tick;
                     qPlayer->played_ += 0.35f;
 
-                    if ((qPlayer->played_ / 60) >= qPlayer->refill_)
+                    if (qPlayer->played_ >= qPlayer->refill_)
                     {
                         //  if queue increment is enabled
                         if (sg_queueIncrement > 0)
                         {
-                            //  increase their default queue limit by this amount
-                            qPlayer->queuesDefault += sg_queueIncrement;
+                            if (qPlayer->queuesDefault < sg_queueMax)
+                            {
+                                //  increase their default queue limit by this amount
+                                qPlayer->queuesDefault += sg_queueIncrement;
+                            }
 
                             //  create the new time for the next time to refill
-                            qPlayer->refill_ = (qPlayer->played_ / 60) + (60 * sg_queueRefillTime);
+                            qPlayer->refill_ = qPlayer->played_ + sg_queueRefillTime;
                         }
 
                         //  refill queues with their original amount
