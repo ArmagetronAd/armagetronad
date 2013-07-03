@@ -6942,7 +6942,7 @@ static void sg_TeleportPlayer(std::istream &s)
 	int pos = 0; //
 	tString PlayerName = ePlayerNetID::FilterName(params.ExtractNonBlankSubString(pos));
 	ePlayerNetID *pPlayer = 0;
-	pPlayer = ePlayerNetID::FindPlayerByName(PlayerName, NULL);
+	pPlayer = ePlayerNetID::FindPlayerByName(PlayerName);
 	if(!pPlayer) {
 		return;
 	}

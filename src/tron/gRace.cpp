@@ -272,6 +272,7 @@ void gRaceScores::Add(gRacePlayer *racePlayer, bool finished)
             tOutput bestTime;
             bestTime.SetTemplateParameter(1, racePlayer->Player()->GetColoredName());
             bestTime.SetTemplateParameter(2, firstRanker->Time());
+            bestTime.SetTemplateParameter(3, pz_mapName);
             bestTime << "$race_player_hold_best_time";
 
             sn_ConsoleOut(bestTime);

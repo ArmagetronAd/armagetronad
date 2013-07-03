@@ -298,16 +298,26 @@ resource_repository_client_help   URI the client uses to search for map files if
 resource_repository_server_help   URI clients and the server use to search for map files if they aren't stored locally
 
 # rotation
-rotation_type_help                      Determines when map and config rotation should occur. Possible values: (0) Do not do any rotation, (1) Ordered Rotate every round, (2) Ordered Rotate every match, (3) Random Rotate every round, (4) Random Rotate every match
-map_rotation_help                       A list of map files to rotate through, with values separated by semicolons
+rotation_type_help                      Determines when map and config rotation should occur. Possible values: (0) Do not do any rotation, (1) Ordered Rotate every round, (2) Ordered Rotate every match, (3) Random Rotate every round, (4) Random Rotate every match, (5) Activates ROTATION_MAX, (6) Activates for rotation where maps and configs load depending on the round they are set for.
+
+map_rotation_help                       A list of map files to rotate through, with values separated by semicolons. Optionally you can enter in the round like this: map|round_number;
 map_rotation_list                       List of maps currently in rotation:\n
 map_rotation_list_show                  Showing \1 maps out of \2 in rotation:\n
-map_rotation_list_total                 
 
-config_rotation_help                    A list of config files to rotate through, with values separated by semicolons
+map_rotation_add_help                   Add a map item to the MAP_ROTATION list of items. Optionally you can also add in the round of selection. Usage: MAP_ROTATION_ADD <map>{|round_number}
+map_rotation_load_help                  Loads the selected map from it's designated id from the list of MAP_ROTATION items. Usage: MAP_ROTATION_LOAD <map_id>
+map_rotation_remove_help                Removed the selected map from the list of MAP_ROTATION items. Usage: MAP_ROTATION_REMOVE <map>
+map_rotation_set_help                   Set the selected map to the round provided. Usage: MAP_ROTATION_SET <map> <round>                 
+
+config_rotation_help                    A list of config files to rotate through, with values separated by semicolons. Optionally you can enter in the round like this: config|round_number;
 config_rotation_type_help               How will the CONFIG_ROTATION files load? 0-INCLUDE or 1-RINCLUDE?; Default: 0
 config_rotation_list                    List of configs currently in rotation:\n
 config_rotation_list_show               Showing \1 cofigs out of \2m in rotation:\n
+
+config_rotation_add_help                Add a config item to the CONFIG_ROTATION list of items. Optionally you can also add in the round of selection. Usage: CONFIG_ROTATION_ADD <config>{|round_number}
+config_rotation_load_help               Loads the selected config from it's designated id from the list of CONFIG_ROTATION items. Usage: CONFIG_ROTATION_LOAD <config_id>
+config_rotation_remove_help             Removed the selected config from the list of CONFIG_ROTATION items. Usage: CONFIG_ROTATION_REMOVE <config>
+config_rotation_set_help                Set the selected config to the round provided. Usage: CONFIG_ROTATION_SET <config> <round>
 
 reset_rotation_help                     Resets map and config rotation
 reset_rotation_on_start_new_match_help  If enabled, map and config rotation will be reset when a START_NEW_MATCH command is issued
@@ -3467,11 +3477,17 @@ base_enemy_kill_help                Flag indicating whether a base will kill ene
 spawn_zone_help                                spawn a zone onto the grid
 collapse_zone_help                             collapse a zone
 set_zone_radius_help                           change zones radius
+set_zone_id_radius_help                        change zones radius
 set_zone_position_help                         change a zones position
+set_zone_id_position_help                      change a zones position
 set_zone_speed_help                            change a zones speed
+set_zone_id_speed_help                         change a zones speed
 set_zone_color_help                            Change the color of a zone
+set_zone_id_color_help                         Change the color of a zone
 set_zone_expansion_help                        Change the Expansion rate of a zone
+set_zone_id_expansion_help                     Change the Expansion rate of a zone 
 set_zone_rotation_help                         Change the rotation speed of a zone
+set_zone_id_rotation_help                      Change the rotation speed of a zone
 condense_conquest_output                       Zone conquest output condensed into one line
 
 cycle_target_assignment      0xff9900Your target is now \1.\n
@@ -3566,9 +3582,10 @@ glance_back_tooltip_help            UNDOCUMENTED
 glance_left_tooltip_help            UNDOCUMENTED
 glance_right_tooltip_help           UNDOCUMENTED
 player_gridpos_interval_help        The time between previous "player_gridpos" output to the next.
-player_gridpos_interval_help        The time between previous "zone_gridpos" output to the next.
+zone_gridpos_interval_help          The time between previous "zone_gridpos" output to the next.
 help_message_help                   A help message sent to those calling it. Works through "/help" as well.
 highlight_name_help                 If set to 1, when your name appears in messages, it gets highlithed for you to notice.
+ladderlog_enabled_help              If set to 1, ladderlog output is enabled.
 ladderlog_write_admin_login_help                    Write to ladderlog: ADMIN_LOGIN [login_name] [ip_address]
 ladderlog_write_admin_logout_help                   Write to ladderlog: ADMIN_LOGOUT [login_name] [ip_address]
 ladderlog_write_ai_positions_help                   If set to 1, the team positions for AI Teams will output under "POSITIONS"
@@ -3586,6 +3603,7 @@ ladderlog_write_objectzone_zone_entered_help        Write to ladderlog: OBJECT_Z
 ladderlog_write_player_ai_left_help                 Write to ladderlog: PLAYER_AI_LEFT [ai_name]
 ladderlog_write_player_colored_name_help            Write to ladderlog: PLAYER_COLORED_NAME [player_useranme] [player_colored_name]
 ladderlog_write_player_gridpos_help                 Write to ladderlog: PLAYER_GRIDPOS [player_username] [pos_x] [pos_y] [dir_x] [dir_y] [cycle_speed] [player_rubber] [cycle_rubber] [team]
+ladderlog_write_custom_invalid_command_help
 ladderlog_write_player_killed_help                  Write to ladderlog: PLAYER_KILLED [player_username] [ip_address] [pos_x] [pos_y] [dir_x] [dir_y]
 ladderlog_write_round_commencing_help               Write to ladderlog: ROUND_COMMENCING [current_round] [total_rounds]
 ladderlog_write_round_ended_help                    Write to ladderlog: ROUND_ENDED [time]
@@ -3674,7 +3692,7 @@ tactical_position_interval_help           UNDOCUMENTED
 tactical_position_midfield_factor_help    UNDOCUMENTED
 tactical_position_start_time_help         UNDOCUMENTED
 tactical_position_zone_factor_help        UNDOCUMENTED
-teleport_player_help                      Teleports player to a new location. Usage: TELEPORT_PLAYER [player] [xpos] [ypos] [xdir] [ydir]
+teleport_player_help                      Teleports player to a new location. Usage: TELEPORT_PLAYER [player] [xpos] [ypos] [rel|abs] [xdir] [ydir]
 toggle_spectator_tooltip_help             UNDOCUMENTED
 voting_bias_challenge_help                Vote-specific extra bias
 winzone_player_enter_win_help             If set to 1, first player to enter the winzone will win the round.
@@ -3724,6 +3742,9 @@ targetzone_color_r_help   The red portion of the target zone's color.
 targetzone_color_g_help   The green portion of the target zone's color.
 targetzone_color_b_help   The blue portion of the target zone's color.
 
+set_cycle_speed_help      Set the current travelling speed of the owner: Usage: SET_CYCLE_SPEED <name> <speed>
+set_cycle_rubber_help     Set the current used up rubber of the owner: Usage: SET_CYCLE_RUBBER <name> <rubber>
+
 #*************************************
 #*************************************
 #
@@ -3744,5 +3765,22 @@ flag_pass_failed           The flag passed by \1 was intercepted by \2.\n
 #--------------------
 
 clear_ladderlog_help       Clear all data from ladderlog.txt located in ./var folder.
-clear_scorelog_help       Clear all data from scorelog.txt located in ./var folder.
-clear_chatlog_help       Clear all data from chatlog.txt located in ./var folder.
+clear_scorelog_help        Clear all data from scorelog.txt located in ./var folder.
+clear_chatlog_help         Clear all data from chatlog.txt located in ./var folder.
+
+# commands
+custom_configs_help        List of configs, seperated by ;, to load during the star-up of the client/server.
+reload_config              Reload the initial settings that are loaded during the beginning of the client/server.
+custom_invalid_commands_help  Contains the list of commands to be executed as chat commands: Usage: CUSTOM_INVALID_COMMANDS {command_method1};{command_method2};
+
+default_execution_level_help  At what level should the default execution level be set to? Default: 1 (Administrato)
+default_owner_level_help      At what level should the owner of the server level be set to? Default: 0 (Owner)
+
+set_commands_accesslevel_help Set the access level of ALL the commands to the given level.
+
+# Ping pong settings
+pingpong_bounce_speed_help    The speed at which the pingpong balls be bouncing off.
+pingpong_death_kill_help      If set to 1, once the pingpong ball is dead, the entire team gets killed.
+pingpong_enabled_help         If set to 1, ping pong game mode is enabled.
+pingpong_points_help          The points you receive for keeping your ping pong from reaching the deathzone.
+pingpong_team_balls_help      The number of ping pong balls a team can have.

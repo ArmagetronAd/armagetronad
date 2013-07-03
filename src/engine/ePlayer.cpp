@@ -7238,7 +7238,7 @@ eLadderLogWriter::~eLadderLogWriter()
     list.erase(std::find_if(list.begin(), list.end(), std::bind2nd(std::equal_to<eLadderLogWriter *>(), this)));
 }
 
-static bool se_ladderlogEnabled = true;
+static bool se_ladderlogEnabled = false;
 static tSettingItem<bool> se_ladderlogEnabledConf("LADDERLOG_ENABLED", se_ladderlogEnabled);
 
 void eLadderLogWriter::write()
