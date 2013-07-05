@@ -6988,6 +6988,7 @@ static void sg_SpawnObjectZone(std::istream &s)
         oZone->RequestSync();
 
         sg_ObjectZoneSpawned << oZone->GOID() << oZone->GetName() << oZone->GetPosition().x << oZone->GetPosition().y << oZone->GetVelocity().x << oZone->GetVelocity().y << se_GameTime();
+        sg_ObjectZoneSpawned.write();
 
         return;
     }

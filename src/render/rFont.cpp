@@ -175,7 +175,7 @@ void rFont::Render(unsigned char c,REAL left,REAL top,REAL right,REAL bot){
             select->Select(true);
             sr_lastSelected = select;
         }
-        
+
         BeginQuads();
 
         glTexCoord2f(tright,tbot);
@@ -334,7 +334,7 @@ void rTextField::FlushLine(int len,bool newline){
         for (i=0;i<=len;i++){
             REAL l=left+realx*cwidth;
             REAL t=top-y*cheight;
-            
+
             if (0 <= cursorPos--){
                 cursor_x=l;
                 cursor_y=t;
@@ -485,7 +485,8 @@ rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode )
             {
                 // found! extract colors
                 cursorPos-=8;
-		color = tColor( c );
+                tString colorStr(c);
+                color = tColor(colorStr.ToLower());
                 use = true;
             }
 
