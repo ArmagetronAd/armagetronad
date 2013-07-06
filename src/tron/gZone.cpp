@@ -122,6 +122,9 @@ static eLadderLogWriter sg_flagHeldWriter("FLAG_HELD", true);
 static eLadderLogWriter sg_baseRespawnWriter("BASE_RESPAWN", true);
 static eLadderLogWriter sg_baseEnemyRespawnWriter("BASE_ENEMY_RESPAWN", true);
 
+static eLadderLogWriter sg_deathZoneActivated("DEATHZONE_ACTIVATED", true);
+static eLadderLogWriter sg_winZoneActivated("WINZONE_ACTIVATED", true);
+
 //! creates a win or death zone (according to configuration) at the specified position
 gZone * sg_CreateWinDeathZone( eGrid * grid, const eCoord & pos )
 {
@@ -130,6 +133,9 @@ gZone * sg_CreateWinDeathZone( eGrid * grid, const eCoord & pos )
     {
         ret = tNEW( gDeathZoneHack( grid, pos ) );
         sn_ConsoleOut( "$instant_death_activated" );
+
+        sg_deathZoneActivated << ret->GOID() << ret->GetName() << ret->Position().x << ret->Position().y;
+        sg_winZoneActivated.write();
     }
     else
     {
@@ -142,6 +148,9 @@ gZone * sg_CreateWinDeathZone( eGrid * grid, const eCoord & pos )
         {
             sn_ConsoleOut( "$instant_round_end_activated" );
         }
+
+        sg_deathZoneActivated << ret->GOID() << ret->GetName() << ret->Position().x << ret->Position().y;
+        sg_winZoneActivated.write();
     }
 
     // initialize radius and expansion speed
