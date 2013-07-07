@@ -5319,6 +5319,8 @@ void gGame::StateUpdate(){
                 //ePlayerNetID::LogScoreDifferences();
 
                 //ePlayerNetID::RankingLadderLog();
+                sg_roundCommencingWriter << (rounds <= 0 ? 1 : rounds+1) << sg_currentSettings->limitRounds;
+                sg_roundCommencingWriter.write();
 
 /*                tOutput Message;
                 Message << "The rounds: " << rounds << "\n";
