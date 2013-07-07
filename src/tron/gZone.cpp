@@ -8589,6 +8589,8 @@ static void sg_DestroyZoneID(std::istream &s)
 
                 sg_collapsezoneWriter << zoneID << object_id_str << Zone->GetPosition().x << Zone->GetPosition().y;
                 sg_collapsezoneWriter.write();
+
+                break;
             }
         }
     }
