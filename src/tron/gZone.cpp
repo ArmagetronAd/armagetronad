@@ -6886,6 +6886,8 @@ static void sg_SpawnObjectZone(std::istream &s)
     tString params;
     params.ReadLine(s, true);
 
+    gZone *Zone = NULL;
+
     if (params.Filter() == "")
     {
         goto usage;
@@ -6915,7 +6917,7 @@ static void sg_SpawnObjectZone(std::istream &s)
             name  = "";
         }
 
-        if(zonePosXStr.ToLower() == "l")
+        if(zonePosXStr == "L")
         {
             tString x,y;
             while(true)
@@ -6931,19 +6933,19 @@ static void sg_SpawnObjectZone(std::istream &s)
             zonePosYStr = params.ExtractNonBlankSubString(pos);
         }
 
-        const tString zoneSizeStr       = params.ExtractNonBlankSubString(pos);
-        const tString zoneGrowthStr     = params.ExtractNonBlankSubString(pos);
-        const tString zoneDirXStr       = params.ExtractNonBlankSubString(pos);
-        const tString zoneDirYStr       = params.ExtractNonBlankSubString(pos);
-        const tString zoneInteractive   = params.ExtractNonBlankSubString(pos);
-        const tString zoneRedStr        = params.ExtractNonBlankSubString(pos);
-        const tString zoneGreenStr      = params.ExtractNonBlankSubString(pos);
-        const tString zoneBlueStr       = params.ExtractNonBlankSubString(pos);
-        const tString targetRadiusStr   = params.ExtractNonBlankSubString(pos);
+        tString zoneSizeStr       = params.ExtractNonBlankSubString(pos);
+        tString zoneGrowthStr     = params.ExtractNonBlankSubString(pos);
+        tString zoneDirXStr       = params.ExtractNonBlankSubString(pos);
+        tString zoneDirYStr       = params.ExtractNonBlankSubString(pos);
+        tString zoneInteractive   = params.ExtractNonBlankSubString(pos);
+        tString zoneRedStr        = params.ExtractNonBlankSubString(pos);
+        tString zoneGreenStr      = params.ExtractNonBlankSubString(pos);
+        tString zoneBlueStr       = params.ExtractNonBlankSubString(pos);
+        tString targetRadiusStr   = params.ExtractNonBlankSubString(pos);
 
-        eCoord zonePos          = route.empty() ? eCoord(atof(zonePosXStr)*sizeMultiplier,atof(zonePosYStr)*sizeMultiplier) : route.front();
-        const REAL zoneSize     = atof(zoneSizeStr)*sizeMultiplier;
-        const REAL zoneGrowth   = atof(zoneGrowthStr)*sizeMultiplier;
+        eCoord zonePos    = route.empty() ? eCoord(atof(zonePosXStr)*sizeMultiplier,atof(zonePosYStr)*sizeMultiplier) : route.front();
+        REAL zoneSize     = atof(zoneSizeStr)*sizeMultiplier;
+        REAL zoneGrowth   = atof(zoneGrowthStr)*sizeMultiplier;
 
         eCoord zoneDir = eCoord(atof(zoneDirXStr)*sizeMultiplier,atof(zoneDirYStr)*sizeMultiplier);
         gRealColor zoneColor;
@@ -6961,42 +6963,50 @@ static void sg_SpawnObjectZone(std::istream &s)
         if (zoneInteractive.ToLower() == "true")
             zoneInteractiveBool = true;
 
-        gObjectZoneHack *oZone = new gObjectZoneHack(grid, zonePos);
-        oZone->SetRadius(zoneSize);
-        oZone->SetExpansionSpeed(zoneGrowth);
-        oZone->SetVelocity(zoneDir);
+        Zone = tNEW(gObjectZoneHack(grid, zonePos, true));
+        Zone->SetRadius(zoneSize);
+        Zone->SetExpansionSpeed(zoneGrowth);
+        Zone->SetVelocity(zoneDir);
 
         if (setColorFlag)
         {
+            /*
             zoneColor.r = (zoneColor.r>1.0)?1.0:zoneColor.r;
             zoneColor.g = (zoneColor.g>1.0)?1.0:zoneColor.g;
             zoneColor.b = (zoneColor.b>1.0)?1.0:zoneColor.b;
-            oZone->SetColor(zoneColor);
+            */
+            Zone->SetColor(zoneColor);
         }
 
         if (zoneInteractiveBool)
         {
-            oZone->SetWallBouncesLeft(-1);
-            oZone->SetWallInteract(zoneInteractiveBool);
+            Zone->SetWallBouncesLeft(-1);
+            Zone->SetWallInteract(zoneInteractiveBool);
         }
 
-        oZone->SetTargetRadius(targetRadius);
+        if(targetRadius != 0)
+            Zone->SetTargetRadius(targetRadius);
 
-        oZone->SetReferenceTime();
-        oZone->SetRotationSpeed( .3f );
+        Zone->SetReferenceTime();
+        Zone->SetRotationSpeed( .3f );
 
         if(!route.empty())
         {
-            oZone->SetPosition(route.front());
+            Zone->SetPosition(route.front());
             for(std::vector<eCoord>::const_iterator iter = route.begin(); iter != route.end(); ++iter)
             {
-                oZone->AddWaypoint(*iter);
+                Zone->AddWaypoint(*iter);
             }
         }
-        oZone->SetName(name);
-        oZone->RequestSync();
+        Zone->SetName(name);
+        Zone->SetEffect(tString("owner"));
+        Zone->RequestSync();
 
-        sg_ObjectZoneSpawned << oZone->GOID() << oZone->GetName() << oZone->GetPosition().x << oZone->GetPosition().y << oZone->GetVelocity().x << oZone->GetVelocity().y << se_GameTime();
+#ifdef DEBUG
+        con << Zone->GetEffect() << " " << Zone->GOID() << " " << Zone->GetName() << " " << Zone->GetPosition().x << " " << Zone->GetPosition().y << " " << Zone->GetVelocity().x << " " << Zone->GetVelocity().y << " " << (Zone->GetWallInteract()?"true":"false") << " " << Zone->GetColor().r << " " << Zone->GetColor().g << " " << Zone->GetColor().b << "\n";
+#endif
+
+        sg_ObjectZoneSpawned << Zone->GOID() << Zone->GetName() << Zone->GetPosition().x << Zone->GetPosition().y << Zone->GetVelocity().x << Zone->GetVelocity().y << se_GameTime();
         sg_ObjectZoneSpawned.write();
 
         return;
@@ -7645,14 +7655,14 @@ static void sg_SpawnSoccer(std::istream &s)
         //  time to create the zone
         if (type.ToLower() == "soccerball")
         {
-            gSoccerZoneHack *sZone = new gSoccerZoneHack(grid, zonePos, false, false);
+            gSoccerZoneHack *sZone = new gSoccerZoneHack(grid, zonePos, true, false);
             sZone->SetType(gSoccerZoneHack::gSoccer_BALL);
 
             Zone = sZone;
         }
         else if (type.ToLower() == "soccergoal")
         {
-            gSoccerZoneHack *sZone = new gSoccerZoneHack(grid, zonePos, false, zoneTeam, false);
+            gSoccerZoneHack *sZone = new gSoccerZoneHack(grid, zonePos, true, zoneTeam, false);
             sZone->SetType(gSoccerZoneHack::gSoccer_GOAL);
 
             Zone = sZone;
@@ -8336,11 +8346,14 @@ static void sg_CreateZone_conf(std::istream &s)
 
         Zone = bZone;
     }
+    else if (zoneTypeStr=="object"){
+        Zone = tNEW( gObjectZoneHack( grid, zonePos, true ) );
+    }
     else
     {
         usage:
         con << "Usage:\n"
-            "SPAWN_ZONE <win|death|ball|target|blast|koh> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
+            "SPAWN_ZONE <win|death|ball|target|blast|object|koh> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
             "SPAWN_ZONE burst <speed> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
             "SPAWN_ZONE rubber <x> <y> <size> <growth> <xdir> <ydir> <rubber> <interactive> <r> <g> <b> <target_size> \n"
             "SPAWN_ZONE teleport <x> <y> <size> <growth> <xdir> <ydir> <xjump> <yjump> <rel|abs> <interactive> <r> <g> <b> <target_size> \n"

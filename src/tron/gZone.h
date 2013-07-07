@@ -107,8 +107,11 @@ public:
     gZone const &   GetRotationAcceleration( REAL & rotationAcceleration ) const;	//!< Gets the current acceleration of the rotation
     //HACK RACE
     void            Vanish				(REAL factor);		//!< let the zone vanish
+
     gZone &         SetWallInteract     (bool wallInteract) {wallInteract_=wallInteract; return *this;}
     gZone &         SetWallBouncesLeft  (int wallBouncesLeft) {wallBouncesLeft_=wallBouncesLeft; return *this;}
+    bool            GetWallInteract     () { return wallInteract_; }
+    int             GetBouncesLeft      () { return wallBouncesLeft_; }
 
     gZone &         SetColor            (gRealColor color) {color_ = color; return *this;}      //!< Sets the current color
     gRealColor &    GetColor            () {return color_;}             //!< Gets the current color
