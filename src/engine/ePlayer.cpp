@@ -4940,6 +4940,44 @@ static nSettingItem<bool> se_allowControlDuringChatConf("ALLOW_CONTROL_DURING_CH
 
 uActionPlayer se_toggleSpectator("TOGGLE_SPECTATOR", -7);
 
+static void se_turnDoubleBindLeft(std::istream &s)
+{
+    ePlayerNetID *player = se_GetLocalPlayer();
+    tString params;
+    s >> params;
+
+    int x = atoi(params);
+    if (player)
+    {
+        gCycle *cycle = dynamic_cast<gCycle *>(player->Object());
+        if (cycle && cycle->Alive())
+        {
+            cycle->Act(&gCycle::se_turnLeft, x);
+            cycle->Act(&gCycle::se_turnLeft, x);
+        }
+    }
+}
+static tConfItemFunc se_turnDoubleBindLeftConf("TURN_DOUBLEBIND_LEFT", &se_turnDoubleBindLeft);
+
+static void se_turnDoubleBindRight(std::istream &s)
+{
+    ePlayerNetID *player = se_GetLocalPlayer();
+    tString params;
+    s >> params;
+
+    int x = atoi(params);
+    if (player)
+    {
+        gCycle *cycle = dynamic_cast<gCycle *>(player->Object());
+        if (cycle && cycle->Alive())
+        {
+            cycle->Act(&gCycle::se_turnRight, x);
+            cycle->Act(&gCycle::se_turnRight, x);
+        }
+    }
+}
+static tConfItemFunc se_turnDoubleBindRightConf("TURN_DOUBLEBIND_RIGHT", &se_turnDoubleBindRight);
+
 bool ePlayer::Act(uAction *act,REAL x)
 {
     eGameObject *object=NULL;
