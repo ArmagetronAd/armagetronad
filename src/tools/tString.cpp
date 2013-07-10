@@ -997,6 +997,11 @@ int tString::RemoveWordLeft( int start ) {
 
 void tString::RemoveSubStr( int start, int length ) {
     int strLen = size();
+
+    if ( start < 0 ) {
+        start += strLen;
+    }
+
     if ( length < 0 ) {
         start += length;
         length = abs( length );

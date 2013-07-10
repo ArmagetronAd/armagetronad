@@ -140,6 +140,11 @@ Section -Post
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayVersion" "${PRODUCT_VERSION}"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "URLInfoAbout" "${PRODUCT_WEB_SITE}"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "Publisher" "${PRODUCT_PUBLISHER}"
+
+  WriteRegStr HKCR "armagetronad" "" "URL:$(^Name)"
+  WriteRegStr HKCR "armagetronad" "URL Protocol" ""
+  WriteRegStr HKCR "armagetronad\DefaultIcon" "" "$INSTDIR\armagetronad.exe"
+  WriteRegStr HKCR "armagetronad\shell\open\command" "" "$INSTDIR\armagetronad.exe --connect %1"
 SectionEnd
 
 Function un.onInit
@@ -191,7 +196,17 @@ Section Uninstall
 
   RMDir "$SMPROGRAMS\${PRODUCT_NAME}"
 
+  # Check if the installed protocol association for armagetronad://
+  # points to this installation (we cheat and use the icon because it
+  # is shorter). Only if it does, we remove it.
+  ReadRegStr $0 HKCR "armagetronad\DefaultIcon" ""
+  StrCmp "$0" "$INSTDIR\armagetronad.exe" delassoc nodelassoc
+  delassoc:
+    DeleteRegKey HKCR "armagetronad"
+  nodelassoc:
+
   DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
   DeleteRegKey HKLM "${PRODUCT_DIR_REGKEY}"
+
   SetAutoClose true
 SectionEnd
