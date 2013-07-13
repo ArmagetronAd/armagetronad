@@ -692,7 +692,7 @@ static bool lowlevel_sr_InitDisplay(){
             }
         }
 
-        sr_SetWindowTitle(tOutput("$window_title_menu"));
+        sr_SetWindowTitle();
 
         sr_CompleteGLAttributes();
 
@@ -1175,6 +1175,12 @@ void sr_Activate(bool active)
     #endif
 }
 
+tString & sr_CurrentWindowTitle()
+{
+    static tString title(tOutput("$window_title_menu"));
+    return title;
+}
+
 void sr_SetWindowTitle(tOutput o)
 {
     tString s;
@@ -1183,11 +1189,9 @@ void sr_SetWindowTitle(tOutput o)
     sr_SetWindowTitle(s);
 }
 
-tString sr_windowTitle = tString(tOutput("Armagetron Advanced"));
-
 void sr_SetWindowTitle(tString s)
 {
-    sr_windowTitle = s;
+    sr_CurrentWindowTitle() = s;
 #ifdef MACOSX
     if(!currentScreensetting.fullscreen)
 #endif
@@ -1200,7 +1204,7 @@ void sr_SetWindowTitle(tString s)
 
 void sr_SetWindowTitle()
 {
-    sr_SetWindowTitle(sr_windowTitle);
+    sr_SetWindowTitle(sr_CurrentWindowTitle());
 }
 
 //**************************************
