@@ -210,7 +210,7 @@ team_max_players_help		Maximum number of players per team
 team_min_players_help		Minimum number of players per team
 team_allow_shuffle_up_help  If set to 1, players are allowed to change their position in the team as they wish. If 0, they only can drop in rank.
 team_center_is_boss_help    If set to 1, the center player is the team's boss. If at 0, it's the player who is on that team longest.
-team_elimination_mode_help  Defines the way ArmagetronAd should eliminate teams when there's more teams than TEAMS_MAX: Set to 0 it will try to keep as many players as possible, kicking teams that have the lowest score if teams are balanced; Set to 1 it will try to keep the best team colors (Team blue, then Team gold, then Team red, etc); Set to 2 it will kick out the teams that have the lowest score, regardless of balance.
+team_elimination_mode_help  Defines the way \g should eliminate teams when there's more teams than TEAMS_MAX: Set to 0 it will try to keep as many players as possible, kicking teams that have the lowest score if teams are balanced; Set to 1 it will try to keep the best team colors (Team blue, then Team gold, then Team red, etc); Set to 2 it will kick out the teams that have the lowest score, regardless of balance.
 
 teams_max_help			Maximum number of teams
 teams_min_help			Minimum number of teams
@@ -2494,7 +2494,7 @@ detail_dither_text		Dithering:
 detail_dither_help		If the colour depth of your current graphic mode does not directly allow the colour that is to be drawn, it is simulated by mixing other colours. Turning it of will improve software rendering performance on some systems; in low resolution modes, turning it off will even improve the visual quality (IMHO).
 
 detail_floor_text		Floor Detail:
-detail_floor_help		Armagetron Advanced has several ways to draw the floor and the grid; the better looking ones will cost you some FPS (Frames Per Second).
+detail_floor_help		\g has several ways to draw the floor and the grid; the better looking ones will cost you some FPS (Frames Per Second).
 
 detail_floor_no_text		No Floor
 detail_floor_no_help		Draw nothing at all. Fastest possibility.
@@ -3104,7 +3104,7 @@ network_message_abortconn_inter	The server terminated our connection.
 
 network_master_timeout_retry	One of the master servers did not answer. Trying next one...\n
 network_master_timeout_title	Master servers do not answer
-network_master_timeout_inter	The master servers could not be reached and the server list could not be updated. You'll browse the old list for now.\n\nThe most likely reason for this is a problem with your network. Please check\n- that you have a working internet connection: point your web browser to www.armagetronad.net to test.\n- that your firewall, if you have one, does not block our traffic. To test whether this is your problem, disable your firewall and try again. If it then works, you should re-enable the firewall, but allow Armagetron traffic specifically: Armagetron uses UDP and usually ports 4533 to 4540. Personal firewalls also have the possibility to block connections based on program names; make sure that armagetronad(.exe) is unblocked.\nIf you don't control parts of the network connection, say because you're at a public WLAN hot spot or in a company or school network, chances are the owner of the network purposefully blocks UDP traffic. You'll need to talk to the owner, then.\nA last possible, but unlikely, cause is that the master server infrastructure is currently down completely. Visit the forums at forums.armagetronad.net or the IRC channel #armagetron on irc.freenode.net to see if anyone else has this problem currently.\n
+network_master_timeout_inter	The master servers could not be reached and the server list could not be updated. You'll browse the old list for now.\n\nThe most likely reason for this is a problem with your network. Please check\n- that you have a working internet connection: point your web browser to www.armagetronad.net to test.\n- that your firewall, if you have one, does not block our traffic. To test whether this is your problem, disable your firewall and try again. If it then works, you should re-enable the firewall, but allow \g traffic specifically: \g uses UDP and usually ports 4533 to 4540. Personal firewalls also have the possibility to block connections based on program names; make sure that armagetronad(.exe) is unblocked.\nIf you don't control parts of the network connection, say because you're at a public WLAN hot spot or in a company or school network, chances are the owner of the network purposefully blocks UDP traffic. You'll need to talk to the owner, then.\nA last possible, but unlikely, cause is that the master server infrastructure is currently down completely. Visit the forums at forums.armagetronad.net or the IRC channel #armagetron on irc.freenode.net to see if anyone else has this problem currently.\n
 
 network_master_denied_title		Master login denied
 network_master_denied_inter		The master server denied your login attempt. That usually means it is full. Try again later.
@@ -3132,7 +3132,7 @@ network_master_exp_needed_long This server will not let you play until you get a
 network_connecting_to_server	Connecting to \1...\n
 network_connecting_gamestate	Waiting for gamestate...\n
 network_syncing_gamestate	Received! Syncing gamestate...\n
-network_warn_unknowndescriptor	\n\n\nGot unknown nMessage with descriptor id \1 \n\nYOU SHOULD PROBABLY UPGRADE ARMAGETRON ADVANCED!!!!\n
+network_warn_unknowndescriptor	\n\n\nGot unknown nMessage with descriptor id \1 \n\nYOU SHOULD PROBABLY UPGRADE \G!!!!\n
 network_error			Network error.\n
 network_error_timeout		User \1 timed out.\n
 network_error_shortmessage	User \1's message was too short.\n
@@ -3405,8 +3405,8 @@ config_sighup           SIGHUP received, reloading configuration.\n
 config_abort               Configuration file/stream loading aborted.\n
 
 nconfig_error_protected	No way. Only the server can change \1.\n
-nconfig_error_unknown		Got conf message for unknown setting \1.\n\nYOU PROBABLY SHOULD UPGRADE ARMAGETRON ADVANCED!!!\n
-nconfig_error_nonet         Got conf message for  setting \1 which is not network aware.\n\nYOU PROBABLY SHOULD UPGRADE ARMAGETRON ADVANCED!!!\n
+nconfig_error_unknown		Got conf message for unknown setting \1.\n\nYOU PROBABLY SHOULD UPGRADE \G!!!\n
+nconfig_error_nonet         Got conf message for  setting \1 which is not network aware.\n\nYOU PROBABLY SHOULD UPGRADE \G!!!\n
 nconfig_error_ignoreold		Ignoring old conf message for setting \1.\n
 nconfig_value_changed		\1 changed from \2 to \3 on server order.\n
 

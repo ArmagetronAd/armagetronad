@@ -76,7 +76,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define TRUE_ARMAGETRONAD_BRANCHURL "UNKNOWN"
 #endif
 
-tString st_programName          ("Armagetron Advanced");
+tString st_programName          ("Armagetron Advanced"); // Correctly set after languages are loaded.
 tString st_programVersion       (TRUE_ARMAGETRONAD_VERSION);
 tString st_programRevId         (TRUE_ARMAGETRONAD_REVID);
 int     st_programRevNo         (TRUE_ARMAGETRONAD_REVNO);
@@ -88,5 +88,12 @@ tString st_programBuildDate     (TRUE_ARMAGETRONAD_BUILDDATE);
 int     st_programBranchLca     (TRUE_ARMAGETRONAD_BRANCHLCA);
 int     st_programBranchLcaZ    (TRUE_ARMAGETRONAD_BRANCHLCAZ);
 tString st_programBranchUrl     (TRUE_ARMAGETRONAD_BRANCHURL);
+
+tString st_ProgramNameUppercase()
+{
+    tString upper = st_programName;
+    tToUpper( upper );
+    return upper;
+}
 
 #endif

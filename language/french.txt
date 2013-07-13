@@ -1416,7 +1416,7 @@ detail_dither_text            Melange de coul.:
 detail_dither_help            Si la profondeur de couleur actuelle ne permet pas qu'une couleur soit dirrectement affichee, elle est simulee en melangeant d'autres couleurs. Le mettre sur "Off" ameliorera l'execution du rendement logiciel sur quelques machines; en mode basse resolution, le mettre sur "Off" ameliorera meme la qualite des graphismes (IMHO)
 
 detail_floor_text             Details du sol:
-detail_floor_help             ArmageTron a plusieurs manieres d'afficher le sol et la grille: le plus joli vous coutera un certain nombre de FPS ( Frames par Seconde )
+detail_floor_help             \g a plusieurs manieres d'afficher le sol et la grille: le plus joli vous coutera un certain nombre de FPS ( Frames par Seconde )
 
 detail_floor_no_text          Pas de sol
 detail_floor_no_help          N'affiche rien du tout. Le plus rapide
@@ -1763,7 +1763,7 @@ network_master_options        Options:\n
 network_connecting_to_server  Connexion a \1...\n
 network_connecting_gamestate  En attente du statut de jeu...\n
 network_syncing_gamestate     Recu! Synchronisation du statut de jeu...\n
-network_warn_unknowndescriptor \n\n\nMessage inconnu recu, avec l'ID \1 \n\nVOUS DEVEZ SANS DOUTE METTRE ARMAGETRON A JOUR!!!!\n
+network_warn_unknowndescriptor \n\n\nMessage inconnu recu, avec l'ID \1 \n\nVOUS DEVEZ SANS DOUTE METTRE \G A JOUR!!!!\n
 network_error                 Erreur de reseau.\n
 network_error_timeout         Le temps de l'utilisateur \1 est ecoule.\n
 network_error_shortmessage    Le message de l'utilisateur \1 est trop court.\n
@@ -1937,7 +1937,7 @@ config_value_changed          \1 a change \2 en \3.\n
 config_error_read             erreur de lecture de \1: format non valide.\n
 config_message_info           \1 est actuellement a \2.\n
 nconfig_error_protected       Seul le serveur peut modifier \1.\n
-nconfig_error_unknown         Message recu du setting \1 inconnu...\n\n\n\nVOUS DEVRIEZ PROBABLEMENT METTRE ARMAGETRON A JOUR\n
+nconfig_error_unknown         Message recu du setting \1 inconnu...\n\n\n\nVOUS DEVRIEZ PROBABLEMENT METTRE \G A JOUR\n
 nconfig_value_changed         \1 a change \2 en \3 dans l'ordre du serveur.\n
 
 #*************************************

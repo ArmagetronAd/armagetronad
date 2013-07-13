@@ -3064,7 +3064,7 @@ network_message_abortconn_inter Der Server hat die Verbindung abgebrochen.
 
 network_master_timeout_retry  Einer der Master-Server antwortet nicht. Nächster wird kontaktiert...\n
 network_master_timeout_title  Master-Server antworten nicht
-network_master_timeout_inter  Die Master-Server sind momentan nicht erreichbar und die Liste der Server konnte nicht aktualisiert werden. Wir versuchen es mit der alten Liste.\n\nWahrscheinlichster Grund für diesen Fehler ist ein lokales Netzwerkproblem. Überprufe bitte, ob der Internetzugang im Allgemeinen funktionniert, z.B. indem Du mit einem Web-Browser www.armagetronad.net besuchst.\nManchmal ist auch eine Firewall für Verbindungsprobleme verantwortlich. Am einfachsten testet man das, indem man die betreffende Firewall deaktiviert, und dann erneut ein Internet-Spiel zu starten versucht. Wenn es dann klappt, solltest Du die Firewall wieder aktivieren, aber speziefisch Armagetron den Zugang erlauben. Wir verwenden UDP, Ports 4533 bis 4540. Sorge auch dafür, dass armagetronad(.exe) nicht in der Liste der erlaubten Anwendungen ist.\nWenn Teile des Netzwerkes sich Deiner Kontrolle entziehen, z.B. weil Du an einem öffentlichen WLAN-Hotspot sitzt oder in einem Unternehmens- oder Schulnetzwerk, dann sprich mit dem Administrator des Netzwerks.\nUnwahrscheinlich, aber möglich, ist es auch, dass die Master-Server Infrastruktur gerade zusammengebrochen ist. Besuche das Forum auf forums.armagetronad.net oder den IRC-Kanal armagetron auf irc.freenode.net für aktuelle Nachrichten.
+network_master_timeout_inter  Die Master-Server sind momentan nicht erreichbar und die Liste der Server konnte nicht aktualisiert werden. Wir versuchen es mit der alten Liste.\n\nWahrscheinlichster Grund für diesen Fehler ist ein lokales Netzwerkproblem. Überprufe bitte, ob der Internetzugang im Allgemeinen funktionniert, z.B. indem Du mit einem Web-Browser www.armagetronad.net besuchst.\nManchmal ist auch eine Firewall für Verbindungsprobleme verantwortlich. Am einfachsten testet man das, indem man die betreffende Firewall deaktiviert, und dann erneut ein Internet-Spiel zu starten versucht. Wenn es dann klappt, solltest Du die Firewall wieder aktivieren, aber speziefisch \g den Zugang erlauben. Wir verwenden UDP, Ports 4533 bis 4540. Sorge auch dafür, dass armagetronad(.exe) nicht in der Liste der erlaubten Anwendungen ist.\nWenn Teile des Netzwerkes sich Deiner Kontrolle entziehen, z.B. weil Du an einem öffentlichen WLAN-Hotspot sitzt oder in einem Unternehmens- oder Schulnetzwerk, dann sprich mit dem Administrator des Netzwerks.\nUnwahrscheinlich, aber möglich, ist es auch, dass die Master-Server Infrastruktur gerade zusammengebrochen ist. Besuche das Forum auf forums.armagetronad.net oder den IRC-Kanal armagetron auf irc.freenode.net für aktuelle Nachrichten.
 
 network_master_denied_title   Verbindung zum Master-Server abgelehnt
 network_master_denied_inter   Der Master-Server lässt keine Verbindung zu sich aufbauen. Vermutlich greifen gerade zu viele Benutzer auf ihn zu.\nWir versuchen es mal mit der alten Liste...
@@ -3092,7 +3092,7 @@ network_master_exp_needed_long Dieser Server wird dich nicht spielen lassen, bis
 network_connecting_to_server  Verbinde mit \1 ...\n
 network_connecting_gamestate  Warte auf Spielstand...\n
 network_syncing_gamestate     Erhalten! Synchronisiere Spielstand...\n
-network_warn_unknowndescriptor \n\n\nUnbekannte Nachricht (ID \1) erhalten.\n\nES IST RATSAM, EINE NEUE VERSION VON ARMAGETRON ZU BESORGEN!!!!\n
+network_warn_unknowndescriptor \n\n\nUnbekannte Nachricht (ID \1) erhalten.\n\nES IST RATSAM, EINE NEUE VERSION VON \G ZU BESORGEN!!!!\n
 network_error                 Netzwerkfehler.\n
 network_error_timeout         Verbindung zu Benutzer \1 verloren.\n
 network_error_shortmessage    Benutzer \1 sendet eine unzulässige (zu kurze) Nachricht.\n
@@ -3365,8 +3365,8 @@ config_sighup                 SIGHUP erhalten, Konfigurationsdateien werden neu 
 config_abort                  Laden bon Konfigurationsdatei/strom abgebrochen.\n
 
 nconfig_error_protected       Nix da. Nur der Server darf \1 ändern.\n
-nconfig_error_unknown         Konfigurationsänderung für die unbekannte Variable \1 erhalten.\n\n\n\nWAHRSCHEINLICH SOLLTE EINE NEUE VERSION VON ARMAGETRON INSTALLIERT WERDEN!!!!\n
-nconfig_error_nonet           Konfigurationsänderung über das Netwzerk für die Variable \1 erhalten, die jedoch keinen Netzwerksupport hat.\n\n\n\nWAHRSCHEINLICH SOLLTE EINE NEUE VERSION VON ARMAGETRON INSTALLIERT WERDEN!!!!\n
+nconfig_error_unknown         Konfigurationsänderung für die unbekannte Variable \1 erhalten.\n\n\n\nWAHRSCHEINLICH SOLLTE EINE NEUE VERSION VON \G INSTALLIERT WERDEN!!!!\n
+nconfig_error_nonet           Konfigurationsänderung über das Netwzerk für die Variable \1 erhalten, die jedoch keinen Netzwerksupport hat.\n\n\n\nWAHRSCHEINLICH SOLLTE EINE NEUE VERSION VON \G INSTALLIERT WERDEN!!!!\n
 nconfig_error_ignoreold       Veraltete Konfigurationsänderung für Einstellung \1 wird ignoriert.\n
 nconfig_value_changed         \1 wurde auf Befehl des Servers von \2 auf \3 verändert.\n
 

@@ -1992,7 +1992,7 @@ network_master_options        Opciones:\n
 network_connecting_to_server  conectando a \1 ...\n
 network_connecting_gamestate  Esperando al estado de juego...\n
 network_syncing_gamestate     Recibido! Sincronizando estado de juego...\n
-network_warn_unknowndescriptor \n\n\nrecibido el nMessage desconocido con id \1 \n\nPROBABLEMENTE DEBAS ACTUALIZAR ARMAGETRON!!!!\n
+network_warn_unknowndescriptor \n\n\nrecibido el nMessage desconocido con id \1 \n\nPROBABLEMENTE DEBAS ACTUALIZAR \G!!!!\n
 network_error                 Error de red.\n
 network_error_timeout         El usuario \1 excedió el tiempo.\n
 network_error_shortmessage    El mensaje del usuario \1 era muy corto.\n
@@ -2188,8 +2188,8 @@ config_error_read             error de lectura de \1: formato no válido.\n
 config_message_info           \1 es actualmente \2.\n
 
 nconfig_error_protected       No es posible. Sólo el servidor puede cambiar \1.\n
-nconfig_error_unknown         Mensaje recibido para configuración desconocida \1\n\n\n\nPROBABLEMENTE DEBERIAS ACTUALIZAR ARMAGETRON ADVANCED!!!\n
-nconfig_error_nonet           Recibido mensaje de conf desconocido para el parámetro \1.\n\nPROBABLEMENTE DEBERIAS ACTUALIZAR ARMAGETRON ADVANCED!!!\n
+nconfig_error_unknown         Mensaje recibido para configuración desconocida \1\n\n\n\nPROBABLEMENTE DEBERIAS ACTUALIZAR \G!!!\n
+nconfig_error_nonet           Recibido mensaje de conf desconocido para el parámetro \1.\n\nPROBABLEMENTE DEBERIAS ACTUALIZAR \G!!!\n
 nconfig_error_ignoreold       Ignorando antiguo mensaje de conf para el parámetro \1.
 nconfig_value_changed         \1 cambia de \2 a \3 por orden del servidor.\n
 

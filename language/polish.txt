@@ -193,7 +193,7 @@ team_max_players_help         Maksymalna ilość graczy na drużynę
 team_min_players_help         Minimalna ilość graczy na drużynę
 team_allow_shuffle_up_help    Jeżeli wynosi 1, gracze mogą się przetasowywać do woli. Jeśli 0, to mogą tylko spadać na mniejsze pozycje.
 team_center_is_boss_help      Jeżeli wynosi 1, graczem startującym na środku będzie szef drużyny. Jeżeli 0, będzie to gracz, który jest w tej drużynie przez najdłuższy okres czasu.
-team_elimination_mode_help    Określa sposób, w jaki ArmagetronAd powinien eliminować zbne drużyny, gdy jest ich więcej niż TEAM_MAX: Jeżeli ustawione na 0, gra będzie starać się utrzymać jak najwięcej graczy przy grze, a jeśli wszytkie drużyny mająpo tyle samo graczy, to odpadnie drużyna z najsłabszym wynikiem; Ustawienie tej wartości na 1 nakaże grze dobieranie drużyn po kolorach (niebieska, potem złota, potem czerwona itd.); Natomiast ustanienie na 2 będzie usuwać drużyny z najsłabszym wynikiem, bez względu na ilość graczy.
+team_elimination_mode_help    Określa sposób, w jaki \g powinien eliminować zbne drużyny, gdy jest ich więcej niż TEAM_MAX: Jeżeli ustawione na 0, gra będzie starać się utrzymać jak najwięcej graczy przy grze, a jeśli wszytkie drużyny mająpo tyle samo graczy, to odpadnie drużyna z najsłabszym wynikiem; Ustawienie tej wartości na 1 nakaże grze dobieranie drużyn po kolorach (niebieska, potem złota, potem czerwona itd.); Natomiast ustanienie na 2 będzie usuwać drużyny z najsłabszym wynikiem, bez względu na ilość graczy.
 
 teams_max_help                Maksymalna ilość drużyn
 teams_min_help                Minimalna ilość drużyn
@@ -2511,7 +2511,7 @@ network_master_options        Opcje:\n
 network_connecting_to_server  Łączenie z \1...\n
 network_connecting_gamestate  Oczekiwanie na informacje o stanie gry...\n
 network_syncing_gamestate     Otrzymane! Synchronizacja gry...\n
-network_warn_unknowndescriptor \n\n\nOtrzymano nieznaną informację \1 \n\nPRAWDOPODOBNIE POWINIENEŚ ZAKTUALIZOWAĆ ARMAGETRON ADVANCED!!!\n
+network_warn_unknowndescriptor \n\n\nOtrzymano nieznaną informację \1 \n\nPRAWDOPODOBNIE POWINIENEŚ ZAKTUALIZOWAĆ \G!!!\n
 network_error                 Błąd sieci.\n
 network_error_timeout         Użytkownik \1 przekroczył limit czasu.\n
 network_error_shortmessage    Wiadomość użytkownika \1 była zbyt krótka.\n
@@ -2679,8 +2679,8 @@ sound_error_unknown           Plik \1 nie mógł być załadowany: \2
 #********************************************
 
 nconfig_error_protected       Tylko serwer moze modyfikowac te wartosc. \1.\n
-nconfig_error_unknown         Otrzymano konfigurację nieznanego ustawienia \1.\n\nPRAWDOPODOBNIE POWINIENEŚ ZAKTUALIZOWAĆ ARMAGETRON ADVANCED!!!\n
-nconfig_error_nonet           Otrzymano konfigurację ustawienia \1 które nie dotyczy sieci.\n\nPRAWDOPODOBNIE POWINIENEŚ ZAKTUALIZOWAĆ ARMAGETRON ADVANCED!!!\n
+nconfig_error_unknown         Otrzymano konfigurację nieznanego ustawienia \1.\n\nPRAWDOPODOBNIE POWINIENEŚ ZAKTUALIZOWAĆ \G!!!\n
+nconfig_error_nonet           Otrzymano konfigurację ustawienia \1 które nie dotyczy sieci.\n\nPRAWDOPODOBNIE POWINIENEŚ ZAKTUALIZOWAĆ \G!!!\n
 nconfig_error_ignoreold       Ignorowanie starej konfiguracji ustawienia \1.\n
 nconfig_value_changed         Wartość \1 zmieniła się z \2 na \3 z polecenia serwera.\n
 

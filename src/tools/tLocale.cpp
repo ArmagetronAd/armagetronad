@@ -299,6 +299,9 @@ tLocaleItem::operator const char *() const// return the version of this string i
                 case 'g':
                     replaced << st_programName;
                     break;
+                case 'G':
+                    replaced << st_ProgramNameUppercase();
+                    break;
                 case 'i':
                     replaced << st_programRevId;
                     break;
@@ -543,6 +546,7 @@ void tLocaleItem::Load(const char *file, bool complete)  // load the language de
                         case '8':
                         case '9':
                         case 'g':
+                        case 'G':
                             r->translation += '\\';
                             li.istemplate = true;
                             break;
