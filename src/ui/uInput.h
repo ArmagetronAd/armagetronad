@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -104,7 +104,7 @@ public:
     uActionTooltip( uAction & action, int numHelp, VETOFUNC * veto = NULL );
     ~uActionTooltip();
 
-    //! presents help to the specified player, starting counting at 1. 
+    //! presents help to the specified player, starting counting at 1.
     //! player = 0 helps on global actions. Returns true if help was given.
     static bool Help( int player = 0 );
 
@@ -113,6 +113,7 @@ public:
 private:
     virtual void WriteVal(std::ostream & s );
     virtual void ReadVal(std::istream & s );
+    virtual void FetchVal(tString &val){};
 
     //! counts how many activations are required to make the tip go away
     int activationsLeft_[uMAX_PLAYERS+1];

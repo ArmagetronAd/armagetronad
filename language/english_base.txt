@@ -3539,6 +3539,12 @@ queue_refill_time_help     How long each time should players refill take? This i
 queue_refill_active_help   Should players be in server to have their queue refill active?
 queue_refill_waiting       You still have to wait \1 minutes for your queueing limit to refill.\n
 
+queue_find_failed          0xff7777Couldn't find queuer with the name: "\1".\n
+queue_refill_success       An administrator restored \2's queues.\n
+
+queue_refill_help          Refill the queue fuel of the given player's name. Usage: QUEUE_REFILL <name>
+queue_give_help            Give a set of queues to the given player's name. Usage: QUEUE_GIVE <name> <amount> 
+
 # items that should not be translated
 include english_base_notranslate.txt
 

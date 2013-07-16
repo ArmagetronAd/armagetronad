@@ -74,7 +74,7 @@ void gMatchEventRuby::DoMatchEvents()
 
 tList<gQueuePlayers> gQueuePlayers::queuePlayers;
 
-int sg_queueLimit = 5;
+int sg_queueLimit = 20;
 static tSettingItem<int> sg_queueLimitConf("QUEUE_LIMIT", sg_queueLimit);
 
 int sg_queueLimitExcempt = 2;
@@ -97,8 +97,67 @@ static tSettingItem<REAL> sg_queueRefillTimeConf("QUEUE_REFILL_TIME", sg_queueRe
 bool sg_queueRefillActive = true;
 static tSettingItem<bool> sg_queueRefillActiveConf("QUEUE_REFILL_ACTIVE", sg_queueRefillActive);
 
-static int sg_queueMax = 30;
+static int sg_queueMax = 100;
 static tSettingItem<int> sg_queueMaxConf("QUEUE_MAX", sg_queueMax);
+
+static void sg_queueRefill(std::istream &s)
+{
+    tString player;
+    tOutput msg;
+
+    player.ReadLine(s);
+
+    gQueuePlayers *qPlayer = gQueuePlayers::GetData(player);
+    if (qPlayer)
+    {
+        qPlayer->SetQueue(qPlayer->QueueDefault());
+
+        msg << "$queue_refill_success";
+        msg.SetTemplateParameter(1, qPlayer->Name());
+        sn_ConsoleOut(msg);
+    }
+    else
+    {
+        msg << "$queue_find_failed";
+        msg.SetTemplateParameter(1, player);
+        sn_ConsoleOut(msg, 0);
+    }
+}
+static tConfItemFunc sg_queueRefillConf("QUEUE_REFILL", &sg_queueRefill);
+
+static void sg_queueGive(std::istream &s)
+{
+    tString player, queueStr;
+    tOutput msg;
+
+    s >> player;
+    s >> queueStr;
+
+    gQueuePlayers *qPlayer = gQueuePlayers::GetData(player);
+    if (qPlayer)
+    {
+        int new_queues = atoi(queueStr);
+        if (new_queues >= 0)
+        {
+            //  send message
+            msg << "$queue_give_success";
+            msg.SetTemplateParameter(1, qPlayer->Name());
+            msg.SetTemplateParameter(2, qPlayer->Queues());
+            msg.SetTemplateParameter(3, new_queues);
+            sn_ConsoleOut(msg);
+
+            //  apply
+            qPlayer->SetQueue(new_queues);
+        }
+    }
+    else
+    {
+        msg << "$queue_find_failed";
+        msg.SetTemplateParameter(1, player);
+        sn_ConsoleOut(msg, 0);
+    }
+}
+static tConfItemFunc sg_queueGiveConf("QUEUE_GIVE", &sg_queueGive);
 
 gQueuePlayers::gQueuePlayers(ePlayerNetID *player)
 {
@@ -237,10 +296,19 @@ bool gQueuePlayers::Timestep(REAL time)
                         //  if queue increment is enabled
                         if (sg_queueIncrement > 0)
                         {
-                            if (qPlayer->queuesDefault < sg_queueMax)
+                            //  if queue max is below 0
+                            if (sg_queueMax <= 0)
                             {
-                                //  increase their default queue limit by this amount
                                 qPlayer->queuesDefault += sg_queueIncrement;
+                            }
+                            //  if queue max is above 0
+                            else
+                            {
+                                if (qPlayer->queuesDefault < sg_queueMax)
+                                {
+                                    //  increase their default queue limit by this amount
+                                    qPlayer->queuesDefault += sg_queueIncrement;
+                                }
                             }
 
                             //  create the new time for the next time to refill

@@ -2422,6 +2422,9 @@ void gDeathZoneHack::OnEnter( gDeathZoneHack * target, REAL time )
 //!
 // *******************************************************************************
 
+static REAL sg_rubberZoneRubber = -1;
+static tSettingItem<REAL> sg_rubberZoneRubberConf("RUBBERZONE_RUBBER", sg_rubberZoneRubber);
+
 gRubberZoneHack::gRubberZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreation, bool delayCreation)
 :gZone( grid, pos, dynamicCreation, delayCreation)
 {
@@ -2431,6 +2434,8 @@ gRubberZoneHack::gRubberZoneHack( eGrid * grid, const eCoord & pos, bool dynamic
 
     if (!delayCreation)
         grid->AddGameObjectInteresting(this);
+
+    rmRubber = sg_rubberZoneRubber;
 }
 
 

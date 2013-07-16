@@ -438,6 +438,8 @@ public:
             }
         }
     }
+
+    virtual void FetchVal(tString &val){};
 };
 
 static tConfItemPassword se_p;
@@ -5937,6 +5939,8 @@ private:
         tASSERT(0);
     }
 
+    virtual void FetchVal(tString &val){val << "";};
+
     virtual bool Writable()
     {
         return false;
@@ -9112,6 +9116,38 @@ static void se_KickConf(std::istream &s)
 static tConfItemFunc se_kickConf("KICK",&se_KickConf);
 static tAccessLevelSetter se_kickConfLevel( se_kickConf, tAccessLevel_Moderator );
 
+static void se_BootConf(std::istream &s)
+{
+    if ( se_NeedsServer( "BOOT", s ) )
+    {
+        return;
+    }
+
+    // get user ID
+    int num = se_ReadUser( s );
+
+    tString reason = se_defaultKickReason;
+    if ( !s.eof() )
+        reason.ReadLine(s);
+
+    // and kick.
+    if ( num > 0 && !s.good() )
+    {
+        // output to console so we can detect
+        con << "ADMIN command BOOT issued for "<< num << " " << reason << "\n";
+
+        sn_DisconnectUser( num ,  reason.Len() > 1 ? static_cast< char const *>( reason ) : "$network_kill_kick" );
+    }
+    else
+    {
+        con << tOutput("$boot_usage");
+        return;
+    }
+}
+
+static tConfItemFunc se_bootConf("BOOT",& se_BootConf);
+static tAccessLevelSetter se_bootConfLevel( se_bootConf, tAccessLevel_Moderator );
+
 static tString se_defaultKickToServer("");
 static int se_defaultKickToPort = 4534;
 static tString se_defaultKickToReason("");
@@ -9392,9 +9428,20 @@ static void Suspend_conf_base(std::istream &s, int rounds )
     msg.ReadLine(s);
 
     tString player = msg.ExtractNonBlankSubString(pos);
+    tString roundStr = msg.ExtractNonBlankSubString(pos);
+    tString reason;
+
+    if ((roundStr.Filter() != "") && (roundStr.IsNumeric()))
+    {
+        rounds = atoi(roundStr);
+    }
+    else
+    {
+        reason << roundStr << " ";
+    }
 
     //  get the rest (should be blank if there isn't anymore to read)
-    tString reason = msg.SubStr(pos + 1);
+    reason << msg.SubStr(pos + 1);
 
     ePlayerNetID *p = ePlayerNetID::FindPlayerByName(player);
 

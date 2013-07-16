@@ -924,6 +924,8 @@ class tSettingMapqueueing: public tConfItemBase
         virtual bool Writable(){return false;}
         virtual bool Save(){return false;}
 
+        virtual void FetchVal(tString &val){};
+
         tArray<tString> items_;
         int current_;
 };
@@ -1058,6 +1060,8 @@ class tSettingConfqueueing: public tConfItemBase
         virtual void WriteVal(std::ostream &s){}
         virtual bool Writable(){return false;}
         virtual bool Save(){return false;}
+
+        virtual void FetchVal(tString &val){};
 
         tArray<tString> items_;
         int current_;

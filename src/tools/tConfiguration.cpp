@@ -308,6 +308,8 @@ public:
         tASSERT(0);
     }
 
+    virtual void FetchVal(tString &val){};
+
     virtual bool Writable(){
         return false;
     }
@@ -379,6 +381,8 @@ public:
     {
         tASSERT(0);
     }
+
+    virtual void FetchVal(tString &val){};
 
     virtual bool Writable(){
         return false;
@@ -665,16 +669,21 @@ void tConfItemBase::WriteAllToFile()
             tConfItemBase * ci = (*iter).second;
             tString help ( ci->help );
 
-            tString mess;
+            tString mess, value;
+
+            //  fetch the value set for this setting.
+            ci->FetchVal(value);
+
             mess << ci->title << " ";
-            //  mess << ci->value;
+
             mess.SetPos( sim_maxlen+2, false );
+            mess << value << " ";
             mess << " # ";
             mess << help;
             mess << "\n";
 
             w << mess;
-            /*w << "| " << ci->title << " || " << help << "\n";
+            /*w << "| " << ci->title << " || " << help << " || " << value << "\n";
             w << "|-\n";*/
         }
         //w << "}}\n";

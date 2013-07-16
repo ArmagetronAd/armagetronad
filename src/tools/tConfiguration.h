@@ -299,6 +299,7 @@ public:
 
     virtual void ReadVal(std::istream &s)=0;
     virtual void WriteVal(std::ostream &s)=0;
+    virtual void FetchVal(tString &val)=0;
 
     virtual void WasChanged(){} // what to do if a read changed the thing
 
@@ -532,6 +533,11 @@ public:
     virtual void WriteVal(std::ostream &s){
         DoWrite( s, *target, DUMMYREQUIRED() );
     }
+
+    virtual void FetchVal(tString &val)
+    {
+        val << *target;
+    }
 };
 
 template<class T> class tSettingItem:public tConfItem<T>{
@@ -577,6 +583,7 @@ public:
 
     virtual void ReadVal(std::istream &s);
     virtual void WriteVal(std::ostream &s);
+    virtual void FetchVal(tString &val){};
 
     virtual bool Save();
 };

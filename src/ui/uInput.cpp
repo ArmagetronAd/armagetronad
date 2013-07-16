@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -139,6 +139,8 @@ public:
         char c=' ';
         while(c!='\n' && s.good() && !s.eof()) c=s.get();
     }
+
+    virtual void FetchVal(tString &val){};
 };
 
 // we need just one
@@ -680,7 +682,7 @@ bool su_HandleEvent(SDL_Event &e, bool delayed ){
 
     }
     else
-#endif  
+#endif
         return false;
 }
 
@@ -783,7 +785,7 @@ bool uBindPlayer::DoActivate(REAL x){
     {
         act->GetTooltip()->Count(ePlayer);
     }
-    
+
     return ret;
 }
 
@@ -869,7 +871,7 @@ uActionTooltip::~uActionTooltip()
 {
     if( action_.tooltip_ == this )
         action_.tooltip_ = NULL;
-        
+
 }
 
 bool uActionTooltip::Help( int player )
@@ -895,9 +897,9 @@ bool uActionTooltip::Help( int player )
         {
             continue;
         }
-        
+
         int activationsLeft = tooltip->activationsLeft_[player];
-        if( activationsLeft > 0 && 
+        if( activationsLeft > 0 &&
             ( !mostWanted || mostWanted->activationsLeft_[player] < activationsLeft ) )
         {
             mostWanted = tooltip;
