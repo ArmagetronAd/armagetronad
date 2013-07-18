@@ -54,7 +54,7 @@ public:
 class gRotationItem
 {
     public:
-        gRotationItem(tString name, int round)
+        gRotationItem(tString name, int round = 0)
         {
             this->name_ = name;
             this->round_ = round;

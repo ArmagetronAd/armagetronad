@@ -97,7 +97,7 @@ static tSettingItem<REAL> sg_queueRefillTimeConf("QUEUE_REFILL_TIME", sg_queueRe
 bool sg_queueRefillActive = true;
 static tSettingItem<bool> sg_queueRefillActiveConf("QUEUE_REFILL_ACTIVE", sg_queueRefillActive);
 
-static int sg_queueMax = 100;
+static int sg_queueMax = 30;
 static tSettingItem<int> sg_queueMaxConf("QUEUE_MAX", sg_queueMax);
 
 static void sg_queueRefill(std::istream &s)
@@ -105,23 +105,36 @@ static void sg_queueRefill(std::istream &s)
     tString player;
     tOutput msg;
 
-    player.ReadLine(s);
+    s >> player;
 
-    gQueuePlayers *qPlayer = gQueuePlayers::GetData(player);
-    if (qPlayer)
-    {
-        qPlayer->SetQueue(qPlayer->QueueDefault());
+#ifdef DEBUG
+    con << "Queuer Name:" << player << "\n";
+#endif
 
-        msg << "$queue_refill_success";
-        msg.SetTemplateParameter(1, qPlayer->Name());
-        sn_ConsoleOut(msg);
-    }
-    else
+    if (gQueuePlayers::queuePlayers.Len() > 0)
     {
-        msg << "$queue_find_failed";
-        msg.SetTemplateParameter(1, player);
-        sn_ConsoleOut(msg, 0);
+        for(int i = 0; i < gQueuePlayers::queuePlayers.Len(); i++)
+        {
+            gQueuePlayers *qPlayer = gQueuePlayers::queuePlayers[i];
+            if (qPlayer)
+            {
+                if (qPlayer->Name().Contains(player))
+                {
+                    qPlayer->SetQueue(qPlayer->QueueDefault());
+
+                    msg.SetTemplateParameter(1, qPlayer->Name());
+                    msg << "$queue_refill_success";
+                    sn_ConsoleOut(msg);
+
+                    return;
+                }
+            }
+        }
     }
+
+    msg.SetTemplateParameter(1, player);
+    msg << "$queue_find_failed";
+    sn_ConsoleOut(msg, 0);
 }
 static tConfItemFunc sg_queueRefillConf("QUEUE_REFILL", &sg_queueRefill);
 
@@ -133,29 +146,42 @@ static void sg_queueGive(std::istream &s)
     s >> player;
     s >> queueStr;
 
-    gQueuePlayers *qPlayer = gQueuePlayers::GetData(player);
-    if (qPlayer)
-    {
-        int new_queues = atoi(queueStr);
-        if (new_queues >= 0)
-        {
-            //  send message
-            msg << "$queue_give_success";
-            msg.SetTemplateParameter(1, qPlayer->Name());
-            msg.SetTemplateParameter(2, qPlayer->Queues());
-            msg.SetTemplateParameter(3, new_queues);
-            sn_ConsoleOut(msg);
+#ifdef DEBUG
+    con << "Queuer Name:" << player << "\n";
+#endif
 
-            //  apply
-            qPlayer->SetQueue(new_queues);
+    if (gQueuePlayers::queuePlayers.Len() > 0)
+    {
+        for(int i = 0; i < gQueuePlayers::queuePlayers.Len(); i++)
+        {
+            gQueuePlayers *qPlayer = gQueuePlayers::queuePlayers[i];
+            if (qPlayer)
+            {
+                if (qPlayer->Name().Contains(player))
+                {
+                    int new_queues = atoi(queueStr);
+                    if (new_queues > 0)
+                    {
+                        //  send message
+                        msg.SetTemplateParameter(1, qPlayer->Name());
+                        msg.SetTemplateParameter(2, qPlayer->Queues());
+                        msg.SetTemplateParameter(3, new_queues);
+                        msg << "$queue_give_success";
+                        sn_ConsoleOut(msg);
+
+                        //  apply
+                        qPlayer->SetQueue(new_queues);
+                    }
+
+                    return;
+                }
+            }
         }
     }
-    else
-    {
-        msg << "$queue_find_failed";
-        msg.SetTemplateParameter(1, player);
-        sn_ConsoleOut(msg, 0);
-    }
+
+    msg.SetTemplateParameter(1, player);
+    msg << "$queue_find_failed";
+    sn_ConsoleOut(msg, 0);
 }
 static tConfItemFunc sg_queueGiveConf("QUEUE_GIVE", &sg_queueGive);
 
@@ -461,3 +487,63 @@ void sg_LogQueue(ePlayerNetID *p, tString command, tString params, tString item)
     }
     o.close();
 }
+
+static void sg_queuersList(std::istream &s)
+{
+    int max = 10;
+    int showing = 0;
+
+    tString params;
+    int pos = 0;
+    params.ReadLine(s);
+
+    int showAmount = 0;
+    tString amount = params.ExtractNonBlankSubString(pos);
+    if (amount.Filter() != "") showAmount = atoi(amount);
+
+    if (gQueuePlayers::queuePlayers.Len() > 0)
+    {
+        if (showAmount < gQueuePlayers::queuePlayers.Len())
+        {
+            if (gQueuePlayers::queuePlayers.Len() < max) max = gQueuePlayers::queuePlayers.Len();
+            if ((gQueuePlayers::queuePlayers.Len() - showAmount) < max) max = gQueuePlayers::queuePlayers.Len() - showAmount;
+
+            if (max > 0)
+            {
+                sn_ConsoleOut(tOutput("$queuers_list"), 0);
+
+                for(int i = 0; i < max; i++)
+                {
+                    int rotID = showAmount + i;
+                    gQueuePlayers *queuePlayer = gQueuePlayers::queuePlayers[rotID];
+                    if (queuePlayer)
+                    {
+                        tColoredString send;
+                        send << tColoredString::ColorString( 1,1,.5 );
+                        send << "( ";
+                        send << "0x55ffff" << queuePlayer->Name();
+                        send << tColoredString::ColorString( 1,1,.5 );
+                        send << " | 0xff55ff" << queuePlayer->Queues() << " queues";
+                        send << tColoredString::ColorString( 1,1,.5 );
+                        send << " | played: 0x88ff22" << queuePlayer->PlayedTime() << " seconds";
+                        send << tColoredString::ColorString( 1,1,.5 );
+                        send << " | refill: 0x88ff22" << queuePlayer->RefillTime() << " seconds";
+                        send << tColoredString::ColorString( 1,1,.5 );
+                        send << " )\n";
+                        sn_ConsoleOut(send, 0);
+
+                        showing++;
+                    }
+                }
+
+                tOutput show;
+                show.SetTemplateParameter(1, showing);
+                show.SetTemplateParameter(2, gQueuePlayers::queuePlayers.Len());
+                show << "$queuers_list_show";
+                sn_ConsoleOut(show, 0);
+            }
+        }
+    }
+}
+static tConfItemFunc sg_queuersListConf("QUEUERS_LIST", &sg_queuersList);
+static tAccessLevelSetter sg_queuersListConfLevel( sg_queuersListConf, tAccessLevel_Moderator );

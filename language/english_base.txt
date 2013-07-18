@@ -307,7 +307,7 @@ map_rotation_list_show                  Showing \1 maps out of \2 in rotation:\n
 map_rotation_add_help                   Add a map item to the MAP_ROTATION list of items. Optionally you can also add in the round of selection. Usage: MAP_ROTATION_ADD <map>{|round_number}
 map_rotation_load_help                  Loads the selected map from it's designated id from the list of MAP_ROTATION items. Usage: MAP_ROTATION_LOAD <map_id>
 map_rotation_remove_help                Removed the selected map from the list of MAP_ROTATION items. Usage: MAP_ROTATION_REMOVE <map>
-map_rotation_set_help                   Set the selected map to the round provided. Usage: MAP_ROTATION_SET <map> <round>                 
+map_rotation_set_help                   Set the selected map to the round provided. Usage: MAP_ROTATION_SET <map> <round>
 
 config_rotation_help                    A list of config files to rotate through, with values separated by semicolons. Optionally you can enter in the round like this: config|round_number;
 config_rotation_type_help               How will the CONFIG_ROTATION files load? 0-INCLUDE or 1-RINCLUDE?; Default: 0
@@ -319,11 +319,16 @@ config_rotation_load_help               Loads the selected config from it's desi
 config_rotation_remove_help             Removed the selected config from the list of CONFIG_ROTATION items. Usage: CONFIG_ROTATION_REMOVE <config>
 config_rotation_set_help                Set the selected config to the round provided. Usage: CONFIG_ROTATION_SET <config> <round>
 
+map_remove_success                      An Administrator removed "0x88ff22\10xRESETT" from the map rotation.\n
+map_remove_failed                       0xff7777Could not find map "\1" in rotation.\n
+config_remove_success                   An Administrator removed "0x88ff22\10xRESETT" from the config rotation.\n
+config_remove_failed                    0xff7777Could not find map "\1" in rotation.\n
+
 reset_rotation_help                     Resets map and config rotation
 reset_rotation_on_start_new_match_help  If enabled, map and config rotation will be reset when a START_NEW_MATCH command is issued
 reset_rotation_message                  Map and config rotation have been reset.
 
-rotation_max_help    The maximum number of rounds the currently loaded map should remain before new map should be selected and loaded.
+rotation_max_help                       The maximum number of rounds the currently loaded map should remain before new map should be selected and loaded.
 
 # limits
 speed_factor_help		Speed modifier for the cycles
@@ -3540,7 +3545,12 @@ queue_refill_active_help   Should players be in server to have their queue refil
 queue_refill_waiting       You still have to wait \1 minutes for your queueing limit to refill.\n
 
 queue_find_failed          0xff7777Couldn't find queuer with the name: "\1".\n
-queue_refill_success       An administrator restored \2's queues.\n
+queue_refill_success       An administrator restored \1's queues.\n
+queue_give_success         \1 received \2 queues from \3 by an administrator.\n
+
+queuers_list_help          Displays the list of queuers and their queues. 
+queuers_list               List of queuers:\n
+queuers_list_show          Showing \1 queuers out of \2:\n
 
 queue_refill_help          Refill the queue fuel of the given player's name. Usage: QUEUE_REFILL <name>
 queue_give_help            Give a set of queues to the given player's name. Usage: QUEUE_GIVE <name> <amount> 

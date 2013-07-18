@@ -4113,7 +4113,7 @@ void handle_chat( nMessage &m )
                         return;
                     }
                     // the commands below (mp and cq) are the ones to use for add/remove/list items in the queueing list
-                    else if ((command == "/mq") || (command == "/cq"))
+                    else if ((command == "/mq") || (command == "/cq") || (command == "/ms") || (command == "/cs"))
                     {
                         sg_AddqueueingItems(p, s, command);
                         return;
@@ -5795,6 +5795,9 @@ void ePlayerNetID::RemoveFromGame()
     SetTeam( NULL );
     UpdateTeam();
     ControlObject( NULL );
+
+    //  update the online players list
+    sg_OutputOnlinePlayers();
 }
 
 bool ePlayerNetID::ActionOnQuit()

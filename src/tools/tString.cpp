@@ -2189,7 +2189,7 @@ tArray<tString> tString::Split(tString del_word)
     tArray<tString> arrayString;
 
     if (del_word.Len() > ret.Len())
-        return NULL;
+        return arrayString;
     else if (del_word == "")
     {
         arrayString[0] = ret;
