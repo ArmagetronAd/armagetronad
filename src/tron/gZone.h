@@ -134,6 +134,9 @@ public:
     tString             GetEffect() {return effect_;}
     void                SetEffect(tString newEffect) {effect_ = newEffect;}
 
+    bool                GetWallPenetrate() { return wallPenetrate_; }
+    void                SetWallPenetrate (bool penetrate = false) { wallPenetrate_ = penetrate; }
+
     static void Timesteps(REAL currentTime);
     static void AddDelay(REAL delayTime, gZone *Zone);
     static void ClearDelay();
@@ -149,6 +152,8 @@ protected:
     REAL newImpactTime_;
     eCoord newImpactPos_;
     eCoord newImpactVelocity_;
+
+    bool wallPenetrate_;
 
     bool dynamicCreation_;  //??? remove
     bool delayCreation_;
@@ -734,6 +739,39 @@ class gSoccerZoneHack: public gZone
         virtual void OnVanish();
         virtual void OnEnter(gCycle *target, REAL time);
 };
+
+/*  For future
+class gRaceZoneHack: public gZone
+{
+    public:
+        enum
+		{
+			TYPE_NORMAL,    //!< Do nothing
+			TYPE_DEATH,     //!< Kill racing player to enter
+
+			NUM_TYPES
+		};
+
+        gRaceZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false, bool delayCreation = false);
+        gRaceZoneHack(nMessage &m);
+        ~gRaceZoneHack();
+
+        virtual void OnExit(gCycle *target, REAL time);
+
+        virtual void OnEnter(gZone *target, REAL time);
+
+        int GetType() { return zoneType; }
+        void SetType(int type) { zoneType = type; }
+
+    protected:
+        int zoneType;
+
+    private:
+        virtual bool Timestep(REAL currentTime);
+        virtual void OnVanish();
+        virtual void OnEnter(gCycle *target, REAL time);
+};
+*/
 
 //! creates a win or death zone (according to configuration) at the specified position
 gZone * sg_CreateWinDeathZone( eGrid * grid, const eCoord & pos );

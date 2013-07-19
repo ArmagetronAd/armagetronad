@@ -2447,7 +2447,7 @@ gCycle::gCycle(eGrid *grid, const eCoord &pos,const eCoord &d,ePlayerNetID *p)
 
     flag_ = NULL;
 
-    gRacePlayer *racePlayer = gRacePlayer::GetPlayer(Player()->GetUserName());
+    gRacePlayer *racePlayer = gRacePlayer::GetPlayer(Player());
     if (racePlayer)
     {
         racePlayer->NewCycle(this);
@@ -4053,9 +4053,9 @@ void gCycle::Kill(){
             se_cycleDestroyedWriter << Player()->GetUserName() << Position().x << Position().y << Direction().x << Direction().y << ePlayerNetID::FilterName(Team()->Name()) << se_GameTime();
             se_cycleDestroyedWriter.write();
 
-            if (gRacePlayer::PlayerExists(Player()->GetUserName()))
+            if (gRacePlayer::PlayerExists(Player()))
             {
-                gRacePlayer *rPlayer = gRacePlayer::GetPlayer(Player()->GetUserName());
+                gRacePlayer *rPlayer = gRacePlayer::GetPlayer(Player());
                 if (rPlayer)
                 {
                     rPlayer->DestroyCycle();
@@ -6495,6 +6495,9 @@ static tSettingItem<int> conf_megashotDirections ("MEGA_SHOT_DIR", sg_megashotDi
 static int sg_megashotExplosion = 1;
 static tSettingItem<int> conf_megashotExplosion ("MEGA_SHOT_EXPLOSION", sg_megashotExplosion);
 
+static bool sg_shotPenetrateWalls = false;
+static tSettingItem<bool> sg_shotPenetrateWallsConf("SHOT_PENETRATE_WALLS", sg_shotPenetrateWalls);
+
 static eLadderLogWriter sg_ZoneShotReleased("ZONE_SHOT_RELEASED", false);
 
 #define FIX_BRAKE_BUG
@@ -6610,6 +6613,8 @@ void gCycle::ProcessShoot(bool deathShot)
                 pZone->SetOwner(Player());
                 pZone->SetType(type);
 
+                pZone->SetWallPenetrate(sg_shotPenetrateWalls);
+
                 //  write to laddderlog
                 sg_ZoneShotReleased << deathShot << pZone->GOID() << Player()->GetUserName() << pZone->GetPosition().x << pZone->GetPosition().y << pZone->GetVelocity().x << pZone->GetVelocity().y;
                 sg_ZoneShotReleased.write();
@@ -6654,6 +6659,8 @@ void gCycle::ProcessShoot(bool deathShot)
                         pZone->SetColor(shotColor);
                         pZone->SetOwner(Player());
                         pZone->SetType(type);
+
+                        pZone->SetWallPenetrate(sg_shotPenetrateWalls);
 
                         //  write to laddderlog
                         sg_ZoneShotReleased << deathShot << pZone->GOID() << Player()->GetUserName() << pZone->GetPosition().x << pZone->GetPosition().y << pZone->GetVelocity().x << pZone->GetVelocity().y;

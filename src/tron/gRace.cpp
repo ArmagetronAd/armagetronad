@@ -115,6 +115,26 @@ static tSettingItem<bool> sg_raceFinishKillConf("RACE_FINISH_KILL", sg_raceFinis
 static bool sg_raceLogLogin = true;
 static tSettingItem<bool> sg_raceLogLoginConf("RACE_LOG_LOGIN", sg_raceLogLogin);
 
+//!  process shot for the racers BEGIN
+bool sg_raceShotEnabled = false;
+static tSettingItem<bool> sg_raceShotEnabledConf("RACE_SHOT_ENABLED", sg_raceShotEnabled);
+
+REAL sg_raceShotRadius = 2.0;
+static tSettingItem<REAL> sg_raceShotRadiusConf("RACE_SHOT_RADIUS", sg_raceShotRadius);
+
+REAL sg_raceShotRotate = 0.3;
+static tSettingItem<REAL> sg_raceShotRotateConf("RACE_SHOT_ROTATE", sg_raceShotRotate);
+
+REAL sg_raceShotVelocityMulti = 10.0;
+static tSettingItem<REAL> sg_raceShotVelocityMultiConf("RACE_SHOT_VELOCITY_MULTI", sg_raceShotVelocityMulti);
+
+int sg_raceShotChances = 2;
+static tSettingItem<int> sg_raceShotChancesConf("RACE_SHOT_CHANCES", sg_raceShotChances);
+
+bool sg_raceShotPenetrate = true;
+static tSettingItem<bool> sg_raceShotPenetrateConf("RACE_SHOT_PENETRATE", sg_raceShotPenetrate);
+//!  process shot for the racers END
+
 tString sg_currentMap("");
 
 //! STATIC VARIABLES
@@ -185,8 +205,8 @@ bool gRaceScores::InOrder(int i,int j)
     gRaceScores *rSP = sg_RaceScores[i];
     gRaceScores *rSR = sg_RaceScores[j];
 
-    if (rSP->time_ == -1) return false;
-    if (rSR->time_ == -1) return true;
+    if (rSP->time_ <= 0) return false;
+    if (rSR->time_ <= 0) return true;
     else return (rSP->time_ < rSR->time_);
 }
 
@@ -595,7 +615,7 @@ void gRaceScores::OutputStart()
             }
             sn_ConsoleOut(mess);
         }
-        else if (sg_raceRankShowEnd == 2)
+        else if (sg_raceRankShowStart == 2)
         {
             int rank        = 0;
             int ranksPos    = 0;
@@ -1003,6 +1023,9 @@ gRacePlayer::gRacePlayer(ePlayerNetID *player)
 
     this->chances_ = sg_raceChances;
 
+    this->shot_chances_ = sg_raceShotChances;
+    this->drop_chances_ = sg_raceShotChances;
+
     sg_RacePlayers.Insert(this);
 }
 
@@ -1039,6 +1062,40 @@ gRacePlayer *gRacePlayer::GetPlayer(tString username)
                     return rPlayer;
 
                 if (rPlayer->Player()->GetUserName() == username)
+                    return rPlayer;
+            }
+        }
+    }
+    return NULL;
+}
+
+bool gRacePlayer::PlayerExists(ePlayerNetID *player)
+{
+    if (sg_RacePlayers.Len() > 0)
+    {
+        for(int i = 0; i < sg_RacePlayers.Len(); i++)
+        {
+            gRacePlayer *rPlayer = sg_RacePlayers[i];
+            if (rPlayer && rPlayer->Player())
+            {
+                if (rPlayer->Player() == player)
+                    return true;
+            }
+        }
+    }
+    return false;
+}
+
+gRacePlayer *gRacePlayer::GetPlayer(ePlayerNetID *player)
+{
+    if (sg_RacePlayers.Len() > 0)
+    {
+        for(int i = 0; i < sg_RacePlayers.Len(); i++)
+        {
+            gRacePlayer *rPlayer = sg_RacePlayers[i];
+            if (rPlayer && rPlayer->Player())
+            {
+                if (rPlayer->Player() == player)
                     return rPlayer;
             }
         }
@@ -1278,8 +1335,8 @@ void gRace::Sync( int alive, int ai_alive, int humans)
                     roundFinished_ = true;
                     countDown_ = -1;
 
-                    if (!firstArrived_)
-                    {
+                    //if (!firstArrived_)
+                    //{
                         //  kill all players that haven't finished yet
                         for(int i = 0; i < se_PlayerNetIDs.Len(); i++)
                         {
@@ -1287,7 +1344,7 @@ void gRace::Sync( int alive, int ai_alive, int humans)
                             if (p && p->Object() && p->Object()->Alive())
                                 p->Object()->Kill();
                         }
-                    }
+                    //}
                 }
                 else
                 {
@@ -1377,6 +1434,9 @@ void gRace::Reset()
             rPlayer->SetScore(0);
             rPlayer->SetFinished(false);
             rPlayer->DestroyCycle();
+
+            rPlayer->SetShotChances(sg_raceShotChances);
+            rPlayer->SetDropChances(sg_raceShotChances);
         }
     }
 
@@ -1559,6 +1619,14 @@ void gRace::RaceChat(ePlayerNetID *player, tString command, std::istream &s)
             message << "0x66ff22!race stats <name> 0x0055ff: Lists the current stats of players by <name>. Leave it blank to view your own stats.\n";
             sn_ConsoleOut(message, player->Owner());
         }
+        else if (command == "shot")
+        {
+            ProcessShot(player, s);
+        }
+        else if (command == "drop")
+        {
+            ProcessDrop(player, s);
+        }
         else
         {
             tOutput message;
@@ -1566,5 +1634,109 @@ void gRace::RaceChat(ePlayerNetID *player, tString command, std::istream &s)
             message << "0x66ff22!race help 0x0055ff: Lists all available commands for racing.\n";
             sn_ConsoleOut(message, player->Owner());
         }
+    }
+}
+
+void gRace::ProcessShot(ePlayerNetID *player, std::istream &s)
+{
+    if (!sg_raceShotEnabled) return;
+
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid) return;
+
+    gRacePlayer *rPlayer = gRacePlayer::GetPlayer(player);
+    if (!rPlayer) return;
+
+    if (rPlayer->Cycle() && rPlayer->Cycle()->Alive())
+    {
+        if (rPlayer->GetShotChances() == 0)
+            return;
+        else
+            rPlayer->SetShotChances(rPlayer->GetShotChances() - 1);
+
+        REAL shotRadius   = sg_raceShotRadius;
+        REAL shotRotation = sg_raceShotRotate;
+
+        eCoord shotPos = rPlayer->Cycle()->Position() + (rPlayer->Cycle()->Direction() * (shotRadius));
+        eCoord shotVelocity = rPlayer->Cycle()->Direction() * rPlayer->Cycle()->Speed() * sg_raceShotVelocityMulti;
+
+        //Check if color_ is too dark
+        gRealColor shotColor = rPlayer->Cycle()->color_;
+        REAL colorTotal = shotColor.r + shotColor.g + shotColor.b;
+        REAL colorLimit = 0.3;
+
+        if (colorTotal < colorLimit)
+        {
+            //This could be much improved....
+            REAL toAdd = (colorLimit - colorTotal) / 3;
+            shotColor.r += toAdd;
+            shotColor.g += toAdd;
+            shotColor.b += toAdd;
+        }
+
+        //Get the type of shot
+        int type = gDeathZoneHack::TYPE_SHOT;
+
+        gDeathZoneHack *pZone = new gDeathZoneHack(grid, shotPos, true);
+        pZone->SetRadius(shotRadius);
+        pZone->SetVelocity(shotVelocity);
+        pZone->SetRotationSpeed(shotRotation);
+        pZone->SetColor(shotColor);
+        pZone->SetOwner(player);
+        pZone->SetType(type);
+
+        pZone->SetWallPenetrate(sg_raceShotPenetrate);
+    }
+}
+
+void gRace::ProcessDrop(ePlayerNetID *player, std::istream &s)
+{
+    if (!sg_raceShotEnabled) return;
+
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid) return;
+
+    gRacePlayer *rPlayer = gRacePlayer::GetPlayer(player);
+    if (!rPlayer) return;
+
+    if (rPlayer->Cycle() && rPlayer->Cycle()->Alive())
+    {
+        if (rPlayer->GetDropChances() == 0)
+            return;
+        else
+            rPlayer->SetDropChances(rPlayer->GetDropChances() - 1);
+
+        REAL shotRadius   = sg_raceShotRadius;
+        REAL shotRotation = sg_raceShotRotate;
+
+        eCoord shotPos = rPlayer->Cycle()->Position() + (rPlayer->Cycle()->Direction() * (shotRadius));
+        eCoord shotVelocity = eCoord(0, 0);
+
+        //Check if color_ is too dark
+        gRealColor shotColor = rPlayer->Cycle()->color_;
+        REAL colorTotal = shotColor.r + shotColor.g + shotColor.b;
+        REAL colorLimit = 0.3;
+
+        if (colorTotal < colorLimit)
+        {
+            //This could be much improved....
+            REAL toAdd = (colorLimit - colorTotal) / 3;
+            shotColor.r += toAdd;
+            shotColor.g += toAdd;
+            shotColor.b += toAdd;
+        }
+
+        //Get the type of shot
+        int type = gDeathZoneHack::TYPE_SHOT;
+
+        gDeathZoneHack *pZone = new gDeathZoneHack(grid, shotPos, true);
+        pZone->SetRadius(shotRadius);
+        pZone->SetVelocity(shotVelocity);
+        pZone->SetRotationSpeed(shotRotation);
+        pZone->SetColor(shotColor);
+        pZone->SetOwner(player);
+        pZone->SetType(type);
+
+        pZone->SetWallPenetrate(sg_raceShotPenetrate);
     }
 }

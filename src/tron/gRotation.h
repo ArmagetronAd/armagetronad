@@ -345,7 +345,7 @@ public:
 
     //!< This is for the rotation loading limit
     static void AddCounter() { counter_ ++; }
-    static void ResetCounter() { counter_ = 0; }
+    static void ResetCounter() { counter_ = 1; }
     static int Counter() { return counter_; }
 
 private:

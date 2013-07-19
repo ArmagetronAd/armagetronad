@@ -2178,25 +2178,26 @@ tString tString::RemoveWord(const char *find_word)
 // *
 // **********************************************************************
 //!
-//!    @param      del_word       The expression to exclude when splitting string
-//!    @return     arrayString    Returns string in array before and after "del_word"
+//!    @param      delimiter       The expression to exclude when splitting string
+//!    @return     arrayString     Returns string in array before and after "delimiter"
 //!
 // **********************************************************************
 
-tArray<tString> tString::Split(tString del_word)
+tArray<tString> tString::Split(tString delimiter)
 {
     tString ret(*this);
     tArray<tString> arrayString;
 
-    if (del_word.Len() > ret.Len())
+    /*  Old Method
+    if (delimiter.Len() > ret.Len())
         return arrayString;
-    else if (del_word == "")
+    else if (delimiter == "")
     {
         arrayString[0] = ret;
         return arrayString;
     }
 
-    int count_word = del_word.Len() - 1;
+    int count_word = delimiter.Len() - 1;
     int this_word = ret.Len();
     int arrayKey = 0;
 
@@ -2208,20 +2209,81 @@ tArray<tString> tString::Split(tString del_word)
             putWordTogether << ret[i+j];
         }
 
-        if (putWordTogether == del_word)
+        if (putWordTogether == delimiter)
         {
             i += count_word - 1;
             arrayKey++;
         }
         else arrayString[arrayKey] << ret[i];
     }
+    */
+
+    //  New Method
+    int strleng = ret.Len() - 1;
+    int delleng = delimiter.Len() - 1;
+    if (delleng == 0)
+        return arrayString;//no change
+
+    int i = 0;
+    int k = 0;
+    while(i < strleng)
+    {
+        int j = 0;
+        while (i + j < strleng && j < delleng && ret[i + j] == delimiter[j])
+            j++;
+
+        if (j == delleng)//found delimiter
+        {
+            arrayString[arrayString.Len()] = ret.SubStr(k, i - k);
+            i += delleng;
+            k = i;
+        }
+        else
+        {
+            i++;
+        }
+    }
+    arrayString[arrayString.Len()] = ret.SubStr(k, i - k);
 
     return arrayString;
 }
 
-tArray<tString> tString::Split(const char *del_word)
+tArray<tString> tString::Split(const char *delimiter)
 {
-    return Split(tString(del_word));
+    return Split(tString(delimiter));
+}
+
+tArray<tString> str_explode(tString delimiter, tString ret)
+{
+    tArray<tString> arrayString;
+
+    int strleng = ret.Len() - 1;
+    int delleng = delimiter.Len() - 1;
+    if (delleng == 0)
+        return arrayString;//no change
+
+    int i = 0;
+    int k = 0;
+    while(i < strleng)
+    {
+        int j = 0;
+        while (i + j < strleng && j < delleng && ret[i + j] == delimiter[j])
+            j++;
+
+        if (j == delleng)//found delimiter
+        {
+            arrayString[arrayString.Len()] = ret.SubStr(k, i - k);
+            i += delleng;
+            k = i;
+        }
+        else
+        {
+            i++;
+        }
+    }
+    arrayString[arrayString.Len()] = ret.SubStr(k, i - k);
+
+    return arrayString;
 }
 
 // **********************************************************************

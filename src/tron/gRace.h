@@ -39,6 +39,8 @@ class gRacePlayer
         gRacePlayer(ePlayerNetID *player);                   //!<    create new instance
 
         static bool PlayerExists(tString username);          //!<    checks if player's race data exists
+        static bool PlayerExists(ePlayerNetID *player);      //!<    checks if player's race data exists
+        static gRacePlayer *GetPlayer(ePlayerNetID *player); //!<    gets that player's race data
         static gRacePlayer *GetPlayer(tString username);     //!<    gets that player's race data
 
         void NewCycle(gCycle *bike)                          //!<    create a new cycle
@@ -90,12 +92,20 @@ class gRacePlayer
 
         int chances_;
 
+        int shot_chances_;
+        int drop_chances_;
+
     public:
         ePlayerNetID    *Player() { return player_; }                  //!<  player's user
         gCycle          *Cycle() { return cycle_; }                    //!<  player's cycle
         eCoord          SpawnPosition() { return position_; }          //!<  spawn position
         eCoord          SpawnDirection() { return direction_; }        //!<  spawn direction
         int             Chances() { return chances_; }                 //!<  player's chances to spawn to race one again
+
+        int             GetShotChances() { return shot_chances_; }        //!< the chances a player has for shooting shot zone
+        void            SetShotChances(int chances) { shot_chances_ = chances; }
+        int             GetDropChances() { return drop_chances_; }        //!< the chances a player has for dropping shot zone
+        void            SetDropChances(int chances) { drop_chances_ = chances; }
 };
 
 class gRace
@@ -107,6 +117,9 @@ class gRace
         static void Reset();                                            //!> reset time and values
 
         static void RaceChat(ePlayerNetID *player, tString command, std::istream &s);
+
+        static void ProcessShot(ePlayerNetID *player, std::istream &s);
+        static void ProcessDrop(ePlayerNetID *player, std::istream &s);
 
         //!> returns the race winner
         static eTeam *Winner();
@@ -174,6 +187,7 @@ class gRaceScores
 };
 
 extern bool sg_RaceTimerEnabled;
+extern bool sg_raceShotEnabled;
 extern int sg_RaceEndDelay;
 extern int sg_raceTryoutsNumber;
 extern int sg_scoreRaceComplete;

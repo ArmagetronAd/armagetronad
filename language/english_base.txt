@@ -3374,10 +3374,10 @@ display_map_author_help       If set to 1, displays the map's author.
 display_map_version_help      If set to 1, displays the map's version.
 display_map_axes_help         If set to 1, displays the map's axes.
 
-display_map_name          0xff6622Map Name   : 0x999999\1\n
-display_map_author        0xff6622Map Author : 0x999999\1\n
-display_map_version       0xff6622Map Version: 0x999999\1\n
-display_map_axes          0xff6622Map Axes   : 0x999999\1\n
+display_map_name              0xff55ffMap Name   : 0x99ff99\1\n
+display_map_author            0xff55ffMap Author : 0x99ff99\1\n
+display_map_version           0xff55ffMap Version: 0x99ff99\1\n
+display_map_axes              0xff55ffMap Axes   : 0x99ff99\1\n
 
 access_level_substitute_denied  Required access level to substitute is "\1", you only have "\2".\n
 substitute_message_usage        Usage: /substitute <user out ID or name> <user in ID or name>\n
@@ -3651,8 +3651,8 @@ race_log_unfinished_help                  It set to 1, logs in the players that 
 race_num_ranks_show_end_help              The number of ranks to display at the end of round.
 race_num_ranks_show_start_help            The number of ranks to display at the start of round.
 race_points_type_help                     If set to 0, players receive points depending on SCORE_RACE_FINISH. if set to 1, players receive points depending on RACE_SCORE_DEPLETE.
-race_ranks_show_end_help                  If set to 1, ranks will appear at the start of the round.
-race_ranks_show_start_help                If set to 1, ranks will appear at the end of the round.
+race_ranks_show_end_help                  If set to 1, ranks will appear at the end of the round; If set to 2, personal ranks will be shown to those players only.
+race_ranks_show_start_help                If set to 1, ranks will appear at the start of the round; If set to 2, personal ranks will be shown to those players only.
 race_smart_timer_help                     If set to 1, timer is decided depending on the top 3 racing ranks.
 reset_config_queueing_help                Reset config queueing.
 reset_map_queueing_help                   Reset map queueing.

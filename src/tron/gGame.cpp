@@ -5364,7 +5364,7 @@ void gGame::StateUpdate(){
                         //  add rotation counter
                         gRotation::AddCounter();
 
-                        if (gRotation::Counter() > sg_rotationMax)
+                        if (gRotation::Counter() >= sg_rotationMax)
                         {
                             //  rotate orderly
                             Orderedrotate();

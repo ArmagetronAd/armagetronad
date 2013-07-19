@@ -33,7 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "eGrid.h"
 
-int gRotation::counter_ = 0;
+int gRotation::counter_ = 1;
 
 void gRotation::HandleNewRound() {
 #ifdef HAVE_LIBRUBY
@@ -523,11 +523,11 @@ static void sg_queuersList(std::istream &s)
                         send << "( ";
                         send << "0x55ffff" << queuePlayer->Name();
                         send << tColoredString::ColorString( 1,1,.5 );
-                        send << " | 0xff55ff" << queuePlayer->Queues() << " queues";
+                        send << " | 0xff55ff" << queuePlayer->Queues() << " qs";
                         send << tColoredString::ColorString( 1,1,.5 );
-                        send << " | played: 0x88ff22" << queuePlayer->PlayedTime() << " seconds";
+                        send << " | 0x88ff22" << queuePlayer->PlayedTime() << " s";
                         send << tColoredString::ColorString( 1,1,.5 );
-                        send << " | refill: 0x88ff22" << queuePlayer->RefillTime() << " seconds";
+                        send << " | 0x88ff22" << queuePlayer->RefillTime() << " s";
                         send << tColoredString::ColorString( 1,1,.5 );
                         send << " )\n";
                         sn_ConsoleOut(send, 0);

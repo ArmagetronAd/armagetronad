@@ -5778,9 +5778,9 @@ void ePlayerNetID::RemoveFromGame()
         se_playerAILeftWriter.write();
     }
 
-    if (gRacePlayer::PlayerExists(GetUserName()))
+    if (gRacePlayer::PlayerExists(this))
     {
-        gRacePlayer *rPlayer = gRacePlayer::GetPlayer(GetUserName());
+        gRacePlayer *rPlayer = gRacePlayer::GetPlayer(this);
         if (rPlayer)
         {
             rPlayer->ErasePlayer();

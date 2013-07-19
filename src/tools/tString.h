@@ -301,6 +301,8 @@ tString st_GetCurrentTime(char const *szFormat);
 bool st_StringEndsWith( tString const & test, tString const & end );
 bool st_StringEndsWith( tString const & test, char const * end );
 
+extern tArray<tString> str_explode(tString delimiter, tString ret);
+
 
 #endif
 

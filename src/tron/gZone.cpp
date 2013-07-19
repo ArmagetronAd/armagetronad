@@ -837,30 +837,48 @@ bool gZone::Timestep( REAL time )
 
             if (s_zoneWallInteractionFound)
             {
-                if (wallBouncesLeft_ == 0)
+                if (wallPenetrate_ && wallBouncesLeft_ == 0)
                 {
-                    // kill the zone as we hit a wall
-                    //??? make kill code a common function
-                    destroyed_ = true;
-                    OnVanish();
-                    SetReferenceTime();
-                    SetExpansionSpeed(-1);
-                    SetRadius(0);
-                    RequestSync();
-                    return false;
+                    if (!eWallRim::IsBound(Position(), 0))
+                    {
+                        // kill the zone as we gone outside arena
+                        //??? make kill code a common function
+                        destroyed_ = true;
+                        OnVanish();
+                        SetReferenceTime();
+                        SetExpansionSpeed(-1);
+                        SetRadius(0);
+                        RequestSync();
+                        return false;
+                    }
                 }
                 else
                 {
-                    // bounce off wall
-                    BounceOffPoint(GetPosition(), s_zoneWallInteractionImpactCoord);
-                    lastImpactTime_ = time + s_zoneWallInteractionImpactTime;
-
-                    if (wallBouncesLeft_ > 0)
+                    if (wallBouncesLeft_ == 0)
                     {
-                        wallBouncesLeft_--;
+                        // kill the zone as we hit a wall
+                        //??? make kill code a common function
+                        destroyed_ = true;
+                        OnVanish();
+                        SetReferenceTime();
+                        SetExpansionSpeed(-1);
+                        SetRadius(0);
+                        RequestSync();
+                        return false;
                     }
+                    else
+                    {
+                        // bounce off wall
+                        BounceOffPoint(GetPosition(), s_zoneWallInteractionImpactCoord);
+                        lastImpactTime_ = time + s_zoneWallInteractionImpactTime;
 
-                    return false;
+                        if (wallBouncesLeft_ > 0)
+                        {
+                            wallBouncesLeft_--;
+                        }
+
+                        return false;
+                    }
                 }
             }
 
@@ -1294,6 +1312,7 @@ void gZone::InteractWith( eGameObject * target, REAL time, int recursion )
             gZone *randomZone = dynamic_cast<gZone *>(target);
             if (randomZone)
             {
+                //  for object zone entry
                 gObjectZoneHack *objZone = dynamic_cast<gObjectZoneHack *>(this);
                 if (objZone && (objZone != randomZone))
                 {
@@ -1303,6 +1322,19 @@ void gZone::InteractWith( eGameObject * target, REAL time, int recursion )
                         objZone->OnEnter(randomZone, time);
                     }
                 }
+
+                /*
+                //  for racing zone entry
+                gRaceZoneHack *raceZone = dynamic_cast<gRaceZoneHack *>(this);
+                if (raceZone && (raceZone != randomZone))
+                {
+                    REAL distance = raceZone->Radius() + randomZone->GetRadius();
+                    if ((randomZone->Position() - raceZone->Position() ).NormSquared() < (distance * distance))
+                    {
+                        raceZone->OnEnter(randomZone, time);
+                    }
+                }
+                */
             }
         }
     }
@@ -8029,6 +8061,150 @@ void gPongZoneHack::OnVanish( void )
 {
     this->RemoveFromListsAll();
 }
+
+/*  For future
+// *******************************************************************************
+// *
+// *    gRaceZoneHack
+// *
+// *******************************************************************************
+//!
+//!     @param  grid Grid to put the zone into
+//!     @param  pos  Position to spawn the zone at
+//!
+// *******************************************************************************
+
+gRaceZoneHack::gRaceZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreation, bool delayCreation)
+:gZone( grid, pos, dynamicCreation, delayCreation)
+{
+    color_.r = 0.0f;
+    color_.g = 1.0f;
+    color_.b = 0.0f;
+
+    if (!delayCreation)
+        grid->AddGameObjectInteresting(this);
+
+    SetExpansionSpeed(0);
+    SetRotationSpeed( .3f );
+    RequestSync();
+}
+
+
+// *******************************************************************************
+// *
+// *    gRaceZoneHack
+// *
+// *******************************************************************************
+//!
+//!     @param  m Message to read creation data from
+//!     @param  null
+//!
+// *******************************************************************************
+
+gRaceZoneHack::gRaceZoneHack( nMessage & m )
+: gZone( m )
+{
+}
+
+
+// *******************************************************************************
+// *
+// *    ~gRaceZoneHack
+// *
+// *******************************************************************************
+//!
+//!
+// *******************************************************************************
+
+gRaceZoneHack::~gRaceZoneHack( void )
+{
+}
+
+
+// *******************************************************************************
+// *
+// *    Timestep
+// *
+// *******************************************************************************
+//!
+//!     @param  time    the current time
+//!
+// *******************************************************************************
+
+bool gRaceZoneHack::Timestep( REAL time )
+{
+    // delegate
+    bool returnStatus = gZone::Timestep( time );
+
+    return (returnStatus);
+}
+
+
+// *******************************************************************************
+// *
+// *    OnEnter
+// *
+// *******************************************************************************
+//!
+//!     @param  target  the cycle that has been found inside the zone
+//!     @param  time    the current time
+//!
+// *******************************************************************************
+
+void gRaceZoneHack::OnEnter( gCycle * target, REAL time )
+{
+    ePlayerNetID *p = target->Player();
+    if (p)
+    {
+        if (zoneType == TYPE_DEATH)
+        {
+            //  kill player
+            target->Kill();
+        }
+    }
+}
+
+
+//  for when zones enter this object zone
+void gRaceZoneHack::OnEnter(gZone *target, REAL time)
+{
+    if (target)
+    {
+
+    }
+}
+
+// *******************************************************************************
+// *
+// *    OnExit
+// *
+// *******************************************************************************
+//!
+//!     @param  target  the cycle that has left the zone
+//!     @param  time    the current time
+//!
+// *******************************************************************************
+
+void gRaceZoneHack::OnExit( gCycle * target, REAL time )
+{
+    ePlayerNetID *p = target->Player();
+    if (p)
+    {
+
+    }
+}
+
+// *******************************************************************************
+// *
+// *    OnVanish
+// *
+// *******************************************************************************
+
+void gRaceZoneHack::OnVanish( void )
+{
+    this->RemoveFromListsAll();
+}
+*/
 
 // *******************************************************************************
 // *
