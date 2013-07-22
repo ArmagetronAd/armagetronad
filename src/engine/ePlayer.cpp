@@ -533,7 +533,7 @@ static void PasswordCallback( nKrawall::nPasswordRequest const & request,
     nKrawall::nScrambledPassword& scrambled = answer.scrambled;
     bool failure = request.failureOnLastTry;
 
-    if ( request.method != "md5" && request.method != "bmd5" )
+    if ( request.method != "md5" && request.method != "bmd5"  && request.method != "sha1")
     {
         con << "INTERNAL ERROR: Unknown password scrambling method requested.";
         answer.aborted = true;

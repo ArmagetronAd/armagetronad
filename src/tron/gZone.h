@@ -265,32 +265,6 @@ class gWinZoneHack: public gZone
 		virtual void OnEnter( gCycle *target, REAL time );
 };
 
-class gPongZoneHack: public gZone
-{
-    public:
-
-        gPongZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false, eTeam *teamOwner = NULL, bool delayCreation = false);
-        gPongZoneHack(nMessage &m);
-        ~gPongZoneHack();
-
-        void SetLastOwner(gCycle *newCycle) { pongLastOwner_ = newCycle; }
-        gCycle *GetLastOwner() { return pongLastOwner_; }
-
-        bool CheckTeamAssignment(); //!< Check if this zone is assigned to a team, if not, try to assign one.
-
-    protected:
-        gCycle *pongLastOwner_;
-
-        bool init_;
-
-    private:
-        virtual bool Timestep(REAL currentTime);
-        virtual void OnVanish();
-        virtual void OnEnter(gCycle *target, REAL time);
-
-		REAL teamDistance_;		 //!< distance to the closest member of the owning team
-};
-
 //! death zone: kills players who enter
 class gDeathZoneHack: public gZone
 {
@@ -322,7 +296,6 @@ class gDeathZoneHack: public gZone
 
 								 //!< reacts on objects inside the zone
 		virtual void OnEnter( gDeathZoneHack *target, REAL time );
-		virtual void OnEnter( gPongZoneHack *target, REAL time );
 
 	protected:
 		virtual void OnVanish(); //!< called when the zone vanishes

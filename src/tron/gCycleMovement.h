@@ -247,8 +247,6 @@ protected:
     REAL            rubberSpeedFactor;          //!< the factor by which the speed is currently multiplied by rubber
     REAL            rubberDepleteTime_;         //!< the time rubber got depleted
 
-    bool            paralyze;                   //!< the paralyzed effect variable
-
     REAL            brakeUsage;                 //!< current brake usage
     REAL            rubberUsage;                //!< current rubber usage (not from hitting a wall, but from tunneling. Without taking efficiency into account.)
 

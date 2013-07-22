@@ -115,11 +115,12 @@ static tSettingItem<bool> sg_raceFinishKillConf("RACE_FINISH_KILL", sg_raceFinis
 static bool sg_raceLogLogin = true;
 static tSettingItem<bool> sg_raceLogLoginConf("RACE_LOG_LOGIN", sg_raceLogLogin);
 
+
 //!  process shot for the racers BEGIN
 bool sg_raceShotEnabled = false;
 static tSettingItem<bool> sg_raceShotEnabledConf("RACE_SHOT_ENABLED", sg_raceShotEnabled);
 
-REAL sg_raceShotRadius = 2.0;
+REAL sg_raceShotRadius = 1.5;
 static tSettingItem<REAL> sg_raceShotRadiusConf("RACE_SHOT_RADIUS", sg_raceShotRadius);
 
 REAL sg_raceShotRotate = 0.3;
@@ -134,6 +135,7 @@ static tSettingItem<int> sg_raceShotChancesConf("RACE_SHOT_CHANCES", sg_raceShot
 bool sg_raceShotPenetrate = true;
 static tSettingItem<bool> sg_raceShotPenetrateConf("RACE_SHOT_PENETRATE", sg_raceShotPenetrate);
 //!  process shot for the racers END
+
 
 tString sg_currentMap("");
 
@@ -357,8 +359,13 @@ void gRaceScores::Add(gRacePlayer *racePlayer, bool finished)
     }
 }
 
+bool sg_raceRecordsLoad = true;
+static tSettingItem<bool> sg_raceRecordsLoadConf("RACE_RECORDS_LOAD", sg_raceRecordsLoad);
+
 void gRaceScores::Read()
 {
+    if (!sg_raceRecordsLoad) return;
+
     tString Input;
     //mapFile << pz_mapAuthor << "/" << pz_mapCategory << "/" << pz_mapName << "-" << pz_mapVersion << ".aamap.xml";
     Input << "race_scores/" << sg_currentMap << ".txt";
@@ -410,8 +417,13 @@ void gRaceScores::Read()
     r.close();
 }
 
+bool sg_raceRecordsSave = true;
+static tSettingItem<bool> sg_raceRecordsSaveConf("RACE_RECORDS_SAVE", sg_raceRecordsSave);
+
 void gRaceScores::Write()
 {
+    if (!sg_raceRecordsSave) return;
+
     tString Output;
 
     Sort();
@@ -1023,8 +1035,10 @@ gRacePlayer::gRacePlayer(ePlayerNetID *player)
 
     this->chances_ = sg_raceChances;
 
+    /*
     this->shot_chances_ = sg_raceShotChances;
     this->drop_chances_ = sg_raceShotChances;
+    */
 
     sg_RacePlayers.Insert(this);
 }
@@ -1435,8 +1449,10 @@ void gRace::Reset()
             rPlayer->SetFinished(false);
             rPlayer->DestroyCycle();
 
+
             rPlayer->SetShotChances(sg_raceShotChances);
             rPlayer->SetDropChances(sg_raceShotChances);
+
         }
     }
 
@@ -1619,6 +1635,7 @@ void gRace::RaceChat(ePlayerNetID *player, tString command, std::istream &s)
             message << "0x66ff22!race stats <name> 0x0055ff: Lists the current stats of players by <name>. Leave it blank to view your own stats.\n";
             sn_ConsoleOut(message, player->Owner());
         }
+
         else if (command == "shot")
         {
             ProcessShot(player, s);
@@ -1627,6 +1644,7 @@ void gRace::RaceChat(ePlayerNetID *player, tString command, std::istream &s)
         {
             ProcessDrop(player, s);
         }
+
         else
         {
             tOutput message;

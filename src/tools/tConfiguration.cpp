@@ -686,7 +686,7 @@ void tConfItemBase::WriteAllToFile()
             /*w << "| " << ci->title << " || " << help << " || " << value << "\n";
             w << "|-\n";*/
         }
-        //w << "}}\n";
+        //w << "|}\n";
     }
     w.close();
 }

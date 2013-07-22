@@ -102,10 +102,12 @@ class gRacePlayer
         eCoord          SpawnDirection() { return direction_; }        //!<  spawn direction
         int             Chances() { return chances_; }                 //!<  player's chances to spawn to race one again
 
+
         int             GetShotChances() { return shot_chances_; }        //!< the chances a player has for shooting shot zone
         void            SetShotChances(int chances) { shot_chances_ = chances; }
         int             GetDropChances() { return drop_chances_; }        //!< the chances a player has for dropping shot zone
         void            SetDropChances(int chances) { drop_chances_ = chances; }
+
 };
 
 class gRace
@@ -118,8 +120,10 @@ class gRace
 
         static void RaceChat(ePlayerNetID *player, tString command, std::istream &s);
 
+
         static void ProcessShot(ePlayerNetID *player, std::istream &s);
         static void ProcessDrop(ePlayerNetID *player, std::istream &s);
+
 
         //!> returns the race winner
         static eTeam *Winner();

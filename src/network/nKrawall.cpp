@@ -62,6 +62,7 @@ static void sn_GetSupportedMethods( std::vector< tString > & toFill )
     char const * protocols[] = {
         "md5",
         "bmd5",
+        "sha1",
         0
     };
 
@@ -205,9 +206,8 @@ void nKrawall::nMethod::ScramblePassword( nScrambleInfo const & info, tString co
     {
         nKrawall::BrokenScramblePassword( password, scramble );
     }
-    else // must be "md5"
+    else //if (method == "md5") // must be "md5"
     {
-        tASSERT( method == "md5" );
         nKrawall::ScramblePassword( sn_Replace(info,prefix) + password + sn_Replace(info,suffix), scramble );
     }
 }

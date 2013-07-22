@@ -59,7 +59,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "gRace.h"
 
 #include "gParser.h"
-#include "gPingPong.h"
 
 #include <time.h>
 #include <algorithm>
@@ -280,6 +279,7 @@ gZone::gZone( eGrid * grid, const eCoord & pos, bool dynamicCreation, bool delay
     delayCreation_ = delayCreation;
     wallInteract_ = false;
     wallBouncesLeft_ = 0;
+    wallPenetrate_ = false;
     targetRadius_ = 0;
     lastImpactTime_ = 0;
     resizeRequested_ = false;
@@ -338,6 +338,7 @@ gZone::gZone( nMessage & m )
     delayCreation_ = false;
     wallInteract_ = false;
     wallBouncesLeft_ = 0;
+    wallPenetrate_ = false;
     lastImpactTime_ = 0;
     targetRadius_ = 0;
     resizeRequested_ = false;
@@ -497,7 +498,7 @@ void gZone::ReadSync( nMessage & m )
 
 static eLadderLogWriter sg_spawnzoneWriter("ZONE_SPAWNED", false);
 
-static void CreateZone(tString zoneEffect, gZone *Zone, const REAL zoneSize, const REAL zoneGrowth, eCoord zoneDir, bool setColorFlag, gRealColor zoneColor, bool zoneInteractive, REAL targetRadius, std::vector<eCoord> route, tString zoneNameStr){
+static void CreateZone(tString zoneEffect, gZone *Zone, const REAL zoneSize, const REAL zoneGrowth, eCoord zoneDir, bool setColorFlag, gRealColor zoneColor, bool zoneInteractive, REAL targetRadius, std::vector<eCoord> route, tString zoneNameStr,  bool zonePenetrate = false){
     static_cast<eGameObject*>(Zone)->Timestep( se_GameTime() );
     Zone->SetReferenceTime();
     Zone->SetRadius( zoneSize );
@@ -515,6 +516,10 @@ static void CreateZone(tString zoneEffect, gZone *Zone, const REAL zoneSize, con
     {
         Zone->SetWallInteract(true);
         Zone->SetWallBouncesLeft(-1);
+    }
+    if (zonePenetrate)
+    {
+        Zone->SetWallPenetrate(true);
     }
     if(targetRadius != 0)
     {
@@ -837,11 +842,23 @@ bool gZone::Timestep( REAL time )
 
             if (s_zoneWallInteractionFound)
             {
-                if (wallPenetrate_ && wallBouncesLeft_ == 0)
+                if (wallBouncesLeft_ == 0)
                 {
-                    if (!eWallRim::IsBound(Position(), 0))
+                    if (wallPenetrate_ && !eWallRim::IsBound(Position(), 0))
                     {
-                        // kill the zone as we gone outside arena
+                        // kill the zone as we hit a wall
+                        //??? make kill code a common function
+                        destroyed_ = true;
+                        OnVanish();
+                        SetReferenceTime();
+                        SetExpansionSpeed(-1);
+                        SetRadius(0);
+                        RequestSync();
+                        return false;
+                    }
+                    else if (!wallPenetrate_)
+                    {
+                        // kill the zone as we hit a wall
                         //??? make kill code a common function
                         destroyed_ = true;
                         OnVanish();
@@ -854,17 +871,19 @@ bool gZone::Timestep( REAL time )
                 }
                 else
                 {
-                    if (wallBouncesLeft_ == 0)
+                    if (wallPenetrate_)
                     {
-                        // kill the zone as we hit a wall
-                        //??? make kill code a common function
-                        destroyed_ = true;
-                        OnVanish();
-                        SetReferenceTime();
-                        SetExpansionSpeed(-1);
-                        SetRadius(0);
-                        RequestSync();
-                        return false;
+                        if (!eWallRim::IsBound(Position(), 0))
+                        {
+                            // bounce off wall
+                            BounceOffPoint(GetPosition(), s_zoneWallInteractionImpactCoord);
+                            lastImpactTime_ = time + s_zoneWallInteractionImpactTime;
+
+                            if (wallBouncesLeft_ > 0)
+                            {
+                                wallBouncesLeft_--;
+                            }
+                        }
                     }
                     else
                     {
@@ -876,9 +895,9 @@ bool gZone::Timestep( REAL time )
                         {
                             wallBouncesLeft_--;
                         }
-
-                        return false;
                     }
+
+                    return false;
                 }
             }
 
@@ -1181,14 +1200,6 @@ void gZone::InteractWith( eGameObject * target, REAL time, int recursion )
                         {
                             pDeathZone->pLastShotCollision = NULL;
                         }
-                    }
-                }
-                else
-                {
-                    gPongZoneHack *pongZone = dynamic_cast<gPongZoneHack *>(target);
-                    if (pongZone)
-                    {
-                        pThisDeathZone->OnEnter(pongZone, time);
                     }
                 }
             }
@@ -2454,7 +2465,7 @@ void gDeathZoneHack::OnEnter( gDeathZoneHack * target, REAL time )
 //!
 // *******************************************************************************
 
-static REAL sg_rubberZoneRubber = -1;
+static REAL sg_rubberZoneRubber = 1;
 static tSettingItem<REAL> sg_rubberZoneRubberConf("RUBBERZONE_RUBBER", sg_rubberZoneRubber);
 
 gRubberZoneHack::gRubberZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreation, bool delayCreation)
@@ -7730,337 +7741,6 @@ static void sg_SpawnSoccer(std::istream &s)
 }
 static tConfItemFunc sg_SpawnSoccerConf("SPAWN_SOCCER", &sg_SpawnSoccer);
 
-// *******************************************************************************
-// *
-// *    gPongZoneHack
-// *
-// *******************************************************************************
-//!
-//!     @param  grid Grid to put the zone into
-//!     @param  pos  Position to spawn the zone at
-//!
-// *******************************************************************************
-
-gPongZoneHack::gPongZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreation, eTeam *teamOwner, bool delayCreation)
-:gZone( grid, pos, dynamicCreation, delayCreation)
-{
-    color_.r = 0.0f;
-    color_.g = 1.0f;
-    color_.b = 1.0f;
-
-    if (teamOwner)
-        team = teamOwner;
-
-    init_ = false;
-    teamDistance_ = 0;
-    pongLastOwner_ = NULL;
-
-    if (!delayCreation)
-        grid->AddGameObjectInteresting(this);
-
-    SetExpansionSpeed(0);
-    SetRotationSpeed( .3f );
-    RequestSync();
-}
-
-
-// *******************************************************************************
-// *
-// *    gPongZoneHack
-// *
-// *******************************************************************************
-//!
-//!     @param  m Message to read creation data from
-//!     @param  null
-//!
-// *******************************************************************************
-
-gPongZoneHack::gPongZoneHack( nMessage & m )
-: gZone( m )
-{
-}
-
-
-// *******************************************************************************
-// *
-// *    ~gPongZoneHack
-// *
-// *******************************************************************************
-//!
-//!
-// *******************************************************************************
-
-gPongZoneHack::~gPongZoneHack( void )
-{
-}
-
-// *******************************************************************************
-// *
-// *   CheckTeamAssignment
-// *
-// *******************************************************************************
-//!
-//! @return true if a team is assigned, false if not
-//!
-// *******************************************************************************
-
-/*
-bool gSoccerZoneHack::CheckTeamAssignment()
-{
-    // find the closest player
-    if ( !team )
-    {
-        teamDistance_ = 0;
-        const tList<eGameObject>& gameObjects = Grid()->GameObjects();
-        gCycle *closest = NULL;
-        REAL closestDistance = 0;
-        for (int i=gameObjects.Len()-1;i>=0;i--)
-        {
-            gCycle *other = dynamic_cast<gCycle *>(gameObjects[i]);
-
-            if (other)
-            {
-                eTeam *otherTeam = other->Player()->CurrentTeam();
-                eCoord otherpos = other->Position() - Position();
-                REAL distance = otherpos.NormSquared();
-                if (!closest || (distance < closestDistance))
-                {
-                    closest = other;
-                    closestDistance = distance;
-                }
-            }
-        }
-
-        if (closest)
-        {
-            // take over team and color
-            team = closest->Player()->CurrentTeam();
-            color_.r = team->R()/15.0;
-            color_.g = team->G()/15.0;
-            color_.b = team->B()/15.0;
-            teamDistance_ = closestDistance;
-
-            RequestSync();
-        }
-
-        // if this zone does not belong to a team, return false.
-        if (!team)
-        {
-            return false;
-        }
-    }
-    return true;
-}
-*/
-
-bool gPongZoneHack::CheckTeamAssignment()
-{
-    // determine the owning team: the one that has a player spawned closest
-    // find the closest player
-    if ( !team )
-    {
-        teamDistance_ = 0;
-        const tList<eGameObject>& gameObjects = Grid()->GameObjects();
-        gCycle *closest = NULL;
-        REAL closestDistance = 0;
-        for (int i = 0; i < gameObjects.Len(); i++)
-        {
-            gCycle *other = dynamic_cast<gCycle *>(gameObjects[i]);
-
-            if (other)
-            {
-                eTeam *otherTeam = other->Team();
-                eCoord otherpos = other->Position() - Position();
-                REAL distance = otherpos.NormSquared();
-                if (!closest || (distance < closestDistance))
-                {
-                    closest = other;
-                    closestDistance = distance;
-                }
-            }
-        }
-
-        if (closest)
-        {
-            // take over team and color
-            team = closest->Team();
-            color_.r = team->R();
-            color_.g = team->G();
-            color_.b = team->B();
-            teamDistance_ = closestDistance;
-
-            RequestSync();
-        }
-
-        // if this zone does not belong to a team, return false.
-        if (!team)
-        {
-            return false;
-        }
-
-        // check other zones owned by the same team. Discard the one farthest away
-        // if the max count is exceeded
-        if ( team && sg_PingPong->team_balls > 0 )
-        {
-            gPongZoneHack *farthest = NULL;
-            int count = 0;
-
-            // check whether other zones are already registered to that team
-            for (int j = 0;j < gameObjects.Len(); j++)
-            {
-                gPongZoneHack *otherZone=dynamic_cast<gPongZoneHack *>(gameObjects[j]);
-
-                if (otherZone)
-                {
-                    if (team == otherZone->Team() )
-                    {
-                        count++;
-                        if ( !farthest || otherZone->teamDistance_ > farthest->teamDistance_ )
-                            farthest = otherZone;
-                    }
-                }
-            }
-
-            // discard team of farthest zone
-            if ( count > sg_PingPong->team_balls )
-            {
-                farthest->team = NULL;
-                farthest->RemoveFromGame();
-            }
-        }
-    }
-    return true;
-}
-
-
-// *******************************************************************************
-// *
-// *    Timestep
-// *
-// *******************************************************************************
-//!
-//!     @param  time    the current time
-//!
-// *******************************************************************************
-
-bool gPongZoneHack::Timestep( REAL time )
-{
-    if (!sg_PingPong->enabled) Collapse();
-
-    if (!init_)
-    {
-        init_ = true;
-
-        if (!team)
-            /*if (!*/CheckTeamAssignment();//)
-                //Collapse();
-    }
-
-    bool returnStatus = gZone::Timestep( time );
-
-    return returnStatus;
-}
-
-// *******************************************************************************
-// *
-// *    OnEnter
-// *
-// *******************************************************************************
-//!
-//!     @param  target  the cycle that has been found inside the zone
-//!     @param  time    the current time
-//!
-// *******************************************************************************
-
-void gPongZoneHack::OnEnter( gCycle *target, REAL time )
-{
-    //  ensure only team players can touch the ping ball
-    if (target && (target->Team() == Team()))
-    {
-        //  calculate the bounce off. Source: gBallZoneHack
-        eCoord p2 = target->Position();
-        eCoord v2 = target->Direction()*target->Speed();
-
-        REAL r1 = this->GetRadius();
-        REAL r2 = target->Player()->ping/.2;                             // the cycle "radius". accomidates for higher ping players
-        REAL R = r1 + r2;
-        eCoord p1 = this->Position();
-        eCoord dp = p2 - p1;
-        REAL c = dp.NormSquared() - R * R;
-        // first find the real time and position of the impact ...
-        eCoord v1 = this->GetVelocity();
-        eCoord dv = v2 - v1;
-        REAL a = dv.NormSquared();
-        REAL b = 2*(dp.x*dv.x+dp.y*dv.y);
-        REAL delta = b*b-4*a*c;
-        if (delta<0) return;         // no t. it can't be, an impact just occured ...
-        delta = sqrt(delta);
-        REAL t1 = (-b-delta)/(2*a);
-        REAL t2 = (-b+delta)/(2*a);
-        REAL t = 0;
-        if ((t1>0) && (t2>0)) return;// can't be, again ...
-        if (t1>0) t = t2;
-        else if (t2>0) t = t1;
-        else if (t1>t2) t = t1;
-        else t = t2;
-
-        // if a wall impact happens too close, just skip cycle bouncing for now ...
-        if (t < lastImpactTime_ - time) return;
-
-        // now that we have the time, get the positions ...
-        eCoord p1c = p1+v1*t;
-        eCoord p2c = p2+v2*t;
-        // now compute the impact : new velocities and new correct positions ...
-        eCoord base = (p2c-p1c);
-        base.Normalize();
-        eCoord new_v1 = base*-target->Speed();
-        eCoord new_p1 = p1c + new_v1*(-t+0.01);
-        new_v1 = new_v1*(1+sg_PingPong->bounce_speed);
-
-        SetPosition(new_p1);
-        SetVelocity(new_v1);
-
-        RequestSync();
-
-        pongLastOwner_ = target;
-    }
-}
-
-void gDeathZoneHack::OnEnter(gPongZoneHack *target, REAL time)
-{
-    if (!sg_PingPong->enabled) return;
-
-    if ((deathZoneType == TYPE_NORMAL) && target->Team())
-    {
-        target->Collapse();
-
-        if (sg_PingPong->collapse_kill)
-        {
-            for(int i = 0; i < target->Team()->players.Len(); i++)
-            {
-                ePlayerNetID *p = target->Team()->players[i];
-                if (p && p->Object())
-                {
-                    if (p->CurrentTeam())
-                    {
-                        p->Object()->Kill();
-                    }
-                }
-            }
-        }
-    }
-}
-
-// *******************************************************************************
-// *
-// *    OnVanish
-// *
-// *******************************************************************************
-
-void gPongZoneHack::OnVanish( void )
-{
-    this->RemoveFromListsAll();
-}
 
 /*  For future
 // *******************************************************************************
@@ -8343,10 +8023,11 @@ static void sg_CreateZone_conf(std::istream &s)
         if (reloc_str == "") reloc = 1.0;
     }
     const tString zoneInteractive = params.ExtractNonBlankSubString(pos);
-    const tString zoneRedStr = params.ExtractNonBlankSubString(pos);
-    const tString zoneGreenStr = params.ExtractNonBlankSubString(pos);
-    const tString zoneBlueStr = params.ExtractNonBlankSubString(pos);
+    const tString zoneRedStr      = params.ExtractNonBlankSubString(pos);
+    const tString zoneGreenStr    = params.ExtractNonBlankSubString(pos);
+    const tString zoneBlueStr     = params.ExtractNonBlankSubString(pos);
     const tString targetRadiusStr = params.ExtractNonBlankSubString(pos);
+    const tString zonePenetrate   = params.ExtractNonBlankSubString(pos);
 
     // second convert params ( to do : check validity).
     eCoord zonePos = route.empty() ? eCoord(atof(zonePosXStr)*sizeMultiplier,atof(zonePosYStr)*sizeMultiplier) : route.front();
@@ -8522,7 +8203,7 @@ static void sg_CreateZone_conf(std::istream &s)
     }
     else if (zoneTypeStr == "burst")
     {
-        gBurstZoneHack *bZone = new gBurstZoneHack(grid, zonePos, true);
+        gBurstZoneHack *bZone = tNEW(gBurstZoneHack(grid, zonePos, true));
         bZone->SetBurstSpeed(cycleBurstSpeed);
 
         Zone = bZone;
@@ -8534,23 +8215,26 @@ static void sg_CreateZone_conf(std::istream &s)
     {
         usage:
         con << "Usage:\n"
-            "SPAWN_ZONE <win|death|ball|target|blast|object|koh> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
-            "SPAWN_ZONE burst <speed> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
-            "SPAWN_ZONE rubber <x> <y> <size> <growth> <xdir> <ydir> <rubber> <interactive> <r> <g> <b> <target_size> \n"
-            "SPAWN_ZONE teleport <x> <y> <size> <growth> <xdir> <ydir> <xjump> <yjump> <rel|abs> <interactive> <r> <g> <b> <target_size> \n"
-            "SPAWN_ZONE <fortress|flag|deathTeam|ballTeam> <team> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
-            "SPAWN_ZONE sumo <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
-            "SPAWN_ZONE zombie <player> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
-            "SPAWN_ZONE zombieOwner <player> <owner> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
+            "SPAWN_ZONE <win|death|ball|target|blast|object|koh> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> penetrate> \n"
+            "SPAWN_ZONE burst <speed> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> <penetrate> \n"
+            "SPAWN_ZONE rubber <x> <y> <size> <growth> <xdir> <ydir> <rubber> <interactive> <r> <g> <b> <target_size> <penetrate> \n"
+            "SPAWN_ZONE teleport <x> <y> <size> <growth> <xdir> <ydir> <xjump> <yjump> <rel|abs> <interactive> <r> <g> <b> <target_size> <penetrate> \n"
+            "SPAWN_ZONE <fortress|flag|deathTeam|ballTeam> <team> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> <penetrate> \n"
+            "SPAWN_ZONE sumo <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> <penetrate> \n"
+            "SPAWN_ZONE zombie <player> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> <penetrate> \n"
+            "SPAWN_ZONE zombieOwner <player> <owner> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> <penetrate> \n"
             "instead of <x> <y> one can write: L <x1> <y1> <x2> <y2> [...] Z\n";
         return;
     }
-        REAL targetRadius = atof(targetRadiusStr)*sizeMultiplier;
+        REAL targetRadius = atof(targetRadiusStr) * sizeMultiplier;
         bool zoneInteractiveBool =false;
-        if (zoneInteractive=="true"){
+        if ((zoneInteractive == "true") || (zoneInteractive == "1")){
             zoneInteractiveBool=true;
         }
-        CreateZone(zoneTypeStr, Zone, zoneSize, zoneGrowth, zoneDir, setColorFlag, zoneColor, zoneInteractiveBool, targetRadius, route, zoneNameStr);
+        bool zonePenetrateBool = false;
+        if (zonePenetrate == "true" || zonePenetrate == "1")
+            zonePenetrateBool = true;
+        CreateZone(zoneTypeStr, Zone, zoneSize, zoneGrowth, zoneDir, setColorFlag, zoneColor, zoneInteractiveBool, targetRadius, route, zoneNameStr, zonePenetrateBool);
 }
 
 
@@ -9100,6 +8784,48 @@ static void sg_SetZoneRotation(std::istream &s)
 }
 static tConfItemFunc sg_SetZoneRotationConf("SET_ZONE_ROTATION", &sg_SetZoneRotation);
 
+static void sg_SetZonePenetrate(std::istream &s)
+{
+    tString params;
+    params.ReadLine( s, true );
+
+    // parse the line to get the param : object_id, expansion
+    int pos = 0;                 //
+    const tString object_id_str = params.ExtractNonBlankSubString(pos);
+    const tString penetrate_str = params.ExtractNonBlankSubString(pos);
+    int penetrate_int = atof(penetrate_str);
+    bool penetrate = false;
+    if (penetrate_int > 0)
+        penetrate = true;
+
+    // first check for the name
+    int zone_id = -1;
+    zone_id=gZone::FindFirst(object_id_str);
+    if (zone_id==-1)
+    {
+        /*zone_id = atoi(object_id_str);
+        if (zone_id==0 && object_id_str!="0")*/ return;
+    }
+
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid) return;
+
+    const tList<eGameObject>& gameObjects = grid->GameObjects();
+    while (zone_id!=-1)
+    {
+        // get the zone ...
+        gZone *zone=dynamic_cast<gZone *>(gameObjects(zone_id));
+        if (zone)
+        {
+            zone->SetWallPenetrate(penetrate);
+            zone->RequestSync();
+        }
+        zone_id=gZone::FindNext(object_id_str, zone_id);
+    }
+}
+static tConfItemFunc sg_SetZonePenetrateConf("SET_ZONE_PENETRATE", &sg_SetZonePenetrate);
+
+
 static void sg_SetZoneIdRadius(std::istream &s)
 {
     tString params;
@@ -9369,3 +9095,41 @@ static void sg_SetZoneIdRotation(std::istream &s)
     }
 }
 static tConfItemFunc sg_SetZoneIdRotationConf("SET_ZONE_ID_ROTATION", &sg_SetZoneIdRotation);
+
+static void sg_SetZoneIdPenetrate(std::istream &s)
+{
+    tString params;
+    params.ReadLine( s, true );
+
+    // parse the line to get the param : object_id, expansion
+    int pos = 0;                 //
+    const tString object_id_str = params.ExtractNonBlankSubString(pos);
+    const tString penetrate_str = params.ExtractNonBlankSubString(pos);
+    int penetrate_int = atoi(penetrate_str);
+    bool penetrate = false;
+    if (penetrate_int > 0)
+        penetrate = true;
+
+    // first check for the name
+    int zone_id = atoi(object_id_str);
+    if (zone_id <= -1)
+    {
+        /*zone_id = atoi(object_id_str);
+        if (zone_id==0 && object_id_str!="0")*/ return;
+    }
+
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid) return;
+
+    const tList<eGameObject>& gameObjects = grid->GameObjects();
+    if (zone_id > gameObjects.Len()) return;
+
+    // get the zone ...
+    gZone *zone=dynamic_cast<gZone *>(gameObjects(zone_id));
+    if (zone)
+    {
+        zone->SetWallPenetrate(penetrate);
+        zone->RequestSync();
+    }
+}
+static tConfItemFunc sg_SetZoneIdPenetrateConf("SET_ZONE_ID_PENETRATE", &sg_SetZoneIdPenetrate);

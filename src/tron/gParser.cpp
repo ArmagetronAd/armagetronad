@@ -29,8 +29,6 @@
 #include "tConfiguration.h"
 #include "gGame.h"
 
-#include "gPingPong.h"
-
 // This fixes stupid crappy OS-wannabe Windoze
 // Someday, autoconf-ize this stuff...
 #ifdef WIN32
@@ -754,27 +752,6 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
                 zone = bZone;
             }
             zoneEffect << "ball";
-        }
-        else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"pingpong")) {
-            tString zoneTeamStr = myxmlGetPropString(cur, "team");
-            eTeam *zoneTeam = eTeam::FindTeamByName(zoneTeamStr);
-
-            if (zoneTeam && (zoneTeamStr != ""))
-            {
-                zoneColor.r = zoneTeam->R()/15.0;
-                zoneColor.g = zoneTeam->G()/15.0;
-                zoneColor.b = zoneTeam->B()/15.0;
-
-                gPongZoneHack *pingZone = new gPongZoneHack( grid, zonePos, true, zoneTeam, delayZoneCreation );
-                pingZone->SetColor(zoneColor);
-                zone = pingZone;
-            }
-            else
-            {
-                gPongZoneHack *pingZone = new gPongZoneHack( grid, zonePos, false, NULL, delayZoneCreation );
-                zone = pingZone;
-            }
-            zoneEffect << "pingpong";
         }
         else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"target")) {
             gTargetZoneHack *tZone = new gTargetZoneHack( grid, zonePos, false, delayZoneCreation);

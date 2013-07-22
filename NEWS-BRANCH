@@ -1,4 +1,75 @@
 ===========================
+Changes since r887
+===========================
+Improvements:
+    * Fixed: Allowing 0.3/4 clients into the server.
+    * Fixed: CYCLE_WALL_TIME command.
+    * Fixed: SPAWN_OBJECT_ZONE => SPAWN_OBJECTZONE
+    * Fixed: Restored gResourceManager.h and gResourceManager.cpp
+    * Added: PLAYER_GRIDPOS now contains the speed, remaining rubber and total rubber
+    * Fixed: english_base.txt
+    * Added: ONLINE_PLAYER now shows whether the user has logged in or not
+    * Fixed: GRID_POSITION_INTERVAL => PLAYER_GRIDPOS_INTERVAL
+    * Added: {MAP|CONFIG}_ROTATION command now canhave a round set for each stored rotation item.
+    * Added: ROTATION_TYPE now supports 6 options.
+    * Fixed: /chat command to have the player their access level names.
+    * Fixed: Greatly improved the racing game mode.
+    * Fixed: Switched queue timer from minutes to seconds.
+    * Fixed: A slight thing in TELEPORT_PLAYER.
+    * Fixed: All color codes in capital letters convert to lower case in client side.
+    * Fixed: OBJECTZONE_SPAWNED wasn't writing to ladderlog.
+    * Fixed: Dynamic Spawn issue with object zones.
+    * Added: ROUND_COMMENCING ... Had no idea it was removed... :P
+    * Added: Made sure most commands can keep their stored values.
+    * Fixed: Using a similar method to the php's explode() function to split values apart.
+    * Fixed: online_players.txt gets updated when a player leaves. Handy to have when server becomes empty.
+    * Added: /ms and /cs to queue items from {MAP|CONFIG}_ROTATION list.
+    * Remov: Removed gPingPong, is no longer needed. A script will simply do exactly what I intended.                
+
+Additions:
+    * /pass command addition to the chat list commands.
+    * Zones now hold the effect that they belong to. Eg. death, win, fortress, flag, target...
+    * Added Ladderlog commands:
+      @ ZONE_GRIDPOS <effect> <id> <name> <radius> <growth> <posx> <posy> <velx> <vely> <r> <g> <b>
+      @ CUSTOM_INVALID_COMMAND <command> <user> <ip> <access_level> <params>
+      @ {DEATH|WIN}ZONE_ACTIVATED <id> <name> <posx> <posy>
+      
+    * Added Commands:
+      @ SET_CYCLE_RUBBER <player> <rubber>         # Sets the cycle's rubber. Will kill if set to <= 0
+      @ ZONE_GRIDPOS_INTERVAL <time>               # Tell you the zone's gridpos depending on the interval
+      @ CUSTOM_CONFIGS <config1>;<config2>;        # Command line that contains the list of configs you want to load.
+      @ RELOAD_CONFIG                              # Reload all configs
+      @ DEFAULT_EXECUTION_LEVEL 0                  # Default access level for access owner.
+      @ SET_COMMANDS_ACCESSLEVEL <access_level>    # Set all commands to this access level.
+      @ LOAD_CUSTOM_CONFIGS                        # Load the configs from the command line in CUSTOM_CONFIGS
+      @ {MAP|CONFIG}_ROTATION_SET <item> <round>   # Set the item the round it should belong to
+      @ {MAP|CONFIG}_ROTATION_LOAD <item_id>       # The current map/config will switch to the id given item_id.
+      @ CUSTOM_INVALID_COMMANDS <prex1>;<prex2>;   # The command line with the list of unknown command prefixs
+      @ LADDERLOG_ENABLED 0                        # Flag to enable/disable ladderlog. Default: 0.
+      @ QUEUE_MAX 30                               # The maximum queues every player can reach maximum through refills and increases.
+      @ TURN_DOUBLEBIND_{LEFT|RIGHT}               # To turn easily for people with difficulty with multiple fingers.
+      @ QUEUE_REFILL <name>                        # Manually refill a player of their queues.
+      @ QUEUE_GIVE <name> <amount>                 # Gives the player that amount to queue.
+      @ BOOT <name>                                # Kick this person as many times you like and no auto ban will occur.
+      @ RUBBERZONE_RUBBER <rubber>                 # Gives a default amount of rubber a rubber zone should handle.
+      @ {MAP|CONFIG}_STORAGE                       # Similar to the {MAP|CONFIG}_ROTATION but is for non-rotation purpose. Quauable.
+      @ QUEUERS_LIST <id>                          # Show the list of queuers.
+      @ SHOT_PENETRATE_WALLS <0|1>                 # Set to 1 to have shot zones going through walls.
+      @ CLEAR_LADDERLOG                            # Remotely clear the ladderlog
+      @ CLEAR_CHATLOG                              # Remotely clear the chatlog
+      @ CLEAR_SCORELOG                             # Remotely clear the scorelog
+
+      @ RACE_RECORDS_LOAD <0|1>                    # If set to 0, racing records will not load. Default: 1.      
+      @ RACE_RECORDS_SAVE <0|1>                    # If set to 0, racing records will not save. Default: 1. 
+      
+      @ RACE_SHOT_ENABLED                          # Set to 1 if you want to start shooting.
+      @ RACE_SHOT_RADIUS <radius>                  # The radius of the shooting zones.
+      @ RACE_SHOT_ROTATE <speed>                   # The speed at which the shooting zones rotate.
+      @ RACE_SHOT_VELOCITY_MULTI <speed>           # The multiplier at which the shooting zone should speed up with cycle's speed
+      @ RACE_SHOT_CHANCES <amount>                 # The number of times a racer gets the chance to shoot in the same round.
+      @ RACE_SHOT_PENETRATE <0|1>                  # Set to 1 if you want shooting zones to go through walls, Default: 0.
+      
+===========================
 Changes in r887
 ===========================
 Improvements:

@@ -329,6 +329,10 @@ void nKrawall::CheckScrambledPassword( nCheckResultBase & result,
         request << "&salt="   << EncodeScrambledPassword( salt );
         request << "&hash="   << EncodeScrambledPassword( data.hash );
 
+        /*tString msg;
+        msg << "password " << "" << "\n";
+        sn_ConsoleOut(msg);*/
+
         // read URL content
         std::stringstream content;
         int rc = FetchURL( data.fullAuthority, request.str().c_str(), content );

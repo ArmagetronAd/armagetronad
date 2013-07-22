@@ -2443,8 +2443,6 @@ gCycle::gCycle(eGrid *grid, const eCoord &pos,const eCoord &d,ePlayerNetID *p)
     sg_ArchiveCoord( this->pos, 1 );
     sg_ArchiveReal( this->verletSpeed_, 1 );
 
-    this->paralyze = false;
-
     flag_ = NULL;
 
     gRacePlayer *racePlayer = gRacePlayer::GetPlayer(Player());

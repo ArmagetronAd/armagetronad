@@ -330,6 +330,10 @@ reset_rotation_message                  Map and config rotation have been reset.
 
 rotation_max_help                       The maximum number of rounds the currently loaded map should remain before new map should be selected and loaded.
 
+# non-rotation
+map_storage_help                        Is mainly use for non-rotation purposes, queue mainly. Usage is similar to MAP_ROTATION, except without round.
+config_storage_help                     Is mainly use for non-rotation purposes, queue mainly. Usage is similar to CONFIG_ROTATION, except without round.
+
 # limits
 speed_factor_help		Speed modifier for the cycles
 sp_speed_factor_help		Speed modifier for the cycles
@@ -1083,6 +1087,7 @@ voice_all_help              Reverse of SILENCE_ALL
 allow_team_change_player_help Allow a specific player to change teams even if ALLOW_TEAM_CHANGE is disabled
 disallow_team_change_player_help Reverse of ALLOW_TEAM_CHANGE_PLAYER
 kick_help					Kicks the specified player from the server.
+boot_help					Kicks the specified player from the server.
 default_kick_reason_help    The reason given to a player kicked by KICK if none is specified.
 kick_to_help    			Kicks the specified player from the server and, if the client supports it, redirects him to a different server.
 move_to_help    			Kicks the specified player from the server and, if the client supports it, redirects him to a different server. Does not imply an autoban penalty.
@@ -3360,6 +3365,10 @@ race_rank_border #
 race_records_manual_load   Racing records have been manually loaded by \1.
 race_records_manual_save   Racing records have been manually saved by \1.
 
+race_records_load_help     Default: 1, if set to 0, race records will not load.
+race_records_save_help     Default: 1, if set to 0, race records will not save.
+race_record_highliter_help The color to highlight that player's records during the personal display session.
+
 #*************************************
 #*************************************
 #
@@ -3421,6 +3430,7 @@ score_zombie_zone_help                         Number of points a player gets fo
 shot_kill_self_help                            Flag for if a player can shot themself or their team
 shot_kill_vanish_help                          Flag for if a shot should vanish
 self_destruct_vanish_help                      Flag for if a self distruct zone should vanish
+shot_penetrate_walls_help                      Flag for if a shot should go through walls when its not bouncing
 zombie_zone_vanish_help                        Flag for if a zombie zone should vanish
 zombie_zone_shoot_help                         How much zone to take away from a zombie when a shot enters it
 shot_collision_help                            Flag for if shots can collide and bounce off one another.
@@ -3493,6 +3503,8 @@ set_zone_expansion_help                        Change the Expansion rate of a zo
 set_zone_id_expansion_help                     Change the Expansion rate of a zone 
 set_zone_rotation_help                         Change the rotation speed of a zone
 set_zone_id_rotation_help                      Change the rotation speed of a zone
+set_zone_penetrate_help                     Change the Penetration of a zone
+set_zone_id_penetrate_help                     Change the Penetration of a zone
 condense_conquest_output                       Zone conquest output condensed into one line
 
 cycle_target_assignment      0xff9900Your target is now \1.\n
@@ -3605,6 +3617,7 @@ ladderlog_enabled_help              If set to 1, ladderlog output is enabled.
 ladderlog_write_admin_login_help                    Write to ladderlog: ADMIN_LOGIN [login_name] [ip_address]
 ladderlog_write_admin_logout_help                   Write to ladderlog: ADMIN_LOGOUT [login_name] [ip_address]
 ladderlog_write_ai_positions_help                   If set to 1, the team positions for AI Teams will output under "POSITIONS"
+ladderlog_write_deathzone_activated_help            Write to ladderlog: DEATHZONE_ACTIVATED [id] [name] [xpos] [ypos]
 ladderlog_write_end_challenge_help                  Write to ladderlog: END_CHALLENGE [time]
 ladderlog_write_invalid_command_help                Write to ladderlog: INVALID_COMMAND [command] [player_username] [ip_address] [access_level] [params]
 ladderlog_write_match_ended_help                    Write to ladderlog: MATCH_ENDED [time]
@@ -3634,6 +3647,7 @@ ladderlog_write_tactical_statistics_help            Write to ladderlog: TACTICAL
 ladderlog_write_team_colored_name_help              Write to ladderlog: TEAM_COLORED_NAME [team_name] [team_colored_name]
 ladderlog_write_voter_help                          Write to ladderlog: VOTER [player_name] [0-against|1-for] [description]
 ladderlog_write_vote_created_help                   Write to ladderlog: VOTE_CREATED [suggestor] [description]
+ladderlog_write_winzone_activated_help              Write to ladderlog: WINZONE_ACTIVATED [id] [name] [xpos] [ypos]
 ladderlog_write_zone_created_help                   Write to ladderlog: ZONE_CREATED [id] [name] [xpos] [ypos] [xdir] [ydir]
 ladderlog_write_zone_gridpos_help                   Write to ladderlog: ZONE_GRIDPOS [effect] [id] [name] [radius] [growth] [posx] [posy] [velx] [vely] [r] [g] [b]
 ladderlog_write_zone_shot_released_help             Write to ladderlog: ZONE_SHOT_RELEASED [0-shot|1-deathshot] [id] [player_name] [zone_pos_x] [zone_pos_y] [zone_dir_x] [zone_dir_y]
@@ -3724,10 +3738,14 @@ arena_boundary_help                       This is the distance players can trave
 arena_boundary_kill_help                  If set to 1, Players beyond the ARENA_BOUNDARY will be killed.
 
 timer_countdown     0xff7777\1
-timer_start_help    Starts a ingame timer, giving players <seconds> to do something
+timer_start_help    Starts a ingame timer, giving players <seconds> to do something. Usage: TIMER_START <seconds> <target>
 timer_stop_help     Perfectly stops the ingame timer.
 timer_resume_help   If the timer was previously stopped, it resumes from where it last stopped.
 timer_reset_help    Resets the ingame timer back to default.
+timer_mode_help     0-countdown ticks down, 1-countdown ticks up, 2-countdown depends on the target time.
+timer_type_help     0-do nothing, 1-kill all cycles, 2-kill all zones, 3-kill everything.
+timer_min_help      The minimum time for timer to reach.
+timer_max_help      The maximum time for timer to reach.
 
 deathzone_random_colors_help    Default: 0; If set to 1, deathzones will have their colors by randomness.
 
@@ -3785,9 +3803,10 @@ clear_scorelog_help        Clear all data from scorelog.txt located in ./var fol
 clear_chatlog_help         Clear all data from chatlog.txt located in ./var folder.
 
 # commands
-custom_configs_help        List of configs, seperated by ;, to load during the star-up of the client/server.
-reload_config              Reload the initial settings that are loaded during the beginning of the client/server.
+custom_configs_help           List of configs, seperated by ;, to load during the star-up of the client/server.
+reload_config_help            Reload the initial settings that are loaded during the beginning of the client/server.
 custom_invalid_commands_help  Contains the list of commands to be executed as chat commands: Usage: CUSTOM_INVALID_COMMANDS {command_method1};{command_method2};
+load_custom_configs_help      Load the custom configs loaded in CUSTOM_CONFIGS command.
 
 default_execution_level_help  At what level should the default execution level be set to? Default: 1 (Administrato)
 default_owner_level_help      At what level should the owner of the server level be set to? Default: 0 (Owner)
@@ -3800,3 +3819,8 @@ pingpong_death_kill_help      If set to 1, once the pingpong ball is dead, the e
 pingpong_enabled_help         If set to 1, ping pong game mode is enabled.
 pingpong_points_help          The points you receive for keeping your ping pong from reaching the deathzone.
 pingpong_team_balls_help      The number of ping pong balls a team can have.
+
+rubberzone_rubber_help        Set the rubber which rubber zone should have to decrease/increase by.
+
+turn_doublebind_left_help     Do the double bind turn to the left side.
+turn_doublebind_right_help    Do the double bind turn to the right side.

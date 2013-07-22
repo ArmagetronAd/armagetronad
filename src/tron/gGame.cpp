@@ -74,8 +74,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //HACK RACE
 #include "gRace.h"
 
-#include "gPingPong.h"
-
 #include "gParser.h"
 #include "tResourceManager.h"
 #include "nAuthentication.h"
@@ -6084,6 +6082,7 @@ static eLadderLogWriter sg_matchEndedWriter("MATCH_ENDED", true);
 // *
 // *******************************************************************************
 
+REAL gGameSpawnTimer::startTimer_ = 0.0;
 REAL gGameSpawnTimer::launchTime_ = 0.0;
 REAL gGameSpawnTimer::targetTime_ = 0.0;
 bool gGameSpawnTimer::timerActive = false;
@@ -6091,17 +6090,17 @@ int gGameSpawnTimer::countDown_ = 0;
 
 static void sg_TimerStart(std::istream &s)
 {
-    tString params;
-    params.ReadLine(s);
+    int seconds, target;
 
-    int seconds = atoi(params);
+    s >> seconds;
+    s >> target;
 
-    if (seconds <= 0)
-        return;
+    if (seconds == target) return;
 
     gGameSpawnTimer::SetTimerActive(true);
+    gGameSpawnTimer::SetStartTimer(seconds);
     gGameSpawnTimer::SetLaunchTime(se_GameTime());
-    gGameSpawnTimer::SetTargetTime(se_GameTime() + seconds);
+    gGameSpawnTimer::SetTargetTime(target);
 
     gGameSpawnTimer::SetCountdown(seconds + 1);
 }
@@ -6125,13 +6124,26 @@ static tConfItemFunc sg_TimerResumeConf("TIMER_RESUME", &sg_TimerResume);
 
 static void sg_TimerReset(std::istream &s)
 {
-    gGameSpawnTimer::SetTimerActive(false);
-    gGameSpawnTimer::SetLaunchTime(0);
-    gGameSpawnTimer::SetTargetTime(0);
-
-    gGameSpawnTimer::SetCountdown(0);
+    gGameSpawnTimer::Reset();
 }
 static tConfItemFunc sg_TimerResetConf("TIMER_RESET", &sg_TimerReset);
+
+bool restrictTimerType(const int &newType)
+{
+    if ((newType < 0) || (newType > 3))
+        return false;
+
+    return true;
+}
+int sg_TimerMode = 2;
+int sg_TimerType = 2;
+static tSettingItem<int> sg_TimerModeConf("TIMER_MODE", sg_TimerMode, &restrictTimerType);
+static tSettingItem<int> sg_TimerTypeConf("TIMER_TYPE", sg_TimerType, &restrictTimerType);
+
+REAL sg_TimerMin = 0;
+REAL sg_TimerMax = 80;
+static tSettingItem<REAL> sg_TimerMinConf("TIMER_MIN", sg_TimerMin);
+static tSettingItem<REAL> sg_TimerMaxConf("TIMER_MAX", sg_TimerMax);
 
 void gGameSpawnTimer::Sync(int alive, int ai_alive, int humans)
 {
@@ -6170,30 +6182,59 @@ void gGameSpawnTimer::Sync(int alive, int ai_alive, int humans)
         return;
     }
 
-    //  do countdown
-    countDown_--;
+    //  dont do it if timer is no longer active
+    if (!timerActive) return;
 
-    if (countDown_ == 0)
+    //  do countdown
+    if (sg_TimerMode == 0)
+        countDown_--;
+    else if (sg_TimerMode == 1)
+        countDown_++;
+    else
     {
-        //  kill all active players
-        for(int i = 0; i < se_PlayerNetIDs.Len(); i++)
+        if (targetTime_ < startTimer_)
+            countDown_--;
+        else if (targetTime_ > startTimer_)
+            countDown_++;
+    }
+
+    //  confirm the reaching time
+    int limit = targetTime_;
+    if (sg_TimerMode == 0)
+        limit = sg_TimerMin;
+    else if (sg_TimerMode == 1)
+        limit = sg_TimerMax;
+    else
+        limit = targetTime_;
+
+    //  do the things once limit is hit
+    if (countDown_ == limit)
+    {
+        if (sg_TimerType == 1)
         {
-            ePlayerNetID *p = se_PlayerNetIDs[i];
-            if (p && p->Object())
+            //  kill all active players
+            for(int i = 0; i < se_PlayerNetIDs.Len(); i++)
             {
-                p->Object()->Kill();
+                ePlayerNetID *p = se_PlayerNetIDs[i];
+                if (p && p->Object())
+                {
+                    p->Object()->Kill();
+                }
             }
         }
 
-        //  vanish all zones
-        const tList<eGameObject>& gameObjects = grid->GameObjects();
-        for (int i = 0; i < gameObjects.Len(); i++)
+        if (sg_TimerType == 2)
         {
-            gZone *Zone = dynamic_cast<gZone *>(gameObjects[i]);
-            if (Zone)
+            //  vanish all zones
+            const tList<eGameObject>& gameObjects = grid->GameObjects();
+            for (int i = 0; i < gameObjects.Len(); i++)
             {
-                //  0.5 fot smooth collapse
-                Zone->Vanish(0.5f);
+                gZone *Zone = dynamic_cast<gZone *>(gameObjects[i]);
+                if (Zone)
+                {
+                    //  0.5 fot smooth collapse
+                    Zone->Vanish(0.5f);
+                }
             }
         }
 
@@ -6469,15 +6510,6 @@ void gGame::Analysis(REAL time){
     {
         gGameSpawnTimer::Sync(alive, ai_alive, sg_NumHumans());
         return;
-    }
-
-    if (sg_PingPong->enabled && (time > 0))
-    {
-        tOutput message;
-        int countdown = ceil(time);
-        message.SetTemplateParameter(1, countdown);
-        message << "$timer_countdown" << "                    ";
-        sn_CenterMessage( message );
     }
 
     //SMALL HACK BEGIN

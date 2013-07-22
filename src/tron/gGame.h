@@ -199,8 +199,10 @@ class gGameSpawnTimer
         static void Sync(int alive, int ai_alive, int humns);
         static bool Active() { return timerActive; }
 
+        static REAL GetStartTimer() { return startTimer_; }
         static REAL GetLaunchTime() { return launchTime_; }
         static REAL GetTargetTime() { return targetTime_; }
+        static void SetStartTimer(REAL time) { startTimer_ = time; }
         static void SetLaunchTime(REAL time) { launchTime_ = time; }
         static void SetTargetTime(REAL time) { targetTime_ = time; }
 
@@ -210,6 +212,7 @@ class gGameSpawnTimer
         static void SetTimerActive(bool active) { timerActive = active; }
 
     private:
+        static REAL startTimer_;    //!<    seconds of which the user sent
         static REAL launchTime_;    //!<    time the timer hs launched at
         static REAL targetTime_;    //!<    time the timer will finish at
         static bool timerActive;    //!<    flag if the timer is finished
