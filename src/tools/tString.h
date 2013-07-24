@@ -203,7 +203,8 @@ public:
 
     void RemoveHex();                                       //!< ?
 
-    static bool HasColors( const char *c );    //!< Checks whether the string contains any string or not.
+    static bool HasColors( const char *c );         //!< Checks whether the string contains any string or not.
+    static tString LowerColors (const char *c );    //!< Sets all color codes in string to lower cased
 
     //! Creates a color string inserter
     inline static tColoredStringProxy ColorString( REAL r,REAL g,REAL b )

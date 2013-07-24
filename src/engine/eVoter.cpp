@@ -1490,30 +1490,29 @@ protected:
     {
         // check whether enough harmful votes were collected already
         ePlayerNetID * p = GetPlayer();
-        if ( p && !p->GetVoter() )
+        if ( fromMenu_ && p )
         {
-            p->CreateVoter();
-        }
-
-        if ( fromMenu_ && p && p->GetVoter() && p->GetVoter()->HarmCount() < se_kickMinHarm )
-        {
-            // try to transfor the vote to a suspension
-            eVoteItem * item = tNEW ( eVoteItemSuspend )( p );
-
-            // let item check its validity
-            if ( !item->CheckValid( senderID ) )
+            eVoter *voter = eVoter::GetVoter( p->Owner() );
+            if ( voter && voter->HarmCount() < se_kickMinHarm )
             {
-                delete item;
-            }
-            else
-            {
-                // no objection? Broadcast it to everyone.
-                item->Update();
-                item->ReBroadcast( senderID );
-            }
+                // try to transfor the vote to a suspension
+                eVoteItem * item = tNEW ( eVoteItemSuspend )( p );
 
-            // and cancel this item here.
-            return false;
+                // let item check its validity
+                if ( !item->CheckValid( senderID ) )
+                {
+                    delete item;
+                }
+                else
+                {
+                    // no objection? Broadcast it to everyone.
+                    item->Update();
+                    item->ReBroadcast( senderID );
+                }
+
+                // and cancel this item here.
+                return false;
+            }
         }
 
         // no transformation needed or transformation failed. Proceed as usual.
@@ -2052,7 +2051,7 @@ bool eVoter::VotingPossible()
     return eVoteItem::GetItems().Len() > 0;
 }
 
-eVoter* eVoter::GetVoter( int ID, bool complain )			// find or create the voter for the specified ID
+eVoter* eVoter::GetVoter( int ID, bool complain )
 {
     // the server has no voter
 #ifdef DEDICATED
@@ -2081,13 +2080,17 @@ eVoter* eVoter::GetVoter( int ID, bool complain )			// find or create the voter 
         }
     }
 
+    return GetPersistentVoter( ID );
+}
+eVoter* eVoter::GetPersistentVoter( int ID )
+{
     // get machine from network subsystem
     nMachine & machine = nMachine::GetMachine( ID );
 
-    return GetVoter( machine );
+    return GetPersistentVoter( machine );
 }
 
-eVoter* eVoter::GetVoter( nMachine & machine )			// find or create the voter for the specified machine
+eVoter* eVoter::GetPersistentVoter( nMachine & machine )
 {
     // iterate through the machine's decorators, find a voter
     nMachineDecorator * run = machine.GetDecorators();

@@ -1230,6 +1230,12 @@ nMessage& nMessage::operator >> (tColoredString &s )
         s.RemoveTrailingColor();
     }
 
+    //  convert colors to lower case
+    if (tColoredString::HasColors(s))
+    {
+        s = tColoredString::LowerColors(s);
+    }
+
     // filter color codes away
     if ( sn_filterColorStrings )
         s = tColoredString::RemoveColors( s, false );

@@ -1236,6 +1236,48 @@ bool tColoredString::HasColors( const char *c )
 
 // *******************************************************************************************
 // *
+// *	HasColors
+// *
+// *******************************************************************************************
+//!
+//!		@param	c	C style string or tString to clear of color codes
+//!		@return   	string with lower cased color codes
+//!
+// *******************************************************************************************
+
+tString tColoredString::LowerColors( const char *c )
+{
+    tString ret;
+    int len = strlen(c);
+
+    // walk through string
+    while (*c!='\0')
+    {
+        // skip color codes
+        if (*c=='0' && len >= 2 && c[1]=='x')
+        {
+            tString color_code;
+            color_code << c[0] << c[1] << c[2] << c[3] << c[4] << c[5] << c[6] << c[7];
+            if (color_code == "0xRESETT")
+                ret << color_code;
+            else
+                ret << color_code.ToLower();
+
+            c   += 8;
+            len -= 8;
+        }
+        else
+        {
+            ret << (*(c++));
+            len--;
+        }
+    }
+
+    return ret;
+}
+
+// *******************************************************************************************
+// *
 // *	RemoveColors
 // *
 // *******************************************************************************************

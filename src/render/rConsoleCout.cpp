@@ -417,9 +417,9 @@ void rConsole::DisplayAtNewline(){
 #define READ 0
 #define WRITE 1
 
-// launches shell command with pipes attached to it
-pid_t
-popen2(const char *command, int *infp, int *outfp, char const ** envp)
+// Launches a program with pipes attached to it. Similar to popen2, but doesn't
+// execute the program through a shell process.
+pid_t SpawnProcess(const char *program, char *const argv[], int *infp, int *outfp, char *const envp[])
 {
     int p_stdin[2], p_stdout[2];
     pid_t pid;
@@ -438,8 +438,8 @@ popen2(const char *command, int *infp, int *outfp, char const ** envp)
         close(p_stdout[READ]);
         dup2(p_stdout[WRITE], WRITE);
 
-        execle("/bin/sh", "sh", "-c", command, NULL, envp);
-        perror("execl");
+        execve(program, argv,  envp);
+        perror("execve");
         exit(1);
     }
 
@@ -471,28 +471,42 @@ static rScriptStream * sr_FindScriptStream( tString const & name )
     return NULL;
 }
 
-static bool sr_sanityCheckScript = true;
-static tConfItem<bool> src_sanityCheckScript( "CHECK_SCRIPT", sr_sanityCheckScript );
-static tAccessLevelSetter src_sanityCheckScriptALS( src_sanityCheckScript, tAccessLevel_Owner );
+class rExecArray
+{
+    public:
+        rExecArray()
+        :data(), rawData_()
+        {
+        }
+
+        char * const * GetRaw()
+        {
+            rawData_.SetLen( 0 );
+            for ( int i = 0; i < data.Len(); i++ )
+            {
+                rawData_[ i ] = &( data( i ) )[ 0 ];
+            }
+            rawData_.Insert( NULL );
+            return &rawData_[ 0 ];
+        }
+
+        tArray< tString > data;
+    private:
+        tArray< char * > rawData_;
+};
 
 class rEnvironment
 {
 public:
-    const char ** GetRaw()
-    {
-        // fill and terminate envp
-        envp_.SetLen(0);
-        for( int i = 0; i < strings_.Len(); ++i )
-        {
-            envp_[i] = strings_[i];
-        }
-        envp_[strings_.Len()] = NULL;
-
-        return &envp_[0];
-    }
 
     rEnvironment()
+    :env_()
     {
+    }
+
+    char * const * GetRaw()
+    {
+        return env_.GetRaw();
     }
 
     void AddAll( const std::map< tString, tString > & m )
@@ -505,7 +519,7 @@ public:
     }
     void Add( char const * var, tString const & value )
     {
-        strings_[strings_.Len()] = tString(var) + "=" + value;
+        env_.data[env_.data.Len()] = tString(var) + "=" + value;
     }
 
     void AddPath( char const * var, tPath const & path )
@@ -513,8 +527,7 @@ public:
         Add( var, path.GetPaths(":","") );
     }
 private:
-    tArray< char const * > envp_;
-    tArray< tString > strings_;
+    rExecArray env_;
 };
 
 static std::map< tString, tString > sr_globalScriptEnv;
@@ -542,55 +555,39 @@ static void sr_SpawnScript( tString const & command )
         return;
     }
 
-    if( sr_sanityCheckScript )
-    {
-        char needle[2];
-        needle[1] = 0;
-        char const * allowed = ".,?/\\\"!@#$%^*-_+=[]~";
-
-        for( int i = command.Len()-2; i >= 0; --i )
-        {
-            // only whitespace and alphanumeric characters plus a few exceptions are allowed
-            needle[0] = command[i];
-            if( !isalnum(needle[0]) && !isblank(needle[0]) && !strstr( allowed, needle ) )
-            {
-                con << "External command \'" << command << "\' contains forbidden characters, only alphanumeric or blank characters are allowed, plus any of '" << allowed << "'.\n";
-                return;
-            }
-        }
-    }
-
     if( !tRecorder::IsPlayingBack() )
     {
-        tString fullCommand;
+        tString script;
+        rExecArray arguments;
+        std::stringstream stream( &command[ 0 ] );
 
+        stream >> script;
+        if ( script.Len() == 1 )
         {
-            tString script;
-            tString arguments;
-            {
-                std::stringstream s( &command[0] );
-                s >> script;
-                arguments.ReadLine(s);
-            }
+            con << "Error: provide a command to spawn.\n";
+            return;
+        }
 
-            // find full path
-            tString path = tDirectories::Data().GetReadPath(tString("scripts/") + script);
-            if( path.Len() > 1 )
+        // Find the full path of the script
+        {
+            tString fullScriptPath = tDirectories::Data().GetReadPath( tString( "scripts/" ) + script );
+            if ( fullScriptPath.Len() == 1 )
             {
-                fullCommand = path + ' ' + arguments;
-            }
-            else if( sr_sanityCheckScript )
-            {
-                con << "External command \'" << command << "\' not found anywhere in <datapath>/scripts/.\n";
+                con << "Command \'" << script << "\' not found in <datadir>/scripts/.\n";
                 return;
-            }
-            else
-            {
-                fullCommand = command;
             }
         }
 
-        con << "Launching external command \'" << fullCommand << "\'...\n";
+        arguments.data.Insert( script );
+        while ( !stream.eof() && !stream.fail() )
+        {
+            tString arg;
+            stream >> arg;
+            arguments.data.Insert( arg );
+        }
+
+        // FIXME show parsed arguments in this message
+        con << "Launching external command \'" << script << "\'...\n";
 
         // get the var directory; it's the last entry
         // tArray<tString> varPaths;
@@ -662,7 +659,7 @@ static void sr_SpawnScript( tString const & command )
         }
 
         int infp, outfp;
-        pid_t pid = popen2( fullCommand, &infp, &outfp, env.GetRaw() );
+        pid_t pid = SpawnProcess( script, arguments.GetRaw(), &infp, &outfp, env.GetRaw() );
         sr_inputStreams[sr_inputStreams.Len()] = tNEW(rScriptStream)( outfp, infp, command, pid );
     }
     else
