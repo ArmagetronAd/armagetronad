@@ -1237,6 +1237,17 @@ protected:
         return eVoteItem::DoCheckValid( senderID );
     }
 
+    virtual void DoExecute()
+    {
+        // Don't prevent name changes if the vote passes
+        eVoter *suggestor = GetSuggestor();
+        if ( suggestor )
+        {
+            suggestor->lastNameChangePreventor_ = -1E30;
+        }
+        DoExecuteHarm();
+    }
+
     virtual void DoFillToMessage( nMessage& m  ) const
     {
         if ( player_ )
@@ -1248,6 +1259,8 @@ protected:
     }
 
 protected:
+    virtual void DoExecuteHarm() = 0;               // Called when the vote passes. Do the harmful action.
+    
     virtual nDescriptor& DoGetDescriptor() const;	// returns the creation descriptor
 
     // get the language string prefix
@@ -1346,7 +1359,7 @@ protected:
         return eVoteItemHarm::DoCheckValid( senderID );
     }
 
-    virtual void DoExecute()						// called when the voting was successful
+    virtual void DoExecuteHarm()						// called when the voting was successful
     {
         ePlayerNetID * player = GetPlayer();
         nMachine * machine = GetMachine();
@@ -1411,6 +1424,11 @@ protected:
 
         eVoteItemServerControlled::DoFillToMessage( m );
     }
+    
+    virtual void DoExecute()
+    {
+        eVoteItemHarm::DoExecute();
+    }
 private:
     virtual void Update() //!< update description and details
     {
@@ -1463,7 +1481,7 @@ protected:
         return se_votingBiasSuspend;
     }
 
-    virtual void DoExecute()						// called when the voting was successful
+    virtual void DoExecuteHarm()						// called when the voting was successful
     {
         ePlayerNetID * player = GetPlayer();
         if ( player )
@@ -1487,41 +1505,41 @@ public:
 protected:
     virtual bool DoCheckValid( int senderID )
     {
+        
         // check whether enough harmful votes were collected already
         ePlayerNetID * p = GetPlayer();
-        if ( p && !p->GetVoter() )
+        if ( fromMenu_ && p )
         {
-            p->CreateVoter();
-        }
-
-        if ( fromMenu_ && p && p->GetVoter() && p->GetVoter()->HarmCount() < se_kickMinHarm )
-        {
-            // try to transfor the vote to a suspension
-            eVoteItem * item = tNEW ( eVoteItemSuspend )( p );
+            eVoter *voter = eVoter::GetVoter( p->Owner() );
+            if ( voter && voter->HarmCount() < se_kickMinHarm )
+            {
+                // try to transfor the vote to a suspension
+                eVoteItem * item = tNEW ( eVoteItemSuspend )( p );
             
-            // let item check its validity
-            if ( !item->CheckValid( senderID ) )
-            {
-                delete item;
-            }
-            else
-            {
-                // no objection? Broadcast it to everyone.
-                item->Update();
-                item->ReBroadcast( senderID );
-            }
+                // let item check its validity
+                if ( !item->CheckValid( senderID ) )
+                {
+                    delete item;
+                }
+                else
+                {
+                    // no objection? Broadcast it to everyone.
+                    item->Update();
+                    item->ReBroadcast( senderID );
+                }
 
-            // and cancel this item here.
-            return false;
+                // and cancel this item here.
+                return false;
+            }
         }
 
         // no transformation needed or transformation failed. Proceed as usual.
         return eVoteItemHarm::DoCheckValid( senderID );
     }
 
-    virtual void DoExecute()						// called when the voting was successful
+    virtual void DoExecuteHarm()						// called when the voting was successful
     {
-        eVoteItemKick::DoExecute();
+        eVoteItemKick::DoExecuteHarm();
     }
 private:
     bool fromMenu_; // flag set if the vote came from the menu
@@ -2051,7 +2069,7 @@ bool eVoter::VotingPossible()
     return eVoteItem::GetItems().Len() > 0;
 }
 
-eVoter* eVoter::GetVoter( int ID, bool complain )			// find or create the voter for the specified ID
+eVoter* eVoter::GetVoter( int ID, bool complain )
 {
     // the server has no voter
 #ifdef DEDICATED
@@ -2080,13 +2098,17 @@ eVoter* eVoter::GetVoter( int ID, bool complain )			// find or create the voter 
         }
     }
 
-    // get machine from network subsystem
-    nMachine & machine = nMachine::GetMachine( ID );
-
-    return GetVoter( machine );
+    return GetPersistentVoter( ID );
 }
 
-eVoter* eVoter::GetVoter( nMachine & machine )			// find or create the voter for the specified machine
+eVoter* eVoter::GetPersistentVoter( int ID )
+{
+    // get machine from network subsystem
+    nMachine & machine = nMachine::GetMachine( ID );
+    return GetPersistentVoter( machine );
+}
+
+eVoter* eVoter::GetPersistentVoter( nMachine & machine )
 {
     // iterate through the machine's decorators, find a voter
     nMachineDecorator * run = machine.GetDecorators();
