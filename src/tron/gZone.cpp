@@ -724,7 +724,7 @@ void gZone::BounceOffPoint(eCoord dest, eCoord collide)
 
 void gZone::Collapse()
 {
-    OnVanish();
+    Vanish(-1);
     destroyed_ = true;
     SetReferenceTime();
     SetExpansionSpeed(-GetRadius());
@@ -848,24 +848,14 @@ bool gZone::Timestep( REAL time )
                     {
                         // kill the zone as we hit a wall
                         //??? make kill code a common function
-                        destroyed_ = true;
-                        OnVanish();
-                        SetReferenceTime();
-                        SetExpansionSpeed(-1);
-                        SetRadius(0);
-                        RequestSync();
+                        Collapse();
                         return false;
                     }
                     else if (!wallPenetrate_)
                     {
                         // kill the zone as we hit a wall
                         //??? make kill code a common function
-                        destroyed_ = true;
-                        OnVanish();
-                        SetReferenceTime();
-                        SetExpansionSpeed(-1);
-                        SetRadius(0);
-                        RequestSync();
+                        Collapse();
                         return false;
                     }
                 }
@@ -6796,7 +6786,7 @@ void gBurstZoneHack::OnEnter( gCycle * target, REAL time )
 
 void gBurstZoneHack::OnVanish( void )
 {
-    this->RemoveFromListsAll();
+    grid->RemoveGameObjectInteresting(this);
 }
 
 // *******************************************************************************
@@ -6894,7 +6884,7 @@ void gObjectZoneHack::OnEnter( gCycle * target, REAL time )
     ePlayerNetID *p = target->Player();
     if (p)
     {
-        sg_objectZonePlayerEntered << GOID() << name_ << Position().x << Position().y << p->GetUserName() << target->Position().x << target->Position().y << target->Direction().x << target->Direction().y << se_GameTime();
+        sg_objectZonePlayerEntered << GOID() << name_ << Position().x << Position().y << p->GetUserName() << target->Position().x << target->Position().y << target->Direction().x << target->Direction().y << time;
         sg_objectZonePlayerEntered.write();
     }
 }
@@ -6902,9 +6892,9 @@ void gObjectZoneHack::OnEnter( gCycle * target, REAL time )
 //  for when zones enter this object zone
 void gObjectZoneHack::OnEnter(gZone *target, REAL time)
 {
-    if (target)
+    if (target && !target->destroyed_)
     {
-        sg_objectZoneZoneEntered << GOID() << name_ << target->GOID() << target->GetName() << target->GetPosition().x << target->GetPosition().y << target->GetVelocity().x << target->GetVelocity().y << se_GameTime();
+        sg_objectZoneZoneEntered << GOID() << name_ << target->GOID() << target->GetName() << target->GetPosition().x << target->GetPosition().y << target->GetVelocity().x << target->GetVelocity().y << time;
         sg_objectZoneZoneEntered.write();
     }
 }
@@ -7091,7 +7081,7 @@ void gObjectZoneHack::OnExit( gCycle * target, REAL time )
 
 void gObjectZoneHack::OnVanish( void )
 {
-    this->RemoveFromListsAll();
+    grid->RemoveGameObjectInteresting(this);
 }
 
 // *******************************************************************************
@@ -8338,7 +8328,6 @@ static void sg_CollapseZone(std::istream &s)
             sg_collapsezoneWriter.write();
 
             zone->Vanish(0.5);
-            zone->RequestSync();
         }
         zone_id = gZone::FindNext(object_id_str, zone_id);
     }
@@ -8379,7 +8368,6 @@ static void sg_DestroyZone(std::istream &s)
             sg_collapsezoneWriter.write();
 
             zone->Collapse();
-            zone->RequestSync();
         }
         zone_id = gZone::FindNext(object_id_str, zone_id);
     }
@@ -8416,7 +8404,6 @@ static void sg_CollapseZoneID(std::istream &s)
                 sg_collapsezoneWriter.write();
 
                 Zone->Vanish(0.5);
-                Zone->RequestSync();
                 break;
             }
         }
