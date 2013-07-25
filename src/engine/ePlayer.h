@@ -235,7 +235,6 @@ private:
     tCONTROLLED_PTR(eTeam)			nextTeam;		// the team we're in ( logically )
     tCONTROLLED_PTR(eTeam)			currentTeam;	// the team we currently are spawned for
     eTeamSet                        invitations_;   // teams this player is invited to
-    tCONTROLLED_PTR(eVoter)			voter_;			// voter assigned to this player
 
     tCHECKED_PTR(eNetGameObject) object; // the object this player is
     // controlling
@@ -378,8 +377,6 @@ public:
 
     bool IsSuspended ( void ) { return suspended_ > 0; }
 
-    eVoter * GetVoter() const {return voter_;}     // returns our voter
-    void CreateVoter();						// create our voter or find it
     static void SilenceMenu();				// menu where you can silence players
     static void PoliceMenu();				// menu where you can silence and kick players
 
@@ -411,6 +408,8 @@ public:
 
     void GreetHighscores(tString &s); // tell him his positions in the
     // highscore lists (defined in game.cpp)
+
+    static ePlayerNetID * ReadPlayer( std::istream & s ); //!< reads a player from the stream
 
     static void Update();           // creates ePlayerNetIDs for new players
     // and destroys those of players that have left
@@ -470,6 +469,7 @@ private:
 
     REAL            wait_;                  //!< time in seconds WaitToLeaveChat() will wait for this player
 
+    void CreateVoter();						// create our voter or find it
     void			MyInitAfterCreation();
 
 protected:

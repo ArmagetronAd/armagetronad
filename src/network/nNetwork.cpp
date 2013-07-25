@@ -217,6 +217,12 @@ static unsigned short highest_ack[MAXCLIENTS+2];
 static int sn_MaxBackwardsCompatibility = 1000;
 static tSettingItem<int> sn_mxc("BACKWARD_COMPATIBILITY",sn_MaxBackwardsCompatibility);
 
+static int sn_minVersion = 0;
+static tSettingItem<int> sn_miv("MIN_PROTOCOL_VERSION",sn_minVersion);
+
+static int sn_maxVersion = 0;
+static tSettingItem<int> sn_mav("MAX_PROTOCOL_VERSION",sn_maxVersion);
+
 static int sn_newFeatureDelay = 0;
 static tSettingItem<int> sn_nfd("NEW_FEATURE_DELAY",sn_newFeatureDelay);
 
@@ -394,9 +400,13 @@ void sn_UpdateCurrentVersion()
     int min = sn_myVersion.Max() - sn_MaxBackwardsCompatibility;
     if ( min < sn_myVersion.Min() )
         min = sn_myVersion.Min();
+    if( min < sn_minVersion )
+        min = sn_minVersion;
 
     // disable features that are too new
     int max = sn_myVersion.Max() - sn_newFeatureDelay;
+    if( sn_maxVersion > 0 && max > sn_maxVersion )
+        max = sn_maxVersion;
     if ( max < min )
         max = min;
 
@@ -1604,9 +1614,9 @@ void login_accept_handler(nMessage &m){
         {
             m >> sn_Connections[0].version;
 
-#ifdef DEBUG
+// #ifdef DEBUG
 #define NOEXPIRE
-#endif
+// #endif
 
 #ifndef NOEXPIRE
 #ifndef DEDICATED
@@ -3194,7 +3204,7 @@ nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket
         sn_SendPlanned();
 
         // check for user abort
-        if ( tConsole::Idle() )
+        if ( tConsole::Idle(true) )
         {
             con << tOutput("$network_login_failed_abort");
             sn_SetNetState(nSTANDALONE);
@@ -4764,14 +4774,16 @@ nMachine & nMachine::GetMachine( unsigned short userID )
         return server;
     }
 
-    tASSERT( userID <= MAXCLIENTS+1 );
-
     if( sn_GetNetState() != nSERVER )
     {
+        tASSERT(userID == 0);
+
         // invalid ID, return invalid machine (clients don't track machines)
         static nMachine invalid;
         return invalid;
     }
+
+    tASSERT( userID <= MAXCLIENTS+1 );
 
     // get address
     tVERIFY( userID <= MAXCLIENTS+1 );
@@ -4973,6 +4985,18 @@ void nMachine::Ban( REAL time )
 
     // set the banning timeout to the current time plus the given time
     banned_ = tSysTimeFloat() + time;
+
+    // kick current clients
+    if( time > 0 )
+    {
+        for( int i = MAXCLIENTS-1; i > 0; --i )
+        {
+            if ( sn_Connections[i].socket && &GetMachine(i) == this )
+            {
+                sn_DisconnectUser( i, banReason_ );
+            }
+        }
+    }
 
     if ( sn_printBans )
     {

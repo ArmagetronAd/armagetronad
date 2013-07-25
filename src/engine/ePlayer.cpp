@@ -2067,9 +2067,9 @@ static tAccessLevel se_adminAccessLevel = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_adminAccessLevelConf( "ACCESS_LEVEL_ADMIN", se_adminAccessLevel );
 static tAccessLevelSetter se_adminAccessLevelConfLevel( se_adminAccessLevelConf, tAccessLevel_Owner );
 
+static eLadderLogWriter se_commandWriter( "COMMAND", true );
+
 void handle_command_intercept( ePlayerNetID *p, tString const & command, std::istream & s, tString const & say ) {
-    static eLadderLogWriter se_commandWriter( "COMMAND", true );
-    
     tString commandArguments;
     commandArguments.ReadLine( s );
     
@@ -2535,6 +2535,9 @@ static void se_AdminAdmin( ePlayerNetID * p, std::istream & s )
     eAdminConsoleFilter consoleFilter( p->Owner() );
     try
     {
+        // forbid CASACL
+        tCasaclPreventer preventer;
+
         tConfItemBase::LoadLine(stream);
     }
     catch (tAbortLoading)
@@ -2579,18 +2582,42 @@ static void handle_chat_admin_commands( ePlayerNetID * p, tString const & comman
     }
     else if ( command == "/invite" )
     {
+        spam.factor_ = 0.4;
+        if( spam.Block() )
+        {
+            return;
+        }
+
         se_Invite( command, p, s, &eTeam::Invite );
     }
     else if ( command == "/uninvite" )
     {
+        spam.factor_ = 0.4;
+        if( spam.Block() )
+        {
+            return;
+        }
+
         se_Invite( command, p, s, &eTeam::UnInvite );
     }
     else if ( command == "/lock" )
     {
+        spam.factor_ = 0.4;
+        if( spam.Block() )
+        {
+            return;
+        }
+
         se_Lock( command, p, s, true );
     }
     else if ( command == "/unlock" )
     {
+        spam.factor_ = 0.4;
+        if( spam.Block() )
+        {
+            return;
+        }
+
         se_Lock( command, p, s, false );
     }
 #endif
@@ -3950,7 +3977,7 @@ static void chat( ePlayer * chatter )
 static bool se_allowControlDuringChat = false;
 static nSettingItem<bool> se_allowControlDuringChatConf("ALLOW_CONTROL_DURING_CHAT",se_allowControlDuringChat);
 
-uActionPlayer se_toggleSpectator("TOGGLE_SPECTATOR", 0);
+uActionPlayer se_toggleSpectator("TOGGLE_SPECTATOR", -7);
 
 bool ePlayer::Act(uAction *act,REAL x){
     eGameObject *object=NULL;
@@ -4095,7 +4122,7 @@ void ePlayer::Init(){
         tOutput help;
         help.SetTemplateParameter(1, i+1);
         help << "$input_instant_chat_help";
-        ePlayer::se_instantChatAction[i]=tNEW(uActionPlayer) (id, desc, help);
+        ePlayer::se_instantChatAction[i]=tNEW(uActionPlayer) (id, desc, help, 100);
         //,desc,       "Issues a special instant chat macro.");
     }
 
@@ -4122,7 +4149,7 @@ void ePlayer::Exit(){
     se_Players = NULL;
 }
 
-uActionPlayer ePlayer::s_chat("CHAT");
+uActionPlayer ePlayer::s_chat("CHAT",-8);
 
 // only display chat in multiplayer games
 static bool se_ChatTooltipVeto(int)
@@ -4579,11 +4606,12 @@ void ePlayerNetID::MyInitAfterCreation()
         // clear old legacy spectator that may be lurking around
         se_ClearLegacySpectator( Owner() );
 
-        // get suspension count
-        if ( GetVoter() )
+        // get silenced state and suspension count
+        eVoter *voter = eVoter::GetPersistentVoter( Owner() );
+        if ( voter )
         {
-            suspended_ = GetVoter()->suspended_;
-            silenced_ = GetVoter()->silenced_;
+            suspended_ = voter->suspended_;
+            silenced_ = voter->silenced_;
         }
     }
 
@@ -4658,12 +4686,14 @@ void ePlayerNetID::RemoveFromGame()
     this->UnregisterWithMachine();
 
     // release voter
-    if ( this->voter_ )
-        this->voter_->RemoveFromGame();
-    this->voter_ = 0;
+    eVoter *voter = eVoter::GetPersistentVoter( Owner() );
+    if ( voter )
+        voter->RemoveFromGame();
 
     // log scores
     LogScoreDifference();
+
+    bool logLeave = false;
 
     if ( sn_GetNetState() != nCLIENT )
     {
@@ -4686,9 +4716,7 @@ void ePlayerNetID::RemoveFromGame()
 
             if ( IsHuman() && sn_GetNetState() == nSERVER && NULL != sn_Connections[Owner()].socket )
             {
-                tString ladder;
-                se_playerLeftWriter << userName_ << nMachine::GetMachine(Owner()).GetIP();
-                se_playerLeftWriter.write();
+                logLeave = true;
             }
         }
     }
@@ -4698,7 +4726,12 @@ void ePlayerNetID::RemoveFromGame()
     SetTeam( NULL );
     UpdateTeam();
     ControlObject( NULL );
-    // currentTeam = NULL;
+
+    if( logLeave )
+    {
+        se_playerLeftWriter << userName_ << nMachine::GetMachine(Owner()).GetIP();
+        se_playerLeftWriter.write();
+    }
 }
 
 bool ePlayerNetID::ActionOnQuit()
@@ -4847,6 +4880,11 @@ private:
     }
 
     virtual bool Save(){
+        return false;
+    }
+
+    // CAN this be saved at all?
+    virtual bool CanSave(){
         return false;
     }
 };
@@ -5528,9 +5566,9 @@ void ePlayerNetID::CreateVoter()
     // only count nonlocal players with voting support as voters
     if ( sn_GetNetState() != nCLIENT && this->Owner() != 0 && sn_Connections[ this->Owner() ].version.Max() >= 3 )
     {
-        this->voter_ = eVoter::GetVoter( this->Owner() );
-        if ( this->voter_ )
-            this->voter_->PlayerChanged();
+        eVoter *voter = eVoter::GetPersistentVoter( Owner() );
+        if ( voter )
+            voter->PlayerChanged();
     }
 }
 
@@ -6039,10 +6077,15 @@ void se_SaveToLadderLog( tOutput const & out )
     {
         std::ofstream o;
         if ( tDirectories::Var().Open(o, "ladderlog.txt", std::ios::app) )
+        {
+            std::stringstream s;
             if(se_ladderlogDecorateTS) {
-                o << st_GetCurrentTime("%Y/%m/%d-%H:%M:%S ");
+                s << st_GetCurrentTime("%Y/%m/%d-%H:%M:%S ");
             }
-            o << out << std::endl;;
+            s << out << std::endl;
+            sr_InputForScripts( s.str().c_str() );
+            o << s.str();
+        }
     }
 }
 
@@ -6476,7 +6519,7 @@ static int se_ColorDistance( int a[3], int b[3] )
     return distance;
 }
 
-bool se_randomizeColor = true;
+bool se_randomizeColor = false;
 static tSettingItem< bool > se_randomizeColorConf( "PLAYER_RANDOM_COLOR", se_randomizeColor );
 
 static void se_RandomizeColor( ePlayer * l, ePlayerNetID * p )
@@ -7876,7 +7919,7 @@ static void se_BanConf(std::istream &s)
 static tConfItemFunc se_banConf("BAN",&se_BanConf);
 static tAccessLevelSetter se_banConfLevel( se_banConf, tAccessLevel_Moderator );
 
-static ePlayerNetID * ReadPlayer( std::istream & s )
+ePlayerNetID * ePlayerNetID::ReadPlayer( std::istream & s )
 {
     // read name of player to be returned
     tString name;
@@ -7899,6 +7942,11 @@ static ePlayerNetID * ReadPlayer( std::istream & s )
     }
 
     return ePlayerNetID::FindPlayerByName( name );
+}
+
+static ePlayerNetID * ReadPlayer( std::istream & s )
+{
+    return ePlayerNetID::ReadPlayer( s );
 }
 
 static void Kill_conf(std::istream &s)
@@ -8160,9 +8208,10 @@ public:
 
             if ( oldScreenName_ != screenName )
             {
-                if ( bool(player_.GetVoter() ) )
+                eVoter *voter = eVoter::GetPersistentVoter( player_.Owner() );
+                if ( voter )
                 {
-                    player_.GetVoter()->PlayerChanged();
+                    voter->PlayerChanged();
                 }
 
                 if ( adminRename_ )
@@ -8394,7 +8443,7 @@ bool ePlayerNetID::HasRenameCapability ( ePlayerNetID const * victim, ePlayerNet
 
 bool ePlayerNetID::IsAllowedToRename ( void )
 {
-    if ( !IsHuman() || ( nameFromServer_ == nameFromClient_ && nameFromServer_ == nameFromAdmin_ ) || nameFromServer_.Len() < 1 || sn_GetNetState() == nCLIENT )
+    if ( !IsHuman() || ( nameFromServer_ == nameFromClient_ && nameFromServer_ == nameFromAdmin_ ) || nameFromServer_.Len() <= 1 || sn_GetNetState() == nCLIENT )
     {
         // Don't complain about people who either are bots, doesn't change name, or are entering the grid
         return true;
@@ -8413,11 +8462,19 @@ bool ePlayerNetID::IsAllowedToRename ( void )
         con << message;
         return false;
     }
+    // don't let the player rename if s/he is silenced.
+    if ( this->IsSilenced() )
+    {
+        tOutput message("$player_rename_silenced");
+        sn_ConsoleOut( message, Owner() );
+        return false;
+    }
     // disallow name changes if there was a kick vote recently
-    if ( !( !bool(this->voter_) || voter_->AllowNameChange() || nameFromServer_.Len() <= 1 ) && nameFromServer_ != nameFromClient_ )
+    eVoter *voter = eVoter::GetVoter( Owner() );
+    if ( !( !bool(voter) || voter->AllowNameChange() || nameFromServer_.Len() <= 1 ) && nameFromServer_ != nameFromClient_ )
     {
         // inform victim to avoid complaints
-        tOutput message( "$player_rename_rejected_kickvote", nameFromServer_, nameFromClient_ );
+        tOutput message( "$player_rename_rejected_votekick", nameFromServer_, nameFromClient_ );
         sn_ConsoleOut( message, Owner() );
         con << message;
         return false;
@@ -8839,10 +8896,11 @@ void ePlayerNetID::UnregisterWithMachine( void )
     if ( registeredMachine_ )
     {
         // store suspension count
-        if ( GetVoter() )
+        eVoter *voter = eVoter::GetPersistentVoter( Owner() );
+        if ( voter )
         {
-            GetVoter()->suspended_ = suspended_;
-            GetVoter()->silenced_ = silenced_;
+            voter->suspended_ = suspended_;
+            voter->silenced_ = silenced_;
         }
 
         registeredMachine_->RemovePlayer();
@@ -8989,6 +9047,11 @@ void ePlayerNetID::UpdateSuspensions() {
 
 void ePlayerNetID::UpdateShuffleSpamTesters()
 {
+    if( sn_GetNetState() != nSERVER )
+    {
+        return;
+    }
+
     for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
     {
         ePlayerNetID *p = se_PlayerNetIDs( i );
@@ -9298,3 +9361,23 @@ int ePlayerNetID::GetSuspended() const
 {
     return suspended_;
 }
+
+static void se_FillServerSettings()
+{
+    nServerInfo::SettingsDigest & digest = *nCallbackFillServerInfo::ToFill();
+    
+    digest.minPlayTimeTotal_ = int(se_minPlayTimeTotal);
+    digest.minPlayTimeOnline_ = int(se_minPlayTimeOnline);
+    digest.minPlayTimeTeam_ = int(se_minPlayTimeTeam);
+
+    digest.SetFlag( nServerInfo::SettingsDigest::Flags_AuthenticationRequired,
+#ifdef KRAWALL_SERVER
+                    se_accessLevelRequiredToPlay < tAccessLevel_Program ||
+                    se_playAccessLevel < tAccessLevel_Program
+#else
+                    false
+#endif
+        );
+}
+
+static nCallbackFillServerInfo se_fillServerSettings(se_FillServerSettings);

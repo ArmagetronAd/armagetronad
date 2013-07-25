@@ -45,6 +45,8 @@ protected:							// protected attributes
     int score;						// score the team has accumulated
     int lastScore_;                 //!< score from the beginning of the round
 
+    bool lastEmpty_;                //!< flag indicating whether the team was empty on the last call to UpdateAppearance
+
     int numHumans;					// number of human players on the team
     int numAIs;						// number of AI players on the team
 
@@ -208,6 +210,7 @@ public:												// public methods
 
 private:
     void 	 		RemovePlayerDirty( ePlayerNetID* player );				// just remove a player from the player list, no messages, no balancing
+    void LogScoreDifference( const tString & teamName );
 };
 
 #endif

@@ -33,6 +33,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tArray.h"
 #include "nNetwork.h"
 
+#include "tCallbackString.h"
+
 #include <iosfwd>
 #include <memory>
 
@@ -183,6 +185,38 @@ public:
     virtual void Save(std::ostream &s) const;
     virtual void Load(std::istream &s);
 
+
+    struct SettingsDigest
+    {
+        enum Flags
+        {
+            Flags_AuthenticationRequired = 0x1, //!< is authentication required to play on this server?
+            Flags_NondefaultMap = 0x2, //!< custom map, indicating complicated gameplay
+            Flags_TeamPlay = 0x4, //!< team play is possible
+            Flags_SettingsDigestSent = 0x8000, //!< Did this server send a settings digest?
+            Flags_All = 0xffff
+        };
+
+        unsigned short flags_;      //!< flags
+
+        void SetFlag( Flags flag, bool set ); //!< sets a certain flag to a value
+        bool GetFlag( Flags flag ) const; //!< returns the value of a certain flag
+
+        // play time requirements, filled by ePlayer.cpp
+        int minPlayTimeTotal_;    //!< minimum number of minutes spent playing up to now
+        int minPlayTimeOnline_;   //!< minimum number of minutes spent playing online
+        int minPlayTimeTeam_;     //!< minimum number of minutes spent playing team games
+
+        // filled by gCycleMovement.cpp
+        REAL cycleDelay_;         //!< cycle delay (max .05s if doublebinding has been disabled)
+        REAL acceleration_;       //!< acceleration strength (relative to base speed)
+        REAL rubberWallHump_;     //!< characteristic rubber number: rubber/(base speed*cycle_delay), the number of times you can hump a wall without suiciding
+        REAL rubberHitWallRatio_;  //!< characteristic rubber number: maximum ratio of time spent sitting on walls to total time
+        REAL wallsLength_;         //!< length of walls (divided by speed, so it's in seconds)
+
+        SettingsDigest();
+    };
+
     // sort key selection
     enum PrimaryKey
     {
@@ -314,8 +348,36 @@ protected:
 
 private:
     QueryType queryType_; //!< the query type to use for this server
+    SettingsDigest settings_; //!< most important settings
 };
 
+//! callback to give other components a chance to help fill in the server info
+class nCallbackFillServerInfo: public tCallback
+{
+    static nServerInfo::SettingsDigest * settings_;
+public:
+    nCallbackFillServerInfo( VOIDFUNC * f );
+
+    //! the server settings to fill
+    static nServerInfo::SettingsDigest *ToFill(){ return settings_; }
+
+    //! fills all server infos
+    static void Fill( nServerInfo::SettingsDigest * settings );
+};
+
+//! callback to give other components a chance to help fill in the server info
+class nCallbackCanPlayOnServer: public tCallbackString
+{
+    static nServerInfo::SettingsDigest const * settings_;
+public:
+    nCallbackCanPlayOnServer( STRINGRETFUNC * f );
+
+    //! the settings
+    static nServerInfo::SettingsDigest const * Settings(){ return settings_; }
+
+    //! return all reasons why you can't play here
+    static tString CantPlayReasons( nServerInfo::SettingsDigest const * settings );
+};
 
 class nServerInfoAdmin
 {

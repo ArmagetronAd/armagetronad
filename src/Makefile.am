@@ -36,6 +36,7 @@ nTrueVersion.h: $(wildcard $(top_srcdir)/*_version) $(wildcard $(top_srcdir)/.sv
 	fi
 
 ${srcdir}/network/nNetwork.cpp: nTrueVersion.h
+${srcdir}/render/rConsoleGraph.cpp: nTrueVersion.h
 
 # library file listings
 
@@ -45,9 +46,6 @@ else
 tools_extra=
 endif
 
-
-# Note: tMemManager.cpp must be last to avoid false leak reports (sorry for
-# the fragile dependency on undefined behaviour of the linker...)
 libtools_a_SOURCES=	${tools_extra} tools/tArray.cpp tools/tArray.h tools/tCallback.cpp tools/tCallback.h tools/tCallbackString.h tools/tColor.cpp tools/tColor.h\
 	tools/tConfiguration.cpp tools/tConfiguration.h tools/tConsole.cpp tools/tConsole.h tools/tCrypt.cpp tools/tCrypt.h\
 	tools/tDirectories.cpp tools/tDirectories.h tools/tError.cpp tools/tError.h tools/tEventQueue.cpp\

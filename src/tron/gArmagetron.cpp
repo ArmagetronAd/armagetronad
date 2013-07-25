@@ -43,6 +43,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tRandom.h"
 #include "tRecorder.h"
 #include "tCommandLine.h"
+#include "tToDo.h"
 #include "eAdvWall.h"
 #include "eGameObject.h"
 #include "uMenu.h"
@@ -126,11 +127,11 @@ private:
 
 static gMainCommandLineAnalyzer commandLineAnalyzer;
 
-static bool use_directx=true;
+extern bool sr_useDirectX; // rScreen.cpp
 #ifdef WIN32
 static tConfItem<bool> udx("USE_DIRECTX","makes use of the DirectX input "
                            "fuctions; causes some graphic cards to fail to work (VooDoo 3,...)",
-                           use_directx);
+                           sr_useDirectX);
 #endif
 
 extern void exit_game_objects(eGrid *grid);
@@ -438,6 +439,12 @@ void cleanup(eGrid *grid){
 }
 
 #ifndef DEDICATED
+static bool sg_active = true;
+static void sg_DelayedActivation()
+{
+    Activate( sg_active );
+}
+
 int filter(const SDL_Event *tEvent){
     // recursion avoidance
     static bool recursion = false;
@@ -499,17 +506,19 @@ int filter(const SDL_Event *tEvent){
             if (currentScreensetting.fullscreen ^ lastSuccess.fullscreen) return false;
 #endif
             int flags = SDL_APPINPUTFOCUS;
-            if ( tEvent->active.gain && tEvent->active.state & flags )
-                Activate(true);
-            if ( !tEvent->active.gain && tEvent->active.state & flags )
-                Activate(false);
+            if ( tEvent->active.state & flags )
+            {
+                // con << tSysTimeFloat() << " " << "active: " << (tEvent->active.gain ? "on" : "off") << "\n";
+                sg_active = tEvent->active.gain;
+                st_ToDo(sg_DelayedActivation);
+            }
 
             // reload GL stuff if application gets reactivated
             if ( tEvent->active.gain && tEvent->active.state & SDL_APPACTIVE )
             {
                 // just treat it like a screen mode change, gets the job done
-                rCallbackBeforeScreenModeChange::Exec();
-                rCallbackAfterScreenModeChange::Exec();
+                st_ToDo(rCallbackBeforeScreenModeChange::Exec);
+                st_ToDo(rCallbackAfterScreenModeChange::Exec);
             }
             return false;
         }
@@ -624,9 +633,9 @@ int main(int argc,char **argv){
         if ( commandLineAnalyzer.windowed_ )
             currentScreensetting.fullscreen   = false;
         if ( commandLineAnalyzer.use_directx_ )
-            use_directx                       = true;
+            sr_useDirectX                       = true;
         if ( commandLineAnalyzer.dont_use_directx_ )
-            use_directx                       = false;
+            sr_useDirectX                       = false;
 
         gAICharacter::LoadAll(tString( "aiplayers.cfg" ) );
 
@@ -634,7 +643,7 @@ int main(int argc,char **argv){
         atexit(tLocale::Clear);
 
         static eLadderLogWriter sg_encodingWriter( "ENCODING", true );
-        sg_encodingWriter << "latin1";
+        sg_encodingWriter << st_internalEncoding;
         sg_encodingWriter.write();
 
         if ( commandLine.Execute() )
@@ -695,8 +704,14 @@ int main(int argc,char **argv){
 
 #ifdef WIN32
             // disable DirectX by default; it causes problems with some boards.
-            if (!use_directx && !getenv( "SDL_VIDEODRIVER") ) {
-                sg_PutEnv( "SDL_VIDEODRIVER=windib" );
+            if (!getenv( "SDL_VIDEODRIVER") ) {
+                if (sr_useDirectX) {
+                    sg_PutEnv( "SDL_VIDEODRIVER=directx" );
+                }
+                else
+                {
+                    sg_PutEnv( "SDL_VIDEODRIVER=windib" );
+                }
             }
 #endif
 
@@ -814,6 +829,10 @@ int main(int argc,char **argv){
 
 
         //	tLocale::Clear();
+    }
+    catch ( tCleanQuit const & e )
+    {
+        return 0;
     }
     catch ( tException const & e )
     {

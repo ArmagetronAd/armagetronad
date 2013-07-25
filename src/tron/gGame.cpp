@@ -68,6 +68,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "gWinZone.h"
 #include "eVoter.h"
 #include "tRecorder.h"
+#include "rScreen.h"
 
 #include "gParser.h"
 #include "tResourceManager.h"
@@ -1192,6 +1193,19 @@ void sg_DeclareWinner( eTeam* team, char const * message )
     }
 }
 
+static void sg_DeclareRoundWinner(std::istream &s)
+{
+    ePlayerNetID *winningPlayer = ePlayerNetID::ReadPlayer(s);
+    if(!winningPlayer)
+    {
+        return;
+    }
+    static const char* message="$player_win_command";
+    sg_DeclareWinner( winningPlayer->CurrentTeam(), message );
+}
+
+static tConfItemFunc sg_DeclareRoundWinner_conf("DECLARE_ROUND_WINNER",&sg_DeclareRoundWinner);
+
 void check_hs(){
     if (sg_singlePlayer)
         if(se_PlayerNetIDs.Len()>0 && se_PlayerNetIDs(0)->IsHuman())
@@ -1313,6 +1327,9 @@ void init_game_grid(eGrid *grid, gParser *aParser){
         // let settings in the map file be executed with the rights of the person
         // who set the map
         tCurrentAccessLevel level( conf_mapfile.GetSetting().GetSetLevel(), true );
+        
+        // and disallow CASACL and script spawning just in case
+        tCasaclPreventer preventer;
 
         Arena.PrepareGrid(grid, aParser);
     }
@@ -1791,6 +1808,13 @@ void Render(eGrid *grid, REAL time, bool swap=true){
 
 #ifndef DEDICATED
     if (sr_glOut){
+        static bool lastMoviePack=sg_MoviePack();
+        if(lastMoviePack!=sg_MoviePack())
+        {
+            lastMoviePack=sg_MoviePack();
+            rDisplayList::ClearAll();
+        }
+
         RenderAllViewports(grid);
 
         sr_ResetRenderState(true);
@@ -2476,7 +2500,7 @@ void sg_DisplayVersionInfo() {
     versionInfo << "$version_info_gl_version";
     versionInfo << gl_version;
 
-    sg_FullscreenMessage("$version_info_title", versionInfo, 1000);
+    sg_ClientFullscreenMessage("$version_info_title", versionInfo, 1000);
 }
 
 void sg_StartupPlayerMenu();
@@ -4677,7 +4701,10 @@ void Activate(bool act){
 
     sr_Activate( act );
 
-    sg_SoundPause( !act, true );
+    if (!sr_keepWindowActive || act)
+    {
+        sg_SoundPause( !act, true );
+    }
 
     if ( !tRecorder::IsRunning() )
     {
@@ -4770,6 +4797,11 @@ static nDescriptor sg_clientFullscreenMessage(312,sg_ClientFullscreenMessage,"cl
 
 void sg_FullscreenMessageWait()
 {
+    if( sn_GetNetState() != nSERVER )
+    {
+        return;
+    }
+
     // wait for the clients to have seen the message
     {
         // stop the game
@@ -4925,4 +4957,17 @@ static void LoginCallback(){
 
 static nCallbackLoginLogout lc(LoginCallback);
 
+static void sg_FillServerSettings()
+{
+    nServerInfo::SettingsDigest & digest = *nCallbackFillServerInfo::ToFill();
+    
+    digest.SetFlag( nServerInfo::SettingsDigest::Flags_NondefaultMap,
+                    mapfile != DEFAULT_MAP );
+    digest.SetFlag( nServerInfo::SettingsDigest::Flags_TeamPlay,
+                    multiPlayer.maxPlayersPerTeam > 1 );
+
+    digest.wallsLength_ = multiPlayer.wallsLength/gCycleMovement::MaximalSpeed();
+}
+
+static nCallbackFillServerInfo sg_fillServerSettings(sg_FillServerSettings);
 

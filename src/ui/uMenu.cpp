@@ -325,20 +325,26 @@ void uMenu::OnEnter(){
             if (YPos(menuentries-1)>menuTop && (int(tSysTimeFloat())+1)%2)
                 arrow(.9,menuTop,1,.05);
 
-            if (tSysTimeFloat()-lastkey>timeout){
-                disphelp=true;
+            REAL helpAlpha = tSysTimeFloat()-lastkey-timeout;
+            if( helpAlpha > 1 )
+            {
+                helpAlpha = 1;
+            }
+            
+            disphelp = helpAlpha > 0;
+            if ( items[selected]->DisplayHelp( disphelp, menuBot, helpAlpha ) )
+            {
                 if (sr_alphaBlend)
-                    glColor4f(1,.8,.8,tSysTimeFloat()-lastkey-timeout);
+                    glColor4f(1,.8,.8, helpAlpha );
                 else
-                    Color(tSysTimeFloat()-lastkey-timeout,
-                          .8*(tSysTimeFloat()-lastkey-timeout),
-                          .8*(tSysTimeFloat()-lastkey-timeout));
+                    Color(helpAlpha,
+                          .8*helpAlpha,
+                          .8*helpAlpha);
 
                 rTextField c(-.95f,menuBot-.04f);
                 c.SetWidth(static_cast<int>((1.9f-items[selected]->SpaceRight())/c.GetCWidth()));
                 c << items[selected]->Help();
             }
-            else disphelp=false;
         }
         else
 #endif
@@ -465,12 +471,17 @@ void uMenu::HandleEvent( SDL_Event event )
 #endif
 }
 
+#ifndef DEDICATED
+static bool s_idleBackground = false;
+#endif
 
 // paints a nice background
 void uMenu::GenericBackground(REAL top){
 #ifndef DEDICATED
     if (idle)
     {
+        s_idleBackground = true;
+
         try
         {
             // throw tGenericException("test"); // (test exception throw to see if error handling works right)
@@ -514,10 +525,13 @@ void uMenu::GenericBackground(REAL top){
         }
         catch ( ... )
         {
+            s_idleBackground = false;
+
             // the idle background function is broken. Disable it and rethrow.
             idle = 0;
             throw;
         }
+        s_idleBackground = false;
     }
     else if (sr_glOut){
         uCallbackMenuBackground::MenuBackground();
@@ -1139,12 +1153,20 @@ void uCallbackMenuBackground::MenuBackground(){
 }
 
 // poll input, return true if ESC was pressed
-bool uMenu::IdleInput()
+bool uMenu::IdleInput( bool processInput )
 {
 #ifndef DEDICATED
+    if( !processInput )
+    {
+        sr_LockSDL();
+        SDL_PumpEvents();
+        sr_UnlockSDL();
+        return uMenu::quickexit != uMenu::QuickExit_Off;
+    }
+
     SDL_Event event;
     uInputProcessGuard inputProcessGuard;
-    while (su_GetSDLInput(event))
+    while (!s_idleBackground && su_GetSDLInput(event))
     {   
         switch (event.type)
         {
@@ -1163,6 +1185,8 @@ bool uMenu::IdleInput()
             break;
         }
     }   
+
+    return uMenu::quickexit != uMenu::QuickExit_Off;
 #endif
 
     return false;

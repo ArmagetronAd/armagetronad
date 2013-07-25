@@ -333,6 +333,13 @@ player_chat_wait_teamleader_help    Set to 1 if only team leaders, and 0 if all 
 wait_for_external_script_help Let the server wait for an external script between two rounds until the script switches this setting back to 0.
 wait_for_external_script_timeout_help If the server has been paused by WAIT_FOR_EXTERNAL_SCRIPT for more seconds than this, kickstart the game.
 
+spawn_script_help                   Spawns an external script from a scripts/ subdirectory on the data path.
+respawn_script_help                 Spawns an external script from a scripts/ subdirectory on the data path if no already running instance is found.
+force_respawn_script_help           Spawns an external script from a scripts/ subdirectory on the data path after killing the other possibly running instance.
+kill_script_help                    Kills a script. Argument must match the SPAWN_SCRIPT argument.
+list_scripts_help                   Lists active scripts.
+script_env_help                     Set custom environment variables for scripts. Usage: SCRIPT_ENV <variable name> <value>
+
 chatter_remove_time_help            Time in seconds after which a permanent chatter is removed from the game
 idle_remove_time_help               Time in seconds after which an inactive player is removed from the game
 idle_kick_time_help                 Time in seconds after which an inactive player is kicked
@@ -725,6 +732,7 @@ score_locx_help                   Horizontal position of the score display
 score_locy_help                   Vertical position of the score display
 score_size_help                   Size of the score display
 cm_locy_help                      Vertical position of the center messages
+hud_cache_threshold_help          Update threshold for HUD gauges, only in effect when display lists are activated: if the relative change times the amount of time since the last update is bigger than this, the gauge gets updated.
 
 #floor
 grid_size_help			Distance between grid lines
@@ -786,10 +794,11 @@ ladderlog_write_all_help Set all the LADDER_LOG_WRITE_* settings to the same val
 ladderlog_write_all_usage Usage: LADDER_LOG_WRITE_ALL 1|0
 ladderlog_write_all_enabled Enabled full ladderlog output.
 ladderlog_write_all_disabled Disabled ladderlog output.
-ladderlog_write_authority_blurb_help          Write to ladderlog: AUTHORITY_BLURB <name> <value>
+ladderlog_write_authority_blurb_help          Write to ladderlog: AUTHORITY_BLURB <blurb> <player> <text>
 ladderlog_write_basezone_conquered_help       Write to ladderlog: BASEZONE_CONQUERED <team> <cx> <cy>
 ladderlog_write_basezone_conquerer_help       Write to ladderlog: BASEZONE_CONQUERER <player>
 ladderlog_write_chat_help                     Write to ladderlog: CHAT <chatter> [/me] <chat string>
+ladderlog_write_command_help                  Write to ladderlog: COMMAND <command> <player> <text>
 ladderlog_write_death_frag_help               Write to ladderlog: DEATH_FRAG <prey> <predator>
 ladderlog_write_death_suicide_help            Write to ladderlog: DEATH_SUICIDE <player>
 ladderlog_write_death_teamkill_help           Write to ladderlog: DEATH_TEAMKILL <prey> <predator>
@@ -810,8 +819,14 @@ ladderlog_write_round_score_team_help         Write to ladderlog: ROUND_SCORE_TE
 ladderlog_write_round_winner_help             Write to ladderlog: ROUND_WINNER <team> <players>
 ladderlog_write_sacrifice_help                Write to ladderlog: SACRIFICE <player who used the hole> <player who created the hole> <player owning the wall the hole was made into>
 ladderlog_write_wait_for_external_script_help Write to ladderlog: WAIT_FOR_EXTERNAL_SCRIPT (see also: WAIT_FOR_EXTERNAL_SCRIPT and WAIT_FOR_EXTERNAL_SCRIPT_TIMEOUT)
+ladderlog_write_team_created_help             Write to ladderlog: TEAM_CREATED <team name>
+ladderlog_write_team_destroyed_help           Write to ladderlog: TEAM_DESTROYED <team name>
+ladderlog_write_team_renamed_help             Write to ladderlog: TEAM_RENAMED <old team name> <new team name>
+ladderlog_write_team_player_added_help        Write to ladderlog: TEAM_PLAYER_ADDED <team name> <player>
+ladderlog_write_team_player_removed_help      Write to ladderlog: TEAM_PLAYER_REMOVED <team name> <player>
 ladderlog_game_time_interval_help If non-negative, write a line with the current game time to the ladder log every n seconds.
 chat_log_help			Write machine parsable chat messages to var/chatlog.txt
+console_log_help		Write all console messages to var/consolelog.txt
 show_fps_help			Enable fps display
 floor_mirror_help		Floor mirror mode
 floor_detail_help		Floor detail settings
@@ -927,6 +942,8 @@ admin_pass_help			Password for the basic in game admin
 
 backward_compatibility_help	Maximum number of old protocol versions to support.
 new_feature_delay_help		Disable features that only came in during the last X protocol versions.
+min_protocol_version_help   Minimum protocol version allowed to play.
+max_protocol_version_help   If > 0, maximum protocol version allowed to play; features not supported by this version are going to be permanently disabled.
 
 # program control
 quit_help					Shuts the dedicated server down and quits.
@@ -1501,7 +1518,7 @@ network_opts_axesindicator_text	Axes Indicator:
 network_opts_axesindicator_help	The axes indicator is meant to show the directions the cycle can turn to as lines going out from the cycle. Good on servers with changing configs so you know what to expect before you turn.
 
 network_opts_predict_text	Prediction:
-network_opts_predict_help	In a network game, this extrapolates the cycles' movement. Leaving it disabled makes the graphics smoother, enabling it gives yo a better image of the actual situation. I leave it disabled; the Lag-O-Meter is a good substitute for prediction. This is always disabled in server mode.
+network_opts_predict_help	In a network game, this extrapolates the cycles' movement. Leaving it disabled makes the graphics smoother, enabling it gives you a better image of the actual situation. I leave it disabled; the Lag-O-Meter is a good substitute for prediction. This is always disabled in server mode.
 
 network_opts_inrate_text	Input Rate:
 network_opts_inrate_help	The maximum number of kilobytes your network can receive per second. 3 for 28.8k modems, 7 for 56k modems, 8 for ISDN, more for cable modems, (A)DSL and LAN.
@@ -1758,7 +1775,7 @@ player_red_text			Red:
 player_red_help			Lets you choose the red component of your colour.
 
 player_autologin_text		Auto Login:
-player_autologin_help		When enabled, you will automatically initiate the (usually completely optional) login procedure as soon as you enter a server.
+player_autologin_help		When enabled, you will automatically initiate the (usually completely optional) login procedure using the Global ID above as soon as you enter a server.
 
 player_stealth_text		Hide Global ID:
 player_stealth_help		Usually your global ID is shown to everyone when you log in or when someone uses the /players chat command. Enabling this tells the server that you prefer to remain anonymous. The server may still show your ID to moderators and administrators on the server or even decide to ignore your request.
@@ -2362,6 +2379,8 @@ player_win_conquest_specific \1 was awarded \2 points for conquering \3's base.\
 player_kill_collapse        \1 was eradicated by its collapsing zone.\n
 player_win_hole             \1 got \2 points for a sacrifice for the good of the team.\n
 player_lose_hole            0xffff00ZOMG! 0xff7f00HOLER!!1!!0xRESETT \1 lost \2 points for being a cheap ass lamer.\n
+player_win_command			\1 was awarded \2 points for winning the round.\n
+declare_round_winner_help		Declare the winner of the current round and end the round. Usage: DECLARE_ROUND_WINNER <player>
 
 player_no_longer_suspended  \1 0x77ff77is allowed to play again.\n
 player_suspended            \1 0xff7777is banned to spectator mode for \2 round(s).\n
@@ -2389,6 +2408,8 @@ spam_protection_prefix  SPAM PROTECTION: your messages have a common prefix: \1\
 spam_protection_silenceall SPAM PROTECTION: public chat is disabled.\n
 spam_protection_silenced SPAM PROTECTION: you have been silenced by the server administrator.\n
 spam_protection_silenced_default SPAM PROTECTION: you have to be given voice in order to chat publicly.\n
+vote_silenced You are not allowed to call a new vote while you are silenced.\n
+player_rename_silenced You are not allowed to rename while you are silenced.\n
 player_silenced         \10xff7777 has been silenced.\n
 player_voiced           \10x77ff77 has been given his voice back.\n
 player_allowed_teamchange \10x77ff77 has been allowed to change his team.\n
@@ -2871,6 +2892,9 @@ config_accesslevel_20       Program
 access_level_help           Changes the access level of a configuration item to make it available to lower ranked users
 access_level_usage          usage: ACCESS_LEVEL <config command> <required minimal access level (numerical)>\n
 access_level_change         Required access level of command \1 changed to "\2".\n
+access_level_nochange_now   Cannot change access level of \1: it is currently at "\2", you only have "\3", you would steal access.\n
+access_level_nochange_later   Cannot change access level of \1 to "\2", you only have "\3" and would not be able to change it back.\n
+access_level_change         Required access level of command \1 changed to "\2".\n
 access_level_error          Required access level of command \1 is "\2", you only have "\3".\n
 
 casacl_help                   For the duration of the rest of the configuration file  this directive appears in, elevate the access level.
@@ -3028,7 +3052,7 @@ login_error_unknown         Unknown error code \1 returned, content "\2".
 login_error_invalidclaim    Authority "\1" can't claim you to be "\2"!
 login_error_unexpected_answer Answer "\1" expected from server, but got \2 instead.
 
-login_error_local_nouser    Local user \1 not found.
+login_error_local_nouser    Local user \1 not found. Try "/login \1@forums" instead.
 login_error_local_password  Supplied password for local user \1 incorrect.
 
 chatcommand_requires_player  \1 requires a player username as additional parameter.\n

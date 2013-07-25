@@ -2,6 +2,8 @@ Changes since 0.2.8.3.x:
 - Added detection and reaction code for timing assist bots
 - /shuffle now works before you actually join a team
 - Implemented /shout command and associated settings
+- Fixed suspension and silenced status not being re-applied after a player
+  disconnects and rejoins a server.
 - Tweaks to enemy influence system.
 - Ingame menu and console now are drawn on top of a semi-transparent,
   darkened area for increased readability.
@@ -21,6 +23,16 @@ Changes since 0.2.8.3.x:
 - Added ENCODING ladderlog event, which specifies the encoding for data in
   ladderlog.txt.
 - "--input" now can be used more than once to read from multiple files or pipes.
+- new team management ladderlog messages:
+  TEAM_CREATED <team name>
+  TEAM_DESTROYED <team name>
+  TEAM_RENAMED <old team name> <new team name>
+  TEAM_PLAYER_ADDED <team name> <player>
+  TEAM_PLAYER_REMOVED <team name> <player>
+- Manage external scripts on Unix dedicated servers. New commands: 
+  SPAWN_SCRIPT, RESPAWN_SCRIPT, FORCE_RESPAWN_SCRIPT, KILL_SCRIPT,
+  LIST_SCRIPTS, SCRIPT_ENV.
+- Authentication is now enabled by default.
 
 Changes since 0.2.8.3.1:
 - security fix: old style action commands from clients no loger cause hangs and crashes

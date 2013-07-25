@@ -22,6 +22,11 @@
 // disable POD initialization behavior change warning in VisualC++ 2005
 #pragma warning ( disable: 4345 )
 
+// compatibility with later mingw versions
+#if defined(__GNUC__) && __GNUC__ >= 4
+#define HAVE_ISBLANK
+#endif
+
 // activate dirty OpenGL initialization option
 #ifndef DIRTY
 #define DIRTY

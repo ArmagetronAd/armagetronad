@@ -612,9 +612,9 @@ bool eCamera::Act(uActionCamera *Act,REAL x){
     pos=pos+dir*mf*.25+dir.Turn(eCoord(0,ml*.25));
 
     fov/=zi;
-    if (fov>120) fov=120;
+    if (fov>160 && zi < 1) fov=160;
 
-    if (fov<30) fov=30;
+    if (fov<30 && zi > 1) fov=30;
 
 
     switch(mode){
@@ -1769,7 +1769,18 @@ void eCamera::Timestep(REAL ts){
             if ( Center() &&  wrongDirection > 0 )
             {
                 // if so, turn to the side using the last driving direction
-                newdir = newdir + Center()->LastDirection()*(wrongDirection*ts*turnSpeed*customTurnSpeed180);
+                eCoord normedLastDir = Center()->LastDirection();
+                REAL wrongWrongDirection = -eCoord::F(cycleDir, normedLastDir);
+                if( wrongWrongDirection > 0)
+                {
+                    normedLastDir = normedLastDir + cycleDir * (wrongWrongDirection/cycleDir.NormSquared());
+                    REAL n = normedLastDir.NormSquared();
+                    if(n > 0)
+                    {
+                        normedLastDir *= 1/sqrt(n);
+                    }
+                }
+                newdir = newdir + normedLastDir*(wrongDirection*ts*turnSpeed*customTurnSpeed180);
             }
         }
         else

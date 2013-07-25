@@ -1136,19 +1136,19 @@ void gNetPlayerWall::RenderNormal(const eCoord &p1,const eCoord &p2,REAL ta,REAL
         {
             BeginQuads();
 
-            glColor3f(r,g,b);
+            glColor4f(r,g,b,1);
             glTexCoord2f(ta,hfrac);
             glVertex3f(p1.x,p1.y,extrarise);
             
-            glColor3f(r,g,b);
+            glColor4f(r,g,b,1);
             glTexCoord2f(ta,0);
             glVertex3f(p1.x,p1.y,extrarise + h*hfrac);
             
-            glColor3f(r,g,b);
+            glColor4f(r,g,b,1);
             glTexCoord2f(te,0);
             glVertex3f(p2.x,p2.y,extrarise + h*hfrac);
             
-            glColor3f(r,g,b);
+            glColor4f(r,g,b,1);
             glTexCoord2f(te,hfrac);
             glVertex3f(p2.x,p2.y,extrarise);
         }

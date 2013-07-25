@@ -29,7 +29,7 @@ dnl AC_CANONICAL_BUILD
 dnl AC_CANONICAL_HOST
 
 AC_PROG_RANLIB
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([subdir-objects])
 
 dnl detect which link commant to use
 AC_PROG_LN_S
@@ -173,12 +173,12 @@ AC_ENABLE(armathentication,
        no)  enable_armathentication=no
 	    ;;
        *) AC_MSG_ERROR(bad value ${enableval} for --enable-armathentication) ;;
-     esac],enable_armathentication=no
+     esac],enable_armathentication=yes
      )
 
 AC_ARG_ENABLE(authentication,
     AC_HELP_STRING([--enable-authentication],
-		[enable server side code for the krawall style user authentication (default=disabled)]),
+		[enable server side code for the krawall style user authentication (default=enabled)]),
     [case "${enableval}" in
        yes) enable_armathentication=yes
 	   	;;
@@ -324,7 +324,9 @@ test $CODELEVEL -ge 4 && CXXFLAGS="$CXXFLAGS -Werror"
 
 # unused variables should be tolerated while debugging, they're sometimes just there
 # to be printed in the debugger
-test $CODELEVEL -ge 1 && test $DEBUGLEVEL -ge 1 && CXXFLAGS="$CXXFLAGS -Wno-unused-but-set-variable"
+if test $CODELEVEL -ge 1 && test $DEBUGLEVEL -ge 1; then
+    AX_CXXFLAGS_GCC_OPTION(-Wno-unused-but-set-variable)
+fi
 
 # work arond known cause of warnings in SDL headers
 test $CODELEVEL -ge 2 && test x$build_dedicated = xtrue || CXXFLAGS="$CXXFLAGS -Wno-long-long"
