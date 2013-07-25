@@ -1238,6 +1238,17 @@ protected:
         return eVoteItem::DoCheckValid( senderID );
     }
 
+    virtual void DoExecute()
+    {
+        // Don't prevent name changes if the vote passes
+        eVoter *suggestor = GetSuggestor();
+        if ( suggestor )
+        {
+            suggestor->lastNameChangePreventor_ = -1E30;
+        }
+        DoExecuteHarm();
+    }
+
     virtual void DoFillToMessage( nMessage& m  ) const
     {
         if ( player_ )
@@ -1249,6 +1260,8 @@ protected:
     }
 
 protected:
+    virtual void DoExecuteHarm() = 0;               // Called when the vote passes. Do the harmful action.
+
     virtual nDescriptor& DoGetDescriptor() const;	// returns the creation descriptor
 
     // get the language string prefix
@@ -1347,7 +1360,7 @@ protected:
         return eVoteItemHarm::DoCheckValid( senderID );
     }
 
-    virtual void DoExecute()						// called when the voting was successful
+    virtual void DoExecuteHarm()                                                // called when the voting was successful
     {
         ePlayerNetID * player = GetPlayer();
         nMachine * machine = GetMachine();
@@ -1377,6 +1390,11 @@ protected:
                 machine->OnKick();
             }
         }
+    }
+
+    virtual void DoExecute()
+    {
+        eVoteItemHarm::DoExecute();
     }
 
 private:
@@ -1411,6 +1429,11 @@ protected:
         tASSERT( sn_GetNetState() != nCLIENT );
 
         eVoteItemServerControlled::DoFillToMessage( m );
+    }
+
+    virtual void DoExecute()
+    {
+        eVoteItemHarm::DoExecute();
     }
 private:
     virtual void Update() //!< update description and details
@@ -1464,7 +1487,7 @@ protected:
         return se_votingBiasSuspend;
     }
 
-    virtual void DoExecute()						// called when the voting was successful
+    virtual void DoExecuteHarm()                                                // called when the voting was successful
     {
         ePlayerNetID * player = GetPlayer();
         if ( player )
@@ -1519,9 +1542,14 @@ protected:
         return eVoteItemHarm::DoCheckValid( senderID );
     }
 
-    virtual void DoExecute()						// called when the voting was successful
+    virtual void DoExecuteHarm()                                                // called when the voting was successful
     {
-        eVoteItemKick::DoExecute();
+        eVoteItemKick::DoExecuteHarm();
+    }
+
+    virtual void DoExecute()
+    {
+        eVoteItemHarm::DoExecute();
     }
 private:
     bool fromMenu_; // flag set if the vote came from the menu
