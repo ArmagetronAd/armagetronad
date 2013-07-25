@@ -50,10 +50,14 @@ enum { NUM_FAVORITES = 10 };
 
 //! favorite server information, just to connect
 gServerInfoFavorite::gServerInfoFavorite( tString const & name_, tString const & connectionName, unsigned int port )
+    :nServerInfo::nServerInfo()
 {
-    name = name_;
     nServerInfoBase::SetConnectionName( connectionName );
     nServerInfoBase::SetPort( port );
+    if ( name_.empty() )
+        name = ToString();
+    else
+        name = name_;
 }
 
 //********************************************************************************

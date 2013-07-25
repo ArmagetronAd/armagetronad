@@ -121,11 +121,10 @@ static void login_callback(){
 
 }
 
-// helper function: server info to string
-tString ToString( const nServerInfoBase & info )
+tString nServerInfoBase::ToString() const
 {
     tString ret;
-    ret << info.GetConnectionName() << ":" << info.GetPort();
+    ret << GetConnectionName() << ":" << GetPort();
     return ret;
 }
 
@@ -1197,7 +1196,7 @@ void nServerInfo::GetSmallServerInfo( Network::SmallServerInfo const & info,
         n->timesNotAnswered = 0;
         if ( sn_IsMaster )
         {
-            con << "Received new server: " << ToString( baseInfo ) << "\n";
+            con << "Received new server: " << baseInfo.ToString() << "\n";
             n->timesNotAnswered = 5;
         }
     }
@@ -1206,14 +1205,14 @@ void nServerInfo::GetSmallServerInfo( Network::SmallServerInfo const & info,
         n->Alive();
 
         // on update, prefer to keep the IP version to avoid needless DNS loopups.
-        if ( n->GetConnectionName() != baseInfo.GetConnectionName() && n->GetAddress().ToString() != ToString(*n) )
+        if ( n->GetConnectionName() != baseInfo.GetConnectionName() && n->GetAddress().ToString() != n->ToString() )
         {
             n->SetConnectionName( baseInfo.GetConnectionName() );
         }
 
         if ( sn_IsMaster )
         {
-            con << "Updated server: " <<  ToString( baseInfo ) << "\n";
+            con << "Updated server: " << baseInfo.ToString() << "\n";
         }
     }
 
@@ -1222,7 +1221,7 @@ void nServerInfo::GetSmallServerInfo( Network::SmallServerInfo const & info,
 
     if (n->name.Len() <= 1)
     {
-        n->name <<  ToString( baseInfo );
+        n->name << baseInfo.ToString();
         n->nameForSorting << sn_serverIPCharacterFilter.FilterServerName( n->name );
     }
 
@@ -1359,7 +1358,7 @@ nServerInfo* nServerInfo::GetBigServerInfoCommon(  Network::BigServerInfo const 
         if ( sn_IsMaster )
         {
             tOutput message;
-            message.SetTemplateParameter(1, ToString( baseInfo ) );
+            message.SetTemplateParameter(1, baseInfo.ToString() );
             message.SetTemplateParameter(2, sn_Connections[sender.SenderID()].socket->GetAddress().ToString() );
             message << "$network_browser_unidentified";
             con << message;
@@ -1369,7 +1368,7 @@ nServerInfo* nServerInfo::GetBigServerInfoCommon(  Network::BigServerInfo const 
             // add the server, but ping it again
             nServerInfo * n = CreateServerInfo();
             n->CopyFrom( baseInfo );
-            n->name = ToString( baseInfo );
+            n->name = baseInfo.ToString();
             n->QueryServer();
 #ifdef DEBUG
             con << "Recevied unknown server " << n->name << ".\n";
@@ -1987,7 +1986,7 @@ void nServerInfo::QueryServer()                                  // start to get
     if ( !queryDirectly )
     {
         // see if the server name is just IP:port; if no, we already successfully polled it
-        if ( name != ToString( *this ) )
+        if ( name != ToString() )
         {
             advancedInfoSetEver = true;
         }
@@ -2009,7 +2008,7 @@ void nServerInfo::QueryServer()                                  // start to get
 #ifdef DEBUG
     if ( sn_IsMaster )
     {
-        con << "Querying server " <<  ToString( *this ) << "\n";
+        con << "Querying server " << ToString() << "\n";
     }
 #endif
 
@@ -2054,7 +2053,7 @@ void nServerInfo::QueryServer()                                  // start to get
             timesNotAnswered = 1000;
             if ( sn_IsMaster )
             {
-                con << "Deleted unreachable server: " <<  ToString( *this ) << "\n";
+                con << "Deleted unreachable server: " << ToString() << "\n";
 
                 delete this;
             }
@@ -2096,11 +2095,11 @@ void nServerInfo::QueryServer()                                  // start to get
     {
         if ( ++timesNotAnswered == sn_TNALostContact && sn_IsMaster )
         {
-            con << "Lost contact with server: " <<  ToString( *this ) << "\n";
+            con << "Lost contact with server: " << ToString() << "\n";
         }
         else if ( sn_IsMaster && timesNotAnswered == 2 )
         {
-            con << "Starting to lose contact with server: " <<  ToString( *this ) << ", name \"" << tColoredString::RemoveColors(name) << "\"\n";
+            con << "Starting to lose contact with server: " << ToString() << ", name \"" << tColoredString::RemoveColors(name) << "\"\n";
         }
     }
 
@@ -3208,12 +3207,12 @@ void nServerInfo::ReadSyncThis(  Network::BigServerInfo const & info,
         {
             if ( !advancedInfoSetEver )
             {
-                con << "Acknowledged server: " <<  ToString( *this ) << ", name: \"" << tColoredString::RemoveColors(name) << "\"\n";
+                con << "Acknowledged server: " << ToString() << ", name: \"" << tColoredString::RemoveColors(name) << "\"\n";
                 Save();
             }
             else if ( name != oldName )
             {
-                con << "Name of server " <<  ToString( *this )
+                con << "Name of server " << ToString()
                 << " changed from \"" << tColoredString::RemoveColors(oldName)
                 << "\" to \"" << tColoredString::RemoveColors(name) << "\"\n";
             }
@@ -3358,9 +3357,9 @@ nAddress & nServerInfoBase::AccessAddress( void ) const
 //!
 // *******************************************************************************************
 
-const tString & nServerInfoBase::DoGetName( void ) const
+tString nServerInfoBase::DoGetName( void ) const
 {
-    return connectionName_;
+    return ToString();
 }
 
 // *******************************************************************************************
@@ -3373,7 +3372,7 @@ const tString & nServerInfoBase::DoGetName( void ) const
 //!
 // *******************************************************************************************
 
-const tString & nServerInfo::DoGetName( void ) const
+tString nServerInfo::DoGetName( void ) const
 {
     return name;
 }

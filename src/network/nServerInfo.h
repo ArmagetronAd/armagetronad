@@ -90,11 +90,14 @@ public:
 
     nServerInfoBase & operator = ( const nServerInfoBase & other );
 
-    inline const tString & GetName() const;     //!< returns the server's name
+    inline tString GetName() const;     //!< returns the server's name
+    
+    // helper function: server info to string
+    tString ToString() const;
 protected:
     virtual void DoGetFrom( nSocket const * socket );  //!< fills data from this server and the given socket
 
-    virtual const tString& DoGetName() const;   //!< returns the server's name
+    virtual tString DoGetName() const;   //!< returns the server's name
 private:
     tString         connectionName_;            //!< the internet name of the server ("192.168.10.10", "atron.dyndns.org")
     unsigned int    port_;                      //!< the network port the server listens on
@@ -404,7 +407,7 @@ public:
     }
 
 protected:
-    virtual const tString& DoGetName() const;   //!< returns the server's name
+    virtual tString DoGetName() const;   //!< returns the server's name
 
 private:
     QueryType queryType_; //!< the query type to use for this server
@@ -474,7 +477,7 @@ public:
 //!
 // *******************************************************************************************
 
-const tString & nServerInfoBase::GetName( void ) const
+tString nServerInfoBase::GetName( void ) const
 {
     return DoGetName();
 }
