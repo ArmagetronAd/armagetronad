@@ -1306,46 +1306,32 @@ void gZone::InteractWith( eGameObject * target, REAL time, int recursion )
                 }
             }
 
-            gSoccerZoneHack *tarZone = dynamic_cast<gSoccerZoneHack *>(target);
-            if (tarZone)
+            gSoccerZoneHack *gSoccerZone = dynamic_cast<gSoccerZoneHack *>(this);
+            if (gSoccerZone)
             {
-                gSoccerZoneHack *tisZone = dynamic_cast<gSoccerZoneHack *>(this);
-                if (tisZone && (tarZone != tisZone))
+                gSoccerZoneHack *gNormalZone = dynamic_cast<gSoccerZoneHack *>(target);
+                if ((gNormalZone) && (gNormalZone != gSoccerZone) && (!gNormalZone->destroyed_))
                 {
-                    REAL distance = tisZone->Radius() + tarZone->GetRadius();
-                    if ((tarZone->Position() - tisZone->Position() ).NormSquared() < (distance * distance))
+                    REAL dis = this->Radius() + gNormalZone->Radius();
+                    if ( ( gNormalZone->Position() - this->Position() ).NormSquared() < (dis * dis) )
                     {
-                        tisZone->OnEnter(tarZone, time);
+                        gSoccerZone->OnEnter(gNormalZone, time);
                     }
                 }
             }
 
-            gZone *randomZone = dynamic_cast<gZone *>(target);
-            if (randomZone)
+            gObjectZoneHack *gObjectZone = dynamic_cast<gObjectZoneHack *>(this);
+            if (gObjectZone)
             {
-                //  for object zone entry
-                gObjectZoneHack *objZone = dynamic_cast<gObjectZoneHack *>(this);
-                if (objZone && (objZone != randomZone))
+                gZone *gNormalZone = dynamic_cast<gZone *>(target);
+                if ((gNormalZone) && (gNormalZone != gObjectZone) && (!gNormalZone->destroyed_))
                 {
-                    REAL distance = objZone->Radius() + randomZone->GetRadius();
-                    if ((randomZone->Position() - objZone->Position() ).NormSquared() < (distance * distance))
+                    REAL dis = this->Radius() + gNormalZone->Radius();
+                    if ( ( gNormalZone->Position() - this->Position() ).NormSquared() < (dis * dis) )
                     {
-                        objZone->OnEnter(randomZone, time);
+                        gObjectZone->OnEnter(gNormalZone, time);
                     }
                 }
-
-                /*
-                //  for racing zone entry
-                gRaceZoneHack *raceZone = dynamic_cast<gRaceZoneHack *>(this);
-                if (raceZone && (raceZone != randomZone))
-                {
-                    REAL distance = raceZone->Radius() + randomZone->GetRadius();
-                    if ((randomZone->Position() - raceZone->Position() ).NormSquared() < (distance * distance))
-                    {
-                        raceZone->OnEnter(randomZone, time);
-                    }
-                }
-                */
             }
         }
     }
