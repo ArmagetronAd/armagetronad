@@ -3891,6 +3891,7 @@ gSumoZoneHack::gSumoZoneHack( nMessage & m )
 
 void gSumoZoneHack::OnVanish( void )
 {
+    grid->RemoveGameObjectInteresting(this);
 }
 // *******************************************************************************
 // *
@@ -6207,6 +6208,8 @@ void gTargetZoneHack::OnVanish( void )
     }
     // decrement target zone counter
     TargetZoneCounter_--;
+
+    grid->RemoveGameObjectInteresting(this);
 }
 
 
@@ -6566,6 +6569,7 @@ void gTeleportZoneHack::OnEnter( gCycle * target, REAL time )
 
 void gTeleportZoneHack::OnVanish( void )
 {
+    grid->RemoveGameObjectInteresting(this);
 }
 
 
@@ -6683,6 +6687,7 @@ void gBlastZoneHack::OnEnter( gCycle * target, REAL time )
 
 void gBlastZoneHack::OnVanish( void )
 {
+    grid->RemoveGameObjectInteresting(this);
 }
 
 // *******************************************************************************
@@ -7537,7 +7542,7 @@ void gSoccerZoneHack::OnVanish( void )
         GoHome();
     }
     else
-        this->RemoveFromListsAll();
+        grid->RemoveGameObjectInteresting(this);
 }
 
 // *******************************************************************************
@@ -7858,7 +7863,7 @@ void gRaceZoneHack::OnExit( gCycle * target, REAL time )
 
 void gRaceZoneHack::OnVanish( void )
 {
-    this->RemoveFromListsAll();
+    grid->RemoveGameObjectInteresting(this);
 }
 */
 
