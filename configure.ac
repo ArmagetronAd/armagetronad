@@ -31,7 +31,7 @@ dnl AC_CANONICAL_HOST
 AC_PROG_RANLIB
 
 dnl use slighly less ancient tar format allowing slighlty longer filenames.
-AM_INIT_AUTOMAKE([tar-ustar filename-length-max=255])
+AM_INIT_AUTOMAKE([tar-ustar filename-length-max=255 subdir-objects])
 
 dnl detect which link commant to use
 AC_PROG_LN_S

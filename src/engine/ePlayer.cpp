@@ -5006,11 +5006,12 @@ void ePlayerNetID::MyInitAfterCreation()
         // clear old legacy spectator that may be lurking around
         se_ClearLegacySpectator( Owner() );
 
-        // get suspension count
-        if ( GetVoter() )
+        // get silenced state and suspension count
+        eVoter *voter = eVoter::GetPersistentVoter( Owner() );
+        if ( voter )
         {
-            suspended_ = GetVoter()->suspended_;
-            silenced_ = GetVoter()->silenced_;
+            suspended_ = voter->suspended_;
+            silenced_ = voter->silenced_;
         }
     }
 
@@ -5084,9 +5085,9 @@ void ePlayerNetID::RemoveFromGame()
     this->UnregisterWithMachine();
 
     // release voter
-    if ( this->voter_ )
-        this->voter_->RemoveFromGame();
-    this->voter_ = 0;
+    eVoter *voter = eVoter::GetPersistentVoter( Owner() );
+    if ( voter )
+        voter->RemoveFromGame();
 
     // log scores
     LogScoreDifference();
@@ -5972,9 +5973,9 @@ void ePlayerNetID::CreateVoter()
     // only count nonlocal players with voting support as voters
     if ( sn_GetNetState() != nCLIENT && this->Owner() != 0 && sn_Connections[ this->Owner() ].version.Max() >= 3 )
     {
-        this->voter_ = eVoter::GetVoter( this->Owner() );
-        if ( this->voter_ )
-            this->voter_->PlayerChanged();
+        eVoter *voter = eVoter::GetPersistentVoter( Owner() );
+        if ( voter )
+            voter->PlayerChanged();
     }
 }
 
@@ -8051,12 +8052,6 @@ void ePlayerNetID::UpdateTeam()
     }
 
     UpdateTeamForce();
-
-    // create voter
-    if( !GetVoter() )
-    {
-        CreateVoter();
-    }
 }
 
 void ePlayerNetID::UpdateTeamForce()
@@ -9167,9 +9162,10 @@ public:
 
             if ( oldScreenName_ != screenName )
             {
-                if ( bool(player_.GetVoter() ) )
+                eVoter *voter = eVoter::GetPersistentVoter( player_.Owner() );
+                if ( voter )
                 {
-                    player_.GetVoter()->PlayerChanged();
+                    voter->PlayerChanged();
                 }
 
                 if ( adminRename_ )
@@ -9401,7 +9397,7 @@ bool ePlayerNetID::HasRenameCapability ( ePlayerNetID const * victim, ePlayerNet
 
 bool ePlayerNetID::IsAllowedToRename ( void )
 {
-    if ( !IsHuman() || ( nameFromServer_ == nameFromClient_ && nameFromServer_ == nameFromAdmin_ ) || nameFromServer_.Len() < 1 || sn_GetNetState() == nCLIENT )
+    if ( !IsHuman() || ( nameFromServer_ == nameFromClient_ && nameFromServer_ == nameFromAdmin_ ) || nameFromServer_.Len() <= 1 || sn_GetNetState() == nCLIENT )
     {
         // Don't complain about people who either are bots, doesn't change name, or are entering the grid
         return true;
@@ -9428,7 +9424,8 @@ bool ePlayerNetID::IsAllowedToRename ( void )
         return false;
     }
     // disallow name changes if there was a kick vote recently
-    if ( !( !bool(this->voter_) || voter_->AllowNameChange() || nameFromServer_.Len() <= 1 ) && nameFromServer_ != nameFromClient_ )
+    eVoter *voter = eVoter::GetVoter( Owner() );
+    if ( !( !bool(voter) || voter->AllowNameChange() || nameFromServer_.Len() <= 1 ) && nameFromServer_ != nameFromClient_ )
     {
         // inform victim to avoid complaints
         tOutput message( "$player_rename_rejected_votekick", nameFromServer_, nameFromClient_ );
@@ -9825,10 +9822,11 @@ void ePlayerNetID::UnregisterWithMachine( void )
     if ( registeredMachine_ )
     {
         // store suspension count
-        if ( GetVoter() )
+        eVoter *voter = eVoter::GetPersistentVoter( Owner() );
+        if ( voter )
         {
-            GetVoter()->suspended_ = suspended_;
-            GetVoter()->silenced_ = silenced_;
+            voter->suspended_ = suspended_;
+            voter->silenced_ = silenced_;
         }
 
         registeredMachine_->RemovePlayer();

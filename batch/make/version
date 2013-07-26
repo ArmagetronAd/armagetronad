@@ -179,7 +179,7 @@ then
         # If really no change was made, use the fool's number, with tag if any
         # So check if we have tags
         revno=$(bzr revno ${srcdir})
-        tag=$(bzr tags -d ${srcdir} | sed -ne 's/^\(.*\) +${revno}$/\1/p' )
+        tag=$(bzr tags -r $revno | awk '{ print $1 }')
         if test ${tag}
         then
             # If it is tagged, use the tag

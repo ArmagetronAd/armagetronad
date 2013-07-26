@@ -154,6 +154,8 @@ Changes since 0.2.8.3.x:
 - Added detection and reaction code for timing assist bots
 - /shuffle now works before you actually join a team
 - Implemented /shout command and associated settings
+- Fixed suspension and silenced status not being re-applied after a player
+  disconnects and rejoins a server.
 - Tweaks to enemy influence system.
 - Ingame menu and console now are drawn on top of a semi-transparent,
   darkened area for increased readability.
@@ -181,7 +183,7 @@ Changes since 0.2.8.3.x:
   TEAM_PLAYER_REMOVED <team name> <player>
 - Manage external scripts on Unix dedicated servers. New commands: 
   SPAWN_SCRIPT, RESPAWN_SCRIPT, FORCE_RESPAWN_SCRIPT, KILL_SCRIPT,
-  CHECK_SCRIPT, LIST_SCRIPTS, SCRIPT_ENV.
+  LIST_SCRIPTS, SCRIPT_ENV.
 - Authentication is now enabled by default.
 
 Changes since 0.2.8.3.1:
