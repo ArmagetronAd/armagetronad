@@ -74,6 +74,7 @@ public:
     static eVoter* GetPersistentVoter (int ID );                // find or create the persistent voter for the specified ID
     static eVoter* GetPersistentVoter ( nMachine & machine );   // find or create the persistent voter for the specified machine
     static bool VotingPossible();								// returns whether voting is currently possible
+    static int NumberVoters();                                  // return the number of possible voters
 
     static void HandleChat( ePlayerNetID * p, std::istream & message ); //!< handles player "/vote" command.
 
