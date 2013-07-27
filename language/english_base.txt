@@ -3329,7 +3329,7 @@ player_reach_race_time                \2| \1 0xfffffffinished in \3 ( \4 s behin
 
 player_personal_best_reach_time       New personal record! Your new time record is \1 seconds.\n
 
-race_player_hold_best_time            Congratulations to \1 0xRESETT holding the best time of \2 seconds here.\n
+race_player_hold_best_time            Congratulations to \1 0xRESETT holding the best time of \2 seconds for \3.\n
 race_player_hold_same_rank            \1 finished \3 seconds slower but remained at rank \4.\n
 race_player_hold_faster_time          \1 finished \3 seconds faster but remained at rank \4.\n
 race_player_hold_faster_rank          \1 finished \3 seconds faster and rose to rank \4.\n

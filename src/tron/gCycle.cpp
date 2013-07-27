@@ -6883,16 +6883,15 @@ static void sg_RespawnPlayer(std::istream &s)
         }
 
         tString params;
-        params.ReadLine( s, true );
+        params.ReadLine( s );
 
         // first parse the line to get the params : <player name> <message flag> <x> <y> <dirx> <diry>
         int pos = 0; //
         tString PlayerName = ePlayerNetID::FilterName(params.ExtractNonBlankSubString(pos));
-        ePlayerNetID *pPlayer = 0;
-        pPlayer = ePlayerNetID::FindPlayerByName(PlayerName, NULL);
-        if(!pPlayer) {
+        ePlayerNetID *pPlayer = ePlayerNetID::FindPlayerByName(PlayerName);
+        if(!pPlayer)
             return;
-        }
+
         //const tString message_str = params.ExtractNonBlankSubString(pos);
         //int message = atoi(message_str);
         const tString x_str = params.ExtractNonBlankSubString(pos);
@@ -6912,8 +6911,7 @@ static void sg_RespawnPlayer(std::istream &s)
         pdir = eCoord(dirx,diry);
 
         // let's respawn now ...
-        eGameObject *pGameObject = pPlayer->Object();
-        if ((!pGameObject) || (!(pGameObject->Alive()) ))
+        if (!pPlayer->Object() || !pPlayer->Object()->Alive())
         {
             gCycle *pCycle = new gCycle(grid, ppos, pdir, pPlayer);
             pPlayer->ControlObject(pCycle);
