@@ -785,10 +785,8 @@ AC_MSG_ERROR([
 # fi
 
 dnl *************************************************
-dnl         Armathentication Threading
+dnl         Threading
 dnl *************************************************
-
-if test x$enable_armathentication = xyes; then
 
 AC_LANG([C++])
 
@@ -813,10 +811,6 @@ AC_DEFINE(HAVE_PTHREAD,1,[Define if you have POSIX threads libraries and header 
 ])
 
 ])
-
-
-fi # armathentication
-
 
 dnl *************************************************
 dnl         protocol buffers

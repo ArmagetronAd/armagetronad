@@ -79,11 +79,10 @@ private:
 };
 }
 
-#else  // HAVE_LIBPTHREAD
+#else  // HAVE_PTHREAD
 
 #include "tError.h"
 
-// replicate the little we actually use with PThreads
 namespace boost
 {
 class thread
@@ -98,7 +97,7 @@ public:
 };
 }
 
-#endif // HAVE_LIBPTHREAD
+#endif // HAVE_PTHREAD
 
 #endif // HAVE_LIBBOOST_THREAD
 
