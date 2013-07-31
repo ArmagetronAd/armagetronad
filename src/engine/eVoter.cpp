@@ -378,15 +378,8 @@ public:
             return false;
         }
 
-        // spawn spectator voters
-        for ( i = MAXCLIENTS; i > 0; --i )
-        {
-            if ( sn_Connections[ i ].socket )
-                eVoter::GetVoter( i );
-        }
-
         // enough voters online?
-        if ( eVoter::voters_.Len() < se_minVoters )
+        if ( eVoter::NumberVoters() < se_minVoters )
         {
             tOutput message("$vote_toofew");
             sn_ConsoleOut( message, senderID );
@@ -496,7 +489,7 @@ public:
                         // remove him from the lists
                         vote->RemoveVoter( voter );
 
-                        // insert hum
+                        // insert him
                         vote->voters_[ result ].Insert( voter );
                     }
 
@@ -601,7 +594,7 @@ public:
         }
 
         // see if the voting has timed out
-        int relevantNumVoters = sn_GetNetState() == nCLIENT ? se_PlayerNetIDs.Len() + MAXCLIENTS : eVoter::voters_.Len(); // the number of voters (overestimate the value on the client)
+        int relevantNumVoters = sn_GetNetState() == nCLIENT ? se_PlayerNetIDs.Len() + MAXCLIENTS : eVoter::NumberVoters(); // the number of voters (overestimate the value on the client)
         if ( this->creationTime_ < tSysTimeFloat() - se_votingTimeout - se_votingTimeoutPerVoter * relevantNumVoters )
         {
             this->BroadcastMessage( tOutput( "$vote_timeout" ) );
@@ -2077,6 +2070,18 @@ bool eVoter::VotingPossible()
     }
 
     return eVoteItem::GetItems().Len() > 0;
+}
+
+int eVoter::NumberVoters()
+{
+    std::set< eVoter * > possibleVoters;
+    for ( int i = MAXCLIENTS; i > 0; --i )
+    {
+        eVoter * voter = eVoter::GetVoter( i );
+        if ( voter )
+        possibleVoters.insert( voter );
+    }
+    return possibleVoters.size();
 }
 
 eVoter* eVoter::GetVoter( int ID, bool complain )

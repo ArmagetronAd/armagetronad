@@ -126,6 +126,8 @@ static void sg_queueRefill(std::istream &s)
                     msg << "$queue_refill_success";
                     sn_ConsoleOut(msg);
 
+                    gQueuePlayers::Save();
+
                     return;
                 }
             }
@@ -171,6 +173,8 @@ static void sg_queueGive(std::istream &s)
 
                         //  apply
                         qPlayer->SetQueue(new_queues);
+
+                        gQueuePlayers::Save();
                     }
 
                     return;

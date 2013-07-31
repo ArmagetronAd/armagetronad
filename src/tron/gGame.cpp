@@ -6512,7 +6512,7 @@ void gGame::Analysis(REAL time){
         return;
     }
 
-    //SMALL HACK BEGIN
+    /*SMALL HACK BEGIN
     if (sg_currentSettings->gameType == gFREESTYLE)
     {
         int everyone_alive = ai_alive + alive;
@@ -6529,13 +6529,12 @@ void gGame::Analysis(REAL time){
         int everyone_alive = ai_alive + alive;
         if ((everyone_alive <= 1) && (!sg_roundfinishedchecker))
         {
-            sg_roundFinishedWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
-            sg_roundFinishedWriter.write();
+
 
             sg_roundfinishedchecker = true;
         }
     }
-    //SMALL HACK END
+    //SMALL HACK END*/
 
     //HACK RACE begin
 
@@ -6689,6 +6688,9 @@ void gGame::Analysis(REAL time){
                 e->OnRoundEnd();
             }
         }
+
+        sg_roundFinishedWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
+        sg_roundFinishedWriter.write();
     }
 
     // analyze the ranking list
