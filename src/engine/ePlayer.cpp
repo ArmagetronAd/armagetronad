@@ -4548,19 +4548,13 @@ void ePlayer::Init(){
     se_Players = tNEW( ePlayer[MAX_PLAYERS] );
 
     int i;
-    for(i=MAX_INSTANT_CHAT-1;i>=0;i--){
+    for( i = MAX_INSTANT_CHAT-1; i >= 0; i-- )
+    {
         tString id;
-        id << "INSTANT_CHAT_";
-        id << i+1;
-        tOutput desc;
-        desc.SetTemplateParameter(1, i+1);
-        desc << "$input_instant_chat_text";
-
-        tOutput help;
-        help.SetTemplateParameter(1, i+1);
-        help << "$input_instant_chat_help";
-        ePlayer::se_instantChatAction[i]=tNEW(uActionPlayer) (id, desc, help, 100);
-        //,desc,       "Issues a special instant chat macro.");
+        id << "INSTANT_CHAT_" << ( i + 1 );
+        uActionPlayer *action = tNEW( uActionPlayer )( id, tOutput( "$input_instant_chat_text" ), tOutput( "$input_instant_chat_help" ), 100 );
+        action->SetShowInGenericConfigurationMenu( false );
+        ePlayer::se_instantChatAction[ i ] = action;
     }
 
 

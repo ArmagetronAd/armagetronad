@@ -35,6 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tConfiguration.h"
 #include "tLocale.h"
 #include "tSafePTR.h"
+#include "uMenu.h"
 
 #define uMAX_PLAYERS 4
 
@@ -56,6 +57,7 @@ class uAction:public tListItem<uAction>{
 
     uActionTooltip *tooltip_;
 protected:
+    bool shouldShowInGenericConfigurationMenu_;
     int localID;  // unique id on this host
     int globalID; // unique ID send from the server
 public:
@@ -70,6 +72,16 @@ public:
     uActionTooltip * GetTooltip() const
     {
         return tooltip_;
+    }
+    
+    void SetShowInGenericConfigurationMenu( bool shouldShow )
+    {
+        shouldShowInGenericConfigurationMenu_ = shouldShow;
+    }
+    
+    bool ShowInGenericConfigurationMenu() const
+    {
+        return shouldShowInGenericConfigurationMenu_;
     }
 
 #ifdef SLOPPYLOCALE
@@ -191,8 +203,6 @@ class uInput;
 
 class uBind: public tReferencable< uBind >
 {
-    friend class uMenuItemInput;
-
     virtual bool Delayable()=0;
     virtual bool DoActivate(REAL x)=0;
     REAL lastValue_;
@@ -328,6 +338,30 @@ void su_KeyInit();
 
 // initialize joysticks
 void su_JoystickInit();
+
+// *****************************************************
+//  Menuitem for input selection
+// *****************************************************
+
+class uMenuItemInput: uMenuItem
+{
+    uAction      *act;
+    int         ePlayer;
+    bool        active;
+public:
+    uMenuItemInput(uMenu *M,uAction *a,int p);
+    virtual ~uMenuItemInput(){}
+    virtual void Render(REAL x,REAL y,REAL alpha=1,bool selected=0);
+    virtual void Enter();
+    virtual bool Event(SDL_Event &e);
+    virtual tString Help()
+    {
+        tString ret;
+        ret << helpText << "\n";
+        ret << tOutput("$input_item_help");
+        return ret;
+    }
+};
 
 #endif
 

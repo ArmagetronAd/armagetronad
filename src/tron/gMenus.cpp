@@ -41,10 +41,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "gCycle.h"
 #include "tRecorder.h"
 #include "rSysdep.h"
+#include "uInput.h"
 
 #include <sstream>
 #include <set>
 #include <ctime>
+#include <vector>
 
 #ifndef DEDICATED
 static tConfItem<int>   tm0("TEXTURE_MODE_0",rTextureGroups::TextureMode[0]);
@@ -924,21 +926,29 @@ void sg_PlayerMenu(int Player){
     //  name.Clear();
     chat_menu.SetCenter(-.5);
 
-    uMenuItemString *ic[MAX_INSTANT_CHAT];
-
     ePlayer *p = ePlayer::PlayerConfig(Player);
     if (!p)
         return;
 
-    int i;
-    for(i=MAX_INSTANT_CHAT-1;i>=0;i--){
-        tOutput name;
-        name.SetTemplateParameter(1, i+1);
-        name << "$player_chat_chat";
-        ic[i]=new uMenuItemString
-              (&chat_menu,name,
-               "$player_chat_chat_help",
-               p->instantChatString[i], se_SpamMaxLen);
+    std::vector< uMenuItemString * > instantChatSlots;
+    std::vector< uMenuItemInput * > instantChatInputs;
+    std::vector< uMenuItemDivider * > instantChatDividers;
+
+    for ( int i = MAX_INSTANT_CHAT - 1 ; i >= 0; i-- )
+    {
+        instantChatSlots.push_back(
+            new uMenuItemString(
+                &chat_menu,
+                tOutput( "$player_chat_chat" ),
+                "$player_chat_chat_help",
+                p->instantChatString[ i ],
+                se_SpamMaxLen
+            )
+        );
+        instantChatInputs.push_back(
+            new uMenuItemInput( &chat_menu, p->se_instantChatAction[ i ], Player + 1 )
+        );
+        instantChatDividers.push_back( new uMenuItemDivider( &chat_menu ) );
     }
 
     uMenuItemToggle al
@@ -1099,9 +1109,12 @@ void sg_PlayerMenu(int Player){
 
     playerMenu.Enter();
 
-    for(i=MAX_INSTANT_CHAT-1; i>=0; i--)
-        delete ic[i];
-
+    for ( std::vector< uMenuItemString * >::const_iterator it = instantChatSlots.begin(); it != instantChatSlots.end(); ++it )
+        delete *it;
+    for ( std::vector< uMenuItemInput * >::const_iterator it = instantChatInputs.begin(); it != instantChatInputs.end(); ++it )
+        delete *it;
+    for ( std::vector< uMenuItemDivider * >::const_iterator it = instantChatDividers.begin(); it != instantChatDividers.end(); ++it )
+        delete *it;
 
     // request network synchronisation if the server can handle it
     static nVersionFeature inGameRenames( 5 );

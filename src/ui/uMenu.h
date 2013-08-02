@@ -267,6 +267,26 @@ protected:
     void SetColor( bool selected, REAL alpha );            //!< Sets the color of text output for this menuitem
 };
 
+// A menu-item that acts as a divider
+class uMenuItemDivider : public uMenuItem
+{
+public:
+    uMenuItemDivider( uMenu *menu )
+        :uMenuItem( menu, tOutput() )
+    {
+    }
+    
+    virtual bool IsSelectable()
+    {
+        return false;
+    }
+    
+    virtual void Render( REAL x, REAL y, REAL alpha=1, bool selected=false )
+    {
+        DisplayText( x - .02, y, "", selected, alpha, 1 );
+    }
+};
+
 
 // *****************************************************
 // Menu Exit

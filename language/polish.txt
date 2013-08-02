@@ -1133,7 +1133,6 @@ input_switch_view_help        Zmienia perspektywę kamery.
 #********************************************
 #********************************************
 
-input_instant_chat_text       Szybki Chat \1
 input_instant_chat_help       Włącza specjalny, dowolnie wybrany tekst.
 
 #********************************************
@@ -1705,8 +1704,6 @@ player_camera_text            Ustawienia Kamery
 player_camera_help            Przygotuj ustawienia kamery.
 
 player_chat_text              Ustawienia Szybkiego Chatu
-
-player_chat_chat              Szybki Chat \1:
 player_chat_chat_help         Ustawia szybkie teksty, które mogą zostać wysłane przez naciśnięcie jednego klawisza.
 
 player_blue_text              Niebieski:

@@ -660,7 +660,6 @@ input_switch_view_help        Change la perspective de la camera. Vues disponibl
 #********************************************
 #********************************************
 
-input_instant_chat_text       Instant Chat \1
 input_instant_chat_help       Publie un macro special pour le chat
 
 
@@ -1139,7 +1138,6 @@ player_camera_help            Configure vos preferences pour la camera
 
 player_chat_text              Configuration du chat
 
-player_chat_chat              Chat \1: 
 player_blue_text              Bleu:
 player_blue_help              Vous permet de choisir le composant bleu de votre couleur.
 

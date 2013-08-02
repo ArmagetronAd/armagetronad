@@ -845,7 +845,6 @@ input_switch_view_help        Cambia la perspectiva de la cámara. Vistas disponi
 #********************************************
 #********************************************
 
-input_instant_chat_text       Instant Chat \1
 input_instant_chat_help       Activa una macro rápida de chat
 
 
@@ -1334,7 +1333,6 @@ player_camera_help            Configura tus preferencias para la cámara.
 
 player_chat_text              Configuración del chat
 
-player_chat_chat              Chat \1: 
 player_chat_chat_help         Configura las macros rápidas de chat que puedes decir al pulsar una tecla.
 
 player_blue_text              Azul:

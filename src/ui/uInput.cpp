@@ -46,7 +46,8 @@ static int     su_allActionsLen = 0;
 uAction::uAction(uAction *&anchor,const char* name,
                  int priority_,
                  uInputType t)
-        :tListItem<uAction>(anchor),tooltip_(NULL),type(t),priority(priority_),internalName(name){
+        :tListItem<uAction>(anchor),tooltip_(NULL), shouldShowInGenericConfigurationMenu_( true ), type(t),priority(priority_),internalName(name)
+{
     globalID = localID = su_allActionsLen++;
 
     tASSERT(localID < uMAX_ACTIONS);
@@ -71,7 +72,8 @@ uAction::uAction(uAction *&anchor,const char* name,
                  const tOutput& help,
                  int priority_,
                  uInputType t)
-        :tListItem<uAction>(anchor),tooltip_(NULL),type(t),priority(priority_),internalName(name), description(desc), helpText(help){
+        :tListItem<uAction>(anchor),tooltip_(NULL), shouldShowInGenericConfigurationMenu_( true ), type(t),priority(priority_),internalName(name), description(desc), helpText(help)
+{
     globalID = localID = su_allActionsLen++;
 
     tASSERT(localID < uMAX_ACTIONS);
@@ -1067,141 +1069,6 @@ static void su_TransformEvent( SDL_Event & e, std::vector< uTransformEventInfo >
 }
 #endif // DEDICATED
 
-// *****************************************************
-//  Menuitem for input selection
-// *****************************************************
-
-class uMenuItemInput: uMenuItem{
-    uAction      *act;
-    int         ePlayer;
-    bool        active;
-public:
-    uMenuItemInput(uMenu *M,uAction *a,int p)
-            :uMenuItem(M,a->helpText),act(a),ePlayer(p),active(0){
-    }
-
-    virtual ~uMenuItemInput(){}
-
-    virtual void Render(REAL x,REAL y,REAL alpha=1,bool selected=0)
-    {
-        DisplayText(REAL(x-.02),y,act->description,selected,alpha,1);
-
-        if (active)
-        {
-            tString s;
-            s << tOutput("$input_press_any_key");
-            DisplayText(REAL(x+.02),y,s,selected,alpha,-1);
-        }
-        else
-        {
-            tString s;
-
-            bool first=1;
-
-            for ( uInputs::const_iterator i = su_inputs.begin(); i != su_inputs.end(); ++i )
-            {
-                uBind * bind = (*i)->GetBind();
-                if ( bind && (*i)->Name().size() > 0 &&
-                        bind->act==act &&
-                        bind->CheckPlayer(ePlayer) )
-                {
-                    if (!first)
-                        s << ", ";
-                    else
-                        first=0;
-
-                    s << (*i)->Name();
-                }
-            }
-            if (!first)
-            {
-                DisplayText(REAL(x+.02),y,s,selected,alpha,-1);
-            }
-            else
-            {
-                DisplayText(REAL(x+.02),y,tOutput("$input_items_unbound"),selected,alpha,-1);
-            }
-        }
-    }
-
-    virtual void Enter()
-    {
-        active=1;
-    }
-
-#define MTHRESH 5
-#define MREL    2
-
-#ifndef DEDICATED
-
-    virtual bool Event(SDL_Event &e){
-        if ( e.type == SDL_KEYDOWN )
-        {
-            SDL_keysym &c = e.key.keysym;
-            if (!active)
-            {
-                if (c.sym==SDLK_DELETE || c.sym==SDLK_BACKSPACE)
-                {
-                    // clear all bindings
-                    for ( uInputs::const_iterator i = su_inputs.begin(); i != su_inputs.end(); ++i )
-                    {
-                        uBind * bind = (*i)->GetBind();
-                        if ( bind &&
-                                bind->act==act &&
-                                bind->CheckPlayer(ePlayer) )
-                        {
-                            (*i)->SetBind( NULL );
-                        }
-                    }
-                    return true;
-                }
-                return false;
-            }
-
-            // ignore escape
-            if ( c.sym == SDLK_ESCAPE )
-            {
-                return false;
-            }
-        }
-
-        // transform events
-        std::vector< uTransformEventInfo > events;
-        su_TransformEvent( e, events );
-
-        for ( std::vector< uTransformEventInfo >::const_iterator i = events.begin(); i != events.end(); ++i )
-        {
-            uTransformEventInfo const & info = *i;
-            if ( info.input && info.value > 0.5 && active )
-            {
-                uBind * bind = info.input->GetBind();
-                if ( bind &&
-                        bind->act==act &&
-                        bind->CheckPlayer(ePlayer))
-                {
-                    info.input->SetBind( NULL );
-                }
-                else
-                {
-                    info.input->SetBind( uBindPlayer::NewBind(act,ePlayer) );
-                }
-
-                active = false;
-                return true;
-            }
-        }
-
-        return false;
-    }
-#endif
-
-    virtual tString Help(){
-        tString ret;
-        ret << helpText << "\n";
-        ret << tOutput("$input_item_help");
-        return ret;
-    }
-};
 
 namespace
 {
@@ -1227,29 +1094,22 @@ static int Input_Compare( const tListItemBase* a, const tListItemBase* b)
 
 
 static void s_InputConfigGeneric(int ePlayer, uAction *&actions,const tOutput &title){
-    uMenuItemInput **input;
-
     uMenu input_menu(title);
 
     actions->tListItemBase::Sort(&Input_Compare);
 
-    int len = actions->Len();
-
-    input=tNEW(uMenuItemInput*)[len];
-    int a=0;
-    for (uAction *A=actions;A; A = A->Next()){
-        input[a++]=new uMenuItemInput(&input_menu,
-                                      A,
-                                      ePlayer+1);
-
+    std::vector< uMenuItemInput * > inputs;
+    for ( uAction *a = actions; a; a = a->Next() )
+    {
+        if ( a->ShowInGenericConfigurationMenu() )
+            inputs.push_back( new uMenuItemInput( &input_menu, a, ePlayer + 1 ) );
     }
 
     input_menu.ReverseItems();
     input_menu.Enter();
 
-    for (int b=a-1;b>=0;b--)
-        delete input[b];
-    delete[] input;
+    for ( std::vector< uMenuItemInput * >::const_iterator it = inputs.begin(); it != inputs.end(); ++it )
+        delete *it;
 }
 
 void su_InputConfig(int ePlayer){
@@ -1667,4 +1527,123 @@ void uActionTooltip::ReadVal(std::istream & s )
     {
         s >> activationsLeft_[i];
     }
+}
+
+// *****************************************************
+//  Menuitem for input selection
+// *****************************************************
+
+uMenuItemInput::uMenuItemInput(uMenu *M,uAction *a,int p)
+    :uMenuItem(M,a->helpText),act(a),ePlayer(p),active(0)
+{
+}
+
+void uMenuItemInput::Render(REAL x,REAL y,REAL alpha,bool selected)
+{
+    DisplayText(REAL(x-.02),y,act->description,selected,alpha,1);
+
+    if (active)
+    {
+        tString s;
+        s << tOutput("$input_press_any_key");
+        DisplayText(REAL(x+.02),y,s,selected,alpha,-1);
+    }
+    else
+    {
+        tString s;
+
+        bool first=1;
+
+        for ( uInputs::const_iterator i = su_inputs.begin(); i != su_inputs.end(); ++i )
+        {
+            uBind * bind = (*i)->GetBind();
+            if ( bind && (*i)->Name().size() > 0 &&
+                    bind->act==act &&
+                    bind->CheckPlayer(ePlayer) )
+            {
+                if (!first)
+                    s << ", ";
+                else
+                    first=0;
+
+                s << (*i)->Name();
+            }
+        }
+        if (!first)
+        {
+            DisplayText(REAL(x+.02),y,s,selected,alpha,-1);
+        }
+        else
+        {
+            DisplayText(REAL(x+.02),y,tOutput("$input_items_unbound"),selected,alpha,-1);
+        }
+    }
+}
+
+void uMenuItemInput::Enter()
+{
+    active=1;
+}
+
+
+bool uMenuItemInput::Event(SDL_Event &e)
+{
+#ifndef DEDICATED
+    if ( e.type == SDL_KEYDOWN )
+    {
+        SDL_keysym &c = e.key.keysym;
+        if (!active)
+        {
+            if (c.sym==SDLK_DELETE || c.sym==SDLK_BACKSPACE)
+            {
+                // clear all bindings
+                for ( uInputs::const_iterator i = su_inputs.begin(); i != su_inputs.end(); ++i )
+                {
+                    uBind * bind = (*i)->GetBind();
+                    if ( bind &&
+                            bind->act==act &&
+                            bind->CheckPlayer(ePlayer) )
+                    {
+                        (*i)->SetBind( NULL );
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+
+        // ignore escape
+        if ( c.sym == SDLK_ESCAPE )
+        {
+            return false;
+        }
+    }
+
+    // transform events
+    std::vector< uTransformEventInfo > events;
+    su_TransformEvent( e, events );
+
+    for ( std::vector< uTransformEventInfo >::const_iterator i = events.begin(); i != events.end(); ++i )
+    {
+        uTransformEventInfo const & info = *i;
+        if ( info.input && info.value > 0.5 && active )
+        {
+            uBind * bind = info.input->GetBind();
+            if ( bind &&
+                    bind->act==act &&
+                    bind->CheckPlayer(ePlayer))
+            {
+                info.input->SetBind( NULL );
+            }
+            else
+            {
+                info.input->SetBind( uBindPlayer::NewBind(act,ePlayer) );
+            }
+
+            active = false;
+            return true;
+        }
+    }
+#endif
+    return false;
 }

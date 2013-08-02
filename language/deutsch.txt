@@ -1327,7 +1327,6 @@ input_switch_view_help        Verändert den Kameramodus. Zur Verfügung stehen: S
 #********************************************
 #********************************************
 
-input_instant_chat_text       Kurzmeldung \1
 input_instant_chat_help       Aktiviert eine der vorher eingespeicherten Kurznachrichten an die anderen Spieler
 
 #********************************************
@@ -2154,7 +2153,6 @@ player_camera_help            Stellt den verwendeten Kameramodus ein.
 
 player_chat_text              Kurzmeldungen konfigurieren
 
-player_chat_chat              Kurzmeldung \1
 player_chat_chat_help         Editieren der kurzen Texte, die im Mehrspielermodus auf einen Tastendruck an die Mitspieler gesendet werden können
 
 player_blue_text              Blau:
