@@ -552,8 +552,8 @@ public:
         int bias = se_votingBias + DoGetExtraBias();
 
         // apply bias
-        con 	+= bias;
-        total 	+= bias;
+        int conAdjusted = con + bias;
+        int totalAdjusted = total + bias;
 
         // reduce number of total voters
         if ( se_votingDecay > 0 )
@@ -561,28 +561,30 @@ public:
             int reduce = int( ( tSysTimeFloat() - this->creationTime_ - se_votingStartDecay ) / se_votingDecay );
             if ( reduce > 0 )
             {
-                total -= reduce;
+                totalAdjusted -= reduce;
             }
         }
 
         if ( sn_GetNetState() == nSERVER )
         {
+            int abstain = total - pro - con;
+
             // see if the vote has been rejected
-            if ( con >= pro && con * 2 >= total )
+            if ( conAdjusted >= pro && conAdjusted * 2 >= totalAdjusted )
             {
                 if ( this->suggestor_ )
                     this->suggestor_->Spam( user_, se_votingSpamReject, tOutput("$spam_vote_rejected") );
 
-                tOutput voteMessage("$vote_rejected", GetDescription(), pro, con-bias, total-pro-con+bias );
+                tOutput voteMessage("$vote_rejected", GetDescription(), pro, con, abstain );
                 this->BroadcastMessage( voteMessage );
                 delete this;
                 return;
             }
 
             // see if the vote has been accepted
-            if ( pro >= con && pro * 2 > total )
+            if ( pro >= conAdjusted && pro * 2 > totalAdjusted )
             {
-                tOutput voteMessage("$vote_accepted", GetDescription(), pro, con-bias, total-pro-con+bias);
+                tOutput voteMessage("$vote_accepted", GetDescription(), pro, con, abstain );
                 this->BroadcastMessage( voteMessage );
                 this->DoExecute();
                 delete this;
