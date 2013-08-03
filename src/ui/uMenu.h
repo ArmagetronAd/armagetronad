@@ -283,7 +283,6 @@ public:
     
     virtual void Render( REAL x, REAL y, REAL alpha=1, bool selected=false )
     {
-        DisplayText( x - .02, y, "", selected, alpha, 1 );
     }
 };
 
