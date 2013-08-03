@@ -2172,6 +2172,9 @@ eVoter* eVoter::GetVoter( int ID, bool complain )
 
 eVoter* eVoter::GetPersistentVoter( int ID )
 {
+    if ( sn_GetNetState() == nCLIENT )
+        return NULL;
+
     // get machine from network subsystem
     nMachine & machine = nMachine::GetMachine( ID );
     return GetPersistentVoter( machine );
@@ -2179,6 +2182,9 @@ eVoter* eVoter::GetPersistentVoter( int ID )
 
 eVoter* eVoter::GetPersistentVoter( nMachine & machine )
 {
+    if ( sn_GetNetState() == nCLIENT )
+        return NULL;
+
     // iterate through the machine's decorators, find a voter
     nMachineDecorator * run = machine.GetDecorators();
     while ( run )
