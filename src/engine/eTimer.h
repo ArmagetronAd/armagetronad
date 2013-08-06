@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -65,7 +65,7 @@ private:
     nAverager  startTimeDrift_;         //!< drift of effective start time
     REAL startTimeSmoothedOffset_;      //!< the smoothed average of startTimeOffset_
     nAverager qualityTester_;           //!< averager that tells us about the quality of the sync messages
-    
+
     REAL lastStartTime_;                //!< last received start time
     REAL lastRemoteTime_;               //!< last received time
 
@@ -92,6 +92,7 @@ void se_KillGameTimer();
 void se_PauseGameTimer(bool p);
 
 REAL se_PredictTime();
+REAL se_Time();
 REAL se_AverageFrameTime();
 REAL se_AverageFPS();
 

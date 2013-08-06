@@ -74,13 +74,25 @@ class gRacePlayer
         REAL Time() { return time_; }
         void SetTime(REAL newTime) { time_ = newTime; }
 
+        REAL LastTime() { return lastTime_; }
+        void SetLastTime(REAL newTime) { lastTime_ = newTime; }
+
         int Score() { return score_; }
         void SetScore(int newScore) { score_ = newScore; }
+
+        bool IsIdle() { return idle_; }
+        void SetIdle(bool idle) { idle_ = idle; }
+
+        REAL IdleLastTime() { return idleLastTime_; }
+        REAL IdleNextTime() { return idleNextTime_; }
+        void SetIdleLastTime(REAL value) { idleLastTime_ = value; }
+        void SetIdleNextTime(REAL value) { idleNextTime_ = value; }
 
     private:
         bool hasFinished_;
 
         REAL time_;
+        REAL lastTime_;
         int score_;
 
         ePlayerNetID *player_;
@@ -92,8 +104,9 @@ class gRacePlayer
 
         int chances_;
 
-        int shot_chances_;
-        int drop_chances_;
+        bool idle_;
+        REAL idleLastTime_;
+        REAL idleNextTime_;
 
     public:
         ePlayerNetID    *Player() { return player_; }                  //!<  player's user
@@ -101,29 +114,17 @@ class gRacePlayer
         eCoord          SpawnPosition() { return position_; }          //!<  spawn position
         eCoord          SpawnDirection() { return direction_; }        //!<  spawn direction
         int             Chances() { return chances_; }                 //!<  player's chances to spawn to race one again
-
-
-        int             GetShotChances() { return shot_chances_; }        //!< the chances a player has for shooting shot zone
-        void            SetShotChances(int chances) { shot_chances_ = chances; }
-        int             GetDropChances() { return drop_chances_; }        //!< the chances a player has for dropping shot zone
-        void            SetDropChances(int chances) { drop_chances_ = chances; }
-
 };
 
 class gRace
 {
     public:
-        static void ZoneHit( ePlayerNetID *player, REAL time );         //!> called when a cycle hits a win zone
-        static void Sync( int alive, int ai_alive, int humans );        //!> update race state, called every second
-        static bool Done();                                             //!> returns true whether round time is over
-        static void Reset();                                            //!> reset time and values
+        static void ZoneHit( ePlayerNetID *player, REAL time );             //!> called when a cycle hits a win zone
+        static void Sync( int alive, int ai_alive, int humans, REAL time ); //!> update race state, called every second
+        static bool Done();                                                 //!> returns true whether round time is over
+        static void Reset();                                                //!> reset time and values
 
         static void RaceChat(ePlayerNetID *player, tString command, std::istream &s);
-
-
-        static void ProcessShot(ePlayerNetID *player, std::istream &s);
-        static void ProcessDrop(ePlayerNetID *player, std::istream &s);
-
 
         //!> returns the race winner
         static eTeam *Winner();
@@ -170,17 +171,22 @@ class gRaceScores
 
         tString Name() { return userName_; }
         REAL Time() { return time_; }
+        REAL LastTime() { return lastTime_; }
         int Played() { return played_; }
         int Rank() { return rank_; }
 
         void SetName(tString name) { userName_ = name; }
         void SetTime(REAL newTime) { time_ = newTime; }
+        void SetLastTime(REAL newTime) { lastTime_ = newTime; }
         void SetPlayed(int newPlayed) { played_ = newPlayed; }
         void SetRank(int newRank) { rank_ = newRank; }
 
     private:
         tString userName_;      // logged name
         REAL    time_;          // best time
+
+        REAL    lastTime_;      // the last time this player played in this map
+
         int     played_;        // number of times finished map
         int     rank_;          // number rank player is on the leaderboard
 

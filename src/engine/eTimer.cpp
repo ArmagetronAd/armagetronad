@@ -34,6 +34,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tConfiguration.h"
 #include "eLagCompensation.h"
 
+#include <ctime>
+
 // #include <fstream>
 
 eTimer *se_mainGameTimer=NULL;
@@ -516,6 +518,8 @@ REAL se_PredictTime(){
     return se_AverageFrameTime()*.5;
 }
 
-
+REAL se_Time(){
+    return time(NULL);
+}
 
 

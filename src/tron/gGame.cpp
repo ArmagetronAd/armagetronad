@@ -6204,8 +6204,6 @@ void gGameSpawnTimer::Sync(int alive, int ai_alive, int humans)
         limit = sg_TimerMin;
     else if (sg_TimerMode == 1)
         limit = sg_TimerMax;
-    else
-        limit = targetTime_;
 
     //  do the things once limit is hit
     if (countDown_ == limit)
@@ -6542,7 +6540,7 @@ void gGame::Analysis(REAL time){
     {
         if ( !gRace::Done() )
         {
-            gRace::Sync( alive, ai_alive, sg_NumHumans() );
+            gRace::Sync( alive, ai_alive, sg_NumHumans(), time );
             return;
         }
         else                                    // time to close the round

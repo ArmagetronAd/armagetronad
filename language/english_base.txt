@@ -3368,6 +3368,9 @@ race_records_load_help     Default: 1, if set to 0, race records will not load.
 race_records_save_help     Default: 1, if set to 0, race records will not save.
 race_record_highliter_help The color to highlight that player's records during the personal display session.
 
+race_idle_inform           0x99ffffWhat are you doing, 0xff55ff\10x99ffff? Hold down your brakes (v) to go faster!\n
+race_idle_kill             0xff55ff\1 0xff9999has been killed for not racing!\n
+
 #*************************************
 #*************************************
 #

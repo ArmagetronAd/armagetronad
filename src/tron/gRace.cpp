@@ -115,27 +115,32 @@ static tSettingItem<bool> sg_raceFinishKillConf("RACE_FINISH_KILL", sg_raceFinis
 static bool sg_raceLogLogin = true;
 static tSettingItem<bool> sg_raceLogLoginConf("RACE_LOG_LOGIN", sg_raceLogLogin);
 
+static bool sg_raceRanksLimit = true;
+static tSettingItem<bool> sg_raceRanksLimitConf("RACE_RANKS_LIMIT", sg_raceRanksLimit);
 
-//!  process shot for the racers BEGIN
-bool sg_raceShotEnabled = false;
-static tSettingItem<bool> sg_raceShotEnabledConf("RACE_SHOT_ENABLED", sg_raceShotEnabled);
+static int sg_raceRanksLimitTime = 1209600;
+bool restrictRaceRanksLimitTime(const int &newValue)
+{
+    if (newValue <= 0) return false;
 
-REAL sg_raceShotRadius = 1.5;
-static tSettingItem<REAL> sg_raceShotRadiusConf("RACE_SHOT_RADIUS", sg_raceShotRadius);
+    return true;
+}
+static tSettingItem<int> sg_raceRanksLimitTimeConf("RACE_RANKS_LIMIT_TIME", sg_raceRanksLimitTime, &restrictRaceRanksLimitTime);
 
-REAL sg_raceShotRotate = 0.3;
-static tSettingItem<REAL> sg_raceShotRotateConf("RACE_SHOT_ROTATE", sg_raceShotRotate);
+static bool sg_raceIdleKill = false;
+static tSettingItem<bool> sg_raceIdleKillConf("RACE_IDLE_KILL", sg_raceIdleKill);
 
-REAL sg_raceShotVelocityMulti = 10.0;
-static tSettingItem<REAL> sg_raceShotVelocityMultiConf("RACE_SHOT_VELOCITY_MULTI", sg_raceShotVelocityMulti);
+static REAL sg_raceIdleTime = 5;
+static REAL sg_raceIdleSpeed = 30;
+bool restrictRaceIdle(const REAL &newValue)
+{
+    if (newValue < 0) return false;
 
-int sg_raceShotChances = 2;
-static tSettingItem<int> sg_raceShotChancesConf("RACE_SHOT_CHANCES", sg_raceShotChances);
+    return true;
+}
 
-bool sg_raceShotPenetrate = true;
-static tSettingItem<bool> sg_raceShotPenetrateConf("RACE_SHOT_PENETRATE", sg_raceShotPenetrate);
-//!  process shot for the racers END
-
+static tSettingItem<REAL> sg_raceIdleTimeConf("RACE_IDLE_TIME", sg_raceIdleTime, &restrictRaceIdle);
+static tSettingItem<REAL> sg_raceIdleSpeedConf("RACE_IDLE_SPEED", sg_raceIdleSpeed, &restrictRaceIdle);
 
 tString sg_currentMap("");
 
@@ -162,6 +167,8 @@ gRaceScores::gRaceScores(tString UserName)
 
     this->time_ = -1;
     this->played_ = 0;
+
+    this->lastTime_ = se_Time();
 
     sg_RaceScores.Insert(this);
 
@@ -275,6 +282,9 @@ void gRaceScores::Add(gRacePlayer *racePlayer, bool finished)
 
     //  increment finished times when they crossed the zone
     if (finished) racingPlayer->SetPlayed(racingPlayer->Played() + 1);
+
+    //  update the last time due to them finishing the map yet again
+    if (finished) racingPlayer->SetLastTime(se_Time());
 
     //  ensure that times really have changed for this to take effect
     if (timeChanged && finished)
@@ -396,21 +406,48 @@ void gRaceScores::Read()
             {
                 gRaceScores *rS = NULL;
 
+                //  name of the owner
                 tString name = params.ExtractNonBlankSubString(pos);
                 if (!CheckPlayer(name))
-                {
                     rS = new gRaceScores(name);
-                }
                 else
-                {
                     rS = GetPlayer(name);
-                }
 
+                //  time of finished
                 rS->time_ = atof(params.ExtractNonBlankSubString(pos));
 
+                //  how many times they crossed the finish line
                 tString playedFor = params.ExtractNonBlankSubString(pos);
                 if (playedFor.Filter() != "")
                     rS->played_ = atoi(playedFor);
+
+                //  the last time they played in this map
+                tString lastTimeStr = params.ExtractNonBlankSubString(pos);
+                if (lastTimeStr.Filter() != "")
+                    rS->lastTime_ = atof(lastTimeStr);
+                else
+                    rS->lastTime_ = se_Time();
+
+                //  Checking for the race ranks limit.
+                //  Cannot have records of people that on't play often.
+                if (sg_raceRanksLimit && sg_raceRanksLimitTime > 0)
+                {
+                    //  checking if the last time + the time limit exceed today's time
+                    if (se_Time() >= (rS->lastTime_ + sg_raceRanksLimitTime))
+                    {
+                        for(int i = 0; i < sg_RaceScores.Len(); i++)
+                        {
+                            gRaceScores *raceScorePlayer = sg_RaceScores[i];
+                            if (raceScorePlayer && (raceScorePlayer == rS))
+                            {
+                                sg_RaceScores.RemoveAt(i);
+                                delete rS;
+
+                                break;
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -443,7 +480,7 @@ void gRaceScores::Write()
                 if (rS)
                 {
                     if (rS->time_ != 0)
-                        w << rS->userName_ << " " << rS->time_ << " " << rS->played_ << "\n";
+                        w << rS->userName_ << " " << rS->time_ << " " << rS->played_ << " " << rS->lastTime_ << "\n";
                 }
             }
         }
@@ -1033,12 +1070,13 @@ gRacePlayer::gRacePlayer(ePlayerNetID *player)
     this->time_  = -1;
     this->score_ = 0;
 
+    this->lastTime_ = se_Time();
+
     this->chances_ = sg_raceChances;
 
-    /*
-    this->shot_chances_ = sg_raceShotChances;
-    this->drop_chances_ = sg_raceShotChances;
-    */
+    this->idle_ = false;
+    this->idleLastTime_ = 0;
+    this->idleNextTime_ = 0;
 
     sg_RacePlayers.Insert(this);
 }
@@ -1242,7 +1280,7 @@ void gRace::ZoneHit( ePlayerNetID *player, REAL time )
 }
 
 //! SYNC
-void gRace::Sync( int alive, int ai_alive, int humans)
+void gRace::Sync( int alive, int ai_alive, int humans, REAL time )
 {
     eGrid *grid = eGrid::CurrentGrid();
     if (!grid) return;
@@ -1277,6 +1315,76 @@ void gRace::Sync( int alive, int ai_alive, int humans)
     // close the round if no human is alive
     if ( alive == 0 )
         roundFinished_ = true;
+
+    if (!roundFinished_ && sg_raceIdleKill)
+    {
+        for(int x = 0; x < sg_RacePlayers.Len(); x++)
+        {
+            gRacePlayer *racePlayer = sg_RacePlayers[x];
+            if (racePlayer && racePlayer->Cycle())
+            {
+                if (racePlayer->Player()->IsHuman() && racePlayer->Cycle()->Alive())
+                {
+                    //  check if player's speed is at idle or not
+                    if (racePlayer->Cycle()->Speed() <= sg_raceIdleSpeed)
+                    {
+                        //  do second counting by 1
+                        if ((time - racePlayer->IdleLastTime()) >= 1)
+                        {
+                            //  update the idle last time
+                            racePlayer->SetIdleLastTime(time);
+
+                            //  if the player is indeed travelling at idle speed
+                            if (!racePlayer->IsIdle())
+                            {
+                                //  assign the next time for idle action to activate
+                                if (racePlayer->IdleNextTime() == 0)
+                                {
+                                    racePlayer->SetIdleNextTime(time + sg_raceIdleTime);
+                                }
+
+                                if (time >= racePlayer->IdleNextTime())
+                                {
+                                    //  so they are idle
+                                    racePlayer->SetIdle(true);
+
+                                    //  reset the next time to apply later
+                                    racePlayer->SetIdleNextTime(time + sg_raceIdleTime);
+
+                                    tOutput msg;
+                                    msg.SetTemplateParameter(1, racePlayer->Player()->GetName());
+                                    msg << "$race_idle_inform";
+                                    sn_ConsoleOut(msg, racePlayer->Player()->Owner());
+                                }
+                            }
+                            else
+                            {
+                                if (time >= racePlayer->IdleNextTime())
+                                {
+                                    //  time up! Let's kill them!
+                                    racePlayer->Cycle()->Kill();
+
+                                    racePlayer->SetIdle(false);
+
+                                    tOutput msg;
+                                    msg.SetTemplateParameter(1, racePlayer->Player()->GetName());
+                                    msg << "$race_idle_kill";
+                                    sn_ConsoleOut(msg);
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        //  good, player doesn't need to get killed for being idle
+                        racePlayer->SetIdle(false);
+                        racePlayer->SetIdleLastTime(0);
+                        racePlayer->SetIdleNextTime(0);
+                    }
+                }
+            }
+        }
+    }
 
     // start counter when someone arrives or when only 1 is alive but not alone
     if (!roundFinished_ && ( firstArrived_ || ( alive == 1 && ai_alive == 0 && humans > 1 ) ))
@@ -1449,10 +1557,9 @@ void gRace::Reset()
             rPlayer->SetFinished(false);
             rPlayer->DestroyCycle();
 
-
-            rPlayer->SetShotChances(sg_raceShotChances);
-            rPlayer->SetDropChances(sg_raceShotChances);
-
+            rPlayer->SetIdle(false);
+            rPlayer->SetIdleLastTime(0);
+            rPlayer->SetIdleNextTime(0);
         }
     }
 
@@ -1489,15 +1596,19 @@ static tString sg_time_ToString ( REAL time_ )
 
 eTeam *gRace::Winner()
 {
+    //  no need to declare once its done
+    if (winnerDeclared_) return NULL;
+
+    //  declaring the first to finish
     if (sg_RaceFinished.Len() > 0)
     {
         gRacePlayer *racePlayer = sg_RaceFinished[0];
         if (racePlayer)
         {
+            winnerDeclared_ = true;
             return racePlayer->Player()->CurrentTeam();
         }
     }
-    return NULL;
 }
 
 void gRace::RaceChat(ePlayerNetID *player, tString command, std::istream &s)
@@ -1635,16 +1746,6 @@ void gRace::RaceChat(ePlayerNetID *player, tString command, std::istream &s)
             message << "0x66ff22!race stats <name> 0x0055ff: Lists the current stats of players by <name>. Leave it blank to view your own stats.\n";
             sn_ConsoleOut(message, player->Owner());
         }
-
-        else if (command == "shot")
-        {
-            ProcessShot(player, s);
-        }
-        else if (command == "drop")
-        {
-            ProcessDrop(player, s);
-        }
-
         else
         {
             tOutput message;
@@ -1652,109 +1753,5 @@ void gRace::RaceChat(ePlayerNetID *player, tString command, std::istream &s)
             message << "0x66ff22!race help 0x0055ff: Lists all available commands for racing.\n";
             sn_ConsoleOut(message, player->Owner());
         }
-    }
-}
-
-void gRace::ProcessShot(ePlayerNetID *player, std::istream &s)
-{
-    if (!sg_raceShotEnabled) return;
-
-    eGrid *grid = eGrid::CurrentGrid();
-    if (!grid) return;
-
-    gRacePlayer *rPlayer = gRacePlayer::GetPlayer(player);
-    if (!rPlayer) return;
-
-    if (rPlayer->Cycle() && rPlayer->Cycle()->Alive())
-    {
-        if (rPlayer->GetShotChances() == 0)
-            return;
-        else
-            rPlayer->SetShotChances(rPlayer->GetShotChances() - 1);
-
-        REAL shotRadius   = sg_raceShotRadius;
-        REAL shotRotation = sg_raceShotRotate;
-
-        eCoord shotPos = rPlayer->Cycle()->Position() + (rPlayer->Cycle()->Direction() * (shotRadius));
-        eCoord shotVelocity = rPlayer->Cycle()->Direction() * rPlayer->Cycle()->Speed() * sg_raceShotVelocityMulti;
-
-        //Check if color_ is too dark
-        gRealColor shotColor = rPlayer->Cycle()->color_;
-        REAL colorTotal = shotColor.r + shotColor.g + shotColor.b;
-        REAL colorLimit = 0.3;
-
-        if (colorTotal < colorLimit)
-        {
-            //This could be much improved....
-            REAL toAdd = (colorLimit - colorTotal) / 3;
-            shotColor.r += toAdd;
-            shotColor.g += toAdd;
-            shotColor.b += toAdd;
-        }
-
-        //Get the type of shot
-        int type = gDeathZoneHack::TYPE_SHOT;
-
-        gDeathZoneHack *pZone = new gDeathZoneHack(grid, shotPos, true);
-        pZone->SetRadius(shotRadius);
-        pZone->SetVelocity(shotVelocity);
-        pZone->SetRotationSpeed(shotRotation);
-        pZone->SetColor(shotColor);
-        pZone->SetOwner(player);
-        pZone->SetType(type);
-
-        pZone->SetWallPenetrate(sg_raceShotPenetrate);
-    }
-}
-
-void gRace::ProcessDrop(ePlayerNetID *player, std::istream &s)
-{
-    if (!sg_raceShotEnabled) return;
-
-    eGrid *grid = eGrid::CurrentGrid();
-    if (!grid) return;
-
-    gRacePlayer *rPlayer = gRacePlayer::GetPlayer(player);
-    if (!rPlayer) return;
-
-    if (rPlayer->Cycle() && rPlayer->Cycle()->Alive())
-    {
-        if (rPlayer->GetDropChances() == 0)
-            return;
-        else
-            rPlayer->SetDropChances(rPlayer->GetDropChances() - 1);
-
-        REAL shotRadius   = sg_raceShotRadius;
-        REAL shotRotation = sg_raceShotRotate;
-
-        eCoord shotPos = rPlayer->Cycle()->Position() + (rPlayer->Cycle()->Direction() * (shotRadius));
-        eCoord shotVelocity = eCoord(0, 0);
-
-        //Check if color_ is too dark
-        gRealColor shotColor = rPlayer->Cycle()->color_;
-        REAL colorTotal = shotColor.r + shotColor.g + shotColor.b;
-        REAL colorLimit = 0.3;
-
-        if (colorTotal < colorLimit)
-        {
-            //This could be much improved....
-            REAL toAdd = (colorLimit - colorTotal) / 3;
-            shotColor.r += toAdd;
-            shotColor.g += toAdd;
-            shotColor.b += toAdd;
-        }
-
-        //Get the type of shot
-        int type = gDeathZoneHack::TYPE_SHOT;
-
-        gDeathZoneHack *pZone = new gDeathZoneHack(grid, shotPos, true);
-        pZone->SetRadius(shotRadius);
-        pZone->SetVelocity(shotVelocity);
-        pZone->SetRotationSpeed(shotRotation);
-        pZone->SetColor(shotColor);
-        pZone->SetOwner(player);
-        pZone->SetType(type);
-
-        pZone->SetWallPenetrate(sg_raceShotPenetrate);
     }
 }
