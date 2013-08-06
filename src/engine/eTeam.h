@@ -41,8 +41,6 @@ std::ostream & operator << ( std::ostream&, const eTeam&);
 
 template<class T> class nConfItem;
 
-extern int se_matches;
-
 class eTeam: public nNetObject{
 protected:							// protected attributes
     int colorID;					// ID of the team predefined color

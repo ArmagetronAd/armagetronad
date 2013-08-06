@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tSysTime.h"
 #include "rFont.h"
 #include "nConfig.h"
+#include "eWarmup.h"
 
 #include <set>
 
@@ -149,8 +150,6 @@ static bool se_allowTeamNameLeader = false; // allow to name a team by it's lead
 static tSettingItem<bool> se_allowTeamNameColorConfig("ALLOW_TEAM_NAME_COLOR", se_allowTeamNameColor );
 static tSettingItem<bool> se_allowTeamNamePlayerConfig("ALLOW_TEAM_NAME_PLAYER", se_allowTeamNamePlayer );
 static tSettingItem<bool> se_allowTeamNameCustomConfig("ALLOW_TEAM_NAME_LEADER", se_allowTeamNameLeader );
-
-int se_matches = 0;
 
 static REAL se_minReady = 0.51;
 static tSettingItem<REAL> se_minReadyConf("WARMUP_MIN_READY_FRAC", se_minReady);
@@ -500,7 +499,7 @@ bool eTeam::IsInvited( ePlayerNetID const * player ) const
 
 void eTeam::AddScore ( int s )
 {
-    if(se_matches < 0)
+    if( se_warmup.IsWarmupMode() )
         return;
 
     score += s;
@@ -530,7 +529,7 @@ void eTeam::AddScore(int points,
                      const tOutput& reasonlose,
                      const tOutput& reasonfree)
 {
-    if(se_matches < 0){
+    if( se_warmup.IsWarmupMode() ){
         return;
     }
 

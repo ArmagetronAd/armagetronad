@@ -2801,7 +2801,7 @@ gamestate_reset_center		New Match
 gamestate_reset_console		Resetting scores and starting new match after this round.\n
 gamestate_resetnow_center	New Match
 gamestate_resetnow_console	Resetting scores...\n
-gamestate_resetnow_console_matches Resetting scores. \1 match(es) to go!\n
+gamestate_resetnow_console_matches Resetting scores... \1 match(es) to go!\n
 gamestate_resetnow_log		New Match\n
 gamestate_newround_console	Go (round \1 of \2)!\n
 gamestate_newround_goldengoal	Go (extra round; whoever gains the lead wins)!\n
@@ -2966,7 +2966,9 @@ kick_usage              Usage: KICK <user ID or name> <Reason>\n
 ban_usage               Usage: BAN <user ID or name> <time in minutes(defaults to 60)> <Reason>\n
 kickmove_usage          Usage: \1 <user ID or name> <server IP to kick to>:<server port to kick to> <Reason>\n
 
-do_warmup_help          Run warmup rounds with no points until players have readied up. Then run this many matches consecutively before the next warmup session.
+do_warmup_help          Usage: DO_WARMUP <n>. Run <n> warmup rounds with no points until players have readied up. Then run this many matches consecutively before the next warmup session.
+do_warmup_enabled       Enabled warmup, \1 match(es) will be played after the warmup ends.
+do_warmup_disabled      Disabled warmup.
 warmup_min_players_help Minimum amount of players required for the warmup to end.
 warmup_min_ready_frac_help Fraction of players per team required to ready up before the match can start.
 warmup_readyup_interval_help Interval between reminders about readying up.

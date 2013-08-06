@@ -41,6 +41,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tPolynomial.h"
 #include "rScreen.h"
 #include "eSoundMixer.h"
+#include "eWarmup.h"
 
 #include "zone/zFortress.h"
 #include "zone/zZone.h"
@@ -515,7 +516,7 @@ void zFortressZone::OnConquest( void )
 
     // add score for successful conquest, divided equally between the teams that are
     // inside the zone
-    if ( totalScore && enemies_.size() > 0 && se_matches >= 0 )
+    if ( totalScore && enemies_.size() > 0 && !se_warmup.IsWarmupMode() )
     {
         tOutput win;
         if ( team )

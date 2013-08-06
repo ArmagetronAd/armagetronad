@@ -60,6 +60,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "nProtoBuf.h"
 #include <time.h>
 #include "tRuby.h"
+#include "eWarmup.h"
 
 #include "ePlayer.pb.h"
 
@@ -3074,7 +3075,7 @@ static void se_ChatTeamLeave( ePlayerNetID * p )
 
     eTeam * leftTeam = p->NextTeam();
 
-    if ( se_matches < 0 ) // allow quickleaving in warmup mode
+    if ( se_warmup.IsWarmupMode() ) // allow quickleaving in warmup mode
     {
         if( p->Object() && p->Object()->Alive() )
         {
@@ -3319,7 +3320,7 @@ static void se_ListTeam( ePlayerNetID * receiver, eTeam * team )
     {
         tos << " " << tOutput( "$invite_team_locked_list" );
     }
-    if ( se_matches < 0 )
+    if ( se_warmup.IsWarmupMode() )
     {
         if ( team->IsReady() )
             tos << " " << tOutput( "$team_list_ready" );
@@ -3410,7 +3411,7 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s, tString co
         tos << p2->GetColoredName()
             << tColoredString::ColorString( -1, -1, -1)
             << " ";
-        if ( se_matches < 0 && p2->IsHuman() && p2->CurrentTeam() )
+        if ( se_warmup.IsWarmupMode() && p2->IsHuman() && p2->CurrentTeam() )
         {
             tos << "( ";
             if ( p2->ready )
@@ -3634,7 +3635,7 @@ void se_Ready( ePlayerNetID * p )
         sn_ConsoleOut(tOutput("$player_ready_noteam"), p->Owner());
         return;
     }
-    if( se_matches >= 0 )
+    if( !se_warmup.IsWarmupMode() )
     {
         sn_ConsoleOut(tOutput("$player_ready_onlywarmup"), p->Owner());
         return;
@@ -6269,7 +6270,7 @@ void ePlayerNetID::ReadSync( Engine::PlayerNetIDSync const & sync, nSenderInfo c
 
         if( sync.has_ready() && (
                 sn_GetNetState() != nSERVER
-                || (se_matches < 0 && CurrentTeam())))
+                || (se_warmup.IsWarmupMode() && CurrentTeam())))
         {
             ready = sync.ready();
         }
@@ -6616,7 +6617,7 @@ void ePlayerNetID::AddScore(int points,
                             const tOutput& reasonlose,
                             const tOutput& reasonfree)
 {
-    if (se_matches < 0)
+    if ( se_warmup.IsWarmupMode() )
         return;
 
     score += points;
@@ -6909,7 +6910,7 @@ float ePlayerNetID::RankingGraph( float y, int MAX ){
             tColoredString prefix;
             if(p->chatting_)
                 prefix << '*';
-            if(se_matches < 0 && p->ready)
+            if( se_warmup.IsWarmupMode() && p->ready)
                 prefix << tColoredString::ColorString(.5,1,.5) << 'R';
             if(prefix.Len())
                 DisplayText(-.704 - (prefix.Len() * .00075), y, .06, prefix.c_str(), sr_fontScoretable, 1);
@@ -8314,7 +8315,7 @@ void ePlayerNetID::ReceiveControlNet( Network::NetObjectControl const & controlB
                 if ( obnoxious )
                     GetChatSpam().CheckSpam( 4.0, Owner(), tOutput("$spam_teamchage") );
 
-                if( se_matches < 0 && nextTeam != currentTeam
+                if( se_warmup.IsWarmupMode() && nextTeam != currentTeam
                     && nextTeam->PlayerMayJoin( this ) )
                 {
                     // Join immediately during warmup if possible

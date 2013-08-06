@@ -137,6 +137,8 @@ public:
     eSoundMixer* m_Mixer;
 
 private:
+    bool WarmupTeamsAreReady() const;
+    
     //! returns the descriptor responsible for this class
     virtual nNetObjectDescriptorBase const & DoGetDescriptor() const;
 };

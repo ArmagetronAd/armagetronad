@@ -57,6 +57,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "gStatistics.h"
 
 #include "cCockpit.h"
+#include "eWarmup.h"
 
 #include "tMath.h"
 #include <stdlib.h>
@@ -3371,7 +3372,7 @@ void gCycle::KillAt( const eCoord& deathPos){
                     notificationMessage << " teamkilled " << Player()->GetUserName();
                     se_sendEventNotification(tString("Death teamkill"), notificationMessage);
 
-                    if( se_matches >= 0 )
+                    if( !se_warmup.IsWarmupMode() )
                     {
                         tColoredString hunterName;
                         hunterName << *hunter << tColoredString::ColorString(1,1,1);
