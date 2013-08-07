@@ -3857,7 +3857,7 @@ void gGame::Analysis(REAL time){
 
     if( sg_currentSettings->gameType!=gFREESTYLE
             && drawreason != &DrawReason_MinAlive && (!drawtime || drawtime > time+sg_minDrawTime)
-            && alive < sg_minAlive && alive < humans && teams_alive > 1
+            && alive > 0 && alive < sg_minAlive && alive < humans && teams_alive > 1
             )
     {
         drawreason = &DrawReason_MinAlive;
