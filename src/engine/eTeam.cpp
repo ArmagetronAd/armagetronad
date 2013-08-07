@@ -341,7 +341,7 @@ void eTeam::UpdateAppearance()
         empty = true;
     }
 
-    tString newNameFiltered = ePlayerNetID::FilterName(name);
+    tString newNameFiltered = ePlayerNetID::FilterName( updateName );
     if( logName != newNameFiltered )
     {
         if( !empty && !lastEmpty_ )
