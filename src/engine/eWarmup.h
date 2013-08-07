@@ -42,6 +42,7 @@ public:
     void DoWarmup( int matchesToPlay );
     void StartNewMatchUserInitiated();
     void MatchStarted();
+    void MatchCanStart();
     void Reset();
 
     int MatchesLeft() const
@@ -57,10 +58,16 @@ public:
     int MatchesToPlay() const
     {
         return matchesToPlay_;
-    }    
+    }
+
+    bool WasReset() const
+    {
+        return wasReset_;
+    }
 private:
     int matchesToPlay_;
     int matchesLeft_;
+    bool wasReset_;
 };
 
 extern eWarmup se_warmup;

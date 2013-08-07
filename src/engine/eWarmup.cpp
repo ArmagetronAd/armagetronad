@@ -33,7 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 eWarmup se_warmup;
 
 eWarmup::eWarmup()
-    :matchesToPlay_( 0 ), matchesLeft_( 0 )
+    :matchesToPlay_( 0 ), matchesLeft_( 0 ), wasReset_( false )
 {
 }
 
@@ -88,10 +88,16 @@ void eWarmup::MatchStarted()
     }
 }
 
+void eWarmup::MatchCanStart()
+{
+    wasReset_ = false;
+}
+
 void eWarmup::Reset()
 {
     if ( IsPickupGame() )
     {
         matchesLeft_ = -1;
+        wasReset_ = true;
     }
 }

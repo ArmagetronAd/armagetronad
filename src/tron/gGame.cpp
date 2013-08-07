@@ -3059,6 +3059,8 @@ void gGame::StateUpdate(){
             sg_newRoundWriter.write();
             if ( rounds < 0 )
             {
+                se_warmup.MatchCanStart();
+
                 if ( WarmupTeamsAreReady() )
                 {
                     se_warmup.MatchStarted();
@@ -3672,7 +3674,7 @@ void gGame::Analysis(REAL time){
         ePlayerNetID *pni=se_PlayerNetIDs(i);
         if (pni->IsActive())
             active ++;
-        if ( se_warmup.IsWarmupMode() && !sg_allReady && ready_next_warn <= time
+        if ( se_warmup.IsWarmupMode() && !se_warmup.WasReset() && !sg_allReady && ready_next_warn <= time
             && !pni->ready && pni->IsHuman() && pni->CurrentTeam()
             // && !rup_banner.Supported(pni->Owner())
             )
