@@ -49,6 +49,7 @@ protected:							// protected attributes
     int lastScore_;                 //!< score from the beginning of the round
 
     bool lastEmpty_;                //!< flag indicating whether the team was empty on the last call to UpdateAppearance
+    bool lastWasCustomTeamName_;    //!< Was the last team name a custom set team name from the last call to UpdateAppearance?
 
     int numHumans;					// number of human players on the team
     int numAIs;						// number of AI players on the team

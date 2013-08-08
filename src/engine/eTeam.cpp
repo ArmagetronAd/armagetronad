@@ -266,6 +266,7 @@ void eTeam::UpdateAppearance()
         nameTeamColor = true;
 
     nameTeamColor = NameTeamAfterColor ( nameTeamColor );
+    bool isCustomTeamName = false;
 
     tString updateName;
     if ( oldest )
@@ -291,6 +292,7 @@ void eTeam::UpdateAppearance()
                 if (se_allowTeamNameLeader && oldest->teamname.Len()>1)
                 {
                     // Use player's custom teamname
+                    isCustomTeamName = true;
                     updateName = oldest->teamname;
                 }
                 else if ( oldest->IsHuman() )
@@ -314,11 +316,16 @@ void eTeam::UpdateAppearance()
             {
                 // did the player set a custom teamname ?
                 if (oldest->teamname.Len()>1)
+                {
                     // use custom teamname
+                    isCustomTeamName = true;
                     updateName = oldest->teamname;
+                }
                 else
+                {
                     // use player name as teamname
                     updateName = oldest->GetName();
+                }
             }
 
             color = oldest->color;
@@ -367,10 +374,15 @@ void eTeam::UpdateAppearance()
     // if the name has been changed then update it
     if (name!=updateName)
     {
-        // only display a message if
-        // the oldest player changed the name of the team
-        // the server also sets the teamname sometimes
-        if(sn_GetNetState()!=nCLIENT && oldest && !( name == "" || name == tString(tOutput("$team_empty"))) )
+        // Notify other players of the team name change if it's interesting
+        if (
+            sn_GetNetState() != nCLIENT
+            && oldest
+            && name != ""
+            && name != tString( tOutput("$team_empty") )
+            && !nameTeamColor
+            && ( lastWasCustomTeamName_ || updateName != oldest->GetName() )
+        )
         {
             tOutput message;
             tColoredString name;
@@ -387,6 +399,7 @@ void eTeam::UpdateAppearance()
             sn_ConsoleOut(message);
         }
         name = updateName;
+        lastWasCustomTeamName_ = isCustomTeamName;
     }
 
     if ( nSERVER == sn_GetNetState() )
@@ -1631,6 +1644,7 @@ eTeam::eTeam()
     maxImbalanceLocal = maxImbalance;
     color.r_ = color.g_ = color.b_ = 32; // initialize color so it will be updated, guaranteed
     lastEmpty_=true;
+    lastWasCustomTeamName_ = false;
     Update();
 }
 
@@ -1647,6 +1661,7 @@ eTeam::eTeam( Engine::TeamSync const & sync, nSenderInfo const & sender )
     maxImbalanceLocal = maxImbalance;
     color.r_ = color.g_ = color.b_ = 32; // initialize color so it will be updated, guaranteed
     lastEmpty_=true;
+    lastWasCustomTeamName_ = false;
     Update();
 }
 
