@@ -726,9 +726,9 @@ public:
         gTutorial::Prepare();
 
         // back to player color
-        PushSetting( "ALLOW_TEAM_NAME_COLOR", "0" );
+        PushSetting( "ALLOW_TEAM_NAME_COLOR", "1" );
         PushSetting( "ALLOW_TEAM_NAME_PLAYER", "1" );
-        PushSetting( "ALLOW_TEAM_NAME_LEADER", "1" );
+        PushSetting( "ALLOW_TEAM_NAME_LEADER", "0" );
 
         // low rubber
         PushSetting( "CYCLE_RUBBER", "1" );
