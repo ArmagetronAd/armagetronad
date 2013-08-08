@@ -380,8 +380,7 @@ void eTeam::UpdateAppearance()
             && oldest
             && name != ""
             && name != tString( tOutput("$team_empty") )
-            && !nameTeamColor
-            && ( lastWasCustomTeamName_ || updateName != oldest->GetName() )
+            && ( lastWasCustomTeamName_ || ( updateName != oldest->GetName() && !nameTeamColor ) )
         )
         {
             tOutput message;
