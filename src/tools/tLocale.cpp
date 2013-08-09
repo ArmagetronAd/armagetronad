@@ -289,9 +289,7 @@ tLocaleItem::operator const char *() const// return the version of this string i
                     replaced << st_programBranchUrl;
                     break;
                 case 'c':
-                    replaced << tOutput(
-                            ( st_programChanged )? "$yes" : "$no"
-                            );
+                    replaced << st_programChanged;
                     break;
                 case 'd':
                     replaced << st_programBuildDate;
