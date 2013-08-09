@@ -558,27 +558,37 @@ void se_SaveToScoreFile( tOutput const & out );  //!< writes something to scorel
 void se_SaveToChatLog( tOutput const & out );  //!< writes something to chatlog.txt (if enabled) and/or ladderlog
 
 //! create a global instance of this to write stuff to ladderlog.txt
-class eLadderLogWriter {
-    static std::list<eLadderLogWriter *> &writers();
-    tString id;
-    bool enabled;
-    tSettingItem<bool> *conf;
-    tColoredString cache;
+class eLadderLogWriter
+{
+    tString name_;
+    bool isEnabledForFile_;
+    bool isEnabledForScript_;
+    tSettingItem<bool> *conf_;
+    tColoredString cache_;
 public:
-    eLadderLogWriter(char const *ID, bool enabledByDefault);
+    eLadderLogWriter( char const *name, bool enabledByDefault );
     ~eLadderLogWriter();
+    tString Name() const { return name_; }
+    
+    void SetForFile( bool enable ) { isEnabledForFile_ = enable; }
+    void SetForScript( bool enable ) { isEnabledForScript_ = enable; }
+    
     //! append a field to the current message. Spaces are added automatically.
-    template<typename T> eLadderLogWriter &operator<<(T const &s) {
-        if(enabled) {
-            cache << ' ' << s;
-        }
+    template<typename T> eLadderLogWriter &operator<<( T const &s )
+    {
+        if( isEnabled() )
+            cache_ << ' ' << s;
         return *this;
     }
-    void write(); //!< send to ladderlog and clear message
+    
+    //!< send to ladderlog and clear message
+    void write();
 
-    bool isEnabled() { return enabled; } //!< check this if you're going to make expensive calculations for ladderlog output
-
-    static void setAll(bool enabled); //!< enable or disable all writers
+    //!< check this if you're going to make expensive calculations for ladderlog output
+    bool isEnabled() const
+    {
+        return isEnabledForFile_ || isEnabledForScript_;
+    }
 };
 
 tColoredString & operator << (tColoredString &s,const ePlayer &p);

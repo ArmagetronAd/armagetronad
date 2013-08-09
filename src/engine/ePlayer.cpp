@@ -6478,37 +6478,24 @@ eNetGameObject *ePlayerNetID::Object() const{
     return object;
 }
 
-static bool se_consoleLadderLog = false;
-static tSettingItem< bool > se_consoleLadderLogConf( "CONSOLE_LADDER_LOG", se_consoleLadderLog );
+typedef std::set< tString > StringSet;
 
-static bool se_ladderlogDecorateTS = false;
-static tSettingItem< bool > se_ladderlogDecorateTSConf( "LADDERLOG_DECORATE_TIMESTAMP", se_ladderlogDecorateTS );
-extern bool sn_decorateTS; // from nNetwork.cpp
-
-void se_SaveToLadderLog( tOutput const & out )
+// Parses a list of tokens and adds them to "set".
+// Returns the number of entries added.
+int se_ParseList( StringSet & set, std::istream & s )
 {
-    if (se_consoleLadderLog)
+    int entries_count = 0;
+    while ( s.good() )
     {
-        std::cout << "[L";
-        if(sn_decorateTS) {
-            std::cout << st_GetCurrentTime(" TS=%Y/%m/%d-%H:%M:%S");
-        }
-        std::cout << "] " << out << std::endl;
-    }
-    if (sn_GetNetState()!=nCLIENT && !tRecorder::IsPlayingBack())
-    {
-        std::ofstream o;
-        if ( tDirectories::Var().Open(o, "ladderlog.txt", std::ios::app) )
+        tString name;
+        s >> name;
+        if ( name.Len() > 1 )
         {
-            std::stringstream s;
-            if(se_ladderlogDecorateTS) {
-                s << st_GetCurrentTime("%Y/%m/%d-%H:%M:%S ");
-            }
-            s << out << std::endl;
-            sr_InputForScripts( s.str().c_str() );
-            o << s.str();
+            std::pair< StringSet::iterator, bool > ret = set.insert( name );
+            if ( ret.second ) entries_count++;
         }
     }
+    return entries_count;
 }
 
 static bool se_chatLog = false;
@@ -6531,65 +6518,196 @@ void se_SaveToChatLog(tOutput const &out) {
     }
 }
 
-std::list<eLadderLogWriter *> &eLadderLogWriter::writers() {
-    static std::list<eLadderLogWriter *> list;
-    return list;
-}
-
-eLadderLogWriter::eLadderLogWriter(char const *ID, bool enabledByDefault) :
-    id(ID),
-    enabled(enabledByDefault),
-    conf(new tSettingItem<bool>(&(tString("LADDERLOG_WRITE_") + id)(0),
-    enabled)),
-    cache(id) {
-    writers().push_back(this);
-}
-
-eLadderLogWriter::~eLadderLogWriter() {
-    if(conf) {
-        delete conf;
+//! Handles configuring ladderlog settings
+class eLadderLogManager
+{
+    enum SetMode
+    {
+        SetMode_File   = 1 << 0,
+        SetMode_Script = 1 << 1
+    };
+    typedef std::map< tString, eLadderLogWriter * > WriterMap;
+    WriterMap writers_;
+public:
+    eLadderLogManager()
+        :writers_()
+    {
     }
-    // generic algorithms aren't exactly easier to understand than regular
-    // code, but anyways, let's try one...
-    std::list<eLadderLogWriter *> list = writers();
-    list.erase(std::find_if(list.begin(), list.end(), std::bind2nd(std::equal_to<eLadderLogWriter *>(), this)));
-}
-
-void eLadderLogWriter::write() {
-    if(enabled) {
-        se_SaveToLadderLog(cache);
+    
+    void Add( eLadderLogWriter *writer )
+    {
+        writers_[ writer->Name() ] = writer;
     }
-    cache = id;
-}
-
-void eLadderLogWriter::setAll(bool enabled) {
-    std::list<eLadderLogWriter *> list = writers();
-    std::list<eLadderLogWriter *>::iterator end = list.end();
-    for(std::list<eLadderLogWriter *>::iterator iter = list.begin(); iter != end; ++iter) {
-        (*iter)->enabled = enabled;
+    
+    void Remove( eLadderLogWriter *writer )
+    {
+        writers_.erase( writer->Name() );
     }
-}
-
-static void LadderLogWriteAll(std::istream &s) {
-    bool enabled;
-    s >> enabled;
-    if(s.fail()) {
-        if(tConfItemBase::printErrors) {
-            con << tOutput("$ladderlog_write_all_usage") << '\n';
+    
+    void WriteAll( std::istream & s )
+    {
+        SetAll( "$ladderlog_write_all_help", s, SetMode_File | SetMode_Script );
+    }
+    
+    void ScriptWriteAll( std::istream & s )
+    {
+        SetAll( "$ladderlog_script_write_all_help", s, SetMode_Script );
+    }
+    
+    void ScriptWrite( std::istream & s )
+    {
+        bool enable;
+        s >> enable;
+        if ( s.fail() )
+        {
+            if ( tConfItemBase::printErrors )
+                con << tOutput( "$ladderlog_script_write_help" ) << '\n';
+            return;
         }
-        return;
-    }
-    if(tConfItemBase::printChange) {
-        if(enabled) {
-            con << tOutput("$ladderlog_write_all_enabled") << '\n';
-        } else {
-            con << tOutput("$ladderlog_write_all_disabled") << '\n';
+
+        StringSet names;
+        se_ParseList( names, s );
+        int numberValid = 0;
+        
+        for ( StringSet::const_iterator it = names.begin(); it != names.end(); ++it )
+        {
+            WriterMap::iterator conf = writers_.find( *it );
+            if ( conf != writers_.end() )
+            {
+                numberValid++;
+                conf->second->SetForScript( enable );
+            }
+        }
+        
+        if ( tConfItemBase::printChange )
+        {
+            if ( enable )
+                con << tOutput( "$ladderlog_script_write_enabled", numberValid ) << '\n';
+            else
+                con << tOutput( "$ladderlog_script_write_disabled", numberValid ) << '\n';
         }
     }
-    eLadderLogWriter::setAll(enabled);
+
+private:
+    void SetAll( const char *help, std::istream & s, int mode )
+    {
+        bool enable;
+        s >> enable;
+
+        if ( s.fail() )
+        {
+            if ( tConfItemBase::printErrors )
+                con << tOutput( help ) << '\n';
+            return;
+        }
+        
+        for ( WriterMap::iterator it = writers_.begin(); it != writers_.end(); ++it )
+        {
+            if ( mode & SetMode_File )
+                it->second->SetForFile( enable );
+            if ( mode & SetMode_Script )
+                it->second->SetForScript( enable );
+        }
+        
+        if ( tConfItemBase::printChange )
+        {
+            if ( enable )
+                con << tOutput( "$ladderlog_write_all_enabled" ) << '\n';
+            else
+                con << tOutput( "$ladderlog_write_all_disabled" ) << '\n';
+        }
+    }    
+};
+
+static eLadderLogManager & se_GlobalLadderLogManager()
+{
+    static eLadderLogManager manager;
+    return manager;
 }
 
-static tConfItemFunc LadderLogWriteAllConf("LADDERLOG_WRITE_ALL", &LadderLogWriteAll);
+//! A tSettingItem that operates on two boolean values.
+class eLadderLogSetting : public tSettingItem< bool >
+{
+public:
+    eLadderLogSetting( tString name, bool & fileTarget, bool & scriptTarget )
+        :tConfItemBase( name ), tSettingItem< bool >( name, fileTarget ),
+        scriptTarget_( &scriptTarget )
+    {
+    }
+    
+    virtual void WasChanged()
+    {
+        *scriptTarget_ = *target;
+    }
+private:
+    bool *scriptTarget_;
+};
+
+eLadderLogWriter::eLadderLogWriter( char const *name, bool enabledByDefault )
+    :name_( name ),
+    isEnabledForFile_( enabledByDefault ),
+    isEnabledForScript_( enabledByDefault ),
+    conf_( new eLadderLogSetting( tString( "LADDERLOG_WRITE_" ) + name, isEnabledForFile_, isEnabledForScript_ ) ),
+    cache_( name )
+{
+    se_GlobalLadderLogManager().Add( this );
+}
+
+eLadderLogWriter::~eLadderLogWriter()
+{
+    se_GlobalLadderLogManager().Remove( this );
+    if ( conf_ )
+        delete conf_;
+}
+
+static bool se_ladderlogDecorateTS = false;
+static tSettingItem< bool > se_ladderlogDecorateTSConf( "LADDERLOG_DECORATE_TIMESTAMP", se_ladderlogDecorateTS );
+
+void eLadderLogWriter::write()
+{
+    if( isEnabled() && sn_GetNetState() != nCLIENT && !tRecorder::IsPlayingBack() )
+    {
+        std::string line;
+        if ( se_ladderlogDecorateTS )
+            line += st_GetCurrentTime("%Y/%m/%d-%H:%M:%S ");
+        line += cache_;
+        line += '\n';
+        
+        if ( isEnabledForFile_ )
+        {
+            std::ofstream o;
+            if ( tDirectories::Var().Open( o, "ladderlog.txt", std::ios::app ) )
+                o << line;
+        }
+        
+        if ( isEnabledForScript_ )
+        {
+            sr_InputForScripts( line.c_str() );
+        }
+    }
+    cache_ = name_;
+}
+
+static void se_LadderLogWriteAll( std::istream & s )
+{
+    se_GlobalLadderLogManager().WriteAll( s );
+}
+static tConfItemFunc se_ladderLogWriteAllConf( "LADDERLOG_WRITE_ALL", se_LadderLogWriteAll );
+
+#if HAVE_UNISTD_H
+static void se_LadderLogScriptWriteAll( std::istream & s )
+{
+    se_GlobalLadderLogManager().ScriptWriteAll( s );
+}
+static tConfItemFunc se_ladderLogScriptWriteAllConf( "LADDERLOG_SCRIPT_WRITE_ALL", se_LadderLogScriptWriteAll );
+
+static void se_LadderLogScriptWrite( std::istream & s )
+{
+    se_GlobalLadderLogManager().ScriptWrite( s );    
+}
+static tConfItemFunc se_ladderLogScriptWriteConf( "LADDERLOG_SCRIPT_WRITE", se_LadderLogScriptWrite );
+#endif /* HAVE_UNISTD_H */
+
 
 void se_SaveToScoreFile(const tOutput &o){
     tString s(o);
@@ -9699,28 +9817,16 @@ public:
     {
         Parse( ip_addresses_whitelist_, s );
     }
-protected:
-    typedef std::set< tString > StringSet;
-    
-    void Parse( StringSet & whitelist, std::istream & s )
-    {
-        int entries_count = 0;
-        while ( s.good() )
-        {
-            tString name;
-            s >> name;
-            if ( name.Len() > 1 )
-            {
-                std::pair< StringSet::iterator, bool > ret = whitelist.insert( name );
-                if ( ret.second ) entries_count++;
-            }
-        }
-        con << tOutput( "$whitelist_enemies_success", entries_count ) << '\n';
-    }
-    
+protected:    
     bool HasEntry( const StringSet & whitelist, const tString & value ) const
     {
         return whitelist.find( value ) != whitelist.end();
+    }
+    
+    void Parse( StringSet & whitelist, std::istream & s )
+    {
+        int entries_count = se_ParseList( whitelist, s );
+        con << tOutput( "$whitelist_enemies_success", entries_count ) << '\n';
     }
     
     StringSet usernames_whitelist_;

@@ -848,7 +848,6 @@ console_indent_help           Anzahl der Leerzeichen, mit denen die Vortsetzung 
 console_decorate_id_help      Jede Ausgabezeile wird mit der ID-Nummer des Clients, der sie verursacht hat, dekoriert
 console_decorate_ip_help      Jede Ausgabezeile wird mit der IP-Adresse des Clients, der sie verursacht hat, dekoriert
 console_decorate_timestamp_help Dekoriert jede Zeile der Konsolenausgabe mit aktuellem Datum und Uhrzeit
-console_ladder_log_help       Schickt das Ladder-Log auch an die Standardausgabe
 ladderlog_decorate_timestamp_help Dekoriert jede zeile von ladderlog.txt mit aktuellem Datum und Uhrzeit
 ladderlog_write_all_help      Setzt alle LADDER_LOG_WRITE_*-Einstellungen auf denselben Wert
 ladderlog_write_all_usage     Verwendung: LADDER_LOG_WRITE_ALL 1|0

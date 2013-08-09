@@ -854,12 +854,14 @@ console_indent_help     Number of spaces each continuation of a wrapped console 
 console_decorate_id_help			Decorates every line of console output with the client ID
 console_decorate_ip_help			Decorates every line of console output with the client IP
 console_decorate_timestamp_help			Decorates every line of console output with the current date and time
-console_ladder_log_help			Sends ladder log output to the console
 ladderlog_decorate_timestamp_help		Decorates every line of ladderlog output with the current date and time
-ladderlog_write_all_help Set all the LADDER_LOG_WRITE_* settings to the same value
-ladderlog_write_all_usage Usage: LADDER_LOG_WRITE_ALL 1|0
-ladderlog_write_all_enabled Enabled full ladderlog output.
-ladderlog_write_all_disabled Disabled ladderlog output.
+ladderlog_write_all_help         Enable or disable all ladderlog writers for both file and script output. Usage: LADDERLOG_WRITE_ALL 0|1
+ladderlog_script_write_all_help  Enable or disable all ladderlog writers for script output. Usage: LADDERLOG_SCRIPT_WRITE_ALL 0|1
+ladderlog_script_write_help      Enable or disable ladderlog writers for script output. Usage: LADDERLOG_SCRIPT_WRITE 0|1 <event1> [<event2> ...]
+ladderlog_script_write_enabled   Enabled \1 ladderlog writers for script output.
+ladderlog_script_write_disabled  Disabled \1 ladderlog writers for script output.
+ladderlog_write_all_enabled Enabled all ladderlog writers.
+ladderlog_write_all_disabled Disabled all ladderlog writers.
 ladderlog_write_authority_blurb_help          Write to ladderlog: AUTHORITY_BLURB <blurb> <player> <text>
 ladderlog_write_basezone_conquered_help       Write to ladderlog: BASEZONE_CONQUERED <team> <cx> <cy>
 ladderlog_write_basezone_conquerer_help       Write to ladderlog: BASEZONE_CONQUERER <player>

@@ -714,7 +714,6 @@ console_indent_help           Ilość spaji poprzedzających kontynuację linii,
 console_decorate_id_help      Umieszcza ID gracza w każdej linii konsoli
 console_decorate_ip_help      Umieszcza IP klienta w każdej linii konsoli
 console_decorate_timestamp_help Dekoruje wszystie linie w konsoli aktualną datą i godziną.
-console_ladder_log_help       Wyświetla w konsoli informacje o rankingu
 ladderlog_decorate_timestamp_help Dekoruje wszystie linie w rankingu aktualną datą i godziną.
 ladderlog_write_all_help      Ustwa wszystkie ustawienia LADDER_LOG_WRITE_* na tę samą wartość.
 ladderlog_write_all_usage     Użycie: LADDER_LOG_WRITE_ALL 1|0

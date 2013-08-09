@@ -21,6 +21,10 @@ Changes since 0.3.1
 	- DEATH_DEATHZONE <player>
 	- WINZONE_PLAYER_ENTER <player>
 - The ONLINE_PLAYER ladderlog entry now includes the access level of the player.
+- New commands LADDERLOG_SCRIPT_WRITE, and LADDERLOG_SCRIPT_WRITE_ALL that
+  allow better control over which events are sent to spawned scripts.
+- The CONSOLE_LADDER_LOG setting has been removed. Its functionality has been
+  reimplemented in scripts/examples/echo.sh.
 - New warmup mode:
     - DO_WARMUP N>0 will make the game enter warmup mode after each N matches
     - In warmup mode, players can use the /ready command to set themselves ready and start the match
