@@ -52,24 +52,23 @@ static bool st_ReadEscapeSequence( char & c, char & c2, std::istream & s )
     c2 = '\0';
 
     // detect escaping
-    if ( c == '\\' && !s.eof() && s.good() )
+    if ( c == '\\' )
     {
-        c2 = s.get();
+        c = s.get();
 
         // nothing useful read?
         if ( s.eof() )
         {
-            c2 = 0;
+            c = '\\';
             return false;
         }
 
         // interpret special escape sequences
-        switch (c2)
+        switch (c)
         {
         case 'n':
             // turn \n into newline
             c = '\n';
-            c2 = 0;
             return true;
         case '"':
         case ' ':
@@ -80,6 +79,8 @@ static bool st_ReadEscapeSequence( char & c, char & c2, std::istream & s )
             return true;
         default:
             // take the whole \x sequence as it appeared.
+            c2 = c;
+            c = '\\';
             return false;
         }
     }
