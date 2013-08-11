@@ -136,9 +136,11 @@ static bool newTeamAllowed;		// is it allowed to create a new team currently?
 
 static nSettingItem<bool> se_newTeamAllowed("NEW_TEAM_ALLOWED", newTeamAllowed );
 
+static bool se_allowTeamNameLeader = false;// allow to name a team after a player's team name
 static bool se_allowTeamNameColor  = true; // allow to name a team after a color
 static bool se_allowTeamNamePlayer = true; // allow to name a team after the leader
 
+static tSettingItem<bool> se_allowTeamNameLeaderConfig("ALLOW_TEAM_NAME_LEADER", se_allowTeamNameLeader );
 static tSettingItem<bool> se_allowTeamNameColorConfig("ALLOW_TEAM_NAME_COLOR", se_allowTeamNameColor );
 static tSettingItem<bool> se_allowTeamNamePlayerConfig("ALLOW_TEAM_NAME_PLAYER", se_allowTeamNamePlayer );
 
@@ -264,6 +266,7 @@ void eTeam::UpdateAppearance()
         nameTeamColor = true;
 
     nameTeamColor = NameTeamAfterColor ( nameTeamColor );
+    bool isCustomTeamName = false;
 
     tString updateName;
     if ( oldest )
@@ -289,9 +292,10 @@ void eTeam::UpdateAppearance()
                 if ( oldest->IsHuman() )
                 {
                     // did the player set a custom teamname ?
-                    if (oldest->teamname.Len()>1)
+                    if (se_allowTeamNameLeader && oldest->teamname.Len()>1)
                     {
                         // Use player's custom teamname
+                        isCustomTeamName = true;
                         updateName = oldest->teamname;
                     }
                     else
@@ -316,11 +320,16 @@ void eTeam::UpdateAppearance()
             {
                 // did the player set a custom teamname ?
                 if (oldest->teamname.Len()>1)
+                {
                     // use custom teamname
+                    isCustomTeamName = true;
                     updateName = oldest->teamname;
+                }
                 else
+                {
                     // use player name as teamname
                     updateName = oldest->GetName();
+                }
             }
 
             r = oldest->r;
@@ -348,10 +357,17 @@ void eTeam::UpdateAppearance()
     // if the name has been changed then update it
     if (name!=updateName)
     {
-        // only display a message if
+        /*// only display a message if
         // the oldest player changed the name of the team
-        // the server also sets the teamname sometimes
-        if(sn_GetNetState()!=nCLIENT && oldest)
+        // the server also sets the teamname sometimes*/
+        // Notify other players of the team name change if it's interesting
+        if (
+            sn_GetNetState() != nCLIENT
+            && oldest
+            && name != ""
+            && name != tString( tOutput("$team_empty") )
+            && ( lastWasCustomTeamName_ || ( updateName != oldest->GetName() && !nameTeamColor ) )
+        )
         {
             tOutput message;
             tColoredString name;
@@ -368,6 +384,7 @@ void eTeam::UpdateAppearance()
             sn_ConsoleOut(message);
         }
         name = updateName;
+        lastWasCustomTeamName_ = isCustomTeamName;
     }
 
     tString oldNameFiltered = ePlayerNetID::FilterName(oldName);
@@ -1599,6 +1616,7 @@ eTeam::eTeam()
     maxImbalanceLocal = maxImbalance;
     r = g = b = 32; // initialize color so it will be updated, guaranteed
     lastEmpty_=true;
+    lastWasCustomTeamName_ = false;
     Update();
 }
 
@@ -1617,6 +1635,7 @@ eTeam::eTeam(nMessage &m)
     maxImbalanceLocal = maxImbalance;
     r = g = b = 32; // initialize color so it will be updated, guaranteed
     lastEmpty_=true;
+    lastWasCustomTeamName_ = false;
     Update();
 }
 

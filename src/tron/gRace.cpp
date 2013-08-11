@@ -142,8 +142,6 @@ bool restrictRaceIdle(const REAL &newValue)
 static tSettingItem<REAL> sg_raceIdleTimeConf("RACE_IDLE_TIME", sg_raceIdleTime, &restrictRaceIdle);
 static tSettingItem<REAL> sg_raceIdleSpeedConf("RACE_IDLE_SPEED", sg_raceIdleSpeed, &restrictRaceIdle);
 
-tString sg_currentMap("");
-
 //! STATIC VARIABLES
 bool gRace::firstArrived_ = false;
 int  gRace::countDown_ = -1;
@@ -378,10 +376,10 @@ void gRaceScores::Read()
 
     tString Input;
     //mapFile << pz_mapAuthor << "/" << pz_mapCategory << "/" << pz_mapName << "-" << pz_mapVersion << ".aamap.xml";
-    Input << "race_scores/" << sg_currentMap << ".txt";
+    Input << "race_scores/" << mapfile << ".txt";
     sn_ConsoleOut(tOutput("$race_ranks_loading", pz_mapName));
 
-    mapFile_ = sg_currentMap;
+    mapFile_ = mapfile;
 
     //  clear old records if they exist to make way for the new
     if (sg_RaceScores.Len() > 0)

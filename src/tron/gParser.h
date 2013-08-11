@@ -100,5 +100,8 @@ protected:
 
 extern tString pz_mapName, pz_mapAuthor, pz_mapVersion, pz_mapCategory, pz_mapAxes;
 
+tString stripMapName(tString mapFile);
+tString stripMapNameOnly(tString mapFile);
+
 #endif //ArmageTron_PARSER_H
 

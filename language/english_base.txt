@@ -302,7 +302,7 @@ rotation_type_help                      Determines when map and config rotation 
 
 map_rotation_help                       A list of map files to rotate through, with values separated by semicolons. Optionally you can enter in the round like this: map|round_number;
 map_rotation_list                       List of maps currently in rotation:\n
-map_rotation_list_show                  Showing \1 maps out of \2 in rotation:\n
+map_rotation_list_show                  Showing \1 maps out of \2 in rotation.\n
 
 map_rotation_add_help                   Add a map item to the MAP_ROTATION list of items. Optionally you can also add in the round of selection. Usage: MAP_ROTATION_ADD <map>{|round_number}
 map_rotation_load_help                  Loads the selected map from it's designated id from the list of MAP_ROTATION items. Usage: MAP_ROTATION_LOAD <map_id>
@@ -312,7 +312,7 @@ map_rotation_set_help                   Set the selected map to the round provid
 config_rotation_help                    A list of config files to rotate through, with values separated by semicolons. Optionally you can enter in the round like this: config|round_number;
 config_rotation_type_help               How will the CONFIG_ROTATION files load? 0-INCLUDE or 1-RINCLUDE?; Default: 0
 config_rotation_list                    List of configs currently in rotation:\n
-config_rotation_list_show               Showing \1 cofigs out of \2m in rotation:\n
+config_rotation_list_show               Showing \1 cofigs out of \2m in rotation.\n
 
 config_rotation_add_help                Add a config item to the CONFIG_ROTATION list of items. Optionally you can also add in the round of selection. Usage: CONFIG_ROTATION_ADD <config>{|round_number}
 config_rotation_load_help               Loads the selected config from it's designated id from the list of CONFIG_ROTATION items. Usage: CONFIG_ROTATION_LOAD <config_id>
@@ -332,7 +332,12 @@ rotation_max_help                       The maximum number of rounds the current
 
 # non-rotation
 map_storage_help                        Is mainly use for non-rotation purposes, queue mainly. Usage is similar to MAP_ROTATION, except without round.
+map_storage_list                        List of maps currently in storge:\n
+map_storage_list_show                   Showing \1 maps out of \2 in storage.\n
+
 config_storage_help                     Is mainly use for non-rotation purposes, queue mainly. Usage is similar to CONFIG_ROTATION, except without round.
+config_storage_list                     List of configs currently in storage:\n
+config_storage_list_show                Showing \1 cofigs out of \2m in storage.\n
 
 # limits
 speed_factor_help		Speed modifier for the cycles

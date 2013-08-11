@@ -347,7 +347,14 @@ bool gQueuePlayers::Timestep(REAL time)
 
                         //  refill queues with their original amount
                         if (qPlayer->queues_ == 0)
+                        {
                             qPlayer->queues_ = qPlayer->queuesDefault;
+
+                            tOutput msg;
+                            msg.SetTemplateParameter(1, qPlayer->Name());
+                            msg << "$queue_refill_complete";
+                            sn_ConsoleOut(msg);
+                        }
                     }
                 }
 

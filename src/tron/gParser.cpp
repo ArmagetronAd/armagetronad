@@ -1519,3 +1519,37 @@ gParser::LoadAndValidateMapXML(char const * uri, FILE* docfd, char const * fileP
 
     return validated;
 }
+
+
+//!> Function to get map name from string given
+tString stripMapName(tString mapFile)
+{
+    int pos = mapFile.StrPos(1, "/");
+    int stoPos = 0;
+    tString map;
+    while (pos != -1)
+    {
+        stoPos = pos + 1;
+        map = mapFile.SubStr(stoPos);
+        pos = mapFile.StrPos(pos + 1, "/");
+    }
+    return map;
+}
+
+//!> Function to get map name (only) from string given
+tString stripMapNameOnly(tString mapFile)
+{
+    int pos = mapFile.StrPos(1, "/");
+    int stoPos = 0;
+    tString map;
+    while (pos != -1)
+    {
+        stoPos = pos + 1;
+        map = mapFile.SubStr(stoPos);
+        pos = mapFile.StrPos(pos + 1, "/");
+    }
+
+    tArray<tString> mapPieces = map.Split("-");
+
+    return mapPieces[0];
+}

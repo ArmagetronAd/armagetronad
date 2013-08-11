@@ -2109,6 +2109,11 @@ void se_SendTeamMessage( eTeam const * team, ePlayerNetID const * sender ,ePlaye
         else
             // send console out message
             se_OldChatMessage( sender, say )->Send( clientID );
+
+        if (se_chatLogWriteTeam)
+        {
+            se_SaveToChatLogC(say);
+        }
     }
 }
 
@@ -3027,6 +3032,8 @@ static void se_ChatMe( ePlayerNetID * p, std::istream & s, eChatSpamTester & spa
     tString str;
     str << p->GetUserName() << " /me " << msg;
     se_SaveToChatLog(str);
+
+    se_SaveToChatLogC(console);
     return;
 }
 
@@ -3119,6 +3126,12 @@ static void se_ChatShout( ePlayerNetID * p, tString const & say, eChatSpamTester
         tString s;
         s << p->GetUserName() << ' ' << say;
         se_SaveToChatLog(s);
+
+        tColoredString message;
+        message << *p;
+        message << tColoredString::ColorString(1,1,.5);
+        message << ": " << say << "\n";
+        se_SaveToChatLogC(message);
     }
 }
 
@@ -3214,6 +3227,8 @@ static void se_ChatTeam( ePlayerNetID * p, tString msg, eChatSpamTester & spam )
         tString str;
         str << p->GetUserName() << " /team " << msg;
         se_SaveToChatLog(str);
+
+
     }
 }
 
@@ -3235,30 +3250,32 @@ static void se_ChatEnemy(ePlayerNetID *p, std::istream &s, eChatSpamTester &spam
 
     switch (sn_GetNetState())
     {
-    case nSERVER:
-    {
-        tColoredString send;
-        send << p->GetColoredName();
-        send << tColoredString::ColorString( 1,1,.5 );
-        send << " --> ";
-        send << tColoredString::ColorString( 1,0,0 );
-        send << "Enemies";
-        send << tColoredString::ColorString( 1,1,.5 );
-        send << ": " << message << "\n";
-
-        // display it
-        sn_ConsoleOut( send );
-
-        break;
-
-        //add /enemy to chatlog
-        if (se_chatLogWriteEnemy)
+        case nSERVER:
         {
-            tString str;
-            str << p->GetUserName() << " /enemy " << message;
-            se_SaveToChatLog(str);
+            tColoredString send;
+            send << p->GetColoredName();
+            send << tColoredString::ColorString( 1,1,.5 );
+            send << " --> ";
+            send << tColoredString::ColorString( 1,0,0 );
+            send << "Enemies";
+            send << tColoredString::ColorString( 1,1,.5 );
+            send << ": " << message << "\n";
+
+            // display it
+            sn_ConsoleOut( send );
+
+            break;
+
+            //add /enemy to chatlog
+            if (se_chatLogWriteEnemy)
+            {
+                tString str;
+                str << p->GetUserName() << " /enemy " << message;
+                se_SaveToChatLog(str);
+
+                se_SaveToChatLogC(send);
+            }
         }
-    }
     }
 }
 
@@ -4119,7 +4136,7 @@ void handle_chat( nMessage &m )
                         return;
                     }
                     //  commands below are for displaying items in map rotation (mr) or config rotation (cr)
-                    else if ((command == "/mr") || (command == "/cr"))
+                    else if ((command == "/mr") || (command == "/msr") || (command == "/cr") || (command == "/csr"))
                     {
                         sg_DisplayRotationList(p, s, command);
                         return;
@@ -4357,6 +4374,7 @@ static void ConsoleSay_conf(std::istream &s)
             sn_ConsoleOut( send );
 
             se_SaveToChatLog(sg_AdminName + " " + message);
+            se_SaveToChatLogC(send);
 
             break;
         }
@@ -7248,7 +7266,9 @@ void se_SaveToLadderLog( tOutput const & out )
 }
 
 static bool se_chatLog = false;
+static bool se_chatLogColors = false;
 static tSettingItem<bool> se_chatLogConf("CHAT_LOG", se_chatLog);
+static tSettingItem<bool> se_chatLogColorsConf("CHAT_LOG_COLORS", se_chatLogColors);
 
 static eLadderLogWriter se_chatWriter("CHAT", false);
 
@@ -7267,6 +7287,21 @@ void se_SaveToChatLog(tOutput const &out)
             if ( tDirectories::Var().Open(o, "chatlog.txt", std::ios::app) )
             {
                 o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << out << std::endl;
+            }
+        }
+    }
+}
+
+void se_SaveToChatLogC(tOutput const &out)
+{
+    if(sn_GetNetState() != nCLIENT && !tRecorder::IsPlayingBack())
+    {
+        if(se_chatLog)
+        {
+            std::ofstream o;
+            if ( tDirectories::Var().Open(o, "chatlog_colors.txt", std::ios::app) )
+            {
+                o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << out;// << std::endl;
             }
         }
     }

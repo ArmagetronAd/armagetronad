@@ -380,8 +380,8 @@ class gQueuePlayers
         int Queues() { return queues_; }
         int QueueDefault() { return queuesDefault; }
 
-        void SetQueue(int newValue) { if (newValue >= 0) queues_ = newValue; }
-        void SetDefaultQueue(int newValue) { if (newValue >= 0) queuesDefault = newValue; }
+        void SetQueue(int newValue) { queues_ = newValue; }
+        void SetDefaultQueue(int newValue) { queuesDefault = newValue; }
 
         static bool PlayerExists(ePlayerNetID *player);
         static bool PlayerExists(tString name);

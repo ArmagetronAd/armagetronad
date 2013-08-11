@@ -224,7 +224,7 @@ extern gGameSettings* sg_currentSettings;
 // Race timer hack
 extern bool sg_RaceTimerEnabled;
 
-extern tString sg_currentMap;
+extern tString mapfile;
 
 void Orderedrotate();
 void Randomrotate();

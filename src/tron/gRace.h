@@ -202,7 +202,5 @@ extern int sg_RaceEndDelay;
 extern int sg_raceTryoutsNumber;
 extern int sg_scoreRaceComplete;
 
-extern tString sg_currentMap;
-
 #endif
 

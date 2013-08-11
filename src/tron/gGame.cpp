@@ -795,6 +795,45 @@ void sg_DisplayRotationList(ePlayerNetID *p, std::istream &s, tString command)
                 }
             }
         }
+        else if (command == "/msr")
+        {
+            if (mapStorage->Size() > 0)
+            {
+                if (showAmount < mapStorage->Size())
+                {
+                    if (mapStorage->Size() < max) max = mapStorage->Size();
+                    if ((mapStorage->Size() - showAmount) < max) max = mapStorage->Size() - showAmount;
+
+                    if (max > 0)
+                    {
+                        sn_ConsoleOut(tOutput("$map_storage_list"), p->Owner());
+
+                        for(int i = 0; i < max; i++)
+                        {
+                            int rotID = showAmount + i;
+                            gRotationItem *mapRotItem = mapStorage->Get(rotID);
+                            if (mapRotItem)
+                            {
+                                tColoredString output;
+                                output << "0x55ffff" << rotID << ") 0xff55ff";
+                                output << mapRotItem->Name();
+                                output << tColoredString::ColorString(1, 1, 1) << "\n";
+                                sn_ConsoleOut(output, p->Owner());
+
+                                showing++;
+                            }
+                        }
+
+                        tOutput show;
+                        show.SetTemplateParameter(1, showing);
+                        show.SetTemplateParameter(2, mapStorage->Size());
+
+                        show << "$map_storage_list_show";
+                        sn_ConsoleOut(show, p->Owner());
+                    }
+                }
+            }
+        }
         else if (command == "/cr")
         {
             sn_ConsoleOut(tOutput("$config_rotation_list"), p->Owner());
@@ -829,6 +868,45 @@ void sg_DisplayRotationList(ePlayerNetID *p, std::istream &s, tString command)
                         show.SetTemplateParameter(2, configRotation->Size());
 
                         show << "$config_rotation_list_show";
+                        sn_ConsoleOut(show, p->Owner());
+                    }
+                }
+            }
+        }
+        else if (command == "/csr")
+        {
+            sn_ConsoleOut(tOutput("$config_storage_list"), p->Owner());
+
+            if (configStorage->Size() > 0)
+            {
+                if (showAmount < configStorage->Size())
+                {
+                    if (configStorage->Size() < max) max = configStorage->Size();
+                    if ((configStorage->Size() - showAmount) < max) max = configStorage->Size() - showAmount;
+
+                    if (max > 0)
+                    {
+                        for(int i = 0; i < max; i++)
+                        {
+                            int rotID = showAmount + i;
+                            gRotationItem *configRotItem = configStorage->Get(rotID);
+                            if (configRotItem)
+                            {
+                                tColoredString output;
+                                output << "0x55ffff" << rotID << ") 0xff55ff";
+                                output << configRotItem->Name();
+                                output << tColoredString::ColorString(1, 1, 1) << "\n";
+                                sn_ConsoleOut(output, p->Owner());
+
+                                showing++;
+                            }
+                        }
+
+                        tOutput show;
+                        show.SetTemplateParameter(1, showing);
+                        show.SetTemplateParameter(2, configStorage->Size());
+
+                        show << "$config_storage_list_show";
                         sn_ConsoleOut(show, p->Owner());
                     }
                 }
@@ -1251,7 +1329,7 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
                                 if (item_name == mapName)
                                 {
                                     tOutput Output;
-                                    Output.SetTemplateParameter(1, mapName);
+                                    Output.SetTemplateParameter(1, stripMapNameOnly(mapName));
                                     Output.SetTemplateParameter(2, j+1);
                                     Output << "$map_queueing_stored_file_found";
                                     sn_ConsoleOut(Output);
@@ -1263,8 +1341,8 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
                             {
                                 sg_mapqueueing.Insert(mapName);
                                 tOutput Output;
-                                Output.SetTemplateParameter(1, mapName);
-                                Output.SetTemplateParameter(2, p->GetColoredName());
+                                Output.SetTemplateParameter(1, stripMapNameOnly(mapName));
+                                Output.SetTemplateParameter(2, p->GetName());
                                 Output << "$map_queueing_file_stored";
                                 sn_ConsoleOut(Output);
 
@@ -1303,18 +1381,18 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
                     tString item = items;
                     bool mapFound = false;
                     tArray<tString> searchFindings;
-                    for (int i = 0; i < mapStorage->Size(); i++)
+                    for (int i = 0; i < sg_mapqueueing.Size(); i++)
                     {
-                        gRotationItem *mapRotItem = mapStorage->Get(i);
+                        tString mapRotItem = sg_mapqueueing.Get(i);
                         if (mapRotItem)
                         {
                             tString filteredName, filteredSearch;
-                            filteredName = ePlayerNetID::FilterName(mapRotItem->Name());
+                            filteredName = ePlayerNetID::FilterName(mapRotItem);
                             filteredSearch = ePlayerNetID::FilterName(item);
                             if (filteredName.Contains(filteredSearch))
                             {
                                 mapFound = true;
-                                searchFindings.Insert(mapRotItem->Name());
+                                searchFindings.Insert(mapRotItem);
                             }
                         }
                     }
@@ -1337,8 +1415,8 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
                                 {
                                     sg_mapqueueing.Remove(j);
                                     tOutput Output;
-                                    Output.SetTemplateParameter(1, mapName);
-                                    Output.SetTemplateParameter(2, p->GetColoredName());
+                                    Output.SetTemplateParameter(1, stripMapNameOnly(mapName));
+                                    Output.SetTemplateParameter(2, p->GetName());
                                     Output << "$map_queueing_file_removed";
                                     sn_ConsoleOut(Output);
 
@@ -1460,7 +1538,7 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
                                 sg_configqueueing.Insert(configName);
                                 tOutput Output;
                                 Output.SetTemplateParameter(1, configName);
-                                Output.SetTemplateParameter(2, p->GetColoredName());
+                                Output.SetTemplateParameter(2, p->GetName());
                                 Output << "config_queueing_file_stored";
                                 sn_ConsoleOut(Output);
 
@@ -1499,18 +1577,18 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
                     tString item = items;
                     bool configFound = false;
                     tArray<tString> searchFindings;
-                    for (int i=0; i < configRotation->Size(); i++)
+                    for (int i=0; i < sg_configqueueing.Size(); i++)
                     {
-                        gRotationItem *configRotItem = configRotation->Get(i);
+                        tString configRotItem = sg_configqueueing.Get(i);
                         if (configRotItem)
                         {
                             tString filteredName, filteredSearch;
-                            filteredName = ePlayerNetID::FilterName(configRotItem->Name());
+                            filteredName = ePlayerNetID::FilterName(configRotItem);
                             filteredSearch = ePlayerNetID::FilterName(item);
                             if (filteredName.Contains(filteredSearch))
                             {
                                 configFound = true;
-                                searchFindings.Insert(configRotItem->Name());
+                                searchFindings.Insert(configRotItem);
                             }
                         }
                     }
@@ -1643,7 +1721,7 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
                                 if (item_name == mapName)
                                 {
                                     tOutput Output;
-                                    Output.SetTemplateParameter(1, mapName);
+                                    Output.SetTemplateParameter(1, stripMapNameOnly(mapName));
                                     Output.SetTemplateParameter(2, j+1);
                                     Output << "$map_queueing_stored_file_found";
                                     sn_ConsoleOut(Output);
@@ -1655,8 +1733,8 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
                             {
                                 sg_mapqueueing.Insert(mapName);
                                 tOutput Output;
-                                Output.SetTemplateParameter(1, mapName);
-                                Output.SetTemplateParameter(2, p->GetColoredName());
+                                Output.SetTemplateParameter(1, stripMapNameOnly(mapName));
+                                Output.SetTemplateParameter(2, p->GetName());
                                 Output << "$map_queueing_file_stored";
                                 sn_ConsoleOut(Output);
 
@@ -1695,18 +1773,18 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
                     tString item = items;
                     bool mapFound = false;
                     tArray<tString> searchFindings;
-                    for (int i = 0; i < mapStorage->Size(); i++)
+                    for (int i = 0; i < sg_mapqueueing.Size(); i++)
                     {
-                        gRotationItem *mapRotItem = mapStorage->Get(i);
-                        if (mapRotItem)
+                        tString mapQueuedItem = sg_mapqueueing.Get(1);
+                        if (mapQueuedItem)
                         {
                             tString filteredName, filteredSearch;
-                            filteredName = ePlayerNetID::FilterName(mapRotItem->Name());
+                            filteredName = ePlayerNetID::FilterName(mapQueuedItem);
                             filteredSearch = ePlayerNetID::FilterName(item);
                             if (filteredName.Contains(filteredSearch))
                             {
                                 mapFound = true;
-                                searchFindings.Insert(mapRotItem->Name());
+                                searchFindings.Insert(mapQueuedItem);
                             }
                         }
                     }
@@ -1730,7 +1808,7 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
                                     sg_mapqueueing.Remove(j);
                                     tOutput Output;
                                     Output.SetTemplateParameter(1, mapName);
-                                    Output.SetTemplateParameter(2, p->GetColoredName());
+                                    Output.SetTemplateParameter(2, p->GetName());
                                     Output << "$map_queueing_file_removed";
                                     sn_ConsoleOut(Output);
 
@@ -1852,7 +1930,7 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
                                 sg_configqueueing.Insert(configName);
                                 tOutput Output;
                                 Output.SetTemplateParameter(1, configName);
-                                Output.SetTemplateParameter(2, p->GetColoredName());
+                                Output.SetTemplateParameter(2, p->GetName());
                                 Output << "config_queueing_file_stored";
                                 sn_ConsoleOut(Output);
 
@@ -1891,18 +1969,18 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
                     tString item = items;
                     bool configFound = false;
                     tArray<tString> searchFindings;
-                    for (int i=0; i < configStorage->Size(); i++)
+                    for (int i=0; i < sg_configqueueing.Size(); i++)
                     {
-                        gRotationItem *configRotItem = configStorage->Get(i);
+                        tString configRotItem = sg_configqueueing.Get(i);
                         if (configRotItem)
                         {
                             tString filteredName, filteredSearch;
-                            filteredName = ePlayerNetID::FilterName(configRotItem->Name());
+                            filteredName = ePlayerNetID::FilterName(configRotItem);
                             filteredSearch = ePlayerNetID::FilterName(item);
                             if (filteredName.Contains(filteredSearch))
                             {
                                 configFound = true;
-                                searchFindings.Insert(configRotItem->Name());
+                                searchFindings.Insert(configRotItem);
                             }
                         }
                     }
@@ -1967,7 +2045,7 @@ void sg_OutputOnlinePlayers()
     {
         if (se_PlayerNetIDs.Len() > 0)
         {
-            o << sg_currentMap << "\n";
+            o << ((mapfile.Filter() != "")?mapfile:tString("NO_MAP")) << "\n";
             for(int pID = 0; pID < se_PlayerNetIDs.Len(); pID++)
             {
                 ePlayerNetID *p = se_PlayerNetIDs[pID];
@@ -3393,6 +3471,8 @@ void update_settings( bool const * goon )
                     sn_ConsoleOut(o2);
 
                     timeout = tSysTimeFloat() + 10.0f;
+
+                    sg_OutputOnlinePlayers();
                 }
 
                 // do tasks
@@ -5530,9 +5610,6 @@ void gGame::StateUpdate(){
                 }
             }
 
-            sg_currentMapWriter << sg_currentSettings->sizeFactor << mapfile;
-            sg_currentMapWriter.write();
-
             nConfItemBase::s_SendConfig(false);
             // wait extra long for the clients to delete the grid; they really need to be
             // synced this time
@@ -5544,7 +5621,8 @@ void gGame::StateUpdate(){
         case GS_CREATE_GRID:
             // sr_con.autoDisplayAtNewline=true;
 
-            sg_currentMap = mapfile;
+            sg_currentMapWriter << sg_currentSettings->sizeFactor << mapfile;
+            sg_currentMapWriter.write();
 
             //HACK RACE begin
             if ( sg_RaceTimerEnabled )
