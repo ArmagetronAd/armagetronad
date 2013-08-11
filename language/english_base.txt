@@ -224,6 +224,7 @@ auto_team_help          Flag indicating whether players should be put into teams
 auto_team_spec_spam_help    If set to 0, spectators won't be announced when joining or leaving, provided AUTO_TEAM is set to 0.
 
 allow_team_name_color_help   Allow a team to be named after a color
+allow_team_name_leader_help  Allow team leader to set a team. 
 allow_team_name_player_help  Allow a team to be named after the leading player
 
 play_time_total_help         Total time in minutes someone has played with this client
@@ -903,11 +904,14 @@ ladderlog_write_new_match_help                Write to ladderlog: NEW_MATCH <dat
 ladderlog_write_new_round_help                Write to ladderlog: NEW_ROUND <date and time>
 ladderlog_write_num_humans_help               Write to ladderlog: NUM_HUMANS <number of humans>
 ladderlog_write_online_player_help            Write to ladderlog: ONLINE_PLAYER <name> <r> <g> <b> <access_level> <did_login?> [<ping> <team>]
+ladderlog_write_online_team_help              Write to ladderlog: ONLINE_TEAM <name> <screen name>
 ladderlog_write_player_ai_entered_help        Write to ladderlog: PLAYER_AI_ENTERED <name> <screen name>
 ladderlog_Write_player_ai_left_help           Write to ladderlog: PLAYER_AI_LEFT <name>
 ladderlog_write_player_entered_grid_help      Write to ladderlog: PLAYER_ENTERED_GRID <name> <IP> <screen name>
 ladderlog_write_player_entered_spectator_help Write to ladderlog: PLAYER_ENTERED_SPECTATOR <name> <IP> <screen name>
 ladderlog_write_player_left_help              Write to ladderlog: PLAYER_LEFT <name> <IP>
+ladderlog_write_player_login_help             Write to ladderlog: PLAYER_LOGIN <name> <authenticated name>
+ladderlog_write_player_logout_help            Write to ladderlog: PLAYER_LOGOUT <authenticated name> <name>
 ladderlog_write_player_renamed_help           Write to ladderlog: PLAYER_RENAMED <old name> <new name> <ip> <did_login?> <screen name>
 ladderlog_write_positions_help                Write to ladderlog: POSITIONS <team> <player1 player2 ...>
 ladderlog_write_round_score_help              Write to ladderlog: ROUND_SCORE <score difference> <player> [<team>]
@@ -931,7 +935,8 @@ ladderlog_write_team_renamed_help             Write to ladderlog: TEAM_RENAMED <
 ladderlog_write_team_player_added_help        Write to ladderlog: TEAM_PLAYER_ADDED <team name> <player>
 ladderlog_write_team_player_removed_help      Write to ladderlog: TEAM_PLAYER_REMOVED <team name> <player>
 ladderlog_game_time_interval_help If non-negative, write a line with the current game time to the ladder log every n seconds.
-chat_log_help			Write machine parsable chat messages to var/chatlog.txt
+chat_log_help			                  Write machine parsable chat messages to var/chatlog.txt
+chat_log_colors_help              Writes chat messages to var/chatlog_colors.txt
 chatlog_write_team_help      Write /team messages to chatlog [1: on | 0:off]
 chatlog_write_pm_help        Write Private messages (/msg) to chatlog [1: on | 0:off]
 chatlog_write_enemy_help     Write /enemy messages to chatlog [1: on | 0: off]
@@ -3375,6 +3380,12 @@ race_record_highliter_help The color to highlight that player's records during t
 
 race_idle_inform           0x99ffffWhat are you doing, 0xff55ff\10x99ffff? Hold down your brakes (v) to go faster!\n
 race_idle_kill             0xff55ff\1 0xff9999has been killed for not racing!\n
+race_idle_kill_help        If set to 1, kills players that are idle for RACE_IDLE_TIME seconds.
+race_idle_speed_help       Set to >= 0, idle activates if players stay for RACE_IDLE_TIME under the set idle speed.
+race_idle_time_help        Number of seconds a player is idle on grid before being warned and then killed.
+
+race_ranks_limit_help      If set to 1, racing records will have a time limit in which a player has not played that map for a while.
+race_ranks_limit_time_help Set to >= 0, if players for each map did not play for this many seconds, their rank will be removed.
 
 #*************************************
 #*************************************
@@ -3592,6 +3603,7 @@ collapse_zone_id_help               Collapse the zone by the given ID.
 condense_conquest_output_help       Condense fort zone conquered output into one line for multiple wiiners.
 custom_message_help                 Send custom message using language string commands. Have spaces between each parameter.\nUsage: CUSTOM_MESSAGE ${language_string} param1 param2 param3 ...
 custom_player_message_help          Send custom message to player using language string commands. Have spaces between each parameter.\nUsage: CUSTOM_MESSAGE_PLAYER [player] ${language_string} param1 param2 param3 ...
+custom_center_message_help          Send custom message in the form of a center message.\nUSAGE: CUSTOM_CENTER_MESSAGE ${language_string} param1 param2 param3 ...
 cycle_brake_tooltip_help            UNDOCUMENTED
 cycle_explosion_radius_help         Radious of the explosion when a cycle gets destroyed.
 cycle_rubber_deplete_enemy_help     If set to 1, rubber depletes for players when hitting enemys' tails.

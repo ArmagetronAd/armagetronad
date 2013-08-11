@@ -6660,7 +6660,7 @@ void ePlayerNetID::DeAuthenticate( ePlayerNetID const * admin )
 
         SetLoggedIn(false);
 
-        se_playerLogoutWriter << authenticatedname << GetUserName();
+        se_playerLogoutWriter << authenticatedname << GetName().Filter();
         se_playerLogoutWriter.write();
     }
 
@@ -7683,6 +7683,7 @@ tString ePlayerNetID::Ranking( int MAX, bool cut )
 }
 
 static eLadderLogWriter se_onlinePlayerWriter("ONLINE_PLAYER", false);
+static eLadderLogWriter se_onlineTeamWriter( "ONLINE_TEAM", true );
 static eLadderLogWriter se_playerColoredNameWriter("PLAYER_COLORED_NAME", false);
 static eLadderLogWriter se_numHumansWriter("NUM_HUMANS", false);
 
@@ -7723,6 +7724,18 @@ void ePlayerNetID::RankingLadderLog()
         }
         se_onlinePlayerWriter.write();
     }
+
+    for(int j = 0; j < eTeam::teams.Len(); j++)
+    {
+        eTeam *team = eTeam::teams[j];
+        if (team)
+        {
+            se_onlineTeamWriter << team->Name().Filter();
+            se_onlineTeamWriter << team->Name();
+            se_onlineTeamWriter.write();
+        }
+    }
+
     se_numHumansWriter << num_humans;
     se_numHumansWriter.write();
 
