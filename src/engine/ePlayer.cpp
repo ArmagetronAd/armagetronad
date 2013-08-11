@@ -7086,38 +7086,6 @@ float ePlayerNetID::RankingGraph( float y, int MAX ){
     return y;
 }
 
-static eLadderLogWriter se_onlinePlayerWriter("ONLINE_PLAYER", false);
-static eLadderLogWriter se_numHumansWriter("NUM_HUMANS", false);
-
-void ePlayerNetID::RankingLadderLog() {
-    SortByScore();
-
-    int num_humans = 0;
-    int max = se_PlayerNetIDs.Len();
-    for(int i = 0; i < max; ++i) {
-        ePlayerNetID *p = se_PlayerNetIDs(i);
-        if(p->Owner() == 0) continue; // ignore AIs
-
-        se_onlinePlayerWriter << p->GetLogName();
-
-        if(p->IsActive()) {
-            se_onlinePlayerWriter << p->ping;
-            if(p->currentTeam) {
-                se_onlinePlayerWriter << FilterName(p->currentTeam->Name());
-                ++num_humans;
-            }
-            else
-            {
-                se_onlinePlayerWriter << "";
-            }
-        }
-        se_onlinePlayerWriter << p->GetAccessLevel();
-        se_onlinePlayerWriter.write();
-    }
-    se_numHumansWriter << num_humans;
-    se_numHumansWriter.write();
-}
-
 void ePlayerNetID::ClearAll(){
     for(int i=MAX_PLAYERS-1;i>=0;i--){
         ePlayer *local_p=ePlayer::PlayerConfig(i);

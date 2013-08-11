@@ -3161,8 +3161,7 @@ void gGame::StateUpdate(){
 
             init_game_objects(grid);
 
-            ePlayerNetID::RankingLadderLog();
-            eTeam::WriteLaunchPositions();
+            eTeam::WriteOnlinePlayers();
 
             // do round begin stuff
             {

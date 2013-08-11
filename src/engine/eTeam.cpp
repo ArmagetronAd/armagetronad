@@ -1046,22 +1046,64 @@ void eTeam::WritePlayers( eLadderLogWriter & writer, const eTeam *team )
     }
 }
 
-static eLadderLogWriter se_positionWriter( "POSITIONS", false );
-void eTeam::WriteLaunchPositions()
+static eLadderLogWriter se_onlinePlayerWriter( "ONLINE_PLAYER", true );
+static eLadderLogWriter se_onlineTeamWriter( "ONLINE_TEAM", true );
+static eLadderLogWriter se_numHumansWriter( "NUM_HUMANS", false );
+
+// Writes the data for the ONLINE_PLAYER ladderlog event.
+// Returns true if the player is a human and is active.
+static bool se_WriteOnlinePlayerData( ePlayerNetID *player, eTeam *team )
 {
+    if ( player->Owner() != 0 && player->IsActive() )
+    {
+        se_onlinePlayerWriter << player->GetLogName();
+        se_onlinePlayerWriter << player->ping;
+        if ( team )
+            se_onlinePlayerWriter << ePlayerNetID::FilterName( team->Name() );
+        else
+            se_onlinePlayerWriter << "";
+        se_onlinePlayerWriter << player->GetAccessLevel();
+        se_onlinePlayerWriter << player->Score();
+        se_onlinePlayerWriter.write();
+        return true;
+    }
+    return false;
+}
+
+void eTeam::WriteOnlinePlayers()
+{
+    int numHumans = 0;
+
+    // Write teams and players (ordered by launch position)
     for ( int i = teams.Len() - 1; i >= 0; --i )
     {
-        eTeam *team = teams(i);
-        
+        eTeam *team = teams( i );
+
         // AI teams are boring.
         if ( !team->IsHuman() )
             continue;
 
-        se_positionWriter << team->GetLogName();
-        for ( int j = 0; j < team->players.Len(); j++ )
-            se_positionWriter << team->players( j )->GetLogName();
-        se_positionWriter.write();
+        se_onlineTeamWriter << ePlayerNetID::FilterName( team->Name() );
+        se_onlineTeamWriter << team->Score();
+        se_onlineTeamWriter.write();
+
+        for ( int j = 0; j < team->players.Len(); j++)
+        {
+            if ( se_WriteOnlinePlayerData( team->players( j ), team ) )
+                numHumans++;
+        }
     }
+
+    // Write spectators
+    for ( int i = se_PlayerNetIDs.Len() - 1; i >= 0; --i )
+    {
+        ePlayerNetID * p = se_PlayerNetIDs(i);
+        if ( !p->CurrentTeam() )
+            se_WriteOnlinePlayerData( p, NULL );
+    }
+
+    se_numHumansWriter << numHumans;
+    se_numHumansWriter.write();
 }
 
 // inquire or set the ability to use a color as a team name

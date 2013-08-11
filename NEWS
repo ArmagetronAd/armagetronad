@@ -20,7 +20,14 @@ Changes since 0.3.1
 	- PLAYER_RESPAWN <RESPAWNEE> <RESPAWNEE'S TEAM> [RESPAWNER]
 	- DEATH_DEATHZONE <player>
 	- WINZONE_PLAYER_ENTER <player>
-- The ONLINE_PLAYER ladderlog entry now includes the access level of the player.
+    - ONLINE_TEAM <name> <aggregate score>
+- Changes to the ONLINE_PLAYER ladderlog event:
+    - It is now enabled by default.
+    - Added additional information about the access level and aggregate score
+      of the player.
+    - Players are written in the order of their launch position on the team.
+- Removed POSITIONS ladderlog event. ONLINE_PLAYER now includes all information
+  it provided.
 - New commands LADDERLOG_SCRIPT_WRITE, and LADDERLOG_SCRIPT_WRITE_ALL that
   allow better control over which events are sent to spawned scripts.
 - The CONSOLE_LADDER_LOG setting has been removed. Its functionality has been
