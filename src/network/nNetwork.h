@@ -34,7 +34,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tLinkedList.h"
 #include "tCallback.h"
 #include "nObserver.h"
-//#include "tCrypt.h"
 #include "tException.h"
 
 #include <memory>
@@ -56,9 +55,6 @@ class nMessageBase;
 class nStreamMessage;
 // typedef nStreamMessage nMessage;
 
-
-
-class tCrypt;
 class tOutput;
 
 typedef double nTimeAbsolute;				// typedef for absolute time variables in network code
@@ -335,8 +331,6 @@ struct nConnectionInfo     // everything that is needed to manage a connection
     int                    ackPending;
 
     nPingAverager          ping;
-
-    // tCrypt*                crypt;
 
     // rate control
     nBandwidthControl		bandwidthControl_;

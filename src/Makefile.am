@@ -54,7 +54,7 @@ INCLUDED_MODULE_SOURCES=
 libtools_a_SOURCES = ${tools_extra} tools/tVersion.cpp tools/tVersion.h tTrueVersion.h\
 	tools/tArray.cpp tools/tArray.h \
 	tools/tCallback.cpp tools/tCallback.h tools/tCallbackString.h tools/tColor.cpp tools/tColor.h\
-	tools/tConfiguration.cpp tools/tConfiguration.h tools/tConsole.cpp tools/tConsole.h tools/tCrypt.cpp tools/tCrypt.h\
+	tools/tConfiguration.cpp tools/tConfiguration.h tools/tConsole.cpp tools/tConsole.h \
 	tools/tDirectories.cpp tools/tDirectories.h tools/tError.cpp tools/tError.h tools/tEventQueue.cpp\
 	tools/tEventQueue.h tools/tHeap.cpp tools/tHeap.h tools/tInitExit.h tools/tLinkedList.cpp tools/tLinkedList.h\
 	tools/tList.h tools/tLocale.cpp tools/tLocale.h tools/tMath.h \
@@ -98,12 +98,14 @@ libtools_a_SOURCES = ${tools_extra} tools/tVersion.cpp tools/tVersion.h tTrueVer
 	tools/tPolynomialWithBase.h tools/tPolynomialWithBase.cpp \
 	tools/tRuby.h tools/tRuby.cpp \
 	tools/tDict.h \
+	tools/md5.cpp tools/md5.h \
+	tools/tCrypto.h tools/tCrypto.cpp \
 	resource/tResource.h resource/tResource.cpp resource/tResourceType.h resource/tResourceType.cpp\
 	tools/tMemManager.cpp tools/tMemManager.h
 # again, tMemManager.cpp/.h must be last here.
 
 #tools/tCommandLine.cpp tools/tCommandLine.h
-libnetwork_a_SOURCES=network/md5.cpp network/md5.h network/nAuthentication.cpp\
+libnetwork_a_SOURCES=network/nAuthentication.cpp\
 	network/nAuthentication.h network/nConfig.cpp network/nConfig.h\
 	network/nKrawall.cpp network/nKrawall.h network/nKrawallPrivate.cpp\
 	network/nNetObject.cpp network/nNetObject.h network/nNetwork.cpp network/nNetwork.h\

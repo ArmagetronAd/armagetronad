@@ -294,11 +294,7 @@ bool nKrawall::MayRequirePassword(tString& adress, unsigned int port)
 bool nKrawall::ArePasswordsEqual(const nScrambledPassword& a,
                                  const nScrambledPassword& b)
 {
-    for (int i=15; i>=0; i--)
-        if (a[i] != b[i])
-            return false;
-
-    return true;
+    return a == b;
 }
 
 nKrawall::nCheckResult::nCheckResult()

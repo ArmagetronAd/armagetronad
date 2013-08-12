@@ -3,7 +3,8 @@
 *************************************************************************
 
 ArmageTron -- Just another Tron Lightcycle Game in 3D.
-Copyright (C) 2000  Manuel Moos (manuel@moosnet.de)
+Copyright (C) 2005 by the AA DevTeam (see the file AUTHORS(.txt)
+in the main source directory)
 
 **************************************************************************
 
@@ -25,75 +26,45 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 */
 
-#include "tCrypt.h"
-#include "tMemManager.h"
+#ifndef TCRYPTO_H_5770T48R
+#define TCRYPTO_H_5770T48R
 
-#include <string>
-#include <string.h>
+#include "md5.h"
+#include "tError.h"
+#include <iostream>
 
-class tCryptDummy: public tCrypt
+class tChecksum
 {
 public:
-    virtual ~tCryptDummy(){}
-
-    virtual int KeyLength(){return 0;}   // the key length in bytes (NOT BITS)
-
-    virtual int MinDataLen(){return 16;}  // minimum data length (bytes)
-    virtual int MaxDataLen(){return 32;}  // maximum data length
-    virtual int StepDataLen(){return 8;} // data length step
-
-    virtual void CreateRandomKey(void *keydata){}
-    virtual bool SetKey(const void *keydata){return true;}
-
-    virtual bool Crypt(const void *data_in, int data_len, void *data_out)
+    tChecksum()
     {
-        memcpy(data_out, data_in, data_len);
-        return true;
+        Clear();
     }
+
+    md5_byte_t operator[]( int i ) const
+    {
+        tASSERT( i >= 0 && i < 16 );
+        return content[i];
+    }
+
+    md5_byte_t & operator[]( int i )
+    {
+        tASSERT( i >= 0 && i < 16 );
+        return content[i];
+    }
+
+    void Clear()
+    {
+        memset( &content, 0, sizeof(content));
+    }
+
+    md5_byte_t content[16];
 };
 
+bool operator==( const tChecksum & a, const tChecksum & b );
+bool operator!=( const tChecksum & a, const tChecksum & b );
 
+std::ostream & operator <<( std::ostream & s, const tChecksum & checksum );
+std::istream & operator >>( std::istream & s, tChecksum & checksum );
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-tCrypt *tCrypt::CreateSymmetricCrypt(int id)
-{
-    return tNEW(tCryptDummy);
-}
-
-tCrypt *tCrypt::CreatePublicEncrypt(int id)
-{
-    return tNEW(tCryptDummy);
-}
-
-tCrypt *tCrypt::CreatePrivateEncrypt(int id)
-{
-    return tNEW(tCryptDummy);
-}
+#endif /* end of include guard: TCRYPTO_H_5770T48R */

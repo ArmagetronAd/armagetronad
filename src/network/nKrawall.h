@@ -44,6 +44,7 @@ the executable is not distributed).
 #include "tString.h"
 // #include "nNetObject.h"
 #include "tConfiguration.h"
+#include "tCrypto.h"
 
 namespace Network{ class Hash; }
 
@@ -60,31 +61,7 @@ class tString;
 class nKrawall
 {
 public:
-    // the scrambled password data types
-    class nScrambledPassword
-    {
-        friend class nKrawall;
-
-        md5_byte_t content[16];
-    public:
-        md5_byte_t operator[]( int i ) const
-        {
-            tASSERT( i >= 0 && i < 16 );
-            return content[i];
-        }
-
-        md5_byte_t & operator[]( int i )
-        {
-            tASSERT( i >= 0 && i < 16 );
-            return content[i];
-        }
-
-        void Clear()
-        {
-            memset( &content, 0, sizeof(content));
-        }
-    };
-
+    typedef tChecksum nScrambledPassword;
     typedef nScrambledPassword nSalt;          // (freely changable)
 
     //! extra information for password scrambling
