@@ -3400,7 +3400,7 @@ void sg_RespawnAllAfter( REAL after, REAL time, eGrid *grid, gArena & arena, boo
 
         if ( ( !e || ( !e->Alive() && e->DeathTime() < time - after ) ) && sn_GetNetState() != nCLIENT )
         {
-            sg_respawnWriter << p->GetLogName() << ePlayerNetID::FilterName(p->CurrentTeam()->Name());
+            sg_respawnWriter << p->GetLogName() << p->CurrentTeam()->GetLogName();
             sg_respawnWriter.write();
             sg_RespawnPlayer(grid, &arena, p, atSpawn);
         }
@@ -3996,10 +3996,10 @@ void gGame::Analysis(REAL time){
                             se_SaveToScoreFile(message);
                         }
 
-                        sg_roundWinnerWriter << ePlayerNetID::FilterName( eTeam::teams[winner-1]->Name() );
+                        sg_roundWinnerWriter << eTeam::teams[winner-1]->GetLogName();
                         eTeam::WritePlayers( sg_roundWinnerWriter, eTeam::teams[winner-1] );
                         sg_roundWinnerWriter.write();
-                        tString notificationMessage( ePlayerNetID::FilterName( eTeam::teams[winner-1]->Name() ) );
+                        tString notificationMessage( eTeam::teams[winner-1]->GetLogName() );
                         notificationMessage << " has won the round";
                         se_sendEventNotification(tString("Round winner"), notificationMessage);
 
@@ -4147,10 +4147,10 @@ void gGame::Analysis(REAL time){
                         name << eTeam::teams[0]->Name();
                         name << tColoredString::ColorString(1,1,1);
 
-                        sg_matchWinnerWriter << ePlayerNetID::FilterName( eTeam::teams[0]->Name() );
+                        sg_matchWinnerWriter << eTeam::teams[0]->GetLogName();
                         eTeam::WritePlayers( sg_matchWinnerWriter, eTeam::teams[0] );
                         sg_matchWinnerWriter.write();
-                        tString notificationMessage( ePlayerNetID::FilterName( eTeam::teams[0]->Name() ) );
+                        tString notificationMessage( eTeam::teams[0]->GetLogName() );
                         notificationMessage << " has won the match";
                         se_sendEventNotification(tString("Match winner"), notificationMessage);
 

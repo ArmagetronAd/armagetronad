@@ -10316,7 +10316,7 @@ void ePlayerNetID::LogScoreDifference( void )
         lastScore_ = IMPOSSIBLY_LOW_SCORE;
         se_roundScoreWriter << scoreDifference << GetUserName();
         if ( currentTeam )
-            se_roundScoreWriter << FilterName( currentTeam->Name() );
+            se_roundScoreWriter << currentTeam->GetLogName();
         se_roundScoreWriter.write();
     }
 }

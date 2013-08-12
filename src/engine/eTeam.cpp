@@ -1059,7 +1059,7 @@ static bool se_WriteOnlinePlayerData( ePlayerNetID *player, eTeam *team )
         se_onlinePlayerWriter << player->GetLogName();
         se_onlinePlayerWriter << player->ping;
         if ( team )
-            se_onlinePlayerWriter << ePlayerNetID::FilterName( team->Name() );
+            se_onlinePlayerWriter << team->GetLogName();
         else
             se_onlinePlayerWriter << "";
         se_onlinePlayerWriter << player->GetAccessLevel();
@@ -1083,7 +1083,7 @@ void eTeam::WriteOnlinePlayers()
         if ( !team->IsHuman() )
             continue;
 
-        se_onlineTeamWriter << ePlayerNetID::FilterName( team->Name() );
+        se_onlineTeamWriter << team->GetLogName();
         se_onlineTeamWriter << team->Score();
         se_onlineTeamWriter.write();
 

@@ -349,7 +349,7 @@ bool zFortressZone::Timestep( REAL time )
 
             // FIXME: only announce group respawns once, regardless of player count
             sg_respawnWriter << pPlayer->GetUserName()
-                             << ePlayerNetID::FilterName(pPlayer->CurrentTeam()->Name());
+                             << pPlayer->CurrentTeam()->GetLogName();
             tColoredString playerName;
             playerName << *pPlayer << tColoredString::ColorString(1,1,1);
             if (ownersInside_ && sg_baseRespawn)
@@ -478,10 +478,10 @@ void zFortressZone::OnConquest( void )
         {
             tCoord p = shape->Position();
 
-            sg_basezoneConqueredWriter << ePlayerNetID::FilterName(team->Name()) << p.x << p.y;
+            sg_basezoneConqueredWriter << team->GetLogName() << p.x << p.y;
         }
         else
-            sg_basezoneConqueredWriter << ePlayerNetID::FilterName(team->Name());
+            sg_basezoneConqueredWriter << team->GetLogName();
         sg_basezoneConqueredWriter.write();
     }
     if (shape)

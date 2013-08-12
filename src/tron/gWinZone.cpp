@@ -1024,7 +1024,7 @@ void gBaseZoneHack::OnConquest( void )
 {
     if ( team )
     {
-        sg_basezoneConqueredWriter << ePlayerNetID::FilterName(team->Name()) << GetPosition().x << GetPosition().y;
+        sg_basezoneConqueredWriter << team->GetLogName() << GetPosition().x << GetPosition().y;
         sg_basezoneConqueredWriter.write();
     }
     float rr = GetRadius();
