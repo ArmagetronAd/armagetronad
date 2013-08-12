@@ -732,6 +732,7 @@ int main(int argc,char **argv){
         // tERR_MESSAGE( "Loading configuration." );
         tLocale::Load("languages.txt");
 
+        eLadderLogInitializer ladderlog;
         st_LoadConfig();
 
         // record and play back the recording debug level
@@ -751,8 +752,6 @@ int main(int argc,char **argv){
 
         sg_LanguageInit();
         atexit(tLocale::Clear);
-
-        eLadderLogInitializer ladderlog;
 
         if ( commandLine.Execute() )
         {
