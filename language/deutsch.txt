@@ -853,39 +853,6 @@ ladderlog_write_all_help      Setzt alle LADDER_LOG_WRITE_*-Einstellungen auf de
 ladderlog_write_all_usage     Verwendung: LADDER_LOG_WRITE_ALL 1|0
 ladderlog_write_all_enabled   Aktiviert volle Ausgabe nach ladderlog.txt.
 ladderlog_write_all_disabled  Deaktiviert ausgabe nach ladderlog.txt.
-ladderlog_write_authority_blurb_help Schreibt in ladderlog.txt: AUTHORITY_BLURB <Name> <Wert>
-ladderlog_write_basezone_conquered_help Schreibt in ladderlog: BASEZONE_CONQUERED <Team> <cx> <cy>
-ladderlog_write_basezone_conquerer_help Schreibt in ladderlog: BASEZONE_CONQUERER <Spieler>
-ladderlog_write_chat_help     Schreibt in ladderlog: CHAT <Redner> [/me] <was er sagt>
-ladderlog_write_death_frag_help Schreibt in ladderlog: DEATH_FRAG <Beute> <Jäger>
-ladderlog_write_death_suicide_help Schreibt in ladderlog: DEATH_SUICIDE <Spieler>
-ladderlog_write_death_teamkill_help Schreibt in ladderlog: DEATH_TEAMKILL <Beute> <Jäger>
-ladderlog_write_death_explosion_help Schreibe in Ladderlog: DEATH_EXPLOSION <prey> <predator>
-ladderlog_write_encoding_help Schreibe in Ladderlog: ENCODING <charset>. Spezifiziert die Encoding-Methode für Dateien in ladderlog.txt.
-ladderlog_write_game_end_help Schreibt in ladderlog: GAME_END
-ladderlog_write_game_time_help Schreibt in ladderlog:  GAME_TIME <Zeit> (beachte ebenfalls: GAME_TIME_INTERVAL)
-ladderlog_write_matches_left_help Schreibe in Ladderlog: MATCHES_LEFT <n>
-ladderlog_write_match_winner_help Schreibt in ladderlog: MATCH_WINNER <Gewinner>
-ladderlog_write_new_match_help Schreibt in ladderlog: NEW_MATCH
-ladderlog_write_new_round_help Schreibt in ladderlog: NEW_ROUND
-ladderlog_write_new_warmup_help Schreibe in Ladderlog: NEW_WARMUP <n> <datum und uhrzeit>. <n> ist die Zahl der Matches die aufeinanderfolgend gespielt werden.
-ladderlog_write_num_humans_help Schreibt in ladderlog.txt: NUM_HUMANS <Zahl der Menschlichen Spieler>
-ladderlog_write_online_player_help Schreibt in ladderlog.txt: ONLINE_PLAYER <Name> [<Ping> [<Team>]]
-ladderlog_write_player_entered_help Schreibt in ladderlog.txt: PLAYER_ENTERED <Name> <IP> <Spitzname>
-ladderlog_write_player_left_help Schreibt in ladderlog.txt: PLAYER_LEFT <Name> <IP>
-ladderlog_write_player_renamed_help Schreibt in ladderlog.txt: PLAYER_RENAMED <alter Name> <neuer Name> <IP> <Spitzname>
-ladderlog_write_player_respawn_help Schreibe in Ladderlog: PLAYER_RESPAWN <respawnee> <respawnee's team> [respawner]
-ladderlog_write_positions_help Schreibt in ladderlog:POSITIONEN <team> <player1 player2 ...>
-ladderlog_write_round_score_help Schreibt in ladderlog.txt: ROUND_SCORE <Punktzahl diese Runde> <Spieler> [<Team>]
-ladderlog_write_round_score_team_help Schreibt in ladderlog.txt: ROUND_SCORE_TEAM <Punktzahl diese Runde> <Team>
-ladderlog_write_round_winner_help Schreibt in ladderlog.txt: ROUND_WINNER <Gewinner>
-ladderlog_write_sacrifice_help Schreibt in ladderlog.txt: SACRIFICE <Spieler, der das Loch benutzt hat> <Spieler, der das Loch gemacht hat> <Spieler, dessen Wand durchlöchert wurde>
-ladderlog_write_wait_for_external_script_help Schreibt in ladderlog.txt: WAIT_FOR_EXTERNAL_SCRIPT (beachte ebenfalls: WAIT_FOR_EXTERNAL_SCRIPT und WAIT_FOR_EXTERNAL_SCRIPT_TIMEOUT)
-ladderlog_write_team_created_help Schreibe in Ladderlog: TEAM_CREATED <teamname>
-ladderlog_write_team_destroyed_help Schreibe in Ladderlog: TEAM_DESTROYED <teamname>
-ladderlog_write_team_renamed_help Schreibe in Ladderlog: TEAM_RENAMED <alter teamname> <neuer teamname>
-ladderlog_write_team_player_added_help Schreibe in Ladderlog: TEAM_PLAYER_ADDED <teamname> <spieler>
-ladderlog_write_team_player_removed_help Schreibe in Ladderlog: TEAM_PLAYER_REMOVED <teamname> <spieler>
 ladderlog_game_time_interval_help Wenn dies auf einen positiven Wert gesetz wird, so wird alle n Sekunden eine Statusmeldung ins Ladder-Log geschrieben.
 chat_log_help                 Schreibt maschinenlesbares Chatlog in var/chatlog.txt
 console_log_help              Schreibe alle Konsolennachrichten in var/consolelog.txt

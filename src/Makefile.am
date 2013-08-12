@@ -138,7 +138,8 @@ libengine_a_SOURCES=engine/eAdvWall.cpp engine/eAdvWall.h engine/eAuthentication
 	engine/eSoundMixer.h engine/eSoundMixer.cpp \
 	engine/eChat.cpp engine/eChat.h \
 	engine/eEventNotification.h engine/eEventNotification.cpp \
-	engine/eWarmup.h engine/eWarmup.cpp
+	engine/eWarmup.h engine/eWarmup.cpp \
+	engine/eLadderLog.h engine/eLadderLog.cpp
 
 librender_a_SOURCES=render/rConsole.cpp render/rConsoleGraph.cpp render/rConsole.h render/rFont.cpp\
 	render/rFont.h render/rGL.cpp render/rGL.h render/rGLEW.h render/rGLRender.cpp render/rModel.cpp render/rModel.h render/rRender.cpp\

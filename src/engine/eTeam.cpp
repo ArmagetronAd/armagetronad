@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "rFont.h"
 #include "nConfig.h"
 #include "eWarmup.h"
+#include "eLadderLog.h"
 
 #include <set>
 
@@ -222,11 +223,11 @@ void eTeam::UpdateProperties()
         RequestSync();
 }
 
-static eLadderLogWriter se_teamRenamedWriter("TEAM_RENAMED", true);
-static eLadderLogWriter se_teamCreateWriter("TEAM_CREATED", true);
-static eLadderLogWriter se_teamDestroyWriter("TEAM_DESTROYED", true);
-static eLadderLogWriter se_teamAddWriter("TEAM_PLAYER_ADDED", true);
-static eLadderLogWriter se_teamRemoveWriter("TEAM_PLAYER_REMOVED", true);
+static eLadderLogWriter se_teamRenamedWriter( "TEAM_RENAMED", true, "old_name new_name" );
+static eLadderLogWriter se_teamCreateWriter( "TEAM_CREATED", true, "team" );
+static eLadderLogWriter se_teamDestroyWriter( "TEAM_DESTROYED", true, "team" );
+static eLadderLogWriter se_teamAddWriter( "TEAM_PLAYER_ADDED", true, "team player" );
+static eLadderLogWriter se_teamRemoveWriter( "TEAM_PLAYER_REMOVED", true, "team player" );
 
 // update name and color
 void eTeam::UpdateAppearance()
@@ -635,7 +636,7 @@ void eTeam::LogScoreDifferences( void )
 //!
 // *******************************************************************************
 
-static eLadderLogWriter se_roundScoreTeamWriter("ROUND_SCORE_TEAM", true);
+static eLadderLogWriter se_roundScoreTeamWriter( "ROUND_SCORE_TEAM", true, "score:int team" );
 
 void eTeam::LogScoreDifference( void )
 {
@@ -1046,9 +1047,9 @@ void eTeam::WritePlayers( eLadderLogWriter & writer, const eTeam *team )
     }
 }
 
-static eLadderLogWriter se_onlinePlayerWriter( "ONLINE_PLAYER", true );
-static eLadderLogWriter se_onlineTeamWriter( "ONLINE_TEAM", true );
-static eLadderLogWriter se_numHumansWriter( "NUM_HUMANS", false );
+static eLadderLogWriter se_onlinePlayerWriter( "ONLINE_PLAYER", true, "player ping:float team access_level:int total_score:int" );
+static eLadderLogWriter se_onlineTeamWriter( "ONLINE_TEAM", true, "team total_score:int" );
+static eLadderLogWriter se_numHumansWriter( "NUM_HUMANS", false, "number_humans:int" );
 
 // Writes the data for the ONLINE_PLAYER ladderlog event.
 // Returns true if the player is a human and is active.

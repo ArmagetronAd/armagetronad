@@ -58,6 +58,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "cCockpit.h"
 #include "eWarmup.h"
+#include "eLadderLog.h"
 
 #include "tMath.h"
 #include <stdlib.h>
@@ -3290,9 +3291,9 @@ void gCycle::Die( REAL time )
     }
 }
 
-static eLadderLogWriter sg_deathFragWriter("DEATH_FRAG", true);
-static eLadderLogWriter sg_deathSuicideWriter("DEATH_SUICIDE", true);
-static eLadderLogWriter sg_deathTeamkillWriter("DEATH_TEAMKILL", true);
+static eLadderLogWriter sg_deathFragWriter( "DEATH_FRAG", true, "prey hunter" );
+static eLadderLogWriter sg_deathSuicideWriter( "DEATH_SUICIDE", true, "player" );
+static eLadderLogWriter sg_deathTeamkillWriter("DEATH_TEAMKILL", true, "prey hunter" );
 
 void gCycle::KillAt( const eCoord& deathPos){
     // don't kill invulnerable cycles
@@ -3496,7 +3497,7 @@ static void sg_HoleScore( gCycle & cycle )
     cycle.Player()->AddScore( score_hole, tOutput("$player_win_hole"), tOutput("$player_lose_hole") );
 }
 
-static eLadderLogWriter sg_sacrificeWriter("SACRIFICE", true);
+static eLadderLogWriter sg_sacrificeWriter( "SACRIFICE", true, "hole_user hole_maker enemy_holed" );
 
 void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
     {

@@ -54,6 +54,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <sys/wait.h>
 #endif
 
+static tCallback *sr_scriptSpawnedCallbackAnchor;
+
+rScriptSpawnedCallback::rScriptSpawnedCallback( AA_VOIDFUNC *f )
+    :tCallback( sr_scriptSpawnedCallbackAnchor, f )
+{
+}
+
 class rStream: public tReferencable< rStream >
 {
     rStream( rStream const & other );
@@ -659,6 +666,7 @@ static void sr_SpawnScript( tString const & command )
         int infp, outfp;
         pid_t pid = SpawnProcess( script, arguments.GetRaw(), &infp, &outfp, env.GetRaw() );
         sr_inputStreams[sr_inputStreams.Len()] = tNEW(rScriptStream)( outfp, infp, command, pid );
+        tCallback::Exec( sr_scriptSpawnedCallbackAnchor );
     }
     else
     {

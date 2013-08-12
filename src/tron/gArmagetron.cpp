@@ -58,10 +58,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <stdio.h>
 #include <stdlib.h>
 #include <fstream>
+#include "tCrypto.h"
 
 #include "nServerInfo.h"
 #include "nSocket.h"
 #include "tRuby.h"
+#include "eLadderLog.h"
 #ifndef DEDICATED
 #include "rRender.h"
 #include "rSDL.h"
@@ -750,9 +752,7 @@ int main(int argc,char **argv){
         sg_LanguageInit();
         atexit(tLocale::Clear);
 
-        static eLadderLogWriter sg_encodingWriter( "ENCODING", true );
-        sg_encodingWriter << st_internalEncoding;
-        sg_encodingWriter.write();
+        eLadderLogInitializer ladderlog;
 
         if ( commandLine.Execute() )
         {

@@ -61,10 +61,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <time.h>
 #include "tRuby.h"
 #include "eWarmup.h"
+#include "eLadderLog.h"
 
 #include "ePlayer.pb.h"
 
 int se_lastSaidMaxEntries = 8;
+static void se_SaveToChatLog( const ePlayerNetID *player, const tString & message );
 
 // call on commands that only work on the server; quit if it returns true
 bool se_NeedsServer(char const * command, std::istream & s, bool strict )
@@ -875,7 +877,7 @@ void se_SecretConsoleOut( tOutput const & message, ePlayerNetID const * hider, H
 
 #ifdef KRAWALL_SERVER
 
-static eLadderLogWriter se_authorityBlurbWriter("AUTHORITY_BLURB", true);
+static eLadderLogWriter se_authorityBlurbWriter( "AUTHORITY_BLURB", true, "blurb player text+" );
 
 static void ResultCallback( nKrawall::nCheckResult const & result )
 {
@@ -2170,7 +2172,7 @@ static tAccessLevel se_adminAccessLevel = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_adminAccessLevelConf( "ACCESS_LEVEL_ADMIN", se_adminAccessLevel );
 static tAccessLevelSetter se_adminAccessLevelConfLevel( se_adminAccessLevelConf, tAccessLevel_Owner );
 
-static eLadderLogWriter se_commandWriter( "COMMAND", true );
+static eLadderLogWriter se_commandWriter( "COMMAND", true, "command player text+" );
 
 void handle_command_intercept( ePlayerNetID *p, tString const & command, std::istream & s, tString const & say ) {
     tString commandArguments;
@@ -3053,10 +3055,7 @@ static void se_ChatMe( ePlayerNetID * p, std::istream & s, eChatSpamTester & spa
     se_BroadcastChatLine( p, console );
     console << "\n";
     sn_ConsoleOut(console,0);
-
-    tString str;
-    str << p->GetUserName() << " /me " << msg;
-    se_SaveToChatLog(str);
+    se_SaveToChatLog( p, tString( "/me " ) + msg );
     return;
 }
 
@@ -3129,10 +3128,7 @@ static void se_ChatShout( ePlayerNetID * p, tString const & say, eChatSpamTester
     {
         se_BroadcastChat( p, say );
         se_DisplayChatLocally( p, say);
-        
-        tString s;
-        s << p->GetUserName() << ' ' << say;
-        se_SaveToChatLog(s);
+        se_SaveToChatLog( p , say );
     }
 }
 
@@ -5072,7 +5068,7 @@ static void se_PlayerRemovedHandler( Engine::PlayerRemoved const & removed, nSen
 
 static nProtoBufDescriptor< Engine::PlayerRemoved > se_playerRemovedDescriptor(202,&se_PlayerRemovedHandler);
 
-static eLadderLogWriter se_playerLeftWriter("PLAYER_LEFT", true);
+static eLadderLogWriter se_playerLeftWriter( "PLAYER_LEFT", true, "player ip" );
 
 void ePlayerNetID::RemoveFromGame()
 {
@@ -6478,236 +6474,28 @@ eNetGameObject *ePlayerNetID::Object() const{
     return object;
 }
 
-typedef std::set< tString > StringSet;
-
-// Parses a list of tokens and adds them to "set".
-// Returns the number of entries added.
-int se_ParseList( StringSet & set, std::istream & s )
-{
-    int entries_count = 0;
-    while ( s.good() )
-    {
-        tString name;
-        s >> name;
-        if ( name.Len() > 1 )
-        {
-            std::pair< StringSet::iterator, bool > ret = set.insert( name );
-            if ( ret.second ) entries_count++;
-        }
-    }
-    return entries_count;
-}
-
 static bool se_chatLog = false;
 static tSettingItem<bool> se_chatLogConf("CHAT_LOG", se_chatLog);
 
-static eLadderLogWriter se_chatWriter("CHAT", false);
+static eLadderLogWriter se_chatWriter( "CHAT", false, "player chat+" );
 
-void se_SaveToChatLog(tOutput const &out) {
-    if(sn_GetNetState() != nCLIENT && !tRecorder::IsPlayingBack()) {
-        if(se_chatWriter.isEnabled()) {
-            se_chatWriter << out;
+static void se_SaveToChatLog( const ePlayerNetID *player, const tString & message )
+{
+    if( sn_GetNetState() != nCLIENT && !tRecorder::IsPlayingBack() )
+    {
+        if( se_chatWriter.isEnabled() )
+        {
+            se_chatWriter << player->GetLogName() << message;
             se_chatWriter.write();
         }
-        if(se_chatLog) {
-            std::ofstream o;
-            if ( tDirectories::Var().Open(o, "chatlog.txt", std::ios::app) ) {
-                o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << out << std::endl;
-            }
-        }
-    }
-}
-
-//! Handles configuring ladderlog settings
-class eLadderLogManager
-{
-    enum SetMode
-    {
-        SetMode_File   = 1 << 0,
-        SetMode_Script = 1 << 1
-    };
-    typedef std::map< tString, eLadderLogWriter * > WriterMap;
-    WriterMap writers_;
-public:
-    eLadderLogManager()
-        :writers_()
-    {
-    }
-    
-    void Add( eLadderLogWriter *writer )
-    {
-        writers_[ writer->Name() ] = writer;
-    }
-    
-    void Remove( eLadderLogWriter *writer )
-    {
-        writers_.erase( writer->Name() );
-    }
-    
-    void WriteAll( std::istream & s )
-    {
-        SetAll( "$ladderlog_write_all_help", s, SetMode_File | SetMode_Script );
-    }
-    
-    void ScriptWriteAll( std::istream & s )
-    {
-        SetAll( "$ladderlog_script_write_all_help", s, SetMode_Script );
-    }
-    
-    void ScriptWrite( std::istream & s )
-    {
-        bool enable;
-        s >> enable;
-        if ( s.fail() )
-        {
-            if ( tConfItemBase::printErrors )
-                con << tOutput( "$ladderlog_script_write_help" ) << '\n';
-            return;
-        }
-
-        StringSet names;
-        se_ParseList( names, s );
-        int numberValid = 0;
-        
-        for ( StringSet::const_iterator it = names.begin(); it != names.end(); ++it )
-        {
-            WriterMap::iterator conf = writers_.find( *it );
-            if ( conf != writers_.end() )
-            {
-                numberValid++;
-                conf->second->SetForScript( enable );
-            }
-        }
-        
-        if ( tConfItemBase::printChange )
-        {
-            if ( enable )
-                con << tOutput( "$ladderlog_script_write_enabled", numberValid ) << '\n';
-            else
-                con << tOutput( "$ladderlog_script_write_disabled", numberValid ) << '\n';
-        }
-    }
-
-private:
-    void SetAll( const char *help, std::istream & s, int mode )
-    {
-        bool enable;
-        s >> enable;
-
-        if ( s.fail() )
-        {
-            if ( tConfItemBase::printErrors )
-                con << tOutput( help ) << '\n';
-            return;
-        }
-        
-        for ( WriterMap::iterator it = writers_.begin(); it != writers_.end(); ++it )
-        {
-            if ( mode & SetMode_File )
-                it->second->SetForFile( enable );
-            if ( mode & SetMode_Script )
-                it->second->SetForScript( enable );
-        }
-        
-        if ( tConfItemBase::printChange )
-        {
-            if ( enable )
-                con << tOutput( "$ladderlog_write_all_enabled" ) << '\n';
-            else
-                con << tOutput( "$ladderlog_write_all_disabled" ) << '\n';
-        }
-    }    
-};
-
-static eLadderLogManager & se_GlobalLadderLogManager()
-{
-    static eLadderLogManager manager;
-    return manager;
-}
-
-//! A tSettingItem that operates on two boolean values.
-class eLadderLogSetting : public tSettingItem< bool >
-{
-public:
-    eLadderLogSetting( tString name, bool & fileTarget, bool & scriptTarget )
-        :tConfItemBase( name ), tSettingItem< bool >( name, fileTarget ),
-        scriptTarget_( &scriptTarget )
-    {
-    }
-    
-    virtual void WasChanged()
-    {
-        *scriptTarget_ = *target;
-    }
-private:
-    bool *scriptTarget_;
-};
-
-eLadderLogWriter::eLadderLogWriter( char const *name, bool enabledByDefault )
-    :name_( name ),
-    isEnabledForFile_( enabledByDefault ),
-    isEnabledForScript_( enabledByDefault ),
-    conf_( new eLadderLogSetting( tString( "LADDERLOG_WRITE_" ) + name, isEnabledForFile_, isEnabledForScript_ ) ),
-    cache_( name )
-{
-    se_GlobalLadderLogManager().Add( this );
-}
-
-eLadderLogWriter::~eLadderLogWriter()
-{
-    se_GlobalLadderLogManager().Remove( this );
-    if ( conf_ )
-        delete conf_;
-}
-
-static bool se_ladderlogDecorateTS = false;
-static tSettingItem< bool > se_ladderlogDecorateTSConf( "LADDERLOG_DECORATE_TIMESTAMP", se_ladderlogDecorateTS );
-
-void eLadderLogWriter::write()
-{
-    if( isEnabled() && sn_GetNetState() != nCLIENT && !tRecorder::IsPlayingBack() )
-    {
-        std::string line;
-        if ( se_ladderlogDecorateTS )
-            line += st_GetCurrentTime("%Y/%m/%d-%H:%M:%S ");
-        line += cache_;
-        line += '\n';
-        
-        if ( isEnabledForFile_ )
+        if( se_chatLog )
         {
             std::ofstream o;
-            if ( tDirectories::Var().Open( o, "ladderlog.txt", std::ios::app ) )
-                o << line;
-        }
-        
-        if ( isEnabledForScript_ )
-        {
-            sr_InputForScripts( line.c_str() );
+            if ( tDirectories::Var().Open(o, "chatlog.txt", std::ios::app) )
+                o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << player->GetLogName() << " " << std::endl;
         }
     }
-    cache_ = name_;
 }
-
-static void se_LadderLogWriteAll( std::istream & s )
-{
-    se_GlobalLadderLogManager().WriteAll( s );
-}
-static tConfItemFunc se_ladderLogWriteAllConf( "LADDERLOG_WRITE_ALL", se_LadderLogWriteAll );
-
-#if HAVE_UNISTD_H
-static void se_LadderLogScriptWriteAll( std::istream & s )
-{
-    se_GlobalLadderLogManager().ScriptWriteAll( s );
-}
-static tConfItemFunc se_ladderLogScriptWriteAllConf( "LADDERLOG_SCRIPT_WRITE_ALL", se_LadderLogScriptWriteAll );
-
-static void se_LadderLogScriptWrite( std::istream & s )
-{
-    se_GlobalLadderLogManager().ScriptWrite( s );    
-}
-static tConfItemFunc se_ladderLogScriptWriteConf( "LADDERLOG_SCRIPT_WRITE", se_LadderLogScriptWrite );
-#endif /* HAVE_UNISTD_H */
-
 
 void se_SaveToScoreFile(const tOutput &o){
     tString s(o);
@@ -9183,8 +8971,8 @@ private:
 
 static gServerInfoAdmin sg_serverAdmin;
 
-static eLadderLogWriter se_playerEnteredWriter("PLAYER_ENTERED", true);
-static eLadderLogWriter se_playerRenamedWriter("PLAYER_RENAMED", true);
+static eLadderLogWriter se_playerEnteredWriter( "PLAYER_ENTERED", true, "player ip screen_name+" );
+static eLadderLogWriter se_playerRenamedWriter( "PLAYER_RENAMED", true, "old_name new_name ip screen_name+" );
 
 class eNameMessenger
 {
@@ -9786,19 +9574,19 @@ public:
         Parse( ip_addresses_whitelist_, s );
     }
 protected:    
-    bool HasEntry( const StringSet & whitelist, const tString & value ) const
+    bool HasEntry( const eListParse::StringSet & whitelist, const tString & value ) const
     {
         return whitelist.find( value ) != whitelist.end();
     }
     
-    void Parse( StringSet & whitelist, std::istream & s )
+    void Parse( eListParse::StringSet & whitelist, std::istream & s )
     {
-        int entries_count = se_ParseList( whitelist, s );
+        int entries_count = eListParse::se_ParseList( whitelist, s );
         con << tOutput( "$whitelist_enemies_success", entries_count ) << '\n';
     }
     
-    StringSet usernames_whitelist_;
-    StringSet ip_addresses_whitelist_;    
+    eListParse::StringSet usernames_whitelist_;
+    eListParse::StringSet ip_addresses_whitelist_;    
 };
 
 static eEnemiesWhitelist se_enemiesWhitelist;
@@ -10306,7 +10094,7 @@ void eUncannyTimingDetector::Analyze( REAL timing, ePlayerNetID * player )
 //!
 // *******************************************************************************
 
-static eLadderLogWriter se_roundScoreWriter("ROUND_SCORE", true);
+static eLadderLogWriter se_roundScoreWriter( "ROUND_SCORE", true, "score:int player team" );
 
 void ePlayerNetID::LogScoreDifference( void )
 {
@@ -10317,6 +10105,8 @@ void ePlayerNetID::LogScoreDifference( void )
         se_roundScoreWriter << scoreDifference << GetUserName();
         if ( currentTeam )
             se_roundScoreWriter << currentTeam->GetLogName();
+        else
+            se_roundScoreWriter << "";
         se_roundScoreWriter.write();
     }
 }

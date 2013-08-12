@@ -862,43 +862,8 @@ ladderlog_script_write_enabled   Enabled \1 ladderlog writers for script output.
 ladderlog_script_write_disabled  Disabled \1 ladderlog writers for script output.
 ladderlog_write_all_enabled Enabled all ladderlog writers.
 ladderlog_write_all_disabled Disabled all ladderlog writers.
-ladderlog_write_authority_blurb_help          Write to ladderlog: AUTHORITY_BLURB <blurb> <player> <text>
-ladderlog_write_basezone_conquered_help       Write to ladderlog: BASEZONE_CONQUERED <team> <cx> <cy>
-ladderlog_write_basezone_conquerer_help       Write to ladderlog: BASEZONE_CONQUERER <player>
-ladderlog_write_chat_help                     Write to ladderlog: CHAT <chatter> [/me] <chat string>
-ladderlog_write_command_help                  Write to ladderlog: COMMAND <command> <player> <text>
-ladderlog_write_death_frag_help               Write to ladderlog: DEATH_FRAG <prey> <predator>
-ladderlog_write_death_suicide_help            Write to ladderlog: DEATH_SUICIDE <player>
-ladderlog_write_death_teamkill_help           Write to ladderlog: DEATH_TEAMKILL <prey> <predator>
-ladderlog_write_death_explosion_help          Write to ladderlog: DEATH_EXPLOSION <prey> <predator>
-ladderlog_write_encoding_help                 Write to ladderlog: ENCODING <charset>. Specifies the encoding for data in ladderlog.txt.
-ladderlog_write_game_end_help                 Write to ladderlog: GAME_END <date and time>
-ladderlog_write_game_time_help                Write to ladderlog: GAME_TIME <time> (see also: GAME_TIME_INTERVAL)
-ladderlog_write_matches_left_help             Write to ladderlog: MATCHES_LEFT <n>
-ladderlog_write_match_winner_help             Write to ladderlog: MATCH_WINNER <team> <players>
-ladderlog_write_new_match_help                Write to ladderlog: NEW_MATCH <date and time>
-ladderlog_write_new_round_help                Write to ladderlog: NEW_ROUND <date and time>
-ladderlog_write_new_warmup_help               Write to ladderlog: NEW_WARMUP <n> <date and time>. <n> is the number of matches to be played consecutively.
-ladderlog_write_num_humans_help               Write to ladderlog: NUM_HUMANS <number of humans>
-ladderlog_write_online_player_help            Write to ladderlog: ONLINE_PLAYER <name> <ping> <team> <access level> <aggregate score>
-ladderlog_write_online_team_help              Write to ladderlog: ONLINE_TEAM <name> <aggregate score>
-ladderlog_write_player_entered_help           Write to ladderlog: PLAYER_ENTERED <name> <IP> <screen name>
-ladderlog_write_player_left_help              Write to ladderlog: PLAYER_LEFT <name> <IP>
-ladderlog_write_player_renamed_help           Write to ladderlog: PLAYER_RENAMED <old name> <new name> <ip> <screen name>
-ladderlog_write_player_respawn_help           Write to ladderlog: PLAYER_RESPAWN <respawnee> <respawnee's team> [respawner]
-ladderlog_write_round_score_help              Write to ladderlog: ROUND_SCORE <score difference> <player> [<team>]
-ladderlog_write_round_score_team_help         Write to ladderlog: ROUND_SCORE_TEAM <score difference> <team>
-ladderlog_write_round_winner_help             Write to ladderlog: ROUND_WINNER <team> <players>
-ladderlog_write_sacrifice_help                Write to ladderlog: SACRIFICE <player who used the hole> <player who created the hole> <player owning the wall the hole was made into>
-ladderlog_write_wait_for_external_script_help Write to ladderlog: WAIT_FOR_EXTERNAL_SCRIPT (see also: WAIT_FOR_EXTERNAL_SCRIPT and WAIT_FOR_EXTERNAL_SCRIPT_TIMEOUT)
-ladderlog_write_team_created_help             Write to ladderlog: TEAM_CREATED <team name>
-ladderlog_write_team_destroyed_help           Write to ladderlog: TEAM_DESTROYED <team name>
-ladderlog_write_team_renamed_help             Write to ladderlog: TEAM_RENAMED <old team name> <new team name>
-ladderlog_write_team_player_added_help        Write to ladderlog: TEAM_PLAYER_ADDED <team name> <player>
-ladderlog_write_team_player_removed_help      Write to ladderlog: TEAM_PLAYER_REMOVED <team name> <player>
-ladderlog_write_death_deathzone_help          Write to ladderlog: DEATH_DEATHZONE <player>
-ladderlog_write_winzone_player_enter_help     Write to ladderlog: WINZONE_PLAYER_ENTER <player>
 ladderlog_game_time_interval_help If non-negative, write a line with the current game time to the ladder log every n seconds.
+ladderlog_write_template Should the \1 ladderlog event be enabled for both file and script output? Specification: \1 \2
 chat_log_help			Write machine parsable chat messages to var/chatlog.txt
 console_log_help		Write all console messages to var/consolelog.txt
 show_fps_help			Enable fps display

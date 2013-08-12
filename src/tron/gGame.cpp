@@ -65,6 +65,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "gAICharacter.h"
 #include "tDirectories.h"
 #include "gTeam.h"
+#include "eLadderLog.h"
 #ifdef ENABLE_ZONESV2
 #include "zone/zTimedZone.h"
 #include "zone/zZone.h"
@@ -1483,7 +1484,7 @@ static void cp(){
 }
 #endif
 
-static eLadderLogWriter sg_gameEndWriter("GAME_END", true);
+static eLadderLogWriter sg_gameEndWriter( "GAME_END", true, "time_string+" );
 
 static void own_game( nNetState enter_state ){
     tNEW(gGame);
@@ -2978,11 +2979,11 @@ static void sg_VoteMenuIdle()
     }
 }
 
-static eLadderLogWriter sg_newRoundWriter("NEW_ROUND", true);
-static eLadderLogWriter sg_newMatchWriter("NEW_MATCH", true);
-static eLadderLogWriter sg_waitForExternalScriptWriter("WAIT_FOR_EXTERNAL_SCRIPT", true);
-static eLadderLogWriter sg_newWarmupWriter("NEW_WARMUP", true);
-static eLadderLogWriter sg_matchesLeftWriter("MATCHES_LEFT", true);
+static eLadderLogWriter sg_newRoundWriter( "NEW_ROUND", true, "time_string+" );
+static eLadderLogWriter sg_newMatchWriter( "NEW_MATCH", true, "time_string+" );
+static eLadderLogWriter sg_waitForExternalScriptWriter( "WAIT_FOR_EXTERNAL_SCRIPT", true, "" );
+static eLadderLogWriter sg_newWarmupWriter( "NEW_WARMUP", true, "number_matches:int time_string+" );
+static eLadderLogWriter sg_matchesLeftWriter( "MATCHES_LEFT", true, "number_matches:int" );
 
 void gGame::StateUpdate(){
 
@@ -3400,7 +3401,7 @@ void sg_RespawnAllAfter( REAL after, REAL time, eGrid *grid, gArena & arena, boo
 
         if ( ( !e || ( !e->Alive() && e->DeathTime() < time - after ) ) && sn_GetNetState() != nCLIENT )
         {
-            sg_respawnWriter << p->GetLogName() << p->CurrentTeam()->GetLogName();
+            sg_respawnWriter << p->GetLogName() << p->CurrentTeam()->GetLogName() << "";
             sg_respawnWriter.write();
             sg_RespawnPlayer(grid, &arena, p, atSpawn);
         }
@@ -3573,9 +3574,9 @@ static tSettingItem< int > sg_minAliveConf("ROUND_MIN_ALIVE", sg_minAlive);
 static REAL sg_minDrawTime = 5;
 static tSettingItem< REAL > sg_minDrawTimeConf("ROUND_DRAW_WARN_TIME", sg_minDrawTime);
 
-static eLadderLogWriter sg_roundWinnerWriter("ROUND_WINNER", true);
-static eLadderLogWriter sg_matchWinnerWriter("MATCH_WINNER", true);
-eLadderLogWriter sg_respawnWriter("PLAYER_RESPAWN", true);
+static eLadderLogWriter sg_roundWinnerWriter( "ROUND_WINNER", true, "team players:list+" );
+static eLadderLogWriter sg_matchWinnerWriter( "MATCH_WINNER", true, "team players:list+" );
+eLadderLogWriter sg_respawnWriter( "PLAYER_RESPAWN", true, "player team respawner_team" );
 
 bool gGame::WarmupTeamsAreReady() const
 {
@@ -4400,7 +4401,7 @@ static uActionGlobalFunc ingamemenu_action(&ingamemenu,&ingamemenu_func, true );
 static uActionTooltip ingamemenuTooltip( uActionTooltip::Level_Expert, ingamemenu, 1 );
 #endif // dedicated
 
-static eLadderLogWriter sg_gameTimeWriter("GAME_TIME", true);
+static eLadderLogWriter sg_gameTimeWriter( "GAME_TIME", true, "time:float" );
 
 // checks whether all players have been fully synced with the server
 static bool sg_PlayersSynced()

@@ -719,28 +719,6 @@ ladderlog_write_all_help      Ustwa wszystkie ustawienia LADDER_LOG_WRITE_* na t
 ladderlog_write_all_usage     Użycie: LADDER_LOG_WRITE_ALL 1|0
 ladderlog_write_all_enabled   Aktywuj pełny widok rankingu.
 ladderlog_write_all_disabled  Wyłącz widok rankingu.
-ladderlog_write_authority_blurb_help Wpisuje do rankingu: AUTHORITY_BLURB <nazwa> <wartość>
-ladderlog_write_basezone_conquered_help Wpisuje do rankingu podbicie bazy:  BASEZONE_CONQUERED <drużyna> <cx> <cy>
-ladderlog_write_basezone_conquerer_help Wpisuje do rankingu podbijającego bazę: BASEZONE_CONQUERER <gracz>
-ladderlog_write_chat_help     Wpisuje do rankingu rozmowę: CHAT <rozmawiający> [/me] <tekst>
-ladderlog_write_death_frag_help Wpisuje do rankingu zabójstwo: DEATH_FRAG <ofiara> <zabójca>
-ladderlog_write_death_suicide_help Wpisuje do rankingu samobójstwo: DEATH_SUICIDE <gracz>
-ladderlog_write_death_teamkill_help Wpisuje do rankingu zabójstwo wewnątrz drużyny: DEATH_TEAMKILL <ofiara> <zabójca>
-ladderlog_write_game_end_help Wpisuje do rankingu koniec gry: GAME_END
-ladderlog_write_game_time_help Wpisuje do rankingu czas gry: GAME_TIME <czas> (zobacz też: GAME_TIME_INTERVAL)
-ladderlog_write_match_winner_help Wpisuje do rankingu zwycięzce meczu: MATCH_WINNER <zwycięzca>
-ladderlog_write_new_match_help Wpisuje do rankingu nowy mecz: NEW_MATCH
-ladderlog_write_new_round_help Wpisuje do rankingu nową rundę: NEW_ROUND
-ladderlog_write_num_humans_help Wpisuje do rankingu ilość ludzi: NUM_HUMANS <ilość ludzi>
-ladderlog_write_online_player_help Wpisuje do rankingu połączenie gracza: ONLINE_PLAYER <imię> [<ping> [<drużyna>]]
-ladderlog_write_player_entered_help Wpisuje do rankingu wejście gracza: PLAYER_ENTERED <imię> <IP> <wyświetlana nazwa>
-ladderlog_write_player_left_help Wpisuje do rankingu opuszczającego gracza: PLAYER_LEFT <imię> <IP>
-ladderlog_write_player_renamed_help Wpisuje do rankingu zmianę nazwy gracza: PLAYER_RENAMED <stara nazwa> <nowa nazwa> <ip> <nazwa wyświetlana>
-ladderlog_write_round_score_help Wpisuje do rankingu wynik gracza po rundzie: ROUND_SCORE <różnica wyniku> <gracz> [<drużyna>]
-ladderlog_write_round_score_team_help Wpisuje do rankingu wynik drużyny po rundzie: ROUND_SCORE_TEAM <różnica wyniku> <drużyna>
-ladderlog_write_round_winner_help Wpisuje do rankingu zwycięzcę rundy: ROUND_WINNER <zwycięzca>
-ladderlog_write_sacrifice_help Wpisuje do rankingu poświęcenie: SACRIFICE <gracz, który użył dziury> <gracz, który zrobił dziurę> <gracz, w czyjej ściany był ta dziura>
-ladderlog_write_wait_for_external_script_help Wpisuje do rankingu oczekiwanie na zewnętrzny skrypt: WAIT_FOR_EXTERNAL_SCRIPT (zobacz również: WAIT_FOR_EXTERNAL_SCRIPT i WAIT)
 chat_log_help                 Zapisuj rozmowy do ver/chatlog.txt
 show_fps_help                 Wyświetlaj fps
 floor_mirror_help             Tryb lustra podłogi

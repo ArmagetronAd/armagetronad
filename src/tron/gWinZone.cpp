@@ -40,6 +40,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tString.h"
 #include "rScreen.h"
 #include "eSoundMixer.h"
+#include "eLadderLog.h"
 
 #include <time.h>
 #include <algorithm>
@@ -1017,8 +1018,8 @@ void gBaseZoneHack::OnVanish( void )
 //!
 // *******************************************************************************
 
-static eLadderLogWriter sg_basezoneConqueredWriter("BASEZONE_CONQUERED", true);
-static eLadderLogWriter sg_basezoneConquererWriter("BASEZONE_CONQUERER", true);
+static eLadderLogWriter sg_basezoneConqueredWriter( "BASEZONE_CONQUERED", true, "team x:float y:float" );
+static eLadderLogWriter sg_basezoneConquererWriter( "BASEZONE_CONQUERER", true, "player" );
 
 void gBaseZoneHack::OnConquest( void )
 {

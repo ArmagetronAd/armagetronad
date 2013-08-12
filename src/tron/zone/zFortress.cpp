@@ -42,6 +42,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "rScreen.h"
 #include "eSoundMixer.h"
 #include "eWarmup.h"
+#include "eLadderLog.h"
 
 #include "zone/zFortress.h"
 #include "zone/zZone.h"
@@ -467,8 +468,8 @@ static bool sz_sortTeams(eTeam* a, eTeam* b)
 //!
 // *******************************************************************************
 
-static eLadderLogWriter sg_basezoneConqueredWriter("BASEZONE_CONQUERED", true);
-static eLadderLogWriter sg_basezoneConquererWriter("BASEZONE_CONQUERER", true);
+static eLadderLogWriter sg_basezoneConqueredWriter( "BASEZONE_CONQUERED", true, "team x:float y:float" );
+static eLadderLogWriter sg_basezoneConquererWriter( "BASEZONE_CONQUERER", true, "player" );
 
 void zFortressZone::OnConquest( void )
 {
@@ -481,7 +482,7 @@ void zFortressZone::OnConquest( void )
             sg_basezoneConqueredWriter << team->GetLogName() << p.x << p.y;
         }
         else
-            sg_basezoneConqueredWriter << team->GetLogName();
+            sg_basezoneConqueredWriter << team->GetLogName() << "" << "";
         sg_basezoneConqueredWriter.write();
     }
     if (shape)

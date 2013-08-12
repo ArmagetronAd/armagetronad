@@ -36,7 +36,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "eTeam.h"
 #include "tRandom.h"
 #include "tMath.h"
-
+#include "eLadderLog.h"
 #include "eSoundMixer.h"
 #ifdef USEPARTICLES
 #include "papi.h"
@@ -73,7 +73,7 @@ static tSettingItem< int > sg_scoreExplosionPreySettingItem( "SCORE_EXPLOSION_OW
 static int sg_scoreExplosion = 0;
 static tSettingItem< int > sg_scoreExplosionPredatorSettingItem( "SCORE_EXPLOSION", sg_scoreExplosion );
 
-static eLadderLogWriter sg_deathExplosionWriter( "DEATH_EXPLOSION", true );
+static eLadderLogWriter sg_deathExplosionWriter( "DEATH_EXPLOSION", true, "player" );
 
 static REAL sg_explosionSpeedFactor = 0;
 static nSettingItemWatched< REAL > sg_explosionSpeedFactorSettingItem( "EXPLOSION_RADIUS_SPEED_FACTOR", sg_explosionSpeedFactor, nConfItemVersionWatcher::Group_Bumpy, 22 );

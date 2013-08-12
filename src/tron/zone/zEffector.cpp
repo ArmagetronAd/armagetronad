@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "gGame.h"
 // Only for SpawnPlayer:
 #include "gParser.h"
+#include "eLadderLog.h"
 
 
 void zEffector::apply(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
@@ -173,7 +174,7 @@ zEffectorManager::Register(std::string const & type, std::string const & desc, X
 
 static zEffectorRegistration regWin("win", "", zEffectorWin::create);
 
-static eLadderLogWriter sg_winZoneWriter("WINZONE_PLAYER_ENTER", true);
+static eLadderLogWriter sg_winZoneWriter( "WINZONE_PLAYER_ENTER", true, "player" );
 
 void zEffectorWin::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
@@ -203,7 +204,7 @@ static tSettingItem<int> sz_dz("SCORE_DEATHZONE",sz_score_deathzone);
 
 static zEffectorRegistration regDeath("death", "", zEffectorDeath::create);
 
-static eLadderLogWriter sg_deathZoneWriter("DEATH_DEATHZONE", true);
+static eLadderLogWriter sg_deathZoneWriter( "DEATH_DEATHZONE", true, "player" );
 
 void zEffectorDeath::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {

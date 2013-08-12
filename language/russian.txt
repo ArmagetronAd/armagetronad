@@ -755,28 +755,6 @@ ladderlog_write_all_help     Установить все настройки LADD
 ladderlog_write_all_usage    Использование: LADDER_LOG_WRITE_ALL 1|0
 ladderlog_write_all_enabled  Включить полный вывод в журнал лестницы.
 ladderlog_write_all_disabled Отключить вывод в журнал лестницы.
-ladderlog_write_authority_blurb_help Писать в журнал лестницы: AUTHORITY_BLURB <имя> <значение>
-ladderlog_write_basezone_conquered_help Писать в журнал лестницы: BASEZONE_CONQUERED <команда> <cx> <cy>
-ladderlog_write_basezone_conquerer_help Писать в журнал лестницы: BASEZONE_CONQUERER <игрок>
-ladderlog_write_chat_help    Писать в журнал лестницы: CHAT <чаттер> [/me] <строка чата>
-ladderlog_write_death_frag_help Писать в журнал лестницы: DEATH_FRAG <жертва> <хищник>
-ladderlog_write_death_suicide_help Писать в журнал лестницы: DEATH_SUICIDE <игрок>
-ladderlog_write_death_teamkill_help Писать в журнал лестницы: DEATH_TEAMKILL <жертва> <хищник>
-ladderlog_write_game_end_help Писать в журнал лестницы: GAME_END
-ladderlog_write_game_time_help Писать в журнал лестницы: GAME_TIME <время> (смотри также: GAME_TIME_INTERVAL)
-ladderlog_write_match_winner_help Писать в журнал лестницы: MATCH_WINNER <победитель>
-ladderlog_write_new_match_help Писать в журнал лестницы: NEW_MATCH
-ladderlog_write_new_round_help Писать в журнал лестницы: NEW_ROUND
-ladderlog_write_num_humans_help Писать в журнал лестницы: NUM_HUMANS <количество человек>
-ladderlog_write_online_player_help Писать в журнал лестницы: ONLINE_PLAYER <имя> [<пинг> [<команда>]]
-ladderlog_write_player_entered_help Писать в журнал лестницы: PLAYER_ENTERED <имя> <IP> <отображаемое имя>
-ladderlog_write_player_left_help Писать в журнал лестницы: PLAYER_LEFT <имя> <IP>
-ladderlog_write_player_renamed_help Писать в журнал лестницы: PLAYER_RENAMED <старое имя> <новое имя> <ip> <отображаемое имя>
-ladderlog_write_round_score_help Писать в журнал лестницы: ROUND_SCORE <различие в счете> <игрок> [<команда>]
-ladderlog_write_round_score_team_help Писать в журнал лестницы: ROUND_SCORE_TEAM <различие в счете> <команда>
-ladderlog_write_round_winner_help Писать в журнал лестницы: ROUND_WINNER <победитель>
-ladderlog_write_sacrifice_help Писать в журнал лестницы: SACRIFICE <игрок который использовал дыру> <игрок который создал дыру> <игрок который владеет шлейфом в котором была сделана дыра>
-ladderlog_write_wait_for_external_script_help Писать в журнал лестницы: WAIT_FOR_EXTERNAL_SCRIPT (смотри также: WAIT_FOR_EXTERNAL_SCRIPT и WAIT_FOR_EXTERNAL_SCRIPT_TIMEOUT)
 ladderlog_game_time_interval_help Если неотрицательное, писать строки с текущем игровым временем в журнал лестницы каждые n секунд.
 chat_log_help                Писать парсенные машиной сообщения чата в var/chatlog.txt
 show_fps_help                Включить отображение fps

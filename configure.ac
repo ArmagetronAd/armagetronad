@@ -813,6 +813,12 @@ AC_DEFINE(HAVE_PTHREAD,1,[Define if you have POSIX threads libraries and header 
 ])
 
 dnl *************************************************
+dnl         Misc
+dnl *************************************************
+
+AC_CHECK_HEADERS([sys/stat.h])
+
+dnl *************************************************
 dnl         protocol buffers
 dnl *************************************************
 

@@ -99,6 +99,14 @@ void sr_Read_stdin();
 // passes ladderlog output to external scripts
 void sr_InputForScripts( char const * input );
 
+#ifdef DEDICATED
+class rScriptSpawnedCallback : public tCallback
+{
+public:
+    rScriptSpawnedCallback( AA_VOIDFUNC *f );
+};
+#endif
+
 class rForceTextCallback:public tCallbackOr{
 public:
     rForceTextCallback(BOOLRETFUNC *f);
