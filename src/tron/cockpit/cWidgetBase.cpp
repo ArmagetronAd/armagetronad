@@ -368,11 +368,8 @@ void WithTable::ProcessRow(tXmlParser::node cur) {
 void WithTable::ProcessCell(tXmlParser::node cur) {
     for (cur = cur.GetFirstChild(); cur; ++cur) {
         if(cur.IsOfType("Text")) {
-            //            m_table.back().back().push_back((tValue::Set(tValue::BasePtr(new tValue::String(cur.GetProp("value"))))));
             tValue::BasePtr a(new tValue::String(cur.GetProp("value")));
-            tValue::BasePtr b(new tValue::Int(3));
-            tValue::BasePtr c(new tValue::Int(4));
-            m_table.back().back().push_back((tValue::Set(a, b, c)));
+            m_table.back().back().push_back(tValue::Set(a));
         } else if(cur.IsOfType("GameData")) {
             std::map<tString, tValue::Set>::iterator iter;
             if((iter = m_data.find(cur.GetProp("data"))) != m_data.end()) {
