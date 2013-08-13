@@ -37,6 +37,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "gParser.h"
 #include "tRandom.h"
 #include "eRectangle.h"
+#include "gCycle.h"
 
 static float sizeMultiplier = .5f;
 static nSettingItem<float> conf_mult ("REAL_ARENA_SIZE_FACTOR", sizeMultiplier);

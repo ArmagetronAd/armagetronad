@@ -1405,13 +1405,13 @@ gParser::parseZoneArthemis_v1(eGrid * grid, xmlNodePtr cur, const xmlChar * keyw
     gZone * zone = NULL;
     if (sn_GetNetState() != nCLIENT )
     {
-        if (!xmlStrcmp(myxmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"win")) {
+        if (!xmlStrcmp(myxmlGetProp(cur, "effect").GetXML(), (const xmlChar *)"win")) {
             zone = tNEW( gWinZoneHack) ( grid, eCoord(x*sizeMultiplier,y*sizeMultiplier) );
         }
-        else if (!xmlStrcmp(myxmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"death")) {
+        else if (!xmlStrcmp(myxmlGetProp(cur, "effect").GetXML(), (const xmlChar *)"death")) {
             zone = tNEW( gDeathZoneHack) ( grid, eCoord(x*sizeMultiplier,y*sizeMultiplier) );
         }
-        else if (!xmlStrcmp(myxmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"fortress")) {
+        else if (!xmlStrcmp(myxmlGetProp(cur, "effect").GetXML(), (const xmlChar *)"fortress")) {
             zone = tNEW( gBaseZoneHack) ( grid, eCoord(x*sizeMultiplier,y*sizeMultiplier) );
         }
 
