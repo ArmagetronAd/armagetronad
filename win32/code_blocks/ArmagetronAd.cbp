@@ -131,6 +131,8 @@
 		<Unit filename="../../src/engine/eGrid.h" />
 		<Unit filename="../../src/engine/eKrawall.cpp" />
 		<Unit filename="../../src/engine/eKrawall.h" />
+		<Unit filename="../../src/engine/eLadderLog.cpp" />
+		<Unit filename="../../src/engine/eLadderLog.h" />
 		<Unit filename="../../src/engine/eLagCompensation.cpp" />
 		<Unit filename="../../src/engine/eLagCompensation.h" />
 		<Unit filename="../../src/engine/eNetGameObject.cpp" />
@@ -160,6 +162,8 @@
 		<Unit filename="../../src/engine/eVoter.h" />
 		<Unit filename="../../src/engine/eWall.cpp" />
 		<Unit filename="../../src/engine/eWall.h" />
+		<Unit filename="../../src/engine/eWarmup.cpp" />
+		<Unit filename="../../src/engine/eWarmup.h" />
 		<Unit filename="../../src/engine/sound/base/eChannel.h" />
 		<Unit filename="../../src/engine/sound/sdl_mixer/eChannelSDLMixer.cpp" />
 		<Unit filename="../../src/engine/sound/sdl_mixer/eChannelSDLMixer.h" />
@@ -185,8 +189,6 @@
 			<Option compile="0" />
 			<Option link="0" />
 		</Unit>
-		<Unit filename="../../src/network/md5.cpp" />
-		<Unit filename="../../src/network/md5.h" />
 		<Unit filename="../../src/network/nAuthentication.cpp" />
 		<Unit filename="../../src/network/nAuthentication.h" />
 		<Unit filename="../../src/network/nBinary.cpp" />
@@ -419,6 +421,8 @@
 		<Unit filename="../../src/thirdparty/particles/ParticleDLL/other_api.cpp" />
 		<Unit filename="../../src/thirdparty/scrap/scrap.cpp" />
 		<Unit filename="../../src/thirdparty/scrap/scrap.h" />
+		<Unit filename="../../src/tools/md5.cpp" />
+		<Unit filename="../../src/tools/md5.h" />
 		<Unit filename="../../src/tools/memtest.cpp">
 			<Option compile="0" />
 			<Option link="0" />
@@ -439,8 +443,8 @@
 		<Unit filename="../../src/tools/tConsole.h" />
 		<Unit filename="../../src/tools/tCoord.cpp" />
 		<Unit filename="../../src/tools/tCoord.h" />
-		<Unit filename="../../src/tools/tCrypt.cpp" />
-		<Unit filename="../../src/tools/tCrypt.h" />
+		<Unit filename="../../src/tools/tCrypto.cpp" />
+		<Unit filename="../../src/tools/tCrypto.h" />
 		<Unit filename="../../src/tools/tDecorator.cpp" />
 		<Unit filename="../../src/tools/tDecorator.h" />
 		<Unit filename="../../src/tools/tDict.h" />
