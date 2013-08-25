@@ -648,50 +648,35 @@ rTextField & rTextField::StringOutput(const FTGL_CHAR * c, ColorMode colorMode)
                                      static_cast<FTGL_CHAR>('T'),
                                      static_cast<FTGL_CHAR>('T'),
                                      0};
-
-        if (*c=='0' && my_strnlen(c, 8)>=8 && c[1]=='x' && colorMode != COLOR_IGNORE && (tColor::VerifyColorCode(c) || 0 == my_strncmp(c,resett,8)))
+        bool isResettColor = false;
+        if (*c == '0' && my_strnlen(c, 8) >= 8 && c[1] == 'x' && colorMode != COLOR_IGNORE && (tColor::VerifyColorCode(c) || (isResettColor = 0 == my_strncmp(c, resett, 8))))
         {
-            tColor color;
-            bool use = false;
+            tColor color = isResettColor ? defaultColor_ : tColor( c );
 
-            if ( 0 == my_strncmp(c,resett,8) )
-            {
-                // color reset to default requested
-                 color = defaultColor_;
-                 use = true;
-            }
-            else
-            {
-                // found! extract colors
-                cursorPos-=8;
-                color = tColor( c );
-                use = true;
-            }
-
-            // advance
             if ( colorMode == COLOR_USE )
             {
-                c+=8;
+                // Advance over the color code.
+                c += 8;
+
+                // The code will be hidden, so move the cursor to correct position.
+                cursorPos -= 8;
             }
             else
             {
-                // write color code out
-                cursorPos+=8;
+                // colorMode is COLOR_SHOW. Write the color code out.
                 for(int i=7; i>=0;--i)
                     WriteChar(*(c++));
             }
 
-            // apply color
-            if ( use )
-            {
-                FlushLine(false);
-                cursorPos++;
-                color_ = color;
-            }
+            FlushLine(false);
+            cursorPos++;
+            color_ = color;
         }
         else
+        {
             // normal operation: add char
             WriteChar(*(c++));
+        }
     }
 #endif
     return *this;
