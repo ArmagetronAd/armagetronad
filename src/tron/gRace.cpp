@@ -1064,6 +1064,7 @@ void gRaceScores::OutputEnd()
 gRacePlayer::gRacePlayer(ePlayerNetID *player)
 {
     this->player_ = player;
+    this->cycle_ = NULL;
 
     this->time_  = -1;
     this->score_ = 0;
@@ -1319,9 +1320,9 @@ void gRace::Sync( int alive, int ai_alive, int humans, REAL time )
         for(int x = 0; x < sg_RacePlayers.Len(); x++)
         {
             gRacePlayer *racePlayer = sg_RacePlayers[x];
-            if (racePlayer && racePlayer->Cycle())
+            if (racePlayer && racePlayer->Player() && !racePlayer->Player()->IsSpectating() && racePlayer->Player()->IsHuman())
             {
-                if (racePlayer->Player()->IsHuman() && racePlayer->Cycle()->Alive())
+                if (racePlayer->Cycle() && racePlayer->Cycle()->Team() && racePlayer->Cycle()->Alive())
                 {
                     //  check if player's speed is at idle or not
                     if (racePlayer->Cycle()->Speed() <= sg_raceIdleSpeed)
