@@ -3820,6 +3820,8 @@ flag_pass_failed           The flag passed by \1 was intercepted by \2.\n
 clear_ladderlog_help       Clear all data from ladderlog.txt located in ./var folder.
 clear_scorelog_help        Clear all data from scorelog.txt located in ./var folder.
 clear_chatlog_help         Clear all data from chatlog.txt located in ./var folder.
+clear_chatlog_colors_help  Clear all data from chatlog_colors.txt located in ./var folder.
+clear_adminlog_help        Clear all data from adminlog.txt located in ./var folder.
 
 # commands
 custom_configs_help           List of configs, seperated by ;, to load during the star-up of the client/server.
@@ -3843,3 +3845,14 @@ rubberzone_rubber_help        Set the rubber which rubber zone should have to de
 
 turn_doublebind_left_help     Do the double bind turn to the left side.
 turn_doublebind_right_help    Do the double bind turn to the right side.
+
+banned_words_help             The list of words banned for various reasons.
+banned_words_add_help         Add a word to the banned words list.
+banned_words_remove_help      Remove a word from the banned words list.
+banned_words_list_help        Display the list of words currently banned.
+banned_words_list             The list of currently banned words:\n
+banned_words_list_show        Showing \1 banned words out of \2 total.\n
+banned_words_warning          BANNED WORDS: Your message is blocked due to containing one or many banned words.\n
+banned_words_replace          * 
+
+chat_message_report           Your report has been submitted.\n

@@ -65,6 +65,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "../tron/gRace.h"
 
 #include "../tron/gRotation.h"
+#include "tBannedWords.h"
 
 int se_lastSaidMaxEntries = 8;
 
@@ -2002,6 +2003,11 @@ void se_BroadcastChatLine( ePlayerNetID* sender, const tString& line, const tStr
 // ( the clients will see <player>: <say>
 void se_BroadcastChat( ePlayerNetID* sender, const tString& say )
 {
+    tString retStr(say);
+
+    if (tBannedWords::BadWordTrigger(sender, retStr))
+        return;
+
     // create chat messages
     tJUST_CONTROLLED_PTR< nMessage > mServerControlled = se_ServerControlledChatMessage( sender, say );
     tJUST_CONTROLLED_PTR< nMessage > mNew = se_NewChatMessage( sender, say );
@@ -3279,6 +3285,30 @@ static void se_ChatEnemy(ePlayerNetID *p, std::istream &s, eChatSpamTester &spam
     }
 }
 
+static void se_ChatReport( ePlayerNetID * p, std::istream & s, eChatSpamTester & spam )
+{
+    // odd, the refactored original did not check for silence. Probably by design.
+    if ( /* IsSilencedWithWarning(player) || */ spam.Block() ) return;
+
+    tString msg, report;
+    msg.ReadLine(s);
+
+    if (msg.Filter() != "")
+    {
+        report << se_Time() << " ";
+        report << p->GetName() << " reports: ";
+        report << msg;
+        report << "\n";
+
+        std::ofstream o;
+        if (tDirectories::Var().Open(o, "reports.txt", std::ios::app))
+        {
+            o << report;
+        }
+        o.close();
+    }
+}
+
 /**
  * Let's just leave it at default at moderators level.
  * This way only moderators or lower level users can view chat messages from this person.
@@ -4058,6 +4088,12 @@ void handle_chat( nMessage &m )
                     {
                         spam.lastSaidType_ = eChatMessageType_Public;
                         se_ChatPlayer( p, s, spam );
+                        return;
+                    }
+                    else if (command == "/report")
+                    {
+                        spam.lastSaidType_ = eChatMessageType_Public;
+                        se_ChatReport( p, s, spam );
                         return;
                     }
                     else if (command == "/msg")

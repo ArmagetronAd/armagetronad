@@ -1,0 +1,988 @@
+<?xml version="1.0"?>
+<!DOCTYPE Code::Blocks_project_file>
+<Code::Blocks_project_file>
+	<FileVersion major="1" minor="1"/>
+	<Project>
+		<Option title="Dedicated Server Visual C++ 2003"/>
+		<Option makefile="Makefile"/>
+		<Option makefile_is_custom="0"/>
+		<Option active_target="0"/>
+		<Option compiler="1"/>
+		<Build>
+			<Target title="Release">
+				<Option output="..\dist\armagetronad_dedicated.exe"/>
+				<Option working_dir="..\dist"/>
+				<Option object_output="tmp\Armagetron_DedicatedVisual_Release"/>
+				<Option deps_output=".deps"/>
+				<Option external_deps=""/>
+				<Option type="1"/>
+				<Option compiler="1"/>
+				<Option projectResourceIncludeDirsRelation="1"/>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="/G6"/>
+			<Add option="/GX"/>
+			<Add option="/GR"/>
+			<Add option="/O1"/>
+			<Add option="/Og"/>
+			<Add directory="src\tools"/>
+			<Add directory="src\network"/>
+			<Add directory="src\engine"/>
+			<Add directory="src\render"/>
+			<Add directory="src\ui"/>
+			<Add directory="src\win32_ded"/>
+			<Add directory="src"/>
+			<Add directory="..\armagetronad_winlibs\libxml2\include"/>
+			<Add directory="..\armagetronad_winlibs\iconv\include"/>
+		</Compiler>
+		<Linker>
+			<Add library="libxml2.lib"/>
+			<Add library="iconv.lib"/>
+			<Add library="wsock32.lib"/>
+			<Add library="winspool.lib"/>
+			<Add library="shell32.lib"/>
+			<Add library="user32.lib"/>
+			<Add directory="..\armagetronad_winlibs\iconv\lib"/>
+			<Add directory="..\armagetronad_winlibs\libxml2\lib"/>
+		</Linker>
+		<Unit filename="src\config_ide.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\engine\eAdvWall.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\engine\eAdvWall.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\engine\eAuthentication.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\engine\eAuthentication.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\engine\eAxis.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\engine\eAxis.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\engine\eCamera.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\engine\eCamera.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\engine\eCoord.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\engine\eDebugLine.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\engine\eDebugLine.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\engine\eDisplay.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\engine\eFloor.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\engine\eFloor.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\engine\eGameObject.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\engine\eGameObject.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\engine\eGrid.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\engine\eGrid.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\engine\eKrawall.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\engine\eKrawall.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\engine\eNetGameObject.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\engine\eNetGameObject.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\engine\ePath.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\engine\ePath.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\engine\ePlayer.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\engine\ePlayer.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\engine\eSensor.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\engine\eSensor.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\engine\eSound.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\engine\eSound.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\engine\eTeam.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\engine\eTeam.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\engine\eTess2.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\engine\eTimer.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\engine\eTimer.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\engine\eVoter.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\engine\eVoter.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\engine\eWall.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\engine\eWall.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\network\md5.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\network\md5.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\network\nAuthentication.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\network\nAuthentication.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\network\nConfig.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\network\nConfig.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\network\nKrawall.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\network\nKrawall.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\network\nKrawallPrivate.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\network\nNetObject.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\network\nNetObject.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\network\nNetwork.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\network\nNetwork.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\network\nObserver.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\network\nObserver.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\network\nPriorizing.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\network\nPriorizing.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\network\nServerInfo.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\network\nServerInfo.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\network\nSimulatePing.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\network\nSocket.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\network\nSocket.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\network\nSpamProtection.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\network\nSpamProtection.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\render\rConsole.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\render\rConsole.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\render\rConsoleGraph.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\render\rFont.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\render\rFont.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\render\rGL.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\render\rGLRender.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\render\rModel.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\render\rModel.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\render\rRender.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\render\rRender.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\render\rSDL.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\render\rScreen.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\render\rScreen.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\render\rSysdep.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\render\rSysdep.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\render\rTexture.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\render\rTexture.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\render\rViewport.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\render\rViewport.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tools\tArray.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tools\tArray.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tools\tCallback.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tools\tCallback.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tools\tCallbackString.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tools\tColor.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tools\tConfiguration.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tools\tConfiguration.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tools\tConsole.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tools\tConsole.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tools\tCrypt.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tools\tCrypt.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tools\tDirectories.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tools\tDirectories.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tools\tError.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tools\tError.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tools\tEventQueue.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tools\tEventQueue.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tools\tHeap.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tools\tHeap.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tools\tInitExit.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tools\tLinkedList.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tools\tLinkedList.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tools\tList.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tools\tLocale.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tools\tLocale.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tools\tMath.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tools\tMemManager.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tools\tMemManager.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tools\tMemStack.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tools\tMemStack.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tools\tReferenceHolder.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tools\tResourceManager.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tools\tResourceManager.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tools\tRing.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tools\tRing.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tools\tSafePTR.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tools\tSafePTR.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tools\tString.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tools\tString.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tools\tSysTime.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tools\tSysTime.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tools\tToDo.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tools\tToDo.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gAIBase.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gAIBase.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gAICharacter.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gAICharacter.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gArena.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gArena.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gArmagetron.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gCamera.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gCamera.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gCycle.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gCycle.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gCycleMovement.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gCycleMovement.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gExplosion.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gExplosion.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gFloor.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gGame.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gGame.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gHud.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gHud.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gLanguageMenu.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gLanguageMenu.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gLogo.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gLogo.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gMenus.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gMenus.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gParser.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gParser.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gParticles.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gParticles.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gSensor.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gSensor.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gServerBrowser.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gServerBrowser.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gSparks.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gSparks.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gSpawn.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gSpawn.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gStuff.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gStuff.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gTeam.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gTeam.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gWall.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gWall.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gWinZone.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\tron\gWinZone.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\ui\uInput.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\ui\uInput.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\ui\uInputQueue.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\ui\uInputQueue.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\ui\uMenu.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\ui\uMenu.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\win32\config_common.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\win32_ded\config.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\win32_ded\dirent.c">
+			<Option compilerVar="CC"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\win32_ded\dirent.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="src\win32_ded\strstream.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="armagetron.rc">
+			<Option compilerVar="WINDRES"/>
+			<Option objectName="armagetronad_build_codeblocks\armagetron.res"/>
+		</Unit>
+	</Project>
+</Code::Blocks_project_file>

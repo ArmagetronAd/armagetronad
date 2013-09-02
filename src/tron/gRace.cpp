@@ -115,6 +115,7 @@ static tSettingItem<bool> sg_raceFinishKillConf("RACE_FINISH_KILL", sg_raceFinis
 static bool sg_raceLogLogin = true;
 static tSettingItem<bool> sg_raceLogLoginConf("RACE_LOG_LOGIN", sg_raceLogLogin);
 
+/*
 static bool sg_raceRanksLimit = true;
 static tSettingItem<bool> sg_raceRanksLimitConf("RACE_RANKS_LIMIT", sg_raceRanksLimit);
 
@@ -126,6 +127,7 @@ bool restrictRaceRanksLimitTime(const int &newValue)
     return true;
 }
 static tSettingItem<int> sg_raceRanksLimitTimeConf("RACE_RANKS_LIMIT_TIME", sg_raceRanksLimitTime, &restrictRaceRanksLimitTime);
+*/
 
 static bool sg_raceIdleKill = false;
 static tSettingItem<bool> sg_raceIdleKillConf("RACE_IDLE_KILL", sg_raceIdleKill);
@@ -426,6 +428,7 @@ void gRaceScores::Read()
                 else
                     rS->lastTime_ = se_Time();
 
+                /*
                 //  Checking for the race ranks limit.
                 //  Cannot have records of people that on't play often.
                 if (sg_raceRanksLimit && sg_raceRanksLimitTime > 0)
@@ -446,6 +449,7 @@ void gRaceScores::Read()
                         }
                     }
                 }
+                */
             }
         }
     }

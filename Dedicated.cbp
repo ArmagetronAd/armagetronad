@@ -160,6 +160,8 @@
 		<Unit filename="src\render\rViewport.h" />
 		<Unit filename="src\tools\tArray.cpp" />
 		<Unit filename="src\tools\tArray.h" />
+		<Unit filename="src\tools\tBannedWords.cpp" />
+		<Unit filename="src\tools\tBannedWords.h" />
 		<Unit filename="src\tools\tCallback.cpp" />
 		<Unit filename="src\tools\tCallback.h" />
 		<Unit filename="src\tools\tCallbackString.h" />
