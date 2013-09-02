@@ -65,7 +65,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "../tron/gRace.h"
 
 #include "../tron/gRotation.h"
-#include "tBannedWords.h"
+#include "eBannedWords.h"
 
 int se_lastSaidMaxEntries = 8;
 
@@ -2005,7 +2005,7 @@ void se_BroadcastChat( ePlayerNetID* sender, const tString& say )
 {
     tString retStr(say);
 
-    if (tBannedWords::BadWordTrigger(sender, retStr))
+    if (eBannedWords::BadWordTrigger(sender, retStr))
         return;
 
     // create chat messages

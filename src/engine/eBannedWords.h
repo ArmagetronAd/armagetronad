@@ -6,10 +6,10 @@
 #include "tList.h"
 #include "ePlayer.h"
 
-class tBannedWords
+class eBannedWords
 {
     public:
-        tBannedWords();
+        eBannedWords();
 
         tArray<tString> BannedWordsList() { bannedWords_; }
 
@@ -57,6 +57,6 @@ class tBannedWords
         tArray<tString> bannedWords_;
 };
 
-extern tBannedWords *st_BannedWords;
+extern eBannedWords *se_BannedWords;
 
 #endif // TBANNEDWORD_H

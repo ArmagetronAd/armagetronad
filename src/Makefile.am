@@ -64,8 +64,7 @@ libtools_a_SOURCES=	${tools_extra} tools/tArray.cpp tools/tArray.h tools/tCallba
 	tools/tRandom.cpp tools/tRandom.h\
 	defs.h\
     thirdparty/binreloc/prefix.c thirdparty/binreloc/prefix.h\
-	tools/tMemManager.cpp tools/tMemManager.h\
-    tools/tBannedWords.cpp tools/tBannedWords.h
+	tools/tMemManager.cpp tools/tMemManager.h
 
 #tools/tCommandLine.cpp tools/tCommandLine.h
 libnetwork_a_SOURCES=network/md5.cpp network/md5.h network/nAuthentication.cpp\
@@ -90,7 +89,8 @@ libengine_a_SOURCES=engine/eAdvWall.cpp engine/eAdvWall.h engine/eAuthentication
 	engine/eTimer.cpp engine/eTimer.h engine/eVoter.cpp engine/eVoter.h engine/eWall.cpp engine/eWall.h\
 	engine/eRectangle.cpp engine/eRectangle.h\
 	engine/eLagCompensation.cpp engine/eLagCompensation.h\
-	engine/eChat.cpp engine/eChat.h
+	engine/eChat.cpp engine/eChat.h\
+    engine/eBannedWords.cpp engine/eBannedWords.h
 
 
 librender_a_SOURCES=render/rConsole.cpp render/rConsoleGraph.cpp render/rConsole.h render/rFont.cpp\

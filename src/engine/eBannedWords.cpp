@@ -1,17 +1,17 @@
-#include "tBannedWords.h"
+#include "eBannedWords.h"
 #include "tConfiguration.h"
 #include "tDirectories.h"
 #include "tRecorder.h"
 #include "nNetwork.h"
 
-tBannedWords::tBannedWords()
+eBannedWords::eBannedWords()
 {
     Clear();
 }
 
-tBannedWords *st_BannedWords = new tBannedWords();
+eBannedWords *se_BannedWords = new eBannedWords();
 
-static void st_BannedWordsStore(std::istream &s)
+static void se_BannedWordsStore(std::istream &s)
 {
     tString wordSt;
     wordSt.ReadLine(s);
@@ -19,7 +19,7 @@ static void st_BannedWordsStore(std::istream &s)
     if (wordSt.Filter() == "")
         return;
 
-    st_BannedWords->Clear();
+    se_BannedWords->Clear();
 
     tArray<tString> words = wordSt.Split(";");
     for(int i = 0; i < words.Len(); i++)
@@ -27,13 +27,13 @@ static void st_BannedWordsStore(std::istream &s)
         tString word = words[i];
         if (word.Filter() != "")
         {
-            st_BannedWords->Add(word);
+            se_BannedWords->Add(word);
         }
     }
 }
-static tConfItemFunc st_BannedWordsStoreConf("BANNED_WORDS", &st_BannedWordsStore);
+static tConfItemFunc se_BannedWordsStoreConf("BANNED_WORDS", &se_BannedWordsStore);
 
-static void st_BannedWordsAdd(std::istream &s)
+static void se_BannedWordsAdd(std::istream &s)
 {
     tString word;
     s >> word;
@@ -42,11 +42,11 @@ static void st_BannedWordsAdd(std::istream &s)
         return;
 
     bool found = false;
-    if (st_BannedWords->Count() >= 0)
+    if (se_BannedWords->Count() >= 0)
     {
-        for(int i = 0; i < st_BannedWords->Count(); i++)
+        for(int i = 0; i < se_BannedWords->Count(); i++)
         {
-            tString wordSearch = st_BannedWords->GetWord(i);
+            tString wordSearch = se_BannedWords->GetWord(i);
             if (wordSearch.Filter() == word.Filter())
             {
                 found = true;
@@ -57,12 +57,12 @@ static void st_BannedWordsAdd(std::istream &s)
 
     if (!found)
     {
-        st_BannedWords->Add(word);
+        se_BannedWords->Add(word);
     }
 }
-static tConfItemFunc st_BannedWordsAddConf("BANNED_WORDS_ADD", &st_BannedWordsAdd);
+static tConfItemFunc se_BannedWordsAddConf("BANNED_WORDS_ADD", &se_BannedWordsAdd);
 
-static void st_BannedWordsRemove(std::istream &s)
+static void se_BannedWordsRemove(std::istream &s)
 {
     tString word;
     s >> word;
@@ -73,11 +73,11 @@ static void st_BannedWordsRemove(std::istream &s)
     bool found = false;
     int wordId = -1;
 
-    if (st_BannedWords->Count() >= 0)
+    if (se_BannedWords->Count() >= 0)
     {
-        for(int i = 0; i < st_BannedWords->Count(); i++)
+        for(int i = 0; i < se_BannedWords->Count(); i++)
         {
-            tString wordSearch = st_BannedWords->GetWord(i);
+            tString wordSearch = se_BannedWords->GetWord(i);
             if (wordSearch.Filter() == word.Filter())
             {
                 found = true;
@@ -90,12 +90,12 @@ static void st_BannedWordsRemove(std::istream &s)
 
     if (found && wordId >= 0)
     {
-        st_BannedWords->RemoveWord(wordId);
+        se_BannedWords->RemoveWord(wordId);
     }
 }
-static tConfItemFunc st_BannedWordsRemoveConf("BANNED_WORDS_REMOVE", &st_BannedWordsRemove);
+static tConfItemFunc se_BannedWordsRemoveConf("BANNED_WORDS_REMOVE", &se_BannedWordsRemove);
 
-static void st_BannedWordsList(std::istream &s)
+static void se_BannedWordsList(std::istream &s)
 {
     int max = 10;
     int showing = 0;
@@ -108,12 +108,12 @@ static void st_BannedWordsList(std::istream &s)
     tString amount = params.ExtractNonBlankSubString(pos);
     if (amount.Filter() != "") showAmount = atoi(amount);
 
-    if (st_BannedWords->Count() > 0)
+    if (se_BannedWords->Count() > 0)
     {
-        if (showAmount < st_BannedWords->Count())
+        if (showAmount < se_BannedWords->Count())
         {
-            if (st_BannedWords->Count() < max) max = st_BannedWords->Count();
-            if ((st_BannedWords->Count() - showAmount) < max) max = st_BannedWords->Count() - showAmount;
+            if (se_BannedWords->Count() < max) max = se_BannedWords->Count();
+            if ((se_BannedWords->Count() - showAmount) < max) max = se_BannedWords->Count() - showAmount;
 
             if (max > 0)
             {
@@ -122,7 +122,7 @@ static void st_BannedWordsList(std::istream &s)
                 for(int i = 0; i < max; i++)
                 {
                     int rotID = showAmount + i;
-                    tString word = st_BannedWords->GetWord(i);
+                    tString word = se_BannedWords->GetWord(i);
                     if (word.Filter() != "")
                     {
                         tColoredString send;
@@ -139,17 +139,17 @@ static void st_BannedWordsList(std::istream &s)
 
                 tOutput show;
                 show.SetTemplateParameter(1, showing);
-                show.SetTemplateParameter(2, st_BannedWords->Count());
+                show.SetTemplateParameter(2, se_BannedWords->Count());
                 show << "$banned_words_list_show";
                 sn_ConsoleOut(show, 0);
             }
         }
     }
 }
-static tConfItemFunc st_BannedWordsListConf("BANNED_WORDS_LIST", &st_BannedWordsList);
-static tAccessLevelSetter st_BannedWordsListConfLevel( st_BannedWordsListConf, tAccessLevel_Moderator );
+static tConfItemFunc se_BannedWordsListConf("BANNED_WORDS_LIST", &se_BannedWordsList);
+static tAccessLevelSetter se_BannedWordsListConfLevel( se_BannedWordsListConf, tAccessLevel_Moderator );
 
-static int st_BannedWordsOptions = 0;
+static int se_BannedWordsOptions = 0;
 bool restrictBannedWordsOptionsValue(const int &newValue)
 {
     if ((newValue < 0) || (newValue > 2))
@@ -157,23 +157,23 @@ bool restrictBannedWordsOptionsValue(const int &newValue)
 
     return true;
 }
-static tSettingItem<int> st_BannedWordsOptionsConf("BANNED_WORDS_OPTIONS", st_BannedWordsOptions, &restrictBannedWordsOptionsValue);
+static tSettingItem<int> se_BannedWordsOptionsConf("BANNED_WORDS_OPTIONS", se_BannedWordsOptions, &restrictBannedWordsOptionsValue);
 
-bool tBannedWords::BadWordTrigger(ePlayerNetID *sender, tString &message)
+bool eBannedWords::BadWordTrigger(ePlayerNetID *sender, tString &message)
 {
-    if ((st_BannedWords->Count() > 0) && (st_BannedWordsOptions > 0))
+    if ((se_BannedWords->Count() > 0) && (se_BannedWordsOptions > 0))
     {
         //  Loop through each bad word container and check in message if that bad word exists
-        for (int wordID = 0; wordID < st_BannedWords->Count(); wordID++)
+        for (int wordID = 0; wordID < se_BannedWords->Count(); wordID++)
         {
             //  fetch the word currently in wordID
-            tString word = st_BannedWords->BannedWordsList()[wordID];
+            tString word = se_BannedWords->BannedWordsList()[wordID];
 
             //  check if a banned word exists in the message
             if ((word.Filter() != "") && (message.Contains(word)))
             {
                 //  option 1: alert the sender of the usage of banned word in their message
-                if (st_BannedWordsOptions == 1)
+                if (se_BannedWordsOptions == 1)
                 {
                     tOutput msg;
                     msg << "$banned_words_warning";
@@ -182,7 +182,7 @@ bool tBannedWords::BadWordTrigger(ePlayerNetID *sender, tString &message)
                     return true;
                 }
                 //  option 2: replace the banned word with the replacement word from the language setting
-                else if (st_BannedWordsOptions == 2)
+                else if (se_BannedWordsOptions == 2)
                 {
                     tString replacementWord;
                     replacementWord = tOutput("$banned_words_replace");
