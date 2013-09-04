@@ -72,6 +72,8 @@
 		<Unit filename="src\engine\eAuthentication.h" />
 		<Unit filename="src\engine\eAxis.cpp" />
 		<Unit filename="src\engine\eAxis.h" />
+		<Unit filename="src\engine\eBannedWords.cpp" />
+		<Unit filename="src\engine\eBannedWords.h" />
 		<Unit filename="src\engine\eCamera.cpp" />
 		<Unit filename="src\engine\eCamera.h" />
 		<Unit filename="src\engine\eChat.cpp" />
@@ -160,8 +162,6 @@
 		<Unit filename="src\render\rViewport.h" />
 		<Unit filename="src\tools\tArray.cpp" />
 		<Unit filename="src\tools\tArray.h" />
-		<Unit filename="src\tools\tBannedWords.cpp" />
-		<Unit filename="src\tools\tBannedWords.h" />
 		<Unit filename="src\tools\tCallback.cpp" />
 		<Unit filename="src\tools\tCallback.h" />
 		<Unit filename="src\tools\tCallbackString.h" />

@@ -1821,7 +1821,8 @@ tString tString::Filter() const
 }
 
 //static const char delimiters[] = "`~!@#$%^&*()-=_+[]\\{}|;':\",./<>? ";
-static tString delimiters("!?.:;_()-, ");
+//static tString delimiters("!?.:;_()-, ");
+static tString delimiters("`~!@#$%^&*()-=_+[]\\{}|;':\",./<>? ");
 static tConfItemLine st_wordDelimiters( "WORD_DELIMITERS", delimiters );
 
 // *******************************************************************************************

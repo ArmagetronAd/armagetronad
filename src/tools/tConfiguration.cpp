@@ -1164,6 +1164,9 @@ static void st_ReLoadConfig(std::istream &s)
 static tConfItemFunc st_ReLoadConfigConf("RELOAD_CONFIG", &st_ReLoadConfig);
 static tAccessLevelSetter st_ReLoadConfigConfLevel( st_ReLoadConfigConf, tAccessLevel_Moderator );
 
+static bool st_UserCfgSave = true;
+static tConfItem<bool> st_UserCfgSaveConf("CFG_USER_SAVE", st_UserCfgSave);
+
 void st_SaveConfig()
 {
     // don't save while playing back
@@ -1175,7 +1178,8 @@ void st_SaveConfig()
     std::ofstream s;
     if ( tDirectories::Var().Open( s, "user.cfg", std::ios::out, true ) )
     {
-        tConfItemBase::SaveAll(s);
+        if (st_UserCfgSave)
+            tConfItemBase::SaveAll(s);
     }
     else
     {

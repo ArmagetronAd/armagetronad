@@ -1951,6 +1951,11 @@ static nMessage* se_OldChatMessage( ePlayerNetID const * player, tString const &
 // ( the client will see <fullLine> resp. <sender name> : <forOldClients> if it is pre-0.2.8 and at least 0.2.6 )
 void se_SendChatLine( ePlayerNetID* sender, const tString& fullLine, const tString& forOldClients, int receiver )
 {
+    tString retStr(fullLine);
+
+    if (eBannedWords::BadWordTrigger(sender, retStr))
+        return;
+
     // create chat messages
 
     // send them to the users, depending on what they understand
@@ -1958,7 +1963,7 @@ void se_SendChatLine( ePlayerNetID* sender, const tString& fullLine, const tStri
     {
         if ( se_chatHandlerClient.Supported( receiver ) )
         {
-            tJUST_CONTROLLED_PTR< nMessage > mServerControlled = se_ServerControlledChatMessageConsole( sender, fullLine );
+            tJUST_CONTROLLED_PTR< nMessage > mServerControlled = se_ServerControlledChatMessageConsole( sender, retStr );
             mServerControlled->Send( receiver );
         }
         else if ( se_chatRelay.Supported( receiver ) )
@@ -1968,7 +1973,7 @@ void se_SendChatLine( ePlayerNetID* sender, const tString& fullLine, const tStri
         }
         else
         {
-            tJUST_CONTROLLED_PTR< nMessage > mOld = se_OldChatMessage( fullLine );
+            tJUST_CONTROLLED_PTR< nMessage > mOld = se_OldChatMessage( retStr );
             mOld->Send( receiver );
         }
     }
@@ -1979,10 +1984,15 @@ void se_SendChatLine( ePlayerNetID* sender, const tString& fullLine, const tStri
 // ( the client will see <fullLine> resp. <sender name> : <forOldClients> if it is pre-0.2.8 and at least 0.2.6 )
 void se_BroadcastChatLine( ePlayerNetID* sender, const tString& line, const tString& forOldClients )
 {
+    tString retStr(line);
+
+    if (eBannedWords::BadWordTrigger(sender, retStr))
+        return;
+
     // create chat messages
-    tJUST_CONTROLLED_PTR< nMessage > mServerControlled = se_ServerControlledChatMessageConsole( sender, line );
+    tJUST_CONTROLLED_PTR< nMessage > mServerControlled = se_ServerControlledChatMessageConsole( sender, retStr );
     tJUST_CONTROLLED_PTR< nMessage > mNew = se_NewChatMessage( sender, forOldClients );
-    tJUST_CONTROLLED_PTR< nMessage > mOld = se_OldChatMessage( line );
+    tJUST_CONTROLLED_PTR< nMessage > mOld = se_OldChatMessage( retStr );
 
     // send them to the users, depending on what they understand
     for ( int user = MAXCLIENTS; user > 0; --user )
@@ -2009,9 +2019,9 @@ void se_BroadcastChat( ePlayerNetID* sender, const tString& say )
         return;
 
     // create chat messages
-    tJUST_CONTROLLED_PTR< nMessage > mServerControlled = se_ServerControlledChatMessage( sender, say );
-    tJUST_CONTROLLED_PTR< nMessage > mNew = se_NewChatMessage( sender, say );
-    tJUST_CONTROLLED_PTR< nMessage > mOld = se_OldChatMessage( sender, say );
+    tJUST_CONTROLLED_PTR< nMessage > mServerControlled = se_ServerControlledChatMessage( sender, retStr );
+    tJUST_CONTROLLED_PTR< nMessage > mNew = se_NewChatMessage( sender, retStr );
+    tJUST_CONTROLLED_PTR< nMessage > mOld = se_OldChatMessage( sender, retStr );
 
     // send them to the users, depending on what they understand
     for ( int user = MAXCLIENTS; user > 0; --user )
@@ -3290,23 +3300,34 @@ static void se_ChatReport( ePlayerNetID * p, std::istream & s, eChatSpamTester &
     // odd, the refactored original did not check for silence. Probably by design.
     if ( /* IsSilencedWithWarning(player) || */ spam.Block() ) return;
 
-    tString msg, report;
+    tString msg;
+    tOutput report, reportPlayer;
     msg.ReadLine(s);
 
     if (msg.Filter() != "")
     {
-        report << se_Time() << " ";
-        report << p->GetName() << " reports: ";
-        report << msg;
-        report << "\n";
+        report.SetTemplateParameter(1, se_Time());
+        report.SetTemplateParameter(2, p->GetName());
+        report.SetTemplateParameter(3, msg);
+        report << "$chat_message_report_message";
 
         std::ofstream o;
         if (tDirectories::Var().Open(o, "reports.txt", std::ios::app))
         {
             o << report;
+            reportPlayer << "$chat_message_report_respond_ok";
+        }
+        else
+        {
+            reportPlayer << "$chat_message_report_respond_no";
         }
         o.close();
     }
+    else
+    {
+        reportPlayer << "$chat_message_report_message_empty";
+    }
+    sn_ConsoleOut(reportPlayer, p->Owner());
 }
 
 /**
@@ -4319,25 +4340,30 @@ void ePlayerNetID::Chat(const tString &s_orig)
     else
 #endif
     {
+        tString retStr(s);
+        if (eBannedWords::BadWordTrigger(this, retStr))
+            return;
+        s = tColoredString(retStr);
+
         switch (sn_GetNetState())
         {
-        case nCLIENT:
-        {
-            se_NewChatMessage( this, s )->BroadCast();
-            break;
-        }
-        case nSERVER:
-        {
-            se_BroadcastChat( this, s );
+            case nCLIENT:
+            {
+                se_NewChatMessage( this, s )->BroadCast();
+                break;
+            }
+            case nSERVER:
+            {
+                se_BroadcastChat( this, s );
 
-            // falling through on purpose
-            // break;
-        }
-        default:
-        {
-            se_DisplayChatLocally( this, s );
-            break;
-        }
+                // falling through on purpose
+                // break;
+            }
+            default:
+            {
+                se_DisplayChatLocally( this, s );
+                break;
+            }
         }
     }
 }
@@ -4642,7 +4668,13 @@ static bool ChatTabCompletition(tString &strString, int &curserPos)
         tString search_string;
         search_string.ReadLine(s);
 
-        if ((command.Filter() != "") && ((command == "/msg") || ((command == "/shout") || (command == "/team"))))
+        if ((command.Filter() != "") && (
+                                         (command == "/msg") ||
+                                         (command == "/shout") ||
+                                         (command == "/team") ||
+                                         (command == "/chat")
+                                         )
+            )
         {
             //  con << "Command found!\n";
             for(int i = 0; i < se_PlayerNetIDs.Len(); i++)
@@ -4661,11 +4693,6 @@ static bool ChatTabCompletition(tString &strString, int &curserPos)
                     while(extract_string.Filter() != "")
                     {
                         lengthCounter += strlen(extract_string);
-
-                        //  con << "length: " << lengthCounter << "\n";
-                        //  con << "word  : " << extract_string << "\n";
-                        //  con << "curser: "<< curserPos << "\n\n";
-
                         if (lengthCounter == curserPos)
                         {
                             //  con << "tab worked!\n";
@@ -4674,7 +4701,7 @@ static bool ChatTabCompletition(tString &strString, int &curserPos)
                             if (filtered_name.Contains(filtered_search))
                             {
                                 //  con << "Player found!\n";
-                                if (first && ((command == "/shout") || (command == "/team")))
+                                if (first && ((command == "/shout") || (command == "/team") || (command == "/chat")))
                                     new_string << p->GetName() + ": ";
                                 else
                                     new_string << p->GetName() + " ";
@@ -4702,26 +4729,10 @@ static bool ChatTabCompletition(tString &strString, int &curserPos)
 
                         return true;
                     }
-
-                    /*tString filtered_name = p->GetName().Filter();
-                    tString filtered_search = player_name.Filter();
-                    if (filtered_name.Contains(filtered_search))
-                    {
-                        strString = "";
-
-                        if (command == "/msg")
-                            strString << "/msg " << p->GetName() + " ";
-                        else if (command == "/shout")
-                            strString << "/shout " << p->GetName() + " ";
-
-                        curserPos = p->GetName().Len() * 2;
-
-                        return true;
-                    }*/
                 }
             }
         }
-        else if ((command.Filter() != "") && (command == "/admin"))
+        else if ((command.Filter() != "") && ((command == "/admin") || (command == "/console")))
         {
             int lengthCounter = strlen(command) + 1;
             bool tabworked = false;
@@ -4842,9 +4853,9 @@ static bool ChatTabCompletition(tString &strString, int &curserPos)
     return false;
 }
 
-static bool sg_displayScoresDuringChat = false;
-bool sg_BlockScores = true;
-static tConfItem<bool> sg_displayScoresDuringChatConf("DISPLAY_SCORES_DURING_CHAT", sg_displayScoresDuringChat);
+static bool se_displayScoresDuringChat = false;
+bool se_BlockScores = false;
+static tConfItem<bool> se_displayScoresDuringChatConf("DISPLAY_SCORES_DURING_CHAT", se_displayScoresDuringChat);
 
 static std::deque<tString> se_chatHistory; // global since the class doesn't live beyond the execution of the command
 static int se_chatHistoryMaxSize=10; // maximal size of chat history
@@ -4879,7 +4890,7 @@ public:
                 }
             }
 
-            sg_BlockScores = false;
+            se_BlockScores = false;
 
             MyMenu()->Exit();
             return true;
@@ -4907,7 +4918,7 @@ public:
         {
             // escape needs to be handled by the surrounding menu, otherwise it
             // probably brings up the ingame menu via global bind.
-            sg_BlockScores = false;
+            se_BlockScores = false;
             return false;
         }
         else
@@ -4919,6 +4930,9 @@ public:
             // exclude modifier keys from possible control triggers
             else if ( e.key.keysym.sym < SDLK_NUMLOCK || e.key.keysym.sym > SDLK_COMPOSE )
             {
+                if (!se_displayScoresDuringChat)
+                    se_BlockScores = true;
+
                 // maybe it's an instant chat button?
                 try
                 {
@@ -5070,12 +5084,13 @@ bool ePlayer::Act(uAction *act,REAL x)
         {
             int i;
             uActionPlayer* pact = reinterpret_cast<uActionPlayer *>(act);
-            for(i=MAX_INSTANT_CHAT-1; i>=0; i--)
+            for(i = MAX_INSTANT_CHAT - 1; i >= 0; i--)
             {
                 uActionPlayer* pcompare = se_instantChatAction[i];
                 if (pact == pcompare && x>=0)
                 {
-                    for(int j=se_PlayerNetIDs.Len()-1; j>=0; j--)
+                    for(int j = se_PlayerNetIDs.Len() - 1; j >= 0; j--)
+                    {
                         if (se_PlayerNetIDs(j)->pID==ID())
                         {
                             tString say = instantChatString[i];
@@ -5090,6 +5105,9 @@ bool ePlayer::Act(uAction *act,REAL x)
 
                             if ( se_chatter == this )
                             {
+                                if (!se_displayScoresDuringChat)
+                                    se_BlockScores = true;
+
                                 // a chat is already active, insert the chat string
                                 throw eChatInsertionCommand( say );
                             }
@@ -5105,17 +5123,16 @@ bool ePlayer::Act(uAction *act,REAL x)
                                     // chat with instant chat string as template
                                     chat( this, say );
                                 }
+
+                                se_BlockScores = false;
                             }
                             return true;
                         }
+                    }
                 }
             }
         }
 
-        if (se_chatter && !sg_displayScoresDuringChat)
-            sg_BlockScores = true;
-        else
-            sg_BlockScores = false;
 
         // no other command should get through during chat
         if ( se_chatter && !se_allowControlDuringChat )
@@ -6804,7 +6821,7 @@ void ePlayerNetID::PassFlag(std::istream &s)
 
     if (cycle)
     {
-        if (cycle->flag_)
+        if (cycle->Alive() && cycle->flag_)
         {
             tString name;
             s >> name;
@@ -7578,7 +7595,13 @@ static bool show_scores=false;
 void ePlayerNetID::DisplayScores()
 {
     //  block displaying scores during chat mode
-    if (sg_BlockScores) return;
+    if (se_BlockScores)
+    {
+        se_alreadyDisplayedScores = false;
+        show_scores = false;
+
+        return;
+    }
 
     if( !show_scores || !se_mainGameTimer || se_alreadyDisplayedScores )
     {

@@ -3846,6 +3846,7 @@ rubberzone_rubber_help        Set the rubber which rubber zone should have to de
 turn_doublebind_left_help     Do the double bind turn to the left side.
 turn_doublebind_right_help    Do the double bind turn to the right side.
 
+# Commands for bad words
 banned_words_help             The list of words banned for various reasons.
 banned_words_add_help         Add a word to the banned words list.
 banned_words_remove_help      Remove a word from the banned words list.
@@ -3854,5 +3855,10 @@ banned_words_list             The list of currently banned words:\n
 banned_words_list_show        Showing \1 banned words out of \2 total.\n
 banned_words_warning          BANNED WORDS: Your message is blocked due to containing one or many banned words.\n
 banned_words_replace          * 
+banned_words_options          0: disable. 1: Block and alert message to sender. 2: Replace bad word with chosen character(s).
 
-chat_message_report           Your report has been submitted.\n
+#chat_message_report_message         [ time ] player reports: message.\n
+chat_message_report_message          [ \1 ] \2 reports: \3.\n
+chat_message_report_message_empty    Your report cannot be empty and you will be punished for spam reporting!\n
+chat_message_report_respond_ok       Your report has been saved.\n
+chat_message_report_respond_no       Your report was not saved due to unknown reasons.\n 

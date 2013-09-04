@@ -122,15 +122,18 @@ static void se_BannedWordsList(std::istream &s)
                 for(int i = 0; i < max; i++)
                 {
                     int rotID = showAmount + i;
-                    tString word = se_BannedWords->GetWord(i);
+                    tString word = se_BannedWords->GetWord(rotID);
                     if (word.Filter() != "")
                     {
                         tColoredString send;
                         send << tColoredString::ColorString( 1,1,.5 );
-                        //send << "( ";
+                        send << "( ";
                         send << "0xaacc09" << word;
                         send << tColoredString::ColorString( 1,1,.5 );
-                        //send << " ),\n";
+                        if (i + 1 == max)
+                            send << " )\n";
+                        else
+                            send << " ),\n";
                         sn_ConsoleOut(send, 0);
 
                         showing++;
@@ -167,7 +170,7 @@ bool eBannedWords::BadWordTrigger(ePlayerNetID *sender, tString &message)
         for (int wordID = 0; wordID < se_BannedWords->Count(); wordID++)
         {
             //  fetch the word currently in wordID
-            tString word = se_BannedWords->BannedWordsList()[wordID];
+            tString word = se_BannedWords->GetWord(wordID);
 
             //  check if a banned word exists in the message
             if ((word.Filter() != "") && (message.Contains(word)))
@@ -175,6 +178,7 @@ bool eBannedWords::BadWordTrigger(ePlayerNetID *sender, tString &message)
                 //  option 1: alert the sender of the usage of banned word in their message
                 if (se_BannedWordsOptions == 1)
                 {
+                    //  build the message to warn the sender
                     tOutput msg;
                     msg << "$banned_words_warning";
                     sn_ConsoleOut(msg, sender->Owner());
@@ -184,9 +188,10 @@ bool eBannedWords::BadWordTrigger(ePlayerNetID *sender, tString &message)
                 //  option 2: replace the banned word with the replacement word from the language setting
                 else if (se_BannedWordsOptions == 2)
                 {
+                    //  switch the bad word with the replacement character(s)
                     tString replacementWord;
-                    replacementWord = tOutput("$banned_words_replace");
-                    message.Replace(word, replacementWord);
+                    replacementWord << tOutput("$banned_words_replace");
+                    message = message.Replace(word, replacementWord);
                 }
             }
         }

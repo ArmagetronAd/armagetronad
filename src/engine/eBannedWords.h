@@ -49,7 +49,7 @@ class eBannedWords
             bannedWords_.SetLen(0);
         }
 
-        int Count() { bannedWords_.Len(); }
+        int Count() { return bannedWords_.Len(); }
 
         static bool BadWordTrigger(ePlayerNetID *sender, tString &message);
 
