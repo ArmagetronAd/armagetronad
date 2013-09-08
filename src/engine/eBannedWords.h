@@ -51,7 +51,12 @@ class eBannedWords
 
         int Count() { return bannedWords_.Len(); }
 
+        static bool HasBadWord(tString message, tString word);
         static bool BadWordTrigger(ePlayerNetID *sender, tString &message);
+        static bool BadWordTrigger(tString &message);
+        static tString ReplaceBadWords(tString message, tString word);
+
+        static bool CharacterInDelimiter(tString character);
 
     private:
         tArray<tString> bannedWords_;

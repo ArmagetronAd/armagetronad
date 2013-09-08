@@ -162,6 +162,45 @@ bool restrictBannedWordsOptionsValue(const int &newValue)
 }
 static tSettingItem<int> se_BannedWordsOptionsConf("BANNED_WORDS_OPTIONS", se_BannedWordsOptions, &restrictBannedWordsOptionsValue);
 
+tString se_BannedWordsDelimiters("-_ ,.");
+static tSettingItem<tString> se_BannedWordsDelimitersConf( "BANNED_WORDS_DELIMITERS", se_BannedWordsDelimiters);
+
+bool eBannedWords::CharacterInDelimiter(tString character)
+{
+    for(int i = 0; i < (se_BannedWordsDelimiters.Len()); i++)
+    {
+        tString chr;
+        chr << se_BannedWordsDelimiters[i];
+
+        if (chr == character)
+            return true;
+    }
+
+    return false;
+}
+
+bool eBannedWords::HasBadWord(tString message, tString word)
+{
+    tString origLowMsg(message.ToLower());
+
+    if ((origLowMsg.Filter() != "") && (word.Filter() != "") && (se_BannedWordsDelimiters.Filter() != ""))
+    {
+        //  process to strip delimiters from message
+        for(int i = 0; i < (se_BannedWordsDelimiters.Len() - 1); i++)
+        {
+            tString chr;
+            chr << se_BannedWordsDelimiters[i];
+            origLowMsg = origLowMsg.Replace(chr, "");
+        }
+    }
+
+    //  check if word exists in converted message
+    if (origLowMsg.Contains(word.ToLower()))
+        return true;
+
+    return false;
+}
+
 bool eBannedWords::BadWordTrigger(ePlayerNetID *sender, tString &message)
 {
     if ((se_BannedWords->Count() > 0) && (se_BannedWordsOptions > 0))
@@ -173,7 +212,7 @@ bool eBannedWords::BadWordTrigger(ePlayerNetID *sender, tString &message)
             tString word = se_BannedWords->GetWord(wordID);
 
             //  check if a banned word exists in the message
-            if ((word.Filter() != "") && (message.Contains(word)))
+            if ((word.Filter() != "") && HasBadWord(message, word))
             {
                 //  option 1: alert the sender of the usage of banned word in their message
                 if (se_BannedWordsOptions == 1)
@@ -189,13 +228,82 @@ bool eBannedWords::BadWordTrigger(ePlayerNetID *sender, tString &message)
                 else if (se_BannedWordsOptions == 2)
                 {
                     //  switch the bad word with the replacement character(s)
-                    tString replacementWord;
-                    replacementWord << tOutput("$banned_words_replace");
-                    message = message.Replace(word, replacementWord);
+                    message = ReplaceBadWords(message, word);
                 }
             }
         }
     }
 
     return false;
+}
+
+bool eBannedWords::BadWordTrigger(tString &message)
+{
+    if ((se_BannedWords->Count() > 0) && (se_BannedWordsOptions > 0))
+    {
+        //  Loop through each bad word container and check in message if that bad word exists
+        for (int wordID = 0; wordID < se_BannedWords->Count(); wordID++)
+        {
+            //  fetch the word currently in wordID
+            tString word = se_BannedWords->GetWord(wordID);
+
+            //  check if a banned word exists in the message
+            if ((word.Filter() != "") && HasBadWord(message, word))
+            {
+                if (se_BannedWordsOptions == 2)
+                {
+                    //  switch the bad word with the replacement character(s)
+                    message = ReplaceBadWords(message, word);
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
+tString eBannedWords::ReplaceBadWords(tString message, tString word)
+{
+    tString originalMsg(message);
+    tString replacement(tOutput("$banned_words_replace"));
+
+    //  replace the word by normal way
+    originalMsg.Replace(word, replacement);
+
+    if (originalMsg.Filter() != "")
+    {
+        tArray<tString> splitWords = originalMsg.Split(" ");
+        for(int i = 0; i < splitWords.Len(); i++)
+        {
+            tString splitWord = splitWords[i];
+            if (splitWord.ToLower() == word.ToLower())
+            {
+                tString replaced;
+                for(int j = 0; j < (splitWord.Len() - 1); j++)
+                    replaced << replacement.Filter();
+
+                splitWords[i] = replaced;
+            }
+            else if (splitWord.Filter().Contains(word.Filter()))
+            {
+                tString trippedWord = splitWord.RemoveWord(word);
+                if (trippedWord.Filter() == "")
+                {
+                    tString replaced;
+                    for(int j = 0; j < (splitWord.Len() - 1); j++)
+                        replaced << replacement.Filter();
+
+                    splitWords[i] = replaced;
+                }
+            }
+        }
+
+        originalMsg = "";
+        for(int x = 0; x < splitWords.Len(); x++)
+        {
+            originalMsg << splitWords[x] << " ";
+        }
+    }
+
+    return originalMsg;
 }

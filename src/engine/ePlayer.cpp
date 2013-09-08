@@ -7327,6 +7327,9 @@ static eLadderLogWriter se_chatWriter("CHAT", false);
 
 void se_SaveToChatLog(tOutput const &out)
 {
+    tString colStr(out);
+    eBannedWords::BadWordTrigger(colStr);
+
     if(sn_GetNetState() != nCLIENT && !tRecorder::IsPlayingBack())
     {
         if(se_chatWriter.isEnabled())
@@ -7339,7 +7342,7 @@ void se_SaveToChatLog(tOutput const &out)
             std::ofstream o;
             if ( tDirectories::Var().Open(o, "chatlog.txt", std::ios::app) )
             {
-                o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << out << std::endl;
+                o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << colStr << std::endl;
             }
         }
     }
@@ -7347,14 +7350,17 @@ void se_SaveToChatLog(tOutput const &out)
 
 void se_SaveToChatLogC(tOutput const &out)
 {
+    tString colStr(out);
+    eBannedWords::BadWordTrigger(colStr);
+
     if(sn_GetNetState() != nCLIENT && !tRecorder::IsPlayingBack())
     {
-        if(se_chatLog)
+        if(se_chatLogColors)
         {
             std::ofstream o;
             if ( tDirectories::Var().Open(o, "chatlog_colors.txt", std::ios::app) )
             {
-                o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << out;// << std::endl;
+                o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << colStr;// << std::endl;
             }
         }
     }
