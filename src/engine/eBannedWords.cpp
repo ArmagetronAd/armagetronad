@@ -162,7 +162,7 @@ bool restrictBannedWordsOptionsValue(const int &newValue)
 }
 static tSettingItem<int> se_BannedWordsOptionsConf("BANNED_WORDS_OPTIONS", se_BannedWordsOptions, &restrictBannedWordsOptionsValue);
 
-tString se_BannedWordsDelimiters("-_ ,.");
+tString se_BannedWordsDelimiters("\" '_-=+");
 static tSettingItem<tString> se_BannedWordsDelimitersConf( "BANNED_WORDS_DELIMITERS", se_BannedWordsDelimiters);
 
 bool eBannedWords::CharacterInDelimiter(tString character)
@@ -267,9 +267,6 @@ tString eBannedWords::ReplaceBadWords(tString message, tString word)
     tString originalMsg(message);
     tString replacement(tOutput("$banned_words_replace"));
 
-    //  replace the word by normal way
-    originalMsg.Replace(word, replacement);
-
     if (originalMsg.Filter() != "")
     {
         tArray<tString> splitWords = originalMsg.Split(" ");
@@ -303,6 +300,7 @@ tString eBannedWords::ReplaceBadWords(tString message, tString word)
         {
             originalMsg << splitWords[x] << " ";
         }
+        originalMsg << "\n";
     }
 
     return originalMsg;

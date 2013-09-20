@@ -2199,7 +2199,7 @@ private:
     virtual void DoFilterLine( tString &line )
     {
         //tColoredString message;
-        message_ << tColoredString::ColorString(1,.3,.3) << "RA: " << tColoredString::ColorString(1,1,1) << line << "\n";
+        message_ << tColoredString::ColorString(1,.3,.3) << tOutput("$admin_command_tag") << tColoredString::ColorString(1,1,1) << line << "\n";
 
         // don't let message grow indefinitely
         unsigned long len = message_.Len();
@@ -4245,7 +4245,7 @@ void handle_chat( nMessage &m )
                 }
                 else
                 {
-                    if (customInvalidCommands.Filter() != "")
+                    if (customInvalidCommands != "")
                     {
                         tArray<tString>invalidCommands = customInvalidCommands.Split(";");
                         if (invalidCommands.Len() > 0)
@@ -4253,7 +4253,7 @@ void handle_chat( nMessage &m )
                             for(int i = 0; i < invalidCommands.Len(); i++)
                             {
                                 tString cmdExt = invalidCommands[i];
-                                if (cmdExt.Filter() != "")
+                                if (cmdExt != "")
                                 {
                                     if (chat_command.StartsWith(cmdExt.ToLower()))
                                     {

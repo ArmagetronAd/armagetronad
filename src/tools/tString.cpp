@@ -1670,7 +1670,7 @@ tString tString::ToUpper(void) const
 class tStringFilter
 {
 public:
-    tStringFilter(char unknown, bool lowercased)
+    tStringFilter()
     {
         int i;
         filter[0]=0;
@@ -1678,7 +1678,7 @@ public:
         // map all unknown characters to underscores
         for (i=255; i>0; --i)
         {
-            filter[i] = unknown;
+            filter[i] = '_';
         }
 
         // leave ASCII characters as they are
@@ -1687,13 +1687,10 @@ public:
             filter[i] = i;
         }
 
-        if (lowercased)
+        // but convert uppercase characters to lowercase
+        for (i='Z'; i>='A'; --i)
         {
-            // but convert uppercase characters to lowercase
-            for (i='Z'; i>='A'; --i)
-            {
-                filter[i] = i + ('a' - 'A');
-            }
+            filter[i] = i + ('a' - 'A');
         }
 
         //! map umlauts and stuff to their base characters
@@ -1772,23 +1769,23 @@ private:
     char filter[256];
 };
 
-static bool st_IsUnderscore( char c, char unknown )
+static bool st_IsUnderscore( char c )
 {
-    return c == unknown;
+    return c == '_';
 }
 
 // function prototype for character testing functions
-typedef bool TestSCharacter( char c, char unknown );
+typedef bool TestSCharacter( char c );
 
 // strips characters matching a test beginnings and ends of names
-static void st_StripMatchingEnds( tString & stripper, TestSCharacter & beginTester, TestSCharacter & endTester, char unknown)
+static void st_StripMatchingEnds( tString & stripper, TestSCharacter & beginTester, TestSCharacter & endTester)
 {
     int len = stripper.Len() - 1;
     int first = 0, last = len;
 
     // eat whitespace from beginnig and end
-    while ( first < len && beginTester( stripper[first], unknown ) ) ++first;
-    while ( last > 0 && ( !stripper[last] || endTester(stripper[last], unknown ) ) ) --last;
+    while ( first < len && beginTester( stripper[first] ) ) ++first;
+    while ( last > 0 && ( !stripper[last] || endTester(stripper[last] ) ) ) --last;
 
     // strip everything?
     if ( first > last )
@@ -1803,12 +1800,12 @@ static void st_StripMatchingEnds( tString & stripper, TestSCharacter & beginTest
 }
 
 //! @returns filtered string and with all of its characters in lowercased string
-tString tString::Filter(char unknown, bool lowercase) const
+tString tString::Filter() const
 {
     tString in(*this);
     tString out;
     out = tColoredString::RemoveColors( in );
-    tStringFilter filter(unknown, lowercase);
+    tStringFilter filter;
 
     // filter out illegal characters
     for (int i = out.Len()-1; i>=0; --i )
@@ -1819,7 +1816,7 @@ tString tString::Filter(char unknown, bool lowercase) const
     }
 
     // strip leading and trailing unknown characters
-    st_StripMatchingEnds( out, st_IsUnderscore, st_IsUnderscore, unknown );
+    st_StripMatchingEnds( out, st_IsUnderscore, st_IsUnderscore );
 
     return out;
 }

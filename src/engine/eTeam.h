@@ -220,6 +220,7 @@ public:												// public methods
     }
 
     static eTeam * FindTeamByName( tString const & name );
+    static eTeam * FindTeamByID  ( int teamID );
 
     // con/desstruction
     eTeam();											// default constructor

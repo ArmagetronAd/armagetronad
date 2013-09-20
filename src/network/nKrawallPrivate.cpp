@@ -466,7 +466,7 @@ static tSettingItem<tString> sn_CustomShorthandPassConf("CUSTOM_SHORTHAND_PASS",
 int nKrawall::CustomShorthandExecute(int userID, tString authority, tString &fullAuthority, tOutput & error)
 {
     //sn_ConsoleOut("Connection to" + authority + "\n");
-    if (authority == sn_CustomShorthand.Filter())
+    if (authority == sn_CustomShorthand)
     {
         /*
         //! Coder: LOVER$BOY

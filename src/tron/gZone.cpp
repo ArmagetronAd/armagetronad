@@ -4772,8 +4772,10 @@ gFlagZoneHack::gFlagZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCrea
     ownerDroppedTime_ = 0;
     lastHoldScoreTime_ = -1;
     positionUpdatePending_ = false;
+
     passingTheFlag_ = false;
     passingOwner_ = NULL;
+    passerOwnerFree_ = false;
 
     SetExpansionSpeed(0);
     SetRotationSpeed( .3f );
@@ -4808,8 +4810,10 @@ gFlagZoneHack::gFlagZoneHack( nMessage & m )
     ownerDroppedTime_ = 0;
     lastHoldScoreTime_ = -1;
     positionUpdatePending_ = false;
+
     passingTheFlag_ = false;
     passingOwner_ = NULL;
+    passerOwnerFree_ = false;
 }
 
 
@@ -5143,7 +5147,7 @@ bool gFlagZoneHack::Timestep( REAL time )
                 SetReferenceTime();
 
                 //  take in the speed of the flag speed command + the person who is going to receive the flag
-                int newSpeed = sg_flagPassSpeed;/* + passingOwner_->verletSpeed_;*/
+                int newSpeed = sg_flagPassSpeed + (passingOwner_->verletSpeed_);
                 SetVelocity(newDir * newSpeed);
 
                 RequestSync();
@@ -5157,9 +5161,7 @@ bool gFlagZoneHack::Timestep( REAL time )
                 RequestSync();
                 positionUpdatePending_ = true;
 
-                passingTheFlag_ = false;
-                passingOwner_ = NULL;
-                passerOwner_ = NULL;
+                SetPassing(false);
             }
         }
         else if(!passingOwner_)
@@ -5171,9 +5173,7 @@ bool gFlagZoneHack::Timestep( REAL time )
             RequestSync();
             positionUpdatePending_ = true;
 
-            passingTheFlag_ = false;
-            passingOwner_ = NULL;
-            passerOwner_ = NULL;
+            SetPassing(false);
         }
     }
 
@@ -5184,6 +5184,337 @@ bool gFlagZoneHack::Timestep( REAL time )
     positionUpdatePending_ = false;
 
     return (returnStatus);
+}
+
+// *******************************************************************************
+// *
+// *    PassTheFlag
+// *
+// *******************************************************************************
+
+void gFlagZoneHack::PassComplete(gCycle *target)
+{
+    //  finish passing the flag
+    if (passingTheFlag_ && passingOwner_ && passerOwner_)
+    {
+        tOutput message;
+
+        tColoredString playerName, passingName;
+        passingName << passerOwner_->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
+        playerName << target->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
+
+        if (target == passingOwner_)
+        {
+            message.SetTemplateParameter(1, playerName);
+            message.SetTemplateParameter(2, passingName);
+            message << "$flag_pass_complete_same";
+        }
+        else
+        {
+            message.SetTemplateParameter(1, passingName);
+            message.SetTemplateParameter(2, playerName);
+            message << "$flag_pass_complete_diff";
+        }
+        sn_ConsoleOut(message);
+    }
+
+    SetPassing(false);
+}
+
+void gFlagZoneHack::PassFailed(gCycle *target)
+{
+    //  finish passing the flag
+    if (passingTheFlag_ && passingOwner_ && passerOwner_)
+    {
+        tOutput message;
+
+        tColoredString playerName, passingName;
+        passingName << passerOwner_->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
+        playerName << target->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
+
+        message.SetTemplateParameter(1, passingName);
+        message.SetTemplateParameter(2, playerName);
+        message << "$flag_pass_failed";
+        sn_ConsoleOut(message);
+    }
+
+    SetPassing(false);
+}
+
+void gFlagZoneHack::SetPassing(bool passed, gCycle *passOwner)
+{
+    if (passed)
+    {
+        passingTheFlag_ = true;
+        passingOwner_ = passOwner;
+        passerOwner_ = owner_;
+        passerOwnerFree_ = false;
+    }
+    else
+    {
+        passingTheFlag_ = false;
+        passingOwner_ = NULL;
+        passerOwner_ = NULL;
+        passerOwnerFree_ = false;
+    }
+}
+
+enum gFlagPassMode
+{
+    gFLAGPASS_DISABLE = 0,  //! Disable passing the flag to team members
+    gFLAGPASS_CLOSEST = 1,  //! Picks a team member close to the passing player
+    gFLAGPASS_FURTHEST = 2, //! Picks a team member furthur to the passing player
+    gFLAGPASS_DISTANCE = 3, //! Picks a team member within the distance specified
+    gFLAGPASS_PERSON = 4    //! Picks a team member by the given name
+};
+tCONFIG_ENUM( gFlagPassMode );
+
+gFlagPassMode sg_flagPassMode = gFLAGPASS_DISABLE;
+bool restrictFlagPassMode(const gFlagPassMode &newValue)
+{
+    if ((newValue < gFLAGPASS_DISABLE) || (newValue > gFLAGPASS_PERSON)) return false;
+    return true;
+}
+static tSettingItem<gFlagPassMode> sg_flagPassModeConf("FLAG_PASS_MODE", sg_flagPassMode, &restrictFlagPassMode);
+
+REAL sg_flagPassDistance = 5.0;
+bool restrictFlagPassDistance(const REAL &newValue)
+{
+    if (newValue < 0) return false;
+    return true;
+}
+static tSettingItem<REAL> sg_flagPassDistanceConf("FLAG_PASS_DISTANCE", sg_flagPassDistance, &restrictFlagPassDistance);
+
+void gFlagZoneHack::PassTheFlag(tString name)
+{
+    if (owner_)
+    {
+        if (sg_flagPassMode == gFLAGPASS_DISABLE) return;
+
+        int alive = 0;
+        for (int i = 0; i < owner_->Team()->players.Len(); i++)
+        {
+            ePlayerNetID *p = owner_->Team()->players[i];
+            if (p && (p != owner_->Player()))
+            {
+                gCycle *pCycle = dynamic_cast<gCycle *>(p->Object());
+
+                if (pCycle && pCycle->Alive())
+                {
+                    alive++;
+                }
+            }
+        }
+
+        //  if no member is alive other than yourself, don't pass the flag
+        if (alive == 0) return;
+
+        //  check the modes of each
+        gCycle *passOwner = NULL;
+        if (sg_flagPassMode == gFLAGPASS_CLOSEST)
+        {
+            REAL closestDistance = 0;
+            for (int i = 0; i < owner_->Team()->players.Len(); i++)
+            {
+                ePlayerNetID *p = owner_->Team()->players[i];
+                if (p && (p != owner_->Player()))
+                {
+                    gCycle *pCycle = dynamic_cast<gCycle *>(p->Object());
+
+                    if (pCycle && pCycle->Alive())
+                    {
+                        eCoord otherpos = pCycle->Position() - owner_->Position();
+                        REAL distance = otherpos.NormSquared();
+                        if (!passOwner || (distance < closestDistance))
+                        {
+                            passOwner = pCycle;
+                            closestDistance = distance;
+                        }
+                    }
+                }
+            }
+
+            if (passOwner)
+            {
+                // put the flag to move towards new owner
+                SetReferenceTime();
+                SetVelocity(passOwner->Direction() * owner_->verletSpeed_);
+                SetPosition(owner_->Position());
+                SetRadius(originalRadius_);
+                SetExpansionSpeed(0);
+                RequestSync();
+                positionUpdatePending_ = true;
+
+                //  announce the passing activation
+                tOutput message;
+
+                tColoredString playerName, passingName;
+                passingName << owner_->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
+                playerName << passOwner->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
+
+                message.SetTemplateParameter(1, passingName);
+                message.SetTemplateParameter(2, playerName);
+                message << "$flag_pass_active";
+                sn_ConsoleOut(message);
+
+                //  set the passing owner (one to receive the flag)
+                SetPassing(true, passOwner);
+
+                // remove the current owner
+                RemoveOwner();
+            }
+        }
+        else if (sg_flagPassMode == gFLAGPASS_FURTHEST)
+        {
+            REAL furthestDistance = 0;
+            for (int i = 0; i < owner_->Team()->players.Len(); i++)
+            {
+                ePlayerNetID *p = owner_->Team()->players[i];
+                if (p && (p != owner_->Player()))
+                {
+                    gCycle *pCycle = dynamic_cast<gCycle *>(p->Object());
+
+                    if (pCycle && pCycle->Alive())
+                    {
+                        eCoord otherpos = pCycle->Position() - owner_->Position();
+                        REAL distance = otherpos.NormSquared();
+                        if (!passOwner || (distance > furthestDistance))
+                        {
+                            passOwner = pCycle;
+                            furthestDistance = distance;
+                        }
+                    }
+                }
+            }
+
+            if (passOwner)
+            {
+                // put the flag to move towards new owner
+                SetReferenceTime();
+                SetVelocity(passOwner->Direction() * owner_->verletSpeed_);
+                SetPosition(owner_->Position());
+                SetRadius(originalRadius_);
+                SetExpansionSpeed(0);
+                RequestSync();
+                positionUpdatePending_ = true;
+
+                //  announce the passing activation
+                tOutput message;
+
+                tColoredString playerName, passingName;
+                passingName << owner_->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
+                playerName << passOwner->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
+
+                message.SetTemplateParameter(1, passingName);
+                message.SetTemplateParameter(2, playerName);
+                message << "$flag_pass_active";
+                sn_ConsoleOut(message);
+
+                //  set the passing owner
+                SetPassing(true, passOwner);
+
+                // remove the current owner
+                RemoveOwner();
+            }
+        }
+        else if (sg_flagPassMode == gFLAGPASS_DISTANCE)
+        {
+            REAL furthestDistance = 0;
+            for (int i = 0; i < owner_->Team()->players.Len(); i++)
+            {
+                ePlayerNetID *p = owner_->Team()->players[i];
+                if (p && (p != owner_->Player()))
+                {
+                    gCycle *pCycle = dynamic_cast<gCycle *>(p->Object());
+
+                    if (pCycle && pCycle->Alive())
+                    {
+                        eCoord otherpos = pCycle->Position() - owner_->Position();
+                        REAL distance = otherpos.NormSquared();
+                        if (!passOwner || (distance > furthestDistance))
+                        {
+                            passOwner = pCycle;
+                            furthestDistance = distance;
+                        }
+
+                        //  if distance is over the specified flag distance, break out of the function
+                        if (furthestDistance >= sg_flagPassDistance) break;
+                    }
+                }
+            }
+
+            if (passOwner)
+            {
+                // put the flag to move towards new owner
+                SetReferenceTime();
+                SetVelocity(passOwner->Direction() * owner_->verletSpeed_);
+                SetPosition(owner_->Position());
+                SetRadius(originalRadius_);
+                SetExpansionSpeed(0);
+                RequestSync();
+                positionUpdatePending_ = true;
+
+                //  announce the passing activation
+                tOutput message;
+
+                tColoredString playerName, passingName;
+                passingName << owner_->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
+                playerName << passOwner->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
+
+                message.SetTemplateParameter(1, passingName);
+                message.SetTemplateParameter(2, playerName);
+                message << "$flag_pass_active";
+                sn_ConsoleOut(message);
+
+                //  set the passing owner
+                SetPassing(true, passOwner);
+
+                // remove the current owner
+                RemoveOwner();
+            }
+        }
+        else if (sg_flagPassMode == gFLAGPASS_PERSON)
+        {
+            if (name.Filter() == "") return;
+
+            ePlayerNetID *p = ePlayerNetID::FindPlayerByName(name);
+            if (!p) return;
+
+            //  make sure that only the same team member will be allowed to get the pass of the flag
+            if (p->CurrentTeam() != owner_->Team()) return;
+
+            passOwner = dynamic_cast<gCycle *>(p->Object());
+            if (passOwner)
+            {
+                // put the flag to move towards new owner
+                SetReferenceTime();
+                SetVelocity(passOwner->Direction() * owner_->verletSpeed_);
+                SetPosition(owner_->Position());
+                SetRadius(originalRadius_);
+                SetExpansionSpeed(0);
+                RequestSync();
+                positionUpdatePending_ = true;
+
+                //  announce the passing activation
+                tOutput message;
+
+                tColoredString playerName, passingName;
+                passingName << owner_->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
+                playerName << passOwner->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
+
+                message.SetTemplateParameter(1, passingName);
+                message.SetTemplateParameter(2, playerName);
+                message << "$flag_pass_active";
+                sn_ConsoleOut(message);
+
+                //  set the passing owner
+                SetPassing(true, passOwner);
+
+                // remove the current owner
+                RemoveOwner();
+            }
+        }
+    }
 }
 
 
@@ -5231,7 +5562,7 @@ void gFlagZoneHack::OnEnter( gCycle * target, REAL time )
                     if (flagHolder){
                         if (flagHolder ==  target->Player())
                         {
-                playerHasFlag = true;
+                            playerHasFlag = true;
                         }
                     }
                 }
@@ -5261,36 +5592,63 @@ void gFlagZoneHack::OnEnter( gCycle * target, REAL time )
     // check if this player dropped the flag previously and ensure that player does not have another flag
     else if (((target != ownerDropped_) || (time > (ownerDroppedTime_ + sg_flagDropTime))) && (!playerHasFlag))
     {
-        // take the flag
-        owner_ = target;
-        ownerTime_ = time;
-        lastHoldScoreTime_ = time;
-        ownerWarnedNotHome_ = false;
-        owner_->flag_ = this;
+        bool process = true;
+        if ((sg_flagPassMode > gFLAGPASS_DISABLE) && passingTheFlag_ && !passerOwnerFree_)
+            process = false;
 
-        blinkUpdateTime_ = -1000;
-        blinkTrackUpdateTime_ = -1000;
+        if (process)
+        {
+            // take the flag
+            owner_ = target;
+            ownerTime_ = time;
+            lastHoldScoreTime_ = time;
+            ownerWarnedNotHome_ = false;
+            owner_->flag_ = this;
 
-        PassComplete(target);
+            blinkUpdateTime_ = -1000;
+            blinkTrackUpdateTime_ = -1000;
 
-        // diminish the flag and put it at the original location
-        SetReferenceTime();
-        SetVelocity(se_zeroCoord);
-        SetPosition(originalPosition_);
-        SetRadius(0);
-        SetExpansionSpeed(0);
-        RequestSync();
-        positionUpdatePending_ = true;
+            PassComplete(target);
 
-        sg_flagTakeWriter << target->Player()->GetUserName();
-        if(team){
-           sg_flagTakeWriter << ePlayerNetID::FilterName( team->Name() );
+            // diminish the flag and put it at the original location
+            SetReferenceTime();
+            SetVelocity(se_zeroCoord);
+            SetPosition(originalPosition_);
+            SetRadius(0);
+            SetExpansionSpeed(0);
+            RequestSync();
+            positionUpdatePending_ = true;
+
+            sg_flagTakeWriter << target->Player()->GetUserName();
+            if(team){
+               sg_flagTakeWriter << ePlayerNetID::FilterName( team->Name() );
+            }
+            sg_flagTakeWriter.write();
+
+            tColoredString playerName;
+            playerName << *target->Player() << tColoredString::ColorString(1,1,1);
+            sn_ConsoleOut( tOutput( "$player_flag_take", playerName ) );
         }
-        sg_flagTakeWriter.write();
+    }
+}
 
-        tColoredString playerName;
-        playerName << *target->Player() << tColoredString::ColorString(1,1,1);
-        sn_ConsoleOut( tOutput( "$player_flag_take", playerName ) );
+// *******************************************************************************
+// *
+// *    OnExit
+// *
+// *******************************************************************************
+//!
+//!     @param  target  the cycle that has been found inside the zone
+//!     @param  time    the current time
+//!
+// *******************************************************************************
+
+void gFlagZoneHack::OnExit( gCycle * target, REAL time )
+{
+    if ((sg_flagPassMode > gFLAGPASS_DISABLE) && passingTheFlag_ && !passerOwnerFree_)
+    {
+        if (passerOwner_ == target)
+            passerOwnerFree_ = true;
     }
 }
 
@@ -5489,333 +5847,6 @@ void gFlagZoneHack::OwnerDropped()
         }
     }
 }
-
-// *******************************************************************************
-// *
-// *    PassTheFlag
-// *
-// *******************************************************************************
-
-void gFlagZoneHack::PassComplete(gCycle *target)
-{
-    //  finish passing the flag
-    if (passingTheFlag_ && passingOwner_ && passerOwner_)
-    {
-        tOutput message;
-
-        tColoredString playerName, passingName;
-        passingName << passerOwner_->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
-        playerName << target->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
-
-        if (target == passingOwner_)
-        {
-            message.SetTemplateParameter(1, playerName);
-            message.SetTemplateParameter(2, passingName);
-            message << "$flag_pass_complete_same";
-        }
-        else
-        {
-            message.SetTemplateParameter(1, passingName);
-            message.SetTemplateParameter(2, playerName);
-            message << "$flag_pass_complete_diff";
-        }
-        sn_ConsoleOut(message);
-    }
-
-    passingTheFlag_ = false;
-    passingOwner_ = NULL;
-    passerOwner_ = NULL;
-}
-
-void gFlagZoneHack::PassFailed(gCycle *target)
-{
-    //  finish passing the flag
-    if (passingTheFlag_ && passingOwner_ && passerOwner_)
-    {
-        tOutput message;
-
-        tColoredString playerName, passingName;
-        passingName << passerOwner_->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
-        playerName << target->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
-
-        message.SetTemplateParameter(1, passingName);
-        message.SetTemplateParameter(2, playerName);
-        message << "$flag_pass_failed";
-        sn_ConsoleOut(message);
-    }
-
-    passingTheFlag_ = false;
-    passingOwner_ = NULL;
-    passerOwner_ = NULL;
-}
-
-enum gFlagPassMode
-{
-    gFLAGPASS_DISABLE = 0,  //! Disable passing the flag to team members
-    gFLAGPASS_CLOSEST = 1,  //! Picks a team member close to the passing player
-    gFLAGPASS_FURTHEST = 2, //! Picks a team member furthur to the passing player
-    gFLAGPASS_DISTANCE = 3, //! Picks a team member within the distance specified
-    gFLAGPASS_PERSON = 4    //! Picks a team member by the given name
-};
-tCONFIG_ENUM( gFlagPassMode );
-
-gFlagPassMode sg_flagPassMode = gFLAGPASS_DISABLE;
-bool restrictFlagPassMode(const gFlagPassMode &newValue)
-{
-    if ((newValue < gFLAGPASS_DISABLE) || (newValue > gFLAGPASS_PERSON)) return false;
-    return true;
-}
-static tSettingItem<gFlagPassMode> sg_flagPassModeConf("FLAG_PASS_MODE", sg_flagPassMode, &restrictFlagPassMode);
-
-REAL sg_flagPassDistance = 5.0;
-bool restrictFlagPassDistance(const REAL &newValue)
-{
-    if (newValue < 0) return false;
-    return true;
-}
-static tSettingItem<REAL> sg_flagPassDistanceConf("FLAG_PASS_DISTANCE", sg_flagPassDistance, &restrictFlagPassDistance);
-
-void gFlagZoneHack::PassTheFlag(tString name)
-{
-    if (owner_)
-    {
-        if (sg_flagPassMode == gFLAGPASS_DISABLE) return;
-
-        int alive = 0;
-        for (int i = 0; i < owner_->Team()->players.Len(); i++)
-        {
-            ePlayerNetID *p = owner_->Team()->players[i];
-            if (p && (p != owner_->Player()))
-            {
-                gCycle *pCycle = dynamic_cast<gCycle *>(p->Object());
-
-                if (pCycle && pCycle->Alive())
-                {
-                    alive++;
-                }
-            }
-        }
-
-        //  if no member is alive other than yourself, don't pass the flag
-        if (alive == 0) return;
-
-        //  check the modes of each
-        gCycle *passOwner = NULL;
-        if (sg_flagPassMode == gFLAGPASS_CLOSEST)
-        {
-            REAL closestDistance = 0;
-            for (int i = 0; i < owner_->Team()->players.Len(); i++)
-            {
-                ePlayerNetID *p = owner_->Team()->players[i];
-                if (p && (p != owner_->Player()))
-                {
-                    gCycle *pCycle = dynamic_cast<gCycle *>(p->Object());
-
-                    if (pCycle && pCycle->Alive())
-                    {
-                        eCoord otherpos = pCycle->Position() - owner_->Position();
-                        REAL distance = otherpos.NormSquared();
-                        if (!passOwner || (distance < closestDistance))
-                        {
-                            passOwner = pCycle;
-                            closestDistance = distance;
-                        }
-                    }
-                }
-            }
-
-            if (passOwner)
-            {
-                // put the flag to move towards new owner
-                SetReferenceTime();
-                SetVelocity(passOwner->Direction() * owner_->verletSpeed_);
-                SetPosition(owner_->Position());
-                SetRadius(originalRadius_);
-                SetExpansionSpeed(0);
-                RequestSync();
-                positionUpdatePending_ = true;
-
-                //  announce the passing activation
-                tOutput message;
-
-                tColoredString playerName, passingName;
-                passingName << owner_->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
-                playerName << passOwner->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
-
-                message.SetTemplateParameter(1, passingName);
-                message.SetTemplateParameter(2, playerName);
-                message << "$flag_pass_active";
-                sn_ConsoleOut(message);
-
-                //  set the passing owner (one to receive the flag)
-                passingTheFlag_ = true;
-                passingOwner_ = passOwner;
-                passerOwner_ = owner_;
-
-                // remove the current owner
-                RemoveOwner();
-            }
-        }
-        else if (sg_flagPassMode == gFLAGPASS_FURTHEST)
-        {
-            REAL furthestDistance = 0;
-            for (int i = 0; i < owner_->Team()->players.Len(); i++)
-            {
-                ePlayerNetID *p = owner_->Team()->players[i];
-                if (p && (p != owner_->Player()))
-                {
-                    gCycle *pCycle = dynamic_cast<gCycle *>(p->Object());
-
-                    if (pCycle && pCycle->Alive())
-                    {
-                        eCoord otherpos = pCycle->Position() - owner_->Position();
-                        REAL distance = otherpos.NormSquared();
-                        if (!passOwner || (distance > furthestDistance))
-                        {
-                            passOwner = pCycle;
-                            furthestDistance = distance;
-                        }
-                    }
-                }
-            }
-
-            if (passOwner)
-            {
-                // put the flag to move towards new owner
-                SetReferenceTime();
-                SetVelocity(passOwner->Direction() * owner_->verletSpeed_);
-                SetPosition(owner_->Position());
-                SetRadius(originalRadius_);
-                SetExpansionSpeed(0);
-                RequestSync();
-                positionUpdatePending_ = true;
-
-                //  announce the passing activation
-                tOutput message;
-
-                tColoredString playerName, passingName;
-                passingName << owner_->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
-                playerName << passOwner->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
-
-                message.SetTemplateParameter(1, passingName);
-                message.SetTemplateParameter(2, playerName);
-                message << "$flag_pass_active";
-                sn_ConsoleOut(message);
-
-                //  set the passing owner
-                passingTheFlag_ = true;
-                passingOwner_ = passOwner;
-                passerOwner_ = owner_;
-
-                // remove the current owner
-                RemoveOwner();
-            }
-        }
-        else if (sg_flagPassMode == gFLAGPASS_DISTANCE)
-        {
-            REAL furthestDistance = 0;
-            for (int i = 0; i < owner_->Team()->players.Len(); i++)
-            {
-                ePlayerNetID *p = owner_->Team()->players[i];
-                if (p && (p != owner_->Player()))
-                {
-                    gCycle *pCycle = dynamic_cast<gCycle *>(p->Object());
-
-                    if (pCycle && pCycle->Alive())
-                    {
-                        eCoord otherpos = pCycle->Position() - owner_->Position();
-                        REAL distance = otherpos.NormSquared();
-                        if (!passOwner || (distance > furthestDistance))
-                        {
-                            passOwner = pCycle;
-                            furthestDistance = distance;
-                        }
-
-                        //  if distance is over the specified flag distance, break out of the function
-                        if (furthestDistance >= sg_flagPassDistance) break;
-                    }
-                }
-            }
-
-            if (passOwner)
-            {
-                // put the flag to move towards new owner
-                SetReferenceTime();
-                SetVelocity(passOwner->Direction() * owner_->verletSpeed_);
-                SetPosition(owner_->Position());
-                SetRadius(originalRadius_);
-                SetExpansionSpeed(0);
-                RequestSync();
-                positionUpdatePending_ = true;
-
-                //  announce the passing activation
-                tOutput message;
-
-                tColoredString playerName, passingName;
-                passingName << owner_->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
-                playerName << passOwner->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
-
-                message.SetTemplateParameter(1, passingName);
-                message.SetTemplateParameter(2, playerName);
-                message << "$flag_pass_active";
-                sn_ConsoleOut(message);
-
-                //  set the passing owner
-                passingTheFlag_ = true;
-                passingOwner_ = passOwner;
-                passerOwner_ = owner_;
-
-                // remove the current owner
-                RemoveOwner();
-            }
-        }
-        else if (sg_flagPassMode == gFLAGPASS_PERSON)
-        {
-            if (name.Filter() == "") return;
-
-            ePlayerNetID *p = ePlayerNetID::FindPlayerByName(name);
-            if (!p) return;
-
-            //  make sure that only the same team member will be allowed to get the pass of the flag
-            if (p->CurrentTeam() != owner_->Team()) return;
-
-            passOwner = dynamic_cast<gCycle *>(p->Object());
-
-            if (passOwner)
-            {
-                // put the flag to move towards new owner
-                SetReferenceTime();
-                SetVelocity(passOwner->Direction() * owner_->verletSpeed_);
-                SetPosition(owner_->Position());
-                SetRadius(originalRadius_);
-                SetExpansionSpeed(0);
-                RequestSync();
-                positionUpdatePending_ = true;
-
-                //  announce the passing activation
-                tOutput message;
-
-                tColoredString playerName, passingName;
-                passingName << owner_->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
-                playerName << passOwner->Player()->GetColoredName() << tColoredString::ColorString(1,1,1);
-
-                message.SetTemplateParameter(1, passingName);
-                message.SetTemplateParameter(2, playerName);
-                message << "$flag_pass_active";
-                sn_ConsoleOut(message);
-
-                //  set the passing owner
-                passingTheFlag_ = true;
-                passingOwner_ = passOwner;
-                passerOwner_ = owner_;
-
-                // remove the current owner
-                RemoveOwner();
-            }
-        }
-    }
-}
-
 
 // *******************************************************************************
 // *

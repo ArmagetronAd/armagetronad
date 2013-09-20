@@ -3861,4 +3861,16 @@ banned_words_options          0: disable. 1: Block and alert message to sender. 
 chat_message_report_message          [ \1 ] \2 reports: \3.\n
 chat_message_report_message_empty    Your report cannot be empty and you will be punished for spam reporting!\n
 chat_message_report_respond_ok       Your report has been saved.\n
-chat_message_report_respond_no       Your report was not saved due to unknown reasons.\n 
+chat_message_report_respond_no       Your report was not saved due to unknown reasons.\n
+
+admin_command_tag      RA: 
+
+# Commands for SHUTDOWN
+shutdown_help          This command activates the shutdown process for the game. Usage: SHUTDOWN <optional: seconds>
+shutdown_timeout_help  This command sets the default seconds timeout before game is closed.
+shutdown_stop_help     This command automatically stops the shutdown process if it is currently active.
+shutdown_inactive      The shutdown process is currently inactive.\n
+shutdown_failed        Cannot activate "SHUTDOWN" due to there being no game.\n
+shutdown_started       The game will shutdown in: \1 seconds\n
+shutdown_stopped       The shutdown process of the game has been stopped.\n
+shutdown_countdown     \1

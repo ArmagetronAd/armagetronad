@@ -1854,13 +1854,28 @@ eTeam * eTeam::FindTeamByName(tString const &name)
     {
         eTeam *team = teams(i);
 
-        tString search_for = ePlayerNetID::FilterName(name);
-        tString searching_in = ePlayerNetID::FilterName(team->Name());
-
-        if (searching_in.Contains(search_for))
+        if (team)
         {
-            return team;
+            tString search_for = name.Filter();
+            tString searching_in = team->Name().Filter();
+
+            if (searching_in.Contains(search_for))
+            {
+                return team;
+            }
         }
     }
+    return NULL;
+}
+
+eTeam * eTeam::FindTeamByID(int teamID)
+{
+    if ((teamID < 0) || (teamID > teams.Len()))
+        return NULL;
+
+    eTeam *team = teams[teamID - 1];
+    if (team)
+        return team;
+
     return NULL;
 }

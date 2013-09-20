@@ -219,6 +219,29 @@ class gGameSpawnTimer
         static int countDown_;      //!<    the countdown to initiate
 };
 
+//  SHUTDOWN HACK BEGIN
+class ShutDownCounter
+{
+    public:
+        ShutDownCounter();
+
+        bool IsActive() { return isActive_; }
+        void SetActive(bool value) { isActive_ = value; }
+
+        int Timeout()   { return timeout_; }
+        void SetTimeout(int value) { timeout_ = value; }
+
+        void Start();
+        void Stop();
+
+        void Execute();
+
+    private:
+        bool isActive_;
+        int timeout_;
+};
+//  SHUTDOWN HACK END
+
 extern gGameSettings* sg_currentSettings;
 
 // Race timer hack

@@ -141,7 +141,7 @@ public:
     tString ToUpper(void) const;
 
     //! Filters string and returns all characters in lowercased string
-    tString Filter(char unknown = '_', bool lowercase = true) const;
+    tString Filter() const;
 
     int PosWordRight(int start) const;          //! Computes the position of the next delimiter relative to start
     int PosWordLeft(int start) const;           //! Computes the position of the previous delimiter relative to start

@@ -479,6 +479,7 @@ public:
     void PassTheFlag(tString name = tString(""));
     void PassComplete(gCycle *target);
     void PassFailed(gCycle *target);
+    void SetPassing(bool passed, gCycle *passOwner = NULL);
 
 protected:
     bool init_;
@@ -495,13 +496,16 @@ protected:
     REAL ownerDroppedTime_;
     REAL lastHoldScoreTime_;
     bool positionUpdatePending_;
+
     bool passingTheFlag_;
     gCycle *passingOwner_;
     gCycle *passerOwner_;
+    bool passerOwnerFree_;
 
 private:
     virtual bool Timestep(REAL currentTime);     //!< simulates behaviour up to currentTime
     virtual void OnEnter( gCycle *target, REAL time ); //!< reacts on objects inside the zone (kills them)
+    virtual void OnExit( gCycle *target, REAL time ); //!< reacts on objects exits the zone (them)
 };
 
 class gTargetZoneHack: public gZone

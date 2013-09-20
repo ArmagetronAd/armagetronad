@@ -4653,8 +4653,7 @@ static void EndChallenge_conf(std::istream &s){
 
 static tConfItemFunc sec("END_CHALLENGE",&EndChallenge_conf);
 
-static eLadderLogWriter sg_Shutdown("SHUTDOWN", true);
-
+static eLadderLogWriter sg_ShutdownLadderLog("SHUTDOWN", true);
 #ifdef DEDICATED
 static void Quit_conf(std::istream &){
 
@@ -4668,14 +4667,93 @@ static void Quit_conf(std::istream &){
     tRecorder::Record("END");
     uMenu::quickexit = uMenu::QuickExit_Total;
 
-    // write to ladderlog.txt the time of server shutting down
-    sg_Shutdown << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
-    sg_Shutdown.write();
+    // write to ladderlog.txt the time of server shutdown
+    sg_ShutdownLadderLog << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
+    sg_ShutdownLadderLog.write();
 }
 
 static tConfItemFunc quit_conf("QUIT",&Quit_conf);
 static tConfItemFunc exit_conf("EXIT",&Quit_conf);
 #endif
+
+//  SHUTDOWN HACK BEGIN
+ShutDownCounter::ShutDownCounter()
+{
+    isActive_ = false;
+    timeout_  = 10;
+}
+
+void ShutDownCounter::Start()
+{
+    if (!isActive_)
+        isActive_ = true;
+}
+
+void ShutDownCounter::Stop()
+{
+    if (isActive_)
+        isActive_ = false;
+}
+
+void ShutDownCounter::Execute()
+{
+    if ( sg_currentGame )
+    {
+        sg_currentGame->NoLongerGoOn();
+    }
+
+    // mark end of recording
+    tRecorder::Playback("END");
+    tRecorder::Record("END");
+    uMenu::quickexit = uMenu::QuickExit_Total;
+
+    // write to ladderlog.txt the time of server shutdown
+    sg_ShutdownLadderLog << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
+    sg_ShutdownLadderLog.write();
+}
+
+ShutDownCounter *sg_ShutDown = new ShutDownCounter();
+
+int sg_shutdownTimeout = 10;
+static tSettingItem<int> sg_shutdownTimeoutConf("SHUTDOWN_TIMEOUT", sg_shutdownTimeout);
+
+static void sg_ShutDownParse(std::istream &s)
+{
+    if ( sg_currentGame )
+    {
+        tString params;
+        s >> params;
+
+        int timeout = sg_shutdownTimeout;
+        if (params != "")
+            if ((atoi(params) >= 0) && (atoi(params) != sg_shutdownTimeout))
+                timeout = atoi(params);
+
+        sg_ShutDown->SetTimeout(timeout);
+        sg_ShutDown->Start();
+        sn_ConsoleOut(tOutput("$shutdown_started", timeout));
+    }
+    else
+    {
+        sn_ConsoleOut(tOutput("$shutdown_failed"), 0);
+    }
+}
+static tConfItemFunc sg_ShutDownConf("SHUTDOWN", &sg_ShutDownParse);
+
+static void sg_ShutDownStop(std::istream &s)
+{
+    if (sg_ShutDown->IsActive())
+    {
+        sg_ShutDown->Stop();
+        sn_ConsoleOut(tOutput("$shutdown_stopped"));
+    }
+    else
+    {
+        sn_ConsoleOut(tOutput("$shutdown_inactive"), 0);
+    }
+}
+static tConfItemFunc sg_ShutDownStopConf("SHUTDOWN_STOP", &sg_ShutDownStop);
+//  SHUTDOWN HACK END
 
 void st_PrintPathInfo(tOutput &buf);
 
@@ -6578,64 +6656,62 @@ void gGame::Analysis(REAL time){
     //! Send to /var/online_players.txt
     sg_OutputOnlinePlayers();
 
-    //  get the queue data working
-    gQueuePlayers::Timestep(time);
-
-    //! Do the count down with ingame timer
-    if (gGameSpawnTimer::Active())
+    //  do the normal process of things when shutdown is inactive
+    if (!sg_ShutDown->IsActive())
     {
-        gGameSpawnTimer::Sync(alive, ai_alive, sg_NumHumans());
-        return;
-    }
+        //  get the queue data working
+        gQueuePlayers::Timestep(time);
 
-    /*SMALL HACK BEGIN
-    if (sg_currentSettings->gameType == gFREESTYLE)
-    {
-        int everyone_alive = ai_alive + alive;
-        if ((everyone_alive == 0) && (!sg_roundfinishedchecker))
+        //! Do the count down with ingame timer
+        if (gGameSpawnTimer::Active())
         {
-            sg_roundFinishedWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
-            sg_roundFinishedWriter.write();
-
-            sg_roundfinishedchecker = true;
-        }
-    }
-    else if (sg_currentSettings->gameType == gDUEL)
-    {
-        int everyone_alive = ai_alive + alive;
-        if ((everyone_alive <= 1) && (!sg_roundfinishedchecker))
-        {
-
-
-            sg_roundfinishedchecker = true;
-        }
-    }
-    //SMALL HACK END*/
-
-    //HACK RACE begin
-
-    if ( sg_RaceTimerEnabled )
-    {
-        if ( !gRace::Done() )
-        {
-            gRace::Sync( alive, ai_alive, sg_NumHumans(), time );
+            gGameSpawnTimer::Sync(alive, ai_alive, sg_NumHumans());
             return;
         }
-        else                                    // time to close the round
-        {
-            eTeam *team = gRace::Winner();
 
-            if (team)
+        //HACK RACE begin
+
+        if ( sg_RaceTimerEnabled )
+        {
+            if ( !gRace::Done() )
             {
-                tOutput message;
-                message.SetTemplateParameter(1, team->GetColoredName());
-                message.SetTemplateParameter(2, sg_scoreRaceComplete);
-                message << "$player_win_race";
-                sg_DeclareWinner( team, message );
+                gRace::Sync( alive, ai_alive, sg_NumHumans(), time );
+                return;
+            }
+            else                                    // time to close the round
+            {
+                eTeam *team = gRace::Winner();
+
+                if (team)
+                {
+                    tOutput message;
+                    message.SetTemplateParameter(1, team->GetColoredName());
+                    message.SetTemplateParameter(2, sg_scoreRaceComplete);
+                    message << "$player_win_race";
+                    sg_DeclareWinner( team, message );
+                }
             }
         }
+        //HACK RACE end
     }
-    //HACK RACE end
+    else    //  begin countdown to shutdown
+    {
+        int shutdown_countdown = sg_ShutDown->Timeout();
+        if (shutdown_countdown > 0)
+        {
+            tString msg;
+            msg << shutdown_countdown << "\n";
+            sn_ConsoleOut(msg);
+            sn_CenterMessage(msg);
+
+            sg_ShutDown->SetTimeout(sg_ShutDown->Timeout() - 1);
+        }
+        else
+        {
+            sg_ShutDown->Execute();
+            return;
+        }
+    }
 
     // who is alive?
     if ( time-lastdeath < 1.0f )

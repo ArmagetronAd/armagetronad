@@ -1637,7 +1637,7 @@ private:
     virtual void DoFilterLine( tString &line )
     {
         //tColoredString message;
-        message_ << tColoredString::ColorString(1,.3,.3) << "RA: " << tColoredString::ColorString(1,1,1) << line << "\n";
+        message_ << tColoredString::ColorString(1,.3,.3) << tOutput("$admin_command_tag") << tColoredString::ColorString(1,1,1) << line << "\n";
 
         // don't let message grow indefinitely
         if (message_.Len() > 600)

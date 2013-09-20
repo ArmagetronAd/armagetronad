@@ -149,10 +149,7 @@ gParser::myxmlGetPropBool(xmlNodePtr cur, const char *name) {
 
 tString
 gParser::myxmlGetPropString(xmlNodePtr cur, const char *name) {
-    gXMLCharReturn v = myxmlGetProp(cur, name);
-    if (v.Get() == NULL) return tString("");
-    tString r(v);
-    return r;
+    return tString( (char const *)myxmlGetProp(cur, name) );
 }
 
 #define myxmlHasProp(cur, name)	xmlHasProp(cur, reinterpret_cast<const xmlChar *>(name))
@@ -616,6 +613,7 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
     bool zoneInteract = false;
     std::vector<eCoord> route;
     tString zoneEffect;
+    eTeam *zoneTeam = NULL;
 
     //  teleport stuff BEGIN
     eCoord zoneJump;
@@ -661,117 +659,161 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
     if (sn_GetNetState() != nCLIENT )
     {
         if (!xmlStrcmp(myxmlGetProp(cur, "effect").GetXML(), (const xmlChar *)"win")) {
-            gWinZoneHack *wZone = new gWinZoneHack( grid, zonePos, false, delayZoneCreation);
+            gWinZoneHack *wZone = tNEW(gWinZoneHack( grid, zonePos, false, delayZoneCreation));
             zone = wZone;
             zoneEffect << "win";
         }
         else if (!xmlStrcmp(myxmlGetProp(cur, "effect").GetXML(), (const xmlChar *)"death")) {
             tString zoneTeamStr = myxmlGetPropString(cur, "team");
-            eTeam *zoneTeam = eTeam::FindTeamByName(zoneTeamStr);
-
-            if (zoneTeam && (zoneTeamStr != ""))
+            if (zoneTeamStr.Filter() != "")
             {
-                zoneColor.r = zoneTeam->R()/15.0;
-                zoneColor.g = zoneTeam->G()/15.0;
-                zoneColor.b = zoneTeam->B()/15.0;
+                if (zoneTeamStr.Filter().StartsWith("team_"))
+                {
+                    tString teamIDStr = zoneTeamStr.Filter().SubStr(tString("team_").Len() - 1);
+                    zoneTeam = eTeam::FindTeamByID(atoi(teamIDStr));
+                }
+                else
+                {
+                    zoneTeam = eTeam::FindTeamByName(zoneTeamStr);
+                }
 
-                gDeathZoneHack *dZone = new gDeathZoneHack( grid, zonePos, true, zoneTeam, delayZoneCreation );
-                dZone->SetColor(zoneColor);
-                zone = dZone;
+                if (zoneTeam)
+                {
+                    zoneColor.r = zoneTeam->R()/15.0;
+                    zoneColor.g = zoneTeam->G()/15.0;
+                    zoneColor.b = zoneTeam->B()/15.0;
+
+                    gDeathZoneHack *dZone = tNEW(gDeathZoneHack( grid, zonePos, true, zoneTeam, delayZoneCreation ));
+                    dZone->SetColor(zoneColor);
+                    zone = dZone;
+                }
             }
             else
             {
-                gDeathZoneHack *dZone = new gDeathZoneHack( grid, zonePos, false, NULL, delayZoneCreation );
+                gDeathZoneHack *dZone = tNEW(gDeathZoneHack( grid, zonePos, false, NULL, delayZoneCreation ));
                 zone = dZone;
             }
             zoneEffect << "death";
         }
         else if (!xmlStrcmp(myxmlGetProp(cur, "effect").GetXML(), (const xmlChar *)"fortress")) {
             tString zoneTeamStr = myxmlGetPropString(cur, "team");
-            eTeam *zoneTeam = eTeam::FindTeamByName(zoneTeamStr);
-
-            if (zoneTeam && (zoneTeamStr != ""))
+            if (zoneTeamStr.Filter() != "")
             {
-                zoneColor.r = zoneTeam->R()/15.0;
-                zoneColor.g = zoneTeam->G()/15.0;
-                zoneColor.b = zoneTeam->B()/15.0;
+                if (zoneTeamStr.Filter().StartsWith("team_"))
+                {
+                    tString teamIDStr = zoneTeamStr.Filter().SubStr(tString("team_").Len() - 1);
+                    zoneTeam = eTeam::FindTeamByID(atoi(teamIDStr));
+                }
+                else
+                {
+                    zoneTeam = eTeam::FindTeamByName(zoneTeamStr);
+                }
 
-                gBaseZoneHack *bZone = new gBaseZoneHack( grid, zonePos, true, zoneTeam, delayZoneCreation );
-                bZone->SetColor(zoneColor);
-                zone = bZone;
+                if (zoneTeam)
+                {
+                    zoneColor.r = zoneTeam->R()/15.0;
+                    zoneColor.g = zoneTeam->G()/15.0;
+                    zoneColor.b = zoneTeam->B()/15.0;
+
+                    gBaseZoneHack *bZone = tNEW(gBaseZoneHack( grid, zonePos, true, zoneTeam, delayZoneCreation ));
+                    bZone->SetColor(zoneColor);
+                    zone = bZone;
+                }
             }
             else
             {
-                gBaseZoneHack *bZone = new gBaseZoneHack( grid, zonePos, false, NULL, delayZoneCreation );
+                gBaseZoneHack *bZone = tNEW(gBaseZoneHack( grid, zonePos, false, NULL, delayZoneCreation ));
                 zone = bZone;
             }
             zoneEffect << "fortress";
         }
         else if (!xmlStrcmp(myxmlGetProp(cur, "effect").GetXML(), (const xmlChar *)"sumo")) {
-            gSumoZoneHack *sZone = new gSumoZoneHack( grid, zonePos, false, delayZoneCreation);
+            gSumoZoneHack *sZone = tNEW(gSumoZoneHack( grid, zonePos, false, delayZoneCreation));
             zone = sZone;
         }
         else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"flag")) {
             tString zoneTeamStr = myxmlGetPropString(cur, "team");
-            eTeam *zoneTeam = eTeam::FindTeamByName(zoneTeamStr);
-
-            if (zoneTeam && (zoneTeamStr != ""))
+            if (zoneTeamStr.Filter() != "")
             {
-                zoneColor.r = zoneTeam->R()/15.0;
-                zoneColor.g = zoneTeam->G()/15.0;
-                zoneColor.b = zoneTeam->B()/15.0;
+                if (zoneTeamStr.Filter().StartsWith("team_"))
+                {
+                    tString teamIDStr = zoneTeamStr.Filter().SubStr(tString("team_").Len() - 1);
+                    zoneTeam = eTeam::FindTeamByID(atoi(teamIDStr));
+                }
+                else
+                {
+                    zoneTeam = eTeam::FindTeamByName(zoneTeamStr);
+                }
 
-                gFlagZoneHack *fZone = new gFlagZoneHack( grid, zonePos, true, zoneTeam, delayZoneCreation );
-                fZone->SetColor(zoneColor);
-                zone = fZone;
+                if (zoneTeam)
+                {
+                    zoneColor.r = zoneTeam->R()/15.0;
+                    zoneColor.g = zoneTeam->G()/15.0;
+                    zoneColor.b = zoneTeam->B()/15.0;
+
+                    gFlagZoneHack *fZone = tNEW(gFlagZoneHack( grid, zonePos, true, zoneTeam, delayZoneCreation ));
+                    fZone->SetColor(zoneColor);
+                    zone = fZone;
+                }
             }
             else
             {
-                gFlagZoneHack *fZone = new gFlagZoneHack( grid, zonePos, false, NULL, delayZoneCreation );
+                gFlagZoneHack *fZone = tNEW(gFlagZoneHack( grid, zonePos, false, NULL, delayZoneCreation ));
                 zone = fZone;
             }
             zoneEffect << "flag";
         }
         else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"ball")) {
             tString zoneTeamStr = myxmlGetPropString(cur, "team");
-            eTeam *zoneTeam = eTeam::FindTeamByName(zoneTeamStr);
-
-            if (zoneTeam && (zoneTeamStr != ""))
+            if (zoneTeamStr.Filter() != "")
             {
-                zoneColor.r = zoneTeam->R()/15.0;
-                zoneColor.g = zoneTeam->G()/15.0;
-                zoneColor.b = zoneTeam->B()/15.0;
+                if (zoneTeamStr.Filter().StartsWith("team_"))
+                {
+                    tString teamIDStr = zoneTeamStr.Filter().SubStr(tString("team_").Len() - 1);
+                    zoneTeam = eTeam::FindTeamByID(atoi(teamIDStr));
+                }
+                else
+                {
+                    zoneTeam = eTeam::FindTeamByName(zoneTeamStr);
+                }
 
-                gBallZoneHack *bZone = new gBallZoneHack( grid, zonePos, true, zoneTeam, delayZoneCreation );
-                bZone->SetColor(zoneColor);
-                zone = bZone;
+                if (zoneTeam)
+                {
+                    zoneColor.r = zoneTeam->R()/15.0;
+                    zoneColor.g = zoneTeam->G()/15.0;
+                    zoneColor.b = zoneTeam->B()/15.0;
+
+                    gBallZoneHack *bZone = tNEW(gBallZoneHack( grid, zonePos, true, zoneTeam, delayZoneCreation ));
+                    bZone->SetColor(zoneColor);
+                    zone = bZone;
+                }
             }
             else
             {
-                gBallZoneHack *bZone = new gBallZoneHack( grid, zonePos, false, NULL, delayZoneCreation );
+                gBallZoneHack *bZone = tNEW(gBallZoneHack( grid, zonePos, false, NULL, delayZoneCreation ));
                 zone = bZone;
             }
             zoneEffect << "ball";
         }
         else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"target")) {
-            gTargetZoneHack *tZone = new gTargetZoneHack( grid, zonePos, false, delayZoneCreation);
+            gTargetZoneHack *tZone = tNEW(gTargetZoneHack( grid, zonePos, false, delayZoneCreation));
             zone = tZone;
             zoneEffect << "target";
         }
         else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"blast")) {
-            gBlastZoneHack *bZone = new gBlastZoneHack( grid, zonePos, false, delayZoneCreation );
+            gBlastZoneHack *bZone = tNEW(gBlastZoneHack( grid, zonePos, false, delayZoneCreation ));
             zone = bZone;
             zoneEffect << "blast";
         }
         else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"object")) {
-            gObjectZoneHack *oZone = new gObjectZoneHack(grid, zonePos, false, delayZoneCreation );
+            gObjectZoneHack *oZone = tNEW(gObjectZoneHack(grid, zonePos, false, delayZoneCreation ));
             zone = oZone;
             zoneEffect << "object";
         }
         else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *) "effect"), (const xmlChar *)"rubber")) {
             REAL rubberVal = myxmlGetPropFloat(cur, "rubberVal");
             if (rubberVal != 0.0 ){
-                gRubberZoneHack *rZone = new gRubberZoneHack(grid, zonePos, false, delayZoneCreation );
+                gRubberZoneHack *rZone = tNEW(gRubberZoneHack(grid, zonePos, false, delayZoneCreation ));
                 rZone->SetRubber(rubberVal);
                 zone = rZone;
                 zoneEffect << "rubber";
@@ -780,7 +822,7 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
         }
         else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *) "effect"), (const xmlChar *)"teleport"))
         {
-            gTeleportZoneHack *tZone = new gTeleportZoneHack(grid, zonePos, false, delayZoneCreation);
+            gTeleportZoneHack *tZone = tNEW(gTeleportZoneHack(grid, zonePos, false, delayZoneCreation));
             tZone->SetJump(zoneJump,relJump);
             tZone->SetNewDir(ndir);
             tZone->SetReloc(reloc);
@@ -791,7 +833,7 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
         else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *) "effect"), (const xmlChar *)"burst"))
         {
             REAL cycle_burst_speed = myxmlGetPropFloat(cur, "speed");
-            gBurstZoneHack *bZone = new gBurstZoneHack(grid, zonePos, false, delayZoneCreation);
+            gBurstZoneHack *bZone = tNEW(gBurstZoneHack(grid, zonePos, false, delayZoneCreation));
             bZone->SetBurstSpeed(cycle_burst_speed);
 
             zone = bZone;
@@ -801,7 +843,7 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
         else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *) "effect"), (const xmlChar *)"soccerball"))
         {
             //  this is for the socker ball
-            gSoccerZoneHack *sZone = new gSoccerZoneHack(grid, zonePos, false, delayZoneCreation);
+            gSoccerZoneHack *sZone = tNEW(gSoccerZoneHack(grid, zonePos, false, delayZoneCreation));
             sZone->SetType(gSoccerZoneHack::gSoccer_BALL);
 
             zone = sZone;
@@ -812,21 +854,32 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
         {
             //  this is for the socker goal
             tString zoneTeamStr = myxmlGetPropString(cur, "team");
-            eTeam *zoneTeam = eTeam::FindTeamByName(zoneTeamStr);
-
-            if (zoneTeam && (zoneTeamStr != ""))
+            if (zoneTeamStr.Filter() != "")
             {
-                zoneColor.r = zoneTeam->R()/15.0;
-                zoneColor.g = zoneTeam->G()/15.0;
-                zoneColor.b = zoneTeam->B()/15.0;
+                if (zoneTeamStr.Filter().StartsWith("team_"))
+                {
+                    tString teamIDStr = zoneTeamStr.Filter().SubStr(tString("team_").Len() - 1);
+                    zoneTeam = eTeam::FindTeamByID(atoi(teamIDStr));
+                }
+                else
+                {
+                    zoneTeam = eTeam::FindTeamByName(zoneTeamStr);
+                }
 
-                gSoccerZoneHack *sZone = new gSoccerZoneHack(grid, zonePos, false, zoneTeam, delayZoneCreation);
-                sZone->SetType(gSoccerZoneHack::gSoccer_GOAL);
-                zone = sZone;
+                if (zoneTeam)
+                {
+                    zoneColor.r = zoneTeam->R()/15.0;
+                    zoneColor.g = zoneTeam->G()/15.0;
+                    zoneColor.b = zoneTeam->B()/15.0;
+
+                    gSoccerZoneHack *sZone = tNEW(gSoccerZoneHack(grid, zonePos, false, zoneTeam, delayZoneCreation));
+                    sZone->SetType(gSoccerZoneHack::gSoccer_GOAL);
+                    zone = sZone;
+                }
             }
             else
             {
-                gSoccerZoneHack *sZone = new gSoccerZoneHack( grid, zonePos, false, NULL, delayZoneCreation );
+                gSoccerZoneHack *sZone = tNEW(gSoccerZoneHack( grid, zonePos, false, NULL, delayZoneCreation ));
                 sZone->SetType(gSoccerZoneHack::gSoccer_GOAL);
                 zone = sZone;
             }
