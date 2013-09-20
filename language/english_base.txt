@@ -3631,6 +3631,7 @@ glance_right_tooltip_help           UNDOCUMENTED
 player_gridpos_interval_help        The time between previous "player_gridpos" output to the next.
 zone_gridpos_interval_help          The time between previous "zone_gridpos" output to the next.
 help_message_help                   A help message sent to those calling it. Works through "/help" as well.
+help_message_type_help              Set 0 to use HELP_{ADD|REMOVE}_TOPIC commands. Set 1 to use HELP_MESSAGE. Default: 0; 
 highlight_name_help                 If set to 1, when your name appears in messages, it gets highlithed for you to notice.
 ladderlog_enabled_help              If set to 1, ladderlog output is enabled.
 ladderlog_write_admin_login_help                    Write to ladderlog: ADMIN_LOGIN [login_name] [ip_address]

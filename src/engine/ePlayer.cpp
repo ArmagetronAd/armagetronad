@@ -2899,6 +2899,9 @@ static tSettingItem<bool> se_silenceDeadConf("SILENCE_DEAD", se_silenceDead);
 static tString se_helpMessage("");
 static tConfItemLine se_helpMessageConf("HELP_MESSAGE",se_helpMessage);
 
+static bool se_helpMessageType = 0;
+static tSettingItem<bool> se_helpMessageTypeConf("HELP_MESSAGE_TYPE", se_helpMessageType);
+
 // time during which no repeaded chat messages are printed
 REAL se_alreadySaidTimeout=5.0;
 static tSettingItem<REAL> se_alreadySaidTimeoutConf("SPAM_PROTECTION_REPEAT",
@@ -4181,9 +4184,14 @@ void handle_chat( nMessage &m )
                     else if (command == "/help")
                     {
                         spam.lastSaidType_ = eChatMessageType_Command;
-                        //se_Help( p, p, s );
-                        sn_ConsoleOut(se_helpMessage + "\n", p->Owner());
-                        se_DisplayChatLocally(p, say);
+
+                        if (se_helpMessageType)
+                        {
+                            sn_ConsoleOut(se_helpMessage + "\n", p->Owner());
+                            se_DisplayChatLocally(p, say);
+                        }
+                        else se_Help( p, p, s );
+
                         return;
                     }
                     // the commands below (mp and cq) are the ones to use for add/remove/list items in the queueing list
