@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -44,6 +44,9 @@ public:
     void FillFrom( const char * c );		//!< Fills this color object from a color code string
 
     bool operator == ( const tColor & other ) const; //!< comparison operator
+
+    static bool VerifyColorCode( const char * c );        // Verifys it's a valid color code
+    static bool VerifyColorCode( const wchar_t * c);      // Verifys it's a valid color code
 
     // the colors are public because they are independent of each other
     REAL r_, g_, b_, a_;                    //!< Color values

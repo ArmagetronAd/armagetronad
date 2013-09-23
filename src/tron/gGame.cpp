@@ -3487,6 +3487,9 @@ void update_settings( bool const * goon )
                 sn_BasicNetworkSystem.Select( 0.1f );
                 gGame::NetSyncIdle();
 
+                // Rename players
+                ePlayerNetID::Update();
+
                 // handle console input
                 sr_Read_stdin();
             }

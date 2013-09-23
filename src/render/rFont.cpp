@@ -470,50 +470,44 @@ rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode )
         }
 
         // detect presence of color code
-        if (*c=='0' && my_strnlen(c, 8)>=8 && c[1]=='x' && colorMode != COLOR_IGNORE )
+        if (*c == '0' && my_strnlen(c, 8) >= 8 && c[1] == 'x' && colorMode != COLOR_IGNORE && tColor::VerifyColorCode(c))
         {
             tColor color;
-            bool use = false;
 
-            if ( 0 ==strncmp(c,"0xRESETT",8) )
+            if ( 0 == strncmp(c,"0xRESETT",8) )
             {
                 // color reset to default requested
                 color = defaultColor_;
-                use = true;
             }
             else
             {
                 // found! extract colors
-                cursorPos-=8;
                 tString colorStr(c);
                 color = tColor(colorStr.ToLower());
-                use = true;
             }
 
             // advance
             if ( colorMode == COLOR_USE )
             {
-                c+=8;
+                c += 8;
+                cursorPos -= 8;
             }
             else
             {
                 // write color code out
-                cursorPos+=8;
-                for(int i=7; i>=0;--i)
+                for(int i = 7; i >= 0; --i)
                     WriteChar(*(c++));
             }
 
-            // apply color
-            if ( use )
-            {
-                FlushLine(false);
-                cursorPos++;
-                color_ = color;
-            }
+            FlushLine(false);
+            cursorPos++;
+            color_ = color;
         }
         else
+        {
             // normal operation: add char
             WriteChar(*(c++));
+        }
     }
 
     RenderEnd( true );
