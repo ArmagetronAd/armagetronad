@@ -2899,7 +2899,7 @@ static tSettingItem<bool> se_silenceDeadConf("SILENCE_DEAD", se_silenceDead);
 static tString se_helpMessage("");
 static tConfItemLine se_helpMessageConf("HELP_MESSAGE",se_helpMessage);
 
-static bool se_helpMessageType = 0;
+static bool se_helpMessageType = false;
 static tSettingItem<bool> se_helpMessageTypeConf("HELP_MESSAGE_TYPE", se_helpMessageType);
 
 // time during which no repeaded chat messages are printed

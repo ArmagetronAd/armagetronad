@@ -165,14 +165,11 @@ static tSettingItem<int> se_BannedWordsOptionsConf("BANNED_WORDS_OPTIONS", se_Ba
 tString se_BannedWordsDelimiters("\" '_-=+");
 static tSettingItem<tString> se_BannedWordsDelimitersConf( "BANNED_WORDS_DELIMITERS", se_BannedWordsDelimiters);
 
-bool eBannedWords::CharacterInDelimiter(tString character)
+bool eBannedWords::CharacterInDelimiter(char character)
 {
     for(int i = 0; i < (se_BannedWordsDelimiters.Len()); i++)
     {
-        tString chr;
-        chr << se_BannedWordsDelimiters[i];
-
-        if (chr == character)
+        if (se_BannedWordsDelimiters[i] == character)
             return true;
     }
 
@@ -183,20 +180,28 @@ bool eBannedWords::HasBadWord(tString message, tString word)
 {
     tString origLowMsg(message.ToLower());
 
-    if ((origLowMsg.Filter() != "") && (word.Filter() != "") && (se_BannedWordsDelimiters.Filter() != ""))
-    {
-        //  process to strip delimiters from message
-        for(int i = 0; i < (se_BannedWordsDelimiters.Len() - 1); i++)
-        {
-            tString chr;
-            chr << se_BannedWordsDelimiters[i];
-            origLowMsg = origLowMsg.Replace(chr, "");
-        }
-    }
-
     //  check if word exists in converted message
-    if (origLowMsg.Contains(word.ToLower()))
-        return true;
+    int pos = 0;
+    tString gotWord = origLowMsg.ExtractNonBlankSubString(pos);
+    while (gotWord.Filter() != "")
+    {
+        for(int i = 0; i < gotWord.Len(); i++)
+        {
+            if (CharacterInDelimiter(gotWord[i]))
+                gotWord = gotWord.RemoveCharacter(gotWord[i]);
+        }
+
+        //  set words lower case and check if word is the same as gotWord
+        if (gotWord.ToLower() == word.ToLower())
+            return true;
+
+        //  set words lower case and check if word contains in gotWord
+        if (gotWord.ToLower().Contains(word.ToLower()))
+            return true;
+
+        //  get the next word
+        gotWord = origLowMsg.ExtractNonBlankSubString(pos);
+    }
 
     return false;
 }
@@ -265,6 +270,7 @@ bool eBannedWords::BadWordTrigger(tString &message)
 tString eBannedWords::ReplaceBadWords(tString message, tString word)
 {
     tString originalMsg(message);
+    tString convertedMsg;
     tString replacement(tOutput("$banned_words_replace"));
 
     if (originalMsg.Filter() != "")
@@ -273,35 +279,47 @@ tString eBannedWords::ReplaceBadWords(tString message, tString word)
         for(int i = 0; i < splitWords.Len(); i++)
         {
             tString splitWord = splitWords[i];
-            if (splitWord.ToLower() == word.ToLower())
+            tString splitWordCon(splitWord);
+
+            for(int i = 0; i < splitWordCon.Len(); i++)
+            {
+                if (CharacterInDelimiter(splitWordCon[i]))
+                    splitWordCon = splitWordCon.RemoveCharacter(splitWordCon[i]);
+            }
+
+            if (splitWordCon.ToLower() == word.ToLower())
             {
                 tString replaced;
                 for(int j = 0; j < (splitWord.Len() - 1); j++)
-                    replaced << replacement.Filter();
+                    replaced << replacement;
 
-                splitWords[i] = replaced;
+                convertedMsg << replaced << " ";
             }
-            else if (splitWord.Filter().Contains(word.Filter()))
+            else if (splitWordCon.ToLower().Contains(word.ToLower()))
             {
-                tString trippedWord = splitWord.RemoveWord(word);
+                tString trippedWord = splitWordCon.RemoveWord(word);
                 if (trippedWord.Filter() == "")
                 {
                     tString replaced;
                     for(int j = 0; j < (splitWord.Len() - 1); j++)
-                        replaced << replacement.Filter();
+                        replaced << replacement;
 
-                    splitWords[i] = replaced;
+                    convertedMsg << replaced << " ";
                 }
+                else convertedMsg << splitWord << " ";
             }
+            else convertedMsg << splitWord << " ";
         }
 
+        /*
         originalMsg = "";
         for(int x = 0; x < splitWords.Len(); x++)
         {
             originalMsg << splitWords[x] << " ";
         }
         originalMsg << "\n";
+        */
     }
 
-    return originalMsg;
+    return convertedMsg;
 }

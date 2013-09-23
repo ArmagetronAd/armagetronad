@@ -2415,3 +2415,28 @@ bool tString::IsNumeric()
     //  looks like everything worked out. Good!
     return true;
 }
+
+// **********************************************************************
+// *
+// *	RemoveCharacter
+// *
+// **********************************************************************
+//!
+//!    @param      find_word       The word to remove from the string
+//!    @return     newLine         Returns string without "find_word"
+//!
+// **********************************************************************
+
+tString tString::RemoveCharacter(char character)
+{
+    tString ret(*this);
+    tString newLine;
+
+    for(int i = 0; i < ret.Len(); i++)
+    {
+        if (ret[i] != character)
+            newLine << ret[i];
+    }
+
+    return newLine;
+}

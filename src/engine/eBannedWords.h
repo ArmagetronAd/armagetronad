@@ -56,7 +56,7 @@ class eBannedWords
         static bool BadWordTrigger(tString &message);
         static tString ReplaceBadWords(tString message, tString word);
 
-        static bool CharacterInDelimiter(tString character);
+        static bool CharacterInDelimiter(char character);
 
     private:
         tArray<tString> bannedWords_;

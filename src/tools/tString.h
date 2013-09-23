@@ -129,6 +129,9 @@ public:
     bool Contains(tString tofind);
     bool Contains(const char *tofind);
 
+    //! remove the specified character and return string
+    tString RemoveCharacter(char character);
+
     //! compares two strings alphanumerically
     static int CompareAlphaNumerical( const tString& a, const tString &b);
 
