@@ -3855,7 +3855,7 @@ banned_words_list_help        Display the list of words currently banned.
 banned_words_list             The list of currently banned words:\n
 banned_words_list_show        Showing \1 banned words out of \2 total.\n
 banned_words_warning          BANNED WORDS: Your message is blocked due to containing one or many banned words.\n
-banned_words_replace          * 
+banned_words_replace          *
 banned_words_options          0: disable. 1: Block and alert message to sender. 2: Replace bad word with chosen character(s).
 
 #chat_message_report_message         [ time ] player reports: message.\n
