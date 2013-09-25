@@ -412,6 +412,7 @@ class gQueuePlayers
         REAL lastTime_;
 };
 
-extern void sg_LogQueue(ePlayerNetID *p, tString command, tString params, tString item);
+void QueueShowPlayer(ePlayerNetID *player);
+void sg_LogQueue(ePlayerNetID *p, tString command, tString params, tString item);
 
 #endif

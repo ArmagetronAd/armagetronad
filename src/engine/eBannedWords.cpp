@@ -310,15 +310,6 @@ tString eBannedWords::ReplaceBadWords(tString message, tString word)
             }
             else convertedMsg << splitWord << " ";
         }
-
-        /*
-        originalMsg = "";
-        for(int x = 0; x < splitWords.Len(); x++)
-        {
-            originalMsg << splitWords[x] << " ";
-        }
-        originalMsg << "\n";
-        */
     }
 
     return convertedMsg;

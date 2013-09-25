@@ -118,7 +118,19 @@ static void sg_queueRefill(std::istream &s)
             gQueuePlayers *qPlayer = gQueuePlayers::queuePlayers[i];
             if (qPlayer)
             {
-                if (qPlayer->Name().Contains(player))
+                if (qPlayer->Name().Filter() == player.Filter())
+                {
+                    qPlayer->SetQueue(qPlayer->QueueDefault());
+
+                    msg.SetTemplateParameter(1, qPlayer->Name());
+                    msg << "$queue_refill_success";
+                    sn_ConsoleOut(msg);
+
+                    gQueuePlayers::Save();
+
+                    return;
+                }
+                else if (qPlayer->Name().Filter().Contains(player.Filter()))
                 {
                     qPlayer->SetQueue(qPlayer->QueueDefault());
 
@@ -159,7 +171,27 @@ static void sg_queueGive(std::istream &s)
             gQueuePlayers *qPlayer = gQueuePlayers::queuePlayers[i];
             if (qPlayer)
             {
-                if (qPlayer->Name().Contains(player))
+                if (qPlayer->Name().Filter() == player.Filter())
+                {
+                    int new_queues = atoi(queueStr);
+                    if (new_queues > 0)
+                    {
+                        //  send message
+                        msg.SetTemplateParameter(1, qPlayer->Name());
+                        msg.SetTemplateParameter(2, qPlayer->Queues());
+                        msg.SetTemplateParameter(3, new_queues);
+                        msg << "$queue_give_success";
+                        sn_ConsoleOut(msg);
+
+                        //  apply
+                        qPlayer->SetQueue(new_queues);
+
+                        gQueuePlayers::Save();
+                    }
+
+                    return;
+                }
+                else if (qPlayer->Name().Filter().Contains(player.Filter()))
                 {
                     int new_queues = atoi(queueStr);
                     if (new_queues > 0)
@@ -558,3 +590,25 @@ static void sg_queuersList(std::istream &s)
 }
 static tConfItemFunc sg_queuersListConf("QUEUERS_LIST", &sg_queuersList);
 static tAccessLevelSetter sg_queuersListConfLevel( sg_queuersListConf, tAccessLevel_Moderator );
+
+void QueueShowPlayer(ePlayerNetID *player)
+{
+    gQueuePlayers *queuePlayer = gQueuePlayers::GetData(player);
+
+    if (queuePlayer)
+    {
+        tColoredString send;
+        send << tColoredString::ColorString( 1,1,.5 );
+        send << "( ";
+        send << "0x55ffff" << queuePlayer->Name();
+        send << tColoredString::ColorString( 1,1,.5 );
+        send << " | 0xff55ff" << queuePlayer->Queues() << " qs";
+        send << tColoredString::ColorString( 1,1,.5 );
+        send << " | 0x88ff22" << queuePlayer->PlayedTime() << " s";
+        send << tColoredString::ColorString( 1,1,.5 );
+        send << " | 0x88ff22" << queuePlayer->RefillTime() << " s";
+        send << tColoredString::ColorString( 1,1,.5 );
+        send << " )\n";
+        sn_ConsoleOut(send, player->Owner());
+    }
+}

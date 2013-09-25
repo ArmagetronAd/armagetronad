@@ -4206,6 +4206,11 @@ void handle_chat( nMessage &m )
                         sg_DisplayRotationList(p, s, command);
                         return;
                     }
+                    else if (command == "/qs")
+                    {
+                        QueueShowPlayer(p);
+                        return;
+                    }
 #ifdef DEDICATED
                     else  if ( command == "/rtfm" || command == "/teach" )
                     {
@@ -10446,12 +10451,27 @@ ePlayerNetID & ePlayerNetID::ForceName( tString const & name )
 
         this->nameFromAdmin_ = name;
         this->nameFromAdmin_.NetFilter();
-        se_CutString( this->nameFromAdmin_, 16 );
+
+        if (tColoredString::HasColors(this->nameFromAdmin_))
+        {
+            //  remove all colors from name
+            tString colorlessName = tColoredString::RemoveColors(this->nameFromAdmin_, false);
+
+            //  check if the colorless name's length is longer than the limited length
+            if (colorlessName.Len() > 16)
+            {
+                se_CutString( this->nameFromAdmin_, 16 );
+            }
+        }
+        else
+        {
+            se_CutString( this->nameFromAdmin_, 16 );
+        }
 
         // crappiest line ever :-/
         newName << tColoredString::ColorString( r/15.0, g/15.0, b/15.0 ) << this->nameFromAdmin_ << tColoredString::ColorString( -1, -1, -1 );
 
-        con << tOutput("$player_will_be_renamed", newName, oldName);
+        sn_ConsoleOut(tOutput("$player_will_be_renamed", newName, oldName));
 
         AllowRename ( false );
     }
