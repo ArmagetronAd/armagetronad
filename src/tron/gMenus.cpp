@@ -1105,7 +1105,7 @@ void sg_PlayerMenu(int Player){
     uMenuItemString n(&playerMenu,
                       "$player_name_text",
                       "$player_name_help",
-                      p->name, 16);
+                      p->name, ePlayerNetID::MAX_NAME_LENGTH);
 
     playerMenu.Enter();
 
