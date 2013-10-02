@@ -346,6 +346,8 @@ void eWavData::Load(){
         return;
     }
 
+    return;
+
 #ifndef DEDICATED
 
     static char const * errorName = "Sound Error";

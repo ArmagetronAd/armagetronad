@@ -963,10 +963,166 @@ bool uMenuItemString::Event(SDL_Event &e){
         {
             ret=true;
 
+            int len = content->Len();
             // insert character if there is room
-            if (content->Len() < maxLength_)
+            if (len < maxLength_)
             {
-                for (int i=content->Len()-1;i>=cursorPos;i--)
+                for (int i = content->Len() - 1; i>= cursorPos; i--)
+                    (*content)[i+1]=(*content)[i];
+
+                // guarantee proper null termination
+                (*content)[content->Len()-1]='\0';
+                (*content)[cursorPos]=c.unicode;
+                cursorPos++;
+            }
+        }
+        else {
+            ret=false;
+        }
+    }
+
+    if (cursorPos<0)    cursorPos=0;
+    if (cursorPos > content->Len()-1) cursorPos=content->Len()-1;
+
+    return ret;
+#else
+    return false;
+#endif
+}
+
+// *****************************************************
+
+bool uMenuItemColorLine::Event(SDL_Event &e){
+#ifndef DEDICATED
+    if (e.type!=SDL_KEYDOWN)
+        return false;
+    bool ret=true;
+    SDL_keysym &c=e.key.keysym;
+    SDLMod mod = c.mod;
+    bool moveWordLeft, moveWordRight, deleteWordLeft, deleteWordRight, moveBeginning, moveEnd, killForwards;
+    moveWordLeft = moveWordRight = deleteWordLeft = deleteWordRight = moveBeginning = moveEnd = killForwards = false;
+
+#if defined (MACOSX)
+    // For moving over/deleting words
+    if (mod & KMOD_ALT) {
+        if (c.sym == SDLK_LEFT) {
+            moveWordLeft = true;
+        }
+        else if (c.sym == SDLK_RIGHT) {
+            moveWordRight = true;
+        }
+        else if (c.sym == SDLK_DELETE) {
+            deleteWordRight = true;
+        }
+        else if (c.sym == SDLK_BACKSPACE) {
+            deleteWordLeft = true;
+        }
+    }
+    // For moving to extremes of the line
+    else if (mod & KMOD_META) {
+        if (c.sym == SDLK_LEFT) {
+            moveBeginning = true;
+        }
+        else if (c.sym == SDLK_RIGHT) {
+            moveEnd = true;
+        }
+    }
+    // Linux and Windows
+#else
+    // Word operations
+    if (mod & KMOD_CTRL) {
+        if (c.sym == SDLK_LEFT) {
+            moveWordLeft = true;
+        }
+        else if (c.sym == SDLK_RIGHT) {
+            moveWordRight = true;
+        }
+        else if (c.sym == SDLK_DELETE) {
+            deleteWordRight = true;
+        }
+        else if (c.sym == SDLK_BACKSPACE) {
+            deleteWordLeft = true;
+        }
+    }
+    else if (c.sym == SDLK_HOME) {
+        moveBeginning = true;
+    }
+    else if (c.sym == SDLK_END) {
+        moveEnd = true;
+    }
+#endif
+    // "bash" keys
+    if (mod & KMOD_CTRL) {
+        if (c.sym == SDLK_a) {
+            moveBeginning = true;
+        }
+        else if (c.sym == SDLK_e) {
+            moveEnd = true;
+        }
+        else if (c.sym == SDLK_k) {
+            killForwards = true;
+        }
+    }
+    // moveWordLeft = moveWordRight = deleteWordLeft = deleteWordRight = moveBeginning = moveEnd = killForwards
+
+    if (moveWordLeft) {
+        cursorPos += content->PosWordLeft(cursorPos);
+    }
+    else if (moveWordRight) {
+        cursorPos += content->PosWordRight(cursorPos);
+    }
+    else if (deleteWordLeft) {
+        cursorPos += content->RemoveWordLeft(cursorPos);
+    }
+    else if (deleteWordRight) {
+        content->RemoveWordRight(cursorPos);
+    }
+    else if (moveBeginning) {
+        cursorPos = 0;
+    }
+    else if (moveEnd) {
+        cursorPos = content->Len()-1;
+    }
+    else if (killForwards) {
+        content->RemoveSubStr(cursorPos,content->Len()-1-cursorPos);
+    }
+    else if (c.sym == SDLK_LEFT) {
+        if (cursorPos > 0) {
+            cursorPos--;
+        }
+    }
+    else if (c.sym == SDLK_RIGHT) {
+        if (cursorPos < content->Len()-1) {
+            cursorPos++;
+        }
+    }
+    else if (c.sym == SDLK_DELETE) {
+        if (cursorPos < content->Len()-1) {
+            content->RemoveSubStr(cursorPos,1);
+        }
+    }
+    else if (c.sym == SDLK_BACKSPACE) {
+        if (cursorPos > 0) {
+            content->RemoveSubStr(cursorPos,-1);
+            cursorPos--;
+        }
+    }
+    else if (c.sym == SDLK_KP_ENTER || c.sym == SDLK_RETURN) {
+        ret = false;
+        //        c.sym = SDLK_DOWN;
+    }
+    else {
+        if (32 <= c.unicode  && c.unicode < 256)
+        {
+            ret=true;
+
+            //  remove colors and get actual colors
+            int len = tColoredString::RemoveColors(*content).Len();
+
+            // insert character if there is room
+            if (len < maxLength_)
+            {
+                for (int i = content->Len() - 1; i>= cursorPos; i--)
                     (*content)[i+1]=(*content)[i];
 
                 // guarantee proper null termination

@@ -54,16 +54,7 @@ static void ReplaceSpaces( std::string & str )
 }
 
 bool sg_RaceTimerEnabled = false;
-/*bool restrictRacetime_r(bool const &newValue)
-{
-    eGrid *grid = eGrid::CurrentGrid();
-    if (grid)
-    {
-        return false;
-    }
-    return true;
-}*/
-static tSettingItem<bool> sg_RaceTimerEnabledConf( "RACE_TIMER_ENABLED", sg_RaceTimerEnabled/*, &restrictRacetime_r*/);
+static tSettingItem<bool> sg_RaceTimerEnabledConf( "RACE_TIMER_ENABLED", sg_RaceTimerEnabled);
 
 int sg_RaceEndDelay = 60;
 static tSettingItem<int> sg_RaceEndDelayConf( "RACE_END_DELAY", sg_RaceEndDelay );
@@ -234,7 +225,7 @@ void gRaceScores::Add(gRacePlayer *racePlayer, bool finished)
     gRaceScores *racingPlayer = NULL;
 
     tString username;
-    if (racePlayer->Player()->HasLoggedIn() && (racePlayer->Player()->GetAuthenticatedName().Len() > 1))
+    if (racePlayer->Player()->HasLoggedIn() && (racePlayer->Player()->GetAuthenticatedName().Filter() != ""))
         username = racePlayer->Player()->GetAuthenticatedName();
     else
         username = racePlayer->Player()->GetUserName();
@@ -1190,7 +1181,7 @@ void gRacePlayer::ErasePlayer()
 void gRace::ZoneHit( ePlayerNetID *player, REAL time )
 {
     tString player_username;
-    if (player->HasLoggedIn() && (player->GetAuthenticatedName().Len() > 1))
+    if (player->HasLoggedIn() && (player->GetAuthenticatedName().Filter() != ""))
         player_username = player->GetAuthenticatedName();
     else
         player_username = player->GetUserName();

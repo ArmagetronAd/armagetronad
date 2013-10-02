@@ -104,12 +104,13 @@ public:
             if (keymap[keysym]){
 
                 if (!first)
-                    s << "\nKEYBOARD\t";
+                    s << "KEYBOARD ";
                 else
                     first=0;
 
-                s << keysym << '\t';
+                s << keysym << " ";
                 keymap[keysym]->Write(s);
+                s << "\n";
             }
         }
         if (first)
@@ -251,7 +252,7 @@ uBind::uBind(std::istream &s): lastValue_(0), delayedValue_(0), lastSym_(-1), la
 }
 
 void uBind::Write(std::ostream &s){
-    s << act->internalName << '\t';
+    s << act->internalName << " ";
 }
 
 bool GlobalAct(uAction *act,REAL x){
@@ -764,7 +765,7 @@ bool uBindPlayer::CheckPlayer(int p){
 }
 
 void uBindPlayer::Write(std::ostream &s){
-    s << Player_keyword << '\t';
+    s << Player_keyword << " ";
     uBind::Write(s);
     s << ePlayer;
 }

@@ -310,6 +310,7 @@ tString eBannedWords::ReplaceBadWords(tString message, tString word)
             }
             else convertedMsg << splitWord << " ";
         }
+
     }
 
     return convertedMsg;

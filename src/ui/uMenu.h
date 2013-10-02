@@ -448,6 +448,17 @@ public:
     }
 };
 
+//  does not cound for the existance of color codes within string
+class uMenuItemColorLine: public uMenuItemString
+{
+    public:
+        uMenuItemColorLine(uMenu *M, tString &c, int maxLength = 1024 ):
+                        uMenuItemString(M,"$player_name_text","$player_name_help",c, maxLength) {}
+        virtual ~uMenuItemColorLine(){}
+
+        virtual bool Event(SDL_Event &e);
+};
+
 class uMenuItemStringWithHistory : protected uMenuItemString {
 protected:
     std::deque<tString> &m_History;

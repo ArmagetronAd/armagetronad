@@ -1114,10 +1114,7 @@ void sg_PlayerMenu(int Player){
                       "$player_teamname_help",
                       p->teamname, 16);
 
-    uMenuItemString n(&playerMenu,
-                      "$player_name_text",
-                      "$player_name_help",
-                      p->name, 16);
+    uMenuItemColorLine n(&playerMenu, p->name, 16);
 
     playerMenu.Enter();
 

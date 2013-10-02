@@ -169,9 +169,6 @@ static tSettingItem< bool > se_allowTeamChangesConf( "ALLOW_TEAM_CHANGE", se_all
 static bool se_chatLogWriteTeam = false;
 static tSettingItem< bool > se_chatLogWriteTeamConf( "CHATLOG_WRITE_TEAM", se_chatLogWriteTeam );
 
-static bool se_chatLogWriteEnemy = false;
-static tSettingItem< bool > se_ChatLogWriteEnemyConf("CHATLOG_WRITE_ENEMY", se_chatLogWriteEnemy);
-
 static bool se_enableChat = true;    //flag indicating whether chat should be allowed at all (logged in players can always chat)
 static tSettingItem< bool > se_enaChat("ENABLE_CHAT", se_enableChat);
 
@@ -399,13 +396,16 @@ public:
             if (storage.save )
             {
                 if (!first)
-                    s << "\nPASSWORD\t";
+                    s << "PASSWORD ";
                 first = false;
 
                 s << "1 ";
                 nKrawall::WriteScrambledPassword(storage.password, s);
-                s << '\t' << storage.methodCongested;
-                s << '\t' << storage.username;
+                s << " " << storage.methodCongested;
+                s << " " << storage.username;
+
+                if ((i - 1) >= 0)
+                    s << "\n";
             }
         }
         if (first)
@@ -751,8 +751,8 @@ static tSettingItem< tAccessLevel > se_playAccessLevelSlidingConf( "ACCESS_LEVEL
 static tAccessLevelSetter se_playAccessLevelSlidingConfLevel( se_playAccessLevelSlidingConf, tAccessLevel_Owner );
 
 // that many high level players are reuqired to drag the access level up
-static int se_playAccessLevelSliders = 4;
-static tSettingItem< int > se_playAccessLevelSlidersConf( "ACCESS_LEVEL_PLAY_SLIDERS", se_playAccessLevelSliders );
+static tAccessLevel se_playAccessLevelSliders = tAccessLevel_4;
+static tSettingItem< tAccessLevel > se_playAccessLevelSlidersConf( "ACCESS_LEVEL_PLAY_SLIDERS", se_playAccessLevelSliders );
 static tAccessLevelSetter se_playAccessLevelSlidersConfLevel( se_playAccessLevelSlidersConf, tAccessLevel_Owner );
 
 static tAccessLevel se_accessLevelRequiredToPlay = tAccessLevel_Program;
@@ -3284,16 +3284,6 @@ static void se_ChatEnemy(ePlayerNetID *p, std::istream &s, eChatSpamTester &spam
             sn_ConsoleOut( send );
 
             break;
-
-            //add /enemy to chatlog
-            if (se_chatLogWriteEnemy)
-            {
-                tString str;
-                str << p->GetUserName() << " /enemy " << message;
-                se_SaveToChatLog(str);
-
-                se_SaveToChatLogC(send);
-            }
         }
     }
 }
@@ -4475,37 +4465,37 @@ static void ConsoleSpeakAsAdmin_conf(std::istream &s)
 
     switch (sn_GetNetState())
     {
-    case nCLIENT:
-    {
-        ePlayerNetID *me = se_GetLocalPlayer();
+        case nCLIENT:
+        {
+            ePlayerNetID *me = se_GetLocalPlayer();
 
-        if (me)
-            me->Chat( message );
+            if (me)
+                me->Chat( message );
 
-        break;
-    }
-    case nSERVER:
-    {
-        tColoredString send;
-        send << tColoredString::ColorString( 1,0,0 );
-        send << "Admin";
-        send << tColoredString::ColorString( 1,1,.5 );
-        send << ": " << message << "\n";
+            break;
+        }
+        case nSERVER:
+        {
+            tColoredString send;
+            send << tColoredString::ColorString( 1,0,0 );
+            send << "Admin";
+            send << tColoredString::ColorString( 1,1,.5 );
+            send << ": " << message << "\n";
 
-        // display it
-        sn_ConsoleOut( send );
+            // display it
+            sn_ConsoleOut( send );
 
-        break;
-    }
-    default:
-    {
-        ePlayerNetID *me = se_GetLocalPlayer();
+            break;
+        }
+        default:
+        {
+            ePlayerNetID *me = se_GetLocalPlayer();
 
-        if ( me )
-            se_DisplayChatLocally( me, message );
+            if ( me )
+                se_DisplayChatLocally( me, message );
 
-        break;
-    }
+            break;
+        }
     }
 }
 
@@ -4519,42 +4509,42 @@ static void ConsoleEnemy_conf(std::istream &s)
 
     switch (sn_GetNetState())
     {
-    case nCLIENT:
-    {
-        ePlayerNetID *me = se_GetLocalPlayer();
+        case nCLIENT:
+        {
+            ePlayerNetID *me = se_GetLocalPlayer();
 
-        if (me)
-            me->Chat( message );
+            if (me)
+                me->Chat( message );
 
-        break;
-    }
-    case nSERVER:
-    {
+            break;
+        }
+        case nSERVER:
+        {
 
-        tColoredString send;
-        send << tColoredString::ColorString( 1,0,0 );
-        send << "Admin";
-        send << tColoredString::ColorString( 1,1,.5 );
-        send << " --> ";
-        send << tColoredString::ColorString( 1,0,0 );
-        send << "Enemies";
-        send << tColoredString::ColorString( 1,1,.5 );
-        send << ": " << message << "\n";
+            tColoredString send;
+            send << tColoredString::ColorString( 1,0,0 );
+            send << "Admin";
+            send << tColoredString::ColorString( 1,1,.5 );
+            send << " --> ";
+            send << tColoredString::ColorString( 1,0,0 );
+            send << "Enemies";
+            send << tColoredString::ColorString( 1,1,.5 );
+            send << ": " << message << "\n";
 
-        // display it
-        sn_ConsoleOut( send );
+            // display it
+            sn_ConsoleOut( send );
 
-        break;
-    }
-    default:
-    {
-        ePlayerNetID *me = se_GetLocalPlayer();
+            break;
+        }
+        default:
+        {
+            ePlayerNetID *me = se_GetLocalPlayer();
 
-        if ( me )
-            se_DisplayChatLocally( me, message );
+            if ( me )
+                se_DisplayChatLocally( me, message );
 
-        break;
-    }
+            break;
+        }
     }
 }
 
@@ -4568,42 +4558,42 @@ static void ConsoleEveryone_conf(std::istream &s)
 
     switch (sn_GetNetState())
     {
-    case nCLIENT:
-    {
-        ePlayerNetID *me = se_GetLocalPlayer();
+        case nCLIENT:
+        {
+            ePlayerNetID *me = se_GetLocalPlayer();
 
-        if (me)
-            me->Chat( message );
+            if (me)
+                me->Chat( message );
 
-        break;
-    }
-    case nSERVER:
-    {
+            break;
+        }
+        case nSERVER:
+        {
 
-        tColoredString send;
-        send << tColoredString::ColorString( 1,0,0 );
-        send << "Admin";
-        send << tColoredString::ColorString( 1,1,.5 );
-        send << " --> ";
-        send << tColoredString::ColorString( 0,1,1 );
-        send << "Everyone";
-        send << tColoredString::ColorString( 1,1,.5 );
-        send << ": " << message << "\n";
+            tColoredString send;
+            send << tColoredString::ColorString( 1,0,0 );
+            send << "Admin";
+            send << tColoredString::ColorString( 1,1,.5 );
+            send << " --> ";
+            send << tColoredString::ColorString( 0,1,1 );
+            send << "Everyone";
+            send << tColoredString::ColorString( 1,1,.5 );
+            send << ": " << message << "\n";
 
-        // display it
-        sn_ConsoleOut( send );
+            // display it
+            sn_ConsoleOut( send );
 
-        break;
-    }
-    default:
-    {
-        ePlayerNetID *me = se_GetLocalPlayer();
+            break;
+        }
+        default:
+        {
+            ePlayerNetID *me = se_GetLocalPlayer();
 
-        if ( me )
-            se_DisplayChatLocally( me, message );
+            if ( me )
+                se_DisplayChatLocally( me, message );
 
-        break;
-    }
+            break;
+        }
     }
 }
 
@@ -4617,40 +4607,40 @@ static void ConsoleAnnounce_conf(std::istream &s)
 
     switch (sn_GetNetState())
     {
-    case nCLIENT:
-    {
-        ePlayerNetID *me = se_GetLocalPlayer();
+        case nCLIENT:
+        {
+            ePlayerNetID *me = se_GetLocalPlayer();
 
-        if (me)
-            me->Chat( message );
+            if (me)
+                me->Chat( message );
 
-        break;
-    }
-    case nSERVER:
-    {
+            break;
+        }
+        case nSERVER:
+        {
 
-        tColoredString send;
-        send << tColoredString::ColorString( 0,0.5,1 );
-        send << "Announcement";
-        send << tColoredString::ColorString( 1,1,.5 );
-        send << ": ";
-        send << tColoredString::ColorString( 1,1,.5 );
-        send << message << "\n";
+            tColoredString send;
+            send << tColoredString::ColorString( 0,0.5,1 );
+            send << "Announcement";
+            send << tColoredString::ColorString( 1,1,.5 );
+            send << ": ";
+            send << tColoredString::ColorString( 1,1,.5 );
+            send << message << "\n";
 
-        // display it
-        sn_ConsoleOut( send );
+            // display it
+            sn_ConsoleOut( send );
 
-        break;
-    }
-    default:
-    {
-        ePlayerNetID *me = se_GetLocalPlayer();
+            break;
+        }
+        default:
+        {
+            ePlayerNetID *me = se_GetLocalPlayer();
 
-        if ( me )
-            se_DisplayChatLocally( me, message );
+            if ( me )
+                se_DisplayChatLocally( me, message );
 
-        break;
-    }
+            break;
+        }
     }
 }
 
@@ -5031,43 +5021,43 @@ static nSettingItem<bool> se_allowControlDuringChatConf("ALLOW_CONTROL_DURING_CH
 
 uActionPlayer se_toggleSpectator("TOGGLE_SPECTATOR", -7);
 
-static void se_turnDoubleBindLeft(std::istream &s)
+static void se_cycleTurn(std::istream &s)
 {
     ePlayerNetID *player = se_GetLocalPlayer();
-    tString params;
-    s >> params;
+    tString times, turn;
+    s >> times;
+    s >> turn;
 
-    int x = atoi(params);
+    int x = atoi(times);
     if (player)
     {
         gCycle *cycle = dynamic_cast<gCycle *>(player->Object());
         if (cycle && cycle->Alive())
         {
-            cycle->Act(&gCycle::se_turnLeft, x);
-            cycle->Act(&gCycle::se_turnLeft, x);
+            if (turn.Filter() == "left")
+            {
+                for(int i = 0; i < x; i++)
+                {
+                    cycle->Act(&gCycle::se_turnLeft, 1);
+                }
+            }
+            else if (turn.Filter() == "right")
+            {
+                for(int i = 0; i < x; i++)
+                {
+                    cycle->Act(&gCycle::se_turnRight, 1);
+                }
+            }
+            else
+            {
+                tString msg;
+                msg << "For command, CYCLE_TURN: CYCLE_TURN <times> [turn: left | right] required.\n";
+                sn_ConsoleOut(msg, player->Owner());
+            }
         }
     }
 }
-static tConfItemFunc se_turnDoubleBindLeftConf("TURN_DOUBLEBIND_LEFT", &se_turnDoubleBindLeft);
-
-static void se_turnDoubleBindRight(std::istream &s)
-{
-    ePlayerNetID *player = se_GetLocalPlayer();
-    tString params;
-    s >> params;
-
-    int x = atoi(params);
-    if (player)
-    {
-        gCycle *cycle = dynamic_cast<gCycle *>(player->Object());
-        if (cycle && cycle->Alive())
-        {
-            cycle->Act(&gCycle::se_turnRight, x);
-            cycle->Act(&gCycle::se_turnRight, x);
-        }
-    }
-}
-static tConfItemFunc se_turnDoubleBindRightConf("TURN_DOUBLEBIND_RIGHT", &se_turnDoubleBindRight);
+static tConfItemFunc se_cycleTurnConf("CYCLE_TURN", &se_cycleTurn);
 
 bool ePlayer::Act(uAction *act,REAL x)
 {
@@ -5120,6 +5110,8 @@ bool ePlayer::Act(uAction *act,REAL x)
                             {
                                 if (!se_displayScoresDuringChat)
                                     se_BlockScores = true;
+                                else
+                                    se_BlockScores = false;
 
                                 // a chat is already active, insert the chat string
                                 throw eChatInsertionCommand( say );
@@ -7074,19 +7066,11 @@ void ePlayerNetID::ReadSync(nMessage &m)
         // filter
         se_OptionalNameFilters( remoteName );
 
-        //  check whether player's display name has colors in it
-        if (tColoredString::HasColors(remoteName))
-        {
-            //  remove all colors from name
-            tString colorlessName = tColoredString::RemoveColors(remoteName, false);
+        //  remove all colors from name
+        tString colorlessName = tColoredString::RemoveColors(remoteName, false);
 
-            //  check if the colorless name's length is longer than the limited length
-            if (colorlessName.Len() > 16)
-            {
-                se_CutString( remoteName, 16 );
-            }
-        }
-        else
+        //  check if the colorless name's length is longer than the limited length
+        if (colorlessName.Len() > 16)
         {
             se_CutString( remoteName, 16 );
         }
@@ -10035,7 +10019,7 @@ void ePlayerNetID::UpdateName( void )
         }
 
         // append numbers until the name is free
-        for ( int i=2; i<1000; ++i )
+        for ( int i = 2; i < se_PlayerNetIDs.Len(); ++i )
         {
             tString testName(newName);
             testName << i;
@@ -10435,7 +10419,7 @@ ePlayerNetID & ePlayerNetID::SetName( char const * name )
 // *
 // ******************************************************************************************
 //!
-//!      @param  name    this player's name without colors. to set
+//!      @param  name    this player's name
 //!
 // ******************************************************************************************
 ePlayerNetID & ePlayerNetID::ForceName( tString const & name )
@@ -10452,18 +10436,11 @@ ePlayerNetID & ePlayerNetID::ForceName( tString const & name )
         this->nameFromAdmin_ = name;
         this->nameFromAdmin_.NetFilter();
 
-        if (tColoredString::HasColors(this->nameFromAdmin_))
-        {
-            //  remove all colors from name
-            tString colorlessName = tColoredString::RemoveColors(this->nameFromAdmin_, false);
+        //  remove all colors from name
+        tString colorlessName = tColoredString::RemoveColors(this->nameFromAdmin_, false);
 
-            //  check if the colorless name's length is longer than the limited length
-            if (colorlessName.Len() > 16)
-            {
-                se_CutString( this->nameFromAdmin_, 16 );
-            }
-        }
-        else
+        //  check if the colorless name's length is longer than the limited length
+        if (colorlessName.Len() > 16)
         {
             se_CutString( this->nameFromAdmin_, 16 );
         }
@@ -11367,32 +11344,31 @@ static nCallbackFillServerInfo se_fillServerSettings(se_FillServerSettings);
 
 static void sg_KillChatters(std::istream &s)
 {
-    if (se_PlayerNetIDs.Len()>0)
+    if (se_PlayerNetIDs.Len() > 0)
     {
-        int max = se_PlayerNetIDs.Len();
-        for(int i=0; i<max; i++)
+        for(int i = 0; i < se_PlayerNetIDs.Len(); i++)
         {
-            ePlayerNetID *p=se_PlayerNetIDs(i);
+            ePlayerNetID *p = se_PlayerNetIDs[i];
             if (p && p->IsChatting())
             {
-                p->Object()->Kill();
+                if (p->Object() && p->Object()->Alive())
+                    p->Object()->Kill();
             }
         }
         sn_ConsoleOut( tOutput( "$player_chatter_die") );
     }
 }
 
-static tConfItemFunc sg_KillChatters_conf("CHATTERS_KILL", sg_KillChatters);
+static tConfItemFunc sg_KillChatters_conf("CHATTERS_KILL", &sg_KillChatters);
 static tAccessLevelSetter sg_KillChatters_conflevel( sg_KillChatters_conf, tAccessLevel_Moderator );
 
 static void sg_SilenceChatters(std::istream &s)
 {
-    if (se_PlayerNetIDs.Len()>0)
+    if (se_PlayerNetIDs.Len() > 0)
     {
-        int max = se_PlayerNetIDs.Len();
-        for(int i=0; i<max; i++)
+        for(int i = 0; i < se_PlayerNetIDs.Len(); i++)
         {
-            ePlayerNetID *p=se_PlayerNetIDs(i);
+            ePlayerNetID *p = se_PlayerNetIDs[i];
             if (p && p->IsChatting())
             {
                 p->SetSilenced(true);
@@ -11402,7 +11378,7 @@ static void sg_SilenceChatters(std::istream &s)
     }
 }
 
-static tConfItemFunc sg_SilenceChatters_conf("CHATTERS_SILENCE", sg_SilenceChatters);
+static tConfItemFunc sg_SilenceChatters_conf("CHATTERS_SILENCE", &sg_SilenceChatters);
 static tAccessLevelSetter sg_SilenceChatters_conflevel( sg_SilenceChatters_conf, tAccessLevel_Moderator );
 
 static void SuspendChatter_conf_base(std::istream &s, int rounds )
@@ -11416,12 +11392,11 @@ static void SuspendChatter_conf_base(std::istream &s, int rounds )
     {
         s >> rounds;
     }
-    if (se_PlayerNetIDs.Len()>0)
+    if (se_PlayerNetIDs.Len() > 0)
     {
-        int max = se_PlayerNetIDs.Len();
-        for(int i=0; i<max; i++)
+        for(int i = 0; i < se_PlayerNetIDs.Len(); i++)
         {
-            ePlayerNetID *p=se_PlayerNetIDs(i);
+            ePlayerNetID *p = se_PlayerNetIDs[i];
             if (p && p->IsChatting())
             {
                 p->Suspend(rounds);
@@ -11436,7 +11411,7 @@ static void SuspendChatters_conf(std::istream &s )
     SuspendChatter_conf_base( s, se_suspendDefault );
 }
 
-static tConfItemFunc sg_SuspendChatters_conf("CHATTERS_SUSPEND", SuspendChatters_conf);
+static tConfItemFunc sg_SuspendChatters_conf("CHATTERS_SUSPEND", &SuspendChatters_conf);
 static tAccessLevelSetter sg_SuspendChatters_conflevel( sg_SuspendChatters_conf, tAccessLevel_Moderator );
 
 static void sg_ListChatters(std::istream &s)
@@ -11444,12 +11419,11 @@ static void sg_ListChatters(std::istream &s)
     ePlayerNetID * receiver=0;
     tColoredString send;
 
-    if (se_PlayerNetIDs.Len()>0)
+    if (se_PlayerNetIDs.Len() > 0)
     {
-        int max = se_PlayerNetIDs.Len();
-        for(int i=0; i<max; i++)
+        for(int i = 0; i < se_PlayerNetIDs.Len(); i++)
         {
-            ePlayerNetID *p=se_PlayerNetIDs(i);
+            ePlayerNetID *p = se_PlayerNetIDs[i];
             if (p && p->IsChatting())
             {
                 send << p->GetColoredName() << tColoredString::ColorString( 1,1,.5 ) << ", ";
@@ -11460,5 +11434,5 @@ static void sg_ListChatters(std::istream &s)
     }
 }
 
-static tConfItemFunc sg_ListChatters_conf("CHATTERS_LIST", sg_ListChatters);
+static tConfItemFunc sg_ListChatters_conf("CHATTERS_LIST", &sg_ListChatters);
 static tAccessLevelSetter sg_ListChatters_confLevel( sg_ListChatters_conf, tAccessLevel_Moderator );

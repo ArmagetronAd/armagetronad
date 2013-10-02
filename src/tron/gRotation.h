@@ -82,10 +82,7 @@ class gRotationRoundSelection
 
         int Round() { return round_; }
 
-        int Size()
-        {
-            return items_.Len();
-        }
+        int Size() { return items_.Len(); }
 
         // returns the current value
         gRotationItem *Current()
@@ -94,10 +91,7 @@ class gRotationRoundSelection
             return items_[current_];
         }
 
-        void Reset()
-        {
-            current_ = 0;
-        }
+        void Reset() { current_ = 0; }
 
         void Clear()
         {
@@ -244,10 +238,7 @@ public:
     }
 
     // the number of items
-    int Size()
-    {
-        return items_.Len();
-    }
+    int Size() { return items_.Len(); }
 
     // returns the current value
     gRotationItem *Current()
@@ -281,10 +272,7 @@ public:
         }
     }
 
-    void Reset()
-    {
-        current_ = 0;
-    }
+    void Reset() { current_ = 0; }
 
     void Clear()
     {
@@ -338,10 +326,7 @@ public:
 
     int ID() { return current_;}
 
-    void SetID(int newID)
-    {
-        current_ = newID;
-    }
+    void SetID(int newID) { current_ = newID; }
 
     //!< This is for the rotation loading limit
     static void AddCounter() { counter_ ++; }
@@ -354,10 +339,41 @@ private:
     int current_;           // the index of the current
 
     static int counter_;
+    static bool queueActive_;
 
 public:
-    static void HandleNewRound();
+    static void HandleNewRound(int rounds);
     static void HandleNewMatch();
+};
+
+class gQueueing
+{
+    public:
+        // the number of items
+        int Size() const { return items_.Len(); }
+
+        void Remove(int itemID) { items_.RemoveAt(itemID); }
+
+        void Reset() { current_ = 0; }
+
+        // returns the current value
+        tString Current() const
+        {
+            tASSERT( Size() > 0 && current_ >= 0 && current_ < Size() );
+
+            return items_[current_];
+        }
+
+        // returns the current id
+        int CurrentID() const { return current_; }
+
+        void Insert(tString item_name) { items_.Insert(item_name); }
+
+        tString Get(int itemID) { return items_[itemID]; }
+
+    private:
+        tArray<tString> items_;
+        int current_;
 };
 
 class gQueuePlayers
@@ -413,6 +429,8 @@ class gQueuePlayers
 };
 
 void QueueShowPlayer(ePlayerNetID *player);
+void sg_DisplayRotationList(ePlayerNetID *p, std::istream &s, tString command);
+void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command);
 void sg_LogQueue(ePlayerNetID *p, tString command, tString params, tString item);
 
 #endif

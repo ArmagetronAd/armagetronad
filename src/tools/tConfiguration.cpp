@@ -479,9 +479,9 @@ void tConfItemBase::SaveAll(std::ostream &s){
     {
         tConfItemBase * ci = (*iter).second;
         if (ci->Save()){
-            s << std::setw(28) << ci->title << " ";
+            s << ci->title << " ";
             ci->WriteVal(s);
-            s << '\n';
+            s << "\n";
         }
     }
 }
@@ -698,6 +698,63 @@ static void sg_ListAllCommands(std::istream &s)
 static tConfItemFunc sg_ListAllCommandsConf("LIST_ALL_COMMANDS", &sg_ListAllCommands);
 
 /** LISTING END **/
+
+/** LISTING ACCESS_LEVEL BEGIN **/
+// writes the list of all commands and their help to commands_list.txt in the var directory
+void tConfItemBase::WriteAllLevelsToFile()
+{
+    tConfItemMap & confmap = ConfItemMap();
+    int sim_maxlen = -1;
+
+    for(tConfItemMap::iterator iter = confmap.begin(); iter != confmap.end() ; ++iter)
+    {
+        tConfItemBase * ci = (*iter).second;
+        if (static_cast<int>(strlen(ci->title)) > sim_maxlen)
+            sim_maxlen = strlen(ci->title);
+    }
+
+    std::ofstream w;
+    tString file("commands_level_list.txt");
+    if ( tDirectories::Var().Open(w, file))
+    {
+        /*w << "{| border=\"2\" cellspacing=\"0\" cellpadding=\"4\" rules=\"all\" style=\"margin:1em 1em 1em 0; border:solid 1px #AAAAAA; border-collapse:collapse; background-color:#F9F9F9; font-size:95%; empty-cells:show;\"\n";
+        w << "!Command\n";
+        w << "!Meaning\n";
+        w << "!Default\n";
+        w << "|-\n";*/
+        for(tConfItemMap::iterator iter = confmap.begin(); iter != confmap.end() ; ++iter)
+        {
+            tConfItemBase * ci = (*iter).second;
+            tString help ( ci->help );
+
+            tString mess;
+
+            mess << "ACCESS_LEVEL ";
+            mess << ci->title << " ";
+
+            //mess.SetPos( sim_maxlen+2, false );
+            mess << ci->requiredLevel;
+            mess.SetPos( sim_maxlen+5, false );
+            mess << " # ";
+            mess << help;
+            mess << "\n";
+
+            w << mess;
+            /*w << "| " << ci->title << " || " << help << " || " << value << "\n";
+            w << "|-\n";*/
+        }
+        //w << "|}\n";
+    }
+    w.close();
+}
+
+static void sg_ListAllCommandsLevels(std::istream &s)
+{
+    tConfItemBase::WriteAllLevelsToFile();
+}
+static tConfItemFunc sg_ListAllCommandsLevelsConf("LIST_ALL_COMMANDS_LEVELS", &sg_ListAllCommandsLevels);
+
+/** LISTING ACCESS_LEVEL END **/
 
 /** SET ALL ACCESS_LEVEL BEGIN **/
 void tConfItemBase::SetAllAccessLevel(int newLevel)

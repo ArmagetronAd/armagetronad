@@ -281,8 +281,9 @@ public:
     static void LoadLine(std::istream &s); //! loads one configuration line
     static bool LoadPlayback( bool print = false ); //! loads configuration from playback
     static void DocAll(std::ostream &s);
-    static int AccessLevel(std::istream &s); //! Returns access level needed for command -1 if command not found
+    static int AccessLevel(std::istream &s); //! Returns access level needed for command. -1 if command not found.
     static void WriteAllToFile();
+    static void WriteAllLevelsToFile();
     static tString FindConfigItem(tString name);    //! Returns the config name of the searching string name
     static void SetAllAccessLevel(int newLevel);
 
@@ -557,7 +558,6 @@ public:
         return false;
     }
 };
-
 
 class tConfItemLine:public tConfItem<tString>, virtual public tConfItemBase{
 public:

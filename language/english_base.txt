@@ -3535,9 +3535,9 @@ map_queueing_help                     Stores map that exist in MAP_ROTATION. Sto
 map_queueing_stored_file_found        Map \1 has already been stored in list in \2 order. This addition has been ignored.\n
 map_queueing_file_stored              Map \1 has successfully been added to the que by \2.\n
 map_queueing_file_removed             Map \1 has successfully been removed from the que by \2.\n
-map_queueing_file_not_found           0xff0000Search term \1 couldn't be found in MAP_ROTATION.\n
-map_queueing_que_file_not_found       0xff0000Search term \1 couldn't be found in the MAP_QUEUEING.\n
-map_queueing_found_toomanyfiles       0xff0000Search term \1 found many matches in MAP_ROTATION. Be more specific.\n
+map_queueing_file_not_found           0xff7777Search term \1 couldn't be found in MAP_ROTATION.\n
+map_queueing_que_file_not_found       0xff7777Search term \1 couldn't be found in the MAP_QUEUEING.\n
+map_queueing_found_toomanyfiles       0xff7777\2 matches are found for search term "\1". Be more specific.\n
 map_queueing_is_empty                 Map queue is now empty. Normal rotation will resume from next round or match.\n
 map_queueing_required_level           Map queueing command \2 requires level is \1. You do not have that access level.\n
 
@@ -3545,9 +3545,9 @@ config_queueing_help                  Stores config that exists in CONFIG_ROTATI
 config_queueing_stored_file_found     Config \1 has already been stored in list in \2 order. This addition has been ignored.\n
 config_queueing_file_stored           Config \1 has successfully been added to the que by \2.\n
 config_queueing_file_removed          Config \1 has successfully been removed from the que by \2.\n
-config_queueing_file_not_found        0xff0000Search term \1 couldn't be found in the CONFIG_ROTATION.\n
-config_queueing_que_file_not_found    0xff0000Search term \1 couldn't be found in the CONFIG_QUEUEING.\n
-config_queueing_found_toomanyfiles    0xff0000Search term \1 found many matches in CONFIG_ROTATION. Be more specific.\n
+config_queueing_file_not_found        0xff7777Search term \1 couldn't be found in the CONFIG_ROTATION.\n
+config_queueing_que_file_not_found    0xff7777\2 matches are found for search term "\1". Be more specific.\n
+config_queueing_found_toomanyfiles    0xff7777Search term \1 found many matches in CONFIG_ROTATION. Be more specific.\n
 config_queueing_is_empty              Config queue is now empty. Normal rotation will resume from next round or match.\n
 config_queueing_required_level        Config queueing command \2 requires level is \1. You do not have that access level.\n
 
@@ -3574,7 +3574,7 @@ queue_refill_time_help     How long each time should players refill take? This i
 queue_refill_active_help   Should players be in server to have their queue refill active?
 queue_refill_waiting       You still have to wait \1 minutes for your queueing limit to refill.\n
 
-queue_find_failed          0xff7777Couldn't find queuer with the name: "\1".\n
+queue_find_failed          0xff7777\2 queuer were found with the search name: "\1".\n
 queue_refill_success       An administrator restored \1's queues.\n
 queue_give_success         \1 received \2 queues from \3 by an administrator.\n
 
@@ -3856,7 +3856,7 @@ banned_words_list             The list of currently banned words:\n
 banned_words_list_show        Showing \1 banned words out of \2 total.\n
 banned_words_warning          BANNED WORDS: Your message is blocked due to containing one or many banned words.\n
 banned_words_replace          *
-banned_words_options          0: disable. 1: Block and alert message to sender. 2: Replace bad word with chosen character(s).
+banned_words_options_help     0: disable. 1: Block and alert message to sender. 2: Replace bad word with chosen character(s).
 
 #chat_message_report_message         [ time ] player reports: message.\n
 chat_message_report_message          [ \1 ] \2 reports: \3.\n

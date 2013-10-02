@@ -73,8 +73,6 @@ class gGame:public nNetObject{
 
     gParser *aParser;
 
-    bool queueActive;
-
 public:
     gGame();
     gGame(nMessage &m);
@@ -249,13 +247,8 @@ extern bool sg_RaceTimerEnabled;
 
 extern tString mapfile;
 
-void Orderedrotate();
-void Randomrotate();
-void QueRotate();
-
-extern void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command);
-extern void sg_DisplayRotationList(ePlayerNetID *p, std::istream &s, tString command);
-extern void sg_OutputOnlinePlayers();
+void sg_OutputOnlinePlayers();
+void LoadMap(tString mapName);
 
 #endif
 

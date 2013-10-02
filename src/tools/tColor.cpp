@@ -233,6 +233,6 @@ bool tColor::VerifyColorCode( const wchar_t * c )
 
 bool tColor::IsDark( void )
 {
-    return ( r_ < sr_minR && g_ < sr_minG && b_ < sr_minG ) || r_+g_+b_ < sr_minTotal;
+    return ( r_ < sr_minR && g_ < sr_minG && b_ < sr_minB ) || r_+g_+b_ < sr_minTotal;
 }
 
