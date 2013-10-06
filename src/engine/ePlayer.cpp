@@ -2267,6 +2267,10 @@ static tAccessLevel se_opAccessLevelMax = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_opAccessLevelMaxConf( "ACCESS_LEVEL_OP_MAX", se_opAccessLevelMax );
 static tAccessLevelSetter se_opAccessLevelMaxConfLevel( se_opAccessLevelMaxConf, tAccessLevel_Owner );
 
+static tAccessLevel se_opAccessLevelMin = tAccessLevel_Punished;
+static tSettingItem< tAccessLevel > se_opAccessLevelMinConf( "ACCESS_LEVEL_OP_MIN", se_opAccessLevelMin );
+static tAccessLevelSetter se_opAccessLevelMinConfLevel( se_opAccessLevelMinConf, tAccessLevel_Owner );
+
 static bool se_CanChangeAccess( ePlayerNetID * admin, ePlayerNetID * victim, char const * command )
 {
     tASSERT( admin );
@@ -2359,9 +2363,9 @@ static void se_ChangeAccess( ePlayerNetID * admin, std::istream & s, char const 
 // Promote changes the access rights of an already authed player
 void se_Promote( ePlayerNetID * admin, ePlayerNetID * victim, tAccessLevel accessLevel )
 {
-    if ( accessLevel > tAccessLevel_Authenticated )
+    if ( accessLevel > se_opAccessLevelMin )
     {
-        accessLevel = tAccessLevel_Authenticated;
+        accessLevel = se_opAccessLevelMin;
     }
     if ( accessLevel < tCurrentAccessLevel::GetAccessLevel() + 1 )
     {
@@ -4387,7 +4391,7 @@ static ePlayerNetID* identifyPlayer(tString inname)
 */
 
 // identify a local player
-static ePlayerNetID* se_GetLocalPlayer()
+ePlayerNetID *se_GetLocalPlayer()
 {
     for(int i=0; i<se_PlayerNetIDs.Len(); i++)
     {
@@ -5020,44 +5024,6 @@ static bool se_allowControlDuringChat = false;
 static nSettingItem<bool> se_allowControlDuringChatConf("ALLOW_CONTROL_DURING_CHAT",se_allowControlDuringChat);
 
 uActionPlayer se_toggleSpectator("TOGGLE_SPECTATOR", -7);
-
-static void se_cycleTurn(std::istream &s)
-{
-    ePlayerNetID *player = se_GetLocalPlayer();
-    tString times, turn;
-    s >> times;
-    s >> turn;
-
-    int x = atoi(times);
-    if (player)
-    {
-        gCycle *cycle = dynamic_cast<gCycle *>(player->Object());
-        if (cycle && cycle->Alive())
-        {
-            if (turn.Filter() == "left")
-            {
-                for(int i = 0; i < x; i++)
-                {
-                    cycle->Act(&gCycle::se_turnLeft, 1);
-                }
-            }
-            else if (turn.Filter() == "right")
-            {
-                for(int i = 0; i < x; i++)
-                {
-                    cycle->Act(&gCycle::se_turnRight, 1);
-                }
-            }
-            else
-            {
-                tString msg;
-                msg << "For command, CYCLE_TURN: CYCLE_TURN <times> [turn: left | right] required.\n";
-                sn_ConsoleOut(msg, player->Owner());
-            }
-        }
-    }
-}
-static tConfItemFunc se_cycleTurnConf("CYCLE_TURN", &se_cycleTurn);
 
 bool ePlayer::Act(uAction *act,REAL x)
 {

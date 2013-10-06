@@ -468,83 +468,24 @@ int nKrawall::CustomShorthandExecute(int userID, tString authority, tString &ful
     //sn_ConsoleOut("Connection to" + authority + "\n");
     if (authority == sn_CustomShorthand)
     {
-        /*
-        //! Coder: LOVER$BOY
-        //! Status: Complete
-        //! Description:
-        //!   This code was meant for allowing only registered custom shorthands to be used.
-        //!       It's not ready yet but will be once permission is obtained either through
-        //!       Z-Man or Tank Program. Until then, this will remain commented.
+        std::stringstream answer;
 
-        //  compose real URL
-        std::ostringstream fullURL;
-        fullURL << "http://shorthands.vertrex.tk/?query=check&authority=" << authority;
+        //  good, put full authority with the custom connection of shorthand
+        fullAuthority = sn_CustomShorthandConnection;
 
-        const tString username(sn_CustomShorthandUser), password(sn_CustomShorthandPass);
-        fullURL << "&user=" << username;
-        fullURL << "&pass=" << password;
-
-        //  fetch URL
-        void * ctxt = xmlNanoHTTPOpen( fullURL.str().c_str(), NULL);
-        if (ctxt == NULL)
+        //  get the response number after fetching the methods from custom shhorthand url
+        int response = nKrawall::FetchURL( fullAuthority, "?query=methods", answer );
+        if (response == -1)
         {
-            error.SetTemplateParameter(1, "http://shorthands.vertrex.tk/");
-            error << "$shorthands_error_invalidurl";
+            error.SetTemplateParameter(1, fullAuthority);
+            error << "$custom_shorthand_url_unknown";
 
             return -1;
         }
-
-        //  read in website response code
-        int rc = xmlNanoHTTPReturnCode(ctxt);
-
-        std::stringstream scontent;
-        int maxlen = 10000;
-        char buf[1000];
-        buf[0] = 0;
-        unsigned int len = 1;
-        while ( len > 0 && maxlen > 0)
-        {
-            int max = sizeof(buf);
-            if ( max > maxlen )
-                max = maxlen;
-            len = xmlNanoHTTPRead( ctxt, &buf, max );
-            scontent.write( buf, len );
-            maxlen -= len;
-        }
-
-        tString content;
-
-        if (rc != 200)
-        {
-            xmlNanoHTTPClose(ctxt);
-
-            content.ReadLine(scontent);
-
-            error.SetTemplateParameter(1, authority);
-            error.SetTemplateParameter(2, rc);
-            error.SetTemplateParameter(3, content);
-            error << "$shorthands_error_unknown";
-
-            return -1;
-        }
-
-        scontent >> content;
-        if (content.Trim().ToLower() == "password_ok")
-        {
-            xmlNanoHTTPClose(ctxt);
-        */
-            //  good, put full authority with the custom connection of shorthand
-            fullAuthority = sn_CustomShorthandConnection;
-            return 1;
-        /*}
         else
         {
-            xmlNanoHTTPClose(ctxt);
-
-            error.SetTemplateParameter(1, authority);
-            error.SetTemplateParameter(2, content);
-            error << "$shorthands_error_different";
-        }*/
+            return 1;
+        }
     }
 
     return 0;

@@ -3729,6 +3729,49 @@ REAL gCycle::PathfindingModifier( const eWall *w ) const
         return 1;
 }
 
+#ifndef DEDICATED
+#ifndef KRAWALL_SERVER
+static void se_cycleTurn(std::istream &s)
+{
+    ePlayerNetID *player = NULL;
+    player = se_GetLocalPlayer();
+
+    tString times, turn;
+    s >> times;
+    s >> turn;
+
+    int x = atoi(times);
+    if (player)
+    {
+        gCycle *cycle = dynamic_cast<gCycle *>(player->Object());
+        if (cycle && cycle->Alive())
+        {
+            if (turn.Filter() == "left")
+            {
+                for(int i = 0; i < x; i++)
+                {
+                    cycle->Act(&gCycle::se_turnLeft, 1);
+                }
+            }
+            else if (turn.Filter() == "right")
+            {
+                for(int i = 0; i < x; i++)
+                {
+                    cycle->Act(&gCycle::se_turnRight, 1);
+                }
+            }
+            else
+            {
+                tString msg;
+                msg << "Usage: CYCLE_TURN <times> [turn: left | right] required.\n";
+                sn_ConsoleOut(msg, player->Owner());
+            }
+        }
+    }
+}
+static tConfItemFunc se_cycleTurnConf("CYCLE_TURN", &se_cycleTurn);
+#endif
+#endif
 
 bool gCycle::Act(uActionPlayer *Act, REAL x){
     // don't accept premature input

@@ -3189,6 +3189,7 @@ access_level_hide_to_help      Minimal access level to see everyone's user accou
 access_level_team_help         Minimal access level for /lock, /unlock, /invite and /uninvite team management.
 access_level_op_help           Minimal access level for /op and /deop co-admin management commands commands.
 access_level_op_max_help       Maximal access level directly attainable by /op commands.
+access_level_op_min_help       Minimal access level directly attainable by /op commands.
 access_level_admin_help        Minimal access level for /admin command.
 access_level_rtfm_help         Minimal access level for /teach or /rtfm command.
 access_level_chat_help         Minimal access level for chatting.
@@ -3531,7 +3532,7 @@ cycle_target_timeout         You fail core dumping your target \1 in time.\n
 cycle_target_cancel          Your target assignment has been cancelled by server.\n
 
 ## MAP/CONFIG _queueing commands and helping hints - LOVER$BOY's additions
-map_queueing_help                     Stores map that exist in MAP_ROTATION. Stops rotation temporarly to complete the listed maps.
+queue_map_help                        Stores map that exist in MAP_ROTATION. Stops rotation temporarly to complete the listed maps.
 map_queueing_stored_file_found        Map \1 has already been stored in list in \2 order. This addition has been ignored.\n
 map_queueing_file_stored              Map \1 has successfully been added to the que by \2.\n
 map_queueing_file_removed             Map \1 has successfully been removed from the que by \2.\n
@@ -3541,7 +3542,7 @@ map_queueing_found_toomanyfiles       0xff7777\2 matches are found for search te
 map_queueing_is_empty                 Map queue is now empty. Normal rotation will resume from next round or match.\n
 map_queueing_required_level           Map queueing command \2 requires level is \1. You do not have that access level.\n
 
-config_queueing_help                  Stores config that exists in CONFIG_ROTATION. Stops rotation temporarly to complete the listed maps.
+queue_config_help                     Stores config that exists in CONFIG_ROTATION. Stops rotation temporarly to complete the listed maps.
 config_queueing_stored_file_found     Config \1 has already been stored in list in \2 order. This addition has been ignored.\n
 config_queueing_file_stored           Config \1 has successfully been added to the que by \2.\n
 config_queueing_file_removed          Config \1 has successfully been removed from the que by \2.\n
@@ -3674,7 +3675,7 @@ ladderlog_write_zone_shot_released_help             Write to ladderlog: ZONE_SHO
 ladder_highscore_output_help              If set to >1, high scores will be announced to all players.
 legacy_ladderlog_command_help             If set to 1, COMMAND will output similar things to INVALID_COMMAND.
 limit_sets_help                           Set the match set limit. Teams winning more sets win the match.
-list_all_commands_help                    One execution and all commands are stored in ./var/commands_list.txt
+
 mega_shot_dir_help                        The number of shots released after full brake release (depending on MEGA_SHOT_THRESH value).
 mega_shot_explosion_help                  If set to 1>, explosions occur when a mega shot is released.
 mega_shot_mult_help                       The boost for the mega shot after being released.
@@ -3780,6 +3781,7 @@ logout_help   Using the given <name>, find the player and logs them out if they 
 custom_shorthand_enabled_help     If set to 1 and CUSTOM_SHORTHAND is found, then CUSTOM_SHORTHAND_CONNECTION will be used to connect.
 custom_shorthand_help             The custom authority to trigger when a player tries to login.
 custom_shorthand_connection_help  The link to connect to when using custom shorthand. Do not include "http://".
+custom_shorthand_url_unknown      Unable to connect to the custom shorthand \1.\n
 
 collapse_all_help   Causes all zones to vanish smoothly.
 destroy_all_help    Causes all zones to vanish instantly.
@@ -3823,6 +3825,7 @@ clear_scorelog_help        Clear all data from scorelog.txt located in ./var fol
 clear_chatlog_help         Clear all data from chatlog.txt located in ./var folder.
 clear_chatlog_colors_help  Clear all data from chatlog_colors.txt located in ./var folder.
 clear_adminlog_help        Clear all data from adminlog.txt located in ./var folder.
+clear_reports_help         Clear all data from reports.txt located in ./var folder.
 
 # commands
 custom_configs_help           List of configs, seperated by ;, to load during the star-up of the client/server.
@@ -3830,10 +3833,11 @@ reload_config_help            Reload the initial settings that are loaded during
 custom_invalid_commands_help  Contains the list of commands to be executed as chat commands: Usage: CUSTOM_INVALID_COMMANDS {command_method1};{command_method2};
 load_custom_configs_help      Load the custom configs loaded in CUSTOM_CONFIGS command.
 
-default_execution_level_help  At what level should the default execution level be set to? Default: 1 (Administrato)
-default_owner_level_help      At what level should the owner of the server level be set to? Default: 0 (Owner)
-
-set_commands_accesslevel_help Set the access level of ALL the commands to the given level.
+default_execution_level_help       At what level should the default execution level be set to? Default: 1 (Administrato)
+default_owner_level_help           At what level should the owner of the server level be set to? Default: 0 (Owner)
+list_all_commands_help             All commands and their values are stored in ./var/commands_list.txt
+list_all_commands_levels_help      All commands are their access levels are stored in ./var/commands_levels_list.txt
+set_commands_accesslevel_help      Set the access level of ALL the commands to the given level.
 
 # Ping pong settings
 pingpong_bounce_speed_help    The speed at which the pingpong balls be bouncing off.
@@ -3844,8 +3848,9 @@ pingpong_team_balls_help      The number of ping pong balls a team can have.
 
 rubberzone_rubber_help        Set the rubber which rubber zone should have to decrease/increase by.
 
-turn_doublebind_left_help     Do the double bind turn to the left side.
-turn_doublebind_right_help    Do the double bind turn to the right side.
+cycle_turn_help               Make the cycle turn. Usage: CYCLE_TURN [times to turn] <turn: left or right>.
+
+cfg_user_save_help            Can the user.cfg be saved after work?
 
 # Commands for bad words
 banned_words_help             The list of words banned for various reasons.
@@ -3857,6 +3862,7 @@ banned_words_list_show        Showing \1 banned words out of \2 total.\n
 banned_words_warning          BANNED WORDS: Your message is blocked due to containing one or many banned words.\n
 banned_words_replace          *
 banned_words_options_help     0: disable. 1: Block and alert message to sender. 2: Replace bad word with chosen character(s).
+banned_words_delimiters_help  The delimiters to remove from in the messages in case people encased banned words in them.
 
 #chat_message_report_message         [ time ] player reports: message.\n
 chat_message_report_message          [ \1 ] \2 reports: \3.\n

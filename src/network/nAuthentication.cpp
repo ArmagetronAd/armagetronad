@@ -686,9 +686,9 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
                         std::ofstream o;
                         if (tDirectories::Var().Open(o, loginErrorLogFile, std::ios::app))
                         {
-                            o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << " | Error: \n";
+                            o << st_GetCurrentTime("[ %Y/%m/%d-%H:%M:%S ] ");
                             o << tOutput( "$login_error_invalidurl_illegal_hostname", authority ) << "\n";
-                            o << "===========================================================\n\n";
+                            o << "\n";
                         }
                         return ReportAuthorityError( tOutput( "$login_error_invalidurl_illegal_hostname", authority ) );
                     }
@@ -705,9 +705,9 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
                         std::ofstream o;
                         if (tDirectories::Var().Open(o, loginErrorLogFile, std::ios::app))
                         {
-                            o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << " | Error: \n";
+                            o << st_GetCurrentTime("[ %Y/%m/%d-%H:%M:%S ] ");
                             o << tOutput( "$login_error_invalidurl_illegal_port", authority ) << "\n";
-                            o << "===========================================================\n\n";
+                            o << "\n";
                         }
                         return ReportAuthorityError( tOutput( "$login_error_invalidurl_illegal_port", authority ) );
                     }
@@ -726,9 +726,9 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
                             std::ofstream o;
                             if (tDirectories::Var().Open(o, loginErrorLogFile, std::ios::app))
                             {
-                                o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << " | Error: \n";
+                                o << st_GetCurrentTime("[ %Y/%m/%d-%H:%M:%S ] ");
                                 o << tOutput( "$login_error_invalidurl_slash", authority ) << "\n";
-                                o << "===========================================================\n\n";
+                                o << "\n";
                             }
                             return ReportAuthorityError( tOutput( "$login_error_invalidurl_slash", authority ) );
                         }
@@ -742,9 +742,9 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
                             std::ofstream o;
                             if (tDirectories::Var().Open(o, loginErrorLogFile, std::ios::app))
                             {
-                                o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << " | Error: \n";
+                                o << st_GetCurrentTime("[ %Y/%m/%d-%H:%M:%S ] ");
                                 o << tOutput( "$login_error_invalidurl_illegal_path", authority ) << "\n";
-                                o << "===========================================================\n\n";
+                                o << "\n";
                             }
                             return ReportAuthorityError( tOutput( "$login_error_invalidurl_illegal_path", authority )  );
                         }
@@ -773,9 +773,9 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
                 std::ofstream o;
                 if (tDirectories::Var().Open(o, loginErrorLogFile, std::ios::app))
                 {
-                    o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << " | Error: \n";
+                    o << st_GetCurrentTime("[ %Y/%m/%d-%H:%M:%S ] ");
                     o << tOutput( "$login_error_invalidurl_slash", authority ) << "\n";
-                    o << "===========================================================\n\n";
+                    o << "\n";
                 }
                 return ReportAuthorityError( tOutput( "$login_error_invalidurl_slash", authority ) );
             }
@@ -784,9 +784,9 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
                 std::ofstream o;
                 if (tDirectories::Var().Open(o, loginErrorLogFile, std::ios::app))
                 {
-                    o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << " | Error: \n";
+                    o << st_GetCurrentTime("[ %Y/%m/%d-%H:%M:%S ] ");
                     o << tOutput( "$login_error_invalidurl_defaultport", authority ) << "\n";
-                    o << "===========================================================\n\n";
+                    o << "\n";
                 }
                 return ReportAuthorityError( tOutput( "$login_error_invalidurl_defaultport", authority ) );
             }
@@ -796,9 +796,9 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
                 std::ofstream o;
                 if (tDirectories::Var().Open(o, loginErrorLogFile, std::ios::app))
                 {
-                    o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << " | Error: \n";
+                    o << st_GetCurrentTime("[ %Y/%m/%d-%H:%M:%S ] ");
                     o << tOutput( "$login_error_invalidurl_rawip", authority ) << "\n";
-                    o << "===========================================================\n\n";
+                    o << "\n";
                 }
                 return ReportAuthorityError( tOutput( "$login_error_invalidurl_rawip", authority ) );
             }
@@ -855,6 +855,14 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
             //  if error was detected, halt and send error message
             if (response == -1)
             {
+                std::ofstream o;
+                if (tDirectories::Var().Open(o, loginErrorLogFile, std::ios::app))
+                {
+                    o << st_GetCurrentTime("[ %Y/%m/%d-%H:%M:%S ] ");
+                    o << displayError << "\n";
+                    o << "\n";
+                }
+
                 return ReportAuthorityError(displayError);
             }
             else if (response == 1)
@@ -869,9 +877,9 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
             std::ofstream o;
             if (tDirectories::Var().Open(o, loginErrorLogFile, std::ios::app))
             {
-                o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << " | Error: \n";
+                o << st_GetCurrentTime("[ %Y/%m/%d-%H:%M:%S ] ");
                 o << tOutput( "$login_error_invalidurl_notfound", authority ) << "\n";
-                o << "===========================================================\n\n";
+                o << "\n";
             }
             return ReportAuthorityError( tOutput( "$login_error_invalidurl_notfound", authority ) );
         }
@@ -890,11 +898,11 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
             std::ofstream o;
             if (tDirectories::Var().Open(o, loginErrorLogFile, std::ios::app))
             {
-                o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << " | Error: \n";
-                o << tOutput( "$login_error_nomethodlist", authority, rc, id + " " + methods ) << "\n";
-                o << "===========================================================\n\n";
+                o << st_GetCurrentTime("[ %Y/%m/%d-%H:%M:%S ] ");
+                o << tOutput( "$login_error_nomethodlist", fullAuthority, rc, id + " " + methods ) << "\n";
+                o << "\n";
             }
-            return ReportAuthorityError( tOutput( "$login_error_nomethodlist", authority, rc, id + " " + methods ) );
+            return ReportAuthorityError( tOutput( "$login_error_nomethodlist", fullAuthority, rc, id + " " + methods ) );
         }
 
 
@@ -930,18 +938,18 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
                 std::ofstream o;
                 if (tDirectories::Var().Open(o, loginErrorLogFile, std::ios::app))
                 {
-                    o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << " | Error: \n";
+                    o << st_GetCurrentTime("[ %Y/%m/%d-%H:%M:%S ] ");
                     o << tOutput( "$login_error_invalidurl_notfound", authority ) << "\n";
-                    o << "===========================================================\n\n";
+                    o << "\n";
                 }
                 return ReportAuthorityError( tOutput( "$login_error_invalidurl_notfound", authority ) );
             }
             std::ofstream o;
             if (tDirectories::Var().Open(o, loginErrorLogFile, std::ios::app))
             {
-                o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << " | Error: \n";
+                o << st_GetCurrentTime("[ %Y/%m/%d-%H:%M:%S ] ");
                 o << tOutput( "$login_error_nomethodproperties", authority, rc, data.str().c_str() ) << "\n";
-                o << "===========================================================\n\n";
+                o << "\n";
             }
             return ReportAuthorityError( tOutput( "$login_error_nomethodproperties", authority, rc, data.str().c_str() ) );
         }
