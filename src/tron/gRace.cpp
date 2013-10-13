@@ -1315,12 +1315,13 @@ void gRace::Sync( int alive, int ai_alive, int humans, REAL time )
         for(int x = 0; x < sg_RacePlayers.Len(); x++)
         {
             gRacePlayer *racePlayer = sg_RacePlayers[x];
-            if (racePlayer && racePlayer->Player() && !racePlayer->Player()->IsSpectating() && racePlayer->Player()->IsHuman())
+            if (racePlayer && racePlayer->Player() && racePlayer->Player()->IsHuman())
             {
-                if (racePlayer->Cycle() && racePlayer->Cycle()->Team() && racePlayer->Cycle()->Alive())
+                //  ensure we have a cycle attached to this player
+                if (racePlayer->Cycle())
                 {
                     //  check if player's speed is at idle or not
-                    if (racePlayer->Cycle()->Speed() <= sg_raceIdleSpeed)
+                    if ((racePlayer->Cycle()->Speed() <= sg_raceIdleSpeed) && racePlayer->Cycle()->Alive())
                     {
                         //  do second counting by 1
                         if ((time - racePlayer->IdleLastTime()) >= 1)
