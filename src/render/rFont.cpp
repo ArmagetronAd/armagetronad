@@ -649,7 +649,10 @@ rTextField & rTextField::StringOutput(const FTGL_CHAR * c, ColorMode colorMode)
                                      static_cast<FTGL_CHAR>('T'),
                                      0};
         bool isResettColor = false;
-        if (*c == '0' && my_strnlen(c, 8) >= 8 && c[1] == 'x' && colorMode != COLOR_IGNORE && (tColor::VerifyColorCode(c) || (isResettColor = 0 == my_strncmp(c, resett, 8))))
+        bool isUsableColor = colorMode != COLOR_IGNORE && *c == '0' && my_strnlen(c, 8) >= 8 && c[1] == 'x';
+
+        // Check for reset color first, because VerifyColorCode() will by default return true for 0xRESETT.
+        if ( isUsableColor &&  ( ( isResettColor = 0 == my_strncmp( c, resett, 8 ) ) || tColor::VerifyColorCode( c ) ) )
         {
             tColor color = isResettColor ? defaultColor_ : tColor( c );
 
