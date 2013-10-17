@@ -1059,7 +1059,6 @@ void gRaceScores::OutputEnd()
 gRacePlayer::gRacePlayer(ePlayerNetID *player)
 {
     this->player_ = player;
-    this->cycle_ = NULL;
 
     this->time_  = -1;
     this->score_ = 0;
@@ -1287,15 +1286,15 @@ void gRace::Sync( int alive, int ai_alive, int humans, REAL time )
             for(int a = 0; a < sg_RacePlayers.Len(); a++)
             {
                 gRacePlayer *rPlayer = sg_RacePlayers[a];
-                if (rPlayer)
+                if (rPlayer && rPlayer->Player())
                 {
-                    if ((rPlayer->Cycle()) && rPlayer->Player() && !rPlayer->Finished())
+                    gCycle *rPCycle = dynamic_cast<gCycle *>(rPlayer->Player()->Object());
+                    if ((rPCycle) && !rPlayer->Finished() && rPlayer->Player()->CurrentTeam())
                     {
                         if ((rPlayer->Chances() > 0) && (rPlayer->Chances() <= sg_raceChances))
                         {
                             //gRacePlayer::CreateNewCycle(rPlayer);
                             gCycle *cycle = new gCycle(grid, rPlayer->SpawnPosition(), rPlayer->SpawnDirection(), rPlayer->Player());
-                            rPlayer->NewCycle(cycle);
                             rPlayer->Player()->ControlObject(cycle);
                             rPlayer->DropChances();    //  decrease chances by this many values
                             alive += 1;
@@ -1317,11 +1316,12 @@ void gRace::Sync( int alive, int ai_alive, int humans, REAL time )
             gRacePlayer *racePlayer = sg_RacePlayers[x];
             if (racePlayer && racePlayer->Player() && racePlayer->Player()->IsHuman())
             {
+                gCycle *rPCycle = dynamic_cast<gCycle *>(racePlayer->Player()->Object());
                 //  ensure we have a cycle attached to this player
-                if (racePlayer->Cycle())
+                if (rPCycle)
                 {
                     //  check if player's speed is at idle or not
-                    if ((racePlayer->Cycle()->Speed() <= sg_raceIdleSpeed) && racePlayer->Cycle()->Alive())
+                    if ((rPCycle->Speed() <= sg_raceIdleSpeed) && rPCycle->Alive())
                     {
                         //  do second counting by 1
                         if ((time - racePlayer->IdleLastTime()) >= 1)
@@ -1357,7 +1357,7 @@ void gRace::Sync( int alive, int ai_alive, int humans, REAL time )
                                 if (time >= racePlayer->IdleNextTime())
                                 {
                                     //  time up! Let's kill them!
-                                    racePlayer->Cycle()->Kill();
+                                    rPCycle->Kill();
 
                                     racePlayer->SetIdle(false);
 
@@ -1550,7 +1550,6 @@ void gRace::Reset()
             rPlayer->SetTime(-1);
             rPlayer->SetScore(0);
             rPlayer->SetFinished(false);
-            rPlayer->DestroyCycle();
 
             rPlayer->SetIdle(false);
             rPlayer->SetIdleLastTime(0);

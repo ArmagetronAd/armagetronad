@@ -2444,12 +2444,6 @@ gCycle::gCycle(eGrid *grid, const eCoord &pos,const eCoord &d,ePlayerNetID *p)
     sg_ArchiveReal( this->verletSpeed_, 1 );
 
     flag_ = NULL;
-
-    gRacePlayer *racePlayer = gRacePlayer::GetPlayer(Player());
-    if (racePlayer)
-    {
-        racePlayer->NewCycle(this);
-    }
 }
 
 gCycle::~gCycle(){
@@ -4094,17 +4088,6 @@ void gCycle::Kill(){
             se_cycleDestroyedWriter << Player()->GetUserName() << Position().x << Position().y << Direction().x << Direction().y << ePlayerNetID::FilterName(Team()->Name()) << se_GameTime();
             se_cycleDestroyedWriter.write();
 
-            /*
-            if (gRacePlayer::PlayerExists(Player()))
-            {
-                gRacePlayer *rPlayer = gRacePlayer::GetPlayer(Player());
-                if (rPlayer)
-                {
-                    rPlayer->DestroyCycle();
-                }
-            }
-            */
-
             if ( currentWall )
             {
                 // z-man: updating the wall so it reflects exactly the position of death looks like
@@ -5305,12 +5288,6 @@ gCycle::gCycle(nMessage &m)
     nextSync = nextSyncOwner = -1;
     flag_ = NULL;
     lastSyncOwnerGameTime_ = 0;
-
-    gRacePlayer *racePlayer = gRacePlayer::GetPlayer(Player());
-    if (racePlayer)
-    {
-        racePlayer->NewCycle(this);
-    }
 }
 
 

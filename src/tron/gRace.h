@@ -43,15 +43,6 @@ class gRacePlayer
         static gRacePlayer *GetPlayer(ePlayerNetID *player); //!<    gets that player's race data
         static gRacePlayer *GetPlayer(tString username);     //!<    gets that player's race data
 
-        void NewCycle(gCycle *bike)                          //!<    create a new cycle
-        {
-            if (bike)
-                cycle_ = bike;
-        }
-
-        //!  if the player dies, their cycle's data is erased
-        void DestroyCycle() { if (cycle_) cycle_ = NULL; }
-
         //! if the player leaves the game, erase their data
         void ErasePlayer();
 
@@ -97,8 +88,6 @@ class gRacePlayer
 
         ePlayerNetID *player_;
 
-        gCycle *cycle_;
-
         eCoord position_;
         eCoord direction_;
 
@@ -110,7 +99,6 @@ class gRacePlayer
 
     public:
         ePlayerNetID    *Player() { return player_; }                  //!<  player's user
-        gCycle          *Cycle() { return cycle_; }                    //!<  player's cycle
         eCoord          SpawnPosition() { return position_; }          //!<  spawn position
         eCoord          SpawnDirection() { return direction_; }        //!<  spawn direction
         int             Chances() { return chances_; }                 //!<  player's chances to spawn to race one again
