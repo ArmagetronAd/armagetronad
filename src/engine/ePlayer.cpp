@@ -5109,6 +5109,7 @@ void se_ListAdmins ( ePlayerNetID * receiver, std::istream &s, tString command )
                        receiver->Owner() );
         return;
     }
+    int client = receiver ? receiver->Owner() : 0;
 
     bool canSeeEverything = false;
     if ( receiver == 0 || receiver->GetAccessLevel() <= se_accessLevelListAdminsSeeEveryone )
@@ -5145,7 +5146,7 @@ void se_ListAdmins ( ePlayerNetID * receiver, std::istream &s, tString command )
         }
         else
         {
-            sn_ConsoleOut( tOutput( "$admin_list_cant_see", command ), receiver->Owner() );
+            sn_ConsoleOut( tOutput( "$admin_list_cant_see", command ), client );
             return;
         }
     }
@@ -5171,7 +5172,7 @@ void se_ListAdmins ( ePlayerNetID * receiver, std::istream &s, tString command )
             }
             if ( !canSeeEverything && highest > se_adminListMinAccessLevel )
             {
-                sn_ConsoleOut( tOutput("$admin_list_cant_see"), receiver->Owner() );
+                sn_ConsoleOut( tOutput("$admin_list_cant_see"), client );
                 return;
             }
         }
@@ -5310,7 +5311,7 @@ void se_ListAdmins ( ePlayerNetID * receiver, std::istream &s, tString command )
         }
 
         output << "\n";
-        sn_ConsoleOut( output, receiver->Owner() );
+        sn_ConsoleOut( output, client );
 
         ++advancement;
     }
@@ -5318,7 +5319,7 @@ void se_ListAdmins ( ePlayerNetID * receiver, std::istream &s, tString command )
     tOutput sumup;
     sumup = "";
 
-    sn_ConsoleOut( tOutput( "$admin_list_end", command, userCount, authorityCount, static_cast<int>( adminLevelsMap.size() ) ), receiver->Owner() );
+    sn_ConsoleOut( tOutput( "$admin_list_end", command, userCount, authorityCount, static_cast<int>( adminLevelsMap.size() ) ), client );
 }
 
 static void se_ListAdmins_conf( std::istream &s )

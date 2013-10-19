@@ -455,7 +455,7 @@ char *eh_getdir(const char *da, size_t *len) {
 tString expand_home(tString const & pathname) {
     const char *pn = (const char *)pathname;
     char *s;
-    size_t len;
+    size_t len = 0;
     tString r;
 
     if ((pn[0] == '~' || !strncmp(pn, "${", 2)) && (s = eh_getdir(pn, &len))) {
