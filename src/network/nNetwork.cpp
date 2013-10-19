@@ -1182,7 +1182,7 @@ nMessage& nMessage::operator << ( const tOutput &o ){
 nMessage& nMessage::ReadRaw(tString &s )
 {
     s.Clear();
-    unsigned short w,len;
+    unsigned short w = 0, len = 0;
     Read(len);
     if ( len > 0 )
     {
@@ -1380,7 +1380,7 @@ nMessage& nMessage::operator>>(REAL &x){
       Read(((unsigned short *)&x)[1]);
      */
 
-    unsigned int trans;
+    unsigned int trans = 0;
     operator>>(reinterpret_cast<int &>(trans));
 
     int mant=trans & ((1 << MS)-1);
@@ -3744,7 +3744,7 @@ void sn_DisconnectUserNoWarn(int i, const tOutput& reason, nServerInfoBase * red
 
                 // write redirection
                 tString redirection;
-                int port;
+                int port = 0;
                 if ( redirectTo )
                 {
                     redirection = redirectTo->GetConnectionName();
