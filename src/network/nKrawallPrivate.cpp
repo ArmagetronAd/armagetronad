@@ -451,21 +451,21 @@ void nKrawall::CheckScrambledPassword( nCheckResultBase & result,
     }
 }
 
+//  shorthand code BEGIN
+bool sn_CustomShorthandEnabled = false;
+static tSettingItem<bool> sn_CustomShorthandEnabledConf("CUSTOM_SHORTHAND_ENABLED", sn_CustomShorthandEnabled);
+
 tString sn_CustomShorthand("");
 static tSettingItem<tString> sn_CustomShorthandConf("CUSTOM_SHORTHAND", sn_CustomShorthand);
 
 tString sn_CustomShorthandConnection("");
 static tSettingItem<tString> sn_CustomShorthandConnectionConf("CUSTOM_SHORTHAND_CONNECTION", sn_CustomShorthandConnection);
 
-/*tString sn_CustomShorthandUser("username");
-static tSettingItem<tString> sn_CustomShorthandUserConf("CUSTOM_SHORTHAND_USER", sn_CustomShorthandUser);
-
-tString sn_CustomShorthandPass("password");
-static tSettingItem<tString> sn_CustomShorthandPassConf("CUSTOM_SHORTHAND_PASS", sn_CustomShorthandPass);*/
-
-int nKrawall::CustomShorthandExecute(int userID, tString authority, tString &fullAuthority, tOutput & error)
+int nKrawall::CustomShorthandCheck(int userID, tString authority, tString &fullAuthority, tOutput & error)
 {
-    //sn_ConsoleOut("Connection to" + authority + "\n");
+    if (!sn_CustomShorthandEnabled) return 0;
+
+    //  check if calling custom shorthand exists
     if (authority == sn_CustomShorthand)
     {
         std::stringstream answer;
@@ -490,7 +490,96 @@ int nKrawall::CustomShorthandExecute(int userID, tString authority, tString &ful
 
     return 0;
 }
+
+bool nKrawall::CustomShorthandMethods(int userID, tString authority, tString & fullAuthority, tOutput & error, int & response, tString & id, tString & methods)
+{
+    if (CustomShorthandCheck(userID, authority, fullAuthority, error) == 1)
+    {
+        std::stringstream answer;
+        response = nKrawall::FetchURL( fullAuthority, "?query=methods", answer );
+
+        tString custom_id;
+        answer >> custom_id;
+        tToLower(custom_id);
+        id = custom_id;
+
+        tString custom_methods;
+        std::ws(answer);
+        custom_methods.ReadLine( answer );
+        tToLower(custom_methods);
+        methods = custom_methods;
+
+        return true;
+    }
+
+    return false;
+}
 //  shorthand code END
+
+//  authority code BEGIN
+bool sn_CustomAuthorityEnabled = false;
+static tSettingItem<bool> sn_CustomAuthorityEnabledConf("CUSTOM_AUTHORITY_ENABLED", sn_CustomAuthorityEnabled);
+
+tString sn_CustomAuthority("");
+static tSettingItem<tString> sn_CustomAuthorityConf("CUSTOM_AUTHORITY", sn_CustomAuthority);
+
+tString sn_CustomAuthorityConnection("");
+static tSettingItem<tString> sn_CustomAuthorityConnectionConf("CUSTOM_AUTHORITY_CONNECTION", sn_CustomAuthorityConnection);
+
+int nKrawall::CustomAuthorityCheck(int userID, tString authority, tString &fullAuthority, tOutput & error)
+{
+    if (!sn_CustomAuthorityEnabled) return 0;
+
+    //  check if calling custom shorthand exists
+    if (authority == sn_CustomAuthority)
+    {
+        std::stringstream answer;
+
+        //  good, put full authority with the custom connection of shorthand
+        fullAuthority = sn_CustomAuthorityConnection;
+
+        //  get the response number after fetching the methods from custom shhorthand url
+        int response = nKrawall::FetchURL( fullAuthority, "?query=methods", answer );
+        if (response == -1)
+        {
+            error.SetTemplateParameter(1, fullAuthority);
+            error << "$custom_authority_url_unknown";
+
+            return -1;
+        }
+        else
+        {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+bool nKrawall::CustomAuthorityMethods(int userID, tString authority, tString & fullAuthority, tOutput & error, int & response, tString & id, tString & methods)
+{
+    if (CustomAuthorityCheck(userID, authority, fullAuthority, error) == 1)
+    {
+        std::stringstream answer;
+        response = nKrawall::FetchURL( fullAuthority, "?query=methods", answer );
+
+        tString custom_id;
+        answer >> custom_id;
+        tToLower(custom_id);
+        id = custom_id;
+
+        tString custom_methods;
+        std::ws(answer);
+        custom_methods.ReadLine( answer );
+        tToLower(custom_methods);
+        methods = custom_methods;
+
+        return true;
+    }
+
+    return false;
+}
+//  authority code END
 
 int nKrawall::FetchURL( tString const & authority, char const * query, std::ostream & target, int maxlen )
 {

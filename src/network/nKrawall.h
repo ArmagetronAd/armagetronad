@@ -262,7 +262,10 @@ public:
                                         nPasswordCheckData const & data );
 
     // check for the custom shorthand authority if enabled.
-    static int CustomShorthandExecute(int userID, tString authority, tString & fullAuthority, tOutput & error);
+    static int CustomShorthandCheck(int userID, tString authority, tString & fullAuthority, tOutput & error);
+    static bool CustomShorthandMethods(int userID, tString authority, tString & fullAuthority, tOutput & error, int & response, tString & id, tString & methods);
+    static int CustomAuthorityCheck(int userID, tString authority, tString & fullAuthority, tOutput & error);
+    static bool CustomAuthorityMethods(int userID, tString authority, tString & fullAuthority, tOutput & error, int & response, tString & id, tString & methods);
 
     // fetches an URL content, return http return code (-1 if total failure), fill result stream.
     static int FetchURL( tString const & authority, char const * query, std::ostream & target, int maxlen = 10000 );

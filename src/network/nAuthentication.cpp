@@ -611,14 +611,11 @@ static bool sn_IsLegalSpecialChar( char c )
 
 tString loginErrorLogFile("errors/login_error.txt");
 
-//  shorthand code BEGIN
-bool sn_CustomShorthandEnabled = false;
-static tSettingItem<bool> sn_CustomShorthandEnabledConf("CUSTOM_SHORTHAND_ENABLED", sn_CustomShorthandEnabled);
-//  shorthand code END
-
 // fetches info from remote authority
 bool nLoginProcess::FetchInfoFromAuthorityRemote()
 {
+    bool shorthand = true;
+
     if ( !sn_supportRemoteLogins )
     {
         return ReportAuthorityError( tOutput("$login_error_noremote") );
@@ -661,7 +658,7 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
                     // check validity of hostname part
                     if ( c == '.' )
                     {
-                        shortcut = false;
+                        shorthand = shortcut = false;
                     }
                     else if ( isalnum(c) )
                     {
@@ -820,7 +817,7 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
             {
                 // strip it
                 authority = authority.SubStr( 0, authority.Len() - strlen( def ) - 1 );
-                shortcut = true;
+                shorthand = shortcut = true;
             }
 
             if( hasPath )
@@ -844,32 +841,76 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
         // try yo find a better method, fetch method list
         std::stringstream answer;
         int rc = nKrawall::FetchURL( fullAuthority, "?query=methods", answer );
+        bool CustomShorthandTest = false;
+        bool CustomAuthorityTest = false;
 
-        if ((rc == -1) && sn_CustomShorthandEnabled)
+        if (rc == -1)
         {
-            tOutput displayError;
-            int userID = sn_UserID(user);
-            tString newAuthority("");
-            int response = nKrawall::CustomShorthandExecute(userID, authority, newAuthority, displayError);
-
-            //  if error was detected, halt and send error message
-            if (response == -1)
+            switch (shorthand)
             {
-                std::ofstream o;
-                if (tDirectories::Var().Open(o, loginErrorLogFile, std::ios::app))
+                //  custom shorthand code
+                case true:
                 {
-                    o << st_GetCurrentTime("[ %Y/%m/%d-%H:%M:%S ] ");
-                    o << displayError << "\n";
-                    o << "\n";
+                    CustomShorthandTest = true;
+
+                    tOutput displayError;
+                    int userID = sn_UserID(user);
+                    tString newAuthority("");
+                    int response = nKrawall::CustomShorthandCheck(userID, authority, newAuthority, displayError);
+
+                    //  if error was detected, halt and send error message
+                    if (response == -1)
+                    {
+                        std::ofstream o;
+                        if (tDirectories::Var().Open(o, loginErrorLogFile, std::ios::app))
+                        {
+                            o << st_GetCurrentTime("[ %Y/%m/%d-%H:%M:%S ] ");
+                            o << displayError << "\n";
+                            o << "\n";
+                        }
+
+                        return ReportAuthorityError(displayError);
+                    }
+                    else if (response == 1)
+                    {
+                        fullAuthority = newAuthority;
+                        rc = nKrawall::FetchURL( fullAuthority, "?query=methods", answer );
+                    }
+                    break;
                 }
 
-                return ReportAuthorityError(displayError);
-            }
-            else if (response == 1)
-            {
-                fullAuthority = newAuthority;
-                rc = nKrawall::FetchURL( fullAuthority, "?query=methods", answer );
-            }
+                //  custom authority code
+                case false:
+                {
+                    CustomAuthorityTest = true;
+
+                    tOutput displayError;
+                    int userID = sn_UserID(user);
+                    tString newAuthority("");
+                    int response = nKrawall::CustomAuthorityCheck(userID, authority, newAuthority, displayError);
+
+                    //  if error was detected, halt and send error message
+                    if (response == -1)
+                    {
+                        std::ofstream o;
+                        if (tDirectories::Var().Open(o, loginErrorLogFile, std::ios::app))
+                        {
+                            o << st_GetCurrentTime("[ %Y/%m/%d-%H:%M:%S ] ");
+                            o << displayError << "\n";
+                            o << "\n";
+                        }
+
+                        return ReportAuthorityError(displayError);
+                    }
+                    else if (response == 1)
+                    {
+                        fullAuthority = newAuthority;
+                        rc = nKrawall::FetchURL( fullAuthority, "?query=methods", answer );
+                    }
+
+                    break;
+                }
+            };
         }
 
         if ( rc == -1 )
@@ -893,16 +934,75 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
         methods.ReadLine( answer );
         tToLower(methods);
 
+        //  custom shorthand hack
+        if ( rc != 200 || id != "methods" )
+        {
+            switch (shorthand)
+            {
+                case true:
+                {
+                    if (!CustomShorthandTest)
+                    {
+                        CustomShorthandTest = true;
+
+                        tOutput displayError;
+                        int userID = sn_UserID(user);
+                        tString newAuthority("");
+
+                        if (!nKrawall::CustomShorthandMethods(userID, authority, fullAuthority, displayError, rc, id, methods))
+                        {
+                            std::ofstream o;
+                            if (tDirectories::Var().Open(o, loginErrorLogFile, std::ios::app))
+                            {
+                                o << st_GetCurrentTime("[ %Y/%m/%d-%H:%M:%S ] ");
+                                o << displayError << "\n";
+                                o << "\n";
+                            }
+
+                            return ReportAuthorityError(displayError);
+                        }
+                    }
+                    break;
+                }
+
+                case false:
+                {
+                    if (!CustomAuthorityTest)
+                    {
+                        CustomAuthorityTest = true;
+
+                        tOutput displayError;
+                        int userID = sn_UserID(user);
+                        tString newAuthority("");
+
+                        if (!nKrawall::CustomAuthorityMethods(userID, authority, fullAuthority, displayError, rc, id, methods))
+                        {
+                            std::ofstream o;
+                            if (tDirectories::Var().Open(o, loginErrorLogFile, std::ios::app))
+                            {
+                                o << st_GetCurrentTime("[ %Y/%m/%d-%H:%M:%S ] ");
+                                o << displayError << "\n";
+                                o << "\n";
+                            }
+
+                            return ReportAuthorityError(displayError);
+                        }
+                    }
+                    break;
+                }
+            };
+        }
+
         if ( rc != 200 || id != "methods" )
         {
             std::ofstream o;
             if (tDirectories::Var().Open(o, loginErrorLogFile, std::ios::app))
             {
                 o << st_GetCurrentTime("[ %Y/%m/%d-%H:%M:%S ] ");
-                o << tOutput( "$login_error_nomethodlist", fullAuthority, rc, id + " " + methods ) << "\n";
+                o << tOutput( "$login_error_nomethodlist", authority, rc, id + " " + methods ) << "\n";
                 o << "\n";
             }
-            return ReportAuthorityError( tOutput( "$login_error_nomethodlist", fullAuthority, rc, id + " " + methods ) );
+            return ReportAuthorityError( tOutput( "$login_error_nomethodlist", authority, rc, id + " " + methods ) );
         }
 
 

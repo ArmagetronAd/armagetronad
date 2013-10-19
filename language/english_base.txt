@@ -3783,6 +3783,11 @@ custom_shorthand_help             The custom authority to trigger when a player 
 custom_shorthand_connection_help  The link to connect to when using custom shorthand. Do not include "http://".
 custom_shorthand_url_unknown      Unable to connect to the custom shorthand \1.\n
 
+custom_authority_enabled_help     If set to 1 and CUSTOM_AUTHORITY is found, then CUSTOM_AUTHORITY_CONNECTION will be used to connect.
+custom_authority_help             The custom authority to trigger when a player tries to login.
+custom_authority_connection_help  The link to connect to when using custom authority. Do not include "http://".
+custom_authority_url_unknown      Unable to connect to the custom authority \1.\n
+
 collapse_all_help   Causes all zones to vanish smoothly.
 destroy_all_help    Causes all zones to vanish instantly.
 
