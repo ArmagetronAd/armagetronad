@@ -1809,7 +1809,7 @@ static ePlayerNetID * se_FindPlayerInChatCommand( ePlayerNetID * sender, char co
 
     if (player == "" )
     {
-        sn_ConsoleOut( tOutput( "$chatcommand_requires_player", command ), sender->Owner() );
+        sn_ConsoleOut( tOutput( "$chatcommand_requires_player", command ), sender ? sender->Owner() : 0 );
         return 0;
     }
 
@@ -8602,9 +8602,7 @@ static tAccessLevelSetter se_unsuspendConfLevel( unsuspend_conf, tAccessLevel_Mo
 
 static void SuspendList_conf(std::istream &s)
 {
-    ePlayerNetID *receiver = 0;
-
-    sn_ConsoleOut("List of currently suspended players:\n", receiver->Owner() );
+    sn_ConsoleOut("List of currently suspended players:\n", 0 );
 
     if (se_PlayerNetIDs.Len()>0)
     {
@@ -8623,7 +8621,7 @@ static void SuspendList_conf(std::istream &s)
                     send << tColoredString::ColorString( 1,1,.5 );
                     send << " | " << p->RoundsSuspended() << " rounds )\n";
 
-                    sn_ConsoleOut( send, receiver->Owner() );
+                    sn_ConsoleOut( send, 0 );
                 }
             }
         }

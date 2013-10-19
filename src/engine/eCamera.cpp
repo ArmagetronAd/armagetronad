@@ -558,13 +558,12 @@ void eCamera::MyInit(){
     //  foot=tNEW(eGameObject)(pos,dir,0);
     distance=0;
     lastrendertime=se_GameTime();
-	if (CameraMain())
+    if ( grid )
     {
-        grid->cameras.Add(this,id);
-    }
-	else if( grid )
-    {
-        grid->subcameras.Add(this,id);
+        if ( CameraMain() )
+            grid->cameras.Add(this,id);
+        else
+            grid->subcameras.Add(this,id);
     }
     //  se_ResetVisibles(id);
     smoothTurning=turning=0;

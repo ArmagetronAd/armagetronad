@@ -250,12 +250,12 @@ public:
     //! override currently active version
     static void Override( nVersion const & version )
     {
-        if ( overrider_ && ! overrider_->overridden_ )
+        if ( overrider_ )
         {
-            overrider_->overridden_ = true;
+            if ( !overrider_->overridden_ )
+                overrider_->overridden_ = true;
+            overrider_->version_ = version;
         }
-
-        overrider_->version_ = version;
     }
     
     //! accept version override message
