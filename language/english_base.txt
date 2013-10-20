@@ -808,6 +808,15 @@ floor_red_help			Floor colour
 floor_green_help		Floor colour
 floor_blue_help			Floor colour
 
+upper_sky_red_help       Upper sky colour
+upper_sky_green_help     Upper sky colour
+upper_sky_blue_help      Upper sky colour
+
+upper_sky_scale_help     Upper sky scaling (decrease to make features larger)
+
+upper_sky_height_help    Upper sky height (changes during gameplay cause graphical errors)
+lower_sky_height_help    Lower sky height (changes during gameplay cause graphical errors)
+
 rim_wall_stretch_x_help Extension of the rim wall texture in the horizontal direction
 rim_wall_stretch_y_help Extension of the rim wall texture in the vertical direction
 rim_wall_wrap_y_help    Set to 1 if the rim wall texture should repeat in the vertical direction

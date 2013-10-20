@@ -324,7 +324,7 @@ static void se_SetWatchedObject( eCamera * cam, eGameObject * obj )
 
 void eCamera::MyInit(){
     if (localPlayer){
-        mode=localPlayer->startCamera;
+        if (cameraMain_) mode = localPlayer->startCamera; //PENDING:
         fov=localPlayer->startFOV;
     }
 
@@ -361,7 +361,15 @@ void eCamera::MyInit(){
     //  foot=tNEW(eGameObject)(pos,dir,0);
     distance=0;
     lastrendertime=se_GameTime();
-    grid->cameras.Add(this,id);
+
+    if ( grid )
+    {
+        if ( CameraMain() )
+            grid->cameras.Add(this,id);
+        else
+            grid->subcameras.Add(this,id);
+    }
+
     //  se_ResetVisibles(id);
     smoothTurning=turning=0;
     centerPosLast=CenterPos();
@@ -415,11 +423,11 @@ const ePlayerNetID* eCamera::Player() const { return netPlayer; }
 const ePlayer* eCamera::LocalPlayer() const { return localPlayer; }
 
 eCamera::eCamera(eGrid *g, rViewport *view,ePlayerNetID *p,
-                 ePlayer *lp,eCamMode m)
+                 ePlayer *lp,eCamMode m,  bool rMain)
         :id(-1),grid(g),netPlayer(p),localPlayer(lp),
         // centerID(0),
         mode(m),pos(0,0),dir(1,0),top(0,0),
-vp(view){
+vp(view), cameraMain_(rMain){
     /*
       if (p->pID>=0)
       localPlayer=playerConfig[p->pID];

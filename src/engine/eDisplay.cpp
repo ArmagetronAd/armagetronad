@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
- 
+
 ***************************************************************************
 
 */
@@ -66,6 +66,9 @@ bool debug_grid=0;
 REAL upper_height=100;
 REAL lower_height=50;
 
+static tSettingItem<REAL> sec_upperSkyHeight("UPPER_SKY_HEIGHT",upper_height);
+static tSettingItem<REAL> sec_lowerSkyHeight("LOWER_SKY_HEIGHT",lower_height);
+
 
 #ifndef DEDICATED
 
@@ -74,18 +77,71 @@ static rFileTexture sky_moviepack(rTextureGroups::TEX_FLOOR,"moviepack/sky.png",
 
 extern bool sg_MoviePack();
 
-static void sky_select(){
+// select the lower sky
+static rFileTexture & se_Sky()
+{
+    static char const * skyPath="textures/sky.png";
+    static char const * skyPathMoviepack="moviepack/sky.png";
+    static rFileTexture sky(rTextureGroups::TEX_FLOOR,skyPath,1,1,true);
+    static rFileTexture sky_moviepack(rTextureGroups::TEX_FLOOR,skyPathMoviepack,1,1,true);
+
     if (sg_MoviePack()){
         // Since old movie packs usually don't include sky.png we need to
         // be nice and fall back to the default sky tecture. -k
-        tString s = tDirectories::Data().GetReadPath( "moviepack/sky.png" );
+        tString s = tDirectories::Data().GetReadPath( skyPathMoviepack );
         if(strlen(s) > 0)
-            sky_moviepack.Select();
-        else
-            sky.Select();
+            return sky_moviepack;
     }
-    else {
-        sky.Select();
+
+    return sky;
+}
+
+static void se_SelectSky()
+{
+    static rFileTexture & sky = se_Sky();
+    sky.Select();
+}
+
+static REAL se_upperSkyScale=1;
+static REAL se_upperSkyColorR=.5;
+static REAL se_upperSkyColorG=.5;
+static REAL se_upperSkyColorB=1;
+static tSettingItem<REAL> sec_upperSkyScale("UPPER_SKY_SCALE",se_upperSkyScale);
+static tSettingItem<REAL> sec_upperSkyColorR("UPPER_SKY_RED",se_upperSkyColorR);
+static tSettingItem<REAL> sec_upperSkyColorG("UPPER_SKY_GREEN",se_upperSkyColorG);
+static tSettingItem<REAL> sec_upperSkyColorB("UPPER_SKY_BLUE",se_upperSkyColorB);
+
+// select the upper sky
+static rFileTexture * se_UpperSky()
+{
+    static char const * skyPath="textures/upper_sky.png";
+    static char const * skyPathMoviepack="moviepack/upper_sky.png";
+    static rFileTexture sky(rTextureGroups::TEX_FLOOR,skyPath,1,1,true);
+    static rFileTexture sky_moviepack(rTextureGroups::TEX_FLOOR,skyPathMoviepack,1,1,true);
+
+    if (sg_MoviePack()){
+        tString s = tDirectories::Data().GetReadPath( skyPathMoviepack );
+        if(s.Len() > 1)
+            return &sky_moviepack;
+    }
+
+    if( tDirectories::Data().GetReadPath( skyPath ).Len() > 1 ){
+        return &sky;
+    }
+
+    return NULL;
+}
+
+static void se_SelectUpperSky()
+{
+    static rFileTexture * sky = se_UpperSky();
+    if( sky )
+    {
+        sky->Select();
+    }
+    else
+    {
+        se_glFloorTexture();
     }
 }
 
@@ -215,7 +271,7 @@ public:
                 const eCoord& camDir = camera->CameraDir();
                 eCoord base = wall->EndPoint(0);
                 eCoord end = wall->EndPoint(1);
-                
+
                 if ( eCoord::F( base-camPos, camDir ) > 0.01f || eCoord::F( end-camPos, camDir ) > 0.01f )
                 {
                     eCoord dirNorm = end - base;
@@ -283,7 +339,7 @@ void paint_sr_lowerSky(eGrid *grid, int viewer,bool sr_upperSky, eCoord const & 
         glTranslatef(-300,-200,0);
     }
 
-    sky_select();
+    se_SelectSky();
 
     REAL sa=(lower_height-z)*.1;
     if (sa>1) sa=1;
@@ -299,7 +355,7 @@ void paint_sr_lowerSky(eGrid *grid, int viewer,bool sr_upperSky, eCoord const & 
         glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 }
 
-void eGrid::display_simple( int viewer,bool floor,
+void eGrid::display_simple( eCamera* cam, int viewer,bool floor,
                             bool sr_upperSky,bool sr_lowerSky,
                             REAL flooralpha,
                             bool eWalls,bool gameObjects,
@@ -334,7 +390,7 @@ void eGrid::display_simple( int viewer,bool floor,
 
     glDisable(GL_CULL_FACE);
 
-    eCoord camPos = CameraGlancePos( viewer );
+    eCoord camPos = cam->CameraGlancePos();
     // eWallRim::Bound( camPos, 10 );
 
     if (sr_upperSky || se_BlackSky()){
@@ -345,21 +401,22 @@ void eGrid::display_simple( int viewer,bool floor,
             glColor3f(0,0,0);
 
             if ( z < lower_height )
-                infinity_xy_plane(camPos, this->CameraDir(viewer),lower_height);
+                infinity_xy_plane(cam->CameraPos(), cam->CameraDir(), lower_height);
 
             glEnable(GL_TEXTURE_2D);
         }
         else {
             TexMatrix();
             glLoadIdentity();
-            //      glScalef(.25,.25,.25);
+            glScalef(upper_height,upper_height,upper_height);
 
             se_glFloorTexture();
 
-            glColor3f(.5,.5,1);
+            se_SelectUpperSky();
+            glColor3f(se_upperSkyColorR,se_upperSkyColorG,se_upperSkyColorB);
 
             if ( z < upper_height )
-                infinity_xy_plane(camPos, this->CameraDir(viewer),upper_height);
+                infinity_xy_plane(cam->CameraPos(), cam->CameraDir(), upper_height);
         }
     }
 
@@ -487,7 +544,7 @@ void eGrid::display_simple( int viewer,bool floor,
     if(eWalls){
         {
             su_FetchAndStoreSDLInput();
-    
+
             eWallRim::RenderAll( cameras(viewer) );
         }
 
@@ -648,7 +705,7 @@ void eGrid::Render( eCamera* cam, int viewer, REAL& zNear ){
         }
 
         cam->SetRenderingMain(false);
-        display_simple(viewer,false,
+        display_simple(cam, viewer,false,
                        us,ls,
                        0,
                        sr_floorMirror>=rMIRROR_WALLS,
@@ -661,7 +718,7 @@ void eGrid::Render( eCamera* cam, int viewer, REAL& zNear ){
 
 
         cam->SetRenderingMain(true);
-        display_simple(viewer,true,
+        display_simple(cam, viewer,true,
                        sr_upperSky,sr_lowerSky,
                        1-sr_floorMirror_strength,
                        true,true,zNear);
@@ -670,7 +727,7 @@ void eGrid::Render( eCamera* cam, int viewer, REAL& zNear ){
     else
     {
         cam->SetRenderingMain(true);
-        display_simple(viewer,true,
+        display_simple(cam, viewer,true,
                        sr_upperSky,sr_lowerSky,
                        1,
                        true,true,zNear);
@@ -712,9 +769,9 @@ void eViewerCrossesEdge::Render(){
     //glColor4f(1,0,0,.5);
 
     static rTexture ArmageTron_invis_eWall(rTEX_WALL,"textures/eWall2.png",1,0);
-    
+
     ArmageTron_invis_eWall.Select();
-    
+
     eWall::Render_helper(e,(p1->x+p1->y)/4,(p2->x+p2->y)/4,h,1,4);
   }
 #endif

@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -101,7 +101,7 @@ public:
     void SetWinding(int number);
     void SetWinding(int number, eCoord directions[], bool normalise=true);
 	float GetWindingAngle(int winding);
-	 
+
     // Ask the grid to turn a winding
     void Turn(int &currentWinding, int direction);
 
@@ -180,7 +180,7 @@ public:
 
 protected:
     // render helper
-    void display_simple( int viewer,bool floor,
+    void display_simple( eCamera* cam, int viewer,bool floor,
                          bool sr_upperSky,bool sr_lowerSky,
                          REAL flooralpha,
                          bool eWalls,bool gameObjects,
@@ -226,6 +226,7 @@ protected:
 
     // cameras
     tList<eCamera>     cameras;
+    tList<eCamera>     subcameras;
 
     // walls
     // tHeap<eWallView>  wallsVisible[MAX_VIEWERS];

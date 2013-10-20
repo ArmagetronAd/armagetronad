@@ -1162,6 +1162,7 @@ void nLoginProcess::ProcessClientAnswer( nMessage & m )
     if ( !socket )
     {
         ReportAuthorityError( "Internal error, no receiving socket of authentication message." );
+        return;
     }
     serverSocketAddress = socket->GetAddress();
 

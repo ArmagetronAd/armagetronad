@@ -3349,7 +3349,7 @@ bool gBaseZoneHack::CheckTeamAssignment()
                         CountZonesOfTeam( Grid(), otherTeam, count, farthest );
 
                     // only set team if not too many closer other zones are registered
-                    if ( sg_baseZonesPerTeam == 0 || count < sg_baseZonesPerTeam || farthest->teamDistance_ > distance )
+                    if ( sg_baseZonesPerTeam == 0 || count < sg_baseZonesPerTeam || (farthest && farthest->teamDistance_ > distance ) )
                     {
                         closest = other;
                         closestDistance = distance;
@@ -3385,6 +3385,7 @@ bool gBaseZoneHack::CheckTeamAssignment()
             CountZonesOfTeam( Grid(), team, count, farthest );
 
             // discard team of farthest zone
+            // No NULL check is required here for farthest, since count is greater than 0 which implies farthest was set.
             if ( count > sg_baseZonesPerTeam )
             {
                 farthest->team = NULL;
@@ -5883,6 +5884,13 @@ ePlayerNetID *gTargetZoneHack::winner_ = 0;
 
 static void sg_SetTargetCmd(std::istream &s)
 {
+    eGrid *grid = eGrid::CurrentGrid();
+    if ( !grid )
+    {
+        con << "Must be called while a grid exists!\n";
+        return;
+    }
+
     tString params;
     params.ReadLine( s, true );
 
@@ -5905,7 +5913,7 @@ static void sg_SetTargetCmd(std::istream &s)
         if (zone_id==0 && object_id_str!="0") return;
     }
 
-    const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
+    const tList<eGameObject>& gameObjects = grid->GameObjects();
     while (zone_id!=-1)
     {
         // get the zone ...
@@ -8333,6 +8341,13 @@ static eLadderLogWriter sg_collapsezoneWriter("ZONE_COLLAPSED", false);
 
 static void sg_CollapseZone(std::istream &s)
 {
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid)
+    {
+        con << "Must be called while a grid exists!\n";
+        return;
+    }
+
     tString params;
     params.ReadLine( s, true );
 
@@ -8347,9 +8362,6 @@ static void sg_CollapseZone(std::istream &s)
         zone_id = atoi(object_id_str);
         if (zone_id < 0) return;
     }
-
-    eGrid *grid = eGrid::CurrentGrid();
-    if (!grid) return;
 
     const tList<eGameObject>& gameObjects = grid->GameObjects();
     if (zone_id >= gameObjects.Len()) return;
@@ -8373,6 +8385,13 @@ static tConfItemFunc sg_CollapseZone_conf("COLLAPSE_ZONE",&sg_CollapseZone);
 
 static void sg_DestroyZone(std::istream &s)
 {
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid)
+    {
+        con << "Must be called while a grid exists!\n";
+        return;
+    }
+
     tString params;
     params.ReadLine( s, true );
 
@@ -8387,9 +8406,6 @@ static void sg_DestroyZone(std::istream &s)
         zone_id = atoi(object_id_str);
         if (zone_id < 0) return;
     }
-
-    eGrid *grid = eGrid::CurrentGrid();
-    if (!grid) return;
 
     const tList<eGameObject>& gameObjects = grid->GameObjects();
     if (zone_id >= gameObjects.Len()) return;
@@ -8412,6 +8428,13 @@ static tConfItemFunc sg_DestroyZoneConf("DESTROY_ZONE", &sg_DestroyZone);
 
 static void sg_CollapseZoneID(std::istream &s)
 {
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid)
+    {
+        con << "Must be called while a grid exists!\n";
+        return;
+    }
+
     tString params;
     params.ReadLine(s);
 
@@ -8422,9 +8445,6 @@ static void sg_CollapseZoneID(std::istream &s)
     tString object_id_str = params.ExtractNonBlankSubString(pos);
 
     int zoneID = atoi(object_id_str);
-
-    eGrid *grid = eGrid::CurrentGrid();
-    if (!grid) return;
 
     const tList<eGameObject>& gameObjects = grid->GameObjects();
     if ((zoneID < 0) || (zoneID >= gameObjects.Len())) return;
@@ -8449,6 +8469,13 @@ static tConfItemFunc sg_CollapseZoneIDConf("COLLAPSE_ZONE_ID", sg_CollapseZoneID
 
 static void sg_DestroyZoneID(std::istream &s)
 {
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid)
+    {
+        con << "Must be called while a grid exists!\n";
+        return;
+    }
+
     tString params;
     params.ReadLine(s);
 
@@ -8459,9 +8486,6 @@ static void sg_DestroyZoneID(std::istream &s)
     tString object_id_str = params.ExtractNonBlankSubString(pos);
 
     int zoneID = atoi(object_id_str);
-
-    eGrid *grid = eGrid::CurrentGrid();
-    if (!grid) return;
 
     const tList<eGameObject>& gameObjects = grid->GameObjects();
     if ((zoneID < 0) || (zoneID >= gameObjects.Len())) return;
@@ -8487,7 +8511,11 @@ static tConfItemFunc sg_DestroyZoneIDConf("DESTROY_ZONE_ID", sg_DestroyZoneID);
 static void sg_CollapseAll(std::istream &s)
 {
     eGrid *grid = eGrid::CurrentGrid();
-    if (!grid) return;
+    if (!grid)
+    {
+        con << "Must be called while a grid exists!\n";
+        return;
+    }
 
     const tList<eGameObject>& gameObjects = grid->GameObjects();
     for(int i = 0; i < gameObjects.Len(); i++)
@@ -8522,6 +8550,13 @@ static tConfItemFunc sg_DestroyAllConf("DESTROY_ALL", sg_DestroyAll);
 
 static void sg_SetZoneRadius(std::istream &s)
 {
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid)
+    {
+        con << "Must be called while a grid exists!\n";
+        return;
+    }
+
     tString params;
     params.ReadLine( s, true );
 
@@ -8541,9 +8576,6 @@ static void sg_SetZoneRadius(std::istream &s)
         zone_id = atoi(object_id_str);
         if (zone_id < 0) return;
     }
-
-    eGrid *grid = eGrid::CurrentGrid();
-    if (!grid) return;
 
     const tList<eGameObject>& gameObjects = grid->GameObjects();
     if (zone_id >= gameObjects.Len()) return;
@@ -8570,6 +8602,13 @@ static tConfItemFunc sg_SetZoneRadius_conf("SET_ZONE_RADIUS",&sg_SetZoneRadius);
 
 static void sg_SetZoneRoute(std::istream &s)
 {
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid)
+    {
+        con << "Must be called while a grid exists!\n";
+        return;
+    }
+
     tString params;
     params.ReadLine( s, true );
 
@@ -8599,9 +8638,6 @@ static void sg_SetZoneRoute(std::istream &s)
         zone_id = atoi(object_id_str);
         if (zone_id < 0) return;
     }
-
-    eGrid *grid = eGrid::CurrentGrid();
-    if (!grid) return;
 
     const tList<eGameObject>& gameObjects = grid->GameObjects();
     if (zone_id >= gameObjects.Len()) return;
@@ -8639,6 +8675,13 @@ static tConfItemFunc sg_SetZoneRoute_conf("SET_ZONE_POSITION",&sg_SetZoneRoute);
 
 static void sg_SetZoneSpeed(std::istream &s)
 {
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid)
+    {
+        con << "Must be called while a grid exists!\n";
+        return;
+    }
+
     tString params;
     params.ReadLine( s, true );
 
@@ -8658,9 +8701,6 @@ static void sg_SetZoneSpeed(std::istream &s)
         zone_id = atoi(object_id_str);
         if (zone_id < 0) return;
     }
-
-    eGrid *grid = eGrid::CurrentGrid();
-    if (!grid) return;
 
     const tList<eGameObject>& gameObjects = grid->GameObjects();
     if (zone_id >= gameObjects.Len()) return;
@@ -8688,6 +8728,13 @@ static tConfItemFunc sg_SetZoneSpeed_conf("SET_ZONE_SPEED",&sg_SetZoneSpeed);
 
 static void sg_SetZoneColor(std::istream &s)
 {
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid)
+    {
+        con << "Must be called while a grid exists!\n";
+        return;
+    }
+
     tString params;
     params.ReadLine( s, true );
 
@@ -8713,9 +8760,6 @@ static void sg_SetZoneColor(std::istream &s)
         if (zone_id < 0) return;
     }
 
-    eGrid *grid = eGrid::CurrentGrid();
-    if (!grid) return;
-
     const tList<eGameObject>& gameObjects = grid->GameObjects();
     if (zone_id >= gameObjects.Len()) return;
 
@@ -8740,6 +8784,13 @@ static tConfItemFunc sg_SetZoneColor_conf("SET_ZONE_COLOR",&sg_SetZoneColor);
 
 static void sg_SetZoneExpansion(std::istream &s)
 {
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid)
+    {
+        con << "Must be called while a grid exists!\n";
+        return;
+    }
+
     tString params;
     params.ReadLine( s, true );
 
@@ -8757,9 +8808,6 @@ static void sg_SetZoneExpansion(std::istream &s)
         zone_id = atoi(object_id_str);
         if (zone_id < 0) return;
     }
-
-    eGrid *grid = eGrid::CurrentGrid();
-    if (!grid) return;
 
     const tList<eGameObject>& gameObjects = grid->GameObjects();
     if (zone_id >= gameObjects.Len()) return;
@@ -8782,6 +8830,13 @@ static tConfItemFunc sg_SetZoneExpansion_conf("SET_ZONE_EXPANSION",&sg_SetZoneEx
 
 static void sg_SetZoneRotation(std::istream &s)
 {
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid)
+    {
+        con << "Must be called while a grid exists!\n";
+        return;
+    }
+
     tString params;
     params.ReadLine( s, true );
 
@@ -8799,9 +8854,6 @@ static void sg_SetZoneRotation(std::istream &s)
         zone_id = atoi(object_id_str);
         if (zone_id < 0) return;
     }
-
-    eGrid *grid = eGrid::CurrentGrid();
-    if (!grid) return;
 
     const tList<eGameObject>& gameObjects = grid->GameObjects();
     if (zone_id >= gameObjects.Len()) return;
@@ -8822,6 +8874,13 @@ static tConfItemFunc sg_SetZoneRotationConf("SET_ZONE_ROTATION", &sg_SetZoneRota
 
 static void sg_SetZonePenetrate(std::istream &s)
 {
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid)
+    {
+        con << "Must be called while a grid exists!\n";
+        return;
+    }
+
     tString params;
     params.ReadLine( s, true );
 
@@ -8843,9 +8902,6 @@ static void sg_SetZonePenetrate(std::istream &s)
         if (zone_id < 0) return;
     }
 
-    eGrid *grid = eGrid::CurrentGrid();
-    if (!grid) return;
-
     const tList<eGameObject>& gameObjects = grid->GameObjects();
     if (zone_id >= gameObjects.Len()) return;
 
@@ -8866,6 +8922,13 @@ static tConfItemFunc sg_SetZonePenetrateConf("SET_ZONE_PENETRATE", &sg_SetZonePe
 
 static void sg_SetZoneIdRadius(std::istream &s)
 {
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid)
+    {
+        con << "Must be called while a grid exists!\n";
+        return;
+    }
+
     tString params;
     params.ReadLine( s, true );
 
@@ -8881,9 +8944,6 @@ static void sg_SetZoneIdRadius(std::istream &s)
     int zone_id = -1;
     zone_id = atoi(object_id_str);
     if (zone_id < 0) return;
-
-    eGrid *grid = eGrid::CurrentGrid();
-    if (!grid) return;
 
     const tList<eGameObject>& gameObjects = grid->GameObjects();
     if (zone_id >= gameObjects.Len()) return;
@@ -8914,6 +8974,13 @@ static tConfItemFunc sg_SetZoneIdRadius_conf("SET_ZONE_ID_RADIUS",&sg_SetZoneIdR
 
 static void sg_SetZoneIdRoute(std::istream &s)
 {
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid)
+    {
+        con << "Must be called while a grid exists!\n";
+        return;
+    }
+
     tString params;
     params.ReadLine( s, true );
 
@@ -8939,9 +9006,6 @@ static void sg_SetZoneIdRoute(std::istream &s)
     int zone_id = -1;
     zone_id = atoi(object_id_str);
     if (zone_id < 0) return;
-
-    eGrid *grid = eGrid::CurrentGrid();
-    if (!grid) return;
 
     const tList<eGameObject>& gameObjects = grid->GameObjects();
     if (zone_id > gameObjects.Len()) return;
@@ -8983,6 +9047,13 @@ static tConfItemFunc sg_SetZoneIdRoute_conf("SET_ZONE_ID_POSITION",&sg_SetZoneId
 
 static void sg_SetZoneIdSpeed(std::istream &s)
 {
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid)
+    {
+        con << "Must be called while a grid exists!\n";
+        return;
+    }
+
     tString params;
     params.ReadLine( s, true );
 
@@ -8998,9 +9069,6 @@ static void sg_SetZoneIdSpeed(std::istream &s)
     int zone_id = -1;
     zone_id = atoi(object_id_str);
     if (zone_id < 0) return;
-
-    eGrid *grid = eGrid::CurrentGrid();
-    if (!grid) return;
 
     const tList<eGameObject>& gameObjects = grid->GameObjects();
     if (zone_id > gameObjects.Len()) return;
@@ -9032,6 +9100,13 @@ static tConfItemFunc sg_SetZoneIdSpeed_conf("SET_ZONE_ID_SPEED",&sg_SetZoneIdSpe
 
 static void sg_SetZoneIdColor(std::istream &s)
 {
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid)
+    {
+        con << "Must be called while a grid exists!\n";
+        return;
+    }
+
     tString params;
     params.ReadLine( s, true );
 
@@ -9052,9 +9127,6 @@ static void sg_SetZoneIdColor(std::istream &s)
     int zone_id = -1;
     zone_id = atoi(object_id_str);
     if (zone_id < 0) return;
-
-    eGrid *grid = eGrid::CurrentGrid();
-    if (!grid) return;
 
     const tList<eGameObject>& gameObjects = grid->GameObjects();
     if (zone_id > gameObjects.Len()) return;
@@ -9084,6 +9156,13 @@ static tConfItemFunc sg_SetZoneIdColor_conf("SET_ZONE_ID_COLOR",&sg_SetZoneIdCol
 
 static void sg_SetZoneIdExpansion(std::istream &s)
 {
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid)
+    {
+        con << "Must be called while a grid exists!\n";
+        return;
+    }
+
     tString params;
     params.ReadLine( s, true );
 
@@ -9097,9 +9176,6 @@ static void sg_SetZoneIdExpansion(std::istream &s)
     int zone_id = -1;
     zone_id = atoi(object_id_str);
     if (zone_id < 0) return;
-
-    eGrid *grid = eGrid::CurrentGrid();
-    if (!grid) return;
 
     const tList<eGameObject>& gameObjects = grid->GameObjects();
     if (zone_id > gameObjects.Len()) return;
@@ -9126,6 +9202,13 @@ static tConfItemFunc sg_SetZoneIdExpansion_conf("SET_ZONE_ID_EXPANSION",&sg_SetZ
 
 static void sg_SetZoneIdRotation(std::istream &s)
 {
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid)
+    {
+        con << "Must be called while a grid exists!\n";
+        return;
+    }
+
     tString params;
     params.ReadLine( s, true );
 
@@ -9139,9 +9222,6 @@ static void sg_SetZoneIdRotation(std::istream &s)
     int zone_id = -1;
     zone_id = atoi(object_id_str);
     if (zone_id < 0) return;
-
-    eGrid *grid = eGrid::CurrentGrid();
-    if (!grid) return;
 
     const tList<eGameObject>& gameObjects = grid->GameObjects();
     if (zone_id > gameObjects.Len()) return;
@@ -9166,6 +9246,13 @@ static tConfItemFunc sg_SetZoneIdRotationConf("SET_ZONE_ID_ROTATION", &sg_SetZon
 
 static void sg_SetZoneIdPenetrate(std::istream &s)
 {
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid)
+    {
+        con << "Must be called while a grid exists!\n";
+        return;
+    }
+
     tString params;
     params.ReadLine( s, true );
 
@@ -9182,9 +9269,6 @@ static void sg_SetZoneIdPenetrate(std::istream &s)
     int zone_id = -1;
     zone_id = atoi(object_id_str);
     if (zone_id < 0) return;
-
-    eGrid *grid = eGrid::CurrentGrid();
-    if (!grid) return;
 
     const tList<eGameObject>& gameObjects = grid->GameObjects();
     if (zone_id > gameObjects.Len()) return;

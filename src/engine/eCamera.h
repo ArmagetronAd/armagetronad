@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -106,6 +106,9 @@ protected:
 
     bool renderingMain_;	// flag indicating whether the current rendering process is the main process or just a mirror effect
 
+    bool cameraMain_;		// flag indicating whether the camera is a main camera or a widget view
+    bool mirrorView_;		// flag indicating whether the rendering should be done as in a mirror
+
     static bool InterestingToWatch(eGameObject const * g);
 
     eCoord Glance( eCoord const & in, eCoord const & glanceDir ) const;
@@ -122,10 +125,13 @@ public:
     bool RenderingMain() const { return renderingMain_;  }
     void SetRenderingMain( bool f ){ renderingMain_ = f; }
 
+    bool CameraMain() const { return cameraMain_;  }
+    void SetCameraMain( bool f ){ cameraMain_ = f; }
+
     const ePlayerNetID* Player() const;
     const ePlayer* LocalPlayer() const;
 
-    eCamera(eGrid *grid, rViewport *vp,ePlayerNetID *owner,ePlayer *lp,eCamMode m=CAMERA_IN);
+    eCamera(eGrid *grid, rViewport *vp,ePlayerNetID *owner,ePlayer *lp,eCamMode m=CAMERA_IN, bool rMain=true);
     virtual ~eCamera();
 
     eGameObject * Center() const;

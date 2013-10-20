@@ -4910,7 +4910,7 @@ void gCycle::Render(const eCamera *cam){
 
         glPopMatrix();
 
-        h=cam->CameraZ()*.005+.03;
+        h = cam ? cam->CameraZ()*.005+.03 : 0;
 
 #ifdef ENABLE_OLD_LAG_O_METER
         if(sg_laggometerUseOld) {
