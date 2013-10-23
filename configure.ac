@@ -231,11 +231,11 @@ if test -n "$ARMAGETRONAD_OS_X_TOOLKIT"; then
 		FTGL_LIBS="-lftgl -lfreetype -lz -lbz2"
 	fi
 	
-	LDFLAGS="-arch ${os_x_arch} -L${ARMAGETRONAD_OS_X_TOOLKIT}/${os_x_arch}/lib $LDFLAGS"
-	test -n "$os_x_sdk" && LDFLAGS="-isysroot $os_x_sdk $LDFLAGS"
-	test -n "$os_x_version_min" && LDFLAGS="-mmacosx-version-min=$os_x_version_min $LDFLAGS"
+	CXXFLAGS="-arch ${os_x_arch} -stdlib=libstdc++ $CXXFLAGS"
+	test -n "$os_x_sdk" && CXXFLAGS="-isysroot $os_x_sdk $CXXFLAGS"
+	test -n "$os_x_version_min" && CXXFLAGS="-mmacosx-version-min=$os_x_version_min $CXXFLAGS"
 	
-	CXXFLAGS="$LDFLAGS $CXXFLAGS"
+	LDFLAGS="$CXXFLAGS -L${ARMAGETRONAD_OS_X_TOOLKIT}/${os_x_arch}/lib $LDFLAGS"
 	CPPFLAGS="-isystem ${ARMAGETRONAD_OS_X_TOOLKIT}/${os_x_arch}/include $CPPFLAGS"
 	
 	OBJCXXFLAGS="$CXXFLAGS $OBJCXXFLAGS"
