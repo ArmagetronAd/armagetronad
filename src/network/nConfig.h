@@ -105,7 +105,7 @@ public:
 
     static void s_GetConfigProtoBuf( Network::Config const & protoBuf, nSenderInfo const & sender );
 
-    virtual void WasChanged(bool nonDefault);
+    void CheckChange(bool nonDefault);
 
     virtual bool Writable();
 
@@ -218,9 +218,9 @@ public:
         Set( saved_ );
     }
 private:
-    void WasChanged()
+    virtual void WasChanged()
     {
-        nConfItemBase::WasChanged( ! (*this->target == default_) );
+        nConfItemBase::CheckChange( ! (*this->target == default_) );
     }
 
     T default_;     //!< default value

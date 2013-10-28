@@ -65,8 +65,8 @@ public:
 
     const tString & Name() const { return name_; }
     const tString & Specification() const { return specification_; }
-    const bool IsEnabledForFile() const { return isEnabledForFile_; }
-    const bool IsEnabledForScript() const { return isEnabledForScript_; }
+    bool IsEnabledForFile() const { return isEnabledForFile_; }
+    bool IsEnabledForScript() const { return isEnabledForScript_; }
 
     void SetForFile( bool enable ) { isEnabledForFile_ = enable; }
     void SetForScript( bool enable ) { isEnabledForScript_ = enable; }

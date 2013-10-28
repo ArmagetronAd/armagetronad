@@ -65,7 +65,7 @@ static NSString *getApplicationName(void)
 
 @implementation NSApplication (SDLApplication)
 /* Invoked from the Quit menu item */
-- (void)terminate:(id)sender
+- (void)terminateCustom:(id)sender
 {
     /* Post a SDL_QUIT event */
     SDL_Event event;
@@ -131,7 +131,7 @@ static void setApplicationMenu(void)
     [appleMenu addItem:[NSMenuItem separatorItem]];
 
     title = [@"Quit " stringByAppendingString:appName];
-    [appleMenu addItemWithTitle:title action:@selector(terminate:) keyEquivalent:@"q"];
+    [appleMenu addItemWithTitle:title action:@selector(terminateCustom:) keyEquivalent:@"q"];
 
     
     /* Put menu into the menubar */
@@ -187,7 +187,9 @@ static void CustomApplicationMain (int argc, char **argv)
     {
         ProcessSerialNumber psn = {0, kCurrentProcess};
         TransformProcessType(&psn, kProcessTransformToForegroundApplication);
-        SetFrontProcess(&psn);
+        [[NSApplication sharedApplication] activateIgnoringOtherApps:YES];
+        // deprecated in OS X 10.9
+        // SetFrontProcess(&psn);
     }    
 #endif /* SDL_USE_CPS */
 
@@ -335,7 +337,11 @@ public:
         // asl_log_descriptor() was added in OS X 10.8. Also in 10.8 messages are
         // not automatically redirected to ASL, so this doubles as a check to see
         // if we should implement that behavior.
-        log_descriptor_func log_descriptor = (log_descriptor_func)dlsym( RTLD_NEXT, "asl_log_descriptor" );
+
+        // cast between pointer-to-function and pointer-to-object is an extension,
+        // so declare it as such to silence pedantic warnings.
+        // http://gcc.gnu.org/onlinedocs/gcc/Alternate-Keywords.html
+        __extension__ log_descriptor_func log_descriptor = reinterpret_cast< log_descriptor_func >( dlsym( RTLD_NEXT, "asl_log_descriptor" ) );
         if ( log_descriptor )
         {
             client_ = asl_open( NULL, "com.apple.console", 0 );

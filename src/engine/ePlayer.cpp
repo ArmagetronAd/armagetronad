@@ -7229,7 +7229,7 @@ void ePlayerNetID::Update(){
 
             // trigger transmission to the clients
             if (sn_GetNetState()==nSERVER)
-                se_pingCharityServerConf.nConfItemBase::WasChanged(true);
+                se_pingCharityServerConf.nConfItemBase::CheckChange(true);
         }
     }
 

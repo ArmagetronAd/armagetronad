@@ -508,7 +508,7 @@ void eTimer::SyncTime(){
         REAL smooth = timeStep * ( .5 + extraSmooth );
         startTimeSmoothedOffset_ = ( startTimeSmoothedOffset_ + startTimeOffset * smooth )/(1 + smooth);
 
-        if ( !finite( startTimeSmoothedOffset_ ) )
+        if ( !isfinite( startTimeSmoothedOffset_ ) )
         {
             // emergency, smoothing the timer produced infinite results
             st_Breakpoint();

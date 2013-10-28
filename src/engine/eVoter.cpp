@@ -681,7 +681,7 @@ protected:
 
     virtual bool DoCheckValid( int senderID ){ return true; }
 
-    virtual void DoFillToMessage( Engine::VoteItem & item ) const
+    void DoFillToMessage( Engine::VoteItem & item ) const
     {
         if(sn_GetNetState()==nSERVER)
         {

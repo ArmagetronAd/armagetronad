@@ -34,7 +34,7 @@
 
 @interface AAURLHandler : NSObject
 {
-    NSMutableString *_startupEvent; //! Set when the game is started via URL
+    NSString *_startupEvent; //! Set when the game is started via URL
     BOOL _shouldConnect;
 }
 - (void) setShouldConnect:(BOOL)shouldConnect showSplash:(bool *)showSplash;
@@ -53,7 +53,7 @@ void ret_to_MainMenu();
                                                            andSelector:@selector(handleURLEvent:withReplyEvent:)
                                                          forEventClass:kInternetEventClass
                                                             andEventID:kAEGetURL];
-        _startupEvent = [[NSMutableString alloc] init];
+        _startupEvent = NULL;
         _shouldConnect = NO;
     }
     return self;
@@ -95,20 +95,17 @@ void ret_to_MainMenu();
 - (void) setShouldConnect:(BOOL)shouldConnect showSplash:(bool *)showSplash
 {
     _shouldConnect = shouldConnect;
-    if ( _shouldConnect )
+    if ( _shouldConnect && _startupEvent )
     {
-        // _startupEvent is initialized to an empty string. Check if a URL event actually occured
-        if ( ![_startupEvent isEqualToString:@""] )
-        {
-            [self connectToServer:_startupEvent showSplash:showSplash];
-        }
+        [self connectToServer:_startupEvent showSplash:showSplash];
     }
 
 }
 
 - (void) dealloc
 {
-    [_startupEvent release];
+    if ( _startupEvent )
+        [_startupEvent release];
     [super dealloc];
 }
 

@@ -113,7 +113,7 @@ namespace
 #define malloc(SIZE)                static_cast<void *>(tNEW(char)[SIZE])
 #define calloc(ELEMCOUNT, ELEMSIZE) static_cast<void *>(tNEW(char)[(ELEMCOUNT)*(ELEMSIZE)])
 #define free(BASEADR)               delete[] (reinterpret_cast< char* >(BASEADR))
-#define realloc(BASEADR, NEWSIZE)   realloc not defined
+// #define realloc(BASEADR, NEWSIZE)   realloc not defined
 
 // and other allocating functions
 #define strdup(ADR)  tStrDup(ADR)

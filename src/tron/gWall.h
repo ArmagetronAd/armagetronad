@@ -60,8 +60,8 @@ public:
 protected:
     virtual void OnBlocksCamera( eCamera * cam, REAL height ) const; //!< called by the camera code when this wall is between the cycle and the camera
 #endif
-    virtual REAL Height();
-    virtual REAL SeeHeight();
+    virtual REAL Height() const;
+    virtual REAL SeeHeight() const;
 
 private:
     mutable REAL renderHeight_; //!< the height with which this wall is really rendered

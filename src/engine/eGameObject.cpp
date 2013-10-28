@@ -174,7 +174,7 @@ void eGameObject::Move( const eCoord &dest, REAL startTime, REAL endTime, bool u
 #ifdef DEBUG
     grid->Check();
 #endif
-    if (!finite(dest.x) || !finite(dest.y))
+    if (!isfinite(dest.x) || !isfinite(dest.y))
     {
         st_Breakpoint();
         return;
@@ -191,7 +191,7 @@ void eGameObject::Move( const eCoord &dest, REAL startTime, REAL endTime, bool u
     grid->Range(stop.NormSquared());
 
 #ifdef DEBUG
-    if (!finite(stop.x) || !finite(stop.y))
+    if (!isfinite(stop.x) || !isfinite(stop.y))
     {
         st_Breakpoint();
 

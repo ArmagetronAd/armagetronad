@@ -243,7 +243,7 @@ void nConfItemBase::SendConfig(bool force, int peer){
     }
 }
 
-void nConfItemBase::WasChanged( bool nonDefault ){
+void nConfItemBase::CheckChange( bool nonDefault ){
     // inform watcher
     if (this->watcher_ )
         this->watcher_->Change( nonDefault );

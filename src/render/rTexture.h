@@ -154,7 +154,13 @@ protected:
     void Upload( rSurface const & surface );        //!< Uploads the passed surface to OpenGL (for use in OnSelect)
 
     virtual void OnSelect(bool enforce);            //!< Selects the texture for rendering
-    virtual void OnSelect()=0;                      //!< Selects the texture for rendering (core part)
+
+    //! Selects the texture for rendering (core part).
+    //!
+    //! In derived classes, this routine is supposed to do the work of loading the texture
+    //! into memory and using the Upload() function to upload it to OpenGL.
+    virtual void OnSelectCore() = 0;
+
     virtual void OnUnload();                        //!< Unloads the texture from OpenGL and memory
 
     void StoreAlpha();                              //!< sets the alpha store flag
@@ -182,7 +188,7 @@ public:
     virtual ~rFileTexture();                //!< destructor
 
 protected:
-    virtual void OnSelect();                //!< Selects the texture for rendering (core part)
+    virtual void OnSelectCore();            //!< Selects the texture for rendering (core part)
 private:
     tString fileName_;                      //!< the texture's filename
     tPath const *path_;
@@ -253,7 +259,7 @@ public:
     virtual ~rSurfaceTexture();                 //!< destructor
 
 protected:
-    virtual void OnSelect();                    //!< Selects the texture for rendering (core part)
+    virtual void OnSelectCore();                //!< Selects the texture for rendering (core part)
 private:
     rSurface const & surface_;                  //!< Surface to use as texture data
 

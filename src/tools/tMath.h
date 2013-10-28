@@ -35,6 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <float.h>
 #define finite _finite
 #define copysign _copysign
+#define isfinite finite
 #endif
 
 #ifdef SOLARIS
@@ -43,13 +44,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 inline bool good( REAL f )
 {
-    return finite( f );
+    return isfinite( f );
 }
 
 static inline bool clamp(REAL &c, REAL min, REAL max){
     tASSERT(min <= max);
 
-    if (!finite(c))
+    if (!isfinite(c))
     {
         c = 0;
         return true;

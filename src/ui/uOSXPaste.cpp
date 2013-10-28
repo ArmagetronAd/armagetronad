@@ -29,6 +29,8 @@
 #include <ApplicationServices/ApplicationServices.h>
 #include "uOSXPaste.h"
 
+#define check_error(error, label) if (error != noErr) goto label
+
 bool su_OSXPastePasteboardData(CFDataRef &outData) {
     static const CFStringRef plainTextFlavor = CFSTR("public.utf8-plain-text");
     
@@ -37,11 +39,11 @@ bool su_OSXPastePasteboardData(CFDataRef &outData) {
     bool success = false;
     
     status = PasteboardCreate(kPasteboardClipboard, &pasteboard);
-    require_noerr(status, CantCreatePasteboard);
+    check_error(status, CantCreatePasteboard);
     
     ItemCount outItemCount;
     status = PasteboardGetItemCount(pasteboard, &outItemCount);
-    require_noerr(status, CantGetItemCount);
+    check_error(status, CantGetItemCount);
     
     // do we have any pastes on the pasteboard?
     if (outItemCount < 1)
@@ -50,11 +52,11 @@ bool su_OSXPastePasteboardData(CFDataRef &outData) {
     PasteboardItemID itemID;
     // Index starts out at 1 here.
     status = PasteboardGetItemIdentifier(pasteboard, 1, &itemID);
-    require_noerr(status, CantGetItemID);
+    check_error(status, CantGetItemID);
     
     CFDataRef data;
     status = PasteboardCopyItemFlavorData(pasteboard, itemID, plainTextFlavor, &data);
-    require_noerr(status, CantGetDataFlavor);
+    check_error(status, CantGetDataFlavor);
     
     outData = data;
     success = true;

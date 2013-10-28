@@ -228,10 +228,10 @@ if test -n "$ARMAGETRONAD_OS_X_TOOLKIT"; then
 		LDFLAGS="-F${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks $LDFLAGS"
 		CPPFLAGS="-F${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks -I${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks/SDL.framework/Headers -I${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks/SDL_mixer.framework/Headers -I${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks/SDL_image.framework/Headers $CPPFLAGS"
 		FTGL_CFLAGS="-I${ARMAGETRONAD_OS_X_TOOLKIT}/${os_x_arch}/include/FTGL -I${ARMAGETRONAD_OS_X_TOOLKIT}/${os_x_arch}/include/freetype2"
-		FTGL_LIBS="-lftgl -lfreetype -lz -lbz2"
+		FTGL_LIBS="-lftgl -lfreetype -lbz2"
 	fi
 	
-	CXXFLAGS="-arch ${os_x_arch} -stdlib=libstdc++ $CXXFLAGS"
+	CXXFLAGS="-arch ${os_x_arch} $CXXFLAGS"
 	test -n "$os_x_sdk" && CXXFLAGS="-isysroot $os_x_sdk $CXXFLAGS"
 	test -n "$os_x_version_min" && CXXFLAGS="-mmacosx-version-min=$os_x_version_min $CXXFLAGS"
 	
@@ -485,6 +485,8 @@ if test $CODELEVEL -ge 1; then
     
     dnl careful, only supported on GCC 4.2 and later
     AX_CXXFLAGS_GCC_OPTION(-Wno-strict-overflow)
+
+    AX_CXXFLAGS_GCC_OPTION(-Wno-mismatched-tags)
 fi
 
 dnl test $CODELEVEL -ge 2 && CXXFLAGS="$CXXFLAGS -Wshadow -Wpointer-arith -Wfloat-equal -W -Wcast-qual -Wcast-align -Wconversion -Wunreachable-code --pedantic -Winline"
@@ -496,6 +498,8 @@ test $CODELEVEL -ge 4 && CXXFLAGS="$CXXFLAGS -Werror"
 # to be printed in the debugger
 if test $CODELEVEL -ge 1 && test $DEBUGLEVEL -ge 1; then
     AX_CXXFLAGS_GCC_OPTION(-Wno-unused-but-set-variable)
+    AX_CXXFLAGS_GCC_OPTION(-Wno-unused-variable)
+    AX_CXXFLAGS_GCC_OPTION(-Wno-unused-private-field)
 fi
 
 dnl determine whether "games" should be put into paths: not if it was
@@ -794,7 +798,7 @@ dnl Boost.System is a mandatory dependency of Boost.Thread
 dnl http://www.boost.org/doc/libs/1_52_0/doc/html/thread/build.html
 AC_CHECK_LIB([boost_system], _ZN5boost6system15system_categoryEv)
 
-AC_CHECK_LIB([boost_thread],_ZNK5boost6thread6get_idEv,[
+AC_CHECK_LIB([boost_thread],_ZN5boost11this_thread5yieldEv,[
 LIBS="-lboost_thread ${LIBS}"
 
 AC_DEFINE(HAVE_LIBBOOST_THREAD,1,[Define if you have boost_thread libraries and header files.])
@@ -1019,6 +1023,23 @@ if test ${have_glew} = true; then
 fi
 
 dnl *************************************************
+dnl         libpng
+dnl *************************************************
+
+AC_MSG_CHECKING(whether libpng is installed)
+if PNGLIBS=`libpng-config --libs`; then
+    AC_MSG_RESULT(yes)
+fi
+
+CPPFLAGS="$CPPFLAGS `libpng-config --cflags`"
+LIBS="$LIBS $PNGLIBS"
+
+AC_CHECK_FUNC(png_sig_cmp,
+,
+AC_MSG_ERROR([You need libpng to compile ${progtitle}.]))
+
+
+dnl *************************************************
 dnl         FTGL
 dnl *************************************************
 
@@ -1116,18 +1137,6 @@ AC_LANG([C])
 
 dnl AC_CHECK_LIB(z, gzread,,
 dnl AC_MSG_ERROR([You need libz to compile ${progtitle}.]))
-
-AC_MSG_CHECKING(whether libpng is installed)
-if PNGLIBS=`libpng-config --libs`; then
-    AC_MSG_RESULT(yes)
-fi
-
-CPPFLAGS="$CPPFLAGS `libpng-config --cflags`"
-LIBS="$LIBS $PNGLIBS"
-
-AC_CHECK_FUNC(png_sig_cmp,
-,
-AC_MSG_ERROR([You need libpng to compile ${progtitle}.]))
 
 dnl AC_CHECK_LIB(jpeg, jpeg_read_header,,
 dnl	AC_MSG_WARN([

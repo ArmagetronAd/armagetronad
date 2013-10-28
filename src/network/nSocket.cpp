@@ -847,8 +847,9 @@ static int PartialIPAddress (const char *in, struct sockaddr *hostaddr, int defa
         port = default_port;
 
     hostaddr->sa_family = AF_INET;
-    ((struct sockaddr_in *)hostaddr)->sin_port = htons((short)port);
-    ((struct sockaddr_in *)hostaddr)->sin_addr.s_addr = (default_addr & htonl(mask)) | htonl(addr);
+    struct sockaddr_in *hostaddr_in = reinterpret_cast< sockaddr_in * >( hostaddr );
+    hostaddr_in->sin_port = htons((short)port);
+    hostaddr_in->sin_addr.s_addr = (default_addr & htonl(mask)) | htonl(addr);
 
     return 0;
 }
@@ -859,9 +860,9 @@ char *ANET_AddrToString (const struct sockaddr *addr)
 {
     static char buffer[23];
     int haddr;
-
-    haddr = ntohl(((struct sockaddr_in const *)addr)->sin_addr.s_addr);
-    snprintf(buffer,22, "%d.%d.%d.%d:%d", (haddr >> 24) & 0xff, (haddr >> 16) & 0xff, (haddr >> 8) & 0xff, haddr & 0xff, ntohs(((struct sockaddr_in const *)addr)->sin_port));
+    const struct sockaddr_in *addr_in = reinterpret_cast< const struct sockaddr_in * >( addr );
+    haddr = ntohl(addr_in->sin_addr.s_addr);
+    snprintf(buffer,22, "%d.%d.%d.%d:%d", (haddr >> 24) & 0xff, (haddr >> 16) & 0xff, (haddr >> 8) & 0xff, haddr & 0xff, ntohs(addr_in->sin_port));
     return buffer;
 }
 
@@ -883,19 +884,24 @@ int ANET_GetSocketAddr (int sock, struct sockaddr *addr)
 
 //=============================================================================
 
-int ANET_AddrCompare (struct sockaddr *addr1, struct sockaddr *addr2)
+#if 0
+int ANET_AddrCompare(const struct sockaddr *addr1, const struct sockaddr *addr2)
 {
     if (addr1->sa_family != addr2->sa_family)
         return -1;
 
-    if (((struct sockaddr_in *)addr1)->sin_addr.s_addr != ((struct sockaddr_in *)addr2)->sin_addr.s_addr)
+    const struct sockaddr_in *addr1_in = reinterpret_cast< const struct sockaddr_in * >( addr1 );
+    const struct sockaddr_in *addr2_in = reinterpret_cast< const struct sockaddr_in * >( addr2 );
+
+    if (addr1_in->sin_addr.s_addr != addr2_in->sin_addr.s_addr)
         return -1;
 
-    if (((struct sockaddr_in *)addr1)->sin_port != ((struct sockaddr_in *)addr2)->sin_port)
+    if (addr1_in->sin_port != addr2_in->sin_port)
         return 1;
 
     return 0;
 }
+#endif
 
 }   // namespace
 
