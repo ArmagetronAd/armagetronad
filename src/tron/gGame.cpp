@@ -3285,20 +3285,20 @@ static void sg_ParseMap ( gParser * aParser, tString mapfile, bool verify )
         }
     } else if(sn_GetNetState()!=nCLIENT) {
         // if map has been loaded succefully
-        if (verify) {
-            // Loading config affecting game settings like axes, walls_length
-            // must be done before these settings are transfer to client
-            // Map config file is executed at accesslevel of the one who set the map
-            tCurrentAccessLevel level( conf_mapfile.GetSetting().GetSetLevel(), true );
-            std::stringstream command;
-            std::string filename = std::string(mapfile);
-            int pos = filename.find(".aamap.xml",filename.length()-10);
-            if (pos!=std::string::npos) {
-                filename.replace(pos,10,".cfg");
-                command << "rinclude " << filename;
-                tConfItemBase::LoadLine(command);
-            }
-        } else {
+
+        // Loading config affecting game settings like axes, walls_length
+        // must be done before these settings are transfer to client
+        // Map config file is executed at accesslevel of the one who set the map
+        tCurrentAccessLevel level( conf_mapfile.GetSetting().GetSetLevel(), true );
+        std::stringstream command;
+        std::string filename = std::string(mapfile);
+        int pos = filename.find(".aamap.xml",filename.length()-10);
+        if (pos!=std::string::npos) {
+            filename.replace(pos,10,".cfg");
+            command << "rinclude " << filename;
+            tConfItemBase::LoadLine(command);
+        }
+        if (!verify) {
             // lua file must be loaded only once, when map has been verified already.
             std::string filename = std::string(mapfile);
             int pos = filename.find(".aamap.xml",filename.length()-10);
