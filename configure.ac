@@ -1201,9 +1201,6 @@ AC_CHECK_FUNCS(wmemset)
 # if the compiler is GCC -Os produces faulty code (exceptions cause crashes), at least on AMD64. Replace it with -O2.
 test -z "`$CXX --version | grep '(GCC)'`" || CXXFLAGS="`echo $CXXFLAGS | sed -e 's,-Os,-O2,g' `" CFLAGS="`echo $CFLAGS | sed -e 's,-Os,-O2,g' `"
 
-dnl add current directories to include search path
-CPPFLAGS="-I. -I.. $CPPFLAGS"
-
 if test "$enable_sound" = "yes"; then
 AC_DEFINE(HAVE_LIBSDL_MIXER, 1, [Use SDL_mixer])
 fi
