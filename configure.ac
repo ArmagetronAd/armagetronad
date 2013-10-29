@@ -232,7 +232,11 @@ if test -n "$ARMAGETRONAD_OS_X_TOOLKIT"; then
 	fi
 	
 	CXXFLAGS="-arch ${os_x_arch} $CXXFLAGS"
-	test -n "$os_x_sdk" && CXXFLAGS="-isysroot $os_x_sdk $CXXFLAGS"
+	if test -n "$os_x_sdk"; then
+		# We could also set the SDKROOT environment variable, instead of using xcrun.
+		XML2_CONFIG="xcrun --sdk $os_x_sdk xml2-config"
+		CXXFLAGS="-isysroot $os_x_sdk $CXXFLAGS"
+	fi
 	test -n "$os_x_version_min" && CXXFLAGS="-mmacosx-version-min=$os_x_version_min $CXXFLAGS"
 	
 	LDFLAGS="$CXXFLAGS -L${ARMAGETRONAD_OS_X_TOOLKIT}/${os_x_arch}/lib $LDFLAGS"
