@@ -1489,6 +1489,8 @@ void  tMemManBase::Profile(){
 
 
     FILE *f = fopen( name, "w" );
+    if ( !f )
+        return;
     //	fprintf( f, "%d\t%d\t%d\t%s\t%s\t%d\t%d\t\n", )
 
     int total_blocks=0,total_bytes =0;

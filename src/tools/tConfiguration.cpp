@@ -194,6 +194,7 @@ tString tCurrentAccessLevel::GetName( tAccessLevel level )
 }
 
 tAccessLevel tCurrentAccessLevel::currentLevel_ = tAccessLevel_Invalid; //!< the current access level
+static tSettingItem<tAccessLevel> st_CurrentAccessLevelConf("CURRENT_ACCESS_LEVEL", tCurrentAccessLevel::currentLevel_);
 
 tAccessLevelSetter::tAccessLevelSetter( tConfItemBase & item, tAccessLevel level )
 {
@@ -290,11 +291,11 @@ public:
             }
             else if ( ci->requiredLevel != level )
             {
-                ci->requiredLevel = level;
                 if(printChange)
                 {
-                    con << tOutput( "$access_level_change", name, tCurrentAccessLevel::GetName( level ) );
+                    con << tOutput( "$access_level_change", name, tCurrentAccessLevel::GetName( ci->requiredLevel ) , tCurrentAccessLevel::GetName( level ) );
                 }
+                ci->requiredLevel = level;
             }
         }
         else if(printErrors)

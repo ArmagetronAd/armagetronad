@@ -4205,6 +4205,11 @@ void handle_chat( nMessage &m )
                         QueueShowPlayer(p);
                         return;
                     }
+                    else if (command == "/rotation")
+                    {
+                        RotationShowPlayer(p, s);
+                        return;
+                    }
 #ifdef DEDICATED
                     else  if ( command == "/rtfm" || command == "/teach" )
                     {
@@ -8180,7 +8185,7 @@ void ePlayerNetID::Update()
 
             // trigger transmission to the clients
             if (sn_GetNetState()==nSERVER)
-                se_pingCharityServerConf.nConfItemBase::WasChanged(true);
+                se_pingCharityServerConf.nConfItemBase::CheckChange(true);
         }
     }
 

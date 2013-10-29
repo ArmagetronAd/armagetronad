@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -85,7 +85,7 @@ public:
 
     static void s_GetConfigMessage(nMessage &m);
 
-    virtual void WasChanged(bool nonDefault);
+    void CheckChange(bool nonDefault);
 
     virtual bool Writable();
 
@@ -174,9 +174,9 @@ public:
         Set( saved_ );
     }
 private:
-    void WasChanged()
+    virtual void WasChanged()
     {
-        nConfItemBase::WasChanged( ! (*this->target == default_) );
+        nConfItemBase::CheckChange( ! (*this->target == default_) );
     }
 
     T default_;     //!< default value

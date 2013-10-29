@@ -222,6 +222,7 @@ private:
     tCurrentAccessLevel & operator = ( tCurrentAccessLevel const & );
 
     tAccessLevel lastLevel_; //!< used to restore the last admin level when the object goes out of scope
+public:
     static tAccessLevel currentLevel_; //!< the current access level
 };
 

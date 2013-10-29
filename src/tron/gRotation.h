@@ -429,6 +429,8 @@ class gQueuePlayers
 };
 
 void QueueShowPlayer(ePlayerNetID *player);
+void RotationShowPlayer(ePlayerNetID *player, std::istream &s);
+
 void sg_DisplayRotationList(ePlayerNetID *p, std::istream &s, tString command);
 void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command);
 void sg_LogQueue(ePlayerNetID *p, tString command, tString params, tString item);

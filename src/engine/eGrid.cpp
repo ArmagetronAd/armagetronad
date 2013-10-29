@@ -19,7 +19,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -40,7 +40,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "eCamera.h"
 
 #include "tMath.h"
-#include "nConfig.h" 
+#include "nConfig.h"
 
 #include "tRecorder.h"
 
@@ -487,7 +487,7 @@ eFace::eFace (eHalfEdge *e1,eHalfEdge *e2,eHalfEdge *e3, tControlledPTR< eFace >
 
 void eFace::Create (eHalfEdge *e1,eHalfEdge *e2,eHalfEdge *e3)
 {
-#ifdef DEBUG 
+#ifdef DEBUG
     tASSERT( edge == 0 );
 
     tASSERT(e1->other);
@@ -736,7 +736,7 @@ ePoint * eGrid::DrawLine(ePoint *start, const eCoord &end, eWall *w, bool change
     //tJUST_CONTROLLED_PTR< eWall > wal( w );
 
     // sanity check
-    if ( !finite( end.x ) || !finite( end.y ) )
+    if ( !isfinite( end.x ) || !isfinite( end.y ) )
         return start;
 
     Range(end.NormSquared());
@@ -1051,7 +1051,7 @@ ePoint * eGrid::DrawLine(ePoint *start, const eCoord &end, eWall *w, bool change
                       :          #
                       :          A
 
-                      Make four new faces around D. 4 new half 
+                      Make four new faces around D. 4 new half
                       segments DA, DB, DC and DE are created.
                       :          C
                       :          #
@@ -1196,7 +1196,7 @@ ePoint * eGrid::DrawLine(ePoint *start, const eCoord &end, eWall *w, bool change
               start=todo->p[0];
               restart=1;
               }
-               
+
               else
             */
             {
@@ -1276,18 +1276,18 @@ ePoint * eGrid::DrawLine(ePoint *start, const eCoord &end, eWall *w, bool change
                     :   a   #  [eFace G]
                     :      #       ##
                     :     #       X  ##  b
-                    :    #   e   /     ## 
+                    :    #   e   /     ##
                     : D ########/######### B
                     :   #      /(new eWall)
                     :   #     /      #
                     :   #    /  [eFace F]
                     :   #   /    #
-                    : d #  /   # c 
+                    : d #  /   # c
                     :   # /  #
                     :   #/ #
-                    :   ##   
+                    :   ##
                     :   C
-                            
+
                     */
 
 
@@ -1312,7 +1312,7 @@ ePoint * eGrid::DrawLine(ePoint *start, const eCoord &end, eWall *w, bool change
                     if (change_grid && e->Movable() && aa*dd>scale*.0001 && cc*bb >scale*.0001){
                         /*
 
-                        if the angles CDA and ABC are less than 180deg, we can 
+                        if the angles CDA and ABC are less than 180deg, we can
                         just "turn" eEdge e:
 
 
@@ -1322,16 +1322,16 @@ ePoint * eGrid::DrawLine(ePoint *start, const eCoord &end, eWall *w, bool change
                         :   a   # |  ## b
                         :      # |     ##
                         :     #  |       ##
-                        :    #  |    X     ## 
+                        :    #  |    X     ##
                         : D #   |   |        # B
                         :   #  |   |(new eWall)
                         :   #  e  |      #
                         :   # |  |     #
                         :   # | |    #
-                        : d #| |   # c 
+                        : d #| |   # c
                         :   #||  #
                         :   #| #
-                        :   ##   
+                        :   ##
                         :   C
 
                         */
@@ -1376,7 +1376,7 @@ ePoint * eGrid::DrawLine(ePoint *start, const eCoord &end, eWall *w, bool change
                     /* if not, we hace to introduce a new ePoint E: the cut between our
                        new eWall and eEdge e.
 
-                            
+
                        :        A
                        :        ##
                        :        #\##
@@ -1386,21 +1386,21 @@ ePoint * eGrid::DrawLine(ePoint *start, const eCoord &end, eWall *w, bool change
                        :          #   \    ###
                        :           #   aa     ##
                        :       a   #     \      ## b
-                       :            #     \       ### 
+                       :            #     \       ###
                        :            #      \   CC    ##
-                       :             #      \ /        ## 
+                       :             #      \ /        ##
                        :           D ## dd ##E### bb #### B [BD = e]
                        :            #      /(new eWall)
                        : [eFace F] #     /      #
                        :          #   cc     # [eFace FF]
                        :         #   /    #
-                       :      d #  /   # c 
+                       :      d #  /   # c
                        :       # /  #
                        :      #/ #
-                       :     #/#   
+                       :     #/#
                        :    ##
                        :   C
-                            
+
 
                     */
 
@@ -1879,11 +1879,11 @@ bool eHalfEdge::Simplify(eGrid *grid)
           C  this
           A ------------ --------------- stays
           Next    |
-          | 
-          |r 
-          |u   
-          |n    
-          |     
+          |
+          |r
+          |u
+          |n
+          |
           |
           B
 
@@ -2543,7 +2543,7 @@ ePoint * eGrid::Insert(const eCoord& x, eFace *start){
       break;
          }
       }
-      return NULL; 
+      return NULL;
     */
 }
 
@@ -2656,7 +2656,7 @@ void eEdge::calc_Len() const{
 void ePoint::InsertIntoGrid(){
   if (f.Len()==0){
     for(int i=eFace::faces.Len()-1;i>=0;i--)
-      
+
       if (eFace::faces(i)->IsInside(*this)){
 	for(int j=0;j<=2;j++){
 	  if (*eFace::faces(i)->p[j]==*this){
@@ -2680,7 +2680,7 @@ void ePoint::InsertIntoGrid(){
 
       do
 	{
-	  
+
 	  run = run->other->next;
 	}
       while (stop != start);

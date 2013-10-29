@@ -1206,7 +1206,7 @@ void gDestination::CopyFrom(const gCycleMovement &other)
     turns 		= other.GetTurns();
 
 #ifdef DEBUG
-    if (!finite(gameTime) || !finite(speed) || !finite(distance))
+    if (!isfinite(gameTime) || !isfinite(speed) || !isfinite(distance))
         st_Breakpoint();
 #endif
     if ( other.Owner() && other.Player() )
@@ -1959,7 +1959,7 @@ bool gCycleExtrapolator::TimestepCore(REAL currentTime, bool calculateAccelerati
     // correct distance
     // distance = dest->distance - DistanceToDestination( *dest );
     // REAL distanceBefore = GetDistance();
-    tASSERT(finite(distance));
+    tASSERT(isfinite(distance));
 
     // delegate
     bool ret = false;
@@ -2400,12 +2400,12 @@ void gCycle::MyInitAfterCreation(){
 
 void gCycle::InitAfterCreation(){
 #ifdef DEBUG
-    if (!finite(Speed()))
+    if (!isfinite(Speed()))
         st_Breakpoint();
 #endif
     gCycleMovement::InitAfterCreation();
 #ifdef DEBUG
-    if (!finite(Speed()))
+    if (!isfinite(Speed()))
         st_Breakpoint();
 #endif
     MyInitAfterCreation();
@@ -2932,9 +2932,9 @@ REAL sg_GetSparksDistance();
 
 
 bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
-    if (!finite(skew))
+    if (!isfinite(skew))
         skew=0;
-    if (!finite(skewDot))
+    if (!isfinite(skewDot))
         skewDot=0;
 
     // eCoord oldpos=pos;
@@ -2977,7 +2977,7 @@ bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
     //if ( 0 )
 
     REAL animts=currentTime-lastTimeAnim;
-    if (animts<0 || !finite(animts))
+    if (animts<0 || !isfinite(animts))
         animts=0;
     else
         lastTimeAnim=currentTime;
@@ -4556,8 +4556,8 @@ void gCycle::Render(const eCamera *cam){
     glProgramLocalParameter4fARB_ptr = (glProgramLocalParameter4fARB_Func) SDL_GL_GetProcAddress("glProgramLocalParameter4fARB");
 #endif
 #endif
-    if (!finite(z) || !finite(pos.x) ||!finite(pos.y)||!finite(dir.x)||!finite(dir.y)
-            || !finite(skew))
+    if (!isfinite(z) || !isfinite(pos.x) ||!isfinite(pos.y)||!isfinite(dir.x)||!isfinite(dir.y)
+            || !isfinite(skew))
         st_Breakpoint();
     if (Alive()){
         //con << "Drawing cycle at " << pos << '\n';
@@ -5881,7 +5881,7 @@ void gCycle::ReadSync( nMessage &m )
         REAL ratio = (interpolatedDistance - bef->distance)/
                      (aft->distance - bef->distance);
 
-        if (!finite(ratio))
+        if (!isfinite(ratio))
             ratio = 0;
 
         // interpolate when the cycle was at the position the sync message was sent

@@ -523,7 +523,7 @@ void gWallRim::OnBlocksCamera( eCamera * camera, REAL height ) const
 //!
 // *******************************************************************************************
 
-REAL gWallRim::Height( void )
+REAL gWallRim::Height( void ) const
 {
     return renderHeight_;
 }
@@ -538,7 +538,7 @@ REAL gWallRim::Height( void )
 //!
 // *******************************************************************************************
 
-REAL gWallRim::SeeHeight( void )
+REAL gWallRim::SeeHeight( void ) const
 {
     return renderHeight_ * 2;
 }
@@ -585,7 +585,7 @@ void gPlayerWall::Flip(){
 }
 
 static void clamp01(REAL &c){
-    if (!finite(c))
+    if (!isfinite(c))
         c = 0.5;
 
     if (c<0)
@@ -1580,10 +1580,10 @@ void gNetPlayerWall::MyInitAfterCreation()
 
     //w=
 #ifdef DEBUG
-    if (!finite(end.x) || !finite(end.y))
+    if (!isfinite(end.x) || !isfinite(end.y))
         st_Breakpoint();
 
-    if (!finite(beg.x) || !finite(beg.y))
+    if (!isfinite(beg.x) || !isfinite(beg.y))
         st_Breakpoint();
 #endif
 
@@ -1634,7 +1634,7 @@ void gNetPlayerWall::Update(REAL Tend,REAL dend){
 		end=beg + dir*(dend-dbegin);
 
 #ifdef DEBUG
-		if (!finite(end.x) || !finite(end.y))
+		if (!isfinite(end.x) || !isfinite(end.y))
 			st_Breakpoint();
 #endif
 
@@ -1683,7 +1683,7 @@ void gNetPlayerWall::real_Update(REAL Tend,const eCoord &pend, bool force )
     }
 
 #ifdef DEBUG
-    if (!finite(end.x) || !finite(end.y))
+    if (!isfinite(end.x) || !isfinite(end.y))
         st_Breakpoint();
 #endif
 
@@ -2301,8 +2301,8 @@ void gNetPlayerWall::Check() const
     for ( i = coords_.Len() -1 ; i>=0; --i )
     {
         gPlayerWallCoord* coords = &( coords_( i ) );
-        tASSERT( finite( coords[0].Pos ) );
-        tASSERT( finite( coords[0].Time ) );
+        tASSERT( isfinite( coords[0].Pos ) );
+        tASSERT( isfinite( coords[0].Time ) );
     }
 #endif
 }

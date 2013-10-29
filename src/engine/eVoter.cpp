@@ -686,7 +686,7 @@ protected:
 
     virtual bool DoCheckValid( int senderID ){ return true; }
 
-    virtual void DoFillToMessage( nMessage& m ) const
+    void DoFillToMessage( nMessage& m ) const
     {
         if(sn_GetNetState()==nSERVER)
         {

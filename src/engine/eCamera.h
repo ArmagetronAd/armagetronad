@@ -107,7 +107,6 @@ protected:
     bool renderingMain_;	// flag indicating whether the current rendering process is the main process or just a mirror effect
 
     bool cameraMain_;		// flag indicating whether the camera is a main camera or a widget view
-    bool mirrorView_;		// flag indicating whether the rendering should be done as in a mirror
 
     static bool InterestingToWatch(eGameObject const * g);
 

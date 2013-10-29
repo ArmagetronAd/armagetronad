@@ -1535,6 +1535,7 @@ static void sg_queuersList(std::istream &s)
 static tConfItemFunc sg_queuersListConf("QUEUERS_LIST", &sg_queuersList);
 static tAccessLevelSetter sg_queuersListConfLevel( sg_queuersListConf, tAccessLevel_Program );
 
+//  show user their current queue limit values, refill time and play time
 void QueueShowPlayer(ePlayerNetID *player)
 {
     gQueuePlayers *queuePlayer = gQueuePlayers::GetData(player);
@@ -1554,6 +1555,82 @@ void QueueShowPlayer(ePlayerNetID *player)
         send << tColoredString::ColorString( 1,1,.5 );
         send << " )\n";
         sn_ConsoleOut(send, player->Owner());
+    }
+    else
+    {
+        tColoredString send;
+        send << tColoredString::ColorString( 1,1,.5 );
+        send << "QUEUE LIMIT: You have not made any queues to show your limits.";
+        send << "\n";
+        sn_ConsoleOut(send, player->Owner());
+    }
+}
+
+//  show user the map they are searching for and its id in the MAP/CONFIG rotation
+void RotationShowPlayer(ePlayerNetID *player, std::istream &s)
+{
+    tString params;
+    params.ReadLine(s);
+    int pos = 0;
+
+    if (params.Filter() != "")
+    {
+        tString type = params.ExtractNonBlankSubString(pos).ToLower();
+        if (type == "map")
+        {
+            tString map = params.ExtractNonBlankSubString(pos);
+            tList<gRotationItem> foundMaps;
+            for(int i = 0; i < mapRotation->Size(); i++)
+            {
+                gRotationItem *gRotItem = mapRotation->Get(i);
+                if (gRotItem)
+                {
+                    if (gRotItem->Name().Filter().Contains(map.Filter()))
+                    {
+                        foundMaps.Insert(gRotItem);
+                    }
+                }
+            }
+
+            if (foundMaps.Len() > 1)
+            {
+                sn_ConsoleOut(tOutput("$rotation_search_unknown", map), player->Owner());
+                sn_ConsoleOut(tOutput("$rotation_search_other"), player->Owner());
+
+                int len = map.Len()-1;
+                int printMax = 1 + 3 * len * len * len;
+
+                if (printMax <= 0 )
+                {
+                    tOutput msg;
+                    msg.SetTemplateParameter(1, foundMaps.Len());
+                    msg.SetTemplateParameter(2, map);
+                    msg << "$rotation_search_found_toomanyfiles";
+                    sn_ConsoleOut(msg, player->Owner());
+                }
+            }
+            else
+            {
+
+            }
+        }
+        else if (type == "cfg")
+        {
+            tString map = params.ExtractNonBlankSubString(pos);
+        }
+        else
+        {
+            tOutput msg;
+            msg.SetTemplateParameter(1, "Type of rotation to look into not set");
+            msg << "$rotation_search_failed";
+            sn_ConsoleOut(msg, player->Owner());
+        }
+    }
+    else
+    {
+        tOutput msg;
+        msg << "$rotation_search_usage";
+        sn_ConsoleOut(msg, player->Owner());
     }
 }
 

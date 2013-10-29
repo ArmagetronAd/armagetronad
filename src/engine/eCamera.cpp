@@ -446,7 +446,10 @@ eCamera::~eCamera(){
     //  se_ResetVisibles(se_cameras.Len());
     //  if (ID!=se_cameras.Len()) se_ResetVisibles(ID);
 
-    grid->cameras.Remove(this, id);
+    if (cameraMain_)
+    	grid->cameras.Remove(this, id);
+    else
+		grid->subcameras.Remove(this, id);
 
     tCHECK_DEST;
 }
@@ -1235,7 +1238,7 @@ bool eCamera::AutoSwitchIncam(){
         return false;
 }
 
-static inline void makefinite(REAL &x,REAL y=2){if (!finite(x)) x=y;}
+static inline void makefinite(REAL &x,REAL y=2){if (!isfinite(x)) x=y;}
 static inline void makefinite(eCoord &x){makefinite(x.x);makefinite(x.y);}
 
 // Smart camera settings

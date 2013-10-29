@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -555,7 +555,7 @@ void rISurfaceTexture::OnSelect( bool enforce )
                 if (textureModeLast_<0)
                 {
                     // delegate core loading work to derived class
-                    OnSelect();
+                    OnSelectCore();
                 }
 
                 //glEnable(GL_TEXTURE);
@@ -599,21 +599,6 @@ void rISurfaceTexture::OnSelect( bool enforce )
     }
     rITexture::OnSelect(enforce);
 #endif
-}
-
-// ******************************************************************************************
-// *
-// * OnSelect
-// *
-// ******************************************************************************************
-//!
-//!  In derived classes, this routine is supposed to do the work of loading the texture
-//!  into memory and using the Upload() function to upload it to OpenGL.
-//!
-// ******************************************************************************************
-
-void rISurfaceTexture::OnSelect()
-{
 }
 
 // ******************************************************************************************
@@ -691,14 +676,14 @@ rFileTexture::~rFileTexture( void )
 
 // ******************************************************************************************
 // *
-// *	OnSelect
+// *	OnSelectCore
 // *
 // ******************************************************************************************
 //!
 //!
 // ******************************************************************************************
 
-void rFileTexture::OnSelect()
+void rFileTexture::OnSelectCore()
 {
 #ifndef DEDICATED
     // std::cerr << "loading texture " << fileName_ << "\n";
@@ -711,7 +696,6 @@ void rFileTexture::OnSelect()
     {
         throw tGenericException( tOutput( "$texture_error_filenotfound", fileName_ ), tOutput("$texture_error_filenotfound_title") );
     }
-    rISurfaceTexture::OnSelect();
 #endif
 }
 
@@ -750,14 +734,14 @@ rSurfaceTexture::~rSurfaceTexture( void )
 
 // ******************************************************************************************
 // *
-// *	OnSelect
+// *	OnSelectCore
 // *
 // ******************************************************************************************
 //!
 //!
 // ******************************************************************************************
 
-void rSurfaceTexture::OnSelect()
+void rSurfaceTexture::OnSelectCore()
 {
 #ifndef DEDICATED
     // upload a copy of the surface ( it may get modified )
@@ -765,7 +749,6 @@ void rSurfaceTexture::OnSelect()
     {
         rSurface copy( surface_ );
         this->Upload( copy );
-        rISurfaceTexture::OnSelect();
     }
 #endif
 }

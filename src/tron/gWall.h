@@ -56,8 +56,8 @@ public:
 protected:
     virtual void OnBlocksCamera( eCamera * cam, REAL height ) const; //!< called by the camera code when this wall is between the cycle and the camera
 #endif
-    virtual REAL Height();
-    virtual REAL SeeHeight();
+    virtual REAL Height() const;
+    virtual REAL SeeHeight() const;
 
 private:
     mutable REAL renderHeight_; //!< the height with which this wall is really rendered
@@ -190,7 +190,7 @@ public:
     eCoord Vec();  //!< returns the vector from the beginning to the end of the wall
 
     tArray<gPlayerWallCoord> &Coords() { return coords_; }
-    
+
 protected:
     virtual ~gNetPlayerWall();
     void ReleaseData(); // release all references

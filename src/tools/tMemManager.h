@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -89,7 +89,7 @@ public:
 #define malloc(SIZE)                static_cast<void *>(tNEW(char)[SIZE])
 #define calloc(ELEMCOUNT, ELEMSIZE) static_cast<void *>(tNEW(char)[(ELEMCOUNT)*(ELEMSIZE)])
 #define free(BASEADR)               delete[] (reinterpret_cast< char* >(BASEADR))
-#define realloc(BASEADR, NEWSIZE)   realloc not defined
+// #define realloc(BASEADR, NEWSIZE)   realloc not defined
 
 // and other allocating functions
 #define strdup(ADR)  tStrDup(ADR)
@@ -137,7 +137,7 @@ void operator delete(
 #define tMEMMANAGER(classname)  public:void *operator new(size_t s){return tMemMan::Alloc(s); }  void operator delete(void *p){  if (p) tMemMan::Dispose(p); }
 #else
 #define tNEW(x) new x
-#define tMEMMANAGER(classname)  
+#define tMEMMANAGER(classname)
 
 // just direct to the real malloc functions
 #define real_malloc(SIZE)                malloc(SIZE)
