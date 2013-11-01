@@ -1283,37 +1283,54 @@ static void sg_AddDelayedCmd(std::istream &s)
 	// first parse the line to get the param : delay or interval
     // if the param start by an r then it means we have the interval
 	// if the param start by a +, assume that it's a delay relative to current game time ...
-	int pos = 0;				 //
-    int interval=0;
+	int pos      = 0;
+    int interval = 0;
 	tString delay_str = params.ExtractNonBlankSubString(pos);
 
-	if (delay_str.SubStr(0,1)=="r")
+	if (delay_str.SubStr(0, 1) == "r")
     {
 		interval = atoi(delay_str.SubStr(1));
         delay_str = params.ExtractNonBlankSubString(pos);
 	}
+
     REAL delay = atof(delay_str);
-    if (delay_str.SubStr(0,1)=="+") {
+
+    if (delay_str.SubStr(0, 1) == "+")
+    {
 		REAL gt = se_GameTime();
 		delay += gt;
 	}
+
     // this will make sure it using the command if  start time has passed
-    if ((interval > 0) && (se_GameTime() > delay)){
+    if ((interval > 0) && (se_GameTime() > delay))
+    {
         REAL ogt = se_GameTime() - delay;
         int disposition = (ogt/interval)+1;
         delay = disposition*interval+delay;
     }
+
     tString cmd_name;
     cmd_name= params.ExtractNonBlankSubString(pos);
 	std::stringstream cmd_str;
 	cmd_str << cmd_name <<"  " << params.SubStr(pos+1);
-	if (cmd_str.str().length()==0) return;
+	if (cmd_str.str().length() == 0) return;
 
     int cLevel = tConfItemBase::AccessLevel(cmd_str);
+
 	// add extracted command
-    if (tCurrentAccessLevel::GetAccessLevel() <=cLevel){
+    if (tCurrentAccessLevel::GetAccessLevel() <= cLevel)
+    {
         delayedCommands::Add(delay,cmd_str.str(),interval);
-    }else{
+
+        tOutput msg;
+        msg.SetTemplateParameter(1, cmd_str.str().c_str());
+        msg.SetTemplateParameter(2, delay);
+        msg.SetTemplateParameter(3, interval);
+        msg << "$delay_command_add";
+        sn_ConsoleOut(msg, 0);
+    }
+    else
+    {
         tToUpper( cmd_name );
         con << tOutput( "$access_level_error",
                     cmd_name,

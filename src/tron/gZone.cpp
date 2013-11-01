@@ -2441,20 +2441,24 @@ void gDeathZoneHack::OnEnter( gDeathZoneHack * target, REAL time )
 //!
 // *******************************************************************************
 
-static REAL sg_rubberZoneRubber = 1;
-static tSettingItem<REAL> sg_rubberZoneRubberConf("RUBBERZONE_RUBBER", sg_rubberZoneRubber);
+static REAL sg_colorRubberZoneR = 15;
+static REAL sg_colorRubberZoneG = 10.5;
+static REAL sg_colorRubberZoneB = 3;
+static tSettingItem<REAL> sg_colorRubberZoneRConf("COLOR_RUBBERZONE_RED", sg_colorRubberZoneR);
+static tSettingItem<REAL> sg_colorRubberZoneGConf("COLOR_RUBBERZONE_GREEN", sg_colorRubberZoneG);
+static tSettingItem<REAL> sg_colorRubberZoneBConf("COLOR_RUBBERZONE_BLUE", sg_colorRubberZoneB);
 
 gRubberZoneHack::gRubberZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreation, bool delayCreation)
 :gZone( grid, pos, dynamicCreation, delayCreation)
 {
-    color_.r = 1.0f;
-    color_.g = 0.7f;
-    color_.b = 0.2f;
+    color_.r = sg_colorRubberZoneR / 15;
+    color_.g = sg_colorRubberZoneG / 15;
+    color_.b = sg_colorRubberZoneB / 15;
 
     if (!delayCreation)
         grid->AddGameObjectInteresting(this);
 
-    rmRubber = sg_rubberZoneRubber;
+    rmRubber = 1.0;
 }
 
 
@@ -7997,6 +8001,32 @@ static void sg_CreateZone_conf(std::istream &s)
             if(x == "Z" || x == "z" || x == "") break;
             y = params.ExtractNonBlankSubString(pos);
             route.push_back(eCoord(atof(x)*sizeMultiplier, atof(y)*sizeMultiplier));
+        }
+    }
+    else if (zonePosXStr == "x_rand")   //  generate random x position
+    {
+        eCoord posX = Arena.GetRandomPos(1);
+        zonePosXStr = "";
+        zonePosXStr << posX.x;
+
+        zonePosYStr = params.ExtractNonBlankSubString(pos);
+        if (zonePosYStr == "y_rand")    //  generate random y position
+        {
+            zonePosYStr = "";
+            zonePosYStr << posX.y;
+        }
+    }
+    else if (zonePosXStr == "x_cent")   //  generate center x position
+    {
+        eCoord posX = Arena.GetRandomPos(0);
+        zonePosXStr = "";
+        zonePosXStr << posX.x;
+
+        zonePosYStr = params.ExtractNonBlankSubString(pos);
+        if (zonePosYStr == "x_cent")    //  generate center y position
+        {
+            zonePosYStr = "";
+            zonePosYStr << posX.y;
         }
     }
     else

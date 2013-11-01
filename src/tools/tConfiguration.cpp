@@ -194,7 +194,6 @@ tString tCurrentAccessLevel::GetName( tAccessLevel level )
 }
 
 tAccessLevel tCurrentAccessLevel::currentLevel_ = tAccessLevel_Invalid; //!< the current access level
-static tSettingItem<tAccessLevel> st_CurrentAccessLevelConf("CURRENT_ACCESS_LEVEL", tCurrentAccessLevel::currentLevel_);
 
 tAccessLevelSetter::tAccessLevelSetter( tConfItemBase & item, tAccessLevel level )
 {
@@ -531,6 +530,11 @@ void tConfItemBase::LoadLine(std::istream &s){
 
             bool cb=ci->changed;
             ci->changed=false;
+
+#ifdef DEBUG
+            con << "Current level: " << tCurrentAccessLevel::GetAccessLevel() << "\n";
+            con << "Required level: " << ci->requiredLevel << "\n";
+#endif
 
             if ( ci->requiredLevel >= tCurrentAccessLevel::GetAccessLevel() )
             {

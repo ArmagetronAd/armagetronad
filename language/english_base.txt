@@ -331,6 +331,13 @@ reset_rotation_message                  Map and config rotation have been reset.
 
 rotation_max_help                       The maximum number of rounds the currently loaded map should remain before new map should be selected and loaded.
 
+rotation_search_unknown                 /rotation unknown: \1.
+rotation_search_other		            You probably want:\n
+rotation_search_usage                   /rotation usage: /rotation <type: map or cfg> [name].\n
+rotation_search_failed                  /rotation failed: \1.\n
+rotation_search_found_toomanyfiles      0xff7777\2 more matches are found for search term "\1".\n
+rotation_search_found                   /rotation: \1: \2.\n
+
 # non-rotation
 map_storage_help                        Is mainly use for non-rotation purposes, queue mainly. Usage is similar to MAP_ROTATION, except without round.
 map_storage_list                        List of maps currently in storge:\n
@@ -3130,10 +3137,9 @@ config_accesslevel_21       Punished
 
 access_level_help           Changes the access level of a configuration item to make it available to lower ranked users
 access_level_usage          usage: ACCESS_LEVEL <config command> <required minimal access level (numerical)>\n
-access_level_change         Required access level of command \1 changed to "\2".\n
+access_level_change         Required access level of command \1 changed from "\2" to "\3".\n
 access_level_nochange_now   Cannot change access level of \1: it is currently at "\2", you only have "\3", you would steal access.\n
-access_level_nochange_later   Cannot change access level of \1 to "\2", you only have "\3" and would not be able to change it back.\n
-access_level_change         Required access level of command \1 changed to "\2".\n
+access_level_nochange_later Cannot change access level of \1 to "\2", you only have "\3" and would not be able to change it back.\n
 access_level_error          Required access level of command \1 is "\2", you only have "\3".\n
 
 casacl_help                   For the duration of the rest of the configuration file  this directive appears in, elevate the access level.
@@ -3627,8 +3633,11 @@ cycle_walls_stay_up_delay_help      The number of seconds the tails remain on th
 cycle_zones_approch_help            The distance a cycle can approch the zone without trigging the OnNear() event.
 cycle_zones_avoid_help              If set to 1, cycles will do their best at avoiding the zone. Is slightly buggy but works often.
 death_shot_help                     If set to 1, killed players will release a death shot if they had been about to shoot.
+
 delay_command_help                  A command to execute at given time. Usage: DELAY_COMMAND [time] [command] [parameters] ...
 delay_command_clear_help            Clears all delayed command from cache.
+delay_command_add                   Delay Command: "\1" with delay of \2 and interval of \3.\n
+
 destroy_zone_help                   Destroy, simply meaning: causes the zone with the given name to disappear instantly.
 destroy_zone_id_help                Destroy, simply meaning: causes the zone with the given id to disappear instantly.
 display_scores_during_chat_help     If set to 1, score board will appear during chat when we hit the "TAB" button on our keyboard.
