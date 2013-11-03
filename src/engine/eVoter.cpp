@@ -555,8 +555,8 @@ public:
         int bias = se_votingBias + DoGetExtraBias();
 
         // apply bias
-        int conAdjusted = con + bias;
-        int totalAdjusted = total + bias;
+        con 	+= bias;
+        total 	+= bias;
 
         // reduce number of total voters
         if ( se_votingDecay > 0 )
@@ -564,31 +564,27 @@ public:
             int reduce = int( ( tSysTimeFloat() - this->creationTime_ - se_votingStartDecay ) / se_votingDecay );
             if ( reduce > 0 )
             {
-                totalAdjusted -= reduce;
+                total -= reduce;
             }
         }
 
         if ( sn_GetNetState() == nSERVER )
         {
-            int abstain = total - pro - con;
-
             // see if the vote has been rejected
-            if ( conAdjusted >= pro && conAdjusted * 2 >= totalAdjusted )
+            if ( con >= pro && con * 2 >= total )
             {
                 if ( this->suggestor_ )
                     this->suggestor_->Spam( user_, se_votingSpamReject, tOutput("$spam_vote_rejected") );
 
-                tOutput voteMessage("$vote_rejected", GetDescription(), pro, con, abstain );
-                this->BroadcastMessage(voteMessage);
+                this->BroadcastMessage( tOutput( "$vote_rejected" ) );
                 delete this;
                 return;
             }
 
             // see if the vote has been accepted
-            if ( pro >= conAdjusted && pro * 2 > totalAdjusted )
+            if ( pro >= con && pro * 2 > total )
             {
-                tOutput voteMessage("$vote_accepted", GetDescription(), pro, con, abstain );
-                this->BroadcastMessage(voteMessage);
+                this->BroadcastMessage( tOutput( "$vote_accepted" ) );
 
                 this->DoExecute();
 
@@ -686,7 +682,7 @@ protected:
 
     virtual bool DoCheckValid( int senderID ){ return true; }
 
-    void DoFillToMessage( nMessage& m ) const
+    virtual void DoFillToMessage( nMessage& m ) const
     {
         if(sn_GetNetState()==nSERVER)
         {
@@ -760,7 +756,7 @@ void se_CancelAllVotes( std::istream & )
 }
 
 static tConfItemFunc se_cancelAllVotes_conf( "VOTES_CANCEL", &se_CancelAllVotes );
-static tAccessLevelSetter se_cancelAllVotes_confLevel( se_cancelAllVotes_conf, tAccessLevel_Moderator );
+
 
 
 
@@ -803,8 +799,7 @@ void se_UnSuspendVotes( std::istream & s )
 
 static tConfItemFunc se_suspendVotes_conf( "VOTES_SUSPEND", &se_SuspendVotes );
 static tConfItemFunc se_unSuspendVotes_conf( "VOTES_UNSUSPEND", &se_UnSuspendVotes );
-static tAccessLevelSetter se_suspendVotes_confLevel( se_suspendVotes_conf, tAccessLevel_Moderator );
-static tAccessLevelSetter se_unsuspendVotes_confLevel( se_unSuspendVotes_conf, tAccessLevel_Moderator );
+
 
 static nDescriptor vote_handler(230,eVoteItem::GetControlMessage,"vote cast");
 
@@ -1357,7 +1352,7 @@ protected:
         return eVoteItemHarm::DoCheckValid( senderID );
     }
 
-    virtual void DoExecuteHarm()                                                // called when the voting was successful
+    virtual void DoExecuteHarm()						// called when the voting was successful
     {
         ePlayerNetID * player = GetPlayer();
         nMachine * machine = GetMachine();
@@ -1387,11 +1382,6 @@ protected:
                 machine->OnKick();
             }
         }
-    }
-
-    virtual void DoExecute()
-    {
-        eVoteItemHarm::DoExecute();
     }
 
 private:
@@ -1484,7 +1474,7 @@ protected:
         return se_votingBiasSuspend;
     }
 
-    virtual void DoExecuteHarm()                                                // called when the voting was successful
+    virtual void DoExecuteHarm()						// called when the voting was successful
     {
         ePlayerNetID * player = GetPlayer();
         if ( player )
@@ -1508,6 +1498,7 @@ public:
 protected:
     virtual bool DoCheckValid( int senderID )
     {
+
         // check whether enough harmful votes were collected already
         ePlayerNetID * p = GetPlayer();
         if ( fromMenu_ && p )
@@ -1539,14 +1530,9 @@ protected:
         return eVoteItemHarm::DoCheckValid( senderID );
     }
 
-    virtual void DoExecuteHarm()                                                // called when the voting was successful
+    virtual void DoExecuteHarm()						// called when the voting was successful
     {
         eVoteItemKick::DoExecuteHarm();
-    }
-
-    virtual void DoExecute()
-    {
-        eVoteItemHarm::DoExecute();
     }
 private:
     bool fromMenu_; // flag set if the vote came from the menu
@@ -1637,7 +1623,7 @@ private:
     virtual void DoFilterLine( tString &line )
     {
         //tColoredString message;
-        message_ << tColoredString::ColorString(1,.3,.3) << tOutput("$admin_command_tag") << tColoredString::ColorString(1,1,1) << line << "\n";
+        message_ << tColoredString::ColorString(1,.3,.3) << "RA: " << tColoredString::ColorString(1,1,1) << line << "\n";
 
         // don't let message grow indefinitely
         if (message_.Len() > 600)
@@ -2083,7 +2069,7 @@ int eVoter::NumberVoters()
     {
         eVoter * voter = eVoter::GetVoter( i );
         if ( voter )
-        possibleVoters.insert( voter );
+            possibleVoters.insert( voter );
     }
     return possibleVoters.size();
 }
@@ -2119,6 +2105,7 @@ eVoter* eVoter::GetVoter( int ID, bool complain )
 
     return GetPersistentVoter( ID );
 }
+
 eVoter* eVoter::GetPersistentVoter( int ID )
 {
     if ( sn_GetNetState() == nCLIENT )
@@ -2126,7 +2113,6 @@ eVoter* eVoter::GetPersistentVoter( int ID )
 
     // get machine from network subsystem
     nMachine & machine = nMachine::GetMachine( ID );
-
     return GetPersistentVoter( machine );
 }
 
@@ -2335,9 +2321,7 @@ void eVoter::HandleChat( ePlayerNetID * p, std::istream & message ) //!< handles
     message >> command;
     tToLower( command );
 
-    eVoter * voter = eVoter::GetVoter( p->Owner(), true ); // can't use ePlayerNedID::GetVoter here,
-                                                           // as it can't show a warning,
-                                                           // for example if the voter has only spectators
+    eVoter * voter = eVoter::GetVoter( p->Owner(), true );
     if ( !eVoteItem::AcceptNewVote( voter, p->Owner() ) )
     {
         return;
@@ -2422,4 +2406,3 @@ void eVoter::HandleChat( ePlayerNetID * p, std::istream & message ) //!< handles
     item->Update();
     item->ReBroadcast( p->Owner() );
 }
-

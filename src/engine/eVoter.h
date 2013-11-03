@@ -58,7 +58,6 @@ class eVoter: public tReferencable< eVoter >, public tListMember, public nMachin
     friend class eVoteItem;
     friend class eVoteItemHarm;
     friend class eVoteItemKick;
-    friend class eVoteItemSuspend;
 public:
     eVoter( nMachine & machine );
     ~eVoter();
@@ -110,4 +109,3 @@ private:
 
 
 #endif	// ArmageTron_VOTER_H
-
