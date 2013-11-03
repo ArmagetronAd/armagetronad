@@ -474,6 +474,7 @@ public:
     void PassFlag(std::istream &s);
 
     static ePlayerNetID * FindPlayerByName( tString const & name, ePlayerNetID * requester = 0, bool print=true ); //!< finds a player by name using lax name matching. Reports errors to the console or to the requesting player.
+    static ePlayerNetID * FindPlayerById(int owner_id);
 
     void UpdateName();                                           //!< update the player name from either the client's wishes, either the admin's wishes.
     static void FilterName( tString const & in, tString & out ); //!< filters a name (removes unprintables, color codes and spaces)

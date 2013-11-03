@@ -919,7 +919,7 @@ ladderlog_write_match_winner_help             Write to ladderlog: MATCH_WINNER <
 ladderlog_write_new_match_help                Write to ladderlog: NEW_MATCH <date and time>
 ladderlog_write_new_round_help                Write to ladderlog: NEW_ROUND <date and time>
 ladderlog_write_num_humans_help               Write to ladderlog: NUM_HUMANS <number of humans>
-ladderlog_write_online_player_help            Write to ladderlog: ONLINE_PLAYER <name> <r> <g> <b> <access_level> <did_login?> [<ping> <team>]
+ladderlog_write_online_player_help            Write to ladderlog: ONLINE_PLAYER <name> <owner_id> <r> <g> <b> <access_level> <did_login?> [<ping> <team>]
 ladderlog_write_online_team_help              Write to ladderlog: ONLINE_TEAM <name> <screen name>
 ladderlog_write_player_ai_entered_help        Write to ladderlog: PLAYER_AI_ENTERED <name> <screen name>
 ladderlog_Write_player_ai_left_help           Write to ladderlog: PLAYER_AI_LEFT <name>
@@ -2731,6 +2731,7 @@ player_shuffle_error    /shuffle expects a number as argument; an explicit sign 
 
 player_message_help     Sends a message to a specified player.
 player_message_usage    Usage: PLAYER_MESSAGE <player name> <Message>\n
+player_message_id_usage Usage: PLAYER_MESSAGE_ID <player id> <Message>\n
 kick_usage              Usage: KICK <user ID or name> <Reason>\n
 ban_usage               Usage: BAN <user ID or name> <time in minutes(defaults to 60)> <Reason>\n
 kickmove_usage          Usage: \1 <user ID or name> <server IP to kick to>:<server port to kick to> <Reason>\n

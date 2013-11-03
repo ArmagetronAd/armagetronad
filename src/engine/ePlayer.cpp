@@ -1791,6 +1791,24 @@ static ePlayerNetID * se_FindPlayerInChatCommand( ePlayerNetID * sender, char co
     return ePlayerNetID::FindPlayerByName( player, sender );
 }
 
+ePlayerNetID * ePlayerNetID::FindPlayerById(int owner_id)
+{
+    if (owner_id >= 0)
+    {
+        for(int i = 0; i < se_PlayerNetIDs.Len(); i++)
+        {
+            ePlayerNetID *p = se_PlayerNetIDs[i];
+            if (p)
+            {
+                if (p->Owner() == owner_id)
+                    return p;
+            }
+        }
+    }
+
+    return NULL;
+}
+
 // chat message from server to client
 void handle_chat_client( nMessage & );
 static nDescriptor chat_handler_client(203,handle_chat_client,"Chat Client");
@@ -7734,6 +7752,7 @@ void ePlayerNetID::RankingLadderLog()
         if(p->Owner() == 0) continue; // ignore AIs
 
         se_onlinePlayerWriter << p->GetLogName();
+        se_onlinePlayerWriter << p->Owner();
 
         // add player color to the message
         se_onlinePlayerWriter << p->r << p->g << p->b;
@@ -9416,6 +9435,36 @@ static void Kill_conf(std::istream &s)
 
 static tConfItemFunc kill_conf("KILL",&Kill_conf);
 static tAccessLevelSetter se_killConfLevel( kill_conf, tAccessLevel_Moderator );
+
+static void Kill_ID_conf(std::istream &s)
+{
+    if ( se_NeedsServer( "KILL_ID", s, false ) )
+    {
+        return;
+    }
+
+    int owner_id = 0;
+    s >> owner_id;
+    ePlayerNetID *p = ePlayerNetID::FindPlayerById(owner_id);
+
+    if (p)
+    {
+        if (p->Object() && p->Object()->Alive())
+        {
+            if (se_enableAdminKillMessage)
+            {
+                sn_ConsoleOut( tOutput( "$player_admin_kill", p->GetColoredName() ) );
+            }
+
+            se_playerKilledWriter << p->GetUserName() << nMachine::GetMachine(p->Owner()).GetIP() << p->Object()->Position().x << p->Object()->Position().y << p->Object()->Direction().x << p->Object()->Direction().y;
+            se_playerKilledWriter.write();
+            p->Object()->Kill();
+        }
+    }
+}
+
+static tConfItemFunc kill_id_conf("KILL_ID",&Kill_conf);
+static tAccessLevelSetter se_killIDConfLevel( kill_id_conf, tAccessLevel_Moderator );
 
 static void Slap_conf(std::istream &s)
 {
