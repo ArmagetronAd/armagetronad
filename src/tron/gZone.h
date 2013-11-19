@@ -106,7 +106,7 @@ public:
     REAL            GetRotationAcceleration( void ) const;	                        //!< Gets the current acceleration of the rotation
     gZone const &   GetRotationAcceleration( REAL & rotationAcceleration ) const;	//!< Gets the current acceleration of the rotation
     //HACK RACE
-    void            Vanish				(REAL factor);		//!< let the zone vanish
+    void            Vanish				(REAL factor = 0.5);		//!< let the zone vanish
 
     gZone &         SetWallInteract     (bool wallInteract) {wallInteract_=wallInteract; return *this;}
     gZone &         SetWallBouncesLeft  (int wallBouncesLeft) {wallBouncesLeft_=wallBouncesLeft; return *this;}
@@ -717,38 +717,29 @@ class gSoccerZoneHack: public gZone
         virtual void OnEnter(gCycle *target, REAL time);
 };
 
-/*  For future
-class gRaceZoneHack: public gZone
+class gRespawnZoneHack: public gZone
 {
     public:
-        enum
-		{
-			TYPE_NORMAL,    //!< Do nothing
-			TYPE_DEATH,     //!< Kill racing player to enter
+        gRespawnZoneHack(eGrid *grid, const eCoord &pos, ePlayerNetID *player, bool dynamicCreation = false, bool delayCreation = false);
+        gRespawnZoneHack(nMessage &m);
+        ~gRespawnZoneHack();
 
-			NUM_TYPES
-		};
+        ePlayerNetID *DeadPlayer() { return this->deadPlayer_; }
+        void SetDeadPlayer(ePlayerNetID *player) { this->deadPlayer_ = player; }
+        void ClearDeadPlayer() { this->deadPlayer_ = NULL; }
 
-        gRaceZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false, bool delayCreation = false);
-        gRaceZoneHack(nMessage &m);
-        ~gRaceZoneHack();
-
-        virtual void OnExit(gCycle *target, REAL time);
-
-        virtual void OnEnter(gZone *target, REAL time);
-
-        int GetType() { return zoneType; }
-        void SetType(int type) { zoneType = type; }
+        eCoord SpawnDirection() { return this->spawnDirection_; }
+        void SetSpawnDirection(eCoord dir) { this->spawnDirection_;  }
 
     protected:
-        int zoneType;
+        ePlayerNetID *deadPlayer_;
+        eCoord spawnDirection_;
 
     private:
         virtual bool Timestep(REAL currentTime);
         virtual void OnVanish();
         virtual void OnEnter(gCycle *target, REAL time);
 };
-*/
 
 //! creates a win or death zone (according to configuration) at the specified position
 gZone * sg_CreateWinDeathZone( eGrid * grid, const eCoord & pos );

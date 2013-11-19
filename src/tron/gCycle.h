@@ -409,6 +409,8 @@ protected:
     virtual 	bool 			DoIsDestinationUsed		( const gDestination *	dest		) const		;	//!< returns whether the given destination is in active use
 };
 
+extern bool sg_cycleRespawnZone;
+
 //extern bool sg_HideCycles, sg_HideCyclesWalls;
 
 #endif

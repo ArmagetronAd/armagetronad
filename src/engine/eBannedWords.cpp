@@ -294,6 +294,8 @@ tString eBannedWords::ReplaceBadWords(tString message, tString word)
                     replaced << replacement;
 
                 convertedMsg << replaced << " ";
+                if ((i + 1) == splitWords.Len())
+                    convertedMsg << "\n";
             }
             else if (splitWordCon.ToLower().Contains(word.ToLower()))
             {
@@ -305,10 +307,17 @@ tString eBannedWords::ReplaceBadWords(tString message, tString word)
                         replaced << replacement;
 
                     convertedMsg << replaced << " ";
+                    if ((i + 1) == splitWords.Len())
+                        convertedMsg << "\n";
                 }
                 else convertedMsg << splitWord << " ";
             }
-            else convertedMsg << splitWord << " ";
+            else
+            {
+                convertedMsg << splitWord << " ";
+                if ((i + 1) == splitWords.Len())
+                    convertedMsg << "\n";
+            }
         }
 
     }

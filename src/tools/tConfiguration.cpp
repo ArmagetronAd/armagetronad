@@ -664,11 +664,11 @@ void tConfItemBase::WriteAllToFile()
     tString file("commands_list.txt");
     if ( tDirectories::Var().Open(w, file))
     {
-        /*w << "{| border=\"2\" cellspacing=\"0\" cellpadding=\"4\" rules=\"all\" style=\"margin:1em 1em 1em 0; border:solid 1px #AAAAAA; border-collapse:collapse; background-color:#F9F9F9; font-size:95%; empty-cells:show;\"\n";
+        w << "{| border=\"2\" cellspacing=\"0\" cellpadding=\"4\" rules=\"all\" style=\"margin:1em 1em 1em 0; border:solid 1px #AAAAAA; border-collapse:collapse; background-color:#F9F9F9; font-size:95%; empty-cells:show;\"\n";
         w << "!Command\n";
-        w << "!Meaning\n";
         w << "!Default\n";
-        w << "|-\n";*/
+        w << "!Meaning\n";
+        w << "|-\n";
         for(tConfItemMap::iterator iter = confmap.begin(); iter != confmap.end() ; ++iter)
         {
             tConfItemBase * ci = (*iter).second;
@@ -679,6 +679,7 @@ void tConfItemBase::WriteAllToFile()
             //  fetch the value set for this setting.
             ci->FetchVal(value);
 
+            /*
             mess << ci->title << " ";
 
             mess.SetPos( sim_maxlen+2, false );
@@ -687,11 +688,11 @@ void tConfItemBase::WriteAllToFile()
             mess << help;
             mess << "\n";
 
-            w << mess;
-            /*w << "| " << ci->title << " || " << help << " || " << value << "\n";
-            w << "|-\n";*/
+            w << mess;*/
+            w << "| " << ci->title << " || " << value << " || " << help << "\n";
+            w << "|-\n";
         }
-        //w << "|}\n";
+        w << "|}\n";
     }
     w.close();
 }
@@ -1203,6 +1204,8 @@ void st_LoadConfig( bool printChange )
     {
         Load( config, "default.cfg" );
     }
+
+    Load( config, "settings_client.cfg" );
 #endif
 
     Load( data, "moviepack/settings.cfg" );

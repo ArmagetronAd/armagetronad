@@ -135,6 +135,9 @@ bool restrictRaceIdle(const REAL &newValue)
 static tSettingItem<REAL> sg_raceIdleTimeConf("RACE_IDLE_TIME", sg_raceIdleTime, &restrictRaceIdle);
 static tSettingItem<REAL> sg_raceIdleSpeedConf("RACE_IDLE_SPEED", sg_raceIdleSpeed, &restrictRaceIdle);
 
+static bool sg_raceFinishCollapse = true;
+static tSettingItem<bool> sg_raceFinishCollapseConf("RACE_FINISH_COLLAPSE", sg_raceFinishCollapse);
+
 //! STATIC VARIABLES
 bool gRace::firstArrived_ = false;
 int  gRace::countDown_ = -1;
@@ -1475,7 +1478,7 @@ void gRace::Sync( int alive, int ai_alive, int humans, REAL time )
     }
 
     //  once the round has finished, collapse all active zones
-    if (roundFinished_)
+    if (roundFinished_ && sg_raceFinishCollapse)
     {
         //  vanish all zones
         const tList<eGameObject>& gameObjects = grid->GameObjects();

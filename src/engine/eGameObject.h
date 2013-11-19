@@ -92,6 +92,9 @@ protected:
     eCoord dir;               // direction
     REAL  z;									// and height (currently unused)
 
+    eCoord startPos_;          // starting position
+    eCoord startDir_;          // starting direction
+
     eTeam *team;       		 				// the team we belong to
 
     tJUST_CONTROLLED_PTR<eFace> currentFace;  // the eFace pos it is currently
@@ -133,6 +136,8 @@ public:
 
     virtual eCoord Position()const{return pos;}
     virtual eCoord Direction()const{return dir;}
+    virtual eCoord StartPosition()const{return startPos_;}
+    virtual eCoord StartDirection()const{return startDir_;}
     virtual eCoord LastDirection()const{return dir;}
     virtual REAL DeathTime()const{return deathTime;}
     virtual REAL  Speed()const{return 20;}

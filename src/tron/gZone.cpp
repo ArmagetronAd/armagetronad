@@ -6989,20 +6989,54 @@ static void sg_SpawnObjectZone(std::istream &s)
             name  = "";
         }
 
+        //  handle x position and get y position
         if(zonePosXStr == "L")
         {
             tString x,y;
             while(true)
             {
                 x = params.ExtractNonBlankSubString(pos);
-                if(x.ToLower() == "z" || x.Filter() == "") break;
+                if(x == "Z" || x == "z" || x == "") break;
                 y = params.ExtractNonBlankSubString(pos);
                 route.push_back(eCoord(atof(x)*sizeMultiplier, atof(y)*sizeMultiplier));
             }
         }
+        else if (zonePosXStr == "x_rand")   //  generate random x position
+        {
+            eCoord posX = Arena.GetRandomPos(1);
+            zonePosXStr = "";
+            zonePosXStr << posX.x;
+
+            zonePosYStr = params.ExtractNonBlankSubString(pos);
+        }
+        else if (zonePosXStr == "x_cent")   //  generate center x position
+        {
+            eCoord posX = Arena.GetRandomPos(0);
+            zonePosXStr = "";
+            zonePosXStr << posX.x;
+        }
         else
         {
             zonePosYStr = params.ExtractNonBlankSubString(pos);
+        }
+
+        //  handle y position
+        if (zonePosYStr.Filter() != "")
+        {
+            if (zonePosYStr == "y_rand")    //  generate random y position
+            {
+                eCoord posY = Arena.GetRandomPos(1);
+
+                zonePosYStr = "";
+                zonePosYStr <<  posY.y;
+            }
+            else if (zonePosYStr == "y_cent")    //  generate center y position
+            {
+                eCoord  posY = Arena.GetRandomPos(0);
+
+                zonePosYStr = "";
+                zonePosYStr <<  posY.y;
+            }
         }
 
         tString zoneSizeStr       = params.ExtractNonBlankSubString(pos);
@@ -7024,9 +7058,9 @@ static void sg_SpawnObjectZone(std::istream &s)
         bool setColorFlag = false;
         if ((zoneRedStr.Filter() != "") && (zoneGreenStr.Filter() != "") && (zoneBlueStr.Filter() != ""))
         {
-            zoneColor.r = atof(zoneRedStr);
-            zoneColor.g = atof(zoneGreenStr);
-            zoneColor.b = atof(zoneBlueStr);
+            zoneColor.r = atof(zoneRedStr) / 15.0;
+            zoneColor.g = atof(zoneGreenStr) / 15.0;
+            zoneColor.b = atof(zoneBlueStr) / 15.0;
             setColorFlag = true;
         }
 
@@ -7042,11 +7076,9 @@ static void sg_SpawnObjectZone(std::istream &s)
 
         if (setColorFlag)
         {
-            /*
             zoneColor.r = (zoneColor.r>1.0)?1.0:zoneColor.r;
             zoneColor.g = (zoneColor.g>1.0)?1.0:zoneColor.g;
             zoneColor.b = (zoneColor.b>1.0)?1.0:zoneColor.b;
-            */
             Zone->SetColor(zoneColor);
         }
 
@@ -7640,7 +7672,7 @@ static void sg_SpawnSoccer(std::istream &s)
         }
         else
         {
-            //  terrible...
+            //  bad...
             goto usage;
             return;
         }
@@ -7648,20 +7680,54 @@ static void sg_SpawnSoccer(std::istream &s)
         tString zonePosXStr = params.ExtractNonBlankSubString(pos);
         tString zonePosYStr;
 
-        if(zonePosXStr.ToLower() == "l")
+        //  handle x position and get y position
+        if(zonePosXStr == "L")
         {
             tString x,y;
             while(true)
             {
                 x = params.ExtractNonBlankSubString(pos);
-                if(x.ToLower() == "z" || x.Filter() == "") break;
+                if(x == "Z" || x == "z" || x == "") break;
                 y = params.ExtractNonBlankSubString(pos);
                 route.push_back(eCoord(atof(x)*sizeMultiplier, atof(y)*sizeMultiplier));
             }
         }
+        else if (zonePosXStr == "x_rand")   //  generate random x position
+        {
+            eCoord posX = Arena.GetRandomPos(1);
+            zonePosXStr = "";
+            zonePosXStr << posX.x;
+
+            zonePosYStr = params.ExtractNonBlankSubString(pos);
+        }
+        else if (zonePosXStr == "x_cent")   //  generate center x position
+        {
+            eCoord posX = Arena.GetRandomPos(0);
+            zonePosXStr = "";
+            zonePosXStr << posX.x;
+        }
         else
         {
             zonePosYStr = params.ExtractNonBlankSubString(pos);
+        }
+
+        //  handle y position
+        if (zonePosYStr.Filter() != "")
+        {
+            if (zonePosYStr == "y_rand")    //  generate random y position
+            {
+                eCoord posY = Arena.GetRandomPos(1);
+
+                zonePosYStr = "";
+                zonePosYStr <<  posY.y;
+            }
+            else if (zonePosYStr == "y_cent")    //  generate center y position
+            {
+                eCoord  posY = Arena.GetRandomPos(0);
+
+                zonePosYStr = "";
+                zonePosYStr <<  posY.y;
+            }
         }
 
         const tString zoneSizeStr       = params.ExtractNonBlankSubString(pos);
@@ -7683,9 +7749,9 @@ static void sg_SpawnSoccer(std::istream &s)
         bool setColorFlag = false;
         if ((zoneRedStr.Filter() != "") && (zoneGreenStr.Filter() != "") && (zoneBlueStr.Filter() != ""))
         {
-            zoneColor.r = atof(zoneRedStr);
-            zoneColor.g = atof(zoneGreenStr);
-            zoneColor.b = atof(zoneBlueStr);
+            zoneColor.r = atof(zoneRedStr) / 15.0;
+            zoneColor.g = atof(zoneGreenStr) / 15.0;
+            zoneColor.b = atof(zoneBlueStr) / 15.0;
             setColorFlag = true;
         }
 
@@ -7765,11 +7831,9 @@ static void sg_SpawnSoccer(std::istream &s)
 }
 static tConfItemFunc sg_SpawnSoccerConf("SPAWN_SOCCER", &sg_SpawnSoccer);
 
-
-/*  For future
 // *******************************************************************************
 // *
-// *    gRaceZoneHack
+// *    gRespawnZoneHack
 // *
 // *******************************************************************************
 //!
@@ -7778,15 +7842,17 @@ static tConfItemFunc sg_SpawnSoccerConf("SPAWN_SOCCER", &sg_SpawnSoccer);
 //!
 // *******************************************************************************
 
-gRaceZoneHack::gRaceZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreation, bool delayCreation)
+gRespawnZoneHack::gRespawnZoneHack( eGrid * grid, const eCoord & pos, ePlayerNetID *player, bool dynamicCreation, bool delayCreation)
 :gZone( grid, pos, dynamicCreation, delayCreation)
 {
-    color_.r = 0.0f;
-    color_.g = 1.0f;
-    color_.b = 0.0f;
+    color_.r = 1.0f;
+    color_.g = 0.0f;
+    color_.b = 0.5f;
 
     if (!delayCreation)
         grid->AddGameObjectInteresting(this);
+
+    deadPlayer_ = player;
 
     SetExpansionSpeed(0);
     SetRotationSpeed( .3f );
@@ -7796,7 +7862,7 @@ gRaceZoneHack::gRaceZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCrea
 
 // *******************************************************************************
 // *
-// *    gRaceZoneHack
+// *    gRespawnZoneHack
 // *
 // *******************************************************************************
 //!
@@ -7805,7 +7871,7 @@ gRaceZoneHack::gRaceZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCrea
 //!
 // *******************************************************************************
 
-gRaceZoneHack::gRaceZoneHack( nMessage & m )
+gRespawnZoneHack::gRespawnZoneHack( nMessage & m )
 : gZone( m )
 {
 }
@@ -7813,14 +7879,14 @@ gRaceZoneHack::gRaceZoneHack( nMessage & m )
 
 // *******************************************************************************
 // *
-// *    ~gRaceZoneHack
+// *    ~gRespawnZoneHack
 // *
 // *******************************************************************************
 //!
 //!
 // *******************************************************************************
 
-gRaceZoneHack::~gRaceZoneHack( void )
+gRespawnZoneHack::~gRespawnZoneHack( void )
 {
 }
 
@@ -7835,10 +7901,16 @@ gRaceZoneHack::~gRaceZoneHack( void )
 //!
 // *******************************************************************************
 
-bool gRaceZoneHack::Timestep( REAL time )
+bool gRespawnZoneHack::Timestep( REAL time )
 {
     // delegate
     bool returnStatus = gZone::Timestep( time );
+
+    if (!deadPlayer_ || !sg_cycleRespawnZone)
+    {
+        ClearDeadPlayer();
+        Vanish();
+    }
 
     return (returnStatus);
 }
@@ -7855,46 +7927,58 @@ bool gRaceZoneHack::Timestep( REAL time )
 //!
 // *******************************************************************************
 
-void gRaceZoneHack::OnEnter( gCycle * target, REAL time )
+bool sg_cycleRespawnZoneEnemies = true;
+static tSettingItem<bool> sg_cycleRespawnZoneEnemiesConf("CYCLE_RESPAWN_ZONE_ENEMY", sg_cycleRespawnZoneEnemies);
+
+bool sg_cycleRespawnZoneEnemiesKill = false;
+static tSettingItem<bool> sg_cycleRespawnZoneEnemiesKillConf("CYCLE_RESPAWN_ZONE_ENEMY_KILL", sg_cycleRespawnZoneEnemiesKill);
+
+void gRespawnZoneHack::OnEnter( gCycle * target, REAL time )
 {
-    ePlayerNetID *p = target->Player();
-    if (p)
+    if (deadPlayer_ && sg_cycleRespawnZone)
     {
-        if (zoneType == TYPE_DEATH)
+        tOutput msg;
+
+        if (sg_cycleRespawnZone && (deadPlayer_->CurrentTeam() == target->Team()))
         {
-            //  kill player
-            target->Kill();
+            gCycle *newCycle = new gCycle(grid, GetPosition(), SpawnDirection(), deadPlayer_);
+            deadPlayer_->ControlObject(newCycle);
+
+            msg.SetTemplateParameter(1, deadPlayer_->GetColoredName());
+            msg.SetTemplateParameter(2, target->Player()->GetColoredName());
+            msg << "$cycle_respawn_zone_team";
+            sn_ConsoleOut(msg);
+
+            ClearDeadPlayer();
+            Collapse();
+
+            return;
         }
-    }
-}
 
+        if (sg_cycleRespawnZoneEnemiesKill && (deadPlayer_->CurrentTeam() != target->Team()))
+        {
+            msg.SetTemplateParameter(1, deadPlayer_->GetColoredName());
+            msg.SetTemplateParameter(2, target->Player()->GetColoredName());
+            msg << "$cycle_respawn_zone_kill_enemy";
+            sn_ConsoleOut(msg);
 
-//  for when zones enter this object zone
-void gRaceZoneHack::OnEnter(gZone *target, REAL time)
-{
-    if (target)
-    {
+            target->Kill();
+            return;
+        }
 
-    }
-}
+        if (sg_cycleRespawnZoneEnemies && (deadPlayer_->CurrentTeam() != target->Team()))
+        {
+            gCycle *newCycle = new gCycle(grid, GetPosition(), SpawnDirection(), deadPlayer_);
+            deadPlayer_->ControlObject(newCycle);
 
-// *******************************************************************************
-// *
-// *    OnExit
-// *
-// *******************************************************************************
-//!
-//!     @param  target  the cycle that has left the zone
-//!     @param  time    the current time
-//!
-// *******************************************************************************
+            msg.SetTemplateParameter(1, deadPlayer_->GetColoredName());
+            msg.SetTemplateParameter(2, target->Player()->GetColoredName());
+            msg << "$cycle_respawn_zone_enemy";
+            sn_ConsoleOut(msg);
 
-void gRaceZoneHack::OnExit( gCycle * target, REAL time )
-{
-    ePlayerNetID *p = target->Player();
-    if (p)
-    {
-
+            ClearDeadPlayer();
+            Collapse();
+        }
     }
 }
 
@@ -7904,11 +7988,10 @@ void gRaceZoneHack::OnExit( gCycle * target, REAL time )
 // *
 // *******************************************************************************
 
-void gRaceZoneHack::OnVanish( void )
+void gRespawnZoneHack::OnVanish( void )
 {
     grid->RemoveGameObjectInteresting(this);
 }
-*/
 
 // *******************************************************************************
 // *
@@ -7991,6 +8074,7 @@ static void sg_CreateZone_conf(std::istream &s)
     tString zonePosXStr = params.ExtractNonBlankSubString(pos);
     tString zonePosYStr;
 
+    //  handle x position and get y position
     std::vector<eCoord> route;
     if(zonePosXStr == "L")
     {
@@ -8010,28 +8094,35 @@ static void sg_CreateZone_conf(std::istream &s)
         zonePosXStr << posX.x;
 
         zonePosYStr = params.ExtractNonBlankSubString(pos);
-        if (zonePosYStr == "y_rand")    //  generate random y position
-        {
-            zonePosYStr = "";
-            zonePosYStr << posX.y;
-        }
     }
     else if (zonePosXStr == "x_cent")   //  generate center x position
     {
         eCoord posX = Arena.GetRandomPos(0);
         zonePosXStr = "";
         zonePosXStr << posX.x;
-
-        zonePosYStr = params.ExtractNonBlankSubString(pos);
-        if (zonePosYStr == "x_cent")    //  generate center y position
-        {
-            zonePosYStr = "";
-            zonePosYStr << posX.y;
-        }
     }
     else
     {
         zonePosYStr = params.ExtractNonBlankSubString(pos);
+    }
+
+    //  handle y position
+    if (zonePosYStr.Filter() != "")
+    {
+        if (zonePosYStr == "y_rand")    //  generate random y position
+        {
+            eCoord posY = Arena.GetRandomPos(1);
+
+            zonePosYStr = "";
+            zonePosYStr <<  posY.y;
+        }
+        else if (zonePosYStr == "y_cent")    //  generate center y position
+        {
+            eCoord  posY = Arena.GetRandomPos(0);
+
+            zonePosYStr = "";
+            zonePosYStr <<  posY.y;
+        }
     }
 
     const tString zoneSizeStr = params.ExtractNonBlankSubString(pos);
@@ -8089,9 +8180,38 @@ static void sg_CreateZone_conf(std::istream &s)
     bool setColorFlag = false;
     if ((zoneRedStr!="")&&(zoneGreenStr!="")&&(zoneBlueStr!=""))
     {
-        zoneColor.r = atof(zoneRedStr);
-        zoneColor.g = atof(zoneGreenStr);
-        zoneColor.b = atof(zoneBlueStr);
+        if (zoneRedStr == "r_rand")
+        {
+            tRandomizer &randomizer = tRandomizer::GetInstance();
+            zoneColor.r = randomizer.Get(0, 15) / 15.0;
+        }
+
+        else
+        {
+            zoneColor.r = atof(zoneRedStr) / 15.0;
+        }
+
+        if (zoneGreenStr == "g_rand")
+        {
+            tRandomizer &randomizer = tRandomizer::GetInstance();
+            zoneColor.g = randomizer.Get(0, 15) / 15.0;
+        }
+        else
+        {
+            zoneColor.g = atof(zoneGreenStr) / 15.0;
+        }
+
+        if (zoneBlueStr == "b_rand")
+        {
+            tRandomizer &randomizer = tRandomizer::GetInstance();
+            zoneColor.b = randomizer.Get(0, 15) / 15.0;
+        }
+        else
+        {
+            zoneColor.b = atof(zoneBlueStr) / 15.0;
+        }
+
+        con << "red: " << zoneColor.r << " blue: " << zoneColor.b << " green: " << zoneColor.g << "\n";
         setColorFlag = true;
     }
 
@@ -8265,7 +8385,7 @@ static void sg_CreateZone_conf(std::istream &s)
     {
         usage:
         con << "Usage:\n"
-            "SPAWN_ZONE <win|death|ball|target|blast|object|koh> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> penetrate> \n"
+            "SPAWN_ZONE <win|death|ball|target|blast|object|koh> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> <penetrate> \n"
             "SPAWN_ZONE burst <speed> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> <penetrate> \n"
             "SPAWN_ZONE rubber <x> <y> <size> <growth> <xdir> <ydir> <rubber> <interactive> <r> <g> <b> <target_size> <penetrate> \n"
             "SPAWN_ZONE teleport <x> <y> <size> <growth> <xdir> <ydir> <xjump> <yjump> <rel|abs> <interactive> <r> <g> <b> <target_size> <penetrate> \n"
@@ -8276,15 +8396,16 @@ static void sg_CreateZone_conf(std::istream &s)
             "instead of <x> <y> one can write: L <x1> <y1> <x2> <y2> [...] Z\n";
         return;
     }
-        REAL targetRadius = atof(targetRadiusStr) * sizeMultiplier;
-        bool zoneInteractiveBool =false;
-        if ((zoneInteractive == "true") || (zoneInteractive == "1")){
-            zoneInteractiveBool=true;
-        }
-        bool zonePenetrateBool = false;
-        if (zonePenetrate == "true" || zonePenetrate == "1")
-            zonePenetrateBool = true;
-        CreateZone(zoneTypeStr, Zone, zoneSize, zoneGrowth, zoneDir, setColorFlag, zoneColor, zoneInteractiveBool, targetRadius, route, zoneNameStr, zonePenetrateBool);
+
+    REAL targetRadius = atof(targetRadiusStr) * sizeMultiplier;
+    bool zoneInteractiveBool =false;
+    if ((zoneInteractive == "true") || (zoneInteractive == "1")){
+        zoneInteractiveBool=true;
+    }
+    bool zonePenetrateBool = false;
+    if (zonePenetrate == "true" || zonePenetrate == "1")
+        zonePenetrateBool = true;
+    CreateZone(zoneTypeStr, Zone, zoneSize, zoneGrowth, zoneDir, setColorFlag, zoneColor, zoneInteractiveBool, targetRadius, route, zoneNameStr, zonePenetrateBool);
 }
 
 

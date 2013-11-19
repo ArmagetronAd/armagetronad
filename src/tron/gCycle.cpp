@@ -2444,6 +2444,9 @@ gCycle::gCycle(eGrid *grid, const eCoord &pos,const eCoord &d,ePlayerNetID *p)
     sg_ArchiveReal( this->verletSpeed_, 1 );
 
     flag_ = NULL;
+
+    startPos_ = this->pos;
+    startDir_ = this->dir;
 }
 
 gCycle::~gCycle(){
@@ -4054,11 +4057,54 @@ void gCycle::Killed(gCycle *pKiller, int type)
 
 static eLadderLogWriter se_cycleDestroyedWriter("CYCLE_DESTROYED", false);
 
+bool sg_cycleRespawnZone = false;
+static tSettingItem<bool> sg_cycleRespawnZoneConf("CYCLE_RESPAWN_ZONE", sg_cycleRespawnZone);
+
+bool sg_cycleRespawnZoneType = false;
+static tSettingItem<bool> sg_cycleRespawnZoneTypeConf("CYCLE_RESPAWN_ZONE_TYPE", sg_cycleRespawnZoneType);
+
+float sg_cycleRespawnZoneRadius = 2.5;
+static tSettingItem<float> sg_cycleRespawnZoneRadiusConf("CYCLE_RESPAWN_ZONE_RADIUS", sg_cycleRespawnZoneRadius);
+
+float sg_cycleRespawnZoneGrowth = -0.4;
+static tSettingItem<float> sg_cycleRespawnZoneGrowthConf("CYCLE_RESPAWN_ZONE_GROWTH", sg_cycleRespawnZoneGrowth);
+
+static void sg_cycleRespawnZone_Create(gCycle *cycle)
+{
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid) return;
+
+    if (!sg_cycleRespawnZone) return;
+
+    //con << "Cycle respawn zone activated...\n";
+
+    eCoord resPos, resDir;
+    if (sg_cycleRespawnZoneType)
+    {
+        resPos = cycle->StartPosition();
+        resDir = cycle->StartDirection();
+    }
+    else
+    {
+        resPos = cycle->Position();
+        resDir = cycle->Direction();
+    }
+
+    gRespawnZoneHack *cycleRespawnZone = new gRespawnZoneHack(grid, resPos, cycle->Player(), true);
+    cycleRespawnZone->SetRadius(sg_cycleRespawnZoneRadius * gArena::SizeMultiplier());
+    cycleRespawnZone->SetExpansionSpeed(sg_cycleRespawnZoneGrowth);
+    cycleRespawnZone->SetColor(cycle->color_);
+    cycleRespawnZone->SetSpawnDirection(resDir);
+
+    cycleRespawnZone->RequestSync();
+}
+
 void gCycle::Kill(){
     // keep this cycle alive
     tJUST_CONTROLLED_PTR< gCycle > keep( this->GetRefcount()>0 ? this : 0 );
 
-    if (sn_GetNetState()!=nCLIENT){
+    if (sn_GetNetState() != nCLIENT)
+    {
         RequestSync(true);
 
         // check if we own a flag
@@ -4068,7 +4114,8 @@ void gCycle::Kill(){
             flag_->OwnerDropped();
         }
 
-        if (Alive() && grid && GOID() >= 0 ){
+        if (Alive() && grid && GOID() >= 0 )
+        {
             if (sg_deathShot)
             {
                 if (braking)
@@ -4087,6 +4134,8 @@ void gCycle::Kill(){
 
             se_cycleDestroyedWriter << Player()->GetUserName() << Position().x << Position().y << Direction().x << Direction().y << ePlayerNetID::FilterName(Team()->Name()) << se_GameTime();
             se_cycleDestroyedWriter.write();
+
+            sg_cycleRespawnZone_Create(this);
 
             if ( currentWall )
             {
