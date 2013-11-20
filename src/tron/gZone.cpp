@@ -7906,10 +7906,11 @@ bool gRespawnZoneHack::Timestep( REAL time )
     // delegate
     bool returnStatus = gZone::Timestep( time );
 
+    //  if player or setting is not active, get rid of zone
     if (!deadPlayer_ || !sg_cycleRespawnZone)
     {
         ClearDeadPlayer();
-        Vanish();
+        return true;
     }
 
     return (returnStatus);

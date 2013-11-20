@@ -4077,6 +4077,7 @@ static void sg_cycleRespawnZone_Create(gCycle *cycle)
     if (!sg_cycleRespawnZone) return;
 
     //con << "Cycle respawn zone activated...\n";
+    ePlayerNetID *player = cycle->Player();
 
     eCoord resPos, resDir;
     if (sg_cycleRespawnZoneType)
@@ -4090,13 +4091,16 @@ static void sg_cycleRespawnZone_Create(gCycle *cycle)
         resDir = cycle->Direction();
     }
 
-    gRespawnZoneHack *cycleRespawnZone = new gRespawnZoneHack(grid, resPos, cycle->Player(), true);
-    cycleRespawnZone->SetRadius(sg_cycleRespawnZoneRadius * gArena::SizeMultiplier());
-    cycleRespawnZone->SetExpansionSpeed(sg_cycleRespawnZoneGrowth);
-    cycleRespawnZone->SetColor(cycle->color_);
-    cycleRespawnZone->SetSpawnDirection(resDir);
+    if (player)
+    {
+        gRespawnZoneHack *cycleRespawnZone = new gRespawnZoneHack(grid, resPos, player, true);
+        cycleRespawnZone->SetRadius(sg_cycleRespawnZoneRadius * gArena::SizeMultiplier());
+        cycleRespawnZone->SetExpansionSpeed(sg_cycleRespawnZoneGrowth);
+        cycleRespawnZone->SetColor(cycle->color_);
+        cycleRespawnZone->SetSpawnDirection(resDir);
 
-    cycleRespawnZone->RequestSync();
+        cycleRespawnZone->RequestSync();
+    }
 }
 
 void gCycle::Kill(){
@@ -4132,10 +4136,15 @@ void gCycle::Kill(){
             tNEW(gExplosion)(grid, pos,lastTime, color_, this );
             //	 eEdge::SeethroughHasChanged();
 
-            se_cycleDestroyedWriter << Player()->GetUserName() << Position().x << Position().y << Direction().x << Direction().y << ePlayerNetID::FilterName(Team()->Name()) << se_GameTime();
-            se_cycleDestroyedWriter.write();
+            if (this && Player())
+            {
+                se_cycleDestroyedWriter << Player()->GetUserName() << Position().x << Position().y << Direction().x << Direction().y << ePlayerNetID::FilterName(Team()->Name()) << se_GameTime();
+                se_cycleDestroyedWriter.write();
 
-            sg_cycleRespawnZone_Create(this);
+
+                sg_cycleRespawnZone_Create(this);
+            }
+
 
             if ( currentWall )
             {
