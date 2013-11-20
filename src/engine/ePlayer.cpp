@@ -7258,9 +7258,7 @@ void ePlayerNetID::ClearRespawn()
         {
             if (resZone->DeadPlayer() == this)
             {
-                resZone->ClearDeadPlayer();
-                resZone->Collapse();
-                break;
+                resZone->Finish();
             }
         }
     }

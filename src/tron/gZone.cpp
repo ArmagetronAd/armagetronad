@@ -7983,14 +7983,32 @@ void gRespawnZoneHack::OnEnter( gCycle * target, REAL time )
     }
 }
 
+void gRespawnZoneHack::Finish()
+{
+    ClearDeadPlayer();
+    Collapse();
+}
+
 // *******************************************************************************
 // *
 // *    OnVanish
 // *
 // *******************************************************************************
 
+bool sg_cycleRespawnZoneRespawn = false;
+static tSettingItem<bool> sg_cycleRespawnZoneRespawnConf("CYCLE_RESPAWN_ZONE_RESPAWN", sg_cycleRespawnZoneRespawn);
+
 void gRespawnZoneHack::OnVanish( void )
 {
+    if (deadPlayer_ && sg_cycleRespawnZone)
+    {
+        gRespawnZoneHack *newResZone = new gRespawnZoneHack(grid, GetPosition(), deadPlayer_, true);
+        newResZone->SetRadius(sg_cycleRespawnZoneRadius * gArena::SizeMultiplier());
+        newResZone->SetExpansionSpeed(sg_cycleRespawnZoneGrowth);
+        newResZone->SetColor(GetColor());
+        newResZone->SetSpawnDirection(SpawnDirection());
+    }
+
     grid->RemoveGameObjectInteresting(this);
 }
 

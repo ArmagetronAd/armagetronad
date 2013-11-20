@@ -731,6 +731,8 @@ class gRespawnZoneHack: public gZone
         eCoord SpawnDirection() { return this->spawnDirection_; }
         void SetSpawnDirection(eCoord dir) { this->spawnDirection_;  }
 
+        void Finish();
+
     protected:
         ePlayerNetID *deadPlayer_;
         eCoord spawnDirection_;

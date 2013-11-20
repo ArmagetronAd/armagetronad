@@ -3918,6 +3918,7 @@ cycle_respawn_zone_enemies_kill_help  Set to 1 to enable respawn zone to kill en
 cycle_respawn_zone_growth_help        The growth rate of respawn zone. Can increase(value>0) or decrease(value<0). 
 cycle_respawn_zone_radius_help        The radius of respawn zone to spawn when player dies.
 cycle_respawn_zone_type_help          The type of respawn occurs. 0-spawn on the location of death; 1-spawn on the starting location. Default: 0
+cycle_respawn_zone_respawn_help       Set to 1 to enable respawn zone to reappear after vanishing.
 
 cycle_respawn_zone_team               \1 0xRESETTwas respawned by their teammates.\n
 cycle_respawn_zone_enemy              \1 0xRESETTwas respawned by an enemy player, \2.\n
