@@ -281,16 +281,16 @@ tString eBannedWords::ReplaceBadWords(tString message, tString word)
             tString splitWord = splitWords[i];
             tString splitWordCon(splitWord);
 
-            for(int i = 0; i < splitWordCon.Len(); i++)
+            for(int j = 0; j < splitWordCon.Len(); j++)
             {
-                if (CharacterInDelimiter(splitWordCon[i]))
-                    splitWordCon = splitWordCon.RemoveCharacter(splitWordCon[i]);
+                if (CharacterInDelimiter(splitWordCon[j]))
+                    splitWordCon = splitWordCon.RemoveCharacter(splitWordCon[j]);
             }
 
             if (splitWordCon.ToLower() == word.ToLower())
             {
                 tString replaced;
-                for(int j = 0; j < (splitWord.Len() - 1); j++)
+                for(int k = 0; k < (splitWord.Len() - 1); k++)
                     replaced << replacement;
 
                 convertedMsg << replaced << " ";
@@ -303,14 +303,19 @@ tString eBannedWords::ReplaceBadWords(tString message, tString word)
                 if (trippedWord.Filter() == "")
                 {
                     tString replaced;
-                    for(int j = 0; j < (splitWord.Len() - 1); j++)
+                    for(int k = 0; k < (splitWord.Len() - 1); k++)
                         replaced << replacement;
 
                     convertedMsg << replaced << " ";
                     if ((i + 1) == splitWords.Len())
                         convertedMsg << "\n";
                 }
-                else convertedMsg << splitWord << " ";
+                else
+                {
+                    convertedMsg << splitWord << " ";
+                    if ((i + 1) == splitWords.Len())
+                        convertedMsg << "\n";
+                }
             }
             else
             {
