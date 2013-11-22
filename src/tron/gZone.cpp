@@ -2486,14 +2486,17 @@ void gRubberZoneHack::OnVanish( void )
 
 gZone & gRubberZoneHack::SetRubber(REAL rubber)
 {
-    rmRubber = rubber;
+    if (rubberType_ == TYPE_RUBBER)
+    {
+        rmRubber = rubber;
 
-    color_.r = 1.0f;
-    REAL p_rubber = (1-(rmRubber/sg_rubberCycle));
-    if (p_rubber <0)
-        p_rubber=0;
-    color_.g = (p_rubber);
-    color_.b = (p_rubber/3);
+        color_.r = 1.0f;
+        REAL p_rubber = (1-(rmRubber/sg_rubberCycle));
+        if (p_rubber <0)
+            p_rubber=0;
+        color_.g = (p_rubber);
+        color_.b = (p_rubber/3);
+    }
 
     return (*this);
 }
@@ -2533,25 +2536,34 @@ gCycle * gRubberZoneHack::getPlayerCycle(ePlayerNetID *pPlayer)
 //!
 // *******************************************************************************
 static eLadderLogWriter sg_deathRubberZoneWriter("DEATH_RUBBERZONE", true);
-static void sg_RubberZoneHurt( gCycle * target, REAL rmRubber );
-void sg_RubberZoneHurt( gCycle * target, REAL rmRubber)
+
+void sg_RubberZoneHurt( gCycle * target, gRubberZoneHack *rubberZone)
 {
     REAL rubber = target->GetRubber();
+    if (rubberZone->GetRubberType() == gRubberZoneHack::TYPE_RUBBER)
+    {
+        if ( rubber + rubberZone->GetRubber() >= sg_rubberCycle )       // max rubber amount reached, kill the cycle
+        {
+            target->Player()->AddScore( score_rubberzone, tOutput(), "$player_lose_rubberzone" );
+            target->Kill();
+            target->SetRubber( sg_rubberCycle );
+            sg_deathRubberZoneWriter << target->Player()->GetUserName();
+            sg_deathRubberZoneWriter.write();
+        }
+        else if ( rubber + rubberZone->GetRubber() > 0 )            // sg_deathZoneRubberMalus might be negative, avoid setting a negative rubber!
+        {
+            target->SetRubber( rubber + rubberZone->GetRubber() );
+        }
+        else                                                        // too low value, just set to zero
+            target->SetRubber( 0 );
+    }
+    else if (rubberZone->GetRubberType() == gRubberZoneHack::TYPE_ADJUST)
+    {
+        if (rubberZone->GetRubber() >= sg_rubberCycle)
+            rubberZone->SetRubber(sg_rubberCycle);
 
-    if ( rubber + rmRubber >= sg_rubberCycle )       // max rubber amount reached, kill the cycle
-    {
-        target->Player()->AddScore( score_rubberzone, tOutput(), "$player_lose_rubberzone" );
-        target->Kill();
-        target->SetRubber( sg_rubberCycle );
-        sg_deathRubberZoneWriter << target->Player()->GetUserName();
-        sg_deathRubberZoneWriter.write();
+        target->SetRubber(rubberZone->GetRubber());
     }
-    else if ( rubber + rmRubber > 0 )            // sg_deathZoneRubberMalus might be negative, avoid setting a negative rubber!
-    {
-        target->SetRubber( rubber + rmRubber );
-    }
-    else                                                        // too low value, just set to zero
-        target->SetRubber( 0 );
 }
 
 
@@ -2568,7 +2580,7 @@ void sg_RubberZoneHurt( gCycle * target, REAL rmRubber)
 
 void gRubberZoneHack::OnEnter( gCycle * target, REAL time )
 {
-    sg_RubberZoneHurt( target, rmRubber );
+    sg_RubberZoneHurt( target, this );
 }
 
 // *******************************************************************************
@@ -6735,7 +6747,7 @@ void gBlastZoneHack::OnVanish( void )
 
 // *******************************************************************************
 // *
-// *    gBurstZoneHack
+// *    gSpeedZoneHack
 // *
 // *******************************************************************************
 //!
@@ -6744,7 +6756,7 @@ void gBlastZoneHack::OnVanish( void )
 //!
 // *******************************************************************************
 
-gBurstZoneHack::gBurstZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreation, bool delayCreation)
+gSpeedZoneHack::gSpeedZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreation, bool delayCreation)
 :gZone( grid, pos, dynamicCreation, delayCreation)
 {
     color_.r = 0.0f;
@@ -6762,7 +6774,7 @@ gBurstZoneHack::gBurstZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCr
 
 // *******************************************************************************
 // *
-// *    gBurstZoneHack
+// *    gSpeedZoneHack
 // *
 // *******************************************************************************
 //!
@@ -6771,7 +6783,7 @@ gBurstZoneHack::gBurstZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCr
 //!
 // *******************************************************************************
 
-gBurstZoneHack::gBurstZoneHack( nMessage & m )
+gSpeedZoneHack::gSpeedZoneHack( nMessage & m )
 : gZone( m )
 {
 }
@@ -6779,14 +6791,14 @@ gBurstZoneHack::gBurstZoneHack( nMessage & m )
 
 // *******************************************************************************
 // *
-// *    ~gBurstZoneHack
+// *    ~gSpeedZoneHack
 // *
 // *******************************************************************************
 //!
 //!
 // *******************************************************************************
 
-gBurstZoneHack::~gBurstZoneHack( void )
+gSpeedZoneHack::~gSpeedZoneHack( void )
 {
 }
 
@@ -6801,7 +6813,7 @@ gBurstZoneHack::~gBurstZoneHack( void )
 //!
 // *******************************************************************************
 
-bool gBurstZoneHack::Timestep( REAL time )
+bool gSpeedZoneHack::Timestep( REAL time )
 {
     // delegate
     bool returnStatus = gZone::Timestep( time );
@@ -6821,9 +6833,16 @@ bool gBurstZoneHack::Timestep( REAL time )
 //!
 // *******************************************************************************
 
-void gBurstZoneHack::OnEnter( gCycle * target, REAL time )
+void gSpeedZoneHack::OnEnter( gCycle * target, REAL time )
 {
-    target->verletSpeed_ += burstSpeed_;
+    if (speedType_ == TYPE_ACCEL)
+    {
+        target->verletSpeed_ += setSpeed_;
+    }
+    else if (speedType_ == TYPE_SPEED)
+    {
+        target->verletSpeed_ = setSpeed_;
+    }
 }
 
 // *******************************************************************************
@@ -6832,7 +6851,7 @@ void gBurstZoneHack::OnEnter( gCycle * target, REAL time )
 // *
 // *******************************************************************************
 
-void gBurstZoneHack::OnVanish( void )
+void gSpeedZoneHack::OnVanish( void )
 {
     grid->RemoveGameObjectInteresting(this);
 }
@@ -7001,42 +7020,9 @@ static void sg_SpawnObjectZone(std::istream &s)
                 route.push_back(eCoord(atof(x)*sizeMultiplier, atof(y)*sizeMultiplier));
             }
         }
-        else if (zonePosXStr == "x_rand")   //  generate random x position
-        {
-            eCoord posX = Arena.GetRandomPos(1);
-            zonePosXStr = "";
-            zonePosXStr << posX.x;
-
-            zonePosYStr = params.ExtractNonBlankSubString(pos);
-        }
-        else if (zonePosXStr == "x_cent")   //  generate center x position
-        {
-            eCoord posX = Arena.GetRandomPos(0);
-            zonePosXStr = "";
-            zonePosXStr << posX.x;
-        }
         else
         {
             zonePosYStr = params.ExtractNonBlankSubString(pos);
-        }
-
-        //  handle y position
-        if (zonePosYStr.Filter() != "")
-        {
-            if (zonePosYStr == "y_rand")    //  generate random y position
-            {
-                eCoord posY = Arena.GetRandomPos(1);
-
-                zonePosYStr = "";
-                zonePosYStr <<  posY.y;
-            }
-            else if (zonePosYStr == "y_cent")    //  generate center y position
-            {
-                eCoord  posY = Arena.GetRandomPos(0);
-
-                zonePosYStr = "";
-                zonePosYStr <<  posY.y;
-            }
         }
 
         tString zoneSizeStr       = params.ExtractNonBlankSubString(pos);
@@ -7058,9 +7044,35 @@ static void sg_SpawnObjectZone(std::istream &s)
         bool setColorFlag = false;
         if ((zoneRedStr.Filter() != "") && (zoneGreenStr.Filter() != "") && (zoneBlueStr.Filter() != ""))
         {
-            zoneColor.r = atof(zoneRedStr) / 15.0;
-            zoneColor.g = atof(zoneGreenStr) / 15.0;
-            zoneColor.b = atof(zoneBlueStr) / 15.0;
+            if (zoneRedStr == "r_rand")
+            {
+                tRandomizer &randomizer = tRandomizer::GetInstance();
+                zoneColor.r = randomizer.Get(0, 15) / 15.0;
+            }
+            else
+            {
+                zoneColor.r = atof(zoneRedStr) / 15.0;
+            }
+
+            if (zoneGreenStr == "g_rand")
+            {
+                tRandomizer &randomizer = tRandomizer::GetInstance();
+                zoneColor.g = randomizer.Get(0, 15) / 15.0;
+            }
+            else
+            {
+                zoneColor.g = atof(zoneGreenStr) / 15.0;
+            }
+
+            if (zoneBlueStr == "b_rand")
+            {
+                tRandomizer &randomizer = tRandomizer::GetInstance();
+                zoneColor.b = randomizer.Get(0, 15) / 15.0;
+            }
+            else
+            {
+                zoneColor.b = atof(zoneBlueStr) / 15.0;
+            }
             setColorFlag = true;
         }
 
@@ -7692,42 +7704,9 @@ static void sg_SpawnSoccer(std::istream &s)
                 route.push_back(eCoord(atof(x)*sizeMultiplier, atof(y)*sizeMultiplier));
             }
         }
-        else if (zonePosXStr == "x_rand")   //  generate random x position
-        {
-            eCoord posX = Arena.GetRandomPos(1);
-            zonePosXStr = "";
-            zonePosXStr << posX.x;
-
-            zonePosYStr = params.ExtractNonBlankSubString(pos);
-        }
-        else if (zonePosXStr == "x_cent")   //  generate center x position
-        {
-            eCoord posX = Arena.GetRandomPos(0);
-            zonePosXStr = "";
-            zonePosXStr << posX.x;
-        }
         else
         {
             zonePosYStr = params.ExtractNonBlankSubString(pos);
-        }
-
-        //  handle y position
-        if (zonePosYStr.Filter() != "")
-        {
-            if (zonePosYStr == "y_rand")    //  generate random y position
-            {
-                eCoord posY = Arena.GetRandomPos(1);
-
-                zonePosYStr = "";
-                zonePosYStr <<  posY.y;
-            }
-            else if (zonePosYStr == "y_cent")    //  generate center y position
-            {
-                eCoord  posY = Arena.GetRandomPos(0);
-
-                zonePosYStr = "";
-                zonePosYStr <<  posY.y;
-            }
         }
 
         const tString zoneSizeStr       = params.ExtractNonBlankSubString(pos);
@@ -7749,9 +7728,36 @@ static void sg_SpawnSoccer(std::istream &s)
         bool setColorFlag = false;
         if ((zoneRedStr.Filter() != "") && (zoneGreenStr.Filter() != "") && (zoneBlueStr.Filter() != ""))
         {
-            zoneColor.r = atof(zoneRedStr) / 15.0;
-            zoneColor.g = atof(zoneGreenStr) / 15.0;
-            zoneColor.b = atof(zoneBlueStr) / 15.0;
+            if (zoneRedStr == "r_rand")
+            {
+                tRandomizer &randomizer = tRandomizer::GetInstance();
+                zoneColor.r = randomizer.Get(0, 15) / 15.0;
+            }
+            else
+            {
+                zoneColor.r = atof(zoneRedStr) / 15.0;
+            }
+
+            if (zoneGreenStr == "g_rand")
+            {
+                tRandomizer &randomizer = tRandomizer::GetInstance();
+                zoneColor.g = randomizer.Get(0, 15) / 15.0;
+            }
+            else
+            {
+                zoneColor.g = atof(zoneGreenStr) / 15.0;
+            }
+
+            if (zoneBlueStr == "b_rand")
+            {
+                tRandomizer &randomizer = tRandomizer::GetInstance();
+                zoneColor.b = randomizer.Get(0, 15) / 15.0;
+            }
+            else
+            {
+                zoneColor.b = atof(zoneBlueStr) / 15.0;
+            }
+
             setColorFlag = true;
         }
 
@@ -8062,10 +8068,10 @@ static void sg_CreateZone_conf(std::istream &s)
         }
     }
 
-    REAL cycleBurstSpeed = 0;
-    if (zoneTypeStr == "burst")
+    REAL setSpeed = 0;
+    if ((zoneTypeStr == "acceleration") || (zoneTypeStr == "speed"))
     {
-        cycleBurstSpeed = atof(params.ExtractNonBlankSubString(pos));
+        setSpeed = atof(params.ExtractNonBlankSubString(pos));
     }
 
     ePlayerNetID *zonePlayer = 0;
@@ -8106,42 +8112,9 @@ static void sg_CreateZone_conf(std::istream &s)
             route.push_back(eCoord(atof(x)*sizeMultiplier, atof(y)*sizeMultiplier));
         }
     }
-    else if (zonePosXStr == "x_rand")   //  generate random x position
-    {
-        eCoord posX = Arena.GetRandomPos(1);
-        zonePosXStr = "";
-        zonePosXStr << posX.x;
-
-        zonePosYStr = params.ExtractNonBlankSubString(pos);
-    }
-    else if (zonePosXStr == "x_cent")   //  generate center x position
-    {
-        eCoord posX = Arena.GetRandomPos(0);
-        zonePosXStr = "";
-        zonePosXStr << posX.x;
-    }
     else
     {
         zonePosYStr = params.ExtractNonBlankSubString(pos);
-    }
-
-    //  handle y position
-    if (zonePosYStr.Filter() != "")
-    {
-        if (zonePosYStr == "y_rand")    //  generate random y position
-        {
-            eCoord posY = Arena.GetRandomPos(1);
-
-            zonePosYStr = "";
-            zonePosYStr <<  posY.y;
-        }
-        else if (zonePosYStr == "y_cent")    //  generate center y position
-        {
-            eCoord  posY = Arena.GetRandomPos(0);
-
-            zonePosYStr = "";
-            zonePosYStr <<  posY.y;
-        }
     }
 
     const tString zoneSizeStr = params.ExtractNonBlankSubString(pos);
@@ -8230,7 +8203,6 @@ static void sg_CreateZone_conf(std::istream &s)
             zoneColor.b = atof(zoneBlueStr) / 15.0;
         }
 
-        con << "red: " << zoneColor.r << " blue: " << zoneColor.b << " green: " << zoneColor.g << "\n";
         setColorFlag = true;
     }
 
@@ -8289,6 +8261,14 @@ static void sg_CreateZone_conf(std::istream &s)
     else if ( zoneTypeStr=="rubber")
     {
         gRubberZoneHack *rZone = tNEW(gRubberZoneHack(grid, zonePos, true));
+        rZone->SetRubberType(gRubberZoneHack::TYPE_RUBBER);
+        rZone->SetRubber(zoneRubber);
+        Zone = rZone;
+    }
+    else if ( zoneTypeStr=="rubberadjust")
+    {
+        gRubberZoneHack *rZone = tNEW(gRubberZoneHack(grid, zonePos, true));
+        rZone->SetRubberType(gRubberZoneHack::TYPE_ADJUST);
         rZone->SetRubber(zoneRubber);
         Zone = rZone;
     }
@@ -8390,10 +8370,19 @@ static void sg_CreateZone_conf(std::istream &s)
     else if (zoneTypeStr=="koh"){
         Zone = tNEW( gKOHZoneHack( grid, zonePos, true ) );
     }
-    else if (zoneTypeStr == "burst")
+    else if (zoneTypeStr == "acceleration")
     {
-        gBurstZoneHack *bZone = tNEW(gBurstZoneHack(grid, zonePos, true));
-        bZone->SetBurstSpeed(cycleBurstSpeed);
+        gSpeedZoneHack *bZone = tNEW(gSpeedZoneHack(grid, zonePos, true));
+        bZone->SetSpeedType(gSpeedZoneHack::TYPE_ACCEL);
+        bZone->SetSpeedVal(setSpeed);
+
+        Zone = bZone;
+    }
+    else if (zoneTypeStr == "speed")
+    {
+        gSpeedZoneHack *bZone = tNEW(gSpeedZoneHack(grid, zonePos, true));
+        bZone->SetSpeedType(gSpeedZoneHack::TYPE_SPEED);
+        bZone->SetSpeedVal(setSpeed);
 
         Zone = bZone;
     }
@@ -8405,8 +8394,8 @@ static void sg_CreateZone_conf(std::istream &s)
         usage:
         con << "Usage:\n"
             "SPAWN_ZONE <win|death|ball|target|blast|object|koh> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> <penetrate> \n"
-            "SPAWN_ZONE burst <speed> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> <penetrate> \n"
-            "SPAWN_ZONE rubber <x> <y> <size> <growth> <xdir> <ydir> <rubber> <interactive> <r> <g> <b> <target_size> <penetrate> \n"
+            "SPAWN_ZONE <acceleration|speed> <speed> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> <penetrate> \n"
+            "SPAWN_ZONE <rubber|rubberadjust> <x> <y> <size> <growth> <xdir> <ydir> <rubber> <interactive> <r> <g> <b> <target_size> <penetrate> \n"
             "SPAWN_ZONE teleport <x> <y> <size> <growth> <xdir> <ydir> <xjump> <yjump> <rel|abs> <interactive> <r> <g> <b> <target_size> <penetrate> \n"
             "SPAWN_ZONE <fortress|flag|deathTeam|ballTeam> <team> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> <penetrate> \n"
             "SPAWN_ZONE sumo <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> <penetrate> \n"

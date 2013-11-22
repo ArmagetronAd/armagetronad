@@ -312,13 +312,21 @@ class gDeathZoneHack: public gZone
 class gRubberZoneHack: public gZone
 {
 	public:
+        enum
+		{
+			TYPE_ADJUST,
+			TYPE_RUBBER,
 
+			NUM_RUBBER_ZONES
+		};
 								 //!< local constructor
 		gRubberZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false, bool delayCreation = false);
 								 //!< network constructor
 		gRubberZoneHack(nMessage &m);
 		~gRubberZoneHack();		 //!< destructor
 
+        void SetRubberType(int type) { this->rubberType_ = type; }
+        int  GetRubberType()         { return this->rubberType_; }
 
 								 //!< Sets the current rubber
 		gZone &         SetRubber            (REAL rubber);
@@ -328,6 +336,7 @@ class gRubberZoneHack: public gZone
 	protected:
 		virtual void OnVanish(); //!< called when the zone vanishes
 		REAL rmRubber;
+		int rubberType_;
 
 	private:
 								 //!< reacts on objects inside the zone (kills them)
@@ -636,18 +645,31 @@ class gBlastZoneHack: public gZone
 		virtual void OnEnter( gCycle *target, REAL time );
 	};
 
-class gBurstZoneHack: public gZone
+class gSpeedZoneHack: public gZone
 {
     public:
-        gBurstZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false, bool delayCreation = false);
-        gBurstZoneHack(nMessage &m);
-        ~gBurstZoneHack();
+        enum
+		{
+			TYPE_ACCEL,
+			TYPE_SPEED,
 
-        void SetBurstSpeed(REAL speed) { this->burstSpeed_ = speed; }
-        REAL GetBurstSpeed() { return burstSpeed_; }
+			NUM_SPEED_ZONES
+		};
+
+        gSpeedZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false, bool delayCreation = false);
+        gSpeedZoneHack(nMessage &m);
+        ~gSpeedZoneHack();
+
+        void SetSpeedType(int type) { this->speedType_ = type; }
+        int  GetSpeedType()         { return this->speedType_; }
+
+        void SetSpeedVal(REAL speed){ this->setSpeed_ = speed; }
+        REAL GetSpeedVal()          { return this->setSpeed_;  }
 
     protected:
-        REAL burstSpeed_;
+        int speedType_;
+
+        REAL setSpeed_;
 
     private:
         virtual bool Timestep(REAL currentTime);

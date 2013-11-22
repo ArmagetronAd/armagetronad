@@ -814,9 +814,21 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
             REAL rubberVal = myxmlGetPropFloat(cur, "rubberVal");
             if (rubberVal != 0.0 ){
                 gRubberZoneHack *rZone = tNEW(gRubberZoneHack(grid, zonePos, false, delayZoneCreation ));
+                rZone->SetRubberType(gRubberZoneHack::TYPE_RUBBER);
                 rZone->SetRubber(rubberVal);
                 zone = rZone;
                 zoneEffect << "rubber";
+            }
+
+        }
+        else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *) "effect"), (const xmlChar *)"rubberadjust")) {
+            REAL rubberVal = myxmlGetPropFloat(cur, "rubberVal");
+            if (rubberVal != 0.0 ){
+                gRubberZoneHack *rZone = tNEW(gRubberZoneHack(grid, zonePos, false, delayZoneCreation ));
+                rZone->SetRubberType(gRubberZoneHack::TYPE_ADJUST);
+                rZone->SetRubber(rubberVal);
+                zone = rZone;
+                zoneEffect << "rubberadjust";
             }
 
         }
@@ -830,15 +842,27 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
 
             zoneEffect << "teleport";
         }
-        else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *) "effect"), (const xmlChar *)"burst"))
+        else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *) "effect"), (const xmlChar *)"acceleration"))
         {
-            REAL cycle_burst_speed = myxmlGetPropFloat(cur, "speed");
-            gBurstZoneHack *bZone = tNEW(gBurstZoneHack(grid, zonePos, false, delayZoneCreation));
-            bZone->SetBurstSpeed(cycle_burst_speed);
+            REAL set_speed = myxmlGetPropFloat(cur, "speed");
+            gSpeedZoneHack *bZone = tNEW(gSpeedZoneHack(grid, zonePos, false, delayZoneCreation));
+            bZone->SetSpeedType(gSpeedZoneHack::TYPE_ACCEL);
+            bZone->SetSpeedVal(set_speed);
 
             zone = bZone;
 
-            zoneEffect << "burst";
+            zoneEffect << "acceleration";
+        }
+        else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *) "effect"), (const xmlChar *)"speed"))
+        {
+            REAL set_speed = myxmlGetPropFloat(cur, "speed");
+            gSpeedZoneHack *bZone = tNEW(gSpeedZoneHack(grid, zonePos, false, delayZoneCreation));
+            bZone->SetSpeedType(gSpeedZoneHack::TYPE_SPEED);
+            bZone->SetSpeedVal(set_speed);
+
+            zone = bZone;
+
+            zoneEffect << "speed";
         }
         else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *) "effect"), (const xmlChar *)"soccerball"))
         {

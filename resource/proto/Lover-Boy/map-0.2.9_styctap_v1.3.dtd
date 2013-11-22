@@ -1,0 +1,100 @@
+<!-- version="map-0.2.9_styctap_V1.3" -->
+<!-- for 0.2.9-armagetronad-sty+ct+ap -->
+
+<!ELEMENT Resource (Map)>
+
+<!ATTLIST Resource
+       type (aamap) "aamap" 
+       name CDATA #REQUIRED
+       version CDATA #REQUIRED
+       author CDATA "Anonymous"
+       category CDATA "unsorted"
+       comissioner CDATA #IMPLIED
+>
+
+<!ELEMENT Map (Settings?, World)> 
+
+<!ELEMENT Settings (Setting*)>
+<!ELEMENT Setting EMPTY>
+<!ATTLIST Setting name CDATA #REQUIRED>
+<!ATTLIST Setting value CDATA #REQUIRED>
+
+<!-- ATM, a map contain only one Field -->
+<!ELEMENT World (Field)>
+<!-- a field 
+  - may have an axes declared
+  - need at least one spawn
+  - need at least one wall -->
+<!ELEMENT Field (Axes?, (Spawn | Wall | Zone)*)>
+
+<!ELEMENT Axes (Axis*)>
+<!ELEMENT Spawn (Spawn*)> 
+<!ELEMENT Wall (Point+) >
+<!ELEMENT Point EMPTY>
+<!ELEMENT Axis EMPTY>
+<!ELEMENT Zone (ShapeCircle) >
+
+<!ATTLIST Map version CDATA #REQUIRED>
+
+<!ATTLIST Field logicalBox (true | false) "true">
+
+<!ATTLIST Axes number CDATA "4">
+<!ATTLIST Axes normalize (true | false) "true">
+
+<!ATTLIST Spawn x CDATA #REQUIRED>
+<!ATTLIST Spawn y CDATA #REQUIRED>
+<!ATTLIST Spawn xdir CDATA #IMPLIED>
+<!ATTLIST Spawn ydir CDATA #IMPLIED>
+<!ATTLIST Spawn angle CDATA #IMPLIED>
+<!ATTLIST Spawn length CDATA "1.0">
+
+<!ATTLIST Wall height CDATA #IMPLIED>
+
+<!ATTLIST Point x CDATA #REQUIRED>
+<!ATTLIST Point y CDATA #REQUIRED>
+
+<!ATTLIST Axis xdir CDATA #IMPLIED>
+<!ATTLIST Axis ydir CDATA #IMPLIED>
+<!ATTLIST Axis angle CDATA #IMPLIED>
+<!ATTLIST Axis length CDATA "1.0">
+
+<!ATTLIST Zone effect ( 
+                        win | death | fortress
+                        | ball | flag | target | sumo 
+                        | teleport | object | soccerball | soccergoal 
+                        | speed | acceleration | rubber | 
+                        ) "death" >
+
+<!ATTLIST Zone name CDATA "">
+<!ATTLIST Zone rubberVal CDATA "0">   <!-- Only works for rubber,rubberadjust zone types -->
+<!ATTLIST Zone team CDATA "">		      <!-- Only works for death,fortress,ball,flag,soccergoal zone types -->
+<!ATTLIST Zone speed CDATA "0">       <!-- Only works for speed,acceleration zone types -->
+<!ATTLIST Zone delay CDATA "0">       <!-- time, in seconds, before zone can actually be spawned -->
+
+<!-- Bellow are used for teleport values -->
+<!--  Only works with effect="teleport"  -->
+<!ELEMENT Teleport EMPTY>
+<!ATTLIST Teleport destX CDATA "0">
+<!ATTLIST Teleport destY CDATA "0">
+<!ATTLIST Teleport dirX CDATA "0">
+<!ATTLIST Teleport dirY CDATA "0">
+<!ATTLIST Teleport modes ( rel | cycle | abs ) "abs" >
+<!ATTLIST Teleport reloc CDATA "1">
+
+<!-- Setting zone it's colors -->
+<!ELEMENT Color EMPTY>
+<!ATTLIST Color r CDATA "15">
+<!ATTLIST Color g CDATA "0">
+<!ATTLIST Color b CDATA "0">
+
+<!-- Setting zone it's movement direction and the route to follow-->
+<!ELEMENT Move EMPTY>
+<!ATTLIST Move xdir CDATA "0">
+<!ATTLIST Move ydir CDATA "0">
+<!ATTLIST Move interact ( true | false ) "false">
+<!ATTLIST Move route CDATA "">
+
+<!ELEMENT ShapeCircle ( Point , Color? , Move? , Teleport? )>
+<!ATTLIST ShapeCircle radius CDATA #REQUIRED>
+<!ATTLIST ShapeCircle growth CDATA "0.0">
+<!ATTLIST ShapeCircle rotate CDATA "0.3">
