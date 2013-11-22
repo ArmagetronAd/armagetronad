@@ -21,13 +21,14 @@ Changes since 0.3.1
 	- DEATH_DEATHZONE <player>
 	- WINZONE_PLAYER_ENTER <player>
     - ONLINE_TEAM <name> <total score>
+	- ONLINE_AI <player> <team> <total score>
 - Changes to the ONLINE_PLAYER ladderlog event:
     - It is now enabled by default.
     - Added additional information about the access level and total score of
       the player.
     - Players are written in the order of their launch position on the team.
-- Removed POSITIONS ladderlog event. ONLINE_PLAYER now includes all information
-  it provided.
+- Removed POSITIONS ladderlog event. ONLINE_PLAYER and ONLINE_AI now include all
+  the information it provided.
 - Ladderlog events now have a specification that defines their format. See
   settings_dedicated.cfg for more documentation.
 - New commands LADDERLOG_SCRIPT_WRITE, and LADDERLOG_SCRIPT_WRITE_ALL that

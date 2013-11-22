@@ -1048,6 +1048,7 @@ void eTeam::WritePlayers( eLadderLogWriter & writer, const eTeam *team )
 }
 
 static eLadderLogWriter se_onlinePlayerWriter( "ONLINE_PLAYER", true, "player ping:float team access_level:int total_score:int" );
+static eLadderLogWriter se_onlineAIWriter( "ONLINE_AI", true, "player team total_score:int" );
 static eLadderLogWriter se_onlineTeamWriter( "ONLINE_TEAM", true, "team total_score:int" );
 static eLadderLogWriter se_numHumansWriter( "NUM_HUMANS", false, "number_humans:int" );
 
@@ -1055,7 +1056,11 @@ static eLadderLogWriter se_numHumansWriter( "NUM_HUMANS", false, "number_humans:
 // Returns true if the player is a human and is active.
 static bool se_WriteOnlinePlayerData( ePlayerNetID *player, eTeam *team )
 {
-    if ( player->Owner() != 0 && player->IsActive() )
+    if ( !player->IsActive() )
+        return false;
+
+    bool isHuman = player->IsHuman();
+    if ( isHuman )
     {
         se_onlinePlayerWriter << player->GetLogName();
         se_onlinePlayerWriter << player->ping;
@@ -1066,9 +1071,15 @@ static bool se_WriteOnlinePlayerData( ePlayerNetID *player, eTeam *team )
         se_onlinePlayerWriter << player->GetAccessLevel();
         se_onlinePlayerWriter << player->Score();
         se_onlinePlayerWriter.write();
-        return true;
     }
-    return false;
+    else
+    {
+        se_onlineAIWriter << player->GetLogName();
+        se_onlineAIWriter << team->GetLogName();
+        se_onlineAIWriter << player->Score();
+        se_onlineAIWriter.write();
+    }
+    return isHuman;    
 }
 
 void eTeam::WriteOnlinePlayers()
@@ -1079,11 +1090,6 @@ void eTeam::WriteOnlinePlayers()
     for ( int i = teams.Len() - 1; i >= 0; --i )
     {
         eTeam *team = teams( i );
-
-        // AI teams are boring.
-        if ( !team->IsHuman() )
-            continue;
-
         se_onlineTeamWriter << team->GetLogName();
         se_onlineTeamWriter << team->Score();
         se_onlineTeamWriter.write();
