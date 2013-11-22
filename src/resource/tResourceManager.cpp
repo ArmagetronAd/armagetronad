@@ -248,10 +248,12 @@ tString tResourceManager::locateResource(const char *file, const char *uri, bool
     // Validate paths and determine detination savepath
     if (!file || file[0] == '\0') {
         con << tOutput( "$resource_no_filename" );
+        free( to_free );
         return (tString) NULL;
     }
     if (file[0] == '/' || file[0] == '\\') {
         con << tOutput( "$resource_abs_path" );
+        free( to_free );
         return (tString) NULL;
     }
 
@@ -277,6 +279,7 @@ tString tResourceManager::locateResource(const char *file, const char *uri, bool
     savepath = tDirectories::Resource().GetWritePath(file);
     if (savepath == "") {
         con << tOutput( "$resource_no_writepath" );
+        free( to_free );
         return (tString) NULL;
     }
 

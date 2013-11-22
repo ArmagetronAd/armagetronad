@@ -736,6 +736,7 @@ void nLoginProcess::ProcessClientAnswer( Network::PasswordAnswer const & answer,
     if ( !socket )
     {
         ReportAuthorityError( "Internal error, no receiving socket of authentication message." );
+        return;
     }
     serverSocketAddress = socket->GetAddress();
 

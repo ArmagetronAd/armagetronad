@@ -1369,7 +1369,7 @@ gParser::parseShapeCircle(eGrid *grid, xmlNodePtr cur, float &x, float &y, float
 bool
 gParser::parseZoneArthemis_v1(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
 {
-    float x, y, radius, growth;
+    float x = 0, y = 0, radius = 0, growth = 0;
     bool shapeFound = false;
     xmlNodePtr shape = cur->xmlChildrenNode;
 
