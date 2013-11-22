@@ -7756,6 +7756,7 @@ tString ePlayerNetID::Ranking( int MAX, bool cut )
 }
 
 static eLadderLogWriter se_onlinePlayerWriter("ONLINE_PLAYER", false);
+static eLadderLogWriter se_onlineAIWriter( "ONLINE_AI", true);
 static eLadderLogWriter se_onlineTeamWriter( "ONLINE_TEAM", true );
 static eLadderLogWriter se_playerColoredNameWriter("PLAYER_COLORED_NAME", false);
 static eLadderLogWriter se_numHumansWriter("NUM_HUMANS", false);
@@ -7769,34 +7770,48 @@ void ePlayerNetID::RankingLadderLog()
     for(int i = 0; i < max; ++i)
     {
         ePlayerNetID *p = se_PlayerNetIDs(i);
-        if(p->Owner() == 0) continue; // ignore AIs
-
-        se_onlinePlayerWriter << p->GetLogName();
-        se_onlinePlayerWriter << p->Owner();
-
-        // add player color to the message
-        se_onlinePlayerWriter << p->r << p->g << p->b;
-
-        // add the player's access level to the message
-        se_onlinePlayerWriter << p->GetAccessLevel();
-
-        // write out if they logged in or not
-        se_onlinePlayerWriter << (p->HasLoggedIn()?1:0);
-
-        if(p->IsActive())
+        if (p)
         {
-            se_onlinePlayerWriter << p->ping;
-            if(p->currentTeam)
+            bool isHuman = p->IsHuman();
+            if (isHuman)
             {
-                se_onlinePlayerWriter << FilterName(p->currentTeam->Name());
-                ++num_humans;
+                se_onlinePlayerWriter << p->GetLogName();
+                se_onlinePlayerWriter << p->Owner();
+
+                // add player color to the message
+                se_onlinePlayerWriter << p->r << p->g << p->b;
+
+                // add the player's access level to the message
+                se_onlinePlayerWriter << p->GetAccessLevel();
+
+                // write out if they logged in or not
+                se_onlinePlayerWriter << (p->HasLoggedIn()?1:0);
+
+                if(p->IsActive())
+                {
+                    se_onlinePlayerWriter << p->ping;
+                    if(p->currentTeam)
+                    {
+                        se_onlinePlayerWriter << FilterName(p->currentTeam->Name());
+                        ++num_humans;
+                    }
+                }
+                else
+                {
+                    se_onlinePlayerWriter << "";
+                }
+
+                se_onlinePlayerWriter.write();
+            }
+            else
+            {
+                se_onlineAIWriter << p->GetLogName();
+                se_onlineAIWriter << p->CurrentTeam()->Name().Filter();
+                se_onlineAIWriter << p->Score();
+
+                se_onlineAIWriter.write();
             }
         }
-        else
-        {
-            se_onlinePlayerWriter << "";
-        }
-        se_onlinePlayerWriter.write();
     }
 
     for(int j = 0; j < eTeam::teams.Len(); j++)
@@ -7804,6 +7819,10 @@ void ePlayerNetID::RankingLadderLog()
         eTeam *team = eTeam::teams[j];
         if (team)
         {
+            //  AI teams are boring
+            if (!team->IsHuman())
+                continue;
+
             se_onlineTeamWriter << team->Name().Filter();
             se_onlineTeamWriter << team->Name();
             se_onlineTeamWriter.write();

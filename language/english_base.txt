@@ -889,7 +889,7 @@ ladderlog_write_cycle_created_help            Write to ladderlog: CYCLE_CREATED 
 ladderlog_write_cycle_destroyed_help          Write to ladderlog: CYCLE_DESTROYED [auth_name] [posx] [posy] [dirx] [diry] [team_name]
 ladderlog_write_chat_help                     Write to ladderlog: CHAT <chatter> [/me] <chat string>
 ladderlog_write_command_help                  Write to ladderlog: COMMAND <player> <ip> <auth level> <command> <options>
-ladderlog_write_current_map_help              Write to ladderlog: CURRENT_MAP [MAP_FILE]
+ladderlog_write_current_map_help              Write to ladderlog: CURRENT_MAP [factor] [MAP_FILE]
 ladderlog_write_death_basezone_conquered_help Write to ladderlog: DEATH_BASEZONE_CONQUERED <player> [NO_ENEMIES]
 ladderlog_write_blastzone_player_enter_help   Write to ladderlog: DEATH_BLASTZONE_PLAYER_ENTER <player>
 ladderlog_write_death_deathshot_help          Write to ladderlog: DEATH_DEATHSHOT <prey> <predator>
@@ -919,7 +919,8 @@ ladderlog_write_match_winner_help             Write to ladderlog: MATCH_WINNER <
 ladderlog_write_new_match_help                Write to ladderlog: NEW_MATCH <date and time>
 ladderlog_write_new_round_help                Write to ladderlog: NEW_ROUND <date and time>
 ladderlog_write_num_humans_help               Write to ladderlog: NUM_HUMANS <number of humans>
-ladderlog_write_online_player_help            Write to ladderlog: ONLINE_PLAYER <name> <r> <g> <b> <access_level> <did_login?> [<ping> <team>]
+ladderlog_write_online_player_help            Write to ladderlog: ONLINE_PLAYER <name> <id> <r> <g> <b> <access_level> <did_login?> [<ping> <team>]
+ladderlog_write_online_ai_help                Write to ladderlog: ONLINE_AI <name> <team> <score>
 ladderlog_write_online_team_help              Write to ladderlog: ONLINE_TEAM <name> <screen name>
 ladderlog_write_player_ai_entered_help        Write to ladderlog: PLAYER_AI_ENTERED <name> <screen name>
 ladderlog_Write_player_ai_left_help           Write to ladderlog: PLAYER_AI_LEFT <name>
@@ -944,7 +945,7 @@ ladderlog_write_targetzone_timeout_help       Write to ladderlog: TARGETZONE_TIM
 ladderlog_write_wait_for_external_script_help Write to ladderlog: WAIT_FOR_EXTERNAL_SCRIPT (see also: WAIT_FOR_EXTERNAL_SCRIPT and WAIT_FOR_EXTERNAL_SCRIPT_TIMEOUT)
 ladderlog_write_winzone_player_enter_help     Write to ladderlog: WINZONE_PLAYER_ENTER <object id> <zone_name> <cx> <cy> <player> <player x> <player y> <player xdir> <player ydir> <time>
 ladderlog_write_zone_collapsed_help           Write to ladderlog: ZONE_COLLAPSED <zone_id> <object_id> <cx> <cy>
-ladderlog_write_zone_spawned_help             Write to ladderlog: ZONE_SPAWNED <object id> <zone_name> <cx> <cy>
+ladderlog_write_zone_spawned_help             Write to ladderlog: ZONE_SPAWNED <zone_effect> <object id> <zone_name> <cx> <cy>
 ladderlog_write_team_created_help             Write to ladderlog: TEAM_CREATED <team name>
 ladderlog_write_team_destroyed_help           Write to ladderlog: TEAM_DESTROYED <team name>
 ladderlog_write_team_renamed_help             Write to ladderlog: TEAM_RENAMED <old team name> <new team name>
@@ -1100,6 +1101,7 @@ players_help                Prints list of currently active players
 teams_help                  Get a list of all teams with a somewhat graphic representation of their formation. Same as saying /teams
 kill_help                   Kill a specific player (as warning before a kick)
 kill_all_help               Kills everyone on the grid.
+kill_id_help                Kill a specific player using their id.
 silence_help                Silence a specific player so he can't use public chat any more (/msg and /team still work)
 silence_all_help            Silence everyone present in the server.
 unsilence_help              Reverts a SILENCE command
@@ -3682,7 +3684,7 @@ ladderlog_write_objectzone_zone_entered_help        Write to ladderlog: OBJECT_Z
 ladderlog_write_player_ai_left_help                 Write to ladderlog: PLAYER_AI_LEFT [ai_name]
 ladderlog_write_player_colored_name_help            Write to ladderlog: PLAYER_COLORED_NAME [player_useranme] [player_colored_name]
 ladderlog_write_player_gridpos_help                 Write to ladderlog: PLAYER_GRIDPOS [player_username] [pos_x] [pos_y] [dir_x] [dir_y] [cycle_speed] [player_rubber] [cycle_rubber] [team]
-ladderlog_write_custom_invalid_command_help
+ladderlog_write_custom_invalid_command_help         Write to ladderlog: CUSTOM_INVALID_COMMAND <command> <player_log> <ip> <access_level> <params>
 ladderlog_write_player_killed_help                  Write to ladderlog: PLAYER_KILLED [player_username] [ip_address] [pos_x] [pos_y] [dir_x] [dir_y]
 ladderlog_write_round_commencing_help               Write to ladderlog: ROUND_COMMENCING [current_round] [total_rounds]
 ladderlog_write_round_ended_help                    Write to ladderlog: ROUND_ENDED [time]
@@ -3698,7 +3700,7 @@ ladderlog_write_team_colored_name_help              Write to ladderlog: TEAM_COL
 ladderlog_write_voter_help                          Write to ladderlog: VOTER [player_name] [0-against|1-for] [description]
 ladderlog_write_vote_created_help                   Write to ladderlog: VOTE_CREATED [suggestor] [description]
 ladderlog_write_winzone_activated_help              Write to ladderlog: WINZONE_ACTIVATED [id] [name] [xpos] [ypos]
-ladderlog_write_zone_created_help                   Write to ladderlog: ZONE_CREATED [id] [name] [xpos] [ypos] [xdir] [ydir]
+ladderlog_write_zone_created_help                   Write to ladderlog: ZONE_CREATED [effect] [id] [name] [xpos] [ypos] [xdir] [ydir]
 ladderlog_write_zone_gridpos_help                   Write to ladderlog: ZONE_GRIDPOS [effect] [id] [name] [radius] [growth] [posx] [posy] [velx] [vely] [r] [g] [b]
 ladderlog_write_zone_shot_released_help             Write to ladderlog: ZONE_SHOT_RELEASED [0-shot|1-deathshot] [id] [player_name] [zone_pos_x] [zone_pos_y] [zone_dir_x] [zone_dir_y]
 ladder_highscore_output_help              If set to >1, high scores will be announced to all players.
@@ -3911,10 +3913,14 @@ shutdown_countdown     \1
 tab_completion_players_found    Tab Completion found \1 players:\n
 tab_completion_players_display  \1 ( \2 ).\n
 
+color_rubberzone_red_help             Red portion of the color for rubber zone from 0 to 15.
+color_rubberzone_blue_help            Blue portion of the color for rubber zone from 0 to 15.
+color_rubberzone_green_help           Green portion of the color for rubber zone from 0 to 15.
+
 # Cycle Respawn zone commands
 cycle_respawn_zone_help               Set to 1 to spawn a zone to respawn player of their death.
-cycle_respawn_zone_enemies_help       Set to 1 to enable enemies entering respawn zone to respawn player.
-cycle_respawn_zone_enemies_kill_help  Set to 1 to enable respawn zone to kill enemies for entering its zone.
+cycle_respawn_zone_enemy_help       Set to 1 to enable enemies entering respawn zone to respawn player.
+cycle_respawn_zone_enemy_kill_help  Set to 1 to enable respawn zone to kill enemies for entering its zone.
 cycle_respawn_zone_growth_help        The growth rate of respawn zone. Can increase(value>0) or decrease(value<0). 
 cycle_respawn_zone_radius_help        The radius of respawn zone to spawn when player dies.
 cycle_respawn_zone_type_help          The type of respawn occurs. 0-spawn on the location of death; 1-spawn on the starting location. Default: 0
