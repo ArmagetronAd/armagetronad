@@ -4059,6 +4059,10 @@ void gGame::Analysis(REAL time){
             {
                 sn_ConsoleOut(tOutput("$warmup_finished"));
                 sn_CenterMessage(tOutput("$warmup_finished_center"));
+
+                // Ensure that no player can cancel the match start by changing their status
+                // to "not ready".
+                sg_allReady = true;
             }
 
             // Finish the round quickly
