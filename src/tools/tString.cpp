@@ -1716,6 +1716,34 @@ void tColoredString::RemoveTrailingColor( void )
     ::RemoveTrailingColor( *this );
 }
 
+static inline bool st_IsSeparatorCharacter( wchar_t c )
+{
+    // Character categories: http://www.fileformat.info/info/unicode/category/index.htm
+    switch ( c )
+    {
+        case 0x00A0:
+        case 0x1680:
+        case 0x2000:
+        case 0x2001:
+        case 0x2002:
+        case 0x2003:
+        case 0x2004:
+        case 0x2005:
+        case 0x2006:
+        case 0x2007:
+        case 0x2008:
+        case 0x2009:
+        case 0x200A:
+        case 0x2028:
+        case 0x2029:
+        case 0x202F:
+        case 0x205F:
+        case 0x3000:
+            return true;
+    }
+    return false;
+}
+
 // *******************************************************************************************
 // *
 // *	NetFilter
@@ -1747,7 +1775,7 @@ void tString::NetFilter( bool filterWhitespace )
             if ( c != 0x7f )
             {
                 // filter
-                if ( isblank(c) )
+                if ( st_IsSeparatorCharacter( c ) )
                 {
                     // unify whitespace to regular space
                     c = ' ';
