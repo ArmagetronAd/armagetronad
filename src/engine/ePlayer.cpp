@@ -5813,7 +5813,7 @@ void ePlayerNetID::RemoveFromGame()
     // log scores
     LogScoreDifference();
 
-    bool logLeave = false;
+    //bool logLeave = false;
 
     if ( sn_GetNetState() != nCLIENT )
     {
@@ -5835,22 +5835,24 @@ void ePlayerNetID::RemoveFromGame()
                 sn_ConsoleOut( tOutput( "$player_left_spectator", playerName ) );
             }
 
+            /*
             if ( IsHuman() && sn_GetNetState() == nSERVER && NULL != sn_Connections[Owner()].socket )
             {
                 logLeave = true;
             }
-        }
-    }
+            */
 
-    if( IsHuman() )
-    {
-        se_playerLeftWriter << userName_ << nMachine::GetMachine(Owner()).GetIP();
-        se_playerLeftWriter.write();
-    }
-    else
-    {
-        se_playerAILeftWriter << userName_;
-        se_playerAILeftWriter.write();
+            if( IsHuman() )
+            {
+                se_playerLeftWriter << userName_ << nMachine::GetMachine(Owner()).GetIP();
+                se_playerLeftWriter.write();
+            }
+            else
+            {
+                se_playerAILeftWriter << userName_;
+                se_playerAILeftWriter.write();
+            }
+        }
     }
 
     if (gRacePlayer::PlayerExists(this))
@@ -5870,6 +5872,7 @@ void ePlayerNetID::RemoveFromGame()
     SetTeam( NULL );
     UpdateTeam();
     ControlObject( NULL );
+    ClearRespawn();
 
     //  update the online players list
     sg_OutputOnlinePlayers();

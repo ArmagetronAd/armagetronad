@@ -745,8 +745,7 @@ void gZone::Collapse()
 
 bool gZone::Timestep( REAL time )
 {
-    if ((sn_GetNetState() != nCLIENT) &&
-        (destroyed_))
+    if ((sn_GetNetState() != nCLIENT) && destroyed_)
     {
         //Keep the zone around on the server side so clients will sync
 
@@ -754,7 +753,7 @@ bool gZone::Timestep( REAL time )
         //??? it to the clients.  Investigate how to both remove the zone from
         //??? game AND sync the last update on time.  Removing from game gets to
         //??? the client much later than the sync does if not killed and looks bad.
-        return (false);
+        return false;
     }
 
     bool doRequestSync = false;
@@ -1128,6 +1127,9 @@ static void TriggerAvoidZone(gCycle *target, gZone *Zone, REAL currentTime)
 
 void gZone::InteractWith( eGameObject * target, REAL time, int recursion )
 {
+    //  don't interact with target when the zone is destroyed
+    if (destroyed_) return;
+
     gCycle* prey = dynamic_cast< gCycle* >( target );
     if ( prey )
     {
@@ -1160,167 +1162,164 @@ void gZone::InteractWith( eGameObject * target, REAL time, int recursion )
     }
     else
     {
-        if (!destroyed_)
+        // check if the interaction target is a zone
+        //gZone *pZone
+        gDeathZoneHack *pThisDeathZone = dynamic_cast<gDeathZoneHack *>(this);
+        if (pThisDeathZone)
         {
-            // check if the interaction target is a zone
-            //gZone *pZone
-            gDeathZoneHack *pThisDeathZone = dynamic_cast<gDeathZoneHack *>(this);
-            if (pThisDeathZone)
+            gDeathZoneHack *pDeathZone = dynamic_cast<gDeathZoneHack *>(target);
+            if ((pDeathZone) && (pDeathZone != pThisDeathZone) && (!pDeathZone->destroyed_))
             {
-                gDeathZoneHack *pDeathZone = dynamic_cast<gDeathZoneHack *>(target);
-                if ((pDeathZone) && (pDeathZone != pThisDeathZone) && (!pDeathZone->destroyed_))
+                REAL dis = this->Radius() + pDeathZone->Radius();
+                if ( ( pDeathZone->Position() - this->Position() ).NormSquared() < (dis * dis) )
                 {
-                    REAL dis = this->Radius() + pDeathZone->Radius();
-                    if ( ( pDeathZone->Position() - this->Position() ).NormSquared() < (dis * dis) )
+                    if ((pThisDeathZone->pLastShotCollision != pDeathZone) &&
+                        (pDeathZone->pLastShotCollision != pThisDeathZone))
                     {
-                        if ((pThisDeathZone->pLastShotCollision != pDeathZone) &&
-                            (pDeathZone->pLastShotCollision != pThisDeathZone))
-                        {
-                            pThisDeathZone->OnEnter(pDeathZone, time);
-                        }
+                        pThisDeathZone->OnEnter(pDeathZone, time);
                     }
-                    else
+                }
+                else
+                {
+                    if (pThisDeathZone->pLastShotCollision == pDeathZone)
                     {
-                        if (pThisDeathZone->pLastShotCollision == pDeathZone)
-                        {
-                            pThisDeathZone->pLastShotCollision = NULL;
-                        }
+                        pThisDeathZone->pLastShotCollision = NULL;
+                    }
 
-                        if (pDeathZone->pLastShotCollision == pThisDeathZone)
-                        {
-                            pDeathZone->pLastShotCollision = NULL;
-                        }
+                    if (pDeathZone->pLastShotCollision == pThisDeathZone)
+                    {
+                        pDeathZone->pLastShotCollision = NULL;
                     }
                 }
             }
+        }
 
-            gBaseZoneHack *thisBaseZone = dynamic_cast<gBaseZoneHack *>(this);
-            if (thisBaseZone)
+        gBaseZoneHack *thisBaseZone = dynamic_cast<gBaseZoneHack *>(this);
+        if (thisBaseZone)
+        {
+            gZone *zone = dynamic_cast<gZone *>(target);
+
+            if ((zone) &&
+                (zone != this) &&
+                (!zone->destroyed_))
             {
-                gZone *zone = dynamic_cast<gZone *>(target);
+                REAL dis = this->Radius() + zone->Radius();
 
-                if ((zone) &&
-                    (zone != this) &&
-                    (!zone->destroyed_))
+                if ((zone->Position() - this->Position()).NormSquared() < (dis * dis))
                 {
-                    REAL dis = this->Radius() + zone->Radius();
+                    OnEnter(zone, time);
+                }
+            }
+        }
 
-                    if ((zone->Position() - this->Position()).NormSquared() < (dis * dis))
-                    {
-                        OnEnter(zone, time);
+        // interaction between 2 balls
+        gBallZoneHack *thisBallZone = dynamic_cast<gBallZoneHack *>(this);
+        if (thisBallZone && sg_ballsInteract)
+        {
+            gBallZoneHack *ball = dynamic_cast<gBallZoneHack *>(target);
+
+            s_zoneWallInteractionFound = false;
+            s_zoneWallInteractionCoord = GetPosition();
+            s_zoneWallInteractionRadius = GetRadius();
+            grid->ProcessWallsInRange(&S_ZoneWallIntersect,
+                s_zoneWallInteractionCoord,
+                s_zoneWallInteractionRadius+.5,
+                CurrentFace());
+
+            if (s_zoneWallInteractionFound)
+                return;
+
+            if ((ball) &&
+                (ball != this) &&
+                (!ball->destroyed_))
+            {
+                REAL r1 = this->Radius();
+                REAL r2 = ball->Radius();
+                REAL R = r1 + r2;
+                eCoord p1 = this->Position();
+                eCoord p2 = ball->Position();
+                eCoord dp = p2 - p1;
+                REAL c = dp.NormSquared() - R * R;
+
+                if (c < 0)   // the 2 balls just hit each other ...
+                {
+                    // first find the real time and position of the impact ...
+                    eCoord v1 = this->GetVelocity();
+                    eCoord v2 = ball->GetVelocity();
+                    eCoord dv = v2 - v1;
+                    REAL a = dv.NormSquared();
+                    REAL b = 2*(dp.x*dv.x+dp.y*dv.y);
+                    REAL delta = b*b-4*a*c;
+                             // no t. it can't be, an impact just occured ...
+                    if (delta<0) return;
+                    else     // delta is positive, it means we have 2 different solutions
+                    {        // the t we are looking for is negative and as close as possible to 0 = it just happens ;)
+                        delta = sqrt(delta);
+                        REAL t1 = (-b-delta)/(2*a);
+                        REAL t2 = (-b+delta)/(2*a);
+                        REAL t = 0;
+                             // can't be, again ...
+                        if ((t1>0) && (t2>0)) return;
+                        if (t1>0) t = t2;
+                        else if (t2>0) t = t1;
+                        else if (t1>t2) t = t1;
+                        else t = t2;
+
+                        // if a wall impact happens too close, just skip balls interaction for now ...
+                        if (t > lastImpactTime_ - time) return;
+
+                        // now that we have the time, get the positions ...
+                        eCoord p1c = p1+v1*t;
+                        eCoord p2c = p2+v2*t;
+                        //eCoord pi = p1c + (p2c-p1c)*(R/this->Radius());
+                        // now compute the impact : new velocities and new correct positions ...
+                        eCoord base = (p2c-p1c);
+                        base.Normalize();
+                             // the weight of the zones are set according to the area
+                        REAL m1 = r1*r1;
+                        REAL m2 = r2*r2;
+                        REAL M = m1+m2;
+                        eCoord new_v1 = v1 + base*((2*m2/M)*(eCoord::F(dv,base)));
+                        eCoord new_v2 = v2 - base*((2*m1/M)*(eCoord::F(dv,base)));
+                        eCoord new_p1 = p1c + new_v1*(-t+0.01);
+                        eCoord new_p2 = p2c + new_v2*(-t+0.01);
+                        this->SetReferenceTime();
+                        this->SetPosition(new_p1);
+                        this->SetVelocity(new_v1);
+                        this->RequestSync();
+                        ball->SetReferenceTime();
+                        ball->SetPosition(new_p2);
+                        ball->SetVelocity(new_v2);
+                        ball->RequestSync();
                     }
                 }
             }
+        }
 
-            // interaction between 2 balls
-            gBallZoneHack *thisBallZone = dynamic_cast<gBallZoneHack *>(this);
-            if (thisBallZone && sg_ballsInteract)
+        gSoccerZoneHack *gSoccerZone = dynamic_cast<gSoccerZoneHack *>(this);
+        if (gSoccerZone)
+        {
+            gSoccerZoneHack *gNormalZone = dynamic_cast<gSoccerZoneHack *>(target);
+            if ((gNormalZone) && (gNormalZone != gSoccerZone) && (!gNormalZone->destroyed_))
             {
-                gBallZoneHack *ball = dynamic_cast<gBallZoneHack *>(target);
-
-                s_zoneWallInteractionFound = false;
-                s_zoneWallInteractionCoord = GetPosition();
-                s_zoneWallInteractionRadius = GetRadius();
-                grid->ProcessWallsInRange(&S_ZoneWallIntersect,
-                    s_zoneWallInteractionCoord,
-                    s_zoneWallInteractionRadius+.5,
-                    CurrentFace());
-
-                if (s_zoneWallInteractionFound)
-                    return;
-
-                if ((ball) &&
-                    (ball != this) &&
-                    (!ball->destroyed_))
+                REAL dis = this->Radius() + gNormalZone->Radius();
+                if ( ( gNormalZone->Position() - this->Position() ).NormSquared() < (dis * dis) )
                 {
-                    REAL r1 = this->Radius();
-                    REAL r2 = ball->Radius();
-                    REAL R = r1 + r2;
-                    eCoord p1 = this->Position();
-                    eCoord p2 = ball->Position();
-                    eCoord dp = p2 - p1;
-                    REAL c = dp.NormSquared() - R * R;
-
-                    if (c < 0)   // the 2 balls just hit each other ...
-                    {
-                        // first find the real time and position of the impact ...
-                        eCoord v1 = this->GetVelocity();
-                        eCoord v2 = ball->GetVelocity();
-                        eCoord dv = v2 - v1;
-                        REAL a = dv.NormSquared();
-                        REAL b = 2*(dp.x*dv.x+dp.y*dv.y);
-                        REAL delta = b*b-4*a*c;
-                                 // no t. it can't be, an impact just occured ...
-                        if (delta<0) return;
-                        else     // delta is positive, it means we have 2 different solutions
-                        {        // the t we are looking for is negative and as close as possible to 0 = it just happens ;)
-                            delta = sqrt(delta);
-                            REAL t1 = (-b-delta)/(2*a);
-                            REAL t2 = (-b+delta)/(2*a);
-                            REAL t = 0;
-                                 // can't be, again ...
-                            if ((t1>0) && (t2>0)) return;
-                            if (t1>0) t = t2;
-                            else if (t2>0) t = t1;
-                            else if (t1>t2) t = t1;
-                            else t = t2;
-
-                            // if a wall impact happens too close, just skip balls interaction for now ...
-                            if (t > lastImpactTime_ - time) return;
-
-                            // now that we have the time, get the positions ...
-                            eCoord p1c = p1+v1*t;
-                            eCoord p2c = p2+v2*t;
-                            //eCoord pi = p1c + (p2c-p1c)*(R/this->Radius());
-                            // now compute the impact : new velocities and new correct positions ...
-                            eCoord base = (p2c-p1c);
-                            base.Normalize();
-                                 // the weight of the zones are set according to the area
-                            REAL m1 = r1*r1;
-                            REAL m2 = r2*r2;
-                            REAL M = m1+m2;
-                            eCoord new_v1 = v1 + base*((2*m2/M)*(eCoord::F(dv,base)));
-                            eCoord new_v2 = v2 - base*((2*m1/M)*(eCoord::F(dv,base)));
-                            eCoord new_p1 = p1c + new_v1*(-t+0.01);
-                            eCoord new_p2 = p2c + new_v2*(-t+0.01);
-                            this->SetReferenceTime();
-                            this->SetPosition(new_p1);
-                            this->SetVelocity(new_v1);
-                            this->RequestSync();
-                            ball->SetReferenceTime();
-                            ball->SetPosition(new_p2);
-                            ball->SetVelocity(new_v2);
-                            ball->RequestSync();
-                        }
-                    }
+                    gSoccerZone->OnEnter(gNormalZone, time);
                 }
             }
+        }
 
-            gSoccerZoneHack *gSoccerZone = dynamic_cast<gSoccerZoneHack *>(this);
-            if (gSoccerZone)
+        gObjectZoneHack *gObjectZone = dynamic_cast<gObjectZoneHack *>(this);
+        if (gObjectZone)
+        {
+            gZone *gNormalZone = dynamic_cast<gZone *>(target);
+            if ((gNormalZone) && (gNormalZone != gObjectZone) && (!gNormalZone->destroyed_))
             {
-                gSoccerZoneHack *gNormalZone = dynamic_cast<gSoccerZoneHack *>(target);
-                if ((gNormalZone) && (gNormalZone != gSoccerZone) && (!gNormalZone->destroyed_))
+                REAL dis = this->Radius() + gNormalZone->Radius();
+                if ( ( gNormalZone->Position() - this->Position() ).NormSquared() < (dis * dis) )
                 {
-                    REAL dis = this->Radius() + gNormalZone->Radius();
-                    if ( ( gNormalZone->Position() - this->Position() ).NormSquared() < (dis * dis) )
-                    {
-                        gSoccerZone->OnEnter(gNormalZone, time);
-                    }
-                }
-            }
-
-            gObjectZoneHack *gObjectZone = dynamic_cast<gObjectZoneHack *>(this);
-            if (gObjectZone)
-            {
-                gZone *gNormalZone = dynamic_cast<gZone *>(target);
-                if ((gNormalZone) && (gNormalZone != gObjectZone) && (!gNormalZone->destroyed_))
-                {
-                    REAL dis = this->Radius() + gNormalZone->Radius();
-                    if ( ( gNormalZone->Position() - this->Position() ).NormSquared() < (dis * dis) )
-                    {
-                        gObjectZone->OnEnter(gNormalZone, time);
-                    }
+                    gObjectZone->OnEnter(gNormalZone, time);
                 }
             }
         }
