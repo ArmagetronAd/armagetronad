@@ -36,6 +36,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define finite _finite
 #define copysign _copysign
 #define isfinite finite
+#else
+using std::isfinite;
 #endif
 
 #ifdef SOLARIS
