@@ -718,6 +718,8 @@ private:
     nMachineDecorator();           //!< constructor
 };
 
+class nMachineIteratorPimpl;
+
 //! class trying to collect information about a certain client, persistent between connections
 class nMachine
 {
@@ -729,6 +731,19 @@ public:
 
     bool operator == ( nMachine const & other ) const; //!< equality operator
     bool operator != ( nMachine const & other ) const; //!< inequality operator
+
+    class iterator
+    {
+    public:
+        nMachine & operator *() const;
+        iterator();
+        ~iterator();
+        void operator ++();
+        void operator ++(int);
+        bool Valid();
+    private:
+        nMachineIteratorPimpl * pimpl_;
+    };
 
     static nMachine & GetMachine( unsigned short userID ); //!< fetches the machine information of a user, creating it on demand
     static nMachine * PeekMachine( unsigned short userID ); //!< fetches the machine information of a user, returning NULL if none is found
