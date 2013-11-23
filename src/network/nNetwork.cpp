@@ -4751,6 +4751,46 @@ static nMachine & sn_LookupMachine( tString const & address )
     return sn_LookupMachine( addr );
 }
 
+class nMachineIteratorPimpl: public nMachineMap::iterator
+{
+public:
+    nMachineIteratorPimpl()
+    : nMachineMap::iterator(sn_GetMachineMap().begin())
+    {
+    }
+};
+
+nMachine & nMachine::iterator::operator *() const
+{
+    nMachineMap::iterator & i = *pimpl_;
+    nMachinePTR & ptr = (*i).second;
+    return *ptr.machine;
+}
+
+nMachine::iterator::iterator()
+{
+    pimpl_ = new nMachineIteratorPimpl();
+}
+
+nMachine::iterator::~iterator()
+{
+    delete pimpl_;
+}
+
+void nMachine::iterator::operator ++()
+{
+    (*pimpl_)++;
+}
+void nMachine::iterator::operator ++(int)
+{
+    (*pimpl_)++;
+}
+
+bool nMachine::iterator::Valid()
+{
+    return (*pimpl_) != sn_GetMachineMap().end();
+}
+
 // *******************************************************************************
 // *
 // *	GetMachine

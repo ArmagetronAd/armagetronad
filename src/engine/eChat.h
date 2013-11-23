@@ -58,13 +58,18 @@ class eChatPrefixSpamTester;
 class eChatSaidEntry
 {
 public:
-    eChatSaidEntry(const tString &, const nTimeRolling &, eChatMessageType);
+    eChatSaidEntry(const tString & message, const tString & playerName, const nTimeRolling &, eChatMessageType);
     ~eChatSaidEntry();
     
     /**
      * @return The string that was said.
      */
     const tString & Said() const;
+
+    /**
+     * @return The player name at that time.
+     */
+    const tString & PlayerName() const;
     
     /**
      * @return The time the user sent the message.
@@ -94,6 +99,7 @@ private:
     friend class eChatPrefixSpamTester;
     
     tString said_;
+    tString playerName_;
     nTimeRolling time_;
     eChatMessageType type_;
 };

@@ -983,6 +983,7 @@ player_list_search          \1: Search string "\2" matches:\n
 player_list_search_no_results \1: Search string "\2" returned no result.\n
 player_list_search_end      \1: End of search (\2 matches).\n
 player_list_end             \1: Listed \2 players.\n
+player_list_disconnected    Past players and their last chat:\n
 
 admins_help                 Lists the server admins. You should use /admins or /listadmins instead of this.
 
