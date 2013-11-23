@@ -4222,15 +4222,6 @@ struct LastChatData
 
 void se_ListPastChatters(ePlayerNetID * receiver)
 {
-    // collect active player decorators
-    std::vector<eMachineDecoratorSpam *> activePlayers;
-
-    for ( int i2 = se_PlayerNetIDs.Len()-1; i2>=0; --i2 )
-    {
-        ePlayerNetID* p2 = se_PlayerNetIDs(i2);
-        activePlayers.push_back(&se_GetSpam(*p2));
-    }
-
     static const unsigned int MaxReport = 3;
     std::vector<LastChatData> report;
 
@@ -4239,7 +4230,7 @@ void se_ListPastChatters(ePlayerNetID * receiver)
     {
         nMachine & machine = *m;
         eMachineDecoratorSpam * spam = machine.GetDecorator<eMachineDecoratorSpam>();
-        if(spam && std::find(activePlayers.begin(), activePlayers.end(), spam) == activePlayers.end())
+        if(spam && spam->lastSaid.Disconnected())
         {
             eChatLastSaid::SaidList const & said = spam->lastSaid.LastSaid();
             eChatSaidEntry const * recentLastSaid = NULL;
@@ -8932,6 +8923,9 @@ void ePlayerNetID::UnregisterWithMachine( void )
 {
     if ( registeredMachine_ )
     {
+        // mark chat spam as disconnected
+        se_GetSpam(*this).lastSaid.MarkDisconnected();
+
         // store suspension count
         eVoter *voter = eVoter::GetPersistentVoter( Owner() );
         if ( voter )

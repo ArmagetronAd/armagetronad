@@ -220,7 +220,7 @@ bool eChatLastSaid::Prefix::StartsWith( const eChatLastSaid::Prefix & other ) co
 
 
 eChatLastSaid::eChatLastSaid()
-: lastSaid_(), knownPrefixes_()
+  : lastSaid_(), knownPrefixes_(), disconnected_(false)
 {
 }
 
@@ -238,8 +238,20 @@ const eChatLastSaid::PrefixList & eChatLastSaid::KnownPrefixes() const
     return knownPrefixes_;
 }
 
+bool eChatLastSaid::Disconnected() const
+{
+    return disconnected_;
+}
+
+void eChatLastSaid::MarkDisconnected()
+{
+    disconnected_ = true;
+}
+
 void eChatLastSaid::AddSaid( const eChatSaidEntry & saidEntry )
 {
+    disconnected_ = false;
+
     if ( lastSaid_.size() >= static_cast< size_t >( se_lastSaidMaxEntries ) )
         lastSaid_.pop_back();
     
@@ -248,6 +260,7 @@ void eChatLastSaid::AddSaid( const eChatSaidEntry & saidEntry )
 
 nTimeRolling eChatLastSaid::AddPrefix( const tString & s, REAL score, nTimeRolling now )
 {
+    disconnected_ = false;
     nTimeRolling timeoutAt = now + se_CalcTimeout( score );
     Prefix prefix( s, score, timeoutAt );
     knownPrefixes_.push_back( prefix );
