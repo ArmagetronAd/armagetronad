@@ -756,6 +756,12 @@ bool gZone::Timestep( REAL time )
         return false;
     }
 
+    //  if zone id is 0, lets get rid of it!
+    if (GOID() == 0)
+    {
+        Collapse();
+    }
+
     bool doRequestSync = false;
 
     // resize
@@ -8623,7 +8629,7 @@ static void sg_CollapseZoneID(std::istream &s)
         }
     }
 }
-static tConfItemFunc sg_CollapseZoneIDConf("COLLAPSE_ZONE_ID", sg_CollapseZoneID);
+static tConfItemFunc sg_CollapseZoneIDConf("COLLAPSE_ZONE_ID", &sg_CollapseZoneID);
 
 static void sg_DestroyZoneID(std::istream &s)
 {
@@ -8664,7 +8670,7 @@ static void sg_DestroyZoneID(std::istream &s)
         }
     }
 }
-static tConfItemFunc sg_DestroyZoneIDConf("DESTROY_ZONE_ID", sg_DestroyZoneID);
+static tConfItemFunc sg_DestroyZoneIDConf("DESTROY_ZONE_ID", &sg_DestroyZoneID);
 
 static void sg_CollapseAll(std::istream &s)
 {
@@ -8686,7 +8692,7 @@ static void sg_CollapseAll(std::istream &s)
         }
     }
 }
-static tConfItemFunc sg_CollapseAllConf("COLLAPSE_ALL", sg_CollapseAll);
+static tConfItemFunc sg_CollapseAllConf("COLLAPSE_ALL", &sg_CollapseAll);
 
 static void sg_DestroyAll(std::istream &s)
 {
@@ -8704,7 +8710,7 @@ static void sg_DestroyAll(std::istream &s)
         }
     }
 }
-static tConfItemFunc sg_DestroyAllConf("DESTROY_ALL", sg_DestroyAll);
+static tConfItemFunc sg_DestroyAllConf("DESTROY_ALL", &sg_DestroyAll);
 
 static void sg_SetZoneRadius(std::istream &s)
 {

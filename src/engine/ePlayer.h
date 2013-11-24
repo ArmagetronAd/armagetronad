@@ -426,6 +426,7 @@ public:
     static tString Ranking( int MAX=12, bool cut = true );     // returns a ranking list
     static void RankingLadderLog();     // writes a small ranking list to ladderlog
     static void GridPosLadderLog();     // writes a cycle positions to ladderlog
+    static void OnlineStatsLadderLog(); //  writes the online players, teams and the numbers
     static void  ResetScore();  // resets the ranking list
 
     static void DisplayScores(); // display scores on the screen

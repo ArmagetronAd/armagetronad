@@ -1048,6 +1048,10 @@ static float sg_zoneGridPosInterval=1;
 static tSettingItem<float> sggzi("ZONE_GRIDPOS_INTERVAL",
                                  sg_zoneGridPosInterval);
 
+static float sg_onlineStatsInterval=1;
+static tSettingItem<float> ssgosi("ONLINE_STATS_INTERVAL",
+                                  sg_onlineStatsInterval);
+
 
 class ladder: public highscores<REAL>{
 public:
@@ -5314,6 +5318,12 @@ bool gGame::GameLoop(bool input){
         static float lastTime = 1e42;
         if((sg_zoneGridPosInterval >= 0) && (gtime > sg_zoneGridPosInterval) && (gtime >= lastTime + sg_zoneGridPosInterval + 1 || gtime < lastTime)) {
             gZone::GridPosLadderLog();
+            lastTime = gtime;
+        }
+    } {
+        static float lastTime = 1e42;
+        if((sg_onlineStatsInterval >= 0) && (gtime > sg_onlineStatsInterval) && (gtime >= lastTime + sg_onlineStatsInterval + 1 || gtime < lastTime)) {
+            ePlayerNetID::OnlineStatsLadderLog();
             lastTime = gtime;
         }
     } {

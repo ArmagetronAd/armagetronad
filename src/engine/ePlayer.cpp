@@ -7974,6 +7974,49 @@ void ePlayerNetID::GridPosLadderLog()
     }
 }
 
+static eLadderLogWriter se_OnlinePlayersAliveWriter("ONLINE_PLAYERS_ALIVE", true);
+static eLadderLogWriter se_OnlinePlayersDeadWriter("ONLINE_PLAYERS_DEAD", true);
+static eLadderLogWriter se_OnlinePlayersCountWriter("ONLINE_PLAYERS_COUNT", true);
+void ePlayerNetID::OnlineStatsLadderLog()
+{
+    int humans  = 0;
+    int ais     = 0;
+    int h_alive = 0;
+    int a_alive = 0;
+
+    for(int i = 0; i < se_PlayerNetIDs.Len(); i++)
+    {
+        ePlayerNetID *p = se_PlayerNetIDs[i];
+        if (p)
+        {
+            if (p->IsHuman())
+                humans++;
+            else
+                ais++;
+
+            if (p->Object() && p->Object()->Alive())
+            {
+                se_OnlinePlayersAliveWriter << p->GetLogName();
+
+                if (p->IsHuman())
+                    h_alive++;
+                else
+                    a_alive++;
+            }
+            else if (p->Object() && !p->Object()->Alive())
+            {
+                se_OnlinePlayersDeadWriter << p->GetLogName();
+            }
+        }
+    }
+
+    se_OnlinePlayersCountWriter << humans << ais << h_alive << a_alive;
+    se_OnlinePlayersCountWriter.write();
+
+    se_OnlinePlayersAliveWriter.write();
+    se_OnlinePlayersDeadWriter.write();
+}
+
 void ePlayerNetID::ClearAll()
 {
     for(int i=MAX_PLAYERS-1; i>=0; i--)
