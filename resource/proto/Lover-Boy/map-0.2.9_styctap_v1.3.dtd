@@ -58,11 +58,9 @@
 <!ATTLIST Axis angle CDATA #IMPLIED>
 <!ATTLIST Axis length CDATA "1.0">
 
-<!ATTLIST Zone effect ( 
-                        win | death | fortress
-                        | ball | flag | target | sumo 
+<!ATTLIST Zone effect ( win | death | fortress | ball | flag | target | sumo  
                         | teleport | object | soccerball | soccergoal 
-                        | speed | acceleration | rubber | 
+                        | speed | acceleration | rubber | rubberadjust 
                         ) "death" >
 
 <!ATTLIST Zone name CDATA "">

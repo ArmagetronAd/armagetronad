@@ -3,7 +3,7 @@
 *************************************************************************
 
 ArmageTron -- Just another Tron Lightcycle Game in 3D.
-Copyright (C) 2005  by 
+Copyright (C) 2005  by
 and the AA DevTeam (see the file AUTHORS(.txt) in the main source directory)
 
 **************************************************************************
@@ -58,42 +58,48 @@ class eChatPrefixSpamTester;
 class eChatSaidEntry
 {
 public:
-    eChatSaidEntry(const tString &, const nTimeRolling &, eChatMessageType);
+    eChatSaidEntry(const tString & message, const tString & playerName, const nTimeRolling &t, eChatMessageType);
     ~eChatSaidEntry();
-    
+
     /**
      * @return The string that was said.
      */
     const tString & Said() const;
-    
+
+    /**
+     * @return The player name at that time.
+     */
+    const tString & PlayerName() const;
+
     /**
      * @return The time the user sent the message.
      */
     const nTimeRolling & Time() const;
-    
+
     /**
      * @return The type of this message.
      */
     eChatMessageType Type() const;
-    
+
     /**
      * Set the message type
-     * 
+     *
      * @param newType The new message type.
      * @see Type()
      */
     void SetType( eChatMessageType newType );
-    
+
     /**
      * Does this message start with the other message?
      */
     bool StartsWith( const eChatSaidEntry & other ) const;
 
 private:
-    
+
     friend class eChatPrefixSpamTester;
-    
+
     tString said_;
+    tString playerName_;
     nTimeRolling time_;
     eChatMessageType type_;
 };
@@ -103,48 +109,60 @@ private:
  */
 class eChatLastSaid
 {
-public:    
+public:
     struct Prefix
     {
         Prefix( const tString & prefix, REAL score, nTimeRolling timeout );
-        
+
         /**
          * Does this message start with the other message?
          */
         bool StartsWith( const Prefix & other ) const;
-        
+
         tString prefix_;
         REAL score_;
         nTimeRolling timeout_;
     };
-    
+
     typedef std::deque< eChatSaidEntry > SaidList;
     typedef std::vector< Prefix > PrefixList;
-    
-    
+
+
     eChatLastSaid();
     ~eChatLastSaid();
-    
+
     /**
      * @return The last said entry
      */
     const SaidList & LastSaid() const;
-    
+
     /**
      * Chat can be checked to guard against prefix-spam. When a prefix has
      * been consistently used in messages, it will stored in this list.
-     * 
+     *
      * @return The known prefixes
      */
     const PrefixList & KnownPrefixes() const;
-    
+
     /**
      * Add a new said entry
-     * 
+     *
      * @param saidEntry the new entry
      */
     void AddSaid( const eChatSaidEntry & saidEntry );
-    
+
+    /**
+    * Marks chatter as disconnected (gets reverted on AddSaid())
+    */
+    void MarkDisconnected();
+
+    /**
+    * Is this chatter to be considered disconnected?
+    *
+    * @return true if disconnected
+    */
+    bool Disconnected() const;
+
     /**
      * Add a new chat prefix
      *
@@ -154,12 +172,13 @@ public:
      * @return the time this prefix will be ignored
      */
     nTimeRolling AddPrefix( const tString & prefix, REAL score, nTimeRolling now );
-    
+
 private:
     friend class eChatPrefixSpamTester;
-    
+
     SaidList lastSaid_;
     PrefixList knownPrefixes_;
+    bool disconnected_;
 };
 
 /**
@@ -175,7 +194,7 @@ public:
      * @return Is this message spam?
      */
     bool Block();
-    
+
     /**
      * Test the message to see if it spam.
      *
@@ -212,7 +231,7 @@ public:
      */
     eChatPrefixSpamTester( ePlayerNetID * player, const eChatSaidEntry & say );
     virtual ~eChatPrefixSpamTester();
-    
+
     /**
      * Check for prefix spam.
      *
@@ -222,41 +241,41 @@ public:
      */
     bool Check( tString & out, nTimeRolling & timeOut );
     bool Check( tString & out, nTimeRolling & timeOut, eChatPrefixSpamType & typeOut );
-    
+
 private:
-        
+
     class PrefixEntry
     {
     public:
         PrefixEntry() : occurrences( 0 ), score( 0 ) { }
         ~PrefixEntry() { }
-        
+
         int occurrences;
         REAL score;
     };
-    
+
     /**
      * Tests the message against known prefixes.
-     * 
+     *
      * @param out See Check()
      * @param timeOut See Check()
      * @return Did the message start with a known prefix?
      */
     bool HasKnownPrefix( tString & out, nTimeRolling & timeOut ) const;
-    
+
     /**
      * Tests if this message is directed towards another player.
      *
      * Example chat message directed to Player 1:
      *
      *     Player 1: change your name
-     * 
+     *
      * @param prefix The possible player name
      * @param nameLen The length of the name searched for
      * @return Was the prefix a player name?
      */
     bool ChatDirectedTowardsPlayer( const tString & prefix, int & nameLen ) const;
-    
+
     /**
      * We should only check certain message types. For example, commands
      * such as /admin should never be checked for prefix-spam.
@@ -265,19 +284,19 @@ private:
      * @return Should we check this message for prefix-spam?
      */
     bool ShouldCheckMessage( const eChatSaidEntry & said ) const;
-    
+
     /**
      * Calculate the score for a prefix
      */
     void CalcScore( PrefixEntry & data, const int & len, const tString & prefix ) const;
-    
+
     /**
      * After a prefix has been found, remove all chat entries with it. We don't want
      * to penalize users after a prefix is found, and the user starts a message with
      * a word that begins with the found prefix.
      */
     void RemovePrefixEntries( const tString & prefix, const eChatSaidEntry & e ) const;
-    
+
     void RemoveTimedOutPrefixes() const;
     nTimeRolling RemainingTime( nTimeRolling t ) const;
 
