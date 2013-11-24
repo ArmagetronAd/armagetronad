@@ -2224,22 +2224,8 @@ void sg_HostGame(){
 static tString sg_roundCenterMessage("");
 static tConfItemLine sn_roundCM_ci("ROUND_CENTER_MESSAGE",sg_roundCenterMessage);
 
-tArray<tString> sg_RoundConsoleMessages;
-static void sg_RoundConsoleMessage(std::istream &s)
-{
-    tString params;
-    params.ReadLine(s, true);
-    params = params + "\n";
-
-    sg_RoundConsoleMessages.Insert(params);
-}
-static tConfItemFunc sn_roundCcM1_ci("ROUND_CONSOLE_MESSAGE", &sg_RoundConsoleMessage);
-
-static void sg_RoundConsoleMessageClear(std::istream &s)
-{
-    sg_RoundConsoleMessages.Clear();
-}
-static tConfItemFunc sn_roundCcM1_clear("ROUND_CONSOLE_MESSAGE_CLEAR", &sg_RoundConsoleMessageClear);
+static tString sg_roundConsoleMessages("");
+static tConfItemLine sn_roundCcM1_ci("ROUND_CONSOLE_MESSAGE", sg_roundConsoleMessages);
 
 
 
@@ -3896,13 +3882,7 @@ void gGame::StateUpdate(){
                     mess.SetTemplateParameter(2, sg_currentSettings->limitRounds);
                     mess << "$gamestate_newround_console";
 
-                    if (sg_RoundConsoleMessages.Len() > 0)
-                    {
-                        for(int roundConsoleID = 0; roundConsoleID < sg_RoundConsoleMessages.Len(); roundConsoleID++)
-                        {
-                            sn_ConsoleOut(sg_RoundConsoleMessages[roundConsoleID]);
-                        }
-                    }
+                    sn_ConsoleOut(sg_roundConsoleMessages);
 				    sg_nextRoundWriter << rounds+1 << sg_currentSettings->limitRounds << mapfile << sg_roundCenterMessage;
 				    sg_nextRoundWriter.write();
                 }
