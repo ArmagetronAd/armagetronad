@@ -756,12 +756,6 @@ bool gZone::Timestep( REAL time )
         return false;
     }
 
-    //  if zone id is 0, lets get rid of it!
-    if (GOID() == 0)
-    {
-        Collapse();
-    }
-
     bool doRequestSync = false;
 
     // resize
