@@ -7052,7 +7052,7 @@ static void sg_SpawnObjectZone(std::istream &s)
             if (zoneRedStr == "r_rand")
             {
                 tRandomizer &randomizer = tRandomizer::GetInstance();
-                zoneColor.r = randomizer.Get(0, 15) / 15.0;
+                zoneColor.r = randomizer.Get(0, 15.0) / 15.0;
             }
             else
             {
@@ -7062,7 +7062,7 @@ static void sg_SpawnObjectZone(std::istream &s)
             if (zoneGreenStr == "g_rand")
             {
                 tRandomizer &randomizer = tRandomizer::GetInstance();
-                zoneColor.g = randomizer.Get(0, 15) / 15.0;
+                zoneColor.g = randomizer.Get(0, 15.0) / 15.0;
             }
             else
             {
@@ -7072,7 +7072,7 @@ static void sg_SpawnObjectZone(std::istream &s)
             if (zoneBlueStr == "b_rand")
             {
                 tRandomizer &randomizer = tRandomizer::GetInstance();
-                zoneColor.b = randomizer.Get(0, 15) / 15.0;
+                zoneColor.b = randomizer.Get(0, 15.0) / 15.0;
             }
             else
             {
@@ -7736,7 +7736,7 @@ static void sg_SpawnSoccer(std::istream &s)
             if (zoneRedStr == "r_rand")
             {
                 tRandomizer &randomizer = tRandomizer::GetInstance();
-                zoneColor.r = randomizer.Get(0, 15) / 15.0;
+                zoneColor.r = randomizer.Get(0, 15.0) / 15.0;
             }
             else
             {
@@ -7746,7 +7746,7 @@ static void sg_SpawnSoccer(std::istream &s)
             if (zoneGreenStr == "g_rand")
             {
                 tRandomizer &randomizer = tRandomizer::GetInstance();
-                zoneColor.g = randomizer.Get(0, 15) / 15.0;
+                zoneColor.g = randomizer.Get(0, 15.0) / 15.0;
             }
             else
             {
@@ -7756,7 +7756,7 @@ static void sg_SpawnSoccer(std::istream &s)
             if (zoneBlueStr == "b_rand")
             {
                 tRandomizer &randomizer = tRandomizer::GetInstance();
-                zoneColor.b = randomizer.Get(0, 15) / 15.0;
+                zoneColor.b = randomizer.Get(0, 15.0) / 15.0;
             }
             else
             {
@@ -8180,7 +8180,7 @@ static void sg_CreateZone_conf(std::istream &s)
         if (zoneRedStr == "r_rand")
         {
             tRandomizer &randomizer = tRandomizer::GetInstance();
-            zoneColor.r = randomizer.Get(0, 15) / 15.0;
+            zoneColor.r = randomizer.Get(0, 15.0) / 15.0;
         }
 
         else
@@ -8191,7 +8191,7 @@ static void sg_CreateZone_conf(std::istream &s)
         if (zoneGreenStr == "g_rand")
         {
             tRandomizer &randomizer = tRandomizer::GetInstance();
-            zoneColor.g = randomizer.Get(0, 15) / 15.0;
+            zoneColor.g = randomizer.Get(0, 15.0) / 15.0;
         }
         else
         {
@@ -8201,7 +8201,7 @@ static void sg_CreateZone_conf(std::istream &s)
         if (zoneBlueStr == "b_rand")
         {
             tRandomizer &randomizer = tRandomizer::GetInstance();
-            zoneColor.b = randomizer.Get(0, 15) / 15.0;
+            zoneColor.b = randomizer.Get(0, 15.0) / 15.0;
         }
         else
         {
