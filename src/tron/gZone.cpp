@@ -743,6 +743,18 @@ void gZone::Collapse()
 //!
 // *******************************************************************************
 
+static bool sg_zoneWallDeath = false;
+static tSettingItem<bool> sg_zoneWallDeathConf("ZONE_WALL_DEATH", sg_zoneWallDeath);
+
+static REAL sg_zoneWallBoundary = -20.0;
+bool restrictZoneBoundry(const REAL &newValue)
+{
+    //  we cannot have the boundry limit be greater than -1
+    if (newValue > 0) return false;
+    return true;
+}
+static tSettingItem<REAL> sg_zoneWallBoundaryConf("ZONE_WALL_BOUNDARY", sg_zoneWallBoundary, &restrictZoneBoundry);
+
 bool gZone::Timestep( REAL time )
 {
     if ((sn_GetNetState() != nCLIENT) && destroyed_)
@@ -843,14 +855,7 @@ bool gZone::Timestep( REAL time )
             {
                 if (wallBouncesLeft_ == 0)
                 {
-                    if (wallPenetrate_ && !eWallRim::IsBound(Position(), 0))
-                    {
-                        // kill the zone as we hit a wall
-                        //??? make kill code a common function
-                        Collapse();
-                        return false;
-                    }
-                    else if (!wallPenetrate_)
+                    if ((wallPenetrate_ && !eWallRim::IsBound(GetPosition(), 0)) || (!wallPenetrate_))
                     {
                         // kill the zone as we hit a wall
                         //??? make kill code a common function
@@ -860,18 +865,15 @@ bool gZone::Timestep( REAL time )
                 }
                 else
                 {
-                    if (wallPenetrate_)
+                    if (wallPenetrate_ && !eWallRim::IsBound(GetPosition(), 0))
                     {
-                        if (!eWallRim::IsBound(Position(), 0))
-                        {
-                            // bounce off wall
-                            BounceOffPoint(GetPosition(), s_zoneWallInteractionImpactCoord);
-                            lastImpactTime_ = time + s_zoneWallInteractionImpactTime;
+                        // bounce off wall
+                        BounceOffPoint(GetPosition(), s_zoneWallInteractionImpactCoord);
+                        lastImpactTime_ = time + s_zoneWallInteractionImpactTime;
 
-                            if (wallBouncesLeft_ > 0)
-                            {
-                                wallBouncesLeft_--;
-                            }
+                        if (wallBouncesLeft_ > 0)
+                        {
+                            wallBouncesLeft_--;
                         }
                     }
                     else
@@ -924,6 +926,14 @@ bool gZone::Timestep( REAL time )
                         return false;
                     }
                 }
+            }
+        }
+        else
+        {
+            if (sg_zoneWallDeath && !eWallRim::IsBound(GetPosition(), sg_zoneWallBoundary))
+            {
+                Collapse();
+                return false;
             }
         }
 

@@ -3924,8 +3924,8 @@ color_rubberzone_green_help           Green portion of the color for rubber zone
 
 # Cycle Respawn zone commands
 cycle_respawn_zone_help               Set to 1 to spawn a zone to respawn player of their death.
-cycle_respawn_zone_enemy_help       Set to 1 to enable enemies entering respawn zone to respawn player.
-cycle_respawn_zone_enemy_kill_help  Set to 1 to enable respawn zone to kill enemies for entering its zone.
+cycle_respawn_zone_enemy_help         Set to 1 to enable enemies entering respawn zone to respawn player.
+cycle_respawn_zone_enemy_kill_help    Set to 1 to enable respawn zone to kill enemies for entering its zone.
 cycle_respawn_zone_growth_help        The growth rate of respawn zone. Can increase(value>0) or decrease(value<0). 
 cycle_respawn_zone_radius_help        The radius of respawn zone to spawn when player dies.
 cycle_respawn_zone_type_help          The type of respawn occurs. 0-spawn on the location of death; 1-spawn on the starting location. Default: 0
@@ -3933,4 +3933,7 @@ cycle_respawn_zone_respawn_help       Set to 1 to enable respawn zone to reappea
 
 cycle_respawn_zone_team               \1 0xRESETTwas respawned by their teammates.\n
 cycle_respawn_zone_enemy              \1 0xRESETTwas respawned by an enemy player, \2.\n
-cycle_respawn_zone_kill_enemy         \2 0xRESETTwas killed for entering \10xRESETT's respawn zone.\n 
+cycle_respawn_zone_kill_enemy         \2 0xRESETTwas killed for entering \10xRESETT's respawn zone.\n
+
+zone_wall_death_help                  Set to 1 to enable zones to vanish after hitting the wall boundary.
+zone_wall_boundary_help               Values <= 0 is the boundary limit in which zone_wall_death will activate. 

@@ -784,7 +784,6 @@ bool restrictArenaBoundry(const REAL &newValue)
 {
     //  we cannot have the boundry limit be greater than -1
     if (newValue > -1) return false;
-
     return true;
 }
 static tSettingItem<REAL> se_arenaBoundaryConf("ARENA_BOUNDARY", se_arenaBoundary);
