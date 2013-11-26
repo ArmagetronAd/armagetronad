@@ -2151,7 +2151,7 @@ bool tString::Contains(tString tofind)
     // the total legnth of tofind, minus the 1 extra garbage
     int strCount = tofind.Len() - 1;
 
-    for (int i=0; i < Len(); i++)
+    for (int i = 0; i < Len(); i++)
     {
         // strip the string to the length of tofind
         tString isThis = this->SubStr(i, strCount);

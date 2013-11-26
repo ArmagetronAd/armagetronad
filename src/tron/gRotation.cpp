@@ -35,6 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tResourceManager.h"
 
 #include "eGrid.h"
+#include "eTimer.h"
 
 int gRotation::counter_ = 0;
 bool gRotation::queueActive_ = false;
@@ -1047,13 +1048,9 @@ static void sg_queueRefill(std::istream &s)
     tOutput msg;
 
     s >> player;
-
-#ifdef DEBUG
-    con << "Queuer Name:" << player << "\n";
-#endif
+    if (player.Filter() == "") return;
 
     tList<gQueuePlayers> listOfFinds;
-
     if (gQueuePlayers::queuePlayers.Len() > 0)
     {
         for(int i = 0; i < gQueuePlayers::queuePlayers.Len(); i++)
@@ -1069,32 +1066,54 @@ static void sg_queueRefill(std::istream &s)
         }
     }
 
-    switch (listOfFinds.Len())
+    bool refill_complete = false;
+    if (listOfFinds.Len() == 1)
     {
-        case 1:
+        gQueuePlayers *qPlayer = listOfFinds[0];
+        if (qPlayer)
         {
-            gQueuePlayers *qPlayer = listOfFinds[0];
+            qPlayer->SetQueue(qPlayer->QueueDefault());
+
+            msg.SetTemplateParameter(1, qPlayer->Name());
+            msg << "$queue_refill_success";
+            sn_ConsoleOut(msg);
+
+            gQueuePlayers::Save();
+
+            refill_complete = true;
+        }
+    }
+    else if (listOfFinds.Len() > 1)
+    {
+        for(int i = 0; i < listOfFinds.Len(); i++)
+        {
+            gQueuePlayers *qPlayer = listOfFinds[i];
             if (qPlayer)
             {
-                qPlayer->SetQueue(qPlayer->QueueDefault());
+                if (qPlayer->Name().Filter() == player.Filter())
+                {
+                    qPlayer->SetQueue(qPlayer->QueueDefault());
 
-                msg.SetTemplateParameter(1, qPlayer->Name());
-                msg << "$queue_refill_success";
-                sn_ConsoleOut(msg);
+                    msg.SetTemplateParameter(1, qPlayer->Name());
+                    msg << "$queue_refill_success";
+                    sn_ConsoleOut(msg);
 
-                gQueuePlayers::Save();
+                    gQueuePlayers::Save();
+
+                    refill_complete = true;
+
+                    break;
+                }
             }
-            break;
         }
+    }
 
-        default:
-        {
-            msg.SetTemplateParameter(1, player);
-            msg.SetTemplateParameter(2, listOfFinds.Len());
-            msg << "$queue_find_failed";
-            sn_ConsoleOut(msg, 0);
-            break;
-        }
+    if (!refill_complete)
+    {
+        msg.SetTemplateParameter(1, player);
+        msg.SetTemplateParameter(2, listOfFinds.Len());
+        msg << "$queue_find_failed";
+        sn_ConsoleOut(msg, 0);
     }
 }
 static tConfItemFunc sg_queueRefillConf("QUEUE_REFILL", &sg_queueRefill);
@@ -1105,16 +1124,12 @@ static void sg_queueGive(std::istream &s)
     tOutput msg;
 
     s >> player;
+    if (player.Filter() == "") return;
 
     s >> queueStr;
     int new_queues = atoi(queueStr);
 
-#ifdef DEBUG
-    con << "Queuer Name:" << player << "\n";
-#endif
-
-    tList<gQueuePlayers> listOfFinds;
-
+    tArray<gQueuePlayers *> listOfGives;
     if (gQueuePlayers::queuePlayers.Len() > 0)
     {
         for(int i = 0; i < gQueuePlayers::queuePlayers.Len(); i++)
@@ -1124,43 +1139,69 @@ static void sg_queueGive(std::istream &s)
             {
                 if (qPlayer->Name().Filter().Contains(player.Filter()))
                 {
-                    listOfFinds.Insert(qPlayer);
+                    listOfGives.Insert(qPlayer);
                 }
             }
         }
     }
 
-    switch (listOfFinds.Len())
+    bool give_complete = false;
+    if (listOfGives.Len() == 1)
     {
-        case 1:
+        if (new_queues > 0)
         {
-            if (new_queues > 0)
+            gQueuePlayers *qPlayer = listOfGives[0];
+
+            //  send message
+            msg.SetTemplateParameter(1, qPlayer->Name());
+            msg.SetTemplateParameter(2, qPlayer->Queues());
+            msg.SetTemplateParameter(3, new_queues);
+            msg << "$queue_give_success";
+            sn_ConsoleOut(msg);
+
+            //  apply
+            qPlayer->SetQueue(new_queues);
+
+            gQueuePlayers::Save();
+
+            give_complete = true;
+        }
+    }
+    else if (listOfGives.Len() > 1)
+    {
+        for(int i = 0; i < listOfGives.Len(); i++)
+        {
+            gQueuePlayers *qPlayer = listOfGives[i];
+            if (qPlayer)
             {
-                gQueuePlayers *qPlayer = listOfFinds[0];
+                if (qPlayer->Name().Filter() == player.Filter())
+                {
+                    //  send message
+                    msg.SetTemplateParameter(1, qPlayer->Name());
+                    msg.SetTemplateParameter(2, qPlayer->Queues());
+                    msg.SetTemplateParameter(3, new_queues);
+                    msg << "$queue_give_success";
+                    sn_ConsoleOut(msg);
 
-                //  send message
-                msg.SetTemplateParameter(1, qPlayer->Name());
-                msg.SetTemplateParameter(2, qPlayer->Queues());
-                msg.SetTemplateParameter(3, new_queues);
-                msg << "$queue_give_success";
-                sn_ConsoleOut(msg);
+                    //  apply
+                    qPlayer->SetQueue(new_queues);
 
-                //  apply
-                qPlayer->SetQueue(new_queues);
+                    gQueuePlayers::Save();
 
-                gQueuePlayers::Save();
+                    give_complete = true;
+
+                    break;
+                }
             }
-            break;
         }
+    }
 
-        default:
-        {
-            msg.SetTemplateParameter(1, player);
-            msg.SetTemplateParameter(2, listOfFinds.Len());
-            msg << "$queue_find_failed";
-            sn_ConsoleOut(msg, 0);
-            break;
-        }
+    if (!give_complete)
+    {
+        msg.SetTemplateParameter(1, player);
+        msg.SetTemplateParameter(2, listOfGives.Len());
+        msg << "$queue_find_failed";
+        sn_ConsoleOut(msg, 0);
     }
 }
 static tConfItemFunc sg_queueGiveConf("QUEUE_GIVE", &sg_queueGive);
@@ -1206,7 +1247,7 @@ bool gQueuePlayers::PlayerExists(ePlayerNetID *player)
             gQueuePlayers * qPlayer = queuePlayers[i];
             if (qPlayer)
             {
-                if (qPlayer->Name() == player->GetUserName())
+                if (qPlayer->name_ == player->GetUserName())
                         return true;
             }
         }
@@ -1223,7 +1264,7 @@ bool gQueuePlayers::PlayerExists(tString name)
             gQueuePlayers * qPlayer = queuePlayers[i];
             if (qPlayer)
             {
-                if (qPlayer->Name() == name)
+                if (qPlayer->name_ == name)
                         return true;
             }
         }
@@ -1274,16 +1315,6 @@ bool gQueuePlayers::Timestep(REAL time)
 {
     if ((queuePlayers.Len() > 0) && sg_queueLimitEnabled)
     {
-        for(int i = 0; i < queuePlayers.Len(); i++)
-        {
-            gQueuePlayers *qPlayer = queuePlayers[i];
-            if (qPlayer)
-            {
-                if (qPlayer->Player() && (qPlayer->Name() == ""))
-                    qPlayer->name_ = qPlayer->Player()->GetUserName();
-            }
-        }
-
         for(int i = 0; i < queuePlayers.Len(); i++)
         {
             gQueuePlayers *qPlayer = queuePlayers[i];
@@ -1352,7 +1383,7 @@ void gQueuePlayers::Save()
                 gQueuePlayers *qPlayer = queuePlayers[i];
                 if (qPlayer)
                 {
-                    o << qPlayer->Name() << " " << qPlayer->Queues() << " " << qPlayer->QueueDefault() << " " << qPlayer->PlayedTime()<< " " << qPlayer->RefillTime() << "\n";
+                    o << qPlayer->name_ << " " << qPlayer->queues_ << " " << qPlayer->queuesDefault << " " << qPlayer->played_ << " " << qPlayer->refill_ << "\n";
                 }
             }
         }
@@ -1374,16 +1405,14 @@ void gQueuePlayers::Load()
             std::string sayLine;
             std::getline(r, sayLine);
             std::istringstream s(sayLine);
-            tString params;
 
-            params.ReadLine(s);
-            int pos = 0;
+            tString name;
+            s >> name;
 
-            if (params.Filter() != "")
+            if (name.Filter() != "")
             {
                 gQueuePlayers *qPlayer = NULL;
 
-                tString name = params.ExtractNonBlankSubString(pos);
                 if (!PlayerExists(name))
                 {
                     qPlayer = new gQueuePlayers(name);
@@ -1393,10 +1422,12 @@ void gQueuePlayers::Load()
                     qPlayer = GetData(name);
                 }
 
-                qPlayer->queues_ = atoi(params.ExtractNonBlankSubString(pos));
-                qPlayer->queuesDefault = atoi(params.ExtractNonBlankSubString(pos));
-                qPlayer->played_ = atof(params.ExtractNonBlankSubString(pos));
-                qPlayer->refill_ = atof(params.ExtractNonBlankSubString(pos));
+                if (!qPlayer) continue;
+
+                s >> qPlayer->queues_;
+                s >> qPlayer->queuesDefault;
+                s >> qPlayer->played_;
+                s >> qPlayer->refill_;
             }
         }
     }

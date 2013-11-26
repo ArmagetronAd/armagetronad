@@ -126,9 +126,6 @@ void eAccessLevelHolder::SetAccessLevel( tAccessLevel level )
 tCONFIG_ENUM( eCamMode );
 
 tList<ePlayerNetID> se_PlayerNetIDs;
-
-// for later prepar
-tList<gCycle> se_CycleIDs;
 static ePlayer* se_Players = NULL;
 
 // tracking play time (in minutes). These times are tracked on the client and yes, you can "cheat" and increase them to get access to servers you are not ready for.
@@ -4689,201 +4686,118 @@ bool se_tabCompletion = true;
 
 //! The tab completion function for in-chat mode
 //! @returns whether text has completed or not
-static bool ChatTabCompletition(tString &strString, int &curserPos)
+static void ChatTabCompletition(tString &strString, int &curserPos)
 {
+    tArray<tString> msgsExt = strString.Split(" ");
+    tArray<ePlayerNetID *> foundPlayers;
+    tString newString;
+
+    int cusPos = 0;
+    bool isFirst = true;
+    bool isChat  = false;
+    bool isAdmin = false;
+
     if (strString.StartsWith("/"))
     {
-        std::string sayStr(strString);
-        std::istringstream s(sayStr);
+        std::string str(strString);
+        std::istringstream s(str);
+
         tString command;
         s >> command;
 
-        tString search_string;
-        search_string.ReadLine(s);
+        if (command == "/msg")
+            isChat = true;
 
-        if ((command.Filter() != "") && (
-                                         (command == "/msg") ||
-                                         (command == "/shout") ||
-                                         (command == "/team") ||
-                                         (command == "/chat")
-                                         )
-            )
+        if ((command == "/admin") || (command == "/console"))
+            isAdmin = true;
+    }
+
+    for(int i = 0; i < msgsExt.Len(); i++)
+    {
+        tString word = msgsExt[i];
+
+        cusPos += word.Len() - 1;
+
+        //con << curserPos << " | " << cusPos << " | " << word << "\n";
+
+        if (cusPos == curserPos)
         {
-            //  con << "Command found!\n";
-            for(int i = 0; i < se_PlayerNetIDs.Len(); i++)
+            if (isAdmin)
             {
-                ePlayerNetID *p = se_PlayerNetIDs[i];
-                if (p)
+                tString found_command = tConfItemBase::FindConfigItem(word.Filter());
+                if (found_command != "")
+                    word = found_command + " ";
+            }
+            else
+            {
+                ePlayerNetID *p = NULL;
+                //p = ePlayerNetID::FindPlayerByName(word);
+
+                for(int j = 0; j < se_PlayerNetIDs.Len(); j++)
                 {
-                    unsigned int lengthCounter = strlen(command) + 1;
-                    bool tabworked = false;
-                    bool first = true;
-                    tString new_string;
-                    new_string << command << " ";
-                    int newPos = 0;
-                    tString extract_string = search_string.ExtractNonBlankSubString(newPos);
-
-                    while(extract_string.Filter() != "")
+                    p = se_PlayerNetIDs[j];
+                    if (p)
                     {
-                        lengthCounter += strlen(extract_string);
-                        if (lengthCounter == curserPos)
+                        //con << p->GetName() << " | " << word << "\n";
+                        if (p->GetName().Filter().Contains(word.Filter()))
                         {
-                            //  con << "tab worked!\n";
-                            tString filtered_name = p->GetName().Filter();
-                            tString filtered_search = extract_string.Filter();
-                            if (filtered_name.Contains(filtered_search))
-                            {
-                                //  con << "Player found!\n";
-                                if (first && ((command == "/shout") || (command == "/team") || (command == "/chat")))
-                                    new_string << p->GetName() + ": ";
-                                else
-                                    new_string << p->GetName() + " ";
+                            foundPlayers.Insert(p);
+                            continue;
+                        }
 
-                                tabworked = true;
+                        //con << p->GetLogName() << " | " << word << "\n";
+                        if (p->GetLogName().Filter().Contains(word.Filter()))
+                        {
+                            foundPlayers.Insert(p);
+                            continue;
+                        }
+                    }
+                }
+
+                if (foundPlayers.Len() == 1)
+                {
+                    p = foundPlayers[0];
+                    if (p)
+                    {
+                        if (isFirst && !isChat)
+                            word = p->GetName() + ": ";
+                        else
+                            word = p->GetName();
+                    }
+                }
+                else if (foundPlayers.Len() > 1)
+                {
+                    for(int k = 0; k < foundPlayers.Len(); k++)
+                    {
+                        p = foundPlayers[k];
+                        if (p)
+                        {
+                            if (p->GetName().Filter() == word.Filter())
+                            {
+                                if (isFirst)
+                                    word = p->GetName() + ": ";
+                                else
+                                    word = p->GetName();
+                                break;
                             }
                         }
-                        else
-                        {
-                            if  (lengthCounter < strlen(strString))
-                                new_string << extract_string << " ";
-                            else
-                                new_string << extract_string;
-                        }
-
-                        first = false;
-                        lengthCounter += 1;
-                        extract_string = search_string.ExtractNonBlankSubString(newPos);
-                    }
-
-                    if (tabworked)
-                    {
-                        strString = new_string;
-                        curserPos = new_string.Filter().Len();
-
-                        return true;
                     }
                 }
             }
         }
-        else if ((command.Filter() != "") && ((command == "/admin") || (command == "/console")))
-        {
-            int lengthCounter = strlen(command) + 1;
-            bool tabworked = false;
-            tString new_string;
-            new_string << command << " ";
-            int pos = 0;
-            tString command_name = search_string.ExtractNonBlankSubString(pos);
 
-            while(command_name.Filter() != "")
-            {
-                lengthCounter += strlen(command_name);
+        cusPos++;
 
-                if (lengthCounter == curserPos)
-                {
-                    tString found_command = tConfItemBase::FindConfigItem(command_name.Filter());
-                    if (found_command != "")
-                    {
-                        new_string << found_command + " ";
+        if ((i + 1) == msgsExt.Len())
+            newString << word;
+        else
+            newString << word << " ";
 
-                        tabworked = true;
-                    }
-                }
-                else
-                {
-                    if  (lengthCounter < strlen(strString))
-                        new_string << command_name << " ";
-                    else
-                        new_string << command_name;
-                }
-
-                lengthCounter += 1;
-                command_name = search_string.ExtractNonBlankSubString(pos);
-            }
-
-            if (tabworked)
-            {
-                strString = new_string;
-                curserPos = new_string.Filter().Len();
-
-                return true;
-            }
-        }
-        return false;
+        if (isFirst) isFirst = false;
     }
-    else
-    {
-        for(int i = 0; i < se_PlayerNetIDs.Len(); i++)
-        {
-            ePlayerNetID *p = se_PlayerNetIDs[i];
-            if (p)
-            {
-                int pos = 0;
-                int lengthCounter = 0;
-                bool tabworked = false;
-                bool first = true;
-                tString new_string;
-                tString extract_string = strString.ExtractNonBlankSubString(pos);
 
-                while(extract_string.Filter() != "")
-                {
-                    lengthCounter += strlen(extract_string);
-
-                    //  con << "length: " << lengthCounter << "\n";
-                    //  con << "word  : " << extract_string << "\n";
-                    //  con << "curser: "<< curserPos << "\n\n";
-
-                    if (lengthCounter == curserPos)
-                    {
-                        //  con << "tab worked!\n";
-                        tString filtered_name = p->GetName().Filter();
-                        tString filtered_search = extract_string.Filter();
-                        if (filtered_name.Contains(filtered_search))
-                        {
-                            //  con << "Player found!\n";
-                            if (first)
-                                new_string << p->GetName() + ": ";
-                            else
-                                new_string << p->GetName() + " ";
-
-                            tabworked = true;
-                        }
-                    }
-                    else
-                    {
-                        if  (lengthCounter < strlen(strString))
-                            new_string << extract_string << " ";
-                        else
-                            new_string << extract_string;
-                    }
-
-                    first = false;
-                    lengthCounter += 1;
-                    extract_string = strString.ExtractNonBlankSubString(pos);
-                }
-
-                if (tabworked)
-                {
-                    strString = new_string;
-                    curserPos = new_string.Filter().Len();
-
-                    return true;
-                }
-
-                /*tString filtered_name = p->GetName().Filter();
-                tString filtered_search = strString.Filter();
-                if (filtered_name.Contains(filtered_search))
-                {
-                    strString = "";
-
-                    strString = p->GetName() + ": ";
-                    curserPos = p->GetName().Len() * 2;
-
-                    return true;
-                }*/
-            }
-        }
-    }
-    return false;
+    strString = newString;
+    curserPos = newString.Len();
 }
 
 static bool se_displayScoresDuringChat = false;
@@ -4935,10 +4849,8 @@ public:
                 tString chattext;
                 chattext << *content;
 
-                if (ChatTabCompletition(chattext, cursorPos))
-                {
-                    *content = chattext;
-                }
+                ChatTabCompletition(chattext, cursorPos);
+                *content = chattext;
             }
         }
         else if (e.type==SDL_KEYDOWN &&

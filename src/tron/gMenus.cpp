@@ -661,49 +661,35 @@ uMenuItemToggle hud2
 
 static tConfItem<bool> WRAP("WRAP_MENU",uMenu::wrap);
 
-static bool ConTabCompletition(tString &strString, int &curserPos)
+static void ConTabCompletition(tString &strString, int &curserPos)
 {
-    int lengthCounter = 0;
-    bool tabworked = false;
-    tString new_string;
-    int pos = 0;
-    tString command_name = strString.ExtractNonBlankSubString(pos);
+    tArray<tString> msgsExt = strString.Split(" ");
+    tString newString;
+    int cusPos = 0;
 
-    while(command_name.Filter() != "")
+    for(int i = 0; i < msgsExt.Len(); i++)
     {
-        lengthCounter += strlen(command_name);
+        tString word = msgsExt[i];
 
-        if (lengthCounter == curserPos)
+        cusPos += word.Len() - 1;
+
+        if (cusPos == curserPos)
         {
-            tString found_command = tConfItemBase::FindConfigItem(command_name.Filter());
+            tString found_command = tConfItemBase::FindConfigItem(word.Filter());
             if (found_command != "")
-            {
-                new_string << found_command + " ";
-
-                tabworked = true;
-            }
+                word = found_command + " ";
         }
+
+        cusPos++;
+
+        if ((i + 1) == msgsExt.Len())
+            newString << word;
         else
-        {
-            if  (lengthCounter < strlen(strString))
-                new_string << command_name << " ";
-            else
-                new_string << command_name;
-        }
-
-        lengthCounter += 1;
-        command_name = strString.ExtractNonBlankSubString(pos);
+            newString << word << " ";
     }
 
-    if (tabworked)
-    {
-        strString = new_string;
-        curserPos = new_string.Filter().Len();
-
-        return true;
-    }
-
-    return false;
+    strString = newString;
+    curserPos = newString.Len();
 }
 
 class gMemuItemConsole: uMenuItemStringWithHistory{
@@ -738,10 +724,8 @@ public:
                 tString strString;
                 strString << *content;
 
-                if (ConTabCompletition(strString, cursorPos))
-                {
-                    *content = strString;
-                }
+                ConTabCompletition(strString, cursorPos);
+                *content = strString;
             }
         }
         else if (e.type==SDL_KEYDOWN &&
