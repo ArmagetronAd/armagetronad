@@ -4289,18 +4289,15 @@ void handle_chat( nMessage &m )
                             for(int i = 0; i < invalidCommands.Len(); i++)
                             {
                                 tString cmdExt = invalidCommands[i];
-                                if (cmdExt != "")
+                                if ((cmdExt != "") && chat_command.StartsWith(cmdExt))
                                 {
-                                    if (chat_command.StartsWith(cmdExt.ToLower()))
-                                    {
-                                        tString params;
-                                        params.ReadLine(s);
+                                    tString params;
+                                    params.ReadLine(s);
 
-                                        se_customInvalidCommandWriter << chat_command << p->GetUserName() << nMachine::GetMachine(p->Owner()).GetIP() << p->GetAccessLevel() << params;
-                                        se_customInvalidCommandWriter.write();
+                                    se_customInvalidCommandWriter << chat_command << p->GetUserName() << nMachine::GetMachine(p->Owner()).GetIP() << p->GetAccessLevel() << params;
+                                    se_customInvalidCommandWriter.write();
 
-                                        return;
-                                    }
+                                    return;
                                 }
                             }
                         }

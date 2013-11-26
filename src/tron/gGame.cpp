@@ -2224,8 +2224,8 @@ void sg_HostGame(){
 static tString sg_roundCenterMessage("");
 static tConfItemLine sn_roundCM_ci("ROUND_CENTER_MESSAGE",sg_roundCenterMessage);
 
-static tString sg_roundConsoleMessages("");
-static tConfItemLine sn_roundCcM1_ci("ROUND_CONSOLE_MESSAGE", sg_roundConsoleMessages);
+static tString sg_roundConsoleMessage("");
+static tConfItemLine sn_roundCcM1_ci("ROUND_CONSOLE_MESSAGE", sg_roundConsoleMessage);
 
 
 
@@ -3882,7 +3882,9 @@ void gGame::StateUpdate(){
                     mess.SetTemplateParameter(2, sg_currentSettings->limitRounds);
                     mess << "$gamestate_newround_console";
 
-                    sn_ConsoleOut(sg_roundConsoleMessages);
+                    if (strlen(sg_roundConsoleMessage) > 2)
+                        sn_ConsoleOut(sg_roundConsoleMessage + "\n");
+
 				    sg_nextRoundWriter << rounds+1 << sg_currentSettings->limitRounds << mapfile << sg_roundCenterMessage;
 				    sg_nextRoundWriter.write();
                 }
