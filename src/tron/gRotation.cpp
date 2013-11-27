@@ -1050,7 +1050,7 @@ static void sg_queueRefill(std::istream &s)
     s >> player;
     if (player.Filter() == "") return;
 
-    tList<gQueuePlayers> listOfFinds;
+    tArray<gQueuePlayers *> listOfFinds;
     if (gQueuePlayers::queuePlayers.Len() > 0)
     {
         for(int i = 0; i < gQueuePlayers::queuePlayers.Len(); i++)
