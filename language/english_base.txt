@@ -3609,7 +3609,7 @@ queue_refill_waiting       You still have to wait \1 minutes for your queueing l
 
 queue_find_failed          0xff7777\2 queuer were found with the search name: "\1".\n
 queue_refill_success       An administrator restored \1's queues.\n
-queue_give_success         \1 received \2 queues from \3 by an administrator.\n
+queue_give_success         \1 received \3 qs from original \2 qs by an administrator.\n
 
 queuers_list_help          Displays the list of queuers and their queues. 
 queuers_list               List of queuers:\n
@@ -3772,6 +3772,7 @@ tactical_position_midfield_factor_help    UNDOCUMENTED
 tactical_position_start_time_help         UNDOCUMENTED
 tactical_position_zone_factor_help        UNDOCUMENTED
 teleport_player_help                      Teleports player to a new location. Usage: TELEPORT_PLAYER [player] [xpos] [ypos] [rel|abs] [xdir] [ydir]
+move_player_help                          Moves player to a new location and makes then invulnerable. Usage: MOVE_PLAYER [player] [xpos] [ypos] [xdir] [ydir]
 toggle_spectator_tooltip_help             UNDOCUMENTED
 voting_bias_challenge_help                Vote-specific extra bias
 winzone_player_enter_win_help             If set to 1, first player to enter the winzone will win the round.

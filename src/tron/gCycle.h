@@ -368,7 +368,7 @@ public:
     const gPlayerWall* CurrentWall();
     // const gPlayerWall* LastWall();
 
-	void TeleportTo(eCoord dest, eCoord dir, REAL time);
+	void TeleportTo(eCoord dest, eCoord dir, REAL time, bool invulnerable = false);
     void SetWallBuilding(bool build);
 
 #ifndef DEDICATED
