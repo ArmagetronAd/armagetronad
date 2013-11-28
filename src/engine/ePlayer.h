@@ -371,7 +371,6 @@ public:
     void RemoveFromGame();
     void ControlObject(eNetGameObject *c);
     void ClearObject();
-    void ClearRespawn();
 
     void Greet();
 

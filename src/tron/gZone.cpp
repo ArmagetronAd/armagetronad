@@ -7867,7 +7867,7 @@ gRespawnZoneHack::gRespawnZoneHack( eGrid * grid, const eCoord & pos, ePlayerNet
     if (!delayCreation)
         grid->AddGameObjectInteresting(this);
 
-    deadPlayer_ = player;
+    pOwner_ = player;
 
     SetExpansionSpeed(0);
     SetRotationSpeed( .3f );
@@ -7918,15 +7918,12 @@ gRespawnZoneHack::~gRespawnZoneHack( void )
 
 bool gRespawnZoneHack::Timestep( REAL time )
 {
+    //  if player or setting is not active, get rid of zone
+    if (!pOwner_ || !sg_cycleRespawnZone)
+        return true;
+
     // delegate
     bool returnStatus = gZone::Timestep( time );
-
-    //  if player or setting is not active, get rid of zone
-    if (!deadPlayer_ || !sg_cycleRespawnZone)
-    {
-        ClearDeadPlayer();
-        return true;
-    }
 
     return (returnStatus);
 }
@@ -7951,29 +7948,28 @@ static tSettingItem<bool> sg_cycleRespawnZoneEnemiesKillConf("CYCLE_RESPAWN_ZONE
 
 void gRespawnZoneHack::OnEnter( gCycle * target, REAL time )
 {
-    if (deadPlayer_ && sg_cycleRespawnZone)
+    if (pOwner_ && sg_cycleRespawnZone)
     {
         tOutput msg;
 
-        if (sg_cycleRespawnZone && (deadPlayer_->CurrentTeam() == target->Team()))
+        if (sg_cycleRespawnZone && (pOwner_->CurrentTeam() == target->Team()))
         {
-            gCycle *newCycle = new gCycle(grid, GetPosition(), SpawnDirection(), deadPlayer_);
-            deadPlayer_->ControlObject(newCycle);
+            gCycle *newCycle = new gCycle(grid, GetPosition(), SpawnDirection(), pOwner_);
+            pOwner_->ControlObject(newCycle);
 
-            msg.SetTemplateParameter(1, deadPlayer_->GetColoredName());
+            msg.SetTemplateParameter(1, pOwner_->GetColoredName());
             msg.SetTemplateParameter(2, target->Player()->GetColoredName());
             msg << "$cycle_respawn_zone_team";
             sn_ConsoleOut(msg);
 
-            ClearDeadPlayer();
             Collapse();
 
             return;
         }
 
-        if (sg_cycleRespawnZoneEnemiesKill && (deadPlayer_->CurrentTeam() != target->Team()))
+        if (sg_cycleRespawnZoneEnemiesKill && (pOwner_->CurrentTeam() != target->Team()))
         {
-            msg.SetTemplateParameter(1, deadPlayer_->GetColoredName());
+            msg.SetTemplateParameter(1, pOwner_->GetColoredName());
             msg.SetTemplateParameter(2, target->Player()->GetColoredName());
             msg << "$cycle_respawn_zone_kill_enemy";
             sn_ConsoleOut(msg);
@@ -7982,26 +7978,19 @@ void gRespawnZoneHack::OnEnter( gCycle * target, REAL time )
             return;
         }
 
-        if (sg_cycleRespawnZoneEnemies && (deadPlayer_->CurrentTeam() != target->Team()))
+        if (sg_cycleRespawnZoneEnemies && (pOwner_->CurrentTeam() != target->Team()))
         {
-            gCycle *newCycle = new gCycle(grid, GetPosition(), SpawnDirection(), deadPlayer_);
-            deadPlayer_->ControlObject(newCycle);
+            gCycle *newCycle = new gCycle(grid, GetPosition(), SpawnDirection(), pOwner_);
+            pOwner_->ControlObject(newCycle);
 
-            msg.SetTemplateParameter(1, deadPlayer_->GetColoredName());
+            msg.SetTemplateParameter(1, pOwner_->GetColoredName());
             msg.SetTemplateParameter(2, target->Player()->GetColoredName());
             msg << "$cycle_respawn_zone_enemy";
             sn_ConsoleOut(msg);
 
-            ClearDeadPlayer();
             Collapse();
         }
     }
-}
-
-void gRespawnZoneHack::Finish()
-{
-    ClearDeadPlayer();
-    Collapse();
 }
 
 // *******************************************************************************
@@ -8015,9 +8004,9 @@ static tSettingItem<bool> sg_cycleRespawnZoneRespawnConf("CYCLE_RESPAWN_ZONE_RES
 
 void gRespawnZoneHack::OnVanish( void )
 {
-    if (deadPlayer_ && sg_cycleRespawnZone)
+    if (pOwner_ && sg_cycleRespawnZone)
     {
-        gRespawnZoneHack *newResZone = new gRespawnZoneHack(grid, GetPosition(), deadPlayer_, true);
+        gRespawnZoneHack *newResZone = new gRespawnZoneHack(grid, GetPosition(), pOwner_, true);
         newResZone->SetRadius(sg_cycleRespawnZoneRadius * gArena::SizeMultiplier());
         newResZone->SetExpansionSpeed(sg_cycleRespawnZoneGrowth);
         newResZone->SetColor(GetColor());

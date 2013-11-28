@@ -6931,7 +6931,7 @@ void gCycle::Statistics::Write() {
     }
 }
 
-void gCycle::TeleportTo(eCoord dest, eCoord dir, REAL time, bool invulnerable) {
+void gCycle::TeleportTo(eCoord dest, eCoord dir, REAL time) {
 	// Cycle must be alive !
 	if (!Alive()) return;
 	// Drop current wall if exists, without building a new one ...
@@ -6957,9 +6957,6 @@ void gCycle::TeleportTo(eCoord dest, eCoord dir, REAL time, bool invulnerable) {
 		DropWall();
 		if ((CurrentWall()) && (CurrentWall()->NetWall())) CurrentWall()->NetWall()->RequestSync();
 	}
-
-	if (invulnerable)
-        spawnTime_ = se_GameTime();
 
 	RequestSync();
 }
@@ -7003,8 +7000,6 @@ static void sg_RespawnPlayer(std::istream &s)
         // let's respawn now ...
         if (!pPlayer->Object() || !pPlayer->Object()->Alive())
         {
-            pPlayer->ClearRespawn();
-
             gCycle *pCycle = new gCycle(grid, ppos, pdir, pPlayer);
             pPlayer->ControlObject(pCycle);
 
@@ -7122,49 +7117,3 @@ static void sg_setCycleRubber(std::istream &s)
     }
 }
 static tConfItemFunc sg_setCycleRubberConf("SET_CYCLE_RUBBER", sg_setCycleRubber);
-
-static void sg_MovePlayer(std::istream &s)
-{
-	eGrid *grid = eGrid::CurrentGrid();
-    if(!grid) {
-            con << "Must be called while a grid exists!\n";
-            return;
-    }
-
-    tString params;
-    params.ReadLine( s );
-
-    // first parse the line to get the params : <player name> <message flag> <x> <y> <dirx> <diry>
-    int pos = 0; //
-    tString PlayerName = ePlayerNetID::FilterName(params.ExtractNonBlankSubString(pos));
-    ePlayerNetID *pPlayer = ePlayerNetID::FindPlayerByName(PlayerName);
-    if(!pPlayer)
-        return;
-
-    //const tString message_str = params.ExtractNonBlankSubString(pos);
-    //int message = atoi(message_str);
-    const tString x_str = params.ExtractNonBlankSubString(pos);
-    REAL x = atof(x_str);
-    const tString y_str = params.ExtractNonBlankSubString(pos);
-    REAL y = atof(y_str);
-    const tString dirx_str = params.ExtractNonBlankSubString(pos);
-    REAL dirx = atof(dirx_str);
-    const tString diry_str = params.ExtractNonBlankSubString(pos);
-    REAL diry = atof(diry_str);
-    // prepare coord and direction ...
-    eCoord ppos, pdir;
-    if (((x_str == "") && (y_str == "")) || ((dirx ==0) && (diry == 0))) {
-        return;
-    }
-    ppos = eCoord(x,y);
-    pdir = eCoord(dirx,diry);
-
-    //  let's move the player safely
-    gCycle *cycle = dynamic_cast<gCycle *>(pPlayer->Object());
-    if (cycle && cycle->Alive())
-    {
-        cycle->TeleportTo(ppos, pdir, cycle->LastTime(), true);
-    }
-}
-
-static tConfItemFunc sg_MovePlayer_conf("MOVE_PLAYER",&sg_MovePlayer);

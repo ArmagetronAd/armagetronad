@@ -746,17 +746,10 @@ class gRespawnZoneHack: public gZone
         gRespawnZoneHack(nMessage &m);
         ~gRespawnZoneHack();
 
-        ePlayerNetID *DeadPlayer() { return this->deadPlayer_; }
-        void SetDeadPlayer(ePlayerNetID *player) { this->deadPlayer_ = player; }
-        void ClearDeadPlayer() { this->deadPlayer_ = NULL; }
-
         eCoord SpawnDirection() { return this->spawnDirection_; }
         void SetSpawnDirection(eCoord dir) { this->spawnDirection_;  }
 
-        void Finish();
-
     protected:
-        ePlayerNetID *deadPlayer_;
         eCoord spawnDirection_;
 
     private:
