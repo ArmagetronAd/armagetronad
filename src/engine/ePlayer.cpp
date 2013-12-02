@@ -4210,23 +4210,23 @@ void handle_chat( nMessage &m )
                         return;
                     }
                     // the commands below (mp and cq) are the ones to use for add/remove/list items in the queueing list
-                    else if ((command == "/mq") || (command == "/cq") || (command == "/ms") || (command == "/cs"))
+                    else if (((command == "/mq") || (command == "/cq") || (command == "/ms") || (command == "/cs")) && (rotationtype != gROTATION_NEVER))
                     {
                         sg_AddqueueingItems(p, s, command);
                         return;
                     }
                     //  commands below are for displaying items in map rotation (mr) or config rotation (cr)
-                    else if ((command == "/mr") || (command == "/msr") || (command == "/cr") || (command == "/csr"))
+                    else if (((command == "/mr") || (command == "/msr") || (command == "/cr") || (command == "/csr")) && (rotationtype != gROTATION_NEVER))
                     {
                         sg_DisplayRotationList(p, s, command);
                         return;
                     }
-                    else if (command == "/qs")
+                    else if ((command == "/qs") && (rotationtype != gROTATION_NEVER))
                     {
                         QueueShowPlayer(p);
                         return;
                     }
-                    else if (command == "/rotation")
+                    else if ((command == "/rotation") && (rotationtype != gROTATION_NEVER))
                     {
                         RotationShowPlayer(p, s);
                         return;

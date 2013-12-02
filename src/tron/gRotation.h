@@ -49,6 +49,18 @@ public:
 };
 #endif // HAVE_LIBRUBY
 
+enum gRotationType
+{
+    gROTATION_NEVER = 0,
+    gROTATION_ORDERED_ROUND = 1,
+    gROTATION_ORDERED_MATCH = 2,
+    gROTATION_RANDOM_ROUND = 3,
+    gROTATION_RANDOM_MATCH = 4,
+    gROTATION_COUNTER = 5,
+    gROTATION_ROUND = 6
+};
+tCONFIG_ENUM( gRotationType );
+
 class gRotationItem
 {
     public:
@@ -432,5 +444,7 @@ void RotationShowPlayer(ePlayerNetID *player, std::istream &s);
 void sg_DisplayRotationList(ePlayerNetID *p, std::istream &s, tString command);
 void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command);
 void sg_LogQueue(ePlayerNetID *p, tString command, tString params, tString item);
+
+extern gRotationType rotationtype;
 
 #endif

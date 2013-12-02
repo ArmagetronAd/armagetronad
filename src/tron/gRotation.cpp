@@ -115,18 +115,6 @@ bool restrictConfigRotationTypes(const int &newValue)
 }
 static tSettingItem<int> sg_configRotationTypeConf("CONFIG_ROTATION_TYPE", sg_configRotationType, &restrictConfigRotationTypes);
 
-enum gRotationType
-{
-    gROTATION_NEVER = 0,
-    gROTATION_ORDERED_ROUND = 1,
-    gROTATION_ORDERED_MATCH = 2,
-    gROTATION_RANDOM_ROUND = 3,
-    gROTATION_RANDOM_MATCH = 4,
-    gROTATION_COUNTER = 5,
-    gROTATION_ROUND = 6
-};
-tCONFIG_ENUM( gRotationType );
-
 gRotationType rotationtype = gROTATION_NEVER;
 bool restrictRotatiobType(const gRotationType &newValue)
 {
@@ -1640,10 +1628,6 @@ void RotationShowPlayer(ePlayerNetID *player, std::istream &s)
                     sn_ConsoleOut(msg, player->Owner());
                 }
             }
-            else
-            {
-
-            }
         }
         else if (type == "cfg")
         {
@@ -2606,6 +2590,8 @@ void QueRotate()
 
 void gRotation::HandleNewRound(int rounds)
 {
+    if (rotationtype == gROTATION_NEVER) return;
+
     if ((sg_MapQueueing->Size() == 0) && (sg_ConfigQueueing->Size() == 0))
     {
         //  resume normal rotation once queue is no longer active
@@ -2741,6 +2727,8 @@ void gRotation::HandleNewRound(int rounds)
 
 void gRotation::HandleNewMatch()
 {
+    if (rotationtype == gROTATION_NEVER) return;
+
     if ((sg_MapQueueing->Size() == 0) || (sg_ConfigQueueing->Size() == 0))
     {
         //check for map rotation, new match...
