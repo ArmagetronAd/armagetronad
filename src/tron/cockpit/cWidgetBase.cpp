@@ -284,6 +284,11 @@ void WithDataFunctions::ProcessDataTags(tXmlParser::node cur, tValue::Base &data
 }
 
 tValue::Base *WithDataFunctions::ProcessDataSource(tString const &data) {
+    // A color code by itself is convertible to a float, so check for that
+    // first.
+    if ( data.StartsWith( "0x" ) )
+        return new tValue::String( data );
+
     //is it an integer?
     int val_int;
     if(data.Convert(val_int)) return new tValue::Int(val_int);
