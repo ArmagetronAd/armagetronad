@@ -805,7 +805,7 @@ void sg_ResetRotation()
     mapRotation->Reset();
     configRotation->Reset();
     if ( rotationtype != gROTATION_NEVER )
-        con << tOutput( "$reset_rotation_message" ) << '\n';
+        con << tOutput( "$reset_rotation_message" ) << "\n";
 }
 
 void sg_ResetRotation( std::istream & )
@@ -826,6 +826,9 @@ bool restrictRotationMax(const int &newValue)
     return true;
 }
 static tSettingItem<int> sg_rotationMaxConf("ROTATION_MAX", sg_rotationMax);
+
+static bool sg_rotationMaxType = false;
+static tSettingItem<bool> sg_rotationMaxTypeConf("ROTATION_MAX_TYPE", sg_rotationMaxType);
 
 static void sg_MapQueueingFunc(std::istream &s)
 {
@@ -2469,7 +2472,7 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
     }
 }
 
-void Orderedrotate()
+void RotateByOrder()
 {
     if ( mapRotation->Size() > 0 )
     {
@@ -2513,7 +2516,7 @@ void Orderedrotate()
     }
 }
 
-void Randomrotate()
+void RotateByRandom()
 {
     if ( mapRotation->Size() > 0 )
     {
@@ -2610,9 +2613,10 @@ void gRotation::HandleNewRound(int rounds)
         {
             // rotate, if rotate is once per round
             if ( rotationtype == gROTATION_ORDERED_ROUND )
-                Orderedrotate();
+                RotateByOrder();
             else if (rotationtype == gROTATION_RANDOM_ROUND)
-                Randomrotate();
+                RotateByRandom();
+
             // rotate depending on how many times map remains the same per round/match
             else if (rotationtype == gROTATION_COUNTER)
             {
@@ -2621,8 +2625,11 @@ void gRotation::HandleNewRound(int rounds)
 
                 if (gRotation::Counter() >= sg_rotationMax)
                 {
-                    //  rotate orderly
-                    Orderedrotate();
+                    //  rotate
+                    if (!sg_rotationMaxType)
+                        RotateByOrder();
+                    else
+                        RotateByRandom();
 
                     //  reset rotation counter
                     gRotation::ResetCounter();
@@ -2742,11 +2749,14 @@ void gRotation::HandleNewMatch()
 
     if ((sg_MapQueueing->Size() == 0) || (sg_ConfigQueueing->Size() == 0))
     {
+        if (sg_resetRotationOnNewMatch)
+            sg_ResetRotation();
+
         //check for map rotation, new match...
         if ( rotationtype == gROTATION_ORDERED_MATCH )
-            Orderedrotate();
+            RotateByOrder();
         else if ( rotationtype == gROTATION_RANDOM_MATCH)
-            Randomrotate();
+            RotateByRandom();
     }
 
 #ifdef HAVE_LIBRUBY

@@ -330,6 +330,7 @@ reset_rotation_on_start_new_match_help  If enabled, map and config rotation will
 reset_rotation_message                  Map and config rotation have been reset.
 
 rotation_max_help                       The maximum number of rounds the currently loaded map should remain before new map should be selected and loaded.
+rotation_max_type_help                  The type of rotation to occur at the end of ROTATION_MAX: ordered rotation or random rotation.
 
 rotation_search_unknown                 /rotation unknown: \1.
 rotation_search_other		            You probably want:\n
