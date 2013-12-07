@@ -74,6 +74,10 @@ class gRacePlayer
         bool IsIdle() { return idle_; }
         void SetIdle(bool idle) { idle_ = idle; }
 
+        int IdleCounter()     { return idleCounter_; }
+        void AddIdleCounter() { idleCounter_++; }
+        void SetIdleCounter(int val) { idleCounter_ = val; }
+
         REAL IdleLastTime() { return idleLastTime_; }
         REAL IdleNextTime() { return idleNextTime_; }
         void SetIdleLastTime(REAL value) { idleLastTime_ = value; }
@@ -94,6 +98,7 @@ class gRacePlayer
         int chances_;
 
         bool idle_;
+        int  idleCounter_;
         REAL idleLastTime_;
         REAL idleNextTime_;
 
@@ -115,7 +120,7 @@ class gRace
         static void RaceChat(ePlayerNetID *player, tString command, std::istream &s);
 
         //!> returns the race winner
-        static eTeam *Winner();
+        static void DeclareWinner();
 
     private:
         static bool   firstArrived_;

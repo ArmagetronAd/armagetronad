@@ -3400,7 +3400,8 @@ race_records_load_help     Default: 1, if set to 0, race records will not load.
 race_records_save_help     Default: 1, if set to 0, race records will not save.
 race_record_highliter_help The color to highlight that player's records during the personal display session.
 
-race_idle_inform           0x99ffffWhat are you doing, 0xff55ff\10x99ffff? Hold down your brakes (v) to go faster!\n
+race_idle_warning          0xff9999RACE IDLE 0xffff7f(\2/\3): 0xff55ff\10x99ffff, hold down your brakes (v) to go faster!\n
+race_idle_warnings_help    The number of times a player should be warned for being idle.
 race_idle_kill             0xff55ff\1 0xff9999has been killed for not racing!\n
 race_idle_kill_help        If set to 1, kills players that are idle for RACE_IDLE_TIME seconds.
 race_idle_speed_help       Set to >= 0, idle activates if players stay for RACE_IDLE_TIME under the set idle speed.
@@ -3419,6 +3420,7 @@ race_ranks_show_end_help                  If set to 1, ranks will appear at the 
 race_ranks_show_start_help                If set to 1, ranks will appear at the start of the round; If set to 2, personal ranks will be shown to those players only.
 race_smart_timer_help                     If set to 1, timer is decided depending on the top 3 racing ranks.
 race_finish_collapse_help                 If set to 1, all zones will collapse at the end of round.
+race_smart_timer_factor_help              The factor by which countdown is multiplied when smart timer is enabled.
 
 #*************************************
 #*************************************

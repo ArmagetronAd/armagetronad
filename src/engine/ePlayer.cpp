@@ -9641,25 +9641,17 @@ static void Suspend_conf_base(std::istream &s, int rounds )
         return;
     }
 
-    tString msg;
-    int pos = 0;
-    msg.ReadLine(s);
+    tString player;
+    s >> player;
 
-    tString player = msg.ExtractNonBlankSubString(pos);
-    tString roundStr = msg.ExtractNonBlankSubString(pos);
+    s >> rounds;
+
     tString reason;
-
-    if ((roundStr.Filter() != "") && (roundStr.IsNumeric()))
+    std::ws(s);
+    if ( s.good() )
     {
-        rounds = atoi(roundStr);
+        reason.ReadLine(s);
     }
-    else
-    {
-        reason << roundStr << " ";
-    }
-
-    //  get the rest (should be blank if there isn't anymore to read)
-    reason << msg.SubStr(pos + 1);
 
     ePlayerNetID *p = ePlayerNetID::FindPlayerByName(player);
 

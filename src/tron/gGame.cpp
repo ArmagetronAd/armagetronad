@@ -4666,18 +4666,9 @@ void gGame::Analysis(REAL time){
                 gRace::Sync( alive, ai_alive, sg_NumHumans(), time );
                 return;
             }
-            else                                    // time to close the round
+            else    // time to close the round
             {
-                eTeam *team = gRace::Winner();
-
-                if (team)
-                {
-                    tOutput message;
-                    message.SetTemplateParameter(1, team->GetColoredName());
-                    message.SetTemplateParameter(2, sg_scoreRaceComplete);
-                    message << "$player_win_race";
-                    sg_DeclareWinner( team, message );
-                }
+                gRace::DeclareWinner();
             }
         }
         //HACK RACE end

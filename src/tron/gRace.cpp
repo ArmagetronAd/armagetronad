@@ -106,37 +106,33 @@ static tSettingItem<bool> sg_raceFinishKillConf("RACE_FINISH_KILL", sg_raceFinis
 static bool sg_raceLogLogin = true;
 static tSettingItem<bool> sg_raceLogLoginConf("RACE_LOG_LOGIN", sg_raceLogLogin);
 
-/*
-static bool sg_raceRanksLimit = true;
-static tSettingItem<bool> sg_raceRanksLimitConf("RACE_RANKS_LIMIT", sg_raceRanksLimit);
-
-static int sg_raceRanksLimitTime = 1209600;
-bool restrictRaceRanksLimitTime(const int &newValue)
-{
-    if (newValue <= 0) return false;
-
-    return true;
-}
-static tSettingItem<int> sg_raceRanksLimitTimeConf("RACE_RANKS_LIMIT_TIME", sg_raceRanksLimitTime, &restrictRaceRanksLimitTime);
-*/
-
 static bool sg_raceIdleKill = false;
 static tSettingItem<bool> sg_raceIdleKillConf("RACE_IDLE_KILL", sg_raceIdleKill);
 
-static REAL sg_raceIdleTime = 5;
+static REAL sg_raceIdleTime  = 5;
 static REAL sg_raceIdleSpeed = 30;
 bool restrictRaceIdle(const REAL &newValue)
 {
     if (newValue < 0) return false;
-
     return true;
 }
 
 static tSettingItem<REAL> sg_raceIdleTimeConf("RACE_IDLE_TIME", sg_raceIdleTime, &restrictRaceIdle);
 static tSettingItem<REAL> sg_raceIdleSpeedConf("RACE_IDLE_SPEED", sg_raceIdleSpeed, &restrictRaceIdle);
 
+static int sg_raceIdleWarnings = 1;
+bool restrictRaceIdleWarnings(const int &newValue)
+{
+    if (newValue <= 0) return false;
+    return true;
+}
+static tSettingItem<int> sg_raceIdleWarningsConf("RACE_IDLE_WARNINGS", sg_raceIdleWarnings, &restrictRaceIdleWarnings);
+
 static bool sg_raceFinishCollapse = true;
 static tSettingItem<bool> sg_raceFinishCollapseConf("RACE_FINISH_COLLAPSE", sg_raceFinishCollapse);
+
+static REAL sg_raceSmartTimerFactor = 1.2;
+static tSettingItem<REAL> sg_raceSmartTimerFactorConf("RACE_SMART_TIMER_FACTOR", sg_raceSmartTimerFactor, &restrictRaceIdle);
 
 //! STATIC VARIABLES
 bool gRace::firstArrived_ = false;
@@ -1043,7 +1039,8 @@ gRacePlayer::gRacePlayer(ePlayerNetID *player)
 
     this->chances_ = sg_raceChances;
 
-    this->idle_ = false;
+    this->idle_         = false;
+    this->idleCounter_  = 0;
     this->idleLastTime_ = 0;
     this->idleNextTime_ = 0;
 
@@ -1219,8 +1216,6 @@ void gRace::ZoneHit( ePlayerNetID *player, REAL time )
                 win.SetTemplateParameter(1, player->GetName());
                 win.SetTemplateParameter(2, racePlayer->Time());
                 win << "$player_reach_race_first";
-
-                firstArrived_ = true;
             }
             else
             {
@@ -1232,6 +1227,8 @@ void gRace::ZoneHit( ePlayerNetID *player, REAL time )
                 win << "$player_reach_race_time";
             }
         }
+
+        firstArrived_ = true;
 
         if (!sg_racePointsType)
         {
@@ -1257,24 +1254,21 @@ void gRace::Sync( int alive, int ai_alive, int humans, REAL time )
     //  check chances and ensure players respawn
     if (!roundFinished_ && (sg_raceChances > 0))
     {
-        if (grid)
+        for(int a = 0; a < sg_RacePlayers.Len(); a++)
         {
-            for(int a = 0; a < sg_RacePlayers.Len(); a++)
+            gRacePlayer *rPlayer = sg_RacePlayers[a];
+            if (rPlayer && rPlayer->Player() && rPlayer->Player()->Object())
             {
-                gRacePlayer *rPlayer = sg_RacePlayers[a];
-                if (rPlayer && rPlayer->Player())
+                gCycle *rPCycle = dynamic_cast<gCycle *>(rPlayer->Player()->Object());
+                if (rPCycle && rPCycle->Alive() && !rPlayer->Finished())
                 {
-                    gCycle *rPCycle = dynamic_cast<gCycle *>(rPlayer->Player()->Object());
-                    if ((rPCycle) && !rPlayer->Finished() && rPlayer->Player()->CurrentTeam())
+                    if ((rPlayer->Chances() > 0) && (rPlayer->Chances() <= sg_raceChances))
                     {
-                        if ((rPlayer->Chances() > 0) && (rPlayer->Chances() <= sg_raceChances))
-                        {
-                            //gRacePlayer::CreateNewCycle(rPlayer);
-                            gCycle *cycle = new gCycle(grid, rPlayer->SpawnPosition(), rPlayer->SpawnDirection(), rPlayer->Player());
-                            rPlayer->Player()->ControlObject(cycle);
-                            rPlayer->DropChances();    //  decrease chances by this many values
-                            alive += 1;
-                        }
+                        //gRacePlayer::CreateNewCycle(rPlayer);
+                        gCycle *cycle = new gCycle(grid, rPlayer->SpawnPosition(), rPlayer->SpawnDirection(), rPlayer->Player());
+                        rPlayer->Player()->ControlObject(cycle);
+                        rPlayer->DropChances();    //  decrease chances by this many values
+                        alive += 1;
                     }
                 }
             }
@@ -1290,68 +1284,72 @@ void gRace::Sync( int alive, int ai_alive, int humans, REAL time )
         for(int x = 0; x < sg_RacePlayers.Len(); x++)
         {
             gRacePlayer *racePlayer = sg_RacePlayers[x];
-            if (racePlayer && racePlayer->Player() && racePlayer->Player()->IsHuman())
+            if (racePlayer && racePlayer->Player() && racePlayer->Player()->Object())
             {
                 gCycle *rPCycle = dynamic_cast<gCycle *>(racePlayer->Player()->Object());
+
                 //  ensure we have a cycle attached to this player
-                if (rPCycle)
+                if (rPCycle && rPCycle->Alive() && (rPCycle->Speed() <= sg_raceIdleSpeed))
                 {
-                    //  check if player's speed is at idle or not
-                    if ((rPCycle->Speed() <= sg_raceIdleSpeed) && rPCycle->Alive())
+                    //  do per second
+                    if ((time - racePlayer->IdleLastTime()) >= 1)
                     {
-                        //  do second counting by 1
-                        if ((time - racePlayer->IdleLastTime()) >= 1)
+                        //  update the idle last time
+                        racePlayer->SetIdleLastTime(time);
+
+                        //  if the player is indeed travelling at idle speed
+                        if (!racePlayer->IsIdle())
                         {
-                            //  update the idle last time
-                            racePlayer->SetIdleLastTime(time);
+                            //  assign the next time for idle action to activate
+                            if (racePlayer->IdleNextTime() == 0)
+                                racePlayer->SetIdleNextTime(time + sg_raceIdleTime);
 
-                            //  if the player is indeed travelling at idle speed
-                            if (!racePlayer->IsIdle())
+                            if (time >= racePlayer->IdleNextTime())
                             {
-                                //  assign the next time for idle action to activate
-                                if (racePlayer->IdleNextTime() == 0)
-                                {
-                                    racePlayer->SetIdleNextTime(time + sg_raceIdleTime);
-                                }
+                                //  add counter to number of warnings displayed
+                                racePlayer->AddIdleCounter();
 
-                                if (time >= racePlayer->IdleNextTime())
+                                tOutput msg;
+                                msg.SetTemplateParameter(1, racePlayer->Player()->GetName());
+                                msg.SetTemplateParameter(2, racePlayer->IdleCounter());
+                                msg.SetTemplateParameter(3, sg_raceIdleWarnings);
+                                msg << "$race_idle_warning";
+                                sn_ConsoleOut(msg, racePlayer->Player()->Owner());
+
+                                if (racePlayer->IdleCounter() >= sg_raceIdleWarnings)
                                 {
                                     //  so they are idle
                                     racePlayer->SetIdle(true);
 
                                     //  reset the next time to apply later
                                     racePlayer->SetIdleNextTime(time + sg_raceIdleTime);
-
-                                    tOutput msg;
-                                    msg.SetTemplateParameter(1, racePlayer->Player()->GetName());
-                                    msg << "$race_idle_inform";
-                                    sn_ConsoleOut(msg, racePlayer->Player()->Owner());
-                                }
-                            }
-                            else
-                            {
-                                if (time >= racePlayer->IdleNextTime())
-                                {
-                                    //  time up! Let's kill them!
-                                    rPCycle->Kill();
-
-                                    racePlayer->SetIdle(false);
-
-                                    tOutput msg;
-                                    msg.SetTemplateParameter(1, racePlayer->Player()->GetName());
-                                    msg << "$race_idle_kill";
-                                    sn_ConsoleOut(msg);
                                 }
                             }
                         }
+                        else
+                        {
+                            if (time >= racePlayer->IdleNextTime())
+                            {
+                                //  time up! Let's kill them!
+                                rPCycle->Kill();
+
+                                racePlayer->SetIdle(false);
+
+                                tOutput msg;
+                                msg.SetTemplateParameter(1, racePlayer->Player()->GetName());
+                                msg << "$race_idle_kill";
+                                sn_ConsoleOut(msg);
+                            }
+                        }
                     }
-                    else
-                    {
-                        //  good, player doesn't need to get killed for being idle
-                        racePlayer->SetIdle(false);
-                        racePlayer->SetIdleLastTime(0);
-                        racePlayer->SetIdleNextTime(0);
-                    }
+                }
+                else
+                {
+                    //  good, player doesn't need to get killed for being idle
+                    racePlayer->SetIdle(false);
+                    racePlayer->SetIdleCounter(0);
+                    racePlayer->SetIdleLastTime(0);
+                    racePlayer->SetIdleNextTime(0);
                 }
             }
         }
@@ -1360,18 +1358,8 @@ void gRace::Sync( int alive, int ai_alive, int humans, REAL time )
     // start counter when someone arrives or when only 1 is alive but not alone
     if (!roundFinished_ && ( firstArrived_ || ( alive == 1 && ai_alive == 0 && humans > 1 ) ))
     {
-        /*if (!sg_raceFinishKill)
-            if (sg_RaceFinished.Len() == alive)
-                roundFinished_ = true;*/
-
-        // freestyle mode
-        if ( sg_RaceEndDelay < 0 )
-        {
-            if ( sg_RaceEndDelay < -1 )
-                sg_RaceEndDelay = -1;
-        }
         // countdown mode
-        else
+        if ( sg_RaceEndDelay > 0 )
         {
             if (countDown_ < 0)
             {
@@ -1387,7 +1375,7 @@ void gRace::Sync( int alive, int ai_alive, int humans, REAL time )
                         if (rScores)
                         {
                             int timer = ceil(rScores->Time());
-                            countDown_ = ceil(timer * 1.2) + 1;
+                            countDown_ = ceil(timer * sg_raceSmartTimerFactor) + 1;
                         }
                     }
                     else if (sg_RaceScores.Len() == 2)
@@ -1397,7 +1385,7 @@ void gRace::Sync( int alive, int ai_alive, int humans, REAL time )
                         if (one && two)
                         {
                             int timer = ceil((one->Time() + two->Time()) / 2);
-                            countDown_ = ceil(timer * 1.2) + 1;
+                            countDown_ = ceil(timer * sg_raceSmartTimerFactor) + 1;
                         }
                     }
                     else if (sg_RaceScores.Len() >= 3)
@@ -1408,7 +1396,7 @@ void gRace::Sync( int alive, int ai_alive, int humans, REAL time )
                         if (one && two && tre)
                         {
                             int timer = ceil((one->Time() + two->Time() + tre->Time()) / 3);
-                            countDown_ = ceil(timer * 1.2) + 1;
+                            countDown_ = ceil(timer * sg_raceSmartTimerFactor) + 1;
                         }
                     }
                 }
@@ -1430,7 +1418,6 @@ void gRace::Sync( int alive, int ai_alive, int humans, REAL time )
 
                     //if (!firstArrived_)
                     //{
-                        //  kill all players that haven't finished yet
                         for(int i = 0; i < se_PlayerNetIDs.Len(); i++)
                         {
                             ePlayerNetID *p = se_PlayerNetIDs[i];
@@ -1461,10 +1448,11 @@ void gRace::Sync( int alive, int ai_alive, int humans, REAL time )
             if (Zone)
             {
                 //  0.5 fot smooth collapse
-                Zone->Vanish(0.5f);
+                Zone->Vanish(0.5);
             }
         }
     }
+
     //  checks whether server should log the unfinished players
     if (roundFinished_ && sg_raceLogUnfinished)
     {
@@ -1528,6 +1516,7 @@ void gRace::Reset()
             rPlayer->SetFinished(false);
 
             rPlayer->SetIdle(false);
+            rPlayer->SetIdleCounter(0);
             rPlayer->SetIdleLastTime(0);
             rPlayer->SetIdleNextTime(0);
         }
@@ -1564,19 +1553,25 @@ static tString sg_time_ToString ( REAL time_ )
     return ret;
 }
 
-eTeam *gRace::Winner()
+void gRace::DeclareWinner()
 {
     //  no need to declare once its done
-    if (winnerDeclared_) return NULL;
+    if (winnerDeclared_) return;
 
     //  declaring the first to finish
-    if (sg_RaceFinished.Len() > 0)
+    if ((sg_RaceFinished.Len() > 0) && firstArrived_)
     {
         gRacePlayer *racePlayer = sg_RaceFinished[0];
-        if (racePlayer)
+        eTeam *team = racePlayer->Player()->CurrentTeam();
+        if (racePlayer && team)
         {
             winnerDeclared_ = true;
-            return racePlayer->Player()->CurrentTeam();
+
+            tOutput message;
+            message.SetTemplateParameter(1, team->GetColoredName());
+            message.SetTemplateParameter(2, sg_scoreRaceComplete);
+            message << "$player_win_race";
+            sg_DeclareWinner( team, message );
         }
     }
 }
