@@ -1016,7 +1016,7 @@ static tSettingItem<bool> sg_queueLimitEnabledConf("QUEUE_LIMIT_ENABLED", sg_que
 int sg_queueIncrement = 0;
 static tSettingItem<int> sg_queueIncrementConf("QUEUE_INCREMENT", sg_queueIncrement);
 
-REAL sg_queueRefillTime = 1;
+REAL sg_queueRefillTime = 2400;
 bool restrictRefillTime(const REAL &newValue)
 {
     if (newValue <= 0) return false;
@@ -1061,6 +1061,8 @@ static void sg_queueRefill(std::istream &s)
         if (qPlayer)
         {
             qPlayer->SetQueue(qPlayer->QueueDefault());
+            qPlayer->SetPlayedTime(0);
+            qPlayer->SetRefillTime(0);
 
             msg.SetTemplateParameter(1, qPlayer->Name());
             msg << "$queue_refill_success";
@@ -1081,6 +1083,8 @@ static void sg_queueRefill(std::istream &s)
                 if (qPlayer->Name().Filter() == player.Filter())
                 {
                     qPlayer->SetQueue(qPlayer->QueueDefault());
+                    qPlayer->SetPlayedTime(0);
+                    qPlayer->SetRefillTime(0);
 
                     msg.SetTemplateParameter(1, qPlayer->Name());
                     msg << "$queue_refill_success";
@@ -1149,6 +1153,8 @@ static void sg_queueGive(std::istream &s)
 
             //  apply
             qPlayer->SetQueue(new_queues);
+            qPlayer->SetPlayedTime(0);
+            qPlayer->SetRefillTime(0);
 
             gQueuePlayers::Save();
 
@@ -1173,6 +1179,8 @@ static void sg_queueGive(std::istream &s)
 
                     //  apply
                     qPlayer->SetQueue(new_queues);
+                    qPlayer->SetPlayedTime(0);
+                    qPlayer->SetRefillTime(0);
 
                     gQueuePlayers::Save();
 
@@ -1200,7 +1208,7 @@ gQueuePlayers::gQueuePlayers(ePlayerNetID *player)
     this->owner_ = NULL;
 
     this->played_ = 0;
-    this->refill_ = -1;
+    this->refill_ = 0;
 
     this->queuesDefault = sg_queueLimit;
     this->queues_ = this->queuesDefault;
@@ -1311,7 +1319,7 @@ bool gQueuePlayers::Timestep(REAL time)
                 // account for play time
                 REAL tick = time - qPlayer->lastTime_;
 
-                if ((qPlayer->Player() && sg_queueRefillActive) || !sg_queueRefillActive)
+                if (((qPlayer->Player() && sg_queueRefillActive) || !sg_queueRefillActive) && (qPlayer->refill_ > 0))
                 {
                     //qPlayer->played_ += tick;
                     qPlayer->played_ += 0.35f;
@@ -1321,7 +1329,7 @@ bool gQueuePlayers::Timestep(REAL time)
                         //  if queue increment is enabled
                         if (sg_queueIncrement > 0)
                         {
-                            //  if queue max is below 0
+                            //  if queue max is below 0 = no increase limit
                             if (sg_queueMax <= 0)
                             {
                                 qPlayer->queuesDefault += sg_queueIncrement;
@@ -1338,12 +1346,15 @@ bool gQueuePlayers::Timestep(REAL time)
 
                             //  create the new time for the next time to refill
                             qPlayer->refill_ = qPlayer->played_ + sg_queueRefillTime;
+                            qPlayer->played_ = 0;
                         }
 
                         //  refill queues with their original amount
                         if (qPlayer->queues_ == 0)
                         {
                             qPlayer->queues_ = qPlayer->queuesDefault;
+                            qPlayer->refill_ = 0;
+                            qPlayer->played_ = 0;
 
                             tOutput msg;
                             msg.SetTemplateParameter(1, qPlayer->Name());

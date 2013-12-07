@@ -1346,7 +1346,6 @@ static void sg_AddDelayedCmd(std::istream &s)
 }
 
 static tConfItemFunc sg_AddDelayedCmd_conf("DELAY_COMMAND",&sg_AddDelayedCmd);
-
 static tAccessLevelSetter sg_AddDelayedCmdConfLevel( sg_AddDelayedCmd_conf, tAccessLevel_Owner );
 
 void delayedCommands::Run(REAL currentTime) {
@@ -1362,7 +1361,7 @@ void delayedCommands::Run(REAL currentTime) {
                 int pos = 0;
                 const tString interval_str = params.ExtractNonBlankSubString(pos);
                 int interval = atoi(interval_str);
-                tCurrentAccessLevel elevator( sg_AddDelayedCmd_conf.GetRequiredLevel(), true );
+                tCurrentAccessLevel elevator( tAccessLevel_Owner, true );
                 std::stringstream command;
                 const tString command_str = params.SubStr(interval_str.Len());
                 command << command_str;
@@ -1399,6 +1398,14 @@ void sg_DeclareWinner( eTeam* team, char const * message )
     {
         wishWinner = team->TeamID() + 1;
         wishWinnerMessage = message;
+    }
+}
+
+void sg_DeclareWinner( eTeam* team )
+{
+    if ( team && !winner && !wishWinner )
+    {
+        wishWinner = team->TeamID() + 1;
     }
 }
 

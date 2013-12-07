@@ -127,6 +127,7 @@ bool GridIsReady(int c);
 void Activate(bool act);
 
 void sg_DeclareWinner( eTeam* team, char const * message );
+void sg_DeclareWinner( eTeam* team );
 
 // Race timer hack begin
 class ePlayerNetID;

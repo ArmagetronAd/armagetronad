@@ -930,8 +930,6 @@ ladderlog_Write_player_ai_left_help           Write to ladderlog: PLAYER_AI_LEFT
 ladderlog_write_player_entered_grid_help      Write to ladderlog: PLAYER_ENTERED_GRID <name> <IP> <screen name>
 ladderlog_write_player_entered_spectator_help Write to ladderlog: PLAYER_ENTERED_SPECTATOR <name> <IP> <screen name>
 ladderlog_write_player_left_help              Write to ladderlog: PLAYER_LEFT <name> <IP>
-ladderlog_write_player_login_help             Write to ladderlog: PLAYER_LOGIN <name> <authenticated name>
-ladderlog_write_player_logout_help            Write to ladderlog: PLAYER_LOGOUT <authenticated name> <name>
 ladderlog_write_player_renamed_help           Write to ladderlog: PLAYER_RENAMED <old name> <new name> <ip> <did_login?> <screen name>
 ladderlog_write_positions_help                Write to ladderlog: POSITIONS <team> <player1 player2 ...>
 ladderlog_write_round_score_help              Write to ladderlog: ROUND_SCORE <score difference> <player> [<team>]
@@ -3362,14 +3360,13 @@ player_reach_race_time                \2| \1 0xfffffffinished in \3 ( \4 s behin
 player_personal_best_reach_time       New personal record! Your new time record is \1 seconds.\n
 
 race_player_hold_best_time            Congratulations to \1 0xRESETT holding the best time of \2 seconds for \3.\n
-race_player_hold_same_rank            \1 finished \3 seconds slower but remained at rank \4.\n
-race_player_hold_faster_time          \1 finished \3 seconds faster but remained at rank \4.\n
-race_player_hold_faster_rank          \1 finished \3 seconds faster and rose to rank \4.\n
-race_player_hold_slower_rank          \1 finished \3 seconds slower and dropped to rank \4.\n
-race_player_hold_new_time             \1 finished in \2 seconds and was placed in rank \3.\n
+race_player_hold_same_rank            \1 finished \3 seconds faster but remained at rank \4.\n
+race_player_hold_rank_up              \1 finished \3 seconds faster and rose to rank \4.\n
+race_player_hold_new_time             \1 finished in \2 seconds and is placed in rank \3.\n
+race_player_hold_slow_time            \1 finished \3 seconds slower and remained at rank \4.\n
 
-player_race_stats_self      Your rank is \1 with a time of \2.\n
-player_race_stats_other     Player: \1 0xRESETTis at rank 0xffff77\2 0xRESETTwith a time of 0xffff77\30xRESETT.\n
+player_race_stats_self                Your rank is \1 with a time of \2.\n
+player_race_stats_other               Player: \1 0xRESETTis at rank 0xffff77\2 0xRESETTwith a time of 0xffff77\30xRESETT.\n
 
 player_race_record_search_found       \1 is ranked \2 with a best time of \3 seconds.\n
 player_race_record_search_not_found   0xff0000The search term \1 couldn't be found in the racing records.\n
@@ -3387,7 +3384,7 @@ race_ranks_personal_message Your current position for 0xffdd00
 race_ranks_loading  Loading Racing Ranks for 0xffdd00\1.\n
 race_ranks_saving Saving Racing Ranks for 0xffdd00\1.\n
 
-race_rank_title_message       Top \1 players for 0xffdd00
+race_rank_title_message       Top \1 players for 0xffdd00\2\n
 race_rank_title_name          Ranks
 race_rank_title_player_name   Players
 race_rank_title_time_name     Times

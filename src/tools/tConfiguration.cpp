@@ -422,11 +422,6 @@ tString tAbortLoading::DoGetDescription() const
     return tString(tOutput( "$abort_loading_description", command_ ));
 }
 
-tAccessLevel st_DefaultOwnerLevel = tAccessLevel_Owner;
-tAccessLevel st_DefaultExecuteLevel = tAccessLevel_Admin;
-static tSettingItem<tAccessLevel> st_DefaultOwnerLevelConf("DEFAULT_OWNER_LEVEL", st_DefaultOwnerLevel);
-static tSettingItem<tAccessLevel> st_DefaultExecuteLevelConf("DEFAULT_EXECUTION_LEVEL", st_DefaultExecuteLevel);
-
 tConfItemBase::tConfItemBase(const char *t)
         :id(-1),title(t),
 changed(false){
@@ -444,8 +439,8 @@ changed(false){
 
     confmap[title] = this;
 
-    requiredLevel = st_DefaultExecuteLevel;
-    setLevel      = st_DefaultOwnerLevel;
+    requiredLevel = tAccessLevel_Admin;
+    setLevel      = tAccessLevel_Owner;
 }
 
 tConfItemBase::tConfItemBase(const char *t, const tOutput& h)
@@ -458,8 +453,8 @@ changed(false){
 
     confmap[title] = this;
 
-    requiredLevel = st_DefaultExecuteLevel;
-    setLevel      = st_DefaultOwnerLevel;
+    requiredLevel = tAccessLevel_Admin;
+    setLevel      = tAccessLevel_Owner;
 }
 
 tConfItemBase::~tConfItemBase()
