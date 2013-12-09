@@ -204,7 +204,7 @@ libui_a_SOURCES=ui/uInput.cpp ui/uInput.h ui/uInputQueue.cpp ui/uInputQueue.h ui
 if OS_X_TOOLKIT
 if !BUILDDEDICATED
 libtron_a_SOURCES += tron/gOSXSDLMain.mm tron/gOSXSDLMain.h tron/gOSXURLHandler.mm tron/gOSXURLHandler.h
-libui_a_SOURCES += ui/uOSXPaste.cpp ui/uOSXPaste.cpp
+libui_a_SOURCES += ui/uOSXPaste.cpp ui/uOSXPaste.h
 endif
 endif
 
