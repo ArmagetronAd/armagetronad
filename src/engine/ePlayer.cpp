@@ -5692,6 +5692,9 @@ void ePlayerNetID::MyInitAfterCreation()
 {
     this->CreateVoter();
 
+    // reset spam timer
+    GetChatSpam().ResetTime();
+
     this->silenced_ = se_silenceDefault;
     this->renameAllowed_ = true;
 
@@ -6610,6 +6613,9 @@ void ePlayerNetID::Authenticate( tString const & authName, tAccessLevel accessLe
 
     if ( !IsAuthenticated() )
     {
+        // reset spam timer
+        GetChatSpam().ResetTime();
+
         // elevate access level for registered users
         se_CheckAccessLevel( accessLevel_, newAuthenticatedName );
 

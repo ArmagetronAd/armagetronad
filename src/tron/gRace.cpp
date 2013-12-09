@@ -1167,8 +1167,7 @@ void gRace::ZoneHit( ePlayerNetID *player, REAL time )
         player_username = player->GetUserName();
 
     gRacePlayer *racePlayer = gRacePlayer::GetPlayer(player_username);
-
-    if (player && racePlayer && !racePlayer->Finished() && !roundFinished_ && player->Object() && player->Object()->Alive())
+    if (racePlayer && !racePlayer->Finished() && !roundFinished_ && player->Object() && player->Object()->Alive())
     {
         REAL reachtime_ = time;
 
@@ -1268,16 +1267,13 @@ void gRace::Sync( int alive, int ai_alive, int humans, REAL time )
             if (rPlayer && rPlayer->Player() && rPlayer->Player()->Object())
             {
                 gCycle *rPCycle = dynamic_cast<gCycle *>(rPlayer->Player()->Object());
-                if (rPCycle && rPCycle->Alive() && !rPlayer->Finished())
+                if (rPCycle && rPCycle->Alive() && !rPlayer->Finished() && (rPlayer->Chances() > 0) && (rPlayer->Chances() <= sg_raceChances))
                 {
-                    if ((rPlayer->Chances() > 0) && (rPlayer->Chances() <= sg_raceChances))
-                    {
-                        //gRacePlayer::CreateNewCycle(rPlayer);
-                        gCycle *cycle = new gCycle(grid, rPlayer->SpawnPosition(), rPlayer->SpawnDirection(), rPlayer->Player());
-                        rPlayer->Player()->ControlObject(cycle);
-                        rPlayer->DropChances();    //  decrease chances by this many values
-                        alive += 1;
-                    }
+                    //gRacePlayer::CreateNewCycle(rPlayer);
+                    gCycle *cycle = new gCycle(grid, rPlayer->SpawnPosition(), rPlayer->SpawnDirection(), rPlayer->Player());
+                    rPlayer->Player()->ControlObject(cycle);
+                    rPlayer->DropChances();    //  decrease chances by this many values
+                    alive += 1;
                 }
             }
         }
@@ -1468,19 +1464,16 @@ void gRace::Sync( int alive, int ai_alive, int humans, REAL time )
         for (int x = 0; x < sg_RacePlayers.Len(); x++)
         {
             gRacePlayer *racePlayer = sg_RacePlayers[x];
-            if (racePlayer)
+            if (racePlayer && !racePlayer->Finished())
             {
-                if (!racePlayer->Finished())
-                {
-                    //  set the default unfinished value
-                    racePlayer->SetTime(-1);
+                //  set the default unfinished value
+                racePlayer->SetTime(-1);
 
-                    //  log the players by time at -1
-                    gRaceScores::Add(racePlayer, false);
+                //  log the players by time at -1
+                gRaceScores::Add(racePlayer, false);
 
-                    //  now set that they have completed
-                    racePlayer->SetFinished(true);
-                }
+                //  now set that they have completed
+                racePlayer->SetFinished(true);
             }
         }
     }

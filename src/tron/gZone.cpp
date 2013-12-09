@@ -3611,8 +3611,7 @@ void gBaseZoneHack::OnEnter( gCycle * target, REAL time )
             {
                 gFlagZoneHack *otherFlag=dynamic_cast<gFlagZoneHack *>(gameObjects(i));
 
-                if ((otherFlag) &&
-                    (otherFlag->Team() == team))
+                if ((otherFlag) && (otherFlag->Team() == team))
                 {
                     // check if flag is at home (starting position)
                     if (!otherFlag->IsHome())
@@ -3633,12 +3632,12 @@ void gBaseZoneHack::OnEnter( gCycle * target, REAL time )
                 }else if(sg_minFlagsHome <= flagsHome){
                     allFlagsHome=true;
                 }
-        }
+            }
 
-        if (!allFlagsHome)
-        {
-        target->flag_->WarnFlagNotHome();
-        }
+            if (!allFlagsHome)
+            {
+                target->flag_->WarnFlagNotHome();
+            }
             else
             {
                 // player has scored a flag capture
@@ -5599,13 +5598,13 @@ void gFlagZoneHack::OnEnter( gCycle * target, REAL time )
     // check if the player is on our team or not (check will fail if team not enabled)
     if (target->Player()->CurrentTeam() == team)
     {
+        PassFailed(target);
+
         // player is on our team, if we're not at home, go back
         if (!IsHome())
         {
             // go home
             GoHome();
-
-            PassFailed(target);
 
             sg_flagReturnWriter << target->Player()->GetUserName();
             sg_flagReturnWriter.write();

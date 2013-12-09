@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -57,6 +57,7 @@ public:
 
     Level	CheckSpam( REAL spamlevel, int UserToKick, tOutput const & message );	// check if someone is spamming
     REAL	BlockTime();									                        // time left in silenced mode
+    void        ResetTime(); //!< Reset spam time so everything that happened between last spammy event and now is erased
 
     nSpamProtection( const nSpamProtectionSettings& settings );
     ~nSpamProtection();
