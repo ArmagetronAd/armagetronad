@@ -6628,7 +6628,12 @@ void ePlayerNetID::Authenticate( tString const & authName, tAccessLevel accessLe
         if ( alias != "" )
         {
             rawAuthenticatedName_ = alias;
+
+            //! Race hack
+            authenticatedname     = alias;
+
             newAuthenticatedName = GetFilteredAuthenticatedName();
+            authenticatedname    = GetFilteredAuthenticatedName();
 
             // elevate access level again according to the new alias
             se_CheckAccessLevel( accessLevel_, newAuthenticatedName );
@@ -9990,6 +9995,11 @@ public:
             se_playerRenamedWriter << screenName;
             se_playerRenamedWriter.write();
 
+            //! Race Hack
+            //  clearing out hacked variable for proper use with username
+            if (player_.HasLoggedIn())
+                player_.SetAuthenticatedName(tString(""));
+
             if ( oldScreenName_ != screenName )
             {
                 eVoter *voter = eVoter::GetPersistentVoter( player_.Owner() );
@@ -10141,6 +10151,7 @@ void ePlayerNetID::UpdateName( void )
     else
     {
         rawAuthenticatedName_ = "";
+        authenticatedname     = "";//! Race hack
     }
 #endif
 }

@@ -534,7 +534,7 @@ public:
 
     //! Race Hack
     tString const & GetAuthenticatedName() const { return authenticatedname; }
-    void SetAuthenticatedName(tString const &name) { authenticatedname = name; }
+    void SetAuthenticatedName(tString name)      { authenticatedname = name; }
 
     ePlayerNetID & SetName( tString const & name ); //!< Sets this player's name. Sets processed names (colored, username, nameFromCLient) as well.
     ePlayerNetID & SetName( char    const * name ); //!< Sets this player's name. Sets processed names (colored, username, nameFromCLient) as well.
