@@ -217,7 +217,6 @@ static void sg_mapRotationAdd(std::istream &s)
     roundStr = params.ExtractNonBlankSubString(pos);
 
     if (mapStr.Filter() == "") return;
-    if (roundStr.Filter() == "") return;
 
     //  check whether map already exists within rotation
     for(int i = 0; i < mapRotation->Size(); i++)
@@ -266,7 +265,6 @@ static void sg_mapRotationSet(std::istream &s)
     roundStr = params.ExtractNonBlankSubString(pos);
 
     if (mapStr.Filter() == "") return;
-    if (roundStr.Filter() == "") return;
 
     //  check whether map already exists within rotation
     for(int i = 0; i < mapRotation->Size(); i++)
@@ -313,7 +311,7 @@ static void sg_mapRotationLoad(std::istream &s)
     int map_id = 0;
     s >> map_id;
 
-    if ((map_id > 0) && (map_id < mapRotation->Size()))
+    if ((map_id >= 0) && (map_id < mapRotation->Size()))
     {
         gRotationItem *gRotItem = mapRotation->Get(map_id);
         if (gRotItem)
@@ -321,6 +319,8 @@ static void sg_mapRotationLoad(std::istream &s)
             //  load in the map for that round
             LoadMap(gRotItem->Name());
             mapRotation->SetID(map_id);
+
+            gRotation::ResetCounter();
         }
     }
 }
@@ -455,7 +455,6 @@ static void sg_configRotationAdd(std::istream &s)
     roundStr = params.ExtractNonBlankSubString(pos);
 
     if (configStr.Filter() == "") return;
-    if (roundStr.Filter() == "") return;
 
     //  check whether map already exists within rotation
     for(int i = 0; i < configRotation->Size(); i++)
@@ -504,7 +503,6 @@ static void sg_configRotationSet(std::istream &s)
     roundStr = params.ExtractNonBlankSubString(pos);
 
     if (configStr.Filter() == "") return;
-    if (roundStr.Filter() == "") return;
 
     //  check whether map already exists within rotation
     for(int i = 0; i < configRotation->Size(); i++)

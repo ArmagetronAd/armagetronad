@@ -3120,6 +3120,15 @@ void gCycleMovement::CalculateAcceleration()
                         if( rear.type != gSENSOR_SELF && rear.type != gSENSOR_TEAMMATE )
                         {
                             REAL timing = rear.hit/(verletSpeed_ + 1E-10);
+
+                            // extra factor: when the number of axes is not 4,
+                            // the effective speed at which the cycle would increase
+                            // the here detected distance is reduced. Thus, we
+                            // need to divide the timing by that speed factor.
+                            REAL factor = -lastDirDrive*dirDrive*d;
+                            if(factor > 0 && factor < 1)
+                                timing /= factor;
+
                             player->AnalyzeTiming( timing );
                         }
                     }
