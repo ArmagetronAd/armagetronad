@@ -332,12 +332,11 @@ reset_rotation_message                  Map and config rotation have been reset.
 rotation_max_help                       The maximum number of rounds the currently loaded map should remain before new map should be selected and loaded.
 rotation_max_type_help                  The type of rotation to occur at the end of ROTATION_MAX: ordered rotation or random rotation.
 
-rotation_search_unknown                 /rotation unknown: \1.
-rotation_search_other		            You probably want:\n
-rotation_search_usage                   /rotation usage: /rotation <type: map or cfg> [name].\n
-rotation_search_failed                  /rotation failed: \1.\n
+rotation_search_other		                You probably want:\n
+rotation_search_usage                   0xffff7f/rotation usage: /rotation <type: map or cfg> [name].\n
+rotation_search_failed                  0xffff7f/rotation failed: 0xff9999\1.\n
 rotation_search_found_toomanyfiles      0xff7777\2 more matches are found for search term "\1".\n
-rotation_search_found                   /rotation: \1: \2.\n
+rotation_search_found                   0xffff7f/rotation: 0xff55ff\1: 0x33ffff\2.\n
 
 # non-rotation
 map_storage_help                        Is mainly use for non-rotation purposes, queue mainly. Usage is similar to MAP_ROTATION, except without round.

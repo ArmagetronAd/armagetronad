@@ -1603,8 +1603,10 @@ void QueueShowPlayer(ePlayerNetID *player)
 void RotationShowPlayer(ePlayerNetID *player, std::istream &s)
 {
     tString params;
-    params.ReadLine(s);
     int pos = 0;
+    int rotItemsFound = 0;
+
+    params.ReadLine(s);
 
     if (params.Filter() != "")
     {
@@ -1612,45 +1614,66 @@ void RotationShowPlayer(ePlayerNetID *player, std::istream &s)
         if (type == "map")
         {
             tString map = params.ExtractNonBlankSubString(pos);
-            tList<gRotationItem> foundMaps;
+            sn_ConsoleOut(tOutput("$rotation_search_other"), player->Owner());
+
+            int len = map.Len()-1;
+            int printMax = 1 + 3 * len * len * len;
+            int rotItemsFound = 0;
+
             for(int i = 0; i < mapRotation->Size(); i++)
             {
                 gRotationItem *gRotItem = mapRotation->Get(i);
-                if (gRotItem)
+                if (gRotItem && gRotItem->Name().Filter().Contains(map.Filter()))
                 {
-                    if (gRotItem->Name().Filter().Contains(map.Filter()))
-                    {
-                        foundMaps.Insert(gRotItem);
-                    }
+                    if (--printMax > 0)
+                        sn_ConsoleOut(tOutput("$rotation_search_found", i, gRotItem->Name()), player->Owner());
+                    else
+                        rotItemsFound++;
                 }
             }
 
-            if (foundMaps.Len() > 1)
+            if (printMax <= 0 )
             {
-                sn_ConsoleOut(tOutput("$rotation_search_unknown", map), player->Owner());
-                sn_ConsoleOut(tOutput("$rotation_search_other"), player->Owner());
-
-                int len = map.Len()-1;
-                int printMax = 1 + 3 * len * len * len;
-
-                if (printMax <= 0 )
-                {
-                    tOutput msg;
-                    msg.SetTemplateParameter(1, foundMaps.Len());
-                    msg.SetTemplateParameter(2, map);
-                    msg << "$rotation_search_found_toomanyfiles";
-                    sn_ConsoleOut(msg, player->Owner());
-                }
+                tOutput msg;
+                msg.SetTemplateParameter(1, rotItemsFound);
+                msg.SetTemplateParameter(2, map);
+                msg << "$rotation_search_found_toomanyfiles";
+                sn_ConsoleOut(msg, player->Owner());
             }
         }
         else if (type == "cfg")
         {
-            tString map = params.ExtractNonBlankSubString(pos);
+            tString cfg = params.ExtractNonBlankSubString(pos);
+            sn_ConsoleOut(tOutput("$rotation_search_other"), player->Owner());
+
+            int len = cfg.Len()-1;
+            int printMax = 1 + 3 * len * len * len;
+
+            for(int i = 0; i < configRotation->Size(); i++)
+            {
+                gRotationItem *gRotItem = configRotation->Get(i);
+                if (gRotItem && gRotItem->Name().Filter().Contains(cfg.Filter()))
+                {
+                    if (--printMax > 0)
+                        sn_ConsoleOut(tOutput("$rotation_search_found", i, gRotItem->Name()), player->Owner());
+                    else
+                        rotItemsFound++;
+                }
+            }
+
+            if (printMax <= 0 )
+            {
+                tOutput msg;
+                msg.SetTemplateParameter(1, rotItemsFound);
+                msg.SetTemplateParameter(2, cfg);
+                msg << "$rotation_search_found_toomanyfiles";
+                sn_ConsoleOut(msg, player->Owner());
+            }
         }
         else
         {
             tOutput msg;
-            msg.SetTemplateParameter(1, "Type of rotation to look into not set");
+            msg.SetTemplateParameter(1, "Type of rotation to look into not set: map|cfg");
             msg << "$rotation_search_failed";
             sn_ConsoleOut(msg, player->Owner());
         }
