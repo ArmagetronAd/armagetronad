@@ -3398,6 +3398,7 @@ bool gCycleMovement::DoTurn( int dir )
                 // and report
                 // player->AnalyzeTiming( timing );
                 */
+                uncannyTimingToReport_ = false;
             }
             else
             {
