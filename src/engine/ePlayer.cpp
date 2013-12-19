@@ -9235,26 +9235,21 @@ static void se_PlayerMessageConf(std::istream &s)
         return;
     }
 
-    tString PlayerName, Message;
+    int receiver = se_ReadUser( s );
 
-    s >> PlayerName;
-    ePlayerNetID *receiver = ePlayerNetID::FindPlayerByName(PlayerName);
-    ePlayerNetID *sender = 0;
+    tColoredString msg;
+    s >> msg;
 
-    if (!receiver)
+    if ( receiver <= 0 || s.good() )
     {
         con << tOutput("$player_message_usage");
         return;
     }
-    //int receiver = se_ReadUser( s );
 
-    tColoredString msg;
-    Message.ReadLine(s, true);
-    msg << Message;
-    msg << "\n";
+    msg << '\n';
 
-    sn_ConsoleOut(msg, sender->Owner());
-    sn_ConsoleOut(msg, receiver->Owner());
+    sn_ConsoleOut(msg, 0);
+    sn_ConsoleOut(msg, receiver);
 }
 static tConfItemFunc se_PlayerMessage_c("PLAYER_MESSAGE", &se_PlayerMessageConf);
 static tAccessLevelSetter se_messConfLevel( se_PlayerMessage_c, tAccessLevel_Moderator );
