@@ -5286,19 +5286,19 @@ bool gGame::GameLoop(bool input){
         }
     } {
         static float lastTime = 1e42;
-        if((sg_playerGridPosInterval >= 0) && (gtime > sg_playerGridPosInterval) && (gtime >= lastTime + sg_playerGridPosInterval + 1 || gtime < lastTime)) {
+        if((sg_playerGridPosInterval >= 0) && (gtime > sg_playerGridPosInterval) && (gtime >= lastTime + sg_playerGridPosInterval || gtime < lastTime)) {
             ePlayerNetID::GridPosLadderLog();
             lastTime = gtime;
         }
     } {
         static float lastTime = 1e42;
-        if((sg_zoneGridPosInterval >= 0) && (gtime > sg_zoneGridPosInterval) && (gtime >= lastTime + sg_zoneGridPosInterval + 1 || gtime < lastTime)) {
+        if((sg_zoneGridPosInterval >= 0) && (gtime > sg_zoneGridPosInterval) && (gtime >= lastTime + sg_zoneGridPosInterval || gtime < lastTime)) {
             gZone::GridPosLadderLog();
             lastTime = gtime;
         }
     } {
         static float lastTime = 1e42;
-        if((sg_onlineStatsInterval >= 0) && (gtime > sg_onlineStatsInterval) && (gtime >= lastTime + sg_onlineStatsInterval + 1 || gtime < lastTime)) {
+        if((sg_onlineStatsInterval >= 0) && (gtime > sg_onlineStatsInterval) && (gtime >= lastTime + sg_onlineStatsInterval || gtime < lastTime)) {
             ePlayerNetID::OnlineStatsLadderLog();
             lastTime = gtime;
         }
