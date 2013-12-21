@@ -520,15 +520,31 @@ static void sg_SetExplosion(std::istream &s)
         int radius = atoi(radius_str);
         if (radius<=0) return;
 
+        const tString r = params.ExtractNonBlankSubString(pos);
+        const tString g = params.ExtractNonBlankSubString(pos);
+        const tString b = params.ExtractNonBlankSubString(pos);
+
         // extra parameters for explosion init ...
         gRealColor ecolor;
-        ecolor.r = 1.0;
-        ecolor.g = 1.0;
-        ecolor.b = 1.0;
+        ecolor.r = atof(r);
+        ecolor.g = atof(g);
+        ecolor.b = atof(b);
+
+        REAL colorTotal = ecolor.r + ecolor.g + ecolor.b;
+        REAL colorLimit = 0.3;
+
+        if (colorTotal < colorLimit)
+        {
+            //This could be much improved....
+            REAL toAdd = (colorLimit - colorTotal) / 3;
+            ecolor.r += toAdd;
+            ecolor.g += toAdd;
+            ecolor.b += toAdd;
+        }
+
         REAL time = se_GameTime();
 
-        gExplosion *explosion = NULL;
-        explosion = tNEW( gExplosion( grid, epos, time, ecolor, NULL, radius) );
+        gExplosion *explosion = tNEW( gExplosion( grid, epos, time, ecolor, NULL, radius) );
 }
 
 static tConfItemFunc sg_SetExplosion_conf("SPAWN_EXPLOSION",&sg_SetExplosion);

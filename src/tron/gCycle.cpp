@@ -7089,6 +7089,7 @@ static void sg_setCycleSpeed(std::istream &s)
             s >> speedStr;
 
             pCycle->verletSpeed_ = atof(speedStr);
+            pCycle->RequestSync();
         }
     }
 }
@@ -7113,6 +7114,8 @@ static void sg_setCycleRubber(std::istream &s)
 
             if (rubber <= 0)
                 pCycle->Kill();
+
+            pCycle->RequestSync();
         }
     }
 }
