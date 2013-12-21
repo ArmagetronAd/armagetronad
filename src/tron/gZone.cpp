@@ -989,25 +989,8 @@ bool gZone::Timestep( REAL time )
                 SetExpansionSpeed( -GetRadius()*1 );
                 targetRadius_ = 0;
                 seeking_ = false;
+
                 doRequestSync = true;
-            }
-            else
-            {
-                //Only run this every poll time to save on network traffic
-                if (lastTime >= (lastSeekTime_ + sg_shotSeekUpdateTime))
-                {
-                    //Calculate new direction
-                    eCoord newDir = pSeekingCycle_->Position() - GetPosition();
-                    newDir.Normalize();
-
-                    SetReferenceTime();
-                    SetVelocity(newDir * sg_zombieZoneSpeed);
-                    //??? move out all seeking variables into base zone
-
-                    lastSeekTime_ = lastTime;
-
-                    doRequestSync = true;
-                }
             }
         }
 
@@ -1912,6 +1895,33 @@ gDeathZoneHack::~gDeathZoneHack( void )
         pLastShotCollision->pLastShotCollision = NULL;
         pLastShotCollision = NULL;
     }
+}
+
+bool gDeathZoneHack::Timestep(REAL time)
+{
+    // delegate
+    bool returnStatus = gZone::Timestep( time );
+
+    if (seeking_)
+    {
+        //Only run this every poll time to save on network traffic
+        if (lastTime >= (lastSeekTime_ + sg_shotSeekUpdateTime))
+        {
+            //Calculate new direction
+            eCoord newDir = pSeekingCycle_->Position() - GetPosition();
+            newDir.Normalize();
+
+            SetReferenceTime();
+            SetVelocity(newDir * sg_zombieZoneSpeed);
+            //??? move out all seeking variables into base zone
+
+            lastSeekTime_ = lastTime;
+
+            RequestSync();
+        }
+    }
+
+    return returnStatus;
 }
 
 
@@ -6937,6 +6947,25 @@ bool gObjectZoneHack::Timestep( REAL time )
     // delegate
     bool returnStatus = gZone::Timestep( time );
 
+    if (seeking_)
+    {
+        //Only run this every poll time to save on network traffic
+        if (lastTime >= (lastSeekTime_ + seekUpdateTime_))
+        {
+            //Calculate new direction
+            eCoord newDir = pSeekingCycle_->Position() - GetPosition();
+            newDir.Normalize();
+
+            SetReferenceTime();
+            SetVelocity(newDir * pSeekingCycle_->Speed());
+            //??? move out all seeking variables into base zone
+
+            lastSeekTime_ = lastTime;
+
+            RequestSync();
+        }
+    }
+
     return (returnStatus);
 }
 
@@ -6959,7 +6988,7 @@ void gObjectZoneHack::OnEnter( gCycle * target, REAL time )
     ePlayerNetID *p = target->Player();
     if (p)
     {
-        sg_objectZonePlayerEntered << GOID() << name_ << Position().x << Position().y << p->GetUserName() << target->Position().x << target->Position().y << target->Direction().x << target->Direction().y << time;
+        sg_objectZonePlayerEntered << GOID() << name_ << GetPosition().x << GetPosition().y << p->GetUserName() << target->Position().x << target->Position().y << target->Direction().x << target->Direction().y << time;
         sg_objectZonePlayerEntered.write();
     }
 }
@@ -6969,7 +6998,7 @@ void gObjectZoneHack::OnEnter(gZone *target, REAL time)
 {
     if (target && !target->destroyed_)
     {
-        sg_objectZoneZoneEntered << GOID() << name_ << target->GOID() << target->GetName() << target->GetPosition().x << target->GetPosition().y << target->GetVelocity().x << target->GetVelocity().y << time;
+        sg_objectZoneZoneEntered << GOID() << name_ << GetPosition().x << GetPosition().y << target->GOID() << target->GetName() << target->GetPosition().x << target->GetPosition().y << target->GetVelocity().x << target->GetVelocity().y << time;
         sg_objectZoneZoneEntered.write();
     }
 }
@@ -6985,7 +7014,7 @@ static void sg_SpawnObjectZone(std::istream &s)
     tString params;
     params.ReadLine(s, true);
 
-    gZone *Zone = NULL;
+    gObjectZoneHack *Zone = NULL;
 
     if (params.Filter() == "")
     {
@@ -7042,6 +7071,8 @@ static void sg_SpawnObjectZone(std::istream &s)
         tString zoneGreenStr      = params.ExtractNonBlankSubString(pos);
         tString zoneBlueStr       = params.ExtractNonBlankSubString(pos);
         tString targetRadiusStr   = params.ExtractNonBlankSubString(pos);
+        tString seekOwnerStr      = params.ExtractNonBlankSubString(pos);
+        tString seekUpdateTimeStr = params.ExtractNonBlankSubString(pos);
 
         eCoord zonePos    = route.empty() ? eCoord(atof(zonePosXStr)*sizeMultiplier,atof(zonePosYStr)*sizeMultiplier) : route.front();
         REAL zoneSize     = atof(zoneSizeStr)*sizeMultiplier;
@@ -7084,7 +7115,6 @@ static void sg_SpawnObjectZone(std::istream &s)
             setColorFlag = true;
         }
 
-        REAL targetRadius = atof(targetRadiusStr)*sizeMultiplier;
         bool zoneInteractiveBool = false;
         if (zoneInteractive.ToLower() == "true")
             zoneInteractiveBool = true;
@@ -7108,8 +7138,22 @@ static void sg_SpawnObjectZone(std::istream &s)
             Zone->SetWallInteract(zoneInteractiveBool);
         }
 
+        REAL targetRadius = atof(targetRadiusStr)*sizeMultiplier;
         if(targetRadius != 0)
             Zone->SetTargetRadius(targetRadius);
+
+        if (seekOwnerStr.Filter() != "")
+        {
+            ePlayerNetID *seekOwnerPlayer = ePlayerNetID::FindPlayerByName(seekOwnerStr);
+            if (seekOwnerPlayer && seekOwnerPlayer->Object() && seekOwnerPlayer->Object()->Alive())
+                Zone->SetSeekingCycle(dynamic_cast<gCycle *>(seekOwnerPlayer->Object()));
+        }
+
+        REAL seekingUpdateTime = atof(seekUpdateTimeStr);
+        if (seekingUpdateTime >= 0)
+            Zone->SetSeekUpdate(seekingUpdateTime);
+        else
+            Zone->SetSeekUpdate(0.5);
 
         Zone->SetReferenceTime();
         Zone->SetRotationSpeed( .3f );
@@ -7142,7 +7186,7 @@ static void sg_SpawnObjectZone(std::istream &s)
         ePlayerNetID *rec = 0;  //  get the caller to send the message
 
         usageMem << "Usage:\n"
-                    "SPAWN_OBJECTZONE <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
+                    "SPAWN_OBJECTZONE <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> <seek_owner> <seek_update_time>\n"
                     "Instead of <x> <y> one can write: L <x1> <y1> <x2> <y2> [...] Z\n"
                     "To give the zone a name, SPAWN_OBJECTZONE n <name> ...\n";
 

@@ -303,6 +303,8 @@ class gDeathZoneHack: public gZone
 		int deathZoneType;
 
 	private:
+        virtual bool Timestep(REAL currentTime);
+
 								 //!< reacts on objects inside the zone (kills them)
 		virtual void OnEnter( gCycle *target, REAL time );
 
@@ -684,11 +686,14 @@ class gObjectZoneHack: public gZone
         gObjectZoneHack(nMessage &m);
         ~gObjectZoneHack();
 
+        virtual void OnEnter(gZone *target, REAL time);
         virtual void OnExit(gCycle *target, REAL time);
 
-        virtual void OnEnter(gZone *target, REAL time);
+        REAL SeekUpdateTime()         { return this->seekUpdateTime_; }
+        void SetSeekUpdate(REAL time) { this->seekUpdateTime_ = time; }
 
     protected:
+        REAL seekUpdateTime_;
 
     private:
         virtual bool Timestep(REAL currentTime);
