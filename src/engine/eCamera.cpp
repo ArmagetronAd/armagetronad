@@ -140,11 +140,9 @@ static nSettingItem<bool> a_fcg
 ("CAMERA_FORBID_CUSTOM_GLANCE",
  se_forbidCustomGlance);
 
-#ifdef DEDICATED
 //... hack for handling the hud map of 0.4 clients
 static bool stc_forbidHudMap = false;
 static nSettingItem<bool> fcs("FORBID_HUD_MAP", stc_forbidHudMap);
-#endif
 
 #ifndef DEDICATED
 #include "rGL.h"
