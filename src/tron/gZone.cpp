@@ -543,7 +543,7 @@ static void CreateZone(tString zoneEffect, gZone *Zone, const REAL zoneSize, con
 
     Zone->RequestSync();
 
-    sg_spawnzoneWriter << zoneEffect << Zone->GOID() << zoneNameStr << Zone->GetPosition().x << Zone->GetPosition().y << Zone->GetVelocity().x << Zone->GetVelocity().y;
+    sg_spawnzoneWriter << zoneEffect << Zone->GOID() << Zone->GetName() << Zone->GetPosition().x << Zone->GetPosition().y << Zone->GetVelocity().x << Zone->GetVelocity().y;
     sg_spawnzoneWriter.write();
 }
 
@@ -2505,10 +2505,10 @@ void gRubberZoneHack::OnVanish( void )
 
 gZone & gRubberZoneHack::SetRubber(REAL rubber)
 {
+    rmRubber = rubber;
+
     if (rubberType_ == TYPE_RUBBER)
     {
-        rmRubber = rubber;
-
         color_.r = 1.0f;
         REAL p_rubber = (1-(rmRubber/sg_rubberCycle));
         if (p_rubber <0)

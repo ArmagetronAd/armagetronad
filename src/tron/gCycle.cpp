@@ -7087,8 +7087,10 @@ static void sg_setCycleSpeed(std::istream &s)
         if (pCycle && pCycle->Alive())
         {
             s >> speedStr;
+            REAL speed = atof(speedStr);
+            if (speed <= 0) speed = 0;
 
-            pCycle->verletSpeed_ = atof(speedStr);
+            pCycle->verletSpeed_ = speed;
             pCycle->RequestSync();
         }
     }
@@ -7108,13 +7110,10 @@ static void sg_setCycleRubber(std::istream &s)
         if (pCycle && pCycle->Alive())
         {
             s >> rubberStr;
-            int rubber = atof(rubberStr);
+            REAL rubber = atof(rubberStr);
+            if (rubber < 0) rubber = 0;
 
             pCycle->SetRubber(rubber);
-
-            if (rubber <= 0)
-                pCycle->Kill();
-
             pCycle->RequestSync();
         }
     }

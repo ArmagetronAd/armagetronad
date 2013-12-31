@@ -947,7 +947,7 @@ ladderlog_write_targetzone_timeout_help       Write to ladderlog: TARGETZONE_TIM
 ladderlog_write_wait_for_external_script_help Write to ladderlog: WAIT_FOR_EXTERNAL_SCRIPT (see also: WAIT_FOR_EXTERNAL_SCRIPT and WAIT_FOR_EXTERNAL_SCRIPT_TIMEOUT)
 ladderlog_write_winzone_player_enter_help     Write to ladderlog: WINZONE_PLAYER_ENTER <object id> <zone_name> <cx> <cy> <player> <player x> <player y> <player xdir> <player ydir> <time>
 ladderlog_write_zone_collapsed_help           Write to ladderlog: ZONE_COLLAPSED <zone_id> <object_id> <cx> <cy>
-ladderlog_write_zone_spawned_help             Write to ladderlog: ZONE_SPAWNED <zone_effect> <object id> <zone_name> <cx> <cy>
+ladderlog_write_zone_spawned_help             Write to ladderlog: ZONE_SPAWNED <zone_effect> <object id> <zone_name> <x> <y> <xdir> <ydir>
 ladderlog_write_team_created_help             Write to ladderlog: TEAM_CREATED <team name>
 ladderlog_write_team_destroyed_help           Write to ladderlog: TEAM_DESTROYED <team name>
 ladderlog_write_team_renamed_help             Write to ladderlog: TEAM_RENAMED <old team name> <new team name>
@@ -3685,7 +3685,7 @@ ladderlog_write_next_round_help                     Write to ladderlog: NEXT_ROU
 ladderlog_write_objectzone_player_entered_help      Write to ladderlog: OBJECTZONE_PLAYER_ENTERED [zone_id] [zone_name] [zone_pos_x] [zone_pos_y] [player_name] [player_pos_x] [player_pos_y] [player_direction_x] [player_direction_y] [game_time]
 ladderlog_write_objectzone_player_left_help         Write to ladderlog: OBJECTZONE_PLAYER_LEFT [zone_id] [zone_name] [zone_pos_x] [zone_pos_y] [player_name] [player_pos_x] [player_pos_y] [player_direction_x] [player_direction_y] [game_time]
 ladderlog_write_objectzone_spawned_help             Write to ladderlog: OBJECTZONE_SPAWNED [id] [name] [pos_x] [pos_y] [xdir] [ydir]
-ladderlog_write_objectzone_zone_entered_help        Write to ladderlog: OBJECT_ZONE_ENTER [zone_id] [zone_name] [target_id] [target_name] [target_pos_x] [target_pos_y] [target_dir_x] [target_dir_y] [game_time]
+ladderlog_write_objectzone_zone_entered_help        Write to ladderlog: OBJECTZONE_ZONE_ENTERED [zone_id] [zone_name] [zone_posx] [zone_posy] [target_id] [target_name] [target_pos_x] [target_pos_y] [target_dir_x] [target_dir_y] [game_time]
 ladderlog_write_player_ai_left_help                 Write to ladderlog: PLAYER_AI_LEFT [ai_name]
 ladderlog_write_player_colored_name_help            Write to ladderlog: PLAYER_COLORED_NAME [player_useranme] [player_colored_name]
 ladderlog_write_player_gridpos_help                 Write to ladderlog: PLAYER_GRIDPOS [player_username] [pos_x] [pos_y] [dir_x] [dir_y] [cycle_speed] [player_rubber] [cycle_rubber] [team]

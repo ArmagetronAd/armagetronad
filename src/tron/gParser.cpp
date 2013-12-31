@@ -812,25 +812,21 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
         }
         else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *) "effect"), (const xmlChar *)"rubber")) {
             REAL rubberVal = myxmlGetPropFloat(cur, "rubberVal");
-            if (rubberVal != 0.0 ){
-                gRubberZoneHack *rZone = tNEW(gRubberZoneHack(grid, zonePos, false, delayZoneCreation ));
-                rZone->SetRubberType(gRubberZoneHack::TYPE_RUBBER);
-                rZone->SetRubber(rubberVal);
-                zone = rZone;
-                zoneEffect << "rubber";
-            }
+            gRubberZoneHack *rZone = tNEW(gRubberZoneHack(grid, zonePos, false, delayZoneCreation ));
+            rZone->SetRubberType(gRubberZoneHack::TYPE_RUBBER);
+            rZone->SetRubber(rubberVal);
+            zone = rZone;
 
+            zoneEffect << "rubber";
         }
         else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *) "effect"), (const xmlChar *)"rubberadjust")) {
             REAL rubberVal = myxmlGetPropFloat(cur, "rubberVal");
-            if (rubberVal != 0.0 ){
-                gRubberZoneHack *rZone = tNEW(gRubberZoneHack(grid, zonePos, false, delayZoneCreation ));
-                rZone->SetRubberType(gRubberZoneHack::TYPE_ADJUST);
-                rZone->SetRubber(rubberVal);
-                zone = rZone;
-                zoneEffect << "rubberadjust";
-            }
+            gRubberZoneHack *rZone = tNEW(gRubberZoneHack(grid, zonePos, false, delayZoneCreation ));
+            rZone->SetRubberType(gRubberZoneHack::TYPE_ADJUST);
+            rZone->SetRubber(rubberVal);
+            zone = rZone;
 
+            zoneEffect << "rubberadjust";
         }
         else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *) "effect"), (const xmlChar *)"teleport"))
         {
