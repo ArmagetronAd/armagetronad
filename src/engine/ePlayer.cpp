@@ -5692,9 +5692,6 @@ void ePlayerNetID::MyInitAfterCreation()
 {
     this->CreateVoter();
 
-    // reset spam timer
-    GetChatSpam().ResetTime();
-
     this->silenced_ = se_silenceDefault;
     this->renameAllowed_ = true;
 
@@ -5702,6 +5699,10 @@ void ePlayerNetID::MyInitAfterCreation()
     if ( Owner() != 0 && sn_GetNetState() == nSERVER )
     {
         this->RegisterWithMachine();
+
+        // reset spam timer
+        GetChatSpam().ResetTime();
+
         if ( se_maxPlayersPerIP < nMachine::GetMachine(Owner()).GetPlayerCount() )
         {
             // kill them
