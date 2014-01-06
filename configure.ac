@@ -225,7 +225,7 @@ if test -n "$ARMAGETRONAD_OS_X_TOOLKIT"; then
 	AC_SUBST(os_x_minimum_system_version, `$srcdir/batch/make/os-x-minimum-system-version $os_x_version_min`)
 	
 	if test "x$build_regular" = "xtrue"; then
-		LDFLAGS="-F${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks $LDFLAGS"
+		LDFLAGS="-F${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks -rpath ${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks $LDFLAGS"
 		CPPFLAGS="-I${ARMAGETRONAD_OS_X_TOOLKIT}/${os_x_arch}/include/AllFrameworks $CPPFLAGS"
 		FTGL_CFLAGS="-I${ARMAGETRONAD_OS_X_TOOLKIT}/${os_x_arch}/include/FTGL -I${ARMAGETRONAD_OS_X_TOOLKIT}/${os_x_arch}/include/freetype2"
 		FTGL_LIBS="-lftgl -lfreetype -lbz2"

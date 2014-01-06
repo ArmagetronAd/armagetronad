@@ -207,8 +207,7 @@ if !BUILDDEDICATED
 	rm -rf "$(DESTDIR)${prefix}/../Frameworks"
 	cp -R "${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks" "$(DESTDIR)${prefix}/.."
 	
-	install_name_tool -delete_rpath "${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks" "$(DESTDIR)${prefix}/../MacOS/@progtitle@" > /dev/null 2>&1 || true
-	install_name_tool -add_rpath "@executable_path/../../Frameworks" "$(DESTDIR)${prefix}/../MacOS/@progtitle@"
+	install_name_tool -rpath "${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks" "@executable_path/../../Frameworks" "$(DESTDIR)${prefix}/../MacOS/@progtitle@"
 endif
 endif
 
