@@ -245,6 +245,7 @@ private:
     tCONTROLLED_PTR(eTeam)			nextTeam;		// the team we're in ( logically )
     tCONTROLLED_PTR(eTeam)			currentTeam;	// the team we currently are spawned for
     eTeamSet                        invitations_;   // teams this player is invited to
+    bool                            invitationsChanged_;
 
     tCHECKED_PTR(eNetGameObject) object; // the object this player is
     // controlling
@@ -340,6 +341,8 @@ public:
     void UpdateTeamForce();						// update team membership without checks
     void UpdateTeam();							// update team membership
 
+    void AddInvitation( eTeam *team );
+    bool RemoveInvitation( eTeam *team );
     eTeamSet const & GetInvitations() const ;   //!< teams this player is invited to
 
     void CreateNewTeam(); 	    				// create a new team and join it (on the server)

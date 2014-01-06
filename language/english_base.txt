@@ -3008,6 +3008,8 @@ invite_team_invite      \10xRESETT has been invited to join \2.\n
 invite_team_kick        \10xRESETT has been kicked from \2.\n
 invite_team_uninvite    \10xRESETT got their invitation to join \2 cancelled.\n
 invite_team_locked_list (locked)
+invites_help            Displays a list of teams and their invited-nonmember players.
+invites_header          Invitations:
 
 team_list_ready         (0x7fff7fready0xRESETT)
 team_list_not_ready     (0xff7f7fnot ready0xRESETT)
@@ -3039,6 +3041,7 @@ player_scoretable_alive_no	No
 player_scoretable_pingcharity   Ping Charity:
 player_scoretable_nobody	Nobody there.\n
 player_scoretable_inactive	Disconnected
+player_scoretable_can_join	Can join \1
 
 
 

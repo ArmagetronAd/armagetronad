@@ -97,6 +97,7 @@ public:							// public configuration options
     void Invite( ePlayerNetID * player );                // invite the player to join
     void UnInvite( ePlayerNetID * player );              // revoke an invitation
     bool IsInvited( ePlayerNetID const * player ) const; // check if a player is invited
+    std::vector< const ePlayerNetID * > InterestingInvitedPlayers() const;
 
     static bool Enemies( eTeam const * team, ePlayerNetID const * player ); //!< determines whether the player is an enemy of the team
     static bool Enemies( eTeam const * team1, eTeam const * team2 ); //!< determines whether two teams are enemies

@@ -485,14 +485,14 @@ void eTeam::Invite( ePlayerNetID * player )
     {
         sn_ConsoleOut( tOutput( "$invite_team_invite", player->GetColoredName(), Name() ) );
     }
-    player->invitations_.insert( this );
+    player->AddInvitation( this );
 }
 
 // revoke an invitation
 void eTeam::UnInvite( ePlayerNetID * player )
 {
     tASSERT( player );
-    size_t wasInvited = player->invitations_.erase( this );
+    bool wasInvited = player->RemoveInvitation( this );
     if ( player->CurrentTeam() == this && this->IsLockedFor( player ) )
     {
         sn_ConsoleOut( tOutput( "$invite_team_kick", player->GetColoredName(), Name() ) );
@@ -508,6 +508,18 @@ void eTeam::UnInvite( ePlayerNetID * player )
 bool eTeam::IsInvited( ePlayerNetID const * player ) const
 {
     return player->invitations_.find( const_cast< eTeam * >( this ) ) != player->invitations_.end();
+}
+
+std::vector< const ePlayerNetID * > eTeam::InterestingInvitedPlayers() const
+{
+    std::vector< const ePlayerNetID * > invites;
+    for ( int i = se_PlayerNetIDs.Len() - 1; i >= 0; --i )
+    {
+        ePlayerNetID *p = se_PlayerNetIDs( i );
+        if ( IsInvited( p ) && p->CurrentTeam() != this )
+            invites.push_back( p );
+    }
+    return invites;
 }
 
 void eTeam::AddScore ( int s )
@@ -1731,7 +1743,7 @@ eTeam::~eTeam()
     // revoke all invitations
     for ( int i = se_PlayerNetIDs.Len()-1; i >= 0; --i )
     {
-        se_PlayerNetIDs(i)->invitations_.erase( this );
+        se_PlayerNetIDs(i)->RemoveInvitation( this );
     }
 }
 // *******************************************************************************

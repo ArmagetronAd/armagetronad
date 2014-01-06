@@ -52,6 +52,9 @@ Changes since 0.3.1
   explosion will be destroyed, and DEATH_EXPLOSION will be written to ladderlog.
   Scoring can be applied with the SCORE_EXPLOSION and SCORE_EXPLOSION_OWNER
   settings.
+- Team invitations are synced to clients and conditionally displayed in the
+  score table.
+- Added /invites chat command to list team invitations.
 - New helper program armagetronad-serverquery. Fetches the master list and
   advanced server information, and outputs it in a JSON format. Only available
   in dedicated server builds.

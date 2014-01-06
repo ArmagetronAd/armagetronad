@@ -86,15 +86,15 @@ tColoredString & operator << (tColoredString &s,const ePlayer &p){
     return s << tColoredString::ColorString(p.rgb[0]/15.0,
                                             p.rgb[1]/15.0,
                                             p.rgb[2]/15.0)
-           << p.Name();
+           << p.Name() << "0xRESETT";
 }
 
 tColoredString & operator << (tColoredString &s,const ePlayerNetID &p){
-    return s << p.GetColoredName();
+    return s << p.GetColoredName() << "0xRESETT";
 }
 
 std::ostream & operator << (std::ostream &s,const ePlayerNetID &p){
-    return s << p.GetColoredName();
+    return s << p.GetColoredName() << "0xRESETT";
 }
 
 eAccessLevelHolder::eAccessLevelHolder()
@@ -3381,6 +3381,29 @@ static void se_ChatTeams( ePlayerNetID * p )
     se_ListTeams( p );
 }
 
+static void se_ListInvites( ePlayerNetID *receiver )
+{
+    tString out;
+    out << tOutput( "$invites_header" ) << '\n';
+    for ( int i = eTeam::teams.Len() - 1; i >= 0; --i )
+    {
+        eTeam *team = eTeam::teams[ i ];
+        std::vector< const ePlayerNetID * > invites = team->InterestingInvitedPlayers();
+        if ( !invites.empty() )
+            out << *team << ": " << invites << '\n';
+    }
+    sn_ConsoleOut( out, receiver ? receiver->Owner() : 0 );
+}
+
+static void ListInvitesFunc( std::istream & s )
+{
+    if ( se_NeedsServer( "INVITES", s ) )
+        return;
+    se_ListInvites( 0 );
+}
+
+static tConfItemFunc listInvitesConfFunc( "INVITES", &ListInvitesFunc );
+
 void se_ListPastChatters(ePlayerNetID * receiver);
 
 static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s, tString command )
@@ -3989,6 +4012,12 @@ void se_ChatHandlerServer( unsigned short id, tColoredString const & say, nMessa
                     {
                         spam.lastSaidType_ = eChatMessageType_Command;
                         se_Ready( p );
+                        return;
+                    }
+                    else if ( command == "/invites" )
+                    {
+                        spam.lastSaidType_ = eChatMessageType_Command;
+                        se_ListInvites( p );
                         return;
                     }
                     else if (command == "/help") {
@@ -4748,7 +4777,7 @@ void se_ListPastChatters(ePlayerNetID * receiver)
     }
 }
 
-ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), timeCreated_( tSysTimeFloat() ), allowTeamChange_(false), registeredMachine_(0), pID(p), ready(false)
+ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), timeCreated_( tSysTimeFloat() ), invitations_(), invitationsChanged_( false ), allowTeamChange_(false), registeredMachine_(0), pID(p), ready(false)
 {
     // default access level
     lastAccessLevel = tAccessLevel_Default;
@@ -6109,6 +6138,16 @@ void ePlayerNetID::WriteSync( Engine::PlayerNetIDSync & sync, bool init )
     sync.set_team_name( teamname );
 
     sync.set_ready( ready );
+
+    if ( sn_GetNetState() == nSERVER && ( invitationsChanged_ || ( init && invitations_.size() > 0 ) ) )
+    {
+        sync.set_invitations_changed( true );
+        for ( eTeamSet::const_iterator it = invitations_.begin(); it != invitations_.end(); ++it )
+        {
+            sync.add_invitation_team_ids( PointerToID( *it ) );
+        }
+        invitationsChanged_ = false;
+    }
 }
 
 // makes sure the passed string is not longer than the given maximum
@@ -6434,6 +6473,20 @@ void ePlayerNetID::ReadSync( Engine::PlayerNetIDSync const & sync, nSenderInfo c
     {
         teamname = sync.team_name();
     }
+
+    if ( sn_GetNetState() != nSERVER && sync.has_invitations_changed() && sync.invitations_changed() )
+    {
+        invitations_.clear();
+        for ( int i = 0; i < sync.invitation_team_ids_size(); i++ )
+        {
+            eTeam *team = NULL;
+            IDToPointer( sync.invitation_team_ids( i ), team );
+            if ( team )
+            {
+                invitations_.insert( team );
+            }
+        }
+    }
     // con << "Player info updated.\n";
 
     // make sure we did not accidentally overwrite values
@@ -6471,7 +6524,7 @@ void ePlayerNetID::ReadSync( Engine::PlayerNetIDSync const & sync, nSenderInfo c
 //! creates a netobject form sync data
 ePlayerNetID::ePlayerNetID( Engine::PlayerNetIDSync const & sync, nSenderInfo const & sender )
 : nNetObject( sync.base(), sender ),listID(-1), teamListID(-1), timeCreated_( tSysTimeFloat() )
- , allowTeamChange_(false), registeredMachine_(0)
+ , invitations_(), invitationsChanged_( false ), allowTeamChange_(false), registeredMachine_(0)
 {
     // default access level
     lastAccessLevel = tAccessLevel_Default;
@@ -6792,6 +6845,24 @@ void ePlayerNetID::DisplayScores()
 #endif
 }
 
+static tString se_GetScoreTableTeamDescription( const ePlayerNetID *player )
+{
+    tString out;
+    const ePlayerNetID::eTeamSet & invites = player->GetInvitations();
+    if ( player->CurrentTeam() )
+    {
+        out << *player->CurrentTeam();
+    }
+    else if ( !invites.empty() )
+    {
+        tString invitedTeam;
+        invitedTeam << **invites.begin();
+        if ( invites.size() > 1 )
+            invitedTeam << ", ...";
+        out << tOutput( "$player_scoretable_can_join", invitedTeam );
+    }
+    return out;
+}
 
 tString ePlayerNetID::Ranking( int MAX, bool cut ){
     SortByScore();
@@ -6942,11 +7013,9 @@ float ePlayerNetID::RankingGraph( float y, int MAX ){
                 tColoredString ping;
                 ping << int(p->ping*1000);
                 DisplayText(.25, y, .06, ping.c_str(), sr_fontScoretable, 1);
-                if ( p->currentTeam )
+                tString team = se_GetScoreTableTeamDescription( p );
+                if ( !team.empty() )
                 {
-                    tColoredString team;
-                    eTeam *t = p->currentTeam;
-                    team << tColoredStringProxy(t->R()/15.f, t->G()/15.f, t->B()/15.f) << t->Name();
                     DisplayText(.3, y, .06, team.c_str(), sr_fontScoretable, -1);
                 }
             }
@@ -8051,6 +8120,27 @@ void ePlayerNetID::UpdateTeamForce()
     {
         RequestSync();
     }
+}
+
+void ePlayerNetID::AddInvitation( eTeam *team )
+{
+    std::pair< eTeamSet::iterator, bool > result = invitations_.insert( team );
+    if ( result.second )
+    {
+        invitationsChanged_ = true;
+        RequestSync();
+    }
+}
+
+bool ePlayerNetID::RemoveInvitation( eTeam *team )
+{
+    bool wasInvited = invitations_.erase( team ) > 0;
+    if ( wasInvited )
+    {
+        invitationsChanged_ = true;
+        RequestSync();
+    }
+    return wasInvited;
 }
 
 // teams this player is invited to
