@@ -1087,7 +1087,10 @@ static bool se_WriteOnlinePlayerData( ePlayerNetID *player, eTeam *team )
     else
     {
         se_onlineAIWriter << player->GetLogName();
-        se_onlineAIWriter << team->GetLogName();
+        if ( team )
+            se_onlineAIWriter << team->GetLogName();
+        else
+            se_onlineAIWriter << "";
         se_onlineAIWriter << player->Score();
         se_onlineAIWriter.write();
     }
@@ -1096,6 +1099,9 @@ static bool se_WriteOnlinePlayerData( ePlayerNetID *player, eTeam *team )
 
 void eTeam::WriteOnlinePlayers()
 {
+    if ( sn_GetNetState() != nSERVER )
+        return;
+
     int numHumans = 0;
 
     // Write teams and players (ordered by launch position)
