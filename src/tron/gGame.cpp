@@ -4149,6 +4149,8 @@ static void sg_RespawnAll(eGrid *grid, gArena & arena, bool respawn_all)
 #ifdef DEBUG
             //                std::cout << "spawning player " << pni->name << "\n";
 #endif
+            p->ClearRespawn();
+
             gCycle * cycle = new gCycle( grid, pos, dir, p );
             p->ControlObject(cycle);
 

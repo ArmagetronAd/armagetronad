@@ -7000,6 +7000,8 @@ static void sg_RespawnPlayer(std::istream &s)
         // let's respawn now ...
         if (!pPlayer->Object() || !pPlayer->Object()->Alive())
         {
+            pPlayer->ClearRespawn();
+
             gCycle *pCycle = new gCycle(grid, ppos, pdir, pPlayer);
             pPlayer->ControlObject(pCycle);
 

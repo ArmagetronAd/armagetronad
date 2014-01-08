@@ -692,8 +692,12 @@ class gObjectZoneHack: public gZone
         REAL SeekUpdateTime()         { return this->seekUpdateTime_; }
         void SetSeekUpdate(REAL time) { this->seekUpdateTime_ = time; }
 
+        REAL SeekSpeed()              { return this->seekSpeed_; }
+        void SetSeekSpeed(REAL speed) { this->seekSpeed_ = speed; }
+
     protected:
         REAL seekUpdateTime_;
+        REAL seekSpeed_;
 
     private:
         virtual bool Timestep(REAL currentTime);
@@ -751,10 +755,17 @@ class gRespawnZoneHack: public gZone
         gRespawnZoneHack(nMessage &m);
         ~gRespawnZoneHack();
 
+        ePlayerNetID *DeadPlayer() { return deadPlayer_; }
+        void SetDeadPlayer(ePlayerNetID *player) { deadPlayer_ = player; }
+        void ClearDeadPlayer() { deadPlayer_ = NULL; }
+
         eCoord SpawnDirection() { return this->spawnDirection_; }
         void SetSpawnDirection(eCoord dir) { this->spawnDirection_;  }
 
+        void Finish();
+
     protected:
+        ePlayerNetID *deadPlayer_;
         eCoord spawnDirection_;
 
     private:

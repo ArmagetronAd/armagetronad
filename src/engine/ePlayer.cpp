@@ -5763,6 +5763,7 @@ ePlayerNetID::~ePlayerNetID()
     RemoveFromGame();
 
     ClearObject();
+    ClearRespawn();
     //con << "Player info sent.\n";
 
     for(int i=MAX_PLAYERS-1; i>=0; i--)
@@ -5868,6 +5869,7 @@ void ePlayerNetID::RemoveFromGame()
     SetTeam( NULL );
     UpdateTeam();
     ControlObject( NULL );
+    ClearRespawn();
 
     //  update the online players list
     sg_OutputOnlinePlayers();
@@ -7223,6 +7225,26 @@ void ePlayerNetID::ControlObject(eNetGameObject *c)
 #endif
 
     NewObject();
+}
+
+void ePlayerNetID::ClearRespawn()
+{
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid) return;
+
+    const tList<eGameObject>& gameObjects = grid->GameObjects();
+    for (int i=gameObjects.Len()-1;i>=0;i--)
+    {
+        gRespawnZoneHack *resZone = dynamic_cast<gRespawnZoneHack *>(gameObjects[i]);
+        if (resZone)
+        {
+            if (resZone->DeadPlayer() == this)
+            {
+                resZone->Finish();
+                break;
+            }
+        }
+    }
 }
 
 void ePlayerNetID::ClearObject()
