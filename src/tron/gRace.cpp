@@ -222,6 +222,7 @@ void gRaceScores::Add(gRacePlayer *racePlayer, bool finished)
     REAL oldTime = 0;
     bool newRacer = false;
     gRaceScores *racingPlayer = NULL;
+    int prevRank = 0;
 
     tString username;
     if (racePlayer->Player()->HasLoggedIn() && (racePlayer->Player()->GetAuthenticatedName().Filter() != ""))
@@ -240,10 +241,10 @@ void gRaceScores::Add(gRacePlayer *racePlayer, bool finished)
 
             if (((racePlayer->Time() < racingPlayer->Time()) && (racePlayer->Time() > 0)) || (racingPlayer->Time() <= 0 && racePlayer->Time() > 0))
             {
-                racingPlayer->time_ = racePlayer->Time();
+                //  store the player's previous rank if their got better or worse
+                prevRank = racingPlayer->Rank();
 
-                //  sort out ranks once player get better time
-                Sort();
+                racingPlayer->time_ = racePlayer->Time();
 
                 //  send message if this player isn't rank 1
                 if (racingPlayer->Rank() > 1)
@@ -264,9 +265,6 @@ void gRaceScores::Add(gRacePlayer *racePlayer, bool finished)
         racingPlayer->time_ = racePlayer->Time();
         oldTime = racingPlayer->Time();
 
-        //  sort out ranks once player get better time
-        Sort();
-
         if (racePlayer->Time() > 0)
         {
             if (racingPlayer->Rank() > 1)
@@ -283,6 +281,9 @@ void gRaceScores::Add(gRacePlayer *racePlayer, bool finished)
         newRacer = true;
     }
 
+    //  sort out ranks once player get better time
+    Sort();
+
     if (finished)
     {
         //  increment finished times when they crossed the zone
@@ -295,9 +296,6 @@ void gRaceScores::Add(gRacePlayer *racePlayer, bool finished)
     //  ensure that times really have changed for this to take effect
     if (timeChanged && finished)
     {
-        //  store the player's previous rank if their got better or worse
-        int prevRank = racingPlayer->Rank();
-
         //  get top player from that list
         gRaceScores *firstRanker = sg_RaceScores[0];
 
@@ -1324,10 +1322,10 @@ void gRace::Sync( int alive, int ai_alive, int humans, REAL time )
                                 {
                                     //  so they are idle
                                     racePlayer->SetIdle(true);
-
-                                    //  reset the next time to apply later
-                                    racePlayer->SetIdleNextTime(time + sg_raceIdleTime);
                                 }
+
+                                //  reset the next time to apply later
+                                racePlayer->SetIdleNextTime(time + sg_raceIdleTime);
                             }
                         }
                         else
@@ -1336,8 +1334,6 @@ void gRace::Sync( int alive, int ai_alive, int humans, REAL time )
                             {
                                 //  time up! Let's kill them!
                                 rPCycle->Kill();
-
-                                racePlayer->SetIdle(false);
 
                                 tOutput msg;
                                 msg.SetTemplateParameter(1, racePlayer->Player()->GetName());
