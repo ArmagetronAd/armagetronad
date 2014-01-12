@@ -79,6 +79,18 @@ REAL	nSpamProtection::BlockTime()					// time left in silenced mode
     return ( spamProtect_ - 6 ) * timeScale + ( tSysTimeFloat() - spamProtectTime_ );
 }
 
+// Reset spam time so everything that happened between last spammy event and now is erased
+void nSpamProtection::ResetTime()
+{
+    double now = tSysTimeFloat();
+    
+    // but move ahead this much
+    double ahead = 1;
+
+    now += ahead;
+    spamProtectTime_ = now;
+ }
+
 nSpamProtection::Level	nSpamProtection::CheckSpam( REAL spamlevel, int userToKick, tOutput const & reason )	// check if someone is spamming
 {
     if ( se_SpamProtection < 0.01f )
@@ -89,9 +101,14 @@ nSpamProtection::Level	nSpamProtection::CheckSpam( REAL spamlevel, int userToKic
     REAL timeScale = this->settings_.timeScale_ * se_SpamProtection;
 
     spamProtect_ += spamlevel;
+    double now = tSysTimeFloat();
+
+    if(now < spamProtectTime_)
+        now = spamProtectTime_;
+
     spamProtect_ -=( tSysTimeFloat() - spamProtectTime_ ) / timeScale;
 
-    spamProtectTime_ = tSysTimeFloat();
+    spamProtectTime_ = now;
     if ( spamProtect_ < 0 )
         spamProtect_ = 0;
 
