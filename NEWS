@@ -32,6 +32,8 @@ Changes since 0.2.8.3.x:
 - Manage external scripts on Unix dedicated servers. New commands: 
   SPAWN_SCRIPT, RESPAWN_SCRIPT, FORCE_RESPAWN_SCRIPT, KILL_SCRIPT,
   LIST_SCRIPTS, SCRIPT_ENV.
+- New setting ACCESS_LEVEL_ANNOUNCE_LOGIN that determines if a player's
+  login/logout message can be announced.
 - Authentication is now enabled by default.
 
 Changes since 0.2.8.3.1:

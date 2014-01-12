@@ -2971,6 +2971,8 @@ rtfm_denied                 You need to be logged in to teach others.\n
 access_level_list_admins_help Access level required to be able to use the "/admins" command.
 access_level_list_admins_see_everyone_help Users with this access level or better will be able to list any configured admin, regardless of ADMIN_LIST_MIN_ACCESS_LEVEL.
 
+access_level_announce_login_help Maximal access level that determines if a player's login/logout message can be announced.
+
 intercept_commands_help     List of chat commands to accept and log to stdout.
 intercept_unknown_commands_help If 1, accept and log all unknown chat commands.
 
