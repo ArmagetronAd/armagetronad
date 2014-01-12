@@ -57,6 +57,7 @@ public:
 
     Level	CheckSpam( REAL spamlevel, int UserToKick, tOutput const & message );	// check if someone is spamming
     REAL	BlockTime();									                        // time left in silenced mode
+    void	ResetTime(); //!< Reset spam time so everything that happened between last spammy event and now is erased
 
     nSpamProtection( const nSpamProtectionSettings& settings );
     ~nSpamProtection();
