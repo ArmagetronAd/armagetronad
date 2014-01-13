@@ -3298,7 +3298,7 @@ private:
     }
 };
 
-static void sg_ParseMap ( gParser * aParser, tString mapfile )
+static void sg_ParseMap ( gParser * aParser, tString mapfile, bool verify )
 {
     FILE* mapFD = NULL;
 
@@ -3335,11 +3335,28 @@ static void sg_ParseMap ( gParser * aParser, tString mapfile )
         }
 
         mapFD = tResourceManager::openResource("", DEFAULT_MAP);
-        if (!mapFD || !aParser->LoadAndValidateMapXML("", mapFD, DEFAULT_MAP)) {
+        if (!mapFD || !aParser->LoadAndValidateMapXML("", mapFD, DEFAULT_MAP))
+        {
             if (mapFD)
                 fclose(mapFD);
             errorMessage << "$map_file_load_failure_default";
             throw tGenericException( errorMessage, errorTitle );
+        }
+        else if(sn_GetNetState()!=nCLIENT && verify)
+        {
+            // if map has been loaded succefully, and this is during setting tranfer...
+            // map config file is executed at accesslevel of the one who set the map
+            tCurrentAccessLevel level( conf_mapfile.GetSetting().GetSetLevel(), true );
+            std::stringstream command;
+            std::string filename = std::string(mapfile);
+            int pos = filename.find(".aamap.xml",filename.length()-10);
+
+            if (pos!=std::string::npos)
+            {
+                filename.replace(pos,10,".cfg");
+                command << "rinclude " << filename;
+                tConfItemBase::LoadLine(command);
+            }
         }
     }
 
@@ -3347,15 +3364,15 @@ static void sg_ParseMap ( gParser * aParser, tString mapfile )
         fclose(mapFD);
 }
 
-static void sg_ParseMap ( gParser * aParser )
+static void sg_ParseMap ( gParser * aParser, bool verify = false )
 {
-    sg_ParseMap(aParser, mapfile);
+    sg_ParseMap(aParser, mapfile, verify);
 }
 
 void gGame::Verify()
 {
     // test map and load map settings
-    sg_ParseMap( aParser );
+    sg_ParseMap( aParser, true );
     init_game_grid(grid, aParser);
     Arena.LeastDangerousSpawnPoint();
     exit_game_grid(grid);

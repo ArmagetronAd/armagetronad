@@ -3461,7 +3461,7 @@ bool gBaseZoneHack::CheckTeamAssignmentOnTeam()
                     if ( sg_baseZonesPerTeam > 0 )
                         CountZonesOfTeam( Grid(), team, count, farthest );
                     // only set team if not too many closer other zones are registered
-                    if ( sg_baseZonesPerTeam == 0 || count < sg_baseZonesPerTeam || farthest->teamDistance_ > distance )
+                    if ( sg_baseZonesPerTeam == 0 || count < sg_baseZonesPerTeam || (farthest && farthest->teamDistance_ > distance ))
                     {
                         closest = other;
                         closestDistance = distance;

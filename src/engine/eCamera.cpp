@@ -1798,6 +1798,7 @@ void eCamera::Timestep(REAL ts){
                         normedLastDir *= 1/sqrt(n);
                     }
                 }
+
                 newdir = newdir + normedLastDir*(wrongDirection*ts*turnSpeed*customTurnSpeed180);
             }
         }

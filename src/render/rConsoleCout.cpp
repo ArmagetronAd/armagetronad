@@ -54,12 +54,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 
 #ifdef TOP_SOURCE_DIR
- #include "nTrueVersion.h"
- #endif
+#include "nTrueVersion.h"
+#endif
 
- #ifndef TRUE_ARMAGETRONAD_VERSION
- #define TRUE_ARMAGETRONAD_VERSION VERSION
- #endif
+#ifndef TRUE_ARMAGETRONAD_VERSION
+#define TRUE_ARMAGETRONAD_VERSION VERSION
+#endif
 
 class rStream: public tReferencable< rStream >
 {
@@ -576,6 +576,8 @@ static void sr_SpawnScript( tString const & command )
                 con << "Command \'" << script << "\' not found in <datadir>/scripts/.\n";
                 return;
             }
+
+            script = fullScriptPath;
         }
 
         arguments.data.Insert( script );
