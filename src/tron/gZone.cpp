@@ -2470,9 +2470,9 @@ static tSettingItem<REAL> sg_colorRubberZoneBConf("COLOR_RUBBERZONE_BLUE", sg_co
 gRubberZoneHack::gRubberZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreation, bool delayCreation)
 :gZone( grid, pos, dynamicCreation, delayCreation)
 {
-    color_.r = sg_colorRubberZoneR / 15;
-    color_.g = sg_colorRubberZoneG / 15;
-    color_.b = sg_colorRubberZoneB / 15;
+    color_.r = sg_colorRubberZoneR / 15.0;
+    color_.g = sg_colorRubberZoneG / 15.0;
+    color_.b = sg_colorRubberZoneB / 15.0;
 
     if (!delayCreation)
         grid->AddGameObjectInteresting(this);

@@ -945,7 +945,7 @@ ladderlog_write_targetzone_player_left_help   Write to ladderlog: TARGETZONE_PLA
 ladderlog_write_targetzone_player_enter_help  Write to ladderlog: TARGETZONE_PLAYER_ENTER <object_id> <zone_name> <cx> <cy> <player> <player x> <player y> <player xdir> <player ydir> <time>
 ladderlog_write_targetzone_timeout_help       Write to ladderlog: TARGETZONE_TIMEOUT <object_id> <zone_name> <cx> <cy>
 ladderlog_write_wait_for_external_script_help Write to ladderlog: WAIT_FOR_EXTERNAL_SCRIPT (see also: WAIT_FOR_EXTERNAL_SCRIPT and WAIT_FOR_EXTERNAL_SCRIPT_TIMEOUT)
-ladderlog_write_winzone_player_enter_help     Write to ladderlog: WINZONE_PLAYER_ENTER <object id> <zone_name> <cx> <cy> <player> <player x> <player y> <player xdir> <player ydir> <time>
+ladderlog_write_winzone_player_enter_help     Write to ladderlog: WINZONE_PLAYER_ENTER <player> <player x> <player y> <player xdir> <player ydir> <time>
 ladderlog_write_zone_collapsed_help           Write to ladderlog: ZONE_COLLAPSED <zone_id> <object_id> <cx> <cy>
 ladderlog_write_zone_spawned_help             Write to ladderlog: ZONE_SPAWNED <zone_effect> <object id> <zone_name> <x> <y> <xdir> <ydir>
 ladderlog_write_team_created_help             Write to ladderlog: TEAM_CREATED <team name>
@@ -3255,6 +3255,8 @@ rtfm_denied                 You need to be logged in to teach others.\n
 
 access_level_list_admins_help Access level required to be able to use the "/admins" command.
 access_level_list_admins_see_everyone_help Users with this access level or better will be able to list any configured admin, regardless of ADMIN_LIST_MIN_ACCESS_LEVEL.
+
+access_level_announce_login_help Maximal access level that determines if a player's login/logout message can be announced.
 
 intercept_commands_help     List of chat commands to accept and log to stdout.
 intercept_unknown_commands_help If 1, accept and log all unknown chat commands.
