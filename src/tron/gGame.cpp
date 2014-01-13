@@ -3626,6 +3626,15 @@ void gGame::StateUpdate(){
             break;
         case GS_CREATED:
         case GS_TRANSFER_SETTINGS:
+            // sr_con.autoDisplayAtNewline=true;
+
+            // transfer game settings
+            if ( nCLIENT != sn_GetNetState() )
+            {
+                update_settings( &goon );
+                ePlayerNetID::RemoveChatbots();
+            }
+
             {
                 // default include files are executed at owner level
                 tCurrentAccessLevel level( tAccessLevel_Owner, true );
@@ -3637,7 +3646,6 @@ void gGame::StateUpdate(){
                     tConfItemBase::ReadFile(s);
                 s.close();
             }
-            // sr_con.autoDisplayAtNewline=true;
 
             ePlayerNetID::ApplySubstitutions();
 
@@ -3645,13 +3653,6 @@ void gGame::StateUpdate(){
             ePlayerNetID::LogScoreDifferences();
 
             gRotation::HandleNewRound(rounds);
-
-            // transfer game settings
-            if ( nCLIENT != sn_GetNetState() )
-            {
-                update_settings( &goon );
-                ePlayerNetID::RemoveChatbots();
-            }
 
             rViewport::Update(MAX_PLAYERS);
 
@@ -3697,6 +3698,13 @@ void gGame::StateUpdate(){
                     conf_mapfile.Set( lastMapfile );
                 }
             }
+
+            if (sg_singlePlayer)
+                sg_currentSettings = &singlePlayer;
+            else
+                sg_currentSettings = &multiPlayer;
+
+            sg_copySettings();
 
             nConfItemBase::s_SendConfig(false);
             // wait extra long for the clients to delete the grid; they really need to be
