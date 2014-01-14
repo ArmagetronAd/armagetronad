@@ -3716,13 +3716,6 @@ void gGame::StateUpdate(){
                 }
             }
 
-            if (sg_singlePlayer)
-                sg_currentSettings = &singlePlayer;
-            else
-                sg_currentSettings = &multiPlayer;
-
-            sg_copySettings();
-
             nConfItemBase::s_SendConfig(false);
             // wait extra long for the clients to delete the grid; they really need to be
             // synced this time
