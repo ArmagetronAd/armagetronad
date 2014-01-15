@@ -2448,6 +2448,14 @@ void se_Op( ePlayerNetID * admin, ePlayerNetID * victim, tAccessLevel level )
     }
 }
 
+static void se_OpFunc(std::istream &s)
+{
+    ePlayerNetID *p = 0;
+
+    se_ChangeAccess(p, s, "/op", &se_Op);
+}
+static tConfItemFunc se_OpFuncConf("OP", &se_OpFunc);
+
 // DeOp takes it away
 void se_DeOp( ePlayerNetID * admin, std::istream & s, char const * command )
 {
@@ -2465,6 +2473,14 @@ void se_DeOp( ePlayerNetID * admin, std::istream & s, char const * command )
         }
     }
 }
+
+static void se_DeOpFunc(std::istream &s)
+{
+    ePlayerNetID *p = 0;
+
+    se_DeOp( p, s, "/deop" );
+}
+static tConfItemFunc se_DeOpFuncConf("DEOP", &se_DeOpFunc);
 
 // minimal access level for /team management
 static tAccessLevel se_teamAccessLevel = tAccessLevel_TeamLeader;
@@ -3952,6 +3968,18 @@ static void se_Help( ePlayerNetID * sender, ePlayerNetID * receiver, std::istrea
     }
 }
 
+static void se_HelpFunc(std::istream &s)
+{
+    ePlayerNetID *p = 0;
+
+    if (se_helpMessageType)
+    {
+        sn_ConsoleOut(se_helpMessage + "\n", p->Owner());
+    }
+    else se_Help( p, p, s );
+}
+static tConfItemFunc se_HelpFuncConf("HELP", &se_HelpFunc);
+
 static tAccessLevel se_rtfmAccessLevel = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_rtfmAccessLevelConf( "ACCESS_LEVEL_RTFM", se_rtfmAccessLevel );
 static tAccessLevelSetter se_rtfmAccessLevelConfLevel( se_rtfmAccessLevelConf, tAccessLevel_Owner );
@@ -4194,7 +4222,6 @@ void handle_chat( nMessage &m )
                         if (se_helpMessageType)
                         {
                             sn_ConsoleOut(se_helpMessage + "\n", p->Owner());
-                            se_DisplayChatLocally(p, say);
                         }
                         else se_Help( p, p, s );
 

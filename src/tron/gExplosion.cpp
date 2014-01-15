@@ -548,4 +548,3 @@ static void sg_SetExplosion(std::istream &s)
 }
 
 static tConfItemFunc sg_SetExplosion_conf("SPAWN_EXPLOSION",&sg_SetExplosion);
-
