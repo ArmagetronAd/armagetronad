@@ -3568,10 +3568,9 @@ static eLadderLogWriter sg_nextRoundWriter("NEXT_ROUND", false);
 static eLadderLogWriter sg_roundCommencingWriter("ROUND_COMMENCING", false);
 static SvgOutput sg_svgOutput;
 
-bool sg_roundStartingChecker = true;
-bool sg_roundfinishedchecker = false;
 static eLadderLogWriter sg_roundFinishedWriter("ROUND_FINISHED", true);
 static eLadderLogWriter sg_roundEndedWriter("ROUND_ENDED", true);
+static eLadderLogWriter sg_roundStartedWriter("ROUND_STARTED", true);
 
 // **********************************************************************
 // *
@@ -3907,15 +3906,15 @@ void gGame::StateUpdate(){
                     mess.SetTemplateParameter(2, sg_currentSettings->limitRounds);
                     mess << "$gamestate_newround_console";
 
-                    if (strlen(sg_roundConsoleMessage) > 2)
-                        sn_ConsoleOut(sg_roundConsoleMessage + "\n");
-
 				    sg_nextRoundWriter << rounds+1 << sg_currentSettings->limitRounds << mapfile << sg_roundCenterMessage;
 				    sg_nextRoundWriter.write();
                 }
                 else
                     mess << "$gamestate_newround_goldengoal";
                 sn_ConsoleOut(mess);
+
+                if (strlen(sg_roundConsoleMessage) > 2)
+                        sn_ConsoleOut(sg_roundConsoleMessage + "\n");
 
                 se_SaveToScoreFile("$gamestate_newround_log");
 
@@ -3933,6 +3932,12 @@ void gGame::StateUpdate(){
 
                     sn_ConsoleOut(Output);
                 }
+
+                sg_roundStartedWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
+                sg_roundStartedWriter.write();
+
+                if (sg_RaceTimerEnabled)
+                    gRaceScores::OutputStart();
             }
             //con << ePlayerNetID::Ranking();
 
@@ -3990,15 +3995,6 @@ void gGame::StateUpdate(){
                 }
             }
 #endif
-            if (!sg_roundStartingChecker)
-            {
-                sg_roundEndedWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
-                sg_roundEndedWriter.write();
-            }
-
-            sg_roundStartingChecker = true;
-            sg_roundfinishedchecker = false;
-
             // pings should not count as much in the between-round phase
             nPingAverager::SetWeight(1E-20);
 
@@ -4009,6 +4005,9 @@ void gGame::StateUpdate(){
             SetState(GS_DELETE_OBJECTS,GS_DELETE_GRID);
             break;
         case GS_DELETE_OBJECTS:
+
+            sg_roundEndedWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
+            sg_roundEndedWriter.write();
 
             winDeathZone_ = NULL;
 
@@ -5112,7 +5111,6 @@ static uActionTooltip ingamemenuTooltip( ingamemenu, 1 );
 #endif // dedicated
 
 static eLadderLogWriter sg_gameTimeWriter("GAME_TIME", true);
-static eLadderLogWriter sg_roundStartedWriter("ROUND_STARTED", true);
 
 bool gGame::GameLoop(bool input){
     nNetState netstate = sn_GetNetState();
@@ -5272,18 +5270,6 @@ bool gGame::GameLoop(bool input){
 
 	delayedCommands::Run(gtime);
 	gZone::Timesteps(gtime);
-	if (sg_roundStartingChecker)
-	{
-        sg_roundStartedWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
-        sg_roundStartedWriter.write();
-
-        if (sg_RaceTimerEnabled)
-        {
-            gRaceScores::OutputStart();
-        }
-
-        sg_roundStartingChecker = false;
-	}
 
     {
         static float lastTime = 1e42;
