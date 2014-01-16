@@ -6994,7 +6994,7 @@ static void sg_RespawnPlayer(std::istream &s)
         if (((x_str == "") && (y_str == "")) || ((dirx ==0) && (diry == 0))) {
             return;
         }
-        ppos = eCoord(x,y);
+        ppos = eCoord(x * gArena::SizeMultiplier(),y * gArena::SizeMultiplier());
         pdir = eCoord(dirx,diry);
 
         // let's respawn now ...
@@ -7059,7 +7059,7 @@ static void sg_TeleportPlayer(std::istream &s)
 	if ((x_str == "") && (y_str == "")) {
 		return;
 	}
-	ppos = eCoord(x,y);
+	ppos = eCoord(x * gArena::SizeMultiplier(),y * gArena::SizeMultiplier());
 
 	// let's teleport now ...
 	gCycle *pGameObject = dynamic_cast<gCycle *>(pPlayer->Object());
