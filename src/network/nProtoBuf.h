@@ -53,7 +53,7 @@ namespace Network{ class nNetObjectInit; }
 #include "nNetObject.h"
 
 class nNetObject;
-class nNetObjectRegistrar;
+struct nNetObjectRegistrar;
 
 class nBinaryReader;
 class nBinaryWriter;
@@ -173,7 +173,7 @@ private:
 // **********************************************************************
 
 //! extra information about the sender of a message
-struct nSenderInfo
+class nSenderInfo
 {
 public:
     //! reference to the message, it contains all info

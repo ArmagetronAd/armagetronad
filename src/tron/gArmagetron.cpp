@@ -319,7 +319,7 @@ static void welcome(){
     {
         bool showSplash = true;
 #ifdef DEBUG
-        showSplash = false;
+//        showSplash = false;
 #endif
 
         // Start the music up
@@ -468,7 +468,11 @@ static void sg_DelayedActivation()
     Activate( sg_active );
 }
 
+#if SDL_VERSION_ATLEAST(2,0,0)
+int filter(void*, SDL_Event *tEvent){
+#else
 int filter(const SDL_Event *tEvent){
+#endif
     // recursion avoidance
     static bool recursion = false;
     if ( !recursion )
@@ -497,7 +501,11 @@ int filter(const SDL_Event *tEvent){
         if ((tEvent->type==SDL_KEYDOWN && tEvent->key.keysym.sym==27 &&
                 tEvent->key.keysym.mod & KMOD_SHIFT) ||
                 (tEvent->type==SDL_KEYDOWN && tEvent->key.keysym.sym==113 &&
+#if SDL_VERSION_ATLEAST(2,0,0)
+                 tEvent->key.keysym.mod & KMOD_GUI) ||
+#else
                  tEvent->key.keysym.mod & KMOD_META) ||
+#endif
                 (tEvent->type==SDL_QUIT)){
             // sn_SetNetState(nSTANDALONE);
             // sn_Receive();
@@ -518,10 +526,32 @@ int filter(const SDL_Event *tEvent){
                 tEvent->type!=SDL_MOUSEBUTTONUP &&
                 ((tEvent->motion.x>=sr_screenWidth-10  || tEvent->motion.x<=10) ||
                  (tEvent->motion.y>=sr_screenHeight-10 || tEvent->motion.y<=10)))
+#if SDL_VERSION_ATLEAST(2,0,0)
+            SDL_WarpMouseInWindow(sr_screen, sr_screenWidth/2, sr_screenHeight/2);
+#else
             SDL_WarpMouse(sr_screenWidth/2,sr_screenHeight/2);
+#endif
 
         // fetch alt-tab
 
+#if SDL_VERSION_ATLEAST(2,0,0)
+        if (tEvent->type==SDL_WINDOWEVENT)
+        {
+            // Jonathans fullscreen bugfix.
+#ifdef MACOSX
+            if(currentScreensetting.fullscreen ^ lastSuccess.fullscreen) return false;
+#endif
+            int flags = SDL_WINDOWEVENT_FOCUS_GAINED | SDL_WINDOWEVENT_FOCUS_LOST;
+	    if ( tEvent->window.event & flags )
+            {
+                // con << tSysTimeFloat() << " " << "active: " << (tEvent->active.gain ? "on" : "off") << "\n";
+                sg_active = tEvent->window.event & SDL_WINDOWEVENT_FOCUS_GAINED;
+                st_ToDo(sg_DelayedActivation);
+            }
+
+            // reload GL stuff if application gets reactivated
+            if ( tEvent->window.event & SDL_WINDOWEVENT_FOCUS_GAINED )
+#else //SDL_VERSION_ATLEAST(2,0,0)
         if (tEvent->type==SDL_ACTIVEEVENT)
         {
             // Jonathans fullscreen bugfix.
@@ -538,6 +568,7 @@ int filter(const SDL_Event *tEvent){
 
             // reload GL stuff if application gets reactivated
             if ( tEvent->active.gain && tEvent->active.state & SDL_APPACTIVE )
+#endif //SDL_VERSION_ATLEAST(2,0,0)
             {
                 // just treat it like a screen mode change, gets the job done
                 st_ToDo(rCallbackBeforeScreenModeChange::Exec);
@@ -801,8 +832,11 @@ int main(int argc,char **argv){
 
             sr_glRendererInit();
 
+#if SDL_VERSION_ATLEAST(2,0,0)
+            SDL_SetEventFilter(&filter, 0);
+#else
             SDL_SetEventFilter(&filter);
-
+#endif
             //std::cout << "set filter\n";
 
             sg_SetIcon();

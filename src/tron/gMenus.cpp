@@ -221,12 +221,20 @@ public:
     {
 #ifndef DEDICATED
         // fetch valid screen modes from SDL
+        int i;
+#if SDL_VERSION_ATLEAST(2,0,0)
+        int modes = SDL_GetNumDisplayModes(0);
+
+        // Check is there are any modes available
+        if(modes < 0)
+#else
         SDL_Rect **modes;
         modes=SDL_ListModes(NULL, SDL_FULLSCREEN|SDL_OPENGL);
 
         // Check is there are any modes available
-        int i;
         if(modes == 0 || modes == (SDL_Rect **)-1)
+#endif
+
         {
             // add all fixed resolutions
             for ( i = ArmageTron_Custom; i>=0; --i )
@@ -247,10 +255,19 @@ public:
             rScreenSize maxSize(0,0);
 
             // fill in available modes (avoid duplicates)
+#if SDL_VERSION_ATLEAST(2,0,0)
+            for ( i = 0 ; i < modes ; i++ )
+            {
+                SDL_DisplayMode mode;
+                // add mode (if it's new)
+                if (0>SDL_GetDisplayMode(0, i, &mode)) continue;
+                rScreenSize size(mode.w, mode.h);
+ #else
             for(i=0;modes[i];++i)
             {
                 // add mode (if it's new)
                 rScreenSize size(modes[i]->w, modes[i]->h);
+#endif
                 NewChoice( size );
                 if ( maxSize.width < size.width )
                     maxSize.width = size.width;
@@ -1257,7 +1274,12 @@ static bool toggle_fullscreen_func( REAL x )
 #endif
 
     // only do anything if the application is active (work around odd bug)
+#if SDL_VERSION_ATLEAST(2,0,0)
+    Uint32 flags = SDL_GetWindowFlags(sr_screen);
+    if ((flags & SDL_WINDOW_SHOWN) && !(flags & SDL_WINDOW_MINIMIZED))
+#else
     if ( x > 0 && ( SDL_GetAppState() & SDL_APPACTIVE ) )
+#endif
     {
         currentScreensetting.fullscreen = !currentScreensetting.fullscreen;
         sr_ReinitDisplay();

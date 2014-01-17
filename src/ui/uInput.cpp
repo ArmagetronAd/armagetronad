@@ -179,10 +179,18 @@ class uKeyInput
 public:
     uKeyInput()
     {
+#if SDL_VERSION_ATLEAST(2,0,0)
+        for ( int i = 0; i <= SDL_NUM_SCANCODES; ++i )
+#else
         for ( int i = 0; i <= SDLK_LAST; ++i )
+#endif
         {
 #ifndef DEDICATED
+#if SDL_VERSION_ATLEAST(2,0,0)
+            char const * ID_Raw = SDL_GetScancodeName(static_cast< SDL_Scancode >( i ) );
+#else
             char const * ID_Raw = SDL_GetKeyName(static_cast< SDLKey >( i ) );
+#endif
 #else
             char const * ID_Raw = "unknown key";
 #endif
@@ -218,7 +226,11 @@ public:
     {
     }
 
+#if SDL_VERSION_ATLEAST(2,0,0)
+    uInput * sdl_keys[SDL_NUM_SCANCODES+1];
+#else
     uInput * sdl_keys[SDLK_LAST+1];
+#endif
 };
 
 static uKeyInput const & su_GetKeyInput()
@@ -461,11 +473,12 @@ public:
         Down = 3
     };
 
-    uJoystick( int id_ ): id( id_ )
+    uJoystick( int id_ ):id(id_)
     {
         tASSERT( id >= 0 && id < SDL_NumJoysticks() );
 
-        name = SDL_JoystickName( id );
+        SDL_Joystick * stick = SDL_JoystickOpen( id );
+        name = SDL_JoystickName( stick );
 
         std::ostringstream iName;
         iName << "JOYSTICK_";
@@ -483,7 +496,6 @@ public:
 
         internalName = iName.str();
 
-        SDL_Joystick * stick = SDL_JoystickOpen( id );
         numAxes = SDL_JoystickNumAxes( stick );
         numButtons = SDL_JoystickNumButtons( stick );
         numBalls = SDL_JoystickNumBalls( stick );
@@ -878,10 +890,18 @@ static void su_TransformEvent( SDL_Event & e, std::vector< uTransformEventInfo >
     case SDL_KEYDOWN:
     case SDL_KEYUP:
         {
+#if SDL_VERSION_ATLEAST(2,0,0)
+            SDL_Keysym &c = e.key.keysym;
+#else
             SDL_keysym &c = e.key.keysym;
+#endif
 
             info.push_back( uTransformEventInfo(
+#if SDL_VERSION_ATLEAST(2,0,0)
+                                su_GetKeyInput().sdl_keys[ c.scancode ],
+#else
                                 su_GetKeyInput().sdl_keys[ c.sym ],
+#endif
                                 ( e.type == SDL_KEYDOWN ) ? 1 : 0 ) );
 
             break;
@@ -1591,7 +1611,11 @@ bool uMenuItemInput::Event(SDL_Event &e)
 #ifndef DEDICATED
     if ( e.type == SDL_KEYDOWN )
     {
+#if SDL_VERSION_ATLEAST(2,0,0)
+        SDL_Keysym &c = e.key.keysym;
+#else
         SDL_keysym &c = e.key.keysym;
+#endif
         if (!active)
         {
             if (c.sym==SDLK_DELETE || c.sym==SDLK_BACKSPACE)

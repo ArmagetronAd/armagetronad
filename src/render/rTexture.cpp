@@ -221,7 +221,10 @@ void rSurface::Create( char const * fileName, tPath const *path )
 #ifndef DEDICATED
     sr_LockSDL();
 
+#if !SDL_VERSION_ATLEAST(2,0,0)
+    // this function was already a no-op for backward compatibility in SDL_image 1.2, as stated in corresponding header
     IMG_InvertAlpha(true);
+#endif
 
     // find path of image and load it
     SDL_Surface *surface;
@@ -393,8 +396,9 @@ void rSurface::CopyFrom( rSurface const & other )
 // surface cache
 typedef std::pair< tString, tPath const * > rSurfaceCacheKey;
 
-struct rSurfaceCacheValue
+class rSurfaceCacheValue
 {
+public:
     rSurface surface;
     bool used;
 

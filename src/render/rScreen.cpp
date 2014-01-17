@@ -59,7 +59,12 @@ tCONFIG_ENUM( rResolution );
 tCONFIG_ENUM( rColorDepth );
 tCONFIG_ENUM( rVSync );
 
-SDL_Surface *sr_screen=NULL; // our window
+#if SDL_VERSION_ATLEAST(2,0,0)
+SDL_Window   *sr_screen=NULL;
+SDL_Renderer *sr_screenRenderer=NULL;
+#else
+SDL_Surface  *sr_screen=NULL; // our window
+#endif
 
     #ifndef DEDICATED
 #ifndef SDL_OPENGL
@@ -115,7 +120,12 @@ rScreenSettings currentScreensetting(sr_DesktopScreensizeSupported() ? ArmageTro
 bool sr_DesktopScreensizeSupported()
 {
 #ifndef DEDICATED
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+    SDL_version sdlVersion;
+     SDL_GetVersion(&sdlVersion);
+#else
     SDL_version const & sdlVersion = *SDL_Linked_Version();
+#endif
 
     return
     sdlVersion.major > 1 || 
@@ -439,7 +449,11 @@ static void sr_SetSwapControl( int frames, bool after = false )
     // use SDL, requires 1.2.10
     #if SDL_VERSION_ATLEAST(1, 2, 10)
     if ( !success )
+    #if SDL_VERSION_ATLEAST(2, 0, 0)
+        SDL_GL_SetSwapInterval( frames );
+    #else
         SDL_GL_SetAttribute( SDL_GL_SWAP_CONTROL, frames );
+    #endif
     #endif
 }
 
@@ -500,6 +514,59 @@ static void sr_CompleteGLAttributes()
 // bool sr_useDirectX = false;
 // static bool use_directx_back = false;
 
+#if SDL_VERSION_ATLEAST(2,0,0)
+int SDL_VideoModeOK(int width, int height, int bpp, Uint32 flags) {
+    int i, actual_bpp = 0;
+
+    if (!(flags & SDL_WINDOW_FULLSCREEN_DESKTOP)) {
+        SDL_DisplayMode mode;
+        SDL_GetDesktopDisplayMode(0, &mode);
+        return SDL_BITSPERPIXEL(mode.format);
+    }
+
+    for (i = 0; i < SDL_GetNumDisplayModes(0); ++i) {
+        SDL_DisplayMode mode;
+        SDL_GetDisplayMode(0, i, &mode);
+        if (!mode.w || !mode.h || (width == mode.w && height == mode.h)) {
+            if (!mode.format) {
+                return bpp;
+            }
+            if (SDL_BITSPERPIXEL(mode.format) >= (Uint32) bpp) {
+                actual_bpp = SDL_BITSPERPIXEL(mode.format);
+            }
+        }
+    }
+    return actual_bpp;
+}
+
+bool IsWindowActive(void) {
+    Uint32 flags = 0;
+
+    flags = SDL_GetWindowFlags(sr_screen);
+    if ((flags & SDL_WINDOW_SHOWN) && !(flags & SDL_WINDOW_MINIMIZED)) {
+        return true;
+    }
+    return false;
+}
+
+int SDL_EnableUNICODE(int enable) {
+    static int SDL_enabled_UNICODE=0;
+    int previous = SDL_enabled_UNICODE;
+
+    switch (enable) {
+    case 1:
+        SDL_enabled_UNICODE = 1;
+        SDL_StartTextInput();
+        break;
+    case 0:
+        SDL_enabled_UNICODE = 0;
+        SDL_StopTextInput();
+        break;
+    }
+    return previous;
+}
+#endif
+
 static bool lowlevel_sr_InitDisplay(){
     #ifndef DEDICATED
     rScreenSize & res = currentScreensetting.fullscreen ? currentScreensetting.res : currentScreensetting.windowSize;
@@ -527,6 +594,23 @@ static bool lowlevel_sr_InitDisplay(){
         sr_desktopWidth = 800;
         sr_desktopHeight = 600;
         
+#if SDL_VERSION_ATLEAST(2,0,0)
+        SDL_DisplayMode mode;
+        if (!SDL_GetDesktopDisplayMode(0, &mode)) {
+            sr_desktopWidth  = mode.w;
+            sr_desktopHeight = mode.h;
+
+            int bpp;
+            Uint32 Rmask, Gmask, Bmask, Amask;
+
+            if (!SDL_PixelFormatEnumToMasks(mode.format, &bpp, &Rmask, &Gmask, &Bmask, &Amask)) {
+                desktopCD    = bpp;
+                desktopCD_R  = Rmask;
+                desktopCD_G  = Gmask;
+                desktopCD_B  = Bmask;
+            }
+        }
+#else
         const SDL_VideoInfo* videoInfo     = SDL_GetVideoInfo( );
         if( videoInfo )
         {
@@ -553,6 +637,7 @@ static bool lowlevel_sr_InitDisplay(){
             }
 #endif
         }
+#endif // #if SDL_VERSION_ATLEAST(2,0,0)
     }
 
     if (!sr_screen)
@@ -606,12 +691,22 @@ static bool lowlevel_sr_InitDisplay(){
 #ifndef FORCE_WINDOW
         if (currentScreensetting.fullscreen)
         {
+#if SDL_VERSION_ATLEAST(2,0,0)
+            attrib=SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN_DESKTOP;
+            SDL_SetWindowFullscreen(sr_screen, SDL_WINDOW_FULLSCREEN_DESKTOP);
+#else
             attrib=SDL_OPENGL | SDL_FULLSCREEN;
+#endif
         }
         else
 #endif
         {
+#if SDL_VERSION_ATLEAST(2,0,0)
+            attrib=SDL_WINDOW_OPENGL;
+            SDL_SetWindowFullscreen(sr_screen, 0);
+#else
             attrib=SDL_OPENGL;
+#endif
         }
 
     #ifdef FORCE_WINDOW
@@ -639,12 +734,21 @@ static bool lowlevel_sr_InitDisplay(){
                 // check if the other fs/windowed mode is better
                 int CD_fsinv = SDL_VideoModeOK
                                (sr_screenWidth, sr_screenHeight,   fullCD,
+#if SDL_VERSION_ATLEAST(2,0,0)
+                                attrib^SDL_WINDOW_FULLSCREEN_DESKTOP);
+#else
                                 attrib^SDL_FULLSCREEN);
+#endif
 
                 if (CD_fsinv >= 15){
                     // yes! change the mode
                     currentScreensetting.fullscreen=!currentScreensetting.fullscreen;
+#if SDL_VERSION_ATLEAST(2,0,0)  
+                    attrib ^= SDL_WINDOW_FULLSCREEN_DESKTOP;
+                    SDL_SetWindowFullscreen(sr_screen, SDL_WINDOW_FULLSCREEN_DESKTOP);
+#else
                     attrib ^= SDL_FULLSCREEN;
+#endif          
                     CD = CD_fsinv;
                 }
             }
@@ -671,15 +775,14 @@ static bool lowlevel_sr_InitDisplay(){
 
         // only reinit the screen if the desktop res detection hasn't left us
         // with a perfectly good one.
-        if ( !sr_screen && (sr_screen=SDL_SetVideoMode
-                        (sr_screenWidth, sr_screenHeight,   CD,
-                         attrib))
-                == NULL)
-        {
-            if((sr_screen=SDL_SetVideoMode
-                          (sr_screenWidth, sr_screenHeight,    CD,
-                           attrib^SDL_FULLSCREEN))==NULL )
-            {
+#if SDL_VERSION_ATLEAST(2,0,0)
+        if ( !sr_screen && SDL_CreateWindowAndRenderer(sr_screenWidth, sr_screenHeight, attrib, &sr_screen, &sr_screenRenderer)) {
+            if ( SDL_CreateWindowAndRenderer(sr_screenWidth, sr_screenHeight, attrib^SDL_WINDOW_FULLSCREEN_DESKTOP,
+                                             &sr_screen, &sr_screenRenderer)) {
+#else
+        if ( !sr_screen && (sr_screen=SDL_SetVideoMode (sr_screenWidth, sr_screenHeight, CD, attrib)) == NULL) {
+            if((sr_screen=SDL_SetVideoMode (sr_screenWidth, sr_screenHeight, CD, attrib^SDL_FULLSCREEN))==NULL ) {
+#endif
                 lastError.Clear();
                 lastError << "Couldn't set video mode: ";
                 lastError << SDL_GetError();
@@ -824,7 +927,11 @@ static bool lowlevel_sr_InitDisplay(){
     }
 
     // wait for activation if we were ALT-Tabbed away:
+#if SDL_VERSION_ATLEAST(2,0,0)
+    while ( !IsWindowActive() )
+#else
     while ( (SDL_GetAppState() & SDL_APPACTIVE) == 0)
+#endif
     {
         SDL_Delay(100);
         SDL_PumpEvents();
@@ -837,7 +944,11 @@ static bool lowlevel_sr_InitDisplay(){
 
 
     // wait for activation if we were ALT-Tabbed away:
+#if SDL_VERSION_ATLEAST(2,0,0)
+    while ( !IsWindowActive() )
+#else
     while ( (SDL_GetAppState() & SDL_APPACTIVE) == 0)
+#endif
     {
         SDL_Delay(100);
         SDL_PumpEvents();
@@ -1197,7 +1308,11 @@ void sr_SetWindowTitle(tString s)
 #endif
     {
 #ifndef DEDICATED
+#if SDL_VERSION_ATLEAST(2,0,0)
+        SDL_SetWindowTitle(sr_screen, s);
+#else
         SDL_WM_SetCaption(s, s);
+#endif
 #endif
     }
 }

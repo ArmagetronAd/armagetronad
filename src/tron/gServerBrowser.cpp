@@ -823,9 +823,9 @@ bool gServerMenuItem::Event( SDL_Event& event )
         default:
             break;
         }
-        switch (event.key.keysym.unicode)
+        switch (event.key.keysym.sym)
         {
-        case '+':
+        case SDLK_PLUS:
             if ( server )
             {
                 server->SetScoreBias( server->GetScoreBias() + 10 );
@@ -835,7 +835,7 @@ bool gServerMenuItem::Event( SDL_Event& event )
 
             return true;
             break;
-        case '-':
+        case SDLK_MINUS:
             if ( server )
             {
                 server->SetScoreBias( server->GetScoreBias() - 10 );
@@ -845,7 +845,7 @@ bool gServerMenuItem::Event( SDL_Event& event )
 
             return true;
             break;
-        case 'b':
+        case SDLK_b:
             if ( server )
             {
                 if (favorite_ ) {

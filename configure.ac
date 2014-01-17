@@ -51,7 +51,7 @@ version=$VERSION
 AC_SUBST(version)
 
 AC_ARG_VAR(XML2_CONFIG,[Configuration script of libxml2 to use, defaults to xml2-config])
-AC_ARG_VAR(SDL_CONFIG,[Configuration script of SDL to use, defaults to sdl-config])
+AC_ARG_VAR(SDL_CONFIG,[Configuration script of SDL to use, defaults to sdl2-config])
 AC_ARG_VAR(FREETYPE_CONFIG,[Configuration script of freetype to use, defaults to freetype-config])
 AC_ARG_VAR(CXXFLAGS,Flags passed to the C++ compiler)
 AC_ARG_VAR(DEBUGLEVEL,[Debug level for developers, normal users can safely ignore it. Accepted values go from 0 to 5. See README-DEVELOPER for details.])
@@ -685,7 +685,7 @@ GENERICUNIX
 ]
 )
 
-SDL_CONFIG_DEFAULT=sdl-config
+SDL_CONFIG_DEFAULT=sdl2-config
 
 dnl *************************************************
 dnl GL AND  MATHLIB SELECTION ( SYSTEM DEPENDANT)
@@ -910,7 +910,7 @@ dnl *************************************************
 dnl         SDL
 dnl *************************************************
 
-test -z "$SDL_CONFIG" && SDL_CONFIG=sdl-config
+test -z "$SDL_CONFIG" && SDL_CONFIG=sdl2-config
 
 AC_MSG_CHECKING(whether SDL is installed)
 if SDLLIBS=`${SDL_CONFIG} --libs`; then
@@ -936,10 +936,10 @@ if test x$enable_sound = xyes; then
  	AC_DEFINE(HAVE_SDL_FOR_SOUND, 1,  [Define if you have SDL_sound, which is part of the core SDL])
 
 	dnl now check for sdl_mixer
- 	AC_CHECK_LIB(SDL_mixer, Mix_OpenAudio,
-		[AC_DEFINE(HAVE_LIBSDL_MIXER, 1, [Define if you have the SDL_mixer library (-lSDL_mixer).])
-			LIBS="-lSDL_mixer $LIBS"],
- 		[AC_MSG_ERROR([SDL_mixer library not found. It is required for now. Sorry.])],
+ 	AC_CHECK_LIB(SDL2_mixer, Mix_OpenAudio,
+		[AC_DEFINE(HAVE_LIBSDL_MIXER, 1, [Define if you have the SDL2_mixer library (-lSDL2_mixer).])
+			LIBS="-lSDL2_mixer $LIBS"],
+ 		[AC_MSG_ERROR([SDL2_mixer library not found. It is required for now. Sorry.])],
 		[])
 
 	dnl now we need to know which audio formats to use
@@ -1148,20 +1148,20 @@ dnl	libjpeg not found. Expect small graphical errors ( missing moviepack title s
 dnl	)
 dnl )
 
-AC_CHECK_LIB(SDL_image, IMG_Load,,
+AC_CHECK_LIB(SDL2_image, IMG_Load,,
 dnl AC_CHECK_LIB(IMG, main,,
-AC_MSG_ERROR([You need the library SDL_image to compile ${progtitle}.]
+AC_MSG_ERROR([You need the library SDL2_image to compile ${progtitle}.]
 dnl )
 ))
 
-dnl look for the right header for SDL_image
+dnl look for the right header for SDL2_image
 AC_CHECK_HEADERS(SDL_image.h,,
 [
 AC_MSG_WARN([SDL_image header not found where it should be ( the SDL include directory ).
 Trying fallback.])
-AC_CHECK_HEADERS(SDL/SDL_image.h,,
+AC_CHECK_HEADERS(SDL2/SDL_image.h,,
 [AC_MSG_WARN([
-SDL_image header not found. The library is there, so something must be unusual
+SDL2_image header not found. The library is there, so something must be unusual
 in your setup: SDL_image.h does not reside in the same folder as the rest of the SDL
 inlcudes and not in any SDL subdirectory in the inclue path. If you know the
 correct path to it, edit src/render/rTexture.cpp and enter it there.])]
@@ -1206,7 +1206,7 @@ AC_CHECK_FUNCS(wmemset)
 test -z "`$CXX --version | grep '(GCC)'`" || CXXFLAGS="`echo $CXXFLAGS | sed -e 's,-Os,-O2,g' `" CFLAGS="`echo $CFLAGS | sed -e 's,-Os,-O2,g' `"
 
 if test "$enable_sound" = "yes"; then
-AC_DEFINE(HAVE_LIBSDL_MIXER, 1, [Use SDL_mixer])
+AC_DEFINE(HAVE_LIBSDL_MIXER, 1, [Use SDL2_mixer])
 fi
 
 # define
