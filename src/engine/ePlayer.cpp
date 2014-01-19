@@ -5223,6 +5223,13 @@ public:
     {
         delete this;
     }
+
+    virtual void OnBan()
+    {
+        // Don't punish the player with restrictive spam checks when they
+        // return from their ban.
+        chatSpam.ResetSpam();
+    }
 };
 
 static eMachineDecoratorSpam & se_GetSpam( ePlayerNetID & p )
