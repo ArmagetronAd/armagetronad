@@ -90,6 +90,12 @@ void nSpamProtection::ResetTime()
     now += ahead;
     spamProtectTime_ = now;
  }
+ 
+ void nSpamProtection::ResetSpam()
+ {
+     spamProtect_ = 0;
+     numWarnings_ = 0;
+ }
 
 nSpamProtection::Level	nSpamProtection::CheckSpam( REAL spamlevel, int userToKick, tOutput const & reason )	// check if someone is spamming
 {
