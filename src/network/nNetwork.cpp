@@ -4994,6 +4994,11 @@ void nMachine::Ban( REAL time )
                 sn_DisconnectUser( i, banReason_ );
             }
         }
+
+        for ( nMachineDecorator *decorator = decorators_; decorator != NULL; decorator = decorator->Next() )
+        {
+            decorator->OnBan();
+        }
     }
 
     if ( sn_printBans )
@@ -5383,6 +5388,10 @@ static tConfItemFunc sn_listBanConf("BAN_LIST",&sn_ListBanConf);
 // *******************************************************************************
 
 void nMachineDecorator::OnDestroy( void )
+{
+}
+
+void nMachineDecorator::OnBan()
 {
 }
 

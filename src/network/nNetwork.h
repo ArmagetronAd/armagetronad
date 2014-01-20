@@ -709,6 +709,7 @@ class nMachineDecorator: public tListItem< nMachineDecorator >
 {
 public:
     inline void Destroy();         //!< called when machine gets destroyed
+    virtual void OnBan();          //!< called when machine gets banned
 protected:
     virtual void OnDestroy();      //!< called when machine gets destroyed
 

@@ -4665,6 +4665,13 @@ public:
     {
         delete this;
     }
+
+    virtual void OnBan()
+    {
+        // Don't punish the player with restrictive spam checks when they
+        // return from their ban.
+        chatSpam.ResetSpam();
+    }
 };
 
 static eMachineDecoratorSpam & se_GetSpam( ePlayerNetID & p )
@@ -5975,6 +5982,34 @@ static void se_CheckAccessLevel( tAccessLevel & level, tString const & authName 
     }
 }
 
+static tAccessLevel se_announceLoginAccessLevel = tAccessLevel_Default;
+static tSettingItem< tAccessLevel > se_announceLoginAccessLevelConf( "ACCESS_LEVEL_ANNOUNCE_LOGIN", se_announceLoginAccessLevel );
+static tAccessLevelSetter se_announceLoginAccessLevelConfLevel( se_announceLoginAccessLevelConf, tAccessLevel_Owner );
+
+static bool se_HideLoginAnnouncement( ePlayerNetID const *hider, ePlayerNetID const *seeker )
+{
+    return hider->GetAccessLevel() > se_announceLoginAccessLevel || se_Hide( hider, seeker );
+}
+
+static bool se_CanHideLoginAnnouncement( ePlayerNetID const *hider )
+{
+    return hider->GetAccessLevel() > se_announceLoginAccessLevel || se_CanHide( hider );
+}
+
+static void se_AnnounceLogin( tOutput const &out, ePlayerNetID const *player, ePlayerNetID const *admin )
+{
+    HIDEFUNC hideFunc = &se_HideLoginAnnouncement;
+    CANHIDEFUNC canHideFunc = &se_CanHideLoginAnnouncement;
+
+    // /op and /deop don't need to account for ACCESS_LEVEL_ANNOUNCE_LOGIN.
+    if ( admin )
+    {
+        hideFunc = &se_Hide;
+        canHideFunc = &se_CanHide;
+    }
+    se_SecretConsoleOut( out, player, hideFunc, admin, player, canHideFunc );
+}
+
 void ePlayerNetID::Authenticate( tString const & authName, tAccessLevel accessLevel_, ePlayerNetID const * admin, bool messages )
 {
     tString newAuthenticatedName( se_EscapeName( authName ).c_str() );
@@ -6037,16 +6072,15 @@ void ePlayerNetID::Authenticate( tString const & authName, tAccessLevel accessLe
             {
                 if ( GetAccessLevel() != tAccessLevel_Remote )
                 {
-                    se_SecretConsoleOut( tOutput( "$login_message_special",
-                                                  GetName(),
-                                                  newAuthenticatedName,
-                                                  tCurrentAccessLevel::GetName( GetAccessLevel() ),
-                                                  order ), this, &se_Hide, admin, 0, &se_CanHide );
+                    tOutput out( "$login_message_special", GetName(), newAuthenticatedName, tCurrentAccessLevel::GetName( GetAccessLevel() ), order );
+                    se_AnnounceLogin( out, this, admin );                
                 }
                 else
                 {
-                    se_SecretConsoleOut( tOutput( "$login_message", GetName(), newAuthenticatedName, order ), this, &se_Hide, admin, 0, &se_CanHide );
+                    tOutput out( "$login_message", GetName(), newAuthenticatedName, order );
+                    se_AnnounceLogin( out, this, admin );
                 }
+
             }
         }
     }
@@ -6058,15 +6092,17 @@ void ePlayerNetID::Authenticate( tString const & authName, tAccessLevel accessLe
 }
 
 void ePlayerNetID::DeAuthenticate( ePlayerNetID const * admin, bool messages ){
-    if ( IsAuthenticated() )
+    if ( IsAuthenticated() && messages )
     {
-        if ( admin && messages )
+        if ( admin )
         {
-            se_SecretConsoleOut( tOutput( "$logout_message_deop", GetName(), GetFilteredAuthenticatedName(), admin->GetLogName() ), this, &se_Hide, admin, 0, &se_CanHide );
+            tOutput out( "$logout_message_deop", GetName(), GetFilteredAuthenticatedName(), admin->GetLogName() );
+            se_AnnounceLogin( out, this, admin );
         }
-        else if ( messages )
+        else
         {
-            se_SecretConsoleOut( tOutput( "$logout_message", GetName(), GetFilteredAuthenticatedName() ), this, &se_Hide, 0, 0, &se_CanHide );
+            tOutput out( "$logout_message", GetName(), GetFilteredAuthenticatedName() );
+            se_AnnounceLogin( out, this, admin );
         }
     }
 
