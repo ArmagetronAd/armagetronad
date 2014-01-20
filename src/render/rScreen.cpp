@@ -365,13 +365,14 @@ rScreenSettings::rScreenSettings( rResolution r, bool fs, rColorDepth cd, bool c
 }
 
 void sr_ReinitDisplay(){
+#if !SDL_VERSION_ATLEAST(2, 0, 0)
     sr_ExitDisplay();
+#endif
     if (!sr_InitDisplay()){
         tERR_ERROR("Oops. Failed to reinit video hardware. "
                    "Resetting to defaults..\n");
         exit(-1);
     }
-
 }
 
 
@@ -518,7 +519,7 @@ static void sr_CompleteGLAttributes()
 int SDL_VideoModeOK(int width, int height, int bpp, Uint32 flags) {
     int i, actual_bpp = 0;
 
-    if (!(flags & SDL_WINDOW_FULLSCREEN_DESKTOP)) {
+    if (!(flags & SDL_WINDOW_FULLSCREEN)) {
         SDL_DisplayMode mode;
         SDL_GetDesktopDisplayMode(0, &mode);
         return SDL_BITSPERPIXEL(mode.format);
@@ -692,8 +693,8 @@ static bool lowlevel_sr_InitDisplay(){
         if (currentScreensetting.fullscreen)
         {
 #if SDL_VERSION_ATLEAST(2,0,0)
-            attrib=SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN_DESKTOP;
-            SDL_SetWindowFullscreen(sr_screen, SDL_WINDOW_FULLSCREEN_DESKTOP);
+            attrib=SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN;
+            SDL_SetWindowFullscreen(sr_screen, SDL_WINDOW_FULLSCREEN);
 #else
             attrib=SDL_OPENGL | SDL_FULLSCREEN;
 #endif
@@ -735,7 +736,7 @@ static bool lowlevel_sr_InitDisplay(){
                 int CD_fsinv = SDL_VideoModeOK
                                (sr_screenWidth, sr_screenHeight,   fullCD,
 #if SDL_VERSION_ATLEAST(2,0,0)
-                                attrib^SDL_WINDOW_FULLSCREEN_DESKTOP);
+                                attrib^SDL_WINDOW_FULLSCREEN);
 #else
                                 attrib^SDL_FULLSCREEN);
 #endif
@@ -744,8 +745,8 @@ static bool lowlevel_sr_InitDisplay(){
                     // yes! change the mode
                     currentScreensetting.fullscreen=!currentScreensetting.fullscreen;
 #if SDL_VERSION_ATLEAST(2,0,0)  
-                    attrib ^= SDL_WINDOW_FULLSCREEN_DESKTOP;
-                    SDL_SetWindowFullscreen(sr_screen, SDL_WINDOW_FULLSCREEN_DESKTOP);
+                    attrib ^= SDL_WINDOW_FULLSCREEN;
+                    SDL_SetWindowFullscreen(sr_screen, SDL_WINDOW_FULLSCREEN);
 #else
                     attrib ^= SDL_FULLSCREEN;
 #endif          
@@ -767,17 +768,19 @@ static bool lowlevel_sr_InitDisplay(){
             sr_screenWidth = sr_desktopWidth;
             sr_screenHeight = sr_desktopHeight;
         }
+#if !SDL_VERSION_ATLEAST(2,0,0)  
         else
         {
             // have the screen reinited
             sr_screen = NULL;
         }
+#endif
 
         // only reinit the screen if the desktop res detection hasn't left us
         // with a perfectly good one.
 #if SDL_VERSION_ATLEAST(2,0,0)
         if ( !sr_screen && SDL_CreateWindowAndRenderer(sr_screenWidth, sr_screenHeight, attrib, &sr_screen, &sr_screenRenderer)) {
-            if ( SDL_CreateWindowAndRenderer(sr_screenWidth, sr_screenHeight, attrib^SDL_WINDOW_FULLSCREEN_DESKTOP,
+            if ( SDL_CreateWindowAndRenderer(sr_screenWidth, sr_screenHeight, attrib^SDL_WINDOW_FULLSCREEN,
                                              &sr_screen, &sr_screenRenderer)) {
 #else
         if ( !sr_screen && (sr_screen=SDL_SetVideoMode (sr_screenWidth, sr_screenHeight, CD, attrib)) == NULL) {
@@ -801,6 +804,40 @@ static bool lowlevel_sr_InitDisplay(){
 
         SDL_EnableUNICODE(1);
     }
+#if SDL_VERSION_ATLEAST(2,0,0)
+    // SDL2 can resize window or toggle fullscreen without recreating a new window and therefore keeping existing GL context.
+    else
+    {
+        if (currentScreensetting.fullscreen)
+        {
+            // if desktop resolution was selected, pick it
+            if ( sr_screenWidth + sr_screenHeight == 0 ) {
+                SDL_SetWindowFullscreen(sr_screen, 0);
+                sr_screenWidth = sr_desktopWidth;
+                sr_screenHeight = sr_desktopHeight;
+                SDL_SetWindowFullscreen(sr_screen, SDL_WINDOW_FULLSCREEN_DESKTOP);
+            } else {
+                SDL_SetWindowFullscreen(sr_screen, 0);
+                SDL_SetWindowSize(sr_screen, sr_screenWidth, sr_screenHeight);
+                SDL_SetWindowFullscreen(sr_screen, SDL_WINDOW_FULLSCREEN);
+            }
+        }
+        else
+        {
+            // Set windowed mode and size accordingly
+            if (!SDL_SetWindowFullscreen(sr_screen, 0)) {
+                SDL_SetWindowSize(sr_screen, sr_screenWidth, sr_screenHeight);
+                SDL_SetWindowPosition(sr_screen, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+            } else {
+                lastError.Clear();
+                lastError << "Couldn't set video mode: ";
+                lastError << SDL_GetError();
+                std::cerr << lastError << '\n';
+                return false;
+            }
+        }
+    }
+#endif
 
     #ifndef DEDICATED
     gl_vendor.Clear();
@@ -990,6 +1027,7 @@ bool sr_InitDisplay(){
         st_SaveConfig();
 
     #ifdef MACOSX
+    #if !SDL_VERSION_ATLEAST(2,0,0)
         // init the screen once in windowed mode
         static bool first = true;
         if ( first && currentScreensetting.fullscreen )
@@ -1006,6 +1044,7 @@ bool sr_InitDisplay(){
 
             currentScreensetting.fullscreen = true;
         }
+    #endif
     #endif
 
         sr_LockSDL();
@@ -1052,9 +1091,15 @@ void sr_ExitDisplay(){
 
     if (sr_screen){
         sr_LockSDL();
+#if SDL_VERSION_ATLEAST(2,0,0)
+        SDL_SetWindowFullscreen(sr_screen, 0);
+        SDL_DestroyRenderer(sr_screenRenderer);
+        SDL_DestroyWindow(sr_screen);
+#else
         // z-man: according to man SDL_SetVideoSurface, screen should not bee freed.
         // SDL_FreeSurface(sr_screen);
         sr_screen=NULL;
+#endif
         sr_UnlockSDL();
         //SDL_Quit();
     }
