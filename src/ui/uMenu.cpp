@@ -1046,7 +1046,7 @@ bool uMenuItemString::Event(SDL_Event &e){
 //        fprintf(stderr, "Keyboard: text input \"%s\" %i\n", e.text.text, utf8);
         if ( utf8!=0 && e.text.text[0] != '\n' )
             ret = InsertChar(utf8);
-            fprintf(stderr, "UTF8 value: %i\n", utf8);
+//            fprintf(stderr, "UTF8 value: %i\n", utf8);
     }
     else if (e.type==SDL_TEXTEDITING) {
 //        fprintf(stderr, "text editing \"%s\", selected range (%d, %d)\n",
