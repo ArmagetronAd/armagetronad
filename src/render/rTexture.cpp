@@ -275,22 +275,31 @@ void rSurface::Create( SDL_Surface * surface )
             break;
 
         case 3:
-            format_ = GL_RGB;
+            if (surface_->format->Rmask == 0x000000ff)
+                format_ = GL_RGB;
+            else
+                format_ = GL_BGR; 
             break;
 
         case 4:
-            format_ = GL_RGBA;
+            if (surface_->format->Rmask == 0x000000ff)
+                format_ = GL_RGBA;
+            else
+                format_ = GL_BGRA; 
             break;
 
         default:
             {
                 // fallback: convert the texture into a known format.
-
                 SDL_Surface *dummy =
                     SDL_CreateRGBSurface(SDL_SWSURFACE, 1, 1,
                                          32,
-                                         0x0000FF, 0x00FF00,
-                                         0xFF0000 ,0xFF000000);
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+                                         0xFF0000, 0x00FF00, 0x0000FF 
+#else
+                                         0x0000FF, 0x00FF00, 0xFF0000 
+#endif
+                                         ,0xFF000000);
 
                 SDL_Surface *convtex =
                     SDL_ConvertSurface(surface_, dummy->format, SDL_SWSURFACE);
@@ -299,7 +308,11 @@ void rSurface::Create( SDL_Surface * surface )
                 surface_ = convtex;
                 SDL_FreeSurface(dummy);
 
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+                format_ = GL_BGRA;
+#else
                 format_ = GL_RGBA;
+#endif
             }
             break;
         }
