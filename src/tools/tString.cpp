@@ -1287,11 +1287,12 @@ public:
         // leave ASCII characters as they are
         // for (i=127; i>=32; --i)
         // no, leave all visible ISO Latin 1 characters as they are
-        for (i=255; i>=32; --i)
-        {
-            filter[i] = i;
-        }
-        filter[0xA0] = ' '; // non-breaking space
+        for ( i = 32; i <= 126; ++i )
+            filter[ i ] = i;
+        for ( i = 161; i <= 255; ++i )
+            filter[ i ] = i;
+
+        filter[ 160 ] = ' '; // non-breaking space
 
         // map return and tab to space
         SetMap('\n',' ');
