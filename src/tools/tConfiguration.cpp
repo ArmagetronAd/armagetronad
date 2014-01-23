@@ -468,12 +468,16 @@ tConfItemBase::~tConfItemBase()
     }
 }
 
-void tConfItemBase::SaveAll(std::ostream &s){
+void tConfItemBase::ExportAll(){
+    SaveAll(std::cout, true);
+}
+
+void tConfItemBase::SaveAll(std::ostream &s, bool all){
     tConfItemMap & confmap = ConfItemMap();
     for(tConfItemMap::iterator iter = confmap.begin(); iter != confmap.end() ; ++iter)
     {
         tConfItemBase * ci = (*iter).second;
-        if (ci->Save()){
+        if ((!all && ci->Save())||(all && ci->CanSave())){
             s << ci->title << " ";
             ci->WriteVal(s);
             s << "\n";

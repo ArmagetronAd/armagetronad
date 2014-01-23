@@ -276,7 +276,8 @@ public:
 
     static int EatWhitespace(std::istream &s); // eat whitespace from stream; return: first non-whitespace char
 
-    static void SaveAll(std::ostream &s);
+    static void ExportAll();
+    static void SaveAll(std::ostream &s, bool all=false);
     static void LoadAll(std::istream &s, bool record = false );  //! loads configuration from stream
     static void LoadAll(std::ifstream &s, bool record = false );  //! loads configuration from file
     static void LoadLine(std::istream &s); //! loads one configuration line

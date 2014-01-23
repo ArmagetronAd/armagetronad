@@ -1746,7 +1746,7 @@ void init_game_objects(eGrid *grid){
             gSpawnPoint *spawn = Arena.LeastDangerousSpawnPoint();
             spawnPointsUsed++;
 
-            // if the spawn points are grouped, make sure the last player is not in a goup of his
+            // if the spawn points are grouped, make sure the last player is not in a group of his
             // own by skipping one spawnpoint
             if ( ( eTeam::teams(0)->IsHuman() || eTeam::teams(0)->NumPlayers() == 1 ) && sg_spawnPointGroupSize > 2 && ( spawnPointsUsed % sg_spawnPointGroupSize == sg_spawnPointGroupSize - 1 ) )
             {

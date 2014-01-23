@@ -93,6 +93,11 @@ private:
         {
             windowed_=true;
         }
+        else if ( parser.GetSwitch( "--exportallcfg" ) )
+        {
+            tConfItemBase::ExportAll();
+            exit(0);
+        }
 #ifdef WIN32
         else if ( parser.GetSwitch( "+directx") )
         {
@@ -121,6 +126,7 @@ private:
         << "                               initialisation under MS Windows\n\n";
         s << "\n\nYes, I know this looks ugly. Sorry about that.\n";
 #endif
+        s << "--exportallcfg               : print all configs and settings that can be saved to standard output\n";
 #endif
     }
 };
