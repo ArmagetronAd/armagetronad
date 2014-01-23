@@ -3651,18 +3651,6 @@ void gGame::StateUpdate(){
                 ePlayerNetID::RemoveChatbots();
             }
 
-            {
-                // default include files are executed at owner level
-                tCurrentAccessLevel level( tAccessLevel_Owner, true );
-
-                // load contents of everytime.cfg for real
-                tString everytime("everytime.cfg");
-                std::ifstream s;
-                if ( tConfItemBase::OpenFile(s, everytime, tConfItemBase::Config ) )
-                    tConfItemBase::ReadFile(s);
-                s.close();
-            }
-
             ePlayerNetID::ApplySubstitutions();
 
             // log scores before players get renamed
@@ -3992,6 +3980,23 @@ void gGame::StateUpdate(){
                     // wait for network messages
                     sn_BasicNetworkSystem.Select( 0.1f );
                     gGame::NetSyncIdle();
+                }
+
+                {
+                    // default include files are executed at owner level
+                    tCurrentAccessLevel level( tAccessLevel_Owner, true );
+
+                    std::ifstream s;
+
+                    // load contents of everytime.cfg for real
+                    static const tString everytime("everytime.cfg");
+                    if ( tConfItemBase::OpenFile(s, everytime, tConfItemBase::Config ) )
+                        tConfItemBase::ReadFile(s);
+
+                    s.close();
+
+                    if ( tConfItemBase::OpenFile(s, everytime, tConfItemBase::Var ) )
+                        tConfItemBase::ReadFile(s);
                 }
             }
 #endif
