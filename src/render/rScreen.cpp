@@ -695,6 +695,7 @@ static bool lowlevel_sr_InitDisplay(){
 #if SDL_VERSION_ATLEAST(2,0,0)
             attrib=SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN;
             SDL_SetWindowFullscreen(sr_screen, SDL_WINDOW_FULLSCREEN);
+            SDL_SetRelativeMouseMode(SDL_TRUE);
 #else
             attrib=SDL_OPENGL | SDL_FULLSCREEN;
 #endif
@@ -705,6 +706,7 @@ static bool lowlevel_sr_InitDisplay(){
 #if SDL_VERSION_ATLEAST(2,0,0)
             attrib=SDL_WINDOW_OPENGL;
             SDL_SetWindowFullscreen(sr_screen, 0);
+            SDL_SetRelativeMouseMode(SDL_FALSE);
 #else
             attrib=SDL_OPENGL;
 #endif
@@ -747,6 +749,7 @@ static bool lowlevel_sr_InitDisplay(){
 #if SDL_VERSION_ATLEAST(2,0,0)  
                     attrib ^= SDL_WINDOW_FULLSCREEN;
                     SDL_SetWindowFullscreen(sr_screen, SDL_WINDOW_FULLSCREEN);
+                    SDL_SetRelativeMouseMode(SDL_TRUE);
 #else
                     attrib ^= SDL_FULLSCREEN;
 #endif          
@@ -810,17 +813,17 @@ static bool lowlevel_sr_InitDisplay(){
     {
         if (currentScreensetting.fullscreen)
         {
+            SDL_SetWindowFullscreen(sr_screen, 0);
             // if desktop resolution was selected, pick it
             if ( sr_screenWidth + sr_screenHeight == 0 ) {
-                SDL_SetWindowFullscreen(sr_screen, 0);
                 sr_screenWidth = sr_desktopWidth;
                 sr_screenHeight = sr_desktopHeight;
                 SDL_SetWindowFullscreen(sr_screen, SDL_WINDOW_FULLSCREEN_DESKTOP);
             } else {
-                SDL_SetWindowFullscreen(sr_screen, 0);
                 SDL_SetWindowSize(sr_screen, sr_screenWidth, sr_screenHeight);
                 SDL_SetWindowFullscreen(sr_screen, SDL_WINDOW_FULLSCREEN);
             }
+            SDL_SetRelativeMouseMode(SDL_TRUE);
         }
         else
         {
@@ -828,6 +831,7 @@ static bool lowlevel_sr_InitDisplay(){
             if (!SDL_SetWindowFullscreen(sr_screen, 0)) {
                 SDL_SetWindowSize(sr_screen, sr_screenWidth, sr_screenHeight);
                 SDL_SetWindowPosition(sr_screen, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+                SDL_SetRelativeMouseMode(SDL_FALSE);
             } else {
                 lastError.Clear();
                 lastError << "Couldn't set video mode: ";
@@ -1093,6 +1097,7 @@ void sr_ExitDisplay(){
         sr_LockSDL();
 #if SDL_VERSION_ATLEAST(2,0,0)
         SDL_SetWindowFullscreen(sr_screen, 0);
+        SDL_SetRelativeMouseMode(SDL_FALSE);
         SDL_DestroyRenderer(sr_screenRenderer);
         SDL_DestroyWindow(sr_screen);
 #else
