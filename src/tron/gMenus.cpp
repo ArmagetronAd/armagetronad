@@ -1276,7 +1276,7 @@ static bool toggle_fullscreen_func( REAL x )
     // only do anything if the application is active (work around odd bug)
 #if SDL_VERSION_ATLEAST(2,0,0)
     Uint32 flags = SDL_GetWindowFlags(sr_screen);
-    if ((flags & SDL_WINDOW_SHOWN) && !(flags & SDL_WINDOW_MINIMIZED))
+    if ( x > 0 && (flags & SDL_WINDOW_SHOWN) && !(flags & SDL_WINDOW_MINIMIZED))
 #else
     if ( x > 0 && ( SDL_GetAppState() & SDL_APPACTIVE ) )
 #endif
