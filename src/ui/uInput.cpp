@@ -847,6 +847,9 @@ struct uTransformEventInfo
     uTransformEventInfo( uInput * input_, float value_ = 1 , bool needsRepeat_ = true ): input(input_), value(value_), needsRepeat(needsRepeat_){}
 };
 
+int GetPlayerCameraClosestDirection(int player);
+int GetPlayerWindingNumber(int player);
+
 // transform SDL event into vector of abstract events
 #ifndef DEDICATED
 static void su_TransformEvent( SDL_Event & e, std::vector< uTransformEventInfo > & info )
@@ -952,14 +955,13 @@ static void su_TransformEvent( SDL_Event & e, std::vector< uTransformEventInfo >
                 }
             }
         }
-        else if (su_enableTouch==2)
+        else if (su_enableTouch>=2)
         {
             static SDL_FingerID finger = 0;
             static float dx=0, dy=0;
             static char count = 0;
             static int previous_dir = -1;
             static int last_time = 0;
-            static const int axes = 4;      // to be replaced by actual real axes number...
 
             if (e.type == SDL_FINGERDOWN) {
                 // if new finger tracking, reset current state
@@ -968,7 +970,7 @@ static void su_TransformEvent( SDL_Event & e, std::vector< uTransformEventInfo >
                     count = 0;
                     dx = 0; dy = 0;
                     last_time = e.tfinger.timestamp;
-                    previous_dir = -1;
+                    previous_dir = su_enableTouch==2 ? -1 : GetPlayerCameraClosestDirection(0);
                 }
             } else if (e.type == SDL_FINGERUP) {
                 // release finger tracking if tracked finger is up
@@ -993,6 +995,7 @@ static void su_TransformEvent( SDL_Event & e, std::vector< uTransformEventInfo >
                         // if move is big enough, process it
                         if (dx*dx+dy*dy>0.0001) {
                             float a = atan2f(dx, -dy);
+                            int axes = GetPlayerWindingNumber(0);
                             a = (a<0?fabs(a+M_PI*2.0f):a) * axes / (M_PI*2.0f);
                             int dir = static_cast<int>(round(a)) % axes; // direction of this move
                             int side = (a-round(a))<0?0:1;               // from which side
