@@ -194,7 +194,7 @@ public:
         {
 #ifndef DEDICATED
 #if SDL_VERSION_ATLEAST(2,0,0)
-            char const * ID_Raw = SDL_GetScancodeName(static_cast< SDL_Scancode >( i ) );
+            char const * ID_Raw = SDL_GetKeyName(SDL_GetKeyFromScancode(static_cast< SDL_Scancode >( i ) ));
 #else
             char const * ID_Raw = SDL_GetKeyName(static_cast< SDLKey >( i ) );
 #endif
@@ -1028,6 +1028,7 @@ static void su_TransformEvent( SDL_Event & e, std::vector< uTransformEventInfo >
     case SDL_KEYUP:
         {
 #if SDL_VERSION_ATLEAST(2,0,0)
+            if (e.key.repeat) break;
             SDL_Keysym &c = e.key.keysym;
 #else
             SDL_keysym &c = e.key.keysym;
