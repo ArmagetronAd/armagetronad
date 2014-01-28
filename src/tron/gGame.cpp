@@ -2491,6 +2491,8 @@ void ConnectToServer(nServerInfoBase *server)
 static tConfItem<int> mor("MAX_OUT_RATE",sn_maxRateOut);
 static tConfItem<int> mir("MAX_IN_RATE",sn_maxRateIn);
 
+static tConfItem<int> mxp("PORT_MAX", gServerBrowser::highPort);
+static tConfItem<int> mip("PORT_MIN", gServerBrowser::lowPort);
 
 static tConfItem<int> pc("PING_CHARITY",pingCharity);
 

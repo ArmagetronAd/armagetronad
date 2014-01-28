@@ -745,6 +745,8 @@ server_ip_help          IP the server listens on
 server_dns_help         If your server is on dynamic IP and you set up a dynamic DNS that always points to it, you can set this variable to the DNS name to help clients remember your server across IP changes.
 server_port_help		Port this server listens on
 client_port_help		Port we try to connect to
+port_max_help       The highest network port that is scanned when looking for a LAN server.
+port_min_help       The lowest network port that is scanned when looking for a LAN server.
 max_clients_help		Maximum number of network clients to accept
 max_clients_high       Warning: MAX_CLIENTS can not be greater than \1. Setting not changed.
 max_clients_low        Warning: MAX_CLIENTS of \1 cannot be lower than 1. Setting not changed.
