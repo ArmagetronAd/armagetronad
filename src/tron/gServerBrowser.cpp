@@ -825,6 +825,7 @@ bool gServerMenuItem::Event( SDL_Event& event )
         }
         switch (event.key.keysym.sym)
         {
+        case SDLK_KP_PLUS:
         case SDLK_PLUS:
             if ( server )
             {
@@ -835,6 +836,7 @@ bool gServerMenuItem::Event( SDL_Event& event )
 
             return true;
             break;
+        case SDLK_KP_MINUS:
         case SDLK_MINUS:
             if ( server )
             {
