@@ -122,7 +122,7 @@ bool sr_DesktopScreensizeSupported()
 #ifndef DEDICATED
 #if SDL_VERSION_ATLEAST(2, 0, 0)
     SDL_version sdlVersion;
-     SDL_GetVersion(&sdlVersion);
+    SDL_GetVersion(&sdlVersion);
 #else
     SDL_version const & sdlVersion = *SDL_Linked_Version();
 #endif
@@ -1305,7 +1305,7 @@ void sr_DepthOffset(bool offset){
     #endif
 }
 
-// set activation staus
+// set activation status
 void sr_Activate(bool active)
 {
     #ifndef DEDICATED

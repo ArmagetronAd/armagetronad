@@ -58,6 +58,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <stdio.h>
 #include <stdlib.h>
 #include <fstream>
+#include <bitset>
 #include "tCrypto.h"
 
 #include "nServerInfo.h"
@@ -319,7 +320,7 @@ static void welcome(){
     {
         bool showSplash = true;
 #ifdef DEBUG
-//        showSplash = false;
+        showSplash = false;
 #endif
 
         // Start the music up
@@ -498,9 +499,9 @@ int filter(const SDL_Event *tEvent){
         RecursionGuard guard( recursion );
 
         // boss key or OS X quit command
-        if ((tEvent->type==SDL_KEYDOWN && tEvent->key.keysym.sym==27 &&
+        if ((tEvent->type==SDL_KEYDOWN && tEvent->key.keysym.sym==SDLK_ESCAPE &&
                 tEvent->key.keysym.mod & KMOD_SHIFT) ||
-                (tEvent->type==SDL_KEYDOWN && tEvent->key.keysym.sym==113 &&
+                (tEvent->type==SDL_KEYDOWN && tEvent->key.keysym.sym==SDLK_q &&
 #if SDL_VERSION_ATLEAST(2,0,0)
                  tEvent->key.keysym.mod & KMOD_GUI) ||
 #else
@@ -541,16 +542,14 @@ int filter(const SDL_Event *tEvent){
 #ifdef MACOSX
             if(currentScreensetting.fullscreen ^ lastSuccess.fullscreen) return false;
 #endif
-            int flags = SDL_WINDOWEVENT_FOCUS_GAINED | SDL_WINDOWEVENT_FOCUS_LOST;
-	    if ( tEvent->window.event & flags )
+	    if ( tEvent->window.event==SDL_WINDOWEVENT_FOCUS_GAINED || tEvent->window.event==SDL_WINDOWEVENT_FOCUS_LOST )
             {
-                // con << tSysTimeFloat() << " " << "active: " << (tEvent->active.gain ? "on" : "off") << "\n";
-                sg_active = tEvent->window.event & SDL_WINDOWEVENT_FOCUS_GAINED;
+                sg_active = tEvent->window.event == SDL_WINDOWEVENT_FOCUS_GAINED;
                 st_ToDo(sg_DelayedActivation);
             }
 
             // reload GL stuff if application gets reactivated
-            if ( tEvent->window.event & SDL_WINDOWEVENT_FOCUS_GAINED )
+            if ( tEvent->window.event == SDL_WINDOWEVENT_FOCUS_GAINED )
 #else //SDL_VERSION_ATLEAST(2,0,0)
         if (tEvent->type==SDL_ACTIVEEVENT)
         {
