@@ -187,19 +187,28 @@ void sg_StartupPlayerMenu()
     net.NewChoice( "$first_setup_net_isdn", "$first_setup_net_isdn_help", gISDN );
     net.NewChoice( "$first_setup_net_dsl", "$first_setup_net_dsl_help", gDSL );
 
+#if SDL_VERSION_ATLEAST(2,0,0)
+    tString keyboardTemplate("sdl2_keys_cursor.cfg");
+#else
     tString keyboardTemplate("keys_cursor.cfg");
+#endif
     uMenuItemSelection<tString> k(&firstSetup, "$first_setup_keys", "$first_setup_keys_help", keyboardTemplate );
     if ( !st_FirstUse )
     {
         k.NewChoice( "$first_setup_leave", "$first_setup_leave_help", tString("") );
         keyboardTemplate="";
     }
+#if SDL_VERSION_ATLEAST(2,0,0)
+    k.NewChoice( "$first_setup_keys_cursor", "$first_setup_keys_cursor_help", tString("sdl2_keys_cursor.cfg") );
+    k.NewChoice( "$first_setup_keys_cursor_single", "$first_setup_keys_cursor_single_help", tString("sdl2_keys_cursor_single.cfg") );
+#else
     k.NewChoice( "$first_setup_keys_cursor", "$first_setup_keys_cursor_help", tString("keys_cursor.cfg") );
     k.NewChoice( "$first_setup_keys_wasd", "$first_setup_keys_wasd_help", tString("keys_wasd.cfg") );
     k.NewChoice( "$first_setup_keys_zqsd", "$first_setup_keys_zqsd_help", tString("keys_zqsd.cfg") );
     k.NewChoice( "$first_setup_keys_cursor_single", "$first_setup_keys_cursor_single_help", tString("keys_cursor_single.cfg") );
     // k.NewChoice( "$first_setup_keys_both", "$first_setup_keys_both_help", tString("keys_twohand.cfg") );
     k.NewChoice( "$first_setup_keys_x", "$first_setup_keys_x_help", tString("keys_x.cfg") );
+#endif
 
     tColor leave(0,0,0,0);
     tColor color(1,0,0);
