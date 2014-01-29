@@ -3300,7 +3300,7 @@ private:
     }
 };
 
-static void sg_ParseMap ( gParser * aParser, tString mapfile, bool verify )
+static void sg_ParseMap ( gParser * aParser, tString mapfile )
 {
     FILE* mapFD = NULL;
 
@@ -3337,28 +3337,11 @@ static void sg_ParseMap ( gParser * aParser, tString mapfile, bool verify )
         }
 
         mapFD = tResourceManager::openResource("", DEFAULT_MAP);
-        if (!mapFD || !aParser->LoadAndValidateMapXML("", mapFD, DEFAULT_MAP))
-        {
+        if (!mapFD || !aParser->LoadAndValidateMapXML("", mapFD, DEFAULT_MAP)) {
             if (mapFD)
                 fclose(mapFD);
             errorMessage << "$map_file_load_failure_default";
             throw tGenericException( errorMessage, errorTitle );
-        }
-        else if(sn_GetNetState()!=nCLIENT && verify)
-        {
-            // if map has been loaded succefully, and this is during setting tranfer...
-            // map config file is executed at accesslevel of the one who set the map
-            tCurrentAccessLevel level( conf_mapfile.GetSetting().GetSetLevel(), true );
-            std::stringstream command;
-            std::string filename = std::string(mapfile);
-            int pos = filename.find(".aamap.xml",filename.length()-10);
-
-            if (pos!=std::string::npos)
-            {
-                filename.replace(pos,10,".cfg");
-                command << "rinclude " << filename;
-                tConfItemBase::LoadLine(command);
-            }
         }
     }
 
@@ -3366,15 +3349,15 @@ static void sg_ParseMap ( gParser * aParser, tString mapfile, bool verify )
         fclose(mapFD);
 }
 
-static void sg_ParseMap ( gParser * aParser, bool verify = false )
+static void sg_ParseMap ( gParser * aParser )
 {
-    sg_ParseMap(aParser, mapfile, verify);
+    sg_ParseMap(aParser, mapfile);
 }
 
 void gGame::Verify()
 {
     // test map and load map settings
-    sg_ParseMap( aParser, true );
+    sg_ParseMap( aParser );
     init_game_grid(grid, aParser);
     Arena.LeastDangerousSpawnPoint();
     exit_game_grid(grid);

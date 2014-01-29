@@ -191,10 +191,6 @@ bool eBannedWords::HasBadWord(tString message, tString word)
                 gotWord = gotWord.RemoveCharacter(gotWord[i]);
         }
 
-        //  set words lower case and check if word is the same as gotWord
-        if (gotWord.ToLower() == word.ToLower())
-            return true;
-
         //  set words lower case and check if word contains in gotWord
         if (gotWord.ToLower().Contains(word.ToLower()))
             return true;
@@ -279,6 +275,14 @@ tString eBannedWords::ReplaceBadWords(tString message, tString word)
         for(int i = 0; i < splitWords.Len(); i++)
         {
             tString splitWord = splitWords[i];
+            if (splitWord == "")
+            {
+                if ((i + 1) < splitWords.Len())
+                    convertedMsg << " ";
+
+                continue;
+            }
+
             tString splitWordCon(splitWord);
 
             for(int j = 0; j < splitWordCon.Len(); j++)
@@ -287,33 +291,23 @@ tString eBannedWords::ReplaceBadWords(tString message, tString word)
                     splitWordCon = splitWordCon.RemoveCharacter(splitWordCon[j]);
             }
 
-            if (splitWordCon.ToLower() == word.ToLower())
+            if (splitWordCon.ToLower().Contains(word.ToLower()))
             {
                 tString replaced;
                 for(int k = 0; k < (splitWord.Len() - 1); k++)
                     replaced << replacement;
 
-                convertedMsg << replaced << " ";
-            }
-            else if (splitWordCon.ToLower().Contains(word.ToLower()))
-            {
-                tString trippedWord = splitWordCon.RemoveWord(word);
-                if (trippedWord.Filter() == "")
-                {
-                    tString replaced;
-                    for(int k = 0; k < (splitWord.Len() - 1); k++)
-                        replaced << replacement;
-
-                    convertedMsg << replaced << " ";
-                }
+                if ((i + 1) == splitWords.Len())
+                    convertedMsg << splitWordCon.Replace(word, replaced);
                 else
-                {
-                    convertedMsg << splitWord << " ";
-                }
+                    convertedMsg << splitWordCon.Replace(word, replaced) << " ";
             }
             else
             {
-                convertedMsg << splitWord << " ";
+                if ((i + 1) == splitWords.Len())
+                    convertedMsg << splitWord;
+                else
+                    convertedMsg << splitWord << " ";
             }
         }
 
