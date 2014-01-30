@@ -162,7 +162,7 @@ bool restrictBannedWordsOptionsValue(const int &newValue)
 }
 static tSettingItem<int> se_BannedWordsOptionsConf("BANNED_WORDS_OPTIONS", se_BannedWordsOptions, &restrictBannedWordsOptionsValue);
 
-tString se_BannedWordsDelimiters("\" '_-=+");
+tString se_BannedWordsDelimiters("`~!@#$%^&*()-=_+[] \{}|;':\",./<>?");
 static tSettingItem<tString> se_BannedWordsDelimitersConf( "BANNED_WORDS_DELIMITERS", se_BannedWordsDelimiters);
 
 bool eBannedWords::CharacterInDelimiter(char character)
@@ -182,22 +182,16 @@ bool eBannedWords::HasBadWord(tString message, tString word)
 
     //  check if word exists in converted message
     int pos = 0;
-    tString gotWord = origLowMsg.ExtractNonBlankSubString(pos);
-    while (gotWord.Filter() != "")
+
+    for(int i = 0; i < origLowMsg.Len(); i++)
     {
-        for(int i = 0; i < gotWord.Len(); i++)
-        {
-            if (CharacterInDelimiter(gotWord[i]))
-                gotWord = gotWord.RemoveCharacter(gotWord[i]);
-        }
-
-        //  set words lower case and check if word contains in gotWord
-        if (gotWord.ToLower().Contains(word.ToLower()))
-            return true;
-
-        //  get the next word
-        gotWord = origLowMsg.ExtractNonBlankSubString(pos);
+        if (CharacterInDelimiter(origLowMsg[i]))
+            origLowMsg = origLowMsg.RemoveCharacter(origLowMsg[i]);
     }
+
+    //  set words lower case and check if word contains in gotWord
+    if (origLowMsg.ToLower().Contains(word.ToLower()))
+        return true;
 
     return false;
 }
@@ -291,16 +285,16 @@ tString eBannedWords::ReplaceBadWords(tString message, tString word)
                     splitWordCon = splitWordCon.RemoveCharacter(splitWordCon[j]);
             }
 
-            if (splitWordCon.ToLower().Contains(word.ToLower()))
+            if (splitWordCon.ToLower() == word.ToLower())
             {
                 tString replaced;
                 for(int k = 0; k < (splitWord.Len() - 1); k++)
                     replaced << replacement;
 
                 if ((i + 1) == splitWords.Len())
-                    convertedMsg << splitWordCon.Replace(word, replaced);
+                    convertedMsg << replaced << "\n";
                 else
-                    convertedMsg << splitWordCon.Replace(word, replaced) << " ";
+                    convertedMsg << replaced << " ";
             }
             else
             {
@@ -310,7 +304,6 @@ tString eBannedWords::ReplaceBadWords(tString message, tString word)
                     convertedMsg << splitWord << " ";
             }
         }
-
     }
 
     return convertedMsg;

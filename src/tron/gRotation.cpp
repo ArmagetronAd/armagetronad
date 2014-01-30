@@ -560,14 +560,7 @@ static void sg_configRotationLoad(std::istream &s)
             }
             else if (sg_configRotationType == 1)
             {
-                tString rclcl = tResourceManager::locateResource(NULL, gRotItem->Name());
-                if ( rclcl ) {
-                    std::ifstream rc(rclcl);
-                    tConfItemBase::LoadAll(rc, false );
-                    return;
-                }
-
-                con << tOutput( "$config_rinclude_not_found", gRotItem->Name());
+                RInclude(gRotItem->Name());
             }
 
             configRotation->SetID(config_id);
@@ -2523,14 +2516,7 @@ void RotateByOrder()
             gRotationItem *configRotItem = configRotation->Current();
             if (configRotItem)
             {
-                tString rclcl = tResourceManager::locateResource(NULL, configRotItem->Name());
-                if ( rclcl ) {
-                    std::ifstream rc(rclcl);
-                    tConfItemBase::LoadAll(rc, false );
-                    return;
-                }
-
-                con << tOutput( "$config_rinclude_not_found", configRotItem->Name() );
+                RInclude(configRotItem->Name());
             }
             configRotation->OrderedRotate();
         }
@@ -2567,14 +2553,7 @@ void RotateByRandom()
             gRotationItem *configRotItem = configRotation->Current();
             if (configRotItem)
             {
-                tString rclcl = tResourceManager::locateResource(NULL, configRotItem->Name());
-                if ( rclcl ) {
-                    std::ifstream rc(rclcl);
-                    tConfItemBase::LoadAll(rc, false );
-                    return;
-                }
-
-                con << tOutput( "$config_rinclude_not_found", configRotItem->Name() );
+                RInclude(configRotItem->Name());
             }
             configRotation->RandomRotate();
         }
@@ -2610,15 +2589,7 @@ void QueRotate()
         }
         else if (sg_configRotationType == 1)
         {
-            tString rclcl = tResourceManager::locateResource(NULL, sg_ConfigQueueing->Current());
-            sg_ConfigQueueing->Remove(sg_ConfigQueueing->CurrentID());
-            if ( rclcl ) {
-                std::ifstream rc(rclcl);
-                tConfItemBase::LoadAll(rc, false );
-                return;
-            }
-
-            con << tOutput( "$config_rinclude_not_found", sg_ConfigQueueing->Current() );
+            RInclude(sg_ConfigQueueing->Current());
         }
     }
 }
@@ -2687,14 +2658,7 @@ void gRotation::HandleNewRound(int rounds)
                         gRotationItem *configRotItem = configRoundSelection->Current();
                         if (configRotItem)
                         {
-                            tString rclcl = tResourceManager::locateResource(NULL, configRotItem->Name());
-                            if ( rclcl ) {
-                                std::ifstream rc(rclcl);
-                                tConfItemBase::LoadAll(rc, false );
-                                return;
-                            }
-
-                            con << tOutput( "$config_rinclude_not_found", configRotItem->Name());
+                            RInclude(configRotItem->Name());
                         }
                     }
 
@@ -2738,14 +2702,7 @@ void gRotation::HandleNewRound(int rounds)
                     gRotationItem *configRotItem = configRotation->Get(newID);
                     if (configRotItem)
                     {
-                        tString rclcl = tResourceManager::locateResource(NULL, configRotItem->Name());
-                        if ( rclcl ) {
-                            std::ifstream rc(rclcl);
-                            tConfItemBase::LoadAll(rc, false );
-                            return;
-                        }
-
-                        con << tOutput( "$config_rinclude_not_found", configRotItem->Name());
+                        RInclude(configRotItem->Name());
                     }
                 }
             }

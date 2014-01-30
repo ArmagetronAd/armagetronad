@@ -3337,11 +3337,25 @@ static void sg_ParseMap ( gParser * aParser, tString mapfile )
         }
 
         mapFD = tResourceManager::openResource("", DEFAULT_MAP);
-        if (!mapFD || !aParser->LoadAndValidateMapXML("", mapFD, DEFAULT_MAP)) {
+        if (!mapFD || !aParser->LoadAndValidateMapXML("", mapFD, DEFAULT_MAP))
+        {
             if (mapFD)
                 fclose(mapFD);
+
             errorMessage << "$map_file_load_failure_default";
             throw tGenericException( errorMessage, errorTitle );
+        }
+
+        if ( mapFD )
+        {
+            //  load the map config file from the same resource folder
+            tCurrentAccessLevel level( tAccessLevel_Owner , true );
+            int pos = mapfile.StrPos(".aamap.xml");
+            if (pos <= 0)
+            {
+                tString filename = mapfile.SubStr(pos) << ".cfg";
+                RInclude(filename);
+            }
         }
     }
 

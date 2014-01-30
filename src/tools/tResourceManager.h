@@ -18,4 +18,6 @@ public:
     static tString resRepoClient;
 };
 
+extern void RInclude(tString file);
+
 #endif //ArmageTron_RESOURCEMANAGER_H
