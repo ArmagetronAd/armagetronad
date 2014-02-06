@@ -156,8 +156,10 @@ class gRaceScores
         //!> Resets the scores for the next map
         static void Reset();
 
-        static void OutputStart();      //!< the ranks to display at start of round
-        static void OutputEnd();        //!< the ranks to display at end of round
+        static void OutputStart();              //!< the ranks to display at start of round
+        static void OutputEnd();                //!< the ranks to display at end of round
+        static void OutputTopRecords(int show); //!< top number of (show) records to display
+        static void OutputIndividualRecords();  //!< send personal messages to players of their current position and above and below
 
         //!> Sorts out by ordering Score (Highest - Lowest) and Time (Lowest - Highest)
         static void Sort();

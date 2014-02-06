@@ -168,7 +168,6 @@ class gCycle: public gCycleMovement
     eSoundPlayer *spark;
 
     REAL spawnTime_;    //!< time the cycle spawned at
-    REAL creationTime_; //!< time the cycle spawned/created
     REAL lastTimeAnim;  //!< last time animation was simulated at
     REAL timeCameIntoView;
 

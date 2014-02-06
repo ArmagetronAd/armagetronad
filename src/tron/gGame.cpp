@@ -3345,18 +3345,6 @@ static void sg_ParseMap ( gParser * aParser, tString mapfile )
             errorMessage << "$map_file_load_failure_default";
             throw tGenericException( errorMessage, errorTitle );
         }
-
-        if ( mapFD )
-        {
-            //  load the map config file from the same resource folder
-            tCurrentAccessLevel level( tAccessLevel_Owner , true );
-            int pos = mapfile.StrPos(".aamap.xml");
-            if (pos <= 0)
-            {
-                tString filename = mapfile.SubStr(pos) << ".cfg";
-                RInclude(filename);
-            }
-        }
     }
 
     if (mapFD)
@@ -3713,7 +3701,7 @@ void gGame::StateUpdate(){
         case GS_CREATE_GRID:
             // sr_con.autoDisplayAtNewline=true;
 
-            sg_currentMapWriter << sg_currentSettings->sizeFactor << mapfile;
+            sg_currentMapWriter << sg_currentSettings->sizeFactor << gArena::SizeMultiplier() << mapfile;
             sg_currentMapWriter.write();
 
             //HACK RACE begin
@@ -3900,9 +3888,6 @@ void gGame::StateUpdate(){
                     mess << "$gamestate_newround_goldengoal";
                 sn_ConsoleOut(mess);
 
-                if (strlen(sg_roundConsoleMessage) > 2)
-                        sn_ConsoleOut(sg_roundConsoleMessage + "\n");
-
                 se_SaveToScoreFile("$gamestate_newround_log");
 
                 if (sg_displayMapDetails)
@@ -3925,6 +3910,9 @@ void gGame::StateUpdate(){
 
                 if (sg_RaceTimerEnabled)
                     gRaceScores::OutputStart();
+
+                if (strlen(sg_roundConsoleMessage) > 2)
+                    sn_ConsoleOut(sg_roundConsoleMessage + "\n");
             }
             //con << ePlayerNetID::Ranking();
 

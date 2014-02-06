@@ -892,7 +892,7 @@ ladderlog_write_cycle_created_help            Write to ladderlog: CYCLE_CREATED 
 ladderlog_write_cycle_destroyed_help          Write to ladderlog: CYCLE_DESTROYED [auth_name] [posx] [posy] [dirx] [diry] [team_name]
 ladderlog_write_chat_help                     Write to ladderlog: CHAT <chatter> [/me] <chat string>
 ladderlog_write_command_help                  Write to ladderlog: COMMAND <player> <ip> <auth level> <command> <options>
-ladderlog_write_current_map_help              Write to ladderlog: CURRENT_MAP [factor] [MAP_FILE]
+ladderlog_write_current_map_help              Write to ladderlog: CURRENT_MAP [size_factor] [size_multiplier] [MAP_FILE]
 ladderlog_write_death_basezone_conquered_help Write to ladderlog: DEATH_BASEZONE_CONQUERED <player> [NO_ENEMIES]
 ladderlog_write_blastzone_player_enter_help   Write to ladderlog: DEATH_BLASTZONE_PLAYER_ENTER <player>
 ladderlog_write_death_deathshot_help          Write to ladderlog: DEATH_DEATHSHOT <prey> <predator>
@@ -3390,10 +3390,14 @@ race_ranks_loading  Loading Racing Ranks for 0xffdd00\1.\n
 race_ranks_saving Saving Racing Ranks for 0xffdd00\1.\n
 
 race_rank_title_message       Top \1 players for 0xffdd00\2\n
-race_rank_title_name          Ranks
-race_rank_title_player_name   Players
-race_rank_title_time_name     Times
+race_rank_title_name          Rank
+race_rank_title_player_name   Player
+race_rank_title_time_name     Time
 race_rank_border              #
+
+race_rank_message_header      0xdd66dd# 0xRESETT\1 0xdd66dd# 0xRESETT\2 0xdd66dd# 0xRESETT\3\n
+race_rank_message_format      0xdd66dd# 0xffff7f\1 0xdd66dd# 0xffff7f\2 0xdd66dd# 0xffff7f\3\n
+race_rank_current_format      0xdd66dd# 0x0099ff\1 0xdd66dd# 0x0099ff\2 0xdd66dd# 0x0099ff\3\n
 
 race_records_manual_load   Racing records have been manually loaded by \1.
 race_records_manual_save   Racing records have been manually saved by \1.

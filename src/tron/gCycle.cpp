@@ -2367,7 +2367,6 @@ void gCycle::MyInitAfterCreation(){
     grid->AddGameObjectInteresting(this);
 
     spawnTime_=lastTimeAnim=lastTime;
-    creationTime_ = lastTime;
     // set spawn time to infinite past if this is the first spawn
     if ( !sg_cycleFirstSpawnProtection && spawnTime_ <= 1.0 )
     {
