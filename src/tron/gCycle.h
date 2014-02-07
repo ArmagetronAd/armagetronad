@@ -411,7 +411,7 @@ protected:
 extern bool sg_cycleRespawnZone;
 extern REAL sg_cycleRespawnZoneRadius, sg_cycleRespawnZoneGrowth;
 
-//extern bool sg_HideCycles, sg_HideCyclesWalls;
+extern bool sg_HideCycles, sg_HideCyclesWalls;
 
 #endif
 

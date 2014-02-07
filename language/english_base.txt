@@ -1406,11 +1406,43 @@ console_repetition          (\1 times)\n
 special_setup_menu_text	Special Setup
 special_setup_menu_help	Configure settings to change features of game.
 
+hide_cycles_walls_menu_text Hide Cycle Walls
+hide_cycles_walls_menu_help Hides the tails of cycles while you are alive.
+
+hide_cycles_menu_text Hide Cycles
+hide_cycles_menu_help Hides all cycles playing on the grid while you are alive.
+
 highlight_name_menu_text Highlight Name
 highlight_name_menu_help If enabled, if your name is in chats, it will get highlited. Disabled will leave the chat string alone.
 
 tab_completion_menu_text Tab Completion
 tab_completion_menu_help If enabled, after typing someone's initial name, hit tab and it should automatically fill their name in your string. When it's disabled, it won't do it. This applies to all tab completion features avilable.
+
+#********************************************
+#********************************************
+#
+#        config setup menu
+#
+#********************************************
+#********************************************
+
+config_setup_menu_text    Config Setup
+config_setup_menu_help    Configuration settings to load or save per options.
+
+config_user_save_text     Save User Config
+config_user_save_help     Saves the user config to user.cfg in var directory.
+
+config_user_load_text     Load User Config
+config_user_load_help     Load the user config from user.cfg in var directory.
+
+config_save_changed_text  Save Changed Config
+config_save_changed_help  Save the changed config to config_changed.cfg in var directory.
+
+config_save_all_text      Save All
+config_save_all_help      Saves all the config to config_all.cfg in var directory.
+
+config_load_all_text      Load All
+config_load_all_help      Loads all the config from the beginning of game start.
 
 #********************************************
 #********************************************

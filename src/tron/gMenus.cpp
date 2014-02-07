@@ -458,19 +458,36 @@ static tConfItem<bool> crexp("EXPLOSION",sg_crashExplosion);
 static tConfItem<bool> se_highlightMyNameConf("HIGHLIGHT_NAME", se_highlightMyName);
 static tConfItem<bool> se_tabCompletionConf("TAB_COMPLETION", se_tabCompletion);
 
+#ifndef DEDICATED
+
 void sg_SpecialMenu()
 {
     uMenu menu("$special_setup_menu_text");
 
-    //new uMenuItemToggle(&menu, "$hide_cycles_walls_menu_text", "$hide_cycles_walls_menu_help", sg_HideCyclesWalls);
-    //new uMenuItemToggle(&menu, "$hide_cycles_menu_text", "$hide_cycles_menu_help", sg_HideCycles);
-    new uMenuItemToggle(&menu, "$tab_completion_menu_text", "$tab_completion_menu_help", se_tabCompletion);
-    new uMenuItemToggle(&menu, "$highlight_name_menu_text", "$highlight_name_menu_help", se_highlightMyName);
+    uMenuItemToggle hlm(&menu, "$highlight_name_menu_text", "$highlight_name_menu_help", se_highlightMyName);
+    uMenuItemToggle tc(&menu, "$tab_completion_menu_text", "$tab_completion_menu_help", se_tabCompletion);
+
+    uMenuItemToggle hcw(&menu, "$hide_cycles_walls_menu_text", "$hide_cycles_walls_menu_help", sg_HideCyclesWalls);
+    uMenuItemToggle hc(&menu, "$hide_cycles_menu_text", "$hide_cycles_menu_help", sg_HideCycles);
 
     menu.Enter();
 }
 
-#ifndef DEDICATED
+void sg_ConfigMenu()
+{
+    uMenu menu("$config_setup_menu_text");
+
+    uMenuItemFunction sac(&menu, "$config_save_all_text", "$config_save_all_help", &tConfItemBase::WriteAllToFile);
+    uMenuItemFunction lac(&menu, "$config_load_all_text", "$config_load_all_help", &st_LoadConfig);
+
+    uMenuItemFunction scc(&menu, "$config_save_changed_text", "$config_save_changed_help", &tConfItemBase::WriteChangedToFile);
+
+    uMenuItemFunction suc(&menu, "$config_user_save_text", "$config_user_save_help", &st_SaveConfig);
+    uMenuItemFunction luc(&menu, "$config_user_load_text", "$config_user_load_help", &st_LoadUserConfig);
+
+    menu.Enter();
+}
+
 //extern bool png_screenshot;		// from rSysdep.cpp
 //static tConfItem<bool> pns("PNG_SCREENSHOT",png_screenshot);
 

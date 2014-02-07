@@ -30,7 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "uMenu.h"
 
-extern void  sg_PlayerMenu(), sg_SpecialMenu();
+extern void  sg_PlayerMenu(), sg_SpecialMenu(), sg_ConfigMenu();
 extern uMenu sg_screenMenu;
 void         sg_ConsoleInput(); // let the player enter one line of console input
 

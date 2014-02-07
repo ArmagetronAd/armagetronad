@@ -184,8 +184,8 @@ enum tAccessLevel
     tAccessLevel_24 = 24,          // reserved
     tAccessLevel_25 = 25,          // reserved
     tAccessLevel_Invalid = 255,    // completely invalid level
-    tAccessLevel_Default = 20,
-    tAccessLevel_Punished = 21
+    tAccessLevel_Default = 20,     // default (program)
+    tAccessLevel_Punished = 21     // punished
 };
 
 //! class to temporarily allow/forbid the use of casacl
@@ -286,6 +286,7 @@ public:
     static int AccessLevel(std::istream &s); //! Returns access level needed for command. -1 if command not found.
     static void WriteAllToFile();
     static void WriteAllLevelsToFile();
+    static void WriteChangedToFile();
     static tString FindConfigItem(tString name);    //! Returns the config name of the searching string name
     static void SetAllAccessLevel(int newLevel);
 
@@ -595,6 +596,8 @@ void st_Include( tString const & file );
 
 void st_LoadConfig();
 void st_SaveConfig();
+void st_LoadUserConfig();
+void st_SaveChangedConfig();
 
 extern bool st_FirstUse;
 

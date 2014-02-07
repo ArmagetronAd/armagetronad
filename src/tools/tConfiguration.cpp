@@ -646,7 +646,7 @@ tString tConfItemBase::FindConfigItem(tString name)
 }
 
 /** LISTING BEGIN **/
-// writes the list of all commands and their help to commands_list.txt in the var directory
+// writes the list of all commands and their help to config_all.cfg in the var directory
 void tConfItemBase::WriteAllToFile()
 {
     tConfItemMap & confmap = ConfItemMap();
@@ -660,8 +660,7 @@ void tConfItemBase::WriteAllToFile()
     }
 
     std::ofstream w;
-    tString file("commands_list.txt");
-    if ( tDirectories::Var().Open(w, file))
+    if ( tDirectories::Var().Open(w, "config_all.cfg"))
     {
         /*w << "{| border=\"2\" cellspacing=\"0\" cellpadding=\"4\" rules=\"all\" style=\"margin:1em 1em 1em 0; border:solid 1px #AAAAAA; border-collapse:collapse; background-color:#F9F9F9; font-size:95%; empty-cells:show;\"\n";
         w << "!Command\n";
@@ -705,7 +704,7 @@ static tConfItemFunc sg_ListAllCommandsConf("LIST_ALL_COMMANDS", &sg_ListAllComm
 /** LISTING END **/
 
 /** LISTING ACCESS_LEVEL BEGIN **/
-// writes the list of all commands and their help to commands_list.txt in the var directory
+// writes the list of all commands and their help to config_all_levels.cfg in the var directory
 void tConfItemBase::WriteAllLevelsToFile()
 {
     tConfItemMap & confmap = ConfItemMap();
@@ -719,14 +718,8 @@ void tConfItemBase::WriteAllLevelsToFile()
     }
 
     std::ofstream w;
-    tString file("commands_level_list.txt");
-    if ( tDirectories::Var().Open(w, file))
+    if ( tDirectories::Var().Open(w, "config_all_levels.cfg"))
     {
-        /*w << "{| border=\"2\" cellspacing=\"0\" cellpadding=\"4\" rules=\"all\" style=\"margin:1em 1em 1em 0; border:solid 1px #AAAAAA; border-collapse:collapse; background-color:#F9F9F9; font-size:95%; empty-cells:show;\"\n";
-        w << "!Command\n";
-        w << "!Meaning\n";
-        w << "!Default\n";
-        w << "|-\n";*/
         for(tConfItemMap::iterator iter = confmap.begin(); iter != confmap.end() ; ++iter)
         {
             tConfItemBase * ci = (*iter).second;
@@ -745,10 +738,7 @@ void tConfItemBase::WriteAllLevelsToFile()
             mess << "\n";
 
             w << mess;
-            /*w << "| " << ci->title << " || " << help << " || " << value << "\n";
-            w << "|-\n";*/
         }
-        //w << "|}\n";
     }
     w.close();
 }
@@ -788,6 +778,47 @@ static void st_SetCommandsAccessLevel(std::istream &s)
 }
 static tConfItemFunc st_SetCommandsAccessLevelConf("SET_COMMANDS_ACCESSLEVEL", &st_SetCommandsAccessLevel);
 /** SET ALL ACCESS_LEVEL END **/
+
+void tConfItemBase::WriteChangedToFile()
+{
+    tConfItemMap & confmap = ConfItemMap();
+    int sim_maxlen = -1;
+
+    for(tConfItemMap::iterator iter = confmap.begin(); iter != confmap.end() ; ++iter)
+    {
+        tConfItemBase * ci = (*iter).second;
+        if (static_cast<int>(strlen(ci->title)) > sim_maxlen)
+            sim_maxlen = strlen(ci->title);
+    }
+
+    std::ofstream w;
+    if ( tDirectories::Var().Open(w, "config_changed.cfg"))
+    {
+        for(tConfItemMap::iterator iter = confmap.begin(); iter != confmap.end() ; ++iter)
+        {
+            tConfItemBase * ci = (*iter).second;
+            if (!ci->changed) continue;
+
+            tString help ( ci->help );
+
+            tString mess, value;
+
+            //  fetch the value set for this setting.
+            ci->FetchVal(value);
+
+            mess << ci->title << " ";
+
+            mess.SetPos( sim_maxlen+2, false );
+            mess << value << " ";
+            mess << " # ";
+            mess << help;
+            mess << "\n";
+
+            w << mess;
+        }
+    }
+    w.close();
+}
 
 int tConfItemBase::AccessLevel(std::istream &s){
     if(!s.eof() && s.good()){
@@ -1251,6 +1282,12 @@ void st_SaveConfig()
         con << o;
         std::cerr << o;
     }
+}
+
+void st_LoadUserConfig()
+{
+    const tPath& var = tDirectories::Var();
+    Load(var, "user.cfg");
 }
 
 void st_LoadConfig()
