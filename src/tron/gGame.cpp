@@ -151,37 +151,6 @@ void LoadMap(tString mapName)
     conf_mapfile.GetSetting().SetSetLevel( tAccessLevel_Owner );
 }
 
-void sg_OutputOnlinePlayers()
-{
-    //! Send to /var/online_players.txt
-    std::ofstream o;
-    if (tDirectories::Var().Open(o, "online_players.txt"))
-    {
-        if (se_PlayerNetIDs.Len() > 0)
-        {
-            o << ((mapfile.Filter() != "")?mapfile:tString("NO_MAP")) << "\n";
-            for(int pID = 0; pID < se_PlayerNetIDs.Len(); pID++)
-            {
-                ePlayerNetID *p = se_PlayerNetIDs[pID];
-                if (p && p->IsHuman())
-                {
-                    o << p->GetUserName() << " ";
-                    if (p->Object() && p->Object()->Alive())
-                        o << "1 ";
-                    else
-                        o << "0 ";
-                    o << (p->ping * 1000) << " ";
-                    o << p->Score() << " ";
-                    o << p->GetAccessLevel() << " ";
-                    o << p->GetName() << "\n";
-                }
-            }
-        }
-        else o << "Nobody Online.\n";
-    }
-    o.close();
-}
-
 // enable/disable sound, supporting two different pause reasons:
 // if fromActivity is set, the pause comes from losing input focus.
 // otherwise, it's from game state changes.
@@ -1418,7 +1387,44 @@ void check_hs(){
 
 static tCONTROLLED_PTR(gGame) sg_currentGame;
 
+void sg_OutputOnlinePlayers()
+{
+    //! Send to /var/online_players.txt
+    std::ofstream o;
+    if (tDirectories::Var().Open(o, "online_players.txt"))
+    {
+        if (se_PlayerNetIDs.Len() > 0)
+        {
+            o << (sg_currentGame?mapfile:tString("NO_MAP")) << "\n";
+            for(int pID = 0; pID < se_PlayerNetIDs.Len(); pID++)
+            {
+                ePlayerNetID *p = se_PlayerNetIDs[pID];
+                if (p)
+                {
+                    o << p->GetUserName() << " ";
+                    if (p->Object() && p->Object()->Alive())
+                    {
+                        o << "1 ";
 
+                        tString logTurnPos;
+                        logTurnPos << p->Object()->Position().x << ", " << p->Object()->Position();
+                        LogPlayersCycleTurns(dynamic_cast<gCycle *>(p->Object()), logTurnPos);
+                    }
+                    else
+                    {
+                        o << "0 ";
+                    }
+                    o << (p->ping * 1000) << " ";
+                    o << p->Score() << " ";
+                    o << p->GetAccessLevel() << " ";
+                    o << p->GetName() << "\n";
+                }
+            }
+        }
+        else o << "Nobody Online.\n";
+    }
+    o.close();
+}
 
 /*
 static gCycle *Cycle(int id){
@@ -4423,6 +4429,25 @@ void gGameSpawnTimer::Reset()
     targetTime_ = 0.0;
     timerActive = false;
     countDown_  = 0;
+}
+
+static bool sg_LogTurns = false;
+static tSettingItem<bool> sg_LogTurnsConf("LOG_TURNS", sg_LogTurns);
+
+void LogPlayersCycleTurns(gCycle *cycle, tString msg)
+{
+    if (sg_LogTurns && cycle->Player())
+    {
+        tString logTurnsFile;
+        logTurnsFile << "log_turns/" << htmlentities(cycle->Player()->GetUserName()) << ".txt";
+
+        std::ofstream o;
+        if ( tDirectories::Var().Open(o, logTurnsFile, std::ios::app) )
+        {
+            o << msg << "\n";
+        }
+        o.close();
+    }
 }
 
 void gGame::Analysis(REAL time){

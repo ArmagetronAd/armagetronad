@@ -482,8 +482,10 @@ void sg_ConfigMenu()
 
     uMenuItemFunction scc(&menu, "$config_save_changed_text", "$config_save_changed_help", &tConfItemBase::WriteChangedToFile);
 
+    /*
     uMenuItemFunction suc(&menu, "$config_user_save_text", "$config_user_save_help", &st_SaveConfig);
     uMenuItemFunction luc(&menu, "$config_user_load_text", "$config_user_load_help", &st_LoadUserConfig);
+    */
 
     menu.Enter();
 }

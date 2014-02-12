@@ -486,6 +486,8 @@ public:
 
     static bool HasRenameCapability ( ePlayerNetID const *, ePlayerNetID const * admin ); //!< Checks if the admin can use the RENAME command. Used in IsAllowedToRename()
 
+    void LogActivity(int activity_type);    //!< Log the activity of the player currently in motion
+
 private:
     tColoredString  nameFromClient_;        //!< this player's name as the client wants it to be. Avoid using it when possilbe.
     tColoredString  nameFromServer_;        //!< this player's name as the server wants it to be. Avoid using it when possilbe.
@@ -581,6 +583,17 @@ public:
     bool isEnabled() { return enabled; } //!< check this if you're going to make expensive calculations for ladderlog output
 
     static void setAll(bool enabled); //!< enable or disable all writers
+};
+
+enum
+{
+    ACTIVITY_LEFT,
+    ACTIVITY_ENTERED_GRID,
+    ACTIVITY_ENTERED_SPECTATOR,
+    ACTIVITY_JOINED_SPECTATOR_FROM_GRID,
+    ACTIVITY_JOINED_GAME_FROM_SPECTATOR,
+    ACTIVITY_FINISHED_RACE,
+    ACTIVITY_DIED
 };
 
 tColoredString & operator << (tColoredString &s,const ePlayer &p);

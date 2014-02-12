@@ -53,6 +53,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "gZone.h"
 
 #include "gRace.h"
+#include "gGame.h"
 
 #include "tMath.h"
 #include <stdlib.h>
@@ -2444,6 +2445,10 @@ gCycle::gCycle(eGrid *grid, const eCoord &pos,const eCoord &d,ePlayerNetID *p)
 
     flag_ = NULL;
 
+    tString logTurnsMsg;
+    logTurnsMsg << "spawned " << st_GetCurrentTime("%Y/%m/%d-%H:%M:%S ");
+    LogPlayersCycleTurns(this, logTurnsMsg);
+
     startPos_ = this->pos;
     startDir_ = this->dir;
 }
@@ -4137,9 +4142,14 @@ void gCycle::Kill(){
 
             if (this && Player())
             {
+                tString logTurnsMsg;
+                logTurnsMsg << "death " << st_GetCurrentTime("%Y/%m/%d-%H:%M:%S ");
+                LogPlayersCycleTurns(this, logTurnsMsg);
+
                 se_cycleDestroyedWriter << Player()->GetUserName() << Position().x << Position().y << Direction().x << Direction().y << ePlayerNetID::FilterName(Team()->Name()) << se_GameTime();
                 se_cycleDestroyedWriter.write();
 
+                Player()->LogActivity(ACTIVITY_DIED);
 
                 sg_cycleRespawnZone_Create(this);
             }
@@ -5341,6 +5351,10 @@ gCycle::gCycle(nMessage &m)
 
     // set last time so that the first read_sync will not think this is old
     lastTimeAnim = lastTime = -EPS;
+
+    tString logTurnsMsg;
+    logTurnsMsg << "spawned " << st_GetCurrentTime("%Y/%m/%d-%H:%M:%S ");
+    LogPlayersCycleTurns(this, logTurnsMsg);
 
     nextSync = nextSyncOwner = -1;
     flag_ = NULL;

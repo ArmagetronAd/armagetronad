@@ -867,6 +867,7 @@ void gRace::ZoneHit( ePlayerNetID *player, REAL time )
     if (racePlayer && !racePlayer->Finished() && !roundFinished_ && player->Object() && player->Object()->Alive())
     {
         REAL reachtime_ = time;
+        player->LogActivity(ACTIVITY_FINISHED_RACE);
 
         if (!firstArrived_)
         {

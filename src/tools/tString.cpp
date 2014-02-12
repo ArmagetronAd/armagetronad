@@ -2442,3 +2442,28 @@ tString tString::RemoveCharacter(char character)
 
     return newLine;
 }
+
+tString htmlentities(tString str)
+{
+    tString ret;
+
+    for(int i = 0; i < (str.Len() - 1); i++)
+    {
+        switch (str[i])
+        {
+            case '\"':  ret << "&quot;";    break;
+            case '\'':  ret << "&apos;";    break;
+            case '<':   ret << "&lt;";      break;
+            case '>':   ret << "&gt;";      break;
+            case '*':   ret << "&#42;";     break;
+            case '/':   ret << "&#47;";     break;
+            case '|':   ret << "&#124;";    break;
+            case ':':   ret << "&#58;";     break;
+            case '?':   ret << "&#63;";     break;
+
+            default: ret << str[i]; break;
+        }
+    }
+
+    return ret;
+}

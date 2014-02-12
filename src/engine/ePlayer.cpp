@@ -4754,16 +4754,14 @@ static void ChatTabCompletition(tString &strString, int &curserPos)
                 for(int j = 0; j < se_PlayerNetIDs.Len(); j++)
                 {
                     p = se_PlayerNetIDs[j];
-                    if (p)
+                    if (p && p->IsActive())
                     {
-                        //con << p->GetName() << " | " << word << "\n";
                         if (p->GetName().Filter().Contains(word.Filter()))
                         {
                             foundPlayers.Insert(p);
                             continue;
                         }
 
-                        //con << p->GetLogName() << " | " << word << "\n";
                         if (p->GetLogName().Filter().Contains(word.Filter()))
                         {
                             foundPlayers.Insert(p);
@@ -4775,12 +4773,12 @@ static void ChatTabCompletition(tString &strString, int &curserPos)
                 if (foundPlayers.Len() == 1)
                 {
                     p = foundPlayers[0];
-                    if (p)
+                    if (p && p->IsActive())
                     {
                         if (isFirst && !isChat)
                             word = p->GetName() + ": ";
                         else
-                            word = p->GetName();
+                            word = p->GetName() + " ";
                     }
                 }
                 else if (foundPlayers.Len() > 1)
@@ -4788,14 +4786,14 @@ static void ChatTabCompletition(tString &strString, int &curserPos)
                     for(int k = 0; k < foundPlayers.Len(); k++)
                     {
                         p = foundPlayers[k];
-                        if (p)
+                        if (p && p->IsActive())
                         {
                             if (p->GetName().Filter() == word.Filter())
                             {
                                 if (isFirst)
                                     word = p->GetName() + ": ";
                                 else
-                                    word = p->GetName();
+                                    word = p->GetName() + " ";
                                 break;
                             }
                         }
@@ -5877,6 +5875,8 @@ void ePlayerNetID::RemoveFromGame()
             {
                 se_playerLeftWriter << userName_ << nMachine::GetMachine(Owner()).GetIP();
                 se_playerLeftWriter.write();
+
+                this->LogActivity(ACTIVITY_LEFT);
             }
             else
             {
@@ -5904,9 +5904,6 @@ void ePlayerNetID::RemoveFromGame()
     UpdateTeam();
     ControlObject( NULL );
     ClearRespawn();
-
-    //  update the online players list
-    sg_OutputOnlinePlayers();
 }
 
 bool ePlayerNetID::ActionOnQuit()
@@ -7350,6 +7347,48 @@ eNetGameObject *ePlayerNetID::Object() const
     return object;
 }
 
+void se_SaveToPlayersLog(tOutput const &out)
+{
+    if (sn_GetNetState()!=nCLIENT && !tRecorder::IsPlayingBack())
+    {
+        std::ofstream o;
+        if ( tDirectories::Var().Open(o, "players_log.txt", std::ios::app) )
+        {
+            std::stringstream s;
+            s << st_GetCurrentTime("%Y/%m/%d-%H:%M:%S ");
+            s << out << std::endl;
+            o << s.str();
+        }
+    }
+}
+
+/*
+ *  This is the function to log the activities of players
+ *  by the numbers from the following:
+ *
+ *  0 - left game
+ *  1 - entered game
+ *  2 - entered game as spectator
+ *  3 - joined spectator from grid
+ *  4 - entered game from spectator
+ *  5 - finished race
+ *  6 - died
+*/
+static bool se_LogPlayersActivitys = false;
+static tSettingItem<bool> se_LogPlayersActivitysConf("LOG_PLAYERS_ACTIVITIES", se_LogPlayersActivitys);
+
+void ePlayerNetID::LogActivity(int activity_type)
+{
+    if (!se_LogPlayersActivitys) return;
+
+    tOutput out;
+    out << this->GetUserName();
+    out << " ";
+    out << activity_type;
+
+    se_SaveToPlayersLog(out);
+}
+
 static bool se_consoleLadderLog = false;
 static tSettingItem< bool > se_consoleLadderLogConf( "CONSOLE_LADDER_LOG", se_consoleLadderLog );
 
@@ -7377,7 +7416,7 @@ void se_SaveToLadderLog( tOutput const & out )
             if(se_ladderlogDecorateTS)
             {
                 s << st_GetCurrentTime("%Y/%m/%d-%H:%M:%S ");
-            }
+           }
             s << out << std::endl;
             sr_InputForScripts( s.str().c_str() );
             o << s.str();
@@ -10039,6 +10078,8 @@ public:
                     se_playerEnteredSpectatorWriter << logName << nMachine::GetMachine(player_.Owner()).GetIP() << screenName;
                     se_playerEnteredSpectatorWriter.write();
 
+                    player_.LogActivity(ACTIVITY_ENTERED_SPECTATOR);
+
                     mess << "$player_entered_spectator";
                     sn_ConsoleOut(mess);
                 }
@@ -10046,6 +10087,8 @@ public:
                 {
                     se_playerEnteredGridWriter << logName << nMachine::GetMachine(player_.Owner()).GetIP() << screenName;
                     se_playerEnteredGridWriter.write();
+
+                    player_.LogActivity(ACTIVITY_ENTERED_GRID);
                 }
 
                 tColoredString colouredName;

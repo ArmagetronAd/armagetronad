@@ -228,6 +228,8 @@ void tToLower( tString & toTransform );
 //! converts a string to uppercase
 void tToUpper( tString & toTransform );
 
+tString htmlentities(tString str);
+
 //#define tMAX_STRING_OUTPUT 1000
 //extern char st_stringOutputBuffer[tMAX_STRING_OUTPUT];
 

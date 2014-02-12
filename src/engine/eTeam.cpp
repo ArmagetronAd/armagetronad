@@ -1092,7 +1092,7 @@ bool eTeam::NameTeamAfterColor ( bool wish )
 }
 
 // register a player
-void eTeam::AddPlayer    ( ePlayerNetID* player )
+void eTeam::AddPlayer( ePlayerNetID* player )
 {
     tASSERT( player );
 
@@ -1188,7 +1188,7 @@ void eTeam::AddPlayer    ( ePlayerNetID* player )
 }
 
 // register a player the dirty way
-void eTeam::AddPlayerDirty   ( ePlayerNetID* player )
+void eTeam::AddPlayerDirty( ePlayerNetID* player )
 {
     tASSERT( player );
 
@@ -1210,10 +1210,14 @@ void eTeam::AddPlayerDirty   ( ePlayerNetID* player )
 
     se_teamAddWriter << ePlayerNetID::FilterName( name ) << player->GetLogName();
     se_teamAddWriter.write();
+
+    //  Note: This is dirty way of doing it since this player
+    //  may have entered team right after entering the game
+    player->LogActivity(ACTIVITY_JOINED_GAME_FROM_SPECTATOR);
 }
 
 // deregister a player
-void eTeam::RemovePlayerDirty ( ePlayerNetID* player )
+void eTeam::RemovePlayerDirty( ePlayerNetID* player )
 {
     tASSERT( player );
     tASSERT( player->currentTeam == this );
@@ -1235,6 +1239,9 @@ void eTeam::RemovePlayerDirty ( ePlayerNetID* player )
     se_teamRemoveWriter << ePlayerNetID::FilterName( name ) << player->GetLogName();
     se_teamRemoveWriter.write();
 
+    if ( player->IsSpectating() || player->IsSuspended() )
+        player->LogActivity(ACTIVITY_JOINED_SPECTATOR_FROM_GRID);
+
     // remove team from list
     if ( listID >= 0 && players.Len() == 0 )
     {
@@ -1253,7 +1260,7 @@ void eTeam::RemovePlayerDirty ( ePlayerNetID* player )
 }
 
 // deregister a player
-void eTeam::RemovePlayer ( ePlayerNetID* player )
+void eTeam::RemovePlayer( ePlayerNetID* player )
 {
     tCONTROLLED_PTR( eTeam ) safety;
     safety = this; 						// avoid premature destruction of this team

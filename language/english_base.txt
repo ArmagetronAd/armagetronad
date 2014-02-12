@@ -888,7 +888,7 @@ ladderlog_write_base_respawn_help             Write to ladderlog: BASE_RESPAWN <
 ladderlog_write_basezone_conquered_help       Write to ladderlog: BASEZONE_CONQUERED <team> <cx> <cy>
 ladderlog_write_basezone_conquerer_help       Write to ladderlog: BASEZONE_CONQUERER <player> <% of zone>
 ladderlog_write_basezone_conquerer_team_help  Write to ladderlog: BASEZONE_CONQUERER_TEAM <team> <score>
-ladderlog_write_cycle_created_help            Write to ladderlog: CYCLE_CREATED [auth_name] [posx] [poxy] [dirx] [diry] [team_name]
+ladderlog_write_cycle_created_help            Write to ladderlog: CYCLE_CREATED [auth_name] [posx] [posy] [dirx] [diry] [team_name]
 ladderlog_write_cycle_destroyed_help          Write to ladderlog: CYCLE_DESTROYED [auth_name] [posx] [posy] [dirx] [diry] [team_name]
 ladderlog_write_chat_help                     Write to ladderlog: CHAT <chatter> [/me] <chat string>
 ladderlog_write_command_help                  Write to ladderlog: COMMAND <player> <ip> <auth level> <command> <options>
@@ -943,11 +943,11 @@ ladderlog_write_shutdown_help                 Write to ladderlog: SHUTDOWN <time
 ladderlog_write_soccer_ball_player_entered_help Write to ladderlog: SOCCER_BALL_PLAYER_ENTERED [player_auth_name] [team]
 ladderlog_write_soccer_goal_player_entered_help Write to ladderlog: SOCCER_GOAL_PLAYER_ENTERED [player_auth_name] [player_team] [team owner of the goal] 
 ladderlog_write_targetzone_conquered_help     Write to ladderlog: TARGETZONE_CONQUERED <object_id> <zone_name> <cx> <cy> [<player> [<team>]]
-ladderlog_write_targetzone_player_left_help   Write to ladderlog: TARGETZONE_PLAYER_LEFT <object_id> <zone_name> <cx> <cy> <player> <player x> <player y> <player xdir> <player ydir>
-ladderlog_write_targetzone_player_enter_help  Write to ladderlog: TARGETZONE_PLAYER_ENTER <object_id> <zone_name> <cx> <cy> <player> <player x> <player y> <player xdir> <player ydir> <time>
+ladderlog_write_targetzone_player_left_help   Write to ladderlog: TARGETZONE_PLAYER_LEFT <object_id> <zone_name> <cx> <cy> <player> <x> <y> <xdir> <ydir>
+ladderlog_write_targetzone_player_enter_help  Write to ladderlog: TARGETZONE_PLAYER_ENTER <object_id> <zone_name> <cx> <cy> <player> <x> <y> <xdir> <ydir> <time>
 ladderlog_write_targetzone_timeout_help       Write to ladderlog: TARGETZONE_TIMEOUT <object_id> <zone_name> <cx> <cy>
 ladderlog_write_wait_for_external_script_help Write to ladderlog: WAIT_FOR_EXTERNAL_SCRIPT (see also: WAIT_FOR_EXTERNAL_SCRIPT and WAIT_FOR_EXTERNAL_SCRIPT_TIMEOUT)
-ladderlog_write_winzone_player_enter_help     Write to ladderlog: WINZONE_PLAYER_ENTER <player> <player x> <player y> <player xdir> <player ydir> <time>
+ladderlog_write_winzone_player_enter_help     Write to ladderlog: WINZONE_PLAYER_ENTER <player> <x> <y> <xdir> <ydir> <time>
 ladderlog_write_zone_collapsed_help           Write to ladderlog: ZONE_COLLAPSED <zone_id> <object_id> <cx> <cy>
 ladderlog_write_zone_spawned_help             Write to ladderlog: ZONE_SPAWNED <zone_effect> <object id> <zone_name> <x> <y> <xdir> <ydir>
 ladderlog_write_team_created_help             Write to ladderlog: TEAM_CREATED <team name>
@@ -3646,6 +3646,7 @@ queue_increment_help       If set to >0, players will get their queues increased
 queue_refill_time_help     How long each time should players refill take? This is measured in hours.
 queue_refill_active_help   Should players be in server to have their queue refill active?
 queue_refill_waiting       You still have to wait \1 minutes for your queueing limit to refill.\n
+queue_refill_complete      \1's queues have been refilled.\n
 
 queue_find_failed          0xff7777\2 queuer were found with the search name: "\1".\n
 queue_refill_success       An administrator restored \1's queues.\n
@@ -3977,4 +3978,7 @@ cycle_respawn_zone_enemy              \1 0xRESETTwas respawned by an enemy playe
 cycle_respawn_zone_kill_enemy         \2 0xRESETTwas killed for entering \10xRESETT's respawn zone.\n
 
 zone_wall_death_help                  Set to 1 to enable zones to vanish after hitting the wall boundary.
-zone_wall_boundary_help               Values <= 0 is the boundary limit in which zone_wall_death will activate. 
+zone_wall_boundary_help               Values <= 0 is the boundary limit in which zone_wall_death will activate.
+
+log_turns_help                Debug command to log the turns of players, positions, direction, spawned and died.
+log_players_activities_help   Log the activities of players like: enter, leave, spectate, finish race, died.
