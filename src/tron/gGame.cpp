@@ -6109,7 +6109,7 @@ static void sg_getCurrentMap(std::istream &s)
     if (mapfile != "")
     {
         //  send the ladderlog string
-        sg_currentMapWriter << sg_currentSettings->sizeFactor << mapfile;
+        sg_currentMapWriter << sg_currentSettings->sizeFactor << gArena::SizeMultiplier() << mapfile;
         sg_currentMapWriter.write();
 
         //  send the message to the caller

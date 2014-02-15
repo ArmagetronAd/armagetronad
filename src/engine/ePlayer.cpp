@@ -3451,6 +3451,7 @@ static void se_ChatReadReport( ePlayerNetID * p, std::istream & s, eChatSpamTest
         tString report = msg.SubStr(pos + 1);
 
         tString pMsg;
+        pMsg << date << " ";
         pMsg << "Line " << lineNo << " | ";
         pMsg << user << ": ";
         pMsg << report << "\n";
