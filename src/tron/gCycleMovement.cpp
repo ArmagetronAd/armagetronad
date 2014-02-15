@@ -3616,10 +3616,10 @@ static bool sg_cycleRubberDepleteTeam = true;
 static bool sg_cycleRubberDepleteEnemy = true;
 static bool sg_cycleRubberDepleteRim = true;
 
-static tSettingItem<bool> sg_cycleRubberDepleteSelfConf("CYCLE_RUBBER_DEPLETE_SELF", sg_cycleRubberDepleteSelf);
-static tSettingItem<bool> sg_cycleRubberDepleteEnemyConf("CYCLE_RUBBER_DEPLETE_ENEMY", sg_cycleRubberDepleteEnemy);
-static tSettingItem<bool> sg_cycleRubberDepleteTeamConf("CYCLE_RUBBER_DEPLETE_TEAM", sg_cycleRubberDepleteTeam);
-static tSettingItem<bool> sg_cycleRubberDepleteRimConf("CYCLE_RUBBER_DEPLETE_RIM", sg_cycleRubberDepleteRim);
+static nSettingItemWatched<bool> sg_cycleRubberDepleteSelfConf("CYCLE_RUBBER_DEPLETE_SELF", sg_cycleRubberDepleteSelf, nConfItemVersionWatcher::Group_Bumpy, 12);
+static nSettingItemWatched<bool> sg_cycleRubberDepleteEnemyConf("CYCLE_RUBBER_DEPLETE_ENEMY", sg_cycleRubberDepleteEnemy, nConfItemVersionWatcher::Group_Bumpy, 12);
+static nSettingItemWatched<bool> sg_cycleRubberDepleteTeamConf("CYCLE_RUBBER_DEPLETE_TEAM", sg_cycleRubberDepleteTeam, nConfItemVersionWatcher::Group_Bumpy, 12);
+static nSettingItemWatched<bool> sg_cycleRubberDepleteRimConf("CYCLE_RUBBER_DEPLETE_RIM", sg_cycleRubberDepleteRim, nConfItemVersionWatcher::Group_Bumpy, 12);
 
 // *******************************************************************************************
 // *

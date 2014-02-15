@@ -503,9 +503,9 @@ void gRaceScores::OutputTopRecords(int show)
             msg.SetTemplateParameter(1, rankStr);
 
             tString playerNameStr = racePlayer->Name();
-            if ((playerNameStr.Len() - 1) > 16)
+            if (playerNameStr.Len() > 16)
                 playerNameStr = playerNameStr.SubStr(0, 16);
-            if ((playerNameStr.Len() - 1) < 16)
+            if (playerNameStr.Len() < 16)
                 playerNameStr.SetPos(16, false);
 
             msg.SetTemplateParameter(2, playerNameStr);
@@ -568,9 +568,9 @@ void gRaceScores::OutputIndividualRecords()
                         msg.SetTemplateParameter(1, rankStr);
 
                         tString playerNameStr = rcP->Name();
-                        if ((playerNameStr.Len() - 1) > 16)
+                        if (playerNameStr.Len() > 16)
                             playerNameStr = playerNameStr.SubStr(0, 16);
-                        if ((playerNameStr.Len() - 1) < 16)
+                        if (playerNameStr.Len() < 16)
                             playerNameStr.SetPos(16, false);
 
                         msg.SetTemplateParameter(2, playerNameStr);
@@ -593,9 +593,9 @@ void gRaceScores::OutputIndividualRecords()
                 msg.SetTemplateParameter(1, rankStr);
 
                 tString playerNameStr = rcC->Name();
-                if ((playerNameStr.Len() - 1) > 16)
+                if (playerNameStr.Len() > 16)
                     playerNameStr = playerNameStr.SubStr(0, 16);
-                if ((playerNameStr.Len() - 1) < 16)
+                if (playerNameStr.Len() < 16)
                     playerNameStr.SetPos(16, false);
 
                 msg.SetTemplateParameter(2, playerNameStr);
@@ -622,9 +622,9 @@ void gRaceScores::OutputIndividualRecords()
                         msg.SetTemplateParameter(1, rankStr);
 
                         tString playerNameStr = rcN->Name();
-                        if ((playerNameStr.Len() - 1) > 16)
+                        if (playerNameStr.Len() > 16)
                             playerNameStr = playerNameStr.SubStr(0, 16);
-                        if ((playerNameStr.Len() - 1) < 16)
+                        if (playerNameStr.Len() < 16)
                             playerNameStr.SetPos(16, false);
 
                         msg.SetTemplateParameter(2, playerNameStr);

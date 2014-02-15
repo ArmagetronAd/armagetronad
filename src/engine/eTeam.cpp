@@ -1877,10 +1877,12 @@ eTeam * eTeam::FindTeamByName(tString const &name)
 
 eTeam * eTeam::FindTeamByID(int teamID)
 {
-    if ((teamID < 0) || (teamID > teams.Len()))
+    int index = teamID - 1;
+
+    if ((index < 0) || (index >= teams.Len()))
         return NULL;
 
-    eTeam *team = teams[teamID - 1];
+    eTeam *team = teams[index];
     if (team)
         return team;
 

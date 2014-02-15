@@ -5975,15 +5975,20 @@ static void sg_DeclareRoundWinner(std::istream &s)
 	tString params;
     params.ReadLine( s, true );
     int pos = 0;
-    ePlayerNetID *winningPlayer = 0;
-    tString targetPlayer = params.ExtractNonBlankSubString(pos);
-    winningPlayer = ePlayerNetID::FindPlayerByName(targetPlayer, NULL);
-    if(!winningPlayer)
-        {
-            return;
-        }
-    static const char* message="$player_win_command";
-    sg_DeclareWinner( winningPlayer->CurrentTeam(), message );
+    ePlayerNetID *winningPlayer = NULL;
+    eTeam *winningTeam = NULL;
+
+    tString winnerName = params.ExtractNonBlankSubString(pos);
+    winningPlayer = ePlayerNetID::FindPlayerByName(winnerName);
+
+    if (winningPlayer)
+        winningTeam = winningPlayer->CurrentTeam();
+    else
+        winningTeam = eTeam::FindTeamByName(winnerName);
+
+    if (!winningTeam) return;
+
+    sg_DeclareWinner(winningTeam, tOutput("$player_win_command"));
 }
 
 static tConfItemFunc sg_DeclareRoundWinner_conf("DECLARE_ROUND_WINNER",&sg_DeclareRoundWinner);

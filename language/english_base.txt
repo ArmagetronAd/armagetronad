@@ -3939,11 +3939,14 @@ banned_words_replace          *
 banned_words_options_help     0: disable. 1: Block and alert message to sender. 2: Replace bad word with chosen character(s).
 banned_words_delimiters_help  The delimiters to remove from in the messages in case people encased banned words in them.
 
-#chat_message_report_message         [ time ] player reports: message.\n
-chat_message_report_message          [ \1 ] \2 reports: \3.\n
 chat_message_report_message_empty    Your report cannot be empty and you will be punished for spam reporting!\n
 chat_message_report_respond_ok       Your report has been saved.\n
 chat_message_report_respond_no       Your report was not saved due to unknown reasons.\n
+
+read_reports_count            There are \1 reports on file.\n
+read_reports_access_no_clear  You do not have the access to clear the report.txt\n
+read_reports_cleared          The reports messages have been cleared.\n
+read_reports_access_no_read   You do not have the access to read the report.txt\n
 
 admin_command_tag      RA: 
 
@@ -3978,7 +3981,4 @@ cycle_respawn_zone_enemy              \1 0xRESETTwas respawned by an enemy playe
 cycle_respawn_zone_kill_enemy         \2 0xRESETTwas killed for entering \10xRESETT's respawn zone.\n
 
 zone_wall_death_help                  Set to 1 to enable zones to vanish after hitting the wall boundary.
-zone_wall_boundary_help               Values <= 0 is the boundary limit in which zone_wall_death will activate.
-
-log_turns_help                Debug command to log the turns of players, positions, direction, spawned and died.
-log_players_activities_help   Log the activities of players like: enter, leave, spectate, finish race, died.
+zone_wall_boundary_help               Values <= 0 is the boundary limit in which zone_wall_death will activate. 

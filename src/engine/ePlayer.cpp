@@ -3320,20 +3320,25 @@ static void se_ChatReport( ePlayerNetID * p, std::istream & s, eChatSpamTester &
     if ( /* IsSilencedWithWarning(player) || */ spam.Block() ) return;
 
     tString msg;
-    tOutput report, reportPlayer;
+    tOutput reportPlayer;
     msg.ReadLine(s);
 
     if (msg.Filter() != "")
     {
-        report.SetTemplateParameter(1, se_Time());
-        report.SetTemplateParameter(2, p->GetName());
-        report.SetTemplateParameter(3, msg);
-        report << "$chat_message_report_message";
+        tString reporMsg;
+        reporMsg << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S]");
+        reporMsg << " ";
+        reporMsg << p->GetMachine().GetIP();
+        reporMsg << " ";
+        reporMsg << p->GetUserName();
+        reporMsg << " ";
+        reporMsg << msg;
+        reporMsg << "\n";
 
         std::ofstream o;
         if (tDirectories::Var().Open(o, "reports.txt", std::ios::app))
         {
-            o << report;
+            o << reporMsg;
             reportPlayer << "$chat_message_report_respond_ok";
         }
         else
@@ -3349,6 +3354,127 @@ static void se_ChatReport( ePlayerNetID * p, std::istream & s, eChatSpamTester &
     sn_ConsoleOut(reportPlayer, p->Owner());
 }
 
+static int se_ReportsCount()
+{
+    int count = 0;
+
+    std::ifstream i;
+    if (tDirectories::Var().Open(i, "reports.txt"))
+    {
+        while (!i.eof())
+        {
+            std::string sayLine;
+            std::getline(i, sayLine);
+            std::istringstream s(sayLine);
+
+            tString params;
+            params.ReadLine(s);
+
+            if (params.Filter() != "")
+                count++;
+        }
+    }
+    i.close();
+
+    return count;
+}
+
+static tArray<tString> se_ReportsMessages()
+{
+    tArray<tString> reports;
+
+    std::ifstream i;
+    if (tDirectories::Var().Open(i, "reports.txt"))
+    {
+        while (!i.eof())
+        {
+            std::string sayLine;
+            std::getline(i, sayLine);
+            std::istringstream s(sayLine);
+
+            tString params;
+            params.ReadLine(s);
+            int pos = 0;
+
+            if (params.Filter() != "")
+                reports.Insert(params);
+        }
+    }
+    i.close();
+
+    return reports;
+}
+
+tAccessLevel se_AccessLevelReportsRead = tAccessLevel_Default;
+static tSettingItem<tAccessLevel> se_AccessLevelReportsReadConf("ACCESS_LEVEL_REPORTS_READ", se_AccessLevelReportsRead);
+
+tAccessLevel se_AccessLevelReportsClear = tAccessLevel_Admin;
+static tSettingItem<tAccessLevel> se_AccessLevelReportsClearConf("ACCESS_LEVEL_REPORTS_CLEAR", se_AccessLevelReportsClear);
+
+static void se_ChatReadReport( ePlayerNetID * p, std::istream & s, eChatSpamTester & spam )
+{
+    // odd, the refactored original did not check for silence. Probably by design.
+    if ( /* IsSilencedWithWarning(player) || */ spam.Block() ) return;
+
+    tString type;
+    s >> type;
+
+    if ((type == "") || (type.ToLower() == "list"))
+    {
+        tOutput msg;
+        msg.SetTemplateParameter(1, se_ReportsCount());
+        msg << "$read_reports_count";
+        sn_ConsoleOut(msg, p->Owner());
+    }
+    else if (type.ToLower() == "read")
+    {
+        if (p->GetAccessLevel() > se_AccessLevelReportsRead)
+        {
+            sn_ConsoleOut(tOutput("$read_reports_access_no_read"), p->Owner());
+            return;
+        }
+
+        int lineNo;
+        s >> lineNo;
+
+        tArray<tString> report_messages = se_ReportsMessages();
+
+        if ((lineNo < 0) || (lineNo >= report_messages.Len()))
+            return;
+
+        tString msg = report_messages[lineNo];
+        int pos = 0;
+
+        tString date   = msg.ExtractNonBlankSubString(pos);
+        tString ip     = msg.ExtractNonBlankSubString(pos);
+        tString user   = msg.ExtractNonBlankSubString(pos);
+        tString report = msg.SubStr(pos + 1);
+
+        tString pMsg;
+        pMsg << "Line " << lineNo << " | ";
+        pMsg << user << ": ";
+        pMsg << report << "\n";
+        sn_ConsoleOut(pMsg, p->Owner());
+    }
+    else if (type.ToLower() == "clear")
+    {
+        if (p->GetAccessLevel() > se_AccessLevelReportsClear)
+        {
+            sn_ConsoleOut(tOutput("$read_reports_access_no_clear"), p->Owner());
+            return;
+        }
+
+        std::ofstream o;
+        if (tDirectories::Var().Open(o, "reports.txt"))
+        {
+            o << "\n";
+        }
+        o.close();
+
+        sn_ConsoleOut(tOutput("$read_reports_cleared"), p->Owner());
+    }
+}
+
 /**
  * Let's just leave it at default at moderators level.
  * This way only moderators or lower level users can view chat messages from this person.
@@ -3359,8 +3485,7 @@ static tSettingItem<int> se_accessLevelViewChatsConf("ACCESS_LEVEL_VIEW_CHATS", 
 
 // /chat commant: talk to the people with the same or lower(better) access level
 static void se_ChatPlayer( ePlayerNetID * p, std::istream & s, eChatSpamTester & spam )
-{
-    // odd, the refactored original did not check for silence. Probably by design.
+{    // odd, the refactored original did not check for silence. Probably by design.
     if ( /* IsSilencedWithWarning(player) || */ spam.Block() ) return;
 
     if (p && (p->GetAccessLevel() <= se_accessLevelViewChats))
@@ -4152,6 +4277,12 @@ void handle_chat( nMessage &m )
                     {
                         spam.lastSaidType_ = eChatMessageType_Public;
                         se_ChatReport( p, s, spam );
+                        return;
+                    }
+                    else if (command == "/reports")
+                    {
+                        spam.lastSaidType_ = eChatMessageType_Public;
+                        se_ChatReadReport( p, s, spam );
                         return;
                     }
                     else if (command == "/msg")
