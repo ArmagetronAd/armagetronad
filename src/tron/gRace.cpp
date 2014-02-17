@@ -581,7 +581,7 @@ void gRaceScores::OutputIndividualRecords()
                             msg.SetTemplateParameter(3, "UNDONE");
 
                         msg << "$race_rank_message_format";
-                        sn_ConsoleOut(msg);
+                        sn_ConsoleOut(msg, p->Owner());
                     }
                 }
 
@@ -606,7 +606,7 @@ void gRaceScores::OutputIndividualRecords()
                     msg.SetTemplateParameter(3, "UNDONE");
 
                 msg << "$race_rank_current_format";
-                sn_ConsoleOut(msg);
+                sn_ConsoleOut(msg, p->Owner());
 
                 //  record below current
                 if ((current_id + 1) < sg_RaceScores.Len())
@@ -635,7 +635,7 @@ void gRaceScores::OutputIndividualRecords()
                             msg.SetTemplateParameter(3, "UNDONE");
 
                         msg << "$race_rank_message_format";
-                        sn_ConsoleOut(msg);
+                        sn_ConsoleOut(msg, p->Owner());
                     }
                 }
             }

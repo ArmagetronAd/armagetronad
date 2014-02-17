@@ -3314,11 +3314,8 @@ static void se_ChatEnemy(ePlayerNetID *p, std::istream &s, eChatSpamTester &spam
     }
 }
 
-static void se_ChatReport( ePlayerNetID * p, std::istream & s, eChatSpamTester & spam )
+static void se_ChatReport( ePlayerNetID * p, std::istream & s )
 {
-    // odd, the refactored original did not check for silence. Probably by design.
-    if ( /* IsSilencedWithWarning(player) || */ spam.Block() ) return;
-
     tString msg;
     tOutput reportPlayer;
     msg.ReadLine(s);
@@ -3340,6 +3337,7 @@ static void se_ChatReport( ePlayerNetID * p, std::istream & s, eChatSpamTester &
         {
             o << reporMsg;
             reportPlayer << "$chat_message_report_respond_ok";
+            reportPlayer << msg << "\n";
         }
         else
         {
@@ -3411,11 +3409,8 @@ static tSettingItem<tAccessLevel> se_AccessLevelReportsReadConf("ACCESS_LEVEL_RE
 tAccessLevel se_AccessLevelReportsClear = tAccessLevel_Admin;
 static tSettingItem<tAccessLevel> se_AccessLevelReportsClearConf("ACCESS_LEVEL_REPORTS_CLEAR", se_AccessLevelReportsClear);
 
-static void se_ChatReadReport( ePlayerNetID * p, std::istream & s, eChatSpamTester & spam )
+static void se_ChatReadReport( ePlayerNetID * p, std::istream & s )
 {
-    // odd, the refactored original did not check for silence. Probably by design.
-    if ( /* IsSilencedWithWarning(player) || */ spam.Block() ) return;
-
     tString type;
     s >> type;
 
@@ -3434,15 +3429,26 @@ static void se_ChatReadReport( ePlayerNetID * p, std::istream & s, eChatSpamTest
             return;
         }
 
-        int lineNo;
-        s >> lineNo;
+        tString lineNoStr;
+        s >> lineNoStr;
+        if (lineNoStr.Filter() == "")
+        {
+            sn_ConsoleOut(tOutput("$chat_message_report_read_usage"), p->Owner());
+            return;
+        }
+
+        int lineNo = atoi(lineNoStr);
+        int index  = lineNo - 1;
 
         tArray<tString> report_messages = se_ReportsMessages();
 
-        if ((lineNo < 0) || (lineNo >= report_messages.Len()))
+        if ((index < 0) || (index >= report_messages.Len()))
+        {
+            sn_ConsoleOut(tOutput("$chat_message_report_read_none", lineNo), p->Owner());
             return;
+        }
 
-        tString msg = report_messages[lineNo];
+        tString msg = report_messages[index];
         int pos = 0;
 
         tString date   = msg.ExtractNonBlankSubString(pos);
@@ -4277,13 +4283,13 @@ void handle_chat( nMessage &m )
                     else if (command == "/report")
                     {
                         spam.lastSaidType_ = eChatMessageType_Public;
-                        se_ChatReport( p, s, spam );
+                        se_ChatReport( p, s );
                         return;
                     }
                     else if (command == "/reports")
                     {
                         spam.lastSaidType_ = eChatMessageType_Public;
-                        se_ChatReadReport( p, s, spam );
+                        se_ChatReadReport( p, s );
                         return;
                     }
                     else if (command == "/msg")

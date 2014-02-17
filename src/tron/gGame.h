@@ -244,10 +244,7 @@ class ShutDownCounter
 //  SHUTDOWN HACK END
 
 extern gGameSettings* sg_currentSettings;
-
-// Race timer hack
-extern bool sg_RaceTimerEnabled;
-
+extern bool sg_LogTurns;
 extern tString mapfile;
 
 void sg_OutputOnlinePlayers();

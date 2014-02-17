@@ -4431,7 +4431,7 @@ void gGameSpawnTimer::Reset()
     countDown_  = 0;
 }
 
-static bool sg_LogTurns = false;
+bool sg_LogTurns = false;
 static tSettingItem<bool> sg_LogTurnsConf("LOG_TURNS", sg_LogTurns);
 
 void LogPlayersCycleTurns(gCycle *cycle, tString msg)

@@ -3942,6 +3942,8 @@ banned_words_delimiters_help  The delimiters to remove from in the messages in c
 chat_message_report_message_empty    Your report cannot be empty and you will be punished for spam reporting!\n
 chat_message_report_respond_ok       Your report has been saved.\n
 chat_message_report_respond_no       Your report was not saved due to unknown reasons.\n
+chat_message_report_read_usage       /reports read <line number>\n
+chat_message_report_read_none        There is no line number \1 in the reports file.\n
 
 read_reports_count            There are \1 reports on file.\n
 read_reports_access_no_clear  You do not have the access to clear the report.txt\n
