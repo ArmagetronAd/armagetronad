@@ -3955,6 +3955,23 @@ void gGame::StateUpdate(){
                 delayedCommands::Clear();
                 gZone::ClearDelay();
 
+                {
+                    // default include files are executed at owner level
+                    tCurrentAccessLevel level( tAccessLevel_Owner, true );
+
+                    std::ifstream s;
+
+                    // load contents of everytime.cfg for real
+                    static const tString everytime("everytime.cfg");
+                    if ( tConfItemBase::OpenFile(s, everytime, tConfItemBase::Config ) )
+                        tConfItemBase::ReadFile(s);
+
+                    s.close();
+
+                    if ( tConfItemBase::OpenFile(s, everytime, tConfItemBase::Var ) )
+                        tConfItemBase::ReadFile(s);
+                }
+
                 // log scores before players get renamed
                 //ePlayerNetID::LogScoreDifferences();
 
@@ -3980,23 +3997,6 @@ void gGame::StateUpdate(){
                     // wait for network messages
                     sn_BasicNetworkSystem.Select( 0.1f );
                     gGame::NetSyncIdle();
-                }
-
-                {
-                    // default include files are executed at owner level
-                    tCurrentAccessLevel level( tAccessLevel_Owner, true );
-
-                    std::ifstream s;
-
-                    // load contents of everytime.cfg for real
-                    static const tString everytime("everytime.cfg");
-                    if ( tConfItemBase::OpenFile(s, everytime, tConfItemBase::Config ) )
-                        tConfItemBase::ReadFile(s);
-
-                    s.close();
-
-                    if ( tConfItemBase::OpenFile(s, everytime, tConfItemBase::Var ) )
-                        tConfItemBase::ReadFile(s);
                 }
             }
 #endif
