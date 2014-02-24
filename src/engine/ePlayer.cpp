@@ -4839,33 +4839,61 @@ struct eChatInsertionCommand
 };
 
 bool se_tabCompletion = true;
+bool se_tabCompletionWithColors = false;
+
+static char const * const se_chatNormalCommands[] = {
+    "/msg ",
+    "/invite ",
+    "/uninvite ",
+    "/teach ",
+    "/rtfm ",
+    "/op ",
+    "/deop ",
+    "/vote kick ",
+    "/vote suspend ",
+    "/players "
+};
+
+static char const * const se_chatCmdCommands[] = {
+    "/admin ",
+    "/console "
+};
 
 //! The tab completion function for in-chat mode
-//! @returns whether text has completed or not
 static void ChatTabCompletition(tString &strString, int &curserPos)
 {
+    if (!se_tabCompletion) return;
+
     tArray<tString> msgsExt = strString.Split(" ");
     tArray<ePlayerNetID *> foundPlayers;
     tString newString;
+
+    tColoredString breaker;
+    breaker << tColoredString::ColorString(1,1,.5);
 
     int cusPos = 0;
     bool isFirst = true;
     bool isChat  = false;
     bool isAdmin = false;
 
-    if (strString.StartsWith("/"))
+    int i = 0;
+    for (i = sizeof(se_chatNormalCommands)/sizeof(se_chatNormalCommands[0]) - 1; i >= 0; --i)
     {
-        std::string str(strString);
-        std::istringstream s(str);
-
-        tString command;
-        s >> command;
-
-        if (command == "/msg")
+        if (strString.StartsWith(se_chatNormalCommands[i]))
+        {
             isChat = true;
+            break;
+        }
+    }
 
-        if ((command == "/admin") || (command == "/console"))
+    i = 0;
+    for (i = sizeof(se_chatCmdCommands)/sizeof(se_chatCmdCommands[0]) - 1; i >= 0; --i)
+    {
+        if (strString.StartsWith(se_chatCmdCommands[i]))
+        {
             isAdmin = true;
+            break;
+        }
     }
 
     for(int i = 0; i < msgsExt.Len(); i++)
@@ -4873,9 +4901,6 @@ static void ChatTabCompletition(tString &strString, int &curserPos)
         tString word = msgsExt[i];
 
         cusPos += word.Len() - 1;
-
-        //con << curserPos << " | " << cusPos << " | " << word << "\n";
-
         if (cusPos == curserPos)
         {
             if (isAdmin)
@@ -4914,9 +4939,9 @@ static void ChatTabCompletition(tString &strString, int &curserPos)
                     if (p && p->IsActive())
                     {
                         if (isFirst && !isChat)
-                            word = p->GetName() + ": ";
+                            word = (se_tabCompletionWithColors ? p->GetColoredName() + breaker : p->GetName()) + ": ";
                         else
-                            word = p->GetName() + " ";
+                            word = (se_tabCompletionWithColors ? p->GetColoredName() + breaker : p->GetName()) + " ";
                     }
                 }
                 else if (foundPlayers.Len() > 1)
@@ -4924,16 +4949,13 @@ static void ChatTabCompletition(tString &strString, int &curserPos)
                     for(int k = 0; k < foundPlayers.Len(); k++)
                     {
                         p = foundPlayers[k];
-                        if (p && p->IsActive())
+                        if (p && p->IsActive() && p->GetName().Filter() == word.Filter())
                         {
-                            if (p->GetName().Filter() == word.Filter())
-                            {
-                                if (isFirst)
-                                    word = p->GetName() + ": ";
-                                else
-                                    word = p->GetName() + " ";
-                                break;
-                            }
+                            if (isFirst && !isChat)
+                                word = (se_tabCompletionWithColors ? p->GetColoredName() + breaker : p->GetName()) + ": ";
+                            else
+                                word = (se_tabCompletionWithColors ? p->GetColoredName() + breaker : p->GetName()) + " ";
+                            break;
                         }
                     }
                 }
@@ -4947,7 +4969,7 @@ static void ChatTabCompletition(tString &strString, int &curserPos)
         else
             newString << word << " ";
 
-        if (isFirst) isFirst = false;
+        if ((i > 0) && isFirst) isFirst = false;
     }
 
     strString = newString;
@@ -4998,14 +5020,11 @@ public:
         }
         else if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_TAB)
         {
-            if ((*content != "") && se_tabCompletion)
-            {
-                tString chattext;
-                chattext << *content;
+            tString chattext;
+            chattext << *content;
 
-                ChatTabCompletition(chattext, cursorPos);
-                *content = chattext;
-            }
+            ChatTabCompletition(chattext, cursorPos);
+            *content = chattext;
         }
         else if (e.type==SDL_KEYDOWN &&
                  uActionGlobal::IsBreakingGlobalBind(e.key.keysym.sym))

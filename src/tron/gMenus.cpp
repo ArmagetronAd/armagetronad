@@ -454,17 +454,19 @@ static tConfItem<bool> wsp("WHITE_SPARKS",white_sparks);
 extern bool sg_crashExplosion;   // from gExplosion.cpp
 static tConfItem<bool> crexp("EXPLOSION",sg_crashExplosion);
 
+#ifndef DEDICATED
 // both from ePlayer.cpp
 static tConfItem<bool> se_highlightMyNameConf("HIGHLIGHT_NAME", se_highlightMyName);
-static tConfItem<bool> se_tabCompletionConf("TAB_COMPLETION", se_tabCompletion);
 
-#ifndef DEDICATED
+static tConfItem<bool> se_tabCompletionConf("TAB_COMPLETION", se_tabCompletion);
+static tConfItem<bool> se_tabCompletionColors("TAB_COMPLETION_WITH_COLORS", se_tabCompletionWithColors);
 
 void sg_SpecialMenu()
 {
     uMenu menu("$special_setup_menu_text");
 
     uMenuItemToggle hlm(&menu, "$highlight_name_menu_text", "$highlight_name_menu_help", se_highlightMyName);
+    uMenuItemToggle tcwc(&menu, "$tab_completion_with_colors_menu_text", "$tab_completion_with_colors_menu_help", se_tabCompletionWithColors);
     uMenuItemToggle tc(&menu, "$tab_completion_menu_text", "$tab_completion_menu_help", se_tabCompletion);
 
     uMenuItemToggle hcw(&menu, "$hide_cycles_walls_menu_text", "$hide_cycles_walls_menu_help", sg_HideCyclesWalls);

@@ -736,6 +736,27 @@ static void sr_KillScriptCommand( std::istream & s )
 static tConfItemFunc sr_killScript( "KILL_SCRIPT", sr_KillScriptCommand );
 static tAccessLevelSetter sr_killScriptALS( sr_killScript, tAccessLevel_Owner );
 
+void se_KillAllScripts()
+{
+    for( int i = sr_inputStreams.Len()-1; i >= 0; --i )
+    {
+        rScriptStream * script = dynamic_cast< rScriptStream * >( (rStream*)sr_inputStreams[i] );
+        if( script )
+        {
+            script->Close();
+        }
+    }
+}
+
+// kills all scripts
+static void sr_KillAllScriptsCommand( std::istream & s )
+{
+    se_KillAllScripts();
+}
+
+static tConfItemFunc sr_killAllScriptsConf( "KILL_ALL_SCRIPTS", sr_KillAllScriptsCommand );
+static tAccessLevelSetter sr_killScriptALS( sr_killAllScriptsConf, tAccessLevel_Owner );
+
 void sr_ListScriptsCommand( std::istream & s )
 {
     int numberScripts = 0;

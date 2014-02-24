@@ -1415,6 +1415,9 @@ hide_cycles_menu_help Hides all cycles playing on the grid while you are alive.
 highlight_name_menu_text Highlight Name
 highlight_name_menu_help If enabled, if your name is in chats, it will get highlited. Disabled will leave the chat string alone.
 
+tab_completion_with_colors_menu_text Tab Completion With Colors
+tab_completion_with_colors_menu_help If enabled, after typing someone's initial name, hit tab and it should automatically fill their colored name in your string. When it's disabled, it won't do it. This applies to all tab completion features avilable.
+
 tab_completion_menu_text Tab Completion
 tab_completion_menu_help If enabled, after typing someone's initial name, hit tab and it should automatically fill their name in your string. When it's disabled, it won't do it. This applies to all tab completion features avilable.
 
@@ -3807,6 +3810,7 @@ svg_output_timing_help                    UNDOCUMENTED
 svg_transparent_background_help           UNDOCUMENTED
 switch_view_tooltip_help                  UNDOCUMENTED
 tab_completion_help                       If set to 1, tab completion is enabled and you can use it to auto complete names and commands.
+tab_completion_with_colors_help           If set to 1, whenever you hit TAN to auto complete a name, it will fill with the complete colored nane.
 tactical_position_enable_help             UNDOCUMENTED
 tactical_position_interval_help           UNDOCUMENTED
 tactical_position_midfield_factor_help    UNDOCUMENTED

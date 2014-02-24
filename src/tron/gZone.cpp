@@ -134,7 +134,7 @@ gZone * sg_CreateWinDeathZone( eGrid * grid, const eCoord & pos )
         sn_ConsoleOut( "$instant_death_activated" );
 
         sg_deathZoneActivated << ret->GOID() << ret->GetName() << ret->Position().x << ret->Position().y;
-        sg_winZoneActivated.write();
+        sg_deathZoneActivated.write();
     }
     else
     {
@@ -148,7 +148,7 @@ gZone * sg_CreateWinDeathZone( eGrid * grid, const eCoord & pos )
             sn_ConsoleOut( "$instant_round_end_activated" );
         }
 
-        sg_deathZoneActivated << ret->GOID() << ret->GetName() << ret->Position().x << ret->Position().y;
+        sg_winZoneActivated << ret->GOID() << ret->GetName() << ret->Position().x << ret->Position().y;
         sg_winZoneActivated.write();
     }
 

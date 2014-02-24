@@ -806,7 +806,7 @@ ePlayerNetID & ePlayerNetID::SetUserName( tString const & userName )
 }
 
 ePlayerNetID *se_GetLocalPlayer();
-extern bool se_highlightMyName, se_tabCompletion;
+extern bool se_highlightMyName, se_tabCompletion, se_tabCompletionWithColors;
 
 #endif
 

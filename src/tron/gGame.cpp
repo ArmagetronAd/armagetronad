@@ -2806,6 +2806,8 @@ static void Quit_conf(std::istream &){
     tRecorder::Record("END");
     uMenu::quickexit = uMenu::QuickExit_Total;
 
+
+
     // write to ladderlog.txt the time of server shutdown
     sg_ShutdownLadderLog << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
     sg_ShutdownLadderLog.write();
