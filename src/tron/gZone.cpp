@@ -124,6 +124,8 @@ static eLadderLogWriter sg_baseEnemyRespawnWriter("BASE_ENEMY_RESPAWN", true);
 static eLadderLogWriter sg_deathZoneActivated("DEATHZONE_ACTIVATED", true);
 static eLadderLogWriter sg_winZoneActivated("WINZONE_ACTIVATED", true);
 
+bool gZone::winnerPlayer_ = false;
+
 //! creates a win or death zone (according to configuration) at the specified position
 gZone * sg_CreateWinDeathZone( eGrid * grid, const eCoord & pos )
 {
@@ -277,6 +279,7 @@ gZone::gZone( eGrid * grid, const eCoord & pos, bool dynamicCreation, bool delay
     destroyed_ = false;
     dynamicCreation_ = dynamicCreation;
     delayCreation_ = delayCreation;
+    winnerPlayer_ = false;
     wallInteract_ = false;
     wallBouncesLeft_ = 0;
     wallPenetrate_ = false;
@@ -336,6 +339,7 @@ gZone::gZone( nMessage & m )
     destroyed_ = false;
     dynamicCreation_ = false;
     delayCreation_ = false;
+    winnerPlayer_ = false;
     wallInteract_ = false;
     wallBouncesLeft_ = 0;
     wallPenetrate_ = false;
@@ -1765,20 +1769,17 @@ void gWinZoneHack::OnEnter( gCycle * target, REAL time )
         {
             static const char* message="$player_win_instant";
             sg_DeclareWinner( target->Player()->CurrentTeam(), message );
+            destroyed_ = true;
             Vanish( 0.5 );
         }
     }
     //HACK RACE end
 
-/*
-    // let zone vanish
-    if ( GetExpansionSpeed() >= 0 )
+    if (!winnerPlayer_)
     {
-        SetReferenceTime();
-        SetExpansionSpeed( -GetRadius()*.5 );
-        RequestSync();
+        winnerPlayer_ = true;
+        LogWinnerCycleTurns(target);
     }
-*/
 }
 
 
@@ -6192,6 +6193,12 @@ void gTargetZoneHack::OnEnter( gCycle * target, REAL time )
         std::istringstream stream(&OnEnterCmd(0));
         tCurrentAccessLevel elevator( sg_SetTargetCmd_conf.GetRequiredLevel(), true );
         tConfItemBase::LoadAll(stream);
+    }
+
+    if (!winnerPlayer_)
+    {
+        winnerPlayer_ = true;
+        LogWinnerCycleTurns(target);
     }
 
     // Check if player already entered this zone

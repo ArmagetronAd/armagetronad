@@ -1407,7 +1407,7 @@ void sg_OutputOnlinePlayers()
                         o << "1 ";
 
                         tString logTurnPos;
-                        logTurnPos << p->Object()->Position().x << ", " << p->Object()->Position();
+                        logTurnPos << p->Object()->Position().x << ", " << p->Object()->Position().y;
                         LogPlayersCycleTurns(dynamic_cast<gCycle *>(p->Object()), logTurnPos);
                     }
                     else
@@ -4436,6 +4436,9 @@ void gGameSpawnTimer::Reset()
 bool sg_LogTurns = false;
 static tSettingItem<bool> sg_LogTurnsConf("LOG_TURNS", sg_LogTurns);
 
+bool sg_LogTurnsWinner = false;
+static tSettingItem<bool> sg_LogTurnsWinnerConf("LOG_TURNS_WINNER", sg_LogTurnsWinner);
+
 void LogPlayersCycleTurns(gCycle *cycle, tString msg)
 {
     if (sg_LogTurns && cycle->Player())
@@ -4447,6 +4450,36 @@ void LogPlayersCycleTurns(gCycle *cycle, tString msg)
         if ( tDirectories::Var().Open(o, logTurnsFile, std::ios::app) )
         {
             o << msg << "\n";
+        }
+        o.close();
+    }
+}
+
+void LogWinnerCycleTurns(gCycle *winner)
+{
+    if (sg_LogTurnsWinner && winner->Player() && winner->Player()->IsActive())
+    {
+        tString logTurnsWinnerFile;
+        logTurnsWinnerFile << "log_turns/winner/" << htmlentities(winner->Player()->GetUserName()) << ".txt";
+
+        std::ofstream o;
+        if ( tDirectories::Var().Open(o, logTurnsWinnerFile) )
+        {
+            o << mapfile << "\n";
+
+            eCoord pos = winner->turnedPositions[0];
+            eCoord dir = winner->turnedDirections[0];
+            o << "spawned " << pos.x << " " << pos.y << " " << dir.x << " " << dir.y << "\n";
+
+            for (int i = 1; i < winner->turnedPositions.size(); i++)
+            {
+                pos = winner->turnedPositions[i];
+                dir = winner->turnedDirections[i];
+
+                o << pos.x << " " << pos.y << " " << dir.x << " " << dir.y << "\n";
+            }
+
+            o << "finished " << winner->Position().x << " " << winner->Position().y << " " << winner->Direction().x << " " << winner->Direction().y << "\n";
         }
         o.close();
     }

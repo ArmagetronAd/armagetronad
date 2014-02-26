@@ -251,6 +251,7 @@ void sg_OutputOnlinePlayers();
 void LoadMap(tString mapName);
 
 void LogPlayersCycleTurns(gCycle *cycle, tString msg);
+void LogWinnerCycleTurns(gCycle *winner);
 
 #endif
 

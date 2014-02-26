@@ -155,6 +155,8 @@ protected:
 
     bool wallPenetrate_;
 
+    static bool winnerPlayer_;
+
     bool dynamicCreation_;  //??? remove
     bool delayCreation_;
     tJUST_CONTROLLED_PTR< ePlayerNetID > pOwner_;

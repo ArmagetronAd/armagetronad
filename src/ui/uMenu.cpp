@@ -1176,6 +1176,8 @@ uMenuItemStringWithHistory::~uMenuItemStringWithHistory()
         m_History.pop_back();
 }
 
+//! @param e the event to process
+/// @returns true if the event was handled, false if it wasn't
 bool uMenuItemStringWithHistory::Event(SDL_Event &e)
 {
     // flag indicating that the event was handled

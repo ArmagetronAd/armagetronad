@@ -5020,11 +5020,7 @@ public:
         }
         else if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_TAB)
         {
-            tString chattext;
-            chattext << *content;
-
-            ChatTabCompletition(chattext, cursorPos);
-            *content = chattext;
+            ChatTabCompletition(*content, cursorPos);
         }
         else if (e.type==SDL_KEYDOWN &&
                  uActionGlobal::IsBreakingGlobalBind(e.key.keysym.sym))

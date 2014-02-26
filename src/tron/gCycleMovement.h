@@ -252,6 +252,9 @@ protected:
 
     // room for accessors
 public:
+    std::deque<eCoord>   turnedPositions;            //!< stores the positions turned
+    std::deque<eCoord>   turnedDirections;           //!< stores the directions turned
+
     REAL RubberDepleteTime() const;                //!< returns the time rubber got fully used (or 0 if it hasn't)
 
     REAL GetMaxSpaceAhead( REAL maxReport ) const; //< Returns the current maximal space ahead

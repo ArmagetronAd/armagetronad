@@ -2445,12 +2445,15 @@ gCycle::gCycle(eGrid *grid, const eCoord &pos,const eCoord &d,ePlayerNetID *p)
 
     flag_ = NULL;
 
+    startPos_ = this->pos;
+    startDir_ = this->dir;
+
     tString logTurnsMsg;
     logTurnsMsg << "spawned " << st_GetCurrentTime("%Y/%m/%d-%H:%M:%S ");
     LogPlayersCycleTurns(this, logTurnsMsg);
 
-    startPos_ = this->pos;
-    startDir_ = this->dir;
+    turnedPositions.push_back(startPos_);
+    turnedDirections.push_back(startDir_);
 }
 
 gCycle::~gCycle(){
@@ -3903,6 +3906,9 @@ bool gCycle::DoTurn(int d)
                 lastDirDrive = lastDirDriveBack;
             }
 
+            turnedPositions.push_back(pos);
+            turnedDirections.push_back(dirDrive);
+
             return true;
         }
     }
@@ -5352,13 +5358,19 @@ gCycle::gCycle(nMessage &m)
     // set last time so that the first read_sync will not think this is old
     lastTimeAnim = lastTime = -EPS;
 
+    nextSync = nextSyncOwner = -1;
+    flag_ = NULL;
+    lastSyncOwnerGameTime_ = 0;
+
+    startPos_ = this->pos;
+    startDir_ = this->dir;
+
     tString logTurnsMsg;
     logTurnsMsg << "spawned " << st_GetCurrentTime("%Y/%m/%d-%H:%M:%S ");
     LogPlayersCycleTurns(this, logTurnsMsg);
 
-    nextSync = nextSyncOwner = -1;
-    flag_ = NULL;
-    lastSyncOwnerGameTime_ = 0;
+    turnedPositions.push_back(startPos_);
+    turnedDirections.push_back(startDir_);
 }
 
 
