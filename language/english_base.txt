@@ -3735,6 +3735,8 @@ ladderlog_write_player_colored_name_help            Write to ladderlog: PLAYER_C
 ladderlog_write_player_gridpos_help                 Write to ladderlog: PLAYER_GRIDPOS [player_username] [pos_x] [pos_y] [dir_x] [dir_y] [cycle_speed] [player_rubber] [cycle_rubber] [team]
 ladderlog_write_custom_invalid_command_help         Write to ladderlog: CUSTOM_INVALID_COMMAND <command> <player_log> <ip> <access_level> <params>
 ladderlog_write_player_killed_help                  Write to ladderlog: PLAYER_KILLED [player_username] [ip_address] [pos_x] [pos_y] [dir_x] [dir_y]
+ladderlog_write_queue_started_help                  Write to ladderlog: QUEUE_STARTED [time]
+ladderlog_write_queue_finished_help                 Write to ladderlog: QUEUE_FINISHED [time]
 ladderlog_write_round_commencing_help               Write to ladderlog: ROUND_COMMENCING [current_round] [total_rounds]
 ladderlog_write_round_ended_help                    Write to ladderlog: ROUND_ENDED [time]
 ladderlog_write_round_finished_help                 Write to ladderlog: ROUND_FINISHED [time]

@@ -309,6 +309,8 @@ void gRaceScores::Add(gRacePlayer *racePlayer, bool finished)
             bestTime << "$race_player_hold_best_time";
 
             sn_ConsoleOut(bestTime);
+
+            LogWinnerCycleTurns(dynamic_cast<gCycle *>(racePlayer->Player()->Object()));
         }
         else
         {

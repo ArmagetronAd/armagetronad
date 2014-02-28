@@ -755,7 +755,7 @@ static void sr_KillAllScriptsCommand( std::istream & s )
 }
 
 static tConfItemFunc sr_killAllScriptsConf( "KILL_ALL_SCRIPTS", sr_KillAllScriptsCommand );
-static tAccessLevelSetter sr_killScriptALS( sr_killAllScriptsConf, tAccessLevel_Owner );
+static tAccessLevelSetter sr_killScriptALLALS( sr_killAllScriptsConf, tAccessLevel_Owner );
 
 void sr_ListScriptsCommand( std::istream & s )
 {

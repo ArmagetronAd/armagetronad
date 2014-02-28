@@ -2594,6 +2594,9 @@ void QueRotate()
     }
 }
 
+static eLadderLogWriter sg_QueueStartedWriter("QUEUE_STARTED", false);
+static eLadderLogWriter sg_QueueFinishedWriter("QUEUE_FINISHED", false);
+
 void gRotation::HandleNewRound(int rounds)
 {
     if (rotationtype == gROTATION_NEVER) return;
@@ -2708,10 +2711,19 @@ void gRotation::HandleNewRound(int rounds)
             }
 
             queueActive_ = false;
+
+            sg_QueueFinishedWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
+            sg_QueueFinishedWriter.write();
         }
     }
     else
     {
+        if (!queueActive_)
+        {
+            sg_QueueStartedWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
+            sg_QueueStartedWriter.write();
+        }
+
         queueActive_ = true;
         QueRotate();
     }

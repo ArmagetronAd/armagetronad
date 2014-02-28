@@ -1774,12 +1774,6 @@ void gWinZoneHack::OnEnter( gCycle * target, REAL time )
         }
     }
     //HACK RACE end
-
-    if (!winnerPlayer_)
-    {
-        winnerPlayer_ = true;
-        LogWinnerCycleTurns(target);
-    }
 }
 
 
@@ -6193,12 +6187,6 @@ void gTargetZoneHack::OnEnter( gCycle * target, REAL time )
         std::istringstream stream(&OnEnterCmd(0));
         tCurrentAccessLevel elevator( sg_SetTargetCmd_conf.GetRequiredLevel(), true );
         tConfItemBase::LoadAll(stream);
-    }
-
-    if (!winnerPlayer_)
-    {
-        winnerPlayer_ = true;
-        LogWinnerCycleTurns(target);
     }
 
     // Check if player already entered this zone

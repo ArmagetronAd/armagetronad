@@ -4460,12 +4460,12 @@ void LogWinnerCycleTurns(gCycle *winner)
     if (sg_LogTurnsWinner && winner->Player() && winner->Player()->IsActive())
     {
         tString logTurnsWinnerFile;
-        logTurnsWinnerFile << "log_turns/winner/" << htmlentities(winner->Player()->GetUserName()) << ".txt";
+        logTurnsWinnerFile << "log_turns/winner/" << mapfile << ".txt";
 
         std::ofstream o;
         if ( tDirectories::Var().Open(o, logTurnsWinnerFile) )
         {
-            o << mapfile << "\n";
+            o << winner->Player()->GetUserName() << "\n";
 
             eCoord pos = winner->turnedPositions[0];
             eCoord dir = winner->turnedDirections[0];
