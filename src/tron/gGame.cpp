@@ -84,7 +84,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <fstream>
 #include <ctype.h>
 #include <time.h>
-#include <map>
 
 #include "gRotation.h"
 #include "nSocket.h"
@@ -1218,35 +1217,69 @@ static ladder highscore_ladder("ladder.txt",
 // ***   delayed commands
 // *************************
 
-class delayedCommands {
-private:
-	static std::map<int, std::set<std::string> > cmd_map;
-	// compute key for std::multimap
-	static int Key(REAL time) {return int(ceil(time*10));};
-public:
-	// clear all delayed commands
-	static void Clear() {
-		cmd_map.clear();
-		con << "Clearing delayed commands ...\n";
-	};
-	// add new delayed commands
-	static void Add(REAL time, std::string cmd, int interval) {
-        std::stringstream store;
-        store << interval << " " << cmd;
-        //std::string stored = store;
-		cmd_map[Key(time)].insert(store.str());
-	};
-	// check, run and remove delayed commands
-	static void Run(REAL currentTime);
-};
+int gDelayCommand::currentID = 0;
+std::map<int, gDelayCommand *> gDelayCommand::delayedCommands_;
 
-std::map<int, std::set<std::string> > delayedCommands::cmd_map;
+gDelayCommand::gDelayCommand(std::string command, REAL time, REAL interval)
+{
+    currentID++;
+
+    delayId_  = currentID;
+    command_  = command;
+    time_     = time;
+    interval_ = interval;
+
+    delayedCommands_[currentID] = this;
+}
+
+void gDelayCommand::Run(REAL currentTime)
+{
+    if (delayedCommands_.empty()) return;
+
+    std::map<int, gDelayCommand *>::iterator it = delayedCommands_.begin();
+    for (; it != delayedCommands_.end(); it++)
+    {
+        gDelayCommand *delayCmd = it->second;
+        if (delayCmd && (delayCmd->Time() <= currentTime))
+        {
+            tCurrentAccessLevel elevator( tAccessLevel_Owner, true );
+
+            std::stringstream st(delayCmd->Command());
+            tConfItemBase::LoadAll(st); // run command if it's not too old, otherwise, just skip it ...
+
+            if (delayCmd->Interval() > 0)
+                new gDelayCommand(delayCmd->Command(), currentTime+delayCmd->Interval(), delayCmd->Interval());
+
+            delayedCommands_.erase(it); // erase current and get next iterator
+        }
+    }
+}
 
 static void sg_ClearDelayedCmd(std::istream &s)
 {
-    delayedCommands::Clear();
+    gDelayCommand::Clear();
 }
 static tConfItemFunc sg_ClearDelayedCmd_conf("DELAY_COMMAND_CLEAR",&sg_ClearDelayedCmd);
+
+static void sg_RemoveDelayedCmd(std::istream &s)
+{
+    tString param;
+    param.ReadLine(s);
+
+    int delayCommandID = atoi(param);
+
+    std::map<int, gDelayCommand *>::iterator it = gDelayCommand::delayedCommands_.begin();
+    for (; it != gDelayCommand::delayedCommands_.end(); it++)
+    {
+        if (it->first == delayCommandID)
+        {
+            gDelayCommand::delayedCommands_.erase(delayCommandID);
+            con << "Delay command removed ( " << delayCommandID << " )\n";
+            break;
+        }
+    }
+}
+static tConfItemFunc sg_RemoveDelayedCmd_conf("DELAY_COMMAND_REMOVE",&sg_RemoveDelayedCmd);
 
 static void sg_AddDelayedCmd(std::istream &s)
 {
@@ -1256,13 +1289,13 @@ static void sg_AddDelayedCmd(std::istream &s)
 	// first parse the line to get the param : delay or interval
     // if the param start by an r then it means we have the interval
 	// if the param start by a +, assume that it's a delay relative to current game time ...
-	int pos      = 0;
-    int interval = 0;
+	int pos       = 0;
+    REAL interval = 0;
 	tString delay_str = params.ExtractNonBlankSubString(pos);
 
 	if (delay_str.SubStr(0, 1) == "r")
     {
-		interval = atoi(delay_str.SubStr(1));
+		interval = atof(delay_str.SubStr(1));
         delay_str = params.ExtractNonBlankSubString(pos);
 	}
 
@@ -1293,7 +1326,7 @@ static void sg_AddDelayedCmd(std::istream &s)
 	// add extracted command
     if (tCurrentAccessLevel::GetAccessLevel() <= cLevel)
     {
-        delayedCommands::Add(delay,cmd_str.str(),interval);
+        new gDelayCommand(cmd_str.str(), delay, interval);
 
         tOutput msg;
         msg.SetTemplateParameter(1, cmd_str.str().c_str());
@@ -1316,34 +1349,6 @@ static void sg_AddDelayedCmd(std::istream &s)
 
 static tConfItemFunc sg_AddDelayedCmd_conf("DELAY_COMMAND",&sg_AddDelayedCmd);
 static tAccessLevelSetter sg_AddDelayedCmdConfLevel( sg_AddDelayedCmd_conf, tAccessLevel_Owner );
-
-void delayedCommands::Run(REAL currentTime) {
-    if (cmd_map.empty()) return;
-    std::map<int, std::set<std::string> >::iterator it = cmd_map.begin();
-    while ((it != cmd_map.end())&&(it->first<=Key(currentTime))) {
-        if (it->first>Key(currentTime-1.0)) {
-            std::set<std::string>::iterator sit (it->second.begin()), send(it->second.end());
-            for(;sit!=send;++sit) {
-                std::istringstream stream(*sit);
-                tString params;
-                params.ReadLine( stream, true );
-                int pos = 0;
-                const tString interval_str = params.ExtractNonBlankSubString(pos);
-                int interval = atoi(interval_str);
-                tCurrentAccessLevel elevator( tAccessLevel_Owner, true );
-                std::stringstream command;
-                const tString command_str = params.SubStr(interval_str.Len());
-                command << command_str;
-                tConfItemBase::LoadAll(command); // run command if it's not too old, otherwise, just skip it ...
-                con << command << " " << interval <<"\n";
-                if (interval>0){
-                    delayedCommands::Add(currentTime+interval,command.str(),interval);
-                }
-            }
-        }
-        cmd_map.erase(it++); // erase current and get next iterator
-    };
-}
 
 // *****************************
 // ***   end delayed commands
@@ -1670,6 +1675,8 @@ void update_settings( bool const * goon )
     }
 
     sg_OutputOnlinePlayers();
+
+    gDelayCommand::Clear();
 
     // update team properties
     for (int i = eTeam::teams.Len() - 1; i>=0; --i)
@@ -2140,6 +2147,8 @@ static void own_game( nNetState enter_state ){
 
     sg_currentGame=NULL;
     se_KillGameTimer();
+
+    gDelayCommand::Clear();
 
     sg_OutputOnlinePlayers();
 }
@@ -3954,7 +3963,7 @@ void gGame::StateUpdate(){
 
                 Analysis(0);
 
-                delayedCommands::Clear();
+                gDelayCommand::Clear();
                 gZone::ClearDelay();
 
                 // log scores before players get renamed
@@ -5327,7 +5336,7 @@ bool gGame::GameLoop(bool input){
         synced_ = true;
     }
 
-	delayedCommands::Run(gtime);
+	gDelayCommand::Run(gtime);
 	gZone::Timesteps(gtime);
 
     {

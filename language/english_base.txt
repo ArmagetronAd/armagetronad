@@ -3698,6 +3698,7 @@ death_shot_help                     If set to 1, killed players will release a d
 delay_command_help                  A command to execute at given time. Usage: DELAY_COMMAND [time] [command] [parameters] ...
 delay_command_clear_help            Clears all delayed command from cache.
 delay_command_add                   Delay Command: "\1" with delay of \2 and interval of \3.\n
+delay_command_remove_help           Removes a delay command at the specified id number. Usage: DELAY_COMMAND_REMOVE [id] ...
 
 destroy_zone_help                   Destroy, simply meaning: causes the zone with the given name to disappear instantly.
 destroy_zone_id_help                Destroy, simply meaning: causes the zone with the given id to disappear instantly.

@@ -2482,6 +2482,9 @@ gCycle::~gCycle(){
     tDESTROY(turning);
     tDESTROY(spark);
 
+    turnedPositions.clear();
+    turnedDirections.clear();
+
     this->RemoveFromGame();
 
     if (mp){

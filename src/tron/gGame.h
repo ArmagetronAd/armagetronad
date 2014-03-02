@@ -34,6 +34,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "gCycle.h"
 
+#include <map>
+
 class eGrid;
 class nServerInfo;
 class nServerInfoBase;
@@ -242,6 +244,36 @@ class ShutDownCounter
         int timeout_;
 };
 //  SHUTDOWN HACK END
+
+class gDelayCommand
+{
+    private:
+        static int currentID;
+
+        int             delayId_;
+        std::string     command_;
+        REAL            time_;
+        REAL            interval_;
+
+    public:
+        gDelayCommand(std::string command, REAL time, REAL interval = 0);
+
+        static std::map<int, gDelayCommand *> delayedCommands_;
+
+        int             ID()        { return delayId_; }
+        std::string     Command()   { return command_; }
+        REAL            Time()      { return time_; }
+        REAL            Interval()  { return interval_; }
+
+        static void Clear()
+        {
+            delayedCommands_.clear();
+            currentID = 0;
+
+            con << "Clearing delayed commands ...\n";
+        }
+        static void Run(REAL currentTime);
+};
 
 extern gGameSettings* sg_currentSettings;
 extern bool sg_LogTurns;
