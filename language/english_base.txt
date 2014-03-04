@@ -3463,6 +3463,17 @@ race_smart_timer_help                     If set to 1, timer is decided dependin
 race_finish_collapse_help                 If set to 1, all zones will collapse at the end of round.
 race_smart_timer_factor_help              The factor by which countdown is multiplied when smart timer is enabled.
 
+race_rank_show_player_length_help         The limit length of players to display in the display of ranks.
+race_rank_show_length_help                The length of the name of the rank should the rank be aligned by.
+
+# Something like: # Rank  # Player        # Time
+rank_race_header_order_help               The order in which the "rank" header will appear. Default: 1.
+rank_race_header_player_order_help        The order in which the "player" header will appear. Default: 2.
+rank_race_header_time_length_help         The order in which the "time" header will appear. Default: 3.
+race_rank_header_length_help              The length of the header "rank" should be.
+race_rank_header_player_length_help       The length of the header "player" should be.
+race_rank_header_time_length_help         The length of the header "time" should be.
+
 #*************************************
 #*************************************
 #

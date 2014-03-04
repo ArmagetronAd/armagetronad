@@ -475,20 +475,76 @@ void gRaceScores::Reset()
     sg_RaceScores.Clear();
 }
 
+bool restrictRaceRankStringLength(const int &newValue)
+{
+    if (newValue < 7) return false;
+    return true;
+}
+static int sg_raceRankShowPlayerLength = 15;
+static int sg_raceRankShowLength = 7;
+static tSettingItem<int> sg_raceRankShowPlayerLengthConf("RACE_RANK_SHOW_PLAYER_LENGTH", sg_raceRankShowPlayerLength, &restrictRaceRankStringLength);
+static tSettingItem<int> sg_raceRankLengthConf("RACE_RANK_SHOW_LENGTH", sg_raceRankShowLength, &restrictRaceRankStringLength);
+
+bool restrictRaceHeader(const int &newValue)
+{
+    if (newValue < 0) return false;
+    return true;
+}
+
+static int sg_raceRankHeaderOrder       = 1;
+static int sg_raceRankHeaderPlayerOrder = 2;
+static int sg_raceRankHeaderTimeOrder   = 3;
+static tSettingItem<int> sg_raceRankHeaderOrderConf("RACE_RANK_HEADER_ORDER", sg_raceRankHeaderOrder, &restrictRaceHeader);
+static tSettingItem<int> sg_raceRankHeaderPlayerOrderConf("RACE_RANK_HEADER_PLAYER_ORDER", sg_raceRankHeaderPlayerOrder, &restrictRaceHeader);
+static tSettingItem<int> sg_raceRankHeaderTimeOrderConf("RACE_RANK_HEADER_TIME_ORDER", sg_raceRankHeaderTimeOrder, &restrictRaceHeader);
+
+static int sg_raceRankHeaderLength = 8;
+static int sg_raceRankHeaderPlayerLength = 16;
+static int sg_raceRankHeaderTimeLength = 0;
+static tSettingItem<int> sg_raceRankHeaderLengthConf("RACE_RANK_HEADER_LENGTH", sg_raceRankHeaderLength, &restrictRaceHeader);
+static tSettingItem<int> sg_raceRankHeaderPlayerLengthConf("RACE_RANK_HEADER_PLAYER_LENGTH", sg_raceRankHeaderPlayerLength, &restrictRaceHeader);
+static tSettingItem<int> sg_raceRankHeaderTimeLengthConf("RACE_RANK_HEADER_TIME_LENGTH", sg_raceRankHeaderTimeLength, &restrictRaceHeader);
+
 void gRaceScores::OutputTopRecords(int show)
 {
+    if (show == 0) return;
+
+    sn_ConsoleOut(tOutput("$race_rank_title_message", show, pz_mapName));
+
     tString rankTitleStr(tOutput("$race_rank_title_name"));
     tString rankPlayerTitleStr(tOutput("$race_rank_title_player_name"));
     tString rankTimeTitleStr(tOutput("$race_rank_title_time_name"));
     tString rankBorderStr(tOutput("$race_rank_border"));
 
-    rankTitleStr.SetPos(7, false);
-    rankPlayerTitleStr.SetPos(24, false);
+    tString rankTitleStrNoColors(tColoredString::RemoveColors(rankTitleStr));
+    tString rankPlayerTitleStrNoColors(tColoredString::RemoveColors(rankPlayerTitleStr));
+    tString rankTimeTitleStrNoColors(tColoredString::RemoveColors(rankTimeTitleStr));
+
+    if (rankTitleStrNoColors.Len() <= sg_raceRankHeaderLength)
+    {
+        tString rankTitleStrAppend;
+        rankTitleStrAppend.SetPos(sg_raceRankHeaderLength - rankTitleStrNoColors.Len(), false);
+        rankTitleStr << rankTitleStrAppend;
+    }
+
+    if (rankPlayerTitleStrNoColors.Len() <= sg_raceRankHeaderPlayerLength)
+    {
+        tString rankTitlePlayerStrAppend;
+        rankTitlePlayerStrAppend.SetPos(sg_raceRankHeaderPlayerLength - rankPlayerTitleStrNoColors.Len(), false);
+        rankPlayerTitleStr << rankTitlePlayerStrAppend;
+    }
+
+    if (rankTimeTitleStrNoColors.Len() <= sg_raceRankHeaderTimeLength)
+    {
+        tString rankTitleTimeStrAppend;
+        rankTitleTimeStrAppend.SetPos(sg_raceRankHeaderTimeLength - rankTimeTitleStrNoColors.Len(), false);
+        rankTimeTitleStr << rankTitleTimeStrAppend;
+    }
 
     tOutput msg_header;
-    msg_header.SetTemplateParameter(1, rankTitleStr);
-    msg_header.SetTemplateParameter(2, rankPlayerTitleStr);
-    msg_header.SetTemplateParameter(3, rankTimeTitleStr);
+    msg_header.SetTemplateParameter(sg_raceRankHeaderOrder, rankTitleStr);
+    msg_header.SetTemplateParameter(sg_raceRankHeaderPlayerOrder, rankPlayerTitleStr);
+    msg_header.SetTemplateParameter(sg_raceRankHeaderTimeOrder, rankTimeTitleStr);
     msg_header << "$race_rank_message_header";
     sn_ConsoleOut(msg_header);
 
@@ -501,14 +557,14 @@ void gRaceScores::OutputTopRecords(int show)
 
             tString rankStr;
             rankStr << racePlayer->Rank();
-            rankStr.SetPos(6, false);
+            rankStr.SetPos(sg_raceRankShowLength, false);
             msg.SetTemplateParameter(1, rankStr);
 
             tString playerNameStr = racePlayer->Name();
-            if (playerNameStr.Len() > 16)
-                playerNameStr = playerNameStr.SubStr(0, 16);
-            if (playerNameStr.Len() < 16)
-                playerNameStr.SetPos(16, false);
+            if (playerNameStr.Len() > sg_raceRankShowPlayerLength)
+                playerNameStr = playerNameStr.SubStr(0, sg_raceRankShowPlayerLength - 1);
+            if (playerNameStr.Len() < sg_raceRankShowPlayerLength)
+                playerNameStr.SetPos(sg_raceRankShowPlayerLength, false);
 
             msg.SetTemplateParameter(2, playerNameStr);
 
@@ -530,8 +586,22 @@ void gRaceScores::OutputIndividualRecords()
     tString rankTimeTitleStr(tOutput("$race_rank_title_time_name"));
     tString rankBorderStr(tOutput("$race_rank_border"));
 
-    rankTitleStr.SetPos(7, false);
-    rankPlayerTitleStr.SetPos(24, false);
+    tString rankTitleStrNoColors(tColoredString::RemoveColors(rankTitleStr));
+    tString rankPlayerTitleStrNoColors(tColoredString::RemoveColors(rankPlayerTitleStr));
+
+    if (rankTitleStrNoColors.Len() <= sg_raceRankHeaderLength)
+    {
+        tString rankTitleStrAppend;
+        rankTitleStrAppend.SetPos(sg_raceRankHeaderLength - rankTitleStrNoColors.Len(), false);
+        rankTitleStr << rankTitleStrAppend;
+    }
+
+    if (rankPlayerTitleStrNoColors.Len() <= sg_raceRankHeaderPlayerLength)
+    {
+        tString rankTitlePlayerStrAppend;
+        rankTitlePlayerStrAppend.SetPos(sg_raceRankHeaderPlayerLength - rankPlayerTitleStrNoColors.Len(), false);
+        rankPlayerTitleStr << rankTitlePlayerStrAppend;
+    }
 
     for(int i = 0; i < se_PlayerNetIDs.Len(); i++)
     {
@@ -548,9 +618,9 @@ void gRaceScores::OutputIndividualRecords()
             if (rcC)
             {
                 tOutput msg_header;
-                msg_header.SetTemplateParameter(1, rankTitleStr);
-                msg_header.SetTemplateParameter(2, rankPlayerTitleStr);
-                msg_header.SetTemplateParameter(3, rankTimeTitleStr);
+                msg_header.SetTemplateParameter(sg_raceRankHeaderOrder, rankTitleStr);
+                msg_header.SetTemplateParameter(sg_raceRankHeaderPlayerOrder, rankPlayerTitleStr);
+                msg_header.SetTemplateParameter(sg_raceRankHeaderTimeOrder, rankTimeTitleStr);
                 msg_header << "$race_rank_message_header";
                 sn_ConsoleOut(msg_header, p->Owner());
 
@@ -566,14 +636,14 @@ void gRaceScores::OutputIndividualRecords()
 
                         tString rankStr;
                         rankStr << rcP->Rank();
-                        rankStr.SetPos(6, false);
+                        rankStr.SetPos(sg_raceRankShowLength, false);
                         msg.SetTemplateParameter(1, rankStr);
 
                         tString playerNameStr = rcP->Name();
-                        if (playerNameStr.Len() > 16)
-                            playerNameStr = playerNameStr.SubStr(0, 16);
-                        if (playerNameStr.Len() < 16)
-                            playerNameStr.SetPos(16, false);
+                        if (playerNameStr.Len() > sg_raceRankShowPlayerLength)
+                            playerNameStr = playerNameStr.SubStr(0, sg_raceRankShowPlayerLength - 1);
+                        if (playerNameStr.Len() < sg_raceRankShowPlayerLength)
+                            playerNameStr.SetPos(sg_raceRankShowPlayerLength, false);
 
                         msg.SetTemplateParameter(2, playerNameStr);
 
@@ -591,14 +661,14 @@ void gRaceScores::OutputIndividualRecords()
 
                 tString rankStr;
                 rankStr << rcC->Rank();
-                rankStr.SetPos(6, false);
+                rankStr.SetPos(sg_raceRankShowLength, false);
                 msg.SetTemplateParameter(1, rankStr);
 
                 tString playerNameStr = rcC->Name();
-                if (playerNameStr.Len() > 16)
-                    playerNameStr = playerNameStr.SubStr(0, 16);
-                if (playerNameStr.Len() < 16)
-                    playerNameStr.SetPos(16, false);
+                if (playerNameStr.Len() > sg_raceRankShowPlayerLength)
+                    playerNameStr = playerNameStr.SubStr(0, sg_raceRankShowPlayerLength - 1);
+                if (playerNameStr.Len() < sg_raceRankShowPlayerLength)
+                    playerNameStr.SetPos(sg_raceRankShowPlayerLength, false);
 
                 msg.SetTemplateParameter(2, playerNameStr);
 
@@ -620,14 +690,14 @@ void gRaceScores::OutputIndividualRecords()
 
                         tString rankStr;
                         rankStr << rcN->Rank();
-                        rankStr.SetPos(6, false);
+                        rankStr.SetPos(sg_raceRankShowLength, false);
                         msg.SetTemplateParameter(1, rankStr);
 
                         tString playerNameStr = rcN->Name();
-                        if (playerNameStr.Len() > 16)
-                            playerNameStr = playerNameStr.SubStr(0, 16);
-                        if (playerNameStr.Len() < 16)
-                            playerNameStr.SetPos(16, false);
+                        if (playerNameStr.Len() > sg_raceRankShowPlayerLength)
+                            playerNameStr = playerNameStr.SubStr(0, sg_raceRankShowPlayerLength - 1);
+                        if (playerNameStr.Len() < sg_raceRankShowPlayerLength)
+                            playerNameStr.SetPos(sg_raceRankShowPlayerLength, false);
 
                         msg.SetTemplateParameter(2, playerNameStr);
 
@@ -668,15 +738,6 @@ void gRaceScores::OutputStart()
     if (sg_RaceScores.Len() == 0) return;
 
     Sort(); //  sort ranks
-
-    tString rankTitleStr(tOutput("$race_rank_title_name"));
-    tString rankPlayerTitleStr(tOutput("$race_rank_title_player_name"));
-    tString rankTimeTitleStr(tOutput("$race_rank_title_time_name"));
-    tString rankBorderStr(tOutput("$race_rank_border"));
-
-    rankTitleStr.SetPos(6, false);
-    rankPlayerTitleStr.SetPos(24, false);
-
     //  show the top RACE_NUM_RANKS_SHOW_START records at the start of round
     if (sg_raceRankShowStart == 1)
     {
@@ -684,8 +745,6 @@ void gRaceScores::OutputStart()
         int ranks_show = sg_RaceScores.Len();
         if ((sg_raceNumRanksShowStart > 0) && (sg_RaceScores.Len() >= sg_raceNumRanksShowStart) && (sg_raceNumRanksShowStart < sg_RaceScores.Len()))
             ranks_show = sg_raceNumRanksShowStart;
-
-        sn_ConsoleOut(tOutput("$race_rank_title_message", ranks_show, pz_mapName));
 
         OutputTopRecords(ranks_show);
     }
@@ -704,27 +763,12 @@ void gRaceScores::OutputEnd()
 
     Sort();
 
-    tString rankTitleStr(tOutput("$race_rank_title_name"));
-    tString rankPlayerTitleStr(tOutput("$race_rank_title_player_name"));
-    tString rankTimeTitleStr(tOutput("$race_rank_title_time_name"));
-    tString rankBorderStr(tOutput("$race_rank_border"));
-
-    rankTitleStr.SetPos(6, false);
-    rankPlayerTitleStr.SetPos(24, false);
-
     if (sg_raceRankShowEnd == 1)
     {
         //  number of ranks to display
         int ranks_show = sg_RaceScores.Len();
         if ((sg_raceNumRanksShowEnd > 0) && (sg_RaceScores.Len() >= sg_raceNumRanksShowEnd) && (sg_raceNumRanksShowEnd < sg_RaceScores.Len()))
             ranks_show = sg_raceNumRanksShowEnd;
-
-        tOutput msg_header;
-        msg_header.SetTemplateParameter(1, rankTitleStr);
-        msg_header.SetTemplateParameter(2, rankPlayerTitleStr);
-        msg_header.SetTemplateParameter(3, rankTimeTitleStr);
-        msg_header << "$race_rank_message_header";
-        sn_ConsoleOut(msg_header);
 
         OutputTopRecords(ranks_show);
     }
