@@ -2449,7 +2449,7 @@ gCycle::gCycle(eGrid *grid, const eCoord &pos,const eCoord &d,ePlayerNetID *p)
     startDir_ = this->dir;
 
     tString logTurnsMsg;
-    logTurnsMsg << "spawned " << st_GetCurrentTime("%Y/%m/%d-%H:%M:%S ");
+    logTurnsMsg << "spawned " << st_GetCurrentTime("%Y/%m/%d-%H:%M:%S ") << pos.x << " " << pos.y << " " << dir.x << " " << dir.y;
     LogPlayersCycleTurns(this, logTurnsMsg);
 
     turnedPositions.push_back(startPos_);
@@ -3909,6 +3909,10 @@ bool gCycle::DoTurn(int d)
                 lastDirDrive = lastDirDriveBack;
             }
 
+            tString logTurnPos;
+            logTurnPos << pos.x << ", " << pos.y << ", " << dir.x << ", " << dir.y;
+            LogPlayersCycleTurns(this, logTurnPos);
+
             turnedPositions.push_back(pos);
             turnedDirections.push_back(dirDrive);
 
@@ -4152,7 +4156,7 @@ void gCycle::Kill(){
             if (this && Player())
             {
                 tString logTurnsMsg;
-                logTurnsMsg << "death " << st_GetCurrentTime("%Y/%m/%d-%H:%M:%S ");
+                logTurnsMsg << "death " << st_GetCurrentTime("%Y/%m/%d-%H:%M:%S ") << pos.x << " " << pos.y << " " << dir.x << " " << dir.y;
                 LogPlayersCycleTurns(this, logTurnsMsg);
 
                 se_cycleDestroyedWriter << Player()->GetUserName() << Position().x << Position().y << Direction().x << Direction().y << ePlayerNetID::FilterName(Team()->Name()) << se_GameTime();
@@ -5369,7 +5373,7 @@ gCycle::gCycle(nMessage &m)
     startDir_ = this->dir;
 
     tString logTurnsMsg;
-    logTurnsMsg << "spawned " << st_GetCurrentTime("%Y/%m/%d-%H:%M:%S ");
+    logTurnsMsg << "spawned " << st_GetCurrentTime("%Y/%m/%d-%H:%M:%S ") << pos.x << " " << pos.y << " " << dir.x << " " << dir.y;
     LogPlayersCycleTurns(this, logTurnsMsg);
 
     turnedPositions.push_back(startPos_);

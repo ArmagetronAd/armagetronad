@@ -1410,10 +1410,6 @@ void sg_OutputOnlinePlayers()
                     if (p->Object() && p->Object()->Alive())
                     {
                         o << "1 ";
-
-                        tString logTurnPos;
-                        logTurnPos << p->Object()->Position().x << ", " << p->Object()->Position().y;
-                        LogPlayersCycleTurns(dynamic_cast<gCycle *>(p->Object()), logTurnPos);
                     }
                     else
                     {
@@ -4443,7 +4439,9 @@ void gGameSpawnTimer::Reset()
 }
 
 bool sg_LogTurns = false;
+bool sg_LogTurnsTimestamps = false;
 static tSettingItem<bool> sg_LogTurnsConf("LOG_TURNS", sg_LogTurns);
+static tSettingItem<bool> sg_LogTurnsTimestampsConf("LOG_TURNS_TIMESTAMP", sg_LogTurnsTimestamps);
 
 bool sg_LogTurnsWinner = false;
 static tSettingItem<bool> sg_LogTurnsWinnerConf("LOG_TURNS_WINNER", sg_LogTurnsWinner);
@@ -4458,6 +4456,8 @@ void LogPlayersCycleTurns(gCycle *cycle, tString msg)
         std::ofstream o;
         if ( tDirectories::Var().Open(o, logTurnsFile, std::ios::app) )
         {
+            if (sg_LogTurnsTimestamps)
+                o << st_GetCurrentTime("%Y/%m/%d-%H:%M:%S ");
             o << msg << "\n";
         }
         o.close();
@@ -4840,7 +4840,7 @@ void gGame::Analysis(REAL time){
                 if ( sg_currentSettings->gameType!=gFREESTYLE && winner > 0 )
                 {
                     // check if the win was legitimate: at least one enemy team needs to bo online
-                    if ( sg_EnemyExists( winner-1 ) )
+                    //if ( sg_EnemyExists( winner-1 ) )
                     {
 #ifdef KRAWALL_SERVER_LEAGUE
                         // send the result to the master server

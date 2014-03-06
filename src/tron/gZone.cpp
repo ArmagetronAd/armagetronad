@@ -277,6 +277,7 @@ gZone::gZone( eGrid * grid, const eCoord & pos, bool dynamicCreation, bool delay
     referenceTime_ = createTime_ = lastTime = 0;
 
     destroyed_ = false;
+    zoneInit_ = false;
     dynamicCreation_ = dynamicCreation;
     delayCreation_ = delayCreation;
     winnerPlayer_ = false;
@@ -337,6 +338,7 @@ gZone::gZone( nMessage & m )
 :eNetGameObject( m ), rotation_(1,0)
 {
     destroyed_ = false;
+    zoneInit_ = false;
     dynamicCreation_ = false;
     delayCreation_ = false;
     winnerPlayer_ = false;
@@ -759,6 +761,8 @@ bool restrictZoneBoundry(const REAL &newValue)
 }
 static tSettingItem<REAL> sg_zoneWallBoundaryConf("ZONE_WALL_BOUNDARY", sg_zoneWallBoundary, &restrictZoneBoundry);
 
+static eLadderLogWriter sg_OnlineZoneWriter("ONLINE_ZONE", false);
+
 bool gZone::Timestep( REAL time )
 {
     if ((sn_GetNetState() != nCLIENT) && destroyed_)
@@ -770,6 +774,14 @@ bool gZone::Timestep( REAL time )
         //??? game AND sync the last update on time.  Removing from game gets to
         //??? the client much later than the sync does if not killed and looks bad.
         return false;
+    }
+
+    if (!zoneInit_)
+    {
+        sg_OnlineZoneWriter << GOID() << name_ << effect_ << GetPosition().x << GetPosition().y << GetVelocity().x << GetVelocity().y
+                            << GetRadius() << GetExpansionSpeed();
+
+        zoneInit_ = true;
     }
 
     bool doRequestSync = false;
@@ -1687,6 +1699,7 @@ static tSettingItem<int> sg_ColorDeathZoneGreenCONF("COLOR_DEATHZONE_GREEN", sg_
 //!     @param  pos  Position to spawn the zone at
 //!
 // *******************************************************************************
+
 
 gWinZoneHack::gWinZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreation, bool delayCreation)
 :gZone( grid, pos, dynamicCreation, delayCreation)

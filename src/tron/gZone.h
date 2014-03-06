@@ -168,6 +168,7 @@ protected:
     REAL previousExpansionSpeed_;
     REAL fallSpeed_;
     REAL lastSeekTime_;
+    bool zoneInit_;
 
     tString name_;
     tString effect_;

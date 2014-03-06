@@ -4003,5 +4003,6 @@ cycle_respawn_zone_kill_enemy         \2 0xRESETTwas killed for entering \10xRES
 zone_wall_death_help                  Set to 1 to enable zones to vanish after hitting the wall boundary.
 zone_wall_boundary_help               Values <= 0 is the boundary limit in which zone_wall_death will activate. 
 
-log_turns_help          If set to 1, this setting will log the spawned time, death time and the positions of which players move to in the file ./var/log_turns/<name>.txt
-log_turns_winner_help   If set to 1, spawned and finished position, direction when a player enters a win zone or a target zone for the first time to the file ./var/log_turns/winner/<name>.txt
+log_turns_help            If set to 1, this setting will log the spawned time, death time and the positions of which players move to in the file ./var/log_turns/<name>.txt
+log_turns_timestamp_help  If set to 1, [TIME-STAMP] <message> will be sent to all the players logging file in ./var/log_turns/<name>.txt
+log_turns_winner_help     If set to 1, spawned and finished position, direction when a player enters a win zone or a target zone for the first time to the file ./var/log_turns/winner/<name>.txt
