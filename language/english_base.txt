@@ -926,7 +926,7 @@ ladderlog_write_online_player_help            Write to ladderlog: ONLINE_PLAYER 
 ladderlog_write_online_ai_help                Write to ladderlog: ONLINE_AI <name> <team> <score>
 ladderlog_write_online_team_help              Write to ladderlog: ONLINE_TEAM <name> <screen name>
 ladderlog_write_online_players_alive_help     Write to ladderlog: ONLINE_PLAYERS_ALIVE <player1> <player2> <player3> ...
-ladderlog_write_online_players_count_help     Write to ladderlog: ONLINE_PLAYERS_COUNT <humans> <ais> <humans alive> <ai alive>
+ladderlog_write_online_players_count_help     Write to ladderlog: ONLINE_PLAYERS_COUNT <humans> <ais> <humans alive> <ai alive> <humans dead> <ai dead>
 ladderlog_write_online_players_dead_help      Write to ladderlog: ONLINE_PLAYERS_DEAD <player1> <player2> <player3> ...
 ladderlog_write_player_ai_entered_help        Write to ladderlog: PLAYER_AI_ENTERED <name> <screen name>
 ladderlog_Write_player_ai_left_help           Write to ladderlog: PLAYER_AI_LEFT <name>

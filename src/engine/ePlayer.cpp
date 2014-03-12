@@ -8138,6 +8138,8 @@ void ePlayerNetID::OnlineStatsLadderLog()
     int ais     = 0;
     int h_alive = 0;
     int a_alive = 0;
+    int h_dead  = 0;
+    int a_dead  = 0;
 
     for(int i = 0; i < se_PlayerNetIDs.Len(); i++)
     {
@@ -8149,23 +8151,31 @@ void ePlayerNetID::OnlineStatsLadderLog()
             else
                 ais++;
 
-            if (p->Object() && p->Object()->Alive())
+            if (p->Object())
             {
-                se_OnlinePlayersAliveWriter << p->GetLogName();
+                if (p->Object()->Alive())
+                {
+                    se_OnlinePlayersAliveWriter << p->GetLogName();
 
-                if (p->IsHuman())
-                    h_alive++;
+                    if (p->IsHuman())
+                        h_alive++;
+                    else
+                        a_alive++;
+                }
                 else
-                    a_alive++;
-            }
-            else if (p->Object() && !p->Object()->Alive())
-            {
-                se_OnlinePlayersDeadWriter << p->GetLogName();
+                {
+                    se_OnlinePlayersDeadWriter << p->GetLogName();
+
+                    if (p->IsHuman())
+                        h_dead++;
+                    else
+                        a_dead++;
+                }
             }
         }
     }
 
-    se_OnlinePlayersCountWriter << humans << ais << h_alive << a_alive;
+    se_OnlinePlayersCountWriter << humans << ais << h_alive << a_alive << h_dead << a_dead;
     se_OnlinePlayersCountWriter.write();
 
     se_OnlinePlayersAliveWriter.write();
