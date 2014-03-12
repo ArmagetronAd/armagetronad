@@ -1768,7 +1768,7 @@ static tSettingItem<bool> sg_winZonePlayerEnteredWinConf("WINZONE_PLAYER_ENTER_W
 
 void gWinZoneHack::OnEnter( gCycle * target, REAL time )
 {
-    sg_winzonePlayerEnterWriter << target->Player()->GetUserName() << target->Position().x << target->Position().y << target->Direction().x << target->Direction().y << time;
+    sg_winzonePlayerEnterWriter << this->GOID() << name_ << GetPosition().x << GetPosition().y << target->Player()->GetUserName() << target->Position().x << target->Position().y << target->Direction().x << target->Direction().y << time;
     sg_winzonePlayerEnterWriter.write();
 
     //HACK RACE begin
