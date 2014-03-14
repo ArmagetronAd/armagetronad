@@ -4494,6 +4494,9 @@ void LogWinnerCycleTurns(gCycle *winner)
     }
 }
 
+static bool sg_RoundWait = false;
+static tSettingItem<bool> sg_RoundWaitConf("ROUND_WAIT", sg_RoundWait);
+
 void gGame::Analysis(REAL time){
     if ( nCLIENT == sn_GetNetState() )
         return;
@@ -4741,6 +4744,8 @@ void gGame::Analysis(REAL time){
     //  do the normal process of things when shutdown is inactive
     if (!sg_ShutDown->IsActive())
     {
+        if (sg_RoundWait) return;
+
         //  get the queue data working
         gQueuePlayers::Timestep(time);
 
@@ -4752,7 +4757,6 @@ void gGame::Analysis(REAL time){
         }
 
         //HACK RACE begin
-
         if ( sg_RaceTimerEnabled )
         {
             if ( !gRace::Done() )
