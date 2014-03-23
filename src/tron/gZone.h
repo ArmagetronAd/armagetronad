@@ -155,8 +155,6 @@ protected:
 
     bool wallPenetrate_;
 
-    static bool winnerPlayer_;
-
     bool dynamicCreation_;  //??? remove
     bool delayCreation_;
     tJUST_CONTROLLED_PTR< ePlayerNetID > pOwner_;
@@ -262,10 +260,15 @@ class gWinZoneHack: public gZone
 		gWinZoneHack(nMessage &m);
 		~gWinZoneHack();		 //!< destructor
 
+		static bool WinnerPlayer() { winnerPlayer_; }
+		static void SetWinnerPlayer(bool val) { winnerPlayer_ = val; }
+
 	protected:
+        static bool winnerPlayer_;
 	private:
 								 //!< reacts on objects inside the zone (declares them the winner)
 		virtual void OnEnter( gCycle *target, REAL time );
+		virtual void OnExit( gCycle *target, REAL time );   //!< reacts to players leaving the zone
 };
 
 //! death zone: kills players who enter
@@ -777,6 +780,30 @@ class gRespawnZoneHack: public gZone
         virtual void OnEnter(gCycle *target, REAL time);
 };
 
+class gCheckpointZoneHack: public gZone
+{
+    public:
+        gCheckpointZoneHack(eGrid *grid, const eCoord &pos, int checkpointId, int checkpointTime = 0.0, bool dynamicCreation = false, bool delayCreation = false);
+        gCheckpointZoneHack(nMessage &m);
+        ~gCheckpointZoneHack();
+
+        int CheckpointID()      { return checkpointId_; }
+        int CheckpointTime()   { return checkpointTime_; }
+
+    protected:
+        int checkpointId_;
+        int checkpointTime_;
+
+        tArray<bool> wrongPlayerEntries_;
+
+    private:
+        virtual bool Timestep(REAL currentTime);
+        virtual void OnVanish();
+        virtual void OnEnter(gCycle *target, REAL time);    //!< reacts to players entering the zone
+        virtual void OnExit( gCycle *target, REAL time );   //!< reacts to players leaving the zone
+};
+
+
 //! creates a win or death zone (according to configuration) at the specified position
 gZone * sg_CreateWinDeathZone( eGrid * grid, const eCoord & pos );
 
@@ -898,6 +925,8 @@ tFunction & tFunction::SetSlope( REAL const & slope )
 	this->slope_ = slope;
 	return *this;
 }
+
+int sg_NumCheckpointZones();
 
 extern bool sg_deathZoneRotation;
 extern REAL sg_deathZoneRotationSpeed;

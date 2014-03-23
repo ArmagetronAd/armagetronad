@@ -3387,11 +3387,21 @@ global_id_help                If set to 1, Global IDs (Armathentication) will be
 #*************************************
 #*************************************
 race_timer_enabled_help		          0 = Disable, 1 = Enable) race timer. Don't change during round.
-race_end_delay_help		              Number of seconds to give players to finish after target reached
+race_countdown_help		              Number of seconds to give players to finish before the round is finished.
 race_score_deplete_help             Number the score depletes by everytime a player enters the win zone.
 race_score_type_help		            0-No sorting; 1-Sort by best score; 2-sort by best time.
 race_log_time_help                  If enabled, it displays the reached time and the position of arrival.
 race_log_login_help                 If enabled, it will only log the time records of players that have logged in.
+
+race_checkpoint_done      All checkpoints are now completed. You can now cross the finish line.\n
+race_checkpoint_wrong     This checkpoint is number \1. You need to go to checkpoint number \2.\n
+race_checkpoint_next      Checkpoint number \1 is done. Now go to checkpoint number \2.\n
+race_checkpoint_miss      You can't finish the race yet. You still have to cross checkpoint number \1.\n
+
+race_laps_help            If set to >1, these are the number of laps to complete to finish the race.
+race_laps_angles_help     These are the angles that are safe to travel in. Anything else and your dead. Usage: degrees1,degrees2,degrees3,...
+race_laps_next            Lap \1 done, \2 more laps to complete.\n
+race_finish_failed        You cannot cross the finish line yet.\n
 
 player_reach_race		                  \1 0xfffffffinished with \2 points in \3 seconds.\n
 player_reach_race_first               \1 0xfffffffinished 1st in \2 seconds.\n
@@ -3462,6 +3472,7 @@ race_ranks_show_start_help                If set to 1, ranks will appear at the 
 race_smart_timer_help                     If set to 1, timer is decided depending on the top 3 racing ranks.
 race_finish_collapse_help                 If set to 1, all zones will collapse at the end of round.
 race_smart_timer_factor_help              The factor by which countdown is multiplied when smart timer is enabled.
+race_smart_timer_num_help                 The number of records to look to obtain the average time for the countdown.
 
 race_rank_show_player_length_help         The limit length of players to display in the display of ranks.
 race_rank_show_length_help                The length of the name of the rank should the rank be aligned by.

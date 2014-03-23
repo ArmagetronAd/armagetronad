@@ -124,7 +124,7 @@ static eLadderLogWriter sg_baseEnemyRespawnWriter("BASE_ENEMY_RESPAWN", true);
 static eLadderLogWriter sg_deathZoneActivated("DEATHZONE_ACTIVATED", true);
 static eLadderLogWriter sg_winZoneActivated("WINZONE_ACTIVATED", true);
 
-bool gZone::winnerPlayer_ = false;
+bool gWinZoneHack::winnerPlayer_ = false;
 
 //! creates a win or death zone (according to configuration) at the specified position
 gZone * sg_CreateWinDeathZone( eGrid * grid, const eCoord & pos )
@@ -280,7 +280,6 @@ gZone::gZone( eGrid * grid, const eCoord & pos, bool dynamicCreation, bool delay
     zoneInit_ = false;
     dynamicCreation_ = dynamicCreation;
     delayCreation_ = delayCreation;
-    winnerPlayer_ = false;
     wallInteract_ = false;
     wallBouncesLeft_ = 0;
     wallPenetrate_ = false;
@@ -341,7 +340,6 @@ gZone::gZone( nMessage & m )
     zoneInit_ = false;
     dynamicCreation_ = false;
     delayCreation_ = false;
-    winnerPlayer_ = false;
     wallInteract_ = false;
     wallBouncesLeft_ = 0;
     wallPenetrate_ = false;
@@ -1136,9 +1134,6 @@ static void TriggerAvoidZone(gCycle *target, gZone *Zone, REAL currentTime)
 
 void gZone::InteractWith( eGameObject * target, REAL time, int recursion )
 {
-    //  don't interact with target when the zone is destroyed
-    if (destroyed_) return;
-
     gCycle* prey = dynamic_cast< gCycle* >( target );
     if ( prey )
     {
@@ -1638,7 +1633,6 @@ bool gZone::RendersAlpha() const
     return sr_alphaBlend ? !sg_zoneAlphaToggle : sg_zoneAlphaToggle;
 }
 
-//HACK RACE begin
 // *******************************************************************************
 // *
 // *	Vanish
@@ -1659,7 +1653,6 @@ void gZone::Vanish( REAL factor )
         RequestSync();
     }
 }
-//HACK RACE end
 
 // *******************************************************************************
 // *
@@ -1780,6 +1773,12 @@ void gWinZoneHack::OnEnter( gCycle * target, REAL time )
     {
         if (sg_winZonePlayerEnteredWin)
         {
+            if (!winnerPlayer_)
+            {
+                LogWinnerCycleTurns(target);
+                winnerPlayer_ = true;
+            }
+
             static const char* message="$player_win_instant";
             sg_DeclareWinner( target->Player()->CurrentTeam(), message );
             destroyed_ = true;
@@ -1787,6 +1786,14 @@ void gWinZoneHack::OnEnter( gCycle * target, REAL time )
         }
     }
     //HACK RACE end
+}
+
+void gWinZoneHack::OnExit( gCycle *target, REAL time )
+{
+    if (sg_RaceTimerEnabled)
+    {
+        gRace::ZoneOut( target->Player(), time );
+    }
 }
 
 
@@ -6181,11 +6188,12 @@ void gTargetZoneHack::OnEnter( gCycle * target, REAL time )
         return;
     }
 
-    //HACK RACE begin
+    // RACE HACK begin
     if ( sg_RaceTimerEnabled )
     {
         gRace::ZoneHit( target->Player(), time );
     }
+    // RACE HACK end
 
     // keep first player in memory, if it's the last zone, he is the winner ...
     if (!firstPlayer_)
@@ -6255,12 +6263,18 @@ void gTargetZoneHack::OnExit(gCycle *target, REAL time)
     tCurrentAccessLevel elevator( sg_SetTargetCmd_conf.GetRequiredLevel(), true );
     tConfItemBase::LoadAll(stream);
 
-    ePlayerNetID *p = target->Player();
-    if (p)
+    sg_targetzonePlayerLeftWriter << this->GOID() << name_ << GetPosition().x << GetPosition().y << target->Player()->GetUserName() << target->Player()->Object()->Position().x << target->Player()->Object()->Position().y << target->Player()->Object()->Direction().x << target->Player()->Object()->Direction().y << time;
+    sg_targetzonePlayerLeftWriter.write();
+
+    if (playersFlags[target->Player()->ListID()])
+        playersFlags[target->Player()->ListID()] = 0;
+
+    // RACE HACK begin
+    if ( sg_RaceTimerEnabled )
     {
-        sg_targetzonePlayerLeftWriter << this->GOID() << name_ << GetPosition().x << GetPosition().y << p->GetUserName() << p->Object()->Position().x << p->Object()->Position().y << p->Object()->Direction().x << p->Object()->Direction().y ;
-        sg_targetzonePlayerLeftWriter.write();
+        gRace::ZoneOut( target->Player(), time );
     }
+    // RACE HACK end
 }
 
 // *******************************************************************************
@@ -8084,6 +8098,188 @@ void gRespawnZoneHack::OnVanish( void )
 
 // *******************************************************************************
 // *
+// *    gCheckpointZoneHack
+// *
+// *******************************************************************************
+//!
+//!     @param  grid Grid to put the zone into
+//!     @param  pos  Position to spawn the zone at
+//!
+// *******************************************************************************
+
+gCheckpointZoneHack::gCheckpointZoneHack( eGrid * grid, const eCoord & pos, int checkpointId, int checkpointTime, bool dynamicCreation, bool delayCreation)
+:gZone( grid, pos, dynamicCreation, delayCreation)
+{
+    color_.r = 1.0f;
+    color_.g = 0.0f;
+    color_.b = 0.5f;
+
+    if (!delayCreation)
+        grid->AddGameObjectInteresting(this);
+
+    checkpointId_ = checkpointId;
+
+    checkpointTime_ = checkpointTime;
+    if (checkpointTime_ < 0)
+        checkpointTime_ = 0;
+
+    for(int i=0; i<MAXCLIENTS; i++) wrongPlayerEntries_[i] = false;
+
+    SetExpansionSpeed(0);
+    SetRotationSpeed( .3f );
+    RequestSync();
+}
+
+int sg_NumCheckpointZones()
+{
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid) return 0;
+
+    int checkpoint_zones = 0;
+    const tList<eGameObject>& gameObjects = grid->GameObjects();
+    for (int i = 0; i < gameObjects.Len(); i++)
+    {
+        gCheckpointZoneHack *checkpointZone = dynamic_cast<gCheckpointZoneHack *>(gameObjects[i]);
+        if (checkpointZone) checkpoint_zones++;
+    }
+
+    return checkpoint_zones;
+}
+
+// *******************************************************************************
+// *
+// *    gCheckpointZoneHack
+// *
+// *******************************************************************************
+//!
+//!     @param  m Message to read creation data from
+//!     @param  null
+//!
+// *******************************************************************************
+
+gCheckpointZoneHack::gCheckpointZoneHack( nMessage & m )
+: gZone( m )
+{
+    for(int i=0; i<MAXCLIENTS; i++) wrongPlayerEntries_[i] = false;
+}
+
+
+// *******************************************************************************
+// *
+// *    ~gCheckpointZoneHack
+// *
+// *******************************************************************************
+//!
+//!
+// *******************************************************************************
+
+gCheckpointZoneHack::~gCheckpointZoneHack( void )
+{
+}
+
+
+// *******************************************************************************
+// *
+// *    Timestep
+// *
+// *******************************************************************************
+//!
+//!     @param  time    the current time
+//!
+// *******************************************************************************
+
+bool gCheckpointZoneHack::Timestep( REAL time )
+{
+    // delegate
+    bool returnStatus = gZone::Timestep( time );
+
+    return (returnStatus);
+}
+
+
+// *******************************************************************************
+// *
+// *    OnEnter
+// *
+// *******************************************************************************
+//!
+//!     @param  target  the cycle that has been found inside the zone
+//!     @param  time    the current time
+//!
+// *******************************************************************************
+
+void gCheckpointZoneHack::OnEnter( gCycle * target, REAL time )
+{
+    gRacePlayer *racer = gRacePlayer::GetPlayer(target->Player());
+    if (racer)
+    {
+        std::deque<int>::iterator it = racer->checkpointsDone.begin();
+        for(; it != racer->checkpointsDone.end(); it++)
+            if (checkpointId_ == *it)
+                return;
+
+        if (racer->Checkpoints() == checkpointId_)  //  if entered right checkpoint (order)
+        {
+            racer->checkpointsDone.push_back(checkpointId_);    //  add as done
+            racer->SetCheckpoints(racer->Checkpoints() + 1);    //  move to next
+
+            //  if they've gone through all the checkpoints
+            //  they can then finish the race by crossing the
+            //  finish line (win/target zone)
+            if (static_cast<signed>(racer->checkpointsDone.size()) == sg_NumCheckpointZones())
+            {
+                racer->SetCanFinish(true);
+                sn_ConsoleOut(tOutput("$race_checkpoint_done", checkpointId_), racer->Player()->Owner());
+            }
+            else
+            {
+                sn_ConsoleOut(tOutput("$race_checkpoint_next", checkpointId_, racer->Checkpoints()), racer->Player()->Owner());
+            }
+
+            if (sg_RaceCountdown > 0)
+                racer->SetCountdown(racer->Countdown() + checkpointTime_);
+        }
+        else
+        {
+            if (!wrongPlayerEntries_[target->Player()->ListID()])
+            {
+                wrongPlayerEntries_[target->Player()->ListID()] = true;
+                sn_ConsoleOut(tOutput("$race_checkpoint_wrong", checkpointId_, racer->Checkpoints()), racer->Player()->Owner());
+            }
+        }
+    }
+}
+
+// *******************************************************************************
+// *
+// *    OnExit
+// *
+// *******************************************************************************
+//!
+//!     @param  target  the cycle that has left the zone
+//!     @param  time    the current time
+//!
+// *******************************************************************************
+
+void gCheckpointZoneHack::OnExit( gCycle * target, REAL time )
+{
+    if (wrongPlayerEntries_[target->Player()->ListID()])
+        wrongPlayerEntries_[target->Player()->ListID()] = false;
+}
+
+// *******************************************************************************
+// *
+// *    OnVanish
+// *
+// *******************************************************************************
+
+void gCheckpointZoneHack::OnVanish( void )
+{
+    grid->RemoveGameObjectInteresting(this);
+}
+
+// *******************************************************************************
+// *
 // *    Spawn_Zone
 // *
 // *******************************************************************************
@@ -8491,22 +8687,23 @@ void gZone::Timesteps(REAL currentTime)
     if (!grid) return;
 
     std::map<REAL, std::set<gZone*> >::iterator it = delayedZones_.begin();
-    while ((it != delayedZones_.end()) && (currentTime >= it->first))
+    for (; it != delayedZones_.end(); it++)
     {
         if (currentTime >= it->first)
         {
-            std::set<gZone*>::iterator sit (it->second.begin()), send(it->second.end());
-            for(; sit != send; ++sit)
+            std::set<gZone*>::iterator sit = it->second.begin();
+            for(; sit != it->second.end(); ++sit)
             {
                 gZone *Zone = *sit;
                 if (Zone)
                 {
                     Zone->AddToList();
                     grid->AddGameObjectInteresting(Zone);
+                    Zone->RequestSync();
                 }
             }
+            delayedZones_.erase(it);
         }
-        delayedZones_.erase(it++);
     }
 }
 
@@ -9513,3 +9710,4 @@ static void sg_SetZoneIdPenetrate(std::istream &s)
     }
 }
 static tConfItemFunc sg_SetZoneIdPenetrateConf("SET_ZONE_ID_PENETRATE", &sg_SetZoneIdPenetrate);
+

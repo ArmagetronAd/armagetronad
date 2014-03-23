@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE Resource SYSTEM "Lover-Boy/map-0.2.9_styctap_v1.3.dtd">
+<!DOCTYPE Resource SYSTEM "Lover-Boy/map-0.2.9_styctap_v1.4.dtd">
 <Resource type="aamap" name="example" version="1.0.0" author="Lover-Boy" category="">
 	<Map version="0.2.9_styctap">
 		<World>
@@ -66,19 +66,41 @@
 					</ShapeCircle>
 				</Zone>
         
-        <Zone effect="rubber" rubberVal="1">
+        <Zone effect="rubber" rubberVal="1.0">
 					<ShapeCircle radius="10">
 						<Point x="300" y="200" />
 						<Color r="6" g="15" b="0" />
 					</ShapeCircle>
 				</Zone>
         
-        <Zone effect="rubberadjust" rubberVal="2">
+        <Zone effect="rubberadjust" rubberVal="0.0">
 					<ShapeCircle radius="10">
 						<Point x="200" y="200" />
 						<Color r="1" g="12" b="12" />
 					</ShapeCircle>
-				</Zone>        
+				</Zone>
+
+        <Zone effect="checkpoint">
+					<ShapeCircle radius="10">
+						<Point x="500" y="400" />
+						<Color hexCode="0x3399ff" />
+            <Checkpoint id="1" time="15" />
+					</ShapeCircle>
+				</Zone>
+
+        <Zone effect="checkpoint">
+					<ShapeCircle radius="10">
+						<Point x="300" y="400" />
+						<Color hexCode="0x3399ff" />
+            <Checkpoint id="2" time="15" />
+					</ShapeCircle>
+				</Zone>
+
+        <Zone effect="win">
+					<ShapeCircle radius="10">
+						<Point x="500" y="350" />
+					</ShapeCircle>
+				</Zone>
 			</Field>
 		</World>
 	</Map>

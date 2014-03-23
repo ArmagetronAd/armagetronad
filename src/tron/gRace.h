@@ -83,6 +83,19 @@ class gRacePlayer
         void SetIdleLastTime(REAL value) { idleLastTime_ = value; }
         void SetIdleNextTime(REAL value) { idleNextTime_ = value; }
 
+        int Laps()              { return laps_; }
+        void SetLaps(int val)   { laps_ = val; }
+
+        int Checkpoints()                   { return checkpoints_; }
+        void SetCheckpoints(int val)        { checkpoints_ = val; }
+        std::deque<int> checkpointsDone;
+
+        bool CanFinish()            { return canFinish_; }
+        void SetCanFinish(bool val) { canFinish_ = val; }
+
+        int Countdown()             { return countdown_; }
+        void SetCountdown(int val)  { countdown_ = val; }
+
     private:
         bool hasFinished_;
 
@@ -102,6 +115,10 @@ class gRacePlayer
         REAL idleLastTime_;
         REAL idleNextTime_;
 
+        int laps_;
+        int checkpoints_;
+        bool canFinish_;
+        int countdown_;
     public:
         ePlayerNetID    *Player() { return player_; }                  //!<  player's user
         eCoord          SpawnPosition() { return position_; }          //!<  spawn position
@@ -113,9 +130,12 @@ class gRace
 {
     public:
         static void ZoneHit( ePlayerNetID *player, REAL time );             //!> called when a cycle hits a win zone
+        static void ZoneOut( ePlayerNetID *player, REAL time );             //!> called when a cycle leaves a win zone
+
         static void Sync( int alive, int ai_alive, int humans, REAL time ); //!> update race state, called every second
         static bool Done();                                                 //!> returns true whether round time is over
         static void Reset();                                                //!> reset time and values
+        static void OnRoundBegin();                                         //!> update settings necessary
 
         static void RaceChat(ePlayerNetID *player, tString command, std::istream &s);
 
@@ -132,6 +152,8 @@ class gRace
         static int     finishPlace_;
         static REAL    firstFinishTime_;
         static tString firstToArive_;
+
+        static bool     cannotFinish_[MAXCLIENTS+1];
 };
 
 class gRaceScores
@@ -193,9 +215,11 @@ class gRaceScores
 
 extern bool sg_RaceTimerEnabled;
 extern bool sg_raceShotEnabled;
-extern int sg_RaceEndDelay;
+extern int sg_RaceCountdown;
 extern int sg_raceTryoutsNumber;
 extern int sg_scoreRaceComplete;
+extern int sg_RaceLaps;
+extern tString sg_RaceLapsAngles;
 
 #endif
 

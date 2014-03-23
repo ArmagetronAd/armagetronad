@@ -56,8 +56,14 @@ static void ReplaceSpaces( std::string & str )
 bool sg_RaceTimerEnabled = false;
 static tSettingItem<bool> sg_RaceTimerEnabledConf( "RACE_TIMER_ENABLED", sg_RaceTimerEnabled);
 
-int sg_RaceEndDelay = 60;
-static tSettingItem<int> sg_RaceEndDelayConf( "RACE_END_DELAY", sg_RaceEndDelay );
+int sg_RaceLaps = 1;
+static tSettingItem<int> sg_RaceLapsConf("RACE_LAPS", sg_RaceLaps);
+
+tString sg_RaceLapsAngles("");
+static tSettingItem<tString> sg_RaceLapsAnglesConf("RACE_LAPS_ANGLES", sg_RaceLapsAngles);
+
+int sg_RaceCountdown = 60;
+static tSettingItem<int> sg_RaceCountdownConf( "RACE_COUNTDOWN", sg_RaceCountdown );
 
 static bool sg_raceSmartTimer = false;
 static tSettingItem<bool> sg_raceSmartTimerConf("RACE_SMART_TIMER", sg_raceSmartTimer);
@@ -100,7 +106,7 @@ static tSettingItem<bool> sg_raceLogUnfinishedConf("RACE_LOG_UNFINISHED", sg_rac
 static int sg_raceChances = 0;
 static tSettingItem<int> sg_raceChancesConf("RACE_CHANCES", sg_raceChances);
 
-static bool sg_raceFinishKill = false;
+static bool sg_raceFinishKill = true;
 static tSettingItem<bool> sg_raceFinishKillConf("RACE_FINISH_KILL", sg_raceFinishKill);
 
 static bool sg_raceLogLogin = true;
@@ -134,6 +140,9 @@ static tSettingItem<bool> sg_raceFinishCollapseConf("RACE_FINISH_COLLAPSE", sg_r
 static REAL sg_raceSmartTimerFactor = 1.2;
 static tSettingItem<REAL> sg_raceSmartTimerFactorConf("RACE_SMART_TIMER_FACTOR", sg_raceSmartTimerFactor, &restrictRaceIdle);
 
+static int sg_raceSmartTimerNum = 3;
+static tSettingItem<int> sg_raceSmartTimerNumConf("RACE_SMART_TIMER_NUM", sg_raceSmartTimerNum, &restrictRaceIdleWarnings);
+
 //! STATIC VARIABLES
 bool gRace::firstArrived_ = false;
 int  gRace::countDown_ = -1;
@@ -142,6 +151,8 @@ bool gRace::winnerDeclared_ = false;
 int gRace::finishPlace_ = 0;
 REAL gRace::firstFinishTime_ = 0;
 tString gRace::firstToArive_;
+
+bool gRace::cannotFinish_[MAXCLIENTS+1];
 
 tString gRaceScores::mapFile_ = tString("");
 
@@ -307,7 +318,6 @@ void gRaceScores::Add(gRacePlayer *racePlayer, bool finished)
             bestTime.SetTemplateParameter(2, firstRanker->Time());
             bestTime.SetTemplateParameter(3, pz_mapName);
             bestTime << "$race_player_hold_best_time";
-
             sn_ConsoleOut(bestTime);
 
             LogWinnerCycleTurns(dynamic_cast<gCycle *>(racePlayer->Player()->Object()));
@@ -795,6 +805,11 @@ gRacePlayer::gRacePlayer(ePlayerNetID *player)
     this->idleLastTime_ = 0;
     this->idleNextTime_ = 0;
 
+    this->laps_ = 1;
+    this->checkpoints_ = 0;
+    this->countdown_ = sg_RaceCountdown + 1;
+    this->canFinish_ = true;
+
     sg_RacePlayers.Insert(this);
 }
 
@@ -903,15 +918,38 @@ void gRacePlayer::ErasePlayer()
 //! ZONE HIT
 void gRace::ZoneHit( ePlayerNetID *player, REAL time )
 {
-    tString player_username;
-    if (player->HasLoggedIn() && (player->GetAuthenticatedName().Filter() != ""))
-        player_username = player->GetAuthenticatedName();
-    else
-        player_username = player->GetUserName();
-
-    gRacePlayer *racePlayer = gRacePlayer::GetPlayer(player_username);
+    gRacePlayer *racePlayer = gRacePlayer::GetPlayer(player);
     if (racePlayer && !racePlayer->Finished() && !roundFinished_ && player->Object() && player->Object()->Alive())
     {
+        if (!racePlayer->CanFinish())
+        {
+            if (!cannotFinish_[player->ListID()])
+            {
+                //  if the race laps is greater than 1
+                if (sg_RaceLaps > 1)
+                {
+                    //  increment the player's lap count
+                    racePlayer->SetLaps(racePlayer->Laps() + 1);
+
+                    //  if the player has completed all the necessary laps
+                    if (racePlayer->Laps() == sg_RaceLaps)
+                        racePlayer->SetCanFinish(true); //  flag them so they can finish the race
+                    else
+                        sn_ConsoleOut(tOutput("$race_laps_next", racePlayer->Laps(), (sg_RaceLaps - racePlayer->Laps())), player->Owner());
+                }
+                else if (sg_NumCheckpointZones() > 0)
+                {
+                    sn_ConsoleOut(tOutput("$race_checkpoint_miss", racePlayer->Checkpoints()), player->Owner());
+                }
+                else
+                {
+                    cannotFinish_[player->ListID()] = true;
+                    sn_ConsoleOut(tOutput("$race_finish_failed"), player->Owner());
+                }
+            }
+            return;
+        }
+
         REAL reachtime_ = time;
         player->LogActivity(ACTIVITY_FINISHED_RACE);
 
@@ -996,11 +1034,25 @@ void gRace::ZoneHit( ePlayerNetID *player, REAL time )
     }
 }
 
+//!< ZONE OUT
+void gRace::ZoneOut( ePlayerNetID *player, REAL time )
+{
+    gRacePlayer *racePlayer = gRacePlayer::GetPlayer(player);
+    if (racePlayer && !racePlayer->Finished() && !roundFinished_ && player->Object() && player->Object()->Alive())
+    {
+        if (cannotFinish_[player->ListID()])
+            cannotFinish_[player->ListID()] = false;
+    }
+}
+
 //! SYNC
 void gRace::Sync( int alive, int ai_alive, int humans, REAL time )
 {
     eGrid *grid = eGrid::CurrentGrid();
     if (!grid) return;
+
+    if (se_mainGameTimer && ( se_mainGameTimer->speed <= 0 || se_mainGameTimer->Time() < 0 ) )
+        return;
 
     //  check chances and ensure players respawn
     if (!roundFinished_ && (sg_raceChances > 0))
@@ -1011,7 +1063,7 @@ void gRace::Sync( int alive, int ai_alive, int humans, REAL time )
             if (rPlayer && rPlayer->Player() && rPlayer->Player()->Object())
             {
                 gCycle *rPCycle = dynamic_cast<gCycle *>(rPlayer->Player()->Object());
-                if (rPCycle && rPCycle->Alive() && !rPlayer->Finished() && (rPlayer->Chances() > 0) && (rPlayer->Chances() <= sg_raceChances))
+                if (rPCycle && !rPCycle->Alive() && !rPlayer->Finished() && (rPlayer->Chances() > 0) && (rPlayer->Chances() <= sg_raceChances))
                 {
                     //gRacePlayer::CreateNewCycle(rPlayer);
                     gCycle *cycle = new gCycle(grid, rPlayer->SpawnPosition(), rPlayer->SpawnDirection(), rPlayer->Player());
@@ -1101,58 +1153,67 @@ void gRace::Sync( int alive, int ai_alive, int humans, REAL time )
         }
     }
 
-    // start counter when someone arrives or when only 1 is alive but not alone
-    if (!roundFinished_ && ( firstArrived_ || ( alive == 1 && ai_alive == 0 && humans > 1 ) ))
+    if (sg_NumCheckpointZones() > 0)
     {
-        // countdown mode
-        if ( sg_RaceEndDelay > 0 )
+        if (!roundFinished_ && (sg_RaceCountdown > 0))
         {
-            if (countDown_ < 0)
+            for(int i = 0; i < sg_RacePlayers.Len(); i++)
             {
-                if (sg_raceSmartTimer)
+                gRacePlayer *racer = sg_RacePlayers[i];
+                if (
+                    racer && racer->Player() &&
+                    racer->Player()->Object() && racer->Player()->Object()->Alive() &&
+                    !racer->Finished()
+                    )
                 {
-                    if (sg_RaceScores.Len() == 0)
+                    racer->SetCountdown(racer->Countdown() - 1);
+
+                    if ( racer->Countdown() < 0 )
                     {
-                        countDown_ = sg_RaceEndDelay + 1;
+                        roundFinished_ = true;
+                        racer->SetCountdown(-1);
+                        racer->Player()->Object()->Kill();
                     }
-                    if (sg_RaceScores.Len() == 1)
+                    else
                     {
-                        gRaceScores *rScores = sg_RaceScores[0];
-                        if (rScores)
-                        {
-                            int timer = ceil(rScores->Time());
-                            countDown_ = ceil(timer * sg_raceSmartTimerFactor) + 1;
-                        }
-                    }
-                    else if (sg_RaceScores.Len() == 2)
-                    {
-                        gRaceScores *one = sg_RaceScores[0];
-                        gRaceScores *two = sg_RaceScores[1];
-                        if (one && two)
-                        {
-                            int timer = ceil((one->Time() + two->Time()) / 2);
-                            countDown_ = ceil(timer * sg_raceSmartTimerFactor) + 1;
-                        }
-                    }
-                    else if (sg_RaceScores.Len() >= 3)
-                    {
-                        gRaceScores *one = sg_RaceScores[0];
-                        gRaceScores *two = sg_RaceScores[1];
-                        gRaceScores *tre = sg_RaceScores[2];
-                        if (one && two && tre)
-                        {
-                            int timer = ceil((one->Time() + two->Time() + tre->Time()) / 3);
-                            countDown_ = ceil(timer * sg_raceSmartTimerFactor) + 1;
-                        }
+                        tOutput message;
+                        message.SetTemplateParameter(1, racer->Countdown());
+                        message << "$timer_countdown" << "                    ";
+                        sn_CenterMessage( message, racer->Player()->Owner());
                     }
                 }
-                else
+            }
+        }
+    }
+    else
+    {
+        // start counter when someone arrives or when only 1 is alive but not alone
+        if (!roundFinished_ && ( firstArrived_ || ( alive == 1 && ai_alive == 0 && humans > 1 ) ))
+        {
+            // countdown mode
+            if ((sg_RaceCountdown > 0) && (countDown_ < 0))
+            {
+                countDown_ = sg_RaceCountdown + 1;
+
+                if (sg_raceSmartTimer && (sg_RaceScores.Len() > 0))
                 {
-                    countDown_ = sg_RaceEndDelay + 1;
+                    int max = sg_RaceScores.Len();
+                    if (max > sg_raceSmartTimerNum)
+                        max = sg_raceSmartTimerNum;
+
+                    int timer = 0;
+                    for(int i = 0; i < max; i++)
+                    {
+                        gRaceScores *rP = sg_RaceScores[i];
+                        if (rP) timer += rP->Time();
+                    }
+
+                    if (timer > 0)
+                        countDown_ = ceil((timer / max) * sg_raceSmartTimerFactor) + 1;
                 }
             }
 
-            if ( !roundFinished_ )
+            if ((sg_RaceCountdown > 0) && (countDown_ >= 0) )
             {
                 // countdown working
                 countDown_ --;
@@ -1246,6 +1307,8 @@ void gRace::Reset()
 
     RacingScore = sg_scoreRaceComplete;
 
+    for(int i=0; i<MAXCLIENTS; i++) cannotFinish_[i] = false;
+
     sg_raceOutputSent = false;
 
     //  reset race players list
@@ -1262,6 +1325,12 @@ void gRace::Reset()
             rPlayer->SetIdleCounter(0);
             rPlayer->SetIdleLastTime(0);
             rPlayer->SetIdleNextTime(0);
+
+            rPlayer->SetLaps(1);
+            rPlayer->SetCheckpoints(0);
+            rPlayer->checkpointsDone.clear();
+            rPlayer->SetCanFinish(true);
+            rPlayer->SetCountdown(sg_RaceCountdown + 1);
         }
     }
 
@@ -1270,6 +1339,22 @@ void gRace::Reset()
     //gRaceScores::Write();
     gRaceScores::Reset();
     gRaceScores::Read();
+}
+
+void gRace::OnRoundBegin()
+{
+    if ((sg_NumCheckpointZones() > 0) || (sg_RaceLaps > 1))
+    {
+        for(int b = 0; b < sg_RacePlayers.Len(); b++)
+        {
+            gRacePlayer *rPlayer = sg_RacePlayers[b];
+            if (rPlayer)
+            {
+                rPlayer->SetCanFinish(false);
+                rPlayer->SetCheckpoints(1);
+            }
+        }
+    }
 }
 
 //! time_ TO STRING
@@ -1399,6 +1484,11 @@ void gRace::RaceChat(ePlayerNetID *player, tString command, std::istream &s)
                 else
                     max = sg_RaceFinished.Len();
 
+                //  message about displaying the allowed number of finished players
+                arrive.SetTemplateParameter(1, max);
+                arrive << "$race_finished_list_arrive";
+                sn_ConsoleOut(arrive, player->Owner());
+
                 //  display only the maximum allowed
                 for(int i = 0; i < max; i++)
                 {
@@ -1414,11 +1504,6 @@ void gRace::RaceChat(ePlayerNetID *player, tString command, std::istream &s)
                         sn_ConsoleOut(message, player->Owner());
                     }
                 }
-
-                //  message about displaying the allowed number of finished players
-                arrive.SetTemplateParameter(1, max);
-                arrive << "$race_finished_list_arrive";
-                sn_ConsoleOut(arrive, player->Owner());
 
                 //  message about the total number of players finished crossing the map
                 amount.SetTemplateParameter(1, sg_RaceFinished.Len());

@@ -2449,7 +2449,7 @@ gCycle::gCycle(eGrid *grid, const eCoord &pos,const eCoord &d,ePlayerNetID *p)
     startDir_ = this->dir;
 
     tString logTurnsMsg;
-    logTurnsMsg << "spawned " << st_GetCurrentTime("%Y/%m/%d-%H:%M:%S ") << pos.x << " " << pos.y << " " << dir.x << " " << dir.y;
+    logTurnsMsg << "spawned " << pos.x << " " << pos.y << " " << dir.x << " " << dir.y;
     LogPlayersCycleTurns(this, logTurnsMsg);
 
     turnedPositions.push_back(startPos_);
@@ -3737,7 +3737,6 @@ REAL gCycle::PathfindingModifier( const eWall *w ) const
 }
 
 #ifndef DEDICATED
-#ifndef KRAWALL_SERVER
 static void se_cycleTurn(std::istream &s)
 {
     ePlayerNetID *player = NULL;
@@ -3777,7 +3776,6 @@ static void se_cycleTurn(std::istream &s)
     }
 }
 static tConfItemFunc se_cycleTurnConf("CYCLE_TURN", &se_cycleTurn);
-#endif
 #endif
 
 bool gCycle::Act(uActionPlayer *Act, REAL x){
@@ -3909,8 +3907,38 @@ bool gCycle::DoTurn(int d)
                 lastDirDrive = lastDirDriveBack;
             }
 
+            //  RACE HACK BEGIN
+            if (sg_RaceTimerEnabled && (sg_RaceLapsAngles != ""))
+            {
+                bool racer_safe = false;
+
+                tArray<tString> degreesList = sg_RaceLapsAngles.Split(",");
+                for(int iD = 0; iD < degreesList.Len(); iD++)
+                {
+                    if (degreesList[iD] == "") continue;
+
+                    double degrees = atof(degreesList[iD]);
+                    double radians = degrees * (M_PI / 180);
+
+                    double rad_x = cos(radians);
+                    double rad_y = sin(radians);
+
+                    //  check the direction this player is turning into
+                    //  if its safe, good. if not, lets check again
+                    if ((rad_x == dirDrive.x) && (rad_y == dirDrive.y))
+                    {
+                        racer_safe = true;
+                        break;
+                    }
+                }
+
+                //  if the racer is not racing in the safe angle, kill them
+                if (!racer_safe) Kill();
+            }
+            //  RACE HACK END
+
             tString logTurnPos;
-            logTurnPos << pos.x << ", " << pos.y << ", " << dir.x << ", " << dir.y;
+            logTurnPos << pos.x << " " << pos.y << " " << dirDrive.x << " " << dirDrive.y;
             LogPlayersCycleTurns(this, logTurnPos);
 
             turnedPositions.push_back(pos);
@@ -4156,7 +4184,7 @@ void gCycle::Kill(){
             if (this && Player())
             {
                 tString logTurnsMsg;
-                logTurnsMsg << "death " << st_GetCurrentTime("%Y/%m/%d-%H:%M:%S ") << pos.x << " " << pos.y << " " << dir.x << " " << dir.y;
+                logTurnsMsg << "death " << pos.x << " " << pos.y << " " << dir.x << " " << dir.y;
                 LogPlayersCycleTurns(this, logTurnsMsg);
 
                 se_cycleDestroyedWriter << Player()->GetUserName() << Position().x << Position().y << Direction().x << Direction().y << ePlayerNetID::FilterName(Team()->Name()) << se_GameTime();
@@ -5373,7 +5401,7 @@ gCycle::gCycle(nMessage &m)
     startDir_ = this->dir;
 
     tString logTurnsMsg;
-    logTurnsMsg << "spawned " << st_GetCurrentTime("%Y/%m/%d-%H:%M:%S ") << pos.x << " " << pos.y << " " << dir.x << " " << dir.y;
+    logTurnsMsg << "spawned " << pos.x << " " << pos.y << " " << dir.x << " " << dir.y;
     LogPlayersCycleTurns(this, logTurnsMsg);
 
     turnedPositions.push_back(startPos_);
@@ -5872,6 +5900,10 @@ void gCycle::ReadSync( nMessage &m )
         DropWall( false );
 
         tNEW(gExplosion)( grid, lastSyncMessage_.pos, lastSyncMessage_.time ,color_, this );
+
+        tString logTurnsMsg;
+        logTurnsMsg << "death " << pos.x << " " << pos.y << " " << dir.x << " " << dir.y;
+        LogPlayersCycleTurns(this, logTurnsMsg);
 
         return;
     }

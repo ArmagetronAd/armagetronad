@@ -56,6 +56,7 @@ public:
 protected:
     bool trueOrFalse(char *str);
     gXMLCharReturn myxmlGetProp(xmlNodePtr cur, const char *name);
+    gRealColor myxmlGetPropColorFromHex(xmlNodePtr cur, const char *name);
     int myxmlGetPropInt(xmlNodePtr cur, const char *name);
     float myxmlGetPropFloat(xmlNodePtr cur, const char *name);
     bool myxmlGetPropBool(xmlNodePtr cur, const char *name);
@@ -78,8 +79,11 @@ protected:
     void parseZone(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
     void parseWall(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
 
-    bool parseShapeCircle(eGrid *grid, xmlNodePtr cur, eCoord &zonePos, float &radius, float &growth, tString &rotate, bool &canRotate, const xmlChar * keyword, gRealColor &zoneColor, bool &colorsExist, eCoord &zoneDir, bool &zoneInteract, std::vector<eCoord> &route);
+    bool parseShapeCircle(eGrid *grid, xmlNodePtr cur, eCoord &zonePos, float &radius, float &growth, tString &rotate, bool &canRotate, const xmlChar * keyword);
+    bool parseColor(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, gRealColor &zoneColor);
+    void parseMovement(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, eCoord &zoneDir, bool &zoneInteract, std::vector<eCoord> &route);
     void parseTeleportZone(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, eCoord &zoneJump, tString &zoneRelAbsStr, int &relJump, eCoord &ndir, REAL &reloc);
+    bool parseCheckpointZone(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, int &checkpointId, int &checkpointTime);
 
     void parseField(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
     void parseWorld(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword = NULL);

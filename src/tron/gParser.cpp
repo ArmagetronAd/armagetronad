@@ -123,6 +123,22 @@ gParser::myxmlGetProp(xmlNodePtr cur, const char *name) {
     return gXMLCharReturn( xmlGetProp(cur, (const xmlChar *)name) );
 }
 
+gRealColor
+gParser::myxmlGetPropColorFromHex(xmlNodePtr cur, const char *name) {
+    gXMLCharReturn v = myxmlGetProp(cur, name);
+    if (v == NULL)	return gRealColor();
+    int r = strtoul(v, NULL, 0);
+    gRealColor aColor;
+    aColor.b = ((REAL)(r & 255)) / 255.0;
+    r /= 256;
+    aColor.g = ((REAL)(r & 255)) / 255.0;
+    r /= 256;
+    aColor.r = ((REAL)(r & 255)) / 255.0;
+    r /= 256;
+
+    return aColor;
+}
+
 int
 gParser::myxmlGetPropInt(xmlNodePtr cur, const char *name) {
     gXMLCharReturn v ( myxmlGetProp(cur, name) );
@@ -490,12 +506,16 @@ gParser::parseSpawn(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
 }
 
 bool
-gParser::parseShapeCircle(eGrid *grid, xmlNodePtr cur, eCoord &zonePos, float &radius, float& growth, tString &rotate, bool &canRotate, const xmlChar * keyword, gRealColor &zoneColor, bool &colorsExist, eCoord &zoneDir, bool &zoneInteract, std::vector<eCoord> &route)
+gParser::parseShapeCircle(eGrid *grid, xmlNodePtr cur, eCoord &zonePos, float &radius, float& growth, tString &rotate, bool &canRotate, const xmlChar * keyword)
 {
     radius = myxmlGetPropFloat(cur, "radius");
     growth = myxmlGetPropFloat(cur, "growth");
-    rotate = myxmlGetPropString(cur, "rotate");
-    if (rotate.Filter() != "") canRotate = true;
+
+    if (myxmlHasProp(cur, "rotate"))
+    {
+        canRotate = true;
+        rotate = myxmlGetPropString(cur, "rotate");
+    }
 
     cur = cur->xmlChildrenNode;
     while( cur != NULL) {
@@ -508,9 +528,26 @@ gParser::parseShapeCircle(eGrid *grid, xmlNodePtr cur, eCoord &zonePos, float &r
             zonePos = eCoord(x * sizeMultiplier, y * sizeMultiplier);
 
             //endElementAlternative(grid, cur, keyword);
-            //return true;
+            return true;
         }
-        else if (isElement(cur->name, (const xmlChar *)"Color", keyword))
+        else if (isElement(cur->name, (const xmlChar *)"Alternative", keyword)) {
+            if (isValidAlternative(cur, keyword)) {
+                parseAlternativeContent(grid, cur);
+            }
+        }
+        cur = cur->next;
+    }
+
+    return false;
+}
+
+bool
+gParser::parseColor(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, gRealColor &zoneColor)
+{
+    cur = cur->xmlChildrenNode;
+    while( cur != NULL)
+    {
+        if (isElement(cur->name, (const xmlChar *)"Color", keyword))
         {
             REAL r = myxmlGetPropFloat(cur, "r");
             REAL g = myxmlGetPropFloat(cur, "g");
@@ -520,12 +557,26 @@ gParser::parseShapeCircle(eGrid *grid, xmlNodePtr cur, eCoord &zonePos, float &r
             zoneColor.g = g / 15.0;
             zoneColor.b = b / 15.0;
 
-            colorsExist = true;
+            if (myxmlHasProp(cur, "hexCode"))
+            {
+                zoneColor = myxmlGetPropColorFromHex(cur, "hexCode");
+            }
 
-            //endElementAlternative(grid, cur, keyword);
-            //return true;
+            return true;
         }
-        else if (isElement(cur->name, (const xmlChar *)"Move", keyword))
+        cur = cur->next;
+    }
+
+    return false;
+}
+
+void
+gParser::parseMovement(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, eCoord &zoneDir, bool &zoneInteract, std::vector<eCoord> &route)
+{
+    cur = cur->xmlChildrenNode;
+    while( cur != NULL)
+    {
+        if (isElement(cur->name, (const xmlChar *)"Move", keyword))
         {
             REAL xDir = myxmlGetPropFloat(cur, "xdir");
             REAL yDir = myxmlGetPropFloat(cur, "ydir");
@@ -550,16 +601,11 @@ gParser::parseShapeCircle(eGrid *grid, xmlNodePtr cur, eCoord &zonePos, float &r
                     x = zoneRoute.ExtractNonBlankSubString(pos);
                 }
             }
-        }
-        else if (isElement(cur->name, (const xmlChar *)"Alternative", keyword)) {
-            if (isValidAlternative(cur, keyword)) {
-                parseAlternativeContent(grid, cur);
-            }
+
+            return;
         }
         cur = cur->next;
     }
-
-    return false;
 }
 
 void gParser::parseTeleportZone(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, eCoord &zoneJump, tString &zoneRelAbsStr, int &relJump, eCoord &ndir, REAL &reloc)
@@ -567,8 +613,7 @@ void gParser::parseTeleportZone(eGrid *grid, xmlNodePtr cur, const xmlChar * key
     cur = cur->xmlChildrenNode;
     while( cur != NULL)
     {
-        if (!xmlStrcmp(cur->name, (const xmlChar *)"text") || !xmlStrcmp(cur->name, (const xmlChar *)"comment")) {}
-        else if (isElement(cur->name, (const xmlChar *)"Teleport", keyword))
+        if (isElement(cur->name, (const xmlChar *)"Teleport", keyword))
         {
             tString zoneJumpXStr = myxmlGetPropString(cur, "destX");
             tString zoneJumpYStr = myxmlGetPropString(cur, "destY");
@@ -590,9 +635,32 @@ void gParser::parseTeleportZone(eGrid *grid, xmlNodePtr cur, const xmlChar * key
             tString reloc_str = myxmlGetPropString(cur, "reloc");
             reloc = atof(reloc_str);
             if (reloc_str == "") reloc = 1.0;
+
+            return;
         }
         cur = cur->next;
     }
+}
+
+bool gParser::parseCheckpointZone(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, int &checkpointId, int &checkpointTime)
+{
+    cur = cur->xmlChildrenNode;
+    while( cur != NULL)
+    {
+        if (isElement(cur->name, (const xmlChar *)"Checkpoint", keyword))
+        {
+            if (myxmlHasProp(cur, "id"))
+            {
+                checkpointId   = myxmlGetPropInt(cur, "id");
+                checkpointTime = myxmlGetPropFloat(cur, "time");
+
+                return true;
+            }
+        }
+        cur = cur->next;
+    }
+
+    return false;
 }
 
 static eLadderLogWriter sg_createzoneWriter("ZONE_CREATED", false);
@@ -607,13 +675,21 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
     bool shapeFound = false;
     gZone * zone = NULL;
     xmlNodePtr shape = cur->xmlChildrenNode;
+
     gRealColor zoneColor;
     bool colorsExist = false;
+
     eCoord zoneDir;
     bool zoneInteract = false;
     std::vector<eCoord> route;
     tString zoneEffect;
     eTeam *zoneTeam = NULL;
+
+    //  checkpoint BEGIN
+    bool checkpointExists = false;
+    int checkpointId = 0;
+    int checkpointTime = 0.0;
+    //  checkpoint END
 
     //  teleport stuff BEGIN
     eCoord zoneJump;
@@ -627,10 +703,19 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
         if (!xmlStrcmp(cur->name, (const xmlChar *)"text") || !xmlStrcmp(cur->name, (const xmlChar *)"comment")) {}
         else if (isElement(shape->name, (const xmlChar *)"ShapeCircle", keyword))
         {
-            shapeFound = parseShapeCircle(grid, shape, zonePos, radius, growth, rotate, canRotate, keyword, zoneColor, colorsExist, zoneDir, zoneInteract, route);
+            shapeFound = parseShapeCircle(grid, shape, zonePos, radius, growth, rotate, canRotate, keyword);
+
+            //  parse for color data
+            colorsExist = parseColor(grid, shape, keyword, zoneColor);
+
+            //  parse for move data
+            parseMovement(grid, shape, keyword, zoneDir, zoneInteract, route);
 
             //  parse for teleport data
             parseTeleportZone(grid, shape, keyword, zoneJump, zoneRelAbsStr, relJump, ndir, reloc);
+
+            //  parse for checkpoint data
+            checkpointExists = parseCheckpointZone(grid, shape, keyword, checkpointId, checkpointTime);
         }
         else if (isElement(cur->name, (const xmlChar *)"Alternative", keyword))
         {
@@ -672,10 +757,9 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
                     tString teamIDStr = zoneTeamStr.Filter().SubStr(tString("team_").Len() - 1);
                     zoneTeam = eTeam::FindTeamByID(atoi(teamIDStr));
                 }
-                else
-                {
+
+                if (!zoneTeam)
                     zoneTeam = eTeam::FindTeamByName(zoneTeamStr);
-                }
 
                 if (zoneTeam)
                 {
@@ -704,10 +788,9 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
                     tString teamIDStr = zoneTeamStr.Filter().SubStr(tString("team_").Len() - 1);
                     zoneTeam = eTeam::FindTeamByID(atoi(teamIDStr));
                 }
-                else
-                {
+
+                if (!zoneTeam)
                     zoneTeam = eTeam::FindTeamByName(zoneTeamStr);
-                }
 
                 if (zoneTeam)
                 {
@@ -740,10 +823,9 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
                     tString teamIDStr = zoneTeamStr.Filter().SubStr(tString("team_").Len() - 1);
                     zoneTeam = eTeam::FindTeamByID(atoi(teamIDStr));
                 }
-                else
-                {
+
+                if (!zoneTeam)
                     zoneTeam = eTeam::FindTeamByName(zoneTeamStr);
-                }
 
                 if (zoneTeam)
                 {
@@ -772,10 +854,9 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
                     tString teamIDStr = zoneTeamStr.Filter().SubStr(tString("team_").Len() - 1);
                     zoneTeam = eTeam::FindTeamByID(atoi(teamIDStr));
                 }
-                else
-                {
+
+                if (!zoneTeam)
                     zoneTeam = eTeam::FindTeamByName(zoneTeamStr);
-                }
 
                 if (zoneTeam)
                 {
@@ -881,10 +962,9 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
                     tString teamIDStr = zoneTeamStr.Filter().SubStr(tString("team_").Len() - 1);
                     zoneTeam = eTeam::FindTeamByID(atoi(teamIDStr));
                 }
-                else
-                {
+
+                if (!zoneTeam)
                     zoneTeam = eTeam::FindTeamByName(zoneTeamStr);
-                }
 
                 if (zoneTeam)
                 {
@@ -905,6 +985,15 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
             }
 
             zoneEffect << "soccergoal";
+        }
+        else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *) "effect"), (const xmlChar *)"checkpoint"))
+        {
+            if (checkpointExists)
+            {
+                gCheckpointZoneHack *cZone =  tNEW(gCheckpointZoneHack( grid, zonePos, checkpointId, checkpointTime, false, delayZoneCreation ));
+                zone = cZone;
+                zoneEffect << "checkpoint";
+            }
         }
 
         // leaving zone undeleted is no memory leak here, the gid takes control of it

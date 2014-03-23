@@ -1483,6 +1483,8 @@ void exit_game_objects(eGrid *grid){
 
 	se_unsplittedRimWalls.clear();
 
+	gWinZoneHack::SetWinnerPlayer(false);
+
     exit_game_grid(grid);
 }
 
@@ -3721,6 +3723,14 @@ void gGame::StateUpdate(){
         case GS_CREATE_GRID:
             // sr_con.autoDisplayAtNewline=true;
 
+            //  reset ingame timer
+            gGameSpawnTimer::Reset();
+
+            // reset queue stuff
+            gQueuePlayers::Reset();
+
+            sg_ParseMap( aParser );
+
             sg_currentMapWriter << sg_currentSettings->sizeFactor << gArena::SizeMultiplier() << mapfile;
             sg_currentMapWriter.write();
 
@@ -3730,14 +3740,6 @@ void gGame::StateUpdate(){
                 gRace::Reset();
             }
             //HACK RACE end
-
-            //  reset ingame timer
-            gGameSpawnTimer::Reset();
-
-            // reset queue stuff
-            gQueuePlayers::Reset();
-
-            sg_ParseMap( aParser );
 
             sn_Statistics();
             sg_Timestamp();
@@ -3929,7 +3931,11 @@ void gGame::StateUpdate(){
                 sg_roundStartedWriter.write();
 
                 if (sg_RaceTimerEnabled)
+                {
                     gRaceScores::OutputStart();
+                    gRace::OnRoundBegin();
+                }
+
 
                 if (strlen(sg_roundConsoleMessage) > 2)
                     sn_ConsoleOut(sg_roundConsoleMessage + "\n");
