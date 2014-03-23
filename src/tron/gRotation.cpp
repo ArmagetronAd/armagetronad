@@ -1734,7 +1734,7 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
         {
             tOutput Output;
             Output.SetTemplateParameter(1, item);
-            file_not_found << "$" << queueType << tString("_file_not_found");
+            file_not_found << "$" << queueType << tString("que_file_not_found");
             Output << file_not_found.str().c_str();
             sn_ConsoleOut(Output, p->Owner());
         }
@@ -1858,7 +1858,7 @@ void QueRotate()
         if (sg_MapQueueing->Size() == 0)
         {
             tOutput Output;
-            Output << "$map_queueing_is_empty";
+            Output << "$map_queue_is_empty";
             sn_ConsoleOut(Output);
         }
     }
@@ -1872,7 +1872,7 @@ void QueRotate()
             if (sg_ConfigQueueing->Size() == 0)
             {
                 tOutput Output;
-                Output << "$config_queueing_is_empty";
+                Output << "$config_queue_is_empty";
                 sn_ConsoleOut(Output);
             }
         }
