@@ -4474,8 +4474,13 @@ void LogWinnerCycleTurns(gCycle *winner)
 {
     if (sg_LogTurnsWinner && winner->Player() && winner->Player()->IsActive())
     {
+        tString mapFileSrc = mapfile;
+        int pos = mapFileSrc.StrPos(0, "(");
+        if (pos > 0)
+            mapFileSrc = mapFileSrc.SubStr(0, pos);
+
         tString logTurnsWinnerFile;
-        logTurnsWinnerFile << "log_turns/winner/" << mapfile << ".txt";
+        logTurnsWinnerFile << "log_turns/winner/" << mapFileSrc << ".txt";
 
         std::ofstream o;
         if ( tDirectories::Var().Open(o, logTurnsWinnerFile) )

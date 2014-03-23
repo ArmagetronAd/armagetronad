@@ -381,14 +381,17 @@ void gRaceScores::Read()
 {
     if (!sg_raceRecordsLoad) return;
 
+    mapFile_ = mapfile;
+    int pos = mapFile_.StrPos(0, "(");
+    if (pos > 0)
+        mapFile_ = mapFile_.SubStr(0, pos);
+
     tString Input;
     //mapFile << pz_mapAuthor << "/" << pz_mapCategory << "/" << pz_mapName << "-" << pz_mapVersion << ".aamap.xml";
-    Input << "race_scores/" << mapfile << ".txt";
+    Input << "race_scores/" << mapFile_ << ".txt";
 #ifdef DEBUG
     sn_ConsoleOut(tOutput("$race_ranks_loading", pz_mapName));
 #endif
-
-    mapFile_ = mapfile;
 
     //  clear old records if they exist to make way for the new
     if (sg_RaceScores.Len() > 0)
@@ -943,9 +946,9 @@ void gRace::ZoneHit( ePlayerNetID *player, REAL time )
                 }
                 else
                 {
-                    cannotFinish_[player->ListID()] = true;
                     sn_ConsoleOut(tOutput("$race_finish_failed"), player->Owner());
                 }
+                cannotFinish_[player->ListID()] = true;
             }
             return;
         }
@@ -1285,6 +1288,8 @@ void gRace::Sync( int alive, int ai_alive, int humans, REAL time )
     {
         gRaceScores::OutputEnd();
         sg_raceOutputSent = true;
+
+        gRaceScores::Write();
     }
 }
 
