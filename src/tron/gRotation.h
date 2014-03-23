@@ -92,7 +92,7 @@ class gRotationRoundSelection
 
         int Round() { return round_; }
 
-        int Size() { return items_.Len(); }
+        int Size() { return items_.size(); }
 
         // returns the current value
         gRotationItem *Current()
@@ -105,50 +105,36 @@ class gRotationRoundSelection
 
         void Clear()
         {
-            /*if (items_.Len() > 0)
-            {
-                for(int i = 0; i < items_.Len(); i++)
-                {
-                    items_.RemoveAt(i);
-                    i--;
-                }
-            }
-
-            items_.RemoveAt(0);*/
-            items_.Clear();
-
-            items_.SetLen(0);
+            items_.clear();
             current_ = 0;
         }
 
         gRotationItem *Get(int itemID) const
         {
-            if ((itemID >= 0) && (itemID < items_.Len()))
+            if ((itemID >= 0) && (itemID < static_cast<signed>(items_.size())))
                 return items_[itemID];
             else
                 return NULL;
         }
 
-        void Add(gRotationItem *reesourceItem)
+        void Add(gRotationItem *resourceItem)
         {
-            if (reesourceItem->Name().Filter() != "")
+            if (resourceItem->Name().Filter() != "")
             {
-                items_.Insert(reesourceItem);
+                items_.push_back(resourceItem);
             }
         }
 
-        void Remove(gRotationItem *reesourceItem)
+        void Remove(gRotationItem *resourceItem)
         {
-            for(int i = 0; i < items_.Len(); i++)
+            std::deque<gRotationItem *>::iterator res = items_.begin();
+            for(; res != items_.end(); res++)
             {
-                gRotationItem *rotItem = items_[i];
-                if (rotItem)
+                gRotationItem *rotItem = *res;
+                if (rotItem && (rotItem == resourceItem))
                 {
-                    if (rotItem == reesourceItem)
-                    {
-                        items_.RemoveAt(i);
-                        break;
-                    }
+                    items_.erase(res);
+                    break;
                 }
             }
         }
@@ -158,14 +144,14 @@ class gRotationRoundSelection
         //!< This is for the rotation loading limit
         void Rotate()
         {
-            if ( ++current_ >= items_.Len() )
+            if ( ++current_ >= static_cast<signed>(items_.size()) )
             {
                 current_ = 0;
             }
         }
 
     private:
-        tList<gRotationItem> items_; // the various values the rotating config can take
+        std::deque<gRotationItem *> items_; // the various values the rotating config can take
         int current_;                // the index of the current
         int round_;                  // round of which items should be loaded in
 };
@@ -173,66 +159,41 @@ class gRotationRoundSelection
 class gRotationRound
 {
     public:
-        gRotationRound()
-        {
-            roundsList_.SetLen(0);
-        }
+        gRotationRound() {}
 
-        tList<gRotationRoundSelection> roundsList_;
+        std::deque<gRotationRoundSelection *> roundsList_;
 
         void Add(gRotationRoundSelection *roundSelection)
         {
-            roundsList_.Insert(roundSelection);
+            roundsList_.push_back(roundSelection);
         }
 
         void Clear()
         {
-            /*if (roundsList_.Len() > 0)
-            {
-                for(int i = 0; i < roundsList_.Len(); i++)
-                {
-                    roundsList_.RemoveAt(i);
-                    i--;
-                }
-            }
-
-            roundsList_.RemoveAt(0);*/
-            roundsList_.Clear();
-
-            roundsList_.SetLen(0);
+            roundsList_.clear();
         }
 
         //!< Global functions for checking
         bool Check(int round)
         {
-            if (roundsList_.Len() > 0)
+            std::deque<gRotationRoundSelection *>::iterator res = roundsList_.begin();
+            for(; res != roundsList_.end(); res++)
             {
-                for(int i = 0; i < roundsList_.Len(); i++)
-                {
-                    gRotationRoundSelection *roundSel = roundsList_[i];
-                    if (roundSel)
-                    {
-                        if (roundSel->Round() == round)
-                            return true;
-                    }
-                }
+                gRotationRoundSelection *roundSel = *res;
+                if (roundSel && (roundSel->Round() == round))
+                    return true;
             }
             return false;
         }
 
         gRotationRoundSelection *Get(int round)
         {
-            if (roundsList_.Len() > 0)
+            std::deque<gRotationRoundSelection *>::iterator res = roundsList_.begin();
+            for(; res != roundsList_.end(); res++)
             {
-                for(int i = 0; i < roundsList_.Len(); i++)
-                {
-                    gRotationRoundSelection *roundSel = roundsList_[i];
-                    if (roundSel)
-                    {
-                        if (roundSel->Round() == round)
-                            return roundSel;
-                    }
-                }
+                gRotationRoundSelection *roundSel = *res;
+                if (roundSel && (roundSel->Round() == round))
+                    return roundSel;
             }
             return NULL;
         }
@@ -243,12 +204,11 @@ class gRotation
 public:
     gRotation()
     {
-        items_.SetLen(0);
         current_ = 0;
     }
 
     // the number of items
-    int Size() { return items_.Len(); }
+    int Size() { return static_cast<signed>(items_.size()); }
 
     // returns the current value
     gRotationItem *Current()
@@ -261,7 +221,7 @@ public:
     // rotates
     void OrderedRotate()
     {
-        if ( ++current_ >= items_.Len() )
+        if ( ++current_ >= static_cast<signed>(items_.size()) )
         {
             current_ = 0;
         }
@@ -273,8 +233,8 @@ public:
         bool goodnumber = false;
         while (goodnumber == false)
         {
-            int random_ = randamizer.Get(items_.Len());
-            if ((random_ < items_.Len()) || (random_ >= 0))
+            int random_ = randamizer.Get(static_cast<signed>(items_.size()));
+            if ((random_ < static_cast<signed>(items_.size())) || (random_ >= 0))
             {
                 current_ = random_;
                 goodnumber = true;
@@ -286,25 +246,13 @@ public:
 
     void Clear()
     {
-        /*if (items_.Len() > 0)
-        {
-            for(int i = 0; i < items_.Len(); i++)
-            {
-                items_.RemoveAt(i);
-                i--;
-            }
-        }
-
-        items_.RemoveAt(0);*/
-        items_.Clear();
-
-        items_.SetLen(0);
+        items_.clear();
         current_ = 0;
     }
 
     gRotationItem *Get(int itemID) const
     {
-        if ((itemID >= 0) && (itemID < items_.Len()))
+        if ((itemID >= 0) && (itemID < static_cast<signed>(items_.size())))
             return items_[itemID];
         else
             return NULL;
@@ -312,24 +260,19 @@ public:
 
     void Add(gRotationItem *resourceItem)
     {
-        if (resourceItem->Name().Filter() != "")
-        {
-            items_.Insert(resourceItem);
-        }
+        items_.push_back(resourceItem);
     }
 
     void Remove(gRotationItem *resourceItem)
     {
-        for(int i = 0; i < items_.Len(); i++)
+        std::deque<gRotationItem *>::iterator res = items_.begin();
+        for(; res != items_.end(); res++)
         {
-            gRotationItem *rotItem = items_[i];
-            if (rotItem)
+            gRotationItem *rotItem = *res;
+            if (rotItem && (rotItem == resourceItem))
             {
-                if (rotItem == resourceItem)
-                {
-                    items_.RemoveAt(i);
-                    break;
-                }
+                items_.erase(res);
+                break;
             }
         }
     }
@@ -345,7 +288,7 @@ public:
 
 private:
 
-    tList<gRotationItem> items_; // the various values the rotating config can take
+    std::deque<gRotationItem *> items_; // the various values the rotating config can take
     int current_;           // the index of the current
 
     static int counter_;

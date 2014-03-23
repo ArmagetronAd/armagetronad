@@ -622,7 +622,12 @@ void sg_DisplayRotationList(ePlayerNetID *p, std::istream &s, tString command)
     if (p)
     {
         int max = 10;
+        int size = 0;
         int showing = 0;
+
+        std::ostringstream rotation_list_show;
+        std::ostringstream rotation_list_header;
+        gRotation *ThisRotation = NULL;
 
         tString params;
         int pos = 0;
@@ -634,160 +639,57 @@ void sg_DisplayRotationList(ePlayerNetID *p, std::istream &s, tString command)
 
         if (command == "/mr")
         {
-            if (mapRotation->Size() > 0)
-            {
-                if (showAmount < mapRotation->Size())
-                {
-                    if (mapRotation->Size() < max) max = mapRotation->Size();
-                    if ((mapRotation->Size() - showAmount) < max) max = mapRotation->Size() - showAmount;
-
-                    if (max > 0)
-                    {
-                        sn_ConsoleOut(tOutput("$map_rotation_list"), p->Owner());
-
-                        for(int i = 0; i < max; i++)
-                        {
-                            int rotID = showAmount + i;
-                            gRotationItem *mapRotItem = mapRotation->Get(rotID);
-                            if (mapRotItem)
-                            {
-                                tColoredString output;
-                                output << "0x55ffff" << rotID << ") 0xff55ff";
-                                output << mapRotItem->Name();
-                                output << tColoredString::ColorString(1, 1, 1) << "\n";
-                                sn_ConsoleOut(output, p->Owner());
-
-                                showing++;
-                            }
-                        }
-
-                        tOutput show;
-                        show.SetTemplateParameter(1, showing);
-                        show.SetTemplateParameter(2, mapRotation->Size());
-
-                        show << "$map_rotation_list_show";
-                        sn_ConsoleOut(show, p->Owner());
-                    }
-                }
-            }
+            ThisRotation = mapRotation;
+            rotation_list_header << "$" << tString("map_rotation_list");
+            rotation_list_show << "$" << tString("map_rotation_list_show");
         }
         else if (command == "/msr")
         {
-            if (mapStorage->Size() > 0)
-            {
-                if (showAmount < mapStorage->Size())
-                {
-                    if (mapStorage->Size() < max) max = mapStorage->Size();
-                    if ((mapStorage->Size() - showAmount) < max) max = mapStorage->Size() - showAmount;
-
-                    if (max > 0)
-                    {
-                        sn_ConsoleOut(tOutput("$map_storage_list"), p->Owner());
-
-                        for(int i = 0; i < max; i++)
-                        {
-                            int rotID = showAmount + i;
-                            gRotationItem *mapRotItem = mapStorage->Get(rotID);
-                            if (mapRotItem)
-                            {
-                                tColoredString output;
-                                output << "0x55ffff" << rotID << ") 0xff55ff";
-                                output << mapRotItem->Name();
-                                output << tColoredString::ColorString(1, 1, 1) << "\n";
-                                sn_ConsoleOut(output, p->Owner());
-
-                                showing++;
-                            }
-                        }
-
-                        tOutput show;
-                        show.SetTemplateParameter(1, showing);
-                        show.SetTemplateParameter(2, mapStorage->Size());
-
-                        show << "$map_storage_list_show";
-                        sn_ConsoleOut(show, p->Owner());
-                    }
-                }
-            }
+            ThisRotation = mapStorage;
+            rotation_list_header << "$" << tString("map_storage_list");
+            rotation_list_show << "$" << tString("map_storage_list_show");
         }
         else if (command == "/cr")
         {
-            sn_ConsoleOut(tOutput("$config_rotation_list"), p->Owner());
-
-            if (configRotation->Size() > 0)
-            {
-                if (showAmount < configRotation->Size())
-                {
-                    if (configRotation->Size() < max) max = configRotation->Size();
-                    if ((configRotation->Size() - showAmount) < max) max = configRotation->Size() - showAmount;
-
-                    if (max > 0)
-                    {
-                        for(int i = 0; i < max; i++)
-                        {
-                            int rotID = showAmount + i;
-                            gRotationItem *configRotItem = configRotation->Get(rotID);
-                            if (configRotItem)
-                            {
-                                tColoredString output;
-                                output << "0x55ffff" << rotID << ") 0xff55ff";
-                                output << configRotItem->Name();
-                                output << tColoredString::ColorString(1, 1, 1) << "\n";
-                                sn_ConsoleOut(output, p->Owner());
-
-                                showing++;
-                            }
-                        }
-
-                        tOutput show;
-                        show.SetTemplateParameter(1, showing);
-                        show.SetTemplateParameter(2, configRotation->Size());
-
-                        show << "$config_rotation_list_show";
-                        sn_ConsoleOut(show, p->Owner());
-                    }
-                }
-            }
+            ThisRotation = configRotation;
+            rotation_list_header << "$" << tString("config_rotation_list");
+            rotation_list_show << "$" << tString("config_rotation_list_show");
         }
         else if (command == "/csr")
         {
-            sn_ConsoleOut(tOutput("$config_storage_list"), p->Owner());
+            ThisRotation = configStorage;
+            rotation_list_header << "$" << tString("config_storage_list");
+            rotation_list_show << "$" << tString("config_storage_list_show");
+        }
 
-            if (configStorage->Size() > 0)
+        if (!ThisRotation) return;
+
+        if (ThisRotation->Size() < max) max = ThisRotation->Size();
+        if ((ThisRotation->Size() - showAmount) < max) max = ThisRotation->Size() - showAmount;
+
+        sn_ConsoleOut(tOutput(rotation_list_header.str().c_str()), p->Owner());
+
+        for(int i = 0; i < max; i++)
+        {
+            int rotID = showAmount + i;
+            gRotationItem *RotItem = ThisRotation->Get(rotID);
+            if (RotItem)
             {
-                if (showAmount < configStorage->Size())
-                {
-                    if (configStorage->Size() < max) max = configStorage->Size();
-                    if ((configStorage->Size() - showAmount) < max) max = configStorage->Size() - showAmount;
+                tColoredString output;
+                output << "0x55ffff" << rotID << ") 0xff55ff";
+                output << RotItem->Name();
+                output << tColoredString::ColorString(1, 1, 1) << "\n";
+                sn_ConsoleOut(output, p->Owner());
 
-                    if (max > 0)
-                    {
-                        for(int i = 0; i < max; i++)
-                        {
-                            int rotID = showAmount + i;
-                            gRotationItem *configRotItem = configStorage->Get(rotID);
-                            if (configRotItem)
-                            {
-                                tColoredString output;
-                                output << "0x55ffff" << rotID << ") 0xff55ff";
-                                output << configRotItem->Name();
-                                output << tColoredString::ColorString(1, 1, 1) << "\n";
-                                sn_ConsoleOut(output, p->Owner());
-
-                                showing++;
-                            }
-                        }
-
-                        tOutput show;
-                        show.SetTemplateParameter(1, showing);
-                        show.SetTemplateParameter(2, configStorage->Size());
-
-                        show << "$config_storage_list_show";
-                        sn_ConsoleOut(show, p->Owner());
-                    }
-                }
+                showing++;
             }
         }
+
+        tOutput show;
+        show.SetTemplateParameter(1, showing);
+        show.SetTemplateParameter(2, ThisRotation->Size());
+        show << rotation_list_show.str().c_str();
+        sn_ConsoleOut(show, p->Owner());
     }
 }
 
@@ -821,84 +723,95 @@ static tSettingItem<int> sg_rotationMaxConf("ROTATION_MAX", sg_rotationMax);
 static bool sg_rotationMaxType = false;
 static tSettingItem<bool> sg_rotationMaxTypeConf("ROTATION_MAX_TYPE", sg_rotationMaxType);
 
+void sg_QueueRotation(tString lang_output_name, tString item, gRotation *ThisRotation, gQueueing *ThisQueueing)
+{
+    std::ostringstream file_not_found;
+    std::ostringstream stored_file_found;
+    std::ostringstream file_stored;
+    std::ostringstream found_toomanyfiles;
+
+    file_not_found      << "$" << lang_output_name << tString("_file_not_found");
+    stored_file_found   << "$" << lang_output_name << tString("_stored_file_found");
+    file_stored         << "$" << lang_output_name << tString("_file_stored");
+    found_toomanyfiles  << "$" << lang_output_name << tString("_found_toomanyfiles");
+
+    bool itemFound = false;
+    tArray<tString> searchFindings;
+    for (int i=0; i < ThisRotation->Size(); i++)
+    {
+        gRotationItem *rotationItem = ThisRotation->Get(i);
+        if (rotationItem)
+        {
+            tString filteredName, filteredSearch;
+            filteredName = ePlayerNetID::FilterName(rotationItem->Name());
+            filteredSearch = ePlayerNetID::FilterName(item);
+            if (filteredName.Contains(filteredSearch))
+            {
+                itemFound = true;
+                searchFindings.Insert(rotationItem->Name());
+            }
+        }
+    }
+    if (!itemFound)
+    {
+        tOutput Output;
+        Output.SetTemplateParameter(1, item);
+        Output << file_not_found.str().c_str();
+        sn_ConsoleOut(Output, 0);
+    }
+    else
+    {
+        if (searchFindings.Len() == 1)
+        {
+            bool found = false;
+            tString configName = searchFindings[0];
+            for (int j=0; j < ThisQueueing->Size(); j++)
+            {
+                tString item_name =  ThisQueueing->Get(j);
+                if (item_name == configName)
+                {
+                    tOutput Output;
+                    Output.SetTemplateParameter(1, configName);
+                    Output.SetTemplateParameter(2, j+1);
+                    Output << stored_file_found.str().c_str();
+                    sn_ConsoleOut(Output, 0);
+                    found = true;
+                    break;
+                }
+            }
+            if (!found)
+            {
+                ThisQueueing->Insert(configName);
+                tOutput Output;
+                Output.SetTemplateParameter(1, configName);
+                Output << file_stored.str().c_str();
+                sn_ConsoleOut(Output);
+            }
+        }
+        else
+        {
+            tOutput Output;
+            Output.SetTemplateParameter(1, item);
+            Output.SetTemplateParameter(2, searchFindings.Len());
+            Output << found_toomanyfiles.str().c_str();
+            sn_ConsoleOut(Output, 0);
+        }
+    }
+
+    searchFindings.Clear();
+}
+
 static void sg_MapQueueingFunc(std::istream &s)
 {
     tString params;
     params.ReadLine(s);
     int pos = 0;
 
-    if (params != "")
-    {
-        tString items = params.ExtractNonBlankSubString(pos);
-        if (items != "")
-        {
-            tString item = items;
-            bool mapFound = false;
-            tArray<tString> searchFindings;
-            for (int i=0; i < mapRotation->Size(); i++)
-            {
-                gRotationItem *mapRotItem = mapRotation->Get(i);
-                if (mapRotItem)
-                {
-                    tString filteredName, filteredSearch;
-                    filteredName = ePlayerNetID::FilterName(mapRotItem->Name());
-                    filteredSearch = ePlayerNetID::FilterName(item);
-                    if (filteredName.Contains(filteredSearch))
-                    {
-                        mapFound = true;
-                        searchFindings.Insert(mapRotItem->Name());
-                    }
-                }
-            }
-            if (!mapFound)
-            {
-                tOutput Output;
-                Output.SetTemplateParameter(1, item);
-                Output << "$map_queueing_file_not_found";
-                sn_ConsoleOut(Output, 0);
-            }
-            else
-            {
-                if (searchFindings.Len() == 1)
-                {
-                    bool found = false;
-                    tString mapName = searchFindings[0];
-                    for (int j=0; j < sg_MapQueueing->Size(); j++)
-                    {
-                        tString item_name = sg_MapQueueing->Get(j);
-                        if (item_name == mapName)
-                        {
-                            tOutput Output;
-                            Output.SetTemplateParameter(1, stripMapNameOnly(mapName));
-                            Output.SetTemplateParameter(2, j+1);
-                            Output << "$map_queueing_stored_file_found";
-                            sn_ConsoleOut(Output, 0);
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found)
-                    {
-                        sg_MapQueueing->Insert(mapName);
-                        tOutput Output;
-                        Output.SetTemplateParameter(1, stripMapNameOnly(mapName));
-                        Output << "$map_queueing_file_stored";
-                        sn_ConsoleOut(Output);
-                    }
-                }
-                else
-                {
-                    tOutput Output;
-                    Output.SetTemplateParameter(1, item);
-                    Output.SetTemplateParameter(2, searchFindings.Len());
-                    Output << "$map_queueing_found_toomanyfiles";
-                    sn_ConsoleOut(Output, 0);
-                }
-            }
+    if (params == "") return;
 
-            searchFindings.Clear();
-        }
-    }
+    tString items = params.ExtractNonBlankSubString(pos);
+    if (items != "")
+        sg_QueueRotation(tString("map_queue"), items, mapRotation, sg_MapQueueing);
 }
 static tConfItemFunc sg_MapQueueingFuncConf("QUEUE_MAP", &sg_MapQueueingFunc);
 
@@ -908,75 +821,11 @@ static void sg_ConfigQueueingFunc(std::istream &s)
     params.ReadLine(s);
     int pos = 0;
 
+    if (params == "") return;
+
     tString items = params.ExtractNonBlankSubString(pos);
     if (items != "")
-    {
-        tString item = items;
-        bool configFound = false;
-        tArray<tString> searchFindings;
-        for (int i=0; i < configRotation->Size(); i++)
-        {
-            gRotationItem *configRotItem = configRotation->Get(i);
-            if (configRotItem)
-            {
-                tString filteredName, filteredSearch;
-                filteredName = ePlayerNetID::FilterName(configRotItem->Name());
-                filteredSearch = ePlayerNetID::FilterName(item);
-                if (filteredName.Contains(filteredSearch))
-                {
-                    configFound = true;
-                    searchFindings.Insert(configRotItem->Name());
-                }
-            }
-        }
-        if (!configFound)
-        {
-            tOutput Output;
-            Output.SetTemplateParameter(1, item);
-            Output << "$config_queueing_file_not_found";
-            sn_ConsoleOut(Output, 0);
-        }
-        else
-        {
-            if (searchFindings.Len() == 1)
-            {
-                bool found = false;
-                tString configName = searchFindings[0];
-                for (int j=0; j < sg_ConfigQueueing->Size(); j++)
-                {
-                    tString item_name =  sg_ConfigQueueing->Get(j);
-                    if (item_name == configName)
-                    {
-                        tOutput Output;
-                        Output.SetTemplateParameter(1, configName);
-                        Output.SetTemplateParameter(2, j+1);
-                        Output << "$config_queueing_stored_file_found";
-                        sn_ConsoleOut(Output, 0);
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found)
-                {
-                    sg_ConfigQueueing->Insert(configName);
-                    tOutput Output;
-                    Output.SetTemplateParameter(1, configName);
-                    Output << "config_queueing_file_stored";
-                    sn_ConsoleOut(Output);
-                }
-            }
-            else
-            {
-                tOutput Output;
-                Output.SetTemplateParameter(1, item);
-                Output.SetTemplateParameter(2, searchFindings.Len());
-                Output << "$config_queueing_found_toomanyfiles";
-                sn_ConsoleOut(Output, 0);
-            }
-        }
-
-        searchFindings.Clear();
-    }
+        sg_QueueRotation(tString("config_queue"), items, configRotation, sg_ConfigQueueing);
 }
 static tConfItemFunc sg_ConfigQueueingFuncConf("QUEUE_CONFIG", &sg_ConfigQueueingFunc);
 
@@ -1691,799 +1540,239 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
     int pos = 0;
     params.ReadLine(s);
 
-    if (command == "/mq")
+    gRotation *ThisRotation = NULL;
+    gQueueing *ThisQueueing = NULL;
+    tAccessLevel ThisAccessLevel;
+
+    std::ostringstream required_level;
+    std::ostringstream file_not_found;
+    std::ostringstream stored_file_found;
+    std::ostringstream file_stored;
+    std::ostringstream found_toomanyfiles;
+    std::ostringstream file_removed;
+    tString queueType;
+
+    tString argument = params.ExtractNonBlankSubString(pos);
+    bool itemFound = false;
+    tArray<tString> searchFindings;
+
+    if ((command == "/mq") || (command == "/ms"))
     {
-        tString argument = params.ExtractNonBlankSubString(pos);
-        if ((argument == "list") || (argument == "ls"))
-        {
-            tColoredString Output;
-            Output << "0xaaffffList of maps in the que by order:\n";
-            if (sg_MapQueueing->Size() > 0)
-            {
-                for (int i=0; i < sg_MapQueueing->Size(); i++)
-                {
-                    if (i == 0)
-                    {
-                        tString name = sg_MapQueueing->Get(i);
-                        Output << "0xffaa00" << name;
-                    }
-                    else
-                    {
-                        tString name = sg_MapQueueing->Get(i);
-                        Output << "0x00aaff, " << "0xffaa00" << name;
-                    }
-                }
-            }
-            else
-            {
-                Output << "0xddff00There are no items currently in the map queueing system.";
-                Output << "\n";
-                sn_ConsoleOut(Output, p->Owner());
-            }
-        }
-        else if (argument == "add")
-        {
-            if (p->GetAccessLevel() <= se_mapqueueingAccessLevel)
-            {
-                tString items = params.ExtractNonBlankSubString(pos);
-                if (items != "")
-                {
-                    int pos = 0;
-                    tString item = items;
-                    bool mapFound = false;
-                    tArray<tString> searchFindings;
-                    for (int i=0; i < mapRotation->Size(); i++)
-                    {
-                        gRotationItem *mapRotItem = mapRotation->Get(i);
-                        if (mapRotItem)
-                        {
-                            tString filteredName, filteredSearch;
-                            filteredName = ePlayerNetID::FilterName(mapRotItem->Name());
-                            filteredSearch = ePlayerNetID::FilterName(item);
-                            if (filteredName.Contains(filteredSearch))
-                            {
-                                mapFound = true;
-                                searchFindings.Insert(mapRotItem->Name());
-                            }
-                        }
-                    }
-                    if (!mapFound)
-                    {
-                        tOutput Output;
-                        Output.SetTemplateParameter(1, item);
-                        Output << "$map_queueing_file_not_found";
-                        sn_ConsoleOut(Output, p->Owner());
-                    }
-                    else
-                    {
-                        if (searchFindings.Len() == 1)
-                        {
-                            if (!gQueuePlayers::CanQueue(p))
-                                return;
+        ThisQueueing = sg_MapQueueing;
+        ThisAccessLevel = se_mapqueueingAccessLevel;
 
-                            bool found = false;
-                            tString mapName = searchFindings[0];
-                            for (int j=0; j < sg_MapQueueing->Size(); j++)
-                            {
-                                tString item_name = sg_MapQueueing->Get(j);
-                                if (item_name == mapName)
-                                {
-                                    tOutput Output;
-                                    Output.SetTemplateParameter(1, stripMapNameOnly(mapName));
-                                    Output.SetTemplateParameter(2, j+1);
-                                    Output << "$map_queueing_stored_file_found";
-                                    sn_ConsoleOut(Output, p->Owner());
-                                    found = true;
-                                    break;
-                                }
-                            }
-                            if (!found)
-                            {
-                                sg_MapQueueing->Insert(mapName);
-                                tOutput Output;
-                                Output.SetTemplateParameter(1, stripMapNameOnly(mapName));
-                                Output.SetTemplateParameter(2, p->GetName());
-                                Output << "$map_queueing_file_stored";
-                                sn_ConsoleOut(Output);
+        ThisRotation = mapRotation;
+        if (command == "/ms")
+            ThisRotation = mapStorage;
 
-                                sg_LogQueue(p, command, argument, mapName);
-                            }
-                        }
-                        else
-                        {
-                            tOutput Output;
-                            Output.SetTemplateParameter(1, item);
-                            Output.SetTemplateParameter(2, searchFindings.Len());
-                            Output << "$map_queueing_found_toomanyfiles";
-                            sn_ConsoleOut(Output, p->Owner());
-                        }
-                    }
-
-                    searchFindings.Clear();
-                }
-            }
-            else
-            {
-                tOutput Output;
-                Output.SetTemplateParameter(1, tCurrentAccessLevel::GetName(se_mapqueueingAccessLevel));
-                Output.SetTemplateParameter(2, argument);
-                Output << "$map_queueing_required_level";
-                sn_ConsoleOut(Output, p->Owner());
-            }
-        }
-        else if (argument == "remove")
-        {
-            if (p->GetAccessLevel() <= se_mapqueueingAccessLevel)
-            {
-                tString items = params.ExtractNonBlankSubString(pos);
-                if (items != "")
-                {
-                    int pos = 0;
-                    tString item = items;
-                    bool mapFound = false;
-                    tArray<tString> searchFindings;
-                    for (int i = 0; i < sg_MapQueueing->Size(); i++)
-                    {
-                        tString mapRotItem = sg_MapQueueing->Get(i);
-                        if (mapRotItem)
-                        {
-                            tString filteredName, filteredSearch;
-                            filteredName = ePlayerNetID::FilterName(mapRotItem);
-                            filteredSearch = ePlayerNetID::FilterName(item);
-                            if (filteredName.Contains(filteredSearch))
-                            {
-                                mapFound = true;
-                                searchFindings.Insert(mapRotItem);
-                            }
-                        }
-                    }
-                    if (!mapFound)
-                    {
-                        tOutput Output;
-                        Output.SetTemplateParameter(1, item);
-                        Output << "$map_queueing_que_file_not_found";
-                        sn_ConsoleOut(Output, p->Owner());
-                    }
-                    else
-                    {
-                        if (searchFindings.Len() == 1)
-                        {
-                            tString mapName = searchFindings[0];
-                            for (int j=0; j < sg_MapQueueing->Size(); j++)
-                            {
-                                tString item_name =  sg_MapQueueing->Get(j);
-                                if (item_name == mapName)
-                                {
-                                    sg_MapQueueing->Remove(j);
-                                    tOutput Output;
-                                    Output.SetTemplateParameter(1, stripMapNameOnly(mapName));
-                                    Output.SetTemplateParameter(2, p->GetName());
-                                    Output << "$map_queueing_file_removed";
-                                    sn_ConsoleOut(Output);
-
-                                    sg_LogQueue(p, command, argument, mapName);
-                                    break;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            tOutput Output;
-                            Output.SetTemplateParameter(1, item);
-                            Output.SetTemplateParameter(2, searchFindings.Len());
-                            Output << "$map_queueing_found_toomanyfiles";
-                            sn_ConsoleOut(Output, p->Owner());
-                        }
-                    }
-
-                    searchFindings.Clear();
-                }
-            }
-            else
-            {
-                tOutput Output;
-                Output.SetTemplateParameter(1, tCurrentAccessLevel::GetName(se_mapqueueingAccessLevel));
-                Output.SetTemplateParameter(2, argument);
-                Output << "$map_queueing_required_level";
-                sn_ConsoleOut(Output, p->Owner());
-            }
-        }
+        queueType = "map_queue";
     }
-    else if (command == "/cq")
+    else if ((command == "/cq") || (command == "/cs"))
     {
-        tString argument = params.ExtractNonBlankSubString(pos);
-        if ((argument == "list") || (argument == "ls"))
+        ThisQueueing = sg_ConfigQueueing;
+        ThisAccessLevel = se_configqueueingAccessLevel;
+
+        ThisRotation = configRotation;
+        if (command == "/ms")
+            ThisRotation = configStorage;
+
+        queueType = "config_queue";
+    }
+
+    if (!ThisRotation) return;
+
+    if ((argument == "list") || (argument == "ls"))
+    {
+        tColoredString Output;
+        Output << "0xaaffffList of items in the que by order:\n";
+
+        if (ThisQueueing->Size() > 0)
         {
-            tColoredString Output;
-            Output << "0xaaffffList of configs in the que by order:\n";
-            if (sg_ConfigQueueing->Size() > 0)
+            for (int i=0; i < ThisQueueing->Size(); i++)
             {
-                for (int i=0; i < sg_ConfigQueueing->Size(); i++)
+                if (i == 0)
                 {
-                    if (i == 0)
-                    {
-                        tString name = sg_ConfigQueueing->Get(i);
-                        Output << "0xffaa00" << name;
-                    }
-                    else
-                    {
-                        tString name = sg_ConfigQueueing->Get(i);
-                        Output << "0x00aaff, " << "0xffaa00" << name;
-                    }
+                    tString name = ThisQueueing->Get(i);
+                    Output << "0xffaa00" << name;
+                }
+                else
+                {
+                    tString name = ThisQueueing->Get(i);
+                    Output << "0x00aaff, " << "0xffaa00" << name;
                 }
             }
-            else
-            {
-                Output << "0xddff00There are no items in the config queueing system.";
-            }
+        }
+        else
+        {
+            Output << "0xddff00There are no items currently in the queueing system.";
             Output << "\n";
             sn_ConsoleOut(Output, p->Owner());
         }
-        else if (argument == "add")
-        {
-            if (p->GetAccessLevel() <= se_configqueueingAccessLevel)
-            {
-                tString items = params.ExtractNonBlankSubString(pos);
-                if (items != "")
-                {
-                    int pos = 0;
-                    tString item = items;
-                    bool configFound = false;
-                    tArray<tString> searchFindings;
-                    for (int i=0; i < configRotation->Size(); i++)
-                    {
-                        gRotationItem *configRotItem = configRotation->Get(i);
-                        if (configRotItem)
-                        {
-                            tString filteredName, filteredSearch;
-                            filteredName = ePlayerNetID::FilterName(configRotItem->Name());
-                            filteredSearch = ePlayerNetID::FilterName(item);
-                            if (filteredName.Contains(filteredSearch))
-                            {
-                                configFound = true;
-                                searchFindings.Insert(configRotItem->Name());
-                            }
-                        }
-                    }
-                    if (!configFound)
-                    {
-                        tOutput Output;
-                        Output.SetTemplateParameter(1, item);
-                        Output << "$config_queueing_file_not_found";
-                        sn_ConsoleOut(Output, p->Owner());
-                    }
-                    else
-                    {
-                        if (searchFindings.Len() == 1)
-                        {
-                            if (!gQueuePlayers::CanQueue(p))
-                                return;
-
-                            bool found = false;
-                            tString configName = searchFindings[0];
-                            for (int j=0; j < sg_ConfigQueueing->Size(); j++)
-                            {
-                                tString item_name =  sg_ConfigQueueing->Get(j);
-                                if (item_name == configName)
-                                {
-                                    tOutput Output;
-                                    Output.SetTemplateParameter(1, configName);
-                                    Output.SetTemplateParameter(2, j+1);
-                                    Output << "$config_queueing_stored_file_found";
-                                    sn_ConsoleOut(Output, p->Owner());
-                                    found = true;
-                                    break;
-                                }
-                            }
-                            if (!found)
-                            {
-                                sg_ConfigQueueing->Insert(configName);
-                                tOutput Output;
-                                Output.SetTemplateParameter(1, configName);
-                                Output.SetTemplateParameter(2, p->GetName());
-                                Output << "config_queueing_file_stored";
-                                sn_ConsoleOut(Output, p->Owner());
-
-                                sg_LogQueue(p, command, argument, configName);
-                            }
-                        }
-                        else
-                        {
-                            tOutput Output;
-                            Output.SetTemplateParameter(1, item);
-                            Output.SetTemplateParameter(2, searchFindings.Len());
-                            Output << "$config_queueing_found_toomanyfiles";
-                            sn_ConsoleOut(Output, p->Owner());
-                        }
-                    }
-
-                    searchFindings.Clear();
-                }
-            }
-            else
-            {
-                tOutput Output;
-                Output.SetTemplateParameter(1, tCurrentAccessLevel::GetName(se_configqueueingAccessLevel));
-                Output.SetTemplateParameter(2, argument);
-                Output << "$config_queueing_required_level";
-                sn_ConsoleOut(Output, p->Owner());
-            }
-        }
-        else if (argument == "remove")
-        {
-            if (p->GetAccessLevel() <= se_configqueueingAccessLevel)
-            {
-                tString items = params.ExtractNonBlankSubString(pos);
-                if (items != "")
-                {
-                    int pos = 0;
-                    tString item = items;
-                    bool configFound = false;
-                    tArray<tString> searchFindings;
-                    for (int i=0; i < sg_ConfigQueueing->Size(); i++)
-                    {
-                        tString configRotItem = sg_ConfigQueueing->Get(i);
-                        if (configRotItem)
-                        {
-                            tString filteredName, filteredSearch;
-                            filteredName = ePlayerNetID::FilterName(configRotItem);
-                            filteredSearch = ePlayerNetID::FilterName(item);
-                            if (filteredName.Contains(filteredSearch))
-                            {
-                                configFound = true;
-                                searchFindings.Insert(configRotItem);
-                            }
-                        }
-                    }
-                    if (!configFound)
-                    {
-                        tOutput Output;
-                        Output.SetTemplateParameter(1, item);
-                        Output << "$config_queueing_que_file_not_found";
-                        sn_ConsoleOut(Output, p->Owner());
-                    }
-                    else
-                    {
-                        if (searchFindings.Len() == 1)
-                        {
-                            tString configName = searchFindings[0];
-                            for (int j=0; j < sg_ConfigQueueing->Size(); j++)
-                            {
-                                tString item_name =  sg_ConfigQueueing->Get(j);
-                                if (item_name == configName)
-                                {
-                                    sg_ConfigQueueing->Remove(j);
-                                    tOutput Output;
-                                    Output.SetTemplateParameter(1, configName);
-                                    Output.SetTemplateParameter(2, p->GetName());
-                                    Output << "$config_queueing_file_removed";
-                                    sn_ConsoleOut(Output);
-
-                                    sg_LogQueue(p, command, argument, configName);
-                                    break;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            tOutput Output;
-                            Output.SetTemplateParameter(1, item);
-                            Output.SetTemplateParameter(2, searchFindings.Len());
-                            Output << "$config_queueing_found_toomanyfiles";
-                            sn_ConsoleOut(Output, p->Owner());
-                        }
-                    }
-
-                    searchFindings.Clear();
-                }
-            }
-            else
-            {
-                tOutput Output;
-                Output.SetTemplateParameter(1, tCurrentAccessLevel::GetName(se_configqueueingAccessLevel));
-                Output.SetTemplateParameter(2, argument);
-                Output << "$config_queueing_required_level";
-                sn_ConsoleOut(Output, p->Owner());
-            }
-        }
     }
-    else if (command == "/ms")
+    else if (argument == "add")
     {
-        tString argument = params.ExtractNonBlankSubString(pos);
-        if ((argument == "list") || (argument == "ls"))
+        if (p->GetAccessLevel() > ThisAccessLevel)
         {
-            tColoredString Output;
-            Output << "0xaaffffList of maps in the que by order:\n";
-            if (sg_MapQueueing->Size() > 0)
+            tOutput Output;
+            Output.SetTemplateParameter(1, tCurrentAccessLevel::GetName(ThisAccessLevel));
+            Output.SetTemplateParameter(2, argument);
+            required_level << "$" << queueType << tString("_required_level");
+            Output << required_level.str().c_str();
+            sn_ConsoleOut(Output, p->Owner());
+
+            return;
+        }
+
+        tString item = params.ExtractNonBlankSubString(pos);
+        if (item == "") return;
+
+        for (int i=0; i < ThisRotation->Size(); i++)
+        {
+            gRotationItem *rotationItem = ThisRotation->Get(i);
+            if (rotationItem)
             {
-                for (int i=0; i < sg_MapQueueing->Size(); i++)
+                tString filteredName, filteredSearch;
+                filteredName = ePlayerNetID::FilterName(rotationItem->Name());
+                filteredSearch = ePlayerNetID::FilterName(item);
+                if (filteredName.Contains(filteredSearch))
                 {
-                    if (i == 0)
-                    {
-                        tString name = sg_MapQueueing->Get(i);
-                        Output << "0xffaa00" << name;
-                    }
-                    else
-                    {
-                        tString name = sg_MapQueueing->Get(i);
-                        Output << "0x00aaff, " << "0xffaa00" << name;
-                    }
+                    itemFound = true;
+                    searchFindings.Insert(rotationItem->Name());
                 }
-            }
-            else
-            {
-                Output << "0xddff00There are no items currently in the map queueing system.";
-                Output << "\n";
-                sn_ConsoleOut(Output, p->Owner());
             }
         }
-        else if (argument == "add")
+        if (!itemFound)
         {
-            if (p->GetAccessLevel() <= se_mapqueueingAccessLevel)
-            {
-                tString items = params.ExtractNonBlankSubString(pos);
-                if (items != "")
-                {
-                    int pos = 0;
-                    tString item = items;
-                    bool mapFound = false;
-                    tArray<tString> searchFindings;
-                    for (int i=0; i < mapStorage->Size(); i++)
-                    {
-                        gRotationItem *mapRotItem = mapStorage->Get(i);
-                        if (mapRotItem)
-                        {
-                            tString filteredName, filteredSearch;
-                            filteredName = ePlayerNetID::FilterName(mapRotItem->Name());
-                            filteredSearch = ePlayerNetID::FilterName(item);
-                            if (filteredName.Contains(filteredSearch))
-                            {
-                                mapFound = true;
-                                searchFindings.Insert(mapRotItem->Name());
-                            }
-                        }
-                    }
-                    if (!mapFound)
-                    {
-                        tOutput Output;
-                        Output.SetTemplateParameter(1, item);
-                        Output << "$map_queueing_file_not_found";
-                        sn_ConsoleOut(Output, p->Owner());
-                    }
-                    else
-                    {
-                        if (searchFindings.Len() == 1)
-                        {
-                            if (!gQueuePlayers::CanQueue(p))
-                                return;
-
-                            bool found = false;
-                            tString mapName = searchFindings[0];
-                            for (int j=0; j < sg_MapQueueing->Size(); j++)
-                            {
-                                tString item_name = sg_MapQueueing->Get(j);
-                                if (item_name == mapName)
-                                {
-                                    tOutput Output;
-                                    Output.SetTemplateParameter(1, stripMapNameOnly(mapName));
-                                    Output.SetTemplateParameter(2, j+1);
-                                    Output << "$map_queueing_stored_file_found";
-                                    sn_ConsoleOut(Output, p->Owner());
-                                    found = true;
-                                    break;
-                                }
-                            }
-                            if (!found)
-                            {
-                                sg_MapQueueing->Insert(mapName);
-                                tOutput Output;
-                                Output.SetTemplateParameter(1, stripMapNameOnly(mapName));
-                                Output.SetTemplateParameter(2, p->GetName());
-                                Output << "$map_queueing_file_stored";
-                                sn_ConsoleOut(Output);
-
-                                sg_LogQueue(p, command, argument, mapName);
-                            }
-                        }
-                        else
-                        {
-                            tOutput Output;
-                            Output.SetTemplateParameter(1, item);
-                            Output.SetTemplateParameter(2, searchFindings.Len());
-                            Output << "$map_queueing_found_toomanyfiles";
-                            sn_ConsoleOut(Output, p->Owner());
-                        }
-                    }
-
-                    searchFindings.Clear();
-                }
-            }
-            else
-            {
-                tOutput Output;
-                Output.SetTemplateParameter(1, tCurrentAccessLevel::GetName(se_mapqueueingAccessLevel));
-                Output.SetTemplateParameter(2, argument);
-                Output << "$map_queueing_required_level";
-                sn_ConsoleOut(Output, p->Owner());
-            }
-        }
-        else if (argument == "remove")
-        {
-            if (p->GetAccessLevel() <= se_mapqueueingAccessLevel)
-            {
-                tString items = params.ExtractNonBlankSubString(pos);
-                if (items != "")
-                {
-                    int pos = 0;
-                    tString item = items;
-                    bool mapFound = false;
-                    tArray<tString> searchFindings;
-                    for (int i = 0; i < sg_MapQueueing->Size(); i++)
-                    {
-                        tString mapQueuedItem = sg_MapQueueing->Get(1);
-                        if (mapQueuedItem)
-                        {
-                            tString filteredName, filteredSearch;
-                            filteredName = ePlayerNetID::FilterName(mapQueuedItem);
-                            filteredSearch = ePlayerNetID::FilterName(item);
-                            if (filteredName.Contains(filteredSearch))
-                            {
-                                mapFound = true;
-                                searchFindings.Insert(mapQueuedItem);
-                            }
-                        }
-                    }
-                    if (!mapFound)
-                    {
-                        tOutput Output;
-                        Output.SetTemplateParameter(1, item);
-                        Output << "$map_queueing_que_file_not_found";
-                        sn_ConsoleOut(Output, p->Owner());
-                    }
-                    else
-                    {
-                        if (searchFindings.Len() == 1)
-                        {
-                            tString mapName = searchFindings[0];
-                            for (int j=0; j < sg_MapQueueing->Size(); j++)
-                            {
-                                tString item_name =  sg_MapQueueing->Get(j);
-                                if (item_name == mapName)
-                                {
-                                    sg_MapQueueing->Remove(j);
-                                    tOutput Output;
-                                    Output.SetTemplateParameter(1, mapName);
-                                    Output.SetTemplateParameter(2, p->GetName());
-                                    Output << "$map_queueing_file_removed";
-                                    sn_ConsoleOut(Output);
-
-                                    sg_LogQueue(p, command, argument, mapName);
-                                    break;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            tOutput Output;
-                            Output.SetTemplateParameter(1, item);
-                            Output.SetTemplateParameter(2, searchFindings.Len());
-                            Output << "$map_queueing_found_toomanyfiles";
-                            sn_ConsoleOut(Output, p->Owner());
-                        }
-                    }
-
-                    searchFindings.Clear();
-                }
-            }
-            else
-            {
-                tOutput Output;
-                Output.SetTemplateParameter(1, tCurrentAccessLevel::GetName(se_mapqueueingAccessLevel));
-                Output.SetTemplateParameter(2, argument);
-                Output << "$map_queueing_required_level";
-                sn_ConsoleOut(Output, p->Owner());
-            }
-        }
-    }
-    else if (command == "/cs")
-    {
-        tString argument = params.ExtractNonBlankSubString(pos);
-        if ((argument == "list") || (argument == "ls"))
-        {
-            tColoredString Output;
-            Output << "0xaaffffList of configs in the que by order:\n";
-            if (sg_ConfigQueueing->Size() > 0)
-            {
-                for (int i=0; i < sg_ConfigQueueing->Size(); i++)
-                {
-                    if (i == 0)
-                    {
-                        tString name = sg_ConfigQueueing->Get(i);
-                        Output << "0xffaa00" << name;
-                    }
-                    else
-                    {
-                        tString name = sg_ConfigQueueing->Get(i);
-                        Output << "0x00aaff, " << "0xffaa00" << name;
-                    }
-                }
-            }
-            else
-            {
-                Output << "0xddff00There are no items in the config queueing system.";
-            }
-            Output << "\n";
+            tOutput Output;
+            Output.SetTemplateParameter(1, item);
+            file_not_found << "$" << queueType << tString("_file_not_found");
+            Output << file_not_found.str().c_str();
             sn_ConsoleOut(Output, p->Owner());
         }
-        else if (argument == "add")
+        else
         {
-            if (p->GetAccessLevel() <= se_configqueueingAccessLevel)
+            if (searchFindings.Len() == 1)
             {
-                tString items = params.ExtractNonBlankSubString(pos);
-                if (items != "")
+                if (!gQueuePlayers::CanQueue(p))
+                    return;
+
+                bool found = false;
+                tString itemName = searchFindings[0];
+                for (int j=0; j < ThisQueueing->Size(); j++)
                 {
-                    int pos = 0;
-                    tString item = items;
-                    bool configFound = false;
-                    tArray<tString> searchFindings;
-                    for (int i=0; i < configStorage->Size(); i++)
-                    {
-                        gRotationItem *configRotItem = configStorage->Get(i);
-                        if (configRotItem)
-                        {
-                            tString filteredName, filteredSearch;
-                            filteredName = ePlayerNetID::FilterName(configRotItem->Name());
-                            filteredSearch = ePlayerNetID::FilterName(item);
-                            if (filteredName.Contains(filteredSearch))
-                            {
-                                configFound = true;
-                                searchFindings.Insert(configRotItem->Name());
-                            }
-                        }
-                    }
-                    if (!configFound)
+                    if (ThisQueueing->Get(j) == itemName)
                     {
                         tOutput Output;
-                        Output.SetTemplateParameter(1, item);
-                        Output << "$config_queueing_file_not_found";
+                        Output.SetTemplateParameter(1, stripMapNameOnly(itemName));
+                        Output.SetTemplateParameter(2, j+1);
+                        stored_file_found << "$" << queueType << tString("_stored_file_found");
+                        Output << stored_file_found.str().c_str();
                         sn_ConsoleOut(Output, p->Owner());
+                        found = true;
+                        break;
                     }
-                    else
-                    {
-                        if (searchFindings.Len() == 1)
-                        {
-                            if (!gQueuePlayers::CanQueue(p))
-                                return;
+                }
+                if (!found)
+                {
+                    ThisQueueing->Insert(itemName);
 
-                            bool found = false;
-                            tString configName = searchFindings[0];
-                            for (int j=0; j < sg_ConfigQueueing->Size(); j++)
-                            {
-                                tString item_name =  sg_ConfigQueueing->Get(j);
-                                if (item_name == configName)
-                                {
-                                    tOutput Output;
-                                    Output.SetTemplateParameter(1, configName);
-                                    Output.SetTemplateParameter(2, j+1);
-                                    Output << "$config_queueing_stored_file_found";
-                                    sn_ConsoleOut(Output, p->Owner());
-                                    found = true;
-                                    break;
-                                }
-                            }
-                            if (!found)
-                            {
-                                sg_ConfigQueueing->Insert(configName);
-                                tOutput Output;
-                                Output.SetTemplateParameter(1, configName);
-                                Output.SetTemplateParameter(2, p->GetName());
-                                Output << "config_queueing_file_stored";
-                                sn_ConsoleOut(Output);
+                    tOutput Output;
+                    Output.SetTemplateParameter(1, stripMapNameOnly(itemName));
+                    Output.SetTemplateParameter(2, p->GetName());
+                    file_stored << "$" << queueType << tString("_file_stored");
+                    Output << file_stored.str().c_str();
+                    sn_ConsoleOut(Output);
 
-                                sg_LogQueue(p, command, argument, configName);
-                            }
-                        }
-                        else
-                        {
-                            tOutput Output;
-                            Output.SetTemplateParameter(1, item);
-                            Output.SetTemplateParameter(2, searchFindings.Len());
-                            Output << "$config_queueing_found_toomanyfiles";
-                            sn_ConsoleOut(Output, p->Owner());
-                        }
-                    }
-
-                    searchFindings.Clear();
+                    sg_LogQueue(p, command, argument, itemName);
                 }
             }
             else
             {
                 tOutput Output;
-                Output.SetTemplateParameter(1, tCurrentAccessLevel::GetName(se_configqueueingAccessLevel));
-                Output.SetTemplateParameter(2, argument);
-                Output << "$config_queueing_required_level";
-                sn_ConsoleOut(Output, p->Owner());
-            }
-        }
-        else if (argument == "remove")
-        {
-            if (p->GetAccessLevel() <= se_configqueueingAccessLevel)
-            {
-                tString items = params.ExtractNonBlankSubString(pos);
-                if (items != "")
-                {
-                    int pos = 0;
-                    tString item = items;
-                    bool configFound = false;
-                    tArray<tString> searchFindings;
-                    for (int i=0; i < sg_ConfigQueueing->Size(); i++)
-                    {
-                        tString configRotItem = sg_ConfigQueueing->Get(i);
-                        if (configRotItem)
-                        {
-                            tString filteredName, filteredSearch;
-                            filteredName = ePlayerNetID::FilterName(configRotItem);
-                            filteredSearch = ePlayerNetID::FilterName(item);
-                            if (filteredName.Contains(filteredSearch))
-                            {
-                                configFound = true;
-                                searchFindings.Insert(configRotItem);
-                            }
-                        }
-                    }
-                    if (!configFound)
-                    {
-                        tOutput Output;
-                        Output.SetTemplateParameter(1, item);
-                        Output << "$config_queueing_que_file_not_found";
-                        sn_ConsoleOut(Output, p->Owner());
-                    }
-                    else
-                    {
-                        if (searchFindings.Len() == 1)
-                        {
-                            tString configName = searchFindings[0];
-                            for (int j=0; j < sg_ConfigQueueing->Size(); j++)
-                            {
-                                tString item_name =  sg_ConfigQueueing->Get(j);
-                                if (item_name == configName)
-                                {
-                                    sg_ConfigQueueing->Remove(j);
+                Output.SetTemplateParameter(1, item);
+                Output.SetTemplateParameter(2, searchFindings.Len());
+                found_toomanyfiles << "$" << queueType << tString("_found_toomanyfiles");
+                Output << found_toomanyfiles.str().c_str();
 
-                                    tOutput Output;
-                                    Output.SetTemplateParameter(1, configName);
-                                    Output.SetTemplateParameter(2, p->GetName());
-                                    Output << "$config_queueing_file_removed";
-                                    sn_ConsoleOut(Output);
-
-                                    sg_LogQueue(p, command, argument, configName);
-                                    break;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            tOutput Output;
-                            Output.SetTemplateParameter(1, item);
-                            Output.SetTemplateParameter(2, searchFindings.Len());
-                            Output << "$config_queueing_found_toomanyfiles";
-                            sn_ConsoleOut(Output, p->Owner());
-                        }
-                    }
-
-                    searchFindings.Clear();
-                }
-            }
-            else
-            {
-                tOutput Output;
-                Output.SetTemplateParameter(1, tCurrentAccessLevel::GetName(se_configqueueingAccessLevel));
-                Output.SetTemplateParameter(2, argument);
-                Output << "$config_queueing_required_level";
                 sn_ConsoleOut(Output, p->Owner());
             }
         }
     }
+    else if (argument == "remove")
+    {
+        if (p->GetAccessLevel() > ThisAccessLevel)
+        {
+            tOutput Output;
+            Output.SetTemplateParameter(1, tCurrentAccessLevel::GetName(ThisAccessLevel));
+            Output.SetTemplateParameter(2, argument);
+            required_level << "$" << queueType << tString("_required_level");
+            Output << required_level.str().c_str();
+            sn_ConsoleOut(Output, p->Owner());
+
+            return;
+        }
+
+        tString item = params.ExtractNonBlankSubString(pos);
+        if (item == "") return;
+
+        for (int i = 0; i < ThisQueueing->Size(); i++)
+        {
+            tString itenName = ThisQueueing->Get(i);
+            if (itenName != "")
+            {
+                tString filteredName, filteredSearch;
+                filteredName = ePlayerNetID::FilterName(itenName);
+                filteredSearch = ePlayerNetID::FilterName(item);
+                if (filteredName.Contains(filteredSearch))
+                {
+                    itemFound = true;
+                    searchFindings.Insert(itenName);
+                }
+            }
+        }
+        if (!itemFound)
+        {
+            tOutput Output;
+            Output.SetTemplateParameter(1, item);
+            file_not_found << "$" << queueType << tString("_file_not_found");
+            Output << file_not_found.str().c_str();
+            sn_ConsoleOut(Output, p->Owner());
+        }
+        else
+        {
+            if (searchFindings.Len() == 1)
+            {
+                tString mapName = searchFindings[0];
+                for (int j=0; j < ThisQueueing->Size(); j++)
+                {
+                    if (ThisQueueing->Get(j) == mapName)
+                    {
+                        ThisQueueing->Remove(j);
+
+                        tOutput Output;
+                        Output.SetTemplateParameter(1, stripMapNameOnly(mapName));
+                        Output.SetTemplateParameter(2, p->GetName());
+                        file_removed << "$" << queueType << tString("_file_removed");
+                        Output << file_removed.str().c_str();
+                        sn_ConsoleOut(Output);
+
+                        sg_LogQueue(p, command, argument, mapName);
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                tOutput Output;
+                Output.SetTemplateParameter(1, item);
+                Output.SetTemplateParameter(2, searchFindings.Len());
+                found_toomanyfiles << "$" << queueType << tString("_found_toomanyfiles");
+                sn_ConsoleOut(Output, p->Owner());
+            }
+        }
+    }
+
+    searchFindings.Clear();
 }
 
 void RotateByOrder()

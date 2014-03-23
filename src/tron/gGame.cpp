@@ -4491,7 +4491,7 @@ void LogWinnerCycleTurns(gCycle *winner)
             eCoord dir = winner->turnedDirections[0];
             o << "spawned " << pos.x << " " << pos.y << " " << dir.x << " " << dir.y << "\n";
 
-            for (int i = 1; i < winner->turnedPositions.size(); i++)
+            for (int i = 1; i < static_cast<signed>(winner->turnedPositions.size()); i++)
             {
                 pos = winner->turnedPositions[i];
                 dir = winner->turnedDirections[i];

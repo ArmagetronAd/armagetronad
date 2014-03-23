@@ -3630,24 +3630,24 @@ cycle_target_cancel          Your target assignment has been cancelled by server
 
 ## MAP/CONFIG _queueing commands and helping hints - LOVER$BOY's additions
 queue_map_help                        Stores map that exist in MAP_ROTATION. Stops rotation temporarly to complete the listed maps.
-map_queueing_stored_file_found        Map \1 has already been stored in list in \2 order. This addition has been ignored.\n
-map_queueing_file_stored              Map \1 has successfully been added to the que by \2.\n
-map_queueing_file_removed             Map \1 has successfully been removed from the que by \2.\n
-map_queueing_file_not_found           0xff7777Search term \1 couldn't be found in MAP_ROTATION.\n
-map_queueing_que_file_not_found       0xff7777Search term \1 couldn't be found in the MAP_QUEUEING.\n
-map_queueing_found_toomanyfiles       0xff7777\2 matches are found for search term "\1". Be more specific.\n
-map_queueing_is_empty                 Map queue is now empty. Normal rotation will resume from next round or match.\n
-map_queueing_required_level           Map queueing command \2 requires level is \1. You do not have that access level.\n
+map_queue_stored_file_found        Map \1 has already been stored in list in \2 order. This addition has been ignored.\n
+map_queue_file_stored              Map \1 has successfully been added to the que by \2.\n
+map_queue_file_removed             Map \1 has successfully been removed from the que by \2.\n
+map_queue_file_not_found           0xff7777Search term \1 couldn't be found in MAP_ROTATION.\n
+map_queue_que_file_not_found       0xff7777Search term \1 couldn't be found in the MAP_QUEUEING.\n
+map_queue_found_toomanyfiles       0xff7777\2 matches are found for search term "\1". Be more specific.\n
+map_queue_is_empty                 Map queue is now empty. Normal rotation will resume from next round or match.\n
+map_queue_required_level           Map queueing command \2 requires level is \1. You do not have that access level.\n
 
 queue_config_help                     Stores config that exists in CONFIG_ROTATION. Stops rotation temporarly to complete the listed maps.
-config_queueing_stored_file_found     Config \1 has already been stored in list in \2 order. This addition has been ignored.\n
-config_queueing_file_stored           Config \1 has successfully been added to the que by \2.\n
-config_queueing_file_removed          Config \1 has successfully been removed from the que by \2.\n
-config_queueing_file_not_found        0xff7777Search term \1 couldn't be found in the CONFIG_ROTATION.\n
-config_queueing_que_file_not_found    0xff7777\2 matches are found for search term "\1". Be more specific.\n
-config_queueing_found_toomanyfiles    0xff7777Search term \1 found many matches in CONFIG_ROTATION. Be more specific.\n
-config_queueing_is_empty              Config queue is now empty. Normal rotation will resume from next round or match.\n
-config_queueing_required_level        Config queueing command \2 requires level is \1. You do not have that access level.\n
+config_queue_stored_file_found     Config \1 has already been stored in list in \2 order. This addition has been ignored.\n
+config_queue_file_stored           Config \1 has successfully been added to the que by \2.\n
+config_queue_file_removed          Config \1 has successfully been removed from the que by \2.\n
+config_queue_file_not_found        0xff7777Search term \1 couldn't be found in the CONFIG_ROTATION.\n
+config_queue_que_file_not_found    0xff7777\2 matches are found for search term "\1". Be more specific.\n
+config_queue_found_toomanyfiles    0xff7777Search term \1 found many matches in CONFIG_ROTATION. Be more specific.\n
+config_queue_is_empty              Config queue is now empty. Normal rotation will resume from next round or match.\n
+config_queue_required_level        Config queueing command \2 requires level is \1. You do not have that access level.\n
 
 access_level_queue_maps_help        Sets the access level required to use chat commands /mq add & remove.
 access_level_queue_configs_help     Sets the access level required to use chat commands /cq add & remove.
