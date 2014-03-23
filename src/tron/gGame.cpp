@@ -1674,8 +1674,6 @@ void update_settings( bool const * goon )
 
     sg_OutputOnlinePlayers();
 
-    gDelayCommand::Clear();
-
     // update team properties
     for (int i = eTeam::teams.Len() - 1; i>=0; --i)
         eTeam::teams(i)->UpdateProperties();
@@ -2145,8 +2143,6 @@ static void own_game( nNetState enter_state ){
 
     sg_currentGame=NULL;
     se_KillGameTimer();
-
-    gDelayCommand::Clear();
 
     sg_OutputOnlinePlayers();
 }
