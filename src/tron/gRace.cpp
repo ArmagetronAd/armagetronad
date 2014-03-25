@@ -826,7 +826,7 @@ gRacePlayer::gRacePlayer(ePlayerNetID *player)
     this->idleLastTime_ = 0;
     this->idleNextTime_ = 0;
 
-    this->laps_ = 1;
+    this->laps_ = 0;
     this->nextCheckpoint_  = -1;
     this->checkpointsDone_ = false;
 
@@ -1429,7 +1429,7 @@ void gRace::Reset()
             rPlayer->SetIdleLastTime(0);
             rPlayer->SetIdleNextTime(0);
 
-            rPlayer->SetLaps(1);
+            rPlayer->SetLaps(0);
             rPlayer->SetNextCheckpoint(-1);
             rPlayer->SetCheckpointsDone(false);
             rPlayer->checkpointsDoneList.clear();
