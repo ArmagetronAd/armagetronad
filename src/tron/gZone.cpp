@@ -8230,6 +8230,53 @@ void gCheckpointZoneHack::OnEnter( gCycle * target, REAL time )
     gRacePlayer *racer = gRacePlayer::GetPlayer(target->Player());
     if (racer && sg_RaceTimerEnabled)
     {
+        if ((racer->NextCheckpoint() == -1) && (!racer->CheckpointsDone()))
+        {
+            int next_checkpoint = -1;
+
+            tArray<gCheckpointZoneHack *> checkpointZonesList = sg_GetCheckpointZones();
+            for(int i = 0; i < checkpointZonesList.Len(); i++)
+            {
+                gCheckpointZoneHack *checkZone = checkpointZonesList[i];
+                if (checkZone)
+                {
+                    int nextCheckZoneID = checkZone->CheckpointID();
+                    bool checkpointDone = false;
+
+                    std::deque<int>::iterator it = racer->checkpointsDoneList.begin();
+                    for(; it != racer->checkpointsDoneList.end(); it++)
+                    {
+                        if (nextCheckZoneID == *it)
+                        {
+                            checkpointDone = true;
+                            break;
+                        }
+                    }
+
+                    //  don't process this checkpoint if it's done
+                    if (checkpointDone) continue;
+
+                    //  get the lowest checkpoint id (greater than 0)
+                    if ((next_checkpoint == -1) || (nextCheckZoneID < next_checkpoint))
+                        next_checkpoint = nextCheckZoneID;
+                }
+            }
+
+            //  if there is a checkpoint to assign, do it.
+            if (next_checkpoint > 0)
+            {
+                racer->SetNextCheckpoint(next_checkpoint);
+                racer->SetCanFinish(false);
+                racer->SetCheckpointsDone(false);
+            }
+            //  if not, let them finish the race
+            else
+            {
+                racer->SetCanFinish(true);
+                racer->SetCheckpointsDone(true);
+            }
+        }
+
         std::deque<int>::iterator it = racer->checkpointsDoneList.begin();
         for(; it != racer->checkpointsDoneList.end(); it++)
             if (checkpointId_ == *it)
