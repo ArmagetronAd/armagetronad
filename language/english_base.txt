@@ -3388,13 +3388,14 @@ global_id_help                If set to 1, Global IDs (Armathentication) will be
 #*************************************
 race_timer_enabled_help		          0 = Disable, 1 = Enable) race timer. Don't change during round.
 race_end_delay_help		              Number of seconds to give players to finish before the round is finished.
-race_checkpoint_countdown_help      Number of seconds to give individual racers to complete the race.
 race_score_deplete_help             Number the score depletes by everytime a player enters the win zone.
 race_score_type_help		            0-No sorting; 1-Sort by best score; 2-sort by best time.
 race_log_time_help                  If enabled, it displays the reached time and the position of arrival.
 race_log_login_help                 If enabled, it will only log the time records of players that have logged in.
 
 race_checkpoint_require_hit_help  Default: 1; 0-will let you finish regarless of doing the checkpoints; 1-MUST complete all checkpoints but not in order; 2-MUST complete all checkpoints in order;
+race_checkpoint_countdown_help    Number of seconds to give individual racers to complete the race.
+race_checkpoint_laps_help         Default: 1; 0-won't do anything; 1-after each completed lap, your completed checkpoints data is cleared to do again.
 race_checkpoint_done              Checkpoint \1 is done.\n
 race_checkpoints_complete         All checkpoints are now completed. You can now cross the finish line.\n
 race_checkpoint_wrong             This is checkpoint \1. You need to go to checkpoint \2.\n

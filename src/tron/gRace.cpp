@@ -70,6 +70,9 @@ static tSettingItem<int> sg_RaceCheckpointRequireHitConf("RACE_CHECKPOINT_REQUIR
 int sg_RaceCheckpointCountdown = 70;
 static tSettingItem<int> sg_RaceCheckpointCountdownConf("RACE_CHECKPOINT_COUNTDOWN", sg_RaceCheckpointCountdown);
 
+bool sg_RaceCheckpointLaps = true;
+static tSettingItem<bool> sg_RaceCheckpointLapsConf("RACE_CHECKPOINT_LAPS", sg_RaceCheckpointLaps);
+
 tString sg_RaceSafeAngles("");
 static tSettingItem<tString> sg_RaceSafeAnglesConf("RACE_SAFE_ANGLES", sg_RaceSafeAngles);
 
@@ -1012,16 +1015,43 @@ void gRace::ZoneHit( ePlayerNetID *player, REAL time )
             //  if the race laps is greater than 1
             if (sg_RaceLaps > 1)
             {
+                bool laps_incremented = false;
                 if (racePlayer->IsSafe())
-                    racePlayer->SetLaps(racePlayer->Laps() + 1);    //  increment the player's lap count
+                {
+                    bool laps_process = true;
+
+                    //  make sure laps process is not done until players complete all checkpoints
+                    if (sg_RaceCheckpointRequireHit && (sg_NumCheckpointZones() > 0) && !racePlayer->CheckpointsDone())
+                        laps_process = false;
+
+                    if (laps_process)
+                    {
+                        laps_incremented = true;
+                        racePlayer->SetLaps(racePlayer->Laps() + 1);    //  increment the player's lap count
+                    }
+                }
 
                 //  the number of laps done is less than required race_laps
                 if (racePlayer->Laps() < sg_RaceLaps)
                 {
                     racePlayer->SetCanFinish(false);
-                    sn_ConsoleOut(tOutput("$race_laps_next", racePlayer->Laps(), (sg_RaceLaps - racePlayer->Laps())), player->Owner());
+                    if (laps_incremented)
+                    {
+                        //  if the race checkpoints laps is enabled clear all the checkpoints done
+                        if (sg_RaceCheckpointRequireHit && sg_RaceCheckpointLaps)
+                        {
+                            racePlayer->SetNextCheckpoint(-1);
+                            racePlayer->SetCheckpointsDone(false);
+                            racePlayer->checkpointsDoneList.clear();
+                        }
+
+                        sn_ConsoleOut(tOutput("$race_laps_next", racePlayer->Laps(), (sg_RaceLaps - racePlayer->Laps())), player->Owner());
+                    }
                 }
-                else racePlayer->SetCanFinish(true);
+                else
+                {
+                    racePlayer->SetCanFinish(true);
+                }
             }
 
             //  flag to indicate not to show this message again
