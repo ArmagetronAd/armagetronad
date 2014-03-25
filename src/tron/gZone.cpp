@@ -8146,6 +8146,23 @@ int sg_NumCheckpointZones()
     return checkpoint_zones;
 }
 
+tArray<gCheckpointZoneHack *> sg_GetCheckpointZones()
+{
+    tArray<gCheckpointZoneHack *> checkpointZones;
+
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid) return checkpointZones;
+
+    const tList<eGameObject>& gameObjects = grid->GameObjects();
+    for (int i = 0; i < gameObjects.Len(); i++)
+    {
+        gCheckpointZoneHack *checkpointZone = dynamic_cast<gCheckpointZoneHack *>(gameObjects[i]);
+        if (checkpointZone) checkpointZones.Insert(checkpointZone);
+    }
+
+    return checkpointZones;
+}
+
 // *******************************************************************************
 // *
 // *    gCheckpointZoneHack
@@ -8211,43 +8228,99 @@ bool gCheckpointZoneHack::Timestep( REAL time )
 void gCheckpointZoneHack::OnEnter( gCycle * target, REAL time )
 {
     gRacePlayer *racer = gRacePlayer::GetPlayer(target->Player());
-    if (racer)
+    if (racer && sg_RaceTimerEnabled)
     {
-        std::deque<int>::iterator it = racer->checkpointsDone.begin();
-        for(; it != racer->checkpointsDone.end(); it++)
+        std::deque<int>::iterator it = racer->checkpointsDoneList.begin();
+        for(; it != racer->checkpointsDoneList.end(); it++)
             if (checkpointId_ == *it)
                 return;
 
-        if (racer->Checkpoints() == checkpointId_)  //  if entered right checkpoint (order)
+        if (!wrongPlayerEntries_[target->Player()->ListID()])
         {
-            racer->checkpointsDone.push_back(checkpointId_);    //  add as done
-            racer->SetCheckpoints(racer->Checkpoints() + 1);    //  move to next
-
-            //  if they've gone through all the checkpoints
-            //  they can then finish the race by crossing the
-            //  finish line (win/target zone)
-            if (static_cast<signed>(racer->checkpointsDone.size()) == sg_NumCheckpointZones())
+            if ((sg_RaceCheckpointRequireHit == 1) || ((sg_RaceCheckpointRequireHit == 2) && (racer->NextCheckpoint() == checkpointId_)))
             {
-                racer->SetCanFinish(true);
-                sn_ConsoleOut(tOutput("$race_checkpoint_done", checkpointId_), racer->Player()->Owner());
+                bool all_done = false;
+                int next_checkpoint = -1;
+
+                racer->checkpointsDoneList.push_back(checkpointId_);    //  add as done
+
+                tArray<gCheckpointZoneHack *> checkpointZonesList = sg_GetCheckpointZones();
+                for(int i = 0; i < checkpointZonesList.Len(); i++)
+                {
+                    gCheckpointZoneHack *checkZone = checkpointZonesList[i];
+                    if (checkZone)
+                    {
+                        int nextCheckZoneID = checkZone->checkpointId_;
+                        bool checkpointDone = false;
+
+                        std::deque<int>::iterator it = racer->checkpointsDoneList.begin();
+                        for(; it != racer->checkpointsDoneList.end(); it++)
+                        {
+                            if (nextCheckZoneID == *it)
+                            {
+                                checkpointDone = true;
+                                break;
+                            }
+                        }
+
+                        //  don't process this checkpoint if it's done
+                        if (checkpointDone) continue;
+
+                        if ((next_checkpoint == -1) || (nextCheckZoneID < next_checkpoint))
+                            next_checkpoint = nextCheckZoneID;
+                    }
+                }
+
+                //  check if a new checkpoint is found
+                if (next_checkpoint > 0)
+                    racer->SetNextCheckpoint(next_checkpoint);    //  move to next
+                else
+                    all_done = true;
+
+                if (sg_RaceCheckpointRequireHit == 1)
+                {
+                    sn_ConsoleOut(tOutput("$race_checkpoint_done", checkpointId_), racer->Player()->Owner());
+
+                    if (all_done)
+                    {
+                        sn_ConsoleOut(tOutput("$race_checkpoints_complete"), racer->Player()->Owner());
+                        racer->SetCanFinish(true);
+                        racer->SetCheckpointsDone(true);
+                    }
+                }
+                else if (sg_RaceCheckpointRequireHit == 2)
+                {
+                    //  if they've gone through all the checkpoints
+                    //  they can then finish the race by crossing the
+                    //  finish line (win/target zone)
+                    if (all_done)
+                    {
+                        sn_ConsoleOut(tOutput("$race_checkpoints_complete"), racer->Player()->Owner());
+                        racer->SetCanFinish(true);
+                        racer->SetCheckpointsDone(true);
+                    }
+                    else
+                    {
+                        sn_ConsoleOut(tOutput("$race_checkpoint_next", checkpointId_, racer->NextCheckpoint()), racer->Player()->Owner());
+                    }
+                }
+
+                //  add the time to the countdown
+                if (sg_RaceCheckpointCountdown > 0)
+                    racer->SetCountdown(racer->Countdown() + checkpointTime_);
             }
             else
             {
-                sn_ConsoleOut(tOutput("$race_checkpoint_next", checkpointId_, racer->Checkpoints()), racer->Player()->Owner());
+                if (sg_RaceCheckpointRequireHit == 2)
+                    sn_ConsoleOut(tOutput("$race_checkpoint_wrong", checkpointId_, racer->NextCheckpoint()), racer->Player()->Owner());
             }
 
-            if (sg_RaceCountdown > 0)
-                racer->SetCountdown(racer->Countdown() + checkpointTime_);
-        }
-        else
-        {
-            if (!wrongPlayerEntries_[target->Player()->ListID()])
-            {
-                wrongPlayerEntries_[target->Player()->ListID()] = true;
-                sn_ConsoleOut(tOutput("$race_checkpoint_wrong", checkpointId_, racer->Checkpoints()), racer->Player()->Owner());
-            }
+            if (sg_RaceCheckpointRequireHit == 0)
+                if (sg_RaceCheckpointCountdown > 0)
+                    racer->SetCountdown(racer->Countdown() + checkpointTime_);
         }
     }
+    wrongPlayerEntries_[target->Player()->ListID()] = true;
 }
 
 // *******************************************************************************

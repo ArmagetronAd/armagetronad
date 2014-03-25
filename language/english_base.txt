@@ -3387,21 +3387,25 @@ global_id_help                If set to 1, Global IDs (Armathentication) will be
 #*************************************
 #*************************************
 race_timer_enabled_help		          0 = Disable, 1 = Enable) race timer. Don't change during round.
-race_countdown_help		              Number of seconds to give players to finish before the round is finished.
+race_end_delay_help		              Number of seconds to give players to finish before the round is finished.
+race_checkpoint_countdown_help      Number of seconds to give individual racers to complete the race.
 race_score_deplete_help             Number the score depletes by everytime a player enters the win zone.
 race_score_type_help		            0-No sorting; 1-Sort by best score; 2-sort by best time.
 race_log_time_help                  If enabled, it displays the reached time and the position of arrival.
 race_log_login_help                 If enabled, it will only log the time records of players that have logged in.
 
-race_checkpoint_done      All checkpoints are now completed. You can now cross the finish line.\n
-race_checkpoint_wrong     This checkpoint is number \1. You need to go to checkpoint number \2.\n
-race_checkpoint_next      Checkpoint number \1 is done. Now go to checkpoint number \2.\n
-race_checkpoint_miss      You can't finish the race yet. You still have to cross checkpoint number \1.\n
+race_checkpoint_require_hit_help  Default: 1; 0-will let you finish regarless of doing the checkpoints; 1-MUST complete all checkpoints but not in order; 2-MUST complete all checkpoints in order;
+race_checkpoint_done              Checkpoint \1 is done.\n
+race_checkpoints_complete         All checkpoints are now completed. You can now cross the finish line.\n
+race_checkpoint_wrong             This is checkpoint \1. You need to go to checkpoint \2.\n
+race_checkpoint_next              Checkpoint \1 is done. Now go to checkpoint \2.\n
+race_checkpoint_miss              You can't finish the race yet. You still have to cross the checkpoint \1.\n
 
-race_laps_help            If set to >1, these are the number of laps to complete to finish the race.
-race_laps_angles_help     These are the angles that are safe to travel in. Anything else and your dead. Usage: degrees1,degrees2,degrees3,...
-race_laps_next            Lap \1 done, \2 more laps to complete.\n
-race_finish_failed        You cannot cross the finish line yet.\n
+race_laps_help                    If set to >1, these are the number of laps to complete to finish the race.
+race_laps_next                    Lap \1 done, \2 more laps to complete.\n
+
+race_safe_angles_help         These are the angles that are safe to travel in. Anything else and your dead. Usage: degrees1,degrees2,degrees3,...
+race_unsafe_angles_kill_help  Default: 0; If set to 1, kills all players that are in the unsafe angles as they finish the race.
 
 player_reach_race		                  \1 0xfffffffinished with \2 points in \3 seconds.\n
 player_reach_race_first               \1 0xfffffffinished 1st in \2 seconds.\n
@@ -3857,7 +3861,8 @@ zone_delay_clear_help                     Clears all delayed zones from cache.
 arena_boundary_help                       This is the distance players can travel outside the arena boundary.
 arena_boundary_kill_help                  If set to 1, Players beyond the ARENA_BOUNDARY will be killed.
 
-timer_countdown     0xff7777\1
+timer_countdown     \1\n
+
 timer_start_help    Starts a ingame timer, giving players <seconds> to do something. Usage: TIMER_START <seconds> <target>
 timer_stop_help     Perfectly stops the ingame timer.
 timer_resume_help   If the timer was previously stopped, it resumes from where it last stopped.

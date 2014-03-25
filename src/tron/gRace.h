@@ -59,8 +59,14 @@ class gRacePlayer
             }
         }
 
-        bool Finished() { return hasFinished_; }
+        bool Finished()     { return hasFinished_; }
         void SetFinished (bool finished) { hasFinished_ = finished; }
+
+        bool CanFinish()                { return canFinish_; }
+        void SetCanFinish(bool val)     { canFinish_  = val; }
+
+        bool IsSafe()           { return isSafe_; }
+        void SetSafe(bool val)  { isSafe_ = val; }
 
         REAL Time() { return time_; }
         void SetTime(REAL newTime) { time_ = newTime; }
@@ -86,18 +92,19 @@ class gRacePlayer
         int Laps()              { return laps_; }
         void SetLaps(int val)   { laps_ = val; }
 
-        int Checkpoints()                   { return checkpoints_; }
-        void SetCheckpoints(int val)        { checkpoints_ = val; }
-        std::deque<int> checkpointsDone;
-
-        bool CanFinish()            { return canFinish_; }
-        void SetCanFinish(bool val) { canFinish_ = val; }
+        int NextCheckpoint()                { return nextCheckpoint_; }
+        bool CheckpointsDone()              { return checkpointsDone_; }
+        void SetNextCheckpoint(int val)     { nextCheckpoint_ = val; }
+        void SetCheckpointsDone(bool val)   { checkpointsDone_ = val; }
+        std::deque<int> checkpointsDoneList;
 
         int Countdown()             { return countdown_; }
         void SetCountdown(int val)  { countdown_ = val; }
 
     private:
         bool hasFinished_;
+        bool isSafe_;
+        bool canFinish_;
 
         REAL time_;
         REAL lastTime_;
@@ -116,8 +123,9 @@ class gRacePlayer
         REAL idleNextTime_;
 
         int laps_;
-        int checkpoints_;
-        bool canFinish_;
+        int nextCheckpoint_;
+        bool checkpointsDone_;
+
         int countdown_;
     public:
         ePlayerNetID    *Player() { return player_; }                  //!<  player's user
@@ -135,12 +143,13 @@ class gRace
         static void Sync( int alive, int ai_alive, int humans, REAL time ); //!> update race state, called every second
         static bool Done();                                                 //!> returns true whether round time is over
         static void Reset();                                                //!> reset time and values
-        static void OnRoundBegin();                                         //!> update settings necessary
 
         static void RaceChat(ePlayerNetID *player, tString command, std::istream &s);
 
         //!> returns the race winner
         static void DeclareWinner();
+
+        static bool     cannotFinish_[MAXCLIENTS+1];
 
     private:
         static bool   firstArrived_;
@@ -152,8 +161,6 @@ class gRace
         static int     finishPlace_;
         static REAL    firstFinishTime_;
         static tString firstToArive_;
-
-        static bool     cannotFinish_[MAXCLIENTS+1];
 };
 
 class gRaceScores
@@ -215,11 +222,12 @@ class gRaceScores
 
 extern bool sg_RaceTimerEnabled;
 extern bool sg_raceShotEnabled;
-extern int sg_RaceCountdown;
+extern int sg_RaceCheckpointCountdown;
 extern int sg_raceTryoutsNumber;
 extern int sg_scoreRaceComplete;
 extern int sg_RaceLaps;
-extern tString sg_RaceLapsAngles;
+extern tString sg_RaceSafeAngles;
+extern int sg_RaceCheckpointRequireHit;
 
 #endif
 

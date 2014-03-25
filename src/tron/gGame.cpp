@@ -3929,7 +3929,6 @@ void gGame::StateUpdate(){
                 if (sg_RaceTimerEnabled)
                 {
                     gRaceScores::OutputStart();
-                    gRace::OnRoundBegin();
                 }
 
 
@@ -4426,7 +4425,7 @@ void gGameSpawnTimer::Sync(int alive, int ai_alive, int humans)
     {
         tOutput message;
         message.SetTemplateParameter(1, countDown_);
-        message << "$timer_countdown" << "                    ";
+        message << "$timer_countdown";
         sn_CenterMessage( message );
     }
 }

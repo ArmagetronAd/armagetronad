@@ -3908,14 +3908,22 @@ bool gCycle::DoTurn(int d)
             }
 
             //  RACE HACK BEGIN
-            if (sg_RaceTimerEnabled && (sg_RaceLapsAngles != ""))
+            if (sg_RaceTimerEnabled && (sg_RaceSafeAngles != ""))
             {
                 bool racer_safe = false;
 
-                tArray<tString> degreesList = sg_RaceLapsAngles.Split(",");
+                tArray<tString> degreesList = sg_RaceSafeAngles.Split(",");
                 for(int iD = 0; iD < degreesList.Len(); iD++)
                 {
                     if (degreesList[iD] == "") continue;
+
+                    //  if this is set, then all angles are safe.
+                    //  any angle after this is unsafe
+                    if (degreesList[iD] == "-1")
+                    {
+                        racer_safe = true;
+                        continue;
+                    }
 
                     double degrees = atof(degreesList[iD]);
                     double radians = degrees * (M_PI / 180);
@@ -3927,13 +3935,17 @@ bool gCycle::DoTurn(int d)
                     //  if its safe, good. if not, lets check again
                     if ((rad_x == dirDrive.x) && (rad_y == dirDrive.y))
                     {
-                        racer_safe = true;
+                        if (!racer_safe)
+                            racer_safe = true;
+                        else
+                            racer_safe = false;
                         break;
                     }
                 }
 
-                //  if the racer is not racing in the safe angle, kill them
-                if (!racer_safe) Kill();
+                gRacePlayer *racer = gRacePlayer::GetPlayer(Player());
+                if (racer)
+                    racer->SetSafe(racer_safe);
             }
             //  RACE HACK END
 
@@ -4193,6 +4205,9 @@ void gCycle::Kill(){
                 Player()->LogActivity(ACTIVITY_DIED);
 
                 sg_cycleRespawnZone_Create(this);
+
+                if (sg_RaceTimerEnabled)
+                    gRace::ZoneOut(Player(), lastTime);
             }
 
 

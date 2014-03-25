@@ -59,11 +59,25 @@ static tSettingItem<bool> sg_RaceTimerEnabledConf( "RACE_TIMER_ENABLED", sg_Race
 int sg_RaceLaps = 1;
 static tSettingItem<int> sg_RaceLapsConf("RACE_LAPS", sg_RaceLaps);
 
-tString sg_RaceLapsAngles("");
-static tSettingItem<tString> sg_RaceLapsAnglesConf("RACE_LAPS_ANGLES", sg_RaceLapsAngles);
+bool requireCheckpointHit(const int &newValue)
+{
+    if ((newValue < 0) || (newValue > 2)) return false;
+    return true;
+}
+int sg_RaceCheckpointRequireHit = 1;
+static tSettingItem<int> sg_RaceCheckpointRequireHitConf("RACE_CHECKPOINT_REQUIRE_HIT", sg_RaceCheckpointRequireHit, &requireCheckpointHit);
 
-int sg_RaceCountdown = 60;
-static tSettingItem<int> sg_RaceCountdownConf( "RACE_COUNTDOWN", sg_RaceCountdown );
+int sg_RaceCheckpointCountdown = 70;
+static tSettingItem<int> sg_RaceCheckpointCountdownConf("RACE_CHECKPOINT_COUNTDOWN", sg_RaceCheckpointCountdown);
+
+tString sg_RaceSafeAngles("");
+static tSettingItem<tString> sg_RaceSafeAnglesConf("RACE_SAFE_ANGLES", sg_RaceSafeAngles);
+
+bool sg_RaceUnsafeAnglesKill = false;
+static tSettingItem<bool> sg_RaceUnsafeAnglesKillConf("RACE_UNSAFE_ANGLES_KILL", sg_RaceUnsafeAnglesKill);
+
+int sg_RaceEndDelay = 60;
+static tSettingItem<int> sg_RaceEndDelayConf( "RACE_END_DELAY", sg_RaceEndDelay );
 
 static bool sg_raceSmartTimer = false;
 static tSettingItem<bool> sg_raceSmartTimerConf("RACE_SMART_TIMER", sg_raceSmartTimer);
@@ -801,7 +815,11 @@ gRacePlayer::gRacePlayer(ePlayerNetID *player)
 
     this->lastTime_ = se_Time();
 
-    this->chances_ = sg_raceChances;
+    this->hasFinished_ = false;
+    this->isSafe_      = true;
+    this->canFinish_   = true;
+
+    this->chances_  = sg_raceChances;
 
     this->idle_         = false;
     this->idleCounter_  = 0;
@@ -809,9 +827,10 @@ gRacePlayer::gRacePlayer(ePlayerNetID *player)
     this->idleNextTime_ = 0;
 
     this->laps_ = 1;
-    this->checkpoints_ = 0;
-    this->countdown_ = sg_RaceCountdown + 1;
-    this->canFinish_ = true;
+    this->nextCheckpoint_  = -1;
+    this->checkpointsDone_ = false;
+
+    this->countdown_ = -1;
 
     sg_RacePlayers.Insert(this);
 }
@@ -924,34 +943,93 @@ void gRace::ZoneHit( ePlayerNetID *player, REAL time )
     gRacePlayer *racePlayer = gRacePlayer::GetPlayer(player);
     if (racePlayer && !racePlayer->Finished() && !roundFinished_ && player->Object() && player->Object()->Alive())
     {
-        if (!racePlayer->CanFinish())
+        //  kill the player if they are not safe
+        if (!racePlayer->IsSafe() && sg_RaceUnsafeAnglesKill)
         {
-            if (!cannotFinish_[player->ListID()])
-            {
-                //  if the race laps is greater than 1
-                if (sg_RaceLaps > 1)
-                {
-                    //  increment the player's lap count
-                    racePlayer->SetLaps(racePlayer->Laps() + 1);
-
-                    //  if the player has completed all the necessary laps
-                    if (racePlayer->Laps() == sg_RaceLaps)
-                        racePlayer->SetCanFinish(true); //  flag them so they can finish the race
-                    else
-                        sn_ConsoleOut(tOutput("$race_laps_next", racePlayer->Laps(), (sg_RaceLaps - racePlayer->Laps())), player->Owner());
-                }
-                else if (sg_NumCheckpointZones() > 0)
-                {
-                    sn_ConsoleOut(tOutput("$race_checkpoint_miss", racePlayer->Checkpoints()), player->Owner());
-                }
-                else
-                {
-                    sn_ConsoleOut(tOutput("$race_finish_failed"), player->Owner());
-                }
-                cannotFinish_[player->ListID()] = true;
-            }
+            player->Object()->Kill();
             return;
         }
+
+        //  no need to repeat messages when once is enough
+        //  this also includes the code within this statement
+        if (!cannotFinish_[player->ListID()])
+        {
+            //  check if the checkpoints have been hit or not
+            if ((sg_RaceCheckpointRequireHit > 0) && (sg_NumCheckpointZones() > 0))
+            {
+                int next_checkpoint = -1;
+
+                tArray<gCheckpointZoneHack *> checkpointZonesList = sg_GetCheckpointZones();
+                for(int i = 0; i < checkpointZonesList.Len(); i++)
+                {
+                    gCheckpointZoneHack *checkZone = checkpointZonesList[i];
+                    if (checkZone)
+                    {
+                        int nextCheckZoneID = checkZone->CheckpointID();
+                        bool checkpointDone = false;
+
+                        std::deque<int>::iterator it = racePlayer->checkpointsDoneList.begin();
+                        for(; it != racePlayer->checkpointsDoneList.end(); it++)
+                        {
+                            if (nextCheckZoneID == *it)
+                            {
+                                checkpointDone = true;
+                                break;
+                            }
+                        }
+
+                        //  don't process this checkpoint if it's done
+                        if (checkpointDone) continue;
+
+                        //  get the lowest checkpoint id (greater than 0)
+                        if ((next_checkpoint == -1) || (nextCheckZoneID < next_checkpoint))
+                            next_checkpoint = nextCheckZoneID;
+                    }
+                }
+
+                //  if there is a checkpoint to assign, do it.
+                if (next_checkpoint > 0)
+                {
+                    racePlayer->SetNextCheckpoint(next_checkpoint);
+                    racePlayer->SetCanFinish(false);
+                    racePlayer->SetCheckpointsDone(false);
+                }
+                //  if not, let them finish the race
+                else
+                {
+                    racePlayer->SetCanFinish(true);
+                    racePlayer->SetCheckpointsDone(true);
+                }
+
+                //  check whether the checkpoints are done or not
+                if (!racePlayer->CheckpointsDone())
+                {
+                    racePlayer->SetCanFinish(false);
+                    sn_ConsoleOut(tOutput("$race_checkpoint_miss", racePlayer->NextCheckpoint()), player->Owner());
+                }
+            }
+
+            //  if the race laps is greater than 1
+            if (sg_RaceLaps > 1)
+            {
+                if (racePlayer->IsSafe())
+                    racePlayer->SetLaps(racePlayer->Laps() + 1);    //  increment the player's lap count
+
+                //  the number of laps done is less than required race_laps
+                if (racePlayer->Laps() < sg_RaceLaps)
+                {
+                    racePlayer->SetCanFinish(false);
+                    sn_ConsoleOut(tOutput("$race_laps_next", racePlayer->Laps(), (sg_RaceLaps - racePlayer->Laps())), player->Owner());
+                }
+                else racePlayer->SetCanFinish(true);
+            }
+
+            //  flag to indicate not to show this message again
+            cannotFinish_[player->ListID()] = true;
+        }
+
+        //  don't let the player finish if they can't
+        if (!racePlayer->CanFinish()) return;
 
         REAL reachtime_ = time;
         player->LogActivity(ACTIVITY_FINISHED_RACE);
@@ -1040,12 +1118,8 @@ void gRace::ZoneHit( ePlayerNetID *player, REAL time )
 //!< ZONE OUT
 void gRace::ZoneOut( ePlayerNetID *player, REAL time )
 {
-    gRacePlayer *racePlayer = gRacePlayer::GetPlayer(player);
-    if (racePlayer && !racePlayer->Finished() && !roundFinished_ && player->Object() && player->Object()->Alive())
-    {
-        if (cannotFinish_[player->ListID()])
-            cannotFinish_[player->ListID()] = false;
-    }
+    if (cannotFinish_[player->ListID()])
+        cannotFinish_[player->ListID()] = false;
 }
 
 //! SYNC
@@ -1079,7 +1153,7 @@ void gRace::Sync( int alive, int ai_alive, int humans, REAL time )
     }
 
     // close the round if no human is alive
-    if ( alive == 0 )
+    if ( ( alive == 0 ) && ( ai_alive >= 0 ) )
         roundFinished_ = true;
 
     if (!roundFinished_ && sg_raceIdleKill)
@@ -1156,93 +1230,114 @@ void gRace::Sync( int alive, int ai_alive, int humans, REAL time )
         }
     }
 
-    if (sg_NumCheckpointZones() > 0)
+    // start counter when someone arrives or when only 1 is alive but not alone
+    if (!roundFinished_ && ( firstArrived_ || ( alive == 1 && ai_alive == 0 && humans > 1 ) ))
     {
-        if (!roundFinished_ && (sg_RaceCountdown > 0))
+        // countdown mode
+        if ((sg_RaceEndDelay > 0) && (countDown_ < 0))
         {
-            for(int i = 0; i < sg_RacePlayers.Len(); i++)
-            {
-                gRacePlayer *racer = sg_RacePlayers[i];
-                if (
-                    racer && racer->Player() &&
-                    racer->Player()->Object() && racer->Player()->Object()->Alive() &&
-                    !racer->Finished()
-                    )
-                {
-                    racer->SetCountdown(racer->Countdown() - 1);
+            countDown_ = sg_RaceEndDelay + 1;
 
-                    if ( racer->Countdown() < 0 )
+            if (sg_raceSmartTimer && (sg_RaceScores.Len() > 0))
+            {
+                int max = sg_RaceScores.Len();
+                if (max > sg_raceSmartTimerNum)
+                    max = sg_raceSmartTimerNum;
+
+                int timer = 0;
+                for(int i = 0; i < max; i++)
+                {
+                    gRaceScores *rP = sg_RaceScores[i];
+                    if (rP) timer += rP->Time();
+                }
+
+                if (timer > 0)
+                    countDown_ = ceil((timer / max) * sg_raceSmartTimerFactor) + 1;
+            }
+        }
+
+        if ((sg_RaceEndDelay > 0) && (countDown_ >= 0) )
+        {
+            // countdown working
+            countDown_ --;
+
+            if ( countDown_ < 0 )
+            {
+                roundFinished_ = true;
+                countDown_ = -1;
+
+                //if (!firstArrived_)
+                //{
+                    for(int i = 0; i < se_PlayerNetIDs.Len(); i++)
                     {
-                        roundFinished_ = true;
-                        racer->SetCountdown(-1);
-                        racer->Player()->Object()->Kill();
+                        ePlayerNetID *p = se_PlayerNetIDs[i];
+                        if (p && p->Object() && p->Object()->Alive())
+                            p->Object()->Kill();
                     }
-                    else
-                    {
-                        tOutput message;
-                        message.SetTemplateParameter(1, racer->Countdown());
-                        message << "$timer_countdown" << "                    ";
-                        sn_CenterMessage( message, racer->Player()->Owner());
-                    }
+                //}
+            }
+        }
+    }
+
+    //  do the checkpoint countdown
+    if (!roundFinished_ && (sg_NumCheckpointZones() > 0) && (sg_RaceCheckpointCountdown > 0))
+    {
+        for(int i = 0; i < sg_RacePlayers.Len(); i++)
+        {
+            gRacePlayer *racer = sg_RacePlayers[i];
+            if (
+                racer && racer->Player() &&
+                racer->Player()->Object() && racer->Player()->Object()->Alive() &&
+                !racer->Finished()
+                )
+            {
+                //  set the racer's checkpoint countdown timer
+                if (racer->Countdown() == -1)
+                    racer->SetCountdown(sg_RaceCheckpointCountdown + 1);
+
+                racer->SetCountdown(racer->Countdown() - 1);
+
+                if ( racer->Countdown() < 0 )
+                {
+                    roundFinished_ = true;
+                    racer->SetCountdown(-1);
+                    racer->Player()->Object()->Kill();
                 }
             }
         }
     }
-    else
+
+    //  show the countdown message
+    if (!roundFinished_)
     {
-        // start counter when someone arrives or when only 1 is alive but not alone
-        if (!roundFinished_ && ( firstArrived_ || ( alive == 1 && ai_alive == 0 && humans > 1 ) ))
+        int NumberOfSpaces  = 22;
+        int NumberOfEntries = 0;
+
+        for(int i = 0; i < sg_RacePlayers.Len(); i++)
         {
-            // countdown mode
-            if ((sg_RaceCountdown > 0) && (countDown_ < 0))
+            gRacePlayer *racer = sg_RacePlayers[i];
+            if (racer && racer->Player())
             {
-                countDown_ = sg_RaceCountdown + 1;
+                tColoredString countdownMsg;
 
-                if (sg_raceSmartTimer && (sg_RaceScores.Len() > 0))
+                //  increase the number of entries to show
+                if (countDown_ > 0)         NumberOfEntries++;
+                if (racer->Countdown() > 0) NumberOfEntries++;
+
+                if (countDown_ > 0)
                 {
-                    int max = sg_RaceScores.Len();
-                    if (max > sg_raceSmartTimerNum)
-                        max = sg_raceSmartTimerNum;
-
-                    int timer = 0;
-                    for(int i = 0; i < max; i++)
-                    {
-                        gRaceScores *rP = sg_RaceScores[i];
-                        if (rP) timer += rP->Time();
-                    }
-
-                    if (timer > 0)
-                        countDown_ = ceil((timer / max) * sg_raceSmartTimerFactor) + 1;
+                    countdownMsg << "0xff7777" << countDown_;
+                    countdownMsg.SetPos(NumberOfSpaces / NumberOfEntries);
                 }
-            }
 
-            if ((sg_RaceCountdown > 0) && (countDown_ >= 0) )
-            {
-                // countdown working
-                countDown_ --;
-
-                if ( countDown_ < 0 )
+                if ( racer->Countdown() > 0 )
                 {
-                    roundFinished_ = true;
-                    countDown_ = -1;
+                    countdownMsg.SetPos(NumberOfSpaces / NumberOfEntries);
+                    countdownMsg << "0xffff7f" << racer->Countdown();
+                }
 
-                    //if (!firstArrived_)
-                    //{
-                        for(int i = 0; i < se_PlayerNetIDs.Len(); i++)
-                        {
-                            ePlayerNetID *p = se_PlayerNetIDs[i];
-                            if (p && p->Object() && p->Object()->Alive())
-                                p->Object()->Kill();
-                        }
-                    //}
-                }
-                else
-                {
-                    tOutput message;
-                    message.SetTemplateParameter(1, countDown_);
-                    message << "$timer_countdown" << "                    ";
-                    sn_CenterMessage( message );
-                }
+                if (NumberOfEntries > 0)
+                    sn_CenterMessage(countdownMsg, racer->Player()->Owner());
             }
         }
     }
@@ -1324,7 +1419,10 @@ void gRace::Reset()
         {
             rPlayer->SetTime(-1);
             rPlayer->SetScore(0);
+
             rPlayer->SetFinished(false);
+            rPlayer->SetSafe(true);
+            rPlayer->SetCanFinish(true);
 
             rPlayer->SetIdle(false);
             rPlayer->SetIdleCounter(0);
@@ -1332,10 +1430,10 @@ void gRace::Reset()
             rPlayer->SetIdleNextTime(0);
 
             rPlayer->SetLaps(1);
-            rPlayer->SetCheckpoints(0);
-            rPlayer->checkpointsDone.clear();
-            rPlayer->SetCanFinish(true);
-            rPlayer->SetCountdown(sg_RaceCountdown + 1);
+            rPlayer->SetNextCheckpoint(-1);
+            rPlayer->SetCheckpointsDone(false);
+            rPlayer->checkpointsDoneList.clear();
+            rPlayer->SetCountdown(-1);
         }
     }
 
@@ -1344,22 +1442,6 @@ void gRace::Reset()
     //gRaceScores::Write();
     gRaceScores::Reset();
     gRaceScores::Read();
-}
-
-void gRace::OnRoundBegin()
-{
-    if ((sg_NumCheckpointZones() > 0) || (sg_RaceLaps > 1))
-    {
-        for(int b = 0; b < sg_RacePlayers.Len(); b++)
-        {
-            gRacePlayer *rPlayer = sg_RacePlayers[b];
-            if (rPlayer)
-            {
-                rPlayer->SetCanFinish(false);
-                rPlayer->SetCheckpoints(1);
-            }
-        }
-    }
 }
 
 //! time_ TO STRING

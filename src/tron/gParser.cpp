@@ -988,7 +988,7 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
         }
         else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *) "effect"), (const xmlChar *)"checkpoint"))
         {
-            if (checkpointExists)
+            if (checkpointExists && (checkpointId > 0))
             {
                 gCheckpointZoneHack *cZone =  tNEW(gCheckpointZoneHack( grid, zonePos, checkpointId, checkpointTime, false, delayZoneCreation ));
                 zone = cZone;

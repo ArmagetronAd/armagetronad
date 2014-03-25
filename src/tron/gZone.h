@@ -927,6 +927,7 @@ tFunction & tFunction::SetSlope( REAL const & slope )
 }
 
 int sg_NumCheckpointZones();
+tArray<gCheckpointZoneHack *> sg_GetCheckpointZones();
 
 extern bool sg_deathZoneRotation;
 extern REAL sg_deathZoneRotationSpeed;
