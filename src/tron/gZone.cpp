@@ -8284,6 +8284,10 @@ void gCheckpointZoneHack::OnEnter( gCycle * target, REAL time )
 
         if (!wrongPlayerEntries_[target->Player()->ListID()])
         {
+            if (sg_RaceCheckpointRequireHit == 0)
+                if (sg_RaceCheckpointCountdown > 0)
+                    racer->SetCountdown(racer->Countdown() + checkpointTime_);
+
             if ((sg_RaceCheckpointRequireHit == 1) || ((sg_RaceCheckpointRequireHit == 2) && (racer->NextCheckpoint() == checkpointId_)))
             {
                 bool all_done = false;
@@ -8361,10 +8365,6 @@ void gCheckpointZoneHack::OnEnter( gCycle * target, REAL time )
                 if (sg_RaceCheckpointRequireHit == 2)
                     sn_ConsoleOut(tOutput("$race_checkpoint_wrong", checkpointId_, racer->NextCheckpoint()), racer->Player()->Owner());
             }
-
-            if (sg_RaceCheckpointRequireHit == 0)
-                if (sg_RaceCheckpointCountdown > 0)
-                    racer->SetCountdown(racer->Countdown() + checkpointTime_);
         }
     }
     wrongPlayerEntries_[target->Player()->ListID()] = true;

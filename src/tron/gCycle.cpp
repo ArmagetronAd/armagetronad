@@ -3910,7 +3910,8 @@ bool gCycle::DoTurn(int d)
             //  RACE HACK BEGIN
             if (sg_RaceTimerEnabled && (sg_RaceSafeAngles != ""))
             {
-                bool racer_safe = false;
+                bool racer_safe     = false;
+                bool racer_safe_all = false;
 
                 tArray<tString> degreesList = sg_RaceSafeAngles.Split(",");
                 for(int iD = 0; iD < degreesList.Len(); iD++)
@@ -3921,24 +3922,24 @@ bool gCycle::DoTurn(int d)
                     //  any angle after this is unsafe
                     if (degreesList[iD] == "-1")
                     {
-                        racer_safe = true;
+                        racer_safe_all = true;
                         continue;
                     }
 
-                    double degrees = atof(degreesList[iD]);
-                    double radians = degrees * (M_PI / 180);
+                    REAL degrees = atof(degreesList[iD]);
+                    REAL radians = degrees * (M_PI / 180);
 
-                    double rad_x = cos(radians);
-                    double rad_y = sin(radians);
+                    REAL rad_x = cos(radians);
+                    REAL rad_y = sin(radians);
 
                     //  check the direction this player is turning into
                     //  if its safe, good. if not, lets check again
                     if ((rad_x == dirDrive.x) && (rad_y == dirDrive.y))
                     {
-                        if (!racer_safe)
-                            racer_safe = true;
-                        else
+                        if (racer_safe_all)
                             racer_safe = false;
+                        else
+                            racer_safe = true;
                         break;
                     }
                 }
