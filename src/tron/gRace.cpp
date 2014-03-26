@@ -1150,6 +1150,13 @@ void gRace::ZoneOut( ePlayerNetID *player, REAL time )
 {
     if (cannotFinish_[player->ListID()])
         cannotFinish_[player->ListID()] = false;
+
+    gRacePlayer *racePlayer = gRacePlayer::GetPlayer(player);
+    if (racePlayer)
+    {
+        if (player->Object() && !player->Object()->Alive())
+            racePlayer->SetCountdown(-1);
+    }
 }
 
 //! SYNC
@@ -1315,23 +1322,22 @@ void gRace::Sync( int alive, int ai_alive, int humans, REAL time )
         for(int i = 0; i < sg_RacePlayers.Len(); i++)
         {
             gRacePlayer *racer = sg_RacePlayers[i];
-            if (
-                racer && racer->Player() &&
-                racer->Player()->Object() && racer->Player()->Object()->Alive() &&
-                !racer->Finished()
-                )
+            if (racer && racer->Player())
             {
-                //  set the racer's checkpoint countdown timer
-                if (racer->Countdown() == -1)
-                    racer->SetCountdown(sg_RaceCheckpointCountdown + 1);
-
-                racer->SetCountdown(racer->Countdown() - 1);
-
-                if ( racer->Countdown() < 0 )
+                if (racer->Player()->Object() && racer->Player()->Object()->Alive() && !racer->Finished())
                 {
-                    roundFinished_ = true;
-                    racer->SetCountdown(-1);
-                    racer->Player()->Object()->Kill();
+                    //  set the racer's checkpoint countdown timer
+                    if (racer->Countdown() == -1)
+                        racer->SetCountdown(sg_RaceCheckpointCountdown + 1);
+
+                    racer->SetCountdown(racer->Countdown() - 1);
+
+                    if ( racer->Countdown() < 0 )
+                    {
+                        roundFinished_ = true;
+                        racer->SetCountdown(-1);
+                        racer->Player()->Object()->Kill();
+                    }
                 }
             }
         }
@@ -1351,16 +1357,16 @@ void gRace::Sync( int alive, int ai_alive, int humans, REAL time )
                 tColoredString countdownMsg;
 
                 //  increase the number of entries to show
-                if (countDown_ > 0)         NumberOfEntries++;
-                if (racer->Countdown() > 0) NumberOfEntries++;
+                if (countDown_ >= 0)         NumberOfEntries++;
+                if (racer->Countdown() >= 0) NumberOfEntries++;
 
-                if (countDown_ > 0)
+                if (countDown_ >= 0)
                 {
                     countdownMsg << "0xff7777" << countDown_;
                     countdownMsg.SetPos(NumberOfSpaces / NumberOfEntries);
                 }
 
-                if ( racer->Countdown() > 0 )
+                if ( racer->Countdown() >= 0 )
                 {
                     countdownMsg.SetPos(NumberOfSpaces / NumberOfEntries);
                     countdownMsg << "0xffff7f" << racer->Countdown();

@@ -4208,7 +4208,9 @@ void gCycle::Kill(){
                 sg_cycleRespawnZone_Create(this);
 
                 if (sg_RaceTimerEnabled)
+                {
                     gRace::ZoneOut(Player(), lastTime);
+                }
             }
 
 
