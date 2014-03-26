@@ -84,9 +84,7 @@ class gRacePlayer
         void AddIdleCounter() { idleCounter_++; }
         void SetIdleCounter(int val) { idleCounter_ = val; }
 
-        REAL IdleLastTime() { return idleLastTime_; }
         REAL IdleNextTime() { return idleNextTime_; }
-        void SetIdleLastTime(REAL value) { idleLastTime_ = value; }
         void SetIdleNextTime(REAL value) { idleNextTime_ = value; }
 
         int Laps()              { return laps_; }
@@ -119,7 +117,6 @@ class gRacePlayer
 
         bool idle_;
         int  idleCounter_;
-        REAL idleLastTime_;
         REAL idleNextTime_;
 
         int laps_;

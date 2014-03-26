@@ -826,7 +826,6 @@ gRacePlayer::gRacePlayer(ePlayerNetID *player)
 
     this->idle_         = false;
     this->idleCounter_  = 0;
-    this->idleLastTime_ = 0;
     this->idleNextTime_ = 0;
 
     this->laps_ = 0;
@@ -1205,53 +1204,46 @@ void gRace::Sync( int alive, int ai_alive, int humans, REAL time )
                 //  ensure we have a cycle attached to this player
                 if (rPCycle && rPCycle->Alive() && (rPCycle->Speed() <= sg_raceIdleSpeed))
                 {
-                    //  do per second
-                    if ((time - racePlayer->IdleLastTime()) >= 1)
+                    //  if the player is indeed travelling at idle speed
+                    if (!racePlayer->IsIdle())
                     {
-                        //  update the idle last time
-                        racePlayer->SetIdleLastTime(time);
+                        //  assign the next time for idle action to activate
+                        if (racePlayer->IdleNextTime() == 0)
+                            racePlayer->SetIdleNextTime(time + sg_raceIdleTime);
 
-                        //  if the player is indeed travelling at idle speed
-                        if (!racePlayer->IsIdle())
+                        if (time >= racePlayer->IdleNextTime())
                         {
-                            //  assign the next time for idle action to activate
-                            if (racePlayer->IdleNextTime() == 0)
-                                racePlayer->SetIdleNextTime(time + sg_raceIdleTime);
+                            //  add counter to number of warnings displayed
+                            racePlayer->AddIdleCounter();
 
-                            if (time >= racePlayer->IdleNextTime())
+                            tOutput msg;
+                            msg.SetTemplateParameter(1, racePlayer->Player()->GetName());
+                            msg.SetTemplateParameter(2, racePlayer->IdleCounter());
+                            msg.SetTemplateParameter(3, sg_raceIdleWarnings);
+                            msg << "$race_idle_warning";
+                            sn_ConsoleOut(msg, racePlayer->Player()->Owner());
+
+                            if (racePlayer->IdleCounter() >= sg_raceIdleWarnings)
                             {
-                                //  add counter to number of warnings displayed
-                                racePlayer->AddIdleCounter();
-
-                                tOutput msg;
-                                msg.SetTemplateParameter(1, racePlayer->Player()->GetName());
-                                msg.SetTemplateParameter(2, racePlayer->IdleCounter());
-                                msg.SetTemplateParameter(3, sg_raceIdleWarnings);
-                                msg << "$race_idle_warning";
-                                sn_ConsoleOut(msg, racePlayer->Player()->Owner());
-
-                                if (racePlayer->IdleCounter() >= sg_raceIdleWarnings)
-                                {
-                                    //  so they are idle
-                                    racePlayer->SetIdle(true);
-                                }
-
-                                //  reset the next time to apply later
-                                racePlayer->SetIdleNextTime(time + sg_raceIdleTime);
+                                //  so they are idle
+                                racePlayer->SetIdle(true);
                             }
+
+                            //  reset the next time to apply later
+                            racePlayer->SetIdleNextTime(time + sg_raceIdleTime);
                         }
-                        else
+                    }
+                    else
+                    {
+                        if (time >= racePlayer->IdleNextTime())
                         {
-                            if (time >= racePlayer->IdleNextTime())
-                            {
-                                //  time up! Let's kill them!
-                                rPCycle->Kill();
+                            //  time up! Let's kill them!
+                            rPCycle->Kill();
 
-                                tOutput msg;
-                                msg.SetTemplateParameter(1, racePlayer->Player()->GetName());
-                                msg << "$race_idle_kill";
-                                sn_ConsoleOut(msg);
-                            }
+                            tOutput msg;
+                            msg.SetTemplateParameter(1, racePlayer->Player()->GetName());
+                            msg << "$race_idle_kill";
+                            sn_ConsoleOut(msg);
                         }
                     }
                 }
@@ -1260,7 +1252,6 @@ void gRace::Sync( int alive, int ai_alive, int humans, REAL time )
                     //  good, player doesn't need to get killed for being idle
                     racePlayer->SetIdle(false);
                     racePlayer->SetIdleCounter(0);
-                    racePlayer->SetIdleLastTime(0);
                     racePlayer->SetIdleNextTime(0);
                 }
             }
@@ -1462,7 +1453,6 @@ void gRace::Reset()
 
             rPlayer->SetIdle(false);
             rPlayer->SetIdleCounter(0);
-            rPlayer->SetIdleLastTime(0);
             rPlayer->SetIdleNextTime(0);
 
             rPlayer->SetLaps(0);
