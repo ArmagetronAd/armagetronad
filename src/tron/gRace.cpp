@@ -1010,6 +1010,8 @@ void gRace::ZoneHit( ePlayerNetID *player, REAL time )
                     sn_ConsoleOut(tOutput("$race_checkpoint_miss", racePlayer->NextCheckpoint()), player->Owner());
                 }
             }
+            if (sg_RaceCheckpointRequireHit == 0)
+                racePlayer->SetCanFinish(true);
 
             //  if the race laps is greater than 1
             if (sg_RaceLaps > 1)
@@ -1020,7 +1022,7 @@ void gRace::ZoneHit( ePlayerNetID *player, REAL time )
                     bool laps_process = true;
 
                     //  make sure laps process is not done until players complete all checkpoints
-                    if (sg_RaceCheckpointRequireHit && (sg_NumCheckpointZones() > 0) && !racePlayer->CheckpointsDone())
+                    if ((sg_RaceCheckpointRequireHit > 0) && (sg_NumCheckpointZones() > 0) && !racePlayer->CheckpointsDone())
                         laps_process = false;
 
                     if (laps_process)
@@ -1037,7 +1039,7 @@ void gRace::ZoneHit( ePlayerNetID *player, REAL time )
                     if (laps_incremented)
                     {
                         //  if the race checkpoints laps is enabled clear all the checkpoints done
-                        if (sg_RaceCheckpointRequireHit && sg_RaceCheckpointLaps)
+                        if ((sg_RaceCheckpointRequireHit > 0) && sg_RaceCheckpointLaps && (sg_NumCheckpointZones() > 0))
                         {
                             racePlayer->SetNextCheckpoint(-1);
                             racePlayer->SetCheckpointsDone(false);
@@ -1047,11 +1049,10 @@ void gRace::ZoneHit( ePlayerNetID *player, REAL time )
                         sn_ConsoleOut(tOutput("$race_laps_next", racePlayer->Laps(), (sg_RaceLaps - racePlayer->Laps())), player->Owner());
                     }
                 }
-                else
-                {
-                    racePlayer->SetCanFinish(true);
-                }
+                else racePlayer->SetCanFinish(true);
             }
+            if (sg_RaceLaps <= 1)
+                racePlayer->SetCanFinish(true);
 
             //  flag to indicate not to show this message again
             cannotFinish_[player->ListID()] = true;
