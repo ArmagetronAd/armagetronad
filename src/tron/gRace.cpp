@@ -1010,8 +1010,6 @@ void gRace::ZoneHit( ePlayerNetID *player, REAL time )
                     sn_ConsoleOut(tOutput("$race_checkpoint_miss", racePlayer->NextCheckpoint()), player->Owner());
                 }
             }
-            if (sg_RaceCheckpointRequireHit == 0)
-                racePlayer->SetCanFinish(true);
 
             //  if the race laps is greater than 1
             if (sg_RaceLaps > 1)
@@ -1051,7 +1049,9 @@ void gRace::ZoneHit( ePlayerNetID *player, REAL time )
                 }
                 else racePlayer->SetCanFinish(true);
             }
-            if (sg_RaceLaps <= 1)
+
+            //  let the player finish if both are disabled
+            if ((sg_RaceLaps <= 1) && ((sg_RaceCheckpointRequireHit == 0) || (sg_NumCheckpointZones() == 0)))
                 racePlayer->SetCanFinish(true);
 
             //  flag to indicate not to show this message again
