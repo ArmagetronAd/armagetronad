@@ -1039,7 +1039,7 @@ void gRace::ZoneHit( ePlayerNetID *player, REAL time )
                     if (laps_incremented)
                     {
                         //  if the race checkpoints laps is enabled clear all the checkpoints done
-                        if ((sg_RaceCheckpointRequireHit > 0) && sg_RaceCheckpointLaps && (sg_NumCheckpointZones() > 0))
+                        if (sg_RaceCheckpointLaps)
                         {
                             racePlayer->SetNextCheckpoint(-1);
                             racePlayer->SetCheckpointsDone(false);
