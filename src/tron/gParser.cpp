@@ -886,6 +886,11 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
             zone = bZone;
             zoneEffect << "blast";
         }
+        else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"koh")) {
+            gKOHZoneHack *kohZone = tNEW(gKOHZoneHack( grid, zonePos, false, delayZoneCreation ));
+            zone = kohZone;
+            zoneEffect << "koh";
+        }
         else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"object")) {
             gObjectZoneHack *oZone = tNEW(gObjectZoneHack(grid, zonePos, false, delayZoneCreation ));
             zone = oZone;

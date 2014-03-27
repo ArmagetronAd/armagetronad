@@ -1,108 +1,107 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE Resource SYSTEM "Lover-Boy/map-0.2.9_styctap_v1.4.dtd">
+<!DOCTYPE Resource SYSTEM "Lover-Boy/map-0.2.9_styctap_v1.5.dtd">
 <Resource type="aamap" name="example" version="1.0.0" author="Lover-Boy" category="">
-	<Map version="0.2.9_styctap">
-		<World>
-			<Field>
-				<Spawn	x="255"	y="50"	xdir="0"	ydir="1"	/>
-				<Spawn	x="245"	y="450"	xdir="0"	ydir="-1"	/>
-				<Spawn	x="50"	y="245"	xdir="1"	ydir="0"	/>
-				<Spawn	x="450"	y="255"	xdir="-1"	ydir="0"	/>
+    <Map version="0.2.9_styctap">
+        <World>
+            <Field>
+                <Spawn x="255" y="50" xdir="0" ydir="1"/>
+                <Spawn x="245" y="450" xdir="0" ydir="-1"/>
+                <Spawn x="50" y="245" xdir="1" ydir="0"/>
+                <Spawn x="450" y="255" xdir="-1" ydir="0"/>
 
-				<Spawn	x="305"	y="100"	xdir="0"	ydir="1"	/>
-				<Spawn	x="195"	y="400"	xdir="0"	ydir="-1"	/>
-				<Spawn	x="100"	y="195"	xdir="1"	ydir="0"	/>
-				<Spawn	x="400"	y="305"	xdir="-1"	ydir="0"	/>
+                <Spawn x="305" y="100" xdir="0" ydir="1"/>
+                <Spawn x="195" y="400" xdir="0" ydir="-1"/>
+                <Spawn x="100" y="195" xdir="1" ydir="0"/>
+                <Spawn x="400" y="305" xdir="-1" ydir="0"/>
 
-				<Spawn	x="205"	y="100"	xdir="0"	ydir="1"	/>
-				<Spawn	x="295"	y="400"	xdir="0"	ydir="-1"	/>
-				<Spawn	x="100"	y="295"	xdir="1"	ydir="0"	/>
-				<Spawn	x="400"	y="205"	xdir="-1"	ydir="0"	/>
+                <Spawn x="205" y="100" xdir="0" ydir="1"/>
+                <Spawn x="295" y="400" xdir="0" ydir="-1"/>
+                <Spawn x="100" y="295" xdir="1" ydir="0"/>
+                <Spawn x="400" y="205" xdir="-1" ydir="0"/>
 
-				<Wall>
-					<Point	x="0"	y="0"	/>
-					<Point	x="0"	y="500"	/>
-					<Point	x="500"	y="500"	/>
-					<Point	x="500"	y="0"	/>
-					<Point	x="0"	y="0"	/>
-				</Wall>
-				
-				<Zone effect="teleport" delay="2">
-					<ShapeCircle radius="10">
-						<Point x="100" y="200" />
-						<Color r="15" g="15" />
-            <Teleport destX="400" destY="20" />
-					</ShapeCircle>
-				</Zone>
-				
-				<Zone effect="speed" speed="10">
-					<ShapeCircle radius="10">
-						<Point x="20" y="200" />
-						<Color b="10" r="10" />
-						<Move xdir="10" ydir="0" />
-					</ShapeCircle>
-				</Zone>
-        
-        <Zone effect="acceleration" speed="10">
-					<ShapeCircle radius="10">
-						<Point x="200" y="20" />
-						<Color g="10" r="10" />
-						<Move xdir="10" ydir="0" />
-					</ShapeCircle>
-				</Zone>
-				
-				<Zone effect="object">
-					<ShapeCircle radius="10">
-						<Point x="-30" y="60" />
-						<Color r="15" g="6" b="8" />
-					</ShapeCircle>
-				</Zone>
-        
-				<Zone effect="object">
-					<ShapeCircle radius="10">
-						<Point x="100" y="100" />
-						<Color r="10" g="0" b="15" />
-            <Move xdir="10" ydir="10" route="100 400 400 100 400 400 100 100" />
-					</ShapeCircle>
-				</Zone>
-        
-        <Zone effect="rubber" rubberVal="1.0">
-					<ShapeCircle radius="10">
-						<Point x="300" y="200" />
-						<Color r="6" g="15" b="0" />
-					</ShapeCircle>
-				</Zone>
-        
-        <Zone effect="rubberadjust" rubberVal="0.0">
-					<ShapeCircle radius="10">
-						<Point x="200" y="200" />
-						<Color r="1" g="12" b="12" />
-					</ShapeCircle>
-				</Zone>
+                <Wall>
+                    <Point x="0" y="0"/>
+                    <Point x="0" y="500"/>
+                    <Point x="500" y="500"/>
+                    <Point x="500" y="0"/>
+                    <Point x="0" y="0"/>
+                </Wall>
 
-        <Zone effect="checkpoint">
-					<ShapeCircle radius="10">
-						<Point x="500" y="400" />
-						<Color hexCode="0x3399ff" />
-            <Checkpoint id="1" time="15" />
-					</ShapeCircle>
-				</Zone>
+                <Zone effect="teleport" delay="2">
+                    <ShapeCircle radius="10">
+                        <Point x="100" y="200"/>
+                        <Color r="15" g="15"/>
+                        <Teleport destX="400" destY="20"/>
+                    </ShapeCircle>
+                </Zone>
 
-        <Zone effect="checkpoint">
-					<ShapeCircle radius="10">
-						<Point x="300" y="400" />
-						<Color hexCode="0x3399ff" />
-            <Checkpoint id="2" time="15" />
-					</ShapeCircle>
-				</Zone>
+                <Zone effect="speed" speed="10">
+                    <ShapeCircle radius="10">
+                        <Point x="20" y="200"/>
+                        <Color b="10" r="10"/>
+                        <Move xdir="10" ydir="0"/>
+                    </ShapeCircle>
+                </Zone>
 
-        <Zone effect="win">
-					<ShapeCircle radius="10">
-						<Point x="500" y="350" />
-					</ShapeCircle>
-				</Zone>
-			</Field>
-		</World>
-	</Map>
+                <Zone effect="acceleration" speed="10">
+                    <ShapeCircle radius="10">
+                        <Point x="200" y="20"/>
+                        <Color g="10" r="10"/>
+                        <Move xdir="10" ydir="0"/>
+                    </ShapeCircle>
+                </Zone>
+
+                <Zone effect="object">
+                    <ShapeCircle radius="10">
+                        <Point x="-30" y="60"/>
+                        <Color r="15" g="6" b="8"/>
+                    </ShapeCircle>
+                </Zone>
+
+                <Zone effect="object">
+                    <ShapeCircle radius="10">
+                        <Point x="100" y="100"/>
+                        <Color r="10" g="0" b="15"/>
+                        <Move xdir="10" ydir="10" route="100 400 400 100 400 400 100 100"/>
+                    </ShapeCircle>
+                </Zone>
+
+                <Zone effect="rubber" rubberVal="1.0">
+                    <ShapeCircle radius="10">
+                        <Point x="300" y="200"/>
+                        <Color r="6" g="15" b="0"/>
+                    </ShapeCircle>
+                </Zone>
+
+                <Zone effect="rubberadjust" rubberVal="0.0">
+                    <ShapeCircle radius="10">
+                        <Point x="200" y="200"/>
+                        <Color r="1" g="12" b="12"/>
+                    </ShapeCircle>
+                </Zone>
+
+                <Zone effect="checkpoint">
+                    <ShapeCircle radius="10">
+                        <Point x="500" y="400"/>
+                        <Color hexCode="0x3399ff"/>
+                        <Checkpoint id="1" time="15"/>
+                    </ShapeCircle>
+                </Zone>
+
+                <Zone effect="checkpoint">
+                    <ShapeCircle radius="10">
+                        <Point x="300" y="400"/>
+                        <Color hexCode="0x3399ff"/>
+                        <Checkpoint id="2" time="15"/>
+                    </ShapeCircle>
+                </Zone>
+
+                <Zone effect="win">
+                    <ShapeCircle radius="10">
+                        <Point x="500" y="350"/>
+                    </ShapeCircle>
+                </Zone>
+            </Field>
+        </World>
+    </Map>
 </Resource>
-

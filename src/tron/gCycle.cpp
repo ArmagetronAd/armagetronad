@@ -3907,6 +3907,12 @@ bool gCycle::DoTurn(int d)
                 lastDirDrive = lastDirDriveBack;
             }
 
+#ifdef DEBUG
+            REAL thisRadians = atan2f(dirDrive.y, dirDrive.x);
+            REAL thisDegrees = thisRadians * (180.0 / M_PI);
+            con << "Turn Angle: " << thisDegrees << " | x: " << dirDrive.x << " y: " << dirDrive.y << "\n\n";
+#endif
+
             //  RACE HACK BEGIN
             if (sg_RaceTimerEnabled && (sg_RaceSafeAngles != ""))
             {
@@ -3915,26 +3921,39 @@ bool gCycle::DoTurn(int d)
                 tArray<tString> degreesList = sg_RaceSafeAngles.Split(",");
                 for(int iD = 0; iD < degreesList.Len(); iD++)
                 {
-                    if (degreesList[iD] == "") continue;
+                    if (degreesList[iD].Filter() == "") continue;
 
                     //  if this is set, then all angles are safe.
                     //  any angle after this is unsafe
-                    if (degreesList[iD] == "-1")
+                    REAL degrees = atof(degreesList[iD]);
+                    if (degrees == -1)
                     {
                         racer_safe = true;
                         continue;
                     }
+                    REAL radians = degrees * (M_PI / 180.0);
+                    eCoord radianCoord = eCoord(cos(radians), sin(radians));
 
-                    REAL degrees = atof(degreesList[iD]);
-                    REAL radians = degrees * (M_PI / 180);
+                    REAL radX = radianCoord.x;
+                    REAL radXA = radX * 10.0f;
+                    REAL radXB = ((int)radXA) / 10.0f;
+                    radianCoord.x = ((radXB == 0) ? 0 : radX);
 
-                    REAL rad_x = cos(radians);
-                    REAL rad_y = sin(radians);
+                    REAL radY = radianCoord.y;
+                    REAL radYA = radY * 10.0f;
+                    REAL radYB = ((int)radYA) / 10.0f;
+                    radianCoord.y = ((radYB == 0) ? 0 : radY);
+#ifdef DEBUG
+                    con << radXB << " " << radYB << "\n";
+#endif
 
-                    //  check the direction this player is turning into
-                    //  if its safe, good. if not, lets check again
-                    if ((rad_x == dirDrive.x) && (rad_y == dirDrive.y))
+                    //  check the direction this player is turning into and if its safe, good. if not, lets check again
+                    if ((radianCoord.x == dirDrive.x) && (radianCoord.y == dirDrive.y))
                     {
+#ifdef DEBUG
+                        con << "Checked Angle: " << degrees << " | x: " << radianCoord.x << " y: " << radianCoord.y << "\n\n";
+#endif
+
                         if (racer_safe)
                             racer_safe = false;
                         else
