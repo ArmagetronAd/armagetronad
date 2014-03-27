@@ -1007,7 +1007,63 @@ void gRace::ZoneHit( ePlayerNetID *player, REAL time )
                 if (!racePlayer->CheckpointsDone())
                 {
                     racePlayer->SetCanFinish(false);
-                    sn_ConsoleOut(tOutput("$race_checkpoint_miss", racePlayer->NextCheckpoint()), player->Owner());
+
+                    //  tell the player the list of checkpoints they missed
+                    if (sg_RaceCheckpointRequireHit == 1)
+                    {
+                        tString checkpointsMissed;
+                        checkpointsMissed << "List of checkpoints you missed:\n";
+
+                        tArray<gCheckpointZoneHack *> checkpointZonesList = sg_GetCheckpointZones();
+                        tArray<int> checkIdsList;
+                        for(int i = 0; i < checkpointZonesList.Len(); i++)
+                        {
+                            gCheckpointZoneHack *checkZone = checkpointZonesList[i];
+                            if (checkZone)
+                            {
+                                int nextCheckZoneID = checkZone->CheckpointID();
+                                bool checkpointDone = false;
+
+                                std::deque<int>::iterator it = racePlayer->checkpointsDoneList.begin();
+                                for(; it != racePlayer->checkpointsDoneList.end(); it++)
+                                {
+                                    if (nextCheckZoneID == *it)
+                                    {
+                                        checkpointDone = true;
+                                        break;
+                                    }
+                                }
+
+                                //  don't process this checkpoint if it's done
+                                if (checkpointDone) continue;
+
+                                bool in_list = false;
+                                for(int x = 0; x < checkIdsList.Len(); x++)
+                                {
+                                    if (checkIdsList[x] == nextCheckZoneID)
+                                    {
+                                        in_list = true;
+                                        break;
+                                    }
+                                }
+
+                                if (in_list) continue;
+
+                                checkIdsList.Insert(nextCheckZoneID);
+                            }
+                        }
+
+                        for(int a = 0; a < checkIdsList.Len(); a++)
+                        {
+                            if ((a + 1) == checkIdsList.Len())
+                                checkpointsMissed << checkIdsList[a];
+                            else
+                                checkpointsMissed << checkIdsList[a] << " ";
+                        }
+                        sn_ConsoleOut(checkpointsMissed, player->Owner());
+                    }
+                    //  tell the player the checkpoint they missed
+                    else sn_ConsoleOut(tOutput("$race_checkpoint_miss", racePlayer->NextCheckpoint()), player->Owner());
                 }
             }
 
