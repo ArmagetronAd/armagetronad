@@ -3987,7 +3987,7 @@ bool gSumoZoneHack::Timestep( REAL time )
                     zoneColor.b = Zone->Team()->B()/15.0;
                     setColorFlag = true;
 
-                    CreateZone(tString("sumo"), Zone, zoneSize, zoneGrowth, zoneDir, setColorFlag, zoneColor, zoneInteractive, targetRadius, route, zoneNameStr);
+                    CreateZone(tString("fortress"), Zone, zoneSize, zoneGrowth, zoneDir, setColorFlag, zoneColor, zoneInteractive, targetRadius, route, zoneNameStr);
                 }
             }
         }

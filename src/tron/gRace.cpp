@@ -1325,7 +1325,6 @@ void gRace::Sync( int alive, int ai_alive, int humans, REAL time )
 
                     if ( racer->Countdown() < 0 )
                     {
-                        roundFinished_ = true;
                         racer->SetCountdown(-1);
                         racer->Player()->Object()->Kill();
                     }
