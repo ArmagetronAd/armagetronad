@@ -35,6 +35,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tLocale.h"
 #include "tConsole.h"
 #include "tLocale.h"
+#include "nNetObject.h"
 #include <iostream>
 #include <ctype.h>
 #include <string>
@@ -289,6 +290,9 @@ public:
     static void WriteChangedToFile();
     static tString FindConfigItem(tString name);    //! Returns the config name of the searching string name
     static void SetAllAccessLevel(int newLevel);
+
+    static void DownloadSettings_Go(nMessage &m);
+    static void DownloadSettings_To(int peer = -1);
 
     // helper functions for files (use these, they manage recording and playback properly)
     enum SearchPath
@@ -586,9 +590,13 @@ public:
 
     virtual void ReadVal(std::istream &s);
     virtual void WriteVal(std::ostream &s);
-    virtual void FetchVal(tString &val){};
+    virtual void FetchVal(tString &val);
 
     virtual bool Save();
+
+    virtual bool CanSave(){
+        return false;
+    }
 };
 
 // includes a single configuration file by name, searches in var and config directories

@@ -820,6 +820,87 @@ void tConfItemBase::WriteChangedToFile()
     w.close();
 }
 
+void tConfItemBase::DownloadSettings_Go(nMessage &m)
+{
+    //  download the config if this is a client
+    if (sn_GetNetState() == nCLIENT)
+    {
+        tString title;
+        m >> title;
+        if (title == "DOWNLOAD_BEGIN")
+        {
+            con << "Downloading config from server...\n";
+
+            //  truncate the file for fresh settings
+            std::ofstream o;
+            if ( tDirectories::Var().Open(o, "server_settings.cfg", std::ios::trunc) ) {}
+            o.close();
+            return;
+        }
+        else if (title == "DOWNLOAD_END")
+        {
+            con << "Download complete!\n";
+            return;
+        }
+        tString value;
+        m >> value;
+
+        std::ofstream o;
+        if (tDirectories::Var().Open(o, "server_settings.cfg", std::ios::app))
+        {
+            o << title << " " << value << "\n";
+        }
+        o.close();
+    }
+}
+
+static nDescriptor downloadConfig(61,tConfItemBase::DownloadSettings_Go, "download config");
+
+void tConfItemBase::DownloadSettings_To(int peer)
+{
+    if(sn_GetNetState() == nSERVER)
+    {
+        {
+            nMessage *m=new nMessage(downloadConfig);
+            *m << tString("DOWNLOAD_BEGIN");
+            if (peer == -1)
+                m->BroadCast();
+            else
+                m->Send(peer);
+        }
+
+        tConfItemMap & confmap = ConfItemMap();
+        for(tConfItemMap::iterator iter = confmap.begin(); iter != confmap.end() ; ++iter)
+        {
+            tConfItemBase * item = (*iter).second;
+            if (item && item->CanSave())
+            {
+                nMessage *m=new nMessage(downloadConfig);
+                *m << item->title;
+
+                tString value;
+                item->FetchVal(value);
+                *m << value;
+
+                if (peer == -1)
+                    m->BroadCast();
+                else
+                    m->Send(peer);
+            }
+        }
+
+        {
+            nMessage *m=new nMessage(downloadConfig);
+            *m << tString("DOWNLOAD_END");
+            if (peer == -1)
+                m->BroadCast();
+            else
+                m->Send(peer);
+        }
+    }
+}
+
+
 int tConfItemBase::AccessLevel(std::istream &s){
     if(!s.eof() && s.good()){
         tString name;
@@ -1362,6 +1443,7 @@ tConfItemFunc::~tConfItemFunc(){}
 
 void tConfItemFunc::ReadVal(std::istream &s){(*f)(s);}
 void tConfItemFunc::WriteVal(std::ostream &){}
+void tConfItemFunc::FetchVal(tString &val){}
 
 bool tConfItemFunc::Save(){return false;}
 

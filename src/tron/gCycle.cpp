@@ -4666,17 +4666,10 @@ void gCycle::Render(const eCamera *cam){
     }
     */
 
-    //  check whether to display or not
-    bool displayCycle = true;
-    if (sg_HideCycles && cam->Player()->Object())
-    {
-        if ((cam->Player()->Object()->Alive()) && (cam->Player() != this->Player()))
-        {
-            displayCycle = false;
-        }
-    }
-
-    if (!displayCycle) return;
+    //  check whether to display other players or not
+    if (sg_HideCycles && (cam->Player() != this->Player()))
+        if (cam->Player()->Object() && cam->Player()->Object()->Alive())
+            return;
 
     // are we blinking from invulnerability?
     bool blinking = false;
@@ -4788,7 +4781,7 @@ void gCycle::Render(const eCamera *cam){
         if (mp){
 
             ModelMatrix();
-            if ( !blinking && displayCycle)
+            if ( !blinking )
             {
                 glPushMatrix();
                 customTexture->Select();
@@ -4805,7 +4798,7 @@ void gCycle::Render(const eCamera *cam){
 
             ModelMatrix();
 
-            if ( !blinking && displayCycle)
+            if ( !blinking )
             {
                 bodyTex->Select();
                 body->Render();
@@ -5024,7 +5017,7 @@ void gCycle::Render(const eCamera *cam){
 
         glEnable(GL_CULL_FACE);
 
-        if(!blinking && displayCycle && sr_floorDetail>rFLOOR_GRID && rTextureGroups::TextureMode[rTextureGroups::TEX_FLOOR]>0 && sr_alphaBlend){
+        if(!blinking && sr_floorDetail>rFLOOR_GRID && rTextureGroups::TextureMode[rTextureGroups::TEX_FLOOR]>0 && sr_alphaBlend){
             glColor3f(0,0,0);
             cycle_shad.Select();
             BeginQuads();

@@ -4387,6 +4387,11 @@ void handle_chat( nMessage &m )
                         RotationShowPlayer(p, s);
                         return;
                     }
+                    else if (command == "/downloadconfig")
+                    {
+                        tConfItemBase::DownloadSettings_To(p->Owner());
+                        return;
+                    }
 #ifdef DEDICATED
                     else  if ( command == "/rtfm" || command == "/teach" )
                     {
@@ -6201,7 +6206,7 @@ private:
         tASSERT(0);
     }
 
-    virtual void FetchVal(tString &val){val << "";};
+    virtual void FetchVal(tString &val){};
 
     virtual bool Writable()
     {

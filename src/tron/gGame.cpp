@@ -6177,10 +6177,7 @@ static tConfItemFunc sg_getCurrentMapConf("GET_CURRENT_MAP", &sg_getCurrentMap);
 static void sg_ladderlogClear(std::istream &s)
 {
     std::ofstream o;
-    if ( tDirectories::Var().Open(o, "ladderlog.txt") )
-    {
-        o << "\n";
-    }
+    if ( tDirectories::Var().Open(o, "ladderlog.txt", std::ios::trunc) ) {}
     o.close();
 }
 static tConfItemFunc sg_ladderlogClearConf("CLEAR_LADDERLOG", &sg_ladderlogClear);
@@ -6188,15 +6185,9 @@ static tConfItemFunc sg_ladderlogClearConf("CLEAR_LADDERLOG", &sg_ladderlogClear
 static void sg_chatlogClear(std::istream &s)
 {
     std::ofstream o;
-    if ( tDirectories::Var().Open(o, "chatlog.txt") )
-    {
-        o << "\n";
-    }
+    if ( tDirectories::Var().Open(o, "chatlog.txt", std::ios::trunc) ){}
     o.close();
-    if ( tDirectories::Var().Open(o, "chatlog_colors.txt") )
-    {
-        o << "\n";
-    }
+    if ( tDirectories::Var().Open(o, "chatlog_colors.txt", std::ios::trunc) ){}
     o.close();
 }
 static tConfItemFunc sg_chatlogClearConf("CLEAR_CHATLOG", &sg_chatlogClear);
@@ -6204,10 +6195,7 @@ static tConfItemFunc sg_chatlogClearConf("CLEAR_CHATLOG", &sg_chatlogClear);
 static void sg_scorelogClear(std::istream &s)
 {
     std::ofstream o;
-    if ( tDirectories::Var().Open(o, "scorelog.txt") )
-    {
-        o << "\n";
-    }
+    if ( tDirectories::Var().Open(o, "scorelog.txt", std::ios::trunc) ) {}
     o.close();
 }
 static tConfItemFunc sg_scorelogClearConf("CLEAR_SCORELOG", &sg_scorelogClear);
@@ -6215,10 +6203,7 @@ static tConfItemFunc sg_scorelogClearConf("CLEAR_SCORELOG", &sg_scorelogClear);
 static void sg_reportsClear(std::istream &s)
 {
     std::ofstream o;
-    if ( tDirectories::Var().Open(o, "reports.txt") )
-    {
-        o << "\n";
-    }
+    if ( tDirectories::Var().Open(o, "reports.txt", std::ios::trunc) ) {}
     o.close();
 }
 static tConfItemFunc sg_reportsClearConf("CLEAR_REPORTS", &sg_reportsClear);

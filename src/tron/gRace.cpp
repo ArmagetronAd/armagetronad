@@ -1056,7 +1056,7 @@ void gRace::ZoneHit( ePlayerNetID *player, REAL time )
                         for(int a = 0; a < checkIdsList.Len(); a++)
                         {
                             if ((a + 1) == checkIdsList.Len())
-                                checkpointsMissed << checkIdsList[a];
+                                checkpointsMissed << checkIdsList[a] << "\n";
                             else
                                 checkpointsMissed << checkIdsList[a] << " ";
                         }
