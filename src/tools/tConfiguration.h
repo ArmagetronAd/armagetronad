@@ -35,7 +35,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tLocale.h"
 #include "tConsole.h"
 #include "tLocale.h"
-#include "nNetObject.h"
+#include "../network/nNetObject.h"
 #include <iostream>
 #include <ctype.h>
 #include <string>

@@ -4176,6 +4176,11 @@ static tSettingItem<tString> customInvalidCommandsConf("CUSTOM_INVALID_COMMANDS"
 
 static eLadderLogWriter se_customInvalidCommandWriter("CUSTOM_INVALID_COMMAND", false);
 
+#ifdef DEDICATED
+static bool sn_ClientDownloadSettings = true;
+static tSettingItem<bool> sn_ClientDownloadSettingsConf("CLIENT_DOWNLOAD_SETTINGS", sn_ClientDownloadSettings);
+#endif
+
 void handle_chat( nMessage &m )
 {
     nTimeRolling currentTime = tSysTimeFloat();
@@ -4387,12 +4392,16 @@ void handle_chat( nMessage &m )
                         RotationShowPlayer(p, s);
                         return;
                     }
+#ifdef DEDICATED
                     else if (command == "/downloadconfig")
                     {
-                        tConfItemBase::DownloadSettings_To(p->Owner());
+                        if (sn_ClientDownloadSettings)
+                            tConfItemBase::DownloadSettings_To(p->Owner());
+                        else
+                            sn_ConsoleOut("Clients are not allowed to download server settings.\n", p->Owner());
+
                         return;
                     }
-#ifdef DEDICATED
                     else  if ( command == "/rtfm" || command == "/teach" )
                     {
                         spam.lastSaidType_ = eChatMessageType_Command;

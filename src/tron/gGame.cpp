@@ -4939,7 +4939,7 @@ void gGame::Analysis(REAL time){
         eTeam::SortByScore();
         if ( eTeam::teams.Len() > 0 ) {
             if (eTeam::teams.Len() <= 1
-                    || ( eTeam::teams(0)->Score() > eTeam::teams(1)->Score() && sg_EnemyExists(0))){
+                    || ( eTeam::teams(0)->Score() > eTeam::teams(1)->Score()/* && sg_EnemyExists(0)*/)){
 
                 // only then we can have a true winner:
                 if (
