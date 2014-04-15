@@ -1150,65 +1150,64 @@ void gQueuePlayers::RemovePlayer()
     owner_ = NULL;
 }
 
-bool gQueuePlayers::Timestep(REAL time)
+void gQueuePlayers::Timestep(REAL time)
 {
-    if ((queuePlayers.Len() > 0) && sg_queueLimitEnabled)
+    if (!sg_queueLimitEnabled) return;
+
+    for(int i = 0; i < queuePlayers.Len(); i++)
     {
-        for(int i = 0; i < queuePlayers.Len(); i++)
+        gQueuePlayers *qPlayer = queuePlayers[i];
+        if (qPlayer)
         {
-            gQueuePlayers *qPlayer = queuePlayers[i];
-            if (qPlayer)
+            // account for play time
+            REAL tick = time - qPlayer->lastTime_;
+
+            if (((qPlayer->Player() && sg_queueRefillActive) || !sg_queueRefillActive) && (qPlayer->refill_ > 0))
             {
-                // account for play time
-                REAL tick = time - qPlayer->lastTime_;
+                //qPlayer->played_ += tick;
+                qPlayer->played_ += 0.35f;
 
-                if (((qPlayer->Player() && sg_queueRefillActive) || !sg_queueRefillActive) && (qPlayer->refill_ > 0))
+                if (qPlayer->played_ >= qPlayer->refill_)
                 {
-                    //qPlayer->played_ += tick;
-                    qPlayer->played_ += 0.35f;
-
-                    if (qPlayer->played_ >= qPlayer->refill_)
+                    //  if queue increment is enabled
+                    if (sg_queueIncrement > 0)
                     {
-                        //  if queue increment is enabled
-                        if (sg_queueIncrement > 0)
+                        //  if queue max is below 0 = no increase limit
+                        if (sg_queueMax <= 0)
                         {
-                            //  if queue max is below 0 = no increase limit
-                            if (sg_queueMax <= 0)
+                            qPlayer->queuesDefault += sg_queueIncrement;
+                        }
+                        //  if queue max is above 0
+                        else
+                        {
+                            if (qPlayer->queuesDefault < sg_queueMax)
                             {
+                                //  increase their default queue limit by this amount
                                 qPlayer->queuesDefault += sg_queueIncrement;
                             }
-                            //  if queue max is above 0
-                            else
-                            {
-                                if (qPlayer->queuesDefault < sg_queueMax)
-                                {
-                                    //  increase their default queue limit by this amount
-                                    qPlayer->queuesDefault += sg_queueIncrement;
-                                }
-                            }
-
-                            //  create the new time for the next time to refill
-                            qPlayer->refill_ = qPlayer->played_ + sg_queueRefillTime;
-                            qPlayer->played_ = 0;
                         }
 
-                        //  refill queues with their original amount
-                        if (qPlayer->queues_ == 0)
-                        {
-                            qPlayer->queues_ = qPlayer->queuesDefault;
-                            qPlayer->refill_ = 0;
-                            qPlayer->played_ = 0;
+                        //  create the new time for the next time to refill
+                        qPlayer->refill_ = qPlayer->played_ + sg_queueRefillTime;
+                        qPlayer->played_ = 0;
+                    }
 
-                            tOutput msg;
-                            msg.SetTemplateParameter(1, qPlayer->Name());
-                            msg << "$queue_refill_complete";
-                            sn_ConsoleOut(msg);
-                        }
+                    //  refill queues with their original amount
+                    if (qPlayer->queues_ == 0)
+                    {
+                        qPlayer->queues_ = qPlayer->queuesDefault;
+                        qPlayer->refill_ = 0;
+                        qPlayer->played_ = 0;
+
+                        tOutput msg;
+                        msg.SetTemplateParameter(1, qPlayer->Name());
+                        msg << "$queue_refill_complete";
+                        sn_ConsoleOut(msg);
                     }
                 }
-
-                qPlayer->lastTime_ = time;
             }
+
+            qPlayer->lastTime_ = time;
         }
     }
 }
@@ -1293,7 +1292,10 @@ bool gQueuePlayers::CanQueue(ePlayerNetID *p)
     if (sg_queueLimitEnabled)
     {
         //  allow access level of players from excempted to queue
-        if (p->GetAccessLevel() <= sg_queueLimitExcempt ) return true;
+        if (p->GetAccessLevel() <= sg_queueLimitExcempt) return true;
+
+        //  no need to let player queue if set <= 0
+        if (sg_queueRefill <= 0) return false;
 
         gQueuePlayers *qPlayer = NULL;
         if (!gQueuePlayers::PlayerExists(p))

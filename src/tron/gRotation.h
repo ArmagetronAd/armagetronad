@@ -357,7 +357,7 @@ class gQueuePlayers
         static gQueuePlayers *GetData(ePlayerNetID *player);
         static gQueuePlayers *GetData(tString name);
 
-        static bool Timestep(REAL time);
+        static void Timestep(REAL time);
 
         static void Save();
         static void Reset(REAL time = se_GameTime());

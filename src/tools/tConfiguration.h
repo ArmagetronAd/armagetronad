@@ -292,7 +292,9 @@ public:
     static void SetAllAccessLevel(int newLevel);
 
     static void DownloadSettings_Go(nMessage &m);
-    static void DownloadSettings_To(int peer = -1);
+    static void DownloadConfig_Go(nMessage &m);
+    static void DownloadSettings_To(int peer);
+    static void DownloadConfig_To(tString file, int peer);
 
     // helper functions for files (use these, they manage recording and playback properly)
     enum SearchPath

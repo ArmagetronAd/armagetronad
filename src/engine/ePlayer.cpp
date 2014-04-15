@@ -3501,39 +3501,33 @@ static void se_ChatPlayer( ePlayerNetID * p, std::istream & s, eChatSpamTester &
         tString msg_core;
         msg_core.ReadLine(s);
 
-        if (sn_GetNetState() == nSERVER)
+        for(int i = 0; i < se_PlayerNetIDs.Len(); i++)
         {
-            for(int i = 0; i < se_PlayerNetIDs.Len(); i++)
+            ePlayerNetID *receiver = se_PlayerNetIDs[i];
+            /**
+             *  Ensure that this message will only be sent to players
+             *  with similar access level as the sender.
+             */
+            if (receiver && (receiver->GetAccessLevel() <= se_accessLevelViewChats))
             {
-                ePlayerNetID *receiver = se_PlayerNetIDs[i];
-                if (receiver)
-                {
-                    /**
-                     *  Ensure that this message will only be sent to players
-                        with similar access level as the sender.
-                     */
-                    if (receiver->GetAccessLevel() <= se_accessLevelViewChats)
-                    {
-                        // build chat string
-                        tColoredString sendOther;
+                // build chat string
+                tColoredString sendOther;
 
-                        sendOther << tColoredString::ColorString( 1,1,.5 );
-                        sendOther << "*";
+                sendOther << tColoredString::ColorString( 1,1,.5 );
+                sendOther << "*";
 
-                        //  get access level name and add it before rest of information
-                        sendOther << tCurrentAccessLevel::GetName(p->GetAccessLevel());
+                //  get access level name and add it before rest of information
+                sendOther << tCurrentAccessLevel::GetName(p->GetAccessLevel());
 
-                        sendOther << tColoredString::ColorString( 1,1,.5 );
-                        sendOther << "* ";
-                        sendOther << p->GetColoredName();
-                        sendOther << tColoredString::ColorString( 1,1,.5 );
-                        sendOther << ": 0x66ffff";
-                        sendOther << msg_core << "\n";
+                sendOther << tColoredString::ColorString( 1,1,.5 );
+                sendOther << "* ";
+                sendOther << p->GetColoredName();
+                sendOther << tColoredString::ColorString( 1,1,.5 );
+                sendOther << ": 0x66ffff";
+                sendOther << msg_core << "\n";
 
-                        // display it to the player with equal access level
-                        sn_ConsoleOut(sendOther, receiver->Owner());
-                    }
-                }
+                // display it to the player with equal access level
+                sn_ConsoleOut(sendOther, receiver->Owner());
             }
         }
     }
@@ -4393,13 +4387,22 @@ void handle_chat( nMessage &m )
                         return;
                     }
 #ifdef DEDICATED
-                    else if (command == "/downloadconfig")
+                    //  download the server settings
+                    else if (command == "/dlsettings")
                     {
                         if (sn_ClientDownloadSettings)
                             tConfItemBase::DownloadSettings_To(p->Owner());
                         else
                             sn_ConsoleOut("Clients are not allowed to download server settings.\n", p->Owner());
 
+                        return;
+                    }
+                    //  download the public config files
+                    else if ((command == "/dlcfg") || (command == "/getcfg"))
+                    {
+                        tString configFile;
+                        s >> configFile;
+                        tConfItemBase::DownloadConfig_To(configFile, p->Owner());
                         return;
                     }
                     else  if ( command == "/rtfm" || command == "/teach" )

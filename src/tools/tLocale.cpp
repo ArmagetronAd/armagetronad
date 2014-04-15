@@ -774,7 +774,7 @@ const tLocaleItem& tLocale::Find(const char* id)
     return tLocaleItem::Find(id);
 }
 
-void               tLocale::Load(const char* filename)
+void tLocale::Load(const char* filename)
 {
     tLocaleItem::Load(filename, false);
 

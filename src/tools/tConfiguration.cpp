@@ -825,9 +825,9 @@ void tConfItemBase::DownloadSettings_Go(nMessage &m)
     //  download the config if this is a client
     if (sn_GetNetState() == nCLIENT)
     {
-        tString title;
-        m >> title;
-        if (title == "DOWNLOAD_BEGIN")
+        tString m_title;
+        m >> m_title;
+        if ((m_title == "DOWNLOAD_BEGIN") && m.End())
         {
             con << "Downloading config from server...\n";
 
@@ -837,36 +837,35 @@ void tConfItemBase::DownloadSettings_Go(nMessage &m)
             o.close();
             return;
         }
-        else if (title == "DOWNLOAD_END")
+        else if ((m_title == "DOWNLOAD_END") && m.End())
         {
             con << "Download complete!\n";
             return;
         }
-        tString value;
-        m >> value;
+        tString m_value;
+        m >> m_value;
 
         std::ofstream o;
         if (tDirectories::Var().Open(o, "server_settings.cfg", std::ios::app))
         {
-            o << title << " " << value << "\n";
+            o << m_title << " " << m_value << "\n";
         }
         o.close();
     }
 }
 
-static nDescriptor downloadConfig(61,tConfItemBase::DownloadSettings_Go, "download config");
+static nDescriptor downloadSettings(61,tConfItemBase::DownloadSettings_Go, "download settings");
 
 void tConfItemBase::DownloadSettings_To(int peer)
 {
-    if(sn_GetNetState() == nSERVER)
+    //  transfer the settings to the requested client
+    //  Client ID must be greater than 0 for it to work
+    if ((sn_GetNetState() == nSERVER) && (peer > 0))
     {
         {
-            nMessage *m=new nMessage(downloadConfig);
+            nMessage *m=new nMessage(downloadSettings);
             *m << tString("DOWNLOAD_BEGIN");
-            if (peer == -1)
-                m->BroadCast();
-            else
-                m->Send(peer);
+            m->Send(peer);
         }
 
         tConfItemMap & confmap = ConfItemMap();
@@ -875,29 +874,115 @@ void tConfItemBase::DownloadSettings_To(int peer)
             tConfItemBase * item = (*iter).second;
             if (item && item->CanSave())
             {
-                nMessage *m=new nMessage(downloadConfig);
+                nMessage *m=new nMessage(downloadSettings);
                 *m << item->title;
 
                 tString value;
                 item->FetchVal(value);
                 *m << value;
 
-                if (peer == -1)
-                    m->BroadCast();
-                else
-                    m->Send(peer);
+                m->Send(peer);
             }
         }
 
         {
-            nMessage *m=new nMessage(downloadConfig);
+            nMessage *m=new nMessage(downloadSettings);
             *m << tString("DOWNLOAD_END");
-            if (peer == -1)
-                m->BroadCast();
-            else
-                m->Send(peer);
+            m->Send(peer);
         }
     }
+}
+
+tString configFileDownload("");
+void tConfItemBase::DownloadConfig_Go(nMessage &m)
+{
+    //  download the config if this is a client
+    if (sn_GetNetState() == nCLIENT)
+    {
+        tString c_line;
+        m >> c_line;
+        if ((c_line == "DOWNLOAD_BEGIN") && !m.End())
+        {
+            m >> configFileDownload;
+            con << "Downloading \"" << configFileDownload << "\" from server...\n";
+
+            //  truncate the file for fresh settings
+            std::ofstream o;
+            tString configFile;
+            configFile << "public/" << configFileDownload;
+            if ( tDirectories::Config().Open(o, configFile, std::ios::trunc) ) {}
+            o.close();
+            return;
+        }
+        else if ((c_line == "DOWNLOAD_END") && m.End())
+        {
+            con << "Download complete!\n";
+            configFileDownload = "";
+            return;
+        }
+
+        if (configFileDownload == "") return;
+
+        std::ofstream o;
+        tString configFile;
+        configFile << "public/" << configFileDownload;
+        if (tDirectories::Config().Open(o, configFile, std::ios::app))
+        {
+            o << c_line << "\n";
+        }
+        o.close();
+    }
+}
+
+static nDescriptor downloadConfigs(62,tConfItemBase::DownloadConfig_Go, "download config");
+
+bool st_downloadConfigProcess = false;
+void tConfItemBase::DownloadConfig_To(tString file, int peer)
+{
+    //  don't process if its under process
+    if (st_downloadConfigProcess) return;
+    st_downloadConfigProcess = true;
+
+    // refuse to load illegal paths
+    if( !tPath::IsValidPath( file ) )
+        return;
+
+    nMessage *m = NULL;
+
+    std::ifstream i;
+    tString configFile;
+    configFile << "public/" << file;
+
+    //  transfer the settings from config to the client
+    //  Client ID must be greater than 0 for it to work
+    if ((sn_GetNetState() == nSERVER) && (peer > 0) && tDirectories::Config().Open(i, configFile))
+    {
+        m = new nMessage(downloadConfigs);
+        *m << tString("DOWNLOAD_BEGIN");
+        *m << file;
+        m->Send(peer);
+
+        std::istream &s(i);
+        int i = 0;
+        while (!s.eof() && s.good())
+        {
+            tString line;
+            line.ReadLine(s);
+
+            m = new nMessage(downloadConfigs);
+            *m << line;
+            m->Send(peer);
+
+            i++;
+        }
+
+        m = new nMessage(downloadConfigs);
+        *m << tString("DOWNLOAD_END");
+        m->Send(peer);
+    }
+    i.close();
+
+    st_downloadConfigProcess = false;
 }
 
 
