@@ -3637,16 +3637,14 @@ void sn_DisconnectUser(int i, const tOutput& reason, nServerInfoBase * redirectT
         return;
     }
 
-    // clients can only disconnect from the server
-    if ( i != 0 && sn_GetNetState() == nCLIENT )
-    {
-        tERR_ERROR( "Client tried to disconnect from another client: impossible and a bad idea." );
-        return;
-    }
-
     // anything to do at all?
     if (!sn_Connections[i].socket)
     {
+        // clients can only disconnect from the server
+        if ( i != 0 && sn_GetNetState() == nCLIENT )
+        {
+            tERR_ERROR( "Client tried to disconnect from another client: impossible and a bad idea." );
+        }
         return;
     }
 
