@@ -176,9 +176,9 @@ static int myFetch(const char *URIs, const char *filename, const char *savepath)
         (p = strchr(r, ';')) ? 0 : (p = strchr(r, '\0'));
         n = (p[0] == '\0') ? p : (p + 1);	// next item starts after the semicolon
         // NOTE: skip semicolons, *NOT* nulls
-        while (p[-1] == ' ') --p;			// skip spaces at the end of the item
-        len = (size_t)(p - r);
-        if (len > 0) {						// skip this for null-length items
+        while (p[-1] == ' ' && p > r) --p;			// skip spaces at the end of the item
+        if (p > r) {						// skip this for null-length items
+            len = (size_t)(p - r);
             u = (char*)malloc((len + 1) * sizeof(char));
             strncpy(u, r, len);
             u[len] = '\0';					// u now contains the individual URI
