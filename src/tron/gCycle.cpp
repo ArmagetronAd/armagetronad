@@ -2426,7 +2426,7 @@ gCycle::gCycle(eGrid *grid, const eCoord &pos,const eCoord &d,ePlayerNetID *p)
         currentWall(NULL),
         lastWall(NULL)
 {
-    se_cycleCreatedWriter << p->GetLogName() << pos.x << pos.y << d.x << d.y;
+    se_cycleCreatedWriter << p->GetLogName() << this->MapPosition().x << this->MapPosition().y << this->MapDirection().x << this->MapDirection().y;
     se_cycleCreatedWriter.write();
 
     windingNumberWrapped_ = windingNumber_ = Grid()->DirectionWinding(dirDrive);

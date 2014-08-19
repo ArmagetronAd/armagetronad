@@ -503,7 +503,7 @@ static void CreateZone(gZone *Zone, const REAL zoneSize, const REAL zoneGrowth, 
     }
     Zone->RequestSync();
 
-    sg_spawnzoneWriter << Zone->GOID() << zoneNameStr << Zone->GetPosition().x << Zone->GetPosition().y;
+    sg_spawnzoneWriter << Zone->GOID() << zoneNameStr << Zone->MapPosition().x << Zone->MapPosition().y;
     sg_spawnzoneWriter.write();
 }
 
@@ -1440,7 +1440,7 @@ void gWinZoneHack::OnEnter( gCycle * target, REAL time )
 
     // message in edlog
     if ((!target) && (!target->Player())) return;
-    sg_winzonePlayerEnterWriter << this->GOID() << name_ << GetPosition().x << GetPosition().y << target->Player()->GetUserName() << target->Player()->Object()->Position().x << target->Player()->Object()->Position().y << target->Player()->Object()->Direction().x << target->Player()->Object()->Direction().y << time;
+    sg_winzonePlayerEnterWriter << this->GOID() << name_ << this->MapPosition().x << this->MapPosition().y << target->Player()->GetUserName() << target->Player()->Object()->MapPosition().x << target->Player()->Object()->MapPosition().y << target->Player()->Object()->MapDirection().x << target->Player()->Object()->MapDirection().y << time;
         sg_winzonePlayerEnterWriter.write();
 }
 
@@ -2674,7 +2674,7 @@ void gBaseZoneHack::OnConquest( void )
 {
     if ( team )
     {
-        sg_basezoneConqueredWriter << ePlayerNetID::FilterName(team->Name()) << GetPosition().x << GetPosition().y;
+        sg_basezoneConqueredWriter << ePlayerNetID::FilterName(team->Name()) << this->MapPosition().x << this->MapPosition().y;
         if ( enemies_.size() == 0 ) //no enemies inside
         {
             sg_basezoneConqueredWriter << "NO_ENEMIES";
@@ -4035,7 +4035,7 @@ static eLadderLogWriter sg_ballVanishWriter("BALL_VANISH", false);
 void gBallZoneHack::OnVanish( void )
 {
     grid->RemoveGameObjectInteresting(this);
-    sg_ballVanishWriter << this->GOID() << name_ << GetPosition().x << GetPosition().y;
+    sg_ballVanishWriter << this->GOID() << name_ << this->MapPosition().x << this->MapPosition().y;
     sg_ballVanishWriter.write();
 }
 
@@ -5142,7 +5142,7 @@ bool gTargetZoneHack::Timestep( REAL time )
         SetExpansionSpeed( -GetRadius()*.5 );
         RequestSync();
         // send message to ladder log file ...
-        sg_targetzoneTimeoutWriter << eGameObject::GOID() << name_ << GetPosition().x << GetPosition().y;
+        sg_targetzoneTimeoutWriter << eGameObject::GOID() << name_ << this->MapPosition().x <<this->MapPosition().y;
         sg_targetzoneTimeoutWriter.write();
     }
 
@@ -5155,7 +5155,7 @@ bool gTargetZoneHack::Timestep( REAL time )
         SetExpansionSpeed( -GetRadius()*.5 );
         RequestSync();
         // send message to ladder log file ...
-        sg_targetzoneConqueredWriter << eGameObject::GOID() << name_ << GetPosition().x << GetPosition().y;
+        sg_targetzoneConqueredWriter << eGameObject::GOID() << name_ << this->MapPosition().x << this->MapPosition().y;
         if (firstPlayer_)
         {
             sg_targetzoneConqueredWriter << firstPlayer_->GetUserName();
@@ -5180,7 +5180,7 @@ bool gTargetZoneHack::Timestep( REAL time )
                     REAL r = this->GetRadius();
                     if (!prey->Alive() || (( prey->Position() - this->Position() ).NormSquared() >= r*r))
                     {
-                        sg_targetzonePlayerLeftWriter << this->GOID() << name_ << GetPosition().x << GetPosition().y << p->GetUserName() << p->Object()->Position().x << p->Object()->Position().y << p->Object()->Direction().x << p->Object()->Direction().y ;
+                        sg_targetzonePlayerLeftWriter << this->GOID() << name_ << this->MapPosition().x << this->MapPosition().y << p->GetUserName() << p->Object()->MapPosition().x << p->Object()->MapPosition().y << p->Object()->MapDirection().x << p->Object()->MapDirection().y ;
                         sg_targetzonePlayerLeftWriter.write();
                         playersFlags[i] = 1;
                     }
@@ -5289,7 +5289,7 @@ void gTargetZoneHack::OnEnter( gCycle * target, REAL time )
     // message in edlog
     if (playersFlags[target->Player()->ListID()] != 2)
     {
-        sg_targetzonePlayerEnterWriter << this->GOID() << name_ << GetPosition().x << GetPosition().y << target->Player()->GetUserName() << target->Player()->Object()->Position().x << target->Player()->Object()->Position().y << target->Player()->Object()->Direction().x << target->Player()->Object()->Direction().y << time;
+        sg_targetzonePlayerEnterWriter << this->GOID() << name_ << this->MapPosition().x << this->MapPosition().y << target->Player()->GetUserName() << target->Player()->Object()->MapPosition().x << target->Player()->Object()->MapPosition().y << target->Player()->Object()->MapDirection().x << target->Player()->Object()->MapDirection().y << time;
         sg_targetzonePlayerEnterWriter.write();
         playersFlags[target->Player()->ListID()] = 2;
     }
@@ -6152,7 +6152,7 @@ static void sg_CollapseZone(std::istream &s)
             zone->SetReferenceTime();
             zone->SetExpansionSpeed( -zone->GetRadius()*.5 );
             zone->RequestSync();
-            sg_collapsezoneWriter << zone_id << object_id_str << zone->GetPosition().x << zone->GetPosition().y;
+            sg_collapsezoneWriter << zone_id << object_id_str << zone->MapPosition().x << zone->MapPosition().y;
             sg_collapsezoneWriter.write();
             zone_id=gZone::FindNext(object_id_str, zone_id);
         }

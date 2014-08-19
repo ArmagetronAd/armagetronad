@@ -6706,11 +6706,10 @@ void ePlayerNetID::GridPosLadderLog() {
             ePlayerNetID *p=se_PlayerNetIDs(i);
             if (p->IsActive() && p->currentTeam && p->Object() && p->Object()->Alive() )
             {
-                se_playerGridPosWriter << p->GetUserName() << p->Object()->Position().x << p->Object()->Position().y << p->Object()->Direction().x << p->Object()->Direction().y;
+                se_playerGridPosWriter << p->GetUserName() << p->Object()->MapPosition().x << p->Object()->MapPosition().y << p->Object()->MapDirection().x << p->Object()->MapDirection().y;
                 if (p->Object() && p->Object()->Team())
                     se_playerGridPosWriter << FilterName(p->Object()->Team()->Name());
-                else
-                    se_playerGridPosWriter << "";
+                else se_playerGridPosWriter << " ";
                 se_playerGridPosWriter.write();
             }
         }
@@ -8220,8 +8219,7 @@ static void Kill_conf(std::istream &s)
 		if (se_enableAdminKillMessage){
             sn_ConsoleOut( tOutput( "$player_admin_kill", p->GetColoredName() ) );
         }
-
-        se_playerKilledWriter << p->GetUserName() << nMachine::GetMachine(p->Owner()).GetIP() << p->Object()->Position().x << p->Object()->Position().y << p->Object()->Direction().x << p->Object()->Direction().y;
+        se_playerKilledWriter << p->GetUserName() << nMachine::GetMachine(p->Owner()).GetIP() << p->Object()->MapPosition().x << p->Object()->MapPosition().y << p->Object()->MapDirection().x << p->Object()->MapDirection().y;
         se_playerKilledWriter.write();
         p->Object()->Kill();
 
