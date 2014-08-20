@@ -1544,7 +1544,7 @@ void nNetObject::SyncAll(){
             // con << sn_SyncRequestedObject.Len() << "/" << sn_netObjects.Len() << "\n";
 
             int currentSync = sn_SyncRequestedObject.Len()-1;
-            while(sn_Connections[user].socket>0 &&
+            while(sn_Connections[user].socket &&
                     sn_Connections[user].bandwidthControl_.CanSend() &&
                     sn_Connections[user].ackPending<sn_maxNoAck &&
                     currentSync >= 0){
