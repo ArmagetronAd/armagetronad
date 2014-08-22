@@ -73,8 +73,8 @@ public:
     { 
         // this class only works under this condition:
         tASSERT( static_cast< tListItemBase * >( ( T * )(NULL)  ) == NULL );
-    };
-    tListItem(T *&a):tListItemBase(reinterpret_cast<tListItemBase*&>(a)){};
+    }
+    tListItem(T *&a):tListItemBase(reinterpret_cast<tListItemBase*&>(a)){}
     T *Next(){return reinterpret_cast<T*>(next);}
 
     template< typename comparator >

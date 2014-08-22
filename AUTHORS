@@ -13,7 +13,7 @@ The AA-DevTeam currently consists of (alphabetic username order):
 +---------------------+---------------+---------------------------------------+
 | Luke-Jr             | luke-jr       |                                       |
 +---------------------+---------------+---------------------------------------+
-| Daniel Harple       | nemostultae   |                                       |
+| Daniel Harple       | dlh3          |                                       |
 +---------------------+---------------+---------------------------------------+
 | Mathias Plichta     | wrtlprnft     |                                       |
 +---------------------+---------------+---------------------------------------+
@@ -37,6 +37,7 @@ Alex E. Kelly
 Kurt Johnson (k_at_work, K )
 Peter ? ( klaxnek, klax )
 Philippe Villeneuve ( philippeqc )
+fman23                   : Console commands
 
 Additional contributions from
 =============================
@@ -71,6 +72,9 @@ Jonathan
 Meriton
     Replacement for the old buggy Lag-O-Meter and new camera glancing code
 
+clime
+    Tweaks to that glancing code
+
 mygal
     French translation (part)
 
@@ -94,6 +98,12 @@ Tomas Birraux
 
 Tru
     Russian translation
+
+Vitty
+    Function to randomise teams (SCRAMBLE), and other titbits
+
+Word
+    0.4 German translation
 
 External code merged in from
 ============================

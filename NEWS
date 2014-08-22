@@ -10,6 +10,77 @@ Changes since 0.3.1
   is displayed.
 - New console commands OP and DEOP replicate the functionnality of chat commands /op and /deop
 - New vote: /callvote referee <player>: Elevates <player> to access level 6. /callvote demotereferee reverts.
+- Config and map rotation can be manually reset with the command
+  “RESET_ROTATION”. Rotation can automatically be reset when a START_NEW_MATCH
+  command is issued by enabling “RESET_ROTATION_ON_START_NEW_MATCH”.
+- New admin command: "SCRAMBLE". Scrambles/randomises which players are in which team.
+- New vote: /callvote scramble: Executes the SCRAMBLE command.
+- Teams now retain their spawn for later respawing
+- New ladderlog entries:
+	- PLAYER_RESPAWN <RESPAWNEE> <RESPAWNEE'S TEAM> [RESPAWNER]
+	- DEATH_DEATHZONE <player>
+	- WINZONE_PLAYER_ENTER <player>
+    - ONLINE_TEAM <name> <total score>
+	- ONLINE_AI <player> <team> <total score>
+- Changes to the ONLINE_PLAYER ladderlog event:
+    - It is now enabled by default.
+    - Added additional information about the access level and total score of
+      the player.
+    - Players are written in the order of their launch position on the team.
+- Removed POSITIONS ladderlog event. ONLINE_PLAYER and ONLINE_AI now include all
+  the information it provided.
+- Ladderlog events now have a specification that defines their format. See
+  settings_dedicated.cfg for more documentation.
+- New commands LADDERLOG_SCRIPT_WRITE, and LADDERLOG_SCRIPT_WRITE_ALL that
+  allow better control over which events are sent to spawned scripts.
+- The CONSOLE_LADDER_LOG setting has been removed. Its functionality has been
+  reimplemented in scripts/examples/echo.sh.
+- New warmup mode:
+    - DO_WARMUP N>0 will make the game enter warmup mode after each N matches
+    - In warmup mode, players can use the /ready command to set themselves ready and start the match
+    - Team joins/switches/leaves(when using /teamleave) are done instantly
+    - By default, players respawn in warmup mode (WARMUP_RESPAWN_TIME)
+    - The game starts when each team has ready/total > WARMUP_MIN_READY(0.51)
+    - However, there should be at least WARMUP_MIN_PLAYERS(2) humans before the warmup can end
+    - Readiness state is synced to clients so that newer ones can show an icon on the scoreboard
+    - ALL_READY makes the game behave as if all players had readied up.
+    - New ladderlog entries:
+        - NEW_WARMUP replaces NEW_MATCH when appropriate: NEW_WARMUP <N> <TIMESTAMP>
+          with N the number of matches to be played consecutively
+        - MATCHES_LEFT <N>
+- DEADLY_EXPLOSIONS setting. When enabled, cycles in the blast radius of an
+  explosion will be destroyed, and DEATH_EXPLOSION will be written to ladderlog.
+  Scoring can be applied with the SCORE_EXPLOSION and SCORE_EXPLOSION_OWNER
+  settings.
+- Team invitations are synced to clients and conditionally displayed in the
+  score table.
+- Added /invites chat command to list team invitations.
+- New helper program armagetronad-serverquery. Fetches the master list and
+  advanced server information, and outputs it in a JSON format. Only available
+  in dedicated server builds.
+- Tutorials and Challenges
+- Resource corruption can be detected in some cases and triggers a redownload.
+- New camera settings: CAMERA_FREE_START_PITCH/ROTATE adjust direction of free camera
+- New camera commands: WARP_CAMERA warps one camera to a specified setup,
+  SAVE_CAMERAS prints the commands to restore the current configuration.
+- Upper sky can now be loaded from moviepack/upper_sky.png resp. textures/upper_sky.png;
+  if they do not exist, the floor is used, as previously. New settings
+  UPPER_SKY_RED, _GREEN, _BLUE, _SCALE and _HEIGHT as well as LOWER_SKY_HEIGHT
+  control the look.
+- Conforming partly to FreeDesktop standards on Unix
+  (http://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html) :
+  UserDataDir defaults to $XDG_DATA_HOME/.armagetronad,
+  VarDir to $XDG_DATA_HOME/.armagetronad/var and
+  UserConfigDir to $XDG_CONFIG_HOME/.armagetronad.
+- user*.cfg now resides in UserConfigDir.
+- Configuration files, with the exception of legacy user*.cfg files, are no longer
+  read from the var directory.
+- Added support for streaming tArrays, lists and vectors to tStrings, producing text
+  looking a bit like this entry.
+- There is now only one score message per zone conquest instead of one per conquerer.
+- Instant chat options have been merged into one menu.
+- The OS X dedicated server can now be run by opening the executable in the Finder.
+- The OS X builds are now created using automake.
 
 Changes since 0.3.0
 ===================
@@ -97,16 +168,67 @@ Changes since 0.2.8
 - New command-line flag: --connect <server>[:<port>]. Startup the game and connect directly to <server>.
 
 Changes since 0.2.8.3.x:
+==========================
+- Added detection and reaction code for timing assist bots
+- /shuffle now works before you actually join a team
 - Implemented /shout command and associated settings
+- Fixed suspension and silenced status not being re-applied after a player
+  disconnects and rejoins a server.
 - Tweaks to enemy influence system.
 - Ingame menu and console now are drawn on top of a semi-transparent,
   darkened area for increased readability.
 - New first start menu with clearer language selection and initial setup.
 - Tutorial match against one AI at slower speed.
 - Tutorial tooltips for the most important keybindings.
+- ADD_MASTER_SERVER command to announce a server to a new master server.
+  Simplifies the process to list your server on a subculture.
+- Team launch positions logged to ladderlog with POSITIONS event. Disabled by
+  default.
+- New command-line option "--input" added to poll for input from a file
+  instead of stdin.
+- Added WHITELIST_ENEMIES_[IP/USERNAME] to allow players to be enemies, even
+  if they come from the same IP address and ALLOW_ENEMIES_SAME_IP is
+  disabled (which is its default setting).
+- GAME_END, NEW_MATCH, and NEW_ROUND ladderlog events include date and time.
+- Added ENCODING ladderlog event, which specifies the encoding for data in
+  ladderlog.txt.
+- "--input" now can be used more than once to read from multiple files or pipes.
+- new team management ladderlog messages:
+  TEAM_CREATED <team name>
+  TEAM_DESTROYED <team name>
+  TEAM_RENAMED <old team name> <new team name>
+  TEAM_PLAYER_ADDED <team name> <player>
+  TEAM_PLAYER_REMOVED <team name> <player>
+- Manage external scripts on Unix dedicated servers. New commands: 
+  SPAWN_SCRIPT, RESPAWN_SCRIPT, FORCE_RESPAWN_SCRIPT, KILL_SCRIPT,
+  LIST_SCRIPTS, SCRIPT_ENV.
+- New setting ACCESS_LEVEL_ANNOUNCE_LOGIN that determines if a player's
+  login/logout message can be announced.
+- Authentication is now enabled by default.
+
+Changes since 0.2.8.3.1:
+- security fix: old style action commands from clients no loger cause hangs and crashes
+- security fix: oversized packets are ignored properly
+- security fix: never read one byte outside of the received buffer
+- security fix: only include .cfg files from the var subfolder
+- compiler compatibility: adapted to gcc 4.60
+- smaller spelling fixes
+- FOV calculations now correct for widescreen and horizontal splitscreen
+- Additional checks against illegal values passed to renderer
+
+Changes since 0.2.8.3:
+- fixed temporary sound disappearance when alt-tabbing away and back
+- default subcultures are now distributed
+- enable 32 bit color depth at desktop resolution
+- no more display lists for SiS cards
+- spelling mistakes and missing German translations
 
 Changes since 0.2.8.3_rc4:
 ==========================
+- New setting: KEEP_PLAYER_SLOT allows the server to kick (preferably) spectators
+   if it gets full so there is always one slot open for players
+- New setting: ACCESS_LEVEL_AUTOKICK_IMMUNITY sets the access level required 
+  to be immune from such kicks (and idle autokicks, too)
 - Intercepted chat commands are now written to ladderlog.txt. Format:
   COMMAND /command-intercepted player [command arguments]
 - Increased default speed of server pinging
@@ -129,7 +251,8 @@ Changes since 0.2.8.3_rc3:
 Changes since 0.2.8.3_rc2:
 ==========================
 - Fixed crash with server polling
-- ROUND_WINNER and MATCH_WINNER logged to ladderlog
+- ROUND_WINNER and MATCH_WINNER ladderlog events now include the players of
+  the team.
 - Camera switches to user preferred camera when you die in incam mode
 - Better support for custom language files
 - Players can no longer spam chat with /shuffle messages. Added new setting

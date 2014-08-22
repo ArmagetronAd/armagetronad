@@ -121,11 +121,10 @@ static void login_callback(){
 
 }
 
-// helper function: server info to string
-tString ToString( const nServerInfoBase & info )
+tString nServerInfoBase::ToString() const
 {
     tString ret;
-    ret << info.GetConnectionName() << ":" << info.GetPort();
+    ret << GetConnectionName() << ":" << GetPort();
     return ret;
 }
 
@@ -156,6 +155,32 @@ static nServerInfo *CreateServerInfo()
     else
         return tNEW(nServerInfo());
 }
+
+static void sn_AddMasterServer( std::istream &s )
+{
+    tString connectionName;
+    unsigned port = 4533;
+    
+    s >> connectionName;
+    if ( !s.eof() )
+        s >> port;
+    
+    // back up regular server list
+    nServerInfo *oldFirstServer = sn_FirstServer;
+    sn_FirstServer = NULL;
+
+    nServerInfo *newMaster = CreateServerInfo();
+    newMaster->SetConnectionName( connectionName );
+    newMaster->SetPort( port );
+    newMaster->Remove();
+    newMaster->Insert( sn_masterList );
+    
+    // restore regular server list
+    sn_FirstServer = oldFirstServer;
+    nServerInfo::TellMasterAboutMe( newMaster );    
+}
+
+static tConfItemFunc sn_addMasterServerConfItemFunc( "ADD_MASTER_SERVER", &sn_AddMasterServer );
 
 nServerInfo::nServerInfo()
         :tListItem<nServerInfo>(sn_FirstServer),
@@ -418,7 +443,7 @@ nServerInfo *nServerInfo::Prev()
 }
 
 // Sort server list
-void nServerInfo::Sort( PrimaryKey key )
+void nServerInfo::Sort( PrimaryKey key, SortHelper Helper, SortHelperPriority helperPriority )
 {
     // insertion sort
     nServerInfo *run = GetFirstServer();
@@ -453,15 +478,13 @@ void nServerInfo::Sort( PrimaryKey key )
                 break;
             }
 
+            signed char help = Helper(ascend) - Helper(prev);
+
             switch ( key )
             {
 
             case KEY_NAME:
-                // Unreachable servers should be displayed at the end of the list                
-                if ( !previousUnreachable && !ascendUnreachable )
-                {
-                    compare = prev->nameForSorting.Compare( ascend->nameForSorting, true );
-                }
+                compare = prev->nameForSorting.Compare( ascend->nameForSorting, true );
                 break;
             case KEY_PING:
                 if ( ascend->ping > prev->ping )
@@ -473,10 +496,6 @@ void nServerInfo::Sort( PrimaryKey key )
                 compare = ascend->users - prev->users;
                 break;
             case KEY_SCORE:
-                if ( previousUnreachable )
-                    compare ++;
-                if ( ascendUnreachable )
-                    compare --;
                 if ( ascend->score > prev->score )
                     compare = 1;
                 else if ( ascend->score < prev->score )
@@ -486,6 +505,48 @@ void nServerInfo::Sort( PrimaryKey key )
                 break;
             }
 
+            if( previousUnreachable != ascendUnreachable )
+            {
+                // in any case, unreachable servers go to the bottom.
+                if( previousUnreachable )
+                {
+                    compare = 1;
+                }
+                else
+                {
+                    compare = -1;
+                }
+            }
+            else if( key != KEY_NAME )
+            {
+                // override sorting if the servers fall into different classes
+                int c = prev->GetClassification().sortOverride_ - ascend->GetClassification().sortOverride_;
+                if( c != 0 )
+                {
+                    compare = c;
+                }
+            }
+
+            // take helper and its priority into account
+            if( help != 0 )
+            {
+                switch( helperPriority )
+                {
+                case PRIORITY_NONE:
+                    break;
+                case PRIORITY_SECONDARY:
+                    if( 0 == compare )
+                    {
+                        compare = help;
+                    }
+                    break;
+                case PRIORITY_PRIMARY:
+                    compare = help;
+                    break;
+                }
+            }
+
+            // least priority: servers that are getting polled go down
             if (0 == compare)
             {
                 if ( previousPolling )
@@ -684,10 +745,10 @@ static nProtoBufDescriptor< Network::BigServerInfo > sn_bigServerInfoDescriptor(
 static nProtoBufDescriptor< Network::BigServerInfo > sn_bigServerInfoDescriptorMaster(54,nServerInfo::GetBigServerInfoMaster, true);
 
 // request small server information from master server/broadcast
-static nProtoBufDescriptor< Network::RequestSmallServerInfo > sn_requestSmallServerInfoDescriptor(52,nServerInfo::GiveSmallServerInfo, true);
+nProtoBufDescriptor< Network::RequestSmallServerInfo > sn_requestSmallServerInfoDescriptor(52,nServerInfo::GiveSmallServerInfo, true);
 
 // request big server information from master server/broadcast
-static nProtoBufDescriptor< Network::RequestBigServerInfo > sn_requestBigServerInfoDescriptor(53,nServerInfo::GiveBigServerInfo, true);
+nProtoBufDescriptor< Network::RequestBigServerInfo > sn_requestBigServerInfoDescriptor(53,nServerInfo::GiveBigServerInfo, true);
 static nProtoBufDescriptor< Network::RequestBigServerInfoMaster > sn_requestBigServerInfoDescriptorMaster(55,nServerInfo::GiveBigServerInfoMaster, true);
 
 // used to transfer the rest of the server info (name, number of players, etc)
@@ -708,6 +769,10 @@ static bool net_Accept()
 static nCallbackAcceptPackedWithoutConnection net_acc( &net_Accept );
 
 static int sn_ServerCount = 0;
+int nServerInfo::ServerCount()
+{
+    return sn_ServerCount;
+}
 
 /*
 static void ReadServerInfo(nMessage &m, unsigned int& port, tString& connectionName, bool acceptDirect, bool acceptMaster)
@@ -874,6 +939,7 @@ public:
     double lastTime_[MAX];   // log of the last times the server was pinged by this client
     int lastTimeIndex_;      // the current index in the array
     bool warned_;            // flag to avoid warning spam in the log file
+    REAL timeFactor_;        // locked time factor
 
     tString GetIP()
     {
@@ -930,24 +996,55 @@ public:
     // determines whether this client should be considered flooding
     bool FloodProtection( REAL timeFactor )
     {
+        if( warned_ && timeFactor < timeFactor_ )
+        {
+            // restore time factor
+            timeFactor = timeFactor_;
+        }
+        else
+        {
+            // store passed time factor for next time
+            timeFactor_ = timeFactor;
+        }
+
+
+
         int i;
         double now = tSysTimeFloat();
 
         bool protect = false;
         REAL diff = 0;
         int count = 0;
+        REAL tolerance = 0;
+        REAL minRelDiff = 10;
 
         // go through the different levels
-        for ( i = sn_minPingCount-1; i >= 0; --i )
+        int lowest = 0;
+
+        // only check 10 and 20 ping limit for the default timefactor
+        if( timeFactor < 1 && sn_minPingTimes[sn_minPingCount-1] > 0 )
+        {
+            // lowest = 2;
+        }
+
+        for ( i = sn_minPingCount-1; i >= lowest; --i )
         {
             // this many pings should be tracked
             count = sn_minPingCounts[i];
             diff = now - lastTime_[(lastTimeIndex_ + MAX - count) % MAX];
-            REAL tolerance = sn_minPingTimes[i]*timeFactor;
-            if ( tolerance > 0 && diff < tolerance )
+            tolerance = sn_minPingTimes[i]*timeFactor;
+            if ( tolerance > 0 )
             {
-                protect = true;
-                break;
+                if( tolerance*minRelDiff > diff )
+                {
+                    minRelDiff = diff/tolerance;
+                }
+
+                if( diff < tolerance )
+                {
+                    protect = true;
+                    break;
+                }
             }
         }
 
@@ -963,7 +1060,7 @@ public:
         }
 
         // reset warning flag
-        if ( warned_ && now - lastTime_[(lastTimeIndex_ + MAX-2 ) % MAX] > sn_minPingTimes[ sn_minPingCount-1 ] )
+        if ( warned_ && minRelDiff > 4 )
         {
             con << "Flood protection ban of " << GetIP() << " removed.\n";
             warned_ = false;
@@ -1008,16 +1105,23 @@ static nCallbackReceivedComplete sn_resetFirstInPacket( sn_ResetFirstInPacket );
 static REAL sn_minPingTimeGlobalFactor = 0.1;
 static tSettingItem< REAL > sn_minPingTimeGlobal( "PING_FLOOD_GLOBAL", sn_minPingTimeGlobalFactor );
 
+// checks for global ping flood events
+static bool GlobalPingFloodProtection()
+{
+    static nMachine server;
+
+    return sn_minPingTimeGlobalFactor > 0 && FloodProtection( server, sn_minPingTimeGlobalFactor );
+}
+
 // determines wheter the message comes from a flood attack; if so, reject it (return true)
 bool FloodProtection( int sender )
 {
-    // get the machine infos
-    nMachine & server = nMachine::GetMachine( 0 );
-    nMachine & peer   = nMachine::GetMachine( sender );
-
     // only accept one ping per packet
     if ( !sn_firstInPacket )
     {
+        // get the machine infos
+        nMachine & peer   = nMachine::GetMachine( sender );
+
         GetQueryMessageStats( peer ).Block();
 
         return true;
@@ -1029,13 +1133,17 @@ bool FloodProtection( int sender )
     if ( sn_minPingTimes[sn_minPingCount - 1] <= 0 )
         return false;
 
-    // and delegate
-    return FloodProtection( peer ) || ( sn_minPingTimeGlobalFactor > 0 && FloodProtection( server, sn_minPingTimeGlobalFactor ) );
+    // and delegate. Only do global check, the per-peer check has already been
+    // done earlier as the packet was received.
+    return GlobalPingFloodProtection();
 }
 
 void nServerInfo::GetSmallServerInfo( Network::SmallServerInfo const & info,
                                       nSenderInfo              const & sender )
 {
+    if ( !sn_IsMaster && sn_GetNetState() == nSERVER )
+        return;
+
     nServerInfoBase baseInfo;
     baseInfo.ReadSync( info.base(), sender );
 
@@ -1068,13 +1176,14 @@ void nServerInfo::GetSmallServerInfo( Network::SmallServerInfo const & info,
         run = run->Next();
     }
 
-    // second pass, look harder if no match was found. Use DNS lookup if you have to.
+    // second pass, look harder if no match was found. Use DNS lookup if it's ready.
     if(!n)
     {
         run = GetFirstServer();
         while(run && !n)
         {
-            if( run->GetAddress() == baseInfo.GetAddress() )
+            if( !run->GetAddress().DNSInProcess() && !baseInfo.GetAddress().DNSInProcess() &&
+                  run->GetAddress() == baseInfo.GetAddress()  )
                 n = run;
             run = run->Next();
         }
@@ -1087,7 +1196,7 @@ void nServerInfo::GetSmallServerInfo( Network::SmallServerInfo const & info,
         n->timesNotAnswered = 0;
         if ( sn_IsMaster )
         {
-            con << "Received new server: " << ToString( baseInfo ) << "\n";
+            con << "Received new server: " << baseInfo.ToString() << "\n";
             n->timesNotAnswered = 5;
         }
     }
@@ -1096,14 +1205,14 @@ void nServerInfo::GetSmallServerInfo( Network::SmallServerInfo const & info,
         n->Alive();
 
         // on update, prefer to keep the IP version to avoid needless DNS loopups.
-        if ( n->GetConnectionName() != baseInfo.GetConnectionName() && n->GetAddress().ToString() != ToString(*n) )
+        if ( n->GetConnectionName() != baseInfo.GetConnectionName() && n->GetAddress().ToString() != n->ToString() )
         {
             n->SetConnectionName( baseInfo.GetConnectionName() );
         }
 
         if ( sn_IsMaster )
         {
-            con << "Updated server: " <<  ToString( baseInfo ) << "\n";
+            con << "Updated server: " << baseInfo.ToString() << "\n";
         }
     }
 
@@ -1112,7 +1221,7 @@ void nServerInfo::GetSmallServerInfo( Network::SmallServerInfo const & info,
 
     if (n->name.Len() <= 1)
     {
-        n->name <<  ToString( baseInfo );
+        n->name << baseInfo.ToString();
         n->nameForSorting << sn_serverIPCharacterFilter.FilterServerName( n->name );
     }
 
@@ -1249,8 +1358,8 @@ nServerInfo* nServerInfo::GetBigServerInfoCommon(  Network::BigServerInfo const 
         if ( sn_IsMaster )
         {
             tOutput message;
-            message.SetTemplateParameter(1, ToString( baseInfo ) );
-            message.SetTemplateParameter(2, sn_Connections[sender.MessageID()].socket->GetAddress().ToString() );
+            message.SetTemplateParameter(1, baseInfo.ToString() );
+            message.SetTemplateParameter(2, sn_Connections[sender.SenderID()].socket->GetAddress().ToString() );
             message << "$network_browser_unidentified";
             con << message;
         }
@@ -1259,7 +1368,7 @@ nServerInfo* nServerInfo::GetBigServerInfoCommon(  Network::BigServerInfo const 
             // add the server, but ping it again
             nServerInfo * n = CreateServerInfo();
             n->CopyFrom( baseInfo );
-            n->name = ToString( baseInfo );
+            n->name = baseInfo.ToString();
             n->QueryServer();
 #ifdef DEBUG
             con << "Recevied unknown server " << n->name << ".\n";
@@ -1287,6 +1396,9 @@ void nServerInfo::GiveBigServerInfoCommon( int receiver, const nServerInfo & inf
 void nServerInfo::GetBigServerInfo( Network::BigServerInfo const & info,
                                     nSenderInfo            const & sender )
 {
+    if ( !sn_IsMaster && sn_GetNetState() == nSERVER )
+        return;
+
     GetBigServerInfoCommon( info, sender );
 }
 
@@ -1312,6 +1424,19 @@ void nServerInfo::GiveBigServerInfo( Network::RequestBigServerInfo const & info,
     if (sn_IsMaster)
         return;
 
+    // log first polls
+    static int logPolls=10;
+    if( logPolls > 0 )
+    {
+        logPolls--;
+        tString senderName;
+        sn_GetAdr( sender.SenderID(), senderName );
+        con << tOutput(
+            logPolls > 0 ? "$network_master_pollanswer" : "$network_master_pollanswer_last", 
+            senderName
+            );
+    }
+
     // collect info
     nServerInfo me;
     me.GetFrom( sn_Connections[sender.SenderID()].socket );
@@ -1335,7 +1460,7 @@ void nServerInfo::SetFromMaster()
 void nServerInfo::GetBigServerInfoMaster( Network::BigServerInfo const & info,
                                           nSenderInfo            const & sender )
 {
-    if ( sn_GetNetState() == nSERVER && FloodProtection( sender.SenderID() ) )
+    if ( sn_GetNetState() == nSERVER )
         return;
 
     nServerInfo *server = GetBigServerInfoCommon( info, sender );
@@ -1349,10 +1474,10 @@ void nServerInfo::GetBigServerInfoMaster( Network::BigServerInfo const & info,
 void nServerInfo::GiveBigServerInfoMaster( Network::RequestBigServerInfoMaster const & info,
                                            nSenderInfo                         const & sender )
 {
-    if ( FloodProtection( sender.SenderID() ) )
+    if ( !sn_IsMaster )
         return;
 
-    if ( !sn_IsMaster )
+    if ( FloodProtection( sender.SenderID() ) )
         return;
 
     // read info of desired server from message
@@ -1483,7 +1608,7 @@ tString MasterFile( char const * suffix )
     return tString( filename.str().c_str() );
 }
 
-void nServerInfo::GetFromMaster(nServerInfoBase *masterInfo, char const * fileSuffix )
+nServerInfoBase *nServerInfo::GetFromMaster(nServerInfoBase *masterInfo, char const * fileSuffix, bool loadKnownServers )
 {
     sn_AcceptingFromMaster = true;
 
@@ -1500,16 +1625,19 @@ void nServerInfo::GetFromMaster(nServerInfoBase *masterInfo, char const * fileSu
     }
 
     if (!masterInfo)
-        return;
+        return NULL;
 
     DeleteAll();
 
     // load all the servers we know
-    Load( tDirectories::Var(), MasterFile( fileSuffix ) );
-
-    // delete unreachable servers
-    DeleteUnreachable();
-
+    if ( loadKnownServers )
+    {
+        Load( tDirectories::Var(), MasterFile( fileSuffix ) );
+        
+        // delete unreachable servers
+        DeleteUnreachable();        
+    }
+    
     // find the latest server we know about
     unsigned int latest=0;
     nServerInfo *run = GetFirstServer();
@@ -1557,7 +1685,7 @@ void nServerInfo::GetFromMaster(nServerInfoBase *masterInfo, char const * fileSu
         break;
     case nABORT:
     {
-        return;
+        return NULL;
     }
     case nTIMEOUT:
         // delete the master and select a new one
@@ -1574,20 +1702,16 @@ void nServerInfo::GetFromMaster(nServerInfoBase *masterInfo, char const * fileSu
         if ( masterInfo )
         {
             con << tOutput( "$network_master_timeout_retry" );
-            GetFromMaster();
+            return GetFromMaster( NULL, fileSuffix, loadKnownServers );
         }
         else
         {
             tConsole::Message("$network_master_timeout_title", "$network_master_timeout_inter", 3600);
         }
-        return;
-        break;
-
+        return NULL;
     case nDENIED:
         tConsole::Message("$network_master_denied_title", "$network_master_denied_inter", 20);
-        return;
-        break;
-
+        return NULL;
     }
 
 
@@ -1655,6 +1779,7 @@ void nServerInfo::GetFromMaster(nServerInfoBase *masterInfo, char const * fileSu
     sn_AcceptingFromMaster = false;
 
     tAdvanceFrame();
+    return masterInfo;
 }
 
 void nServerInfo::GetFromLAN(unsigned int pollBeginPort, unsigned int pollEndPort)
@@ -1747,15 +1872,15 @@ void nServerInfo::TellMasterAboutMe(nServerInfoBase *masterInfo)
     // don't reinitialize the network system
     nSocketResetInhibitor inhibitor;
 
-    static unsigned int lastPort = 0;
+    // static unsigned int lastPort = 0;
 
     // enter server state so we know our true port number
     sn_SetNetState(nSERVER);
-    unsigned int port = sn_GetServerPort();
+    // unsigned int port = sn_GetServerPort();
     //if (port == lastPort)
     //    return; // the master already knows about us
 
-    lastPort = port;
+    // lastPort = port;
 
     //    sn_SetNetState(nSTANDALONE);
 
@@ -1861,7 +1986,7 @@ void nServerInfo::QueryServer()                                  // start to get
     if ( !queryDirectly )
     {
         // see if the server name is just IP:port; if no, we already successfully polled it
-        if ( name != ToString( *this ) )
+        if ( name != ToString() )
         {
             advancedInfoSetEver = true;
         }
@@ -1883,7 +2008,7 @@ void nServerInfo::QueryServer()                                  // start to get
 #ifdef DEBUG
     if ( sn_IsMaster )
     {
-        con << "Querying server " <<  ToString( *this ) << "\n";
+        con << "Querying server " << ToString() << "\n";
     }
 #endif
 
@@ -1928,7 +2053,7 @@ void nServerInfo::QueryServer()                                  // start to get
             timesNotAnswered = 1000;
             if ( sn_IsMaster )
             {
-                con << "Deleted unreachable server: " <<  ToString( *this ) << "\n";
+                con << "Deleted unreachable server: " << ToString() << "\n";
 
                 delete this;
             }
@@ -1970,11 +2095,11 @@ void nServerInfo::QueryServer()                                  // start to get
     {
         if ( ++timesNotAnswered == sn_TNALostContact && sn_IsMaster )
         {
-            con << "Lost contact with server: " <<  ToString( *this ) << "\n";
+            con << "Lost contact with server: " << ToString() << "\n";
         }
         else if ( sn_IsMaster && timesNotAnswered == 2 )
         {
-            con << "Starting to lose contact with server: " <<  ToString( *this ) << ", name \"" << tColoredString::RemoveColors(name) << "\"\n";
+            con << "Starting to lose contact with server: " << ToString() << ", name \"" << tColoredString::RemoveColors(name) << "\"\n";
         }
     }
 
@@ -2137,7 +2262,7 @@ bool nServerInfo::DoQueryAll(int simultaneous)         // continue querying the 
     {
         nServerInfo* next = sn_Requesting->Next();
 
-        if (!sn_Requesting->advancedInfoSet && sn_Requesting->pollID < 0 && sn_Requesting->queried <= sn_numQueries)
+        if (!sn_Requesting->advancedInfoSet && sn_Requesting->pollID < 0 && sn_Requesting->queried <= sn_numQueries && !sn_Requesting->GetAddress().DNSInProcess() )
         {
             sn_Requesting->QueryServer();
         }
@@ -2277,13 +2402,17 @@ void nServerInfo::RunMaster()
                     sn_Timeout[i] = tSysTimeFloat() + .2f;
             }
 
-            // defend against DOS attacks: Kill idle clients
+            // defend against DoS attacks: Kill idle clients
             if(sn_Timeout[i] < tSysTimeFloat())
+            {
+                sn_DisconnectUser(i, "$network_kill_servercomplete");
+                continue;
+            }
+            else if (!sn_Requested[i] && sn_Timeout[i] < tSysTimeFloat() + 60.0f)
+            {
                 sn_DisconnectUser(i, "$network_kill_timeout");
-
-            if (!sn_Requested[i] && sn_Timeout[i] < tSysTimeFloat() + 60.0f)
-                sn_DisconnectUser(i, "$network_kill_timeout");
-
+                continue;
+            }
         }
 
         if (sn_Transmitting[i] && sn_MessagesPending(i) < 3)
@@ -2451,6 +2580,88 @@ nServerInfo::Compat	nServerInfo::Compatibility() const
     return Compat_Ok;
 }
 
+nServerInfo::SettingsDigest::SettingsDigest()
+  : flags_(0)
+  ,  minPlayTimeTotal_(0)
+  ,  minPlayTimeOnline_(0)
+  ,  minPlayTimeTeam_(0)
+  ,  cycleDelay_(0)
+  ,  acceleration_(0)
+  ,  rubberWallHump_(0)
+  ,  rubberHitWallRatio_(0)
+{
+}
+
+void nServerInfo::SettingsDigest::WriteSync( Network::SettingsDigest & sync ) const
+{
+    sync.set_flags( flags_ );
+    sync.set_min_play_time_total( minPlayTimeTotal_ );
+    sync.set_min_play_time_online( minPlayTimeOnline_ );
+    sync.set_min_play_time_team( minPlayTimeTeam_ );
+    sync.set_cycle_delay( cycleDelay_ );
+    sync.set_acceleration( acceleration_ );
+    sync.set_rubber_wall_hump( rubberWallHump_ );
+    sync.set_rubber_hit_wall_ratio( rubberHitWallRatio_ );
+    sync.set_walls_length( wallsLength_ );
+}
+
+void nServerInfo::SettingsDigest::ReadSync( Network::SettingsDigest const & sync )
+{
+    flags_ = sync.flags();
+    minPlayTimeTotal_ = sync.min_play_time_total();
+    minPlayTimeOnline_ = sync.min_play_time_online();
+    minPlayTimeTeam_ = sync.min_play_time_team();
+    cycleDelay_ = sync.cycle_delay();
+    acceleration_ = sync.acceleration();
+    rubberWallHump_ = sync.rubber_wall_hump();
+    rubberHitWallRatio_ = sync.rubber_hit_wall_ratio();
+    if( sync.has_walls_length() )
+    {
+        wallsLength_ = sync.walls_length();
+    }
+    else
+    {
+        wallsLength_ = 0;
+    }
+}
+
+void nServerInfo::SettingsDigest::SetFlag( Flags flag, bool set )
+{
+    if( set )
+    {
+        flags_ |= flag;
+    }
+    else
+    {
+        flags_ &= ~flag;
+    }
+}
+
+bool nServerInfo::SettingsDigest::GetFlag( Flags flag ) const
+{
+    return 0 != (flags_ & flag);
+}
+
+nServerInfo::Classification::Classification()
+: sortOverride_(1)
+{
+}
+
+
+//! callback to give other components a chance to help fill in the server info
+nServerInfo::SettingsDigest * nCallbackFillServerInfo::settings_ = NULL;
+static tCallback * sn_fillServerInfoAnchor = NULL;
+nCallbackFillServerInfo::nCallbackFillServerInfo( AA_VOIDFUNC * f )
+: tCallback( sn_fillServerInfoAnchor, f )
+{}
+
+//! fills all server infos
+void nCallbackFillServerInfo::Fill( nServerInfo::SettingsDigest * settings )
+{
+    settings_ = settings;
+    Exec( sn_fillServerInfoAnchor );
+    settings_ = NULL;
+}
 
 static nServerInfoAdmin* sn_serverInfoAdmin = NULL;
 
@@ -2509,7 +2720,14 @@ nServerInfoBase::~nServerInfoBase()
 
 bool nServerInfoBase::operator ==( const nServerInfoBase & other ) const
 {
-    return GetAddress().IsSet() && GetAddress() == other.GetAddress() && port_ == other.port_;
+    if( GetAddress().DNSInProcess() || other.GetAddress().DNSInProcess() )
+    {
+        return port_ == other.port_ && connectionName_ == other.connectionName_;
+    }
+    else
+    {
+        return GetAddress().IsSet() && GetAddress() == other.GetAddress() && port_ == other.port_;
+    }
 }
 
 // *******************************************************************************************
@@ -2632,7 +2850,8 @@ void nServerInfoBase::ReadSync( Network::SmallServerInfoBase const & info,
     port_ = info.port();                                 // get the port
     sn_ReadFiltered( info.hostname(), connectionName_ ); // get the connection name
 
-    if ( ( sn_IsMaster || sn_AcceptingFromBroadcast || sn_AcceptingFromMaster ) && connectionName_.Len()>1 ) // no valid name (must come directly from the server who does not know his own address)
+    // ban us.to dns service, it's down too often
+    if ( ( ( sn_IsMaster && !connectionName_.EndsWith( ".us.to" ) ) || sn_AcceptingFromBroadcast || sn_AcceptingFromMaster ) && connectionName_.Len()>1 ) // valid name (must come directly from the server who does not know his own address)
     {
         // resolve DNS
         connectionName_ = S_LocalizeName( connectionName_ );
@@ -2664,6 +2883,11 @@ void nServerInfoBase::ReadSync( Network::SmallServerInfoBase const & info,
 static tString net_dns("");
 
 static tConfItemLine sn_sbtip_official("SERVER_DNS", net_dns);
+
+bool SortHelperNoop(nServerInfoBase const * server)
+{
+    return false;
+}
 
 tString const & sn_GetMyDNSName()
 {
@@ -2792,6 +3016,8 @@ void nServerInfo::DoGetFrom( nSocket const * socket )
         url_        = str;
         userGlobalIDs_ = "";
     }
+
+    nCallbackFillServerInfo::Fill( &settings_ );
 }
 
 // *******************************************************************************************
@@ -2819,6 +3045,43 @@ void nServerInfo::WriteSyncThis( Network::BigServerInfo & info ) const
     info.set_url( url_ );
 
     info.set_global_ids( userGlobalIDs_ );
+
+    settings_.WriteSync( *info.mutable_settings() );
+}
+
+// loads the shipped map of server setting digests. Not nearly up to date,
+// but gives basic orientation.
+typedef std::map< std::string, nServerInfo::SettingsDigest > nCacheMap;
+static nCacheMap & sn_LoadCacheMap()
+{
+    static nCacheMap map;
+    tTextFileRecorder cacheReader;
+    cacheReader.Open( tDirectories::Config(), "serverconfigcache.cfg" );
+    while( !cacheReader.EndOfFile() )
+    {
+        tString line = cacheReader.GetLine();
+        std::istringstream parse( line );
+
+        nServerInfo::SettingsDigest settings;
+        std::string key;
+        parse >> key;
+        parse >> settings.cycleDelay_;
+        parse >> settings.acceleration_;
+        parse >> settings.rubberWallHump_;
+        parse >> settings.rubberHitWallRatio_;
+        parse >> settings.wallsLength_;
+        parse >> settings.flags_;
+
+        map[key] = settings;
+    }
+
+    return map;
+}
+
+static nCacheMap const & sn_GetCacheMap()
+{
+    static nCacheMap map = sn_LoadCacheMap();
+    return map;
 }
 
 // *******************************************************************************************
@@ -2885,6 +3148,33 @@ void nServerInfo::ReadSyncThis(  Network::BigServerInfo const & info,
         userGlobalIDs_ = "";
     }
 
+    if( info.has_settings() )
+    {
+        settings_.ReadSync( info.settings() );
+        settings_.SetFlag( SettingsDigest::Flags_SettingsDigestSent, true );
+    }
+    else
+    {
+        // check cache
+        std::ostringstream key;
+        key << GetConnectionName() << ":" << GetPort();
+        nCacheMap const & map = sn_GetCacheMap();
+        nCacheMap::const_iterator i = map.find( key.str() );
+        if( i != map.end() )
+        {
+            settings_ = (*i).second;
+            settings_.SetFlag( SettingsDigest::Flags_SettingsDigestSent, true );
+        }
+        else
+        {
+            settings_.flags_ = 0;
+        }
+    }
+    if( nServerInfoAdmin::GetAdmin() )
+    {
+        nServerInfoAdmin::GetAdmin()->Classify( settings_, classification_ );
+    }
+
     userNamesOneLine_.Clear();
     for ( int i = 0, j = 0; i < userNames_.Len()-1 ; ++i )
     {
@@ -2917,13 +3207,12 @@ void nServerInfo::ReadSyncThis(  Network::BigServerInfo const & info,
         {
             if ( !advancedInfoSetEver )
             {
-                con << "Acknowledged server: " <<  ToString( *this ) << ", name: \"" << tColoredString::RemoveColors(name) << "\"\n";
-                con << "\n";
+                con << "Acknowledged server: " << ToString() << ", name: \"" << tColoredString::RemoveColors(name) << "\"\n";
                 Save();
             }
             else if ( name != oldName )
             {
-                con << "Name of server " <<  ToString( *this )
+                con << "Name of server " << ToString()
                 << " changed from \"" << tColoredString::RemoveColors(oldName)
                 << "\" to \"" << tColoredString::RemoveColors(name) << "\"\n";
             }
@@ -3046,16 +3335,12 @@ nAddress & nServerInfoBase::AccessAddress( void ) const
         std::auto_ptr< nAddress > address( tNEW( nAddress ) );
 
         // fill it with hostname and port
-        address->SetHostname( this->GetConnectionName() );
         address->SetPort( this->GetPort() );
+        address->SetHostname( this->GetConnectionName() );
 
         this->address_ = address;
 
 #ifdef DEBUG
-        tString unresolved = ToString( *this );
-        tString resolved = this->address_->ToString();
-        if ( unresolved != resolved )
-            con << "Address of server " << unresolved << " determined to be " << resolved << "\n";
 #endif
     }
 
@@ -3072,9 +3357,9 @@ nAddress & nServerInfoBase::AccessAddress( void ) const
 //!
 // *******************************************************************************************
 
-const tString & nServerInfoBase::DoGetName( void ) const
+tString nServerInfoBase::DoGetName( void ) const
 {
-    return connectionName_;
+    return ToString();
 }
 
 // *******************************************************************************************
@@ -3087,7 +3372,7 @@ const tString & nServerInfoBase::DoGetName( void ) const
 //!
 // *******************************************************************************************
 
-const tString & nServerInfo::DoGetName( void ) const
+tString nServerInfo::DoGetName( void ) const
 {
     return name;
 }
@@ -3181,3 +3466,23 @@ tString nServerInfoCharacterFilter::FilterServerName( tString const & s )
     return FilterString( tColoredString::RemoveColors( s ) );
 }
 
+nMasterLoader::nMasterLoader()
+    :realFirstServer_( sn_FirstServer )
+{
+    sn_FirstServer = NULL;
+}
+
+nMasterLoader::~nMasterLoader()
+{
+    sn_FirstServer = realFirstServer_;
+}
+
+nServerInfo *nMasterLoader::AddMaster( const tString & connectionName, unsigned port )
+{
+    nServerInfo *master = CreateServerInfo();
+    master->SetConnectionName( connectionName );
+    master->SetPort( port );
+    master->Remove();
+    master->Insert( sn_masterList );
+    return master;
+}

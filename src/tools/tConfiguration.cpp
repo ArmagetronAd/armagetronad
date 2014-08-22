@@ -78,7 +78,7 @@ static void st_ToggleConfigItem( std::istream & s )
     }
     
     tConfItem< bool > *confItem = dynamic_cast< tConfItem< bool > * >( base );
-    if ( confItem )
+    if ( confItem && confItem->Writable() )
     {
         confItem->SetVal( !*confItem->GetTarget() );
     }
@@ -149,6 +149,11 @@ tConfItemBase::tConfItemMap & tConfItemBase::ConfItemMap()
     return *st_confMap;
 }
 
+tConfItemBase::tConfItemMap const & tConfItemBase::GetConfItemMap()
+{
+    return ConfItemMap();
+}
+
 static bool st_preventCasacl = false;
 
 tCasaclPreventer::tCasaclPreventer( bool prevent )
@@ -160,6 +165,12 @@ tCasaclPreventer::tCasaclPreventer( bool prevent )
 tCasaclPreventer::~tCasaclPreventer()
 {
     st_preventCasacl = previous_;
+}
+
+//! returns whether we're currently in an RINCLUDE file
+bool tCasaclPreventer::InRInclude()
+{
+    return st_preventCasacl;
 }
 
 // changes the access level of a configuration item
@@ -201,7 +212,22 @@ public:
         {
             // and change the level
             tConfItemBase * ci = (*iter).second;
-            if ( ci->requiredLevel != level )
+
+            if( ci->requiredLevel < tCurrentAccessLevel::GetAccessLevel() )
+            {
+                con << tOutput( "$access_level_nochange_now", 
+                                name, 
+                                tCurrentAccessLevel::GetName( ci->requiredLevel ),
+                                tCurrentAccessLevel::GetName( tCurrentAccessLevel::GetAccessLevel() ) );
+            }
+            else if( level < tCurrentAccessLevel::GetAccessLevel() )
+            {
+                con << tOutput( "$access_level_nochange_later", 
+                                name, 
+                                tCurrentAccessLevel::GetName( level ),
+                                tCurrentAccessLevel::GetName( tCurrentAccessLevel::GetAccessLevel() ) );
+            }
+            else if ( ci->requiredLevel != level )
             {
                 ci->requiredLevel = level;
                 if(printChange)
@@ -226,6 +252,11 @@ public:
     }
 
     virtual bool Save(){
+        return false;
+    }
+
+    // CAN this be saved at all?
+    virtual bool CanSave(){
         return false;
     }
 };
@@ -265,7 +296,7 @@ public:
         else if ( tCurrentAccessLevel::GetAccessLevel() > required )
         {
             con << tOutput( "$access_level_error",
-                            "SUDO",
+                            "CASACL",
                             tCurrentAccessLevel::GetName( required ),
                             tCurrentAccessLevel::GetName( tCurrentAccessLevel::GetAccessLevel() )
                 );
@@ -293,6 +324,11 @@ public:
     }
 
     virtual bool Save(){
+        return false;
+    }
+
+    // CAN this be saved at all?
+    virtual bool CanSave(){
         return false;
     }
 };
@@ -387,7 +423,10 @@ int tConfItemBase::EatWhitespace(std::istream &s){
             !s.eof())
         c=s.get();
 
-    s.putback(c);
+    if( s.good() )
+    {
+        s.putback(c);
+    }
 
     return c;
 }
@@ -777,11 +816,11 @@ void tConfItemBase::LoadAll(std::ifstream &s, bool record )
 
 //! @param s        file stream to be used for reading later
 //! @param filename name of the file to open
-//! @param var      whether to look in var directory
+//! @param path     whether to look in var directory
 //! @return success flag
-bool tConfItemBase::OpenFile( std::ifstream & s, tString const & filename, SearchPath path )
+bool tConfItemBase::OpenFile( std::ifstream & s, tString const & filename )
 {
-    bool ret = ( ( path & Config ) && tDirectories::Config().Open(s, filename ) ) || ( ( path & Var ) && tDirectories::Var().Open(s, filename ) );
+    bool ret = tDirectories::Config().Open(s, filename );
     
     static char const * section = "INCLUDE_VOTE";
     tRecorder::Playback( section, ret );
@@ -902,16 +941,14 @@ char const * st_userConfigsLatin1[] = { "user_3_1.cfg", "user_3_0.cfg", "user.cf
 
 static void st_InstallSigHupHandler();
 
-static bool st_LoadUserConfigs( char const * const * userConfig, bool latin1 )
+static bool st_LoadUserConfigs( char const * const * userConfig, bool latin1, tPath const & path )
 {
-    const tPath& var = tDirectories::Var();
-
     st_loadAsLatin1 = latin1;
 
     // load the first available user configuration file
     while ( *userConfig )
     { 
-        if ( Load( var, *userConfig ) )
+        if ( Load( path, *userConfig ) )
         {
             st_loadAsLatin1 = false;
             return true;
@@ -923,6 +960,13 @@ static bool st_LoadUserConfigs( char const * const * userConfig, bool latin1 )
     return false;
 }
 
+static bool st_LoadUserConfigs( char const * const * userConfig, bool latin1 )
+{
+    return 
+    st_LoadUserConfigs( userConfig, latin1, tDirectories::Config() ) ||
+    st_LoadUserConfigs( userConfig, latin1, tDirectories::Var() );
+}
+
 void st_LoadConfig( bool printChange )
 {
     // default include files are executed at owner level
@@ -930,7 +974,6 @@ void st_LoadConfig( bool printChange )
 
     st_InstallSigHupHandler();
 
-    const tPath& var = tDirectories::Var();
     const tPath& config = tDirectories::Config();
     const tPath& data = tDirectories::Data();
 
@@ -953,10 +996,10 @@ void st_LoadConfig( bool printChange )
     }
 #endif
 
+    Load( data, "textures/settings_textures.cfg" );
     Load( data, "moviepack/settings.cfg" );
 
     Load( config, "autoexec.cfg" );
-    Load( var, "autoexec.cfg" );
 
     // load configuration from playback
     tConfItemBase::LoadPlayback();
@@ -974,7 +1017,7 @@ void st_SaveConfig()
     }
 
     std::ofstream s;
-    if ( tDirectories::Var().Open( s, st_userConfigs[0], std::ios::out, true ) )
+    if ( tDirectories::Config().Open( s, st_userConfigs[0], std::ios::out, true ) )
     {
         tConfItemBase::SaveAll(s);
     }
@@ -1072,12 +1115,9 @@ void st_Include( tString const & file )
     if ( !tRecorder::IsPlayingBack() )
     {
         // really load include file
-        if ( !Load( tDirectories::Var(), file ) )
+        if (!Load( tDirectories::Config(), file ) && tConfItemBase::printErrors )
         {
-            if (!Load( tDirectories::Config(), file ) && tConfItemBase::printErrors )
-            {
-                con << tOutput( "$config_include_not_found", file );
-            }
+            con << tOutput( "$config_include_not_found", file );
         }
     }
     else

@@ -483,6 +483,12 @@ unsigned short next_free(){
                 sn_SendPlanned();
                 //	st_Breakpoint();
                 tAdvanceFrame(1000000);
+
+                // check for user abort, but just make it time out faster
+                if ( tConsole::Idle(false) )
+                {
+                    timeout -= 10;
+                }
             }
             if (tSysTimeFloat()>=timeout)
                 tERR_ERROR_INT("Not enough nNetObject IDs to distribute. Sorry!\n");
@@ -1112,7 +1118,15 @@ nNetObject *nNetObject::Object(int i){
 
     bool printMessage=true;
     while (sn_Connections[0].socket &&
-            NULL==(ret=sn_netObjects[i]) && timeout >tSysTimeFloat()){ // wait until it is spawned
+            NULL==(ret=sn_netObjects[i]) && timeout >tSysTimeFloat())
+    { // wait until it is spawned
+
+        // check for user abort, but just make it time out faster
+        if ( tConsole::Idle(false) )
+        {
+            timeout -= 10;
+        }
+
         if (tSysTimeFloat()>timeout-(totalTimeout + printMessageTimeout))
         {
             if (printMessage)
@@ -1627,6 +1641,11 @@ bool nNetObject::DoDebugPrint()
 
 static int sn_syncedUser = -1;
 
+int nNetObject::SyncedUser()
+{
+    return sn_syncedUser;
+}
+
 void nNetObject::SyncAll()
 {
 #ifdef DEBUG
@@ -2072,6 +2091,13 @@ void sn_Sync(REAL timeout,bool sync_sn_netObjects, bool otherEnd){
                 if (sync_sn_netObjects)
                     nNetObject::SyncAll();
                 sn_SendPlanned();
+
+                // check for user abort, but just make it time out faster
+                if ( tConsole::Idle(false) )
+                {
+                    endTime -= 10;
+                    timeout *= .5;
+                }
             }
 
             // decrease timeout for next try
@@ -2106,6 +2132,12 @@ void sn_Sync(REAL timeout,bool sync_sn_netObjects, bool otherEnd){
                 {
                     goon=true;
                 }
+            }
+
+            // check for user abort, but just make it time out faster
+            if ( tConsole::Idle(false) )
+            {
+                endTime -= 10;
             }
 
             if (tSysTimeFloat()>endTime)

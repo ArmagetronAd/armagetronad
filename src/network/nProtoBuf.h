@@ -169,6 +169,37 @@ private:
 };
 
 // **********************************************************************
+// nSenderInfo
+// **********************************************************************
+
+//! extra information about the sender of a message
+struct nSenderInfo
+{
+public:
+    //! reference to the message, it contains all info
+    nMessageBase const & envelope;
+    
+    int SenderID() const
+    {
+        return envelope.SenderID();
+    }
+    
+    int MessageIDBig() const
+    {
+        return envelope.MessageIDBig();
+    }
+    
+    unsigned short MessageID() const
+    {
+        return envelope.MessageID();
+    }
+    
+    explicit nSenderInfo( nMessageBase const & e )
+    : envelope( e )
+    {}
+};
+
+// **********************************************************************
 // nProtoBufMessage
 // **********************************************************************
 
@@ -259,37 +290,6 @@ private:
 
 template< class PROTOBUF >
 PROTOBUF nProtoBufMessage< PROTOBUF >::workProtoBuf_;
-
-// **********************************************************************
-// nSenderInfo
-// **********************************************************************
-
-//! extra information about the sender of a message
-struct nSenderInfo
-{
-public:
-    //! reference to the message, it contains all info
-    nMessageBase const & envelope;
-
-    int SenderID() const
-    {
-        return envelope.SenderID();
-    }
-
-    int MessageIDBig() const
-    {
-        return envelope.MessageIDBig();
-    }
-
-    unsigned short MessageID() const
-    {
-        return envelope.MessageID();
-    }
-
-    explicit nSenderInfo( nMessageBase const & e )
-    : envelope( e )
-    {}
-};
 
 // **********************************************************************
 // nMessageTranslatorBase
@@ -851,7 +851,7 @@ private:
 
         // read sync
         PROTOBUF sync;
-        StreamFrom( envelope, sync, create ? nProtoBufDescriptorBase::SECTION_First : nProtoBufDescriptorBase::SECTION_Second );
+        this->StreamFrom( envelope, sync, create ? nProtoBufDescriptorBase::SECTION_First : nProtoBufDescriptorBase::SECTION_Second );
         cast.ReadSync( nProtoBufBaseConverter< PROTOBUF const >( sync ), nSenderInfo( envelope ) );
     }
 
@@ -865,7 +865,7 @@ private:
         // read sync
         PROTOBUF sync;
         cast.WriteSync( nProtoBufBaseConverter< PROTOBUF >( sync ), create );
-        StreamTo( sync, envelope, create ? nProtoBufDescriptorBase::SECTION_First : nProtoBufDescriptorBase::SECTION_Second );
+        this->StreamTo( sync, envelope, create ? nProtoBufDescriptorBase::SECTION_First : nProtoBufDescriptorBase::SECTION_Second );
     }
 
     virtual nProtoBufMessageBase* DoCreateMessage() const

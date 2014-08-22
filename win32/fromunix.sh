@@ -12,7 +12,7 @@ popd
 
 pushd code_blocks
 
-CODEBLOCKS="C:\Program Files\CodeBlocks-13.12\codeblocks.exe"
+CODEBLOCKS="C:\Program Files\CodeBlocks\codeblocks.exe"
 
 # parallel build of server and client
 for p in Dedicated.cbp ArmagetronAd.cbp; do 

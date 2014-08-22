@@ -41,10 +41,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "gCycle.h"
 #include "tRecorder.h"
 #include "rSysdep.h"
+#include "uInput.h"
 
 #include <sstream>
 #include <set>
+#include <ctime>
+#include <vector>
 
+#ifndef DEDICATED
 static tConfItem<int>   tm0("TEXTURE_MODE_0",rTextureGroups::TextureMode[0]);
 static tConfItem<int>   tm1("TEXTURE_MODE_1",rTextureGroups::TextureMode[1]);
 static tConfItem<int>   tm2("TEXTURE_MODE_2",rTextureGroups::TextureMode[2]);
@@ -77,19 +81,17 @@ static tConfItemLine c_rEnd("GL_RENDERER",gl_renderer);
 static tConfItemLine c_vEnd("GL_VENDOR",gl_vendor);
 // static tConfItemLine a_ver("ARMAGETRON_VERSION",st_programVersion);
 
-#ifndef DEDICATED
 static uMenuItemStringWithHistory::history_t &sg_consoleHistory() {
     static uMenuItemStringWithHistory::history_t instance("console_history.txt");
     return instance;
 }
-#endif
 
 static int sg_consoleHistoryMaxSize=100; // size of the console history
 static tSettingItem< int > sg_consoleHistoryMaxSizeConf("HISTORY_SIZE_CONSOLE",sg_consoleHistoryMaxSize);
 
 class ArmageTron_feature_menuitem: public uMenuItemSelection<int>{
-    void NewChoice(uSelectItem<bool> *){};
-    void NewChoice(char *,bool ){};
+    void NewChoice(uSelectItem<bool> *){}
+    void NewChoice(char *,bool ){}
 public:
     ArmageTron_feature_menuitem(uMenu *m,char const * tit,char const * help,int &targ)
             :uMenuItemSelection<int>(m,tit,help,targ){
@@ -107,13 +109,13 @@ public:
             rFEAT_ON);
     }
 
-    ~ArmageTron_feature_menuitem(){};
+    ~ArmageTron_feature_menuitem(){}
 };
 
 
 class ArmageTron_texmode_menuitem: public uMenuItemSelection<int>{
-    void NewChoice(uSelectItem<bool> *){};
-    void NewChoice(char *,bool ){};
+    void NewChoice(uSelectItem<bool> *){}
+    void NewChoice(char *,bool ){}
 public:
     ArmageTron_texmode_menuitem(uMenu *m,char const * tit,int &targ,
                                 bool font=false)
@@ -148,7 +150,7 @@ public:
     #endif
     }
 
-    ~ArmageTron_texmode_menuitem(){};
+    ~ArmageTron_texmode_menuitem(){}
 };
 
 static tConfItem<bool>    ab("ALPHA_BLEND",sr_alphaBlend);
@@ -281,7 +283,7 @@ public:
                 else
                     s << tOutput("$screen_size_desktop");
 
-                res_men.NewChoice( s.str().c_str(), help, size );
+                res_men.NewChoice( s.str().c_str(), "", size );
             }
 
 #endif
@@ -312,13 +314,6 @@ static void sg_ScreenModeMenu()
 
 
 #ifdef SDL_OPENGL
-#ifdef DIRTY
-    uMenuItemToggle sdl_t
-    (&screen_menu_mode,
-     "$screen_use_sdl_text",
-     "$screen_use_sdl_help",
-     currentScreensetting.useSDL);
-#endif // dirty
 
 #if SDL_VERSION_ATLEAST(1, 2, 10)
     uMenuItemSelection<rVSync> zvs_t
@@ -400,6 +395,92 @@ static void sg_ScreenModeMenu()
 }
 
 
+#define gZONE_STYLE_VERT 0
+#define gZONE_STYLE_FLAT 1
+#define gZONE_STYLE_COMB 2
+#define gZONE_STYLE_CUST 3
+static int sg_zoneStyle;
+
+void zone_style_on_select(int const& val) {
+    // default include files are executed at owner level
+    tCurrentAccessLevel level( tAccessLevel_Owner, true );
+
+    // hardcoded includes
+    switch (val) {
+        case gZONE_STYLE_VERT:
+            st_Include(tString("zonestyle_vertical.cfg"));
+            break;
+        case gZONE_STYLE_FLAT:
+            st_Include(tString("zonestyle_flat.cfg"));
+            break;
+        case gZONE_STYLE_COMB:
+            st_Include(tString("zonestyle_combined.cfg"));
+    }
+}
+
+extern int  sz_zoneSegments;
+extern int  sz_zoneSegSteps;
+extern REAL sz_zoneSegLength;
+extern REAL sz_zoneBottom;
+extern REAL sz_zoneHeight;
+extern REAL sz_zoneFloorScalePercent;
+extern REAL sz_zoneProximityDistance;
+extern REAL sz_zoneProximityOffset;
+
+void zone_style_on_enter(int const& val) {
+    if (val!=gZONE_STYLE_CUST) return;
+    uMenu customMenu("$zone_style_custom_menu");
+    uMenuItemReal cm8(&customMenu,
+                      "$zone_style_proximity_offset_text",
+                      "$zone_style_proximity_offset_help",
+                      sz_zoneProximityOffset, (REAL)0, (REAL)100, (REAL)1 );
+    uMenuItemReal cm7(&customMenu,
+                      "$zone_style_proximity_distance_text",
+                      "$zone_style_proximity_distance_help",
+                      sz_zoneProximityDistance, (REAL)-1, (REAL)100, (REAL)1 );
+    uMenuItemReal cm6(&customMenu,
+                      "$zone_style_floor_scale_pct_text",
+                      "$zone_style_floor_scale_pct_help",
+                      sz_zoneFloorScalePercent, (REAL)0, (REAL)1, (REAL).05 );
+    uMenuItemReal cm5(&customMenu,
+                      "$zone_style_height_text",
+                      "$zone_style_height_help",
+                      sz_zoneHeight, (REAL)0, (REAL)20, (REAL)1 );
+    uMenuItemReal cm4(&customMenu,
+                      "$zone_style_bottom_text",
+                      "$zone_style_bottom_help",
+                      sz_zoneBottom, (REAL)0, (REAL)10, (REAL)1 );
+    uMenuItemReal cm3(&customMenu,
+                      "$zone_style_segment_length_text",
+                      "$zone_style_segment_length_help",
+                      sz_zoneSegLength, (REAL)0, (REAL)1, (REAL).05 );
+    uMenuItemInt  cm2(&customMenu,
+                      "$zone_style_segment_steps_text",
+                      "$zone_style_segment_steps_help",
+                      sz_zoneSegSteps, 1, 16, 1);
+    uMenuItemInt  cm1(&customMenu,
+                      "$zone_style_segments_text",
+                      "$zone_style_segments_help",
+                      sz_zoneSegments, 2, 20, 1);
+    customMenu.SetCenter(.3);
+    customMenu.Enter();
+}
+
+static uMenuItemSelection<int> mzm
+(&screen_menu_prefs,
+ "$detail_zone_style_text",
+ "$detail_zone_style_help",
+ sg_zoneStyle, &zone_style_on_select, &zone_style_on_enter);
+static uSelectEntry<int> mzm0(mzm,"$detail_zone_style_vertical_text",
+                              "$detail_zone_style_vertical_help", gZONE_STYLE_VERT);
+static uSelectEntry<int> mzm1(mzm,"$detail_zone_style_flat_text",
+                              "$detail_zone_style_flat_help", gZONE_STYLE_FLAT);
+static uSelectEntry<int> mzm2(mzm,"$detail_zone_style_combined_text",
+                              "$detail_zone_style_combined_help", gZONE_STYLE_COMB);
+static uSelectEntry<int> mzm3(mzm,"$detail_zone_style_custom_text",
+                              "$detail_zone_style_custom_help", gZONE_STYLE_CUST);
+
+
 static uMenuItemSelection<int> mfm
 (&screen_menu_detail,
  "$detail_floor_mirror_text",
@@ -422,6 +503,14 @@ static uMenuItemToggle fs_dither
 (&screen_menu_detail,"$detail_dither_text",
  "$detail_dither_help",
  sr_dither);
+
+// from gWall.cpp
+extern bool sg_simpleTrail;
+static uMenuItemToggle sgm_simpleTrail
+(&screen_menu_detail,
+ "$detail_simple_trail_text",
+ "$detail_simple_trail_help",
+ sg_simpleTrail);
 
 static uMenuItemSelection<int> mfd
 (&screen_menu_detail,
@@ -462,10 +551,8 @@ static tConfItem<bool> crexp("EXPLOSION",sg_crashExplosion);
 extern bool sg_crashExplosionHud;   // from gExplosion.cpp
 static tConfItem<bool> crexph("EXPLOSION_HUD",sg_crashExplosionHud);
 
-#ifndef DEDICATED
 //extern bool png_screenshot;		// from rSysdep.cpp
 //static tConfItem<bool> pns("PNG_SCREENSHOT",png_screenshot);
-#endif
 
 static uMenuItemToggle  t32b
 (&screen_menu_detail,"$detail_text_truecolor_text",
@@ -579,8 +666,6 @@ static tConfItem< rSysDep::rSwapOptimize > swapOptimizeCI("SWAP_OPTIMIZE", rSysD
 
 static tConfItem<bool> WRAP("WRAP_MENU",uMenu::wrap);
 
-#ifndef DEDICATED
-
 class gAutoCompleterConsole : public uAutoCompleter {
 public:
     int Complete(tString &string, unsigned pos) {
@@ -640,7 +725,7 @@ bool gMemuItemConsole::Event(SDL_Event &e){
 
 void do_con(){
     su_ClearKeys();
-        
+
     se_ChatState( ePlayerNetID::ChatFlags_Console, true );
     sr_con.SetHeight(20,false);
     se_SetShowScoresAuto(false);
@@ -665,7 +750,7 @@ void do_con(){
 
 void sg_ConsoleInput(){
 #ifndef DEDICATED
-    st_ToDo(&do_con);
+    st_ToDoOnce(&do_con);
 #endif
 }
 
@@ -793,7 +878,7 @@ public:
         m->RequestSpaceBelow(.2);
     }
 
-    ~ArmageTron_color_menuitem(){};
+    ~ArmageTron_color_menuitem(){}
 
     virtual REAL SpaceRight(){return .2;}
 
@@ -841,21 +926,29 @@ void sg_PlayerMenu(int Player){
     //  name.Clear();
     chat_menu.SetCenter(-.5);
 
-    uMenuItemString *ic[MAX_INSTANT_CHAT];
-
     ePlayer *p = ePlayer::PlayerConfig(Player);
     if (!p)
         return;
 
-    int i;
-    for(i=MAX_INSTANT_CHAT-1;i>=0;i--){
-        tOutput name;
-        name.SetTemplateParameter(1, i+1);
-        name << "$player_chat_chat";
-        ic[i]=new uMenuItemString
-              (&chat_menu,name,
-               "$player_chat_chat_help",
-               p->instantChatString[i], se_SpamMaxLen);
+    std::vector< uMenuItemString * > instantChatSlots;
+    std::vector< uMenuItemInput * > instantChatInputs;
+    std::vector< uMenuItemDivider * > instantChatDividers;
+
+    for ( int i = MAX_INSTANT_CHAT - 1 ; i >= 0; i-- )
+    {
+        instantChatSlots.push_back(
+            new uMenuItemString(
+                &chat_menu,
+                tOutput( "$player_chat_chat" ),
+                "$player_chat_chat_help",
+                p->instantChatString[ i ],
+                se_SpamMaxLen
+            )
+        );
+        instantChatInputs.push_back(
+            new uMenuItemInput( &chat_menu, p->se_instantChatAction[ i ], Player + 1 )
+        );
+        instantChatDividers.push_back( new uMenuItemDivider( &chat_menu ) );
     }
 
     uMenuItemToggle al
@@ -988,7 +1081,7 @@ void sg_PlayerMenu(int Player){
     (&camera_menu,
      "$player_camera_fov_text",
      "$player_camera_fov_help",
-     p->startFOV,30,120,5);
+     p->startFOV,30,160,5);
 
     uMenuItemSelection<eCamMode> cam_s
     (&camera_menu,
@@ -1012,13 +1105,16 @@ void sg_PlayerMenu(int Player){
     uMenuItemString n(&playerMenu,
                       "$player_name_text",
                       "$player_name_help",
-                      p->name, 16);
+                      p->name, ePlayerNetID::MAX_NAME_LENGTH);
 
     playerMenu.Enter();
 
-    for(i=MAX_INSTANT_CHAT-1; i>=0; i--)
-        delete ic[i];
-
+    for ( std::vector< uMenuItemString * >::const_iterator it = instantChatSlots.begin(); it != instantChatSlots.end(); ++it )
+        delete *it;
+    for ( std::vector< uMenuItemInput * >::const_iterator it = instantChatInputs.begin(); it != instantChatInputs.end(); ++it )
+        delete *it;
+    for ( std::vector< uMenuItemDivider * >::const_iterator it = instantChatDividers.begin(); it != instantChatDividers.end(); ++it )
+        delete *it;
 
     // request network synchronisation if the server can handle it
     static nVersionFeature inGameRenames( 5 );
@@ -1121,9 +1217,21 @@ static uActionGlobal screenshot( "SCREENSHOT" );
 
 static uActionGlobal togglefullscreen( "TOGGLE_FULLSCREEN" );
 
+#ifndef DEDICATED
+static const char* sg_defaultScreenshotName = "%Y-%m-%d_%H-%M-%S";
+#endif
+
 static bool screenshot_func(REAL x){
     if (x>0){
 #ifndef DEDICATED
+        time_t rawtime;
+        char rawname[30];
+        time( &rawtime );
+        strftime(
+            rawname, 29,
+            sg_defaultScreenshotName, localtime( &rawtime )
+            );
+        sr_screenshotName = rawname;
         sr_screenshotIsPlanned=true;
 #endif
     }

@@ -228,12 +228,15 @@ protected:
 
     unsigned short  turns;                      //!< the number of turns taken so far
     unsigned short  braking;                    //!< flag indicating status of brakes ( on/off )
+    
+    bool            uncannyTimingToReport_;     //!< flag indicating whether we have uncanny timing to report from the last turn
 
     int             windingNumber_;             //!< number that gets increased on every right turn and decreased on every left turn ( used by the AI )
     int             windingNumberWrapped_;      //!< winding number wrapped to be used as an index to the axes code
 
     mutable REAL    gap_[2];                    //!< when driving towards a wall, this is set to the maximal distance we need to approach it so that when the cycle turns, it can squeeze through any gaps
     mutable bool    keepLookingForGap_[2];      //!< flags telling the system whether it is worthwile to look for further, smaller, gaps
+    mutable bool    gapIsBackdoor_[2];          //!< flags indicating whether gaps are backdoors
 
     eCoord			lastTurnPos_;	            //!< the location of the last turn
     REAL            lastTurnTimeRight_;         //!< the time of the last turn right

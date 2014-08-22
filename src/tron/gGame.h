@@ -38,6 +38,7 @@ class eGrid;
 class nServerInfo;
 class nServerInfoBase;
 class eTeam;
+class eLadderLogWriter;
 class gParser;
 class gArena;
 class ePlayerNetID;
@@ -54,6 +55,8 @@ extern bool      sg_TalkToMaster;  // should this server be known on the interne
 typedef enum{gFINISH_EXPRESS,gFINISH_IMMEDIATELY,gFINISH_SPEEDUP,gFINISH_NORMAL}
 gFinishType;
 
+struct DrawReason{};
+
 #ifdef ENABLE_ZONESV2
 class zZone;
 #else
@@ -61,6 +64,8 @@ class gZone;
 #endif
 
 //extern gFinishType sg_finishType;
+
+extern eLadderLogWriter sg_respawnWriter;
 
 class gGame:public nNetObject{
     unsigned short state;      // the gamestate we are currently in
@@ -132,6 +137,8 @@ public:
     eSoundMixer* m_Mixer;
 
 private:
+    bool WarmupTeamsAreReady() const;
+    
     //! returns the descriptor responsible for this class
     virtual nNetObjectDescriptorBase const & DoGetDescriptor() const;
 };
@@ -158,12 +165,17 @@ void sg_DeclareWinner( eTeam* team, char const * message );
 void sg_FullscreenMessage(tOutput const & title, tOutput const & message,REAL timeout = 60, int client = 0); //!< Displays a message on a specific client or all clients that gets displayed on the whole screen, blocking view to the game
 void sg_ClientFullscreenMessage( tOutput const & title, tOutput const & message, REAL timeout = 60 ); //!< Displays a message locally that gets displayed on the whole screen, blocking view to the game
 
+void sg_RespawnAllAfter( REAL after, REAL time, eGrid *grid, gArena & arena,
+    bool atSpawn=false );
+void sg_RespawnAllAfter( REAL after, bool atSpawn=false );
+
 void sg_RespawnPlayer(eGrid *, gArena *, tCoord & pos, tCoord & dir, ePlayerNetID *);
 void sg_RespawnPlayer(eGrid *, gArena *, tCoord & near, ePlayerNetID *);
 void sg_RespawnPlayer(eGrid *, gArena *, tCoord * near, ePlayerNetID *);
 void sg_RespawnPlayer(eGameObject & near, ePlayerNetID *);
-void sg_RespawnPlayer(eGrid *, gArena *, eGameObject * near, ePlayerNetID *); 
-void sg_RespawnPlayer(eGrid *grid, gArena *arena, ePlayerNetID *p);
+void sg_RespawnPlayer(eGrid *, gArena *, eGameObject * near, ePlayerNetID *);
+void sg_RespawnPlayer(eGrid *grid, gArena *arena, ePlayerNetID *p,
+    bool atSpawn=false);
 
 // HACK
 gArena * sg_GetArena();
@@ -179,6 +191,8 @@ public:
     int limitTime;   // match time limit
     int limitRounds; // match round limit
     int limitScore;  // match score limit
+    int limitScoreMinLead;  // minimum lead for limitScore to take effect
+    int maxBlowout;  // max score advance
 
     int numAIs;      // number of AI players
     int minPlayers;  // minimum number of players
@@ -211,6 +225,7 @@ public:
 
     gGameSettings(int a_scoreWin,
                   int a_limitTime, int a_limitRounds, int a_limitScore,
+                  int a_limitScoreMinLead, int a_maxBlowout,
                   int a_numAIs,    int a_minPlayers,  int a_AI_IQ,
                   bool a_autoNum, bool a_autoIQ,
                   int a_speedFactor, int a_sizeFactor,
@@ -226,7 +241,6 @@ public:
 extern gGameSettings* sg_currentSettings;
 
 void rotate();
-
 
 #endif
 

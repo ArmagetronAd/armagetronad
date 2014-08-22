@@ -77,7 +77,7 @@ if test -d "${srcdir}/CVS"; then
     fi
 fi
 
-if test -d "${srcdir}/.svn" || test -d "${srcdir}/../.svn"; then
+if test -d "${srcdir}/.svn"; then
     # get the inter-repository path by parsing the URL
 
     URL=`svn info ${srcdir} | grep ^URL | sed -e 's,^URL: ,,'`

@@ -124,7 +124,7 @@ private:
     widget_list_t m_Widgets; //!< All widgets
 
     void ProcessWidgets(node cur); //!< Processes all Widgets within the <Cockpit> node passed to it
-    std::unique_ptr<cWidget::Base> ProcessWidgetType(node cur); //!< returns a new instance of the right widget class for the given node
+    std::auto_ptr<cWidget::Base> ProcessWidgetType(node cur); //!< returns a new instance of the right widget class for the given node
 
     //this should be done by the cWidget::Base class one day
     void ProcessWidgetCamera(node cur, cWidget::Base &widget); //!< Processes the camera of the widget if given its root node

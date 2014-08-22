@@ -193,7 +193,7 @@ team_max_players_help         Maksymalna ilość graczy na drużynę
 team_min_players_help         Minimalna ilość graczy na drużynę
 team_allow_shuffle_up_help    Jeżeli wynosi 1, gracze mogą się przetasowywać do woli. Jeśli 0, to mogą tylko spadać na mniejsze pozycje.
 team_center_is_boss_help      Jeżeli wynosi 1, graczem startującym na środku będzie szef drużyny. Jeżeli 0, będzie to gracz, który jest w tej drużynie przez najdłuższy okres czasu.
-team_elimination_mode_help    Określa sposób, w jaki ArmagetronAd powinien eliminować zbne drużyny, gdy jest ich więcej niż TEAM_MAX: Jeżeli ustawione na 0, gra będzie starać się utrzymać jak najwięcej graczy przy grze, a jeśli wszytkie drużyny mająpo tyle samo graczy, to odpadnie drużyna z najsłabszym wynikiem; Ustawienie tej wartości na 1 nakaże grze dobieranie drużyn po kolorach (niebieska, potem złota, potem czerwona itd.); Natomiast ustanienie na 2 będzie usuwać drużyny z najsłabszym wynikiem, bez względu na ilość graczy.
+team_elimination_mode_help    Określa sposób, w jaki \g powinien eliminować zbne drużyny, gdy jest ich więcej niż TEAM_MAX: Jeżeli ustawione na 0, gra będzie starać się utrzymać jak najwięcej graczy przy grze, a jeśli wszytkie drużyny mająpo tyle samo graczy, to odpadnie drużyna z najsłabszym wynikiem; Ustawienie tej wartości na 1 nakaże grze dobieranie drużyn po kolorach (niebieska, potem złota, potem czerwona itd.); Natomiast ustanienie na 2 będzie usuwać drużyny z najsłabszym wynikiem, bez względu na ilość graczy.
 
 teams_max_help                Maksymalna ilość drużyn
 teams_min_help                Minimalna ilość drużyn
@@ -714,34 +714,11 @@ console_indent_help           Ilość spaji poprzedzających kontynuację linii,
 console_decorate_id_help      Umieszcza ID gracza w każdej linii konsoli
 console_decorate_ip_help      Umieszcza IP klienta w każdej linii konsoli
 console_decorate_timestamp_help Dekoruje wszystie linie w konsoli aktualną datą i godziną.
-console_ladder_log_help       Wyświetla w konsoli informacje o rankingu
 ladderlog_decorate_timestamp_help Dekoruje wszystie linie w rankingu aktualną datą i godziną.
 ladderlog_write_all_help      Ustwa wszystkie ustawienia LADDER_LOG_WRITE_* na tę samą wartość.
 ladderlog_write_all_usage     Użycie: LADDER_LOG_WRITE_ALL 1|0
 ladderlog_write_all_enabled   Aktywuj pełny widok rankingu.
 ladderlog_write_all_disabled  Wyłącz widok rankingu.
-ladderlog_write_authority_blurb_help Wpisuje do rankingu: AUTHORITY_BLURB <nazwa> <wartość>
-ladderlog_write_basezone_conquered_help Wpisuje do rankingu podbicie bazy:  BASEZONE_CONQUERED <drużyna> <cx> <cy>
-ladderlog_write_basezone_conquerer_help Wpisuje do rankingu podbijającego bazę: BASEZONE_CONQUERER <gracz>
-ladderlog_write_chat_help     Wpisuje do rankingu rozmowę: CHAT <rozmawiający> [/me] <tekst>
-ladderlog_write_death_frag_help Wpisuje do rankingu zabójstwo: DEATH_FRAG <ofiara> <zabójca>
-ladderlog_write_death_suicide_help Wpisuje do rankingu samobójstwo: DEATH_SUICIDE <gracz>
-ladderlog_write_death_teamkill_help Wpisuje do rankingu zabójstwo wewnątrz drużyny: DEATH_TEAMKILL <ofiara> <zabójca>
-ladderlog_write_game_end_help Wpisuje do rankingu koniec gry: GAME_END
-ladderlog_write_game_time_help Wpisuje do rankingu czas gry: GAME_TIME <czas> (zobacz też: GAME_TIME_INTERVAL)
-ladderlog_write_match_winner_help Wpisuje do rankingu zwycięzce meczu: MATCH_WINNER <zwycięzca>
-ladderlog_write_new_match_help Wpisuje do rankingu nowy mecz: NEW_MATCH
-ladderlog_write_new_round_help Wpisuje do rankingu nową rundę: NEW_ROUND
-ladderlog_write_num_humans_help Wpisuje do rankingu ilość ludzi: NUM_HUMANS <ilość ludzi>
-ladderlog_write_online_player_help Wpisuje do rankingu połączenie gracza: ONLINE_PLAYER <imię> [<ping> [<drużyna>]]
-ladderlog_write_player_entered_help Wpisuje do rankingu wejście gracza: PLAYER_ENTERED <imię> <IP> <wyświetlana nazwa>
-ladderlog_write_player_left_help Wpisuje do rankingu opuszczającego gracza: PLAYER_LEFT <imię> <IP>
-ladderlog_write_player_renamed_help Wpisuje do rankingu zmianę nazwy gracza: PLAYER_RENAMED <stara nazwa> <nowa nazwa> <ip> <nazwa wyświetlana>
-ladderlog_write_round_score_help Wpisuje do rankingu wynik gracza po rundzie: ROUND_SCORE <różnica wyniku> <gracz> [<drużyna>]
-ladderlog_write_round_score_team_help Wpisuje do rankingu wynik drużyny po rundzie: ROUND_SCORE_TEAM <różnica wyniku> <drużyna>
-ladderlog_write_round_winner_help Wpisuje do rankingu zwycięzcę rundy: ROUND_WINNER <zwycięzca>
-ladderlog_write_sacrifice_help Wpisuje do rankingu poświęcenie: SACRIFICE <gracz, który użył dziury> <gracz, który zrobił dziurę> <gracz, w czyjej ściany był ta dziura>
-ladderlog_write_wait_for_external_script_help Wpisuje do rankingu oczekiwanie na zewnętrzny skrypt: WAIT_FOR_EXTERNAL_SCRIPT (zobacz również: WAIT_FOR_EXTERNAL_SCRIPT i WAIT)
 chat_log_help                 Zapisuj rozmowy do ver/chatlog.txt
 show_fps_help                 Wyświetlaj fps
 floor_mirror_help             Tryb lustra podłogi
@@ -1133,7 +1110,6 @@ input_switch_view_help        Zmienia perspektywę kamery.
 #********************************************
 #********************************************
 
-input_instant_chat_text       Szybki Chat \1
 input_instant_chat_help       Włącza specjalny, dowolnie wybrany tekst.
 
 #********************************************
@@ -1705,8 +1681,6 @@ player_camera_text            Ustawienia Kamery
 player_camera_help            Przygotuj ustawienia kamery.
 
 player_chat_text              Ustawienia Szybkiego Chatu
-
-player_chat_chat              Szybki Chat \1:
 player_chat_chat_help         Ustawia szybkie teksty, które mogą zostać wysłane przez naciśnięcie jednego klawisza.
 
 player_blue_text              Niebieski:
@@ -2511,12 +2485,12 @@ network_master_options        Opcje:\n
 network_connecting_to_server  Łączenie z \1...\n
 network_connecting_gamestate  Oczekiwanie na informacje o stanie gry...\n
 network_syncing_gamestate     Otrzymane! Synchronizacja gry...\n
-network_warn_unknowndescriptor \n\n\nOtrzymano nieznaną informację \1 \n\nPRAWDOPODOBNIE POWINIENEŚ ZAKTUALIZOWAĆ ARMAGETRON ADVANCED!!!\n
+network_warn_unknowndescriptor \n\n\nOtrzymano nieznaną informację \1 \n\nPRAWDOPODOBNIE POWINIENEŚ ZAKTUALIZOWAĆ \G!!!\n
 network_error                 Błąd sieci.\n
 network_error_timeout         Użytkownik \1 przekroczył limit czasu.\n
 network_error_shortmessage    Wiadomość użytkownika \1 była zbyt krótka.\n
 network_error_overflow        Użytkownik \1 nie jest w stanie utrzymać przesyłu danych.\n
-network_killuser              Usuwanie użytkownika \1, ping \2.\n
+network_killuser              Usuwanie użytkownika \1, ping \2, IP: \3, \4\n
 network_statistics1           Czas:     \1 sek.\n
 network_statistics2           Wysłano:     \2 bajtów w \3 pakietach (\4 bajtów/s)\n
 network_statistics3           Otrzymano: \5 bajtów w \6 pakietach (\7 bajtów/s)\n
@@ -2678,8 +2652,9 @@ sound_error_unknown           Plik \1 nie mógł być załadowany: \2
 #********************************************
 #********************************************
 
-nconfig_error_unknown         Otrzymano konfigurację nieznanego ustawienia \1.\n\nPRAWDOPODOBNIE POWINIENEŚ ZAKTUALIZOWAĆ ARMAGETRON ADVANCED!!!\n
-nconfig_error_nonet           Otrzymano konfigurację ustawienia \1 które nie dotyczy sieci.\n\nPRAWDOPODOBNIE POWINIENEŚ ZAKTUALIZOWAĆ ARMAGETRON ADVANCED!!!\n
+nconfig_error_protected       Tylko serwer moze modyfikowac te wartosc. \1.\n
+nconfig_error_unknown         Otrzymano konfigurację nieznanego ustawienia \1.\n\nPRAWDOPODOBNIE POWINIENEŚ ZAKTUALIZOWAĆ \G!!!\n
+nconfig_error_nonet           Otrzymano konfigurację ustawienia \1 które nie dotyczy sieci.\n\nPRAWDOPODOBNIE POWINIENEŚ ZAKTUALIZOWAĆ \G!!!\n
 nconfig_error_ignoreold       Ignorowanie starej konfiguracji ustawienia \1.\n
 nconfig_value_changed         Wartość \1 zmieniła się z \2 na \3 z polecenia serwera.\n
 

@@ -196,6 +196,10 @@ void sr_ResetRenderState(bool menu=0);
 void sr_DepthOffset(bool offset);
 void sr_Activate(bool active); // set activation staus
 
+void sr_SetWindowTitle(tOutput o);
+void sr_SetWindowTitle(tString s);
+void sr_SetWindowTitle();
+
 void sr_LockSDL();
 void sr_UnlockSDL();
 #endif

@@ -455,7 +455,9 @@ static void sr_SetSwapControlAuto( bool after = false )
     }
     else if( rSysDep::IsBenchmark() )
     {
+#ifndef DEBUG        
         sr_SetSwapControl( 0, after );
+#endif
     }
     else
     {
@@ -493,6 +495,10 @@ static void sr_CompleteGLAttributes()
 }
     #endif // SDL_OPENGL
     #endif // DEDICATED
+
+// flag indicating whether directX is supposed to be used for input (defaults to false, crashes on my Win7)
+// bool sr_useDirectX = false;
+// static bool use_directx_back = false;
 
 static bool lowlevel_sr_InitDisplay(){
     #ifndef DEDICATED
@@ -635,7 +641,7 @@ static bool lowlevel_sr_InitDisplay(){
                                (sr_screenWidth, sr_screenHeight,   fullCD,
                                 attrib^SDL_FULLSCREEN);
 
-                if (CD_fsinv > 15){
+                if (CD_fsinv >= 15){
                     // yes! change the mode
                     currentScreensetting.fullscreen=!currentScreensetting.fullscreen;
                     attrib ^= SDL_FULLSCREEN;
@@ -686,16 +692,7 @@ static bool lowlevel_sr_InitDisplay(){
             }
         }
 
-        // MacOSX SDL 1.2.4 crashes if we SetCaption after switch to fullscreen. (fixed in 1.2.5)
-    #ifdef MACOSX
-        if(!currentScreensetting.fullscreen)
-    #endif
-        {
-            tOutput o("Armagetron Advanced");
-            tString s;
-            s << o;
-            SDL_WM_SetCaption(s, s);
-        }
+        sr_SetWindowTitle();
 
         sr_CompleteGLAttributes();
 
@@ -852,6 +849,7 @@ static bool lowlevel_sr_InitDisplay(){
 
     lastSuccess=currentScreensetting;
     failed_attempts = 0;
+//    sr_useDirectX = use_directx_back;
     st_SaveConfig();
 #endif
     return true;
@@ -860,6 +858,8 @@ static bool lowlevel_sr_InitDisplay(){
 bool cycleprograminited = false;
 
 bool sr_InitDisplay(){
+//    use_directx_back = sr_useDirectX;
+
     cycleprograminited = false;
     while (failed_attempts <= MAXEMERGENCY+1)
     {
@@ -870,6 +870,8 @@ bool sr_InitDisplay(){
             std::cout.flush();
 #endif
             currentScreensetting = *emergency[failed_attempts];
+
+//            sr_useDirectX = false;
         }
 
         // prepare for crash, note failure and save config
@@ -963,7 +965,7 @@ bool sr_dither=true;
 bool sr_infinityPlane=false;
 bool sr_laggometer=true;
 bool sr_predictObjects=false;
-bool sr_texturesTruecolor=false;
+bool sr_texturesTruecolor=true;
 
 bool sr_textOut=false;
 bool sr_FPSOut=true;
@@ -1171,6 +1173,38 @@ void sr_Activate(bool active)
     }
     #endif
     #endif
+}
+
+tString & sr_CurrentWindowTitle()
+{
+    static tString title(tOutput("$window_title_menu"));
+    return title;
+}
+
+void sr_SetWindowTitle(tOutput o)
+{
+    tString s;
+    s << o;
+
+    sr_SetWindowTitle(s);
+}
+
+void sr_SetWindowTitle(tString s)
+{
+    sr_CurrentWindowTitle() = s;
+#ifdef MACOSX
+    if(!currentScreensetting.fullscreen)
+#endif
+    {
+#ifndef DEDICATED
+        SDL_WM_SetCaption(s, s);
+#endif
+    }
+}
+
+void sr_SetWindowTitle()
+{
+    sr_SetWindowTitle(sr_CurrentWindowTitle());
 }
 
 //**************************************

@@ -35,6 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tConfiguration.h"
 #include "tLocale.h"
 #include "tSafePTR.h"
+#include "uMenu.h"
 
 #define uMAX_PLAYERS 4
 
@@ -56,6 +57,7 @@ class uAction:public tListItem<uAction>{
 
     uActionTooltip *tooltip_;
 protected:
+    bool shouldShowInGenericConfigurationMenu_;
     int localID;  // unique id on this host
     int globalID; // unique ID send from the server
 public:
@@ -70,6 +72,16 @@ public:
     uActionTooltip * GetTooltip() const
     {
         return tooltip_;
+    }
+    
+    void SetShowInGenericConfigurationMenu( bool shouldShow )
+    {
+        shouldShowInGenericConfigurationMenu_ = shouldShow;
+    }
+    
+    bool ShowInGenericConfigurationMenu() const
+    {
+        return shouldShowInGenericConfigurationMenu_;
     }
 
 #ifdef SLOPPYLOCALE
@@ -99,8 +111,16 @@ public:
 class uActionTooltip: public tConfItemBase
 {
 public:
+    enum Level
+    {
+        Level_Essential, // turns
+        Level_Basic,     // speed control
+        Level_Advanced,  // glancing, camera modes
+        Level_Expert     // game menu, chat
+    };
+
     typedef bool VETOFUNC(int player);
-    uActionTooltip( uAction & action, int numHelp, VETOFUNC * veto = NULL );
+    uActionTooltip( Level level, uAction & action, int numHelp, VETOFUNC * veto = NULL );
     ~uActionTooltip();
 
     //! presents help to the specified player, starting counting at 1. 
@@ -109,6 +129,9 @@ public:
 
     //! call if an action was triggered
     void Count( int player );
+
+    //! call to show the tooltip one more time
+    void ShowAgain();
 private:
     virtual void WriteVal(std::ostream & s );
     virtual void ReadVal(std::istream & s );
@@ -118,6 +141,7 @@ private:
     tString help_;        //!< help languate item
     uAction & action_;    //!< action this belongs to
     VETOFUNC * veto_;  //!< function that can block help display
+    Level level_;      //!< level of sophistication
 };
 
 
@@ -179,8 +203,6 @@ class uInput;
 
 class uBind: public tReferencable< uBind >
 {
-    friend class uMenuItemInput;
-
     virtual bool Delayable()=0;
     virtual bool DoActivate(REAL x)=0;
     REAL lastValue_;
@@ -316,6 +338,30 @@ void su_KeyInit();
 
 // initialize joysticks
 void su_JoystickInit();
+
+// *****************************************************
+//  Menuitem for input selection
+// *****************************************************
+
+class uMenuItemInput: uMenuItem
+{
+    uAction      *act;
+    int         ePlayer;
+    bool        active;
+public:
+    uMenuItemInput(uMenu *M,uAction *a,int p);
+    virtual ~uMenuItemInput(){}
+    virtual void Render(REAL x,REAL y,REAL alpha=1,bool selected=0);
+    virtual void Enter();
+    virtual bool Event(SDL_Event &e);
+    virtual tString Help()
+    {
+        tString ret;
+        ret << helpText << "\n";
+        ret << tOutput("$input_item_help");
+        return ret;
+    }
+};
 
 #endif
 

@@ -101,7 +101,7 @@ protected:
 private:
     tString         connectionName_;            //!< the internet name of the server ("192.168.10.10", "atron.dyndns.org")
     unsigned int    port_;                      //!< the network port the server listens on
-    mutable std::unique_ptr< nAddress > address_; //!< the network address of the server
+    mutable std::auto_ptr< nAddress > address_; //!< the network address of the server
 public:
     inline tString const & GetConnectionName( void ) const;	                                 //!< Gets the internet name of the server ("192.168.10.10", "atron.dyndns.org")
     inline nServerInfoBase const & GetConnectionName( tString & connectionName ) const;	     //!< Gets the internet name of the server ("192.168.10.10", "atron.dyndns.org")
@@ -444,13 +444,7 @@ class nServerInfoAdmin
     friend class nServerInfo;
 
 public:
-    static nServerInfoAdmin* GetAdmin();
 
-    // called before a new server browsing process is started
-    virtual void BeforeNewScan() = 0;
-    // if too few servers are displayed after a rescan
-    virtual void LowerThreshold() = 0;
-    virtual int MinValidServerCount() const = 0;
 protected:
     nServerInfoAdmin();
     virtual ~nServerInfoAdmin();
@@ -461,10 +455,9 @@ private:
     virtual tString	GetOptions()	const = 0;
     virtual tString GetUrl()		const = 0;
     virtual void Classify( nServerInfo::SettingsDigest const & in, 
-                           nServerInfo::Classification & out ) = 0;  //!< classifies the server according to its setting digest
+                           nServerInfo::Classification & out ) const = 0;  //!< classifies the server according to its setting digest
 
-    // returns true if all servers need reclassification. Resets flag after once returning true.
-    virtual bool NeedGlobalReclassification() = 0;
+    static nServerInfoAdmin* GetAdmin();
 };
 
 class nServerInfoCharacterFilter: public tCharacterFilter

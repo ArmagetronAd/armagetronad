@@ -31,7 +31,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tToDo.h"
 #include "tThread.h"
 #include "tLockedQueue.h"
-#include "tSafePTR.h"
 
 //! template that runs void member functions of reference countable objects
 template< class T > class tMemberFunctionRunnerTemplate
@@ -59,7 +58,7 @@ public:
     static void ScheduleBackground( T & object, void (T::*function)()  )
     {
         // schedule the task into a background thread
-        boost::thread(tMemberFunctionRunnerTemplate<T>( object, function ) ).detach();
+        boost::thread(tMemberFunctionRunnerTemplate<T>( object, function ) );
     }
 
     //! schedule a task for execution in the next tToDo call

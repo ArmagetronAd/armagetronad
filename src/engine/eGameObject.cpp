@@ -34,6 +34,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "rScreen.h"
 #include "rGL.h"
 
+#include "eSound.h"
 #include "eSoundMixer.h"
 
 #include "eAdvWall.h"
@@ -46,14 +47,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <map>
 
 uActionPlayer eGameObject::se_turnRight("CYCLE_TURN_RIGHT", -10);
-static uActionTooltip se_turnRightTooltip( eGameObject::se_turnRight, 11, &ePlayer::VetoActiveTooltip );
+static uActionTooltip se_turnRightTooltip( uActionTooltip::Level_Essential, eGameObject::se_turnRight, 11, &ePlayer::VetoActiveTooltip );
 
 uActionPlayer eGameObject::se_turnLeft("CYCLE_TURN_LEFT", -10);
-static uActionTooltip se_turnLeftTooltip( eGameObject::se_turnLeft, 10, &ePlayer::VetoActiveTooltip );
+static uActionTooltip se_turnLeftTooltip( uActionTooltip::Level_Essential, eGameObject::se_turnLeft, 10, &ePlayer::VetoActiveTooltip );
 
 
 // entry and deletion in the list of all gameObjects
 void eGameObject::AddToList(){
+    eSoundLocker locker;
+
     if ( id < 0 )
         AddRef();
 
@@ -61,6 +64,8 @@ void eGameObject::AddToList(){
     grid->gameObjects.Add(this,id);
 }
 void eGameObject::RemoveFromList(){
+    eSoundLocker locker;
+
     int oldID = id;
 
     currentFace = 0;
@@ -73,6 +78,8 @@ void eGameObject::RemoveFromList(){
 }
 
 void eGameObject::RemoveFromListsAll(){
+    eSoundLocker locker;
+
     int oldID = id;
 
     currentFace = 0;
@@ -167,7 +174,7 @@ void eGameObject::Move( const eCoord &dest, REAL startTime, REAL endTime, bool u
 #ifdef DEBUG
     grid->Check();
 #endif
-    if (!finite(dest.x) || !finite(dest.y))
+    if (!isfinite(dest.x) || !isfinite(dest.y))
     {
         st_Breakpoint();
         return;
@@ -184,7 +191,7 @@ void eGameObject::Move( const eCoord &dest, REAL startTime, REAL endTime, bool u
     grid->Range(stop.NormSquared());
 
 #ifdef DEBUG
-    if (!finite(stop.x) || !finite(stop.y))
+    if (!isfinite(stop.x) || !isfinite(stop.y))
     {
         st_Breakpoint();
 
@@ -898,6 +905,9 @@ void eGameObject::RenderAll(eGrid *grid, const eCamera *cam){
                 // but the small flickering error is to be tolerated, especially
                 // since alpha blended game objects tend to gently fade in.
                 int firstAlphaID = firstAlpha->id;
+
+                eSoundLocker locker;
+	       
                 grid->gameObjects.Remove(firstAlpha,firstAlpha->id);
                 grid->gameObjects.Add(firstAlpha,firstAlpha->id);
                 grid->gameObjects.Remove(object,object->id);

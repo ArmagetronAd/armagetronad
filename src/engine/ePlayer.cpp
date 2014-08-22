@@ -60,10 +60,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "nProtoBuf.h"
 #include <time.h>
 #include "tRuby.h"
+#include "eWarmup.h"
+#include "eLadderLog.h"
 
 #include "ePlayer.pb.h"
 
 int se_lastSaidMaxEntries = 8;
+static void se_SaveToChatLog( const ePlayerNetID *player, const tString & message );
 
 // call on commands that only work on the server; quit if it returns true
 bool se_NeedsServer(char const * command, std::istream & s, bool strict )
@@ -83,15 +86,15 @@ tColoredString & operator << (tColoredString &s,const ePlayer &p){
     return s << tColoredString::ColorString(p.rgb[0]/15.0,
                                             p.rgb[1]/15.0,
                                             p.rgb[2]/15.0)
-           << p.Name();
+           << p.Name() << "0xRESETT";
 }
 
 tColoredString & operator << (tColoredString &s,const ePlayerNetID &p){
-    return s << p.GetColoredName();
+    return s << p.GetColoredName() << "0xRESETT";
 }
 
 std::ostream & operator << (std::ostream &s,const ePlayerNetID &p){
-    return s << p.GetColoredName();
+    return s << p.GetColoredName() << "0xRESETT";
 }
 
 eAccessLevelHolder::eAccessLevelHolder()
@@ -164,7 +167,6 @@ static tConfItemLine se_hiddenPlayerPrefixConf( "PLAYER_LIST_HIDDEN_PLAYER_PREFI
 static tConfItemFunc Rename_conf("RENAME", &ForceName);
 static tAccessLevelSetter Rename_confLevel( Rename_conf, tAccessLevel_Moderator );
 
-
 static tReferenceHolder< ePlayerNetID > se_PlayerReferences;
 
 class PasswordStorage
@@ -175,7 +177,7 @@ public:
     nKrawall::nScrambledPassword password;
     bool save;
 
-    PasswordStorage(): save(false){};
+    PasswordStorage(): save(false){}
 };
 
 static bool operator == ( PasswordStorage const & a, PasswordStorage const & b )
@@ -362,7 +364,7 @@ void se_DeletePasswords(){
 class tConfItemPassword:public tConfItemBase{
 public:
     tConfItemPassword():tConfItemBase("PASSWORD"){}
-    ~tConfItemPassword(){};
+    ~tConfItemPassword(){}
 
     // write the complete passwords
     virtual void WriteVal(std::ostream &s){
@@ -834,7 +836,7 @@ typedef bool (*CANHIDEFUNC)( ePlayerNetID const * hider );
 typedef bool (*HIDEFUNC)( ePlayerNetID const * hider, ePlayerNetID const * seeker );
 
 // secret console messages: If CanHideFunc returns false it is displayed to everyone. Else, for each player we apply HideFunc, to see if one can hide his message to the other. The two exceptions get a message anyway.
-void se_SecretConsoleOut( tOutput const & message, ePlayerNetID const * hider, HIDEFUNC HideFunc, ePlayerNetID const * exception1, ePlayerNetID const * exception2 = 0, CANHIDEFUNC CanHideFunc = 0 )
+void se_SecretConsoleOut( tOutput const & message, ePlayerNetID const * hider, HIDEFUNC HideFunc, ePlayerNetID const * exception1 = 0, ePlayerNetID const * exception2 = 0, CANHIDEFUNC CanHideFunc = 0 )
 {
     // high enough access levels are never secret
     if ( CanHideFunc != 0 && !(*CanHideFunc)( hider ) )
@@ -875,7 +877,7 @@ void se_SecretConsoleOut( tOutput const & message, ePlayerNetID const * hider, H
 
 #ifdef KRAWALL_SERVER
 
-static eLadderLogWriter se_authorityBlurbWriter("AUTHORITY_BLURB", true);
+static eLadderLogWriter se_authorityBlurbWriter( "AUTHORITY_BLURB", true, "blurb player text+" );
 
 static void ResultCallback( nKrawall::nCheckResult const & result )
 {
@@ -1138,6 +1140,8 @@ static const tString& se_UserName()
     return ret;
 }
 
+static char const * se_defaultGID = "@forums";
+
 ePlayer::ePlayer():cockpit(0){
     nAuthentication::SetUserPasswordCallback(&PasswordCallback);
 #ifdef KRAWALL_SERVER
@@ -1161,7 +1165,7 @@ ePlayer::ePlayer():cockpit(0){
         name << "Player " << id+1;
 
     // default global ID so logins are redirected to the forums
-    globalID = "@forums";
+    globalID = se_defaultGID;
 
 #ifndef DEDICATED
     tString confname;
@@ -1202,7 +1206,7 @@ ePlayer::ePlayer():cockpit(0){
                    centerIncamOnTurn) );
 
     confname.Clear();
-    startCamera=CAMERA_SMART;
+    startCamera=CAMERA_CUSTOM;
     confname << "START_CAM_"<< id+1;
     StoreConfitem(tNEW(tConfItem<eCamMode>) (confname,
                   "$start_cam_help",
@@ -1332,6 +1336,8 @@ ePlayer::~ePlayer(){
     DeleteConfitems();
 }
 
+extern uActionTooltip::Level su_helpLevel;
+
 #ifndef DEDICATED
 void ePlayer::Render(){
     if (cam) cam->Render();
@@ -1340,7 +1346,7 @@ void ePlayer::Render(){
     double now = tSysTimeFloat();
     if( se_GameTime() > 1 && now-lastTooltip_ > 1 && !rConsole::CenterDisplayActive() )
     {
-        if( uActionTooltip::Help( ID()+1 ) || uActionTooltip::Help( 0 ) || VetoActiveTooltip(ID()+1) )
+        if( uActionTooltip::Help( ID()+1 ) || uActionTooltip::Help( 0 ) || VetoActiveTooltip(ID()+1) || su_helpLevel != uActionTooltip::Level_Expert )
             lastTooltip_ = now;
         else
             lastTooltip_ = now+60;
@@ -1625,7 +1631,7 @@ static void se_DisplayChatLocallyClient( ePlayerNetID* p, const tString& message
         if ( se_silenceEnemies && !sentFromTeamMember )
             return;
         
-        if (!p->Object() || !p->Object()->Alive())
+        if ( p->CurrentTeam() && ( !p->Object() || !p->Object()->Alive() ) )
             con << tOutput("$dead_console_decoration");
         
         con << actualMessage << "\n";
@@ -1803,7 +1809,7 @@ static ePlayerNetID * se_FindPlayerInChatCommand( ePlayerNetID * sender, char co
 
     if (player == "" )
     {
-        sn_ConsoleOut( tOutput( "$chatcommand_requires_player", command ), sender->Owner() );
+        sn_ConsoleOut( tOutput( "$chatcommand_requires_player", command ), sender ? sender->Owner() : 0 );
         return 0;
     }
 
@@ -2166,9 +2172,9 @@ static tAccessLevel se_adminAccessLevel = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_adminAccessLevelConf( "ACCESS_LEVEL_ADMIN", se_adminAccessLevel );
 static tAccessLevelSetter se_adminAccessLevelConfLevel( se_adminAccessLevelConf, tAccessLevel_Owner );
 
+static eLadderLogWriter se_commandWriter( "COMMAND", true, "command player text+" );
+
 void handle_command_intercept( ePlayerNetID *p, tString const & command, std::istream & s, tString const & say ) {
-    static eLadderLogWriter se_commandWriter( "COMMAND", true );
-    
     tString commandArguments;
     commandArguments.ReadLine( s );
     
@@ -2804,6 +2810,9 @@ static void se_AdminAdmin( ePlayerNetID * p, std::istream & s )
     eAdminConsoleFilter consoleFilter( p->Owner() );
     try
     {
+        // forbid CASACL
+        tCasaclPreventer preventer;
+
         tConfItemBase::LoadLine(stream);
     }
     catch (tAbortLoading)
@@ -2848,18 +2857,42 @@ static void handle_chat_admin_commands( ePlayerNetID * p, tString const & comman
     }
     else if ( command == "/invite" )
     {
+        spam.factor_ = 0.4;
+        if( spam.Block() )
+        {
+            return;
+        }
+
         se_Invite( command, p, s, &eTeam::Invite );
     }
     else if ( command == "/uninvite" )
     {
+        spam.factor_ = 0.4;
+        if( spam.Block() )
+        {
+            return;
+        }
+
         se_Invite( command, p, s, &eTeam::UnInvite );
     }
     else if ( command == "/lock" )
     {
+        spam.factor_ = 0.4;
+        if( spam.Block() )
+        {
+            return;
+        }
+
         se_Lock( command, p, s, true );
     }
     else if ( command == "/unlock" )
     {
+        spam.factor_ = 0.4;
+        if( spam.Block() )
+        {
+            return;
+        }
+
         se_Lock( command, p, s, false );
     }
 #endif
@@ -3022,10 +3055,7 @@ static void se_ChatMe( ePlayerNetID * p, std::istream & s, eChatSpamTester & spa
     se_BroadcastChatLine( p, console );
     console << "\n";
     sn_ConsoleOut(console,0);
-
-    tString str;
-    str << p->GetUserName() << " /me " << msg;
-    se_SaveToChatLog(str);
+    se_SaveToChatLog( p, tString( "/me " ) + msg );
     return;
 }
 
@@ -3043,8 +3073,21 @@ static void se_ChatTeamLeave( ePlayerNetID * p )
     }
 
     eTeam * leftTeam = p->NextTeam();
-    if ( leftTeam )
+
+    if ( se_warmup.IsWarmupMode() ) // allow quickleaving in warmup mode
     {
+        if( p->Object() && p->Object()->Alive() )
+        {
+            p->Object()->Kill();
+        }
+        p->SetTeam(0);
+        p->SetTeamWish(0);
+        p->UpdateTeam();
+        p->RequestSync();
+    }
+    else if ( leftTeam )
+    {
+        p->SetTeamWish(0);
         if ( !leftTeam )
             leftTeam = p->CurrentTeam();
 
@@ -3060,8 +3103,6 @@ static void se_ChatTeamLeave( ePlayerNetID * p )
                                     tColoredString::RemoveColors(p->GetName()) ) );
         }
     }
-
-    p->SetTeamWish(0);
 }
 
 static bool se_filterColorTeam=false;
@@ -3087,10 +3128,7 @@ static void se_ChatShout( ePlayerNetID * p, tString const & say, eChatSpamTester
     {
         se_BroadcastChat( p, say );
         se_DisplayChatLocally( p, say);
-        
-        tString s;
-        s << p->GetUserName() << ' ' << say;
-        se_SaveToChatLog(s);
+        se_SaveToChatLog( p , say );
     }
 }
 
@@ -3278,6 +3316,13 @@ static void se_ListTeam( ePlayerNetID * receiver, eTeam * team )
     {
         tos << " " << tOutput( "$invite_team_locked_list" );
     }
+    if ( se_warmup.IsWarmupMode() )
+    {
+        if ( team->IsReady() )
+            tos << " " << tOutput( "$team_list_ready" );
+        else
+            tos << " " << tOutput( "$team_list_not_ready" );
+    }
     tos << ":\n";
 
     // send team members
@@ -3336,6 +3381,31 @@ static void se_ChatTeams( ePlayerNetID * p )
     se_ListTeams( p );
 }
 
+static void se_ListInvites( ePlayerNetID *receiver )
+{
+    tString out;
+    out << tOutput( "$invites_header" ) << '\n';
+    for ( int i = eTeam::teams.Len() - 1; i >= 0; --i )
+    {
+        eTeam *team = eTeam::teams[ i ];
+        std::vector< const ePlayerNetID * > invites = team->InterestingInvitedPlayers();
+        if ( !invites.empty() )
+            out << *team << ": " << invites << '\n';
+    }
+    sn_ConsoleOut( out, receiver ? receiver->Owner() : 0 );
+}
+
+static void ListInvitesFunc( std::istream & s )
+{
+    if ( se_NeedsServer( "INVITES", s ) )
+        return;
+    se_ListInvites( 0 );
+}
+
+static tConfItemFunc listInvitesConfFunc( "INVITES", &ListInvitesFunc );
+
+void se_ListPastChatters(ePlayerNetID * receiver);
+
 static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s, tString command )
 {
     tString search;
@@ -3354,11 +3424,30 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s, tString co
     for ( int i2 = se_PlayerNetIDs.Len()-1; i2>=0; --i2 )
     {
         ePlayerNetID* p2 = se_PlayerNetIDs(i2);
+
         tColoredString tos;
         if ( doSearch )
             tos << "  ";
         tos << p2->Owner();
         tos << ": ";
+        tos << p2->GetColoredName()
+            << tColoredString::ColorString( -1, -1, -1)
+            << " ";
+        if ( se_warmup.IsWarmupMode() && p2->IsHuman() && p2->CurrentTeam() )
+        {
+            tos << "( ";
+            if ( p2->ready )
+            {
+                tos << tOutput("$player_list_ready")
+                    << tColoredString::ColorString( -1, -1, -1);
+            }
+            else
+            {
+                tos << tOutput("$player_list_not_ready")
+                    << tColoredString::ColorString( -1, -1, -1);
+            }
+            tos << " )";
+        }
         if ( p2->GetAccessLevel() < tAccessLevel_Default && !se_Hide( p2, receiver ) )
         {
 #ifdef KRAWALL_SERVER
@@ -3366,9 +3455,7 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s, tString co
 #else
             hidden = false;
 #endif
-            tos << p2->GetColoredName()
-                << tColoredString::ColorString( -1, -1, -1)
-                << " ( ";
+            tos << "( ";
             if ( hidden )
                 tos << se_hiddenPlayerPrefix;
 #ifdef KRAWALL_SERVER
@@ -3387,7 +3474,7 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s, tString co
         }
         else
         {
-            tos << p2->GetColoredName() << tColoredString::ColorString(1,1,1) << " ( )";
+            tos << "( )";
         }
         if ( ( p2->Owner() != 0 && tCurrentAccessLevel::GetAccessLevel() <= se_ipAccessLevel ) || ( p2->Owner() != 0 && p2->Owner() == receiver->Owner() ) )
         {
@@ -3437,6 +3524,9 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s, tString co
     else
     {
         sn_ConsoleOut( tOutput( "$player_list_end", command, count ) , receiver->Owner() );
+
+        if(tCurrentAccessLevel::GetAccessLevel() < tAccessLevel_DefaultAuthenticated)
+            se_ListPastChatters(receiver);
     }
 }
 
@@ -3466,12 +3556,19 @@ static void se_ChatShuffle( ePlayerNetID * p, std::istream & s )
     // /teamshuffle +/-<dist>: shuffles you dist to the outside/inside
     // con << msgRest << "\n";
     int IDNow = p->TeamListID();
+    int len = eTeam::maxPlayers;
     if (!p->CurrentTeam())
     {
-        sn_ConsoleOut(tOutput("$player_not_on_team"), p->Owner());
-        return;
+        // players start on the outside by default
+        if( IDNow < 0 )
+        {
+            IDNow = len-1;
+        }
     }
-    int len = p->CurrentTeam()->NumPlayers();
+    else
+    {
+        len = p->CurrentTeam()->NumPlayers();
+    }
 
     // but read the target position as additional parameter
     int IDWish = len-1; // default to shuffle to the outside
@@ -3508,7 +3605,7 @@ static void se_ChatShuffle( ePlayerNetID * p, std::istream & s )
     if (IDWish >= len)
         IDWish = len-1;
 
-    if(IDWish < IDNow)
+    if( !p->CurrentTeam() || IDWish < IDNow )
     {
 #ifndef KRAWALL_SERVER
         if ( !se_allowShuffleUp )
@@ -3531,17 +3628,64 @@ static void se_ChatShuffle( ePlayerNetID * p, std::istream & s )
         return;
     }
 
-    p->CurrentTeam()->Shuffle( IDNow, IDWish );
-    se_ListTeam( p, p->CurrentTeam() );
+    if( p->CurrentTeam() )
+    {
+        // really shuffle
+        p->CurrentTeam()->Shuffle( IDNow, IDWish );
+        se_ListTeam( p, p->CurrentTeam() );
+    }
+    else
+    {
+        // just store the shuffle wish for later
+        p->SetShuffleWish( IDWish );
+    }
 }
 
+void ePlayerNetID::SetShuffleWish( int pos )
+{
+    tASSERT( !CurrentTeam() );
+
+    if ( GetShuffleSpam().ShouldAnnounce() )
+    {
+        sn_ConsoleOut( GetShuffleSpam().ShuffleMessage( this, pos+1 ) );
+    }
+
+    teamListID = pos;
+}
+
+void se_Ready( ePlayerNetID * p )
+{
+    if( !p->CurrentTeam() )
+    {
+        sn_ConsoleOut(tOutput("$player_ready_noteam"), p->Owner());
+        return;
+    }
+    if( !se_warmup.IsWarmupMode() )
+    {
+        sn_ConsoleOut(tOutput("$player_ready_onlywarmup"), p->Owner());
+        return;
+    }
+
+    p->ready = !p->ready;
+
+    p->RequestSync();
+
+    if( p->ready )
+    {
+        sn_ConsoleOut(tOutput("$player_ready", p->GetColoredName()), p->Owner());
+    }
+    else
+    {
+        sn_ConsoleOut(tOutput("$player_ready_not", p->GetColoredName()), p->Owner());
+    }
+}
 class eHelpTopic {
     tString m_shortdesc, m_text;
 
     // singleton accessor
     static std::map<tString, eHelpTopic> & GetHelpTopics();
 public:
-    eHelpTopic() {};
+    eHelpTopic() {}
     eHelpTopic(tString const &shortdesc, tString const &text) : m_shortdesc(shortdesc), m_text(text) {
     }
 
@@ -3864,6 +4008,18 @@ void se_ChatHandlerServer( unsigned short id, tColoredString const & say, nMessa
                         }
                         return;
                     }
+                    else if (command == "/ready")
+                    {
+                        spam.lastSaidType_ = eChatMessageType_Command;
+                        se_Ready( p );
+                        return;
+                    }
+                    else if ( command == "/invites" )
+                    {
+                        spam.lastSaidType_ = eChatMessageType_Command;
+                        se_ListInvites( p );
+                        return;
+                    }
                     else if (command == "/help") {
                         spam.lastSaidType_ = eChatMessageType_Command;
                         se_Help( p, p, s );
@@ -3961,7 +4117,14 @@ void ePlayerNetID::Chat(const tString &s_orig)
         {
         case nCLIENT:
         {
-            se_ChatMessageForServer( this, s )->BroadCast();
+            if( s_orig.StartsWith( "/ready") )
+            {
+                se_Ready( this );
+            }
+            else
+            {
+                se_ChatMessageForServer( this, s )->BroadCast();
+            }
             break;
         }
         case nSERVER:
@@ -3988,7 +4151,9 @@ void ePlayerNetID::Chat(const tString &s_orig)
                     std::stringstream s(static_cast< char const * >( params ) );
                     tConfItemBase::LoadAll(s);
                 }
+#ifdef DEBUG
                 std::cout << "console selected\n";
+#endif
             } else
                 se_DisplayChatLocally( this, s );
 
@@ -4111,7 +4276,7 @@ public:
         tString actualString;
         if(pos - len == 0 || ( pos - len == 6 && string.StartsWith("/team ") ) ) {
             actualString = match + ": ";
-        } else if(string.StartsWith("/admin ")) {
+        } else if(string.StartsWith("/admin ") || string.StartsWith("/vote shuffle ")) {
             actualString = Simplify(match) + " ";
         } else {
             int i;
@@ -4281,7 +4446,7 @@ static void chat( ePlayer * chatter )
 static bool se_allowControlDuringChat = false;
 static nSettingItem<bool> se_allowControlDuringChatConf("ALLOW_CONTROL_DURING_CHAT",se_allowControlDuringChat);
 
-uActionPlayer se_toggleSpectator("TOGGLE_SPECTATOR", 0);
+uActionPlayer se_toggleSpectator("TOGGLE_SPECTATOR", -7);
 
 bool ePlayer::Act(uAction *act,REAL x){
     eGameObject *object=NULL;
@@ -4297,7 +4462,7 @@ bool ePlayer::Act(uAction *act,REAL x){
         return true;
     }
     else if (!se_chatter && s_chat==*reinterpret_cast<uActionPlayer *>(act)){
-        if(x>0) {
+        if(x>0 && sn_GetNetState() != nSTANDALONE ) {
             chat( this );
         }
         return true;
@@ -4415,19 +4580,13 @@ void ePlayer::Init(){
     se_Players = tNEW( ePlayer[MAX_PLAYERS] );
 
     int i;
-    for(i=MAX_INSTANT_CHAT-1;i>=0;i--){
+    for( i = MAX_INSTANT_CHAT-1; i >= 0; i-- )
+    {
         tString id;
-        id << "INSTANT_CHAT_";
-        id << i+1;
-        tOutput desc;
-        desc.SetTemplateParameter(1, i+1);
-        desc << "$input_instant_chat_text";
-
-        tOutput help;
-        help.SetTemplateParameter(1, i+1);
-        help << "$input_instant_chat_help";
-        ePlayer::se_instantChatAction[i]=tNEW(uActionPlayer) (id, desc, help);
-        //,desc,       "Issues a special instant chat macro.");
+        id << "INSTANT_CHAT_" << ( i + 1 );
+        uActionPlayer *action = tNEW( uActionPlayer )( id, tOutput( "$input_instant_chat_text" ), tOutput( "$input_instant_chat_help" ), 100 );
+        action->SetShowInGenericConfigurationMenu( false );
+        ePlayer::se_instantChatAction[ i ] = action;
     }
 
 
@@ -4453,7 +4612,7 @@ void ePlayer::Exit(){
     se_Players = NULL;
 }
 
-uActionPlayer ePlayer::s_chat("CHAT");
+uActionPlayer ePlayer::s_chat("CHAT",-8);
 
 // only display chat in multiplayer games
 static bool se_ChatTooltipVeto(int)
@@ -4461,8 +4620,8 @@ static bool se_ChatTooltipVeto(int)
     return sn_GetNetState() == nSTANDALONE;
 }
 
-uActionTooltip ePlayer::s_chatTooltip(ePlayer::s_chat, 1, &se_ChatTooltipVeto);
-uActionTooltip s_toggleSpectatorTooltip(se_toggleSpectator, 1, &se_ChatTooltipVeto);
+uActionTooltip ePlayer::s_chatTooltip(uActionTooltip::Level_Expert, ePlayer::s_chat, 1, &se_ChatTooltipVeto);
+uActionTooltip s_toggleSpectatorTooltip(uActionTooltip::Level_Expert, se_toggleSpectator, 1, &se_ChatTooltipVeto);
 
 int pingCharity = 100;
 static const int maxPingCharity = 300;
@@ -4490,7 +4649,142 @@ static int IMPOSSIBLY_LOW_SCORE=(-1 << 31);
 
 static nSpamProtectionSettings se_chatSpamSettings( 1.0f, "SPAM_PROTECTION_CHAT", tOutput("$spam_protection") );
 
-ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), timeCreated_( tSysTimeFloat() ), allowTeamChange_(false), registeredMachine_(0), pID(p), chatSpam_( se_chatSpamSettings )
+bool ePlayerNetID::Scramble = false;
+std::vector<ePlayerNetID*> ePlayerNetID::ScramblePlayerIDs;
+
+class eMachineDecoratorSpam: public nMachineDecorator
+{
+public:
+    nSpamProtection chatSpam;
+    eShuffleSpamTester shuffleSpam;
+    eChatLastSaid lastSaid;
+
+    eMachineDecoratorSpam( nMachine & m ): nMachineDecorator( m ), chatSpam( se_chatSpamSettings ){}
+
+    virtual void OnDestroy()
+    {
+        delete this;
+    }
+
+    virtual void OnBan()
+    {
+        // Don't punish the player with restrictive spam checks when they
+        // return from their ban.
+        chatSpam.ResetSpam();
+    }
+};
+
+static eMachineDecoratorSpam & se_GetSpam( ePlayerNetID & p )
+{
+    nMachine & machine = p.GetMachine();
+    eMachineDecoratorSpam * spam = machine.GetDecorator< eMachineDecoratorSpam >();
+    if( !spam )
+    {
+        spam = tNEW(eMachineDecoratorSpam)( machine );
+    }
+    return *spam;
+}
+
+nSpamProtection & ePlayerNetID::GetChatSpam()
+{
+    return se_GetSpam( *this ).chatSpam;
+}
+
+eChatLastSaid & ePlayerNetID::GetLastSaid()
+{
+    return se_GetSpam( *this ).lastSaid;
+}
+
+eShuffleSpamTester & ePlayerNetID::GetShuffleSpam()
+{
+    return se_GetSpam( *this ).shuffleSpam;
+}
+
+struct LastChatData
+{
+    LastChatData(nMachine const & machine_, eChatSaidEntry const & entry_)
+    :machine(&machine_), entry(&entry_)
+    {
+    }
+
+    nMachine const * machine;
+    eChatSaidEntry const * entry;
+};
+
+void se_ListPastChatters(ePlayerNetID * receiver)
+{
+    static const unsigned int MaxReport = 3;
+    std::vector<LastChatData> report;
+
+    // list dead connections
+    for(nMachine::iterator m; m.Valid(); ++m)
+    {
+        nMachine & machine = *m;
+        eMachineDecoratorSpam * spam = machine.GetDecorator<eMachineDecoratorSpam>();
+        if(spam && spam->lastSaid.Disconnected())
+        {
+            eChatLastSaid::SaidList const & said = spam->lastSaid.LastSaid();
+            eChatSaidEntry const * recentLastSaid = NULL;
+            for(int i = said.size()-1; i >= 0; --i)
+            {
+                eChatSaidEntry const & lastSaid = said[i];
+                if(lastSaid.Type() != eChatMessageType_Team && lastSaid.Type() != eChatMessageType_Private)
+                {
+                    if(!recentLastSaid || recentLastSaid->Time() < lastSaid.Time())
+                        recentLastSaid = &lastSaid;
+                }
+            }
+
+                    
+            if(recentLastSaid)
+            {
+                // put report in list
+                report.push_back(LastChatData(machine, *recentLastSaid));
+                
+                // let it bubble up
+                for(int j = report.size()-1; j > 0; --j)
+                {
+                    if(report[j].entry->Time() > report[j-1].entry->Time())
+                    {
+                        std::swap(report[j-1], report[j]);
+                    }
+                }
+                
+                // cull reports
+                if(report.size() > MaxReport)
+                    report.pop_back();
+            }
+        }
+    }
+
+    // and print
+    if(report.size() > 0)
+    {
+        sn_ConsoleOut( tOutput( "$player_list_disconnected" ), receiver->Owner() );
+    }
+
+    for(std::vector<LastChatData>::iterator iter = report.begin(); iter != report.end(); ++iter)
+    {
+        tColoredString line;
+        LastChatData const & data = *iter;
+        eChatSaidEntry const & lastSaid = *(data.entry);
+        
+        if ( tCurrentAccessLevel::GetAccessLevel() <= se_ipAccessLevel )
+        {
+            tString IP = data.machine->GetIP();
+            if ( IP.Len() > 1 )
+            {
+                line << "IP = " << IP << "; ";
+            }
+        }
+        
+        line << lastSaid.PlayerName() << ": " << lastSaid.Said() << "\n";
+        
+        sn_ConsoleOut( line, receiver->Owner() );
+    }
+}
+
+ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), timeCreated_( tSysTimeFloat() ), invitations_(), invitationsChanged_( false ), allowTeamChange_(false), registeredMachine_(0), pID(p), ready(false)
 {
     flagOverrideChat = false;
     flagChatState = false; 
@@ -4504,7 +4798,7 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), timeC
 
     color.r_ = color.g_ = color.b_ = 15;
 
-    greeted             = true;
+    greeted             = false;
     chatting_           = false;
     spectating_         = false;
     stealth_            = false;
@@ -4579,6 +4873,202 @@ void ePlayerNetID::Activity()
 static int se_maxPlayersPerIP = 4;
 static tSettingItem<int> se_maxPlayersPerIPConf( "MAX_PLAYERS_SAME_IP", se_maxPlayersPerIP );
 
+// should unworthy spectators be kicked if the server is full?
+static bool se_kickUnworthy=false;
+tSettingItem< bool > se_kickUnworthyConf( "KEEP_PLAYER_SLOT", se_kickUnworthy );
+
+// access level needed to grant immunity against all forms of idle kicks
+static tAccessLevel se_autokickImmunity = tAccessLevel_TeamLeader;
+static tSettingItem< tAccessLevel > se_autokickImmunityConf( "ACCESS_LEVEL_AUTOKICK_IMMUNITY", se_autokickImmunity );
+
+// compares the worth of two players. Returns 1 if the first is better, -1 if the second is better, 0 if they are equal.
+static int se_comparePlayerWorth( ePlayerNetID * a, ePlayerNetID * b, int nullPointerSign=1 )
+{
+    // check for NULL pointers
+    if( !a )
+    {
+        if ( !b )
+        {
+            return 0;
+        }
+        else
+        {
+            return -nullPointerSign;
+        }
+    }
+    else
+    {
+        if ( !b )
+        {
+            return nullPointerSign;
+        }
+    }
+
+    // potential players > spectators
+    if ( !se_GetManagedTeam( a ) )
+    {
+        if( se_GetManagedTeam( b ) )
+        {
+            return -1;
+        }
+    }
+    else
+    {
+        if( !se_GetManagedTeam( b ) )
+        {
+            return 1;
+        }
+    }
+
+    // actual players > potential players
+    if ( !a->CurrentTeam() )
+    {
+        if( b->CurrentTeam() )
+        {
+            return -1;
+        }
+    }
+    else
+    {
+        if( !b->CurrentTeam() )
+        {
+            return 1;
+        }
+    }
+
+    // access level counts
+#ifdef KRAWALL_SERVER
+    if( a->GetAccessLevel() < b->GetAccessLevel() )
+    {
+        return 1;
+    }
+    else if( a->GetAccessLevel() > b->GetAccessLevel() )
+    {
+        return -1;
+    }
+#endif
+
+    // players with login process > players without
+    if( !nAuthentication::LoginInProcess( a ) )
+    {
+        if( nAuthentication::LoginInProcess( b ) )
+        {
+            return -1;
+        }
+    }
+    else
+    {
+        if( !nAuthentication::LoginInProcess( b ) )
+        {
+            return 1;
+        }
+    }
+
+    // players online for shorter times are more worthy
+    if( a->GetTimeCreated() < b->GetTimeCreated() )
+    {
+        return 1;
+    }
+    else if( a->GetTimeCreated() > b->GetTimeCreated() )
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
+// the user that last logged in; spare him.
+static int se_kickUnworthySpare=-1;
+
+// clear out one unworthy spectator
+static void se_KickUnworthy()
+{
+    int userToSpare=se_kickUnworthySpare;
+
+    static REAL banForMinutes = 0;
+    static double roundBegin = -1;
+    double lastRoundBegin = roundBegin;
+
+    // each player joining increases the ban, rounds passing decrease it
+    if( userToSpare >= 0 )
+    {
+        banForMinutes += .05f;
+    }
+    else
+    {
+        banForMinutes *= 0.875;
+        roundBegin = tSysTimeFloat();
+    }
+
+    // nothing to do?
+    if( !se_kickUnworthy || sn_NumUsers() < sn_MaxUsers() )
+    {
+        return;
+    }
+
+    // find the most worthy player for each client
+    ePlayerNetID * mostWorthy[MAXCLIENTS+2];
+    for( int i = MAXCLIENTS+1; i >= 0; --i )
+    {
+        mostWorthy[i] = NULL;
+    }
+    for( int i = se_PlayerNetIDs.Len() - 1; i >=0; --i )
+    {
+        ePlayerNetID * p = se_PlayerNetIDs(i);
+        ePlayerNetID * & rival = mostWorthy[p->Owner()];
+        if( se_comparePlayerWorth( p, rival ) > 0 )
+        {
+            rival = p;
+        }
+    }
+
+    // find the most unworthy client
+    int mostUnworthyUser = 0;
+
+    for( int i = MAXCLIENTS; i >= 1; --i )
+    {
+        // NULL players are actually more worthy here now
+        ePlayerNetID * player = mostWorthy[i];
+        if( ( i != userToSpare && sn_Connections[i].socket ) && 
+            // don't kick players with immune access level
+            !( player && se_autokickImmunity >= player->GetAccessLevel() ) && 
+            // give players one round to sign in
+            !( player && nAuthentication::LoginInProcess(player) && player->GetTimeCreated() >= lastRoundBegin ) && 
+            ( !mostUnworthyUser || se_comparePlayerWorth( mostWorthy[mostUnworthyUser], mostWorthy[i], -1 ) > 0 ) )
+        {   
+            mostUnworthyUser = i;
+        }
+    }
+
+    // take care not to auto-kick someone with a high access level
+    if( mostUnworthyUser )
+    {
+        tString name;
+        ePlayerNetID * player = mostWorthy[mostUnworthyUser];
+        if( player )
+        {
+            mostWorthy[mostUnworthyUser]->PrintName( name );
+        }
+        else
+        {
+            name = "?";
+        }
+        
+        con << tOutput( "$network_kill_unworthy_log", name, banForMinutes );
+        if( banForMinutes > 1 )
+        {
+            nMachine::GetMachine( mostUnworthyUser ).Ban( banForMinutes*60, 
+                                                          tString( 
+                                                              tOutput( "$network_kill_unworthy_banreason" ) ) );
+            sn_DisconnectUser( mostUnworthyUser, tOutput( "$network_kill_unworthy_ban", banForMinutes ) );
+        }
+        else
+        {   
+            sn_DisconnectUser( mostUnworthyUser, tOutput( "$network_kill_unworthy" ) );
+        }
+    }
+}
+
 // array of players in legacy spectator mode: they have been
 // deleted by their clients, but no new player has popped up for them yet
 static tJUST_CONTROLLED_PTR< ePlayerNetID > se_legacySpectators[MAXCLIENTS+2];
@@ -4596,12 +5086,19 @@ static void se_ClearLegacySpectator( int owner )
     se_legacySpectators[ owner ] = NULL;
 }
 
-// callback clearing the legacy spectator when a client enters or leaves
-static void se_LegacySpectatorClearer()
+static void se_PlayerLoginLogoutCallback()
 {
+    // clear the legacy spectator when a client enters or leaves
     se_ClearLegacySpectator( nCallbackLoginLogout::User() );
+
+    // always keep one slot free
+    if( nCallbackLoginLogout::Login() )
+    { 
+        se_kickUnworthySpare=nCallbackLoginLogout::User();
+        st_ToDo( se_KickUnworthy );
+    }
 }
-static nCallbackLoginLogout se_legacySpectatorClearer( se_LegacySpectatorClearer );
+static nCallbackLoginLogout se_playerLoginLogoutCallback( se_PlayerLoginLogoutCallback );
 
 
 
@@ -4616,6 +5113,10 @@ void ePlayerNetID::MyInitAfterCreation()
     if ( Owner() != 0 && sn_GetNetState() == nSERVER )
     {
         this->RegisterWithMachine();
+
+        // reset spam timer
+        GetChatSpam().ResetTime();
+
         if ( se_maxPlayersPerIP < nMachine::GetMachine(Owner()).GetPlayerCount() )
         {
             // kill them
@@ -4629,11 +5130,12 @@ void ePlayerNetID::MyInitAfterCreation()
         // clear old legacy spectator that may be lurking around
         se_ClearLegacySpectator( Owner() );
 
-        // get suspension count
-        if ( GetVoter() )
+        // get silenced state and suspension count
+        eVoter *voter = eVoter::GetPersistentVoter( Owner() );
+        if ( voter )
         {
-            suspended_ = GetVoter()->suspended_;
-            silenced_ = GetVoter()->silenced_;
+            suspended_ = voter->suspended_;
+            silenced_ = voter->silenced_;
         }
     }
 
@@ -4699,7 +5201,7 @@ static void se_PlayerRemovedHandler( Engine::PlayerRemoved const & removed, nSen
 
 static nProtoBufDescriptor< Engine::PlayerRemoved > se_playerRemovedDescriptor(202,&se_PlayerRemovedHandler);
 
-static eLadderLogWriter se_playerLeftWriter("PLAYER_LEFT", true);
+static eLadderLogWriter se_playerLeftWriter( "PLAYER_LEFT", true, "player ip" );
 
 void ePlayerNetID::RemoveFromGame()
 {
@@ -4707,12 +5209,14 @@ void ePlayerNetID::RemoveFromGame()
     this->UnregisterWithMachine();
 
     // release voter
-    if ( this->voter_ )
-        this->voter_->RemoveFromGame();
-    this->voter_ = 0;
+    eVoter *voter = eVoter::GetPersistentVoter( Owner() );
+    if ( voter )
+        voter->RemoveFromGame();
 
     // log scores
     LogScoreDifference();
+
+    bool logLeave = false;
 
     if ( sn_GetNetState() != nCLIENT )
     {
@@ -4734,9 +5238,7 @@ void ePlayerNetID::RemoveFromGame()
 
             if ( IsHuman() && sn_GetNetState() == nSERVER && NULL != sn_Connections[Owner()].socket )
             {
-                tString ladder;
-                se_playerLeftWriter << userName_ << nMachine::GetMachine(Owner()).GetIP();
-                se_playerLeftWriter.write();
+                logLeave = true;
                 tString notificationMessage(userName_);
                 notificationMessage << " left the grid";
                 se_sendEventNotification(tString("Player left"), notificationMessage);
@@ -4753,7 +5255,12 @@ void ePlayerNetID::RemoveFromGame()
     SetTeam( NULL );
     UpdateTeam();
     ControlObject( NULL );
-    // currentTeam = NULL;
+
+    if( logLeave )
+    {
+        se_playerLeftWriter << userName_ << nMachine::GetMachine(Owner()).GetIP();
+        se_playerLeftWriter.write();
+    }
 }
 
 bool ePlayerNetID::ActionOnQuit()
@@ -4865,7 +5372,7 @@ protected:
 
     virtual P ReadRawVal(tString const & name, std::istream &s) const = 0;
     virtual P GetDefault() const = 0;
-    virtual void TransformName( tString & name ) const {};
+    virtual void TransformName( tString & name ) const {}
 
     virtual void ReadVal(std::istream &s)
     {
@@ -4902,6 +5409,11 @@ private:
     }
 
     virtual bool Save(){
+        return false;
+    }
+
+    // CAN this be saved at all?
+    virtual bool CanSave(){
         return false;
     }
 };
@@ -5037,6 +5549,7 @@ void se_ListAdmins ( ePlayerNetID * receiver, std::istream &s, tString command )
                        receiver->Owner() );
         return;
     }
+    int client = receiver ? receiver->Owner() : 0;
 
     bool canSeeEverything = false;
     if ( receiver == 0 || receiver->GetAccessLevel() <= se_accessLevelListAdminsSeeEveryone )
@@ -5073,7 +5586,7 @@ void se_ListAdmins ( ePlayerNetID * receiver, std::istream &s, tString command )
         }
         else
         {
-            sn_ConsoleOut( tOutput( "$admin_list_cant_see", command ), receiver->Owner() );
+            sn_ConsoleOut( tOutput( "$admin_list_cant_see", command ), client );
             return;
         }
     }
@@ -5099,7 +5612,7 @@ void se_ListAdmins ( ePlayerNetID * receiver, std::istream &s, tString command )
             }
             if ( !canSeeEverything && highest > se_adminListMinAccessLevel )
             {
-                sn_ConsoleOut( tOutput("$admin_list_cant_see"), receiver->Owner() );
+                sn_ConsoleOut( tOutput("$admin_list_cant_see"), client );
                 return;
             }
         }
@@ -5238,7 +5751,7 @@ void se_ListAdmins ( ePlayerNetID * receiver, std::istream &s, tString command )
         }
 
         output << "\n";
-        sn_ConsoleOut( output, receiver->Owner() );
+        sn_ConsoleOut( output, client );
 
         ++advancement;
     }
@@ -5246,7 +5759,7 @@ void se_ListAdmins ( ePlayerNetID * receiver, std::istream &s, tString command )
     tOutput sumup;
     sumup = "";
 
-    sn_ConsoleOut( tOutput( "$admin_list_end", command, userCount, authorityCount, static_cast<int>( adminLevelsMap.size() ) ), receiver->Owner() );
+    sn_ConsoleOut( tOutput( "$admin_list_end", command, userCount, authorityCount, static_cast<int>( adminLevelsMap.size() ) ), client );
 }
 
 static void se_ListAdmins_conf( std::istream &s )
@@ -5472,6 +5985,34 @@ static void se_CheckAccessLevel( tAccessLevel & level, tString const & authName 
     }
 }
 
+static tAccessLevel se_announceLoginAccessLevel = tAccessLevel_Default;
+static tSettingItem< tAccessLevel > se_announceLoginAccessLevelConf( "ACCESS_LEVEL_ANNOUNCE_LOGIN", se_announceLoginAccessLevel );
+static tAccessLevelSetter se_announceLoginAccessLevelConfLevel( se_announceLoginAccessLevelConf, tAccessLevel_Owner );
+
+static bool se_HideLoginAnnouncement( ePlayerNetID const *hider, ePlayerNetID const *seeker )
+{
+    return hider->GetAccessLevel() > se_announceLoginAccessLevel || se_Hide( hider, seeker );
+}
+
+static bool se_CanHideLoginAnnouncement( ePlayerNetID const *hider )
+{
+    return hider->GetAccessLevel() > se_announceLoginAccessLevel || se_CanHide( hider );
+}
+
+static void se_AnnounceLogin( tOutput const &out, ePlayerNetID const *player, ePlayerNetID const *admin )
+{
+    HIDEFUNC hideFunc = &se_HideLoginAnnouncement;
+    CANHIDEFUNC canHideFunc = &se_CanHideLoginAnnouncement;
+
+    // /op and /deop don't need to account for ACCESS_LEVEL_ANNOUNCE_LOGIN.
+    if ( admin )
+    {
+        hideFunc = &se_Hide;
+        canHideFunc = &se_CanHide;
+    }
+    se_SecretConsoleOut( out, player, hideFunc, admin, player, canHideFunc );
+}
+
 void ePlayerNetID::Authenticate( tString const & authName, tAccessLevel accessLevel_, ePlayerNetID const * admin, bool messages )
 {
     tString newAuthenticatedName( se_EscapeName( authName ).c_str() );
@@ -5484,6 +6025,9 @@ void ePlayerNetID::Authenticate( tString const & authName, tAccessLevel accessLe
 
     if ( !IsAuthenticated() )
     {
+        // reset spam timer
+        GetChatSpam().ResetTime();
+
         // elevate access level for registered users
         se_CheckAccessLevel( accessLevel_, newAuthenticatedName );
 
@@ -5531,16 +6075,15 @@ void ePlayerNetID::Authenticate( tString const & authName, tAccessLevel accessLe
             {
                 if ( GetAccessLevel() != tAccessLevel_Remote )
                 {
-                    se_SecretConsoleOut( tOutput( "$login_message_special",
-                                                  GetName(),
-                                                  newAuthenticatedName,
-                                                  tCurrentAccessLevel::GetName( GetAccessLevel() ),
-                                                  order ), this, &se_Hide, admin, 0, &se_CanHide );
+                    tOutput out( "$login_message_special", GetName(), newAuthenticatedName, tCurrentAccessLevel::GetName( GetAccessLevel() ), order );
+                    se_AnnounceLogin( out, this, admin );                
                 }
                 else
                 {
-                    se_SecretConsoleOut( tOutput( "$login_message", GetName(), newAuthenticatedName, order ), this, &se_Hide, admin, 0, &se_CanHide );
+                    tOutput out( "$login_message", GetName(), newAuthenticatedName, order );
+                    se_AnnounceLogin( out, this, admin );
                 }
+
             }
         }
     }
@@ -5552,15 +6095,17 @@ void ePlayerNetID::Authenticate( tString const & authName, tAccessLevel accessLe
 }
 
 void ePlayerNetID::DeAuthenticate( ePlayerNetID const * admin, bool messages ){
-    if ( IsAuthenticated() )
+    if ( IsAuthenticated() && messages )
     {
-        if ( admin && messages )
+        if ( admin )
         {
-            se_SecretConsoleOut( tOutput( "$logout_message_deop", GetName(), GetFilteredAuthenticatedName(), admin->GetLogName() ), this, &se_Hide, admin, 0, &se_CanHide );
+            tOutput out( "$logout_message_deop", GetName(), GetFilteredAuthenticatedName(), admin->GetLogName() );
+            se_AnnounceLogin( out, this, admin );
         }
-        else if ( messages )
+        else
         {
-            se_SecretConsoleOut( tOutput( "$logout_message", GetName(), GetFilteredAuthenticatedName() ), this, &se_Hide, 0, 0, &se_CanHide );
+            tOutput out( "$logout_message", GetName(), GetFilteredAuthenticatedName() );
+            se_AnnounceLogin( out, this, admin );
         }
     }
 
@@ -5585,9 +6130,9 @@ void ePlayerNetID::CreateVoter()
     // only count nonlocal players with voting support as voters
     if ( sn_GetNetState() != nCLIENT && this->Owner() != 0 && sn_Connections[ this->Owner() ].version.Max() >= 3 )
     {
-        this->voter_ = eVoter::GetVoter( this->Owner() );
-        if ( this->voter_ )
-            this->voter_->PlayerChanged();
+        eVoter *voter = eVoter::GetPersistentVoter( Owner() );
+        if ( voter )
+            voter->PlayerChanged();
     }
 }
 
@@ -5633,8 +6178,20 @@ void ePlayerNetID::WriteSync( Engine::PlayerNetIDSync & sync, bool init )
 
     sync.set_favorite_number_of_players_per_team( favoriteNumberOfPlayersPerTeam );
     sync.set_name_team_after_me( nameTeamAfterMe );
-    
+
     sync.set_team_name( teamname );
+
+    sync.set_ready( ready );
+
+    if ( sn_GetNetState() == nSERVER && ( invitationsChanged_ || ( init && invitations_.size() > 0 ) ) )
+    {
+        sync.set_invitations_changed( true );
+        for ( eTeamSet::const_iterator it = invitations_.begin(); it != invitations_.end(); ++it )
+        {
+            sync.add_invitation_team_ids( PointerToID( *it ) );
+        }
+        invitationsChanged_ = false;
+    }
 }
 
 // makes sure the passed string is not longer than the given maximum
@@ -5870,7 +6427,7 @@ void ePlayerNetID::ReadSync( Engine::PlayerNetIDSync const & sync, nSenderInfo c
         // filter
         se_OptionalNameFilters( remoteName );
 
-        se_CutString( remoteName, 16 );
+        se_CutString( remoteName, MAX_NAME_LENGTH );
     }
 
     // directly apply name changes sent from the server, they are safe.
@@ -5880,11 +6437,20 @@ void ePlayerNetID::ReadSync( Engine::PlayerNetIDSync const & sync, nSenderInfo c
     }
 
     if (sn_GetNetState()!=nSERVER)
+    {
         ping = sync.ping();
+    }
 
     {
         // read chat and spectator status
         unsigned short flags = sync.flags();
+
+        if( sync.has_ready() && (
+                sn_GetNetState() != nSERVER
+                || (se_warmup.IsWarmupMode() && CurrentTeam())))
+        {
+            ready = sync.ready();
+        }
 
         if (Owner() != ::sn_myNetID)
         {
@@ -5951,6 +6517,20 @@ void ePlayerNetID::ReadSync( Engine::PlayerNetIDSync const & sync, nSenderInfo c
     {
         teamname = sync.team_name();
     }
+
+    if ( sn_GetNetState() != nSERVER && sync.has_invitations_changed() && sync.invitations_changed() )
+    {
+        invitations_.clear();
+        for ( int i = 0; i < sync.invitation_team_ids_size(); i++ )
+        {
+            eTeam *team = NULL;
+            IDToPointer( sync.invitation_team_ids( i ), team );
+            if ( team )
+            {
+                invitations_.insert( team );
+            }
+        }
+    }
     // con << "Player info updated.\n";
 
     // make sure we did not accidentally overwrite values
@@ -5978,12 +6558,17 @@ void ePlayerNetID::ReadSync( Engine::PlayerNetIDSync const & sync, nSenderInfo c
 
         RequestSync();
     }
+
+    if( sn_GetNetState() == nCLIENT )
+    {
+        greeted = true;
+    }
 }
 
 //! creates a netobject form sync data
 ePlayerNetID::ePlayerNetID( Engine::PlayerNetIDSync const & sync, nSenderInfo const & sender )
 : nNetObject( sync.base(), sender ),listID(-1), teamListID(-1), timeCreated_( tSysTimeFloat() )
- , allowTeamChange_(false), registeredMachine_(0), chatSpam_( se_chatSpamSettings )
+ , invitations_(), invitationsChanged_( false ), allowTeamChange_(false), registeredMachine_(0)
 {
     flagOverrideChat = false;
     flagChatState = false; 
@@ -5997,6 +6582,7 @@ ePlayerNetID::ePlayerNetID( Engine::PlayerNetIDSync const & sync, nSenderInfo co
     disconnected=false;
     suspended_  = 0;
     chatFlags_  =0;
+    ready       =false;
 
     color = tShortColor(15,15,15);
 
@@ -6061,6 +6647,12 @@ void ePlayerNetID::ClearObject(){
 
 void ePlayerNetID::Greet(){
     if (!greeted){
+        greeted=true;
+        if( Owner() == sn_myNetID )
+        {
+            return;
+        }
+
         tOutput o;
         o.SetTemplateParameter(1, GetName() );
         o.SetTemplateParameter(2, st_programVersion);
@@ -6072,7 +6664,6 @@ void ePlayerNetID::Greet(){
         s << "\n";
         //std::cout << s;
         sn_ConsoleOut(s,Owner());
-        greeted=true;
     }
 }
 
@@ -6080,113 +6671,28 @@ eNetGameObject *ePlayerNetID::Object() const{
     return object;
 }
 
-static bool se_consoleLadderLog = false;
-static tSettingItem< bool > se_consoleLadderLogConf( "CONSOLE_LADDER_LOG", se_consoleLadderLog );
-
-static bool se_ladderlogDecorateTS = false;
-static tSettingItem< bool > se_ladderlogDecorateTSConf( "LADDERLOG_DECORATE_TIMESTAMP", se_ladderlogDecorateTS );
-extern bool sn_decorateTS; // from nNetwork.cpp
-
-void se_SaveToLadderLog( tOutput const & out )
-{
-    if (se_consoleLadderLog)
-    {
-        std::cout << "[L";
-        if(sn_decorateTS) {
-            std::cout << st_GetCurrentTime(" TS=%Y/%m/%d-%H:%M:%S");
-        }
-        std::cout << "] " << out << std::endl;
-    }
-    if (sn_GetNetState()!=nCLIENT && !tRecorder::IsPlayingBack())
-    {
-        std::ofstream o;
-        if ( tDirectories::Var().Open(o, "ladderlog.txt", std::ios::app) )
-            if(se_ladderlogDecorateTS) {
-                o << st_GetCurrentTime("%Y/%m/%d-%H:%M:%S ");
-            }
-            o << out << std::endl;;
-    }
-}
-
 static bool se_chatLog = false;
 static tSettingItem<bool> se_chatLogConf("CHAT_LOG", se_chatLog);
 
-static eLadderLogWriter se_chatWriter("CHAT", false);
+static eLadderLogWriter se_chatWriter( "CHAT", false, "player chat+" );
 
-void se_SaveToChatLog(tOutput const &out) {
-    if(sn_GetNetState() != nCLIENT && !tRecorder::IsPlayingBack()) {
-        if(se_chatWriter.isEnabled()) {
-            se_chatWriter << out;
+static void se_SaveToChatLog( const ePlayerNetID *player, const tString & message )
+{
+    if( sn_GetNetState() != nCLIENT && !tRecorder::IsPlayingBack() )
+    {
+        if( se_chatWriter.isEnabled() )
+        {
+            se_chatWriter << player->GetLogName() << message;
             se_chatWriter.write();
         }
-        if(se_chatLog) {
+        if( se_chatLog )
+        {
             std::ofstream o;
-            if ( tDirectories::Var().Open(o, "chatlog.txt", std::ios::app) ) {
-                o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << out << std::endl;
-            }
+            if ( tDirectories::Var().Open(o, "chatlog.txt", std::ios::app) )
+                o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << player->GetLogName() << " " << std::endl;
         }
     }
 }
-
-std::list<eLadderLogWriter *> &eLadderLogWriter::writers() {
-    static std::list<eLadderLogWriter *> list;
-    return list;
-}
-
-eLadderLogWriter::eLadderLogWriter(char const *ID, bool enabledByDefault) :
-    id(ID),
-    enabled(enabledByDefault),
-    conf(new tSettingItem<bool>(&(tString("LADDERLOG_WRITE_") + id)(0),
-    enabled)),
-    cache(id) {
-    writers().push_back(this);
-}
-
-eLadderLogWriter::~eLadderLogWriter() {
-    if(conf) {
-        delete conf;
-    }
-    // generic algorithms aren't exactly easier to understand than regular
-    // code, but anyways, let's try one...
-    std::list<eLadderLogWriter *> list = writers();
-    list.erase(std::find_if(list.begin(), list.end(), std::bind2nd(std::equal_to<eLadderLogWriter *>(), this)));
-}
-
-void eLadderLogWriter::write() {
-    if(enabled) {
-        se_SaveToLadderLog(cache);
-    }
-    cache = id;
-}
-
-void eLadderLogWriter::setAll(bool enabled) {
-    std::list<eLadderLogWriter *> list = writers();
-    std::list<eLadderLogWriter *>::iterator end = list.end();
-    for(std::list<eLadderLogWriter *>::iterator iter = list.begin(); iter != end; ++iter) {
-        (*iter)->enabled = enabled;
-    }
-}
-
-static void LadderLogWriteAll(std::istream &s) {
-    bool enabled;
-    s >> enabled;
-    if(s.fail()) {
-        if(tConfItemBase::printErrors) {
-            con << tOutput("$ladderlog_write_all_usage") << '\n';
-        }
-        return;
-    }
-    if(tConfItemBase::printChange) {
-        if(enabled) {
-            con << tOutput("$ladderlog_write_all_enabled") << '\n';
-        } else {
-            con << tOutput("$ladderlog_write_all_disabled") << '\n';
-        }
-    }
-    eLadderLogWriter::setAll(enabled);
-}
-
-static tConfItemFunc LadderLogWriteAllConf("LADDERLOG_WRITE_ALL", &LadderLogWriteAll);
 
 void se_SaveToScoreFile(const tOutput &o){
     tString s(o);
@@ -6211,9 +6717,10 @@ void se_SaveToScoreFile(const tOutput &o){
 
 void ePlayerNetID::AddScore(int points,
                             const tOutput& reasonwin,
-                            const tOutput& reasonlose)
+                            const tOutput& reasonlose,
+                            const tOutput& reasonfree)
 {
-    if (points==0)
+    if ( se_warmup.IsWarmupMode() )
         return;
 
     score += points;
@@ -6225,10 +6732,17 @@ void ePlayerNetID::AddScore(int points,
 
     tOutput message;
     message.SetTemplateParameter(1, name);
-    message.SetTemplateParameter(2, points > 0 ? points : -points);
+    message.SetTemplateParameter(2, abs(points));
 
 
-    if (points>0)
+    if(points == 0 )
+    {
+        if (reasonfree.IsEmpty())
+            return;
+        else
+            message.Append(reasonfree);
+    }
+    else if (points>0)
     {
         if (reasonwin.IsEmpty())
             message << "$player_win_default";
@@ -6244,9 +6758,12 @@ void ePlayerNetID::AddScore(int points,
     }
 
     sn_ConsoleOut(message);
-    RequestSync(true);
 
-    se_SaveToScoreFile(message);
+    if( points )
+    {
+        RequestSync(true);
+        se_SaveToScoreFile(message);
+    }
 }
 
 
@@ -6286,22 +6803,29 @@ void ePlayerNetID::SwapPlayersNo(int a,int b){
 void ePlayerNetID::SortByScore(){
     // bubble sort (AAARRGGH! but good for lists that change not much)
 
-    bool inorder=false;
-    while (!inorder){
-        inorder=true;
-        int i;
-        for(i=se_PlayerNetIDs.Len()-2;i>=0;i--)
-            if (se_PlayerNetIDs(i)->TotalScore() < se_PlayerNetIDs(i+1)->TotalScore() ){
-                SwapPlayersNo(i,i+1);
-                inorder=false;
+    bool inorder = false;
+    while ( !inorder )
+    {
+        inorder = true;
+        for( int i = se_PlayerNetIDs.Len() - 2; i >= 0; i-- )
+        {
+            ePlayerNetID *a = se_PlayerNetIDs( i );
+            ePlayerNetID *b = se_PlayerNetIDs( i + 1 );
+            if ( a->TotalScore() < b->TotalScore() || ( a->TotalScore() == b->TotalScore() && !a->CurrentTeam() && b->CurrentTeam() ) )
+            {
+                SwapPlayersNo( i, i + 1 );
+                inorder = false;
             }
+        }
     }
 }
 
 void ePlayerNetID::ResetScore(){
     int i;
     for(i=se_PlayerNetIDs.Len()-1;i>=0;i--){
-        se_PlayerNetIDs(i)->score=0;
+        ePlayerNetID * p = se_PlayerNetIDs(i);
+        p->score = 0;
+        p->ready = false;
         if (sn_GetNetState()==nSERVER)
             se_PlayerNetIDs(i)->RequestSync();
     }
@@ -6349,7 +6873,6 @@ void ePlayerNetID::DisplayScores()
 
         // print team ranking if there actually is a team with more than one player
         int maxPlayers = 20;
-        bool showTeam = false;
         for ( int i = eTeam::teams.Len() - 1; i >= 0; --i )
         {
             if ( eTeam::teams[i]->NumPlayers() > 1 ||
@@ -6358,7 +6881,6 @@ void ePlayerNetID::DisplayScores()
                 y = eTeam::RankingGraph(y);
                 y-=.06;
                 maxPlayers -= ( eTeam::teams.Len() > 6 ? 6 : eTeam::teams.Len() ) + 2;
-                showTeam = true;
                 break;
             }
         }
@@ -6369,6 +6891,24 @@ void ePlayerNetID::DisplayScores()
 #endif
 }
 
+static tString se_GetScoreTableTeamDescription( const ePlayerNetID *player )
+{
+    tString out;
+    const ePlayerNetID::eTeamSet & invites = player->GetInvitations();
+    if ( player->CurrentTeam() )
+    {
+        out << *player->CurrentTeam();
+    }
+    else if ( !invites.empty() )
+    {
+        tString invitedTeam;
+        invitedTeam << **invites.begin();
+        if ( invites.size() > 1 )
+            invitedTeam << ", ...";
+        out << tOutput( "$player_scoretable_can_join", invitedTeam );
+    }
+    return out;
+}
 
 tString ePlayerNetID::Ranking( int MAX, bool cut ){
     SortByScore();
@@ -6487,8 +7027,15 @@ float ePlayerNetID::RankingGraph( float y, int MAX ){
 
         for(int i=0;i<max;i++){
             ePlayerNetID *p=se_PlayerNetIDs(i);
+
+            tColoredString prefix;
             if(p->chatting_)
-                DisplayText(-.705, y, .06, "*", sr_fontScoretable, 1);
+                prefix << '*';
+            if( se_warmup.IsWarmupMode() && p->ready)
+                prefix << tColoredString::ColorString(.5,1,.5) << 'R';
+            if(prefix.Len())
+                DisplayText(-.704 - (prefix.Len() * .00075), y, .06, prefix.c_str(), sr_fontScoretable, 1);
+
             tColoredString name;
             name << *p;
             DisplayText(-.7, y, .06, name.c_str(), sr_fontScoretable, -1);
@@ -6512,11 +7059,9 @@ float ePlayerNetID::RankingGraph( float y, int MAX ){
                 tColoredString ping;
                 ping << int(p->ping*1000);
                 DisplayText(.25, y, .06, ping.c_str(), sr_fontScoretable, 1);
-                if ( p->currentTeam )
+                tString team = se_GetScoreTableTeamDescription( p );
+                if ( !team.empty() )
                 {
-                    tColoredString team;
-                    eTeam *t = p->currentTeam;
-                    team << tColoredStringProxy(t->R()/15.f, t->G()/15.f, t->B()/15.f) << t->Name();
                     DisplayText(.3, y, .06, team.c_str(), sr_fontScoretable, -1);
                 }
             }
@@ -6540,33 +7085,6 @@ float ePlayerNetID::RankingGraph( float y, int MAX ){
         DisplayText(-.7, y, .06, noone.c_str(), sr_fontScoretable, -1);
     }
     return y;
-}
-
-static eLadderLogWriter se_onlinePlayerWriter("ONLINE_PLAYER", false);
-static eLadderLogWriter se_numHumansWriter("NUM_HUMANS", false);
-
-void ePlayerNetID::RankingLadderLog() {
-    SortByScore();
-
-    int num_humans = 0;
-    int max = se_PlayerNetIDs.Len();
-    for(int i = 0; i < max; ++i) {
-        ePlayerNetID *p = se_PlayerNetIDs(i);
-        if(p->Owner() == 0) continue; // ignore AIs
-
-        se_onlinePlayerWriter << p->GetLogName();
-
-        if(p->IsActive()) {
-            se_onlinePlayerWriter << p->ping;
-            if(p->currentTeam) {
-                se_onlinePlayerWriter << FilterName(p->currentTeam->Name());
-                ++num_humans;
-            }
-        }
-        se_onlinePlayerWriter.write();
-    }
-    se_numHumansWriter << num_humans;
-    se_numHumansWriter.write();
 }
 
 void ePlayerNetID::ClearAll(){
@@ -6623,7 +7141,7 @@ static int se_ColorDistance( int a[3], int b[3] )
     return distance;
 }
 
-bool se_randomizeColor = true;
+bool se_randomizeColor = false;
 static tSettingItem< bool > se_randomizeColorConf( "PLAYER_RANDOM_COLOR", se_randomizeColor );
 
 static void se_RandomizeColor( ePlayer * l, ePlayerNetID * p )
@@ -6707,6 +7225,13 @@ static bool se_ForceSpectate( REAL & time, REAL minTime, char const * message, c
         return true;
     }
 }
+
+// sorted storage for pre-join shuffle commands
+typedef std::multimap< int, tJUST_CONTROLLED_PTR< ePlayerNetID > >
+ePrejoinShuffleMap;
+typedef std::pair< int, tJUST_CONTROLLED_PTR< ePlayerNetID > >
+ePrejoinPair;
+static ePrejoinShuffleMap se_prejoinShuffles;
 
 // Update the netPlayer_id list
 void ePlayerNetID::Update(){
@@ -6917,7 +7442,7 @@ void ePlayerNetID::Update(){
 
             // trigger transmission to the clients
             if (sn_GetNetState()==nSERVER)
-                se_pingCharityServerConf.nConfItemBase::WasChanged(true);
+                se_pingCharityServerConf.nConfItemBase::CheckChange(true);
         }
     }
 
@@ -7007,6 +7532,35 @@ void ePlayerNetID::Update(){
     {
         eTeam::teams(i)->UpdateProperties();
     }
+
+    // execute all prejoin shuffles
+    for( ePrejoinShuffleMap::iterator i = se_prejoinShuffles.begin(); i!= se_prejoinShuffles.end(); ++i )
+    {
+        ePlayerNetID * player = (*i).second;
+        if( player && player->IsActive() )
+        {
+            eTeam * team = player->CurrentTeam();
+            if( team )
+            {
+                int wish = (*i).first;
+
+                // sanity check
+                if( wish < 0 )
+                {
+                    wish = 0;
+                }
+                if( wish >= team->NumPlayers() )
+                {
+                    wish = team->NumPlayers()-1;
+                }
+
+                // delegate shuffling work
+                team->Shuffle( player->TeamListID(), wish );
+            }
+        }
+    }
+    se_prejoinShuffles.clear();
+             
 
     // get rid of deleted netobjects
     nNetObject::ClearAllDeleted();
@@ -7177,9 +7731,15 @@ void ePlayerNetID::RemoveChatbots()
             // see to it that the player has or has not a team.
             if ( shouldHaveTeam )
             {
-                if ( !p->CurrentTeam() )
+                if ( !p->CurrentTeam() && !ePlayerNetID::Scramble )
                 {
                     p->SetDefaultTeam();
+                }
+
+                if (ePlayerNetID::Scramble)
+                {
+                    if ( p->CurrentTeam() ) p->SetTeam(NULL);
+                    ScramblePlayerIDs.push_back(p);
                 }
             }
             else
@@ -7192,7 +7752,7 @@ void ePlayerNetID::RemoveChatbots()
             }
 
             // kick idle players (Removes player from list, this must be the last operation of the loop)
-            if ( se_idleKickTime > 0 && se_idleKickTime < p->LastActivity() - roundTime )
+            if ( se_idleKickTime > 0 && se_idleKickTime < p->LastActivity() - roundTime && se_autokickImmunity < p->GetAccessLevel() )
             {
                 sn_KickUser( p->Owner(), tOutput( "$network_kill_idle" ) );
 
@@ -7202,6 +7762,53 @@ void ePlayerNetID::RemoveChatbots()
             }
         }
     }
+
+    // kick unworthy spectators (in case MAX_CLIENTS has changed)
+    se_kickUnworthySpare = -1;
+    se_KickUnworthy();
+}
+
+// Set players to be scrambled next round
+void ePlayerNetID::SetScramble()
+{
+    // nothing to be done on the clients
+    if ( nCLIENT == sn_GetNetState() )
+        return;
+
+    if (eTeam::maxPlayers > 1 && se_PlayerNetIDs.Len() > 2)
+    {
+        ePlayerNetID::Scramble = true;
+        sn_ConsoleOut("$gamestate_scramble_teams");
+    } else {
+        sn_ConsoleOut("$scramble_teams_too_small");
+    }
+}
+
+//Scramble up the teams
+void ePlayerNetID::ScrambleTeams()
+{
+    // nothing to be done on the clients
+    if ( nCLIENT == sn_GetNetState() )
+        return;
+
+#ifdef KRAWALL_SERVER
+    // update access level
+    UpdateAccessLevelRequiredToPlay();
+#endif
+
+    ePlayerNetID::Scramble = false;
+    sn_CenterMessage("$gamestate_scramble_teams_center");
+
+    ePlayerNetID::Update();
+    std::random_shuffle(ScramblePlayerIDs.begin(), ScramblePlayerIDs.end());
+
+    for ( int i = ScramblePlayerIDs.size()-1; i>=0; i--)
+    {
+        ScramblePlayerIDs[i]->SetDefaultTeam( true );
+    }
+
+    ePlayerNetID::Update();
+    ScramblePlayerIDs.clear();
 }
 
 void ePlayerNetID::ThrowOutDisconnected()
@@ -7277,11 +7884,11 @@ static void scores(){
 
 static rPerFrameTask pf(&scores);
 
-static bool force_small_cons(){
-    return show_scores;
-}
+// static bool force_small_cons(){
+//    return show_scores;
+// }
 
-static rSmallConsoleCallback sc(&force_small_cons);
+// static rSmallConsoleCallback sc(&force_small_cons);
 
 //static void cd(){
 //    show_scores = false;
@@ -7408,10 +8015,10 @@ bool ePlayerNetID::TeamChangeAllowed( bool informPlayer ) const {
 }
 
 // put a new player into a default team
-void ePlayerNetID::SetDefaultTeam( )
+void ePlayerNetID::SetDefaultTeam( bool isScrambleCommand )
 {
     // only the server should do this, the client does not have the full information on how to do do it right.
-    if ( sn_GetNetState() == nCLIENT || !se_assignTeamAutomatically || spectating_ || !TeamChangeAllowed() )
+    if ( sn_GetNetState() == nCLIENT || ( !se_assignTeamAutomatically && !isScrambleCommand ) || spectating_ || !TeamChangeAllowed() )
         return;
 
     //    if ( !IsHuman() )
@@ -7512,13 +8119,7 @@ void ePlayerNetID::UpdateTeam()
         return;
     }
 
-    // check if the team change is legal
-    if ( nCLIENT ==  sn_GetNetState() )
-    {
-        return;
-    }
-
-    if ( bool( nextTeam ) && !nextTeam->PlayerMayJoin( this ) )
+    if ( nCLIENT != sn_GetNetState() && bool( nextTeam ) && !nextTeam->PlayerMayJoin( this ) )
     {
         tOutput message;
         message.SetTemplateParameter(1, GetName() );
@@ -7546,14 +8147,46 @@ void ePlayerNetID::UpdateTeamForce()
     eTeam *oldTeam = currentTeam;
 
     if ( nextTeam )
+    {
+        if( nCLIENT != sn_GetNetState() && !oldTeam && teamListID >= 0 )
+        {
+            // clear current team list ID, it was just a shuffle wish
+            // but store the shuffle wish first
+            se_prejoinShuffles.insert( ePrejoinPair( teamListID, this ) );
+            teamListID = -1;
+        }
         nextTeam->AddPlayer ( this );
+    }
     else if ( oldTeam )
+    {
         oldTeam->RemovePlayer( this );
+    }
 
-    if( nCLIENT !=  sn_GetNetState() && GetRefcount() > 0 )
+    if ( nCLIENT != sn_GetNetState() && GetRefcount() > 0 )
     {
         RequestSync();
     }
+}
+
+void ePlayerNetID::AddInvitation( eTeam *team )
+{
+    std::pair< eTeamSet::iterator, bool > result = invitations_.insert( team );
+    if ( result.second )
+    {
+        invitationsChanged_ = true;
+        RequestSync();
+    }
+}
+
+bool ePlayerNetID::RemoveInvitation( eTeam *team )
+{
+    bool wasInvited = invitations_.erase( team ) > 0;
+    if ( wasInvited )
+    {
+        invitationsChanged_ = true;
+        RequestSync();
+    }
+    return wasInvited;
 }
 
 // teams this player is invited to
@@ -7638,7 +8271,24 @@ void ePlayerNetID::CreateNewTeam()
 
 const unsigned short TEAMCHANGE = 0;
 const unsigned short NEW_TEAM   = 1;
+const unsigned short AUTO_TEAM  = 2;
 
+// AUTO_TEAM is only available since 0.4_alpha
+nVersionFeature se_defaultTeamWish(22);
+
+// express the with to put a new player into a default team
+void ePlayerNetID::SetDefaultTeamWish()
+{
+    if ( nCLIENT ==  sn_GetNetState() )
+    {
+        Engine::PlayerNetIDControl & control = *BroadcastControl().MutableExtension( Engine::player_control );
+
+        control.set_type( AUTO_TEAM );
+    }
+    else
+        // create a new team if possible otherwise spectate
+        SetDefaultTeam();
+}
 
 // express the wish to be part of the given team (always callable)
 void ePlayerNetID::SetTeamWish(eTeam* newTeam)
@@ -7717,6 +8367,15 @@ void ePlayerNetID::ReceiveControlNet( Network::NetObjectControl const & controlB
 
     switch (messageType)
     {
+    case AUTO_TEAM:
+        {
+            if (NextTeam()==NULL)
+            {
+                SetDefaultTeam(true);
+            }
+
+            break;
+        }
     case NEW_TEAM:
         {
             // create a new team if possible otherwise spectate or...
@@ -7759,11 +8418,22 @@ void ePlayerNetID::ReceiveControlNet( Network::NetObjectControl const & controlB
             // announce the change
             if ( bool(nextTeam) && !redundant )
             {
-                se_TeamChangeMessage( *this );
 
                 // count it as spam if it is obnoxious
                 if ( obnoxious )
-                    chatSpam_.CheckSpam( 4.0, Owner(), tOutput("$spam_teamchage") );
+                    GetChatSpam().CheckSpam( 4.0, Owner(), tOutput("$spam_teamchage") );
+
+                if( se_warmup.IsWarmupMode() && nextTeam != currentTeam
+                    && nextTeam->PlayerMayJoin( this ) )
+                {
+                    // Join immediately during warmup if possible
+                    if( Object() && Object()->Alive() )
+                        Object()->Kill();
+                    UpdateTeam();
+                    RequestSync();
+                }
+                else
+                    se_TeamChangeMessage( *this );
             }
 
             break;
@@ -7790,7 +8460,7 @@ nProtoBuf const * ePlayerNetID::ExtractControl( Network::NetObjectControl const 
 
 void ePlayerNetID::Color( REAL&a_r, REAL&a_g, REAL&a_b ) const
 {
-    if ( ( static_cast<bool>(currentTeam) ) && ( currentTeam->IsHuman() ) )
+    if ( ( static_cast<bool>(currentTeam) ) && ( ( currentTeam->IsHuman() || currentTeam->TeamNamedAfterColor() ) ) )
     {
         REAL w = 5;
         REAL r_w = 2;
@@ -8043,7 +8713,7 @@ static void se_BanConf(std::istream &s)
 static tConfItemFunc se_banConf("BAN",&se_BanConf);
 static tAccessLevelSetter se_banConfLevel( se_banConf, tAccessLevel_Moderator );
 
-static ePlayerNetID * ReadPlayer( std::istream & s )
+ePlayerNetID * ePlayerNetID::ReadPlayer( std::istream & s )
 {
     // read name of player to be returned
     tString name;
@@ -8071,6 +8741,11 @@ static ePlayerNetID * ReadPlayer( std::istream & s )
     } catch ( tGenericException ) {}
 
     return ePlayerNetID::FindPlayerByName( name );
+}
+
+static ePlayerNetID * ReadPlayer( std::istream & s )
+{
+    return ePlayerNetID::ReadPlayer( s );
 }
 
 static void Kill_conf(std::istream &s)
@@ -8107,17 +8782,13 @@ static void Slap_conf(std::istream &s)
 
         s >> points;
 
-        if ( points == 0)
-        {
-            // oh well :)
-            sn_ConsoleOut( tOutput("$player_admin_slap_free", victim->GetColoredName() ) );
-        }
-
         tOutput win;
         tOutput lose;
+        tOutput free;
         win << "$player_admin_slap_win";
         lose << "$player_admin_slap_lose";
-        victim->AddScore( -points, win, lose );
+        free << "$player_admin_slap_free";
+        victim->AddScore( -points, win, lose, free );
     }
 }
 
@@ -8162,6 +8833,37 @@ static tAccessLevelSetter se_suspendConfLevel( suspend_conf, tAccessLevel_Modera
 
 static tConfItemFunc unsuspend_conf("UNSUSPEND",&UnSuspend_conf);
 static tAccessLevelSetter se_unsuspendConfLevel( unsuspend_conf, tAccessLevel_Moderator );
+
+static void SuspendList_conf(std::istream &s)
+{
+    sn_ConsoleOut("List of currently suspended players:\n", 0 );
+
+    if (se_PlayerNetIDs.Len()>0)
+    {
+        for(int i = 0; i < se_PlayerNetIDs.Len(); i++)
+        {
+            ePlayerNetID *p = se_PlayerNetIDs[i];
+            if (p)
+            {
+                //  let's ensure this person is actually suspended
+                if (p->IsSuspended())
+                {
+                    tColoredString send;
+                    send << tColoredString::ColorString( 1,1,.5 );
+                    send << "( ";
+                    send << p->GetColoredName();
+                    send << tColoredString::ColorString( 1,1,.5 );
+                    send << " | " << p->RoundsSuspended() << " rounds )\n";
+
+                    sn_ConsoleOut( send, 0 );
+                }
+            }
+        }
+    }
+}
+
+static tConfItemFunc suspendlist_conf("SUSPEND_LIST", &SuspendList_conf);
+static tAccessLevelSetter se_suspendlistConfLevel( suspendlist_conf, tAccessLevel_Moderator );
 
 static void Silence_conf(std::istream &s)
 {
@@ -8212,7 +8914,7 @@ static tConfItemLine sg_optionsConf( "SERVER_OPTIONS", sg_options );
 class gServerInfoAdmin: public nServerInfoAdmin
 {
 public:
-    gServerInfoAdmin(){};
+    gServerInfoAdmin(){}
 
 private:
     virtual tString GetUsers() const
@@ -8268,12 +8970,241 @@ private:
         se_CutString( sg_url, 75 );
         return sg_url;
     }
+
+    // levels of values
+    enum Classifications
+    {
+        Classification_None,
+        Classification_LudicrouslyLow,
+        Classification_Nano,
+        Classification_Micro,
+        Classification_ExtremlyLow,
+        Classification_VeryLow,
+        Classification_Low,
+        Classification_Medium,
+        Classification_High,
+        Classification_VeryHigh,
+        Classification_ExtremlyHigh,
+        Classification_Mega,
+        Classification_Giga,
+        Classification_LudicrouslyHigh,
+        Classification_Infinite
+    };
+
+    static tString ComposeClassification( int index, char const * classification_root, char const * item )
+    {
+        std::ostringstream s;
+        s << classification_root << index;
+        return tString(tOutput( s.str().c_str(), 
+                                tOutput((char const *)(tString(item) + "_1")),
+                                tOutput((char const *)(tString(item) + "_2")),
+                                tOutput((char const *)(tString(item) + "_3")) ) );
+    }
+
+    class Classifier
+    {
+    public:
+        // classifies lowerBoundX just as classificationX, any lower value as classificationX-1
+        Classifier( REAL lowerBound1, int classification1,
+                    REAL lowerBound2, int classification2 )
+        : logBound1_(log(lowerBound1))
+          , logBound2_(log(lowerBound2))
+          , classification1_( classification1 )
+          , classification2_( classification2 )
+        {
+        }
+
+        int Classify( REAL value, int invalid = Classification_None )
+        {
+            if( value <= 0 )
+            {
+                return invalid;
+            }
+            REAL a = ( log( value ) - logBound1_ )/( logBound2_ - logBound1_ );
+            REAL c = classification1_ + a * ( classification2_ - classification1_ );
+            int ret = int(floor( c ));
+            if ( ret < Classification_LudicrouslyLow )
+                ret = Classification_LudicrouslyLow;
+            if ( ret > Classification_LudicrouslyHigh )
+                ret = Classification_LudicrouslyHigh;
+            return ret;
+        }
+    private:
+        REAL logBound1_, logBound2_;
+        REAL classification1_, classification2_;
+    };
+
+    // adds a +1 penalty for every level value goes over the limit
+    static int Penalty( int limit, int value, int max = 3 )
+    {
+        int ret = value - limit;
+        if ( ret < 0 )
+        {
+            ret = 0;
+        }
+        else if ( ret > max )
+        {
+            ret = max;
+        }
+
+        return ret;
+    }
+
+    virtual void Classify( nServerInfo::SettingsDigest const & in, 
+                           nServerInfo::Classification & out ) const
+    {
+        // various classifiers
+        static Classifier delayClassifier( .06, Classification_Medium, .12, Classification_High );
+        static Classifier accelerationClassifier( 4, Classification_Medium, 8, Classification_High );
+        static Classifier rubberHumpClassifier( 1, Classification_Medium, 100, Classification_LudicrouslyHigh );
+        static Classifier rubberWallClassifier( 0.015, Classification_Medium, .3, Classification_LudicrouslyHigh );
+        static Classifier wallsLengthClassifier( 1, Classification_Low, 10, Classification_VeryHigh );
+        
+        // apply them
+        int delay        = delayClassifier.Classify( in.cycleDelay_ );
+        int acceleration = accelerationClassifier.Classify( in.acceleration_ );
+        int rubberHump   = rubberHumpClassifier.Classify( in.rubberWallHump_ );
+        int rubberWall   = rubberWallClassifier.Classify( in.rubberHitWallRatio_ );
+        int length       = wallsLengthClassifier.Classify( in.wallsLength_, Classification_Infinite );
+
+        // fuse rubber values into one
+        int rubber = rubberHump;
+        if( rubberWall + 1 < rubber )
+        {
+            rubber--;
+        }
+        if( rubberWall > rubber + 1 )
+        {
+            rubber = rubberWall - 1;
+        }
+        if( rubber <= Classification_Micro )
+        {
+            rubber = Classification_None;
+        }
+
+        bool digestIsAccurate = in.GetFlag( nServerInfo::SettingsDigest::Flags_SettingsDigestSent );
+
+        std::ostringstream compose;
+        if( digestIsAccurate )
+        {
+            compose 
+            << ComposeClassification( rubber, "$classification_", "$classification_rubber" ) << ", "
+            << ComposeClassification( acceleration, "$classification_", "$classification_acceleration" ) << ", "
+            << ComposeClassification( delay, "$classification_", "$classification_delay" ) << ", "
+            << ComposeClassification( length, "$classification_", "$classification_walls" );
+            if( in.GetFlag( nServerInfo::SettingsDigest::Flags_TeamPlay ) )
+            {
+                compose << ", " << tOutput( "$classification_teams" );
+            }
+            if( in.GetFlag( nServerInfo::SettingsDigest::Flags_NondefaultMap ) )
+            {
+                compose << ", " << tOutput( "$classification_maps" );
+            }
+            compose << "\n";
+        }
+
+        // determine experience level required.
+        int experienceLevel = 0;
+        if( in.GetFlag( nServerInfo::SettingsDigest::Flags_TeamPlay ) )
+        {
+            // team play is difficult.
+            experienceLevel+=2;
+        }
+        if( in.GetFlag( nServerInfo::SettingsDigest::Flags_NondefaultMap ) )
+        {
+            // non default maps hint at complicated gameplay.
+            experienceLevel++;
+        }
+        experienceLevel += Penalty( Classification_Medium, rubber );
+        experienceLevel += Penalty( delay, Classification_Medium );
+        // low delay and high rubber usually go hand in hand, let's not overpenalize them
+        if( experienceLevel > 4 )
+        {
+            experienceLevel = 4;
+        }
+        experienceLevel += Penalty( Classification_High, acceleration, 1 );
+        experienceLevel += Penalty( length, Classification_Low, 2 );
+
+        if( !digestIsAccurate )
+        {
+            experienceLevel = 1;
+        }
+
+        // calculate the experience level the player has
+        int levelDistance = 10;
+        int experienceLevelThere = int(floor( se_playTimeTotal/levelDistance ));
+        int missingForThisLevel = int( experienceLevelThere*levelDistance - se_playTimeTotal + 2 );
+
+        out.noJoin_ = "";
+        out.sortOverride_ = experienceLevel - experienceLevelThere;
+        if( out.sortOverride_ > 0 )
+        {
+            compose << tOutput( digestIsAccurate ? "$network_master_exp_recommended_long" : "$network_master_exp_recommended_long_oldserver", missingForThisLevel + out.sortOverride_*levelDistance );
+            // if( digestIsAccurate )
+            {
+                out.noJoin_ = tOutput("$network_master_exp_recommended");
+            }
+        }
+        else
+        {
+            out.sortOverride_ = 0;
+        }
+
+        // check whether a GID has been registered
+        bool registered = false;
+        for( int i = MAX_PLAYERS-1; i >= 0; --i )
+        {
+            registered |= ( ePlayer::PlayerConfig(i)->globalID != se_defaultGID && ePlayer::PlayerConfig(i)->globalID.Len() > 1 );
+        }
+
+        // find reasons why the player should not join
+        if( !registered && in.GetFlag( nServerInfo::SettingsDigest::Flags_AuthenticationRequired ) )
+        {
+            out.noJoin_ = tOutput("$network_master_login_needed");
+            compose << tOutput("$network_master_login_needed_long");
+
+            // keep servers you need authentication to play on at the bottom until
+            // the player is really experienced
+            if( out.sortOverride_ < 1 && se_playTimeOnline < 120 )
+            {
+                out.sortOverride_ = 1;
+            }
+        }
+        else
+        {
+            REAL timeLacking=0;
+            if( in.minPlayTimeTotal_ - se_playTimeTotal > 0 )
+            {
+                timeLacking = in.minPlayTimeTotal_ - se_playTimeTotal;
+            }
+            if( in.minPlayTimeOnline_ - se_playTimeOnline > timeLacking )
+            {
+                timeLacking = in.minPlayTimeOnline_ - se_playTimeOnline;
+            }
+            if( in.minPlayTimeTeam_ - se_playTimeTeam > timeLacking )
+            {
+                timeLacking = in.minPlayTimeTeam_ - se_playTimeTeam;
+            }
+            if ( timeLacking > 0 )
+            {
+                out.noJoin_ = tOutput("$network_master_exp_needed");
+                compose << tOutput("$network_master_exp_needed_long", timeLacking+2 );
+                int minLevel = int(timeLacking/10)+1;
+                if( out.sortOverride_ < minLevel )
+                {
+                    out.sortOverride_ = minLevel;
+                }
+            }
+        }
+
+        out.description_ = compose.str();
+    }
 };
 
 static gServerInfoAdmin sg_serverAdmin;
 
-static eLadderLogWriter se_playerEnteredWriter("PLAYER_ENTERED", true);
-static eLadderLogWriter se_playerRenamedWriter("PLAYER_RENAMED", true);
+static eLadderLogWriter se_playerEnteredWriter( "PLAYER_ENTERED", true, "player ip screen_name+" );
+static eLadderLogWriter se_playerRenamedWriter( "PLAYER_RENAMED", true, "old_name new_name ip screen_name+" );
 
 class eNameMessenger
 {
@@ -8332,9 +9263,10 @@ public:
 
             if ( oldScreenName_ != screenName )
             {
-                if ( bool(player_.GetVoter() ) )
+                eVoter *voter = eVoter::GetPersistentVoter( player_.Owner() );
+                if ( voter )
                 {
-                    player_.GetVoter()->PlayerChanged();
+                    voter->PlayerChanged();
                 }
 
                 if ( adminRename_ )
@@ -8566,7 +9498,7 @@ bool ePlayerNetID::HasRenameCapability ( ePlayerNetID const * victim, ePlayerNet
 
 bool ePlayerNetID::IsAllowedToRename ( void )
 {
-    if ( !IsHuman() || ( nameFromServer_ == nameFromClient_ && nameFromServer_ == nameFromAdmin_ ) || nameFromServer_.Len() < 1 || sn_GetNetState() == nCLIENT )
+    if ( !IsHuman() || ( nameFromServer_ == nameFromClient_ && nameFromServer_ == nameFromAdmin_ ) || nameFromServer_.Len() <= 1 || sn_GetNetState() == nCLIENT )
     {
         // Don't complain about people who either are bots, doesn't change name, or are entering the grid
         return true;
@@ -8585,11 +9517,19 @@ bool ePlayerNetID::IsAllowedToRename ( void )
         con << message;
         return false;
     }
+    // don't let the player rename if s/he is silenced.
+    if ( this->IsSilenced() )
+    {
+        tOutput message("$player_rename_silenced");
+        sn_ConsoleOut( message, Owner() );
+        return false;
+    }
     // disallow name changes if there was a kick vote recently
-    if ( !( !bool(this->voter_) || voter_->AllowNameChange() || nameFromServer_.Len() <= 1 ) && nameFromServer_ != nameFromClient_ )
+    eVoter *voter = eVoter::GetVoter( Owner() );
+    if ( !( !bool(voter) || voter->AllowNameChange() || nameFromServer_.Len() <= 1 ) && nameFromServer_ != nameFromClient_ )
     {
         // inform victim to avoid complaints
-        tOutput message( "$player_rename_rejected_kickvote", nameFromServer_, nameFromClient_ );
+        tOutput message( "$player_rename_rejected_votekick", nameFromServer_, nameFromClient_ );
         sn_ConsoleOut( message, Owner() );
         con << message;
         return false;
@@ -8793,7 +9733,7 @@ ePlayerNetID & ePlayerNetID::ForceName( tString const & name )
 
         this->nameFromAdmin_ = name;
         this->nameFromAdmin_.NetFilter();
-        se_CutString( this->nameFromAdmin_, 16 );
+        se_CutString( this->nameFromAdmin_, MAX_NAME_LENGTH );
 
         // crappiest line ever :-/
         newName << tColoredString::ColorString( color.r_/15.0, color.g_/15.0, color.b_/15.0 ) << this->nameFromAdmin_ << tColoredString::ColorString( -1, -1, -1 );
@@ -8838,6 +9778,65 @@ tString ePlayerNetID::GetFilteredAuthenticatedName( void ) const
 #endif
 }
 
+class eEnemiesWhitelist
+{
+public:
+    eEnemiesWhitelist() :usernames_whitelist_(), ip_addresses_whitelist_() {}
+    
+    // Returns true if the two players can be enemies.
+    // 
+    // Assumes both "a" and "b" are from the same IP address.
+    bool CanBeEnemies( const ePlayerNetID * a, const ePlayerNetID * b ) const
+    {
+        bool enemies = HasEntry( ip_addresses_whitelist_, a->GetMachine().GetIP() );
+#ifdef KRAWALL_SERVER
+        enemies |= a->IsAuthenticated() && HasEntry( usernames_whitelist_, a->GetLogName() );
+        enemies |= b->IsAuthenticated() && HasEntry( usernames_whitelist_, b->GetLogName() );
+#endif
+        return enemies;
+    }
+    
+    void AddUsernames( std::istream & s )
+    {
+        Parse( usernames_whitelist_, s );
+    }
+    
+    void AddIPAddresses( std::istream & s )
+    {
+        Parse( ip_addresses_whitelist_, s );
+    }
+protected:    
+    bool HasEntry( const eListParse::StringSet & whitelist, const tString & value ) const
+    {
+        return whitelist.find( value ) != whitelist.end();
+    }
+    
+    void Parse( eListParse::StringSet & whitelist, std::istream & s )
+    {
+        int entries_count = eListParse::se_ParseList( whitelist, s );
+        con << tOutput( "$whitelist_enemies_success", entries_count ) << '\n';
+    }
+    
+    eListParse::StringSet usernames_whitelist_;
+    eListParse::StringSet ip_addresses_whitelist_;    
+};
+
+static eEnemiesWhitelist se_enemiesWhitelist;
+
+#ifdef KRAWALL_SERVER
+void se_WhiteListEnemiesUsername( std::istream & s )
+{
+    se_enemiesWhitelist.AddUsernames( s );
+}
+static tConfItemFunc se_whiteListEnemiesUsernameConfItemFunc( "WHITELIST_ENEMIES_USERNAME", se_WhiteListEnemiesUsername );
+#endif
+
+void se_WhiteListEnemiesIP( std::istream & s )
+{
+    se_enemiesWhitelist.AddIPAddresses( s );
+}
+static tConfItemFunc se_whiteListEnemiesIPConfItemFunc( "WHITELIST_ENEMIES_IP", se_WhiteListEnemiesIP );
+
 // allow enemies from the same IP?
 static bool se_allowEnemiesSameIP = false;
 static tSettingItem< bool > se_allowEnemiesSameIPConf( "ALLOW_ENEMIES_SAME_IP", se_allowEnemiesSameIP );
@@ -8868,7 +9867,7 @@ bool ePlayerNetID::Enemies( ePlayerNetID const * a, ePlayerNetID const * b )
         return false;
 
     // no scoring for two players from the same IP
-    if ( !se_allowEnemiesSameIP && a->Owner() != 0 && a->GetMachine() == b->GetMachine() )
+    if ( !se_allowEnemiesSameIP && a->Owner() != 0 && a->GetMachine() == b->GetMachine() && !se_enemiesWhitelist.CanBeEnemies( a, b ) )
         return false;
 
     // no scoring for two players from the same client
@@ -8911,11 +9910,15 @@ void ePlayerNetID::UnregisterWithMachine( void )
 {
     if ( registeredMachine_ )
     {
+        // mark chat spam as disconnected
+        se_GetSpam(*this).lastSaid.MarkDisconnected();
+
         // store suspension count
-        if ( GetVoter() )
+        eVoter *voter = eVoter::GetPersistentVoter( Owner() );
+        if ( voter )
         {
-            GetVoter()->suspended_ = suspended_;
-            GetVoter()->silenced_ = silenced_;
+            voter->suspended_ = suspended_;
+            voter->silenced_ = silenced_;
         }
 
         registeredMachine_->RemovePlayer();
@@ -9062,10 +10065,258 @@ void ePlayerNetID::UpdateSuspensions() {
 
 void ePlayerNetID::UpdateShuffleSpamTesters()
 {
+    if( sn_GetNetState() != nSERVER )
+    {
+        return;
+    }
+
     for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
     {
         ePlayerNetID *p = se_PlayerNetIDs( i );
-        p->shuffleSpam.Reset();
+        p->GetShuffleSpam().Reset();
+    }
+}
+
+// *******************************************************************************
+// *
+// *    AnalyzeTiming
+// *
+// *******************************************************************************
+//!
+//!
+// *******************************************************************************
+
+void ePlayerNetID::AnalyzeTiming( REAL timing )
+{
+    // just delegate safely
+    if( GetRefcount() > 0 )
+    {
+        tJUST_CONTROLLED_PTR< ePlayerNetID > keep( this );
+        uncannyTimingDetector_.Analyze( timing, this );
+    }
+}
+
+eUncannyTimingDetector::eUncannyTimingSettings::~eUncannyTimingSettings()
+{
+#ifdef DEBUG_X
+#ifdef DEDICATED
+    con << "Best ratio achieved for " << timescale*1000 << "ms stat: " << bestRatio << "\n";
+#endif
+#endif
+}
+
+REAL eUncannyTimingDetector::eUncannyTimingAnalysis::Analyze( REAL timing, eUncannyTimingSettings const & settings )
+{
+    if( timing < settings.timescale )
+    {
+        REAL increment = 1.0/turnsSoFar;
+        if( turnsSoFar < settings.averageOverEvents )
+        {
+            turnsSoFar++;
+        }
+        
+        // don't rate failed timings too much. The user may not even have
+        // attempted to time something.
+        if( timing < 0 )
+        {
+            increment /= 4;
+        }
+
+        // event falls into the buckets
+        if( 2*timing < settings.timescale && timing > 0 )
+        {
+            // event falls into the 'good' bucket, count it
+            accurateRatio += increment;
+        }
+
+        // let ratio decay
+        accurateRatio /= 1+increment;
+    }
+
+    REAL ratio = accurateRatio/(1-accurateRatio);
+    
+    // keep stats
+    if (ratio > settings.bestRatio)
+    {
+        settings.bestRatio = ratio;
+    }
+
+    REAL ret = (ratio-settings.goodHumanRatio)/(settings.maxGoodRatio-settings.goodHumanRatio);
+    if( ret < 0 )
+    {
+        ret = 0;
+    }
+    return ret;
+}
+
+eUncannyTimingDetector::eUncannyTimingAnalysis::eUncannyTimingAnalysis()
+: accurateRatio( .3 ), turnsSoFar(10)
+{}
+
+/* stats; ladle 37:
+prematch:
+[0] Best ratio achieved for 125ms stat: 0.653367, 591turns.
+[0] Best ratio achieved for 62.5ms stat: 1.07667, 124turns.
+[0] Best ratio achieved for 31.25ms stat: 0.464286, 43turns.
+up to zealous assertion failure:
+[0] Best ratio achieved for 125ms stat: 1.45674
+[0] Best ratio achieved for 62.5ms stat: 1.08824
+[0] Best ratio achieved for 31.25ms stat: 0.942842
+proper, after assertions had been removed:
+[0] Best ratio achieved for 125ms stat: 1.71929, 4686turns.
+[0] Best ratio achieved for 62.5ms stat: 1.08824, 713turns.
+[0] Best ratio achieved for 31.25ms stat: 0.952494, 163turns.
+z-man, trying really hard:
+[0] Best ratio achieved for 125ms stat: 4.71739
+[0] Best ratio achieved for 62.5ms stat: 0.945886
+[0] Best ratio achieved for 31.25ms stat: 0.444307
+tst prematch, only counting enemy grinds:
+[0] Best ratio achieved for 125ms stat: 6.04985
+[0] Best ratio achieved for 62.5ms stat: 1.80428
+[0] Best ratio achieved for 31.25ms stat: 0.819629
+all grinds:
+[0] Best ratio achieved for 125ms stat: 2.09805
+[0] Best ratio achieved for 62.5ms stat: 2.32939
+[0] Best ratio achieved for 31.25ms stat: 1
+tst proper, enemies only: 
+[0] Best ratio achieved for 125ms stat: 5.60549
+[0] Best ratio achieved for 62.5ms stat: 1.01227
+[0] Best ratio achieved for 31.25ms stat: 0.681035
+all grinds:
+[0] Best ratio achieved for 125ms stat: 1.72932
+[0] Best ratio achieved for 62.5ms stat: 1.68816
+[0] Best ratio achieved for 31.25ms stat: 0.750099
+ladle41, hamar and partner team actions included:
+[0] Best ratio achieved for 125ms stat: 23.7208
+[0] Best ratio achieved for 62.5ms stat: 2.01171
+[0] Best ratio achieved for 31.25ms stat: 0.90623
+*/
+
+static eUncannyTimingDetector::eUncannyTimingSettings 
+se_uncannyTimingSettingsFast(1/32.0, 1, 1.5),
+se_uncannyTimingSettingsMedium(1/16.0, 2, 4);
+// se_uncannyTimingSettingsSlow(1/8.0, 7, 15);
+
+static REAL se_Max( REAL a, REAL b )
+{
+    return a > b ? a : b;
+}
+
+eUncannyTimingDetector::eUncannyTimingDetector()
+: dangerLevel( DangerLevel_Low )
+{
+}
+
+// opportunity to tune timebot detection sensitivity
+static REAL se_timebotSensitivity = 1.0;
+static tSettingItem< REAL > se_timebotSensitivityConf( "TIMEBOT_SENSITIVITY", se_timebotSensitivity );
+
+// different ways to react to timebot detection
+enum eTimebotAction
+{
+    eTimebotAction_Nothing = 0, // do nothing
+    eTimebotAction_Log     = 1, // log it
+    eTimebotAction_NotifyModerator = 2, // notify moderators that happen to be online
+    eTimebotAction_NotifyEveryone  = 3, // notify all players
+    eTimebotAction_Kick  = 4            // kick the player
+};
+tCONFIG_ENUM( eTimebotAction );
+
+static eTimebotAction se_timebotActionMedium = eTimebotAction_Log;
+static eTimebotAction se_timebotActionHigh   = eTimebotAction_Log;
+static eTimebotAction se_timebotActionMax    = eTimebotAction_Log;
+static tSettingItem< eTimebotAction > se_timebotActionMediumConf( "TIMEBOT_ACTION_MEDIUM", se_timebotActionMedium );
+static tSettingItem< eTimebotAction > se_timebotActionHighConf( "TIMEBOT_ACTION_HIGH", se_timebotActionHigh );
+static tSettingItem< eTimebotAction > se_timebotActionMaxConf( "TIMEBOT_ACTION_MAX", se_timebotActionMax );
+
+// severity of kick (for autobans)
+static REAL se_timebotKickSeverity = 0.5;
+static tSettingItem< REAL > se_timebotKickSeverityConf( "TIMEBOT_KICK_SEVERITY", se_timebotKickSeverity );
+
+static void se_TimebotAction( eTimebotAction action, ePlayerNetID * player, char const * message )
+{
+    if (action == eTimebotAction_Nothing)
+    {
+        return;
+    }
+    // look up message
+    tOutput m (message, player->GetName());
+    switch (action)
+    {
+    case eTimebotAction_Kick:
+        if( player->Owner() > 0 )
+        {
+            sn_KickUser( player->Owner(), m, se_timebotKickSeverity );
+        }
+        // no break on purpose.
+    case eTimebotAction_NotifyEveryone:
+        sn_ConsoleOut( m );
+        break;
+    case eTimebotAction_NotifyModerator:
+#ifdef DEDICATED
+        se_SecretConsoleOut( m, player, &se_cannotSeeConsole );
+        break;
+#endif
+    case eTimebotAction_Log:
+        con << m;
+        break;
+    case eTimebotAction_Nothing:
+        break;
+    }
+}
+
+//! analzye a timing event
+void eUncannyTimingDetector::Analyze( REAL timing, ePlayerNetID * player )
+{
+    // ignore this system on the client itself
+    if( sn_GetNetState() != nSERVER || se_timebotSensitivity <= 0 )
+    {
+        return;
+    }
+
+    // apply sensitivity
+    timing /= se_timebotSensitivity;
+
+    REAL maxUncanny = fast.Analyze( timing, se_uncannyTimingSettingsFast );
+    maxUncanny = se_Max( maxUncanny, medium.Analyze( timing, se_uncannyTimingSettingsMedium ) );
+    // maxUncanny = se_Max( maxUncanny, slow.Analyze( timing, se_uncannyTimingSettingsSlow ) );
+
+    switch( dangerLevel )
+    {
+    case DangerLevel_Low:
+        if( maxUncanny > .25 )
+        {
+            dangerLevel =DangerLevel_Medium;
+            se_TimebotAction( se_timebotActionMedium, player, "$timebot_action_medium" );
+        }
+        break;
+    case DangerLevel_Medium:
+        if( maxUncanny > .5 )
+        {
+            dangerLevel = DangerLevel_High;
+            se_TimebotAction( se_timebotActionHigh, player, "$timebot_action_high" );
+        }
+        else if( maxUncanny <= 0.01 )
+        {
+            dangerLevel = DangerLevel_Low;
+        }
+        break;
+    case DangerLevel_High:
+        if( maxUncanny > 1 )
+        {
+            dangerLevel = DangerLevel_Max;
+            se_TimebotAction( se_timebotActionMax, player, "$timebot_action_max" );
+        }
+        else if( maxUncanny < .25 )
+        {
+            dangerLevel = DangerLevel_Medium;
+        }
+        break;
+    case DangerLevel_Max:
+        if( maxUncanny < .75 )
+        {
+            dangerLevel = DangerLevel_High;
+        }
     }
 }
 
@@ -9078,7 +10329,7 @@ void ePlayerNetID::UpdateShuffleSpamTesters()
 //!
 // *******************************************************************************
 
-static eLadderLogWriter se_roundScoreWriter("ROUND_SCORE", true);
+static eLadderLogWriter se_roundScoreWriter( "ROUND_SCORE", true, "score:int player team" );
 
 void ePlayerNetID::LogScoreDifference( void )
 {
@@ -9088,7 +10339,9 @@ void ePlayerNetID::LogScoreDifference( void )
         lastScore_ = IMPOSSIBLY_LOW_SCORE;
         se_roundScoreWriter << scoreDifference << GetUserName();
         if ( currentTeam )
-            se_roundScoreWriter << FilterName( currentTeam->Name() );
+            se_roundScoreWriter << currentTeam->GetLogName();
+        else
+            se_roundScoreWriter << "";
         se_roundScoreWriter.write();
     }
 }
@@ -9128,3 +10381,23 @@ int ePlayerNetID::GetSuspended() const
 {
     return suspended_;
 }
+
+static void se_FillServerSettings()
+{
+    nServerInfo::SettingsDigest & digest = *nCallbackFillServerInfo::ToFill();
+    
+    digest.minPlayTimeTotal_ = int(se_minPlayTimeTotal);
+    digest.minPlayTimeOnline_ = int(se_minPlayTimeOnline);
+    digest.minPlayTimeTeam_ = int(se_minPlayTimeTeam);
+
+    digest.SetFlag( nServerInfo::SettingsDigest::Flags_AuthenticationRequired,
+#ifdef KRAWALL_SERVER
+                    se_accessLevelRequiredToPlay < tAccessLevel_Program ||
+                    se_playAccessLevel < tAccessLevel_Program
+#else
+                    false
+#endif
+        );
+}
+
+static nCallbackFillServerInfo se_fillServerSettings(se_FillServerSettings);

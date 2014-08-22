@@ -1,10 +1,7 @@
-src/macosx/config_common.h
-src/macosx/English.lproj/InfoPlist.strings
-MacOS/Armagetron Advanced.xcodeproj/*.mode1v3
-MacOS/Armagetron Advanced.xcodeproj/*.pbxuser
-MacOS/build/
-macosx_build_information.yml
 *.DS_Store
+Armagetron Advanced Dedicated
+Armagetron Advanced.app
+desktop/os-x/Info.plist
 .gdbinit
 batch/rcd_config
 batch/rcd_server
@@ -42,7 +39,7 @@ batch/sysinstall
 config/Makefile
 config/aiplayers.cfg
 config/rc.config
-desktop/armagetronad.desktop
+desktop/armagetronad-armagetronad.desktop
 language/languages.txt
 resource/included/
 resource/automatic/
@@ -79,3 +76,12 @@ a.out.dSYM
 src/tFakeVersion.h
 config/settings_custom.cfg
 config/server_info.cfg
+src/armagetronad-serverquery
+./rubbish
+__pycache__
+./src/armagetronad_serverquery
+src/armagetronad_main_master
+src/doc/COPYING.txt
+rubbish
+desktop/armagetronad-armagetronad-handler.desktop
+desktop/armagetronad-link.xml

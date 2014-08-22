@@ -255,11 +255,6 @@ public:
     // void WriteSync( Game::AIPlayerSync & sync, bool init );
     //! returns the descriptor responsible for this class
     virtual nNetObjectDescriptorBase const & DoGetDescriptor() const;
-
-    // don't accept syncs from client
-    virtual bool AcceptClientSync() const	{
-        return false;
-    }
 };
 
 // the AI team

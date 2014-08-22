@@ -86,7 +86,7 @@ void eNetGameObject::InitAfterCreation(){
 eNetGameObject::eNetGameObject(eGrid *grid, const eCoord &pos,const eCoord &dir,
                                ePlayerNetID* p,bool autodelete)
         :eGameObject(grid, pos,dir,NULL,autodelete),
-         nNetObject(Owner(p)),player(p){
+nNetObject(p->Owner()),player(p){
     lastClientsideAction=0;
     if (sn_GetNetState()!=nCLIENT)
         RequestSync();
@@ -203,7 +203,7 @@ void eNetGameObject::ReceiveControlNet( Network::NetObjectControl const & contro
 
 void eNetGameObject::SetPlayer(ePlayerNetID* a_player)
 {
-    tASSERT( !a_player || Owner() == Owner(player) );
+    tASSERT( !a_player || Owner() == player->Owner() );
     player  = a_player;
     if ( laggometerSmooth == 0 && sn_GetNetState() != nCLIENT )
         laggometerSmooth = laggometer = se_GetPing( player );
@@ -250,7 +250,7 @@ void eNetGameObject::WriteSync( Engine::NetGameObjectSync & sync, bool init ) co
 
     if ( init )
     {
-        sync.set_player_id( ID(player) );
+        sync.set_player_id( player->ID() );
         sync.set_autodelete( autodelete );
     }
 

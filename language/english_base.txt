@@ -97,11 +97,12 @@ cycle_width_rubber_max_help  If the cycle_width conditions are massively violate
 
 cycle_rubber_help		Niceness factor to allow you drive really close to a wall
 cycle_rubber_time_help		    Timescale rubber is restored on.
-cycle_rubber_legacy_help		Revert to old, framerate dependant and old-clients-ripping, rubber code if old clients are present. Old means <= 0.2.7.0 here.
+cycle_rubber_legacy_help		Revert to old, framerate dependent and old-clients-ripping, rubber code if old clients are present. Old means <= 0.2.7.0 here.
 cycle_rubber_timebased_help		Rubber usage is based on distance travelled if this is 0 (default) and the time passed if this is 1. Intermediate values and values out of these bounds are supported as well.
 cycle_rubber_speed_help             Logarithmic speed of wall approximation when rubber is in effect (every second, you get closer to the wall by a factor of ~0.4^{this value})
 cycle_rubber_mindistance_help		The minimal distance rubber code keeps you from the wall in front of you
-cycle_rubber_mindistance_gap_help		If > 0, CYCLE_RUBBER_MINDISTANCE effectively is never taken to be bigger than this value times the size of any detected gaps the cylce can squeeze through. For "Open" gameplay.
+cycle_rubber_mindistance_gap_help		If > 0, CYCLE_RUBBER_MINDISTANCE effectively is never taken to be bigger than this value times the size of any detected gaps the cycle can squeeze through. For "Open" gameplay.
+cycle_rubber_mindistance_gap_backdoor_help If > 0, CYCLE_RUBBER_MINDISTANCE effectively is never taken to be bigger than this value times the size of any detected backdoor gaps the cycle can squeeze through. For "Open" gameplay. If = 0, CYCLE_RUBBER_MINDISTANCE_GAP applies to backdoors, too.
 cycle_rubber_mindistance_gap_side_help Gap detection only sees gaps that the cycle may reach in no less than this many seconds.
 cycle_rubber_mindistance_ratio_help	Additional distance to CYCLE_RUBBER_MINDISTANCE for every length unit of the wall you have in front of you
 cycle_rubber_mindistance_reservoir_help		Additional distance if you have an empty rubber meter (gets faded out gradually as you use up all your rubber)
@@ -113,6 +114,7 @@ cycle_rubber_delay_help     During this fraction of the cycle delay time after e
 cycle_rubber_delay_bonus_help Factor for CYCLE_RUBBER_DELAY rubber efficiency.
 cycle_ping_rubber_help		Additional niceness for high ping players
 cycle_rubber_wall_shrink_help       With finite length trails, the used rubber is multiplied with this value and the result is subtracted from the wall length.
+cycle_rubber_sync_help              Determines whether rubber is synced to clients. The default 1 makes it sync only to the owner of each cycle, a value of 0 does not sync it at all and renders rubber meters useless, a value of 2 syncs rubber of all cycles to all clients, which was the old behavior before this setting was introduced.
 cycle_brake_refill_help				Rate at which the brake reservoir refills when you are not braking
 cycle_brake_deplete_help			Rate at which the brake reservoir depletes when you are braking
 cycle_sync_interval_enemy_help		Time in seconds between server-client updates of enemy cycles
@@ -123,8 +125,8 @@ cycle_time_tolerance_help			Maximum time difference of execution of turns on ser
 cycle_packetloss_tolerance_help     Cycle death is prevented as long as the player's failure to turn can be explained by the loss of this many network packets. Enabling this allows cheating.
 cycle_sync_ff_help 					Speed of simulation of the extrapolating sync; decrease for lower CPU load, but higher effective ping
 cycle_sync_ff_steps_help 			Number of extrapolation simulation timesteps each real timestep; increase for better accuracy
-topology_police_help				The topology police does posteriori checks to determine whether game moves were legal.
-topology_police_parallel_help		Extra topology police flag to check for walls that are put into the grid datastructure exactly parallel to each other. Requites TOPOLOGY_POLICE to be active.
+topology_police_help				The topology police does posterior checks to determine whether game moves were legal.
+topology_police_parallel_help		Extra topology police flag to check for walls that are put into the grid data-structure exactly parallel to each other. Requites TOPOLOGY_POLICE to be active.
 cycle_smooth_time_help				Timescale for smoothing options. Increasing this will make interpolation smoother, but less accurate. Decreasing it will make network synchronization jumpy.
 cycle_smooth_min_speed_help			Minimum speed of smooth correction relative to cycle speed.
 cycle_smooth_threshold_help			Only syncs that differ from your position by less than this amount (measured in speed) will be handled smoothly, bigger differences will be applied instantly. 
@@ -139,7 +141,7 @@ cycle_max_refcount_help				Maximum allowed reference count on cycles before they
 #********************************************
 
 chatbot_always_active_help          if set to 1, the chatbot is active all of the time
-chatbot_new_wall_blindness_help     the chatbot won't see walls that were bult less than this many seconds ago
+chatbot_new_wall_blindness_help     the chatbot won't see walls that were built less than this many seconds ago
 chatbot_min_timestep_help           minimal time in seconds between chatbot thoughts
 chatbot_delay_help                  time between entering chat and chatbot activation
 chatbot_range_help                  time in seconds the bot is capable of planning ahead
@@ -165,6 +167,10 @@ score_kill_help                     Amount of points you get for killing someone
 score_suicide_help                  Amount of points you get for stupidly dying
 score_win_help                      Amount of points you get for winning a round
 score_deathzone_help                Amount of points you get for hitting the Death Zone
+score_explosion_owner_help  Points the owner of an explosion gains for destroying another enemy cycle.
+score_explosion_help        Points the enemy cycle destroyed in an explosion gains.
+deadly_explosions_help      Should cycles in the blast radius of an explosion be destroyed?
+
 
 sp_score_win_help			What you get for winning a round in single player mode
 sp_walls_stay_up_delay_help	Number of seconds the walls stay up after a player died; negative values will keep them up forever.
@@ -185,8 +191,10 @@ sp_ai_iq_help			IQ of the AI opponents in single player mode
 sp_min_players_help		Minimum number of players in single player mode
 sp_num_ais_help			Number of AI players in single player mode
 sp_limit_score_help		End the match when a player reaches this score in single player mode
+limit_score_min_lead_help	Only consider LIMIT_SCORE when this lead is achieved by the winning team in single player mode
 sp_limit_rounds_help		End the match after this number of rounds in single player mode
 sp_limit_time_help		End the match after this number of minutes in single player mode
+sp_limit_advance_help   End the match in single player mode when the first team in score is this number of points ahead of the second team
 
 spawn_wingmen_back_help     Determines how much each wingman is placed backwards in a team.
 spawn_wingmen_side_help     Determines how much each wingman is placed sidewards in a team.
@@ -194,6 +202,7 @@ spawn_wingmen_side_help     Determines how much each wingman is placed sidewards
 walls_stay_up_delay_help	Number of seconds the walls stay up after a player died; negative values will keep them up forever.
 walls_length_help		Length of the cycle walls in meters; negative values will make the walls infinite.
 explosion_radius_help		Blast radius of the cycle explosions
+explosion_radius_speed_factor_help  Positive values will increase EXPLOSION_RADIUS the faster the cycle is, negative value will decrease it.
 team_balance_on_quit_help	Balance teams on player quit?
 team_balance_with_ais_help	Balance teams with AI players?
 team_max_imbalance_help	Maximum allowed team imbalance
@@ -201,7 +210,7 @@ team_max_players_help		Maximum number of players per team
 team_min_players_help		Minimum number of players per team
 team_allow_shuffle_up_help  If set to 1, players are allowed to change their position in the team as they wish. If 0, they only can drop in rank.
 team_center_is_boss_help    If set to 1, the center player is the team's boss. If at 0, it's the player who is on that team longest.
-team_elimination_mode_help  Defines the way ArmagetronAd should eliminate teams when there's more teams than TEAMS_MAX: Set to 0 it will try to keep as many players as possible, kicking teams that have the lowest score if teams are balanced; Set to 1 it will try to keep the best team colors (Team blue, then Team gold, then Team red, etc); Set to 2 it will kick out the teams that have the lowest score, regardless of balance.
+team_elimination_mode_help  Defines the way \g should eliminate teams when there's more teams than TEAMS_MAX: Set to 0 it will try to keep as many players as possible, kicking teams that have the lowest score if teams are balanced; Set to 1 it will try to keep the best team colors (Team blue, then Team gold, then Team red, etc); Set to 2 it will kick out the teams that have the lowest score, regardless of balance.
 
 teams_max_help			Maximum number of teams
 teams_min_help			Minimum number of teams
@@ -213,8 +222,13 @@ ai_iq_help			IQ of the AI opponents
 min_players_help		Minimum number of players
 num_ais_help			Number of AI players
 limit_score_help		End the match when a player reaches this score	 
+limit_score_min_lead_help	Only consider LIMIT_SCORE when this lead is achieved by the winning team
 limit_rounds_help		End the match after this number of rounds
 limit_time_help			End the match after this number of minutes 
+limit_advance_help      End the match when the first team in score is this number of points ahead of the second team
+
+round_min_alive_help    End the round in a draw if there aren't this many humans alive.
+round_draw_warn_time_help Time allotted for teams to win until round actually ends in a draw.
 
 auto_team_help          Flag indicating whether players should be put into teams automatically.
 no_spectators_allowed	Sorry, does not work with automatic team assignment.\n
@@ -327,20 +341,30 @@ win_zone_initial_size_help			Initial size of the instant win zone
 win_zone_deaths_help	            A value of 1 turns it into a death zone.
 win_zone_randomness_help            Randomness factor of the initial win zone position. 0 fixes it at the arena center, 1 spreads the zone all over it.
 
+condense_conquest_output_help       Zone conquest output condensed into one line
+
 game_timeout_help					Base timeout for game state synchronisation; gives approximately the maximum time between rounds.
 last_chat_break_time_help           Last round time a player in chat mode is able to pause the timer
 extra_round_time_help               Length of an extra pause at the beginning of the round
 player_chat_wait_max_help           Maximum time in seconds to wait for a single player to stop chatting.
 player_chat_wait_fraction_help      Maximum fraction of time to wait for a single player to stop chatting.
-player_chat_wait_single_help        Set to 1 if only one player should get his chat wait time reduced at any given time.
+player_chat_wait_single_help        Set to 1 if only one player should get their chat wait time reduced at any given time.
 player_chat_wait_teamleader_help    Set to 1 if only team leaders, and 0 if all players, should be allowed to pause the timer.
 
 wait_for_external_script_help Let the server wait for an external script between two rounds until the script switches this setting back to 0.
 wait_for_external_script_timeout_help If the server has been paused by WAIT_FOR_EXTERNAL_SCRIPT for more seconds than this, kickstart the game.
 
+spawn_script_help                   Spawns an external script from a scripts/ subdirectory on the data path.
+respawn_script_help                 Spawns an external script from a scripts/ subdirectory on the data path if no already running instance is found.
+force_respawn_script_help           Spawns an external script from a scripts/ subdirectory on the data path after killing the other possibly running instance.
+kill_script_help                    Kills a script. Argument must match the SPAWN_SCRIPT argument.
+list_scripts_help                   Lists active scripts.
+script_env_help                     Set custom environment variables for scripts. Usage: SCRIPT_ENV <variable name> <value>
+
 chatter_remove_time_help            Time in seconds after which a permanent chatter is removed from the game
 idle_remove_time_help               Time in seconds after which an inactive player is removed from the game
 idle_kick_time_help                 Time in seconds after which an inactive player is kicked
+keep_player_slot_help               If set to 1, every time the server gets full, an unworthy spectator is kicked.
 
 #********************************************
 #********************************************
@@ -354,7 +378,7 @@ player_name_confitem_help	    Player name
 player_teamname_confitem_help	Team name
 player_user_confitem_help	Global player ID
 auto_login_confitem_help	Should this player automatically request authentication?
-hide_identity_confitem_help Should this player hide his ID?
+hide_identity_confitem_help Should this player hide their ID?
 camcenter_help			Center internal camera on driving direction
 start_cam_help			Initial Camera
 start_fov_help			Initial field of vision
@@ -395,6 +419,11 @@ ping_flood_time_20_help             Minimum time for 20 ping packets from one ma
 ping_flood_time_50_help             Minimum time for 50 ping packets from one machine to arrive.
 ping_flood_time_100_help            Minimum time for 100 ping packets from one machine to arrive.
 ping_flood_global_help              The times PING_FLOOD_TIME_X, multiplied by this value, count for all pings from all machines. Negative values disable global flood protection.
+connection_flood_sensitivity_help   The times PING_FLOOD_TIME_X, multiplied by this value, count for all incoming messages from clients not connected already. A flood here activates turtle mode. Negative values disable global flood protection.
+connection_limit_help               Maximum number of packets from unknown peers to handle in one run of the main loop; further messages are ignored.
+anti_spoof_help                     If set to 1, checks connecting clients for spoofed IPs. Only clients passing a connectivity test are allowed in. This is done in turtle mode automatically, but may be useful to have on at all times.
+turtle_mode_activated               Server is under heavy load. Turtle mode activated. Communication with new clients is on a budget.\n
+turtle_mode_deactivated             The high load seems to have normalized for now. Turtle mode deactivated.\n
 
 shuffle_spam_messages_per_round_help Per round, per player limit on the number of shuffle messages displayed. A negative or zero value disables this check.
 spam_protection_repeat_help         Minimum time between identical chat messages.
@@ -406,7 +435,7 @@ spam_maxlen_help					Maximal length of chat message.
 spam_autokick_help					Spam score that causes you to get kicked instantly.
 spam_autokick_count_help			Number of spam warnings before a player gets spamkicked.
 silence_default_help				If set to 1, new players will be silenced
-enable_chat_help					If set to 0, all chat will be surpressed (if reset on the server, messages from logged in players and private/team messages are still shown)
+enable_chat_help					If set to 0, all chat will be suppressed (if reset on the server, messages from logged in players and private/team messages are still shown)
 allow_team_change_help				If set to 1, all players can change teams. If set to 0, players can only change teams if they've been specifically allowed to by ALLOW_TEAM_CHANGE_PLAYER
 
 # spam prefix settings
@@ -439,11 +468,24 @@ default_shout_player_help    1 if the default chat action for players should be 
 
 allow_enemies_same_ip_help         If set to 1, this allows two players that apparently come from the same machine to fight for points with each other.
 allow_enemies_same_client_help     If set to 1, this allows two players that play on the same client to fight for points with each other.
+whitelist_enemies_username_help    Allow players from the same IP address to be enemies if one of them is authenticated, and in this list. WHITELIST_ENEMIES_USERNAME <authenticated name1> <authenticated name2> ...
+whitelist_enemies_ip_help          Allow any players from the specified IP address to be enemies. Usage: WHITELIST_ENEMIES_IP <ip1> ...
+whitelist_enemies_success          Added \1 entries to the whitelist.
 
 allow_control_during_chat_help     If set to 1, this allows a player to issue cycle and camera control commands during chat (losing the chatbot and the yellow chat pyramid).
 
 allow_imposters_help               If set to 1, players with identical names are tolerated. If set to 0, all but one will be renamed.
 allow_impostors_help               If set to 1, players with identical names are tolerated. If set to 0, all but one will be renamed.
+
+timebot_kick_severity_help         If players get kicked by the timebot detection, it's done with this severity level.
+timebot_sensitivity_help           The sensitivity of the timebot detection code. 1.0 is the default and you probably shouldn't deviate more than .5 from that.
+timebot_action_medium_help         Action to take on a medium suspicion of timebottery. 0: do nothing, 1: log it, 2: message moderators, 3: message all players, 4: kick the offending player.
+timebot_action_high_help           Action to take on a high suspicion of timebottery. 0: do nothing, 1: log it, 2: message moderators, 3: message all players, 4: kick the offending player.
+timebot_action_max_help            Action to take on a very high suspicion of timebottery. 0: do nothing, 1: log it, 2: message moderators, 3: message all players, 4: kick the offending player.
+
+timebot_action_medium              \1 is showing excellent timing ability, almost too good for a human.\n
+timebot_action_high                \1 is showing suspiciously superhuman timing ability.\n
+timebot_action_max                 \1 is very likely using timing assistance software.\n
 
 #********************************************
 #********************************************
@@ -479,7 +521,7 @@ lag_frequency_threshold_help       Minimal frequency of lag events (measured aga
 #********************************************
 #********************************************
 
-network_min_ban_help                When a client's connection is blocked because he's banned, make him banned for at least this many seconds.
+network_min_ban_help                When a client's connection is blocked because they're banned, make them banned for at least this many seconds.
 
 network_autoban_offset_help         Autoban players for NETWORK_AUTOBAN_FACTOR * ( kph - NETWORK_AUTOBAN_OFFSET ) minutes when they get kicked; kph is the average number of kicks per hour they get.
 network_autoban_factor_help         Autoban players for NETWORK_AUTOBAN_FACTOR * ( kph - NETWORK_AUTOBAN_OFFSET ) minutes when they get kicked; kph is the average number of kicks per hour they get.
@@ -505,7 +547,7 @@ max_votes_help                      The maximum number of total votes that can b
 votes_cancel_help                   Cancels all running polls.
 max_votes_per_voter_help            The maximum number of votes suggested by each voter that can be active at any given moment.
 voting_start_decay_help				Number of seconds after that the non-voters start to get ignored.
-voting_decay_help					One non-voter is ignored everytime this many seconds pass.
+voting_decay_help					One non-voter is ignored every time this many seconds pass.
 voting_bias_help					Add virtual voters that oppose every change.
 voting_bias_kick_help				Add virtual voters that oppose every kick vote.
 voting_bias_suspend_help			Add virtual voters that oppose every suspend vote.
@@ -517,7 +559,7 @@ voting_spam_issue_help              The spam level of issuing a vote.
 voting_spam_reject_help             The spam level of getting your vote rejected.
 voting_harm_time_help               The minimum time in seconds between two harmful votes against the same player.
 voting_kick_time_help               The minimum time in seconds between two kick votes against the same player.
-voting_maturity_help                The minimum time in seconds a player needs to be online with the same name before he can issue votes.
+voting_maturity_help                The minimum time in seconds a player needs to be online with the same name before they can issue votes.
 voting_suspend_rounds_help          The number of rounds "/vote suspend <player>" suspends a player for.
 voting_kick_minharm_help            Minimal number of harmful votes (suspension, kick,..) that need to have been issued (success is not required) against a player before a kick vote issued via the menu really results in a kick; otherwise, the result is a simple suspension.
 votes_suspend_help		    Suspends voting for n minutes.
@@ -551,6 +593,7 @@ recording_debuglevel_help		    Level of additional information in recording file
 fast_forward_maxstep_help           Maximum recording time between rendered frames in fast forward mode
 fast_forward_maxstep_real_help      Maximum real time between rendered frames in fast forward mode
 fast_forward_maxstep_rel_help       Maximum fraction of the time left until the end of FF mode between rendered frames
+stop_recording_help                 Stops a currently running recording to save resources. Resuming is impossible.
 
 #********************************************
 #********************************************
@@ -585,6 +628,11 @@ camera_smart_glance_custom_text Custom Glance
 camera_free_start_x_help	Start position of the free camera
 camera_free_start_y_help	Start position of the free camera
 camera_free_start_z_help	Start position of the free camera
+camera_free_start_rotate_help Start rotation of the free camera (relative to looking at the initially watched cycle)
+camera_free_start_pitch_help Start pitch of the free camera (if 0, it will tilt to look at the cycle)
+
+save_cameras_help           Prints commands that restore the current camera positions later.
+warp_camera_help            Instantly changes the position of one camera. Format: WARP_CAMERA camera_id posx posy dirx diry height pitch fov.
 
 camera_custom_back_help		Position of the custom camera: how much is it moved back from the cycle?
 camera_custom_rise_help		Position of the custom camera: how much is it moved up from the cycle?
@@ -601,7 +649,7 @@ camera_server_custom_rise_help		Position of the custom camera: how much is it mo
 camera_server_custom_back_fromspeed_help		This value is multiplied with the current speed and added to CAMERA_SERVER_CUSTOM_BACK.
 camera_server_custom_rise_fromspeed_help		This value is multiplied with the current speed and added to CAMERA_SERVER_CUSTOM_RISE.
 camera_server_custom_pitch_help		Position of the custom camera: how much does it look up/down?
-camera_server_custom_turn_speed_help Speed the server custom camera turns with. Turn values are taken from the clientside settings if this is negative.
+camera_server_custom_turn_speed_help Speed the server custom camera turns with. Turn values are taken from the client-side settings if this is negative.
 camera_server_custom_turn_speed_180_help Extra factor to CAMERA_SERVER_CUSTOM_TURN_SPEED after a quick reverse
 
 camera_glance_back_help		Position of the glance camera: how much is it moved back from the cycle?
@@ -609,6 +657,13 @@ camera_glance_rise_help		Position of the glance camera: how much is it moved up 
 camera_glance_back_fromspeed_help		This value is multiplied with the current speed and added to CAMERA_GLANCE_BACK.
 camera_glance_rise_fromspeed_help		This value is multiplied with the current speed and added to CAMERA_GLANCE_RISE.
 camera_glance_pitch_help	Position of the glance camera: how much does it look up/down?
+
+camera_glance_mode_help           Way the camera switches into glances. Valid settings range from 0 to 3 
+camera_glance_stacking_help       If this is set, glances stack, glance directions are relative to the current view then.
+camera_glance_return_help         If you release all glance keys and this is set, the order to glance forward directly into the direction you're driving in is issued. This can return the view back to normal faster than if you leave it up to the default camera code.
+camera_glance_return_stop_help    Cosine of the angle between driving direction and glance direction the return glance command is aborted at and control is returned to the normal (non-smart) camera.
+camera_glance_return_stop_smart_help When the smart camera is used: cosine of the angle between driving direction and glance direction the return glance command is aborted at and control is returned to the normal camera.
+camera_glance_snap_help          If the cosine between the desired and current glance direction is smaller than this, the glance snaps directly to the desired target, irrespective of CAMERA_GLANCE_MODE.
 
 camera_server_glance_back_help		Position of the server glance camera: how much is it moved back from the cycle?
 camera_server_glance_rise_help		Position of the server glance camera: how much is it moved up from the cycle?
@@ -644,7 +699,8 @@ custom_server_name_help	Name of the server to connect to
 dedicated_idle_help		After running this time (in hours), the dedicated server takes the next chance to quit.
 dedicated_fps_help      Maximum simulation steps per second the dedicated server will perform
 dedicated_fps_idle_factor_help Number of times per frame the server should check whether simulation can be done if no network input is coming
-talk_to_master_help		Announce this server on the internet?
+talk_to_master_help		Announce this server on the Internet?
+add_master_server_help  Announce this server to another master server. Usage: ADD_MASTER_SERVER host port(optional, default=4533).
 max_out_rate_help		Maximum network output rate
 max_in_rate_help		Maximum network input rate
 message_cache_size_help Size of the network message cache in messages.
@@ -672,8 +728,22 @@ url_help				HTTP URI associated with a server
 setting_legacy_behavior_breaking_help    Default legacy behavior for settings that absolutely break the client and make play impossible. Example of an affected setting: MAP_FILE
 setting_legacy_behavior_bumpy_help     Default legacy behavior for settings that allow play on old clients in principle, but with severe limitations (cycles bouncing around, player commands not executed on time). Example: CYCLE_DELAY_TIMEBASED
 setting_legacy_behavior_annoying_help Default legacy behavior for settings that only cause minor annoyances on old clients, like enemy cycles stopping for .1 seconds after each turn. Example: CYCLE_RUBBER_MINDISTANCE
-setting_legacy_behavior_cheating_help     Default legacy behavior for settings where the default behavior could be considered cheating if nondefault was set. Example: DOUBLEBIND_TIME
+setting_legacy_behavior_cheating_help     Default legacy behavior for settings where the default behavior could be considered cheating if non-default was set. Example: DOUBLEBIND_TIME
 setting_legacy_behavior_visual_help   Default legacy behavior for settings that only affect status displays and visuals, not game physics. Example: CYCLE_RUBBER_* (the client displays the rubber meter, but it's not used for anything)
+
+# server browser
+
+browser_query_filter_help            query filter. Set to 0 to poll all servers, 1 to query servers with nonnegative score bias, 2 to query only those with positive bias and 3 to not query at all. Non-queried servers will appear to have ping 999; the player info comes indirectly from the master server.
+browser_queries_simultaneous_help    max. number of simultaneous query messages that are sent
+browser_query_delay_single_help      time delay between queries of the same server
+browser_query_delay_global_help      time delay between all queries
+browser_num_queries_help             number of queries per try
+browser_contactloss_help             number of failed contact attempts before a server can be considered lost
+browser_sort_key_help                current sorting key in the server browser
+browser_bookmark_priority_ping_help  priority of bookmarks for sorting by ping
+browser_bookmark_priority_users_help priority of bookmarks for sorting by users
+browser_bookmark_priority_score_help priority of bookmarks for sorting by score
+
 
 #********************************************
 #********************************************
@@ -694,15 +764,28 @@ forbid_cockpit_data_help          Colon- separated list of cockpit data sources 
 cm_locy_help                      Vertical position of the center messages
 
 #floor
-grid_size_help			Distance between gridlines
-grid_size_moviepack_help	Distance between gridlines when moviepack is active
+grid_size_help			Distance between grid lines
+grid_size_moviepack_help	Distance between grid lines when moviepack is active
 floor_red_help			Floor colour
 floor_green_help		Floor colour
 floor_blue_help			Floor colour
 
+upper_sky_red_help       Upper sky colour
+UPPER_SKY_GREEN_help     Upper sky colour
+UPPER_SKY_BLUE_help      Upper sky colour
+
+UPPER_SKY_SCALE_help     Upper sky scaling (decrease to make features larger)
+
+UPPER_SKY_HEIGHT_help    Upper sky height (changes during gameplay cause graphical errors)
+LOWER_SKY_HEIGHT_help    Lower sky height (changes during gameplay cause graphical errors)
+
 rim_wall_stretch_x_help Extension of the rim wall texture in the horizontal direction
 rim_wall_stretch_y_help Extension of the rim wall texture in the vertical direction
 rim_wall_wrap_y_help    Set to 1 if the rim wall texture should repeat in the vertical direction
+
+rim_wall_red_help        Red portion of rim walls when using no textures. Any value between 0 and 1.
+rim_wall_green_help      Green portion of rim walls when using no textures. Any value between 0 and 1.
+rim_wall_blue_help       Blue portion of rim walls when using no textures. Any value between 0 and 1.
 
 #moviepack settings
 moviepack_floor_red_help	Floor colour
@@ -758,7 +841,7 @@ gl_vendor_help			OpenGL system information
 alpha_blend_help		Enable alpha blending
 zone_alpha_toggle_help		This is XORd with ALPHA_BLEND to determine the way to draw zones
 zone_segments_help		How many segments the zone is formed with. Default is 11
-zone_seg_length_help	The rendered percentual of every segment. Default is .5
+zone_seg_length_help	The rendered fraction of every segment. Default is .5
 zone_bottom_help        Where to put the zone along the Z axis. Default is 0.0
 zone_height_help        The zone segments' height. Default is 5.0
 smooth_shading_help     Enable smooth shading
@@ -766,40 +849,23 @@ text_out_help			Enable console text output
 console_columns_help    Number of characters in each line of console output
 console_rows_help       Number of lines of console output without user intervention
 console_rows_max_help   Number of lines of console output when scrolling back
+chat_layer_help         Opacity of the console and menu background: 0 for fully transparent, 1 for fully opaque.
 console_indent_help     Number of spaces each continuation of a wrapped console line is indented by
 console_decorate_id_help			Decorates every line of console output with the client ID
 console_decorate_ip_help			Decorates every line of console output with the client IP
 console_decorate_timestamp_help			Decorates every line of console output with the current date and time
-console_ladder_log_help			Sends ladder log output to the console
 ladderlog_decorate_timestamp_help		Decorates every line of ladderlog output with the current date and time
-ladderlog_write_all_help Set all the LADDER_LOG_WRITE_* settings to the same value
-ladderlog_write_all_usage Usage: LADDER_LOG_WRITE_ALL 1|0
-ladderlog_write_all_enabled Enabled full ladderlog output.
-ladderlog_write_all_disabled Disabled ladderlog output.
-ladderlog_write_authority_blurb_help          Write to ladderlog: AUTHORITY_BLURB <name> <value>
-ladderlog_write_basezone_conquered_help       Write to ladderlog: BASEZONE_CONQUERED <team> <cx> <cy>
-ladderlog_write_basezone_conquerer_help       Write to ladderlog: BASEZONE_CONQUERER <player>
-ladderlog_write_chat_help                     Write to ladderlog: CHAT <chatter> [/me] <chat string>
-ladderlog_write_death_frag_help               Write to ladderlog: DEATH_FRAG <prey> <predator>
-ladderlog_write_death_suicide_help            Write to ladderlog: DEATH_SUICIDE <player>
-ladderlog_write_death_teamkill_help           Write to ladderlog: DEATH_TEAMKILL <prey> <predator>
-ladderlog_write_game_end_help                 Write to ladderlog: GAME_END
-ladderlog_write_game_time_help                Write to ladderlog: GAME_TIME <time> (see also: GAME_TIME_INTERVAL)
-ladderlog_write_match_winner_help             Write to ladderlog: MATCH_WINNER <winner>
-ladderlog_write_new_match_help                Write to ladderlog: NEW_MATCH
-ladderlog_write_new_round_help                Write to ladderlog: NEW_ROUND
-ladderlog_write_num_humans_help               Write to ladderlog: NUM_HUMANS <number of humans>
-ladderlog_write_online_player_help            Write to ladderlog: ONLINE_PLAYER <name> [<ping> [<team>]]
-ladderlog_write_player_entered_help           Write to ladderlog: PLAYER_ENTERED <name> <IP> <screen name>
-ladderlog_write_player_left_help              Write to ladderlog: PLAYER_LEFT <name> <IP>
-ladderlog_write_player_renamed_help           Write to ladderlog: PLAYER_RENAMED <old name> <new name> <ip> <screen name>
-ladderlog_write_round_score_help              Write to ladderlog: ROUND_SCORE <score difference> <player> [<team>]
-ladderlog_write_round_score_team_help         Write to ladderlog: ROUND_SCORE_TEAM <score difference> <team>
-ladderlog_write_round_winner_help             Write to ladderlog: ROUND_WINNER <winner>
-ladderlog_write_sacrifice_help                Write to ladderlog: SACRIFICE <player who used the hole> <player who created the hole> <player owning the wall the hole was made into>
-ladderlog_write_wait_for_external_script_help Write to ladderlog: WAIT_FOR_EXTERNAL_SCRIPT (see also: WAIT_FOR_EXTERNAL_SCRIPT and WAIT_FOR_EXTERNAL_SCRIPT_TIMEOUT)
-ladderlog_game_time_interval_help If nonnegative, write a line with the current game time to the ladder log every n seconds.
+ladderlog_write_all_help         Enable or disable all ladderlog writers for both file and script output. Usage: LADDERLOG_WRITE_ALL 0|1
+ladderlog_script_write_all_help  Enable or disable all ladderlog writers for script output. Usage: LADDERLOG_SCRIPT_WRITE_ALL 0|1
+ladderlog_script_write_help      Enable or disable ladderlog writers for script output. Usage: LADDERLOG_SCRIPT_WRITE 0|1 <event1> [<event2> ...]
+ladderlog_script_write_enabled   Enabled \1 ladderlog writers for script output.
+ladderlog_script_write_disabled  Disabled \1 ladderlog writers for script output.
+ladderlog_write_all_enabled Enabled all ladderlog writers.
+ladderlog_write_all_disabled Disabled all ladderlog writers.
+ladderlog_game_time_interval_help If non-negative, write a line with the current game time to the ladder log every n seconds.
+ladderlog_write_template Should the \1 ladderlog event be enabled for both file and script output? Specification: \1 \2
 chat_log_help			Write machine parsable chat messages to var/chatlog.txt
+console_log_help		Write all console messages to var/consolelog.txt
 show_fps_help			Enable fps display
 floor_mirror_help		Floor mirror mode
 floor_detail_help		Floor detail settings
@@ -823,6 +889,7 @@ explosion_help          Enable explosions?
 wrap_menu_help			If set, you leave a menu to the top and reenter it at the bottom.
 floor_mirror_int_help   Intensity of the floor mirror effect
 color_strings_help		Generate strings that will be rendered with color effects.
+verify_color_strict_help Verify color codes before interpreting them if this is set to 1. Capital letters and anything not 0-9, a-f is not considered a color code then. If set to 0 (the in code default), out of range ascii characters are accepted and interpreted as 0.
 filter_color_strings_help		Filter color codes from strings coming in over the network.
 filter_dark_color_strings_help		Filter dark color codes from strings coming in over the network.
 filter_color_names_help		    Filter color codes from player names.
@@ -864,6 +931,9 @@ software_renderer_help		Is the OpenGL renderer not hardware accelerated?
 
 #model
 use_displaylists_help		Use display lists for rendering the cycles?
+
+#walls
+simple_trail_help           If set to 1, trails are rendered simplified for better performance.
 
 #********************************************
 #********************************************
@@ -909,6 +979,13 @@ viewport_belongs_help		Assign this viewport to a player
 #********************************************
 #********************************************
 
+rotation_type_help                      Determines when map and config rotation should occur. Possible values: (0) Do not do any rotation, (1) Rotate every round (2) Rotate every match
+map_rotation_help                       A list of map files to rotate through, with values separated by semicolons
+config_rotation_help                    A list of config files to rotate through, with values separated by semicolons
+reset_rotation_help                     Resets map and config rotation
+reset_rotation_on_start_new_match_help  If enabled, map and config rotation will be reset when a START_NEW_MATCH command is issued
+reset_rotation_message                  Map and config rotation have been reset.
+
 word_delimiters_help    Characters that count as word delimiters when skipping over words in a text input field.
 
 mouse_grab_help			Grab the mouse pointer, so it can't leave the window
@@ -920,12 +997,14 @@ message_of_day_timeout_help		Time message_of_day is displayed for in fullscreen 
 round_console_message_help	Message sent to clients after every round
 round_center_message_help	Big message sent to clients after every round
 
-password_storage_help			Determines where your passwords are stored: 1 means on harddisk (dangerous), 0 in memory and -1 means they are not stored at all.
+password_storage_help			Determines where your passwords are stored: 1 means on hard disk (dangerous), 0 in memory and -1 means they are not stored at all.
 protect_sensitive_files_help Try to protect user.cfg from read access by other users?
 admin_pass_help			Password for the basic in game admin
 
 backward_compatibility_help	Maximum number of old protocol versions to support.
 new_feature_delay_help		Disable features that only came in during the last X protocol versions.
+min_protocol_version_help   Minimum protocol version allowed to play.
+max_protocol_version_help   If > 0, features not supported by this protocol version are permanently disabled.
 
 # program control
 quit_help					Shuts the dedicated server down and quits.
@@ -936,18 +1015,19 @@ only_works_on_server        The console command \1 only works on the server. You
 players_help                Prints list of currently active players
 teams_help                  Get a list of all teams with a somewhat graphic representation of their formation. Same as saying /teams
 kill_help                   Kill a specific player (as warning before a kick)
-silence_help                Silence a specific player so he can't use public chat any more (/msg and /team still work)
+silence_help                Silence a specific player so they can't use public chat any more (/msg and /team still work)
 unsilence_help              Reverts a SILENCE command
 suspend_help                Suspend a player from playing for the following N rounds (default is set by SUSPEND_DEFAULT_ROUNDS)
 unsuspend_help              Removes a player suspension.
+suspend_list_help           Lists the currently suspended players.
 suspend_default_rounds_help Sets default round timeout for SUSPEND.
 voice_help                  Reverse of SILENCE
 allow_team_change_player_help Allow a specific player to change teams even if ALLOW_TEAM_CHANGE is disabled
 disallow_team_change_player_help Reverse of ALLOW_TEAM_CHANGE_PLAYER
 kick_help					Kicks the specified player from the server.
 default_kick_reason_help    The reason given to a player kicked by KICK if none is specified.
-kick_to_help    			Kicks the specified player from the server and, if the client supports it, redirects him to a different server.
-move_to_help    			Kicks the specified player from the server and, if the client supports it, redirects him to a different server. Does not imply an autoban penalty.
+kick_to_help    			Kicks the specified player from the server and, if the client supports it, redirects them to a different server.
+move_to_help    			Kicks the specified player from the server and, if the client supports it, redirects them to a different server. Does not imply an autoban penalty.
 default_kick_to_reason_help The reason given to a player kicked by KICK_TO or MOVE_TO if none is specified.
 default_kick_to_server_help Default server IP/name a player is redirected to by KICK_TO and MOVE_TO.
 default_kick_to_port_help   Default server port a player is redirected to by KICK_TO and MOVE_TO.
@@ -956,16 +1036,19 @@ vote_kick_to_port_help      Default server port a player is redirected to by vot
 vote_kick_reason_help       Default reason given to players when they're vote-kicked.
 full_redirect_server_help   Server a player is redirected to when this server is full.
 
-ban_help                    Bans the specified player from the server (kicks him first) for a variable time in minutes.
+ban_help                    Bans the specified player from the server (kicks them first) for a variable time in minutes.
 ban_ip_help                 Bans the specified IP address from the server for a variable time.
 ban_list_help               Prints a list of currently banned IPs.
 unban_ip_help               Revokes the ban of the specified IP address.
 
 player_list_hidden_player_prefix_help	The prefix that is shown on hidden players' Global ID and access level when we can see it.
+player_list_ready           0x7fff7fReady
+player_list_not_ready       0xff7f7fNot ready
 player_list_search          \1: Search string "\2" matches:\n
 player_list_search_no_results \1: Search string "\2" returned no result.\n
 player_list_search_end      \1: End of search (\2 matches).\n
 player_list_end             \1: Listed \2 players.\n
+player_list_disconnected    Past players and their last chat:\n
 
 admins_help                 Lists the server admins. You should use /admins or /listadmins instead of this.
 
@@ -988,7 +1071,7 @@ fullscreen_message_help     Prints a big message all over the screen, interrupti
 say_help					Dedicated server only: let the server administrator say something.
 rename_help		    Renames the given player.
 allow_rename_player_help    Gives the given player the ability to rename.
-disallow_rename_player_help Prevents the given player from renameing.
+disallow_rename_player_help Prevents the given player from rename-ing.
 
 silence_enemies_help        When enabled, chat sent from enemies is not displayed on your client if you are alive. If you are dead all chat is displayed.
 
@@ -1028,6 +1111,10 @@ input_items_global		Global Controls
 # used for listing key bindings
 input_or                or
 
+# used for printing lists
+separator               ,\ 
+and                     \ and\ 
+
 #********************************************
 #********************************************
 #
@@ -1062,9 +1149,9 @@ input_toggle_mousegrab_help         Frees the mouse pointer or constrains it to 
 input_reload_textures_text          Reload textures
 input_reload_textures_help          Reloads all textures. Useful for content creators.
 
-input_ingame_menu_tooltip           Press \1 to access the ingame menu.
-input_ingame_menu_text              Ingame menu
-input_ingame_menu_help              Triggers the ingame menu. ESC is hardcoded to this function so you don't get trapped in the game :)
+input_ingame_menu_tooltip           Press \1 to access the in-game menu.
+input_ingame_menu_text              In-game menu
+input_ingame_menu_help              Triggers the in-game menu. ESC is hardcoded to this function so you don't get trapped in the game :)
 
 input_pause_game_text               Pause game
 input_pause_game_help               Stops the game timer or resumes it.
@@ -1094,6 +1181,7 @@ input_mess_end_help					Scrolls to the end of the messages to show the most rece
 #********************************************
 #********************************************
 
+input_cockpit_key_1_tooltip         Press \1 to cycle through map modes.
 input_cockpit_key_1_text			Cockpit key 1
 input_cockpit_key_2_text			Cockpit key 2
 input_cockpit_key_3_text			Cockpit key 3
@@ -1175,18 +1263,19 @@ input_zoom_out_help		Shows more of the scene, but with less details.
 input_zoom_in_text		Zoom in
 input_zoom_in_help		Reduces the field of vision and reveals more details on faraway objects.
 
-input_glance_back_tooltip   Press \1 to glance back.
+input_glance_back_tooltip   Press and hold \1 to glance back.
 input_glance_back_text		Glance back
 input_glance_back_help		Turns the camera temporarily backwards.
 
-input_glance_right_tooltip   Press \1 to glance right.
+input_glance_right_tooltip  Press and hold \1 to glance right.
 input_glance_right_text		Glance right
 input_glance_right_help		Turns the camera temporarily to the right.
 
-input_glance_left_tooltip   Press \1 to glance left.
+input_glance_left_tooltip   Press and hold \1 to glance left.
 input_glance_left_text		Glance left
 input_glance_left_help		Turns the camera temporarily to the left.
 
+input_glance_forward_tooltip Press \1 to glance forward (Hold it and make turns to see how it is useful).
 input_glance_forward_text	Glance forward
 input_glance_forward_help	Turns the camera temporarily to the front.
 
@@ -1214,7 +1303,7 @@ input_switch_view_help		Switches the camera perspective. Available views: Smart 
 #********************************************
 #********************************************
 
-input_instant_chat_text		Instant Chat \1
+input_instant_chat_text		Input:
 input_instant_chat_help		Issues a special instant chat macro
 
 #********************************************
@@ -1256,6 +1345,28 @@ input_music_volume_down_help Decreases the volume of the music
 #********************************************
 #********************************************
 
+#********************************************
+#********************************************
+#
+#             console
+#
+#********************************************
+#********************************************
+
+console_repetition          (\1 times)\n
+
+#********************************************
+#********************************************
+#
+#               window titles
+#
+#********************************************
+#********************************************
+
+window_title_menu       \g
+window_title_connecting \g - Connecting to \1
+window_title_connected  \g - Playing on \1
+window_title_local      \g - Playing locally
 
 #********************************************
 #********************************************
@@ -1278,6 +1389,38 @@ system_settings_menu_help	Configure sound, graphics and overall appearance of \g
 
 main_menu_about_text		About
 main_menu_about_help		Displays information about the version of \g, the location of its config files, sites to visit and the project admins.
+
+help_menu_wiki_text	    Show Wiki
+help_menu_wiki_help		Opens the WIKI documentation in an external browser.
+help_menu_wiki_uri	    http://wiki.armagetronad.net
+
+help_menu_doc_text	    Show Documentation
+help_menu_doc_help		Opens the included HTML documentation in an external browser
+help_menu_doc_file	    index.html
+
+help_menu_irc_text	    Open IRC Chatroom
+help_menu_irc_help		Opens a web interface to our IRC chatroom where you may be lucky and catch a friendly soul willing to answer your questions.
+
+help_menu_directories_text Open Directories
+help_menu_directories_help Gives easy access to game data and configuration menus.
+
+help_menu_userdata_text Open User Data
+help_menu_userdata_help Opens the User Data directory where you can store personal modifications to the game.
+
+help_menu_userconfig_text Open User Configuration
+help_menu_userconfig_help Opens the User Configuration directory where your personal configuration is kept and system configuration files can be overridden in.
+
+help_menu_screenshots_text Open Screenshots
+help_menu_screenshots_help Opens the directory where screenshots are stored.
+
+help_menu_systemdata_text Open System Data
+help_menu_systemdata_help Opens the System Data directory where you can store modifications to the game affecting all users on this machine; probably requires admin rights to modify, may get overwritten on the next upgrade, modifications may break things. It is generally recommended to treat this as read only.
+
+help_menu_systemconfig_text Open System Configuration
+help_menu_systemconfig_help Opens the System Configuration directory where you can store modifications to the game configuration affecting all users on this machine; probably requires admin rights to modify, may get overwritten on the next upgrade, modifications may break things. It is generally recommended to treat this as read only.
+
+main_help_menu_text     Help
+main_help_menu_help     Having problems or just want to look something up? Here is the place.
 
 main_menu_exit_text		Exit Game
 main_menu_exit_help		Goodbye!
@@ -1333,6 +1476,9 @@ version_info_gl_version		\n  GL Version  :
 #
 #********************************************
 #********************************************
+
+game_menu_tutorials_text    Tutorials and Challenges
+game_menu_tutorials_help    Small training tasks to make you familiar with the basic concepts of this game.
 
 game_menu_start_text		Local Game
 game_menu_start_help		Enter the game grid! Only players configured on this computer will play.
@@ -1522,6 +1668,186 @@ game_menu_wz_mr_help		Minimum number of seconds the round has to be going on bef
 game_menu_wz_ld_text		Win Zone Min Last Death
 game_menu_wz_ld_help		Minimum number of seconds since the last death before the instant win zone is activated
 
+#********************************************
+#********************************************
+#
+#             tutorials
+#
+#********************************************
+#********************************************
+
+window_title_tutorial       \g - \1
+tutorial_success            Well done!
+tutorial_teamkill           Failure: Team Kill
+
+tutorial_menu_navigation_text     Navigation
+tutorial_menu_navigation_help     Navigation Tutorial: learn to control your cycle.
+tutorial_menu_navigation_instructions Use the turn controls to reach the green winzone, get used to how the basic physics work. Take your time, nothing is trying to kill you yet.\n\nPress Escape to abort this tutorial, most other keys let you continue.
+tutorial_menu_navigation_animation textures/tutorials/navigation/navigation.txt
+
+tutorial_menu_survival_text     Survival
+tutorial_menu_survival_help     Survival Tutorial: learn to survive.
+tutorial_menu_survival_instructions Walls are deadly in \g, that includes your own trail. Your task in this tutorial is to avoid crashing in a small arena for long 30 seconds, after which a green winzone will appear. Drive into it to finish this tutorial.\n\nTraining wheels are activated, touching walls does not kill you right away.\n\nPress Escape to abort this tutorial as well as those that follow, most other keys let you continue.
+tutorial_menu_survival_animation textures/tutorials/survival/survival.txt
+
+tutorial_menu_grind_text     Grind
+tutorial_menu_grind_help     Grind Tutorial: learn to accelerate
+tutorial_menu_grind_instructions Walls are also your friend in \g. You can drive close to a cycle trail to accelerate. If you are driving so close to a wall that you see sparks fly, you're doing it right.\nUse that to beat the enemy AI in a race to the winzone up ahead.
+tutorial_menu_grind_animation textures/tutorials/grinding/grinding.txt
+
+tutorial_menu_conquest_text     Conquest
+tutorial_menu_conquest_help     Conquest Tutorial: learn to conquer a fortress.
+tutorial_menu_conquest_instructions The goal of the Fortress mode is to conquer the enemy zone and defend your own zone. Unlike the winzones you saw earlier, a simple touch is not enough; you have to stay inside the zone and keep defenders out for a few seconds.\nIn this excercise, you will try to attack the enemy Gold zone, your home zone is safe. You will need to find a way past the lone defender or kill it.\n\nSadly, Fortress mode is not available for local play against AIs. We don't have any good AIs for it yet.
+tutorial_menu_conquest_animation textures/tutorials/conquest/conquest.txt
+tutorial_conquest_ai_retreated   The defending AI has retreated. Take the gold zone!
+tutorial_conquest_ai_killed      The defending AI has been killed. Take the gold zone!
+tutorial_conquest_ai_go          Drive into the gold zone and stay inside for a bit.
+tutorial_conquest_ai_gap         Break into the enemy defenses. Aim for the gap!
+
+tutorial_menu_teamstart_text     Team Start
+tutorial_menu_teamstart_help     Team Start Tutorial: learn the standard team formation opening move
+tutorial_menu_teamstart_instructions If you play in a team, it usually is the best startup move to tightly grind each others walls. The outside players should cuddle up on the center player, the ones further outside doing so in several steps. This tutorial puts you in the most difficult position there is, the player next to the outer player. Survive the start and don't let anyone on your team die.
+tutorial_menu_teamstart_animation textures/tutorials/teamstart/teamstart.txt
+tutorial_fail_backdoor            Failure: Follow the other cycles.
+
+tutorial_menu_doublegrind_text     Double Grind
+tutorial_menu_doublegrind_help     Double Grind Tutorial: learn the other standard team formation opening move
+tutorial_menu_doublegrind_instructions In many configurations, a modification of the standard team formation called 'double grinding' is of advantage: the two players next to the center do not grind it immediately. Instead, they go straight for a bit, then turn back, then forward again. They grind the center player twice, hence the name. This gives them extra time between two cycle trails and thus extra acceleration. Your job as a player right next to one of them is to supply that extra trail. Do not grind the center too hard or you will kill the double grinder.\nThe double grinding itself takes practice to do right and the exact timing depends a lot on the configuration, so we can't teach it here. Don't worry, it is mostly optional.
+tutorial_menu_doublegrind_animation textures/tutorials/doublegrind/doublegrind.txt
+
+tutorial_menu_speedkill_text     Speed Kill
+tutorial_menu_speedkill_help     Speed Kill: learn to use a speed advantage to trap an enemy
+tutorial_menu_speedkill_instructions The speed kill is the most basic way to get rid of your enemies in \g. You sneak up on them, grinding their trail, and after you overtake them, you cut them off and wrap them in your tail.\nHere, we set you up for an easy speed kill against an oblivious AI.
+tutorial_menu_speedkill_animation textures/tutorials/speedkill/speedkill.txt
+
+tutorial_menu_speedkilldefense_text     Speed Kill Defense
+tutorial_menu_speedkilldefense_help     Defense: learn how to defend against speed kills
+tutorial_menu_speedkilldefense_instructions Oh no! Now the situation is reversed. An enemy is grinding your tail on the right hand side and is going to cut you off in a moment. Quick, think of a counter!
+tutorial_menu_speedkilldefense_animation textures/tutorials/speedkilldefense/speedkilldefense.txt
+
+tutorial_menu_congratulations_text     Closing Words
+tutorial_menu_congratulations_help     Not everything can be taught in tutorials.
+tutorial_menu_congratulations_instructions Congratulations, you should now have completed all the essential tutorials. What follows here are optional challenges. You are now ready to enter the proper game, which is the online multiplayer component. Before you dive into that, there are a couple of things you should know about the online community and server landscape:\n\nYou can scroll this and other messages of this kind up and down using the cursor up and down keys.\n\nSumo Mode: You were taught the basics of Fortress mode here; Sumo uses the same basic mechanics, only usually for single players and not teams, and the zones of several competing players are put right on top of each other. And they shrink.\n\nCapture the Flag (CTF): Some servers offer this classic game mode, with a small zone standing in as the flag and a bigger one serving as base to return the flag to.\n\nAlso, It is best to read over the included documentation (use the Help menu to launch it in a browser). And you should definitely stick to basic game modes and close-to-default settings at first. The server browser helps you with that by hiding advanced servers from immediate view initially; you can still enter them early if you dare.
+
+tutorial_menu_bullies_text     Maze Challenge
+tutorial_menu_bullies_help     Maze: two enemies have trapped you between their walls. Can you survive?
+tutorial_menu_bullies_instructions Two bullies have trapped you between their walls and are forcing you through their maze. Follow the turns they make and escape.
+tutorial_menu_bullies_animation 
+tutorial_menu_bullies_teamname Bullies
+
+tutorial_menu_hilbert2_text     Maze Challenge: Hilbert 2
+tutorial_menu_hilbert2_help     Maze: two enemies have trapped you between their walls. Can you survive? They follow a Hilbert Curve of order 2.
+tutorial_menu_hilbert2_instructions The two bullies have read a math book and are now torturing you with Hilbert Curves, paths that cover a whole square with arbitrary density. First, a simple order two curve.
+
+tutorial_menu_hilbert3_text     Maze Challenge: Hilbert 3
+tutorial_menu_hilbert3_help     Maze: two enemies have trapped you between their walls. Can you survive? They follow a Hilbert Curve of order 3.
+tutorial_menu_hilbert3_instructions The two bullies now force you on to a faster Hilbert Curve of order 3.
+
+tutorial_menu_hilbert4_text     Ultimate Maze Challenge
+tutorial_menu_hilbert4_help     Maze: two enemies have trapped you between their walls. Can you survive? They follow a Hilbert Curve of order 4.
+tutorial_menu_hilbert4_instructions The two bullies now force you on to an extremely fast and narrow Hilbert Curve of order 4.\n\nNo human can survive this.
+
+tutorial_menu_dragon1_text     Maze Challenge: Dragon 5
+tutorial_menu_dragon1_help     Maze: two enemies have trapped you between their walls. Can you survive? They follow a Simplified Dragon Curve of order 5.
+tutorial_menu_dragon1_instructions The two bullies now force you on to a simplified Dragon Curve of order 5. (The regular dragon curve would intersect itself at corners, which we can't allow. So we follow the diagonals instead.)
+
+tutorial_menu_dragon2_text     Maze Challenge: Dragon 6
+tutorial_menu_dragon2_help     Maze: two enemies have trapped you between their walls. Can you survive? They follow a Simplified Dragon Curve of order 6.
+tutorial_menu_dragon2_instructions The two bullies now force you on to a simplified Dragon Curve of order 6.
+
+tutorial_menu_dragon3_text     Maze Challenge: Dragon 7
+tutorial_menu_dragon3_help     Maze: two enemies have trapped you between their walls. Can you survive? They follow a Simplified Dragon Curve of order 7.
+tutorial_menu_dragon3_instructions The two bullies now force you on to a simplified Dragon Curve of order 7.
+
+tutorial_menu_dragon4_text     Maze Challenge: Dragon 8
+tutorial_menu_dragon4_help     Maze: two enemies have trapped you between their walls. Can you survive? They follow a Simplified Dragon Curve of order 8.
+tutorial_menu_dragon4_instructions The two bullies now force you on to a simplified Dragon Curve of order 8.
+
+tutorial_menu_dragon5_text     Maze Challenge: Dragon 9
+tutorial_menu_dragon5_help     Maze: two enemies have trapped you between their walls. Can you survive? They follow a Simplified Dragon Curve of order 9.
+tutorial_menu_dragon5_instructions The two bullies now force you on to a simplified Dragon Curve of order 9.
+
+tutorial_menu_survival1_text     Survival Challenge 1
+tutorial_menu_survival1_help     Survive for a given time.
+tutorial_menu_survival1_instructions You are in a bit of a sticky situation. Your brakes are offline and your engine is overloading; your bike is accelerating exponentially. Slow it down by making many turns and survive until the countdown for the emergency shutdown runs out.\n\nDoublebinding is disabled for this challenge.
+
+tutorial_menu_survival2_text     Survival Challenge 2
+tutorial_menu_survival2_help     Survive for a given time.
+tutorial_menu_survival2_instructions Yes, we really mean that your cycle is accelerating exponentially. In the strict mathematical sense. The really, really bad sense. It's doing that faster now.\n\nGood luck. On an unrelated note, We are not liable for any peripherals you break while playing \g. Or fingers, for that matter.
+
+tutorial_menu_survival3_text     Survival Challenge 3
+tutorial_menu_survival3_help     Survive for a given time.
+tutorial_menu_survival3_instructions The good news: your engines are ine a slightly better state this time.\nThe bad news: you have even less room than before.
+
+tutorial_menu_survival4_text     Survival Challenge 4
+tutorial_menu_survival4_help     Survive for a given time.
+tutorial_menu_survival4_instructions Your engines are perfectly fine this time, but there are three ininitely respawning AIs in the arena, cramping your style. And their walls give you extra acceleration.
+
+tutorial_menu_ai1_text     AI Fight
+tutorial_menu_ai1_help     Play against one AI, no time limit.
+tutorial_menu_ai1_instructions As the final tutorial, we test your skills against a lone AI.\n\nTraining wheels are off for this fight, touching walls is as deadly as it should be.
+
+tutorial_ai_timeout        Failure: Timeout
+tutorial_ai_extratime      Extra Time
+
+tutorial_menu_controls_text     Advanced Controls
+tutorial_menu_controls_help     Learn the rest of the control scheme.
+tutorial_menu_controls_instructions Turning left and right is all well and good, but there are a couple of other input options you may want to use occasionally. This tutorial demonstrates them to you in a risk-free environment.\n\nFollow the onscreen prompts. You'll finish it quicker if you experiment with the commands you learn.
+
+tutorial_menu_ai2_text     AI Challenge 2
+tutorial_menu_ai2_help     Play against two AIs, no time limit.
+tutorial_menu_ai2_instructions You need to defeat two sligtly smarter AIs.
+
+tutorial_menu_ai3_text     AI Challenge 3
+tutorial_menu_ai3_help     Play against three AIs, no time limit.
+tutorial_menu_ai3_instructions You need to defeat three AIs.
+
+tutorial_menu_ai4_text     AI Challenge 4
+tutorial_menu_ai4_help     Kill AIs, beat the ticking clock.
+tutorial_menu_ai4_instructions From now on, the AIs respawn endlessly. There is a time limit, extended every time you manage to kill one.\n\nHere, you need to score four kills without getting killed yourself.
+
+tutorial_menu_ai5_text     AI Challenge 5
+tutorial_menu_ai5_help     Kill AIs, beat the ticking clock.
+tutorial_menu_ai5_instructions Score six kills.
+
+tutorial_menu_ai6_text     AI Challenge 6
+tutorial_menu_ai6_help     Kill AIs, beat the ticking clock.
+tutorial_menu_ai6_instructions Score eight kills.
+
+tutorial_menu_ai7_text     AI Challenge 7
+tutorial_menu_ai7_help     Kill AIs, beat the ticking clock.
+tutorial_menu_ai7_instructions Score ten kills.
+
+tutorial_menu_ai8_text     AI Challenge 8
+tutorial_menu_ai8_help     Kill AIs, beat the ticking clock.
+tutorial_menu_ai8_instructions Score fifteen kills.
+
+tutorial_menu_highrubber_text         Showcase: High Rubber
+tutorial_menu_highrubber_help         Prepares you for some of the weird settings out there.
+tutorial_menu_highrubber_instructions Remember how in the early tutorials, you could touch walls without exlpoding immediately? We call this 'rubber' for historical reasons. Some servers ramp up that rubber setting really high and also reduce the delay between cycle turns so it gets harder to die.\n\nOther human players you meet on high rubber servers will usually do tight moves close to walls in tiny corridors; it's impossible to read these and find a way out after they are built, so you need to watch the players themselves.\n\nIt may be helpful (but not required if you have quick fingers) if you 'doublebind': go to your input configuration and bind the turn commands to two keys, then press those at the same time during the game. You will make an instant 180 degree turn.\n\nAs always, kill all AIs.
+
+tutorial_menu_brakeboost_text         Showcase: Brake Boost
+tutorial_menu_brakeboost_help         Prepares you for some of the weird settings out there.
+tutorial_menu_brakeboost_instructions One of the strengths of \g are the various gameplay configurations it allows. These showcases prepare you for a little bit of the insanity you will encounter online.\n\nFirst, a simple one: The brake can be reconfigured to act as a speed boost. Use it to obliterate the AIs.
+
+tutorial_menu_open_text         Showcase: Open Play
+tutorial_menu_open_help         Prepares you for some of the weird settings out there.
+tutorial_menu_open_instructions This challenge has you playing in a high rubber environment where you cannot grind too tightly; you are forced to leave a gap. If someone wants to follow you, though, they will always be able to squeeze through that gap. Naturally, this makes it very hard to kill someone properly.\n\nTry do do so anyway, eliminate the AIs.\n\n\nSome servers you find online enforce this style of play not via settings used here, but by policy. You are expected to voluntarily leave a gap for trapped players to try and escape through.
+
+tutorial_menu_turbo_text         Showcase: High Speed
+tutorial_menu_turbo_help         Prepares you for some of the weird settings out there.
+tutorial_menu_turbo_instructions Some servers will have you racing at ludicrous speed or, which is the same from a gameplay perspective, confined to a very small arena.\n\nSurvive. The AIs will probably suicide within seconds.
+
+tutorial_menu_map_text         Showcase: Maps
+tutorial_menu_map_help         Prepares you for some of the weird settings out there.
+tutorial_menu_map_instructions Not all battles are fought on rectangular arenas. Some have obstacles, passages and traps. This is one of them.\n\nGet the AIs.
+
+tutorial_menu_axes_text         Showcase: Betrayal
+tutorial_menu_axes_help         Prepares you for some of the weird settings out there.
+tutorial_menu_axes_instructions When we said you can only make 90 degree turns, we lied. In this showcase, you make 45 degree turns.\n\nSurvive the AIs. Interestingly, the easiest way to do so is to let them try and trap you and fail miserably.
+
+tutorial_complete_all_help      Marks all tutorials as completed.
+tutorial_incomplete_all_help    Marks all tutorials and challenges as not completed.
 
 #********************************************
 #********************************************
@@ -1543,7 +1869,7 @@ network_opts_help		Configures your network preferences.
 
 #network options
 network_opts_pingchar_text	Ping Charity:
-network_opts_pingchar_help	The maximum ping (in ms) you are willing to take over from the other players. \g will reduce their ping and increase yours, until you have equal ping or the maximum transfer set by this menuitem is hit.
+network_opts_pingchar_help	The maximum ping (in ms) you are willing to take over from the other players. \g will reduce their ping and increase yours, until you have equal ping or the maximum transfer set by this menu-item is hit.
 
 network_opts_lagometer_text	Lag-O-Meter:
 network_opts_lagometer_help	In a network game, the place where the other players may already be now (but you have not yet noticed because of the network delay) is indicated as a geometrical shape. Useful for internet play.
@@ -1551,7 +1877,7 @@ network_opts_axesindicator_text	Axes Indicator:
 network_opts_axesindicator_help	The axes indicator is meant to show the directions the cycle can turn to as lines going out from the cycle. Good on servers with changing configs so you know what to expect before you turn.
 
 network_opts_predict_text	Prediction:
-network_opts_predict_help	In a network game, this extrapolates the cycles' movement. Leaving it disabled makes the graphics smoother, enabling it gives yo a better image of the actual situation. I leave it disabled; the Lag-O-Meter is a good substitute for prediction. This is always disabled in server mode.
+network_opts_predict_help	In a network game, this extrapolates the cycles' movement. Leaving it disabled makes the graphics smoother, enabling it gives you a better image of the actual situation. I leave it disabled; the Lag-O-Meter is a good substitute for prediction. This is always disabled in server mode.
 
 network_opts_inrate_text	Input Rate:
 network_opts_inrate_help	The maximum number of kilobytes your network can receive per second. 3 for 28.8k modems, 7 for 56k modems, 8 for ISDN, more for cable modems, (A)DSL and LAN.
@@ -1595,7 +1921,7 @@ network_host_port_text		Server Port:
 network_host_port_help		The network port this server will listen on.
 
 network_host_host_text		Host Network Game
-network_host_host_help		Enter the game grid! Other players are allowed to join you via the "Connect to Server"-menuitem.
+network_host_host_help		Enter the game grid! Other players are allowed to join you via the "Connect to Server"-menu-item.
 
 bookmarks_menu              Server Bookmarks
 bookmarks_menu_help         Add, edit, and connect to your server bookmarks.
@@ -1629,6 +1955,7 @@ friends_menu_help			Edit your mates.
 friends_enable				Mates Enabled
 friends_enable_help			Turn on/off mates filtering.
 enable_friends_help			Turn on/off mates filtering.
+enable_friends_casing_help	Turn on/off case sensitivity of mates filtering. 1 is on, 0 off.
 friend_word					Mate
 friend_help					If a server has this name on its players list, it will show when filtering is on.
 
@@ -1678,7 +2005,7 @@ language_menu_item_fist		First Language:
 language_menu_item_first_help	\g will display most text messages in this language. Use Cursor Left/Right to choose.
 
 language_menu_item_second	Second Language:
-language_menu_item_second_help	If the first language is not available for one text item, it will be displayed in the second language (or in english as final fallback).  Use Cursor Left/Right to choose.
+language_menu_item_second_help	If the first language is not available for one text item, it will be displayed in the second language (or in English as final fallback).  Use Cursor Left/Right to choose.
 
 #*************************************
 #*************************************
@@ -1720,6 +2047,9 @@ vote_include_message				Including file \1. Only users of access level \2 or high
 vote_command_details_text			If accepted, the console command "\1" will be executed on the server.
 vote_command_text					Command \1
 vote_command_message				Executing command "\1".\n
+
+vote_scramble_details                           If accepted, all players will be removed from their team and assigned a new one randomly.
+vote_scramble_text                              Scramble the teams
 
 #*************************************
 #*************************************
@@ -1774,7 +2104,7 @@ viewport_assign_text		Assign Viewports to Players
 viewport_assign_help		Which player's game is seen on which part of the screen?
 
 player_authenticate_text    Authentication
-player_authenticate_help    If you have a global ID, activating this menuitem will make you log in with it. You'll be prompted for a password, naturally.
+player_authenticate_help    If you have a global ID, activating this menu-item will make you log in with it. You'll be prompted for a password, naturally.
 player_authenticate_action  Authentication requests have been sent to the server. You should be prompted for a password shortly.\n
 
 #player setup
@@ -1803,7 +2133,7 @@ player_camera_help		Set up your camera preferences.
 
 player_chat_text		Instant Chat Setup
 
-player_chat_chat		Instant Chat \1:
+player_chat_chat		Chat:
 player_chat_chat_help		Sets the instant chat macros that can be said with one keystroke.
 
 player_blue_text		Blue:
@@ -1816,13 +2146,13 @@ player_red_text			Red:
 player_red_help			Lets you choose the red component of your colour.
 
 player_autologin_text		Auto Login:
-player_autologin_help		When enabled, you will automatically initiate the (usually completely optional) login procedure as soon as you enter a server.
+player_autologin_help		When enabled, you will automatically initiate the (usually completely optional) login procedure using the Global ID above as soon as you enter a server.
 
 player_stealth_text		Hide Global ID:
 player_stealth_help		Usually your global ID is shown to everyone when you log in or when someone uses the /players chat command. Enabling this tells the server that you prefer to remain anonymous. The server may still show your ID to moderators and administrators on the server or even decide to ignore your request.
 
 player_spectator_text		Spectator Mode:
-player_spectator_help		In spectator mode, you do not control a cycle; you just watch the game as if you were already dead. The other players will see you on the score table and you can chat with them, but you won't be spawned at the beginng of a round.
+player_spectator_help		In spectator mode, you do not control a cycle; you just watch the game as if you were already dead. The other players will see you on the score table and you can chat with them, but you won't be spawned at the beginning of a round.
 
 player_name_team_text		Name Team after Player:
 player_name_team_help		You can set your preferred method for naming your team here: On indicates you want the team to be named after its most senior player, Off means you want a simple colour label.
@@ -1940,7 +2270,7 @@ sound_menu_text			Sound Settings
 sound_menu_help			Sound quality settings.
 
 sound_menu_sources_text		Sound Sources:
-sound_menu_sources_help		Gives the approximate number of sound sources to be mixed; setting it too low will result in important sound sources (your own engine) to be constantly turned on and off, too high values eat away too much CPU power. Six seems to be a good value for low-power CPU's.
+sound_menu_sources_help		Gives the approximate number of sound sources to be mixed; setting it too low will result in important sound sources (your own engine) to be constantly turned on and off, too high values eat away too much CPU power. Six seems to be a good value for low-power CPUs.
 
 sound_menu_quality_text		Sound Quality:
 sound_menu_quality_help		Selects the quality of the sound; currently, only 16 bit stereo modes are available.
@@ -2047,10 +2377,10 @@ window_size_text		Window Size:
 window_size_help		Selects the window size. Changes will be be applied the next time you start \g or when you select "Apply Changes" below.
 
 screen_custom_text		Custom
-screen_custom_help		Set the variables CUSTOM_SCREEN_WIDTH and CUSTOM_SCREEN_HEIGHT in artr.cfg (Windows) or ~/.ArmageTronrc (Linux) to adjust you custom screen size.
+screen_custom_help		Set the variables CUSTOM_SCREEN_WIDTH and CUSTOM_SCREEN_HEIGHT in user.cfg to adjust you custom screen size.
 
 screen_fullscreen_text		Fullscreen:
-screen_fullscreen_help		This toggles fullscreen and window mode. As with resolution changes. You have to exit and re-enter \g or select "Apply Changes" for this to have an effect.
+screen_fullscreen_help		This toggles fullscreen and window mode. As with resolution changes. You have to exit and re-enter \g or select "Apply Changes" for this to have an effect. You can bind a key to toggle this at any time in System Setup/Misc Stuff/Global Keyboard Configuration.
 
 screen_colordepth_text		Colour Depth:
 screen_colordepth_help		Choose the colour depth you want \g to run at. You have to exit and reenter \g or select "Apply Changes" for this to have an effect. 
@@ -2124,11 +2454,14 @@ detail_floor_mirror_ow_help	Everything that is important in the game
 detail_floor_mirror_ev_text	Everything!
 detail_floor_mirror_ev_help	(Currently no difference to "Objects and Walls".)
 
+detail_simple_trail_text    Simple Trails:
+detail_simple_trail_help    If activated, cycle trails are displayed in a simplified form without the buildup after the cycle.
+
 detail_dither_text		Dithering:
 detail_dither_help		If the colour depth of your current graphic mode does not directly allow the colour that is to be drawn, it is simulated by mixing other colours. Turning it of will improve software rendering performance on some systems; in low resolution modes, turning it off will even improve the visual quality (IMHO).
 
 detail_floor_text		Floor Detail:
-detail_floor_help		Armagetron Advanced has several ways to draw the floor and the grid; the better looking ones will cost you some FPS (Frames Per Second).
+detail_floor_help		\g has several ways to draw the floor and the grid; the better looking ones will cost you some FPS (Frames Per Second).
 
 detail_floor_no_text		No Floor
 detail_floor_no_help		Draw nothing at all. Fastest possibility.
@@ -2211,17 +2544,46 @@ misc_fps_help			Toggles the display of the current FPS (frames per second) rate 
 
 #tweaks menu
 tweaks_displaylists_text	Display Lists:
-tweaks_displaylists_help	Display lists are a feature of OpenGL for rendering the same thing many times; it is normally used for the cycles and other geometry. Some implementations are broken however; if you do no see the cycles, you should disable this feature.
+tweaks_displaylists_help	Display lists are a feature of OpenGL for rendering the same thing many times. Some implementations are broken; if you do no see the cycles, you should disable this feature.
 tweaks_displaylists_off_text Off
 tweaks_displaylists_off_help Don't use display lists at all.
 tweaks_displaylists_cac_text Create and Call
 tweaks_displaylists_cac_help Use displaylists; Create them and call them directly. This is the recommended way.
 tweaks_displaylists_cae_text Create and Execute
-tweaks_displaylists_cae_help Use displaylists; Create them let them be executed while they are filled. The expers say this is slower than Create and Call.
+tweaks_displaylists_cae_help Use displaylists; Create them and let them be executed while they are filled. The experts say this is slower than Create and Call.
 
 tweaks_infinity_text		Infinity:
 tweaks_infinity_help		Some planes (grid, sky...) have an infinite extension; if this feature is enabled, they are really drawn as infinite planes. Some OpenGL renderers do not seem to like this (all Windows versions I have seen...); disable it if the floor or sky textures are screwed up.
 
+# not in the detail menu any more, but in the preferences menu
+detail_zone_style_text          Zone rendering mode:
+detail_zone_style_help          Select how zones should be rendered
+detail_zone_style_vertical_text Vertical
+detail_zone_style_vertical_help Classic vertical rectangles
+detail_zone_style_flat_text     Flat
+detail_zone_style_flat_help     On floor trapezoids
+detail_zone_style_combined_text Combined
+detail_zone_style_combined_help Combination of vertical and flat rendering
+detail_zone_style_custom_text   Custom
+detail_zone_style_custom_help   Custom submenu. Press enter to access custom menu.
+
+zone_style_custom_menu          Custom zone rendering mode
+zone_style_segments_text        Number of segments
+zone_style_segments_help        number of rectangles forming the zone
+zone_style_segment_steps_text   Number of steps
+zone_style_segment_steps_help   Number of steps for each segments
+zone_style_segment_length_text  Segment length
+zone_style_segment_length_help  Size (in percent) of each segments. 1 means segments will be contiguous
+zone_style_bottom_text          Bottom
+zone_style_bottom_help          Bottom position for vertical rendering
+zone_style_height_text          Height
+zone_style_height_help          height for vertical rendering
+zone_style_floor_scale_pct_text Floor scale percent
+zone_style_floor_scale_pct_help Percentage of zone radius/size for flat rendering
+zone_style_proximity_distance_text Proximity max distance
+zone_style_proximity_distance_help Distance from which zone's height start to shrink
+zone_style_proximity_offset_text   Proximity min distance
+zone_style_proximity_offset_help   Distance to which zone's height will be 0
 
 #********************************************
 #********************************************
@@ -2236,9 +2598,9 @@ menuitem_exit_text		Exit Menu
 menuitem_exit_help		Exits this menu and returns to the previous level
 
 menuitem_accept			Accept
-menuitem_accept_help		Accepts the settings in this menu and continues.
+menuitem_accept_help		Pressing Enter, Return or Space here accepts the settings in this menu and continues.
 
-input_item_help			To change, press ENTER or SPACE, then press the key/mousebutton you want to assign to this control. Moving the mouse also works.
+input_item_help			To change, press ENTER or SPACE, then press the key/mouse-button you want to assign to this control. Moving the mouse also works.
 input_press_any_key		Press any key! 
 
 menuitem_toggle_on		On
@@ -2291,7 +2653,7 @@ first_setup                 First Setup
 first_game_title            First Game
 
 first_setup_color           Colour:
-first_setup_color_help      Selects the colour of your lightcylce. You'll later be able to customize it in more detail.
+first_setup_color_help      Selects the colour of your lightcylce with cursor left/right. You'll later be able to customize it in more detail in the player menu.
 first_setup_color_red       0xff0000Red0xRESETT
 first_setup_color_green     0x00ff00Green0xRESETT
 first_setup_color_blue      0x0000ffBlue0xRESETT
@@ -2317,7 +2679,7 @@ first_setup_keys_wasd_help  Control your cycle with the ASD keys and surrounding
 first_setup_keys_zqsd       ZQSD Keys
 first_setup_keys_zqsd_help  Control your cycle with the QSD keys and surroundings, Cursor keys and rest of keyboard control camera and special actions. Good for left handed people and those used to move with ZQSD on AZERTY keyboards.
 #first_setup_keys_both       Two Handed
-#first_setup_keys_both_help  Turn and look left with your left hand, turn and look right with the right hand. Good for ambidextrous people who don't want to use the mouse in any way and never play with a second player in splitscreen.
+#first_setup_keys_both_help  Turn and look left with your left hand, turn and look right with the right hand. Good for ambidextrous people who don't want to use the mouse in any way and never play with a second player in split-screen.
 first_setup_keys_x          Traditional
 first_setup_keys_x_help     The default setup of old versions of the game. X turns right, the key left to that turns left. Recommended only for veterans.
 first_setup_keys_leave      Leave Alone
@@ -2407,11 +2769,16 @@ gamestate_reset_center		New Match
 gamestate_reset_console		Resetting scores and starting new match after this round.\n
 gamestate_resetnow_center	New Match
 gamestate_resetnow_console	Resetting scores...\n
+gamestate_resetnow_console_matches Resetting scores... \1 match(es) to go!\n
 gamestate_resetnow_log		New Match\n
 gamestate_newround_console	Go (round \1 of \2)!\n
 gamestate_newround_goldengoal	Go (extra round; whoever gains the lead wins)!\n
+gamestate_newround_warmup   Go (Warmup; the match will start when enough players have readied up)!\n
 gamestate_newround_log		New Round\n
 gamestate_chat_wait         Waiting up to \2 seconds for \1 to finish chatting.\n
+
+gamestate_scramble_teams        Resetting the scores and scrambling the teams after this round.\n
+gamestate_scramble_teams_center Scrambling the teams...\n
 
 gamestate_wait_players		Waiting for real players...\n
 gamestate_wait_players_con	Waiting for real players (only spectators online)...\n
@@ -2426,13 +2793,18 @@ gamestate_10minutes_warn	Ten minutes left!\n
 gamestate_champ_center		Match Winner: \1
 gamestate_champ_console		Overall Winner: \1 
 gamestate_champ_scorehit	with \1 points.\n
-gamestate_champ_timehit		after the timelimit of \1 minutes was hit.\n
+gamestate_champ_timehit		after the time limit of \1 minutes was hit.\n
+gamestate_champ_blowout     after getting a \1-point advantage.\n
 gamestate_champ_default		after \1 rounds.\n
 gamestate_champ_finalscores	Final Scores:\n
 
 gamestate_winner_winner		Winner: 
 gamestate_winner_ai		AI.
 gamestate_winner_humans		Humans.
+gamestate_draw_soon         Round draw in \1 seconds!\n
+gamestate_draw_center       Round Draw!
+gamestate_draw_default      The round ended in a draw.\n
+gamestate_draw_minalive     The round ended in a draw, because not enough players were alive.\n
 
 instant_win_activated		Instant win zone activated! Enter it to win the round.\n
 instant_round_end_activated	Round end zone activated! Enter it to end the round.\n
@@ -2442,21 +2814,27 @@ player_admin_kill			\1 0xRESETTwas smitten by an administrator.\n
 player_admin_slap_free			\1 0xRESETThas been slapped by an administrator.\n
 player_admin_slap_win			\1 has been hugged by an administrator and got \2 points.\n
 player_admin_slap_lose			\1 has been slapped by an administrator and lost \2 points.\n
-slap_help                   Slaps the given player by penalizing him with the specified amount of points. Be smart and you may be able to hug your users, too ;)
+slap_help                   Slaps the given player by penalizing them with the specified amount of points. Be smart and you may be able to hug your users, too ;)
 player_win_instant			\1 was awarded \2 points for hitting the instant win zone.\n
 player_win_conquest			\1 was awarded \2 points for conquering the enemy base.\n
 player_win_held_fortress	\1 was awarded \2 points for holding the base.\n
 player_lose_held_fortress	\1 lost \2 points for being too defensive.\n
 player_win_conquest_specific \1 was awarded \2 points for conquering \3's base.\n
+players_win_conquest        \1 were awarded \2 points each for conquering the enemy base.\n
+players_win_conquest_specific \1 were awarded \2 points each for conquering \3's base.\n
 player_kill_collapse        \1 was eradicated by its collapsing zone.\n
 player_win_hole             \1 got \2 points for a sacrifice for the good of the team.\n
 player_lose_hole            0xffff00ZOMG! 0xff7f00HOLER!!1!!0xRESETT \1 lost \2 points for being a cheap ass lamer.\n
+player_win_command			\1 was awarded \2 points for winning the round.\n
+declare_round_winner_help		Declare the winner of the current round and end the round. Usage: DECLARE_ROUND_WINNER <player>
 
 player_base_respawn		\1 was respawned by \2.\n
 player_base_enemy_respawn	\1 was respawned by their enemy \2.\n
 
 player_no_longer_suspended  \1 0x77ff77is allowed to play again.\n
 player_suspended            \1 0xff7777is banned to spectator mode for \2 round(s).\n
+
+scramble_teams_too_small     The teams are too small to scramble them.\n
 
 zone_collapse_harmless      \1's zone collapses harmlessly for lack of enemy contacts.\n
 
@@ -2523,12 +2901,14 @@ spam_protection_prefix  SPAM PROTECTION: your messages have a common prefix: \1\
 
 spam_protection_silenceall SPAM PROTECTION: public chat is disabled.\n
 spam_protection_silenced SPAM PROTECTION: you have been silenced by the server administrator.\n
-spam_protection_silenced_default SPAM PROTECTION: you have to be given voice in order to chat publically.\n
+spam_protection_silenced_default SPAM PROTECTION: you have to be given voice in order to chat publicly.\n
+vote_silenced You are not allowed to call a new vote while you are silenced.\n
+player_rename_silenced You are not allowed to rename while you are silenced.\n
 player_silenced         \10xff7777 has been silenced.\n
 player_silenced_local   \10xff7777 has been locally silenced.\n
-player_voiced           \10x77ff77 has been given his voice back.\n
 player_voiced_local     \10x77ff77 has been locally voiced.\n
-player_allowed_teamchange \10x77ff77 has been allowed to change his team.\n
+player_voiced           \10x77ff77 has been given their voice back.\n
+player_allowed_teamchange \10x77ff77 has been allowed to change their team.\n
 player_disallowed_teamchange \10xff7777 cannot change teams anymore.\n
 vote_spam_protection	VOTE SPAM PROTECTION: you are disallowed from issuing votes for the next \1 seconds.\n
 chat_title_text			Say:
@@ -2558,6 +2938,7 @@ player_win_frag_ai		\1 got \2 points for core dumping an AI player.\n
 player_lose_frag		\1 lost \2 points since it caused a general protection fault.\n
 player_lose_rim		    \1 lost \2 points for trying to escape from the game grid.\n
 player_win_survivor		\1 was awarded \2 points for being last active team.\n
+player_dead_explosion   \1 was destroyed in the explosion made by \2.\n
 player_respawn_center_message	You've been respawned\n
 player_joins_team       \1 wants to play for \2 on the next respawn.\n
 player_joins_team_wish  \1 still wants to play for \2, but isn't currently allowed to.\n
@@ -2579,6 +2960,7 @@ no_real_teams           No teams with more than one player.\n
 player_topologypolice	Order from Topology Police: \1
 
 team_shuffle            \1 gets shuffled from rank \2 to \3.
+team_preshuffle         \1 will join at rank \2.
 team_shuffle_suppress   Future shuffle messages from this player will be suppressed.\n
 player_noshuffleup      You are not allowed to shuffle up.\n
 player_noshuffle        Your shuffling wish has no effect.\n
@@ -2594,6 +2976,27 @@ player_message_usage    Usage: PLAYER_MESSAGE <user ID or name> "<Message>"\n
 kick_usage              Usage: KICK <user ID or name> <Reason>\n
 ban_usage               Usage: BAN <user ID or name> <time in minutes(defaults to 60)> <Reason>\n
 kickmove_usage          Usage: \1 <user ID or name> <server IP to kick to>:<server port to kick to> <Reason>\n
+
+do_warmup_help          Usage: DO_WARMUP <n>. Run <n> warmup rounds with no points until players have readied up. Then run this many matches consecutively before the next warmup session.
+do_warmup_enabled       Enabled warmup, \1 match(es) will be played after the warmup ends.
+do_warmup_disabled      Disabled warmup.
+warmup_min_players_help Minimum amount of players required for the warmup to end.
+warmup_min_ready_frac_help Fraction of players per team required to ready up before the match can start.
+warmup_readyup_interval_help Interval between reminders about readying up.
+warmup_respawn_time_help Time in seconds before which players are respawned in warmup mode. -1 disables this behaviour.
+
+player_ready_onlywarmup This command only works in warmup mode.\n
+player_ready_noteam     You must be in a team to use this command.\n
+player_ready            \1 0x7fff7fis ready!\n
+player_ready_not        \1 0xff7f7fis not ready anymore.\n
+player_allready         All players marked as ready.\n
+player_allready_not     All players marked as not ready.\n
+allready_help           Makes it as if all players were ready.
+warmup_needmoreplayers  Not starting game yet because we need at least \1 players.\n
+warmup_finished         Enough players are ready! Starting match now.\n
+warmup_finished_allready Forced all players to be ready! Starting match now.\n
+warmup_finished_center  Warmup over!
+warmup_rup_compat       0xff3333Please type /ready in chat
 
 add_help_topic_help     Add a new help topic to be used with /help. Usage: ADD_HELP_TOPIC <topic> <short description> <text>
 add_help_topic_usage    Usage: ADD_HELP_TOPIC <topic> <short description> <text>\n
@@ -2617,15 +3020,15 @@ help_commands_chat_shortdesc Basic chat commands
 help_commands_chat_text      0x88ff88/me <message>0xffff88: Transmit an action, as in "/me is a noob."\n0x88ff88/msg <part of a nickname> <message>0xffff88: Send a private message that only a specific player can see\n0x88ff88/team <message>0xffff88: Send a message to your teammates, or to all spectators if you're not on a team
 
 help_commands_team_shortdesc Basic team management commands
-help_commands_team_text 0x88ff88/teamshuffle0xffff88: Shuffle yourself to be at the outside of your team's wingmen formation\n0x88ff88/teamshuffle <position>0xffff88: Shuffle yourself to be at a specific position\n0x88ff88/teamshuffle [+|-]<offset>0xffff88: Shuffle yourself up/down by a certain number of ranks\n0x88ff88/teamleave0xffff88: Leave your current team. Only works on some servers\n0x88ff88/teams0xffff88: Get a list of all teams with a somewhat graphic representation of their formation.\n0x88ff88/myteam0xffff88: Get the formation and memberlist of your current team
+help_commands_team_text 0x88ff88/teamshuffle0xffff88: Shuffle yourself to be at the outside of your team's wingmen formation\n0x88ff88/teamshuffle <position>0xffff88: Shuffle yourself to be at a specific position\n0x88ff88/teamshuffle [+|-]<offset>0xffff88: Shuffle yourself up/down by a certain number of ranks\n0x88ff88/teamleave0xffff88: Leave your current team. Only works on some servers\n0x88ff88/teams0xffff88: Get a list of all teams with a somewhat graphic representation of their formation.\n0x88ff88/myteam0xffff88: Get the formation and member list of your current team
 
 help_commands_pp_shortdesc Player police commands
 help_commands_pp_text 0x88ff88/players [<search>]0xffff88: Get a list of all players, along with some other information. You can also match specific users with the search argument.\n0x88ff88/admins [<access level> [<access level>]]0xffff88: Gets the list of admins. If first parameter is specified, only admins who have this exact level will be shown. If both arguments are set, all the admins in that range of access levels will be listed.\n0x88ff88/vote kick|suspend <player>0xffff88: Start a poll to kick or suspend a player
 
 help_commands_auth_shortdesc Authentication related commands
-help_commands_auth_text 0x88ff88/login [<user>]@<authority>0xffff88: Authenticate yourself using a given authority. Try @forums if you have an account at http://forums.armagetronad.net/\n0x88ff88/logout0xffff88: Log out so you can log back in as another player\n0x88ff88/vote include <file>0xffff88: Start a poll to include a given file\n0x88ff88/vote command <command>0xffff88: Start a poll to execute an admin command\n0x88ff88/admin <command>0xffff88: Execute a console command on the server if you have sufficient access rights\n0x88ff88/op <player> [+|-]<optional access level>0xffff88: Gives another player a higher or a lower access level; the level defaults to the level one lower than you access level, which is also the maximal possible level\n0x88ff88/deop <player>0xffff88: Reverses /op; it takes away a player's access level, effectively making him unauthenticated again. Only works on players of lower access level than yours, of course.\n
+help_commands_auth_text 0x88ff88/login [<user>]@<authority>0xffff88: Authenticate yourself using a given authority. Try @forums if you have an account at http://forums.armagetronad.net/\n0x88ff88/logout0xffff88: Log out so you can log back in as another player\n0x88ff88/vote include <file>0xffff88: Start a poll to include a given file\n0x88ff88/vote command <command>0xffff88: Start a poll to execute an admin command\n0x88ff88/admin <command>0xffff88: Execute a console command on the server if you have sufficient access rights\n0x88ff88/op <player> [+|-]<optional access level>0xffff88: Gives another player a higher or a lower access level; the level defaults to the level one lower than you access level, which is also the maximal possible level\n0x88ff88/deop <player>0xffff88: Reverses /op; it takes away a player's access level, effectively making them unauthenticated again. Only works on players of lower access level than yours, of course.\n
 help_commands_auth_levels_shortdesc List of all access levels
-help_commands_auth_levels_text 0x88ff880 (Owner)0xffff88: The owner of the server. Commands entered on the server console are executed with these rights.\n0x88ff881 (Admin)0xffff88: A server administrator. By default, almost as powerful as the owner himself.\n0x88ff882 (Moderator)0xffff88: A server moderator. Is still allowed to use /admin, but is restricted to player management commands.\n0x88ff887 (Team Leader)0xffff88: Leader of a team. By default, no admin rights at all.\n0x88ff888 (Team Member)0xffff88: Member of a team. Local team accounts get this level.\n0x88ff8812 (Local User)0xffff88: Players with local accounts get this level.\n0x88ff8815 (Remote User)0xffff88: Players with remote accounts get this level by default.\n0x88ff8816 (Fallen from Grace)0xffff88: Authenticated players who abused default rights given to them.\n0x88ff8817 (Shunned)0xffff88: Same, only worse :)\n0x88ff8819 (Authenticated)0xffff88: Minimal level authenticated players can get.\n0x88ff8820 (Program)0xffff88: Unauthenticated players.
+help_commands_auth_levels_text 0x88ff880 (Owner)0xffff88: The owner of the server. Commands entered on the server console are executed with these rights.\n0x88ff881 (Admin)0xffff88: A server administrator. By default, almost as powerful as the owner themself.\n0x88ff882 (Moderator)0xffff88: A server moderator. Is still allowed to use /admin, but is restricted to player management commands.\n0x88ff887 (Team Leader)0xffff88: Leader of a team. By default, no admin rights at all.\n0x88ff888 (Team Member)0xffff88: Member of a team. Local team accounts get this level.\n0x88ff8812 (Local User)0xffff88: Players with local accounts get this level.\n0x88ff8815 (Remote User)0xffff88: Players with remote accounts get this level by default.\n0x88ff8816 (Fallen from Grace)0xffff88: Authenticated players who abused default rights given to them.\n0x88ff8817 (Shunned)0xffff88: Same, only worse :)\n0x88ff8819 (Authenticated)0xffff88: Minimal level authenticated players can get.\n0x88ff8820 (Program)0xffff88: Unauthenticated players.
 
 help_commands_ra_shortdesc Remote admin commands
 help_commands_ra_text 0x88ff88/login <password>0xffff88: Log in as the server administrator using the server-specific password\n0x88ff88/logout0xffff88: Drop your logged in status so that other players can't see that you're an administrator\n0x88ff88/admin <command>0xffff88: Execute a console command as if it were entered on the server
@@ -2634,7 +3037,7 @@ help_commands_misc_shortdesc Miscellaneous commands
 help_commands_misc_text 0x88ff88/help0xffff88: You just found out about this one :-)\n0x88ff88/teach <player> <topic>0xffff88: same as /help, but the the output gets sent to another player.\n0x88ff88/rtfm0xffff88: alias for /teach\n0x88ff88/command <command>0xffff88: Execute a command on your own client. Useful for instant chats
 
 help_commands_tourney_shortdesc Tourney related commands
-help_commands_tourney_text 0x88ff88/lock0xffff88: Locks your current team. Nobody can join it any more on their own. To let someone in, you need to invoke\n0x88ff88/invite <player>0xffff88: From that moment on, the player is allowed to join you. Another effect of /invite, even if your team is not locked, is that the invited player can read all of your team's /team messages. Invitations are permanent until revoked. That means a player who is invited into your team can join and leave it freely without further need to /invite him again. Players who were on the team when you /locked it are not automatically invited when they leave on their own account.\n0x88ff88/uninvite <player>0xffff88: reverses /invite. The invitation is revoked, the player can no longer join you, and if he currently is on your team, he will be thrown out.\n0x88ff88/unlock0xffff88: makes your team available for everyone to join again.
+help_commands_tourney_text 0x88ff88/lock0xffff88: Locks your current team. Nobody can join it any more on their own. To let someone in, you need to invoke\n0x88ff88/invite <player>0xffff88: From that moment on, the player is allowed to join you. Another effect of /invite, even if your team is not locked, is that the invited player can read all of your team's /team messages. Invitations are permanent until revoked. That means a player who is invited into your team can join and leave it freely without further need to /invite him again. Players who were on the team when you /locked it are not automatically invited when they leave on their own account.\n0x88ff88/uninvite <player>0xffff88: reverses /invite. The invitation is revoked, the player can no longer join you, and if he currently is on your team, he will be thrown out.\n0x88ff88/unlock0xffff88: makes your team available for everyone to join again.\n0x88ff88/ready0xffff88: Toggles your readiness state in a warmup.
 
 help_version_shortdesc  This server's version
 help_version_text       0xffff7fThis is running:\n0x7fff7f    \g \v\n0xffff7fIt was built on 0x7fff7f\d0xffff7f, from revision 0x7fff7fr\o0xffff7f(0x7fff7fz\z0xffff7f), which has revision 0x7fff7fr\l0xffff7f(0x7fff7fz\m0xffff7f) for last common ancestor with branch 0x7fff7f\p0xffff7f, which can be found at:\n0x7fff7f    \b\n0xffff7fThis revision's ID is:\n0x7fff7f    \i\n0xffff7fIt was tagged(empty if not tagged):\n0x7fff7f    \t\n0xffff7fSource changed:\n0x7fff7f    \c
@@ -2646,8 +3049,13 @@ unlock_all_teams_help   Unlocks all teams.
 invite_team_can_join      \10xRESETT can now join \2.\n
 invite_team_invite      \10xRESETT has been invited to join \2.\n
 invite_team_kick        \10xRESETT has been kicked from \2.\n
-invite_team_uninvite    \10xRESETT got his invitation to join \2 cancelled.\n
+invite_team_uninvite    \10xRESETT got their invitation to join \2 cancelled.\n
 invite_team_locked_list (locked)
+invites_help            Displays a list of teams and their invited-nonmember players.
+invites_header          Invitations:
+
+team_list_ready         (0x7fff7fready0xRESETT)
+team_list_not_ready     (0xff7f7fnot ready0xRESETT)
 
 msg_toomanymatches 0xff0000Too many matches found for the search term \1. Be more specific.\n
 msg_nomatch 0xff0000No matches were found that contained \1.\n
@@ -2676,6 +3084,7 @@ player_scoretable_alive_no	No
 player_scoretable_pingcharity   Ping Charity:
 player_scoretable_nobody	Nobody there.\n
 player_scoretable_inactive	Disconnected
+player_scoretable_can_join	Can join \1
 
 
 
@@ -2710,14 +3119,17 @@ network_message_abortconn_inter	The server terminated our connection.
 
 network_master_timeout_retry	One of the master servers did not answer. Trying next one...\n
 network_master_timeout_title	Master servers do not answer
-network_master_timeout_inter	The master servers could not be reached and the server list could not be updated. You'll browse the old list for now.\n\nThe most likely reason for this is a problem with your network. Please check\n- that you have a working internet connection: point your web browser to www.armagetronad.net to test.\n- that your firewall, if you have one, does not block our traffic. To test whether this is your problem, disable your firewall and try again. If it then works, you should reenable the firewall, but allow Armagetron traffic specifically: Armagetron uses UDP and usually ports 4533 to 4540. Personal firewalls also have the possibility to block connections based on program names; make sure that armagetronad(.exe) is unblocked.\nIf you don't control parts of the network connection, say because you're at a public WLAN hotspot or in a company or school network, chances are the owner of the network purposefully blocks UDP traffic. You'll need to talk to the owner, then.\nA last possible, but unlikely, cause is that the master server infrastructure is currently down completely. Visit the forums at forums.armagetronad.net or the IRC channel #armagetron on irc.freenode.net to see if anyone else has this problem currently.
+network_master_timeout_inter	The master servers could not be reached and the server list could not be updated. You'll browse the old list for now.\n\nThe most likely reason for this is a problem with your network. Please check\n- that you have a working internet connection: point your web browser to www.armagetronad.net to test.\n- that your firewall, if you have one, does not block our traffic. To test whether this is your problem, disable your firewall and try again. If it then works, you should re-enable the firewall, but allow \g traffic specifically: \g uses UDP and usually ports 4533 to 4540. Personal firewalls also have the possibility to block connections based on program names; make sure that armagetronad(.exe) is unblocked.\nIf you don't control parts of the network connection, say because you're at a public WLAN hot spot or in a company or school network, chances are the owner of the network purposefully blocks UDP traffic. You'll need to talk to the owner, then.\nA last possible, but unlikely, cause is that the master server infrastructure is currently down completely. Visit the forums at forums.armagetronad.net or the IRC channel #armagetron on irc.freenode.net to see if anyone else has this problem currently.\n
 
 network_master_denied_title		Master login denied
 network_master_denied_inter		The master server denied your login attempt. That usually means it is full. Try again later.
 
 testing_version_expired_title   Version Expired
-testing_version_expired         You are running a public test version or an unsupported CVS build. The server you tried to connect to is running a much newer version and that combination is only supported for major releases. An update is probably available for you on www.armagetronad.net or beta.armagetronad.net.
+testing_version_expired         You are running a public test version and the server you tried to connect to is running a much newer version and that combination is only supported for major releases. Proceed at your own risk.
 
+network_master_login_needed     Registration needed
+network_master_exp_needed       Experience needed
+network_master_exp_recommended  Experience recommended
 network_master_upgrage			Upgrade needed
 network_master_downgrage		Server is outdated
 network_master_incompatible		Server is incompatible
@@ -2727,15 +3139,20 @@ network_master_players			Players:
 network_master_players_empty	Empty
 network_master_options			Options:\n
 
+network_master_exp_recommended_long_oldserver This server uses old code and did not transmit settings; you should probably get \1 more minutes of play elsewhere first.\n
+network_master_exp_recommended_long This server uses advanced settings; you should probably get \1 more minutes of play elsewhere first.\n
+network_master_login_needed_long You need to have a global ID to play here. Get one at forums.armagetronad.net.\n
+network_master_exp_needed_long This server will not let you play until you get at least \n more minutes of play elsewhere first.\n
+
 network_connecting_to_server	Connecting to \1...\n
 network_connecting_gamestate	Waiting for gamestate...\n
 network_syncing_gamestate	Received! Syncing gamestate...\n
-network_warn_unknowndescriptor	\n\n\nGot unknown nMessage with descriptor id \1 \n\nYOU SHOULD PROBABLY UPGRADE ARMAGETRON ADVANCED!!!!\n
+network_warn_unknowndescriptor	\n\n\nGot unknown nMessage with descriptor id \1 \n\nYOU SHOULD PROBABLY UPGRADE \G!!!!\n
 network_error			Network error.\n
 network_error_timeout		User \1 timed out.\n
 network_error_shortmessage	User \1's message was too short.\n
 network_error_overflow		User \1 is unable to keep up with the network traffic.\n
-network_killuser		Killing user \1, ping \2.\n
+network_killuser		Killing user \1, ping \2, IP \3: \4\n
 network_statistics1		Time:     \1 seconds\n
 network_statistics2		Sent:     \2 bytes in \3 packets (\4 bytes/s)\n
 network_statistics3		Received: \5 bytes in \6 packets (\7 bytes/s)\n
@@ -2765,13 +3182,14 @@ network_login_relabeling	Relabeling NetObjects...\n
 network_login_sync2		Syncing again...\n
 network_login_done		Done!\n
 
-network_kill_log            User \1 kicked, reason given to him: \2\n
+network_kill_log            User \1 kicked, reason given to them: \2\n
 network_redirect            \n\nYou will now be redirected to the server \1:\2. You can prevent that by pressing ESC.\n
 network_kill_preface		Reason given by server:
-network_kill_maxidgrabber	It ran out of IDs; your client was the one occupying most of them for himself. The reason for this can be a bug.
+network_kill_maxidgrabber	It ran out of IDs; your client was the one occupying most of them for itself. The reason for this can be a bug.
 network_kill_maxiduser		It ran out of IDs; your client was the one occupying most of them.
 network_kill_cheater		It assumed you are cheating. If that is untrue, it is a bug you should report.
 network_kill_error			An error occurred while processing messages from your client. This usually indicates a client or server bug.
+network_kill_servercomplete	Server list transfer complete.
 network_kill_timeout		You timed out.
 network_kill_logout			You logged out regularly.
 network_kill_incompatible	You are running a version incompatible with the server.
@@ -2787,6 +3205,10 @@ network_kill_unknown		No reason was given.
 network_kill_spamkick		You have been auto-kicked for spamming.
 voted_kill_kick				You have been kicked by an angry mob of players; please stay away.
 network_kill_spectator      You have been sitting in spectator mode for too long.
+network_kill_unworthy       The server is full; you have been removed to make room for potential players. Only come back if you really have to.
+network_kill_unworthy_banreason The server is overloaded and new connections need to be throttled. Sorry for the inconvenience.
+network_kill_unworthy_ban   The server is full; you have been removed to make room for potential players. Only come back if you really have to, and wait \1 minutes.
+network_kill_unworthy_log   Kicking unworthy spectator \1 for \2 minutes.\n
 
 network_ban_kph             Kicks per hour of IP \1 are now \2.\n
 network_ban                 Players from IP \1 are banned for \2 minutes. Reason: \3\n
@@ -2846,9 +3268,43 @@ network_master_reqlist		Requesting server list...\n
 network_master_status		Receiving server \1...\n
 network_master_finish		Received \1 servers.\n
 network_master_start		Host Game
+network_master_pollanswer       Answering ping poll from \1.\n
+network_master_pollanswer_last	Answering ping poll from \1. This is the last logged poll.\n
 network_master_host_inet_help	This will start a network game on your computer and announce it on the internet.
 network_master_host_lan_help	This will start a network game that is only visible from your LAN.
 
+classification_0 no \1
+classification_1 ludicrously \2
+classification_2 nano \1
+classification_3 micro \1
+classification_4 extremly \2
+classification_5 very \2
+classification_6 \2
+classification_7 normal \1
+classification_8 \3
+classification_9 very \3
+classification_10 extremly \3
+classification_11 mega \1
+classification_12 giga \1
+classification_13 ludicrouly \3
+classification_14 infinite \1
+
+# The _1, _2 and _3 strings are inserted into the strings above as \1, \2 and \3.
+# Translations can use that to form grammatically correct combinations.
+classification_acceleration_1 acceleration
+classification_acceleration_2 low acceleration
+classification_acceleration_3 high acceleration
+classification_delay_1 delay
+classification_delay_2 low delay
+classification_delay_3 high delay
+classification_rubber_1 rubber
+classification_rubber_2 low rubber
+classification_rubber_3 high rubber
+classification_walls_1 walls
+classification_walls_2 short walls
+classification_walls_3 long walls
+classification_teams team play
+classification_maps custom map
 
 #********************************************
 #********************************************
@@ -2957,14 +3413,15 @@ config_command_other		You probably want:\n
 config_command_more		    There are more commands containing your search string that were left out to avoid flooding your terminal.\n
 config_file_write_error		Could not write configuration file!\n
 config_value_changed		\1 changed from \2 to \3.\n
+config_value_not_changed	\1 not changed from \2 to \3: the guardian function objected.\n
 config_error_read		Input error reading \1: invalid format.\n
 config_message_info		\1 is currently set to \2.\n
 config_sighup           SIGHUP received, reloading configuration.\n
 config_abort               Configuration file/stream loading aborted.\n
 
-nconfig_errror_protected	No way. Only the server can change \1.\n
-nconfig_error_unknown		Got conf message for unknown setting \1.\n\nYOU PROBABLY SHOULD UPGRADE ARMAGETRON ADVANCED!!!\n
-nconfig_error_nonet         Got conf message for  setting \1 which is not network aware.\n\nYOU PROBABLY SHOULD UPGRADE ARMAGETRON ADVANCED!!!\n
+nconfig_error_protected	No way. Only the server can change \1.\n
+nconfig_error_unknown		Got conf message for unknown setting \1.\n\nYOU PROBABLY SHOULD UPGRADE \G!!!\n
+nconfig_error_nonet         Got conf message for  setting \1 which is not network aware.\n\nYOU PROBABLY SHOULD UPGRADE \G!!!\n
 nconfig_error_ignoreold		Ignoring old conf message for setting \1.\n
 nconfig_value_changed		\1 changed from \2 to \3 on server order.\n
 
@@ -2985,9 +3442,12 @@ config_accesslevel_20       Program
 access_level_help           Changes the access level of a configuration item to make it available to lower ranked users
 access_level_usage          usage: ACCESS_LEVEL <config command> <required minimal access level (numerical)>\n
 access_level_change         Required access level of command \1 changed to "\2".\n
+access_level_nochange_now   Cannot change access level of \1: it is currently at "\2", you only have "\3", you would steal access.\n
+access_level_nochange_later   Cannot change access level of \1 to "\2", you only have "\3" and would not be able to change it back.\n
+access_level_change         Required access level of command \1 changed to "\2".\n
 access_level_error          Required access level of command \1 is "\2", you only have "\3".\n
 
-casacl_help                   For the duration of the rest of the configuration file  thiss directive appears in, elevate the access level.
+casacl_help                   For the duration of the rest of the configuration file  this directive appears in, elevate the access level.
 casacl_usage                  Usage: CASACL <required access level> <elevated access level>\n
 casacl_not_allowed            CASACL usage not allowed in this context.\n
 
@@ -3002,9 +3462,9 @@ authority_level_help             Changes the access level for all users from the
 authority_level_usage            usage: AUTHORITY_LEVEL <authority> <new access level (numerical)>\n
 authority_level_change           Access level of users from authority \1 changed to "\2".\n
 
-toggle_help                 Cycle between 0 and 1 for a boolean config item. Example: TOGGLE PREDICT_OBJECTS\n
+toggle_help                 Cycle between 0 and 1 for a boolean and locally changeable config item. Example: TOGGLE PREDICT_OBJECTS\n
 toggle_usage_error          TOGGLE requires a config item name. Usage: TOGGLE config_item\n
-toggle_invalid_config_item  TOGGLE requires a boolean config item, and \1 is not.\n
+toggle_invalid_config_item  TOGGLE requires a boolean and locally changeable config item, and \1 is not.\n
 
 #*************************************
 #*************************************
@@ -3034,7 +3494,7 @@ login_storepw_mem_text		In memory
 login_storepw_mem_help		Password will be remembered for this session of \g.
 
 login_storepw_disk_text		On disk
-login_storepw_disk_help		Lazy: store the password on the harddisk so you won't have to retype it ever again. Although the password is stored in encrypted form, this is pretty unsafe.
+login_storepw_disk_help		Lazy: store the password on the hard disk so you won't have to retype it ever again. Although the password is stored in encrypted form, this is pretty unsafe.
 
 password_help			Password setting
 
@@ -3067,6 +3527,7 @@ access_level_rtfm_help         Minimal access level for /teach or /rtfm command.
 access_level_chat_help         Minimal access level for chatting.
 access_level_shout_help        Minimal access level for shouting.
 access_level_ips_help          Minimal access level you need for seeing IPs of other players in the /players command.
+access_level_autokick_immunity_help Minimal access level to be protected against autokicks.
 access_level_nver_help         Minimal access level you need for seeing Network versions/strings from other players in /players.
 access_level_spy_console_help  Minimal access level you need for seeing console input from other (in-game) admins.
 access_level_spy_team_help     Minimal access level you need for seeing /team messages as a spectator.
@@ -3079,7 +3540,7 @@ access_level_play_changed      Access level required to play changed from \1 to 
 
 access_level_vote_suspend_help    Minimal access level required to issue suspend votes.
 access_level_vote_kick_help    Minimal access level required to issue kick votes.
-access_level_vote_include_help    Minimal access level required to issue inclue votes.
+access_level_vote_include_help    Minimal access level required to issue include votes.
 access_level_vote_include_execute_help    Minimal access level successful include votes will be executed at.
 access_level_vote_command_help    Minimal access level required to issue command votes.
 access_level_vote_command_execute_help    Minimal access level successful command votes will be executed at.
@@ -3109,6 +3570,8 @@ rtfm_denied                 You need to be logged in to teach others.\n
 access_level_list_admins_help Access level required to be able to use the "/admins" command.
 access_level_list_admins_see_everyone_help Users with this access level or better will be able to list any configured admin, regardless of ADMIN_LIST_MIN_ACCESS_LEVEL.
 
+access_level_announce_login_help Maximal access level that determines if a player's login/logout message can be announced.
+
 intercept_commands_help     List of chat commands to accept and log to stdout.
 intercept_unknown_commands_help If 1, accept and log all unknown chat commands.
 
@@ -3123,7 +3586,6 @@ hash_method_blacklist_help  List of hash authentication methods to disable suppo
 legacy_log_names_help       If 1, the log names of unauthenticated players are kept like they were before authentication was implemented. If 0, log names are escaped so that authenticated player names look best.
 
 login_message_requested     User \1 requests authentication as "\2@\3".\n
-login_message_delayed       Your login process will be delayed because the server configuration makes it impossible to be processed immedeately in the background. We're sorry for the inconvenience.\n
 login_message_responded     Password request sent to user \1, username "\2", method \3, message "\4".\n
 login_message               \3\1 has been logged in as \2.\n
 login_message_byorder       Order of \1: 
@@ -3144,9 +3606,9 @@ login_error_invalidurl_notfound      Authentication URL \1 invalid, it was not f
 login_error_noremote                 Authentication via Global ID not available on this server.
 login_error_blacklist                Authority \1 is on this server's blacklist.
 login_error_whitelist                Authority \1 is not on this server's whitelist.
-login_error_pharm                    Server adress mismatch, \1 (sent by client) != \2 (our address). Pharming suspected. If  you are connecting from the LAN and get this error, either set "TRUST_LAN" on the server (only if your LAN can be fully trusted, of course) or use "SERVER_IP" to make the local IP known to the server.
+login_error_pharm                    Server address mismatch, \1 (sent by client) != \2 (our address). Pharming suspected. If  you are connecting from the LAN and get this error, set "TRUST_LAN" on the server (only if your LAN can be fully trusted, of course). If you are connecting from the internet, use "SERVER_DNS" to make its own real IP known to the server.
 login_error_pharm_cheap              Server address trouble. Client sent unspecific server address.
-login_error_methodmismatch  The local method used for auhtentication has been modified since your password was set. In the server's config files, put all commands that define authentication methods before all local password definitions.
+login_error_methodmismatch  The local method used for authentication has been modified since your password was set. In the server's config files, put all commands that define authentication methods before all local password definitions.
 login_error_nomethod        No authentication method could be found. Your client supports \1, this server supports \2, and the authentication server supports \3.
 login_error_nomethodlist    Authentication URL \1 does not return a list of supported methods, got error code \2, content "\3".
 login_error_nomethodproperties    Authentication URL \1 does not return a list of methods properties, got error code \2, content "\3".
@@ -3156,10 +3618,10 @@ login_error_unknown         Unknown error code \1 returned, content "\2".
 login_error_invalidclaim    Authority "\1" can't claim you to be "\2"!
 login_error_unexpected_answer Answer "\1" expected from server, but got \2 instead.
 
-login_error_local_nouser    Local user \1 not found.
+login_error_local_nouser    Local user \1 not found. Try "/login \1@forums" instead.
 login_error_local_password  Supplied password for local user \1 incorrect.
 
-chatcommand_requires_player  \1 requires a player username as additional paramenter.\n
+chatcommand_requires_player  \1 requires a player username as additional parameter.\n
 
 local_user_help   Adds a local user account from a name/password pair.
 local_user_syntax Usage: LOCAL_USER <user name> <password>\n

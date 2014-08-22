@@ -46,6 +46,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tRandom.h"
 #include "tRecorder.h"
 #include "tCommandLine.h"
+#include "tToDo.h"
 #include "eAdvWall.h"
 #include "eGameObject.h"
 #include "uMenu.h"
@@ -57,10 +58,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <stdio.h>
 #include <stdlib.h>
 #include <fstream>
+#include "tCrypto.h"
 
 #include "nServerInfo.h"
 #include "nSocket.h"
 #include "tRuby.h"
+#include "eLadderLog.h"
 #ifndef DEDICATED
 #include "rRender.h"
 #include "rSDL.h"
@@ -70,9 +73,8 @@ static gCommandLineJumpStartAnalyzer sg_jumpStartAnalyzer;
 #endif
 
 #ifndef DEDICATED
-#ifdef MACOSX
-#include "AAURLHandler.h"
-#include "version.h"
+#ifdef MACOSX_XCODE
+#include "gOSXURLHandler.h"
 #endif
 #endif
 
@@ -80,7 +82,6 @@ static gCommandLineJumpStartAnalyzer sg_jumpStartAnalyzer;
 class gMainCommandLineAnalyzer: public tCommandLineAnalyzer
 {
 public:
-    bool     daemon_;
     bool     fullscreen_;
     bool     windowed_;
     bool     use_directx_;
@@ -88,7 +89,6 @@ public:
 
     gMainCommandLineAnalyzer()
     {
-        daemon_ = false;
         windowed_ = false;
         fullscreen_ = false;
         use_directx_ = false;
@@ -99,11 +99,7 @@ public:
 private:
     virtual bool DoAnalyze( tCommandLineParser & parser )
     {
-        if ( parser.GetSwitch( "--daemon","-d") )
-        {
-            daemon_ = true;
-        }
-        else if ( parser.GetSwitch( "-fullscreen", "-f" ) )
+        if ( parser.GetSwitch( "-fullscreen", "-f" ) )
         {
             fullscreen_=true;
         }
@@ -111,7 +107,6 @@ private:
         {
             windowed_=true;
         }
-
 #ifdef WIN32
         else if ( parser.GetSwitch( "+directx") )
         {
@@ -140,23 +135,22 @@ private:
         << "                               initialisation under MS Windows\n\n";
         s << "\n\nYes, I know this looks ugly. Sorry about that.\n";
 #endif
-#else
-#ifndef WIN32
-        s << "-d, --daemon                 : allow the dedicated server to run as a daemon\n"
-        << "                               (will not poll for input on stdin)\n";
-#endif
 #endif
     }
 };
 
 static gMainCommandLineAnalyzer commandLineAnalyzer;
 
-static bool use_directx=true;
+// flag indicating whether directX is supposed to be used for input (defaults to false, crashes on my Win7)
+static bool sr_useDirectX = false;
+/*
+extern bool sr_useDirectX; // rScreen.cpp
 #ifdef WIN32
 static tConfItem<bool> udx("USE_DIRECTX","makes use of the DirectX input "
                            "fuctions; causes some graphic cards to fail to work (VooDoo 3,...)",
-                           use_directx);
+                           sr_useDirectX);
 #endif
+*/
 
 extern void exit_game_objects(eGrid *grid);
 
@@ -241,7 +235,7 @@ void sg_StartupPlayerMenu()
     uMenuItemString n(&firstSetup,
                       "$player_name_text",
                       "$player_name_help",
-                      player->name, 16);
+                      player->name, ePlayerNetID::MAX_NAME_LENGTH);
     
     uMenuItemExit e(&firstSetup, "$menuitem_accept", "$menuitem_accept_help");
     
@@ -269,16 +263,16 @@ void sg_StartupPlayerMenu()
     // store color
     if( ! (color == leave) )
     {
-        player->rgb[0] = color.r_*15;
-        player->rgb[1] = color.g_*15;
-        player->rgb[2] = color.b_*15;
+        player->rgb[0] = int(color.r_*15);
+        player->rgb[1] = int(color.g_*15);
+        player->rgb[2] = int(color.b_*15);
     }
 
     // load keyboard layout
     if( keyboardTemplate.Len() > 1 )
     {
         std::ifstream s;
-        if( tConfItemBase::OpenFile( s, keyboardTemplate, tConfItemBase::Config ) )
+        if( tConfItemBase::OpenFile( s, keyboardTemplate ) )
         {
             tCurrentAccessLevel level( tAccessLevel_Owner, true );
             tConfItemBase::ReadFile( s );
@@ -354,8 +348,8 @@ static void welcome(){
         }
 #endif
 
-#ifdef MACOSX
-        StartAAURLHandler( showSplash );
+#ifdef MACOSX_XCODE
+        sg_StartAAURLHandler( showSplash );
 #endif
         tRecorder::Record( splashSection, showSplash );
 
@@ -411,19 +405,6 @@ static void welcome(){
 
     st_FirstUse=false;
 
-    sr_textOut = textOutBack;
-    uMenu::Message( tOutput("$welcome_message_heading"), tOutput("$welcome_message"), 300 );
-
-    // start a first single player game
-    sg_currentSettings->speedFactor = -2;
-    sg_currentSettings->autoNum = 0;
-    sr_textOut = textOutBack;
-    sg_SinglePlayerGame();
-    sg_currentSettings->autoNum = 1;
-    sg_currentSettings->speedFactor = 0;
-
-    sr_textOut = textOutBack;
-    uMenu::Message( tOutput("$welcome_message_2_heading"), tOutput("$welcome_message_2"), 300 );
 
     sr_textOut = textOutBack;
 }
@@ -481,6 +462,12 @@ void cleanup(eGrid *grid){
 }
 
 #ifndef DEDICATED
+static bool sg_active = true;
+static void sg_DelayedActivation()
+{
+    Activate( sg_active );
+}
+
 int filter(const SDL_Event *tEvent){
     // recursion avoidance
     static bool recursion = false;
@@ -542,17 +529,19 @@ int filter(const SDL_Event *tEvent){
             if(currentScreensetting.fullscreen ^ lastSuccess.fullscreen) return false;
 #endif
             int flags = SDL_APPINPUTFOCUS;
-            if ( tEvent->active.gain && tEvent->active.state & flags )
-                Activate(true);
-            if ( !tEvent->active.gain && tEvent->active.state & flags )
-                Activate(false);
+            if ( tEvent->active.state & flags )
+            {
+                // con << tSysTimeFloat() << " " << "active: " << (tEvent->active.gain ? "on" : "off") << "\n";
+                sg_active = tEvent->active.gain;
+                st_ToDo(sg_DelayedActivation);
+            }
 
             // reload GL stuff if application gets reactivated
             if ( tEvent->active.gain && tEvent->active.state & SDL_APPACTIVE )
             {
                 // just treat it like a screen mode change, gets the job done
-                rCallbackBeforeScreenModeChange::Exec();
-                rCallbackAfterScreenModeChange::Exec();
+                st_ToDo(rCallbackBeforeScreenModeChange::Exec);
+                st_ToDo(rCallbackAfterScreenModeChange::Exec);
             }
             return false;
         }
@@ -636,12 +625,14 @@ int main(int argc,char **argv){
 
     try
     {
-        tCommandLineData commandLine;
-        commandLine.programVersion_  = &st_programVersion;
+        // Create this command line analyzer here instead of statically
+        // so it will be the first to display in --help.
+        tDefaultCommandLineAnalyzer defaultCommandLineAnalyzer;
+        tCommandLineData commandLine( st_programVersion );
 
         // analyse command line
         // tERR_MESSAGE( "Analyzing command line." );
-        if ( ! commandLine.Analyse(argc, argv) )
+        if ( !commandLine.Analyse(argc, argv) )
             return 0;
 
 
@@ -680,8 +671,14 @@ int main(int argc,char **argv){
 
 #ifdef WIN32
         // disable DirectX by default; it causes problems with some boards.
-        if (!use_directx && !getenv("SDL_VIDEODRIVER") ) {
-            sg_PutEnv("SDL_VIDEODRIVER=windib");
+        if (!getenv( "SDL_VIDEODRIVER") ) {
+            if (sr_useDirectX) {
+                sg_PutEnv( "SDL_VIDEODRIVER=directx" );
+            }
+            else
+            {
+                sg_PutEnv( "SDL_VIDEODRIVER=windib" );
+            }
         }
 #endif
 
@@ -735,6 +732,7 @@ int main(int argc,char **argv){
         // tERR_MESSAGE( "Loading configuration." );
         tLocale::Load("languages.txt");
 
+        eLadderLogInitializer ladderlog;
         st_LoadConfig();
 
         // record and play back the recording debug level
@@ -745,9 +743,9 @@ int main(int argc,char **argv){
         if ( commandLineAnalyzer.windowed_ )
             currentScreensetting.fullscreen   = false;
         if ( commandLineAnalyzer.use_directx_ )
-            use_directx                       = true;
+            sr_useDirectX                       = true;
         if ( commandLineAnalyzer.dont_use_directx_ )
-            use_directx                       = false;
+            sr_useDirectX                       = false;
 
         //gAICharacter::LoadAll(tString( "aiplayers.cfg" ) );
         gAICharacter::LoadAll( aiPlayersConfig );
@@ -893,9 +891,6 @@ int main(int argc,char **argv){
 
             SDL_Quit();
 #else // DEDICATED
-            if (!commandLineAnalyzer.daemon_)
-                sr_Unblock_stdin();
-
             sr_glOut=0;
 
             //  nServerInfo::TellMasterAboutMe();
@@ -915,7 +910,11 @@ int main(int argc,char **argv){
 
         //	tLocale::Clear();
     }
-    catch( tException const & e )
+    catch ( tCleanQuit const & e )
+    {
+        return 0;
+    }
+    catch ( tException const & e )
     {
         try
         {

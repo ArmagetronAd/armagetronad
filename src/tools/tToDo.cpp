@@ -30,16 +30,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "tMutex.h"
 
-static boost::recursive_mutex & st_GetMutex()
-{
-    static boost::recursive_mutex mutex;
-    return mutex;
-}
+static boost::recursive_mutex st_mutex;
 
 tArray<tTODO_FUNC *> tToDos;
 
 void st_ToDo(tTODO_FUNC *td){ // postpone something
-    boost::lock_guard< boost::recursive_mutex > lock( st_GetMutex() );
+    boost::lock_guard< boost::recursive_mutex > lock( st_mutex );
 
     tToDos[tToDos.Len()]=td;
 }
@@ -48,7 +44,7 @@ void st_ToDo(tTODO_FUNC *td){ // postpone something
 static tTODO_FUNC * st_toDoCurrent = 0;
 
 void st_ToDoOnce(tTODO_FUNC *td){ // postpone something, avoid double entries
-    boost::lock_guard< boost::recursive_mutex > lock( st_GetMutex() );
+    boost::lock_guard< boost::recursive_mutex > lock( st_mutex );
 
     if( st_toDoCurrent == td )
     {
@@ -77,7 +73,7 @@ void st_DoToDo(){ // do the things that have been postponed
     }
 
     {
-        boost::unique_lock< boost::recursive_mutex > lock( st_GetMutex() );
+        boost::unique_lock< boost::recursive_mutex > lock( st_mutex );
         while (tToDos.Len()){
             tTODO_FUNC *last = st_toDoCurrent;
             tTODO_FUNC *td = tToDos[tToDos.Len()-1];

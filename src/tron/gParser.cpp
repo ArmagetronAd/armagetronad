@@ -11,6 +11,9 @@
 #include <sys/types.h>
 #include <stdarg.h>
 #include <memory>
+#include <boost/assign/list_of.hpp>
+#include <boost/foreach.hpp>
+#define foreach BOOST_FOREACH
 
 #include "eCoord.h"
 #include "eGrid.h"
@@ -740,6 +743,17 @@ void gParser::myCheapParameterSplitter(const string &str, tFunction &tf, bool ad
     tf = tFunction().parse(str, addSizeMultiplier ? &sizeMultiplier : NULL);
 }
 
+typedef std::map<std::string, void(zShape::*)(const tPolynomial&)> shape_polynomial_settings_map_t;
+static shape_polynomial_settings_map_t shape_polynomial_settings =
+    boost::assign::map_list_of("rotation", &zShape::setRotation2)
+                              ("bottom", &zShape::SetBottom)
+                              ("height", &zShape::SetHeight)
+                              ("segments", &zShape::SetSegments)
+                              ("segment_length", &zShape::SetSegmentLength)
+                              ("segment_steps", &zShape::SetSegmentSteps)
+                              ("floor_scale_pct", &zShape::SetFloorScalePct)
+                              ("proximity_distance", &zShape::SetProximityDistance)
+                              ("proximity_offset", &zShape::SetProximityOffset);
 void
 gParser::parseShape(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, zShapePtr &shape)
 {
@@ -762,12 +776,14 @@ gParser::parseShape(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, zShape
     }
     shape->setScale( tfScale );
 
-    if (myxmlHasProp(cur, "rotation")) {
-        string str = string(myxmlGetProp(cur, "rotation"));
-        tPolynomial tpRotation;
-
-	tpRotation.parse(str);
-        shape->setRotation2( tpRotation );
+    foreach(shape_polynomial_settings_map_t::value_type item, shape_polynomial_settings) {
+        const char* name = item.first.c_str();
+        if (myxmlHasProp(cur, name)) {
+            string str = string(myxmlGetProp(cur, name));
+            tPolynomial tpAttribute;
+	    tpAttribute.parse(str);
+            (shape->*item.second)( tpAttribute );
+        }
     }
 
     cur = cur->xmlChildrenNode;
@@ -1353,7 +1369,7 @@ gParser::parseShapeCircle(eGrid *grid, xmlNodePtr cur, float &x, float &y, float
 bool
 gParser::parseZoneArthemis_v1(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
 {
-    float x, y, radius, growth;
+    float x = 0, y = 0, radius = 0, growth = 0;
     bool shapeFound = false;
     xmlNodePtr shape = cur->xmlChildrenNode;
 
@@ -1389,13 +1405,13 @@ gParser::parseZoneArthemis_v1(eGrid * grid, xmlNodePtr cur, const xmlChar * keyw
     gZone * zone = NULL;
     if (sn_GetNetState() != nCLIENT )
     {
-        if (!xmlStrcmp(myxmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"win")) {
+        if (!xmlStrcmp(myxmlGetProp(cur, "effect").GetXML(), (const xmlChar *)"win")) {
             zone = tNEW( gWinZoneHack) ( grid, eCoord(x*sizeMultiplier,y*sizeMultiplier) );
         }
-        else if (!xmlStrcmp(myxmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"death")) {
+        else if (!xmlStrcmp(myxmlGetProp(cur, "effect").GetXML(), (const xmlChar *)"death")) {
             zone = tNEW( gDeathZoneHack) ( grid, eCoord(x*sizeMultiplier,y*sizeMultiplier) );
         }
-        else if (!xmlStrcmp(myxmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"fortress")) {
+        else if (!xmlStrcmp(myxmlGetProp(cur, "effect").GetXML(), (const xmlChar *)"fortress")) {
             zone = tNEW( gBaseZoneHack) ( grid, eCoord(x*sizeMultiplier,y*sizeMultiplier) );
         }
 
@@ -1608,7 +1624,10 @@ void
 gParser::parseWall(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
 {
     ePoint *R = NULL, *sR = NULL;
-    REAL ox, oy, x, y;
+#ifdef DEBUG
+    REAL ox, oy;
+#endif
+    REAL x, y;
 
     REAL height = myxmlGetPropFloat(cur, "height");
     if ( height <= 0 )
@@ -1653,8 +1672,10 @@ gParser::parseWall(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
             }
         }
         cur = cur->next;
+#ifdef DEBUG
         ox = x;
         oy = y;
+#endif
     }
 }
 

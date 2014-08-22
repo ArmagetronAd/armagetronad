@@ -64,6 +64,13 @@ static tSettingItem< nServerInfo::QueryType > sg_query_type( "BROWSER_QUERY_FILT
 
 class gServerMenuItem;
 
+static nServerInfo::PrimaryKey sg_sortKey = nServerInfo::KEY_USERS;
+tCONFIG_ENUM( nServerInfo::PrimaryKey );
+static tConfItem< nServerInfo::PrimaryKey > sg_sortKeyConf( "BROWSER_SORT_KEY", sg_sortKey );
+
+//  enabling this will cause friend's names to be case sensitive
+static bool sg_enableFriendsCasing = true;
+static tConfItem< bool > sg_enableFriendsCasingConf("ENABLE_FRIENDS_CASING", sg_enableFriendsCasing);
 
 class gServerInfo: public nServerInfo
 {
@@ -73,7 +80,7 @@ public:
 
     gServerInfo():menuItem(NULL), show(true)
     {
-    };
+    }
 
     virtual ~gServerInfo();
 
@@ -105,8 +112,6 @@ nServerInfo* CreateGServer()
 
 class gServerMenu: public uMenu
 {
-    int sortKey_;
-
 public:
     virtual void OnRender();
 
@@ -129,6 +134,9 @@ public:
 class gBrowserMenuItem: public uMenuItem
 {
 protected:
+    bool displayHelp_;
+    REAL helpAlpha_;
+    
     gBrowserMenuItem(uMenu *M,const tOutput &help): uMenuItem( M, help )
     {
     }
@@ -137,6 +145,13 @@ protected:
     virtual bool Event( SDL_Event& event );
 
     virtual void RenderBackground();
+
+    virtual bool DisplayHelp( bool display, REAL y, REAL alpha )
+    {
+        helpAlpha_ = alpha;
+        displayHelp_ = display;
+        return false;
+    }
 };
 
 class gServerMenuItem: public gBrowserMenuItem
@@ -218,6 +233,24 @@ void gServerBrowser::BrowseSpecialMaster( nServerInfoBase * master, char const *
     nServerInfo::DeleteAll();
     nServerInfo::GetFromMaster( master, prefix );
     nServerInfo::Save();
+
+#ifdef SERVER_SURVEY
+    // connect to all servers and log stats
+    nServerInfo * info = nServerInfo::GetFirstServer();
+    {
+        std::ofstream o;
+        if ( tDirectories::Var().Open(o, "serversurvey.txt", std::ios::app) )
+        {
+            o << "New survey\n";
+        }
+    }
+    while( info )
+    {
+        ConnectToServer(info);
+        info = info->Next();
+    }
+    return;
+#endif
 
     //  gLogo::SetBig(true);
     //  gLogo::SetSpinning(false);
@@ -322,12 +355,14 @@ void gServerMenu::HandleEvent( SDL_Event event )
         switch (event.key.keysym.sym)
         {
         case(SDLK_LEFT):
-                        sortKey_ = ( sortKey_ + nServerInfo::KEY_MAX-1 ) % nServerInfo::KEY_MAX;
+                        sg_sortKey = static_cast<nServerInfo::PrimaryKey>
+                            ( ( sg_sortKey + nServerInfo::KEY_MAX-1 ) % nServerInfo::KEY_MAX );
             Update();
             return;
             break;
         case(SDLK_RIGHT):
-                        sortKey_ = ( sortKey_ + 1 ) % nServerInfo::KEY_MAX;
+                        sg_sortKey = static_cast<nServerInfo::PrimaryKey>
+                            ( ( sg_sortKey + 1 ) % nServerInfo::KEY_MAX );
             Update();
             return;
             break;
@@ -359,6 +394,22 @@ void gServerMenu::OnRender()
     }
 }
 
+// priority of bookmarks in sorting
+static nServerInfo::SortHelperPriority sg_bookmarkPriority[nServerInfo::KEY_MAX]=
+{
+    nServerInfo::PRIORITY_NONE,
+    nServerInfo::PRIORITY_PRIMARY,
+    nServerInfo::PRIORITY_SECONDARY,
+    nServerInfo::PRIORITY_PRIMARY
+};
+
+tCONFIG_ENUM( nServerInfo::SortHelperPriority );
+static tSettingItem< nServerInfo::SortHelperPriority > sgc_bookmarkPriorityName( "BROWSER_BOOKMARK_PRIORITY_NAME", sg_bookmarkPriority[nServerInfo::KEY_NAME] );
+static tSettingItem< nServerInfo::SortHelperPriority > sgc_bookmarkPriorityPing( "BROWSER_BOOKMARK_PRIORITY_PING", sg_bookmarkPriority[nServerInfo::KEY_PING] );
+static tSettingItem< nServerInfo::SortHelperPriority > sgc_bookmarkPriorityUsers( "BROWSER_BOOKMARK_PRIORITY_USERS", sg_bookmarkPriority[nServerInfo::KEY_USERS] );
+static tSettingItem< nServerInfo::SortHelperPriority > sgc_bookmarkPriorityScore( "BROWSER_BOOKMARK_PRIORITY_SCORE", sg_bookmarkPriority[nServerInfo::KEY_SCORE] );
+
+
 void gServerMenu::Update()
 {
     // get currently selected server
@@ -379,23 +430,30 @@ void gServerMenu::Update()
     ReverseItems();
 
     nServerInfo::CalcScoreAll();
-    nServerInfo::Sort( nServerInfo::PrimaryKey( sortKey_ ) );
+    nServerInfo::Sort( nServerInfo::PrimaryKey( sg_sortKey ), &gServerFavorites::IsFavorite, sg_bookmarkPriority[sg_sortKey] );
 
     int mi = 1;
     gServerInfo *run = gServerInfo::GetFirstServer();
     bool oneFound = false; //so we can display all if none were found
+    
+    tString filteredFriends[MAX_FRIENDS];
+    tString* friends = getFriends();
+    int i;
+    for (i = MAX_FRIENDS-1; i>=0; i--)
+    {
+        filteredFriends[i] = sg_enableFriendsCasing ? friends[i] : friends[i].ToLower();
+    }
+
     while (run)
     {
         //check friend filter
         if (getFriendsEnabled())
         {
             run->show = false;
-            int i;
-            tString userNames = run->UserNames();
-            tString* friends = getFriends();
-            for (i = MAX_FRIENDS; i>=0; i--)
+            tString userNames = sg_enableFriendsCasing ? run->UserNames() : run->UserNames().ToLower();
+            for (i = MAX_FRIENDS-1; i>=0; i--)
             {
-                if (run->Users() > 0 && friends[i].Len() > 1 && userNames.StrPos(friends[i]) >= 0)
+                if (run->Users() > 0 && friends[i].Len() > 1 && userNames.StrPos(filteredFriends[i]) >= 0)
                 {
                     oneFound = true;
                     run->show = true;
@@ -461,7 +519,6 @@ void gServerMenu::Update()
 
 gServerMenu::gServerMenu(const char *title)
         : uMenu(title, false)
-        , sortKey_( nServerInfo::KEY_SCORE )
 {
     nServerInfo *run = nServerInfo::GetFirstServer();
     while (run)
@@ -522,7 +579,7 @@ void gServerMenu::Render(REAL y,
     u << normal;
     p << normal;
 
-    switch ( sortKey_ )
+    switch ( sg_sortKey )
     {
     case nServerInfo::KEY_NAME:
         sn = highlight;
@@ -582,6 +639,10 @@ void gServerMenuItem::Render(REAL x,REAL y,REAL alpha, bool selected)
         if (server->Score() < -10000)
             s = -10000;
 
+        if ( favorite_ )
+        {
+            score << "B ";
+        }
         if (server->Polling())
         {
             score << tOutput("$network_master_polling");
@@ -605,6 +666,10 @@ void gServerMenuItem::Render(REAL x,REAL y,REAL alpha, bool selected)
                 break;
             }
         }
+        else if ( !favorite_ && server->GetClassification().noJoin_.Len() > 1 )
+        {
+            score << server->GetClassification().noJoin_;
+        }
         else if ( server->Users() >= server->MaxUsers() )
         {
             score << tOutput( "$network_master_full" );
@@ -612,15 +677,6 @@ void gServerMenuItem::Render(REAL x,REAL y,REAL alpha, bool selected)
         }
         else
         {
-            if ( favorite_ )
-            {
-                score << "B ";
-            }
-            else
-            {
-                score << "  ";
-            }
-
             score << s;
             users << server->Users() << "/" << server->MaxUsers();
             ping  << p;
@@ -652,18 +708,22 @@ void gServerMenuItem::Render(REAL x,REAL y,REAL alpha, bool selected)
 #endif
 }
 
+static REAL sg_menuBottom    = -.9;
+static REAL sg_requestBottom = -.9;
 
 void gServerMenuItem::RenderBackground()
 {
 #ifndef DEDICATED
+    REAL helpTopReal = sg_requestBottom*shrink + displace - .05;;
+
     gBrowserMenuItem::RenderBackground();
 
+    rTextField::SetDefaultColor( tColor(1,1,1) );
+
+    rTextField players( -.9, helpTopReal, text_height, sr_fontServerDetails );
+    players.EnableLineWrap();
     if ( server )
     {
-        rTextField::SetDefaultColor( tColor(1,1,1) );
-
-        rTextField players( -.9, -.3, text_height, sr_fontServerDetails );
-        players.EnableLineWrap();
         players << tOutput( "$network_master_players" );
         if ( server->UserNamesOneLine().Len() > 2 )
             players << server->UserNamesOneLine();
@@ -672,8 +732,33 @@ void gServerMenuItem::RenderBackground()
         players << "\n" << tColoredString::ColorString(1,1,1);
         tColoredString uri;
         uri << server->Url() << tColoredString::ColorString(1,1,1);
-        players << tOutput( "$network_master_serverinfo", server->Release(), uri, server->Options() );
+        tColoredString options;
+        options << server->GetClassification().description_;
+        options << server->Options();
+        players << tOutput( "$network_master_serverinfo", server->Release(), uri, options );
     }
+
+    if( displayHelp_ )
+    {
+        players << "\n";
+        players.SetColor(tColor(1,1,1,helpAlpha_));
+        players << Help();
+    }
+
+    REAL helpSpace = players.GetTop() - players.GetBottom();
+    REAL helpTop = -.85 + helpSpace;
+    REAL helpTopScaled = ( helpTop - displace )/shrink;
+    REAL helpTopMax = .25;
+    REAL helpTopMin = -.9;
+    if( helpTopScaled > helpTopMax )
+    {
+        helpTopScaled = helpTopMax;
+    }
+    if( helpTopScaled < helpTopMin )
+    {
+        helpTopScaled = helpTopMin;
+    }
+    sg_requestBottom = helpTopScaled;
 #endif
 }
 
@@ -785,6 +870,24 @@ bool gServerMenuItem::Event( SDL_Event& event )
 
 void gBrowserMenuItem::RenderBackground()
 {
+    if( menu )
+    {
+        double now = tSysTimeFloat();
+        static double lastTime = now;
+        if( sg_menuBottom > sg_requestBottom )
+        {
+            sg_menuBottom -= now - lastTime;
+        }
+        lastTime = now;
+        if( sg_menuBottom < sg_requestBottom )
+        {
+            sg_menuBottom = sg_requestBottom;
+        }
+
+        menu->SetBot( sg_menuBottom );
+        sg_requestBottom = -.9;
+    }
+
     sn_Receive();
     sn_SendPlanned();
 

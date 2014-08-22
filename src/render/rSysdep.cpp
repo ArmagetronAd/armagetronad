@@ -181,6 +181,7 @@ static rGLFence & sr_GetFence()
 #endif // DEDICATED
 
 bool sr_screenshotIsPlanned=false;
+tString sr_screenshotName("screenshot");
 static bool   s_videoout    =false;
 static int    s_videooutDest=fileno(stdout);
 
@@ -225,7 +226,7 @@ static void SDL_SavePNG(SDL_Surface *image, tString filename){
 
     for (i = 0; i < sr_screenHeight; i++) {
         row_ptrs[i] = (png_byte *)image->pixels + (sr_screenHeight - i - 1)
-                      * SCREENSHOT_BYTES_PER_PIXEL * sr_screenWidth;
+                      * image->pitch;
     }
 
     png_write_image(png_ptr, row_ptrs);
@@ -239,9 +240,8 @@ static void SDL_SavePNG(SDL_Surface *image, tString filename){
 
 static void make_screenshot(){
 #ifndef DEDICATED
-    // screenshot count
-    static int number=0;
-    number++;
+    // duplicate count (if we already took a screenshot the same second/with the same name)
+    int number=0;
 
     SDL_Surface *image;
     SDL_Surface *temp;
@@ -259,15 +259,18 @@ static void make_screenshot(){
     // turn image around
     for (idx = 0; idx < sr_screenHeight; idx++)
     {
-        memcpy(reinterpret_cast<char *>(temp->pixels) + 3 * sr_screenWidth * idx,
-               reinterpret_cast<char *>(image->pixels)+ 3
-               * sr_screenWidth*(sr_screenHeight - idx-1),
-               3*sr_screenWidth);
+        memcpy(reinterpret_cast<char *>(temp->pixels) + temp->pitch * idx,
+               reinterpret_cast<char *>(image->pixels)
+               + image->pitch*(sr_screenHeight - idx-1),
+               3*sr_screenWidth); // Optionally, use the pitch of either surface here
     }
 
     if (s_videoout)
     {
-        Ignore( write(s_videooutDest, temp->pixels, sr_screenWidth * sr_screenHeight * 3) );
+        for (idx = 0; idx < sr_screenHeight; idx++)
+        {
+            Ignore( write(s_videooutDest, reinterpret_cast<char *>(temp->pixels) + temp->pitch * idx, sr_screenWidth * 3) );
+        }
     }
 
     if (sr_screenshotIsPlanned) {
@@ -276,8 +279,11 @@ static void make_screenshot(){
         while ( !done )
         {
             // generate filename
-            tString fileName("screenshot_");
-            fileName << number;
+            tString fileName(sr_screenshotName);
+            if(number)
+            {
+                fileName << '_' << number;
+            }
             if (png_screenshot)
                 fileName << ".png";
             else
@@ -799,7 +805,7 @@ public:
         // delay
         if( opt == rSysDep::rSwap_Latency && delay_ > smallDelay )
         {
-            tDelay( delay_ * 1000 * 1000 );
+            tDelay( int(delay_ * 1000 * 1000) );
         }
     }
 protected:
@@ -1437,17 +1443,16 @@ void rSysDep::SwapGL(){
     // SDL_mutexV(  sr_netLock );
     // sr_LockSDL();
 
-    // actiate motion blur (does not use the game state, so it's OK to call here )
-    bool shouldSwap = sr_MotionBlur( time, blurTarget );
-
-    sr_SwapTime().Finish( shouldSwap );
-
     if (sr_screenshotIsPlanned){
         make_screenshot();
         sr_screenshotIsPlanned=false;
     }
     else if (s_videoout)
         make_screenshot();
+    
+    // actiate motion blur (does not use the game state, so it's OK to call here )
+    bool shouldSwap = sr_MotionBlur( time, blurTarget );
+    sr_SwapTime().Finish( shouldSwap );
 
     // sr_UnlockSDL();
     // lock mutex again

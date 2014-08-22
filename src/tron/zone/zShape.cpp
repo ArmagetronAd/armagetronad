@@ -44,6 +44,19 @@ static tSettingItem< REAL > sg_zoneAlphaConf( "ZONE_ALPHA", sz_zoneAlpha );
 // v1 zones synced from the server and v2 fortress zones.
 REAL sz_zoneAlphaServer = 0.7;
 static nSettingItem< REAL > sg_zoneAlphaConfServer( "ZONE_ALPHA_SERVER", sz_zoneAlphaServer );
+
+int sz_zoneSegSteps = 1;
+static tSettingItem<int> sz_zoneSegStepsConf( "ZONE_SEG_STEPS", sz_zoneSegSteps );
+
+REAL sz_zoneFloorScalePercent = 1.0f;
+static tSettingItem<REAL> sz_zoneFloorScalePercentConf( "ZONE_FLOOR_SCALE_PERCENT", sz_zoneFloorScalePercent );
+
+REAL sz_zoneProximityDistance = -1.0f;
+static tSettingItem<REAL> sz_zoneProximityDistanceConf( "ZONE_PROXIMITY_DISTANCE", sz_zoneProximityDistance );
+
+REAL sz_zoneProximityOffset = 0.0f;
+static tSettingItem<REAL> sz_zoneProximityOffsetConf( "ZONE_PROXIMITY_OFFSET", sz_zoneProximityOffset );
+
 #else
 #include "gWinZone.h"
 
@@ -72,6 +85,10 @@ zShape::zShape( eGrid* grid, zZone * zone )
         rotation2(),
         segments_(),
         seglength_(),
+        segsteps_(),
+        floorscalepct_(),
+        proximitydistance_(),
+        proximityoffset_(),
         color_(),
         createdtime_(0.0),
         referencetime_(0.0)
@@ -93,6 +110,10 @@ zShape::zShape( Zone::ShapeSync const & sync, nSenderInfo const & sender )
         rotation2(),
         segments_(),
         seglength_(),
+        segsteps_(),
+        floorscalepct_(),
+        proximitydistance_(),
+        proximityoffset_(),
         color_(),
         referencetime_(0.0)
 {
@@ -153,6 +174,10 @@ void zShape::WriteSync( Zone::ShapeSync & sync, bool init ) const
     rotation2.WriteSync( *sync.mutable_rotation2() );
     segments_.WriteSync( *sync.mutable_segments() );
     seglength_.WriteSync( *sync.mutable_segment_length() );
+    segsteps_.WriteSync( *sync.mutable_segment_steps() );
+    floorscalepct_.WriteSync( *sync.mutable_floor_scale_pct() );
+    proximitydistance_.WriteSync( *sync.mutable_proximity_distance() );
+    proximityoffset_.WriteSync( *sync.mutable_proximity_offset() );
     color_.WriteSync( *sync.mutable_color() );
 }
 
@@ -166,14 +191,22 @@ void zShape::ReadSync( Zone::ShapeSync const & sync, nSenderInfo const & sender 
     if (sync.has_pos_z_bottom())
         bottom_.ReadSync( sync.pos_z_bottom() );
     scale_.ReadSync( sync.scale() );
+    rotation2.ReadSync( sync.rotation2() );
+    color_.ReadSync( sync.color() );
     if (sync.has_height())
         height_.ReadSync( sync.height() );
-    rotation2.ReadSync( sync.rotation2() );
     if (sync.has_segments())
         segments_.ReadSync( sync.segments() );
     if (sync.has_segment_length())
         seglength_.ReadSync( sync.segment_length() );
-    color_.ReadSync( sync.color() );
+    if (sync.has_segment_steps())
+        segsteps_.ReadSync( sync.segment_steps() );
+    if (sync.has_floor_scale_pct())
+        floorscalepct_.ReadSync( sync.floor_scale_pct() );
+    if (sync.has_proximity_distance())
+        proximitydistance_.ReadSync( sync.proximity_distance() );
+    if (sync.has_proximity_offset())
+        proximityoffset_.ReadSync( sync.proximity_offset() );
 
     // old servers don't send alpha values; replace them by the server controlled alpha setting
     if( !sync.color().has_a() )
@@ -275,18 +308,6 @@ REAL zShape::GetCurrentScale() const {
     return scale_.Evaluate(lasttime_ - referencetime_);
 }
 
-REAL zShape::GetEffectiveBottom() const {
-    if (bottom_.Len())
-        return bottom_.evaluate(lastTime);
-    return sz_zoneBottom;
-}
-
-REAL zShape::GetEffectiveHeight() const {
-    if (height_.Len())
-        return height_.evaluate(lastTime);
-    return sz_zoneHeight;
-}
-
 tCoord zShape::GetRotation() const {
     REAL currAngle = rotation2.evaluate(lasttime_);
     tCoord rot( cos(currAngle), sin(currAngle) );
@@ -313,6 +334,18 @@ void zShape::SetRotationAcceleration(REAL r) {
     setRotation2(r2);
 }
 
+REAL zShape::GetEffectiveBottom() const {
+    if (bottom_.Len())
+        return bottom_.evaluate(lastTime);
+    return sz_zoneBottom;
+}
+
+REAL zShape::GetEffectiveHeight() const {
+    if (height_.Len())
+        return height_.evaluate(lastTime);
+    return sz_zoneHeight;
+}
+
 int zShape::GetEffectiveSegments() const {
     if (segments_.Len())
         return int( segments_.evaluate(lastTime) );
@@ -321,9 +354,43 @@ int zShape::GetEffectiveSegments() const {
 
 REAL zShape::GetEffectiveSegmentLength() const {
     if (seglength_.Len())
-        return int( seglength_.evaluate(lastTime) );
+        return seglength_.evaluate(lastTime);
     return sz_zoneSegLength;
 }
+
+int zShape::GetEffectiveSegmentSteps() const {
+    int ret=sz_zoneSegSteps;
+    if (segsteps_.Len())
+        ret = (int)segsteps_.evaluate(lastTime);
+    return ret<=0?1:ret;
+}
+
+REAL zShape::GetEffectiveFloorScalePct() const {
+    if (floorscalepct_.Len())
+        return floorscalepct_.evaluate(lastTime);
+    return sz_zoneFloorScalePercent;
+}
+
+REAL zShape::GetEffectiveProximityDistance() const {
+    if (proximitydistance_.Len())
+        return proximitydistance_.evaluate(lastTime);
+    return sz_zoneProximityDistance;
+}
+
+REAL zShape::GetEffectiveProximityOffset() const {
+    if (proximityoffset_.Len())
+        return proximityoffset_.evaluate(lastTime);
+    return sz_zoneProximityOffset;
+}
+
+void zShape::SetBottom(const tPolynomial & r) { bottom_=r; }
+void zShape::SetHeight(const tPolynomial & r) { height_=r; }
+void zShape::SetSegments(const tPolynomial & r) { segments_=r; }
+void zShape::SetSegmentLength(const tPolynomial & r) { seglength_=r; }
+void zShape::SetSegmentSteps(const tPolynomial & r) { segsteps_=r; }
+void zShape::SetFloorScalePct(const tPolynomial & r) { floorscalepct_=r; }
+void zShape::SetProximityDistance(const tPolynomial & r) { proximitydistance_=r; }
+void zShape::SetProximityOffset(const tPolynomial & r) { proximityoffset_=r; }
 
 void zShape::animate( REAL time ) {
     // Is this needed as the items are already animated?
@@ -368,7 +435,8 @@ bool zShape::RendersAlpha() const
 zShapeCircle::zShapeCircle(eGrid *grid, zZone * zone ):
         zShape(grid, zone ),
         radius(sz_initialSize, sz_expansionSpeed)
-{}
+{
+}
 
 /*
  * to create a shape on the clients
@@ -461,46 +529,84 @@ void zShapeCircle::Render(const eCamera * cam )
 
     if ( useAlpha ) {
         glDepthMask(GL_FALSE);
-        BeginQuads();
+        BeginTriangleFan();
     } else {
         glDepthMask(GL_TRUE);
         BeginLineStrip();
     }
 
+    const REAL effectiveRadius = scale_.Evaluate(lasttime_ - referencetime_) *
+                                 radius.Evaluate(lasttime_ - referencetime_);
     const int sg_segments = GetEffectiveSegments();
+    const int sg_steps = GetEffectiveSegmentSteps(); //<=0 ? 1 : sz_zoneSegSteps;
+    const REAL sg_floor_radius_pct = GetEffectiveFloorScalePct();
+    const REAL sg_proximity_distance = GetEffectiveProximityDistance();
+    const REAL sg_proximity_offset = GetEffectiveProximityOffset();
     const REAL seglen = 2 * M_PI / sg_segments * GetEffectiveSegmentLength();
+
+    REAL height_mult;
+    if (cam->Center() && sg_proximity_distance>=.0) {
+        REAL dist = (cam->Center()->Position()-Position()).Norm()-effectiveRadius;
+        if (sg_proximity_distance==sg_proximity_offset) {
+            height_mult = dist>sg_proximity_distance?1.0:0.0;
+        } else {
+            height_mult = (dist-sg_proximity_offset)/(sg_proximity_distance-sg_proximity_offset);
+            height_mult = (height_mult<0?.0:(height_mult>1.0?1.0:height_mult));
+        }
+    } else {
+        height_mult = 1.0;
+    }
     const REAL bot = GetEffectiveBottom();
-    const REAL top = bot + GetEffectiveHeight();
+    const REAL top = bot + GetEffectiveHeight()*height_mult;
 
     // apply color, respecting client chosen extra alpha factor
     rColor color = color_;
     color.a_ *= sz_zoneAlpha;
     color.Apply();
 
-    REAL effectiveRadius;
-    effectiveRadius = scale_.Evaluate(lasttime_ - referencetime_) * radius.Evaluate(lasttime_ - referencetime_);
     if (effectiveRadius >= 0.0)
     {
         for ( int i = sg_segments - 1; i>=0; --i )
         {
             REAL a = i * 2 * 3.14159 / REAL( sg_segments );
-            REAL b = a + seglen;
-
             REAL sa = effectiveRadius * sin(a);
             REAL ca = effectiveRadius * cos(a);
-            REAL sb = effectiveRadius * sin(b);
-            REAL cb = effectiveRadius * cos(b);
-
-            glVertex3f(sa, ca, bot);
-            glVertex3f(sa, ca, top);
-            glVertex3f(sb, cb, top);
-            glVertex3f(sb, cb, bot);
-
-            if ( !useAlpha )
+            for ( int s = 0; s<sg_steps; ++s )
             {
+                REAL b = a + seglen/sg_steps;                
+                REAL sb = effectiveRadius * sin(b);
+                REAL cb = effectiveRadius * cos(b);
+                
+                // classic zone
                 glVertex3f(sa, ca, bot);
-                RenderEnd();
-                BeginLineStrip();
+                if (top!=bot) {
+                    glVertex3f(sa, ca, top);
+                    glVertex3f(sb, cb, top);
+                }
+                glVertex3f(sb, cb, bot);
+                
+                if ( useAlpha )
+                {
+                    if (bot!=.0) {
+                        RenderEnd();
+                        BeginTriangleFan();
+                        color.Apply();
+                        glVertex3f(sa, ca, 0);
+                        glVertex3f(sb, cb, 0);
+                    }
+                    // floor zone
+                    glVertex3f(sb*sg_floor_radius_pct, cb*sg_floor_radius_pct, 0);
+                    glVertex3f(sa*sg_floor_radius_pct, ca*sg_floor_radius_pct, 0);
+                    RenderEnd();
+                    BeginTriangleFan();
+                } else {
+                    glVertex3f(sa, ca, bot);
+                    RenderEnd();
+                    BeginLineStrip();
+                }
+                a = b; // next segment step
+                sa = sb;
+                ca = cb;
             }
         }
     }
@@ -534,9 +640,10 @@ void zShapeCircle::Render2D(tCoord scale) const {
 
     glMultMatrixf(&m[0][0]);
 
-    BeginLines();
+    BeginLineStrip();
 
     int sg_segments = GetEffectiveSegments();
+    const int sg_steps = GetEffectiveSegmentSteps();
     const REAL seglen = 2 * M_PI / sg_segments * GetEffectiveSegmentLength();
 
     color_.Apply();
@@ -548,15 +655,21 @@ void zShapeCircle::Render2D(tCoord scale) const {
         for ( int i = sg_segments - 1; i>=0; --i )
         {
             REAL a = i * 2 * 3.14159 / REAL( sg_segments );
-            REAL b = a + seglen;
-
             REAL sa = effectiveRadius * sin(a);
             REAL ca = effectiveRadius * cos(a);
-            REAL sb = effectiveRadius * sin(b);
-            REAL cb = effectiveRadius * cos(b);
-
             glVertex2f(sa, ca);
-            glVertex2f(sb, cb);
+            for ( int s = 0; s<sg_steps; ++s )
+            {
+                REAL b = a + seglen/sg_steps;
+                REAL sb = effectiveRadius * sin(b);
+                REAL cb = effectiveRadius * cos(b);
+                glVertex2f(sb, cb);
+                a = b; // next step
+                sa = sb;
+                ca = cb;
+            }
+            RenderEnd();
+            BeginLineStrip();
         }
     }
     RenderEnd();

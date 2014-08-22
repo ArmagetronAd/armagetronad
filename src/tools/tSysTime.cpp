@@ -38,7 +38,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <unistd.h>
 #endif
 
-// Both implementations are stolen from Q1.
+// Both implementations for Windows and Linux were originally from the Q1 source,
+// but by now, all similarities should be gone.
+
+// set to true if the timer is strictly going upwards and without leaps
+static bool st_timerIsStrictlyMonotonic = false;
 
 //! time structure
 struct tTime
@@ -93,12 +97,27 @@ struct tTime
 #include "rSDL.h"
 #endif
 
+// test tick count overflow by wrapping the real tick count
+// #define TEST_TICK_COUNT
+#ifdef TEST_TICK_COUNT
+DWORD GetTickCount2()
+{
+    static DWORD first = GetTickCount();
+    return GetTickCount() - first - 10000;
+}
+#define GetTickCount GetTickCount2
+#endif
+
+
 // flag indicating whether the HPC is reliable
-static bool st_hpcReliable = true;
+static bool st_hpcReliable = false;
 
 void GetTimeInner( tTime & time )
 {
     LARGE_INTEGER mtime,frq;
+
+    // these timers are always monotonic
+    st_timerIsStrictlyMonotonic = true;
 
     // Check if high-resolution performance counter is supported
     if (!QueryPerformanceFrequency(&frq))
@@ -114,11 +133,29 @@ void GetTimeInner( tTime & time )
     }
     else
     {
+
+#ifdef SUPPORT_WIN9X
         // Nope, not supported, do it the old way.
         struct _timeb tstruct;
         _ftime( &tstruct );
         time.microseconds = tstruct.millitm*1000;
         time.seconds = tstruct.time;
+
+        // not monotonic :(
+        st_timerIsStrictlyMonotonic = false;
+#else
+        // Or, better, GetTickCount(). Be aware of overflows after two months uptime.
+        // (TickCount64 only exists on Vista and up, we don't want to go cutting compatibility off that far yet.)
+        static DWORD lastTickCount = GetTickCount();
+        DWORD tickCount = GetTickCount();
+        static int64_t tick64 = 0;
+        unsigned int tickUpdate = tickCount - lastTickCount;
+        lastTickCount = tickCount;
+        tick64 += tickUpdate;
+        int milliseconds = tick64 % 1000;
+        time.microseconds = milliseconds * 1000;
+        time.seconds = (tick64 - milliseconds)/1000;
+#endif
     }
 
     time.Normalize();
@@ -203,10 +240,78 @@ void usleep(int x)
 
 #else
 
+// if possible, use clock_gettime()
+#if HAVE_LIBRT && HAVE_TIME_H
+#ifdef CLOCK_MONOTONIC
+#define USE_CLOCK_GETTIME
+// for testing, z-man on Lucid doesn't have _RAW defined yet
+// #define CLOCK_MONOTONIC_RAW CLOCK_MONOTONIC
+#endif
+#endif
+
+#ifdef MACOSX
+//#include <CoreServices/CoreServices.h>
+#include <mach/mach.h>
+#include <mach/mach_time.h>
+#include <unistd.h>
+
+void GetTime( tTime & time )
+{
+	// get the absolute time
+	uint64_t machTime = mach_absolute_time();
+	static uint64_t start = machTime;
+	machTime -= start;
+	static double machTimeToMicroseconds;
+	if ( 0 == machTime )
+	{
+		static mach_timebase_info_data_t    timebaseInfo;
+		(void) mach_timebase_info(&timebaseInfo);
+		machTimeToMicroseconds = timebaseInfo.numer*1E-3/timebaseInfo.denom;
+	}
+	
+	// convert to microseconds, carefully avoiding overflows and rounding trouble
+	uint64_t microseconds = machTime*machTimeToMicroseconds;
+	time.microseconds = microseconds % 1000000;
+	time.seconds = (microseconds - time.microseconds)/1000000;
+}
+
+#else // macosx
+
 #include <sys/time.h>
 
 void GetTime( tTime & time )
 {
+#ifdef USE_CLOCK_GETTIME
+    struct timespec res;
+    // try several clocks
+    bool success = false;
+    st_timerIsStrictlyMonotonic = false;
+// prefer CLOCK_MONOTONIC_RAW, but if that doesn't exist, go without _RAW
+#ifdef CLOCK_MONOTONIC_RAW
+    if( !clock_gettime( CLOCK_MONOTONIC_RAW, &res ) )
+    {
+        success = true;
+        st_timerIsStrictlyMonotonic = true;
+    }
+    else
+#endif
+    {
+        if( !clock_gettime( CLOCK_MONOTONIC, &res ) )
+        {
+            success = true;
+        }
+    }
+
+    // transfer the result or go on with gettimeofday()
+    if( success )
+    {
+        time.microseconds = res.tv_nsec/1000;
+        time.seconds      = res.tv_sec;
+
+        return;
+    }
+#endif
+
     struct timeval tp;
     struct timezone tzp;
 
@@ -217,14 +322,14 @@ void GetTime( tTime & time )
 
     time.Normalize();
 }
+#endif // macosx
 
 //! returns true if a timer with more than millisecond accuracy is available
 bool tTimerIsAccurate()
 {
     return true; // always on unix
 }
-
-#endif
+#endif // windows
 
 static char const * recordingSection = "T";
 
@@ -267,7 +372,7 @@ void tAdvanceFrameSys( tTime & start, tTime & relative )
     // detect and counter timer hiccups
     tTime newRelative = time - start;
     tTime timeStep = newRelative - relative;
-    if ( !tRecorder::IsPlayingBack() && ( timeStep.seconds < 0 || timeStep.seconds > 10 ) )
+    if ( !tRecorder::IsPlayingBack() && ( timeStep.seconds < 0 || ( !st_timerIsStrictlyMonotonic && timeStep.seconds > 10 ) ) )
     {
         static bool warn = true;
         if ( warn )
@@ -283,12 +388,13 @@ void tAdvanceFrameSys( tTime & start, tTime & relative )
         relative = newRelative;
     }
 
-
+#ifdef DEBUG
     if ( relative.seconds > 20 )
     {
         int x;
         x = 0;
     }
+#endif
 }
 
 static bool s_delayedInPlayback = false;
@@ -374,7 +480,7 @@ void tAdvanceFrame( int usecdelay )
         static tTime oldRelative = timeRelative;
         tTime timeStep = timeRelative - oldRelative;
         oldRelative = timeRelative;
-        
+
         // detect unusually large timesteps
         static REAL bigStep = 10;
         bigStep *= .99;

@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "gGame.h"
 // Only for SpawnPlayer:
 #include "gParser.h"
+#include "eLadderLog.h"
 
 
 void zEffector::apply(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
@@ -173,6 +174,8 @@ zEffectorManager::Register(std::string const & type, std::string const & desc, X
 
 static zEffectorRegistration regWin("win", "", zEffectorWin::create);
 
+static eLadderLogWriter sg_winZoneWriter( "WINZONE_PLAYER_ENTER", true, "player" );
+
 void zEffectorWin::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
     // BOP
@@ -184,6 +187,8 @@ void zEffectorWin::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
             iter != d_calculatedTargets.end();
             ++iter)
     {
+        sg_winZoneWriter << (*iter)->GetUserName();
+        sg_winZoneWriter.write();
         sg_DeclareWinner((*iter)->CurrentTeam(), message );
     }
 }
@@ -194,7 +199,12 @@ zEffectorWin::setupVisuals(gParserState & state)
     state.set("color", rColor(0, 1, 0, .7));
 }
 
+static int sz_score_deathzone=-1;
+static tSettingItem<int> sz_dz("SCORE_DEATHZONE",sz_score_deathzone);
+
 static zEffectorRegistration regDeath("death", "", zEffectorDeath::create);
+
+static eLadderLogWriter sg_deathZoneWriter( "DEATH_DEATHZONE", true, "player" );
 
 void zEffectorDeath::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
@@ -203,7 +213,10 @@ void zEffectorDeath::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
             iter != d_calculatedTargets.end();
             ++iter)
     {
-        static_cast<gCycle *>((*iter)->Object())->Kill();
+        (*iter)->AddScore(sz_score_deathzone, tOutput(), "$player_lose_suicide");
+        sg_deathZoneWriter << (*iter)->GetUserName();
+        sg_deathZoneWriter.write();
+        (*iter)->Object()->Kill();
     }
 }
 

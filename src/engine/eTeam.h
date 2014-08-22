@@ -31,15 +31,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "ePlayer.h"
 #include "nNetObject.h"
 #include "tList.h"
+#include "eSpawn.h"
 #include <vector>
 
 namespace Engine{ class TeamSync; }
+class eLadderLogWriter;
 
 tString & operator << ( tString&, const eTeam&);
 std::ostream & operator << ( std::ostream&, const eTeam&);
 
 template<class T> class nConfItem;
-
 
 class eTeam: public nNetObject{
 protected:							// protected attributes
@@ -47,6 +48,9 @@ protected:							// protected attributes
     int listID; 					// ID in the list of all teams
     int score;						// score the team has accumulated
     int lastScore_;                 //!< score from the beginning of the round
+
+    bool lastEmpty_;                //!< flag indicating whether the team was empty on the last call to UpdateAppearance
+    bool lastWasCustomTeamName_;    //!< Was the last team name a custom set team name from the last call to UpdateAppearance?
 
     int numHumans;					// number of human players on the team
     int numAIs;						// number of AI players on the team
@@ -60,8 +64,11 @@ protected:							// protected attributes
 
     tShortColor color;	            // team color
     tString	name;					// our name
+    tString logName;                // our name for logs, sorting and admin UI
 
     bool locked_;                   //!< if set, only invited players may join
+
+    eSpawnPoint * spawnPoint;
 
     static void UpdateStaticFlags();// update all internal information
 
@@ -90,6 +97,7 @@ public:							// public configuration options
     void Invite( ePlayerNetID * player );                // invite the player to join
     void UnInvite( ePlayerNetID * player );              // revoke an invitation
     bool IsInvited( ePlayerNetID const * player ) const; // check if a player is invited
+    std::vector< const ePlayerNetID * > InterestingInvitedPlayers() const;
 
     static bool Enemies( eTeam const * team, ePlayerNetID const * player ); //!< determines whether the player is an enemy of the team
     static bool Enemies( eTeam const * team1, eTeam const * team2 ); //!< determines whether two teams are enemies
@@ -97,6 +105,7 @@ public:							// public configuration options
     static void Enforce( int minTeams, int maxTeams, int maxImbalance );
     
     static void WritePlayers( eLadderLogWriter & writer, const eTeam *team );
+    static void WriteOnlinePlayers();
 public:												// public methods
     static void	EnforceConstraints();					// make sure the limits on team number and such are met
 
@@ -107,7 +116,9 @@ public:												// public methods
     static tString Ranking( int MAX = 6, bool cut = true );				// return ranking information
     static float RankingGraph( float y, int MAX = 6 );				// print ranking information
 
-    bool			NameTeamAfterColor ( bool wish );	// inquire or set the ability to use a color as a team name
+    bool			NameTeamAfterColor ( bool wish );	// set the ability to use a color as a team name, return status
+
+    bool			TeamNamedAfterColor () const { return colorID >= 0; } //!< returns whether the team is currently named after a color
 
     void 			AddPlayer   	( ePlayerNetID* player );				// register a player
     void 			AddPlayerDirty 	( ePlayerNetID* player );				// register a player without calling UpdateProperties
@@ -139,7 +150,17 @@ public:												// public methods
 
     void 			AddScore		( int points,
                         const tOutput& reasonwin,
-                        const tOutput& reasonlose );
+                        const tOutput& reasonlose,
+                        const tOutput& reasonfree=tOutput());
+
+    eSpawnPoint * SpawnPoint() {
+        return spawnPoint;
+    }
+
+    void SetSpawnPoint(eSpawnPoint * sp)
+    {
+        spawnPoint = sp;
+    }
 
     static void ResetScoreDifferences(); //<! Resets the last stored score so ScoreDifferences takes this as a reference time
     static void LogScoreDifferences();   //<! Logs accumulated scores of all players since the last call to ResetScoreDifferences() to ladderlog.txt
@@ -173,6 +194,7 @@ public:												// public methods
     ePlayerNetID*	YoungestHumanPlayer(	) const;							//!< the youngest human player
     ePlayerNetID*	YoungestAIPlayer(		) const;							//!< the youngest AI player
     bool			Alive			(		) const;							//!< is any of the players currently alive?
+    bool            IsReady         (       ) const;                            //!< is the team ready to play?
 
     // color
     tShortColor const & Color() const
@@ -195,6 +217,7 @@ public:												// public methods
     }
 
     tColoredString GetColoredName(void) const;
+    const tString& GetLogName() const { return logName; }
 
     virtual void PrintName(tString &s) const;					// print out an understandable name in to s
 
@@ -221,6 +244,7 @@ public:												// public methods
 
 private:
     void 	 		RemovePlayerDirty( ePlayerNetID* player );				// just remove a player from the player list, no messages, no balancing
+    void LogScoreDifference( const tString & teamName );
 };
 
 #endif
