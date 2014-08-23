@@ -1,5 +1,5 @@
 ServerBegin
-connection  master1.armagetronad.net
+connection  master1.armagetronad.org
 port        4533
 method      0
 key         0  
@@ -8,7 +8,7 @@ name        Master Server 1
 ServerEnd
 
 ServerBegin
-connection  master2.armagetronad.net
+connection  master2.armagetronad.org
 port        4533
 method      0
 key         0  
