@@ -227,7 +227,7 @@ if test -n "$ARMAGETRONAD_OS_X_TOOLKIT"; then
 	if test "x$build_regular" = "xtrue"; then
 		LDFLAGS="-F${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks -rpath ${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks $LDFLAGS"
 		CPPFLAGS="-I${ARMAGETRONAD_OS_X_TOOLKIT}/${os_x_arch}/include/AllFrameworks $CPPFLAGS"
-		FTGL_CFLAGS="-I${ARMAGETRONAD_OS_X_TOOLKIT}/${os_x_arch}/include/FTGL -I${ARMAGETRONAD_OS_X_TOOLKIT}/${os_x_arch}/include/freetype2"
+		FTGL_CFLAGS="-I${ARMAGETRONAD_OS_X_TOOLKIT}/${os_x_arch}/include/freetype2"
 		FTGL_LIBS="-lftgl -lfreetype -lbz2"
 	fi
 	
@@ -1126,7 +1126,7 @@ CXXFLAGS="$CXXFLAGS -Werror -pedantic"
 AC_MSG_CHECKING([whether FTGLPixmapFont.h is deprecated])
 AC_TRY_COMPILE([#include <FTGLPixmapFont.h>],return 0,[AC_MSG_RESULT([no, not checking <ftgl.h>.])],
 [AC_MSG_RESULT([yes])
-AC_CHECK_HEADERS(ftgl.h)]
+AC_CHECK_HEADERS([FTGL/ftgl.h ftgl.h], [break])]
 )
 CXXFLAGS="$CXXFLAGS_SAVE"
 
