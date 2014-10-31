@@ -9847,7 +9847,7 @@ static void Slap_conf(std::istream &s)
             tOutput lose;
             win << "$player_admin_slap_win";
             lose << "$player_admin_slap_lose";
-            victim->AddScore( points, win, lose );
+            victim->AddScore( -points, win, lose );
         }
     }
 }
