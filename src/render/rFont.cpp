@@ -40,7 +40,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #ifdef HAVE_FTGL_FTGL_H
 // single include. practical.
 #include <FTGL/ftgl.h>
-#elif HAVE_FTGL_H
+#elif defined(HAVE_FTGL_H)
 #include <ftgl.h>
 #else
 // alternative includes go here
