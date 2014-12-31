@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
 <!DOCTYPE Resource SYSTEM "cockpit.dtd">
 
-<Resource type="aacockpit" name="Playroom" version="0.0.2" author="Lucifer" category="sick">
+<Resource type="aacockpit" name="Playroom" version="0.0.3" author="Lucifer" category="sick">
     <Cockpit version="0.0.1">
         <WidgetTemplate id="VerticalBar">
             <Size height="0.150" width="0.010" />
@@ -292,7 +292,7 @@
             <Size height="0.24" width="0.24" />
             <Background>
                 <Image scale_x=".075" scale_y=".075" repeat="both">
-                    <Graphic author="wrtlprnft" version="1" name="floor" extension="png" uri="http://wrtlprnft.ath.cx/floor.png" />
+                    <Graphic version="1" name="floor" extension="png" />
                 </Image>
                 <Solid>
                     <Color r=".5" g="1." b=".5" alpha="1." />
@@ -382,7 +382,7 @@
             <Size height="0.150" width="0.013" />
             <Background>
                 <Image scale_x="1" scale_y=".2">
-                    <Graphic category="sick" author="Lucifer" version="1" name="bubblewindow" extension="png" />
+                    <Graphic author="wrtlprnft" version="1" name="bubblewindow" extension="png" />
                 </Image>
             </Background>
         </Rectangle>
@@ -391,7 +391,7 @@
             <Size height="0.150" width="0.013" />
             <Background>
                 <Image scale_x="1" scale_y=".2">
-                    <Graphic category="sick" author="Lucifer" version="1" name="bubblewindow" extension="png" />
+                    <Graphic author="wrtlprnft" version="1" name="bubblewindow" extension="png" />
                 </Image>
             </Background>
         </Rectangle>
@@ -400,7 +400,7 @@
             <Size height="0.150" width="0.013" />
             <Background>
                 <Image scale_x="1" scale_y=".2">
-                    <Graphic category="sick" author="Lucifer" version="1" name="bubblewindow" extension="png" />
+                    <Graphic author="wrtlprnft" version="1" name="bubblewindow" extension="png" />
                 </Image>
             </Background>
         </Rectangle>
