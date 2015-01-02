@@ -551,8 +551,6 @@ voting_decay_help					One non-voter is ignored every time this many seconds pass
 voting_bias_help					Add virtual voters that oppose every change.
 voting_bias_kick_help				Add virtual voters that oppose every kick vote.
 voting_bias_suspend_help			Add virtual voters that oppose every suspend vote.
-voting_bias_silence_help			Add virtual voters that oppose every silence vote.
-voting_bias_voice_help			Add virtual voters that oppose every voice vote.
 voting_bias_include_help			Add virtual voters that oppose every include vote.
 voting_bias_command_help			Add virtual voters that oppose every command vote.
 
@@ -2041,12 +2039,6 @@ referee_player_text                 Make \1 referee
 demotereferee_player_details_text   If accepted, \1 won't be referee anymore: He will not be able to administrate teams.
 demotereferee_player_text           Demote \1 as referee
 
-silence_player_details_text			If accepted, \1 will be silenced.
-silence_player_text					Silenced \1
-
-voice_player_details_text			If accepted, \1 will be unsilenced.
-voice_player_text					Voice \1
-
 vote_include_details_text			If accepted, the file \1 will be included as a configuration file.
 vote_include_text					Include \1
 vote_include_error					Include file \1 not found or not readable.\n
@@ -2344,6 +2336,7 @@ performance_tweaks_menu_help	Settings that may improve game performance, but do 
 graphics_load_defaults_text	Load Defaults
 graphics_load_defaults_help	This will reset all this options to the ones that suit your system best. (In the opinion of this stupid program...)
 
+
 #feature menuitem
 feature_disabled_text		Off
 feature_disabled_help		Feature is currently disabled.
@@ -2442,20 +2435,8 @@ screen_grab_mouse_help		If activated, the mouse pointer is centered after every 
 screen_apply_changes_text	Apply Changes
 screen_apply_changes_help	Tries to enable the settings in this menu without exiting \g. Use at your own risk.
 
-screen_keep_window_active_text   Keep Window Active:
+screen_keep_window_active_text   Keep Window Active
 screen_keep_window_active_help   This toggles if \g should stay active when window mode is selected and \g loses focus.
-
-screen_mode_advanced		Advanced
-screen_mode_advanced_help	Settings for custom refresh rate, multimonitor setup, color depth and other things you usually do not need to change.
-
-screen_displayindex_text    Display:
-screen_displayindex_help    Index of the screen to use for fullscreen display. 0 is your main screen.
-
-screen_refreshrate_text    Refresh Rate: 
-screen_refreshrate_help    The video mode's refresh rate in fullscreen mode.
-screen_refreshrate_select  \1 Hz
-screen_refreshrate_desk_text	Default
-screen_refreshrate_desk_help	Your monitor's default refresh rate.
 
 #detail menu
 detail_floor_mirror_text	Floor Mirror:
@@ -3237,7 +3218,6 @@ network_master_servername	Server Name
 network_master_score		Score
 network_master_users		Users
 network_master_ping		Ping
-network_master_filter Filter:
 network_master_browserhelp	Press "Enter" to connect to this server, "p" to refresh a single server, "r" to refresh the whole list, "+/-" to set the score bias for this server, "cursor left/right" to change the sorting key, or "b" to add the server to your bookmarks. "m" toggles mates filtering.
 network_master_connecting	Connecting to \1...\n
 network_master_send		Sending my server info...\n
@@ -3516,7 +3496,6 @@ access_level_play_sliders_help The access level required to play will only slide
 access_level_play_changed      Access level required to play changed from \1 to \2.\n
 
 access_level_vote_suspend_help    Minimal access level required to issue suspend votes.
-access_level_vote_silence_help    Minimal access level required to issue silence and voice votes.
 access_level_vote_kick_help    Minimal access level required to issue kick votes.
 access_level_vote_include_help    Minimal access level required to issue include votes.
 access_level_vote_include_execute_help    Minimal access level successful include votes will be executed at.
@@ -3555,16 +3534,6 @@ intercept_unknown_commands_help If 1, accept and log all unknown chat commands.
 
 chat_command_unknown        Unknown chat command "\1".\n
 chat_command_accesslevel    Sorry, your access level is not high enough to use the "\1" command. You're \2, required would be \3.\n
-
-read_reports_count                 There are \1 reports.\n
-read_reports_access_no_clear       You do not have access to clear the reports.\n
-read_reports_cleared               The reports have successfully been cleared.\n
-read_reports_access_no_read        You do not have access to read the reports.\n
-chat_message_report_message_empty  Your report cannot be empty.\n
-chat_message_report_respond_ok     Your report has been saved.\n
-chat_message_report_respond_no     Your report was not saved. Please report this issue.\n
-chat_message_report_read_usage     /reports read <line number>\n
-chat_message_report_read_none      Report \1 does not exist.\n
 
 authority_blacklist_help    Comma separated list of authorities your server should refuse to query.
 authority_whitelist_help    If non-empty, only authorities on this comma separated list will be queried by your server.

@@ -20,10 +20,13 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add library="..\..\..\winlibs\build\dist\SDL_mixer.dll" />
+					<Add library="..\..\..\winlibs\build\dist\SDL_image.dll" />
+					<Add library="..\..\..\winlibs\build\dist\SDL.dll" />
 					<Add library="..\..\..\winlibs\build\dist\FTGL.dll" />
 					<Add library="..\..\..\winlibs\protobuf\vsprojects\libprotobuf.a" />
-					<Add library="..\..\..\winlibs\win32\boost_libs\libboost_system-mgw47-mt-1_53.a" />
 					<Add library="..\..\..\winlibs\win32\boost_libs\libboost_thread-mgw47-mt-1_53.a" />
+					<Add library="..\..\..\winlibs\win32\boost_libs\libboost_system-mgw47-mt-1_53.a" />
 				</Linker>
 			</Target>
 			<Target title="Win32 Debug">
@@ -36,14 +39,16 @@
 				<Compiler>
 					<Add option="-g" />
 					<Add option="-W" />
-					<Add option="-O0" />
 					<Add option="-DDEBUG" />
 				</Compiler>
 				<Linker>
+					<Add library="..\..\..\winlibs\build\debug\SDL_mixer.dll" />
+					<Add library="..\..\..\winlibs\build\debug\SDL_image.dll" />
+					<Add library="..\..\..\winlibs\build\debug\SDL.dll" />
 					<Add library="..\..\..\winlibs\build\debug\FTGL.dll" />
 					<Add library="..\..\..\winlibs\protobuf\vsprojects\libprotobuf_debug.a" />
-					<Add library="..\..\..\winlibs\win32\boost_libs\libboost_system-mgw47-mt-d-1_53.a" />
 					<Add library="..\..\..\winlibs\win32\boost_libs\libboost_thread-mgw47-mt-d-1_53.a" />
+					<Add library="..\..\..\winlibs\win32\boost_libs\libboost_system-mgw47-mt-d-1_53.a" />
 				</Linker>
 			</Target>
 		</Build>
@@ -75,6 +80,10 @@
 			<Add directory="../../src/thirdparty/particles/ParticleDLL" />
 			<Add directory="../../src/thirdparty/shttpd" />
 			<Add directory="../../../winlibs/include" />
+			<Add directory="../../../winlibs/SDL/include" />
+			<Add directory="../../../winlibs/SDL_image" />
+			<Add directory="../../../winlibs/SDL_image/VisualC/graphics/include" />
+			<Add directory="../../../winlibs/SDL_mixer" />
 			<Add directory="../../../winlibs/libxml2/include" />
 			<Add directory="../../../winlibs/iconv/include" />
 			<Add directory="../../../winlibs/FTGL/src/FTGL" />
@@ -86,24 +95,18 @@
 			<Add directory="../../../winlibs/protobuf/src" />
 			<Add directory="../../src/protobuf" />
 			<Add directory="../../src/thirdparty/utf8" />
-			<Add directory="../../../winlibs/SDL2/i686-w64-mingw32/include/SDL2" />
-			<Add directory="../../../winlibs/SDL2_image/i686-w64-mingw32/include/SDL2" />
-			<Add directory="../../../winlibs/SDL2_mixer/i686-w64-mingw32/include/SDL2" />
 		</Compiler>
 		<Linker>
-			<Add option="-mwindows" />
-			<Add library="..\..\..\winlibs\libxml2\lib\libxml2.lib" />
-			<Add library="mingw32" />
-			<Add library="..\..\..\winlibs\SDL2\i686-w64-mingw32\lib\libSDL2main.a" />
-			<Add library="..\..\..\winlibs\SDL2\i686-w64-mingw32\lib\libSDL2.dll.a" />
-			<Add library="..\..\..\winlibs\SDL2_image\i686-w64-mingw32\lib\libSDL2_image.dll.a" />
-			<Add library="..\..\..\winlibs\SDL2_mixer\i686-w64-mingw32\lib\libSDL2_mixer.dll.a" />
+			<Add library="libopengl32.a" />
+			<Add library="libglu32.a" />
 			<Add library="libshell32.a" />
 			<Add library="libws2_32.a" />
-			<Add library="libglu32.a" />
-			<Add library="libopengl32.a" />
-			<Add library="..\..\..\winlibs\SDL2_image\i686-w64-mingw32\bin\libpng16-16.dll" />
+			<Add library="..\..\..\winlibs\SDL_image\VisualC\graphics\lib\libpng13.lib" />
+			<Add library="..\..\..\winlibs\libxml2\lib\libxml2.lib" />
 		</Linker>
+		<Unit filename="../../../winlibs/SDL/src/main/win32/SDL_win32_main.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="../../src/engine/eAdvWall.cpp" />
 		<Unit filename="../../src/engine/eAdvWall.h" />
 		<Unit filename="../../src/engine/eAuthentication.cpp" />

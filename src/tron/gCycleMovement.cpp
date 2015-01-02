@@ -3969,13 +3969,7 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
                             // need many attempts
                             verletSpeed_=lastSpeed;
                             acceleration=lastAcceleration;
-
-                            // simulate until rubber runs out (no need to recalc acceleration)
-                            if ( TimestepCore( runOutTime, false ) )
-                                return true;
-
-                            // simulate post-rubber gap or, more frequently, the crash into the next wall
-                            return TimestepCore( currentTime );
+                            return TimestepCore( runOutTime, false ) || TimestepCore( currentTime );
                         }
                     }
                 }
@@ -4006,20 +4000,6 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
             step -= rubberneeded;
             if (step<0)
                 step=0;
-
-            // ignore the next destination position for now.
-            // if the space ahead is far less that what the cycle would traverse
-            // until the destination turn time, die.
-            // the destination must have come from a 0.2.6 or cheating client with a wrong time set;
-            // the control code calling this has no clue that the cycle has entered the rubber gap
-            // and would respect the destination's position, allowing for extremely deep grinds.
-            if( sn_GetNetState() != nCLIENT &&
-                currentDestination && !currentDestination->hasBeenUsed && 
-                rubberneeded >= rubberAvailable &&
-                space * 1.25 < (currentDestination->gameTime - lastTime) * verletSpeed_)
-            {
-                throw gCycleDeath(pos + dirDrive * space);
-            }
 
             //{
             //    rubber+=step;
@@ -4162,11 +4142,10 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
 
     tASSERT( rubber >= 0 );
 
-    // use up rubber from tunneling (calculated by CalculateAcceleration)
+    // use up rubber from tunneling (calculated by CalculateAcceleration
     if ( rubberEffectiveness > 0 )
     {
-        rubber += rubberUsage * ts * verletSpeed_ / rubberEffectiveness; 
-    }
+        rubber += rubberUsage * ts * verletSpeed_ / rubberEffectiveness;            }
     else if ( rubberUsage > 0 )
     {
         rubber = rubber_granted + 10;
@@ -4175,7 +4154,7 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
 
     // decide over kill
     bool rubberUsedUp = false;
-    if ( rubber > rubber_granted )
+    if ( rubber > rubber_granted || ( sg_cycleWidthRubberMax == 0 && sg_cycleWidthRubberMin == 0 ) )
     {
         if ( sn_GetNetState() != nCLIENT )
         {

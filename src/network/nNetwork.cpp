@@ -1346,10 +1346,6 @@ nServerInfoBase * sn_PeekRedirectTo()
 }
 
 static void sn_LoginDeniedHandler( Network::LoginDenied const & denied, nSenderInfo const & sender ){
-    // only the server is allowed to send this
-    if(sender.SenderID() != 0)
-        return;
-
     if ( denied.has_reason() )
     {
         sn_DenyReason = denied.reason();
@@ -1650,7 +1646,7 @@ static tSettingItem< bool > sn_synCookieConf( "ANTI_SPOOF", sn_synCookie );
 
 
 // number of packets from unknown sources to process each call to rec_peer
-static int sn_connectionLimit = 5;
+static int sn_connectionLimit = 100;
 static tSettingItem< int > sn_connectionLimitConf( "CONNECTION_LIMIT", sn_connectionLimit );
 
 // turtle mode control
@@ -1998,11 +1994,6 @@ void sn_LoginHandler( Network::Login const & login, nSenderInfo const & sender )
 void sn_LogoutHandler( Network::Logout const &, nSenderInfo const & sender )
 {
     unsigned short id = sender.SenderID();
-
-    // only the server or legal clients are allowed to send this
-    // (client check comes later)
-    if(sn_GetNetState() == nCLIENT && id != 0)
-        return;
 
     if (sn_Connections[id].socket)
     {
@@ -2398,7 +2389,7 @@ static void rec_peer(unsigned int peer){
             nAddress addrFrom; // the sender of the current packet
             received = sn_Connections[peer].socket->Read( reinterpret_cast< int8 *>( buffer ), maxReceive, addrFrom);
 
-            if ( received >= 2 )
+            if ( received > 0 )
             {
                 if ( received >= maxReceive )
                 {
@@ -2520,10 +2511,6 @@ static void rec_peer(unsigned int peer){
                         continue;
                     }
 
-                    // logged in clients should ignore packets from unknown sources
-                    if(sn_GetNetState() != nSERVER && sn_myNetID != 0)
-                        continue;
-
                     // assume it's a new connection
                     id = MAXCLIENTS+1;
                     peers[ MAXCLIENTS+1 ] = addrFrom;
@@ -2532,7 +2519,7 @@ static void rec_peer(unsigned int peer){
 // #define NO_GLOBAL_FLOODPROTECTION
 #ifndef NO_GLOBAL_FLOODPROTECTION
                     // flood check for pings, logins and other potential nasties; as early as possible
-                    if( sn_turtleMode && count > sn_connectionLimit*5 )
+                    if( sn_turtleMode && count > sn_connectionLimit*10 )
                     {
                         continue;
                     }
@@ -2844,11 +2831,6 @@ static bool sn_Listen( unsigned int & net_hostport, const tString& net_hostip )
             {
                 con << "sn_SetNetState: Unable to open accept socket on desired port " << net_hostport << ", Trying next ports...\n";
                 reported = true;
-
-                // just for safety, wait a bit. Does not do much good.
-                tDelay(100000);
-                
-                continue;
             }
 
             net_hostport++;
@@ -3655,16 +3637,14 @@ void sn_DisconnectUser(int i, const tOutput& reason, nServerInfoBase * redirectT
         return;
     }
 
-    // clients can only disconnect from the server
-    if ( i != 0 && i <= MAXCLIENTS && sn_GetNetState() == nCLIENT )
-    {
-        tERR_WARN( "Client tried to disconnect from another client: impossible and a bad idea." );
-        return;
-    }
-
     // anything to do at all?
     if (!sn_Connections[i].socket)
     {
+        // clients can only disconnect from the server
+        if ( i != 0 && sn_GetNetState() == nCLIENT )
+        {
+            tERR_ERROR( "Client tried to disconnect from another client: impossible and a bad idea." );
+        }
         return;
     }
 
@@ -4680,15 +4660,7 @@ typedef sockaddr nMachineKey;
 
 bool operator < ( nMachineKey const & a, nMachineKey const & b )
 {
-    sockaddr_in const & sa = reinterpret_cast< sockaddr_in const & >( a );
-    sockaddr_in const & sb = reinterpret_cast< sockaddr_in const & >( b );
-#ifdef DEBUG_X
-// compare ports first to make different clients appear as different voters
-    if(sa.sin_port != sb.sin_port)
-        return sa.sin_port < sb.sin_port;
-#endif
-
-    return sa.sin_addr.s_addr < sb.sin_addr.s_addr;
+    return reinterpret_cast< sockaddr_in const & >( a ).sin_addr.s_addr < reinterpret_cast< sockaddr_in const & >( b ).sin_addr.s_addr;
 }
 
 typedef std::map< nMachineKey, nMachinePTR > nMachineMap;

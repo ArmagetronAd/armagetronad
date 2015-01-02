@@ -25,7 +25,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 */
 
-#include "rGL.h"
 #include "eGameObject.h"
 #include "uInputQueue.h"
 #include "eTimer.h"
@@ -33,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "eWall.h"
 #include "tConsole.h"
 #include "rScreen.h"
+#include "rGL.h"
 
 #include "eSound.h"
 #include "eSoundMixer.h"

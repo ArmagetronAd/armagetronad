@@ -36,10 +36,8 @@ AM_INIT_AUTOMAKE([tar-ustar filename-length-max=255 subdir-objects])
 dnl detect which link commant to use
 AC_PROG_LN_S
 
-dnl find a parser generator to useo
+dnl find a parser generator to use
 AC_PROG_YACC
-test -r $srcdir/src/tools/values/vParser.cpp || AC_MSG_CHECKING(bison version)
-test -r $srcdir/src/tools/values/vParser.cpp || ${YACC} --version | grep bison || AC_MSG_ERROR(GNU Bison is required to compile from source control.)
 
 dnl check whether m4 is available for documentation processing
 AC_CHECK_PROG(HAVE_M4,m4,true,false)
@@ -54,7 +52,6 @@ AC_SUBST(version)
 
 AC_ARG_VAR(XML2_CONFIG,[Configuration script of libxml2 to use, defaults to xml2-config])
 AC_ARG_VAR(SDL_CONFIG,[Configuration script of SDL to use, defaults to sdl-config])
-AC_ARG_VAR(SDL2_CONFIG,[Configuration script of SDL to use, defaults to sdl2-config])
 AC_ARG_VAR(FREETYPE_CONFIG,[Configuration script of freetype to use, defaults to freetype-config])
 AC_ARG_VAR(CXXFLAGS,Flags passed to the C++ compiler)
 AC_ARG_VAR(DEBUGLEVEL,[Debug level for developers, normal users can safely ignore it. Accepted values go from 0 to 5. See README-DEVELOPER for details.])
@@ -98,28 +95,6 @@ AC_ARG_ENABLE(dedicated,
 	    ;;
        *) AC_MSG_ERROR(bad value ${enableval} for --enable-dedicated) ;;
      esac],[build_dedicated=false])
-
-AC_ARG_ENABLE(sdl2,
-     AC_HELP_STRING([--enable-sdl2],
-		[enables sdl2 support (default=enabled)]),
-     [case "${enableval}" in
-       yes) use_sdl2=true
-	   	;;
-       no)  use_sdl2=false
-	    ;;
-       *) AC_MSG_ERROR(bad value ${enableval} for --enable-sdl2) ;;
-     esac],[use_sdl2=true])
-
-AC_ARG_ENABLE(sdl1,
-     AC_HELP_STRING([--enable-sdl1],
-		[enables sdl1.X support (default=enabled)]),
-     [case "${enableval}" in
-       yes) use_sdl1=true
-	   	;;
-       no)  use_sdl1=false
-	    ;;
-       *) AC_MSG_ERROR(bad value ${enableval} for --enable-sdl1) ;;
-     esac],[use_sdl1=true])
 
 
 dnl AC_ARG_ENABLE(glout,
@@ -515,13 +490,7 @@ if test $CODELEVEL -ge 1; then
     dnl careful, only supported on GCC 4.2 and later
     AX_CXXFLAGS_GCC_OPTION(-Wno-strict-overflow)
 
-    if test $DEBUGLEVEL -lt 1; then
-        dnl false positive warnings for this on boost
-        AX_CXXFLAGS_GCC_OPTION(-Wno-error=maybe-uninitialized)
-    fi
-    
-    dnl dropped out of support
-    dnl AX_CXXFLAGS_GCC_OPTION(-Wno-mismatched-tags)
+    AX_CXXFLAGS_GCC_OPTION(-Wno-mismatched-tags)
 fi
 
 dnl test $CODELEVEL -ge 2 && CXXFLAGS="$CXXFLAGS -Wshadow -Wpointer-arith -Wfloat-equal -W -Wcast-qual -Wcast-align -Wconversion -Wunreachable-code --pedantic -Winline"
@@ -556,9 +525,9 @@ AC_SUBST(games_suffix_doc)
 AC_SUBST(games_suffix_var)
 
 dnl determine memmanager state
-dnl if test x$enable_memmanager != xyes ; then
+if test x$enable_memmanager != xyes ; then
   AC_DEFINE(DONTUSEMEMMANAGER)
-dnl fi
+fi
 
 dnl LibTool configuration
 dnl AC_LIBTOOL_DLOPEN
@@ -716,7 +685,6 @@ GENERICUNIX
 ]
 )
 
-SDL2_CONFIG_DEFAULT=sdl2-config
 SDL_CONFIG_DEFAULT=sdl-config
 
 dnl *************************************************
@@ -775,7 +743,6 @@ SAFEUNIX
 esac
 
 test -z "$SDL_CONFIG" && SDL_CONFIG=$SDL_CONFIG_DEFAULT
-test -z "$SDL2_CONFIG" && SDL2_CONFIG=$SDL2_CONFIG_DEFAULT
 
 AC_SUBST(docstyle)
 
@@ -812,7 +779,7 @@ AC_CHECK_LIB(xml2,xmlParseMemory,
 CPPFLAGS="$CPPFLAGS `$XML2_CONFIG --cflags`"
 LIBS="`$XML2_CONFIG --libs` $LIBS"
 AC_DEFINE(HAVE_LIBXML2, 1, [Define if you have the xml2 library (-lxml2).]),
-AC_MSG_ERROR([You need the library xml2 to compile ${progtitle}. Read the file documentation/installation.txt.])
+AC_MSG_ERROR([You need the library xml2 to compile ${progtitle}. Read the file doc/installation.txt.])
 ,`$XML2_CONFIG --libs`)
 
 AC_CHECK_FUNC(xmlParserInputBufferCreateFilenameDefault,
@@ -828,6 +795,7 @@ AC_MSG_ERROR([
 dnl *************************************************
 dnl         Threading
 dnl *************************************************
+
 AC_LANG([C++])
 
 dnl Boost.System is a mandatory dependency of Boost.Thread
@@ -942,44 +910,20 @@ dnl *************************************************
 dnl         SDL
 dnl *************************************************
 
-#use_sdl1=true
+test -z "$SDL_CONFIG" && SDL_CONFIG=sdl-config
 
-if test x$use_sdl2 = xtrue ; then
-    AC_MSG_CHECKING(whether SDL2 is installed)
-    if SDLLIBS=`${SDL2_CONFIG} --libs`; then
-    	AC_MSG_RESULT(yes)
-    fi
-
-    CPPFLAGS="$CPPFLAGS `${SDL2_CONFIG} --cflags`"
-    LIBS="${SDLLIBS} $LIBS"
-
-    AC_CHECK_FUNC(SDL_GL_SetAttribute,
-    AC_DEFINE(HAVE_LIBSDL,,[Define if you have the library SDL]),
-        use_sdl2=false
-        if test x$use_sdl1 != xtrue ; then
-            AC_MSG_ERROR([You need the library SDL2 to compile ${progtitle}. Read the file documentation/installation.txt.])
-        fi
-    ,)
+AC_MSG_CHECKING(whether SDL is installed)
+if SDLLIBS=`${SDL_CONFIG} --libs`; then
+    AC_MSG_RESULT(yes)
 fi
 
-if test x$use_sdl2 = xtrue ; then
-   use_sdl1=false
-fi
+CPPFLAGS="$CPPFLAGS `${SDL_CONFIG} --cflags`"
+LIBS="${SDLLIBS} $LIBS"
 
-if test x$use_sdl1 = xtrue ; then
-    AC_MSG_CHECKING(whether SDL is installed)
-    if SDLLIBS=`${SDL_CONFIG} --libs`; then
-    	AC_MSG_RESULT(yes)
-    fi
-
-    CPPFLAGS="$CPPFLAGS `${SDL_CONFIG} --cflags`"
-    LIBS="${SDLLIBS} $LIBS"
-
-    AC_CHECK_FUNC(SDL_GL_GetAttribute,
-    AC_DEFINE(HAVE_LIBSDL,,[Define if you have the library SDL]),
-        AC_MSG_ERROR([You need the library SDL or SDL2 to compile ${progtitle}. Read the file documentation/installation.txt.])
-    ,)
-fi
+AC_CHECK_FUNC(SDL_GL_SetAttribute,
+AC_DEFINE(HAVE_LIBSDL,,[Define if you have the library SDL]),
+ AC_MSG_ERROR([You need the library SDL to compile ${progtitle}. Read the file doc/installation.txt.])
+,)
 
 dnl ***************** OPTIONAL STUFF AFTER THIS POINT **********************
 
@@ -987,19 +931,7 @@ dnl *************************************************
 dnl         Sound
 dnl *************************************************
 
-if test x$enable_sound = xyes && test x$use_sdl2 = xtrue ; then
-	dnl first do the regular sdl define
- 	AC_DEFINE(HAVE_SDL_FOR_SOUND, 1,  [Define if you have SDL_sound, which is part of the core SDL])
-
-	dnl now check for sdl_mixer
- 	AC_CHECK_LIB(SDL2_mixer, Mix_OpenAudio,
-		[AC_DEFINE(HAVE_LIBSDL_MIXER, 1, [Define if you have the SDL2_mixer library (-lSDL2_mixer).])
-			LIBS="-lSDL2_mixer $LIBS"],
- 		[AC_MSG_ERROR([SDL2_mixer library not found. It is required for now. Sorry.])],
-		[])
-fi
-
-if test x$enable_sound = xyes && test x$use_sdl1 = xtrue ; then
+if test x$enable_sound = xyes; then
 	dnl first do the regular sdl define
  	AC_DEFINE(HAVE_SDL_FOR_SOUND, 1,  [Define if you have SDL_sound, which is part of the core SDL])
 
@@ -1009,6 +941,8 @@ if test x$enable_sound = xyes && test x$use_sdl1 = xtrue ; then
 			LIBS="-lSDL_mixer $LIBS"],
  		[AC_MSG_ERROR([SDL_mixer library not found. It is required for now. Sorry.])],
 		[])
+
+	dnl now we need to know which audio formats to use
 fi
 
 dnl *************************************************
@@ -1051,7 +985,7 @@ AC_CHECK_LIB($SYS_GL_LIB, glVertex3f,,
  AC_CHECK_LIB($SYS_GL_LIB, glBegin,,AC_MSG_ERROR([
   You need Mesa or an OpenGL-System to compile ${progtitle}.
   Maybe your libGL needs the X libraries and your system does not
-  find them? Read the file documentation/installation.txt.]),-L/usr/X11R6/lib)
+  find them? Read the file doc/installation.txt.]),-L/usr/X11R6/lib)
 )
 
 dnl check for 3DFX-MESA
@@ -1070,7 +1004,7 @@ dnl AC_CHECK_LIB($SYS_GLU_LIB, gluBuild2DMipmaps,,
 AC_CHECK_LIB($SYS_GLU_LIB, gluBuild3DMipmaps,,
 AC_MSG_ERROR([
 You need GLU to compile ${progtitle}; it SHOULD have come with OpenGL.
-Read the file documentation/installation.txt.]))
+Read the file doc/installation.txt.]))
 
 fi
 
@@ -1122,7 +1056,7 @@ if test -z "$ARMAGETRONAD_OS_X_TOOLKIT"; then
 	FTGL_LIBS="`pkg-config ftgl --libs`"
 fi
 
-FTGL_ERROR="You need the library ftgl in at least version 2.1.3~rc5 to compile Armagetron. Read the file documentation/installation.txt."
+FTGL_ERROR="You need the library ftgl in at least version 2.1.3~rc5 to compile Armagetron. Read the file doc/installation.txt."
 
 AC_CHECK_LIB(ftgl,ftglRenderGlyph,
 CPPFLAGS="$CPPFLAGS $FTGL_CFLAGS"
@@ -1181,7 +1115,7 @@ AC_CHECK_LIB(freetype,FT_Init_FreeType,
 CPPFLAGS="$CPPFLAGS `$FREETYPE_CONFIG --cflags`"
 LIBS="$LIBS `$FREETYPE_CONFIG --libs`"
 ,
-AC_MSG_ERROR([You need the library freetype to compile Armagetron. Read the file documentation/installation.txt.])
+AC_MSG_ERROR([You need the library freetype to compile Armagetron. Read the file doc/installation.txt.])
 )
 
 dnl FTGL again. Check for the headers. First, try the individual header.
@@ -1214,48 +1148,26 @@ dnl	libjpeg not found. Expect small graphical errors ( missing moviepack title s
 dnl	)
 dnl )
 
-if test x$use_sdl2 = xtrue; then
-    AC_CHECK_LIB(SDL2_image, IMG_Load,,
-    AC_MSG_ERROR([You need the library SDL2_image to compile ${progtitle}.]
-    ))
+AC_CHECK_LIB(SDL_image, IMG_Load,,
+dnl AC_CHECK_LIB(IMG, main,,
+AC_MSG_ERROR([You need the library SDL_image to compile ${progtitle}.]
+dnl )
+))
 
-    dnl look for the right header for SDL2_image
-    AC_CHECK_HEADERS(SDL_image.h,,
-    [
-    AC_MSG_WARN([SDL_image header not found where it should be ( the SDL include directory ).
-    Trying fallback.])
-    AC_CHECK_HEADERS(SDL2/SDL_image.h,,
-    [AC_MSG_WARN([
-    SDL2_image header not found. The library is there, so something must be unusual
-    in your setup: SDL_image.h does not reside in the same folder as the rest of the SDL
-    inlcudes and not in any SDL subdirectory in the inclue path. If you know the
-    correct path to it, edit src/render/rTexture.cpp and enter it there.])]
-    )
-    ]
-    )
-fi
-
-if test x$use_sdl1 = xtrue; then
-    AC_CHECK_LIB(SDL_image, IMG_Load,,
-    AC_MSG_ERROR([You need the library SDL_image to compile ${progtitle}.]
-    ))
-
-    dnl look for the right header for SDL_image
-    AC_CHECK_HEADERS(SDL_image.h,,
-    [
-    AC_MSG_WARN([SDL_image header not found where it should be ( the SDL include directory ).
-    Trying fallback.])
-    AC_CHECK_HEADERS(SDL/SDL_image.h,,
-    [AC_MSG_WARN([
-    SDL_image header not found. The library is there, so something must be unusual
-    in your setup: SDL_image.h does not reside in the same folder as the rest of the SDL
-    inlcudes and not in any SDL subdirectory in the inclue path. If you know the
-    correct path to it, edit src/render/rTexture.cpp and enter it there.])]
-    )
-    ]
-    )
-fi
-
+dnl look for the right header for SDL_image
+AC_CHECK_HEADERS(SDL_image.h,,
+[
+AC_MSG_WARN([SDL_image header not found where it should be ( the SDL include directory ).
+Trying fallback.])
+AC_CHECK_HEADERS(SDL/SDL_image.h,,
+[AC_MSG_WARN([
+SDL_image header not found. The library is there, so something must be unusual
+in your setup: SDL_image.h does not reside in the same folder as the rest of the SDL
+inlcudes and not in any SDL subdirectory in the inclue path. If you know the
+correct path to it, edit src/render/rTexture.cpp and enter it there.])]
+)
+]
+)
 
 ifelse(,,,
 [
@@ -1294,7 +1206,7 @@ AC_CHECK_FUNCS(wmemset)
 test -z "`$CXX --version | grep '(GCC)'`" || CXXFLAGS="`echo $CXXFLAGS | sed -e 's,-Os,-O2,g' `" CFLAGS="`echo $CFLAGS | sed -e 's,-Os,-O2,g' `"
 
 if test "$enable_sound" = "yes"; then
-AC_DEFINE(HAVE_LIBSDL_MIXER, 1, [Use SDL2_mixer])
+AC_DEFINE(HAVE_LIBSDL_MIXER, 1, [Use SDL_mixer])
 fi
 
 # define

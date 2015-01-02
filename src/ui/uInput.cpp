@@ -38,13 +38,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <vector>
 #include <map>
 
-// Touch devices support (touchscreen or touchpad)
-// 0:disabled
-// 1:touch control by left/right touches
-// 2:touch control by swipes and drawing
-static int su_enableTouch = 0;
-static tSettingItem< int > su_enableTouchConf( "ENABLE_TOUCH", su_enableTouch );
-
 bool su_mouseGrab = false;
 
 static uAction* su_allActions[uMAX_ACTIONS];
@@ -107,13 +100,10 @@ uAction * uAction::Find( char const * name )
 
 typedef std::vector< uInput * > uInputs;
 uInputs su_inputs;
-std::map< std::string, uInput * > su_inputMap; // map from persistent ID to input
-
-// alternative map for legacy keycodes
-std::map< std::string, uInput * > su_alternativeInputMap;
+std::map< std::string, uInput * > su_inputMap;
 
 uInput::uInput( tString const & persistentID, tString const & name )
-  : persistentID_( persistentID ), name_( name )
+        : persistentID_( persistentID ), name_( name )
         , pressed_( 0 )
 {
     ID_ = su_inputs.size();
@@ -131,10 +121,7 @@ static uInput * su_GetInput( tString const & persistentID )
 {
     try
     {
-        uInput * ret = su_inputMap[ persistentID ];
-        if(!ret)
-            ret = su_alternativeInputMap[ persistentID ];
-        return ret;
+        return su_inputMap[ persistentID ];
     }
     catch (...)
     {
@@ -186,121 +173,42 @@ static uInput * su_NewInput( char const * ID, char const * name )
     return su_GetAutoDeleteInput().Create( tString( ID ), tString( name ) );
 }
 
-static void su_WriteSanitizedKeyname(std::ostream & s, char const * input)
-{
-    for ( char const * c = input; *c; ++c )
-    {
-        if ( isblank( *c ) )
-        {
-            s << "_";
-        }
-        else
-        {
-            s << char(toupper( *c ));
-        }
-    }
-}
-
 // class that manages keyboard input
 class uKeyInput
 {
 public:
     uKeyInput()
     {
-#if SDL_VERSION_ATLEAST(2,0,0)
-        for ( int i = 0; i <= SDL_NUM_SCANCODES; ++i )
-#else
         for ( int i = 0; i <= SDLK_LAST; ++i )
-#endif
         {
-            tString displayID;
-            tString persistentID;
-            tString alternativePersistentID;
 #ifndef DEDICATED
-#if SDL_VERSION_ATLEAST(2,0,0)
-            SDL_Scancode scancode = static_cast<SDL_Scancode>(i);
-            SDL_Keycode key = SDL_GetKeyFromScancode(scancode);
-            displayID = SDL_GetKeyName(key);
-            switch(scancode)
-            {
-            default:
-            {
-                std::ostringstream s;
-                const char * name = SDL_GetScancodeName(scancode); // probably the same as displayID for US keyboards
-                if(name && name[0] >= ' ')
-                {
-                    s << "SCANCODE_";
-                    su_WriteSanitizedKeyname(s, name);
-                }
-                else
-                {
-                    s << "UNKNOWNSCANCODE_" << i;
-                }
-                persistentID = s.str();
-            }
-            break;
-            // couple of special cases
-            case SDL_SCANCODE_RETURN2:
-                persistentID = "SCANCODE_RETURN2";
-                break;
-            case SDL_SCANCODE_BACKSLASH:
-                persistentID = "SCANCODE_BACKSLASH";
-                break;
-            case SDL_SCANCODE_APOSTROPHE:
-                persistentID = "SCANCODE_APOSTROPHE";
-                break;
-            case SDL_SCANCODE_SLASH:
-                persistentID = "SCANCODE_SLASH";
-                break;
-            case SDL_SCANCODE_LEFTBRACKET:
-                persistentID = "SCANCODE_LEFTBRACKET";
-                break;
-            case SDL_SCANCODE_RIGHTBRACKET:
-                persistentID = "SCANCODE_RIGHTBRACKET";
-                break;
-            case SDL_SCANCODE_KP_LEFTPAREN:
-                persistentID = "SCANCODE_KP_LEFTPAREN";
-                break;
-            case SDL_SCANCODE_KP_RIGHTPAREN:
-                persistentID = "SCANCODE_KP_RIGHTPAREN";
-                break;
-            case SDL_SCANCODE_KP_LEFTBRACE:
-                persistentID = "SCANCODE_KP_LEFTBRACE";
-                break;
-            case SDL_SCANCODE_KP_RIGHTBRACE:
-                persistentID = "SCANCODE_KP_RIGHTBRACE";
-                break;
-            }
+            char const * ID_Raw = SDL_GetKeyName(static_cast< SDLKey >( i ) );
 #else
-            SDLKey key = static_cast<SDLKey>(i);
-            displayID = SDL_GetKeyName(key);
+            char const * ID_Raw = "unknown key";
 #endif
-#endif
-            if(displayID.size() == 0)
+            std::ostringstream id;
+            id << "KEY_";
+            if ( strcmp( ID_Raw, "unknown key" ) == 0 )
             {
-                std::ostringstream s;
-                s << "UNKNOWN_" << i;
-                displayID = s.str();
+                id << "UNKNONW_" << i;
             }
+            else
             {
-                std::ostringstream s;
-                s << "KEY_";
-                su_WriteSanitizedKeyname(s, displayID.c_str());
-                alternativePersistentID = s.str();
-            }
-            if(persistentID.size() == 0)
-            {
-                persistentID = alternativePersistentID;
+                for ( char const * c = ID_Raw; *c; ++c )
+                {
+                    if ( isblank( *c ) )
+                    {
+                        id << "_";
+                    }
+                    else
+                    {
+                        id << char(toupper( *c ));
+                    }
+                }
             }
 
             // store new input key
-            uInput * pNewInput = su_NewInput( persistentID, displayID );
-            sdl_keys[i] = pNewInput;
-
-            // store in alternative map
-            if(alternativePersistentID != persistentID)
-                su_alternativeInputMap[ alternativePersistentID ] = pNewInput;
-
+            sdl_keys[i] = su_NewInput( id.str(), tString(ID_Raw) );
 
             tASSERT( sdl_keys[i]->ID() == i );
         }
@@ -310,11 +218,7 @@ public:
     {
     }
 
-#if SDL_VERSION_ATLEAST(2,0,0)
-    uInput * sdl_keys[SDL_NUM_SCANCODES+1];
-#else
     uInput * sdl_keys[SDLK_LAST+1];
-#endif
 };
 
 static uKeyInput const & su_GetKeyInput()
@@ -322,42 +226,6 @@ static uKeyInput const & su_GetKeyInput()
     static uKeyInput filler;
     return filler;
 }
-
-#ifndef DEDICATED
-#if SDL_VERSION_ATLEAST(2,0,0)
-class uTouchInput
-{
-public:
-    uTouchInput() {
-        turnLeft  = su_NewInput( "TOUCH_LEFT_TURN", "touch left turn" );
-        turnRight = su_NewInput( "TOUCH_RIGHT_TURN", "touch right turn" );
-        brake     = su_NewInput( "TOUCH_BRAKE", "touch brake" );
-
-        uAction * actLeft  = uAction::Find( "CYCLE_TURN_LEFT" );
-        uAction * actRight = uAction::Find( "CYCLE_TURN_RIGHT" );
-        uAction * actBrake = uAction::Find( "CYCLE_BRAKE" );
-
-        tJUST_CONTROLLED_PTR< uBind > bindLeft  = uBindPlayer::NewBind(actLeft, 1);
-        tJUST_CONTROLLED_PTR< uBind > bindRight = uBindPlayer::NewBind(actRight, 1);
-        tJUST_CONTROLLED_PTR< uBind > bindBrake = uBindPlayer::NewBind(actBrake, 1);
-
-        turnLeft->SetBind(bindLeft);
-        turnRight->SetBind(bindRight);
-        brake->SetBind(bindBrake);
-    }
-
-    uInput* turnLeft;
-    uInput* turnRight;
-    uInput* brake;
-};
-
-static uTouchInput const & su_GetTouchInput()
-{
-    static uTouchInput filler;
-    return filler;
-}
-#endif
-#endif
 
 # define MOUSE_BUTTONS 7
 
@@ -453,43 +321,6 @@ public:
                 std::istringstream readValue( id );
                 int value = -1;
                 readValue >> value;
-
-#ifndef DEDICATED
-#if SDL_VERSION_ATLEAST(2,0,0)
-                // map from old SDLKey to SDL_Scancode
-                switch(value)
-                {
-                default:
-                    if(value < 127)
-                    {
-                        // regular keys
-                        value = SDL_GetScancodeFromKey(value);
-                    }
-                    else if( value >= 282 && value <= 293)
-                    {
-                        // function keys
-                        value = value - 282 + SDL_SCANCODE_F1;
-                    }
-                    else
-                    {
-                        // no mapping, ignore
-                        return;
-                    }
-                    break;
-                    // special keys
-                case 273: value = SDL_SCANCODE_UP; break;
-                case 274: value = SDL_SCANCODE_DOWN; break;
-                case 275: value = SDL_SCANCODE_RIGHT; break;
-                case 276: value = SDL_SCANCODE_LEFT; break;
-                case 277: value = SDL_SCANCODE_INSERT; break;
-                case 278: value = SDL_SCANCODE_HOME; break;
-                case 279: value = SDL_SCANCODE_END; break;
-                case 280: value = SDL_SCANCODE_PAGEUP; break;
-                case 281: value = SDL_SCANCODE_PAGEDOWN; break;
-                    // other keys have no unique mapping
-                }
-#endif
-#endif
 
                 if ( value >= 0 && value < (int)su_inputs.size() )
                 {
@@ -630,16 +461,11 @@ public:
         Down = 3
     };
 
-    uJoystick( int id_ ):id(id_)
+    uJoystick( int id_ ): id( id_ )
     {
         tASSERT( id >= 0 && id < SDL_NumJoysticks() );
 
-        SDL_Joystick * stick = SDL_JoystickOpen( id );
-#if SDL_VERSION_ATLEAST(2,0,0)
-        name = SDL_JoystickName( stick );
-#else
         name = SDL_JoystickName( id );
-#endif
 
         std::ostringstream iName;
         iName << "JOYSTICK_";
@@ -657,6 +483,7 @@ public:
 
         internalName = iName.str();
 
+        SDL_Joystick * stick = SDL_JoystickOpen( id );
         numAxes = SDL_JoystickNumAxes( stick );
         numButtons = SDL_JoystickNumButtons( stick );
         numBalls = SDL_JoystickNumBalls( stick );
@@ -967,9 +794,6 @@ struct uTransformEventInfo
     uTransformEventInfo( uInput * input_, float value_ = 1 , bool needsRepeat_ = true ): input(input_), value(value_), needsRepeat(needsRepeat_){}
 };
 
-int GetPlayerCameraClosestDirection(int player);
-int GetPlayerWindingNumber(int player);
-
 // transform SDL event into vector of abstract events
 #ifndef DEDICATED
 static void su_TransformEvent( SDL_Event & e, std::vector< uTransformEventInfo > & info )
@@ -977,7 +801,6 @@ static void su_TransformEvent( SDL_Event & e, std::vector< uTransformEventInfo >
     switch (e.type)
     {
     case SDL_MOUSEMOTION:
-        if (!su_enableTouch)
         {
             // ignore events generated by mouse grabbing
             if ( su_mouseGrab &&
@@ -1052,114 +875,13 @@ static void su_TransformEvent( SDL_Event & e, std::vector< uTransformEventInfo >
             }
         }
         break;
-#if SDL_VERSION_ATLEAST(2,0,0)
-    case SDL_FINGERDOWN:
-    case SDL_FINGERUP:
-    case SDL_FINGERMOTION:
-        if (su_enableTouch==1)
-        {
-            static SDL_FingerID finger = 0;
-
-            if (e.type == SDL_FINGERDOWN) {
-                float px = e.tfinger.x;
-                if (px<0.33)      info.push_back( uTransformEventInfo( su_GetTouchInput().turnLeft, 1 ) );
-                else if (px>0.67) info.push_back( uTransformEventInfo( su_GetTouchInput().turnRight, 1 ) );
-                else if (!finger) {
-                    finger = e.tfinger.fingerId;
-                    info.push_back( uTransformEventInfo( su_GetTouchInput().brake, 1 ) );
-                }
-            } else if (e.type == SDL_FINGERUP) {
-                if (finger == e.tfinger.fingerId) {
-                    finger = 0;
-                    info.push_back( uTransformEventInfo( su_GetTouchInput().brake, 0 ) );
-                }
-            }
-        }
-        else if (su_enableTouch>=2)
-        {
-            static SDL_FingerID finger = 0;
-            static float dx=0, dy=0;
-            static char count = 0;
-            static int previous_dir = -1;
-            static int last_time = 0;
-
-            if (e.type == SDL_FINGERDOWN) {
-                // if new finger tracking, reset current state
-                if (!finger) {
-                    finger = e.tfinger.fingerId;
-                    count = 0;
-                    dx = 0; dy = 0;
-                    last_time = e.tfinger.timestamp;
-                    previous_dir = su_enableTouch==2 ? -1 : GetPlayerCameraClosestDirection(0);
-                }
-            } else if (e.type == SDL_FINGERUP) {
-                // release finger tracking if tracked finger is up
-                if (finger == e.tfinger.fingerId) finger = 0;
-            } else if (e.type == SDL_FINGERMOTION) {
-                // if this finger is tracked, process touch motion analysis
-                if (finger == e.tfinger.fingerId) {
-                    // check motion timeout reset current state
-                    if (e.tfinger.timestamp-last_time>50) {
-                        count = 0;
-                        dx = 0; dy = 0;
-                        last_time = e.tfinger.timestamp;
-                    }
-                    last_time = e.tfinger.timestamp;
-
-                    // cumulate some motion to be more accurate
-                    dx+=e.tfinger.dx;
-                    dy+=e.tfinger.dy;
-                    ++count;
-
-                    if (count==4) {
-                        // if move is big enough, process it
-                        if (dx*dx+dy*dy>0.0001) {
-                            float a = atan2f(dx, -dy);
-                            int axes = GetPlayerWindingNumber(0);
-                            a = (a<0?fabs(a+M_PI*2.0f):a) * axes / (M_PI*2.0f);
-                            int dir = static_cast<int>(round(a)) % axes; // direction of this move
-                            int side = (a-round(a))<0?0:1;               // from which side
-                            // if direction changed, generate 1 or more turns
-                            if (previous_dir!=dir) {
-                                int diff_dir = previous_dir==-1 ? dir : dir - previous_dir;
-                                diff_dir = diff_dir>axes/2 ? diff_dir - axes : diff_dir<-axes/2 ? axes + diff_dir : diff_dir;
-                                // handling the annoying case where you're trying to do a u-turn.
-                                // we need to take care from which side we are coming from (really dangerous move as
-                                // detection might failed).
-                                if (diff_dir!=0) {
-                                    if ((diff_dir==axes/2 && side==1)||(diff_dir==-axes/2 && side==0)) diff_dir=-diff_dir;
-                                    uInput* input = diff_dir<0 ? su_GetTouchInput().turnLeft : su_GetTouchInput().turnRight;
-                                    for(int i=abs(diff_dir); i==1; --i) {
-                                        info.push_back( uTransformEventInfo( input, 1 ) );
-                                    }
-                                }
-                                previous_dir=dir;
-                            }
-                        }
-                        count = 0;
-                        dx = 0; dy = 0;
-                    }
-                }
-            }
-        }
-        break;
-#endif
     case SDL_KEYDOWN:
     case SDL_KEYUP:
         {
-#if SDL_VERSION_ATLEAST(2,0,0)
-            if (e.key.repeat) break;
-            SDL_Keysym &c = e.key.keysym;
-#else
             SDL_keysym &c = e.key.keysym;
-#endif
 
             info.push_back( uTransformEventInfo(
-#if SDL_VERSION_ATLEAST(2,0,0)
-                                su_GetKeyInput().sdl_keys[ c.scancode ],
-#else
                                 su_GetKeyInput().sdl_keys[ c.sym ],
-#endif
                                 ( e.type == SDL_KEYDOWN ) ? 1 : 0 ) );
 
             break;
@@ -1604,7 +1326,7 @@ bool uBindPlayer::DoActivate(REAL x){
     {
         act->GetTooltip()->Count(ePlayer);
     }
-
+    
     return ret;
 }
 
@@ -1695,7 +1417,7 @@ uActionTooltip::~uActionTooltip()
 {
     if( action_.tooltip_ == this )
         action_.tooltip_ = NULL;
-
+        
 }
 
 bool uActionTooltip::Help( int player )
@@ -1727,9 +1449,9 @@ bool uActionTooltip::Help( int player )
         {
             continue;
         }
-
+        
         int activationsLeft = tooltip->activationsLeft_[player];
-        if( activationsLeft > 0 &&
+        if( activationsLeft > 0 && 
             ( !mostWanted || mostWanted->activationsLeft_[player] < activationsLeft ) )
         {
             mostWanted = tooltip;
@@ -1869,11 +1591,7 @@ bool uMenuItemInput::Event(SDL_Event &e)
 #ifndef DEDICATED
     if ( e.type == SDL_KEYDOWN )
     {
-#if SDL_VERSION_ATLEAST(2,0,0)
-        SDL_Keysym &c = e.key.keysym;
-#else
         SDL_keysym &c = e.key.keysym;
-#endif
         if (!active)
         {
             if (c.sym==SDLK_DELETE || c.sym==SDLK_BACKSPACE)

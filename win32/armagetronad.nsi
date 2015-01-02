@@ -82,9 +82,9 @@ Section "MainSection" SEC01
   CreateShortCut "$SMPROGRAMS\${PRODUCT_BASENAME}\Armagetron Forums.lnk" "$INSTDIR\Armagetron Forums.url"
   File "armagetronad.exe"
   CreateShortCut "$SMPROGRAMS\${PRODUCT_BASENAME}\${PRODUCT_BASENAME}.lnk" "$INSTDIR\armagetronad.exe"
-  CreateShortCut "$SMPROGRAMS\${PRODUCT_BASENAME}\${PRODUCT_BASENAME} Record.lnk" "$INSTDIR\armagetronad.exe" '--record "%USERPROFILE%\Desktop\ArmagetronAdvancedDebugRecording.aarec"'
-  CreateShortCut "$SMPROGRAMS\${PRODUCT_BASENAME}\${PRODUCT_BASENAME} Playback.lnk" "$INSTDIR\armagetronad.exe" '--playback "%USERPROFILE%\Desktop\ArmagetronAdvancedDebugRecording.aarec"'
-  CreateShortCut "$SMPROGRAMS\${PRODUCT_BASENAME}\${PRODUCT_BASENAME} Benchmark.lnk" "$INSTDIR\armagetronad.exe" '--benchmark --playback "%USERPROFILE%\Desktop\ArmagetronAdvancedDebugRecording.aarec"'
+  CreateShortCut "$SMPROGRAMS\${PRODUCT_BASENAME}\${PRODUCT_BASENAME} Record.lnk" "$INSTDIR\armagetronad.exe" '--record "$DESKTOP\ArmagetronAdvancedDebugRecording.aarec"'
+  CreateShortCut "$SMPROGRAMS\${PRODUCT_BASENAME}\${PRODUCT_BASENAME} Playback.lnk" "$INSTDIR\armagetronad.exe" '--playback "$DESKTOP\ArmagetronAdvancedDebugRecording.aarec"'
+  CreateShortCut "$SMPROGRAMS\${PRODUCT_BASENAME}\${PRODUCT_BASENAME} Benchmark.lnk" "$INSTDIR\armagetronad.exe" '--benchmark --playback "$DESKTOP\ArmagetronAdvancedDebugRecording.aarec"'
   CreateShortCut "$SMPROGRAMS\${PRODUCT_BASENAME}\${PRODUCT_BASENAME} User Data.lnk" "$APPDATA\Armagetron"
   CreateShortCut "$SMPROGRAMS\${PRODUCT_BASENAME}\${PRODUCT_BASENAME} System Data.lnk" "$INSTDIR"
   SetOutPath "$INSTDIR\config"

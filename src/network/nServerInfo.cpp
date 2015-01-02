@@ -40,6 +40,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "nServerInfo.h"
 #include "nNetObject.h"
+#ifdef KRAWALL_SERVER
+#include "nAuthentication.h"
+#endif
 
 #include "nProtoBuf.h"
 #include "nServerInfo.pb.h"
@@ -55,6 +58,10 @@ static unsigned int          sn_LastKnown   [MAXCLIENTS+2];
 static bool                  sn_SendAll     [MAXCLIENTS+2];
 static bool                  sn_Requested   [MAXCLIENTS+2];
 static REAL                  sn_Timeout     [MAXCLIENTS+2];
+
+#ifdef KRAWALL_SERVER
+static bool                  sn_Auth        [MAXCLIENTS+2];
+#endif
 
 static nServerInfo*          sn_Requesting=NULL;
 static unsigned int          sn_NextTransactionNr = 0;
@@ -108,6 +115,10 @@ static void login_callback(){
     sn_SendAll     [nCallbackLoginLogout::User()] = true;
     sn_Requested   [nCallbackLoginLogout::User()] = false;
     sn_Timeout     [nCallbackLoginLogout::User()] = tSysTimeFloat() + 70;
+#ifdef KRAWALL_SERVER
+    sn_Auth        [nCallbackLoginLogout::User()] = false;
+#endif
+
 }
 
 tString nServerInfoBase::ToString() const
@@ -116,6 +127,23 @@ tString nServerInfoBase::ToString() const
     ret << GetConnectionName() << ":" << GetPort();
     return ret;
 }
+
+// authentification stuff
+#ifdef KRAWALL_SERVER_LEAGUE
+void ResultCallback(const tString& username,
+                    const tString& origUsername,
+                    int user, bool success)
+{
+    if (success)
+    {
+        sn_Auth[user] = true;
+        sn_Transmitting[user] = nServerInfo::GetFirstServer();
+    }
+    else
+        nAuthentication::RequestLogin(username, user, tOutput("$login_request_failed"), true);
+}
+#endif // KRAWALL_SERVER_LEAGUE
+
 
 
 static nCallbackLoginLogout nlc(&login_callback);
@@ -1239,7 +1267,24 @@ void nServerInfo::GiveSmallServerInfo( Network::RequestSmallServerInfo const & i
         con << "Giving server info to user " << sender.SenderID() << "\n";
 
         sn_Requested[sender.SenderID()] = true;
+#ifdef KRAWALL_SERVER_LEAGUE
+        // one moment! check if we need authentification
+        tString adr;
+        unsigned int port = sn_GetPort(sender.SenderID());
+        sn_GetAdr(sender.SenderID(), adr);
+        if (nKrawall::RequireMasterLogin(adr, port))
+        {
+            nAuthentication::SetLoginResultCallback(&ResultCallback);
+            nAuthentication::RequestLogin(tString(""), sender.SenderID(), tOutput("$login_request_master"));
+        }
+        else
+        {
+            sn_Transmitting[sender.SenderID()] = GetFirstServer();
+            sn_Auth[sender.SenderID()]         = true;
+        }
+#else
         sn_Transmitting[sender.SenderID()] = GetFirstServer();
+#endif
 
         sn_SendAll  [sender.SenderID()] = !info.has_transaction();
         sn_LastKnown[sender.SenderID()] = info.transaction();
@@ -1307,31 +1352,6 @@ nServerInfo* nServerInfo::GetBigServerInfoCommon(  Network::BigServerInfo const 
         server->ReadSyncThis( info, sender );
         server->Alive();
         server->CalcScore();
-
-        if(nServerInfoAdmin::GetAdmin() && nServerInfoAdmin::GetAdmin()->NeedGlobalReclassification())
-        {
-            int count = 0;
-            // reclassify everyone
-            nServerInfo *run = GetFirstServer();
-            while( run )
-            {
-                nServerInfoAdmin::GetAdmin()->Classify( run->settings_, run->classification_ );
-                if(0 == run->classification_.sortOverride_)
-                    count++;
-                run = run->Next();
-            }
-            
-            if(count < nServerInfoAdmin::GetAdmin()->MinValidServerCount())
-            {
-                nServerInfoAdmin::GetAdmin()->LowerThreshold();
-                nServerInfo *run = GetFirstServer();
-                while( run )
-                {
-                    nServerInfoAdmin::GetAdmin()->Classify( run->settings_, run->classification_ );
-                    run = run->Next();
-                }
-            }            
-        }
     }
     else
     {
@@ -2373,6 +2393,9 @@ void nServerInfo::RunMaster()
         {
             // kick the user soon when the transfer is completed
             if ((sn_Requested[i] && !sn_Transmitting[i]
+#ifdef KRAWALL_SERVER
+                    && sn_Auth[i]
+#endif
                     && sn_MessagesPending(i) == 0))
             {
                 if (sn_Timeout[i] > tSysTimeFloat() + .2f)

@@ -54,10 +54,9 @@ Christian Reitwiessner
 Edd Keefe
     contributed Mac OS X icon and the title screen
 
-Emmanuel Rollet (voodoo)
+Emmanuel Rollet
     clipping and basic movement for the overhead map, camview widget
-    SDL2 support, touch controls
-    
+
 Fabrice Holbe
     original Moviepack and font
 
@@ -66,11 +65,6 @@ hang3r
 
 hoop
     Zone rendering settings
-
-brandesign (Jip on the forums)
-    Server browser name filter
-    GID mate filter
-    Tab completion for colored names
 
 Jonathan
     Headlight (needs activation) and overhead map
@@ -110,12 +104,6 @@ Vitty
 
 Word
     0.4 German translation
-
-Vertex
-    /report player reporting
-
-<|tux (ubuntu_dpg)
-    POSIX Thread improvements
 
 External code merged in from
 ============================

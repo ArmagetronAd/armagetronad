@@ -690,18 +690,6 @@ void tOutput::AddLocale(const char *x)
 {
     tNEW(tOutputItemLocale)(*this, tLocale::Find(x));
 }
-void tOutput::AddString(char const * locale)
-{
-    int len = strlen(locale);
-    if (len == 0)
-        return;
-    if (len == 1 && locale[0] == ' ')
-        tNEW(tOutputItemSpace)(*this);
-    else if (locale[0] == '$')
-        tNEW(tOutputItemLocale)(*this, tLocale::Find(locale+1));
-    else
-        tNEW(tOutputItem<tString>)(*this, tString(locale));
-}
 
 tOutput::tOutput(const std::string & x)
         :anchor(NULL)
@@ -819,7 +807,16 @@ tOutput& operator << (tOutput &o, char *locale)
 
 // and a special implementation for the locales and strings:
 tOutput& operator << (tOutput &o, const char *locale){
-    o.AddString(locale);
+    int len = strlen(locale);
+    if (len == 0)
+        return o;
+    if (len == 1 && locale[0] == ' ')
+        tNEW(tOutputItemSpace)(o);
+    else if (locale[0] == '$')
+        tNEW(tOutputItemLocale)(o, tLocale::Find(locale+1));
+    else
+        tNEW(tOutputItem<tString>)(o, tString(locale));
+
     return o;
 }
 

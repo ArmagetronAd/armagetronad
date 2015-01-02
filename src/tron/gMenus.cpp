@@ -47,7 +47,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <set>
 #include <ctime>
 #include <vector>
-#include <memory>
 
 #ifndef DEDICATED
 static tConfItem<int>   tm0("TEXTURE_MODE_0",rTextureGroups::TextureMode[0]);
@@ -191,107 +190,13 @@ bool operator < ( rScreenSize const & a, rScreenSize const & b )
     return a.Compare(b) < 0;
 }
 
-#if SDL_VERSION_ATLEAST(2,0,0)
-class gRefreshRateMenuItem: public uMenuItemSelection<int>
+class gResMenEntry
 {
-public:
-    void Rescan()
-    {
-        Clear();
-
-        // collect refresh rates
-        std::set<int> refreshRates;
-        int modes = SDL_GetNumDisplayModes(currentScreensetting.displayIndex);
-
-        for(int run = 0; run <= 1; ++run)
-        {
-            int width = currentScreensetting.res.width;
-            int height = currentScreensetting.res.height;
-            
-            if(width + height == 0)
-            {
-                // desktop mode, get real res
-                SDL_DisplayMode mode;
-                if(SDL_GetDesktopDisplayMode(currentScreensetting.displayIndex, &mode) == 0)
-                {
-                    width = mode.w;
-                    height = mode.h;
-                }
-            }
-
-            for(int i = modes-1; i >= 0; --i)
-            {
-                SDL_DisplayMode mode;
-                if (0>SDL_GetDisplayMode(currentScreensetting.displayIndex, i, &mode)) continue;
-
-                // first scan only matching modes, then all
-                if(run == 0)
-                {
-                    if(width != mode.w)
-                        continue;
-                    if(height != mode.h)
-                        continue;
-                }
-                if(refreshRates.find(mode.refresh_rate) == refreshRates.end())
-                {
-                    refreshRates.insert(mode.refresh_rate);
-                }
-            }
-
-            if(refreshRates.size() > 0)
-                break;
-        }
-
-        // emergenct default fallback
-        if(refreshRates.size() == 0)
-            refreshRates.insert(60);
-
-        // add them to menu
-        for(std::set<int>::iterator i = refreshRates.begin(); i != refreshRates.end(); ++i)
-        {
-            int displayRate = *i;
-
-            // round up display rates ending in 9.
-            if((displayRate % 10) == 9 && refreshRates.find(displayRate+1) == refreshRates.end())
-                displayRate++;
-
-            tOutput text("$screen_refreshrate_select", displayRate);
-            NewChoice(text, text, *i);
-        }
-
-        // add default on top
-        NewChoice("$screen_refreshrate_desk_text", "$screen_refreshrate_desk_help", 0);
-
-        select = -1;
-        PickFromValue();
-        if(select < 0)
-        {
-            select = choices.Len()-1;
-        }
-        LeftRight(0);
-    }
-
-    gRefreshRateMenuItem( uMenu & screen_menu_mode, const tOutput& text, const tOutput& help )
-            :uMenuItemSelection<int>
-            (&screen_menu_mode,
-             text,
-             help,
-             currentScreensetting.refreshRate)
-    {
-        Rescan();
-    }
-};
-
-static gRefreshRateMenuItem * sg_refreshRateMenuItem = NULL;
-#endif // SDL_VER
-
-class gResolutionMenuItem: uMenuItemSelection<rScreenSize> 
-{
+    uMenuItemSelection<rScreenSize> res_men; // menu item
     std::set< rScreenSize > sizes;           // set of already added modes
-    bool addFixed; // true if fixed set of resolutions is to be added
 
     // adds a single custom screen resolution
-    void NewSize( rScreenSize const & size )
+    void NewChoice( rScreenSize const & size )
     {
         if ( sizes.find( size ) == sizes.end() )
         {
@@ -300,68 +205,53 @@ class gResolutionMenuItem: uMenuItemSelection<rScreenSize>
     }
 
     // adds a single predefined resolution
-    void NewSize( rResolution res )
+    void NewChoice( rResolution res )
     {
         rScreenSize size( res );
-        NewSize( size );
+        NewChoice( size );
     }
 
 public:
-    void Rescan()
+    gResMenEntry( uMenu & screen_menu_mode, rScreenSize& res, const tOutput& text, const tOutput& help, bool addFixed )
+            :res_men
+            (&screen_menu_mode,
+             text,
+             help,
+             res)
     {
-        sizes.clear();
-        Clear();
-
 #ifndef DEDICATED
         // fetch valid screen modes from SDL
-        int i;
-#if SDL_VERSION_ATLEAST(2,0,0)
-        int modes = SDL_GetNumDisplayModes(currentScreensetting.displayIndex);
-
-        // Check is there are any modes available
-        if(modes < 0)
-#else
         SDL_Rect **modes;
         modes=SDL_ListModes(NULL, SDL_FULLSCREEN|SDL_OPENGL);
 
         // Check is there are any modes available
+        int i;
         if(modes == 0 || modes == (SDL_Rect **)-1)
-#endif
-
         {
             // add all fixed resolutions
             for ( i = ArmageTron_Custom; i>=0; --i )
             {
-                NewSize( rResolution(i) );
+                NewChoice( rResolution(i) );
             }
         }
         else
         {
             // add custom resolution
-            NewSize( ArmageTron_Custom );
+            NewChoice( ArmageTron_Custom );
 
             // add desktop resolution
             if ( sr_DesktopScreensizeSupported() && !addFixed )
-                NewSize( ArmageTron_Desktop );
+                NewChoice( ArmageTron_Desktop );
 
             // the maximal allowed screen size
             rScreenSize maxSize(0,0);
 
             // fill in available modes (avoid duplicates)
-#if SDL_VERSION_ATLEAST(2,0,0)
-            for ( i = 0 ; i < modes ; i++ )
-            {
-                SDL_DisplayMode mode;
-                // add mode (if it's new)
-                if (0>SDL_GetDisplayMode(currentScreensetting.displayIndex, i, &mode)) continue;
-                rScreenSize size(mode.w, mode.h);
- #else
             for(i=0;modes[i];++i)
             {
                 // add mode (if it's new)
                 rScreenSize size(modes[i]->w, modes[i]->h);
-#endif
-                NewSize( size );
+                NewChoice( size );
                 if ( maxSize.width < size.width )
                     maxSize.width = size.width;
                 if ( maxSize.height < size.height )
@@ -377,7 +267,7 @@ public:
 
                     // only add those that fit the maximal resolution
                     if ( maxSize.height >= size.height && maxSize.width >= size.width )
-                        NewSize( size );
+                        NewChoice( size );
                 }
             }
         }
@@ -393,82 +283,22 @@ public:
                 else
                     s << tOutput("$screen_size_desktop");
 
-                NewChoice( s.str().c_str(), "", size );
+                res_men.NewChoice( s.str().c_str(), "", size );
             }
 
 #endif
-
-        select = -1;
-        PickFromValue();
-        if(select < 0)
-        {
-            select = choices.Len()-1;
-        }
-        LeftRight(0);
-    }
-
-        
-    virtual void LeftRight(int lr)
-    {
-        uMenuItemSelection<rScreenSize>::LeftRight(lr);
-
-#if SDL_VERSION_ATLEAST(2,0,0)       
-        if(sg_refreshRateMenuItem)
-            sg_refreshRateMenuItem->Rescan();
-#endif
-    }
-
-    gResolutionMenuItem( uMenu & screen_menu_mode, rScreenSize& res, const tOutput& text, const tOutput& help, bool addFixed )
-            :uMenuItemSelection<rScreenSize>
-            (&screen_menu_mode,
-             text,
-             help,
-             res)
-    {
-        this->addFixed = addFixed;
-
-        Rescan();
     }
 };
 
-static gResolutionMenuItem * sg_windowResMen = NULL, * sg_screenResMen = NULL;
-
-class gDisplayMenuItem: public uMenuItemInt
+static void sg_ScreenModeMenu()
 {
-public:
-    gDisplayMenuItem( uMenu & screen_menu_mode, const tOutput& text, const tOutput& help, int max )
-            :uMenuItemInt
-            (&screen_menu_mode,
-             text,
-             help,
-             currentScreensetting.displayIndex, 0, max)
-    {
-    }
+    uMenu screen_menu_mode("$screen_mode_menu");
 
-    virtual void LeftRight(int lr)
-    {
-        uMenuItemInt::LeftRight(lr);
-        
-        if(sg_windowResMen)
-        {
-            sg_windowResMen->Rescan();
-        }
-        if(sg_screenResMen)
-        {
-            sg_screenResMen->Rescan();
-        }
-    }
-};
-
-static void sg_ScreenModeAdvanced()
-{
-    uMenu screen_menu_mode("$screen_mode_advanced");
-    
-    uMenuItemToggle gm(
-        &screen_menu_mode,
-        "$screen_grab_mouse_text",
-        "$screen_grab_mouse_help",
-        su_mouseGrab);
+    uMenuItemFunction appl
+    (&screen_menu_mode,
+     "$screen_apply_changes_text",
+     "$screen_apply_changes_help",
+     &sr_ReinitDisplay);
 
     uMenuItemToggle kwa_t(
         &screen_menu_mode,
@@ -476,15 +306,15 @@ static void sg_ScreenModeAdvanced()
         "$screen_keep_window_active_help",
         sr_keepWindowActive);
 
-#if !SDL_VERSION_ATLEAST(2,0,0)
     uMenuItemToggle ie_t
     (&screen_menu_mode,
      "$screen_check_errors_text",
      "$screen_check_errors_help",
      currentScreensetting.checkErrors);
-#endif
+
 
 #ifdef SDL_OPENGL
+
 #if SDL_VERSION_ATLEAST(1, 2, 10)
     uMenuItemSelection<rVSync> zvs_t
     (&screen_menu_mode,
@@ -500,6 +330,12 @@ static void sg_ScreenModeAdvanced()
 #endif // HAVE_GLEW
 #endif // SDL_GL_SWAP_CONTROL
 #endif // SDL_OPENGL
+
+    uMenuItemToggle gm(
+        &screen_menu_mode,
+        "$screen_grab_mouse_text",
+        "$screen_grab_mouse_help",
+        su_mouseGrab);
 
     uMenuItemSelection<rColorDepth> zd_t
     (&screen_menu_mode,
@@ -521,67 +357,41 @@ static void sg_ScreenModeAdvanced()
     uSelectEntry<rColorDepth> cd_d(cd_t,"$screen_colordepth_desk_text","$screen_colordepth_desk_help",ArmageTron_ColorDepth_Desktop);
     uSelectEntry<rColorDepth> cd_32(cd_t,"$screen_colordepth_32_text","$screen_colordepth_32_help",ArmageTron_ColorDepth_32);
 
-    screen_menu_mode.Enter();
-}
-
-static void sg_ScreenModeMenu()
-{
-    uMenu screen_menu_mode("$screen_mode_menu");
-
-    uMenuItemFunction appl
-    (&screen_menu_mode,
-     "$screen_apply_changes_text",
-     "$screen_apply_changes_help",
-     &sr_ReinitDisplay);
-
-    uMenuItemFunction sma(&screen_menu_mode,"$screen_mode_advanced",
-                          "$screen_mode_advanced_help", sg_ScreenModeAdvanced );
-
-    gResolutionMenuItem winsize( screen_menu_mode, currentScreensetting.windowSize, "$window_size_text", "$window_size_help", true );
-
     uMenuItemToggle fs_t
     (&screen_menu_mode,
      "$screen_fullscreen_text",
      "$screen_fullscreen_help",
      currentScreensetting.fullscreen);
 
-#if SDL_VERSION_ATLEAST(2,0,0)
-    gRefreshRateMenuItem refreshRate
-    (screen_menu_mode,
-     "$screen_refreshrate_text",
-     "$screen_refreshrate_help");
 
-    sg_refreshRateMenuItem = &refreshRate;
-#endif
+    gResMenEntry res( screen_menu_mode, currentScreensetting.res, "$screen_resolution_text", "$screen_resolution_help", false );
+    gResMenEntry winsize( screen_menu_mode, currentScreensetting.windowSize, "$window_size_text", "$window_size_help", true );
+
+    /*
+    uMenuItemSelection<rResolution> res_men
+    (&screen_menu_mode,
+     "$screen_resolution_text",
+     "$screen_resolution_help",
+     currentScreensetting.res);
 
 
-    gResolutionMenuItem res( screen_menu_mode, currentScreensetting.res, "$screen_resolution_text", "$screen_resolution_help", false );
-
-    sg_windowResMen = &winsize;
-    sg_screenResMen = &res;
-
-#if SDL_VERSION_ATLEAST(2,0,0)
-
-    int numDisplays = SDL_GetNumVideoDisplays();
-    std::auto_ptr<uMenuItemInt> pDisplayIndex;
-    if(numDisplays > 1)
-    {
-        pDisplayIndex = std::auto_ptr<uMenuItemInt>(new gDisplayMenuItem
-        (screen_menu_mode,
-         "$screen_displayindex_text",
-         "$screen_displayindex_help",
-         numDisplays-1));
-    }
-#endif
+    uSelectEntry<rResolution> a(res_men,"320x200","",ArmageTron_320_200);
+     static uSelectEntry<rResolution> b(res_men,"320x240","",ArmageTron_320_240);
+    static uSelectEntry<rResolution> c(res_men,"400x300","",ArmageTron_400_300);
+    static uSelectEntry<rResolution> d(res_men,"512x384","",ArmageTron_512_384);
+    static uSelectEntry<rResolution> e(res_men,"640x480","",ArmageTron_640_480);
+    static uSelectEntry<rResolution> f(res_men,"800x600","",ArmageTron_800_600);
+    static uSelectEntry<rResolution> g(res_men,"1024x768","",ArmageTron_1024_768);
+    static uSelectEntry<rResolution> h(res_men,"1280x1024","",ArmageTron_1280_1024);
+    static uSelectEntry<rResolution> i(res_men,"1600x1200","",ArmageTron_1600_1200);
+    static uSelectEntry<rResolution> j(res_men,"2048x1572","",ArmageTron_2048_1572);
+    static uSelectEntry<rResolution> jj(res_men,
+    				    "$screen_custom_text",
+    				    "$screen_custom_help"
+    				    ,ArmageTron_Custom);
+    */
 
     screen_menu_mode.Enter();
-
-    sg_windowResMen = NULL;
-    sg_screenResMen = NULL;
-
-#if SDL_VERSION_ATLEAST(2,0,0)       
-    sg_refreshRateMenuItem = NULL;
-#endif
 }
 
 
@@ -1447,12 +1257,7 @@ static bool toggle_fullscreen_func( REAL x )
 #endif
 
     // only do anything if the application is active (work around odd bug)
-#if SDL_VERSION_ATLEAST(2,0,0)
-    Uint32 flags = SDL_GetWindowFlags(sr_screen);
-    if ( x > 0 && (flags & SDL_WINDOW_SHOWN) && !(flags & SDL_WINDOW_MINIMIZED))
-#else
     if ( x > 0 && ( SDL_GetAppState() & SDL_APPACTIVE ) )
-#endif
     {
         currentScreensetting.fullscreen = !currentScreensetting.fullscreen;
         sr_ReinitDisplay();

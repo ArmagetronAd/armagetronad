@@ -40,8 +40,8 @@
 				</Compiler>
 				<Linker>
 					<Add library="..\..\..\winlibs\protobuf\vsprojects\libprotobuf_debug.a" />
-					<Add library="..\..\..\winlibs\win32\boost_libs\libboost_system-mgw47-mt-d-1_53.a" />
 					<Add library="..\..\..\winlibs\win32\boost_libs\libboost_thread-mgw47-mt-d-1_53.a" />
+					<Add library="..\..\..\winlibs\win32\boost_libs\libboost_system-mgw47-mt-d-1_53.a" />
 				</Linker>
 			</Target>
 		</Build>
@@ -73,6 +73,7 @@
 			<Add library="..\..\..\winlibs\libxml2\lib\libxml2.lib" />
 		</Linker>
 		<Unit filename="../../src/network/master.cpp" />
+		<Unit filename="../../src/network/md5.cpp" />
 		<Unit filename="../../src/network/md5.h" />
 		<Unit filename="../../src/network/nAuthentication.cpp" />
 		<Unit filename="../../src/network/nAuthentication.h" />
@@ -233,7 +234,6 @@
 		<Unit filename="../../src/resource/tResourceManager.h" />
 		<Unit filename="../../src/resource/tResourceType.cpp" />
 		<Unit filename="../../src/resource/tResourceType.h" />
-		<Unit filename="../../src/tools/md5.cpp" />
 		<Unit filename="../../src/tools/tArray.cpp" />
 		<Unit filename="../../src/tools/tArray.h" />
 		<Unit filename="../../src/tools/tCallback.cpp" />
@@ -247,8 +247,8 @@
 		<Unit filename="../../src/tools/tConfiguration.h" />
 		<Unit filename="../../src/tools/tConsole.cpp" />
 		<Unit filename="../../src/tools/tConsole.h" />
+		<Unit filename="../../src/tools/tCrypt.cpp" />
 		<Unit filename="../../src/tools/tCrypt.h" />
-		<Unit filename="../../src/tools/tCrypto.cpp" />
 		<Unit filename="../../src/tools/tDirectories.cpp" />
 		<Unit filename="../../src/tools/tDirectories.h" />
 		<Unit filename="../../src/tools/tError.cpp" />

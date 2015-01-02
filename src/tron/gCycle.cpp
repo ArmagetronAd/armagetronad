@@ -2766,7 +2766,7 @@ bool gCycle::Timestep(REAL currentTime){
             gCycleChatBot & bot = gCycleChatBot::Get( this );
             bot.Activate( currentTime );
         }
-        else if ( chatBot_.get() )
+        else if ( &(*chatBot_) )
         {
             chatBot_->nextChatAI_ = 0;
         }
