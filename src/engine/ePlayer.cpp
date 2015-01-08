@@ -9558,6 +9558,32 @@ static void se_PlayerMessageConf(std::istream &s)
 static tConfItemFunc se_PlayerMessage_c("PLAYER_MESSAGE", &se_PlayerMessageConf);
 static tAccessLevelSetter se_messConfLevel( se_PlayerMessage_c, tAccessLevel_Moderator );
 
+static void CenterPlayerMessage_conf(std::istream &s)
+{
+
+    if ( se_NeedsServer( "CENTER_PLAYER_MESSAGE", s ) )
+    {
+        return;
+    }
+ 
+    int receiver = se_ReadUser( s );
+
+    tColoredString msg;
+    s >> msg;
+
+    if ( receiver <= 0 || s.good() )
+    {
+        con << tOutput("Usage: CENTER_PLAYER_MESSAGE <user ID or name> \"<Message>\"\n");
+        return;
+    }
+
+    // display it
+    sn_CenterMessage(msg, receiver);
+}
+
+static tConfItemFunc CenterPlayerMessage_c("CENTER_PLAYER_MESSAGE",&CenterPlayerMessage_conf);
+static tAccessLevelSetter sn_CenterPlayerConfLevel( CenterPlayerMessage_c, tAccessLevel_Moderator );
+
 static tString se_defaultKickReason("");
 static tConfItemLine se_defaultKickReasonConf( "DEFAULT_KICK_REASON", se_defaultKickReason );
 

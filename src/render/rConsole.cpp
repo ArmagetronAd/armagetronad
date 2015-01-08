@@ -97,6 +97,13 @@ REAL rCHEIGHT_CON=REAL(32/480.0);
 static bool sr_consoleLog = false;
 static tConfItem<bool> sr_consoleLogConf("CONSOLE_LOG", sr_consoleLog);
 
+static bool sr_consoleLogColor = false;
+static tConfItem<bool> sr_consoleLogColorConf("CONSOLE_LOG_COLOR", sr_consoleLogColor);
+
+// I'll fix it later...
+//static bool sr_consoleLogColorTimestamp = true;
+//static tConfItem<bool> sr_consoleLogColorTimestampConf("CONSOLE_LOG_COLOR_DECORATE_TIMESTAMP", sr_consoleLogColorTimestamp);
+
 tConsole & rConsole::DoPrint(const tString &s){
     bool print_to_stdout=false;
 #ifdef DEBUG
@@ -116,6 +123,16 @@ tConsole & rConsole::DoPrint(const tString &s){
             std::ofstream o;
             if ( tDirectories::Var().Open(o, "consolelog.txt", std::ios::app) ) {
                 o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << tColoredString::RemoveColors(s);
+            }
+    }
+    
+    if(!tRecorder::IsPlayingBack() && sr_consoleLogColor) {
+            std::ofstream o;
+            if ( tDirectories::Var().Open(o, "consolelogcolor.txt", std::ios::app /*&& sr_consoleLogColorTimestamp*/) ) {
+            //    o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << s;
+            //}
+            //else {
+                o << s;
             }
     }
 
