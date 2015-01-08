@@ -9578,6 +9578,7 @@ static void CenterPlayerMessage_conf(std::istream &s)
     }
 
     // display it
+    con << tOutput(msg) << tOutput("\n");
     sn_CenterMessage(msg, receiver);
 }
 
