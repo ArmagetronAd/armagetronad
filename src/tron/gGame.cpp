@@ -5003,7 +5003,7 @@ void gGame::Analysis(REAL time){
                             sg_matchWinnerWriter.write();
 
 	                        message.SetTemplateParameter(1, name);
-	                        message << "$gamestate_champ_console";
+	                        message << "$gamestate_champ_console" << " ";
 						}
 
                         if (eTeam::teams(0)->Score() >=sg_currentSettings->limitScore)

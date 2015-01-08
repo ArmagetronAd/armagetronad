@@ -733,7 +733,7 @@ void gServerMenuItem::RenderBackground()
     rTextField players( -.9, helpTopReal, text_width, text_height );
     if ( server )
     {
-        players << tOutput( "$network_master_players" );
+        players  << tOutput( "$network_master_players" ) << tOutput(" ");
         if ( server->UserNamesOneLine().Len() > 2 )
             players << server->UserNamesOneLine();
         else
