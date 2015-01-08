@@ -346,7 +346,7 @@ void eWavData::Load(){
         return;
     }
 
-    return;
+    //return;
 
 #ifndef DEDICATED
 
