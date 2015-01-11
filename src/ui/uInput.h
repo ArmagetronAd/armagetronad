@@ -25,6 +25,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 */
 
+// Spurious edit
+
 #ifndef ArmageTron_INPUT_H
 #define ArmageTron_INPUT_H
 
