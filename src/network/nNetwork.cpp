@@ -2843,7 +2843,7 @@ static void rec_peer(unsigned int peer){
                 catch(nKillHim)
                 {
                     con << "nKillHim signal caught: ";
-                    sn_DisconnectUser(peer, "$network_kill_error");
+                    sn_DisconnectUser(id, "$network_kill_error");
                 }
 #endif
             }
