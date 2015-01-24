@@ -2513,7 +2513,7 @@ static void rec_peer(unsigned int peer){
             nAddress addrFrom; // the sender of the current packet
             len = sn_Connections[peer].socket->Read( reinterpret_cast<int8 *>(buff),maxrec*2, addrFrom);
 
-            if (len>0){
+            if (len>=2){
                 if ( len >= maxrec*2 )
                 {
 #ifndef DEDICATED
