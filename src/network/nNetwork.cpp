@@ -2632,6 +2632,10 @@ static void rec_peer(unsigned int peer){
                         continue;
                     }
 
+                    // logged in clients should ignore packets from unknown sources
+                    if(sn_GetNetState() != nSERVER && sn_myNetID != 0)
+                        continue;
+
                     // assume it's a new connection
                     id = MAXCLIENTS+1;
                     peers[ MAXCLIENTS+1 ] = addrFrom;
