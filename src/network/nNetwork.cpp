@@ -2389,7 +2389,7 @@ static void rec_peer(unsigned int peer){
             nAddress addrFrom; // the sender of the current packet
             received = sn_Connections[peer].socket->Read( reinterpret_cast< int8 *>( buffer ), maxReceive, addrFrom);
 
-            if ( received > 0 )
+            if ( received >= 2 )
             {
                 if ( received >= maxReceive )
                 {
@@ -3637,14 +3637,16 @@ void sn_DisconnectUser(int i, const tOutput& reason, nServerInfoBase * redirectT
         return;
     }
 
+    // clients can only disconnect from the server
+    if ( i != 0 && i <= MAXCLIENTS && sn_GetNetState() == nCLIENT )
+    {
+        tERR_WARN( "Client tried to disconnect from another client: impossible and a bad idea." );
+        return;
+    }
+
     // anything to do at all?
     if (!sn_Connections[i].socket)
     {
-        // clients can only disconnect from the server
-        if ( i != 0 && sn_GetNetState() == nCLIENT )
-        {
-            tERR_ERROR( "Client tried to disconnect from another client: impossible and a bad idea." );
-        }
         return;
     }
 
