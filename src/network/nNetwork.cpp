@@ -1521,6 +1521,10 @@ nServerInfoBase * sn_PeekRedirectTo()
 }
 
 void login_deny_handler(nMessage &m){
+    // only the server is allowed to send this
+    if(m.SenderID() != 0)
+        return;
+
     if ( !m.End() )
     {
         //		tOutput output;
@@ -2150,6 +2154,11 @@ void login_handler_2(nMessage& m)
 void logout_handler(nMessage &m){
     unsigned short id = m.SenderID();
     //m.Read(id);
+
+    // only the server or legal clients are allowed to send this
+    // (client check comes later)
+    if(sn_GetNetState() == nCLIENT && id != 0)
+        return;
 
     if (sn_Connections[id].socket)
     {
