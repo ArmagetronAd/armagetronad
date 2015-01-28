@@ -21,8 +21,8 @@
 				<Linker>
 					<Add option="-s" />
 					<Add library="..\..\..\winlibs\protobuf\vsprojects\libprotobuf.a" />
-					<Add library="..\..\..\winlibs\win32\boost_libs\libboost_thread-mgw47-mt-1_53.a" />
-					<Add library="..\..\..\winlibs\win32\boost_libs\libboost_system-mgw47-mt-1_53.a" />
+					<Add library="..\..\..\winlibs\win32\boost_libs\libboost_thread-mgw44-mt-1_53.a" />
+					<Add library="..\..\..\winlibs\win32\boost_libs\libboost_system-mgw44-mt-1_53.a" />
 				</Linker>
 			</Target>
 			<Target title="Win32 Debug">
@@ -40,8 +40,8 @@
 				</Compiler>
 				<Linker>
 					<Add library="..\..\..\winlibs\protobuf\vsprojects\libprotobuf_debug.a" />
-					<Add library="..\..\..\winlibs\win32\boost_libs\libboost_thread-mgw47-mt-d-1_53.a" />
-					<Add library="..\..\..\winlibs\win32\boost_libs\libboost_system-mgw47-mt-d-1_53.a" />
+					<Add library="..\..\..\winlibs\win32\boost_libs\libboost_thread-mgw44-mt-d-1_53.a" />
+					<Add library="..\..\..\winlibs\win32\boost_libs\libboost_system-mgw44-mt-d-1_53.a" />
 				</Linker>
 			</Target>
 		</Build>
