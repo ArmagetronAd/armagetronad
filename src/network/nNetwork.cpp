@@ -1413,6 +1413,10 @@ nServerInfoBase * sn_PeekRedirectTo()
 }
 
 void login_deny_handler(nMessage &m){
+    // only the server is allowed to send this
+    if(m.SenderID() != 0)
+        return;
+
     if ( !m.End() )
     {
         //		tOutput output;
@@ -1908,6 +1912,11 @@ void logout_handler(nMessage &m){
     unsigned short id = m.SenderID();
     //m.Read(id);
 
+    // only the server or legal clients are allowed to send this
+    // (client check comes later)
+    if(sn_GetNetState() == nCLIENT && id != 0)
+        return;
+
     if (sn_Connections[id].socket)
     {
         tOutput o;
@@ -2266,7 +2275,7 @@ static void rec_peer(unsigned int peer){
             nAddress addrFrom; // the sender of the current packet
             len = sn_Connections[peer].socket->Read( reinterpret_cast<int8 *>(buff),maxrec*2, addrFrom);
 
-            if (len>0){
+            if (len>=2){
                 if ( len >= maxrec*2 )
                 {
 #ifndef DEDICATED
@@ -2360,6 +2369,10 @@ static void rec_peer(unsigned int peer){
                 }
                 else
                 {
+                    // logged in clients should ignore packets from unknown sources
+                    if(sn_GetNetState() != nSERVER && sn_myNetID != 0)
+                        continue;
+
                     // assume it's a new connection
                     id = MAXCLIENTS+1;
                     peers[ MAXCLIENTS+1 ] = addrFrom;
@@ -2491,7 +2504,7 @@ static void rec_peer(unsigned int peer){
                 catch(nKillHim)
                 {
                     con << "nKillHim signal caught: ";
-                    sn_DisconnectUser(peer, "$network_kill_error");
+                    sn_DisconnectUser(id, "$network_kill_error");
                 }
 #endif
             }
@@ -3332,9 +3345,9 @@ void sn_DisconnectUser(int i, const tOutput& reason, nServerInfoBase * redirectT
     }
 
     // clients can only disconnect from the server
-    if ( i != 0 && sn_GetNetState() == nCLIENT )
+    if ( i != 0 && i <= MAXCLIENTS && sn_GetNetState() == nCLIENT )
     {
-        tERR_ERROR( "Client tried to disconnect from another client: impossible and a bad idea." );
+        tERR_WARN( "Client tried to disconnect from another client: impossible and a bad idea." );
         return;
     }
 
