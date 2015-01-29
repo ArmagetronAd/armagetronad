@@ -1346,6 +1346,10 @@ nServerInfoBase * sn_PeekRedirectTo()
 }
 
 static void sn_LoginDeniedHandler( Network::LoginDenied const & denied, nSenderInfo const & sender ){
+    // only the server is allowed to send this
+    if(sender.SenderID() != 0)
+        return;
+
     if ( denied.has_reason() )
     {
         sn_DenyReason = denied.reason();
@@ -1995,6 +1999,11 @@ void sn_LogoutHandler( Network::Logout const &, nSenderInfo const & sender )
 {
     unsigned short id = sender.SenderID();
 
+    // only the server or legal clients are allowed to send this
+    // (client check comes later)
+    if(sn_GetNetState() == nCLIENT && id != 0)
+        return;
+
     if (sn_Connections[id].socket)
     {
         tOutput o;
@@ -2510,6 +2519,10 @@ static void rec_peer(unsigned int peer){
                         // new login packets, pings etc. all come with claim_id == 0.
                         continue;
                     }
+
+                    // logged in clients should ignore packets from unknown sources
+                    if(sn_GetNetState() != nSERVER && sn_myNetID != 0)
+                        continue;
 
                     // assume it's a new connection
                     id = MAXCLIENTS+1;
