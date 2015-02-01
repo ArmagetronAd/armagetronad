@@ -1352,6 +1352,31 @@ nServerInfo* nServerInfo::GetBigServerInfoCommon(  Network::BigServerInfo const 
         server->ReadSyncThis( info, sender );
         server->Alive();
         server->CalcScore();
+
+        if(nServerInfoAdmin::GetAdmin() && nServerInfoAdmin::GetAdmin()->NeedGlobalReclassification())
+        {
+            int count = 0;
+            // reclassify everyone
+            nServerInfo *run = GetFirstServer();
+            while( run )
+            {
+                nServerInfoAdmin::GetAdmin()->Classify( run->settings_, run->classification_ );
+                if(0 == run->classification_.sortOverride_)
+                    count++;
+                run = run->Next();
+            }
+            
+            if(count < nServerInfoAdmin::GetAdmin()->MinValidServerCount())
+            {
+                nServerInfoAdmin::GetAdmin()->LowerThreshold();
+                nServerInfo *run = GetFirstServer();
+                while( run )
+                {
+                    nServerInfoAdmin::GetAdmin()->Classify( run->settings_, run->classification_ );
+                    run = run->Next();
+                }
+            }            
+        }
     }
     else
     {

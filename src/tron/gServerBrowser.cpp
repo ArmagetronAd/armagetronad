@@ -309,6 +309,11 @@ void gServerBrowser::BrowseLAN()
 
 void gServerBrowser::BrowseServers()
 {
+    if( nServerInfoAdmin::GetAdmin() )
+    {
+        nServerInfoAdmin::GetAdmin()->BeforeNewScan();
+    }
+
     //nServerInfo::CalcScoreAll();
     //nServerInfo::Sort();
     nServerInfo::StartQueryAll( sg_queryType );
