@@ -58,7 +58,7 @@ public:
     static void ScheduleBackground( T & object, void (T::*function)()  )
     {
         // schedule the task into a background thread
-        boost::thread(tMemberFunctionRunnerTemplate<T>( object, function ) );
+        boost::thread(tMemberFunctionRunnerTemplate<T>( object, function ) ).detach();
     }
 
     //! schedule a task for execution in the next tToDo call
