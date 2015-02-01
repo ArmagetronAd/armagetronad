@@ -109,9 +109,9 @@ void nReadError( bool critical = true );
 
 #ifndef MAXCLIENTS
 #ifdef DEDICATED
-#define MAXCLIENTS 32
+#define MAXCLIENTS 64
 #else
-#define MAXCLIENTS 16
+#define MAXCLIENTS 32
 #endif
 #endif
 
