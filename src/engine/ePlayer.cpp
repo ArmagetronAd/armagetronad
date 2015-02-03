@@ -9148,7 +9148,7 @@ private:
 
         if( !digestIsAccurate )
         {
-            experienceLevel = 1;
+            experienceLevel = 3;
         }
 
         // calculate the experience level the player has
