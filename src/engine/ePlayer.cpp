@@ -2448,14 +2448,6 @@ void se_Op( ePlayerNetID * admin, ePlayerNetID * victim, tAccessLevel level )
     }
 }
 
-static void se_OpFunc(std::istream &s)
-{
-    ePlayerNetID *p = 0;
-
-    se_ChangeAccess(p, s, "/op", &se_Op);
-}
-static tConfItemFunc se_OpFuncConf("OP", &se_OpFunc);
-
 // DeOp takes it away
 void se_DeOp( ePlayerNetID * admin, std::istream & s, char const * command )
 {
@@ -2474,11 +2466,156 @@ void se_DeOp( ePlayerNetID * admin, std::istream & s, char const * command )
     }
 }
 
+// log out
+static void se_AdminLogout( ePlayerNetID * p, char const * command )
+{
+#ifdef KRAWALL_SERVER
+    // revoke the other kind of authentication as well
+    if ( p->IsAuthenticated() )
+    {
+        p->DeAuthenticate();
+    }
+    else
+    {
+        sn_ConsoleOut( tOutput( "$access_level_op_same", command ), p->Owner() );
+    }
+#else
+    if ( p->IsLoggedIn() )
+    {
+        sn_ConsoleOut("You have been logged out!\n",p->Owner());
+        se_adminLogoutWriter << p->GetUserName() << nMachine::GetMachine(p->Owner()).GetIP();
+        se_adminLogoutWriter.write();
+    }
+    p->BeNotLoggedIn();
+#endif
+}
+
+// Changes the access level of a player, from console or other anonymous sources
+// and which is not to be called when you can call an OPFUNC
+// This isn't meant to be an user command, rather a simple switch between promoting and logging in, so make necessary checks yourself
+void se_AnonOp( ePlayerNetID * victim, tAccessLevel accessLevel, bool messages=true )
+{
+    if ( !victim->IsHuman() )
+    {
+        return;
+    }
+
+    if ( victim->IsAuthenticated() )
+    {
+        if ( accessLevel > tAccessLevel_Authenticated )
+        {
+            accessLevel = tAccessLevel_Authenticated;
+        }
+
+        tAccessLevel oldAccessLevel = victim->GetAccessLevel();
+        victim->SetAccessLevel( accessLevel );
+
+
+        if ( accessLevel < oldAccessLevel && messages )
+        {
+            se_SecretConsoleOut( tOutput( "$access_level_promote_anon",
+                                          victim->GetLogName(),
+                                          tCurrentAccessLevel::GetName( accessLevel )
+                                            ), victim, &se_Hide, 0, 0, &se_CanHide );
+        }
+        else if ( accessLevel > oldAccessLevel && messages )
+        {
+            se_SecretConsoleOut( tOutput( "$access_level_demote_anon",
+                                 victim->GetLogName(),
+                                 tCurrentAccessLevel::GetName( accessLevel )
+                                        ), victim, &se_Hide, 0, 0, &se_CanHide );
+        }
+    }
+    else
+    {
+        tString authName = victim->GetUserName() + "@L_OP";
+        if ( victim->IsAuthenticated() )
+        {
+            authName = victim->GetRawAuthenticatedName();
+        }
+
+        victim->Authenticate( authName, accessLevel, 0, messages );
+    }
+}
+
+// Console command for it
+void se_OpConf( std::istream &s )
+{
+    if ( se_NeedsServer( "OP", s ) )
+    {
+        return;
+    }
+
+    ePlayerNetID * victim = se_FindPlayerInChatCommand( 0, "OP", s );
+    bool isexplicit = false;
+
+    if ( victim )
+    {
+        // read optional access level, this part is merly a copypaste from the /shuffle code
+        int level = se_opAccessLevelMax;
+        if ( victim->IsAuthenticated() )
+        {
+            level = victim->GetAccessLevel();
+        }
+        char first;
+        s >> first;
+        if ( !s.eof() && !s.fail() )
+        {
+            isexplicit = true;
+            s.unget();
+            int newLevel = 0;
+            s >> newLevel;
+
+            if ( first == '+' || first == '-' )
+            {
+                level += newLevel;
+            }
+            else
+            {
+                level = newLevel;
+            }
+        }
+
+        s >> level;
+
+        tAccessLevel accessLevel;
+        accessLevel = static_cast< tAccessLevel >( level );
+
+        if ( accessLevel == victim->GetAccessLevel() )
+        {
+            if ( isexplicit )
+            {
+                sn_ConsoleOut( tOutput( "$access_level_op_same", "OP" ), 0 );
+            }
+            else
+            {
+                sn_ConsoleOut( tOutput( "$access_level_op_unclear", "OP" ), 0 );
+            }
+        }
+        else
+        {
+            se_AnonOp( victim, accessLevel );
+        }
+    }
+
+}
+
+static tConfItemFunc se_opConf( "OP", &se_OpConf );
+static tAccessLevelSetter se_opConfLevel( se_opConf, tAccessLevel_Owner );
+
 static void se_DeOpFunc(std::istream &s)
 {
-    ePlayerNetID *p = 0;
+    if ( se_NeedsServer( "DEOP", s ) )
+    {
+        return;
+    }
+    tString params;
+    s >> params;
 
-    se_DeOp( p, s, "/deop" );
+    ePlayerNetID *player = ePlayerNetID::FindPlayerByName(params);
+    if (!player) return;
+
+    se_AdminLogout(player, "DEOP");
 }
 static tConfItemFunc se_DeOpFuncConf("DEOP", &se_DeOpFunc);
 
@@ -2710,30 +2847,6 @@ static void se_Login_Call(std::istream &s)
 }
 static tConfItemFunc se_Login_Conf("LOGIN", &se_Login_Call);
 static tAccessLevelSetter se_Login_ConfLevel( se_Login_Conf, tAccessLevel_Moderator );
-
-// log out
-static void se_AdminLogout( ePlayerNetID * p, char const * command )
-{
-#ifdef KRAWALL_SERVER
-    // revoke the other kind of authentication as well
-    if ( p->IsAuthenticated() )
-    {
-        p->DeAuthenticate();
-    }
-    else
-    {
-        sn_ConsoleOut( tOutput( "$access_level_op_same", command ), p->Owner() );
-    }
-#else
-    if ( p->IsLoggedIn() )
-    {
-        sn_ConsoleOut("You have been logged out!\n",p->Owner());
-        se_adminLogoutWriter << p->GetUserName() << nMachine::GetMachine(p->Owner()).GetIP();
-        se_adminLogoutWriter.write();
-    }
-    p->BeNotLoggedIn();
-#endif
-}
 
 static void se_Logout_Call(std::istream &s)
 {
@@ -6833,7 +6946,7 @@ static void se_AnnounceLogin( tOutput const &out, ePlayerNetID const *player, eP
     se_SecretConsoleOut( out, player, hideFunc, admin, player, canHideFunc );
 }
 
-void ePlayerNetID::Authenticate( tString const & authName, tAccessLevel accessLevel_, ePlayerNetID const * admin )
+void ePlayerNetID::Authenticate( tString const & authName, tAccessLevel accessLevel_, ePlayerNetID const * admin, bool messages )
 {
     tString newAuthenticatedName( se_EscapeName( authName ).c_str() );
 
