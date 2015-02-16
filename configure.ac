@@ -731,7 +731,7 @@ fi
 CPPFLAGS="$CPPFLAGS `libpng-config --cflags`"
 LIBS="$LIBS $PNGLIBS"
 
-AC_CHECK_FUNC(png_check_sig,
+AC_CHECK_FUNC(png_sig_cmp,
 ,
 AC_MSG_ERROR([You need libpng to compile Armagetron.]))
 
