@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 // #define CAMERA_LOGGING
 
 #include "rSDL.h"
+#include "rGL.h"
 
 #ifdef CAMERA_LOGGING
 #include <iostream>
