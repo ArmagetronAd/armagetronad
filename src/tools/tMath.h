@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define ArmageTron_MATH_H
 
 //includes math headers
+#include <cmath>
 #include <math.h>
 #include <cmath>
 

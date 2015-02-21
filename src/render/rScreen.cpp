@@ -1131,7 +1131,7 @@ bool sr_texturesTruecolor=true;
 bool sr_textOut=false;
 bool sr_FPSOut=true;
 
-bool sr_keepWindowActive=false;
+bool sr_keepWindowActive=true;
 
 tString renderer_identification;
 
@@ -1156,7 +1156,7 @@ void sr_LoadDefaultConfig(){
     sr_infinityPlane=false;
     sr_lowerSky=false;
     sr_upperSky=false;
-    sr_keepWindowActive=false;
+    sr_keepWindowActive=true;
 
     if (software_renderer){
         // A software renderer! Poor soul. Set low details:
