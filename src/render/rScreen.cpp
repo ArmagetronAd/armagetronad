@@ -394,7 +394,9 @@ static tConfItem<bool> lsr("SOFTWARE_RENDERER",last_software_renderer);
 
 tString lastError("Unknown");
 
-    #ifndef DEDICATED
+#if SDL_VERSION_ATLEAST(2,0,0)
+#else
+#ifndef DEDICATED
 static int countBits(unsigned int count)
 {
     int ret = 0;
@@ -406,7 +408,8 @@ static int countBits(unsigned int count)
 
     return ret;
 }
-    #endif
+#endif
+#endif
 
     #ifndef DEDICATED
     #ifdef SDL_OPENGL
