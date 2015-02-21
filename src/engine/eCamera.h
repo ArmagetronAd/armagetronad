@@ -249,6 +249,8 @@ public:
 
     static void s_Timestep(eGrid *grid, REAL time);
 
+    int DirectionWinding() const;
+    int WindingNumber() const;
 private:
     //! make sure CenterPos() + dirFromTarget() is visible from pos
     bool Bound( REAL ratio, eCoord & pos, eCoord const & dirFromTarget, REAL & hitCache );

@@ -2639,4 +2639,34 @@ void eCamera::CenterCockpitFixedAfter() const{
         return;
 }
 
+///////////////////////////////////////////////
+// Some functions to grab axis informations for touches support (cf uInput.cpp)
+//
+
+// Return cycle direction relatively to camera current direction (nearest axis)
+// It allows to keep touches consistent with current camera display
+int eCamera::DirectionWinding() const {
+    if (!grid || !center) return -1;
+    int r = (grid->DirectionWinding(center->Direction())-grid->DirectionWinding(dir))%grid->WindingNumber();
+    return r<0 ? grid->WindingNumber()+r : r;
+}
+// Return number of axes of Camera's Grid
+int eCamera::WindingNumber() const {
+    if (!grid) return -1;
+    return grid->WindingNumber();
+}
+
+// Get current camera orientation relative to player's cycle direction
+int GetPlayerCameraClosestDirection(int player) {
+    ePlayer* p = ePlayer::PlayerConfig(player);
+    if (!p || !p->cam) return -1;
+    return p->cam->DirectionWinding();
+}
+
+// Get number of axes in player's camera grid
+int GetPlayerWindingNumber(int player) {
+    ePlayer* p = ePlayer::PlayerConfig(player);
+    if (!p || !p->cam) return -1;
+    return p->cam->WindingNumber();
+}
 

@@ -642,7 +642,11 @@ public:
         // do the actual buffer swap.
         if( reallyDoIt )
         {
+#if SDL_VERSION_ATLEAST(2,0,0)
+            SDL_GL_SwapWindow(sr_screen);
+#else
             SDL_GL_SwapBuffers();
+#endif
 
 #ifdef DEBUG_SWAP_X
             {
@@ -1108,7 +1112,11 @@ void rSysDep::StartNetSyncThread( rNetIdler * idler )
         sr_netLock = SDL_CreateMutex();
 
     // start thread
+#if SDL_VERSION_ATLEAST(2,0,0)
+    sr_netSyncThread = SDL_CreateThread( sr_NetSyncThread, "net_sync", sr_netLock );
+#else
     sr_netSyncThread = SDL_CreateThread( sr_NetSyncThread, sr_netLock );
+#endif
     if ( !sr_netSyncThread )
         return;
 

@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 //includes math headers
 #include <math.h>
+#include <cmath>
 
 #ifdef WIN32
 #include <float.h>

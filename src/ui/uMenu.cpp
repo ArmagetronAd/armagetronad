@@ -96,6 +96,7 @@ uMenu::uMenu(const tOutput &t,bool exit_item)
 }
 
 uMenu::~uMenu(){
+    if( selected >=0 && selected < items.Len() ) items[selected]->Deselect();
     for (int i=items.Len()-1;i>=0;i--)
         delete items[i];
 }
@@ -194,6 +195,7 @@ void uMenu::OnEnter(){
         bool wrapBack = wrap;
         wrap = true;
         selected = GetPrevSelectable(0);
+        if( selected >=0 && selected < items.Len() ) items[selected]->Select();
         wrap = wrapBack;
     }
     while (!exitFlag && !quickexit && !exitToMain){
@@ -411,11 +413,15 @@ void uMenu::HandleEvent( SDL_Event event )
 
                 case(SDLK_UP):
                                 lastkey=tSysTimeFloat();
+                    if( selected >=0 && selected < items.Len() ) items[selected]->Deselect();
                     selected = GetNextSelectable(selected);
+                    if( selected >=0 && selected < items.Len() ) items[selected]->Select();
                     break;
                 case(SDLK_DOWN):
                                 lastkey=tSysTimeFloat();
+                    if( selected >=0 && selected < items.Len() ) items[selected]->Deselect();
                     selected = GetPrevSelectable(selected);
+                    if( selected >=0 && selected < items.Len() ) items[selected]->Select();
                     break;
 
             case(SDLK_LEFT):
@@ -599,6 +605,7 @@ void uMenu::GenericBackground(REAL top){
 
 // marks the menu for exit
 void uMenu::OnExit(){
+    if( selected >=0 && selected < items.Len() ) items[selected]->Deselect();
     exitFlag=1;
 }
 
@@ -845,171 +852,212 @@ void uMenuItemString::Render(REAL x,REAL y,
 
 bool uMenuItemString::Event(SDL_Event &e){
 #ifndef DEDICATED
-    if (e.type!=SDL_KEYDOWN)
-        return false;
-    bool ret=true;
-    SDL_keysym &c=e.key.keysym;
-    SDLMod mod = c.mod;
-    bool moveWordLeft, moveWordRight, deleteWordLeft, deleteWordRight, moveBeginning, moveEnd, killForwards;
-    moveWordLeft = moveWordRight = deleteWordLeft = deleteWordRight = moveBeginning = moveEnd = killForwards = false;
+    bool ret =  false;
+    if (e.type==SDL_KEYDOWN) {
+        ret=true;
+#if SDL_VERSION_ATLEAST(2,0,0)
+        SDL_Keysym &c  = e.key.keysym;
+        SDL_Keymod mod = static_cast<SDL_Keymod>(c.mod);
+#else
+        SDL_keysym &c = e.key.keysym;
+        SDLMod mod    = c.mod;
+#endif
+        bool moveWordLeft, moveWordRight, deleteWordLeft, deleteWordRight, moveBeginning, moveEnd, killForwards;
+        moveWordLeft = moveWordRight = deleteWordLeft = deleteWordRight = moveBeginning = moveEnd = killForwards = false;
 
 #if defined (MACOSX)
-    // For moving over/deleting words
-    if (mod & KMOD_ALT) {
-        if (c.sym == SDLK_LEFT) {
-            moveWordLeft = true;
+        // For moving over/deleting words
+        if (mod & KMOD_ALT) {
+            if (c.sym == SDLK_LEFT) {
+                moveWordLeft = true;
+            }
+            else if (c.sym == SDLK_RIGHT) {
+                moveWordRight = true;
+            }
+            else if (c.sym == SDLK_DELETE) {
+                deleteWordRight = true;
+            }
+            else if (c.sym == SDLK_BACKSPACE) {
+                deleteWordLeft = true;
+            }
         }
-        else if (c.sym == SDLK_RIGHT) {
-            moveWordRight = true;
-        }
-        else if (c.sym == SDLK_DELETE) {
-            deleteWordRight = true;
-        }
-        else if (c.sym == SDLK_BACKSPACE) {
-            deleteWordLeft = true;
-        }
-    }
-    // For moving to extremes of the line
-    else if (mod & KMOD_META) {
-        if (c.sym == SDLK_LEFT) {
-            moveBeginning = true;
-        }
-        else if (c.sym == SDLK_RIGHT) {
-            moveEnd = true;
-        }
-    }
-    // Linux and Windows
+        // For moving to extremes of the line
+#if SDL_VERSION_ATLEAST(2,0,0)
+        else if (mod & KMOD_GUI) {
 #else
-    // Word operations
-    if (mod & KMOD_CTRL) {
-        if (c.sym == SDLK_LEFT) {
-            moveWordLeft = true;
-        }
-        else if (c.sym == SDLK_RIGHT) {
-            moveWordRight = true;
-        }
-        else if (c.sym == SDLK_DELETE) {
-            deleteWordRight = true;
-        }
-        else if (c.sym == SDLK_BACKSPACE) {
-            deleteWordLeft = true;
-        }
-    }
-    else if (c.sym == SDLK_HOME) {
-        moveBeginning = true;
-    }
-    else if (c.sym == SDLK_END) {
-        moveEnd = true;
-    }
+        else if (mod & KMOD_META) {
 #endif
-    // "bash" keys
-    if (mod & KMOD_CTRL) {
-        if (c.sym == SDLK_a) {
+            if (c.sym == SDLK_LEFT) {
+                moveBeginning = true;
+            }
+            else if (c.sym == SDLK_RIGHT) {
+                moveEnd = true;
+            }
+        }
+        // Linux and Windows
+#else
+        // Word operations
+        if (mod & KMOD_CTRL) {
+            if (c.sym == SDLK_LEFT) {
+                moveWordLeft = true;
+            }
+            else if (c.sym == SDLK_RIGHT) {
+                moveWordRight = true;
+            }
+            else if (c.sym == SDLK_DELETE) {
+                deleteWordRight = true;
+            }
+            else if (c.sym == SDLK_BACKSPACE) {
+                deleteWordLeft = true;
+            }
+        }
+        else if (c.sym == SDLK_HOME) {
             moveBeginning = true;
         }
-        else if (c.sym == SDLK_e) {
+        else if (c.sym == SDLK_END) {
             moveEnd = true;
         }
-        else if (c.sym == SDLK_k) {
-            killForwards = true;
-        }
-    }
-    // moveWordLeft = moveWordRight = deleteWordLeft = deleteWordRight = moveBeginning = moveEnd = killForwards
-
-    if (moveWordLeft) {
-        realCursorPos += content->PosWordLeft(realCursorPos);
-    }
-    else if (moveWordRight) {
-        realCursorPos += content->PosWordRight(realCursorPos);
-    }
-    else if (deleteWordLeft) {
-        realCursorPos += content->RemoveWordLeft(realCursorPos);
-    }
-    else if (deleteWordRight) {
-        content->RemoveWordRight(realCursorPos);
-    }
-    else if (moveBeginning) {
-        realCursorPos = 0;
-    }
-    else if (moveEnd) {
-        realCursorPos = content->size();
-    }
-    else if (killForwards) {
-        content->RemoveSubStr(realCursorPos,content->size()-realCursorPos);
-    }
-    else if (c.sym == SDLK_LEFT) {
-        if (realCursorPos > 0) {
-            while(((*content)[--realCursorPos]&0xc0) == 0x80) ;
-        }
-    }
-    else if (c.sym == SDLK_RIGHT) {
-        if ( realCursorPos < content->size() ) {
-            while(++realCursorPos < content->size() && ((*content)[realCursorPos]&0xc0) == 0x80) ;
-        }
-    }
-    else if (c.sym == SDLK_DELETE) {
-        if (realCursorPos < content->size() ) {
-            content->RemoveSubStrUtf8(realCursorPos,1);
-        }
-    }
-    else if (c.sym == SDLK_BACKSPACE) {
-        if (realCursorPos > 0) {
-            realCursorPos -= content->RemoveSubStrUtf8(realCursorPos,-1);
-        }
-    }
-    else if (c.sym == SDLK_KP_ENTER || c.sym == SDLK_RETURN || c.sym == SDLK_UP || c.sym == SDLK_DOWN || c.sym == SDLK_ESCAPE ) {
-        ret = false;
-        //        c.sym = SDLK_DOWN;
-    }
-#ifdef MACOSX_XCODE
-    else if (c.sym == SDLK_v && mod & KMOD_META) {
-        CFDataRef data;
-        if (su_OSXPastePasteboardData(data)) {
-            const UInt8 *bytes = CFDataGetBytePtr(data);
-            CFIndex bytesLength = CFDataGetLength(data);
-            
-            for (int i = 0; i < bytesLength; i++) {
-                if (!InsertChar(bytes[i], false))
-                    break;
+#endif
+        // "bash" keys
+        if (mod & KMOD_CTRL) {
+            if (c.sym == SDLK_a) {
+                moveBeginning = true;
             }
-            
-            CFRelease(data);
+            else if (c.sym == SDLK_e) {
+                moveEnd = true;
+            }
+            else if (c.sym == SDLK_k) {
+                killForwards = true;
+            }
         }
-        else {
+        // moveWordLeft = moveWordRight = deleteWordLeft = deleteWordRight = moveBeginning = moveEnd = killForwards
+
+        if (moveWordLeft) {
+            realCursorPos += content->PosWordLeft(realCursorPos);
+        }
+        else if (moveWordRight) {
+            realCursorPos += content->PosWordRight(realCursorPos);
+        }
+        else if (deleteWordLeft) {
+            realCursorPos += content->RemoveWordLeft(realCursorPos);
+        }
+        else if (deleteWordRight) {
+            content->RemoveWordRight(realCursorPos);
+        }
+        else if (moveBeginning) {
+            realCursorPos = 0;
+        }
+        else if (moveEnd) {
+            realCursorPos = content->size();
+        }
+        else if (killForwards) {
+            content->RemoveSubStr(realCursorPos,content->size()-realCursorPos);
+        }
+        else if (c.sym == SDLK_LEFT) {
+            if (realCursorPos > 0) {
+                while(((*content)[--realCursorPos]&0xc0) == 0x80) ;
+            }
+        }
+        else if (c.sym == SDLK_RIGHT) {
+            if ( realCursorPos < content->size() ) {
+                while(++realCursorPos < content->size() && ((*content)[realCursorPos]&0xc0) == 0x80) ;
+            }
+        }
+        else if (c.sym == SDLK_DELETE) {
+            if (realCursorPos < content->size() ) {
+                content->RemoveSubStrUtf8(realCursorPos,1);
+            }
+        }
+        else if (c.sym == SDLK_BACKSPACE) {
+            if (realCursorPos > 0) {
+                realCursorPos -= content->RemoveSubStrUtf8(realCursorPos,-1);
+            }
+        }
+        else if (c.sym == SDLK_KP_ENTER || c.sym == SDLK_RETURN || c.sym == SDLK_UP || c.sym == SDLK_DOWN || c.sym == SDLK_ESCAPE ) {
             ret = false;
+//            c.sym = SDLK_DOWN;
         }
-    }
-#elif !defined(MACOSX)
-    else if (c.sym == SDLK_v && mod & KMOD_CTRL) {
-        char *scrap = 0;
-        int scraplen;
-        static bool initialized_scrap = false;
-
-        ret = false;
-
-        if(!initialized_scrap && init_scrap() >= 0) {
-            initialized_scrap = true;
-        }
-        if(initialized_scrap) {
-            get_scrap(SCRAP_TEXT, &scraplen, &scrap);
-            if(scraplen > 0) {
-                std::cerr << "scrap: " << scrap << std::endl;
-                for(unsigned char *c = (unsigned char *)scrap; *c; ++c) {
-                    if(!InsertChar(*c)) {
-                        break; // we hit a newline or were trying to
-                              // paste binary stuff
-                    }
-                    ret = true;
+#ifdef MACOSX_XCODE
+#if SDL_VERSION_ATLEAST(2,0,0)
+        else if (c.sym == SDLK_v && mod & KMOD_GUI) {
+#else
+        else if (c.sym == SDLK_v && mod & KMOD_META) {
+#endif
+            CFDataRef data;
+            if (su_OSXPastePasteboardData(data)) {
+                const UInt8 *bytes = CFDataGetBytePtr(data);
+                CFIndex bytesLength = CFDataGetLength(data);
+            
+                for (int i = 0; i < bytesLength; i++) {
+                    if (!InsertChar(bytes[i], false))
+                        break;
                 }
-                //free(scrap);
+            
+                CFRelease(data);
             }
+            else {
+                ret = false;
+            }
+        }
+#elif !defined(MACOSX)
+        else if (c.sym == SDLK_v && mod & KMOD_CTRL) {
+            char *scrap = 0;
+            int scraplen;
+            static bool initialized_scrap = false;
+
+            ret = false;
+
+            if(!initialized_scrap && init_scrap() >= 0) {
+                initialized_scrap = true;
+            }
+            if(initialized_scrap) {
+                get_scrap(SCRAP_TEXT, &scraplen, &scrap);
+                if(scraplen > 0) {
+                    std::cerr << "scrap: " << scrap << std::endl;
+                    for(unsigned char *c = (unsigned char *)scrap; *c; ++c) {
+                        if(!InsertChar(*c)) {
+                            break; // we hit a newline or were trying to
+                                  // paste binary stuff
+                        }
+                        ret = true;
+                    }
+                    //free(scrap);
+                }
+            }
+        }
+#endif
+#if SDL_VERSION_ATLEAST(2,0,0)
+    }
+    else if (e.type==SDL_TEXTINPUT) {
+
+         unsigned char c = (unsigned char)(0xff & e.text.text[0]);
+         // hmmm, how portable is it ??? anyway, expected unicode UTF8 encoding, so just to check it is working ...
+         // TO BE REWRITTEN THE RIGHT WAY... 
+         int utf8 = 0;
+         if (c < 0x80)
+             utf8 = e.text.text[0];
+         else if ((c >> 5) ==0x6)
+             utf8 = e.text.text[0]*0xff+e.text.text[1];
+         else if ((c >> 4) == 0xe)
+             utf8 = e.text.text[0]*0xffff+e.text.text[1]*0xff+e.text.text[2];
+         else if ((c >> 3) == 0x1e)
+             utf8 = e.text.text[0]*0xffffff+e.text.text[1]*0xffff+e.text.text[2]*0xff+e.text.text[3];
+
+//        fprintf(stderr, "Keyboard: text input \"%s\" %i\n", e.text.text, utf8);
+        if ( utf8!=0 && e.text.text[0] != '\n' )
+            ret = InsertChar(utf8);
+//            fprintf(stderr, "UTF8 value: %i\n", utf8);
+    }
+    else if (e.type==SDL_TEXTEDITING) {
+//        fprintf(stderr, "text editing \"%s\", selected range (%d, %d)\n",
+//                e.edit.text, e.edit.start, e.edit.length);
+    }
+#else
+        else {
+            ret = InsertChar(c.unicode);
         }
     }
 #endif
-    else {
-        ret = InsertChar(c.unicode);
-    }
-
     if( realCursorPos > content->size()) {
         realCursorPos=content->size();
     }
@@ -1018,6 +1066,14 @@ bool uMenuItemString::Event(SDL_Event &e){
 #else
     return false;
 #endif
+}
+
+void uMenuItemString::Select() {
+    SDL_StartTextInput();
+}
+
+void uMenuItemString::Deselect() {
+    SDL_StopTextInput();
 }
 
 inline bool IsReservedCodePoint(int unicode)

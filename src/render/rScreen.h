@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tCallback.h"
 #include "tCallbackString.h"
 #include "tRuby.h"
+#include "SDL_version.h"
 
 typedef enum {
     ArmageTron_Desktop=0,ArmageTron_320_200,ArmageTron_Min=ArmageTron_320_200, ArmageTron_320_240,ArmageTron_400_300,
@@ -91,8 +92,15 @@ bool sr_DesktopScreensizeSupported();
 extern rScreenSettings currentScreensetting;
 extern rScreenSettings lastSuccess;
 
+#if SDL_VERSION_ATLEAST(2,0,0)
+struct SDL_Window;
+struct SDL_Renderer;
+extern SDL_Window   *sr_screen;
+extern SDL_Renderer *sr_screenRenderer;
+#else
 struct SDL_Surface;
-extern SDL_Surface *sr_screen;
+extern SDL_Surface  *sr_screen;
+#endif
 
 extern int sr_screenWidth,sr_screenHeight;
 

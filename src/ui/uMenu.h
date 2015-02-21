@@ -263,6 +263,9 @@ public:
 
     virtual bool IsSelectable(){return true;};
 
+    virtual void Select() {}   // called when this item is selected and ready to set
+    virtual void Deselect() {} // called when this item is deselected
+
 protected:
     void SetColor( bool selected, REAL alpha );            //!< Sets the color of text output for this menuitem
 };
@@ -529,6 +532,9 @@ public:
     {
         return colorMode_;
     }
+
+    void Select();
+    void Deselect();
 };
 
 //! A class that can provide auto- completion and supports overwriting of parts for special cases.
