@@ -51,7 +51,8 @@ version=$VERSION
 AC_SUBST(version)
 
 AC_ARG_VAR(XML2_CONFIG,[Configuration script of libxml2 to use, defaults to xml2-config])
-AC_ARG_VAR(SDL_CONFIG,[Configuration script of SDL to use, defaults to sdl2-config])
+AC_ARG_VAR(SDL_CONFIG,[Configuration script of SDL to use, defaults to sdl-config])
+AC_ARG_VAR(SDL2_CONFIG,[Configuration script of SDL to use, defaults to sdl2-config])
 AC_ARG_VAR(FREETYPE_CONFIG,[Configuration script of freetype to use, defaults to freetype-config])
 AC_ARG_VAR(CXXFLAGS,Flags passed to the C++ compiler)
 AC_ARG_VAR(DEBUGLEVEL,[Debug level for developers, normal users can safely ignore it. Accepted values go from 0 to 5. See README-DEVELOPER for details.])
@@ -95,6 +96,17 @@ AC_ARG_ENABLE(dedicated,
 	    ;;
        *) AC_MSG_ERROR(bad value ${enableval} for --enable-dedicated) ;;
      esac],[build_dedicated=false])
+
+AC_ARG_ENABLE(sdl2,
+     AC_HELP_STRING([--enable-sdl2],
+		[enables sdl2 support (default=enabled)]),
+     [case "${enableval}" in
+       yes) use_sdl2=true
+	   	;;
+       no)  use_sdl2=false
+	    ;;
+       *) AC_MSG_ERROR(bad value ${enableval} for --enable-sdl2) ;;
+     esac],[use_sdl2=true])
 
 
 dnl AC_ARG_ENABLE(glout,
@@ -685,7 +697,8 @@ GENERICUNIX
 ]
 )
 
-SDL_CONFIG_DEFAULT=sdl2-config
+SDL2_CONFIG_DEFAULT=sdl2-config
+SDL_CONFIG_DEFAULT=sdl-config
 
 dnl *************************************************
 dnl GL AND  MATHLIB SELECTION ( SYSTEM DEPENDANT)
@@ -743,6 +756,7 @@ SAFEUNIX
 esac
 
 test -z "$SDL_CONFIG" && SDL_CONFIG=$SDL_CONFIG_DEFAULT
+test -z "$SDL2_CONFIG" && SDL2_CONFIG=$SDL2_CONFIG_DEFAULT
 
 AC_SUBST(docstyle)
 
@@ -910,20 +924,40 @@ dnl *************************************************
 dnl         SDL
 dnl *************************************************
 
-test -z "$SDL_CONFIG" && SDL_CONFIG=sdl2-config
+use_sdl1=true
 
-AC_MSG_CHECKING(whether SDL is installed)
-if SDLLIBS=`${SDL_CONFIG} --libs`; then
-    AC_MSG_RESULT(yes)
+if test x$use_sdl2 = xtrue ; then
+   use_sdl1=false
+
+    AC_MSG_CHECKING(whether SDL2 is installed)
+    if SDLLIBS=`${SDL2_CONFIG} --libs`; then
+    	AC_MSG_RESULT(yes)
+    fi
+
+    CPPFLAGS="$CPPFLAGS `${SDL2_CONFIG} --cflags`"
+    LIBS="${SDLLIBS} $LIBS"
+
+    AC_CHECK_FUNC(SDL_GL_SetAttribute,
+    AC_DEFINE(HAVE_LIBSDL,,[Define if you have the library SDL]),
+        use_sdl1=true
+        use_sdl2=false
+    ,)
 fi
 
-CPPFLAGS="$CPPFLAGS `${SDL_CONFIG} --cflags`"
-LIBS="${SDLLIBS} $LIBS"
+if test x$use_sdl1 = xtrue ; then
+    AC_MSG_CHECKING(whether SDL is installed)
+    if SDLLIBS=`${SDL_CONFIG} --libs`; then
+    	AC_MSG_RESULT(yes)
+    fi
 
-AC_CHECK_FUNC(SDL_GL_SetAttribute,
-AC_DEFINE(HAVE_LIBSDL,,[Define if you have the library SDL]),
- AC_MSG_ERROR([You need the library SDL to compile ${progtitle}. Read the file doc/installation.txt.])
-,)
+    CPPFLAGS="$CPPFLAGS `${SDL_CONFIG} --cflags`"
+    LIBS="${SDLLIBS} $LIBS"
+
+    AC_CHECK_FUNC(SDL_GL_GetAttribute,
+    AC_DEFINE(HAVE_LIBSDL,,[Define if you have the library SDL]),
+        AC_MSG_ERROR([You need the library SDL or SDL2 to compile ${progtitle}. Read the file doc/installation.txt.])
+    ,)
+fi
 
 dnl ***************** OPTIONAL STUFF AFTER THIS POINT **********************
 
@@ -931,7 +965,7 @@ dnl *************************************************
 dnl         Sound
 dnl *************************************************
 
-if test x$enable_sound = xyes; then
+if test x$enable_sound = xyes && test x$use_sdl2 = xtrue ; then
 	dnl first do the regular sdl define
  	AC_DEFINE(HAVE_SDL_FOR_SOUND, 1,  [Define if you have SDL_sound, which is part of the core SDL])
 
@@ -941,8 +975,18 @@ if test x$enable_sound = xyes; then
 			LIBS="-lSDL2_mixer $LIBS"],
  		[AC_MSG_ERROR([SDL2_mixer library not found. It is required for now. Sorry.])],
 		[])
+fi
 
-	dnl now we need to know which audio formats to use
+if test x$enable_sound = xyes && test x$use_sdl1 = xtrue ; then
+	dnl first do the regular sdl define
+ 	AC_DEFINE(HAVE_SDL_FOR_SOUND, 1,  [Define if you have SDL_sound, which is part of the core SDL])
+
+	dnl now check for sdl_mixer
+ 	AC_CHECK_LIB(SDL_mixer, Mix_OpenAudio,
+		[AC_DEFINE(HAVE_LIBSDL_MIXER, 1, [Define if you have the SDL_mixer library (-lSDL_mixer).])
+			LIBS="-lSDL_mixer $LIBS"],
+ 		[AC_MSG_ERROR([SDL_mixer library not found. It is required for now. Sorry.])],
+		[])
 fi
 
 dnl *************************************************
@@ -1148,26 +1192,48 @@ dnl	libjpeg not found. Expect small graphical errors ( missing moviepack title s
 dnl	)
 dnl )
 
-AC_CHECK_LIB(SDL2_image, IMG_Load,,
-dnl AC_CHECK_LIB(IMG, main,,
-AC_MSG_ERROR([You need the library SDL2_image to compile ${progtitle}.]
-dnl )
-))
+if test x$use_sdl2 = xtrue; then
+    AC_CHECK_LIB(SDL2_image, IMG_Load,,
+    AC_MSG_ERROR([You need the library SDL2_image to compile ${progtitle}.]
+    ))
 
-dnl look for the right header for SDL2_image
-AC_CHECK_HEADERS(SDL_image.h,,
-[
-AC_MSG_WARN([SDL_image header not found where it should be ( the SDL include directory ).
-Trying fallback.])
-AC_CHECK_HEADERS(SDL2/SDL_image.h,,
-[AC_MSG_WARN([
-SDL2_image header not found. The library is there, so something must be unusual
-in your setup: SDL_image.h does not reside in the same folder as the rest of the SDL
-inlcudes and not in any SDL subdirectory in the inclue path. If you know the
-correct path to it, edit src/render/rTexture.cpp and enter it there.])]
-)
-]
-)
+    dnl look for the right header for SDL2_image
+    AC_CHECK_HEADERS(SDL_image.h,,
+    [
+    AC_MSG_WARN([SDL_image header not found where it should be ( the SDL include directory ).
+    Trying fallback.])
+    AC_CHECK_HEADERS(SDL2/SDL_image.h,,
+    [AC_MSG_WARN([
+    SDL2_image header not found. The library is there, so something must be unusual
+    in your setup: SDL_image.h does not reside in the same folder as the rest of the SDL
+    inlcudes and not in any SDL subdirectory in the inclue path. If you know the
+    correct path to it, edit src/render/rTexture.cpp and enter it there.])]
+    )
+    ]
+    )
+fi
+
+if test x$use_sdl1 = xtrue; then
+    AC_CHECK_LIB(SDL_image, IMG_Load,,
+    AC_MSG_ERROR([You need the library SDL_image to compile ${progtitle}.]
+    ))
+
+    dnl look for the right header for SDL_image
+    AC_CHECK_HEADERS(SDL_image.h,,
+    [
+    AC_MSG_WARN([SDL_image header not found where it should be ( the SDL include directory ).
+    Trying fallback.])
+    AC_CHECK_HEADERS(SDL/SDL_image.h,,
+    [AC_MSG_WARN([
+    SDL_image header not found. The library is there, so something must be unusual
+    in your setup: SDL_image.h does not reside in the same folder as the rest of the SDL
+    inlcudes and not in any SDL subdirectory in the inclue path. If you know the
+    correct path to it, edit src/render/rTexture.cpp and enter it there.])]
+    )
+    ]
+    )
+fi
+
 
 ifelse(,,,
 [

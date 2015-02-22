@@ -630,7 +630,11 @@ public:
         tASSERT( id >= 0 && id < SDL_NumJoysticks() );
 
         SDL_Joystick * stick = SDL_JoystickOpen( id );
+#if SDL_VERSION_ATLEAST(2,0,0)
         name = SDL_JoystickName( stick );
+#else
+        name = SDL_JoystickName( id );
+#endif
 
         std::ostringstream iName;
         iName << "JOYSTICK_";

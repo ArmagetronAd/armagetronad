@@ -1069,11 +1069,15 @@ bool uMenuItemString::Event(SDL_Event &e){
 }
 
 void uMenuItemString::Select() {
+#if SDL_VERSION_ATLEAST(2,0,0)
     SDL_StartTextInput();
+#endif
 }
 
 void uMenuItemString::Deselect() {
+#if SDL_VERSION_ATLEAST(2,0,0)
     SDL_StopTextInput();
+#endif
 }
 
 inline bool IsReservedCodePoint(int unicode)
