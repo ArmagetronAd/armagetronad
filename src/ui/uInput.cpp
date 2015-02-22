@@ -107,10 +107,13 @@ uAction * uAction::Find( char const * name )
 
 typedef std::vector< uInput * > uInputs;
 uInputs su_inputs;
-std::map< std::string, uInput * > su_inputMap;
+std::map< std::string, uInput * > su_inputMap; // map from persistent ID to input
+
+// alternative map for legacy keycodes
+std::map< std::string, uInput * > su_alternativeInputMap;
 
 uInput::uInput( tString const & persistentID, tString const & name )
-        : persistentID_( persistentID ), name_( name )
+  : persistentID_( persistentID ), name_( name )
         , pressed_( 0 )
 {
     ID_ = su_inputs.size();
@@ -128,7 +131,10 @@ static uInput * su_GetInput( tString const & persistentID )
 {
     try
     {
-        return su_inputMap[ persistentID ];
+        uInput * ret = su_inputMap[ persistentID ];
+        if(!ret)
+            ret = su_alternativeInputMap[ persistentID ];
+        return ret;
     }
     catch (...)
     {
@@ -180,6 +186,21 @@ static uInput * su_NewInput( char const * ID, char const * name )
     return su_GetAutoDeleteInput().Create( tString( ID ), tString( name ) );
 }
 
+static void su_WriteSanitizedKeyname(std::ostream & s, char const * input)
+{
+    for ( char const * c = input; *c; ++c )
+    {
+        if ( isblank( *c ) )
+        {
+            s << "_";
+        }
+        else
+        {
+            s << char(toupper( *c ));
+        }
+    }
+}
+
 // class that manages keyboard input
 class uKeyInput
 {
@@ -192,38 +213,93 @@ public:
         for ( int i = 0; i <= SDLK_LAST; ++i )
 #endif
         {
+            tString displayID;
+            tString persistentID;
+            tString alternativePersistentID;
 #ifndef DEDICATED
 #if SDL_VERSION_ATLEAST(2,0,0)
-            char const * ID_Raw = SDL_GetKeyName(SDL_GetKeyFromScancode(static_cast< SDL_Scancode >( i ) ));
-#else
-            char const * ID_Raw = SDL_GetKeyName(static_cast< SDLKey >( i ) );
-#endif
-#else
-            char const * ID_Raw = "unknown key";
-#endif
-            std::ostringstream id;
-            id << "KEY_";
-            if ( strcmp( ID_Raw, "unknown key" ) == 0 )
+            SDL_Scancode scancode = static_cast<SDL_Scancode>(i);
+            SDL_Keycode key = SDL_GetKeyFromScancode(scancode);
+            displayID = SDL_GetKeyName(key);
+            switch(scancode)
             {
-                id << "UNKNONW_" << i;
-            }
-            else
+            default:
             {
-                for ( char const * c = ID_Raw; *c; ++c )
+                std::ostringstream s;
+                const char * name = SDL_GetScancodeName(scancode); // probably the same as displayID for US keyboards
+                if(name && name[0] >= ' ')
                 {
-                    if ( isblank( *c ) )
-                    {
-                        id << "_";
-                    }
-                    else
-                    {
-                        id << char(toupper( *c ));
-                    }
+                    s << "SCANCODE_";
+                    su_WriteSanitizedKeyname(s, name);
                 }
+                else
+                {
+                    s << "UNKNOWNSCANCODE_" << i;
+                }
+                persistentID = s.str();
+            }
+            break;
+            // couple of special cases
+            case SDL_SCANCODE_BACKSLASH:
+                persistentID = "SCANCODE_BACKSLASH";
+                break;
+            case SDL_SCANCODE_APOSTROPHE:
+                persistentID = "SCANCODE_APOSTROPHE";
+                break;
+            case SDL_SCANCODE_SLASH:
+                persistentID = "SCANCODE_SLASH";
+                break;
+            case SDL_SCANCODE_LEFTBRACKET:
+                persistentID = "SCANCODE_LEFTBRACKET";
+                break;
+            case SDL_SCANCODE_RIGHTBRACKET:
+                persistentID = "SCANCODE_RIGHTBRACKET";
+                break;
+            case SDL_SCANCODE_KP_LEFTPAREN:
+                persistentID = "SCANCODE_KP_LEFTPAREN";
+                break;
+            case SDL_SCANCODE_KP_RIGHTPAREN:
+                persistentID = "SCANCODE_KP_RIGHTPAREN";
+                break;
+            case SDL_SCANCODE_KP_LEFTBRACE:
+                persistentID = "SCANCODE_KP_LEFTBRACE";
+                break;
+            case SDL_SCANCODE_KP_RIGHTBRACE:
+                persistentID = "SCANCODE_KP_RIGHTBRACE";
+                break;
+            }
+#else
+            SDLKey key = static_cast<SDLKey>(i);
+            {
+                displayID = SDL_GetKeyName(static_cast< SDLKey >( i ) );
+            }
+#endif
+#endif
+            if(displayID.size() == 0)
+            {
+                std::ostringstream s;
+                s << "UNKNOWN_" << i;
+                displayID = s.str();
+            }
+            {
+                std::ostringstream s;
+                s << "KEY_";
+                su_WriteSanitizedKeyname(s, displayID.c_str());
+                alternativePersistentID = s.str();
+            }
+            if(persistentID.size() == 0)
+            {
+                persistentID = alternativePersistentID;
             }
 
             // store new input key
-            sdl_keys[i] = su_NewInput( id.str(), tString(ID_Raw) );
+            uInput * pNewInput = su_NewInput( persistentID, displayID );
+            sdl_keys[i] = pNewInput;
+
+            // store in alternative map
+            if(alternativePersistentID != persistentID)
+                su_alternativeInputMap[ alternativePersistentID ] = pNewInput;
+
 
             tASSERT( sdl_keys[i]->ID() == i );
         }
@@ -374,6 +450,41 @@ public:
                 std::istringstream readValue( id );
                 int value = -1;
                 readValue >> value;
+
+#if SDL_VERSION_ATLEAST(2,0,0)
+                // map from old SDLKey to SDL_Scancode
+                switch(value)
+                {
+                default:
+                    if(value < 127)
+                    {
+                        // regular keys
+                        value = SDL_GetScancodeFromKey(value);
+                    }
+                    else if( value >= 282 && value <= 293)
+                    {
+                        // function keys
+                        value = value - 282 + SDL_SCANCODE_F1;
+                    }
+                    else
+                    {
+                        // no mapping, ignore
+                        return;
+                    }
+                    break;
+                    // special keys
+                case 273: value = SDL_SCANCODE_UP; break;
+                case 274: value = SDL_SCANCODE_DOWN; break;
+                case 275: value = SDL_SCANCODE_RIGHT; break;
+                case 276: value = SDL_SCANCODE_LEFT; break;
+                case 277: value = SDL_SCANCODE_INSERT; break;
+                case 278: value = SDL_SCANCODE_HOME; break;
+                case 279: value = SDL_SCANCODE_END; break;
+                case 280: value = SDL_SCANCODE_PAGEUP; break;
+                case 281: value = SDL_SCANCODE_PAGEDOWN; break;
+                    // other keys have no unique mapping
+                }
+#endif
 
                 if ( value >= 0 && value < (int)su_inputs.size() )
                 {

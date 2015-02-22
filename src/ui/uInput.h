@@ -251,7 +251,7 @@ public:
     std::string const Name(){ return name_; }
 private:
     int ID_;               //!< local ID for this program run
-    tString persistentID_; //!< global ID that does not change over program runs
+    tString persistentID_; //!< global ID that does not change over program runs; scancode for SDL2
     tString name_;         //!< human readable name
 
     tJUST_CONTROLLED_PTR< uBind > bound_; //!< the binding
