@@ -804,7 +804,7 @@ AC_CHECK_LIB(xml2,xmlParseMemory,
 CPPFLAGS="$CPPFLAGS `$XML2_CONFIG --cflags`"
 LIBS="`$XML2_CONFIG --libs` $LIBS"
 AC_DEFINE(HAVE_LIBXML2, 1, [Define if you have the xml2 library (-lxml2).]),
-AC_MSG_ERROR([You need the library xml2 to compile ${progtitle}. Read the file doc/installation.txt.])
+AC_MSG_ERROR([You need the library xml2 to compile ${progtitle}. Read the file documentation/installation.txt.])
 ,`$XML2_CONFIG --libs`)
 
 AC_CHECK_FUNC(xmlParserInputBufferCreateFilenameDefault,
@@ -820,7 +820,6 @@ AC_MSG_ERROR([
 dnl *************************************************
 dnl         Threading
 dnl *************************************************
-
 AC_LANG([C++])
 
 dnl Boost.System is a mandatory dependency of Boost.Thread
@@ -950,7 +949,7 @@ if test x$use_sdl2 = xtrue ; then
     AC_DEFINE(HAVE_LIBSDL,,[Define if you have the library SDL]),
         use_sdl2=false
         if test x$use_sdl1 != xtrue ; then
-            AC_MSG_ERROR([You need the library SDL2 to compile ${progtitle}. Read the file doc/installation.txt.])
+            AC_MSG_ERROR([You need the library SDL2 to compile ${progtitle}. Read the file documentation/installation.txt.])
         fi
     ,)
 fi
@@ -970,7 +969,7 @@ if test x$use_sdl1 = xtrue ; then
 
     AC_CHECK_FUNC(SDL_GL_GetAttribute,
     AC_DEFINE(HAVE_LIBSDL,,[Define if you have the library SDL]),
-        AC_MSG_ERROR([You need the library SDL or SDL2 to compile ${progtitle}. Read the file doc/installation.txt.])
+        AC_MSG_ERROR([You need the library SDL or SDL2 to compile ${progtitle}. Read the file documentation/installation.txt.])
     ,)
 fi
 
@@ -1044,7 +1043,7 @@ AC_CHECK_LIB($SYS_GL_LIB, glVertex3f,,
  AC_CHECK_LIB($SYS_GL_LIB, glBegin,,AC_MSG_ERROR([
   You need Mesa or an OpenGL-System to compile ${progtitle}.
   Maybe your libGL needs the X libraries and your system does not
-  find them? Read the file doc/installation.txt.]),-L/usr/X11R6/lib)
+  find them? Read the file documentation/installation.txt.]),-L/usr/X11R6/lib)
 )
 
 dnl check for 3DFX-MESA
@@ -1063,7 +1062,7 @@ dnl AC_CHECK_LIB($SYS_GLU_LIB, gluBuild2DMipmaps,,
 AC_CHECK_LIB($SYS_GLU_LIB, gluBuild3DMipmaps,,
 AC_MSG_ERROR([
 You need GLU to compile ${progtitle}; it SHOULD have come with OpenGL.
-Read the file doc/installation.txt.]))
+Read the file documentation/installation.txt.]))
 
 fi
 
@@ -1115,7 +1114,7 @@ if test -z "$ARMAGETRONAD_OS_X_TOOLKIT"; then
 	FTGL_LIBS="`pkg-config ftgl --libs`"
 fi
 
-FTGL_ERROR="You need the library ftgl in at least version 2.1.3~rc5 to compile Armagetron. Read the file doc/installation.txt."
+FTGL_ERROR="You need the library ftgl in at least version 2.1.3~rc5 to compile Armagetron. Read the file documentation/installation.txt."
 
 AC_CHECK_LIB(ftgl,ftglRenderGlyph,
 CPPFLAGS="$CPPFLAGS $FTGL_CFLAGS"
@@ -1174,7 +1173,7 @@ AC_CHECK_LIB(freetype,FT_Init_FreeType,
 CPPFLAGS="$CPPFLAGS `$FREETYPE_CONFIG --cflags`"
 LIBS="$LIBS `$FREETYPE_CONFIG --libs`"
 ,
-AC_MSG_ERROR([You need the library freetype to compile Armagetron. Read the file doc/installation.txt.])
+AC_MSG_ERROR([You need the library freetype to compile Armagetron. Read the file documentation/installation.txt.])
 )
 
 dnl FTGL again. Check for the headers. First, try the individual header.
