@@ -108,6 +108,17 @@ AC_ARG_ENABLE(sdl2,
        *) AC_MSG_ERROR(bad value ${enableval} for --enable-sdl2) ;;
      esac],[use_sdl2=true])
 
+AC_ARG_ENABLE(sdl1,
+     AC_HELP_STRING([--enable-sdl1],
+		[enables sdl1.X support (default=enabled)]),
+     [case "${enableval}" in
+       yes) use_sdl1=true
+	   	;;
+       no)  use_sdl1=false
+	    ;;
+       *) AC_MSG_ERROR(bad value ${enableval} for --enable-sdl1) ;;
+     esac],[use_sdl1=true])
+
 
 dnl AC_ARG_ENABLE(glout,
 dnl [  --enable-glout          enable graphical output; otherwise, compile
@@ -924,11 +935,9 @@ dnl *************************************************
 dnl         SDL
 dnl *************************************************
 
-use_sdl1=true
+#use_sdl1=true
 
 if test x$use_sdl2 = xtrue ; then
-   use_sdl1=false
-
     AC_MSG_CHECKING(whether SDL2 is installed)
     if SDLLIBS=`${SDL2_CONFIG} --libs`; then
     	AC_MSG_RESULT(yes)
@@ -939,9 +948,15 @@ if test x$use_sdl2 = xtrue ; then
 
     AC_CHECK_FUNC(SDL_GL_SetAttribute,
     AC_DEFINE(HAVE_LIBSDL,,[Define if you have the library SDL]),
-        use_sdl1=true
         use_sdl2=false
+        if test x$use_sdl1 != xtrue ; then
+            AC_MSG_ERROR([You need the library SDL2 to compile ${progtitle}. Read the file doc/installation.txt.])
+        fi
     ,)
+fi
+
+if test x$use_sdl2 = xtrue ; then
+   use_sdl1=false
 fi
 
 if test x$use_sdl1 = xtrue ; then
