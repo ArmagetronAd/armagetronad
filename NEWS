@@ -1,3 +1,14 @@
+Changes since 0.2.8.3.2:
+- security fix: do not read ahead of the beginning of network buffer.
+- security fix: don't attribute network errors from processing random
+  packets to the connection to the server 
+- security fix: while at it, don't process random packets unless they
+  may be important
+- fix for potential crash with friend list filtering
+- intel driver compatibility
+- fix for rare crash with sound lock
+- fix for camera turning for bizarre axis configurations
+
 Changes since 0.2.8.3.1:
 - security fix: old style action commands from clients no loger cause hangs and crashes
 - security fix: oversized packets are ignored properly
