@@ -54,9 +54,10 @@ Christian Reitwiessner
 Edd Keefe
     contributed Mac OS X icon and the title screen
 
-Emmanuel Rollet
+Emmanuel Rollet (voodoo)
     clipping and basic movement for the overhead map, camview widget
-
+    SDL2 support, touch controls
+    
 Fabrice Holbe
     original Moviepack and font
 
