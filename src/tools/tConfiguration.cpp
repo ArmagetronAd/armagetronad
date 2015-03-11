@@ -993,10 +993,11 @@ void st_LoadConfig( bool printChange )
 #else
     if (st_FirstUse)
     {
-#if SDL_VERSION_ATLEAST(2,0,0)
-        Load( config, "sdl2_default.cfg" );
-#else
         Load( config, "default.cfg" );
+#if SDL_VERSION_ATLEAST(2,0,0)
+        Load( config, "sdl2/default.cfg" );
+#else
+        Load( config, "sdl1/default.cfg" );
 #endif
     }
 #endif

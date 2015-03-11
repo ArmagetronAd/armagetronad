@@ -10,8 +10,12 @@ nobase_config_DATA=default.cfg master.srv settings.cfg\
 	uphillbothways.cfg\
 	serverconfigcache.cfg\
     settings_authentication.cfg\
-	keys_cursor.cfg   keys_wasd.cfg  keys_zqsd.cfg\
-    keys_twohand.cfg  keys_x.cfg keys_cursor_single.cfg\
+	sdl1/default.cfg\
+	sdl1/keys_cursor.cfg   sdl1/keys_wasd.cfg  sdl1/keys_zqsd.cfg\
+	sdl1/keys_twohand.cfg  sdl1/keys_x.cfg sdl1/keys_cursor_single.cfg\
+	sdl2/default.cfg\
+	sdl2/keys_cursor.cfg   sdl2/keys_wasd.cfg\
+	sdl2/keys_twohand.cfg  sdl2/keys_x.cfg sdl2/keys_cursor_single.cfg\
 	zonestyle_vertical.cfg zonestyle_flat.cfg zonestyle_combined.cfg\
     examples/breakfast_in_hell.cfg examples/single_use_turbo.cfg\
 	examples/fortress_soccer.cfg examples/death_zone.cfg\
