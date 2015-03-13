@@ -38,12 +38,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 // GLEW, if active, needs to be included before gl.h
 #include "rGLEW.h"
-#include "GL/glu.h"
+
 
 // and we don't want the SDL extension definitions, they conflict with GLEW.
 #define NO_SDL_GLEXT
 
 #include <SDL_opengl.h>
+
+// GLU
+#ifdef __APPLE__
+#include <OpenGL/glu.h>
+#else
+#include <GL/glu.h>
+#endif
 
 #else
 
