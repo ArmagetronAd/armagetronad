@@ -275,17 +275,25 @@ void rSurface::Create( SDL_Surface * surface )
             break;
 
         case 3:
+#ifdef GL_BRG
             if (surface_->format->Rmask == 0x000000ff)
                 format_ = GL_RGB;
             else
-                format_ = GL_BGR; 
+                format_ = GL_BGR;
+#else
+            format_ = GL_RGB;
+#endif
             break;
 
         case 4:
+#ifdef GL_BGRA
             if (surface_->format->Rmask == 0x000000ff)
                 format_ = GL_RGBA;
             else
-                format_ = GL_BGRA; 
+                format_ = GL_BGRA;
+#else
+            format_ = GL_RGBA;
+#endif
             break;
 
         default:
@@ -295,9 +303,9 @@ void rSurface::Create( SDL_Surface * surface )
                     SDL_CreateRGBSurface(SDL_SWSURFACE, 1, 1,
                                          32,
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-                                         0xFF0000, 0x00FF00, 0x0000FF 
+                                         0xFF0000, 0x00FF00, 0x0000FF
 #else
-                                         0x0000FF, 0x00FF00, 0xFF0000 
+                                         0x0000FF, 0x00FF00, 0xFF0000
 #endif
                                          ,0xFF000000);
 
@@ -370,7 +378,7 @@ void rSurface::CreateQuarter( rSurface const & big )
             int ind = j*bytesPerPixel;
             int sind1 = (j<<1)*bytesPerPixel;
             int sind2 = (((j<<1)+1)%sourceW)*bytesPerPixel;
-            
+
             for( int b = 0; b < bytesPerPixel; ++b )
             {
                 // box filter
@@ -723,7 +731,7 @@ void rISurfaceTexture::Upload( rSurface const & surface )
                 con << "\nWARNING: non-power-of-two texture dimensions in unknown texture. If you're the artist creating one, recheck your work, it may cease to work in future versions or even not work right now for some people.\n\n";
             }
         }
-        
+
         // no power of two, delegate to legacy function without checks
         gluBuild2DMipmaps(GL_TEXTURE_2D,format,tex->w,tex->h,
                           texformat,GL_UNSIGNED_BYTE,tex->pixels);
@@ -736,7 +744,7 @@ void rISurfaceTexture::Upload( rSurface const & surface )
         rSurface even(surface), odd(surface);
         rSurface * current = &even;
         rSurface * next = &odd;
-        
+
         bool sizeOK = false;
         while(true)
         {
@@ -750,7 +758,7 @@ void rISurfaceTexture::Upload( rSurface const & surface )
                 // so far, so good; check via proxy
                 glTexImage2D(GL_PROXY_TEXTURE_2D,level,format,tex->w,tex->h,0,
                              texformat,GL_UNSIGNED_BYTE,tex->pixels);
-                GLint width; 
+                GLint width;
                 glGetTexLevelParameteriv(GL_PROXY_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
                 sizeOK = ( width != 0 );
             }
@@ -1093,7 +1101,7 @@ static void sr_VerifyResourceTexture( tString const & resourcePath )
 
 rResourceTexture::InternalTex::InternalTex(tResourcePath const &path) : rFileTexture(rTextureGroups::TEX_OBJ, tResourceManager::locateResource(path.Path().c_str()).c_str(), true, true, true, 0), use_(1), path_(path) {
     sr_VerifyResourceTexture( path.Path() );
-    
+
     textures.push_back(this);
 }
 

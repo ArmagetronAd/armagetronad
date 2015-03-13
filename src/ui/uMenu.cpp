@@ -1,29 +1,29 @@
 /*
- 
+
 *************************************************************************
- 
+
 ArmageTron -- Just another Tron Lightcycle Game in 3D.
 Copyright (C) 2000  Manuel Moos (manuel@moosnet.de)
 Copyright (C) 2004  Armagetron Advanced Team (http://sourceforge.net/projects/armagetronad/)
- 
+
 **************************************************************************
- 
+
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
 as published by the Free Software Foundation; either version 2
 of the License, or (at your option) any later version.
- 
+
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
- 
+
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 ***************************************************************************
- 
+
 */
 
 #include "aa_config.h"
@@ -357,7 +357,7 @@ void uMenu::OnEnter(){
             {
                 helpAlpha = 1;
             }
-            
+
             disphelp = helpAlpha > 0;
             if ( items[selected]->DisplayHelp( disphelp, menuBot, helpAlpha ) )
             {
@@ -987,12 +987,12 @@ bool uMenuItemString::Event(SDL_Event &e){
             if (su_OSXPastePasteboardData(data)) {
                 const UInt8 *bytes = CFDataGetBytePtr(data);
                 CFIndex bytesLength = CFDataGetLength(data);
-            
+
                 for (int i = 0; i < bytesLength; i++) {
                     if (!InsertChar(bytes[i], false))
                         break;
                 }
-            
+
                 CFRelease(data);
             }
             else {
@@ -1032,7 +1032,7 @@ bool uMenuItemString::Event(SDL_Event &e){
 
          unsigned char c = (unsigned char)(0xff & e.text.text[0]);
          // hmmm, how portable is it ??? anyway, expected unicode UTF8 encoding, so just to check it is working ...
-         // TO BE REWRITTEN THE RIGHT WAY... 
+         // TO BE REWRITTEN THE RIGHT WAY...
          int utf8 = 0;
          if (c < 0x80)
              utf8 = e.text.text[0];
@@ -1069,14 +1069,18 @@ bool uMenuItemString::Event(SDL_Event &e){
 }
 
 void uMenuItemString::Select() {
+#ifndef DEDICATED
 #if SDL_VERSION_ATLEAST(2,0,0)
     SDL_StartTextInput();
+#endif
 #endif
 }
 
 void uMenuItemString::Deselect() {
+#ifndef DEDICATED
 #if SDL_VERSION_ATLEAST(2,0,0)
     SDL_StopTextInput();
+#endif
 #endif
 }
 
@@ -1089,10 +1093,10 @@ inline bool IsReservedCodePoint(int unicode)
      Function keys code points. See the “Function-Key Unicodes” section.
      http://developer.apple.com/DOCUMENTATION/Cocoa/Reference/ApplicationKit/Classes/NSEvent_Class/Reference/Reference.html
      */
-     
+
     reserved = reserved || (unicode >= 0xF700 && unicode <= 0xF747);
 #endif
-    
+
     return reserved;
 }
 
@@ -1104,7 +1108,7 @@ bool uMenuItemString::InsertChar(int unicode, bool convert) {
         if ( content->LenUtf8() < maxLength_ )
         {
             tString utf8string;
-            
+
             if (convert)
             {
                 unsigned short utf16string[1];
@@ -1115,11 +1119,11 @@ bool uMenuItemString::InsertChar(int unicode, bool convert) {
             {
                 utf8string.push_back(unicode);
             }
-            
+
             content->insert(realCursorPos, utf8string);
             realCursorPos+=utf8string.size();
         }
-        
+
         return true;
     }
     else {
@@ -1604,7 +1608,7 @@ bool uMenu::IdleInput( bool processInput )
     SDL_Event event;
     uInputProcessGuard inputProcessGuard;
     while (!s_idleBackground && su_GetSDLInput(event))
-    {   
+    {
         switch (event.type)
         {
         case SDL_KEYDOWN:
@@ -1617,11 +1621,11 @@ bool uMenu::IdleInput( bool processInput )
                 break;
             default:
                 break;
-            }   
+            }
         default:
             break;
         }
-    }   
+    }
 
     return uMenu::quickexit != uMenu::QuickExit_Off;
 #endif
@@ -1677,7 +1681,7 @@ bool uAnimationFrame::Load( std::vector< uAnimationFrame > & animation, char con
     {
         return false;
     }
-        
+
     while( f.good() )
     {
         tString l;
@@ -1808,15 +1812,15 @@ void uAnimationPlayer::Render( tRectangle & drawArea )
 
         bool end = ( iter+1 == textures_.end() );
         if ( end )
-        { 
+        {
             glAlphaFunc(GL_GREATER,1-completion);
-            
+
         }
         else
         {
             glAlphaFunc(GL_GREATER,0);
         }
-        
+
         Color(1,1,1);
         BeginQuads();
         TexCoord(0,1);
@@ -1946,7 +1950,7 @@ bool uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL 
                 TexCoord(0,1);
                 Vertex(-1,-1);
                 RenderEnd();
-                
+
                 REAL w=16*3/640.0;
                 REAL h=32*3/480.0;
 

@@ -128,9 +128,9 @@ bool sr_DesktopScreensizeSupported()
 #endif
 
     return
-    sdlVersion.major > 1 || 
+    sdlVersion.major > 1 ||
     ( sdlVersion.major == 1 &&
-      ( sdlVersion.minor > 2 || 
+      ( sdlVersion.minor > 2 ||
         ( sdlVersion.minor == 2 &&
           ( sdlVersion.patch >= 10 ) ) ) );
 #else
@@ -467,13 +467,13 @@ static void sr_SetSwapControlAuto( bool after = false )
     if ( tRecorder::IsRecording() )
     {
         // recordings are always done with VSync enabled
-#ifndef DEBUG        
+#ifndef DEBUG
         sr_SetSwapControl( 1, after );
 #endif
     }
     else if( rSysDep::IsBenchmark() )
     {
-#ifndef DEBUG        
+#ifndef DEBUG
         sr_SetSwapControl( 0, after );
 #endif
     }
@@ -518,6 +518,7 @@ static void sr_CompleteGLAttributes()
 // bool sr_useDirectX = false;
 // static bool use_directx_back = false;
 
+#ifndef DEDICATED
 #if SDL_VERSION_ATLEAST(2,0,0)
 int SDL_VideoModeOK(int width, int height, int bpp, Uint32 flags) {
     int i, actual_bpp = 0;
@@ -570,6 +571,7 @@ int SDL_EnableUNICODE(int enable) {
     return previous;
 }
 #endif
+#endif
 
 static bool lowlevel_sr_InitDisplay(){
     #ifndef DEDICATED
@@ -597,7 +599,7 @@ static bool lowlevel_sr_InitDisplay(){
         // select sane defaults in case the following operation fails
         sr_desktopWidth = 800;
         sr_desktopHeight = 600;
-        
+
 #if SDL_VERSION_ATLEAST(2,0,0)
         SDL_DisplayMode mode;
         if (!SDL_GetDesktopDisplayMode(0, &mode)) {
@@ -629,7 +631,7 @@ static bool lowlevel_sr_InitDisplay(){
                 desktopCD_B  = countBits(pixelFormat->Bmask);
             }
 
-            // the struct components we read here only exist since 
+            // the struct components we read here only exist since
             // SDL 1.2.10. The version check here is to safeguard against
             // code compiled against SDL 1.2.10, but linked with an earlier
             // version, accessing data out of bounds.
@@ -749,13 +751,13 @@ static bool lowlevel_sr_InitDisplay(){
                 if (CD_fsinv >= 15){
                     // yes! change the mode
                     currentScreensetting.fullscreen=!currentScreensetting.fullscreen;
-#if SDL_VERSION_ATLEAST(2,0,0)  
+#if SDL_VERSION_ATLEAST(2,0,0)
                     attrib ^= SDL_WINDOW_FULLSCREEN;
                     SDL_SetWindowFullscreen(sr_screen, SDL_WINDOW_FULLSCREEN);
                     SDL_SetRelativeMouseMode(SDL_TRUE);
 #else
                     attrib ^= SDL_FULLSCREEN;
-#endif          
+#endif
                     CD = CD_fsinv;
                 }
             }
@@ -774,7 +776,7 @@ static bool lowlevel_sr_InitDisplay(){
             sr_screenWidth = sr_desktopWidth;
             sr_screenHeight = sr_desktopHeight;
         }
-#if !SDL_VERSION_ATLEAST(2,0,0)  
+#if !SDL_VERSION_ATLEAST(2,0,0)
         else
         {
             // have the screen reinited
@@ -898,7 +900,7 @@ static bool lowlevel_sr_InitDisplay(){
         sr_blacklistDisplayLists=true;
     }
 
-   
+
 #ifndef WIN32
     if(!strstr(gl_renderer,"Voodoo3"))
     #endif

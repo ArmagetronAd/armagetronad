@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-  
+
 ***************************************************************************
 
 */
@@ -44,7 +44,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tResourceManager.h"
 #include "tError.h"
 #include "utf8.h"
-#include <SDL_version.h>
+#include "rSDL.h"
 
 #include <vector>
 #include <string.h>
@@ -63,21 +63,21 @@ static void st_ToggleConfigItem( std::istream & s )
 {
     tString name;
     s >> name;
-    
+
     if ( name.Size() == 0 )
     {
         con << tOutput( "$toggle_usage_error" );
         return;
     }
-    
+
     tConfItemBase *base = tConfItemBase::FindConfigItem( name );
-    
+
     if ( !base )
     {
         con << tOutput( "$config_command_unknown", name );
         return;
     }
-    
+
     tConfItem< bool > *confItem = dynamic_cast< tConfItem< bool > * >( base );
     if ( confItem && confItem->Writable() )
     {
@@ -216,15 +216,15 @@ public:
 
             if( ci->requiredLevel < tCurrentAccessLevel::GetAccessLevel() )
             {
-                con << tOutput( "$access_level_nochange_now", 
-                                name, 
+                con << tOutput( "$access_level_nochange_now",
+                                name,
                                 tCurrentAccessLevel::GetName( ci->requiredLevel ),
                                 tCurrentAccessLevel::GetName( tCurrentAccessLevel::GetAccessLevel() ) );
             }
             else if( level < tCurrentAccessLevel::GetAccessLevel() )
             {
-                con << tOutput( "$access_level_nochange_later", 
-                                name, 
+                con << tOutput( "$access_level_nochange_later",
+                                name,
                                 tCurrentAccessLevel::GetName( level ),
                                 tCurrentAccessLevel::GetName( tCurrentAccessLevel::GetAccessLevel() ) );
             }
@@ -477,9 +477,9 @@ void tConfItemBase::LoadLine(std::istream &s){
             {
                 tString discard;
                 discard.ReadLine(s);
-                
+
                 con << tOutput( "$access_level_error",
-                                name,  
+                                name,
                                 tCurrentAccessLevel::GetName( ci->requiredLevel ),
                                 tCurrentAccessLevel::GetName( tCurrentAccessLevel::GetAccessLevel() )
                     );
@@ -822,11 +822,11 @@ void tConfItemBase::LoadAll(std::ifstream &s, bool record )
 bool tConfItemBase::OpenFile( std::ifstream & s, tString const & filename )
 {
     bool ret = tDirectories::Config().Open(s, filename );
-    
+
     static char const * section = "INCLUDE_VOTE";
     tRecorder::Playback( section, ret );
     tRecorder::Record( section, ret );
-    
+
     return ret;
 }
 
@@ -853,7 +853,7 @@ tString configfile(){
 	tString f;
 	//#ifndef WIN32
 	//  f << static_cast<const char *>(getenv("HOME"));
-	//  f << st_LogDir << 
+	//  f << st_LogDir <<
 	//  f << "/.ArmageTronrc";
 	//#else
 		const tPath& vpath = tDirectories::Var();
@@ -948,7 +948,7 @@ static bool st_LoadUserConfigs( char const * const * userConfig, bool latin1, tP
 
     // load the first available user configuration file
     while ( *userConfig )
-    { 
+    {
         if ( Load( path, *userConfig ) )
         {
             st_loadAsLatin1 = false;
@@ -963,7 +963,7 @@ static bool st_LoadUserConfigs( char const * const * userConfig, bool latin1, tP
 
 static bool st_LoadUserConfigs( char const * const * userConfig, bool latin1 )
 {
-    return 
+    return
     st_LoadUserConfigs( userConfig, latin1, tDirectories::Config() ) ||
     st_LoadUserConfigs( userConfig, latin1, tDirectories::Var() );
 }

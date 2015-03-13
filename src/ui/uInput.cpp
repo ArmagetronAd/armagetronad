@@ -451,6 +451,7 @@ public:
                 int value = -1;
                 readValue >> value;
 
+#ifndef DEDICATED
 #if SDL_VERSION_ATLEAST(2,0,0)
                 // map from old SDLKey to SDL_Scancode
                 switch(value)
@@ -484,6 +485,7 @@ public:
                 case 281: value = SDL_SCANCODE_PAGEDOWN; break;
                     // other keys have no unique mapping
                 }
+#endif
 #endif
 
                 if ( value >= 0 && value < (int)su_inputs.size() )
@@ -1100,12 +1102,12 @@ static void su_TransformEvent( SDL_Event & e, std::vector< uTransformEventInfo >
                         last_time = e.tfinger.timestamp;
                     }
                     last_time = e.tfinger.timestamp;
-                        
+
                     // cumulate some motion to be more accurate
                     dx+=e.tfinger.dx;
                     dy+=e.tfinger.dy;
                     ++count;
-                    
+
                     if (count==4) {
                         // if move is big enough, process it
                         if (dx*dx+dy*dy>0.0001) {
@@ -1599,7 +1601,7 @@ bool uBindPlayer::DoActivate(REAL x){
     {
         act->GetTooltip()->Count(ePlayer);
     }
-    
+
     return ret;
 }
 
@@ -1690,7 +1692,7 @@ uActionTooltip::~uActionTooltip()
 {
     if( action_.tooltip_ == this )
         action_.tooltip_ = NULL;
-        
+
 }
 
 bool uActionTooltip::Help( int player )
@@ -1722,9 +1724,9 @@ bool uActionTooltip::Help( int player )
         {
             continue;
         }
-        
+
         int activationsLeft = tooltip->activationsLeft_[player];
-        if( activationsLeft > 0 && 
+        if( activationsLeft > 0 &&
             ( !mostWanted || mostWanted->activationsLeft_[player] < activationsLeft ) )
         {
             mostWanted = tooltip;
