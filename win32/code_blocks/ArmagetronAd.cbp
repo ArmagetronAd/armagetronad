@@ -47,7 +47,7 @@
 					<Add library="..\..\..\winlibs\build\debug\SDL.dll" />
 					<Add library="..\..\..\winlibs\build\debug\FTGL.dll" />
 					<Add library="..\..\..\winlibs\protobuf\vsprojects\libprotobuf_debug.a" />
-					<Add library="..\..\..\winlibs\win32\boost_libs\libboost_system-mgw47-mt-d-1_53.a" />
+					<Add library="..\..\..\winlibs\win32\boost_libs\libboost_system-mgw44-mt-d-1_53.a" />
 					<Add library="..\..\..\winlibs\win32\boost_libs\libboost_thread-mgw44-mt-d-1_53.a" />
 				</Linker>
 			</Target>
