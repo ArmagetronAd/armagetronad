@@ -44,7 +44,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tResourceManager.h"
 #include "tError.h"
 #include "utf8.h"
-#include "rSDL.h"
+
+#ifndef DEDICATED
+#include <SDL_version.h>
+#endif
 
 #include <vector>
 #include <string.h>
@@ -994,10 +997,12 @@ void st_LoadConfig( bool printChange )
     if (st_FirstUse)
     {
         Load( config, "default.cfg" );
+#ifndef DEDICATED
 #if SDL_VERSION_ATLEAST(2,0,0)
         Load( config, "sdl2/default.cfg" );
 #else
         Load( config, "sdl1/default.cfg" );
+#endif
 #endif
     }
 #endif
