@@ -322,6 +322,7 @@ static uKeyInput const & su_GetKeyInput()
     return filler;
 }
 
+#ifndef DEDICATED
 #if SDL_VERSION_ATLEAST(2,0,0)
 class uTouchInput
 {
@@ -354,6 +355,7 @@ static uTouchInput const & su_GetTouchInput()
     static uTouchInput filler;
     return filler;
 }
+#endif
 #endif
 
 # define MOUSE_BUTTONS 7
