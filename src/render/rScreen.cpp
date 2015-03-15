@@ -140,6 +140,14 @@ bool sr_DesktopScreensizeSupported()
 
 static int failed_attempts = 0;
 
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+static tConfItem<int>  at_di("ARMAGETRON_DISPLAY_INDEX"	, currentScreensetting.displayIndex);
+static tConfItem<int>  at_ldi("ARMAGETRON_LAST_DISPLAY_INDEX"	, lastSuccess.displayIndex);
+
+static tConfItem<int>  at_rr("ARMAGETRON_REFRESH_RATE"	, currentScreensetting.refreshRate);
+static tConfItem<int>  at_lrr("ARMAGETRON_LAST_REFRESH_RATE"	, lastSuccess.refreshRate);
+#endif
+
 static tConfItem<rResolution> screenres("ARMAGETRON_SCREENMODE",currentScreensetting.res.res);
 static tConfItem<rResolution> screenresLast("ARMAGETRON_LAST_SCREENMODE",lastSuccess.res.res);
 
@@ -355,7 +363,7 @@ int rScreenSize::Compare( rScreenSize const & other ) const
 // *******************************************************************************************
 
 rScreenSettings::rScreenSettings( rResolution r, bool fs, rColorDepth cd, bool ce )
-        :res(r), windowSize(r), fullscreen(fs), colorDepth(cd), zDepth( ArmageTron_ColorDepth_Desktop ), checkErrors(true), vSync( ArmageTron_VSync_Default ), aspect (1)
+:res(r), windowSize(r), fullscreen(fs), colorDepth(cd), zDepth( ArmageTron_ColorDepth_Desktop ), checkErrors(true), displayIndex(0), refreshRate(0), vSync( ArmageTron_VSync_Default ), aspect (1)
 {
     // special case for desktop resolution: window size of 640x480
     if ( r == ArmageTron_Desktop )
@@ -602,7 +610,7 @@ static bool lowlevel_sr_InitDisplay(){
 
 #if SDL_VERSION_ATLEAST(2,0,0)
         SDL_DisplayMode mode;
-        if (!SDL_GetDesktopDisplayMode(0, &mode)) {
+        if (!SDL_GetDesktopDisplayMode(currentScreensetting.displayIndex, &mode)) {
             sr_desktopWidth  = mode.w;
             sr_desktopHeight = mode.h;
 
@@ -787,7 +795,8 @@ static bool lowlevel_sr_InitDisplay(){
         // only reinit the screen if the desktop res detection hasn't left us
         // with a perfectly good one.
 #if SDL_VERSION_ATLEAST(2,0,0)
-        if ( !sr_screen && SDL_CreateWindowAndRenderer(sr_screenWidth, sr_screenHeight, attrib, &sr_screen, &sr_screenRenderer)) {
+        if ( !sr_screen && SDL_CreateWindowAndRenderer(sr_screenWidth, sr_screenHeight, attrib, &sr_screen, &sr_screenRenderer)) 
+        {
             if ( SDL_CreateWindowAndRenderer(sr_screenWidth, sr_screenHeight, attrib^SDL_WINDOW_FULLSCREEN,
                                              &sr_screen, &sr_screenRenderer)) {
 #else
@@ -826,6 +835,20 @@ static bool lowlevel_sr_InitDisplay(){
                 SDL_SetWindowFullscreen(sr_screen, SDL_WINDOW_FULLSCREEN_DESKTOP);
             } else {
                 SDL_SetWindowSize(sr_screen, sr_screenWidth, sr_screenHeight);
+
+                /*
+                // set the display mode
+                SDL_DisplayMode desiredMode, mode;
+                desiredMode.format = 0;
+                desiredMode.w = sr_screenWidth;
+                desiredMode.h = sr_screenHeight;
+                desiredMode.refresh_rate = currentScreensetting.refreshRate;
+                desiredMode.driverdata = NULL;
+                SDL_DisplayMode *closest = SDL_GetClosestDisplayMode(currentScreensetting.displayIndex, &desiredMode, &mode);
+                if(closest)
+                    SDL_SetWindowDisplayMode(sr_screen, closest);
+                */
+
                 SDL_SetWindowFullscreen(sr_screen, SDL_WINDOW_FULLSCREEN);
             }
             SDL_SetRelativeMouseMode(SDL_TRUE);

@@ -78,6 +78,8 @@ public:
     rColorDepth			colorDepth;
     rColorDepth			zDepth;
     bool				checkErrors;
+    int                 displayIndex;   // display to use
+    int                 refreshRate;    // screen refresh rate
     rVSync              vSync;          // whether to wait for vsync
     REAL				aspect;			// aspect ratio of pixels ( width/height )
 
