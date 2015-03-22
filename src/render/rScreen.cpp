@@ -581,6 +581,7 @@ int SDL_EnableUNICODE(int enable) {
 #endif
 #endif
 
+
 static bool lowlevel_sr_InitDisplay(){
     #ifndef DEDICATED
     rScreenSize & res = currentScreensetting.fullscreen ? currentScreensetting.res : currentScreensetting.windowSize;
