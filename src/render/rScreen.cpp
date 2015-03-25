@@ -603,12 +603,22 @@ static bool lowlevel_sr_InitDisplay(){
     // desktop resolution
     static int sr_desktopWidth = 0, sr_desktopHeight = 0;
 
-    // determine those values
-    if ( sr_desktopWidth == 0 && !sr_screen )
+    // last diplay index in use
+    static int sr_lastDisplayIndex = -1;
+
+    // fetch actual display index in case user dragged window
+    if( sr_screen )
     {
+        currentScreensetting.displayIndex = SDL_GetWindowDisplayIndex(sr_screen);
+    }
+
+    if ( sr_lastDisplayIndex != currentScreensetting.displayIndex )
+    {
+        // determine desktop mode
+
         // select sane defaults in case the following operation fails
-        sr_desktopWidth = 800;
-        sr_desktopHeight = 600;
+        sr_desktopWidth = 640;
+        sr_desktopHeight = 480;
 
         SDL_DisplayMode mode;
         if (!SDL_GetDesktopDisplayMode(currentScreensetting.displayIndex, &mode)) {
@@ -666,29 +676,8 @@ static bool lowlevel_sr_InitDisplay(){
 
         sr_SetGLAttributes( singleCD_R, singleCD_G, singleCD_B, zDepth );
 
-        /*
-          #ifdef POWERPAK_DEB
-          PD_SetGFXMode(sr_screenWidth, sr_screenHeight, 32, PD_DEFAULT);
-          sr_screen=DoubleBuffer;
-          #else
-        */
-
-        int attrib;
-
-#ifndef FORCE_WINDOW
-        if (currentScreensetting.fullscreen)
-        {
-            attrib=SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN;
-            SDL_SetWindowFullscreen(sr_screen, SDL_WINDOW_FULLSCREEN);
-            SDL_SetRelativeMouseMode(SDL_TRUE);
-        }
-        else
-#endif
-        {
-            attrib=SDL_WINDOW_OPENGL;
-            SDL_SetWindowFullscreen(sr_screen, 0);
-            SDL_SetRelativeMouseMode(SDL_FALSE);
-        }
+        int attrib=SDL_WINDOW_OPENGL;
+        SDL_SetRelativeMouseMode(SDL_FALSE);
 
     #ifdef FORCE_WINDOW
     #ifdef WIN32
@@ -744,20 +733,13 @@ static bool lowlevel_sr_InitDisplay(){
 
         // only reinit the screen if the desktop res detection hasn't left us
         // with a perfectly good one.
-        if ( !sr_screen && SDL_CreateWindowAndRenderer(sr_screenWidth, sr_screenHeight, attrib, &sr_screen, &sr_screenRenderer)) 
+        if ( !sr_screen && SDL_CreateWindowAndRenderer(640, 480, attrib, &sr_screen, &sr_screenRenderer)) 
         {
-            if ( SDL_CreateWindowAndRenderer(sr_screenWidth, sr_screenHeight, attrib^SDL_WINDOW_FULLSCREEN,
-                                             &sr_screen, &sr_screenRenderer)) {
-                lastError.Clear();
-                lastError << "Couldn't set video mode: ";
-                lastError << SDL_GetError();
-                std::cerr << lastError << '\n';
-                return false;
-            }
-            else
-            {
-                currentScreensetting.fullscreen=!currentScreensetting.fullscreen;
-            }
+            lastError.Clear();
+            lastError << "Couldn't set video mode: ";
+            lastError << SDL_GetError();
+            std::cerr << lastError << '\n';
+            return false;
         }
 
         sr_SetWindowTitle();
@@ -766,51 +748,74 @@ static bool lowlevel_sr_InitDisplay(){
 
         SDL_EnableUNICODE(1);
     }
-    // SDL2 can resize window or toggle fullscreen without recreating a new window and therefore keeping existing GL context.
-    else
+
+    if ( sr_lastDisplayIndex != currentScreensetting.displayIndex )
     {
-        if (currentScreensetting.fullscreen)
+        // go to window mode, position window on center of selected display
+        SDL_SetWindowFullscreen(sr_screen, 0);
+        SDL_SetWindowSize(sr_screen, 640, 480);
+        SDL_Rect bounds;
+        SDL_GetDisplayBounds(currentScreensetting.displayIndex, &bounds);
+        SDL_SetWindowPosition(sr_screen, bounds.x + (bounds.w-640)/2, bounds.y + (bounds.h - 480)/2);
+    }
+
+    // SDL2 can resize window or toggle fullscreen without recreating a new window and therefore keeping existing GL context.
+    if (currentScreensetting.fullscreen)
+    {
+        SDL_SetWindowFullscreen(sr_screen, 0);
+        // if desktop resolution was selected, pick it
+        if ( sr_screenWidth + sr_screenHeight == 0 ) 
         {
-            SDL_SetWindowFullscreen(sr_screen, 0);
-            // if desktop resolution was selected, pick it
-            if ( sr_screenWidth + sr_screenHeight == 0 ) {
-                sr_screenWidth = sr_desktopWidth;
-                sr_screenHeight = sr_desktopHeight;
-                SDL_SetWindowFullscreen(sr_screen, SDL_WINDOW_FULLSCREEN_DESKTOP);
-            } else {
+            sr_screenWidth = sr_desktopWidth;
+            sr_screenHeight = sr_desktopHeight;
+            SDL_SetWindowSize(sr_screen, sr_screenWidth, sr_screenHeight);
+            SDL_SetWindowFullscreen(sr_screen, SDL_WINDOW_FULLSCREEN_DESKTOP);
+        } 
+        else 
+        {
+            // set the display mode
+            SDL_DisplayMode desiredMode, mode;
+            desiredMode.format = 0;
+            desiredMode.w = sr_screenWidth;
+            desiredMode.h = sr_screenHeight;
+            desiredMode.refresh_rate = currentScreensetting.refreshRate;
+            desiredMode.driverdata = NULL;
+            SDL_DisplayMode *closest = SDL_GetClosestDisplayMode(currentScreensetting.displayIndex, &desiredMode, &mode);
+            if(closest)
+            {
+                sr_screenWidth = closest->w;
+                sr_screenHeight = closest->h;
+
+                SDL_SetWindowDisplayMode(sr_screen, closest);
                 SDL_SetWindowSize(sr_screen, sr_screenWidth, sr_screenHeight);
-
-                /*
-                // set the display mode
-                SDL_DisplayMode desiredMode, mode;
-                desiredMode.format = 0;
-                desiredMode.w = sr_screenWidth;
-                desiredMode.h = sr_screenHeight;
-                desiredMode.refresh_rate = currentScreensetting.refreshRate;
-                desiredMode.driverdata = NULL;
-                SDL_DisplayMode *closest = SDL_GetClosestDisplayMode(currentScreensetting.displayIndex, &desiredMode, &mode);
-                if(closest)
-                    SDL_SetWindowDisplayMode(sr_screen, closest);
-                */
-
                 SDL_SetWindowFullscreen(sr_screen, SDL_WINDOW_FULLSCREEN);
+                SDL_SetRelativeMouseMode(SDL_TRUE);
             }
-            SDL_SetRelativeMouseMode(SDL_TRUE);
+            else
+            {
+                currentScreensetting.fullscreen = false;
+
+                sr_screenWidth  = currentScreensetting.windowSize.width;
+                sr_screenHeight = currentScreensetting.windowSize.height;
+            }
         }
+    }
+    if (!currentScreensetting.fullscreen)
+    {
+        // Set windowed mode and size accordingly
+        if (!SDL_SetWindowFullscreen(sr_screen, 0)) 
+        {
+            SDL_SetWindowSize(sr_screen, sr_screenWidth, sr_screenHeight);
+            SDL_SetWindowPosition(sr_screen, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+            SDL_SetRelativeMouseMode(SDL_FALSE);
+        } 
         else
         {
-            // Set windowed mode and size accordingly
-            if (!SDL_SetWindowFullscreen(sr_screen, 0)) {
-                SDL_SetWindowSize(sr_screen, sr_screenWidth, sr_screenHeight);
-                SDL_SetWindowPosition(sr_screen, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-                SDL_SetRelativeMouseMode(SDL_FALSE);
-            } else {
-                lastError.Clear();
-                lastError << "Couldn't set video mode: ";
-                lastError << SDL_GetError();
-                std::cerr << lastError << '\n';
-                return false;
-            }
+            lastError.Clear();
+            lastError << "Couldn't set video mode: ";
+            lastError << SDL_GetError();
+            std::cerr << lastError << '\n';
+            return false;
         }
     }
 
@@ -961,6 +966,9 @@ static bool lowlevel_sr_InitDisplay(){
     sr_ResetRenderState(true);
 
     rCallbackAfterScreenModeChange::Exec();
+
+    // store last display index
+    sr_lastDisplayIndex = currentScreensetting.displayIndex;
 
     lastSuccess=currentScreensetting;
     failed_attempts = 0;
