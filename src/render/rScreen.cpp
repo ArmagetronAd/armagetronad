@@ -588,7 +588,7 @@ static bool lowlevel_sr_InitDisplay(){
     rScreenSize & res = currentScreensetting.fullscreen ? currentScreensetting.res : currentScreensetting.windowSize;
 
     // update pixel aspect ratio
-    if ( res.res != ArmageTron_Invalid )
+    if ( res.res != ArmageTron_Invalid && size_t(res.res) < sizeof(aspect)/sizeof(aspect[0]) )
         currentScreensetting.aspect = aspect[res.res];
 
     res.UpdateSize();
@@ -602,6 +602,9 @@ static bool lowlevel_sr_InitDisplay(){
     static int desktopCD   = 16;
     // desktop resolution
     static int sr_desktopWidth = 0, sr_desktopHeight = 0;
+
+    static const int minWidth = 640;
+    static const int minHeight = 480;
 
     // last diplay index in use
     static int sr_lastDisplayIndex = -1;
@@ -617,8 +620,8 @@ static bool lowlevel_sr_InitDisplay(){
         // determine desktop mode
 
         // select sane defaults in case the following operation fails
-        sr_desktopWidth = 640;
-        sr_desktopHeight = 480;
+        sr_desktopWidth = minWidth;
+        sr_desktopHeight = minHeight;
 
         SDL_DisplayMode mode;
         if (!SDL_GetDesktopDisplayMode(currentScreensetting.displayIndex, &mode)) {
@@ -684,8 +687,8 @@ static bool lowlevel_sr_InitDisplay(){
         //		sr_screenWidth  = 400;
         //		sr_screenHeight = 300;
     #else
-        //		sr_screenWidth  = 640;
-        //		sr_screenHeight = 480;
+        //		sr_screenWidth  = minWidth;
+        //		sr_screenHeight = minHeight;
     #endif
     #endif
         int CD = fullCD;
@@ -733,7 +736,7 @@ static bool lowlevel_sr_InitDisplay(){
 
         // only reinit the screen if the desktop res detection hasn't left us
         // with a perfectly good one.
-        if ( !sr_screen && SDL_CreateWindowAndRenderer(640, 480, attrib, &sr_screen, &sr_screenRenderer)) 
+        if ( !sr_screen && SDL_CreateWindowAndRenderer(minWidth, minHeight, attrib, &sr_screen, &sr_screenRenderer)) 
         {
             lastError.Clear();
             lastError << "Couldn't set video mode: ";
@@ -753,10 +756,10 @@ static bool lowlevel_sr_InitDisplay(){
     {
         // go to window mode, position window on center of selected display
         SDL_SetWindowFullscreen(sr_screen, 0);
-        SDL_SetWindowSize(sr_screen, 640, 480);
+        SDL_SetWindowSize(sr_screen, minWidth, minHeight);
         SDL_Rect bounds;
         SDL_GetDisplayBounds(currentScreensetting.displayIndex, &bounds);
-        SDL_SetWindowPosition(sr_screen, bounds.x + (bounds.w-640)/2, bounds.y + (bounds.h - 480)/2);
+        SDL_SetWindowPosition(sr_screen, bounds.x + (bounds.w-minWidth)/2, bounds.y + (bounds.h - minHeight)/2);
     }
 
     // SDL2 can resize window or toggle fullscreen without recreating a new window and therefore keeping existing GL context.
@@ -982,7 +985,7 @@ static bool lowlevel_sr_InitDisplay(){
     rScreenSize & res = currentScreensetting.fullscreen ? currentScreensetting.res : currentScreensetting.windowSize;
 
     // update pixel aspect ratio
-    if ( res.res != ArmageTron_Invalid )
+    if ( res.res != ArmageTron_Invalid  && size_t(res.res) < sizeof(aspect)/sizeof(aspect[0]) )
         currentScreensetting.aspect = aspect[res.res];
 
     res.UpdateSize();
@@ -997,12 +1000,15 @@ static bool lowlevel_sr_InitDisplay(){
     // desktop resolution
     static int sr_desktopWidth = 0, sr_desktopHeight = 0;
 
+    static const int minWidth = 640;
+    static const int minHeight = 480;
+
     // determine those values
     if ( sr_desktopWidth == 0 && !sr_screen )
     {
         // select sane defaults in case the following operation fails
-        sr_desktopWidth = 800;
-        sr_desktopHeight = 600;
+        sr_desktopWidth = minWidth;
+        sr_desktopHeight = minHeight;
 
         const SDL_VideoInfo* videoInfo     = SDL_GetVideoInfo( );
         if( videoInfo )
@@ -1096,7 +1102,7 @@ static bool lowlevel_sr_InitDisplay(){
         //		sr_screenWidth  = 400;
         //		sr_screenHeight = 300;
     #else
-        //		sr_screenWidth  = 640;
+        //		sr_screenWidth  = minWidth;
         //		sr_screenHeight = 480;
     #endif
     #endif
