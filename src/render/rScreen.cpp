@@ -601,7 +601,7 @@ static bool lowlevel_sr_InitDisplay(){
     static int desktopCD_R = 5;
     static int desktopCD_G = 5;
     static int desktopCD_B = 5;
-    static int desktopCD   = 16;
+    // static int desktopCD   = 16;
     // desktop resolution
     static int sr_desktopWidth = 0, sr_desktopHeight = 0;
 
@@ -634,7 +634,7 @@ static bool lowlevel_sr_InitDisplay(){
             Uint32 Rmask, Gmask, Bmask, Amask;
 
             if (!SDL_PixelFormatEnumToMasks(mode.format, &bpp, &Rmask, &Gmask, &Bmask, &Amask)) {
-                desktopCD    = bpp;
+                // desktopCD    = bpp;
                 desktopCD_R  = Rmask;
                 desktopCD_G  = Gmask;
                 desktopCD_B  = Bmask;
@@ -647,7 +647,7 @@ static bool lowlevel_sr_InitDisplay(){
         int singleCD_R	= 5;
         int singleCD_G	= 5;
         int singleCD_B	= 5;
-        int fullCD		= 16;
+        // int fullCD		= 16;
         int zDepth		= 16;
 
         switch (currentScreensetting.colorDepth)
@@ -657,7 +657,7 @@ static bool lowlevel_sr_InitDisplay(){
             break;
         case ArmageTron_ColorDepth_Desktop:
             {
-                fullCD     = desktopCD;
+                // fullCD     = desktopCD;
                 singleCD_R = desktopCD_R;
                 singleCD_G = desktopCD_G;
                 singleCD_B = desktopCD_B;
@@ -667,7 +667,7 @@ static bool lowlevel_sr_InitDisplay(){
             singleCD_R	= 8;
             singleCD_G	= 8;
             singleCD_B	= 8;
-            fullCD		= 24;
+            // fullCD		= 24;
             zDepth		= 32;
             break;
         }
@@ -693,7 +693,7 @@ static bool lowlevel_sr_InitDisplay(){
         //		sr_screenHeight = minHeight;
     #endif
     #endif
-        int CD = fullCD;
+        // int CD = fullCD;
 
         // if desktop resolution was selected, pick it
         if ( sr_screenWidth + sr_screenHeight == 0 )
@@ -718,7 +718,8 @@ static bool lowlevel_sr_InitDisplay(){
 
         // only reinit the screen if the desktop res detection hasn't left us
         // with a perfectly good one.
-        if (!sr_screen && SDL_CreateWindowAndRenderer(minWidth, minHeight, attrib, &sr_screen, &sr_screenRenderer)) 
+        if (!sr_screen && 
+            SDL_CreateWindowAndRenderer(minWidth, minHeight, attrib, &sr_screen, &sr_screenRenderer))
         {
             lastError.Clear();
             lastError << "Couldn't set video mode: ";
