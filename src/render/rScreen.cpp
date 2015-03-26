@@ -733,18 +733,13 @@ static bool lowlevel_sr_InitDisplay(){
     // SDL2 can resize window or toggle fullscreen without recreating a new window and therefore keeping existing GL context.
     if (currentScreensetting.fullscreen)
     {
+        bool fullscreenSuccess = false;
+
         SDL_SetWindowFullscreen(sr_screen, 0);
-        // if desktop resolution was selected, pick it
-        if ( sr_screenWidth + sr_screenHeight == 0 ) 
+
+        if ( sr_screenWidth + sr_screenHeight > 0 ) 
         {
-            sr_screenWidth = sr_desktopWidth;
-            sr_screenHeight = sr_desktopHeight;
-            SDL_SetWindowSize(sr_screen, sr_screenWidth, sr_screenHeight);
-            SDL_SetWindowFullscreen(sr_screen, SDL_WINDOW_FULLSCREEN_DESKTOP);
-        } 
-        else 
-        {
-            // set the display mode
+            // find best display mode
             SDL_DisplayMode desiredMode, mode;
             desiredMode.format = 0;
             desiredMode.w = sr_screenWidth;
@@ -754,21 +749,50 @@ static bool lowlevel_sr_InitDisplay(){
             SDL_DisplayMode *closest = SDL_GetClosestDisplayMode(currentScreensetting.displayIndex, &desiredMode, &mode);
             if(closest)
             {
+                // set the display mode
                 sr_screenWidth = closest->w;
                 sr_screenHeight = closest->h;
 
-                SDL_SetWindowDisplayMode(sr_screen, closest);
-                SDL_SetWindowSize(sr_screen, sr_screenWidth, sr_screenHeight);
-                SDL_SetWindowFullscreen(sr_screen, SDL_WINDOW_FULLSCREEN);
-                SDL_SetRelativeMouseMode(SDL_TRUE);
+                if(0 == SDL_SetWindowDisplayMode(sr_screen, closest))
+                {
+                    SDL_SetWindowSize(sr_screen, sr_screenWidth, sr_screenHeight);
+                    fullscreenSuccess = (0 == SDL_SetWindowFullscreen(sr_screen, SDL_WINDOW_FULLSCREEN));
+                }
             }
-            else
-            {
-                currentScreensetting.fullscreen = false;
 
-                sr_screenWidth  = currentScreensetting.windowSize.width;
-                sr_screenHeight = currentScreensetting.windowSize.height;
+            if(!fullscreenSuccess)
+            {
+                lastError.Clear();
+                lastError << "Couldn't set video mode: ";
+                lastError << SDL_GetError();
+                std::cerr << lastError << '\n';
             }
+        }
+
+        // if desktop resolution was selected or custom mode setting failed, pick desktop mode
+        if(!fullscreenSuccess)
+        {
+            sr_screenWidth = sr_desktopWidth;
+            sr_screenHeight = sr_desktopHeight;
+            SDL_SetWindowSize(sr_screen, sr_screenWidth, sr_screenHeight);
+            fullscreenSuccess = (0 == SDL_SetWindowFullscreen(sr_screen, SDL_WINDOW_FULLSCREEN_DESKTOP));
+        } 
+
+        if(fullscreenSuccess)
+        {
+            SDL_SetRelativeMouseMode(SDL_TRUE);
+        }
+        else
+        {
+            lastError.Clear();
+            lastError << "Couldn't set desktop video mode: ";
+            lastError << SDL_GetError();
+            std::cerr << lastError << '\n';
+
+            currentScreensetting.fullscreen = false;
+            
+            sr_screenWidth  = currentScreensetting.windowSize.width;
+            sr_screenHeight = currentScreensetting.windowSize.height;
         }
     }
     if (!currentScreensetting.fullscreen)
@@ -783,7 +807,7 @@ static bool lowlevel_sr_InitDisplay(){
         else
         {
             lastError.Clear();
-            lastError << "Couldn't set video mode: ";
+            lastError << "Couldn't set windowed mode: ";
             lastError << SDL_GetError();
             std::cerr << lastError << '\n';
             return false;
