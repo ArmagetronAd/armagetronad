@@ -323,12 +323,13 @@ static void sg_ScreenModeMenu()
         "$screen_keep_window_active_help",
         sr_keepWindowActive);
 
+#if !SDL_VERSION_ATLEAST(2,0,0)
     uMenuItemToggle ie_t
     (&screen_menu_mode,
      "$screen_check_errors_text",
      "$screen_check_errors_help",
      currentScreensetting.checkErrors);
-
+#endif
 
 #ifdef SDL_OPENGL
 

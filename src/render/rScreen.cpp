@@ -179,8 +179,10 @@ static tConfItem<rColorDepth> ltc("LAST_COLORDEPTH",lastSuccess.colorDepth);
 static tConfItem<rColorDepth> tzd("ZDEPTH",currentScreensetting.zDepth);
 static tConfItem<rColorDepth> ltzd("LAST_ZDEPTH",lastSuccess.zDepth);
 
+#if !SDL_VERSION_ATLEAST(2,0,0)
 static tConfItem<bool> check_errors("CHECK_ERRORS",currentScreensetting.checkErrors);
 static tConfItem<bool> check_errorsl("LAST_CHECK_ERRORS",lastSuccess.checkErrors);
+#endif
 
 static tConfItem<int> fa("FAILED_ATTEMPTS", failed_attempts);
 
@@ -692,40 +694,6 @@ static bool lowlevel_sr_InitDisplay(){
     #endif
     #endif
         int CD = fullCD;
-
-        // only check for errors if requested and if we're not about to set the
-        // desktop resolution, where SDL_VideoModeOK apparently doesn't work.
-        if (currentScreensetting.checkErrors && sr_screenWidth + sr_screenHeight > 0)
-        {
-            // check if the video mode should be OK:
-            CD = SDL_VideoModeOK
-                 (sr_screenWidth, sr_screenHeight,   fullCD,
-                  attrib);
-
-            // if not quite right
-            if (CD < 15){
-                // check if the other fs/windowed mode is better
-                int CD_fsinv = SDL_VideoModeOK
-                               (sr_screenWidth, sr_screenHeight,   fullCD,
-                                attrib^SDL_WINDOW_FULLSCREEN);
-
-                if (CD_fsinv >= 15){
-                    // yes! change the mode
-                    currentScreensetting.fullscreen=!currentScreensetting.fullscreen;
-                    attrib ^= SDL_WINDOW_FULLSCREEN;
-                    SDL_SetWindowFullscreen(sr_screen, SDL_WINDOW_FULLSCREEN);
-                    SDL_SetRelativeMouseMode(SDL_TRUE);
-                    CD = CD_fsinv;
-                }
-            }
-
-            if (CD < fullCD && currentScreensetting.colorDepth != ArmageTron_ColorDepth_16)
-            {
-                currentScreensetting.colorDepth = ArmageTron_ColorDepth_16;
-
-                sr_SetGLAttributes( 5, 5, 5, 16 );
-            }
-        }
 
         // if desktop resolution was selected, pick it
         if ( sr_screenWidth + sr_screenHeight == 0 )
