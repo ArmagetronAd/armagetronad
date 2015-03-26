@@ -702,9 +702,23 @@ static bool lowlevel_sr_InitDisplay(){
             sr_screenHeight = sr_desktopHeight;
         }
 
+#ifdef FORCE_WINDOW
+        #undef SDL_WINDOW_FULLSCREEN_DESKTOP
+        #define SDL_WINDOW_FULLSCREEN_DESKTOP 0
+        #undef SDL_WINDOW_FULLSCREEN
+        #define SDL_WINDOW_FULLSCREEN 0
+#endif
+
+        // try fullscreen first if requested and sensible (only display 0 is supported)
+        if (currentScreensetting.fullscreen && currentScreensetting.displayIndex == 0 && SDL_CreateWindowAndRenderer(sr_screenWidth, sr_screenHeight, attrib | SDL_WINDOW_FULLSCREEN_DESKTOP, &sr_screen, &sr_screenRenderer)) 
+        {
+            sr_screen = NULL;
+            sr_screenRenderer = NULL;
+        }
+
         // only reinit the screen if the desktop res detection hasn't left us
         // with a perfectly good one.
-        if ( !sr_screen && SDL_CreateWindowAndRenderer(minWidth, minHeight, attrib, &sr_screen, &sr_screenRenderer)) 
+        if (!sr_screen && SDL_CreateWindowAndRenderer(minWidth, minHeight, attrib, &sr_screen, &sr_screenRenderer)) 
         {
             lastError.Clear();
             lastError << "Couldn't set video mode: ";
@@ -720,7 +734,10 @@ static bool lowlevel_sr_InitDisplay(){
         SDL_EnableUNICODE(1);
     }
 
-    if ( sr_lastDisplayIndex != currentScreensetting.displayIndex )
+    if(!sr_screen)
+        return false;
+
+    if (SDL_GetWindowDisplayIndex(sr_screen) != currentScreensetting.displayIndex)
     {
         // go to window mode, position window on center of selected display
         SDL_SetWindowFullscreen(sr_screen, 0);
@@ -734,8 +751,6 @@ static bool lowlevel_sr_InitDisplay(){
     if (currentScreensetting.fullscreen)
     {
         bool fullscreenSuccess = false;
-
-        SDL_SetWindowFullscreen(sr_screen, 0);
 
         if ( sr_screenWidth + sr_screenHeight > 0 ) 
         {
@@ -755,8 +770,8 @@ static bool lowlevel_sr_InitDisplay(){
 
                 if(0 == SDL_SetWindowDisplayMode(sr_screen, closest))
                 {
-                    SDL_SetWindowSize(sr_screen, sr_screenWidth, sr_screenHeight);
                     fullscreenSuccess = (0 == SDL_SetWindowFullscreen(sr_screen, SDL_WINDOW_FULLSCREEN));
+                    SDL_SetWindowSize(sr_screen, sr_screenWidth, sr_screenHeight);
                 }
             }
 
@@ -774,8 +789,8 @@ static bool lowlevel_sr_InitDisplay(){
         {
             sr_screenWidth = sr_desktopWidth;
             sr_screenHeight = sr_desktopHeight;
-            SDL_SetWindowSize(sr_screen, sr_screenWidth, sr_screenHeight);
             fullscreenSuccess = (0 == SDL_SetWindowFullscreen(sr_screen, SDL_WINDOW_FULLSCREEN_DESKTOP));
+            SDL_SetWindowSize(sr_screen, sr_screenWidth, sr_screenHeight);
         } 
 
         if(fullscreenSuccess)
