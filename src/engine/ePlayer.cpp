@@ -9994,6 +9994,39 @@ static void Slap_conf(std::istream &s)
 
 static tConfItemFunc slap_conf("SLAP", &Slap_conf);
 
+static void Points_conf(std::istream &s)
+{
+    if ( se_NeedsServer( "POINTS", s, false ) )
+    {
+        return;
+    }
+
+    ePlayerNetID * victim = ReadPlayer( s );
+
+    if ( victim )
+    {
+        int points = 1;
+
+        s >> points;
+
+        if ( points == 0)
+        {
+            // oh well :)
+            sn_ConsoleOut( tOutput("$player_admin_slap_free", victim->GetColoredName() ) );
+        }
+        else
+        {
+            tOutput win;
+            tOutput lose;
+            win << "$player_admin_slap_win";
+            lose << "$player_admin_slap_lose";
+            victim->AddScore( points, win, lose );
+        }
+    }
+}
+
+static tConfItemFunc pointsconf("POINTS", &Points_conf);
+
 static void GivePoints_conf(std::istream &s)
 {
     if ( se_NeedsServer( "GIVE_POINTS", s, false ) )
