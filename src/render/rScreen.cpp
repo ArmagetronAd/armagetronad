@@ -611,9 +611,12 @@ static bool lowlevel_sr_InitDisplay(){
     // last diplay index in use
     static int sr_lastDisplayIndex = -1;
 
-    // fetch actual display index in case user dragged window
+    // last window position
+    static int lastWindowX = SDL_WINDOWPOS_CENTERED, lastWindowY = SDL_WINDOWPOS_CENTERED;
+
     if( sr_screen )
     {
+        // fetch actual display index in case user dragged window
         static int lastFactualDisplayIndex = currentScreensetting.displayIndex;
         int factualDisplayIndex = SDL_GetWindowDisplayIndex(sr_screen);
         if(factualDisplayIndex != lastFactualDisplayIndex)
@@ -621,11 +624,13 @@ static bool lowlevel_sr_InitDisplay(){
             currentScreensetting.displayIndex = factualDisplayIndex;
             lastFactualDisplayIndex = factualDisplayIndex;
         }
-    }
 
-    // determine layout of current screen
-    SDL_Rect screenBounds;
-    SDL_GetDisplayBounds(currentScreensetting.displayIndex, &screenBounds);
+        // last window position
+        if(!lastSuccess.fullscreen)
+        {
+            SDL_GetWindowPosition(sr_screen, &lastWindowX, &lastWindowY);
+        }
+    }
 
     if(0 > currentScreensetting.displayIndex || currentScreensetting.displayIndex >= SDL_GetNumVideoDisplays())
         currentScreensetting.displayIndex = 0;
@@ -655,6 +660,10 @@ static bool lowlevel_sr_InitDisplay(){
         }
     }
 
+    // determine layout of current screen
+    SDL_Rect screenBounds;
+    SDL_GetDisplayBounds(currentScreensetting.displayIndex, &screenBounds);
+
     // default start window size and position
     int defaultWidth = sr_desktopWidth;
     int defaultHeight = sr_desktopHeight;
@@ -666,7 +675,14 @@ static bool lowlevel_sr_InitDisplay(){
 
     int defaultX = screenBounds.x + (screenBounds.w-defaultWidth)/2;
     int defaultY = screenBounds.y + (screenBounds.h-defaultHeight)/2;
-    
+
+    if(!currentScreensetting.fullscreen && (
+           lastWindowX != SDL_WINDOWPOS_CENTERED || lastWindowY != SDL_WINDOWPOS_CENTERED))
+    {
+        defaultX = lastWindowX;
+        defaultY = lastWindowY;
+    }
+
     if (!sr_screen)
     {
         int singleCD_R	= 5;
@@ -760,7 +776,10 @@ static bool lowlevel_sr_InitDisplay(){
     if(!sr_screen)
         return false;
 
-    if (SDL_GetWindowDisplayIndex(sr_screen) != currentScreensetting.displayIndex)
+    if (SDL_GetWindowDisplayIndex(sr_screen) != currentScreensetting.displayIndex ||
+        (sr_lastDisplayIndex >= 0 && sr_lastDisplayIndex != currentScreensetting.displayIndex) ||
+        (currentScreensetting.fullscreen && !lastSuccess.fullscreen)
+        )
     {
         // go to window mode, position window on center of selected display
         SDL_SetWindowFullscreen(sr_screen, 0);
@@ -837,7 +856,7 @@ static bool lowlevel_sr_InitDisplay(){
         if (!SDL_SetWindowFullscreen(sr_screen, 0)) 
         {
             SDL_SetWindowSize(sr_screen, sr_screenWidth, sr_screenHeight);
-            SDL_SetWindowPosition(sr_screen, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+            SDL_SetWindowPosition(sr_screen, defaultX, defaultY);
             SDL_SetRelativeMouseMode(SDL_FALSE);
         } 
         else
