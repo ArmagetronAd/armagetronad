@@ -605,8 +605,8 @@ static bool lowlevel_sr_InitDisplay(){
     // desktop resolution
     static int sr_desktopWidth = 0, sr_desktopHeight = 0;
 
-    static const int minWidth = 640;
-    static const int minHeight = 480;
+    int minWidth = 640;
+    int minHeight = 480;
 
     // last diplay index in use
     static int sr_lastDisplayIndex = -1;
@@ -614,8 +614,21 @@ static bool lowlevel_sr_InitDisplay(){
     // fetch actual display index in case user dragged window
     if( sr_screen )
     {
-        currentScreensetting.displayIndex = SDL_GetWindowDisplayIndex(sr_screen);
+        static int lastFactualDisplayIndex = currentScreensetting.displayIndex;
+        int factualDisplayIndex = SDL_GetWindowDisplayIndex(sr_screen);
+        if(factualDisplayIndex != lastFactualDisplayIndex)
+        {
+            currentScreensetting.displayIndex = factualDisplayIndex;
+            lastFactualDisplayIndex = factualDisplayIndex;
+        }
     }
+
+    // determine layout of current screen
+    SDL_Rect screenBounds;
+    SDL_GetDisplayBounds(currentScreensetting.displayIndex, &screenBounds);
+
+    if(0 > currentScreensetting.displayIndex || currentScreensetting.displayIndex >= SDL_GetNumVideoDisplays())
+        currentScreensetting.displayIndex = 0;
 
     if ( sr_lastDisplayIndex != currentScreensetting.displayIndex )
     {
@@ -642,6 +655,18 @@ static bool lowlevel_sr_InitDisplay(){
         }
     }
 
+    // default start window size and position
+    int defaultWidth = sr_desktopWidth;
+    int defaultHeight = sr_desktopHeight;
+    if(!currentScreensetting.fullscreen)
+    {
+        defaultWidth = sr_screenWidth;
+        defaultHeight = sr_screenHeight;
+    }
+
+    int defaultX = screenBounds.x + (screenBounds.w-defaultWidth)/2;
+    int defaultY = screenBounds.y + (screenBounds.h-defaultHeight)/2;
+    
     if (!sr_screen)
     {
         int singleCD_R	= 5;
@@ -695,14 +720,7 @@ static bool lowlevel_sr_InitDisplay(){
     #endif
         // int CD = fullCD;
 
-        // if desktop resolution was selected, pick it
-        if ( sr_screenWidth + sr_screenHeight == 0 )
-        {
-            sr_screenWidth = sr_desktopWidth;
-            sr_screenHeight = sr_desktopHeight;
-        }
-
-#ifdef FORCE_WINDOW
+#ifdef FORCE_WINDOW_X
         #undef SDL_WINDOW_FULLSCREEN_DESKTOP
         #define SDL_WINDOW_FULLSCREEN_DESKTOP 0
         #undef SDL_WINDOW_FULLSCREEN
@@ -710,7 +728,7 @@ static bool lowlevel_sr_InitDisplay(){
 #endif
 
         // try fullscreen first if requested and sensible (only display 0 is supported)
-        if (currentScreensetting.fullscreen && currentScreensetting.displayIndex == 0 && SDL_CreateWindowAndRenderer(sr_screenWidth, sr_screenHeight, attrib | SDL_WINDOW_FULLSCREEN_DESKTOP, &sr_screen, &sr_screenRenderer)) 
+        if (currentScreensetting.fullscreen && currentScreensetting.displayIndex == 0 && SDL_CreateWindowAndRenderer(sr_desktopWidth, sr_desktopHeight, attrib | SDL_WINDOW_FULLSCREEN_DESKTOP, &sr_screen, &sr_screenRenderer)) 
         {
             sr_screen = NULL;
             sr_screenRenderer = NULL;
@@ -718,8 +736,12 @@ static bool lowlevel_sr_InitDisplay(){
 
         // only reinit the screen if the desktop res detection hasn't left us
         // with a perfectly good one.
-        if (!sr_screen && 
-            SDL_CreateWindowAndRenderer(minWidth, minHeight, attrib, &sr_screen, &sr_screenRenderer))
+        if (!sr_screen &&
+            (
+                !(sr_screen = SDL_CreateWindow("", defaultX, defaultY, defaultWidth, defaultHeight, attrib)) ||
+                !(sr_screenRenderer = SDL_CreateRenderer(sr_screen, -1, 0))
+                )
+            )
         {
             lastError.Clear();
             lastError << "Couldn't set video mode: ";
@@ -742,10 +764,8 @@ static bool lowlevel_sr_InitDisplay(){
     {
         // go to window mode, position window on center of selected display
         SDL_SetWindowFullscreen(sr_screen, 0);
-        SDL_SetWindowSize(sr_screen, minWidth, minHeight);
-        SDL_Rect bounds;
-        SDL_GetDisplayBounds(currentScreensetting.displayIndex, &bounds);
-        SDL_SetWindowPosition(sr_screen, bounds.x + (bounds.w-minWidth)/2, bounds.y + (bounds.h - minHeight)/2);
+        SDL_SetWindowSize(sr_screen, defaultWidth, defaultHeight);
+        SDL_SetWindowPosition(sr_screen, defaultX, defaultY);
     }
 
     // SDL2 can resize window or toggle fullscreen without recreating a new window and therefore keeping existing GL context.
