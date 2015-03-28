@@ -614,10 +614,10 @@ static bool lowlevel_sr_InitDisplay(){
     // last window position
     static int lastWindowX = SDL_WINDOWPOS_CENTERED, lastWindowY = SDL_WINDOWPOS_CENTERED;
 
+    static int lastFactualDisplayIndex = currentScreensetting.displayIndex;
     if( sr_screen )
     {
         // fetch actual display index in case user dragged window
-        static int lastFactualDisplayIndex = currentScreensetting.displayIndex;
         int factualDisplayIndex = SDL_GetWindowDisplayIndex(sr_screen);
         if(factualDisplayIndex != lastFactualDisplayIndex)
         {
@@ -634,6 +634,7 @@ static bool lowlevel_sr_InitDisplay(){
 
     if(0 > currentScreensetting.displayIndex || currentScreensetting.displayIndex >= SDL_GetNumVideoDisplays())
         currentScreensetting.displayIndex = 0;
+    lastFactualDisplayIndex = currentScreensetting.displayIndex;
 
     if ( sr_lastDisplayIndex != currentScreensetting.displayIndex )
     {
@@ -785,6 +786,8 @@ static bool lowlevel_sr_InitDisplay(){
         SDL_SetWindowFullscreen(sr_screen, 0);
         SDL_SetWindowSize(sr_screen, defaultWidth, defaultHeight);
         SDL_SetWindowPosition(sr_screen, defaultX, defaultY);
+
+        SDL_Delay(10);
     }
 
     // SDL2 can resize window or toggle fullscreen without recreating a new window and therefore keeping existing GL context.
