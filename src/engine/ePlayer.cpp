@@ -4394,6 +4394,11 @@ void handle_chat( nMessage &m )
                     }
                     else if (command == "/report")
                     {
+                        spam.factor_ = 1;
+                        if ( spam.Block() )
+                        {
+                            return;
+                        }
                         spam.lastSaidType_ = eChatMessageType_Public;
                         se_ChatReport( p, s );
                         return;
@@ -4478,7 +4483,7 @@ void handle_chat( nMessage &m )
                         return;
                     }
                     // the commands below (mp and cq) are the ones to use for add/remove/list items in the queueing list
-                    else if (((command == "/mq") || (command == "/cq") || (command == "/ms") || (command == "/cs")) && (rotationtype != gROTATION_NEVER))
+                    else if (((command == "/mq") || (command == "/cq") || (command == "/ms") || (command == "/cs") || (command == "/q")) && (rotationtype != gROTATION_NEVER))
                     {
                         sg_AddqueueingItems(p, s, command);
                         return;

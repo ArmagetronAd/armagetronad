@@ -1580,6 +1580,33 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
 
         queueType = "config_queue";
     }
+    else if ((command == "/q"))
+    {
+        if((configRotation->Size() > 0) && (mapRotation->Size() > 0))
+        {
+            sn_ConsoleOut("Since map rotation and config rotation are set, you must use /cq or /mq.\n", p->Owner());
+            return;
+        }
+        else if(configRotation->Size() > 0)
+        {
+            ThisQueueing = sg_ConfigQueueing;
+            ThisAccessLevel = se_configqueueingAccessLevel;
+            ThisRotation = configRotation;
+            queueType = "config_queue";
+        }
+        else if(mapRotation->Size() > 0)
+        {
+            ThisQueueing = sg_MapQueueing;
+            ThisAccessLevel = se_mapqueueingAccessLevel;
+            ThisRotation = mapRotation;
+            queueType = "map_queue";
+        }
+        else
+        {
+            sn_ConsoleOut("No possible maps or configs found...\n", p->Owner());
+            return;
+        }
+    }
 
     if (!ThisRotation) return;
 
