@@ -191,6 +191,7 @@ bool operator < ( rScreenSize const & a, rScreenSize const & b )
     return a.Compare(b) < 0;
 }
 
+#if SDL_VERSION_ATLEAST(2,0,0)
 class gRefreshRateMenuItem: public uMenuItemSelection<int>
 {
 public:
@@ -265,6 +266,7 @@ public:
 };
 
 static gRefreshRateMenuItem * sg_refreshRateMenuItem = NULL;
+#endif // SDL_VER
 
 class gResolutionMenuItem: uMenuItemSelection<rScreenSize> 
 {
@@ -392,9 +394,11 @@ public:
     virtual void LeftRight(int lr)
     {
         uMenuItemSelection<rScreenSize>::LeftRight(lr);
-        
+
+#if SDL_VERSION_ATLEAST(2,0,0)       
         if(sg_refreshRateMenuItem)
             sg_refreshRateMenuItem->Rescan();
+#endif
     }
 
     gResolutionMenuItem( uMenu & screen_menu_mode, rScreenSize& res, const tOutput& text, const tOutput& help, bool addFixed )
@@ -557,7 +561,10 @@ static void sg_ScreenModeMenu()
 
     sg_windowResMen = NULL;
     sg_screenResMen = NULL;
+
+#if SDL_VERSION_ATLEAST(2,0,0)       
     sg_refreshRateMenuItem = NULL;
+#endif
 }
 
 
