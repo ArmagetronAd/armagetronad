@@ -798,7 +798,7 @@ static bool lowlevel_sr_InitDisplay(){
         if ( sr_screenWidth + sr_screenHeight > 0 ) 
         {
             // find best display mode
-            SDL_DisplayMode desiredMode, mode;
+            SDL_DisplayMode desiredMode, mode, lastMode;
             desiredMode.format = 0;
             desiredMode.w = sr_screenWidth;
             desiredMode.h = sr_screenHeight;
@@ -807,14 +807,26 @@ static bool lowlevel_sr_InitDisplay(){
             SDL_DisplayMode *closest = SDL_GetClosestDisplayMode(currentScreensetting.displayIndex, &desiredMode, &mode);
             if(closest)
             {
+                SDL_GetWindowDisplayMode(sr_screen, &lastMode);
+                if(lastMode.format != closest->format ||
+                   lastMode.w != closest->w ||
+                   lastMode.h != closest->h ||
+                   lastMode.refresh_rate != closest->refresh_rate)
+                {
+                    SDL_SetWindowFullscreen(sr_screen, 0);
+                    SDL_Delay(100);
+                }
+
                 // set the display mode
                 sr_screenWidth = closest->w;
                 sr_screenHeight = closest->h;
 
                 if(0 == SDL_SetWindowDisplayMode(sr_screen, closest))
                 {
-                    fullscreenSuccess = (0 == SDL_SetWindowFullscreen(sr_screen, SDL_WINDOW_FULLSCREEN));
+                    SDL_Delay(100);
                     SDL_SetWindowSize(sr_screen, sr_screenWidth, sr_screenHeight);
+                    SDL_Delay(100);
+                    fullscreenSuccess = (0 == SDL_SetWindowFullscreen(sr_screen, SDL_WINDOW_FULLSCREEN));
                 }
             }
 
@@ -832,8 +844,12 @@ static bool lowlevel_sr_InitDisplay(){
         {
             sr_screenWidth = sr_desktopWidth;
             sr_screenHeight = sr_desktopHeight;
-            fullscreenSuccess = (0 == SDL_SetWindowFullscreen(sr_screen, SDL_WINDOW_FULLSCREEN_DESKTOP));
+            SDL_SetWindowFullscreen(sr_screen, SDL_WINDOW_FULLSCREEN_DESKTOP);
+            SDL_SetWindowFullscreen(sr_screen, 0);
+            SDL_Delay(100);
             SDL_SetWindowSize(sr_screen, sr_screenWidth, sr_screenHeight);
+            SDL_Delay(100);
+            fullscreenSuccess = (0 == SDL_SetWindowFullscreen(sr_screen, SDL_WINDOW_FULLSCREEN_DESKTOP));
         } 
 
         if(fullscreenSuccess)
