@@ -260,7 +260,6 @@ tString tResourceManager::locateResource(const char *file, const char *uri, bool
     if( !forceFetch )
     {
         // Do we have this file locally ?
-        con << tOutput("Inside !forcefetch");
         filepath = tDirectories::Resource().GetReadPath(file);
 
         if (filepath != "")
