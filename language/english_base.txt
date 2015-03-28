@@ -2336,7 +2336,6 @@ performance_tweaks_menu_help	Settings that may improve game performance, but do 
 graphics_load_defaults_text	Load Defaults
 graphics_load_defaults_help	This will reset all this options to the ones that suit your system best. (In the opinion of this stupid program...)
 
-
 #feature menuitem
 feature_disabled_text		Off
 feature_disabled_help		Feature is currently disabled.
@@ -2435,8 +2434,18 @@ screen_grab_mouse_help		If activated, the mouse pointer is centered after every 
 screen_apply_changes_text	Apply Changes
 screen_apply_changes_help	Tries to enable the settings in this menu without exiting \g. Use at your own risk.
 
-screen_keep_window_active_text   Keep Window Active
+screen_keep_window_active_text   Keep Window Active:
 screen_keep_window_active_help   This toggles if \g should stay active when window mode is selected and \g loses focus.
+
+screen_mode_advanced		Advanced
+screen_mode_advanced_help	Settings for custom refresh rate, multimonitor setup, color depth and other things you usually do not need to change.
+
+screen_displayindex_text    Display:
+screen_displayindex_help    Index of the screen to use for fullscreen display. 0 is your main screen.
+
+screen_refreshrate_text    Refresh Rate:
+screen_refreshrate_help    The video mode's refresh rate in fullscreen mode.
+screen_refreshrate_select  \1 Hz
 
 #detail menu
 detail_floor_mirror_text	Floor Mirror:
