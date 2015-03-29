@@ -270,9 +270,7 @@ public:
             }
 #else
             SDLKey key = static_cast<SDLKey>(i);
-            {
-                displayID = SDL_GetKeyName(static_cast< SDLKey >( i ) );
-            }
+            displayID = SDL_GetKeyName(key);
 #endif
 #endif
             if(displayID.size() == 0)

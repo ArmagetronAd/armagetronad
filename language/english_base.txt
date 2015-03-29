@@ -2443,7 +2443,7 @@ screen_mode_advanced_help	Settings for custom refresh rate, multimonitor setup, 
 screen_displayindex_text    Display:
 screen_displayindex_help    Index of the screen to use for fullscreen display. 0 is your main screen.
 
-screen_refreshrate_text    Refresh Rate:
+screen_refreshrate_text    Refresh Rate: 
 screen_refreshrate_help    The video mode's refresh rate in fullscreen mode.
 screen_refreshrate_select  \1 Hz
 screen_refreshrate_desk_text	Default
