@@ -530,29 +530,6 @@ static void sr_CompleteGLAttributes()
 
 #ifndef DEDICATED
 #if SDL_VERSION_ATLEAST(2,0,0)
-int SDL_VideoModeOK(int width, int height, int bpp, Uint32 flags) {
-    int i, actual_bpp = 0;
-
-    if (!(flags & SDL_WINDOW_FULLSCREEN)) {
-        SDL_DisplayMode mode;
-        SDL_GetDesktopDisplayMode(0, &mode);
-        return SDL_BITSPERPIXEL(mode.format);
-    }
-
-    for (i = 0; i < SDL_GetNumDisplayModes(0); ++i) {
-        SDL_DisplayMode mode;
-        SDL_GetDisplayMode(0, i, &mode);
-        if (!mode.w || !mode.h || (width == mode.w && height == mode.h)) {
-            if (!mode.format) {
-                return bpp;
-            }
-            if (SDL_BITSPERPIXEL(mode.format) >= (Uint32) bpp) {
-                actual_bpp = SDL_BITSPERPIXEL(mode.format);
-            }
-        }
-    }
-    return actual_bpp;
-}
 
 bool IsWindowActive(void) {
     Uint32 flags = 0;
@@ -636,6 +613,8 @@ static bool lowlevel_sr_InitDisplay(){
         currentScreensetting.displayIndex = 0;
     lastFactualDisplayIndex = currentScreensetting.displayIndex;
 
+    static SDL_DisplayMode desktopMode;
+
     if ( sr_lastDisplayIndex != currentScreensetting.displayIndex )
     {
         // determine desktop mode
@@ -644,15 +623,14 @@ static bool lowlevel_sr_InitDisplay(){
         sr_desktopWidth = minWidth;
         sr_desktopHeight = minHeight;
 
-        SDL_DisplayMode mode;
-        if (!SDL_GetDesktopDisplayMode(currentScreensetting.displayIndex, &mode)) {
-            sr_desktopWidth  = mode.w;
-            sr_desktopHeight = mode.h;
+        if (!SDL_GetDesktopDisplayMode(currentScreensetting.displayIndex, &desktopMode)) {
+            sr_desktopWidth  = desktopMode.w;
+            sr_desktopHeight = desktopMode.h;
 
             int bpp;
             Uint32 Rmask, Gmask, Bmask, Amask;
 
-            if (!SDL_PixelFormatEnumToMasks(mode.format, &bpp, &Rmask, &Gmask, &Bmask, &Amask)) {
+            if (!SDL_PixelFormatEnumToMasks(desktopMode.format, &bpp, &Rmask, &Gmask, &Bmask, &Amask)) {
                 // desktopCD    = bpp;
                 desktopCD_R  = Rmask;
                 desktopCD_G  = Gmask;
@@ -788,6 +766,7 @@ static bool lowlevel_sr_InitDisplay(){
         SDL_SetWindowPosition(sr_screen, defaultX, defaultY);
 
         SDL_Delay(10);
+        SDL_PumpEvents();
     }
 
     // SDL2 can resize window or toggle fullscreen without recreating a new window and therefore keeping existing GL context.
@@ -795,13 +774,26 @@ static bool lowlevel_sr_InitDisplay(){
     {
         bool fullscreenSuccess = false;
 
-        if ( sr_screenWidth + sr_screenHeight > 0 ) 
+        // do we need a custom display mode? if a display mode
+        // is set, yes, but also if a non-default custom refresh rate
+        // is set.
+        if ( sr_screenWidth + sr_screenHeight > 0 || (currentScreensetting.refreshRate != desktopMode.refresh_rate && currentScreensetting.refreshRate > 0)) 
         {
             // find best display mode
             SDL_DisplayMode desiredMode, mode, lastMode;
             desiredMode.format = 0;
             desiredMode.w = sr_screenWidth;
             desiredMode.h = sr_screenHeight;
+            if ( sr_screenWidth + sr_screenHeight <= 0)
+            {
+                desiredMode.w = desktopMode.w;
+                desiredMode.h = desktopMode.h;
+            }
+            else
+            {
+                desiredMode.w = sr_screenWidth;
+                desiredMode.h = sr_screenHeight;
+            }
             desiredMode.refresh_rate = currentScreensetting.refreshRate;
             desiredMode.driverdata = NULL;
             SDL_DisplayMode *closest = SDL_GetClosestDisplayMode(currentScreensetting.displayIndex, &desiredMode, &mode);
@@ -815,6 +807,7 @@ static bool lowlevel_sr_InitDisplay(){
                 {
                     SDL_SetWindowFullscreen(sr_screen, 0);
                     SDL_Delay(100);
+                    SDL_PumpEvents();
                 }
 
                 // set the display mode
@@ -824,8 +817,10 @@ static bool lowlevel_sr_InitDisplay(){
                 if(0 == SDL_SetWindowDisplayMode(sr_screen, closest))
                 {
                     SDL_Delay(100);
+                    SDL_PumpEvents();
                     SDL_SetWindowSize(sr_screen, sr_screenWidth, sr_screenHeight);
                     SDL_Delay(100);
+                    SDL_PumpEvents();
                     fullscreenSuccess = (0 == SDL_SetWindowFullscreen(sr_screen, SDL_WINDOW_FULLSCREEN));
                 }
             }
@@ -847,8 +842,10 @@ static bool lowlevel_sr_InitDisplay(){
             SDL_SetWindowFullscreen(sr_screen, SDL_WINDOW_FULLSCREEN_DESKTOP);
             SDL_SetWindowFullscreen(sr_screen, 0);
             SDL_Delay(100);
+            SDL_PumpEvents();
             SDL_SetWindowSize(sr_screen, sr_screenWidth, sr_screenHeight);
             SDL_Delay(100);
+            SDL_PumpEvents();
             fullscreenSuccess = (0 == SDL_SetWindowFullscreen(sr_screen, SDL_WINDOW_FULLSCREEN_DESKTOP));
         } 
 

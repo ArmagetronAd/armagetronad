@@ -205,6 +205,20 @@ public:
 
         for(int run = 0; run <= 1; ++run)
         {
+            int width = currentScreensetting.res.width;
+            int height = currentScreensetting.res.height;
+            
+            if(width + height == 0)
+            {
+                // desktop mode, get real res
+                SDL_DisplayMode mode;
+                if(SDL_GetDesktopDisplayMode(currentScreensetting.displayIndex, &mode) == 0)
+                {
+                    width = mode.w;
+                    height = mode.h;
+                }
+            }
+
             for(int i = modes-1; i >= 0; --i)
             {
                 SDL_DisplayMode mode;
@@ -213,9 +227,9 @@ public:
                 // first scan only matching modes, then all
                 if(run == 0)
                 {
-                    if(currentScreensetting.res.width != mode.w)
+                    if(width != mode.w)
                         continue;
-                    if(currentScreensetting.res.height != mode.h)
+                    if(height != mode.h)
                         continue;
                 }
                 if(refreshRates.find(mode.refresh_rate) == refreshRates.end())
@@ -244,6 +258,9 @@ public:
             tOutput text("$screen_refreshrate_select", displayRate);
             NewChoice(text, text, *i);
         }
+
+        // add default on top
+        NewChoice("$screen_refreshrate_desk_text", "$screen_refreshrate_desk_help", 0);
 
         select = -1;
         PickFromValue();
