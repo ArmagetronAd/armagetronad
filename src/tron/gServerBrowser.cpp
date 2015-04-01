@@ -345,6 +345,14 @@ void gServerMenu::HandleEvent( SDL_Event event )
             Update();
 			return;
 			break;
+        case(SDLK_HOME):
+            SetSelected(NumItems() - 1);
+            Update();
+            return;
+        case(SDLK_END):
+            SetSelected(0);
+            Update();
+            return;
         default:
             break;
         }
