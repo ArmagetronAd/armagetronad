@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -1028,7 +1028,7 @@ nNetObject::~nNetObject(){
         this->observer_->SetObject( NULL );
     }
 
-#ifdef DEBUG    
+#ifdef DEBUG
     int extra=0;
 
     // account for the reference held by the creator of the object
@@ -1544,7 +1544,7 @@ void nNetObject::SyncAll(){
             // con << sn_SyncRequestedObject.Len() << "/" << sn_netObjects.Len() << "\n";
 
             int currentSync = sn_SyncRequestedObject.Len()-1;
-            while(sn_Connections[user].socket>0 &&
+            while(sn_Connections[user].socket &&
                     sn_Connections[user].bandwidthControl_.CanSend() &&
                     sn_Connections[user].ackPending<sn_maxNoAck &&
                     currentSync >= 0){
@@ -1589,7 +1589,7 @@ void nNetObject::SyncAll(){
                             //con << "remotely creating object " << s << '\n';
 #endif
                             /*
-                              con << "creating object " << s << " at user " << user 
+                              con << "creating object " << s << " at user " << user
                               << " owned by " << sn_netObjects(s)->owner << '\n';
                             */
                             // send a creation message
@@ -1636,7 +1636,7 @@ void nNetObject::SyncAll(){
                             new nWaitForAckSync(m,user,s);
                             nos->knowsAbout[user].nextSyncAck=false;
                         }
-#ifndef nSIMULATE_PING	    
+#ifndef nSIMULATE_PING
                         unsigned long id = m->MessageIDBig();
                         //m->Send(user,0,false);
                         m->SendImmediately(user,false);
@@ -1804,7 +1804,7 @@ void nNetObject::ClearKnows(int user, bool clear){
                         sn_BreakOnObjectID(i);
 #endif
                         bool destroy = no->ActionOnQuit();
-                        
+
                         // take ownership of the object in any case
                         no->createdLocally=true;
                         no->owner=::sn_myNetID;

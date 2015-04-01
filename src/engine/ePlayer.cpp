@@ -8250,8 +8250,8 @@ void ePlayerNetID::GridPosLadderLog()
                 gCycle *pCycle = dynamic_cast<gCycle *>(p->Object());
 
                 se_playerGridPosWriter << p->GetUserName();
-                se_playerGridPosWriter << pCycle->Position().x << pCycle->Position().y;
-                se_playerGridPosWriter << pCycle->Direction().x << pCycle->Direction().y;
+                se_playerGridPosWriter << pCycle->MapPosition().x << pCycle->MapPosition().y;
+                se_playerGridPosWriter << pCycle->MapDirection().x << pCycle->MapDirection().y;
                 se_playerGridPosWriter << pCycle->verletSpeed_;
                 se_playerGridPosWriter << pCycle->GetRubber() << sg_rubberCycle;
 
@@ -9683,7 +9683,7 @@ static void CenterPlayerMessage_conf(std::istream &s)
     {
         return;
     }
- 
+
     int receiver = se_ReadUser( s );
 
     tColoredString msg;

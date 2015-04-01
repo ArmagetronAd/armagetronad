@@ -37,6 +37,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <fstream>
 #include <iostream>
 
+#include "../tron/gArena.h"
 class eGrid;
 class uActionPlayer;
 class eTeam;
@@ -135,6 +136,8 @@ public:
     virtual ~eGameObject();
 
     virtual eCoord Position()const{return pos;}
+    virtual eCoord MapPosition()const{return pos*(1.0/gArena::SizeMultiplier());}
+    virtual eCoord MapDirection()const{return dir*(1.0/gArena::SizeMultiplier());}
     virtual eCoord Direction()const{return dir;}
     virtual eCoord StartPosition()const{return startPos_;}
     virtual eCoord StartDirection()const{return startDir_;}

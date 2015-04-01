@@ -135,7 +135,7 @@ gZone * sg_CreateWinDeathZone( eGrid * grid, const eCoord & pos )
         ret = tNEW( gDeathZoneHack( grid, pos ) );
         sn_ConsoleOut( "$instant_death_activated" );
 
-        sg_deathZoneActivated << ret->GOID() << ret->GetName() << ret->Position().x << ret->Position().y;
+        sg_deathZoneActivated << ret->GOID() << ret->GetName() << ret->MapPosition().x << ret->MapPosition().y;
         sg_deathZoneActivated.write();
     }
     else
@@ -150,7 +150,7 @@ gZone * sg_CreateWinDeathZone( eGrid * grid, const eCoord & pos )
             sn_ConsoleOut( "$instant_round_end_activated" );
         }
 
-        sg_winZoneActivated << ret->GOID() << ret->GetName() << ret->Position().x << ret->Position().y;
+        sg_winZoneActivated << ret->GOID() << ret->GetName() << ret->MapPosition().x << ret->MapPosition().y;
         sg_winZoneActivated.write();
     }
 
@@ -547,7 +547,7 @@ static void CreateZone(tString zoneEffect, gZone *Zone, const REAL zoneSize, con
 
     Zone->RequestSync();
 
-    sg_spawnzoneWriter << zoneEffect << Zone->GOID() << Zone->GetName() << Zone->GetPosition().x << Zone->GetPosition().y << Zone->GetVelocity().x << Zone->GetVelocity().y;
+    sg_spawnzoneWriter << zoneEffect << Zone->GOID() << Zone->GetName() << Zone->MapPosition().x << Zone->MapPosition().y << Zone->GetVelocity().x << Zone->GetVelocity().y;
     sg_spawnzoneWriter.write();
 }
 
@@ -776,7 +776,7 @@ bool gZone::Timestep( REAL time )
 
     if (!zoneInit_)
     {
-        sg_OnlineZoneWriter << GOID() << name_ << effect_ << GetPosition().x << GetPosition().y << GetVelocity().x << GetVelocity().y
+        sg_OnlineZoneWriter << GOID() << name_ << effect_ << MapPosition().x << MapPosition().y << GetVelocity().x << GetVelocity().y
                             << GetRadius() << GetExpansionSpeed();
 
         zoneInit_ = true;
@@ -1761,7 +1761,7 @@ static tSettingItem<bool> sg_winZonePlayerEnteredWinConf("WINZONE_PLAYER_ENTER_W
 
 void gWinZoneHack::OnEnter( gCycle * target, REAL time )
 {
-    sg_winzonePlayerEnterWriter << this->GOID() << name_ << GetPosition().x << GetPosition().y << target->Player()->GetUserName() << target->Position().x << target->Position().y << target->Direction().x << target->Direction().y << time;
+    sg_winzonePlayerEnterWriter << this->GOID() << name_ << MapPosition().x << MapPosition().y << target->Player()->GetUserName() << target->MapPosition().x << target->MapPosition().y << target->MapDirection().x << target->MapDirection().y << time;
     sg_winzonePlayerEnterWriter.write();
 
     //HACK RACE begin
@@ -3133,7 +3133,7 @@ void gBaseZoneHack::OnConquest( void )
 {
     if ( team )
     {
-        sg_basezoneConqueredWriter << ePlayerNetID::FilterName(team->Name()) << GetPosition().x << GetPosition().y;
+        sg_basezoneConqueredWriter << ePlayerNetID::FilterName(team->Name()) << MapPosition().x << MapPosition().y;
         if ( enemies_.size() == 0 ) //no enemies inside
         {
             sg_basezoneConqueredWriter << "NO_ENEMIES";
@@ -4563,7 +4563,7 @@ static eLadderLogWriter sg_ballVanishWriter("BALL_VANISH", false);
 void gBallZoneHack::OnVanish( void )
 {
     grid->RemoveGameObjectInteresting(this);
-    sg_ballVanishWriter << this->GOID() << name_ << GetPosition().x << GetPosition().y;
+    sg_ballVanishWriter << this->GOID() << name_ << MapPosition().x << MapPosition().y;
     sg_ballVanishWriter.write();
 }
 
@@ -6105,7 +6105,7 @@ bool gTargetZoneHack::Timestep( REAL time )
         SetExpansionSpeed( -GetRadius()*.5 );
         RequestSync();
         // send message to ladder log file ...
-        sg_targetzoneTimeoutWriter << eGameObject::GOID() << name_ << GetPosition().x << GetPosition().y;
+        sg_targetzoneTimeoutWriter << eGameObject::GOID() << name_ << MapPosition().x << MapPosition().y;
         sg_targetzoneTimeoutWriter.write();
     }
 
@@ -6118,7 +6118,7 @@ bool gTargetZoneHack::Timestep( REAL time )
         SetExpansionSpeed( -GetRadius()*.5 );
         RequestSync();
         // send message to ladder log file ...
-        sg_targetzoneConqueredWriter << eGameObject::GOID() << name_ << GetPosition().x << GetPosition().y;
+        sg_targetzoneConqueredWriter << eGameObject::GOID() << name_ << MapPosition().x << MapPosition().y;
         if (firstPlayer_)
         {
             sg_targetzoneConqueredWriter << firstPlayer_->GetUserName();
@@ -6237,7 +6237,7 @@ void gTargetZoneHack::OnEnter( gCycle * target, REAL time )
     // message in edlog
     if (playersFlags[target->Player()->ListID()] != 2)
     {
-        sg_targetzonePlayerEnterWriter << this->GOID() << name_ << GetPosition().x << GetPosition().y << target->Player()->GetUserName() << target->Player()->Object()->Position().x << target->Player()->Object()->Position().y << target->Player()->Object()->Direction().x << target->Player()->Object()->Direction().y << time;
+        sg_targetzonePlayerEnterWriter << this->GOID() << name_ << MapPosition().x << MapPosition().y << target->Player()->GetUserName() << target->Player()->Object()->MapPosition().x << target->Player()->Object()->MapPosition().y << target->Player()->Object()->MapDirection().x << target->Player()->Object()->MapDirection().y << time;
         sg_targetzonePlayerEnterWriter.write();
         playersFlags[target->Player()->ListID()] = 2;
     }
@@ -6263,7 +6263,7 @@ void gTargetZoneHack::OnExit(gCycle *target, REAL time)
     tCurrentAccessLevel elevator( sg_SetTargetCmd_conf.GetRequiredLevel(), true );
     tConfItemBase::LoadAll(stream);
 
-    sg_targetzonePlayerLeftWriter << this->GOID() << name_ << GetPosition().x << GetPosition().y << target->Player()->GetUserName() << target->Player()->Object()->Position().x << target->Player()->Object()->Position().y << target->Player()->Object()->Direction().x << target->Player()->Object()->Direction().y << time;
+    sg_targetzonePlayerLeftWriter << this->GOID() << name_ << MapPosition().x << MapPosition().y << target->Player()->GetUserName() << target->Player()->Object()->MapPosition().x << target->Player()->Object()->MapPosition().y << target->Player()->Object()->MapDirection().x << target->Player()->Object()->MapDirection().y << time;
     sg_targetzonePlayerLeftWriter.write();
 
     if (playersFlags[target->Player()->ListID()])
@@ -7009,7 +7009,7 @@ void gObjectZoneHack::OnEnter( gCycle * target, REAL time )
     ePlayerNetID *p = target->Player();
     if (p)
     {
-        sg_objectZonePlayerEntered << GOID() << name_ << GetPosition().x << GetPosition().y << p->GetUserName() << target->Position().x << target->Position().y << target->Direction().x << target->Direction().y << time;
+        sg_objectZonePlayerEntered << GOID() << name_ << MapPosition().x << MapPosition().y << p->GetUserName() << target->MapPosition().x << target->MapPosition().y << target->MapDirection().x << target->MapDirection().y << time;
         sg_objectZonePlayerEntered.write();
     }
 }
@@ -7019,7 +7019,7 @@ void gObjectZoneHack::OnEnter(gZone *target, REAL time)
 {
     if (target && !target->destroyed_)
     {
-        sg_objectZoneZoneEntered << GOID() << name_ << GetPosition().x << GetPosition().y << target->GOID() << target->GetName() << target->GetPosition().x << target->GetPosition().y << target->GetVelocity().x << target->GetVelocity().y << time;
+        sg_objectZoneZoneEntered << GOID() << name_ << MapPosition().x << MapPosition().y << target->GOID() << target->GetName() << target->MapPosition().x << target->MapPosition().y << target->GetVelocity().x << target->GetVelocity().y << time;
         sg_objectZoneZoneEntered.write();
     }
 }
@@ -7199,10 +7199,10 @@ static void sg_SpawnObjectZone(std::istream &s)
         Zone->RequestSync();
 
 #ifdef DEBUG
-        con << Zone->GetEffect() << " " << Zone->GOID() << " " << Zone->GetName() << " " << Zone->GetPosition().x << " " << Zone->GetPosition().y << " " << Zone->GetVelocity().x << " " << Zone->GetVelocity().y << " " << (Zone->GetWallInteract()?"true":"false") << " " << Zone->GetColor().r << " " << Zone->GetColor().g << " " << Zone->GetColor().b << "\n";
+        con << Zone->GetEffect() << " " << Zone->GOID() << " " << Zone->GetName() << " " << Zone->MapPosition().x << " " << Zone->MapPosition().y << " " << Zone->GetVelocity().x << " " << Zone->GetVelocity().y << " " << (Zone->GetWallInteract()?"true":"false") << " " << Zone->GetColor().r << " " << Zone->GetColor().g << " " << Zone->GetColor().b << "\n";
 #endif
 
-        sg_ObjectZoneSpawned << Zone->GOID() << Zone->GetName() << Zone->GetPosition().x << Zone->GetPosition().y << Zone->GetVelocity().x << Zone->GetVelocity().y << se_GameTime();
+        sg_ObjectZoneSpawned << Zone->GOID() << Zone->GetName() << Zone->MapPosition().x << Zone->MapPosition().y << Zone->GetVelocity().x << Zone->GetVelocity().y << se_GameTime();
         sg_ObjectZoneSpawned.write();
 
         return;
@@ -7240,7 +7240,7 @@ void gObjectZoneHack::OnExit( gCycle * target, REAL time )
     ePlayerNetID *p = target->Player();
     if (p)
     {
-        sg_objectZonePlayerLeft << GOID() << name_ << Position().x << Position().y << p->GetUserName() << target->Position().x << target->Position().y << target->Direction().x << target->Direction().y << se_GameTime();
+        sg_objectZonePlayerLeft << GOID() << name_ << MapPosition().x << MapPosition().y << p->GetUserName() << target->MapPosition().x << target->MapPosition().y << target->Direction().x << target->Direction().y << se_GameTime();
         sg_objectZonePlayerLeft.write();
     }
 }
@@ -8869,7 +8869,7 @@ void gZone::GridPosLadderLog()
         {
             sg_zoneGridPosWriter << zone->GetEffect() << zone->GOID() << zone->GetName();
             sg_zoneGridPosWriter << zone->GetRadius() << zone->GetExpansionSpeed();
-            sg_zoneGridPosWriter << zone->Position().x << zone->Position().y << zone->GetVelocity().x << zone->GetVelocity().y;
+            sg_zoneGridPosWriter << zone->MapPosition().x << zone->MapPosition().y << zone->GetVelocity().x << zone->GetVelocity().y;
             sg_zoneGridPosWriter << zone->color_.r << zone->color_.g << zone->color_.b;
 
             sg_zoneGridPosWriter.write();
@@ -8912,7 +8912,7 @@ static void sg_CollapseZone(std::istream &s)
         gZone *zone = dynamic_cast<gZone *>(gameObjects(zone_id));
         if (zone)
         {
-            sg_collapsezoneWriter << zone_id << object_id_str << zone->GetPosition().x << zone->GetPosition().y;
+            sg_collapsezoneWriter << zone_id << object_id_str << zone->MapPosition().x << zone->MapPosition().y;
             sg_collapsezoneWriter.write();
 
             zone->Vanish(0.5);
@@ -8956,7 +8956,7 @@ static void sg_DestroyZone(std::istream &s)
         gZone *zone = dynamic_cast<gZone *>(gameObjects(zone_id));
         if (zone)
         {
-            sg_collapsezoneWriter << zone_id << object_id_str << zone->GetPosition().x << zone->GetPosition().y;
+            sg_collapsezoneWriter << zone_id << object_id_str << zone->MapPosition().x << zone->MapPosition().y;
             sg_collapsezoneWriter.write();
 
             zone->Collapse();
@@ -8996,7 +8996,7 @@ static void sg_CollapseZoneID(std::istream &s)
         {
             if (Zone->GOID() == zoneID)
             {
-                sg_collapsezoneWriter << zoneID << object_id_str << Zone->GetPosition().x << Zone->GetPosition().y;
+                sg_collapsezoneWriter << zoneID << object_id_str << Zone->MapPosition().x << Zone->MapPosition().y;
                 sg_collapsezoneWriter.write();
 
                 Zone->Vanish(0.5);
@@ -9037,7 +9037,7 @@ static void sg_DestroyZoneID(std::istream &s)
         {
             if (Zone->GOID() == zoneID)
             {
-                sg_collapsezoneWriter << zoneID << object_id_str << Zone->GetPosition().x << Zone->GetPosition().y;
+                sg_collapsezoneWriter << zoneID << object_id_str << Zone->MapPosition().x << Zone->MapPosition().y;
                 sg_collapsezoneWriter.write();
 
                 Zone->Collapse();

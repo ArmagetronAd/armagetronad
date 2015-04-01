@@ -2425,7 +2425,7 @@ gCycle::gCycle(eGrid *grid, const eCoord &pos,const eCoord &d,ePlayerNetID *p)
         currentWall(NULL),
         lastWall(NULL)
 {
-    se_cycleCreatedWriter << p->GetLogName() << pos.x << pos.y << d.x << d.y << Team()->Name().Filter() << se_GameTime();
+    se_cycleCreatedWriter << p->GetLogName() << this->MapPosition().x << this->MapPosition().y << this->MapDirection().x << this->MapDirection().y << Team()->Name().Filter() << se_GameTime();
     se_cycleCreatedWriter.write();
 
     windingNumberWrapped_ = windingNumber_ = Grid()->DirectionWinding(dirDrive);
@@ -2449,7 +2449,7 @@ gCycle::gCycle(eGrid *grid, const eCoord &pos,const eCoord &d,ePlayerNetID *p)
     startDir_ = this->dir;
 
     tString logTurnsMsg;
-    logTurnsMsg << "spawned " << pos.x << " " << pos.y << " " << dir.x << " " << dir.y;
+    logTurnsMsg << "spawned " << this->MapPosition().x << " " << this->MapPosition().y << " " << this->MapDirection().x << " " << this->MapDirection().y;
     LogPlayersCycleTurns(this, logTurnsMsg);
 
     turnedPositions.push_back(startPos_);
@@ -4215,10 +4215,10 @@ void gCycle::Kill(){
             if (this && Player())
             {
                 tString logTurnsMsg;
-                logTurnsMsg << "death " << pos.x << " " << pos.y << " " << dir.x << " " << dir.y;
+                logTurnsMsg << "death " << MapPosition().x << " " << MapPosition().y << " " << MapDirection().x << " " << MapDirection().y;
                 LogPlayersCycleTurns(this, logTurnsMsg);
 
-                se_cycleDestroyedWriter << Player()->GetUserName() << Position().x << Position().y << Direction().x << Direction().y << ePlayerNetID::FilterName(Team()->Name()) << se_GameTime();
+                se_cycleDestroyedWriter << Player()->GetUserName() << MapPosition().x << MapPosition().y << MapDirection().x << MapDirection().y << ePlayerNetID::FilterName(Team()->Name()) << se_GameTime();
                 se_cycleDestroyedWriter.write();
 
                 Player()->LogActivity(ACTIVITY_DIED);
@@ -5430,7 +5430,7 @@ gCycle::gCycle(nMessage &m)
     startDir_ = this->dir;
 
     tString logTurnsMsg;
-    logTurnsMsg << "spawned " << pos.x << " " << pos.y << " " << dir.x << " " << dir.y;
+    logTurnsMsg << "spawned " << this->MapPosition().x << " " << this->MapPosition().y << " " << this->MapDirection().x << " " << this->MapDirection().y;
     LogPlayersCycleTurns(this, logTurnsMsg);
 
     turnedPositions.push_back(startPos_);
@@ -5931,7 +5931,7 @@ void gCycle::ReadSync( nMessage &m )
         tNEW(gExplosion)( grid, lastSyncMessage_.pos, lastSyncMessage_.time ,color_, this );
 
         tString logTurnsMsg;
-        logTurnsMsg << "death " << pos.x << " " << pos.y << " " << dir.x << " " << dir.y;
+        logTurnsMsg << "death " << this->MapPosition().x << " " << this->MapPosition().y << " " << this->MapDirection().x << " " << this->MapDirection().y;
         LogPlayersCycleTurns(this, logTurnsMsg);
 
         return;
@@ -6793,7 +6793,7 @@ void gCycle::ProcessShoot(bool deathShot)
                 pZone->SetWallPenetrate(sg_shotPenetrateWalls);
 
                 //  write to laddderlog
-                sg_ZoneShotReleased << deathShot << pZone->GOID() << Player()->GetUserName() << pZone->GetPosition().x << pZone->GetPosition().y << pZone->GetVelocity().x << pZone->GetVelocity().y;
+                sg_ZoneShotReleased << deathShot << pZone->GOID() << Player()->GetUserName() << pZone->MapPosition().x << pZone->MapPosition().y << pZone->GetVelocity().x << pZone->GetVelocity().y;
                 sg_ZoneShotReleased.write();
 
                 if (sg_shotExplosion == 1)
@@ -6840,7 +6840,7 @@ void gCycle::ProcessShoot(bool deathShot)
                         pZone->SetWallPenetrate(sg_shotPenetrateWalls);
 
                         //  write to laddderlog
-                        sg_ZoneShotReleased << deathShot << pZone->GOID() << Player()->GetUserName() << pZone->GetPosition().x << pZone->GetPosition().y << pZone->GetVelocity().x << pZone->GetVelocity().y;
+                        sg_ZoneShotReleased << deathShot << pZone->GOID() << Player()->GetUserName() << pZone->MapPosition().x << pZone->MapPosition().y << pZone->GetVelocity().x << pZone->GetVelocity().y;
                         sg_ZoneShotReleased.write();
 
                         if (sg_megashotExplosion >= 2)
