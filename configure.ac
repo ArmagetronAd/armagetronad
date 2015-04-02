@@ -36,8 +36,10 @@ AM_INIT_AUTOMAKE([tar-ustar filename-length-max=255 subdir-objects])
 dnl detect which link commant to use
 AC_PROG_LN_S
 
-dnl find a parser generator to use
+dnl find a parser generator to useo
 AC_PROG_YACC
+AC_MSG_CHECKING(bison version)
+test -r $srcdir/src/tools/values/vParser.cpp || ${YACC} --version | grep bison || AC_MSG_ERROR(GNU Bison is required to compile from source control.)
 
 dnl check whether m4 is available for documentation processing
 AC_CHECK_PROG(HAVE_M4,m4,true,false)
