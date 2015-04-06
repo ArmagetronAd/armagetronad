@@ -871,6 +871,7 @@ text_out_help			Enable console text output
 console_columns_help    Number of characters in each line of console output
 console_rows_help       Number of lines of console output without user intervention
 console_rows_max_help   Number of lines of console output when scrolling back
+chat_layer_help         Opacity of the console and menu background: 0 for fully transparent, 1 for fully opaque.
 console_indent_help     Number of spaces each continuation of a wrapped console line is indented by
 console_decorate_id_help			Decorates every line of console output with the client ID
 console_decorate_ip_help			Decorates every line of console output with the client IP

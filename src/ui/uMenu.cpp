@@ -540,7 +540,7 @@ void uMenu::GenericBackground(REAL top){
             }
 
             // fade everything rendered so far to black
-            if( sr_alphaBlend )
+            if( sr_alphaBlend && sr_chatLayer > 0 )
             {
                 sr_ResetRenderState(true);
 
@@ -555,7 +555,7 @@ void uMenu::GenericBackground(REAL top){
                 else
                 {
                     alpha += timePassed;
-                    static const REAL limit = .5;
+                    REAL limit = sr_chatLayer;
 
                     if( alpha > limit )
                     {
