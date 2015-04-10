@@ -367,6 +367,7 @@ void gRaceScores::Add(gRacePlayer *racePlayer, bool finished)
                     rankMsg.SetTemplateParameter(2, racePlayer->Time());
                     rankMsg.SetTemplateParameter(3, oldTime - racePlayer->Time());
                     rankMsg.SetTemplateParameter(4, racingPlayer->Rank());
+                    rankMsg.SetTemplateParameter(5, prevRank - racingPlayer->Rank());
                     rankMsg << "$race_player_hold_rank_up";
                 }
             }
