@@ -53,7 +53,17 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "SDL_thread.h"
 #include "SDL_mutex.h"
 
+#ifndef WIN32
+#define PNG_SCREENSHOT
+#else
+#if !SDL_VERSION_ATLEAST(2, 0, 0)
+#define PNG_SCREENSHOT
+#endif
+#endif
+
+#ifdef PNG_SCREENSHOT
 #include <png.h>
+#endif
 #include <unistd.h>
 #define SCREENSHOT_PNG_BITDEPTH 8
 #define SCREENSHOT_BYTES_PER_PIXEL 3
@@ -83,13 +93,13 @@ public:
         {
             glSetFenceNV( *this, GL_ALL_COMPLETED_NV );
         }
-#endif       
+#endif
 #ifdef GLEW_APPLE_fence
         if( GLEW_APPLE_fence )
         {
             glSetFenceAPPLE( *this );
         }
-#endif       
+#endif
         sr_CheckGLError();
     }
 
@@ -102,13 +112,13 @@ public:
         {
             glFinishFenceNV( *this );
         }
-#endif       
+#endif
 #ifdef GLEW_APPLE_fence
         if( GLEW_APPLE_fence )
         {
             glFinishFenceAPPLE( *this );
         }
-#endif       
+#endif
         sr_CheckGLError();
     }
 
@@ -125,13 +135,13 @@ private:
         {
             return true;
         }
-#endif       
+#endif
 #ifdef GLEW_APPLE_fence
         if( GLEW_APPLE_fence )
         {
             return true;
         }
-#endif       
+#endif
 #endif
         // fallback: no fence
         return false;
@@ -144,13 +154,13 @@ private:
         {
             glGenFencesNV( 1, &object_ );
         }
-#endif       
+#endif
 #ifdef GLEW_APPLE_fence
         if( GLEW_APPLE_fence )
         {
             glGenFencesAPPLE( 1, &object_ );
         }
-#endif       
+#endif
     }
 
     virtual void DoDelete()    //!< really frees the object
@@ -160,13 +170,13 @@ private:
         {
             glDeleteFencesNV( 1, &object_ );
         }
-#endif       
+#endif
 #ifdef GLEW_APPLE_fence
         if( GLEW_APPLE_fence )
         {
             glDeleteFencesAPPLE( 1, &object_ );
         }
-#endif       
+#endif
     }
 };
 
@@ -189,6 +199,7 @@ static bool png_screenshot=true;
 static tConfItem<bool> pns("PNG_SCREENSHOT",png_screenshot);
 #ifndef DEDICATED
 
+#ifdef PNG_SCREENSHOT
 static void SDL_SavePNG(SDL_Surface *image, tString filename){
     png_structp png_ptr;
     png_infop info_ptr;
@@ -236,6 +247,7 @@ static void SDL_SavePNG(SDL_Surface *image, tString filename){
     free(row_ptrs);
     fclose(fp);
 }
+#endif
 #endif
 
 static void make_screenshot(){
@@ -299,9 +311,11 @@ static void make_screenshot(){
             }
 
             // save image
+#ifdef PNG_SCREENSHOT
             if (png_screenshot)
                 SDL_SavePNG(image, tDirectories::Screenshot().GetWritePath( fileName ));
             else
+#endif
                 SDL_SaveBMP(temp, tDirectories::Screenshot().GetWritePath( fileName ) );
             done = true;
         }
@@ -562,7 +576,7 @@ static REAL sr_swapDelayFactor = .5f;
 static tConfItem< REAL > sr_swapDelayFactorCI("SWAP_LATENCY_DELAY_FACTOR", sr_swapDelayFactor );
 
 
-// measures time wasted on waiting for swaps 
+// measures time wasted on waiting for swaps
 class rSwapTime
 {
 public:
@@ -662,7 +676,7 @@ public:
             }
 #endif
 
-        
+
 
         }
     }
@@ -693,7 +707,7 @@ public:
         double start = Time();
         glFinish();
         REAL ret = Time() - start;
-        
+
         AdvanceClear();
 
         return ret;
@@ -713,7 +727,7 @@ public:
             double start = Time();
 
             Swap(swap);
-            
+
             static rGLFence & fence = sr_GetFence();
 
             // finish last frame's fence
@@ -746,7 +760,7 @@ public:
             count = 60;
             con << "SwapTime " << ret*1000 << "\n";
         }
-#endif       
+#endif
 
         return ret;
     }
@@ -787,7 +801,7 @@ public:
     }
 
     // call after swapping buffers with an argument of true
-    // and once just before rendering with an argument 
+    // and once just before rendering with an argument
     void FinishComplicated( bool swap = false )
     {
 #ifdef DEBUG_SWAP_X
@@ -850,7 +864,7 @@ protected:
         {
             minFrameTime = referenceFrameTime;
         }
-        
+
         // tolerance factor for dropped frames
         static const REAL frameDropTolerance = 1.5;
         static const int framePenaltyMax = 1200;
@@ -860,10 +874,10 @@ protected:
         // the real time spent waiting, not doing anything, during the last frame
         timeSpentWaiting += delay_;
 
-        bool frameDrop = inGame_ && 
+        bool frameDrop = inGame_ &&
             (
-                timeSpent > frameDropTolerance * minFrameTime 
-                || 
+                timeSpent > frameDropTolerance * minFrameTime
+                ||
                 timeSpentWaiting < smallDelay/10
                 );
         inGame_ = false;
@@ -930,7 +944,7 @@ protected:
                 con << "Rendering fine again.\n";
 #endif
                 badFrame_ = framePenaltyMin;
-                
+
                 // just dropping out of throughput mode; better still be a bit careful
                 smoothDelay_ = delay_ = 0;
                 counter_ = 0;
@@ -1457,7 +1471,7 @@ void rSysDep::SwapGL(){
     }
     else if (s_videoout)
         make_screenshot();
-    
+
     // actiate motion blur (does not use the game state, so it's OK to call here )
     bool shouldSwap = sr_MotionBlur( time, blurTarget );
     sr_SwapTime().Finish( shouldSwap );

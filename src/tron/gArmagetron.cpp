@@ -169,9 +169,9 @@ void sg_StartupPlayerMenu()
 {
     uMenu firstSetup("$first_setup", false);
     firstSetup.SetBot(-.2);
-    
+
     uMenuItemExit e2(&firstSetup, "$menuitem_accept", "$menuitem_accept_help");
-    
+
     ePlayer * player = ePlayer::PlayerConfig(0);
     tASSERT( player );
 
@@ -214,7 +214,7 @@ void sg_StartupPlayerMenu()
     uMenuItemSelection<tColor> c(&firstSetup,
                                  "$first_setup_color",
                                  "$first_setup_color_help",
-                                 color);   
+                                 color);
 
     if ( !st_FirstUse )
     {
@@ -232,7 +232,7 @@ void sg_StartupPlayerMenu()
     c.NewChoice( "$first_setup_color_cyan", "", tColor(0,1,1) );
     c.NewChoice( "$first_setup_color_white", "", tColor(1,1,1) );
     c.NewChoice( "$first_setup_color_dark", "", tColor(0,0,0) );
-    
+
     if ( st_FirstUse )
     {
         for(int i=tRandomizer::GetInstance().Get(4); i>=0; --i)
@@ -245,9 +245,9 @@ void sg_StartupPlayerMenu()
                       "$player_name_text",
                       "$player_name_help",
                       player->name, ePlayerNetID::MAX_NAME_LENGTH);
-    
+
     uMenuItemExit e(&firstSetup, "$menuitem_accept", "$menuitem_accept_help");
-    
+
     firstSetup.Enter();
 
     // apply network rates
@@ -609,7 +609,7 @@ void sg_SetIcon()
 {
 #ifndef DEDICATED
 #ifndef MACOSX
-#ifdef  WIN32
+#ifdef  WIN32_X
     SDL_SysWMinfo	info;
     HICON			icon;
     // get the HWND handle
@@ -699,7 +699,7 @@ int main(int argc,char **argv){
             const char * dedicatedSection = "DEDICATED";
             if ( !tRecorder::PlaybackStrict( dedicatedSection, dedicatedServer ) )
             {
-#ifdef DEDICATED          
+#ifdef DEDICATED
                 dedicatedServer = true;
 #endif
             }
@@ -720,16 +720,19 @@ int main(int argc,char **argv){
 #endif
 
 #ifdef WIN32
+#if !SDL_VERSION_ATLEAST(2,0,0)
         // disable DirectX by default; it causes problems with some boards.
         if (!getenv( "SDL_VIDEODRIVER") ) {
-            if (sr_useDirectX) {
-                sg_PutEnv( "SDL_VIDEODRIVER=directx" );
-            }
-            else
+            if (!sr_useDirectX)
             {
                 sg_PutEnv( "SDL_VIDEODRIVER=windib" );
             }
+            else
+            {
+                sg_PutEnv( "SDL_VIDEODRIVER=directx" );
+            }
         }
+#endif
 #endif
 
         // atexit(ANET_Shutdown);
@@ -897,7 +900,7 @@ int main(int argc,char **argv){
 
                     sn_bigBrotherString = renderer_identification + "VER=" + st_programVersion + "\n\n";
 
-#ifdef HAVE_LIBRUBY      
+#ifdef HAVE_LIBRUBY
                     try {
                         // tRuby::Load(tDirectories::Data(), "scripts/menu.rb");
                         tRuby::Load(tDirectories::Data(), "scripts/ai.rb");

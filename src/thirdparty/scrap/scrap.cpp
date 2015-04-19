@@ -29,7 +29,7 @@
 #include <SDL_clipboard.h>
 
 #include "scrap.h"
-
+#include <memory.h>
 
 int        init_scrap(void)
 {

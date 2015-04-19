@@ -723,7 +723,7 @@ static bool lowlevel_sr_InitDisplay(){
 #endif
 
         // try fullscreen first if requested and sensible (only display 0 is supported)
-        if (currentScreensetting.fullscreen && currentScreensetting.displayIndex == 0 && SDL_CreateWindowAndRenderer(sr_desktopWidth, sr_desktopHeight, attrib | SDL_WINDOW_FULLSCREEN_DESKTOP, &sr_screen, &sr_screenRenderer)) 
+        if (currentScreensetting.fullscreen && currentScreensetting.displayIndex == 0 && SDL_CreateWindowAndRenderer(sr_desktopWidth, sr_desktopHeight, attrib | SDL_WINDOW_FULLSCREEN_DESKTOP, &sr_screen, &sr_screenRenderer))
         {
             sr_screen = NULL;
             sr_screenRenderer = NULL;
@@ -777,7 +777,7 @@ static bool lowlevel_sr_InitDisplay(){
         // do we need a custom display mode? if a display mode
         // is set, yes, but also if a non-default custom refresh rate
         // is set.
-        if ( sr_screenWidth + sr_screenHeight > 0 || (currentScreensetting.refreshRate != desktopMode.refresh_rate && currentScreensetting.refreshRate > 0)) 
+        if ( sr_screenWidth + sr_screenHeight > 0 || (currentScreensetting.refreshRate != desktopMode.refresh_rate && currentScreensetting.refreshRate > 0))
         {
             // find best display mode
             SDL_DisplayMode desiredMode, mode, lastMode;
@@ -847,7 +847,7 @@ static bool lowlevel_sr_InitDisplay(){
             SDL_Delay(100);
             SDL_PumpEvents();
             fullscreenSuccess = (0 == SDL_SetWindowFullscreen(sr_screen, SDL_WINDOW_FULLSCREEN_DESKTOP));
-        } 
+        }
 
         if(fullscreenSuccess)
         {
@@ -861,7 +861,7 @@ static bool lowlevel_sr_InitDisplay(){
             std::cerr << lastError << '\n';
 
             currentScreensetting.fullscreen = false;
-            
+
             sr_screenWidth  = currentScreensetting.windowSize.width;
             sr_screenHeight = currentScreensetting.windowSize.height;
         }
@@ -869,12 +869,12 @@ static bool lowlevel_sr_InitDisplay(){
     if (!currentScreensetting.fullscreen)
     {
         // Set windowed mode and size accordingly
-        if (!SDL_SetWindowFullscreen(sr_screen, 0)) 
+        if (!SDL_SetWindowFullscreen(sr_screen, 0))
         {
             SDL_SetWindowSize(sr_screen, sr_screenWidth, sr_screenHeight);
             SDL_SetWindowPosition(sr_screen, defaultX, defaultY);
             SDL_SetRelativeMouseMode(SDL_FALSE);
-        } 
+        }
         else
         {
             lastError.Clear();
@@ -1721,11 +1721,13 @@ void sr_Activate(bool active)
     // Only on Windows, you get a deactivation event when you ALT-TAB away
     // from th application, then iconification is the right thing to do.
     // On Linux at least, there is no standard alt-tab for fullscreen applications.
-#ifdef WIN32
+    #ifdef WIN32
+    #if !SDL_VERSION_ATLEAST(2,0,0)
     if ( currentScreensetting.fullscreen && !active )
     {
         SDL_WM_IconifyWindow();
     }
+    #endif
     #endif
     #endif
 }
