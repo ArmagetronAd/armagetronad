@@ -1394,14 +1394,14 @@ void gRace::Sync( int alive, int ai_alive, int humans, REAL time )
     //  show the countdown message
     if (!roundFinished_)
     {
-        int NumberOfSpaces  = 22;
-        int NumberOfEntries = 0;
-
         for(int i = 0; i < sg_RacePlayers.Len(); i++)
         {
             gRacePlayer *racer = sg_RacePlayers[i];
             if (racer && racer->Player())
             {
+                int NumberOfSpaces  = 22;
+                int NumberOfEntries = 0;
+
                 tColoredString countdownMsg;
 
                 //  increase the number of entries to show
@@ -1416,8 +1416,8 @@ void gRace::Sync( int alive, int ai_alive, int humans, REAL time )
 
                 if ( racer->Countdown() >= 0 )
                 {
-                    countdownMsg.SetPos(NumberOfSpaces / NumberOfEntries);
                     countdownMsg << "0xffff7f" << racer->Countdown();
+                    countdownMsg.SetPos(NumberOfSpaces / NumberOfEntries);
                 }
 
                 if (NumberOfEntries > 0)
