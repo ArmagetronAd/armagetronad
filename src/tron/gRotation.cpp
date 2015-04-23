@@ -1619,24 +1619,18 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
         {
             for (int i=0; i < ThisQueueing->Size(); i++)
             {
+                tString name = ThisQueueing->Get(i);
+
                 if (i == 0)
-                {
-                    tString name = ThisQueueing->Get(i);
-                    Output << "0xffaa00" << name;
-                }
+                    Output << "0xffff7f" << stripMapNameOnly(name);
                 else
-                {
-                    tString name = ThisQueueing->Get(i);
-                    Output << "0x00aaff, " << "0xffaa00" << name;
-                }
+                    Output << "0x00cccc, 0xffff7f" << stripMapNameOnly(name);
             }
         }
-        else
-        {
-            Output << "0xddff00There are no items currently in the queueing system.";
-            Output << "\n";
-            sn_ConsoleOut(Output, p->Owner());
-        }
+        else Output << "0xddff00There are no items currently in the queueing system.";
+
+        Output << "\n";
+        sn_ConsoleOut(Output, p->Owner());
     }
     else if (argument == "add")
     {
