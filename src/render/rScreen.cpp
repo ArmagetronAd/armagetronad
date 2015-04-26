@@ -513,6 +513,10 @@ static void sr_SetGLAttributes( int rDepth, int gDepth, int bDepth, int zDepth )
     SDL_GL_SetAttribute( SDL_GL_RED_SIZE, rDepth );
     SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, gDepth );
     SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, bDepth );
+#ifdef WIN32
+    if(zDepth > 24)
+        zDepth = 24;
+#endif
     SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, zDepth );
     SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
 
