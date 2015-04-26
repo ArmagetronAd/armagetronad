@@ -62,6 +62,7 @@ tCONFIG_ENUM( rVSync );
 #if SDL_VERSION_ATLEAST(2,0,0)
 SDL_Window   *sr_screen=NULL;
 SDL_Renderer *sr_screenRenderer=NULL;
+SDL_GLContext sr_glcontext=NULL;
 #else
 SDL_Surface  *sr_screen=NULL; // our window
 #endif
@@ -563,6 +564,20 @@ int SDL_EnableUNICODE(int enable) {
 
 #ifndef DEDICATED
 #if SDL_VERSION_ATLEAST(2,0,0)
+static int CountBits(int toCount)
+{
+    int ret = 0;
+    while(toCount != 0)
+    {
+        if(toCount & 1)
+            ret++;
+
+        toCount >>= 1;
+    }
+
+    return ret;
+}
+
 static bool lowlevel_sr_InitDisplay(){
     rScreenSize & res = currentScreensetting.fullscreen ? currentScreensetting.res : currentScreensetting.windowSize;
 
@@ -575,9 +590,9 @@ static bool lowlevel_sr_InitDisplay(){
     sr_screenHeight= res.height;
 
     // desktop color depth
-    static int desktopCD_R = 5;
-    static int desktopCD_G = 5;
-    static int desktopCD_B = 5;
+    static int desktopCD_R = 8;
+    static int desktopCD_G = 8;
+    static int desktopCD_B = 8;
     // static int desktopCD   = 16;
     // desktop resolution
     static int sr_desktopWidth = 0, sr_desktopHeight = 0;
@@ -630,11 +645,11 @@ static bool lowlevel_sr_InitDisplay(){
             int bpp;
             Uint32 Rmask, Gmask, Bmask, Amask;
 
-            if (!SDL_PixelFormatEnumToMasks(desktopMode.format, &bpp, &Rmask, &Gmask, &Bmask, &Amask)) {
+            if (SDL_PixelFormatEnumToMasks(desktopMode.format, &bpp, &Rmask, &Gmask, &Bmask, &Amask)) {
                 // desktopCD    = bpp;
-                desktopCD_R  = Rmask;
-                desktopCD_G  = Gmask;
-                desktopCD_B  = Bmask;
+                desktopCD_R  = CountBits(Rmask);
+                desktopCD_G  = CountBits(Gmask);
+                desktopCD_B  = CountBits(Bmask);
             }
         }
     }
@@ -681,6 +696,7 @@ static bool lowlevel_sr_InitDisplay(){
                 singleCD_R = desktopCD_R;
                 singleCD_G = desktopCD_G;
                 singleCD_B = desktopCD_B;
+                zDepth		= 32;
             }
             break;
         case ArmageTron_ColorDepth_32:
@@ -882,6 +898,16 @@ static bool lowlevel_sr_InitDisplay(){
             lastError << SDL_GetError();
             std::cerr << lastError << '\n';
             return false;
+        }
+    }
+
+    {
+        static SDL_Window *lastScreen = NULL;
+        if(lastScreen != sr_screen)
+        {
+            if(sr_glcontext)
+                SDL_GL_DeleteContext(sr_glcontext);
+            sr_glcontext = SDL_GL_CreateContext(sr_screen);
         }
     }
 
@@ -1502,6 +1528,10 @@ void sr_ExitDisplay(){
         sr_UnlockSDL();
         //SDL_Quit();
     }
+
+    if(sr_glcontext)
+        SDL_GL_DeleteContext(sr_glcontext);
+
     #endif
 }
 
