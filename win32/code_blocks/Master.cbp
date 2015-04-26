@@ -7,9 +7,9 @@
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="Win32 Release">
-				<Option output="..\..\build\dist\armagetronad_master.exe" prefix_auto="0" extension_auto="0" />
-				<Option working_dir="..\..\build\dist\" />
-				<Option object_output="..\..\build\tmp\Armagetron_Master___Win32_Release" />
+				<Option output="../../build/dist/armagetronad_master.exe" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="../../build/dist/" />
+				<Option object_output="../../build/tmp/Armagetron_Master___Win32_Release" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Option projectResourceIncludeDirsRelation="1" />
@@ -21,14 +21,14 @@
 				<Linker>
 					<Add option="-s" />
 					<Add library="..\..\..\winlibs\protobuf\vsprojects\libprotobuf.a" />
-					<Add library="..\..\..\winlibs\win32\boost_libs\libboost_thread-mgw44-mt-1_53.a" />
-					<Add library="..\..\..\winlibs\win32\boost_libs\libboost_system-mgw44-mt-1_53.a" />
+					<Add library="..\..\..\winlibs\win32\boost_libs\libboost_thread-mgw47-mt-1_53.a" />
+					<Add library="..\..\..\winlibs\win32\boost_libs\libboost_system-mgw47-mt-1_53.a" />
 				</Linker>
 			</Target>
 			<Target title="Win32 Debug">
-				<Option output="..\..\build\debug\armagetronad_master.exe" prefix_auto="0" extension_auto="0" />
-				<Option working_dir="..\..\build\debug\" />
-				<Option object_output="..\..\build\tmp\Armagetron_Master___Win32_Debug" />
+				<Option output="../../build/debug/armagetronad_master.exe" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="../../build/debug/" />
+				<Option object_output="../../build/tmp/Armagetron_Master___Win32_Debug" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Option projectResourceIncludeDirsRelation="1" />
@@ -40,8 +40,8 @@
 				</Compiler>
 				<Linker>
 					<Add library="..\..\..\winlibs\protobuf\vsprojects\libprotobuf_debug.a" />
-					<Add library="..\..\..\winlibs\win32\boost_libs\libboost_system-mgw44-mt-d-1_53.a" />
-					<Add library="..\..\..\winlibs\win32\boost_libs\libboost_thread-mgw44-mt-d-1_53.a" />
+					<Add library="..\..\..\winlibs\win32\boost_libs\libboost_system-mgw47-mt-d-1_53.a" />
+					<Add library="..\..\..\winlibs\win32\boost_libs\libboost_thread-mgw47-mt-d-1_53.a" />
 				</Linker>
 			</Target>
 		</Build>
@@ -53,255 +53,255 @@
 			<Add option="-DWIN32" />
 			<Add option="-D_CONSOLE" />
 			<Add option="-D_MBCS" />
-			<Add directory="..\..\src" />
-			<Add directory="..\..\src\protobuf" />
-			<Add directory="..\..\src\engine" />
-			<Add directory="..\..\src\network" />
-			<Add directory="..\..\src\render" />
-			<Add directory="..\..\src\tools" />
-			<Add directory="..\..\src\ui" />
-			<Add directory="..\..\src\win32_ded" />
-			<Add directory="..\..\..\winlibs\libxml2\include" />
-			<Add directory="..\..\src\resource" />
-			<Add directory="..\..\..\winlibs\boost\includes" />
-			<Add directory="..\..\..\winlibs\iconv\include" />
-			<Add directory="..\..\..\winlibs\protobuf\src" />
-			<Add directory="..\..\src\thirdparty\utf8" />
+			<Add directory="../../src" />
+			<Add directory="../../src/protobuf" />
+			<Add directory="../../src/engine" />
+			<Add directory="../../src/network" />
+			<Add directory="../../src/render" />
+			<Add directory="../../src/tools" />
+			<Add directory="../../src/ui" />
+			<Add directory="../../src/win32_ded" />
+			<Add directory="../../../winlibs/libxml2/include" />
+			<Add directory="../../src/resource" />
+			<Add directory="../../../winlibs/boost/includes" />
+			<Add directory="../../../winlibs/iconv/include" />
+			<Add directory="../../../winlibs/protobuf/src" />
+			<Add directory="../../src/thirdparty/utf8" />
 		</Compiler>
 		<Linker>
 			<Add library="libws2_32.a" />
 			<Add library="..\..\..\winlibs\libxml2\lib\libxml2.lib" />
 		</Linker>
-		<Unit filename="..\..\src\network\master.cpp" />
-		<Unit filename="..\..\src\network\md5.h" />
-		<Unit filename="..\..\src\network\nAuthentication.cpp" />
-		<Unit filename="..\..\src\network\nAuthentication.h" />
-		<Unit filename="..\..\src\network\nBinary.cpp" />
-		<Unit filename="..\..\src\network\nBinary.h" />
-		<Unit filename="..\..\src\network\nConfig.cpp" />
-		<Unit filename="..\..\src\network\nConfig.h" />
-		<Unit filename="..\..\src\network\nKrawall.cpp" />
-		<Unit filename="..\..\src\network\nKrawall.h" />
-		<Unit filename="..\..\src\network\nKrawallPrivate.cpp" />
-		<Unit filename="..\..\src\network\nNetObject.cpp" />
-		<Unit filename="..\..\src\network\nNetObject.h" />
-		<Unit filename="..\..\src\network\nNetwork.cpp" />
-		<Unit filename="..\..\src\network\nNetwork.h" />
-		<Unit filename="..\..\src\network\nObserver.cpp" />
-		<Unit filename="..\..\src\network\nObserver.h" />
-		<Unit filename="..\..\src\network\nPriorizing.cpp" />
-		<Unit filename="..\..\src\network\nPriorizing.h" />
-		<Unit filename="..\..\src\network\nProtoBuf.cpp" />
-		<Unit filename="..\..\src\network\nProtoBuf.h" />
-		<Unit filename="..\..\src\network\nServerInfo.cpp" />
-		<Unit filename="..\..\src\network\nServerInfo.h" />
-		<Unit filename="..\..\src\network\nSimulatePing.h" />
-		<Unit filename="..\..\src\network\nSocket.cpp" />
-		<Unit filename="..\..\src\network\nSocket.h" />
-		<Unit filename="..\..\src\network\nSpamProtection.cpp" />
-		<Unit filename="..\..\src\network\nSpamProtection.h" />
-		<Unit filename="..\..\src\network\nStreamMessage.cpp" />
-		<Unit filename="..\..\src\network\nStreamMessage.h" />
-		<Unit filename="..\..\src\protobuf\eEventNotification.pb.cc">
+		<Unit filename="../../src/network/master.cpp" />
+		<Unit filename="../../src/network/md5.h" />
+		<Unit filename="../../src/network/nAuthentication.cpp" />
+		<Unit filename="../../src/network/nAuthentication.h" />
+		<Unit filename="../../src/network/nBinary.cpp" />
+		<Unit filename="../../src/network/nBinary.h" />
+		<Unit filename="../../src/network/nConfig.cpp" />
+		<Unit filename="../../src/network/nConfig.h" />
+		<Unit filename="../../src/network/nKrawall.cpp" />
+		<Unit filename="../../src/network/nKrawall.h" />
+		<Unit filename="../../src/network/nKrawallPrivate.cpp" />
+		<Unit filename="../../src/network/nNetObject.cpp" />
+		<Unit filename="../../src/network/nNetObject.h" />
+		<Unit filename="../../src/network/nNetwork.cpp" />
+		<Unit filename="../../src/network/nNetwork.h" />
+		<Unit filename="../../src/network/nObserver.cpp" />
+		<Unit filename="../../src/network/nObserver.h" />
+		<Unit filename="../../src/network/nPriorizing.cpp" />
+		<Unit filename="../../src/network/nPriorizing.h" />
+		<Unit filename="../../src/network/nProtoBuf.cpp" />
+		<Unit filename="../../src/network/nProtoBuf.h" />
+		<Unit filename="../../src/network/nServerInfo.cpp" />
+		<Unit filename="../../src/network/nServerInfo.h" />
+		<Unit filename="../../src/network/nSimulatePing.h" />
+		<Unit filename="../../src/network/nSocket.cpp" />
+		<Unit filename="../../src/network/nSocket.h" />
+		<Unit filename="../../src/network/nSpamProtection.cpp" />
+		<Unit filename="../../src/network/nSpamProtection.h" />
+		<Unit filename="../../src/network/nStreamMessage.cpp" />
+		<Unit filename="../../src/network/nStreamMessage.h" />
+		<Unit filename="../../src/protobuf/eEventNotification.pb.cc">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\eEventNotification.pb.h" />
-		<Unit filename="..\..\src\protobuf\eEventNotification.proto" />
-		<Unit filename="..\..\src\protobuf\eLagCompensation.pb.cc">
+		<Unit filename="../../src/protobuf/eEventNotification.pb.h" />
+		<Unit filename="../../src/protobuf/eEventNotification.proto" />
+		<Unit filename="../../src/protobuf/eLagCompensation.pb.cc">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\eLagCompensation.pb.h" />
-		<Unit filename="..\..\src\protobuf\eLagCompensation.proto" />
-		<Unit filename="..\..\src\protobuf\eNetGameObject.pb.cc">
+		<Unit filename="../../src/protobuf/eLagCompensation.pb.h" />
+		<Unit filename="../../src/protobuf/eLagCompensation.proto" />
+		<Unit filename="../../src/protobuf/eNetGameObject.pb.cc">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\eNetGameObject.pb.h" />
-		<Unit filename="..\..\src\protobuf\eNetGameObject.proto" />
-		<Unit filename="..\..\src\protobuf\ePlayer.pb.cc">
+		<Unit filename="../../src/protobuf/eNetGameObject.pb.h" />
+		<Unit filename="../../src/protobuf/eNetGameObject.proto" />
+		<Unit filename="../../src/protobuf/ePlayer.pb.cc">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\ePlayer.pb.h" />
-		<Unit filename="..\..\src\protobuf\ePlayer.proto" />
-		<Unit filename="..\..\src\protobuf\eTeam.pb.cc">
+		<Unit filename="../../src/protobuf/ePlayer.pb.h" />
+		<Unit filename="../../src/protobuf/ePlayer.proto" />
+		<Unit filename="../../src/protobuf/eTeam.pb.cc">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\eTeam.pb.h" />
-		<Unit filename="..\..\src\protobuf\eTeam.proto" />
-		<Unit filename="..\..\src\protobuf\eTimer.pb.cc">
+		<Unit filename="../../src/protobuf/eTeam.pb.h" />
+		<Unit filename="../../src/protobuf/eTeam.proto" />
+		<Unit filename="../../src/protobuf/eTimer.pb.cc">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\eTimer.pb.h" />
-		<Unit filename="..\..\src\protobuf\eTimer.proto" />
-		<Unit filename="..\..\src\protobuf\eVoter.pb.cc">
+		<Unit filename="../../src/protobuf/eTimer.pb.h" />
+		<Unit filename="../../src/protobuf/eTimer.proto" />
+		<Unit filename="../../src/protobuf/eVoter.pb.cc">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\eVoter.pb.h" />
-		<Unit filename="..\..\src\protobuf\eVoter.proto" />
-		<Unit filename="..\..\src\protobuf\gAIBase.pb.cc">
+		<Unit filename="../../src/protobuf/eVoter.pb.h" />
+		<Unit filename="../../src/protobuf/eVoter.proto" />
+		<Unit filename="../../src/protobuf/gAIBase.pb.cc">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\gAIBase.pb.h" />
-		<Unit filename="..\..\src\protobuf\gAIBase.proto" />
-		<Unit filename="..\..\src\protobuf\gCycle.pb.cc">
+		<Unit filename="../../src/protobuf/gAIBase.pb.h" />
+		<Unit filename="../../src/protobuf/gAIBase.proto" />
+		<Unit filename="../../src/protobuf/gCycle.pb.cc">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\gCycle.pb.h" />
-		<Unit filename="..\..\src\protobuf\gCycle.proto" />
-		<Unit filename="..\..\src\protobuf\gGame.pb.cc">
+		<Unit filename="../../src/protobuf/gCycle.pb.h" />
+		<Unit filename="../../src/protobuf/gCycle.proto" />
+		<Unit filename="../../src/protobuf/gGame.pb.cc">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\gGame.pb.h" />
-		<Unit filename="..\..\src\protobuf\gGame.proto" />
-		<Unit filename="..\..\src\protobuf\gWall.pb.cc">
+		<Unit filename="../../src/protobuf/gGame.pb.h" />
+		<Unit filename="../../src/protobuf/gGame.proto" />
+		<Unit filename="../../src/protobuf/gWall.pb.cc">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\gWall.pb.h" />
-		<Unit filename="..\..\src\protobuf\gWall.proto" />
-		<Unit filename="..\..\src\protobuf\gZone.pb.cc">
+		<Unit filename="../../src/protobuf/gWall.pb.h" />
+		<Unit filename="../../src/protobuf/gWall.proto" />
+		<Unit filename="../../src/protobuf/gZone.pb.cc">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\gZone.pb.h" />
-		<Unit filename="..\..\src\protobuf\gZone.proto" />
-		<Unit filename="..\..\src\protobuf\nAuthentication.pb.cc">
+		<Unit filename="../../src/protobuf/gZone.pb.h" />
+		<Unit filename="../../src/protobuf/gZone.proto" />
+		<Unit filename="../../src/protobuf/nAuthentication.pb.cc">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\nAuthentication.pb.h" />
-		<Unit filename="..\..\src\protobuf\nAuthentication.proto" />
-		<Unit filename="..\..\src\protobuf\nConfig.pb.cc">
+		<Unit filename="../../src/protobuf/nAuthentication.pb.h" />
+		<Unit filename="../../src/protobuf/nAuthentication.proto" />
+		<Unit filename="../../src/protobuf/nConfig.pb.cc">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\nConfig.pb.h" />
-		<Unit filename="..\..\src\protobuf\nConfig.proto" />
-		<Unit filename="..\..\src\protobuf\nNetObject.pb.cc">
+		<Unit filename="../../src/protobuf/nConfig.pb.h" />
+		<Unit filename="../../src/protobuf/nConfig.proto" />
+		<Unit filename="../../src/protobuf/nNetObject.pb.cc">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\nNetObject.pb.h" />
-		<Unit filename="..\..\src\protobuf\nNetObject.proto" />
-		<Unit filename="..\..\src\protobuf\nNetObjectPrivate.pb.cc">
+		<Unit filename="../../src/protobuf/nNetObject.pb.h" />
+		<Unit filename="../../src/protobuf/nNetObject.proto" />
+		<Unit filename="../../src/protobuf/nNetObjectPrivate.pb.cc">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\nNetObjectPrivate.pb.h" />
-		<Unit filename="..\..\src\protobuf\nNetObjectPrivate.proto" />
-		<Unit filename="..\..\src\protobuf\nNetwork.pb.cc">
+		<Unit filename="../../src/protobuf/nNetObjectPrivate.pb.h" />
+		<Unit filename="../../src/protobuf/nNetObjectPrivate.proto" />
+		<Unit filename="../../src/protobuf/nNetwork.pb.cc">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\nNetwork.pb.h" />
-		<Unit filename="..\..\src\protobuf\nNetwork.proto" />
-		<Unit filename="..\..\src\protobuf\nServerInfo.pb.cc">
+		<Unit filename="../../src/protobuf/nNetwork.pb.h" />
+		<Unit filename="../../src/protobuf/nNetwork.proto" />
+		<Unit filename="../../src/protobuf/nServerInfo.pb.cc">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\nServerInfo.pb.h" />
-		<Unit filename="..\..\src\protobuf\nServerInfo.proto" />
-		<Unit filename="..\..\src\protobuf\prototype.pb.cc">
+		<Unit filename="../../src/protobuf/nServerInfo.pb.h" />
+		<Unit filename="../../src/protobuf/nServerInfo.proto" />
+		<Unit filename="../../src/protobuf/prototype.pb.cc">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\prototype.pb.h" />
-		<Unit filename="..\..\src\protobuf\prototype.proto" />
-		<Unit filename="..\..\src\protobuf\tColor.pb.cc">
+		<Unit filename="../../src/protobuf/prototype.pb.h" />
+		<Unit filename="../../src/protobuf/prototype.proto" />
+		<Unit filename="../../src/protobuf/tColor.pb.cc">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\tColor.pb.h" />
-		<Unit filename="..\..\src\protobuf\tColor.proto" />
-		<Unit filename="..\..\src\protobuf\tCoord.pb.cc">
+		<Unit filename="../../src/protobuf/tColor.pb.h" />
+		<Unit filename="../../src/protobuf/tColor.proto" />
+		<Unit filename="../../src/protobuf/tCoord.pb.cc">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\tCoord.pb.h" />
-		<Unit filename="..\..\src\protobuf\tCoord.proto" />
-		<Unit filename="..\..\src\protobuf\tFunction.pb.cc">
+		<Unit filename="../../src/protobuf/tCoord.pb.h" />
+		<Unit filename="../../src/protobuf/tCoord.proto" />
+		<Unit filename="../../src/protobuf/tFunction.pb.cc">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\tFunction.pb.h" />
-		<Unit filename="..\..\src\protobuf\tFunction.proto" />
-		<Unit filename="..\..\src\protobuf\tPolynomial.pb.cc">
+		<Unit filename="../../src/protobuf/tFunction.pb.h" />
+		<Unit filename="../../src/protobuf/tFunction.proto" />
+		<Unit filename="../../src/protobuf/tPolynomial.pb.cc">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\tPolynomial.pb.h" />
-		<Unit filename="..\..\src\protobuf\tPolynomial.proto" />
-		<Unit filename="..\..\src\protobuf\zShape.pb.cc">
+		<Unit filename="../../src/protobuf/tPolynomial.pb.h" />
+		<Unit filename="../../src/protobuf/tPolynomial.proto" />
+		<Unit filename="../../src/protobuf/zShape.pb.cc">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\zShape.pb.h" />
-		<Unit filename="..\..\src\protobuf\zShape.proto" />
-		<Unit filename="..\..\src\protobuf\zZone.pb.cc">
+		<Unit filename="../../src/protobuf/zShape.pb.h" />
+		<Unit filename="../../src/protobuf/zShape.proto" />
+		<Unit filename="../../src/protobuf/zZone.pb.cc">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\protobuf\zZone.pb.h" />
-		<Unit filename="..\..\src\protobuf\zZone.proto" />
-		<Unit filename="..\..\src\resource\tResource.cpp" />
-		<Unit filename="..\..\src\resource\tResource.h" />
-		<Unit filename="..\..\src\resource\tResourceManager.cpp" />
-		<Unit filename="..\..\src\resource\tResourceManager.h" />
-		<Unit filename="..\..\src\resource\tResourceType.cpp" />
-		<Unit filename="..\..\src\resource\tResourceType.h" />
-		<Unit filename="..\..\src\tools\md5.cpp" />
-		<Unit filename="..\..\src\tools\tArray.cpp" />
-		<Unit filename="..\..\src\tools\tArray.h" />
-		<Unit filename="..\..\src\tools\tCallback.cpp" />
-		<Unit filename="..\..\src\tools\tCallback.h" />
-		<Unit filename="..\..\src\tools\tCallbackString.h" />
-		<Unit filename="..\..\src\tools\tColor.cpp" />
-		<Unit filename="..\..\src\tools\tColor.h" />
-		<Unit filename="..\..\src\tools\tCommandLine.cpp" />
-		<Unit filename="..\..\src\tools\tCommandLine.h" />
-		<Unit filename="..\..\src\tools\tConfiguration.cpp" />
-		<Unit filename="..\..\src\tools\tConfiguration.h" />
-		<Unit filename="..\..\src\tools\tConsole.cpp" />
-		<Unit filename="..\..\src\tools\tConsole.h" />
-		<Unit filename="..\..\src\tools\tCrypt.h" />
-		<Unit filename="..\..\src\tools\tCrypto.cpp" />
-		<Unit filename="..\..\src\tools\tDirectories.cpp" />
-		<Unit filename="..\..\src\tools\tDirectories.h" />
-		<Unit filename="..\..\src\tools\tError.cpp" />
-		<Unit filename="..\..\src\tools\tError.h" />
-		<Unit filename="..\..\src\tools\tEventQueue.cpp" />
-		<Unit filename="..\..\src\tools\tEventQueue.h" />
-		<Unit filename="..\..\src\tools\tException.cpp" />
-		<Unit filename="..\..\src\tools\tException.h" />
-		<Unit filename="..\..\src\tools\tHeap.cpp" />
-		<Unit filename="..\..\src\tools\tHeap.h" />
-		<Unit filename="..\..\src\tools\tInitExit.h" />
-		<Unit filename="..\..\src\tools\tLinkedList.cpp" />
-		<Unit filename="..\..\src\tools\tLinkedList.h" />
-		<Unit filename="..\..\src\tools\tList.h" />
-		<Unit filename="..\..\src\tools\tLocale.cpp" />
-		<Unit filename="..\..\src\tools\tLocale.h" />
-		<Unit filename="..\..\src\tools\tMath.h" />
-		<Unit filename="..\..\src\tools\tMemManager.cpp" />
-		<Unit filename="..\..\src\tools\tMemManager.h" />
-		<Unit filename="..\..\src\tools\tMemStack.cpp" />
-		<Unit filename="..\..\src\tools\tMemStack.h" />
-		<Unit filename="..\..\src\tools\tMutex.cpp" />
-		<Unit filename="..\..\src\tools\tMutex.h" />
-		<Unit filename="..\..\src\tools\tRandom.cpp" />
-		<Unit filename="..\..\src\tools\tRandom.h" />
-		<Unit filename="..\..\src\tools\tRecorder.cpp" />
-		<Unit filename="..\..\src\tools\tRecorder.h" />
-		<Unit filename="..\..\src\tools\tRecorderInternal.cpp" />
-		<Unit filename="..\..\src\tools\tRecorderInternal.h" />
-		<Unit filename="..\..\src\tools\tReferenceHolder.h" />
-		<Unit filename="..\..\src\tools\tRing.cpp" />
-		<Unit filename="..\..\src\tools\tRing.h" />
-		<Unit filename="..\..\src\tools\tSafePTR.cpp" />
-		<Unit filename="..\..\src\tools\tSafePTR.h" />
-		<Unit filename="..\..\src\tools\tString.cpp" />
-		<Unit filename="..\..\src\tools\tString.h" />
-		<Unit filename="..\..\src\tools\tSysTime.cpp" />
-		<Unit filename="..\..\src\tools\tSysTime.h" />
-		<Unit filename="..\..\src\tools\tThread.h" />
-		<Unit filename="..\..\src\tools\tToDo.cpp" />
-		<Unit filename="..\..\src\tools\tToDo.h" />
-		<Unit filename="..\..\src\tools\tVersion.cpp" />
-		<Unit filename="..\..\src\tools\tVersion.h" />
-		<Unit filename="..\..\src\tools\tXmlParser.cpp" />
-		<Unit filename="..\..\src\tools\tXmlParser.h" />
-		<Unit filename="..\..\src\win32\armagetron.rc">
+		<Unit filename="../../src/protobuf/zZone.pb.h" />
+		<Unit filename="../../src/protobuf/zZone.proto" />
+		<Unit filename="../../src/resource/tResource.cpp" />
+		<Unit filename="../../src/resource/tResource.h" />
+		<Unit filename="../../src/resource/tResourceManager.cpp" />
+		<Unit filename="../../src/resource/tResourceManager.h" />
+		<Unit filename="../../src/resource/tResourceType.cpp" />
+		<Unit filename="../../src/resource/tResourceType.h" />
+		<Unit filename="../../src/tools/md5.cpp" />
+		<Unit filename="../../src/tools/tArray.cpp" />
+		<Unit filename="../../src/tools/tArray.h" />
+		<Unit filename="../../src/tools/tCallback.cpp" />
+		<Unit filename="../../src/tools/tCallback.h" />
+		<Unit filename="../../src/tools/tCallbackString.h" />
+		<Unit filename="../../src/tools/tColor.cpp" />
+		<Unit filename="../../src/tools/tColor.h" />
+		<Unit filename="../../src/tools/tCommandLine.cpp" />
+		<Unit filename="../../src/tools/tCommandLine.h" />
+		<Unit filename="../../src/tools/tConfiguration.cpp" />
+		<Unit filename="../../src/tools/tConfiguration.h" />
+		<Unit filename="../../src/tools/tConsole.cpp" />
+		<Unit filename="../../src/tools/tConsole.h" />
+		<Unit filename="../../src/tools/tCrypt.h" />
+		<Unit filename="../../src/tools/tCrypto.cpp" />
+		<Unit filename="../../src/tools/tDirectories.cpp" />
+		<Unit filename="../../src/tools/tDirectories.h" />
+		<Unit filename="../../src/tools/tError.cpp" />
+		<Unit filename="../../src/tools/tError.h" />
+		<Unit filename="../../src/tools/tEventQueue.cpp" />
+		<Unit filename="../../src/tools/tEventQueue.h" />
+		<Unit filename="../../src/tools/tException.cpp" />
+		<Unit filename="../../src/tools/tException.h" />
+		<Unit filename="../../src/tools/tHeap.cpp" />
+		<Unit filename="../../src/tools/tHeap.h" />
+		<Unit filename="../../src/tools/tInitExit.h" />
+		<Unit filename="../../src/tools/tLinkedList.cpp" />
+		<Unit filename="../../src/tools/tLinkedList.h" />
+		<Unit filename="../../src/tools/tList.h" />
+		<Unit filename="../../src/tools/tLocale.cpp" />
+		<Unit filename="../../src/tools/tLocale.h" />
+		<Unit filename="../../src/tools/tMath.h" />
+		<Unit filename="../../src/tools/tMemManager.cpp" />
+		<Unit filename="../../src/tools/tMemManager.h" />
+		<Unit filename="../../src/tools/tMemStack.cpp" />
+		<Unit filename="../../src/tools/tMemStack.h" />
+		<Unit filename="../../src/tools/tMutex.cpp" />
+		<Unit filename="../../src/tools/tMutex.h" />
+		<Unit filename="../../src/tools/tRandom.cpp" />
+		<Unit filename="../../src/tools/tRandom.h" />
+		<Unit filename="../../src/tools/tRecorder.cpp" />
+		<Unit filename="../../src/tools/tRecorder.h" />
+		<Unit filename="../../src/tools/tRecorderInternal.cpp" />
+		<Unit filename="../../src/tools/tRecorderInternal.h" />
+		<Unit filename="../../src/tools/tReferenceHolder.h" />
+		<Unit filename="../../src/tools/tRing.cpp" />
+		<Unit filename="../../src/tools/tRing.h" />
+		<Unit filename="../../src/tools/tSafePTR.cpp" />
+		<Unit filename="../../src/tools/tSafePTR.h" />
+		<Unit filename="../../src/tools/tString.cpp" />
+		<Unit filename="../../src/tools/tString.h" />
+		<Unit filename="../../src/tools/tSysTime.cpp" />
+		<Unit filename="../../src/tools/tSysTime.h" />
+		<Unit filename="../../src/tools/tThread.h" />
+		<Unit filename="../../src/tools/tToDo.cpp" />
+		<Unit filename="../../src/tools/tToDo.h" />
+		<Unit filename="../../src/tools/tVersion.cpp" />
+		<Unit filename="../../src/tools/tVersion.h" />
+		<Unit filename="../../src/tools/tXmlParser.cpp" />
+		<Unit filename="../../src/tools/tXmlParser.h" />
+		<Unit filename="../../src/win32/armagetron.rc">
 			<Option compilerVar="WINDRES" />
 		</Unit>
-		<Unit filename="..\..\src\win32_ded\config.h" />
-		<Unit filename="..\..\src\win32_ded\dirent.c">
+		<Unit filename="../../src/win32_ded/config.h" />
+		<Unit filename="../../src/win32_ded/dirent.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\src\win32_ded\dirent.h" />
+		<Unit filename="../../src/win32_ded/dirent.h" />
 		<Extensions>
 			<code_completion />
 			<debugger />
