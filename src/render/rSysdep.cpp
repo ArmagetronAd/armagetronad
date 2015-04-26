@@ -53,13 +53,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "SDL_thread.h"
 #include "SDL_mutex.h"
 
-#ifndef WIN32
+//#ifndef WIN32
+//#define PNG_SCREENSHOT
+//#else
+//#if !SDL_VERSION_ATLEAST(2, 0, 0)
 #define PNG_SCREENSHOT
-#else
-#if !SDL_VERSION_ATLEAST(2, 0, 0)
-#define PNG_SCREENSHOT
-#endif
-#endif
+//#endif
+//#endif
 
 #ifdef PNG_SCREENSHOT
 #include <png.h>

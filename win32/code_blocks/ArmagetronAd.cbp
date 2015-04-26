@@ -89,7 +89,6 @@
 			<Add directory="../../../winlibs/SDL2/i686-w64-mingw32/include/SDL2" />
 			<Add directory="../../../winlibs/SDL2_image/i686-w64-mingw32/include/SDL2" />
 			<Add directory="../../../winlibs/SDL2_mixer/i686-w64-mingw32/include/SDL2" />
-			<Add directory="../../../winlibs/SDL_image/VisualC/graphics/include" />
 		</Compiler>
 		<Linker>
 			<Add option="-mwindows" />
@@ -103,6 +102,7 @@
 			<Add library="libws2_32.a" />
 			<Add library="libglu32.a" />
 			<Add library="libopengl32.a" />
+			<Add library="..\..\..\winlibs\SDL2_image\i686-w64-mingw32\bin\libpng16-16.dll" />
 		</Linker>
 		<Unit filename="../../src/engine/eAdvWall.cpp" />
 		<Unit filename="../../src/engine/eAdvWall.h" />
