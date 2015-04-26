@@ -62,7 +62,9 @@ tCONFIG_ENUM( rVSync );
 #if SDL_VERSION_ATLEAST(2,0,0)
 SDL_Window   *sr_screen=NULL;
 SDL_Renderer *sr_screenRenderer=NULL;
+#ifndef DEDICATED
 SDL_GLContext sr_glcontext=NULL;
+#endif
 #else
 SDL_Surface  *sr_screen=NULL; // our window
 #endif
