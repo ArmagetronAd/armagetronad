@@ -40,9 +40,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "nServerInfo.h"
 #include "nNetObject.h"
-#ifdef KRAWALL_SERVER
-#include "nAuthentication.h"
-#endif
 
 #include <fstream>
 
@@ -55,10 +52,6 @@ static unsigned int          sn_LastKnown   [MAXCLIENTS+2];
 static bool                  sn_SendAll     [MAXCLIENTS+2];
 static bool                  sn_Requested   [MAXCLIENTS+2];
 static REAL                  sn_Timeout     [MAXCLIENTS+2];
-
-#ifdef KRAWALL_SERVER
-static bool                  sn_Auth        [MAXCLIENTS+2];
-#endif
 
 static nServerInfo*          sn_Requesting=NULL;
 static unsigned int          sn_NextTransactionNr = 0;
@@ -109,10 +102,6 @@ static void login_callback(){
     sn_SendAll     [nCallbackLoginLogout::User()] = true;
     sn_Requested   [nCallbackLoginLogout::User()] = false;
     sn_Timeout     [nCallbackLoginLogout::User()] = tSysTimeFloat() + 70;
-#ifdef KRAWALL_SERVER
-    sn_Auth        [nCallbackLoginLogout::User()] = false;
-#endif
-
 }
 
 // helper function: server info to string
@@ -122,23 +111,6 @@ tString ToString( const nServerInfoBase & info )
     ret << info.GetConnectionName() << ":" << info.GetPort();
     return ret;
 }
-
-// authentification stuff
-#ifdef KRAWALL_SERVER_LEAGUE
-void ResultCallback(const tString& username,
-                    const tString& origUsername,
-                    int user, bool success)
-{
-    if (success)
-    {
-        sn_Auth[user] = true;
-        sn_Transmitting[user] = nServerInfo::GetFirstServer();
-    }
-    else
-        nAuthentication::RequestLogin(username, user, tOutput("$login_request_failed"), true);
-}
-#endif // KRAWALL_SERVER_LEAGUE
-
 
 
 static nCallbackLoginLogout nlc(&login_callback);
@@ -1208,24 +1180,7 @@ void nServerInfo::GiveSmallServerInfo(nMessage &m)
         con << "Giving server info to user " << m.SenderID() << "\n";
 
         sn_Requested[m.SenderID()] = true;
-#ifdef KRAWALL_SERVER_LEAGUE
-        // one moment! check if we need authentification
-        tString adr;
-        unsigned int port = sn_GetPort(m.SenderID());
-        sn_GetAdr(m.SenderID(), adr);
-        if (nKrawall::RequireMasterLogin(adr, port))
-        {
-            nAuthentication::SetLoginResultCallback(&ResultCallback);
-            nAuthentication::RequestLogin(tString(""), m.SenderID(), tOutput("$login_request_master"));
-        }
-        else
-        {
-            sn_Transmitting[m.SenderID()] = GetFirstServer();
-            sn_Auth[m.SenderID()]         = true;
-        }
-#else
         sn_Transmitting[m.SenderID()] = GetFirstServer();
-#endif
 
         if (m.End())
             sn_SendAll[m.SenderID()] = true;
@@ -2301,9 +2256,6 @@ void nServerInfo::RunMaster()
         {
             // kick the user soon when the transfer is completed
             if ((sn_Requested[i] && !sn_Transmitting[i]
-#ifdef KRAWALL_SERVER
-                    && sn_Auth[i]
-#endif
                     && sn_MessagesPending(i) == 0))
             {
                 if (sn_Timeout[i] > tSysTimeFloat() + .2f)

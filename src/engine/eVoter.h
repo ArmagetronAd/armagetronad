@@ -70,9 +70,11 @@ public:
 
     static void KickMenu();										// activate player kick menu
     static void VotingMenu();									// activate voting menu ( you can vote about suggestions there )
-    static eVoter* GetVoter ( int ID, bool complain = false );	// find or create the voter for the specified user ID
-    static eVoter* GetVoter ( nMachine & machine );	            // find or create the voter for the specified machine
+    static eVoter* GetVoter ( int ID, bool complain = false );  // find or create the voter for the specified user ID
+    static eVoter* GetPersistentVoter (int ID );                // find or create the persistent voter for the specified ID
+    static eVoter* GetPersistentVoter ( nMachine & machine );   // find or create the persistent voter for the specified machine
     static bool VotingPossible();								// returns whether voting is currently possible
+    static int NumberVoters();                                  // return the number of possible voters
 
     static void HandleChat( ePlayerNetID * p, std::istream & message ); //!< handles player "/vote" command.
 

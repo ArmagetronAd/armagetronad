@@ -41,7 +41,7 @@ if test -d "${srcdir}/CVS"; then
     fi
 fi
 
-if test -d "${srcdir}/.svn"; then
+if test -d "${srcdir}/.svn" || test -d "${srcdir}/../.svn"; then
     # get the inter-repository path by parsing the URL
 
     URL=`svn info ${srcdir} | grep ^URL | sed -e 's,^URL: ,,'`
@@ -108,7 +108,7 @@ then
     then
         # If no change was made, use revision number (with offset to match svn revno)
         # but first check if it's tagged
-        tag=$(bzr tags | grep -P "^(.*?) +${revno}$" | awk '{ print $1 }')
+        tag=$(bzr tags -r $revno | awk '{ print $1 }')
         if test $tag
         then
             # If it is tagged, use the tag

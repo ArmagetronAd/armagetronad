@@ -44,7 +44,7 @@ static int myHTTPFetch(const char *URI, const char *filename, const char *savepa
     }
 
     fd = fopen(savepath, "w");
-    if (fd < 0) {
+    if (fd == NULL) {
         xmlNanoHTTPClose(ctxt);
         con << tOutput( "$resource_no_write", savepath );
         return 3;
@@ -146,15 +146,18 @@ tString tResourceManager::locateResource(const char *uri, const char *file) {
     // Validate paths and determine detination savepath
     if (!file || file[0] == '\0') {
         con << tOutput( "$resource_no_filename" );
+        free( to_free );
         return (tString) NULL;
     }
     if (file[0] == '/' || file[0] == '\\') {
         con << tOutput( "$resource_abs_path" );
+        free( to_free );
         return (tString) NULL;
     }
     savepath = tDirectories::Resource().GetWritePath(file);
     if (savepath == "") {
         con << tOutput( "$resource_no_writepath" );
+        free( to_free );
         return (tString) NULL;
     }
 

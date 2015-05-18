@@ -3099,6 +3099,8 @@ static void se_ChatTeams( ePlayerNetID * p )
     se_ListTeams( p );
 }
 
+void se_ListPastChatters(ePlayerNetID * receiver);
+
 static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s, tString command )
 {
     tString search;
@@ -3117,6 +3119,7 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s, tString co
     for ( int i2 = se_PlayerNetIDs.Len()-1; i2>=0; --i2 )
     {
         ePlayerNetID* p2 = se_PlayerNetIDs(i2);
+
         tColoredString tos;
         if ( doSearch )
             tos << "  ";
@@ -3200,6 +3203,9 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s, tString co
     else
     {
         sn_ConsoleOut( tOutput( "$player_list_end", command, count ) , receiver->Owner() );
+
+        if(tCurrentAccessLevel::GetAccessLevel() < tAccessLevel_DefaultAuthenticated)
+            se_ListPastChatters(receiver);
     }
 }
 
@@ -4199,6 +4205,13 @@ public:
     {
         delete this;
     }
+
+    virtual void OnBan()
+    {
+        // Don't punish the player with restrictive spam checks when they
+        // return from their ban.
+        chatSpam.ResetSpam();
+    }
 };
 
 static eMachineDecoratorSpam & se_GetSpam( ePlayerNetID & p )
@@ -4225,6 +4238,90 @@ eChatLastSaid & ePlayerNetID::GetLastSaid()
 eShuffleSpamTester & ePlayerNetID::GetShuffleSpam()
 {
     return se_GetSpam( *this ).shuffleSpam;
+}
+
+struct LastChatData
+{
+    LastChatData(nMachine const & machine_, eChatSaidEntry const & entry_)
+    :machine(&machine_), entry(&entry_)
+    {
+    }
+
+    nMachine const * machine;
+    eChatSaidEntry const * entry;
+};
+
+void se_ListPastChatters(ePlayerNetID * receiver)
+{
+    static const unsigned int MaxReport = 3;
+    std::vector<LastChatData> report;
+
+    // list dead connections
+    for(nMachine::iterator m; m.Valid(); ++m)
+    {
+        nMachine & machine = *m;
+        eMachineDecoratorSpam * spam = machine.GetDecorator<eMachineDecoratorSpam>();
+        if(spam && spam->lastSaid.Disconnected())
+        {
+            eChatLastSaid::SaidList const & said = spam->lastSaid.LastSaid();
+            eChatSaidEntry const * recentLastSaid = NULL;
+            for(int i = said.size()-1; i >= 0; --i)
+            {
+                eChatSaidEntry const & lastSaid = said[i];
+                if(lastSaid.Type() != eChatMessageType_Team && lastSaid.Type() != eChatMessageType_Private)
+                {
+                    if(!recentLastSaid || recentLastSaid->Time() < lastSaid.Time())
+                        recentLastSaid = &lastSaid;
+                }
+            }
+
+                    
+            if(recentLastSaid)
+            {
+                // put report in list
+                report.push_back(LastChatData(machine, *recentLastSaid));
+                
+                // let it bubble up
+                for(int j = report.size()-1; j > 0; --j)
+                {
+                    if(report[j].entry->Time() > report[j-1].entry->Time())
+                    {
+                        std::swap(report[j-1], report[j]);
+                    }
+                }
+                
+                // cull reports
+                if(report.size() > MaxReport)
+                    report.pop_back();
+            }
+        }
+    }
+
+    // and print
+    if(report.size() > 0)
+    {
+        sn_ConsoleOut( tOutput( "$player_list_disconnected" ), receiver->Owner() );
+    }
+
+    for(std::vector<LastChatData>::iterator iter = report.begin(); iter != report.end(); ++iter)
+    {
+        tColoredString line;
+        LastChatData const & data = *iter;
+        eChatSaidEntry const & lastSaid = *(data.entry);
+        
+        if ( tCurrentAccessLevel::GetAccessLevel() <= se_ipAccessLevel )
+        {
+            tString IP = data.machine->GetIP();
+            if ( IP.Len() > 1 )
+            {
+                line << "IP = " << IP << "; ";
+            }
+        }
+        
+        line << lastSaid.PlayerName() << ": " << lastSaid.Said() << "\n";
+        
+        sn_ConsoleOut( line, receiver->Owner() );
+    }
 }
 
 ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), timeCreated_( tSysTimeFloat() ), allowTeamChange_(false), registeredMachine_(0), pID(p)
@@ -4593,6 +4690,10 @@ void ePlayerNetID::MyInitAfterCreation()
     if ( Owner() != 0 && sn_GetNetState() == nSERVER )
     {
         this->RegisterWithMachine();
+
+        // reset spam timer
+        GetChatSpam().ResetTime();
+
         if ( se_maxPlayersPerIP < nMachine::GetMachine(Owner()).GetPlayerCount() )
         {
             // kill them
@@ -4606,11 +4707,12 @@ void ePlayerNetID::MyInitAfterCreation()
         // clear old legacy spectator that may be lurking around
         se_ClearLegacySpectator( Owner() );
 
-        // get suspension count
-        if ( GetVoter() )
+        // get silenced state and suspension count
+        eVoter *voter = eVoter::GetPersistentVoter( Owner() );
+        if ( voter )
         {
-            suspended_ = GetVoter()->suspended_;
-            silenced_ = GetVoter()->silenced_;
+            suspended_ = voter->suspended_;
+            silenced_ = voter->silenced_;
         }
     }
 
@@ -4685,9 +4787,9 @@ void ePlayerNetID::RemoveFromGame()
     this->UnregisterWithMachine();
 
     // release voter
-    if ( this->voter_ )
-        this->voter_->RemoveFromGame();
-    this->voter_ = 0;
+    eVoter *voter = eVoter::GetPersistentVoter( Owner() );
+    if ( voter )
+        voter->RemoveFromGame();
 
     // log scores
     LogScoreDifference();
@@ -5019,6 +5121,7 @@ void se_ListAdmins ( ePlayerNetID * receiver, std::istream &s, tString command )
                        receiver->Owner() );
         return;
     }
+    int client = receiver ? receiver->Owner() : 0;
 
     bool canSeeEverything = false;
     if ( receiver == 0 || receiver->GetAccessLevel() <= se_accessLevelListAdminsSeeEveryone )
@@ -5055,7 +5158,7 @@ void se_ListAdmins ( ePlayerNetID * receiver, std::istream &s, tString command )
         }
         else
         {
-            sn_ConsoleOut( tOutput( "$admin_list_cant_see", command ), receiver->Owner() );
+            sn_ConsoleOut( tOutput( "$admin_list_cant_see", command ), client );
             return;
         }
     }
@@ -5081,7 +5184,7 @@ void se_ListAdmins ( ePlayerNetID * receiver, std::istream &s, tString command )
             }
             if ( !canSeeEverything && highest > se_adminListMinAccessLevel )
             {
-                sn_ConsoleOut( tOutput("$admin_list_cant_see"), receiver->Owner() );
+                sn_ConsoleOut( tOutput("$admin_list_cant_see"), client );
                 return;
             }
         }
@@ -5220,7 +5323,7 @@ void se_ListAdmins ( ePlayerNetID * receiver, std::istream &s, tString command )
         }
 
         output << "\n";
-        sn_ConsoleOut( output, receiver->Owner() );
+        sn_ConsoleOut( output, client );
 
         ++advancement;
     }
@@ -5228,7 +5331,7 @@ void se_ListAdmins ( ePlayerNetID * receiver, std::istream &s, tString command )
     tOutput sumup;
     sumup = "";
 
-    sn_ConsoleOut( tOutput( "$admin_list_end", command, userCount, authorityCount, static_cast<int>( adminLevelsMap.size() ) ), receiver->Owner() );
+    sn_ConsoleOut( tOutput( "$admin_list_end", command, userCount, authorityCount, static_cast<int>( adminLevelsMap.size() ) ), client );
 }
 
 static void se_ListAdmins_conf( std::istream &s )
@@ -5454,6 +5557,34 @@ static void se_CheckAccessLevel( tAccessLevel & level, tString const & authName 
     }
 }
 
+static tAccessLevel se_announceLoginAccessLevel = tAccessLevel_Default;
+static tSettingItem< tAccessLevel > se_announceLoginAccessLevelConf( "ACCESS_LEVEL_ANNOUNCE_LOGIN", se_announceLoginAccessLevel );
+static tAccessLevelSetter se_announceLoginAccessLevelConfLevel( se_announceLoginAccessLevelConf, tAccessLevel_Owner );
+
+static bool se_HideLoginAnnouncement( ePlayerNetID const *hider, ePlayerNetID const *seeker )
+{
+    return hider->GetAccessLevel() > se_announceLoginAccessLevel || se_Hide( hider, seeker );
+}
+
+static bool se_CanHideLoginAnnouncement( ePlayerNetID const *hider )
+{
+    return hider->GetAccessLevel() > se_announceLoginAccessLevel || se_CanHide( hider );
+}
+
+static void se_AnnounceLogin( tOutput const &out, ePlayerNetID const *player, ePlayerNetID const *admin )
+{
+    HIDEFUNC hideFunc = &se_HideLoginAnnouncement;
+    CANHIDEFUNC canHideFunc = &se_CanHideLoginAnnouncement;
+
+    // /op and /deop don't need to account for ACCESS_LEVEL_ANNOUNCE_LOGIN.
+    if ( admin )
+    {
+        hideFunc = &se_Hide;
+        canHideFunc = &se_CanHide;
+    }
+    se_SecretConsoleOut( out, player, hideFunc, admin, player, canHideFunc );
+}
+
 void ePlayerNetID::Authenticate( tString const & authName, tAccessLevel accessLevel_, ePlayerNetID const * admin )
 {
     tString newAuthenticatedName( se_EscapeName( authName ).c_str() );
@@ -5466,6 +5597,9 @@ void ePlayerNetID::Authenticate( tString const & authName, tAccessLevel accessLe
 
     if ( !IsAuthenticated() )
     {
+        // reset spam timer
+        GetChatSpam().ResetTime();
+
         // elevate access level for registered users
         se_CheckAccessLevel( accessLevel_, newAuthenticatedName );
 
@@ -5511,15 +5645,13 @@ void ePlayerNetID::Authenticate( tString const & authName, tAccessLevel accessLe
         {
             if ( GetAccessLevel() != tAccessLevel_Default )
             {
-                se_SecretConsoleOut( tOutput( "$login_message_special",
-                                              GetName(),
-                                              newAuthenticatedName,
-                                              tCurrentAccessLevel::GetName( GetAccessLevel() ),
-                                              order ), this, &se_Hide, admin, 0, &se_CanHide );
+                tOutput out( "$login_message_special", GetName(), newAuthenticatedName, tCurrentAccessLevel::GetName( GetAccessLevel() ), order );
+                se_AnnounceLogin( out, this, admin );                
             }
             else
             {
-                se_SecretConsoleOut( tOutput( "$login_message", GetName(), newAuthenticatedName, order ), this, &se_Hide, admin, 0, &se_CanHide );
+                tOutput out( "$login_message", GetName(), newAuthenticatedName, order );
+                se_AnnounceLogin( out, this, admin );
             }
 
         }
@@ -5536,11 +5668,13 @@ void ePlayerNetID::DeAuthenticate( ePlayerNetID const * admin ){
     {
         if ( admin )
         {
-            se_SecretConsoleOut( tOutput( "$logout_message_deop", GetName(), GetFilteredAuthenticatedName(), admin->GetLogName() ), this, &se_Hide, admin, 0, &se_CanHide );
+            tOutput out( "$logout_message_deop", GetName(), GetFilteredAuthenticatedName(), admin->GetLogName() );
+            se_AnnounceLogin( out, this, admin );
         }
         else
         {
-            se_SecretConsoleOut( tOutput( "$logout_message", GetName(), GetFilteredAuthenticatedName() ), this, &se_Hide, 0, 0, &se_CanHide );
+            tOutput out( "$logout_message", GetName(), GetFilteredAuthenticatedName() );
+            se_AnnounceLogin( out, this, admin );
         }
     }
 
@@ -5565,9 +5699,9 @@ void ePlayerNetID::CreateVoter()
     // only count nonlocal players with voting support as voters
     if ( sn_GetNetState() != nCLIENT && this->Owner() != 0 && sn_Connections[ this->Owner() ].version.Max() >= 3 )
     {
-        this->voter_ = eVoter::GetVoter( this->Owner() );
-        if ( this->voter_ )
-            this->voter_->PlayerChanged();
+        eVoter *voter = eVoter::GetPersistentVoter( Owner() );
+        if ( voter )
+            voter->PlayerChanged();
     }
 }
 
@@ -8207,9 +8341,10 @@ public:
 
             if ( oldScreenName_ != screenName )
             {
-                if ( bool(player_.GetVoter() ) )
+                eVoter *voter = eVoter::GetPersistentVoter( player_.Owner() );
+                if ( voter )
                 {
-                    player_.GetVoter()->PlayerChanged();
+                    voter->PlayerChanged();
                 }
 
                 if ( adminRename_ )
@@ -8441,7 +8576,7 @@ bool ePlayerNetID::HasRenameCapability ( ePlayerNetID const * victim, ePlayerNet
 
 bool ePlayerNetID::IsAllowedToRename ( void )
 {
-    if ( !IsHuman() || ( nameFromServer_ == nameFromClient_ && nameFromServer_ == nameFromAdmin_ ) || nameFromServer_.Len() < 1 || sn_GetNetState() == nCLIENT )
+    if ( !IsHuman() || ( nameFromServer_ == nameFromClient_ && nameFromServer_ == nameFromAdmin_ ) || nameFromServer_.Len() <= 1 || sn_GetNetState() == nCLIENT )
     {
         // Don't complain about people who either are bots, doesn't change name, or are entering the grid
         return true;
@@ -8468,7 +8603,8 @@ bool ePlayerNetID::IsAllowedToRename ( void )
         return false;
     }
     // disallow name changes if there was a kick vote recently
-    if ( !( !bool(this->voter_) || voter_->AllowNameChange() || nameFromServer_.Len() <= 1 ) && nameFromServer_ != nameFromClient_ )
+    eVoter *voter = eVoter::GetVoter( Owner() );
+    if ( !( !bool(voter) || voter->AllowNameChange() || nameFromServer_.Len() <= 1 ) && nameFromServer_ != nameFromClient_ )
     {
         // inform victim to avoid complaints
         tOutput message( "$player_rename_rejected_votekick", nameFromServer_, nameFromClient_ );
@@ -8892,11 +9028,15 @@ void ePlayerNetID::UnregisterWithMachine( void )
 {
     if ( registeredMachine_ )
     {
+        // mark chat spam as disconnected
+        se_GetSpam(*this).lastSaid.MarkDisconnected();
+
         // store suspension count
-        if ( GetVoter() )
+        eVoter *voter = eVoter::GetPersistentVoter( Owner() );
+        if ( voter )
         {
-            GetVoter()->suspended_ = suspended_;
-            GetVoter()->silenced_ = silenced_;
+            voter->suspended_ = suspended_;
+            voter->silenced_ = silenced_;
         }
 
         registeredMachine_->RemovePlayer();

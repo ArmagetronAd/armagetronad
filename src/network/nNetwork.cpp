@@ -1182,7 +1182,7 @@ nMessage& nMessage::operator << ( const tOutput &o ){
 nMessage& nMessage::ReadRaw(tString &s )
 {
     s.Clear();
-    unsigned short w,len;
+    unsigned short w = 0, len = 0;
     Read(len);
     if ( len > 0 )
     {
@@ -1380,7 +1380,7 @@ nMessage& nMessage::operator>>(REAL &x){
       Read(((unsigned short *)&x)[1]);
      */
 
-    unsigned int trans;
+    unsigned int trans = 0;
     operator>>(reinterpret_cast<int &>(trans));
 
     int mant=trans & ((1 << MS)-1);
@@ -1521,6 +1521,10 @@ nServerInfoBase * sn_PeekRedirectTo()
 }
 
 void login_deny_handler(nMessage &m){
+    // only the server is allowed to send this
+    if(m.SenderID() != 0)
+        return;
+
     if ( !m.End() )
     {
         //		tOutput output;
@@ -2151,6 +2155,11 @@ void logout_handler(nMessage &m){
     unsigned short id = m.SenderID();
     //m.Read(id);
 
+    // only the server or legal clients are allowed to send this
+    // (client check comes later)
+    if(sn_GetNetState() == nCLIENT && id != 0)
+        return;
+
     if (sn_Connections[id].socket)
     {
         tOutput o;
@@ -2513,7 +2522,7 @@ static void rec_peer(unsigned int peer){
             nAddress addrFrom; // the sender of the current packet
             len = sn_Connections[peer].socket->Read( reinterpret_cast<int8 *>(buff),maxrec*2, addrFrom);
 
-            if (len>0){
+            if (len>=2){
                 if ( len >= maxrec*2 )
                 {
 #ifndef DEDICATED
@@ -2631,6 +2640,10 @@ static void rec_peer(unsigned int peer){
                         // new login packets, pings etc. all come with claim_id == 0.
                         continue;
                     }
+
+                    // logged in clients should ignore packets from unknown sources
+                    if(sn_GetNetState() != nSERVER && sn_myNetID != 0)
+                        continue;
 
                     // assume it's a new connection
                     id = MAXCLIENTS+1;
@@ -2843,7 +2856,7 @@ static void rec_peer(unsigned int peer){
                 catch(nKillHim)
                 {
                     con << "nKillHim signal caught: ";
-                    sn_DisconnectUser(peer, "$network_kill_error");
+                    sn_DisconnectUser(id, "$network_kill_error");
                 }
 #endif
             }
@@ -3697,9 +3710,9 @@ void sn_DisconnectUser(int i, const tOutput& reason, nServerInfoBase * redirectT
     }
 
     // clients can only disconnect from the server
-    if ( i != 0 && sn_GetNetState() == nCLIENT )
+    if ( i != 0 && i <= MAXCLIENTS && sn_GetNetState() == nCLIENT )
     {
-        tERR_ERROR( "Client tried to disconnect from another client: impossible and a bad idea." );
+        tERR_WARN( "Client tried to disconnect from another client: impossible and a bad idea." );
         return;
     }
 
@@ -3744,7 +3757,7 @@ void sn_DisconnectUserNoWarn(int i, const tOutput& reason, nServerInfoBase * red
 
                 // write redirection
                 tString redirection;
-                int port;
+                int port = 0;
                 if ( redirectTo )
                 {
                     redirection = redirectTo->GetConnectionName();
@@ -4751,6 +4764,46 @@ static nMachine & sn_LookupMachine( tString const & address )
     return sn_LookupMachine( addr );
 }
 
+class nMachineIteratorPimpl: public nMachineMap::iterator
+{
+public:
+    nMachineIteratorPimpl()
+    : nMachineMap::iterator(sn_GetMachineMap().begin())
+    {
+    }
+};
+
+nMachine & nMachine::iterator::operator *() const
+{
+    nMachineMap::iterator & i = *pimpl_;
+    nMachinePTR & ptr = (*i).second;
+    return *ptr.machine;
+}
+
+nMachine::iterator::iterator()
+{
+    pimpl_ = new nMachineIteratorPimpl();
+}
+
+nMachine::iterator::~iterator()
+{
+    delete pimpl_;
+}
+
+void nMachine::iterator::operator ++()
+{
+    (*pimpl_)++;
+}
+void nMachine::iterator::operator ++(int)
+{
+    (*pimpl_)++;
+}
+
+bool nMachine::iterator::Valid()
+{
+    return (*pimpl_) != sn_GetMachineMap().end();
+}
+
 // *******************************************************************************
 // *
 // *	GetMachine
@@ -4995,6 +5048,11 @@ void nMachine::Ban( REAL time )
             {
                 sn_DisconnectUser( i, banReason_ );
             }
+        }
+
+        for ( nMachineDecorator *decorator = decorators_; decorator != NULL; decorator = decorator->Next() )
+        {
+            decorator->OnBan();
         }
     }
 
@@ -5385,6 +5443,10 @@ static tConfItemFunc sn_listBanConf("BAN_LIST",&sn_ListBanConf);
 // *******************************************************************************
 
 void nMachineDecorator::OnDestroy( void )
+{
+}
+
+void nMachineDecorator::OnBan()
 {
 }
 
