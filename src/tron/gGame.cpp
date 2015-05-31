@@ -143,6 +143,9 @@ static tSettingItem<bool> sg_svgOutputScoreDifferencesConf( "SVG_OUTPUT_LOG_SCOR
 static REAL sg_playerPositioningStartTime = 5.0;
 static tSettingItem<REAL> sg_playerPositioningStartTimeConf( "TACTICAL_POSITION_START_TIME", sg_playerPositioningStartTime );
 
+static bool sg_loaCfgWithMap = false;
+static tSettingItem< bool > sg_loaCfgWithMapConf( "LOAD_CFG_WITH_MAP", sg_loaCfgWithMap );
+
 static nSettingItemWatched<tString> conf_mapfile("MAP_FILE",mapfile, nConfItemVersionWatcher::Group_Breaking, 8 );
 
 // enable/disable sound, supporting two different pause reasons:
@@ -3282,7 +3285,7 @@ static void sg_ParseMap ( gParser * aParser, tString mapfile, bool verify )
             errorMessage << "$map_file_load_failure_default";
             throw tGenericException( errorMessage, errorTitle );
         }
-    } else if(sn_GetNetState()!=nCLIENT && verify) {
+    } else if(sn_GetNetState()!=nCLIENT && sg_loaCfgWithMap && verify) {
         // if map has been loaded succefully, and this is during setting tranfer...
         // map config file is executed at accesslevel of the one who set the map
         tCurrentAccessLevel level( conf_mapfile.GetSetting().GetSetLevel(), true );
