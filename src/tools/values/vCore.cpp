@@ -105,7 +105,7 @@ template<> float   Base::Get<float  >() const { return GetFloat(); }
 //! @returns GetValue streamed to a tString
 tString Base::GetString(Base const *other) const {
     Variant v = GetValue();
-    if (tString *iptr = boost::get<tString>(&v))
+    if (std::string *iptr = boost::get<std::string>(&v))
             return *iptr;
     return Output(v, other);
 }
