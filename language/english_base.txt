@@ -3218,6 +3218,7 @@ network_master_servername	Server Name
 network_master_score		Score
 network_master_users		Users
 network_master_ping		Ping
+network_master_filter Filter:
 network_master_browserhelp	Press "Enter" to connect to this server, "p" to refresh a single server, "r" to refresh the whole list, "+/-" to set the score bias for this server, "cursor left/right" to change the sorting key, or "b" to add the server to your bookmarks. "m" toggles mates filtering.
 network_master_connecting	Connecting to \1...\n
 network_master_send		Sending my server info...\n
