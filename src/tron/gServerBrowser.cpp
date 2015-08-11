@@ -499,9 +499,10 @@ void gServerMenu::Update()
         {
             run->show = false;
             tString userNames = sg_enableFriendsCasing ? run->UserNames() : run->UserNames().ToLower();
+            tString globalIds = sg_enableFriendsCasing ? run->UserGlobalIDs() : run->UserGlobalIDs().ToLower();
             for (i = MAX_FRIENDS-1; i>=0; i--)
             {
-                if (run->Users() > 0 && friends[i].Len() > 1 && userNames.StrPos(filteredFriends[i]) >= 0)
+                if (run->Users() > 0 && friends[i].Len() > 1 && (userNames.StrPos(filteredFriends[i]) >= 0 || globalIds.StrPos(filteredFriends[i]) >= 0))
                 {
                     oneFound = true;
                     run->show = true;
