@@ -71,8 +71,11 @@ goto :exit
 		move /Y %1\language\languages.txt.in %1\language\languages.txt
 
 		echo *** copying binary only dlls ( WATCH FOR ERRORS! )...
-		xcopy %LIBS_DIR%\SDL_image\VisualC\graphics\lib\*.dll %1 /C /Y /I
-		xcopy %LIBS_DIR%\SDL_mixer\VisualC\smpeg\lib\*.dll %1 /C /Y /I
+		xcopy %LIBS_DIR%\SDL2\i686-w64-mingw32\bin\*.dll %1 /C /Y /I
+		xcopy %LIBS_DIR%\SDL2_image\i686-w64-mingw32\bin\*.dll %1 /C /Y /I
+		xcopy %LIBS_DIR%\SDL2_mixer\i686-w64-mingw32\bin\*.dll %1 /C /Y /I
+		xcopy %LIBS_DIR%\SDL_image\VisualC\graphics\lib\*png*.dll %1 /C /Y /I
+		#xcopy %LIBS_DIR%\SDL_mixer\VisualC\smpeg\lib\*.dll %1 /C /Y /I
 		xcopy %LIBS_DIR%\libxml2\lib\*.dll %1 /C /Y /I
 		xcopy %LIBS_DIR%\iconv\lib\*.dll %1 /C /Y /I
 		xcopy %LIBS_DIR%\FTGL\win32\freetype\lib\*.dll %1 /C /Y /I

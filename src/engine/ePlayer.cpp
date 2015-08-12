@@ -4355,7 +4355,13 @@ public:
                 return true;
             }
             // exclude modifier keys from possible control triggers
+#if SDL_VERSION_ATLEAST(2,0,0)
+            else if (( e.key.keysym.scancode < SDL_SCANCODE_LCTRL || e.key.keysym.scancode > SDL_SCANCODE_LCTRL )
+                     && e.key.keysym.scancode != SDL_SCANCODE_CAPSLOCK 
+                     && e.key.keysym.scancode != SDL_SCANCODE_NUMLOCKCLEAR)
+#else
             else if ( e.key.keysym.sym < SDLK_NUMLOCK || e.key.keysym.sym > SDLK_COMPOSE )
+#endif
             {
                 // maybe it's an instant chat button?
                 try

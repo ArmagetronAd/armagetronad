@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-  
+
 ***************************************************************************
 
 */
@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tCallback.h"
 #include "tCallbackString.h"
 #include "tRuby.h"
+#include "rSDL.h"
 
 typedef enum {
     ArmageTron_Desktop=0,ArmageTron_320_200,ArmageTron_Min=ArmageTron_320_200, ArmageTron_320_240,ArmageTron_400_300,
@@ -77,6 +78,8 @@ public:
     rColorDepth			colorDepth;
     rColorDepth			zDepth;
     bool				checkErrors;
+    int                 displayIndex;   // display to use
+    int                 refreshRate;    // screen refresh rate
     rVSync              vSync;          // whether to wait for vsync
     REAL				aspect;			// aspect ratio of pixels ( width/height )
 
@@ -91,8 +94,15 @@ bool sr_DesktopScreensizeSupported();
 extern rScreenSettings currentScreensetting;
 extern rScreenSettings lastSuccess;
 
+#if SDL_VERSION_ATLEAST(2,0,0)
+struct SDL_Window;
+struct SDL_Renderer;
+extern SDL_Window   *sr_screen;
+extern SDL_Renderer *sr_screenRenderer;
+#else
 struct SDL_Surface;
-extern SDL_Surface *sr_screen;
+extern SDL_Surface  *sr_screen;
+#endif
 
 extern int sr_screenWidth,sr_screenHeight;
 

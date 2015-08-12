@@ -263,6 +263,9 @@ public:
 
     virtual bool IsSelectable(){return true;};
 
+    virtual void Select() {}   // called when this item is selected and ready to set
+    virtual void Deselect() {} // called when this item is deselected
+
 protected:
     void SetColor( bool selected, REAL alpha );            //!< Sets the color of text output for this menuitem
 };
@@ -388,11 +391,17 @@ public:
     virtual void Enter(){
         if (onenter) onenter(*target);
     }
-
-    virtual void Render(REAL x,REAL y,REAL alpha=1,bool selected=0){
+    
+    // selects the correct item according to the value in the controlled variable
+    void PickFromValue()
+    {
         for(int i=choices.Len()-1;i>=0;i--)
             if (choices(i)->value==*target)
                 select=i;
+    }
+
+    virtual void Render(REAL x,REAL y,REAL alpha=1,bool selected=0){
+        PickFromValue();
 
         DisplayText(REAL(x-.02),y,title,selected,alpha,1);
         if (choices.Len()>0)
@@ -529,6 +538,9 @@ public:
     {
         return colorMode_;
     }
+
+    void Select();
+    void Deselect();
 };
 
 //! A class that can provide auto- completion and supports overwriting of parts for special cases.

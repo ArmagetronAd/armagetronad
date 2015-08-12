@@ -30,11 +30,7 @@ you can get hold of the corresponding library packages in the right versions.
 It is very important that Armagetron Advanced and all of its dependencies are
 built with the same compiler. The different versions of gcc tend to be
 slightly binary incompatible with each other, and on complex projects like
-this one these small glitches tend to cause unexplainable problems. The
-distributed binaries are compiled with gcc 3.3, and we test source
-compatibility with 3.4 and 4.0 regularly. Yes, theoretically the binary
-interface for C code (ABI) did not change, but be prepared for problems
-nevertheless.
+this one these small glitches tend to cause unexplainable problems.
 
 ------------------
 Required libraries
@@ -49,38 +45,24 @@ Required libraries
 
 - OpenGL or `Mesa <http://mesa3d.sourceforge.net>`_ for rendering.
 
-- `SDL <http://libsdl.org>`_ version 1.2.x for input and sound output).
+- `SDL <http://libsdl.org>`_ version 2.x or 1.2.x for input and sound output).
 
 - `FreeType 2 <www.freetype.org>`_ for font loading.
 
 - `FTGL <http://homepages.paradise.net.nz/henryj/code/index.html>`_ for font
   rendering.
 
-- `SDL_image <http://libsdl.org/projects/SDL_image/>`_ version 1.2.x for
+- `SDL_image <http://libsdl.org/projects/SDL_image/>`_ version 2.x or 1.2.x for
   the textures which itself needs the libraries.
+
+- `SDL_mixer <http://libsdl.org/projects/SDL_mixer>`_ version 2.x or 1.2.x
 
 - `libpng and zlib <http://libpng.org/pub/png/pngcode.html>`_ (they should be
   included in your distribution).
 
-- Binary versions only: libstdc++ 5.0.7 (any 5.x.y or whatever came with your
-  System if it uses GCC 3.2 or higher should do). Use `rpmfind`_ or `google`_
-  to find a RPM with that library for your system. Sorry, Debian users: I
-  don't know what you need to do; use the source packages instead.
-
-.. _rpmfind: 
-    http://rpmfind.net/linux/rpm2html/search.php?query=libstdc%2B%2B5.0.7
-.. _google: http://www.google.com/search?q=libstdc%2B%2B+5.0.7
-  
-Optional libraries:
-
-- `SDL_mixer <http://libsdl.org/projects/SDL_mixer>`_ 
-
-You should take a look at the `Linux Distribution Field Report`_ to check
-how likely it is for Armagetron Advanced to work on your PC.
-
-.. _Linux Distribution Field Report: 
-    http://wiki.armagetronad.net/index.php/Linux_Distribution_Field_Report
-
+Note on the SDL libraries: Separate code paths are required for 2.x and 1.x,
+the currently actively maintained one is that of 2.x. 1.x is just a legacy fallback
+for older systems (like Ubuntu 12.04 LTS).
 
 -------------------------------
 Installation — Source archive
