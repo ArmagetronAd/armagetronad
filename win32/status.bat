@@ -6,16 +6,16 @@ REM up from here where the release and debug binaries will be compiled to.
 SET MY_ERROR=
 
 echo +-------------------------------------------------------
-echo ^| Status report                                       
+echo ^| Status report
 echo +-------------------------------------------------------
 call :test %1\FTGL.dll "check for missing files"
 call :test %1\iconv.dll "check for missing files"
 call :test %1\libjpeg-9.dll "check for missing files"
 call :test %1\libpng13.dll "check for missing files"
 call :test %1\libxml2.dll "check for missing files"
-call :test %1\SDL.dll "check for missing files"
-call :test %1\SDL_image.dll "check for missing files"
-call :test %1\SDL_mixer.dll "check for missing files"
+call :test %1\SDL2.dll "check for missing files"
+call :test %1\SDL2_image.dll "check for missing files"
+call :test %1\SDL2_mixer.dll "check for missing files"
 call :test %1\zlib1.dll "check for missing files"
 call :test %1\resource\included\Anonymous\polygon\regular\square-1.0.1.aamap.xml "check for python errors"
 IF DEFINED MY_ERROR goto :warn
