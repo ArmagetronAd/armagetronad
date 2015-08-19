@@ -1535,8 +1535,10 @@ void sr_ExitDisplay(){
         //SDL_Quit();
     }
 
+#if SDL_VERSION_ATLEAST(2,0,0)
     if(sr_glcontext)
         SDL_GL_DeleteContext(sr_glcontext);
+#endif
 
     #endif
 }
