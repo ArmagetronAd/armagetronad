@@ -585,6 +585,8 @@ static int CountBits(int toCount)
 }
 
 static bool lowlevel_sr_InitDisplay(){
+    rCallbackBeforeScreenModeChange::Exec();
+
     rScreenSize & res = currentScreensetting.fullscreen ? currentScreensetting.res : currentScreensetting.windowSize;
 
     // update pixel aspect ratio
