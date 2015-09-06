@@ -175,6 +175,8 @@ static tConfItemLine se_hiddenPlayerPrefixConf( "PLAYER_LIST_HIDDEN_PLAYER_PREFI
 static tConfItemFunc Rename_conf("RENAME", &ForceName);
 static tAccessLevelSetter Rename_confLevel( Rename_conf, tAccessLevel_Moderator );
 
+static bool se_ctfcommands = true;
+static tConfItem< bool > se_ctfCommandsConf("FLAG_CONTROLS", se_ctfcommands);
 
 static tReferenceHolder< ePlayerNetID > se_PlayerReferences;
 
@@ -4422,13 +4424,13 @@ void handle_chat( nMessage &m )
                         se_ChatShout( p, s, spam );
                         return;
                     }
-                    else if (command == "/drop")
+                    else if ((command == "/drop") && (se_ctfcommands != 0))
                     {
                         spam.lastSaidType_= eChatMessageType_Command;
                         p->DropFlag();
                         return;
                     }
-                    else if (command == "/pass")
+                    else if ((command == "/pass") && (se_ctfcommands != 0))
                     {
                         spam.lastSaidType_= eChatMessageType_Command;
                         p->PassFlag(s);
