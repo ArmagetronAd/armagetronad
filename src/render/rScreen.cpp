@@ -394,7 +394,7 @@ static bool lowlevel_sr_InitDisplay(){
     rScreenSize & res = currentScreensetting.fullscreen ? currentScreensetting.res : currentScreensetting.windowSize;
 
     // update pixel aspect ratio
-    if ( res.res != ArmageTron_Invalid )
+    if ( res.res != ArmageTron_Invalid && size_t(res.res) < sizeof(aspect)/sizeof(aspect[0]) )
         currentScreensetting.aspect = aspect[res.res];
 
 #ifndef DIRTY
