@@ -163,12 +163,12 @@ zEffectorManager::Create(std::string const & typex)
 void
 zEffectorManager::Register(std::string const & type, std::string const & desc, NullFactory_t f)
 {
-    _effectors().insert(std::make_pair(type, new NullFactory(f)));
+    _effectors()[type] = boost::shared_ptr<NullFactory>(new NullFactory(f));
 }
 void
 zEffectorManager::Register(std::string const & type, std::string const & desc, XMLFactory_t f)
 {
-    _effectors().insert(std::make_pair(type, new XMLFactory(f)));
+    _effectors()[type] = boost::shared_ptr<XMLFactory>( new XMLFactory(f));
 }
 
 
