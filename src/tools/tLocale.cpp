@@ -34,6 +34,35 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <fstream>
 #include <string>
 #include <map>
+#include "utf8.h"
+
+//! transform a string from latin1 to utf8 unicode
+tColoredString st_Latin1ToUTF8( tString const & s )
+{
+    try
+    {
+        tColoredString copy;
+        
+        tColoredString::const_iterator reader = s.begin();
+        std::back_insert_iterator< tColoredString > writer = back_inserter(copy);
+        
+        while ( reader != s.end() )
+        {
+            // just convert every byte of the original latin1 into utf8, unicode matches latin1
+            // where latin1 is defined.
+            utf8::append( (unsigned char)*reader, writer );
+            ++reader;
+        }
+        
+        return copy;
+    }
+    catch( ... )
+    {
+        // ok, not the best error handling in the world, but actually the above code
+        // should never fail.
+        return tColoredString( "Latin1 to UTF8 conversion error" );
+    }
+}
 
 class tLocaleSubItem; // identifies a single string in a single language
 
@@ -359,12 +388,20 @@ tLocaleItem& tLocaleItem::Find(const char *nn)
 
 static const tString LANGUAGE("language");
 static const tString INCLUDE("include");
+static const tString ENCODING("encoding");
 // static const tString CHECK("check");
+
+enum tEncoding
+{
+    tEncoding_utf8, tEncoding_latin1
+};
 
 void tLocaleItem::Load(const char *file, bool complete)  // load the language definitions from a file
 {
     // bool check = false;
     {
+        tEncoding encoding = tEncoding_utf8;
+
         tString f;
 
         f <<  "language/" << file;
@@ -374,6 +411,7 @@ void tLocaleItem::Load(const char *file, bool complete)  // load the language de
         {
             while (!s.eof() && s.good())
             {
+                // read first word (including whitespace after it)
                 tString id;
                 s >> id;
 
@@ -382,18 +420,27 @@ void tLocaleItem::Load(const char *file, bool complete)  // load the language de
                     continue;
                 }
 
+                // read rest of line
+                tString rest;
+                rest.ReadLine(s);
+
                 if(id[0] == '#')
                 {
-                    tString dummy;
-                    dummy.ReadLine(s);
                     continue;
                 }
 
+                // transform rest of line to utf8 if required
+                if ( tEncoding_latin1 == encoding )
+                {
+                    rest = st_Latin1ToUTF8( rest );
+                }
+
+                // theoretically, the identifiers would need transoding, too. But they're all ascii.
+                tASSERT( st_Latin1ToUTF8( id ) == id );
+
                 if (LANGUAGE == id)
                 {
-                    tString lang;
-                    lang.ReadLine(s);
-                    currentLanguage = tLanguage::Find(lang);
+                    currentLanguage = tLanguage::Find(rest);
 
                     // delayed loading
                     if (!complete)
@@ -404,11 +451,27 @@ void tLocaleItem::Load(const char *file, bool complete)  // load the language de
                     continue;
                 }
 
+                if (ENCODING == id)
+                {
+                    if ( "utf8" == rest || "utf-8" == rest )
+                    {
+                        encoding = tEncoding_utf8;
+                    }
+                    else if ( "latin1" == rest )
+                    {
+                        encoding = tEncoding_latin1;
+                    }
+                    else
+                    {
+                        tERR_ERROR( "Unsupported encoding." );
+                    }
+
+                    continue;
+                }
+
                 if (INCLUDE == id)
                 {
-                    tString inc;
-                    inc.ReadLine(s);
-                    Load(inc, complete);
+                    Load(rest, complete);
                     continue;
                 }
 
@@ -446,9 +509,9 @@ void tLocaleItem::Load(const char *file, bool complete)  // load the language de
                     // << currentLanguage->Name() << ".\n";
                 }
 
-                tString pre;
-                pre.ReadLine(s);
                 r->translation.Clear();
+
+                tString & pre = rest;
 
                 for (size_t i=0; i< pre.Size(); i++)
                 {

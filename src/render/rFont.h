@@ -33,9 +33,34 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "defs.h"
 //#include "rTexture.h"
 #include "tString.h"
-#include "tColor.h"
+#include "rColor.h"
+#include "tCoord.h"
 
 #include <map>
+#include <vector>
+
+#ifdef HAVE_FTGL_H
+// also, the installed version of ftgl then has utf8 support. presumably. use it.
+#define FTGL_HAS_UTF8
+#else
+// alternative includes go here
+#endif
+
+// defines for interface with FTGL
+#ifdef FTGL_HAS_UTF8
+// typedefs for chars and strings
+#define FTGL_CHAR char
+#define FTGL_STRING std::string
+// macro expecting a tString as 'in' and producing at least a 'const FTGL_STRING &' as out, living at least as long as in does.
+#define STRING_TO_FTGL( in, out ) FTGL_STRING const & out = in
+#else
+// description: see other branch
+#define FTGL_CHAR wchar_t
+#define FTGL_STRING std::wstring
+// function to convert utf8 to wchar strings. Only needed if utf8 is not supported natively.
+void sr_utf8216(tString const &in, std::wstring &out);
+#define STRING_TO_FTGL( in, out ) FTGL_STRING out;  sr_utf8216(in, out)
+#endif // FTGL_HAS_UTF8
 
 //! Different types of fonts, they might get different font files assigned
 enum sr_fontClass {
@@ -69,7 +94,7 @@ class FTFont;
 
 // maybe make this a child of std::ostream...
 class rTextField{
-    tString buffer;       // buffer where we store stuff before we print it
+    FTGL_STRING buffer;       // buffer where we store stuff before we print it
     float  width;          // width in openGL units
     int  parIndent;      // number of spaces to insert after automatic newline
     REAL left,top;       // top left corner of the console
@@ -87,7 +112,7 @@ class rTextField{
     static tColor blendColor_;   //!< color all other colors are multiplied with
 
     int cursor; // display mode of the cursor; 0: disabled, 1: low, 2: high
-    int cursorPos; // position of the cursor (number of chars to come)
+    int cursorPos; // position of the cursor (number of FTGL_CHARs to come)
 
     REAL cursor_x,cursor_y; // position on the screen
 
@@ -138,6 +163,7 @@ public:
         return parIndent;
     }
 
+    // sets the cursor mode position. Cursor position is in FTGL_CHARs, so not true characters in utf8 mode.
     void SetCursor(int c,int p){
         cursor=c;
         cursorPos=p;
@@ -160,7 +186,7 @@ public:
         COLOR_SHOW      // use color codes, but print them as well
     };
 
-    rTextField & StringOutput(const char *c, ColorMode colorMode = COLOR_USE );
+    rTextField & StringOutput(const FTGL_CHAR *c, ColorMode colorMode = COLOR_USE );
 
     int Lines(){
         return y;
@@ -176,16 +202,54 @@ public:
     static tColor const & GetBlendColor( void );	//!< Gets color all other colors are multiplied with
     static void GetBlendColor( tColor & blendColor );	//!< Gets color all other colors are multiplied with
 
-    static float GetTextLength (tString const &str, float height, bool stripColors=false, bool useNewline=true, float *resultingHeight=0); //!< Predict the dimenstions of a string
+    static float GetTextLength (std::string const &str, float height, bool stripColors=false, bool useNewline=true, float *resultingHeight=0); //!< Predict the dimenstions of a string
+    static float GetTextLengthRaw (FTGL_STRING const &str, float height, bool useNewline=true, float *resultingHeight=0); //!< Predict the dimenstions of a string
 
 private:
-    inline void WriteChar(unsigned char c); //!< writes a single character as it is, no automatic newline breaking
+    inline void WriteChar(FTGL_CHAR c); //!< writes a single character as it is, no automatic newline breaking
 };
 
+//! Text box class with wrapping: unlike rTextField this is designed to stay in memory all the time and only re- wrap/interpret colors if the contents change
+class rTextBox {
+public:
+    rTextBox(float size, tCoord const &pos, float width); //!< default constructor
+    void SetText(tString const &); //!< changes the text contained in the text box and re- computes contents
+    void Render(void) const; //!< renders the text
+private:
+    //! class for single font items (one line, one color)
+    class item {
+        tCoord m_pos; //!< the top- left position of the text
+        float m_size; //!< the color to be used
+        FTGL_STRING m_text; //!< the text to be rendered
+        rColor m_color; //!< the color to be used
+    public:
+        inline item(tCoord const &pos, float size, FTGL_STRING const &text, tColor const &color); //!< default constructor
+        void Render(void) const; //!< renders the text
+    };
+    float m_size; //!< the size of the font to be used
+    tCoord m_pos; //!< the top-left corner of the font
+    float m_width; //!< the width to be wrapped at
+
+    std::vector<item> m_items; //!< the split- up font items
+};
+
+//! @param pos the top- left position of the text
+//! @param size the height of the text
+//! @param text the text to be rendered
+//! @param color the color to be used
+inline rTextBox::item::item(tCoord const &pos, float size, FTGL_STRING const &text, tColor const &color) :
+        m_pos(pos),
+        m_size(size),
+        m_text(text),
+        m_color(color)
+{}
+
+rTextField & operator<<(rTextField &c,const FTGL_STRING &x);
 template<class T> rTextField & operator<<(rTextField &c,const T &x){
     tColoredString out;
     out << x;
-    return c.StringOutput(out);
+    STRING_TO_FTGL( out, str );
+    return c.StringOutput(str.c_str());
 }
 
 void DisplayText(REAL x,REAL y,REAL h,const char *text, sr_fontClass type,int center=0,

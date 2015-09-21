@@ -401,7 +401,7 @@ public:
     //		const char *name);
     static void HandleMessage(nMessage &message);
 
-    unsigned short ID(){
+    unsigned short ID() const{
         return id;
     }
 };
@@ -458,7 +458,7 @@ public:
         return data.Len();
     }
 
-    unsigned short Data(unsigned short n){
+    unsigned short Data(unsigned short n) const {
         return data(n);
     }
 

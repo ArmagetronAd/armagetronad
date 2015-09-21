@@ -403,7 +403,7 @@ class uMenuItemString: public uMenuItem{
 protected:
     tOutput  description;
     tString *content;
-    int      cursorPos;
+    unsigned int realCursorPos; // position of cursor as byte offset into string
     int      maxLength_;
 
     bool InsertChar(int unicode);
@@ -452,9 +452,9 @@ protected:
     virtual tString Simplify(tString const &str); //!< Simplifies a string, by default converts it to lowercase
 public:
     uAutoCompleter(std::deque<tString> &words); //!< Constructor
+    virtual ~uAutoCompleter() {}
     virtual int Complete(tString &string, unsigned pos); //!< Attempts the completion
 
-    virtual ~uAutoCompleter(){}
     void SetIgnorecase(bool ignorecase); //!< Enable or disable case ignoring?
 };
 

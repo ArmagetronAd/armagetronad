@@ -165,10 +165,12 @@ protected:
     virtual void            InitAfterCreation       ()                                              ;   //!< shared initialization routine
 
     // acceleration handling
+public:
     virtual void            AccelerationDiscontinuity ()                                            ;   //!< call when you know the acceleration makes a sharp jump now
     virtual void            CalculateAcceleration   (                                   )           ;   //!< calculate acceleration to apply later
     virtual void            ApplyAcceleration       ( REAL                  dt          )           ;   //!< apply acceleration calculated earlier
 
+protected:
     // destination handling
     REAL                    DistanceToDestination   ( gDestination &        dest        ) const     ;   //!< calculates the distance to the given destination
     virtual void            OnNotifyNewDestination  ( gDestination *        dest        )           ;   //!< notifies cycle of the insertion of a new destination

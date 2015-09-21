@@ -457,6 +457,7 @@ static char const * sn_versionString[] =
         "0.2.8.5_alpha", // 18
         "0.2.8.5", // 19
         "0.3.1", // 20
+        // "0.3.1_utf", // 21
         0
     };
 

@@ -630,6 +630,8 @@ dnl *************************************************
 
 if test x$enable_armathentication = xyes; then
 
+AC_LANG([C++])
+
 dnl ACX_PTHREAD([
 
 dnl LIBS="${PTHREAD_LIBS} ${LIBS}"
@@ -805,16 +807,21 @@ dnl *************************************************
 dnl         FTGL
 dnl *************************************************
 
+AC_LANG([C++])
+
 test -z "$FREETYPE_CONFIG" && FREETYPE_CONFIG=freetype-config
 
 FTGL_CFLAGS="`pkg-config ftgl --cflags`"
+FTGL_LIBS="`pkg-config ftgl --libs`"
 
-AC_CHECK_LIB(ftgl,FT_Render_Glyph,
+FTGL_ERROR="You need the library ftgl in at least version 2.1.3~rc5 to compile Armagetron. Read the file doc/install_linux.html."
+
+AC_CHECK_LIB(ftgl,ftglRenderGlyph,
 CPPFLAGS="$CPPFLAGS $FTGL_CFLAGS"
-LIBS="$LIBS `pkg-config ftgl --libs`"
+LIBS="$LIBS $FTGL_LIBS"
 ,
-AC_MSG_ERROR([You need the library ftgl to compile Armagetron. Read the file doc/install_linux.html.]),
-`pkg-config ftgl --libs`
+AC_MSG_ERROR([$FTGL_ERROR]),
+$FTGL_LIBS
 )
 
 USE_FTGL=yes
@@ -847,7 +854,7 @@ if test -z "`echo $FTGL_CFLAGS | grep FTGL`"; then
     done
 
     if test ${found} = false; then
-        AC_MSG_RESULT(not found)
+        AC_MSG_RESULT([not found])
         AC_MSG_ERROR([FTGL headers not found on your system. Please pass the correct location via --with-ftgl=<path to FTGL include directory>.])
     fi
 fi
@@ -866,6 +873,18 @@ LIBS="$LIBS `$FREETYPE_CONFIG --libs`"
 AC_MSG_ERROR([You need the library freetype to compile Armagetron. Read the file doc/install_linux.html.])
 )
 
+dnl FTGL again. Check for the headers. First, try the individual header.
+dnl Use modified pedantic CXXFLAGS for that. If the headers are deprecated,
+dnl the test will fail.
+CXXFLAGS_SAVE="$CXXFLAGS"
+CXXFLAGS="$CXXFLAGS -Werror -pedantic"
+AC_MSG_CHECKING([whether FTGLPixmapFont.h is deprecated])
+AC_TRY_COMPILE([#include <FTGLPixmapFont.h>],return 0,[AC_MSG_RESULT([no, not checking <ftgl.h>.])],
+[AC_MSG_RESULT([yes])
+AC_CHECK_HEADERS(ftgl.h)]
+)
+CXXFLAGS="$CXXFLAGS_SAVE"
+
 # end of dedicated server if/else
 fi
 
@@ -875,6 +894,8 @@ dnl *************************************************
 
 dnl AC_CHECK_LIB(g++, main,,
 dnl AC_MSG_WARN([C++ standard library not found. You can ignore this warning on non-GNU-systems.]))
+
+AC_LANG([C])
 
 AC_CHECK_LIB(z, main,,
 AC_MSG_ERROR([You need libz to compile Armagetron.]))

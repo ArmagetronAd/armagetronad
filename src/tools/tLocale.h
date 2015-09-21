@@ -36,6 +36,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 class tLocaleItem;
 class tOutputItemBase;
 
+//! transform a string from latin1 to utf8 unicode
+tColoredString st_Latin1ToUTF8( tString const & s );
+
 class tLanguage: public tListItem<tLanguage>      // identifies a language
 {
     tString name;           //!< the language's name

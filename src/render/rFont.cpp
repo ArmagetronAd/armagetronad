@@ -30,177 +30,133 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tConfiguration.h"
 #include "tDirectories.h"
 #include "tCoord.h"
-#include "rTexture.h"
 #include "tColor.h"
 #include <ctype.h>
 
 #ifndef DEDICATED
 #include "rRender.h"
+#include "rTexture.h"
+
+#ifdef HAVE_FTGL_H
+// single include. practical.
 #include <ftgl.h>
+#else
+// alternative includes go here
+#include <FTGLPixmapFont.h>
+#include <FTGLBitmapFont.h>
+#include <FTGLTextureFont.h>
+#include <FTGLPolygonFont.h>
+#include <FTGLOutlineFont.h>
+#include <FTGLExtrdFont.h>
+#endif
+
 //#include <GL/gl>
 //#include <SDL>
-#endif
 
-static REAL sr_bigFontThresholdWidth  = 12;
-static REAL sr_bigFontThresholdHeight = 24;
+#include "utf8.h"
+#include <iconv.h>
+#include <errno.h>
 
-static tSettingItem< REAL > sr_bigFontThresholdWidthConf(  "FONT_BIG_THRESHOLD_WIDTH", sr_bigFontThresholdWidth );
-static tSettingItem< REAL > sr_bigFontThresholdHeightConf( "FONT_BIG_THRESHOLD_HEIGHT", sr_bigFontThresholdHeight );
-
-class rFont:public rFileTexture{
-    int offset;
-    REAL cwidth;
-    REAL cheight;
-    REAL onepixel;
-    rFont *lowerPart;
-public:
-    rFont(const char *fileName,int Offset=0,REAL CWidth=(1/16.0),
-          REAL CHeight=(1/8.0),REAL onepixel=1/256.0, rFont *lower=NULL);
-    rFont(const char *fileName, rFont *lower);
-    virtual ~rFont();
-
-#ifndef DEDICATED
-    // displays c
-    void Render(unsigned char c,REAL left,REAL top,REAL right,REAL bot);
-#endif
-    static rFont s_defaultFont,s_defaultFontSmall;
-
-protected:
-    virtual void ProcessImage(SDL_Surface *);       //!< process the surface before uploading it to GL
-    virtual void OnSelect( bool enforce );
-};
-#ifndef DEDICATED
 //! like strnlen, but that's nonstandard :-(
-static size_t my_strnlen(char const *c, size_t i) {
-	char const *begin = c;
-	char const *end = c + i;
-	for(; *c && c != end; ++c) ;
-	return c - begin;
-}
-#endif
-
-static rFont sr_lowerPartFont("textures/font_extra.png");
-rFont rFont::s_defaultFont("textures/font.png", &sr_lowerPartFont);
-rFont rFont::s_defaultFontSmall("textures/font_s.png",32,5/128.0,9/128.0,1/128.0);
-//rFont rFont::s_defaultFontSmall("textures/Font.png",0,16/256.0,32/256.0);
-//rFont rFont::s_defaultFontSmall("textures/Font.png",0,1/16.0,1/8.0);
-
-rFont::rFont(const char *fileName,int Offset,REAL CWidth,REAL CHeight,REAL op, rFont *lower):
-        rFileTexture(rTextureGroups::TEX_FONT,fileName,0,0),
-        offset(Offset),cwidth(CWidth),cheight(CHeight),
-        onepixel(op),lowerPart(lower)
-{
-    StoreAlpha();
+//! also replaces the equally nonstandard wcsnlen.
+static size_t my_strnlen(FTGL_CHAR const * c, size_t i) {
+    FTGL_CHAR const *begin = c;
+    FTGL_CHAR const *end = c + i;
+    for(; *c && c != end; ++c) ;
+    return c - begin;
 }
 
-rFont::rFont(const char *fileName, rFont *lower):
-        rFileTexture(rTextureGroups::TEX_FONT,fileName,0,0),
-        offset(0),cwidth(1/16.0),cheight(1/8.0),
-        onepixel(1/256.0),lowerPart(lower)
-{
-    StoreAlpha();
-}
+// more defines for interface with FTGL
+#ifdef FTGL_HAS_UTF8
+// string compare
+#define my_strncmp strncmp
+#else
+#define my_strncmp wcsncmp
 
-rFont::~rFont(){}
-
-// ******************************************************************************************
-// *
-// *	ProcessImage
-// *
-// ******************************************************************************************
-//!
-//!		@param	surface the surface to process
-//!
-// ******************************************************************************************
-
-void rFont::ProcessImage( SDL_Surface * surface )
-{
-#ifndef DEDICATED
-    if ( sr_alphaBlend )
-        return;
-
-    // pre-blend alpha values
-    GLubyte *pixels =reinterpret_cast<GLubyte *>(surface->pixels);
-
-    if (surface->format->BytesPerPixel == 4)
-    {
-        for (int i=surface->w*surface->h-1;i>=0;i--){
-            GLubyte alpha=pixels[4*i+3];
-            pixels[4*i  ] = (alpha * pixels[4*i  ]) >> 8;
-            pixels[4*i+1] = (alpha * pixels[4*i+1]) >> 8;
-            pixels[4*i+2] = (alpha * pixels[4*i+2]) >> 8;
-        }
-    }
-    else if (surface->format->BytesPerPixel == 2)
-    {
-        for (int i=surface->w*surface->h-1;i>=0;i--){
-            GLubyte alpha=pixels[2*i+1];
-            pixels[2*i  ] = (alpha * pixels[2*i  ]) >> 8;
-        }
-    }
-#endif
-}
-
-void rFont::OnSelect( bool enforce )
-{
-    rISurfaceTexture::OnSelect( enforce );
-    if ( !Loaded() && sr_glOut )
-    {
-        // abort. It makes no sense to continue without a font.
-        tERR_ERROR( "Font file " << this->GetFileName() << " could not be loaded.");
+// conversion functions utf8->wstring
+wchar_t sr_utf8216(tString::const_iterator &c, tString::const_iterator const &end) {
+    unsigned char char1 = *c;
+    if(char1 < 128) {
+        // 0xxxxxxx
+        return static_cast<wchar_t>(char1);
+        //std::cerr << "1: " << std::oct << static_cast<int>(char1) << std::endl;
+    } else if (char1 >> 5 == 06) {
+        // 110x xxxx   10xx xxxx
+        if(char1 == 0xc0 || char1 == 0xc1) return 0xfffd;
+        if(++c == end || ( *c & 0xC0 ) != 0x80) return 0xfffd;
+        unsigned char char2 = *c;
+        return ((static_cast<wchar_t>(char1) & 0x1F) << 6) |
+               (static_cast<wchar_t>(char2) & 0x3F);
+    } else if (char1 >> 4 == 016) {
+        // 1110 xxxx  10xx xxxx  10xx xxxx
+        if(++c == end || ( *c & 0xC0 ) != 0x80 ) return 0xfffd;
+        unsigned char char2 = *c;
+        if(++c == end || ( *c & 0xC0 ) != 0x80) return 0xfffd;
+        unsigned char char3 = *c;
+        return ((static_cast<wchar_t>(char1) & 0x0F) << 12) |
+               ((static_cast<wchar_t>(char2) & 0x3F) <<  6) |
+               (static_cast<wchar_t>(char3) & 0x3F);
+    } else if (char1 >> 3 == 036) {
+        // 11110 xxx  10xx xxxx  10xx xxxx 10xx xxxx
+        if(++c == end || ( *c & 0xC0 ) != 0x80) return 0xfffd;
+        unsigned char char2 = *c;
+        if(++c == end || ( *c & 0xC0 ) != 0x80) return 0xfffd;
+        unsigned char char3 = *c;
+        if(++c == end || ( *c & 0xC0 ) != 0x80) return 0xfffd;
+        unsigned char char4 = *c;
+        return ((static_cast<wchar_t>(char1) & 0x07) << 18) |
+               ((static_cast<wchar_t>(char2) & 0x3F) << 12) |
+               ((static_cast<wchar_t>(char3) & 0x3F) <<  6) |
+               (static_cast<wchar_t>(char4) & 0x3F);
+    } else {
+        return 0xfffd;
     }
 }
-
-// displays c
-#ifndef DEDICATED
-void rFont::Render(unsigned char c,REAL left,REAL top,REAL right,REAL bot){
-    //  if (c > 128 && this == &rFont::s_defaultFont)
-    //rFont::s_defaultFontSmall.Render(c, left, top, right, bot);
-    //  else
-    // if(31<c && 256>c && sr_glOut)
-    {
-        c-=offset;
-
-        int x=c%16;
-        int y=c/16;
-
-        REAL pix = onepixel *.1;
-        if (rTextureGroups::TextureMode[rTextureGroups::TEX_FONT] != GL_NEAREST && rTextureGroups::TextureMode[rTextureGroups::TEX_FONT] != GL_NEAREST_MIPMAP_NEAREST)
-            pix = onepixel * .5;
-
-
-        REAL ttop=y*cheight+pix;
-        REAL tbot=(y+1)*cheight-pix;
-        REAL tleft=x*cwidth+pix;
-        REAL tright=(x+1)*cwidth-pix;
-
-        rFont* select = this;
-        while (ttop > .999 && select->lowerPart)
-        {
-            tbot -= 1;
-            ttop -= 1;
-            select = select->lowerPart;
-        }
-        select->Select(true);
-        
-        BeginQuads();
-        glTexCoord2f(tright,tbot);
-        glVertex2f(   right, bot);
-
-        glTexCoord2f(tright,ttop);
-        glVertex2f(   right ,top);
-
-        glTexCoord2f(tleft,ttop);
-        glVertex2f(   left, top);
-
-        glTexCoord2f(tleft,tbot);
-        glVertex2f(   left, bot);
-        RenderEnd();
+void sr_utf8216(tString const &in, std::wstring &out) {
+    //if(!utf8::is_valid(in.begin(), in.end())) {
+    //    tERR_WARN("Invalid utf-8 char");
+    //}
+    //out.clear();
+    //utf8::utf8to16(in.begin(), in.end(), back_inserter(out));
+    //std::cerr << in << std::endl;
+    //for(std::wstring::const_iterator i = out.begin(); i != out.end(); ++i) {
+    //	std::cerr << static_cast<unsigned short>(*i) << std::endl;
+    //}
+    out.clear();
+    //iconv_t cd = iconv_open("UTF-32", "UTF-8");
+    //const char *inbuf = in.c_str();
+    //size_t inbytesleft = in.size();
+    //char outbuf[4];
+    //size_t outbytesleft = 4;
+    //char *outbufptr = outbuf;
+    //int run = 0;
+    //std::cerr << in << std::endl;
+    //while (true) {
+    //	++run;
+    //	if(run > 100) return;
+    //	outbytesleft = 4;
+    //	outbufptr = outbuf;
+    //	std::cerr << "inbytesleft: " << inbytesleft << std::endl;
+    //	size_t ret = iconv(cd, const_cast<char **>(&inbuf), &inbytesleft, &outbufptr, &outbytesleft);
+    //	if(ret == -1) {
+    //		std::cerr << *inbuf << std::endl;
+    //		std::cerr << (errno == EILSEQ) << std::endl;
+    //		std::cerr << (errno == EINVAL) << std::endl;
+    //		std::cerr << (errno == E2BIG) << std::endl;
+    //		out += static_cast<wchar_t>(*(reinterpret_cast<wchar_t *>(outbuf)));
+    //		std::cerr << static_cast<unsigned>(*(reinterpret_cast<wchar_t *>(outbuf))) << std::endl;
+    //		outbuf[0] = outbuf[1] = outbuf[2] = outbuf[3] = 0;
+    //	} else {
+    //		return;
+    //	}
+    //}
+    //iconv_close(cd);
+    for(tString::const_iterator c = in.begin(); c != in.end(); ++c) {
+        //std::cerr << "char: " << *c << std::endl;
+        out += sr_utf8216(c, in.end());
     }
 }
-#endif
-
-#ifndef DEDICATED
+#endif // FTGL_HAS_UTF8
 
 int sr_fontType = sr_fontTexture;
 static tConfItem< int > sr_fontTypeConf( "FONT_TYPE", sr_fontType, &sr_ReloadFont);
@@ -218,54 +174,41 @@ public:
         }
         std::map<int, FTFont *>::clear();
     }
+    /*
     float GetWidth(tString const &str, float height) {
         if(sr_fontType == sr_fontPixmap) {
             return height*(height*sr_screenHeight < sr_bigFontThresholdHeight ? .41 : .5)*str.size();
         }
+    }
+    */
+    float GetWidth(FTGL_STRING const &str, float height) {
         return GetFont(height).Advance(str.c_str())/sr_screenWidth*2.;
     }
-    void Render(tString const &str, float height, tCoord const &where) {
-        if (sr_fontType != sr_fontOld) {
-            if(sr_fontType >= sr_fontTexture) {
-                glPushMatrix();
-                glTranslatef(where.x, where.y, 0.);
-                glScalef(2./sr_screenWidth, 2./sr_screenHeight, 1.);
-                if(sr_fontType == sr_fontTexture) {
-                    glEnable(GL_TEXTURE_2D);
-                    glEnable(GL_BLEND);
-                    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-                }
-                if(sr_fontType == sr_fontExtruded) {
-                    glEnable( GL_DEPTH_TEST);
-                    glDisable( GL_BLEND);
-                    glEnable(GL_TEXTURE_2D);
-                    static rFileTexture sg_RimWallNoWrap(rTextureGroups::TEX_WALL,"textures/dir_wall.png",1,0);
-                    sg_RimWallNoWrap.Select();
-                    glRotatef(45,1.,0.,0.);
-                }
-            } else {
-                glRasterPos2f(where.x, where.y);
+    void Render(FTGL_STRING const &str, float height, tCoord const &where) {
+        //std::cerr << "len: " << str.size() << std::endl;
+        if(sr_fontType >= sr_fontTexture) {
+            glPushMatrix();
+            glTranslatef(where.x, where.y, 0.);
+            glScalef(2./sr_screenWidth, 2./sr_screenHeight, 1.);
+            if(sr_fontType == sr_fontTexture) {
+                glEnable(GL_TEXTURE_2D);
+                glEnable(GL_BLEND);
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             }
-            GetFont(height).Render(str.c_str());
-            if(sr_fontType >= sr_fontTexture) {
-                glPopMatrix();
+            if(sr_fontType == sr_fontExtruded) {
+                glEnable( GL_DEPTH_TEST);
+                glDisable( GL_BLEND);
+                glEnable(GL_TEXTURE_2D);
+                static rFileTexture sg_RimWallNoWrap(rTextureGroups::TEX_WALL,"textures/dir_wall.png",1,0);
+                sg_RimWallNoWrap.Select();
+                glRotatef(45,1.,0.,0.);
             }
         } else {
-            rFont *font;
-            float widthFactor;
-            if (height*sr_screenHeight < sr_bigFontThresholdHeight) {
-                font = &rFont::s_defaultFontSmall;
-                widthFactor = .41;
-            } else {
-                font = &rFont::s_defaultFont;
-                widthFactor = .5;
-            }
-            float left = where.x;
-            for(tString::const_iterator i = str.begin(); i < str.end(); ++i, left += height*widthFactor) {
-                //void rFont::Render(unsigned char c,REAL left,REAL top,REAL right,REAL bot){
-                font->Render(*i, left, where.y+height, left+widthFactor*height, where.y);
-                //F->Render(buffer[realx],l,t,l+cwidth,t-cheight);
-            }
+            glRasterPos2f(where.x, where.y);
+        }
+        GetFont(height).Render(str.c_str());
+        if(sr_fontType >= sr_fontTexture) {
+            glPopMatrix();
         }
     }
     FTFont &GetFont(float height) {
@@ -276,7 +219,7 @@ public:
             return New(size);
         }
     }
-    void BBox(tString const &str, float height, tCoord where, float &l, float &b, float &r, float &t) {
+    void BBox(FTGL_STRING const &str, float height, tCoord where, float &l, float &b, float &r, float &t) {
         if(sr_fontType != sr_fontOld) {
             float rubbish;
             GetFont(height).BBox(str.c_str(), l, b, rubbish, r, t, rubbish);
@@ -360,6 +303,7 @@ FTFont &rFontContainer::New(int size) {
     }
     font->CharMap(ft_encoding_latin_1);
     font->FaceSize(size);
+    font->CharMap(ft_encoding_unicode);
     (*this)[size] = font;
     return *font;
 }
@@ -375,9 +319,7 @@ rTextField::rTextField(REAL Left,REAL Top,
         :parIndent(0),
 left(Left),top(Top),cheight(Cheight),x(0),y(0),realx(0),nextx(Left),currentWidth(0),multiline(false),type(Type),cursor(0),cursorPos(0){
     if (cheight*sr_screenHeight<18)
-    {
         cheight=18/REAL(sr_screenHeight);
-    }
 
     color_ = defaultColor_;
 
@@ -417,11 +359,11 @@ rTextField::~rTextField(){
 void rTextField::FlushLine(int len,bool newline){
 #ifndef DEDICATED
     float realTop = top-y*cheight;
-    tString str(buffer.SubStr(realx, len));
+    FTGL_STRING str(buffer.substr(realx, len));
     realx += len;
     if (len >= cursorPos && cursorPos >= 0) {
         cursor_y=realTop;
-        cursor_x=nextx+sr_Font.GetWidth(str.SubStr(0, cursorPos), cheight);
+        cursor_x=nextx+sr_Font.GetWidth(str.substr(0, cursorPos), cheight);
     }
     cursorPos -= len+1;
     float thisx = nextx+sr_Font.GetWidth(str, cheight);
@@ -498,15 +440,15 @@ void rTextField::FlushLine(int len,bool newline){
 }
 
 void rTextField::FlushLine(bool newline){
-    FlushLine(buffer.Size()-realx,newline);
+    FlushLine(buffer.size()-realx,newline);
 }
 
-inline void rTextField::WriteChar(unsigned char c)
+inline void rTextField::WriteChar(FTGL_CHAR c)
 {
-    switch (c){
+    switch(c){
     case('\n'):
                     FlushLine();
-        buffer.Clear();
+        buffer.clear();
         break;
     default:
         buffer += c;
@@ -552,20 +494,36 @@ rTextField & rTextField::operator<<(unsigned char c){
 }
 */
 
-rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode )
+rTextField & rTextField::StringOutput(const FTGL_CHAR * c, ColorMode colorMode)
 {
 #ifndef DEDICATED
     //float currentWidth = nextx - left;
     float const &maxWidth = width;
     bool lastIsNewline = true;
     bool trouble = false; // Do we have a word that won't fit on a line?
-    static tString spaces;
+    static FTGL_STRING spaces;
     // run through string
     while (*c!='\0')
     {
         if (trouble && !(*c=='0' && my_strnlen(c, 8)>=8 && c[1]=='x' && colorMode != COLOR_IGNORE)) {
-            tString str;
-            str << *c;
+            FTGL_STRING str;
+            str += *c;
+#ifdef FTGL_HAS_UTF8
+            // be sure to add full utf8 character sequences
+            if ( (*c & 0x80) == 0x80 )
+            {
+                c++;
+                while ((*c & 0xc0) == 0x80 )
+                {
+                    str += *(c);
+                    c++;
+                }
+
+                // gone one step too far
+                c--;
+            }
+            // ( we don't need to worry about the isspace() tests, they'll fail)
+#endif
             currentWidth += sr_Font.GetWidth(str, cheight);
             if(isspace(*c)) {
                 trouble = false;
@@ -575,7 +533,7 @@ rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode )
                 for ( int i = parIndent-1; i >= 0; --i )
                 {
                     WriteChar(' ');
-                    spaces << ' ';
+                    spaces += ' ';
                     cursorPos++;
                 }
                 currentWidth = sr_Font.GetWidth(spaces, cheight);
@@ -586,7 +544,7 @@ rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode )
         {
             lastIsNewline = false;
             // count number of nonblank characters following
-            char const * nextSpace = c+1;
+            FTGL_CHAR const * nextSpace = c+1;
             int wordLen = 0;
             while ( *nextSpace != '\0' && *nextSpace != '\n' && !isblank(*nextSpace) )
             {
@@ -602,8 +560,11 @@ rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode )
                     wordLen++;
                 }
             }
-            tString str(c, nextSpace);
+            FTGL_STRING str(c, nextSpace);
+            //TODO: fix for non-utf8 rendering, too
+#ifdef FTGL_HAS_UTF8
             str = tColoredString::RemoveColors(str.c_str());
+#endif
             float wordWidth = sr_Font.GetWidth(str, cheight);
 
             currentWidth += wordWidth;
@@ -616,7 +577,7 @@ rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode )
                 for ( int i = parIndent-1; i >= 0; --i )
                 {
                     WriteChar(' ');
-                    spaces << ' ';
+                    spaces += ' ';
                     cursorPos++;
                 }
                 float spaceWidth = sr_Font.GetWidth(spaces, cheight);
@@ -640,7 +601,7 @@ rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode )
         //if ( x >= width )
         //{
         //    WriteChar('\n');
-        //    currentWidth = 0.;
+        //    currentWidth = 0.
         //}
 
         // detect presence of color code
@@ -649,17 +610,27 @@ rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode )
             tColor color;
             bool use = false;
 
-            if ( 0 ==strncmp(c,"0xRESETT",8) )
+            FTGL_CHAR const resett[] = {
+                                         static_cast<FTGL_CHAR>('0'),
+                                         static_cast<FTGL_CHAR>('x'),
+                                         static_cast<FTGL_CHAR>('R'),
+                                         static_cast<FTGL_CHAR>('E'),
+                                         static_cast<FTGL_CHAR>('S'),
+                                         static_cast<FTGL_CHAR>('E'),
+                                         static_cast<FTGL_CHAR>('T'),
+                                         static_cast<FTGL_CHAR>('T'),
+                                         0};
+            if ( 0 == my_strncmp(c,resett,8) )
             {
                 // color reset to default requested
-                color = defaultColor_;
-                use = true;
+                 color = defaultColor_;
+                 use = true;
             }
             else
             {
                 // found! extract colors
                 cursorPos-=8;
-		color = tColor( c );
+                color = tColor( c );
                 use = true;
             }
 
@@ -692,10 +663,19 @@ rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode )
     return *this;
 }
 
-void DisplayText(REAL x,REAL y,REAL h,const char *text,sr_fontClass type,int center,int cursor,int cursorPos, rTextField::ColorMode colorMode){
+rTextField & operator<<(rTextField &c,const FTGL_STRING &x){
+    return c.StringOutput(x.c_str());
+}
+
+void DisplayText(REAL x,REAL y,REAL h,const char *t,sr_fontClass type,int center,int cursor,int cursorPos, rTextField::ColorMode colorMode){
 #ifndef DEDICATED
+    tString text( t );
+    // transform string for FTGL
+    STRING_TO_FTGL( text, str );
+    // do so again, with colors removed
+    STRING_TO_FTGL( tColoredString::RemoveColors(t), str_colorless );
     float height;
-    float width = rTextField::GetTextLength(tString(text), h, true, true, &height);
+    float width = rTextField::GetTextLengthRaw(str_colorless, h, true, &height);
 
     // shrink fields that don't fit the screen
     REAL maxw = 1.95 - x;
@@ -713,8 +693,14 @@ void DisplayText(REAL x,REAL y,REAL h,const char *text,sr_fontClass type,int cen
 
     c.SetIndent(5);
     if (cursor)
+    {
+#ifndef FTGL_HAS_UTF8
+        // translate cursor position from byte index to character index
+        cursorPos = text.LenUtf8(0, cursorPos);
+#endif
         c.SetCursor(cursor,cursorPos);
-    c.StringOutput(text, colorMode );
+    }
+    c.StringOutput(str.c_str(), colorMode );
 #endif
 }
 // *******************************************************************************************
@@ -818,10 +804,155 @@ tColor rTextField::blendColor_;
 //! @param useNewline should newlines be recognized (and the longest line be found)?
 //! @param resultingHeight address to store the number of lines (height times the number of newlines+1)
 //! @returns the width of the string if it was printed
-float rTextField::GetTextLength (tString const &str, float height, bool stripColors, bool useNewline, float *resultingHeight) {
+float rTextField::GetTextLength (std::string const &utf8str, float height, bool stripColors, bool useNewline, float *resultingHeight) {
     if(stripColors) {
-        return sr_Font.GetWidth(tColoredString::RemoveColors(str.c_str()), height); //TODO: Implement all the rest!
+        tString colorlessstr = tColoredString::RemoveColors(utf8str.c_str());
+        STRING_TO_FTGL(colorlessstr, str);
+        return GetTextLengthRaw( str, height, useNewline, resultingHeight );
+    } else {
+        STRING_TO_FTGL( utf8str, str );
+        return GetTextLengthRaw( str, height, useNewline, resultingHeight );
     }
+}
+
+//! @param str the string to be used
+//! @param height the height of one character
+//! @param useNewline should newlines be recognized (and the longest line be found)?
+//! @param resultingHeight address to store the number of lines (height times the number of newlines+1)
+//! @returns the width of the string if it was printed
+float rTextField::GetTextLengthRaw (FTGL_STRING const &str, float height, bool useNewline, float *resultingHeight) {
     return sr_Font.GetWidth(str, height); //TODO: Implement all the rest!
 }
+
+//! @param m_size the size of the font to be used
+//! @param m_pos  the top-left corner of the font
+//! @param width  the width to be wrapped at
+rTextBox::rTextBox(float size, tCoord const &pos, float width) :
+        m_size  (size ),
+        m_pos   (pos  ),
+        m_width (width)
+{}
+
+void rTextBox::Render(void) const {
+    for(std::vector<item>::const_iterator i = m_items.begin(); i != m_items.end(); ++i) {
+        i->Render();
+    }
+}
+
+void rTextBox::item::Render(void) const {
+    m_color.Apply();
+    sr_Font.Render(m_text, m_size, m_pos);
+}
+
+void rTextBox::SetText(tString const &utf8str) {
+    STRING_TO_FTGL( utf8str, str );
+    typedef std::pair<tColor, FTGL_STRING> colorText;
+    typedef std::vector<colorText> line;
+    typedef std::vector<line> lineVector;
+    lineVector lines;
+    lines.push_back(line());
+    lines.back().push_back(colorText(rColor(1.,1.,1.,1.), FTGL_STRING()));
+    for(FTGL_STRING::const_iterator c = str.begin(); c != str.end(); ++c) {
+        if(*c == '\n') {
+            lines.push_back(line());
+            lines.back().push_back(colorText(rColor(1.,1.,1.,1.), FTGL_STRING()));
+            continue;
+        }
+        if(*c == '0' && (c+1) != str.end() && c[1] == 'x') {
+            bool end=false;
+            for(int i = 2; i < 8; ++i) {
+                if((c+i) == str.end()) {
+                    end=true;
+                    break;
+                }
+                if(!end) {
+                    tColor color = tColor( &(*c) );
+                    lines.back().push_back(colorText(color, FTGL_STRING()));
+                    c+=8;
+                    break;
+                }
+            }
+        }
+        lines.back().back().second += *c;
+    }
+    float y=m_pos.y;
+    for(lineVector::iterator l=lines.begin(); l != lines.end(); ++l) {
+        float currentX=m_pos.x;
+        for(line::iterator i=l->begin(); i != l->end(); ++i) {
+            float const targetWidth = m_width - currentX + m_pos.x;
+            {
+                float width;
+                //see if it fits
+                if((width = sr_Font.GetWidth(i->second, m_size)) < targetWidth) {
+                    m_items.push_back(item(tCoord(currentX, y), m_size, i->second, i->first));
+                    currentX += width;
+                    continue;
+                }
+            }
+            //ok, it doesn't, see where we have to break it
+            while (!i->second.empty()) {
+                size_t length = i->second.size();
+                size_t biggest = 0; // biggest found length that would fit, if it had to
+                size_t smallest = i->second.size(); // smallest tested length that doesn't fit
+                float smallstep = false; // do 1-char steps now?
+                while (biggest+1 < smallest) {
+                    //std::cerr << "Checking: " << i->second.substr(0, length) << std::endl;
+                    FTGL_STRING checkedString = i->second.substr(0, length);
+                    float width = sr_Font.GetWidth(checkedString, m_size);
+                    if(smallstep) {
+                        if(width > targetWidth) {
+                            length--;
+                            smallest = length;
+                        } else {
+                            length++;
+                            biggest = length;
+                        }
+                    } else {
+                        float ratio = width / targetWidth;
+                        //std::cerr << "ratio: " << ratio << std::endl;
+                        size_t newpos = static_cast<int>(length / ratio);
+                        if (newpos > i->second.size()) newpos = i->second.size();
+                        if(newpos >= smallest || newpos <= biggest) {
+                            smallstep = true;
+                        }
+                        if(width > targetWidth) {
+                            smallest = newpos;
+                        } else {
+                            biggest = newpos;
+                        }
+                        length = newpos;
+                    }
+                }
+                size_t pos;
+                for(pos = biggest; !isspace(i->second[pos]); --pos) ;
+                if(pos == 0) pos = biggest; //the word won't fit
+                //TODO: word break
+                m_items.push_back(item(tCoord(currentX, y), m_size, i->second.substr(0, pos), i->first));
+                currentX = m_pos.x;
+                y -= m_size;
+                i->second = i->second.substr(pos + 1);
+            }
+        }
+        y -= m_size;
+    }
+}
+
+//static rTextBox test(0.05, tCoord(-.95, 0.), 1.9);
+//class cls {
+//public:
+//    cls();
+//    int i;
+//};
+//cls::cls() {
+//    //test.SetText(tString("Hi there! 0xff0000green!\nNewline! Word1, Word2, Word3, Word4, Word5, Word6, Word7, Word8, Word9, Word10, Word11, Word12, Word13, Word14, Word15, Word16, Word17, Word18, ... €öäüßa"));
+//}
+//void asdf(){
+//    //static cls obj;
+//    //obj.i = 2;
+//    //sr_ResetRenderState(false);
+//    //test.Render();
+//	DisplayText(0,0,.1,"…€äöü§xyz",sr_fontConsole);
+//}
+//static rPerFrameTask asdfgh(&asdf);
+
 #endif

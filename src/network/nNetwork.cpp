@@ -42,6 +42,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <stdlib.h>
 #include <fstream>
 #include "tMath.h"
+#include "utf8.h"
 #include <string.h>
 
 #ifndef WIN32
@@ -206,6 +207,92 @@ static unsigned short highest_ack[MAXCLIENTS+2];
 // Version control
 //********************************************************
 
+//! class that can temporarily override the current version
+class nTempVersionOverrider
+{
+public:
+    nTempVersionOverrider()
+    : lastOverrider_( overrider_ )
+    , overridden_( false )
+    , version_( sn_CurrentVersion() )
+    {
+        overrider_ = this;
+    }
+    
+    ~nTempVersionOverrider()
+    {
+        // restore old overrider
+        overrider_ = lastOverrider_;
+    }
+
+    //! send a version override message to a peer
+    static void SendOverrideMessage( int peer, nVersion const & version )
+    {
+        // create message
+        nMessage *m = tNEW(nMessage)( descriptor_ );
+
+        // write info
+        *m << version;
+        
+        // send info
+        m->ClearMessageID();
+        m->SendImmediately(peer, false);
+    }
+
+    static bool Overridden()
+    {
+        return ( overrider_ && overrider_->overridden_ );
+    }
+
+    static nVersion const & OverriddenVersion()
+    {
+        if ( Overridden() )
+            return overrider_->version_;
+        else
+            return sn_CurrentVersion();
+    }
+
+    //! override currently active version
+    static void Override( nVersion const & version )
+    {
+        if ( overrider_ && ! overrider_->overridden_ )
+        {
+            overrider_->overridden_ = true;
+        }
+
+        overrider_->version_ = version;
+    }
+    
+    //! accept version override message
+    static void ReceiveOverrideMessage( nMessage & m )
+    {
+        // as the server, return the favor
+        if ( sn_GetNetState() == nSERVER )
+            SendOverrideMessage( m.SenderID(), sn_MyVersion() );
+
+        nVersion version;
+        m >> version;
+
+        Override( version );
+    }
+
+    //! returns the network message descriptor
+    static nDescriptor const & Descriptor()
+    {
+        return descriptor_;
+    }
+private:
+    static nTempVersionOverrider * overrider_;    //!< the current overrider
+    nTempVersionOverrider * lastOverrider_;       //!< the last overrider
+    static nDescriptor descriptor_;               //!< message descriptor for version override messages
+
+    bool overridden_;                             //!< flag telling the destructor whether it needs to revert stuff
+    nVersion version_;                            //!< the version to use as override
+};
+
+nTempVersionOverrider * nTempVersionOverrider::overrider_ = 0;
+nDescriptor nTempVersionOverrider::descriptor_( 12, nTempVersionOverrider::ReceiveOverrideMessage, "override_version", true );
+
 static int sn_MaxBackwardsCompatibility = 1000;
 static tSettingItem<int> sn_mxc("BACKWARD_COMPATIBILITY",sn_MaxBackwardsCompatibility);
 
@@ -327,7 +414,7 @@ std::ostream& operator << ( std::ostream& s, const nVersion& ver )
     return s;
 }
 
-nVersionFeature::nVersionFeature( int min, int max ) // creates a feature that is supported from version min to max; values of -1 indicate no border
+nVersionFeature::nVersionFeature( int min, int max ) // creates a feature that is supported from version min to max; values of -1 indicate no bordera
 {
     tASSERT( min_ >= sn_MyVersion().Min() );
     tASSERT( max < 0 || max <= sn_MyVersion().Max() );
@@ -338,7 +425,9 @@ nVersionFeature::nVersionFeature( int min, int max ) // creates a feature that i
 
 bool nVersionFeature::Supported()
 {
-    return ( min_ < 0 || sn_CurrentVersion().Max() >= min_ ) &&  ( max_ < 0 || sn_CurrentVersion().Min() <= max_ );
+    return 
+    ( min_ < 0 || nTempVersionOverrider::OverriddenVersion().Max() >= min_ ) &&  
+    ( max_ < 0 || nTempVersionOverrider::OverriddenVersion().Min() <= max_ );
 }
 
 bool nVersionFeature::Supported( int client )
@@ -347,7 +436,7 @@ bool nVersionFeature::Supported( int client )
         return false;
 
     // the version to check the feature for
-    const nVersion * version = &sn_CurrentVersion();
+    const nVersion * version = &nTempVersionOverrider::OverriddenVersion();
 
     if ( sn_GetNetState() == nCLIENT )
     {
@@ -1010,10 +1099,73 @@ void nMessage::BroadCast(bool ack){
     }
 }
 
-
 static nVersionFeature sn_ZeroMessageCrashfix( 1 );
 
-nMessage& nMessage::operator << (const tString &s){
+/*
+// Z-Man: commented out looking for a better way, please don't delete yet until we have a proper
+// different way of sending UTF8 over the network.
+
+static nVersionFeature unicode( 21_not_anymore_adapt_to_new_version );
+static bool sn_serverSendsUnicode = false;
+static nSettingItemWatched<bool> sn_serverSendsUnicodeConf( "SERVER_SENDS_UTF8", sn_serverSendsUnicode, nConfItemVersionWatcher::Group_Visual, 21 );
+
+static bool ServerSendsUnicode()
+{
+    // while a version override is active, it's safe to rely on the set version.
+    // otherwise, use the setting item.
+    return nTempVersionOverrider::Overridden() ? unicode.Supported() : sn_serverSendsUnicode;
+}
+*/
+
+nMessage& nMessage::operator << (const tString &ss){
+    tString s = ss;
+
+    /*
+    // Z-Man: commented out looking for a better way, please don't delete yet until we have a proper
+    // different way of sending UTF8 over the network.
+
+    // convert utf8 to latin1. For comments the operator >>.
+    if ( sn_GetNetState() == nSERVER ? !ServerSendsUnicode() : !unicode.Supported(0) )
+    */
+
+    {
+        try
+        {
+            tString copy;
+
+            tString::iterator reader = s.begin();
+            std::back_insert_iterator< tString > writer = back_inserter(copy);
+            
+            while ( reader != s.end() )
+            {
+                // just convert every byte of the original latin1 into utf8, assuming unicode matches latin1
+                // where latin1 is defined.
+                uint32_t c = utf8::next( reader, s.end() );
+                
+                // convert unknown characters to underscores
+                if ( c < 256 )
+                    *writer = c;
+                else
+                    *writer = '_';
+                
+                ++writer;
+            }
+
+            s = copy;
+        }
+        catch( ... )
+        {
+            // no need to do a thing. utf8 passes as latin1 almost all of the time, unless
+            // you're German or French or anything non-English. well.
+            con << "latin1 to utf8 conversion error!\n";
+        }
+    }
+
+    if ( !sn_ZeroMessageCrashfix.Supported() && s.Len() <= 0 )
+    {
+        return this->operator<<( s + " " );
+    }
+
     unsigned short len=s.Size()+1;
 
     // clamp away excess zeroes
@@ -1031,7 +1183,7 @@ nMessage& nMessage::operator << (const tString &s){
             return this->operator<<( replacement );
         }
     }
-    else if ( len == 1 && s(0) == 0 )
+    else if ( len == 1 )
     {
         // do away with the the trailing zero in zero length strings.
         len = 0;
@@ -1096,6 +1248,29 @@ nMessage& nMessage::operator >> (tColoredString &s )
 {
     // read the raw data
     ReadRaw( s );
+
+    // convert latin1 encoding to utf8
+    // The server knows which clients support unicode precisely; every unicode supporting client
+    // sends in utf8 to a unicode supporting server. However, the server has to send back latin1
+    // to all clients once one client does not support unicode, because messages containing strings
+    // can be broadcast. So the client has to do the conversion if only one client is online
+    // that does not support unicode.
+    // if ( sn_GetNetState() == nSERVER ? !unicode.Supported( SenderID() ) : !ServerSendsUnicode() )
+    {
+        s =  st_Latin1ToUTF8(s);
+    }
+    /*
+    // Z-Man: commented out looking for a better way, please don't delete yet until we have a proper
+    // different way of sending UTF8 over the network.
+    else
+    {
+        // the incoming string is supposed to be in utf8 format. check that, and crop it otherwise.
+        // no invalid utf8 string is supposed to be able to enter the system. Maybe it's just a
+        // stray latin1 string? If not, it's set to an error string.
+        if ( !utf8::is_valid( s.begin(), s.end() ) )
+            s = st_Latin1ToUTF8(s);
+    }
+    */
 
     // filter client string messages
     if ( sn_GetNetState() == nSERVER )
@@ -2422,6 +2597,10 @@ static void rec_peer(unsigned int peer){
             try
             {
 	#endif
+                // prepare to override currently active version
+                nTempVersionOverrider overrider;
+
+
                 static int recursionCount = 0;
                 ++recursionCount;
 
@@ -2430,6 +2609,15 @@ static void rec_peer(unsigned int peer){
                 {
                     tJUST_CONTROLLED_PTR< nMessage > mess = receivedMessages.front();
                     receivedMessages.pop_front();
+
+                    // set version to something really old on messages from the login slot
+                    // or messages the client receives while it's not yet logged in
+                    if ( ( mess->SenderID() == MAXCLIENTS+1 ||
+                         ( sn_GetNetState() == nCLIENT && !login_succeeded ) ) 
+                         && !nTempVersionOverrider::Overridden() )
+                    {
+                        nTempVersionOverrider::Override( nVersion( 0, 4 ) );
+                    }
 
                     // perhaps the connection died?
                     if ( sn_Connections[ mess->SenderID() ].socket )
@@ -2643,6 +2831,9 @@ void sn_Bend( nAddress const & address )
         sn_SetNetState(nCLIENT);
 
     peers[0] = address;
+
+    // prepend packet with version information
+    nTempVersionOverrider::SendOverrideMessage( 0, sn_myVersion );
 }
 
 void sn_Bend( tString const & server, unsigned int port)
@@ -3393,7 +3584,8 @@ static bool net_Accept()
 {
     return
         nCallbackAcceptPackedWithoutConnection::Descriptor()==login_accept.ID() ||
-        nCallbackAcceptPackedWithoutConnection::Descriptor()==login_deny.ID();
+        nCallbackAcceptPackedWithoutConnection::Descriptor()==login_deny.ID() ||
+        nCallbackAcceptPackedWithoutConnection::Descriptor()==nTempVersionOverrider::Descriptor().ID();
 }
 
 static nCallbackAcceptPackedWithoutConnection net_acc( &net_Accept );

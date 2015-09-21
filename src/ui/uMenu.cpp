@@ -55,6 +55,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tException.h"
 #include <iterator>
 
+#include "utf8.h"
+
 #ifndef DEDICATED
 #include "rRender.h"
 #include "rSDL.h"
@@ -744,11 +746,11 @@ uMenuItemString::uMenuItemString(uMenu *M,
                                  const tOutput& help,
                                  tString &c,
                                  int maxLength )
-        :uMenuItem(M,help),description(de),content(&c),cursorPos(0), maxLength_( maxLength ){
+        :uMenuItem(M,help),description(de),content(&c),realCursorPos(0), maxLength_( maxLength ){
     // int len=content->Len();
     // if (len==0 || (*content)(len-1)!=0)
     //    (*content)[len]=0;
-    cursorPos=content->Len()-1;
+    realCursorPos=content->size();
     colorMode_ = rTextField::COLOR_SHOW;
 }
 
@@ -770,7 +772,7 @@ void uMenuItemString::Render(REAL x,REAL y,
         colorMode = rTextField::COLOR_USE;
 
     DisplayText(x-.02,y,description,selected,alpha,1);
-    DisplayText(x+.02,y,*content,selected,alpha,-1,cmode,cursorPos,colorMode);
+    DisplayText(x+.02,y,*content,selected,alpha,-1,cmode,realCursorPos,colorMode);
 #endif
 }
 
@@ -848,45 +850,44 @@ bool uMenuItemString::Event(SDL_Event &e){
     // moveWordLeft = moveWordRight = deleteWordLeft = deleteWordRight = moveBeginning = moveEnd = killForwards
 
     if (moveWordLeft) {
-        cursorPos += content->PosWordLeft(cursorPos);
+        realCursorPos += content->PosWordLeft(realCursorPos);
     }
     else if (moveWordRight) {
-        cursorPos += content->PosWordRight(cursorPos);
+        realCursorPos += content->PosWordRight(realCursorPos);
     }
     else if (deleteWordLeft) {
-        cursorPos += content->RemoveWordLeft(cursorPos);
+        realCursorPos += content->RemoveWordLeft(realCursorPos);
     }
     else if (deleteWordRight) {
-        content->RemoveWordRight(cursorPos);
+        content->RemoveWordRight(realCursorPos);
     }
     else if (moveBeginning) {
-        cursorPos = 0;
+        realCursorPos = 0;
     }
     else if (moveEnd) {
-        cursorPos = content->Len()-1;
+        realCursorPos = content->size();
     }
     else if (killForwards) {
-        content->RemoveSubStr(cursorPos,content->Len()-1-cursorPos);
+        content->RemoveSubStr(realCursorPos,content->size()-realCursorPos);
     }
     else if (c.sym == SDLK_LEFT) {
-        if (cursorPos > 0) {
-            cursorPos--;
+        if (realCursorPos > 0) {
+            while(((*content)[--realCursorPos]&0xc0) == 0x80) ;
         }
     }
     else if (c.sym == SDLK_RIGHT) {
-        if (cursorPos < content->Len()-1) {
-            cursorPos++;
+        if ( realCursorPos < content->size() ) {
+            while(++realCursorPos < content->size() && ((*content)[realCursorPos]&0xc0) == 0x80) ;
         }
     }
     else if (c.sym == SDLK_DELETE) {
-        if (cursorPos < content->Len()-1) {
-            content->RemoveSubStr(cursorPos,1);
+        if (realCursorPos < content->size() ) {
+            content->RemoveSubStrUtf8(realCursorPos,1);
         }
     }
     else if (c.sym == SDLK_BACKSPACE) {
-        if (cursorPos > 0) {
-            content->RemoveSubStr(cursorPos,-1);
-            cursorPos--;
+        if (realCursorPos > 0) {
+            realCursorPos -= content->RemoveSubStrUtf8(realCursorPos,-1);
         }
     }
     else if (c.sym == SDLK_KP_ENTER || c.sym == SDLK_RETURN) {
@@ -942,8 +943,9 @@ bool uMenuItemString::Event(SDL_Event &e){
         ret = InsertChar(c.unicode);
     }
 
-    if (cursorPos<0)    cursorPos=0;
-    if (cursorPos > content->Len()-1) cursorPos=content->Len()-1;
+    if( realCursorPos > content->size()) {
+        realCursorPos=content->size();
+    }
 
     return ret;
 #else
@@ -953,19 +955,19 @@ bool uMenuItemString::Event(SDL_Event &e){
 
 bool uMenuItemString::InsertChar(int unicode) {
 #ifndef DEDICATED
-    if (32 <= unicode  && unicode < 256)
+    if (32 <= unicode)
     {
         // insert character if there is room
-        if (content->Len() < maxLength_)
+        if ( content->LenUtf8() < maxLength_ )
         {
-            tString beg = content->SubStr(0,cursorPos);
-            tString end = content->SubStr(cursorPos);
-            *content = beg;
-            *content += tString::CHAR(unicode);
-            *content += end;
-            cursorPos++;
+            tString utf8string;
+            unsigned short utf16string[1];
+            utf16string[0] = unicode;
+            utf8::utf16to8(utf16string, utf16string+1, back_inserter(utf8string));
+            content->insert(realCursorPos, utf8string);
+            realCursorPos+=utf8string.size();
         }
-
+        
         return true;
     }
     else {
@@ -1216,7 +1218,7 @@ bool uMenuItemStringWithHistory::Event(SDL_Event &e){
                 m_History.front() = *content;
             m_HistoryPos++;
             *content = m_History[m_HistoryPos];
-            cursorPos = content->Len() - 1;
+            realCursorPos = content->size();
         }
 
         return true;
@@ -1227,7 +1229,7 @@ bool uMenuItemStringWithHistory::Event(SDL_Event &e){
         {
             m_HistoryPos--;
             *content = m_History[m_HistoryPos];
-            cursorPos = content->Len() - 1;
+            realCursorPos = content->size();
         }
 
         return true;
@@ -1239,15 +1241,15 @@ bool uMenuItemStringWithHistory::Event(SDL_Event &e){
             m_History.push_front(tString());
         }
         content->erase();
+        realCursorPos=0;
         m_HistoryPos++;
-        cursorPos=0;
         m_SearchFailing=false;
         return true;
     }
     else if (e.type==SDL_KEYDOWN &&
              (e.key.keysym.sym==SDLK_TAB && !m_Searchmode)){
         if(m_Completer != 0) {
-            cursorPos = m_Completer->Complete(*content, cursorPos);
+            realCursorPos = m_Completer->Complete(*content, realCursorPos);
         }
 
         return true;
@@ -1256,7 +1258,7 @@ bool uMenuItemStringWithHistory::Event(SDL_Event &e){
         if(e.key.keysym.sym==SDLK_LEFT || e.key.keysym.sym==SDLK_RIGHT) {
             *content = m_History[m_HistoryPos];
             m_Searchmode = false;
-            cursorPos=0;
+            realCursorPos=0;
             return true;
         }
         bool ret = uMenuItemString::Event(e);

@@ -33,6 +33,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "defs.h"
 
+#include "tArray.h"
+
 #include <string>
 #include <sstream>
 #include <iostream>
@@ -135,6 +137,7 @@ public:
     int RemoveWordRight(int start);             //!< Remove word right according to the delimiters
     int RemoveWordLeft(int start);              //!< Remove word left according to the delimiters
     void RemoveSubStr(int start, int length);   //!< Remove a substring, in-place
+    int RemoveSubStrUtf8(int start, int length);//!< Remove a substring, in-place, only complete utf-8 characters
     tString GetFileMimeExtension() const;       //!< Gets the lowercased file extension, as in a MIME type
     tString Reverse() const;                    //!< Reverses strings
 
@@ -169,12 +172,14 @@ private:
     int Count(CHAR what) const; //!< Counts the number of a certain character within the string
     int LongestLine() const; //!< the length of the longest line
 
+    int LenUtf8(size_type start = 0, size_type len = npos) const; //!< returns the length in characters
+
     // LEGACY FUNCTIONS, DON'T USE IN NEW CODE
     int Len() const; //!< returns the lenghth PLUS ONE (the allocated length)
 
     void SetLen( int len ); //!< sets the allocated length
 
-    void NetFilter();                           //!< filters strings from the net for strange things like newlines
+    void NetFilter( bool filterWhitespace = true );       //!< filters strings from the net for strange things like newlines
 };
 
 //! proxy class for inserting color markings
@@ -293,21 +298,21 @@ tString st_GetCurrentTime(char const *szFormat);
 class tCharacterFilter
 {
 public:
-    char Filter ( unsigned char );
+    // filter a single character
+    wchar_t Filter ( wchar_t );
+
+    // filter a whole string, byte for byte
+    tString FilterByteString ( tString & );
+
+    // filter a whole utf8 string
     tString FilterString ( tString & );
 protected:
-    tCharacterFilter ( void ) {} // To use a tCharacterFilter, make your own class herit of this one and define the constructor
+    tCharacterFilter ( void ) {} // To use a tCharacterFilter, make your own class inherit of this one and define the constructor
 
-    void SetMap ( unsigned char, unsigned char, unsigned char );
-    void SetMap ( unsigned char, unsigned char );
+    void SetMap ( wchar_t, wchar_t, wchar_t );
+    void SetMap ( wchar_t, wchar_t );
 
-    char filter[256];
-};
-
-class tNetCharacterFilter: public tCharacterFilter
-{
-public:
-    tNetCharacterFilter ( void );
+    tArray< wchar_t > filter;
 };
 
 #endif

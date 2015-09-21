@@ -34,6 +34,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <ctype.h>
 #include <string>
 #include <iostream>
+#include "utf8.h"
 
 // *******************************************************************************
 // *
@@ -979,7 +980,7 @@ int tString::RemoveWordLeft( int start ) {
 // *******************************************************************************************
 
 void tString::RemoveSubStr( int start, int length ) {
-    int strLen = Len()-1;
+    int strLen = size();
     if ( length < 0 ) {
         start += length;
         length = abs( length );
@@ -1000,6 +1001,46 @@ void tString::RemoveSubStr( int start, int length ) {
     else {
         *this = SubStr( 0, start ) + SubStr( start + length, strLen );
     }
+
+    // SetSze(strLen+1-length);
+}
+
+// *******************************************************************************************
+// *
+// *	RemoveSubStrUtf8
+// *
+// *******************************************************************************************
+//!
+//!    @param      start       The position in the string
+//!    @param      length      How many characters to delete and the direction.
+//!                                x > 0 deletes right
+//!                                x < 0 deletes left
+//!	   @returns the number or characters that were really deleted.
+//!
+// *******************************************************************************************
+
+int tString::RemoveSubStrUtf8( int start, int length ) {
+    int strLen = size();
+    if ( length < 0 ) {
+        start += length;
+        length = -length;
+    }
+
+    if ( start + length > strLen || start < 0 || length == 0 ) {
+        return 0;
+    }
+
+    while(((*this)[start] & 0xc0) == 0x80) {
+        --start;
+        ++length;
+    }
+    while(start+length < strLen && ((*this)[start+length] & 0xc0) == 0x80) {
+        ++length;
+    }
+
+    erase(start,length);
+
+    return length;
 
     // SetSze(strLen+1-length);
 }
@@ -1267,6 +1308,28 @@ tString::operator const tString::CHAR *( void ) const
     return c_str();
 }
 
+//! @param start The position in the string to begin measuring
+//! @param len The length of the string to measure (in bytes)
+//! @returns the real length in characters
+int tString::LenUtf8( size_t start, size_t len ) const
+{
+    tASSERT(start+(len == npos ? 0 : len)<=size());
+    size_type ret = 0;
+    const_iterator i = begin() + start;
+    const_iterator end_iter;
+    if(len == npos) {
+        end_iter = end();
+    } else {
+        end_iter = i + len;
+    }
+    for(; i != end_iter; ++i) {
+        if((*i & 0xc0) != 0x80) {
+            ++ret;
+        }
+    }
+    return ret;
+}
+
 // *******************************************************************************
 // *
 // *	Len
@@ -1389,7 +1452,7 @@ tColoredString::tColoredString( void )
 // *******************************************************************************************
 
 tColoredString::tColoredString( const tColoredString & other )
-:tString( other )
+        :tString( other )
 {
 }
 
@@ -1602,15 +1665,59 @@ void tColoredString::RemoveTrailingColor( void )
 // *
 // *******************************************************************************************
 //!
+//!		@param	filterWhitespace whether whitespace should be filtered away
 //!
 // *******************************************************************************************
 
-void tString::NetFilter( void )
+void tString::NetFilter( bool filterWhitespace )
 {
-    static tNetCharacterFilter filter;
+    // output string
+    tString out;
 
-    // run through string
-    *this = filter.FilterString( *this );
+    // prepare reader and writer
+    tString::iterator reader = begin();
+    std::back_insert_iterator< tString > writer = back_inserter(out);
+
+    try
+    {
+        // filter out illegal characters
+        while( reader != end() )
+        {
+            // convert from utf8
+            wchar_t c = utf8::next( reader, end() );
+
+            // ignore backspace
+            if ( c != 0x7f )
+            {
+                // filter
+                if ( isblank(c) )
+                {
+                    // unify whitespace to regular space
+                    c = ' ';
+                }
+                else if ( c < 32 )
+                {
+                    // nonprintable characters -> underscore
+                    c = '_';
+                }
+                // everything else is legal.
+
+                // convert back to utf8
+                utf8::append( c, writer );
+            }
+        }
+    }
+    catch(...)
+    {
+        // just leave the conversion incomplete in case of encoding errors
+
+        // but not in debug mode. This shoudln't happen.
+#ifdef DEBUG
+        tERR_ERROR( "Invalid utf8 strings in the system." );
+#endif
+    }
+
+    *this = out;
 }
 
 bool st_colorStrings=true;
@@ -2203,14 +2310,22 @@ void tToUpper( tString & toTransform )
 //!
 // **********************************************************************
 
-char tCharacterFilter::Filter( unsigned char in )
+wchar_t tCharacterFilter::Filter( wchar_t in )
 {
-    return filter[ in ];
+    if ( in < filter.Len() )
+    {
+        return filter[ in ];
+    }
+    else
+    {
+        // unknown characters get mapped to underscores.
+        return '_';
+    }
 }
 
 // **********************************************************************
 // *
-// *	Filter
+// *	FilterByteString
 // *
 // **********************************************************************
 //!
@@ -2218,7 +2333,7 @@ char tCharacterFilter::Filter( unsigned char in )
 //!
 // **********************************************************************
 
-tString tCharacterFilter::FilterString( tString & s )
+tString tCharacterFilter::FilterByteString( tString & s )
 {
     int len = s.Len() -1;
     tString out;
@@ -2231,7 +2346,52 @@ tString tCharacterFilter::FilterString( tString & s )
             out << c;
         }
     }
-    // std::cout << "Filtered name for " /*<< ( IP? "IP ":"" )*/ << "'" << s << "' : '" << out << "'\n";
+
+    return out;
+}
+
+// **********************************************************************
+// *
+// *	FilterString
+// *
+// **********************************************************************
+//!
+//!    @param      in            Character to process filters on
+//!
+// **********************************************************************
+
+tString tCharacterFilter::FilterString( tString & s )
+{
+    // output string
+    tString out;
+
+    // prepare reader and writer
+    tString::iterator reader = s.begin();
+    std::back_insert_iterator< tString > writer = back_inserter(out);
+
+    try
+    {
+        // filter out illegal characters
+        while( reader != s.end() )
+        {
+            // convert from utf8
+            wchar_t c = utf8::next( reader, s.end() );
+            if ( c != 0x7f )
+            {
+                // filter and convert back to utf8
+                utf8::append( Filter( c ), writer );
+            }
+        }
+    }
+    catch(...)
+    {
+        // just leave the conversion incomplete in case of encoding errors
+
+        // but not in debug mode. This shoudln't happen.
+#ifdef DEBUG
+        tERR_ERROR( "Invalid utf8 strings in the system." );
+#endif
+    }
 
     return out;
 }
@@ -2248,10 +2408,16 @@ tString tCharacterFilter::FilterString( tString & s )
 //!
 // **********************************************************************
 
-void tCharacterFilter::SetMap( unsigned char in1, unsigned char in2, unsigned char out)
+void tCharacterFilter::SetMap( wchar_t in1, wchar_t in2, wchar_t out)
 {
-    tASSERT( in1 < in2 );
-    for( unsigned char i = in2; i >= in1; --i )
+    // fill gaps with underscores
+    for( wchar_t i = filter.Len(); i < in1; ++i )
+    {
+        filter[ i ] = '_';
+    }
+    
+    tASSERT( in1 <= in2 );
+    for( wchar_t i = in2; i >= in1; --i )
         filter[ i ] = out;
 }
 
@@ -2266,42 +2432,9 @@ void tCharacterFilter::SetMap( unsigned char in1, unsigned char in2, unsigned ch
 //!
 // **********************************************************************
 
-void tCharacterFilter::SetMap( unsigned char in, unsigned char out )
+void tCharacterFilter::SetMap( wchar_t in, wchar_t out )
 {
-    filter[ in ] = out;
-}
-
-// **********************************************************************
-// *
-// *	tNetCharacterFilter
-// *
-// **********************************************************************
-//!
-//!
-// **********************************************************************
-
-tNetCharacterFilter::tNetCharacterFilter ( void )
-{
-    unsigned int i;
-    filter[0]=0;
-
-    // map all unknown characters to underscores
-    for (i=255; i > 0; i--)
-    {
-        filter[i] = '_';
-    }
-
-    // no, leave all ISO Latin 1 characters as they are
-    for (i=255; i >= 32; --i)
-    {
-        filter[i] = i;
-    }
-
-    // map return and tab to space
-    SetMap('\n',' ');
-    SetMap('\t',' ');
-
-
+    SetMap( in, in, out );
 }
 
 tString st_GetCurrentTime( char const * szFormat )

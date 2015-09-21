@@ -32,7 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "eWall.h"
 #include "nNetObject.h"
 
-class eRectangle;
+class tRectangle;
 
 class eWallRim:public eWall{
 protected:
@@ -80,7 +80,7 @@ public:
     static REAL Clip(const eCoord& in, eCoord &out,REAL offset=0);
 
     //! returns the bounding rectangle enclosing all rim walls
-    static eRectangle const & GetBounds();
+    static tRectangle const & GetBounds();
     //! updates the bounding rectangle enclosing all rim walls (call after arena buildup)
     static void UpdateBounds();
 };

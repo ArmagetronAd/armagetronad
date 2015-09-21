@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #ifndef ArmageTron_rCOLOR_H
 #define ArmageTron_rCOLOR_H
 
+#define DONTDOIT
 #include "rRender.h"
 
 #include "defs.h"
@@ -38,6 +39,7 @@ struct rColor: public tColor
 {
 public:
     rColor():tColor() {}       //!< Constructor
+    rColor( tColor const & other ):tColor( other ) {}       //!< Constructor
     rColor( REAL r, REAL g, REAL b, REAL a = 1 )      //!< Constructor
             :tColor(r,g,b,a) {}
     ~rColor(){}                         //!< Destructor
