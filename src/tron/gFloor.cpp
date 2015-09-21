@@ -32,7 +32,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "gLogo.h"
 #include "eFloor.h"
 #include "tConfiguration.h"
-#include "rScreen.h"
 
 
 // grid size
@@ -87,8 +86,8 @@ rFileTexture ArmageTron_mp_floor(rTextureGroups::TEX_FLOOR, lala_mp_floor, 1,1);
 
 static rFileTexture floor_a(rTextureGroups::TEX_FLOOR,"textures/floor_a.png",1,1);
 static rFileTexture floor_b(rTextureGroups::TEX_FLOOR,"textures/floor_b.png",1,1);
-static rFileTexture mp_floor_a(rTextureGroups::TEX_FLOOR,"moviepack/floor_a.png",1,1,true);
-static rFileTexture mp_floor_b(rTextureGroups::TEX_FLOOR,"moviepack/floor_b.png",1,1,true);
+static rFileTexture mp_floor_a(rTextureGroups::TEX_FLOOR,"moviepack/floor_a.png",1,1);
+static rFileTexture mp_floor_b(rTextureGroups::TEX_FLOOR,"moviepack/floor_b.png",1,1);
 rFileTexture ArmageTron_floor(rTextureGroups::TEX_FLOOR,"textures/floor.png",1,1);
 rFileTexture ArmageTron_mp_floor(rTextureGroups::TEX_FLOOR,"moviepack/floor.png",1,1);
 
@@ -175,8 +174,6 @@ static void MenuBackground(){
 
         TexMatrix();
         glLoadMatrixf(&tm[0][0]);
-
-        glScalef((REAL)sr_screenWidth/sr_screenHeight/4. * 3., 1., 1.);
 
 
         BeginQuads();

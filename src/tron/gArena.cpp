@@ -95,13 +95,17 @@ eCoord gArena::GetRandomPos(REAL factor) const
 
 void gArena::PrepareGrid(eGrid *grid, gParser *aParser)
 {
+    exit_game_objects(grid);
+    //BOP
     RemoveAllSpawn();
+    //EOP
 
     init_grid_in_process=true;
     grid->Create();
     grid->SetWinding(axes);
 
-    aParser->InstantiateMap(sizeMultiplier);
+    aParser->setSizeMultiplier(sizeMultiplier);
+    aParser->Parse();
 
     init_grid_in_process=false;
 
@@ -130,9 +134,7 @@ gSpawnPoint * gArena::LeastDangerousSpawnPoint()
     }
 
     if (!ret)
-    {
-        throw tGenericException( "No spawnpoint available." );
-    }
+        tERR_ERROR("No spawnpoint available!");
 
 #ifdef DEBUG
     //	std::cout << "Spawn at " << ret->location << "\n";

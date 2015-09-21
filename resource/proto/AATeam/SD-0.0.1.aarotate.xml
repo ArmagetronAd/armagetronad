@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<!-- This XML file contains the data for the map/settings rotation script. -->
+
+<Resource type="aarotate" name="test" author="Self_Destructo" category="" version="0.0.2">
+	<Rotate type="match" order="random">
+  	<!-- shuffles between match types totally at random -->
+  		<Possibility probability=".8">
+   			<Rotate type="round" order="shuffle">
+   			<!-- still random, but guarantees that each one will be used once -->
+    			<Possibility probability=".8">
+					<Messages>
+						<Message type="center" text="Round 1 - Pillar" />
+					</Messages>
+					<Settings>
+						<!-- Settings for this round -->
+					</Settings>
+	 				<Resources>
+						<UseResource type="aamap" author="ed" category="fortress" name="pillar" version="0.0.6" />
+					</Resources>
+    			</Possibility>
+    			<Possibility probability=".2">
+				<!-- blah (second possible round in this match) -->
+					<Messages>
+						<Message type="center" text="Round 2 - Minefield" />
+					</Messages>
+     				<Settings>
+      					<!-- Settings for this round -->
+     				</Settings>
+	 				<Resources>
+						<UseResource type="aamap" author="ed" category="fortress" name="minefield" version="0.0.6" />
+					</Resources>
+    			</Possibility>
+    			<Possibility>
+				<!-- blah (third possible round in this match) -->
+     				<Settings>
+      					<!-- Settings for this round -->
+     				</Settings>
+    			</Possibility>
+    		<!-- ... -->
+   			</Rotate>
+  		</Possibility>
+  		<!-- ===== -->
+  		<Possibility probability=".2">
+   			<Rotate type="round" order="ordered">
+   			<!-- nice and ordered, first <Possibility> comes first, then the second -->
+   			<!-- etc. until it repeats -->
+    			<Possibility>
+     			<Rotate type="fixed" order="random">
+     			<!-- picks a different <Possibility> every time but doesn't change -->
+     			<!-- without the parent changing -->
+      				<Possibility probability=".5">
+       					<!-- first possible first round -->
+      				</Possibility>
+      				<Possibility probability=".5">
+       					<!-- second possible first round -->
+      				</Possibility>
+     			</Rotate>
+    	</Possibility>
+    	<Possibility>
+     		<Rotate type="fixed" order="random">
+     		<!-- picks a different <Possibility> every time but doesn't change -->
+     		<!-- without the parent changing -->
+      			<Possibility probability=".5">
+       			<!-- first possible second round -->
+					<Messages>
+						<Message type="center" value="Round 2 -Minefield" />
+					</Messages>
+	   				<Settings>
+						<!-- Settings for this round -->
+	   				</Settings>
+	   				<Resources>
+						<UseResource type="aamap" author="ed" category="fortress" name="minefield" version="0.0.6" />
+      				</Resources>
+	  			</Possibility>
+      			<Possibility probability=".5">
+       			<!-- second possible second round -->
+					<Messages>
+						<Message type="center" text="Round 2 - Mine Pillars" />
+					</Messages>
+	   				<Settings>
+					<!-- Settings for this round -->
+	   				</Settings>
+	   				<Resources>
+						<UseResource type="aamap" author="ed" category="fortress" name="minepillars" version="0.0.2" />
+      				</Resources>
+	  			</Possibility>
+     		</Rotate>
+    	</Possibility>
+   </Rotate>
+  </Possibility>
+ </Rotate>
+</Resource>

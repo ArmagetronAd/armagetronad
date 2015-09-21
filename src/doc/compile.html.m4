@@ -29,9 +29,9 @@ download locations, and they count as "making the source available" in our eyes.
 SECTION(Packaging)
 
 PARAGRAPH([
-We manage distribution building with an additional module we don't put into regular releases;
-it is called FILE(build) and also hosted at Launchpad. Get it with
-CMDLINE(bzr branch http://bazaar.launchpad.net/%7Earmagetronad-dev/armagetronad/0.2.8-build-work/)
+We manage distribution building with an additional CVS module we don't put into regular releases;
+it is called FILE(armagetronad_build) and also hosted at SourceForge. Get it with
+CMDLINE(CVSROOT=:pserver:anonymous@cvs.sf.net:/cvsroot/armagetronad co armagetronad_build)
 enter it and type FILE(make) once to configure it to your system. Edit FILE(make.conf) to put
 in the missing details. Then, drop a tarball from our distribution into the FILE(tarballs)
 subdirectory and use FILE(make) to build the package of your choice. See the enclosed README.txt

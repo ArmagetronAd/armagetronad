@@ -33,9 +33,6 @@ LOGDIR=@logdir_reloc@
 
 server_args=""
 
-# niceness level of the servers.
-# Be aware that a too low niceness level will make the server take away
-# processing time from the network scheduler of the kernel, which is not
-# what you want.
+# niceness level of the servers
 
-niceness_level=-2
+niceness_level=-5

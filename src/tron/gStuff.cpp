@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -45,9 +45,10 @@ bool pp_tess_deb=0;
 
 // network setting item for the reesource repository from tResourceManager.cpp
 // may be dangerous, so it's disabled for now.
-static nSettingItem<tString> conf_res_repo("RESOURCE_REPOSITORY_SERVER", tResourceManager::resRepoServer);
+static nSettingItem<tString> conf_res_repo("RESOURCE_REPOSITORY_SERVER", tResourceManager::AccessRepoServer());
 
 static tConfItem<bool> grab("MOUSE_GRAB",su_mouseGrab);
+static tConfItem<bool> zt("ZTRICK",sr_ZTrick);
 
 bool sg_moviepackInstalled=false; // do we have the mp on disk?
 bool sg_moviepackUse=true;       // do we use it?

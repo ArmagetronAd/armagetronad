@@ -42,8 +42,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tMath.h"
 #include "nConfig.h" 
 
-#include "tRecorder.h"
-
 #include <vector>
 #include <set>
 
@@ -53,16 +51,6 @@ const REAL se_maxGridSize = 1E+15;	// this gives us way more space than OpenGL a
 // #define EPS 1E-2
 
 int se_debugExt=0;
-
-// counts how many edges we should attempt to simplify
-static int se_simplifyEdges = 0;
-
-// after one edge has been successfully simplified, simplify that many more,
-// it seems to pay
-static const int se_simplifyEdgesSuccess = 20;
-
-// after one edge has been inserted, try to simplify that many old ones
-static const int se_simplifyEdgesNew = 2;
 
 tDEFINE_REFOBJ( ePoint )
 tDEFINE_REFOBJ( eHalfEdge )
@@ -167,7 +155,7 @@ inline void eHalfEdge::Unlink()
 {
     if (point && this == point->edge)
     {
-        if (prev && prev->other)
+        if (prev && prev->other && prev->other)
             point->edge = prev->other;
         else if (other && other->next)
             point->edge = other->next;
@@ -359,7 +347,7 @@ eFaceScorePair se_FindBestReplacement( const eFace *old, eFaceReplacementArgumen
 {
     // return invalid return if the face was already visited
     if ( arg.visited.find( old ) != arg.visited.end() )
-        return eFaceScorePair( 0, -se_maxGridSize*se_maxGridSize );
+        return eFaceScorePair( 0, -se_maxGridSize );
 
     // register face as visited
     arg.visited.insert( old );
@@ -374,7 +362,7 @@ eFaceScorePair se_FindBestReplacement( const eFace *old, eFaceReplacementArgumen
         // iterate it
 
         // the currently best face/insideness pair
-        std::pair< eFace*, REAL > best( 0, -se_maxGridSize*se_maxGridSize );
+        std::pair< eFace*, REAL > best( 0, -100000 );
         for( eReplacementStorage::const_iterator i = storage.begin(); i != storage.end(); ++i )
         {
             // the current face/insideness pair
@@ -396,10 +384,8 @@ eFaceScorePair se_FindBestReplacement( const eFace *old, eFaceReplacementArgumen
                 current = se_FindBestReplacement( face, arg );
             }
 
-            if ( ( current.second > best.second && current.first ) || !best.first )
-            {
+            if ( current.second > best.second && current.first )
                 best = current;
-            }
         }
 
         return best;
@@ -720,9 +706,6 @@ static int se_drawLineTimeout = 10000;
 static tSettingItem<int> se_drawLineTimeoutConf("DRAWLINE_TIMEOUT", se_drawLineTimeout);
 
 ePoint * eGrid::DrawLine(ePoint *start, const eCoord &end, eWall *w, bool change_grid){
-    // for every edge we add, allow to simplify
-    se_simplifyEdges += se_simplifyEdgesNew;
-
     // prepare a teporary edge so we always know what the wall we are placing looks like
     tStackObject< eTempEdge > toBePlaced( *start, end, w );
     //tJUST_CONTROLLED_PTR< eWall > wal( w );
@@ -753,8 +736,6 @@ ePoint * eGrid::DrawLine(ePoint *start, const eCoord &end, eWall *w, bool change
 
 #ifdef DEBUG
     bool foundCurrentEdge;
-    static const int laststarts_max = 10;
-    ePoint *laststarts[laststarts_max];
 #endif
 
     eCoord dir=eCoord(1,1); // the direction we are going
@@ -788,7 +769,9 @@ ePoint * eGrid::DrawLine(ePoint *start, const eCoord &end, eWall *w, bool change
         lastStart = start;
 
 #ifdef DEBUG
-        for (int i = laststarts_max-1; i>=1; i--)
+        ePoint *laststarts[10];
+
+        for (int i = 9; i>=1; i--)
             laststarts[i] = laststarts[i-1];
 
         laststarts[0] = start;
@@ -865,7 +848,7 @@ ePoint * eGrid::DrawLine(ePoint *start, const eCoord &end, eWall *w, bool change
                 if (right_test < 0 && left_test < 0)
                     score *= -1;     // here, - * - still is -.....
 
-                if (!best || ( score > best_score  && rvec * lvec < 0 )
+                if (!best || score > best_score  && rvec * lvec < 0
                    )
                     best = run;
 
@@ -1834,16 +1817,12 @@ bool eFace::CorrectArea()
     return newarea > area;
 }
 
+
 bool eHalfEdge::Simplify(eGrid *grid)
 {
     if (GetWall() && GetWall()->Deletable() && face)
     {
         ClearWall();
-    }
-
-    if (other && other->GetWall() && other->GetWall()->Deletable() && other->face)
-    {
-        other->ClearWall();
     }
 
     if (GetWall() || !other || other->GetWall() || !face || !other->face)
@@ -1954,9 +1933,6 @@ bool eHalfEdge::Simplify(eGrid *grid)
 
     tControlledPTR< eHalfEdge > keep( this );
 
-    int idrec = ID;
-    tRecorderSync< int >::Archive( "_GRID_SIMPLIFY_REAL", 8, idrec );
-
     // the faces that will be removed
     tControlledPTR< eFace > killed1 = grid->ZombifyFace( face );
     tControlledPTR< eFace > killed2 = grid->ZombifyFace( other->face );
@@ -2023,12 +1999,7 @@ void eGrid::SimplifyNum(int e){
         if ( toBeRemoved == A || toBeRemoved == B || toBeRemoved == C )
             return;
 
-        tRecorderSync< int >::Archive( "_GRID_SIMPLIFY", 8, e );
-
-        if ( E->Simplify(this) )
-        {
-            se_simplifyEdges += se_simplifyEdgesSuccess;
-        }
+        E->Simplify(this);
 
 #ifdef DEBUG
         tASSERT(Esave);
@@ -2051,10 +2022,7 @@ void eGrid::SimplifyAll(int count){
 
     static int counter=0;
 
-    // try to simplify at least one edge
-    se_simplifyEdges++;
-
-    for(;count>0 && se_simplifyEdges>0;count--,se_simplifyEdges--){
+    for(;count>0;count--){
         counter--;
 
         if (counter<0 || counter>=edges.Len())
@@ -2112,8 +2080,6 @@ void eGrid::Create(){
 
 void eGrid::Clear(){
     eHalfEdge::ClearPathData();
-
-    eGameObject::DeleteAll( this );
 
     base=eCoord(0,100);
     maxNormSquared=0;
@@ -2396,9 +2362,6 @@ void eGrid::AddEdge    (eHalfEdge *e)
     tASSERT(e->Other() && *e->Point() != *e->Other()->Point());
 
     edges.Add(e, e->ID);
-
-    int idrec = e->ID;
-    tRecorderSync< int >::Archive( "_GRID_ADD_EDGE", 8, idrec );
 }
 
 void eGrid::RemoveEdge (eHalfEdge *e)
@@ -2408,9 +2371,6 @@ void eGrid::RemoveEdge (eHalfEdge *e)
 
     if (e->ID < 0)
         return;
-
-    int idrec = e->ID;
-    tRecorderSync< int >::Archive( "_GRID_REMOVE_EDGE", 8, idrec );
 
     edges.Remove(e, e->ID);
 }
@@ -2570,21 +2530,18 @@ eFace * eGrid::FindSurroundingFace(const eCoord &pos, eFace *currentFace) const{
                 continue;
             }
 
-            if ( run->Other() && run->Other()->Face() )
-            {
-                eCoord vec=pos - (*run->Point()); // the vector to our destination
+            eCoord vec=pos - (*run->Point()); // the vector to our destination
 
-                REAL score = run->Vec() * vec;
-
-                if (score > bestScore)
-                {
-                    best      = run;
-                    bestScore = score;
-                }
-            }
+            REAL score = run->Vec() * vec;
 
             if (!first)
                 first = run;
+
+            if (score > bestScore)
+            {
+                best      = run;
+                bestScore = score;
+            }
 
             run = run->Next();
         }

@@ -1,36 +1,29 @@
 #! /bin/bash
-# armagetronad start script
+# 
+# script to be put in /etc/rc.d to start @progtitle@ server process
+# tested on Gentoo 2004.4
+# Author: Manuel Moos <manuel@moosnet.de>
+#
 
-# init info lifted from debian package rules
-### BEGIN INIT INFO
-# Provides:          @progname@
-# Required-Start:    $local_fs $network
-# Required-Stop:     $local_fs $network
-# Should-Start:
-# Should-Stop:
-# Default-Start:     2 3 4 5
-# Default-Stop:      0 1 6
-# Short-Description: @progtitle@ Dedicated Server
-# Description:       Runs the @progtitle@ Dedicated Server
-### END INIT INFO
+# set -x
 
 # program installation directory
 PROGDIR=@scriptdir_reloc@
 
 # load configuration
-. ${PROGDIR}/rcd_config
+. $PROGDIR/rcd_config
 
 # files where PIDs are stored
-STARTERPIDFILE=${PIDDIR}/@progname@-starter.pid
-MAINPIDFILE=${PIDDIR}/@progname@.pid
+STARTERPIDFILE=$PIDDIR/@progname@-starter.pid
+MAINPIDFILE=$PIDDIR/@progname@.pid
 
 # program to run
 BINARY=serverstarter
-BINFILE=${PROGDIR}/${BINARY}
+BINFILE=$PROGDIR/$BINARY
 TYPE=server
 
 # log file
-LOGFILE=${LOGDIR}/@prognamebase@.log
+LOGFILE=$LOGDIR/@prognamebase@.log
 
 # delegate to common start/stop/status code
-. ${RCDDIR}/rcd_startstop
+. $RCDDIR/rcd_startstop

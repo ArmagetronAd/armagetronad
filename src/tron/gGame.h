@@ -32,6 +32,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "nNetObject.h"
 
+class eSoundMixer;
 class eGrid;
 class nServerInfo;
 class nServerInfoBase;
@@ -99,26 +100,25 @@ public:
 
     virtual bool GameLoop(bool input=true); // return values: exit the game loop?
 
-    bool GridIsReady(int c); // can we transfer gameObjects that need the grid to exist?
-    eGrid * Grid() const { return grid; }
+    bool GridIsReady(int c); // can we transfer gameObjects that
+    // need the grid to exist?
 
     void NoLongerGoOn();
 
     void StartNewMatch();
 
     void StartNewMatchNow();
+
+    eSoundMixer* m_Mixer;
 };
 
-void update_settings( bool const * goon = 0 );
+void update_settings();
 
 void ConnectToServer(nServerInfoBase *server);
 
 void sg_EnterGame( nNetState enter_state );
 void sg_HostGame();
 void sg_HostGameMenu();
-
-// runs a single player game
-void sg_SinglePlayerGame();
 
 void MainMenu(bool ingame=false);
 
@@ -127,9 +127,6 @@ bool GridIsReady(int c);
 void Activate(bool act);
 
 void sg_DeclareWinner( eTeam* team, char const * message );
-
-void sg_FullscreenMessage(tOutput const & title, tOutput const & message,REAL timeout = 60, int client = 0); //!< Displays a message on a specific client or all clients that gets displayed on the whole screen, blocking view to the game
-void sg_ClientFullscreenMessage( tOutput const & title, tOutput const & message, REAL timeout = 60 ); //!< Displays a message locally that gets displayed on the whole screen, blocking view to the game
 
 class gGameSettings
 {
@@ -152,8 +149,8 @@ public:
 
     int  autoAIFraction; // helper variable for the autoAI functions
 
-    REAL winZoneMinRoundTime;	// minimum number of seconds a round must be going before the win zone is activated
-    REAL winZoneMinLastDeath;	// minimum number of seconds the last death happended before the win zone is activated
+    int	 winZoneMinRoundTime;	// minimum number of seconds a round must be going before the win zone is activated
+    int	 winZoneMinLastDeath;	// minimum number of seconds the last death happended before the win zone is activated
 
     gGameType   gameType;      // what type of game is played?
     gFinishType finishType;    // what happens when all humans are dead?
@@ -176,7 +173,7 @@ public:
                   int a_speedFactor, int a_sizeFactor,
                   gGameType a_gameType,  gFinishType a_finishType,
                   int a_minTeams,
-                  REAL a_winZoneMinRoundTime, REAL a_winZoneMinLastDeath
+                  int a_winZoneMinRoundTime, int a_winZoneMinLastDeath
                  );
 
     void AutoAI(bool success);
@@ -184,6 +181,8 @@ public:
 };
 
 extern gGameSettings* sg_currentSettings;
+
+void rotate();
 
 #endif
 

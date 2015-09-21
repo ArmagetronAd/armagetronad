@@ -34,14 +34,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tSysTime.h"
 #include "tToDo.h"
 #include "nObserver.h"
-#include "nConfig.h"
-#include "tRecorder.h"
 
 #include <deque>
 #include <set>
-#include <map>
-
-// #define DEBUG
 
 // debug watchs
 #ifdef DEBUG
@@ -52,7 +47,8 @@ extern nMessage* sn_WatchMessage;
 tDEFINE_REFOBJ( nNetObject )
 
 // max ping to equalize;
-int sn_pingCharityServer=0;
+int sn_pingCharityServer=100;
+
 
 // first, we need a mechanism to distribute the nNetObject id's
 // among the clients and the server.
@@ -74,7 +70,7 @@ static const unsigned short net_max_current_id_min = 16000;
 static unsigned short net_max_current_id = net_max_current_id_min;
 
 #ifdef DEBUG
-static void sn_BreakOnObjectID( unsigned short id )
+static void sn_BreakOnObjectID( unsigned int id )
 {
 #ifdef DEBUG_X
     static unsigned int breakOnID = sn_WatchNetID;
@@ -96,7 +92,7 @@ static unsigned short inc_id(){
 
     if ( net_current_id > net_max_current_id )
     {
-        net_current_id = 1;
+        net_current_id = 0;
     }
 
     if (net_current_id==0)
@@ -152,9 +148,7 @@ struct nDeletedInfo
     }
 };
 
-// info about deleted objects, sorted by their former ID
-typedef std::map< nNetObjectID, nDeletedInfo > nDeletedInfos;
-static nDeletedInfos sn_netObjectsDeleted;
+static tArray< nDeletedInfo > sn_netObjectsDeleted(1024);
 
 static bool free_server( nNetObjectID id )
 {
@@ -163,24 +157,19 @@ static bool free_server( nNetObjectID id )
         return false;
     }
 
-    nDeletedInfos::iterator found = sn_netObjectsDeleted.find( id );
-    if ( found != sn_netObjectsDeleted.end() )
+    nDeletedInfo& deleted = sn_netObjectsDeleted[ id ];
+    if ( deleted.time_ > tSysTimeFloat() - nDeletedTimeout )
     {
-        nDeletedInfo  & deleted = (*found).second;
-        if ( deleted.time_ > tSysTimeFloat() - nDeletedTimeout )
-        {
-            return false;
-        }
-
-        if ( deleted.object_ )
-        {
+        return false;
+    }
+    if ( deleted.object_ )
+    {
 #ifdef DEBUG
-            sn_BreakOnObjectID( id );
+        sn_BreakOnObjectID( id );
 #endif
-            // clear the deletion info, but don't reuse the ID just yet
-            deleted.UnSet();
-            return false;
-        }
+        // clear the deletion info, but don't reuse the ID just yet
+        deleted.UnSet();
+        return false;
     }
 
     return true;
@@ -189,11 +178,7 @@ static bool free_server( nNetObjectID id )
 static unsigned short next_free_server_nokill(){
     // slowly decrease max user ID
     if ( net_max_current_id > net_max_current_id_min )
-    {
         net_max_current_id--;
-        if ( net_current_id > net_max_current_id )
-            net_current_id = 1;
-    }
 
     // recycle old used IDs
     while ( sn_freedIDs.size() > 1000 && sn_freedIDs.size() * 20 > net_max_current_id )
@@ -217,6 +202,9 @@ static unsigned short next_free_server_nokill(){
 
         if ( net_current_id != start_id )
         {
+#ifdef DEBUG
+            sn_BreakOnObjectID( net_current_id );
+#endif
             // no problem!
 #ifdef DEBUG
             sn_BreakOnObjectID( net_current_id );
@@ -254,16 +242,15 @@ static int kill_id_hog()
     for ( i = sn_netObjectsOwner.Len()-1; i>=0; --i )
     {
         int owner = sn_netObjectsOwner( i );
-        if ( owner >= 0 && owner <= MAXCLIENTS )
+        tASSERT( owner >= 0 && owner <= MAXCLIENTS );
+
+        if ( sn_netObjects[i] )
         {
-            if ( sn_netObjects[i] )
-            {
-                usedIDs[ owner ] ++;
-            }
-            else if ( owner > 0 )
-            {
-                grabbedIDs[ owner ] ++;
-            }
+            usedIDs[ owner ] ++;
+        }
+        else if ( owner > 0 )
+        {
+            grabbedIDs[ owner ] ++;
         }
     }
 
@@ -310,15 +297,12 @@ static int kill_id_hog()
 }
 
 // wrapper for toto tools
-static bool sg_todoKillHog=false;
 static void kill_id_hog_todo()
 {
-    if ( sg_todoKillHog )
-        kill_id_hog();
-    sg_todoKillHog=false;
+    kill_id_hog();
 }
 
-static unsigned short next_free_server( bool kill ){
+static unsigned short next_free_server(){
     nNetObjectID id = next_free_server_nokill();
     if ( id > 0 )
     {
@@ -327,7 +311,6 @@ static unsigned short next_free_server( bool kill ){
     else
     {
         // plan to kill the worst ID user
-        sg_todoKillHog=true;
         st_ToDo( kill_id_hog_todo );
 
         // increase ID limit
@@ -344,11 +327,6 @@ static unsigned short next_free_server( bool kill ){
         }
         else
         {
-            // throw an error
-            if ( kill )
-                throw nKillHim();
-
-            // or just exit silently
             con << "Emergency exit: desperately ran out of IDs.\n";
             exit(-1);
         }
@@ -403,7 +381,7 @@ void id_req_handler(nMessage &m){
         if (m.End())
         { // old style request; send only one ID back.
             tJUST_CONTROLLED_PTR< nMessage > rep=new nMessage(req_id);
-            unsigned short id=next_free_server(true);
+            unsigned short id=next_free_server();
             sn_netObjectsOwner[id]=m.SenderID();
             //	  con << "Assigning ID " << id << "\n";
             rep->Write(id);
@@ -418,13 +396,6 @@ void id_req_handler(nMessage &m){
             // new style request: many IDs
             unsigned short num;
             m.Read(num);
-
-            // but not too many. kick violators.
-            if ( num > ID_PREFETCH*4 )
-            {
-                throw nKillHim();
-            }
-
             tJUST_CONTROLLED_PTR< nMessage > rep=new nMessage(req_id);
 
             unsigned short begin_block=0;	// begin of the block of currently assigned IDs
@@ -432,7 +403,7 @@ void id_req_handler(nMessage &m){
 
             for (int i = num-1; i>=0; i--)
             {
-                nNetObjectID id = next_free_server(true);
+                nNetObjectID id = next_free_server();
 
                 sn_netObjectsOwner[id]=m.SenderID();
 
@@ -487,15 +458,8 @@ unsigned short next_free(){
 #endif
                 sn_Receive();
                 nNetObject::SyncAll();
-                sn_SendPlanned();
                 //	st_Breakpoint();
                 tAdvanceFrame(1000000);
-
-                // check for user abort, but just make it time out faster
-                if ( tConsole::Idle(false) )
-                {
-                    timeout -= 10;
-                }
             }
             if (tSysTimeFloat()>=timeout)
                 tERR_ERROR_INT("Not enough nNetObject IDs to distribute. Sorry!\n");
@@ -510,7 +474,7 @@ unsigned short next_free(){
         }
         else
         {
-            ret=next_free_server(false);
+            ret=next_free_server();
         }
 
         if (sn_netObjects[ret]){
@@ -529,22 +493,20 @@ void first_fill_ids(){
 
     distribute=request=0;
 
+    //  for (int i = 50; i>=0; i--)
+    //    {
     tJUST_CONTROLLED_PTR< nMessage > m = new nMessage(id_req);
     m->Write(ID_PREFETCH - 10);
     m->Send(0);
+    //    }
 }
 
 
 void Cheater(int i)
 {
-    // anything to do at all?
-    if (i != 0 && !sn_Connections[i].socket)
-    {
-        return;
-    }
-
     con << "User " << i << " tried to cheat.\n";
     //	st_Breakpoint();
+
 
     if ( i == 0 )
         // terminate connection to server
@@ -745,10 +707,6 @@ nNetObjectRegistrar::~nNetObjectRegistrar()
 // gegister with the object database
 void nNetObject::Register( const nNetObjectRegistrar& registrar )
 {
-#ifdef DEBUG
-        sn_BreakOnObjectID( registrar.id );
-#endif
-
     tASSERT( this == registrar.object );
     tASSERT( id == 0 || id == registrar.id );
 
@@ -770,6 +728,9 @@ void nNetObject::Register( const nNetObjectRegistrar& registrar )
     }
     else
     {
+#ifdef DEBUG
+        sn_BreakOnObjectID( id );
+#endif
         sn_netObjects[id]=this;
     }
 
@@ -801,15 +762,6 @@ nNetObject::nNetObject(nMessage &m):lastSyncID_(m.MessageIDBig()),refCtr_(0){
     //  st_Breakpoint();
 #endif
     m.Read( owner );
-
-    // clients are only allowed to create self-owned objects
-    if ( sn_GetNetState() == nSERVER )
-    {
-        if ( owner != m.SenderID() )
-        {
-            throw nKillHim();
-        }
-    }
 
     registrar.object = this;
     registrar.sender = m.SenderID();
@@ -900,15 +852,8 @@ static void net_destroy_handler(nMessage &m){
         // notify object of pending deletion
         if (nNetObject *no=sn_netObjects[id])
         {
-            tASSERT( !no->Owned() );
-
             no->ActionOnDelete();
             info.actionOnDeleteExecuted=true;
-
-            // if the object is now suddenly owned by this machine, there must be a reason.
-            // undo the deletion. Whoever did this has now the responsibility for the object.
-            if ( no->Owned() )
-                sn_Destroyed.SetLen( sn_Destroyed.Len() - 1 );
         }
 
 #ifdef DEBUG
@@ -954,8 +899,7 @@ static void sn_DoDestroy()
                     if (!info.actionOnDeleteExecuted)
                         no->ActionOnDelete();
 
-                    no->TakeOwnership();
-                    tJUST_CONTROLLED_PTR< nNetObject > bounce( no );
+                    sn_netObjects(id)=NULL;
                     sn_netObjectsOwner(id)=0;
                 }
                 else
@@ -987,32 +931,6 @@ static nDescriptor net_destroy(22,net_destroy_handler,"net_destroy");
 
 static tJUST_CONTROLLED_PTR< nMessage > destroyers[MAXCLIENTS+2];
 static REAL                             destroyersTime[MAXCLIENTS+2];
-static int                              destroyersCount[MAXCLIENTS+2];
-
-// special ack for destroy messages
-class nWaitForAckDestroy: public nWaitForAck{
-public:
-    nWaitForAckDestroy(nMessage* m,int receiver)
-            :nWaitForAck(m,receiver)
-    {
-        ++destroyersCount[receiver];
-    }
-    virtual ~nWaitForAckDestroy()
-    {
-        --destroyersCount[receiver];
-    }
-};
-
-static void sn_SendDestroyer( int client )
-{
-    tASSERT( 0 <= client && client <= MAXCLIENTS+1 );
-    if ( destroyers[ client ] )
-    {
-        destroyers[ client ]->SendImmediately( client, false );
-        new nWaitForAckDestroy( destroyers[ client ], client );
-        destroyers[ client ] = 0;
-    }
-}
 
 // list of netobjects that have a sync request running
 static tList< nNetObject > sn_SyncRequestedObject;
@@ -1076,12 +994,9 @@ nNetObject::~nNetObject(){
     // send it
     if ( sendDestroyMessage )
     {
-        int idsync=id;
-        tRecorderSync< int >::Archive( "_NETOBJECT_DESTROYED", 3, idsync );
-
         // con << "Destroying object " << id << '\n';
         for(int user=MAXCLIENTS;user>=0;user--){
-            if( ( user!=sn_myNetID && knowsAbout[user].knowsAboutExistence ) ||
+            if(user!=sn_myNetID && knowsAbout[user].knowsAboutExistence ||
                     knowsAbout[user].acksPending){
                 if (destroyers[user]==NULL)
                 {
@@ -1090,9 +1005,9 @@ nNetObject::~nNetObject(){
                 }
                 destroyers[user]->Write(id);
 
-                if (destroyers[user]->DataLen() > ( destroyersCount[user] ? 1000 : 100 ) )
-                {
-                    sn_SendDestroyer( user );
+                if (destroyers[user]->DataLen()>100){
+                    destroyers[user]->Send(user);
+                    destroyers[user]=NULL;
                 }
 
 #ifdef DEBUG
@@ -1102,29 +1017,15 @@ nNetObject::~nNetObject(){
         }
     }
     refCtr_=100;
-    if (id)
+    if (id && (this == sn_netObjects[id]))
     {
-        if (this == sn_netObjects[id])
-        {
 #ifdef DEBUG
-            sn_BreakOnObjectID( id );
+        sn_BreakOnObjectID( id );
 #endif
-            sn_netObjects[id] = NULL;
-        }
 
-        // clear object from info arrays
-        nDeletedInfos::iterator found = sn_netObjectsDeleted.find( id );
-        if ( found != sn_netObjectsDeleted.end() )
-        {
-            nDeletedInfo  & deleted = (*found).second;
-            if ( this == deleted.object_ )
-            {
-                deleted.Set( NULL );
-                sn_netObjectsDeleted.erase(found);
-            }
-        }
+        sn_netObjectsDeleted[id].Set( NULL );
+        sn_netObjects[id] = NULL;
     }
-
     refCtr_=-100;
     tCHECK_DEST;
 }
@@ -1136,12 +1037,7 @@ nNetObject *nNetObject::Object(int i){
         return NULL;
 
     // the last deleted object with specified ID
-    nNetObject* deleted = NULL;
-    nDeletedInfos::const_iterator found = sn_netObjectsDeleted.find( id );
-    if ( found != sn_netObjectsDeleted.end() )
-    {
-        deleted = (*found).second.object_;
-    }
+    nNetObject* deleted = sn_netObjectsDeleted[ i ].object_;
 
     // return immediately if the object is there
     nNetObject *ret=ObjectDangerous( i );
@@ -1161,15 +1057,7 @@ nNetObject *nNetObject::Object(int i){
 
     bool printMessage=true;
     while (sn_Connections[0].socket &&
-            NULL==(ret=sn_netObjects[i]) && timeout >tSysTimeFloat())
-    { // wait until it is spawned
-
-        // check for user abort, but just make it time out faster
-        if ( tConsole::Idle(false) )
-        {
-            timeout -= 10;
-        }
-
+            NULL==(ret=sn_netObjects[i]) && timeout >tSysTimeFloat()){ // wait until it is spawned
         if (tSysTimeFloat()>timeout-(totalTimeout + printMessageTimeout))
         {
             if (printMessage)
@@ -1197,7 +1085,6 @@ nNetObject *nNetObject::Object(int i){
         }
         tAdvanceFrame(10000);
         sn_Receive();
-        sn_SendPlanned();
     }
 
     if (!ret)
@@ -1224,38 +1111,15 @@ nNetObject *nNetObject::ObjectDangerous(int i ){
         }
         else
         {
-            nDeletedInfos::const_iterator found = sn_netObjectsDeleted.find( i );
-            if ( found != sn_netObjectsDeleted.end() )
+            const nDeletedInfo& info = sn_netObjectsDeleted[ i ];
+            if ( info.time_ > tSysTimeFloat() - nDeletedTimeout )
             {
-                nDeletedInfo const & deleted = (*found).second;
-                if ( deleted.time_ > tSysTimeFloat() - nDeletedTimeout )
-                {
-                    return deleted.object_;
-                }
+                return info.object_;
             }
         }
     }
 
     return NULL;
-}
-
-void nNetObject::ClearDeleted( unsigned short id )
-{
-    // clear object from info arrays
-    nDeletedInfos::iterator found = sn_netObjectsDeleted.find( id );
-    if ( found != sn_netObjectsDeleted.end() )
-    {
-#ifdef DEBUG
-        sn_BreakOnObjectID( id );
-#endif
-
-        nDeletedInfo  & deleted = (*found).second;
-        if( deleted.object_ == sn_netObjects[id] )
-        {
-            sn_netObjects[id] = 0;
-            sn_netObjectsOwner[id] = 0;
-        }
-    }
 }
 
 void nNetObject::PrintName(tString &s) const
@@ -1326,9 +1190,6 @@ void nNetObject::GetID()
         sn_netObjectsOwner[id]=owner;
         sn_netObjects_AcceptClientSync[id]=false;
 
-#ifdef DEBUG
-        sn_BreakOnObjectID(id);
-#endif
         sn_netObjects[id]=this;
     }
 }
@@ -1514,14 +1375,6 @@ bool nNetObject::DoDebugPrint()
     return s_DoPrintDebug;
 }
 
-static int sn_syncedUser = -1;
-
-//! returns the user that the current WriteSync() is intended for
-int nNetObject::SyncedUser()
-{
-    return sn_syncedUser;
-}
-
 void nNetObject::SyncAll(){
 #ifdef DEBUG
     s_DoPrintDebug = false;
@@ -1539,12 +1392,23 @@ void nNetObject::SyncAll(){
         if (is_ready_to_get_objects[user] &&
                 sn_Connections[user].socket && sn_netObjects.Len()>0 && user!=sn_myNetID){
 
-            sn_syncedUser = user;
+            // send the destroy messages
+            if (destroyers[user])
+            {
+                // but check whether the opportunity is good (big destroyers message, or a sync packet in the pipe) first
+                if ( destroyers[user]->DataLen() > 75 ||
+                        sn_Connections[user].sendBuffer_.Len() > 0 ||
+                        destroyersTime[user] < tSysTimeFloat()-.5 )
+                {
+                    destroyers[user]->Send(user);
+                    destroyers[user]=NULL;
+                }
+            }
 
             // con << sn_SyncRequestedObject.Len() << "/" << sn_netObjects.Len() << "\n";
 
             int currentSync = sn_SyncRequestedObject.Len()-1;
-            while(sn_Connections[user].socket &&
+            while(sn_Connections[user].socket>0 &&
                     sn_Connections[user].bandwidthControl_.CanSend() &&
                     sn_Connections[user].ackPending<sn_maxNoAck &&
                     currentSync >= 0){
@@ -1559,31 +1423,6 @@ void nNetObject::SyncAll(){
                     if (// nos->knowsAbout[user].syncReq &&
                         !nos->knowsAbout[user].knowsAboutExistence)
                     {
-                        // look for the object ID in the current destruction message
-                        {
-                            if ( destroyers[user] )
-                            {
-                                for( int i = destroyers[user]->DataLen()-1; i >= 0; --i )
-                                {
-                                    if ( destroyers[user]->Data(i) == s )
-                                    {
-                                        // found it. Send the destruction
-                                        // message and wait for its ack.
-                                        sn_SendDestroyer( user );
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-
-                        if ( destroyersCount[user] )
-                        {
-                            // don't send creation messages while destruction
-                            // messages are unacknowledged.
-                            --currentSync;
-                            continue;
-                        }
-
                         if (!nos->knowsAbout[user].acksPending){
 #ifdef DEBUG
                             //con << "remotely creating object " << s << '\n';
@@ -1608,8 +1447,6 @@ void nNetObject::SyncAll(){
                             unsigned long id = m->MessageIDBig();
                             m->SendImmediately(user, false);
                             m->messageIDBig_ = id;
-
-                            nos->knowsAbout[user].syncReq = false;
                         }
 #ifdef DEBUG
                         else if (DoDebugPrint())
@@ -1646,22 +1483,29 @@ void nNetObject::SyncAll(){
 
                 }
 
+                if ( nos )
+                {
+                    // check if nos can be removed from sync request list
+                    bool canRemove = true;
+
+                    // check if there is anything preventing the removal
+                    if ( nos == sn_netObjects( nos->id ) )
+                    {
+                        int start = ( sn_GetNetState() == nSERVER ) ? MAXCLIENTS : 0;
+                        int stop  = ( sn_GetNetState() == nSERVER ) ? 1 : 0;
+                        for ( int i = start; i>=stop && canRemove; --i )
+                        {
+                            const nKnowsAboutInfo& knows = nos->knowsAbout[i];
+                            if ( sn_Connections[i].socket && ( knows.acksPending > 0 || knows.syncReq ) )
+                                canRemove = false;
+                        }
+                    }
+                    if ( canRemove )
+                        sn_SyncRequestedObject.Remove( nos, nos->syncListID_ );
+                }
+
                 currentSync--;
             }
-
-            // send the destroy messages
-            if (destroyers[user] && !destroyersCount[user] )
-            {
-                // but check whether the opportunity is good (big destroyers message, or a sync packet in the pipe) first
-                if ( destroyers[user]->DataLen() > 75 ||
-                        sn_Connections[user].sendBuffer_.Len() > 0 ||
-                        destroyersTime[user] < tSysTimeFloat()-.5-2*sn_Connections[user].ping.GetPing() )
-                {
-                    sn_SendDestroyer( user );
-                }
-            }
-
-            sn_syncedUser = -1;
 
 #ifdef DEBUG
             bool inc=false;
@@ -1691,35 +1535,6 @@ void nNetObject::SyncAll(){
 #endif
         }
 
-
-    // clear out objects that no longer need to be in the list because
-    // all requested syncs have been sent
-    {
-        for ( int currentSync = sn_SyncRequestedObject.Len()-1; currentSync >= 0; --currentSync ){
-            nNetObject *nos = sn_SyncRequestedObject( currentSync );
-
-            if ( nos )
-            {
-                // check if nos can be removed from sync request list
-                bool canRemove = true;
-
-                // check if there is anything preventing the removal
-                if ( nos == sn_netObjects( nos->id ) )
-                {
-                    int start = ( sn_GetNetState() == nSERVER ) ? MAXCLIENTS : 0;
-                    int stop  = ( sn_GetNetState() == nSERVER ) ? 1 : 0;
-                    for ( int i = start; i>=stop && canRemove; --i )
-                    {
-                        const nKnowsAboutInfo& knows = nos->knowsAbout[i];
-                        if ( sn_Connections[i].socket && knows.syncReq )
-                            canRemove = false;
-                    }
-                }
-                if ( canRemove )
-                    sn_SyncRequestedObject.Remove( nos, nos->syncListID_ );
-            }
-        }
-    }
 }
 
 
@@ -1746,18 +1561,24 @@ static nDescriptor net_clear(26,net_clear_handler,"net_clear");
 
 void nNetObject::ClearAllDeleted()
 {
-    // forget about objects that were deleted in the past. The swap trick is to
-    // avoid that the objects try to remove themselves from the list while it is cleared.
-    nDeletedInfos swap;
-    swap.swap( sn_netObjectsDeleted );
-    swap.clear();
+    int i;
+
+    // forget about objects that were deleted in the past
+    for (i=sn_netObjectsDeleted.Len()-1;i>=0;i--)
+    {
+        nDeletedInfo& info = sn_netObjectsDeleted[ i ];
+        info.UnSet();
+    }
+
+    sn_netObjectsDeleted.SetLen(0);
 
     // send out object deletion messages
-    for( int i = MAXCLIENTS;i>=0;i--)
+    for( i = MAXCLIENTS;i>=0;i--)
     {
-        if ( sn_Connections[i].socket )
+        if ( sn_Connections[i].socket && destroyers[i] )
         {
-            sn_SendDestroyer(i);
+            destroyers[i]->Send(i);
+            destroyers[i] = NULL;
         }
     }
 }
@@ -1800,19 +1621,14 @@ void nNetObject::ClearKnows(int user, bool clear){
 
                 if (clear){
                     if (no->owner==user && user!=sn_myNetID){
-#ifdef DEBUG
-                        sn_BreakOnObjectID(i);
-#endif
-                        bool destroy = no->ActionOnQuit();
-                        
-                        // take ownership of the object in any case
-                        no->createdLocally=true;
-                        no->owner=::sn_myNetID;
-                        sn_netObjectsOwner(i)=::sn_myNetID;
-
-                        if (destroy || no->AcceptClientSync())
-                        {
-                            tControlledPTR< nNetObject > bounce( no ); // destroy it, if noone wants it
+                        if (no->ActionOnQuit())
+                            sn_netObjects(i)=NULL; // destroy it
+                        else{
+                            no->owner=::sn_myNetID; // or make it mine.
+                            sn_netObjectsOwner(i)=::sn_myNetID;
+                            if (no->AcceptClientSync()){
+                                tControlledPTR< nNetObject > bounce( no ); // destroy it, if noone wants it
+                            }
                         }
                     }
                 }
@@ -1827,12 +1643,7 @@ void ClearKnows(int user, bool clear){
     if (clear)
         for(int i=sn_netObjectsOwner.Len()-1;i>=0;i--){
             if(sn_netObjectsOwner(i)==user)
-            {
-#ifdef DEBUG
-                sn_BreakOnObjectID(i);
-#endif
                 sn_netObjectsOwner(i)=0;
-            }
         }
 }
 
@@ -1904,9 +1715,11 @@ static void login_callback(){
     }
 
     // send and delete the  remaining destroyer message
-    sn_SendDestroyer(user);
-
-    destroyersCount[user] = 0;
+    if ( destroyers[user] )
+    {
+        destroyers[user]->Send(user);
+        destroyers[user]=NULL;
+    }
 }
 
 static nCallbackLoginLogout nlc(&login_callback);
@@ -1968,18 +1781,10 @@ void sn_Sync(REAL timeout,bool sync_sn_netObjects, bool otherEnd){
             // wait for all packets to be sent and the sync ack packet to be received
             while ( sn_Connections[0].socket && ( sync_ack[0] == false || sn_Connections[0].ackPending>0 || sn_QueueLen(0)) &&
                     tSysTimeFloat()<endTime){
-                sn_Delay();
-                sn_Receive();
+                tAdvanceFrame(sn_defaultDelay);
                 if (sync_sn_netObjects)
                     nNetObject::SyncAll();
-                sn_SendPlanned();
-
-                // check for user abort, but just make it time out faster
-                if ( tConsole::Idle(false) )
-                {
-                    endTime -= 10;
-                    timeout *= .5;
-                }
+                sn_Receive();
             }
 
             // decrease timeout for next try
@@ -2001,11 +1806,10 @@ void sn_Sync(REAL timeout,bool sync_sn_netObjects, bool otherEnd){
 
         bool goon=true;
         while(goon){
-            sn_Delay();
-            sn_Receive();
+            tAdvanceFrame(sn_defaultDelay);
             if (sync_sn_netObjects)
                 nNetObject::SyncAll();
-            sn_SendPlanned();
+            sn_Receive();
 
             goon=false;
             for(int user=MAXCLIENTS;user>0;user--)
@@ -2015,12 +1819,6 @@ void sn_Sync(REAL timeout,bool sync_sn_netObjects, bool otherEnd){
                 {
                     goon=true;
                 }
-            }
-
-            // check for user abort, but just make it time out faster
-            if ( tConsole::Idle(false) )
-            {
-                endTime -= 10;
             }
 
             if (tSysTimeFloat()>endTime)

@@ -36,12 +36,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <sstream>
 #include <iosfwd>
 #include <string>
-#include <string.h>
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
-#define tVERIFY( x ) { if ( !( x ) ){ char const * mess = "Assertion " #x " failed";  tERR_ERROR_INT( mess ); } }
+#define tVERIFY( x ) { if ( !( x ) ){ char* mess = "Assertion " #x " failed";  tERR_ERROR_INT( mess ); } }
 
 #ifdef DEBUG
 
@@ -61,9 +60,9 @@ int st_debugValid(tLevel l,tChannel c);
 
 #define tERR_FLOW_LOW() if(st_debugValid(very_low,flow)) std::cout  <<  std::setw(30) << __PRETTY_FUNCTION__  << '\n'
 
-#define tASSERT( x ) { if ( !( x ) ){ char const * mess = "Assertion " #x " failed";  tERR_ERROR_INT( mess ); } }
+#define tASSERT( x ) { if ( !( x ) ){ char* mess = "Assertion " #x " failed";  tERR_ERROR_INT( mess ); } }
 
-#define tASSERT_EVAL( x ) { if ( !( x ) ){ char const * mess = "Assertion " #x " failed";  tERR_ERROR_INT( mess ); } }
+#define tASSERT_EVAL( x ) { if ( !( x ) ){ char* mess = "Assertion " #x " failed";  tERR_ERROR_INT( mess ); } }
 
 #else  /* DEBUG */
 #define tERR_DUMP(level,stream,stuff) 

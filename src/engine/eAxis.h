@@ -11,8 +11,6 @@
 // YES its y then x! Why did you think I made a define? :)
 #define eCoordToRad(POS) atan2f(POS.y, POS.x)
 
-class eCoord;
-
 class eAxis {
     friend class eGrid;
 

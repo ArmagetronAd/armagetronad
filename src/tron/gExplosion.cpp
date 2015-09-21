@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
+  
 ***************************************************************************
 
 */
@@ -35,7 +35,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tRandom.h"
 #include "tMath.h"
 
-static eWavData explode("moviesounds/dietron.wav","sound/expl.wav");
+#include "eSoundMixer.h"
 
 static tList< gExplosion > sg_Explosions;
 
@@ -57,7 +57,6 @@ REAL gExplosion::expansionTime = 0.2f;
 static eCoord s_explosionCoord;
 static REAL   s_explosionRadius;
 static REAL	  s_explosionTime;
-static gExplosion * s_holer = 0;
 
 // blow a hole centered at s_explosionCoord with radius s_explosionRadius into wall w
 static void S_BlowHoles( eWall * w )
@@ -118,7 +117,7 @@ static void S_BlowHoles( eWall * w )
 
     if ( end > start )
     {
-        wall->BlowHole ( start, end, s_holer );
+        wall->BlowHole ( start, end );
     }
 }
 
@@ -135,21 +134,19 @@ static void S_Sync( eWall * w )
 }
 */
 
-gExplosion::gExplosion(eGrid *grid, const eCoord &pos,REAL time, gRealColor& color, gCycle * owner )
-        :eReferencableGameObject(grid, pos, eCoord(0,0), NULL, true),
-        sound(explode),
+gExplosion::gExplosion(eGrid *grid, const eCoord &pos,REAL time, gRealColor& color)
+        :eGameObject(grid, pos, eCoord(0,0), NULL, true),
         createTime(time),
         expansion(0),
-        listID(-1),
-        owner_(owner) 
+        listID(-1)
 {
-    holeAccountedFor_ = false;
-
+    eSoundMixer* mixer = eSoundMixer::GetMixer();
+    mixer->PushButton(CYCLE_EXPLOSION, pos);
+        
     lastTime = time;
     explosion_r = color.r;
     explosion_g = color.g;
     explosion_b = color.b;
-    sound.Reset();
     sg_Explosions.Add( this, listID );
     z=0;
 
@@ -216,8 +213,7 @@ bool gExplosion::Timestep(REAL currentTime){
         s_explosionCoord  = pos;
         REAL factor = expansion / REAL( expansionSteps );
         s_explosionRadius = gCycle::ExplosionRadius() * sqrt(factor);
-        s_explosionTime = currentTime;
-        s_holer = this;
+        s_explosionTime = createTime;
 
         if ( s_explosionRadius > 0 && (currentTime < createTime+4) )
         {
@@ -227,7 +223,6 @@ bool gExplosion::Timestep(REAL currentTime){
                                        this->CurrentFace() );
         }
 
-        s_holer = 0;
     }
 
     /*
@@ -252,7 +247,7 @@ bool gExplosion::Timestep(REAL currentTime){
     				const gPlayerWall* w = c->CurrentWall();
 
     				if ( !w	|| w->BegTime() < time || w->EndTime() < time )
-    				{
+    				{	
     					// c has not made a turn; we need to stay around some more
     					return false;
     				}
@@ -274,16 +269,7 @@ void gExplosion::InteractWith(eGameObject *,REAL ,int){}
 
 void gExplosion::PassEdge(const eWall *,REAL ,REAL ,int){}
 
-void gExplosion::Kill(){
-    createTime=lastTime-100;
-}
-
-bool gExplosion::AccountForHole()
-{
-    bool ret = !holeAccountedFor_;
-    holeAccountedFor_ = true;
-    return ret;
-}
+void gExplosion::Kill(){createTime=lastTime-100;}
 
 void gExplosion::OnNewWall( eWall* w )
 {
@@ -320,7 +306,7 @@ static void init_exp(){
 
     tRandomizer & randomizer = tRandomizer::GetInstance();
 
-    for (int j=i;j<40;j++){
+    for(int j=i;j<40;j++){
         expvec[i++]=Vec3(fak*( randomizer.Get() -.5f ),
                          fak*( randomizer.Get() -.5f ),
                          1);
@@ -329,7 +315,7 @@ static void init_exp(){
         //                         1);
     }
 
-    for (int k=expvec.Len()-1;k>=0;k--)
+    for(int k=expvec.Len()-1;k>=0;k--)
         expvec[k]=expvec[k]*(1/expvec[k].Norm());
 }
 
@@ -340,11 +326,11 @@ bool sg_crashExplosion = true;
 #ifndef DEDICATED
 void gExplosion::Render(const eCamera *cam){
 #ifdef USE_PARTICLES
-    if (sg_crashExplosion){
+    if(sg_crashExplosion){
         theExplosion->Render(cam);
     }
-#else
-    if (sg_crashExplosion){
+#else	
+    if(sg_crashExplosion){
         REAL a1=(lastTime-createTime)+.01f;//+.2;
         REAL e=a1-1;
 
@@ -366,7 +352,7 @@ void gExplosion::Render(const eCamera *cam){
 
         glColor4f(explosion_r,explosion_g,explosion_b,fade);
         BeginLines();
-        for (int i=expvec.Len()-1;i>=0;i--){
+        for(int i=expvec.Len()-1;i>=0;i--){
             glVertex3f(a1*expvec[i].x[0],a1*expvec[i].x[1],a1*expvec[i].x[2]);
             glVertex3f( e*expvec[i].x[0], e*expvec[i].x[1], e*expvec[i].x[2]);
         }
@@ -400,18 +386,14 @@ void gExplosion::Render(const eCamera *cam){
 #endif
 }
 
+#if 0
 void gExplosion::SoundMix(Uint8 *dest,unsigned int len,
                           int viewer,REAL rvol,REAL lvol){
+#ifndef HAVE_LaIBSDL_MIXER
     sound.Mix(dest,len,viewer,rvol*4,lvol*4);
+#endif
 }
 #endif
 
-void gExplosion::OnRemoveFromGame()
-{
-    // remove from list to avoid costy checks whenever a new wall appears
-    sg_Explosions.Remove( this, listID );
-
-    // delegate to base
-    eReferencableGameObject::OnRemoveFromGame();
-}
+#endif
 

@@ -70,16 +70,11 @@ class tConsole
 {
 public:
     // callback for messages the user should read
-    typedef bool MessageCallback(const tOutput& message, const tOutput& interpretation, REAL timeout);
-
-    // idle callback; called from various spots when the progam is waiting.
-    // return true if the waiting should be aborted, parameter is true if input should
-    // actually be processed
-    typedef bool IdleCallback( bool );
+    typedef void MessageCallback(const tOutput& message, const tOutput& interpretation, REAL timeout);
 
     virtual ~tConsole();
 
-    tConsole & Print(tString const & s);
+    tConsole & Print(tString s);
 
     template<class T> tConsole & operator<<(const T&x){
         tColoredString s;
@@ -90,16 +85,11 @@ public:
     void CenterDisplay(tString s,REAL timeout=5,REAL r=1,REAL g=1,REAL b=1);
 
     // give a message to the user
-    static bool Message(const tOutput& message, const tOutput& interpetation, REAL timeout = -1);
-
-    // idle around a bit (return value true: abort whatever you're doing),
-    // input value determines whether input is actually processed
-    static bool Idle( bool processInput );
+    static void Message(const tOutput& message, const tOutput& interpetation, REAL timeout = -1);
 
     virtual tString ColorString(REAL r, REAL g, REAL b) const;
 
     static void RegisterMessageCallback(MessageCallback *callback);
-    static void RegisterIdleCallback(IdleCallback *callback);
 
 protected:
     static void RegisterBetterConsole(tConsole *better);
@@ -107,7 +97,6 @@ protected:
 private:
     static tConsole *s_betterConsole;
 
-    void PrintLine(tString const & s, int repetitions);
     virtual tConsole & DoPrint(const tString& s);
     virtual void DoCenterDisplay(const tString& s,REAL timeout=5,REAL r=1,REAL g=1,REAL b=1);
 };

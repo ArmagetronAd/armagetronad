@@ -7,15 +7,15 @@
 class tResourceManager {
 public:
     //! Return the position of the resource in the cache
-    static tString locateResource(const char *uri, const char *file);
+    static tString locateResource(const char *file, const char *uri="");
     //! opens a resource
-    static FILE *openResource(const char *uri, const char *pathname);
+    static FILE *openResource(const char *pathname, const char *uri="");
 
     //! server determined resource repository
-    static tString resRepoServer;
+    static tString & AccessRepoServer();
 
     //! client determined resource repository
-    static tString resRepoClient;
+    static tString & AccessRepoClient();
 };
 
 #endif //ArmageTron_RESOURCEMANAGER_H

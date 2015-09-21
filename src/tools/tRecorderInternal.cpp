@@ -40,6 +40,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include    "tCommandLine.h"
 #include    "tConsole.h"
+#include    "tError.h"
 
 #undef  INLINE_DEF
 #define INLINE_DEF
@@ -81,20 +82,6 @@ tRecording::tRecording()
 
     // set current recording
     currentRecording_ = this;
-}
-
-// ******************************************************************************************
-// *
-// *    Stop
-// *
-// ******************************************************************************************
-//!
-//!
-// ******************************************************************************************
-
-void tRecording::Stop()
-{
-    currentRecording_ = NULL;
 }
 
 // ******************************************************************************************

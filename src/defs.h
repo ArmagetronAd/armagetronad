@@ -39,15 +39,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 #include <iosfwd>
 
-// Includes required for GCC 4.3 only. Remove them as soon as some of 
-// us developers have GCC 4.3, then it is of course better to only put them
-// where they are needed.
-#include <string.h>
-#include <memory>
-#include <typeinfo>
-#include <cstdlib>
-// end of GCC 4.3 includes
-
 // maximum number of supported viewports
 #ifndef MAX_VIEWERS
 #define MAX_VIEWERS 4
@@ -93,11 +84,11 @@ inline REAL atan2f( REAL y, REAL x ) throw() { return REAL(atan2( y, x )); }
 inline REAL sqrtf( REAL x ) throw() { return REAL(sqrt( x )); }
 #endif
 
-#ifndef HAVE_LOGF
+#ifndef HAVE_SQRTF
 inline REAL logf( REAL x ) throw() { return REAL(log( x )); }
 #endif
 
-#ifndef HAVE_EXPF
+#ifndef HAVE_SQRTF
 inline REAL expf( REAL x ) throw() { return REAL(exp( x )); }
 #endif
 
@@ -109,15 +100,10 @@ inline REAL fabsf( REAL x ) throw() { return REAL(fabs( x )); }
 inline REAL floorf( REAL x ) throw() { return REAL(floor( x )); }
 #endif
 
-#ifndef HAVE_ISBLANK
-// this function does not seem to exist in windows and solaris 2.8
+#ifdef WIN32
+// this function does not seem to exist in windows...
 inline bool isblank(int x){ return ((x == ' ') || (x == '\t')); }
 #endif
-
-// use this function to explicitly ignore return values
-template< typename T >
-static void Ignore( T )
-{}
 
 #ifdef _MSC_VER
 

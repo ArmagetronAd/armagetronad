@@ -33,12 +33,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "config.h"
 #include "tRandom.h"
-#include "tSysTime.h"
+
 #include "tRandom.h"
 
 #include <string>
 #include <stdio.h>
-#include <string.h>
 
 #include <sys/types.h>
 
@@ -48,9 +47,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #ifndef WIN32
 #include <arpa/inet.h> 
-#include <netinet/in_systm.h>
-#include <netinet/in.h>
-#include <netinet/ip.h>
 #include <netdb.h>
 #include <sys/param.h>
 #include <sys/ioctl.h>
@@ -654,7 +650,7 @@ public:
 bool ANET_ListenOn( char * hostname, int net_hostport,  nSocketListener::SocketArray & sockets, bool & onesocketonly, bool & relaxed, bool & ignoreErrors )
 {
     // skip whitespace
-    while ( isblank( *hostname ) )
+    while ( isspace( *hostname ) )
         hostname ++;
 
     // quit silently on empty hostname
@@ -693,10 +689,10 @@ bool ANET_Listen (bool state, int net_hostport, const tString & net_hostip, nSoc
 
         // first try: generate sockets for explicitly requested IP
         tString ips = net_hostip;   // copy of the hostname string
-        int lastpos = 0;            // position where the current IP starts
-        for ( int pos = 0; pos < ips.Len(); ++pos )
+        size_t lastpos = 0;            // position where the current IP starts
+        for ( size_t pos = 0; pos < ips.Size(); ++pos )
         {
-            if (isblank(ips[pos]))
+            if (isspace(ips[pos]))
             {
                 ips[pos] = '\0';
                 if ( pos > lastpos )
@@ -707,7 +703,7 @@ bool ANET_Listen (bool state, int net_hostport, const tString & net_hostip, nSoc
             }
         }
         // don't forget the last IP entry
-        if ( ips.Len() > lastpos )
+        if ( ips.Size() > lastpos )
             if ( !ANET_ListenOn( &ips[lastpos], net_hostport, sockets, onesocketonly, relaxed, ignoreErrors ) )
                 return false;
 
@@ -1088,6 +1084,8 @@ int nAddress::FromString( const char * string )
     int ha1, ha2, ha3, ha4, hp;
     int ipaddr;
 
+    tString source( string );
+
     // parse IP address if the passed name looks like one
     if (string[0] >= '0' && string[0] <= '9')
     {
@@ -1105,23 +1103,20 @@ int nAddress::FromString( const char * string )
     {
         addr_.addr   .sa_family = AF_INET;
 
-        // copy input string
-        tString stringCopy ( string );
-
         // find colon
-        char * colon = const_cast< char * >( strrchr (stringCopy, ':') );
-        if ( colon )
+        int colonPos = source.StrPos(":");
+        if ( colonPos > 0 )
         {
-            *colon = 0;
+            tString addr = source.SubStr( 0, colonPos );
+
             // extract port
-            SetPort( atoi( colon + 1 ) );
+            SetPort( source.ToInt( colonPos + 1 ) );
 
             // extract hostname
-            if ( stringCopy == "*.*.*.*" )
+            if ( addr == "*.*.*.*" )
                 addr_.addr_in.sin_addr.s_addr = INADDR_ANY;
             else
-                SetHostname( stringCopy );
-            *colon = ':';
+                SetHostname( addr );
 
             return 0;
         }
@@ -1407,22 +1402,6 @@ const nAddress & nAddress::GetPort( int & port ) const
     return *this;
 }
 
-
-// *******************************************************************************************
-// *
-// *	IsSet
-// *
-// *******************************************************************************************
-//!
-//!		@return		    true only if address was set to something valid
-//!
-// *******************************************************************************************
-
-bool nAddress::IsSet () const
-{
-    return addr_.addr_in.sin_addr.s_addr != INADDR_ANY;
-}
-
 // *******************************************************************************************
 // *
 // *	Compare
@@ -1431,7 +1410,7 @@ bool nAddress::IsSet () const
 //!
 //!		@param	a1  first address to compare
 //!		@param	a2  second address to compare
-//!		@return -1 if the addresses don't match, +1 if the ports don't match, 0 if everything matches.
+//!		@return
 //!
 // *******************************************************************************************
 
@@ -1520,14 +1499,6 @@ int nSocket::Create( void )
     socket_ = socket( family_, socktype_, protocol_ );
     if ( socket_ < 0 )
         return -1;
-
-    // set TOS to low latency ( see manpages getsockopt(2), ip(7) and socket(7) )
-    // maybe this works for Windows, too?
-#ifndef WIN32
-    char tos = IPTOS_LOWDELAY;
-
-    setsockopt( socket_, IPPROTO_IP, IP_TOS, &tos, sizeof(char) );
-#endif    
 
     // unblock it
     bool _true = true;
@@ -2029,7 +2000,6 @@ int nSocket::Read( int8 * buf, int len, nAddress & addr ) const
 
     if ( ret >= 0 )
     {
-        // con << "Read " << ret << " bytes from socket " << GetSocket() << ".\n";
     }
 
 #ifdef PRINTPACKETS
@@ -2074,9 +2044,9 @@ int nSocket::Write( const int8 * buf, int len, const sockaddr * addr, int addrle
 
     // check if return value was archived
     static char const * section = "SEND";
-    static tReproducibleRandomizer randomizer;
     if ( !tRecorder::Playback( section, ret ) )
     {
+        static tReproducibleRandomizer randomizer;
 #ifdef DEBUG
         // pretend send was successful in packet loss simulation
         if ( sn_simulateSendPacketLoss > randomizer.Get() )
@@ -2606,65 +2576,6 @@ nSocket * nBasicNetworkSystem::Init()
     //  Con_Printf("UDP Initialized\n");
     //tcpipAvailable = true;
 
-}
-
-// *******************************************************************************
-// *
-// *	Select
-// *
-// *******************************************************************************
-//!
-//!		@param	dt	the time in seconds to wait at max
-//!		@return		true if data came in
-//!
-// *******************************************************************************
-
-bool nBasicNetworkSystem::Select( REAL dt )
-{
-    int retval = 0;
-    static char const * section = "NETSELECT";
-    if ( !tRecorder::PlaybackStrict( section, retval ) )
-    {
-        if ( controlSocket_.GetSocket() < 0 )
-        {
-            tDelay( int( dt * 1000000 ) );
-        }
-        else
-        {
-            fd_set rfds; // set of sockets to watch
-            struct timeval tv; // time value to pass to select()
-
-            FD_ZERO( &rfds );
-
-            // watch the control socket
-            FD_SET( controlSocket_.GetSocket(), &rfds );
-            // con << "Watching " << controlSocket_.GetSocket();
-
-            int max = controlSocket_.GetSocket();
-
-            // watch listening sockets
-            for( nSocketListener::SocketArray::const_iterator iter = listener_.GetSockets().begin(); iter != listener_.GetSockets().end(); ++iter )
-            {
-                FD_SET( (*iter).GetSocket(), &rfds );
-                if ( (*iter).GetSocket() > max )
-                    max = (*iter).GetSocket();
-                // con << ", " << (*iter).GetSocket();
-            }
-
-            // set time
-            tv.tv_sec  = static_cast< long int >( dt );
-            tv.tv_usec = static_cast< long int >( (dt-tv.tv_sec)*1000000 );
-
-            // delegate to system select
-            retval = select(max+1, &rfds, NULL, NULL, &tv);
-        }
-    }
-    tRecorder::Record( section, retval );
-
-    // con << " : " << retval << "\n";
-
-    // return result
-    return ( retval > 0 );
 }
 
 // *******************************************************************************************

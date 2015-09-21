@@ -50,8 +50,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <stdlib.h>
 
-class tMemManBase{
+class tMemMan{
 public:
+    static void *Alloc(size_t s);
+    static void  Dispose(void *p);
+    static void  DisposeButKeep(void *p);
     static void  Check();
     static void  Profile();
 };
@@ -77,13 +80,8 @@ public:
 
 #ifndef NO_MALLOC_REPLACEMENT
 
-// the following include files were found to disable the macros again
+// the following include file was found to disable the macros again
 #include <ios>
-#include <cstdlib>
-
-// defines the used functions, we thus need to include it before
-// we define macros for them
-#include <string.h>
 
 // macros replacing C memory management
 #define malloc(SIZE)                static_cast<void *>(tNEW(char)[SIZE])

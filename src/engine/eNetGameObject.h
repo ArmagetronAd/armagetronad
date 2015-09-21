@@ -75,7 +75,7 @@ public:
     eNetGameObject(eGrid *grid, const eCoord &pos,const eCoord &dir,ePlayerNetID* p,bool autodelete=false);
     eNetGameObject(nMessage &m);
 
-    virtual void DoRemoveFromGame(); // just remove it from the lists and unregister it
+    virtual void RemoveFromGame(); // just remove it from the lists and unregister it
 
     virtual void WriteCreate(nMessage &m);
     virtual void WriteSync(nMessage &m);
@@ -101,7 +101,7 @@ public:
     void clientside_action(){lastClientsideAction=lastTime;}
 
     virtual REAL Lag() const;
-    virtual REAL LagThreshold() const;
+
 };
 
 nMessage &operator << (nMessage &m, const eCoord &x);

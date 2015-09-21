@@ -44,7 +44,6 @@ static tSettingItem<REAL> f_m("FLOOR_MIRROR_INT",sr_floorMirror_strength);
 #include "rFont.h"
 #include "eTimer.h"
 #include "eCamera.h"
-#include "eSensor.h"
 #include "rScreen.h"
 #include "rRender.h"
 #include "eWall.h"
@@ -124,6 +123,8 @@ static void finite_xy_plane( const eCoord &pos,const eCoord &dir,REAL h, eRectan
 }
 
 static void infinity_xy_plane(eCoord const & pos, const eCoord &dir,REAL h=0){
+    glEdgeFlag(GL_FALSE);
+
     bool use_rim=false;
     REAL zero=0;
 
@@ -200,75 +201,68 @@ REAL          eGrid::CameraHeight(int i){return cameras(i)->CameraZ();}
 
 
 
-class eZNearSensor: public eSensor
+eWall *displayed_eWall=0;
+
+void draw_eWall(eGrid* grid, int v,int i, REAL& zNear, eCamera const * cam)
 {
-public:
-    static bool AdaptZNear( REAL & zNear, eWall const * wall, eCamera const * camera )
+    if (i<se_wallsVisible[v].Len())
     {
-        REAL len = wall->Len();
-        if ( len > .01)
+        eWallView *view=se_wallsVisible[v](i);
+#ifdef DEBUG
+        if (view->Value()<=z)
         {
-            REAL zDist = ::z - wall->Height();
-            if ( zDist < zNear )
+#endif
+            displayed_eWall = view->Belongs();
+            REAL len = displayed_eWall->Len();
+            if ( len > .01)
             {
-                const eCoord& camPos = camera->CameraPos();
-                const eCoord& camDir = camera->CameraDir();
-                eCoord base = wall->EndPoint(0);
-                eCoord end = wall->EndPoint(1);
-                
-                if ( eCoord::F( base-camPos, camDir ) > 0.01f || eCoord::F( end-camPos, camDir ) > 0.01f )
+                REAL zDist = z - displayed_eWall->Height();
+                if ( zDist < zNear )
                 {
-                    eCoord dirNorm = end - base;
-                    dirNorm.Normalize();
-                    eCoord camRelative = ( camPos - base ).Turn( dirNorm.Conj() );
-                    REAL dist = fabs( camRelative.y );
-                    if ( camRelative.x < 0 )
+                    const eCoord& camPos = grid->CameraPos( v );
+                    const eCoord& camDir = grid->CameraDir( v );
+                    eCoord base = displayed_eWall->EndPoint(0);
+                    eCoord end = displayed_eWall->EndPoint(1);
+
+                    if ( eCoord::F( base-camPos, camDir ) > 0.01f || eCoord::F( end-camPos, camDir ) > 0.01f )
                     {
-                        dist -= camRelative.x;
-                    }
-                    if ( camRelative.x > len )
-                    {
-                        dist += camRelative.x - len;
-                    }
-                    if ( dist < zDist )
-                    {
-                        dist = zDist;
-                    }
-                    // TODO: better criterion for ingoring of walls
-                    if ( dist < zNear && dist > 0.001f )
-                    {
-                        zNear = dist;
-                        return true;
+                        eCoord dirNorm = end - base;
+                        dirNorm.Normalize();
+                        eCoord camRelative = ( camPos - base ).Turn( dirNorm.Conj() );
+                        REAL dist = fabs( camRelative.y );
+                        if ( camRelative.x < 0 )
+                        {
+                            dist -= camRelative.x;
+                        }
+                        if ( camRelative.x > len )
+                        {
+                            dist += camRelative.x - len;
+                        }
+                        if ( dist < zDist )
+                        {
+                            dist = zDist;
+                        }
+                        // TODO: better criterion for ingoring of walls
+                        if ( dist < zNear && dist > 0.001f )
+                        {
+                            zNear = dist;
+                        }
                     }
                 }
+
+                displayed_eWall->Render(cam);
             }
+            displayed_eWall=0;
+
+            draw_eWall(grid,v,tHeapBase::UpperL(i),zNear,cam);
+            draw_eWall(grid,v,tHeapBase::UpperR(i),zNear,cam);
+
+#ifdef DEBUG
         }
-
-        return false;
+#endif 
     }
+}
 
-    eZNearSensor(eGameObject *o,const eCoord &start,const eCoord &d, REAL & zNear, eCamera const * camera )
-    :eSensor( o, start, d ), zNear_( zNear ), camera_( camera )
-    {}
-
-    void Detect()
-    {
-        detect( zNear_ * 2 );
-    }
-
-    // called when passing an edge
-    void PassEdge( const eWall * w, REAL time, REAL, int)
-    {
-        // adapt zNear and be done
-        if( AdaptZNear( zNear_, w, camera_ ) )
-        {
-            throw eSensorFinished();
-        }
-    }
-private:
-    REAL & zNear_; // the reference to the near clipping plane value
-    eCamera const * camera_; // the camera currently in use
-};
 
 void paint_sr_lowerSky(eGrid *grid, int viewer,bool sr_upperSky, eCoord const & camPos){
     TexMatrix();
@@ -329,8 +323,9 @@ void eGrid::display_simple( int viewer,bool floor,
     */
 
 
+    glEdgeFlag(GL_FALSE);
+
     glDisable(GL_DEPTH_TEST);
-    glDepthMask(GL_FALSE);
 
     glDisable(GL_CULL_FACE);
 
@@ -368,8 +363,6 @@ void eGrid::display_simple( int viewer,bool floor,
     }
 
     if (floor){
-        sr_DepthOffset(false);
-
         su_FetchAndStoreSDLInput();
         int floorDetail = sr_floorDetail;
 
@@ -472,9 +465,6 @@ void eGrid::display_simple( int viewer,bool floor,
         }
     }
 
-    glEnable(GL_DEPTH_TEST);
-    glDepthMask(GL_TRUE);
-
     TexMatrix();
     glLoadIdentity();
     ModelMatrix();
@@ -484,11 +474,12 @@ void eGrid::display_simple( int viewer,bool floor,
     //  glDisable(GL_TEXTURE_GEN_Q);
     //  glDisable(GL_TEXTURE_GEN_R);
 
+    glEnable(GL_DEPTH_TEST);
+
     if(eWalls){
-        {
+        for(int i=se_rimWalls.Len()-1;i>=0;i--){
             su_FetchAndStoreSDLInput();
-    
-            eWallRim::RenderAll( cameras(viewer) );
+            se_rimWalls(i)->RenderReal(cameras(viewer));
         }
 
         if (sr_lowerSky && sr_highRim){
@@ -508,27 +499,15 @@ void eGrid::display_simple( int viewer,bool floor,
             glLoadIdentity();
             ModelMatrix();
         }
+
+        glEnable(GL_DEPTH_TEST);
     }
+    else
+        glEnable(GL_DEPTH_TEST);
 
     if (eWalls){
-        // send out sensors to find walls close to the camera
-        if ( z < 3 )
-        {
-            eCamera const * camera = cameras(viewer);
-            if( camera && camera->Center() )
-            {
-                eCoord dir = camera->CameraDir().Turn(1,.5);
-                for(int i = 8; i > 0; --i)
-                {
-                    dir = dir.Turn(sqrt(.5),sqrt(.5));
-                    eZNearSensor s( camera->Center(), camPos, dir, zNear, camera );
-                    s.Detect();
-                }
-            }
-        }
-
-        // glDisable(GL_CULL_FACE);
-        // draw_eWall(this,viewer,0,zNear,cameras(viewer));
+        glDisable(GL_CULL_FACE);
+        draw_eWall(this,viewer,0,zNear,cameras(viewer));
 
         /*
         #ifdef DEBUG

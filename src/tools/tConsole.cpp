@@ -131,7 +131,7 @@ static void FilterLine( tString& line )
 
     // remove end of line
     bool hasEOL = false;
-    int eol = line.Len()-1;
+    int eol = line.Size()-1;
     while ( eol >= 0 && line[eol] == 0 )
         eol--;
     if ( eol >= 0 && line[eol] == '\n' )
@@ -163,37 +163,14 @@ tConsole::~tConsole(){
 // stored line
 static tString line_("");
 
-void tConsole::PrintLine(tString const & line, int repetitions)
-{
-    if( repetitions > 1 )
-    {
-        // find the true line end. Sometimes, there are trailing color codes.
-        char const * lineEnd = strstr( line, "\n" );
-        int length = line.Len()-2;
-        if( lineEnd )
-        {
-            length = lineEnd - (char const *)line;
-        }
-        PrintLine( line.SubStr(0, length) + " 0xffffff" + tOutput("$console_repetition", repetitions ), 1 );
-    }
-    else
-    {
-        // print
-        if (s_betterConsole)
-            s_betterConsole->DoPrint( line );
-        else
-            DoPrint( line );
-    }
-}
-
-tConsole & tConsole::Print(tString const & s)
+tConsole & tConsole::Print(tString s)
 {
     // append to line
     line_ += s;
 
     // determine if a newline was received
     bool newline = false;
-    for ( int i = s.Len()-1; i>=0; --i )
+    for ( int i = s.Size()-1; i>=0; --i )
         if ( s(i) == '\n' )
             newline = true;
 
@@ -202,44 +179,11 @@ tConsole & tConsole::Print(tString const & s)
         // filter
         FilterLine( line_ );
 
-        // check for repetitions
-        static tString lastLine("not the last line");
-        static int repetitions = 0;
-        static int threshold = 1;
-        if( lastLine != line_ )
-        {
-            if( repetitions > 0 )
-            {
-                PrintLine( lastLine, repetitions );
-            }
-
-            repetitions = 0;
-            threshold = 1;
-            lastLine = line_;
-        }
+        // print
+        if (s_betterConsole)
+            s_betterConsole->DoPrint( line_ );
         else
-        {
-            repetitions++;
-            if( threshold < 10 || repetitions >= threshold )
-            {
-                PrintLine( line_, repetitions );
- 
-                if( threshold < 10 )
-                {
-                    threshold++;
-                }
-                else
-                {
-                    threshold*=10;
-                }
-                repetitions = 0;
-            }
-
-            line_ = "";
-            return *this;
-        }
-
-        PrintLine( line_, 1 );
+            DoPrint( line_ );
 
         line_ = "";
     }
@@ -258,7 +202,7 @@ void tConsole::CenterDisplay(tString s,REAL timeout,REAL r,REAL g,REAL b)
 }
 
 tConsole & tConsole::DoPrint(const tString& s){
-    std::cout << tColoredString::RemoveColors(s);
+    std::cout << s;
     std::cout.flush();
     return *this;
 }
@@ -280,37 +224,19 @@ tString tConsole::ColorString(REAL r, REAL g, REAL b) const{
 }
 
 
-static tConsole::MessageCallback *s_messageCallback = NULL;
+static tConsole::MessageCallback *s_callback = NULL;
 void tConsole::RegisterMessageCallback(MessageCallback *a_callback)
 {
-    s_messageCallback = a_callback;
+    s_callback = a_callback;
 }
 
-bool tConsole::Message(const tOutput& message, const tOutput& interpretation, REAL timeout){
-    if (s_messageCallback)
-        return (*s_messageCallback)(message, interpretation, timeout);
+void tConsole::Message(const tOutput& message, const tOutput& interpretation, REAL timeout){
+    if (s_callback)
+        (*s_callback)(message, interpretation, timeout);
     else
     {
         con << tString(message) << ":\n";
         con << tString(interpretation) << '\n';
-        return true;
-    }
-}
-
-static tConsole::IdleCallback *s_idleCallback = NULL;
-void tConsole::RegisterIdleCallback(IdleCallback *a_callback)
-{
-    s_idleCallback = a_callback;
-}
-
-bool tConsole::Idle( bool processInput ){
-    if (s_idleCallback)
-    {
-        return (*s_idleCallback)( processInput );
-    }
-    else
-    {
-        return false;
     }
 }
 

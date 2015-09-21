@@ -32,7 +32,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tList.h"
 // #include "eGrid.h"
 #include "eCoord.h"
-#include "tSafePTR.h"
 
 class eGrid;
 class uActionPlayer;
@@ -55,20 +54,12 @@ class eGameObject{
 #define GO_I ((int *)NULL)
 
     // small wrapper of TimestepThis doing preparation and cleanup work
-    static void TimestepThisWrapper(eGrid * grid, REAL currentTime, eGameObject *t, REAL minTimestep);
-
-    bool urgentSimulationRequested_;   //!< Flag set when a pending event needs simulation
+    static void TimestepThisWrapper(eGrid * grid, REAL currentTime, eGameObject *t);
 
 protected:
     // does a timestep and all interactions for this gameobject,
     // divided in many small steps
     static bool TimestepThis(REAL currentTime,eGameObject *t);
-
-    // tells game objects how far they are allowed to exeed the given simulation time
-    static REAL MaxSimulateAhead();
-
-    //! call if you need to be simulated right now
-    void RequestSimulation(){ urgentSimulationRequested_ = true; }
 
     // a list of all eGameObjects that are interesting to watch
     int interestingID;
@@ -96,11 +87,6 @@ protected:
 
     // entry and deletion in the list of all eGameObjects
 public:
-    //! tells game objects what the maximum lag caused by lazy simulation of timesteps is
-    static REAL GetMaxLazyLag();
-    //! sets the value reported by GetMaxLazyLag()
-    static void SetMaxLazyLag( REAL lag );
-
     eTeam* Team() const { return team; }
 
     static uActionPlayer se_turnLeft,se_turnRight;
@@ -108,19 +94,13 @@ public:
     eGrid* Grid()        const { return grid;        }
     eFace* CurrentFace() const { return currentFace; }
 
-    virtual void AddRef()  = 0;          //!< adds a reference
-    virtual void Release() = 0;         //!< removes a reference
+    virtual void AddRef(){};          //!< adds a reference
+    virtual void Release(){};         //!< removes a reference
 
     void AddToList();
     void RemoveFromList();
     void RemoveFromListsAll();
-    void RemoveFromGame(); //!< removes the object physically from the game
-
-protected:
-    virtual void OnRemoveFromGame(); //!< called on RemoveFromGame(). Call base class implementation, too, in your implementation. Must keep the object alive.
-private:
-    virtual void DoRemoveFromGame(); //!< called on RemoveFromGame() after OnRemoveFromGame(). Do not call base class implementation of this function, don't expect to get called from subclasses.
-public:
+    virtual void RemoveFromGame(); // call this instead of the destructor
 
     int GOID() const {return id;}
     REAL LastTime() const {return lastTime;}
@@ -135,7 +115,7 @@ public:
     virtual REAL  Speed()const{return 20;}
 
     // position after FPS dependant extrapolation
-    virtual eCoord PredictPosition() const {return pos;}
+    virtual eCoord PredictPosition(){return pos;}
 
     // makes two gameObjects interact:
     virtual void InteractWith( eGameObject *target,REAL time,int recursion=1 );
@@ -161,24 +141,14 @@ public:
         return w;
     }
 
-    //! called when the round begins, after all game objects have been created,
-    //! before the first network sync is sent out.
-    virtual void OnRoundBegin();
-
-    //! called when the round ends
-    virtual void OnRoundEnd();
-
-    //! destroys the gameobject (in the game)
+    // destroys the gameobject (in the game)
     virtual void Kill();
 
-    //! tells whether the object is alive
+    // tells whether the object is alive
     virtual bool Alive() const {return false;}
 
-    //! draws object to the screen using OpenGL
+    // draws it to the screen using OpenGL
     virtual void Render(const eCamera *cam);
-
-    //! returns whether the rendering uses alpha blending (massively, so sorting errors would show)
-    virtual bool RendersAlpha() const;
 
     // draws the cockpit or whatever is seen from the interior
     // in fixed perspective, called before the main rendering
@@ -192,19 +162,19 @@ public:
     virtual void RenderCockpitVirtual(bool primary=false);
 
     //sound output
-    virtual void SoundMix(unsigned char *dest,unsigned int len,
-                          int viewer,REAL rvol,REAL lvol){}
+    //virtual void SoundMix(unsigned char *dest,unsigned int len,
+    //                      int viewer,REAL rvol,REAL lvol){};
 
     // internal camera
-    virtual eCoord CamDir()  const {return dir;}
-    virtual REAL  CamRise()  const {return 0;}
-    virtual eCoord CamPos()  const {return pos;}
-    virtual REAL  CamZ()     const {return z;}
-    virtual eCoord  CamTop() const {return eCoord(0,0);}
+    virtual eCoord CamDir(){return dir;}
+    virtual REAL  CamRise(){return 0;}
+    virtual eCoord CamPos() {return pos;}
+    virtual REAL  CamZ(){return z;}
+    virtual eCoord  CamTop(){return eCoord(0,0);}
 
     // sr_laggometer
-    virtual REAL Lag() const{return 0;}          //!< expected average network latency
-    virtual REAL LagThreshold() const{return 0;} //!< tolerated network latency variation
+    virtual REAL Lag() const{return 0;}
+
 
 #ifdef POWERPAK_DEB
     virtual void PPDisplay();
@@ -214,7 +184,7 @@ public:
     virtual bool Act(uActionPlayer *Act,REAL x);
 
     // does a timestep and all interactions for every gameobject
-    static void s_Timestep(eGrid *grid, REAL currentTime, REAL minTimestep);
+    static void s_Timestep(eGrid *grid, REAL currentTime);
 
     // displays everything:
     static void RenderAll(eGrid *grid, const eCamera *cam);
@@ -224,40 +194,12 @@ public:
     static void DeleteAll(eGrid *grid);
 };
 
-// game object to be created on the heap
-class eReferencableGameObject: public eGameObject, public tReferencable< eReferencableGameObject >
-{
-public:
-    eReferencableGameObject(eGrid *grid, const eCoord &p,const eCoord &d, eFace *currentface, bool autodelete=1);
-
-    // real reference counting
-    virtual void AddRef();          //!< adds a reference
-    virtual void Release();         //!< removes a reference
-
-private:
-    virtual void DoRemoveFromGame(); //!< called when removed from the game
-};
-
-// game object of temporary lifetime on the stack. Don't dynamically allocate this.
-class eStackGameObject: public eGameObject
-{
-public:
-    eStackGameObject(eGrid *grid, const eCoord &p,const eCoord &d, eFace *currentface);
-
-    // dummy reference counting
-    virtual void AddRef();          //!< adds a reference
-    virtual void Release();         //!< removes a reference
-
-private:
-    virtual void DoRemoveFromGame(); //!< called when removed from the game
-};
-
 //! Exception to throw when a gameobject dies during movement
 class eDeath
 {
 public:
-    eDeath(){}   //!< constructor
-    ~eDeath(){}  //!< destructor
+    eDeath(){};   //!< constructor
+    ~eDeath(){};  //!< destructor
 };
 
 #endif

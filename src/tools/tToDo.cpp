@@ -28,78 +28,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tToDo.h"
 #include "tArray.h"
 
-#ifdef HAVE_LIBZTHREAD
-#include <zthread/FastRecursiveMutex.h>
-
-static ZThread::FastRecursiveMutex st_mutex;
-#elif defined(HAVE_PTHREAD)
-#include "pthread-binding.h"
-static tPThreadRecursiveMutex st_mutex;
-#else
-class tMockMutex
-{
-public:
-    void acquire(){}
-    void release(){}
-};
-
-static tMockMutex st_mutex;
-#endif
-
 tArray<tTODO_FUNC *> tToDos;
 
 void st_ToDo(tTODO_FUNC *td){ // postpone something
-    st_mutex.acquire();
     tToDos[tToDos.Len()]=td;
-    st_mutex.release();
 }
-
-// the function currently in execution
-static tTODO_FUNC * st_toDoCurrent = 0;
-
-void st_ToDoOnce(tTODO_FUNC *td){ // postpone something, avoid double entries
-    st_mutex.acquire();
-    if( st_toDoCurrent == td )
-    {
-        return;
-    }
-    for( int i = tToDos.Len()-1; i >= 0; --i )
-    {
-        if( tToDos[i]==td )
-        {
-            return;
-        }
-    }
-    tToDos[tToDos.Len()]=td;
-    st_mutex.release();
-}
-
-// a lone (but relatively safe) function pointer for things to do triggered by signals.
-static tTODO_FUNC * st_toDoFromSignal = 0;
 
 void st_DoToDo(){ // do the things that have been postponed
-    if ( st_toDoFromSignal )
-    {
-        st_ToDo( st_toDoFromSignal );
-        st_toDoFromSignal = 0;
-    }
-    st_mutex.acquire();
     while (tToDos.Len()){
-        tTODO_FUNC *last = st_toDoCurrent;
-        tTODO_FUNC *td = tToDos[tToDos.Len()-1];
-        st_toDoCurrent = td;
+        tTODO_FUNC *td=tToDos[tToDos.Len()-1];
         tToDos.SetLen(tToDos.Len()-1);
         (*td)();
-        st_toDoCurrent = last;
     }
-    st_mutex.release();
-}
-
-void st_ToDo_Signal(tTODO_FUNC *td){ // postpone something
-    // simply ignore double todos from signals.
-    if ( st_toDoFromSignal )
-    {
-        return;
-    }
-    st_toDoFromSignal = td;
 }

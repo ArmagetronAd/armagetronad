@@ -27,8 +27,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "config.h"
 #include <iostream>
-#include <string.h>
-#include <cstdlib>
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -57,12 +55,8 @@ void st_PresentError( const char* caption, const char *message )
 {
     std::cerr << caption << ": " << message << "\n";
     st_Breakpoint();
-    static bool error = false; // to disable the error if it is inconvenient right now and you think it may not be fatal
-    if ( error )
-    {
-        // throw 1; //tSimpleException( message, caption );
-        exit(-1);
-    }
+    throw 1; //tSimpleException( message, caption );
+    exit(-1);
 }
 
 void st_PresentMessage( const char* caption, const char *message )

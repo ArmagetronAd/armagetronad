@@ -1,6 +1,6 @@
-Directory for arenas of polygonal type.
+Directory for arenas of polygonial type.
 
-Definition: A polygonal map is a map with a single closed wall.
+Definition: A polygonial map is a map with a single closed wall.
 It should contain no further obstacle walls inside.
 
 Se here for a mathematical definition:

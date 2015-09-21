@@ -31,6 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "gGame.h"
 #include "ePlayer.h"
 #include "rFont.h"
+#include "eSoundMixer.h"
 
 void gCamera::MyInit(){
     if (mode == CAMERA_SMART)
@@ -47,10 +48,8 @@ gCamera::gCamera(eGrid *grid, rViewport *view,ePlayerNetID *p,ePlayer *lp,eCamMo
 
 
 gCamera::~gCamera(){
-#ifdef DEBUG
     int x;
     x =0;
-#endif
 }
 
 eCoord gCamera::CenterCycleDir(){
@@ -86,6 +85,9 @@ void gCamera::Timestep(REAL ts){
                 }
             }
             lastCenter=Center();
+                        
+            eSoundMixer* mixer = eSoundMixer::GetMixer();
+            mixer->SetMicrophoneOwner(Center());
         }
     }
 }

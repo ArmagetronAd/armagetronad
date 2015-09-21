@@ -67,31 +67,16 @@ protected:
     REAL YPos(int num);
 public:
     static bool          wrap;
-    
-    // different quick exit types
-    enum QuickExit
-    {
-        QuickExit_Off  = 0, // no quick exit, keep going
-        QuickExit_Game = 1, // quit to game selection menu
-        QuickExit_Total = 2 // quit the program
-    };
-
-    static QuickExit     quickexit;
+    static bool          quickexit;
     static bool          exitToMain;
 
     tOutput              title;
 
     FUNCPTR IdleFunc(){return idle;}
     static void SetIdle(FUNCPTR idle_func) {idle=idle_func;}
-
-    // poll input, return true if ESC was pressed
-    static bool IdleInput( bool processInput );
-
     void SetCenter(REAL c) {center=c;}
     void SetTop(REAL t) {menuTop=t;}
     void SetBot(REAL b) {menuBot=b;spaceBelow=1+menuBot;}
-    REAL GetTop() const {return menuTop;}
-    REAL GetBot() const {return menuBot;}
     void SetSelected(int s) {selected = s;}
     int  NumItems()         {return items.Len();}
     uMenuItem* Item(int i)  { return items[i]; }
@@ -110,7 +95,7 @@ public:
     void ReverseItems();
 
     // paints a nice background
-    static void GenericBackground(REAL top=1.0);
+    static void GenericBackground();
 
     // marks the menu for exit
     inline void Exit(){OnExit();}
@@ -121,7 +106,7 @@ public:
     }
 
     // print a big message and a small interpretation
-    static bool Message(const tOutput& message, const tOutput& interpretation, REAL timeout = -1);
+    static void Message(const tOutput& message, const tOutput& interpretation, REAL timeout = -1);
 
     //! returns whether there is currently an active menu
     static bool MenuActive();
@@ -134,9 +119,6 @@ protected:
 
     //! marks the menu for exit
     virtual void OnExit();
-
-    //! called every frame before the menu is rendered
-    virtual void OnRender();
 };
 
 
@@ -146,13 +128,13 @@ class uMenuItem{
     friend class uMenu;
 
     int idnum;
-    uMenuItem(){}
+    uMenuItem(){};
 protected:
     uMenu  *menu;
     tOutput helpText;
 
     void DisplayText(REAL x,REAL y,const char *text,bool selected,
-                     REAL alpha=1,int center=0,int cursor=0,int cursorPos=0, rTextField::ColorMode colorMode = rTextField::COLOR_USE );
+                     REAL alpha=1,int center=0,int cursor=0,int cursorPos=0, float maxWidth=2.);
     void DisplayTextSpecial(REAL x,REAL y,const char *text,bool selected,
                             REAL alpha=1,int center=0);
 public:
@@ -174,26 +156,20 @@ public:
             menu->items.Remove(this,idnum);
     }
 
-    //! called when the menu item is selected, the incoming parameter says
-    //! whether help should be displayed, the function returns true if 
-    //! the menu code itself should handle the display or whether the menu item
-    //! does that.
-    virtual bool DisplayHelp( bool display, REAL y, REAL alpha ){return display;}
-
-    virtual tString Help(){return tString(helpText);}
+virtual tString Help(){return tString(helpText);}
     // displays the menuitem at position x,y. set selected to true
     // if the item is currently under the cursor
-    virtual void Render(REAL ,REAL ,REAL =1,bool =0){}
+    virtual void Render(REAL ,REAL ,REAL =1,bool =0){};
 
     virtual void RenderBackground(){
         menu->GenericBackground();
-    }
+    };
 
     // if the user presses left/right on menuitem
-    virtual void LeftRight(int ){} //lr=-1:left lr=+1: right
-    virtual void LeftRightRelease(){}
+    virtual void LeftRight(int ){}; //lr=-1:left lr=+1: right
+    virtual void LeftRightRelease(){};
 
-    virtual void Enter(){} // if the user presses enter/space on menu
+    virtual void Enter(){}; // if the user presses enter/space on menu
 
     virtual bool Event(SDL_Event &){return false;} // if the key c is
     // pressed,mouse moved ...
@@ -229,7 +205,7 @@ public:
     // if the item is currently under the cursor
     virtual void Render(REAL x,REAL y,REAL alpha=1,bool selected=0){
         DisplayTextSpecial(x,y,tString(t),selected,alpha);
-    }
+    };
 
     virtual void Enter(){menu->Exit();}
     // if the user presses enter/space on menu
@@ -372,39 +348,15 @@ public:
                  const tOutput &help,int &targ,
                  int mi,int ma,int step=1);
 
-    ~uMenuItemInt(){}
+    ~uMenuItemInt(){};
 
     virtual void LeftRight(int);
 
     virtual void Render(REAL x,REAL y,REAL alpha=1,bool selected=0);
 };
 
-// *****************************************
-//               Float Choose
-// *****************************************
 
-class uMenuItemReal:public uMenuItem{
-protected:
-    tOutput title;
-    REAL &target;
-    REAL Min,Max;
-    REAL Step;
-public:
-    /*
-      uMenuItemInt(uMenu *m,const char *tit,
-      const char *help,int &targ,
-      int mi,int ma,int step=1);
-    */
-    uMenuItemReal(uMenu *m,const tOutput &title,
-                 const tOutput &help,REAL &targ,
-                 REAL mi,REAL ma,REAL step=1);
 
-    ~uMenuItemReal(){}
-
-    virtual void LeftRight(int);
-
-    virtual void Render(REAL x,REAL y,REAL alpha=1,bool selected=0);
-};
 
 // *****************************************************
 //  String query
@@ -417,9 +369,6 @@ protected:
     tString *content;
     int      cursorPos;
     int		maxLength_;
-
-    // color mode used for rendering
-    rTextField::ColorMode colorMode_;
 public:
     uMenuItemString(uMenu *M,const tOutput& desc,
                     const tOutput& help,tString &c, int maxLength = 1024 );
@@ -430,35 +379,42 @@ public:
     virtual bool Event(SDL_Event &e);
 
     uMenu *MyMenu(){return menu;}
-
-    void SetColorMode( rTextField::ColorMode colorMode )
-    {
-        colorMode_ = colorMode;
-    }
-
-    rTextField::ColorMode GetColorMode() const
-    {
-        return colorMode_;
-    }
 };
 
+//! A class that can provide auto- completion and supports overwriting of parts for special cases.
+//!
+//! The default implementation implements the typical bash- like auto- completion, if you need more than that derive your own class.
+class uAutoCompleter {
+protected:
+    std::deque<tString> &m_PossibleWords; //!< The words that can be used for completion
+    int m_LastCompletion;
+
+    virtual int FindLengthOfLastWord(tString &string, unsigned pos); //!< Finds the space to the last delimiter
+    virtual void FindPossibleWords(tString word, std::deque<tString> &results, bool ignorecase=true); //!< Finds the possible completions for a word
+    virtual tString FindClosestMatch(tString &word, std::deque<tString> &results, bool ignorecase=true); //!< Attempts to complete as much of the word as possible
+    virtual void ShowPossibilities(std::deque<tString> &results, int len); //!< Prints the possible completions to the console
+    virtual int DoCompletion(tString &string, int pos, int len, tString &match); //!< Replaces the word the cursor is on by the closest match
+    virtual int DoFullCompletion(tString &string, int pos, int len, tString &match); //!< Replaces the word the cursor is on by the given match and a space
+    virtual int TryCompletion(tString &string, unsigned pos, unsigned len); //!< Attempt completion with a certain word length
+public:
+    uAutoCompleter(std::deque<tString> &words); //!< Constructor
+    virtual int Complete(tString &string, unsigned pos); //!< Attempts the completion
+};
+
+//! uMenuItemString extended by a simple history function and tab completion
 class uMenuItemStringWithHistory : protected uMenuItemString {
 protected:
-    std::deque<tString> &m_History;
-    unsigned int m_HistoryPos;
-    unsigned int m_HistoryLimit;
+    std::deque<tString> &m_History; //!< The saved history lines
+    unsigned int m_HistoryPos; //!< The current position within the history
+    unsigned int m_HistoryLimit; //!< The maximal length of the history
+    uAutoCompleter *m_Completer; //!< The object used for completion
 public:
-    uMenuItemStringWithHistory(uMenu *M,const tOutput& desc, const tOutput& help,tString &c, int maxLength, std::deque<tString> &history, int limit );
+    uMenuItemStringWithHistory(uMenu *M,const tOutput& desc, const tOutput& help,tString &c, int maxLength, std::deque<tString> &history, int limit, uAutoCompleter *completer = 0); //!< Consructor
 
-    ~uMenuItemStringWithHistory();
+    ~uMenuItemStringWithHistory(); //!< Destructor
 
-    virtual void RenderBackground(){
-        menu->GenericBackground(menu->GetTop());
-    }
-
-    virtual bool Event(SDL_Event &e);
+    virtual bool Event(SDL_Event &e); //!< Handles an event
 };
-
 
 // *****************************************************
 //  Submenu
@@ -559,14 +515,14 @@ public:
         Reload();
     }
 
-    virtual ~uMenuItemFileSelection() {}
+    virtual ~uMenuItemFileSelection() {};
 
-    void SetDir( const char *dir ) { dir_ = dir; }
-    void SetFileSpec( const char *fileSpec ) { fileSpec_ = fileSpec; }
-    void SetFormatName( bool formatName ) { formatName_ = formatName; }
-    void SetGetFilesFlag( int getFilesFlag ) { getFilesFlag_ = getFilesFlag; }
-    void SetDefaultFileName( const char *defaultFileName ) { defaultFileName_ = defaultFileName; }
-    void SetDefaultFilePath( const char *defaultFilePath ) { defaultFilePath_ = defaultFilePath; }
+    void SetDir( const char *dir ) { dir_ = dir; }; const
+    void SetFileSpec( const char *fileSpec ) { fileSpec_ = fileSpec; }; const
+    void SetFormatName( bool formatName ) { formatName_ = formatName; }; const
+    void SetGetFilesFlag( int getFilesFlag ) { getFilesFlag_ = getFilesFlag; } const
+    void SetDefaultFileName( const char *defaultFileName ) { defaultFileName_ = defaultFileName; }; const
+    void SetDefaultFilePath( const char *defaultFilePath ) { defaultFilePath_ = defaultFilePath; }; const
 
     void SetParams( const char *dir, const char *fileSpec, int getFilesFlag,
                     bool formatName, const char *defaultFileName, const char *defaultFilePath )

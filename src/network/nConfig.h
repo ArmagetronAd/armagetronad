@@ -210,18 +210,6 @@ public:
     virtual void ReadVal(std::istream &s);
 };
 
-//! how we react on a client with a version incompatible with a setting
-enum nConfigItemBehavior
-{
-    Behavior_Nothing = 0, //!< do nothing, let client on
-    Behavior_Revert = 1,  //!< revert setting to default value
-    Behavior_Block = 2,   //!< don't let the client play at all
-    Behavior_Default = 3  //!< do whatever someone else says
-};
-
-class nConfItemVersionWatcher;
-tCONFIG_ENUM( nConfigItemBehavior );
-
 //! configuration item watcher that shuts out clients that don't support a certain interface
 class nConfItemVersionWatcher: public nIConfItemWatcher
 {
@@ -238,7 +226,14 @@ public:
         Group_Max
     };
 
-    typedef nConfigItemBehavior Behavior;
+    //! how we react on a client with a version incompatible with a setting
+    enum Behavior
+    {
+        Behavior_Nothing = 0, //!< do nothing, let client on
+        Behavior_Revert = 1,  //!< revert setting to default value
+        Behavior_Block = 2,   //!< don't let the client play at all
+        Behavior_Default = 3  //!< do whatever someone else says
+    };
 
     nConfItemVersionWatcher( nConfItemBase & item, Group group, int min, int max = -1 );          //!< constructor
     virtual ~nConfItemVersionWatcher();                      //!< destructor
@@ -260,7 +255,7 @@ private:
 
     Group group_;                                            //!< class of incompatibility
     Behavior overrideGroupBehavior_;                         //!< if set, the global behavior for the class gets ignored
-    tSettingItem< Behavior > overrideGroupBehaviorConf_;     //!< setting item for override
+    tSettingItem< int > overrideGroupBehaviorConf_;          //!< setting item for override
 };
 
 //! convenience helper class: setting item and version watcher combined
@@ -275,13 +270,6 @@ public:
             , watcher_( setting_, group, min, max )
     {
     }
-
-    void Set( T const & value )
-    {
-        this->setting_.Set( value );
-    }
-
-    nSettingItem< T > & GetSetting(){ return setting_; }
 private:
     nSettingItem< T > setting_;
     nConfItemVersionWatcher watcher_;
@@ -366,8 +354,6 @@ bool nIConfItemWatcher::Writable( void ) const
 {
     return this->DoWritable();
 }
-
-tOutput sn_GetClientVersionString(int version);
 
 #endif
 

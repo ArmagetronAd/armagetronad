@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
+  
 ***************************************************************************
 
 */
@@ -29,9 +29,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "tSysTime.h"
 #include "tRecorder.h"
-#include "tConsole.h"
-#include "tConfiguration.h"
-#include "tLocale.h"
+#include "tError.h"
+
+// Both implementations are stolen from Q1.
 
 //! time structure
 struct tTime
@@ -81,74 +81,41 @@ struct tTime
 
 #ifdef WIN32
 #include <windows.h>
-#include <sys/timeb.h>
+#include <sys/timeb.h> 
 #ifndef DEDICATED
 #include "rSDL.h"
 #endif
 
-// flag indicating whether the HPC is reliable
-static bool st_hpcReliable = true;
-
-void GetTimeInner( tTime & time )
+void GetTime( tTime & time )
 {
+    struct _timeb tstruct;
     LARGE_INTEGER mtime,frq;
 
     // Check if high-resolution performance counter is supported
     if (!QueryPerformanceFrequency(&frq))
     {
-        st_hpcReliable = false;
+        // Nope, not supported, do it the old way.
+        _ftime( &tstruct );
+        time.microseconds = tstruct.millitm*1000;
+        time.seconds = tstruct.time;
     }
-
-    if (st_hpcReliable)
+    else
     {
         QueryPerformanceCounter(&mtime);
         time.seconds = mtime.QuadPart/frq.QuadPart;
         time.microseconds = ( ( mtime.QuadPart - time.seconds * frq.QuadPart ) * 1000000 ) / frq.QuadPart;
     }
-    else
-    {
-        // Nope, not supported, do it the old way.
-        struct _timeb tstruct;
-        _ftime( &tstruct );
-        time.microseconds = tstruct.millitm*1000;
-        time.seconds = tstruct.time;
-    }
+
 
     time.Normalize();
-}
 
-void GetTime( tTime & relative )
-{
-    tTime time;
-    GetTimeInner( time );
-    static tTime start = time;
-    relative = time - start;
-
-    // detect timer trouble
-    if ( st_hpcReliable )
-    {
-        static struct tTime lastTime = relative;
-
-        // test transition
-        //if ( relative.seconds > 10 )
-        //    lastTime.seconds = lastTime.seconds+1;
-
-        if ( (time - lastTime).seconds < 0 )
-        {
-            st_hpcReliable = false;
-
-            GetTimeInner( time );
-            start = start + time - lastTime;
-            relative = time - start;
-        }
-        lastTime = time;
-    }
 }
 
 //! returns true if a timer with more than millisecond accuracy is available
 bool tTimerIsAccurate()
 {
-    return st_hpcReliable;
+    LARGE_INTEGER dummy;
+    return QueryPerformanceFrequency(&dummy);
 }
 
 /*
@@ -247,42 +214,9 @@ void tAdvanceFrameSys( tTime & start, tTime & relative )
 
     // get time from OS
     GetTime( time );
-
-    // test hiccupery
-    // time.seconds -= time.seconds/10;
-
-    // record starting point
     if ( start.microseconds == 0 && start.seconds == 0 )
-    {
         start = time;
-    }
-
-    // detect and counter timer hiccups
-    tTime newRelative = time - start;
-    tTime timeStep = newRelative - relative;
-    if ( !tRecorder::IsPlayingBack() && ( timeStep.seconds < 0 || timeStep.seconds > 10 ) )
-    {
-        static bool warn = true;
-        if ( warn )
-        {
-            warn = false;
-            con << tOutput( "$timer_hickup", float( timeStep.seconds + timeStep.microseconds * 1E-6  ) );
-        }
-
-        start = start + timeStep;
-    }
-    else
-    {
-        relative = newRelative;
-    }
-
-#ifdef DEBUG
-    if ( relative.seconds > 20 )
-    {
-        int x;
-        x = 0;
-    }
-#endif
+    relative = time - start;
 }
 
 static bool s_delayedInPlayback = false;
@@ -318,7 +252,7 @@ void tAdvanceFrame( int usecdelay )
     if ( usecdelay > 0 )
         tDelay( usecdelay );
 
-    static tTime timeNewRelative;
+    tTime timeNewRelative;
     tAdvanceFrameSys( timeStart, timeNewRelative );
 
     // try to fetch time from playback
@@ -335,32 +269,32 @@ void tAdvanceFrame( int usecdelay )
         // must never be called when a recording is running
         tASSERT( !tRecorder::IsPlayingBack() );
 
+#ifdef FIXED_FRAMERATE
+        tTime fixed, catchup, timeFixedRelative;
+        fixed.seconds = 0;
+        fixed.microseconds = (int)(1000000. / FIXED_FRAMERATE);
+        timeFixedRelative = timeRelative + fixed;
+
+        catchup = timeFixedRelative/*game-time*/ - timeNewRelative/*real-time*/;
+        if (catchup.seconds >= 0) {
+#ifdef DEBUG
+            printf("catching up %d.%d seconds\n", catchup.seconds, catchup.microseconds);
+#endif
+            for (int i = catchup.seconds; i; --i)
+                tDelay(1000000);
+            tDelay(catchup.microseconds);
+            timeNewRelative = timeFixedRelative;
+        } else {
+            printf("WARNING: Real time ahead of game time!\nreal: %d.%06d\ngame: %d.%06d\ncatchup: %d.%06d\n", timeNewRelative.seconds, timeNewRelative.microseconds, timeFixedRelative.seconds, timeFixedRelative.microseconds, 1 - catchup.seconds, 1000000 - catchup.microseconds);
+#ifdef FIXED_FRAMERATE_PRIORITY
+            timeNewRelative = timeFixedRelative;
+#endif
+        }
+#endif
+
         // timeAdvance = timeRealRelative - timeRelative;
         timeRelative = timeNewRelative;
     }
-
-
-#ifdef DEBUG_X
-    {
-        static tTime oldRelative = timeRelative;
-        tTime timeStep = timeRelative - oldRelative;
-        oldRelative = timeRelative;
-        
-        // detect unusually large timesteps
-        static REAL bigStep = 10;
-        bigStep *= .99;
-        REAL step = float( timeStep.seconds + timeStep.microseconds * 1E-6  );
-        if ( step > 3 * bigStep )
-        {
-            con << "Small timer hiccup of " << step << " seconds.\n";
-            bigStep = bigStep * 1.02;
-        }
-        else if ( step > bigStep )
-        {
-            bigStep = step;
-        }
-    }
-#endif
 
     // try to archive it
     TimeArchiver< tRecordingBlock >::Archive( timeRelative );
@@ -374,27 +308,24 @@ void tAdvanceFrame( int usecdelay )
 #endif
 }
 
-static float st_timeFactor = 1.0;
-static tSettingItem< float > st_timeFactorConf( "TIME_FACTOR", st_timeFactor );
-
 double tSysTimeFloat ()
 {
 #ifdef DEBUG
-    // if ( ! tRecorder::IsPlayingBack() )
-    // {
-    // static tTime time;
-    // tAdvanceFrameSys( timeStart, time );
-    // tTime timeStep = time - timeRelative;
-    //        if ( timeStep.seconds > 5 )
-    //        {
-    //            std::cout << "tAdvanceFrame not called often enough!\n";
-    //            st_Breakpoint();
-    //            tAdvanceFrameSys( timeRealRelative );
-    //        }
-    // }
+    if ( ! tRecorder::IsPlayingBack() )
+    {
+        tTime time;
+        tAdvanceFrameSys( timeStart, time );
+        time = time - timeRelative;
+        //        if ( time.seconds > 5 )
+        //        {
+        //            std::cout << "tAdvanceFrame not called often enough!\n";
+        //            st_Breakpoint();
+        //            tAdvanceFrameSys( timeRealRelative );
+        //        }
+    }
 #endif
 
-    return ( timeRelative.seconds + timeRelative.microseconds*1E-6 ) * st_timeFactor;
+    return timeRelative.seconds + timeRelative.microseconds*0.000001;
 }
 
 static struct tTime timeRealStart;    // the real time at the start of the program
@@ -404,5 +335,5 @@ double tRealSysTimeFloat ()
 {
     // get real time from real OS
     tAdvanceFrameSys( timeRealStart, timeRealRelative );
-    return ( timeRealRelative.seconds + timeRealRelative.microseconds*1E-6 ) * st_timeFactor;
+    return timeRealRelative.seconds + timeRealRelative.microseconds*0.000001;
 }

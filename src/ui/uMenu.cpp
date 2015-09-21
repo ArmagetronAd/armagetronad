@@ -21,7 +21,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
+  
 ***************************************************************************
 
 */
@@ -46,12 +46,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "rSDL.h"
 #endif
 
-#include <vector>
-
 FUNCPTR  uMenu::idle(NULL);
 
 bool uMenu::wrap=true;
-uMenu::QuickExit uMenu::quickexit=uMenu::QuickExit_Off;
+bool uMenu::quickexit=false;
 bool uMenu::exitToMain=false;
 
 // *****************************************************
@@ -64,7 +62,7 @@ uMenu::uMenu(const char *t="",bool exit_item)
     menuTop=.7;
     menuBot=-.7;
     yOffset=0;
-    selected = 10000000;
+    selected = -1;
 }
 #endif
 
@@ -75,17 +73,17 @@ uMenu::uMenu(const tOutput &t,bool exit_item)
     menuTop=.7;
     menuBot=-.7;
     yOffset=0;
-    selected = 100000000;
+    selected = -1;
 }
 
 uMenu::~uMenu(){
-    for (int i=items.Len()-1;i>=0;i--)
+    for(int i=items.Len()-1;i>=0;i--)
         delete items[i];
 }
 
 void uMenu::ReverseItems(){
-    tList<uMenuItem> dummy;
-    dummy.Swap( items );
+    tList<uMenuItem> dummy = items;
+    items.SetLen(0);
 
     for (int i=dummy.Len()-1; i>=0; i--){
         uMenuItem *x = dummy[i];
@@ -147,10 +145,8 @@ static rNoAutoDisplayAtNewlineCallback su_noNewline( uMenu::MenuActive );
 void uMenu::OnEnter(){
 #ifndef DEDICATED
     float nextrepeat = 0.0f;
-    static const float repeatdelay = 0.2f;
-    static const float repeatrateStart  = 0.2f;
-    static const float repeatrateMin  = 0.05f;
-    static float repeatrate  = repeatrateStart;
+    static const float repeatdelay = 0.3f;
+    static const float repeatrate  = 0.05f;
     SDL_Event tEventRepeat;
 #else
     return;
@@ -170,14 +166,17 @@ void uMenu::OnEnter(){
     REAL lastt=0;
     REAL ts=0;
 
-#ifndef DEDICATED
+#ifndef DEDICATED  
     lastkey=tSysTimeFloat();
-    static const REAL timeout=.5;
+    static const REAL timeout=3;
 #endif
 
     while (!exitFlag && !quickexit && !exitToMain){
         st_DoToDo();
         tAdvanceFrame();
+
+        if (selected < 0 || selected >= items.Len())
+            selected = items.Len()-1;
 
         ts=tSysTimeFloat()-lastt;
         lastt=tSysTimeFloat();
@@ -185,36 +184,24 @@ void uMenu::OnEnter(){
 
         menuentries=items.Len();
 
-        // clamp cursor
-        if (selected < 0 )
-            selected = 0;
-        if ( selected >= items.Len())
-            selected = items.Len()-1;
 
 #ifndef DEDICATED
         {
             SDL_Event tEvent;
             uInputProcessGuard inputProcessGuard;
-            while (su_GetSDLInput(tEvent))
+            while(su_GetSDLInput(tEvent))
             {
                 REAL entertime = tSysTimeFloat();
 
                 switch (tEvent.type)
                 {
                 case SDL_KEYDOWN:
-                    if ( tEvent.key.keysym.sym == SDLK_UNKNOWN )
-                    {
-                        // don't repeat unknown syms. They come from multi-key compositions and
-                        // don't send keyup events when released.
-                        break;
-                    }
                     repeat = true;
                     memcpy( &tEventRepeat, &tEvent, sizeof( SDL_Event ) );
                     nextrepeat = tSysTimeFloat() + repeatdelay;
                     break;
                 case SDL_KEYUP:
                     repeat = false;
-                    repeatrate = repeatrateStart;
                     break;
                 }
 
@@ -234,20 +221,8 @@ void uMenu::OnEnter(){
             {
                 this->HandleEvent( tEventRepeat );
                 nextrepeat = tSysTimeFloat() + repeatrate;
-                repeatrate *= .71;
-                if ( repeatrate < repeatrateMin )
-                    repeatrate = repeatrateMin;
             }
         }
-
-        // we're about to render, last chance to make changes to the menu
-        OnRender();
-
-        // clamp cursor
-        if (selected < 0 )
-            selected = 0;
-        if ( selected >= items.Len())
-            selected = items.Len()-1;
 #endif
         // quit shortcut
         if ( quickexit )
@@ -282,6 +257,7 @@ void uMenu::OnEnter(){
             yOffset+=menuTop-smallborder-YPos(menuentries-1);
 
 #ifndef DEDICATED
+        rSysDep::ClearGL();
         sr_ResetRenderState(true);
         items[selected]->RenderBackground();
 
@@ -292,14 +268,14 @@ void uMenu::OnEnter(){
         if (sr_glOut && !exitFlag && !quickexit){
             items[selected]->Render(center,YPos(selected),1,true);
 
-            for (int i=items.Len()-1;i>=0;i--)
-                if (i!=selected){
+            for(int i=items.Len()-1;i>=0;i--)
+                if(i!=selected){
                     REAL y=YPos(i);
                     REAL alpha=1;
                     const REAL b=.1;
-                    if (y<menuBot+b)
+                    if(y<menuBot+b)
                         alpha=(y-menuBot)/b;
-                    if (y>menuTop-b)
+                    if(y>menuTop-b)
                         alpha=(menuTop-y)/b;
                     if (y>menuBot && y<menuTop)
                     {
@@ -325,37 +301,30 @@ void uMenu::OnEnter(){
             if (YPos(menuentries-1)>menuTop && (int(tSysTimeFloat())+1)%2)
                 arrow(.9,menuTop,1,.05);
 
-            REAL helpAlpha = tSysTimeFloat()-lastkey-timeout;
-            if( helpAlpha > 1 )
-            {
-                helpAlpha = 1;
-            }
-            
-            disphelp = helpAlpha > 0;
-            if ( items[selected]->DisplayHelp( disphelp, menuBot, helpAlpha ) )
-            {
+            if (tSysTimeFloat()-lastkey>timeout){
+                disphelp=true;
                 if (sr_alphaBlend)
-                    glColor4f(1,.8,.8, helpAlpha );
+                    glColor4f(1,.8,.8,tSysTimeFloat()-lastkey-timeout);
                 else
-                    Color(helpAlpha,
-                          .8*helpAlpha,
-                          .8*helpAlpha);
+                    Color(tSysTimeFloat()-lastkey-timeout,
+                          .8*(tSysTimeFloat()-lastkey-timeout),
+                          .8*(tSysTimeFloat()-lastkey-timeout));
 
                 rTextField c(-.95f,menuBot-.04f);
                 c.SetWidth(static_cast<int>((1.9f-items[selected]->SpaceRight())/c.GetCWidth()));
+		c.EnableLineWrap();
                 c << items[selected]->Help();
             }
+            else disphelp=false;
         }
         else
 #endif
-            if ( !sr_glOut )
-            {
-                tDelay( 10000 );
-            }
+        {
+            tDelay( 100000 );
+        }
 
 #ifndef DEDICATED
         rSysDep::SwapGL();
-        rSysDep::ClearGL();
 #endif
     }
 
@@ -372,94 +341,90 @@ void uMenu::HandleEvent( SDL_Event event )
     {
         switch (event.type){
         case SDL_KEYDOWN:
-        {
-            if (!disphelp)
-                lastkey=tSysTimeFloat();
-            switch (event.key.keysym.sym){
+            {
+                if (!disphelp)
+                    lastkey=tSysTimeFloat();
+                switch (event.key.keysym.sym){
 
-            case(SDLK_ESCAPE):
-                            repeat = false;
-                lastkey=tSysTimeFloat();
-                Exit();
-                break;
+                case(SDLK_ESCAPE):
+                                repeat = false;
+                    lastkey=tSysTimeFloat();
+                    Exit();
+                    break;
 
-            case(SDLK_UP):
-                            lastkey=tSysTimeFloat();
-                selected++;
-                if (selected>=items.Len())
-                {
-                    if (wrap)
-                        selected=0;
-                    else
-                        selected=items.Len()-1;
-                }
-                break;
+                case(SDLK_UP):
+                                lastkey=tSysTimeFloat();
+                    selected++;
+                    if (selected>=items.Len())
+                        if (wrap)
+                            selected=0;
+                        else
+                            selected=items.Len()-1;
+                    break;
 
-            case(SDLK_DOWN):
-                            lastkey=tSysTimeFloat();
-                selected--;
-                if (selected<0)
-                {
-                    if (wrap)
-                        selected=items.Len()-1;
-                    else
-                        selected=0;
-                }
+                case(SDLK_DOWN):
+                                lastkey=tSysTimeFloat();
+                    selected--;
+                    if (selected<0)
+                        if(wrap)
+                            selected=items.Len()-1;
+                        else
+                            selected=0;
 
-                break;
+                    break;
 
-            case(SDLK_LEFT):
-                            items[selected]->LeftRight(-1);
-                break;
-            case(SDLK_RIGHT):
-                            items[selected]->LeftRight(1);
-                break;
+                case(SDLK_LEFT):
+                                items[selected]->LeftRight(-1);
+                    break;
+                case(SDLK_RIGHT):
+                                items[selected]->LeftRight(1);
+                    break;
 
-            case(SDLK_SPACE):
-                        case(SDLK_KP_ENTER):
-                            case(SDLK_RETURN):
-                                    repeat = false;
-                try
-        {
-                    su_inMenu = false;
-                    items[selected]->Enter();
-                }
-                catch (tException const & e)
-                {
-                    uMenu::SetIdle(NULL);
-
-                    // inform user of generic errors
-                    tConsole::Message( e.GetName(), e.GetDescription(), 20 );
-                }
-#ifdef _MSC_VER
-#pragma warning ( disable : 4286 )
-                // GRR. Visual C++ dones not handle generic exceptions with the above general statement.
-                // A specialized version is needed. The best part: it warns about the code below being redundant.
-                catch ( tGenericException const & e )
-                {
+                case(SDLK_SPACE):
+                            case(SDLK_KP_ENTER):
+                                case(SDLK_RETURN):
+                                        repeat = false;
                     try
+            {
+                        su_inMenu = false;
+                        items[selected]->Enter();
+                    }
+                    catch (tException const & e)
                     {
+                        uMenu::SetIdle(NULL);
+
+                        // inform user of generic errors
                         tConsole::Message( e.GetName(), e.GetDescription(), 20 );
                     }
-                    catch (...)
+#ifdef _MSC_VER
+#pragma warning ( disable : 4286 )
+                    // GRR. Visual C++ dones not handle generic exceptions with the above general statement.
+                    // A specialized version is needed. The best part: it warns about the code below being redundant.
+                    catch( tGenericException const & e )
                     {
+                        try
+                        {
+                            tConsole::Message( e.GetName(), e.GetDescription(), 20 );
+                        }
+                        catch(...)
+                        {
+                        }
                     }
-                }
 #endif
 
-                su_inMenu = true;
+                    su_inMenu = true;
 
-                repeat = false;
-                lastkey=tSysTimeFloat();
-                break;
+                    repeat = false;
+                    lastkey=tSysTimeFloat();
+                    break;
 
-            default:
-                // let the input subsystem handle events for later processing
-                su_HandleEvent( event, true );
-                break;
+                default:
+                    // let the input subsystem handle events for later processing
+                    su_HandleEvent( event, true );
+                    break;
+                }
             }
-        }
-        break;
+            break;
         default:
             // let the input subsystem handle events for later processing
             su_HandleEvent( event, true );
@@ -471,67 +436,23 @@ void uMenu::HandleEvent( SDL_Event event )
 #endif
 }
 
-#ifndef DEDICATED
-static bool s_idleBackground = false;
-#endif
 
 // paints a nice background
-void uMenu::GenericBackground(REAL top){
+void uMenu::GenericBackground(){
 #ifndef DEDICATED
     if (idle)
     {
-        s_idleBackground = true;
-
         try
         {
             // throw tGenericException("test"); // (test exception throw to see if error handling works right)
             (*idle)();
-
-            // render the console so it appears behind the menu
-            if( sr_con.autoDisplayAtSwap )
-            {
-                sr_con.Render();
-            }
-
-            // fade everything rendered so far to black
-            if( sr_alphaBlend )
-            {
-                sr_ResetRenderState(true);
-
-                double time = tSysTimeFloat();
-                static double lastTime = time - 100;
-                static REAL alpha = 0.0f;
-                double timePassed = time - lastTime;
-                if( time - lastTime > 1.0 )
-                {
-                    alpha = 0.0f;
-                }
-                else
-                {
-                    alpha += timePassed;
-                    static const REAL limit = .5;
-
-                    if( alpha > limit )
-                    {
-                        alpha = limit;
-                    }
-                }
-                lastTime = time;
-
-                RenderEnd();
-                glColor4f(0, 0, 0, alpha);
-                glRectf(-1,-1,1,top);
-            }
         }
-        catch ( ... )
+        catch( ... )
         {
-            s_idleBackground = false;
-
             // the idle background function is broken. Disable it and rethrow.
             idle = 0;
             throw;
         }
-        s_idleBackground = false;
     }
     else if (sr_glOut){
         uCallbackMenuBackground::MenuBackground();
@@ -545,11 +466,6 @@ void uMenu::GenericBackground(REAL top){
 // marks the menu for exit
 void uMenu::OnExit(){
     exitFlag=1;
-}
-
-//! called every frame before the menu is rendered
-void uMenu::OnRender()
-{
 }
 
 // *****************************************************
@@ -570,7 +486,7 @@ void uMenuItem::SetColor( bool selected, REAL alpha )
     //   rTextField::SetBlendColor( tColor(.8+.2*sin(time),.3-.1*sin(time),.3-.1*sin(time),alpha) );
     rTextField::SetDefaultColor( tColor(1,1,1,alpha) );
 
-    if (selected)
+    if(selected)
     {
         REAL time=tSysTimeFloat()*10;
         REAL intensity = 1+.3*sin(time);
@@ -581,7 +497,7 @@ void uMenuItem::SetColor( bool selected, REAL alpha )
 
 void uMenuItem::DisplayText(REAL x,REAL y,const char *text,
                             bool selected,REAL alpha,
-                            int center,int c,int cp, rTextField::ColorMode colorMode ){
+                            int center,int c,int cp, float maxWidth){
 #ifndef DEDICATED
     if (sr_glOut){
         SetColor( selected, alpha );
@@ -589,22 +505,18 @@ void uMenuItem::DisplayText(REAL x,REAL y,const char *text,
         REAL tw = text_width;
         REAL th = text_height;
 
-        
-#if 0
-        // the function that is called takes care of that
         REAL availw = 1.9f;
         if (center < 0) availw = (.9f-x);
         if (center > 0) availw = (x + .9f);
+        if (availw > maxWidth) availw = maxWidth;
 
-        int len = strlen(text);
-        if (len * tw > availw)
+        float usedwidth=rTextField::GetTextLength(tString(text), th, true);
+        if (usedwidth > availw)
         {
-            th *= availw/(len * tw);
-            tw  = availw/len;
+            th *= availw/(usedwidth);
         }
-#endif
 
-        ::DisplayText(x,y,tw,th,text,center,c,cp, colorMode );
+        ::DisplayText(x,y,tw,th,text,center,c,cp);
     }
 #endif
 }
@@ -684,7 +596,7 @@ uMenuItemInt::uMenuItemInt
 (uMenu *m,const char *tit,const char *help,int &targ,
  int mi,int ma,int step)
         :uMenuItem(m,help),title(tit),target(targ),Min(mi),Max(ma),
-        Step(step){
+Step(step){
     if (target<Min) target=Min;
     if (target>Max) target=Max;
 }
@@ -694,7 +606,7 @@ uMenuItemInt::uMenuItemInt
 (uMenu *m,const tOutput &tit,const tOutput &help,int &targ,
  int mi,int ma,int step)
         :uMenuItem(m,help),title(tit),target(targ),Min(mi),Max(ma),
-        Step(step){
+Step(step){
     if (target<Min) target=Min;
     if (target>Max) target=Max;
 }
@@ -715,46 +627,6 @@ void uMenuItemInt::Render(REAL x,REAL y,REAL alpha,
     DisplayText(x+.02,y,s,selected,alpha,-1);
 }
 
-// *****************************************
-//               Float Choose
-// *****************************************
-
-#ifdef SLOPPYLOCALE
-uMenuItemReal::uMenuItemReal
-(uMenu *m,const char *tit,const char *help,REAL &targ,
- REAL mi,REAL ma,REAL step)
-        :uMenuItem(m,help),title(tit),target(targ),Min(mi),Max(ma),
-        Step(step){
-    if (target<Min) target=Min;
-    if (target>Max) target=Max;
-}
-#endif
-
-uMenuItemReal::uMenuItemReal
-(uMenu *m,const tOutput &tit,const tOutput &help,REAL &targ,
- REAL mi,REAL ma,REAL step)
-        :uMenuItem(m,help),title(tit),target(targ),Min(mi),Max(ma),
-        Step(step){
-    if (target<Min) target=Min;
-    if (target>Max) target=Max;
-}
-
-
-void uMenuItemReal::LeftRight(int dir){
-    target+=dir*Step;
-    if (target<Min) target=Min;
-    if (target>Max) target=Max;
-}
-
-void uMenuItemReal::Render(REAL x,REAL y,REAL alpha,
-                          bool selected){
-    DisplayText(x-.02,y,title,selected,alpha,1);
-
-    tString s;
-    s << target;
-    DisplayText(x+.02,y,s,selected,alpha,-1);
-}
-
 
 // *****************************************************
 
@@ -764,11 +636,10 @@ uMenuItemString::uMenuItemString(uMenu *M,
                                  tString &c,
                                  int maxLength )
         :uMenuItem(M,help),description(de),content(&c),cursorPos(0), maxLength_( maxLength ){
-    int len=content->Len();
-    if (len==0 || (*content)(len-1)!=0)
-        (*content)[len]=0;
+    // int len=content->Len();
+    // if (len==0 || (*content)(len-1)!=0)
+    //    (*content)[len]=0;
     cursorPos=content->Len()-1;
-    colorMode_ = rTextField::COLOR_SHOW;
 }
 
 void uMenuItemString::Render(REAL x,REAL y,
@@ -783,13 +654,8 @@ void uMenuItemString::Render(REAL x,REAL y,
         if (counter & 32) cmode=2;
     }
 
-    // unslected items with COLOR_SHOW should be rendered with COLOR_USE
-    rTextField::ColorMode colorMode = colorMode_;
-    if ( colorMode == rTextField::COLOR_SHOW && !selected )
-        colorMode = rTextField::COLOR_USE;
-
     DisplayText(x-.02,y,description,selected,alpha,1);
-    DisplayText(x+.02,y,&((*content)[0]),selected,alpha,-1,cmode,cursorPos, colorMode );
+    DisplayText(x+.02,y,*content,selected,alpha,-1,cmode,cursorPos);
 #endif
 }
 
@@ -920,12 +786,11 @@ bool uMenuItemString::Event(SDL_Event &e){
             // insert character if there is room
             if (content->Len() < maxLength_)
             {
-                for (int i=content->Len()-1;i>=cursorPos;i--)
-                    (*content)[i+1]=(*content)[i];
-
-                // guarantee proper null termination
-                (*content)[content->Len()-1]='\0';
-                (*content)[cursorPos]=c.unicode;
+                tString beg = content->SubStr(0,cursorPos);
+                tString end = content->SubStr(cursorPos);
+                *content = beg;
+                *content += tString::CHAR(c.unicode);
+                *content += end;
                 cursorPos++;
             }
         }
@@ -934,73 +799,226 @@ bool uMenuItemString::Event(SDL_Event &e){
         }
     }
 
-    if (cursorPos<0)    cursorPos=0;
-    if (cursorPos > content->Len()-1) cursorPos=content->Len()-1;
+    if(cursorPos<0)    cursorPos=0;
+    if(cursorPos > content->Len()-1) cursorPos=content->Len()-1;
 
     return ret;
-#else
+#else  
     return false;
 #endif
 }
 
-uMenuItemStringWithHistory::uMenuItemStringWithHistory(uMenu *M,const tOutput& desc, const tOutput& help,tString &c, int maxLength, std::deque<tString> &history, int limit ):
+//! @param words a deque containing the possible words that can be used for completion
+uAutoCompleter::uAutoCompleter(std::deque<tString> &words) :
+        m_PossibleWords(words),
+        m_LastCompletion(-1)
+{}
+
+//! @param string the string that should be tested
+//! @param pos    the cursor position within the string
+//! @return -1 if the cursor isn't at the end of a word, the number of characters to the previous space if it is
+int uAutoCompleter::FindLengthOfLastWord(tString &string, unsigned pos) {
+    int charright = ' ', charleft  = ' ';
+    if(string.size() >= 1) {
+        if (pos == string.size()) {
+            charleft=string.at(pos-1);
+        }
+        else if (pos < string.size()) {
+            charright=string.at(pos);
+            if(pos>1) {
+                charleft=string.at(pos-1);
+            }
+        }
+    }
+    if(charright != ' ' && charleft != ' ')
+        return -1; //no completion possible
+    if(charleft == ' ')
+        return 0;
+    else
+        return pos - string.find_last_of(' ', pos - 1) - 1;
+}
+
+//! @param word       the part of the word that is searched for
+//! @param results    the list where the possible completions will be saved
+//! @param ignorecase if true, the case will be ignored
+void uAutoCompleter::FindPossibleWords(tString word, std::deque<tString> &results, bool ignorecase) {
+    if(ignorecase)
+        word = word.ToLower();
+    unsigned len = word.size();
+    for(std::deque<tString>::iterator i=m_PossibleWords.begin(); i!=m_PossibleWords.end(); ++i) {
+        if((ignorecase ? i->SubStr(0, len).ToLower() : i->SubStr(0, len)) == word)
+            results.push_back(*i);
+    }
+}
+
+//! @param word       the part of the word that is searched for
+//! @param results    the list of possible completions
+//! @param ignorecase if true, the case will be ignored
+//! @return the match, if any
+tString uAutoCompleter::FindClosestMatch(tString &word, std::deque<tString> &results, bool ignorecase) {
+    tString ret(word);
+    unsigned int len = ret.size();
+    while(true) {
+        std::deque<tString>::iterator i;
+        i = results.begin();
+        char nextchar;
+        bool found=true;
+        if(len < i->size()) {
+            found=false;
+            nextchar=i->at(len);
+            if(ignorecase) nextchar=tolower(nextchar);
+            ++i;
+            for(; i!=results.end(); ++i) {
+                if(len >= i->size() || nextchar != (ignorecase ? tolower(i->at(len)) : i->at(len))) {
+                    found=true;
+                    break;
+                }
+            }
+        }
+        if (found) //we found a mismatch
+            break;
+        else{
+            ret += nextchar;
+            len++;
+        }
+    }
+    return ret;
+}
+
+//! @param results    the list of possible completions
+//! @param len        the length of the word that was already typed, it will be highlighted
+void uAutoCompleter::ShowPossibilities(std::deque<tString> &results, int len) {
+    if(results.size() > 10) {
+        con << tOutput("$tab_completion_toomanyresults");
+    }
+    else {
+        con << tOutput("$tab_completion_results");
+        for(std::deque<tString>::iterator i=results.begin(); i!=results.end(); ++i) {
+            con << "0xff8888"
+            << i->SubStr(0, len)
+            << "0xffffff"
+            << i->SubStr(len)
+            << "\n";
+        }
+    }
+}
+
+//! @param string     the string in which the completion should take place
+//! @param pos        the position in strind where the replaced word ends
+//! @param len        the length of the word that is already there
+//! @param match      the string that will be inserted into the other one
+//! @return the new cursor position
+int uAutoCompleter::DoCompletion(tString &string, int pos, int len, tString &match) {
+    string.erase(pos-len, len);
+    string.insert(pos-len, match);
+    return pos - len + match.size();
+}
+
+//! @param string     the string in which the completion should take place
+//! @param pos        the position in string where the replaced word ends
+//! @param len        the length of the word that is already there
+//! @param match      the string that will be inserted into the other one
+//! @return the new cursor position
+int uAutoCompleter::DoFullCompletion(tString &string, int pos, int len, tString &match) {
+    tString actualString = match + " ";
+    return DoCompletion(string, pos, len, actualString);
+}
+
+//! @param string     the string in which the completion should take place
+//! @param pos        the cursor position
+//! @param len	      the length of the word
+//! @return the new position on success (something was found), -1 on failure
+int uAutoCompleter::TryCompletion(tString &string, unsigned pos, unsigned len) {
+    tString word(string.SubStr(pos-len, len));
+    std::deque<tString> results;
+    FindPossibleWords(word, results);
+    if(results.size() > 1){
+        tString match(FindClosestMatch(word, results, true));
+        if(match == word) { //no completion took place
+            ShowPossibilities(results, len);
+            return pos;
+        }
+        else { //do the completion
+            return DoCompletion(string, pos, len, match);
+        }
+    }
+    else if(!results.empty()){
+        return DoFullCompletion(string, pos, len, results.front());
+    }
+    return -1;
+}
+
+//! @param string     the string in which the completion should take place
+//! @param pos        the cursor position
+//! @return the new cursor position
+int uAutoCompleter::Complete(tString &string, unsigned pos) {
+    if(m_LastCompletion != -1 && (unsigned)m_LastCompletion < pos) {
+        int res = TryCompletion(string, pos, pos - m_LastCompletion);
+        if(res != -1) return res;
+    }
+    int len = FindLengthOfLastWord(string, pos);
+    if(len == -1) return pos; //in the middle of a word...
+    int res = TryCompletion(string, pos, len);
+    if(res != -1) {
+        m_LastCompletion = pos - len;
+        return res;
+    }
+    return pos;
+}
+
+//! @param M         passed on to uMenuItemString
+//! @param desc      passed on to uMenuItemString
+//! @param help      passed on to uMenuItemString
+//! @param c         passed on to uMenuItemString
+//! @param maxLength passed on to uMenuItemString
+//! @param history   a reference to the history of commands
+//! @param limit     the limit for the history's size
+//! @param completer the autocompleter to be used, if 0, no completion will take place
+uMenuItemStringWithHistory::uMenuItemStringWithHistory(uMenu *M,const tOutput& desc, const tOutput& help,tString &c, int maxLength, std::deque<tString> &history, int limit, uAutoCompleter *completer ):
         uMenuItemString(M, desc,help,c, maxLength ),
         m_History(history),
         m_HistoryPos(0),
-        m_HistoryLimit(limit)
-{
+        m_HistoryLimit(limit),
+m_Completer(completer) {
     m_History.push_front(tString());
 }
 
-uMenuItemStringWithHistory::~uMenuItemStringWithHistory()
-{
-    if (content->Len() > 1)
-    {
-        for (std::deque<tString>::iterator i=m_History.begin(); i!=m_History.end(); ++i)
-        {
-            if (*i == *content)
-            {
+//! This destructor will write the currently displayed string into the history if it isn't already in it
+uMenuItemStringWithHistory::~uMenuItemStringWithHistory() {
+    if(content->Len() > 1){
+        for(std::deque<tString>::iterator i=m_History.begin(); i!=m_History.end(); ++i) {
+            if(*i == *content) {
                 m_History.erase(i);
                 break;
             }
         }
         m_History.front() = *content;
-    }
-    else
-    {
+    } else {
         m_History.pop_front();
     }
-    if (m_History.size() > m_HistoryLimit)
+    if(m_History.size() > m_HistoryLimit)
         m_History.pop_back();
 }
 
-bool uMenuItemStringWithHistory::Event(SDL_Event &e)
-{
-    // flag indicating that the event was handled
-    bool ret = false;
+//! @param e the event to process
+/// @returns true if the event was handled, false if it wasn't
+bool uMenuItemStringWithHistory::Event(SDL_Event &e){
 #ifndef DEDICATED
-    SDLMod mod = e.key.keysym.mod;
-
-    if (e.type == SDL_KEYDOWN
-            && ((e.key.keysym.sym == SDLK_UP)
-                || (e.key.keysym.sym == SDLK_p && mod & KMOD_CTRL)))
-    {
+    if (e.type==SDL_KEYDOWN &&
+            (e.key.keysym.sym==SDLK_UP)){
         if (m_History.size() - 1 > m_HistoryPos)
         {
-            // the new entry... save it before overwriting it
-            if (m_HistoryPos == 0)
+            if(m_HistoryPos == 0)  //the new entry... save it before overwriting it
                 m_History.front() = *content;
             m_HistoryPos++;
             *content = m_History[m_HistoryPos];
             cursorPos = content->Len() - 1;
         }
 
-        ret = true;
+        return true;
     }
-    else if (e.type == SDL_KEYDOWN
-             && ((e.key.keysym.sym == SDLK_DOWN)
-                 || (e.key.keysym.sym == SDLK_n && mod & KMOD_CTRL)))
-    {
+    else if (e.type==SDL_KEYDOWN &&
+             (e.key.keysym.sym==SDLK_DOWN)){
         if (m_HistoryPos > 0)
         {
             m_HistoryPos--;
@@ -1008,18 +1026,20 @@ bool uMenuItemStringWithHistory::Event(SDL_Event &e)
             cursorPos = content->Len() - 1;
         }
 
-        ret = true;
+        return true;
     }
+    else if (e.type==SDL_KEYDOWN &&
+             (e.key.keysym.sym==SDLK_TAB)){
+        if(m_Completer != 0) {
+            cursorPos = m_Completer->Complete(*content, cursorPos);
+        }
 
-    // clamp cursor position
-    if (cursorPos<0)
-        cursorPos=0;
-    if (cursorPos > content->Len() - 1)
-        cursorPos=content->Len() - 1;
+        return true;
+    }
+    else
+        return uMenuItemString::Event(e);
 #endif
-
-    // return result or delegate
-    return ret || uMenuItemString::Event(e);
+    return false;
 }
 
 // *****************************************************
@@ -1030,7 +1050,7 @@ bool uMenuItemStringWithHistory::Event(SDL_Event &e)
 uMenuItemSubmenu::uMenuItemSubmenu(uMenu *M,
                                    uMenu *s,
                                    const tOutput& help)
-        :uMenuItem(M,help),submenu(s){}
+    :uMenuItem(M,help),submenu(s){}
 
 
 void uMenuItemSubmenu::Render(REAL x,REAL y,REAL alpha,bool selected){
@@ -1132,7 +1152,7 @@ void uMenuItemFileSelection::AddFile( const char *fileName, const char *filePath
 static tCallback *enter_anchor=NULL,*leave_anchor=NULL, *background_anchor=NULL;
 
 uCallbackMenuEnter::uCallbackMenuEnter(VOIDFUNC *f)
-        :tCallback(enter_anchor,f){}
+    :tCallback(enter_anchor,f){}
 
 void uCallbackMenuEnter::MenuEnter(){
     Exec(enter_anchor);
@@ -1152,56 +1172,17 @@ void uCallbackMenuBackground::MenuBackground(){
     Exec(background_anchor);
 }
 
-// poll input, return true if ESC was pressed
-bool uMenu::IdleInput( bool processInput )
-{
-#ifndef DEDICATED
-    if( !processInput )
-    {
-        sr_LockSDL();
-        SDL_PumpEvents();
-        sr_UnlockSDL();
-        return uMenu::quickexit != uMenu::QuickExit_Off;
-    }
 
-    SDL_Event event;
-    uInputProcessGuard inputProcessGuard;
-    while (!s_idleBackground && su_GetSDLInput(event))
-    {   
-        switch (event.type)
-        {
-        case SDL_KEYDOWN:
-            switch (event.key.keysym.sym)
-            {
-            case(SDLK_ESCAPE):
-                repeat = false;
-                lastkey=tSysTimeFloat();
-                return true;
-                break;
-            default:
-                break;
-            }   
-        default:
-            break;
-        }
-    }   
 
-    return uMenu::quickexit != uMenu::QuickExit_Off;
-#endif
-
-    return false;
-}
-
-// return value: false only if the user pressed ESC
-bool uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL to){
-    bool ret = true;
+void uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL to){
 #ifdef DEDICATED
     con << message << ":\n";
     con << interpretation << '\n';
 #else
-
     // reload textures (just in case)
     rITexture::UnloadAll();
+
+    tAdvanceFrame();
 
     bool textOutBack = sr_textOut;
     sr_textOut = false;
@@ -1214,11 +1195,11 @@ bool uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL 
 
     rSysDep::ClearGL();
     rSysDep::SwapGL();
-    if (sr_glOut)
-    {
-        rFont::s_defaultFont.Select();
-        rFont::s_defaultFontSmall.Select();
-    }
+    //    if (sr_glOut)
+    //    {
+    //        rFont::s_defaultFont.Select();
+    //        rFont::s_defaultFontSmall.Select();
+    //    }
     rSysDep::ClearGL();
     rSysDep::SwapGL();
 
@@ -1228,45 +1209,14 @@ bool uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL 
     // catch some keyboard input
     {
         uInputProcessGuard inputProcessGuard;
-        while (su_GetSDLInput(tEvent)) ;
+        while(su_GetSDLInput(tEvent));
     }
 
     {
         uInputProcessGuard inputProcessGuard;
+        while(  !quickexit && ( !su_GetSDLInput(tEvent) || tEvent.type!=SDL_KEYDOWN) &&
+                (to < 0 || tSysTimeFloat() < timeout)){
 
-        unsigned offset = 0; //amount of scrolling taking place
-        //convert to an array for scrolling
-        tString interpretationString;
-        interpretationString << interpretation << "\n";
-        std::vector<tString> lines;
-        int lastNewline = 0;
-        for (int i = 0; i < interpretationString.Len() - 1; ++i) {
-            if (interpretationString[i] == '\n' && i != 0) {
-                lines.push_back(interpretationString.SubStr(lastNewline, i - lastNewline));
-                lastNewline = i + 1;
-            }
-        }
-        while (  !quickexit &&
-                 (to < 0 || tSysTimeFloat() < timeout)){
-            //while(  !quickexit && ( !su_GetSDLInput(tEvent) || tEvent.type!=SDL_KEYDOWN) &&
-            //        (to < 0 || tSysTimeFloat() < timeout)){
-            if ( su_GetSDLInput(tEvent) && tEvent.type==SDL_KEYDOWN) {
-                switch (tEvent.key.keysym.sym) {
-                case SDLK_UP:
-                    if (offset > 0)
-                        offset -= 1;
-                    continue;
-                case SDLK_DOWN:
-                    offset += 1;
-                    continue;
-                case SDLK_ESCAPE:
-                    ret = false;
-                    break;
-                default:
-                    break;
-                }
-                break;
-            }
             if ( sr_glOut )
             {
                 sr_ResetRenderState(true);
@@ -1296,15 +1246,14 @@ bool uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL 
                 w = 16/640.0;
                 h = 32/480.0;
 
-                if (offset >= lines.size()) offset = lines.size() - 1;
                 {
                     rTextField c(-.8,.6, w, h);
 
-                    for (unsigned i = offset; i < lines.size(); ++i)
-                        c << lines[i] << "\n";
+                    c << interpretation;
                 }
+
+                rSysDep::SwapGL();
             }
-            rSysDep::SwapGL();
             tAdvanceFrame();
         }
     }
@@ -1312,7 +1261,7 @@ bool uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL 
     // catch some keyboard input
     {
         uInputProcessGuard inputProcessGuard;
-        while (su_GetSDLInput(tEvent)) ;
+        while (su_GetSDLInput(tEvent));
     }
 
     uMenu::SetIdle(idle_back);
@@ -1322,7 +1271,5 @@ bool uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL 
 
     sr_textOut = textOutBack;
 #endif
-
-    return ret;
 }
 

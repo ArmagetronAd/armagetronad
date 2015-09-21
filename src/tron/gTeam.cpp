@@ -30,49 +30,28 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "ePlayer.h"
 #include "eTeam.h"
 
-// sets the spectator mode of a local player
-static void SetSpectator( ePlayerNetID * player, bool spectate )
-{
-    for ( int i = MAX_PLAYERS-1; i>=0; --i )
-    {
-        if ( ePlayer::PlayerIsInGame(i))
-        {
-            ePlayer* localPlayer = ePlayer::PlayerConfig( i );
-            ePlayerNetID* pni = localPlayer->netPlayer;
-            if ( pni == player && localPlayer->spectate != spectate )
-            {
-                localPlayer->spectate = spectate;
-                con << tOutput( spectate ? "$player_toggle_spectator_on" : "$player_toggle_spectator_off", localPlayer->name );
-                ePlayerNetID::Update();
-            }
-        }
-    }
-}
-
-
 class gMenuItemPlayerTeam: public uMenuItem
 {
     ePlayerNetID* 	player;
     eTeam*			team;
-    bool            canJoin_;
 public:
-    gMenuItemPlayerTeam(uMenu *M,ePlayerNetID* p, eTeam* t, bool canJoin )
+    gMenuItemPlayerTeam(uMenu *M,ePlayerNetID* p, eTeam* t )
             : uMenuItem( M, tOutput("$team_menu_join_help") ),
             player ( p ),
-            team ( t),
-            canJoin_( canJoin )
+            team ( t)
     {
     }
 
     virtual void Render(REAL x,REAL y,REAL alpha=1,bool selected=0)
     {
-        tOutput text( "$team_menu_join", team->Name() );
-        DisplayTextSpecial( x, y, text, selected, alpha * ( canJoin_ ? 1 : ( selected ? .8 : .5 ) ) );
+        tOutput text;
+        text.SetTemplateParameter(1 , team->Name() );
+        text << "$team_menu_join";
+        DisplayTextSpecial( x, y, text, selected, alpha );
     }
 
     virtual void Enter()
     {
-        SetSpectator( player, false );
         player->SetTeamWish( team );
         menu->Exit();
     }
@@ -95,30 +74,7 @@ public:
 
     virtual void Enter()
     {
-        SetSpectator( player, false );
         player->CreateNewTeamWish();
-        menu->Exit();
-    }
-};
-
-class gMenuItemSpectate: public uMenuItem
-{
-    ePlayerNetID* 	player;
-public:
-    gMenuItemSpectate( uMenu *M,ePlayerNetID* p )
-            : uMenuItem( M, tOutput("$team_menu_spectate_help") ),
-            player ( p )
-    {
-    }
-
-    virtual void Render(REAL x,REAL y,REAL alpha=1,bool selected=0)
-    {
-        DisplayTextSpecial( x, y, tOutput("$team_menu_spectate"), selected, alpha );
-    }
-
-    virtual void Enter()
-    {
-        SetSpectator( player, true );
         menu->Exit();
     }
 };
@@ -149,26 +105,22 @@ public:
         uMenu playerMenu( title );
         tArray<uMenuItem*> items;
 
-        if ( !player->IsSpectating() )
-        {
-            items[ items.Len() ] = tNEW( gMenuItemSpectate ) ( &playerMenu, player );
-        }
-
         for ( i = eTeam::teams.Len()-1; i>=0; --i )
         {
             eTeam *team = eTeam::teams(i);
-            if ( team != player->NextTeam() )
+            if ( team != player->NextTeam() && team->PlayerMayJoin( player ) )
             {
-                items[ items.Len() ] = tNEW( gMenuItemPlayerTeam ) ( &playerMenu, player, team, team->PlayerMayJoin( player )  );
+                items[ items.Len() ] = tNEW( gMenuItemPlayerTeam ) ( &playerMenu, player, team );
             }
         }
 
-        if ( player->IsSpectating() ||
+        if ( /* eTeam::NewTeamAllowed() && */
             !( player->NextTeam() && player->NextTeam()->NumHumanPlayers() == 1 &&
                player->CurrentTeam() && player->CurrentTeam()->NumHumanPlayers() == 1 )
         )
         {
             items[ items.Len() ] = tNEW( gMenuItemNewTeam ) ( &playerMenu, player );
+
         }
 
         playerMenu.Enter();
@@ -191,7 +143,7 @@ void gTeam::TeamMenu()
     uMenu Menu( tOutput("$team_menu_title") );
     tArray<uMenuItem*> items;
 
-    for ( i = MAX_PLAYERS-1; i>=0; --i )
+    for ( i = MAX_PLAYERS; i>=0; --i )
     {
         if ( ePlayer::PlayerIsInGame(i))
         {
@@ -200,7 +152,7 @@ void gTeam::TeamMenu()
             help.SetTemplateParameter(1, player->Name() );
             help << "$team_menu_player_help";
             ePlayerNetID* pni = player->netPlayer;
-            if ( pni )
+            if ( pni && !player->spectate )
                 items[ items.Len() ] = tNEW( gMenuItemPlayer ) ( &Menu, pni, help );
         }
     }

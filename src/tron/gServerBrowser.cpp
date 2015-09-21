@@ -29,7 +29,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "gGame.h"
 #include "gLogo.h"
 #include "gServerFavorites.h"
-#include "gFriends.h"
 
 #include "nServerInfo.h"
 #include "nNetwork.h"
@@ -40,7 +39,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "rRender.h"
 
 #include "uMenu.h"
-#include "uInputQueue.h"
 
 #include "tMemManager.h"
 #include "tSysTime.h"
@@ -53,14 +51,13 @@ int gServerBrowser::lowPort  = 4534;
 
 int gServerBrowser::highPort = 4540;
 static bool continuePoll = false;
-static int sg_simultaneous = 20;
+static int sg_simultaneous = 5;
 static tSettingItem< int > sg_simultaneousConf( "BROWSER_QUERIES_SIMULTANEOUS", sg_simultaneous );
 
 static tOutput *sg_StartHelpText = NULL;
 
 nServerInfo::QueryType sg_queryType = nServerInfo::QUERY_OPTOUT;
-tCONFIG_ENUM( nServerInfo::QueryType );
-static tSettingItem< nServerInfo::QueryType > sg_query_type( "BROWSER_QUERY_FILTER", sg_queryType );
+static tSettingItem< int > sg_query_type( "BROWSER_QUERY_FILTER", reinterpret_cast< int & >( sg_queryType ) );
 
 class gServerMenuItem;
 
@@ -69,24 +66,12 @@ class gServerInfo: public nServerInfo
 {
 public:
     gServerMenuItem *menuItem;
-	bool show; //for server browser hiding
 
-    gServerInfo():menuItem(NULL), show(true)
+    gServerInfo():menuItem(NULL)
     {
-    }
+    };
 
     virtual ~gServerInfo();
-
-    // during browsing, the whole server list consists of gServerInfos
-    static gServerInfo * GetFirstServer()
-    {
-        return dynamic_cast< gServerInfo * >( nServerInfo::GetFirstServer() );
-    }
-
-    gServerInfo * Next()
-    {
-        return dynamic_cast< gServerInfo * >( nServerInfo::Next() );
-    }
 };
 
 nServerInfo* CreateGServer()
@@ -108,8 +93,6 @@ class gServerMenu: public uMenu
     int sortKey_;
 
 public:
-    virtual void OnRender();
-
     void Update(); // sort the server view by score
     gServerMenu(const char *title);
     ~gServerMenu();
@@ -117,7 +100,7 @@ public:
     virtual void HandleEvent( SDL_Event event );
 
     void Render(REAL y,
-                const tString &servername, const tOutput &score,
+                const tOutput &servername, const tOutput &score,
                 const tOutput &users     , const tOutput &ping);
 
     void Render(REAL y,
@@ -129,9 +112,6 @@ public:
 class gBrowserMenuItem: public uMenuItem
 {
 protected:
-    bool displayHelp_;
-    REAL helpAlpha_;
-    
     gBrowserMenuItem(uMenu *M,const tOutput &help): uMenuItem( M, help )
     {
     }
@@ -140,13 +120,6 @@ protected:
     virtual bool Event( SDL_Event& event );
 
     virtual void RenderBackground();
-
-    virtual bool DisplayHelp( bool display, REAL y, REAL alpha )
-    {
-        helpAlpha_ = alpha;
-        displayHelp_ = display;
-        return false;
-    }
 };
 
 class gServerMenuItem: public gBrowserMenuItem
@@ -192,21 +165,6 @@ static bool sg_RequestLANcontinuously = false;
 
 void gServerBrowser::BrowseMaster()
 {
-    BrowseSpecialMaster(0,"");
-}
-
-// the currently active master
-static nServerInfoBase * sg_currentMaster = 0;
-nServerInfoBase * gServerBrowser::CurrentMaster()
-{
-    return sg_currentMaster;
-}
-
-
-void gServerBrowser::BrowseSpecialMaster( nServerInfoBase * master, char const * prefix )
-{
-    sg_currentMaster = master;
-
     sg_RequestLANcontinuously = false;
 
     sn_ServerInfoCreator *cback = nServerInfo::SetCreator(&CreateGServer);
@@ -225,7 +183,7 @@ void gServerBrowser::BrowseSpecialMaster( nServerInfoBase * master, char const *
     sr_textOut=true;
 
     nServerInfo::DeleteAll();
-    nServerInfo::GetFromMaster( master, prefix );
+    nServerInfo::GetFromMaster();
     nServerInfo::Save();
 
     //  gLogo::SetBig(true);
@@ -244,9 +202,8 @@ void gServerBrowser::BrowseSpecialMaster( nServerInfoBase * master, char const *
     sg_TalkToMaster = false;
 
     nServerInfo::SetCreator(cback);
-
-    sg_currentMaster = master;
 }
+
 
 void gServerBrowser::BrowseLAN()
 {
@@ -303,12 +260,6 @@ void gServerBrowser::BrowseServers()
       ConnectToServer(nServerInfo::GetFirstServer());
     */
     browser.Update();
-
-    // eat excess input the user made while the list was fetched
-    SDL_Event ignore;
-    REAL time;
-    while(su_GetSDLInput(ignore, time)) ;
-
     browser.Enter();
 
     nServerInfo::GetFromLANContinuouslyStop();
@@ -331,20 +282,15 @@ void gServerMenu::HandleEvent( SDL_Event event )
         switch (event.key.keysym.sym)
         {
         case(SDLK_LEFT):
-            sortKey_ = ( sortKey_ + nServerInfo::KEY_MAX-1 ) % nServerInfo::KEY_MAX;
+                        sortKey_ = ( sortKey_ + nServerInfo::KEY_MAX-1 ) % nServerInfo::KEY_MAX;
             Update();
             return;
             break;
         case(SDLK_RIGHT):
-            sortKey_ = ( sortKey_ + 1 ) % nServerInfo::KEY_MAX;
+                        sortKey_ = ( sortKey_ + 1 ) % nServerInfo::KEY_MAX;
             Update();
             return;
             break;
-		case(SDLK_m):
-			FriendsToggle();
-            Update();
-			return;
-			break;
         default:
             break;
         }
@@ -354,36 +300,18 @@ void gServerMenu::HandleEvent( SDL_Event event )
     uMenu::HandleEvent( event );
 }
 
-void gServerMenu::OnRender()
-{
-    uMenu::OnRender();
-
-    // next time the server list is to be resorted
-    static double sg_serverMenuRefreshTimeout=-1E+32f;
-
-    if (sg_serverMenuRefreshTimeout < tSysTimeFloat())
-    {
-        Update();
-        sg_serverMenuRefreshTimeout = tSysTimeFloat()+2.0f;
-    }
-}
 
 void gServerMenu::Update()
 {
     // get currently selected server
     gServerMenuItem *item = NULL;
     if ( selected < items.Len() )
-    {
         item = dynamic_cast<gServerMenuItem*>(items(selected));
-    }
     gServerInfo* info = NULL;
     if ( item )
     {
         info = item->GetServer();
     }
-
-    // keep the cursor position relative to the top, if possible
-    int selectedFromTop = items.Len() - selected;
 
     ReverseItems();
 
@@ -391,44 +319,16 @@ void gServerMenu::Update()
     nServerInfo::Sort( nServerInfo::PrimaryKey( sortKey_ ) );
 
     int mi = 1;
-    gServerInfo *run = gServerInfo::GetFirstServer();
-	bool oneFound = false; //so we can display all if none were found
+    nServerInfo *run = nServerInfo::GetFirstServer();
     while (run)
     {
-		//check friend filter
-		if (getFriendsEnabled())
-		{
-			run->show = false;
-			int i;
-			tString userNames = run->UserNames();
-			tString* friends = getFriends();
-			for (i = MAX_FRIENDS-1; i>=0; i--)
-			{
-				if (run->Users() > 0 && friends[i].Len() > 1 && userNames.StrPos(friends[i]) >= 0)
-				{
-					oneFound = true;
-					run->show = true;
-				}
-			}
-		}
+        if (mi >= items.Len())
+            tNEW(gServerMenuItem)(this);
+
+        gServerMenuItem *item = dynamic_cast<gServerMenuItem*>(items(mi));
+        item->SetServer(run);
         run = run->Next();
-	}
-
-	run = gServerInfo::GetFirstServer();
-	{
-   		while (run)
-    	{
-			if (run->show || oneFound == false)
-			{
-	        	if (mi >= items.Len())
-    		        tNEW(gServerMenuItem)(this);
-
-    	    	gServerMenuItem *item = dynamic_cast<gServerMenuItem*>(items(mi));
-    	    	item->SetServer(run);
-	    	    mi++;
-			}
-        	run = run->Next();
-		}
+        mi ++;
     }
 
     if (items.Len() == 1)
@@ -442,11 +342,8 @@ void gServerMenu::Update()
 
     ReverseItems();
 
-    // keep the cursor position relative to the top, if possible ( calling function will handle the clamping )
-    selected = items.Len() - selectedFromTop;
-
-    // set cursor to currently selected server, if possible
-    if ( info && info->menuItem )
+    // set cursor to currently selected server
+    if ( info )
     {
         selected = info->menuItem->GetID();
     }
@@ -510,50 +407,48 @@ void gServerMenu::Render(REAL y,
 {
     if (sr_glOut)
     {
-        rTextField c(-.9f, y+text_height*.5, text_width, text_height);
-        c.SetWidth(1000);
+        DisplayText(-.9f, y, text_width, text_height, servername.c_str(), -1);
+        DisplayText(.6f, y, text_width, text_height, ping.c_str(), 1);
+        DisplayText(.75f, y, text_width, text_height, users.c_str(), 1);
+        DisplayText(.9f, y, text_width, text_height, score.c_str(), 1);
 
-        c.SetIndent(5);
+        ////int posDisplacement = 0;
+        //tColoredString text;
+        //if (tColoredString::RemoveColors(servername).Len() > 1)
+        //{
+        //    text << servername << "0xRESETT";
+        //}
+        //else
+        //    text << tOutput("$network_master_unknown");
 
+        //bool cut = true;
+        //if (ping.Len() > 1)
+        //{
+        //    text.SetPos(static_cast<int>(1.35/c.GetCWidth())  - tColoredString::RemoveColors( ping ).Len() - 1, cut );
+        //    cut = false;
+        //    text << " " << ping;
+        //}
 
-        //int posDisplacement = 0;
-        tColoredString text;
-        if (tColoredString::RemoveColors(servername).Len() > 1)
-        {
-            text << servername << "0xRESETT";
-        }
-        else
-            text << tOutput("$network_master_unknown");
+        //if (users.Len() > 1)
+        //{
+        //    text.SetPos(static_cast<int>(1.6/c.GetCWidth()) - tColoredString::RemoveColors( users ).Len(), cut );
+        //    cut = false;
+        //    text << users;
+        //}
 
-        if (ping.Len() > 1)
-        {
-            text.SetPos(static_cast<int>(1.35/c.GetCWidth())  - tColoredString::RemoveColors( ping ).Len() - 1, true );
-            text << "0xRESETT";
-            text << " " << ping;
-        }
-        else
-        {
-            text << "0xRESETT";
-        }
+        //if (score.Len() > 1)
+        //{
+        //    text.SetPos(static_cast<int>(1.8/c.GetCWidth()) - tColoredString::RemoveColors( score ).Len(), cut );
+        //    cut = false;
+        //    text << score;
+        //}
 
-        if (users.Len() > 1)
-        {
-            text.SetPos(static_cast<int>(1.6/c.GetCWidth()) - tColoredString::RemoveColors( users ).Len(), false );
-            text << users;
-        }
-
-        if (score.Len() > 1)
-        {
-            text.SetPos(static_cast<int>(1.8/c.GetCWidth()) - tColoredString::RemoveColors( score ).Len(), false );
-            text << score;
-        }
-
-        c << text;
+        //c << text;
     }
 }
 
 void gServerMenu::Render(REAL y,
-                         const tString &servername, const tOutput &score,
+                         const tOutput &servername, const tOutput &score,
                          const tOutput &users     , const tOutput &ping)
 {
     tColoredString highlight, normal;
@@ -596,8 +491,6 @@ void gServerMenu::Render(REAL y,
 #endif /* DEDICATED */
 static bool sg_filterServernameColorStrings = true;
 static tSettingItem< bool > removeServerNameColors("FILTER_COLOR_SERVER_NAMES", sg_filterServernameColorStrings);
-static bool sg_filterServernameDarkColorStrings = true;
-static tSettingItem< bool > removeServerNameDarkColors("FILTER_DARK_COLOR_SERVER_NAMES", sg_filterServernameDarkColorStrings);
 
 void gServerMenuItem::Render(REAL x,REAL y,REAL alpha, bool selected)
 {
@@ -668,9 +561,7 @@ void gServerMenuItem::Render(REAL x,REAL y,REAL alpha, bool selected)
         }
 
         if ( sg_filterServernameColorStrings )
-            name << tColoredString::RemoveColors( server->GetName(), false );
-	else if ( sg_filterServernameDarkColorStrings )
-            name << tColoredString::RemoveColors( server->GetName(), true );
+            name << tColoredString::RemoveColors( server->GetName() );
         else
         {
             name << server->GetName();
@@ -693,53 +584,26 @@ void gServerMenuItem::Render(REAL x,REAL y,REAL alpha, bool selected)
 #endif
 }
 
-static REAL sg_menuBottom    = -.9;
-static REAL sg_requestBottom = -.9;
 
 void gServerMenuItem::RenderBackground()
 {
 #ifndef DEDICATED
-    REAL helpTopReal = sg_requestBottom*shrink + displace - .05;;
-
     gBrowserMenuItem::RenderBackground();
 
-    rTextField::SetDefaultColor( tColor(1,1,1) );
-
-    rTextField players( -.9, helpTopReal, text_width, text_height );
     if ( server )
     {
+        rTextField::SetDefaultColor( tColor(1,1,1) );
+
+        rTextField players( -.9, -.3, text_width, text_height );
+	players.EnableLineWrap();
         players << tOutput( "$network_master_players" );
         if ( server->UserNamesOneLine().Len() > 2 )
             players << server->UserNamesOneLine();
         else
             players << tOutput( "$network_master_players_empty" );
         players << "\n" << tColoredString::ColorString(1,1,1);
-        tColoredString uri;
-        uri << server->Url() << tColoredString::ColorString(1,1,1);
-        players << tOutput( "$network_master_serverinfo", server->Release(), uri, server->Options() );
+        players << tOutput( "$network_master_serverinfo", server->Release(), server->Url(), server->Options() );
     }
-
-    if( displayHelp_ )
-    {
-        players << "\n";
-        players.SetColor(tColor(1,1,1,helpAlpha_));
-        players << Help();
-    }
-
-    REAL helpSpace = players.GetTop() - players.GetBottom();
-    REAL helpTop = -.85 + helpSpace;
-    REAL helpTopScaled = ( helpTop - displace )/shrink;
-    REAL helpTopMax = .25;
-    REAL helpTopMin = -.9;
-    if( helpTopScaled > helpTopMax )
-    {
-        helpTopScaled = helpTopMax;
-    }
-    if( helpTopScaled < helpTopMin )
-    {
-        helpTopScaled = helpTopMin;
-    }
-    sg_requestBottom = helpTopScaled;
 #endif
 }
 
@@ -844,44 +708,28 @@ bool gServerMenuItem::Event( SDL_Event& event )
 
 void gBrowserMenuItem::RenderBackground()
 {
-    if( menu )
-    {
-        double now = tSysTimeFloat();
-        static double lastTime = now;
-        if( sg_menuBottom > sg_requestBottom )
-        {
-            sg_menuBottom -= now - lastTime;
-        }
-        lastTime = now;
-        if( sg_menuBottom < sg_requestBottom )
-        {
-            sg_menuBottom = sg_requestBottom;
-        }
-
-        menu->SetBot( sg_menuBottom );
-        sg_requestBottom = -.9;
-    }
-
     sn_Receive();
-    sn_SendPlanned();
 
     menu->GenericBackground();
     if (continuePoll)
     {
         continuePoll = nServerInfo::DoQueryAll(sg_simultaneous);
         sn_Receive();
-        sn_SendPlanned();
+    }
+
+    static double timeout=-1E+32f;
+
+    if (timeout < tSysTimeFloat())
+    {
+        (static_cast<gServerMenu*>(menu))->Update();
+        timeout = tSysTimeFloat()+2.0f;
     }
 
 #ifndef DEDICATED
     rTextField::SetDefaultColor( tColor(.8,.3,.3,1) );
 
-	tString sn2 = tString(tOutput("$network_master_servername"));
-	if (getFriendsEnabled()) //display that friends filter is on
-		sn2 << " - " << tOutput("$friends_enable");
-
     static_cast<gServerMenu*>(menu)->Render(.62,
-                                            sn2,
+                                            tOutput("$network_master_servername"),
                                             tOutput("$network_master_score"),
                                             tOutput("$network_master_users"),
                                             tOutput("$network_master_ping"));
@@ -929,7 +777,7 @@ gServerInfo *gServerMenuItem::GetServer()
     return server;
 }
 
-static char const * sg_HelpText = "$network_master_browserhelp";
+static char *sg_HelpText = "$network_master_browserhelp";
 
 gServerMenuItem::gServerMenuItem(gServerMenu *men)
         :gBrowserMenuItem(men, sg_HelpText), server(NULL), lastPing_(-100), favorite_(false)

@@ -42,40 +42,6 @@
 #	include "tDirectories.h"
 #endif
 
-// lean auto-deleting wrapper class for xmlChar * return values the user has to clean after use
-class gXMLCharReturn
-{
-public:
-    gXMLCharReturn( xmlChar * string = NULL ): string_( string ){}
-    ~gXMLCharReturn(){ Destroy(); }
-
-    //! auto_ptrish copy constructor
-    gXMLCharReturn( gXMLCharReturn const & other ): string_( const_cast< gXMLCharReturn & >( other ).Release() ){}
-
-    //! auto_ptrish assignment operator
-    gXMLCharReturn & operator = ( gXMLCharReturn & other ){ string_ = other.Release(); return *this; }
-
-    //! conversion to char *
-    operator char * () const{ return reinterpret_cast< char * >( string_ ); }
-
-    //! conversion to xmlChar *( bad idea, causes overload trouble )
-    // operator xmlChar * () const{ return string_; }
-
-    //! releases ownership of the string and returns it
-    xmlChar * Release(){ xmlChar * ret = string_; string_ = 0; return ret; }
-
-    //! returns the xml string without modifying it
-    xmlChar * GetXML() const { return string_; }
-
-    //! returns the string without modifying it
-    char * Get() const { return *this; }
-
-    //! destroys the string
-    void Destroy(){ xmlFree(string_); string_ = 0; }
-private:
-    xmlChar * string_; //!< the string storage
-};
-
 //! Warn about deprecated map format
 static void sg_Deprecated()
 {
@@ -87,19 +53,9 @@ static void sg_Deprecated()
 gParser::gParser(gArena *anArena, eGrid *aGrid)
 {
     theArena = anArena;
-
     theGrid = aGrid;
-    doc = NULL;
+    m_Doc = NULL;
     rimTexture = 0;
-}
-
-gParser::~gParser()
-{
-    if (doc)
-    {
-        xmlFreeDoc(doc);
-        doc=NULL;
-    }
 }
 
 bool
@@ -109,32 +65,35 @@ gParser::trueOrFalse(char *str)
     return (!strncasecmp(str, "t", 1) || !strncasecmp(str, "y", 1) || atoi(str));
 }
 
-gXMLCharReturn
+char *
 gParser::myxmlGetProp(xmlNodePtr cur, const char *name) {
-    return gXMLCharReturn( xmlGetProp(cur, (const xmlChar *)name) );
+    return (char *)xmlGetProp(cur, (const xmlChar *)name);
 }
 
 int
 gParser::myxmlGetPropInt(xmlNodePtr cur, const char *name) {
-    gXMLCharReturn v ( myxmlGetProp(cur, name) );
-    if (v.Get() == NULL)	return 0;
+    char *v = myxmlGetProp(cur, name);
+    if (v == NULL)	return 0;
     int r = atoi(v);
+    xmlFree(v);
     return r;
 }
 
 float
 gParser::myxmlGetPropFloat(xmlNodePtr cur, const char *name) {
-    gXMLCharReturn v = myxmlGetProp(cur, name);
-    if (v.Get() == NULL)	return 0.;
+    char *v = myxmlGetProp(cur, name);
+    if (v == NULL)	return 0.;
     float r = atof(v);
+    xmlFree(v);
     return r;
 }
 
 bool
 gParser::myxmlGetPropBool(xmlNodePtr cur, const char *name) {
-    gXMLCharReturn v = myxmlGetProp(cur, name);
-    if (v.Get() == NULL)	return false;
+    char *v = myxmlGetProp(cur, name);
+    if (v == NULL)	return false;
     bool r = trueOrFalse(v);
+    xmlFree(v);
     return r;
 }
 
@@ -173,13 +132,13 @@ gParser::isElement(const xmlChar *elementName, const xmlChar *searchedElement, c
  */
 bool
 gParser::isValidAlternative(xmlNodePtr cur, const xmlChar * keyword) {
-    gXMLCharReturn version = myxmlGetProp(cur, "version");
+    xmlChar *version = xmlGetProp(cur, (const xmlChar *) "version");
     /*
      * Find non empty version and
      * Alternative element, ie those having a name starting by "Alternative" and
      * only the Alternative elements that are for our version, ie Arthemis
      */
-    return ((version.Get() != NULL) && isElement(cur->name, (const xmlChar *)"Alternative", keyword) && validateVersionRange(version.GetXML(), (const xmlChar*)"Artemis", (const xmlChar*)"0.2.8.0") );
+    return ((version != NULL) && isElement(cur->name, (const xmlChar *)"Alternative", keyword) && validateVersionRange(version, (const xmlChar*)"Artemis", (const xmlChar*)"0.2.8.0") );
 }
 
 bool
@@ -208,7 +167,7 @@ gParser::isValidDotNumber(const xmlChar *version)
     /* Check that we have at least i.j.k.xxx */
     for (int i=0; i<3; i++)
     {
-        Ignore( strtol(start, &end, 10) );
+        strtol(start, &end, 10);
         if (start != end) {
             valid = true;
             start = end +1;
@@ -478,7 +437,7 @@ gParser::parseShapeCircle(eGrid *grid, xmlNodePtr cur, float &x, float &y, float
 void
 gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
 {
-    float x = 0, y = 0, radius = 0, growth = 0;
+    float x, y, radius, growth;
     bool shapeFound = false;
     xmlNodePtr shape = cur->xmlChildrenNode;
 
@@ -498,13 +457,13 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
     gZone * zone = NULL;
     if (sn_GetNetState() != nCLIENT )
     {
-        if (!xmlStrcmp(myxmlGetProp(cur, "effect").GetXML(), (const xmlChar *)"win")) {
+        if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"win")) {
             zone = tNEW( gWinZoneHack) ( grid, eCoord(x*sizeMultiplier,y*sizeMultiplier) );
         }
-        else if (!xmlStrcmp(myxmlGetProp(cur, "effect").GetXML(), (const xmlChar *)"death")) {
+        else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"death")) {
             zone = tNEW( gDeathZoneHack) ( grid, eCoord(x*sizeMultiplier,y*sizeMultiplier) );
         }
-        else if (!xmlStrcmp(myxmlGetProp(cur, "effect").GetXML(), (const xmlChar *)"fortress")) {
+        else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"fortress")) {
             zone = tNEW( gBaseZoneHack) ( grid, eCoord(x*sizeMultiplier,y*sizeMultiplier) );
         }
 
@@ -570,10 +529,7 @@ void
 gParser::parseWall(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
 {
     ePoint *R = NULL, *sR = NULL;
-#ifdef DEBUG
-    REAL ox, oy;
-#endif
-    REAL x, y;
+    REAL ox, oy, x, y;
 
     REAL height = myxmlGetPropFloat(cur, "height");
     if ( height <= 0 )
@@ -617,10 +573,7 @@ gParser::parseWall(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
                 parseAlternativeContent(grid, cur);
             }
         }
-        cur = cur->next;
-#ifdef DEBUG
-        ox = x;	oy = y;
-#endif
+        cur = cur->next;	ox = x;	oy = y;
     }
 }
 
@@ -679,8 +632,7 @@ gParser::processSubAlt(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword) {
 void
 gParser::parseAlternativeContent(eGrid *grid, xmlNodePtr cur)
 {
-    gXMLCharReturn keywordStore = myxmlGetProp(cur, "keyword");
-    xmlChar * keyword = keywordStore.GetXML();
+    const xmlChar * keyword = xmlGetProp(cur, (const xmlChar *) "keyword");
 
     cur = cur->xmlChildrenNode;
 
@@ -817,7 +769,10 @@ gParser::parseSetting(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
         std::stringstream ss;
         /* Yes it is ackward to generate a string that will be decifered on the other end*/
         ss << myxmlGetProp(cur, "name")  << " " << myxmlGetProp(cur, "value");
-        tConfItemBase::LoadLine(ss);
+        if ( tRecorder::IsPlayingBack() )
+            tConfItemBase::LoadPlayback( true );
+        else
+            tConfItemBase::LoadAll(ss);
     }
     /* Verify if any sub elements are included, and if they contain any Alt
        Sub elements of Point arent defined in the current version*/
@@ -867,14 +822,19 @@ gParser::parseMap(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
 }
 
 void
-gParser::InstantiateMap(float aSizeMultiplier)
+gParser::setSizeMultiplier(REAL aSizeMultiplier)
 {
-    rimTexture = 0;
     // BOP
     sizeMultiplier = aSizeMultiplier;
     // EOP
+}
+
+void
+gParser::Parse()
+{
+    rimTexture = 0;
     xmlNodePtr cur;
-    cur = xmlDocGetRootElement(doc);
+    cur = xmlDocGetRootElement(m_Doc);
 
     if (cur == NULL) {
         con << "ERROR: Map file is blank\n";
@@ -882,8 +842,8 @@ gParser::InstantiateMap(float aSizeMultiplier)
     }
 
     if (isElement(cur->name, (const xmlChar *) "Resource")) {
-        if (xmlStrcmp((const xmlChar *) "aamap", myxmlGetProp(cur,"type").GetXML())) {
-            con << "Type aamap expected, found " << myxmlGetProp(cur, "type") << " instead\n";
+        if (xmlStrcmp((const xmlChar *) "aamap", xmlGetProp(cur, (const xmlChar *) "type"))) {
+            con << "Type aamap expected, found " << xmlGetProp(cur, (const xmlChar *) "type") << " instead\n";
             con << "formalise this message\n";
         }
         else {
@@ -927,201 +887,4 @@ gParser::InstantiateMap(float aSizeMultiplier)
 
     //        fprintf(stderr,"ERROR: Map file is missing root \'Resources\' node");
 
-}
-
-int myxmlInputReadFILE (void *context, char *buffer, int len) {
-    return fread(buffer, 1, len, (FILE *)context);
-}
-
-int myxmlInputCloseFILE (void *context) {
-    return (fclose((FILE *)context) == 0) ? 0 : -1;
-}
-
-static bool sg_IgnoreRequest( tString const & URI )
-{
-#ifdef WIN32
-    return st_StringEndsWith( URI, "../etc/catalog" );
-#else
-    return URI.StartsWith( "file:///" ) && strstr( URI, "xml" ) && st_StringEndsWith( URI, "catalog" );
-#endif
-}
-
-#ifndef HAVE_LIBXML2_WO_PIBCREATE
-xmlParserInputBufferPtr
-myxmlParserInputBufferCreateFilenameFunc (const char *URI, xmlCharEncoding enc) {
-    if ( sg_IgnoreRequest( tString( URI ) ) )
-    {
-#ifdef DEBUG
-        con << "Ignoring xml request for " << URI << "\n";
-#endif
-        return NULL;
-    }
-#ifdef DEBUG
-    con << "xml wants " << URI << "\n";
-#endif
-    FILE *f = tResourceManager::openResource(NULL, URI);
-    if (f == NULL)
-        return NULL;
-    xmlParserInputBufferPtr ret = xmlAllocParserInputBuffer(enc);
-    ret->context = f;
-    ret->readcallback = myxmlInputReadFILE;
-    ret->closecallback = myxmlInputCloseFILE;
-    return ret;
-}
-#endif
-
-#ifndef DEDICATED
-static tString sg_errorLeadIn("");
-
-static void sg_ErrorFunc( void * ctx,
-                          const char * msg,
-                          ... )
-{
-    // print formatted message into buffer
-    static int maxlen = 100;
-    tArray<char> buffer;
-    bool retry = true;
-    while ( retry )
-    {
-        buffer.SetLen( maxlen );
-        va_list ap;
-        va_start(ap, msg);
-        retry = vsnprintf(&buffer[0], maxlen, msg, ap) >= maxlen;
-        va_end(ap);
-
-        if ( retry )
-            maxlen *= 2;
-    }
-    char * message = &buffer[0];
-
-    // print buffer to stderr and console
-    if ( sg_errorLeadIn.Len() > 2 )
-    {
-        con << sg_errorLeadIn;
-#ifndef DEBUG
-        std::cerr << sg_errorLeadIn;
-#endif
-        sg_errorLeadIn = "";
-    }
-
-#ifndef DEBUG
-    std::cerr << message;
-#endif
-
-    con << message;
-}
-#endif
-
-bool
-gParser::LoadAndValidateMapXML(char const * uri, FILE* docfd, char const * filePath)
-{
-#ifndef DEDICATED
-    /* register error handler */
-    xmlGenericErrorFunc errorFunc = &sg_ErrorFunc;
-    initGenericErrorDefaultFunc( &errorFunc );
-    sg_errorLeadIn = "XML validation error in ";
-    sg_errorLeadIn += filePath;
-    sg_errorLeadIn += ":\n\n";
-#endif
-
-    bool validated = false;
-
-    if (docfd == NULL) {
-        con << "LoadAndValidateMapXML passed a NULL docfd (we should really trap this somewhere else!)\n";
-        return false;
-    }
-
-#ifndef HAVE_LIBXML2_WO_PIBCREATE
-    //xmlSetExternalEntityLoader(myxmlResourceEntityLoader);
-    xmlParserInputBufferCreateFilenameDefault(myxmlParserInputBufferCreateFilenameFunc);	//should be moved to some program init area
-#endif
-
-    if (doc)
-    {
-        xmlFreeDoc(doc);
-        doc=NULL;
-    }
-
-    /*Validate the xml*/
-    xmlParserCtxtPtr ctxt; /*Parser context*/
-
-    ctxt = xmlNewParserCtxt();
-    if (ctxt == NULL) {
-        con << "Failed to allocate parser context\n";
-        return false;
-    }
-
-#if HAVE_LIBXML2_WO_PIBCREATE
-    // bend URI to the place our included DTDs can be found at
-    tString fakeURI = tDirectories::Resource().GetIncluded() + "/aamap.xml";
-    uri = fakeURI;
-#endif
-
-    /* parse the file, activating the DTD validation option */
-    doc = xmlCtxtReadIO(ctxt, myxmlInputReadFILE, NULL, docfd, uri, NULL, XML_PARSE_DTDVALID);
-    // NOTE: Do *not* pass myxmlInputCloseFILE; we close the file *later*
-
-    /* check if parsing suceeded */
-    if (doc == NULL) {
-        con << "Failed to parse \n";
-    } else {
-        /* check if validation suceeded */
-        if (ctxt->valid == 0) {
-            con << "Failed to validate.\n";
-            xmlFreeDoc(doc);
-            doc=NULL;
-        }
-        else
-        {
-            validated = true;
-        }
-    }
-
-    /* check filepath */
-    if ( sn_GetNetState() != nCLIENT )
-    {
-        xmlNodePtr root;
-        root = xmlDocGetRootElement(doc);
-
-        if (root) {
-            if (isElement(root->name, (const xmlChar *) "Resource"))
-            {
-                tString rightFilePath = tString( (char const *)myxmlGetProp(root, "author") ) + "/" +
-                                        tString( (char const *)myxmlGetProp(root, "category") ) + "/" +
-                                        tString( (char const *)myxmlGetProp(root, "name") ) + "-" +
-                                        tString( (char const *)myxmlGetProp(root, "version") ) + "." +
-                                        tString( (char const *)myxmlGetProp(root, "type") ) + ".xml";
-
-                tString pureFilePath( filePath );
-                int paren = pureFilePath.StrPos( "(" );
-                if ( paren > 0 )
-                {
-                    pureFilePath = pureFilePath.SubStr( 0, paren );
-                }
-                int pos;
-                while((pos = rightFilePath.StrPos("//")) != -1) {
-                    rightFilePath.RemoveSubStr(pos, 1);
-                }
-                while((pos = pureFilePath.StrPos("//")) != -1) {
-                    pureFilePath.RemoveSubStr(pos, 1);
-                }
-                if ( rightFilePath != pureFilePath )
-                {
-                    tOutput message( "$resource_file_wrong_place", pureFilePath, rightFilePath );
-                    tOutput title( "$resource_file_wrong_place_title" );
-                    throw tGenericException( message, title );
-                }
-            }
-        }
-    }
-
-    /* free up the parser context */
-    xmlFreeParserCtxt(ctxt);
-
-#ifndef DEDICATED
-    /* reset error handler */
-    initGenericErrorDefaultFunc( NULL );
-#endif
-
-    return validated;
 }

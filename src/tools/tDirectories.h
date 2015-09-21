@@ -41,30 +41,38 @@ public:
 
     bool Open    ( std::ofstream& f,
                    const char* filename,
-                   std::ios::openmode mode = std::ios::out,
-                   bool sensitive = false ) const; // opens a file to write
+                   std::ios::openmode mode = std::ios::out ) const; // opens a file to write
+
+    bool Open    ( std::fstream& f,
+                   const char* filename   ) const; // let's read and write at the same time shall we?
 
     tString GetReadPath   ( const char* filename   ) const; // finds the full path to a file to read
     tString GetWritePath  ( const char* filename   ) const; // finds the full path to a file to write
     static bool IsValidPath( char const * filename ); //!< checks whether filename is valid, i.e. does not endanger system security.
 
-    tString GetPaths(void) const; //!< Puts all paths into a tString for outputting to the user
-    tString GetPaths(char const * delimiter, char const * finalizer) const; //!< Puts all paths into a tString for outputting to the user
-
-    tPath(){}
-    virtual ~tPath(){}
+    tPath(){};
+    virtual ~tPath(){};
 protected:
-    virtual void    Paths ( tArray< tString >& paths ) const = 0;  // maximum priority is given to paths[0]
+    virtual void    Paths ( tArray< tString >& paths ) const = 0;  // maximum priority
 };
 
 class tPathResource: public tPath {
 public:
-    tPathResource() {}
     tString GetWritePath(const char *filename) const;
-    tString GetIncluded() const; //!< returns the path to the included resources
+    static tString GetDirPath(); //!< returns the path to the included resources
 private:
     void Paths(tArray< tString >& paths) const;
 };
+
+#ifdef DEDICATED
+class tPathWebroot: public tPath
+{
+public:
+    static tString GetDirPath();
+private:
+    void Paths ( tArray< tString >& paths ) const;
+};
+#endif
 
 class tDirectories
 {
@@ -72,10 +80,14 @@ public:
     enum { eGetFilesAllFiles = 0, eGetFilesFilesOnly = 1, eGetFilesDirsOnly = 2 };
 
     static const tPath& Data();       // directory for game data
+    static const tPath& Music();       // directory for game music
     static const tPath& Config();     // directory for static configuration files
     static const tPath& Var();        // directory for dynamic logs and highscores
     static const tPath& Screenshot(); // directory for screenshots
-    static const tPathResource& Resource();
+    static const tPathResource& Resource();  // directory for resources
+#ifdef DEDICATED    
+    static const tPathWebroot& Webroot();    // directory for webroot of embedded web server
+#endif
 
     static void SetData( const tString& dir );       // set location of data directory
     static void SetUserData( const tString& dir );   // set location of user data directory

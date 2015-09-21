@@ -1,5 +1,6 @@
-/*
 
+/*
+  
 *************************************************************************
 
 ArmageTron -- Just another Tron Lightcycle Game in 3D.
@@ -20,7 +21,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
+  
 ***************************************************************************
 
 */
@@ -30,107 +31,146 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "config.h"
 
-#include "tArray.h"
-#include "tMemStack.h"
+#include "defs.h"
 
+#include <string>
 #include <sstream>
 #include <iostream>
 #include <iosfwd>
 
+// macros that help wrapping operators defined for a base class, they probably
+// should be refactored into another header. They assume THISCLASS is a typedef to the
+// class just being defined and BASE the base class.
+
+//! wraps a mutating operator (+=, -=, *=). op is the operator and T the argument type.
+#define WRAP_MUTATING_OPERATOR(op, T) inline THISCLASS & operator op( T t ){ static_cast< BASE & >( *this ) op t; return *this; }
+//! wraps a mutating operator (+=, -=, *=) for all argument types. op is the operator.
+#define WRAP_MUTATING_OPERATOR_ALLTYPES(op) template< class T > WRAP_MUTATING_OPERATOR(op, T const &)
+
+//! wraps a non-mutating binary operator (+, -, *). op is the operator and T the second argument.
+#define WRAP_OPERATOR(op, T) inline THISCLASS operator op( T t ) const { return THISCLASS( static_cast< const BASE & >( *this ) op  t ); }
+//! wraps a non-mutating binary operator (+, -, *) for second arguments. op is the operator.
+#define WRAP_OPERATOR_ALLTYPES(op) template< class T > WRAP_OPERATOR(op, T const &)
+
 //typedef tArray<char> string;
 class tOutput;
 
-class tString:public tArray<char>{
+using std::string;
+
+//! string class: standard string with some extras
+class tString:public string{
 private:
 public:
-    tString();
-    tString(const tString &);
-    explicit tString(const char *);
-    explicit tString(const tOutput &);
+    typedef tString          THISCLASS; //!< typedef for this class
+    typedef std::string      BASE;      //!< typedef for base clase
+    typedef BASE::value_type CHAR;      //!< the character class
 
-    void ReadLine(std::istream &s, bool enableEscapeSequences=false);
+    tString();                         //!< default constructor
+    tString(const BASE &);             //!< pseudo copy constructor
+    tString(const tString &);          //!< copy constructor
+    explicit tString(const CHAR *);    //!< conversion from C string
+    template<typename T>
+    tString(T begin, T end) : string(begin,end) {} //!< initialisation by iterators
+    // explicit tString(const char *);    //!< conversion from C string
+    // explicit tString(const tOutput &); //!< conversion from output
 
-    tString & operator+=(const char *c);
-    tString & operator=(const char *c);
-    tString & operator<<(const char *c);
-    tString operator+(const char *c) const;
-    tString & operator<<(char c);
-    tString & operator+=(char c);
-    tString operator+(char c) const;
+    // wrap base operators so they have the correct type
+    // if you end up here in the debugger, don't bother to look up
+    WRAP_OPERATOR_ALLTYPES(+)              // concatenation
+    WRAP_MUTATING_OPERATOR_ALLTYPES(+=)    // appending
+    WRAP_MUTATING_OPERATOR(=,CHAR const *) // assignment of C string
+    WRAP_MUTATING_OPERATOR(=,BASE const &) // assignment from C++ string
 
-    // comparison operators
-    int Compare( const char* other ) const;		// wrapper for strcmp
-    int Compare( const char* other, bool ignoreCase ) const; // strcasecmp
+    tString & operator =( tOutput const & other ); //!< assignment from output collector
 
-    bool operator==( const char* other ) const;
-    bool operator!=( const char* other ) const;
-    bool operator<( const char* other ) const;
-    bool operator>( const char* other ) const;
-    bool operator<=( const char* other ) const;
-    bool operator>=( const char* other ) const;
+    size_type Size() const;                        //!< Returns the size of the string in characters.
 
-    operator const char*() const;
-
-    tString & operator =(const tString &s);
-    tString & operator =(const tOutput &s);
-    tString & operator+=(const tString &s);
-
-    // Z-Man: stupid, stupid disambiguation for Visual C++.
-    // not harmful to GCC, but not required.
+    //! Converts the string to an arbitrary type, starting at the given position.
 #ifdef _MSC_VER
-    template<class I> char& operator[](I i) {
-        return tArray<char>::operator [](i);
-    };
+    bool Convert( int & target, size_type startPos = 0 ) const;
+    bool Convert( REAL & target, size_type startPos = 0 ) const;
+#else
+    template < class T > bool Convert( T & target, size_type startPos = 0 ) const;
 #endif
 
-    // bool operator==(const tString &other) const;
-    //	bool operator>=(const tString &other) const;
+    void ReadLine(std::istream &s, bool enableEscapeSequences=false); //!< read a whole line from a stream into this string
 
-    //	static char * ReserveTempString();
-    //	static int    TempStringLength();
-    //	static void   MakeTempStringLonger();
-    //	static void   FreeTempString();
+    void Clear();                       //!< clears the string
+    void SetPos( int len, bool cut );   //!< makes this string exactly of length len.
 
-    void Clear(){
-        tArray<char>::Clear();
-    }
+    bool StartsWith( const tString & other ) const; //!< determines whether this string starts with the argument string
+    bool StartsWith( const CHAR * other ) const;    //!< determines whether this string starts with the argument string
 
-    //! makes this string exactly of length len.
-    void SetPos( int len, bool cut );
+    bool EndsWith( const tString & other) const;    //!< determines whether this string ends with the argument string
+    bool EndsWith( const CHAR* other) const;        //!< determines whether this string ends with the argument string
 
-    //! determines whether this string starts with the argument string
-    bool StartsWith( const tString & other ) const;
-    bool StartsWith( const char * other ) const;
+    tString LTrim() const;                          //!< returns a copy with leading whitespace removed
+    tString RTrim() const;                          //!< returns a copy with trailing whitespace removed
+    tString Trim() const;                           //!< returns a copy with leading and trailing whitespace removed
 
-    //Get the position of a substring within a string...
-    int StrPos( const tString &tofind ) const;
-    int StrPos( const char * tofind ) const;
+    int StrPos( const tString &tofind ) const;      //!< Get the position of a substring within this string.
+    int StrPos( const CHAR * tofind ) const;        //!< Get the position of a substring within this string.
 
-    //Get a substring within a string...
-    tString SubStr( const int start, int len) const;
-    tString SubStr( const int start ) const;
+    tString SubStr( int start, int len) const;      //!< Get an arbitrary substring within this string.
+    tString SubStr( int start ) const;              //!< Get a substring within this string from the end.
 
-    //toInt as getInt is funky...
-    int toInt( const int pos ) const;
-    int toInt() const;
+    int ToInt( size_type pos = 0 ) const;           //!< Returns the string converted to an integer.
+    REAL ToFloat( size_type pos = 0 ) const;        //!< Returns the string converted to a float.
 
-    //! compares two strings alphanumerically
+    //! Compares two strings alphanumerically
     static int CompareAlphaNumerical( const tString& a, const tString &b);
 
-    //! strips all whitespace from a string
+    //! Strips all whitespace from a string
     tString StripWhitespace( void ) const;
 
-    int PosWordRight(int start) const;          //! Computes the position of the next delimiter relative to start
-    int PosWordLeft(int start) const;           //! Computes the position of the previous delimiter relative to start
-    int RemoveWordRight(int start);             //! Remove word right according to the delimiters
-    int RemoveWordLeft(int start);              //! Remove word left according to the delimiters
-    void RemoveSubStr(int start, int length);   //! Remove a substring, in-place
-    tString Reverse() const;                    //! Reverses strings
+    //! Converts the string to lowercase
+    tString ToLower(void) const;
+    //! Converts the string to uppercase
+    tString ToUpper(void) const;
 
-    //! Truncate a string
-    tString Truncate( int truncateAt ) const;
+    int PosWordRight(int start) const;          //!< Computes the position of the next delimiter relative to start
+    int PosWordLeft(int start) const;           //!< Computes the position of the previous delimiter relative to start
+    int RemoveWordRight(int start);             //!< Remove word right according to the delimiters
+    int RemoveWordLeft(int start);              //!< Remove word left according to the delimiters
+    void RemoveSubStr(int start, int length);   //!< Remove a substring, in-place
+    tString GetFileMimeExtension() const;       //!< Gets the lowercased file extension, as in a MIME type
+    tString Reverse() const;                    //!< Reverses strings
 
-    void NetFilter();                           //!< filters strings from the net for strange things like newlines
+    tString Truncate( int truncateAt ) const;   //!< Returns a truncated string (copy of this with excess chars replaced by "...")
+
+
+    // TO BE REPLACED
+    // auto-expanding subscription operators, will become non-expanding
+    CHAR operator[]( size_t i ) const;
+    CHAR & operator[]( size_t i );
+    CHAR operator[]( int i ) const;
+    CHAR & operator[]( int i );
+
+    void SetSize( unsigned int size ); //!< sets the string length by cutting or appending spaces
+
+#ifdef NOLEGACY
+private:
+#endif
+    // non-expanding subscription operators, will disappear
+    CHAR operator()( size_t i ) const;
+    CHAR & operator()( size_t i );
+    CHAR operator()( int i ) const;
+    CHAR & operator()( int i );
+
+    // comparison operators
+    int Compare( const CHAR* other ) const;		             //!< Compares two strings lexicographically
+    int Compare( const CHAR* other, bool ignoreCase ) const; //!< Compares two strings lexicographically, ignoring case differences if second argument is true
+
+    // automatic conversion will go away, it's dangerous
+    operator const CHAR*() const;
+
+    int Count(CHAR what) const; //!< Counts the number of a certain character within the string
+    int LongestLine() const; //!< the length of the longest line
+
+    // LEGACY FUNCTIONS, DON'T USE IN NEW CODE
+    int Len() const; //!< returns the lenghth PLUS ONE (the allocated length)
+
+    void SetLen( int len ); //!< sets the allocated length
 };
 
 //! proxy class for inserting color markings
@@ -143,29 +183,34 @@ struct tColoredStringProxy
     {}
 };
 
-//!< strings that know about color markings
+//! strings that know about color markings
 class tColoredString: public tString
 {
 public:
+    typedef tColoredString   THISCLASS; //!< typedef for this class
+    typedef tString          BASE;      //!< typedef for base clase
+
     ~tColoredString();                                      //!< Destructor
     tColoredString();                                       //!< Default constructor
     tColoredString( const tColoredString& other );          //!< Copy constructor
     explicit tColoredString( const tString& other );        //!< Base copy constructor
-    explicit tColoredString( const char * other );          //!< Constructor from raw C string
+    explicit tColoredString( const CHAR * other );          //!< Constructor from raw C string
     explicit tColoredString( const tOutput & other );       //!< Constructor from output gatherer
 
     //! Assignment operators
-    tString & operator = ( const char * c );
-    tString & operator = ( const tString & s );
-    tString & operator = ( const tOutput & s );
+    WRAP_MUTATING_OPERATOR(=,CHAR const *)    // assignment of C string
+    WRAP_MUTATING_OPERATOR(=,BASE const &)    // assignment from C++ string
+    WRAP_MUTATING_OPERATOR(=,tOutput const &) // assignment from output collector
 
-    static tString RemoveColors( const char *c );           //!< Removes the color codes from a string
-    static tString RemoveColors( const char *c, bool darkonly );           //!< Removes the color codes from a string
+    static tString RemoveColors( const CHAR *c );           //!< Removes the color codes from a string
     void SetPos( int len, bool cut=false );                 //!< Makes sure string has length len when color codes are removed
 
     void RemoveTrailingColor();                             //!< Removes trailing, unfinished color code
+    void NetFilter();                                       //!< filters strings from the net for strange things like newlinesa
 
-    void RemoveHex();                                       //!< ?
+    // void RemoveHex();                                       //!< ?
+
+    int LongestLine() const;
 
     //! Creates a color string inserter
     inline static tColoredStringProxy ColorString( REAL r,REAL g,REAL b )
@@ -174,39 +219,14 @@ public:
     }
 };
 
-std::ostream & operator<< (std::ostream &s,const tString &x);
-std::istream & operator>> (std::istream &s,tString &x);
-
-//! check whether item is in a comma or whitespace separated list
-bool tIsInList( tString const & list, tString const & item );
-
-//! converts a string to lowercase
-void tToLower( tString & toTransform );
-
-//! converts a string to uppercase
-void tToUpper( tString & toTransform );
-
-//#define tMAX_STRING_OUTPUT 1000
-//extern char st_stringOutputBuffer[tMAX_STRING_OUTPUT];
-
-/*
-  tString & operator <<(tString &s,const char* c){
-  return s+=c;
-  }
-
-  tString & operator <<(tString &s,char c){
-  return s+=c;
-  }
-*/
-
 //! string building streaming operator
 template<class T> tString & operator <<(tString &s,const T &c)
 {
     std::ostringstream S;
 
-    S << c << '\0';
+    S << c;
 
-    return s+=S.str().c_str();
+    return s += S.str();
 }
 
 //! string building streaming operator
@@ -224,45 +244,36 @@ template<class T> tColoredString & operator <<(tColoredString &s,const T &c)
     return s;
 }
 
-std::stringstream& operator<<(std::stringstream& s,const tString &t);
-//std::stringstream& operator<<(std::stringstream& s, const int &t);
-//std::stringstream& operator<<(std::stringstream& s, const float &t);
-//std::stringstream& operator<<(std::stringstream& s, const short unsigned int &t);
-//std::stringstream& operator<<(std::stringstream& s, const short int &t);
-//std::stringstream& operator<<(std::stringstream& s, const unsigned int &t);
-//std::stringstream& operator<<(std::stringstream& s, const unsigned long &t);
-//std::stringstream& operator<<(std::stringstream& s, char t);
-//std::stringstream& operator<<(std::stringstream& s, bool t);
-//std::stringstream& operator<<(std::stringstream& s, const char * const &t);
+//! stream reading operator honoring escape sequences and quoting
+std::istream & operator>> (std::istream &s,tString &x);
 
-bool operator==( const char* first, const tString& second );
-bool operator!=( const char* first, const tString& second );
-bool operator<( const char* first, const tString& second );
-bool operator>( const char* first, const tString& second );
-bool operator<=( const char* first, const tString& second );
-bool operator>=( const char* first, const tString& second );
+#ifndef _MSC_VER
+// *******************************************************************************
+// *
+// *	Convert
+// *
+// *******************************************************************************
+//!
+//!		@param	target	  the variable to write the conversion result to
+//!		@param	startPos  the position to start the conversion at
+//!		@return		      true on success
+//!
+// *******************************************************************************
 
-bool operator==( const tString& first, const tString& second );
-bool operator!=( const tString& first, const tString& second );
-bool operator<( const tString& first, const tString& second );
-bool operator>( const tString& first, const tString& second );
-bool operator<=( const tString& first, const tString& second );
-bool operator>=( const tString& first, const tString& second );
+template< class T >
+bool tString::Convert( T & target, size_type startPos ) const
+{
+    // generate string stream and advance it to the start position
+    std::istringstream s(*this);
+    s.seekg(startPos);
 
+    // read it
+    s >> target;
 
-/*
-  void operator <<(tString &s,const char * c);
-  void operator <<(tString &s,const unsigned char * c);
-  void operator <<(tString &s,int c);
-  void operator <<(tString &s,float c);
-*/
-
-tString st_GetCurrentTime(char const *szFormat);
-
-// replacement for tString::EndsWith from the trunk
-bool st_StringEndsWith( tString const & test, tString const & end );
-bool st_StringEndsWith( tString const & test, char const * end );
-
+    // return failure condition
+    return !s.fail() && s.eof() || isspace(s.get());
+}
+#endif
 
 #endif
 

@@ -8,15 +8,7 @@ dnl Comment this out to disable autoconf custom directories:
 m4_include(accustomdir.m4)
 
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(armagetronad,AUTOMATIC_VERSION)
-
-dnl FIXME: remove this in the future, when automake decides to actually set datarootdir by default
-dnl http://www.gnu.org/software/hello/manual/autoconf/Changed-Directory-Variables.html
-AC_DEFUN([AC_DATAROOTDIR_CHECKED])
-
-#set
-#echo args : "$@"
-#exit 1
+AC_INIT(Armagetronad,AUTOMATIC_VERSION)
 
 dnl flag telling the status message whether some files will be installed outside of prefix
 OUTSIDE_OF_PREFIX=no
@@ -29,7 +21,7 @@ dnl AC_CANONICAL_BUILD
 dnl AC_CANONICAL_HOST
 
 AC_PROG_RANLIB
-AM_INIT_AUTOMAKE([subdir-objects])
+AM_INIT_AUTOMAKE
 
 dnl detect which link commant to use
 AC_PROG_LN_S
@@ -46,71 +38,20 @@ version=$VERSION
 AC_SUBST(version)
 
 AC_ARG_VAR(XML2_CONFIG,[Configuration script of libxml2 to use, defaults to xml2-config])
+AC_ARG_VAR(FREETYPE_CONFIG,[Configuration script of freetype to use, defaults to freetype-config])
 AC_ARG_VAR(CXXFLAGS,Flags passed to the C++ compiler)
 AC_ARG_VAR(DEBUGLEVEL,[Debug level for developers, normal users can safely ignore it. Accepted values go from 0 to 5. See README-DEVELOPER for details.])
 AC_ARG_VAR(CODELEVEL,[Code checking strictness level for developers, normal users can safely ignore it. Accepted values go from 0 to 4. See README-DEVELOPER for details.])
 AC_ARG_VAR(docstyle,[Documentation style for cross-building of documentation. Possible values: unix, web and windows.])
-AC_ARG_VAR(progname,[Program short name, default: armagetronad.])
-AC_ARG_VAR(progtitle,[Program long name, default: Armagetron Advanced.])
-AC_ARG_VAR(APBUILD_CXX1,[Autopackage ABI 1 C++ compiler.])
-AC_ARG_VAR(APBUILD_CXX2,[Autopackage ABI 2 C++ compiler.])
-AC_ARG_VAR(APBUILD_CC,[Autopackage C compiler.])
-AC_ARG_VAR(CXX_ABI,[Autopackage C++ ABI version.])
-AC_ARG_VAR(APBUILD_STATIC,[Autopackage static libraries.])
 
 dnl a modern autoconf is required to process this
 AC_PREREQ(2.50)
 
 build_regular=true
 
-have_lzma=false
-    AC_ARG_WITH(maxclients, AC_HELP_STRING([--with-maxclients],[sets the hardcoded limit for the number of connected clients (default: 16 for clients and 32 for dedicated servers)]),
-[ 
-    AC_DEFINE_UNQUOTED(MAXCLIENTS,${withval},maximal number of clients)
-])
-
-AC_ARG_ENABLE(dedicated,
-     AC_HELP_STRING([--enable-dedicated],
-		[enables dedicated server; otherwise, compile a client (default=disabled)]),
-     [case "${enableval}" in
-       yes) build_dedicated=true
-			build_regular=false
-	   	;;
-       no)  build_dedicated=false
-			build_regular=true
-	    ;;
-       *) AC_MSG_ERROR(bad value ${enableval} for --enable-dedicated) ;;
-     esac],[build_dedicated=false])
-
-
-dnl AC_ARG_ENABLE(glout,
-dnl [  --enable-glout          enable graphical output; otherwise, compile
-dnl                          a dedicated server (default=enabled)],,
-dnl enable_glout=yes)
-
-AC_ARG_ENABLE(master,
-     AC_HELP_STRING([--enable-master],
-		[Build the master server]),
-     [case "${enableval}" in
-       yes) armamaster=true ;;
-       no)  armamaster=false ;;
-       *) AC_MSG_ERROR(bad value ${enableval} for --enable-master) ;;
-     esac],[armamaster=false])
-	 
-AM_CONDITIONAL(BUILDMASTER, test x$armamaster = xtrue)
-
-AC_ARG_ENABLE(main,
-     AC_HELP_STRING([--enable-main],
-		[Build the main program]),
-     [case "${enableval}" in
-       yes) armamain=true ;;
-       no)  armamain=false ;;
-       *) AC_MSG_ERROR(bad value ${enableval} for --enable-main) ;;
-     esac],[armamain=true])
-
 AC_ARG_ENABLE(glout,
      AC_HELP_STRING([--enable-glout],
-		[Inverse alias of --enable-dedicated]),
+		[enable graphical output; otherwise, compile a dedicated server (default=enabled)]),
      [case "${enableval}" in
        yes) build_dedicated=false
 			build_regular=true
@@ -119,15 +60,7 @@ AC_ARG_ENABLE(glout,
 			build_regular=false
 	    ;;
        *) AC_MSG_ERROR(bad value ${enableval} for --enable-glout) ;;
-     esac],)
-
-# consistency check of the three build flags	 
-test x$armamain = xfalse && build_dedicated=false build_regular=false
-test x$build_dedicated = xfalse && test x$build_regular = xfalse && armamain=false
-
-AM_CONDITIONAL(BUILDDEDICATED, test x$build_dedicated = xtrue)
-AM_CONDITIONAL(BUILDREGULAR, test x$build_regular = xtrue)
-AM_CONDITIONAL(BUILDMAIN, test x$armamain = xtrue)
+     esac],[build_dedicated=false])
 
 # flag to set when mockup versions of the executables should be built to save
 # compile time when testing the release process
@@ -145,49 +78,64 @@ AC_SUBST(progtitle_server)
 AC_SUBST(build_dedicated)
 AC_SUBST(build_regular)
 
+dnl AC_ARG_ENABLE(glout,
+dnl [  --enable-glout          enable graphical output; otherwise, compile
+dnl                          a dedicated server (default=enabled)],,
+dnl enable_glout=yes)
+
+AC_ARG_ENABLE(master,
+     AC_HELP_STRING([--enable-master],
+		[Build the master server]),
+     [case "${enableval}" in
+       yes) armamaster=true ;;
+       no)  armamaster=false ;;
+       *) AC_MSG_ERROR(bad value ${enableval} for --enable-master) ;;
+     esac],[armamaster=false])
+
+AM_CONDITIONAL(BUILDMASTER, test x$armamaster = xtrue)
+
+AC_ARG_ENABLE(main,
+     AC_HELP_STRING([--enable-main],
+		[Build the main program]),
+     [case "${enableval}" in
+       yes) armamain=true ;;
+       no)  armamain=false ;;
+       *) AC_MSG_ERROR(bad value ${enableval} for --enable-main) ;;
+     esac],[armamain=true])
+
+# consistency check of the three build flags
+test x$armamain = xfalse && build_dedicated=false build_regular=false
+test x$build_dedicated = xfalse && test x$build_regular = xfalse && buildmain=false
+
+AM_CONDITIONAL(BUILDDEDICATED, test x$build_dedicated = xtrue)
+AM_CONDITIONAL(BUILDREGULAR, test x$build_regular = xfalse)
+AM_CONDITIONAL(BUILDMAIN, test x$armamain = xtrue)
+
 AC_ARG_ENABLE(memmanager,
 	AC_HELP_STRING([--enable-memmanager],
 		[enable custom memory manager on systems that allow it (default=disabled)]),,
 enable_memmanager=no)
 
-AC_ARG_ENABLE(music,
-	AC_HELP_STRING([--enable-music],
-		[compile in support for background music (default=disabled)]),,
-enable_music=no)
+AC_ARG_ENABLE(sound,
+	AC_HELP_STRING([--enable-sound],
+	[compile in support for sound (default=enabled)]),,
+enable_sound=yes)
 
-AC_ARG_ENABLE(respawn,
-	AC_HELP_STRING([--enable-respawn],
-		[enable unsupported, hacky, impossible to deactivate at runtime, deathmatch mode. Use at your own risk. (default=disabled)]),,
-enable_respawn=no)
+AC_ARG_ENABLE(joystick,
+	AC_HELP_STRING([--enable-joystick],
+		[enable joystick support (default=disabled)]),,
+enable_joystick=no)
 
 AC_ARG_ENABLE(krawall,
 	AC_HELP_STRING([--enable-krawall],
-		[enable special visuals for the krawall gaming network (default=disabled)]),,
+		[enable special code for the krawall gaming network (user authentification...) (default=disabled)]),,
 enable_krawall=no)
 
-dnl start alias group
-AC_ENABLE(armathentication,
-    [echo $enableval; case "${enableval}" in
-       yes) enable_armathentication=yes
-	   	;;
-       no)  enable_armathentication=no
-	    ;;
-       *) AC_MSG_ERROR(bad value ${enableval} for --enable-armathentication) ;;
-     esac],enable_armathentication=yes
-     )
+AC_ARG_ENABLE(krawallserver,
+	AC_HELP_STRING([--enable-krawallserver],
+		[enable special code for the krawall gaming network SERVER (user database query...). dont't touch this! (default=disabled)]),,
+enable_krawallserver=no)
 
-AC_ARG_ENABLE(authentication,
-    AC_HELP_STRING([--enable-authentication],
-		[enable server side code for the krawall style user authentication (default=enabled)]),
-    [case "${enableval}" in
-       yes) enable_armathentication=yes
-	   	;;
-       no)  enable_armathentication=no
-	    ;;
-       *) AC_MSG_ERROR(bad value ${enableval} for --enable-authentication) ;;
-     esac],
-    )
-dnl end alias group
 AC_ARG_ENABLE(automakedefaults,
 	AC_HELP_STRING([--enable-automakedefaults],
 		[enforce the default installation directories as set by automake. localstatedir=prefix/var violates the FHS, so this is off by default.]),,
@@ -267,26 +215,11 @@ AC_ARG_ENABLE(games,
 		[decorates all installation paths with "games" (default=enabled)]),,
 enable_games=yes)
 
-AC_ARG_ENABLE(enginecoredebug,
-     AC_HELP_STRING([--enable-enginecoredebug],
-		[Apply debugging options to engine core (for DEBUGLEVEL>0, defaults to enabled)]),
-     [case "${enableval}" in
-       yes) enginecoredebug=true ;;
-       no)  enginecoredebug=false ;;
-       *) AC_MSG_ERROR(bad value ${enableval} for --enable-enginecoredebug) ;;
-     esac],[enginecoredebug=true])
-	 
-AM_CONDITIONAL(ENGINECOREDEBUG, test x$enginecoredebug = xtrue)
-
-if test x$enable_respawn = xyes; then
-AC_DEFINE(RESPAWN_HACK,,enables hacky support for deathmatch mode)
-fi
-
 if test x$enable_krawall = xyes; then
 AC_DEFINE(KRAWALL,,enables krawall)
 fi
 
-if test x$enable_armathentication = xyes; then
+if test x$enable_krawallserver = xyes; then
 AC_DEFINE(KRAWALL_SERVER,,enables krawall server)
 fi
 
@@ -294,39 +227,20 @@ dnl developer CXXFLAGS
 test -z "$DEBUGLEVEL" && DEBUGLEVEL=0
 test -z "$CODELEVEL" && CODELEVEL=0
 
-dnl default CXX flags: optimize a bit if no optimization optimization has been selected yet
-test -z "`echo $CXXFLAGS | grep "\-O"`" && CXXFLAGS="$CXXFLAGS -O2"
-
-test $DEBUGLEVEL -ge 1 && CXXFLAGS="`echo $CXXFLAGS | sed -e 's,-O.,,'` -g -O0"
+test $DEBUGLEVEL -ge 1 && CXXFLAGS="$CXXFLAGS -O0 -g"
 test $DEBUGLEVEL -ge 2 && CXXFLAGS="$CXXFLAGS -DDEBUG"
 test $DEBUGLEVEL -ge 3 && enable_memmanager=yes
 test $DEBUGLEVEL -ge 4 && CXXFLAGS="$CXXFLAGS -DDEBUG_EXPENSIVE"
 test $DEBUGLEVEL -ge 5 && CXXFLAGS="$CXXFLAGS -DMEM_DEB"
 
-dnl oddly, this macro needs to be called once unconditionally, or automake
-dnl borks up. Backup CXXFLAGS and restore them in case the test passes. Which it does
-dnl for some versions of GCC.
-CXXFLAGS_BACK="${CXXFLAGS}"
-AX_CXXFLAGS_GCC_OPTION(-nobodyreadsconfigureoutputanyway)
-CXXFLAGS="${CXXFLAGS_BACK}"
+dnl default CXX flags: optimize for size if no optimization optimization has been selected yet
+test -z "`echo $CXXFLAGS | grep "\-O"`" && CXXFLAGS="$CXXFLAGS -O2"
 
-if test $CODELEVEL -ge 1; then
-    CXXFLAGS="$CXXFLAGS -Wall"
-    
-    dnl careful, only supported on GCC 4.2 and later
-    AX_CXXFLAGS_GCC_OPTION(-Wno-strict-overflow)
-fi
-
+test $CODELEVEL -ge 1 && CXXFLAGS="$CXXFLAGS -Wall"
 dnl test $CODELEVEL -ge 2 && CXXFLAGS="$CXXFLAGS -Wshadow -Wpointer-arith -Wfloat-equal -W -Wcast-qual -Wcast-align -Wconversion -Wunreachable-code --pedantic -Winline"
-test $CODELEVEL -ge 2 && CXXFLAGS="$CXXFLAGS -Wpointer-arith -W -Wcast-qual -Wcast-align --pedantic -Wno-unused-parameter"
-test $CODELEVEL -ge 3 && CXXFLAGS="$CXXFLAGS -Weffc++ -Wshadow -Winline -Wfloat-equal -Wconversion"
+test $CODELEVEL -ge 2 && CXXFLAGS="$CXXFLAGS -Wpointer-arith -W -Wcast-qual -Wcast-align -Wconversion --pedantic -Wno-unused-parameter"
+test $CODELEVEL -ge 3 && CXXFLAGS="$CXXFLAGS -Weffc++ -Wshadow -Winline -Wfloat-equal"
 test $CODELEVEL -ge 4 && CXXFLAGS="$CXXFLAGS -Werror"
-
-# unused variables should be tolerated while debugging, they're sometimes just there
-# to be printed in the debugger
-if test $CODELEVEL -ge 1 && test $DEBUGLEVEL -ge 1; then
-    AX_CXXFLAGS_GCC_OPTION(-Wno-unused-but-set-variable)
-fi
 
 # work arond known cause of warnings in SDL headers
 test $CODELEVEL -ge 2 && test x$build_dedicated = xtrue || CXXFLAGS="$CXXFLAGS -Wno-long-long"
@@ -365,7 +279,7 @@ AC_CONFIG_HEADER(config.h)
 dnl Checks for programs.
 
 dnl C Compiler:
-AC_PROG_CC
+dnl AC_PROG_CC
 AC_PROG_CPP
 
 dnl C++ Compiler:
@@ -443,10 +357,8 @@ done
 # configuration for various unix flavours
 define(GENERICUNIX,[
         MATHLIB="m"
-        if test x$build_regular = xtrue; then
-                AC_PATH_X
-                AC_PATH_XTRA
-        fi
+        AC_PATH_X
+        AC_PATH_XTRA
         if test x$have_x = xyes; then
             CFLAGS="$CFLAGS $X_CFLAGS"
             CXXFLAGS="$CXXFLAGS $X_CFLAGS"
@@ -466,7 +378,7 @@ GENERICUNIX
 ]
 )
 
-SDL_CONFIG_DEFAULT=sdl-config
+SDL_CONFIG=sdl-config
 
 dnl *************************************************
 dnl GL AND  MATHLIB SELECTION ( SYSTEM DEPENDANT)
@@ -517,7 +429,7 @@ SAFEUNIX
         ;;
     *-*-freebsd* )
         # FreeBSD, sdl-config is specialized to sdl11-config there
-        SDL_CONFIG_DEFAULT=sdl11-config
+        SDL_CONFIG=sdl11-config
 SAFEUNIX
         ;;
     *)
@@ -525,8 +437,6 @@ SAFEUNIX
 SAFEUNIX
         ;;
 esac
-
-test -z "$SDL_CONFIG" && SDL_CONFIG=$SDL_CONFIG_DEFAULT
 
 AC_SUBST(docstyle)
 
@@ -550,54 +460,55 @@ dnl *************************************************
 dnl         libxml2
 dnl *************************************************
 
-if test x$armamain = xtrue; then
-
 test -z "$XML2_CONFIG" && XML2_CONFIG=xml2-config
-
-if ! $XML2_CONFIG --libs > /dev/null; then
-  AC_MSG_ERROR([Fatal error: the libxml2 configuration script $XML2_CONFIG does not work/exist.])
-fi
 
 # if test x$armamain = xtrue; then
 AC_CHECK_LIB(xml2,xmlParseMemory,
-CPPFLAGS="$CPPFLAGS `$XML2_CONFIG --cflags`"
-LIBS="`$XML2_CONFIG --libs` $LIBS"
+#export CXXFLAGS="$CXXFLAGS `$XML2_CONFIG --cflags`"
+export CPPFLAGS="$CPPFLAGS `$XML2_CONFIG --cflags`"
+export LIBS="`$XML2_CONFIG --libs` $LIBS"
 AC_DEFINE(HAVE_LIBXML2, 1, [Define if you have the xml2 library (-lxml2).]),
-AC_MSG_ERROR([You need the library xml2 to compile ${progtitle}. Read the file doc/install_linux.html.])
+AC_MSG_ERROR([You need the library xml2 to compile Armagetron. Read the file doc/install_linux.html.])
 ,`$XML2_CONFIG --libs`)
 
 AC_CHECK_FUNC(xmlParserInputBufferCreateFilenameDefault,
 ,
-AC_MSG_ERROR([
+AC_DEFINE(HAVE_LIBXML2_WO_PIBCREATE, 1, [Define if your xml2 library is obsolete (lacks xmlParserInputBufferCreateFilenameDefault).])
+AC_MSG_WARN([
 	Your xml2 library is obsolete!
-	Please upgrade to 2.6.11 or later
+	Map validation will be insecure and may fail!
 ])
 )
 # fi
 
-dnl *************************************************
-dnl         Armathentication Threading
-dnl *************************************************
+if test x$build_regular = xfalse; then
+ AC_MSG_RESULT([
 
-if test x$enable_armathentication = xyes; then
+ Configuring dedicated server, skipping libraries...
+ ])
 
-dnl ACX_PTHREAD([
+dnl ****************************************************
+dnl Put stuff needed for the dedicated server here
+dnl ****************************************************
 
-dnl LIBS="${PTHREAD_LIBS} ${LIBS}"
-dnl CXXFLAGS="${CXXFLAGS} ${PTHREAD_CFLAGS}"
-dnl CC="${PTHREAD_CC}"
-dnl AC_DEFINE(HAVE_PTHREAD,1,[Define if you have POSIX threads libraries and header files.])
+ AC_DEFINE(DEDICATED,,[Define if you wish to compile a dedicated server])
 
-dnl ],[
+ AC_DEFINE(NOJOYSTICK,,[No joysticks in the dedicated server])
+ enable_sound=no
+ progname=${prognamebase}-dedicated
+ AC_SUBST(progname)
 
-AM_PATH_ZTHREAD_AA(2.3.2)
-CXXFLAGS="${CXXFLAGS} ${ZTHREAD_CXXFLAGS}"
-LIBS="${LIBS} ${ZTHREAD_LIBS}"
+ needdata=no
+ AC_SUBST(needdata)
+else
 
-dnl ])
 
-fi # krawall
-fi # armamain
+if test x$enable_dirty = xyes; then
+  AC_DEFINE(DIRTY,,[Define if you wish to use the old and dirty OpenGL
+  initialization method])
+fi
+
+
 
 dnl *************************************************
 dnl         math
@@ -612,56 +523,63 @@ AC_CHECK_LIB($MATHLIB, exp,,
 )
 fi
 
-if test x$build_regular = xfalse; then
- AC_MSG_RESULT([
- 
- Configuring dedicated server, skipping libraries...
- ])
- AC_DEFINE(DEDICATED,,[Define if you wish to compile a dedicated server])
-
- progname=${prognamebase}-dedicated
- AC_SUBST(progname)
- 
- needdata=no
- AC_SUBST(needdata)
-else
-
-
-if test x$enable_dirty = xyes; then
-  AC_DEFINE(DIRTY,,[Define if you wish to use the old and dirty OpenGL
-  initialization method])
-fi
-
-
 dnl *************************************************
 dnl         SDL
 dnl *************************************************
 
 AC_MSG_CHECKING(whether SDL is installed)
 if SDLLIBS=`${SDL_CONFIG} --libs`; then
-    AC_MSG_RESULT(yes)
+    AC_MSG_RESULT([yes, '${SDL_CONFIG} --libs' gave ${SDLLIBS}])
+    AC_MSG_CHECKING(what name the SDL library is know under)
+    SDLLIB=SDL`echo ${SDLLIBS} | sed -e "s,.*-lSDL,," -e "s, .*$,,"`
+    if test -z ${SDLLIB}; then
+        SDLLIB=`${SDLLIBS} | sed -e "s,.*-l,," -e "s, .*$,,"`
+        if test -z ${SDLLIB}; then
+            AC_MSG_RESULT([failed, taking default: SDL])
+            SDLLIB=SDL
+        else
+            AC_MSG_RESULT([failed, taking anything from ${SDL_CONFIG} output: ${SDLLIB}])
+        fi
+    else
+        AC_MSG_RESULT(${SDLLIB})
+    fi
+else
+    AC_MSG_RESULT(no, trying default name)
+    SDLLIBS=''
+    SDLLIB=SDL
 fi
 
+AC_CHECK_LIB($SDLLIB,SDL_Init,
+CXXFLAGS="$CXXFLAGS `${SDL_CONFIG} --cflags`"
 CPPFLAGS="$CPPFLAGS `${SDL_CONFIG} --cflags`"
+export CPPFLAGS
+export CXXFLAGS
 LIBS="${SDLLIBS} $LIBS"
-
-AC_CHECK_FUNC(SDL_Init,
+export LIBS
 AC_DEFINE(HAVE_LIBSDL,,[Define if you have the library SDL]),
-AC_MSG_ERROR([You need the library SDL to compile ${progtitle}. Read the file doc/install_linux.html.])
-,)
+AC_MSG_ERROR([You need the library SDL to compile Armagetron. Read the file doc/install_linux.html.])
+,${SDLLIBS})
 
 dnl *************************************************
 dnl         SDL_Mixer
 dnl *************************************************
 
-if test x$enable_music = xyes; then
+if test x$enable_sound = xyes; then
  AC_CHECK_LIB(SDL_mixer,Mix_OpenAudio,
  AC_DEFINE(HAVE_LIBSDL_MIXER, 1, [Define if you have the SDL_mixer library (-lSDL_mixer).])
  LIBS="-lSDL_mixer $LIBS",
  AC_MSG_WARN([
  SDL_mixer library not found. You will not hear music.])
- enable_music=no
+ enable_sound=no
  ,)
+fi
+
+dnl *************************************************
+dnl             Joystick support
+dnl *************************************************
+
+if test x$enable_joystick = xno; then
+	AC_DEFINE(NOJOYSTICK, 1, [Define if you don't want joystick support.])
 fi
 
 dnl *************************************************
@@ -669,7 +587,7 @@ dnl  Winsock on windows cross-compile
 dnl *************************************************
 
 if test "`${SDL_CONFIG} --libs | grep windows`" ; then
-	AC_CHECK_LIB(wsock32, connect)
+	AC_CHECK_LIB(wsock32, main)
 fi
 
 dnl *************************************************
@@ -682,19 +600,20 @@ dnl AC_CHECK_LIB($SYS_GL_LIB, glEnd,,
 
 AC_CHECK_LIB($SYS_GL_LIB, glVertex3f,,
  AC_MSG_RESULT([OpenGL not found. Maybe it needs X11 to compile? Checking that...])
- AC_CHECK_LIB(X11,XOpenDisplay,
+ AC_CHECK_LIB(X11,main,
   LIBS="-lX11 -L/usr/X11R6/lib $LIBS"
+  export LIBS
   AC_DEFINE(HAVE_LIBX11, 1, [Define if you have the X11 library (-lX11).])
   ,
   AC_MSG_WARN([
   Standard X11 library needed by OpenGL not found.
   ]),-L/usr/X11R6/lib)
- AC_CHECK_LIB(Xext,XextFindDisplay,-L/usr/X11R6/lib)
-  AC_CHECK_LIB(Xt,XtFree,-L/usr/X11R6/lib)
- AC_CHECK_LIB(Xi,XOpenDevice,-L/usr/X11R6/lib)
- AC_CHECK_LIB(Xmu,XmuDrawLogo,-L/usr/X11R6/lib)
+ AC_CHECK_LIB(Xext,main,-L/usr/X11R6/lib)
+ AC_CHECK_LIB(Xt,main,-L/usr/X11R6/lib)
+ AC_CHECK_LIB(Xi,main,-L/usr/X11R6/lib)
+ AC_CHECK_LIB(Xmu,main,-L/usr/X11R6/lib)
 AC_CHECK_LIB($SYS_GL_LIB, glBegin,,AC_MSG_ERROR([
-  You need Mesa or an OpenGL-System to compile ${progtitle}.
+  You need Mesa or an OpenGL-System to compile Armagetron.
   Maybe your libGL needs the X libraries and your system does not
   find them? Read the file doc/install_linux.html.]),-L/usr/X11R6/lib)
 )
@@ -714,42 +633,88 @@ if test $SYS_GLU_LIB && echo $LIBS | grep -v "\-lGLU" > /dev/null; then
 dnl AC_CHECK_LIB($SYS_GLU_LIB, gluBuild2DMipmaps,,
 AC_CHECK_LIB($SYS_GLU_LIB, gluBuild3DMipmaps,,
 AC_MSG_ERROR([
-You need GLU to compile ${progtitle}; it SHOULD have come with OpenGL.
+You need GLU to compile Armagetron; it SHOULD have come with OpenGL.
 Read the file doc/install_linux.html.]))
 
+dnl *************************************************
+dnl         freetype
+dnl *************************************************
+
+test -z "$FREETYPE_CONFIG" && FREETYPE_CONFIG=freetype-config
+AC_CHECK_LIB(freetype,FT_Free,
+CPPFLAGS="$CPPFLAGS `$FREETYPE_CONFIG --cflags`"
+LIBS="$LIBS `$FREETYPE_CONFIG --libs`"
+,
+AC_MSG_ERROR([You need the library freetype to compile Armagetron. Read the file doc/install_linux.html.])
+)
+
+dnl *************************************************
+dnl         FTGL
+dnl *************************************************
+AC_CHECK_LIB(ftgl,FT_Render_Glyph,
+,
+AC_MSG_ERROR([You need the library ftgl to compile Armagetron. Read the file doc/install_linux.html.]))
+
+# remove next line when b0_2_8 gets merged the next time
+test -z "$SDL_CONFIG" && SDL_CONFIG=sdl-config
+
+USE_FTGL=yes
+
+# look for FTGL headers in default system header locations and the prefixes of the libraries that do have a -config script
+FTGL_HEADERS="/usr/include/FTGL /usr/local/include/FTGL `$FREETYPE_CONFIG --prefix`/include/FTGL `$SDL_CONFIG --prefix`/include/FTGL `$XML2_CONFIG --prefix/`include/FTGL ${prefix}/include/FTGL "
+
+AC_ARG_WITH(ftgl,
+    AC_HELP_STRING([--with-ftgl],
+        [use FTGL for rendering (default=enabled, which is currently required), the argument is the location of the FTGL headers]),
+    if test "${withval}" = yes -o "${withval}" = no; then
+        USE_FTGL="${withval}"
+    else
+        FTGL_HEADERS=${withval}
+    fi
+)
+
+# FTGL does not have a -config script, we are on our own finding the includes
+found=false
+AC_MSG_CHECKING(for location of FTGL includes)
+for candidate in ${FTGL_HEADERS}; do
+    if test -r ${candidate}/FTGL.h; then
+        AC_MSG_RESULT(${candidate})
+        CPPFLAGS="$CPPFLAGS -I${candidate}"
+        found=true
+        break
+    fi    
+done
+
+if test ${found} = false; then
+    AC_MSG_RESULT(not found)
+    AC_MSG_ERROR([FTGL headers not found on your system. Please pass the correct location via --with-ftgl=<path to FTGL include directory>.])
+fi
+
+# end of dedicated server if/else
 fi
 
 dnl *************************************************
 dnl         Other Stuff
 dnl *************************************************
 
-dnl AC_CHECK_LIB(g++, cin,,
+dnl AC_CHECK_LIB(g++, main,,
 dnl AC_MSG_WARN([C++ standard library not found. You can ignore this warning on non-GNU-systems.]))
 
-dnl AC_CHECK_LIB(z, gzread,,
-dnl AC_MSG_ERROR([You need libz to compile ${progtitle}.]))
+AC_CHECK_LIB(z, main,,
+AC_MSG_ERROR([You need libz to compile Armagetron.]))
 
-AC_MSG_CHECKING(whether libpng is installed)
-if PNGLIBS=`libpng-config --libs`; then
-    AC_MSG_RESULT(yes)
-fi
+AC_CHECK_LIB(png, main,,
+AC_MSG_ERROR([You need libpng to compile Armagetron.]))
 
-CPPFLAGS="$CPPFLAGS `libpng-config --cflags`"
-LIBS="$LIBS $PNGLIBS"
-
-AC_CHECK_FUNC(png_sig_cmp,
-,
-AC_MSG_ERROR([You need libpng to compile ${progtitle}.]))
-
-dnl AC_CHECK_LIB(jpeg, jpeg_read_header,,
-dnl	AC_MSG_WARN([
-dnl	libjpeg not found. Expect small graphical errors ( missing moviepack title screen ).]
-dnl	)
-dnl )
+AC_CHECK_LIB(jpeg, main,,
+	AC_MSG_WARN([
+	libjpeg not found. Expect small graphical errors ( missing moviepack title screen ).]
+	)
+)
 
 AC_CHECK_LIB(SDL_image, IMG_Load,,
 dnl AC_CHECK_LIB(IMG, main,,
-AC_MSG_ERROR([You need the library SDL_image to compile ${progtitle}.]
+AC_MSG_ERROR([You need libIMG/SDL_image to compile Armagetron.]
 dnl )
 ))
 
@@ -789,17 +754,20 @@ AC_MSG_WARN(
 [
 
 
-You are using PGCC to compile ${progtitle}. Due to a bug in PGCC,
+You are using PGCC to compile Armagetron. Due to a bug in PGCC,
 exception handling needs to be disabled. This makes the server
 mode vulnerable to an attack that causes the server to block or
-crash. (The attack is still detected, but nothing can be done 
+crash. (The attack is still detected, but nothing can be done
 about it. You will get the message \"I told you not to use PGCC!\")
 
 
 ])
 CXXFLAGS="$CXXFLAGS -fno-exceptions -DNOEXCEPT"
+export CXXFLAGS
 fi
 
+
+dnl Replace `main' with a function in -lpthread:
 
 dnl Checks for header files.
 AC_HEADER_STDC
@@ -810,14 +778,19 @@ AC_C_CONST
 
 dnl Checks for library functions.
 AC_CHECK_FUNCS(select)
-AC_CHECK_FUNCS(isblank atan2f sinf cosf tanf sqrtf logf expf fabsf floorf)
+AC_CHECK_FUNCS(atan2f sinf cosf tanf sqrtf logf expf fabsf floorf)
 AC_CHECK_FUNCS(wmemset)
 
 # if the compiler is GCC -Os produces faulty code (exceptions cause crashes), at least on AMD64. Replace it with -O2.
 test -z "`$CXX --version | grep '(GCC)'`" || CXXFLAGS="`echo $CXXFLAGS | sed -e 's,-Os,-O2,g' `" CFLAGS="`echo $CFLAGS | sed -e 's,-Os,-O2,g' `"
 
 dnl add current directories to include search path
-CPPFLAGS="-I. -I.. $CPPFLAGS"
+CXXFLAGS="-I. -I.. $CXXFLAGS"
+export CXXFLAGS
+
+if test "$enable_sound" = "yes"; then
+AC_DEFINE(HAVE_LIBSDL_MIXER, 1, [Use SDL_mixer])
+fi
 
 # define
 AC_DEFINE_UNQUOTED(TOP_SOURCE_DIR,"${srcdir}", [Define the top source directory])
@@ -831,6 +804,7 @@ realexecprefix=${exec_prefix}
 test x${realexecprefix} = xNONE && realexecprefix=${realprefix}
 
 AM_CONDITIONAL(NEEDDATA, test "$needdata" = "yes" )
+AM_CONDITIONAL(USE_SDLMIXER, test "$enable_sound" = "yes" )
 
 #test universal variables
 dnl univar1=\${prefix}/foo
@@ -913,7 +887,7 @@ AC_AA_PATH_RAW(mandir)
 
 # additional paths:
 # scripts
-AC_AA_PATH_NOSUFFIX(scriptdir,${aa_datadir}/scripts,[shell scripts],[DATADIR/scripts])
+AC_AA_PATH(scriptdir,${aa_datadir}/scripts,[shell scripts],[DATADIR/scripts])
 
 # documentation
 AC_AA_PATH_PREPARE(docdir)
@@ -953,10 +927,6 @@ AC_SUBST_UNIVERSAL(relocatable)
 AC_USE_SUBST_UNIVERSAL
 AC_AA_REPLACEPATHS
 
-export CPPFLAGS
-export CXXFLAGS
-export LIBS
-
 AC_OUTPUT(src/Makefile
 src/first/Makefile
 Makefile
@@ -966,11 +936,14 @@ config/rc.config config/aiplayers.cfg
 src/doc/Makefile src/doc/net/Makefile src/doc/Doxyfile
 src/doc/html.m4
 src/thirdparty/Makefile
-src/thirdparty/particles/Makefile
+dnl src/thirdparty/particles/Makefile
+src/thirdparty/shttpd/Makefile
 resource/Makefile
 config/Makefile
 desktop/Makefile
+www-root/Makefile
 desktop/armagetronad.desktop
+desktop/armagetronad.protocol
 )
 
 # m4_define(FULLEVAL,stage1=`eval echo $1`; stage2 
@@ -987,7 +960,7 @@ echo "     Prefix: $prefix"
 echo ""
 if test x$build_dedicated = xtrue -o x$armamaster = xtrue ;
 then
-echo "     Build with Armathentication support (server): $enable_armathentication"
+echo "     Build with Krawall authentication support (server): $enable_krawallserver"
 echo "     Init scripts will be installed in  : $initdir"
 echo "     Dynamic data will be kept in       : `eval echo ${aa_localstatedir}`"
 echo "     PID files will be kept in          : `eval echo ${rundir}`"
@@ -995,6 +968,8 @@ echo "     Log files will be kept in          : `eval echo ${logdir}`"
 echo "     Add user to run server             : $enable_useradd"
 echo ""
 fi
+echo "     Sound support: $enable_sound"
+echo "     Joystick support; $enable_joystick"
 echo "     Binaries will be installed in      : `eval echo ${bindir}`"
 echo "     Static data will be installed in   : `eval echo ${aa_datadir}`"
 echo "     Configuration will be installed in : `eval echo ${aa_sysconfdir}`"
@@ -1018,11 +993,8 @@ else
 fi
 echo "     Allow multiple versions: $enable_multiver$multiver_info"
 echo "     Use custom memory manager: $enable_memmanager"
-echo "     Debug level : $DEBUGLEVEL"
-echo "     Code level  : $CODELEVEL"
-echo "     CPPFLAGS    : $CPPFLAGS"
-echo "     CXXFLAGS    : $CXXFLAGS"
-echo "     LIBS        : $LIBS"
+echo "     Debug level: $DEBUGLEVEL"
+echo "     Code level: $CODELEVEL"
 
 # print warning about behavior deviating from automake's defaults
 SWITCHES=""

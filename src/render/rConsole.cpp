@@ -30,8 +30,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tConfiguration.h"
 #include "rConsole.h"
 #include "rScreen.h"
-#include "tDirectories.h"
-#include "tRecorder.h"
 #include <iostream>
 
 
@@ -94,29 +92,19 @@ void rConsole::SetTimeout(REAL to){timeout=to;}
 REAL rCWIDTH_CON=REAL(16/640.0);
 REAL rCHEIGHT_CON=REAL(32/480.0);
 
-static bool sr_consoleLog = false;
-static tConfItem<bool> sr_consoleLogConf("CONSOLE_LOG", sr_consoleLog);
+
 
 tConsole & rConsole::DoPrint(const tString &s){
     bool print_to_stdout=false;
 #ifdef DEBUG
     print_to_stdout=true;
 #endif
-    bool swap = false;
-
     if (!sr_screen)
         print_to_stdout=true;
     if (print_to_stdout)
     {
         std::cout << tColoredString::RemoveColors(s);
         std::cout.flush();
-    }
-
-    if(!tRecorder::IsPlayingBack() && sr_consoleLog) {
-            std::ofstream o;
-            if ( tDirectories::Var().Open(o, "consolelog.txt", std::ios::app) ) {
-                o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << tColoredString::RemoveColors(s);
-            }
     }
 
     if (sr_screen){
@@ -129,7 +117,7 @@ tConsole & rConsole::DoPrint(const tString &s){
                 currentIn++;
                 if (autoDisplayAtNewline && !rNoAutoDisplayAtNewlineCallback::NoAutoDisplayAtNewline() && (sr_textOut ||
                         rForceTextCallback::ForceText()))
-                    swap = true;
+                    DisplayAtNewline();
 
                 if (currentIn >= MAXBACK+BACKEXTRA){
                     for(int i=0;i<MAXBACK;i++)
@@ -151,21 +139,7 @@ tConsole & rConsole::DoPrint(const tString &s){
             while ((currentIn-currentTop) > Height())
                 currentTop++;
     }
-
-    if (swap)
-        DisplayAtNewline();
-
     return *this;
-}
-
-// moves to the end, showing the last lines
-void rConsole::End(int last)
-{
-    currentTop = currentIn - last;
-    if ( currentTop < 0 )
-    {
-        currentTop = 0;
-    }
 }
 
 void rConsole::Scroll(int dir){

@@ -1,7 +1,6 @@
 language American English
 include english_base.txt
 
-first_setup_color                 Color:
 fav_num_per_team_player_help      The favorite number of players per team for this player
 color_b_help                      Cycle and wall color, blue component.
 color_g_help                      Cycle and wall color, green component.
@@ -17,12 +16,12 @@ color_strings_help                Print colored strings
 colordepth_help                   Color depth to use (0: 16 1: desktop 2: 24)
 last_colordepth_help              Color depth, last successful init
 zdepth_help                       z buffer depth to use (0: 16 1: from color depth 2: 32)
-failed_attempts_help              Number of failed attempts to initialize graphics mode
+failed_attempts_help              Number of failed attemts to initialize graphics mode
 player_blue_help                  Lets you choose the blue component of your color.
 player_green_help                 Lets you choose the green component of your color.
 player_red_help                   Lets you choose the red component of your color.
-player_name_team_help             You can set your preferred method for naming your team here: On indicates you want the team to be named after its most senior player, Off means you want a simple color label.
-player_num_per_team_help          Set your favorite number of players per team here. When you join a game and the smallest team has less players than specified here, you'll join that team. Otherwise, you will create a new team. Only the default behavior is governed by this setting; you can switch teams later.
+player_name_team_help             You can set your prefered method for naming your team here: On indicates you want the team to be named after its most senior player, Off means you want a simple color label.
+player_num_per_team_help          Set your favorite number of players per team here. When you join a game and the smallest team has less players than specified here, you'll join that team. Otherwise, you will create a new team. Only the default behaviour is governed by this setting; you can switch teams later.
 player_camera_initial_help        Choose your favorite camera perspective here.
 player_camera_fov_help            Choose your favorite FOV (Field of vision).
 screen_colordepth_text            Color Depth:
@@ -36,4 +35,3 @@ detail_smooth_help                Makes edges appear "round" by adding a color g
 detail_text_truecolor_text        TrueColor Textures:
 detail_text_truecolor_help        Stores the textures with 32 bit color depth instead of the default of 16 bit.
 sound_inited                      Sound initialized: 16 bit stereo at \1 Hz, buffer size \2 samples.\n
-player_random_color_help If set to 1, each local player will receive a semi-random color every round, trying to get as far away from every other player color.

@@ -32,6 +32,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "defs.h"
 #include "tString.h"
+#include "tSafePTR.h"
 
 class rViewport{
     REAL left,bottom,width,height;
@@ -93,7 +94,7 @@ public:
 
     static rViewportConfiguration *s_viewportConfigurations[];
     static const int               s_viewportNumConfigurations;
-    static char const *            s_viewportConfigurationNames[];
+    static char                   *s_viewportConfigurationNames[];
 
     static rViewportConfiguration *CurrentViewportConfiguration();
 

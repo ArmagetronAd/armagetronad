@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -29,11 +29,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define ArmageTron_CAMERA_H
 
 typedef enum {CAMERA_IN=0, CAMERA_CUSTOM=1, CAMERA_FREE=2, CAMERA_FOLLOW=3,
-              CAMERA_SMART=4,  CAMERA_SERVER_CUSTOM=5, CAMERA_SMART_IN=6, CAMERA_COUNT=7 } eCamMode;
+              CAMERA_SMART=4, CAMERA_MER=5, CAMERA_SERVER_CUSTOM=6,
+              CAMERA_SMART_IN=7, CAMERA_COUNT=8 } eCamMode;
 
 #include "eCoord.h"
 //#include "uInput.h"
 #include "rViewport.h"
+#include "tLinkedList.h"
 #include "tList.h"
 #include "nObserver.h"
 
@@ -44,20 +46,27 @@ class eNetGameObject;
 class eCamera;
 class eGrid;
 class uActionCamera;
-class uActionTooltip;
+class uGlanceAction;
+
 
 //extern REAL se_cameraRise; // how far down does the current camera look?
 //extern REAL se_cameraZ;
 
 // extern List<eCamera> se_cameras;
 
+class eGlanceRequest : public tListItem<eGlanceRequest> {
+public:
+    eGlanceRequest() : tListItem<eGlanceRequest>() {}
+    eCoord dir;
+};
+
 class eCamera{
 protected:
+    static const int se_glances = 4;
     static uActionCamera se_lookUp,se_lookDown,se_lookLeft,se_lookRight,
     se_moveLeft,se_moveRight,se_moveUp,se_moveDown,se_moveForward,se_moveBack,
-    se_zoomIn,se_zoomOut,se_glanceLeft,se_glanceRight,se_glanceBack,
-    se_switchView;
-    static uActionTooltip se_glanceLeftTooltip, se_glanceRightTooltip, se_glanceBackTooltip, se_switchViewTooltip;
+    se_zoomIn,se_zoomOut, se_switchView;
+    static uGlanceAction se_glance[se_glances];
 
     int id;
     //  tCHECKED_PTR(eGameObject) foot;
@@ -96,19 +105,23 @@ protected:
 
     tCHECKED_PTR(rViewport) vp;
 
-    eCoord centerPosLast;
+    eCoord centerPosLast, centerposLast;
     REAL  userCameraControl;
     REAL  centerIncam;
 
-    bool glancingLeft,glancingRight,glancingBack;
-    REAL glanceSmooth, glanceSmoothAbs;
-    eCoord glanceDir_;
+    eGlanceRequest* activeGlanceRequest;
+    eGlanceRequest glanceRequests[se_glances];
 
     bool renderingMain_;	// flag indicating whether the current rendering process is the main process or just a mirror effect
 
     static bool InterestingToWatch(eGameObject const * g);
 
-    eCoord Glance( eCoord const & in, eCoord const & glanceDir ) const;
+    //! returns the next view direction if a glance towards targetDir is requested
+    //! dir is the current view direction
+    //! targetDir is the desired view direction
+    //! ts is the time step
+    //! note: directions are represented by unit-length vectors
+    static eCoord nextDirIfGlancing(eCoord const & dir, eCoord const & targetDir, REAL ts);
 
     void Bound( REAL dt ); //!< make sure the camera is inside the arena and has clear line of sight
     void Bound( REAL dt, eCoord & pos ); //!< make sure pos is inside the arena and has clear line of sight
@@ -123,7 +136,6 @@ public:
     void SetRenderingMain( bool f ){ renderingMain_ = f; }
 
     const ePlayerNetID* Player() const;
-    const ePlayer* LocalPlayer() const;
 
     eCamera(eGrid *grid, rViewport *vp,ePlayerNetID *owner,ePlayer *lp,eCamMode m=CAMERA_IN);
     virtual ~eCamera();
@@ -146,7 +158,7 @@ public:
 
     const eCoord& CameraDir() const {return dir;}
     const eCoord& CameraPos() const {return pos;}
-    eCoord        CameraGlancePos() const {return Glance(pos, glanceDir_);}
+    eCoord        CameraGlancePos() const {return pos;}  //! CHECK: this method is redundant with CameraPos(). I leave removing it to you since it is called externally.
     REAL          CameraZ  () const {return z;}
 
     bool CenterAlive() const;

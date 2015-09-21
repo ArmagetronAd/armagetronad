@@ -155,14 +155,14 @@ public:
     // of a
     // bDir tells the direction the wall of b is going (-1: to the left, 1:...)
     // bDist is the distance of b's wall to its start.
-    static void CycleBlocksWay(const gCycleMovement *a, const gCycleMovement *b,
+    static void CycleBlocksWay(const gCycle *a, const gCycle *b,
                                int aDir, int bDir, REAL bDist, int winding);
 
     // called whenever a cylce blocks the rim wall.
-    static void CycleBlocksRim(const gCycleMovement *a, int aDir);
+    static void CycleBlocksRim(const gCycle *a, int aDir);
 
     // called whenever a hole is ripped in a's wall at distance aDist.
-    static void BreakWall(const gCycleMovement *a, REAL aDist);
+    static void BreakWall(const gCycle *a, REAL aDist);
 
     static void ConfigureAIs();  // ai configuration menu
 

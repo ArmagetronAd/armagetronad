@@ -126,12 +126,9 @@ void gLogo::Display()
                 sg_DisplayStatus = 0;
         }
 
-        if (sg_DisplayStatus <= .01)
-            return;
-
         sg_LogoMPTitle->Select();
 
-        if(!sg_LogoMPTitle->Loaded())
+        if (sg_DisplayStatus <= .01 || !sg_LogoMPTitle->Loaded())
             return;
 
         Color(1,1,1, sg_DisplayStatus);
@@ -173,12 +170,9 @@ void gLogo::Display()
                 sg_DisplayStatus = 0;
         }
 
-        if (sg_DisplayStatus <= .01)
-            return;
-
         sg_LogoMPTitle->Select();
 
-        if (!sg_LogoMPTitle->Loaded())
+        if (sg_DisplayStatus <= .01 || !sg_LogoMPTitle->Loaded())
             return;
 
         Color(1,1,1, sg_DisplayStatus);
@@ -240,7 +234,7 @@ void gLogo::Display()
                 sg_DisplayStatus = 0;
         }
 
-        if (sg_DisplayStatus <= 0)
+        if (sg_DisplayStatus < 0)
             return;
 
         eCoord center(.8*(sg_SizeStatus*sg_SizeStatus-1), .8*(1-sg_SizeStatus));

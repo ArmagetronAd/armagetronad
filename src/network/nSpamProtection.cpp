@@ -30,8 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tSysTime.h"
 
 static REAL se_SpamProtection = 4.0f;	// degree of spam protection
-static REAL se_SpamPenalty	  = 0.0f;	// silence penalty when found guilty of spamming
-static int  se_SpamAutoKickCount  = 3;	// minimal number of 
+static REAL se_SpamPenalty	  = 10.0f;	// silence penalty when found guilty of spamming
 static REAL se_SpamAutoKick	  = 20.0f;	// spam value that causes someone to get instantly kicked.
 int			se_SpamMaxLen	  = 80;		// maximal length of chat message
 
@@ -41,22 +40,10 @@ static tSettingItem<REAL> se_SPE("SPAM_PENALTY",
                                  se_SpamPenalty);
 static tSettingItem<REAL> se_SAK("SPAM_AUTOKICK",
                                  se_SpamAutoKick);
-static tSettingItem<int> se_SAKC("SPAM_AUTOKICK_COUNT",
-                                 se_SpamAutoKickCount);
-
-// prevent spam_maxlen from being set so low no admin can increase it back up
-static bool sn_SpamMaxLenLimit(int const & value)
-{
-    static int minlen=strlen("/admin SPAM_MAXLEN 1000");
-    return value >= minlen;
-    // yeah, if the admin also logs out and it's reallylongname@clanwiththelongestname.com, 
-    // he's screwed.
-}
 static nSettingItemWatched<int> se_SML("SPAM_MAXLEN",
                                        se_SpamMaxLen,
                                        nConfItemVersionWatcher::Group_Cheating,
                                        3 );
-static tAccessLevelSetter se_SMLAL( se_SML.GetSetting().SetShouldChangeFunc(sn_SpamMaxLenLimit), tAccessLevel_Owner );
 
 
 nSpamProtectionSettings::nSpamProtectionSettings( REAL timeScale, char const * timeScaleConfig, const tOutput& silence )
@@ -65,7 +52,7 @@ nSpamProtectionSettings::nSpamProtectionSettings( REAL timeScale, char const * t
 }
 
 nSpamProtection::nSpamProtection( const nSpamProtectionSettings& settings )
-    : settings_( settings ), spamProtect_( 0.0f ), spamProtectTime_( tSysTimeFloat( )), numWarnings_( 0 )
+        : settings_( settings ), spamProtect_( 0.0f ), spamProtectTime_( tSysTimeFloat( ))
 {
 }
 
@@ -79,25 +66,7 @@ REAL	nSpamProtection::BlockTime()					// time left in silenced mode
     return ( spamProtect_ - 6 ) * timeScale + ( tSysTimeFloat() - spamProtectTime_ );
 }
 
-// Reset spam time so everything that happened between last spammy event and now is erased
-void nSpamProtection::ResetTime()
-{
-    double now = tSysTimeFloat();
-    
-    // but move ahead this much
-    double ahead = 1;
-
-    now += ahead;
-    spamProtectTime_ = now;
- }
- 
- void nSpamProtection::ResetSpam()
- {
-     spamProtect_ = 0;
-     numWarnings_ = 0;
- }
-
-nSpamProtection::Level	nSpamProtection::CheckSpam( REAL spamlevel, int userToKick, tOutput const & reason )	// check if someone is spamming
+nSpamProtection::Level	nSpamProtection::CheckSpam( REAL spamlevel, int userToKick )	// check if someone is spamming
 {
     if ( se_SpamProtection < 0.01f )
     {
@@ -107,14 +76,9 @@ nSpamProtection::Level	nSpamProtection::CheckSpam( REAL spamlevel, int userToKic
     REAL timeScale = this->settings_.timeScale_ * se_SpamProtection;
 
     spamProtect_ += spamlevel;
-    double now = tSysTimeFloat();
-
-    if(now < spamProtectTime_)
-        now = spamProtectTime_;
-
     spamProtect_ -=( tSysTimeFloat() - spamProtectTime_ ) / timeScale;
 
-    spamProtectTime_ = now;
+    spamProtectTime_ = tSysTimeFloat();
     if ( spamProtect_ < 0 )
         spamProtect_ = 0;
 
@@ -130,20 +94,15 @@ nSpamProtection::Level	nSpamProtection::CheckSpam( REAL spamlevel, int userToKic
 
         sn_ConsoleOut(message,userToKick);
 
-        if ( spamProtect_ > se_SpamAutoKick && numWarnings_ >= se_SpamAutoKickCount )
+        if ( spamProtect_ > se_SpamAutoKick )
         {
-            tOutput message( "$network_kill_spamkick" );
-            message.Append( " " );
-            message.Append( reason );
-            sn_KickUser( userToKick, message );
+            sn_KickUser( userToKick, "$network_kill_spamkick" );
 
             return Level_Hard;
         }
 
-        ++numWarnings_;
         return Level_Mild;
     }
 
-    numWarnings_ = 0;
     return Level_Ok;
 }

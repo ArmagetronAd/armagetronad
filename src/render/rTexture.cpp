@@ -30,7 +30,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "config.h"
 
 #include "rTexture.h"
-#include "rDisplayList.h"
 #include "tString.h"
 #include "rScreen.h"
 #include "tDirectories.h"
@@ -445,8 +444,6 @@ rISurfaceTexture::~rISurfaceTexture( void )
 #ifndef DEDICATED
     if (tint_ > 0)
     {
-        rDisplayList::ClearAll();
-
         glDeleteTextures(1,&tint_);
         tint_ = 0;
     }
@@ -480,7 +477,6 @@ void rISurfaceTexture::ProcessImage( SDL_Surface * surface )
 void rISurfaceTexture::Upload( rSurface & surface )
 {
 #ifndef DEDICATED
-    sr_LockSDL();
     GLenum texformat = surface.GetFormat();
     SDL_Surface * tex = surface.GetSurface();
     tASSERT( tex );
@@ -512,9 +508,7 @@ void rISurfaceTexture::Upload( rSurface & surface )
 
     gluBuild2DMipmaps(GL_TEXTURE_2D,format,tex->w,tex->h,
                       texformat,GL_UNSIGNED_BYTE,tex->pixels);
-
-    sr_UnlockSDL();
- #endif
+#endif
 }
 
 // ******************************************************************************************
@@ -532,8 +526,6 @@ void rISurfaceTexture::OnSelect( bool enforce )
 #ifndef DEDICATED
     if(sr_glOut)
     {
-        RenderEnd(true);
-
         int texmod=rTextureGroups::TextureMode[group_];
         if (enforce && texmod<0) texmod=GL_NEAREST_MIPMAP_NEAREST;
 
@@ -546,8 +538,7 @@ void rISurfaceTexture::OnSelect( bool enforce )
             // std::cerr << "loading texture " << fileName << ':' << tint << "\n";
 
             if (texmod>0){
-                // don't generate textures inside display lists
-                rDisplayList::Cancel();
+                RenderEnd(true);
 
                 glGenTextures(1, &tint_);
                 glBindTexture(GL_TEXTURE_2D,tint_);
@@ -630,8 +621,6 @@ void rISurfaceTexture::OnUnload( void )
 #ifndef DEDICATED
     if (tint_ > 0)
     {
-        rDisplayList::ClearAll();
-
         // std::cerr << "unloading texture " << fileName << ':' << tint_ << "\n";
         glDeleteTextures(1,&tint_);
         tint_ = 0;
@@ -774,13 +763,9 @@ void rSurfaceTexture::OnSelect()
 bool rISurfaceTexture::s_reportErrors_=false;
 tList<rITexture> rITexture::s_textures_;
 
-int rTextureGroups::TextureMode[rTextureGroups::TEX_GROUPS]
-#ifndef DEDICATED
-={GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR }
-#endif
-;
+int rTextureGroups::TextureMode[rTextureGroups::TEX_GROUPS];
 
-char const * rTextureGroups::TextureGroupDescription[rTextureGroups::TEX_GROUPS]=
+char *rTextureGroups::TextureGroupDescription[rTextureGroups::TEX_GROUPS]=
     {
         "$texture_mode_0_help",
         "$texture_mode_1_help",

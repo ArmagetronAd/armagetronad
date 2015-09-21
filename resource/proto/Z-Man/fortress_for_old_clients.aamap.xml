@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE Resource SYSTEM "AATeam/map-0.2.8.0_rc4.dtd">
+<!DOCTYPE Resource SYSTEM "map.dtd">
 <Resource type="aamap" name="for_old_clients" version="0.1.0" author="Z-Man" category="fortress">
 	<Map version="2">
 		<!-- The original square map, technically created by z-man.

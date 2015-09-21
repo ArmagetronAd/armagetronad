@@ -27,17 +27,24 @@ did not change, but be prepared for problems nevertheless.
 SECTION(Required libraries,libs)
 
 ULIST([
-ITEM(ELINK(www.xmlsoft.org/,LibXML2) version 2.6.0 (some binaries: 2.6.12) or later for map file parsing)
+ITEM(ELINK(http://www.xmlsoft.org/,LibXML2) version 2.6.0 (some binaries: 2.6.12) or later for map file parsing)
 ITEM([OpenGL or ELINK(mesa3d.sourceforge.net/,Mesa) for rendering])
 ITEM(ELINK(www.libsdl.org,SDL) version 1.2.x (Simple Direct Media Layer) for input and sound output)
+ITEM(ELINK(www.freetype.org,FreeType 2) for font loading)
+ITEM(ELINK(homepages.paradise.net.nz/henryj/code/index.html,FTGL), version 2.X, for font rendering)
 ITEM(ELINK(www.libsdl.org/projects/SDL_image/index.html, SDL_image)
 version 1.2.x for the textures
 which itself needs the libs)
 ITEM(ELINK(www.libpng.org/pub/png/pngcode.html,pnglib and zlib)
 (they should be included in your distribution))
 ITEM(Optional: ELINK(www.libsdl.org/projects/SDL_mixer/,SDL_mixer))
-ITEM([Binary versions only: libstdc++.so.6 (any version that came with
-your System if it uses GCC 4.1 or higher should do).])
+ITEM([Binary versions only: libstdc++ 5.0.7 (any 5.x.y or whatever came with
+your System if it uses GCC 3.2 or higher should do). Use 
+ELINK([rpmfind.net/linux/rpm2html/search.php?query=libstdc%2B%2B&submit=Search+...&system=&arch=],rpmfind)
+or
+ELINK([www.google.com/search?hl=en&lr=&q=libstdc%2B%2B+5.0.7&btnG=Search],google)
+to find a RPM with that library for your system. Sorry, Debian users: I don't know what you need to do; use the
+source packages instead.])
 ])
 
 PARAGRAPH(,[
@@ -68,7 +75,6 @@ Please ELINK(armagetron.sf.net/contact.html,report it) if this procedure gives y
 resolve; the goal is to make it work on as many systems as possible.
 ])
 
-ifelse(,,,
 SUBSECTION(Binary RPM,rpm)
 PARAGRAPH([
 Type CMDLINE(rpm -i filename.rpm) The RPM build is quite untested, so it may be
@@ -100,7 +106,6 @@ dependencies were all there when you built the package. (It is possible,
 if not likely, that the automatic dependency generation of RPM produces
 junk.)
 ])
-)
 
 SUBSECTION(Non-Root install)
 PARAGRAPH([

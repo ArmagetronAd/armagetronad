@@ -1,0 +1,105 @@
+In this file you find instructions how to get from a fresh CVS checkout to a running game.
+It is assumed that you know how to check out modules on your system, because you apparently already managed to check out one :) "Checking out module X in parallel to this" means you should go to the parent directory and check out module X from the same repository where you got this module from, so that the parent directory looks like this:
+
+parent_directory:
+    armagetronad:
+        README-CVS and other files
+    X:
+        files from X
+
+To use the sources from CVS, you need to have additional tools installed: on all operating systems, you'll need Python (www.python.org). On Unix, you also need all autotools (autoconf and automake, check with your distribution).
+To build tarball distributions, you also need cvs2cl (http://www.red-bean.com/cvs2cl/).
+
+****************
+* Unix vanilla *
+****************
+You're in luck, you already have everything you'll need. Follow these steps:
+
+# generate configure, config.h.in and the like
+> sh ./bootstrap.sh
+# generate and change to build directory
+> mkdir ../armagetronad-build; cd ../armagetronad-build
+# run the configure script ( add --disable-glout for the dedicated server )
+> ../armagetronad/configure 
+# run make
+> make
+# run game
+> make run
+# or run with arguments
+> ./src/armagetronad_main <options>
+# install game if you like
+> make install
+
+****************
+* Unix managed *
+****************
+
+There is also a helper module for the unix build, managing the tasks above and managing debug and optimized versions of the client and the server. It is designed to operate with the Eclipse IDE, but runs fine without it. The module's name is armagetronad_build_eclipse.
+Check it out parallel to the armagetronad module, cd there and read the enclosed README.
+If you're in a hurry, just run "make" there.
+
+********
+* OS X *
+********
+
+The Mac OS projects are located in the armagetronad/MacOS/ directory.
+
+== Armagetron.pbproj
+
+This is the old project. If you would like to build on Xcode < 2.1 or Project Builder you must use this. It is not up-to date, so you must add several missing files to it.
+
+== Armagetron Advanced.xcodeproj
+
+This will only open in Xcode >= 2.1. It has three targets:
+* Armagetron Advanced -- The client
+* Armagetron Advanced 10.2.8 -- The client for Mac OS X 10.2.8
+* Armagetron Advanced Dedicated -- Dedicated Server
+
+Armagetron Advanced requires:
+* SDL.framework
+* SDL_mixer.framework
+* SDL_image.framework
+* libpng.framework
+
+Armagetron Advanced 10.2.8 requires everything listed for Armagetron Advanced plus:
+* libxml2 built for 10.2.8
+* The Mac OS X 10.2.8 SDK
+
+All dependencies for Armagetron Advanced Dedicated are included with Mac OS X.
+
+To build:
+== Armagetron Advanced
+* The default configuration is Release. The other option is Debug.
+* Build
+
+== Armagetron Advanced 10.2.8
+* Change the target to Armagetron Advanced 10.2.8
+* In config_common.h un-comment "#define MACOSX_VERSION_10_2 1"
+* Build
+
+== Armagetron Advanced Dedicated
+* Change to the dedicated target.
+* Build
+
+*********************
+* Windows + VisualC *
+*********************
+
+You'll need to check out the additional module armagetronad_build_visualc parallel to this module. In it, you'll find a README describing how to proceed; you'll need to download some libraries and put them in the right place.
+
+********************
+* Windows + Cygwin *
+********************
+
+Not supported yet.
+
+*******************
+* Windows + Mingw *
+*******************
+
+Not supported yet.
+
+
+
+------------------------------------------
+Initialy written by z-man.

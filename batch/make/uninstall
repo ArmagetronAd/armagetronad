@@ -11,7 +11,7 @@ test x$UNINSTALL = x && UNINSTALL=uninstall
 EXTERNAL_CMD=$2
 
 test -z "`echo $UNINSTALL | grep '^/'`" && UNINSTALL=`pwd`/$UNINSTALL
-echo "Generating uninstallation script" $UNINSTALL...
+echo -n "Generating uninstallation script" $UNINSTALL...
 
 if test "$EXTERNAL_CMD" != "" && test "$EXTERNAL_CMD" != "yes"; then
 	{
@@ -23,7 +23,7 @@ else
 # start $UNINSTALL
 cat > ${UNINSTALL} <<EOF
 #! /bin/sh
-# uninstalls ${PROGTITLE}
+#uninstalls ${PROGTITLE}
 
 # set default destdir to where the game was installed to
 test -z "\${DESTDIR}" && DESTDIR=${ROOTDIR}
@@ -32,54 +32,46 @@ export DESTDIR
 # uninstall system files
 \${DESTDIR}${SCRIPTDIR}/sysinstall uninstall ${PREFIX} || exit 1
 
-# automaticall generated from "make install"
+# automaticall generated from "make uninstall"
 EOF
 
+# generate wrapper for "rm"
+TMPBIN=${DESTDIR}${PREFIX}/armatempbin
+test -d ${TMPBIN} || mkdir ${TMPBIN} || exit 1
+RM=${TMPBIN}/rm
 
-# do an installation
-echo -n "Performing test installation..."
-DEST=$(pwd)/.foruninstall
+# eek, that's horrible. For every call to rm, we need to record what is done, but we
+# have to revert the value of ${DESTDIR} with the literal ${DESTDIR}. A lot of
+# escaping is needed to get the literal through all the expansion layers.
 
-# test for recursion
-if echo ${DESTDIR} | grep "\.foruninstall$"; then
-   echo "Recursion detected, aborting."
-   exit 0
-fi
-
-if ${MAKE} DESTDIR=${DEST} install > /dev/null; then
-echo "Success!"
-else
-echo "Failure :("
-rm -rf $DEST
-exit -1
-fi
-
-find "$DEST" -type d | sed -e "s,^${DEST},rmdir --ignore-fail-on-non-empty \\\$\{DESTDIR\}," > ${UNINSTALL}.dir0
-find "$DEST" -type f | sed -e "s,^${DEST},rm -f \\\$\{DESTDIR\}," > ${UNINSTALL}.files
-
-# less ${UNINSTALL}.dir0
-
-# add all parent directories of those that are still game-specific
-grep ${PROGNAME} ${UNINSTALL}.dir0 > ${UNINSTALL}.dir
-while test -s ${UNINSTALL}.dir0; do
-  sed -e "s,/[^/]*\$,," < ${UNINSTALL}.dir0 | grep ${PROGNAME} > ${UNINSTALL}.dir1
-  cat ${UNINSTALL}.dir1 >> ${UNINSTALL}.dir
-  mv ${UNINSTALL}.dir1 ${UNINSTALL}.dir0
+cat > ${RM} <<EOF
+#! /bin/sh
+ARGS=""
+for arg in "\$@"; do
+ #echo \${arg}
+ arg_trans=\`echo "\${arg}" | sed -e "s,^${DESTDIR},\\\\\\\${DESTDIR},"\`
+ #echo \${arg_trans}
+ ARGS="\${ARGS} \"\${arg_trans}\""
 done
+#echo "\${ARGS}"
+echo rm "\${ARGS}" >> ${UNINSTALL}
+EOF
 
-# compose uninstall script from file and directory list
-cat ${UNINSTALL}.files >> ${UNINSTALL}
-sort ${UNINSTALL}.dir --reverse --unique >> ${UNINSTALL}
+chmod 755 ${RM} || exit 1
 
-rm -rf ${DEST}
+# invoke "make uninstall" with path bend to the rm wrapper
+OLDPATH=$PATH
+PATH=${TMPBIN}:$OLDPATH
+export PATH
+AA_FAKE_UNINSTALL="YES" ${MAKE} uninstall > /dev/null || exit 1
+
+# remove the wrapper
+PATH=$OLDPATH
+rm -rf ${TMPBIN} || exit -1
+rm -f ${RM}
 
 fi
 
-# clean up
-rm -f ${UNINSTALL}.dir ${UNINSTALL}.dir0 ${UNINSTALL}.files
-
-chmod 755 ${UNINSTALL}
-
-# less ${UNINSTALL}
+chmod 755 $UNINSTALL
 
 echo "done."

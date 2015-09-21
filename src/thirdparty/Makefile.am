@@ -1,6 +1,9 @@
 if BUILDFAKERELEASE
+SUBDIRS=
 else
-if BUILDREGULAR
-SUBDIRS=particles
+if BUILDDEDICATED
+SUBDIRS=shttpd
+else
+SUBDIRS=shttpd
 endif
 endif

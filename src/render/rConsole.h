@@ -32,7 +32,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tString.h"
 #include "tConsole.h"
 #include "tCallback.h"
-
+#include "tArray.h"
 
 extern REAL rCWIDTH_CON;
 extern REAL rCHEIGHT_CON;
@@ -73,29 +73,21 @@ public:
     //  rConsole & operator<<(const tString &s);
     virtual tConsole & DoPrint( const tString& s );
 
-    //! scrolls up or down
     void Scroll(int dir);
-
-    //! moves to the end, showing the last lines
-    void End(int last);
 
     virtual void DoCenterDisplay(const tString &s,REAL timeout=2,REAL r=1,REAL g=1,REAL b=1);
 
     virtual tString ColorString(REAL r, REAL g, REAL b) const;
-
-    //! returns whether a center display is currently in progress
-    static bool CenterDisplayActive();
 };
 
 
 extern rConsole sr_con; // where all the output is directed to
 
 #ifdef DEDICATED
+// read from stdin
+void sr_Unblock_stdin();
 void sr_Read_stdin();
 #endif
-
-// passes ladderlog output to external scripts
-void sr_InputForScripts( char const * input );
 
 class rForceTextCallback:public tCallbackOr{
 public:

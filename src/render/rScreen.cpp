@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
+  
 ***************************************************************************
 
 */
@@ -33,9 +33,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "rTexture.h"
 #include "rScreen.h"
 #include "rSysdep.h"
-#include "rConsole.h"
 #include "rViewport.h"
 #include "tConfiguration.h"
+#include "tRecorder.h"
 #include "tSysTime.h"
 
 #ifndef DEDICATED
@@ -69,12 +69,12 @@ SDL_Surface *sr_screen=NULL; // our window
 static int default_texturemode = GL_LINEAR_MIPMAP_LINEAR;
 #endif
 
-rDisplayListUsage sr_useDisplayLists=rDisplayList_Off;
-bool              sr_blacklistDisplayLists=false;
+bool sr_ZTrick=false;
+bool sr_useDisplayLists=false;
 
-static int width[ArmageTron_Custom+2]  = {0, 320, 320, 400, 512, 640, 800, 1024	, 1280, 1280, 1280, 1600, 1680, 2048,800,320};
-static int height[ArmageTron_Custom+2] = {0, 200, 240, 300, 384, 480, 600,  768	,  800,  854, 1024, 1200, 1050, 1572,600,200};
-static REAL aspect[ArmageTron_Custom+2]= {1, 1	, 1  , 1  , 1  , 1  , 1	 , 1	,    1,    1, 1   ,    1,    1,    1,1,  1};
+static int width[]={320	,320,400,512,640,800,1024	,1280, 	1280 ,1280	,1600	,1680 ,2048	,800,320};
+static int height[]={200,240,300,384,480,600,768	,800, 	854  ,1024	,1200	,1050 ,1572	,600,200};
+static REAL aspect[]={1	,1	,1	,1	,1	,1    ,1	,1	,1    ,1	,1		,1,1	,1};
 
 int sr_screenWidth,sr_screenHeight;
 
@@ -98,6 +98,7 @@ std::istream & operator >> ( std::istream & s, rScreenSize const & size )
 }
 */
 
+#ifndef DEBUG
 static rScreenSettings em6(ArmageTron_320_240, false, ArmageTron_ColorDepth_16, true, false);
 static rScreenSettings em5(ArmageTron_320_240, false, ArmageTron_ColorDepth_Desktop, true, false);
 static rScreenSettings em4(ArmageTron_640_480, false,ArmageTron_ColorDepth_16);
@@ -106,28 +107,13 @@ static rScreenSettings em2(ArmageTron_640_480, true, ArmageTron_ColorDepth_16, f
 static rScreenSettings em1(ArmageTron_640_480);
 
 static rScreenSettings *emergency[MAXEMERGENCY+2]={ &lastSuccess, &lastSuccess, &em1, &em2, &em3 , &em4, &em5, &em6};
+#endif
 
 #ifdef DEBUG
-rScreenSettings currentScreensetting(ArmageTron_640_480);
+rScreenSettings currentScreensetting(ArmageTron_320_200);
 #else
-rScreenSettings currentScreensetting(sr_DesktopScreensizeSupported() ? ArmageTron_Desktop : ArmageTron_800_600, true);
+rScreenSettings currentScreensetting(ArmageTron_640_480, true);
 #endif
-
-bool sr_DesktopScreensizeSupported()
-{
-#ifndef DEDICATED
-    SDL_version const & sdlVersion = *SDL_Linked_Version();
-
-    return
-    sdlVersion.major > 1 || 
-    ( sdlVersion.major == 1 &&
-      ( sdlVersion.minor > 2 || 
-        ( sdlVersion.minor == 2 &&
-          ( sdlVersion.patch >= 10 ) ) ) );
-#else
-    return false;
-#endif
-}
 
 static int failed_attempts = 0;
 
@@ -175,14 +161,8 @@ static tConfItem<int> fa("FAILED_ATTEMPTS", failed_attempts);
 
 static tCallback *rPerFrameTask_anchor;
 
-bool sr_True(){return true;}
-
 rPerFrameTask::rPerFrameTask(VOIDFUNC *f):tCallback(rPerFrameTask_anchor, f){}
-void rPerFrameTask::DoPerFrameTasks(){
-    // prevent console rendering, that can cause nasty recursions
-    rNoAutoDisplayAtNewlineCallback noAutoDisplay( sr_True );
-    Exec(rPerFrameTask_anchor);
-}
+void rPerFrameTask::DoPerFrameTasks(){Exec(rPerFrameTask_anchor);}
 
 
 // *******************************************
@@ -222,7 +202,7 @@ rScreenSize::rScreenSize( int w, int h )
 // *******************************************************************************************
 
 rScreenSize::rScreenSize( rResolution r )
-        :res( r ), width(0), height(0)
+        :res( r )
 {
     UpdateSize();
 }
@@ -291,12 +271,6 @@ bool rScreenSize::operator !=( rScreenSize const & other ) const
 
 int rScreenSize::Compare( rScreenSize const & other ) const
 {
-    // desktop size dominates all
-    if ( width == 0 && other.width != 0 )
-        return 1;
-    if ( other.width == 0 && width != 0 )
-        return -1;
-
     if ( width < other.width )
         return -1;
     else if ( width > other.width )
@@ -335,11 +309,6 @@ int rScreenSize::Compare( rScreenSize const & other ) const
 rScreenSettings::rScreenSettings( rResolution r, bool fs, rColorDepth cd, bool sdl, bool ce )
         :res(r), windowSize(r), fullscreen(fs), colorDepth(cd), zDepth( ArmageTron_ColorDepth_Desktop ), useSDL(sdl), checkErrors(true), aspect (1)
 {
-    // special case for desktop resolution: window size of 640x480
-    if ( r == ArmageTron_Desktop )
-    {
-        windowSize = rScreenSize( ArmageTron_640_480 );
-    }
 }
 
 void sr_ReinitDisplay(){
@@ -385,16 +354,12 @@ static int countBits(unsigned int count)
 }
 #endif
 
-// flag indicating whether directX is supposed to be used for input (defaults to false, crashes on my Win7)
-bool sr_useDirectX = false;
-static bool use_directx_back = false;
-
 static bool lowlevel_sr_InitDisplay(){
 #ifndef DEDICATED
     rScreenSize & res = currentScreensetting.fullscreen ? currentScreensetting.res : currentScreensetting.windowSize;
 
     // update pixel aspect ratio
-    if ( res.res != ArmageTron_Invalid && size_t(res.res) < sizeof(aspect)/sizeof(aspect[0]) )
+    if ( res.res != ArmageTron_Invalid )
         currentScreensetting.aspect = aspect[res.res];
 
 #ifndef DIRTY
@@ -403,49 +368,6 @@ static bool lowlevel_sr_InitDisplay(){
     res.UpdateSize();
     sr_screenWidth = res.width;
     sr_screenHeight= res.height;
-
-    // desktop color depth
-    static int desktopCD_R = 5;
-    static int desktopCD_G = 5;
-    static int desktopCD_B = 5;
-    static int desktopCD   = 16;
-    // desktop resolution
-    static int sr_desktopWidth = 0, sr_desktopHeight = 0;
-
-    // determine those values
-    if ( sr_desktopWidth == 0 && !sr_screen )
-    {
-        // select sane defaults in case the following operation fails
-        sr_desktopWidth = 800;
-        sr_desktopHeight = 600;
-        
-        const SDL_VideoInfo* videoInfo     = SDL_GetVideoInfo( );
-        if( videoInfo )
-        {
-            const SDL_PixelFormat* pixelFormat = videoInfo->vfmt;
-
-            // don't accept anything less than 15 bpp, OpenGL doesn't like indexed colors.
-            if( pixelFormat && 15 <= pixelFormat->BitsPerPixel && NULL == pixelFormat->palette )
-            {
-                desktopCD    = pixelFormat->BitsPerPixel;
-                desktopCD_R  = countBits(pixelFormat->Rmask);
-                desktopCD_G  = countBits(pixelFormat->Gmask);
-                desktopCD_B  = countBits(pixelFormat->Bmask);
-            }
-
-            // the struct components we read here only exist since 
-            // SDL 1.2.10. The version check here is to safeguard against
-            // code compiled against SDL 1.2.10, but linked with an earlier
-            // version, accessing data out of bounds.
-#if SDL_VERSION_ATLEAST(1, 2, 10)
-            if( sr_DesktopScreensizeSupported() )
-            {
-                sr_desktopWidth  = videoInfo->current_w;
-                sr_desktopHeight = videoInfo->current_h;
-            }
-#endif
-        }
-    }
 
     if (!sr_screen)
     {
@@ -462,10 +384,12 @@ static bool lowlevel_sr_InitDisplay(){
             break;
         case ArmageTron_ColorDepth_Desktop:
             {
-                fullCD     = desktopCD;
-                singleCD_R = desktopCD_R;
-                singleCD_G = desktopCD_G;
-                singleCD_B = desktopCD_B;
+                const SDL_VideoInfo* videoInfo     = SDL_GetVideoInfo( );
+                const SDL_PixelFormat* pixelFormat = videoInfo->vfmt;
+                fullCD         		               = pixelFormat->BitsPerPixel;
+                singleCD_R                         = countBits(pixelFormat->Rmask);
+                singleCD_G                         = countBits(pixelFormat->Gmask);
+                singleCD_B                         = countBits(pixelFormat->Bmask);
             }
             break;
         case ArmageTron_ColorDepth_32:
@@ -542,9 +466,7 @@ static bool lowlevel_sr_InitDisplay(){
 #endif
         int CD = fullCD;
 
-        // only check for errors if requested and if we're not about to set the
-        // desktop resolution, where SDL_VideoModeOK apparently doesn't work.
-        if (currentScreensetting.checkErrors && sr_screenWidth + sr_screenHeight > 0)
+        if (currentScreensetting.checkErrors)
         {
             // check if the video mode should be OK:
             CD = SDL_VideoModeOK
@@ -552,13 +474,13 @@ static bool lowlevel_sr_InitDisplay(){
                   attrib);
 
             // if not quite right
-            if (CD < 15){
+            if (CD < fullCD){
                 // check if the other fs/windowed mode is better
                 int CD_fsinv = SDL_VideoModeOK
                                (sr_screenWidth, sr_screenHeight,   fullCD,
                                 attrib^SDL_FULLSCREEN);
 
-                if (CD_fsinv >= 15){
+                if (CD_fsinv > fullCD){
                     // yes! change the mode
                     currentScreensetting.fullscreen=!currentScreensetting.fullscreen;
                     attrib ^= SDL_FULLSCREEN;
@@ -584,21 +506,7 @@ static bool lowlevel_sr_InitDisplay(){
             }
         }
 
-        // if desktop resolution was selected, pick it
-        if ( sr_screenWidth + sr_screenHeight == 0 )
-        {
-            sr_screenWidth = sr_desktopWidth;
-            sr_screenHeight = sr_desktopHeight;
-        }
-        else
-        {
-            // have the screen reinited
-            sr_screen = NULL;
-        }
-
-        // only reinit the screen if the desktop res detection hasn't left us
-        // with a perfectly good one.
-        if ( !sr_screen && (sr_screen=SDL_SetVideoMode
+        if ( (sr_screen=SDL_SetVideoMode
                         (sr_screenWidth, sr_screenHeight,   CD,
                          attrib))
                 == NULL)
@@ -621,12 +529,12 @@ static bool lowlevel_sr_InitDisplay(){
                 				sr_ExitDisplay();
 
                 				if ( (sr_screen=SDL_SetVideoMode
-                					  (sr_screenWidth, sr_screenHeight,   CD,
+                					  (sr_screenWidth, sr_screenHeight,   CD, 
                 					   attrib))
                 					 == NULL)
                 				{
                 					if((sr_screen=SDL_SetVideoMode
-                						(sr_screenWidth, sr_screenHeight,    CD,
+                						(sr_screenWidth, sr_screenHeight,    CD, 
                 						 attrib^SDL_FULLSCREEN))==NULL )
                 					{
                 						lastError.Clear();
@@ -642,10 +550,8 @@ static bool lowlevel_sr_InitDisplay(){
             }
         }
 
-#ifdef MACOSX
         // MacOSX SDL 1.2.4 crashes if we SetCaption after switch to fullscreen. (fixed in 1.2.5)
         if(!currentScreensetting.fullscreen)
-#endif
         {
             tOutput o("Armagetron Advanced");
             tString s;
@@ -656,73 +562,30 @@ static bool lowlevel_sr_InitDisplay(){
         SDL_EnableUNICODE(1);
     }
 
-    // sanity check texture modes
-    for(int i=rTextureGroups::TEX_GROUPS-1; i>=0; --i)
-    {
-        int & texmode = rTextureGroups::TextureMode[i];
-
-        // don't do anything for deliberately disabled textures
-        if( i == rTextureGroups::TEX_FONT || texmode >= 0 )
-        {
-            // to default if the modes have been reset for some reason
-            if( texmode == 0 )
-            {
-                texmode = default_texturemode;
-            }
-            if( texmode < GL_NEAREST )
-            {
-                texmode = GL_NEAREST;
-            }
-            if( texmode > GL_LINEAR_MIPMAP_LINEAR )
-            {
-                texmode = GL_LINEAR_MIPMAP_LINEAR;
-            }
-        }
-    }
-
 #ifdef DIRTY
     if (!currentScreensetting.useSDL)
         if(!rSysDep::InitGL()) return false;
 #endif
 
 #ifndef DEDICATED
-    gl_vendor.SetLen(0);
-    gl_renderer.SetLen(0);
-    gl_version.SetLen(0);
-    gl_extensions.SetLen(0);
-    renderer_identification.SetLen(0);
+    gl_vendor.Clear();
+    gl_renderer.Clear();
+    gl_version.Clear();
+    gl_extensions.Clear();
+    renderer_identification.Clear();
 
     gl_vendor     << reinterpret_cast<const char *>(glGetString(GL_VENDOR));
     gl_renderer   << reinterpret_cast<const char *>(glGetString(GL_RENDERER));
     gl_version    << reinterpret_cast<const char *>(glGetString(GL_VERSION));
     gl_extensions << reinterpret_cast<const char *>(glGetString(GL_EXTENSIONS));
 
-    // display list blacklist
-    sr_blacklistDisplayLists=false;
-
-    if(strstr(gl_version,"Mesa 7.0") || strstr(gl_version,"Mesa 7.1"))
-    {
-        // mesa DRI and software has problems in the 7.0/7.1 series
-        sr_blacklistDisplayLists=true;
-    }
-
-    if(strstr(gl_vendor,"SiS"))
-    {
-        // almost nobody has those cards/chips, and we have
-        // at least one bluescreen problem reported.
-        sr_blacklistDisplayLists=true;
-    }
-
-   
 #ifndef WIN32
     if(!strstr(gl_renderer,"Voodoo3"))
 #endif
-    {
         if(currentScreensetting.fullscreen)
             SDL_ShowCursor(0);
         else
             SDL_ShowCursor(1);
-    }
 
 #ifdef WIN32
     renderer_identification << "WIN32 ";
@@ -762,12 +625,6 @@ static bool lowlevel_sr_InitDisplay(){
     )
         software_renderer=true;
 
-    if ( // test for Mesa software GL, new versions
-        strstr(gl_vendor,"Mesa") &&
-        strstr(gl_renderer,"Software Rasterizer")
-        )
-        software_renderer=true;
-
     if ( // test for GLX software GL
         strstr(gl_renderer,"GLX") &&
         strstr(gl_renderer,"ndirect") &&
@@ -793,12 +650,9 @@ static bool lowlevel_sr_InitDisplay(){
 
     // wait for activation if we were ALT-Tabbed away:
     while ( (SDL_GetAppState() & SDL_APPACTIVE) == 0)
-    {
         SDL_Delay(100);
-        SDL_PumpEvents();
-    }
 
-    if (software_renderer && !last_software_renderer)
+    if (software_renderer && !last_software_renderer && !tRecorder::IsPlayingBack())
         sr_LoadDefaultConfig();
 
     last_software_renderer=software_renderer;
@@ -806,46 +660,31 @@ static bool lowlevel_sr_InitDisplay(){
 
     // wait for activation if we were ALT-Tabbed away:
     while ( (SDL_GetAppState() & SDL_APPACTIVE) == 0)
-    {
         SDL_Delay(100);
-        SDL_PumpEvents();
-    }
 
     sr_ResetRenderState(true);
 
     rCallbackAfterScreenModeChange::Exec();
-
-    lastSuccess=currentScreensetting;
-    failed_attempts = 0;
-    sr_useDirectX = use_directx_back;
-    st_SaveConfig();
 #endif
     return true;
 }
 
-bool cycleprograminited = false;
+extern bool cycleprograminited;
 
 bool sr_InitDisplay(){
-    use_directx_back = sr_useDirectX;
-
     cycleprograminited = false;
     while (failed_attempts <= MAXEMERGENCY+1)
     {
+#ifndef DEBUG
         if (failed_attempts)
-        {
-#ifdef DEBUG
-            std::cout << "failed attempts:" << failed_attempts << "\n";
-            std::cout.flush();
-#endif
             currentScreensetting = *emergency[failed_attempts];
 
-            sr_useDirectX = false;
-        }
-
-        // prepare for crash, note failure and save config
         failed_attempts++;
         st_SaveConfig();
 
+        //      std::cout << failed_attempts << "\n";
+        //      std::cout.flush();
+#endif
 
 #ifdef MACOSX
         // init the screen once in windowed mode
@@ -869,6 +708,7 @@ bool sr_InitDisplay(){
         sr_LockSDL();
         if (lowlevel_sr_InitDisplay())
         {
+            lastSuccess=currentScreensetting;
             sr_UnlockSDL();
             return true;
         }
@@ -877,6 +717,7 @@ bool sr_InitDisplay(){
 
         if (lowlevel_sr_InitDisplay())
         {
+            lastSuccess=currentScreensetting;
             sr_UnlockSDL();
             return true;
         }
@@ -909,6 +750,9 @@ void sr_ExitDisplay(){
 #endif
 
     if (sr_screen){
+        failed_attempts = 0;
+        st_SaveConfig();
+
         sr_LockSDL();
         // z-man: according to man SDL_SetVideoSurface, screen should not bee freed.
         // SDL_FreeSurface(sr_screen);
@@ -919,6 +763,11 @@ void sr_ExitDisplay(){
 #endif
 }
 
+
+
+int     sr_lineAntialias=rFEAT_DEFAULT;
+int     sr_polygonAntialias=rFEAT_DEFAULT;
+int     sr_perspectiveCorrection=rFEAT_DEFAULT;
 bool    sr_alphaBlend=true;
 bool    sr_glOut=true;
 bool    sr_smoothShading=true;
@@ -939,15 +788,19 @@ bool sr_texturesTruecolor=false;
 bool sr_textOut=false;
 bool sr_FPSOut=true;
 
-bool sr_keepWindowActive=true;
+bool sr_keepWindowActive=false;
 
 tString renderer_identification;
 
 void sr_LoadDefaultConfig(){
 
     // High detail defaults; no problem for your ordinary 3d-card.
+    sr_lineAntialias=rFEAT_DEFAULT;
+    sr_polygonAntialias=rFEAT_DEFAULT;
+    sr_perspectiveCorrection=rFEAT_DEFAULT;
     sr_alphaBlend=true;
-    sr_useDisplayLists=rDisplayList_Off;
+    sr_ZTrick=false;
+    sr_useDisplayLists=false;
     sr_textOut=true;
     sr_dither=true;
     sr_smoothShading=true;
@@ -964,7 +817,7 @@ void sr_LoadDefaultConfig(){
     sr_infinityPlane=false;
     sr_lowerSky=false;
     sr_upperSky=false;
-    sr_keepWindowActive=true;
+    sr_keepWindowActive=false;
     rSysDep::swapMode_=rSysDep::rSwap_glFinish;
 
     if (software_renderer){
@@ -977,6 +830,9 @@ void sr_LoadDefaultConfig(){
         rTextureGroups::TextureMode[rTextureGroups::TEX_FONT]=GL_NEAREST_MIPMAP_NEAREST;
 #endif
 
+        sr_lineAntialias=rFEAT_OFF;
+        sr_polygonAntialias=rFEAT_OFF;
+        sr_perspectiveCorrection=rFEAT_OFF;
         sr_highRim=false;
         sr_dither=false;
         sr_alphaBlend=false;
@@ -988,11 +844,13 @@ void sr_LoadDefaultConfig(){
     else if(strstr(gl_vendor,"3Dfx")){
         //workaround for 3dfx renderer: aliasing must be turned on
         //sr_lineAntialias=rFEAT_OFF;
+        sr_polygonAntialias=rFEAT_ON;
+        sr_perspectiveCorrection=rFEAT_ON;
     }
     else if(strstr(gl_vendor,"NVIDIA")){
         // infinity , display lists and glFlush swapping work for NVIDIA
         sr_infinityPlane=true;
-        sr_useDisplayLists=rDisplayList_CAC;
+        sr_useDisplayLists=true;
         rSysDep::swapMode_=rSysDep::rSwap_glFlush;
     }
 #ifdef MACOSX
@@ -1004,13 +862,6 @@ void sr_LoadDefaultConfig(){
     else if(strstr(gl_vendor,"Matrox")){
         sr_floorDetail = rFLOOR_TEXTURE;  // double textured floor does not work
     }
-
-    /*
-    else if(strstr(gl_version,"Mesa"))
-    {
-        sr_useDisplayLists=rDisplayList_Off;
-    }
-    */
 }
 
 void sr_ResetRenderState(bool menu){
@@ -1028,6 +879,17 @@ void sr_ResetRenderState(bool menu){
     else{
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
+        switch(sr_perspectiveCorrection){
+        case rFEAT_ON:
+            glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+            break;
+        case rFEAT_OFF:
+            glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
+            break;
+        case rFEAT_DEFAULT:
+            glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_DONT_CARE);
+            break;
+        }
     }
 
     if (sr_dither)
@@ -1048,6 +910,33 @@ void sr_ResetRenderState(bool menu){
         glShadeModel(GL_SMOOTH);
     else
         glShadeModel(GL_FLAT);
+
+    // antialiasing for lines
+    switch(sr_lineAntialias){
+    case rFEAT_OFF:
+        glDisable(GL_LINE_SMOOTH);
+        glHint (GL_LINE_SMOOTH_HINT, GL_FASTEST);
+        break;
+    case rFEAT_ON:
+        glEnable(GL_LINE_SMOOTH);
+        glHint (GL_LINE_SMOOTH_HINT, GL_NICEST);
+        break;
+    default:
+        glHint (GL_LINE_SMOOTH_HINT, GL_DONT_CARE);
+    }
+
+    // and polygons
+    switch(sr_polygonAntialias){
+    case rFEAT_OFF:
+        glDisable(GL_POLYGON_SMOOTH);
+        glHint (GL_POLYGON_SMOOTH_HINT, GL_FASTEST);
+        break;
+    case rFEAT_ON:
+        glEnable(GL_POLYGON_SMOOTH);
+        glHint (GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+    default:
+        glHint (GL_POLYGON_SMOOTH_HINT, GL_DONT_CARE);
+    }
 
     // alpha blending
     if (sr_alphaBlend){
@@ -1097,13 +986,12 @@ void sr_DepthOffset(bool offset){
     if (offset){
         //glMatrixMode(GL_PROJECTION);
         //glScalef(.9,.9,.9);
-        glPolygonOffset(-2,-5);
+        glPolygonOffset(0,-5);
         glEnable(GL_POLYGON_OFFSET_LINE);
         glEnable(GL_POLYGON_OFFSET_POINT);
         glEnable(GL_POLYGON_OFFSET_FILL);
     }
     else{
-        glPolygonOffset(0,0);
         glDisable(GL_POLYGON_OFFSET_POINT);
         glDisable(GL_POLYGON_OFFSET_LINE);
         glDisable(GL_POLYGON_OFFSET_FILL);
@@ -1132,11 +1020,7 @@ void sr_Activate(bool active)
         rCallbackBeforeScreenModeChange::Exec();
 
     // Jonathans fullscreen bugfix.
-    // z-man's ammendmend: apparently, doing this in Linux is painful as well.
-    // Only on Windows, you get a deactivation event when you ALT-TAB away
-    // from th application, then iconification is the right thing to do.
-    // On Linux at least, there is no standard alt-tab for fullscreen applications.
-#ifdef WIN32
+#ifndef MACOSX
     if ( currentScreensetting.fullscreen && !active )
     {
         SDL_WM_IconifyWindow();

@@ -1,4 +1,17 @@
 # Parts of the makefile that are not handled by automake
+
+###############
+# Fingerprint #
+###############
+
+# make snapshot of CVS state
+fingerprint.tbz:
+# make copies of all CVS state directories
+#   top_srcdir=${top_srcdir} sh ${top_srcdir}/batch/make/fingerprint
+	touch $@
+# later, you can uncompress it somewhere and do "./regenerate.sh" to regenerate the source tree
+# from CVS, so you have something to base your bugfixes on.
+
 ##################
 # Beautification #
 ##################
@@ -6,20 +19,20 @@
 # use this target if you're OK with the project's defaults and
 # want updated file timestamps
 rebeautify:
-#	ARTISTIC_STYLE_OPTIONS=$(srcdir)/config/astylerc sh $(srcdir)/batch/make/beautify -t $(srcdir) .beautytag.re
+	ARTISTIC_STYLE_OPTIONS=$(srcdir)/config/astylerc sh $(srcdir)/batch/make/beautify -t $(srcdir) .beautytag.re
 
 # use this target if you want to switch between your settings
 # (beautify-personal) and the project defaults to get back to
 # the defaults (timestamps stay untouched)
 beautify:
 	rm -f $(srcdir)/.beautytag.personal
-#	ARTISTIC_STYLE_OPTIONS=$(srcdir)/config/astylerc sh $(srcdir)/batch/make/beautify $(srcdir) .beautytag
+	ARTISTIC_STYLE_OPTIONS=$(srcdir)/config/astylerc sh $(srcdir)/batch/make/beautify $(srcdir) .beautytag
 
 # use this target to run astyle with your personal settings for
-# it (but remember to do "make beautify" before comitting to Subversion!)
+# it (but remember to do "make beautify" before comitting to CVS!)
 beautify-personal:
 	rm -f $(srcdir)/.beautytag $(srcdir)/.beautytag.re
-#	ARTISTIC_STYLE_OPTIONS=~/.astylerc sh $(srcdir)/batch/make/beautify $(srcdir) .beautytag.personal 
+	ARTISTIC_STYLE_OPTIONS=~/.astylerc sh $(srcdir)/batch/make/beautify $(srcdir) .beautytag.personal 
 
 ##########
 # Checks #
@@ -49,15 +62,13 @@ installcheck_install.%:
 
 #	delete old configuration and prune empty directories
 	rm -rf ._$*@oldvardir@
-	for d in `find ._$* -depth -type d`; do rmdir $$d; done > /dev/null 2>&1 || true
+	for d in `find ._$* -type d -depth`; do rmdir $$d; done > /dev/null 2>&1 || true
 
 #   move to final destination
 	mv -f ._$*$(destdir.$*)/* ._$*/ || true
 	rmdir ._$*$(destdir.$*) || true
 
-if USE_SYSINSTALL
 	test -r	._$*/@aa_localstatedir@/users.txt
-endif
 
 installcheck_run_%: installcheck_install_%
 	@echo "Testing executable..."
@@ -103,8 +114,13 @@ endif
 installcheck_douninstall.inst:
 	DESTDIR=`pwd`/._inst $(MAKE) uninstall
 
-installcheck_uninstall.inst: installcheck_test.inst
+installcheck_douninstall.inst2:
+	./._inst2/$(bindir)/${uninstaller}
 
+installcheck_douninstall.inst3:
+	./._inst3/$(bindir)/${uninstaller}
+
+installcheck_uninstall.inst: installcheck_test.inst
 installcheck_uninstall.%: installcheck_install.%
 	rm -rf ._$*/${localstatedir} ._$*/.doc ._$*/.help ._$*/leak.log ._$*/memprofile*.txt ._$*/gmon.out ._$*/@logdir@
 	$(MAKE) installcheck_douninstall.$*
@@ -113,64 +129,62 @@ installcheck_uninstall.%: installcheck_install.%
 	if test -s .leftover.$*; then cat .leftover.$*; false; else true; fi
 	rm -f .leftover.$*
 
-if USE_UNINSTALL
-installcheck_douninstall.inst2:
-	./._inst2/$(bindir)/${uninstaller}
-	find ._inst2 -mindepth 1 -type d -name ${progname} -exec echo leftover directory \{\} >> .leftover.inst2 \;
-
-installcheck_douninstall.inst3:
-	./._inst3/$(bindir)/${uninstaller}
-	find ._inst3 -mindepth 1 -type d -name ${progname} -exec echo leftover directory \{\} >> .leftover.inst3 \;
-
-myinstallcheck: installcheck_uninstall.inst installcheck_uninstall.inst2
-else
-myinstallcheck: installcheck_uninstall.inst
-endif
+installcheck: installcheck_uninstall.inst installcheck_uninstall.inst2
 	$(predistcheckclean)
 	@echo -e "\n---------------------------------------\nInstallation and uninstallation worked!\n---------------------------------------\n"
 
-installcheck: myinstallcheck
-devcheck: beautify myinstallcheck
-fullcheck: beautify devcheck distcheck
-
-# run all that don't require a full rebuild
-test: installcheck
-
-###############
-# Fingerprint #
-###############
-
-# initial rule for source change tag (make it really old)
-.changetag:
-	touch -t 9001010101 $@
-
-# make snapshot of SVN state, tracking relevant changes in .changetag
-fingerprint: .changetag
-# easy, just do svn info, that contains all the information needed. If that fails, try other scms.
-	svn info ${top_srcdir} > $@ || svk info ${top_srcdir} > $@ || { bzr testament ${top_srcdir}; bzr info ${top_srcdir};  } > $@ || echo "unknown" > $@
-	svn info `dirname ${top_srcdir}` >> @$ || svn info `dirname ${top_srcdir}` >> $@ || echo "unknown" >> $@
-	diff $@ .changetag > /dev/null 2>&1 || cp $@ .changetag
+cvscheck: beautify installcheck
+fullcheck: beautify cvscheck distcheck
 
 ########################
-# tracking changes     #
+# tracking CVS changes #
 ########################
 
-# change version on deliberate version edit
-$(srcdir)/version: $(wildcard $(srcdir)/*_version) .changetag
+# tag that will be newer than all CVS control files, thus being a good indicator for
+# official code changes that warrant version bumps or ChangeLog updates
+.cvsfiles:
+	touch $@
+#	rm -f $@
+#	touch -r $(srcdir)/ChangeLog $@
+#	for dir in $$(find $(srcdir) -name CVS | grep -v ". ."); do\
+#		echo -e .cvsfiles: $${dir}/Entries "\n" $${dir}/Entries: "\n\t@rm -f .cvsfiles" >> $@; \
+#	done
+
+ @silent_inc@ .cvsfiles
+
+# the version creation shell script only looks for changes of this directory, so
+# we update it as well
+$(srcdir)/CVS: .cvsfiles
+	test -r $@ && touch $@
+
+# Keeping version up to date,
+# but only touch it silently on real changes, and only when a distribution is built
+VERSIONDEPS=$(wildcard $(srcdir)/*_version) $(wildcard $(srcdir)/CVS)
+.version.new: $(VERSIONDEPS)
+	echo "m4_define(AUTOMATIC_VERSION,["`sh $(srcdir)/batch/make/version $(srcdir)`"])" > .version.new
+	if diff $@ ${srcdir}/version >/dev/null 2>&1; then :; else cp $@ ${srcdir}/version; fi
+
+# extra target to make before a real distribution is built
+distprep: .version.new
+# clear fingerprint
+#   if test -r ${srcdir}/CVS/Entries; then rm -f fingerprint.tbz; fi
+
+# change version on deliberate version edit anyway
+$(srcdir)/version: $(wildcard $(srcdir)/*_version)
 	echo "m4_define(AUTOMATIC_VERSION,["`sh $(srcdir)/batch/make/version $(srcdir)`"])" > $@
 
 # Keep the changelog up to date as well (triggered by make dist only)
-$(srcdir)/ChangeLog: .changetag
+$(srcdir)/ChangeLog: .cvsfiles
 	touch $@
-	@echo -e "\nGenerating ChangeLog from SVN/BZR, please be patient...\n"
-	cd ${srcdir}; svn log 2>&1 > ChangeLog || bzr log --gnu-changelog 2>&1 > ChangeLog || echo "No official releasse: no changelog" > ChangeLog
-	test -r $@ || touch $@
+#	rm -f $@
+#	@echo -e "\nGenerating ChangeLog from CVS, please be patient...\n"
+#	cd ${srcdir}; cvs2cl --follow-only b0_2_8_0 2>&1 || echo "No official releasse: no changelog" > ChangeLog
+#	test -r $@ || touch $@
 
-# extra target to make before a real distribution is built
-# triggers regeneration of ChangeLog and version
-distprep:
-# rebuild fingerprint and update source change tag that way
-	if test -d ${srcdir}/.svn; then rm -f fingerprint; $(MAKE) fingerprint; fi
+cvsclean:
+	rm -rf .cvsfiles .version.new
+
+clean-local: cvsclean
 
 #############
 # Debugging #
@@ -180,7 +194,7 @@ distprep:
 	echo "break st_Breakpoint()" > $@
 
 @progname@: all
-	test -r $@ || ln -sf src/armagetronad_main $@
+	ln -sf src/armagetronad_main $@
 
 DEBUGFILES=.gdbinit @progname@
 debug: $(DEBUGFILES)

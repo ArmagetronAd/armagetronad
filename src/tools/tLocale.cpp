@@ -35,8 +35,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <string>
 #include <map>
 
-const tString st_internalEncoding("latin1");
-
 class tLocaleSubItem; // identifies a single string in a single language
 
 static tArray<tString> st_TemplateParameters;
@@ -417,12 +415,12 @@ void tLocaleItem::Load(const char *file, bool complete)  // load the language de
                 pre.ReadLine(s);
                 r->translation.Clear();
 
-                for (int i=0; i< pre.Len(); i++)
+                for (size_t i=0; i< pre.Size(); i++)
                 {
                     char c = pre(i);
                     if (c != '\\')
                         r->translation += c;
-                    else if (i < pre.Len()-1)
+                    else if (i < pre.Size())
                         switch (pre(i+1))
                         {
                         case 'n':
@@ -622,6 +620,12 @@ tOutput & tOutput::SetTemplateParameter(int num, float parameter)
     return *this;
 }
 
+
+tOutput::tOutput(const std::string & x)
+        :anchor(NULL)
+{
+    tNEW(tOutputItem<tString>)(*this, x);
+}
 
 tOutput::tOutput(const tString& x)
         :anchor(NULL)

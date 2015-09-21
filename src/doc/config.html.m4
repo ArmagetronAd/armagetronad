@@ -16,10 +16,10 @@ define(MI,<li><strong>$1</strong> ($2)</li>)
 
 SUBSUBSECTION(Main Menu)
 <ul>
-MI(Play Game,start and setup a game)
+MI(Game,start and setup a game)
 <ul>
-MI(Multiplayer,Connects to or creates a network game)
 MI(Local Game,Starts a local game)
+MI(Network Game,Connects to or creates a network game)
 MI(Game Setup,Sets your favourite single player game mode: number of AI opponents, game speed, arena size)
 </ul>
 MI(Player Setup,Player customisation: [keyboard input, camera setup, multiplayer
@@ -32,7 +32,6 @@ MI(Camera Input Configuration,keyboard and mouse setup for camera controls)
 MI(Camera Setup,camera mode options)
 MI(Instant Chat,things you can say with one keystroke)
 </ul>
-MI(Viewports,selects the splitscreen mode)
 MI(Assign Viewports To Players,which player sees himself on which part of
 the screen)
 </ul>
@@ -46,7 +45,6 @@ MI(Detail Settings,things that affect visual quality and depend on your
 system's OpenGL power)
 MI(Performance Tweaks,[settings that increase graphics speed, but
 may not work on your system])
-MI(Load Defaults,[Reverts critical settings to default values we believe to be safe.])
 </ul>
 MI(Sound Settings,sound quality)
 MI(Misc Stuff,things that did not fit anywhere else: [Moviepack, console text
@@ -54,7 +52,6 @@ output, menu wrap option and global keyboard configuration])
 <ul>
 MI(Global Keyboard Configuration,[keyboard setup for player-independent functions (console, scores)])
 MI(Language settings,[Choose the language of PROGTITLE here])
-MI(Redo First Setup,[Repeats the simple setup you saw when first starting the game])
 </ul>
 </ul>
 </ul>
@@ -138,14 +135,10 @@ compilers and operating systems.
 SUBSECTION(Protect Your Passwords)
 PARAGRAPH([
 Since all network traffic is logged and the ingame admin password is currently sent unencrypred,
-it is not a good idea to publish server recordings where you or anyone else logs in as admin using the old SI(ADMIN_PASS) method.
+it is not a good idea to publish server recordings where you or anyone else logs in as admin.
 The same holds for a client session recording where you log in anywhere; remember that all your
-keypresses are recorded almost without exception.
+keypresses are recorded without exception.
 ])
-PARAGRAPH([
-Everything surrounding the new account based authentication is safe, though. Keypresses in the pasword entry form are not recorded and passwords stored in your user.cfg are not copied over, either.
-])
-
 SUBSECTION(Primary Use: Bug Reports)
 PARAGRAPH([
 Sometimes, when you report a bug, the team may ask you do send a recording of
@@ -181,7 +174,7 @@ PARAGRAPH([
 Take a look at the files
 FILE(settings.cfg) and FILE(settings_dedicated.cfg) for the dedicated server
 (best save all your changes to 
-FILE(autoexec.cfg) or FILE(settings_custom.cfg) if you don't want the next
+FILE(autoexec.cfg) if you don't want the next
 release of PROGTITLE to overwrite them). They contain a lot of settings
 inaccessible from the menu system. All relevant settings are synced from the
 server to the connected clients.
@@ -214,11 +207,9 @@ approach CI(CYCLE_SPEED) over time. The bigger the constants, the faster the app
 
 PARAGRAPH([
 The acceleration caused by the wall at distance <CODE>D</CODE> is
-<pre>acceleration=CYCLE_ACCEL * F(D)</pre>
-with
 <pre>
-F(D) = 1 / (CYCLE_ACCEL_OFFSET + D) 
-     - 1 / (CYCLE_ACCEL_OFFSET + CYCLE_WALL_NEAR)
+acceleration=CYCLE_ACCEL / (CYCLE_ACCEL_OFFSET + D)-
+             CYCLE_ACCEL / (CYCLE_ACCEL_OFFSET + CYCLE_WALL_NEAR)
 </pre>
 if the wall is closer than <CODE>CYCLE_WALL_NEAR</CODE>. 
 the stuff in the second
@@ -228,9 +219,7 @@ Depending on the nature of the wall (whether it belongs to you, your teammate,
 your enemy or is the arena rim), the acceleration gets multiplied with 
 CI(CYCLE_ACCEL_SELF), CI(_TEAM) resp. CI(_ENEMY) or CI(_RIM). If your cycle
 is stuck between one of your walls and a wall of any other type, your total
-acceleration by walls gets multiplied by CI(CYCLE_ACCEL_SLINGSHOT). If you drive
-between two walls that are not your own, your acceleration gets multiplied with
-CI(CYCLE_ACCEL_TUNNEL).
+acceleration by walls gets multiplied by CI(CYCLE_ACCEL_SLINGSHOT).
 ])
 
 PARAGRAPH([
@@ -261,18 +250,6 @@ At every turn, your cycle loses a bit of speed; how much is determined by
 CI(CYCLE_TURN_SPEED_FACTOR). At every turn, your speed gets multiplied with this value.
 Set it to 1 to disable the turn slowdown.
 ])
-PARAGRAPH([
-When you turn away from a wall, your cycle can get an instant speed boost or speed drain
-from it. The formula for your speed after the break is
-<pre>speed_after=speed_before + (F(D)/F(0)) * ( CYCLE_BOOST_? + ( CYCLE_BOOSTFACTOR_? - 1 ) * speed_before )
-</pre>where ? is, as for the different acceleration effects of walls, either SELF, TEAM, ENEMY or
-RIM for your own walls, teammates' walls, enemy walls or rim walls that you break away from, and
-F(D) is the same function that is used in the wall acceleration formula.])
-PARAGRAPH([
-In words: If you break away from a wall after grinding it really hard, your speed gets multiplied
-with CYCLE_BOOSTFACTOR_?, then CYCLE_BOOST_? is added. If you're not really close, the boost
-is scaled down with the same profile as the continuous wall acceleration.])
-
 
 SUBSUBSECTION(Rubber)
 PARAGRAPH([
@@ -364,12 +341,6 @@ for a modified client to cheat at this point, using the forbidden
 camera perspectives anyway.) Try a match with all but the internal
 camera disabled :-)
 ])
-
-PARAGRAPH([Likewise, you can override the glance settings with server defined glance
-settings with CAMERA_OVERRIDE_CUSTOM_GLANCE 1 for all cameras or just for the server defined
-custom camera with CAMERA_OVERRIDE_CUSTOM_GLANCE_SERVER_CUSTOM 1. You can forbid custom
-glancing settings alltogether with CAMERA_FORBID_CUSTOM_GLANCE 1. Note that only relatively
-new clients (0.2.8.3 or later) respect these settings.])
 
 SUBSECTION(Maps)
 PARAGRAPH([

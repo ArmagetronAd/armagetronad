@@ -73,7 +73,7 @@ static int buffer_shift=0;
 
 static tConfItem<int> bs("SOUND_BUFFER_SHIFT",buffer_shift);
 
-static int sound_quality=SOUND_MED;
+int sound_quality=SOUND_MED;
 static tConfItem<int> sq("SOUND_QUALITY",sound_quality);
 
 static int sound_sources=10;
@@ -168,7 +168,6 @@ void se_SoundInit()
     if (!sound_is_there && sound_quality!=SOUND_OFF)
     {
         SDL_AudioSpec desired;
-        memset( &desired, 0, sizeof( SDL_AudioSpec ) );
 
         switch (sound_quality)
         {
@@ -244,7 +243,6 @@ void se_SoundInit()
             o << "$sound_inited";
             con << o;
 #endif
-            se_SoundPause(false);
         }
     }
 
@@ -258,10 +256,12 @@ void se_SoundInit()
 
 void se_SoundExit(){
 #ifndef DEDICATED
-    eSoundLocker locker;
+    se_SoundLock();
 
     eWavData::UnloadAll();
     se_SoundPause(true);
+
+    se_SoundUnlock();
 
     if (sound_is_there){
 #ifdef DEBUG
@@ -330,7 +330,7 @@ void se_SoundPause(bool p){
 eWavData* eWavData::s_anchor = NULL;
 
 eWavData::eWavData(const char * fileName,const char *alternative)
-        :tListItem<eWavData>(s_anchor),data(NULL),len(0),freeData(false), loadError(false){
+        :tListItem<eWavData>(s_anchor),data(NULL),len(0),freeData(false){
     //wavs.Add(this,id);
     filename     = fileName;
     filename_alt = alternative;
@@ -341,18 +341,13 @@ void eWavData::Load(){
     //wavs.Add(this,id);
 
     if (data)
-    {
-        loadError = false;
         return;
-    }
 
 #ifndef DEDICATED
 
     static char const * errorName = "Sound Error";
 
     freeData = false;
-
-    loadError = true;
 
     alt=false;
 
@@ -444,8 +439,6 @@ void eWavData::Load(){
     con << "at " << spec.freq << " Hz,\n";
 
     con << samples << " samples in " << len << " bytes.\n";
-
-    loadError = false;
 #endif
 #endif
 #endif
@@ -453,11 +446,9 @@ void eWavData::Load(){
 
 void eWavData::Unload(){
 #ifndef DEDICATED
-    loadError = false;
-
     //wavs.Add(this,id);
     if (data){
-        eSoundLocker locker;
+        se_SoundLock();
         if ( freeData )
         {
 
@@ -477,6 +468,7 @@ void eWavData::Unload(){
 
         data=NULL;
         len=0;
+        se_SoundUnlock();
     }
 #endif
 }
@@ -503,14 +495,7 @@ bool eWavData::Mix(Uint8 *dest,Uint32 playlen,eAudioPos &pos,
 #ifndef DEDICATED
     if ( !data )
     {
-        if( !loadError )
-        {
-            Load();
-        }
-        if ( !data )
-        {
-            return false;
-        }
+        return false;
     }
 
     playlen/=4;
@@ -758,11 +743,7 @@ eSoundPlayer::eSoundPlayer(eWavData &w,bool l)
         goon[i]=true;
 }
 
-eSoundPlayer::~eSoundPlayer()
-{
-    eSoundLocker locker;
-    se_globalPlayers.Remove(this,id);
-}
+eSoundPlayer::~eSoundPlayer(){}
 
 bool eSoundPlayer::Mix(Uint8 *dest,
                        Uint32 len,
@@ -802,8 +783,9 @@ void eSoundPlayer::End(){
 void eSoundPlayer::MakeGlobal(){
     wav->Load();
 
-    eSoundLocker locker;
+    se_SoundLock();
     se_globalPlayers.Add(this,id);
+    se_SoundUnlock();
 }
 
 
@@ -883,15 +865,5 @@ void se_SoundMenu(){
     }
     //	se_SoundUnlock();
     //  se_SoundPause(false);
-}
-
-eSoundLocker::eSoundLocker()
-{
-    se_SoundLock();
-}
-
-eSoundLocker::~eSoundLocker()
-{
-    se_SoundUnlock();
 }
 

@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
+  
 ***************************************************************************
 
 */
@@ -32,9 +32,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tRecorder.h"
 #include "tMath.h"
 #include "tConfiguration.h"
-#include "eLagCompensation.h"
-
-// #include <fstream>
 
 eTimer *se_mainGameTimer=NULL;
 
@@ -75,11 +72,6 @@ eTimer::eTimer(nMessage &m):nNetObject(m), startTimeSmoothedOffset_(0){
     averageSpf_.Add(1/60.0,5);
 
     creationSystemTime_ = tSysTimeFloat();
-
-    lastStartTime_ = lastRemoteTime_ = 0;
-
-    // assume VERY strongly the clocks are in sync
-    startTimeDrift_.Add( 0, 10000 );
 }
 
 eTimer::~eTimer(){
@@ -87,20 +79,9 @@ eTimer::~eTimer(){
     se_mainGameTimer=NULL;
 }
 
-// see if a client supports lag compensation
-static nVersionFeature se_clientLagCompensation( 14 );
-
-// old clients need a default lag compensation
-static REAL se_lagOffsetLegacy = 0.0f;
-static tSettingItem< REAL > se_lagOffsetLegacyConf( "LAG_OFFSET_LEGACY", se_lagOffsetLegacy );
-
 void eTimer::WriteSync(nMessage &m){
     nNetObject::WriteSync(m);
     REAL time = Time();
-
-    if ( SyncedUser() > 0 && !se_clientLagCompensation.Supported( SyncedUser() ) )
-        time += se_lagOffsetLegacy;
-
     m << time;
     m << speed;
     //std::cerr << "syncing:" << currentTime << ":" << speed << '\n';
@@ -118,59 +99,39 @@ void eTimer::WriteSync(nMessage &m){
     }
 }
 
+static REAL se_timerStartFudge = 0.0;
+static tSettingItem<REAL> se_timerStartFudgeConf("TIMER_SYNC_START_FUDGE",se_timerStartFudge);
+static REAL se_timerStartFudgeStop = 2.0;
+static tSettingItem<REAL> se_timerStartFudgeStopConf("TIMER_SYNC_START_FUDGE_STOP",se_timerStartFudgeStop);
+
 void eTimer::ReadSync(nMessage &m){
     nNetObject::ReadSync(m);
 
-    if( sn_GetNetState() != nCLIENT || m.SenderID() != 0 )
-    {
-        return;
-    }
-
-    m >> remoteCurrentTime_; // read in the remote time
-    m >> remoteSpeed_;
-    sync_ = true;
-
     //std::cerr << "Got sync:" << remote_currentTime << ":" << speed << '\n';
-}
-
-static REAL se_cullDelayEnd=3.0;        // end of extra delay cull
-static REAL se_cullDelayPerSecond=3.0;  // delay cull drop per second
-static REAL se_cullDelayMin=10.0;       // plateau of delay cull after extra 
-
-static tSettingItem< REAL > se_cullDelayEndConf( "CULL_DELAY_END", se_cullDelayEnd );
-static tSettingItem< REAL > se_cullDelayPerSecondConf( "CULL_DELAY_PER_SECOND", se_cullDelayPerSecond );
-static tSettingItem< REAL > se_cullDelayMinConf( "CULL_DELAY_MIN", se_cullDelayMin );
-
-void eTimer::ProcessSync()
-{
-    sync_ = false;
-
-    bool checkDrift = true;
 
     // determine the best estimate of the start time offset that reproduces the sent remote
     // time and its expected quality.
     REAL remoteStartTimeOffset = 0;
     REAL remoteTimeNonQuality = 0;
-
-    // determine ping
-    nPingAverager & pingAverager = sn_Connections[0].ping;
-    REAL ping = pingAverager.GetPing();
-    REAL pingVariance = pingAverager.GetFastAverager().GetAverageVariance();
-
     {
-        // adapt remote time a little, we're processing syncs with a frame delay
-        REAL remote_currentTime = remoteCurrentTime_ + averageSpf_.GetAverage();
-        REAL remoteSpeed = remoteSpeed_;
- 
+        //REAL oldTime=currentTime;
+        REAL remote_currentTime, remoteSpeed;
+        m >> remote_currentTime; // read in the remote time
+        m >> remoteSpeed;
+
         // forget about earlier syncs if the speed changed
         if ( fabs( speed - remoteSpeed ) > 10 * EPS )
         {
             qualityTester_.Timestep( 100 );
             startTimeOffset_.Reset();
-            checkDrift = false;
         }
 
         speed = remoteSpeed;
+
+        // determine ping
+        nPingAverager & averager = sn_Connections[m.SenderID()].ping;
+        // pingAverager_.Add( rawAverager.GetPing(), remote_currentTime > .01 ? remote_currentTime : .01 );
+        REAL ping = averager.GetPing();
 
         // add half our ping (see Einsteins SRT on clock syncronisation)
         REAL real_remoteTime=remote_currentTime+ping*speed*.5;
@@ -184,32 +145,18 @@ void eTimer::ProcessSync()
         else
             remote_currentTime=real_remoteTime;
 
+        // HACK: warp time into the future at the beginning of the round.
+        // I can't explain why this is required; without it, the timer is late.
+        if ( remote_currentTime < se_timerStartFudgeStop )
+        {
+            remote_currentTime += ping * ( se_timerStartFudgeStop - remote_currentTime ) * se_timerStartFudge;
+        }
+
         // determine quality from ping variance
-        remoteTimeNonQuality = pingVariance;
+        remoteTimeNonQuality = averager.GetFastAverager().GetAverageVariance();
 
         // determine start time
         remoteStartTimeOffset = smoothedSystemTime_ - startTime_ - remote_currentTime;
-
-        // calculate drift
-        if( checkDrift )
-        {
-            REAL timeDifference = remote_currentTime - lastRemoteTime_;
-            REAL drift = lastStartTime_ - remoteStartTimeOffset;
-
-            if ( timeDifference > 0 )
-            {
-                REAL driftAverage = startTimeDrift_.GetAverage();
-                // con << "Drift: " << driftAverage << "\n";
-                REAL driftDifference = drift/timeDifference;
-                
-                timeDifference = timeDifference > 1 ? 1 : timeDifference;
-                startTimeDrift_.Timestep( timeDifference * .1 );
-                startTimeDrift_.Add( driftDifference + driftAverage, timeDifference );
-            }
-        }
-
-        lastStartTime_ = remoteStartTimeOffset;
-        lastRemoteTime_ = remote_currentTime;
 
         // let the averagers decay faster at the beginning
         if ( remote_currentTime < 0 )
@@ -224,40 +171,6 @@ void eTimer::ProcessSync()
 
     // add the variance to the non-quality, along with an offset to avoid division by zero
     remoteTimeNonQuality += 0.00001 + 4 * qualityTester_.GetAverageVariance();
-
-#ifdef DEBUG_X
-    con << "T=" << smoothedSystemTime_ << " " << lastRemoteTime_ << ", Q= " << remoteTimeNonQuality << ", P= " << ping << " +/- " << sqrt(pingVariance) << " Time offset: " << remoteStartTimeOffset << " : " << startTimeOffset_.GetAverage() << "\n";
-
-    std::ofstream plot("timesync.txt",std::ios_base::app);
-    plot << smoothedSystemTime_ << " " << remoteStartTimeOffset << " " << startTimeOffset_.GetAverage() << "\n";
-#endif
-
-    // check for unusually delayed packets, give them lower weight
-    REAL delay =  remoteStartTimeOffset - startTimeOffset_.GetAverage();
-    if( delay > 0 )
-    {
-        // fluctuations up to the ping variance are acceptable,
-        // (plus some extra factors, like a 1 ms offset and 10% of the current ping)
-        // severity will be < 1 for those
-        REAL severity = delay*delay/(.000001 + pingVariance + .01*ping*ping);
-        // but it is culled above 1
-        if( severity > 1 )
-        {
-            severity = pow(severity,.25);
-        }
-
-        REAL cullFactor = (se_cullDelayEnd-lastRemoteTime_)*se_cullDelayPerSecond;
-        if( cullFactor < 0 )
-        {
-            cullFactor = 0;
-        }
-        cullFactor += se_cullDelayMin;
-
-#ifdef DEBUG_X
-        con << "severity=" << severity << ", cull= " << cullFactor << "\n";
-#endif
-        remoteTimeNonQuality *= 1+(cullFactor-1)*severity;
-    }
 
     // add the offset to the statistics, weighted by the quality
     startTimeOffset_.Add( remoteStartTimeOffset, 1/remoteTimeNonQuality );
@@ -289,22 +202,15 @@ static bool se_SmoothTime()
 
 REAL eTimer::Time()
 {
-    return ( smoothedSystemTime_ - startTime_ ) - startTimeSmoothedOffset_ + eLag::Current();
+    return ( smoothedSystemTime_ - startTime_ ) - startTimeSmoothedOffset_;
 }
 
 void eTimer::SyncTime(){
+    // get current system time
     {
-        // get current system time and store it
         double newTime=tSysTimeFloat();
 
         static bool smooth = se_SmoothTime();
-
-        // recheck if no recording/playback is running
-        if ( !tRecorder::IsRunning() )
-        {
-            smooth = !tTimerIsAccurate();
-        }
-
         if ( !smooth )
         {
             // take it
@@ -333,18 +239,8 @@ void eTimer::SyncTime(){
 #endif
 #endif
 
-    // update lag compensation
-    eLag::Timestep( timeStep );
-
     // store and average frame times
     spf_ = timeStep;
-
-    // process sync now before an unusually large timestep messes up averageSpf_.
-    if( sync_ )
-    {
-        ProcessSync();
-    }
-
     if ( timeStep > 0 && speed > 0 )
     {
         averageSpf_.Add( timeStep );
@@ -357,7 +253,7 @@ void eTimer::SyncTime(){
     // pingAverager_   .Timestep( timeStep * .05);
 
     // if we're not running at default speed, update the virtual start time
-    startTime_ += ( 1.0 - speed - startTimeDrift_.GetAverage() ) * timeStep;
+    startTime_ += ( 1.0 - speed ) * timeStep;
 
     // smooth time offset
     {
@@ -407,8 +303,6 @@ void eTimer::Reset(REAL t){
     startTimeOffset_.Add(100,EPS);
     startTimeOffset_.Add(-100,EPS);
 
-    sync_ = false;
-
     qualityTester_.Reset();
     static const REAL qual = sqrt(1/EPS);
     qualityTester_.Add(qual,EPS);
@@ -426,15 +320,9 @@ bool eTimer::IsSynced() const
         return true;
 
     // the quality of the start time offset needs to be good enough (to .1 s, variance is the square of the expected)
-    bool synced = startTimeOffset_.GetAverageVariance() < .01 &&
-                  fabs( startTimeOffset_.GetAverage() - startTimeSmoothedOffset_ ) < .01;
-
-    static char const * section = "TIMER_SYNCED";
-
-    if ( tRecorder::IsPlayingBack() ? tRecorder::Playback( section ) : synced )
+    if ( startTimeOffset_.GetAverageVariance() < .01 &&
+            fabs( startTimeOffset_.GetAverage() - startTimeSmoothedOffset_ ) < .01 )
     {
-        tRecorder::Record( section );
-
         // and make sure the next calls also return true.
         creationSystemTime_ = smoothedSystemTime_ - 11;
         return true;

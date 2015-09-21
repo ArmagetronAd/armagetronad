@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
+  
 ***************************************************************************
 
 */
@@ -35,31 +35,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tString.h"
 #include "tColor.h"
 
-class rFont:public rFileTexture{
-    int offset;
-    REAL cwidth;
-    REAL cheight;
-    REAL onepixel;
-    rFont *lowerPart;
-public:
-    rFont(const char *fileName,int Offset=0,REAL CWidth=(1/16.0),
-          REAL CHeight=(1/8.0),REAL onepixel=1/256.0, rFont *lower=NULL);
-    rFont(const char *fileName, rFont *lower);
-    virtual ~rFont();
+#include <map>
 
-#ifndef DEDICATED
-    // displays c
-    void Render(unsigned char c,REAL left,REAL top,REAL right,REAL bot);
-#endif
-    static rFont s_defaultFont,s_defaultFontSmall;
-
-protected:
-    virtual void ProcessImage(SDL_Surface *);       //!< process the surface before uploading it to GL
-    virtual void OnSelect( bool enforce );
-};
-
-
-// **********************************************+
+class FTFont;
 
 // maybe make this a child of std::ostream...
 class rTextField{
@@ -68,8 +46,11 @@ class rTextField{
     int  parIndent;      // number of spaces to insert after automatic newline
     REAL left,top;       // top left corner of the console
     REAL cwidth,cheight; // character dimensions
-    rFont *F;             // the font
+    //    rFont *F;             // the font
     int  x,y,realx;      // current cursor position
+    float nextx;          // x-coordinate the next char should go to
+    bool multiline;        // linewrapping enabled?
+    FTFont *font;
 
     tColor color_;               //!< current color
     static tColor defaultColor_; //!< default color
@@ -83,56 +64,23 @@ class rTextField{
     void FlushLine(int len,bool newline=true);
     void FlushLine(bool newline=true);
 public:
-#define  rCWIDTH_NORMAL  (16/640.0)
-#define  rCHEIGHT_NORMAL (32/480.0)
+ #define  rCWIDTH_NORMAL  (16/640.0)
+ #define  rCHEIGHT_NORMAL (32/480.0)
 
     rTextField(REAL Left,REAL Top,
-               REAL Cwidth=rCWIDTH_NORMAL,REAL Cheight=rCHEIGHT_NORMAL,
-               rFont *f=&rFont::s_defaultFont);
+               REAL Cwidth=rCWIDTH_NORMAL,REAL Cheight=rCHEIGHT_NORMAL);
 
     virtual ~rTextField(); // for future extensions (buffered console?)
 
-    REAL GetCWidth() const {
-        return cwidth;
-    }
-    REAL GetCHeight() const {
-        return cheight;
-    }
-
-    void SetTop( REAL t ){
-        top = t;
-    }
-
-    void SetLeft( REAL l ){
-        top = l;
-    }
-    
-    REAL GetTop() const{
-        return top;
-    }
-    REAL GetBottom() const{
-        return top - cheight * y;
-    }
-
-
-    REAL GetLeft() const{
-        return left;
-    }
+    REAL GetCWidth(){ return cwidth; }
+    REAL GetCHeight(){ return cheight; }
 
     void SetWidth(int w){
         width=w;
     }
 
-    int GetWidth() const {
-        return width;
-    }
-
     void SetIndent(int i){
         parIndent=i;
-    }
-
-    int GetIndent() const {
-        return parIndent;
     }
 
     void SetCursor(int c,int p){
@@ -145,6 +93,10 @@ public:
         color_ = defaultColor_;
     }
 
+    void EnableLineWrap() {
+        multiline = true;
+    }
+
     // rTextField & operator<<(unsigned char c);
 
     enum ColorMode {
@@ -155,9 +107,7 @@ public:
 
     rTextField & StringOutput(const char *c, ColorMode colorMode = COLOR_USE );
 
-    int Lines(){
-        return y;
-    }
+    int Lines(){return y;}
 
     inline rTextField & SetColor( tColor const & color );	//!< Sets current color
     inline tColor const & GetColor( void ) const;	//!< Gets current color
@@ -168,6 +118,8 @@ public:
     static void SetBlendColor( tColor const & blendColor );	//!< Sets color all other colors are multiplied with
     static tColor const & GetBlendColor( void );	//!< Gets color all other colors are multiplied with
     static void GetBlendColor( tColor & blendColor );	//!< Gets color all other colors are multiplied with
+
+    static float GetTextLength (tString const &str, float height, bool stripColors=false, bool useNewline=true, float *resultingHeight=0); //!< Predict the dimenstions of a string
 
 private:
     inline void WriteChar(unsigned char c); //!< writes a single character as it is, no automatic newline breaking
@@ -180,7 +132,7 @@ template<class T> rTextField & operator<<(rTextField &c,const T &x){
 }
 
 void DisplayText(REAL x,REAL y,REAL w,REAL h,const char *text,int center=0,
-                 int cursor=0,int cursorPos=0, rTextField::ColorMode colorMode = rTextField::COLOR_USE );
+                 int cursor=0,int cursorPos=0);
 
 // *******************************************************************************************
 // *
@@ -230,6 +182,8 @@ rTextField & rTextField::SetColor( tColor const & color )
     this->color_ = color;
     return *this;
 }
+//! Reloads the font (in case the resolution or font type changes)
+void sr_ReloadFont(void);
 
 #endif
 

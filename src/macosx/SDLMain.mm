@@ -12,10 +12,10 @@
 #include "tError.h"
 #include "tConfiguration.h"
 #include "uMenu.h"
+#include "AAURLHandler.h"
 
 /* Use this flag to determine whether we use SDLMain.nib or not */
 #define		SDL_USE_NIB_FILE	1
-
 
 static int    gArgc;
 static char  **gArgv;
@@ -42,50 +42,33 @@ SDL_Event event;
 
 - (void)terminate:(id)sender
 {
-/* Post a SDL_QUIT event */
-//    event.type = SDL_QUIT;
-//    SDL_PushEvent(&event);
-    
     st_SaveConfig();
-    uMenu::quickexit=uMenu::QuickExit_Total;  
-}
-
-- (void)sendEvent:(NSEvent *)event
-{
-    NSEventType eventType = [event type];
-    
-    if (eventType == NSKeyDown || eventType == NSKeyUp)
-    {
-        // Let Mac OS X handle Hide, Minimize, etc
-        if ([event modifierFlags] & NSCommandKeyMask)
-            [super sendEvent:event];
-    }
-    else
-    {
-        [super sendEvent:event];
-    }
+    uMenu::quickexit=true;  
 }
 
 @end
 
-//this changes the current working directory to the resource folder of 
-//the .app bundle in Mac OS X
+//! Change to the resource folder of the application bundle
 void MacOSX_SetCWD(char **argv) {
     char buffer[300];
     int count = 2, i;
     strcpy(buffer, argv[0]);
     
-    if ( !strstr( buffer, ".app") ) {
+    if ( !strstr(buffer, ".app") )
+    {
         //it's not a .app bundle
         return;
     }
 
-    for (i = strlen(buffer); i > 0 && count > 0; i--) {
+    for ( i = strlen(buffer); i > 0 && count > 0; i-- )
+    {
         if (buffer[i] == '/')
             count--;
     }
-    if (i == 0) 
+    
+    if ( i == 0 )
         return;
+    
     i+=2;
     buffer[i] = 0;
     strcat( buffer, "Resources");
@@ -97,13 +80,8 @@ void MacOSX_SetCWD(char **argv) {
 
 - (void)quit:(id)sender
 {
-// Why doesn't SDL_PushEvent work?
-//    event.type = SDL_QUIT;
-//    SDL_PushEvent(&event); 
     st_SaveConfig();
-    uMenu::quickexit=uMenu::QuickExit_Total;    
-//    [[NSApplication sharedApplication] terminate:self];
-//    exit(1);   
+    uMenu::quickexit=true;    
 }
 
 /* Fix menu to contain the real app name instead of "SDL App" */
@@ -126,7 +104,7 @@ void MacOSX_SetCWD(char **argv) {
         if ([menuItem hasSubmenu])
             [self fixMenu:[menuItem submenu] withAppName:appName];
     }
-    [ aMenu sizeToFit ];
+    [aMenu sizeToFit];
 }
 
 /* Called when the internal event loop has just started running */
@@ -139,12 +117,9 @@ void MacOSX_SetCWD(char **argv) {
     [self fixMenu:[NSApp mainMenu] withAppName:[[NSProcessInfo processInfo] processName]];
 #endif
 
-    // Forward events to NSApp
-    setenv("SDL_ENABLEAPPEVENTS", "1", 1);
-
     /* Hand off to main application code */
-    status = SDL_main (gArgc, gArgv);
-
+    status = SDL_main(gArgc, gArgv);
+    
     /* We're done, thank you for playing */
     exit(status);
 }
@@ -182,7 +157,6 @@ void MacOSX_SetCWD(char **argv) {
     
     /* Build output string */
     result = [NSString stringWithCharacters:buffer length:bufferSize];
-    
     NSDeallocateMemoryPages(buffer, bufferSize);
     
     return result;
@@ -190,40 +164,46 @@ void MacOSX_SetCWD(char **argv) {
 
 @end
 
-
-
 #ifdef main
 #  undef main
 #endif
 
-
 /* Main entry point to executable - should *not* be SDL_main! */
-int main (int argc, const char *argv[])
+int main (int argc, char **argv)
 {
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    SetupAAURLHandler();
 
-    /* Copy the arguments into a global variable */
-    int i;
-    
     /* This is passed if we are launched by double-clicking */
-    if ( argc >= 2 && strncmp (argv[1], "-psn", 4) == 0 ) {
+    if ( argc >= 2 && strncmp (argv[1], "-psn", 4) == 0 )
+    {
         gArgc = 1;
-	gFinderLaunch = YES;
-    } else {
-        gArgc = argc;
-	gFinderLaunch = NO;
+        gFinderLaunch = YES;
     }
-    gArgv = (char**) malloc (sizeof(*gArgv) * (gArgc+1));
+    else
+    {
+        gArgc = argc;
+        gFinderLaunch = NO;
+    }
+
+    gArgv = (char**)malloc( sizeof(*gArgv) * (gArgc+1) );
     tASSERT (gArgv != NULL);
-    for (i = 0; i < gArgc; i++)
+    int i = 0;
+    for (i; i < gArgc; i++)
+    {
         gArgv[i] = (char *) argv[i];
+    }
+
     gArgv[i] = NULL;
-	
 	MacOSX_SetCWD(gArgv);
+    
 #if SDL_USE_NIB_FILE
     [SDLApplication poseAsClass:[NSApplication class]];
-    NSApplicationMain (argc, argv);
+    NSApplicationMain (argc, (const char **)argv);
 #else
     CustomApplicationMain (argc, argv);
 #endif
+    CleanupAAURLHandler();
+    [pool release];
     return 0;
 }

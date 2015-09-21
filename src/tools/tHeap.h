@@ -108,8 +108,8 @@ private:
 
 template<class T> class tHeap: public tHeapBase{
 public:
-    tHeap(){}
-    ~tHeap(){}
+    tHeap(){};
+    ~tHeap(){};
 
     void Insert(T *e){tHeapBase::Insert(e);}  // starts to manage object e
     void Remove(T *e){tHeapBase::Remove(e);}  // stops (does not delete e)

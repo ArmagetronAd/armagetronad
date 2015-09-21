@@ -55,19 +55,16 @@ public:
         Level_Hard				// extremly annoying
     };
 
-    Level	CheckSpam( REAL spamlevel, int UserToKick, tOutput const & message );	// check if someone is spamming
-    REAL	BlockTime();									                        // time left in silenced mode
-    void	ResetTime(); //!< Reset spam time so everything that happened between last spammy event and now is erased
-    void	ResetSpam(); //!< Reset current spam and warning status
+    Level	CheckSpam( REAL spamlevel, int UserToKick );	// check if someone is spamming
+    REAL	BlockTime();									// time left in silenced mode
 
     nSpamProtection( const nSpamProtectionSettings& settings );
     ~nSpamProtection();
 
 private:
     const nSpamProtectionSettings&	settings_;
-    REAL                            spamProtect_;
-    nTimeRolling                    spamProtectTime_;
-    int                             numWarnings_;
+    REAL							spamProtect_;
+    nTimeRolling					spamProtectTime_;
 };
 
 #endif // !defined(ArmageTron_SPAM_PROTECTION_H)

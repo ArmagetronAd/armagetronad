@@ -29,15 +29,24 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define ArmageTron_SERVERFAVORITES_H
 
 #include "tString.h"
+#include "nServerInfo.h"
 
 class nServerInfoBase;
+
+//! favorite server information, just to connect
+class gServerInfoFavorite: public nServerInfoBase
+{
+public:
+    // construct a server directly with connection name and port
+    gServerInfoFavorite( tString const & connectionName, unsigned int port );
+    gServerInfoFavorite() {}
+    void SetPort( unsigned int port ) { nServerInfoBase::SetPort( port ); }
+    void SetConnectionName( tString const connectionName ) { nServerInfoBase::SetConnectionName( connectionName ); }
+};
 
 class gServerFavorites
 {
 public:
-    //! open the alternative masters
-    static void AlternativesMenu();
-
     //! open the favorites menu
     static void FavoritesMenu();
 

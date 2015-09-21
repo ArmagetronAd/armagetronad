@@ -11,7 +11,7 @@ TOUCH=false
 
 SRCDIR="$1"
 shift
-if test "$SRCDIR" = "-t"; then
+if test "$SRCDIR" == "-t"; then
     TOUCH=true
     SRCDIR="$1"
     shift

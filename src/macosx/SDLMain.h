@@ -7,5 +7,5 @@ Feel free to customize this file to suit your needs
 
 #import <Cocoa/Cocoa.h>
 
-@interface SDLMain : NSObject
+@interface SDLMain : NSObject {}
 @end

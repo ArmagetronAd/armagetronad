@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
+  
 ***************************************************************************
 
 */
@@ -32,83 +32,31 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <set>
 
-tString & operator << ( tString &s, const eTeam & team)
-{
-    if ( !(&team) )
-        return s << tOutput("$player_spectator_message");
-    else
-        return s << team.GetColoredName();
-}
-std::ostream & operator << ( std::ostream &s, const eTeam & team)
-{
-    if ( !(&team) )
-        return s << tOutput("$player_spectator_message");
-    else
-        return s << team.GetColoredName();
-}
-
 #define TEAMCOLORS 8
 
 static unsigned short se_team_rgb[TEAMCOLORS][3]=
-{ {  4,  8, 15 } , // blue
-    { 15, 13,  0 } , // gold
-    { 15,  1,  1 } , // red
-    {  0, 15,  4 } , // green
-    { 15,  4, 15 } , // violet
-    {  4, 15, 15 } , // ugly green
-    { 15, 15, 15 } , // white
-    {  7,  7,  7 }   // black
-};
+    { {  4,  8, 15 } , // blue
+      { 15, 15,  4 } , // gold
+      { 15,  4,  4 } , // red
+      {  4, 15,  4 } , // green
+      { 15,  4, 15 } , // violet
+      {  4, 15, 15 } , // ugly green
+      { 15, 15, 15 } , // white
+      {  7,  7,  7 }   // black
+    };
 
-static tString se_team_name[TEAMCOLORS]=
-{
-    tString("$team_name_blue"),
-    tString("$team_name_gold"),
-    tString("$team_name_red"),
-    tString("$team_name_green"),
-    tString("$team_name_violet"),
-    tString("$team_name_ugly"),
-    tString("$team_name_white"),
-    tString("$team_name_black")
-};
+static char* se_team_name[TEAMCOLORS]=
+    {
+        "$team_name_blue",
+        "$team_name_gold",
+        "$team_name_red",
+        "$team_name_green",
+        "$team_name_violet",
+        "$team_name_ugly",
+        "$team_name_white",
+        "$team_name_black"
+    };
 
-// static tList<eTeam> se_ColoredTeams;
-static eTeam * se_ColoredTeams[TEAMCOLORS]={0,0,0,0,0,0,0,0};
-
-static int IMPOSSIBLY_LOW_SCORE=(-1 << 31);
-
-// class that creates config items for one team
-// TEAM_(NAME|RED|GREEN|BLUE)_X
-class eTeamColorConfig {
-    typedef tSettingItem<tString> nameConf;
-    typedef tSettingItem<unsigned short int> colorConf;
-    colorConf *m_red, *m_green, *m_blue;
-    nameConf *m_name;
-    static int teamCount;
-public:
-    eTeamColorConfig() {
-        std::ostringstream name(""), red(""), green(""), blue("");
-        name  << "TEAM_NAME_"  << teamCount + 1;
-        red   << "TEAM_RED_"   << teamCount + 1;
-        green << "TEAM_GREEN_" << teamCount + 1;
-        blue  << "TEAM_BLUE_"  << teamCount + 1;
-        m_name  = new nameConf (name .str().c_str(), se_team_name[teamCount]);
-        m_red   = new colorConf(red  .str().c_str(), se_team_rgb [teamCount][0]);
-        m_green = new colorConf(green.str().c_str(), se_team_rgb [teamCount][1]);
-        m_blue  = new colorConf(blue .str().c_str(), se_team_rgb [teamCount][2]);
-        ++teamCount;
-    }
-    ~eTeamColorConfig() {
-        delete m_name;
-        delete m_red;
-        delete m_green;
-        delete m_blue;
-    }
-};
-
-int eTeamColorConfig::teamCount = 0;
-
-static eTeamColorConfig se_team_config[TEAMCOLORS];
 
 //! Creates a color string inserter
 inline static tColoredStringProxy ColorString( const eTeam * t )
@@ -156,18 +104,6 @@ void eTeam::UpdateStaticFlags()
     }
 }
 
-// number of rounds played (updated right after spawning)
-int eTeam::RoundsPlayed() const
-{
-    return roundsPlayed;
-}
-
-// increase round counter
-void eTeam::PlayRound()
-{
-    roundsPlayed++;
-}
-
 //update internal properties ( player count )
 void eTeam::UpdateProperties()
 {
@@ -196,40 +132,23 @@ void eTeam::UpdateProperties()
     int i;
     for ( i = players.Len()-1; i>=0; --i )
     {
-        ePlayerNetID * player = players(i);
-
-        // on the client, don't count players who already expressed their wish
-        // to leave a team as active players.
-        if ( sn_GetNetState() != nCLIENT || player->nextTeam == this )
+        if ( players(i)->IsHuman() )
         {
-            if ( player->IsHuman() )
-            {
-                if ( player->IsActive() )
-                    ++numHumans;
-            }
-            else
-                ++numAIs;
+            if ( players(i)->IsActive() )
+                ++numHumans;
         }
+        else
+            ++numAIs;
     }
 
     if ( nSERVER == sn_GetNetState() )
         RequestSync();
 }
 
-static eLadderLogWriter se_teamRenamedWriter("TEAM_RENAMED", true);
-static eLadderLogWriter se_teamCreateWriter("TEAM_CREATED", true);
-static eLadderLogWriter se_teamDestroyWriter("TEAM_DESTROYED", true);
-static eLadderLogWriter se_teamAddWriter("TEAM_PLAYER_ADDED", true);
-static eLadderLogWriter se_teamRemoveWriter("TEAM_PLAYER_REMOVED", true);
-
 // update name and color
 void eTeam::UpdateAppearance()
 {
-    bool empty = false;
-
     unsigned short oldr = r, oldg = g, oldb = b;
-
-    tString oldName = name;
 
     ePlayerNetID* oldest = OldestHumanPlayer();
     if ( !oldest )
@@ -264,7 +183,7 @@ void eTeam::UpdateAppearance()
         {
             // team name determined by color
             tOutput newname;
-            newname << &se_team_name[ colorID ][0];
+            newname << se_team_name[ colorID ];
 
             name = newname;
 
@@ -317,31 +236,24 @@ void eTeam::UpdateAppearance()
         // empty team
         name = tOutput("$team_empty");
         r = g = b = 7;
-        empty = true;
     }
-    
-    tString oldNameFiltered = ePlayerNetID::FilterName(oldName);
-    tString newNameFiltered = ePlayerNetID::FilterName(name);
-    if( oldNameFiltered != newNameFiltered )
+
+    /* z-man: no longer required
+    // make the oldest player spawn in front
+    if ( oldest )
     {
-        if( !empty && !lastEmpty_ )
+        int max = players.Len()-1;
+        int real = oldest->teamListID;
+        if ( real < max )
         {
-            se_teamRenamedWriter << oldNameFiltered << newNameFiltered;
-            se_teamRenamedWriter.write();
-        }
-        else if( !empty )
-        {
-            se_teamCreateWriter << newNameFiltered;
-            se_teamCreateWriter.write();
-        }
-        else if( !lastEmpty_ )
-        {
-            LogScoreDifference( oldNameFiltered );
-            se_teamDestroyWriter << oldNameFiltered;
-            se_teamDestroyWriter.write();
+            players(max)->teamListID = real;
+            oldest->teamListID = max;
+
+            players(real) = players(max);
+            players(max) = oldest;
         }
     }
-    lastEmpty_ = empty;
+    */
 
     if ( nSERVER == sn_GetNetState() )
         RequestSync();
@@ -361,85 +273,6 @@ void eTeam::Update()
 {
     UpdateProperties();
     UpdateAppearance();
-}
-
-// sets the lock status
-void eTeam::SetLocked( bool locked )
-{
-    if ( locked && !locked_ )
-    {
-        sn_ConsoleOut( tOutput( "$invite_team_locked", Name() ) );
-    }
-    if ( !locked && locked_ )
-    {
-        sn_ConsoleOut( tOutput( "$invite_team_unlocked", Name() ) );
-    }
-
-    locked_ = locked;
-}
-
-// returns the lock status
-bool eTeam::IsLocked() const
-{
-    return locked_;
-}
-
-static void se_UnlockAllTeams ( void )
-{
-    for ( int i = eTeam::teams.Len()-1; i>=0; --i )
-    {
-        (eTeam::teams(i))->SetLocked( false );
-    }
-}
-
-static void se_UnlockAllTeamsConf ( std::istream & s )
-{
-    if ( se_NeedsServer( "UNLOCK_ALL_TEAMS", s ) )
-    {
-        return;
-    }
-
-    se_UnlockAllTeams();
-}
-
-static tConfItemFunc se_unlockAllTeamsConf("UNLOCK_ALL_TEAMS",&se_UnlockAllTeamsConf);
-static tAccessLevelSetter se_unlockAllTemasConfLevel( se_unlockAllTeamsConf, tAccessLevel_Moderator );
-
-// invite the player to join
-void eTeam::Invite( ePlayerNetID * player )
-{
-    tASSERT( player );
-    if ( !IsInvited( player ) && this->IsLocked() )
-    {
-	sn_ConsoleOut( tOutput( "$invite_team_can_join", player->GetColoredName(), Name() ) );
-    }
-    else if ( !IsInvited( player ) )
-    {
-        sn_ConsoleOut( tOutput( "$invite_team_invite", player->GetColoredName(), Name() ) );
-    }
-    player->invitations_.insert( this );
-}
-
-// revoke an invitation
-void eTeam::UnInvite( ePlayerNetID * player )
-{
-    tASSERT( player );
-    size_t wasInvited = player->invitations_.erase( this );
-    if ( player->CurrentTeam() == this && this->IsLocked() )
-    {
-        sn_ConsoleOut( tOutput( "$invite_team_kick", player->GetColoredName(), Name() ) );
-        player->SetTeam(0);
-    }
-    else if ( wasInvited )
-    {
-        sn_ConsoleOut( tOutput( "$invite_team_uninvite", player->GetColoredName(), Name() ) );
-    }
-}
-
-// check if a player is invited
-bool eTeam::IsInvited( ePlayerNetID const * player ) const
-{
-    return player->invitations_.find( const_cast< eTeam * >( this ) ) != player->invitations_.end();
 }
 
 void eTeam::AddScore ( int s )
@@ -483,7 +316,7 @@ void eTeam::AddScore(int points,
     score += points;
 
     tOutput message;
-    message.SetTemplateParameter(1, GetColoredName());
+    message.SetTemplateParameter(1, tColoredString::RemoveColors(name));
     message.SetTemplateParameter(2, points > 0 ? points : -points);
 
     if (points>0)
@@ -505,72 +338,6 @@ void eTeam::AddScore(int points,
     RequestSync(true);
 
     se_SaveToScoreFile(message);
-}
-
-// *******************************************************************************
-// *
-// *	ResetScoreDifferences
-// *
-// *******************************************************************************
-//!
-//!
-// *******************************************************************************
-
-void eTeam::ResetScoreDifferences( void )
-{
-    for ( int i = teams.Len()-1; i>=0; --i )
-    {
-        eTeam* t = teams(i);
-        if ( t->IsHuman() )
-            t->lastScore_ = t->score;
-    }
-}
-
-// *******************************************************************************
-// *
-// *	LogScoreDifferences
-// *
-// *******************************************************************************
-//!
-//!
-// *******************************************************************************
-
-void eTeam::LogScoreDifferences( void )
-{
-    for ( int i = teams.Len()-1; i>=0; --i )
-    {
-        eTeam* t = teams(i);
-        t->LogScoreDifference();
-    }
-}
-
-// *******************************************************************************
-// *
-// *	LogScoreDifference
-// *
-// *******************************************************************************
-//!
-//!
-// *******************************************************************************
-
-static eLadderLogWriter se_roundScoreTeamWriter("ROUND_SCORE_TEAM", true);
-
-void eTeam::LogScoreDifference( void )
-{
-    LogScoreDifference( Name() );
-}
-
-void eTeam::LogScoreDifference( const tString & teamName )
-{
-    if ( lastScore_ > IMPOSSIBLY_LOW_SCORE && IsHuman() )
-    {
-        tString ret;
-        int scoreDifference = score - lastScore_;
-        lastScore_ = IMPOSSIBLY_LOW_SCORE;
-        se_roundScoreTeamWriter << scoreDifference << ePlayerNetID::FilterName( teamName );
-        se_roundScoreTeamWriter.write();
-    }
-    
 }
 
 void eTeam::SwapTeamsNo(int a,int b){
@@ -597,7 +364,7 @@ void eTeam::SortByScore(){
     while (!inorder){
         inorder=true;
         int i;
-        for (i=teams.Len()-2;i>=0;i--)
+        for(i=teams.Len()-2;i>=0;i--)
             if (teams(i)->score < teams(i+1)->score){
                 SwapTeamsNo(i,i+1);
                 inorder=false;
@@ -608,14 +375,17 @@ void eTeam::SortByScore(){
 tString eTeam::Ranking( int MAX, bool cut ){
     SortByScore();
 
-    tColoredString ret;
+    tString ret;
 
     if (teams.Len()>0){
-        ret << tColoredString::ColorString(1,.5,.5);
+        ret.SetPos(2, cut );
         ret << tOutput("$team_scoretable_name");
-        ret << tColoredString::ColorString(1,1,1);
-        ret.SetPos(24, cut );
+        ret.SetPos(25, cut );
         ret << tOutput("$team_scoretable_score");
+        ret.SetPos(32, cut );
+        ret << tOutput("$team_scoretable_members");
+        ret.SetPos(41, cut );
+        ret << tOutput("$team_scoretable_alive");
         ret << "\n";
 
         int max = teams.Len();
@@ -623,7 +393,7 @@ tString eTeam::Ranking( int MAX, bool cut ){
         {
             max = MAX ;
         }
-        for (int i=0;i<max;i++){
+        for(int i=0;i<max;i++){
             tColoredString line;
             eTeam *t = teams(i);
             line << ColorString(t);
@@ -631,20 +401,80 @@ tString eTeam::Ranking( int MAX, bool cut ){
             //name.RemoveHex();
             name.SetPos( 24, cut );
 
+            line.SetPos(2, false );
             line << name;
-            line << tColoredString::ColorString(1,1,1);
-            line.SetPos(24, false );
+            line.SetPos(25, false );
             line << t->score;
+            line.SetPos(32, false );
+            line << t->NumPlayers();
+            line.SetPos(41, false);
+            int alive=t->AlivePlayers();
+            line << alive;
             ret << line << "\n";
         }
         if ( max < teams.Len() )
         {
-            ret << "...\n";
+            ret << " ...\n";
         }
     }
     // else
     //    ret << tOutput("$team_scoretable_nobody");
     return ret;
+}
+float eTeam::RankingGraph( float y, int MAX ){
+    SortByScore();
+
+    tColoredString ret;
+
+    if (teams.Len()>0){
+        tColoredString name;
+        name << tColoredString::ColorString(1.,.5,.5)
+        << tOutput("$team_scoretable_name");
+        DisplayText(-.7, y, 1., .06, name.c_str(), -1);
+        tColoredString score;
+        score << tOutput("$team_scoretable_score");
+        DisplayText(-.3, y, 1., .06, score.c_str(), -1);
+        tColoredString members;
+        members << tOutput("$team_scoretable_members");
+        DisplayText(-.1, y, 1., .06, members.c_str(), -1);
+        tColoredString alive;
+        alive << tOutput("$team_scoretable_alive");
+        DisplayText(.3, y, 1., .06, alive.c_str(), -1);
+        y-=.06;
+
+        int max = teams.Len();
+        if ( max > MAX && MAX > 0 )
+        {
+            max = MAX ;
+        }
+        for(int i=0;i<max;i++){
+            eTeam *t = teams(i);
+            tColoredString name;
+            name << ColorString(t) << t->Name();
+            DisplayText(-.7, y, 1., .06, name.c_str(), -1);
+            tColoredString score;
+            score << t->score;
+            DisplayText(-.3, y, 1., .06, score.c_str(), -1);
+            tColoredString members;
+            members << t->NumPlayers();
+            DisplayText(-.1, y, 1., .06, members.c_str(), -1);
+            tColoredString alive;
+            int alivep=t->AlivePlayers();
+            if(alivep)
+                alive << tColoredString::ColorString(0,1,0);
+            else
+                alive << tColoredString::ColorString(1,0,0);
+            alive << alivep;
+            DisplayText(.3, y, 1., .06, alive.c_str(), -1);
+            y-=.06;
+        }
+        if ( max < teams.Len() )
+        {
+            DisplayText(-.7, y, 1., .06, "...", -1);
+            y-=.06;
+        }
+    }
+    return y;
 }
 
 
@@ -677,18 +507,6 @@ void eTeam::EnforceConstraints()
     if ( imbalance <= 0 )
         imbalance=0;
 }
-
-enum eTeamEliminationMode
-{
-    TEAM_ELIMINATION_SIZE  = 0, // eliminate smallest team
-    TEAM_ELIMINATION_COLOR = 1, // eliminate ugliest team
-    TEAM_ELIMINATION_SCORE = 2  // eliminate suckiest team
-};
-
-tCONFIG_ENUM( eTeamEliminationMode );
-
-static eTeamEliminationMode se_teamEliminationMode = TEAM_ELIMINATION_SIZE;
-static tSettingItem<eTeamEliminationMode> se_teamEliminationModeConf("TEAM_ELIMINATION_MODE", se_teamEliminationMode );
 
 // make sure the limits on team number and such are met
 void eTeam::Enforce( int minTeams, int maxTeams, int maxImbalance)
@@ -725,9 +543,8 @@ void eTeam::Enforce( int minTeams, int maxTeams, int maxImbalance)
         balance = true;
 
         // find the max and min number of players per team and the
-        eTeam *max = NULL, *min = NULL, *ai = NULL, *lastColor = NULL, *last = NULL;
+        eTeam *max = NULL, *min = NULL, *ai = NULL;
         int    maxP = minPlayers, minP = 100000;
-        int    maxColorID = 0;
 
         int numTeams = 0;
         int numHumanTeams = 0;
@@ -754,103 +571,35 @@ void eTeam::Enforce( int minTeams, int maxTeams, int maxImbalance)
                     max  = t;
                 }
 
-                // mode 0: prefer unlocked teams as elimination victims, and of course smaller teams
-                if ( ( humans > 0 || t->NumPlayers() == 0 ) && humans < minP && !t->IsLocked() )
+                if ( ( humans > 0 || t->NumPlayers() == 0 ) && humans < minP )
                 {
                     minP = humans;
                     min  = t;
                 }
-
-                // mode 1: keep the first teams (Team blue, Team gold, etc)
-                if ( ( humans > 0 || t->NumPlayers() == 0 ) && t->colorID > maxColorID && t == se_ColoredTeams[t->colorID])
-                {
-                    maxColorID = t->colorID;
-                    lastColor = t;
-                }
-
-                // mode 2: lowest score goes out
-                if ( !last )
-                {
-                    last = t;
-                }
             }
         }
 
-        eTeam * teamToKill = NULL;
-        if( (int)se_teamEliminationMode > 2 ) se_teamEliminationMode = TEAM_ELIMINATION_SIZE;
-        // let negative values simply "lock" teams like you lock a server with a low MAX_CLIENTS
-        switch ( se_teamEliminationMode )
-        {
-            case TEAM_ELIMINATION_SIZE:
-                teamToKill = min;
-                break;
-            case TEAM_ELIMINATION_COLOR:
-                teamToKill = lastColor;
-                break;
-            case TEAM_ELIMINATION_SCORE:
-                teamToKill = last;
-                break;
-        }
-
-        if ( ( numTeams > maxTeams && teamToKill ) || ( numTeams > minTeams && ai ) )
+        if ( ( numTeams > maxTeams && min ) || ( numTeams > minTeams && ai ) )
         {
             // too many teams. Destroy the smallest team.
             // better: destroy the AI team
             if ( ai )
-                teamToKill = ai;
+                min = ai;
 
-            for ( i = teamToKill->NumPlayers()-1; i>=0; --i )
+            // find the second smallest team:
+            // TODO: really find the second smallest...
+            eTeam* second = max;
+
+            for ( i = min->NumPlayers()-1; i>=0; --i )
             {
-                // one player from the dismantled team.
-                tJUST_CONTROLLED_PTR< ePlayerNetID > pni = teamToKill->Player(i);
-
-                // just ignore AIs, they get removed later by the "balance with AIs" code once it notices all humans are gone from this team
-                if ( !pni->IsHuman() )
-                {
-                    continue;
-                }
-
-                // find the second smallest team:
-                eTeam* second = NULL;
-                int secondMinP = maxPlayers; // the number of humans on that team
-                for ( int j = teams.Len()-1; j>=0; --j )
-                {
-                    eTeam *t = teams(j);
-
-                    if ( t->BalanceThisTeam() )
-                    {
-                        int humans = t->NumHumanPlayers();
-
-                        if ( humans < secondMinP && t != teamToKill )
-                        {
-                            secondMinP = humans;
-                            second = t;
-                        }
-                    }
-                }
-
-                if ( second )
-                {
-                    // put the player into the second smallest team, overriding balancing settings (they're likely to be in the way )
-                    int imbBackup = second->maxImbalanceLocal;
-                    second->maxImbalanceLocal = 99999;
-                    pni->SetTeamForce( 0 );
-                    pni->UpdateTeamForce();
-                    pni->SetTeamForce( second );
-                    pni->UpdateTeamForce();
-                    second->maxImbalanceLocal = imbBackup;
-
-                    balance = false;
-                }
-                else
-                {
-                    // no room, kick the player out
-                    pni->SetTeamForce( NULL );
-                    pni->UpdateTeamForce();
-
-                    balance = false;
-                }
+                tJUST_CONTROLLED_PTR< ePlayerNetID > pni = min->Player(i);
+                pni->SetTeamForce( second );
+                pni->UpdateTeamForce();
             }
+
+            //			tDESTROY( min );
+
+            balance = false;
         }
         else if ( numTeams < minTeams )
         {
@@ -861,7 +610,7 @@ void eTeam::Enforce( int minTeams, int maxTeams, int maxImbalance)
 
             balance = false;
         }
-        else if ( ( ( maxP - maxImbalance > minP || maxP > maxPlayers ) && minP < maxPlayers ) || ( minP == 0 && maxP > 1 ) )
+        else if ( maxP - maxImbalance > minP || ( maxP > maxPlayers && minP < maxPlayers ) || ( minP == 0 && maxP > 1 ) )
         {
             // teams are unbalanced; move one player from the strongest team to the weakest
             if ( max )
@@ -888,41 +637,13 @@ void eTeam::Enforce( int minTeams, int maxTeams, int maxImbalance)
     }
 }
 
-void eTeam::WritePlayers( eLadderLogWriter & writer, const eTeam *team )
-{
-    for ( int i = team->players.Len() - 1; i >= 0; --i )
-    {
-        writer << team->players( i )->GetLogName();
-    }
-}
+// static tList<eTeam> se_ColoredTeams;
 
-static eLadderLogWriter se_positionWriter( "POSITIONS", false );
-void eTeam::WriteLaunchPositions()
-{
-    for ( int i = teams.Len() - 1; i >= 0; --i )
-    {
-        eTeam *team = teams(i);
-        
-        // AI teams are boring.
-        if ( !team->IsHuman() )
-            continue;
-
-        se_positionWriter << ePlayerNetID::FilterName( team->Name() );
-        for ( int j = 0; j < team->players.Len(); j++ )
-            se_positionWriter << team->players( j )->GetLogName();
-        se_positionWriter.write();
-    }
-}
+static eTeam * se_ColoredTeams[TEAMCOLORS]={0,0,0,0,0,0,0,0};
 
 // inquire or set the ability to use a color as a team name
 bool eTeam::NameTeamAfterColor ( bool wish )
 {
-    // reassign colors if colorID >= maxTeams
-    if ( wish && colorID >= maxTeams && se_teamEliminationMode == TEAM_ELIMINATION_COLOR )
-    {
-        NameTeamAfterColor( false );
-    }
-
     if ( wish && colorID < 0 )
     {
         for ( int i = 0; i < TEAMCOLORS; ++i )
@@ -987,10 +708,6 @@ void eTeam::AddPlayer    ( ePlayerNetID* player )
         sn_ConsoleOut( message );
         */
     }
-
-
-    se_teamAddWriter << ePlayerNetID::FilterName( name ) << player->GetLogName();
-    se_teamAddWriter.write();
 
     // anounce joining if there are is more than one member now or if the team is color-named
     if ( sn_GetNetState() != nCLIENT )
@@ -1061,9 +778,6 @@ void eTeam::AddPlayerDirty   ( ePlayerNetID* player )
     }
 
     player->UpdateName();
-
-    se_teamAddWriter << ePlayerNetID::FilterName( name ) << player->GetLogName();
-    se_teamAddWriter.write();
 }
 
 // deregister a player
@@ -1086,23 +800,10 @@ void eTeam::RemovePlayerDirty ( ePlayerNetID* player )
     players.Remove ( player, player->teamListID );
     player->currentTeam = NULL;
 
-    se_teamRemoveWriter << ePlayerNetID::FilterName( name ) << player->GetLogName();
-    se_teamRemoveWriter.write();
-
     // remove team from list
     if ( listID >= 0 && players.Len() == 0 )
     {
         teams.Remove( this, listID );
-
-        // correctly log removal
-        UpdateAppearance();
-
-        // don't forget the colored team list
-        if ( colorID >= 0 )
-        {
-            se_ColoredTeams[ colorID ] = 0;
-            colorID = -1;
-        }
     }
 }
 
@@ -1148,21 +849,6 @@ bool eTeam::PlayerMayJoin( const ePlayerNetID* player ) const
 {
     int i;
 
-    // AI players are always allowed to join, the logic that tries to put the AI into
-    // this team is responsible for checking
-    if ( !player->IsHuman() )
-        return true;
-
-    // suspended players cannot join
-    if ( player->GetSuspended() > 0 )
-        return false;
-
-    // check for invitations. Not with those shoes!
-    if ( IsLocked() && !IsInvited( player ) )
-    {
-        return false;
-    }
-
     int maxInb = maxImbalanceLocal;
 
     int minP = 10000; // minimum number of humans in a team after the player left
@@ -1179,7 +865,7 @@ bool eTeam::PlayerMayJoin( const ePlayerNetID* player ) const
     {
         eTeam *t = teams(i);
 
-        if ( !t->IsLocked() && t->BalanceThisTeam() )
+        if ( t->BalanceThisTeam() )
         {
             int humans = t->NumHumanPlayers();
 
@@ -1206,23 +892,23 @@ bool eTeam::PlayerMayJoin( const ePlayerNetID* player ) const
         {
             goon = false;
             for ( std::set< eTeam const * >::iterator iter = swapTargets.begin(); iter != swapTargets.end(); ++iter )
-            {
-                eTeam const * team = *iter;
-                for ( i = team->players.Len()-1; i>=0; --i )
                 {
-                    ePlayerNetID * otherPlayer = team->players(i);
-                    eTeam * swapTeam = otherPlayer->NextTeam();
-                    if ( swapTeam && swapTeam != otherPlayer->CurrentTeam() && swapTargets.find( swapTeam ) == swapTargets.end() )
+                    eTeam const * team = *iter;
+                    for ( i = team->players.Len()-1; i>=0; --i )
                     {
-                        goon = true;
-                        swapTargets.insert( swapTeam );
+                        ePlayerNetID * otherPlayer = team->players(i);
+                        eTeam * swapTeam = otherPlayer->NextTeam();
+                        if ( swapTeam && swapTeam != otherPlayer->CurrentTeam() && swapTargets.find( swapTeam ) == swapTargets.end() )
+                        {
+                            goon = true;
+                            swapTargets.insert( swapTeam );
 
-                        // early return if we find a closed swap chain
-                        if ( swapTeam == player->CurrentTeam() )
-                            return true;
+                            // early return if we find a closed swap chain
+                            if ( swapTeam == player->CurrentTeam() )
+                                return true;
+                        }
                     }
                 }
-            }
         }
     }
 
@@ -1270,20 +956,6 @@ ePlayerNetID*	eTeam::OldestHumanPlayer(		) const
         if ( p->IsHuman() && ( !ret || ret->timeJoinedTeam > p->timeJoinedTeam || se_centerPlayerIsBoss ) )
         {
             ret = p;
-        }
-    }
-
-    if ( !ret )
-    {
-        // nobody? Darn. Look for a player that has this team set as next team.
-        
-        for (int i= se_PlayerNetIDs.Len()-1; i>=0; i--)
-        {   
-            ePlayerNetID* p = se_PlayerNetIDs(i);
-            if ( p->NextTeam() == this && p->IsHuman() && ( !ret || ret->timeJoinedTeam > p->timeJoinedTeam || se_centerPlayerIsBoss ) )
-            {
-                ret = p;
-            }
         }
     }
 
@@ -1373,6 +1045,22 @@ bool eTeam::Alive ( ) const
     return false;
 }
 
+// how many of the current players are currently alive?
+int eTeam::AlivePlayers ( ) const
+{
+    int ret = 0;
+    for (int i= players.Len()-1; i>=0; --i)
+    {
+        ePlayerNetID* p = players(i);
+        if ( p->Object() && p->Object()->Alive() )
+        {
+            ret++;
+        }
+    }
+
+    return ret;
+}
+
 
 // print out an understandable name in to s
 void eTeam::PrintName(tString &s) const
@@ -1456,15 +1144,12 @@ void eTeam::ReceiveControlNet(nMessage &m)
 // con/desstruction
 // default constructor
 eTeam::eTeam()
-        :colorID(-1),listID(-1), roundsPlayed(0)
+        :colorID(-1),listID(-1)
 {
     score = 0;
-    lastScore_=IMPOSSIBLY_LOW_SCORE;
-    locked_ = false;
     maxPlayersLocal = maxPlayers;
     maxImbalanceLocal = maxImbalance;
     r = g = b = 32; // initialize color so it will be updated, guaranteed
-    lastEmpty_=true;
     Update();
 }
 
@@ -1475,21 +1160,14 @@ eTeam::eTeam(nMessage &m)
         colorID(-1),listID(-1)
 {
     score = 0;
-    lastScore_=IMPOSSIBLY_LOW_SCORE;
-    locked_ = false;
     maxPlayersLocal = maxPlayers;
     maxImbalanceLocal = maxImbalance;
-    r = g = b = 32; // initialize color so it will be updated, guaranteed
-    lastEmpty_=true;
     Update();
 }
 
 // destructor
 eTeam::~eTeam()
 {
-    // one last time
-    UpdateAppearance();
-
     if ( listID >= 0 )
         teams.Remove( this, listID );
 
@@ -1497,12 +1175,6 @@ eTeam::~eTeam()
     {
         se_ColoredTeams[ colorID ] = 0;
         colorID = -1;
-    }
-
-    // revoke all invitations
-    for ( int i = se_PlayerNetIDs.Len()-1; i >= 0; --i )
-    {
-        se_PlayerNetIDs(i)->invitations_.erase( this );
     }
 }
 // *******************************************************************************
@@ -1627,14 +1299,9 @@ void eTeam::Shuffle( int startID, int stopID )
 
     if ( startID == stopID )
         return;
-    
-    ePlayerNetID *player = players[startID];
-    eShuffleSpamTester & spam = player->GetShuffleSpam();
-    
-    if ( spam.ShouldAnnounce() )
-    {
-        sn_ConsoleOut( spam.ShuffleMessage( player, startID + 1, stopID + 1 ) );
-    }
+
+    tOutput message( "$team_shuffle", players[startID]->GetName(), startID+1, stopID+1 );
+    sn_ConsoleOut( message );
 
     // simply swap the one player over all the players in between.
     while ( startID < stopID )
@@ -1647,14 +1314,6 @@ void eTeam::Shuffle( int startID, int stopID )
         SwapPlayers( players[startID], players[startID-1] );
         startID--;
     }
-    
-    spam.Shuffle();
 }
 
-tColoredString eTeam::GetColoredName(void) const
-{
-    tColoredString ret;
-    return ret << tColoredString::ColorString( R() / 15.0, G() / 15.0, B() / 15.0)
-        << Name()
-        << tColoredString::ColorString(-1, -1, -1);
-}
+

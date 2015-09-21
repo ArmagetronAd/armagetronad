@@ -29,7 +29,7 @@ Just in case you do not know: this idea is best known from the Disney
 movie "Tron" from 1982. However, that's not the origin of the game idea:
 The earliest arcade game of that type was 
 ELINK(www.klov.com/B/Blockade.html,Blockade) from 1976, the first known home versions
-ELINK([en.wikipedia.org/wiki/Snafu_%28video_game%29],SNAFU) on the Intellivision from 1981 and
+ELINK(www.thelogbook.com/phosphor/mattel/snafu.html,SNAFU) on the Intellivision from 1981 and
 ELINK(www.atarihq.com/reviews/2600/surround.html,Surround) for the Atari 2600.
 ])
 
@@ -42,25 +42,24 @@ too nervous; speed is your only resource against other players!
 SUBSECTION(Quick start)
 PARAGRAPH([
 First, you'll be confronted with the selection of your favourite language. 
-Use CURSOR UP/DOWN to select, then ENTER/RETURN to accept. Next, there is a quick
-and simplified setup screen. use CURSOR UP/DOWN to navigate the entries, CURSOR LEFT/RIGHT
-to make changes to selection items and use standard editing controls to change your name.
-If you're happy with the choices, press ENTER on any of the two 'Accept' menu items.
-You will be tossed into a training match against a single AI opponent with reduced speed
-where you can learn the keybindings.
+Use CURSOR LEFT/RIGHT to select, then CURSOR_DOWN to move
+to the "Accept" menu item. Then, press ENTER/RETURN three times. 
+You'll immediately be set to fight against one weak AI opponent.
 ])
-PARAGRAPH([
-Reading this, you probably already went through those steps. You can repeat the simplified
-setup in the menu "System Setup"/"Misc Stuff"/"Redo First Setup" and pick different languages
-in "System Setup"/"Misc Stuff"/"Language Settings".])
 
-SUBSECTION([Additional keyboard layout])
+SUBSUBSECTION([Initial keyboard layout])
 
 PARAGRAPH([
 <table>
+<tr><td>turn left      </td><td>: y,z,w</td></tr>
+<tr><td>turn right     </td><td>: x</td></tr>
+<tr><td>brake 	       </td><td>: v</td></tr>
+<tr><td>switch camera  </td><td>: c</td></tr>
+<tr><td>glance         </td><td>: cursor left/right/down</td></tr>
+<tr><td></td></tr>
 <tr><td>show scores            </td><td>: TAB</td></tr>
 <tr><td>scroll message console </td><td>: page up/down</td></tr>
-<tr><td>toggle fullscreen	   </td><td>: n</td></tr>
+<tr><td>toggle fullscreen	   </td><td>: f</td></tr>
 <tr><td></td></tr>
 <tr><td width = 200 >pauses/unpauses the game</td><td>: p</td></tr> 
 <tr><td>quit to the game menu</td><td>: q/ESC</td></tr>
@@ -106,11 +105,10 @@ Visit the ELINK([www.armagetronad.net/],main webpage) for up to date information
 about PROGTITLE and the latest stable builds. Check out the 
 ELINK([forums.armagetronad.net/],Forums) for keeping in touch with
 current development and venting your anger that we broke your favorite feature
-in the current release. Check the ELINK([wiki.armagetronad.net],Wiki) for community maintained documentation, the pages you're reading right now only scratch the surface. Visit the 
+in the current release. Visit the 
 ELINK(sourceforge.net/projects/armagetronad/,SourceForge project page) to get
-informed by email or RSS when a new release is out. Most of our current development is managed
-on ELINK(launchpad.net/armagetronad,Launchpad). Get the latest
-snapshot builds in various flavors from ELINK(sourceforge.net/projects/armagetronad/files/snapshots/,the SourceForge file release system).
+informed by email or RSS when a new release is out. Get the latest
+alpha and beta builds on ELINK(beta.armagetronad.net/,AABeta).
 ])
 
 SECTION(Credits:)
@@ -141,7 +139,8 @@ PARAGRAPH([
 This program is free software; you can redistribute it and/or
 modify it under the terms of the 
 LINK(COPYING.txt,GNU General Public License)
-as published by the Free Software Foundation, version 2.
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
 ])
 
 PARAGRAPH([

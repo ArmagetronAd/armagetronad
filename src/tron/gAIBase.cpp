@@ -43,8 +43,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tRandom.h"
 #include "tRecorder.h"
 #include <stdlib.h>
-#include <cstdlib>
-#include <memory>
 
 #define AI_REACTION          0 
 #define AI_EMERGENCY         1 
@@ -416,7 +414,6 @@ static bool CheckLoop(const gCycle *a, const gCycle *b,
 
                 // detect early loop
                 if (run == b)
-                {
                     if (bClosedIn)
                     {
                         winding = 0;
@@ -424,7 +421,6 @@ static bool CheckLoop(const gCycle *a, const gCycle *b,
                     }
                     else
                         bClosedIn = true;
-                }
             }
             else
             {
@@ -867,8 +863,8 @@ gCycleMemoryEntry* gCycleMemory::Latest (int side)  const
     for (int i=memory.Len()-1; i>=0; i--)
     {
         gCycleMemoryEntry* m = memory(i);
-        if ((!ret || ( (m->max[side].dist > ret->max[side].dist)
-                       && bool( m->cycle ) && m->cycle->Alive() ) ) )
+        if ((!ret || (m->max[side].dist > ret->max[side].dist)
+                && bool( m->cycle ) && m->cycle->Alive() ))
             ret = memory(i);
     }
 
@@ -882,8 +878,8 @@ gCycleMemoryEntry* gCycleMemory::Earliest (int side)  const
     for (int i=memory.Len()-1; i>=0; i--)
     {
         gCycleMemoryEntry* m = memory(i);
-        if ((!ret || ( (m->min[side].dist < ret->min[side].dist)
-                       && bool( m->cycle ) && m->cycle->Alive() ) ) )
+        if ((!ret || (m->min[side].dist < ret->min[side].dist)
+                && bool( m->cycle ) && m->cycle->Alive()))
             ret = memory(i);
     }
     return ret;
@@ -955,14 +951,10 @@ static void CycleBlocksWayHelper(const gCycle *a, const gCycle *b,
 // of a
 // bDir tells the direction the wall of b is going (-1: to the left, 1:...)
 // bDist is the distance of b's wall to its start.
-void gAIPlayer::CycleBlocksWay(const gCycleMovement *aa, const gCycleMovement *bb,
+void gAIPlayer::CycleBlocksWay(const gCycle *a, const gCycle *b,
                                int aDir, int bDir, REAL bDist, int winding)
 {
-
-
-    tASSERT(aa && bb);
-    gCycle * a = dynamic_cast< gCycle * >( const_cast< gCycleMovement * > ( aa ) );
-    gCycle * b = dynamic_cast< gCycle * >( const_cast< gCycleMovement * > ( bb ) );
+    tASSERT(a && b);
 
     REAL aDist = a->GetDistance();
     aDir = (aDir > 0 ? 1 : 0);
@@ -1015,12 +1007,12 @@ void gAIPlayer::CycleBlocksWay(const gCycleMovement *aa, const gCycleMovement *b
 }
 
 // called whenever a cylce blocks the rim wall.
-void gAIPlayer::CycleBlocksRim(const gCycleMovement *a, int aDir)
+void gAIPlayer::CycleBlocksRim(const gCycle *a, int aDir)
 {
 }
 
 // called whenever a hole is ripped in a's wall at distance aDist.
-void gAIPlayer::BreakWall(const gCycleMovement *a, REAL aDist)
+void gAIPlayer::BreakWall(const gCycle *a, REAL aDist)
 {}
 
 
@@ -1157,6 +1149,9 @@ gAIPlayer::gAIPlayer():
     pingCharity = 300;
 
     NewObject();
+
+    // AI players don't need to log in
+    Auth();
 }
 
 void gAIPlayer::ConfigureAIs()  // ai configuration menu
@@ -1234,7 +1229,7 @@ void gAIPlayer::SetNumberOfAIs(int num, int minPlayers, int iq, int tries)
         for (i = se_PlayerNetIDs.Len()-1; i>=0; i--)
         {
             ePlayerNetID *p = se_PlayerNetIDs(i);
-            if ( p->CurrentTeam() )
+            if ( !p->IsSpectating() )
                 ++pcount;
         }
 
@@ -1340,10 +1335,6 @@ void gAIPlayer::SetTraceSide(int side)
         lazySideChange = -10;
 }
 
-// flag set if pathfinding is enabled. It's an expensive opeeration, so we just turn it
-// off if the PC can't handle it. Doesn't doo much good, anyway.
-static bool sg_pathEnabled = true;
-
 // state change:
 void gAIPlayer::SwitchToState(gAI_STATE nextState, REAL minTime)
 {
@@ -1374,10 +1365,6 @@ void gAIPlayer::SwitchToState(gAI_STATE nextState, REAL minTime)
         break;
     case AI_PATH:
         nextAbility = character->properties[AI_STATE_PATH];
-        if (!sg_pathEnabled )
-        {
-            nextAbility = 0;
-        }
         break;
     case AI_SURVIVE:
         break;
@@ -1399,12 +1386,6 @@ void gAIPlayer::SwitchToState(gAI_STATE nextState, REAL minTime)
 // state update functions:
 void gAIPlayer::ThinkSurvive(  ThinkData & data )
 {
-    if (!character)
-    {
-        st_Breakpoint();
-        return;
-    }
-
     REAL random = 0;
     // do nothing much. Rely on the emergency program.
     /*
@@ -1512,14 +1493,14 @@ void gAIPlayer::ThinkTrace( ThinkData & data )
 
         if (a < b)
             a = b;
-        if ( ( a > 0 && a < nextTurn ) || !left.front.edge)
+        if ( a > 0 && a < nextTurn || !left.front.edge)
             nextTurn = a;
     }
 
     nextTurn/= Object()->Speed() * .98f;
 
     REAL delay = Delay() * 1.5f;
-    if ((!Object()->CanMakeTurn(1) || !Object()->CanMakeTurn(-1) || success) && nextTurn > delay)
+    if ((!Object()->CanMakeTurn() || success) && nextTurn > delay)
         nextTurn = delay;
 
     if (nextTurn > .3f)
@@ -1577,6 +1558,7 @@ void gAIPlayer::ThinkTrace( ThinkData & data )
     return;
 }
 
+
 void gAIPlayer::ThinkPath( ThinkData & data )
 {
     int lr = 0;
@@ -1601,14 +1583,6 @@ void gAIPlayer::ThinkPath( ThinkData & data )
 
     if ( nextStateChange < se_GameTime() )
     {
-        if( !sg_pathEnabled )
-        {
-            SwitchToState(AI_SURVIVE, 5);
-            EmergencySurvive( data );
-
-            return;
-        }
-
         gSensor p(Object(),Object()->Position(), tDir);
         p.detect(REAL(.9999999));
         if (p.hit >=  .9999999)  // free line of sight to victim. Switch to close combat.
@@ -1626,38 +1600,11 @@ void gAIPlayer::ThinkPath( ThinkData & data )
     if (lastPath < se_GameTime() - 10)
         if (target->CurrentFace())
         {
-            if( !sg_pathEnabled )
-            {
-                // yeah, apparently, we can't go on with this. Bail out.
-                SwitchToState(AI_SURVIVE, 5);
-                EmergencySurvive( data );
-                return;
-            }
-
             Object()->FindCurrentFace();
-            REAL before = tRealSysTimeFloat();
             eHalfEdge::FindPath(Object()->Position(), Object()->CurrentFace(),
                                 target->Position(), target->CurrentFace(),
                                 Object(),
                                 path);
-
-            // calculate (and archive) time used for pathfinding
-            REAL used = tRealSysTimeFloat() - before;
-            static char const * section = "PATH_TIME";
-            tRecorder::PlaybackStrict( section, used );
-            tRecorder::Record( section, used );
-            static REAL usedAverage = 0;
-            const REAL decay = .1;
-            usedAverage = (usedAverage+used*decay)/(1+decay);
-
-            // disable pathfinding if it just takes too long.
-            if ( used > .06 || usedAverage > .03 )
-            {
-#ifdef DEBUG
-                con << "Path finding is too expensive for this PC. Disabling it.\n";
-#endif
-                sg_pathEnabled = false;
-            }
             lastPath = se_GameTime();
         }
 
@@ -1769,7 +1716,7 @@ void gAIPlayer::ThinkCloseCombat( ThinkData & data )
         p.detect(REAL(1));
         if (p.hit <=  .999999)  // no free line of sight to victim. Switch to path mode.
         {
-            SwitchToState(sg_pathEnabled ? AI_PATH : AI_SURVIVE, 5);
+            SwitchToState(AI_PATH, 5);
             EmergencySurvive( data );
             return;
         }
@@ -2034,12 +1981,6 @@ public:
 // emergency functions:
 bool gAIPlayer::EmergencySurvive( ThinkData & data, int enemyevade, int preferedSide)
 {
-    if (!character)
-    {
-        st_Breakpoint();
-        return false;
-    }
-
     gAISensor const & front = data.front;
     gAISensor const & left = data.left;
     gAISensor const & right = data.right;
@@ -2060,8 +2001,7 @@ bool gAIPlayer::EmergencySurvive( ThinkData & data, int enemyevade, int prefered
         log->Print();
         //      st_Breakpoint();
     }
-    if ( log->current > 0 )
-        last = log->entries[log->current-1].turn;
+    last = log->entries[log->current-1].turn;
 #endif
 
     triesLeft = (triesLeft * character->properties[AI_EMERGENCY])/10;
@@ -2084,7 +2024,7 @@ bool gAIPlayer::EmergencySurvive( ThinkData & data, int enemyevade, int prefered
     REAL range = Object()->Speed() * delay;
 
     // nothing we can do if we cannot make a turn immediately
-    if (!Object()->CanMakeTurn(1) || !Object()->CanMakeTurn(-1))
+    if (!Object()->CanMakeTurn())
         return false;
 
     //  bool dontCheckForLoop[2] = { false, false };
@@ -2301,7 +2241,7 @@ bool gAIPlayer::EmergencySurvive( ThinkData & data, int enemyevade, int prefered
         if (character->properties[AI_ENEMY] > 7)
         {
             // would he be able to trap us if we drive straight on?
-            // bool trap[2] = {false, false};
+            bool trap[2] = {false, false};
 
             if (!isTrapped)
                 for (i = 1; i>=0; i--)
@@ -2324,7 +2264,7 @@ bool gAIPlayer::EmergencySurvive( ThinkData & data, int enemyevade, int prefered
                     if (loop)
                         if (winding * (i+i-1) < 0)
                         {
-                            // trap[i] = true;
+                            trap[i] = true;
                             REAL x = enemypos.x * (i+i-1);
                             REAL y = enemypos.y;
 
@@ -2580,12 +2520,6 @@ void gAIPlayer::RightBeforeDeath(int triesLeft) // is called right before the ve
     if ( nCLIENT == sn_GetNetState() )
         return;
 
-    if (!character)
-    {
-        st_Breakpoint();
-        return;
-    }
-
     gRandomController random( randomizer_ );
 
     // think again immediately after this
@@ -2701,7 +2635,7 @@ static gAISensor * sg_GetSensor( int currentDirectionNumber, gCycle const & obje
     int turns = 1;
     grid.Turn( direction, turn );
     eCoord dir = grid.GetDirection( direction );
-    while ( !ret || ( turn * ( origDir * dir ) > .01 && currentDirectionNumber != direction ) )
+    while ( turn * ( origDir * dir ) > .01 && currentDirectionNumber != direction )
     {
         // cast rays
         gAISensor * sensor = tNEW(gAISensor)(&object,object.Position(),dir, side, range, corridor*.5f, turn );
@@ -2944,10 +2878,6 @@ void gAIPlayer::Timestep(REAL time){
         st_Breakpoint();
         return;
     }
-
-    // don't think if the object is not up to date
-    if ( Object() && Object()->LastTime() < time - EPS )
-        return;
 
     REAL ts=time-lastTime;
     lastTime=time;

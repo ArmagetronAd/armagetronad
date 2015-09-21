@@ -46,28 +46,28 @@ define(VAR, ifelse( DOCSTYLE_RESULT,unix, FILE(~/.armagetron/var), the FILE(var)
 
 PARAGRAPH([
 containing ONLY files and no subdirectories.
-dnl When you have run PROGTITLE, you'll see the additional files
+When you have run PROGTITLE, you'll see the additional files
 ])
 
-dnl <table>
-dnl FI([highscores.txt,ladder.txt,won_matches.txt and won_rounds.txt],
-dnl score statistics files)
-dnl FI(user.cfg,PROGTITLE custom configuration file)
-dnl </table>
+<table>
+FI([highscores.txt,ladder.txt,won_matches.txt and won_rounds.txt],
+score statistics files)
+FI(user.cfg,PROGTITLE custom configuration file)
+</table>
 
-dnl PARAGRAPH([
-dnl Inside VAR,
-dnl You may want to create your own 
-dnl <a href="config.html#files">configuration files</a>
-dnl ])
+PARAGRAPH([
+Inside VAR,
+You may want to create your own 
+<a href="config.html#files">configuration files</a>
+])
 
-dnl <table>
-dnl FI(autoexec.cfg,config file read at every start)
-dnl </table>
-dnl inside VAR or the 
-dnl FILE(config) subdirectory for your 
-dnl custom modifications; that way, they don't get overwritten by the defaults the
-dnl next time you install an update.
+<table>
+FI(autoexec.cfg,config file read at every start)
+</table>
+inside VAR or the 
+FILE(config) subdirectory for your 
+custom modifications; that way, they don't get overwritten by the defaults the
+next time you install an update.
 
 define(CL,<tr><td valign=top width=200><strong>$1</strong> </td><td>$2</td></tr>)
 

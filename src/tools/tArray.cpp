@@ -33,14 +33,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <stdlib.h>
 #include <string>
 #include "tArray.h"
-#include <string.h>
-
-void GrowingArrayBase::Swap( GrowingArrayBase & other )
-{
-    ::Swap( len, other.len );
-    ::Swap( size, other.size );
-    ::Swap( base, other.base );
-}
 
 void GrowingArrayBase::ComplainIfFull(){
     if (Len()>0)
@@ -96,7 +88,7 @@ void GrowingArrayBase::ResizeBase(int i,int size_of_T, bool useMalloc){
     unsigned int oldsize=size;
 
     int size_a=i+(1<<12);
-    int size_b=i+(i>>2);
+    int size_b=i+(i>>8);
 
     int new_size;
 

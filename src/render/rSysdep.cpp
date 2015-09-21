@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
+  
 ***************************************************************************
 
 */
@@ -45,9 +45,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tRecorder.h"
 
 #ifndef DEDICATED
-#include "SDL_thread.h"
-#include "SDL_mutex.h"
-
 #include <png.h>
 #define SCREENSHOT_PNG_BITDEPTH 8
 #define SCREENSHOT_BYTES_PER_PIXEL 3
@@ -88,7 +85,7 @@ static GLXContext cx;
 Display *dpy=NULL;
 Window  win;
 
-#endif
+#endif 
 
 #ifdef DIRTY
 #include <SDL_syswm.h>
@@ -115,15 +112,15 @@ bool  rSysDep::InitGL(){
         std::cerr << "No 3Dfx hardware available.\n" << x << '\n';
         return(false);
       }
-
+      
       GLint attribs[]={FXMESA_DOUBLEBUFFER,FXMESA_DEPTH_SIZE,16,FXMESA_NONE};
       ctx=fxMesaCreateBestContext(0,sr_screenWidth,sr_screenHeight,attribs);
-
+      
       if (!ctx){
         std::cerr << "Could not create FX rendering context!\n";
         return(false);
       }
-
+      
       fxMesaMakeCurrent(ctx);
     }
     */
@@ -202,7 +199,7 @@ bool  rSysDep::InitGL(){
         }
     }
 
-#endif
+#endif 
 
     return true;
 }
@@ -243,11 +240,13 @@ void  rSysDep::ExitGL(){
         glXDestroyContext(dpy, cx );
         dpy=NULL;
     }
-#endif
+#endif 
 }
 #endif // DIRTY
 
 bool sr_screenshotIsPlanned=false;
+static bool   s_videoout    =false;
+static int    s_videooutDest=fileno(stdout);
 
 static bool png_screenshot=true;
 static tConfItem<bool> pns("PNG_SCREENSHOT",png_screenshot);
@@ -290,7 +289,7 @@ static void SDL_SavePNG(SDL_Surface *image, tString filename){
 
     for(i = 0; i < sr_screenHeight; i++) {
         row_ptrs[i] = (png_byte *)image->pixels + (sr_screenHeight - i - 1)
-                      * image->pitch;
+                      * SCREENSHOT_BYTES_PER_PIXEL * sr_screenWidth;
     }
 
     png_write_image(png_ptr, row_ptrs);
@@ -323,12 +322,16 @@ static void make_screenshot(){
     // turn image around
     for (idx = 0; idx < sr_screenHeight; idx++)
     {
-        memcpy(reinterpret_cast<char *>(temp->pixels) + temp->pitch * idx,
-               reinterpret_cast<char *>(image->pixels)
-               + image->pitch*(sr_screenHeight - idx-1),
-               3*sr_screenWidth); // Optionally, use the pitch of either surface here
+        memcpy(reinterpret_cast<char *>(temp->pixels) + 3 * sr_screenWidth * idx,
+               reinterpret_cast<char *>(image->pixels)+ 3
+               * sr_screenWidth*(sr_screenHeight - idx-1),
+               3*sr_screenWidth);
     }
 
+    if (s_videoout)
+        write(s_videooutDest, temp->pixels, sr_screenWidth * sr_screenHeight * 3);
+
+    if (sr_screenshotIsPlanned) {
     // save screenshot in unused slot
     bool done = false;
     while ( !done )
@@ -356,6 +359,7 @@ static void make_screenshot(){
         else
             SDL_SaveBMP(temp, tDirectories::Screenshot().GetWritePath( fileName ) );
         done = true;
+    }
     }
 
     // cleanup
@@ -432,6 +436,24 @@ private:
             return true;
         }
 
+#ifndef DEDICATED
+        if ( parser.GetSwitch( "--videoout" ) )
+        {
+            // redirect all regular output to stderr
+            if ((s_videooutDest = dup(fileno(stdout))) == -1)
+                std::cout << "Warning: Failed to duplicate stdout descriptor for video\n";
+            else {
+                if (-1 == dup2(fileno(stderr), fileno(stdout)))
+                    std::cout << "Warning: Failed to redirect default output to stderr\n";
+                else
+                    std::cout << "Video Output: normal output redirected to stderr\n";
+            }
+            // set video out mode
+            s_videoout = true;
+            return true;
+        }
+#endif
+
         return false;
     }
 
@@ -439,6 +461,9 @@ private:
     {                                      //
         s << "--fastforward <time>         : lets time run very fast until the given time is reached\n";
         s << "--benchmark                  : renders frames as they were recorded\n";
+#ifndef DEDICATED
+        s << "--videoout                   : writes a raw video stream of frames to stdout\n";
+#endif
     }
 };
 
@@ -457,14 +482,14 @@ static void sr_DelayFrame( int targetFPS )
     double thisFrame = tRealSysTimeFloat();
 
     int uSecsPassed = static_cast<int>( MILLION * ( thisFrame - lastFrame ) );
-
+    
 //    con << uSecsPassed << "\n";
 
     // wait
     int uSecsToWait = uSecsPerFrame - uSecsPassed;
     if ( uSecsToWait > 0 )
         tDelay( uSecsToWait );
-
+    
     // call glFinish to wait for GPU
     glFinish();
 }
@@ -474,91 +499,9 @@ rSysDep::rSwapMode rSysDep::swapMode_ = rSysDep::rSwap_glFlush;
 //rSysDep::rSwapMode rSysDep::swapMode_ = rSysDep::rSwap_60Hz;
 
 // buffer swap:
-#ifndef DEDICATED
+#ifndef DEDICATED   
 // for setting breakpoints in optimized mode, too
 static void breakpoint(){}
-
-static bool sr_netSyncThreadGoOn = true;
-static rSysDep::rNetIdler * sr_netIdler = NULL;
-int sr_NetSyncThread(void *lockVoid)
-{
-    SDL_mutex *lock = (SDL_mutex *)lockVoid;
-
-    SDL_mutexP(lock);
-
-    while ( sr_netSyncThreadGoOn )
-    {
-        SDL_mutexV(lock);
-        // wait for network data
-        bool toDo = sr_netIdler->Wait();
-        SDL_mutexP(lock);
-
-        if ( toDo )
-        {
-            // disable rendering (during auto-scrolling of console, for example)
-            bool glout = sr_glOut;
-            sr_glOut = false;
-
-            // new network data arrived, handle it
-            sr_netIdler->Do();
-
-            // enable rendering again
-            sr_glOut = glout;
-        }
-    }
-
-    SDL_mutexV(lock);
-
-    return 0;
-}
-
-static SDL_Thread * sr_netSyncThread = NULL;
-static SDL_mutex * sr_netLock = NULL;
-void rSysDep::StartNetSyncThread( rNetIdler * idler )
-{
-    sr_netIdler = idler;
-
-    return;
-
-    // can't use thrading trouble while recording
-    if ( tRecorder::IsRunning() )
-        return;
-
-    if ( sr_netSyncThread )
-        return;
-
-    // create lock
-    if ( !sr_netLock )
-        sr_netLock = SDL_CreateMutex();
-
-    // start thread
-    sr_netSyncThread = SDL_CreateThread( sr_NetSyncThread, sr_netLock );
-    if ( !sr_netSyncThread )
-        return;
-
-    // lock mutex, the thread should only do work while the main thread is waiting for the refresh
-    SDL_mutexP( sr_netLock );
-}
-
-void rSysDep::StopNetSyncThread()
-{
-    // stop and delete thread
-    if ( sr_netSyncThread )
-    {
-        SDL_mutexV(  sr_netLock );
-        sr_netSyncThreadGoOn = false;
-        SDL_WaitThread( sr_netSyncThread, NULL );
-        sr_netSyncThread = NULL;
-        sr_netIdler = NULL;
-    }
-
-    // delete lock
-    if ( sr_netLock )
-    {
-        SDL_DestroyMutex( sr_netLock );
-        sr_netLock = NULL;
-    }
-}
 
 void rSysDep::SwapGL(){
     if ( s_benchmark )
@@ -571,6 +514,16 @@ void rSysDep::SwapGL(){
     double realTime = tRealSysTimeFloat();
 
     bool next_glOut = sr_glOut;
+
+    /* static double mytime = time; //ljr
+    if (false && time < mytime + 1. / 29.97) {
+        printf("skipping! %f %f\n", time, mytime);
+        next_glOut = false;
+    } else {
+        printf("rendering %f %f\n", time, mytime);
+        mytime = time;
+        next_glOut = true;
+    } */
 
     // adapt playback speed to recorded speed
     if ( !s_benchmark && !s_fastForward && tRecorder::IsPlayingBack() )
@@ -622,25 +575,17 @@ void rSysDep::SwapGL(){
     if (!sr_glOut)
     {
         // display next frame in fast foward mode
-        if ( ( s_fastForward && ( time > s_nextFastForwardFrameRecorded || realTime > s_nextFastForwardFrameReal ) ) || next_glOut )
+        if ( s_fastForward && ( time > s_nextFastForwardFrameRecorded || realTime > s_nextFastForwardFrameReal ) || next_glOut )
         {
             sr_glOut = true;
             rSysDep::ClearGL();
         }
-
-        // in playback or recording mode, always execute frame tasks, they may be improtant for consistency
-        if ( tRecorder::IsRunning() )
-            rPerFrameTask::DoPerFrameTasks();
-
         return;
     }
 
+    sr_LockSDL();
 
     rPerFrameTask::DoPerFrameTasks();
-
-    // unlock the mutex while waiting for the swap operation to finish
-    SDL_mutexV(  sr_netLock );
-    sr_LockSDL();
 
     switch( swapMode_ )
     {
@@ -675,11 +620,10 @@ void rSysDep::SwapGL(){
         make_screenshot();
         sr_screenshotIsPlanned=false;
     }
+    else if (s_videoout)
+        make_screenshot();
 
     sr_UnlockSDL();
-    // lock mutex again
-    SDL_mutexP(  sr_netLock );
-
 
     // disable output in fast forward mode
     if ( s_fastForward && tRecorder::IsPlayingBack() )

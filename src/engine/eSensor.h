@@ -32,11 +32,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "eTess2.h"
 //#include "eGrid.h"
 
-// exception that is thrown when the sensor hit something
-class eSensorFinished{};
-
 // sensor sent out to detect near eWalls
-class eSensor: public eStackGameObject{
+class eSensor: public eGameObject{
+protected:
+    tCHECKED_PTR(eGameObject) owned;
 public:
     REAL            hit;            // where is the eWall?
     tCHECKED_PTR_CONST(eHalfEdge) ehit;     // the eWall we sense
@@ -50,64 +49,6 @@ public:
     void detect(REAL range);
 
     void SetCurrentFace(eFace *f) { currentFace = f ; }
-
-    inline eSensor & SetInverseSpeed( REAL inverseSpeed );	//!< Sets the inverse speed of the sensor
-    inline REAL GetInverseSpeed( void ) const;	//!< Gets the inverse speed of the sensor
-    inline eSensor const & GetInverseSpeed( REAL & inverseSpeed ) const;	//!< Gets the inverse speed of the sensor
-    eGameObject const * GetOwner() const { return owned; } //!< Returns the gameobject owning this sensor
-protected:
-    tCHECKED_PTR(eGameObject) owned;
-private:
-    REAL inverseSpeed_; //! the inverse speed of the sensor; walls far away will be checked for opacity a bit in the future if this is set.
 };
-
-// *******************************************************************************
-// *
-// *	GetInverseSpeed
-// *
-// *******************************************************************************
-//!
-//!		@return		the inverse speed of the sensor
-//!
-// *******************************************************************************
-
-REAL eSensor::GetInverseSpeed( void ) const
-{
-    return this->inverseSpeed_;
-}
-
-// *******************************************************************************
-// *
-// *	GetInverseSpeed
-// *
-// *******************************************************************************
-//!
-//!		@param	inverseSpeed	the inverse speed of the sensor to fill
-//!		@return		A reference to this to allow chaining
-//!
-// *******************************************************************************
-
-eSensor const & eSensor::GetInverseSpeed( REAL & inverseSpeed ) const
-{
-    inverseSpeed = this->inverseSpeed_;
-    return *this;
-}
-
-// *******************************************************************************
-// *
-// *	SetInverseSpeed
-// *
-// *******************************************************************************
-//!
-//!		@param	inverseSpeed	the inverse speed of the sensor to set
-//!		@return		A reference to this to allow chaining
-//!
-// *******************************************************************************
-
-eSensor & eSensor::SetInverseSpeed( REAL inverseSpeed )
-{
-    this->inverseSpeed_ = inverseSpeed;
-    return *this;
-}
 
 #endif

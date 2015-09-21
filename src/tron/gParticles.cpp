@@ -29,7 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <cmath>
 #include <ctime>
 #include <cstdlib>
-#include "papi.h"
+// #include "papi.h"
 
 #ifndef DEDICATED
 void gParticles::Render(const eCamera *cam) {

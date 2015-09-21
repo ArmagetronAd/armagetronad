@@ -57,7 +57,7 @@ public:
     virtual void Color(REAL r, REAL g, REAL b)        = 0;
     virtual void Color(REAL r, REAL g, REAL b,REAL a) = 0;
 
-    virtual void End(bool force=true)   = 0;
+    virtual void End(bool force=false)   = 0;
 
     virtual void BeginLines()      = 0;
     virtual void BeginTriangles()  = 0;
@@ -66,6 +66,8 @@ public:
     virtual void BeginLineStrip()      = 0;
     virtual void BeginTriangleStrip()  = 0;
     virtual void BeginQuadStrip()      = 0;
+
+    virtual void IsEdge(bool ie)  = 0;
 
     virtual void BeginTriangleFan()    = 0;
     virtual void BeginLineLoop()      = 0;
@@ -150,7 +152,7 @@ inline void Color(REAL r, REAL g, REAL b,REAL a){
     renderer->Color(r,g,b,a);
 }
 
-inline void RenderEnd(bool force=true){
+inline void RenderEnd(bool force=false){
     renderer->End(force);
 }
 
@@ -181,6 +183,12 @@ inline void BeginTriangleStrip(){
 inline void BeginQuadStrip(){
     renderer->BeginQuadStrip();
 }
+
+
+inline void IsEdge(bool ie){
+    renderer->IsEdge(ie);
+}
+
 
 inline void BeginTriangleFan(){
     renderer->BeginTriangleFan();

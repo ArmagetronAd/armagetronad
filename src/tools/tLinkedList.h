@@ -28,8 +28,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef ArmageTron_tLinkedList_H
 #define ArmageTron_tLinkedList_H
 
-#include "tError.h"
-
 #include <stdlib.h>
 
 class tListItemBase{
@@ -47,11 +45,7 @@ public:
     tListItemBase(tListItemBase *&a):next(NULL),anchor(NULL){Insert(a);}
     virtual ~tListItemBase()                                {Remove();}
 
-    //! returns the next list element
     tListItemBase *Next()                             {return next;}
-
-    //! returns true if this object is in a list
-    bool IsInList() const {return anchor;}
 
     int Len();
     void Sort( Comparator* comparator );
@@ -69,12 +63,8 @@ int st_Compare( const tListItemBase* a, const tListItemBase* b )
 
 template <class T> class tListItem:public tListItemBase{
 public:
-    tListItem():tListItemBase()
-    { 
-        // this class only works under this condition:
-        tASSERT( static_cast< tListItemBase * >( ( T * )(NULL)  ) == NULL );
-    }
-    tListItem(T *&a):tListItemBase(reinterpret_cast<tListItemBase*&>(a)){}
+    tListItem():tListItemBase(){};
+    tListItem(T *&a):tListItemBase(reinterpret_cast<tListItemBase*&>(a)){};
     T *Next(){return reinterpret_cast<T*>(next);}
 
     template< typename comparator >

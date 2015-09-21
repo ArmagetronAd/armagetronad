@@ -35,7 +35,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "uMenu.h"
 
 #include "tConfiguration.h"
-#include "tDirectories.h"
 
 #include "gServerBrowser.h"
 #include "nServerInfo.h"
@@ -48,25 +47,19 @@ static bool sg_ConnectionStress = false;
 
 enum { NUM_FAVORITES = 10 };
 
-//! favorite server information, just to connect
-/*
-class gServerInfoFavorite: public nServerInfoBase
+gServerInfoFavorite::gServerInfoFavorite( tString const & connectionName, unsigned int port )
 {
-public:
-    // construct a server directly with connection name and port
-    gServerInfoFavorite( tString const & connectionName, unsigned int port )
-    {
-        nServerInfoBase::SetConnectionName( connectionName );
-        nServerInfoBase::SetPort( port );
-    };
-};
-*/
-typedef nServerInfoRedirect gServerInfoFavorite;
+    nServerInfoBase::SetConnectionName( connectionName );
+    nServerInfoBase::SetPort( port );
+}
 
-static tString sg_ConfName( int ID, char const * prefix, char const * name )
+//********************************************************************************
+//********************************************************************************
+
+static tString sg_ConfName( int ID, char const * name )
 {
     std::stringstream s;
-    s << "BOOKMARK_" << prefix << ID+1 << name;
+    s << "BOOKMARK_" << ID+1 << name;
 
     return tString( s.str().c_str() );
 }
@@ -78,15 +71,15 @@ public:
     friend class gServerFavoritesHolder;
 
     //! constructor
-    gServerFavorite( int ID, char const * prefix )
+    gServerFavorite( int ID )
             : name_( "" )
             , port_( sn_defaultPort )
             , index_( ID )
-            , confName_( sg_ConfName( ID, prefix, "_NAME") ,name_ )
-            , confAddress_( sg_ConfName( ID, prefix, "_ADDRESS"), address_ )
-            , confPort( sg_ConfName( ID, prefix, "_PORT"), port_ )
+            , confName_( sg_ConfName( ID, "_NAME") ,name_ )
+            , confAddress_( sg_ConfName( ID, "_ADDRESS"), address_ )
+            , confPort( sg_ConfName( ID, "_PORT"), port_ )
     {
-    }
+    };
 
     //! connects to the server
     void Connect()
@@ -120,12 +113,12 @@ private:
 class gServerFavoritesHolder
 {
 public:
-    gServerFavoritesHolder( char const * prefix )
-    :custom(-1, prefix)
+    gServerFavoritesHolder()
+            :custom(-1)
     {
         // generate favorites
         for (int i = NUM_FAVORITES-1; i>=0; --i )
-            favorites[i] = new gServerFavorite( i, prefix );
+            favorites[i] = new gServerFavorite( i );
     }
 
     ~gServerFavoritesHolder()
@@ -145,47 +138,6 @@ public:
         tASSERT( favorites[index] );
         return *favorites[index];
     }
-
-    bool AddFavorite( nServerInfoBase const * server )
-    {
-        if ( !server )
-            return false;
-        
-        for ( int i = NUM_FAVORITES-1; i>=0; --i )
-        {
-            gServerFavorite & fav = GetFavorite(i);
-            
-            if (fav.name_ == "" || fav.name_ == "Empty")
-            {
-                fav.name_ = tColoredString::RemoveColors(server->GetName());
-                fav.address_ = server->GetConnectionName();
-                fav.port_ = server->GetPort();
-                
-                return true;
-            }
-        }
-        
-        return false;
-}
-
-    bool IsFavorite( nServerInfoBase const * server )
-    {
-        if ( !server )
-            return false;
-        
-        for ( int i = NUM_FAVORITES-1; i>=0; --i )
-        {
-            gServerFavorite & fav = GetFavorite(i);
-            
-            if (fav.name_ != "" && fav.name_ != "Empty" && fav.address_ == server->GetConnectionName() && fav.port_ == static_cast< int >( server->GetPort() ) )
-            {
-                return true;
-            }
-        }
-        
-        return false;
-    }
-    
 private:
     // regular bookmarks
     gServerFavorite * favorites[NUM_FAVORITES];
@@ -195,10 +147,7 @@ private:
 };
 
 // server bookmarks
-static gServerFavoritesHolder sg_favoriteHolder("");
-
-// alternative master servers
-static gServerFavoritesHolder sg_masterHolder("_MASTER");
+static gServerFavoritesHolder sg_holder;
 
 //! edit submenu item quitting the parent menu when it's done
 class gMenuItemEditSubmenu: public uMenuItemSubmenu
@@ -223,48 +172,7 @@ public:
 //! connect to a favorite server
 static void sg_ConnectFavorite( int ID )
 {
-    sg_favoriteHolder.GetFavorite(ID).Connect();
-}
-
-//! browse servers on alternative master server
-static void sg_AlternativeMaster( int ID )
-{
-    // generate suffix for filename
-    std::stringstream suffix;
-    suffix << "_" << ID;
-
-    // fetch server info
-    gServerFavorite & favorite = sg_masterHolder.GetFavorite(ID);
-    gServerInfoFavorite fav( favorite.address_, favorite.port_ );
-
-    // browse master info
-    gServerBrowser::BrowseSpecialMaster( &fav, suffix.str().c_str() );
-}
-
-// current connection function
-static INTFUNCPTR sg_Connect = &sg_ConnectFavorite;
-// current server holder
-static gServerFavoritesHolder * sg_holder = &sg_favoriteHolder;
-
-// current language id prefix
-static char const * sg_languageIDPrefix = "$bookmarks_";
-// yeah, this could all be more elegant.
-
-// generates a language string item fitting the current situation
-static void sg_AddBookmarkString( char const * suffix, tOutput & addTo )
-{
-    std::ostringstream s;
-    s << sg_languageIDPrefix;
-    s << suffix;
-    addTo << s.str().c_str();
-}
-
-// generates a language string item fitting the current situation
-static tOutput sg_GetBookmarkString( char const * suffix )
-{
-    tOutput ret;
-    sg_AddBookmarkString( suffix, ret );
-    return ret;
+    sg_holder.GetFavorite(ID).Connect();
 }
 
 //! conglomerate of menus and entries for custom connect
@@ -275,9 +183,9 @@ public:
     {
         // prepare output reading "Edit <server name>"
         // create menu items (autodeleted when the edit menu is killed)
-        tNEW(uMenuItemFunctionInt) ( menu, sg_GetBookmarkString( "menu_edit_connect_text" ), sg_GetBookmarkString( "menu_edit_connect_help" ), sg_Connect, fav.GetIndex() );
-        tNEW(uMenuItemInt)         ( menu,"$network_custjoin_port_text","$network_custjoin_port_help", fav.port_, 0, 0x7fffffff );
-        tNEW(uMenuItemString)      ( menu,sg_GetBookmarkString( "menu_address" ),sg_GetBookmarkString( "menu_address_help" ),fav.address_);
+        tNEW(uMenuItemFunctionInt) ( menu,"$network_custjoin_connect_text" ,"$network_custjoin_connect_help" ,&sg_ConnectFavorite, fav.GetIndex() );
+        tNEW(uMenuItemInt)         ( menu,"$network_custjoin_port_text","$network_custjoin_port_help", fav.port_, gServerBrowser::lowPort, gServerBrowser::highPort);
+        tNEW(uMenuItemString)      ( menu,"$bookmarks_menu_address","$bookmarks_menu_address_help",fav.address_);
     }
 
     gCustomConnectEntries()
@@ -303,6 +211,7 @@ public:
     gServerFavoriteMenuEntries( gServerFavorite & fav, uMenu & edit_menu )
     {
         // prepare output reading "Edit <server name>"
+        tOutput fe;
         tString serverName = tColoredString::RemoveColors(fav.name_);
         if ( serverName == "" || serverName == "Empty" )
         {
@@ -311,10 +220,8 @@ public:
 
             serverName = s.str().c_str();
         }
-
-        tOutput fe;
         fe.SetTemplateParameter(1, serverName);
-        sg_AddBookmarkString( "menu_edit_slot", fe );
+        fe << "$bookmarks_menu_edit_slot";
 
         // create edit menu
         edit_     = tNEW(uMenu)                (fe);
@@ -322,7 +229,7 @@ public:
 
         Generate( fav, edit_ );
 
-        tNEW(uMenuItemString)      ( edit_,sg_GetBookmarkString( "menu_name" ),sg_GetBookmarkString( "menu_name_help" ),fav.name_);
+        tNEW(uMenuItemString)      ( edit_,"$bookmarks_menu_name","$bookmarks_menu_name_help",fav.name_);
     }
 
     ~gServerFavoriteMenuEntries()
@@ -344,12 +251,12 @@ static void sg_EditServers()
     int i;
 
     // create menu
-    uMenu edit_menu(sg_GetBookmarkString( "menu_edit" ) );
+    uMenu edit_menu("$bookmarks_menu_edit");
 
     // create menu entries
     gServerFavoriteMenuEntries * entries[ NUM_FAVORITES ];
     for ( i = NUM_FAVORITES-1; i>=0; --i )
-        entries[i] = tNEW( gServerFavoriteMenuEntries )( sg_holder->GetFavorite(i), edit_menu );
+        entries[i] = tNEW( gServerFavoriteMenuEntries )( sg_holder.GetFavorite(i), edit_menu );
 
     // enter menu
     edit_menu.Enter();
@@ -387,15 +294,15 @@ static void sg_GenerateConnectionItems()
     // create new connection items
     for ( int i = NUM_FAVORITES-1; i>=0; --i )
     {
-        gServerFavorite & fav = sg_holder->GetFavorite(i);
+        gServerFavorite & fav = sg_holder.GetFavorite(i);
 
         if (fav.name_ != "" && fav.name_ != "Empty" && fav.address_ != "")
         {
-            tOutput fc;
+            tOutput fc; // Connect to "favn_name"
             fc.SetTemplateParameter(1,tColoredString::RemoveColors(fav.name_) );
-            sg_AddBookmarkString( "menu_connect", fc );
+            fc << "$bookmarks_menu_connect";
 
-            tNEW(uMenuItemFunctionInt)(sg_connectionMenu ,fc ,sg_GetBookmarkString( "menu_edit_connect_help" ) , sg_Connect, i );
+            tNEW(uMenuItemFunctionInt)(sg_connectionMenu ,fc ,"$network_custjoin_connect_help" ,&sg_ConnectFavorite, i );
         }
     }
 }
@@ -420,27 +327,6 @@ static void sg_TransferCustomServer()
     }
 }
 
-static void sg_FavoritesMenu( INTFUNCPTR connect, gServerFavoritesHolder & holder )
-{
-    sg_Connect = connect;
-    sg_holder  = &holder;
-
-    sg_TransferCustomServer();
-
-    uMenu net_menu(sg_GetBookmarkString( "menu" ) );
-    sg_connectionMenu = & net_menu;
-
-    uMenuItemFunction edit(&net_menu,sg_GetBookmarkString( "menu_edit" ), sg_GetBookmarkString( "menu_edit_help" ),&sg_EditServers);
-    sg_connectionMenuItemKeep = & edit;
-
-    sg_GenerateConnectionItems();
-    net_menu.Enter();
-    sg_ClearConnectionItems();
-
-    sg_connectionMenuItemKeep = NULL;
-    sg_connectionMenu = NULL;
-}
-
 // *********************************************************************************************
 // *
 // *	FavoritesMenu
@@ -452,41 +338,20 @@ static void sg_FavoritesMenu( INTFUNCPTR connect, gServerFavoritesHolder & holde
 
 void gServerFavorites::FavoritesMenu( void )
 {
-    sg_languageIDPrefix = "$bookmarks_";
-    sg_FavoritesMenu( &sg_ConnectFavorite, sg_favoriteHolder );
-}
+    sg_TransferCustomServer();
 
-// *********************************************************************************************
-// *
-// *	AlternativesMenu
-// *
-// *********************************************************************************************
-//!
-//!
-// *********************************************************************************************
+    uMenu net_menu("$bookmarks_menu");
+    sg_connectionMenu = & net_menu;
 
-void gServerFavorites::AlternativesMenu( void )
-{
-    // load default subcultures
-    nServerInfo::DeleteAll();
-    nServerInfo::Load( tDirectories::Config(), "subcultures.srv" );
+    uMenuItemFunction edit(&net_menu,"$bookmarks_menu_edit", "$bookmarks_menu_edit_help",&sg_EditServers);
+    sg_connectionMenuItemKeep = & edit;
 
-    // add them
-    nServerInfo * run = nServerInfo::GetFirstServer();
-    while( run )
-    {
-        if ( !sg_masterHolder.IsFavorite( run ) )
-        {
-            sg_masterHolder.AddFavorite( run );
-        }
+    sg_GenerateConnectionItems();
+    net_menu.Enter();
+    sg_ClearConnectionItems();
 
-        run = run->Next();
-    }
-
-    nServerInfo::DeleteAll();
-
-    sg_languageIDPrefix = "$masters_";
-    sg_FavoritesMenu( &sg_AlternativeMaster, sg_masterHolder );
+    sg_connectionMenuItemKeep = NULL;
+    sg_connectionMenu = NULL;
 }
 
 // *********************************************************************************************
@@ -505,11 +370,9 @@ void gServerFavorites::CustomConnectMenu( void )
     uMenu net_menu("$network_custjoin_text");
     sg_connectionMenu = & net_menu;
 
-    gServerFavorite & fav = sg_favoriteHolder.GetFavorite(-1);
-    
+    gServerFavorite & fav = sg_holder.GetFavorite(-1);
+
     // create menu entries
-    sg_languageIDPrefix = "$bookmarks_";
-    sg_Connect = &sg_ConnectFavorite;
     gCustomConnectEntries submenu( fav, &net_menu );
 
     net_menu.Enter();
@@ -528,7 +391,24 @@ void gServerFavorites::CustomConnectMenu( void )
 
 bool gServerFavorites::AddFavorite( nServerInfoBase const * server )
 {
-    return sg_favoriteHolder.AddFavorite( server );
+    if ( !server )
+        return false;
+
+    for ( int i = NUM_FAVORITES-1; i>=0; --i )
+    {
+        gServerFavorite & fav = sg_holder.GetFavorite(i);
+
+        if (fav.name_ == "" || fav.name_ == "Empty")
+        {
+            fav.name_ = tColoredString::RemoveColors(server->GetName());
+            fav.address_ = server->GetConnectionName();
+            fav.port_ = server->GetPort();
+
+            return true;
+        }
+    }
+
+    return false;
 }
 
 // *********************************************************************************************
@@ -544,7 +424,20 @@ bool gServerFavorites::AddFavorite( nServerInfoBase const * server )
 
 bool gServerFavorites::IsFavorite( nServerInfoBase const * server )
 {
-    return sg_favoriteHolder.IsFavorite( server );
+    if ( !server )
+        return false;
+
+    for ( int i = NUM_FAVORITES-1; i>=0; --i )
+    {
+        gServerFavorite & fav = sg_holder.GetFavorite(i);
+
+        if (fav.name_ != "" && fav.name_ != "Empty" && fav.address_ == server->GetConnectionName() && fav.port_ == static_cast< int >( server->GetPort() ) )
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 

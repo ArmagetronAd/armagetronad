@@ -39,12 +39,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "nConfig.h"
 #include "tString.h"
 #include "rScreen.h"
+#include "eSoundMixer.h"
 
 #include <time.h>
 #include <algorithm>
+#include <functional>
+#include <deque>
 
-static int sg_zoneAlphaToggle = 0;
-static tSettingItem<int> sg_zoneAlphaToggleConf( "ZONE_ALPHA_TOGGLE", sg_zoneAlphaToggle );
+std::deque<gZone *> sg_Zones;
 
 static int sg_zoneDeath = 1;
 static tSettingItem<int> sg_zoneDeathConf( "WIN_ZONE_DEATHS", sg_zoneDeath );
@@ -54,19 +56,6 @@ static REAL sg_initialSize = 5.0f;
 
 static nSettingItem< REAL > sg_expansionSpeedConf( "WIN_ZONE_EXPANSION", sg_expansionSpeed );
 static nSettingItem< REAL > sg_initialSizeConf( "WIN_ZONE_INITIAL_SIZE", sg_initialSize );
-
-static int sg_zoneSegments = 11;
-static tSettingItem<int> sg_zoneSegmentsConf( "ZONE_SEGMENTS", sg_zoneSegments );
-
-static REAL sg_zoneSegLength = .5;
-static tSettingItem<REAL> sg_zoneSegLengthConf( "ZONE_SEG_LENGTH", sg_zoneSegLength );
-
-static REAL sg_zoneBottom = 0.0f;
-static tSettingItem<REAL> sg_zoneBottomConf( "ZONE_BOTTOM", sg_zoneBottom );
-
-static REAL sg_zoneHeight = 5.0f;
-static tSettingItem<REAL> sg_zoneHeightConf( "ZONE_HEIGHT", sg_zoneHeight );
-
 
 //! creates a win or death zone (according to configuration) at the specified position
 gZone * sg_CreateWinDeathZone( eGrid * grid, const eCoord & pos )
@@ -80,14 +69,7 @@ gZone * sg_CreateWinDeathZone( eGrid * grid, const eCoord & pos )
     else
     {
         ret = tNEW( gWinZoneHack( grid, pos ) );
-        if ( sg_currentSettings->gameType != gFREESTYLE )
-        {
-            sn_ConsoleOut( "$instant_win_activated" );
-        }
-        else
-        {
-            sn_ConsoleOut( "$instant_round_end_activated" );
-        }
+        sn_ConsoleOut( "$instant_win_activated" );
     }
 
     // initialize radius and expansion speed
@@ -155,8 +137,12 @@ gZone::gZone( eGrid * grid, const eCoord & pos )
     // add to game grid
     this->AddToList();
 
+    sg_Zones.push_back(this);
+
     // initialize position functions
     SetPosition( pos );
+    eSoundMixer* mixer = eSoundMixer::GetMixer();
+    mixer->PushButton(ZONE_SPAWN, pos);
 }
 
 // *******************************************************************************
@@ -177,13 +163,17 @@ gZone::gZone( nMessage & m )
     referenceTime_ = lastTime = createTime_;
 
     // initialize color to white, ReadSync will fill in the true value if available
-    color_.r = color_.g = color_.b = 1.0f;
+    color_.r_ = color_.g_ = color_.b_ = 1.0f;
 
     // add to game grid
     this->AddToList();
 
+    sg_Zones.push_back(this);
+
     // initialize position functions
     SetPosition( pos );
+    eSoundMixer* mixer = eSoundMixer::GetMixer();
+    mixer->PushButton(ZONE_SPAWN, pos);
 }
 
 // *******************************************************************************
@@ -197,6 +187,15 @@ gZone::gZone( nMessage & m )
 
 gZone::~gZone( void )
 {
+    sg_Zones.erase(
+        std::find_if(
+            sg_Zones.begin(),
+            sg_Zones.end(),
+            std::bind2nd(
+                std::equal_to<gZone *>(),
+                this)
+        )
+    );
 }
 
 // *******************************************************************************
@@ -233,9 +232,9 @@ void gZone::WriteSync( nMessage & m )
     eNetGameObject::WriteSync( m );
 
     // write color
-    m << color_.r;
-    m << color_.g;
-    m << color_.b;
+    m << color_.r_;
+    m << color_.g_;
+    m << color_.b_;
 
     // write reference time and functions
     m << referenceTime_;
@@ -265,10 +264,10 @@ void gZone::ReadSync( nMessage & m )
     // read color
     if (!m.End())
     {
-        m >> color_.r;
-        m >> color_.g;
-        m >> color_.b;
-        se_MakeColorValid(color_.r, color_.g, color_.b, 1.0f);
+        m >> color_.r_;
+        m >> color_.g_;
+        m >> color_.b_;
+        se_MakeColorValid(color_.r_, color_.g_, color_.b_, 1.0f);
     }
 
     // read reference time and functions
@@ -427,11 +426,6 @@ REAL gZone::Radius( void ) const
     return GetRadius();
 }
 
-// extra alpha blending factors
-static REAL sg_zoneAlpha = 1.0, sg_zoneAlphaServer = 1.0;
-static tSettingItem< REAL > sg_zoneAlphaConf( "ZONE_ALPHA", sg_zoneAlpha );
-static nSettingItem< REAL > sg_zoneAlphaConfServer( "ZONE_ALPHA_SERVER", sg_zoneAlphaServer );
-
 // *******************************************************************************
 // *
 // *	Render
@@ -445,107 +439,78 @@ static nSettingItem< REAL > sg_zoneAlphaConfServer( "ZONE_ALPHA_SERVER", sg_zone
 void gZone::Render( const eCamera * cam )
 {
 #ifndef DEDICATED
-    if ( sg_zoneSegLength <= 0 )
-        sg_zoneSegLength = .5;
-    if ( sg_zoneSegments < 1 )
-        sg_zoneSegments = 11;
 
-    REAL alpha = ( lastTime - createTime_ ) * .2f;
-    if ( alpha > .7f )
-        alpha = .7f;
-    if ( alpha <= 0 )
+    color_.a_ = ( lastTime - createTime_ ) * .2f;
+    if ( color_.a_ > .7f )
+        color_.a_ = .7f;
+    if ( color_.a_ <= 0 )
         return;
 
-    alpha *= sg_zoneAlpha * sg_zoneAlphaServer;
+    GLfloat m[4][4]={{rotation_.x,rotation_.y,0,0},
+                     {-rotation_.y,rotation_.x,0,0},
+                     {0,0,1,0},
+                     {pos.x,pos.y,0,1}};
 
     ModelMatrix();
     glPushMatrix();
 
-    REAL seglen = 2 * M_PI / sg_zoneSegments * sg_zoneSegLength;
+    glDisable(GL_LIGHT0);
+    glDisable(GL_LIGHT1);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_CULL_FACE);
+    glDepthMask(GL_FALSE);
+    glBlendFunc( GL_SRC_ALPHA, GL_ONE );
 
-    REAL r = Radius();
-    GLfloat m[4][4]={{r*rotation_.x,r*rotation_.y,0,0},
-                     {-r*rotation_.y,r*rotation_.x,0,0},
-                     {0,0,sg_zoneHeight,0},
-                     {pos.x,pos.y,sg_zoneBottom,1}};
+    //glDisable(GL_TEXTURE);
+    glDisable(GL_TEXTURE_2D);
+
+    //	glTranslatef(pos.x,pos.y,0);
 
     glMultMatrixf(&m[0][0]);
+    //	glScalef(.5,.5,.5);
 
-    glColor4f( color_.r ,color_.g,color_.b, alpha );
+    if ( sr_alphaBlend )
+        BeginQuads();
+    else
+        BeginLineStrip();
 
-	bool useAlpha = sr_alphaBlend ? !sg_zoneAlphaToggle : sg_zoneAlphaToggle;
-    static bool lastAlpha = useAlpha;
+    const REAL seglen = .2f;
+    const REAL bot = 0.0f;
+    const REAL top = 5.0f; // + ( lastTime - createTime_ ) * .1f;
 
-    static rDisplayList zoneList;
-    if ( lastAlpha != useAlpha || !zoneList.Call() )
+    color_.Apply();
+
+    REAL r = Radius();
+    for ( int i = sg_segments - 1; i>=0; --i )
     {
-        lastAlpha = useAlpha;
+        REAL a = i * 2 * 3.14159 / REAL( sg_segments );
+        REAL b = a + seglen;
 
-        rDisplayListFiller filler( zoneList );
-        
-        glDisable(GL_LIGHT0);
-        glDisable(GL_LIGHT1);
-        glDisable(GL_LIGHTING);
-        glDisable(GL_CULL_FACE);
-        glDepthMask(GL_FALSE);
-        glBlendFunc( GL_SRC_ALPHA, GL_ONE );
-        glDisable(GL_TEXTURE_2D);
-        
-        if ( useAlpha )
-            BeginQuads();
-        else
+        REAL sa = r * sin(a);
+        REAL ca = r * cos(a);
+        REAL sb = r * sin(b);
+        REAL cb = r * cos(b);
+
+        glVertex3f(sa, ca, bot);
+        glVertex3f(sa, ca, top);
+        glVertex3f(sb, cb, top);
+        glVertex3f(sb, cb, bot);
+
+        if ( !sr_alphaBlend )
         {
-            sr_DepthOffset(true);
+            glVertex3f(sa, ca, bot);
+            RenderEnd();
             BeginLineStrip();
         }
-
-        for ( int i = sg_zoneSegments - 1; i>=0; --i )
-        {
-            REAL a = i * 2 * M_PI / REAL( sg_zoneSegments );
-            REAL b = a + seglen;
-            
-            REAL sa = sin(a);
-            REAL ca = cos(a);
-            REAL sb = sin(b);
-            REAL cb = cos(b);
-            
-            glVertex3f(sa, ca, 0);
-            glVertex3f(sa, ca, 1);
-            glVertex3f(sb, cb, 1);
-            glVertex3f(sb, cb, 0);
-            
-            if ( !useAlpha )
-            {
-                glVertex3f(sa, ca, 0);
-                RenderEnd();
-                BeginLineStrip();
-            }
-        }
-        
-        RenderEnd();
-
-        sr_DepthOffset(false);
-        glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-        glDepthMask(GL_TRUE);
     }
+
+    RenderEnd();
+
+    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+    glDepthMask(GL_TRUE);
 
     glPopMatrix();
 #endif
-}
-
-
-// *******************************************************************************
-// *
-// *	RendersAlpha
-// *
-// *******************************************************************************
-//!
-//!		@return	True if alpha blending is used
-//!
-// *******************************************************************************
-bool gZone::RendersAlpha() const
-{
-	return sr_alphaBlend ? !sg_zoneAlphaToggle : sg_zoneAlphaToggle;
 }
 
 // *******************************************************************************
@@ -562,9 +527,9 @@ bool gZone::RendersAlpha() const
 gWinZoneHack::gWinZoneHack( eGrid * grid, const eCoord & pos )
         :gZone( grid, pos )
 {
-    color_.r = 0.0f;
-    color_.g = 1.0f;
-    color_.b = 0.0f;
+    color_.r_ = 0.0f;
+    color_.g_ = 1.0f;
+    color_.b_ = 0.0f;
 }
 
 // *******************************************************************************
@@ -635,9 +600,9 @@ void gWinZoneHack::OnEnter( gCycle * target, REAL time )
 gDeathZoneHack::gDeathZoneHack( eGrid * grid, const eCoord & pos )
         :gZone( grid, pos )
 {
-    color_.r = 1.0f;
-    color_.g = 0.0f;
-    color_.b = 0.0f;
+    color_.r_ = 1.0f;
+    color_.g_ = 0.0f;
+    color_.b_ = 0.0f;
 }
 
 // *******************************************************************************
@@ -707,10 +672,6 @@ gBaseZoneHack::gBaseZoneHack( eGrid * grid, const eCoord & pos )
     conquered_ = 0;
     lastSync_ = -10;
     teamDistance_ = 0;
-    lastEnemyContact_ = se_GameTime();
-    touchy_ = false;
-
-    color_.r = color_.g = color_.b = 0;
 }
 
 // *******************************************************************************
@@ -730,8 +691,6 @@ gBaseZoneHack::gBaseZoneHack( nMessage & m )
     conquered_ = 0;
     lastSync_ = -10;
     teamDistance_ = 0;
-    lastEnemyContact_ = se_GameTime();
-    touchy_ = false;
 }
 
 // *******************************************************************************
@@ -754,10 +713,6 @@ static REAL sg_conquestDecayRate = .1;
 static tSettingItem< REAL > sg_conquestRateConf( "FORTRESS_CONQUEST_RATE", sg_conquestRate );
 static tSettingItem< REAL > sg_defendRateConf( "FORTRESS_DEFEND_RATE", sg_defendRate );
 static tSettingItem< REAL > sg_conquestDecayRateConf( "FORTRESS_CONQUEST_DECAY_RATE", sg_conquestDecayRate );
-
-// time with no enemy inside a zone before it collapses harmlessly
-static REAL sg_conquestTimeout = 0;
-static tSettingItem< REAL > sg_conquestTimeoutConf( "FORTRESS_CONQUEST_TIMEOUT", sg_conquestTimeout );
 
 // kill at least than many players from the team that just got its zone conquered
 static int sg_onConquestKillMin = 0;
@@ -801,12 +756,6 @@ void gBaseZoneHack::CountZonesOfTeam( eGrid const * grid, eTeam * otherTeam, int
     }
 }
 
-static int sg_onSurviveScore = 0;
-static tSettingItem< int > sg_onSurviveConquestScoreConfig( "FORTRESS_HELD_SCORE", sg_onSurviveScore );
-
-static REAL sg_collapseSpeed = .5;
-static tSettingItem< REAL > sg_collapseSpeedConfig( "FORTRESS_COLLAPSE_SPEED", sg_collapseSpeed );
-
 
 // *******************************************************************************
 // *
@@ -820,37 +769,15 @@ static tSettingItem< REAL > sg_collapseSpeedConfig( "FORTRESS_COLLAPSE_SPEED", s
 
 bool gBaseZoneHack::Timestep( REAL time )
 {
-    // no team?!? Get rid of this zone ASAP.
-    if ( !team )
-    {
-        return true;
-    }
-
     if ( currentState_ == State_Conquering )
     {
         // let zone vanish
         SetReferenceTime();
-
-        // let it light up in agony
-        if ( sg_collapseSpeed < .4 )
-        {
-            color_.r = color_.g = color_.b = 1;
-        }
-
-        SetExpansionSpeed( -GetRadius()*sg_collapseSpeed );
+        SetExpansionSpeed( -GetRadius()*.5 );
         SetRotationAcceleration( -GetRotationSpeed()*.4 );
         RequestSync();
 
         currentState_ = State_Conquered;
-    }
-    else if ( currentState_ == State_Conquered && GetRotationSpeed() < 0 )
-    {
-        // let zone vanish
-        SetReferenceTime();
-        SetRotationSpeed( 0 );
-        SetRotationAcceleration( 0 );
-        color_.r = color_.g = color_.b = .5;
-        RequestSync();
     }
 
     REAL dt = time - lastTime;
@@ -858,11 +785,6 @@ bool gBaseZoneHack::Timestep( REAL time )
     // conquest going on
     REAL conquest = sg_conquestRate * enemiesInside_ - sg_defendRate * ownersInside_ - sg_conquestDecayRate;
     conquered_ += dt * conquest;
-
-    if ( touchy_ && enemiesInside_ > 0 )
-    {
-        conquered_ = 1.01;
-    }
 
     // clamp
     if ( conquered_ < 0 )
@@ -879,17 +801,17 @@ bool gBaseZoneHack::Timestep( REAL time )
     // set speed according to conquest status
     if ( currentState_ == State_Safe )
     {
-        REAL maxSpeed = 10 * ( 2 * M_PI ) / sg_segments;
+        REAL maxSpeed = 10 * ( 2 * 3.141 ) / sg_segments;
         REAL omega = .3 + conquered_ * conquered_ * maxSpeed;
         REAL omegaDot = 2 * conquered_ * conquest * maxSpeed;
 
         // determine the time since the last sync (exaggerate for smoother motion in local games)
-        REAL timeStep = lastTime - lastSync_;
+        REAL time = lastTime - lastSync_;
         if ( sn_GetNetState() != nSERVER )
-            timeStep *= 100;
+            time *= 100;
 
         if ( sn_GetNetState() != nCLIENT &&
-                ( ( fabs( omega - GetRotationSpeed() ) + fabs( omegaDot - GetRotationAcceleration() ) ) * timeStep > .5 ) )
+                ( ( fabs( omega - GetRotationSpeed() ) + fabs( omegaDot - GetRotationAcceleration() ) ) * time > .5 ) )
         {
             SetRotationSpeed( omega );
             SetRotationAcceleration( omegaDot );
@@ -897,54 +819,97 @@ bool gBaseZoneHack::Timestep( REAL time )
             RequestSync();
             lastSync_ = lastTime;
         }
+    }
 
-
-        // check for enemy contact timeout
-        if ( sg_conquestTimeout > 0 && lastEnemyContact_ + sg_conquestTimeout < time )
-        {
-            enemies_.clear();
-
-            // if the zone would collapse without defenders, let it collapse now. A smart defender would
-            // have left the zone to let it collapse anyway.
-            if ( sg_conquestDecayRate < 0 )
-            {
-                if ( team )
-                {
-                    if ( sg_onSurviveScore != 0 )
-                    {
-                        // give player the survive score bonus right now, they deserve it
-                        ZoneWasHeld();
-                    }
-                    else
-                    {
-                        sn_ConsoleOut( tOutput( "$zone_collapse_harmless", team->GetColoredName()  ) );
-                    }
-                }
-                conquered_ = 1.0;
-            }
-        }
-
-        // check whether the zone got conquered
-        if ( conquered_ >= 1 )
-        {
-            currentState_ = State_Conquering;
-            OnConquest();
-        }
+    // check whether the zone got conquered
+    if ( currentState_ == State_Safe && conquered_ >= 1 )
+    {
+        currentState_ = State_Conquering;
+        OnConquest();
     }
 
     // reset counts
     enemiesInside_ = ownersInside_ = 0;
 
+    // determine the owning team: the one that has a player spawned closest
+
+    // find the closest player
+    if ( !team )
+    {
+        teamDistance_ = 0;
+        const tList<eGameObject>& gameObjects = Grid()->GameObjects();
+        gCycle * closest = NULL;
+        REAL closestDistance = 0;
+        for (int i=gameObjects.Len()-1;i>=0;i--)
+        {
+            gCycle *other=dynamic_cast<gCycle *>(gameObjects(i));
+
+            if (other )
+            {
+                eTeam * otherTeam = other->Player()->CurrentTeam();
+                eCoord otherpos = other->Position() - pos;
+                REAL distance = otherpos.NormSquared();
+                if ( !closest || distance < closestDistance )
+                {
+                    // check whether other zones are already registered to that team
+                    gBaseZoneHack * farthest = NULL;
+                    int count = 0;
+                    if ( sg_baseZonesPerTeam > 0 )
+                        CountZonesOfTeam( Grid(), otherTeam, count, farthest );
+
+                    // only set team if not too many closer other zones are registered
+                    if ( sg_baseZonesPerTeam == 0 || count < sg_baseZonesPerTeam || farthest->teamDistance_ > distance )
+                    {
+                        closest = other;
+                        closestDistance = distance;
+                    }
+                }
+            }
+        }
+
+        if ( closest )
+        {
+            // take over team and color
+            team = closest->Player()->CurrentTeam();
+            color_.r_ = team->R()/15.0;
+            color_.g_ = team->G()/15.0;
+            color_.b_ = team->B()/15.0;
+            teamDistance_ = closestDistance;
+
+            RequestSync();
+        }
+
+        // if this zone does not belong to a team, discard it.
+        if ( !team )
+        {
+            return true;
+        }
+
+        // check other zones owned by the same team. Discard the one farthest away
+        // if the max count is exceeded
+        if ( team && sg_baseZonesPerTeam > 0 )
+        {
+            gBaseZoneHack * farthest = 0;
+            int count = 0;
+            CountZonesOfTeam( Grid(), team, count, farthest );
+
+            // discard team of farthest zone
+            if ( count > sg_baseZonesPerTeam )
+                farthest->team = NULL;
+        }
+    }
+
+
     // delegate
     bool ret = gZone::Timestep( time );
 
     // reward survival
-    if ( team && !ret && onlySurvivor_ )
+    if ( !ret && onlySurvivor_ )
     {
-        const char* message= ( eTeam::teams.Len() > 2 || sg_onConquestScore ) ? "$player_win_held_fortress" : "$player_win_conquest";
+        const char* message= ( eTeam::teams.Len() > 2 || sg_onConquestScore ) ? "$player_win_survive" : "$player_win_conquest";
         sg_DeclareWinner( team, message );
     }
-    
+
     return ret;
 }
 
@@ -965,7 +930,7 @@ void gBaseZoneHack::OnVanish( void )
     CheckSurvivor();
 
     // kill the closest owners of the zone
-    if ( currentState_ != State_Safe && ( enemies_.size() > 0 || sg_defendRate < 0 ) )
+    if ( currentState_ != State_Safe && enemies_.size() > 0 )
     {
         int kills = int( sg_onConquestKillRatio * team->NumPlayers() );
         kills = kills > sg_onConquestKillMin ? kills : sg_onConquestKillMin;
@@ -996,10 +961,7 @@ void gBaseZoneHack::OnVanish( void )
 
             if ( closest )
             {
-                tColoredString playerName;
-                playerName = closest->GetColoredName();
-                playerName << tColoredStringProxy(-1,-1,-1);
-                sn_ConsoleOut( tOutput("$player_kill_collapse", playerName ) );
+                sn_ConsoleOut( tOutput("$player_kill_collapse", closest->GetName() ) );
                 closest->Object()->Kill();
             }
         }
@@ -1015,33 +977,8 @@ void gBaseZoneHack::OnVanish( void )
 //!
 // *******************************************************************************
 
-static eLadderLogWriter sg_basezoneConqueredWriter("BASEZONE_CONQUERED", true);
-static eLadderLogWriter sg_basezoneConquererWriter("BASEZONE_CONQUERER", true);
-
 void gBaseZoneHack::OnConquest( void )
 {
-    if ( team )
-    {
-        sg_basezoneConqueredWriter << ePlayerNetID::FilterName(team->Name()) << GetPosition().x << GetPosition().y;
-        sg_basezoneConqueredWriter.write();
-    }
-    float rr = GetRadius();
-    rr *= rr;
-    for(int i = se_PlayerNetIDs.Len()-1; i >=0; --i) {
-        ePlayerNetID *player = se_PlayerNetIDs(i);
-        if(!player) {
-            continue;
-        }
-        gCycle *cycle = dynamic_cast<gCycle *>(player->Object());
-        if(!cycle) {
-            continue;
-        }
-        if(cycle->Alive() && (cycle->Position() - Position()).NormSquared() < rr) {
-            sg_basezoneConquererWriter << player->GetUserName();
-            sg_basezoneConquererWriter.write();
-        }
-    }
-
     // calculate score. If nobody really was inside the zone any more, half it.
     int totalScore = sg_onConquestScore;
     if ( 0 == enemiesInside_ )
@@ -1064,7 +1001,7 @@ void gBaseZoneHack::OnConquest( void )
         tOutput win;
         if ( team )
         {
-            win.SetTemplateParameter( 3, team->GetColoredName() );
+            win.SetTemplateParameter( 3, team->Name() );
             win << "$player_win_conquest_specific";
         }
         else
@@ -1072,7 +1009,7 @@ void gBaseZoneHack::OnConquest( void )
             win << "$player_win_conquest";
         }
 
-        int score = totalScore / (int)enemies_.size();
+        int score = totalScore / enemies_.size();
         for ( TeamArray::iterator iter = enemies_.begin(); iter != enemies_.end(); ++iter )
         {
             (*iter)->AddScore( score, win, tOutput() );
@@ -1134,140 +1071,6 @@ void gBaseZoneHack::CheckSurvivor( void )
 
 // *******************************************************************************
 // *
-// *   ZoneWasHeld
-// *
-// *******************************************************************************
-//!
-//!
-// *******************************************************************************
-
-void gBaseZoneHack::ZoneWasHeld( void )
-{
-    // survived?
-    if ( currentState_ == State_Safe && sg_onSurviveScore != 0 )
-    {
-        // award owning team
-        if ( team && team->Alive() )
-        {
-            team->AddScore( sg_onSurviveScore, tOutput("$player_win_held_fortress"), tOutput("$player_lose_held_fortress") );
-
-            currentState_ = State_Conquering;
-            enemies_.clear();
-        }
-        else
-        {
-            // give a little conquering help. The round is almost over, if
-            // an enemy actually made it into the zone by now, it should be his.
-            touchy_ = true;
-        }
-    }
-}
-
-// *******************************************************************************
-// *
-// *   OnRoundBegin
-// *
-// *******************************************************************************
-//!
-//! @return shall the hole process be repeated?
-//!
-// *******************************************************************************
-
-void gBaseZoneHack::OnRoundBegin( void )
-{
-    // determine the owning team: the one that has a player spawned closest
-    // find the closest player
-    if ( !team )
-    {
-        teamDistance_ = 0;
-        const tList<eGameObject>& gameObjects = Grid()->GameObjects();
-        gCycle * closest = NULL;
-        REAL closestDistance = 0;
-        for (int i=gameObjects.Len()-1;i>=0;i--)
-        {
-            gCycle *other=dynamic_cast<gCycle *>(gameObjects(i));
-
-            if (other )
-            {
-                eTeam * otherTeam = other->Player()->CurrentTeam();
-                eCoord otherpos = other->Position() - pos;
-                REAL distance = otherpos.NormSquared();
-                if ( !closest || distance < closestDistance )
-                {
-                    // check whether other zones are already registered to that team
-                    gBaseZoneHack * farthest = NULL;
-                    int count = 0;
-                    if ( sg_baseZonesPerTeam > 0 )
-                        CountZonesOfTeam( Grid(), otherTeam, count, farthest );
-
-                    // only set team if not too many closer other zones are registered
-                    if ( sg_baseZonesPerTeam == 0 || count < sg_baseZonesPerTeam || (farthest && farthest->teamDistance_ > distance ) )
-                    {
-                        closest = other;
-                        closestDistance = distance;
-                    }
-                }
-            }
-        }
-
-        if ( closest )
-        {
-            // take over team and color
-            team = closest->Player()->CurrentTeam();
-            color_.r = team->R()/15.0;
-            color_.g = team->G()/15.0;
-            color_.b = team->B()/15.0;
-            teamDistance_ = closestDistance;
-
-            RequestSync();
-        }
-
-        // if this zone does not belong to a team, discard it.
-        if ( !team )
-        {
-            RemoveFromGame();
-            return;
-        }
-
-        // check other zones owned by the same team. Discard the one farthest away
-        // if the max count is exceeded
-        if ( team && sg_baseZonesPerTeam > 0 )
-        {
-            gBaseZoneHack * farthest = 0;
-            int count = 0;
-            CountZonesOfTeam( Grid(), team, count, farthest );
-
-            // discard team of farthest zone
-            // No NULL check is required here for farthest, since count is greater than 0 which implies farthest was set.
-            if ( count > sg_baseZonesPerTeam )
-            {
-                farthest->team = NULL;
-                farthest->RemoveFromGame();
-            }
-        }
-    }
-}
-
-// *******************************************************************************
-// *
-// *   OnRoundEnd
-// *
-// *******************************************************************************
-//!
-//!
-// *******************************************************************************
-
-void gBaseZoneHack::OnRoundEnd( void )
-{
-    // survived?
-    if ( currentState_ == State_Safe )
-    {
-        ZoneWasHeld();
-    }
-}
-
-// *******************************************************************************
-// *
 // *	OnEnter
 // *
 // *******************************************************************************
@@ -1286,8 +1089,6 @@ void gBaseZoneHack::OnEnter( gCycle * target, REAL time )
     tJUST_CONTROLLED_PTR< eTeam > otherTeam = target->Player()->CurrentTeam();
     if (!otherTeam)
         return;
-    if ( currentState_ != State_Safe )
-        return;
 
     // remember who is inside
     if ( team == otherTeam )
@@ -1302,8 +1103,6 @@ void gBaseZoneHack::OnEnter( gCycle * target, REAL time )
         ++ enemiesInside_;
         if ( std::find( enemies_.begin(), enemies_.end(), otherTeam ) == enemies_.end() )
             enemies_.push_back( otherTeam );
-
-        lastEnemyContact_ = time;
     }
 }
 
@@ -1665,6 +1464,21 @@ REAL gZone::GetRotationSpeed( void ) const
 
 // *******************************************************************************
 // *
+// *	GetRotation
+// *
+// *******************************************************************************
+//!
+//!		@return		The current rotation position, as normalized x and y coordinates
+//!
+// *******************************************************************************
+
+tCoord const &gZone::GetRotation( void ) const
+{
+    return rotation_;
+}
+
+// *******************************************************************************
+// *
 // *	GetRotationSpeed
 // *
 // *******************************************************************************
@@ -1727,6 +1541,21 @@ gZone const & gZone::GetRotationAcceleration( REAL & rotationAcceleration ) cons
 {
     rotationAcceleration = this->GetRotationAcceleration();
     return *this;
+}
+
+// *******************************************************************************
+// *
+// *	GetColor
+// *
+// *******************************************************************************
+//!
+//!		@return		the current color of the zone
+//!
+// *******************************************************************************
+
+rColor const & gZone::GetColor( void ) const
+{
+    return color_;
 }
 
 // *******************************************************************************

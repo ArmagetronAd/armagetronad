@@ -83,14 +83,14 @@ static tConfItemLine c_vEnd("GL_VENDOR",gl_vendor);
 // static tConfItemLine a_ver("ARMAGETRON_VERSION",sn_programVersion);
 
 static std::deque<tString> sg_consoleHistory; // global since the class doesn't live beyond the execution of the command
-static int sg_consoleHistoryMaxSize=10; // size of the console history
+static int sg_consoleHistoryMaxSize=100; // size of the console history
 static tSettingItem< int > sg_consoleHistoryMaxSizeConf("HISTORY_SIZE_CONSOLE",sg_consoleHistoryMaxSize);
 
 class ArmageTron_feature_menuitem: public uMenuItemSelection<int>{
-    void NewChoice(uSelectItem<bool> *){}
-    void NewChoice(char *,bool ){}
+    void NewChoice(uSelectItem<bool> *){};
+    void NewChoice(char *,bool ){};
 public:
-    ArmageTron_feature_menuitem(uMenu *m,char const * tit,char const * help,int &targ)
+    ArmageTron_feature_menuitem(uMenu *m,char *tit,const char *help,int &targ)
             :uMenuItemSelection<int>(m,tit,help,targ){
         uMenuItemSelection<int>::NewChoice(
             "$feature_disabled_text",
@@ -106,15 +106,15 @@ public:
             rFEAT_ON);
     }
 
-    ~ArmageTron_feature_menuitem(){}
+    ~ArmageTron_feature_menuitem(){};
 };
 
 
 class ArmageTron_texmode_menuitem: public uMenuItemSelection<int>{
-    void NewChoice(uSelectItem<bool> *){}
-    void NewChoice(char *,bool ){}
+    void NewChoice(uSelectItem<bool> *){};
+    void NewChoice(char *,bool ){};
 public:
-    ArmageTron_texmode_menuitem(uMenu *m,char const * tit,int &targ,
+    ArmageTron_texmode_menuitem(uMenu *m,char *tit,int &targ,
                                 bool font=false)
             :uMenuItemSelection<int>
     (m,tit,"$texture_menuitem_help",targ){
@@ -147,9 +147,12 @@ public:
     #endif
     }
 
-    ~ArmageTron_texmode_menuitem(){}
+    ~ArmageTron_texmode_menuitem(){};
 };
 
+static tConfItem<int>     la("LINE_ANTIALIAS",sr_lineAntialias);
+static tConfItem<int>     pa("POLY_ANTIALIAS",sr_polygonAntialias);
+static tConfItem<int>     pc("PERSP_CORRECT",sr_perspectiveCorrection);
 static tConfItem<bool>    ab("ALPHA_BLEND",sr_alphaBlend);
 static tConfItem<bool>    ss("SMOOTH_SHADING",sr_smoothShading);
 static tConfItem<bool>    to("TEXT_OUT",sr_textOut);
@@ -164,10 +167,7 @@ static tConfItem<bool> ls("LOWER_SKY",sr_lowerSky);
 static tConfItem<bool> wos("SKY_WOBBLE",sr_skyWobble);
 static tConfItem<bool> ip("INFINITY_PLANE",sr_infinityPlane);
 
-extern bool sg_axesIndicator;
-
 static tConfItem<bool> lm("LAG_O_METER",sr_laggometer);
-static tConfItem<bool> ai("AXES_INDICATOR",sg_axesIndicator);
 static tConfItem<bool> po("PREDICT_OBJECTS",sr_predictObjects);
 static tConfItem<bool> t32("TEXTURES_HI",sr_texturesTruecolor);
 
@@ -234,16 +234,12 @@ public:
         else
         {
             // add custom resolution
-            NewChoice( ArmageTron_Custom );
-
-            // add desktop resolution
-            if ( sr_DesktopScreensizeSupported() && !addFixed )
-                NewChoice( ArmageTron_Desktop );
+            NewChoice( ArmageTron_Custom );//, "$screen_custom_text","$screen_custom_help" );
 
             // the maximal allowed screen size
             rScreenSize maxSize(0,0);
 
-            // fill in available modes (avoid duplicates)
+            // fill in available modes (avoid dublicates)
             for(i=0;modes[i];++i)
             {
                 // add mode (if it's new)
@@ -258,7 +254,7 @@ public:
             // add fixed resolutions (as window sizes)
             if ( addFixed )
             {
-                for ( i = ArmageTron_Custom; i>=ArmageTron_Min; --i )
+                for ( i = ArmageTron_Custom; i>=0; --i )
                 {
                     rScreenSize size( static_cast< rResolution >(i) );
 
@@ -275,12 +271,8 @@ public:
                 rScreenSize const & size = *iter;
 
                 std::stringstream s;
-                if ( size.width + size.height > 0 )
-                    s << size.width << " x " << size.height;
-                else
-                    s << tOutput("$screen_size_desktop");
-
-                res_men.NewChoice( s.str().c_str(), "", size );
+                s << size.width << " x " << size.height;
+                res_men.NewChoice( s.str().c_str(), help, size );
             }
 
 #endif
@@ -407,16 +399,6 @@ static uMenuItemToggle fs_dither
  "$detail_dither_help",
  sr_dither);
 
-#ifndef DEDICATED
-// from gWall.cpp
-extern bool sg_simpleTrail;
-static uMenuItemToggle sgm_simpleTrail
-(&screen_menu_detail,
- "$detail_simple_trail_text",
- "$detail_simple_trail_help",
- sg_simpleTrail);
-#endif
-
 static uMenuItemSelection<int> mfd
 (&screen_menu_detail,
  "$detail_floor_text",
@@ -436,6 +418,17 @@ static uSelectEntry<int> mfdd(mfd,"$detail_floor_2tex_text",
                               "$detail_floor_2tex_help",
                               rFLOOR_TWOTEXTURE);
 
+
+static ArmageTron_feature_menuitem pam
+(&screen_menu_detail,"$detail_polyantialias_text",
+ "$detail_polyantialias_help",
+ sr_polygonAntialias);
+
+static ArmageTron_feature_menuitem lam
+(&screen_menu_detail,"$detail_lineantialias_text",
+ "$detail_lineantialias_help",
+ sr_lineAntialias);
+
 static uMenuItemToggle  abm
 (&screen_menu_detail,"$detail_alpha_text",
  "$detail_alpha_help",
@@ -445,6 +438,11 @@ static uMenuItemToggle  ssm
 (&screen_menu_detail,"$detail_smooth_text",
  "$detail_smooth_help",
  sr_smoothShading);
+
+static ArmageTron_feature_menuitem pcm
+(&screen_menu_detail,"$detail_persp_text",
+ "$detail_persp_help",
+ sr_perspectiveCorrection);
 
 extern bool crash_sparks;		// from gCycle.cpp
 extern bool white_sparks;		// from gSparks.cpp
@@ -457,6 +455,7 @@ static tConfItem<bool> crexp("EXPLOSION",sg_crashExplosion);
 #ifndef DEDICATED
 //extern bool png_screenshot;		// from rSysdep.cpp
 //static tConfItem<bool> pns("PNG_SCREENSHOT",png_screenshot);
+#endif
 
 static uMenuItemToggle  t32b
 (&screen_menu_detail,"$detail_text_truecolor_text",
@@ -520,12 +519,13 @@ static uMenuItemToggle cs
  "$pref_sparks_help",
  crash_sparks);
 
-static uMenuItemSelection<rDisplayListUsage> dl
+static uMenuItemToggle dl
 (&screen_menu_tweaks,"$tweaks_displaylists_text",
  "$tweaks_displaylists_help", sr_useDisplayLists);
-static uSelectEntry<rDisplayListUsage> dl_off(dl,"$tweaks_displaylists_off_text","$tweaks_displaylists_off_help",rDisplayList_Off);
-static uSelectEntry<rDisplayListUsage> dl_cac(dl,"$tweaks_displaylists_cac_text","$tweaks_displaylists_cac_help",rDisplayList_CAC);
-static uSelectEntry<rDisplayListUsage> dl_cae(dl,"$tweaks_displaylists_cae_text","$tweaks_displaylists_cae_help",rDisplayList_CAE);
+
+static uMenuItemToggle zt
+(&screen_menu_tweaks,"$tweaks_ztrick_text",
+ "$tweaks_ztrick_help",sr_ZTrick);
 
 static uMenuItemToggle infp
 (&screen_menu_tweaks,"$tweaks_infinity_text",
@@ -555,21 +555,22 @@ static uSelectEntry<rSysDep::rSwapMode> swapMode_80Hz(swapMode,"$swapmode_80hz_t
 static uSelectEntry<rSysDep::rSwapMode> swapMode_60Hz(swapMode,"$swapmode_60hz_text","$swapmode_60hz_help",rSysDep::rSwap_60Hz);
 */
 
-tCONFIG_ENUM( rSysDep::rSwapMode );
-
-static tConfItem< rSysDep::rSwapMode > swapModeCI("SWAP_MODE", rSysDep::swapMode_ );
+static tConfItem<int> swapModeCI("SWAP_MODE", reinterpret_cast< int & >( rSysDep::swapMode_ ) );
 
 static tConfItem<REAL> sgs("SPEED_GAUGE_SIZE",subby_SpeedGaugeSize);
 static tConfItem<REAL> sgx("SPEED_GAUGE_LOCX",subby_SpeedGaugeLocX);
 static tConfItem<REAL> sgy("SPEED_GAUGE_LOCY",subby_SpeedGaugeLocY);
+static tConfItem<bool> sgbar("SPEED_GAUGE_BAR", subby_SpeedGaugeBar);
 
 static tConfItem<REAL> bgs("BRAKE_GAUGE_SIZE",subby_BrakeGaugeSize);
 static tConfItem<REAL> bgx("BRAKE_GAUGE_LOCX",subby_BrakeGaugeLocX);
 static tConfItem<REAL> bgy("BRAKE_GAUGE_LOCY",subby_BrakeGaugeLocY);
+static tConfItem<bool> bgbar("BRAKE_GAUGE_BAR", subby_BrakeGaugeBar);
 
 static tConfItem<REAL> rgs("RUBBER_GAUGE_SIZE",subby_RubberGaugeSize);
 static tConfItem<REAL> rgx("RUBBER_GAUGE_LOCX",subby_RubberGaugeLocX);
 static tConfItem<REAL> rgy("RUBBER_GAUGE_LOCY",subby_RubberGaugeLocY);
+static tConfItem<bool> rgbar("RUBBER_GAUGE_BAR", subby_RubberGaugeBar);
 
 static tConfItem<bool> showh("SHOW_HUD",subby_ShowHUD);
 static tConfItem<bool> showf("SHOW_FASTEST",subby_ShowSpeedFastest);
@@ -638,51 +639,70 @@ uMenuItemToggle hud2
 (&hud_prefs,"$pref_showhud_text",
  "$pref_showhud_help",subby_ShowHUD);
 
+
+
 static tConfItem<bool> WRAP("WRAP_MENU",uMenu::wrap);
 
+
+
+#ifndef DEDICATED
+
+//! Handles the console prompt
 class gMemuItemConsole: uMenuItemStringWithHistory{
 public:
-    gMemuItemConsole(uMenu *M,tString &c):
-    uMenuItemStringWithHistory(M,"Con:","", c, 1024, sg_consoleHistory, sg_consoleHistoryMaxSize) {}
-
+    gMemuItemConsole(uMenu *M,tString &c, uAutoCompleter *completer); //!< Constructor
     virtual ~gMemuItemConsole(){}
-
-    //virtual void Render(REAL x,REAL y,REAL alpha=1,bool selected=0);
-
-    virtual bool Event(SDL_Event &e){
-        if (e.type==SDL_KEYDOWN &&
-                (e.key.keysym.sym==SDLK_KP_ENTER || e.key.keysym.sym==SDLK_RETURN)){
-
-            con << tColoredString::ColorString(.5,.5,1) << " > " << *content << '\n';
-
-            // direct commands are executed at owner level
-            tCurrentAccessLevel level( tAccessLevel_Owner, true );
-
-            // pass the console command to the configuration system
-            std::stringstream s(&((*content)[0]));
-            tConfItemBase::LoadAll( s, false );
-
-            MyMenu()->Exit();
-            return true;
-        }
-        else if (e.type==SDL_KEYDOWN &&
-                 uActionGlobal::IsBreakingGlobalBind(e.key.keysym.sym))
-            return su_HandleEvent(e, true);
-        else
-            return uMenuItemStringWithHistory::Event(e);
-    }
+    bool Event(SDL_Event &e);
 };
 
+//! @param M         passed on to uMenuItemStringWithHistory
+//! @param c         passed on to uMenuItemStringWithHistory
+//! @param completer the completer to be used
+gMemuItemConsole::gMemuItemConsole(uMenu *M,tString &c, uAutoCompleter *completer):
+        uMenuItemStringWithHistory(M,"Con:","", c, 1024, sg_consoleHistory, sg_consoleHistoryMaxSize, completer)
+{}
+
+
+bool gMemuItemConsole::Event(SDL_Event &e){
+    if (e.type==SDL_KEYDOWN &&
+            (e.key.keysym.sym==SDLK_KP_ENTER || e.key.keysym.sym==SDLK_RETURN)){
+
+        con << tColoredString::ColorString(.5,.5,1) << " > " << *content << '\n';
+
+        if ( tRecorder::IsPlayingBack() )
+        {
+            // the command was also recorded; better play it back,
+            // or the playback gets out of sync
+            tConfItemBase::LoadPlayback( false );
+        }
+        else
+        {
+            // pass the console command to the configuration system
+            std::stringstream s(&((*content)[0]));
+            tConfItemBase::LoadAll(s);
+        }
+
+        MyMenu()->Exit();
+        return true;
+    }
+    else if (e.type==SDL_KEYDOWN &&
+             uActionGlobal::IsBreakingGlobalBind(e.key.keysym.sym))
+        return su_HandleEvent(e, true);
+    else
+        return uMenuItemStringWithHistory::Event(e);
+}
+
 void do_con(){
-    su_ClearKeys();
-        
     se_ChatState( ePlayerNetID::ChatFlags_Console, true );
     sr_con.SetHeight(20,false);
     se_SetShowScoresAuto(false);
     tString c;
 
     uMenu con_menu("",false);
-    gMemuItemConsole s(&con_menu,c);
+    std::deque<tString> commands;
+    commands = tConfItemBase::GetCommands();
+    uAutoCompleter completer(commands);
+    gMemuItemConsole s(&con_menu,c,&completer);
     con_menu.SetCenter(-.75);
     con_menu.SetBot(-2);
     con_menu.SetTop(-.7);
@@ -697,7 +717,7 @@ void do_con(){
 
 void sg_ConsoleInput(){
 #ifndef DEDICATED
-    st_ToDoOnce(&do_con);
+    st_ToDo(&do_con);
 #endif
 }
 
@@ -825,7 +845,7 @@ public:
         m->RequestSpaceBelow(.2);
     }
 
-    ~ArmageTron_color_menuitem(){}
+    ~ArmageTron_color_menuitem(){};
 
     virtual REAL SpaceRight(){return .2;}
 
@@ -842,14 +862,13 @@ public:
         }
         */
 #ifndef DEDICATED
-        uMenuItem::RenderBackground();
         if (!sr_glOut)
             return;
+        uMenuItem::RenderBackground();
         REAL r = rgb[0]/15.0;
         REAL g = rgb[1]/15.0;
         REAL b = rgb[2]/15.0;
         se_MakeColorValid(r, g, b, 1.0f);
-        RenderEnd();
         glColor3f(r, g, b);
         glRectf(.8,-.8,.98,-.98);
 #endif
@@ -871,7 +890,6 @@ void sg_PlayerMenu(int Player){
     uMenu camera_menu("$player_camera_text");
     uMenu chat_menu("$player_chat_text");
     //  name.Clear();
-    chat_menu.SetCenter(-.5);
 
     uMenuItemString *ic[MAX_INSTANT_CHAT];
 
@@ -890,21 +908,6 @@ void sg_PlayerMenu(int Player){
                p->instantChatString[i], se_SpamMaxLen);
     }
 
-    uMenuItemToggle al
-    (&playerMenu,"$player_autologin_text",
-     "$player_autologin_help",
-     p->autoLogin);
-
-    uMenuItemString gid(&playerMenu,
-                      "$player_global_id_text",
-                      "$player_global_id_help",
-                      p->globalID, 400);
-    gid.SetColorMode( rTextField::COLOR_IGNORE );
-
-    uMenuItemToggle st
-    (&playerMenu,"$player_stealth_text",
-     "$player_stealth_help",
-     p->stealth);
 
     uMenuItemToggle sp
     (&playerMenu,"$player_spectator_text",
@@ -1015,7 +1018,7 @@ void sg_PlayerMenu(int Player){
     (&camera_menu,
      "$player_camera_fov_text",
      "$player_camera_fov_help",
-     p->startFOV,30,160,5);
+     p->startFOV,30,120,5);
 
     uMenuItemSelection<eCamMode> cam_s
     (&camera_menu,
@@ -1044,10 +1047,7 @@ void sg_PlayerMenu(int Player){
     // request network synchronisation if the server can handle it
     static nVersionFeature inGameRenames( 5 );
     if ( inGameRenames.Supported() )
-    {
         ePlayerNetID::Update();
-        ePlayer::SendAuthNames();
-    }
 
     /*
     for (i=MAX_PLAYERS-1; i>=0; i--)
@@ -1162,20 +1162,11 @@ static bool con_func(REAL x){
 
 static bool toggle_fullscreen_func( REAL x )
 {
-#ifndef DEDICATED
-#ifdef DEBUG
-    // don't toggle fullscreen while playing back in debug mode, that's annoying
-    if ( tRecorder::IsPlayingBack() )
-        return true;
-#endif
-
-    // only do anything if the application is active (work around odd bug)
-    if ( x > 0 && ( SDL_GetAppState() & SDL_APPACTIVE ) )
+    if ( x > 0 )
     {
         currentScreensetting.fullscreen = !currentScreensetting.fullscreen;
         sr_ReinitDisplay();
     }
-#endif
 
     return true;
 }

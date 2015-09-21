@@ -1,7 +1,7 @@
 # include $(top_srcdir)/Makefile.paths
 
 # script locations
-armascriptdir=$(scriptdir)
+armascriptdir=$(aa_scriptdir)
 
 # Handle which scripts to build
 basercScripts=rcd_config rcd_startstop
@@ -19,16 +19,16 @@ regrcScriptLN=
 endif
 
 if BUILDMASTER
-masterScripts=masterstarter
+masterScripts=$(basercScripts) masterstarter
 masrcScripts=rcd_master
 endif
 
 if BUILDDEDICATED
-dedScripts=serverstarter
+dedScripts=$(basercScripts) serverstarter
 dedrcScripts=rcd_server
 endif
 
-scriptsToBuild=$(basercScripts) $(masterScripts) $(dedScripts) $(regScripts) sysinstall relocate
+scriptsToBuild=$(masterScripts) $(dedScripts) $(regScripts) sysinstall relocate
 rcScripts=$(regrcScripts) $(masrcScripts) $(dedrcScripts)
 
 armascript_SCRIPTS=$(scriptsToBuild) $(rcScripts)

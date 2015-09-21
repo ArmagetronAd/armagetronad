@@ -30,7 +30,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tConsole.h"
 #include "tSysTime.h"
 #include <set>
-#include <string.h>
 
 nConfItemBase::nConfItemBase()
         :tConfItemBase(""), lastChangeTime_(-10000), lastChangeMessage_(0), watcher_(0){}
@@ -378,7 +377,7 @@ nConfItemVersionWatcher::nConfItemVersionWatcher( nConfItemBase & item, Group c,
         , reverted_( false )
         , group_( c )
         , overrideGroupBehavior_( Behavior_Default )
-        , overrideGroupBehaviorConf_( item.GetTitle() + "_OVERRIDE", overrideGroupBehavior_ )
+        , overrideGroupBehaviorConf_( item.GetTitle() + "_OVERRIDE", reinterpret_cast< int & >( overrideGroupBehavior_ ) )
 {
     sn_StrongWatchersAddRef();
     sn_GetStrongWatchers().insert(this);
@@ -446,11 +445,7 @@ static char const * sn_versionString[] =
         "0.2.8.0",       // 11
         "0.2.8_alpha20060414", // 12
         "0.2.8.2", // 13
-        "0.2.8.3_alpha", // 14
-        "0.2.8.3_alpha_auth", // 15
-        "0.2.8.3.X", // 16, was: 0.2.8.3_beta2
-        "0.2.9_alpha", // 17
-       0
+        0
     };
 
 int sn_GetCurrentProtocolVersion()
@@ -464,15 +459,6 @@ static char const * sn_GetVersionString( int version )
     tVERIFY ( version >= 0 );
 
     return sn_versionString[ version ];
-}
-
-tOutput sn_GetClientVersionString(int version) {
-    if(version >= 0 && version * sizeof(char *) < sizeof(sn_versionString)) {
-        tOutput ret;
-        ret.AddLiteral(sn_GetVersionString(version));
-        return ret;
-    }
-    return tOutput("$network_unknown_version", version);
 }
 
 // *******************************************************************************************
@@ -601,18 +587,18 @@ void nConfItemVersionWatcher::OnVersionChange( nVersion const & version )
 
 static nConfItemVersionWatcher::Behavior sn_GroupBehaviors[ nConfItemVersionWatcher::Group_Max ] =
     {
-        Behavior_Block,
-        Behavior_Block,
-        Behavior_Nothing,
-        Behavior_Block,
-        Behavior_Nothing,
+        nConfItemVersionWatcher::Behavior_Block,
+        nConfItemVersionWatcher::Behavior_Block,
+        nConfItemVersionWatcher::Behavior_Nothing,
+        nConfItemVersionWatcher::Behavior_Block,
+        nConfItemVersionWatcher::Behavior_Nothing,
     };
 
-static tSettingItem< nConfItemVersionWatcher::Behavior > sn_GroupBehaviorBreaks( "SETTING_LEGACY_BEHAVIOR_BREAKING", sn_GroupBehaviors[ nConfItemVersionWatcher::Group_Breaking] );
-static tSettingItem< nConfItemVersionWatcher::Behavior > sn_GroupBehaviorBumpy( "SETTING_LEGACY_BEHAVIOR_BUMPY", sn_GroupBehaviors[ nConfItemVersionWatcher::Group_Bumpy] );
-static tSettingItem< nConfItemVersionWatcher::Behavior > sn_GroupBehaviorAnnoyance( "SETTING_LEGACY_BEHAVIOR_ANNOYING", sn_GroupBehaviors[ nConfItemVersionWatcher::Group_Annoying] );
-static tSettingItem< nConfItemVersionWatcher::Behavior > sn_GroupBehaviorCheat( "SETTING_LEGACY_BEHAVIOR_CHEATING", sn_GroupBehaviors[ nConfItemVersionWatcher::Group_Cheating] );
-static tSettingItem< nConfItemVersionWatcher::Behavior > sn_GroupBehaviorDisplay( "SETTING_LEGACY_BEHAVIOR_VISUAL", sn_GroupBehaviors[ nConfItemVersionWatcher::Group_Visual] );
+static tSettingItem< int > sn_GroupBehaviorBreaks( "SETTING_LEGACY_BEHAVIOR_BREAKING", reinterpret_cast< int & >( sn_GroupBehaviors[ nConfItemVersionWatcher::Group_Breaking] ) );
+static tSettingItem< int > sn_GroupBehaviorBumpy( "SETTING_LEGACY_BEHAVIOR_BUMPY", reinterpret_cast< int & >( sn_GroupBehaviors[ nConfItemVersionWatcher::Group_Bumpy] ) );
+static tSettingItem< int > sn_GroupBehaviorAnnoyance( "SETTING_LEGACY_BEHAVIOR_ANNOYING", reinterpret_cast< int & >( sn_GroupBehaviors[ nConfItemVersionWatcher::Group_Annoying] ) );
+static tSettingItem< int > sn_GroupBehaviorCheat( "SETTING_LEGACY_BEHAVIOR_CHEATING", reinterpret_cast< int & >( sn_GroupBehaviors[ nConfItemVersionWatcher::Group_Cheating] ) );
+static tSettingItem< int > sn_GroupBehaviorDisplay( "SETTING_LEGACY_BEHAVIOR_VISUAL", reinterpret_cast< int & >( sn_GroupBehaviors[ nConfItemVersionWatcher::Group_Visual] ) );
 
 // *******************************************************************************************
 // *

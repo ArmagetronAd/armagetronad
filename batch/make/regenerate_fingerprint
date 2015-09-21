@@ -4,9 +4,9 @@
 echo -n "Enter you SF username (hit return for anonymous access) :"
 U=`line`
 if test -z "$U"; then
-    CVSROOT=:pserver:anonymous@cvs.sourceforge.net:/cvsroot/armagetronad
+    CVSROOT=:pserver:anonymous@armagetronad.cvs.sourceforge.net:/cvsroot/armagetronad
 else
-    CVSROOT=:ext:$U@cvs.sourceforge.net:/cvsroot/armagetronad
+    CVSROOT=:ext:$U@armagetronad.cvs.sourceforge.net:/cvsroot/armagetronad
 fi
 export CVSROOT
 

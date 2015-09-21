@@ -62,8 +62,8 @@ private:
 struct tCommandLineParser
 {
 public:
-    bool GetSwitch( char const * option, char const * option_short=NULL );                      //! Tests whether the current argument is the given switch
-    bool GetOption( tString & target, char const * option, char const * option_short=NULL );    //! Tests whether the current argument is the given option and extracts the value
+    bool GetSwitch( char const * option, char * option_short=NULL );                      //! Tests whether the current argument is the given switch
+    bool GetOption( tString & target, char const * option, char * option_short=NULL );    //! Tests whether the current argument is the given option and extracts the value
 
     bool End() const;                                                                     //! Tests whether the command line parsing is done
 

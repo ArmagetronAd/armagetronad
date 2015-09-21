@@ -111,7 +111,7 @@ public:
 protected:
     tJUST_CONTROLLED_PTR<nBandwidthTask> Next( nType type );		// removes and returns the top priority task
 private:
-    virtual void OnChange(){}										// called on every change of data
+    virtual void OnChange(){};										// called on every change of data
     nTaskHeap tasks_[ nBandwidthTask::Type_Count ];
 };
 

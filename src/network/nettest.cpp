@@ -185,7 +185,6 @@ int ntest(const tString &serv,bool server){
     while(i>0 && sn_GetNetState()!=nSTANDALONE){
         sn_Receive();
         nNetObject::SyncAll();
-        sn_SendPlanned();
 
         x.x+=.007;
         if (i%10==0){
@@ -218,7 +217,6 @@ int ntest(const tString &serv,bool server){
     sn_SetNetState(nSTANDALONE);
     usleep(100000);
     sn_Receive();
-    sn_SendPlanned();
 
     if (y)
         delete y;

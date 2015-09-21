@@ -1,0 +1,19 @@
+[header]
+author = Dave Fancella
+title = Fortress Walk
+record = None
+year = 2006
+genre = Rock
+installed = yes
+
+[tracks]
+1 = music/fortresswalk.ogg
+2 = music/doIknowyou.ogg
+
+[sequence]
+1
+2
+1
+1
+2
+

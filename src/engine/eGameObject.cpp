@@ -32,7 +32,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "eWall.h"
 #include "tConsole.h"
 #include "rScreen.h"
-#include "eSound.h"
+
+#include "eSoundMixer.h"
+
 #include "eAdvWall.h"
 #include "eGrid.h"
 #include "uInput.h"
@@ -43,16 +45,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <map>
 
 uActionPlayer eGameObject::se_turnRight("CYCLE_TURN_RIGHT", -10);
-static uActionTooltip se_turnRightTooltip( eGameObject::se_turnRight, 11, &ePlayer::VetoActiveTooltip );
 
 uActionPlayer eGameObject::se_turnLeft("CYCLE_TURN_LEFT", -10);
-static uActionTooltip se_turnLeftTooltip( eGameObject::se_turnLeft, 10, &ePlayer::VetoActiveTooltip );
 
 
 // entry and deletion in the list of all gameObjects
 void eGameObject::AddToList(){
-    eSoundLocker locker;
-
     if ( id < 0 )
         AddRef();
 
@@ -60,11 +58,7 @@ void eGameObject::AddToList(){
     grid->gameObjects.Add(this,id);
 }
 void eGameObject::RemoveFromList(){
-    eSoundLocker locker;
-
     int oldID = id;
-
-    currentFace = 0;
 
     grid->gameObjects.Remove(this,id);
     grid->gameObjectsInactive.Add(this,inactiveID);
@@ -74,11 +68,7 @@ void eGameObject::RemoveFromList(){
 }
 
 void eGameObject::RemoveFromListsAll(){
-    eSoundLocker locker;
-
     int oldID = id;
-
-    currentFace = 0;
 
     grid->gameObjects.Remove(this,id);
     grid->gameObjectsInactive.Remove(this,inactiveID);
@@ -86,49 +76,38 @@ void eGameObject::RemoveFromListsAll(){
 
     if ( oldID >= 0 )
         Release();
+
 }
 
-void eGameObject::RemoveFromGame()
-{
-    tJUST_CONTROLLED_PTR< eGameObject > keepAlive;
-    if ( id >= 0 )
-        keepAlive = this;
-
-    OnRemoveFromGame();
-    DoRemoveFromGame();
-}
-
-
-// called on RemoveFromGame(). Call base class implementation, too, in your implementation.
-void eGameObject::OnRemoveFromGame()
-{
-    // remove from grid
-    currentFace = 0;
-
-    // remove from lists
+void eGameObject::RemoveFromGame(){
     RemoveFromListsAll();
-}
 
-
-// called on RemoveFromGame(). Do not call base class implementation of this function, don't expect to get called from subclasses.
-void eGameObject::DoRemoveFromGame()
-{
-    // simply delete
     delete this;
 }
+
 
 
 eGameObject::eGameObject(eGrid *g,const eCoord &p,const eCoord &d,eFace *currentface,bool autodel)
         :autodelete(autodel),pos(p),dir(d),z(0),grid(g){
     tASSERT(g);
-    urgentSimulationRequested_=false;
     currentFace=currentface;
     lastTime=se_GameTime();
     id=-1;
     interestingID=-1;
     inactiveID=-1;
+    //if (grid)
+    //{
+    // AddToList();
+    // FindCurrentFace();
+    //}
     if ( lastTime < 0 )
         lastTime=0;
+
+    if ( !currentFace )
+    {
+        FindCurrentFace();
+    }
+
     team = 0;
 }
 
@@ -150,7 +129,7 @@ void eGameObject::PassEdge(const eWall *w,REAL,REAL,int){
     if (w) Kill();
 }
 
-static int se_moveTimeout = 100;
+static int se_moveTimeout = 10;
 static tSettingItem<int> se_moveTimeoutC("GAMEOBJECT_MOVE_TIMEOUT", se_moveTimeout);
 
 // data structures for storing temp wall collisions
@@ -246,6 +225,11 @@ void eGameObject::Move( const eCoord &dest, REAL startTime, REAL endTime, bool u
         // start iterator for collisions with temporary walls
         eTempEdgeMap::const_iterator currentTempCollision = tempCollisions.begin();
 
+        // we modify our position while we go; we need to compensate
+        // all time calculations for that. This variable stores how much
+        // of the way to the target position we're already gone.
+        REAL goneRatio = 0;
+
         int timeout = se_moveTimeout;
 
         REAL lastDistance = 1E+30; // the distance of pos and stop in the last step
@@ -261,20 +245,16 @@ void eGameObject::Move( const eCoord &dest, REAL startTime, REAL endTime, bool u
             {
                 timeout--;
             }
-            else
-            {
-                timeout = se_moveTimeout;
-                if ( lastDistance > 1E+29 )
-                    lastDistance = distance * 1.1;
-                lastDistance = .1 * lastDistance + distance * (.9 - EPS);
+            if ( lastDistance > 1E+29 )
+                lastDistance = distance * 1.1;
+            lastDistance = .1 * lastDistance + distance * (.9 - EPS);
 
-                // check if the target has been reached within tolerance; it can only make matters
-                // worse then to continue, even if the current face claims we're not part of it.
-                if ( distance <= EPS * totalDistance )
-                {
-                    // st_Breakpoint();
-                    break;
-                }
+            // check if the target has been reached within tolerance; it can only make matters
+            // worse then to continue, even if the current face claims we're not part of it.
+            if ( distance <= EPS * totalDistance )
+            {
+                // st_Breakpoint();
+                break;
             }
 #ifdef DEBUG_X
 rerun:
@@ -283,7 +263,7 @@ rerun:
             eHalfEdge *run   = currentFace->Edge(); // runs through all edges of the face
             eHalfEdge *best  = NULL;                // the best face to leave
             eHalfEdge *end   = run;
-            REAL bestScore   = -10.0;
+            REAL bestScore   = -1000;
             REAL bestERatio  = .5;
             REAL bestRRatio  = .5;
             eCoord bestCross   (0,0);
@@ -353,7 +333,7 @@ rerun:
                     e_ratio = 1;
                 }
 
-                if (score > bestScore)
+                if (!best || score > bestScore)
                 {
                     best       = run;
                     bestScore  = score;
@@ -377,8 +357,11 @@ rerun:
 
             if (best)
             {
+                // update the fraction of the full way we've gone so far
+                goneRatio = goneRatio + ( 1 - goneRatio ) * bestERatio;
+
                 // handle stored temp collisions
-                while ( currentTempCollision != tempCollisions.end() && (*currentTempCollision).first < bestERatio )
+                while ( currentTempCollision != tempCollisions.end() && (*currentTempCollision).first < goneRatio )
                 {
                     eTempEdgePassing const & passing = (*currentTempCollision).second;
                     PassEdge( passing.wall, TIME( (*currentTempCollision).first ), passing.ratio, 0 );
@@ -409,7 +392,7 @@ rerun:
                         PassEdge(w,time,bestRRatio,0);
                 }
 
-                // switch to the next face
+                // switch to the next fase
                 if (in)
                     currentFace=in->Face();
                 else
@@ -418,6 +401,7 @@ rerun:
             else
             {
                 timeout = 0;
+                st_Breakpoint();
             }
         }
 
@@ -433,11 +417,7 @@ rerun:
             PassEdge( passing.wall, TIME( (*currentTempCollision).first ), passing.ratio, 0 );
             ++ currentTempCollision;
         }
-    }
-    else // !currentFace
-    {
-        // just move.
-        pos = dest;
+
     }
 
     // not if the movement timed out
@@ -494,16 +474,6 @@ void eGameObject::FindCurrentFace(){
         }
     }
 
-    // don't fetch a new current face if you're out of the game
-    if ( !currentFace && GOID() < 0 )
-    {
-#ifdef DEBUG
-        con << "Attempting to get a current face, but object is not in game.\n";
-        st_Breakpoint();
-#endif        
-        return;
-    }
-
     // did that do the trick? If no, use brute force.
     if ( !currentFace )
         currentFace = grid->FindSurroundingFace(pos);
@@ -529,53 +499,15 @@ void eGameObject::FindCurrentFace(){
             }
             eCoord centerToPos = -center*(1/3.0);
             center = pos - centerToPos;
-  
-            // find a position that lies just inside the current triange
-            REAL centerInsideness = currentFace->Insideness(center);
-            eCoord inside;
-            
-            if( centerInsideness < 0 )
-            {
-                // this should not happen! but will, if the triangle has wrong orientation.
-                inside = center;
-            }
-            else
-            {
-                REAL factor = ( -insideness/( centerInsideness - insideness ) );
-                if ( factor > 1 )
-                {
-                    factor = 1;
-                }
-                inside = pos - centerToPos * factor;
-            }
 
             static bool recurse = true;
             if ( recurse )
             {
-                class RecursionGuard
-                {
-                public:
-                    RecursionGuard( bool& recursion )
-                            :recursion_( recursion )
-                    {
-                        recursion = false;
-                    }
-
-                    ~RecursionGuard()
-                    {
-                        recursion_ = true;
-                    }
-
-                private:
-                    bool& recursion_;
-                };
-
-                RecursionGuard guard( recurse );
-
                 // warp to the known good position and move back to where the
                 // object should be
+                recurse = false;
                 eCoord oldPos = pos;
-                pos = inside;
+                pos = center;
 #ifdef DEBUG
                 eFace * lastFace = currentFace;
 #endif
@@ -586,8 +518,7 @@ void eGameObject::FindCurrentFace(){
                 catch( eDeath & ) // ignore death exceptions and leave object where it would have died
                 {
 #ifdef DEBUG
-                    // try again (yeah, this looks like a WTF, but it really helps in some cases because the situation has changed since the last try. /me blames floating points)
-                    // besides, (now, this was changed) the start position changed.
+                    // try again
                     try
                     {
                         pos = center;
@@ -633,24 +564,10 @@ bool eGameObject::Timestep(REAL t){
 }
 // return value: shall this object be destroyed?
 
-void eGameObject::OnRoundBegin(){}
-void eGameObject::OnRoundEnd(){}
-
 void eGameObject::Kill(){}
 
 // draws it to the screen using OpenGL
 void eGameObject::Render(const eCamera *){}
-
-// *******************************************************************************
-// *
-// *	RendersAlpha
-// *
-// *******************************************************************************
-//!
-//!		@return	True if alpha blending is used
-//!
-// *******************************************************************************
-bool eGameObject::RendersAlpha() const{return false;}
 
 // Cockpit
 bool eGameObject::RenderCockpitFixedBefore(bool){return true;}
@@ -701,6 +618,10 @@ bool eGameObject::TimestepThis(REAL currentTime,eGameObject *c){
 
     REAL maxstep=.2;
 
+    // don't do a thing if the timestep is too small
+    if (fabs(currentTime - c->lastTime) < .001)
+        return false;
+
     // be more careful when going back
     if (currentTime<c->lastTime)
         maxstep=.1;
@@ -721,29 +642,9 @@ bool eGameObject::TimestepThis(REAL currentTime,eGameObject *c){
     {
         // make current face valid
         c->FindCurrentFace();
-
-        if (sn_GetNetState()!=nCLIENT)
-            for(int j=c->grid->gameObjectsInteresting.Len()-1;j>=0;j--)
-                c->InteractWith(c->grid->gameObjectsInteresting(j),currentTime,0);
-
-        REAL timeThisStep = lastTime+i*(currentTime-lastTime)/number_of_steps;
-
-        c->urgentSimulationRequested_ = false;
-        ret = ret || c->Timestep(timeThisStep);
-        c->FindCurrentFace();
-
-        // see if the object refused to get simulated, if yes, give up
-        if ( 2 * c->lastTime < timeThisStep + lastTime )
-            break;
-    }
-    for(int timeout = 10; timeout >= 0 && c->urgentSimulationRequested_; --timeout )
-    {
-        // simulate on while events are pending
-        c->urgentSimulationRequested_ = false;
-        ret = ret || c->Timestep(currentTime);
+        ret = ret || c->Timestep(lastTime+i*(currentTime-lastTime)/number_of_steps);
         c->FindCurrentFace();
     }
-
 #ifdef DEBUG
     c->grid->Check();
 #endif
@@ -751,32 +652,7 @@ bool eGameObject::TimestepThis(REAL currentTime,eGameObject *c){
     return ret;
 }
 
-#ifdef DEDICATED
-static REAL se_maxSimulateAhead = .1f;
-static tSettingItem<REAL> se_maxSimulateAheadConf( "MAX_SIMULATE_AHEAD", se_maxSimulateAhead );
-#endif
-
-// what is left of this time for the gameobject to use up
-static REAL se_maxSimulateAheadLeft = 0.0f;
-REAL eGameObject::MaxSimulateAhead()
-{
-    return se_maxSimulateAheadLeft;
-}
-
-static REAL se_lazyLag = 0;
-//! @return the maximum extra simulation time difference, on top of regular lag, caused by lazy simulation
-REAL eGameObject::GetMaxLazyLag()
-{
-    return se_lazyLag;
-}
-
-//! @param lag the maximum extra simulation time difference, on top of regular lag, caused by lazy simulation
-void eGameObject::SetMaxLazyLag( REAL lag )
-{
-    se_lazyLag = lag;
-}
-
-void eGameObject::TimestepThisWrapper(eGrid * grid, REAL currentTime, eGameObject *c, REAL minTimestep )
+void eGameObject::TimestepThisWrapper(eGrid * grid, REAL currentTime, eGameObject *c)
 {
     su_FetchAndStoreSDLInput();
 
@@ -787,58 +663,25 @@ void eGameObject::TimestepThisWrapper(eGrid * grid, REAL currentTime, eGameObjec
 #endif
         simTime -= c->Lag();
 
-    REAL maxSimTime = simTime;
-#ifdef DEDICATED
-    se_maxSimulateAheadLeft = se_maxSimulateAhead+se_lazyLag;
-
-    REAL lagThreshold = c->LagThreshold();
-    if( !c->urgentSimulationRequested_ )
-    {
-        // nothing interesting happening. add an extra portion of lag compensation
-        simTime -= lagThreshold;
-
-        if ( simTime < c->LastTime() + minTimestep )
-        {
-            // don't waste your time on too small timesteps
-            return;
-        }
-    }
-    else
-    {
-        maxSimTime += se_maxSimulateAheadLeft;
-    }
-
-#endif
-
-    // check for teleports out of arena bounds
     if (!eWallRim::IsBound(c->pos,-20))
-    {
-        se_maxSimulateAheadLeft = 0;
-
         c->Kill();
-        return;
-    }
-
-    // only simulate forward here
-    if ( maxSimTime > c->lastTime )
+    else if (TimestepThis(simTime,c))
     {
-        if (TimestepThis(simTime,c))
+        if (c->autodelete)
+            c->RemoveFromGame();
+        else
         {
-            if (c->autodelete)
-                c->RemoveFromGame();
-            else
-            {
-                c->currentFace=NULL;
-                c->RemoveFromList();
-            }
+            c->currentFace=NULL;
+            c->RemoveFromList();
         }
     }
-
-    se_maxSimulateAheadLeft = 0.0;
+    else if (sn_GetNetState()!=nCLIENT)
+        for(int j=grid->gameObjectsInteresting.Len()-1;j>=0;j--)
+            c->InteractWith(grid->gameObjectsInteresting(j),currentTime,0);
 }
 
 // does a timestep and all interactions for every eGameObject
-void eGameObject::s_Timestep(eGrid *grid, REAL currentTime, REAL minTimestep)
+void eGameObject::s_Timestep(eGrid *grid, REAL currentTime)
 {
 #ifdef DEBUG
     grid->Check();
@@ -848,7 +691,7 @@ void eGameObject::s_Timestep(eGrid *grid, REAL currentTime, REAL minTimestep)
     for(int i=grid->gameObjects.Len()-1;i>=0;i--)
     {
         eGameObject * c = grid->gameObjects(i);
-        TimestepThisWrapper( grid, currentTime, c, minTimestep );
+        TimestepThisWrapper( grid, currentTime, c );
     }
 
 #ifdef DEBUG
@@ -863,50 +706,14 @@ eGameObject *displayed_gameobject = 0;
 void eGameObject::RenderAll(eGrid *grid, const eCamera *cam){
     //if (!sr_glOut)
     //    return;
-    
-    // first, we need to render all the non-alpha blended objects.
-    // if we encounter non-alpha blended objects after alpha blended objects
-    // have already been rendered, we need to re-sort them to the back.
-    eGameObject * firstAlpha = NULL;
+
     for(int i=grid->gameObjects.Len()-1;i>=0;i--){
         su_FetchAndStoreSDLInput();
         if (sr_glOut){
-            eGameObject * object = grid->gameObjects(i);
 #ifdef DEBUG
-            displayed_gameobject = object;
+            displayed_gameobject = grid->gameObjects(i);
 #endif
-            object->Render(cam);
-
-            bool thisAlpha = object->RendersAlpha();
-            if ( !thisAlpha && firstAlpha )
-            {
-                // resort the object, switch places with the first alpha blended one.
-                // This will only have an effect in the next frame,
-                // but the small flickering error is to be tolerated, especially
-                // since alpha blended game objects tend to gently fade in.
-                int firstAlphaID = firstAlpha->id;
-
-                eSoundLocker locker;
-	       
-                grid->gameObjects.Remove(firstAlpha,firstAlpha->id);
-                grid->gameObjects.Add(firstAlpha,firstAlpha->id);
-                grid->gameObjects.Remove(object,object->id);
-                grid->gameObjects.Add(object,object->id);
-                
-                // the first alpha blended object no longer is the first. Look for
-                // a replacement, only one object is a candidate.
-                firstAlpha = 0;
-                if ( firstAlphaID > 0 )
-                {   
-                    firstAlpha = grid->gameObjects(firstAlphaID - 1);
-                    tASSERT( firstAlpha->RendersAlpha() );
-                }
-            }
-            if ( thisAlpha && !firstAlpha )
-            {
-                // store first known alpha blending object
-                firstAlpha = object;
-            }
+            grid->gameObjects(i)->Render(cam);
 #ifdef DEBUG
             displayed_gameobject = 0;
 #endif
@@ -928,51 +735,14 @@ void eGameObject::DeleteAll(eGrid *grid){
     for(i=grid->gameObjects.Len()-1;i>=0;i--)
     {
         eGameObject* o = grid->gameObjects(i);
-        o->RemoveFromGame();
+        o->Kill();
+        if (o->autodelete)
+            o->RemoveFromGame();
 #ifdef POWERPAK_DEB
         if (pp_out) o->PPDisplay();
 #endif
     }
 }
 
-eReferencableGameObject::eReferencableGameObject(eGrid *grid, const eCoord &p,const eCoord &d, eFace *currentface, bool autodelete)
-: eGameObject( grid, p, d, currentface, autodelete )
-{
-}
-
-// delegate real reference counting
-void eReferencableGameObject::AddRef()
-{
-    tReferencable< eReferencableGameObject >::AddRef();
-}
-
-void eReferencableGameObject::Release()
-{
-    tReferencable< eReferencableGameObject >::Release();
-}
-
-void eReferencableGameObject::DoRemoveFromGame()
-{
-    // nothing needs to be done, the reference counting takes care of the destruction
-}
-
-eStackGameObject::eStackGameObject(eGrid *grid, const eCoord &p,const eCoord &d, eFace *currentface)
-: eGameObject( grid, p, d, currentface, false )
-{
-}
-
-void eStackGameObject::AddRef()
-{
-}
-
-void eStackGameObject::Release()
-{
-}
-
-void eStackGameObject::DoRemoveFromGame()
-{
-    // must not get called
-    tERR_ERROR("Stack game object removed from game.");
-}
 
 

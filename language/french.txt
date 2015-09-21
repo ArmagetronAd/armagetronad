@@ -1,3 +1,13 @@
+#*****************************************
+#
+# Traduction francaise par mygal
+# Commentaires, critiques, etc.?
+#            themygal@gmail.com
+# Thx 2 tang322 4 his help
+#
+#*****************************************
+
+
 language                      Francais
 
 #*****************************************
@@ -17,9 +27,8 @@ language                      Francais
 #*****************************************
 
 first_use_help                Est-ce la premiere fois que vous jouez a \g?
-include_help                  Inclus un fichier.
-sinclude_help                 Inclus un fichier silencieusement, sans message d'erreur s'il n'est pas trouvé.
-new_team_allowed_help         Est-ce possible de creer une nouvelle équipe?
+include_help                  Inclus ce fichier
+new_team_allowed_help         Est-ce possible de creer une nouvelle team?
 
 #********************************************
 #********************************************
@@ -39,7 +48,8 @@ keyboard_help                 Configuration du clavier
 #********************************************
 #********************************************
 
-doublebind_time_help          Temps en secondes pendant lequel deux touches différentes peuvent effectuer la même action.
+#ORIGINAL TEXT:               Time in seconds during which no two different keyboard events can trigger the same action
+#doublebind_time_help         UNTRANSLATED
 
 #********************************************
 #********************************************
@@ -50,48 +60,32 @@ doublebind_time_help          Temps en secondes pendant lequel deux touches diff
 #********************************************
 
 cycle_speed_help              Vitesse basique de votre moto si vous roulez en ligne droite.
-cycle_speed_min_help          Vitesse minimum de votre moto, relativement à CYCLE_SPEED.
-cycle_speed_max_help          Vitesse maximum de votre moto, relativement à CYCLE_SPEED.
-cycle_speed_decay_below_help  Vitesse de retour à CYCLE_SPEED quand la vitesse est en dessous de ceci.
-cycle_speed_decay_above_help  Vitesse de retour à CYCLE_SPEED quand la vitesse est en dessous de ceci.
-cycle_start_speed_help        Vitesse initiale de votre moto.
-cycle_sound_speed_help        Facteur appliqué à la vitesse currente pour obtenir la vitesse du son du moteur.
-
-cycle_accel_help              Facteur d'acceleration des murs.
-cycle_accel_self_help         Multiplicateur de CYCLE_ACCEL pour votre propre mur.
-cycle_accel_team_help         Multiplicateur de CYCLE_ACCEL pour les murs de vos coéquipiers.
-cycle_accel_enemy_help        Multiplicateur de CYCLE_ACCEL pour les murs de vos ennemis.
-cycle_accel_rim_help          Multiplicateur de CYCLE_ACCEL pour les murs de l'arène.
-cycle_accel_slingshot_help    Multiplicateur de l'effect cumulé de CYCLE_ACCEL, si la moto est entre son propre mur et un autre mur.
-cycle_accel_tunnel_help       Multiplicateur de l'effect cumulé de CYCLE_ACCEL, si la moto est entre deux murs qui ne lui appartiennent pas.
-cycle_accel_offset_help       Distance numerique minimum des murs.
-cycle_wall_near_help          Distance maximum des murs accelerateurs.
-
-cycle_boost_self_help         Accélération lorsque vous vous tournez de votre mur.
-cycle_boost_team_help         Accélération lorsque vous vous tournez d'un des murs de vos coéquipiers.
-cycle_boost_enemy_help        Accélération lorsque vous vous tournez d'un mur ennemi.
-cycle_boost_rim_help          Accélération lorsque vous vous tournez du mur de l'arène.
-cycle_boostfactor_self_help   Facteur auquel votre vitesse est multipliée quand vous vous tournez de votre mur.
-cycle_boostfactor_team_help   Facteur auquel votre vitesse est multipliée quand vous vous tournez d'un des murs de vos coéquipiers.
-cycle_boostfactor_enemy_help  Facteur auquel votre vitesse est multipliée quand vous vous tournez d'un mur ennemi.
-cycle_boostfactor_rim_help    Facteur auquel votre vitesse est multipliée quand vous vous tournez du mur de l'arène.
-
-cycle_turn_memory_help        Nombre de tours une moto va mémoriser lorsque ces tours ne sont pour le moment pas possibles.
-
+cycle_start_speed_help        Vitesse initiale de votre moto
 cycle_delay_help              Temps minimum entre les tours
-cycle_delay_bonus_help        Facteur additionnel à CYCLE_DELAY appliqué sur le server dédié seulement.
-cycle_delay_timebased_help    Est-ce que CYCLE_DELAY doit être basé sur le dernier tour (1) or par rapport à la distance (0) ? Les valeurs intermédiaires sont aussi supportées.
-cycle_turn_speed_factor_help  Facteur auquel la vitesse est multipliée après un tour.
-cycle_delay_doublebind_bonus_help Facteur auquel CYCLE_DELAY est multiplié pour des tours consécutifs dans la même direction.
 
-
+#ORIGINAL TEXT:               Turn delays will be based on the time since the last turn if this is 1 (default) and the distance if this is 0. Intermediate values and values out of these bounds are supported as well.
+#cycle_delay_timebased_help   UNTRANSLATED
+cycle_accel_help              Facteur d'acceleration des murs
+cycle_accel_offset_help       Distance numerique minimum des murs
+cycle_wall_near_help          Distance maximum des murs accelerateurs
+cycle_sound_speed_help        Vitesse du son
 cycle_brake_help              Intensite du frein
+cycle_rubber_help             DIstance minimum a laquelle vous pouvez rouler contre un mur
 
-cycle_width_help              La largeur d'une moto lors des collisions. Par exemple elle ne pourra pas rentrer dans des tunnels trop petits.
-cycle_width_side_help         cycle_rubber_help             DIstance minimum a laquelle vous pouvez rouler contre un mur
+#ORIGINAL TEXT:               Rubber usage is based on distance travelled if this is 0 (default) and the time passed if this is 1. Intermediate values and values out of these bounds are supported as well.
+#cycle_rubber_timebased_help  UNTRANSLATED
 cycle_rubber_speed_help       Vitesse logarithmique de l'approximation du mur( chaque seconde, vous vous rapprochez du mur avec un facteur de ~0.4^{cette valeur} )
 cycle_rubber_mindistance_help Le code de la distance minimale qui vous separe du mur
 cycle_rubber_mindistance_ratio_help Distance additionnelle a CYCLE_RUBBER_MINDISTANCE pour chaque unite de longueur du mur que vous avez devant vous 
+
+#ORIGINAL TEXT:               Addidional distance if you have an empty rubber meter (gets faded out gradually as you use up all your rubber)
+#cycle_rubber_mindistance_reservoir_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Additional distance for unprepared grinds; it gets applied when the cycle's last turn was just a fraction of a second ago and faded out preparation times larger than CYCLE_RUBBER_MINDISTANCE_PREPARATION. 
+#cycle_rubber_mindistance_unprepared_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Timescale in seconds a cycle's last turn time is compared with to determine the effect of CYCLE_RUBBER_MINDISTANCE_UNPREPARED.  
+#cycle_rubber_mindistance_preparation_help UNTRANSLATED
 cycle_rubber_mindistance_legacy_help Extra factor for minimal distance to walls enforced by the rubber code, active when peers with the rip bug are connected
 cycle_rubber_minadjust_help   En s'ajustant sur environ 180ing. de mur, permet de se rapprocher d'au moins cette valeur ( relativement a la derniere distance )
 cycle_ping_rubber_help        Finesse additionnelle pour les joueurs avec un haut ping
@@ -99,9 +93,27 @@ cycle_brake_refill_help       Evalue ce qu'il reste dans le reservoir de frein q
 cycle_brake_deplete_help      Evalue ce que le reservoir de frein utilise quand vous freinez
 cycle_sync_interval_enemy_help Temps ( en secondes ), entre les updates serveur/client des ennemis
 cycle_sync_interval_self_help Temps ( en secondes ), entre les updates serveur/client des ennemis possedes par le client lui-meme
+
+#ORIGINAL TEXT:               If set to 1, old clients will not get sync messages in situations that are known to confuse them
+#cycle_avoid_oldclient_bad_sync_help UNTRANSLATED
+
+#ORIGINAL TEXT:               If set to 1, this deactivates the anti lag-sliding code when old clients are connected
+#cycle_fair_antilag_help      UNTRANSLATED
 cycle_time_tolerance_help     Pas encore utilise
+
+#ORIGINAL TEXT:               Cycle death is prevented as long as the player's failure to turn can be explained by the loss of this many network packets. Enabling this allows cheating.
+#cycle_packetloss_tolerance_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Speed of simulation of the extrapolating sync; decrease for lower CPU load, but higher effective ping
+#cycle_sync_ff_help           UNTRANSLATED
+
+#ORIGINAL TEXT:               Number of extrapolation simulation timesteps each real timestep; increase for better accuracy
+#cycle_sync_ff_steps_help     UNTRANSLATED
 topology_police_help          Fait des controles "a posteriori", pour verifier que les mouvements en jeu etaient possibles. Lui attribuer "1" pour l'activer.
 cycle_smooth_time_help        Timescale for smoothing options. Increasing this will make interpolation smoother, but less accurate. Decreasing it will make network synchronization jumpy.
+
+#ORIGINAL TEXT:               Minimum speed of smooth correction relative to cycle speed.
+#cycle_smooth_min_speed_help  UNTRANSLATED
 cycle_smooth_threshold_help   Seulement les synchronisations qui different de votre position par moins que cela ( en ping x vitesse ) ne souffriront pas de lag, de plus grandes differences seront appliquees immediatement
 cycle_max_refcount_help       Nombre maximum de reference admis pour les motos avant qu'elles ne s'autodetruisent. Ce parametre est protege aux attaques relatives a Dos.
 
@@ -125,6 +137,7 @@ sp_walls_length_help          Longueur des murs en metres. Une valeur negative r
 sp_explosion_radius_help      Rayon de l'onde de choc des explosions
 sp_team_balance_on_quit_help  Les equipes s'equilibrent-elles si un joueur s'en va?
 sp_team_balance_with_ais_help Les equipes s'equilibrent-elles avec les IA?
+sp_team_max_imbalance_perm_help Disproportion maximum et permanente autorisee pour une equipe
 sp_team_max_imbalance_help    Disproportion maximum mais temporaire autorisee pour une equipe
 sp_team_max_players_help      Nombre maximum de joueurs par equipe
 sp_team_min_players_help      Nombre minimum de joueurs par equipe
@@ -146,6 +159,7 @@ walls_length_help             Longueur des murs en metres. Une valeur negative r
 explosion_radius_help         Rayon de l'onde de choc des explosions
 team_balance_on_quit_help     Les equipes s'equilibrent-elles si un joueur s'en va?
 team_balance_with_ais_help    Les equipes s'equilibrent-elles avec les IA?
+team_max_imbalance_perm_help  Disproportion maximum et permanente autorisee pour une equipe
 team_max_imbalance_help       Disproportion maximum mais temporaire autorisee pour une equipe
 team_max_players_help         Nombre maximum de joueurs par equipe
 team_min_players_help         Nombre minimum de joueurs par equipe
@@ -162,9 +176,6 @@ limit_score_help              Fin du match lorsqu'un joueur atteint ce score
 limit_rounds_help             Fin du match apres autant de rounds
 limit_time_help               Fin du match apres autant de minutes 
 
-# wall length modification
-
-# respawn relevant settings (no server supports respawning yet, but the client is prepared)
 
 #********************************************
 #********************************************
@@ -174,13 +185,12 @@ limit_time_help               Fin du match apres autant de minutes
 #********************************************
 #********************************************
 
-# map file
-
 # limits
 speed_factor_help             Modificateur de vitesse des motos
 sp_speed_factor_help          Modificateur de vitesse des motos
 size_factor_help              Modificateur de la taille de l'arene
 sp_size_factor_help           Modificateur de la taille de l'arene
+win_zone_deaths_help          "1" pour activer une "Death Zone"
 
 # single player settings (used by dedicated server only)
 sp_ais_help                   Nombre d'IA en mode Single-Player
@@ -196,6 +206,8 @@ ladder_lose_min_on_load_help  Score minimum dans le top que vous perdez a chaque
 
 ladder_gain_extra_help        Points supplementaires dans le top pour le gagnant, en fonction du ping
 
+#ORIGINAL TEXT:               The currently active arena size. Leave it alone! Change size_factor instead.
+#real_arena_size_factor_help  UNTRANSLATED
 real_cycle_speed_factor_help  La vitesse des motos actuelles. N'y touchez pas; changez plutot speed_factor.
 
 sp_win_zone_min_round_time_help Nombre minimum ( en secondes ) ou la "Instant Win Zone" est activee a partir du debut du round
@@ -204,10 +216,8 @@ win_zone_min_round_time_help  Nombre minimum ( en secondes ) ou la "Instant Win 
 win_zone_min_last_death_help  Nombre minimum ( en secondes ) depuis le dernier crash avant l'activation de la "Instant Win Zone"
 win_zone_expansion_help       Vitesse d'expansion de la "Instant Win Zone"
 win_zone_initial_size_help    Taille initiale de la "Instant Win Zone"
-win_zone_deaths_help          "1" pour activer une "Death Zone"
+
 game_timeout_help             Donne approximativement le temps maximum entre les rounds
-wait_for_external_script_help Let the server wait for an external script between two rounds until the script switches this setting back to 0.
-wait_for_external_script_timeout_help If the server has been paused by WAIT_FOR_EXTERNAL_SCRIPT for more seconds than this, kickstart the game.
 
 #********************************************
 #********************************************
@@ -229,16 +239,10 @@ spectator_mode_help           Fait de ce joueur un spectateur
 auto_incam_help               Utilise automatiquement la camera interne dans un labyrinthe
 camwobble_help                Laisse la camera interne se deplacer avec votre moto
 
+#ORIGINAL TEXT:               Cycle and wall colour, blue component.
+#color_b_help                 UNTRANSLATED
 color_g_help                  Couleur de votre moto et de ses murs, vert. Il n'est pas possible de la changer pendant le jeu
 color_r_help                  Couleur de votre moto et de ses murs, rouge. Il n'est pas possible de la changer pendant le jeu 
-
-#********************************************
-#********************************************
-#
-#       Convenience
-#
-#********************************************
-#********************************************
 
 #********************************************
 #********************************************
@@ -249,10 +253,16 @@ color_r_help                  Couleur de votre moto et de ses murs, rouge. Il n'
 #********************************************
 
 spam_protection_help          Determine la "puissance" du filtre anti-spam: determine le delai minimum entre 2 messages
+
+#ORIGINAL TEXT:               Extra factor for SPAM_PROTECTION for votes.
+#spam_protection_vote_help    UNTRANSLATED
+
+#ORIGINAL TEXT:               Extra factor for SPAM_PROTECTION for chat messages.
+#spam_protection_chat_help    UNTRANSLATED
 spam_penalty_help             Nombre de secondes ou un spammeur ne peut plus poster
 spam_maxlen_help              Taille maximale des messages dans le chat
 spam_autokick_help            Les "points de spam", qui vous bannissent d'un serveur instantanement.
-# spam kick messages
+silence_all_help              Si "1", le chat sera desactive
 
 #********************************************
 #********************************************
@@ -262,13 +272,11 @@ spam_autokick_help            Les "points de spam", qui vous bannissent d'un ser
 #********************************************
 #********************************************
 
-#********************************************
-#********************************************
-#
-#       Lag compensation
-#
-#********************************************
-#********************************************
+#ORIGINAL TEXT:               If set to 1, this allows two players that apparently come from the same machine to fight for points with each other.
+#allow_enemies_same_ip_help   UNTRANSLATED
+
+#ORIGINAL TEXT:               If set to 1, this allows two players that play on the same client to fight for points with each other.
+#allow_enemies_same_client_help UNTRANSLATED
 
 #********************************************
 #********************************************
@@ -277,6 +285,19 @@ spam_autokick_help            Les "points de spam", qui vous bannissent d'un ser
 #
 #********************************************
 #********************************************
+
+#ORIGINAL TEXT:               When a client's connection is blocked because he's banned, make him banned for at least this many seconds.
+#network_min_ban_help         UNTRANSLATED
+
+#ORIGINAL TEXT:               Autoban players for NETWORK_AUTOBAN_FACTOR * ( kph - NETWORK_AUTOBAN_OFFSET ) minutes when they get kicked; kph is the average number of kicks per hour they get.
+#network_autoban_offset_help  UNTRANSLATED
+
+#ORIGINAL TEXT:               Autoban players for NETWORK_AUTOBAN_FACTOR * ( kph - NETWORK_AUTOBAN_OFFSET ) minutes when they get kicked; kph is the average number of kicks per hour they get.
+#network_autoban_factor_help  UNTRANSLATED
+
+#ORIGINAL TEXT:               Maximal value of the kicks per hour; larger values are smoothly clamped.
+#network_autoban_max_kph_help UNTRANSLATED
+
 
 #********************************************
 #********************************************
@@ -291,14 +312,17 @@ allow_voting_help             Si 1, les votes seront permis aux joueurs.
 allow_voting_spectator_help   Si 1, les votes seront permis aux spectateurs.
 min_voters_help               Nombre de votants devant etre online pour que le vote soit active.                      
 voting_start_decay_help       Nombre de secondes apres lequel les non-votants sont ignores.
+
+#ORIGINAL TEXT:               One non-voter is ignored everytime this many secons pass.
+#voting_decay_help            UNTRANSLATED
 voting_bias_help              Ajoute des personnes votantes virtuels qui s'opposent a chaque changement.
 voting_privacy_help           controls logging of voting process. 2: nothing gets logged 1: vote submission is logged for the server admin 0: voting is logged for the server admin -1: vote submission is made public -2: everything is made public
-votes_suspend_help            Arrête les votes pour n minutes.
-votes_suspend_default_help    Valeur par défaut de VOTING_SUSPEND.
-votes_unsuspend_help          Autorise les votes à nouveau.
-voting_suspended              Les votes ont été suspendus pour les prochaines \1 minutes.\n
-voting_unsuspended            Les votes sont à nouveau autorisés.\n
-vote_rejected_voting_suspended Les votes ont été suspendus par l'Administrateur.\n
+
+#ORIGINAL TEXT:               The spam level of issuing a vote.
+#voting_spam_issue_help       UNTRANSLATED
+
+#ORIGINAL TEXT:               The spam level of getting your vote rejected.
+#voting_spam_reject_help      UNTRANSLATED
 
 #********************************************
 #********************************************
@@ -319,6 +343,15 @@ show_own_name_help            Voulez-vous aussi afficher votre nom au-dessus de 
 #********************************************
 #********************************************
 
+#ORIGINAL TEXT:               Level of additonal information in recording file.
+#recording_debuglevel_help    UNTRANSLATED
+
+#ORIGINAL TEXT:               Maximum recording time between rendered frames in fast forward mode
+#fast_forward_maxstep_help    UNTRANSLATED
+
+#ORIGINAL TEXT:               Maximum fraction of the time left until the end of FF mode between rendered frames
+#fast_forward_maxstep_rel_help UNTRANSLATED
+
 #********************************************
 #********************************************
 #
@@ -332,6 +365,7 @@ camera_forbid_in_help         Interdit l'utilisation de la camera interne pour t
 camera_forbid_free_help       Interdit l'utilisation de la camera libre pour tout le monde
 camera_forbid_follow_help     Interdit l'utilisation de la camera externe pour tout le monde
 camera_forbid_custom_help     Interdit l'utilisation de la camera personnalisee pour tout le monde
+
 camera_follow_start_x_help    Determine la position (x) de la camera externe fixe
 camera_follow_start_y_help    Determine la position (y) de la camera externe fixe
 camera_follow_start_z_help    Determine la position (z) de la camera externe fixe
@@ -339,6 +373,10 @@ camera_follow_start_z_help    Determine la position (z) de la camera externe fix
 camera_smart_start_x_help     Determine la position (x) de la "smart camera"
 camera_smart_start_y_help     Determine la position (y) de la "smart camera"
 camera_smart_start_z_help     Determine la position (z) de la "smart camera"
+
+#ORIGINAL TEXT:               use custom camera settings when glancing with the smart camera
+#camera_smart_glance_custom_help UNTRANSLATED
+
 camera_free_start_x_help      Determine la position (x) de la camera libre
 camera_free_start_y_help      Determine la position (y) de la camera libre
 camera_free_start_z_help      Determine la position (z) de la camera libre
@@ -346,9 +384,38 @@ camera_free_start_z_help      Determine la position (z) de la camera libre
 camera_custom_back_help       Position de la camera personnalisee: de combien peut-elle s'eloigner de la moto?
 camera_custom_rise_help       Position de la camera personnalisee: de combien peut-elle se rapprocher de la moto?
 camera_custom_pitch_help      Position de la camera personnalisee: de combien peut-elle monter/descendre?
+
 camera_server_custom_back_help Position de la camera personnalisee: de combien peut-elle s'eloigner de la moto?
 camera_server_custom_rise_help Position de la camera personnalisee: de combien peut-elle se rapprocher de la moto?
 camera_server_custom_pitch_help Position de la camera personnalisee: de combien peut-elle monter/descendre?
+
+#ORIGINAL TEXT:               The speed the external visibility targets recovers from wall hits
+#camera_visibility_recovery_speed_help UNTRANSLATED
+
+#ORIGINAL TEXT:               The distance the visibility targets keep from walls
+#camera_visibility_wall_distance_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Speed with wich the visibility targets is brought into view
+#camera_visibility_clip_speed_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Distance (measured in seconds, gets multiplied by speed) of the visibility targets from the watched object
+#camera_visibility_extension_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Extra forward component of the sideways visibility targets
+#camera_visibility_sideskew_help UNTRANSLATED
+
+#ORIGINAL TEXT:               If set to 1, walls are lowerd when they block the view and the camera is not moved
+#camera_visibility_lower_wall_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Like CAMERA_VISIBILITY_LOWER_WALL, but special setting for the smart camera
+#camera_visibility_lower_wall_smart_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Unsupported: make all rim walls semi-transparent by rendering them without occlusion tests
+#bug_transparency_help        UNTRANSLATED
+
+#ORIGINAL TEXT:               Unsupported: use transparency instead of lowering walls
+#bug_transparency_demand_help UNTRANSLATED
+
 #********************************************
 #********************************************
 #
@@ -359,6 +426,9 @@ camera_server_custom_pitch_help Position de la camera personnalisee: de combien 
  
 custom_server_name_help       Nom du serveur auquel se connecter
 dedicated_idle_help           Apres autant de temps ( en heures ), le serveur dedie essaie une nouvelle fois de s'arreter
+
+#ORIGINAL TEXT:               Maximum simulation steps per second the dedicated server will perform
+#dedicated_fps_help           UNTRANSLATED
 talk_to_master_help           Annoncer ce serveur sur Internet?
 max_out_rate_help             Taux maximum de sortie sur le reseau
 max_in_rate_help              Taux maximum d'entree sur le reseau
@@ -370,9 +440,27 @@ client_port_help              Port auquel nous essayons de nous connecter
 max_clients_help              Nombre maximum de clients reseau a accepter
 max_clients_same_ip_soft_help Maximum number of network clients to accept from the same IP; more logins will get kicked when the server is full
 max_clients_same_ip_hard_help Maximum number of network clients to accept from the same IP; more logins will be ignored
+
+#ORIGINAL TEXT:               maximum number of players from the same IP (note that each client can legally host up to four players)
+#max_players_same_ip_help     UNTRANSLATED
 url_help                      URI HTTP associee a un serveur
 
 # settings compatibility 
+
+#ORIGINAL TEXT:               Default legacy behavior for settings that absolutely break the client and make play impossilbe. Example of an affected setting: MAP_FILE
+#setting_legacy_behavior_breaking_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Default legacy behavior for settings that allow play on old clients in principle, but with severe limitations (cycles bouncing around, player commands not executed on time). Example: CYCLE_DELAY_TIMEBASED
+#setting_legacy_behavior_bumpy_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Default legacy behavior for settings that only cause minor annoyances on old clients, like enemy cycles stopping for .1 seconds after each turn. Example: CYCLE_RUBBER_MINDISTANCE
+#setting_legacy_behavior_annoying_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Default legacy behavior for settings where the default behavior could be considered cheating if nondefault was set. Example: DOUBLEBIND_TIME
+#setting_legacy_behavior_cheating_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Default legacy behavior for settings that only affect status displays and visuals, not game physics. Example: CYCLE_RUBBER_* (the client displays the rubber meter, but it's not used for anything)
+#setting_legacy_behavior_visual_help UNTRANSLATED
 
 #********************************************
 #********************************************
@@ -382,14 +470,13 @@ url_help                      URI HTTP associee a un serveur
 #********************************************
 #********************************************
 
-# hud
-
 #floor
 grid_size_help                Distance entre les lignes de la grille
 grid_size_moviepack_help      distance between gridlines when moviepack is active
 floor_red_help                Couleur du sol ( rouge )
 floor_green_help              Couleur du sol ( vert )
 floor_blue_help               Couleur du sol ( bleu )
+
 
 #moviepack settings
 moviepack_floor_red_help      Couleur du sol ( rouge )
@@ -398,7 +485,34 @@ moviepack_floor_blue_help     Couleur du sol ( bleu )
 moviepack_wall_stretch_help   Distance entre les lignes verticales des murs du moviepack
 
 #detail settings
+#ORIGINAL TEXT:               Swap Mode:
+#swapmode_text                UNTRANSLATED
 
+#ORIGINAL TEXT:               Determines the commands used to sync graphics and input every frame. The current value implies:
+#swapmode_help                UNTRANSLATED
+
+#ORIGINAL TEXT:               Fastest
+#swapmode_fastest_text        UNTRANSLATED
+
+#ORIGINAL TEXT:               No sync commands. This is fastest and uses the least CPU, but may cause graphics to severely lag behind input. Use at your own risk.
+#swapmode_fastest_help        UNTRANSLATED
+
+#ORIGINAL TEXT:               Flush
+#swapmode_glflush_text        UNTRANSLATED
+
+#ORIGINAL TEXT:               Calls glFlush() to sync graphics output. Very little overhead and prevents graphics lag. This is the default.
+#swapmode_glflush_help        UNTRANSLATED
+
+#ORIGINAL TEXT:               Finish
+#swapmode_glfinish_text       UNTRANSLATED
+
+#ORIGINAL TEXT:               Calls glFinish() to sync graphics output. This is guaranteed to prevent graphics lagging behind input, but causes loss of framerate on some systems and full CPU load on others. Use if Flush does not work.
+#swapmode_glfinish_help       UNTRANSLATED
+
+#ORIGINAL TEXT:               Determines the commands used to sync graphics and input. 0: do nothing, 1: call glFlush(), 2: call glFinish().
+#swap_mode_help               UNTRANSLATED
+
+ztrick_help                   Performance tweak; Ne fonctionne pas sur la plupart des systemes Windows
 texture_mode_0_help           Texture du sol:
 texture_mode_1_help           Texture des murs:
 texture_mode_2_help           Texture des objets:
@@ -408,6 +522,9 @@ gl_extensions_help            Informations du systeme "OpenGL"
 gl_version_help               Informations du systeme "OpenGL"
 gl_renderer_help              Informations du systeme "OpenGL"
 gl_vendor_help                informations du systeme "OpenGL"
+line_antialias_help           Active l'anti-aliasing des lignes
+poly_antialias_help           Active l'anti-aliasing des polygones
+persp_correct_help            Active la correction des perspectives
 alpha_blend_help              Active l'alpha-blending
 smooth_shading_help           Active le smooth shading
 text_out_help                 Active la sortie console texte
@@ -426,8 +543,12 @@ lag_o_meter_help              Dessine le lagmetre  dans le jeu en reseau
 predict_objects_help          Predit les deplacements des motos dans le jeu en reseau
 textures_hi_help              Utilise des textures haute-definition
 sparks_help                   Dessine des etincelles lorsqu'une moto roule trop pres d'un mur
+
+#ORIGINAL TEXT:               If set, you leave a menu to the top and reenter it at the bottom.
+#wrap_menu_help               UNTRANSLATED
 floor_mirror_int_help         Intensite de l'effet reflechissant du sol
 color_strings_help            Dessine des cordes colorees
+
 #screen mode
 custom_screen_height_help     Taille d'ecran personnalisee ( longueur )
 custom_screen_width_help      Taille d'ecran personnalisee ( hauteur )
@@ -505,19 +626,24 @@ exit_help                     Eteint le serveur dedie et quitte
 # manning and kicking commands
 kick_help                     Bannis le joueur indique du serveur
 
+#ORIGINAL TEXT:               Bans the specified player from the server (kicks him first) for a variable time in minutes.
+#ban_help                     UNTRANSLATED
+
+#ORIGINAL TEXT:               Bans the spedified IP address from the server for a variable time.
+#ban_ip_help                  UNTRANSLATED
+
+#ORIGINAL TEXT:               Prints a list of currently banned IPs.
+#ban_list_help                UNTRANSLATED
+
+#ORIGINAL TEXT:               Revokes the ban of the specified IP address.
+#unban_ip_help                UNTRANSLATED
+
 # communication
 console_message_help          Affiche un message dans la console a tous les clients connectes
 center_message_help           Affiche un message en grand sur l'ecran pour tous les clients connectes
 say_help                      Serveurs dedies seulement: permet a l'administrateur de dire quelque chose
 
 #********************************************
-#********************************************
-#
-#       Bugs
-#
-#********************************************
-#********************************************
-
 #********************************************
 #********************************************
 #********************************************
@@ -576,7 +702,7 @@ input_mess_up_help            Derouler les messages d'une page vers le haut.
 
 input_mess_down_text          Derouler vers le bas
 input_mess_down_help          Derouler les messages d'une page vers le bas.
-
+	
 #********************************************
 #********************************************
 #
@@ -689,7 +815,7 @@ input_instant_chat_help       Publie un macro special pour le chat
 #********************************************
 #********************************************
 
-main_menu_text                \g v\1
+main_menu_text                \g \v
 
 game_menu_text                Jeu
 game_menu_main_help           Configuration et lancement du jeu.
@@ -723,13 +849,6 @@ game_menu_disconnect_text     Deconnexion
 game_menu_disconnect_help     Deconnecte du serveur et retourne au menu principal.
 
 
-#********************************************
-#********************************************
-#
-#             Version Info screen
-#
-#********************************************
-#********************************************
 
 #********************************************
 #********************************************
@@ -952,6 +1071,7 @@ network_opts_pingchar_help    Le ping maximum ( en ms ), que vous pouvez obtenir
 
 network_opts_lagometer_text   Lagmetre:
 network_opts_lagometer_help   Dans un jeu en reseau, l'endroit ou les autres joueurs peuvent deja etre maintenant ( mais vous ne le voyez pas encore a cause du retardement du reseau ) est indique sous forme d'une figure geometrique. Utile lors d'un jeu sur Internet
+
 network_opts_predict_text     Prevision:
 network_opts_predict_help     Dans un jeu en reseau, extrapole le mouvement des motos. La laisser desactivee donnera des meilleurs graphismes, l'activer donnera une meilleure image de la situation; le lagmetre est un bon substitut pour les previsions. Toujours desactive en mode serveur
 
@@ -986,6 +1106,9 @@ network_custjoin_port_help    Le port que le serveur reseau utilise; doit corres
 network_custjoin_name_text    Nom du serveur:
 network_custjoin_name_help    Le nom ou l'adresse IP du serveur auquel vous voulez vous connecter
 
+network_custjoin_connect_text Connection!
+network_custjoin_connect_help Entre dans l'arene!
+
 #network host menu
 network_host_text             Heberger un jeu en reseau
 network_host_help             Demarrer un serveur
@@ -999,8 +1122,35 @@ network_host_port_help        Le port reseau que ce serveur utilisera.
 network_host_host_text        Heberger le jeu!
 network_host_host_help        Entre dans l'arene! Les autres joueurs pourront venir via l'option "Se connecter a un serveur"
 
-bookmarks_menu_edit_connect_help Entre dans l'arene!
+#ORIGINAL TEXT:               Server Bookmarks
+#bookmarks_menu               UNTRANSLATED
 
+#ORIGINAL TEXT:               Add, edit, and connect to your server bookmarks.
+#bookmarks_menu_help          UNTRANSLATED
+
+#ORIGINAL TEXT:               Edit Bookmarks
+#bookmarks_menu_edit          UNTRANSLATED
+
+#ORIGINAL TEXT:               Edit and add server bookmarks.
+#bookmarks_menu_edit_help     UNTRANSLATED
+
+#ORIGINAL TEXT:               Edit \1
+#bookmarks_menu_edit_slot     UNTRANSLATED
+
+#ORIGINAL TEXT:               Address
+#bookmarks_menu_address       UNTRANSLATED
+
+#ORIGINAL TEXT:               The address of the server to connect to.
+#bookmarks_menu_address_help  UNTRANSLATED
+
+#ORIGINAL TEXT:               Name
+#bookmarks_menu_name          UNTRANSLATED
+
+#ORIGINAL TEXT:               The name of the server. This is used only for display, not functional purposes.
+#bookmarks_menu_name_help     UNTRANSLATED
+
+#ORIGINAL TEXT:               Connect to \1
+#bookmarks_menu_connect       UNTRANSLATED
 
 #********************************************
 #********************************************
@@ -1089,6 +1239,8 @@ vote_dont_mind_help           Ceci equivaut a un vote blanc.
 vote_reject                   Desapprouve
 vote_reject_help              En selectionnant ceci, vous etes "contre".
 
+vote_help                     This menu entry determines your vote.
+
 #*************************************
 #*************************************
 #
@@ -1118,6 +1270,7 @@ viewport_belongs_text         La vue \1 est assignee au joueur \2 (\3)
 viewport_assign_text          Assigner des vues aux joueurs
 viewport_assign_help          Qui se trouve dans quelle partie de l'ecran?       
 
+
 #player setup
 
 player_name_text              Nom:
@@ -1139,6 +1292,10 @@ player_camera_help            Configure vos preferences pour la camera
 player_chat_text              Configuration du chat
 
 player_chat_chat              Chat \1: 
+
+#ORIGINAL TEXT:               Sets the instant chat macros that can be said with one keystroke.
+#player_chat_chat_help        UNTRANSLATED
+
 player_blue_text              Bleu:
 player_blue_help              Vous permet de choisir le composant bleu de votre couleur.
 
@@ -1304,6 +1461,12 @@ screen_mode_menu_help         Resolution de l'ecran et autres.
 preferences_menu              Preferences
 preferences_menu_help         Options qui dependent plus de vos preferences personelles que des performances du systeme
 
+#ORIGINAL TEXT:               HUD Options
+#hud_menu                     UNTRANSLATED
+
+#ORIGINAL TEXT:               Modify HUD (heads up display) options.
+#hud_menu_help                UNTRANSLATED
+
 detail_settings_menu          Configuration: details
 detail_settings_menu_help     Vous permet d'ajuster les details graphiques pour les performances du systeme
 
@@ -1395,6 +1558,12 @@ screen_grab_mouse_help        Si cette option est activee, le pointeur de la sou
 screen_apply_changes_text     Appliquer les modifications
 screen_apply_changes_help     Essaie d'appliquer les modifications sans quitter \g. A utiliser a vos risque et perils (ndlr:Appuyez plusieurs fois sur Esc. s'il y a un plantage)
 
+#ORIGINAL TEXT:               Keep Window Active
+#screen_keep_window_active_text UNTRANSLATED
+
+#ORIGINAL TEXT:               This toggles if \g should stay active when window mode is selected and \g loses focus.
+#screen_keep_window_active_help UNTRANSLATED
+
 #detail menu
 detail_floor_mirror_text      Sol reflechissant:
 detail_floor_mirror_help      Quels objets doivent etre reflechis sur le sol, a la maniere d'un miroir?
@@ -1429,11 +1598,20 @@ detail_floor_tex_help         Un plan infini est affiche, avec la structure de l
 detail_floor_2tex_text        Double plan acev texture
 detail_floor_2tex_help        Tout comme dans "Plan avec texture", le sol est un plan infini avec une texture. Mais ici, les deux types de lignes sont affichees dans deux etapes separees du rendu, ayant pour resultat une image beaucoup plus jolie
 
+detail_polyantialias_text     Antial. des polygones:
+detail_polyantialias_help     Les contours des objets doivent ils etre lisses pour eviter les escaliers de pixel laids? Indisponible sur la plupart des systemes
+
+detail_lineantialias_text     Antial. des lignes:
+detail_lineantialias_help     Les lignes doivent-elles etre lissees pour eviter les escaliers laids de pixels?
+
 detail_alpha_text             Couche alpha:
 detail_alpha_help             La couche alpha est utilisee pour afficher des objets semitransparents, comme les explosions ou les murs derriere les motos. Ca ne necessite pas beaucoup de ressources sur la plupart des cartes 3D, mais cela ralentit un peu le rendu logiciel
 
 detail_smooth_text            "Nuances lisses":
 detail_smooth_help            Les bords semblent arrondis, en ajoutant un degrade de couleurs aux surfaces. M^me le rendu logiciel n'est pas ralenti avec cela!
+
+detail_persp_text             corr. de la persp.:
+detail_persp_help             La plupart des rendus ignorent ceci. Si il est sur "Off", les textures des murs et des sols seront horriblement deformees. Je ne vois vraiment pas pourquoi je vous laisse choisir ceci :D
 
 detail_text_truecolor_text    Textures en "Couleur vraie":
 detail_text_truecolor_help    Utilise des textures en mode 32 bits, au lieu du 16 bits traditionnel.
@@ -1441,6 +1619,12 @@ detail_text_truecolor_help    Utilise des textures en mode 32 bits, au lieu du 1
 #preferences menu
 pref_sparks_text              Etincelles:
 pref_sparks_help              Des etincelles rougeoyantes apparaissent chaque fois que vous roulez trop pres d'un mur.
+
+#ORIGINAL TEXT:               Explosion:
+#pref_explosion_text          UNTRANSLATED
+
+#ORIGINAL TEXT:               Toggles the explosion animation when a cycle crashes.
+#pref_explosion_help          UNTRANSLATED
 
 pref_skymove_text             Mouvements du ciel:
 pref_skymove_help             Anime le ciel inferieur.
@@ -1454,6 +1638,12 @@ pref_uppersky_help            Affiche le plan superieur du ciel, un plan semblab
 pref_highrim_text             Hauts murs:
 pref_highrim_help             Si cela est active, les murs des bords de l'arene seront infiniment grands. Sinon, ils seront aussi haut que les murs des motos.
 
+#ORIGINAL TEXT:               Show Headlight:
+#pref_headlight_text          UNTRANSLATED
+
+#ORIGINAL TEXT:               Render a headlight in front of each cycle.  Requires support by your video card.
+#pref_headlight_help          UNTRANSLATED
+
 pref_showhud_text             Afficher  TDB
 pref_showhud_help             Si active, le "tableau de bord" sera affiche en mode "Un Seul Joueur".
 
@@ -1465,6 +1655,18 @@ pref_showscore_help           Affiche votre score dans le TDB (le tableau de bor
 
 pref_showenemies_text         Afficher ennemis (TDB)
 pref_showenemies_help         Affiche combien de joueurs sont encore en vie, vous excepte (le tableau de bord doit etre active)
+
+#ORIGINAL TEXT:               Show Time:
+#pref_showtime_text           UNTRANSLATED
+
+#ORIGINAL TEXT:               Show the current time of day on the HUD.
+#pref_showtime_help           UNTRANSLATED
+
+#ORIGINAL TEXT:               Show 24 Hour Clock:
+#pref_show24hour_text         UNTRANSLATED
+
+#ORIGINAL TEXT:               Shows the clock as a 24 hour clock, if enabled.  Set this to 'off' to show the clock as a 12 hour clock.
+#pref_show24hour_help         UNTRANSLATED
 
 pref_showping_text            Afficher ping (TDB)
 pref_showping_help            Affiche le ping dans le TDB (le tableau de bord doit etre active)
@@ -1484,6 +1686,9 @@ misc_fps_help                 Affiche ou non les FPS ( "frames per second", nbe 
 #tweaks menu
 tweaks_displaylists_text      Listes d'affichage:
 tweaks_displaylists_help      Les liste d'affichage sont une propriete d'OpenGL pour afficher la meme chose plusieurs fois; elles sont normalement utilisees pour les motos. Cependant, quelques utilisations ne fonctionnent pas: Si vous ne voyez pas les motos, desactivez ceci.
+
+tweaks_ztrick_text            ZTrick:
+tweaks_ztrick_help            Une acceleration qui fonctionne sur la plupart des systemes: au lieu d'effacer et de recreer tout apres chaque frame, nous dessinons juste l'arriere-plan (sols et murs d'enceinte). Activez-le si vous n'avez aucun problemes avec.
 
 tweaks_infinity_text          Infini:
 tweaks_infinity_help          Quelques plans ( ciel, sol, etc. ) ont une prolongation infinie. Si ceci est active, ils sont vraiment dessines en tant que plans infinis. Quelques rendus d'OpenGL ne semble pas trop apprecier ceci ( toutes les versions de Windows que j'ai vu ). Le desactiver si les textures du sol et/ou du ciel sont deformees
@@ -1552,6 +1757,18 @@ welcome_message_finish        \nBon amusement!\n
 #********************************************
 #********************************************
 
+#ORIGINAL TEXT:               Setting \1 (Group: \2) deviates from its default value; clients older than \3 will not be allowed in.\n
+#setting_legacy_clientblock   UNTRANSLATED
+
+#ORIGINAL TEXT:               Setting \1 (Group: \2) deviates from its default value; it will revert to it when clients older than \3 connect.\n
+#setting_legacy_revert        UNTRANSLATED
+
+#ORIGINAL TEXT:               Setting \1 (Group: \2) deviates from its default value; clients older than \3 may experience problems.\n
+#setting_legacy_ignore        UNTRANSLATED
+
+#ORIGINAL TEXT:               Setting \1 (Group: \2) can't be changed currently; clients older than \3 are connected.\n
+#setting_legacy_change_blocked UNTRANSLATED
+
 #********************************************
 #********************************************
 #
@@ -1615,9 +1832,10 @@ gamestate_reset_console       Remise a zero des scores et debut d'un nouveau mat
 gamestate_resetnow_center     Nouveau match!
 gamestate_resetnow_console    Remise a zero des scores...\n
 gamestate_resetnow_log        Nouveau match\n
-gamestate_newround_console    C'est parti (round \1 sur \2)!\n
+gamestate_newround_console    C'est parti (round \1 sur \2 )!\n
 gamestate_newround_goldengoal C'est parti! (Round special; le gagnant gagne le match)!\n
 gamestate_newround_log        Nouveau round\n
+
 gamestate_wait_players        En attente de joueurs reels...\n
 gamestate_wait_players_con    En attente de joueurs reels ( seuls des spectateurs sont en ligne )...\n
 
@@ -1640,7 +1858,13 @@ gamestate_winner_ai           IA.
 gamestate_winner_humans       Humains.
 
 instant_win_activated         "Instant Win Zone" activee! Entrez-y pour gagner le round.\n
+
+#ORIGINAL TEXT:               Death zone zone activated! Avoid it!\n
+#instant_death_activated      UNTRANSLATED
+
 player_win_instant            \1 a gagne \2 points pour avoir atteint la "Instant Win Zone".\n
+
+
 #********************************************
 #********************************************
 #
@@ -1667,7 +1891,6 @@ player_lose_frag              \1 perd \2 points puisqu'il a cause une erreur gen
 player_lose_rim               \1 perd \2 points pour avoir essaye de s'enfuir lachement de l'arene.\n
 player_win_survivor           \1 a obtenu \2 points pour etre la derniere equipe active.\n
 player_joins_team             \1 se battra avec \2 lors du prochain round.\n
-#player_joins_team_now   \1 0x7fff7fnow plays for \2.\n
 player_leaves_team            \1 0xff7f7fquitte \2.\n
 player_creates_team           \1 a cree une nouvelle equipe.\n
 player_nocreate_team          \1 ne peut pas creer actuellement une nouvelle equipe.\n
@@ -1707,6 +1930,7 @@ network_message_timeout_inter Le serveur auquel vous voulez vous connecter n'a p
 
 network_message_denied_title  Login refuse
 network_message_denied_inter  Le serveur auquel vous voulez vous connecter a refuse votre login.\nLa plupart du temps, c'est parcequ'il est plein.
+
 network_message_lateto_title  Temps ecoule
 network_message_lateto_inter  La connexion au serveur etait reussie; cependant, la synchronisation a echoue.\nEssayez juste encore!
 
@@ -1716,6 +1940,8 @@ network_message_lostconn_inter La connexion avec le serveur a ete perdue. Cela p
 network_message_abortconn_title Connexion achevee
 network_message_abortconn_inter Le serveur a acheve votre connexion
 
+#ORIGINAL TEXT:               One of the master servers did not answer. Trying next one...\n
+#network_master_timeout_retry UNTRANSLATED
 network_master_timeout_title  Le serveur maitre ne repond pas
 network_master_timeout_inter  Le serveur maitre ne repond pas, donc la liste des serveurs ne peut pas etre mise a jour.\nVous devrez utiliser l'ancienne liste...
 
@@ -1726,7 +1952,7 @@ network_master_upgrage        Une mise a jour est necessaire
 network_master_downgrage      Le serveur n'est plus a jour
 network_master_incompatible   Le serveur n'est pas compatible
 network_master_full           Le serveur est plein
-network_master_serverinfo     Version: \1\nURI    : \2\nOptions: \3\n
+network_master_serverinfo     Version: \1\nURI    : \2\n
 network_master_players        Joueurs: 
 network_master_players_empty  vide
 network_master_options        Options:\n
@@ -1737,9 +1963,9 @@ network_syncing_gamestate     Recu! Synchronisation du statut de jeu...\n
 network_warn_unknowndescriptor \n\n\nMessage inconnu recu, avec l'ID \1 \n\nVOUS DEVEZ SANS DOUTE METTRE ARMAGETRON A JOUR!!!!\n
 network_error                 Erreur de reseau.\n
 network_error_timeout         Le temps de l'utilisateur \1 est ecoule.\n
-network_error_shortmessage    Le message de l'utilisateur \1 est trop court.\n
+network_error_shortmessage    Le message de l'utilisateur \1 est trop court. Destruction de celui-ci.\n
 network_error_overflow        L'utilisateur \1 ne sait pas suivre le trafic du reseau.\n
-network_killuser              Fin de l'utilisateur \1, ping \2, IP \3: \4\n
+network_killuser              Fin de l'utilisateur \1, ping \2.\n
 network_statistics1           Duree:     \1 secondes\n
 network_statistics2           Envoyes:   \2 octets dans \3 paquets (\4 octets/s)\n
 network_statistics3           Recus:     \5 octets dans \6 paquets (\7 octets/s)\n
@@ -1748,8 +1974,10 @@ network_login_denial          Login refuse...\n
 network_server_login          Login recu de \1.\n
 network_server_login_success  Nouvel utilisateur: \1\n
 
-
 network_toomanyservers        \n\n\nAttention: trop de serveurs en place sur cet ordinateur.\nLeaving the port range that is scanned by clients with default settings.\n\n\n
+
+#ORIGINAL TEXT:               Reveived unidentifiable server information from \1 over socket \2.\n
+#network_browser_unidentified UNTRANSLATED
 
 network_logout_process        Deconnexion du compte...\n 
 network_logout_done           Termine!\n
@@ -1775,12 +2003,23 @@ network_kill_incompatible     Vous utilisez une version incompatible avec celle 
 network_kill_full             Le serveur est complet.
 network_kill_shutdown         Le serveur s'est eteint.                
 network_kill_overflow         Le reseau etait plein.
+
+#ORIGINAL TEXT:               Too many players were logged in from your connection.
+#network_kill_too_many_players UNTRANSLATED
 network_kill_kick             Vous avez ete banni par l'administrateur; veuillez rester a l'ecart.
+#network_kill_banned		You are banned for at least \1 minutes.
 network_kill_banned           Vous avez ete banni par l'administrateur du serveur. \2
-#network_kill_banned         You are banned. Please stay away. The more often you retry to connect, the longer your ban stays.
 network_kill_unknown          Aucune raison n'a ete donnee.
 network_kill_spamkick         Vous avez ete banni automatiquement pour avoir spamme.
 voted_kill_kick               Vous avez ete banni par une foule fachee; veuillez rester a l'ecart.
+
+network_kick_notfound         Le joueur \1 n'a pas ete trouve. Souvenez-vous que la casse doit etre respecter (majuscules/minuscules).\n
+
+#ORIGINAL TEXT:               Kicks per hour of IP \1 are now \2.\n
+#network_ban_kph              UNTRANSLATED
+
+#ORIGINAL TEXT:               Players from IP \1 are banned for \2 minutes.\n
+#network_ban                  UNTRANSLATED
 
 #*************************************
 #*************************************
@@ -1801,6 +2040,7 @@ vote_toofew                   Sondage refuse, trop peu d'utilisaturs en ligne.\n
 vote_submitted                Sondage "\2" propose par \1.\n
 vote_vote_for                 \1 a vote "pour" au sondage "\2".\n
 vote_vote_against             \1 a vote "Contre" au sondage "\2".\n
+
 #********************************************
 #********************************************
 #
@@ -1837,13 +2077,8 @@ network_master_host_lan_help  Cela demarrera un jeu sur votre ordinateur, mais s
 #********************************************
 #********************************************
 
-#********************************************
-#********************************************
-#
-#       Directory messages
-#
-#********************************************
-#********************************************
+#ORIGINAL TEXT:               Resource \1 not found in cache. Downloading it, please be patient...\n
+#resource_not_cached          UNTRANSLATED
 
 #********************************************
 #********************************************
@@ -1853,17 +2088,21 @@ network_master_host_lan_help  Cela demarrera un jeu sur votre ordinateur, mais s
 #********************************************
 #********************************************
 
-# printed on loading a map
-
 # title of map error message
+#ORIGINAL TEXT:               Map load failure
+#map_file_load_failure_title  UNTRANSLATED
 
 # printed when a map can't be loaded, and the user can do something about it
+#ORIGINAL TEXT:               The map \1 could not be loaded; please check your configuration for spelling mistakes.\n
+#map_file_load_failure_self   UNTRANSLATED
 
 # printed when a map can't be loaded, and  the failure is the server admin's fault
+#ORIGINAL TEXT:               The map \1 could not be loaded.\nThe server you tried to connect to may have a broken configuration; you should inform the server administrator of this error.\n
+#map_file_load_failure_server UNTRANSLATED
 
 # worst case: default map could not load, either
-
-# resource at the wrong place
+#ORIGINAL TEXT:               \nFallback to default map did not work either. Please send a bug report, this is unusual.\n
+#map_file_load_failure_default UNTRANSLATED
 
 #********************************************
 #********************************************
@@ -1874,6 +2113,11 @@ network_master_host_lan_help  Cela demarrera un jeu sur votre ordinateur, mais s
 #********************************************
 
 # texture not found error message
+#ORIGINAL TEXT:               The texture file \1 could not be loaded.\n
+#texture_error_filenotfound   UNTRANSLATED
+
+#ORIGINAL TEXT:               Texture not found.
+#texture_error_filenotfound_title UNTRANSLATED
 
 #********************************************
 #********************************************
@@ -1907,9 +2151,11 @@ config_file_write_error       N'a pas pu ecrire dans le fichier de configuration
 config_value_changed          \1 a change \2 en \3.\n
 config_error_read             erreur de lecture de \1: format non valide.\n
 config_message_info           \1 est actuellement a \2.\n
-nconfig_error_protected       Seul le serveur peut modifier \1.\n
+
+nconfig_errror_protected      Seul le serveur peut modifier \1.\n
 nconfig_error_unknown         Message recu du setting \1 inconnu...\n\n\n\nVOUS DEVRIEZ PROBABLEMENT METTRE ARMAGETRON A JOUR\n
 nconfig_value_changed         \1 a change \2 en \3 dans l'ordre du serveur.\n
+
 
 #*************************************
 #*************************************
@@ -1944,17 +2190,9 @@ login_storepw_disk_help       Paresseux: stocke le mot de passe sur votre disque
 password_help                 Configurations: mot de passe
 
 login_request_failed          La connexion a echoue. Reessayez!
+login_request_first           Login requis sur ce serveur
 login_request_namechange      Le nom a change; un login est necessaire
 login_request_master          Le serveur maitre a besoin d'un login
 
-# access level messages
-
-# various reasons for logins to fail
-
-# items that should not be translated
-
 # Room for lost settings in translation files:
 
-
-# Outdated:
-login_request_first           Login requis sur ce serveur

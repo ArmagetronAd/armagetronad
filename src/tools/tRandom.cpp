@@ -36,7 +36,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include    "tError.h"
 #include    "tRecorder.h"
-#include    <cstdlib>
 
 #undef 	INLINE_DEF
 #define INLINE_DEF

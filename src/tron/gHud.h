@@ -25,8 +25,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
+// TODO: Get rid of this file and all the obsolete config vars in here
+
 #ifndef ARMAGETRON_HUD_H
 #define ARMAGETRON_HUD_H
+
+#include "defs.h"
 
 extern REAL subby_SpeedGaugeSize, subby_SpeedGaugeLocX, subby_SpeedGaugeLocY;
 extern REAL subby_BrakeGaugeSize, subby_BrakeGaugeLocX, subby_BrakeGaugeLocY;
@@ -38,4 +42,6 @@ extern REAL subby_AlivePeopleLocX, subby_AlivePeopleLocY, subby_AlivePeopleSize;
 extern REAL subby_PingLocX, subby_PingLocY, subby_PingSize;
 extern bool showTime;
 extern bool show24hour;
+extern bool subby_SpeedGaugeBar, subby_BrakeGaugeBar, subby_RubberGaugeBar;
+
 #endif

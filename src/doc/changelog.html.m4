@@ -104,7 +104,7 @@ NEWSENTRY([2000/06/04],[fixed some hangups (Seven3); game menu now pauses
 the game if not in a network game (Seven3)])
 
 NEWSENTRY([2000/05/30],[really fixed the latest exit crash, the camera
-          hiccups, a score bug, (hopefully) the VooDoo problems. Added
+          hickups, a score bug, (hopefully) the VooDoo problems. Added
 	  <a href=index.html#cl>command line switches</a>.])
 
 NEWSENTRY([2000/05/29],[Released version 0.1.3; 

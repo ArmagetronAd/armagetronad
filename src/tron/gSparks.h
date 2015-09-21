@@ -28,11 +28,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef ArmageTron_gSparks_H
 #define ArmageTron_gSparks_H
 
-#include "eSound.h"
+#include "config.h"
+
+#include "eSoundMixer.h"
 #include "eGameObject.h"
 #include "rModel.h"
 
-class gSpark: public eReferencableGameObject{ // When the player nearly hits a eWall
+class gSpark: public eGameObject{ // When the player nearly hits a eWall
     REAL createTime;
 
 #define SPARKS 10
@@ -66,8 +68,8 @@ public:
 #ifndef DEDICATED
     virtual void Render(const eCamera *cam);
 
-    virtual void SoundMix(Uint8 *dest,unsigned int len,
-                          int viewer,REAL rvol,REAL lvol);
+    //virtual void SoundMix(Uint8 *dest,unsigned int len,
+    //                      int viewer,REAL rvol,REAL lvol);
 #endif
 };
 

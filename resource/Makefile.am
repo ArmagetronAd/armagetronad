@@ -11,18 +11,16 @@ included: ${sourcefiles} ${top_srcdir}/batch/make/sortresources.py ${top_srcdir}
 all: included
 
 linked_included.%: included
-	if test ! -r $@; then \
-		if test -d included; then\
-			ln -sf ./included $@;\
-		else\
-			ln -sf ${srcdir}/included $@;\
-		fi;\
+	if test -d included; then\
+		ln -sf included $@;\
+	else\
+		ln -sf ${srcdir}/included $@;\
 	fi
 
 install-data-local: linked_included.install
 #   copy processed included resources into target directory
 	mkdir -p ${DESTDIR}${resourcedir}/included
-	cp -r $</* ${DESTDIR}${resourcedir}/included
+	cp -LR $</* ${DESTDIR}${resourcedir}/included
 	find ${DESTDIR}${resourcedir} -type d -exec chmod 755 \{\} \;
 	find ${DESTDIR}${resourcedir} -type f -exec chmod 644 \{\} \;
 	rm -f $<	
@@ -34,7 +32,7 @@ uninstall-local:
 dist-hook: linked_included.dist
 #   copy processed included resources into distribution
 	mkdir -p $(distdir)/included
-	cp -r $</* $(distdir)/included/
+	cp -LR $</* $(distdir)/included/
 
 #	delete temporary files
 	rm -f $< $(distdir)/included/map.dtd

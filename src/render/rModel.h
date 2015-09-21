@@ -33,13 +33,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tLinkedList.h"
 #include <math.h>
 #include "rGL.h"
-#include "rDisplayList.h"
 
 class Vec3{
 public:
     float x[3];
     Vec3(REAL a=0,REAL b=0,REAL c=0){x[0]=a;x[1]=b;x[2]=c;}
-    ~Vec3(){}
+    ~Vec3(){};
 
     REAL Norm(){return REAL(sqrt(x[0]*x[0]+x[1]*x[1]+x[2]*x[2]));}
 
@@ -54,31 +53,25 @@ class rModelFace{
 public:
     int A[3];
     rModelFace(int a=0,int b=0,int c=0){A[0]=a;A[1]=b;A[2]=c;}
-    ~rModelFace(){}
+    ~rModelFace(){};
 };
 
-class rModel
-{
-    rDisplayList displayList_;
+class rModel: public tListItem<rModel>{
+    GLuint displayList;
 
     tArray<Vec3> vertices;
     tArray<Vec3> texVert;
     tArray<Vec3> normals;
     tArray<rModelFace> modelFaces;
     tArray<rModelFace> modelTexFaces;
-    bool modelTexFacesCoherent; // if modelFaces and modelTexFaces are identical
     void Load(std::istream &s,const char *fileName);
-    explicit rModel(const char *fileName);
-    rModel(rModel const &);
-    ~rModel();
 public:
-    //! returns a model from the cache
-    static rModel * GetModel(const char * filename);
+    rModel(const char *fileName,const char *fileName_alt="");
+    ~rModel();
 
-    //! clears the model cache
-    static void ClearCache();
-    
     void Render();
+
+    static void UnloadAllDisplayLists();
 };
 
 #endif

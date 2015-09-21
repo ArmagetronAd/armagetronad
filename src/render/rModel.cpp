@@ -35,14 +35,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tConfiguration.h"
 #include "tLocale.h"
 #include "rGL.h"
-#include <string.h>
 
-#define DONTDOIT
-#include "rRender.h"
 
-tCONFIG_ENUM(rDisplayListUsage);
+static rModel *sr_ModelAnchor;
 
-static tConfItem<rDisplayListUsage> mod_udl("USE_DISPLAYLISTS", sr_useDisplayLists);
+static tConfItem<bool> mod_udl("USE_DISPLAYLISTS", sr_useDisplayLists);
 
 #ifndef DEDICATED
 
@@ -58,7 +55,6 @@ void Vec3::RenderNormal(){
 void rModel::Load(std::istream &in,const char *fileName){
 
 #ifndef DEDICATED
-    modelTexFacesCoherent = false;
     bool calc_normals=true;
 
     if (strstr(fileName,".mod")){ // old loader
@@ -106,7 +102,6 @@ void rModel::Load(std::istream &in,const char *fileName){
             Vec3 &v = vertices[i];
             texVert[i] = Vec3((v.x[0]-xmin)/(xmax-xmin), (zmax-v.x[2])/(zmax-zmin), 0);
         }
-        modelTexFacesCoherent = true;
         for (i = modelFaces.Len()-1; i>=0; i--)
         {
             modelTexFaces[i] = modelFaces[i];
@@ -117,7 +112,9 @@ void rModel::Load(std::istream &in,const char *fileName){
         int offset=0;       //
         int current_vertex=0; //
 
-        tArray< int > translate(10000);
+#define MAXVERT 10000
+
+        int   translate[MAXVERT];
 
         enum {VERTICES,FACES} status=VERTICES;
 
@@ -240,7 +237,9 @@ void rModel::Load(std::istream &in,const char *fileName){
 #endif
 }
 
-rModel::rModel(const char *fileName)
+rModel::rModel(const char *fileName,const char *fileName_alt)
+        :tListItem<rModel>(sr_ModelAnchor), displayList(0)
+        // ,vertices(0),normals(0),modelFaces(0)
 {
 #ifndef DEDICATED
     //	tString s;
@@ -251,13 +250,24 @@ rModel::rModel(const char *fileName)
 
     if ( !tDirectories::Data().Open( in, fileName ) )
     {
-        tERR_ERROR("\n\nModel file " << fileName << " could not be found.\n" <<
-                   "are you sure you are running " << tOutput("$program_name") << " in it's own directory?\n\n");
+        if (fileName_alt){
+            std::ifstream in2;
+            tDirectories::Data().Open( in2, fileName_alt );
+
+            if (!in2.good()){
+                tERR_ERROR("\n\nModel file " << fileName_alt << " could not be found.\n" <<
+                           "are you sure you are running " << tOutput("$program_name") << " in it's own directory?\n\n");
+            }
+            else
+                Load(in2,fileName_alt);
+        }
+        else
+            tERR_ERROR("\n\nModel file " << fileName << " could not be found.\n" <<
+                       "are you sure you are running " << tOutput("$program_name") << " in it's own directory?\n\n");
+
     }
     else
-    {
         Load(in,fileName);
-    }
 #endif
 }
 
@@ -265,122 +275,88 @@ rModel::rModel(const char *fileName)
 void rModel::Render(){
     if (!sr_glOut)
         return;
-    if ( !displayList_.Call() )
+    if(displayList)
+        glCallList(displayList);
+    else
     {
-        // close pending glBegin() blocks
-        RenderEnd();
+        if (sr_useDisplayLists)
+        {
+            displayList=glGenLists(1);
+            glNewList(displayList,GL_COMPILE_AND_EXECUTE);
+        }
 
-        // model display lists should definitely be compiled before other lists
-        rDisplayList::Cancel();
+        if (normals.Len()>=vertices.Len()){
+            glNormalPointer(GL_FLOAT,0,&normals[0]);
+            glEnableClientState(GL_NORMAL_ARRAY);
+        }
+        glVertexPointer(3,GL_FLOAT,0,&vertices[0]);
+        glEnableClientState(GL_VERTEX_ARRAY);
+
 
         bool texcoord=true;
         if (texVert.Len()<0)
             texcoord=false;
         if (modelTexFaces.Len()!=modelFaces.Len())
             texcoord=false;
-        if ( !modelTexFacesCoherent )
-            texcoord=false;
 
-        if (texcoord)
-        {
-            glTexCoordPointer(3,GL_FLOAT,0,&texVert[0]);
-            glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-        }
 
-           
+        glEnable(GL_CULL_FACE);
 
-        if ( !modelTexFacesCoherent )
-        {
-            rDisplayListFiller filler( displayList_, false );
-            glEnable(GL_CULL_FACE);
-
-            // sigh, we need to do it the complicated way
-            glBegin( GL_TRIANGLES );
-            for(int i=modelFaces.Len()-1;i>=0;i--)
-            {
-                for(int j=0;j<=2;j++)
-                {
-                    if ( modelTexFaces.Len() > 0 )
-                    {
-                        glTexCoord3fv(reinterpret_cast<REAL *>(&(texVert(modelTexFaces(i).A[j]))));
-                    }
-                    if ( normals.Len() > 0 )
-                    {
-                        glNormal3fv(reinterpret_cast<REAL *>(&(normals(modelFaces(i).A[j]))));
-                    }
-                    glVertex3fv(reinterpret_cast<REAL *>(&(vertices(modelFaces(i).A[j]))));
+        if (texcoord){
+            glBegin(GL_TRIANGLES);
+            for(int i=modelFaces.Len()-1;i>=0;i--){
+                for(int j=0;j<=2;j++){
+                    glTexCoord3fv(reinterpret_cast<REAL *>(&(texVert(modelTexFaces(i).A[j]))));
+                    glArrayElement(modelFaces(i).A[j]);
                 }
             }
-            glEnd();
 
-            glDisable(GL_CULL_FACE);
+            glEnd();
         }
         else
-        {
-            // glDrawElements works
-            if (normals.Len()>=vertices.Len())
-            {
-                glNormalPointer(GL_FLOAT,0,&normals[0]);
-                glEnableClientState(GL_NORMAL_ARRAY);
-            }
-            glVertexPointer(3,GL_FLOAT,0,&vertices[0]);
-            glEnableClientState(GL_VERTEX_ARRAY);
-
-            rDisplayListFiller filler( displayList_, false );
-            glEnable(GL_CULL_FACE);
-
             glDrawElements(GL_TRIANGLES,
                            modelFaces.Len()*3,
                            GL_UNSIGNED_INT,
                            &modelFaces(0));
 
-            glDisable(GL_CULL_FACE);
-        }
 
-
-        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
         glDisableClientState(GL_VERTEX_ARRAY);
         glDisableClientState(GL_NORMAL_ARRAY);
+
+        glDisable(GL_CULL_FACE);
+
+        if (sr_useDisplayLists)
+        {
+            glEndList();
+        }
     }
 }
 #endif
 
 rModel::~rModel(){
+#ifndef DEDICATED
+    if (displayList) glDeleteLists(displayList,1);
+#endif
     tCHECK_DEST;
 }
 
-static std::map<std::string, rModel *> sr_modelCache;
 
-//! returns a model from the cache
-rModel * rModel::GetModel(const char * filename)
+void rModel::UnloadAllDisplayLists()
 {
-    std::string key(filename);
-    if(sr_modelCache.find(key) == sr_modelCache.end())
+#ifndef DEDICATED
+    rModel *run = sr_ModelAnchor;
+    while (run)
     {
-        std::ifstream in;
-        rModel * model = 0;
-        if ( tDirectories::Data().Open( in, filename ) )
+        if (run->displayList && sr_glOut)
         {
-            model = tNEW(rModel( filename ));
+            glDeleteLists(run->displayList, 1);
+            run->displayList = 0;
         }
-        sr_modelCache[key] = model;
+        run = run->Next();
     }
-
-    return sr_modelCache[key];
-}
-
-//! clears the model cache
-void rModel::ClearCache()
-{
-    for(std::map<std::string, rModel *>::iterator iter = sr_modelCache.begin(); iter != sr_modelCache.end(); ++iter)
-    {
-        delete (*iter).second;
-    }
-
-    sr_modelCache.clear();
+#endif
 }
 
 
-
-
+static rCallbackBeforeScreenModeChange unload(&rModel::UnloadAllDisplayLists);
 

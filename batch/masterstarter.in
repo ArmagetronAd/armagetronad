@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/sh
 #
 # starts the @progtitle@ master server from the installation directory
 

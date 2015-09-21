@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+<!DOCTYPE Resource SYSTEM "cockpit.dtd">
+
+<Resource type="aacockpit" name="Playroom" version="0.0.1" author="Lucifer" category="sick">
+    <Cockpit version="0.0.1">
+        <!-- speed meter -->
+        <BarGauge camera="*">
+            <DataSet>
+                <AtomicData field="source" source="player_speed" />
+                <AtomicData field="minimum" source="0" />
+                <AtomicData field="maximum" source="80" />
+            </DataSet>
+            <Position x="0.4" y="-0.4" />
+            <Size height="0.015" width="0.15" />
+            <ShowCurrent value="false" />
+            <ShowMaximum value="false" />
+            <ShowMinimum value="false" />
+            <Caption location="off">
+                <Text value="Speed" />
+            </Caption>
+            <Background>
+                <Solid>
+                    <Color r="0.1" g="0.3" b="0.2" alpha="0.2" />
+                </Solid>
+            </Background>
+            <Foreground>
+                <Solid>
+                            <Color r="1." g="0." b="0." alpha="1." />
+                </Solid>
+            </Foreground>
+        </BarGauge>
+        <!-- Brakes -->
+        <BarGauge camera="*">
+            <DataSet>
+                <AtomicData field="source" source="player_brakes" />
+                <AtomicData field="minimum" source="0" />
+                <AtomicData field="maximum" source="1" />
+            </DataSet>
+            <Position x="-0.4" y="-0.4" />
+            <Size height="0.015" width="0.15" />
+            <ShowCurrent value="false" />
+            <ShowMaximum value="false" />
+            <ShowMinimum value="false" />
+            <Caption location="off">
+                <Text value="Brakes" />
+            </Caption>
+            <Background>
+                <Solid>
+                    <Color r="0.1" g="0.3" b="0.2" alpha="0.2" />
+                </Solid>
+            </Background>
+            <Foreground>
+                <Gradient orientation="horizontal">
+                    <Color r="0.0" g="0.0" b="1.0" alpha="0.7" at="0.0" />
+                    <Color r="1.0" g="0.0" b="0.0" alpha="0.7" at="1.0" />
+                </Gradient>
+            </Foreground>
+        </BarGauge>
+
+        <!-- Enemies alive -->
+        <Label camera="*">
+            <DataSet id="enemies">
+                <AtomicData field="source" source="enemies_alive" />
+            </DataSet>
+            <DataSet id="friends">
+                <AtomicData field="source" source="friends_alive" />
+            </DataSet>
+            <DataSet id="enemiescolor">
+                <Conditional field="source" lvalue="enemies_alive" rvalue="friends_alive" operator="eq">
+                    <IfTrue>
+                        <AtomicData source="0x0000ff" />
+                    </IfTrue>
+                    <IfFalse>
+                        <Conditional lvalue="enemies_alive" rvalue="friends_alive" operator="gt">
+                            <IfTrue>
+                                <AtomicData source="0x00ff66" />
+                            </IfTrue>
+                            <IfFalse>
+                                <AtomicData source="0xff0000" />
+                            </IfFalse>
+                        </Conditional>
+                    </IfFalse>
+                </Conditional>
+            </DataSet>
+            <DataSet id="friendscolor">
+                <Conditional field="source" lvalue="enemies_alive" rvalue="friends_alive" operator="eq">
+                    <IfTrue>
+                        <AtomicData source="0x0000ff" />
+                    </IfTrue>
+                    <IfFalse>
+                        <Conditional lvalue="enemies_alive" rvalue="friends_alive" operator="gt">
+                            <IfTrue>
+                                <AtomicData source="0xff0000" />
+                            </IfTrue>
+                            <IfFalse>
+                                <AtomicData source="0x00ff66" />
+                            </IfFalse>
+                        </Conditional>
+                    </IfFalse>
+                </Conditional>
+            </DataSet>
+            <Position x="-0.475" y="-0.4" />
+            <Size height="0.06" width="0.017" /> <!-- Size would be the font size in this case -->
+            <Caption location="off">
+                <Text value="Player Status" />
+            </Caption>
+            <Face>
+                <Table>
+                    <Row>
+                        <Cell><GameData data="enemiescolor" /><Text value="Enemies:" /></Cell>
+                        <Cell><GameData data="enemiescolor" /><GameData data="enemies" /></Cell>
+                    </Row>
+                    <Row>
+                        <Cell><GameData data="friendscolor" /><Text value="Friends:" /></Cell>
+                        <Cell><GameData data="friendscolor" /><GameData data="friends" /></Cell>
+                    </Row>
+                </Table>
+            </Face>
+        </Label>
+        <!-- Ping
+        <Label camera="*">
+            <DataSet id="ping">
+                <AtomicData field="source" source="current_ping" />
+            </DataSet>
+            <Position x="-0.1" y="-0.96" />
+            <Size height="0.035" width="0.017" />
+            <Caption location="off">
+                <Text value="Player Status" />
+            </Caption>
+            <Face>
+                <Table>
+                    <Row>
+                        <Cell><Text value="Ping:" /></Cell>
+                        <Cell><GameData data="ping" /></Cell>
+                    </Row>
+                </Table>
+            </Face>
+        </Label> -->
+        <!-- Score -
+        <Label camera="*">
+            <DataSet id="myscore">
+                <AtomicData source="current_score" />
+            </DataSet>
+            <DataSet id="topscore">
+                <AtomicData source="top_score" />
+            </DataSet>
+            <DataSet id="color">
+                <Conditional field="source" lvalue="current_score" rvalue="top_score" operator="eq">
+                    <IfTrue>
+                        <AtomicData source="0xff9d50" />
+                    </IfTrue>
+                    <IfFalse>
+                        <Conditional lvalue="current_score" rvalue="top_score" operator="gt">
+                            <IfTrue>
+                                <AtomicData source="0x11ff11" />
+                            </IfTrue>
+                            <IfFalse>
+                                <AtomicData source="0x11ffff" />
+                            </IfFalse>
+                        </Conditional>
+                    </IfFalse>
+                </Conditional>
+            </DataSet>
+            <Position x="-.93" y="-.88" />
+            <Size height="0.04" width="0.02" />
+            <Caption location="top">
+                <Text value="Scores" />
+            </Caption>
+            <Face>
+                <Table>
+                    <Row>
+                        <Cell><GameData data="color" /><Text value="Me:" /></Cell>
+                        <Cell><GameData data="color" /><Text value="Top:" /></Cell>
+                    </Row>
+                    <Row>
+                        <Cell><GameData data="color" /><GameData data="myscore" /></Cell>
+                        <Cell><GameData data="color" /><GameData data="topscore" /></Cell>
+                    </Row>
+                </Table>
+            </Face>
+        </Label> -->
+        <!-- Clock -->
+        <Label camera="*" viewport="top">
+            <DataSet id="hours">
+                <AtomicData source="current_hours12h" minwidth="2" fill="0" />
+            </DataSet>
+            <DataSet id="minutes">
+                <AtomicData source="current_minutes" minwidth="2" fill="0" />
+            </DataSet>
+            <DataSet id="ampm">
+                <Conditional field="source" lvalue="current_hours" rvalue="12" operator="le">
+                    <IfTrue>
+                        <AtomicData source="AM" />
+                    </IfTrue>
+                    <IfFalse>
+                        <AtomicData source="PM" />
+                    </IfFalse>
+                </Conditional>
+            </DataSet>
+            <Position x="0.6" y="0.4" />
+            <Size height="0.04" width="0.02" />
+            <Caption location="off">
+                <Text value="Time/Fps/Timestamp" />
+            </Caption>
+            <Face>
+                <Table>
+                    <Row>
+                        <Cell><GameData data="hours" /><Text value=":" /><GameData data="minutes" /><Text value=" " /><GameData data="ampm" /></Cell>
+                    </Row>
+                </Table>
+            </Face>
+        </Label>
+        <!-- FPS -->
+        <BarGauge camera="*" viewport="top">
+            <DataSet>
+                <AtomicData field="source" source="current_framerate" />
+                <AtomicData field="minimum" source="0" />
+                <AtomicData field="maximum" source="100" />
+            </DataSet>
+            <Position x="0" y="0.45" />
+            <Size height="0.03" width="0.08" />
+            <ShowCurrent value="true" />
+            <ShowMaximum value="true" />
+            <ShowMinimum value="true" />
+            <Background>
+                <Solid>
+                    <Color r="0." g="1." b="0." alpha="1." />
+                </Solid>
+            </Background>
+            <Foreground>
+                <Solid>
+                    <Color r="1." g="0." b="0." alpha="1." />
+                </Solid>
+            </Foreground>
+        </BarGauge>
+
+        <!-- HUD Map (obviously) -->
+        <Map camera="*" viewport="top">
+            <Position x="0" y="-0.759" />
+            <Size height="0.24" width="0.24" />
+        </Map>
+    </Cockpit>
+</Resource>

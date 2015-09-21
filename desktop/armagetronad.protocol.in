@@ -1,0 +1,13 @@
+[Protocol]
+exec=@progname@ --connect "%u"
+protocol=armagetronad
+input=none
+output=none
+helper=true
+listing=false
+reading=false
+writing=false
+makedir=false
+deleting=false
+URIMode=rawuri
+Icon=@progname@.png

@@ -4,7 +4,7 @@ If you want to become a developer, you should register at the Armagetron Advance
 http://forums.armagetronad.net/viewtopic.php?t=1360
 Just tell us that you want to join and what your skills are. We can always use another hand.
 
-The information here is for the Unix side of development, Windows developers just need to read README-Subversion to get going.
+The information here is for the Unix side of development, Windows developers just need to read README-CVS to get going.
 
 **********************************************************
 * Flags and Settings only developers need to know about: *
@@ -52,10 +52,10 @@ There exist three source code reformatting targets for different needs:
 
 Build system integrity checks:
 "make installcheck" installs the game in a local directory tree (._inst), tests its basic operation and uninstalls it, checking whether there are leftover files.
-"make devcheck" runs beautification and "make installcheck".
+"make cvscheck" runs beautification and "make installcheck".
 "make distcheck" (provided by automake) builds a distributable source tarball and checks whether "make (dist)clean" and various installations work correctly. It makes a full rebuild and is time consuming.
 "make fullcheck" runs all of the above.
-z-man's advice: Before committing your work to Subversion, please run at least "make devcheck", it only takes some seconds. Run "make fullcheck" when you have made changes to the build system.
+z-man's advice: Before committing your work to CVS, please run at least "make cvscheck", it only takes some seconds. Run "make fullcheck" when you have made changes to the build system.
 
 -------------------------------------------------------
 initially written by z-man

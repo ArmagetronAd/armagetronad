@@ -15,12 +15,21 @@
 #include "tString.h"
 
 // server determined resource repository
-tString tResourceManager::resRepoServer("http://resource.armagetronad.net/resource/");
+tString & tResourceManager::AccessRepoServer()
+{
+    static tString resRepoServer("http://resource.armagetronad.net/resource/");
+    return resRepoServer;
+}
 // the nSettingItem is in gStuff.cpp
 
 // client determined resource repository
-tString tResourceManager::resRepoClient("http://resource.armagetronad.net/resource/");
-static tSettingItem<tString> conf_res_repo("RESOURCE_REPOSITORY_CLIENT", tResourceManager::resRepoClient);
+tString & tResourceManager::AccessRepoClient()
+{
+    static tString resRepoClient("http://resource.armagetronad.net/resource/");
+    return resRepoClient;
+}
+
+static tSettingItem<tString> conf_res_repo("RESOURCE_REPOSITORY_CLIENT", tResourceManager::AccessRepoClient());
 
 static int myHTTPFetch(const char *URI, const char *filename, const char *savepath)
 {
@@ -34,7 +43,7 @@ static int myHTTPFetch(const char *URI, const char *filename, const char *savepa
 
     ctxt = xmlNanoHTTPOpen(URI, NULL);
     if (ctxt == NULL) {
-        con << tOutput( "$resource_fetcherror_noconnect", URI );
+        con << "ERROR: ctxt is NULL\n";
         return 1;
     }
 
@@ -44,7 +53,7 @@ static int myHTTPFetch(const char *URI, const char *filename, const char *savepa
     }
 
     fd = fopen(savepath, "w");
-    if (fd == NULL) {
+    if (fd < 0) {
         xmlNanoHTTPClose(ctxt);
         con << tOutput( "$resource_no_write", savepath );
         return 3;
@@ -54,7 +63,7 @@ static int myHTTPFetch(const char *URI, const char *filename, const char *savepa
     int maxlen = 10000;
     buf = (char*)malloc(maxlen);
     while( (len = xmlNanoHTTPRead(ctxt, buf, maxlen)) > 0 ) {
-        Ignore( fwrite(buf, len, 1, fd) );
+        fwrite(buf, len, 1, fd);
     }
     free(buf);
 
@@ -77,9 +86,7 @@ static int myFetch(const char *URIs, const char *filename, const char *savepath)
 
     while (r[0] != '\0') {
         while (r[0] == ' ') ++r;			// skip spaces at the start of the item
-        p = strchr(r, ';');
-        if ( !p )
-            p = strchr(r, '\0');
+        (p = strchr(r, ';')) ? 0 : (p = strchr(r, '\0'));
         n = (p[0] == '\0') ? p : (p + 1);	// next item starts after the semicolon
         // NOTE: skip semicolons, *NOT* nulls
         while (p[-1] == ' ') --p;			// skip spaces at the end of the item
@@ -101,17 +108,17 @@ static int myFetch(const char *URIs, const char *filename, const char *savepath)
 /*
 Allows for the fetching and caching of ressources available on the web,
 such as maps (xml), texture (jpg, gif, bmp), sound and models.
-Nota: On some forums (such as forums.armagetronad.net), it is possible
-for the download link not give information about the filename or type,
-ie: http://forums.armagetronad.net/download/file.php?id=1191. This is
-why the filename parameter is required.
+Nota: On some forums (such as guru3.sytes.net), it is possible for the
+download link not give information about the filename or type, ie:
+http://guru3.sytes.net/download.php?id=1191. This is why the filename
+parameter is required.
 Parameters:
 uri: The full uri to obtain the ressource
 filename: The filename to use for the local ressource
 Return a file handle to the ressource
 NOTE: There must be *at least* one directory level, even if it is ./
 */
-tString tResourceManager::locateResource(const char *uri, const char *file) {
+tString tResourceManager::locateResource(const char *file, const char *uri) {
     tString filepath, a_uri = tString(), savepath;
     int rv;
 
@@ -146,18 +153,15 @@ tString tResourceManager::locateResource(const char *uri, const char *file) {
     // Validate paths and determine detination savepath
     if (!file || file[0] == '\0') {
         con << tOutput( "$resource_no_filename" );
-        free( to_free );
         return (tString) NULL;
     }
     if (file[0] == '/' || file[0] == '\\') {
         con << tOutput( "$resource_abs_path" );
-        free( to_free );
         return (tString) NULL;
     }
     savepath = tDirectories::Resource().GetWritePath(file);
     if (savepath == "") {
         con << tOutput( "$resource_no_writepath" );
-        free( to_free );
         return (tString) NULL;
     }
 
@@ -176,11 +180,11 @@ tString tResourceManager::locateResource(const char *uri, const char *file) {
         a_uri << uri << ';';
 
     // add repositories to uri
-    if ( resRepoServer.Len() > 2 )
-        a_uri << resRepoServer << file << ';';
+    if ( AccessRepoServer().Len() > 2 )
+        a_uri << AccessRepoServer() << file << ';';
 
-    if ( resRepoClient.Len() > 2 && resRepoClient != resRepoServer )
-        a_uri << resRepoClient << file << ';';
+    if ( AccessRepoClient().Len() > 2 && AccessRepoClient() != AccessRepoServer() )
+        a_uri << AccessRepoClient() << file << ';';
 
     con << tOutput( "$resource_not_cached", file );
 
@@ -194,31 +198,10 @@ tString tResourceManager::locateResource(const char *uri, const char *file) {
     return savepath;
 }
 
-FILE* tResourceManager::openResource(const char *uri, const char *file) {
+FILE* tResourceManager::openResource(const char *file, const char *uri) {
     tString filepath;
-    filepath = locateResource(uri, file);
+    filepath = locateResource(file, uri);
     if ( filepath.Len() <= 1 )
         return NULL;
     return fopen((const char *)filepath, "r");
 }
-
-static void RInclude(std::istream& s)
-{
-    // forbid CASACL
-    tCasaclPreventer preventer;
-
-    tString file;
-    s >> file;
-
-    tString rclcl = tResourceManager::locateResource(NULL, file);
-    if ( rclcl ) {
-        std::ifstream rc(rclcl);
-        tConfItemBase::LoadAll(rc, false );
-        return;
-    }
-
-    con << tOutput( "$config_rinclude_not_found", file );
-}
-
-static tConfItemFunc s_RInclude("RINCLUDE",  &RInclude);
-

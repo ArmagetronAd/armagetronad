@@ -1,4 +1,7 @@
-# include $(top_srcdir)/Makefile.paths
+include $(top_srcdir)/Makefile.paths
+
+# evil hack: some target in doc will reinvoke make here. For that to work,
+# doc needs to be the last subdirectory visited.
 SUBDIRS = first doc thirdparty
 
 # target directory
@@ -15,7 +18,7 @@ tUniversalVariables.h: Makefile tUniversalVariables.h.in ${top_builddir}/univers
 
 ${srcdir}/tools/tDirectories.cpp: tUniversalVariables.h
 
-EXTRA_DIST = render/rConsoleCout.cpp
+EXTRA_DIST = render/rConsoleCout.cpp tools/tAutoDeque.h
 
 dist-hook:
 	cp -R ${srcdir}/config_ide.h ${srcdir}/macosx ${srcdir}/win32 ${srcdir}/win32_ded $(distdir)
@@ -26,46 +29,37 @@ dist-hook:
 		sed -e "s,#define VERSION.*$$,#define VERSION \"${VERSION}\"," < ${srcdir}/$$f > ${distdir}/$$f;\
 	done
 
-# keep track of true version
-nTrueVersion.h: $(wildcard $(top_srcdir)/*_version) $(wildcard $(top_srcdir)/.svn) $(wildcard $(top_srcdir)/CVS) $(wildcard $(top_srcdir)/batch/make/version) Makefile
-#	if the version generation files exist, use it to define the version. Else, Fallback to the autopackage version.
-	if test -r $(top_srcdir)/batch/make/version; then \
-		echo \#define TRUE_ARMAGETRONAD_VERSION \"`sh $(top_srcdir)/batch/make/version $(top_srcdir)`\" > $@; \
-	else \
-		echo "#define TRUE_ARMAGETRONAD_VERSION VERSION" > $@; \
-	fi
-
-${srcdir}/network/nNetwork.cpp: nTrueVersion.h
-${srcdir}/render/rConsoleGraph.cpp: nTrueVersion.h
-
 # library file listings
 
-if BUILDMAIN
-tools_extra=tools/tResourceManager.cpp tools/tResourceManager.h
-else
-tools_extra=
-endif
-
-libtools_a_SOURCES=	${tools_extra} tools/tArray.cpp tools/tArray.h tools/tCallback.cpp tools/tCallback.h tools/tCallbackString.h tools/tColor.cpp tools/tColor.h\
+# Note: tMemManager.cpp must be last to avoid false leak reports (sorry for
+# the fragile dependency on undefined behaviour of the linker...)
+libtools_a_SOURCES=	tools/tArray.cpp tools/tArray.h tools/tCallback.cpp tools/tCallback.h tools/tCallbackString.h tools/tColor.h\
 	tools/tConfiguration.cpp tools/tConfiguration.h tools/tConsole.cpp tools/tConsole.h tools/tCrypt.cpp tools/tCrypt.h\
 	tools/tDirectories.cpp tools/tDirectories.h tools/tError.cpp tools/tError.h tools/tEventQueue.cpp\
 	tools/tEventQueue.h tools/tHeap.cpp tools/tHeap.h tools/tInitExit.h tools/tLinkedList.cpp tools/tLinkedList.h\
 	tools/tList.h tools/tLocale.cpp tools/tLocale.h tools/tMath.h \
-	tools/tMemStack.cpp tools/tMemStack.h tools/tReferenceHolder.h \
-    tools/tRing.cpp tools/tRing.h tools/tSafePTR.cpp\
+	tools/tMemStack.cpp tools/tMemStack.h tools/tReferenceHolder.h tools/tResourceManager.cpp\
+	tools/tResourceManager.h tools/tRing.cpp tools/tRing.h tools/tSafePTR.cpp\
 	tools/tSafePTR.h tools/tString.cpp tools/tString.h tools/tSysTime.cpp tools/tSysTime.h tools/tToDo.cpp tools/tToDo.h\
 	tools/tException.cpp tools/tException.h\
 	tools/tRecorder.cpp tools/tRecorder.h\
 	tools/tRecorderInternal.cpp tools/tRecorderInternal.h\
 	tools/tCommandLine.cpp tools/tCommandLine.h\
 	tools/tRandom.cpp tools/tRandom.h\
+	tools/tIniFile.h tools/tIniFile.cpp\
+	tools/tXmlParser.h tools/tXmlParser.cpp\
 	defs.h\
     thirdparty/binreloc/prefix.c thirdparty/binreloc/prefix.h\
-	tools/tMemManager.cpp tools/tMemManager.h
+	tools/tMemManager.cpp tools/tMemManager.h\
+	tools/tStatFile.cpp tools/tStatFile.h\
+	tools/tStatEntry.h tools/tStatEntry.cpp\
+	tools/tPlayList.h tools/tPlayList.cpp\
+	tools/tCoord.h \
+	tools/tValue.h tools/tValue.cpp
 
 #tools/tCommandLine.cpp tools/tCommandLine.h
-libnetwork_a_SOURCES=network/md5.cpp network/md5.h network/nAuthentication.cpp\
-	network/nAuthentication.h network/nConfig.cpp network/nConfig.h\
+libnetwork_a_SOURCES=network/md5.cpp network/md5.h network/nAuthentification.cpp\
+	network/nAuthentification.h network/nConfig.cpp network/nConfig.h\
 	network/nKrawall.cpp network/nKrawall.h network/nKrawallPrivate.cpp\
 	network/nNetObject.cpp network/nNetObject.h network/nNetwork.cpp network/nNetwork.h\
 	network/nObserver.cpp network/nObserver.h network/nPriorizing.cpp network/nPriorizing.h\
@@ -73,27 +67,23 @@ libnetwork_a_SOURCES=network/md5.cpp network/md5.h network/nAuthentication.cpp\
 	network/nSocket.h network/nSpamProtection.cpp network/nSpamProtection.h
 
 if BUILDMAIN
-libenginecore_a_SOURCES=engine/eGameObject.cpp engine/eGameObject.h \
-	engine/eGrid.cpp engine/eGrid.h
-
-libengine_a_SOURCES=engine/eAdvWall.cpp engine/eAdvWall.h engine/eAuthentication.cpp\
-	engine/eAuthentication.h engine/eAxis.cpp	engine/eAxis.h engine/eCamera.cpp engine/eCamera.h\
+libengine_a_SOURCES=engine/eAdvWall.cpp engine/eAdvWall.h engine/eAuthentification.cpp\
+	engine/eAuthentification.h engine/eAxis.cpp	engine/eAxis.h engine/eCamera.cpp engine/eCamera.h\
 	engine/eCoord.h engine/eDebugLine.cpp engine/eDebugLine.h engine/eDisplay.cpp engine/eFloor.cpp\
-	engine/eFloor.h \
+	engine/eFloor.h engine/eGameObject.cpp engine/eGameObject.h engine/eGrid.cpp engine/eGrid.h\
 	engine/eKrawall.cpp engine/eKrawall.h engine/eNetGameObject.cpp engine/eNetGameObject.h\
 	engine/ePath.cpp engine/ePath.h engine/ePlayer.cpp engine/ePlayer.h engine/eSensor.cpp\
-	engine/eSensor.h engine/eSound.cpp engine/eSound.h engine/eTeam.cpp engine/eTeam.h engine/eTess2.h\
+	engine/eSensor.h engine/eTeam.cpp engine/eTeam.h engine/eTess2.h\
 	engine/eTimer.cpp engine/eTimer.h engine/eVoter.cpp engine/eVoter.h engine/eWall.cpp engine/eWall.h\
-	engine/eRectangle.cpp engine/eRectangle.h\
-	engine/eLagCompensation.cpp engine/eLagCompensation.h\
-	engine/eChat.cpp engine/eChat.h
-
+	engine/eRectangle.cpp engine/eRectangle.h \
+	engine/sound/eChannel.cpp engine/sound/eChannel.h engine/sound/eMusicTrack.cpp \
+	engine/sound/eMusicTrack.h \
+	engine/eSoundMixer.h engine/eSoundMixer.cpp
 
 librender_a_SOURCES=render/rConsole.cpp render/rConsoleGraph.cpp render/rConsole.h render/rFont.cpp\
-	render/rFont.h render/rGL.h render/rGL.cpp render/rGLRender.cpp render/rModel.cpp render/rModel.h render/rRender.cpp\
-    render/rDisplayList.h render/rDisplayList.cpp \
+	render/rFont.h render/rGL.h render/rGLRender.cpp render/rModel.cpp render/rModel.h render/rRender.cpp\
 	render/rRender.h render/rScreen.cpp render/rScreen.h render/rSDL.h render/rSysdep.cpp render/rSysdep.h\
-	render/rTexture.cpp render/rTexture.h render/rViewport.cpp render/rViewport.h
+	render/rTexture.cpp render/rTexture.h render/rViewport.cpp render/rViewport.h render/rColor.h render/rGradient.cpp render/rGradient.h
 
 
 libtron_a_SOURCES=tron/gAIBase.cpp tron/gAIBase.h tron/gAICharacter.cpp tron/gAICharacter.h tron/gArena.cpp tron/gArena.h\
@@ -104,10 +94,20 @@ libtron_a_SOURCES=tron/gAIBase.cpp tron/gAIBase.h tron/gAICharacter.cpp tron/gAI
 	tron/gSensor.cpp tron/gSensor.h tron/gServerBrowser.cpp tron/gServerBrowser.h tron/gSparks.cpp tron/gSparks.h\
 	tron/gSpawn.cpp tron/gSpawn.h tron/gStuff.cpp tron/gStuff.h tron/gTeam.cpp tron/gTeam.h tron/gWall.cpp\
 	tron/gWall.h tron/gWinZone.cpp tron/gWinZone.h\
-	tron/gFriends.h tron/gFriends.cpp\
-	tron/gServerFavorites.h tron/gServerFavorites.cpp
+	tron/gServerFavorites.h tron/gServerFavorites.cpp\
+	tron/gStatistics.h tron/gStatistics.cpp\
+	tron/gStatList.h tron/gStatList.cpp\
+	tron/gCommandLineJumpStart.cpp tron/gCommandLineJumpStart.h \
+	tron/gRotation.h tron/gRotation.cpp \
+	tron/cockpit/cCockpit.h tron/cockpit/cCockpit.cpp \
+	tron/cockpit/cWidgetBase.h tron/cockpit/cWidgetBase.cpp \
+	tron/cockpit/cMap.h tron/cockpit/cMap.cpp \
+	tron/cockpit/cLabel.h tron/cockpit/cLabel.cpp \
+	tron/cockpit/cGauges.h tron/cockpit/cGauges.cpp \
+	tron/cockpit/cRectangle.h tron/cockpit/cRectangle.cpp
 
-libui_a_SOURCES=ui/uInput.cpp ui/uInput.h ui/uInputQueue.cpp ui/uInputQueue.h ui/uMenu.cpp ui/uMenu.h
+libui_a_SOURCES=ui/uInput.cpp ui/uInput.h ui/uInputQueue.cpp ui/uInputQueue.h ui/uMenu.cpp ui/uMenu.h\
+    ui/uWebinterface.cpp ui/uWebinterface.h
 endif
 
 # library include dependency structure. Watch out, don't create circular include dependencies.
@@ -118,17 +118,9 @@ endif
 libtools_a_CXXFLAGS  =$(AM_CXXFLAGS)  -I@srcdir@/tools
 libnetwork_a_CXXFLAGS=$(libtools_a_CXXFLAGS)  -I@srcdir@/network
 librender_a_CXXFLAGS =$(libtools_a_CXXFLAGS)  -I@srcdir@/render
-libui_a_CXXFLAGS     =$(librender_a_CXXFLAGS) -I@srcdir@/ui
-libengine_a_CXXFLAGS =$(libui_a_CXXFLAGS)     -I@srcdir@/network -I@srcdir@/engine 
+libui_a_CXXFLAGS     =$(librender_a_CXXFLAGS) -I@srcdir@/ui -I@srcdir@/thirdparty/shttpd
+libengine_a_CXXFLAGS =$(libui_a_CXXFLAGS)     -I@srcdir@/network -I@srcdir@/engine -I@srcdir@/engine/sound
 libtron_a_CXXFLAGS   =$(libengine_a_CXXFLAGS) -I@srcdir@/thirdparty/particles -I@srcdir@/tron 
-
-# core engine files can get compiled with optimization turned on for more painless debugging
-# on weak computers
-if ENGINECOREDEBUG
-libenginecore_a_CXXFLAGS =$(libengine_a_CXXFLAGS)
-else
-libenginecore_a_CXXFLAGS =$(libengine_a_CXXFLAGS) -O2
-endif
 
 if BUILDMASTER
 buildthemaster = armagetronad_main_master$(EXEEXT)
@@ -155,14 +147,14 @@ armagetronad_main_master$(EXEEXT): Makefile
 	${BUILDFAKE}
 else
 if BUILDMAIN
-noinst_LIBRARIES = libenginecore.a libengine.a librender.a  libtron.a libui.a libnetwork.a libtools.a
+noinst_LIBRARIES = libengine.a librender.a  libtron.a libui.a libnetwork.a libtools.a
 else
 noinst_LIBRARIES = libnetwork.a libtools.a
 endif
 
 armagetronad_main_SOURCES = tron/gFloor.cpp
 armagetronad_main_CXXFLAGS =$(libtron_a_CXXFLAGS)
-armagetronad_main_LDADD=libtron.a libenginecore.a libengine.a libnetwork.a libui.a librender.a libtools.a
+armagetronad_main_LDADD=libtron.a libengine.a libnetwork.a libui.a thirdparty/shttpd/libshttpd.a librender.a libtools.a
 
 armagetronad_main_master_SOURCES = network/master.cpp
 armagetronad_main_master_CXXFLAGS =$(libtron_a_CXXFLAGS)

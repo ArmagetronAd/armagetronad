@@ -36,12 +36,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "nObserver.h"
 //#include "tCrypt.h"
 #include "tException.h"
-#include <memory>
 
 class nSocket;
 class nAddress;
 class nBasicNetworkSystem;
-class nServerInfoBase;
 
 extern nBasicNetworkSystem sn_BasicNetworkSystem;
 
@@ -64,16 +62,15 @@ extern const unsigned int sn_defaultPort; // default port a server listens on
 
 extern int sn_defaultDelay;
 
-extern  bool sn_decorateTS;
-
 extern tString sn_DenyReason;		// the reason the server gave for sending a login_deny packet
 
 // rate control
 extern int sn_maxRateIn,sn_maxRateOut;
 
-//! exception that is thrown on any unexpected network error;
-//! causes the owner of the current nNetObject or the sender of
-//! the currently processed netmessage to be killed.
+// exception that is thrown on any unexpected network error;
+// causes the owner of the current nNetObject or the sender of
+// the currently processed netmessage to be killed.
+
 class nKillHim: public tException
 {
 public:
@@ -85,41 +82,24 @@ private:
     virtual tString DoGetDescription()  const;              //!< returns a detailed description
 };
 
-//! exception that is thrown on errors where it is safe to just ignore the
-//! offending packet. 
-class nIgnore: public nKillHim
-{
-public:
-    nIgnore();
-    ~nIgnore();
-
-private:
-    virtual tString DoGetName()         const;              //!< returns the name of the exception
-    virtual tString DoGetDescription()  const;              //!< returns a detailed description
-};
-
 // call this function on any error occuring while reading a message:
-void nReadError( bool critical = true );
+void nReadError();
 
 #ifndef MAXCLIENTS
-#ifdef DEDICATED
-#define MAXCLIENTS 32
-#else
 #define MAXCLIENTS 16
-#endif
 #endif
 
 // We can be single player, multiplayer server/client.
 typedef enum {nSTANDALONE,nSERVER,nCLIENT} nNetState;
-typedef enum {nOK, nTIMEOUT, nDENIED, nABORT}   nConnectError;
+typedef enum {nOK, nTIMEOUT, nDENIED}      nConnectError;
 
 
 // set/get the state
 nConnectError sn_GetLastError();
 nNetState sn_GetNetState();
 void sn_SetNetState(nNetState x);
-void sn_DisconnectUser(int i, const tOutput& reason, nServerInfoBase * redirectTo = 0 ); //!< terminate connection with user i (peacefully)
-void sn_KickUser(int i, const tOutput& reason, REAL severity = 1, nServerInfoBase * redirectTo = 0 );   //!< throw out user i (violently)
+void sn_DisconnectUser(int i, const tOutput& reason ); //!< terminate connection with user i (peacefully)
+void sn_KickUser(int i, const tOutput& reason, REAL severity = 1 );   //!< throw out user i (violently)
 
 void sn_GetAdr(int user,  tString& name);
 unsigned int sn_GetPort(int user);
@@ -163,8 +143,8 @@ class nVersionFeature
 {
 public:
     nVersionFeature( int min, int max = -1 ); // creates a feature that is supported from version min to max; values of -1 indicate no border
-    bool Supported() const;                   // returns whether this feature is supported by everyone
-    bool Supported( int client ) const;       // returns whether this feature is supported by a certain client ( resp. the server in client mode )
+    bool Supported();                         // returns whether this feature is supported by everyone
+    bool Supported( int client );             // returns whether this feature is supported by a certain client ( resp. the server in client mode )
 private:
     int min_, max_;
 };
@@ -234,25 +214,15 @@ public:
     REAL GetAverage() const;               //!< returns the average value
     REAL GetDataVariance() const;          //!< returns the variance of the data ( average of (value-average)^2 )
     REAL GetAverageVariance() const;       //!< returns the expected variance of the returned average
-    REAL GetWeight() const;                //!< returns the current weight
     void Timestep( REAL decay );           //!< lets all values decay, so they can be replaced by new ones
     void Add( REAL value, REAL weight=1 ); //!< adds a value to the average
     void Reset();                          //!< resets average to zero
-
-    std::istream & operator << ( std::istream & stream );       //!< read operator
-    std::ostream & operator >> ( std::ostream & stream ) const; //!< write operator
 private:
     REAL weight_;       //!< the total statistical weight
     REAL sum_;          //!< the total sum of value*weight
     REAL sumSquared_;   //!< the total sum of value*value*weight
     REAL weightSquared_;//!< the sum of all weights, squared
 };
-
-//! read operator for nAveragers
-std::istream & operator >> ( std::istream & stream, nAverager & averager );
-
-//! write operator for nAveragers
-std::ostream & operator << ( std::ostream & stream, nAverager const & averager );
 
 //! averager for pings, detects lag
 class nPingAverager
@@ -301,7 +271,7 @@ struct nConnectionInfo     // everything that is needed to manage a connection
 
     nPingAverager          ping;
 
-    // tCrypt*                crypt;
+    tCrypt*                crypt;
 
     // rate control
     nBandwidthControl		bandwidthControl_;
@@ -316,10 +286,7 @@ struct nConnectionInfo     // everything that is needed to manage a connection
     tJUST_CONTROLLED_PTR< nMessage >          ackMess;
 
     // authentication
-    // tString                userName;
-
-    // supported authentication methods of the client in a comma separated list
-    tString                 supportedAuthenticationMethods_;
+    tString                userName;
 
     nConnectionInfo();
     ~nConnectionInfo();
@@ -449,10 +416,6 @@ public:
         messageIDBig_ = 0;
     }
 
-    void BendMessageID( int id ){ // bends the message ID. Use with extreme caution.
-        messageIDBig_ = id;
-    }
-
     nMessage(const nDescriptor &);  // create a new message
     nMessage(unsigned short*& buffer, short sn_myNetID, int lenLeft );
     // read a message from the network stream
@@ -495,18 +458,15 @@ public:
         return *this;
     }
 
-    // read a string without any kind of filtering
-    nMessage& ReadRaw(tString &s);
-
     nMessage& operator >> (tString &s);
     nMessage& operator >> (tColoredString &s);
     nMessage& operator << (const tString &s);
     nMessage& operator << (const tColoredString &s);
-    nMessage& operator << (const tOutput &o);
 
     template<class T> void BinWrite (const T &x){
         for(unsigned int i=0;i<sizeof(T)/2;i++)
             Write((reinterpret_cast<const unsigned short *>(&x))[i]);
+        return *this;
     }
 
 bool End(){return readOut>=static_cast<unsigned int>(data.Len());}
@@ -518,6 +478,7 @@ bool End(){return readOut>=static_cast<unsigned int>(data.Len());}
     template<class T> void BinRead (const T &x){
         for(unsigned int i=0;i<sizeof(T)/2;i++)
             Read(reinterpret_cast<unsigned short *>(&x)[i]);
+        return *this;
     }
 
 
@@ -589,7 +550,6 @@ protected:
     int id;
     tCONTROLLED_PTR(nMessage) message;  // the message
     int           receiver;      // the computer who should send the ack
-    REAL          timeout;       // the time in seconds between send attempts
     nTimeRolling  timeSendAgain; // for timeout
     nTimeRolling  timeFirstSent; // for ping calculation
     nTimeRolling  timeLastSent;  // for ping calculation
@@ -599,7 +559,7 @@ public:
     nWaitForAck(nMessage* m,int rec);
     virtual ~nWaitForAck();
 
-    virtual void AckExtraAction(){}
+    virtual void AckExtraAction(){};
 
     static void Ackt(unsigned short id,unsigned short peer);
 
@@ -609,17 +569,8 @@ public:
 };
 
 
-//! pause a bit, abort pause on network activity
-void sn_Delay();
-
 // process the messages from all hosts and send acks
 void sn_Receive();
-
-// receive and process data from control socket (used on master server to ping servers)
-extern void sn_ReceiveFromControlSocket();
-
-// receive and discard data from control socket (used on regular servers to keep the pipe clean)
-extern void sn_DiscardFromControlSocket();
 
 // attempts to sync with server/all clients (<=> wait for all acks)
 // sync_netObjects: if set, network objects are synced as well
@@ -629,7 +580,7 @@ void sn_Sync(REAL timeout,bool sync_sn_netObjects=false, bool otherEnd=true); //
 
 // causes the connected clients to print a message
 void sn_ConsoleOut(const tOutput &message,int client=-1);
-nMessage* sn_ConsoleOutMessage( tString const & message );
+nMessage* sn_ConsoleOutMessage(const tOutput &message);
 
 // causes the connected clients to print a message in the center of the screeen
 void sn_CenterMessage(const tOutput &message,int client=-1);
@@ -672,12 +623,6 @@ int sn_QueueLen(int user);
 
 void sn_Statistics();
 
-//! return the public IP address and port of this machine, or "*.*.*.*:*" if it is unknown..
-tString const & sn_GetMyAddress();
-
-//! checks wheter a given address is on the user's LAN (or on loopback).
-bool sn_IsLANAddress( tString const & address );
-
 // the SenderID of the currently handled message is stored here for reference
 class nCurrentSenderID
 {
@@ -700,7 +645,6 @@ class nMachineDecorator: public tListItem< nMachineDecorator >
 {
 public:
     inline void Destroy();         //!< called when machine gets destroyed
-    virtual void OnBan();          //!< called when machine gets banned
 protected:
     virtual void OnDestroy();      //!< called when machine gets destroyed
 
@@ -710,13 +654,10 @@ private:
     nMachineDecorator();           //!< constructor
 };
 
-class nMachineIteratorPimpl;
-
 //! class trying to collect information about a certain client, persistent between connections
 class nMachine
 {
     friend class nMachineDecorator;
-    friend class nMachinePersistor;
 public:
     nMachine();          //!< constructor
     virtual ~nMachine(); //!< destructor
@@ -724,21 +665,7 @@ public:
     bool operator == ( nMachine const & other ) const; //!< equality operator
     bool operator != ( nMachine const & other ) const; //!< inequality operator
 
-    class iterator
-    {
-    public:
-        nMachine & operator *() const;
-        iterator();
-        ~iterator();
-        void operator ++();
-        void operator ++(int);
-        bool Valid();
-    private:
-        nMachineIteratorPimpl * pimpl_;
-    };
-
-    static nMachine & GetMachine( unsigned short userID ); //!< fetches the machine information of a user, creating it on demand
-    static nMachine * PeekMachine( unsigned short userID ); //!< fetches the machine information of a user, returning NULL if none is found
+    static nMachine & GetMachine( unsigned short userID ); //!< fetches the machine information of a user
     static void Expire();                       //!< expires machine information that is no longer needed
     static void KickSpectators();               //!< remove clients without players from the server
 
@@ -749,9 +676,6 @@ public:
     void     Ban( REAL time );                         //!< ban users from this machine for the given time
     void     Ban( REAL time, tString const & reason ); //!< ban users from this machine for the given time
     REAL     IsBanned() const; //!< returns the number of seconds users from this machine are currently banned for
-
-    bool      IsValidated() const { return validated_; }
-    void      Validate()          { validated_ = true; }
 
     // player accounting
     void      AddPlayer();     //!< call when a player joins from this machine
@@ -769,8 +693,6 @@ private:
     int            players_;      //!< number of players coming from this machine currently
     REAL           lastPlayerAction_; //!< time of the last player action
 
-    bool           validated_;    //!< true if the machine has been validated as a real client without spoofed IP
-
     tString        IP_;           //!< IP address of the machine
     nMachineDecorator * decorators_; //!< list of decorators
 
@@ -785,28 +707,6 @@ public:
     nMachine const & GetBanReason( tString & reason )const;//!< Gets the reason of the ban
     inline nMachineDecorator * GetDecorators( void ) const;	//!< Gets list of decorators
     inline nMachine const & GetDecorators( nMachineDecorator * & decorators ) const;	//!< Gets list of decorators
-
-    //! returns the next machine decorator of a given type
-    template< class T > static T * GetNextDecorator( nMachineDecorator * run )
-    {
-        while ( run )
-        {
-            T * ret = dynamic_cast< T * >( run );
-            if ( ret )
-            {
-                return ret;
-            }
-            run = run->Next();
-        }
-
-        return 0;
-    }
-
-    //! returns the first machine decorator of a given type
-    template< class T > T * GetDecorator()
-    {
-        return GetNextDecorator< T >( GetDecorators() );
-    }
 protected:
 private:
     inline nMachine & SetDecorators( nMachineDecorator * decorators );	//!< Sets list of decorators
@@ -819,13 +719,6 @@ public:
     nSocketResetInhibitor();
     ~nSocketResetInhibitor();
 };
-
-// on disconnection, this returns a server we should be redirected to (or NULL if we should not be redirected)
-std::auto_ptr< nServerInfoBase > sn_GetRedirectTo();
-
-// take a peek at the same info
-nServerInfoBase * sn_PeekRedirectTo();
-
 
 // *******************************************************************************************
 // *

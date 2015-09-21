@@ -14,10 +14,7 @@ TROW2(0.2.8.0_beta1,6 )
 TROW2(0.2.8.0_beta2,7 )
 TROW2(0.2.8.0_beta3,8 )
 TROW2(0.2.8.0_beta4,9 )
-TROW2(0.2.8.0_rcX,10 )
-TROW2(0.2.8.0,11 )
-TROW2(0.2.8.2,13 )
-TROW2(0.2.8.3,16 )
+TROW2(0.2.8.0 - ,10 )
 ],cellpadding="5" border="1")
 ])
 
@@ -32,18 +29,12 @@ TROW2(5,[new cycle sync code: server sends more data to identify which client co
 TROW2(6,[Client support for server formatted chat messages.])
 TROW2(7,[Doublebind countermeasures. Proper cycle speed and acceleration handling and syncing.])
 TROW2(8,[Server bugfix: turns that were accepted from the client, but not yet executed, are not claimed to be executed in sync messages.])
-TROW2(10,[New server controlled voting items to add voting items that only require code on the server (code was broken and is no longer used).])
-TROW2(11,[No actual change, just the bump to 0.2.8.])
-TROW2(12,[Again, no actual change to be found. Z-Man wonders why.])
-TROW2(13,[Spectators can now be visible and chat, clients no longer send redundant brake commands.])
-TROW2(14,[Clientside lag compensation and server controlled ping charity, fullscreen messages.])
-TROW2(15,[Player authentication, new fixed version of the server controlled vote items.])
-TROW2(16,[Bugfix: clients no longer get confused if they have to move a cycle backwards during a sync from the server.])
+TROW2(10,[New server controlled voting items to add voting items that only require code on the server.])
 ],cellpadding="5" border="1")
 ])
 
 PARAGRAPH([
-Note: Some protocol versions were only available in CVS/SVN/BZR, so not every protocol version corresponds to a PROGTITLE version. Likewise, not every version had a network protocol change.
+Note: Some protocol versions were only available in CVS, so not every protocol version corresponds to a PROGTITLE version.
 ])
 
 include(sig.m4)

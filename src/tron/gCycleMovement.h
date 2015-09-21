@@ -34,50 +34,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 class gCycle;
 class gDestination;
 class gPlayerWall;
-class gCycleMovement;
-class gSensor;
-struct gMaxSpaceAheadHitInfo;
-
-//! used to clear out dangerous information from hit info after simulation is done
-class gMaxSpaceAheadHitInfoClearer
-{
-public:
-    gMaxSpaceAheadHitInfoClearer( gMaxSpaceAheadHitInfo * & info );
-    ~gMaxSpaceAheadHitInfoClearer();
-private:
-    gMaxSpaceAheadHitInfo * & info_;
-};
 
 REAL GetTurnSpeedFactor(void);
-
-class gEnemyInfluence{
-private:
-    nObserverPtr< ePlayerNetID >	lastEnemyInfluence;  	// the last enemy wall we encountered
-    REAL							lastTime;				// the time it was drawn at
-
-public:
-    gEnemyInfluence();
-
-    ePlayerNetID const *            GetEnemy() const;	    // the last enemy possibly responsible for our death
-    REAL                            GetTime() const;        // the time of the influence
-    void							AddSensor( const gSensor& sensor, REAL timePenalty, gCycleMovement * thisCycle ); // add the result of the sensor scan to our data
-    void							AddWall( const eWall * wall, eCoord const & point, REAL timePenalty, gCycleMovement * thisCycle ); // add the interaction with a wall to our data
-    void							AddWall( const gPlayerWall * wall, REAL timeBuilt, REAL timePenalty, gCycleMovement * thisCycle ); // add the interaction with a wall to our data
-};
-
-struct gRealColor {
-    REAL r,g,b;
-
-    gRealColor():r(1), g(1), b(1){}
-
-};
 
 //! class handling lightcycle movement aspects ( not networking beyond construction, no rendering, no wall building )
 class gCycleMovement : public eNetGameObject
 {
 public:
     // accessors
-    static float            RubberSpeed             ()                                              ;   //!< returns the rubber speed (decay rate of the distance to the wall in front)
     static float            SpeedMultiplier         ()                                              ;   //!< returns the current speed multiplier
     static void             SetSpeedMultiplier      ( REAL                  mult        )           ;   //!< sets the current speed multiplier
     static float            MaximalSpeed            ()                                              ;   //!< returns the maximal speed a cycle can reach on its own
@@ -93,12 +57,11 @@ public:
     virtual bool            Alive                   ()                                    const     ;   //!< returns whether the cycle is still alive
     virtual bool            Vulnerable              ()                                    const     ;   //!< returns whether the cycle can be killed
 
-    bool                    CanMakeTurn             (int direction)                                    const     ;   //!< returns whether a turn is currently possible
-    bool                    CanMakeTurn             ( REAL time, int direction                         ) const     ;   //!< returns whether a turn is possible at the given time
+    bool                    CanMakeTurn             ()                                    const     ;   //!< returns whether a turn is currently possible
+    bool                    CanMakeTurn             ( REAL time                         ) const     ;   //!< returns whether a turn is possible at the given time
     inline  REAL            GetDistanceSinceLastTurn(                                   ) const     ;   //!< returns the distance since the last turn
-    REAL                    GetTurnDelay            (                                   ) const     ;   //!< returns the time between turns in different directions
-    REAL                    GetTurnDelayDb            (                                   ) const     ;   //!< returns the time between turns in the same direcion
-    REAL                    GetNextTurn             (int direction                                   ) const     ;   //!< returns the time of the next turn
+    REAL                    GetTurnDelay            (                                   ) const     ;   //!< returns the time between turns
+    REAL                    GetNextTurn             (                                   ) const     ;   //!< returns the time of the next turn
 
     // destination handling
     void                    AddDestination          ()                                              ;   //!< adds current position as destination
@@ -108,9 +71,7 @@ public:
     void                    NotifyNewDestination    ( gDestination *        dest        )           ;   //!< notifies cycle of the insertion of a new destination ( don't call manually )
     bool                    IsDestinationUsed       ( const gDestination *  dest        ) const     ;   //!< returns whether the given destination is in active use
 
-    inline void            DropTempWall             ( gPlayerWall *         wall
-            ,                                         eCoord const &        pos
-            ,                                         eCoord const &        dir         )           ;   //!< called when another cycle grinds a wall; this cycle should then drop its current wall if the grinding is too close.
+    inline void            DropTempWall             ( gPlayerWall *         wall        )           ;   //!< called when another cycle grinds a wall; this cycle should then drop its current wall if the grinding is too close.
     // information query
     virtual bool            EdgeIsDangerous         ( const eWall *         wall
             ,                                         REAL                  time
@@ -136,10 +97,7 @@ public:
                     ,                                 bool                  autodelete=1 )          ;   //!< local constructor
     gCycleMovement                                  ( nMessage &            message      )          ;   //!< remote constructor
     virtual ~gCycleMovement                         ()                                              ;   //!< destructor
-    virtual void OnRemoveFromGame(); // called when the cycle is physically removed from the game
 
-    void RequestSync(bool ack=true);     //!< request a sync
-    void RequestSync(int user,bool ack); //!< only for a single user
 protected:
     //! data from sync message
     struct SyncData
@@ -162,16 +120,13 @@ protected:
     virtual void            InitAfterCreation       ()                                              ;   //!< shared initialization routine
 
     // acceleration handling
-    virtual void            AccelerationDiscontinuity ()                                            ;   //!< call when you know the acceleration makes a sharp jump now
-    virtual void            CalculateAcceleration   (                                   )           ;   //!< calculate acceleration to apply later
+    virtual void            CalculateAcceleration   ( REAL                  dt          )           ;   //!< calculate acceleration to apply later
     virtual void            ApplyAcceleration       ( REAL                  dt          )           ;   //!< apply acceleration calculated earlier
 
     // destination handling
     REAL                    DistanceToDestination   ( gDestination &        dest        ) const     ;   //!< calculates the distance to the given destination
     virtual void            OnNotifyNewDestination  ( gDestination *        dest        )           ;   //!< notifies cycle of the insertion of a new destination
-    virtual void            OnDropTempWall          ( gPlayerWall *         wall
-            ,                                         eCoord const &        pos
-            ,                                         eCoord const &        dir         )           ;   //!< called when another cycle grinds a wall; this cycle should then drop its current wall if the grinding is too close.
+    virtual void            OnDropTempWall          ( gPlayerWall *         wall        )           ;   //!< called when another cycle grinds a wall; this cycle should then drop its current wall if the grinding is too close.
     virtual bool            DoIsDestinationUsed     ( const gDestination *  dest        ) const     ;   //!< returns whether the given destination is in active use
     static  gDestination*   GetDestinationBefore    ( const SyncData &      sync
             ,                                         gDestination*         first       ) 		    ;   //!< determine the destination from before the sync message
@@ -180,10 +135,9 @@ protected:
     virtual REAL            DoGetDistanceSinceLastTurn  (                               ) const     ;   //!< returns the distance since the last turn
 
     virtual void            RightBeforeDeath        ( int                   numTries    )           ;   //!< called when the cycle is very close to a wall and about to crash
-    virtual void            Die                     ( REAL time                         )           ;  //!< dies at the specified time
+    void                    Die                     ( REAL time                         )           ;  //!< dies at the specified time
 
-    virtual bool            TimestepCore            ( REAL                  currentTime
-            ,                                         bool                  calculateAcceleration = true )           ;   //!< core physics simulation routine
+    virtual bool            TimestepCore            ( REAL                  currentTime )           ;   //!< core physics simulation routine
 private:
     void                    MyInitAfterCreation     ()                                              ;   //!< private shared initialization code
 
@@ -198,8 +152,6 @@ private:
     short           alive_;                     //!< status: 1: cycle is alive, -1: cycle just died, 0: cycle is dead
 
 protected:
-    gEnemyInfluence				enemyInfluence; //!< keeps track of enemies that influenced this cycle
-
     gDestination*   destinationList;            //!< the list of destinations that belong to this cycle ( for memory management )
     gDestination*   currentDestination;         //!< the destination this cycle aims for now
     gDestination*   lastDestination;            //!< the last destination that was passed
@@ -214,25 +166,14 @@ protected:
     REAL            distance;                   //!< the distance traveled so far
     // REAL         wallContDistance;           //!< distance at which the walls will start to build up ( negative if the wall is already building )
 
-    mutable bool    refreshSpaceAhead_;         //!< flag to set when maximum space in front of cycle should be recalculated
-    REAL            maxSpaceMaxCast_;           //!< the maximum raycast length to determine the above value
-    mutable gMaxSpaceAheadHitInfo * maxSpaceHit_; //!< detailed information about the wall in front
-
     unsigned short  turns;                      //!< the number of turns taken so far
     unsigned short  braking;                    //!< flag indicating status of brakes ( on/off )
-    
-    bool            uncannyTimingToReport_;     //!< flag indicating whether we have uncanny timing to report from the last turn
 
     int             windingNumber_;             //!< number that gets increased on every right turn and decreased on every left turn ( used by the AI )
     int             windingNumberWrapped_;      //!< winding number wrapped to be used as an index to the axes code
 
-    mutable REAL    gap_[2];                    //!< when driving towards a wall, this is set to the maximal distance we need to approach it so that when the cycle turns, it can squeeze through any gaps
-    mutable bool    keepLookingForGap_[2];      //!< flags telling the system whether it is worthwile to look for further, smaller, gaps
-    mutable bool    gapIsBackdoor_[2];          //!< flags indicating whether gaps are backdoors
-
-    eCoord			lastTurnPos_;	            //!< the location of the last turn
-    REAL            lastTurnTimeRight_;         //!< the time of the last turn right
-    REAL            lastTurnTimeLeft_;          //!< the time of the last turn left
+    eCoord			lastTurnPos_;	            //! the location of the last turn
+    REAL            lastTurnTime_;              //!< the time of the last turn
     REAL            lastTimeAlive_;             //!< the time of the last timestep where we would not have been killed
     std::deque<int> pendingTurns;               //!< stores turns ordered by the user, but not yet executed
 
@@ -240,17 +181,9 @@ protected:
     REAL            rubber;                     //!< the amount rubber used up by the cycle
     REAL            rubberMalus;                //!< additional rubber usage factor
     REAL            rubberSpeedFactor;          //!< the factor by which the speed is currently multiplied by rubber
-    REAL            rubberDepleteTime_;         //!< the time rubber got depleted
-
-    REAL            brakeUsage;                 //!< current brake usage
-    REAL            rubberUsage;                //!< current rubber usage (not from hitting a wall, but from tunneling. Without taking efficiency into account.)
 
     // room for accessors
 public:
-    REAL RubberDepleteTime() const;                //!< returns the time rubber got fully used (or 0 if it hasn't)
-
-    REAL GetMaxSpaceAhead( REAL maxReport ) const; //< Returns the current maximal space ahead
-
     inline REAL GetDistance( void ) const;  //!< Gets the distance traveled so far
     inline gCycleMovement const & GetDistance( REAL & distance ) const; //!< Gets the distance traveled so far
     inline REAL GetRubber( void ) const;    //!< Gets the amount rubber used up by the cycle
@@ -281,7 +214,7 @@ private:
 };
 
 //! Determines the maximum space ahead of a cycle
-// float MaxSpaceAhead( const gCycleMovement* cycle, float ts, float lookAhead, float maxReport );
+float MaxSpaceAhead( const gCycleMovement* cycle, float ts, float lookAhead, float maxReport );
 
 //! Exception to throw when cycle dies in a simulation frame
 class gCycleDeath: public eDeath
@@ -292,11 +225,6 @@ public:
     {}
 
     eCoord pos_;
-};
-
-//! Exception thrown to indicate simulation should be held for a while
-class gCycleStop: public eDeath
-{
 };
 
 // this class describes a point on the map the cycle on another
@@ -329,7 +257,7 @@ public:
     explicit gDestination(const gCycle &takeitfrom);
 
     // or from a message
-    explicit gDestination( nMessage &m, unsigned short & cycle_id );
+    explicit gDestination(nMessage &m);
 
     // take pos,dir and time from a cycle
     void CopyFrom(const gCycleMovement &other);
@@ -339,7 +267,7 @@ public:
     int CompareWith( const gDestination& other ) const;
 
     // write all the data into a nMessage
-    void WriteCreate( nMessage &m, unsigned short cycle_id );
+    void WriteCreate(nMessage &m);
 
     // insert yourself into a list ordered by distance
     void InsertIntoList(gDestination **list);
@@ -386,28 +314,12 @@ inline bool gCycleMovement::IsDestinationUsed( const gDestination * dest ) const
 // *******************************************************************************************
 //!
 //!		@param	wall	   the wall the other cycle is grinding
-//!		@param	pos	       the position of the grind
-//!     @param  dir        the direction the raycast triggering the gridding comes from
 //!
 // *******************************************************************************************
 
-inline void gCycleMovement::DropTempWall( gPlayerWall * wall, eCoord const & pos, eCoord const & dir )
+inline void gCycleMovement::DropTempWall( gPlayerWall * wall )
 {
-    this->OnDropTempWall( wall, pos, dir );
-}
-
-// *******************************************************************************************
-// *
-// *    RubberDepleteTime
-// *
-// *******************************************************************************************
-//!
-//!     @return     the time rubber got depleted
-//!
-// *******************************************************************************************
-inline REAL gCycleMovement::RubberDepleteTime() const
-{
-    return rubberDepleteTime_;
+    this->OnDropTempWall( wall );
 }
 
 // *******************************************************************************************
@@ -780,7 +692,7 @@ gCycleMovement & gCycleMovement::SetLastTurnPos( eCoord const & lastTurnPos )
 
 REAL const & gCycleMovement::GetLastTurnTime( void ) const
 {
-    return lastTurnTimeRight_ > lastTurnTimeLeft_ ? lastTurnTimeRight_ : lastTurnTimeLeft_;
+    return this->lastTurnTime_;
 }
 
 // *******************************************************************************************
@@ -796,7 +708,7 @@ REAL const & gCycleMovement::GetLastTurnTime( void ) const
 
 gCycleMovement const & gCycleMovement::GetLastTurnTime( REAL & lastTurnTime ) const
 {
-    lastTurnTime = GetLastTurnTime();
+    lastTurnTime = this->lastTurnTime_;
     return *this;
 }
 
@@ -813,7 +725,7 @@ gCycleMovement const & gCycleMovement::GetLastTurnTime( REAL & lastTurnTime ) co
 
 gCycleMovement & gCycleMovement::SetLastTurnTime( REAL const & lastTurnTime )
 {
-    lastTurnTimeRight_ = lastTurnTimeLeft_ = lastTurnTime;
+    this->lastTurnTime_ = lastTurnTime;
     return *this;
 }
 

@@ -5,7 +5,7 @@
 ArmageTron -- Just another Tron Lightcycle Game in 3D.
 Copyright (C) 2000  Manuel Moos (manuel@moosnet.de)
 #include <stdio>
-#include <stdlib.h>
+#include <stdlib.h> 
 **************************************************************************
 
 This program is free software; you can redistribute it and/or
@@ -21,7 +21,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
+  
 ***************************************************************************
 
 */
@@ -29,11 +29,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef ArmageTron_gWALL_H
 #define ArmageTron_gWALL_H
 
+#define HUD_MAP
+
 #include "eAdvWall.h"
 #include "nNetObject.h"
-#include "rDisplayList.h"
 //#include "nObserver.h"
-class gExplosion;
 class gCycle;
 class gCycleMovement;
 class gNetPlayerWall;
@@ -65,20 +65,15 @@ private:
     REAL tBeg_, tEnd_;          //!< begin and end texture coordinates
 };
 
-//! a coordinate entry for wall points, where walls turn into holes
-//! or vice versa
 class gPlayerWallCoord{
 public:
-    REAL Pos;             //!< the start position, measured relative to the point where the cycle started driving
-    REAL Time;            //!< the time this point was created
-    bool IsDangerous;     //!< true iff the segment AFTER this point is a true wall (and not a hole)
-    tJUST_CONTROLLED_PTR< gExplosion > holer; //< if it is a hole, store who made it here.
+    REAL Pos;
+    REAL Time;
+    bool IsDangerous;
 };
 
 class gPlayerWall:public eWall{
 public:
-    friend class gNetPlayerWall;
-
     gPlayerWall(gNetPlayerWall*w, gCycle *p);
     virtual ~gPlayerWall();
 
@@ -95,7 +90,7 @@ public:
 
 #ifndef DEDICATED
     virtual void Render(const eCamera *cam);
-    // void RenderList(bool list);
+    void RenderList(bool list);
 #endif
 
     virtual REAL BlockHeight() const;
@@ -103,17 +98,16 @@ public:
 
     int WindingNumber() const {return windingNumber_;}
 
-    REAL LocalToGlobal( REAL a ) const; //!< transform alpha value of this wall into alpha value of underlying net wall
-    REAL GlobalToLocal( REAL a ) const; //!< transform alpha value of underlying net wall to value of this wall
+    REAL LocalToGlobal( REAL a ) const;
+    REAL GlobalToLocal( REAL a ) const;
 
     REAL Time(REAL a) const;
     REAL Pos(REAL a) const;
     REAL Alpha(REAL pos) const;
     bool IsDangerousAnywhere( REAL time ) const;
     bool IsDangerous( REAL a, REAL time ) const;
-    gExplosion * Holer( REAL a, REAL time ) const; // returns the guy who holed here
 
-    void BlowHole	( REAL dbeg, REAL dend, gExplosion * holer ); // blow a hole into the wall form distance dbeg to dend, created by holer
+    void BlowHole	( REAL dbeg, REAL dend ); // blow a hole into the wall form distance dbeg to dend
 
     REAL BegPos() const;
     REAL EndPos() const;
@@ -137,21 +131,19 @@ private:
     //  nObserverPtr< gNetPlayerWall > netWall_;
 
     int windingNumber_;
-    // REAL begAlpha_, endAlpha_;	// relative position i gNetPlayerWall
-    REAL begDist_, endDist_;	// cycle driving distance at beginning and end
+    REAL begAlpha_, endAlpha_;	// relative position i gNetPlayerWall
 
     gPlayerWall();
 };
 
 
 // the sn_netObjects that represents eWalls across the network.
-class gNetPlayerWall: public tListItem< gNetPlayerWall >, public nNetObject{
+class gNetPlayerWall: public nNetObject{
     friend class gCycle;
     int id,griddedid;
 
     tCONTROLLED_PTR(gCycle) cycle_;       // our cycle
     tCONTROLLED_PTR(eTempEdge) edge_;       // the eEdge we are representing
-    gPlayerWall * lastWall_;                //! the last wall that was dropped into the grid by PartialCopyIntoGrid()
 
     eCoord dir;      // the direction from start to end
     REAL dbegin;    // the start position
@@ -160,15 +152,15 @@ class gNetPlayerWall: public tListItem< gNetPlayerWall >, public nNetObject{
 
     unsigned short inGrid;   // are we planned to be insite the grid?
     REAL           gridding; // when are we going to enter the grid?
-    bool           preliminary:1; // is it a eWall preliminary installed?
-    REAL           obsoleted_;    // the game time this preliminary wall got obsoleted by a final wall (negative if it is not yet obsolete)
+
+bool           preliminary:1; // is it a eWall preliminary installed?
+    REAL       obsoleted_;    // the game time this preliminary wall got obsoleted by a final wall (negative if it is not yet obsolete)
     // by the client while it is waiting for the real eWall from the server?
 
     void CreateEdge();
     void InitArray();
     void MyInitAfterCreation();
     void real_CopyIntoGrid(eGrid *grid);
-    void PartialCopyIntoGrid(eGrid *grid);
     void real_Update(REAL tEnd,const eCoord &pend, bool force );
 public:
     virtual void InitAfterCreation();
@@ -181,12 +173,14 @@ public:
     void CopyIntoGrid(eGrid *grid,bool force=false);
     static void s_CopyIntoGrid();
     void RealWallReceived( gNetPlayerWall* realwall );
-    void Checkpoint(); //!< marks the current distance and time for more accurate interpolation
 
     gNetPlayerWall(nMessage &m);
 
     //eCoord Vec(){return w->Vec();}
     eCoord Vec();  //!< returns the vector from the beginning to the end of the wall
+#ifdef HUD_MAP
+    tArray<gPlayerWallCoord> &Coords() { return coords_; }
+#endif
 protected:
     virtual ~gNetPlayerWall();
     void ReleaseData(); // release all references
@@ -200,11 +194,9 @@ public:
     REAL Pos(REAL a) const;
     REAL Alpha(REAL pos) const;
     bool IsDangerousAnywhere( REAL time ) const;
-    bool IsDangerousApartFromHoles( REAL a, REAL time ) const; // checks all danger signs, except hooles
-    bool IsDangerous( REAL a, REAL time ) const;               // checks all danger signs
-    gExplosion * Holer( REAL a, REAL time ) const;                 // returns the cycle responsible for a hole
+    bool IsDangerous( REAL a, REAL time ) const;
 
-    void BlowHole	( REAL dbeg, REAL dend, gExplosion * holer ); // blow a hole into the wall form distance dbeg to dend
+    void BlowHole	( REAL dbeg, REAL dend ); // blow a hole into the wall form distance dbeg to dend
 
     REAL BegPos() const;
     REAL EndPos() const;
@@ -225,18 +217,10 @@ public:
 
 
 #ifndef DEDICATED
-    //! should the whole wall be rendered or just the line/quad segnemts?
-    //! individual segments will be rendered without the glBegin/End block.
-    enum gWallRenderMode
-    {
-        gWallRenderMode_Lines = 1,
-        gWallRenderMode_Quads = 2
-    };
-
-    // virtual void Render(const eCamera *cam);
-    void RenderList(bool list, gWallRenderMode );
-    virtual void RenderNormal(const eCoord &x1,const eCoord &x2,REAL ta,REAL te,REAL r,REAL g,REAL b,REAL a, gWallRenderMode mode );
-    virtual void RenderBegin(const eCoord &x1,const eCoord &x2,REAL ta,REAL te,REAL ra,REAL rb,REAL r,REAL g,REAL b,REAL a, gWallRenderMode mode );
+    virtual void Render(const eCamera *cam);
+    void RenderList(bool list);
+    virtual void RenderNormal(const eCoord &x1,const eCoord &x2,REAL ta,REAL te,REAL r,REAL g,REAL b,REAL a);
+    virtual void RenderBegin(const eCoord &x1,const eCoord &x2,REAL ta,REAL te,REAL ra,REAL rb,REAL r,REAL g,REAL b,REAL a);
 #endif
 
     virtual bool ActionOnQuit();
@@ -253,7 +237,7 @@ public:
     virtual bool SyncIsNew(nMessage &m);
 
 
-    eTempEdge   *Edge(){return this->edge_;}
+eTempEdge   *Edge(){return this->edge_;}
     gPlayerWall *Wall();
     gCycle *Cycle() const {return this->cycle_;}
     gCycleMovement *CycleMovement() const;
@@ -263,22 +247,13 @@ public:
 
     static void Clear(); // delete all sg_netPlayerWalls.
 
-    void Check() const;
-
-    bool CanHaveDisplayList()
-    {
-        return displayListInhibition_ == 0;
-    }
-
-    //! clears the display list (possibility)
-    void ClearDisplayList( int inhibitThis = 2, int inhibitCycle = 0 );
 private:
+    void Check() const;
     tArray<gPlayerWallCoord> coords_;
 
-    int displayListInhibition_;
+    unsigned int displayList_;
 };
 
 extern tList<gNetPlayerWall> sg_netPlayerWalls;
-extern tList<gNetPlayerWall> sg_netPlayerWallsGridded;
 
 #endif

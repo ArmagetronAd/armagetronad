@@ -20,11 +20,12 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
 
+#include <stdarg.h>
 #include "uInput.h"
 #include "tMemManager.h"
 #include "rScreen.h"
@@ -39,11 +40,24 @@ bool su_mouseGrab = false;
 static uAction* su_allActions[uMAX_ACTIONS];
 static int     su_allActionsLen = 0;
 
+static int sdlk_dynlast = SDLK_NEWLAST;
+
+#ifndef DEDICATED
+static const char *sdlk_dynnames[SDLK_MAX - SDLK_NEWLAST];
+#endif
+
+#ifndef NOJOYSTICK
+#define JOYSTICK_MAX 16
+static int joystick_sdlk[JOYSTICK_MAX][4];
+#endif
+
 uAction::uAction(uAction *&anchor,const char* name,
                  int priority_,
                  uInputType t)
-        :tListItem<uAction>(anchor),tooltip_(NULL),type(t),priority(priority_),internalName(name){
+        :tListItem<uAction>(anchor),type(t),priority(priority_),internalName(name){
     globalID = localID = su_allActionsLen++;
+
+    int i;
 
     tASSERT(localID < uMAX_ACTIONS);
 
@@ -51,13 +65,15 @@ uAction::uAction(uAction *&anchor,const char* name,
 
     tString descname;
     descname << "input_" << name << "_text";
-    tToLower( descname );
+    for(i=descname.Size()-1;i>=0;i--)
+        descname[i]=tolower(descname[i]);
 
     const_cast<tOutput&>(description).AddLocale(descname);
 
     tString helpname;
     helpname << "input_" << name << "_help";
-    tToLower( helpname );
+    for(i=helpname.Size()-1;i>=0;i--)
+        helpname[i]=tolower(helpname[i]);
 
     const_cast<tOutput&>(helpText).AddLocale(helpname);
 }
@@ -67,7 +83,7 @@ uAction::uAction(uAction *&anchor,const char* name,
                  const tOutput& help,
                  int priority_,
                  uInputType t)
-        :tListItem<uAction>(anchor),tooltip_(NULL),type(t),priority(priority_),internalName(name), description(desc), helpText(help){
+        :tListItem<uAction>(anchor),type(t),priority(priority_),internalName(name), description(desc), helpText(help){
     globalID = localID = su_allActionsLen++;
 
     tASSERT(localID < uMAX_ACTIONS);
@@ -95,12 +111,12 @@ uAction * uAction::Find( char const * name )
 class tConfItem_key:public tConfItemBase{
 public:
     tConfItem_key():tConfItemBase("KEYBOARD"){}
-    ~tConfItem_key(){}
+    ~tConfItem_key(){};
 
     // write the complete keymap
     virtual void WriteVal(std::ostream &s){
         int first=1;
-        for(int keysym=SDLK_NEWLAST-1;keysym>=0;keysym--){
+        for(int keysym=sdlk_dynlast-1;keysym>=0;keysym--){
             if (keymap[keysym]){
 
                 if (!first)
@@ -122,7 +138,12 @@ public:
         int keysym;
         s >> keysym;
         if (keysym>=0){
-            tASSERT(keysym < SDLK_NEWLAST);
+            // ignore invalid keysyms
+#ifndef DEDICATED
+            tASSERT( keysym < sdlk_dynlast);
+#endif
+            if (keysym >= sdlk_dynlast)
+                return;
             s >> in;
             if (uBindPlayer::IsKeyWord(in))
             {
@@ -171,7 +192,6 @@ uActionPlayer *uActionPlayer::Find(int id){
     while (run){
         if (run->ID() == id)
             return static_cast<uActionPlayer*>(run);
-        run = run->Next();
     }
 
     return NULL;
@@ -214,22 +234,69 @@ bool uActionGlobal::IsBreakingGlobalBind(int sym){
 //    the generic keymaps
 // ***************************
 
-tJUST_CONTROLLED_PTR< uBind > keymap[SDLK_NEWLAST];
-bool                          pressed[SDLK_NEWLAST];
+tJUST_CONTROLLED_PTR< uBind > keymap[SDLK_MAX];
+bool                          pressed[SDLK_MAX];
 
 static void keyboard_init(){
-    for(int i=0;i<SDLK_NEWLAST;i++)
+    for(int i=0;i<sdlk_dynlast;i++)
         keymap[i]=NULL;
     //uBindPlayer::Init();
     //global_bind::Init();
 }
 
 static void keyboard_exit(){
-    for(int i=0;i<SDLK_NEWLAST;i++)
+    for(int i=0;i<sdlk_dynlast;i++)
         keymap[i] = 0;
     //uBindPlayer::Init();
     //global_bind::Init();
 }
+
+#ifndef NOJOYSTICK
+static int add_sdlk(const char *desc, ...) {
+    char *mycopy;
+    va_list va;
+    int mclen;
+
+    if (sdlk_dynlast == SDLK_MAX)
+        return -1; /* Too many already! */
+
+    va_start(va, desc);
+    mycopy = (char *)malloc(mclen = 1 + vsnprintf(NULL, 0, desc, va));
+    va_end(va);
+    va_start(va, desc);
+    vsnprintf(mycopy, mclen, desc, va);
+    va_end(va);
+    sdlk_dynnames[sdlk_dynlast - SDLK_NEWLAST] = mycopy;
+    return sdlk_dynlast++;
+}
+
+void su_JoystickInit() {
+    int joycount = SDL_NumJoysticks(), i, j, na;
+    SDL_Joystick *cur;
+
+    if (joycount > JOYSTICK_MAX)
+        joycount = JOYSTICK_MAX;
+
+    SDL_JoystickEventState(SDL_ENABLE);
+    for (i = 0; i < joycount; ++i) {
+        cur = SDL_JoystickOpen(i);
+        na = SDL_JoystickNumAxes(cur);
+        joystick_sdlk[i][0] = sdlk_dynlast;
+        for (j = 0; j < na; ++j) {
+            add_sdlk("Joystick %d Axis %d Decrease", i, j);
+            add_sdlk("Joystick %d Axis %d Increase", i, j);
+        }
+        na = SDL_JoystickNumButtons(cur);
+        joystick_sdlk[i][1] = sdlk_dynlast;
+        for (j = 0; j < na; ++j) {
+            add_sdlk("Joystick %d Button %d", i, j);
+        }
+        /* TODO: Balls, Hats, Buttons */
+    }
+
+    std::cout << joycount << " joystick" << (joycount == 1 ? "" : "s") << " initialized\n";
+}
+#endif
 
 static tInitExit keyboard_ie(&keyboard_init, &keyboard_exit);
 
@@ -341,10 +408,12 @@ int uPlayerPrototype::Num(){return nextid;}
 //  Menuitem for input selection
 // *****************************************************
 
-static char const * keyname(int sym){
+static const char *keyname(int sym){
 #ifndef DEDICATED
     if (sym<=SDLK_LAST)
         return SDL_GetKeyName(static_cast<SDLKey>(sym));
+    else if (sym > sdlk_dynlast)
+        return "Unknown";
     else switch (sym){
         case SDLK_MOUSE_X_PLUS: return "Mouse right";
         case SDLK_MOUSE_X_MINUS: return "Mouse left";
@@ -359,6 +428,7 @@ static char const * keyname(int sym){
         case SDLK_MOUSE_BUTTON_5: return "Mousebutton 5";
         case SDLK_MOUSE_BUTTON_6: return "Mousebutton 6";
         case SDLK_MOUSE_BUTTON_7: return "Mousebutton 7";
+        default: return sdlk_dynnames[sym - SDLK_NEWLAST];
         }
 #endif
     return "";
@@ -389,7 +459,7 @@ public:
 
             bool first=1;
 
-            for(int keysym=SDLK_NEWLAST-1;keysym>=0;keysym--)
+            for(int keysym=sdlk_dynlast-1;keysym>=0;keysym--)
                 if(keymap[keysym] &&
                         keymap[keysym]->act==act &&
                         keymap[keysym]->CheckPlayer(ePlayer)){
@@ -458,7 +528,7 @@ public:
                 if(!active){
                     if (c.sym==SDLK_DELETE || c.sym==SDLK_BACKSPACE)
                     {
-                        for(int keysym=SDLK_NEWLAST-1;keysym>=0;keysym--)
+                        for(int keysym=sdlk_dynlast-1;keysym>=0;keysym--)
                             if(keymap[keysym] &&
                                     keymap[keysym]->act==act &&
                                     keymap[keysym]->CheckPlayer(ePlayer)){
@@ -477,6 +547,26 @@ public:
                     return true;
             }
             break;
+#ifndef NOJOYSTICK
+        case SDL_JOYAXISMOTION:
+            if (e.jaxis.value > -16384 && e.jaxis.value < 16384) {
+#if DEBUG
+                std::cout << "JS: Ignoring value of " << e.jaxis.value << "\n";
+#endif
+                return false;
+            }
+            sym = joystick_sdlk[e.jaxis.which][0] + (e.jaxis.axis * 2) + ((e.jaxis.value > 0) ? 1 : 0);
+            active = 0;
+#if DEBUG
+            printf("JS: %d,%d,%d is %s\n", e.jaxis.which, e.jaxis.axis, e.jaxis.value, keyname(sym));
+            fflush(stdout);
+#endif
+            break;
+        case SDL_JOYBUTTONDOWN:
+            sym = joystick_sdlk[e.jbutton.which][1] + e.jbutton.button;
+            active = 0;
+            break;
+#endif
         default:
             return(false);
         }
@@ -595,7 +685,7 @@ void su_HandleDelayedEvents ()
 
     su_delayed = false;
 
-    for ( int i = SDLK_NEWLAST - 1; i>=0; --i )
+    for ( int i = sdlk_dynlast - 1; i>=0; --i )
     {
         if ( keymap[i] )
         {
@@ -616,7 +706,7 @@ bool su_HandleEvent(SDL_Event &e, bool delayed ){
 
     su_delayed = delayed;
 
-    // there is nearly allways a mouse motion tEvent:
+    // there is nearly alllways a mouse motion tEvent:
     int xrel=e.motion.xrel;
     int yrel=-e.motion.yrel;
 
@@ -666,6 +756,21 @@ bool su_HandleEvent(SDL_Event &e, bool delayed ){
         pm=-1;
         break;
 
+#ifndef NOJOYSTICK
+    case SDL_JOYAXISMOTION:
+        pm = 1;
+        if (e.jaxis.value > -16384 && e.jaxis.value < 16384)
+            pm = -1;
+        sym = joystick_sdlk[e.jaxis.which][0] + (e.jaxis.axis * 2) + ((e.jaxis.value > 0) ? 1 : 0);
+        break;
+
+    case SDL_JOYBUTTONDOWN:
+    case SDL_JOYBUTTONUP:
+        pm = (e.type == SDL_JOYBUTTONDOWN) ? 1 : -1;
+        sym = joystick_sdlk[e.jbutton.which][1] + e.jbutton.button;
+        break;
+#endif
+
     default:
         break;
     }
@@ -674,13 +779,13 @@ bool su_HandleEvent(SDL_Event &e, bool delayed ){
         if (keymap[sym]->act->type==uAction::uINPUT_ANALOG)
             pm*=ts*key_sensitivity;
         pressed[sym]=(realpm>0);
-        if ( pm > 0 && keymap[sym]->IsDoubleBind( sym ) )
+        if ( keymap[sym]->IsDoubleBind( sym ) )
             return true;
         return (keymap[sym]->Activate(pm, delayed ));
 
     }
     else
-#endif  
+#endif
         return false;
 }
 
@@ -693,7 +798,7 @@ void su_InputSync(){
     //tsSmooth/=REAL(1.1);
     lastTime=time;
 
-    for(int sym=SDLK_NEWLAST-1;sym>=0;sym--)
+    for(int sym=sdlk_dynlast-1;sym>=0;sym--)
         if (pressed[sym] && keymap[sym] &&
                 keymap[sym]->act->type==uAction::uINPUT_ANALOG)
             keymap[sym]->Activate(ts*key_sensitivity, su_delayed );
@@ -701,7 +806,7 @@ void su_InputSync(){
 
 void su_ClearKeys()
 {
-    for(int sym=SDLK_NEWLAST-1;sym>=0;sym--)
+    for(int sym=sdlk_dynlast-1;sym>=0;sym--)
     {
         if (pressed[sym] && keymap[sym] )
             keymap[sym]->Activate(-1, su_delayed );
@@ -713,7 +818,7 @@ void su_ClearKeys()
 // Player binds
 // *****************
 
-static char const * Player_keyword="PLAYER_BIND";
+static char *Player_keyword="PLAYER_BIND";
 
 uBindPlayer::uBindPlayer(uAction *a,int p):uBind(a),ePlayer(p){}
 
@@ -737,7 +842,7 @@ uBindPlayer * uBindPlayer::NewBind(std::istream &s)
 uBindPlayer * uBindPlayer::NewBind( uAction * action, int player )
 {
     // see if the bind has an alias
-    for ( int i = SDLK_NEWLAST-1; i >= 0; --i )
+    for ( int i = sdlk_dynlast-1; i >= 0; --i )
     {
         // compare action
         uBind * old = keymap[i];
@@ -773,18 +878,10 @@ bool uBindPlayer::Delayable()
 }
 
 bool uBindPlayer::DoActivate(REAL x){
-    bool ret = false;
     if (ePlayer==0)
-        ret = GlobalAct(act,x);
+        return  GlobalAct(act,x);
     else
-        ret = uPlayerPrototype::PlayerConfig(ePlayer-1)->Act(act,x);
-
-    if( ret && act && act->GetTooltip() && x > 0 )
-    {
-        act->GetTooltip()->Count(ePlayer);
-    }
-    
-    return ret;
+        return uPlayerPrototype::PlayerConfig(ePlayer-1)->Act(act,x);
 }
 
 
@@ -815,11 +912,9 @@ bool uActionGlobalFunc::GlobalAct(uAction *act, REAL x){
     return false;
 }
 
-static uActionGlobal mess_up("MESS_UP",1);
+static uActionGlobal mess_up("MESS_UP");
 
-static uActionGlobal mess_down("MESS_DOWN",2);
-
-static uActionGlobal mess_end("MESS_END",3);
+static uActionGlobal mess_down("MESS_DOWN");
 
 static bool messup_func(REAL x){
     if (x>0){
@@ -835,130 +930,5 @@ static bool messdown_func(REAL x){
     return true;
 }
 
-static bool messend_func(REAL x){
-    if (x>0){
-        sr_con.End(2);
-    }
-    return true;
-}
-
 static uActionGlobalFunc mu(&mess_up,&messup_func);
 static uActionGlobalFunc md(&mess_down,&messdown_func);
-static uActionGlobalFunc me(&mess_end,&messend_func);
-
-// ********
-// tooltips
-// ********
-
-uActionTooltip::uActionTooltip( uAction & action, int numHelp, VETOFUNC * veto )
-: tConfItemBase(action.internalName + "_TOOLTIP"), action_( action ), veto_(veto)
-{
-    help_ = tString("$input_") + action.internalName + "_tooltip";
-    tToLower( help_ );
-
-    // initialize array holding the number of help attempts to give left
-    for( int i = uMAX_PLAYERS; i >= 0; --i )
-    {
-        activationsLeft_[i] = 0; // numHelp;
-    }
-
-    action.tooltip_ = this;
-}
-
-uActionTooltip::~uActionTooltip()
-{
-    if( action_.tooltip_ == this )
-        action_.tooltip_ = NULL;
-        
-}
-
-bool uActionTooltip::Help( int player )
-{
-    // find most needed tooltip
-    uActionTooltip * mostWanted = NULL;
-
-    // keys bound to the action of the tooltip that needs help
-    tString maps;
-    tString last;
-
-    // run through binds
-    for( int i = SDLK_NEWLAST - 1; i >= 0; --i )
-    {
-        uBind * bind = keymap[i];
-        if( !bind ||!bind->CheckPlayer(player) )
-            continue;
-        uAction * action = bind->act;
-        if( !action )
-            continue;
-        uActionTooltip * tooltip = action->GetTooltip();
-        if( !tooltip || ( tooltip->veto_ && (*tooltip->veto_)(player) ) )
-        {
-            continue;
-        }
-        
-        int activationsLeft = tooltip->activationsLeft_[player];
-        if( activationsLeft > 0 && 
-            ( !mostWanted || mostWanted->activationsLeft_[player] < activationsLeft ) )
-        {
-            mostWanted = tooltip;
-            maps = "";
-            last = "";
-        }
-
-        // build up key list
-        if( mostWanted == tooltip )
-        {
-            if ( maps.Len() > 1 )
-            {
-                maps << ", ";
-            }
-            if ( last.Len() > 1 )
-            {
-                maps << last;
-            }
-            last = tString("<") + keyname(i) + ">";
-        }
-    }
-
-    if( mostWanted )
-    {
-        if( last.Len() > 1 )
-        {
-            if( maps.Len() > 1 )
-                maps << " " << tOutput("$input_or") << " " << last;
-            else
-                maps = last;
-        }
-
-        con.CenterDisplay(tString(tOutput(mostWanted->help_, maps)));
-
-        return true;
-    }
-
-        return false;
-}
-
-void uActionTooltip::Count( int player )
-{
-    if ( activationsLeft_[player] > 0 )
-    {
-        activationsLeft_[player]--;
-        Help(player);
-    }
-}
-
-void uActionTooltip::WriteVal(std::ostream & s )
-{
-    for( int i = 0; i <= uMAX_PLAYERS; ++i )
-    {
-        s << activationsLeft_[i] << " ";
-    }
-}
-
-void uActionTooltip::ReadVal(std::istream & s )
-{
-    for( int i = 0; i <= uMAX_PLAYERS; ++i )
-    {
-        s >> activationsLeft_[i];
-    }
-}

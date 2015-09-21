@@ -48,7 +48,7 @@ PREFIX="$1"
 shift
 
 INSTALLING="Installing"
-test ${MODE} = install || INSTALLING="Uninstalling"
+test ${MODE} == install || INSTALLING="Uninstalling"
 
 # prefix in lowercase is the prefix the game was built with. For source
 # installations, this will be identical to PREFIX, but for binary installs
@@ -222,7 +222,7 @@ if test @enable_initscripts@ = yes ; then
     fi
 
     # install/uninstall scripts
-    if test @initdir@ = OpenBSD; then
+    if test @initdir@ == OpenBSD; then
         if test -z "${DESTDIR}${ROOTDIR}" && test -w /etc/rc.local; then
         # special code for OpenBSD, they don't use init script directories, but one huge
         # file where you have to add your startup stuff. The parts that work done
@@ -296,37 +296,23 @@ fi
 install_link ${BINDIR}/@progname@-@version@            ${BINDIR}/@progname@
 install_link ${BINDIR}/@prognamebase@-master-@version@ ${BINDIR}/@prognamebase@-master
 
-# install desktop files
-if test @enable_desktop@ = yes; then
+# add KDE icons and desktop link
+if test @enable_desktop@ = yes && kde-config --install icon > /dev/null 2>&1; then
     DESKTOPSOURCE=@aa_datadir@/desktop
-
-    # rebrand icons and desktop file
-    if test "$MODE" = "install"; then
-        if test @prognamebase@ = armagetronad; then
-            true # echo no rebranding
-        else
-            for f in large small medium; do mv ${DESTDIR}${DESKTOPSOURCE}/icons/$f/armagetronad.png ${DESTDIR}${DESKTOPSOURCE}/icons/$f/@prognamebase@.png; done
-            mv ${DESTDIR}${DESKTOPSOURCE}/armagetronad.desktop ${DESTDIR}${DESKTOPSOURCE}/@prognamebase@.desktop
-        fi
+    ICONSDEST=`kde_get_write_path icon ${DESTDIR}`
+    if test -z "${ICONSDEST}"; then
+        echo "No permission to write to KDE icons directory."
+    else
+        echo "${INSTALLING} KDE icon in ${ICONSDEST}..."
+        install_link ${DESKTOPSOURCE}/icons/large/armagetronad.png ${ICONSDEST}/@progname@.png
     fi
 
-    # add KDE icons and desktop link
-    if kde-config --install icon > /dev/null 2>&1; then
-        ICONSDEST=`kde_get_write_path icon ${DESTDIR}`
-        if test -z "${ICONSDEST}"; then
-            echo "No permission to write to KDE icons directory."
-        else
-            echo "${INSTALLING} KDE icon in ${ICONSDEST}..."
-            install_link ${DESKTOPSOURCE}/icons/large/@prognamebase@.png ${ICONSDEST}/@progname@.png
-        fi
-
-        DESKTOPDEST=`kde_get_write_path apps ${DESTDIR}`
-        if test -z "${DESKTOPDEST}"; then
-            echo "No permission to write to KDE application menu directory."
-        else
-            echo "${INSTALLING} KDE start menu entry in ${DESKTOPDEST}..."
-            install_link ${DESKTOPSOURCE}/@prognamebase@.desktop ${DESKTOPDEST}/@progname@.desktop
-        fi
+    DESKTOPDEST=`kde_get_write_path apps ${DESTDIR}`
+    if test -z "${DESKTOPDEST}"; then
+        echo "No permission to write to KDE application menu directory."
+    else
+        echo "${INSTALLING} KDE start menu entry in ${DESKTOPDEST}..."
+        install_link ${DESKTOPSOURCE}/armagetronad.desktop ${DESKTOPDEST}/@progname@.desktop
     fi
 fi
 
@@ -352,14 +338,13 @@ if test @enable_restoreold@ = yes && test ${MODE} = uninstall; then
     fi
 fi
 
-NEWVARDIR=`relocate @aa_localstatedir@`
-
 # migrate old configuration
 if test ${MODE} = install && test @enable_migratestate@ != no; then
     # locate old configuration
     OLDVARDIR=`relocate @oldvardir@`
     if test -d ${ROOTDIR}${OLDVARDIR}; then
         # locate new configuration
+        NEWVARDIR=`relocate @aa_localstatedir@`
         if ! test -r ${ROOTDIR}${NEWVARDIR}/won_rounds.txt && test ${OLDVARDIR} != ${NEWVARDIR}; then
             # move or copy it over
             command=cp
@@ -373,11 +358,6 @@ if test ${MODE} = install && test @enable_migratestate@ != no; then
             ${command} ${ROOTDIR}${OLDVARDIR}/* ${DESTDIR}${NEWVARDIR}/
         fi
     fi
-fi
-
-# remove var directory
-if test ${MODE} = uninstall; then
-  test -d "${DESTDIR}${NEWVARDIR}" && rmdir --ignore-fail-on-non-empty "${DESTDIR}${NEWVARDIR}"
 fi
 
 # add user

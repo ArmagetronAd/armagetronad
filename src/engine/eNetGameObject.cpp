@@ -25,14 +25,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
-#include "eNetGameObject.h"
 #include "ePlayer.h"
-#include "eLagCompensation.h"
+#include "eNetGameObject.h"
 #include "eTimer.h"
 #include "uInput.h"
 #include "eGrid.h"
 #include "eTeam.h"
-#include "eTess2.h"
 
 //static nNOInitialisator<eNetGameObject> eNetGameObject_Init("eNetGameObject");
 
@@ -67,13 +65,12 @@ static REAL se_GetPing( ePlayerNetID * player )
 }
 
 void eNetGameObject::MyInitAfterCreation(){
-    laggometer=laggometerSmooth=0;
-
     if (player){
         player->ControlObject(this);
     }
     clientside_action();
 
+    laggometer=laggometerSmooth=0;
     pingOverflow=0;
 }
 
@@ -111,11 +108,13 @@ nNetObject(m){
     pingOverflow=0;
 }
 
-void eNetGameObject::DoRemoveFromGame(){
+void eNetGameObject::RemoveFromGame(){
     // let the object get deleted on exit if nobody else is interested
     tControlledPTR< eNetGameObject > bounce;
     if ( this->GetRefcount() >= 0 )
         bounce = this;
+
+    RemoveFromListsAll();
 
     // unregister from player
     if ( player && this == player->object )
@@ -198,8 +197,8 @@ void eNetGameObject::ReceiveControlNet(nMessage &m){
         time=se_GameTime()+1;
 
     uActionPlayer *Act=uActionPlayer::Find(act_id);
-    if ( Act )
-        ReceiveControl(time,Act,x);
+
+    ReceiveControl(time,Act,x);
 }
 
 
@@ -207,8 +206,6 @@ void eNetGameObject::SetPlayer(ePlayerNetID* a_player)
 {
     tASSERT( !a_player || Owner() == player->Owner() );
     player  = a_player;
-    if ( laggometerSmooth == 0 && sn_GetNetState() != nCLIENT )
-        laggometerSmooth = laggometer = se_GetPing( player );
 }
 
 void eNetGameObject::SendControl(REAL time,uActionPlayer *Act,REAL x){
@@ -331,19 +328,10 @@ REAL eNetGameObject::Lag() const{
     return laggometerSmooth;
 }
 
-REAL eNetGameObject::LagThreshold() const{
-    // ask the lag compensation framework
-    if ( sn_GetNetState() != nSERVER )
-        return 0;
-    if ( Owner() == 0 )
-        return 0;
-    return eLag::Threshold();
-}
-
 static tCallbackOr* transfer_anchor;
 
 eTransferInhibitor::eTransferInhibitor(BOOLRETFUNC *f)
-    :tCallbackOr(transfer_anchor,f){}
+        :tCallbackOr(transfer_anchor,f){}
 
 bool eTransferInhibitor::no_transfer(int u){
     user = u;

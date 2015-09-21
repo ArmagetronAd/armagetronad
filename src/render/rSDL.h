@@ -6,7 +6,7 @@
 #ifndef DEDICATED
 #include <SDL.h>
 #else
-#define SDLK_LAST 1024
+#define SDLK_LAST 300
 typedef int SDL_keysym;
 typedef int SDL_Event;
 typedef unsigned char Uint8;

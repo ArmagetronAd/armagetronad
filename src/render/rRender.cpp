@@ -30,10 +30,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 rRenderer *renderer;
 
 void sr_RendererCleanup(){
-    if ( renderer )
-    {
-        renderer->End(true);
-    }
     delete renderer;
     renderer = 0;
 }

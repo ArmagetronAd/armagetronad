@@ -46,18 +46,10 @@ class glRenderer: public rRenderer{
         //  return;
 
         if (lastPrimitive != p && lastPrimitive != GL_FALSE)
-        {
             glEnd();
-            sr_CheckGLError();
-        }
-
-        if ( lastPrimitive != p )
-        {
-            sr_CheckGLError();
-            glBegin(p);
-        }
 
         lastPrimitive = p;
+        glBegin(p);
 
         forceglEnd = forceEnd;
     }
@@ -71,7 +63,7 @@ class glRenderer: public rRenderer{
     }
 
 public:
-    glRenderer():lastPrimitive(GL_FALSE), forceglEnd(false), lastMatrix(GL_FALSE){
+    glRenderer():lastPrimitive(GL_FALSE), lastMatrix(GL_FALSE){
         ChangeFlags(0xffffffff,0);
     };
 
@@ -121,15 +113,14 @@ public:
     };
 
 
-    virtual void End(bool force=true){
+    virtual void End(bool force=false){
         //    glEnd();
         //    return;
 
-        if ((forceglEnd || force ) && lastPrimitive!=GL_FALSE)
+        if ((forceglEnd || force || true) && lastPrimitive!=GL_FALSE)
         {
             forceglEnd = false;
             glEnd();
-            sr_CheckGLError();
             lastPrimitive = GL_FALSE;
         }
     }
@@ -145,6 +136,10 @@ public:
     virtual void BeginQuads(){
         BeginPrimitive(GL_QUADS);
     }
+
+    virtual void IsEdge(bool ie){
+        glEdgeFlag(ie ? GL_TRUE : GL_FALSE);
+    };
 
     virtual void BeginLineStrip(){
         BeginPrimitive(GL_LINE_STRIP, true);
@@ -204,8 +199,7 @@ public:
     virtual void MultMatrix(REAL mdata[4][4]){
         End(true);
         tASSERT(sizeof(REAL) == sizeof(GLfloat));
-        REAL * mdat=&mdata[0][0];
-        glMultMatrixf(reinterpret_cast<GLfloat *>(mdat));
+        glMultMatrixf(reinterpret_cast<GLfloat *>(&mdata));
     };
 
     virtual void IdentityMatrix(){

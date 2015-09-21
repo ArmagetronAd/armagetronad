@@ -32,7 +32,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tSysTime.h"
 #include "tLocale.h"
 #include "tCommandLine.h"
-#include "nSocket.h"
 #include  <time.h>
 
 REAL save_interval = 300.0f;
@@ -46,6 +45,8 @@ static tSettingItem< int > mp( "MASTER_PORT", master_port );
 
 REAL master_idle = 2;
 static tSettingItem< REAL > mi( "MASTER_IDLE", master_idle );
+
+extern void sn_ReceiveFromControlSocket();
 
 // console with filter for better machine readable log format
 class nConsoleDateFilter:public tConsoleFilter{
@@ -104,13 +105,11 @@ int main(int argc, char** argv)
     {
         nServerInfo::RunMaster();
 
-        sn_BasicNetworkSystem.Select( .1f );
-        tAdvanceFrame();
+        tAdvanceFrame( 10000 );
         nTimeAbsolute time = tSysTimeFloat();
 
         sn_Receive();
         sn_ReceiveFromControlSocket();
-        sn_SendPlanned();
 
         static bool queryGoesOn = true;
         if (queryGoesOn && time > querytimeout)

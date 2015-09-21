@@ -52,18 +52,6 @@ public:
     // buffer swap:
     static void SwapGL();
     static void ClearGL(); // not really system depentent.......
-
-    // starting and stopping of background network processing
-    class rNetIdler
-    {
-    public:
-        virtual ~rNetIdler(){};
-        // only during Do(), gamestate may be modified.
-        virtual bool Wait() = 0; //!< wait for something to do, return true fi there is work
-        virtual void Do() = 0;   //!< do the work.
-    };
-    static void StartNetSyncThread( rNetIdler * idler );
-    static void StopNetSyncThread();
 #endif
 
     static rSwapMode swapMode_;

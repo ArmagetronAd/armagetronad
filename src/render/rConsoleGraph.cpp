@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
+  
 ***************************************************************************
 
 */
@@ -30,31 +30,21 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef DEDICATED
 
 #include "rFont.h"
-#include "rRender.h"
 #include "tSysTime.h"
 #include "rConsole.h"
 #include "rSysdep.h"
 #include "rScreen.h"
 #include "rGL.h"
 #include "tConfiguration.h"
-#include "rDisplayList.h"
 
-static tString sr_centerString;
+static tColoredString sr_centerString;
 static REAL center_r,center_g,center_b,center_fadetime;
 
 static REAL Time;
 
-static rDisplayListAlphaSensitive sr_consoleDisplayList;
-
-// flag memorizing whether the console already has been rendered this frame
-static bool sr_alreadyDisplayed = false;
-
 static void sr_ConsolePerFrame(){
     if (sr_con.autoDisplayAtSwap)
-    {
         sr_con.Render();
-    }
-    sr_alreadyDisplayed = false;
 }
 
 static rPerFrameTask console_pf(&sr_ConsolePerFrame);
@@ -77,21 +67,9 @@ static tConfItem<REAL> cmlocy("CM_LOCY",centerMessageY);
 static int sr_columns = 78;
 static tConfItem<int> sr_columnsConf("CONSOLE_COLUMNS",sr_columns);
 
-static int sr_indent = 3;
-static tConfItem<int> sr_indentConf("CONSOLE_INDENT",sr_indent);
-
 void rConsole::Render(){
-    if( sr_alreadyDisplayed )
-    {
-        return;
-    }
-
-    sr_alreadyDisplayed = true;
-
     if (!sr_glOut)
         return;
-
-    static REAL lastBottom = -1.0;
 
     sr_ResetRenderState(true);
 
@@ -112,69 +90,31 @@ void rConsole::Render(){
     // of columns in it
     rCWIDTH_CON=1.9/sr_columns;
 
+    // but don't shrink the small font.
+    if (rCWIDTH_CON < 10/W)
+        rCWIDTH_CON = 10/W;
+
     // get corresponding character height
     rCHEIGHT_CON=rCWIDTH_CON*W*9/(5*H);
 
     if (sr_screen){
         Time=tSysTimeFloat();
 
-        if (Time-center_fadetime<2){
-            REAL alpha=center_fadetime-Time+1;
-            if (alpha>1) alpha=1;
-            if (alpha<0) alpha=0;
-            rTextField::SetDefaultColor( tColor(center_r,center_g,center_b,alpha) );
-
-            REAL space = 1.6;
-            REAL needed = rCWIDTH_CON * 4 * sr_centerString.Len();
-            REAL fak = 1;
-            if (needed > space)
-                fak = space/needed;
-
-            DisplayText(0,centerMessageY,rCWIDTH_CON*4*fak,rCHEIGHT_CON*4*fak,sr_centerString);
-            RenderEnd();
-            sr_ResetRenderState(true);
-        }
-
         if (sr_textOut || rForceTextCallback::ForceText()){
-            if (lastCustomTimeout<Time-5 &&
+            if(lastCustomTimeout<Time-5 &&
                     lastTimeout+timeout<Time && currentTop<currentIn){
                 currentTop++;
                 lastTimeout=Time;
             }
 
-            rTextField out(-.95f,.99f,rCWIDTH_CON,rCHEIGHT_CON);//,&rFont::s_defaultFontSmall);
-            out.SetWidth(static_cast<int>(1.9f/out.GetCWidth()));
-
-            static int lastTop = currentTop;
-            static int lastIn  = currentIn;
-            REAL predictBottom = lastBottom - ( lastTop - currentTop + currentIn - lastIn ) * out.GetCHeight();
-
-            if ( lastTop != currentTop || lastIn != currentIn )
-            {
-                lastTop = currentTop;
-                lastIn  = currentIn;
-                sr_consoleDisplayList.Clear();
-            }
-
             rTextField::SetDefaultColor( tColor(1,1,1) );
 
-            if ( sr_consoleDisplayList.Call() )
-            {
-                return;
-            }
-            rDisplayListFiller filler( sr_consoleDisplayList );
-
-            out.SetIndent(sr_indent);
-
-            if( sr_alphaBlend )
-            {
-                RenderEnd();
-                glColor4f(0, 0, 0, .5f);
-                glRectf(-1,predictBottom,1,1);
-            }
+            rTextField out(-.95f,.99f,rCWIDTH_CON,rCHEIGHT_CON);//,&rFont::s_defaultFontSmall);
+            out.SetWidth(static_cast<int>(1.9f/rCWIDTH_CON));
+	    out.EnableLineWrap();
 
             int i;
-            for (i=currentTop;i<=currentIn && i<=currentTop+MaxHeight();i++)
+            for(i=currentTop;i<=currentIn && i<=currentTop+MaxHeight();i++)
                 if (lines[i].Len()>1){
                     rTextField::SetDefaultColor( tColor(1,1,1) );
                     out << lines[i];
@@ -191,14 +131,34 @@ void rConsole::Render(){
                 lastTimeout=Time;
                 currentTop+=(over+1)/2;
             }
-           
-            // check for mispredictions of console height
-            lastBottom = out.GetBottom();
-            if( fabs(predictBottom - lastBottom) > .0001 )
-            {
-                sr_consoleDisplayList.Clear();
+        }
+
+        if (Time-center_fadetime<2){
+            REAL alpha=center_fadetime-Time+1;
+            if (alpha>1) alpha=1;
+            if (alpha<0) alpha=0;
+            rTextField::SetDefaultColor( tColor(center_r,center_g,center_b,alpha) );
+
+            REAL width=rCWIDTH_CON*4;
+            REAL height=rCHEIGHT_CON*4;
+            REAL len=sr_centerString.LongestLine();
+            REAL lines=(REAL)(sr_centerString.Count('\n')+1);
+
+            REAL space = 1.6;
+            REAL needed = width * len;
+            if (needed > space) {
+                width *= space/needed;
+                height *= space/needed;
+            }
+            space = 0.9 + centerMessageY;
+            needed = height*lines;
+            if (needed > space) {
+                width *= space/needed;
+                height *= space/needed;
             }
 
+            DisplayText(0,centerMessageY,width,height,sr_centerString);
+            //std::cerr << "DisplayText(0," << centerMessageY << "," << (rCWIDTH_CON*4*fak) << "," << (rCHEIGHT_CON*4*fak) << "," <<sr_centerString << ");\n";
         }
 
         rTextField::SetDefaultColor( tColor(1,1,1) );
@@ -225,15 +185,6 @@ void rConsole::DoCenterDisplay(const tString &s,REAL timeout,REAL r,REAL g,REAL 
     center_g=g;
     center_b=b;
 }
-
-bool rConsole::CenterDisplayActive()
-{
-    return tSysTimeFloat() - center_fadetime < 1.5;
-}
-
-// passes ladderlog output to external scripts (do nothing here)
-void sr_InputForScripts( char const * input )
-{}
 
 #else
 #include "rConsoleCout.cpp"

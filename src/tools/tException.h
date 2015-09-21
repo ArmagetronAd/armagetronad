@@ -61,10 +61,4 @@ private:
     tString name_;          //!< exception name
 };
 
-//! throw if a clean program exit is desired
-class tCleanQuit: public tException
-{
-    virtual tString DoGetName() const;
-};
-
 #endif

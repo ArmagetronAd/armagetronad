@@ -35,8 +35,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 
 eSensor::eSensor(eGameObject *o,const eCoord &start,const eCoord &d)
-        :eStackGameObject(o->grid, start,d,o->currentFace)
-        ,hit(1000),ehit(NULL),lr(0), owned(o) , inverseSpeed_(0)
+        :eGameObject(o->grid, start,d,o->currentFace,0),owned(o)
+        ,hit(1000),ehit(NULL),lr(0)
 {
     if (owned)
     {
@@ -44,7 +44,7 @@ eSensor::eSensor(eGameObject *o,const eCoord &start,const eCoord &d)
 
         // find a better current face if our start postion is not really at the
         // current position of the owner
-        if ( ( grid && !currentFace ) || ( !currentFace->IsInside( pos ) && currentFace->IsInside( owned->pos ) ) )
+        if ( grid && !currentFace || !currentFace->IsInside( pos ) && currentFace->IsInside( owned->pos ) )
         {
             currentFace = o->grid->FindSurroundingFace( pos, currentFace );
         }
@@ -54,38 +54,36 @@ eSensor::eSensor(eGameObject *o,const eCoord &start,const eCoord &d)
 }
 
 void eSensor::PassEdge(const eWall *w,REAL time,REAL a,int){
-    if (!w->Massive()){
-        return;
-    }
+    if (hit>time){
+        if (!w->Massive()){
+            return;
+        }
 
-    // extrapolate the hit time
-    REAL hitTime = owned->LastTime() + time * inverseSpeed_;
+        if (owned && !owned->EdgeIsDangerous(w, owned->LastTime(), a))
+            return;
 
-    if (owned && !owned->EdgeIsDangerous(w, hitTime, a))
-        return;
-
-    lr=0;
-
-    const eHalfEdge *e = w->Edge();
-
-    eCoord eEdge_dir=w->Vec();
-    eCoord collPos = w->Point( a );
-
-    // con << dir << eEdge_dir << '\n';
-    REAL dec=- eEdge_dir*dir;
-
-    if (dec>0)
-        lr=1;
-    else if (dec<0)
-        lr=-1;
-    else
         lr=0;
 
-    hit=time;
-    ehit=e;
-    before_hit=collPos-dir*.000001;
+        const eHalfEdge *e = w->Edge();
 
-    throw eSensorFinished();
+        eCoord eEdge_dir=w->Vec();
+        eCoord collPos = w->Point( a );
+
+        // con << dir << eEdge_dir << '\n';
+        REAL dec=- eEdge_dir*dir;
+
+        if (dec>0)
+            lr=1;
+        else if (dec<0)
+            lr=-1;
+        else
+            lr=0;
+
+        hit=time;
+        ehit=e;
+        before_hit=collPos-dir*.000001;
+
+    }
 }
 
 //void eSensor::PassEdge(eEdge *e,REAL time,REAL a,int recursion){
@@ -130,13 +128,7 @@ void eSensor::detect(REAL range){
     }
     */
 
-    try
-    {
-        Move(pos+dir*range,0,range);
-    }
-    catch( eSensorFinished & e )
-    {
-    }
+    Move(pos+dir*range,0,range);
 
 #ifdef DEBUGLINE
     if (hit < range)

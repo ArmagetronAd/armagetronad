@@ -1,5 +1,5 @@
 # all values have a range of 0 to 10. More is only meaningful for the range variable.
-# the "meta"-meaning of a value was used by me to deduce the AI abilities from the abilities of the real program.
+# the "meta"-meaning of a value was used by me to deduce the AI abilities from the abilites of the real program.
 # 1st column "name": Program name
 # 2nd column "rs": Program reaction speed (meta: program execution speed)
 # 3rd column "er": Reaction in an emergency

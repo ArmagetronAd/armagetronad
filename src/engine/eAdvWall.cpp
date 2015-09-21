@@ -28,14 +28,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "eWall.h"
 #include "math.h"
 #include "rTexture.h"
-#include "rDisplayList.h"
 #include "eTimer.h"
 #include "rScreen.h"
 #include "eAdvWall.h"
 #include "eCamera.h"
 #include "tConfiguration.h"
 #include "eRectangle.h"
-#include "rRender.h"
 
 /* **********************************************
    RimWall
@@ -52,13 +50,11 @@ eWallRim::eWallRim(eGrid *grid, bool backface_cull, REAL h)
 
     //  if(bf_cull && sr_ZTrick)
     se_rimWalls.Add(this,rim_id);
-    DestroyDisplayList();}
-
+}
 
 eWallRim::~eWallRim()
 {
     se_rimWalls.Remove(this,rim_id);
-    DestroyDisplayList();
 }
 
 //ArmageTron_eWalltype gWallRim::type(){return ArmageTron_RIM;}
@@ -112,68 +108,6 @@ bool eWallRim::IsBound(const eCoord &x, REAL offset)
     // return true;
     return se_OffsetBounds( offset ).Contains( x );
 }
-
-static bool se_RimWrapY=true;
-static tSettingItem<bool> se_RimWrapYConf
-("RIM_WALL_WRAP_Y",se_RimWrapY);
-
-#ifndef DEDICATED
-static rDisplayList se_rimDisplayList;
-
-extern bool sg_MoviePack();
-
-static rFileTexture se_RimWallNoWrap(rTextureGroups::TEX_WALL,"textures/rim_wall.png",1,0);
-static rFileTexture se_RimWallWrap(rTextureGroups::TEX_WALL,"textures/rim_wall.png",1,1);
-
-#endif
-
-// *******************************************************************************************
-// *
-// *    RenderAll
-// *
-// *******************************************************************************************
-//!        @param  camera  camera used for rendering
-// *******************************************************************************************
-void eWallRim::RenderAll( eCamera * camera )
-{
-#ifndef DEDICATED
-    // call or fill display list
-    if ( se_rimDisplayList.Call() )
-    {
-        return;
-    }
-    rDisplayListFiller filler( se_rimDisplayList );
-
-    glEnable(GL_DEPTH_TEST);
-    glDisable(GL_CULL_FACE);
-    
-    if ( !sg_MoviePack() )
-    {
-        ( se_RimWrapY ? se_RimWallWrap : se_RimWallNoWrap).Select();
-    }
-
-    for(int i=se_rimWalls.Len()-1;i>=0;i--){
-        se_rimWalls(i)->RenderReal( rDisplayList::IsRecording() ? 0 : camera );
-    }
-    RenderEnd();
-    
-    glEnable(GL_CULL_FACE);
-#endif
-}
-
-// *******************************************************************************************
-// *
-// *    DestroyDisplayList
-// *
-// *******************************************************************************************
-void eWallRim::DestroyDisplayList()
-{
-#ifndef DEDICATED
-    se_rimDisplayList.Clear( 3 );
-#endif
-}
-
-static rCallbackBeforeScreenModeChange unload(&eWallRim::DestroyDisplayList);
 
 // *******************************************************************************************
 // *

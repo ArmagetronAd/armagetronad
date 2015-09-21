@@ -33,25 +33,24 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 extern REAL sg_delayCycle;
 
 void gSensor::PassEdge(const eWall *ww,REAL time,REAL a,int r){
-    if (!ww)
-        return;
-
-    try{
-        eSensor::PassEdge(ww,time,a,r);
-    }
-    catch( eSensorFinished & e )
+    if (hit>time)
     {
+        if (!ww)
+            return;
+
+        eSensor::PassEdge(ww,time,a,r);
+
+        // see if the base class found the hit unworthy: ( HACK! )
+        if ( time != hit )
+            return;
+
         const gPlayerWall *w=dynamic_cast<const gPlayerWall*>(ww);
         if (w)
         {
             gCycle *owner=w->Cycle();
-            if (owner && owner->IsMe( owned ) )
+            if (owner==owned)
             {
                 type=gSENSOR_SELF;
-            }
-            else if ( owner && owned && owner->Team() == owned->Team() )
-            {
-                type=gSENSOR_TEAMMATE;
             }
             else
             {
@@ -63,8 +62,6 @@ void gSensor::PassEdge(const eWall *ww,REAL time,REAL a,int r){
         }
         else if (dynamic_cast<const gWallRim*>(ww))
             type=gSENSOR_RIM;
-
-        throw;
     }
 }
 

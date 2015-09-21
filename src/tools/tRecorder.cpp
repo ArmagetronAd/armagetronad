@@ -82,27 +82,6 @@ bool tRecorderBase::IsRunning( void )
     return IsRecording() || IsPlayingBack();
 }
 
-// *****************************************************************************************
-// *
-// *   Stop
-// *
-// *****************************************************************************************
-//!
-//!
-// *****************************************************************************************
-
-void tRecorderBase::StopRecording( void )
-{
-    return tRecording::Stop();
-}
-static void st_StopRecording(std::istream &)
-{
-    tRecorderBase::StopRecording();
-}
-
-static tConfItemFunc snm("STOP_RECORDING",&st_StopRecording);
-
-
 // *******************************************************************************************
 // *
 // *    Record
@@ -239,10 +218,10 @@ std::istream & operator >> ( std::istream & s, tLineString & line )
     line.Clear();
 
     // copy line, replacing "\n" with real newline
-    for(int i=0; i<read.Len()-1; ++i)
+    for(size_t i=0; i<read.Size(); ++i)
     {
         char c = read[i];
-        if ( c != '\\' || i+1 == read.Len() || ( read[i+1] != 'n' && read[i+1] != '\\' ) )
+        if ( c != '\\' || i+1 == read.Size() || ( read[i+1] != 'n' && read[i+1] != '\\' ) )
         {
             line << c;
         }
@@ -438,8 +417,6 @@ bool tPlaybackBlockBase::Initialize( char const * section, tPlayback * playback 
     if (!playback_)
         return false;
 
-    // std::cout << playback_->GetNextSection() << "," << section << "\n";
-
     // read section
     if( playback_->GetNextSection() != section )
     {
@@ -584,7 +561,7 @@ static int st_GetDebugLevelPlayback()
     // sync level with recording
     int level = st_debugLevelRecording;
     tRecorder::Playback( "DEBUGLEVEL", level );
-    tRecorder::Record( "DEBUGLEVEL", level );
+    tRecorder::Record( "DEBUGLEVEL", st_debugLevelRecording );
 
     return level;
 }
@@ -619,9 +596,7 @@ int tRecorderSyncBase::GetDebugLevelPlayback( void )
 
 int tRecorderSyncBase::GetDebugLevelRecording( void )
 {
-    // delegate so this doesn't change when the config changes
-    return GetDebugLevelPlayback();
-    // return st_debugLevelRecording;
+    return st_debugLevelRecording;
 }
 
 REAL st_GetDifference( REAL a, REAL b)

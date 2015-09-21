@@ -29,7 +29,7 @@ def parseResource(filename, data):
 
         def startElement(self,name,attr):
             # just parse the <map> tag and fill data
-            if name in("Resource","Map"):
+            if name in("Resource","Map","Cockpit"):
                 # set type from tag name it is not already set
                 try: oldtype = self.data.type
                 except: self.data.type = name.lower()       
@@ -92,6 +92,8 @@ def parseResource(filename, data):
     try: 
          if data.type == "map":
             data.type = "aamap"
+         if data.type == "cockpit":
+            data.type = "aacockpit"
     except: pass
 
 # take the parsed data and trandsform it into a filename
@@ -111,15 +113,13 @@ def getCanonicalPath(path):
 
 # scan for all XML files in the directory and rename them according to the rules
 def scanDir(sourceDir, destinationDir, function):
-    def visitor( arg, dirname, names ):
-        for file in names:
+    for directory in (os.walk(sourceDir)):
+        for file in directory[2]:
             if len(file) > 4 and file[-4:] == ".xml":
-                path = os.path.join(dirname,file)
+                path = os.path.join(directory[0],file)
                 newPath = getCanonicalPath(path)
                 # call the passed function
                 function(path, os.path.join(destinationDir, newPath), newPath)
-        
-    os.path.walk(sourceDir, visitor, visitor )
 
 # move file oldFile to newFile
 def Move(oldFile, newFile, canonicalPath ):

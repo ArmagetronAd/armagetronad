@@ -38,18 +38,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tToDo.h"
 #include "tConsole.h"
 #include "tDirectories.h"
-#include "tLocale.h"
 #include "tRecorder.h"
 #include "tCommandLine.h"
-#include "tResourceManager.h"
-#include "tError.h"
 
 #include <vector>
-#include <string.h>
-
-#ifndef WIN32
-#include <signal.h>
-#endif
 
 /***********************************************************************
  * The new Configuration interface, currently not completely implemented
@@ -150,58 +142,6 @@ const tConfiguration* tConfiguration::GetConfiguration() {
 bool           tConfItemBase::printChange=true;
 bool           tConfItemBase::printErrors=true;
 
-
-//! @param newLevel         the new access level to set over the course of the lifetime of this object
-//! @param allowElevation   only if set to true, getting higher access rights is possible. Use with extreme care.
-tCurrentAccessLevel::tCurrentAccessLevel( tAccessLevel newLevel, bool allowElevation )
-{
-    // prevent elevation
-    if ( !allowElevation && newLevel < currentLevel_ )
-    {
-        // you probably want to know when this happens in the debugger
-        st_Breakpoint();
-        newLevel = currentLevel_;
-    }
-
-    lastLevel_ = currentLevel_;
-    currentLevel_ = newLevel;
-}
-
-
-tCurrentAccessLevel::tCurrentAccessLevel()
-{
-    lastLevel_ = currentLevel_;
-}
-
-tCurrentAccessLevel::~tCurrentAccessLevel()
-{
-    currentLevel_ = lastLevel_;
-}
-
-//! returns the current access level
-tAccessLevel tCurrentAccessLevel::GetAccessLevel()
-{
-    tASSERT( currentLevel_ != tAccessLevel_Invalid );
-    return currentLevel_;
-}
-
-// returns the name of an access level
-tString tCurrentAccessLevel::GetName( tAccessLevel level )
-{
-    std::ostringstream s;
-    s << "$config_accesslevel_" << level;
-    return tString( tOutput( s.str().c_str() ) );
-}
-
-tAccessLevel tCurrentAccessLevel::currentLevel_ = tAccessLevel_Invalid; //!< the current access level
-
-tAccessLevelSetter::tAccessLevelSetter( tConfItemBase & item, tAccessLevel level )
-{
-#ifdef KRAWALL_SERVER
-    item.requiredLevel = level;
-#endif
-}
-
 static std::map< tString, tConfItemBase * > * st_confMap = 0;
 tConfItemBase::tConfItemMap & tConfItemBase::ConfItemMap()
 {
@@ -210,217 +150,13 @@ tConfItemBase::tConfItemMap & tConfItemBase::ConfItemMap()
     return *st_confMap;
 }
 
-tConfItemBase::tConfItemMap const & tConfItemBase::GetConfItemMap()
-{
-    return ConfItemMap();
-}
-
-static bool st_preventCasacl = false;
-
-tCasaclPreventer::tCasaclPreventer( bool prevent )
-{
-    previous_ = st_preventCasacl;
-    st_preventCasacl = prevent;
-}
-
-tCasaclPreventer::~tCasaclPreventer()
-{
-    st_preventCasacl = previous_;
-}
-
-//! returns whether we're currently in an RINCLUDE file
-bool tCasaclPreventer::InRInclude()
-{
-    return st_preventCasacl;
-}
-
-// changes the access level of a configuration item
-class tConfItemLevel: public tConfItemBase
-{
-public:
-    tConfItemLevel()
-    : tConfItemBase( "ACCESS_LEVEL" )
-    {
-        requiredLevel = tAccessLevel_Owner;
-    }
-
-    virtual void ReadVal(std::istream &s)
-    {
-        // read name and access level
-        tString name;
-        s >> name;
-
-        int levelInt;
-        s >> levelInt;
-        tAccessLevel level = static_cast< tAccessLevel >( levelInt );
-
-        if ( s.fail() )
-        {
-            if(printErrors)
-            {
-                con << tOutput( "$access_level_usage" );
-            }
-            return;
-        }
-
-        // make name uppercase:
-        tToUpper( name );
-
-        // find the item
-        tConfItemMap & confmap = ConfItemMap();
-        tConfItemMap::iterator iter = confmap.find( name );
-        if ( iter != confmap.end() )
-        {
-            // and change the level
-            tConfItemBase * ci = (*iter).second;
-
-            if( ci->requiredLevel < tCurrentAccessLevel::GetAccessLevel() )
-            {
-                con << tOutput( "$access_level_nochange_now", 
-                                name, 
-                                tCurrentAccessLevel::GetName( ci->requiredLevel ),
-                                tCurrentAccessLevel::GetName( tCurrentAccessLevel::GetAccessLevel() ) );
-            }
-            else if( level < tCurrentAccessLevel::GetAccessLevel() )
-            {
-                con << tOutput( "$access_level_nochange_later", 
-                                name, 
-                                tCurrentAccessLevel::GetName( level ),
-                                tCurrentAccessLevel::GetName( tCurrentAccessLevel::GetAccessLevel() ) );
-            }
-            else if ( ci->requiredLevel != level )
-            {
-                ci->requiredLevel = level;
-                if(printChange)
-                {
-                    con << tOutput( "$access_level_change", name, tCurrentAccessLevel::GetName( level ) );
-                }
-            }
-        }
-        else if(printErrors)
-        {
-            con << tOutput( "$config_command_unknown", name );
-        }
-    }
-
-    virtual void WriteVal(std::ostream &s)
-    {
-        tASSERT(0);
-    }
-
-    virtual bool Writable(){
-        return false;
-    }
-
-    virtual bool Save(){
-        return false;
-    }
-
-    // CAN this be saved at all?
-    virtual bool CanSave(){
-        return false;
-    }
-};
-
-static tConfItemLevel st_confLevel;
-
-#ifdef KRAWALL_SERVER
-
-static char const *st_casacl = "CASACL";
-
-//! casacl (Check And Set ACcess Level) command: elevates the access level for the context of the current configuration file
-class tCasacl: tConfItemBase
-{
-public:
-    tCasacl()
-    : tConfItemBase( st_casacl )
-    {
-        requiredLevel = tAccessLevel_Program;
-    }
-
-    virtual void ReadVal( std::istream & s )
-    {
-        int required_int = 0, elevated_int = 20;
-
-        // read required and elevated access levels
-        s >> required_int;
-        s >> elevated_int;
-
-        tAccessLevel elevated = static_cast< tAccessLevel >( elevated_int );
-        tAccessLevel required = static_cast< tAccessLevel >( required_int );
-
-        if ( s.fail() )
-        {
-            con << tOutput( "$casacl_usage" );
-            throw tAbortLoading( st_casacl );
-        }
-        else if ( tCurrentAccessLevel::GetAccessLevel() > required )
-        {
-            con << tOutput( "$access_level_error",
-                            "CASACL",
-                            tCurrentAccessLevel::GetName( required ),
-                            tCurrentAccessLevel::GetName( tCurrentAccessLevel::GetAccessLevel() )
-                );
-            throw tAbortLoading( st_casacl );
-        }
-        else if ( st_preventCasacl )
-        {
-            con << tOutput( "$casacl_not_allowed" );
-            throw tAbortLoading( st_casacl );
-        }
-        else
-        {
-            tString().ReadLine(s); // prevent commands following this one without a newline
-            tCurrentAccessLevel::currentLevel_ = elevated;
-        }
-    }
-
-    virtual void WriteVal(std::ostream &s)
-    {
-        tASSERT(0);
-    }
-
-    virtual bool Writable(){
-        return false;
-    }
-
-    virtual bool Save(){
-        return false;
-    }
-
-    // CAN this be saved at all?
-    virtual bool CanSave(){
-        return false;
-    }
-};
-
-static tCasacl st_sudo;
-
-#endif
-
-bool st_FirstUse=true;
+bool st_FirstUse=true;\
 static tConfItem<bool> fu("FIRST_USE",st_FirstUse);
 //static tConfItem<bool> fu("FIRST_USE","help_first_use",st_FirstUse);
 
-
-tAbortLoading::tAbortLoading( char const * command )
-: command_( command )
-{
-}
-
-tString tAbortLoading::DoGetName() const
-{
-    return tString(tOutput( "$abort_loading_name"));
-}
-
-tString tAbortLoading::DoGetDescription() const
-{
-    return tString(tOutput( "$abort_loading_description", command_ ));
-}
-
-tConfItemBase::tConfItemBase(const char *t)
+tConfItemBase::tConfItemBase(const char *t, callbackFunc *cb)
         :id(-1),title(t),
-changed(false){
+changed(false),callback(cb){
 
     tConfItemMap & confmap = ConfItemMap();
     if ( confmap.find( title ) != confmap.end() )
@@ -429,28 +165,23 @@ changed(false){
     // compose help name
     tString helpname;
     helpname << title << "_help";
-    tToLower( helpname );
+    for(int i=helpname.Size()-1;i>=0;i--)
+        helpname[i]=tolower(helpname[i]);
 
     const_cast<tOutput&>(help).AddLocale(helpname);
 
     confmap[title] = this;
-
-    requiredLevel = tAccessLevel_Admin;
-    setLevel      = tAccessLevel_Owner;
 }
 
-tConfItemBase::tConfItemBase(const char *t, const tOutput& h)
+tConfItemBase::tConfItemBase(const char *t, const tOutput& h, callbackFunc *cb)
         :id(-1),title(t), help(h),
-changed(false){
+changed(false),callback(cb){
 
     tConfItemMap & confmap = ConfItemMap();
     if ( confmap.find( title ) != confmap.end() )
         tERR_ERROR_INT("Two tConfItems with the same name " << t << "!");
 
     confmap[title] = this;
-
-    requiredLevel = tAccessLevel_Admin;
-    setLevel      = tAccessLevel_Owner;
 }
 
 tConfItemBase::~tConfItemBase()
@@ -480,38 +211,37 @@ void tConfItemBase::SaveAll(std::ostream &s){
 int tConfItemBase::EatWhitespace(std::istream &s){
     int c=' ';
 
-    while(isblank(c) &&
+    while(isspace(c) &&
             c!='\n'    &&
             s.good()  &&
             !s.eof())
         c=s.get();
 
-    if( s.good() )
-    {
-        s.putback(c);
-    }
+    s.putback(c);
 
     return c;
 }
 
 void tConfItemBase::LoadLine(std::istream &s){
-    if(!s.eof() && s.good()){
+    while(!s.eof() && s.good()){
+        int i;
+
         tString name;
         s >> name;
 
         // make name uppercase:
-        tToUpper( name );
+        for(i=name.Size()-1;i>=0;i--)
+            name[i]=toupper(name[i]);
 
         bool found=false;
 
-        if (name[0]=='#'){ // comment. ignore rest of line
+        if (name.Size()==0) // ignore empty lines
+            found=true;
+        else if (name[0]=='#'){ // comment. ignore rest of line
             char c=' ';
             while(c!='\n' && s.good() && !s.eof()) c=s.get();
             found=true;
         }
-
-        if (strlen(name)==0) // ignore empty lines
-            found=true;
 
         tConfItemMap & confmap = ConfItemMap();
         tConfItemMap::iterator iter = confmap.find( name );
@@ -521,33 +251,11 @@ void tConfItemBase::LoadLine(std::istream &s){
 
             bool cb=ci->changed;
             ci->changed=false;
-
-            if ( ci->requiredLevel >= tCurrentAccessLevel::GetAccessLevel() )
-            {
-                ci->setLevel = tCurrentAccessLevel::GetAccessLevel();
-
-                ci->ReadVal(s);
-                if (ci->changed)
-                {
-                    ci->WasChanged();
-                }
-                else
-                {
-                    ci->changed=cb;
-                }
-            }
+            ci->ReadVal(s);
+            if (ci->changed)
+                ci->WasChanged();
             else
-            {
-                tString discard;
-                discard.ReadLine(s);
-                
-                con << tOutput( "$access_level_error",
-                                name,  
-                                tCurrentAccessLevel::GetName( ci->requiredLevel ),
-                                tCurrentAccessLevel::GetName( tCurrentAccessLevel::GetAccessLevel() )
-                    );
-                return;
-            }
+                ci->changed=cb;
 
             found=true;
         }
@@ -648,11 +356,12 @@ bool LoadAllHelper(std::istream * s)
 static bool s_Veto( tString line_in, std::vector< tString > const & vetos )
 {
     // make name uppercase:
-    tToUpper( line_in );
+    for(int i=line_in.Size()-1;i>=0;i--)
+        line_in[i]=toupper(line_in[i]);
 
     // eat whitespace at the beginning
     char const * test = line_in;
-    while( isblank(*test) )
+    while( isspace(*test) )
         test++;
 
     // skip "LAST_"
@@ -666,16 +375,7 @@ static bool s_Veto( tString line_in, std::vector< tString > const & vetos )
         tString const & veto = *iter;
 
         if ( line.StartsWith( veto ) )
-        {
-#ifdef DEBUG_X
-            if ( !line.StartsWith( "INCLUDE" ) && tRecorder::IsRunning() )
-            {
-                con << "Veto on config line: " << line << "\n";
-            }
-#endif
-
             return true;
-        }
     }
 
     return false;
@@ -701,16 +401,16 @@ static bool s_VetoPlayback( tString const & line )
 {
     static char const * vetos_char[]=
         { "USE_DISPLAYLISTS", "CHECK_ERRORS", "ZDEPTH",
-          "COLORDEPTH", "FULLSCREEN ", "ARMAGETRON_LAST_WINDOWSIZE",
+          "COLORDEPTH", "FULLSCREEN", "ARMAGETRON_LAST_WINDOWSIZE",
           "ARMAGETRON_WINDOWSIZE", "ARMAGETRON_LAST_SCREENMODE",
           "ARMAGETRON_SCREENMODE", "CUSTOM_SCREEN", "SOUND",
-          "PASSWORD", "ADMIN_PASS",
+          "PASSWORD", "ADMIN_PASS", "RECORDING_DEBUGLEVEL",
           "ZTRICK", "MOUSE_GRAB", "PNG_SCREENSHOT", // "WHITE_SPARKS", "SPARKS",
           "KEEP_WINDOW_ACTIVE", "TEXTURE_MODE", "TEXTURES_HI", "LAG_O_METER", "INFINITY_PLANE",
           "SKY_WOBBLE", "LOWER_SKY", "UPPER_SKY", "DITHER", "HIGH_RIM", "FLOOR_DETAIL",
           "FLOOR_MIRROR", "SHOW_FPS", "TEXT_OUT", "SMOOTH_SHADING", "ALPHA_BLEND",
           "PERSP_CORRECT", "POLY_ANTIALIAS", "LINE_ANTIALIAS", "FAST_FORWARD_MAXSTEP",
-          "DEBUG_GNUPLOT", "FLOOR_", "MOVIEPACK_", "RIM_WALL_",
+          "DEBUG_GNUPLOT", "FLOOR_", "MOVIEPACK_", "RIM_WALL_", "INCLUDE", "SINCLUDE",
           0 };
 
     static std::vector< tString > vetos = st_Stringify( vetos_char );
@@ -724,23 +424,16 @@ static bool s_VetoPlayback( tString const & line )
 static bool s_VetoRecording( tString const & line )
 {
     static char const * vetos_char[]=
-        { "#", "PASSWORD", "ADMIN_PASS", "LOCAL_USER", "LOCAL_TEAM",
+        { "PASSWORD", "ADMIN_PASS",
           0 };
 
     static std::vector< tString > vetos = st_Stringify( vetos_char );
 
     // delegate
-    return s_Veto( line, vetos ) || s_VetoPlayback( line );
+    return s_Veto( line, vetos );
 }
 
-
-//! @param s        stream to read from
-//! @param record   set to true if the configuration is to be recorded and played back. That's usually only required if s is a file stream.
-void tConfItemBase::LoadAll(std::istream &s, bool record ){
-    tCurrentAccessLevel levelResetter;
-
-    try{
-
+void tConfItemBase::LoadAll(std::istream &s){
     while(!s.eof() && s.good())
     {
         tString line;
@@ -759,7 +452,6 @@ void tConfItemBase::LoadAll(std::istream &s, bool record ){
                 break;
             }
 
-            line.SetLen( line.Len()-1 );
             tString rest;
             rest.ReadLine( s );
             line << rest;
@@ -769,7 +461,7 @@ void tConfItemBase::LoadAll(std::istream &s, bool record ){
             continue;
 
         // write line to recording
-        if ( record && !s_VetoRecording( line ) )
+        if ( !s_VetoRecording( line ) )
         {
             // don't record supid admins' instant chat logins
             static tString instantChat("INSTANT_CHAT_STRING");
@@ -789,18 +481,12 @@ void tConfItemBase::LoadAll(std::istream &s, bool record ){
 
         // process line
         // line << '\n';
-        if ( !record || !tRecorder::IsPlayingBack() || s_VetoPlayback( line ) )
+        if ( !tRecorder::IsPlayingBack() || s_VetoPlayback( line ) )
         {
             std::stringstream str(static_cast< char const * >( line ) );
             tConfItemBase::LoadLine(str);
             // std::cout << line << '\n';
         }
-    }
-    }
-    catch( tAbortLoading const & e )
-    {
-        // loading was aborted
-        con << e.GetDescription() << "\n";
     }
 }
 
@@ -822,40 +508,24 @@ void tConfItemBase::DocAll(std::ostream &s){
     }
 }
 
-//! @param s        stream to read from
-//! @param record   set to true if the configuration is to be recorded and played back. That's usually only required if s is a file stream, so it defaults to true here.
-void tConfItemBase::LoadAll(std::ifstream &s, bool record )
-{
-    std::istream &ss(s);
-    LoadAll( ss, record );
-}
+std::deque<tString> tConfItemBase::GetCommands(){
+    std::deque<tString> ret;
+    tConfItemMap & confmap = ConfItemMap();
+    for(tConfItemMap::iterator iter = confmap.begin(); iter != confmap.end() ; ++iter)
+    {
+        tConfItemBase * ci = (*iter).second;
 
-
-//! @param s        file stream to be used for reading later
-//! @param filename name of the file to open
-//! @param path     whether to look in var directory
-//! @return success flag
-bool tConfItemBase::OpenFile( std::ifstream & s, tString const & filename, SearchPath path )
-{
-    bool ret = ( ( path & Config ) && tDirectories::Config().Open(s, filename ) ) || ( ( path & Var ) && st_StringEndsWith(filename, ".cfg") && tDirectories::Var().Open(s, filename ) );
-    
-    static char const * section = "INCLUDE_VOTE";
-    tRecorder::Playback( section, ret );
-    tRecorder::Record( section, ret );
-    
+        ret.push_back(ci->title.ToLower());
+    }
     return ret;
 }
-
-//! @param s        file to read from
-void tConfItemBase::ReadFile( std::ifstream & s )
-{
-    if ( !tRecorder::IsPlayingBack() )
-    {
-        tConfItemBase::LoadAll(s, true );
-    }
-    else
-    {
-        tConfItemBase::LoadPlayback();
+tConfItemBase *tConfItemBase::FindConfigItem(tString const &name) {
+    tConfItemMap & confmap = ConfItemMap();
+    tConfItemMap::iterator iter = confmap.find( name.ToUpper() );
+    if ( iter != confmap.end() ) {
+        return iter->second;
+    } else {
+        return 0;
     }
 }
 
@@ -917,7 +587,7 @@ static bool Load( const tPath& path, const char* filename )
     std::ifstream s;
     if ( path.Open( s, filename ) )
     {
-        tConfItemBase::LoadAll( s, true );
+        tConfItemBase::LoadAll( s );
         return true;
     }
     else
@@ -950,20 +620,13 @@ private:
 static tExtraConfigCommandLineAnalyzer s_extraAnalyzer;
 #endif
 
-static void st_InstallSigHupHandler();
-
-void st_LoadConfig( bool printChange )
+void st_LoadConfig()
 {
-    // default include files are executed at owner level
-    tCurrentAccessLevel level( tAccessLevel_Owner, true );
-
-    st_InstallSigHupHandler();
-
     const tPath& var = tDirectories::Var();
     const tPath& config = tDirectories::Config();
     const tPath& data = tDirectories::Data();
 
-    tConfItemBase::printChange=printChange;
+    tConfItemBase::printChange=false;
 #ifdef DEDICATED
     tConfItemBase::printErrors=false;
 #endif
@@ -1004,7 +667,7 @@ void st_SaveConfig()
     }
 
     std::ofstream s;
-    if ( tDirectories::Var().Open( s, "user.cfg", std::ios::out, true ) )
+    if ( tDirectories::Var().Open( s, "user.cfg" ) )
     {
         tConfItemBase::SaveAll(s);
     }
@@ -1016,34 +679,6 @@ void st_SaveConfig()
     }
 }
 
-void st_LoadConfig()
-{
-    st_LoadConfig( false );
-}
-
-static void st_DoHandleSigHup()
-{
-    con << tOutput("$config_sighup");
-    st_SaveConfig();
-    st_LoadConfig();
-}
-
-static void st_HandleSigHup( int signal )
-{
-    st_ToDo_Signal( st_DoHandleSigHup );
-}
-
-static void st_InstallSigHupHandler()
-{
-#ifndef WIN32
-    static bool installed = false;
-    if ( !installed )
-    {
-        signal( SIGHUP, &st_HandleSigHup );
-        installed = true;
-    }
-#endif
-}
 
 void tConfItemLine::ReadVal(std::istream &s){
     tString dummy;
@@ -1051,19 +686,17 @@ void tConfItemLine::ReadVal(std::istream &s){
     if(strcmp(dummy,*target)){
         if (printChange)
         {
-            tColoredString oldval;
-            oldval << *target << tColoredString::ColorString(1,1,1);
-            tColoredString newval;
-            newval << dummy << tColoredString::ColorString(1,1,1);
             tOutput o;
             o.SetTemplateParameter(1, title);
-            o.SetTemplateParameter(2, oldval);
-            o.SetTemplateParameter(3, newval);
+            o.SetTemplateParameter(2, *target);
+            o.SetTemplateParameter(3, dummy);
             o << "$config_value_changed";
             con << o;
         }
         *target=dummy;
         changed=true;
+
+        ExecuteCallback();
     }
 
     *target=dummy;
@@ -1093,9 +726,6 @@ bool tConfItemFunc::Save(){return false;}
 
 static void Include(std::istream& s, bool error )
 {
-    // allow CASACL
-    tCasaclPreventer allower(false);
-
     tString file;
     s >> file;
 
@@ -1103,29 +733,13 @@ static void Include(std::istream& s, bool error )
     if( !tPath::IsValidPath( file ) )
         return;
 
-    if ( !tRecorder::IsPlayingBack() )
+    if ( !Load( tDirectories::Var(), file ) )
     {
-        // really load include file
-        if ( !st_StringEndsWith(file, ".cfg") || !Load( tDirectories::Var(), file ) )
+        if (!Load( tDirectories::Config(), file ) && error )
         {
-            if (!Load( tDirectories::Config(), file ) && error )
-            {
-                con << tOutput( "$config_include_not_found", file );
-            }
+            con << tOutput( "$config_include_not_found", file );
         }
     }
-    else
-    {
-        // just read configuration, and don't forget to reset the config level
-        tCurrentAccessLevel levelResetter;
-        tConfItemBase::LoadPlayback();
-    }
-
-    // mark section
-    char const * section = "INCLUDE_END";
-    tRecorder::Record( section );
-    tRecorder::PlaybackStrict( section );
-
 }
 
 static void Include(std::istream& s )

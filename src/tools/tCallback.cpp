@@ -27,6 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "tCallback.h"
 #include "tCallbackString.h"
+#include "tError.h"
 
 tCallback::tCallback(tCallback*& anchor, VOIDFUNC *f)
         :tListItem<tCallback>(anchor), func(f){

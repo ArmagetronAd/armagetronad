@@ -28,18 +28,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef     TRECORDER_H_INCLUDED
 #define     TRECORDER_H_INCLUDED
 
-#ifdef DEBUG
-#ifndef DEBUG_DIFFERENCE
-#define DEBUG_DIFFERENCE
-#endif
-#endif
-
 // self include
 #ifndef     TRECORDER_H_INCLUDED
 #include    "tRecorder.h"
 #endif
 
 #include    "tString.h"
+#include    "tError.h"
 
 // #include    "tRecorderInternal.h"
 
@@ -86,7 +81,6 @@ public:
     static bool IsRecording();                          //!< returns whether there is a recording running
     static bool IsPlayingBack();                        //!< returns whether there is a playback running
     static bool IsRunning();                            //!< returns whether recording or playback are running
-    static void StopRecording();                        //!< stops recording
 };
 
 //! simple interface to recording functionality
@@ -912,7 +906,7 @@ void tRecorderSync< DATA >::Archive( char const * section, int level, DATA & dat
         // read data from archive
         if ( tRecorder::PlaybackStrict( section, copy ) )
         {
-#ifdef DEBUG_DIFFERENCE
+#ifdef DEBUG
             // determine difference
             REAL diff = GetDifference( data, copy );
 
@@ -933,12 +927,6 @@ void tRecorderSync< DATA >::Archive( char const * section, int level, DATA & dat
             {
                 data = copy;
             }
-        }
-        else if ( tRecorder::IsPlayingBack() )
-        {
-            std::cout << "Syncing difference found: expected " << section << ".\n";
-
-            st_Breakpoint();
         }
     }
 

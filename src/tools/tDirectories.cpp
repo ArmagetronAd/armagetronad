@@ -30,9 +30,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <errno.h>
 #include <sys/types.h>
-#ifndef WIN32
-#include <sys/stat.h>
-#endif
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -44,12 +41,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tMemManager.h"
 
 // include definition for top source directory
-#ifndef MACOSX
 #ifdef TOP_SOURCE_DIR
 static const char * s_topSourceDir = TOP_SOURCE_DIR;
 #else
 static const char * s_topSourceDir = ".";
-#endif
 #endif
 
 // program name definition
@@ -146,7 +141,11 @@ static tString st_DataDir(expand_home_c(DATA_DIR));    // directory for game dat
 static tString st_DataDir(".");    // directory for game data
 #endif
 
-// #define USER_DATA_DIR  "${APPDATA}/Armagetron"
+#ifdef MUSIC_DIR
+static tString st_MusicDir(expand_home_c(DATA_DIR));    // directory for game music
+#else
+static tString st_MusicDir(".");    // directory for game music
+#endif
 
 #ifdef USER_DATA_DIR
 static tString st_UserDataDir(expand_home_c(USER_DATA_DIR));    // directory for game data
@@ -170,6 +169,14 @@ static tString st_UserConfigDir("");  // directory for static configuration file
 static tString st_VarDir(expand_home_c(VAR_DIR));     // directory for dynamic logs and highscores
 #else
 static tString st_VarDir("");     // directory for dynamic logs and highscores
+#endif
+
+#ifdef DEDICATED
+#ifdef WWW_DIR
+static tString st_WwwDir(expand_home_c(WWW_DIR));     // directory for dynamic logs and highscores
+#else
+static tString st_WwwDir("");     // directory for dynamic logs and highscores
+#endif
 #endif
 
 #ifdef RESOURCE_DIR
@@ -455,11 +462,12 @@ char *eh_getdir(const char *da, size_t *len) {
 tString expand_home(tString const & pathname) {
     const char *pn = (const char *)pathname;
     char *s;
-    size_t len = 0;
+    size_t len;
     tString r;
 
     if ((pn[0] == '~' || !strncmp(pn, "${", 2)) && (s = eh_getdir(pn, &len))) {
-        r = tString(s) << (pn + len);
+        tString sStr(s);
+        r = sStr << (pn + len);
         free(s);
     }
     else
@@ -474,7 +482,6 @@ tString expand_home(tString const & pathname) {
 class tPathConfig: public tPath
 {
 public:
-    tPathConfig() {}
 private:
     void Paths ( tArray< tString >& paths ) const
     {
@@ -506,7 +513,6 @@ static const tPathConfig st_Config;
 class tPathData: public tPath
 {
 public:
-    tPathData() {}
 private:
     void Paths ( tArray< tString >& paths ) const
     {
@@ -524,11 +530,47 @@ private:
 
 static const tPathData st_Data;
 
+// This doesn't work because I don't understand this stuff at all :(  --Lucifer
+class tPathMusic: public tPath
+{
+public:
+private:
+    void Paths ( tArray< tString >& paths ) const
+    {
+        paths.SetLen( 0 );
+        int pos = 0;
+
+        paths[ pos++ ] = st_MusicDir;
+    }
+};
+
+static const tPathMusic st_Music;
+
+#ifdef DEDICATED
+void tPathWebroot::Paths ( tArray< tString >& paths ) const
+{
+    paths.SetLen( 0 );
+    int pos = 0;
+
+    paths[ pos++ ] = st_WwwDir + "www-root";
+}
+
+tString tPathWebroot::GetDirPath() {
+    return st_WwwDir + "www-root";
+}
+
+static const tPathWebroot st_Webroot;
+
+const tPathWebroot& tDirectories::Webroot()
+{
+    return st_Webroot;
+}
+
+#endif
 
 class tPathVar: public tPath
 {
 public:
-    tPathVar() {}
 private:
     void Paths ( tArray< tString >& paths ) const
     {
@@ -555,7 +597,6 @@ static const tPathVar st_Var;
 class tPathScreenshot: public tPath
 {
 public:
-    tPathScreenshot() {}
 private:
     void Paths ( tArray< tString >& paths ) const
     {
@@ -602,7 +643,8 @@ tString tPathResource::GetWritePath(const char *filename) const {
     return fullname;
 }
 
-tString tPathResource::GetIncluded() const {
+tString tPathResource::GetDirPath()
+{
     if ( st_IncludedResourceDir.Len() > 2 )
         return st_IncludedResourceDir;
     else
@@ -684,13 +726,9 @@ bool tPath::Open    ( std::ifstream& f,
     return false;
 }
 
-static bool st_protectFiles = true;
-tSettingItem<bool> st_protectFilesConf("PROTECT_SENSITIVE_FILES", st_protectFiles);
-
 bool tPath::Open    ( std::ofstream& f,
                       const char* filename,
-                      std::ios::openmode mode,
-                      bool sensitive) const
+                      std::ios::openmode mode ) const
 {
     if ( !tPath::IsValidPath( filename ) )
         return false;
@@ -700,23 +738,19 @@ bool tPath::Open    ( std::ofstream& f,
 
     tString fullname = GetWritePath(filename);
 
-#ifndef WIN32
-    mode_t oldmask=0;
-    if(sensitive && st_protectFiles)
-    {
-        oldmask = umask(0600);
-    }
-#endif
     f.open( fullname, mode );
-#ifndef WIN32
-    if(sensitive && st_protectFiles)
-    {
-        chmod( &fullname(0), 0600 );
-        umask(oldmask);
-    }
-#endif
 
     return ( f && f.good() );
+}
+
+bool tPath::Open(std::fstream& f, const char* filename) const
+{
+    //	std::cout << "open\n";
+
+    tString fullname = GetWritePath(filename);
+    f.open(fullname, std::ios::in | std::ios::out);
+
+    return ( f.good() );
 }
 
 tString tPath::GetReadPath   ( const char* filename   ) const
@@ -787,6 +821,11 @@ tString tPath::GetWritePath  ( const char* filename   ) const
 const tPath& tDirectories::Data()
 {
     return st_Data;
+}
+
+const tPath& tDirectories::Music()
+{
+    return st_Music;
 }
 
 const tPath& tDirectories::Config()
@@ -1241,7 +1280,7 @@ static tString GetParent( char const * child, int levels )
 
     // strip last two path segments
     int toStrip = levels;
-    int stripCurrent = ret.Len()-1;
+    int stripCurrent = ret.Size()-1;
     while (stripCurrent >= 0 && toStrip > 0)
     {
         char & c = ret[ stripCurrent ];
@@ -1548,35 +1587,3 @@ private:
 };
 
 static tDirectoriesCommandLineAnalyzer analyzer;
-
-tString tPath::GetPaths(void) const {
-    tString ret;
-    tArray<tString> paths;
-    Paths(paths);
-    for (int i = 0; i < paths.Len(); ++i) {
-        if(i > 0 && paths[i - 1] == paths[i]) continue;
-        ret << " - " << paths[i] << "\n";
-    }
-    return ret;
-}
-
-tString tPath::GetPaths(char const * delimiter, char const * finalizer) const {
-    tString ret;
-    tArray<tString> paths;
-    Paths(paths);
-    for (int i = 0; i < paths.Len(); ++i) {
-        ret << paths[i];
-        ret << ( (i == paths.Len() - 1) ? finalizer : delimiter );
-    }
-    return ret;
-}
-
-void st_PrintPathInfo(tOutput &buf) {
-    tString const hcol("0xff8888");
-    buf << hcol << "$path_info_user_cfg"   << "0xRESETT\n   " << tDirectories::Var().GetReadPath("user.cfg") << "\n"
-    << hcol << "$path_info_config"     << "0xRESETT\n" << tDirectories::Config().GetPaths()
-    << hcol << "$path_info_resource"   << "0xRESETT\n" << tDirectories::Resource().GetPaths()
-    << hcol << "$path_info_data"       << "0xRESETT\n" << tDirectories::Data().GetPaths()
-    << hcol << "$path_info_screenshot" << "0xRESETT\n" << tDirectories::Screenshot().GetPaths()
-    << hcol << "$path_info_var"        << "0xRESETT\n" << tDirectories::Var().GetPaths();
-}

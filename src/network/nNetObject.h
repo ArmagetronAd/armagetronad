@@ -31,7 +31,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "nNetwork.h"
 #include "tArray.h"
 #include "tConsole.h"
-#include <string.h>
 
 class nObserver;
 
@@ -72,13 +71,13 @@ private:
 
     int syncListID_;                                 // ID for the list of objects to sync
 public:
-    struct nKnowsAboutInfo{
+    class nKnowsAboutInfo{
     public:
     bool knowsAboutExistence:1; // is the creation message through?
     bool nextSyncAck:1;         // should the next sync message wait
         // for it's ack?
     bool syncReq:1;              // should a sync message be sent?
-    unsigned char acksPending:4;  // how many messages are underway?
+    int  acksPending:4;          // how many messages are underway?
 
         nKnowsAboutInfo(){
             memset(this, 0, sizeof(nKnowsAboutInfo) );
@@ -92,6 +91,7 @@ public:
             syncReq=true;
             acksPending=0;
         }
+
     };
 protected:
 
@@ -109,9 +109,6 @@ public:
 
     static nNetObject *ObjectDangerous(int i );
     // the same thin but returns NULL if the object is not yet available.
-    
-    // clears an eventually deleted object of the given ID out of the main lists
-    static void ClearDeleted( unsigned short ID );
 
     virtual void AddRef(); // call this every time you add a pointer
     // to this nNetObject from another nNetObject, so we know when it is
@@ -122,7 +119,6 @@ public:
 
     virtual void ReleaseOwnership(); // release the object only if it was created on this machine
     virtual void TakeOwnership(); // treat an object like it was created locally
-    bool Owned(){ return createdLocally; } //!< returns whether the object is owned by this machine
 
     nObserver& GetObserver() const;    // retunrs the observer of this object
 
@@ -213,12 +209,10 @@ public:
     // the information written by this function should
     // be read from the message in the "message"- connstructor
 
+
     // control functions:
 
 protected:
-    //! returns the user that the current WriteSync() is intended for
-    static int SyncedUser();
-
     nMessage *NewControlMessage();
     // creates a new nMessage that can be used to control other
     // copies of this nNetObject; control is received with ReceiveControl();
@@ -308,8 +302,6 @@ template<class T> class nNOInitialisator:public nDescriptor{
             unsigned short id=m.Data(0);
             //unsigned short owner=m.data(1);
 
-            nNetObject::ClearDeleted(id);
-
             if (sn_netObjectsOwner[id]!=m.SenderID() || bool(sn_netObjects[id]))
             {
 #ifdef DEBUG
@@ -334,7 +326,6 @@ template<class T> class nNOInitialisator:public nDescriptor{
                 nNetObjectRegistrar registrar;
                 //			nNetObject::RegisterRegistrar( registrar );
                 tJUST_CONTROLLED_PTR< T > n=new T(m);
-                n->InitAfterCreation();
                 ((nNetObject*)n)->ReadSync(m);
                 n->Register( registrar );
 
@@ -356,6 +347,10 @@ template<class T> class nNOInitialisator:public nDescriptor{
                     // object was unable to be registered
                     n->Release(); // silently delete it.
                 }
+                else
+                {
+                    n->InitAfterCreation();
+                }
             }
 #ifndef NOEXCEPT
         }
@@ -371,7 +366,7 @@ public:
     //nDescriptor desc;
 
     //  nNOInitialisator(const char *name):nDescriptor(init,name){};
-    nNOInitialisator(unsigned short id,const char *name):nDescriptor(id,Init,name){}
+    nNOInitialisator(unsigned short id,const char *name):nDescriptor(id,Init,name){};
 };
 
 // Z-Man: operators moved here from nNetwork.h. TODO: make them nonmember operators if possible.

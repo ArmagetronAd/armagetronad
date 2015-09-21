@@ -35,7 +35,6 @@ the executable is not distributed).
 #include "nKrawall.h"
 #include "nNetwork.h"
 #include "nServerInfo.h"
-#include "nNetObject.h"
 #include "tString.h"
 #include "tArray.h"
 #include "tConsole.h"
@@ -45,233 +44,7 @@ the executable is not distributed).
 
 #include <stdlib.h>
 #include <string>
-#include <vector>
-#include <string.h>
 
-#ifndef DEDICATED
-// on the client, we want to disable the broken bmd5 by default.
-static tString sn_methodBlacklist( "bmd5" );
-#else
-// servers should still accept it, though.
-static tString sn_methodBlacklist( "" );
-#endif
-static tConfItemLine sn_methodBlacklistConf( "HASH_METHOD_BLACKLIST", sn_methodBlacklist );
-
-static void sn_GetSupportedMethods( std::vector< tString > & toFill )
-{
-    char const * protocols[] = { 
-        "md5",
-        "bmd5",
-        0
-    };
-
-    // iterate through methods, starting from best, and return the first that fits
-    char const * const * run = protocols;
-    while ( *run )
-    {
-        tString method( *run );
-        if ( !tIsInList( sn_methodBlacklist, method ) )
-        {
-            toFill.push_back( method );
-        }
-        ++run;
-    }
-}
-
-static bool sn_IsSupportedMethod( tString const & method )
-{
-    std::vector< tString > methods;
-    sn_GetSupportedMethods( methods);
-    
-    for( std::vector< tString >::iterator iter = methods.begin(); iter != methods.end(); ++iter )
-    {
-        if ( method == *iter )
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-// supported authentication methods of this client in a comma separated list 
-tString nKrawall::nMethod::SupportedMethods()
-{
-    std::ostringstream s;
-
-    std::vector< tString > methods;
-    sn_GetSupportedMethods( methods);
-    
-    bool first = false;
-    for( std::vector< tString >::iterator iter = methods.begin(); iter != methods.end(); ++iter )
-    {
-        if ( !first )
-        {
-            s << ", ";
-        }
-        s << *iter;
-
-        first = false;
-    }
-
-    return tString( s.str().c_str() );
-}
-
-// checks whether both a and b support protocol m
-static bool sn_BothHave( tString const & a, tString const & b, tString const & m)
-{
-    return tIsInList( a, m ) && tIsInList( b, m );
-}
-
-// from two strings of supported-method-lists, select the best one
-tString nKrawall::nMethod::BestMethod( tString const & a, tString const & b )
-{
-    tString ret;
-    
-    // iterate through methods, starting from best, and return the first that fits
-    std::vector< tString > methods;
-    sn_GetSupportedMethods( methods);
-    for( std::vector< tString >::iterator iter = methods.begin(); iter != methods.end(); ++iter )
-    {
-        if ( sn_BothHave( a, b, *iter ) )
-        {
-            return *iter;
-        }
-    }
-
-    return tString("");
-}
-
-//! fetch best local method supported by the client
-bool nKrawall::nMethod::BestLocalMethod( tString const & supportedOnClient, nMethod & result )
-{
-    nMethod const * const * run = LocalMethods();
-
-    while ( * run )
-    {
-        if ( sn_IsSupportedMethod( (*run)->method ) && tIsInList( supportedOnClient, (*run)->method ) )
-        {
-            result = **run;
-            return true;
-        }
-        
-        ++run;
-    }
-
-    return false;
-}
-
-bool nKrawall::nMethod::Equal( nMethod const & a, nMethod const & b )
-{
-    return a.method == b.method && a.prefix == b.prefix && a.suffix == b.suffix;
-}
-
-// does standard replacements to prefix and suffix;
-// %u -> username
-static tString sn_Replace( nKrawall::nScrambleInfo const & info, tString const & original )
-{
-    std::istringstream in( static_cast< char const * >( original ) );
-    std::ostringstream out;
-
-    char s = in.get();
-    while ( !in.eof() )
-    {
-        if ( s != '%' || in.eof() )
-        {
-            out.put(s);
-        }
-        else
-        {
-            s = in.get();
-            if ( s == 'u' )
-            {
-                out << info.username;
-            }
-            else
-            {
-                out << '%' << s;
-            }
-        }
-
-        s = in.get();
-    }
-
-    return tString( out.str().c_str() );
-}
-
-void nKrawall::nMethod::ScramblePassword( nScrambleInfo const & info, tString const & password, nScrambledPassword & scramble ) const
-{
-    if ( method == "bmd5" )
-    {
-        nKrawall::BrokenScramblePassword( password, scramble );
-    }
-    else // must be "md5"
-    {
-        tASSERT( method == "md5" );
-        nKrawall::ScramblePassword( sn_Replace(info,prefix) + password + sn_Replace(info,suffix), scramble );
-    }
-}
-
-//! extra salt scrambling step, done on client and server, not on authentication server
-void nKrawall::nMethod::ScrambleSalt( nSalt & salt, tString const & serverIP ) const
-{
-    if ( method != "bmd5" )
-    {
-        // just some random operation
-        nSalt tmp;
-        nKrawall::ScramblePassword( serverIP, tmp );
-        nKrawall::ScrambleWithSalt2( salt, tmp, salt );
-    }
-}
-
-// scramble a password hash with a salt
-void nKrawall::nMethod::ScrambleWithSalt( nScrambleInfo const & info, nScrambledPassword const & scrambled, nSalt const & salt, nScrambledPassword & result ) const
-{
-    // sanity check
-    if ( !sn_IsSupportedMethod( method ) )
-    {
-        memset( &result, 0, sizeof(result) );
-        con << tColoredStringProxy(1,0,0) << "INTERNAL ERROR OR PHARMING ATTEMPT:" <<  tColoredStringProxy(1,1,1) << " unsupported hash method " << method << " selected.\n";
-        return;
-    }
-
-    // nothing fancy heere
-    nKrawall::ScrambleWithSalt2( scrambled, salt, result );
-}
-
-// construct a method from the type and a stream with properties
-// the stream is supposed to consist of lines of the "property_name property_value" form.
-nKrawall::nMethod::nMethod( char const * method_, std::istream & properties )
-{
-    method = method_;
-    
-    while ( !properties.eof() )
-    {
-        tString property;
-        properties >> property;
-        tToLower( property );
-
-        if ( property == "prefix" )
-        {
-            prefix.ReadLine( properties );
-        }
-        else if ( property == "suffix" )
-        {
-            suffix.ReadLine( properties );
-        }
-
-    }
-}
-
-nKrawall::nMethod::nMethod( char const * method_, char const * prefix_, char const * suffix_)
-
-    : method( method_ ),
-      prefix( prefix_ ),
-      suffix( suffix_ )
-{
-}
-
-#ifdef KRAWALL_SERVER_LEAGUE
 bool nKrawall::MayRequirePassword(tString& adress, unsigned int port)
 {
     return true;
@@ -285,7 +58,6 @@ bool nKrawall::MayRequirePassword(tString& adress, unsigned int port)
 
     return false;
 }
-#endif
 
 bool nKrawall::ArePasswordsEqual(const nScrambledPassword& a,
                                  const nScrambledPassword& b)
@@ -297,78 +69,7 @@ bool nKrawall::ArePasswordsEqual(const nScrambledPassword& a,
     return true;
 }
 
-nKrawall::nCheckResult::nCheckResult()
-: aborted( false ), automatic( false ){}
 
-nKrawall::nCheckResult::~nCheckResult(){}
-
-nKrawall::nCheckResult::nCheckResult( nCheckResult const & other )
-: nCheckResultBase( other ), user( other.user ), aborted( other.aborted ), automatic( other.automatic )
-{
-}
-
-static void sn_WriteHexByte( std::ostream & s, unsigned int c )
-{
-    // don't want to rely on filling type iomanip things, never learned how to use them reliably
-    s << std::hex <<  std::setfill('0') << std::setw(2) << c;
-    // s << ( val & 0xF0 ) / 0x10;
-    // s << ( val & 0x0F );
-}
-
-// encode scrambled passwords and salts as hexcode strings
-tString nKrawall::EncodeScrambledPassword( nScrambledPassword const & scrambled )
-{
-    std::ostringstream s;
-    for( int i = 0; i < 16; ++i )
-    {
-        unsigned int val = scrambled[i];
-        sn_WriteHexByte( s, val );
-    }
-
-    return tString( s.str().c_str() );
-}
-
-// write one escaped character
-static void sn_WriteEscaped( std::ostream & out, unsigned char c )
-{
-    out.put('%');
-    out << std::uppercase;
-    sn_WriteHexByte( out, c );
-}
-
-// encode a string for safe inclusion into an URL
-tString nKrawall::EncodeString( tString const & original )
-{
-    std::istringstream in( static_cast< char const * >( original ) );
-    std::ostringstream out;
-
-    unsigned char c = in.get();
-    while ( !in.eof() )
-    {
-        if ( c == ' ' )
-        {
-            out.put( '+' );
-        }
-        else if ( isalnum( c ) )
-        {
-            out.put( c );
-        }
-        else if( c < 0x80 )
-        {
-            // write single escape for unusual ascii characters
-            sn_WriteEscaped( out, c );
-        }
-        else
-        {
-            // write utf8 as two escapes
-            sn_WriteEscaped( out, 0xc0 | ( c >> 6 ) );
-            sn_WriteEscaped( out, 0x80 | ( c & 0x3f ) );
-        }
-        c = in.get();
-    }
-
-    return tString( out.str().c_str() );
-}
 
 // network read/write operations of these data types
 void nKrawall::WriteScrambledPassword(const nScrambledPassword& scrambled,
@@ -415,56 +116,26 @@ void nKrawall::ReadScrambledPassword( std::istream &s,
 
 
 // scramble a password locally (so it does not have to be stored on disk)
-void nKrawall::ScramblePassword(const tString& password,
+void nKrawall::ScramblePassword(const tString& username,
                                 nScrambledPassword &scrambled)
 {
-    // convert from latin1 to utf8
-    std::ostringstream utf8;
-    for( int i = 0; i < password.Len()-1; ++i )
-    {
-        unsigned char c = password[i];
-
-        if( c < 0x80 )
-        {
-            // write ascii
-            utf8.put( c );
-        }
-        else
-        {
-            // write utf8 as two escapes
-            utf8.put( 0xc0 | ( c >> 6 ) );
-            utf8.put( 0x80 | ( c & 0x3f ) );
-        }
-    }
-    std::string const & pw = utf8.str();
-
     md5_state_t state;
     md5_init(&state);
-    md5_append(&state, (md5_byte_t const *)(&pw[0]), pw.size());
-    md5_finish(&state, scrambled.content);
-}
-
-// scramble a password locally (so it does not have to be stored on disk)
-void nKrawall::BrokenScramblePassword(const tString& password,
-                                      nScrambledPassword &scrambled)
-{
-    md5_state_t state;
-    md5_init(&state);
-    md5_append(&state, (md5_byte_t const *)(&password[0]), password.Len());
-    md5_finish(&state, scrambled.content);
+    md5_append(&state, (md5_byte_t const *)(username.c_str()), username.Len());
+    md5_finish(&state, scrambled);
 }
 
 
 // scramble it again before transfering it over the network
-void nKrawall::ScrambleWithSalt2(const nScrambledPassword& source,
+void nKrawall::ScrambleWithSalt(const nScrambledPassword& source,
                                 const nSalt& salt,
                                 nScrambledPassword& dest)
 {
     md5_state_t state;
     md5_init(&state);
-    md5_append(&state, source.content, 16);
-    md5_append(&state, salt.content  , 16);
-    md5_finish(&state, dest.content);
+    md5_append(&state, source, 16);
+    md5_append(&state, salt  , 16);
+    md5_finish(&state, dest);
 }
 
 
@@ -474,70 +145,8 @@ void nKrawall::ScrambleWithSalt2(const nScrambledPassword& source,
 
 
 
-
-// get a random salt value
-void nKrawall::RandomSalt(nSalt& salt)
-{
-    // oh dear. getting a random salt value with this method is EVIL...
-    tRandomizer & randomizer = tRandomizer::GetInstance();
-    for (int i=15; i>=0; i--)
-        salt[i] = randomizer.Get( 256 );
-    //        salt[i] = (int)(256.0 * rand() / (RAND_MAX + 1.0));
-}
 
 #ifdef KRAWALL_SERVER
-
-//! split a fully qualified user name in authority and username part
-void nKrawall::SplitUserName( tString const & original, tString & username, tString & authority )
-{
-    std::ostringstream filter; 
-    
-    for( int i = original.Len()-2; i >=0 ; --i )
-    {
-        if ( original[i] == '@' )
-        {
-                username = original.SubStr( 0, i );
-                authority = original.SubStr( i+1, original.Len() - i -2 );
-                return;
-        }
-    }
-    
-    username = original;
-    authority = "";
-}
-
-void nKrawall::SplitBaseAuthorityName( tString const & authority, tString & base )
-{
-    for( int i = 1; i < authority.Len(); ++i )
-    {
-        if ( authority[i] == '/' )
-        {
-                base = authority.SubStr( 0, i );
-                return;
-        }
-    }
-    base = authority;
-    return;
-}
-
-// Tell if an authority has the right to claim that the user uses another authority
-bool nKrawall::CanClaim ( tString contacted, tString claimed )
-{
-    // Check if the claimed authority is just the one we contacted
-    if ( contacted == claimed )
-        return true;
-
-    // It could be claiming the user is from a subdirectory:
-    tString contactedBase, claimedBase;
-    SplitBaseAuthorityName( contacted, contactedBase );
-    SplitBaseAuthorityName( claimed, claimedBase );
-    if ( claimedBase == contactedBase )
-        return true;
-
-    return false;
-}
-
-#ifdef KRAWALL_SERVER_LEAGUE
 
 // called on the master server when the league message is received
 void nKrawall::ReceiveLeagueMessage(const tString& message)
@@ -588,6 +197,17 @@ void nKrawall::RoundEnd(const tString* players, int numPlayers, tString& message
         message << players[i] << '\0';
 }
 
+
+
+// get a random salt value
+void nKrawall::RandomSalt(nSalt& salt)
+{
+    // oh dear. getting a random salt value with this method is EVIL...
+    tRandomizer & randomizer = tRandomizer::GetInstance();
+    for (int i=15; i>=0; i--)
+        salt[i] = randomizer.Get( 256 );
+    //        salt[i] = (int)(256.0 * rand() / (RAND_MAX + 1.0));
+}
 
 
 // called ON THE SERVER when victim drives against killer's wall
@@ -843,7 +463,6 @@ void ReceiveLeagueMessageAck(nMessage &m)
     }
 }
 
-#endif
 #endif
 
 

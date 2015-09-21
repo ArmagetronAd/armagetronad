@@ -36,19 +36,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 void se_SoundInit();
 void se_SoundExit();
-//void se_SoundLock();
-//void se_SoundUnlock();
+void se_SoundLock();
+void se_SoundUnlock();
 void se_SoundPause(bool p);
 void se_SoundMenu();
-
-//! locks sound while in existence.
-class eSoundLocker
-{
-    eSoundLocker( eSoundLocker const & );
-public:
-    eSoundLocker();
-    ~eSoundLocker();
-};
 
 class eAudioPos{
 public:
@@ -68,7 +59,6 @@ class eWavData: public tListItem<eWavData>{
     tString       filename; // the filename
     tString       filename_alt; // the filename
     bool          freeData; // manually free data or use SDL_FreeWAV?
-    bool          loadError; //!< was there an error during loading?
 
     static eWavData* s_anchor; // list anchor
 
@@ -102,7 +92,7 @@ public:
 };
 
 class eSoundPlayer{
-    int id; // ID in the global players list
+    int id;
     eWavData *wav; // the sound we should put out
     eAudioPos pos[MAX_VIEWERS]; // the position of all viewers
     bool goon[MAX_VIEWERS];

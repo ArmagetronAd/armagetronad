@@ -3,16 +3,14 @@
 #define ArmageTron_PARSER_H
 
 #include "defs.h"
-#include <libxml/parser.h>
-#include <libxml/tree.h>
+#include "tXmlParser.h"
+#include "eCoord.h"
 
 class eGrid;
 class gArena;
-class eCoord;
 class ePoint;
 class gGame;
 class gWallRim;
-class gXMLCharReturn;
 
 /*
 Note to the reader: In the full World idea, the parser should, 
@@ -25,12 +23,10 @@ pointer to the gGame, the gArena and the gGrid.
 
 */
 
-class gParser {
+class gParser : public tXmlResource {
 
     gArena *theArena; /*Patch: All the world structure should be created by the parser*/
     eGrid *theGrid; /*Patch: All the world structure should be created by the parser*/
-
-    xmlDocPtr doc; /* The map xml document */
 
     REAL rimTexture; /* The rim wall texture coordinate */
 
@@ -39,17 +35,12 @@ class gParser {
 public:
     gParser(gArena *anArena, eGrid *aGrid);
     //    gParser(const gGame *aGame, gArena *anArena, tControlledPTR<eGrid> aGrid);
-    /*Sorry, I just cant figure when you'd want to load without
-      validating, or revalidate a document. So I joined both 
-      toghether */
-    ~gParser();
-
-    bool LoadAndValidateMapXML(char const *uri, FILE* docfd, char const * filepath );
-    void InstantiateMap(float sizeMultiplier);
+    void setSizeMultiplier(REAL aSizeMultiplier);
+    void Parse();
 
 protected:
     bool trueOrFalse(char *str);
-    gXMLCharReturn myxmlGetProp(xmlNodePtr cur, const char *name);
+    char *myxmlGetProp(xmlNodePtr cur, const char *name);
     int myxmlGetPropInt(xmlNodePtr cur, const char *name);
     float myxmlGetPropFloat(xmlNodePtr cur, const char *name);
     bool myxmlGetPropBool(xmlNodePtr cur, const char *name);

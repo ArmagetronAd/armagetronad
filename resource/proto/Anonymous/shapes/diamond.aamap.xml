@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE Resource SYSTEM "AATeam/map-0.2.8.0_rc4.dtd">
+<!DOCTYPE Resource SYSTEM "map.dtd">
 <Resource type="aamap" name="diamond" version="1.0.2" author="Anonymous" category="polygon/regular" >
 	<Map version="2">
 

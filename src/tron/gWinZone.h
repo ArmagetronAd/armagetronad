@@ -32,8 +32,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <vector>
 
-// get rid of this include (it's needed for gColor)
 #include "gCycle.h"
+#include "rColor.h"
 
 
 class eTeam;
@@ -90,12 +90,14 @@ public:
     gZone const &   GetExpansionSpeed   ( REAL & expansionSpeed ) const;//!< Gets the current expansion speed
     gZone &         SetRotationSpeed    ( REAL rotationSpeed );	        //!< Sets the current rotation speed
     REAL            GetRotationSpeed    ( void ) const;	                //!< Gets the current rotation speed
+    tCoord const &  GetRotation    ( void ) const;	                //!< Gets the current rotation state
     gZone const &   GetRotationSpeed    ( REAL & rotationSpeed ) const;	//!< Gets the current rotation speed
     gZone &         SetRotationAcceleration( REAL rotationAcceleration );	        //!< Sets the current acceleration of the rotation
     REAL            GetRotationAcceleration( void ) const;	                        //!< Gets the current acceleration of the rotation
     gZone const &   GetRotationAcceleration( REAL & rotationAcceleration ) const;	//!< Gets the current acceleration of the rotation
+    rColor const &  GetColor( void ) const;	//!< Gets the current color
 protected:
-    gRealColor color_;           //!< the zone's color
+    rColor color_;           //!< the zone's color
     REAL createTime_;            //!< the time the zone was created at
 
     REAL referenceTime_;         //!< reference time for function evaluations
@@ -122,9 +124,6 @@ private:
     REAL Radius() const;           //!< returns the current radius
 
     virtual void Render(const eCamera *cam);  //!< renders the zone
-
-    //! returns whether the rendering uses alpha blending (massively, so sorting errors would show)
-    virtual bool RendersAlpha() const;
 
     inline REAL EvaluateFunctionNow( tFunction const & f ) const;  //!< evaluates the given function with lastTime - referenceTime_ as argument
     inline void SetFunctionNow( tFunction & f, REAL value ) const; //!< makes sure EvaluateFunctionNow() returns the given value
@@ -173,10 +172,6 @@ private:
     virtual void OnVanish();                           //!< called when the zone vanishes
     virtual void OnConquest();                         //!< called when the zone gets conquered
     virtual void CheckSurvivor();                      //!< checks for the only surviving zone
-    virtual void OnRoundBegin();                       //!< called on the beginning of the round
-    virtual void OnRoundEnd();                         //!< called on the end of the round
-
-    void ZoneWasHeld();                                //!< call when the zone was held as long as possible with the set game rules
 
     static void CountZonesOfTeam( eGrid const * grid, eTeam * otherTeam, int & count, gBaseZoneHack * & farthest ); //!< counts the zones belonging to the given team.
 
@@ -188,11 +183,8 @@ private:
 
     typedef std::vector< tJUST_CONTROLLED_PTR< eTeam > > TeamArray;
     TeamArray enemies_;                     //!< list of teams that currently have a player in the zone
-    REAL lastEnemyContact_;                 //!< last time an enemy player was in the zone
 
     REAL teamDistance_;                     //!< distance to the closest member of the owning team
-
-    bool touchy_;                           //!< flag set when the zone is "touchy", which makes it get conquered on the slightest enemy touch
 
     //! possible states
     enum State

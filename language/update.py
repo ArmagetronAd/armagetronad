@@ -9,8 +9,6 @@
 #           panish translation is up to date.
 #           the --complete switch adds the original texts as comments to all items, even
 #           those already translated.
-#           the --scm switch removes all comments added by previous runs so you can
-#           easily check in partial translations into source control.
 #
 # update.py --dist
 #           compactifies translations: strips comments and whitespace
@@ -24,8 +22,7 @@ class LanguageUpdater:
     def __init__(self):
         # maximal assumed length of identifier
         self.maxlen = 30
-        self.commentAll  = False
-        self.commentNone = False
+        self.commentAll = False
         self.autoComment = "#ORIGINAL TEXT:"
         self.autoComment2 = "#TRANSLATION "
         self.untranslated = "UNTRANSLATED\n"
@@ -56,8 +53,7 @@ class LanguageUpdater:
             del self.dictionary[ key ]
         except KeyError:
             # translation not found: note that.
-            if not self.commentNone:
-                self.Write( "#" + key, self.untranslated )
+            self.Write( "#" + key, self.untranslated )
 
     # writes dictionary to open outfile
     def WriteDictionary0( self ):
@@ -120,12 +116,6 @@ class LanguageUpdater:
         # flag indicating whether the next item needs an extra separation line
         separate = True    
 
-        # flag indicating whether the last language item was translated
-        lastTranslated = True
-
-        # flag indicating whether the last line was empty
-        lastEmpty = False
-
         # read through base file, rewriting it
         for line in infile.readlines():
             pair = self.ParseLine( line )
@@ -134,16 +124,12 @@ class LanguageUpdater:
                 try: del self.lostcomments[ line ]
                 except KeyError: pass
                 # just print line, it is a comment or whitespace
-                empty = ( len(line) <= 1 )
-                if lastTranslated or ( not empty or not lastEmpty ):
-                    self.outfile.write( line )
-                    lastEmpty = empty
+                self.outfile.write( line )
                 separate = False
             else:
                 if not pair[0] == "include":
                     # write original text as a comment
-                    lastTranslated = pair[0] in self.dictionary
-                    if self.commentAll or ( not lastTranslated and not self.commentNone ):
+                    if self.commentAll or pair[0] not in self.dictionary:
                         if separate:
                             self.outfile.write("\n")
                         self.Write( self.autoComment, pair[1] )
@@ -200,13 +186,13 @@ class LanguageUpdater:
 
 if __name__ == "__main__":
     # determine languages to update: everything included from
-    # languages.txt.in except am/eng and custom.
+    # languages.txt.in except am/eng.
     files = []
     listfile = open("languages.txt.in")
     for line in listfile.readlines():
         if line.startswith("include"):
             file =line.split()[1]
-            if file != "american.txt" and file != "english.txt" and file != "british.txt" and file != "custom.txt":
+            if file != "american.txt" and file != "english.txt" and file != "british.txt":
                 files += [file]
 
     lu = LanguageUpdater()
@@ -218,8 +204,6 @@ if __name__ == "__main__":
     else:
         if len( sys.argv ) >= 2 and sys.argv[1] == "--complete":
             lu.commentAll = True
-        if len( sys.argv ) >= 2 and sys.argv[1] == "--scm":
-            lu.commentNone = True
 
         # read in all translations
         for file in sys.argv[1:]:
