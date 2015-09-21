@@ -32,7 +32,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <vector>
 
-#include "gCycle.h"
 #include "rColor.h"
 #include "tFunction.h"
 
@@ -46,6 +45,7 @@ extern REAL sg_conquestRate;
 extern REAL sg_defendRate;
 
 class eTeam;
+class gCycle;
 
 //! basic zone class: handles rendering and entwork syncing
 class gZone: public eNetGameObject
@@ -78,7 +78,7 @@ public:
     gZone const &   GetRotationAcceleration( REAL & rotationAcceleration ) const;	//!< Gets the current acceleration of the rotation
     rColor const &  GetColor( void ) const;	//!< Gets the current color
 protected:
-    rColor color_;           //!< the zone's color
+    rColor color_;               //!< the zone's color
     REAL createTime_;            //!< the time the zone was created at
 
     REAL referenceTime_;         //!< reference time for function evaluations
@@ -157,6 +157,10 @@ private:
     virtual void OnVanish();                           //!< called when the zone vanishes
     virtual void OnConquest();                         //!< called when the zone gets conquered
     virtual void CheckSurvivor();                      //!< checks for the only surviving zone
+    virtual void OnRoundBegin();                       //!< called on the beginning of the round
+    virtual void OnRoundEnd();                         //!< called on the end of the round
+
+    void ZoneWasHeld();                                //!< call when the zone was held as long as possible with the set game rules
 
     static void CountZonesOfTeam( eGrid const * grid, eTeam * otherTeam, int & count, gBaseZoneHack * & farthest ); //!< counts the zones belonging to the given team.
 
