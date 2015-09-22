@@ -976,8 +976,13 @@ private:
     tCONTROLLED_PTR( ePlayerNetID ) player_;        // keep player referenced
 };
 
-
-
+void ePlayerNetID::SetSilenced( bool silenced )
+{ 
+    silenced_ = silenced;
+    eVoter * pVoter = eVoter::GetPersistentVoter(Owner());
+    if(pVoter)
+        pVoter->silenced_ = silenced;
+}
 
 // menu where you can silence players
 void ePlayerNetID::SilenceMenu()
@@ -8968,14 +8973,6 @@ void ePlayerNetID::UnregisterWithMachine( void )
         // mark chat spam as disconnected
         se_GetSpam(*this).lastSaid.MarkDisconnected();
 
-        // store suspension count
-        eVoter *voter = eVoter::GetPersistentVoter( Owner() );
-        if ( voter )
-        {
-            voter->suspended_ = suspended_;
-            voter->silenced_ = silenced_;
-        }
-
         registeredMachine_->RemovePlayer();
         registeredMachine_ = 0;
     }
@@ -9053,23 +9050,36 @@ void ePlayerNetID::Suspend( int rounds )
         rounds = 0;
     }
 
-    int & suspended = AccessSuspended();
-
-    if ( suspended == rounds )
+    if ( suspended_ == rounds )
     {
         return;
     }
 
-    suspended = rounds;
+    eVoter * pVoter = eVoter::GetPersistentVoter(Owner());
+    if(pVoter)
+    {
+        // transfer suspension rounds to persistent voter, take care to only go
+        // into the same direction as this player
+        if(rounds > suspended_ && rounds > pVoter->suspended_)
+        {
+            pVoter->suspended_ = rounds;
+        }
+        if(rounds < suspended_ && rounds < pVoter->suspended_)
+        {
+            pVoter->suspended_ = rounds;
+        }
+    }
 
-    if ( suspended == 0 )
+    suspended_ = rounds;
+
+    if ( suspended_ == 0 )
     {
         sn_ConsoleOut( tOutput( "$player_no_longer_suspended", GetColoredName() ) );
         FindDefaultTeam();
     }
     else
     {
-        sn_ConsoleOut( tOutput( "$player_suspended", GetColoredName(), suspended ) );
+        sn_ConsoleOut( tOutput( "$player_suspended", GetColoredName(), suspended_ ) );
         SetTeam( NULL );
         if ( Object() && Object()->Alive() )
             Object()->Kill();
@@ -9424,10 +9434,12 @@ static tAccessLevelSetter se_atcConfLevel( se_allowTeamChangesPlayerConf, tAcces
 static tAccessLevelSetter se_dtcConfLevel( se_disallowTeamChangesPlayerConf, tAccessLevel_TeamLeader );
 
 //! accesses the suspension count
+/*
 int & ePlayerNetID::AccessSuspended()
 {
     return suspended_;
 }
+*/
 
 //! returns the suspension count
 int ePlayerNetID::GetSuspended() const
