@@ -4717,7 +4717,15 @@ typedef sockaddr nMachineKey;
 
 bool operator < ( nMachineKey const & a, nMachineKey const & b )
 {
-    return reinterpret_cast< sockaddr_in const & >( a ).sin_addr.s_addr < reinterpret_cast< sockaddr_in const & >( b ).sin_addr.s_addr;
+    sockaddr_in const & sa = reinterpret_cast< sockaddr_in const & >( a );
+    sockaddr_in const & sb = reinterpret_cast< sockaddr_in const & >( b );
+#ifdef DEBUG_X
+// compare ports first to make different clients appear as different voters
+    if(sa.sin_port != sb.sin_port)
+        return sa.sin_port < sb.sin_port;
+#endif
+
+    return sa.sin_addr.s_addr < sb.sin_addr.s_addr;
 }
 
 typedef std::map< nMachineKey, nMachinePTR > nMachineMap;
