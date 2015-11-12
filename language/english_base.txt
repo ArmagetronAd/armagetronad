@@ -598,6 +598,8 @@ max_votes_per_voter_help            The maximum number of votes suggested by eac
 voting_start_decay_help                Number of seconds after that the non-voters start to get ignored.
 voting_decay_help                    One non-voter is ignored every time this many seconds pass.
 voting_bias_help                    Add virtual voters that oppose every change.
+voting_bias_silence_help                        Add virtual voters that oppose every silence vote.
+voting_bias_voice_help                  Add virtual voters that oppose every voice vote.
 voting_bias_kick_help                Add virtual voters that oppose every kick vote.
 voting_bias_suspend_help            Add virtual voters that oppose every suspend vote.
 voting_bias_include_help            Add virtual voters that oppose every include vote.
@@ -1902,6 +1904,12 @@ kick_player_help                    Pressing enter or space on this menu item wi
 
 suspend_player_details_text            If accepted, \1 will be suspended for some rounds.
 suspend_player_text                    Suspend \1
+
+silence_player_details_text                     If accepted, \1 will be silenced.
+silence_player_text                                     Silenced \1
+
+voice_player_details_text                       If accepted, \1 will be unsilenced.
+voice_player_text                                       Voice \1
 
 vote_include_details_text            If accepted, the file \1 will be included as a configuration file.
 vote_include_text                    Include \1
@@ -3265,6 +3273,7 @@ access_level_play_sliders_help The access level required to play will only slide
 access_level_play_changed      Access level required to play changed from \1 to \2.\n
 
 access_level_vote_suspend_help    Minimal access level required to issue suspend votes.
+access_level_vote_silence_help    Minimal access level required to issue silence and voice votes.
 access_level_vote_kick_help    Minimal access level required to issue kick votes.
 access_level_vote_include_help    Minimal access level required to issue include votes.
 access_level_vote_include_execute_help    Minimal access level successful include votes will be executed at.
