@@ -550,9 +550,9 @@ AC_SUBST(games_suffix_doc)
 AC_SUBST(games_suffix_var)
 
 dnl determine memmanager state
-if test x$enable_memmanager != xyes ; then
+dnl if test x$enable_memmanager != xyes ; then
   AC_DEFINE(DONTUSEMEMMANAGER)
-fi
+dnl fi
 
 dnl LibTool configuration
 dnl AC_LIBTOOL_DLOPEN

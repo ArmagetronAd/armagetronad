@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tToDo.h"
 #include "tThread.h"
 #include "tLockedQueue.h"
+#include "tSafePTR.h"
 
 //! template that runs void member functions of reference countable objects
 template< class T > class tMemberFunctionRunnerTemplate

@@ -89,7 +89,7 @@ public:
     }
 };
 
-template <class T, bool MALLOC=false, bool REFERENCE=false> class tList:public tArray<T *, MALLOC> {
+template <class T, bool MALLOC=false, bool REFERENCE=false> class tList:public tArray<T *> {
     //  friend T;
     int offset;
 
@@ -101,7 +101,7 @@ public:
             (reinterpret_cast<int *>((*this)(i)))[offset]=-1;
     }
 
-    tList(int size=0):tArray<T*, MALLOC>(size){}
+    tList(int size=0):tArray<T*>(size){tASSERT(!MALLOC);}
 
     void Add(T *t,int &idnum){
         offset=&idnum-(reinterpret_cast<int *>(t));
@@ -168,7 +168,7 @@ public:
     //! fast data swap with other list
     void Swap( tList & other )
     {
-        tArray<T *, MALLOC>::Swap( other );
+        tArray<T *>::Swap( other );
 
         ::Swap( offset, other.offset );
     }
