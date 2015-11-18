@@ -240,6 +240,9 @@ public:
             }
             break;
             // couple of special cases
+            case SDL_SCANCODE_RETURN2:
+                persistentID = "SCANCODE_RETURN2";
+                break;
             case SDL_SCANCODE_BACKSLASH:
                 persistentID = "SCANCODE_BACKSLASH";
                 break;
