@@ -6803,16 +6803,20 @@ static void sg_RespawnPlayer(std::istream &s)
         if(!pPlayer) {
             return;
         }
+
+		// Get the size multiplier to adjust the cordinates to be based on the map's.
+        float sizeMultiplier = gArena::SizeMultiplier();
+
         const tString message_str = params.ExtractNonBlankSubString(pos);
         int message = atoi(message_str);
         const tString x_str = params.ExtractNonBlankSubString(pos);
-        REAL x = atof(x_str);
+        REAL x = atof(x_str) * sizeMultiplier;
         const tString y_str = params.ExtractNonBlankSubString(pos);
-        REAL y = atof(y_str);
+        REAL y = atof(y_str) * sizeMultiplier;
         const tString dirx_str = params.ExtractNonBlankSubString(pos);
-        REAL dirx = atof(dirx_str);
+        REAL dirx = atof(dirx_str) * sizeMultiplier;
         const tString diry_str = params.ExtractNonBlankSubString(pos);
-        REAL diry = atof(diry_str);
+        REAL diry = atof(diry_str) * sizeMultiplier;
         // prepare coord and direction ...
         eCoord ppos, pdir;
         if (((x_str == "") && (y_str == "")) || ((dirx ==0) && (diry == 0))) {
@@ -6861,17 +6865,21 @@ static void sg_TeleportPlayer(std::istream &s)
 	if(!pPlayer) {
 		return;
 	}
+
+	// Get the size multiplier to adjust the cordinates to be based on the map's.
+	float sizeMultiplier = gArena::SizeMultiplier();
+
 	const tString x_str = params.ExtractNonBlankSubString(pos);
-	REAL x = atof(x_str);
+	REAL x = atof(x_str) * sizeMultiplier;
 	const tString y_str = params.ExtractNonBlankSubString(pos);
-	REAL y = atof(y_str);
+	REAL y = atof(y_str) * sizeMultiplier;
 	tString relabs = params.ExtractNonBlankSubString(pos);
 	if (relabs=="") relabs="rel";
 
 	const tString xdir_str = params.ExtractNonBlankSubString(pos);
-	REAL xdir = atof(xdir_str);
+	REAL xdir = atof(xdir_str) * sizeMultiplier;
 	const tString ydir_str = params.ExtractNonBlankSubString(pos);
-	REAL ydir = atof(ydir_str);
+	REAL ydir = atof(ydir_str) * sizeMultiplier;
 	if ((xdir_str == "") && (ydir_str == "")) {
 		xdir = ydir = 0.0;
 	}
