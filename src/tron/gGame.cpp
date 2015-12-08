@@ -1327,7 +1327,7 @@ void init_game_grid(eGrid *grid, gParser *aParser){
         // let settings in the map file be executed with the rights of the person
         // who set the map
         tCurrentAccessLevel level( conf_mapfile.GetSetting().GetSetLevel(), true );
-        
+
         // and disallow CASACL and script spawning just in case
         tCasaclPreventer preventer;
 
@@ -3189,7 +3189,7 @@ void gGame::StateUpdate(){
             ePlayerNetID::LogScoreDifferences();
             ePlayerNetID::UpdateSuspensions();
             ePlayerNetID::UpdateShuffleSpamTesters();
-            
+
             sg_newRoundWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
             sg_newRoundWriter.write();
             if ( rounds < 0 )
@@ -3565,8 +3565,8 @@ void gGame::Timestep(REAL time,bool cam){
 #endif
 
 #ifdef RESPAWN_HACK
-    // no respawining while deathzone is active.
-    if( !winDeathZone_ )
+    // Only respawn when the round is in play mode and while the deathzone is not active.
+    if( state == GS_PLAY && !winDeathZone_ )
     {
         sg_Respawn(time,grid,Arena);
     }
@@ -4754,11 +4754,11 @@ void sg_ClientFullscreenMessage( tOutput const & title, tOutput const & message,
     uMenu::Message( title, message, timeout );
 
     // and print it to the console
-#ifndef DEDICATED    
+#ifndef DEDICATED
     con <<  title << "\n" << message << "\n";
 #endif
 
-        
+
     // continue the game
     if( sn_GetNetState() != nCLIENT )
     {
@@ -4808,10 +4808,10 @@ void sg_FullscreenMessageWait()
         bool paused = se_mainGameTimer && se_mainGameTimer->speed < .0001;
         se_PauseGameTimer(true);
         gGame::NetSyncIdle();
-        
+
         REAL waitTo = tSysTimeFloat() + sg_fullscreenMessageTimeout;
         REAL waitToMin = tSysTimeFloat() + 1.0;
-        
+
         // wait for players to see it
         bool goon = true;
         while( goon && waitTo > tSysTimeFloat() )
@@ -4820,7 +4820,7 @@ void sg_FullscreenMessageWait()
             gameloop_idle();
             if ( se_GameTime() > sg_lastChatBreakTime )
                 se_PauseGameTimer(true);
-            
+
             // give the clients a second to enter chat state
             if ( tSysTimeFloat() > waitToMin )
             {
@@ -4960,7 +4960,7 @@ static nCallbackLoginLogout lc(LoginCallback);
 static void sg_FillServerSettings()
 {
     nServerInfo::SettingsDigest & digest = *nCallbackFillServerInfo::ToFill();
-    
+
     digest.SetFlag( nServerInfo::SettingsDigest::Flags_NondefaultMap,
                     mapfile != DEFAULT_MAP );
     digest.SetFlag( nServerInfo::SettingsDigest::Flags_TeamPlay,
