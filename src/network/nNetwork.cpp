@@ -1812,7 +1812,7 @@ static tSettingItem< bool > sn_synCookieConf( "ANTI_SPOOF", sn_synCookie );
 
 
 // number of packets from unknown sources to process each call to rec_peer
-static int sn_connectionLimit = 100;
+static int sn_connectionLimit = 5;
 static tSettingItem< int > sn_connectionLimitConf( "CONNECTION_LIMIT", sn_connectionLimit );
 
 // turtle mode control
@@ -2653,7 +2653,7 @@ static void rec_peer(unsigned int peer){
 // #define NO_GLOBAL_FLOODPROTECTION
 #ifndef NO_GLOBAL_FLOODPROTECTION
                     // flood check for pings, logins and other potential nasties; as early as possible
-                    if( sn_turtleMode && count > sn_connectionLimit*10 )
+                    if( sn_turtleMode && count > sn_connectionLimit*5 )
                     {
                         continue;
                     }
@@ -2946,6 +2946,10 @@ static bool sn_Listen( unsigned int & net_hostport, const tString& net_hostip )
             {
                 con << "sn_SetNetState: Unable to open accept socket on desired port " << net_hostport << ", Trying next ports...\n";
                 reported = true;
+                
+                usleep(100000);
+
+                continue;
             }
 
             net_hostport++;
@@ -4717,7 +4721,15 @@ typedef sockaddr nMachineKey;
 
 bool operator < ( nMachineKey const & a, nMachineKey const & b )
 {
-    return reinterpret_cast< sockaddr_in const & >( a ).sin_addr.s_addr < reinterpret_cast< sockaddr_in const & >( b ).sin_addr.s_addr;
+    sockaddr_in const & sa = reinterpret_cast< sockaddr_in const & >( a );
+    sockaddr_in const & sb = reinterpret_cast< sockaddr_in const & >( b );
+#ifdef DEBUG_X
+// compare ports first to make different clients appear as different voters
+    if(sa.sin_port != sb.sin_port)
+        return sa.sin_port < sb.sin_port;
+#endif
+
+    return sa.sin_addr.s_addr < sb.sin_addr.s_addr;
 }
 
 typedef std::map< nMachineKey, nMachinePTR > nMachineMap;

@@ -382,7 +382,9 @@ public:
     bool IsActive() const { return !disconnected; }
 
     bool IsSilenced( void ) const { return silenced_; }
-    void SetSilenced( bool silenced ) { silenced_ = silenced; }
+    void SetSilenced( bool silenced ); // { silenced_ = silenced; }
+
+    // only for the menu
     bool& AccessSilenced( void ) { return silenced_; }
 
     bool IsSuspended ( void ) { return suspended_ > 0; }
@@ -522,7 +524,7 @@ private:
     inline ePlayerNetID & SetColoredName( tColoredString const & coloredName ); //!< Sets this player's name, cleared by the server. Use this for onscreen screen display.
 
     //! accesses the suspension count
-    int & AccessSuspended();
+    // int & AccessSuspended();
 
     //! returns the suspension count
     int GetSuspended() const;

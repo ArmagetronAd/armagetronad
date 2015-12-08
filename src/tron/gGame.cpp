@@ -1579,7 +1579,7 @@ void init_game_grid(eGrid *grid, gParser *aParser){
         // let settings in the map file be executed with the rights of the person
         // who set the map
         tCurrentAccessLevel level( conf_mapfile.GetSetting().GetSetLevel(), true );
-        
+
         // and disallow CASACL and script spawning just in case
         tCasaclPreventer preventer;
 
@@ -3991,8 +3991,8 @@ void gGame::Timestep(REAL time,bool cam){
 #endif
 
 #ifdef RESPAWN_HACK
-    // no respawining while deathzone is active.
-    if( !winDeathZone_ )
+    // Only respawn when the round is in play mode and while the deathzone is not active.
+    if( state == GS_PLAY && !winDeathZone_ )
     {
         sg_Respawn(time,grid,Arena);
     }
@@ -5460,7 +5460,7 @@ static nCallbackLoginLogout lc(LoginCallback);
 static void sg_FillServerSettings()
 {
     nServerInfo::SettingsDigest & digest = *nCallbackFillServerInfo::ToFill();
-    
+
     digest.SetFlag( nServerInfo::SettingsDigest::Flags_NondefaultMap,
                     mapfile != DEFAULT_MAP );
     digest.SetFlag( nServerInfo::SettingsDigest::Flags_TeamPlay,
