@@ -3556,7 +3556,7 @@ void gGame::Timestep(REAL time,bool cam){
 
 #ifdef RESPAWN_HACK
     // Only respawn when the round is in play mode and while the deathzone is not active.
-    if( state == GS_PLAY && !winDeathZone_ )
+    if( state == GS_PLAY && time > 0 && winner == 0 && !winDeathZone_ )
     {
         sg_Respawn(time,grid,Arena);
     }
