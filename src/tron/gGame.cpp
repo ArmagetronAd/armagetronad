@@ -3564,20 +3564,18 @@ void gGame::Timestep(REAL time,bool cam){
     tMemManBase::Check();
 #endif
 
-#ifdef RESPAWN_HACK
-    // Only respawn when the round is in play mode and while the deathzone is not active.
-    if( state == GS_PLAY && !winDeathZone_ )
-    {
-        sg_Respawn(time,grid,Arena);
-    }
-#endif
-
     // chop timestep into small, managable bits
     REAL dt = time - lastTimeTimestep;
     if ( dt < 0 )
         return;
     REAL lt = lastTimeTimestep;
-
+#ifdef RESPAWN_HACK
+    // Only respawn when the round is in play mode and while the deathzone is not active.
+    if( state == GS_PLAY && time > 0 && winner == 0 && !winDeathZone_ )
+    {
+        sg_Respawn(time,grid,Arena);
+    }
+#endif
     // determine the number of bits
     int number_of_steps=int(fabs((dt)/sg_timestepMax));
     if (number_of_steps<1)
