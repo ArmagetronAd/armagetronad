@@ -4406,7 +4406,7 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
     sr_DepthOffset(true);
     if ( rTextureGroups::TextureMode[rTextureGroups::TEX_WALL] != 0 )
         glDisable(GL_TEXTURE_2D);
-    
+
     gNetPlayerWall * run = list;
     while( run )
     {
@@ -4419,7 +4419,7 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
     sr_DepthOffset(false);
     if ( rTextureGroups::TextureMode[rTextureGroups::TEX_WALL] != 0 )
         glEnable(GL_TEXTURE_2D);
-    
+
     run = list;
     while( run )
     {
@@ -6800,7 +6800,9 @@ static void sg_RespawnPlayer(std::istream &s)
         tString PlayerName = ePlayerNetID::FilterName(params.ExtractNonBlankSubString(pos));
         ePlayerNetID *pPlayer = 0;
         pPlayer = ePlayerNetID::FindPlayerByName(PlayerName, NULL);
-        if(!pPlayer) {
+
+        // If no player, or the player is not allowed to respawn.
+        if( ! pPlayer || ! pPlayer->CanRespawn() ) {
             return;
         }
 
