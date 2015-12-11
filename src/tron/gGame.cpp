@@ -3518,7 +3518,7 @@ static void sg_Respawn( REAL time, eGrid *grid, gArena & arena )
     {
         ePlayerNetID *p = se_PlayerNetIDs(i);
 
-        if ( !p->CurrentTeam() )
+        if ( !p->CanRespawn() )
             continue;
 
         eGameObject *e=p->Object();
