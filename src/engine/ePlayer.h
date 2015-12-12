@@ -301,6 +301,11 @@ public:
     virtual bool ActionOnQuit();
     virtual void ActionOnDelete();
 
+    // Check if a player can be respawned. Relaying on team alone is not enough.
+    // If a player enters as spectator, they are still assumed to be on a team.
+    // When a player is suspeded they are also on a team until the end of the round.
+    bool CanRespawn() const { return currentTeam && suspended_ == 0 && ! spectating_; }
+ 
     // chatting
     bool IsChatting() const { return chatting_; }
     void SetChatting ( ChatFlags flag, bool chatting );
