@@ -1780,7 +1780,7 @@ void tString::NetFilter( bool filterWhitespace )
                     // unify whitespace to regular space
                     c = ' ';
                 }
-                else if ( c < 32 )
+                else if ( c < 32 || ( c > 126 && c < 161) )
                 {
                     // nonprintable characters -> underscore
                     c = '_';

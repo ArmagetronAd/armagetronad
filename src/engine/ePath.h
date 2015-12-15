@@ -45,8 +45,8 @@ public:
     ePath();
     ~ePath();
     bool     Valid()           const { return current >= 0 && current < positions.Len(); }
-    eCoord&  CurrentPosition() const { return positions(current); }
-    eCoord&  CurrentOffset()   const { return offsets(current); }
+    eCoord const &  CurrentPosition() const { return positions(current); }
+    eCoord const &  CurrentOffset()   const { return offsets(current); }
     bool     Proceed();
     bool     GoBack();
 

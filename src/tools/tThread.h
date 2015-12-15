@@ -61,6 +61,8 @@ public:
 
         pthread_create(&thread, NULL, &run<T>, (void*) o);
     }
+
+    void detach(){}
 private:
     // worker function
     template< class T >
@@ -94,6 +96,8 @@ public:
         // should never be called, then
         tVERIFY(0);
     }
+
+    void detach(){}
 };
 }
 

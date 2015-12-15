@@ -88,7 +88,8 @@ bool tCommandLineData::Analyse(int argc,char **argv)
             s << "Usage: " << parser.ExecutableName() << " [options]" << extraProgamUsage_ << '\n'
               << "Options:\n\n"
               << "-h, --help                   : print this message\n"
-              << "-v, --version                : print version number\n";
+              << "-v, --version                : print version number\n"
+              << "--short-version          : print only the version\n";
 
             // ask third party analyzers
             tCommandLineAnalyzer * commandLineAnalyzer = commandLineAnalyzerAnchor_;
@@ -105,6 +106,11 @@ bool tCommandLineData::Analyse(int argc,char **argv)
         else if ( parser.GetSwitch( "--version", "-v" ) )
         {
             INFORM_HELPER( "This is " << parser.ExecutableName() << " version " << programVersion_ << ".\n" );
+            return false;
+        }
+        else if ( parser.GetSwitch( "--shortversion", "-v" ) )
+        {
+            INFORM_HELPER( programVersion_ << "\n" );
             return false;
         }
         else

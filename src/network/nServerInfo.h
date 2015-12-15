@@ -444,7 +444,13 @@ class nServerInfoAdmin
     friend class nServerInfo;
 
 public:
+    static nServerInfoAdmin* GetAdmin();
 
+    // called before a new server browsing process is started
+    virtual void BeforeNewScan() = 0;
+    // if too few servers are displayed after a rescan
+    virtual void LowerThreshold() = 0;
+    virtual int MinValidServerCount() const = 0;
 protected:
     nServerInfoAdmin();
     virtual ~nServerInfoAdmin();
@@ -455,9 +461,10 @@ private:
     virtual tString	GetOptions()	const = 0;
     virtual tString GetUrl()		const = 0;
     virtual void Classify( nServerInfo::SettingsDigest const & in, 
-                           nServerInfo::Classification & out ) const = 0;  //!< classifies the server according to its setting digest
+                           nServerInfo::Classification & out ) = 0;  //!< classifies the server according to its setting digest
 
-    static nServerInfoAdmin* GetAdmin();
+    // returns true if all servers need reclassification. Resets flag after once returning true.
+    virtual bool NeedGlobalReclassification() = 0;
 };
 
 class nServerInfoCharacterFilter: public tCharacterFilter

@@ -2175,6 +2175,9 @@ eVoter* eVoter::GetPersistentVoter( int ID )
     if ( sn_GetNetState() == nCLIENT )
         return NULL;
 
+    if ( sn_GetNetState() == nSTANDALONE && ID != 0 )
+        return NULL;
+
     // get machine from network subsystem
     nMachine & machine = nMachine::GetMachine( ID );
     return GetPersistentVoter( machine );

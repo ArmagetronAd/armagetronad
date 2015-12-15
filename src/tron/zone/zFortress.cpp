@@ -214,27 +214,32 @@ bool zFortressZone::Timestep( REAL time )
         else
         {
             OnVanish();
+            return true;
         }
 
         currentState_ = State_Conquered;
     }
-    else if ( currentState_ == State_Conquered && ( !shape || shape->GetRotationSpeed() < 0 ) )
+    else if ( currentState_ == State_Conquered )
     {
         if (shape)
         {
-            // stop zone rotation
-            shape->setReferenceTime(lastTime);
-            shape->SetRotationSpeed( 0 );
-            shape->SetRotationAcceleration( 0 );
+            if( shape->GetRotationSpeed() < 0 )
+        	{
+                // stop zone rotation
+                shape->setReferenceTime(lastTime);
+                shape->SetRotationSpeed( 0 );
+                shape->SetRotationAcceleration( 0 );
 
-            rColor color_ = shape->getColor();
-            color_.r_ = color_.g_ = color_.b_ = .5;
-            shape->setColor(color_);
-            shape->RequestSync();
-        }
+                rColor color_ = shape->getColor();
+                color_.r_ = color_.g_ = color_.b_ = .5;
+                shape->setColor(color_);
+                shape->RequestSync();
+            }
+    	}
         else
         {
             OnVanish();
+            return true;
         }
 
         // vanish the zone completely once it shrinks to zero size

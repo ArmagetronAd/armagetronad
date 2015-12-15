@@ -15,7 +15,7 @@ tUniversalVariables.h: Makefile tUniversalVariables.h.in ${top_builddir}/univers
 
 ${srcdir}/tools/tDirectories.cpp: tUniversalVariables.h
 
-EXTRA_DIST = render/rConsoleCout.cpp engine/sound/base/eChannel.h vParser.cpp engine/eSound.cpp engine/eSound.h
+EXTRA_DIST = render/rConsoleCout.cpp engine/sound/base/eChannel.h tools/values/vParser.cpp engine/eSound.cpp engine/eSound.h
 
 dist-hook:
 	cp -R ${srcdir}/config_ide.h ${srcdir}/win32 ${srcdir}/win32_ded $(distdir)
@@ -208,7 +208,7 @@ libui_a_SOURCES=ui/uInput.cpp ui/uInput.h ui/uInputQueue.cpp ui/uInputQueue.h ui
 
 if OS_X_TOOLKIT
 if !BUILDDEDICATED
-libtron_a_SOURCES += tron/gOSXSDLMain.mm tron/gOSXSDLMain.h tron/gOSXURLHandler.mm tron/gOSXURLHandler.h
+libtron_a_SOURCES += tron/gOSXURLHandler.mm tron/gOSXURLHandler.h
 libui_a_SOURCES += ui/uOSXPaste.cpp ui/uOSXPaste.h
 endif
 endif

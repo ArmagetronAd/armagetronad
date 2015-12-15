@@ -37,8 +37,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "rRender.h"
 #include "rTexture.h"
 
-#ifdef HAVE_FTGL_H
+#ifdef HAVE_FTGL_FTGL_H
 // single include. practical.
+#include <FTGL/ftgl.h>
+#elif defined(HAVE_FTGL_H)
 #include <ftgl.h>
 #else
 // alternative includes go here

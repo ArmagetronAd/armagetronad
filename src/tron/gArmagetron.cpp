@@ -58,6 +58,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <stdio.h>
 #include <stdlib.h>
 #include <fstream>
+#include <bitset>
 #include "tCrypto.h"
 
 #include "nServerInfo.h"
@@ -168,9 +169,9 @@ void sg_StartupPlayerMenu()
 {
     uMenu firstSetup("$first_setup", false);
     firstSetup.SetBot(-.2);
-    
+
     uMenuItemExit e2(&firstSetup, "$menuitem_accept", "$menuitem_accept_help");
-    
+
     ePlayer * player = ePlayer::PlayerConfig(0);
     tASSERT( player );
 
@@ -187,25 +188,33 @@ void sg_StartupPlayerMenu()
     net.NewChoice( "$first_setup_net_dsl", "$first_setup_net_dsl_help", gDSL );
 
     tString keyboardTemplate("keys_cursor.cfg");
+
     uMenuItemSelection<tString> k(&firstSetup, "$first_setup_keys", "$first_setup_keys_help", keyboardTemplate );
     if ( !st_FirstUse )
     {
         k.NewChoice( "$first_setup_leave", "$first_setup_leave_help", tString("") );
         keyboardTemplate="";
     }
+
     k.NewChoice( "$first_setup_keys_cursor", "$first_setup_keys_cursor_help", tString("keys_cursor.cfg") );
     k.NewChoice( "$first_setup_keys_wasd", "$first_setup_keys_wasd_help", tString("keys_wasd.cfg") );
+#if SDL_VERSION_ATLEAST(2,0,0)
+#else
     k.NewChoice( "$first_setup_keys_zqsd", "$first_setup_keys_zqsd_help", tString("keys_zqsd.cfg") );
+#endif
     k.NewChoice( "$first_setup_keys_cursor_single", "$first_setup_keys_cursor_single_help", tString("keys_cursor_single.cfg") );
-    // k.NewChoice( "$first_setup_keys_both", "$first_setup_keys_both_help", tString("keys_twohand.cfg") );
     k.NewChoice( "$first_setup_keys_x", "$first_setup_keys_x_help", tString("keys_x.cfg") );
+
+#ifdef DEBUG
+    k.NewChoice( "none", "none", tString("") );
+#endif
 
     tColor leave(0,0,0,0);
     tColor color(1,0,0);
     uMenuItemSelection<tColor> c(&firstSetup,
                                  "$first_setup_color",
                                  "$first_setup_color_help",
-                                 color);   
+                                 color);
 
     if ( !st_FirstUse )
     {
@@ -223,7 +232,7 @@ void sg_StartupPlayerMenu()
     c.NewChoice( "$first_setup_color_cyan", "", tColor(0,1,1) );
     c.NewChoice( "$first_setup_color_white", "", tColor(1,1,1) );
     c.NewChoice( "$first_setup_color_dark", "", tColor(0,0,0) );
-    
+
     if ( st_FirstUse )
     {
         for(int i=tRandomizer::GetInstance().Get(4); i>=0; --i)
@@ -236,9 +245,9 @@ void sg_StartupPlayerMenu()
                       "$player_name_text",
                       "$player_name_help",
                       player->name, ePlayerNetID::MAX_NAME_LENGTH);
-    
+
     uMenuItemExit e(&firstSetup, "$menuitem_accept", "$menuitem_accept_help");
-    
+
     firstSetup.Enter();
 
     // apply network rates
@@ -271,8 +280,16 @@ void sg_StartupPlayerMenu()
     // load keyboard layout
     if( keyboardTemplate.Len() > 1 )
     {
+        std::ostringstream fullName;
+#if SDL_VERSION_ATLEAST(2,0,0)
+        fullName << "sdl2/";
+#else
+        fullName << "sdl1/";
+#endif
+        fullName << keyboardTemplate;
+
         std::ifstream s;
-        if( tConfItemBase::OpenFile( s, keyboardTemplate ) )
+        if( tConfItemBase::OpenFile( s, fullName.str() ) )
         {
             tCurrentAccessLevel level( tAccessLevel_Owner, true );
             tConfItemBase::ReadFile( s );
@@ -468,7 +485,11 @@ static void sg_DelayedActivation()
     Activate( sg_active );
 }
 
+#if SDL_VERSION_ATLEAST(2,0,0)
+int filter(void*, SDL_Event *tEvent){
+#else
 int filter(const SDL_Event *tEvent){
+#endif
     // recursion avoidance
     static bool recursion = false;
     if ( !recursion )
@@ -494,10 +515,14 @@ int filter(const SDL_Event *tEvent){
         RecursionGuard guard( recursion );
 
         // boss key or OS X quit command
-        if ((tEvent->type==SDL_KEYDOWN && tEvent->key.keysym.sym==27 &&
+        if ((tEvent->type==SDL_KEYDOWN && tEvent->key.keysym.sym==SDLK_ESCAPE &&
                 tEvent->key.keysym.mod & KMOD_SHIFT) ||
-                (tEvent->type==SDL_KEYDOWN && tEvent->key.keysym.sym==113 &&
+                (tEvent->type==SDL_KEYDOWN && tEvent->key.keysym.sym==SDLK_q &&
+#if SDL_VERSION_ATLEAST(2,0,0)
+                 tEvent->key.keysym.mod & KMOD_GUI) ||
+#else
                  tEvent->key.keysym.mod & KMOD_META) ||
+#endif
                 (tEvent->type==SDL_QUIT)){
             // sn_SetNetState(nSTANDALONE);
             // sn_Receive();
@@ -518,10 +543,30 @@ int filter(const SDL_Event *tEvent){
                 tEvent->type!=SDL_MOUSEBUTTONUP &&
                 ((tEvent->motion.x>=sr_screenWidth-10  || tEvent->motion.x<=10) ||
                  (tEvent->motion.y>=sr_screenHeight-10 || tEvent->motion.y<=10)))
+#if SDL_VERSION_ATLEAST(2,0,0)
+            SDL_WarpMouseInWindow(sr_screen, sr_screenWidth/2, sr_screenHeight/2);
+#else
             SDL_WarpMouse(sr_screenWidth/2,sr_screenHeight/2);
+#endif
 
         // fetch alt-tab
 
+#if SDL_VERSION_ATLEAST(2,0,0)
+        if (tEvent->type==SDL_WINDOWEVENT)
+        {
+            // Jonathans fullscreen bugfix.
+#ifdef MACOSX
+            if(currentScreensetting.fullscreen ^ lastSuccess.fullscreen) return false;
+#endif
+	    if ( tEvent->window.event==SDL_WINDOWEVENT_FOCUS_GAINED || tEvent->window.event==SDL_WINDOWEVENT_FOCUS_LOST )
+            {
+                sg_active = tEvent->window.event == SDL_WINDOWEVENT_FOCUS_GAINED;
+                st_ToDo(sg_DelayedActivation);
+            }
+
+            // reload GL stuff if application gets reactivated
+            if ( tEvent->window.event == SDL_WINDOWEVENT_FOCUS_GAINED )
+#else //SDL_VERSION_ATLEAST(2,0,0)
         if (tEvent->type==SDL_ACTIVEEVENT)
         {
             // Jonathans fullscreen bugfix.
@@ -538,6 +583,7 @@ int filter(const SDL_Event *tEvent){
 
             // reload GL stuff if application gets reactivated
             if ( tEvent->active.gain && tEvent->active.state & SDL_APPACTIVE )
+#endif //SDL_VERSION_ATLEAST(2,0,0)
             {
                 // just treat it like a screen mode change, gets the job done
                 st_ToDo(rCallbackBeforeScreenModeChange::Exec);
@@ -563,7 +609,7 @@ void sg_SetIcon()
 {
 #ifndef DEDICATED
 #ifndef MACOSX
-#ifdef  WIN32
+#ifdef  WIN32_X
     SDL_SysWMinfo	info;
     HICON			icon;
     // get the HWND handle
@@ -578,7 +624,11 @@ void sg_SetIcon()
     //    SDL_Surface *tex=IMG_Load( tDirectories::Data().GetReadPath( "textures/icon.png" ) );
 
     if (tex.GetSurface())
+#if SDL_VERSION_ATLEAST(2,0,0)
+        SDL_SetWindowIcon(sr_screen, tex.GetSurface());
+#else
         SDL_WM_SetIcon(tex.GetSurface(),NULL);
+#endif
 #endif
 #endif
 #endif
@@ -649,7 +699,7 @@ int main(int argc,char **argv){
             const char * dedicatedSection = "DEDICATED";
             if ( !tRecorder::PlaybackStrict( dedicatedSection, dedicatedServer ) )
             {
-#ifdef DEDICATED          
+#ifdef DEDICATED
                 dedicatedServer = true;
 #endif
             }
@@ -670,16 +720,19 @@ int main(int argc,char **argv){
 #endif
 
 #ifdef WIN32
+#if !SDL_VERSION_ATLEAST(2,0,0)
         // disable DirectX by default; it causes problems with some boards.
         if (!getenv( "SDL_VIDEODRIVER") ) {
-            if (sr_useDirectX) {
-                sg_PutEnv( "SDL_VIDEODRIVER=directx" );
-            }
-            else
+            if (!sr_useDirectX)
             {
                 sg_PutEnv( "SDL_VIDEODRIVER=windib" );
             }
+            else
+            {
+                sg_PutEnv( "SDL_VIDEODRIVER=directx" );
+            }
         }
+#endif
 #endif
 
         // atexit(ANET_Shutdown);
@@ -801,8 +854,11 @@ int main(int argc,char **argv){
 
             sr_glRendererInit();
 
+#if SDL_VERSION_ATLEAST(2,0,0)
+            SDL_SetEventFilter(&filter, 0);
+#else
             SDL_SetEventFilter(&filter);
-
+#endif
             //std::cout << "set filter\n";
 
             sg_SetIcon();
@@ -844,7 +900,7 @@ int main(int argc,char **argv){
 
                     sn_bigBrotherString = renderer_identification + "VER=" + st_programVersion + "\n\n";
 
-#ifdef HAVE_LIBRUBY      
+#ifdef HAVE_LIBRUBY
                     try {
                         // tRuby::Load(tDirectories::Data(), "scripts/menu.rb");
                         tRuby::Load(tDirectories::Data(), "scripts/ai.rb");

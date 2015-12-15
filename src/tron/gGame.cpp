@@ -4585,6 +4585,11 @@ bool gGame::GameLoop(bool input){
     sg_Receive();
     sn_SendPlanned();
 
+    if ( netstate != sn_GetNetState() )
+    {
+        return false;
+    }
+
     bool synced = se_mainGameTimer && ( se_mainGameTimer->IsSynced() || ( stateNext >= GS_DELETE_OBJECTS || stateNext <= GS_CREATE_GRID ) );
 
     static bool playersSynced = false;
@@ -4880,7 +4885,7 @@ void sg_EnterGameCore( nNetState enter_state ){
         // do the regular simulation
         tAdvanceFrame();
 
-        goon=GameLoop();
+        goon=GameLoop() && sn_GetNetState() == enter_state;
 
         st_DoToDo();
     }

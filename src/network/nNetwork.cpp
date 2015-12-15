@@ -1346,6 +1346,10 @@ nServerInfoBase * sn_PeekRedirectTo()
 }
 
 static void sn_LoginDeniedHandler( Network::LoginDenied const & denied, nSenderInfo const & sender ){
+    // only the server is allowed to send this
+    if(sender.SenderID() != 0)
+        return;
+
     if ( denied.has_reason() )
     {
         sn_DenyReason = denied.reason();
@@ -1646,7 +1650,7 @@ static tSettingItem< bool > sn_synCookieConf( "ANTI_SPOOF", sn_synCookie );
 
 
 // number of packets from unknown sources to process each call to rec_peer
-static int sn_connectionLimit = 100;
+static int sn_connectionLimit = 5;
 static tSettingItem< int > sn_connectionLimitConf( "CONNECTION_LIMIT", sn_connectionLimit );
 
 // turtle mode control
@@ -1994,6 +1998,11 @@ void sn_LoginHandler( Network::Login const & login, nSenderInfo const & sender )
 void sn_LogoutHandler( Network::Logout const &, nSenderInfo const & sender )
 {
     unsigned short id = sender.SenderID();
+
+    // only the server or legal clients are allowed to send this
+    // (client check comes later)
+    if(sn_GetNetState() == nCLIENT && id != 0)
+        return;
 
     if (sn_Connections[id].socket)
     {
@@ -2389,7 +2398,7 @@ static void rec_peer(unsigned int peer){
             nAddress addrFrom; // the sender of the current packet
             received = sn_Connections[peer].socket->Read( reinterpret_cast< int8 *>( buffer ), maxReceive, addrFrom);
 
-            if ( received > 0 )
+            if ( received >= 2 )
             {
                 if ( received >= maxReceive )
                 {
@@ -2511,6 +2520,10 @@ static void rec_peer(unsigned int peer){
                         continue;
                     }
 
+                    // logged in clients should ignore packets from unknown sources
+                    if(sn_GetNetState() != nSERVER && sn_myNetID != 0)
+                        continue;
+
                     // assume it's a new connection
                     id = MAXCLIENTS+1;
                     peers[ MAXCLIENTS+1 ] = addrFrom;
@@ -2519,7 +2532,7 @@ static void rec_peer(unsigned int peer){
 // #define NO_GLOBAL_FLOODPROTECTION
 #ifndef NO_GLOBAL_FLOODPROTECTION
                     // flood check for pings, logins and other potential nasties; as early as possible
-                    if( sn_turtleMode && count > sn_connectionLimit*10 )
+                    if( sn_turtleMode && count > sn_connectionLimit*5 )
                     {
                         continue;
                     }
@@ -3637,14 +3650,16 @@ void sn_DisconnectUser(int i, const tOutput& reason, nServerInfoBase * redirectT
         return;
     }
 
+    // clients can only disconnect from the server
+    if ( i != 0 && i <= MAXCLIENTS && sn_GetNetState() == nCLIENT )
+    {
+        tERR_WARN( "Client tried to disconnect from another client: impossible and a bad idea." );
+        return;
+    }
+
     // anything to do at all?
     if (!sn_Connections[i].socket)
     {
-        // clients can only disconnect from the server
-        if ( i != 0 && sn_GetNetState() == nCLIENT )
-        {
-            tERR_ERROR( "Client tried to disconnect from another client: impossible and a bad idea." );
-        }
         return;
     }
 

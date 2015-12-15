@@ -4355,7 +4355,13 @@ public:
                 return true;
             }
             // exclude modifier keys from possible control triggers
+#if SDL_VERSION_ATLEAST(2,0,0)
+            else if (( e.key.keysym.scancode < SDL_SCANCODE_LCTRL || e.key.keysym.scancode > SDL_SCANCODE_LCTRL )
+                     && e.key.keysym.scancode != SDL_SCANCODE_CAPSLOCK 
+                     && e.key.keysym.scancode != SDL_SCANCODE_NUMLOCKCLEAR)
+#else
             else if ( e.key.keysym.sym < SDLK_NUMLOCK || e.key.keysym.sym > SDLK_COMPOSE )
+#endif
             {
                 // maybe it's an instant chat button?
                 try
@@ -8914,9 +8920,40 @@ static tConfItemLine sg_optionsConf( "SERVER_OPTIONS", sg_options );
 class gServerInfoAdmin: public nServerInfoAdmin
 {
 public:
-    gServerInfoAdmin(){}
+    gServerInfoAdmin()
+    {
+        lowestExperienceSlowChange_ = 1;
+        BeforeNewScanCore();
+    }
 
 private:
+    int lowestExperienceSlowChange_; // same, but only able to increase slowly, one slot per run
+    int certainlyDisplayedServersCount_; // number of servers displayed if lowestExperienceSlowChange_ were 1 smaller
+    bool needGlobalReclassification_; // flag indicating the lowest experience changed, triggering a rescan
+
+    void LowerExperienceThreshold()
+    {
+        if(lowestExperienceSlowChange_ <= 0)
+            return;
+
+        lowestExperienceSlowChange_--;
+        certainlyDisplayedServersCount_ = 0;
+        needGlobalReclassification_ = true;
+    }
+
+    virtual int MinValidServerCount() const
+    {
+        return 3;
+    }
+
+    // if too few servers are displayed after a rescan
+    virtual void LowerThreshold()
+    {
+        lowestExperienceSlowChange_++;
+        certainlyDisplayedServersCount_ = 0;
+        needGlobalReclassification_ = true;
+    }
+
     virtual tString GetUsers() const
     {
         tString ret;
@@ -9051,7 +9088,7 @@ private:
     }
 
     virtual void Classify( nServerInfo::SettingsDigest const & in, 
-                           nServerInfo::Classification & out ) const
+                           nServerInfo::Classification & out )
     {
         // various classifiers
         static Classifier delayClassifier( .06, Classification_Medium, .12, Classification_High );
@@ -9127,7 +9164,7 @@ private:
 
         if( !digestIsAccurate )
         {
-            experienceLevel = 1;
+            experienceLevel = 3;
         }
 
         // calculate the experience level the player has
@@ -9136,7 +9173,18 @@ private:
         int missingForThisLevel = int( experienceLevelThere*levelDistance - se_playTimeTotal + 2 );
 
         out.noJoin_ = "";
-        out.sortOverride_ = experienceLevel - experienceLevelThere;
+        out.sortOverride_ = experienceLevel - experienceLevelThere - lowestExperienceSlowChange_;
+
+        if(out.sortOverride_ < 0)
+        {
+            certainlyDisplayedServersCount_++;
+            if(certainlyDisplayedServersCount_ >= MinValidServerCount())
+            {
+                LowerExperienceThreshold();
+                out.sortOverride_ ++;
+            }
+        }
+
         if( out.sortOverride_ > 0 )
         {
             compose << tOutput( digestIsAccurate ? "$network_master_exp_recommended_long" : "$network_master_exp_recommended_long_oldserver", missingForThisLevel + out.sortOverride_*levelDistance );
@@ -9198,6 +9246,35 @@ private:
         }
 
         out.description_ = compose.str();
+    }
+ 
+    void BeforeNewScanCore()
+    {
+        lowestExperienceSlowChange_*=2;
+        if(lowestExperienceSlowChange_ < 1)
+            lowestExperienceSlowChange_=1;
+        certainlyDisplayedServersCount_ = 0;
+        needGlobalReclassification_ = false;
+    }
+
+   // called before a new server browsing process is started
+    virtual void BeforeNewScan()
+    {
+        BeforeNewScanCore();
+    }
+
+    // returns true if all servers need reclassification
+    virtual bool NeedGlobalReclassification()
+    {
+        if(needGlobalReclassification_)
+        {
+            needGlobalReclassification_ = false;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 };
 

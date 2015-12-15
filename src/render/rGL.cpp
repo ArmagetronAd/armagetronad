@@ -35,7 +35,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 void sr_CheckGLError()
 {
     GLenum error;
-    while ( (error = glGetError()) != GL_NO_ERROR )
+    int timeout = 2;
+    while ( --timeout >= 0 && (error = glGetError()) != GL_NO_ERROR )
     {
         // don't spam, only report every odd error
         static int count = 0;
@@ -50,7 +51,7 @@ void sr_CheckGLError()
         }
 
         std::stringstream s;
-        s << "GL error 0X" << std::hex << error << " (" << tString::FromUnknown((char const *)gluErrorString(error)) << ")\n";
+        s << "GL error " << gluErrorString(error) << "\n";
         con << s.str();
 
         // catch a breakpoint

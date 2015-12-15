@@ -2300,14 +2300,14 @@ void gNetPlayerWall::Check() const
     int i;
     for ( i = coords_.Len() -2 ; i>=0; --i )
     {
-        gPlayerWallCoord* coords = &( coords_( i ) );
+        gPlayerWallCoord const * coords = &( coords_( i ) );
         tASSERT( coords[0].Pos <= coords[1].Pos );
         tASSERT( coords[0].Time <= coords[1].Time );
     }
 
     for ( i = coords_.Len() -1 ; i>=0; --i )
     {
-        gPlayerWallCoord* coords = &( coords_( i ) );
+        gPlayerWallCoord const * coords = &( coords_( i ) );
         tASSERT( isfinite( coords[0].Pos ) );
         tASSERT( isfinite( coords[0].Time ) );
     }

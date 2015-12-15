@@ -103,6 +103,8 @@
 		<Unit filename="../../src/engine/eGrid.h" />
 		<Unit filename="../../src/engine/eKrawall.cpp" />
 		<Unit filename="../../src/engine/eKrawall.h" />
+		<Unit filename="../../src/engine/eLadderLog.cpp" />
+		<Unit filename="../../src/engine/eLadderLog.h" />
 		<Unit filename="../../src/engine/eLagCompensation.cpp" />
 		<Unit filename="../../src/engine/eLagCompensation.h" />
 		<Unit filename="../../src/engine/eNetGameObject.cpp" />
@@ -128,12 +130,13 @@
 		<Unit filename="../../src/engine/eVoter.h" />
 		<Unit filename="../../src/engine/eWall.cpp" />
 		<Unit filename="../../src/engine/eWall.h" />
+		<Unit filename="../../src/engine/eWarmup.cpp" />
+		<Unit filename="../../src/engine/eWarmup.h" />
 		<Unit filename="../../src/engine/sound/base/eChannel.h" />
 		<Unit filename="../../src/engine/sound/sdl_mixer/eChannelSDLMixer.cpp" />
 		<Unit filename="../../src/engine/sound/sdl_mixer/eChannelSDLMixer.h" />
 		<Unit filename="../../src/engine/sound/sdl_mixer/eMusicTrackSDLMixer.cpp" />
 		<Unit filename="../../src/engine/sound/sdl_mixer/eMusicTrackSDLMixer.h" />
-		<Unit filename="../../src/network/md5.cpp" />
 		<Unit filename="../../src/network/md5.h" />
 		<Unit filename="../../src/network/nAuthentication.cpp" />
 		<Unit filename="../../src/network/nAuthentication.h" />
@@ -331,6 +334,7 @@
 		<Unit filename="../../src/thirdparty/particles/pVec.h" />
 		<Unit filename="../../src/thirdparty/particles/papi.h" />
 		<Unit filename="../../src/thirdparty/shttpd/shttpd.h" />
+		<Unit filename="../../src/tools/md5.cpp" />
 		<Unit filename="../../src/tools/tArray.cpp" />
 		<Unit filename="../../src/tools/tArray.h" />
 		<Unit filename="../../src/tools/tCallback.cpp" />
@@ -346,8 +350,8 @@
 		<Unit filename="../../src/tools/tConsole.h" />
 		<Unit filename="../../src/tools/tCoord.cpp" />
 		<Unit filename="../../src/tools/tCoord.h" />
-		<Unit filename="../../src/tools/tCrypt.cpp" />
-		<Unit filename="../../src/tools/tCrypt.h" />
+		<Unit filename="../../src/tools/tCrypto.cpp" />
+		<Unit filename="../../src/tools/tCrypto.h" />
 		<Unit filename="../../src/tools/tDirectories.cpp" />
 		<Unit filename="../../src/tools/tDirectories.h" />
 		<Unit filename="../../src/tools/tError.cpp" />
