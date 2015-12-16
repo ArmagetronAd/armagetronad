@@ -2714,6 +2714,7 @@ player_lose_frag                 \1 lost \2 points since it caused a general pro
 player_lose_rim                     \1 lost \2 points for trying to escape from the game grid.\n
 player_win_survivor                 \1 was awarded \2 points for being last active team.\n
 player_joins_team                \1 wants to play for \2 on the next respawn.\n
+player_joins_team_solo           \1 wants to play by themself on the next respawn.\n
 player_joins_team_wish           \1 still wants to play for \2, but isn't currently allowed to.\n
 player_joins_team_noex           \1 wants to play for a team that ceased to exist, ignoring request.\n
 player_leave_team_wish           \1 wants to leave \2 on the next respawn.\n
