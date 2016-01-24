@@ -100,6 +100,10 @@ static nSettingItem<bool> a_i
 ("CAMERA_FORBID_IN",
  forbid_camera[CAMERA_IN]);
 
+// forbid mer camera
+static bool stc_forbidMerCam = false;
+static nSettingItem<bool> cafmer("CAMERA_FORBID_MER", stc_forbidMerCam);
+
 // forbid custom camerea
 static nSettingItem<bool> a_c
 ("CAMERA_FORBID_CUSTOM",
@@ -139,6 +143,7 @@ static bool se_forbidCustomGlance=false;
 static nSettingItem<bool> a_fcg
 ("CAMERA_FORBID_CUSTOM_GLANCE",
  se_forbidCustomGlance);
+
 
 //... hack for handling the hud map of 0.4 clients
 static bool stc_forbidHudMap = false;
