@@ -4352,7 +4352,7 @@ void handle_chat( nMessage &m )
                     }
                     else if (command == "/teamname")
                     {
-                        tString teamname(((const char*)say)+6);
+                        tString teamname(((const char*)say)+10);
                         p->SetTeamname(teamname);
                         return;
                     }
