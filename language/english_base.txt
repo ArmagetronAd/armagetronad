@@ -1910,7 +1910,7 @@ silence_player_text                                     Silenced \1
 
 voice_player_details_text                       If accepted, \1 will be unsilenced.
 voice_player_text                                       Voice \1
-
+            
 vote_include_details_text            If accepted, the file \1 will be included as a configuration file.
 vote_include_text                    Include \1
 vote_include_error                    Include file \1 not found or not readable.\n
@@ -3970,11 +3970,12 @@ pingpong_team_balls_help      The number of ping pong balls a team can have.
 rubberzone_rubber_help        Set the rubber which rubber zone should have to decrease/increase by.
 
 cycle_turn_help               Make the cycle turn. Usage: CYCLE_TURN [times to turn] <turn: left or right>.
-
+                                             
 cfg_user_save_help            Can the user.cfg be saved after work?
 
 # Commands for bad words
 banned_words_help             The list of words banned for various reasons.
+banned_words_whole_help       0: Shorten bad words to first and last letters. 1: All bad words get censored.\n
 banned_words_add_help         Add a word to the banned words list.
 banned_words_remove_help      Remove a word from the banned words list.
 banned_words_list_help        Display the list of words currently banned.

@@ -257,6 +257,9 @@ bool eBannedWords::BadWordTrigger(tString &message)
     return false;
 }
 
+static bool se_BannedWordsWhole = true;
+static tSettingItem<bool> se_BannedWordsWholeConf("BANNED_WORDS_WHOLE", se_BannedWordsWhole);
+
 tString eBannedWords::ReplaceBadWords(tString message, tString word)
 {
     tString originalMsg(message);
@@ -285,17 +288,27 @@ tString eBannedWords::ReplaceBadWords(tString message, tString word)
                     splitWordCon = splitWordCon.RemoveCharacter(splitWordCon[j]);
             }
 
+            //  do the censorship
             if (splitWordCon.ToLower() == word.ToLower())
             {
                 tString replaced;
-                for(int k = 0; k < (splitWord.Len() - 1); k++)
-                    replaced << replacement;
 
-                if ((i + 1) == splitWords.Len())
-                    convertedMsg << replaced << "\n";
+                if (se_BannedWordsWhole)
+                {
+                    for(int k = 0; k < (splitWord.Len() - 1); k++)
+                        replaced << replacement;
+                }
                 else
-                    convertedMsg << replaced << " ";
+                {
+                    tString f_letter = splitWordCon.SubStr(0, 1);
+                    tString l_letter = splitWordCon.SubStr(splitWordCon.Len() - 2, 1);
+
+                    replaced = f_letter << replacement << l_letter;
+                }
+
+                convertedMsg << replaced << " ";
             }
+            //  otherwise, append the normal text
             else
             {
                 if ((i + 1) == splitWords.Len())
