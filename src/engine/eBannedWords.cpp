@@ -180,6 +180,9 @@ bool eBannedWords::HasBadWord(tString message, tString word)
 {
     tString origLowMsg(message.ToLower());
 
+    if (tColoredString::HasColors(origLowMsg))
+        origLowMsg = tColoredString::RemoveColors(origLowMsg);
+
     //  check if word exists in converted message
     int pos = 0;
 
@@ -288,6 +291,13 @@ tString eBannedWords::ReplaceBadWords(tString message, tString word)
                     splitWordCon = splitWordCon.RemoveCharacter(splitWordCon[j]);
             }
 
+            //  check if it has colours in its text
+            if (tColoredString::HasColors(splitWordCon))
+            {
+                //  if so, filter them out
+                splitWordCon = tColoredString::RemoveColors(splitWordCon);
+            }
+
             //  do the censorship
             if (splitWordCon.ToLower() == word.ToLower())
             {
@@ -295,7 +305,7 @@ tString eBannedWords::ReplaceBadWords(tString message, tString word)
 
                 if (se_BannedWordsWhole)
                 {
-                    for(int k = 0; k < (splitWord.Len() - 1); k++)
+                    for(int k = 0; k < (splitWordCon.Len() - 1); k++)
                         replaced << replacement;
                 }
                 else
