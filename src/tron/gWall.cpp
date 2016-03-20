@@ -121,7 +121,7 @@ static REAL sg_MPRimStretchY=50;
 static tSettingItem<REAL> sg_MPRimStretchYConf
 ("MOVIEPACK_RIM_WALL_STRETCH_Y",sg_MPRimStretchY);
 
-static REAL rim_wall_red = .3, rim_wall_green = .3, rim_wall_blue = .3;
+static REAL rim_wall_red = 1, rim_wall_green = 1, rim_wall_blue = 1;
 static tSettingItem<REAL>
 rwr("RIM_WALL_RED",rim_wall_red),
 rwg("RIM_WALL_GREEN",rim_wall_green),
@@ -427,10 +427,9 @@ void gWallRim::RenderReal(const eCamera *cam){
             
             REAL intensity = .3 * xs/(xs+ys+1E-30);
             
-            // The 0-1 float makes up only 70% of the color, thus we need to divide by 1.43, as 1 / 1.43 = 0.699
-            REAL rwr = (rim_wall_red / 1.43) + intensity;
-            REAL rwg = (rim_wall_green / 1.43) + intensity;
-            REAL rwb = (rim_wall_blue / 1.43) + intensity;
+            REAL rwr = (rim_wall_red * .7) + intensity;
+            REAL rwg = (rim_wall_green * .7) + intensity;
+            REAL rwb = (rim_wall_blue * .7) + intensity;
             
             RenderEnd( true );
             Color(rwr, rwg, rwb);
