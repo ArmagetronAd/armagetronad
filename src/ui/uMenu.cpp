@@ -846,8 +846,8 @@ bool uMenuItemString::Event(SDL_Event &e){
     bool ret=true;
     SDL_keysym &c=e.key.keysym;
     SDLMod mod = c.mod;
-    bool moveWordLeft, moveWordRight, deleteWordLeft, deleteWordRight, moveBeginning, moveEnd, killForwards;
-    moveWordLeft = moveWordRight = deleteWordLeft = deleteWordRight = moveBeginning = moveEnd = killForwards = false;
+    bool moveWordLeft, moveWordRight, deleteWordLeft, deleteWordRight, moveBeginning, moveEnd, killForwards, pasteText;
+    moveWordLeft = moveWordRight = deleteWordLeft = deleteWordRight = moveBeginning = moveEnd = killForwards = pasteText = false;
 
 #if defined (MACOSX)
     // For moving over/deleting words
@@ -909,6 +909,9 @@ bool uMenuItemString::Event(SDL_Event &e){
         else if (c.sym == SDLK_k) {
             killForwards = true;
         }
+        else if (c.sym == SDLK_v) {
+            pasteText = true;
+        }
     }
     // moveWordLeft = moveWordRight = deleteWordLeft = deleteWordRight = moveBeginning = moveEnd = killForwards
 
@@ -932,6 +935,26 @@ bool uMenuItemString::Event(SDL_Event &e){
     }
     else if (killForwards) {
         content->RemoveSubStr(cursorPos,content->Len()-1-cursorPos);
+    }
+    else if (pasteText) {
+        if (OpenClipboard(0))
+        {
+            HANDLE hClipboardData = GetClipboardData(CF_TEXT);
+            char *pchData = (char*)GlobalLock(hClipboardData);
+            tString cData(pchData);
+
+            tString oContent(*content);
+            tString aContent = oContent.SubStr(0, cursorPos);
+            tString bContent = oContent.SubStr(cursorPos);
+
+            tString nContent = aContent + cData + bContent;
+
+            *content = nContent;
+            cursorPos += cData.Len()-1;
+
+            GlobalUnlock(hClipboardData);
+            CloseClipboard();
+        }
     }
     else if (c.sym == SDLK_LEFT) {
         if (cursorPos > 0) {
@@ -999,8 +1022,8 @@ bool uMenuItemColorLine::Event(SDL_Event &e){
     bool ret=true;
     SDL_keysym &c=e.key.keysym;
     SDLMod mod = c.mod;
-    bool moveWordLeft, moveWordRight, deleteWordLeft, deleteWordRight, moveBeginning, moveEnd, killForwards;
-    moveWordLeft = moveWordRight = deleteWordLeft = deleteWordRight = moveBeginning = moveEnd = killForwards = false;
+    bool moveWordLeft, moveWordRight, deleteWordLeft, deleteWordRight, moveBeginning, moveEnd, killForwards, pasteText;
+    moveWordLeft = moveWordRight = deleteWordLeft = deleteWordRight = moveBeginning = moveEnd = killForwards = pasteText = false;
 
 #if defined (MACOSX)
     // For moving over/deleting words
@@ -1062,6 +1085,9 @@ bool uMenuItemColorLine::Event(SDL_Event &e){
         else if (c.sym == SDLK_k) {
             killForwards = true;
         }
+        else if (c.sym == SDLK_v) {
+            pasteText = true;
+        }
     }
     // moveWordLeft = moveWordRight = deleteWordLeft = deleteWordRight = moveBeginning = moveEnd = killForwards
 
@@ -1085,6 +1111,26 @@ bool uMenuItemColorLine::Event(SDL_Event &e){
     }
     else if (killForwards) {
         content->RemoveSubStr(cursorPos,content->Len()-1-cursorPos);
+    }
+    else if (pasteText) {
+        if (OpenClipboard(0))
+        {
+            HANDLE hClipboardData = GetClipboardData(CF_TEXT);
+            char *pchData = (char*)GlobalLock(hClipboardData);
+            tString cData(pchData);
+
+            tString oContent(*content);
+            tString aContent = oContent.SubStr(0, cursorPos);
+            tString bContent = oContent.SubStr(cursorPos);
+
+            tString nContent = aContent + cData + bContent;
+
+            *content = nContent;
+            cursorPos += cData.Len()-1;
+
+            GlobalUnlock(hClipboardData);
+            CloseClipboard();
+        }
     }
     else if (c.sym == SDLK_LEFT) {
         if (cursorPos > 0) {
