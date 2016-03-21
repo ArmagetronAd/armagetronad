@@ -909,9 +909,11 @@ bool uMenuItemString::Event(SDL_Event &e){
         else if (c.sym == SDLK_k) {
             killForwards = true;
         }
+#ifdef WIN32
         else if (c.sym == SDLK_v) {
             pasteText = true;
         }
+#endif
     }
     // moveWordLeft = moveWordRight = deleteWordLeft = deleteWordRight = moveBeginning = moveEnd = killForwards
 
@@ -936,6 +938,7 @@ bool uMenuItemString::Event(SDL_Event &e){
     else if (killForwards) {
         content->RemoveSubStr(cursorPos,content->Len()-1-cursorPos);
     }
+#ifdef WIN32
     else if (pasteText) {
         if (OpenClipboard(0))
         {
@@ -956,6 +959,7 @@ bool uMenuItemString::Event(SDL_Event &e){
             CloseClipboard();
         }
     }
+#endif
     else if (c.sym == SDLK_LEFT) {
         if (cursorPos > 0) {
             cursorPos--;
@@ -1085,9 +1089,11 @@ bool uMenuItemColorLine::Event(SDL_Event &e){
         else if (c.sym == SDLK_k) {
             killForwards = true;
         }
+#ifdef WIN32
         else if (c.sym == SDLK_v) {
             pasteText = true;
         }
+#endif
     }
     // moveWordLeft = moveWordRight = deleteWordLeft = deleteWordRight = moveBeginning = moveEnd = killForwards
 
@@ -1112,6 +1118,7 @@ bool uMenuItemColorLine::Event(SDL_Event &e){
     else if (killForwards) {
         content->RemoveSubStr(cursorPos,content->Len()-1-cursorPos);
     }
+#ifdef WIN32
     else if (pasteText) {
         if (OpenClipboard(0))
         {
@@ -1132,6 +1139,7 @@ bool uMenuItemColorLine::Event(SDL_Event &e){
             CloseClipboard();
         }
     }
+#endif
     else if (c.sym == SDLK_LEFT) {
         if (cursorPos > 0) {
             cursorPos--;
