@@ -3228,6 +3228,183 @@ static void se_ChatTeam( ePlayerNetID * p, std::istream & s, eChatSpamTester & s
     se_ChatTeam( p, msg, spam );
 }
 
+static void se_ChatReport( ePlayerNetID * p, std::istream & s )
+{
+    tString msg;
+    tOutput reportPlayer;
+    msg.ReadLine(s);
+
+    if (msg != "")
+    {
+        tString reporMsg;
+        reporMsg << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S]");
+        reporMsg << " ";
+        reporMsg << p->GetMachine().GetIP();
+        reporMsg << " ";
+        reporMsg << p->GetUserName();
+        reporMsg << " ";
+        reporMsg << msg;
+        reporMsg << "\n";
+
+        std::ofstream o;
+        if (tDirectories::Var().Open(o, "reports.txt", std::ios::app))
+        {
+            o << reporMsg;
+            reportPlayer << "$chat_message_report_respond_ok";
+            reportPlayer << msg << "\n";
+        }
+        else
+        {
+            reportPlayer << "$chat_message_report_respond_no";
+        }
+        o.close();
+    }
+    else
+    {
+        reportPlayer << "$chat_message_report_message_empty";
+    }
+    sn_ConsoleOut(reportPlayer, p->Owner());
+}
+
+static int se_ReportsCount()
+{
+    int count = 0;
+
+    std::ifstream i;
+    if (tDirectories::Var().Open(i, "reports.txt"))
+    {
+        while (!i.eof())
+        {
+            std::string sayLine;
+            std::getline(i, sayLine);
+            std::istringstream s(sayLine);
+
+            tString params;
+            params.ReadLine(s);
+
+            if (params != "")
+                count++;
+        }
+    }
+    i.close();
+
+    return count;
+}
+
+static tArray<tString> se_ReportsMessages()
+{
+    tArray<tString> reports;
+
+    std::ifstream i;
+    if (tDirectories::Var().Open(i, "reports.txt"))
+    {
+        while (!i.eof())
+        {
+            std::string sayLine;
+            std::getline(i, sayLine);
+            std::istringstream s(sayLine);
+
+            tString params;
+            params.ReadLine(s);
+            int pos = 0;
+
+            if (params != "")
+                reports.Insert(params);
+        }
+    }
+    i.close();
+
+    return reports;
+}
+
+tAccessLevel se_AccessLevelReportsRead = tAccessLevel_Default;
+static tSettingItem<tAccessLevel> se_AccessLevelReportsReadConf("ACCESS_LEVEL_REPORTS_READ", se_AccessLevelReportsRead);
+
+tAccessLevel se_AccessLevelReportsClear = tAccessLevel_Admin;
+static tSettingItem<tAccessLevel> se_AccessLevelReportsClearConf("ACCESS_LEVEL_REPORTS_CLEAR", se_AccessLevelReportsClear);
+
+static void se_ChatReadReport( ePlayerNetID * p, std::istream & s )
+{
+    tString type;
+    s >> type;
+
+    if ((type == "") || (type.ToLower() == "list"))
+    {
+        tOutput msg;
+        msg.SetTemplateParameter(1, se_ReportsCount());
+        msg << "$read_reports_count";
+        sn_ConsoleOut(msg, p->Owner());
+    }
+    else if (type.ToLower() == "read")
+    {
+        if (p->GetAccessLevel() > se_AccessLevelReportsRead)
+        {
+            sn_ConsoleOut(tOutput("$read_reports_access_no_read"), p->Owner());
+            return;
+        }
+
+        tString lineNoStr;
+        s >> lineNoStr;
+        if (lineNoStr == "")
+        {
+            sn_ConsoleOut(tOutput("$chat_message_report_read_usage"), p->Owner());
+            return;
+        }
+
+        int lineNo = atoi(lineNoStr);
+        int index  = lineNo - 1;
+
+        tArray<tString> report_messages = se_ReportsMessages();
+
+        if ((index < 0) || (index >= report_messages.Len()))
+        {
+            sn_ConsoleOut(tOutput("$chat_message_report_read_none", lineNo), p->Owner());
+            return;
+        }
+
+        tString msg = report_messages[index];
+        int pos = 0;
+        int lnum = 0;
+        tArray<tString> reportSplit;
+       
+        while(lnum++ <= 3)
+        {
+            if(lnum > 1)pos = msg.StrPos(pos," ")+1;
+            tString str = msg.SubStr(pos);
+            int stringLen=str.StrPos(" ");str.RemoveSubStr(stringLen,str.length()-stringLen);
+            reportSplit.Insert(str);
+            std::cout << str << "|" << pos << "/" << str.StrPos(" ") << "/" << str.length() << "\n";
+        }
+       
+
+        tString pMsg;
+        pMsg << "Report " << lineNo << " by " << reportSplit[2];
+        if(p->GetAccessLevel() <= se_ipAccessLevel)
+        {
+            pMsg << "@" << reportSplit[1];
+        }
+        pMsg << " at " << reportSplit[0] << ": " << msg.SubStr(pos) << "\n";
+        sn_ConsoleOut(pMsg, p->Owner());
+    }
+    else if (type.ToLower() == "clear")
+    {
+        if (p->GetAccessLevel() > se_AccessLevelReportsClear)
+        {
+            sn_ConsoleOut(tOutput("$read_reports_access_no_clear"), p->Owner());
+            return;
+        }
+
+        std::ofstream o;
+        if (tDirectories::Var().Open(o, "reports.txt"))
+        {
+            o << "\n";
+        }
+        o.close();
+
+        sn_ConsoleOut(tOutput("$read_reports_cleared"), p->Owner());
+    }
+}
+
 // /msg chat commant: talk to anyone team
 static void se_ChatMsg( ePlayerNetID * p, std::istream & s, eChatSpamTester & spam )
 {
@@ -3963,6 +4140,23 @@ void se_ChatHandlerServer( unsigned short id, tColoredString const & say, nMessa
                     {
                         spam.lastSaidType_ = eChatMessageType_Team;
                         se_ChatTeam( p, s, spam );
+                        return;
+                    }
+                    else if (command == "/report")
+                    {
+                        spam.factor_ = 1;
+                        if ( spam.Block() )
+                        {
+                            return;
+                        }
+                        spam.lastSaidType_ = eChatMessageType_Public;
+                        se_ChatReport( p, s );
+                        return;
+                    }
+                    else if (command == "/reports")
+                    {
+                        spam.lastSaidType_ = eChatMessageType_Public;
+                        se_ChatReadReport( p, s );
                         return;
                     }
                     else if (command == "/shout")

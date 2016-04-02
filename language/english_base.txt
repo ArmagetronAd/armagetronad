@@ -3547,6 +3547,16 @@ intercept_unknown_commands_help If 1, accept and log all unknown chat commands.
 chat_command_unknown        Unknown chat command "\1".\n
 chat_command_accesslevel    Sorry, your access level is not high enough to use the "\1" command. You're \2, required would be \3.\n
 
+read_reports_count                 There are \1 reports.\n
+read_reports_access_no_clear       You do not have access to clear the reports.\n
+read_reports_cleared               The reports have successfully been cleared.\n
+read_reports_access_no_read        You do not have access to read the reports.\n
+chat_message_report_message_empty  Your report cannot be empty.\n
+chat_message_report_respond_ok     Your report has been saved.\n
+chat_message_report_respond_no     Your report was not saved. Please report this issue.\n
+chat_message_report_read_usage     /reports read <line number>\n
+chat_message_report_read_none      Report \1 does not exist.\n
+
 authority_blacklist_help    Comma separated list of authorities your server should refuse to query.
 authority_whitelist_help    If non-empty, only authorities on this comma separated list will be queried by your server.
 trust_lan_help              If set to 1, the server assumes that your LAN is safe and that nobody can run a pharming server on it.
