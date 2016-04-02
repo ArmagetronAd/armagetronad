@@ -70,6 +70,7 @@ hoop
 brandesign (Jip on the forums)
     Server browser name filter
     GID mate filter
+    Tab completion for colored names
 
 Jonathan
     Headlight (needs activation) and overhead map
@@ -109,6 +110,9 @@ Vitty
 
 Word
     0.4 German translation
+
+aP|Nelg
+    /report player reporting
 
 External code merged in from
 ============================

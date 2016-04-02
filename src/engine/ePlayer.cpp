@@ -161,6 +161,9 @@ static tSettingItem< bool > se_allowTeamChangesConf( "ALLOW_TEAM_CHANGE", se_all
 static bool se_enableChat = true;    //flag indicating whether chat should be allowed at all (logged in players can always chat)
 static tSettingItem< bool > se_enaChat("ENABLE_CHAT", se_enableChat);
 
+static bool se_autoCompleteWithColor = false;
+static tSettingItem< bool > se_autoComplColor("AUTO_COMPLETE_WITH_COLOR", se_autoCompleteWithColor);
+
 static tString se_hiddenPlayerPrefix ("0xaaaaaa");
 static tConfItemLine se_hiddenPlayerPrefixConf( "PLAYER_LIST_HIDDEN_PLAYER_PREFIX", se_hiddenPlayerPrefix );
 
@@ -4457,7 +4460,9 @@ static char const * const se_simplifiedCommands[] = {
     "/promote ",
     "/demote ",
     "/vote kick ",
-    "/vote suspend "
+    "/vote suspend ",
+    "/vote referee ",
+    "/players "
 };
 
 //! Completer with the addition that it adds a : to a fully completed name if it's at the beginning of the line
@@ -4468,8 +4473,12 @@ public:
     eAutoCompleterChat(std::deque<tString> &words):uAutoCompleter(words) {};
     int DoFullCompletion(tString &string, int pos, int len, tString &match) {
         tString actualString;
+        tString resetColor;
+        
+        resetColor = se_autoCompleteWithColor ? "0xffff7f" : "";
+        
         if(pos - len == 0 || ( pos - len == 6 && string.StartsWith("/team ") ) ) {
-            actualString = match + ": ";
+            actualString = match + resetColor + ": ";
         } else if(string.StartsWith("/admin ") || string.StartsWith("/vote shuffle ")) {
             actualString = Simplify(match) + " ";
         } else {
@@ -4481,7 +4490,7 @@ public:
                 }
             }
             if(i < 0) {
-                actualString = match + " ";
+                actualString = match + resetColor + " ";
             }
         }
         return DoCompletion(string, pos, len, actualString);
@@ -4611,7 +4620,7 @@ static void do_chat(){
         unsigned short int max=se_PlayerNetIDs.Len();
         for(unsigned short int i=0;i<max;i++){
             ePlayerNetID *p=se_PlayerNetIDs(i);
-            players.push_back(p->GetName());
+            players.push_back(se_autoCompleteWithColor ? p->GetColoredName() : p->GetName());
         }
         eAutoCompleterChat completer(players);
 
