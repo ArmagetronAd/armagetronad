@@ -3309,7 +3309,6 @@ static tArray<tString> se_ReportsMessages()
 
             tString params;
             params.ReadLine(s);
-            int pos = 0;
 
             if (params != "")
                 reports.Insert(params);
