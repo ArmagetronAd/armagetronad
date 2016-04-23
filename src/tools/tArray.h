@@ -56,7 +56,7 @@ public:
         return this->size();
     }
 
-    void SetLen(int i){
+    void SetLen(size_t i){
         while(i > this->size())
             this->push_back(T());
         while(i < this->size())
