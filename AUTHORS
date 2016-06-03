@@ -111,8 +111,11 @@ Vitty
 Word
     0.4 German translation
 
-aP|Nelg
+Vertex
     /report player reporting
+
+tux|ubuntu_dpg
+    POSIX Thread improvements
 
 External code merged in from
 ============================
