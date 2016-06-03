@@ -515,7 +515,13 @@ if test $CODELEVEL -ge 1; then
     dnl careful, only supported on GCC 4.2 and later
     AX_CXXFLAGS_GCC_OPTION(-Wno-strict-overflow)
 
-    AX_CXXFLAGS_GCC_OPTION(-Wno-mismatched-tags)
+    if test $DEBUGLEVEL -lt 1; then
+        dnl false positive warnings for this on boost
+        AX_CXXFLAGS_GCC_OPTION(-Wno-error=maybe-uninitialized)
+    fi
+    
+    dnl dropped out of support
+    dnl AX_CXXFLAGS_GCC_OPTION(-Wno-mismatched-tags)
 fi
 
 dnl test $CODELEVEL -ge 2 && CXXFLAGS="$CXXFLAGS -Wshadow -Wpointer-arith -Wfloat-equal -W -Wcast-qual -Wcast-align -Wconversion -Wunreachable-code --pedantic -Winline"
