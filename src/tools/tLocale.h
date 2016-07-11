@@ -92,7 +92,7 @@ public:
     void AddLiteral(const char *);       // adds a language independent string
     void AddLocale(const char *);        // adds a language dependant string
     void AddSpace();                     // adds a simple space
-    tOutput & AddString(char const * pString); // checks the string, delegates to correct Add...()-Function
+    void AddString(char const * pString); // checks the string, delegates to correct Add...()-Function
 
     // set a template parameter at this position of the output string
     tOutput & SetTemplateParameter(int num, const char *parameter);
