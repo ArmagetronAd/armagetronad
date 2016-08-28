@@ -6,7 +6,6 @@ NoDisplay=true
 Comment=3d light cycle game
 Icon=armagetronad-@prognamebase@
 Terminal=false
-Path=@prefix@/bin
 Categories=Game;ActionGame;
 StartupNotify=false
 MimeType=x-scheme-handler/armagetronad;

@@ -6,7 +6,6 @@ Comment=3d light cycle game
 Comment[de]=dreidimensionales Lichtradspiel
 Icon=armagetronad-@prognamebase@
 Terminal=@build_dedicated@
-Path=@prefix@/bin
 Categories=Game;ActionGame;
 StartupNotify=@build_dedicated@
 MimeType=application/x-armagetronad;
