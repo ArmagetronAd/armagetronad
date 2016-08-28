@@ -551,6 +551,8 @@ voting_decay_help					One non-voter is ignored every time this many seconds pass
 voting_bias_help					Add virtual voters that oppose every change.
 voting_bias_kick_help				Add virtual voters that oppose every kick vote.
 voting_bias_suspend_help			Add virtual voters that oppose every suspend vote.
+voting_bias_silence_help			Add virtual voters that oppose every silence vote.
+voting_bias_voice_help			Add virtual voters that oppose every voice vote.
 voting_bias_include_help			Add virtual voters that oppose every include vote.
 voting_bias_command_help			Add virtual voters that oppose every command vote.
 
@@ -2039,6 +2041,12 @@ referee_player_text                 Make \1 referee
 demotereferee_player_details_text   If accepted, \1 won't be referee anymore: He will not be able to administrate teams.
 demotereferee_player_text           Demote \1 as referee
 
+silence_player_details_text			If accepted, \1 will be silenced.
+silence_player_text					Silenced \1
+
+voice_player_details_text			If accepted, \1 will be unsilenced.
+voice_player_text					Voice \1
+
 vote_include_details_text			If accepted, the file \1 will be included as a configuration file.
 vote_include_text					Include \1
 vote_include_error					Include file \1 not found or not readable.\n
@@ -3508,6 +3516,7 @@ access_level_play_sliders_help The access level required to play will only slide
 access_level_play_changed      Access level required to play changed from \1 to \2.\n
 
 access_level_vote_suspend_help    Minimal access level required to issue suspend votes.
+access_level_vote_silence_help    Minimal access level required to issue silence and voice votes.
 access_level_vote_kick_help    Minimal access level required to issue kick votes.
 access_level_vote_include_help    Minimal access level required to issue include votes.
 access_level_vote_include_execute_help    Minimal access level successful include votes will be executed at.

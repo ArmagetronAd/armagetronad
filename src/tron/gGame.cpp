@@ -3397,7 +3397,7 @@ void sg_RespawnAllAfter( REAL after, REAL time, eGrid *grid, gArena & arena, boo
     {
         ePlayerNetID *p = se_PlayerNetIDs(i);
 
-        if ( !p->CurrentTeam() )
+        if ( !p->CanRespawn() )
             continue;
 
         eGameObject *e=p->Object();
@@ -3522,8 +3522,8 @@ void gGame::Timestep(REAL time,bool cam){
 #endif
 
 #ifdef RESPAWN_HACK
-    // no respawining while deathzone is active.
-    if( !winDeathZone_ )
+    // Only respawn when the round is in play mode and while the deathzone is not active.
+    if( state == GS_PLAY && time > 0 && winner == 0 && !winDeathZone_ )
     {
         sg_RespawnAllAfter(0.5, time, grid, Arena);
     }

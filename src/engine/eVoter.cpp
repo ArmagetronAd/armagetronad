@@ -96,6 +96,14 @@ static tSettingItem< int > se_vb( "VOTING_BIAS", se_votingBias );
 static int se_votingBiasKick = 0;
 static tSettingItem< int > se_vbKick( "VOTING_BIAS_KICK", se_votingBiasKick );
 
+// the number set here always acts as additional votes against a silence vote.
+static int se_votingBiasSilence = 0;
+static tSettingItem< int > se_vbSilence( "VOTING_BIAS_SILENCE", se_votingBiasSilence );
+
+// the number set here always acts as additional votes against a voice vote.
+static int se_votingBiasVoice = 0;
+static tSettingItem< int > se_vbVoice( "VOTING_BIAS_VOICE", se_votingBiasVoice );
+
 // the number set here always acts as additional votes against a suspend vote.
 static int se_votingBiasSuspend = 0;
 static tSettingItem< int > se_vbSuspend( "VOTING_BIAS_SUSPEND", se_votingBiasSuspend );
@@ -149,6 +157,11 @@ static tSettingItem< int > se_votingMaturitySI( "VOTING_MATURITY", se_votingMatu
 static tAccessLevel se_accessLevelVoteKick = tAccessLevel_Program;
 static tSettingItem< tAccessLevel > se_accessLevelVoteKickSI( "ACCESS_LEVEL_VOTE_KICK", se_accessLevelVoteKick );
 static tAccessLevelSetter se_accessLevelVoteKickSILevel( se_accessLevelVoteKickSI, tAccessLevel_Owner );
+
+// minimal access level for silence and voice votes
+static tAccessLevel se_accessLevelVoteSilence = tAccessLevel_Program;
+static tSettingItem< tAccessLevel > se_accessLevelVoteSilenceSI( "ACCESS_LEVEL_VOTE_SILENCE", se_accessLevelVoteSilence );
+static tAccessLevelSetter se_accessLevelVoteSilenceSILevel( se_accessLevelVoteSilenceSI, tAccessLevel_Owner );
 
 // minimal access level for suspend votes
 static tAccessLevel se_accessLevelVoteSuspend = tAccessLevel_Program;
@@ -1134,7 +1147,7 @@ protected:
         return m;
     }
 
-    virtual bool DoCheckValid( int senderID )
+    bool CheckValidNoHarm(int senderID)
     {
         // always accept votes from server
         if ( sn_GetNetState() == nCLIENT && senderID == 0 )
@@ -1177,6 +1190,16 @@ protected:
         // prevent the sender from changing his name for confusion
         if ( sender )
             sender->lastNameChangePreventor_ = time;
+
+        return true;
+    }
+
+    virtual bool DoCheckValid( int senderID )
+    {
+        if(!CheckValidNoHarm(senderID))
+            return false;
+
+        double time = tSysTimeFloat();
 
         // check if player is protected from kicking
         if ( player_ && sn_GetNetState() != nCLIENT )
@@ -1460,6 +1483,92 @@ protected:
         if ( player )
         {
             player->Suspend( se_suspendRounds );
+        }
+    }
+};
+
+//  vote on silencing
+class eVoteItemSilence: public virtual eVoteItemHarmServerControlled
+{
+public:
+    // constructors/destructor
+    eVoteItemSilence( ePlayerNetID* player)
+        : eVoteItemHarm( player )
+        {}
+
+    ~eVoteItemSilence()
+    {}
+protected:
+    // get the language string prefix
+    virtual char const * DoGetPrefix() const{ return "silence"; }
+
+#ifdef KRAWALL_SERVER
+    // access level required for this kind of vote
+    virtual tAccessLevel DoGetAccessLevel() const
+    {
+        return se_accessLevelVoteSilence;
+    }
+#endif
+
+    // return vote-specific extra bias
+    virtual int DoGetExtraBias() const
+    {
+        return se_votingBiasSilence;
+    }
+
+    virtual void DoExecuteHarm()						// called when the voting was successful
+    {
+        ePlayerNetID * player = GetPlayer();
+        if ( player )
+        {
+            player->SetSilenced(true);
+        }
+    }
+};
+
+//  vote on giving players their voice back (not really harmful, but it's a convenient base class)
+class eVoteItemVoice: public virtual eVoteItemHarmServerControlled
+{
+public:
+    // constructors/destructor
+    eVoteItemVoice( ePlayerNetID* player )
+        : eVoteItemHarm( player )
+        {}
+
+    ~eVoteItemVoice()
+    {}
+protected:
+    // get the language string prefix
+    virtual char const * DoGetPrefix() const{ return "voice"; }
+
+#ifdef KRAWALL_SERVER
+    // access level required for this kind of vote
+    virtual tAccessLevel DoGetAccessLevel() const
+    {
+        return se_accessLevelVoteSilence;
+    }
+#endif
+
+    // return vote-specific extra bias
+    virtual int DoGetExtraBias() const
+    {
+        return se_votingBiasVoice;
+    }
+
+    virtual bool DoCheckValid( int senderID )
+    {
+        if(!CheckValidNoHarm(senderID))
+            return false;
+
+        return eVoteItem::DoCheckValid( senderID );
+    }
+
+    virtual void DoExecuteHarm()						// called when the voting was successful
+    {
+        ePlayerNetID * player = GetPlayer();
+        if ( player )
+        {
+            player->SetSilenced(false);
         }
     }
 };
@@ -2390,6 +2499,28 @@ void eVoter::HandleChat( ePlayerNetID * p, std::istream & message ) //!< handles
         }
     }
 #ifdef DEDICATED
+    else if ( command == "silence" )
+    {
+        tString name;
+        name.ReadLine( message );
+        ePlayerNetID * toSilence = ePlayerNetID::FindPlayerByName( name, p );
+        if ( toSilence )
+        {
+            // accept message
+            item = tNEW( eVoteItemSilence )( toSilence );
+        }
+    }
+    else if ( command == "voice" )
+    {
+        tString name;
+        name.ReadLine( message );
+        ePlayerNetID * toVoice = ePlayerNetID::FindPlayerByName( name, p );
+        if ( toVoice )
+        {
+            // accept message
+            item = tNEW( eVoteItemVoice )( toVoice );
+        }
+    }
 #ifdef KRAWALL_SERVER
     else if ( command == "include" )
     {
@@ -2441,10 +2572,14 @@ void eVoter::HandleChat( ePlayerNetID * p, std::istream & message ) //!< handles
 #endif
     else
     {
-#if defined(DEDICATED) && defined(KRAWALL_SERVER)
-        sn_ConsoleOut( tOutput("$vote_unknown_command", command, "command, demotereferee, include, kick, referee, suspend, scramble" ), p->Owner() );
+#if defined(DEDICATED)
+#if defined(KRAWALL_SERVER)
+        sn_ConsoleOut( tOutput("$vote_unknown_command", command, "suspend, kick, silence, voice, command, include, referee, demotereferee, scramble" ), p->Owner() );
 #else
-        sn_ConsoleOut( tOutput("$vote_unknown_command", command, "kick, suspend" ), p->Owner() );
+        sn_ConsoleOut( tOutput("$vote_unknown_command", command, "suspend, kick, silence, voice" ), p->Owner() );
+#endif
+#else
+        sn_ConsoleOut( tOutput("$vote_unknown_command", command, "suspend, kick" ), p->Owner() );
 #endif
     }
 

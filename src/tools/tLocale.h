@@ -107,7 +107,7 @@ class tOutput{
 
     tOutputItemBase *anchor;
 
-    tOutput& operator << (const tOutput &o);
+    // tOutput& operator << (const tOutput &o);
 public:
     tOutput();
     ~tOutput();
@@ -117,6 +117,7 @@ public:
     void AddLiteral(const char *);       // adds a language independent string
     void AddLocale(const char *);        // adds a language dependant string
     void AddSpace();                     // adds a simple space
+    void AddString(char const * pString); // checks the string, delegates to correct Add...()-Function
 
     // set a template parameter at this position of the output string
     template<typename T> tOutput & SetTemplateParameter(int num, T const& parameter)
@@ -145,7 +146,7 @@ public:
 
         SetTemplateParameter(1, template1);
 
-        *this << identifier;
+        AddString(identifier);
     }
 
     template< class T1, class T2 >
@@ -157,7 +158,7 @@ public:
         SetTemplateParameter(1, template1);
         SetTemplateParameter(2, template2);
 
-        *this << identifier;
+        AddString(identifier);
     }
 
     template< class T1, class T2, class T3 >
@@ -170,7 +171,7 @@ public:
         SetTemplateParameter(2, template2);
         SetTemplateParameter(3, template3);
 
-        *this << identifier;
+        AddString(identifier);
     }
 
     template< class T1, class T2, class T3, class T4 >
@@ -184,7 +185,7 @@ public:
         SetTemplateParameter(3, template3);
         SetTemplateParameter(4, template4);
 
-        *this << identifier;
+        AddString(identifier);
     }
 
     tOutput(const tOutput &o); // copy constructor

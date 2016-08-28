@@ -314,6 +314,11 @@ public:
     virtual bool ActionOnQuit();
     virtual void ActionOnDelete();
 
+    // Check if a player can be respawned. Relaying on team alone is not enough.
+    // If a player enters as spectator, they are still assumed to be on a team.
+    // When a player is suspeded they are also on a team until the end of the round.
+    bool CanRespawn() const { return currentTeam && suspended_ == 0 && ! spectating_; }
+ 
     // chatting
     bool IsChatting() const { return chatting_; }
     void SetChatting ( ChatFlags flag, bool chatting );
@@ -401,7 +406,9 @@ public:
     bool IsActive() const { return !disconnected; }
 
     bool IsSilenced( void ) const { return silenced_; }
-    void SetSilenced( bool silenced ) { silenced_ = silenced; }
+    void SetSilenced( bool silenced ); // { silenced_ = silenced; }
+
+    // only for the menu
     bool& AccessSilenced( void ) { return silenced_; }
 
     bool IsSuspended ( void ) const { return suspended_ > 0; }
@@ -543,7 +550,7 @@ private:
     inline ePlayerNetID & SetColoredName( tColoredString const & coloredName ); //!< Sets this player's name, cleared by the server. Use this for onscreen screen display.
 
     //! accesses the suspension count
-    int & AccessSuspended();
+    // int & AccessSuspended();
 
     //! returns the suspension count
     int GetSuspended() const;
