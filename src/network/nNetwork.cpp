@@ -2844,9 +2844,10 @@ static bool sn_Listen( unsigned int & net_hostport, const tString& net_hostip )
             {
                 con << "sn_SetNetState: Unable to open accept socket on desired port " << net_hostport << ", Trying next ports...\n";
                 reported = true;
-                
-                usleep(100000);
 
+                // just for safety, wait a bit. Does not do much good.
+                tDelay(100000);
+                
                 continue;
             }
 
