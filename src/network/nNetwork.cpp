@@ -2947,10 +2947,8 @@ static bool sn_Listen( unsigned int & net_hostport, const tString& net_hostip )
                 con << "sn_SetNetState: Unable to open accept socket on desired port " << net_hostport << ", Trying next ports...\n";
                 reported = true;
 
-#ifndef WIN32
                 // just for safety, wait a bit. Does not do much good.
-                usleep(100000);
-#endif
+                tDelay(100000);
                 
                 continue;
             }
