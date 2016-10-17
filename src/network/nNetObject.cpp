@@ -581,8 +581,7 @@ void nNetObject::TakeOwnership(){
 }
 
 void nNetObject::Release(){
-    tASSERT( this );
-
+    tASSERT(this);
     if (this){
         if (refCtr_>0)
             refCtr_--;
