@@ -86,7 +86,7 @@ void eNetGameObject::InitAfterCreation(){
 eNetGameObject::eNetGameObject(eGrid *grid, const eCoord &pos,const eCoord &dir,
                                ePlayerNetID* p,bool autodelete)
         :eGameObject(grid, pos,dir,NULL,autodelete),
-nNetObject(p->Owner()),player(p){
+  nNetObject(p ? p->Owner() : ::sn_myNetID),player(p){
     lastClientsideAction=0;
     if (sn_GetNetState()!=nCLIENT)
         RequestSync();
