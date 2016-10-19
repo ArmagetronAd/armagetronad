@@ -37,8 +37,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 namespace Engine{ class TeamSync; }
 class eLadderLogWriter;
 
-tString & operator << ( tString&, const eTeam&);
-std::ostream & operator << ( std::ostream&, const eTeam&);
+tString & operator << ( tString&, const eTeam*);
+std::ostream & operator << ( std::ostream&, const eTeam*);
 
 template<class T> class nConfItem;
 

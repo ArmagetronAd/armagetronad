@@ -62,6 +62,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tRuby.h"
 #include "eWarmup.h"
 #include "eLadderLog.h"
+#include <climits>
 
 #include "ePlayer.pb.h"
 
@@ -1968,9 +1969,9 @@ static tColoredString se_BuildChatString( eTeam const *team, ePlayerNetID const 
         // foo (Red Team) --> Blue Team: some message here
         eTeam *senderTeam = sender->CurrentTeam();
         console << tColoredString::ColorString(1,1,.5) << " (";
-        console << *senderTeam;
+        console << senderTeam;
         console << tColoredString::ColorString(1,1,.5) << ") --> ";
-        console << *team;
+        console << team;
     }
 
     console << tColoredString::ColorString(1,1,.5) << ": ";
@@ -3574,7 +3575,7 @@ static void se_ListInvites( ePlayerNetID *receiver )
         eTeam *team = eTeam::teams[ i ];
         std::vector< const ePlayerNetID * > invites = team->InterestingInvitedPlayers();
         if ( !invites.empty() )
-            out << *team << ": " << invites << '\n';
+            out << team << ": " << invites << '\n';
     }
     sn_ConsoleOut( out, receiver ? receiver->Owner() : 0 );
 }
@@ -4858,7 +4859,7 @@ static void sg_ClampPingCharity()
     sg_ClampPingCharity( ::pingCharity );
 }
 
-static int IMPOSSIBLY_LOW_SCORE=(-1 << 31);
+static int IMPOSSIBLY_LOW_SCORE=INT_MIN;
 
 static nSpamProtectionSettings se_chatSpamSettings( 1.0f, "SPAM_PROTECTION_CHAT", tOutput("$spam_protection") );
 
@@ -7100,12 +7101,12 @@ static tString se_GetScoreTableTeamDescription( const ePlayerNetID *player )
     const ePlayerNetID::eTeamSet & invites = player->GetInvitations();
     if ( player->CurrentTeam() )
     {
-        out << *player->CurrentTeam();
+        out << player->CurrentTeam();
     }
     else if ( !invites.empty() )
     {
         tString invitedTeam;
-        invitedTeam << **invites.begin();
+        invitedTeam << *invites.begin();
         if ( invites.size() > 1 )
             invitedTeam << ", ...";
         out << tOutput( "$player_scoretable_can_join", invitedTeam );

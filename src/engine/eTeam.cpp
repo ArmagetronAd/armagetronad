@@ -33,24 +33,25 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "eLadderLog.h"
 
 #include <set>
+#include <climits>
 
 #include "nProtoBuf.h"
 #include "eTeam.pb.h"
 #include "aa_config.h"
 
-tString & operator << ( tString &s, const eTeam & team)
+tString & operator << ( tString &s, const eTeam * team)
 {
-    if ( !(&team) )
+    if ( !team )
         return s << tOutput("$player_spectator_message");
     else
-        return s << team.GetColoredName();
+        return s << team->GetColoredName();
 }
-std::ostream & operator << ( std::ostream &s, const eTeam & team)
+std::ostream & operator << ( std::ostream &s, const eTeam * team)
 {
-    if ( !(&team) )
+    if ( !team )
         return s << tOutput("$player_spectator_message");
     else
-        return s << team.GetColoredName();
+        return s << team->GetColoredName();
 }
 
 #define TEAMCOLORS 8
@@ -81,7 +82,7 @@ static tString se_team_name[TEAMCOLORS]=
 // static tList<eTeam> se_ColoredTeams;
 static eTeam * se_ColoredTeams[TEAMCOLORS]={0,0,0,0,0,0,0,0};
 
-static int IMPOSSIBLY_LOW_SCORE=(-1 << 31);
+static int IMPOSSIBLY_LOW_SCORE=INT_MIN;
 
 // class that creates config items for one team
 // TEAM_(NAME|RED|GREEN|BLUE)_X

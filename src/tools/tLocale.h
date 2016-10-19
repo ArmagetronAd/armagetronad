@@ -278,7 +278,7 @@ tString& operator<< (tString& s, const std::vector<T>& arr)
             else
                 s << tOutput("$separator");
         }
-        s << *(arr[i]);
+        s << arr[i];
     }
     return s;
 }
