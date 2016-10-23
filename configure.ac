@@ -147,7 +147,7 @@ AC_SUBST(build_regular)
 
 AC_ARG_ENABLE(memmanager,
 	AC_HELP_STRING([--enable-memmanager],
-		[enable custom memory manager on systems that allow it (default=disabled)]),,
+		[enable custom memory manager on systems that allow it [BROKEN] (default=disabled)]),,
 enable_memmanager=no)
 
 AC_ARG_ENABLE(music,
@@ -299,7 +299,7 @@ test -z "`echo $CXXFLAGS | grep "\-O"`" && CXXFLAGS="$CXXFLAGS -O2"
 
 test $DEBUGLEVEL -ge 1 && CXXFLAGS="`echo $CXXFLAGS | sed -e 's,-O.,,'` -g -O0"
 test $DEBUGLEVEL -ge 2 && CXXFLAGS="$CXXFLAGS -DDEBUG"
-test $DEBUGLEVEL -ge 3 && enable_memmanager=yes
+dnl test $DEBUGLEVEL -ge 3 && enable_memmanager=yes
 test $DEBUGLEVEL -ge 4 && CXXFLAGS="$CXXFLAGS -DDEBUG_EXPENSIVE"
 test $DEBUGLEVEL -ge 5 && CXXFLAGS="$CXXFLAGS -DMEM_DEB"
 
