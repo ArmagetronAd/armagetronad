@@ -237,7 +237,7 @@ void eNetGameObject::ReceiveControl(REAL time,uActionPlayer *Act,REAL x){
 
 void eNetGameObject::WriteCreate(nMessage &m){
     nNetObject::WriteCreate(m);
-    m.Write(player->ID());
+    m.Write(ID(player));
     m.Write(autodelete);
 }
 
