@@ -56,6 +56,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "nConfig.h"
 #include "nNetwork.h"
 #include <time.h>
+#include <climits>
 
 int se_lastSaidMaxEntries = 8;
 
@@ -1689,9 +1690,9 @@ static tColoredString se_BuildChatString( eTeam const *team, ePlayerNetID const 
         // foo (Red Team) --> Blue Team: some message here
         eTeam *senderTeam = sender->CurrentTeam();
         console << tColoredString::ColorString(1,1,.5) << " (";
-        console << *senderTeam;
+        console << senderTeam;
         console << tColoredString::ColorString(1,1,.5) << ") --> ";
-        console << *team;
+        console << team;
     }
 
     console << tColoredString::ColorString(1,1,.5) << ": ";
@@ -1923,7 +1924,7 @@ void se_SendTeamMessage( eTeam const * team, ePlayerNetID const * sender ,ePlaye
         else {
             eTeam *senderTeam = sender->CurrentTeam();
             say << tColoredString::ColorString(1,1,.5) << " (";
-            say << *team;
+            say << team;
             say << tColoredString::ColorString(1,1,.5) << " ) --> ";
             say << senderTeam;
         }
@@ -3941,7 +3942,7 @@ static void sg_ClampPingCharity()
     sg_ClampPingCharity( ::pingCharity );
 }
 
-static int IMPOSSIBLY_LOW_SCORE=(-1 << 31);
+static int IMPOSSIBLY_LOW_SCORE=INT_MIN;
 
 static nSpamProtectionSettings se_chatSpamSettings( 1.0f, "SPAM_PROTECTION_CHAT", tOutput("$spam_protection") );
 

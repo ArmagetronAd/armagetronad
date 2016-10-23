@@ -731,6 +731,13 @@ tOutput& operator << (tOutput &o, char *locale)
 
 // and a special implementation for the locales and strings:
 tOutput& operator << (tOutput &o, const char *locale){
+    return o.AddString(locale);
+}
+
+tOutput & tOutput::AddString(char const * locale)
+{
+    tOutput & o = *this;
+
     int len = strlen(locale);
     if (len == 0)
         return o;
