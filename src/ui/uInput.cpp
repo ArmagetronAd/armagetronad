@@ -533,7 +533,8 @@ static void s_InputConfigGeneric(int ePlayer, uAction *&actions,const tOutput &t
 
     uMenu input_menu(title);
 
-    actions->tListItemBase::Sort(&Input_Compare);
+    if(actions)
+        actions->tListItemBase::Sort(&Input_Compare);
 
     int len = actions->Len();
 
