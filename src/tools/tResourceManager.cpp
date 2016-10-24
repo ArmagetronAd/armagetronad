@@ -44,7 +44,7 @@ static int myHTTPFetch(const char *URI, const char *filename, const char *savepa
     }
 
     fd = fopen(savepath, "w");
-    if (fd < 0) {
+    if (fd == NULL) {
         xmlNanoHTTPClose(ctxt);
         con << tOutput( "$resource_no_write", savepath );
         return 3;
