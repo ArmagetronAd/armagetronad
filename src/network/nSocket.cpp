@@ -834,6 +834,7 @@ int ANET_GetSocketAddr (int sock, struct sockaddr *addr)
 
 //=============================================================================
 
+/*
 int ANET_AddrCompare (struct sockaddr *addr1, struct sockaddr *addr2)
 {
     if (addr1->sa_family != addr2->sa_family)
@@ -847,6 +848,7 @@ int ANET_AddrCompare (struct sockaddr *addr1, struct sockaddr *addr2)
 
     return 0;
 }
+*/
 
 }   // namespace
 
