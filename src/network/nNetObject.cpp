@@ -555,14 +555,11 @@ nDescriptor& nNetObject::CreatorDescriptor() const{
 */
 
 void nNetObject::AddRef(){
-    tASSERT ( this );
+    tASSERT_THIS();
 
-    if ( this )
-    {
-        tASSERT( refCtr_ >= 0 );
-        refCtr_++;
-        tASSERT( refCtr_ >= 0 );
-    }
+    tASSERT( refCtr_ >= 0 );
+    refCtr_++;
+    tASSERT( refCtr_ >= 0 );
 }
 
 void nNetObject::ReleaseOwnership(){
@@ -582,9 +579,9 @@ void nNetObject::TakeOwnership(){
 }
 
 void nNetObject::Release(){
-    tASSERT( this );
+    tASSERT_THIS();
 
-    if (this){
+    {
         if (refCtr_>0)
             refCtr_--;
         else
@@ -1530,7 +1527,7 @@ void nNetObject::SyncAll(){
             // con << sn_SyncRequestedObject.Len() << "/" << sn_netObjects.Len() << "\n";
 
             int currentSync = sn_SyncRequestedObject.Len()-1;
-            while(sn_Connections[user].socket>0 &&
+            while(sn_Connections[user].socket &&
                     sn_Connections[user].bandwidthControl_.CanSend() &&
                     sn_Connections[user].ackPending<sn_maxNoAck &&
                     currentSync >= 0){

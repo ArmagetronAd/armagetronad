@@ -441,12 +441,13 @@ public:
     {
 #ifdef DEBUG
         st_AddRefBreakpint( this );
-#endif        
-        tASSERT( this && refCtr_ >= 0 );
+#endif
+        tASSERT_THIS();
+        tASSERT( refCtr_ >= 0 );
         mutex_.acquire();
         ++refCtr_;
         mutex_.release();
-        tASSERT( this && refCtr_ >= 0 );
+        tASSERT( refCtr_ >= 0 );
     }
 
     void		Release		() const
@@ -455,7 +456,8 @@ public:
         st_ReleaseBreakpint( this );
 #endif        
 
-        tASSERT ( this && refCtr_ >= 0 );
+        tASSERT_THIS();
+        tASSERT ( refCtr_ >= 0 );
         mutex_.acquire();
         --refCtr_;
         bool kill = (refCtr_ <= 0);
@@ -470,13 +472,14 @@ public:
 
     int			GetRefcount	() const
     {
-        tASSERT( this );
+        tASSERT_THIS();
         return refCtr_;
     }
 protected:
     ~tReferencable()
     {
-        tASSERT( this && ( refCtr_ == -1000 || refCtr_ == 0 ) );
+        tASSERT_THIS();
+        tASSERT( ( refCtr_ == -1000 || refCtr_ == 0 ) );
         refCtr_ = -1000;
     }
 private:
