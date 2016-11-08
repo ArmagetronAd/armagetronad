@@ -4,6 +4,7 @@ Changes since 0.2.8.3.3:
 - Eliminated compilation disambiguity that was just causing a mild
   performance degradation in gcc 5 and is now a compilation failure in
   gcc 6.
+  
 Changes since 0.2.8.3.2:
 - security fix: do not read ahead of the beginning of network buffer.
 - security fix: don't attribute network errors from processing random
