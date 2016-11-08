@@ -138,7 +138,10 @@ public:
 
     unsigned short ID() const{
         tASSERT_THIS();
-        return id;
+        if (st_CheckThis(this))
+            return id;
+        else
+            return 0;
     }
 
     static unsigned short Owner(nNetObject const *pThis)
@@ -151,7 +154,10 @@ public:
 
     unsigned short Owner() const{
         tASSERT_THIS();
-        return owner;
+        if (st_CheckThis(this))
+            return owner;
+        else
+            return ::sn_myNetID;
     }
 
     inline nMachine & GetMachine() const;  //!< returns the machine this object belongs to
