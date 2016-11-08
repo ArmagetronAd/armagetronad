@@ -3144,7 +3144,7 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s, tString co
             tos << tCurrentAccessLevel::GetName( p2->GetAccessLevel() );
             if ( hidden )
                 tos << tColoredString::ColorString( -1 ,-1 ,-1 );
-                tos << " )";
+            tos << " )";
         }
         else
         {
@@ -6161,9 +6161,11 @@ void se_SaveToLadderLog( tOutput const & out )
         if ( tDirectories::Var().Open(o, "ladderlog.txt", std::ios::app) )
         {
             std::stringstream s;
+
             if(se_ladderlogDecorateTS) {
                 s << st_GetCurrentTime("%Y/%m/%d-%H:%M:%S ");
             }
+
             s << out << std::endl;
             sr_InputForScripts( s.str().c_str() );
             o << s.str();
