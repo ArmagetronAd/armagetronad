@@ -1374,7 +1374,8 @@ static int Input_Compare( const tListItemBase* a, const tListItemBase* b)
 static void s_InputConfigGeneric(int ePlayer, uAction *&actions,const tOutput &title){
     uMenu input_menu(title);
 
-    actions->tListItemBase::Sort(&Input_Compare);
+    if(actions)
+        actions->tListItemBase::Sort(&Input_Compare);
 
     std::vector< uMenuItemInput * > inputs;
     for ( uAction *a = actions; a; a = a->Next() )

@@ -162,19 +162,13 @@ public:
     }
 
     unsigned short ID() const{
-        tASSERT(this);
-        if (this)
-            return id;
-        else
-            return 0;
+        tASSERT_THIS();
+        return id;
     }
 
     unsigned short Owner() const{
-        tASSERT(this);
-        if (this)
-            return owner;
-        else
-            return ::sn_myNetID;
+        tASSERT_THIS();
+        return owner;
     }
 
     unsigned static short Owner(const nNetObject *pThis)

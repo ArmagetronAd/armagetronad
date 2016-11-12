@@ -250,7 +250,7 @@ void eNetGameObject::WriteSync( Engine::NetGameObjectSync & sync, bool init ) co
 
     if ( init )
     {
-        sync.set_player_id( player->ID() );
+        sync.set_player_id( ID(player) );
         sync.set_autodelete( autodelete );
     }
 

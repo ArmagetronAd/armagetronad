@@ -3655,7 +3655,7 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s, tString co
             tos << tCurrentAccessLevel::GetName( p2->GetAccessLevel() );
             if ( hidden )
                 tos << tColoredString::ColorString( -1 ,-1 ,-1 );
-                tos << " )";
+            tos << " )";
         }
         else
         {

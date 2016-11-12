@@ -443,11 +443,12 @@ public:
     {
 #ifdef DEBUG
         st_AddRefBreakpint( this );
-#endif        
-        tASSERT( this && refCtr_ >= 0 );
+#endif
+        tASSERT_THIS();
+        tASSERT( refCtr_ >= 0 );
         boost::lock_guard< MUTEX > lock( mutex_ );
         ++refCtr_;
-        tASSERT( this && refCtr_ >= 0 );
+        tASSERT( refCtr_ >= 0 );
     }
 
     void		Release		() const
@@ -456,7 +457,8 @@ public:
         st_ReleaseBreakpint( this );
 #endif        
 
-        tASSERT ( this && refCtr_ >= 0 );
+        tASSERT_THIS();
+        tASSERT ( refCtr_ >= 0 );
         boost::unique_lock< MUTEX > lock( mutex_ );
         --refCtr_;
 
@@ -470,13 +472,14 @@ public:
 
     int			GetRefcount	() const
     {
-        tASSERT( this );
+        tASSERT_THIS();
         return refCtr_;
     }
 protected:
     ~tReferencable()
     {
-        tASSERT( this && ( refCtr_ == -1000 || refCtr_ == 0 ) );
+        tASSERT_THIS();
+        tASSERT( ( refCtr_ == -1000 || refCtr_ == 0 ) );
         refCtr_ = -1000;
     }
 private:
