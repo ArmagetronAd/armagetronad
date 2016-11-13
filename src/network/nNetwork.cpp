@@ -1509,10 +1509,10 @@ void RequestInfoHandler(nHandler *handle){
 }
 
 // the server we are redirected to
-static std::auto_ptr< nServerInfoBase > sn_redirectTo;
-std::auto_ptr< nServerInfoBase > sn_GetRedirectTo()
+static std::unique_ptr< nServerInfoBase > sn_redirectTo;
+std::unique_ptr< nServerInfoBase > sn_GetRedirectTo()
 {
-    return sn_redirectTo;
+    return std::move(sn_redirectTo);
 }
 
 nServerInfoBase * sn_PeekRedirectTo()
@@ -1548,7 +1548,7 @@ void login_deny_handler(nMessage &m){
         if ( connectionName.Len() > 1 )
         {
             // create server info and fill it with data
-            sn_redirectTo = std::auto_ptr< nServerInfoBase>( new nServerInfoRedirect( connectionName, port ) );
+            sn_redirectTo.reset(new nServerInfoRedirect( connectionName, port ) );
         }
     }
 
@@ -3115,7 +3115,7 @@ nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket
     sn_DenyReason = "";
 
     // reset redirection
-    sn_redirectTo.release();
+    sn_redirectTo.reset();
 
     // pings in the beginning of the login are not really representative
     nPingAverager::SetWeight(.0001);

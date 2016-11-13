@@ -170,7 +170,7 @@ class gCycle: public gCycleMovement
     REAL timeCameIntoView;
 
     friend class gCycleChatBot;
-    std::auto_ptr< gCycleChatBot > chatBot_;
+    std::unique_ptr< gCycleChatBot > chatBot_;
 
     bool dropWallRequested_; //!< flag indicating that someone requested a wall drop
 public:

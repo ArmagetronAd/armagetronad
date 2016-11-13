@@ -622,7 +622,7 @@ class Sensor: public gSensor
 
         // create
         if ( &(*cycle->chatBot_) == 0 )
-            cycle->chatBot_ = std::auto_ptr< gCycleChatBot >( new gCycleChatBot( cycle ) );
+            cycle->chatBot_.reset( new gCycleChatBot( cycle ) );
 
         return *cycle->chatBot_;
     }
@@ -2060,8 +2060,8 @@ struct gCycleVisuals
     // loads a specific texture from a specific folder
     static rSurface * LoadTextureSafe2( Slot slot, int mp )
     {
-        static std::auto_ptr<rSurface> cache[SLOT_MAX][2];
-        std::auto_ptr<rSurface> & surface = cache[slot][mp];
+        static std::unique_ptr<rSurface> cache[SLOT_MAX][2];
+        std::unique_ptr<rSurface> & surface = cache[slot][mp];
         if ( surface.get() == NULL )
         {
             static char const * names[SLOT_MAX]={"bike.png","cycle_body.png", "cycle_wheel.png"};
@@ -2070,7 +2070,7 @@ struct gCycleVisuals
             char const * folder = mp ? "moviepack" : "textures";
             tString file = tString(folder) + "/" + name;
 
-            surface = std::auto_ptr<rSurface> ( tNEW( rSurface( file ) ) );
+            surface.reset( tNEW( rSurface( file ) ) );
         }
 
         if ( surface->GetSurface() )
