@@ -66,3 +66,4 @@ a.out.dSYM
 src/armagetronad_main_master
 src/doc/COPYING.txt
 rubbish
+./version.h
