@@ -1504,9 +1504,9 @@ void login_accept_handler(nMessage &m){
         {
             m >> sn_Connections[0].version;
 
-#ifdef DEBUG
+//#ifdef DEBUG
 #define NOEXPIRE
-#endif
+//#endif
 
 #ifndef NOEXPIRE
 #ifndef DEDICATED
