@@ -1334,10 +1334,10 @@ static bool sn_expired=true;
 static nKrawall::nSalt loginSalt;
 
 // the server we are redirected to
-static std::auto_ptr< nServerInfoBase > sn_redirectTo;
-std::auto_ptr< nServerInfoBase > sn_GetRedirectTo()
+static std::unique_ptr< nServerInfoBase > sn_redirectTo;
+std::unique_ptr< nServerInfoBase > sn_GetRedirectTo()
 {
-    return sn_redirectTo;
+    return std::move(sn_redirectTo);
 }
 
 nServerInfoBase * sn_PeekRedirectTo()
@@ -1368,7 +1368,7 @@ static void sn_LoginDeniedHandler( Network::LoginDenied const & denied, nSenderI
         if ( connectionName.Len() > 1 )
         {
             // create server info and fill it with data
-            sn_redirectTo = std::auto_ptr< nServerInfoBase>( new nServerInfoRedirect( connectionName, port ) );
+            sn_redirectTo.reset(new nServerInfoRedirect( connectionName, port ) );
         }
     }
 
@@ -3040,7 +3040,7 @@ nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket
     sn_expired = false;
 
     // reset redirection
-    sn_redirectTo.release();
+    sn_redirectTo.reset();
 
     // first, get all pending messages, ignoring them.
     sn_SetNetState(nSTANDALONE);

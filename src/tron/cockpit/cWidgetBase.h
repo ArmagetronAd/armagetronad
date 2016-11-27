@@ -99,7 +99,7 @@ public:
     void ParseTemplate(bool state) {m_ParsingTemplate = state;}
 };
 
-typedef std::auto_ptr<Base> Base_ptr; //!< simple shortcut; used in the derived classes
+typedef std::unique_ptr<Base> Base_ptr; //!< simple shortcut; used in the derived classes
 
 //! Able to store and parse the position and size of a widget
 class WithCoordinates : virtual public Base {

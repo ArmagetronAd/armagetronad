@@ -1868,7 +1868,7 @@ void ConnectToServer(nServerInfoBase *server)
     // check for redirection
     while( okToRedirect )
     {
-        std::auto_ptr< nServerInfoBase > redirectTo( sn_GetRedirectTo() );
+        auto redirectTo = sn_GetRedirectTo();
 
         // abort loop
         if ( !(&(*redirectTo)) )
@@ -2381,7 +2381,7 @@ void MainMenu(bool ingame){
 
     uMenuItemFunction *reset=NULL;
 
-    std::auto_ptr< uMenuItemFunction > tutorials;
+    std::unique_ptr< uMenuItemFunction > tutorials;
 
     if (ingame && sn_GetNetState()!=nCLIENT){
         reset=new uMenuItemFunction
@@ -2410,7 +2410,7 @@ void MainMenu(bool ingame){
     if (!ingame){
         if( sg_TutorialsCompleted() )
         {
-            tutorials = std::auto_ptr< uMenuItemFunction > (tNEW(uMenuItemFunction)( &game_menu, "$game_menu_tutorials_text", "$game_menu_tutorials_help", &sg_TutorialMenu ));
+            tutorials.reset( tNEW(uMenuItemFunction)( &game_menu, "$game_menu_tutorials_text", "$game_menu_tutorials_help", &sg_TutorialMenu ) );
         }
 
         start= new uMenuItemFunction(&game_menu,"$game_menu_start_text",
@@ -2423,7 +2423,7 @@ void MainMenu(bool ingame){
 
         if( !sg_TutorialsCompleted() )
         {
-            tutorials = std::auto_ptr< uMenuItemFunction > (tNEW(uMenuItemFunction)( &game_menu, "$game_menu_tutorials_text", "$game_menu_tutorials_help", &sg_TutorialMenu ));
+            tutorials.reset( tNEW(uMenuItemFunction)( &game_menu, "$game_menu_tutorials_text", "$game_menu_tutorials_help", &sg_TutorialMenu ) );
         }
     }
 

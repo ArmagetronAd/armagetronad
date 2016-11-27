@@ -830,7 +830,7 @@ public:
 };
 
 // on disconnection, this returns a server we should be redirected to (or NULL if we should not be redirected)
-std::auto_ptr< nServerInfoBase > sn_GetRedirectTo();
+std::unique_ptr< nServerInfoBase > sn_GetRedirectTo();
 
 // take a peek at the same info
 nServerInfoBase * sn_PeekRedirectTo();

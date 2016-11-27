@@ -87,3 +87,4 @@ rubbish
 desktop/armagetronad-armagetronad-handler.desktop
 desktop/armagetronad-link.xml
 *.cbTemp
+./version.h

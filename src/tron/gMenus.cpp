@@ -563,14 +563,14 @@ static void sg_ScreenModeMenu()
 #if SDL_VERSION_ATLEAST(2,0,0)
 
     int numDisplays = SDL_GetNumVideoDisplays();
-    std::auto_ptr<uMenuItemInt> pDisplayIndex;
+    std::unique_ptr<uMenuItemInt> pDisplayIndex;
     if(numDisplays > 1)
     {
-        pDisplayIndex = std::auto_ptr<uMenuItemInt>(new gDisplayMenuItem
+        pDisplayIndex.reset( tNEW(gDisplayMenuItem)
         (screen_menu_mode,
          "$screen_displayindex_text",
          "$screen_displayindex_help",
-         numDisplays-1));
+         numDisplays-1) );
     }
 #endif
 

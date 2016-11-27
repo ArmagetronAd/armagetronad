@@ -1261,7 +1261,7 @@ static tSettingItem<REAL> c_mb( "MOTION_BLUR_TIME",
                                 sr_motionBlurTime );
 
 // blurs the motion, time is the current time
-bool sr_MotionBlur( double time, std::auto_ptr< rTextureRenderTarget > & blurTarget )
+bool sr_MotionBlur( double time, std::unique_ptr< rTextureRenderTarget > & blurTarget )
 {
     static bool lastActive = false;
     bool active = false;
@@ -1315,7 +1315,7 @@ bool sr_MotionBlur( double time, std::auto_ptr< rTextureRenderTarget > & blurTar
         // destroy existing blur texture if it is too small
         if ( blurTarget.get() && ( blurTarget->GetWidth() < blurWidth || blurTarget->GetHeight() < blurHeight ) )
         {
-            blurTarget = std::auto_ptr< rTextureRenderTarget >();
+            blurTarget.reset();
         }
 
         // create blur texture
@@ -1323,7 +1323,7 @@ bool sr_MotionBlur( double time, std::auto_ptr< rTextureRenderTarget > & blurTar
         {
             try
             {
-                blurTarget = std::auto_ptr< rTextureRenderTarget >( new rTextureRenderTarget( blurWidth, blurHeight  ) );
+                blurTarget.reset( tNEW( rTextureRenderTarget )( blurWidth, blurHeight ) );
             }
             catch( rExceptionGLEW const & e )
             {
@@ -1364,7 +1364,7 @@ bool sr_MotionBlur( double time, std::auto_ptr< rTextureRenderTarget > & blurTar
 }
 
 void rSysDep::SwapGL(){
-    static std::auto_ptr< rTextureRenderTarget > blurTarget(0);
+    static std::unique_ptr< rTextureRenderTarget > blurTarget;
 
     if ( s_benchmark )
     {

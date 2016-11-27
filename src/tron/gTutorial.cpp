@@ -568,7 +568,7 @@ private:
     bool completed_;
     tConfItem< bool > completedConf_;
     tString name_;
-    std::auto_ptr< gTutorialMenuItem > menuItem_;
+    std::unique_ptr< gTutorialMenuItem > menuItem_;
     static gTutorial * anchor_;
 
 protected:
@@ -675,7 +675,7 @@ static uMenu sg_tutorialMenu( "$game_menu_tutorials_text" );
 
 void gTutorial::CreateMenu()
 {
-    menuItem_ = std::auto_ptr< gTutorialMenuItem >( tNEW( gTutorialMenuItem )( &sg_tutorialMenu, *this ) );
+    menuItem_.reset( tNEW(gTutorialMenuItem)( &sg_tutorialMenu, *this ) );
 }
 
 /*

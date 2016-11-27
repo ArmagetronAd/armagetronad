@@ -3271,8 +3271,7 @@ nServerInfoBase const & nServerInfoBase::GetAddress( nAddress & address ) const
 
 nServerInfoBase const & nServerInfoBase::ClearAddress() const
 {
-    std::auto_ptr< nAddress > clearedAddress;
-    address_ = clearedAddress;
+    address_.reset();
     return *this;
 }
 
@@ -3309,13 +3308,11 @@ nAddress & nServerInfoBase::AccessAddress( void ) const
     // create address if it is not already there
     if ( !this->address_.get() )
     {
-        std::auto_ptr< nAddress > address( tNEW( nAddress ) );
+        this->address_.reset( tNEW( nAddress ) );
 
         // fill it with hostname and port
-        address->SetPort( this->GetPort() );
-        address->SetHostname( this->GetConnectionName() );
-
-        this->address_ = address;
+        address_->SetHostname( this->GetConnectionName() );
+        address_->SetPort( this->GetPort() );
 
 #ifdef DEBUG
 #endif
