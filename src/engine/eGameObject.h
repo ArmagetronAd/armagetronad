@@ -149,8 +149,14 @@ public:
     // makes two gameObjects interact:
     virtual void InteractWith( eGameObject *target,REAL time,int recursion=1 );
 
-    // what happens if we pass eWall w? (at position e->p[0]*a + e->p[1]*(1-a) )
-    virtual void PassEdge( const eWall *w,REAL time,REAL a,int recursion=1 );
+    enum ePassEdgeResult
+    {
+        eContinue, // go on moving
+        eAbort,    // abort the movement, freeze in this spot
+    };
+
+    // what happens if we pass eWall w? (at position e->p[0]*a + e->p[1]*(1-a) ) Return value should be eContinue if the movement should be continued, eAbort if not.
+    virtual ePassEdgeResult PassEdge( const eWall *w,REAL time,REAL a,int recursion=1 );
 
     // what length multiplicator does driving along the given wall get when it is the given distance away?
     virtual REAL PathfindingModifier( const eWall *w ) const { return 1 ;}

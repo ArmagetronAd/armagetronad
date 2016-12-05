@@ -349,7 +349,7 @@ void gExplosion::InteractWith( eGameObject *target, REAL time, int recursion )
         
 }
 
-void gExplosion::PassEdge(const eWall *,REAL ,REAL ,int){}
+eGameObject::ePassEdgeResult gExplosion::PassEdge(const eWall *,REAL ,REAL ,int){return eContinue;}
 
 void gExplosion::Kill(){
     createTime=lastTime-100;

@@ -68,7 +68,7 @@ public:
 
     virtual void InteractWith(eGameObject *target,REAL time,int recursion=1);
 
-    virtual void PassEdge(const eWall *e,REAL time,REAL a,int recursion=1) override;
+    virtual ePassEdgeResult PassEdge(const eWall *e,REAL time,REAL a,int recursion=1) override;
 
     virtual void Kill();
 

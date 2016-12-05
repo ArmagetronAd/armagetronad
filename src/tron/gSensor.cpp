@@ -32,39 +32,42 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 extern REAL sg_delayCycle;
 
-void gSensor::PassEdge(const eWall *ww,REAL time,REAL a,int r){
+eGameObject::ePassEdgeResult gSensor::PassEdge(const eWall *ww,REAL time,REAL a,int r){
     if (!ww)
-        return;
+        return eContinue;
 
     try{
-        eSensor::PassEdge(ww,time,a,r);
+        auto res = eSensor::PassEdge(ww,time,a,r);
+        if(res != eAbort)
+            return res;
     }
     catch( eSensorFinished & e )
     {
-        const gPlayerWall *w=dynamic_cast<const gPlayerWall*>(ww);
-        if (w)
-        {
-            gCycle *owner=w->Cycle();
-            if (owner && owner->IsMe( owned ) )
-            {
-                type=gSENSOR_SELF;
-            }
-            else if ( owner && owned && owner->Team() == owned->Team() )
-            {
-                type=gSENSOR_TEAMMATE;
-            }
-            else
-            {
-                type=gSENSOR_ENEMY;
-            }
-
-            if (w->EndTime() < w->BegTime())
-                lr=-lr;
-        }
-        else if (dynamic_cast<const gWallRim*>(ww))
-            type=gSENSOR_RIM;
-
-        throw;
     }
+
+    const gPlayerWall *w=dynamic_cast<const gPlayerWall*>(ww);
+    if (w)
+    {
+        gCycle *owner=w->Cycle();
+        if (owner && owner->IsMe( owned ) )
+        {
+            type=gSENSOR_SELF;
+        }
+        else if ( owner && owned && owner->Team() == owned->Team() )
+        {
+            type=gSENSOR_TEAMMATE;
+        }
+        else
+        {
+            type=gSENSOR_ENEMY;
+        }
+
+        if (w->EndTime() < w->BegTime())
+            lr=-lr;
+    }
+    else if (dynamic_cast<const gWallRim*>(ww))
+        type=gSENSOR_RIM;
+
+    return eAbort;
 }
 

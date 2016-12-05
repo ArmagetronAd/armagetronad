@@ -358,16 +358,27 @@ class Sensor: public gSensor
         }
         */
 
-        virtual void PassEdge(const eWall *ww,REAL time,REAL a,int r) override
+        virtual ePassEdgeResult PassEdge(const eWall *ww,REAL time,REAL a,int r) override
         {
             try{
-                gSensor::PassEdge(ww,time,a,r);
+                auto res = gSensor::PassEdge(ww,time,a,r);
+                if(res == eAbort)
+                {
+                    if ( DoExtraDetectionStuff() )
+                        return eAbort;
+                }
+                else
+                {
+                    return res;
+                }
             }
             catch( eSensorFinished & e )
             {
                 if ( DoExtraDetectionStuff() )
                     throw;
             }
+
+            return eContinue;
         }
 
         bool DoExtraDetectionStuff()
@@ -1974,11 +1985,11 @@ bool gCycleExtrapolator::EdgeIsDangerous(const eWall *ww, REAL time, REAL alpha 
     return bool(parent_) && parent_->EdgeIsDangerous( ww, time, alpha ) && gCycleMovement::EdgeIsDangerous( ww, time, alpha );
 }
 
-void gCycleExtrapolator::PassEdge(const eWall *ww,REAL time,REAL a,int){
+eGameObject::ePassEdgeResult gCycleExtrapolator::PassEdge(const eWall *ww,REAL time,REAL a,int){
     {
         if (!EdgeIsDangerous(ww,time,a) || !Alive() )
         {
-            return;
+            return eContinue;
         }
         else
         {
@@ -1986,6 +1997,8 @@ void gCycleExtrapolator::PassEdge(const eWall *ww,REAL time,REAL a,int){
             throw gCycleDeath( collPos );
         }
     }
+
+    return eContinue;
 }
 
 bool gCycleExtrapolator::TimestepCore(REAL currentTime, bool calculateAcceleration)
@@ -3499,7 +3512,7 @@ static void sg_HoleScore( gCycle & cycle )
 
 static eLadderLogWriter sg_sacrificeWriter( "SACRIFICE", true, "hole_user hole_maker enemy_holed" );
 
-void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
+eGameObject::ePassEdgeResult gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
     {
         // deactivate time check
         gJustChecking thisIsSerious;
@@ -3546,12 +3559,12 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
                 }
             }
 
-            return;
+            return eContinue;
         }
 
 #ifdef DEBUG
         if (!EdgeIsDangerous(ww,time,a) || !Alive() )
-            return;
+            return eContinue;
 #endif
     }
 
@@ -3602,7 +3615,7 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
                 if ( fix && lastTime > se_GameTime() - 2 * Lag() - GetMaxLazyLag() )
                     throw gCycleStop();
                 else
-                    return;
+                    return eContinue;
             }
 
             // we were first!
@@ -3650,7 +3663,7 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
                     if ( wallTimeLeft < 0 )
                     {
                         // isn't hit at all
-                        return;
+                        return eContinue;
                     }
 
                     // check how much rubber would be used
@@ -3699,6 +3712,8 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
         }
 
     }
+
+    return eContinue;
 }
 
 REAL gCycle::PathfindingModifier( const eWall *w ) const

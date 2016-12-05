@@ -150,7 +150,7 @@ bool gSpark::Timestep(REAL currentTime){
 }
 
 void gSpark::InteractWith(eGameObject *,REAL ,int){}
-void gSpark::PassEdge(const eWall *,REAL ,REAL ,int){}
+eGameObject::ePassEdgeResult gSpark::PassEdge(const eWall *,REAL ,REAL ,int){return eContinue;}
 
 void gSpark::Kill(){createTime=lastTime-100000;}
 

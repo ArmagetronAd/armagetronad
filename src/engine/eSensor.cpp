@@ -53,16 +53,16 @@ eSensor::eSensor(eGameObject *o,const eCoord &start,const eCoord &d)
         currentFace=NULL;
 }
 
-void eSensor::PassEdge(const eWall *w,REAL time,REAL a,int){
+eGameObject::ePassEdgeResult eSensor::PassEdge(const eWall *w,REAL time,REAL a,int){
     if (!w->Massive()){
-        return;
+        return eContinue;
     }
 
     // extrapolate the hit time
     REAL hitTime = owned->LastTime() + time * inverseSpeed_;
 
     if (owned && !owned->EdgeIsDangerous(w, hitTime, a))
-        return;
+        return eContinue;
 
     lr=0;
 
@@ -85,7 +85,7 @@ void eSensor::PassEdge(const eWall *w,REAL time,REAL a,int){
     ehit=e;
     before_hit=collPos-dir*.000001;
 
-    throw eSensorFinished();
+    return eAbort;
 }
 
 //void eSensor::PassEdge(eEdge *e,REAL time,REAL a,int recursion){

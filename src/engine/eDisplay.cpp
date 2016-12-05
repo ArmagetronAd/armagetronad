@@ -310,13 +310,15 @@ public:
     }
 
     // called when passing an edge
-    void PassEdge( const eWall * w, REAL time, REAL, int) override
+    ePassEdgeResult PassEdge( const eWall * w, REAL time, REAL, int) override
     {
         // adapt zNear and be done
         if( AdaptZNear( zNear_, w, camera_ ) )
         {
-            throw eSensorFinished();
+            return eAbort;
         }
+
+        return eContinue;
     }
 private:
     REAL & zNear_; // the reference to the near clipping plane value

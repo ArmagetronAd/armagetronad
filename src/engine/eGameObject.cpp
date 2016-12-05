@@ -152,8 +152,16 @@ eGameObject::~eGameObject(){
 void eGameObject::InteractWith(eGameObject *,REAL,int){}
 
 // what happens if we pass eWall w?
-void eGameObject::PassEdge(const eWall *w,REAL,REAL,int){
-    if (w) Kill();
+eGameObject::ePassEdgeResult eGameObject::PassEdge(const eWall *w,REAL,REAL,int){
+    if (w)
+    {
+        Kill();
+        return eAbort;
+    }
+    else
+    {
+        return eContinue;
+    }
 }
 
 static int se_moveTimeout = 100;
@@ -387,7 +395,12 @@ rerun:
                 while ( currentTempCollision != tempCollisions.end() && (*currentTempCollision).first < bestERatio )
                 {
                     eTempEdgePassing const & passing = (*currentTempCollision).second;
-                    PassEdge( passing.wall, TIME( (*currentTempCollision).first ), passing.ratio, 0 );
+                    auto res = PassEdge( passing.wall, TIME( (*currentTempCollision).first ), passing.ratio, 0 );
+                    if(res != eContinue)
+                    {
+                        pos = passing.wall->Point(passing.ratio);
+                        return;
+                    }
                     ++ currentTempCollision;
                 }
 
@@ -399,7 +412,13 @@ rerun:
                 // leave this face (through a wall)
                 eWall*     w     = best->GetWall();
                 if (w)
-                    PassEdge(w,time,bestRRatio,0);
+                {
+                    auto res = PassEdge(w,time,bestRRatio,0);
+                    if(res != eContinue)
+                    {
+                        return;
+                    }
+                }
 
                 // set next incoming edge
                 tASSERT(best->Other());
@@ -412,7 +431,13 @@ rerun:
                     w = in->GetWall();
 
                     if (w)
-                        PassEdge(w,time,bestRRatio,0);
+                    {
+                        auto res = PassEdge(w,time,bestRRatio,0);
+                        if(res != eContinue)
+                        {
+                            return;
+                        }
+                    }
                 }
 
                 // switch to the next face
@@ -436,7 +461,13 @@ rerun:
         while ( currentTempCollision != tempCollisions.end() )
         {
             eTempEdgePassing const & passing = (*currentTempCollision).second;
-            PassEdge( passing.wall, TIME( (*currentTempCollision).first ), passing.ratio, 0 );
+            auto res = PassEdge( passing.wall, TIME( (*currentTempCollision).first ), passing.ratio, 0 );
+            if(res != eContinue)
+            {
+                pos = passing.wall->Point(passing.ratio);
+                return;
+            }
+
             ++ currentTempCollision;
         }
     }
