@@ -358,7 +358,7 @@ class Sensor: public gSensor
         }
         */
 
-        virtual void PassEdge(const eWall *ww,REAL time,REAL a,int r)
+        virtual void PassEdge(const eWall *ww,REAL time,REAL a,int r) override
         {
             try{
                 gSensor::PassEdge(ww,time,a,r);

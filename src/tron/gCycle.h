@@ -101,7 +101,7 @@ public:
 
     virtual bool EdgeIsDangerous(const eWall *w, REAL time, REAL a) const;
 
-    virtual void PassEdge(const eWall *w,REAL time,REAL a,int recursion=1);
+    virtual void PassEdge(const eWall *w,REAL time,REAL a,int recursion=1) override;
 
     virtual bool TimestepCore(REAL currentTime, bool calculateAcceleration = true );
 
@@ -308,7 +308,7 @@ public:
 
     virtual bool EdgeIsDangerous(const eWall *w, REAL time, REAL a) const;
 
-    virtual void PassEdge(const eWall *w,REAL time,REAL a,int recursion=1);
+    virtual void PassEdge(const eWall *w,REAL time,REAL a,int recursion=1) override;
 
     virtual REAL PathfindingModifier( const eWall *w ) const;
 

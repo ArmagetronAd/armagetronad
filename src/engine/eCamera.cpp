@@ -1078,7 +1078,7 @@ public:
     //! @param time  usually the game time of the event, here time simply is the fraction of the
     //!              distance from the object to the camera covered so far
     //! @param alpha relative coordinate of the collision point on the wall
-    virtual void PassEdge(const eWall *w,REAL time,REAL alpha,int)
+    virtual void PassEdge(const eWall *w,REAL time,REAL alpha,int) override
     {
         // determine the height limit (max. height at which walls will not be considered blockers)
         REAL objectZ = 1.5;

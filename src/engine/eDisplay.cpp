@@ -310,7 +310,7 @@ public:
     }
 
     // called when passing an edge
-    void PassEdge( const eWall * w, REAL time, REAL, int)
+    void PassEdge( const eWall * w, REAL time, REAL, int) override
     {
         // adapt zNear and be done
         if( AdaptZNear( zNear_, w, camera_ ) )
