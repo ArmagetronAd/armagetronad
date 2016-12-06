@@ -36,14 +36,9 @@ eGameObject::ePassEdgeResult gSensor::PassEdge(const eWall *ww,REAL time,REAL a,
     if (!ww)
         return eContinue;
 
-    try{
-        auto res = eSensor::PassEdge(ww,time,a,r);
-        if(res != eAbort)
-            return res;
-    }
-    catch( eSensorFinished & e )
-    {
-    }
+	auto res = eSensor::PassEdge(ww,time,a,r);
+	if(res != eAbort)
+		return res;
 
     const gPlayerWall *w=dynamic_cast<const gPlayerWall*>(ww);
     if (w)

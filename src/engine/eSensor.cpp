@@ -130,13 +130,7 @@ void eSensor::detect(REAL range){
     }
     */
 
-    try
-    {
-        Move(pos+dir*range,0,range);
-    }
-    catch( eSensorFinished & e )
-    {
-    }
+	Move(pos+dir*range,0,range);
 
 #ifdef DEBUGLINE
     if (hit < range)

@@ -360,22 +360,15 @@ class Sensor: public gSensor
 
         virtual ePassEdgeResult PassEdge(const eWall *ww,REAL time,REAL a,int r) override
         {
-            try{
-                auto res = gSensor::PassEdge(ww,time,a,r);
-                if(res == eAbort)
-                {
-                    if ( DoExtraDetectionStuff() )
-                        return eAbort;
-                }
-                else
-                {
-                    return res;
-                }
-            }
-            catch( eSensorFinished & e )
+            auto res = gSensor::PassEdge(ww,time,a,r);
+            if(res == eAbort)
             {
                 if ( DoExtraDetectionStuff() )
-                    throw;
+                    return eAbort;
+            }
+            else
+            {
+                return res;
             }
 
             return eContinue;
