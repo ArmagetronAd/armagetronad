@@ -1987,7 +1987,7 @@ eGameObject::ePassEdgeResult gCycleExtrapolator::PassEdge(const eWall *ww,REAL t
         else
         {
             eCoord collPos = ww->Point( a );
-            throw gCycleDeath( collPos );
+            return DieWhileMoving( collPos );
         }
     }
 
@@ -2010,10 +2010,8 @@ bool gCycleExtrapolator::TimestepCore(REAL currentTime, bool calculateAccelerati
 
     // delegate
     bool ret = false;
-    try{
-        ret = gCycleMovement::TimestepCore( currentTime, calculateAcceleration );
-    }
-    catch( gCycleDeath & )
+    ret = gCycleMovement::TimestepCore( currentTime, calculateAcceleration );
+    if(DiedWhileMoving())
     {
         return false;
     }
@@ -2784,13 +2782,10 @@ bool gCycle::Timestep(REAL currentTime){
 
         if (simulate)
         {
-            try
+            ret = gCycleMovement::Timestep(currentTime);
+            if(DiedWhileMoving())
             {
-                ret = gCycleMovement::Timestep(currentTime);
-            }
-            catch ( gCycleDeath const & death )
-            {
-                KillAt( death.pos_ );
+                KillAt( deathPosition_ );
                 return false;
             }
         }
@@ -2800,26 +2795,20 @@ bool gCycle::Timestep(REAL currentTime){
     else
     {
         // just basic movement to do: let base class handle that.
-        try
+        gCycleMovement::Timestep(currentTime);
+        if(DiedWhileMoving())
         {
-            gCycleMovement::Timestep(currentTime);
-        }
-        catch ( gCycleDeath const & death )
-        {
-            KillAt( death.pos_ );
+            KillAt( deathPosition_ );
             return false;
         }
     }
 
     // do the rest of the timestep
-    try
+    if ( currentTime > lastTime )
+        ret = gCycleMovement::Timestep(currentTime);
+    if(DiedWhileMoving())
     {
-        if ( currentTime > lastTime )
-            ret = gCycleMovement::Timestep(currentTime);
-    }
-    catch ( gCycleDeath const & death )
-    {
-        KillAt( death.pos_ );
+        KillAt( deathPosition_ );
         return false;
     }
 
@@ -3056,7 +3045,6 @@ bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
 
         if ( Alive() ){
             // delegate core work to base class
-            try
             {
                 // start building wall
                 REAL startBuildWallAt = spawnTime_ + sg_cycleWallTime;
@@ -3080,12 +3068,12 @@ bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
                 if ( gCycleMovement::TimestepCore( currentTime, calculateAcceleration ) )
                     return true;
             }
-            catch ( gCycleDeath const & death )
+            if(DiedWhileMoving())
             {
-                KillAt( death.pos_ );
+                KillAt( deathPosition_ );
 
                 // death exceptions are precise; we can safely take over the position from it
-                oldPos = death.pos_;
+                oldPos = deathPosition_;
             }
         }
 
@@ -3505,6 +3493,8 @@ static void sg_HoleScore( gCycle & cycle )
 
 static eLadderLogWriter sg_sacrificeWriter( "SACRIFICE", true, "hole_user hole_maker enemy_holed" );
 
+static bool s_extrapolationStopped = false;
+
 eGameObject::ePassEdgeResult gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
     {
         // deactivate time check
@@ -3606,7 +3596,7 @@ eGameObject::ePassEdgeResult gCycle::PassEdge(const eWall *ww,REAL time,REAL a,i
                 static bool fix = false;
                 // it's an extrapolation wall, don't simulate further.
                 if ( fix && lastTime > se_GameTime() - 2 * Lag() - GetMaxLazyLag() )
-                    throw gCycleStop();
+                    return StopMoving();
                 else
                     return eContinue;
             }
@@ -3691,7 +3681,7 @@ eGameObject::ePassEdgeResult gCycle::PassEdge(const eWall *ww,REAL time,REAL a,i
         else // sad but true
         {
             // this cycle has to die here unless it has rubber left or is invulnerable (checked on catching the exception, and besides, this code path isn't called for invulnerable cycles)
-            throw gCycleDeath( collPos );
+            return DieWhileMoving( collPos );
 
             //			REAL dist = w->Pos( a );
             //			const_cast<gPlayerWall*>(w)->BlowHole( dist - explosionRadius, dist + explosionRadius );
@@ -3701,7 +3691,7 @@ eGameObject::ePassEdgeResult gCycle::PassEdge(const eWall *ww,REAL time,REAL a,i
     {
         if (bool(player) && sn_GetNetState()!=nCLIENT && Alive() )
         {
-            throw gCycleDeath( collPos );
+            return DieWhileMoving( collPos );
         }
 
     }

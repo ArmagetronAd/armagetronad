@@ -62,6 +62,8 @@ class eGameObject{
 
     bool urgentSimulationRequested_;   //!< Flag set when a pending event needs simulation
 
+    static bool diedWhileMoving_;
+
 protected:
     // does a timestep and all interactions for this gameobject,
     // divided in many small steps
@@ -192,6 +194,11 @@ public:
     //! tells whether the object is alive
     virtual bool Alive() const {return false;}
 
+   //! equivalent to old throw eDeath
+   ePassEdgeResult DieWhileMoving();
+   //! returns true ONCE after DieWhileMoving was called
+   bool DiedWhileMoving();
+
     //! draws object to the screen using OpenGL
     virtual void Render(const eCamera *cam);
 
@@ -271,14 +278,6 @@ public:
 
 private:
     virtual void DoRemoveFromGame(); //!< called when removed from the game
-};
-
-//! Exception to throw when a gameobject dies during movement
-class eDeath
-{
-public:
-    eDeath(){}   //!< constructor
-    ~eDeath(){}  //!< destructor
 };
 
 #endif

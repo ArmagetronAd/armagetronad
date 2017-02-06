@@ -179,6 +179,8 @@ typedef std::multimap< REAL, eTempEdgePassing > eTempEdgeMap;
 // moves
 void eGameObject::Move( const eCoord &dest, REAL startTime, REAL endTime, bool useTempWalls )
 {
+    diedWhileMoving_ = false;
+
 #ifdef DEBUG
     grid->Check();
 #endif
@@ -616,22 +618,16 @@ void eGameObject::FindCurrentFace(){
 #ifdef DEBUG
                 eFace * lastFace = currentFace;
 #endif
-                try
-                {
-                    Move( oldPos, lastTime, lastTime, false );
-                }
-                catch( eDeath & ) // ignore death exceptions and leave object where it would have died
+                Move( oldPos, lastTime, lastTime, false );
+                if(diedWhileMoving_) // ignore death exceptions and leave object where it would have died
                 {
 #ifdef DEBUG
                     // try again (yeah, this looks like a WTF, but it really helps in some cases because the situation has changed since the last try. /me blames floating points)
                     // besides, (now, this was changed) the start position changed.
-                    try
-                    {
-                        pos = center;
-                        currentFace = lastFace;
-                        Move( oldPos, lastTime, lastTime, false );
-                    }
-                    catch( eDeath & ){}
+                    pos = center;
+                    currentFace = lastFace;
+                    Move( oldPos, lastTime, lastTime, false );
+                    diedWhileMoving_ = false;
 #endif
                 }
 
@@ -682,6 +678,21 @@ void eGameObject::EnsureBorn() {
 }
 
 void eGameObject::Kill(){}
+
+bool eGameObject::diedWhileMoving_ = false;
+
+eGameObject::ePassEdgeResult eGameObject::DieWhileMoving()
+{
+    diedWhileMoving_ = true;
+    return eAbort;
+}
+
+bool eGameObject::DiedWhileMoving()
+{
+    bool ret = diedWhileMoving_;
+    diedWhileMoving_ = false;
+    return ret;
+}
 
 // draws it to the screen using OpenGL
 void eGameObject::Render(const eCamera *){}
@@ -742,6 +753,8 @@ bool eGameObject::TimestepThis(REAL currentTime,eGameObject *c){
 #ifdef DEBUG
     c->grid->Check();
 #endif
+
+    diedWhileMoving_ = false;
 
     tJUST_CONTROLLED_PTR< eGameObject > keep( c ); // keep object alive
 

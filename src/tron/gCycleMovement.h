@@ -169,6 +169,9 @@ public:
     virtual void            CalculateAcceleration   (                                   )           ;   //!< calculate acceleration to apply later
     virtual void            ApplyAcceleration       ( REAL                  dt          )           ;   //!< apply acceleration calculated earlier
 
+    static eCoord const &   DeathPosition           ()                                              ;   //!< position passed to DieDuringMove()
+
+
     //! creates a netobject form sync data
     gCycleMovement( Game::CycleMovementSync const & sync, nSenderInfo const & sender );
 protected:
@@ -190,6 +193,9 @@ protected:
 
     virtual bool            TimestepCore            ( REAL                  currentTime
             ,                                         bool                  calculateAcceleration = true )           ;   //!< core physics simulation routine
+
+    ePassEdgeResult         DieWhileMoving          ( eCoord const &        deathPosition )         ;   //!< equivalent to old throw gCycleDeath
+    ePassEdgeResult         StopMoving              ()                                              ;   //!< equivalent to old throw gCycleStop
 private:
     void                    MyInitAfterCreation     ()                                              ;   //!< private shared initialization code
 
@@ -204,7 +210,10 @@ private:
     short           alive_;                     //!< status: 1: cycle is alive, -1: cycle just died, 0: cycle is dead
 
 protected:
-    gEnemyInfluence				enemyInfluence; //!< keeps track of enemies that influenced this cycle
+    static eCoord   deathPosition_;             //!< the position the last move let a cylce die on
+    static bool     stoppedMovement_;           //!< true if (extrapolating) movement should be stopped
+
+    gEnemyInfluence	enemyInfluence;             //!< keeps track of enemies that influenced this cycle
 
     gDestination*   destinationList;            //!< the list of destinations that belong to this cycle ( for memory management )
     gDestination*   currentDestination;         //!< the destination this cycle aims for now
@@ -299,22 +308,6 @@ private: // END OF HACK
 
 //! Determines the maximum space ahead of a cycle
 // float MaxSpaceAhead( const gCycleMovement* cycle, float ts, float lookAhead, float maxReport );
-
-//! Exception to throw when cycle dies in a simulation frame
-class gCycleDeath: public eDeath
-{
-public:
-    gCycleDeath( eCoord const & pos )
-            : pos_(pos)
-    {}
-
-    eCoord pos_;
-};
-
-//! Exception thrown to indicate simulation should be held for a while
-class gCycleStop: public eDeath
-{
-};
 
 // this class describes a point on the map the cycle on another
 // computer of the game IS at. The copies of the cycle on the

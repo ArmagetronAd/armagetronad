@@ -701,13 +701,12 @@ void sg_TopologyPoliceCheck( gCycle* cycle, eWall* oldWall, gPlayerWall* newWall
     gTopologyPoliceConsoleFiler filter;
 
     // treat the crossing as if the cycle just went through the old wall.
-    try
     {
         cycle->PassEdge( oldWall, time, oldAlpha );
     }
-    catch ( gCycleDeath const & death )
+	if(cycle->DiedWhileMoving())
     {
-        cycle->KillAt( death.pos_ );
+		cycle->KillAt( gCycle::DeathPosition() );
     }
 }
 
