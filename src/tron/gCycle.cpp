@@ -3493,8 +3493,6 @@ static void sg_HoleScore( gCycle & cycle )
 
 static eLadderLogWriter sg_sacrificeWriter( "SACRIFICE", true, "hole_user hole_maker enemy_holed" );
 
-static bool s_extrapolationStopped = false;
-
 eGameObject::ePassEdgeResult gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
     {
         // deactivate time check
