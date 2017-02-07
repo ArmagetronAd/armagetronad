@@ -4437,16 +4437,6 @@ static void ConsoleSay_conf(std::istream &s)
 
 static tConfItemFunc ConsoleSay_c("SAY",&ConsoleSay_conf);
 
-struct eChatInsertionCommand
-{
-    tString insertion_;
-
-    eChatInsertionCommand( tString const & insertion )
-            : insertion_( insertion )
-    {}
-};
-
-
 static uMenuItemStringWithHistory::history_t &se_chatHistory() {
     static uMenuItemStringWithHistory::history_t instance("chat_history.txt");
     return instance;
@@ -4572,25 +4562,22 @@ public:
 #endif
             {
                 // maybe it's an instant chat button?
-                try
-                {
-                    return su_HandleEvent(e, false);
-                }
-                catch ( eChatInsertionCommand & insertion )
-                {
-                    if ( content->Len() + insertion.insertion_.Len() <= maxLength_ )
-                    {
-                        *content = content->SubStr( 0, realCursorPos ) + insertion.insertion_ + content->SubStr( realCursorPos );
-                        realCursorPos += insertion.insertion_.Len()-1;
-                    }
-
-                    return true;
-                }
+                return su_HandleEvent(e, false);
             }
         }
 #endif // DEDICATED
 
         return false;
+    }
+
+    //! inserts an entire string at the current cursor
+    void Insert(tString const &insertion)
+    {
+        if ( content->Len() + insertion.Len() <= maxLength_ )
+        {
+            *content = content->SubStr( 0, realCursorPos ) + insertion + content->SubStr( realCursorPos );
+            realCursorPos += insertion.Len()-1;
+        }
     }
 };
 
@@ -4608,6 +4595,7 @@ void se_ChatState(ePlayerNetID::ChatFlags flag, bool cs){
 static ePlayer * se_chatterPlanned=NULL;
 static ePlayer * se_chatter =NULL;
 static tString se_say;
+static eMenuItemChat *se_chatItem = nullptr;
 static void do_chat(){
     if (se_chatterPlanned){
         su_ClearKeys();
@@ -4631,6 +4619,8 @@ static void do_chat(){
 
 
         eMenuItemChat s(&chat_menu,se_say,se_chatter,&completer);
+        auto *lastChatItem = se_chatItem;
+        se_chatItem = &s;
         chat_menu.SetCenter(-.75);
         chat_menu.SetBot(-2);
         chat_menu.SetTop(-.7);
@@ -4640,6 +4630,7 @@ static void do_chat(){
 
         sr_con.SetHeight(7,false);
         se_SetShowScoresAuto(true);
+        se_chatItem = lastChatItem;
     }
     se_chatter=NULL;
     se_chatterPlanned=NULL;
@@ -4702,10 +4693,10 @@ bool ePlayer::Act(uAction *act,REAL x){
                                 sendImmediately = false;
                             }
 
-                            if ( se_chatter == this )
+                            if ( se_chatter == this && se_chatItem)
                             {
                                 // a chat is already active, insert the chat string
-                                throw eChatInsertionCommand( say );
+                                se_chatItem->Insert( say );
                             }
                             else
                             {
