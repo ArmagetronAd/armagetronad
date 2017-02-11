@@ -183,6 +183,7 @@ public:
 
                 archive.Archive(button.button).Archive(button.state).Archive(button.x).Archive(button.y);
             }
+#if SDL_VERSION_ATLEAST(2,0,0)
             case SDL_TEXTINPUT:
             {
                 auto &text = event.text.text;
@@ -195,6 +196,7 @@ public:
                 }
             }
             break;
+#endif
             default:
                 // do nothing
                 break;
