@@ -167,10 +167,6 @@ public:
     
     virtual void Render(REAL x,REAL y,REAL alpha=1, bool selected=0);
     virtual bool Event( SDL_Event& event );
-    
-    
-private:
-    tString prev_filter_string;
 };
 
 class gServerMenuItem: public gBrowserMenuItem
@@ -1092,42 +1088,56 @@ void gServerFilterMenuItem::Render(REAL x,REAL y,REAL alpha, bool selected)
 bool gServerFilterMenuItem::Event( SDL_Event& event )
 {
 #ifndef DEDICATED
-    if (event.type!=SDL_KEYDOWN)
-        return false;
-    
-    bool update = prev_filter_string != *content;
-    prev_filter_string = *content;
-    
-    switch (event.key.keysym.sym)
+    auto prev_filter_string = *content; // store current content for later comparison
+    bool update = false; // do we need to update the server list?
+    bool ret = false; // have we handled the event?
+
+    if (event.type==SDL_KEYDOWN)
     {
-    case(SDLK_ESCAPE):
-        if(! content->empty())
+        switch (event.key.keysym.sym)
         {
-            *content = "";
-            
-            (static_cast<gServerMenu*>(menu))->Update();
-            return true;
-            
+        case(SDLK_ESCAPE):
+            // escape clears the filter
+            if(!content->empty())
+            {
+                *content = "";
+
+                update = true;
+                ret = true;
+
+                break;
+            }
+
+            // fall through
+        default:
+            // let base handle it
+            ret = uMenuItemString::Event( event );
+
             break;
         }
-        else    
-        {
-            return uMenuItemString::Event( event );
-        }
-
-        break;
-    default:
-        break;
     }
-        
+    else
+    {
+        // let base handle it
+        ret = uMenuItemString::Event( event );
+    }
+
+    // update on change
+    if(prev_filter_string != *content)
+    {
+        update = true;
+    }
+
     if(update)
     {
+        // update menu, filter has changed
         (static_cast<gServerMenu*>(menu))->Update();
     }
-    
-#endif
 
-    return uMenuItemString::Event( event );
+    return ret;
+#else
+    return false;
+#endif
 }
 
 gServerStartMenuItem::gServerStartMenuItem(gServerMenu *men)
