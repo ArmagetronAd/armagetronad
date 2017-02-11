@@ -183,6 +183,17 @@ public:
 
                 archive.Archive(button.button).Archive(button.state).Archive(button.x).Archive(button.y);
             }
+            case SDL_TEXTINPUT:
+            {
+                auto &text = event.text.text;
+
+                for(size_t i = 0; i < sizeof(text); ++i)
+                {
+                    archive.Archive(text[i]);
+                    if(!text[i])
+                        break;
+                }
+            }
             break;
             default:
                 // do nothing
