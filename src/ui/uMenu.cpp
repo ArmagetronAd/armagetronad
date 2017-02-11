@@ -1029,24 +1029,7 @@ bool uMenuItemString::Event(SDL_Event &e){
 #if SDL_VERSION_ATLEAST(2,0,0)
     }
     else if (e.type==SDL_TEXTINPUT) {
-
-         unsigned char c = (unsigned char)(0xff & e.text.text[0]);
-         // hmmm, how portable is it ??? anyway, expected unicode UTF8 encoding, so just to check it is working ...
-         // TO BE REWRITTEN THE RIGHT WAY...
-         int utf8 = 0;
-         if (c < 0x80)
-             utf8 = e.text.text[0];
-         else if ((c >> 5) ==0x6)
-             utf8 = e.text.text[0]*0xff+e.text.text[1];
-         else if ((c >> 4) == 0xe)
-             utf8 = e.text.text[0]*0xffff+e.text.text[1]*0xff+e.text.text[2];
-         else if ((c >> 3) == 0x1e)
-             utf8 = e.text.text[0]*0xffffff+e.text.text[1]*0xffff+e.text.text[2]*0xff+e.text.text[3];
-
-//        fprintf(stderr, "Keyboard: text input \"%s\" %i\n", e.text.text, utf8);
-        if ( utf8!=0 && e.text.text[0] != '\n' )
-            ret = InsertChar(utf8);
-//            fprintf(stderr, "UTF8 value: %i\n", utf8);
+        Insert(tString(e.text.text)); // just insert input text as utf8 string
     }
     else if (e.type==SDL_TEXTEDITING) {
 //        fprintf(stderr, "text editing \"%s\", selected range (%d, %d)\n",
@@ -1082,6 +1065,15 @@ void uMenuItemString::Deselect() {
     SDL_StopTextInput();
 #endif
 #endif
+}
+
+void uMenuItemString::Insert(const tString &insertion)
+{
+    if ( content->Len() + insertion.Len() <= maxLength_ )
+    {
+        *content = content->SubStr( 0, realCursorPos ) + insertion + content->SubStr( realCursorPos );
+        realCursorPos += insertion.Len()-1;
+    }
 }
 
 inline bool IsReservedCodePoint(int unicode)

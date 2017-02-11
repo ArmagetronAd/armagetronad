@@ -4573,12 +4573,9 @@ public:
     //! inserts an entire string at the current cursor
     void Insert(tString const &insertion)
     {
-        if ( content->Len() + insertion.Len() <= maxLength_ )
-        {
-            *content = content->SubStr( 0, realCursorPos ) + insertion + content->SubStr( realCursorPos );
-            realCursorPos += insertion.Len()-1;
-        }
+        uMenuItemString::Insert(insertion);
     }
+
 };
 
 
