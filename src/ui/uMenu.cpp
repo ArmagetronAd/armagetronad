@@ -1030,6 +1030,7 @@ bool uMenuItemString::Event(SDL_Event &e){
     }
     else if (e.type==SDL_TEXTINPUT) {
         Insert(tString(e.text.text)); // just insert input text as utf8 string
+        ret = true;
     }
     else if (e.type==SDL_TEXTEDITING) {
 //        fprintf(stderr, "text editing \"%s\", selected range (%d, %d)\n",
