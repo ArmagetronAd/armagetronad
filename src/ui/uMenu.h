@@ -543,7 +543,7 @@ public:
     void Deselect();
 
     //! inserts an entire string at the current cursor
-    void Insert(tString const &insertion);
+    bool Insert(tString const &insertion);
 };
 
 //! A class that can provide auto- completion and supports overwriting of parts for special cases.

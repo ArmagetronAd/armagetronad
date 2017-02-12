@@ -1027,10 +1027,14 @@ bool uMenuItemString::Event(SDL_Event &e){
         }
 #endif
 #if SDL_VERSION_ATLEAST(2,0,0)
+        else
+        {
+            // typically, SDL2 text input does not handle key down events.
+            ret = false;
+        }
     }
     else if (e.type==SDL_TEXTINPUT) {
-        Insert(tString(e.text.text)); // just insert input text as utf8 string
-        ret = true;
+        ret = Insert(tString(e.text.text)); // just insert input text as utf8 string
     }
     else if (e.type==SDL_TEXTEDITING) {
 //        fprintf(stderr, "text editing \"%s\", selected range (%d, %d)\n",
@@ -1068,12 +1072,17 @@ void uMenuItemString::Deselect() {
 #endif
 }
 
-void uMenuItemString::Insert(const tString &insertion)
+bool uMenuItemString::Insert(const tString &insertion)
 {
-    if ( content->Len() + insertion.Len() <= maxLength_ )
+    if ( insertion.Len() > 0 && content->Len() + insertion.Len() <= maxLength_ )
     {
         *content = content->SubStr( 0, realCursorPos ) + insertion + content->SubStr( realCursorPos );
         realCursorPos += insertion.Len()-1;
+        return true;
+    }
+    else
+    {
+        return false;
     }
 }
 

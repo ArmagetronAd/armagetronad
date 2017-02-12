@@ -4511,6 +4511,12 @@ public:
 //! Handles the chat prompt
 class eMenuItemChat : protected uMenuItemStringWithHistory{
     ePlayer *me; //!< The player the chat prompt is for
+
+#if SDL_VERSION_ATLEAST(2,0,0)
+    SDL_Event lastKeyDown_; // the last key down event
+    bool lastKeyDownWasHandled_; // did the last keydown event (or following textinput event) cause an effect?
+#endif
+
 public:
     //! Constructor
     //! @param M         passed on to uMenuItemStringWithHistory
@@ -4548,22 +4554,52 @@ public:
         }
         else
         {
+#if SDL_VERSION_ATLEAST(2,0,0)
+            if(e.type == SDL_KEYDOWN)
+            {
+                // record last keydown event
+                lastKeyDown_ = e;
+                lastKeyDownWasHandled_ = false;
+
+                // pretend we handled it. We will later, promise!
+                return true;
+            }
+            else if(e.type == SDL_KEYUP)
+            {
+                // on key up, if it has not been handled, pass previous key down event to global system. It may be an instachat.
+                if(!lastKeyDownWasHandled_)
+                {
+                    lastKeyDownWasHandled_ = true;
+                    bool ret = su_HandleEvent(lastKeyDown_, false); // delay handle key down event
+                    ret |= uMenuItemStringWithHistory::Event(e);    // regularily handle key up event
+                    return ret;
+                }
+            }
+
+            if(e.type == SDL_TEXTINPUT)
+            {
+                bool ret = uMenuItemStringWithHistory::Event(e);
+                if(ret)
+                    lastKeyDownWasHandled_ = true;
+                return ret;
+            }
+#endif
+
             if ( uMenuItemStringWithHistory::Event(e) )
             {
                 return true;
             }
-            // exclude modifier keys from possible control triggers
+
 #if SDL_VERSION_ATLEAST(2,0,0)
-            else if (( e.key.keysym.scancode < SDL_SCANCODE_LCTRL || e.key.keysym.scancode > SDL_SCANCODE_LCTRL )
-                     && e.key.keysym.scancode != SDL_SCANCODE_CAPSLOCK 
-                     && e.key.keysym.scancode != SDL_SCANCODE_NUMLOCKCLEAR)
+            return false;
 #else
-            else if ( e.key.keysym.sym < SDLK_NUMLOCK || e.key.keysym.sym > SDLK_COMPOSE )
-#endif
+            // exclude control modifiers
+            if ( e.key.keysym.sym < SDLK_NUMLOCK || e.key.keysym.sym > SDLK_COMPOSE )
             {
                 // maybe it's an instant chat button?
                 return su_HandleEvent(e, false);
             }
+#endif // SDL2
         }
 #endif // DEDICATED
 
@@ -4571,9 +4607,9 @@ public:
     }
 
     //! inserts an entire string at the current cursor
-    void Insert(tString const &insertion)
+    bool Insert(tString const &insertion)
     {
-        uMenuItemString::Insert(insertion);
+        return uMenuItemString::Insert(insertion);
     }
 
 };
