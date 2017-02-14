@@ -4557,12 +4557,21 @@ public:
 #if SDL_VERSION_ATLEAST(2,0,0)
             if(e.type == SDL_KEYDOWN)
             {
-                // record last keydown event
-                lastKeyDown_ = e;
-                lastKeyDownWasHandled_ = false;
+                bool ret = uMenuItemStringWithHistory::Event(e);
+                if(ret)
+                {
+                    lastKeyDownWasHandled_ = true;
+                    return ret;
+                }
+                else
+                {
+                    // record last keydown event
+                    lastKeyDown_ = e;
+                    lastKeyDownWasHandled_ = false;
 
-                // pretend we handled it. We will later, promise!
-                return true;
+                    // pretend we handled it. We will later, promise!
+                    return true;
+                }
             }
             else if(e.type == SDL_KEYUP)
             {
@@ -4575,8 +4584,7 @@ public:
                     return ret;
                 }
             }
-
-            if(e.type == SDL_TEXTINPUT)
+            else if(e.type == SDL_TEXTINPUT)
             {
                 bool ret = uMenuItemStringWithHistory::Event(e);
                 if(ret)
