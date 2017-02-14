@@ -49,6 +49,7 @@
 			<Add alias="All" targets="Win32 Release;Win32 Debug;" />
 		</VirtualTargets>
 		<Compiler>
+			<Add option="-std=gnu++0x" />
 			<Add option="-fexceptions" />
 			<Add option="-DWIN32" />
 			<Add option="-D_CONSOLE" />
