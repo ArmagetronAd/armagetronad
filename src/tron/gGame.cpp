@@ -1302,7 +1302,7 @@ void delayedCommands::Run(REAL currentTime) {
                 const tString command_str = params.SubStr(interval_str.Len());
                 command << command_str;
                 tConfItemBase::LoadAll(command); // run command if it's not too old, otherwise, just skip it ...
-                con << command << " " << interval <<"\n";
+                con << command.str() << " " << interval <<"\n";
                 if (interval>0){
                     delayedCommands::Add(currentTime+interval,command.str(),interval);
                 }
