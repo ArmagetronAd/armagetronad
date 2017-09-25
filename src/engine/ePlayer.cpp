@@ -3661,24 +3661,27 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s, tString co
         {
             tos << "( )";
         }
-        if ( ( p2->Owner() != 0 && tCurrentAccessLevel::GetAccessLevel() <= se_ipAccessLevel ) || ( p2->Owner() != 0 && p2->Owner() == receiver->Owner() ) )
+        if(sn_GetNetState() == nSERVER)
         {
-            tString IP = p2->GetMachine().GetIP();
-            if ( IP.Len() > 1 )
+            if ( ( p2->Owner() != 0 && tCurrentAccessLevel::GetAccessLevel() <= se_ipAccessLevel ) || ( p2->Owner() != 0 && p2->Owner() == receiver->Owner() ) )
             {
-                tos << ", IP = " << IP;
+                tString IP = p2->GetMachine().GetIP();
+                if ( IP.Len() > 1 )
+                {
+                    tos << ", IP = " << IP;
+                }
             }
-        }
-        if ( ( p2->Owner() != 0 && tCurrentAccessLevel::GetAccessLevel() <= se_nVerAccessLevel ) || ( p2->Owner() != 0 && p2->Owner() == receiver->Owner() ) )
-        {
-            tos << ", " << sn_GetClientVersionString( sn_Connections[ p2->Owner() ].version.Max() ) << " (ID: " << sn_Connections[ p2->Owner() ].version.Max() << ")";
+            if ( ( p2->Owner() != 0 && tCurrentAccessLevel::GetAccessLevel() <= se_nVerAccessLevel ) || ( p2->Owner() != 0 && p2->Owner() == receiver->Owner() ) )
+            {
+                tos << ", " << sn_GetClientVersionString( sn_Connections[ p2->Owner() ].version.Max() ) << " (ID: " << sn_Connections[ p2->Owner() ].version.Max() << ")";
+            }
         }
 
         tos << "\n";
 
         if ( !doSearch )
         {
-            sn_ConsoleOut( tos, receiver->Owner() );
+            sn_ConsoleOut( tos, nNetObject::Owner(receiver) );
             count++;
         }
         else
@@ -3691,24 +3694,24 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s, tString co
                 count++;
                 if ( count == 1 )
                 {
-                    sn_ConsoleOut( tOutput( "$player_list_search", command, search ) , receiver->Owner() );
+                    sn_ConsoleOut( tOutput( "$player_list_search", command, search ) , nNetObject::Owner(receiver) );
                 }
-                sn_ConsoleOut( tos, receiver->Owner() );
+                sn_ConsoleOut( tos, nNetObject::Owner(receiver) );
             }
         }
     }
 
     if ( doSearch && !count )
     {
-        sn_ConsoleOut( tOutput( "$player_list_search_no_results", command, search ) , receiver->Owner() );
+        sn_ConsoleOut( tOutput( "$player_list_search_no_results", command, search ) , nNetObject::Owner(receiver) );
     }
     else if ( doSearch )
     {
-        sn_ConsoleOut( tOutput( "$player_list_search_end", command, count ) , receiver->Owner() );
+        sn_ConsoleOut( tOutput( "$player_list_search_end", command, count ) , nNetObject::Owner(receiver) );
     }
     else
     {
-        sn_ConsoleOut( tOutput( "$player_list_end", command, count ) , receiver->Owner() );
+        sn_ConsoleOut( tOutput( "$player_list_end", command, count ) , nNetObject::Owner(receiver) );
 
         if(tCurrentAccessLevel::GetAccessLevel() < tAccessLevel_DefaultAuthenticated)
             se_ListPastChatters(receiver);
