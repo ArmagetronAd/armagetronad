@@ -163,7 +163,7 @@ static bool se_enableChat = true;    //flag indicating whether chat should be al
 static tSettingItem< bool > se_enaChat("ENABLE_CHAT", se_enableChat);
 
 static bool se_autoCompleteWithColor = false;
-static tSettingItem< bool > se_autoComplColor("AUTO_COMPLETE_WITH_COLOR", se_autoCompleteWithColor);
+static tConfItemLine< bool > se_autoComplColor("AUTO_COMPLETE_WITH_COLOR", se_autoCompleteWithColor);
 
 static tString se_hiddenPlayerPrefix ("0xaaaaaa");
 static tConfItemLine se_hiddenPlayerPrefixConf( "PLAYER_LIST_HIDDEN_PLAYER_PREFIX", se_hiddenPlayerPrefix );
