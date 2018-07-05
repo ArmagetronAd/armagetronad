@@ -82,7 +82,9 @@ class tOutput{
 
     tOutputItemBase *anchor;
 
-    tOutput& operator << (const tOutput &o);
+    tOutput& operator << (const tOutput &o) {
+        *this << o;
+    }
 public:
     tOutput();
     ~tOutput();
