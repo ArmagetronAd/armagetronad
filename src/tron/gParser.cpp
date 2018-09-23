@@ -1228,20 +1228,21 @@ gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
             }
         }
         else
+        {
             zone = zZonePtr(zZoneExtManager::Create("", grid));
+        }
 
-            // If a name was assigned to it, save the zone in a map so it can be refered to
-            if (!zoneName.empty())
-            {
-                mapZones[zoneName] = zone;
-
-                std::vector< zZoneInfluencePtr > myZIP = ZIPtoMap[zoneName];
-                std::vector< zZoneInfluencePtr >::iterator i;
-                for (i = myZIP.begin(); i < myZIP.end(); ++i)
-                    (*i)->bindZone(zone);
-                ZIPtoMap.erase(zoneName);
-            }
-            zone->setName(zoneName);
+        // If a name was assigned to it, save the zone in a map so it can be refered to
+        if (!zoneName.empty())
+        {
+            mapZones[zoneName] = zone;
+             std::vector< zZoneInfluencePtr > myZIP = ZIPtoMap[zoneName];
+            std::vector< zZoneInfluencePtr >::iterator i;
+            for (i = myZIP.begin(); i < myZIP.end(); ++i)
+                (*i)->bindZone(zone);
+            ZIPtoMap.erase(zoneName);
+        }
+        zone->setName(zoneName);
 
         zone->setupVisuals(state);
         zone->readXML(tXmlParser::node(cur));

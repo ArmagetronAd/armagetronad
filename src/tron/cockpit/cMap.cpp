@@ -346,6 +346,7 @@ void Map::DrawMap(bool rimWalls, bool cycleWalls,
         // check if at least 1 zone was found, if not, toggle to mode 2 ...
         if (rad==0) {
             m_mode = MODE_CYCLE;
+            [[fallthrough]];
         } else {
             break;
         }

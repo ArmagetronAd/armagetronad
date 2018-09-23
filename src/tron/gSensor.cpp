@@ -34,8 +34,10 @@ extern REAL sg_delayCycle;
 
 eGameObject::ePassEdgeResult gSensor::PassEdge(const eWall *ww,REAL time,REAL a,int r){
     if (!ww)
+    {
         return eContinue;
-
+    }
+    
 	auto res = eSensor::PassEdge(ww,time,a,r);
 	if(res != eAbort)
 		return res;

@@ -1169,7 +1169,7 @@ bool tDirectories::FileMatchesWildcard(const char *str, const char *pattern,
         case '\\':
             if (*pattern)
                 c = *pattern++;
-
+            [[fallthrough]];
         default:
             if (ignoreCase)
             {
