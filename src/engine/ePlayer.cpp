@@ -234,6 +234,7 @@ static std::string se_EscapeName( tString const & original, bool keepAt = true )
                 filter << "\\x";
                 break;
             }
+            // fallthrough
         default:
             if ( 0x20 < c && 0x7f >= c )
             {
@@ -3747,9 +3748,9 @@ void ePlayerNetID::Chat(const tString &s_orig)
         {
             se_BroadcastChat( this, s );
             
-            // falling through on purpose
             // break;
         }
+        // falling through on purpose
         default:
         {
             se_DisplayChatLocally( this, s );
