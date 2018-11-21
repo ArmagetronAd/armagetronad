@@ -621,7 +621,7 @@ class Sensor: public gSensor
         tASSERT( cycle );
 
         // create
-        if ( &(*cycle->chatBot_) == 0 )
+        if ( cycle->chatBot_.get() == 0 )
             cycle->chatBot_.reset( new gCycleChatBot( cycle ) );
 
         return *cycle->chatBot_;
