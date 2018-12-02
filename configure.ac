@@ -543,6 +543,11 @@ if test $CODELEVEL -ge 1; then
     
     dnl dropped out of support
     dnl AX_CXXFLAGS_GCC_OPTION(-Wno-mismatched-tags)
+
+    dnl this one is from GCC 7 (change to 1 or 2 in the future,
+    dnl leave at default and use [[fallthrough]] (std C++ 17)
+    dnl we're using both here; hopefully, old compilers ignore the [[fallthrough]].
+    AX_CXXFLAGS_GCC_OPTION(-Wimplicit-fallthrough=1)
 fi
 
 dnl test $CODELEVEL -ge 2 && CXXFLAGS="$CXXFLAGS -Wshadow -Wpointer-arith -Wfloat-equal -W -Wcast-qual -Wcast-align -Wconversion -Wunreachable-code --pedantic -Winline"

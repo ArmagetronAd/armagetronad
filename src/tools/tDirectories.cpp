@@ -1170,6 +1170,7 @@ bool tDirectories::FileMatchesWildcard(const char *str, const char *pattern,
             if (*pattern)
                 c = *pattern++;
             [[fallthrough]];
+            // fallthrough, we're just unescaping
         default:
             if (ignoreCase)
             {

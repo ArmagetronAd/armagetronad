@@ -247,6 +247,7 @@ static std::string se_EscapeName( tString const & original, bool keepAt = true )
             }
             
             [[fallthrough]];
+            // fallthrough
         default:
             if ( 0x20 < c && 0x7f >= c )
             {
@@ -3607,7 +3608,8 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s, tString co
     bool hidden = false;
 
     int count = 0;
-
+    short receiverOwner = nNetObject::Owner(receiver);
+    
     for ( int i2 = se_PlayerNetIDs.Len()-1; i2>=0; --i2 )
     {
         ePlayerNetID* p2 = se_PlayerNetIDs(i2);
@@ -3665,7 +3667,7 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s, tString co
         }
         if(sn_GetNetState() == nSERVER)
         {
-            if ( ( p2->Owner() != 0 && tCurrentAccessLevel::GetAccessLevel() <= se_ipAccessLevel ) || ( p2->Owner() != 0 && p2->Owner() == receiver->Owner() ) )
+            if ( ( p2->Owner() != 0 && tCurrentAccessLevel::GetAccessLevel() <= se_ipAccessLevel ) || ( p2->Owner() != 0 && p2->Owner() == receiverOwner ) )
             {
                 tString IP = p2->GetMachine().GetIP();
                 if ( IP.Len() > 1 )
@@ -3673,7 +3675,7 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s, tString co
                     tos << ", IP = " << IP;
                 }
             }
-            if ( ( p2->Owner() != 0 && tCurrentAccessLevel::GetAccessLevel() <= se_nVerAccessLevel ) || ( p2->Owner() != 0 && p2->Owner() == receiver->Owner() ) )
+            if ( ( p2->Owner() != 0 && tCurrentAccessLevel::GetAccessLevel() <= se_nVerAccessLevel ) || ( p2->Owner() != 0 && p2->Owner() == receiverOwner ) )
             {
                 tos << ", " << sn_GetClientVersionString( sn_Connections[ p2->Owner() ].version.Max() ) << " (ID: " << sn_Connections[ p2->Owner() ].version.Max() << ")";
             }
@@ -3683,7 +3685,7 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s, tString co
 
         if ( !doSearch )
         {
-            sn_ConsoleOut( tos, nNetObject::Owner(receiver) );
+            sn_ConsoleOut( tos, receiverOwner );
             count++;
         }
         else
@@ -3696,24 +3698,24 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s, tString co
                 count++;
                 if ( count == 1 )
                 {
-                    sn_ConsoleOut( tOutput( "$player_list_search", command, search ) , nNetObject::Owner(receiver) );
+                    sn_ConsoleOut( tOutput( "$player_list_search", command, search ) , receiverOwner );
                 }
-                sn_ConsoleOut( tos, nNetObject::Owner(receiver) );
+                sn_ConsoleOut( tos, receiverOwner );
             }
         }
     }
 
     if ( doSearch && !count )
     {
-        sn_ConsoleOut( tOutput( "$player_list_search_no_results", command, search ) , nNetObject::Owner(receiver) );
+        sn_ConsoleOut( tOutput( "$player_list_search_no_results", command, search ) , receiverOwner );
     }
     else if ( doSearch )
     {
-        sn_ConsoleOut( tOutput( "$player_list_search_end", command, count ) , nNetObject::Owner(receiver) );
+        sn_ConsoleOut( tOutput( "$player_list_search_end", command, count ) , receiverOwner );
     }
     else
     {
-        sn_ConsoleOut( tOutput( "$player_list_end", command, count ) , nNetObject::Owner(receiver) );
+        sn_ConsoleOut( tOutput( "$player_list_end", command, count ) , receiverOwner );
 
         if(tCurrentAccessLevel::GetAccessLevel() < tAccessLevel_DefaultAuthenticated)
             se_ListPastChatters(receiver);
@@ -4008,17 +4010,19 @@ static void se_Help( ePlayerNetID * sender, ePlayerNetID * receiver, std::istrea
         s >> name;
         eHelpTopic::printTopic(reply, name);
     }
+
+    short receiverOwner = nNetObject::Owner(receiver);
     if ( sender == receiver )
     {
         // just send a console message, the player asked for help himself
-        sn_ConsoleOut(reply, receiver->Owner());
+        sn_ConsoleOut(reply, receiverOwner);
     }
     else
     {
         // send help disguised as a chat message (with disabled spam limit)
         int spamMaxLenBack = se_SpamMaxLen;
         se_SpamMaxLen = 0;
-        se_SendChatLine( sender, reply, receiver->Owner() );
+        se_SendChatLine( sender, reply, receiverOwner );
         se_SpamMaxLen = spamMaxLenBack;
     }
 }
@@ -4340,6 +4344,7 @@ void ePlayerNetID::Chat(const tString &s_orig)
 
             [[fallthrough]];
         }
+        // falling through on purpose
         default:
         {
             if(s_orig.StartsWith("/console") ) {
@@ -5007,10 +5012,12 @@ void se_ListPastChatters(ePlayerNetID * receiver)
         }
     }
 
+    short receiverOwner = nNetObject::Owner(receiver);
+
     // and print
     if(report.size() > 0)
     {
-        sn_ConsoleOut( tOutput( "$player_list_disconnected" ), receiver->Owner() );
+        sn_ConsoleOut( tOutput( "$player_list_disconnected" ), receiverOwner );
     }
 
     for(std::vector<LastChatData>::iterator iter = report.begin(); iter != report.end(); ++iter)
@@ -5030,7 +5037,7 @@ void se_ListPastChatters(ePlayerNetID * receiver)
         
         line << lastSaid.PlayerName() << ": " << lastSaid.Said() << "\n";
         
-        sn_ConsoleOut( line, receiver->Owner() );
+        sn_ConsoleOut( line, receiverOwner );
     }
 }
 
@@ -5787,16 +5794,17 @@ static tSettingItem< int > se_adminListColors_WorstBlue_Conf( "ADMIN_LIST_COLORS
 
 void se_ListAdmins ( ePlayerNetID * receiver, std::istream &s, tString command )
 {
+    short client = nNetObject::Owner(receiver);
+
     // What's going to be sent ? But wait..are we sending anything at all?
     if ( receiver != 0 && receiver->GetAccessLevel() > se_accessLevelListAdmins )
     {
         sn_ConsoleOut( tOutput("$chat_command_accesslevel", command,
                                tCurrentAccessLevel::GetName( receiver->GetAccessLevel() ),
                                tCurrentAccessLevel::GetName( se_accessLevelListAdmins ) ),
-                       receiver->Owner() );
+                       client );
         return;
     }
-    int client = receiver ? receiver->Owner() : 0;
 
     bool canSeeEverything = false;
     if ( receiver == 0 || receiver->GetAccessLevel() <= se_accessLevelListAdminsSeeEveryone )

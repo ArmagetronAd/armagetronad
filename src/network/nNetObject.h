@@ -166,17 +166,17 @@ public:
         return id;
     }
 
+    static unsigned short Owner(nNetObject const *pThis)
+    {
+        if (pThis)
+            return pThis->owner;
+        else
+            return ::sn_myNetID;
+    }
+
     unsigned short Owner() const{
         tASSERT_THIS();
         return owner;
-    }
-
-    unsigned static short Owner(const nNetObject *pThis)
-    {
-        if(pThis)
-            return pThis->Owner();
-        else
-            return ::sn_myNetID;
     }
 
     inline nMachine & GetMachine() const;  //!< returns the machine this object belongs to
