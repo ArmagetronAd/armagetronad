@@ -1074,7 +1074,8 @@ void uMenuItemString::Deselect() {
 
 bool uMenuItemString::Insert(const tString &insertion)
 {
-    if ( insertion.Len() > 0 && content->Len() + insertion.Len() <= maxLength_ )
+	// Len() includes the trailing \0
+	if ( insertion.Len() > 0 && content->Len() + insertion.Len() <= maxLength_ + 2 )
     {
         *content = content->SubStr( 0, realCursorPos ) + insertion + content->SubStr( realCursorPos );
         realCursorPos += insertion.Len()-1;
