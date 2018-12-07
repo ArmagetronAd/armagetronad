@@ -1037,7 +1037,7 @@ void  Puiss10(float*&p)
     if(*p==ErrVal||fabs(*p)>DBL_MAX_10_EXP){*(--p)=ErrVal;return;};
     if(fabs(*(--p))<sqrtminfloat)*p=0;else if(*p==ErrVal||fabs(*p)>sqrtmaxfloat)
     {*p=ErrVal;return;};
-    *p*=pow10(*(p+1));}
+	*p*=exp10(*(p+1));}
 void  ArcTangente2(float*&p)
 {if(*p==ErrVal||fabs(*p)>inveps){*(--p)=ErrVal;return;};
     if(*(--p)==ErrVal||fabs(*p)>inveps){*p=ErrVal;return;};
