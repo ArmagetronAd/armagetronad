@@ -498,7 +498,7 @@ test -z "`echo $CXXFLAGS | grep "\-O"`" && CXXFLAGS="$CXXFLAGS -O2"
 
 test $DEBUGLEVEL -ge 1 && CXXFLAGS="`echo $CXXFLAGS | sed -e 's,-O.,,'` -g -O0"
 test $DEBUGLEVEL -ge 2 && CXXFLAGS="$CXXFLAGS -DDEBUG"
-test $DEBUGLEVEL -ge 3 && enable_memmanager=yes
+test $DEBUGLEVEL -ge 3 && enable_memmanager=yes CXXFLAGS="$CXXFLAGS -DNO_MALLOC_REPLACEMENT"
 test $DEBUGLEVEL -ge 4 && CXXFLAGS="$CXXFLAGS -DDEBUG_EXPENSIVE"
 test $DEBUGLEVEL -ge 5 && CXXFLAGS="$CXXFLAGS -DMEM_DEB"
 
