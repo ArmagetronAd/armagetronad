@@ -89,4 +89,6 @@ desktop/armagetronad-link.xml
 *.cbTemp
 /version.h
 *.pyc
-
+src/.cproject
+src/.project
+src/.settings
