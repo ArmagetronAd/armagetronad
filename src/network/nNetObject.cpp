@@ -561,14 +561,11 @@ nDescriptor& nNetObject::CreatorDescriptor() const{
 */
 
 void nNetObject::AddRef(){
-    tASSERT ( this );
+    tASSERT_THIS();
 
-    if ( this )
-    {
-        tASSERT( refCtr_ >= 0 );
-        refCtr_++;
-        tASSERT( refCtr_ >= 0 );
-    }
+    tASSERT( refCtr_ >= 0 );
+    refCtr_++;
+    tASSERT( refCtr_ >= 0 );
 }
 
 void nNetObject::ReleaseOwnership(){
@@ -588,9 +585,9 @@ void nNetObject::TakeOwnership(){
 }
 
 void nNetObject::Release(){
-    tASSERT( this );
+    tASSERT_THIS();
 
-    if (this){
+    {
         if (refCtr_>0)
             refCtr_--;
         else

@@ -2781,8 +2781,8 @@ REAL gAIPlayer::Think(){
     // get the sensors to the left and right with the most free space
     int currentDirectionNumber = Object()->Grid()->DirectionWinding( dir );
     REAL mindistLeft = 1E+30, mindistRight = 1E+30;
-    std::auto_ptr< gAISensor > left  ( sg_GetSensor( currentDirectionNumber, *Object(), -1, side, range, corridor, mindistLeft ) );
-    std::auto_ptr< gAISensor > right ( sg_GetSensor( currentDirectionNumber, *Object(), 1, side, range, corridor, mindistRight ) );
+    std::unique_ptr< gAISensor > left  ( sg_GetSensor( currentDirectionNumber, *Object(), -1, side, range, corridor, mindistLeft ) );
+    std::unique_ptr< gAISensor > right ( sg_GetSensor( currentDirectionNumber, *Object(), 1, side, range, corridor, mindistRight ) );
 
     // count intermediate walls to the left and right as if they were in front
     {

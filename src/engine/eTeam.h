@@ -32,8 +32,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "nNetObject.h"
 #include "tList.h"
 
-tString & operator << ( tString&, const eTeam&);
-std::ostream & operator << ( std::ostream&, const eTeam&);
+tString & operator << ( tString&, const eTeam*);
+std::ostream & operator << ( std::ostream&, const eTeam*);
 
 template<class T> class nConfItem;
 
