@@ -2102,8 +2102,7 @@ void eCamera::s_Timestep(eGrid *grid, REAL time){
 #ifndef DEDICATED
 
 void eCamera::SoundMix(Uint8 *dest,unsigned int len){
-    if (!this)
-        return;
+    tASSERT_THIS();
 
     if (id>=0){
         eGameObject *c=Center();
@@ -2118,6 +2117,9 @@ void eCamera::SoundMix(Uint8 *dest,unsigned int len){
 
 
 void eCamera::SoundMixGameObject(Uint8 *dest,unsigned int len,eGameObject *go){
+    if(!go)
+        return;
+    
     eCoord vec((go->pos-pos).Turn(dir.Conj()));
     REAL dist_squared=vec.NormSquared()+(z-go->z)*(z-go->z);
 

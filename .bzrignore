@@ -17,6 +17,7 @@ COPYING
 ChangeLog
 EclipseBuild
 ./INSTALL
+./compile
 Makefile.in
 ./aclocal.m4
 ./autom4te.cache
@@ -65,3 +66,4 @@ a.out.dSYM
 src/armagetronad_main_master
 src/doc/COPYING.txt
 rubbish
+./version.h

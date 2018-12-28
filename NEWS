@@ -36,6 +36,24 @@ Changes since 0.2.8.3.x:
   login/logout message can be announced.
 - Authentication is now enabled by default.
 
+Changes since 0.2.8.3.3:
+- Eliminated undefined behavior that was fine in gcc 5, but now
+  (rightfully!) turned into crashes in gcc 6.
+- Eliminated compilation disambiguity that was just causing a mild
+  performance degradation in gcc 5 and is now a compilation failure in
+  gcc 6.
+  
+Changes since 0.2.8.3.2:
+- security fix: do not read ahead of the beginning of network buffer.
+- security fix: don't attribute network errors from processing random
+  packets to the connection to the server 
+- security fix: while at it, don't process random packets unless they
+  may be important
+- fix for potential crash with friend list filtering
+- intel driver compatibility
+- fix for rare crash with sound lock
+- fix for camera turning for bizarre axis configurations
+
 Changes since 0.2.8.3.1:
 - security fix: old style action commands from clients no loger cause hangs and crashes
 - security fix: oversized packets are ignored properly

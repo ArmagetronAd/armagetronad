@@ -1170,7 +1170,7 @@ protected:
         {
             return true;
         }
-
+        
         eVoter * sender = eVoter::GetVoter( senderID  );
 
         double time = tSysTimeFloat();
@@ -1180,18 +1180,21 @@ protected:
         for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
         {
             ePlayerNetID * senderPlayer = se_PlayerNetIDs(i);
-            if( senderPlayer->Owner() == senderID && senderPlayer->GetTimeCreated() < timeCreated )
+            if( senderPlayer->Owner() == senderID )
             {
-                timeCreated = senderPlayer->GetTimeCreated();
+                // don't let the player call a vote if s/he is silenced.
+                if ( senderPlayer->IsSilenced() )
+                {
+                    tOutput message("$vote_silenced");
+                    sn_ConsoleOut( message, senderID );
+                    return false;
+                }
+                
+                if( senderPlayer->GetTimeCreated() < timeCreated )
+                {
+                    timeCreated = senderPlayer->GetTimeCreated();
+                }
             }
-        }
-
-        // don't let the player call a vote if s/he is silenced.
-        if ( player_->IsSilenced() )
-        {
-            tOutput message("$vote_silenced");
-            sn_ConsoleOut( message, player_->Owner() );
-            return false;
         }
 
         // check whether the issuer is allowed to start a vote
