@@ -563,6 +563,23 @@ if test $CODELEVEL -ge 1 && test $DEBUGLEVEL -ge 1; then
     AX_CXXFLAGS_GCC_OPTION(-Wno-unused-private-field)
 fi
 
+dnl Strip pedantic flags from general CXXFLAGS and put them into a separate variable
+CXXFLAGS_OURFILES=''
+
+if echo ${CXXFLAGS} | grep -- '-Werror' > /dev/null; then
+  CXXFLAGS_OURFILES="${CXXFLAGS_OURFILES} -Werror"
+fi
+
+if echo ${CXXFLAGS} | grep -- '--pedantic' > /dev/null; then
+  CXXFLAGS_OURFILES="${CXXFLAGS_OURFILES} --pedantic"
+fi
+
+CXXFLAGS="`echo ${CXXFLAGS} | sed -e 's,-Werror,,g' | sed -e 's,--pedantic,,g'`"
+
+dnl CXX flags for our own hand-written files. Can be pedantic.
+AC_SUBST(CXXFLAGS_OURFILES)
+
+
 dnl determine whether "games" should be put into paths: not if it was
 dnl requested with --disable-games or if "games" is already included
 dnl in the data path
@@ -1458,22 +1475,6 @@ AC_SUBST_UNIVERSAL(relocatable)
 
 AC_USE_SUBST_UNIVERSAL
 AC_AA_REPLACEPATHS
-
-dnl Strip pedantic flags from general CXXFLAGS and put them into a separate variable
-CXXFLAGS_OURFILES=''
-
-if echo ${CXXFLAGS} | grep -- '-Werror' > /dev/null; then
-  CXXFLAGS_OURFILES="${CXXFLAGS_OURFILES} -Werror"
-fi
-
-if echo ${CXXFLAGS} | grep -- '--pedantic' > /dev/null; then
-  CXXFLAGS_OURFILES="${CXXFLAGS_OURFILES} --pedantic"
-fi
-
-CXXFLAGS="`echo ${CXXFLAGS} | sed -e 's,-Werror,,g' | sed -e 's,--pedantic,,g'`"
-
-dnl CXX flags for our own hand-written files. Can be pedantic.
-AC_SUBST(CXXFLAGS_OURFILES)
 
 export CFLAGS
 export CPPFLAGS
