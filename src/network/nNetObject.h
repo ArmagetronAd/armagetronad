@@ -128,18 +128,30 @@ public:
 
     virtual void Dump( tConsole& con ); // dumps object stats
 
-    unsigned short ID() const{
-        if (this)
-            return id;
+    static unsigned short ID(nNetObject const *pThis)
+    {
+        if (pThis)
+            return pThis->id;
         else
             return 0;
     }
 
-    unsigned short Owner() const{
-        if (this)
-            return owner;
+    unsigned short ID() const{
+        tASSERT_THIS();
+        return id;
+    }
+
+    static unsigned short Owner(nNetObject const *pThis)
+    {
+        if (pThis)
+            return pThis->owner;
         else
             return ::sn_myNetID;
+    }
+
+    unsigned short Owner() const{
+        tASSERT_THIS();
+        return owner;
     }
 
     inline nMachine & GetMachine() const;  //!< returns the machine this object belongs to

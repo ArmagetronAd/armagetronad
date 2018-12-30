@@ -625,8 +625,8 @@ class Sensor: public gSensor
         tASSERT( cycle );
 
         // create
-        if ( &(*cycle->chatBot_) == 0 )
-            cycle->chatBot_ = std::auto_ptr< gCycleChatBot >( new gCycleChatBot( cycle ) );
+        if ( cycle->chatBot_.get() == 0 )
+            cycle->chatBot_.reset( new gCycleChatBot( cycle ) );
 
         return *cycle->chatBot_;
     }
@@ -2064,8 +2064,8 @@ struct gCycleVisuals
     // loads a specific texture from a specific folder
     static rSurface * LoadTextureSafe2( Slot slot, int mp )
     {
-        static std::auto_ptr<rSurface> cache[SLOT_MAX][2];
-        std::auto_ptr<rSurface> & surface = cache[slot][mp];
+        static std::unique_ptr<rSurface> cache[SLOT_MAX][2];
+        std::unique_ptr<rSurface> & surface = cache[slot][mp];
         if ( surface.get() == NULL )
         {
             static char const * names[SLOT_MAX]={"bike.png","cycle_body.png", "cycle_wheel.png"};
@@ -2074,7 +2074,7 @@ struct gCycleVisuals
             char const * folder = mp ? "moviepack" : "textures";
             tString file = tString(folder) + "/" + name;
 
-            surface = std::auto_ptr<rSurface> ( tNEW( rSurface( file ) ) );
+            surface.reset( tNEW( rSurface( file ) ) );
         }
 
         if ( surface->GetSurface() )
@@ -2426,7 +2426,7 @@ gCycle::gCycle(eGrid *grid, const eCoord &pos,const eCoord &d,ePlayerNetID *p)
         currentWall(NULL),
         lastWall(NULL)
 {
-    se_cycleCreatedWriter << p->GetLogName() << pos.x << pos.y << d.x << d.y;
+    se_cycleCreatedWriter << p->GetLogName() << this->MapPosition().x << this->MapPosition().y << this->MapDirection().x << this->MapDirection().y;
     se_cycleCreatedWriter.write();
 
     windingNumberWrapped_ = windingNumber_ = Grid()->DirectionWinding(dirDrive);
@@ -2751,7 +2751,7 @@ bool gCycle::Timestep(REAL currentTime){
             gCycleChatBot & bot = gCycleChatBot::Get( this );
             bot.Activate( currentTime );
         }
-        else if ( &(*chatBot_) )
+        else if ( chatBot_.get() )
         {
             chatBot_->nextChatAI_ = 0;
         }
@@ -4406,7 +4406,7 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
     sr_DepthOffset(true);
     if ( rTextureGroups::TextureMode[rTextureGroups::TEX_WALL] != 0 )
         glDisable(GL_TEXTURE_2D);
-    
+
     gNetPlayerWall * run = list;
     while( run )
     {
@@ -4419,7 +4419,7 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
     sr_DepthOffset(false);
     if ( rTextureGroups::TextureMode[rTextureGroups::TEX_WALL] != 0 )
         glEnable(GL_TEXTURE_2D);
-    
+
     run = list;
     while( run )
     {
@@ -6800,19 +6800,25 @@ static void sg_RespawnPlayer(std::istream &s)
         tString PlayerName = ePlayerNetID::FilterName(params.ExtractNonBlankSubString(pos));
         ePlayerNetID *pPlayer = 0;
         pPlayer = ePlayerNetID::FindPlayerByName(PlayerName, NULL);
-        if(!pPlayer) {
+
+        // If no player, or the player is not allowed to respawn.
+        if( ! pPlayer || ! pPlayer->CanRespawn() ) {
             return;
         }
+
+		// Get the size multiplier to adjust the cordinates to be based on the map's.
+        float sizeMultiplier = gArena::SizeMultiplier();
+
         const tString message_str = params.ExtractNonBlankSubString(pos);
         int message = atoi(message_str);
         const tString x_str = params.ExtractNonBlankSubString(pos);
-        REAL x = atof(x_str);
+        REAL x = atof(x_str) * sizeMultiplier;
         const tString y_str = params.ExtractNonBlankSubString(pos);
-        REAL y = atof(y_str);
+        REAL y = atof(y_str) * sizeMultiplier;
         const tString dirx_str = params.ExtractNonBlankSubString(pos);
-        REAL dirx = atof(dirx_str);
+        REAL dirx = atof(dirx_str) * sizeMultiplier;
         const tString diry_str = params.ExtractNonBlankSubString(pos);
-        REAL diry = atof(diry_str);
+        REAL diry = atof(diry_str) * sizeMultiplier;
         // prepare coord and direction ...
         eCoord ppos, pdir;
         if (((x_str == "") && (y_str == "")) || ((dirx ==0) && (diry == 0))) {
@@ -6861,17 +6867,21 @@ static void sg_TeleportPlayer(std::istream &s)
 	if(!pPlayer) {
 		return;
 	}
+
+	// Get the size multiplier to adjust the cordinates to be based on the map's.
+	float sizeMultiplier = gArena::SizeMultiplier();
+
 	const tString x_str = params.ExtractNonBlankSubString(pos);
-	REAL x = atof(x_str);
+	REAL x = atof(x_str) * sizeMultiplier;
 	const tString y_str = params.ExtractNonBlankSubString(pos);
-	REAL y = atof(y_str);
+	REAL y = atof(y_str) * sizeMultiplier;
 	tString relabs = params.ExtractNonBlankSubString(pos);
 	if (relabs=="") relabs="rel";
 
 	const tString xdir_str = params.ExtractNonBlankSubString(pos);
-	REAL xdir = atof(xdir_str);
+	REAL xdir = atof(xdir_str) * sizeMultiplier;
 	const tString ydir_str = params.ExtractNonBlankSubString(pos);
-	REAL ydir = atof(ydir_str);
+	REAL ydir = atof(ydir_str) * sizeMultiplier;
 	if ((xdir_str == "") && (ydir_str == "")) {
 		xdir = ydir = 0.0;
 	}

@@ -144,6 +144,9 @@ static tSettingItem<bool> sg_svgOutputScoreDifferencesConf( "SVG_OUTPUT_LOG_SCOR
 static REAL sg_playerPositioningStartTime = 5.0;
 static tSettingItem<REAL> sg_playerPositioningStartTimeConf( "TACTICAL_POSITION_START_TIME", sg_playerPositioningStartTime );
 
+static bool sg_loaCfgWithMap = false;
+static tSettingItem< bool > sg_loaCfgWithMapConf( "LOAD_CFG_WITH_MAP", sg_loaCfgWithMap );
+
 static nSettingItemWatched<tString> conf_mapfile("MAP_FILE",mapfile, nConfItemVersionWatcher::Group_Breaking, 8 );
 
 // enable/disable sound, supporting two different pause reasons:
@@ -1300,7 +1303,7 @@ void delayedCommands::Run(REAL currentTime) {
                 const tString command_str = params.SubStr(interval_str.Len());
                 command << command_str;
                 tConfItemBase::LoadAll(command); // run command if it's not too old, otherwise, just skip it ...
-                con << command << " " << interval <<"\n";
+                con << command.str() << " " << interval <<"\n";
                 if (interval>0){
                     delayedCommands::Add(currentTime+interval,command.str(),interval);
                 }
@@ -1577,7 +1580,7 @@ void init_game_grid(eGrid *grid, gParser *aParser){
         // let settings in the map file be executed with the rights of the person
         // who set the map
         tCurrentAccessLevel level( conf_mapfile.GetSetting().GetSetLevel(), true );
-        
+
         // and disallow CASACL and script spawning just in case
         tCasaclPreventer preventer;
 
@@ -1782,7 +1785,7 @@ void init_game_objects(eGrid *grid){
             gSpawnPoint *spawn = Arena.LeastDangerousSpawnPoint();
             spawnPointsUsed++;
 
-            // if the spawn points are grouped, make sure the last player is not in a goup of his
+            // if the spawn points are grouped, make sure the last player is not in a group of his
             // own by skipping one spawnpoint
             if ( ( eTeam::teams(0)->IsHuman() || eTeam::teams(0)->NumPlayers() == 1 ) && sg_spawnPointGroupSize > 2 && ( spawnPointsUsed % sg_spawnPointGroupSize == sg_spawnPointGroupSize - 1 ) )
             {
@@ -2473,7 +2476,7 @@ void ConnectToServer(nServerInfoBase *server)
     // check for redirection
     while( okToRedirect )
     {
-        std::auto_ptr< nServerInfoBase > redirectTo( sn_GetRedirectTo() );
+        auto redirectTo = sn_GetRedirectTo();
 
         // abort loop
         if ( !(&(*redirectTo)) )
@@ -3283,12 +3286,9 @@ static void sg_ParseMap ( gParser * aParser, tString mapfile, bool verify )
             errorMessage << "$map_file_load_failure_default";
             throw tGenericException( errorMessage, errorTitle );
         }
-    } else if(sn_GetNetState()!=nCLIENT) {
-        // if map has been loaded succefully
-
-        // Loading config affecting game settings like axes, walls_length
-        // must be done before these settings are transfer to client
-        // Map config file is executed at accesslevel of the one who set the map
+    } else if(sn_GetNetState()!=nCLIENT && sg_loaCfgWithMap && verify) {
+        // if map has been loaded succefully, and this is during setting tranfer...
+        // map config file is executed at accesslevel of the one who set the map
         tCurrentAccessLevel level( conf_mapfile.GetSetting().GetSetLevel(), true );
         std::stringstream command;
         std::string filename = std::string(mapfile);
@@ -3957,7 +3957,7 @@ static void sg_Respawn( REAL time, eGrid *grid, gArena & arena )
     {
         ePlayerNetID *p = se_PlayerNetIDs(i);
 
-        if ( !p->CurrentTeam() )
+        if ( !p->CanRespawn() )
             continue;
 
         eGameObject *e=p->Object();
@@ -4003,20 +4003,18 @@ void gGame::Timestep(REAL time,bool cam){
     tMemManBase::Check();
 #endif
 
-#ifdef RESPAWN_HACK
-    // no respawining while deathzone is active.
-    if( !winDeathZone_ )
-    {
-        sg_Respawn(time,grid,Arena);
-    }
-#endif
-
     // chop timestep into small, managable bits
     REAL dt = time - lastTimeTimestep;
     if ( dt < 0 )
         return;
     REAL lt = lastTimeTimestep;
-
+#ifdef RESPAWN_HACK
+    // Only respawn when the round is in play mode and while the deathzone is not active.
+    if( state == GS_PLAY && time > 0 && winner == 0 && !winDeathZone_ )
+    {
+        sg_Respawn(time,grid,Arena);
+    }
+#endif
     // determine the number of bits
     int number_of_steps=int(fabs((dt)/sg_timestepMax));
     if (number_of_steps<1)
@@ -5473,7 +5471,7 @@ static nCallbackLoginLogout lc(LoginCallback);
 static void sg_FillServerSettings()
 {
     nServerInfo::SettingsDigest & digest = *nCallbackFillServerInfo::ToFill();
-    
+
     digest.SetFlag( nServerInfo::SettingsDigest::Flags_NondefaultMap,
                     mapfile != DEFAULT_MAP );
     digest.SetFlag( nServerInfo::SettingsDigest::Flags_TeamPlay,

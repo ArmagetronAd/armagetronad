@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -28,7 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef ArmageTron_PLAYER_H
 #define ArmageTron_PLAYER_H
 
-#ifndef MAX_INSTANT_CHAT 
+#ifndef MAX_INSTANT_CHAT
 #define MAX_INSTANT_CHAT 25
 #endif
 
@@ -171,7 +171,7 @@ public:
         REAL maxGoodRatio; //!< the maximal allowed recent ratio of events to land in the 'good' bucket
         REAL goodHumanRatio; //!< the maximal observed ratio for a human
         int  averageOverEvents; //!< number of events to average over
-        
+
         mutable REAL bestRatio; //!< best ratio achieved by players during this session
 
         eUncannyTimingSettings( REAL ts, REAL human, REAL max )
@@ -315,6 +315,11 @@ public:
     virtual bool ActionOnQuit();
     virtual void ActionOnDelete();
 
+    // Check if a player can be respawned. Relaying on team alone is not enough.
+    // If a player enters as spectator, they are still assumed to be on a team.
+    // When a player is suspeded they are also on a team until the end of the round.
+    bool CanRespawn() const { return currentTeam && suspended_ == 0 && ! spectating_; }
+
     // chatting
     bool IsChatting() const { return chatting_; }
     void SetChatting ( ChatFlags flag, bool chatting );
@@ -371,7 +376,7 @@ public:
     // suspend the player from playing, forcing him to spectate
     void Suspend( int rounds = 5 );
 #ifdef KRAWALL_SERVER
-    void Authenticate( tString const & authName, 
+    void Authenticate( tString const & authName,
                        tAccessLevel accessLevel = tAccessLevel_Authenticated,
                        ePlayerNetID const * admin = 0 );    //!< make the authentification valid
     void DeAuthenticate( ePlayerNetID const * admin = 0 );  //!< make the authentification invalid
@@ -383,7 +388,9 @@ public:
     bool IsActive() const { return !disconnected; }
 
     bool IsSilenced( void ) const { return silenced_; }
-    void SetSilenced( bool silenced ) { silenced_ = silenced; }
+    void SetSilenced( bool silenced ); // { silenced_ = silenced; }
+
+    // only for the menu
     bool& AccessSilenced( void ) { return silenced_; }
 
     bool IsSuspended ( void ) { return suspended_ > 0; }
@@ -444,7 +451,7 @@ public:
     void GetScoreFromDisconnectedCopy(); // get the player's data from the previous login
 
     void Chat(const tString &s);
-    
+
     nTimeAbsolute GetTimeCreated() const { return timeCreated_; }
 
     virtual void Color( REAL&r, REAL&g, REAL&b ) const;
@@ -514,7 +521,7 @@ public:
     ePlayerNetID & SetName( tString const & name ); //!< Sets this player's name. Sets processed names (colored, username, nameFromCLient) as well.
     ePlayerNetID & SetName( char    const * name ); //!< Sets this player's name. Sets processed names (colored, username, nameFromCLient) as well.
     ePlayerNetID & SetName( tString const & name , bool force ); //!< Sets this player's name. Sets processed names (colored, username, nameFromCLient) as well.
-    ePlayerNetID & ForceName( tString const & name ); //!< Forces this player's name. Forces processed names (colored, username, nameFromCLient) as well.    
+    ePlayerNetID & ForceName( tString const & name ); //!< Forces this player's name. Forces processed names (colored, username, nameFromCLient) as well.
 
     inline ePlayerNetID & SetUserName( tString const & userName );  //!< Sets this player's name, cleared for system logs. Use for writing to files or comparing with admin input. The other names stay unaffected.
 
@@ -523,7 +530,7 @@ private:
     inline ePlayerNetID & SetColoredName( tColoredString const & coloredName ); //!< Sets this player's name, cleared by the server. Use this for onscreen screen display.
 
     //! accesses the suspension count
-    int & AccessSuspended();
+    // int & AccessSuspended();
 
     //! returns the suspension count
     int GetSuspended() const;

@@ -327,7 +327,7 @@ last_chat_break_time_help           Last round time a player in chat mode is abl
 extra_round_time_help               Length of an extra pause at the beginning of the round
 player_chat_wait_max_help           Maximum time in seconds to wait for a single player to stop chatting.
 player_chat_wait_fraction_help      Maximum fraction of time to wait for a single player to stop chatting.
-player_chat_wait_single_help        Set to 1 if only one player should get his chat wait time reduced at any given time.
+player_chat_wait_single_help        Set to 1 if only one player should get their chat wait time reduced at any given time.
 player_chat_wait_teamleader_help    Set to 1 if only team leaders, and 0 if all players, should be allowed to pause the timer.
 
 wait_for_external_script_help Let the server wait for an external script between two rounds until the script switches this setting back to 0.
@@ -356,7 +356,7 @@ keep_player_slot_help               If set to 1, every time the server gets full
 player_name_confitem_help	Player name
 player_user_confitem_help	Global player ID
 auto_login_confitem_help	Should this player automatically request authentication?
-hide_identity_confitem_help Should this player hide his ID?
+hide_identity_confitem_help Should this player hide their ID?
 camcenter_help			Center internal camera on driving direction
 start_cam_help			Initial Camera
 start_fov_help			Initial field of vision
@@ -499,7 +499,7 @@ lag_frequency_threshold_help       Minimal frequency of lag events (measured aga
 #********************************************
 #********************************************
 
-network_min_ban_help                When a client's connection is blocked because he's banned, make him banned for at least this many seconds.
+network_min_ban_help                When a client's connection is blocked because they're banned, make them banned for at least this many seconds.
 
 network_autoban_offset_help         Autoban players for NETWORK_AUTOBAN_FACTOR * ( kph - NETWORK_AUTOBAN_OFFSET ) minutes when they get kicked; kph is the average number of kicks per hour they get.
 network_autoban_factor_help         Autoban players for NETWORK_AUTOBAN_FACTOR * ( kph - NETWORK_AUTOBAN_OFFSET ) minutes when they get kicked; kph is the average number of kicks per hour they get.
@@ -529,6 +529,8 @@ voting_decay_help					One non-voter is ignored every time this many seconds pass
 voting_bias_help					Add virtual voters that oppose every change.
 voting_bias_kick_help				Add virtual voters that oppose every kick vote.
 voting_bias_suspend_help			Add virtual voters that oppose every suspend vote.
+voting_bias_silence_help			Add virtual voters that oppose every silence vote.
+voting_bias_voice_help			Add virtual voters that oppose every voice vote.
 voting_bias_include_help			Add virtual voters that oppose every include vote.
 voting_bias_command_help			Add virtual voters that oppose every command vote.
 
@@ -537,7 +539,7 @@ voting_spam_issue_help              The spam level of issuing a vote.
 voting_spam_reject_help             The spam level of getting your vote rejected.
 voting_harm_time_help               The minimum time in seconds between two harmful votes against the same player.
 voting_kick_time_help               The minimum time in seconds between two kick votes against the same player.
-voting_maturity_help                The minimum time in seconds a player needs to be online with the same name before he can issue votes.
+voting_maturity_help                The minimum time in seconds a player needs to be online with the same name before they can issue votes.
 voting_suspend_rounds_help          The number of rounds "/vote suspend <player>" suspends a player for.
 voting_kick_minharm_help            Minimal number of harmful votes (suspension, kick,..) that need to have been issued (success is not required) against a player before a kick vote issued via the menu really results in a kick; otherwise, the result is a simple suspension.
 votes_suspend_help		    Suspends voting for n minutes.
@@ -985,7 +987,7 @@ only_works_on_server        The console command \1 only works on the server. You
 players_help                Prints list of currently active players
 teams_help                  Get a list of all teams with a somewhat graphic representation of their formation. Same as saying /teams
 kill_help                   Kill a specific player (as warning before a kick)
-silence_help                Silence a specific player so he can't use public chat any more (/msg and /team still work)
+silence_help                Silence a specific player so they can't use public chat any more (/msg and /team still work)
 unsilence_help              Reverts a SILENCE command
 suspend_help                Suspend a player from playing for the following N rounds (default is set by SUSPEND_DEFAULT_ROUNDS)
 unsuspend_help              Removes a player suspension.
@@ -995,8 +997,8 @@ allow_team_change_player_help Allow a specific player to change teams even if AL
 disallow_team_change_player_help Reverse of ALLOW_TEAM_CHANGE_PLAYER
 kick_help					Kicks the specified player from the server.
 default_kick_reason_help    The reason given to a player kicked by KICK if none is specified.
-kick_to_help    			Kicks the specified player from the server and, if the client supports it, redirects him to a different server.
-move_to_help    			Kicks the specified player from the server and, if the client supports it, redirects him to a different server. Does not imply an autoban penalty.
+kick_to_help    			Kicks the specified player from the server and, if the client supports it, redirects them to a different server.
+move_to_help    			Kicks the specified player from the server and, if the client supports it, redirects them to a different server. Does not imply an autoban penalty.
 default_kick_to_reason_help The reason given to a player kicked by KICK_TO or MOVE_TO if none is specified.
 default_kick_to_server_help Default server IP/name a player is redirected to by KICK_TO and MOVE_TO.
 default_kick_to_port_help   Default server port a player is redirected to by KICK_TO and MOVE_TO.
@@ -1004,7 +1006,7 @@ vote_kick_to_server_help    Server IP/name a player is redirected to by vote kic
 vote_kick_to_port_help      Default server port a player is redirected to by vote kicks.
 vote_kick_reason_help       Default reason given to players when they're vote-kicked.
 
-ban_help                    Bans the specified player from the server (kicks him first) for a variable time in minutes.
+ban_help                    Bans the specified player from the server (kicks them first) for a variable time in minutes.
 ban_ip_help                 Bans the specified IP address from the server for a variable time.
 ban_list_help               Prints a list of currently banned IPs.
 unban_ip_help               Revokes the ban of the specified IP address.
@@ -1014,6 +1016,7 @@ player_list_search          \1: Search string "\2" matches:\n
 player_list_search_no_results \1: Search string "\2" returned no result.\n
 player_list_search_end      \1: End of search (\2 matches).\n
 player_list_end             \1: Listed \2 players.\n
+player_list_disconnected    Past players and their last chat:\n
 
 admins_help                 Lists the server admins. You should use /admins or /listadmins instead of this.
 
@@ -1704,6 +1707,12 @@ kick_player_help					Pressing enter or space on this menu item will issue a kick
 
 suspend_player_details_text			If accepted, \1 will be suspended for some rounds.
 suspend_player_text					Suspend \1
+
+silence_player_details_text			If accepted, \1 will be silenced.
+silence_player_text					Silenced \1
+
+voice_player_details_text			If accepted, \1 will be unsilenced.
+voice_player_text					Voice \1
 
 vote_include_details_text			If accepted, the file \1 will be included as a configuration file.
 vote_include_text					Include \1
@@ -2413,7 +2422,7 @@ player_admin_kill			\1 0xRESETTwas smitten by an administrator.\n
 player_admin_slap_free			\1 0xRESETThas been slapped by an administrator.\n
 player_admin_slap_win			\1 has been hugged by an administrator and got \2 points.\n
 player_admin_slap_lose			\1 has been slapped by an administrator and lost \2 points.\n
-slap_help                   Slaps the given player by penalizing him with the specified amount of points. Be smart and you may be able to hug your users, too ;)
+slap_help                   Slaps the given player by penalizing them with the specified amount of points. Be smart and you may be able to hug your users, too ;)
 player_win_instant			\1 was awarded \2 points for hitting the instant win zone.\n
 player_win_conquest			\1 was awarded \2 points for conquering the enemy base.\n
 player_win_conquest2			\1 was awarded \2 points for conquering \3's base.\n
@@ -2457,8 +2466,8 @@ spam_protection_silenced_default SPAM PROTECTION: you have to be given voice in 
 vote_silenced You are not allowed to call a new vote while you are silenced.\n
 player_rename_silenced You are not allowed to rename while you are silenced.\n
 player_silenced         \10xff7777 has been silenced.\n
-player_voiced           \10x77ff77 has been given his voice back.\n
-player_allowed_teamchange \10x77ff77 has been allowed to change his team.\n
+player_voiced           \10x77ff77 has been given their voice back.\n
+player_allowed_teamchange \10x77ff77 has been allowed to change their team.\n
 player_disallowed_teamchange \10xff7777 cannot change teams anymore.\n
 vote_spam_protection	VOTE SPAM PROTECTION: you are disallowed from issuing votes for the next \1 seconds.\n
 chat_title_text			Say:
@@ -2588,9 +2597,9 @@ help_commands_pp_shortdesc Player police commands
 help_commands_pp_text 0x88ff88/players [<search>]0xffff88: Get a list of all players, along with some other information. You can also match specific users with the search argument.\n0x88ff88/admins [<access level> [<access level>]]0xffff88: Gets the list of admins. If first parameter is specified, only admins who have this exact level will be shown. If both arguments are set, all the admins in that range of access levels will be listed.\n0x88ff88/vote kick|suspend <player>0xffff88: Start a poll to kick or suspend a player
 
 help_commands_auth_shortdesc Authentication related commands
-help_commands_auth_text 0x88ff88/login [<user>]@<authority>0xffff88: Authenticate yourself using a given authority. Try @forums if you have an account at http://forums.armagetronad.net/\n0x88ff88/logout0xffff88: Log out so you can log back in as another player\n0x88ff88/vote include <file>0xffff88: Start a poll to include a given file\n0x88ff88/vote command <command>0xffff88: Start a poll to execute an admin command\n0x88ff88/admin <command>0xffff88: Execute a console command on the server if you have sufficient access rights\n0x88ff88/op <player> [+|-]<optional access level>0xffff88: Gives another player a higher or a lower access level; the level defaults to the level one lower than you access level, which is also the maximal possible level\n0x88ff88/deop <player>0xffff88: Reverses /op; it takes away a player's access level, effectively making him unauthenticated again. Only works on players of lower access level than yours, of course.\n
+help_commands_auth_text 0x88ff88/login [<user>]@<authority>0xffff88: Authenticate yourself using a given authority. Try @forums if you have an account at http://forums.armagetronad.net/\n0x88ff88/logout0xffff88: Log out so you can log back in as another player\n0x88ff88/vote include <file>0xffff88: Start a poll to include a given file\n0x88ff88/vote command <command>0xffff88: Start a poll to execute an admin command\n0x88ff88/admin <command>0xffff88: Execute a console command on the server if you have sufficient access rights\n0x88ff88/op <player> [+|-]<optional access level>0xffff88: Gives another player a higher or a lower access level; the level defaults to the level one lower than you access level, which is also the maximal possible level\n0x88ff88/deop <player>0xffff88: Reverses /op; it takes away a player's access level, effectively making them unauthenticated again. Only works on players of lower access level than yours, of course.\n
 help_commands_auth_levels_shortdesc List of all access levels
-help_commands_auth_levels_text 0x88ff880 (Owner)0xffff88: The owner of the server. Commands entered on the server console are executed with these rights.\n0x88ff881 (Admin)0xffff88: A server administrator. By default, almost as powerful as the owner himself.\n0x88ff882 (Moderator)0xffff88: A server moderator. Is still allowed to use /admin, but is restricted to player management commands.\n0x88ff887 (Team Leader)0xffff88: Leader of a team. By default, no admin rights at all.\n0x88ff888 (Team Member)0xffff88: Member of a team. Local team accounts get this level.\n0x88ff8812 (Local User)0xffff88: Players with local accounts get this level.\n0x88ff8815 (Remote User)0xffff88: Players with remote accounts get this level by default.\n0x88ff8816 (Fallen from Grace)0xffff88: Authenticated players who abused default rights given to them.\n0x88ff8817 (Shunned)0xffff88: Same, only worse :)\n0x88ff8819 (Authenticated)0xffff88: Minimal level authenticated players can get.\n0x88ff8820 (Program)0xffff88: Unauthenticated players.
+help_commands_auth_levels_text 0x88ff880 (Owner)0xffff88: The owner of the server. Commands entered on the server console are executed with these rights.\n0x88ff881 (Admin)0xffff88: A server administrator. By default, almost as powerful as the owner themself.\n0x88ff882 (Moderator)0xffff88: A server moderator. Is still allowed to use /admin, but is restricted to player management commands.\n0x88ff887 (Team Leader)0xffff88: Leader of a team. By default, no admin rights at all.\n0x88ff888 (Team Member)0xffff88: Member of a team. Local team accounts get this level.\n0x88ff8812 (Local User)0xffff88: Players with local accounts get this level.\n0x88ff8815 (Remote User)0xffff88: Players with remote accounts get this level by default.\n0x88ff8816 (Fallen from Grace)0xffff88: Authenticated players who abused default rights given to them.\n0x88ff8817 (Shunned)0xffff88: Same, only worse :)\n0x88ff8819 (Authenticated)0xffff88: Minimal level authenticated players can get.\n0x88ff8820 (Program)0xffff88: Unauthenticated players.
 
 help_commands_ra_shortdesc Remote admin commands
 help_commands_ra_text 0x88ff88/login <password>0xffff88: Log in as the server administrator using the server-specific password\n0x88ff88/logout0xffff88: Drop your logged in status so that other players can't see that you're an administrator\n0x88ff88/admin <command>0xffff88: Execute a console command as if it were entered on the server
@@ -2599,7 +2608,7 @@ help_commands_misc_shortdesc Miscellaneous commands
 help_commands_misc_text 0x88ff88/help0xffff88: You just found out about this one :-)\n0x88ff88/teach <player> <topic>0xffff88: same as /help, but the the output gets sent to another player.\n0x88ff88/rtfm0xffff88: alias for /teach\n0x88ff88/command <command>0xffff88: Execute a command on your own client. Useful for instant chats
 
 help_commands_tourney_shortdesc Tourney related commands
-help_commands_tourney_text 0x88ff88/lock0xffff88: Locks your current team. Nobody can join it any more on their own. To let someone in, you need to invoke\n0x88ff88/invite <player>0xffff88: From that moment on, the player is allowed to join you. Another effect of /invite, even if your team is not locked, is that the invited player can read all of your team's /team messages. Invitations are permanent until revoked. That means a player who is invited into your team can join and leave it freely without further need to /invite him again. Players who were on the team when you /locked it are not automatically invited when they leave on their own account.\n0x88ff88/uninvite <player>0xffff88: reverses /invite. The invitation is revoked, the player can no longer join you, and if he currently is on your team, he will be thrown out.\n0x88ff88/unlock0xffff88: makes your team available for everyone to join again.
+help_commands_tourney_text 0x88ff88/lock0xffff88: Locks your current team. Nobody can join it any more on their own. To let someone in, you need to invoke\n0x88ff88/invite <player>0xffff88: From that moment on, the player is allowed to join you. Another effect of /invite, even if your team is not locked, is that the invited player can read all of your team's /team messages. Invitations are permanent until revoked. That means a player who is invited into your team can join and leave it freely without further need to /invite them again. Players who were on the team when you /locked it are not automatically invited when they leave on their own account.\n0x88ff88/uninvite <player>0xffff88: reverses /invite. The invitation is revoked, the player can no longer join you, and if they are currently on your team, they will be thrown out.\n0x88ff88/unlock0xffff88: makes your team available for everyone to join again.
 
 invite_no_team          Can't use \1 if you're not on a team.\n
 invite_team_locked      \1 locked, you'll need an invitation from a team leader via the /invite command to join from now on.\n
@@ -2608,7 +2617,7 @@ unlock_all_teams_help   Unlocks all teams.
 invite_team_can_join      \10xRESETT can now join \2.\n
 invite_team_invite      \10xRESETT has been invited to join \2.\n
 invite_team_kick        \10xRESETT has been kicked from \2.\n
-invite_team_uninvite    \10xRESETT got his invitation to join \2 cancelled.\n
+invite_team_uninvite    \10xRESETT got their invitation to join \2 cancelled.\n
 invite_team_locked_list (locked)
 
 msg_toomanymatches 0xff0000Too many matches found for the search term \1. Be more specific.\n
@@ -2722,7 +2731,7 @@ network_login_relabeling	Relabeling NetObjects...\n
 network_login_sync2		Syncing again...\n
 network_login_done		Done!\n
 
-network_kill_log            User \1 kicked, reason given to him: \2\n
+network_kill_log            User \1 kicked, reason given to them: \2\n
 network_redirect            \n\nYou will now be redirected to the server \1:\2. You can prevent that by pressing ESC.\n
 network_kill_preface		Reason given by server:
 network_kill_maxidgrabber	It ran out of IDs; your client was the one occupying most of them for itself. The reason for this can be a bug.
@@ -3031,6 +3040,7 @@ access_level_play_sliders_help The access level required to play will only slide
 access_level_play_changed      Access level required to play changed from \1 to \2.\n
 
 access_level_vote_suspend_help    Minimal access level required to issue suspend votes.
+access_level_vote_silence_help    Minimal access level required to issue silence and voice votes.
 access_level_vote_kick_help    Minimal access level required to issue kick votes.
 access_level_vote_include_help    Minimal access level required to issue include votes.
 access_level_vote_include_execute_help    Minimal access level successful include votes will be executed at.
@@ -3059,6 +3069,8 @@ rtfm_denied                 You need to be logged in to teach others.\n
 
 access_level_list_admins_help Access level required to be able to use the "/admins" command.
 access_level_list_admins_see_everyone_help Users with this access level or better will be able to list any configured admin, regardless of ADMIN_LIST_MIN_ACCESS_LEVEL.
+
+access_level_announce_login_help Maximal access level that determines if a player's login/logout message can be announced.
 
 intercept_commands_help     List of chat commands to accept and log to stdout.
 intercept_unknown_commands_help If 1, accept and log all unknown chat commands.

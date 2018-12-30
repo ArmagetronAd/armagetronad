@@ -394,7 +394,7 @@ static bool lowlevel_sr_InitDisplay(){
     rScreenSize & res = currentScreensetting.fullscreen ? currentScreensetting.res : currentScreensetting.windowSize;
 
     // update pixel aspect ratio
-    if ( res.res != ArmageTron_Invalid )
+    if ( res.res != ArmageTron_Invalid && size_t(res.res) < sizeof(aspect)/sizeof(aspect[0]) )
         currentScreensetting.aspect = aspect[res.res];
 
 #ifndef DIRTY
@@ -939,7 +939,7 @@ bool sr_texturesTruecolor=false;
 bool sr_textOut=false;
 bool sr_FPSOut=true;
 
-bool sr_keepWindowActive=false;
+bool sr_keepWindowActive=true;
 
 tString renderer_identification;
 
@@ -964,7 +964,7 @@ void sr_LoadDefaultConfig(){
     sr_infinityPlane=false;
     sr_lowerSky=false;
     sr_upperSky=false;
-    sr_keepWindowActive=false;
+    sr_keepWindowActive=true;
     rSysDep::swapMode_=rSysDep::rSwap_glFinish;
 
     if (software_renderer){

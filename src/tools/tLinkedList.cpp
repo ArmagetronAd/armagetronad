@@ -59,8 +59,10 @@ int  tListItemBase::Len(){
 
 void tListItemBase::Sort( Comparator* compare )
 {
+    tASSERT_THIS();
+    
     // early return statements: empty list or single element in list
-    if ( !this || !next )
+    if (!next )
     {
         return;
     }
@@ -88,8 +90,10 @@ void tListItemBase::Sort( Comparator* compare )
     tListItemBase*& first = *anchor;
 
     // sort the two half lists
-    first->Sort( compare );
-    middle->Sort( compare );
+    if(first)
+        first->Sort( compare );
+    if(middle)
+        middle->Sort( compare );
 
     // merge the lists
     {

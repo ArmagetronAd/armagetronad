@@ -109,3 +109,8 @@ void st_PresentMessage( const char* caption, const char *message )
 
 char ERROR_MESSAGE[1000];
 
+bool st_CheckThis(void const *in)
+{
+    return in;
+}
+
