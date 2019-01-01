@@ -284,7 +284,9 @@ public:
         ChatFlags_Menu = 4,
         ChatFlags_Console = 8
     };
-
+    
+    bool flagOverrideChat;
+    bool flagChatState; 
     int    pID;
     tString teamname;
     // REAL	rubberstatus;

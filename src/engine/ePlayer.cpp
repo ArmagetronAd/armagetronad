@@ -5036,6 +5036,9 @@ void se_ListPastChatters(ePlayerNetID * receiver)
 
 ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), timeCreated_( tSysTimeFloat() ), invitations_(), invitationsChanged_( false ), allowTeamChange_(false), registeredMachine_(0), pID(p), ready(false)
 {
+    flagOverrideChat = false;
+    flagChatState = false; 
+    
     // default access level
     lastAccessLevel = tAccessLevel_Default;
 
@@ -6408,6 +6411,11 @@ void ePlayerNetID::WriteSync( Engine::PlayerNetIDSync & sync, bool init )
 
     sync.set_ping( ping );
 
+    bool tempChat = chatting_;
+        if (flagOverrideChat)
+	    {
+            tempChat = flagChatState;
+        }
     // pack chat, spectator and stealth status together
     unsigned short flags = ( chatting_ ? 1 : 0 ) | ( spectating_ ? 2 : 0 ) | ( stealth_ ? 4 : 0 );
     sync.set_flags( flags );
@@ -6812,6 +6820,8 @@ ePlayerNetID::ePlayerNetID( Engine::PlayerNetIDSync const & sync, nSenderInfo co
 : nNetObject( sync.base(), sender ),listID(-1), teamListID(-1), timeCreated_( tSysTimeFloat() )
  , invitations_(), invitationsChanged_( false ), allowTeamChange_(false), registeredMachine_(0)
 {
+    flagOverrideChat = false;
+    flagChatState = false; 
     // default access level
     lastAccessLevel = tAccessLevel_Default;
 

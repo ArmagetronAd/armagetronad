@@ -192,6 +192,11 @@ INCLUDED_MODULE_SOURCES +=\
 	tron/zone/zFortress.cpp        tron/zone/zFortress.h
 endif
 
+if BUILD_FLAG
+INCLUDED_MODULE_SOURCES +=\
+	tron/zone/zFlag.cpp        tron/zone/zFlag.h
+endif
+
 endif
 
 if BUILDZONESV1

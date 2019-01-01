@@ -65,6 +65,7 @@ public:
     void setColorNow(const rColor &c);
 
     virtual tCoord Position() const;
+    tCoord getPosition(){return Position();}
     tFunction getPosX() {return posx_;};
     tFunction getPosY() {return posy_;};
     tPolynomial getRotation2() { return rotation2; };
@@ -76,6 +77,7 @@ public:
     tCoord GetRotation() const;
     REAL GetRotationSpeed();
     void SetRotationSpeed(REAL r);
+	void SetVelocity(eCoord const & velocity); //!< Sets the current velocity
     REAL GetRotationAcceleration();
     void SetRotationAcceleration(REAL r);
 
