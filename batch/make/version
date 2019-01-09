@@ -32,6 +32,7 @@ fi
 
 # set version parts to defaults for CVS snapshot
 major_version=`cat ${srcdir}/major_version`
+minor_version_proto=`cat ${srcdir}/minor_version`
 DATE=`date +%Y%m%d`
 builddate=`date +'%a, %d %b %Y %T %z'`
 minor_version=
@@ -201,9 +202,28 @@ then
     fi
 fi
 
+if test -d "${srcdir}/.git"; then
+    # check for a tag
+    cd $srcdir
+    # todo: once we have make tags, consider just git describe --tags as version ID.
+    if tag=`git describe --tags --candidates=0` > /dev/null 2>&1; then
+        major_version=`echo $tag | sed -e s/version_// -e s/release_//`
+        minor_version=""
+        DATE=""
+    else
+        if git diff-index --quiet HEAD --; then
+            # local checkout clean, just use revno
+            DATE=_g`git rev-list HEAD --count`
+        else
+            # local changes, add date
+            DATE=_g`git rev-list HEAD --count`_$DATE
+        fi
+    fi
+fi
+
 if test -z "$minor_version"
 then
-    test -z "$DATE" || minor_version=`cat ${srcdir}/minor_version | sed -e "s,DATE,$DATE," -e "s,YYYYMMDD,$DATE,"`
+    test -z "$DATE" || minor_version=`echo ${minor_version_proto} | sed -e "s,DATE,$DATE," -e "s,YYYYMMDD,$DATE,"`
 fi
 
 if test $verbose
