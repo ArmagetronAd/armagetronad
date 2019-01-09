@@ -213,10 +213,10 @@ if test -d "${srcdir}/.git"; then
     else
         if git diff-index --quiet HEAD --; then
             # local checkout clean, just use revno
-            DATE=_g`git rev-list HEAD --count`
+            DATE=_z`git rev-list HEAD --count`
         else
             # local changes, add date
-            DATE=_g`git rev-list HEAD --count`_$DATE
+            DATE=_z`git rev-list HEAD --count`_$DATE
         fi
     fi
 fi
