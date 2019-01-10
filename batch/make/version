@@ -14,6 +14,17 @@ DATE=`date +%Y%m%d`
 #echo $major_version
 #echo $minor_version
 
+bzr_count_revisions()
+{
+    srcdir="$1"
+    limit="$2"
+
+    test -z "$limit" || limit="-l $limit"
+
+    count=$(bzr log --include-merges --line $limit "${srcdir}" 2>/dev/null | wc -l)
+    echo $count
+}
+
 # *TODO* once we get our superproject up on launchpad (and thus get saner branch nicks), use branch nicks for $major_version
 # Check if bzr is installed, and if the path is versionned
 bzr >/dev/null 2>&1
