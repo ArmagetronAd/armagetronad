@@ -14,57 +14,6 @@ DATE=`date +%Y%m%d`
 #echo $major_version
 #echo $minor_version
 
-if test -d "${srcdir}/.svn" || test -d "${srcdir}/../.svn"; then
-    # get the inter-repository path by parsing the URL
-
-    URL=`svn info ${srcdir} | grep ^URL | sed -e 's,^URL: ,,'`
-
-    # uncomment the followint URLs to test various cases
-    # trunk
-    # URL=https://svn.sourceforge.net/svnroot/armagetronad/armagetronad/trunk/armagetronad
-    # branch 0.4
-    # URL=https://svn.sourceforge.net/svnroot/armagetronad/armagetronad/branches/0.4/armagetronad
-
-    # tag 0.2.8.2
-    # URL=https://svn.sourceforge.net/svnroot/armagetronad/armagetronad/tags/0.2.8.2/armagetronad
-
-    #echo URL=$URL
-    REPOPATH=`echo $URL | sed -e 's,/armagetronad$,,' -e 's,.*/armagetronad/,,'`
-    #echo REPOPATH=$REPOPATH
-
-    # is it a tag?
-    if echo $REPOPATH | grep '^tags/' > /dev/null; then
-        # echo Tag
-        major_version=`echo $REPOPATH | sed -e 's,^tags/,,'`
-        minor_version=""
-        DATE=""
-    else
-        # make revision the alpha tag
-        REVISION=`svn info ${srcdir} | grep ^Revision | sed -e 's,^Revision: ,,'`
-
-        # is it a branch?
-        if echo $REPOPATH | grep '^branches/' > /dev/null; then
-            # echo Branch
-            branch=`echo $REPOPATH | sed -e 's,^branches/,,'`
-            # branch 0.2.8 produces 0.2.9 versions. Confusing, yeah, but moving it
-            # in the repo is too risky.
-            if test ${branch} = "0.2.8"; then
-                # try to get revision ID from bzr using the magic bzr-svn marker
-                # (only works this way on 0.2.8)
-                REVISION=`svn propget bzr:revision-id:v3-list-QlpoOTFBWSZTWZvbKhsAAAdRgAAQABK6798QIABURMgAAaeoNT1TxT1DQbKaeobXKiyAmlWT7Y5MkdJOtXDtB7w7DOGFBHiOBxaUIu7HQyyQSvxdyRThQkJvbKhs ${srcdir} | tail -n 4 | sed -e 's, .*,,' | grep [0-9] | tail -n 1`
-            else
-                major_version=${branch}
-            fi
-        fi
-        
-        # trunk or branch
-
-        #echo REVISION=$REVISION
-        minor_version=_alpha_r$REVISION
-        DATE=""
-    fi
-fi
-
 # *TODO* once we get our superproject up on launchpad (and thus get saner branch nicks), use branch nicks for $major_version
 # Check if bzr is installed, and if the path is versionned
 bzr >/dev/null 2>&1
