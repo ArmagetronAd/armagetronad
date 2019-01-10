@@ -50,82 +50,13 @@ branchurl=
 #echo $major_version
 #echo $minor_version
 
-if test -d "${srcdir}/CVS"; then
-    # get the date/branch/version tag
-    rawtag=`cat ${srcdir}/CVS/Entries | grep major_version | sed -e "s,/major_version/.*/.*/.*/,,"`
-    #echo $rawtag
-    # determine the type of the tag
-    echo $rawtag | grep "^D" > /dev/null && tagtype=D
-    #echo $rawtag | grep "^Tb" > /dev/null && tagtype=Tb
-    echo $rawtag | grep "^Tv" > /dev/null && tagtype=Tv
-    #echo $tagtype
-
-    # extract the raw tag
-    tag=`echo $rawtag | sed -e "s,^$tagtype,,"`
-    #echo $tag
-
-    # date tag: make it a date dagged alpha release
-    if test "$tagtype" = D; then
-        DATE=`echo $tag | sed -e "s,\...\...\...\$,," | sed -e "s,\.,,g"`
-        minor_version=`cat ${srcdir}/minor_version | sed -e "s,DATE,$DATE," -e "s,YYYYMMDD,$DATE,"`
-    fi
-
-    # version tag: take whole version, replace _[number] with .[number]
-    if test "$tagtype" = Tv; then
-        major_version=`echo $tag | sed -e "s,_\([0-9]\),\.\\1,g"`
-        minor_version=""
-        DATE=""
-    fi
-fi
-
-if test -d "${srcdir}/.svn" || test -d "${srcdir}/../.svn"; then
-    # get the inter-repository path by parsing the URL
-
-    URL=`svn info ${srcdir} | grep ^URL | sed -e 's,^URL: ,,'`
-
-    # uncomment the following URLs to test various cases
-    # trunk
-    # URL=https://svn.sourceforge.net/svnroot/armagetronad/armagetronad/trunk/armagetronad
-    # branch 0.4
-    # URL=https://svn.sourceforge.net/svnroot/armagetronad/armagetronad/branches/0.4/armagetronad
-
-    # tag 0.2.8.2
-    # URL=https://svn.sourceforge.net/svnroot/armagetronad/armagetronad/tags/0.2.8.2/armagetronad
-
-    #echo URL=$URL
-    REPOPATH=`echo $URL | sed -e 's,/armagetronad$,,' -e 's,.*/armagetronad/,,'`
-    #echo REPOPATH=$REPOPATH
-
-    # is it a tag?
-    if echo $REPOPATH | grep '^tags/' > /dev/null; then
-        # echo Tag
-        major_version=`echo $REPOPATH | sed -e 's,^tags/,,'`
-        minor_version=""
-        DATE=""
-    else
-        # is it a branch?
-        if echo $REPOPATH | grep '^branches/' > /dev/null; then
-            # echo Branch
-            major_version=`echo $REPOPATH | sed -e 's,^branches/,,'`
-        fi
-        
-        # trunk or branch
-
-        # make revision the alpha tag
-        REVISION=`svn info ${srcdir} | grep ^Revision | sed -e 's,^Revision: ,,'`
-        # echo REVISION=$REVISION
-        minor_version=_alpha$REVISION
-        DATE=""
-    fi
-fi
-
 bzr_count_revisions()
 {
     srcdir="$1"
     limit="$2"
-    
+
     test -z "$limit" || limit="-l $limit"
-    
+
     count=$(bzr log --include-merges --line $limit "${srcdir}" 2>/dev/null | wc -l)
     echo $count
 }
@@ -207,7 +138,7 @@ if test -d "${srcdir}/.git"; then
     cd $srcdir
     # todo: once we have make tags, consider just git describe --tags as version ID.
     if tag=`git describe --tags --candidates=0` > /dev/null 2>&1; then
-        major_version=`echo $tag | sed -e s/version_// -e s/release_//`
+        major_version=`echo ${tag} | sed -e s/version_// -e s/release_//`
         minor_version=""
         DATE=""
     else
