@@ -170,16 +170,16 @@ if test -d "${srcdir}/.git"; then
     cd $srcdir
     # todo: once we have make tags, consider just git describe --tags as version ID.
     if tag=`git describe --tags --candidates=0` > /dev/null 2>&1; then
-        major_version=`echo $tag | sed -e s/version_// -e s/release_//`
+        major_version=`echo ${tag} | sed -e s/version_// -e s/release_//`
         minor_version=""
         DATE=""
     else
         if git diff-index --quiet HEAD --; then
             # local checkout clean, just use revno
-            DATE=_g`git rev-list HEAD --count`
+            DATE=_z`git rev-list HEAD --count`
         else
             # local changes, add date
-            DATE=_g`git rev-list HEAD --count`_$DATE
+            DATE=_z`git rev-list HEAD --count`_$DATE
         fi
     fi
 fi
