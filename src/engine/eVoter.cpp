@@ -998,6 +998,11 @@ protected:
     {
         return expired_ ? tString("Expired vote") : details_;
     }
+
+    bool Expired() const
+    {
+        return expired_;
+    }
 protected:
     mutable tString description_;              //!< the description of the vote
     mutable tString details_;                  //!< details on the vote
@@ -1442,12 +1447,12 @@ private:
 
     virtual tString DoGetDescription() const		// returns the description of the voting item
     {
-        return eVoteItemServerControlled::DoGetDescription();
+        return Expired() ? eVoteItemServerControlled::DoGetDescription() : eVoteItemHarm::DoGetDescription();
     }
 
     virtual tString DoGetDetails() const		// returns the detailed description of the voting item
     {
-        return eVoteItemServerControlled::DoGetDetails();
+        return Expired() ? eVoteItemServerControlled::DoGetDetails() : eVoteItemHarm::DoGetDetails();
     }
 };
 
