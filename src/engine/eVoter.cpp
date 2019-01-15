@@ -986,12 +986,12 @@ protected:
 
     virtual tString DoGetDescription() const		// returns the description of the voting item
     {
-        return expired_ ? tString("Expired vote") : description_;
+        return expired_ ? tString( tOutput( "$vote_expired", description_ ) ) : description_;
     }
 
     virtual tString DoGetDetails() const		    // returns the detailed description of the voting item
     {
-        return expired_ ? tString("Expired vote") : details_;
+        return expired_ ? tString( tOutput( "$vote_expired", details_ ) ) : details_;
     }
 
     bool Expired() const
