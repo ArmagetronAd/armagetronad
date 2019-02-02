@@ -3421,17 +3421,17 @@ race_laps_next                    Lap \1 done, \2 more laps to complete.\n
 race_safe_angles_help         These are the angles that are safe to travel in. Anything else and your dead. Usage: degrees1,degrees2,degrees3,...
 race_unsafe_angles_kill_help  Default: 0; If set to 1, kills all players that are in the unsafe angles as they finish the race.
 
-player_reach_race                          \1 0xfffffffinished with \2 points in \3 seconds.\n
+player_reach_race                     \1 0xfffffffinished with \2 points in \3 seconds.\n
 player_reach_race_first               \1 0xfffffffinished 1st in \2 seconds.\n
 player_reach_race_time                \2| \1 0xfffffffinished in \3 ( \4 s behind 1st ).\n
 
 player_personal_best_reach_time       New personal record! Your new time record is \1 seconds.\n
 
-race_player_hold_best_time            Congratulations to \1 0xRESETT holding the best time of \2 seconds for \3.\n
-race_player_hold_same_rank            \1 finished \3 seconds faster but remained at rank \4.\n
-race_player_hold_rank_up              \1 finished \3 seconds faster and rose to rank \4 (went up \5 ranks).\n
-race_player_hold_new_time             \1 finished in \2 seconds and is placed in rank \3.\n
-race_player_hold_slow_time            \1 finished \3 seconds slower and remained at rank \4.\n
+race_player_hold_best_time            \1 0xRESETTis now on rank 0x00ffff1 0xRESETTwith 0xffff00\2 s 0xRESETTon 0xff99ff\30xRESETT.\n
+race_player_hold_same_rank            \1 0xRESETTstayed at rank 0x00ffff\4 0xRESETTin 0xffff00\2 s 0xff9900(+\3 s)0xRESETT.\n
+race_player_hold_rank_up              \1 0xRESETTmoved to rank 0x00ffff\4 0x99ffff(+\5) 0xRESETTin 0xffff00\2 0xff9900(+\3 s)0xRESETT.\n
+race_player_hold_new_time             \1 0xRESETTgets into rank 0x00ffff\3 0xRESETTin 0xffff00\2 s.\n
+race_player_hold_slow_time            \1 0xRESETTstayed at rank 0x00ffff\4 0xRESETTin 0xffff00\2 s 0xff9999(-\3 s)0xRESETT.\n
 
 player_race_stats_self                Your rank is \1 with a time of \2.\n
 player_race_stats_other               Player: \1 0xRESETTis at rank 0xffff77\2 0xRESETTwith a time of 0xffff77\30xRESETT.\n
@@ -3458,9 +3458,9 @@ race_rank_title_player_name   Player
 race_rank_title_time_name     Time
 race_rank_border              #
 
-race_rank_message_header      0xdd66dd# 0xRESETT\1 0xdd66dd# 0xRESETT\2 0xdd66dd# 0xRESETT\3\n
-race_rank_message_format      0xdd66dd# 0xffff7f\1 0xdd66dd# 0xffff7f\2 0xdd66dd# 0xffff7f\3\n
-race_rank_current_format      0xdd66dd# 0x0099ff\1 0xdd66dd# 0x0099ff\2 0xdd66dd# 0x0099ff\3\n
+race_rank_message_header      0xdd66dd# 0xRESETT\1 0xdd66dd# 0xRESETT\2 0xdd66dd# 0xRESETT\3 0xdd66dd#\n
+race_rank_message_format      0xdd66dd# 0xffff7f\1 0xdd66dd# 0xffff7f\2 0xdd66dd# 0xffff7f\3 0xdd66dd#\n
+race_rank_current_format      0xdd66dd# 0x00ff99\1 0xdd66dd# 0x00ff99\2 0xdd66dd# 0x00ff99\3 0xdd66dd#\n
 
 race_records_manual_load   Racing records have been manually loaded by \1.
 race_records_manual_save   Racing records have been manually saved by \1.

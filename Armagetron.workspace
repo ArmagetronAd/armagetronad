@@ -6,6 +6,7 @@
 		<Project filename="Master.cbp" />
 		<Project filename="SDL.cbp" />
 		<Project filename="SDL_image.cbp" />
+		<Project filename="SDL_mixer.cbp" />
 		<Project filename="mikmod.cbp" />
 		<Project filename="Armagetron.cbp" active="1" />
 	</Workspace>
