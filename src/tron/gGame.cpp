@@ -3585,20 +3585,14 @@ static eLadderLogWriter sg_roundStartedWriter("ROUND_STARTED", true);
 
 static eLadderLogWriter sg_currentMapWriter("CURRENT_MAP", false);
 
-static bool sg_displayMapDetails = false;
-static tSettingItem<bool> sg_displayMapDetailsConf("DISPLAY_MAP_DETAILS", sg_displayMapDetails);
+static bool sg_showMapDetails = false;
+static tSettingItem<bool> sg_showMapDetailsConf("SHOW_MAP_DETAILS", sg_showMapDetails);
 
-static bool sg_displayMapName = true;
-static tSettingItem<bool> sg_displayMapNameConf("DISPLAY_MAP_NAME", sg_displayMapName);
+static bool sg_showMapCreation = true;
+static tSettingItem<bool> sg_showMapCreationConf("SHOW_MAP_CREATION", sg_showMapCreation);
 
-static bool sg_displayMapAuthor = true;
-static tSettingItem<bool> sg_displayMapAuthorConf("DISPLAY_MAP_AUTHOR", sg_displayMapAuthor);
-
-static bool sg_displayMapVersion = true;
-static tSettingItem<bool> sg_displayMapVersionConf("DISPLAY_MAP_VERSION", sg_displayMapVersion);
-
-static bool sg_displayMapAxes = true;
-static tSettingItem<bool> sg_displayMapAxesConf("DISPLAY_MAP_AXES", sg_displayMapAxes);
+static bool sg_showMapAxes = true;
+static tSettingItem<bool> sg_showMapAxesConf("SHOW_MAP_AXES", sg_showMapAxes);
 
 void gGame::StateUpdate(){
 
@@ -3908,19 +3902,20 @@ void gGame::StateUpdate(){
 
                 se_SaveToScoreFile("$gamestate_newround_log");
 
-                if (sg_displayMapDetails)
+                if (sg_showMapDetails)
                 {
                     tColoredString Output;
-                    if (sg_displayMapName)
-                        Output << tOutput("$display_map_name", pz_mapName);
-                    if (sg_displayMapAuthor)
-                        Output << tOutput("$display_map_author", pz_mapAuthor);
-                    if (sg_displayMapVersion)
-                        Output << tOutput("$display_map_version", pz_mapVersion);
-                    if (sg_displayMapAxes)
-                        Output << tOutput("$display_map_axes", pz_mapAxes);
+                    if (sg_showMapCreation)
+                    {
+                        if (rotationtype == gROTATION_COUNTER)
+                            Output << tOutput("$show_map_details_with_rotation", pz_mapName, pz_mapAuthor, gRotation::Counter(), sg_rotationMax);
+                        else Output << tOutput("$show_map_details", pz_mapName, pz_mapAuthor);
+                    }
+                    if (sg_showMapAxes)
+                        Output << tOutput("$show_map_axes", pz_mapAxes);
 
-                    sn_ConsoleOut(Output);
+                    if (Output != "")
+                        sn_ConsoleOut(Output);
                 }
 
                 sg_roundStartedWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");

@@ -3511,16 +3511,13 @@ race_rank_header_time_length_help         The length of the header "time" should
 #*************************************
 #*************************************
 
-display_map_details_help      Display the map's details for everyone to view.
-display_map_name_help         If set to 1, displays the map's name.
-display_map_author_help       If set to 1, displays the map's author.
-display_map_version_help      If set to 1, displays the map's version.
-display_map_axes_help         If set to 1, displays the map's axes.
+show_map_details_help           Display the map's details for everyone to view.
+show_map_creation_help          If set to 1, shows the map's name and creator's name. 
+show_map_axes_help              If set to 1, shows the map's axes.
 
-display_map_name              0xff55ffMap Name   : 0x99ff99\1\n
-display_map_author            0xff55ffMap Author : 0x99ff99\1\n
-display_map_version           0xff55ffMap Version: 0x99ff99\1\n
-display_map_axes              0xff55ffMap Axes   : 0x99ff99\1\n
+show_map_details                    0x00ffffCurrent map: 0xccaa66\1 0xRESETTby 0xaa66cc\2\n
+show_map_details_with_rotation      0x00ffffCurrent map: 0xccaa66\1 0xRESETTby 0xaa66cc\2 0x33ee33(\3/\4)\n
+show_map_axes                       0xff55ffMap Axes: 0x99ff99\1\n
 
 access_level_substitute_denied  Required access level to substitute is "\1", you only have "\2".\n
 substitute_message_usage        Usage: /substitute <user out ID or name> <user in ID or name>\n
