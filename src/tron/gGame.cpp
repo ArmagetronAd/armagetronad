@@ -144,6 +144,14 @@ static tSettingItem<REAL> sg_playerPositioningStartTimeConf( "TACTICAL_POSITION_
 
 static nSettingItemWatched<tString> conf_mapfile("MAP_FILE",mapfile, nConfItemVersionWatcher::Group_Breaking, 8 );
 
+#ifdef DEDICATED
+static tString sg_defaultMapFile("");
+static tSettingItem<tString> sg_defaultMapFileConf( "DEFAULT_MAP_FILE", sg_defaultMapFile );
+
+static bool sg_defaultMapFileOnEmpty = false;
+static tSettingItem<bool> sg_defaultMapFileOnEmptyConf( "DEFAULT_MAP_FILE_ON_EMPTY", sg_defaultMapFileOnEmpty );
+#endif
+
 void LoadMap(tString mapName)
 {
     conf_mapfile.Set( mapName );
@@ -2184,6 +2192,9 @@ void sg_HostGame(){
         cp();
         con << tOutput("$online_activity_napping") << "\n";
         sg_Timestamp();
+
+        if (sg_defaultMapFileOnEmpty && sg_defaultMapFile != "")
+            mapfile = sg_defaultMapFile;
 
         int counter = -1;
 

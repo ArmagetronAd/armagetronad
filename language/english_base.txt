@@ -298,6 +298,9 @@ arena_axes_help                   In how many directions a cycle can turn 4 is t
 resource_repository_client_help   URI the client uses to search for map files if they aren't stored locally. Better leave it alone
 resource_repository_server_help   URI clients and the server use to search for map files if they aren't stored locally
 
+default_map_file_help             The default map to revert to when no players are active
+default_map_file_on_empty_help    If set to 1, the DEFAULT_MAP_FILE is selected when no players are active
+
 # rotation
 rotation_type_help                      Determines when map and config rotation should occur. Possible values: (0) Do not do any rotation, (1) Ordered Rotate every round, (2) Ordered Rotate every match, (3) Random Rotate every round, (4) Random Rotate every match, (5) Activates ROTATION_MAX, (6) Activates for rotation where maps and configs load depending on the round they are set for.
 
