@@ -1930,7 +1930,7 @@ void gRotation::HandleNewRound(int rounds)
                 //  add rotation counter
                 gRotation::AddCounter();
 
-                if (gRotation::Counter() >= sg_rotationMax)
+                if (gRotation::Counter() > sg_rotationMax)
                 {
                     //  rotate
                     if (!sg_rotationMaxType)
