@@ -224,7 +224,7 @@ auto_team_help          Flag indicating whether players should be put into teams
 auto_team_spec_spam_help    If set to 0, spectators won't be announced when joining or leaving, provided AUTO_TEAM is set to 0.
 
 allow_team_name_color_help   Allow a team to be named after a color
-allow_team_name_leader_help  Allow team leader to set a team. 
+allow_team_name_leader_help  Allow team leader to set a team.
 allow_team_name_player_help  Allow a team to be named after the leading player
 
 play_time_total_help         Total time in minutes someone has played with this client
@@ -634,7 +634,8 @@ vote_rejected_voting_suspended            Voting has been suspended by the Admin
 fadeout_name_delay_help                Time the player names are shown. Set to 0 if you don't want to show them at all or -1 if you want to show them always.
 show_own_name_help                      Should your name be displayed above your cycle on your screen?
 show_colored_name_help        Should names appear to be colored above the cycles that players control?
-dead_console_decoration       *DEAD* 
+dead_console_decoration       *DEAD*
+spectator_console_decoration  *SPEC*
 
 #********************************************
 #********************************************
@@ -947,7 +948,7 @@ ladderlog_write_round_winner_help             Write to ladderlog: ROUND_WINNER <
 ladderlog_write_sacrifice_help                Write to ladderlog: SACRIFICE <player who used the hole> <player who created the hole> <player owning the wall the hole was made into>
 ladderlog_write_shutdown_help                 Write to ladderlog: SHUTDOWN <time> when the server has been shut down using exit/quit commands
 ladderlog_write_soccer_ball_player_entered_help Write to ladderlog: SOCCER_BALL_PLAYER_ENTERED [player_auth_name] [team]
-ladderlog_write_soccer_goal_player_entered_help Write to ladderlog: SOCCER_GOAL_PLAYER_ENTERED [player_auth_name] [player_team] [team owner of the goal] 
+ladderlog_write_soccer_goal_player_entered_help Write to ladderlog: SOCCER_GOAL_PLAYER_ENTERED [player_auth_name] [player_team] [team owner of the goal]
 ladderlog_write_targetzone_conquered_help     Write to ladderlog: TARGETZONE_CONQUERED <object_id> <zone_name> <cx> <cy> [<player> [<team>]]
 ladderlog_write_targetzone_player_left_help   Write to ladderlog: TARGETZONE_PLAYER_LEFT <object_id> <zone_name> <cx> <cy> <player> <x> <y> <xdir> <ydir>
 ladderlog_write_targetzone_player_enter_help  Write to ladderlog: TARGETZONE_PLAYER_ENTER <object_id> <zone_name> <cx> <cy> <player> <x> <y> <xdir> <ydir> <time>
@@ -1913,7 +1914,7 @@ silence_player_text                                     Silenced \1
 
 voice_player_details_text                       If accepted, \1 will be unsilenced.
 voice_player_text                                       Voice \1
-            
+
 vote_include_details_text            If accepted, the file \1 will be included as a configuration file.
 vote_include_text                    Include \1
 vote_include_error                    Include file \1 not found or not readable.\n
@@ -3431,10 +3432,10 @@ player_reach_race_time                \2| \1 0xfffffffinished in \3 ( \4 s behin
 player_personal_best_reach_time       New personal record! Your new time record is \1 seconds.\n
 
 race_player_hold_best_time            \1 0xRESETTis now on rank 0x00ffff1 0xRESETTwith 0xffff00\2 s 0xRESETTon 0xff99ff\30xRESETT.\n
-race_player_hold_same_rank            \1 0xRESETTstayed at rank 0x00ffff\4 0xRESETTin 0xffff00\2 s 0xff9900(+\3 s)0xRESETT.\n
-race_player_hold_rank_up              \1 0xRESETTmoved to rank 0x00ffff\4 0x99ffff(+\5) 0xRESETTin 0xffff00\2 0xff9900(+\3 s)0xRESETT.\n
+race_player_hold_same_rank            \1 0xRESETTstayed at rank 0x00ffff\4 0xRESETTin 0xffff00\2 s 0xff9900(-\3 s)0xRESETT.\n
+race_player_hold_rank_up              \1 0xRESETTmoved to rank 0x00ffff\4 0x99ffff(-\5) 0xRESETTin 0xffff00\2 0xff9900(-\3 s)0xRESETT.\n
 race_player_hold_new_time             \1 0xRESETTgets into rank 0x00ffff\3 0xRESETTin 0xffff00\2 s.\n
-race_player_hold_slow_time            \1 0xRESETTstayed at rank 0x00ffff\4 0xRESETTin 0xffff00\2 s 0xff9999(-\3 s)0xRESETT.\n
+race_player_hold_slow_time            \1 0xRESETTstayed at rank 0x00ffff\4 0xRESETTin 0xffff00\2 s 0xff9999(+\3 s)0xRESETT.\n
 
 player_race_stats_self                Your rank is \1 with a time of \2.\n
 player_race_stats_other               Player: \1 0xRESETTis at rank 0xffff77\2 0xRESETTwith a time of 0xffff77\30xRESETT.\n
@@ -3483,7 +3484,7 @@ race_ranks_limit_help      If set to 1, racing records will have a time limit in
 race_ranks_limit_time_help Set to >= 0, if players for each map did not play for this many seconds, their rank will be removed.
 
 race_chances_help                         The number of chances player get to play again in the same round after death. Depletes each time you use it up and resets for next round.
-race_finish_kill_help                     If set to 1, players crossing the finish line will get killed.  
+race_finish_kill_help                     If set to 1, players crossing the finish line will get killed.
 race_log_unfinished_help                  It set to 1, logs in the players that have not yet finished that racing course. Time values will be set to -1.
 race_num_ranks_show_end_help              The number of ranks to display at the end of round.
 race_num_ranks_show_start_help            The number of ranks to display at the start of round.
@@ -3515,7 +3516,7 @@ race_rank_header_time_length_help         The length of the header "time" should
 #*************************************
 
 show_map_details_help           Display the map's details for everyone to view.
-show_map_creation_help          If set to 1, shows the map's name and creator's name. 
+show_map_creation_help          If set to 1, shows the map's name and creator's name.
 show_map_axes_help              If set to 1, shows the map's axes.
 
 show_map_details                    0x00ffffCurrent map: 0xccaa66\1 0xRESETTby 0xaa66cc\2\n
@@ -3604,7 +3605,7 @@ score_rubberzone_help               Score player is given for dieing on a rubber
 soccer_goal_enemy_entered           \1 0xRESETTwas killed for entering \20xRESETT's goal.\n
 soccer_goal_self                    0xff7777TEAM \1 0xRESETThit the ball into their own goal. Boo-Hoo! No points!\n
 soccer_goal_score                   \1 0xRESETTwon \3 points for scoring in \20xRESETT's team goal.\n
-soccer_winner                       \1 0xRESETTwon the soccer round.\n                       
+soccer_winner                       \1 0xRESETTwon the soccer round.\n
 
 soccer_goal_score_help              The points the team get for scoring a goal.
 soccer_goal_kill_enemies_help       If set to 1, enemy players entering other team's base will get killed.
@@ -3634,7 +3635,7 @@ set_zone_id_speed_help                         change a zones speed
 set_zone_color_help                            Change the color of a zone
 set_zone_id_color_help                         Change the color of a zone
 set_zone_expansion_help                        Change the Expansion rate of a zone
-set_zone_id_expansion_help                     Change the Expansion rate of a zone 
+set_zone_id_expansion_help                     Change the Expansion rate of a zone
 set_zone_rotation_help                         Change the rotation speed of a zone
 set_zone_id_rotation_help                      Change the rotation speed of a zone
 set_zone_penetrate_help                     Change the Penetration of a zone
@@ -3695,12 +3696,12 @@ queue_find_failed          0xff7777\2 queuer were found with the search name: "\
 queue_refill_success       An administrator restored \1's queues.\n
 queue_give_success         \1 received \3 qs from original \2 qs by an administrator.\n
 
-queuers_list_help          Displays the list of queuers and their queues. 
+queuers_list_help          Displays the list of queuers and their queues.
 queuers_list               List of queuers:\n
 queuers_list_show          Showing \1 queuers out of \2:\n
 
 queue_refill_help          Refill the queue fuel of the given player's name. Usage: QUEUE_REFILL <name>
-queue_give_help            Give a set of queues to the given player's name. Usage: QUEUE_GIVE <name> <amount> 
+queue_give_help            Give a set of queues to the given player's name. Usage: QUEUE_GIVE <name> <amount>
 
 # items that should not be translated
 include english_base_notranslate.txt
@@ -3753,7 +3754,7 @@ player_gridpos_interval_help        The time between previous "player_gridpos" o
 zone_gridpos_interval_help          The time between previous "zone_gridpos" output to the next.
 online_stats_interval_help          The time between previous "online_players_*" output to the next.
 help_message_help                   A help message sent to those calling it. Works through "/help" as well.
-help_message_type_help              Set 0 to use HELP_{ADD|REMOVE}_TOPIC commands. Set 1 to use HELP_MESSAGE. Default: 0; 
+help_message_type_help              Set 0 to use HELP_{ADD|REMOVE}_TOPIC commands. Set 1 to use HELP_MESSAGE. Default: 0;
 highlight_name_help                 If set to 1, when your name appears in messages, it gets highlithed for you to notice.
 ladderlog_enabled_help              If set to 1, ladderlog output is enabled.
 ladderlog_write_admin_login_help                    Write to ladderlog: ADMIN_LOGIN [login_name] [ip_address]
@@ -3814,7 +3815,7 @@ score_shot_base_help                      Points player's team receives for shoo
 self_destruct_help                        If set to 1, once a player gets killed, a large zone will appear at the spot and kill inside of it.
 self_destruct_fall_help                   The speed at which zone's radius falls after increasing.
 self_destruct_radius_help                 The initial radius of the destruct zone.
-self_destruct_rise_help                   The speed at which zone's radius increases initially. 
+self_destruct_rise_help                   The speed at which zone's radius increases initially.
 self_destruct_rot_help                    The speed at which the zone rotates.
 set_ai_position_help                      Set the route at which the ai player should follow. Usage: SET_AI_POSITION [name] [x1] [y1] [x2] [y2] ...
 set_player_team_help                      Forcably place the selected player into the given team. Usage: SET_PLAYER_TEAM [name] [team]
@@ -3836,7 +3837,7 @@ soccer_ball_slowdown_speed_help           The speed at which the ball show slow 
 spawn_alternate_help                      If set to 1, switch positions each round.
 spawn_explosion_help                      Spawns an explosion. Usage: SPAWN_EXPLOSION [x] [y] [radius] [r] [g] [b].
 spawn_objectzone_help                     Spawns an object zone. Usage: SPAWN_OBJECTZONE [x] [y] [growth] [radius] [xdir] [ydir] [interact] [r] [g] [b] [target_radius]
-spawn_soccer_help                         Spawns a soccer zone. 
+spawn_soccer_help                         Spawns a soccer zone.
 spawn_winners_first_help                  If set to 1, winners from previous round will be spawned first in the next round.
 spawn_wrap_help                           Number of spawns after which to start wrapping new spawns at the beginning.
 speak_as_admin_help                       Let's you speak as admin. Output:= Admin: {message}
@@ -3972,7 +3973,7 @@ pingpong_team_balls_help      The number of ping pong balls a team can have.
 rubberzone_rubber_help        Set the rubber which rubber zone should have to decrease/increase by.
 
 cycle_turn_help               Make the cycle turn. Usage: CYCLE_TURN [times to turn] <turn: left or right>.
-                                             
+
 cfg_user_save_help            Can the user.cfg be saved after work?
 
 # Commands for bad words
@@ -3999,7 +4000,7 @@ read_reports_access_no_clear  You do not have the access to clear the report.txt
 read_reports_cleared          The reports messages have been cleared.\n
 read_reports_access_no_read   You do not have the access to read the report.txt\n
 
-admin_command_tag      RA: 
+admin_command_tag      RA:
 
 # Commands for SHUTDOWN
 shutdown_help          This command activates the shutdown process for the game. Usage: SHUTDOWN <optional: seconds>
@@ -4022,7 +4023,7 @@ color_rubberzone_green_help           Green portion of the color for rubber zone
 cycle_respawn_zone_help               Set to 1 to spawn a zone to respawn player of their death.
 cycle_respawn_zone_enemy_help         Set to 1 to enable enemies entering respawn zone to respawn player.
 cycle_respawn_zone_enemy_kill_help    Set to 1 to enable respawn zone to kill enemies for entering its zone.
-cycle_respawn_zone_growth_help        The growth rate of respawn zone. Can increase(value>0) or decrease(value<0). 
+cycle_respawn_zone_growth_help        The growth rate of respawn zone. Can increase(value>0) or decrease(value<0).
 cycle_respawn_zone_radius_help        The radius of respawn zone to spawn when player dies.
 cycle_respawn_zone_type_help          The type of respawn occurs. 0-spawn on the location of death; 1-spawn on the starting location. Default: 0
 cycle_respawn_zone_respawn_help       Set to 1 to enable respawn zone to reappear after vanishing.
@@ -4032,7 +4033,7 @@ cycle_respawn_zone_enemy              \1 0xRESETTwas respawned by an enemy playe
 cycle_respawn_zone_kill_enemy         \2 0xRESETTwas killed for entering \10xRESETT's respawn zone.\n
 
 zone_wall_death_help                  Set to 1 to enable zones to vanish after hitting the wall boundary.
-zone_wall_boundary_help               Values <= 0 is the boundary limit in which zone_wall_death will activate. 
+zone_wall_boundary_help               Values <= 0 is the boundary limit in which zone_wall_death will activate.
 
 log_turns_help            If set to 1, this setting will log the spawned time, death time and the positions of which players move to in the file ./var/log_turns/<name>.txt
 log_turns_timestamp_help  If set to 1, [TIME-STAMP] <message> will be sent to all the players logging file in ./var/log_turns/<name>.txt
