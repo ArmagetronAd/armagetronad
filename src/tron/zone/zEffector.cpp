@@ -172,6 +172,9 @@ zEffectorManager::Register(std::string const & type, std::string const & desc, X
 }
 
 
+static bool sz_wz_player_win = true;
+static tSettingItem<bool> wzpw("WIN_ZONE_PLAYER_WIN",sz_wz_player_win);
+
 static zEffectorRegistration regWin("win", "", zEffectorWin::create);
 
 static eLadderLogWriter sg_winZoneWriter( "WINZONE_PLAYER_ENTER", true, "player" );
@@ -189,7 +192,8 @@ void zEffectorWin::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
     {
         sg_winZoneWriter << (*iter)->GetUserName();
         sg_winZoneWriter.write();
-        sg_DeclareWinner((*iter)->CurrentTeam(), message );
+        if(sz_wz_player_win)
+            sg_DeclareWinner((*iter)->CurrentTeam(), message );
     }
 }
 
