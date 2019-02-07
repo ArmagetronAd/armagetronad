@@ -340,7 +340,7 @@ win_zone_expansion_help				Expansion speed of the instant win zone
 win_zone_initial_size_help			Initial size of the instant win zone
 win_zone_deaths_help	            A value of 1 turns it into a death zone.
 win_zone_randomness_help            Randomness factor of the initial win zone position. 0 fixes it at the arena center, 1 spreads the zone all over it.
-win_zone_player_win                 If set to 1, first player to enter the winzone wins.
+win_zone_player_win_help            If set to 1, first player to enter the winzone wins.
 
 condense_conquest_output_help       Zone conquest output condensed into one line
 
