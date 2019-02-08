@@ -141,6 +141,7 @@ zEffectorRegistration::zEffectorRegistration(std::string const & type, std::stri
     zEffectorManager::Register(type, desc, f);
 }
 
+extern bool sz_wz_player_win;
 
 class zEffectorWin : public zEffector
 {
