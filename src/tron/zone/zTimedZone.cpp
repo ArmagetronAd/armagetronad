@@ -9,6 +9,9 @@
 static int sz_timedZoneDeath = 1;
 static tSettingItem<int> sz_timedZoneDeathConf( "WIN_ZONE_DEATHS", sz_timedZoneDeath );
 
+static tString sz_wz_custommsg("Zone activated!");
+static tConfItemLine sz_wzcm("WIN_ZONE_CUSTOM_SPAWN_MSG",sz_wz_custommsg);
+
 //! creates a win or death zone (according to configuration) at the specified position
 zZone * sz_CreateTimedZone( eGrid * grid, const eCoord & pos )
 {
@@ -42,7 +45,11 @@ zZone * sz_CreateTimedZone( eGrid * grid, const eCoord & pos )
     else
     {
         type = "win";
-        if ( sg_currentSettings->gameType != gFREESTYLE )
+        if(!sz_wz_player_win)
+        {
+            if(sz_wz_custommsg != "") sn_ConsoleOut(sz_wz_custommsg+"\n");
+        }
+        else if ( sg_currentSettings->gameType != gFREESTYLE )
         {
             sn_ConsoleOut( "$instant_win_activated" );
         }
