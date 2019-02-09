@@ -3992,10 +3992,10 @@ std::map<tString, eHelpTopic> & eHelpTopic::GetHelpTopics()
 static tConfItemFunc add_help_topic_conf("ADD_HELP_TOPIC",&eHelpTopic::addHelpTopic);
 static tConfItemFunc remove_help_topic_conf("REMOVE_HELP_TOPIC",&eHelpTopic::removeHelpTopic);
 static tString se_helpIntroductoryBlurb;
-static tConfItemLine se_helpIntroductoryBlurbConf("HELP_INTRODUCTORY_BLURB",se_helpIntroductoryBlurb);
+static tSettingItemLine se_helpIntroductoryBlurbConf("HELP_INTRODUCTORY_BLURB",se_helpIntroductoryBlurb);
 
 // Sty compatibility
-static tConfItemLine se_helpStyCompat("HELP_MESSAGE",se_helpIntroductoryBlurb);
+static tSettingItemLine se_helpStyCompat("HELP_MESSAGE",se_helpIntroductoryBlurb);
 
 static void se_Help( ePlayerNetID * sender, ePlayerNetID * receiver, std::istream & s ) {
     std::ws(s);
@@ -8829,7 +8829,7 @@ static tConfItemFunc se_PlayerMessage_c("PLAYER_MESSAGE", &se_PlayerMessageConf)
 static tAccessLevelSetter se_messConfLevel( se_PlayerMessage_c, tAccessLevel_Moderator );
 
 static tString se_defaultKickReason("");
-static tConfItemLine se_defaultKickReasonConf( "DEFAULT_KICK_REASON", se_defaultKickReason );
+static tSettingItemLine se_defaultKickReasonConf( "DEFAULT_KICK_REASON", se_defaultKickReason );
 
 static void se_KickConf(std::istream &s)
 {
@@ -8866,7 +8866,7 @@ static tString se_defaultKickToReason("");
 
 static tSettingItem< tString > se_defaultKickToServerConf( "DEFAULT_KICK_TO_SERVER", se_defaultKickToServer );
 static tSettingItem< int > se_defaultKickToPortConf( "DEFAULT_KICK_TO_PORT", se_defaultKickToPort );
-static tConfItemLine se_defaultKickToReasonConf( "DEFAULT_KICK_TO_REASON", se_defaultKickToReason );
+static tSettingItemLine se_defaultKickToReasonConf( "DEFAULT_KICK_TO_REASON", se_defaultKickToReason );
 
 static void se_MoveToConf(std::istream &s, REAL severity, const char * command )
 {

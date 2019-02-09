@@ -1066,7 +1066,7 @@ static tSettingItem< int > se_kickMinHarmSI( "VOTING_KICK_MINHARM", se_kickMinHa
 
 // reason given on vote kicks
 static tString se_voteKickReason("");
-static tConfItemLine se_voteKickReasonConf( "VOTE_KICK_REASON", se_voteKickReason );
+static tSettingItemLine se_voteKickReasonConf( "VOTE_KICK_REASON", se_voteKickReason );
 
 void se_VoteKickUser( int user )
 {

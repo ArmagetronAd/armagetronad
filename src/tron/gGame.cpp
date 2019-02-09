@@ -1606,10 +1606,10 @@ void sg_HostGame(){
 }
 
 static tString sg_roundCenterMessage("");
-static tConfItemLine sn_roundCM_ci("ROUND_CENTER_MESSAGE",sg_roundCenterMessage);
+static tSettingItemLine sn_roundCM_ci("ROUND_CENTER_MESSAGE",sg_roundCenterMessage);
 
 static tString sg_roundConsoleMessage("");
-static tConfItemLine sn_roundCcM1_ci("ROUND_CONSOLE_MESSAGE",sg_roundConsoleMessage);
+static tSettingItemLine sn_roundCcM1_ci("ROUND_CONSOLE_MESSAGE",sg_roundConsoleMessage);
 
 static bool sg_RequestedDisconnection = false;
 
@@ -5207,10 +5207,10 @@ static tConfItemFunc sg_fullscreenMessageConf("FULLSCREEN_MESSAGE",&sg_Fullscree
 
 // message of day presented to clients logging in
 tString sg_greeting("");
-static tConfItemLine a_mod("MESSAGE_OF_DAY",sg_greeting);
+static tSettingItemLine a_mod("MESSAGE_OF_DAY",sg_greeting);
 
 tString sg_greetingTitle("");
-static tConfItemLine a_tod("TITLE_OF_DAY",sg_greetingTitle);
+static tSettingItemLine a_tod("TITLE_OF_DAY",sg_greetingTitle);
 
 REAL sg_greetingTimeout=60;
 static tSettingItem< REAL > a_modt("MESSAGE_OF_DAY_TIMEOUT",sg_greetingTimeout);
