@@ -434,6 +434,21 @@ public:
     virtual void WriteVal(std::ostream &s);
 };
 
+class tSettingItemLine:public tConfItemLine{
+public:
+    tSettingItemLine(const char *title,const char *help,tString &s, callbackFunc *cb=0)
+            :tConfItemBase(title,help),tConfItemLine(title,help,s,cb){}
+
+    tSettingItemLine(const char *title, tString &s, callbackFunc *cb=0)
+            :tConfItemBase(title,cb),tConfItemLine(title,s,cb){}
+
+    virtual ~tSettingItemLine() = default;
+
+    bool Save() override{
+        return false;
+    }
+};
+
 typedef void CONF_FUNC(std::istream &s);
 
 class tConfItemFunc:public tConfItemBase{

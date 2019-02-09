@@ -56,13 +56,13 @@ bool sn_supportRemoteLogins = false;
 
 // authority black and whitelists
 static tString sn_AuthorityBlacklist, sn_AuthorityWhitelist;
-tConfItemLine  sn_AuthorityBlacklistConf( "AUTHORITY_BLACKLIST", sn_AuthorityBlacklist );
-tConfItemLine  sn_AuthorityWhitelistConf( "AUTHORITY_WHITELIST", sn_AuthorityWhitelist );
+tSettingItemLine  sn_AuthorityBlacklistConf( "AUTHORITY_BLACKLIST", sn_AuthorityBlacklist );
+tSettingItemLine  sn_AuthorityWhitelistConf( "AUTHORITY_WHITELIST", sn_AuthorityWhitelist );
 
 #ifdef DEBUG
 // list of authorities that get accepted as valid authorities, no questions asked
 static tString sn_AuthorityNoCheck;
-tConfItemLine  sn_AuthorityNoCheckConf( "AUTHORITY_NO_CHECK", sn_AuthorityNoCheck );
+tSettingItemLine  sn_AuthorityNoCheckConf( "AUTHORITY_NO_CHECK", sn_AuthorityNoCheck );
 #endif
 
 static nAuthentication::UserPasswordCallback* S_UserPasswordCallback = NULL;
