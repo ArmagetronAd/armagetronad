@@ -3693,6 +3693,10 @@ void handle_chat( nMessage &m )
 // a name is only legal if it contains at least one non-witespace character.
 static bool IsLegalPlayerName( tString const & name )
 {
+    tString userName = se_UnauthenticatedUserName( name );
+    if ( userName.Len() <= 1 )
+        return false;
+
     // strip colors
     tString stripped( tColoredString::RemoveColors( name ) );
 
