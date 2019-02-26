@@ -4280,6 +4280,10 @@ void se_ChatHandlerServer( Engine::Chat const & message, nSenderInfo const & sen
 // a name is only legal if it contains at least one non-witespace character.
 static bool IsLegalPlayerName( tString const & name )
 {
+    tString userName = se_UnauthenticatedUserName( name );
+    if ( userName.Len() <= 1 )
+        return false;
+
     // strip colors
     tString stripped( tColoredString::RemoveColors( name ) );
 
@@ -6572,7 +6576,7 @@ static bool se_stripMiddle=true;
 tSettingItem< bool > se_stripMiddleConf( "FILTER_NAME_MIDDLE", se_stripMiddle );
 
 // do the optional filtering steps
-static void se_OptionalNameFilters( tString & remoteName )
+static void se_OptionalNameFilters( tString & remoteName, int owner )
 {
     // filter colors
     if ( se_filterColorNames )
@@ -6640,7 +6644,8 @@ static void se_OptionalNameFilters( tString & remoteName )
         {
             // or replace it by a default value
             // (no, not bad localization, this is only a punishment for people who think they're smart.)
-            remoteName = "Player 1";
+            remoteName = "Player ";
+            remoteName << owner;
         }
     }
 }
@@ -6675,7 +6680,7 @@ void ePlayerNetID::ReadSync( Engine::PlayerNetIDSync const & sync, nSenderInfo c
         remoteName = sync.player_name();
 
         // filter
-        se_OptionalNameFilters( remoteName );
+        se_OptionalNameFilters( remoteName, Owner() );
 
         se_CutString( remoteName, MAX_NAME_LENGTH );
     }
@@ -9637,14 +9642,13 @@ void ePlayerNetID::UpdateName( void )
            )
        )
     {
-
         if ( sn_GetNetState() == nSTANDALONE || Owner() == 0 || ( IsHuman() && ( nameFromServer_ != nameFromClient_ && !messenger.adminRename_ ) ) )
         {
             // apply name filters only on remote players
             if ( Owner() != 0 )
-            se_OptionalNameFilters( nameFromClient_ );
+            se_OptionalNameFilters( nameFromClient_, Owner() );
 
-            // nothing wrong ? proceed to renaming
+	   // nothing wrong ? proceed to renaming
             nameFromAdmin_ = nameFromServer_ = nameFromClient_;
         }
         else
@@ -10003,7 +10007,10 @@ ePlayerNetID & ePlayerNetID::SetName( tString const & name )
 
     // replace empty name
     if ( !IsLegalPlayerName( nameFromClient_ ) )
-        nameFromClient_ = "Player 1";
+    {
+        nameFromClient_ = "Player ";
+        nameFromClient_ << Owner();
+    }
 
     if ( sn_GetNetState() != nCLIENT )
         nameFromServer_ = nameFromClient_;
