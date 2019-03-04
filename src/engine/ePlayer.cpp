@@ -4668,6 +4668,12 @@ void ePlayerNetID::Chat(const tString &s_orig)
             tConfItemBase::LoadAll(s);
         }
     }
+    //Not sure if this is a good short handle. Maybe something like /colors? Then introduce the basic list if no parameters are sent, but if a players name is sent give that players colors alone.
+    else if( s_orig.StartsWith("/listcolors") || s_orig.StartsWith("/colors") )
+    {
+        con << "Player Colors: \n";
+        se_listPlayerColors();
+    }
     else
 #endif
     {
@@ -8133,7 +8139,9 @@ tString ePlayerNetID::Ranking( int MAX, bool cut )
                 {
                     //tString teamtemp = p->currentTeam->Name();
                     //teamtemp.RemoveHex();
-                    line << tColoredString::RemoveColors(p->currentTeam->Name());
+                    //Not sure why we need to filter the color here. 
+                       // line << tColoredString::RemoveColors(p->currentTeam->Name());
+                    line << p->currentTeam->GetColoredName();
                     line.SetPos(56, cut );
                 }
             }
@@ -8387,10 +8395,36 @@ static int se_ColorDistance( int a[3], int b[3] )
     return distance;
 }
 
+
 bool se_randomizeColor = false;
 static tSettingItem< bool > se_randomizeColorConf( "PLAYER_RANDOM_COLOR", se_randomizeColor );
 
-static void se_RandomizeColor( ePlayer * l, ePlayerNetID * p )
+bool se_uniqueColor = false;
+static tSettingItem< bool > se_uniqueColorConf( "PLAYER_UNIQUE_COLOR", se_uniqueColor );
+
+
+//This seems more random. Stolen from the old randomize color, but no comparing. Also another bonus, generates multi colored cycle / tails with the limit increase to 32.
+static void se_RandomizeColor(ePlayer * l)
+{
+    int currentRGB[3];
+    int newRGB[3];
+    
+    static tReproducibleRandomizer randomizer;
+
+    for( int i = 2; i >= 0; --i )
+        {
+            currentRGB[i] = l->rgb[i];
+            newRGB[i] = randomizer.Get(32);
+        }
+
+    for( int i = 2; i >= 0; --i )
+        {
+            l->rgb[i] = newRGB[i];
+        }
+}
+
+//This didnt seem to be too random, more like picking a unique color no one else currently has.
+static void se_UniqueColor( ePlayer * l, ePlayerNetID * p )
 {
     int currentRGB[3];
     int newRGB[3];
@@ -8436,6 +8470,25 @@ static void se_RandomizeColor( ePlayer * l, ePlayerNetID * p )
         }
     }
 }
+
+//Gather all the rgb colors and put them in a nice list.
+static void se_listPlayerColors()
+{
+    tColoredString listColors;
+     for ( int i = 0; i <= se_PlayerNetIDs.Len()-1; i++ )
+    {
+        ePlayerNetID * otherPlayers = se_PlayerNetIDs(i);
+
+
+        listColors << (i+1) << ": " << otherPlayers->GetColoredName() << "0xRESETT (" << otherPlayers->r << ", " << otherPlayers->g << ", " << otherPlayers->b << ")\n";
+     
+        con << listColors;
+
+        listColors  = "";
+
+    }
+}
+
 
 static nSettingItem<int> se_pingCharityServerConf("PING_CHARITY_SERVER",sn_pingCharityServer );
 static nVersionFeature   se_pingCharityServerControlled( 14 );
@@ -8547,8 +8600,14 @@ void ePlayerNetID::Update()
 
                 if ( se_randomizeColor )
                 {
-                    se_RandomizeColor(local_p,p);
+                    se_RandomizeColor(local_p);
                 }
+
+                if ( se_uniqueColor )
+                {
+                    se_UniqueColor(local_p,p);
+                }
+
 
                 p->r=ePlayer::PlayerConfig(i)->rgb[0];
                 p->g=ePlayer::PlayerConfig(i)->rgb[1];

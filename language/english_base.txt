@@ -446,6 +446,10 @@ color_b_help            Cycle and wall colour, blue component.
 color_g_help            Cycle and wall colour, green component.
 color_r_help            Cycle and wall colour, red component.
 
+player_random_color_help Gives a player a random color every round. The max range is 32 allowing multi-colored tails / bikes.
+player_unique_color_help Gives a player a semi-random unique color every round. Attempts to generate colors that are different from other players.
+
+
 #********************************************
 #********************************************
 #
@@ -634,8 +638,8 @@ vote_rejected_voting_suspended            Voting has been suspended by the Admin
 fadeout_name_delay_help                Time the player names are shown. Set to 0 if you don't want to show them at all or -1 if you want to show them always.
 show_own_name_help                      Should your name be displayed above your cycle on your screen?
 show_colored_name_help        Should names appear to be colored above the cycles that players control?
-dead_console_decoration       *DEAD*
-spectator_console_decoration  *SPEC*
+dead_console_decoration       *DEAD* 
+spectator_console_decoration  *SPEC* 
 
 #********************************************
 #********************************************
@@ -867,6 +871,7 @@ gl_version_help            OpenGL system information
 gl_renderer_help        OpenGL system information
 gl_vendor_help            OpenGL system information
 alpha_blend_help        Enable alpha blending
+text_bright_background_help  Enable the bright white background behind text considered dark 
 zone_alpha_toggle_help        This is XORd with ALPHA_BLEND to determine the way to draw zones
 zone_segments_help        How many segments the zone is formed with. Default is 11
 zone_seg_length_help    The rendered fraction of every segment. Default is .5

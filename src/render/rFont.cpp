@@ -267,6 +267,9 @@ rTextField::~rTextField(){
 #endif
 }
 
+static bool sr_renderBrightBackground = false;
+static tConfItem<bool> rbb("TEXT_BRIGHT_BACKGROUND",sr_renderBrightBackground);
+
 void rTextField::FlushLine(int len,bool newline){
 #ifndef DEDICATED
     // reload textures if alpha blending changed
@@ -291,7 +294,8 @@ void rTextField::FlushLine(int len,bool newline){
     if (sr_glOut)
     {
         // render bright background
-        if ( color_.IsDark() )
+        //this is kind of ugly
+        if ( color_.IsDark() && sr_renderBrightBackground)
         {
             RenderEnd(true);
             glDisable(GL_TEXTURE_2D);

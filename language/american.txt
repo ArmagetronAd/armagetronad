@@ -36,4 +36,3 @@ detail_smooth_help                Makes edges appear "round" by adding a color g
 detail_text_truecolor_text        TrueColor Textures:
 detail_text_truecolor_help        Stores the textures with 32 bit color depth instead of the default of 16 bit.
 sound_inited                      Sound initialized: 16 bit stereo at \1 Hz, buffer size \2 samples.\n
-player_random_color_help If set to 1, each local player will receive a semi-random color every round, trying to get as far away from every other player color.
