@@ -5,8 +5,8 @@ fav_num_per_team_player_help      The favourite number of players per team for t
 color_b_help                      Cycle and wall colour, blue component.
 color_g_help                      Cycle and wall colour, green component.
 color_r_help                      Cycle and wall colour, red component.
-player_random_color_help Gives a player a random colour every round. The max range is 32 allowing multi-colored tails / bikes.
-player_unique_color_help Gives a player a semi-random unique colour every round. Attempts to generate colors that are different from other players.
+player_random_color_help Gives a player a random colour every round. The max range is 32 allowing multi-coloured tails / bikes.
+player_unique_color_help Gives a player a semi-random unique colour every round. Attempts to generate colours that are different from other players.
 floor_red_help                    Floor colour
 floor_green_help                  Floor colour
 floor_blue_help                   Floor colour
