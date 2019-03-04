@@ -1590,9 +1590,9 @@ static void se_DisplayChatLocallyClient( ePlayerNetID* p, const tString& message
         if ( p->CurrentTeam() )
         {
             if ( p->Object() && !p->Object()->Alive() )
-                con << tOutput("$dead_console_decoration") << " ";
+                con << tOutput("$dead_console_decoration");
         }
-        else con << tOutput("$spectator_console_decoration") << " ";
+        else con << tOutput("$spectator_console_decoration");
 
         if (se_highlightMyName && actualMessage.Contains(p->GetName()))
         {

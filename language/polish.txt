@@ -3027,7 +3027,7 @@ input_joy_down_text           Joystick - Dól
 sound_channels_help           Ilosc kanalów, jaka moze obsluzyc Twoja karta dzwiekowa.
 sound_playlist_text           Lista Odtwarzania.
 persp_correct_help            Aktywuj korekcje perspektywy
-dead_console_decoration       *MARTWY*  
+dead_console_decoration       *MARTWY*   
 screen_vsync_on_text          Czekaj
 input_glance_forward_text     Glance w przód
 input_joy_down_help           Kaze cyklowi jechac w dól wzgledem aktualnego widoku
