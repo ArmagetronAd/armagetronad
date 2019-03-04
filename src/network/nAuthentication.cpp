@@ -1301,7 +1301,7 @@ void nLoginProcess::Authorize()
 // the finish task can also be triggered any time by this function:
 void nLoginProcess::Abort()
 {
-    nMemberFunctionRunner::ScheduleBackground( *this, &nLoginProcess::Finish );
+    nMemberFunctionRunner::ScheduleForeground( *this, &nLoginProcess::Finish );
 }
 
 // which, when finished, triggers the foreground task of updating the

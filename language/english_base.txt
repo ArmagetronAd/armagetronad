@@ -1952,6 +1952,8 @@ vote_reject_help                    By selecting this, you reject the vote.
 vote_details_help                   This menu entry determines your vote. Details: \1
 vote_submitter_text                 This vote was submitted by \1.
 
+vote_expired                        \1 (Already resolved)
+
 #*************************************
 #*************************************
 #

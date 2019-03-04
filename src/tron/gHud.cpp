@@ -581,9 +581,9 @@ static void display_fps_subby()
         thisTime = localtime ( &rawtime );
 
         if(thisTime->tm_min != lastTime) {
-            char h[3];
-            char m[3];
-            char ampm[3] = " ";
+            char h[13];
+            char m[13];
+            char ampm[13] = " ";
 
             lastTime = thisTime->tm_min;
 
