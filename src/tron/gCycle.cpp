@@ -2425,7 +2425,7 @@ gCycle::gCycle(eGrid *grid, const eCoord &pos,const eCoord &d,ePlayerNetID *p)
         currentWall(NULL),
         lastWall(NULL)
 {
-    se_cycleCreatedWriter << p->GetLogName() << this->MapPosition().x << this->MapPosition().y << this->MapDirection().x << this->MapDirection().y << Team()->Name().Filter() << se_GameTime();
+    se_cycleCreatedWriter << p->GetLogName() << this->MapPosition().x << this->MapPosition().y << this->MapDirection().x << this->MapDirection().y << (p->CurrentTeam()?Team()->Name().Filter():"") << se_GameTime();
     se_cycleCreatedWriter.write();
 
     windingNumberWrapped_ = windingNumber_ = Grid()->DirectionWinding(dirDrive);
@@ -2878,7 +2878,7 @@ bool gCycle::Timestep(REAL currentTime){
 #ifdef DEDICATED
     if ( Alive() && currentTime > lastTime + Lag() + 1 )
     {
-        sn_ConsoleOut( "0xff7777Admin : 0xffff77BUG had to kill a cycle because it lagged behind in the simulation. Probably the invulnerability bug. Investigate!\n" );
+        //sn_ConsoleOut( "0xff7777Admin : 0xffff77BUG had to kill a cycle because it lagged behind in the simulation. Probably the invulnerability bug. Investigate!\n" );
         st_Breakpoint();
         KillAt( pos );
         ret = false;
@@ -4218,7 +4218,7 @@ void gCycle::Kill(){
                 logTurnsMsg << "death " << MapPosition().x << " " << MapPosition().y << " " << MapDirection().x << " " << MapDirection().y;
                 LogPlayersCycleTurns(this, logTurnsMsg);
 
-                se_cycleDestroyedWriter << Player()->GetUserName() << MapPosition().x << MapPosition().y << MapDirection().x << MapDirection().y << ePlayerNetID::FilterName(Team()->Name()) << se_GameTime();
+                se_cycleDestroyedWriter << Player()->GetUserName() << MapPosition().x << MapPosition().y << MapDirection().x << MapDirection().y << (Player()->CurrentTeam()?ePlayerNetID::FilterName(Team()->Name()):"") << se_GameTime();
                 se_cycleDestroyedWriter.write();
 
                 Player()->LogActivity(ACTIVITY_DIED);
