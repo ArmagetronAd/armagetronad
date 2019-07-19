@@ -32,6 +32,10 @@ public:
         //x = ax; y = ay; z = az;
     }
 
+    inline pVector(pVector const &a) : x(a.x), y(a.y), z(a.z)
+    {
+    }
+
     inline pVector() {}
 
     inline float length() const
