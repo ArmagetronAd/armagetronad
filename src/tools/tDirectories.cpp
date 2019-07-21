@@ -1278,13 +1278,15 @@ public:
         char const * bestGuess = "./" PROGNAME;
 #endif// win32
 
-#ifndef ENABLE_BINRELOC
-        // if the passed default path is a real path, let it override the best guess
-        if ( strstr( defaultPath, "/" ) || strstr( defaultPath, "\\" ) )
-            bestGuess = defaultPath;
-        //            bestGuess = "./armagetronad-dedicated";
+#ifdef ENABLE_BINRELOC
+	if ( !bestGuess || 0 == strlen(bestGuess) )
 #endif
-
+        {
+            // if the passed default path is a real path, let it override the best guess
+            if ( strstr( defaultPath, "/" ) || strstr( defaultPath, "\\" ) )
+                bestGuess = defaultPath;
+            //            bestGuess = "./armagetronad-dedicated";
+        }
         path_ = bestGuess;
 
 #ifdef DEBUG_PATH
