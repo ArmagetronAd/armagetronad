@@ -343,7 +343,7 @@ std::ostream& operator << ( std::ostream& s, const nVersion& ver )
 
 nVersionFeature::nVersionFeature( int min, int max ) // creates a feature that is supported from version min to max; values of -1 indicate no border
 {
-    tASSERT( min_ >= sn_MyVersion().Min() );
+    tASSERT( min >= sn_MyVersion().Min() );
     tASSERT( max < 0 || max <= sn_MyVersion().Max() );
 
     min_ = min;
@@ -2853,7 +2853,7 @@ static void rec_peer(unsigned int peer){
 #ifndef NOEXCEPT
                 }
 
-                catch(nKillHim)
+                catch(nKillHim const &)
                 {
                     con << "nKillHim signal caught: ";
                     sn_DisconnectUser(id, "$network_kill_error");
@@ -3649,14 +3649,14 @@ void sn_Receive(){
     switch (current_state){
     case nSERVER:
         {
-            memset( &peers[0], 0, sizeof(sockaddr) );
+	    peers[0] = nAddress{};
 
             // listen on all sockets
             nSocketListener const & listener = sn_BasicNetworkSystem.GetListener();
             for ( nSocketListener::iterator i = listener.begin(); i != listener.end(); ++i )
             {
                 // clear peer info used for receiving
-                memset( &peers[MAXCLIENTS+1], 0, sizeof(sockaddr) );
+                peers[MAXCLIENTS+1] = nAddress{};
 
                 // copy socket info over to [MAXCLIENTS+1] and receive. The copy
                 // step is important, nAuthentication.cpp relies on the socket being set.
