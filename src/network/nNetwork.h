@@ -159,7 +159,7 @@ public:
         return !operator==(other);
     }
     bool operator == ( const nVersion& other );
-    nVersion& operator = ( const nVersion& other );
+    nVersion& operator = ( const nVersion& other ) = default;
 private:
     int min_, max_;
 };

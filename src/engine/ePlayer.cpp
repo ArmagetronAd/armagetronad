@@ -8991,7 +8991,7 @@ ePlayerNetID * ePlayerNetID::ReadPlayer( std::istream & s )
             }
         }
     // name.ToInt will throw a tGenericException when name doesn't look like an int, but it's not fatal, so we will just go on
-    } catch ( tGenericException ) {}
+    } catch ( tGenericException const & ) {}
 
     return ePlayerNetID::FindPlayerByName( name );
 }

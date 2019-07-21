@@ -68,6 +68,8 @@ public:
     Base(Base const &other); //!< Copy constructor
     virtual ~Base() { };
 
+    Base & operator =(Base const &) = default;
+  
     virtual Base *copy(void) const; //!< Returns an exact copy of this object
 
     virtual int GetInt(void) const; //!< Returns an integer using the current value

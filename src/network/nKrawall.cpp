@@ -234,7 +234,7 @@ void nKrawall::nMethod::ScrambleWithSalt( nScrambleInfo const & info, nScrambled
     // sanity check
     if ( !sn_IsSupportedMethod( method ) )
     {
-        memset( &result, 0, sizeof(result) );
+        result.Clear();
         con << tColoredStringProxy(1,0,0) << "INTERNAL ERROR OR PHARMING ATTEMPT:" <<  tColoredStringProxy(1,1,1) << " unsupported hash method " << method << " selected.\n";
         return;
     }

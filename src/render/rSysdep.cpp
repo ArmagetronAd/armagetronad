@@ -795,6 +795,7 @@ public:
             default:
                 break;
             }
+	    // falltrhough intentional
         default:
             FinishComplicated( swap );
         }

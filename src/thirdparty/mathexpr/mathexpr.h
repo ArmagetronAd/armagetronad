@@ -125,7 +125,7 @@ class RFunction{
     float*buf;
 public:
     signed char type;
-    float ((*pfuncval)(float));
+    float (*pfuncval)(float);
     ROperation op;int nvars;RVar** ppvar;
     char*name;
     RFunction();
