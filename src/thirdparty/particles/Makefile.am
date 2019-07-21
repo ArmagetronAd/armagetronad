@@ -4,6 +4,6 @@ libparticles_a_SOURCES = pDomain.h pVec.h papi.h\
 			ParticleDLL/actions.cpp     ParticleDLL/ParticleState.cpp\
 			ParticleDLL/actions.h        ParticleDLL/Particle.h\
 			ParticleDLL/ParticleGroup.h  ParticleDLL/ParticleState.h
-			
-libparticles_a_CXXFLAGS = ${AM_CXXFLAGS} -I ${top_srcdir}/src -I ./ -I ParticleDLL
+
+libparticles_a_CXXFLAGS = ${AM_CXXFLAGS} -iquote ${top_srcdir}/src -iquote ./ -iquote ${srcdir}/ParticleDLL
 

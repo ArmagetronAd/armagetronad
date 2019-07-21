@@ -215,12 +215,13 @@ endif
 
 #AM_CXXFLAGS= $(BINRELOC_CFLAGS)
 
-libtools_a_CXXFLAGS  =$(AM_CXXFLAGS) $(CXXFLAGS_OURFILES) -I@srcdir@/tools -I@srcdir@/resource -I@srcdir@/thirdparty/mathexpr -I@srcdir@/thirdparty/utf8 -I@srcdir@/protobuf -Iprotobuf
-libnetwork_a_CXXFLAGS=$(libtools_a_CXXFLAGS)  -I@srcdir@/network
-librender_a_CXXFLAGS =$(libtools_a_CXXFLAGS)  -I@srcdir@/render
-libui_a_CXXFLAGS     =$(librender_a_CXXFLAGS) -I@srcdir@/ui -I@srcdir@/thirdparty/shttpd -I@srcdir@/thirdparty/scrap
-libengine_a_CXXFLAGS =$(libui_a_CXXFLAGS)     -I@srcdir@/network -I@srcdir@/engine -I@srcdir@/engine/sound
-libtron_a_CXXFLAGS   =$(libengine_a_CXXFLAGS) -I@srcdir@/thirdparty/particles -I@srcdir@/tron -I@srcdir@/tron/cockpit
+libtools_a_CPPFLAGS = -iquote @srcdir@/thirdparty/binreloc
+libtools_a_CXXFLAGS  =$(AM_CXXFLAGS) $(CXXFLAGS_OURFILES) -iquote @srcdir@/tools -iquote @srcdir@/resource -iquote @srcdir@/thirdparty/mathexpr -iquote @srcdir@/thirdparty/utf8 -iquote @srcdir@/protobuf -iquote protobuf
+libnetwork_a_CXXFLAGS=$(libtools_a_CXXFLAGS)  -iquote @srcdir@/network
+librender_a_CXXFLAGS =$(libtools_a_CXXFLAGS)  -iquote @srcdir@/render
+libui_a_CXXFLAGS     =$(librender_a_CXXFLAGS) -iquote @srcdir@/ui -iquote @srcdir@/thirdparty/shttpd -iquote @srcdir@/thirdparty/scrap
+libengine_a_CXXFLAGS =$(libui_a_CXXFLAGS)     -iquote @srcdir@/network -iquote @srcdir@/engine -iquote @srcdir@/engine/sound
+libtron_a_CXXFLAGS   =$(libengine_a_CXXFLAGS) -iquote @srcdir@/thirdparty/particles -iquote @srcdir@/tron -iquote @srcdir@/tron/cockpit
 
 if OS_X_TOOLKIT
 libtools_a_OBJCXXFLAGS  =$(libtools_a_CXXFLAGS)
@@ -303,7 +304,7 @@ armagetronad_main_master_LDADD=libnetwork.a libtools.a protobuf/libprotobuf.a
 
 if BUILDDEDICATED
 armagetronad_serverquery_SOURCES = serverquery/serverquery.cpp serverquery/jsoncpp.cpp serverquery/json/json.h serverquery/json/json-forwards.h
-armagetronad_serverquery_CXXFLAGS = $(AM_CXXFLAGS) -I@srcdir@ -I@srcdir@/serverquery -I@srcdir@/tools -I@srcdir@/network
+armagetronad_serverquery_CXXFLAGS = $(AM_CXXFLAGS) -iquote @srcdir@ -iquote @srcdir@/serverquery -iquote @srcdir@/tools -iquote @srcdir@/network
 armagetronad_serverquery_LDADD = libnetwork.a libtools.a protobuf/libprotobuf.a
 endif
 endif

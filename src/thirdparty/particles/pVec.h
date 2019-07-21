@@ -77,6 +77,8 @@ public:
 
     inline pVec(float a) : vx(a), vy(a), vz(a) {}
 
+    inline pVec(pVec const &a) = default;
+
     inline pVec() {}
 
     const float& x() const { return vx; }

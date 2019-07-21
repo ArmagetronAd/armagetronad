@@ -2827,7 +2827,7 @@ static void se_AdminAdmin( ePlayerNetID * p, std::istream & s )
 
         tConfItemBase::LoadLine(stream);
     }
-    catch (tAbortLoading)
+    catch (tAbortLoading const &)
     {
         con << tOutput("$config_abort");
     }

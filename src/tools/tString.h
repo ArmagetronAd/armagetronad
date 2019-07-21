@@ -84,6 +84,7 @@ public:
     WRAP_MUTATING_OPERATOR(=,BASE const &) // assignment from C++ string
 
     tString & operator =( tOutput const & other ); //!< assignment from output collector
+    tString & operator =( tString const & other ) = default;
 
     size_type Size() const;                        //!< Returns the size of the string in characters.
 
