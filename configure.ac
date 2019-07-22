@@ -2,7 +2,7 @@ dnl I would like to do this to generate the version number...
 dnl AC_DEFUN([AUTOMATIC_VERSION],syscmd([sh batch/make/version .]))
 
 dnl but have to do this with version generated in bootstrap.sh instead for some reason
-m4_include(version)
+m4_include(version.m4)
 
 dnl Comment this out to disable autoconf custom directories:
 m4_include(accustomdir.m4)
@@ -1477,7 +1477,7 @@ AC_USE_SUBST_UNIVERSAL
 AC_AA_REPLACEPATHS
 
 # all include directories added via -I so far should be system level inlcudes, divide them from those added by individual makefiles
-CPPFLAGS="-I- $CPPFLAGS"
+# CPPFLAGS="-I- $CPPFLAGS"
 
 export CFLAGS
 export CPPFLAGS

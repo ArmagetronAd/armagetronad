@@ -126,7 +126,7 @@ dist-hook-scm:
 #	replace dynamic version in configure.ac with the version this build is configured with,
 #   as well as default package and program name
 	sed \
-	-e "s/m4_include(version)//" \
+	-e "s/m4_include(version.m4)//" \
 	-e "s/AC_INIT(armagetronad,AUTOMATIC_VERSION)/AC_INIT(@prognamebase@,$(VERSION))/" \
 	-e "s/  progname=.*/  progname='@prognamebase@'/" \
 	-e "s/  progtitle=.*/  progtitle='@progtitle@'/" \
@@ -138,9 +138,9 @@ dist-hook-scm:
 	sed	-e "s,/ArmagetronDedicated,/@progtitle@@progtitle_server@," \
 	< @srcdir@/src/win32_ded/aa_config.h > $(distdir)/src/win32_ded/aa_config.h
 
-#   regenerate dependant files so they no longer reference to the file "version" which will be removed
+#   regenerate dependant files so they no longer reference to the file "version.m4" which will be removed
 	cp @srcdir@/bootstrap.sh $(distdir)
-	cd $(distdir); rm -f aa_config.h.in version; sh ./bootstrap.sh
+	cd $(distdir); rm -f aa_config.h.in version.m4; sh ./bootstrap.sh
 	rm -rf $(distdir)/autom4te.cache
 
 dist-hook:
@@ -151,13 +151,13 @@ dist-hook:
 	find $(distdir) -depth -name .svn -exec rm -rf \{\} \;
 
 #   strip comments from translated files
-	cd $(distdir)/language; python ./update.py --dist
+	cd $(distdir)/language; python2 ./update.py --dist
 #	restore timestamps
 	cd $(distdir)/language; for f in *.txt; do test -r $$f.bak && touch -r $$f.bak $$f; done
 	rm -f $(distdir)/language/*.bak
 
 # 	generate ChangeLog and configure.ac
-	test -r $(srcdir)/version && $(MAKE) dist-hook-scm || echo "Version not from SCM, skipping version fixing."
+	test -r $(srcdir)/version.m4 && $(MAKE) dist-hook-scm || echo "Version not from SCM, skipping version fixing."
 
 #   fix internal version info
 	mv $(distdir)/src/tTrueVersion.h $(distdir)/src/tFakeVersion.h
@@ -206,7 +206,7 @@ if !BUILDDEDICATED
 
 	rm -rf "$(DESTDIR)${prefix}/../Frameworks"
 	cp -R "${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks" "$(DESTDIR)${prefix}/.."
-	
+
 	install_name_tool -rpath "${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks" "@executable_path/../../Frameworks" "$(DESTDIR)${prefix}/../MacOS/@progtitle@"
 endif
 endif

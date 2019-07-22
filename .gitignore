@@ -24,7 +24,7 @@ Makefile.in
 /ylwrap
 /missing
 /touch
-/version
+/version.m4
 src/doc/commands.txt
 ./.changetag
 Makefile
