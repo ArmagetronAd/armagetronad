@@ -295,14 +295,6 @@ bool nVersion::operator == ( const nVersion& other )
     return this->max_ == other.max_ && this->min_ == other.min_;
 }
 
-nVersion& nVersion::operator = ( const nVersion& other )
-{
-    this->min_ = other.min_;
-    this->max_ = other.max_;
-
-    return *this;
-}
-
 nMessage& operator >> ( nMessage& m, nVersion& ver )
 {
     int min,max;

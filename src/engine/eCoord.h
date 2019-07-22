@@ -47,7 +47,7 @@ public:
     REAL NormSquared() 			const 	{return x*x+y*y;}
     REAL Norm() 				const 	{return sqrt(NormSquared());}
     void Normalize()					{ *this *= 1/Norm(); }
-    const eCoord &operator=(const eCoord &a){ x=a.x;y=a.y; return *this;  }
+    eCoord &operator=(const eCoord &a) = default;
 
     //scalar product:
     static REAL F(const eCoord &a,const eCoord &b){
