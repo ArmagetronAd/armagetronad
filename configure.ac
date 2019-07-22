@@ -982,7 +982,7 @@ AC_USE_SUBST_UNIVERSAL
 AC_AA_REPLACEPATHS
 
 # all include directories added via -I so far should be system level inlcudes, divide them from those added by individual makefiles
-CPPFLAGS="-I- $CPPFLAGS"
+# CPPFLAGS="-I- $CPPFLAGS"
 
 export CPPFLAGS
 export CXXFLAGS
