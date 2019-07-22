@@ -7,6 +7,7 @@ MYDIR=`dirname $0`
 if test -r batch/make/version; then
     echo "Generating version..."
     echo "m4_define(AUTOMATIC_VERSION,["`sh batch/make/version $MYDIR`"])" > version.m4 || exit 1
+    rm -f version
 fi
 echo "Copying license..."
 cp COPYING.txt COPYING
