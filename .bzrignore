@@ -25,7 +25,7 @@ Makefile.in
 ./install-sh
 ./missing
 ./touch
-./version
+./version.m4
 src/doc/commands.txt
 ./.changetag
 Makefile
