@@ -3736,32 +3736,42 @@ REAL gCycle::PathfindingModifier( const eWall *w ) const
         return 1;
 }
 
-#ifndef DEDICATED
-static void se_cycleTurn(std::istream &s)
+static void se_cycleTurn(std::istream& s)
 {
-    ePlayerNetID *player = NULL;
-    player = se_GetLocalPlayer();
+#ifdef DEDICATED
+    tString foundPlayer;
+    s >> foundPlayer;
+#endif
 
     tString times, turn;
     s >> times;
     s >> turn;
 
+#ifndef DEDICATED
+    ePlayerNetID* player = se_GetLocalPlayer();
+#else
+    ePlayerNetID* player = ePlayerNetID::FindPlayerByName(foundPlayer);
+#endif
+
+    if (!player)
+        return;
+
     int x = atoi(times);
     if (player)
     {
-        gCycle *cycle = dynamic_cast<gCycle *>(player->Object());
+        gCycle* cycle = dynamic_cast<gCycle*>(player->Object());
         if (cycle && cycle->Alive())
         {
             if (turn.Filter() == "left")
             {
-                for(int i = 0; i < x; i++)
+                for (int i = 0; i < x; i++)
                 {
                     cycle->Act(&gCycle::se_turnLeft, 1);
                 }
             }
             else if (turn.Filter() == "right")
             {
-                for(int i = 0; i < x; i++)
+                for (int i = 0; i < x; i++)
                 {
                     cycle->Act(&gCycle::se_turnRight, 1);
                 }
@@ -3769,14 +3779,17 @@ static void se_cycleTurn(std::istream &s)
             else
             {
                 tString msg;
+#ifndef DEDICATED
                 msg << "Usage: CYCLE_TURN <times> [turn: left | right] required.\n";
+#else
+                msg << "Usage: CYCLE_TURN <player> <times> [turn: left | right] required.\n";
+#endif
                 sn_ConsoleOut(msg, player->Owner());
             }
         }
     }
 }
 static tConfItemFunc se_cycleTurnConf("CYCLE_TURN", &se_cycleTurn);
-#endif
 
 bool gCycle::Act(uActionPlayer *Act, REAL x){
     // don't accept premature input
