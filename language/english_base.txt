@@ -2722,7 +2722,7 @@ player_free_frag                 \1 core dumped \2.\n
 player_teamkill                     \1 core dumped teammate \2! Boo! No points for that!\n
 player_win_frag_ai                 \1 got \2 points for core dumping an AI player.\n
 player_lose_frag                 \1 lost \2 points since it caused a general protection fault.\n
-player_lose_rim                     \1 lost \2 points for trying to  escape from the game grid.\n
+player_lose_rim                     \1 lost \2 points for trying to escape from the game grid.\n
 player_win_survivor                 \1 was awarded \2 points for being last active team.\n
 player_joins_team                \1 wants to play for \2 on the next respawn.\n
 player_joins_team_solo           \1 wants to play by themself on the next respawn.\n
