@@ -39,6 +39,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tMath.h"
 #include "nConfig.h"
 #include "eTeam.h"
+#include "../tron/gCycle.h"
 
 #include <map>
 
@@ -788,8 +789,8 @@ bool restrictArenaBoundry(const REAL &newValue)
 }
 static tSettingItem<REAL> se_arenaBoundaryConf("ARENA_BOUNDARY", se_arenaBoundary);
 
-bool se_arenaBoundaryKill = true;
-static tSettingItem<bool> se_arenaBoundaryKillConf("ARENA_BOUNDARY_KILL", se_arenaBoundaryKill);
+int se_arenaBoundaryKill = 1;
+static tSettingItem<int> se_arenaBoundaryKillConf("ARENA_BOUNDARY_KILL", se_arenaBoundaryKill);
 
 void eGameObject::TimestepThisWrapper(eGrid * grid, REAL currentTime, eGameObject *c, REAL minTimestep )
 {
@@ -828,12 +829,32 @@ void eGameObject::TimestepThisWrapper(eGrid * grid, REAL currentTime, eGameObjec
     // check for teleports out of arena bounds
     if (!eWallRim::IsBound(c->pos, se_arenaBoundary))
     {
-        se_maxSimulateAheadLeft = 0;
-
-        if (se_arenaBoundaryKill)
-            c->Kill();
-
-        return;
+        switch(se_arenaBoundaryKill)
+        {
+            case 1:
+                c->Kill();
+                break;
+            case 2:
+            {
+                gCycle *p = static_cast<gCycle *>(c);
+                if(p && p->Alive())
+                {
+                    REAL timestep = (currentTime - c->LastTime());
+                    REAL rubber = p->GetRubber();
+                    rubber += (p->Speed()*timestep);
+                    p->SetRubber(rubber);
+                    
+                    if(rubber >= sg_rubberCycle) p->KillAt(c->pos);
+                    else p->RequestSync();
+                }
+            }
+                break;
+            default:
+            {
+                se_maxSimulateAheadLeft = 0;
+                return;
+            }
+        }
     }
 
     // only simulate forward here
