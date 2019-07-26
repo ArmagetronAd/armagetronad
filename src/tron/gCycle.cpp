@@ -2425,7 +2425,12 @@ gCycle::gCycle(eGrid *grid, const eCoord &pos,const eCoord &d,ePlayerNetID *p)
         currentWall(NULL),
         lastWall(NULL)
 {
-    se_cycleCreatedWriter << p->GetLogName() << this->MapPosition().x << this->MapPosition().y << this->MapDirection().x << this->MapDirection().y << (p->CurrentTeam()?Team()->Name().Filter():"") << se_GameTime();
+    se_cycleCreatedWriter << p->GetLogName() << this->MapPosition().x << this->MapPosition().y << this->MapDirection().x << this->MapDirection().y;
+    if(p->CurrentTeam())
+        se_cycleCreatedWriter << Team()->Name().Filter();
+    else
+        se_cycleCreatedWriter << "";
+    se_cycleCreatedWriter << se_GameTime();
     se_cycleCreatedWriter.write();
 
     windingNumberWrapped_ = windingNumber_ = Grid()->DirectionWinding(dirDrive);
@@ -4231,7 +4236,12 @@ void gCycle::Kill(){
                 logTurnsMsg << "death " << MapPosition().x << " " << MapPosition().y << " " << MapDirection().x << " " << MapDirection().y;
                 LogPlayersCycleTurns(this, logTurnsMsg);
 
-                se_cycleDestroyedWriter << Player()->GetUserName() << MapPosition().x << MapPosition().y << MapDirection().x << MapDirection().y << (Player()->CurrentTeam()?ePlayerNetID::FilterName(Team()->Name()):"") << se_GameTime();
+                se_cycleDestroyedWriter << Player()->GetUserName() << MapPosition().x << MapPosition().y << MapDirection().x << MapDirection().y;
+                if(Player()->CurrentTeam())
+                    se_cycleDestroyedWriter << ePlayerNetID::FilterName(Team()->Name());
+                else
+                    se_cycleDestroyedWriter << "";
+                se_cycleDestroyedWriter << se_GameTime();
                 se_cycleDestroyedWriter.write();
 
                 Player()->LogActivity(ACTIVITY_DIED);
