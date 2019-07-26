@@ -38,7 +38,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 // #include <fstream>
 
-eTimer *se_mainGameTimer=NULL;
+eTimer * se_mainGameTimer=NULL;
+tJUST_CONTROLLED_PTR<eTimer> se_mainGameTimerHolder=NULL;
 
 // from nNetwork.C; used to sync time with the server
 //extern REAL sn_ping[MAXCLIENTS+2];
@@ -50,9 +51,11 @@ eTimer::eTimer():nNetObject(), startTimeSmoothedOffset_(0){
 
     Reset(0);
 
+    se_mainGameTimerHolder=nullptr;
     if (se_mainGameTimer)
         delete se_mainGameTimer;
     se_mainGameTimer=this;
+    se_mainGameTimerHolder=this;
     if (sn_GetNetState()==nSERVER)
         RequestSync();
 
@@ -69,6 +72,7 @@ eTimer::eTimer(nMessage &m):nNetObject(m), startTimeSmoothedOffset_(0){
 
     Reset(0);
 
+    se_mainGameTimerHolder=nullptr;
     if (se_mainGameTimer)
         delete se_mainGameTimer;
     se_mainGameTimer=this;
@@ -487,6 +491,7 @@ void se_MakeGameTimer(){
 }
 
 void se_KillGameTimer(){
+    se_mainGameTimerHolder=nullptr;
     if (se_mainGameTimer)
         delete se_mainGameTimer;
     se_mainGameTimer=NULL; // to make sure

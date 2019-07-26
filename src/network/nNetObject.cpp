@@ -1792,11 +1792,15 @@ void nNetObject::ClearKnows(int user, bool clear){
     if (0<=user && user <=MAXCLIENTS){
         is_ready_to_get_objects[user]=false;
         for(int i=sn_netObjects.Len()-1;i>=0;i--){
-            tJUST_CONTROLLED_PTR<nNetObject> no=sn_netObjects(i);
+            nNetObject* no=sn_netObjects(i);
             if (no){
+                nObserverPtr<nNetObject> noObserved{no};
                 no->knowsAbout[user].Reset();
 
                 no->DoBroadcastExistence();  // immediately transfer the thing
+                no=sn_netObjects(i);
+                if(!noObserved)
+                    continue;
 
                 if (clear){
                     if (no->owner==user && user!=sn_myNetID){
@@ -1804,6 +1808,9 @@ void nNetObject::ClearKnows(int user, bool clear){
                         sn_BreakOnObjectID(i);
 #endif
                         bool destroy = no->ActionOnQuit();
+                        no=sn_netObjects(i);
+                        if(!noObserved)
+                            continue;
 
                         // take ownership of the object in any case
                         no->createdLocally=true;
