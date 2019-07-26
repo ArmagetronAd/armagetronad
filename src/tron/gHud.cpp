@@ -40,7 +40,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "gGame.h"
 #include "tRecorder.h"
 
-#include <rRender.h>
+#include "rRender.h"
 #include <math.h>
 #include "gCycle.h"
 #include <time.h>
@@ -572,7 +572,7 @@ static void display_fps_subby()
     // Show the time
     if(showTime) {
         static int lastTime=0;
-        static char theTime[13];
+        static char theTime[13*3];
         float size =.15;
         struct tm* thisTime;
         time_t rawtime;

@@ -2,7 +2,7 @@ dnl I would like to do this to generate the version number...
 dnl AC_DEFUN([AUTOMATIC_VERSION],syscmd([sh batch/make/version .]))
 
 dnl but have to do this with version generated in bootstrap.sh instead for some reason
-m4_include(version)
+m4_include(version.m4)
 
 dnl Comment this out to disable autoconf custom directories: 
 m4_include(accustomdir.m4)
@@ -817,7 +817,7 @@ AC_CHECK_FUNCS(wmemset)
 test -z "`$CXX --version | grep '(GCC)'`" || CXXFLAGS="`echo $CXXFLAGS | sed -e 's,-Os,-O2,g' `" CFLAGS="`echo $CFLAGS | sed -e 's,-Os,-O2,g' `"
 
 dnl add current directories to include search path
-CPPFLAGS="-I. -I.. $CPPFLAGS"
+CPPFLAGS="-iquote . -iquote .. $CPPFLAGS"
 
 # define
 AC_DEFINE_UNQUOTED(TOP_SOURCE_DIR,"${srcdir}", [Define the top source directory])
@@ -952,6 +952,9 @@ AC_SUBST_UNIVERSAL(relocatable)
 
 AC_USE_SUBST_UNIVERSAL
 AC_AA_REPLACEPATHS
+
+# all include directories added via -I so far should be system level inlcudes, divide them from those added by individual makefiles
+# CPPFLAGS="-I- $CPPFLAGS"
 
 export CPPFLAGS
 export CXXFLAGS

@@ -197,6 +197,7 @@ public:
     tString & operator = ( const char * c );
     tString & operator = ( const tString & s );
     tString & operator = ( const tOutput & s );
+    tColoredString & operator = ( const tColoredString & s ) = default;
 
     static tString RemoveColors( const char *c );           //!< Removes the color codes from a string
     static tString RemoveColors( const char *c, bool darkonly );           //!< Removes the color codes from a string

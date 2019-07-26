@@ -122,12 +122,13 @@ endif
 
 #AM_CXXFLAGS= $(BINRELOC_CFLAGS)
 
-libtools_a_CXXFLAGS  =$(AM_CXXFLAGS)  -I@srcdir@/tools
-libnetwork_a_CXXFLAGS=$(libtools_a_CXXFLAGS)  -I@srcdir@/network
-librender_a_CXXFLAGS =$(libtools_a_CXXFLAGS)  -I@srcdir@/render
-libui_a_CXXFLAGS     =$(librender_a_CXXFLAGS) -I@srcdir@/ui
-libengine_a_CXXFLAGS =$(libui_a_CXXFLAGS)     -I@srcdir@/network -I@srcdir@/engine 
-libtron_a_CXXFLAGS   =$(libengine_a_CXXFLAGS) -I@srcdir@/thirdparty/particles -I@srcdir@/tron 
+libtools_a_CPPFLAGS = -iquote @srcdir@/thirdparty/binreloc
+libtools_a_CXXFLAGS  =$(AM_CXXFLAGS)  -iquote @srcdir@/tools
+libnetwork_a_CXXFLAGS=$(libtools_a_CXXFLAGS)  -iquote @srcdir@/network
+librender_a_CXXFLAGS =$(libtools_a_CXXFLAGS)  -iquote @srcdir@/render
+libui_a_CXXFLAGS     =$(librender_a_CXXFLAGS) -iquote @srcdir@/ui
+libengine_a_CXXFLAGS =$(libui_a_CXXFLAGS)     -iquote @srcdir@/network -iquote @srcdir@/engine 
+libtron_a_CXXFLAGS   =$(libengine_a_CXXFLAGS) -iquote @srcdir@/thirdparty/particles -iquote @srcdir@/tron 
 
 # core engine files can get compiled with optimization turned on for more painless debugging
 # on weak computers

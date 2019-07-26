@@ -898,7 +898,7 @@ static void net_destroy_handler(nMessage &m){
         info.timeout=tSysTimeFloat()+nDeletedTimeout;
 
         // notify object of pending deletion
-        if (nNetObject *no=sn_netObjects[id])
+        if (tJUST_CONTROLLED_PTR<nNetObject> no=sn_netObjects[id])
         {
             tASSERT( !no->Owned() );
 
@@ -1792,7 +1792,7 @@ void nNetObject::ClearKnows(int user, bool clear){
     if (0<=user && user <=MAXCLIENTS){
         is_ready_to_get_objects[user]=false;
         for(int i=sn_netObjects.Len()-1;i>=0;i--){
-            nNetObject *no=sn_netObjects(i);
+            tJUST_CONTROLLED_PTR<nNetObject> no=sn_netObjects(i);
             if (no){
                 no->knowsAbout[user].Reset();
 

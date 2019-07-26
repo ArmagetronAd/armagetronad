@@ -359,7 +359,7 @@ template<class T> class nNOInitialisator:public nDescriptor{
             }
 #ifndef NOEXCEPT
         }
-        catch(nKillHim)
+        catch(nKillHim const &)
         {
             con << "nKillHim signal caught.\n";
             Cheater(m.SenderID());
