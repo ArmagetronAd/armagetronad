@@ -1791,11 +1791,11 @@ void nNetObject::ClearKnows(int user, bool clear){
         for(int i=sn_netObjects.Len()-1;i>=0;i--){
             nNetObject* no=sn_netObjects(i);
             if (no){
+                nObserverPtr<nNetObject> noObserved{no};
                 no->knowsAbout[user].Reset();
 
                 no->DoBroadcastExistence();  // immediately transfer the thing
-                no=sn_netObjects(i);
-                if(!no)
+                if(!noObserved)
                     continue;
 
                 if (clear){
@@ -1804,8 +1804,7 @@ void nNetObject::ClearKnows(int user, bool clear){
                         sn_BreakOnObjectID(i);
 #endif
                         bool destroy = no->ActionOnQuit();
-                        no=sn_netObjects(i);
-                        if(!no)
+                        if(!noObserved)
                           continue;
                         
                         // take ownership of the object in any case
