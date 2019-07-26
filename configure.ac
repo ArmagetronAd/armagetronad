@@ -548,6 +548,9 @@ if test $CODELEVEL -ge 1; then
     dnl leave at default and use [[fallthrough]] (std C++ 17)
     dnl we're using both here; hopefully, old compilers ignore the [[fallthrough]].
     AX_CXXFLAGS_GCC_OPTION(-Wimplicit-fallthrough=1)
+
+    dnl Well, they don't, GCC 5.7 warns about them; silence it.
+    AX_CXXFLAGS_GCC_OPTION(-Wno-attributes)
 fi
 
 dnl test $CODELEVEL -ge 2 && CXXFLAGS="$CXXFLAGS -Wshadow -Wpointer-arith -Wfloat-equal -W -Wcast-qual -Wcast-align -Wconversion -Wunreachable-code --pedantic -Winline"
