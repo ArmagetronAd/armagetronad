@@ -3100,7 +3100,8 @@ nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket
     case Login_Protobuf:
         // switch server connection to protobuf capable version
         sn_Connections[0].version = sn_myVersion;
-        [[fallthrough]];
+        // [[fallthrough]];
+        // fallthrough on purpose
     case Login_Pre0252:
         // just write a protobuf message. In pre-0.2.5.2 mode, it'll get converted
         // to a stream message correctly.

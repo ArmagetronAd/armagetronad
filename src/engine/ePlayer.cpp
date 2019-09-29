@@ -246,7 +246,7 @@ static std::string se_EscapeName( tString const & original, bool keepAt = true )
                 break;
             }
             
-            [[fallthrough]];
+            // [[fallthrough]];
             // fallthrough
         default:
             if ( 0x20 < c && 0x7f >= c )
@@ -4346,7 +4346,7 @@ void ePlayerNetID::Chat(const tString &s_orig)
         {
             se_BroadcastChat( this, s );
 
-            [[fallthrough]];
+            // [[fallthrough]];
         }
         // falling through on purpose
         default:
@@ -10580,7 +10580,8 @@ static void se_TimebotAction( eTimebotAction action, ePlayerNetID * player, char
             sn_KickUser( player->Owner(), m, se_timebotKickSeverity );
         }
 
-        [[fallthrough]];
+        // [[fallthrough]];
+        // fallthrough on purpose
     case eTimebotAction_NotifyEveryone:
         sn_ConsoleOut( m );
         break;
