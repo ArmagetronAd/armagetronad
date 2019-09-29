@@ -685,6 +685,11 @@ static int sr_GetMaxTextureSize()
 void rISurfaceTexture::Upload( rSurface const & surface )
 {
 #ifndef DEDICATED
+#ifndef GL_CLAMP_TO_EDGE
+// GL_CLAMP_TO_EDGE was observed undefined in Windows; should be the same as GL_CLAMP.
+#define GL_CLAMP_TO_EDGE GL_CLAMP
+#endif
+
     sr_LockSDL();
     GLenum texformat = surface.GetFormat();
     SDL_Surface * tex = surface.GetSurface();
