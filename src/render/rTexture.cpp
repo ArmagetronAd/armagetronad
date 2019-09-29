@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -480,6 +480,12 @@ void rISurfaceTexture::ProcessImage( SDL_Surface * surface )
 void rISurfaceTexture::Upload( rSurface & surface )
 {
 #ifndef DEDICATED
+
+#ifndef GL_CLAMP_TO_EDGE
+// GL_CLAMP_TO_EDGE was observed undefined in Windows; should be the same as GL_CLAMP.
+#define GL_CLAMP_TO_EDGE GL_CLAMP
+#endif
+
     sr_LockSDL();
     GLenum texformat = surface.GetFormat();
     SDL_Surface * tex = surface.GetSurface();
