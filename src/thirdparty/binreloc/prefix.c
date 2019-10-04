@@ -121,7 +121,7 @@ br_locate (void *symbol)
 
 		if (!fgets (line, sizeof (line), f))
 			continue;
-		if (!strstr (line, " r-xp ") || !strchr (line, '/'))
+		if ((!strstr (line, " r-xp ") && !strstr (line, " r--p ")) || !strchr (line, '/'))
 			continue;
 
 		sscanf (line, "%lx-%lx ", &start, &end);
