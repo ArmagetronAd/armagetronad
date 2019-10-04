@@ -1326,6 +1326,8 @@ static tString GeneratePrefix()
     tString const & bindirCompiled = st_bindirCompiled;
     // and the current binary path
     tString bindirNow(GenerateParentOfExecutable(1));
+    if(bindirNow.Len() <= 1)
+        return prefixCompiled;
 
     // the length of the bindir suffix, the part that is added below prefix
     int bindirSuffixLength=bindirCompiled.Len() - prefixCompiled.Len();
