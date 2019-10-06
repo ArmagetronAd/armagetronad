@@ -1087,7 +1087,7 @@ public:
         REAL heightLimit = ( .5 * zLimit_ * time + objectZ * ( 1 - time ) );
 
         // exit early if the wall does not obstruct view
-        if ( moved_ || !w || !owned->EdgeIsDangerous(w, time, alpha) || w->Height() <= heightLimit )
+        if ( moved_ || !w || !owned->EdgeIsDangerous(w, time, alpha) || w->SeeHeight() <= heightLimit )
             return eContinue;
 
         heightLimit *= .5f;
