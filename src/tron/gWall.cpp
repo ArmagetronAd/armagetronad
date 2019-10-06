@@ -132,13 +132,13 @@ rwb("RIM_WALL_BLUE",rim_wall_blue);
    ********************************************** */
 
 gWallRim::gWallRim(eGrid *grid, REAL h)
-        :eWallRim(grid, false, h), renderHeight_(h), lastUpdate_(-100), tBeg_( 0 ), tEnd_( 0 )
+        :eWallRim(grid, false, h), renderHeight_(h), lastUpdate_(-100), lastRenderHeight_(h), tBeg_( 0 ), tEnd_( 0 )
 {
     // std::cout << "create " << this << "\n";
 }
 
 gWallRim::gWallRim(eGrid *grid, REAL tBeg, REAL tEnd, REAL h)
-        :eWallRim(grid, false, h), renderHeight_(h), lastUpdate_(-100), tBeg_( tBeg ), tEnd_( tEnd )
+        :eWallRim(grid, false, h), renderHeight_(h), lastUpdate_(-100), lastRenderHeight_(h), tBeg_( tBeg ), tEnd_( tEnd )
 {
     // std::cout << "create " << this << "\n";
 }
@@ -494,11 +494,12 @@ void gWallRim::RenderReal(const eCamera *cam){
                 renderHeight_ = height;
             }
         }
+    }
 
-        if ( renderHeight_ < height )
-        {
-            DestroyDisplayList();
-        }
+    if(abs(renderHeight_ - lastRenderHeight_) > 0.01)
+    {
+        DestroyDisplayList();
+        lastRenderHeight_ = renderHeight_;
     }
 }
 
@@ -515,8 +516,6 @@ void gWallRim::RenderReal(const eCamera *cam){
 
 void gWallRim::OnBlocksCamera( eCamera * camera, REAL height ) const
 {
-    DestroyDisplayList();
-
     // lower the wall so it now longer blocks the view
     if ( height < renderHeight_ )
     {
@@ -524,6 +523,12 @@ void gWallRim::OnBlocksCamera( eCamera * camera, REAL height ) const
    }
     if ( renderHeight_ < .25 )
         renderHeight_ = .25;
+
+    if(abs(renderHeight_ - lastRenderHeight_) > 0.01)
+    {
+        DestroyDisplayList();
+        lastRenderHeight_ = renderHeight_;
+    }
 }
 
 #endif

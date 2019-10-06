@@ -66,6 +66,7 @@ protected:
 private:
     mutable REAL renderHeight_; //!< the height with which this wall is really rendered
     mutable REAL lastUpdate_;   //!< time of the last render height update
+    mutable REAL lastRenderHeight_; //!< the last height the wall was rendered with
 
     REAL tBeg_, tEnd_;          //!< begin and end texture coordinates
 };
