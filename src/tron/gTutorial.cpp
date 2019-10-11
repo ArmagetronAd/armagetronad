@@ -1989,6 +1989,7 @@ public:
                     // AI retreated
                     Hint( "$tutorial_conquest_ai_retreated", "$tutorial_conquest_ai_go" );
                 }
+		/*
                 else if( AIPlayer().GetState() == AI_PATH_GIVEN && se_GameTime() > 30 )
                 {
                     // aim for the gap. Don't be obnoxious about it.
@@ -1996,6 +1997,7 @@ public:
                     sn_CenterMessage( tOutput( "$tutorial_conquest_ai_gap" ) );
                     lastHint_ = se_GameTime() + 15;
                 }
+		*/
             }
         }
     }

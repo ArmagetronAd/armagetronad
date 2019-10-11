@@ -69,7 +69,7 @@ public:
     public:
         Sensor(gAINavigator & ai,const eCoord &start,const eCoord &d);
 
-        virtual void PassEdge(const eWall *ww,REAL time,REAL a,int r);
+        virtual ePassEdgeResult PassEdge(const eWall *ww,REAL time,REAL a,int r);
 
         // check how far the hit wall extends straight into the given direction
         REAL HitWallExtends( eCoord const & dir, eCoord const & origin );

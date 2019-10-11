@@ -79,16 +79,16 @@ gSensor::detect( range );
 }
 */
 
-void gAINavigator::Sensor::PassEdge(const eWall *ww,REAL time,REAL a,int r)
+eGameObject::ePassEdgeResult gAINavigator::Sensor::PassEdge(const eWall *ww,REAL time,REAL a,int r)
 {
-    try{
-        gSensor::PassEdge(ww,time,a,r);
-    }
-    catch( eSensorFinished & e )
+    ePassEdgeResult ret = gSensor::PassEdge(ww,time,a,r);
+    if(ret != eContinue)
     {
         if ( DoExtraDetectionStuff() )
-            throw;
+            return ret;
     }
+    
+    return eContinue;
 }
 
 extern REAL sg_cycleRubberWallShrink;
@@ -163,7 +163,7 @@ bool gAINavigator::Sensor::DoExtraDetectionStuff()
             if( !playerWall->IsDangerous( wallAlpha, ai_.owner_->LastTime() + timeToHit ) )
             {
                 // wall will be gone until we get there. ignore.
-                ehit = false;
+	        ehit = nullptr;
                 hit = 1.01;
                 return false;
             }
@@ -767,13 +767,10 @@ public:
     gTargetSensor(eGameObject const * o,const eCoord &start,const eCoord &d)
     :gSensor(o,start,d), lastOwnLR(0), lastOwnEHit(0) {}
 
-    virtual void PassEdge(const eWall *w,REAL time,REAL a,int i)
+    virtual ePassEdgeResult PassEdge(const eWall *w,REAL time,REAL a,int i)
     {
-        try
-        {
-            gSensor::PassEdge( w, time, a, i );
-        }
-        catch( eSensorFinished & e )
+        auto ret = gSensor::PassEdge( w, time, a, i );
+        if( ret != eContinue )
         {
             if( type == gSENSOR_SELF )
             {
@@ -784,9 +781,11 @@ public:
             }
             else
             {
-                throw;
+	      return ret;
             }
         }
+
+	return eContinue;
     }
 };
 
