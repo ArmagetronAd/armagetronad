@@ -79,6 +79,11 @@ IF EXIST %AA_DIR%\.bzr (
 	SET /P REV= < %HELP_FILE%
 )
 
+IF EXIST %AA_DIR%\.git (
+    git rev-list --count HEAD > %HELP_FILE%
+	SET /P REV= < %HELP_FILE%
+)
+
 echo %REV%
 IF NOT DEFINED REV SET REV=%DATESTAMP:~4%
 

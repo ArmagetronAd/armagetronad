@@ -85,9 +85,11 @@ const tSong& tPlayList::GetPreviousSong() {
 bool tPlayList::LoadPlaylist(const char *playlist) {
     std::ifstream playList(playlist);
     if(playList.good() ) {
+#ifdef DEBUG
         std::cout << "Opened playlist\n";
+#endif
     } else {
-        std::cout << "Couldn't open playlist\n";
+        std::cerr << "Couldn't open playlist\n";
         return false;
     }
     while(! playList.eof() && playList.good() ) {

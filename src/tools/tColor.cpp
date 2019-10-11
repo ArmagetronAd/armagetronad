@@ -217,6 +217,23 @@ void tColor::ReadSync( Tools::Color const & source )
     a_ = source.a();
 }
 
+// strict checking: accept only 0-9 and a-f.  Network aware config item is in nNetwork.cpp.
+bool st_verifyColorCodeStrictly = 0;
+
+static bool st_verifyColorChar( int c )
+{
+    if( st_verifyColorCodeStrictly )
+    {
+        // really check for valid hexcodes
+        return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f');
+    }
+    else    
+    {
+        // be content with ASCII.
+        return (0 < c) && (c <= 0x7f);
+    }
+}
+
 // *******************************************************************************************
 // *
 // *	VerifyColorCode
@@ -231,12 +248,10 @@ bool tColor::VerifyColorCode( const char * c )
 {
     for( int i = 2; i < 8; ++i )
     {
-        if ( !c[i] ||
-             (!(c[i] >= '0' && c[i] <= '9') &&
-              !(c[i] >= 'A' && c[i] <= 'F') &&
-              !(c[i] >= 'a' && c[i] <= 'f')
-             )
-           ) return false;
+        if ( !st_verifyColorChar(c[i]) )
+        {
+            return false;
+        }
     }
     return true;
 }
@@ -255,12 +270,10 @@ bool tColor::VerifyColorCode( const wchar_t * c )
 {
     for( int i = 2; i < 8; ++i )
     {
-        if ( !c[i] ||
-             (!(c[i] >= '0' && c[i] <= '9') &&
-              !(c[i] >= 'A' && c[i] <= 'F') &&
-              !(c[i] >= 'a' && c[i] <= 'f')
-             )
-           ) return false;
+        if ( !st_verifyColorChar(c[i]) )
+        {
+            return false;
+        }
     }
     return true;
 }

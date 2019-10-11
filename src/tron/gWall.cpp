@@ -121,18 +121,24 @@ static REAL sg_MPRimStretchY=50;
 static tSettingItem<REAL> sg_MPRimStretchYConf
 ("MOVIEPACK_RIM_WALL_STRETCH_Y",sg_MPRimStretchY);
 
+static REAL rim_wall_red = 1, rim_wall_green = 1, rim_wall_blue = 1;
+static tSettingItem<REAL>
+rwr("RIM_WALL_RED",rim_wall_red),
+rwg("RIM_WALL_GREEN",rim_wall_green),
+rwb("RIM_WALL_BLUE",rim_wall_blue);
+
 /* **********************************************
    RimWall
    ********************************************** */
 
 gWallRim::gWallRim(eGrid *grid, REAL h)
-        :eWallRim(grid, false, h), renderHeight_(h), lastUpdate_(-100), tBeg_( 0 ), tEnd_( 0 )
+        :eWallRim(grid, false, h), renderHeight_(h), lastUpdate_(-100), lastRenderHeight_(h), tBeg_( 0 ), tEnd_( 0 )
 {
     // std::cout << "create " << this << "\n";
 }
 
 gWallRim::gWallRim(eGrid *grid, REAL tBeg, REAL tEnd, REAL h)
-        :eWallRim(grid, false, h), renderHeight_(h), lastUpdate_(-100), tBeg_( tBeg ), tEnd_( tEnd )
+        :eWallRim(grid, false, h), renderHeight_(h), lastUpdate_(-100), lastRenderHeight_(h), tBeg_( tBeg ), tEnd_( tEnd )
 {
     // std::cout << "create " << this << "\n";
 }
@@ -159,7 +165,7 @@ bool gWallRim::RunsParallelPassive( eWall* newWall )
 }
 
 // from display.C
-extern REAL lower_height,upper_height;
+extern REAL se_lowerSkyHeight,se_upperSkyHeight;
 
 #ifndef DEDICATED
 
@@ -198,9 +204,9 @@ static void gWallRim_helper(eCoord p1,eCoord p2,REAL tBeg,REAL tEnd,REAL h,
     }
 
 
-    if (h>lower_height){
-        if (sr_upperSky && !sg_MoviePack() && h>upper_height) h=upper_height;
-        else if (sr_lowerSky || sg_MoviePack()) h=lower_height;
+    if (h>se_lowerSkyHeight){
+        if (sr_upperSky && !sg_MoviePack() && h>se_upperSkyHeight) h=se_upperSkyHeight;
+        else if (sr_lowerSky || sg_MoviePack()) h=se_lowerSkyHeight;
     }
 
     BeginQuads();
@@ -418,9 +424,15 @@ void gWallRim::RenderReal(const eCamera *cam){
             eCoord vec = P1-P2;
             REAL xs = vec.x*vec.x;
             REAL ys = vec.y*vec.y;
-            REAL intensity = .7 + .3 * xs/(xs+ys+1E-30);
+            
+            REAL intensity = .3 * xs/(xs+ys+1E-30);
+            
+            REAL rwr = (rim_wall_red * .7) + intensity;
+            REAL rwg = (rim_wall_green * .7) + intensity;
+            REAL rwb = (rim_wall_blue * .7) + intensity;
+            
             RenderEnd( true );
-            Color(intensity, intensity, intensity);
+            Color(rwr, rwg, rwb);
         }
 
         if (sg_MoviePack()){
@@ -482,11 +494,12 @@ void gWallRim::RenderReal(const eCamera *cam){
                 renderHeight_ = height;
             }
         }
+    }
 
-        if ( renderHeight_ < height )
-        {
-            DestroyDisplayList();
-        }
+    if(abs(renderHeight_ - lastRenderHeight_) > 0.01)
+    {
+        DestroyDisplayList();
+        lastRenderHeight_ = renderHeight_;
     }
 }
 
@@ -503,8 +516,6 @@ void gWallRim::RenderReal(const eCamera *cam){
 
 void gWallRim::OnBlocksCamera( eCamera * camera, REAL height ) const
 {
-    DestroyDisplayList();
-
     // lower the wall so it now longer blocks the view
     if ( height < renderHeight_ )
     {
@@ -512,6 +523,12 @@ void gWallRim::OnBlocksCamera( eCamera * camera, REAL height ) const
    }
     if ( renderHeight_ < .25 )
         renderHeight_ = .25;
+
+    if(abs(renderHeight_ - lastRenderHeight_) > 0.01)
+    {
+        DestroyDisplayList();
+        lastRenderHeight_ = renderHeight_;
+    }
 }
 
 #endif
@@ -526,7 +543,7 @@ void gWallRim::OnBlocksCamera( eCamera * camera, REAL height ) const
 //!
 // *******************************************************************************************
 
-REAL gWallRim::Height( void )
+REAL gWallRim::Height( void ) const
 {
     return renderHeight_;
 }
@@ -541,7 +558,7 @@ REAL gWallRim::Height( void )
 //!
 // *******************************************************************************************
 
-REAL gWallRim::SeeHeight( void )
+REAL gWallRim::SeeHeight( void ) const
 {
     return renderHeight_ * 2;
 }
@@ -588,7 +605,7 @@ void gPlayerWall::Flip(){
 }
 
 static void clamp01(REAL &c){
-    if (!finite(c))
+    if (!isfinite(c))
         c = 0.5;
 
     if (c<0)
@@ -689,13 +706,12 @@ void sg_TopologyPoliceCheck( gCycle* cycle, eWall* oldWall, gPlayerWall* newWall
     gTopologyPoliceConsoleFiler filter;
 
     // treat the crossing as if the cycle just went through the old wall.
-    try
     {
         cycle->PassEdge( oldWall, time, oldAlpha );
     }
-    catch ( gCycleDeath const & death )
+	if(cycle->DiedWhileMoving())
     {
-        cycle->KillAt( death.pos_ );
+		cycle->KillAt( gCycle::DeathPosition() );
     }
 }
 
@@ -1141,19 +1157,19 @@ void gNetPlayerWall::RenderNormal(const eCoord &p1,const eCoord &p2,REAL ta,REAL
         {
             BeginQuads();
 
-            glColor3f(r,g,b);
+            glColor4f(r,g,b,1);
             glTexCoord2f(ta,hfrac);
             glVertex3f(p1.x,p1.y,extrarise);
             
-            glColor3f(r,g,b);
+            glColor4f(r,g,b,1);
             glTexCoord2f(ta,0);
             glVertex3f(p1.x,p1.y,extrarise + h*hfrac);
             
-            glColor3f(r,g,b);
+            glColor4f(r,g,b,1);
             glTexCoord2f(te,0);
             glVertex3f(p2.x,p2.y,extrarise + h*hfrac);
             
-            glColor3f(r,g,b);
+            glColor4f(r,g,b,1);
             glTexCoord2f(te,hfrac);
             glVertex3f(p2.x,p2.y,extrarise);
         }
@@ -1586,10 +1602,10 @@ void gNetPlayerWall::MyInitAfterCreation()
 
     //w=
 #ifdef DEBUG
-    if (!finite(end.x) || !finite(end.y))
+    if (!isfinite(end.x) || !isfinite(end.y))
         st_Breakpoint();
 
-    if (!finite(beg.x) || !finite(beg.y))
+    if (!isfinite(beg.x) || !isfinite(beg.y))
         st_Breakpoint();
 #endif
 
@@ -1640,7 +1656,7 @@ void gNetPlayerWall::Update(REAL Tend,REAL dend){
 		end=beg + dir*(dend-dbegin);
 
 #ifdef DEBUG
-		if (!finite(end.x) || !finite(end.y))
+		if (!isfinite(end.x) || !isfinite(end.y))
 			st_Breakpoint();
 #endif
 
@@ -1689,7 +1705,7 @@ void gNetPlayerWall::real_Update(REAL Tend,const eCoord &pend, bool force )
     }
 
 #ifdef DEBUG
-    if (!finite(end.x) || !finite(end.y))
+    if (!isfinite(end.x) || !isfinite(end.y))
         st_Breakpoint();
 #endif
 
@@ -2287,16 +2303,16 @@ void gNetPlayerWall::Check() const
     int i;
     for ( i = coords_.Len() -2 ; i>=0; --i )
     {
-        gPlayerWallCoord* coords = &( coords_( i ) );
+        gPlayerWallCoord const * coords = &( coords_( i ) );
         tASSERT( coords[0].Pos <= coords[1].Pos );
         tASSERT( coords[0].Time <= coords[1].Time );
     }
 
     for ( i = coords_.Len() -1 ; i>=0; --i )
     {
-        gPlayerWallCoord* coords = &( coords_( i ) );
-        tASSERT( finite( coords[0].Pos ) );
-        tASSERT( finite( coords[0].Time ) );
+        gPlayerWallCoord const * coords = &( coords_( i ) );
+        tASSERT( isfinite( coords[0].Pos ) );
+        tASSERT( isfinite( coords[0].Time ) );
     }
 #endif
 }

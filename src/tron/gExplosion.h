@@ -43,7 +43,7 @@ public:
 
     virtual void InteractWith(eGameObject *target,REAL time,int recursion=1);
 
-    virtual void PassEdge(const eWall *w,REAL time,REAL a,int recursion=1);
+    virtual ePassEdgeResult PassEdge(const eWall *w,REAL time,REAL a,int recursion=1) override;
 
     virtual void Kill();
 #ifndef DEDICATED
@@ -69,6 +69,11 @@ public:
         return owner_;
     }
 
+    REAL GetRadius() const
+    {
+        return radius_;
+    }
+
 protected:
     virtual void OnRemoveFromGame(); // called last when the object is removed from the game
 
@@ -90,5 +95,7 @@ private:
     int 		listID;
 
     tJUST_CONTROLLED_PTR< gCycle > owner_; // the owner/victim of the explosion
+    
+    REAL radius_;
 };
 #endif

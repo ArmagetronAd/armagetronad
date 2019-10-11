@@ -28,7 +28,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #ifndef     TBACKGROUNDPROCESS_H_INCLUDED
 #define     TBACKGROUNDPROCESS_H_INCLUDED
 
+#include "tToDo.h"
 #include "tThread.h"
+#include "tLockedQueue.h"
+#include "tSafePTR.h"
 
 //! template that runs void member functions of reference countable objects
 template< class T > class tMemberFunctionRunnerTemplate
@@ -56,9 +59,35 @@ public:
     static void ScheduleBackground( T & object, void (T::*function)()  )
     {
         // schedule the task into a background thread
-        boost::thread(tMemberFunctionRunnerTemplate<T>( object, function ) );
+        boost::thread(tMemberFunctionRunnerTemplate<T>( object, function ) ).detach();
+    }
+
+    //! schedule a task for execution in the next tToDo call
+    static void ScheduleForeground( T & object, void (T::*function)()  )
+    {
+        Pending().add( tMemberFunctionRunnerTemplate( object, function ) );
+        st_ToDoOnce( FinishAll );
     }
 private:
+    // queue of foreground tasks
+    typedef tLockedQueue< tMemberFunctionRunnerTemplate, boost::mutex > Queue;
+    static Queue & Pending()
+    {
+        static Queue pending;
+        return pending;
+    }
+
+    // function that calls them
+    static void FinishAll()
+    {
+        // finish all pending tasks
+        while( Pending().size() > 0 )
+        {
+            tMemberFunctionRunnerTemplate next = Pending().next();
+            next.run();
+        }
+    }
+
     //! pointer to the object we should so something with
     tJUST_CONTROLLED_PTR< T > object_;
     
@@ -70,9 +99,16 @@ private:
 class tMemberFunctionRunner
 {
 public:
+    //! runs a member function in a background thread
     template< class T > static void ScheduleBackground( T & object, void (T::*function)() )
     {
         tMemberFunctionRunnerTemplate<T>::ScheduleBackground( object, function );
+    }
+
+    //! runs a member function on the next call of st_DoToDo()
+    template< class T > static void ScheduleForeground( T & object, void (T::*function)() )
+    {
+        tMemberFunctionRunnerTemplate<T>::ScheduleForeground( object, function );
     }
 };
 

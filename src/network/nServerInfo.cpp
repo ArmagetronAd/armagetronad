@@ -40,9 +40,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "nServerInfo.h"
 #include "nNetObject.h"
-#ifdef KRAWALL_SERVER
-#include "nAuthentication.h"
-#endif
 
 #include "nProtoBuf.h"
 #include "nServerInfo.pb.h"
@@ -58,10 +55,6 @@ static unsigned int          sn_LastKnown   [MAXCLIENTS+2];
 static bool                  sn_SendAll     [MAXCLIENTS+2];
 static bool                  sn_Requested   [MAXCLIENTS+2];
 static REAL                  sn_Timeout     [MAXCLIENTS+2];
-
-#ifdef KRAWALL_SERVER
-static bool                  sn_Auth        [MAXCLIENTS+2];
-#endif
 
 static nServerInfo*          sn_Requesting=NULL;
 static unsigned int          sn_NextTransactionNr = 0;
@@ -115,36 +108,14 @@ static void login_callback(){
     sn_SendAll     [nCallbackLoginLogout::User()] = true;
     sn_Requested   [nCallbackLoginLogout::User()] = false;
     sn_Timeout     [nCallbackLoginLogout::User()] = tSysTimeFloat() + 70;
-#ifdef KRAWALL_SERVER
-    sn_Auth        [nCallbackLoginLogout::User()] = false;
-#endif
-
 }
 
-// helper function: server info to string
-tString ToString( const nServerInfoBase & info )
+tString nServerInfoBase::ToString() const
 {
     tString ret;
-    ret << info.GetConnectionName() << ":" << info.GetPort();
+    ret << GetConnectionName() << ":" << GetPort();
     return ret;
 }
-
-// authentification stuff
-#ifdef KRAWALL_SERVER_LEAGUE
-void ResultCallback(const tString& username,
-                    const tString& origUsername,
-                    int user, bool success)
-{
-    if (success)
-    {
-        sn_Auth[user] = true;
-        sn_Transmitting[user] = nServerInfo::GetFirstServer();
-    }
-    else
-        nAuthentication::RequestLogin(username, user, tOutput("$login_request_failed"), true);
-}
-#endif // KRAWALL_SERVER_LEAGUE
-
 
 
 static nCallbackLoginLogout nlc(&login_callback);
@@ -770,6 +741,10 @@ static bool net_Accept()
 static nCallbackAcceptPackedWithoutConnection net_acc( &net_Accept );
 
 static int sn_ServerCount = 0;
+int nServerInfo::ServerCount()
+{
+    return sn_ServerCount;
+}
 
 /*
 static void ReadServerInfo(nMessage &m, unsigned int& port, tString& connectionName, bool acceptDirect, bool acceptMaster)
@@ -1193,7 +1168,7 @@ void nServerInfo::GetSmallServerInfo( Network::SmallServerInfo const & info,
         n->timesNotAnswered = 0;
         if ( sn_IsMaster )
         {
-            con << "Received new server: " << ToString( baseInfo ) << "\n";
+            con << "Received new server: " << baseInfo.ToString() << "\n";
             n->timesNotAnswered = 5;
         }
     }
@@ -1202,14 +1177,14 @@ void nServerInfo::GetSmallServerInfo( Network::SmallServerInfo const & info,
         n->Alive();
 
         // on update, prefer to keep the IP version to avoid needless DNS loopups.
-        if ( n->GetConnectionName() != baseInfo.GetConnectionName() && n->GetAddress().ToString() != ToString(*n) )
+        if ( n->GetConnectionName() != baseInfo.GetConnectionName() && n->GetAddress().ToString() != n->ToString() )
         {
             n->SetConnectionName( baseInfo.GetConnectionName() );
         }
 
         if ( sn_IsMaster )
         {
-            con << "Updated server: " <<  ToString( baseInfo ) << "\n";
+            con << "Updated server: " << baseInfo.ToString() << "\n";
         }
     }
 
@@ -1218,7 +1193,7 @@ void nServerInfo::GetSmallServerInfo( Network::SmallServerInfo const & info,
 
     if (n->name.Len() <= 1)
     {
-        n->name <<  ToString( baseInfo );
+        n->name << baseInfo.ToString();
         n->nameForSorting << sn_serverIPCharacterFilter.FilterServerName( n->name );
     }
 
@@ -1264,24 +1239,7 @@ void nServerInfo::GiveSmallServerInfo( Network::RequestSmallServerInfo const & i
         con << "Giving server info to user " << sender.SenderID() << "\n";
 
         sn_Requested[sender.SenderID()] = true;
-#ifdef KRAWALL_SERVER_LEAGUE
-        // one moment! check if we need authentification
-        tString adr;
-        unsigned int port = sn_GetPort(sender.SenderID());
-        sn_GetAdr(sender.SenderID(), adr);
-        if (nKrawall::RequireMasterLogin(adr, port))
-        {
-            nAuthentication::SetLoginResultCallback(&ResultCallback);
-            nAuthentication::RequestLogin(tString(""), sender.SenderID(), tOutput("$login_request_master"));
-        }
-        else
-        {
-            sn_Transmitting[sender.SenderID()] = GetFirstServer();
-            sn_Auth[sender.SenderID()]         = true;
-        }
-#else
         sn_Transmitting[sender.SenderID()] = GetFirstServer();
-#endif
 
         sn_SendAll  [sender.SenderID()] = !info.has_transaction();
         sn_LastKnown[sender.SenderID()] = info.transaction();
@@ -1349,13 +1307,38 @@ nServerInfo* nServerInfo::GetBigServerInfoCommon(  Network::BigServerInfo const 
         server->ReadSyncThis( info, sender );
         server->Alive();
         server->CalcScore();
+
+        if(nServerInfoAdmin::GetAdmin() && nServerInfoAdmin::GetAdmin()->NeedGlobalReclassification())
+        {
+            int count = 0;
+            // reclassify everyone
+            nServerInfo *run = GetFirstServer();
+            while( run )
+            {
+                nServerInfoAdmin::GetAdmin()->Classify( run->settings_, run->classification_ );
+                if(0 == run->classification_.sortOverride_)
+                    count++;
+                run = run->Next();
+            }
+            
+            if(count < nServerInfoAdmin::GetAdmin()->MinValidServerCount())
+            {
+                nServerInfoAdmin::GetAdmin()->LowerThreshold();
+                nServerInfo *run = GetFirstServer();
+                while( run )
+                {
+                    nServerInfoAdmin::GetAdmin()->Classify( run->settings_, run->classification_ );
+                    run = run->Next();
+                }
+            }            
+        }
     }
     else
     {
         if ( sn_IsMaster )
         {
             tOutput message;
-            message.SetTemplateParameter(1, ToString( baseInfo ) );
+            message.SetTemplateParameter(1, baseInfo.ToString() );
             message.SetTemplateParameter(2, sn_Connections[sender.SenderID()].socket->GetAddress().ToString() );
             message << "$network_browser_unidentified";
             con << message;
@@ -1365,7 +1348,7 @@ nServerInfo* nServerInfo::GetBigServerInfoCommon(  Network::BigServerInfo const 
             // add the server, but ping it again
             nServerInfo * n = CreateServerInfo();
             n->CopyFrom( baseInfo );
-            n->name = ToString( baseInfo );
+            n->name = baseInfo.ToString();
             n->QueryServer();
 #ifdef DEBUG
             con << "Recevied unknown server " << n->name << ".\n";
@@ -1605,7 +1588,7 @@ tString MasterFile( char const * suffix )
     return tString( filename.str().c_str() );
 }
 
-void nServerInfo::GetFromMaster(nServerInfoBase *masterInfo, char const * fileSuffix )
+nServerInfoBase *nServerInfo::GetFromMaster(nServerInfoBase *masterInfo, char const * fileSuffix, bool loadKnownServers )
 {
     sn_AcceptingFromMaster = true;
 
@@ -1622,16 +1605,19 @@ void nServerInfo::GetFromMaster(nServerInfoBase *masterInfo, char const * fileSu
     }
 
     if (!masterInfo)
-        return;
+        return NULL;
 
     DeleteAll();
 
     // load all the servers we know
-    Load( tDirectories::Var(), MasterFile( fileSuffix ) );
-
-    // delete unreachable servers
-    DeleteUnreachable();
-
+    if ( loadKnownServers )
+    {
+        Load( tDirectories::Var(), MasterFile( fileSuffix ) );
+        
+        // delete unreachable servers
+        DeleteUnreachable();        
+    }
+    
     // find the latest server we know about
     unsigned int latest=0;
     nServerInfo *run = GetFirstServer();
@@ -1679,7 +1665,7 @@ void nServerInfo::GetFromMaster(nServerInfoBase *masterInfo, char const * fileSu
         break;
     case nABORT:
     {
-        return;
+        return NULL;
     }
     case nTIMEOUT:
         // delete the master and select a new one
@@ -1696,20 +1682,16 @@ void nServerInfo::GetFromMaster(nServerInfoBase *masterInfo, char const * fileSu
         if ( masterInfo )
         {
             con << tOutput( "$network_master_timeout_retry" );
-            GetFromMaster();
+            return GetFromMaster( NULL, fileSuffix, loadKnownServers );
         }
         else
         {
             tConsole::Message("$network_master_timeout_title", "$network_master_timeout_inter", 3600);
         }
-        return;
-        break;
-
+        return NULL;
     case nDENIED:
         tConsole::Message("$network_master_denied_title", "$network_master_denied_inter", 20);
-        return;
-        break;
-
+        return NULL;
     }
 
 
@@ -1777,6 +1759,7 @@ void nServerInfo::GetFromMaster(nServerInfoBase *masterInfo, char const * fileSu
     sn_AcceptingFromMaster = false;
 
     tAdvanceFrame();
+    return masterInfo;
 }
 
 void nServerInfo::GetFromLAN(unsigned int pollBeginPort, unsigned int pollEndPort)
@@ -1983,7 +1966,7 @@ void nServerInfo::QueryServer()                                  // start to get
     if ( !queryDirectly )
     {
         // see if the server name is just IP:port; if no, we already successfully polled it
-        if ( name != ToString( *this ) )
+        if ( name != ToString() )
         {
             advancedInfoSetEver = true;
         }
@@ -2005,7 +1988,7 @@ void nServerInfo::QueryServer()                                  // start to get
 #ifdef DEBUG
     if ( sn_IsMaster )
     {
-        con << "Querying server " <<  ToString( *this ) << "\n";
+        con << "Querying server " << ToString() << "\n";
     }
 #endif
 
@@ -2050,7 +2033,7 @@ void nServerInfo::QueryServer()                                  // start to get
             timesNotAnswered = 1000;
             if ( sn_IsMaster )
             {
-                con << "Deleted unreachable server: " <<  ToString( *this ) << "\n";
+                con << "Deleted unreachable server: " << ToString() << "\n";
 
                 delete this;
             }
@@ -2092,11 +2075,11 @@ void nServerInfo::QueryServer()                                  // start to get
     {
         if ( ++timesNotAnswered == sn_TNALostContact && sn_IsMaster )
         {
-            con << "Lost contact with server: " <<  ToString( *this ) << "\n";
+            con << "Lost contact with server: " << ToString() << "\n";
         }
         else if ( sn_IsMaster && timesNotAnswered == 2 )
         {
-            con << "Starting to lose contact with server: " <<  ToString( *this ) << ", name \"" << tColoredString::RemoveColors(name) << "\"\n";
+            con << "Starting to lose contact with server: " << ToString() << ", name \"" << tColoredString::RemoveColors(name) << "\"\n";
         }
     }
 
@@ -2390,9 +2373,6 @@ void nServerInfo::RunMaster()
         {
             // kick the user soon when the transfer is completed
             if ((sn_Requested[i] && !sn_Transmitting[i]
-#ifdef KRAWALL_SERVER
-                    && sn_Auth[i]
-#endif
                     && sn_MessagesPending(i) == 0))
             {
                 if (sn_Timeout[i] > tSysTimeFloat() + .2f)
@@ -2879,7 +2859,7 @@ void nServerInfoBase::ReadSync( Network::SmallServerInfoBase const & info,
 // message will figure the IP out on its own.
 static tString net_dns("");
 
-static tConfItemLine sn_sbtip_official("SERVER_DNS", net_dns);
+static tSettingItemLine sn_sbtip_official("SERVER_DNS", net_dns);
 
 bool SortHelperNoop(nServerInfoBase const * server)
 {
@@ -3204,12 +3184,12 @@ void nServerInfo::ReadSyncThis(  Network::BigServerInfo const & info,
         {
             if ( !advancedInfoSetEver )
             {
-                con << "Acknowledged server: " <<  ToString( *this ) << ", name: \"" << tColoredString::RemoveColors(name) << "\"\n";
+                con << "Acknowledged server: " << ToString() << ", name: \"" << tColoredString::RemoveColors(name) << "\"\n";
                 Save();
             }
             else if ( name != oldName )
             {
-                con << "Name of server " <<  ToString( *this )
+                con << "Name of server " << ToString()
                 << " changed from \"" << tColoredString::RemoveColors(oldName)
                 << "\" to \"" << tColoredString::RemoveColors(name) << "\"\n";
             }
@@ -3291,8 +3271,7 @@ nServerInfoBase const & nServerInfoBase::GetAddress( nAddress & address ) const
 
 nServerInfoBase const & nServerInfoBase::ClearAddress() const
 {
-    std::auto_ptr< nAddress > clearedAddress;
-    address_ = clearedAddress;
+    address_.reset();
     return *this;
 }
 
@@ -3329,13 +3308,11 @@ nAddress & nServerInfoBase::AccessAddress( void ) const
     // create address if it is not already there
     if ( !this->address_.get() )
     {
-        std::auto_ptr< nAddress > address( tNEW( nAddress ) );
+        this->address_.reset( tNEW( nAddress ) );
 
         // fill it with hostname and port
-        address->SetPort( this->GetPort() );
-        address->SetHostname( this->GetConnectionName() );
-
-        this->address_ = address;
+        address_->SetHostname( this->GetConnectionName() );
+        address_->SetPort( this->GetPort() );
 
 #ifdef DEBUG
 #endif
@@ -3354,9 +3331,9 @@ nAddress & nServerInfoBase::AccessAddress( void ) const
 //!
 // *******************************************************************************************
 
-const tString & nServerInfoBase::DoGetName( void ) const
+tString nServerInfoBase::DoGetName( void ) const
 {
-    return connectionName_;
+    return ToString();
 }
 
 // *******************************************************************************************
@@ -3369,7 +3346,7 @@ const tString & nServerInfoBase::DoGetName( void ) const
 //!
 // *******************************************************************************************
 
-const tString & nServerInfo::DoGetName( void ) const
+tString nServerInfo::DoGetName( void ) const
 {
     return name;
 }
@@ -3463,3 +3440,23 @@ tString nServerInfoCharacterFilter::FilterServerName( tString const & s )
     return FilterString( tColoredString::RemoveColors( s ) );
 }
 
+nMasterLoader::nMasterLoader()
+    :realFirstServer_( sn_FirstServer )
+{
+    sn_FirstServer = NULL;
+}
+
+nMasterLoader::~nMasterLoader()
+{
+    sn_FirstServer = realFirstServer_;
+}
+
+nServerInfo *nMasterLoader::AddMaster( const tString & connectionName, unsigned port )
+{
+    nServerInfo *master = CreateServerInfo();
+    master->SetConnectionName( connectionName );
+    master->SetPort( port );
+    master->Remove();
+    master->Insert( sn_masterList );
+    return master;
+}

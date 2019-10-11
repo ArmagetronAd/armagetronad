@@ -53,7 +53,17 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "SDL_thread.h"
 #include "SDL_mutex.h"
 
+//#ifndef WIN32
+//#define PNG_SCREENSHOT
+//#else
+//#if !SDL_VERSION_ATLEAST(2, 0, 0)
+#define PNG_SCREENSHOT
+//#endif
+//#endif
+
+#ifdef PNG_SCREENSHOT
 #include <png.h>
+#endif
 #include <unistd.h>
 #define SCREENSHOT_PNG_BITDEPTH 8
 #define SCREENSHOT_BYTES_PER_PIXEL 3
@@ -83,13 +93,13 @@ public:
         {
             glSetFenceNV( *this, GL_ALL_COMPLETED_NV );
         }
-#endif       
+#endif
 #ifdef GLEW_APPLE_fence
         if( GLEW_APPLE_fence )
         {
             glSetFenceAPPLE( *this );
         }
-#endif       
+#endif
         sr_CheckGLError();
     }
 
@@ -102,13 +112,13 @@ public:
         {
             glFinishFenceNV( *this );
         }
-#endif       
+#endif
 #ifdef GLEW_APPLE_fence
         if( GLEW_APPLE_fence )
         {
             glFinishFenceAPPLE( *this );
         }
-#endif       
+#endif
         sr_CheckGLError();
     }
 
@@ -125,13 +135,13 @@ private:
         {
             return true;
         }
-#endif       
+#endif
 #ifdef GLEW_APPLE_fence
         if( GLEW_APPLE_fence )
         {
             return true;
         }
-#endif       
+#endif
 #endif
         // fallback: no fence
         return false;
@@ -144,13 +154,13 @@ private:
         {
             glGenFencesNV( 1, &object_ );
         }
-#endif       
+#endif
 #ifdef GLEW_APPLE_fence
         if( GLEW_APPLE_fence )
         {
             glGenFencesAPPLE( 1, &object_ );
         }
-#endif       
+#endif
     }
 
     virtual void DoDelete()    //!< really frees the object
@@ -160,13 +170,13 @@ private:
         {
             glDeleteFencesNV( 1, &object_ );
         }
-#endif       
+#endif
 #ifdef GLEW_APPLE_fence
         if( GLEW_APPLE_fence )
         {
             glDeleteFencesAPPLE( 1, &object_ );
         }
-#endif       
+#endif
     }
 };
 
@@ -181,6 +191,7 @@ static rGLFence & sr_GetFence()
 #endif // DEDICATED
 
 bool sr_screenshotIsPlanned=false;
+tString sr_screenshotName("screenshot");
 static bool   s_videoout    =false;
 static int    s_videooutDest=fileno(stdout);
 
@@ -188,6 +199,7 @@ static bool png_screenshot=true;
 static tConfItem<bool> pns("PNG_SCREENSHOT",png_screenshot);
 #ifndef DEDICATED
 
+#ifdef PNG_SCREENSHOT
 static void SDL_SavePNG(SDL_Surface *image, tString filename){
     png_structp png_ptr;
     png_infop info_ptr;
@@ -225,7 +237,7 @@ static void SDL_SavePNG(SDL_Surface *image, tString filename){
 
     for (i = 0; i < sr_screenHeight; i++) {
         row_ptrs[i] = (png_byte *)image->pixels + (sr_screenHeight - i - 1)
-                      * SCREENSHOT_BYTES_PER_PIXEL * sr_screenWidth;
+                      * image->pitch;
     }
 
     png_write_image(png_ptr, row_ptrs);
@@ -236,12 +248,12 @@ static void SDL_SavePNG(SDL_Surface *image, tString filename){
     fclose(fp);
 }
 #endif
+#endif
 
 static void make_screenshot(){
 #ifndef DEDICATED
-    // screenshot count
-    static int number=0;
-    number++;
+    // duplicate count (if we already took a screenshot the same second/with the same name)
+    int number=0;
 
     SDL_Surface *image;
     SDL_Surface *temp;
@@ -259,15 +271,18 @@ static void make_screenshot(){
     // turn image around
     for (idx = 0; idx < sr_screenHeight; idx++)
     {
-        memcpy(reinterpret_cast<char *>(temp->pixels) + 3 * sr_screenWidth * idx,
-               reinterpret_cast<char *>(image->pixels)+ 3
-               * sr_screenWidth*(sr_screenHeight - idx-1),
-               3*sr_screenWidth);
+        memcpy(reinterpret_cast<char *>(temp->pixels) + temp->pitch * idx,
+               reinterpret_cast<char *>(image->pixels)
+               + image->pitch*(sr_screenHeight - idx-1),
+               3*sr_screenWidth); // Optionally, use the pitch of either surface here
     }
 
     if (s_videoout)
     {
-        Ignore( write(s_videooutDest, temp->pixels, sr_screenWidth * sr_screenHeight * 3) );
+        for (idx = 0; idx < sr_screenHeight; idx++)
+        {
+            Ignore( write(s_videooutDest, reinterpret_cast<char *>(temp->pixels) + temp->pitch * idx, sr_screenWidth * 3) );
+        }
     }
 
     if (sr_screenshotIsPlanned) {
@@ -276,8 +291,11 @@ static void make_screenshot(){
         while ( !done )
         {
             // generate filename
-            tString fileName("screenshot_");
-            fileName << number;
+            tString fileName(sr_screenshotName);
+            if(number)
+            {
+                fileName << '_' << number;
+            }
             if (png_screenshot)
                 fileName << ".png";
             else
@@ -293,9 +311,11 @@ static void make_screenshot(){
             }
 
             // save image
+#ifdef PNG_SCREENSHOT
             if (png_screenshot)
                 SDL_SavePNG(image, tDirectories::Screenshot().GetWritePath( fileName ));
             else
+#endif
                 SDL_SaveBMP(temp, tDirectories::Screenshot().GetWritePath( fileName ) );
             done = true;
         }
@@ -556,7 +576,7 @@ static REAL sr_swapDelayFactor = .5f;
 static tConfItem< REAL > sr_swapDelayFactorCI("SWAP_LATENCY_DELAY_FACTOR", sr_swapDelayFactor );
 
 
-// measures time wasted on waiting for swaps 
+// measures time wasted on waiting for swaps
 class rSwapTime
 {
 public:
@@ -636,7 +656,11 @@ public:
         // do the actual buffer swap.
         if( reallyDoIt )
         {
+#if SDL_VERSION_ATLEAST(2,0,0)
+            SDL_GL_SwapWindow(sr_screen);
+#else
             SDL_GL_SwapBuffers();
+#endif
 
 #ifdef DEBUG_SWAP_X
             {
@@ -652,7 +676,7 @@ public:
             }
 #endif
 
-        
+
 
         }
     }
@@ -683,7 +707,7 @@ public:
         double start = Time();
         glFinish();
         REAL ret = Time() - start;
-        
+
         AdvanceClear();
 
         return ret;
@@ -703,7 +727,7 @@ public:
             double start = Time();
 
             Swap(swap);
-            
+
             static rGLFence & fence = sr_GetFence();
 
             // finish last frame's fence
@@ -736,7 +760,7 @@ public:
             count = 60;
             con << "SwapTime " << ret*1000 << "\n";
         }
-#endif       
+#endif
 
         return ret;
     }
@@ -771,13 +795,14 @@ public:
             default:
                 break;
             }
+	    // falltrhough intentional
         default:
             FinishComplicated( swap );
         }
     }
 
     // call after swapping buffers with an argument of true
-    // and once just before rendering with an argument 
+    // and once just before rendering with an argument
     void FinishComplicated( bool swap = false )
     {
 #ifdef DEBUG_SWAP_X
@@ -840,7 +865,7 @@ protected:
         {
             minFrameTime = referenceFrameTime;
         }
-        
+
         // tolerance factor for dropped frames
         static const REAL frameDropTolerance = 1.5;
         static const int framePenaltyMax = 1200;
@@ -850,10 +875,10 @@ protected:
         // the real time spent waiting, not doing anything, during the last frame
         timeSpentWaiting += delay_;
 
-        bool frameDrop = inGame_ && 
+        bool frameDrop = inGame_ &&
             (
-                timeSpent > frameDropTolerance * minFrameTime 
-                || 
+                timeSpent > frameDropTolerance * minFrameTime
+                ||
                 timeSpentWaiting < smallDelay/10
                 );
         inGame_ = false;
@@ -920,7 +945,7 @@ protected:
                 con << "Rendering fine again.\n";
 #endif
                 badFrame_ = framePenaltyMin;
-                
+
                 // just dropping out of throughput mode; better still be a bit careful
                 smoothDelay_ = delay_ = 0;
                 counter_ = 0;
@@ -1102,7 +1127,11 @@ void rSysDep::StartNetSyncThread( rNetIdler * idler )
         sr_netLock = SDL_CreateMutex();
 
     // start thread
+#if SDL_VERSION_ATLEAST(2,0,0)
+    sr_netSyncThread = SDL_CreateThread( sr_NetSyncThread, "net_sync", sr_netLock );
+#else
     sr_netSyncThread = SDL_CreateThread( sr_NetSyncThread, sr_netLock );
+#endif
     if ( !sr_netSyncThread )
         return;
 
@@ -1233,7 +1262,7 @@ static tSettingItem<REAL> c_mb( "MOTION_BLUR_TIME",
                                 sr_motionBlurTime );
 
 // blurs the motion, time is the current time
-bool sr_MotionBlur( double time, std::auto_ptr< rTextureRenderTarget > & blurTarget )
+bool sr_MotionBlur( double time, std::unique_ptr< rTextureRenderTarget > & blurTarget )
 {
     static bool lastActive = false;
     bool active = false;
@@ -1287,7 +1316,7 @@ bool sr_MotionBlur( double time, std::auto_ptr< rTextureRenderTarget > & blurTar
         // destroy existing blur texture if it is too small
         if ( blurTarget.get() && ( blurTarget->GetWidth() < blurWidth || blurTarget->GetHeight() < blurHeight ) )
         {
-            blurTarget = std::auto_ptr< rTextureRenderTarget >();
+            blurTarget.reset();
         }
 
         // create blur texture
@@ -1295,7 +1324,7 @@ bool sr_MotionBlur( double time, std::auto_ptr< rTextureRenderTarget > & blurTar
         {
             try
             {
-                blurTarget = std::auto_ptr< rTextureRenderTarget >( new rTextureRenderTarget( blurWidth, blurHeight  ) );
+                blurTarget.reset( tNEW( rTextureRenderTarget )( blurWidth, blurHeight ) );
             }
             catch( rExceptionGLEW const & e )
             {
@@ -1336,7 +1365,7 @@ bool sr_MotionBlur( double time, std::auto_ptr< rTextureRenderTarget > & blurTar
 }
 
 void rSysDep::SwapGL(){
-    static std::auto_ptr< rTextureRenderTarget > blurTarget(0);
+    static std::unique_ptr< rTextureRenderTarget > blurTarget;
 
     if ( s_benchmark )
     {
@@ -1443,7 +1472,7 @@ void rSysDep::SwapGL(){
     }
     else if (s_videoout)
         make_screenshot();
-    
+
     // actiate motion blur (does not use the game state, so it's OK to call here )
     bool shouldSwap = sr_MotionBlur( time, blurTarget );
     sr_SwapTime().Finish( shouldSwap );

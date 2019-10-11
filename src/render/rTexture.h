@@ -59,18 +59,20 @@ public:
 //! wrapper for SDL surface
 class rSurface
 {
+    friend class rSurfaceCache;
+    friend class rSurfaceCacheValue;
 public:
     explicit rSurface( char const * fileName, tPath const *path = &tDirectories::Data() );       //!< constructor creating the surface from a file
     ~rSurface();                                      //!< destructor
     rSurface( rSurface const & other );               //!< copy constructor
     rSurface & operator = ( rSurface const & other ); //!< copy operator
+    void CreateQuarter( rSurface const & big );       //!< scales down the given image
 protected:
     rSurface();                             //!< default constructor, not creating a real surface
     void Init();                            //!< initialize data members
     void Clear();                           //!< destroys data members
     void Create( char const * fileName, tPath const *path = &tDirectories::Data() );   //!< create surface from file
     void Create( SDL_Surface * surface );   //!< take ownership of surface
-
 private:
     // attributes
     SDL_Surface * surface_;                  //!< the surface itself
@@ -88,6 +90,20 @@ protected:
     inline rSurface & SetSurface( SDL_Surface * surface );	             //!< Sets the surface itself
     inline rSurface & SetFormat( GLenum const & format );	             //!< Sets openGL texture format to use
 private:
+};
+
+//! surface cache
+class rSurfaceCache
+{
+public:
+    //! loads the given file as a surface. The returned surface belongs to the static cache; NULL is returned 
+    static rSurface const * GetSurface( char const * fileName, tPath const *path = &tDirectories::Data() );
+
+    //! call every once in a while to throw out unused surfaces
+    static void CycleCache();
+
+    //! clears the cache completely
+    static void ClearCache();
 };
 
 // ******************************************************************************************
@@ -135,10 +151,16 @@ public:
 protected:
     virtual void ProcessImage(SDL_Surface *);       //!< process the surface before uploading it to GL
 
-    void Upload( rSurface & surface );              //!< Uploads the passed surface to OpenGL (for use in OnSelect)
+    void Upload( rSurface const & surface );        //!< Uploads the passed surface to OpenGL (for use in OnSelect)
 
     virtual void OnSelect(bool enforce);            //!< Selects the texture for rendering
-    virtual void OnSelect()=0;                      //!< Selects the texture for rendering (core part)
+
+    //! Selects the texture for rendering (core part).
+    //!
+    //! In derived classes, this routine is supposed to do the work of loading the texture
+    //! into memory and using the Upload() function to upload it to OpenGL.
+    virtual void OnSelectCore() = 0;
+
     virtual void OnUnload();                        //!< Unloads the texture from OpenGL and memory
 
     void StoreAlpha();                              //!< sets the alpha store flag
@@ -166,7 +188,7 @@ public:
     virtual ~rFileTexture();                //!< destructor
 
 protected:
-    virtual void OnSelect();                //!< Selects the texture for rendering (core part)
+    virtual void OnSelectCore();            //!< Selects the texture for rendering (core part)
 private:
     tString fileName_;                      //!< the texture's filename
     tPath const *path_;
@@ -237,7 +259,7 @@ public:
     virtual ~rSurfaceTexture();                 //!< destructor
 
 protected:
-    virtual void OnSelect();                    //!< Selects the texture for rendering (core part)
+    virtual void OnSelectCore();                //!< Selects the texture for rendering (core part)
 private:
     rSurface const & surface_;                  //!< Surface to use as texture data
 

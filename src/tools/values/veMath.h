@@ -75,6 +75,22 @@ public:
     virtual Variant GetValue(void) const; //!< Returns the value in its native format
     virtual Base *copy(void) const; //!< Returns an exact copy of this object
 };
+class Power : public BinaryOp {
+public:
+    Power(BasePtr lvalue, BasePtr rvalue) : BinaryOp(lvalue, rvalue) {}; //!< Basic constructor
+    Power(BinaryOp const &other) : BinaryOp(other) {}; //!< Copy constructor
+
+    virtual Variant GetValue(void) const; //!< Returns the value in its native format
+    virtual Base *copy(void) const; //!< Returns an exact copy of this object
+};
+class Root : public BinaryOp {
+public:
+    Root(BasePtr lvalue, BasePtr rvalue) : BinaryOp(lvalue, rvalue) {}; //!< Basic constructor
+    Root(BinaryOp const &other) : BinaryOp(other) {}; //!< Copy constructor
+
+    virtual Variant GetValue(void) const; //!< Returns the value in its native format
+    virtual Base *copy(void) const; //!< Returns an exact copy of this object
+};
 
 typedef Bindings::CFunction::fZeroary<long int, ve_math_random> Random;
 

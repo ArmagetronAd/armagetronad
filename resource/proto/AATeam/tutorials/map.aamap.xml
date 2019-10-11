@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE Resource SYSTEM "AATeam/map-0.2.8.0_rc4.dtd">
+<Resource type="aamap" name="map" version="0.1.0" author="Z-Man" category="tutorial">
+  <Map version="1">
+    <!-- The original square map, technically created by z-man.
+           Converted to XML by philippeqc.
+	   Adding obstacles for map showcase.
+           License: Public Domain. Do with it what you want.
+        -->
+
+    <World>
+      <Field>
+        <Spawn	x="255"	y="150"	xdir="0"	ydir="1"	/>
+        <Spawn	x="245"	y="350"	xdir="0"	ydir="-1"	/>
+        <Spawn	x="150"	y="245"	xdir="1"	ydir="0"	/>
+        <Spawn	x="350"	y="255"	xdir="-1"	ydir="0"	/>
+
+       <Wall>
+          <Point  x="0"  y="0"  />
+          <Point  x="0"  y="500"  />
+          <Point  x="500"  y="500"  />
+          <Point  x="500"  y="0"  />
+          <Point  x="0"  y="0"  />
+        </Wall>
+
+       <Wall height="5">
+          <Point  x="100"  y="100"  />
+          <Point  x="200"  y="100"  />
+          <Point  x="200"  y="200"  />
+          <Point  x="100"  y="200"  />
+          <Point  x="100"  y="100"  />
+        </Wall>
+
+       <Wall height="5">
+          <Point  x="300"  y="100"  />
+          <Point  x="400"  y="100"  />
+          <Point  x="400"  y="200"  />
+          <Point  x="300"  y="200"  />
+          <Point  x="300"  y="100"  />
+        </Wall>
+
+       <Wall height="5">
+          <Point  x="300"  y="300"  />
+          <Point  x="400"  y="300"  />
+          <Point  x="400"  y="400"  />
+          <Point  x="300"  y="400"  />
+          <Point  x="300"  y="300"  />
+        </Wall>
+
+       <Wall height="5">
+          <Point  x="100"  y="300"  />
+          <Point  x="200"  y="300"  />
+          <Point  x="200"  y="400"  />
+          <Point  x="100"  y="400"  />
+          <Point  x="100"  y="300"  />
+        </Wall>
+      </Field>
+    </World>
+  </Map>
+</Resource>

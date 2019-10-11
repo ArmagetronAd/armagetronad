@@ -168,8 +168,8 @@ static nTimeRolling se_CalcTimeout( double score )
     return se_CalcScore2( score ) * se_prefixSpamTimeoutMultiplier;
 }
 
-eChatSaidEntry::eChatSaidEntry(const tString & said, const nTimeRolling & t, eChatMessageType type)
-: said_( said ), time_( t ), type_( type )
+eChatSaidEntry::eChatSaidEntry(const tString & said, const tString & name, const nTimeRolling & t, eChatMessageType type)
+: said_( said ), playerName_(name), time_( t ), type_( type )
 {
 }
 
@@ -180,6 +180,11 @@ eChatSaidEntry::~eChatSaidEntry()
 const tString & eChatSaidEntry::Said() const
 {
     return said_;
+}
+
+const tString & eChatSaidEntry::PlayerName() const
+{
+    return playerName_;
 }
 
 const nTimeRolling & eChatSaidEntry::Time() const
@@ -215,7 +220,7 @@ bool eChatLastSaid::Prefix::StartsWith( const eChatLastSaid::Prefix & other ) co
 
 
 eChatLastSaid::eChatLastSaid()
-: lastSaid_(), knownPrefixes_()
+  : lastSaid_(), knownPrefixes_(), disconnected_(false)
 {
 }
 
@@ -233,8 +238,20 @@ const eChatLastSaid::PrefixList & eChatLastSaid::KnownPrefixes() const
     return knownPrefixes_;
 }
 
+bool eChatLastSaid::Disconnected() const
+{
+    return disconnected_;
+}
+
+void eChatLastSaid::MarkDisconnected()
+{
+    disconnected_ = true;
+}
+
 void eChatLastSaid::AddSaid( const eChatSaidEntry & saidEntry )
 {
+    disconnected_ = false;
+
     if ( lastSaid_.size() >= static_cast< size_t >( se_lastSaidMaxEntries ) )
         lastSaid_.pop_back();
     
@@ -243,6 +260,7 @@ void eChatLastSaid::AddSaid( const eChatSaidEntry & saidEntry )
 
 nTimeRolling eChatLastSaid::AddPrefix( const tString & s, REAL score, nTimeRolling now )
 {
+    disconnected_ = false;
     nTimeRolling timeoutAt = now + se_CalcTimeout( score );
     Prefix prefix( s, score, timeoutAt );
     knownPrefixes_.push_back( prefix );
@@ -284,7 +302,7 @@ bool eChatSpamTester::Check()
         }
     }
     
-    eChatSaidEntry saidEntry( say_, currentTime, lastSaidType_ );
+    eChatSaidEntry saidEntry( say_, player_->GetUserName(), currentTime, lastSaidType_ );
     
     // check for prefix spam
     if ( se_prefixSpamShouldEnable )
@@ -469,7 +487,7 @@ void eChatPrefixSpamTester::CalcScore( PrefixEntry & data, const int & len, cons
 
 void eChatPrefixSpamTester::RemovePrefixEntries( const tString & prefix, const eChatSaidEntry & e ) const
 {
-    eChatSaidEntry entry( prefix, e.Time(), e.Type() );
+    eChatSaidEntry entry( prefix, player_->GetUserName(), e.Time(), e.Type() );
     eChatLastSaid::SaidList & xs = player_->GetLastSaid().lastSaid_;
     xs.erase( std::remove_if( xs.begin(), xs.end(), IsPrefixPredicate< eChatSaidEntry >( entry, false ) ), xs.end() );
 }

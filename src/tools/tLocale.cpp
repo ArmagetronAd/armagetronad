@@ -64,6 +64,8 @@ tColoredString st_Latin1ToUTF8( tString const & s )
     }
 }
 
+const tString st_internalEncoding("utf-8");
+
 class tLocaleSubItem; // identifies a single string in a single language
 
 static tArray<tString> st_TemplateParameters;
@@ -287,15 +289,16 @@ tLocaleItem::operator const char *() const// return the version of this string i
                     replaced << st_programBranchUrl;
                     break;
                 case 'c':
-                    replaced << tOutput(
-                            ( st_programChanged )? "$yes" : "$no"
-                            );
+                    replaced << st_programChanged;
                     break;
                 case 'd':
                     replaced << st_programBuildDate;
                     break;
                 case 'g':
                     replaced << st_programName;
+                    break;
+                case 'G':
+                    replaced << st_ProgramNameUppercase();
                     break;
                 case 'i':
                     replaced << st_programRevId;
@@ -526,6 +529,11 @@ void tLocaleItem::Load(const char *file, bool complete)  // load the language de
                             i++;
                             break;
 
+                        case ' ':
+                            r->translation += ' ';
+                            i++;
+                            break;
+
                         case '1':
                         case '2':
                         case '3':
@@ -536,6 +544,7 @@ void tLocaleItem::Load(const char *file, bool complete)  // load the language de
                         case '8':
                         case '9':
                         case 'g':
+                        case 'G':
                             r->translation += '\\';
                             li.istemplate = true;
                             break;
@@ -579,17 +588,6 @@ class tOutputItemSpace: public tOutputItemBase
 {
 public:
     tOutputItemSpace(tOutput& o);
-    virtual void Print(tString& target) const;
-    virtual void Clone(tOutput& o)      const;
-};
-
-
-class tOutputItemTemplate: public tOutputItemBase
-{
-    int       num;
-    tString   parameter;
-public:
-    tOutputItemTemplate(tOutput& o, int n, const char *p);
     virtual void Print(tString& target) const;
     virtual void Clone(tOutput& o)      const;
 };
@@ -692,32 +690,18 @@ void tOutput::AddLocale(const char *x)
 {
     tNEW(tOutputItemLocale)(*this, tLocale::Find(x));
 }
-
-
-tOutput & tOutput::SetTemplateParameter(int num, const char *parameter)
+void tOutput::AddString(char const * locale)
 {
-    tNEW(tOutputItemTemplate)(*this, num, parameter);
-    return *this;
+    int len = strlen(locale);
+    if (len == 0)
+        return;
+    if (len == 1 && locale[0] == ' ')
+        tNEW(tOutputItemSpace)(*this);
+    else if (locale[0] == '$')
+        tNEW(tOutputItemLocale)(*this, tLocale::Find(locale+1));
+    else
+        tNEW(tOutputItem<tString>)(*this, tString(locale));
 }
-
-tOutput &  tOutput::SetTemplateParameter(int num, int parameter)
-{
-    tString p;
-    p << parameter;
-    tNEW(tOutputItemTemplate)(*this, num, p);
-
-    return *this;
-}
-
-tOutput & tOutput::SetTemplateParameter(int num, float parameter)
-{
-    tString p;
-    p << parameter;
-    tNEW(tOutputItemTemplate)(*this, num, p);
-
-    return *this;
-}
-
 
 tOutput::tOutput(const std::string & x)
         :anchor(NULL)
@@ -835,16 +819,7 @@ tOutput& operator << (tOutput &o, char *locale)
 
 // and a special implementation for the locales and strings:
 tOutput& operator << (tOutput &o, const char *locale){
-    int len = strlen(locale);
-    if (len == 0)
-        return o;
-    if (len == 1 && locale[0] == ' ')
-        tNEW(tOutputItemSpace)(o);
-    else if (locale[0] == '$')
-        tNEW(tOutputItemLocale)(o, tLocale::Find(locale+1));
-    else
-        tNEW(tOutputItem<tString>)(o, tString(locale));
-
+    o.AddString(locale);
     return o;
 }
 

@@ -29,12 +29,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define ArmageTron_MATH_H
 
 //includes math headers
+#include <cmath>
 #include <math.h>
 
 #ifdef WIN32
 #include <float.h>
 #define finite _finite
 #define copysign _copysign
+#define isfinite finite
+#else
+using std::isfinite;
 #endif
 
 #ifdef SOLARIS
@@ -44,14 +48,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //! returns wiether a float value is good and finite
 inline bool good( REAL f )
 {
-    return finite( f );
+    return isfinite( f );
 }
 
 //! clamps a value between two others
 static inline bool clamp(REAL &c, REAL min, REAL max){
     tASSERT(min <= max);
 
-    if (!finite(c))
+    if (!isfinite(c))
     {
         c = 0;
         return true;

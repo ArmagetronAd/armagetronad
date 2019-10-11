@@ -58,6 +58,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "cCockpit.h"
 #include "gAINavigator.h"
+#include "eWarmup.h"
+#include "eLadderLog.h"
 
 #include "tMath.h"
 #include <stdlib.h>
@@ -219,9 +221,9 @@ static tSettingItem<int> s_s("SCORE_SUICIDE",score_suicide);
 
 // input control
 
-uActionPlayer gCycle::s_brake("CYCLE_BRAKE", -5);
-static uActionPlayer s_brakeToggle("CYCLE_BRAKE_TOGGLE", -5);
-static uActionTooltip sg_brakeTooltip( uActionTooltip::Level_Advanced, gCycle::s_brake, 2, &ePlayer::VetoActiveTooltip );
+uActionPlayer gCycle::s_brake("CYCLE_BRAKE", -9);
+static uActionPlayer s_brakeToggle("CYCLE_BRAKE_TOGGLE", -9);
+uActionTooltip sg_brakeTooltip( uActionTooltip::Level_Advanced, gCycle::s_brake, 2, &ePlayer::VetoActiveTooltip );
 
 // a class of textures where the transparent part of the
 // image is replaced by the player color
@@ -344,8 +346,8 @@ public:
         tASSERT( cycle );
 
         // create
-        if ( &(*cycle->chatBot_) == 0 )
-            cycle->chatBot_ = std::auto_ptr< gCycleChatBot >( new gCycleChatBot( cycle ) );
+        if ( cycle->chatBot_.get() == 0 )
+            cycle->chatBot_.reset( new gCycleChatBot( cycle ) );
 
         return *cycle->chatBot_;
     }
@@ -503,7 +505,7 @@ void gDestination::CopyFrom(const gCycleMovement &other)
     turns 		= other.GetTurns();
 
 #ifdef DEBUG
-    if (!finite(gameTime) || !finite(speed) || !finite(distance))
+    if (!isfinite(gameTime) || !isfinite(speed) || !isfinite(distance))
         st_Breakpoint();
 #endif
     if ( other.Owner() && other.Player() )
@@ -1279,18 +1281,20 @@ bool gCycleExtrapolator::EdgeIsDangerous(const eWall *ww, REAL time, REAL alpha 
     return bool(parent_) && parent_->EdgeIsDangerous( ww, time, alpha ) && gCycleMovement::EdgeIsDangerous( ww, time, alpha );
 }
 
-void gCycleExtrapolator::PassEdge(const eWall *ww,REAL time,REAL a,int){
+eGameObject::ePassEdgeResult gCycleExtrapolator::PassEdge(const eWall *ww,REAL time,REAL a,int){
     {
         if (!EdgeIsDangerous(ww,time,a) || !Alive() )
         {
-            return;
+            return eContinue;
         }
         else
         {
             eCoord collPos = ww->Point( a );
-            throw gCycleDeath( collPos );
+            return DieWhileMoving( collPos );
         }
     }
+
+    return eContinue;
 }
 
 bool gCycleExtrapolator::TimestepCore(REAL currentTime, bool calculateAcceleration)
@@ -1305,14 +1309,12 @@ bool gCycleExtrapolator::TimestepCore(REAL currentTime, bool calculateAccelerati
     // correct distance
     // distance = dest->distance - DistanceToDestination( *dest );
     // REAL distanceBefore = GetDistance();
-    tASSERT(finite(distance));
+    tASSERT(isfinite(distance));
 
     // delegate
     bool ret = false;
-    try{
-        ret = gCycleMovement::TimestepCore( currentTime, calculateAcceleration );
-    }
-    catch( gCycleDeath & )
+    ret = gCycleMovement::TimestepCore( currentTime, calculateAcceleration );
+    if(DiedWhileMoving())
     {
         return false;
     }
@@ -1409,8 +1411,8 @@ struct gCycleVisuals
     // loads a specific texture from a specific folder
     static rSurface * LoadTextureSafe2( Slot slot, int mp )
     {
-        static std::auto_ptr<rSurface> cache[SLOT_MAX][2];
-        std::auto_ptr<rSurface> & surface = cache[slot][mp];
+        static std::unique_ptr<rSurface> cache[SLOT_MAX][2];
+        std::unique_ptr<rSurface> & surface = cache[slot][mp];
         if ( surface.get() == NULL )
         {
             static char const * names[SLOT_MAX]={"bike.png","cycle_body.png", "cycle_wheel.png"};
@@ -1419,7 +1421,7 @@ struct gCycleVisuals
             char const * folder = mp ? "moviepack" : "textures";
             tString file = tString(folder) + tString("/") + tString( name );
 
-            surface = std::auto_ptr<rSurface> ( tNEW( rSurface( file ) ) );
+            surface.reset( tNEW( rSurface( file ) ) );
         }
 
         if ( surface->GetSurface() )
@@ -1748,12 +1750,12 @@ void gCycle::MyInitAfterCreation(){
 
 void gCycle::InitAfterCreation(){
 #ifdef DEBUG
-    if (!finite(Speed()))
+    if (!isfinite(Speed()))
         st_Breakpoint();
 #endif
     gCycleMovement::InitAfterCreation();
 #ifdef DEBUG
-    if (!finite(Speed()))
+    if (!isfinite(Speed()))
         st_Breakpoint();
 #endif
     MyInitAfterCreation();
@@ -2071,7 +2073,7 @@ bool gCycle::Timestep(REAL currentTime){
             gCycleChatBot & bot = gCycleChatBot::Get( this );
             bot.Activate( currentTime );
         }
-        else if ( &(*chatBot_) )
+        else if ( chatBot_.get() )
         {
             chatBot_->nextChatAI_ = 0;
         }
@@ -2083,13 +2085,10 @@ bool gCycle::Timestep(REAL currentTime){
 
         if (simulate)
         {
-            try
+            ret = gCycleMovement::Timestep(currentTime);
+            if(DiedWhileMoving())
             {
-                ret = gCycleMovement::Timestep(currentTime);
-            }
-            catch ( gCycleDeath const & death )
-            {
-                KillAt( death.pos_ );
+                KillAt( deathPosition_ );
                 return false;
             }
         }
@@ -2099,26 +2098,20 @@ bool gCycle::Timestep(REAL currentTime){
     else
     {
         // just basic movement to do: let base class handle that.
-        try
+        gCycleMovement::Timestep(currentTime);
+        if(DiedWhileMoving())
         {
-            gCycleMovement::Timestep(currentTime);
-        }
-        catch ( gCycleDeath const & death )
-        {
-            KillAt( death.pos_ );
+            KillAt( deathPosition_ );
             return false;
         }
     }
 
     // do the rest of the timestep
-    try
+    if ( currentTime > lastTime )
+        ret = gCycleMovement::Timestep(currentTime);
+    if(DiedWhileMoving())
     {
-        if ( currentTime > lastTime )
-            ret = gCycleMovement::Timestep(currentTime);
-    }
-    catch ( gCycleDeath const & death )
-    {
-        KillAt( death.pos_ );
+        KillAt( deathPosition_ );
         return false;
     }
 
@@ -2241,9 +2234,9 @@ REAL sg_GetSparksDistance();
 
 
 bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
-    if (!finite(skew))
+    if (!isfinite(skew))
         skew=0;
-    if (!finite(skewDot))
+    if (!isfinite(skewDot))
         skewDot=0;
 
     // eCoord oldpos=pos;
@@ -2292,7 +2285,7 @@ bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
     //if ( 0 )
 
     REAL animts=currentTime-lastTimeAnim;
-    if (animts<0 || !finite(animts))
+    if (animts<0 || !isfinite(animts))
         animts=0;
     else
         lastTimeAnim=currentTime;
@@ -2355,7 +2348,6 @@ bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
 
         if ( Alive() ){
             // delegate core work to base class
-            try
             {
                 // start building wall
                 REAL startBuildWallAt = spawnTime_ + sg_cycleWallTime;
@@ -2379,12 +2371,12 @@ bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
                 if ( gCycleMovement::TimestepCore( currentTime, calculateAcceleration ) )
                     return true;
             }
-            catch ( gCycleDeath const & death )
+            if(DiedWhileMoving())
             {
-                KillAt( death.pos_ );
+                KillAt( deathPosition_ );
 
                 // death exceptions are precise; we can safely take over the position from it
-                oldPos = death.pos_;
+                oldPos = deathPosition_;
             }
         }
 
@@ -2596,9 +2588,9 @@ void gCycle::Die( REAL time )
     }
 }
 
-static eLadderLogWriter sg_deathFragWriter("DEATH_FRAG", true);
-static eLadderLogWriter sg_deathSuicideWriter("DEATH_SUICIDE", true);
-static eLadderLogWriter sg_deathTeamkillWriter("DEATH_TEAMKILL", true);
+static eLadderLogWriter sg_deathFragWriter( "DEATH_FRAG", true, "prey hunter" );
+static eLadderLogWriter sg_deathSuicideWriter( "DEATH_SUICIDE", true, "player" );
+static eLadderLogWriter sg_deathTeamkillWriter("DEATH_TEAMKILL", true, "prey hunter" );
 
 void gCycle::KillAt( const eCoord& deathPos){
     // don't kill invulnerable cycles
@@ -2678,7 +2670,7 @@ void gCycle::KillAt( const eCoord& deathPos){
                     notificationMessage << " teamkilled " << Player()->GetUserName();
                     se_sendEventNotification(tString("Death teamkill"), notificationMessage);
 
-                    if( se_matches >= 0 )
+                    if( !se_warmup.IsWarmupMode() )
                     {
                         tColoredString hunterName;
                         hunterName << *hunter << tColoredString::ColorString(1,1,1);
@@ -2802,9 +2794,9 @@ static void sg_HoleScore( gCycle & cycle )
     cycle.Player()->AddScore( score_hole, tOutput("$player_win_hole"), tOutput("$player_lose_hole") );
 }
 
-static eLadderLogWriter sg_sacrificeWriter("SACRIFICE", true);
+static eLadderLogWriter sg_sacrificeWriter( "SACRIFICE", true, "hole_user hole_maker enemy_holed" );
 
-void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
+eGameObject::ePassEdgeResult gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
     {
         // deactivate time check
         gJustChecking thisIsSerious;
@@ -2851,12 +2843,12 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
                 }
             }
 
-            return;
+            return eContinue;
         }
 
 #ifdef DEBUG
         if (!EdgeIsDangerous(ww,time,a) || !Alive() )
-            return;
+            return eContinue;
 #endif
     }
 
@@ -2905,9 +2897,9 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
                 static bool fix = false;
                 // it's an extrapolation wall, don't simulate further.
                 if ( fix && lastTime > se_GameTime() - 2 * Lag() - GetMaxLazyLag() )
-                    throw gCycleStop();
+                    return StopMoving();
                 else
-                    return;
+                    return eContinue;
             }
 
             // we were first!
@@ -2955,7 +2947,7 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
                     if ( wallTimeLeft < 0 )
                     {
                         // isn't hit at all
-                        return;
+                        return eContinue;
                     }
 
                     // check how much rubber would be used
@@ -2990,7 +2982,7 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
         else // sad but true
         {
             // this cycle has to die here unless it has rubber left or is invulnerable (checked on catching the exception, and besides, this code path isn't called for invulnerable cycles)
-            throw gCycleDeath( collPos );
+            return DieWhileMoving( collPos );
 
             //			REAL dist = w->Pos( a );
             //			const_cast<gPlayerWall*>(w)->BlowHole( dist - explosionRadius, dist + explosionRadius );
@@ -3000,10 +2992,12 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
     {
         if (bool(player) && sn_GetNetState()!=nCLIENT && Alive() )
         {
-            throw gCycleDeath( collPos );
+            return DieWhileMoving( collPos );
         }
 
     }
+
+    return eContinue;
 }
 
 REAL gCycle::PathfindingModifier( const eWall *w ) const
@@ -3108,13 +3102,13 @@ bool gCycle::DoTurn(int d)
     if (d < -1) d = -1;
 
     if (Alive()){
-        eSoundMixer* mixer = eSoundMixer::GetMixer();
-        mixer->PushButton(CYCLE_TURN, Position());
-
         clientside_action();
 
         if ( gCycleMovement::DoTurn( d ) )
         {
+            eSoundMixer* mixer = eSoundMixer::GetMixer();
+            mixer->PushButton(CYCLE_TURN, Position());
+
             sg_ArchiveCoord( pos, 1 );
 
             skewDot+=4*d;
@@ -3637,8 +3631,8 @@ void gCycle::Render(const eCamera *cam){
     glProgramLocalParameter4fARB_ptr = (glProgramLocalParameter4fARB_Func) SDL_GL_GetProcAddress("glProgramLocalParameter4fARB");
 #endif
 #endif    
-    if (!finite(z) || !finite(pos.x) ||!finite(pos.y)||!finite(dir.x)||!finite(dir.y)
-            || !finite(skew))
+    if (!isfinite(z) || !isfinite(pos.x) ||!isfinite(pos.y)||!isfinite(dir.x)||!isfinite(dir.y)
+            || !isfinite(skew))
         st_Breakpoint();
     if (Alive()){
         //con << "Drawing cycle at " << pos << '\n';
@@ -3991,7 +3985,7 @@ void gCycle::Render(const eCamera *cam){
 
         glPopMatrix();
 
-        h=cam->CameraZ()*.005+.03;
+        h = cam ? cam->CameraZ()*.005+.03 : 0;
 
 #ifdef ENABLE_OLD_LAG_O_METER
         if(sg_laggometerUseOld) {
@@ -4966,7 +4960,7 @@ void gCycle::ReadSync( Game::CycleSync const & syncX, nSenderInfo const & sender
         REAL ratio = (interpolatedDistance - bef->distance)/
                      (aft->distance - bef->distance);
 
-        if (!finite(ratio))
+        if (!isfinite(ratio))
             ratio = 0;
 
         // interpolate when the cycle was at the position the sync message was sent
@@ -5584,7 +5578,7 @@ struct gWallInfoTemp
     REAL smallestBlend;
     
     gWallInfoTemp()
-    : weight( 0 ), smallestBlend( HUGE ){}
+    : weight( 0 ), smallestBlend( 1E+38 ){}
 
     void AddWall( gNetPlayerWall * wall, gCycle const & cycle, REAL totalLength )
     {

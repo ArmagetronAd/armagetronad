@@ -89,7 +89,11 @@ void fill_audio(void *udata, Uint8 *stream, int len)
     int i;
     if (eGrid::CurrentGrid())
         for(i=eGrid::CurrentGrid()->Cameras().Len()-1;i>=0;i--)
-            eGrid::CurrentGrid()->Cameras()(i)->SoundMix(stream,len);
+        {
+            eCamera *pCam = eGrid::CurrentGrid()->Cameras()(i);
+            if(pCam)
+                pCam->SoundMix(stream,len);
+        }
 
     for(i=se_globalPlayers.Len()-1;i>=0;i--)
         se_globalPlayers(i)->Mix(stream,len,0,1,1);
@@ -167,6 +171,7 @@ void se_SoundInit()
     if (!sound_is_there && sound_quality!=SOUND_OFF)
     {
         SDL_AudioSpec desired;
+        memset( &desired, 0, sizeof( SDL_AudioSpec ) );
 
         switch (sound_quality)
         {

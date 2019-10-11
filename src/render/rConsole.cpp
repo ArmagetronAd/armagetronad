@@ -30,6 +30,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tConfiguration.h"
 #include "rConsole.h"
 #include "rScreen.h"
+#include "tDirectories.h"
+#include "tRecorder.h"
 #include <iostream>
 
 
@@ -92,7 +94,8 @@ void rConsole::SetTimeout(REAL to){timeout=to;}
 REAL rCWIDTH_CON=REAL(16/640.0);
 REAL rCHEIGHT_CON=REAL(32/480.0);
 
-
+static bool sr_consoleLog = false;
+static tConfItem<bool> sr_consoleLogConf("CONSOLE_LOG", sr_consoleLog);
 
 tConsole & rConsole::DoPrint(const tString &s){
     bool print_to_stdout=false;
@@ -107,6 +110,13 @@ tConsole & rConsole::DoPrint(const tString &s){
     {
         std::cout << tColoredString::RemoveColors(s);
         std::cout.flush();
+    }
+
+    if(!tRecorder::IsPlayingBack() && sr_consoleLog) {
+            std::ofstream o;
+            if ( tDirectories::Var().Open(o, "consolelog.txt", std::ios::app) ) {
+                o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << tColoredString::RemoveColors(s);
+            }
     }
 
     if (sr_screen){

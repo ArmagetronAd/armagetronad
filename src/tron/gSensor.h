@@ -43,6 +43,6 @@ public:
     gSensor(eGameObject const * o,const eCoord &start,const eCoord &d)
             :eSensor(o,start,d), type(gSENSOR_NONE){}
 
-    virtual void PassEdge(const eWall *w,REAL time,REAL,int =1);
+    virtual ePassEdgeResult PassEdge(const eWall *w,REAL time,REAL,int =1) override;
 };
 #endif

@@ -202,15 +202,15 @@
                 <AtomicData source="current_score" />
             </DataSet>
             <DataSet id="topscore">
-                <AtomicData source="top_score" />
+                <AtomicData source="top_other_score" />
             </DataSet>
             <DataSet id="color">
-                <Conditional field="source" lvalue="current_score" rvalue="top_score" operator="eq">
+                <Conditional field="source" lvalue="current_score" rvalue="top_other_score" operator="eq">
                     <IfTrue>
                         <AtomicData source="0xff9d50" />
                     </IfTrue>
                     <IfFalse>
-                        <Conditional lvalue="current_score" rvalue="top_score" operator="gt">
+                        <Conditional lvalue="current_score" rvalue="top_other_score" operator="gt">
                             <IfTrue>
                                 <AtomicData source="0x11ff11" />
                             </IfTrue>

@@ -79,6 +79,9 @@ static int sg_cycleDebugPrintLevel = 0;
 
 #include "gCycle.pb.h"
 
+eCoord   gCycleMovement::deathPosition_;                     //!< the position the last move let a cylce die on
+bool     gCycleMovement::stoppedMovement_ = false;           //!< true if (extrapolating) movement should be stopped
+
 // get rubber values in effect
 void sg_RubberValues( ePlayerNetID const * player, REAL speed, REAL & max, REAL & effectiveness );
 
@@ -2659,7 +2662,7 @@ bool gCycleMovement::Timestep( REAL currentTime )
     // request the function gets called again right away.
     if( !vetoSimulationRequest &&
         ( currentDestination || 
-          ( !pendingTurns.empty() && GetNextTurn( pendingTurns.front() < currentTime + MaxSimulateAhead() ) )
+          ( !pendingTurns.empty() && GetNextTurn( pendingTurns.front() < currentTime + MaxSimulateAhead() ) != 0 )
             )
         )
     {
@@ -2861,7 +2864,7 @@ void gCycleMovement::CopyFrom( const gCycleMovement & other )
     windingNumber_          = other.windingNumber_;
     windingNumberWrapped_   = other.windingNumberWrapped_;
 
-    tASSERT(finite(distance));
+    tASSERT(isfinite(distance));
 
     // std::cout << "copy: " << brakingReservoir << ":" << braking << "\n";
 
@@ -2906,7 +2909,7 @@ void gCycleMovement::CopyFrom( const SyncData & sync, const gCycleMovement & oth
     brakingReservoir= sync.brakingReservoir;
     // std::cout << "fromsync: " << brakingReservoir << ":" << braking << "\n";
 
-    tASSERT(finite(distance));
+    tASSERT(isfinite(distance));
 
     // reset winding number and acceleration
     this->SetWindingNumberWrapped( Grid()->DirectionWinding(dirDrive) );
@@ -2960,12 +2963,12 @@ void gCycleMovement::CopyFrom( const SyncData & sync, const gCycleMovement & oth
 void gCycleMovement::InitAfterCreation( void )
 {
 #ifdef DEBUG
-    if (!finite(verletSpeed_))
+    if (!isfinite(verletSpeed_))
         st_Breakpoint();
 #endif
     eNetGameObject::InitAfterCreation();
 #ifdef DEBUG
-    if (!finite(verletSpeed_))
+    if (!isfinite(verletSpeed_))
         st_Breakpoint();
 #endif
     MyInitAfterCreation();
@@ -3147,6 +3150,15 @@ void gCycleMovement::CalculateAcceleration()
                         if( rear.type != gSENSOR_SELF && rear.type != gSENSOR_TEAMMATE )
                         {
                             REAL timing = rear.hit/(verletSpeed_ + 1E-10);
+
+                            // extra factor: when the number of axes is not 4,
+                            // the effective speed at which the cycle would increase
+                            // the here detected distance is reduced. Thus, we
+                            // need to divide the timing by that speed factor.
+                            REAL factor = -lastDirDrive*dirDrive*d;
+                            if(factor > 0 && factor < 1)
+                                timing /= factor;
+
                             player->AnalyzeTiming( timing );
                         }
                     }
@@ -3356,6 +3368,11 @@ void gCycleMovement::ApplyAcceleration( REAL dt )
     sg_ArchiveReal( verletSpeed_, 9 );
 }
 
+const tCoord &gCycleMovement::DeathPosition()
+{
+    return deathPosition_;
+}
+
 // *******************************************************************************************
 // *
 // *	DoTurn
@@ -3418,6 +3435,7 @@ bool gCycleMovement::DoTurn( int dir )
                 // and report
                 // player->AnalyzeTiming( timing );
                 */
+                uncannyTimingToReport_ = false;
             }
             else
             {
@@ -3707,7 +3725,7 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
     clamp(ts, -10, 10);
 
     REAL step=verletSpeed_*ts;
-    tASSERT(finite(step));
+    tASSERT(isfinite(step));
 
     bool emergency = false;
 
@@ -3974,7 +3992,7 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
                             // inform AI of its impending doom
                             RightBeforeDeath(0);
 
-                            // simulate rest of timestep
+                            // simulate post-rubber gap or, more frequently, the crash into the next wall
                             return TimestepCore( currentTime );
                         }
                     }
@@ -4001,6 +4019,20 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
             step -= rubberneeded;
             if (step<0)
                 step=0;
+
+            // ignore the next destination position for now.
+            // if the space ahead is far less that what the cycle would traverse
+            // until the destination turn time, die.
+            // the destination must have come from a 0.2.6 or cheating client with a wrong time set;
+            // the control code calling this has no clue that the cycle has entered the rubber gap
+            // and would respect the destination's position, allowing for extremely deep grinds.
+            if( sn_GetNetState() != nCLIENT &&
+                currentDestination && !currentDestination->hasBeenUsed && 
+                rubberneeded >= rubberAvailable &&
+                space * 1.25 < (currentDestination->gameTime - lastTime) * verletSpeed_)
+            {
+                return eAbort == DieWhileMoving(pos + dirDrive * space);
+            }
 
             //{
             //    rubber+=step;
@@ -4032,7 +4064,7 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
 
     eCoord lastPos = pos;
     tJUST_CONTROLLED_PTR< eFace > lastFace = currentFace;
-    try
+    stoppedMovement_ = false;
     {
 #ifdef DEBUG
         static int run = 0;
@@ -4052,13 +4084,15 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
         }
 #endif
 
-        tASSERT(finite(distance));
-        tASSERT(finite(step));
+        tASSERT(isfinite(distance));
+        tASSERT(isfinite(step));
         distance += step;
         lastTimeAlive_ = currentTime;
     }
-    catch ( gCycleStop const & )
+    if(stoppedMovement_)
     {
+        stoppedMovement_ = false;
+
         // undo simulation done so far and stop
         pos = lastPos;
         verletSpeed_ = lastSpeed;
@@ -4068,7 +4102,7 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
         // don't simulate further
         return false;
     }
-    catch ( gCycleDeath const & )
+    if(DiedWhileMoving())
     {
         rubberSpeedFactor = 0;
 
@@ -4119,11 +4153,12 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
                 rubber = rubber_granted;
 
                 // update distance to include the really covered space
-                tASSERT(finite(distance));
+                tASSERT(isfinite(distance));
                 distance += eCoord::F( dirDrive, pos - lastPos )/dirDrive.NormSquared();
-                tASSERT(finite(distance));
+                tASSERT(isfinite(distance));
 
-                throw;
+                DieWhileMoving( deathPosition_ );
+                return true;
             }
         }
         else
@@ -4140,10 +4175,11 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
 
     tASSERT( rubber >= 0 );
 
-    // use up rubber from tunneling (calculated by CalculateAcceleration
+    // use up rubber from tunneling (calculated by CalculateAcceleration)
     if ( rubberEffectiveness > 0 )
     {
-        rubber += rubberUsage * ts * verletSpeed_ / rubberEffectiveness;            }
+        rubber += rubberUsage * ts * verletSpeed_ / rubberEffectiveness; 
+    }
     else if ( rubberUsage > 0 )
     {
         rubber = rubber_granted + 10;
@@ -4152,11 +4188,11 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
 
     // decide over kill
     bool rubberUsedUp = false;
-    if ( rubber > rubber_granted || ( sg_cycleWidthRubberMax == 0 && sg_cycleWidthRubberMin == 0 ) )
+    if ( rubber > rubber_granted )
     {
         if ( sn_GetNetState() != nCLIENT )
         {
-            throw gCycleDeath( pos );
+            return eAbort == DieWhileMoving( pos );
         }
         else
         {
@@ -4230,12 +4266,24 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
     if ( !sg_verletIntegration.Supported() )
         this->ApplyAcceleration( ts );
 
-    tASSERT(finite(distance));
+    tASSERT(isfinite(distance));
 
     tASSERT( rubber >= 0 );
 
     // call base timestep
     return eNetGameObject::Timestep(currentTime);
+}
+
+eGameObject::ePassEdgeResult gCycleMovement::StopMoving()
+{
+    stoppedMovement_ = true;
+    return eAbort;
+}
+
+eGameObject::ePassEdgeResult gCycleMovement::DieWhileMoving(const tCoord &deathPosition)
+{
+    deathPosition_ = deathPosition;
+    return eNetGameObject::DieWhileMoving();
 }
 
 // *******************************************************************************************
@@ -4290,7 +4338,7 @@ void gCycleMovement::MyInitAfterCreation( void )
 
     lastTimeAlive_ = lastTime;
 
-    if (!finite(verletSpeed_)){
+    if (!isfinite(verletSpeed_)){
         st_Breakpoint();
         verletSpeed_ = 1;
     }
@@ -4441,12 +4489,11 @@ void gCycleMovement::MoveSafely( const eCoord & dest, REAL startTime, REAL endTi
     if ( !recursing )
     {
         recursing = true;
-        try
         {
             // try a regular move
             Move( dest, startTime, endTime );
         }
-        catch( eDeath & death )
+        if(DiedWhileMoving())
         {
             // and play dead if that doesn't work right
             short lastAlive = alive_;

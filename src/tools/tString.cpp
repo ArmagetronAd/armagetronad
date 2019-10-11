@@ -52,24 +52,23 @@ static bool st_ReadEscapeSequence( char & c, char & c2, std::istream & s )
     c2 = '\0';
 
     // detect escaping
-    if ( c == '\\' && !s.eof() && s.good() )
+    if ( c == '\\' )
     {
-        c2 = s.get();
+        c = s.get();
 
         // nothing useful read?
         if ( s.eof() )
         {
-            c2 = 0;
+            c = '\\';
             return false;
         }
 
         // interpret special escape sequences
-        switch (c2)
+        switch (c)
         {
         case 'n':
             // turn \n into newline
             c = '\n';
-            c2 = 0;
             return true;
         case '"':
         case ' ':
@@ -80,6 +79,8 @@ static bool st_ReadEscapeSequence( char & c, char & c2, std::istream & s )
             return true;
         default:
             // take the whole \x sequence as it appeared.
+            c2 = c;
+            c = '\\';
             return false;
         }
     }
@@ -997,6 +998,11 @@ int tString::RemoveWordLeft( int start ) {
 
 void tString::RemoveSubStr( int start, int length ) {
     int strLen = size();
+
+    if ( start < 0 ) {
+        start += strLen;
+    }
+
     if ( length < 0 ) {
         start += length;
         length = abs( length );
@@ -1134,6 +1140,32 @@ tString tString::Truncate( int truncateAt ) const
         return *this;
 
     return SubStr( 0, truncateAt ) + "...";
+}
+
+// *******************************************************************************************
+// *
+// *	FromUnknown
+// *
+// *******************************************************************************************
+//!
+//!    @param      source       Source string of unknown format
+//!    @return     A new string that is valid utf8
+//!
+// *******************************************************************************************
+tString tString::FromUnknown( char const * source )
+{
+    std::string ret( source );
+
+    // if the string already is utf8, just return it
+    if( utf8::is_valid( ret.begin(), ret.end() ) )
+    {
+        return ret;
+    }
+    else
+    {
+        // convert it
+        return st_Latin1ToUTF8( ret );
+    }
 }
 
 // *******************************************************************************
@@ -1684,6 +1716,34 @@ void tColoredString::RemoveTrailingColor( void )
     ::RemoveTrailingColor( *this );
 }
 
+static inline bool st_IsSeparatorCharacter( wchar_t c )
+{
+    // Character categories: http://www.fileformat.info/info/unicode/category/index.htm
+    switch ( c )
+    {
+        case 0x00A0:
+        case 0x1680:
+        case 0x2000:
+        case 0x2001:
+        case 0x2002:
+        case 0x2003:
+        case 0x2004:
+        case 0x2005:
+        case 0x2006:
+        case 0x2007:
+        case 0x2008:
+        case 0x2009:
+        case 0x200A:
+        case 0x2028:
+        case 0x2029:
+        case 0x202F:
+        case 0x205F:
+        case 0x3000:
+            return true;
+    }
+    return false;
+}
+
 // *******************************************************************************************
 // *
 // *	NetFilter
@@ -1715,12 +1775,12 @@ void tString::NetFilter( bool filterWhitespace )
             if ( c != 0x7f )
             {
                 // filter
-                if ( isblank(c) )
+                if ( st_IsSeparatorCharacter( c ) )
                 {
                     // unify whitespace to regular space
                     c = ' ';
                 }
-                else if ( c < 32 )
+                else if ( c < 32 || ( c > 126 && c < 161) )
                 {
                     // nonprintable characters -> underscore
                     c = '_';

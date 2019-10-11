@@ -18,6 +18,7 @@
 	#include "values/vParser.h"
 	#include "tString.h"
 	#include <cstdio>
+    #include "stdio.h"
 	
 	int yylex(void);
 	void yyerror(char const *s);

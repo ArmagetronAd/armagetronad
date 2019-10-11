@@ -43,6 +43,8 @@ class tPolynomialMarshaler
     tPolynomialMarshaler(const tPolynomialMarshaler & other); //!< Copy constructor
     tPolynomialMarshaler(const tPolynomial & _constant, const tPolynomial & _variant); //!< Constructor from 2 tPolynomial
 
+    tPolynomialMarshaler & operator = (const tPolynomialMarshaler &) = default;
+  
     void setConstant(REAL value, int index);
     void setVariant(REAL value, int index);
     void setConstant(const tPolynomial & tpConstant);

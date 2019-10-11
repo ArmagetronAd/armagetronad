@@ -37,8 +37,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "rRender.h"
 #include "rTexture.h"
 
-#ifdef HAVE_FTGL_H
+#ifdef HAVE_FTGL_FTGL_H
 // single include. practical.
+#include <FTGL/ftgl.h>
+#elif defined(HAVE_FTGL_H)
 #include <ftgl.h>
 #else
 // alternative includes go here
@@ -57,6 +59,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <iconv.h>
 #include <errno.h>
 
+
 //! like strnlen, but that's nonstandard :-(
 //! also replaces the equally nonstandard wcsnlen.
 static size_t my_strnlen(FTGL_CHAR const * c, size_t i) {
@@ -72,6 +75,7 @@ static size_t my_strnlen(FTGL_CHAR const * c, size_t i) {
 #define my_strncmp strncmp
 #else
 #define my_strncmp wcsncmp
+#include <iterator>
 
 // conversion functions utf8->wstring
 wchar_t sr_utf8216(tString::const_iterator &c, tString::const_iterator const &end) {
@@ -161,8 +165,13 @@ void sr_utf8216(tString const &in, std::wstring &out) {
 int sr_fontType = sr_fontTexture;
 static tConfItem< int > sr_fontTypeConf( "FONT_TYPE", sr_fontType, &sr_ReloadFont);
 
+bool restrictLineHeight( float const &newValue )
+{
+    return newValue > 0;
+}
+
 float sr_lineHeight = 1.;
-static tConfItem< float > sr_lineHeightconf( "LINE_HEIGHT", sr_lineHeight);
+static tConfItem< float > sr_lineHeightconf( "LINE_HEIGHT", sr_lineHeight, &restrictLineHeight );
 
 class rFontContainer : std::map<int, FTFont *> {
     FTFont &New(int size);
@@ -573,9 +582,22 @@ rTextField & rTextField::StringOutput(const FTGL_CHAR * c, ColorMode colorMode)
                 }
             }
             FTGL_STRING str(c, nextSpace);
-            //TODO: fix for non-utf8 rendering, too
 #ifdef FTGL_HAS_UTF8
             str = tColoredString::RemoveColors(str.c_str());
+#else
+            {
+                // Oh my this is wasteful: get the string back to utf8
+                tString str_in_utf8;
+                std::back_insert_iterator< std::string > inserter( str_in_utf8 );
+                for( unsigned int i = 0; i < str.size(); ++i )
+                {
+                    inserter = utf8::append( str[i], inserter );
+                }
+                // remove colors there
+                str_in_utf8 = tColoredString::RemoveColors(str_in_utf8.c_str());
+                // and convert back
+                sr_utf8216( str_in_utf8, str );
+            }
 #endif
             float wordWidth = sr_Font.GetWidth(str, cheight);
 
@@ -628,50 +650,38 @@ rTextField & rTextField::StringOutput(const FTGL_CHAR * c, ColorMode colorMode)
                                      static_cast<FTGL_CHAR>('T'),
                                      static_cast<FTGL_CHAR>('T'),
                                      0};
+        bool isResettColor = false;
+        bool isUsableColor = colorMode != COLOR_IGNORE && *c == '0' && my_strnlen(c, 8) >= 8 && c[1] == 'x';
 
-        if (*c=='0' && my_strnlen(c, 8)>=8 && c[1]=='x' && colorMode != COLOR_IGNORE && (tColor::VerifyColorCode(c) || 0 == my_strncmp(c,resett,8)))
+        // Check for reset color first, because VerifyColorCode() will by default return true for 0xRESETT.
+        if ( isUsableColor &&  ( ( isResettColor = 0 == my_strncmp( c, resett, 8 ) ) || tColor::VerifyColorCode( c ) ) )
         {
-            tColor color;
-            bool use = false;
+            tColor color = isResettColor ? defaultColor_ : tColor( c );
 
-            if ( 0 == my_strncmp(c,resett,8) )
-            {
-                // color reset to default requested
-                 color = defaultColor_;
-                 use = true;
-            }
-            else
-            {
-                // found! extract colors
-                cursorPos-=8;
-                color = tColor( c );
-                use = true;
-            }
-
-            // advance
             if ( colorMode == COLOR_USE )
             {
-                c+=8;
+                // Advance over the color code.
+                c += 8;
+
+                // The code will be hidden, so move the cursor to correct position.
+                cursorPos -= 8;
             }
             else
             {
-                // write color code out
-                cursorPos+=8;
+                // colorMode is COLOR_SHOW. Write the color code out.
                 for(int i=7; i>=0;--i)
                     WriteChar(*(c++));
             }
 
-            // apply color
-            if ( use )
-            {
-                FlushLine(false);
-                cursorPos++;
-                color_ = color;
-            }
+            FlushLine(false);
+            cursorPos++;
+            color_ = color;
         }
         else
+        {
             // normal operation: add char
             WriteChar(*(c++));
+        }
     }
 #endif
     return *this;

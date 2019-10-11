@@ -34,6 +34,7 @@ class ePlayerNetID;
 class gTeam
 {
 public:
+    static void TeamMenu(bool defaultSpectate);				// bring up the team selection menu
     static void TeamMenu(); 								// bring up the team selection menu
 };
 

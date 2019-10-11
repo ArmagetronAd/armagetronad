@@ -30,12 +30,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "tMutex.h"
 
-static boost::recursive_mutex st_mutex;
+static boost::recursive_mutex & st_GetMutex()
+{
+    static boost::recursive_mutex mutex;
+    return mutex;
+}
 
 tArray<tTODO_FUNC *> tToDos;
 
 void st_ToDo(tTODO_FUNC *td){ // postpone something
-    boost::lock_guard< boost::recursive_mutex > lock( st_mutex );
+    boost::lock_guard< boost::recursive_mutex > lock( st_GetMutex() );
 
     tToDos[tToDos.Len()]=td;
 }
@@ -44,7 +48,7 @@ void st_ToDo(tTODO_FUNC *td){ // postpone something
 static tTODO_FUNC * st_toDoCurrent = 0;
 
 void st_ToDoOnce(tTODO_FUNC *td){ // postpone something, avoid double entries
-    boost::lock_guard< boost::recursive_mutex > lock( st_mutex );
+    boost::lock_guard< boost::recursive_mutex > lock( st_GetMutex() );
 
     if( st_toDoCurrent == td )
     {
@@ -72,14 +76,22 @@ void st_DoToDo(){ // do the things that have been postponed
         st_toDoFromSignal = 0;
     }
 
-    boost::lock_guard< boost::recursive_mutex > lock( st_mutex );
-    while (tToDos.Len()){
-        tTODO_FUNC *last = st_toDoCurrent;
-        tTODO_FUNC *td = tToDos[tToDos.Len()-1];
-        st_toDoCurrent = td;
-        tToDos.SetLen(tToDos.Len()-1);
-        (*td)();
-        st_toDoCurrent = last;
+    {
+        boost::unique_lock< boost::recursive_mutex > lock( st_GetMutex() );
+        while (tToDos.Len()){
+            tTODO_FUNC *last = st_toDoCurrent;
+            tTODO_FUNC *td = tToDos[tToDos.Len()-1];
+            st_toDoCurrent = td;
+            tToDos.SetLen(tToDos.Len()-1);
+
+            // execute function, temporarily unlock queue in case it wants to add
+            // further items
+            lock.unlock();
+            (*td)();
+            lock.lock();
+
+            st_toDoCurrent = last;
+        }
     }
 
     st_SyncBackgroundThreads();

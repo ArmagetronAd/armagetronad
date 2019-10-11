@@ -61,6 +61,8 @@ public:
 
         pthread_create(&thread, NULL, &run<T>, (void*) o);
     }
+
+    void detach(){}
 private:
     // worker function
     template< class T >
@@ -79,11 +81,10 @@ private:
 };
 }
 
-#else  // HAVE_LIBPTHREAD
+#else  // HAVE_PTHREAD
 
 #include "tError.h"
 
-// replicate the little we actually use with PThreads
 namespace boost
 {
 class thread
@@ -95,10 +96,12 @@ public:
         // should never be called, then
         tVERIFY(0);
     }
+
+    void detach(){}
 };
 }
 
-#endif // HAVE_LIBPTHREAD
+#endif // HAVE_PTHREAD
 
 #endif // HAVE_LIBBOOST_THREAD
 

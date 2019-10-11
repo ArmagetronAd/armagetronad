@@ -52,13 +52,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #ifndef WIN32
 #include <arpa/inet.h>
-
-#ifndef MACOSX
-#   include <netinet/ip.h>
-#else
-#   define IPTOS_LOWDELAY 0x10 // http://www.tcpdump.org/cgi-bin/cvsweb/tcpdump/ip.h?rev=1.11
-#endif
-
+#include <netinet/ip.h>
 #include <netinet/in_systm.h>
 #include <netinet/in.h>
 #include <netdb.h>
@@ -612,7 +606,7 @@ void ANET_GetHostList( char const * hostname, nHostList & hostList, int net_host
         int ret = getaddrinfo( hostname, NULL, NULL, &info );
         if ( ret || !info )
         {
-            con << "Error looking up " << ( hostname ? hostname : "localhost" ) << " : " << gai_strerror( ret ) << "\n";
+            con << "Error looking up " << ( hostname ? hostname : "localhost" ) << " : " << tString::FromUnknown( gai_strerror( ret ) ) << "\n";
             return;
         }
         
@@ -853,8 +847,9 @@ static int PartialIPAddress (const char *in, struct sockaddr *hostaddr, int defa
         port = default_port;
 
     hostaddr->sa_family = AF_INET;
-    ((struct sockaddr_in *)hostaddr)->sin_port = htons((short)port);
-    ((struct sockaddr_in *)hostaddr)->sin_addr.s_addr = (default_addr & htonl(mask)) | htonl(addr);
+    struct sockaddr_in *hostaddr_in = reinterpret_cast< sockaddr_in * >( hostaddr );
+    hostaddr_in->sin_port = htons((short)port);
+    hostaddr_in->sin_addr.s_addr = (default_addr & htonl(mask)) | htonl(addr);
 
     return 0;
 }
@@ -865,9 +860,9 @@ char *ANET_AddrToString (const struct sockaddr *addr)
 {
     static char buffer[23];
     int haddr;
-
-    haddr = ntohl(((struct sockaddr_in const *)addr)->sin_addr.s_addr);
-    snprintf(buffer,22, "%d.%d.%d.%d:%d", (haddr >> 24) & 0xff, (haddr >> 16) & 0xff, (haddr >> 8) & 0xff, haddr & 0xff, ntohs(((struct sockaddr_in const *)addr)->sin_port));
+    const struct sockaddr_in *addr_in = reinterpret_cast< const struct sockaddr_in * >( addr );
+    haddr = ntohl(addr_in->sin_addr.s_addr);
+    snprintf(buffer,22, "%d.%d.%d.%d:%d", (haddr >> 24) & 0xff, (haddr >> 16) & 0xff, (haddr >> 8) & 0xff, haddr & 0xff, ntohs(addr_in->sin_port));
     return buffer;
 }
 
@@ -889,19 +884,24 @@ int ANET_GetSocketAddr (int sock, struct sockaddr *addr)
 
 //=============================================================================
 
-int ANET_AddrCompare (struct sockaddr *addr1, struct sockaddr *addr2)
+#if 0
+int ANET_AddrCompare(const struct sockaddr *addr1, const struct sockaddr *addr2)
 {
     if (addr1->sa_family != addr2->sa_family)
         return -1;
 
-    if (((struct sockaddr_in *)addr1)->sin_addr.s_addr != ((struct sockaddr_in *)addr2)->sin_addr.s_addr)
+    const struct sockaddr_in *addr1_in = reinterpret_cast< const struct sockaddr_in * >( addr1 );
+    const struct sockaddr_in *addr2_in = reinterpret_cast< const struct sockaddr_in * >( addr2 );
+
+    if (addr1_in->sin_addr.s_addr != addr2_in->sin_addr.s_addr)
         return -1;
 
-    if (((struct sockaddr_in *)addr1)->sin_port != ((struct sockaddr_in *)addr2)->sin_port)
+    if (addr1_in->sin_port != addr2_in->sin_port)
         return 1;
 
     return 0;
 }
+#endif
 
 }   // namespace
 
@@ -1062,6 +1062,41 @@ public:
         ClearAddressCore();
     }
 
+    //! prints console output on the next st_ToDo call
+    class ForegroundPrinter
+    {
+    public:
+        ForegroundPrinter()
+        {
+            printer_ = tNEW( Printer );
+        }
+
+        ~ForegroundPrinter()
+        {
+            tMemberFunctionRunner::ScheduleForeground( *printer_, &Printer::Print );
+        }
+
+        template < typename T >
+        ForegroundPrinter & operator << ( T t )
+        {
+            printer_->s << t;
+            return *this;
+        }
+    private:
+        class Printer: public tReferencable< Printer >
+        {
+        public:
+            std::ostringstream s;
+
+            void Print()
+            {
+                con << s.str();
+            }
+        };
+
+        tJUST_CONTROLLED_PTR< Printer > printer_;
+    };
+
     void Resolve()
     {
         tJUST_CONTROLLED_PTR< nDNSResolver > keep( this );
@@ -1091,8 +1126,10 @@ public:
         }
         else
         {
-            struct addrinfo *res = NULL;
-            int ret = getaddrinfo( hostname_, NULL, NULL, &res );
+            struct addrinfo *res = NULL, hints;
+            memset( &hints, 0, sizeof( hints ) );
+            hints.ai_family = AF_INET;
+            int ret = getaddrinfo( hostname_, NULL, &hints, &res );
     
             // bulk waiting work is done, the rest of the function can be
             // synced to the foreground
@@ -1101,7 +1138,7 @@ public:
             bool success = false;
             if( ret )
             {
-                con << "Failed to resolve hostname " << hostname_ << ", error " << gai_strerror( ret ) << "\n";
+                ForegroundPrinter() << "Failed to resolve hostname " << hostname_ << ", error " << tString::FromUnknown( gai_strerror( ret ) ) << "\n";
             }
             else if (res)
             {
@@ -1134,7 +1171,7 @@ public:
         if ( hostname_ != resolved )
         {
             // not to the console, that would cause a swap, which can be deadly from background threads
-            std::cout << "Address of server " << hostname_ << " determined to be " << resolved << "\n";
+            ForegroundPrinter() << "Address of server " << hostname_ << " determined to be " << resolved << "\n";
         }
 #endif
         {
@@ -2962,35 +2999,36 @@ bool nBasicNetworkSystem::Select( REAL dt )
         if ( controlSocket_.GetSocket() < 0 )
         {
             tDelay( int( dt * 1000000 ) );
-            return false;
         }
-
-        fd_set rfds; // set of sockets to wathc
-        struct timeval tv; // time value to pass to select()
-
-        FD_ZERO( &rfds );
-
-        // watch the control socket
-        FD_SET( controlSocket_.GetSocket(), &rfds );
-        // con << "Watching " << controlSocket_.GetSocket();
-
-        int max = controlSocket_.GetSocket();
-
-        // watch listening sockets
-        for( nSocketListener::SocketArray::const_iterator iter = listener_.GetSockets().begin(); iter != listener_.GetSockets().end(); ++iter )
+        else
         {
-            FD_SET( (*iter).GetSocket(), &rfds );
-            if ( (*iter).GetSocket() > max )
-                max = (*iter).GetSocket();
-            // con << ", " << (*iter).GetSocket();
+            fd_set rfds; // set of sockets to watch
+            struct timeval tv; // time value to pass to select()
+
+            FD_ZERO( &rfds );
+
+            // watch the control socket
+            FD_SET( controlSocket_.GetSocket(), &rfds );
+            // con << "Watching " << controlSocket_.GetSocket();
+
+            int max = controlSocket_.GetSocket();
+
+            // watch listening sockets
+            for( nSocketListener::SocketArray::const_iterator iter = listener_.GetSockets().begin(); iter != listener_.GetSockets().end(); ++iter )
+            {
+                FD_SET( (*iter).GetSocket(), &rfds );
+                if ( (*iter).GetSocket() > max )
+                    max = (*iter).GetSocket();
+                // con << ", " << (*iter).GetSocket();
+            }
+
+            // set time
+            tv.tv_sec  = static_cast< long int >( dt );
+            tv.tv_usec = static_cast< long int >( (dt-tv.tv_sec)*1000000 );
+
+            // delegate to system select
+            retval = select(max+1, &rfds, NULL, NULL, &tv);
         }
-
-        // set time
-        tv.tv_sec  = static_cast< long int >( dt );
-        tv.tv_usec = static_cast< long int >( (dt-tv.tv_sec)*1000000 );
-
-        // delegate to system select
-        retval = select(max+1, &rfds, NULL, NULL, &tv);
     }
     tRecorder::Record( section, retval );
 

@@ -96,6 +96,14 @@ static tSettingItem< int > se_vb( "VOTING_BIAS", se_votingBias );
 static int se_votingBiasKick = 0;
 static tSettingItem< int > se_vbKick( "VOTING_BIAS_KICK", se_votingBiasKick );
 
+// the number set here always acts as additional votes against a silence vote.
+static int se_votingBiasSilence = 0;
+static tSettingItem< int > se_vbSilence( "VOTING_BIAS_SILENCE", se_votingBiasSilence );
+
+// the number set here always acts as additional votes against a voice vote.
+static int se_votingBiasVoice = 0;
+static tSettingItem< int > se_vbVoice( "VOTING_BIAS_VOICE", se_votingBiasVoice );
+
 // the number set here always acts as additional votes against a suspend vote.
 static int se_votingBiasSuspend = 0;
 static tSettingItem< int > se_vbSuspend( "VOTING_BIAS_SUSPEND", se_votingBiasSuspend );
@@ -149,6 +157,11 @@ static tSettingItem< int > se_votingMaturitySI( "VOTING_MATURITY", se_votingMatu
 static tAccessLevel se_accessLevelVoteKick = tAccessLevel_Program;
 static tSettingItem< tAccessLevel > se_accessLevelVoteKickSI( "ACCESS_LEVEL_VOTE_KICK", se_accessLevelVoteKick );
 static tAccessLevelSetter se_accessLevelVoteKickSILevel( se_accessLevelVoteKickSI, tAccessLevel_Owner );
+
+// minimal access level for silence and voice votes
+static tAccessLevel se_accessLevelVoteSilence = tAccessLevel_Program;
+static tSettingItem< tAccessLevel > se_accessLevelVoteSilenceSI( "ACCESS_LEVEL_VOTE_SILENCE", se_accessLevelVoteSilence );
+static tAccessLevelSetter se_accessLevelVoteSilenceSILevel( se_accessLevelVoteSilenceSI, tAccessLevel_Owner );
 
 // minimal access level for suspend votes
 static tAccessLevel se_accessLevelVoteSuspend = tAccessLevel_Program;
@@ -383,15 +396,9 @@ public:
             return false;
         }
 
-        // spawn spectator voters
-        for ( i = MAXCLIENTS; i > 0; --i )
-        {
-            if ( sn_Connections[ i ].socket )
-                eVoter::GetVoter( i );
-        }
-
         // enough voters online?
-        if ( eVoter::voters_.Len() < se_minVoters || eVoter::voters_.Len() < 2 )
+        int numberVoters = eVoter::NumberVoters();
+        if ( numberVoters < se_minVoters || numberVoters < 2 )
         {
             tOutput message("$vote_toofew");
             sn_ConsoleOut( message, senderID );
@@ -492,7 +499,7 @@ public:
                         // remove him from the lists
                         vote->RemoveVoter( voter );
 
-                        // insert hum
+                        // insert him
                         vote->voters_[ result ].Insert( voter );
                     }
 
@@ -558,8 +565,8 @@ public:
         int bias = se_votingBias + DoGetExtraBias();
 
         // apply bias
-        con 	+= bias;
-        total 	+= bias;
+        int conAdjusted = con + bias;
+        int totalAdjusted = total + bias;
 
         // reduce number of total voters
         if ( se_votingDecay > 0 )
@@ -567,28 +574,30 @@ public:
             int reduce = int( ( tSysTimeFloat() - this->creationTime_ - se_votingStartDecay ) / se_votingDecay );
             if ( reduce > 0 )
             {
-                total -= reduce;
+                totalAdjusted -= reduce;
             }
         }
 
         if ( sn_GetNetState() == nSERVER )
         {
+            int abstain = total - pro - con;
+
             // see if the vote has been rejected
-            if ( con >= pro && con * 2 >= total )
+            if ( conAdjusted >= pro && conAdjusted * 2 >= totalAdjusted )
             {
                 if ( this->suggestor_ )
                     this->suggestor_->Spam( user_, se_votingSpamReject, tOutput("$spam_vote_rejected") );
 
-                tOutput voteMessage("$vote_rejected", GetDescription(), pro, con-bias, total-pro-con+bias );
+                tOutput voteMessage("$vote_rejected", GetDescription(), pro, con, abstain );
                 this->BroadcastMessage( voteMessage );
                 delete this;
                 return;
             }
 
             // see if the vote has been accepted
-            if ( pro >= con && pro * 2 > total )
+            if ( pro >= conAdjusted && pro * 2 > totalAdjusted )
             {
-                tOutput voteMessage("$vote_accepted", GetDescription(), pro, con-bias, total-pro-con+bias);
+                tOutput voteMessage("$vote_accepted", GetDescription(), pro, con, abstain );
                 this->BroadcastMessage( voteMessage );
                 this->DoExecute();
                 delete this;
@@ -597,7 +606,7 @@ public:
         }
 
         // see if the voting has timed out
-        int relevantNumVoters = sn_GetNetState() == nCLIENT ? se_PlayerNetIDs.Len() + MAXCLIENTS : eVoter::voters_.Len(); // the number of voters (overestimate the value on the client)
+        int relevantNumVoters = sn_GetNetState() == nCLIENT ? se_PlayerNetIDs.Len() + MAXCLIENTS : eVoter::NumberVoters(); // the number of voters (overestimate the value on the client)
         if ( this->creationTime_ < tSysTimeFloat() - se_votingTimeout - se_votingTimeoutPerVoter * relevantNumVoters )
         {
             this->BroadcastMessage( tOutput( "$vote_timeout" ) );
@@ -685,7 +694,7 @@ protected:
 
     virtual bool DoCheckValid( int senderID ){ return true; }
 
-    virtual void DoFillToMessage( Engine::VoteItem & item ) const
+    void DoFillToMessage( Engine::VoteItem & item ) const
     {
         if(sn_GetNetState()==nSERVER)
         {
@@ -982,12 +991,22 @@ protected:
 
     virtual tString DoGetDescription() const		// returns the description of the voting item
     {
-        return expired_ ? tString("Expired vote") : description_;
+        return expired_ ? tString( tOutput( "$vote_expired", description_ ) ) : description_;
     }
 
     virtual tString DoGetDetails() const		    // returns the detailed description of the voting item
     {
-        return expired_ ? tString("Expired vote") : details_;
+        return expired_ ? tString( tOutput( "$vote_expired", details_ ) ) : details_;
+    }
+
+    bool Expired() const
+    {
+        return expired_;
+    }
+
+    bool Pending() const
+    {
+        return !expired_;
     }
 protected:
     mutable tString description_;              //!< the description of the vote
@@ -1047,7 +1066,7 @@ static tSettingItem< int > se_kickMinHarmSI( "VOTING_KICK_MINHARM", se_kickMinHa
 
 // reason given on vote kicks
 static tString se_voteKickReason("");
-static tConfItemLine se_voteKickReasonConf( "VOTE_KICK_REASON", se_voteKickReason );
+static tSettingItemLine se_voteKickReasonConf( "VOTE_KICK_REASON", se_voteKickReason );
 
 void se_VoteKickUser( int user )
 {
@@ -1138,22 +1157,44 @@ protected:
         return m;
     }
 
-    virtual bool DoCheckValid( int senderID )
+    bool CheckValidNoHarm(int senderID)
     {
         // always accept votes from server
         if ( sn_GetNetState() == nCLIENT && senderID == 0 )
         {
             return true;
         }
-
+        
         eVoter * sender = eVoter::GetVoter( senderID  );
 
         double time = tSysTimeFloat();
 
-        // check whether the issuer is allowed to start a vote
-        if ( sender && player_ && player_->GetTimeCreated() + se_votingMaturity > time )
+        // get the oldest player from the sending client
+        double timeCreated = time;
+        for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
         {
-            REAL timeLeft = player_->GetTimeCreated() + se_votingMaturity - time;
+            ePlayerNetID * senderPlayer = se_PlayerNetIDs(i);
+            if( senderPlayer->Owner() == senderID )
+            {
+                // don't let the player call a vote if s/he is silenced.
+                if ( senderPlayer->IsSilenced() )
+                {
+                    tOutput message("$vote_silenced");
+                    sn_ConsoleOut( message, senderID );
+                    return false;
+                }
+                
+                if( senderPlayer->GetTimeCreated() < timeCreated )
+                {
+                    timeCreated = senderPlayer->GetTimeCreated();
+                }
+            }
+        }
+
+        // check whether the issuer is allowed to start a vote
+        if ( sender && player_ && timeCreated + se_votingMaturity > time )
+        {
+            REAL timeLeft = timeCreated + se_votingMaturity - time;
             tOutput message( "$vote_maturity", timeLeft );
             sn_ConsoleOut( message, senderID );
             return false;
@@ -1162,6 +1203,16 @@ protected:
         // prevent the sender from changing his name for confusion
         if ( sender )
             sender->lastNameChangePreventor_ = time;
+
+        return true;
+    }
+
+    virtual bool DoCheckValid( int senderID )
+    {
+        if(!CheckValidNoHarm(senderID))
+            return false;
+
+        double time = tSysTimeFloat();
 
         // check if player is protected from kicking
         if ( player_ && sn_GetNetState() != nCLIENT )
@@ -1207,6 +1258,20 @@ protected:
     }
 
 protected:
+
+    virtual void DoExecute()
+    {
+        // Don't prevent name changes if the vote passes
+        eVoter *suggestor = GetSuggestor();
+        if ( suggestor )
+        {
+            suggestor->lastNameChangePreventor_ = -1E30;
+        }
+        DoExecuteHarm();
+    }
+
+    virtual void DoExecuteHarm() = 0;               // Called when the vote passes. Do the harmful action.
+
     // get the language string prefix
     virtual char const * DoGetPrefix() const = 0;
 
@@ -1303,7 +1368,7 @@ protected:
         return eVoteItemHarm::DoCheckValid( senderID );
     }
 
-    virtual void DoExecute()						// called when the voting was successful
+    virtual void DoExecuteHarm()						// called when the voting was successful
     {
         ePlayerNetID * player = GetPlayer();
         nMachine * machine = GetMachine();
@@ -1373,6 +1438,11 @@ protected:
 
         eVoteItemHarm::DoFillToMessage( harm );
     }
+    
+    virtual void DoExecute()
+    {
+        eVoteItemHarm::DoExecute();
+    }
 private:
     virtual void Update() //!< update description and details
     {
@@ -1382,12 +1452,12 @@ private:
 
     virtual tString DoGetDescription() const		// returns the description of the voting item
     {
-        return eVoteItemServerControlled::DoGetDescription();
+        return Pending() ?  eVoteItemHarm::DoGetDescription() : eVoteItemServerControlled::DoGetDescription();
     }
 
     virtual tString DoGetDetails() const		// returns the detailed description of the voting item
     {
-        return eVoteItemServerControlled::DoGetDetails();
+        return Pending() ? eVoteItemHarm::DoGetDetails() : eVoteItemServerControlled::DoGetDetails();
     }
 };
 
@@ -1420,12 +1490,98 @@ protected:
         return se_votingBiasSuspend;
     }
 
-    virtual void DoExecute()						// called when the voting was successful
+    virtual void DoExecuteHarm()						// called when the voting was successful
     {
         ePlayerNetID * player = GetPlayer();
         if ( player )
         {
             player->Suspend( se_suspendRounds );
+        }
+    }
+};
+
+//  vote on silencing
+class eVoteItemSilence: public virtual eVoteItemHarmServerControlled
+{
+public:
+    // constructors/destructor
+    eVoteItemSilence( ePlayerNetID* player)
+        : eVoteItemHarm( player )
+        {}
+
+    ~eVoteItemSilence()
+    {}
+protected:
+    // get the language string prefix
+    virtual char const * DoGetPrefix() const{ return "silence"; }
+
+#ifdef KRAWALL_SERVER
+    // access level required for this kind of vote
+    virtual tAccessLevel DoGetAccessLevel() const
+    {
+        return se_accessLevelVoteSilence;
+    }
+#endif
+
+    // return vote-specific extra bias
+    virtual int DoGetExtraBias() const
+    {
+        return se_votingBiasSilence;
+    }
+
+    virtual void DoExecuteHarm()						// called when the voting was successful
+    {
+        ePlayerNetID * player = GetPlayer();
+        if ( player )
+        {
+            player->SetSilenced(true);
+        }
+    }
+};
+
+//  vote on giving players their voice back (not really harmful, but it's a convenient base class)
+class eVoteItemVoice: public virtual eVoteItemHarmServerControlled
+{
+public:
+    // constructors/destructor
+    eVoteItemVoice( ePlayerNetID* player )
+        : eVoteItemHarm( player )
+        {}
+
+    ~eVoteItemVoice()
+    {}
+protected:
+    // get the language string prefix
+    virtual char const * DoGetPrefix() const{ return "voice"; }
+
+#ifdef KRAWALL_SERVER
+    // access level required for this kind of vote
+    virtual tAccessLevel DoGetAccessLevel() const
+    {
+        return se_accessLevelVoteSilence;
+    }
+#endif
+
+    // return vote-specific extra bias
+    virtual int DoGetExtraBias() const
+    {
+        return se_votingBiasVoice;
+    }
+
+    virtual bool DoCheckValid( int senderID )
+    {
+        if(!CheckValidNoHarm(senderID))
+            return false;
+
+        return eVoteItem::DoCheckValid( senderID );
+    }
+
+    virtual void DoExecuteHarm()						// called when the voting was successful
+    {
+        ePlayerNetID * player = GetPlayer();
+        if ( player )
+        {
+            player->SetSilenced(false);
         }
     }
 };
@@ -1444,41 +1600,41 @@ public:
 protected:
     virtual bool DoCheckValid( int senderID )
     {
+        
         // check whether enough harmful votes were collected already
         ePlayerNetID * p = GetPlayer();
-        if ( p && !p->GetVoter() )
+        if ( fromMenu_ && p )
         {
-            p->CreateVoter();
-        }
-
-        if ( fromMenu_ && p && p->GetVoter() && p->GetVoter()->HarmCount() < se_kickMinHarm )
-        {
-            // try to transfor the vote to a suspension
-            eVoteItem * item = tNEW ( eVoteItemSuspend )( p );
+            eVoter *voter = eVoter::GetVoter( p->Owner() );
+            if ( voter && voter->HarmCount() < se_kickMinHarm )
+            {
+                // try to transfor the vote to a suspension
+                eVoteItem * item = tNEW ( eVoteItemSuspend )( p );
             
-            // let item check its validity
-            if ( !item->CheckValid( senderID ) )
-            {
-                delete item;
-            }
-            else
-            {
-                // no objection? Broadcast it to everyone.
-                item->Update();
-                item->ReBroadcast( senderID );
-            }
+                // let item check its validity
+                if ( !item->CheckValid( senderID ) )
+                {
+                    delete item;
+                }
+                else
+                {
+                    // no objection? Broadcast it to everyone.
+                    item->Update();
+                    item->ReBroadcast( senderID );
+                }
 
-            // and cancel this item here.
-            return false;
+                // and cancel this item here.
+                return false;
+            }
         }
 
         // no transformation needed or transformation failed. Proceed as usual.
         return eVoteItemHarm::DoCheckValid( senderID );
     }
 
-    virtual void DoExecute()						// called when the voting was successful
+    virtual void DoExecuteHarm()						// called when the voting was successful
     {
-        eVoteItemKick::DoExecute();
+        eVoteItemKick::DoExecuteHarm();
     }
 private:
     bool fromMenu_; // flag set if the vote came from the menu
@@ -1611,7 +1767,7 @@ protected:
 
     bool Open( std::ifstream & s, int userToNotify )
     {
-        bool ret = tConfItemBase::OpenFile( s, file_, tConfItemBase::All );
+        bool ret = tConfItemBase::OpenFile( s, file_ );
 
         if ( ret )
         {
@@ -1773,7 +1929,7 @@ protected:
     {
         return se_votingBiasReferee;
     }
-    virtual void DoExecute()                        // called when the voting was successful
+    virtual void DoExecuteHarm()                        // called when the voting was successful
     {
         ePlayerNetID * player = GetPlayer();
         if ( player )
@@ -1823,7 +1979,7 @@ protected:
     {
         return se_votingBiasCancelReferee;
     }
-    virtual void DoExecute()                        // called when the voting was successful
+    virtual void DoExecuteHarm()                        // called when the voting was successful
     {
         ePlayerNetID * player = GetPlayer();
         if ( player )
@@ -1842,7 +1998,7 @@ protected:
 // **************************************************************************************
 
 
-// menu item to silence selected players
+// menu item to kick selected players
 class eMenuItemKick: public uMenuItemAction
 {
 public:
@@ -2081,7 +2237,19 @@ bool eVoter::VotingPossible()
     return eVoteItem::GetItems().Len() > 0;
 }
 
-eVoter* eVoter::GetVoter( int ID, bool complain )			// find or create the voter for the specified ID
+int eVoter::NumberVoters()
+{
+    std::set< eVoter * > possibleVoters;
+    for ( int i = MAXCLIENTS; i > 0; --i )
+    {
+        eVoter * voter = eVoter::GetVoter( i );
+        if ( voter )
+            possibleVoters.insert( voter );
+    }
+    return possibleVoters.size();
+}
+
+eVoter* eVoter::GetVoter( int ID, bool complain )
 {
     // the server has no voter
 #ifdef DEDICATED
@@ -2090,34 +2258,58 @@ eVoter* eVoter::GetVoter( int ID, bool complain )			// find or create the voter 
 #endif
 
     // see if there is a real player on the specified ID
-    if ( !se_allowVotingSpectator )
+    bool spectator = false;
+    bool player = false;
+    for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
     {
-        bool player = false;
-        for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
+        ePlayerNetID* p = se_PlayerNetIDs(i);
+        if ( p->Owner() == ID )
         {
-            ePlayerNetID* p = se_PlayerNetIDs(i);
-            if ( p->Owner() == ID && p->CurrentTeam() )
-                player = true;
-        }
-        if (!player)
-        {
-            if ( complain )
+            if( p->CurrentTeam() )
             {
-                tOutput message("$vote_disabled_spectator");
-                sn_ConsoleOut( message, ID );
+                player = true;
             }
-            return NULL;
+            spectator = true;
         }
     }
 
-    // get machine from network subsystem
-    nMachine & machine = nMachine::GetMachine( ID );
+    if( !spectator )
+    {
+        // no support for old style, playerless spectators any more
+        return NULL;
+    }
 
-    return GetVoter( machine );
+    if ( !se_allowVotingSpectator && !player )
+    {
+        if ( complain )
+        {
+            tOutput message("$vote_disabled_spectator");
+            sn_ConsoleOut( message, ID );
+        }
+        return NULL;
+    }
+
+    return GetPersistentVoter( ID );
 }
 
-eVoter* eVoter::GetVoter( nMachine & machine )			// find or create the voter for the specified machine
+eVoter* eVoter::GetPersistentVoter( int ID )
 {
+    if ( sn_GetNetState() == nCLIENT )
+        return NULL;
+
+    if ( sn_GetNetState() == nSTANDALONE && ID != 0 )
+        return NULL;
+
+    // get machine from network subsystem
+    nMachine & machine = nMachine::GetMachine( ID );
+    return GetPersistentVoter( machine );
+}
+
+eVoter* eVoter::GetPersistentVoter( nMachine & machine )
+{
+    if ( sn_GetNetState() == nCLIENT )
+        return NULL;
+
     // iterate through the machine's decorators, find a voter
     nMachineDecorator * run = machine.GetDecorators();
     while ( run )
@@ -2276,14 +2468,20 @@ void eVoter::HandleChat( ePlayerNetID * p, std::istream & message ) //!< handles
         return;
     }
 
+    // don't let the player call a vote if s/he is silenced.
+    if ( p->IsSilenced() )
+    {
+        tOutput message("$vote_silenced");
+        sn_ConsoleOut( message, p->Owner() );
+        return;
+    }
+
     // read command part (kick, remove, include)
     tString command;
     message >> command;
     tToLower( command );
 
-    eVoter * voter = eVoter::GetVoter( p->Owner(), true ); // can't use ePlayerNedID::GetVoter here,
-                                                           // as it can't show a warning,
-                                                           // for example if the voter has only spectators
+    eVoter * voter = eVoter::GetVoter( p->Owner(), true );
     if ( !eVoteItem::AcceptNewVote( voter, p->Owner() ) )
     {
         return;
@@ -2314,6 +2512,28 @@ void eVoter::HandleChat( ePlayerNetID * p, std::istream & message ) //!< handles
         }
     }
 #ifdef DEDICATED
+    else if ( command == "silence" )
+    {
+        tString name;
+        name.ReadLine( message );
+        ePlayerNetID * toSilence = ePlayerNetID::FindPlayerByName( name, p );
+        if ( toSilence )
+        {
+            // accept message
+            item = tNEW( eVoteItemSilence )( toSilence );
+        }
+    }
+    else if ( command == "voice" )
+    {
+        tString name;
+        name.ReadLine( message );
+        ePlayerNetID * toVoice = ePlayerNetID::FindPlayerByName( name, p );
+        if ( toVoice )
+        {
+            // accept message
+            item = tNEW( eVoteItemVoice )( toVoice );
+        }
+    }
 #ifdef KRAWALL_SERVER
     else if ( command == "include" )
     {
@@ -2365,10 +2585,14 @@ void eVoter::HandleChat( ePlayerNetID * p, std::istream & message ) //!< handles
 #endif
     else
     {
-#if defined(DEDICATED) && defined(KRAWALL_SERVER)
-        sn_ConsoleOut( tOutput("$vote_unknown_command", command, "command, demotereferee, include, kick, referee, suspend, scramble" ), p->Owner() );
+#if defined(DEDICATED)
+#if defined(KRAWALL_SERVER)
+        sn_ConsoleOut( tOutput("$vote_unknown_command", command, "suspend, kick, silence, voice, command, include, referee, demotereferee, scramble" ), p->Owner() );
 #else
-        sn_ConsoleOut( tOutput("$vote_unknown_command", command, "kick, suspend" ), p->Owner() );
+        sn_ConsoleOut( tOutput("$vote_unknown_command", command, "suspend, kick, silence, voice" ), p->Owner() );
+#endif
+#else
+        sn_ConsoleOut( tOutput("$vote_unknown_command", command, "suspend, kick" ), p->Owner() );
 #endif
     }
 

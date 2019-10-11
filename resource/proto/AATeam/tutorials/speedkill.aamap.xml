@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE Resource SYSTEM "AATeam/map-0.2.8.0_rc4.dtd">
+<Resource type="aamap" name="speedkill" version="0.1.0" author="Z-Man" category="tutorial">
+	<Map version="2">
+		<!-- The original square map, technically created by z-man.
+             Spawn points for speed kill tutorial.
+		 
+		 License: Do with it what you want.-->
+
+		<World>
+			<Field>
+				<Spawn	x=".1"	y="0.01"	xdir="0"	ydir="1"	/>
+				<Spawn	x="0"	y="0.01"	xdir="0"	ydir="1"	/>
+			
+				<Wall>
+					<Point	x="200" y="2000"	/>
+					<Point	x="200"	y="-200"	/>
+					<Point	x="-200" y="-200"	/>
+					<Point	x="-200" y="2000"	/>
+					<Point	x="200" y="2000"	/>
+				</Wall>
+			</Field>
+		</World>
+	</Map>
+</Resource>

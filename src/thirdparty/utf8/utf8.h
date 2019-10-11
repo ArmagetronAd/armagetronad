@@ -45,7 +45,7 @@ class invalid_code_point : public std::exception {
     uint32_t cp;
 public:
     invalid_code_point(uint32_t cp) : cp(cp) {}
-    const char* what() { return "Invalid code point"; }
+    const char* what() const throw() { return "Invalid code point"; }
     uint32_t code_point() const {return cp;}
 };
 
@@ -53,7 +53,7 @@ class invalid_utf8 : public std::exception {
     uint8_t u8;
 public:
     invalid_utf8 (uint8_t u) : u8(u) {}
-    const char* what() { return "Invalid UTF-8"; }
+    const char* what() const throw() { return "Invalid UTF-8"; }
     uint8_t utf8_octet() const {return u8;}
 };
 
@@ -61,13 +61,13 @@ class invalid_utf16 : public std::exception {
     uint16_t u16;
 public:
     invalid_utf16 (uint16_t u) : u16(u) {}
-    const char* what() { return "Invalid UTF-16"; }
+    const char* what() const throw() { return "Invalid UTF-16"; }
     uint16_t utf16_word() const {return u16;}
 };
 
 class not_enough_room : public std::exception {
 public:
-    const char* what() { return "Not enough space"; }
+    const char* what() const throw() { return "Not enough space"; }
 };
 
 
@@ -401,13 +401,13 @@ octet_iterator append(uint32_t cp, octet_iterator result)
     }
     else if (cp < 0x10000) {              // three octets
         *(result++) = static_cast<uint8_t>((cp >> 12)         | 0xe0);
-        *(result++) = static_cast<uint8_t>((cp >> 6) & 0x3f   | 0x80);
+        *(result++) = static_cast<uint8_t>(((cp >> 6) & 0x3f) | 0x80);
         *(result++) = static_cast<uint8_t>((cp & 0x3f)        | 0x80);
     }
     else {                                // four octets
         *(result++) = static_cast<uint8_t>((cp >> 18)         | 0xf0);
-        *(result++) = static_cast<uint8_t>((cp >> 12)& 0x3f   | 0x80);
-        *(result++) = static_cast<uint8_t>((cp >> 6) & 0x3f   | 0x80);
+        *(result++) = static_cast<uint8_t>(((cp >> 12)& 0x3f) | 0x80);
+        *(result++) = static_cast<uint8_t>(((cp >> 6) & 0x3f) | 0x80);
         *(result++) = static_cast<uint8_t>((cp & 0x3f)        | 0x80);
     }
     return result;

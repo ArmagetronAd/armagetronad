@@ -39,7 +39,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <map>
 #include <vector>
 
-#ifdef HAVE_FTGL_H
+#if defined(HAVE_FTGL_FTGL_H) || defined(HAVE_FTGL_H)
 // also, the installed version of ftgl then has utf8 support. presumably. use it.
 #define FTGL_HAS_UTF8
 #else

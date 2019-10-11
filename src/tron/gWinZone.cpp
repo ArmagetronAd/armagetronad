@@ -40,6 +40,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tString.h"
 #include "rScreen.h"
 #include "eSoundMixer.h"
+#include "eLadderLog.h"
 
 #include <time.h>
 #include <algorithm>
@@ -966,7 +967,8 @@ void gBaseZoneHack::OnVanish( void )
     CheckSurvivor();
 
     // kill the closest owners of the zone
-    if ( currentState_ != State_Safe && ( enemies_.size() > 0 || sg_defendRate < 0 ) )
+    if ( currentState_ != State_Safe
+        && ( enemies_.size() > 0 || sg_defendRate < 0 || sg_conquestTimeout < 0 ) )
     {
         int kills = int( sg_onConquestKillRatio * team->NumPlayers() );
         kills = kills > sg_onConquestKillMin ? kills : sg_onConquestKillMin;
@@ -1016,14 +1018,14 @@ void gBaseZoneHack::OnVanish( void )
 //!
 // *******************************************************************************
 
-static eLadderLogWriter sg_basezoneConqueredWriter("BASEZONE_CONQUERED", true);
-static eLadderLogWriter sg_basezoneConquererWriter("BASEZONE_CONQUERER", true);
+static eLadderLogWriter sg_basezoneConqueredWriter( "BASEZONE_CONQUERED", true, "team x:float y:float" );
+static eLadderLogWriter sg_basezoneConquererWriter( "BASEZONE_CONQUERER", true, "player" );
 
 void gBaseZoneHack::OnConquest( void )
 {
     if ( team )
     {
-        sg_basezoneConqueredWriter << ePlayerNetID::FilterName(team->Name()) << GetPosition().x << GetPosition().y;
+        sg_basezoneConqueredWriter << team->GetLogName() << GetPosition().x << GetPosition().y;
         sg_basezoneConqueredWriter.write();
     }
     float rr = GetRadius();
@@ -1202,7 +1204,7 @@ void gBaseZoneHack::OnRoundBegin( void )
                         CountZonesOfTeam( Grid(), otherTeam, count, farthest );
 
                     // only set team if not too many closer other zones are registered
-                    if ( sg_baseZonesPerTeam == 0 || count < sg_baseZonesPerTeam || farthest->teamDistance_ > distance )
+                    if ( sg_baseZonesPerTeam == 0 || count < sg_baseZonesPerTeam || (farthest && farthest->teamDistance_ > distance ) )
                     {
                         closest = other;
                         closestDistance = distance;
@@ -1239,6 +1241,7 @@ void gBaseZoneHack::OnRoundBegin( void )
             CountZonesOfTeam( Grid(), team, count, farthest );
 
             // discard team of farthest zone
+            // No NULL check is required here for farthest, since count is greater than 0 which implies farthest was set.
             if ( count > sg_baseZonesPerTeam )
             {
                 farthest->team = NULL;

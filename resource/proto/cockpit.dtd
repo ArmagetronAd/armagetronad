@@ -161,7 +161,7 @@
 <!ATTLIST Math field (source | minimum | maximum) "source">
 <!ATTLIST Math lvalue CDATA "0.">
 <!ATTLIST Math rvalue CDATA "0.">
-<!ATTLIST Math type (sum | difference | product | quotient) #REQUIRED>
+<!ATTLIST Math type (sum | difference | product | quotient | root | power) #REQUIRED>
 <!ATTLIST Math precision CDATA "1">
 <!ATTLIST Math minwidth CDATA "0">
 <!ATTLIST Math fill CDATA "0">

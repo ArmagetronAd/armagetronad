@@ -74,8 +74,6 @@ void eNetGameObject::MyInitAfterCreation(){
         player->ControlObject(this);
     }
     clientside_action();
-
-    pingOverflow=0;
 }
 
 void eNetGameObject::InitAfterCreation(){
@@ -86,7 +84,7 @@ void eNetGameObject::InitAfterCreation(){
 eNetGameObject::eNetGameObject(eGrid *grid, const eCoord &pos,const eCoord &dir,
                                ePlayerNetID* p,bool autodelete)
         :eGameObject(grid, pos,dir,NULL,autodelete),
-nNetObject(p->Owner()),player(p){
+         nNetObject(Owner(p)),player(p){
     lastClientsideAction=0;
     if (sn_GetNetState()!=nCLIENT)
         RequestSync();
@@ -106,8 +104,6 @@ nNetObject( sync.base(), sender ){
     autodelete = sync.autodelete();
 
     laggometerSmooth=laggometer=0;
-
-    pingOverflow=0;
 }
 
 void eNetGameObject::DoRemoveFromGame(){
@@ -163,7 +159,7 @@ void eNetGameObject::Release()
     nNetObject::Release();
 }
 
-// control functions:
+// control functions. Obsolete, regular clients haven't been using this for a long time.
 void eNetGameObject::ReceiveControlNet( Network::NetObjectControl const & controlBase )
 {
     tASSERT( controlBase.HasExtension( Engine::net_game_object_control ) );
@@ -173,27 +169,8 @@ void eNetGameObject::ReceiveControlNet( Network::NetObjectControl const & contro
     unsigned short act_id = control.action_id();
     REAL x = control.action_level();
 
-    REAL backdate=Lag();//sn_ping[m.SenderID()]*.5;
-    if (backdate>sn_pingCharityServer*.001)
-        backdate=sn_pingCharityServer*.001;
-
-    REAL mintime=se_GameTime()-backdate*1.5-.1;
-    if (time<mintime){
-        con << "mintime\n";
-        REAL pov_needed=mintime-time;
-        if (pov_needed+pingOverflow > MAX_PING_OVERFLOW*backdate){
-            pov_needed = MAX_PING_OVERFLOW*backdate-pingOverflow;
-            con << "Mintime\n";
-        }
-        if (pov_needed<0)
-            pov_needed=0;
-
-        time=mintime-pov_needed;
-        pingOverflow+=pov_needed;
-    }
-
-    if (time>se_GameTime()+1)
-        time=se_GameTime()+1;
+    // don't bother trusting the client sent time in any way
+    time = se_GameTime();
 
     uActionPlayer *Act=uActionPlayer::Find(act_id);
     if ( Act )
@@ -203,7 +180,7 @@ void eNetGameObject::ReceiveControlNet( Network::NetObjectControl const & contro
 
 void eNetGameObject::SetPlayer(ePlayerNetID* a_player)
 {
-    tASSERT( !a_player || Owner() == player->Owner() );
+    tASSERT( !a_player || Owner() == Owner(player) );
     player  = a_player;
     if ( laggometerSmooth == 0 && sn_GetNetState() != nCLIENT )
         laggometerSmooth = laggometer = se_GetPing( player );
@@ -250,7 +227,7 @@ void eNetGameObject::WriteSync( Engine::NetGameObjectSync & sync, bool init ) co
 
     if ( init )
     {
-        sync.set_player_id( player->ID() );
+        sync.set_player_id( ID(player) );
         sync.set_autodelete( autodelete );
     }
 
@@ -328,9 +305,6 @@ bool eNetGameObject::Timestep(REAL currentTime){
 
     laggometerSmooth=(laggometerSmooth+laggometer*animts)/(1 + animts);
     lastTime=currentTime;
-
-    // Update ping overflow
-    pingOverflow/=(1+animts*PING_OVERFLOW_TS);
 
     return false;
 }

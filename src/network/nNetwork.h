@@ -34,7 +34,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tLinkedList.h"
 #include "tCallback.h"
 #include "nObserver.h"
-//#include "tCrypt.h"
 #include "tException.h"
 
 #include <memory>
@@ -56,9 +55,6 @@ class nMessageBase;
 class nStreamMessage;
 // typedef nStreamMessage nMessage;
 
-
-
-class tCrypt;
 class tOutput;
 
 typedef double nTimeAbsolute;				// typedef for absolute time variables in network code
@@ -113,9 +109,9 @@ void nReadError( bool critical = true );
 
 #ifndef MAXCLIENTS
 #ifdef DEDICATED
-#define MAXCLIENTS 32
+#define MAXCLIENTS 64
 #else
-#define MAXCLIENTS 16
+#define MAXCLIENTS 32
 #endif
 #endif
 
@@ -163,7 +159,7 @@ public:
         return !operator==(other);
     }
     bool operator == ( const nVersion& other );
-    nVersion& operator = ( const nVersion& other );
+    nVersion& operator = ( const nVersion& other ) = default;
 private:
     int min_, max_;
 };
@@ -335,8 +331,6 @@ struct nConnectionInfo     // everything that is needed to manage a connection
     int                    ackPending;
 
     nPingAverager          ping;
-
-    // tCrypt*                crypt;
 
     // rate control
     nBandwidthControl		bandwidthControl_;
@@ -715,6 +709,7 @@ class nMachineDecorator: public tListItem< nMachineDecorator >
 {
 public:
     inline void Destroy();         //!< called when machine gets destroyed
+    virtual void OnBan();          //!< called when machine gets banned
 protected:
     virtual void OnDestroy();      //!< called when machine gets destroyed
 
@@ -723,6 +718,8 @@ protected:
 private:
     nMachineDecorator();           //!< constructor
 };
+
+class nMachineIteratorPimpl;
 
 //! class trying to collect information about a certain client, persistent between connections
 class nMachine
@@ -735,6 +732,19 @@ public:
 
     bool operator == ( nMachine const & other ) const; //!< equality operator
     bool operator != ( nMachine const & other ) const; //!< inequality operator
+
+    class iterator
+    {
+    public:
+        nMachine & operator *() const;
+        iterator();
+        ~iterator();
+        void operator ++();
+        void operator ++(int);
+        bool Valid();
+    private:
+        nMachineIteratorPimpl * pimpl_;
+    };
 
     static nMachine & GetMachine( unsigned short userID ); //!< fetches the machine information of a user, creating it on demand
     static nMachine * PeekMachine( unsigned short userID ); //!< fetches the machine information of a user, returning NULL if none is found
@@ -820,7 +830,7 @@ public:
 };
 
 // on disconnection, this returns a server we should be redirected to (or NULL if we should not be redirected)
-std::auto_ptr< nServerInfoBase > sn_GetRedirectTo();
+std::unique_ptr< nServerInfoBase > sn_GetRedirectTo();
 
 // take a peek at the same info
 nServerInfoBase * sn_PeekRedirectTo();

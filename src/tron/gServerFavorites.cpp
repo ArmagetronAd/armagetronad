@@ -50,13 +50,15 @@ enum { NUM_FAVORITES = 10 };
 
 //! favorite server information, just to connect
 gServerInfoFavorite::gServerInfoFavorite( tString const & name_, tString const & connectionName, unsigned int port )
+    :nServerInfo::nServerInfo()
 {
-    name = name_;
     nServerInfoBase::SetConnectionName( connectionName );
     nServerInfoBase::SetPort( port );
+    if ( name_.empty() )
+        name = ToString();
+    else
+        name = name_;
 }
-
-//typedef nServerInfoRedirect gServerInfoFavorite;
 
 //********************************************************************************
 //********************************************************************************
@@ -251,8 +253,7 @@ static void sg_AlternativeMaster( int ID )
 
     // fetch server info
     gServerFavorite & favorite = sg_masterHolder.GetFavorite(ID);
-    gServerInfoFavorite fav( favorite.name_,
-        favorite.address_, favorite.port_ );
+    nServerInfoRedirect fav( favorite.address_, favorite.port_ );
 
     // browse master info
     gServerBrowser::BrowseSpecialMaster( &fav, suffix.str().c_str() );

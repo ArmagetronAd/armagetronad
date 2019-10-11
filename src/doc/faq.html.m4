@@ -171,6 +171,14 @@ I get an error saying the master server is not responding.],
 laptop connected by DSL; that is not completely failsafe. The previous question may give some insights, too.
 ])
 
+FAQQ([I am a veteran player, yet the game practically forces me to 
+play the tutorials and hides my favourite servers from me, 
+claiming I lack experience. How dare you!?],
+[The game just couldn't find an old configuration file that would prove your veteran status.
+ You can get it back by entering <pre>include uphillbothways.cfg</pre> at the console. After a game
+restart, eveything should be fine.
+])
+
 FAQQ([Sometimes, I see players (esp. me) passing through walls. Is that a bug?],
 [Probably not; it is the normal effect of network latency (Laaaag!)
 when your client does not yet have the latest information from the server. But

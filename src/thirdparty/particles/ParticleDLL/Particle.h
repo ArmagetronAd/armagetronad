@@ -58,6 +58,8 @@ struct Particle
     {
     }
 
+    Particle &operator=(Particle const &) = default;
+  
     // For sorting.
     bool operator<(const Particle &P) const
     {

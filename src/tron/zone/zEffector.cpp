@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "gGame.h"
 // Only for SpawnPlayer:
 #include "gParser.h"
+#include "eLadderLog.h"
 
 
 void zEffector::apply(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
@@ -162,16 +163,21 @@ zEffectorManager::Create(std::string const & typex)
 void
 zEffectorManager::Register(std::string const & type, std::string const & desc, NullFactory_t f)
 {
-    _effectors().insert(std::make_pair(type, new NullFactory(f)));
+    _effectors()[type] = boost::shared_ptr<NullFactory>(new NullFactory(f));
 }
 void
 zEffectorManager::Register(std::string const & type, std::string const & desc, XMLFactory_t f)
 {
-    _effectors().insert(std::make_pair(type, new XMLFactory(f)));
+    _effectors()[type] = boost::shared_ptr<XMLFactory>( new XMLFactory(f));
 }
 
 
+bool sz_wz_player_win = true;
+static tSettingItem<bool> wzpw("WIN_ZONE_PLAYER_WIN",sz_wz_player_win);
+
 static zEffectorRegistration regWin("win", "", zEffectorWin::create);
+
+static eLadderLogWriter sg_winZoneWriter( "WINZONE_PLAYER_ENTER", true, "player" );
 
 void zEffectorWin::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
@@ -184,7 +190,10 @@ void zEffectorWin::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
             iter != d_calculatedTargets.end();
             ++iter)
     {
-        sg_DeclareWinner((*iter)->CurrentTeam(), message );
+        sg_winZoneWriter << (*iter)->GetUserName();
+        sg_winZoneWriter.write();
+        if(sz_wz_player_win)
+            sg_DeclareWinner((*iter)->CurrentTeam(), message );
     }
 }
 
@@ -199,6 +208,8 @@ static tSettingItem<int> sz_dz("SCORE_DEATHZONE",sz_score_deathzone);
 
 static zEffectorRegistration regDeath("death", "", zEffectorDeath::create);
 
+static eLadderLogWriter sg_deathZoneWriter( "DEATH_DEATHZONE", true, "player" );
+
 void zEffectorDeath::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
     gVectorExtra<ePlayerNetID *>::iterator iter;
@@ -207,6 +218,8 @@ void zEffectorDeath::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
             ++iter)
     {
         (*iter)->AddScore(sz_score_deathzone, tOutput(), "$player_lose_suicide");
+        sg_deathZoneWriter << (*iter)->GetUserName();
+        sg_deathZoneWriter.write();
         (*iter)->Object()->Kill();
     }
 }

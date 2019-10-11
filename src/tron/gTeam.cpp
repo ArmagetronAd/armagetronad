@@ -30,7 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "ePlayer.h"
 #include "eTeam.h"
 
-static tString se_TeamMenu_Team_Ok("0xffffff");
+static tString se_TeamMenu_Team_Ok("0xRESETT");
 static tString se_TeamMenu_Team_Full("0xaaaaaa");
 static tConfItem<tString> se_TeamMenu_Team_Ok_Cfg("TEAM_MENU_COLOR_TEAM_OK",
         "$team_menu_color_team_ok_help",
@@ -168,6 +168,8 @@ public:
     }
 };
 
+extern nVersionFeature se_defaultTeamWish;
+
 class gMenuItemAutoSelect: public uMenuItem
 {
     ePlayerNetID* 	player;
@@ -185,7 +187,8 @@ public:
 
     virtual void Enter()
     {
-        player->SetDefaultTeam();
+        SetSpectator( player, false );
+        player->SetDefaultTeamWish();
         menu->Exit();
     }
 };
@@ -237,11 +240,13 @@ public:
 class gMenuItemPlayer: public uMenuItem
 {
     ePlayerNetID* player;
+    bool defaultSpectate_;
 public:
     gMenuItemPlayer(uMenu *M,ePlayerNetID* p,
-                    const tOutput& help)
+                    const tOutput& help, bool defaultSpectate )
             : uMenuItem( M, help ),
-            player ( p )
+              player ( p ),
+              defaultSpectate_( defaultSpectate )
     {
     }
 
@@ -258,7 +263,8 @@ public:
         uMenu playerMenu( title );
         tArray<uMenuItem*> items;
 
-        if ( !player->IsSpectating() || player->NextTeam() != NULL)
+        bool spectatorMenu = !player->IsSpectating() || player->NextTeam() != NULL;
+        if (spectatorMenu && !defaultSpectate_)
         {
             items[ items.Len() ] = tNEW( gMenuItemSpectate ) ( &playerMenu, player );
         }
@@ -272,6 +278,17 @@ public:
                 items[ items.Len() ] = tNEW( gMenuItemPlayerTeam ) ( &playerMenu, player, team, false );
             }
         }
+
+        bool newTeam = player->IsSpectating() ||
+        !( player->NextTeam() && player->NextTeam()->NumHumanPlayers() == 1 &&
+           player->CurrentTeam() && player->CurrentTeam()->NumHumanPlayers() == 1 );
+
+        if( newTeam && se_defaultTeamWish.Supported(0) )
+        {
+            items[ items.Len() ] = tNEW( gMenuItemNewTeam ) ( &playerMenu, player );
+        }
+
+
         // second pass add teams who probably can be joined
         // Note: these will appear above the unjoinable ones.
         for ( int i = 0; i<eTeam::teams.Len(); i++ )
@@ -281,12 +298,18 @@ public:
                 items[ items.Len() ] = tNEW( gMenuItemPlayerTeam ) ( &playerMenu, player, team, true );
         }
 
-        if ( player->IsSpectating() ||
-            !( player->NextTeam() && player->NextTeam()->NumHumanPlayers() == 1 &&
-               player->CurrentTeam() && player->CurrentTeam()->NumHumanPlayers() == 1 )
-        )
+        if( se_defaultTeamWish.Supported() )
+        {
+            items[items.Len()] = tNEW ( gMenuItemAutoSelect ) ( &playerMenu, player );
+        }
+        else if( newTeam )
         {
             items[ items.Len() ] = tNEW( gMenuItemNewTeam ) ( &playerMenu, player );
+        }
+
+        if (spectatorMenu && defaultSpectate_)
+        {
+            items[ items.Len() ] = tNEW( gMenuItemSpectate ) ( &playerMenu, player );
         }
 
         items[items.Len()] = tNEW ( gMenuItemSpacer ) ( &playerMenu );
@@ -302,11 +325,13 @@ public:
     }
 };
 
-
-
+void gTeam::TeamMenu()
+{
+    TeamMenu( false );
+}
 
 // bring up the team selection menu
-void gTeam::TeamMenu()
+void gTeam::TeamMenu(bool defaultSpectate)
 {
     int i;
 
@@ -323,7 +348,7 @@ void gTeam::TeamMenu()
             help << "$team_menu_player_help";
             ePlayerNetID* pni = player->netPlayer;
             if ( pni )
-                items[ items.Len() ] = tNEW( gMenuItemPlayer ) ( &Menu, pni, help );
+                items[ items.Len() ] = tNEW( gMenuItemPlayer ) ( &Menu, pni, help, defaultSpectate );
         }
     }
 

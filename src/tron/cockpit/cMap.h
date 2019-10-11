@@ -114,7 +114,7 @@ class ClipperCircle : public Clipper {
         void End();
     };
     friend class ClipperCircle;
-    std::auto_ptr<Clipper> m_clipper;
+    std::unique_ptr<Clipper> m_clipper;
 
     class Mode {
     public:

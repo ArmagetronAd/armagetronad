@@ -40,6 +40,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <string>
 #include <deque>
 #include <map>
+#include <boost/tuple/tuple.hpp>
+#include <boost/tuple/tuple_comparison.hpp>
+#include <boost/tuple/tuple_io.hpp>
 
 //! access levels for admin interfaces; lower numeric values are better
 enum tAccessLevel
@@ -170,15 +173,7 @@ public:
     static std::deque<tString> GetCommands(void);
     static tConfItemBase *FindConfigItem(tString const &name);
 
-    // helper functions for files (use these, they manage recording and playback properly)
-    enum SearchPath
-    {
-        Config = 1,
-        Var    = 2,
-        All    = 3
-    };
-
-    static bool OpenFile( std::ifstream & s, tString const & filename, SearchPath path ); //! opens a file stream for configuration reading
+    static bool OpenFile( std::ifstream & s, tString const & filename ); //! opens a file stream for configuration reading
     static void ReadFile( std::ifstream & s ); //! loads configuration from a file
 
     virtual void ReadVal(std::istream &s)=0;
@@ -437,6 +432,21 @@ public:
 
     virtual void ReadVal(std::istream &s);
     virtual void WriteVal(std::ostream &s);
+};
+
+class tSettingItemLine:public tConfItemLine{
+public:
+    tSettingItemLine(const char *title,const char *help,tString &s, callbackFunc *cb=0)
+            :tConfItemBase(title,help),tConfItemLine(title,help,s,cb){}
+
+    tSettingItemLine(const char *title, tString &s, callbackFunc *cb=0)
+            :tConfItemBase(title,cb),tConfItemLine(title,s,cb){}
+
+    virtual ~tSettingItemLine() = default;
+
+    bool Save() override{
+        return false;
+    }
 };
 
 typedef void CONF_FUNC(std::istream &s);

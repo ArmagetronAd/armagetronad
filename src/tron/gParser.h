@@ -9,10 +9,6 @@
 #include <map>
 #include <string>
 
-#ifdef ENABLE_ZONESV2
-#include <boost/any.hpp>
-#endif
-
 class eGrid;
 class gArena;
 class ePoint;
@@ -21,10 +17,10 @@ class gWallRim;
 class gXMLCharReturn;
 
 #ifdef ENABLE_ZONESV2
+#include <boost/any.hpp>
 #include "zone/zShape.h"
 #include "zone/zZone.h"
 #include "zone/zMisc.h"
-#endif
 
 class gParserState {
 private:
@@ -61,6 +57,7 @@ public:
     void push();
     void pop();
 };
+#endif
 
 /*
 Note to the reader: In the full World idea, the parser should, 

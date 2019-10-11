@@ -43,6 +43,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tPolynomial.h"
 #include "rScreen.h"
 #include "eSoundMixer.h"
+#include "eWarmup.h"
+#include "eLadderLog.h"
 
 #include "gAIBase.h"
 
@@ -114,6 +116,10 @@ static tSettingItem< REAL > sg_onConquestKillRationConfig( "FORTRESS_CONQUERED_K
 // score you get for conquering a zone
 static int sg_onConquestScore = 0;
 static tSettingItem< int > sg_onConquestConquestScoreConfig( "FORTRESS_CONQUERED_SCORE", sg_onConquestScore );
+
+// Score factor if zone is conquered but no enemies inside the zone when it collapses.
+static REAL sg_onConquestEmptyScoreFactor = .5;
+static tSettingItem< REAL > sg_onConquestEmptyScoreFactorConfig( "FORTRESS_CONQUERED_EMPTY_SCORE_FACTOR", sg_onConquestEmptyScoreFactor );
 
 // flag indicating whether the team conquering the first zone wins (good for one on one matches)
 static int sg_onConquestWin = 1;
@@ -228,27 +234,32 @@ bool zFortressZone::Timestep( REAL time )
         else
         {
             OnVanish();
+            return true;
         }
 
         currentState_ = State_Conquered;
     }
-    else if ( currentState_ == State_Conquered && ( !shape || shape->GetRotationSpeed() < 0 ) )
+    else if ( currentState_ == State_Conquered )
     {
         if (shape)
         {
-            // stop zone rotation
-            shape->setReferenceTime(lastTime);
-            shape->SetRotationSpeed( 0 );
-            shape->SetRotationAcceleration( 0 );
+            if( shape->GetRotationSpeed() < 0 )
+        	{
+                // stop zone rotation
+                shape->setReferenceTime(lastTime);
+                shape->SetRotationSpeed( 0 );
+                shape->SetRotationAcceleration( 0 );
 
-            rColor color_ = shape->getColor();
-            color_.r_ = color_.g_ = color_.b_ = .5;
-            shape->setColor(color_);
-            shape->RequestSync();
-        }
+                rColor color_ = shape->getColor();
+                color_.r_ = color_.g_ = color_.b_ = .5;
+                shape->setColor(color_);
+                shape->RequestSync();
+            }
+    	}
         else
         {
             OnVanish();
+            return true;
         }
 
         // vanish the zone completely once it shrinks to zero size
@@ -364,7 +375,7 @@ bool zFortressZone::Timestep( REAL time )
 
             // FIXME: only announce group respawns once, regardless of player count
             sg_respawnWriter << pPlayer->GetUserName()
-                             << ePlayerNetID::FilterName(pPlayer->CurrentTeam()->Name());
+                             << pPlayer->CurrentTeam()->GetLogName();
             tColoredString playerName;
             playerName << *pPlayer << tColoredString::ColorString(1,1,1);
             if (ownersInside_ && sg_baseRespawn)
@@ -422,7 +433,8 @@ void zFortressZone::OnVanish( void )
     CheckSurvivor();
 
     // kill the closest owners of the zone
-    if ( currentState_ != State_Safe && ( enemies_.size() > 0 || sg_defendRate < 0 ) )
+    if ( currentState_ != State_Safe
+        && ( enemies_.size() > 0 || sg_defendRate < 0 || sg_conquestTimeout < 0) )
     {
         int kills = int( sg_onConquestKillRatio * team->NumPlayers() );
         kills = kills > sg_onConquestKillMin ? kills : sg_onConquestKillMin;
@@ -465,6 +477,11 @@ void zFortressZone::OnVanish( void )
             }
         }
     }
+}
+
+static bool sz_sortTeams(eTeam* a, eTeam* b)
+{
+    return a->GetLogName() < b->GetLogName();
 }
 
 // *******************************************************************************
@@ -658,8 +675,8 @@ bool zFortressZone::Alive() const
 //!
 // *******************************************************************************
 
-static eLadderLogWriter sg_basezoneConqueredWriter("BASEZONE_CONQUERED", true);
-static eLadderLogWriter sg_basezoneConquererWriter("BASEZONE_CONQUERER", true);
+static eLadderLogWriter sg_basezoneConqueredWriter( "BASEZONE_CONQUERED", true, "team x:float y:float" );
+static eLadderLogWriter sg_basezoneConquererWriter( "BASEZONE_CONQUERER", true, "player" );
 
 void zFortressZone::OnConquest( void )
 {
@@ -669,30 +686,31 @@ void zFortressZone::OnConquest( void )
         {
             tCoord p = shape->Position();
 
-            sg_basezoneConqueredWriter << ePlayerNetID::FilterName(team->Name()) << p.x << p.y;
+            sg_basezoneConqueredWriter << team->GetLogName() << p.x << p.y;
         }
         else
-            sg_basezoneConqueredWriter << ePlayerNetID::FilterName(team->Name());
+            sg_basezoneConqueredWriter << team->GetLogName() << "" << "";
         sg_basezoneConqueredWriter.write();
     }
     if (shape)
     {
-    for(int i = se_PlayerNetIDs.Len()-1; i >=0; --i) {
-        ePlayerNetID *player = se_PlayerNetIDs(i);
-        if(!player) {
-            continue;
+        for(int i = se_PlayerNetIDs.Len()-1; i >=0; --i) {
+            ePlayerNetID *player = se_PlayerNetIDs(i);
+            if(!player) {
+                continue;
+            }
+            if (shape->isInteracting(player->Object())) {
+                sg_basezoneConquererWriter << player->GetUserName();
+                sg_basezoneConquererWriter.write();
+            }
         }
-        if (shape->isInteracting(player->Object())) {
-            sg_basezoneConquererWriter << player->GetUserName();
-            sg_basezoneConquererWriter.write();
-        }
-    }
     }
 
-    // calculate score. If nobody really was inside the zone any more, half it.
+    // calculate score. If nobody really was inside the zone any more, multiply by factor.
+    // TODO: set message for when factor is less than 0; default is "lost X points for a very strange reason".
     int totalScore = sg_onConquestScore;
     if ( 0 == enemiesInside_ )
-        totalScore /= 2;
+        totalScore = int(totalScore * sg_onConquestEmptyScoreFactor);
 
     // eliminate dead enemies
     TeamArray enemiesAlive;
@@ -706,7 +724,7 @@ void zFortressZone::OnConquest( void )
 
     // add score for successful conquest, divided equally between the teams that are
     // inside the zone
-    if ( totalScore && enemies_.size() > 0 )
+    if ( totalScore && enemies_.size() > 0 && !se_warmup.IsWarmupMode() )
     {
         tOutput win;
         if ( team )
@@ -720,9 +738,32 @@ void zFortressZone::OnConquest( void )
         }
 
         int score = totalScore / (int)enemies_.size();
-        for ( TeamArray::iterator iter = enemies_.begin(); iter != enemies_.end(); ++iter )
+        if(enemies_.size() > 1)
         {
-            (*iter)->AddScore( score, win, tOutput() );
+            sort(enemies_.begin(), enemies_.end(), sz_sortTeams);
+            for ( TeamArray::iterator iter = enemies_.begin(); iter != enemies_.end(); ++iter )
+            {
+                    (*iter)->AddScore( score);
+            }
+
+            tOutput message;
+            message.SetTemplateParameter(1, enemies_);
+            message.SetTemplateParameter(2, abs(score));
+            if( team )
+            {
+                message.SetTemplateParameter(3, team->GetColoredName());
+                message << "$players_win_conquest_specific";
+            }
+            else
+            {
+                message << "$players_win_conquest";
+            }
+
+            sn_ConsoleOut(message);
+            }
+        else
+        {
+            (*enemies_.begin())->AddScore(score, win, tOutput());
         }
     }
 

@@ -56,13 +56,13 @@ bool sn_supportRemoteLogins = false;
 
 // authority black and whitelists
 static tString sn_AuthorityBlacklist, sn_AuthorityWhitelist;
-tConfItemLine  sn_AuthorityBlacklistConf( "AUTHORITY_BLACKLIST", sn_AuthorityBlacklist );
-tConfItemLine  sn_AuthorityWhitelistConf( "AUTHORITY_WHITELIST", sn_AuthorityWhitelist );
+tSettingItemLine  sn_AuthorityBlacklistConf( "AUTHORITY_BLACKLIST", sn_AuthorityBlacklist );
+tSettingItemLine  sn_AuthorityWhitelistConf( "AUTHORITY_WHITELIST", sn_AuthorityWhitelist );
 
 #ifdef DEBUG
 // list of authorities that get accepted as valid authorities, no questions asked
 static tString sn_AuthorityNoCheck;
-tConfItemLine  sn_AuthorityNoCheckConf( "AUTHORITY_NO_CHECK", sn_AuthorityNoCheck );
+tSettingItemLine  sn_AuthorityNoCheckConf( "AUTHORITY_NO_CHECK", sn_AuthorityNoCheck );
 #endif
 
 static nAuthentication::UserPasswordCallback* S_UserPasswordCallback = NULL;
@@ -736,6 +736,7 @@ void nLoginProcess::ProcessClientAnswer( Network::PasswordAnswer const & answer,
     if ( !socket )
     {
         ReportAuthorityError( "Internal error, no receiving socket of authentication message." );
+        return;
     }
     serverSocketAddress = socket->GetAddress();
 
@@ -879,16 +880,13 @@ void nLoginProcess::Authorize()
 // the finish task can also be triggered any time by this function:
 void nLoginProcess::Abort()
 {
-    tMemberFunctionRunner::ScheduleBackground( *this, &nLoginProcess::Finish );
+    tMemberFunctionRunner::ScheduleForeground( *this, &nLoginProcess::Finish );
 }
 
 // which, when finished, triggers the foreground task of updating the
 // game state and informing the client of the success of the operation.
 void nLoginProcess::Finish()
 {
-    // sync to foreground
-    tBackgroundSyncEvent syncEvent( sync_ );
-
     // again, userID is safe in this function
     int userID = sn_UserID( user );
     if ( !IsActive() )

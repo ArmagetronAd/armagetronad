@@ -41,7 +41,7 @@ gFriends::gFriends()
 	{
 		name = "FRIEND_";
 		name << (i + 1);
-		confItems[i] = std::auto_ptr< tConfItemLine >( tNEW(tConfItemLine) (tConfItemLine(name, friends[i])));
+        confItems[i].reset( tNEW(tConfItemLine) (tConfItemLine(name, friends[i])));
     }
 }
 

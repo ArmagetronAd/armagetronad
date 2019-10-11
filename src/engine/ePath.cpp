@@ -356,26 +356,21 @@ tHeapBase *eHalfEdge::Heap() const
 }
 
 
-static ePath* lastPath = NULL;
-
 #ifdef DEBUG
 #include "rRender.h"
 
-void ePath::RenderLast()  // renders the last found path
+void ePath::Render()  // renders the last found path
 {
 #ifndef DEDICATED
-    if (!lastPath)
-        return;
-
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_LIGHTING);
 
     glColor4f(1,0,0,1);
 
     BeginLineStrip();
-    for (int i = lastPath->positions.Len()-1; i>=0; i--)
+    for (int i = positions.Len()-1; i>=0; i--)
     {
-        eCoord c = lastPath->positions(i) + lastPath->offsets(i);
+        eCoord c = positions(i) + offsets(i);
         Vertex(c.x, c.y, 0.1f);
     }
     RenderEnd();
@@ -383,13 +378,27 @@ void ePath::RenderLast()  // renders the last found path
     glColor4f(1,1,0,1);
 
     BeginLineStrip();
-    if (lastPath->current >= 0 && lastPath->positions.Len() > 0)
+    if (current >= 0 && positions.Len() > 0)
     {
-        eCoord c = lastPath->CurrentPosition();
+        eCoord c = CurrentPosition();
         Vertex(c.x, c.y, 0);
         Vertex(c.x, c.y, 50);
     }
     RenderEnd();
+#endif
+}
+
+static ePath* lastPath2 = NULL;
+static ePath* lastPath = NULL;
+
+void ePath::RenderLast()  // renders the last found path
+{
+#ifndef DEDICATED
+    if (lastPath)
+        lastPath->Render();
+    if (lastPath2)
+        lastPath2->Render();
+
 #endif
 }
 #endif
@@ -421,8 +430,12 @@ ePath::ePath(){
 }
 
 ePath::~ePath(){
+#ifdef DEBUG
     if ( lastPath == this )
         lastPath = NULL;
+    if ( lastPath2 == this )
+        lastPath2 = NULL;
+#endif
 }
 
 void ePath::Add(eHalfEdge *e)
@@ -455,7 +468,13 @@ void ePath::Add(const eCoord& point)
 
 void ePath::Clear()
 {
+#ifdef DEBUG
+    if( lastPath != 0 && lastPath != this )
+    {
+        lastPath2 = lastPath;
+    }
     lastPath = this;
+#endif
 
     current=-1;
 

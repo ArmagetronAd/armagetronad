@@ -64,6 +64,7 @@ bool sg_MoviePack(){
     return sg_moviepackInstalled && sg_moviepackUse;
 }
 
+#ifndef MACOSX
 static bool sg_OpenStuff( char const * uri, bool tryBrowser )
 {
 #ifndef DEDICATED
@@ -71,7 +72,11 @@ static bool sg_OpenStuff( char const * uri, bool tryBrowser )
     {
         // iconify; otherwise, the screen freezes while the browser is started,
         // and on Linux, the game gets window-ified without being noticed about it.
+#if SDL_VERSION_ATLEAST(2,0,0)
+        SDL_MinimizeWindow(sr_screen);
+#else
         SDL_WM_IconifyWindow();
+#endif
     }
 #endif
 
@@ -91,6 +96,7 @@ static bool sg_OpenStuff( char const * uri, bool tryBrowser )
 #endif
     return true;
 }
+#endif
 
 bool sg_OpenURI( char const * uri )
 {
@@ -110,9 +116,12 @@ bool sg_OpenDirectory( char const * path )
 {
 #ifdef MACOSX
 #ifndef DEDICATED
-    FSRef REF;
-    FSPathMakeRef( (UInt8 *)path, &REF, NULL );
-    LSOpenFSRef( &REF, NULL );
+    FSRef ref;
+    CFURLRef url = CFURLCreateFromFileSystemRepresentation( NULL, (UInt8 *)path, strlen( path ), true );
+    // LSOpenCFURLRef() doesn't seem to traverse past "..", so we open a FSRef instead.
+    CFURLGetFSRef( url, &ref );
+    CFRelease( url );
+    LSOpenFSRef( &ref, NULL );
 #endif
 	return true;
 #else

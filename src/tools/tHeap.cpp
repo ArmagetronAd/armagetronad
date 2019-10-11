@@ -234,7 +234,7 @@ tHeapElement::~tHeapElement()
 }
 
 void tHeapElement::RemoveFromHeap(){
-    tASSERT( this );
+    tASSERT_THIS();
 
     if (hID>=0)
     {

@@ -43,8 +43,64 @@ if NEEDDATA
 # install media data only when it is needed
 nobase_texture_DATA=textures/cycle_body.png textures/cycle_wheel.png textures/dir_wall.png\
 	textures/floor_a.png textures/floor_b.png textures/floor.png textures/font_extra.png\
-	textures/font.png textures/font_s.png textures/icon.png textures/KGN_logo.png textures/rim_wall.png\
+	textures/font.png textures/font_s.png textures/icon.png textures/rim_wall.png\
 	textures/shadow.png textures/sky.png textures/title.jpg\
+	textures/settings_textures.cfg \
+	textures/message_background.png \
+	textures/tutorials/teamstart/success.png \
+	textures/tutorials/teamstart/background.png \
+	textures/tutorials/teamstart/straight.png \
+	textures/tutorials/doublegrind/success.png \
+	textures/tutorials/doublegrind/toohard1.png \
+	textures/tutorials/doublegrind/background.png \
+	textures/tutorials/doublegrind/toohard2.png \
+	textures/tutorials/doublegrind/toohard3.png \
+	textures/tutorials/grinding/fail2.png \
+	textures/tutorials/grinding/nogrind.png \
+	textures/tutorials/grinding/fail3.png \
+	textures/tutorials/grinding/fail1.png \
+	textures/tutorials/grinding/grind.png \
+	textures/tutorials/survival/fail2.png \
+	textures/tutorials/survival/fail3.png \
+	textures/tutorials/survival/spiral.png \
+	textures/tutorials/survival/fail1.png \
+	textures/tutorials/survival/wiggle.png \
+	textures/tutorials/navigation/fail2.png \
+	textures/tutorials/navigation/fancy.png \
+	textures/tutorials/navigation/fail3.png \
+	textures/tutorials/navigation/indirect.png \
+	textures/tutorials/navigation/fail1.png \
+	textures/tutorials/navigation/zone.png \
+	textures/tutorials/navigation/direct.png \
+	textures/tutorials/navigation/start.png \
+	textures/tutorials/clipart/fail.png \
+	textures/tutorials/clipart/background.png \
+	textures/tutorials/clipart/check.png \
+	textures/tutorials/clipart/circle.png \
+	textures/tutorials/speedkill/adjust3.png \
+	textures/tutorials/speedkill/adjust1.png \
+	textures/tutorials/speedkill/adjust2.png \
+	textures/tutorials/speedkill/success2.png \
+	textures/tutorials/speedkill/success1.png \
+	textures/tutorials/speedkill/fail_donothing.png \
+	textures/tutorials/speedkill/success3.png \
+	textures/tutorials/speedkilldefense/fail2.png \
+	textures/tutorials/speedkilldefense/fail3.png \
+	textures/tutorials/speedkilldefense/trap3.png \
+	textures/tutorials/speedkilldefense/fail1.png \
+	textures/tutorials/speedkilldefense/trap1.png \
+	textures/tutorials/speedkilldefense/trap2.png \
+	textures/tutorials/speedkilldefense/start.png \
+	textures/tutorials/conquest/success.png \
+	textures/tutorials/conquest/start.png \
+	textures/tutorials/teamstart/teamstart.txt \
+	textures/tutorials/doublegrind/doublegrind.txt \
+	textures/tutorials/grinding/grinding.txt \
+	textures/tutorials/survival/survival.txt \
+	textures/tutorials/navigation/navigation.txt \
+	textures/tutorials/speedkill/speedkill.txt \
+	textures/tutorials/speedkilldefense/speedkilldefense.txt \
+	textures/tutorials/conquest/conquest.txt \
 	textures/Armagetronad.ttf
 
 nobase_sound_DATA=sound/1voicemale.ogg  sound/announcerGO.ogg  sound/expl.ogg\
@@ -70,24 +126,24 @@ dist-hook-scm:
 #	replace dynamic version in configure.ac with the version this build is configured with,
 #   as well as default package and program name
 	sed \
-	-e "s/m4_include(version)//" \
+	-e "s/m4_include(version.m4)//" \
 	-e "s/AC_INIT(armagetronad,AUTOMATIC_VERSION)/AC_INIT(@prognamebase@,$(VERSION))/" \
 	-e "s/  progname=.*/  progname='@prognamebase@'/" \
 	-e "s/  progtitle=.*/  progtitle='@progtitle@'/" \
 	< @srcdir@/configure.ac > $(distdir)/configure.ac
 
-#   regenerate dependant files so they no longer reference to the file "version" which will be removed
+#   rebrand Windows config directories
+	sed	-e "s,/Armagetron,/@progtitle@," \
+	< @srcdir@/src/win32/aa_config.h > $(distdir)/src/win32/aa_config.h
+	sed	-e "s,/ArmagetronDedicated,/@progtitle@@progtitle_server@," \
+	< @srcdir@/src/win32_ded/aa_config.h > $(distdir)/src/win32_ded/aa_config.h
+
+#   regenerate dependant files so they no longer reference to the file "version.m4" which will be removed
 	cp @srcdir@/bootstrap.sh $(distdir)
-	cd $(distdir); rm -f aa_config.h.in version; sh ./bootstrap.sh
+	cd $(distdir); rm -f aa_config.h.in version.m4; sh ./bootstrap.sh
 	rm -rf $(distdir)/autom4te.cache
 
 dist-hook:
-#   copy mac files
-	cp -R ${srcdir}/MacOS ${distdir}
-
-#   copy tutorial textures
-	cp -R ${srcdir}/textures/tutorials ${distdir}/textures/
-
 #	clear CVS
 	find $(distdir) -depth -name CVS -exec rm -rf \{\} \;
 
@@ -95,13 +151,13 @@ dist-hook:
 	find $(distdir) -depth -name .svn -exec rm -rf \{\} \;
 
 #   strip comments from translated files
-	cd $(distdir)/language; python ./update.py --dist
+	cd $(distdir)/language; python2 ./update.py --dist
 #	restore timestamps
 	cd $(distdir)/language; for f in *.txt; do test -r $$f.bak && touch -r $$f.bak $$f; done
 	rm -f $(distdir)/language/*.bak
 
 # 	generate ChangeLog and configure.ac
-	test -r $(srcdir)/version && $(MAKE) dist-hook-scm || echo "Version not from SCM, skipping version fixing."
+	test -r $(srcdir)/version.m4 && $(MAKE) dist-hook-scm || echo "Version not from SCM, skipping version fixing."
 
 #   fix internal version info
 	mv $(distdir)/src/tTrueVersion.h $(distdir)/src/tFakeVersion.h
@@ -128,7 +184,10 @@ endif
 install-exec-hook: install-uninstall
 #	rename executable to armagetronad-VERSION and link to armagetronad
 if BUILDMAIN
-	cd  $(DESTDIR)${bindir}; mv armagetronad_main$(EXEEXT) @progname@$(executable_suffix)
+	cd  "$(DESTDIR)${bindir}"; mv armagetronad_main$(EXEEXT) @progname@$(executable_suffix)
+endif
+if BUILDDEDICATED
+	cd  "$(DESTDIR)${bindir}"; mv armagetronad_serverquery$(EXEEXT) @prognamebase@-serverquery$(executable_suffix)
 endif
 
 #	delegate to special tasks
@@ -137,26 +196,30 @@ endif
 install-data-hook:
 #	install systemwide files
 if USE_SYSINSTALL
-	DESTDIR=$(DESTDIR) ROOTDIR=$(ROOTDIR) bash $(DESTDIR)${scriptdir}/sysinstall install $(prefix)
+	DESTDIR=$(DESTDIR) ROOTDIR=$(ROOTDIR) bash "$(DESTDIR)${scriptdir}/sysinstall" install "$(prefix)"
 endif
+if OS_X_TOOLKIT
+	${top_srcdir}/batch/make/symlink-relative "$(DESTDIR)${prefix}" --files-in-directory "$(DESTDIR)${aa_datadir}" --file-with-name "$(DESTDIR)${aa_sysconfdir}" config
+if !BUILDDEDICATED
+	${top_srcdir}/batch/make/symlink-relative "$(DESTDIR)${prefix}/../MacOS" --file-with-name "$(DESTDIR)${bindir}/@progname@${executable_suffix}" "@progtitle@"
+	${top_srcdir}/batch/make/symlink-relative "$(DESTDIR)${prefix}/.." --file "$(DESTDIR)${aa_datadir}/desktop/os-x/Info.plist"
 
-if NEEDDATA
-#   copy tutorial textures
-	cp -R ${srcdir}/textures/tutorials $(DESTDIR)$(aa_datadir)/textures/
-	find $(DESTDIR)$(aa_datadir)/textures/tutorials -name *.xcf -exec rm \{\} \;
+	rm -rf "$(DESTDIR)${prefix}/../Frameworks"
+	cp -R "${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks" "$(DESTDIR)${prefix}/.."
+
+	install_name_tool -rpath "${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks" "@executable_path/../../Frameworks" "$(DESTDIR)${prefix}/../MacOS/@progtitle@"
+endif
 endif
 
 uninstall-hook:
 #	delete executable and uninstaller
 	rm -f $(DESTDIR)${bindir}/@progname@$(executable_suffix)
+if BUILDDEDICATED
+	rm -f $(DESTDIR)${bindir}/@prognamebase@-serverquery$(executable_suffix)
+endif
 
 #	delegate to special tasks
 	$(masterUninstallTasks)
-
-if NEEDDATA
-#   delete tutorial textures
-	rm -rf $(DESTDIR)$(aa_datadir)/textures/tutorials
-endif
 
 if USE_UNINSTALL
 	rm -f $(uninstall_location)

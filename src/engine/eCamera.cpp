@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 // #define CAMERA_LOGGING
 
 #include "rSDL.h"
+#include "rGL.h"
 
 #ifdef CAMERA_LOGGING
 #include <iostream>
@@ -222,12 +223,11 @@ uActionTooltip eCamera::se_glanceBackTooltip( uActionTooltip::Level_Advanced, eC
 uActionTooltip eCamera::se_glanceForwardTooltip( uActionTooltip::Level_Advanced, eCamera::se_glance[GLANCE_FORWARD], 1 );
 uActionTooltip eCamera::se_glanceRightTooltip( uActionTooltip::Level_Advanced, eCamera::se_glance[GLANCE_RIGHT], 3 );
 uActionTooltip eCamera::se_glanceLeftTooltip( uActionTooltip::Level_Advanced, eCamera::se_glance[GLANCE_LEFT], 3 );
-uActionTooltip eCamera::se_switchViewTooltip( uActionTooltip::Level_Expert, eCamera::se_switchView, 2 );
-
+uActionTooltip eCamera::se_switchViewTooltip( uActionTooltip::Level_Advanced, eCamera::se_switchView, 2 );
 
 static REAL s_startFollowX = -30, s_startFollowY = -30, s_startFollowZ = 80;
 static REAL s_startSmartX = 10, s_startSmartY = 30, s_startSmartZ = 2;
-static REAL s_startFreeX =  10, s_startFreeY = -70, s_startFreeZ = 100;
+static REAL s_startFreeX =  10, s_startFreeY = -70, s_startFreeZ = 100, s_startFreeRotate = 0, s_startFreePitch = 0;
 
 static tSettingItem<REAL> s_foX("CAMERA_FOLLOW_START_X", s_startFollowX);
 static tSettingItem<REAL> s_smX("CAMERA_SMART_START_X", s_startSmartX);
@@ -240,6 +240,9 @@ static tSettingItem<REAL> s_frY("CAMERA_FREE_START_Y", s_startFreeY);
 static tSettingItem<REAL> s_foZ("CAMERA_FOLLOW_START_Z", s_startFollowZ);
 static tSettingItem<REAL> s_smZ("CAMERA_SMART_START_Z", s_startSmartZ);
 static tSettingItem<REAL> s_frZ("CAMERA_FREE_START_Z", s_startFreeZ);
+
+static tSettingItem<REAL> s_frR("CAMERA_FREE_START_ROTATE", s_startFreeRotate);
+static tSettingItem<REAL> s_frP("CAMERA_FREE_START_PITCH", s_startFreePitch);
 
 // custom camera displacement
 static REAL s_customBack = 30, s_customRise = 20, s_customBackSpeed = 0, s_customRiseSpeed = 0 , s_customPitch = -.7, s_customZoom = 0.5, s_customTurnSpeed=40, s_customTurnSpeed180 = 2;
@@ -363,6 +366,49 @@ eCoord eCamera::nextDirIfGlancing(eCoord const & dir, eCoord const & targetDir, 
     }
 }
 
+//! loads a camera configuration from a line
+void eCamera::LoadAny( eGrid * grid, std::istream & s )
+{
+    int id;
+    s >> id;
+    if( s.good() && id >= 0 && grid && id < grid->cameras.Len() )
+    {
+        // load the rest
+        grid->cameras(id)->Load( s );
+    }
+}
+
+//! loads this camera configuration from a line
+void eCamera::Load( std::istream & s )
+{
+    s >> pos.x >> pos.y >> dir.x >> dir.y >> z >> rise >> fov;
+    dir.Normalize();
+}
+
+//! saves all this cameras' configuration in a form that can be used from a config file
+void eCamera::SaveAll( eGrid * grid, std::ostream & s )
+{
+    if( !grid )
+    {
+        return;
+    }
+    for( int i = 0; i < grid->cameras.Len(); ++i )
+    {
+        s << "WARP_CAMERA " << i << " ";
+        grid->cameras(i)->Save(s);
+        s << "\n";
+    }
+}
+
+//! saves this camera configuration
+void eCamera::Save( std::ostream & s ) const
+{
+    s << " " << pos.x << " " << pos.y << " " << dir.x << " " << dir.y << " " 
+      << z << " " << rise << " " << fov;
+}
+
+// settings items exploiting these functions are in gGame.cpp, only there they have good
+// access to the grid.
 
 // pointer holding the last player watched actively
 static nObserverPtr< ePlayerNetID > se_watchedPlayer[ MAX_PLAYERS ];
@@ -518,13 +564,12 @@ void eCamera::MyInit(){
     //  foot=tNEW(eGameObject)(pos,dir,0);
     distance=0;
     lastrendertime=se_GameTime();
-	if (CameraMain())
+    if ( grid )
     {
-        grid->cameras.Add(this,id);
-    }
-	else if( grid )
-    {
-        grid->subcameras.Add(this,id);
+        if ( CameraMain() )
+            grid->cameras.Add(this,id);
+        else
+            grid->subcameras.Add(this,id);
     }
     //  se_ResetVisibles(id);
     smoothTurning=turning=0;
@@ -573,6 +618,17 @@ void eCamera::MyInit(){
         if (dist<.001) dist=1;
         dir=dir*(1/dist);
         rise=(CenterZ()-z)/dist;
+    }
+
+    // modify rotation and pitch
+    if( mode == CAMERA_FREE )
+    {
+        if( s_startFreePitch != 0 )
+        {
+            rise = s_startFreePitch;
+        }
+        REAL rot = s_startFreeRotate*M_PI/180;
+        dir = dir.Turn( cosf(rot), sinf(rot) );
     }
 
     activeGlanceRequest=NULL;
@@ -846,9 +902,9 @@ bool eCamera::Act(uActionCamera *Act,REAL x){
     pos=pos+dir*mf*.25+dir.Turn(eCoord(0,ml*.25));
 
     fov/=zi;
-    if (fov>120) fov=120;
+    if (fov>160 && zi < 1) fov=160;
 
-    if (fov<30) fov=30;
+    if (fov<30 && zi > 1) fov=30;
 
 
     switch(mode){
@@ -1027,7 +1083,7 @@ public:
     //! @param time  usually the game time of the event, here time simply is the fraction of the
     //!              distance from the object to the camera covered so far
     //! @param alpha relative coordinate of the collision point on the wall
-    virtual void PassEdge(const eWall *w,REAL time,REAL alpha,int)
+    virtual ePassEdgeResult PassEdge(const eWall *w,REAL time,REAL alpha,int) override
     {
         // determine the height limit (max. height at which walls will not be considered blockers)
         REAL objectZ = 1.5;
@@ -1036,8 +1092,8 @@ public:
         REAL heightLimit = ( .5 * zLimit_ * time + objectZ * ( 1 - time ) );
 
         // exit early if the wall does not obstruct view
-        if ( moved_ || !w || !owned->EdgeIsDangerous(w, time, alpha) || w->Height() <= heightLimit )
-            return;
+        if ( moved_ || !w || !owned->EdgeIsDangerous(w, time, alpha) || w->SeeHeight() <= heightLimit )
+            return eContinue;
 
         heightLimit *= .5f;
 
@@ -1070,6 +1126,8 @@ public:
             moved_ = correction.distance > .001f;
             camPos_ = correction.correctTo;
         }
+
+        return eContinue;
     }
     bool moved_; //!< flag indicating that the camera position was moved
 
@@ -1444,7 +1502,7 @@ bool eCamera::AutoSwitchIncam(){
         return false;
 }
 
-static inline void makefinite(REAL &x,REAL y=2){if (!finite(x)) x=y;}
+static inline void makefinite(REAL &x,REAL y=2){if (!isfinite(x)) x=y;}
 static inline void makefinite(eCoord &x){makefinite(x.x);makefinite(x.y);}
 
 // Smart camera settings
@@ -1633,6 +1691,7 @@ void eCamera::Render(){
 		if (mirrorView_) glScalef(-1,1,1);
         vp->Perspective(fov,zNear,1E+20,se_cameraEyeDistance/2.);
 
+        glMatrixMode(GL_MODELVIEW);
         gluLookAt(0,
                   0,
                   0,
@@ -1645,7 +1704,6 @@ void eCamera::Render(){
                   1);
 
         glTranslatef(-pos.x,-pos.y,-z);
-        glMatrixMode(GL_MODELVIEW);
 
         bool draw_center=((CenterPos()-pos).NormSquared()>1 ||
                           fabs(CenterZ() - z)>1);
@@ -1690,6 +1748,7 @@ void eCamera::Render(){
             }
 #endif
 
+            glMatrixMode(GL_MODELVIEW);
             gluLookAt(0,
                       0,
                       0,
@@ -1702,7 +1761,6 @@ void eCamera::Render(){
                       1);
 
             glTranslatef(-pos.x,-pos.y,-z);
-            glMatrixMode(GL_MODELVIEW);
 
             draw_center=((CenterPos()-pos).NormSquared()>1 ||
                          fabs(CenterZ() - z)>1);
@@ -2034,7 +2092,18 @@ void eCamera::Timestep(REAL ts){
             if ( Center() &&  wrongDirection > 0 )
             {
                 // if so, turn to the side using the last driving direction
-                newdir = newdir + Center()->LastDirection()*(wrongDirection*ts*turnSpeed*customTurnSpeed180);
+                eCoord normedLastDir = Center()->LastDirection();
+                REAL wrongWrongDirection = -eCoord::F(cycleDir, normedLastDir);
+                if( wrongWrongDirection > 0)
+                {
+                    normedLastDir = normedLastDir + cycleDir * (wrongWrongDirection/cycleDir.NormSquared());
+                    REAL n = normedLastDir.NormSquared();
+                    if(n > 0)
+                    {
+                        normedLastDir *= 1/sqrt(n);
+                    }
+                }
+                newdir = newdir + normedLastDir*(wrongDirection*ts*turnSpeed*customTurnSpeed180);
             }
         }
         else
@@ -2439,8 +2508,7 @@ void eCamera::s_Timestep(eGrid *grid, REAL time){
 #ifndef DEDICATED
 
 void eCamera::SoundMix(Uint8 *dest,unsigned int len){
-    if (!this)
-        return;
+    tASSERT_THIS();
 
     if (id>=0){
         eGameObject *c=Center();
@@ -2455,6 +2523,9 @@ void eCamera::SoundMix(Uint8 *dest,unsigned int len){
 
 
 void eCamera::SoundMixGameObject(Uint8 *dest,unsigned int len,eGameObject *go){
+    if(!go)
+        return;
+    
     eCoord vec((go->pos-pos).Turn(dir.Conj()));
     REAL dist_squared=vec.NormSquared()+(z-go->z)*(z-go->z);
 
@@ -2578,4 +2649,34 @@ void eCamera::CenterCockpitFixedAfter() const{
         return;
 }
 
+///////////////////////////////////////////////
+// Some functions to grab axis informations for touches support (cf uInput.cpp)
+//
+
+// Return cycle direction relatively to camera current direction (nearest axis)
+// It allows to keep touches consistent with current camera display
+int eCamera::DirectionWinding() const {
+    if (!grid || !center) return -1;
+    int r = (grid->DirectionWinding(center->Direction())-grid->DirectionWinding(dir))%grid->WindingNumber();
+    return r<0 ? grid->WindingNumber()+r : r;
+}
+// Return number of axes of Camera's Grid
+int eCamera::WindingNumber() const {
+    if (!grid) return -1;
+    return grid->WindingNumber();
+}
+
+// Get current camera orientation relative to player's cycle direction
+int GetPlayerCameraClosestDirection(int player) {
+    ePlayer* p = ePlayer::PlayerConfig(player);
+    if (!p || !p->cam) return -1;
+    return p->cam->DirectionWinding();
+}
+
+// Get number of axes in player's camera grid
+int GetPlayerWindingNumber(int player) {
+    ePlayer* p = ePlayer::PlayerConfig(player);
+    if (!p || !p->cam) return -1;
+    return p->cam->WindingNumber();
+}
 

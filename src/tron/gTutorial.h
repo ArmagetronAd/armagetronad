@@ -30,14 +30,18 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define ArmageTron_GTUTORIAL_H
 
 class tString;
-struct gGameSettings;
+class gGameSettings;
 class eTeam;
+
+#ifndef DEDICATED
 
 //! opens the tutorial menu
 void sg_TutorialMenu();
 
 //! returns whether all tutorials have been completed
 bool sg_TutorialsCompleted();
+
+#endif // DEDICATED
 
 class gTutorialBase
 {
@@ -48,6 +52,12 @@ public:
     // the tutorial was failed or passed
     virtual void Analysis() = 0;
 
+    // called before objects are spawned
+    virtual void BeforeSpawn();
+
+    // called after objects are spawned
+    virtual void AfterSpawn();
+    
     // called the moment a team won
     virtual void OnWin( eTeam * winner );
 

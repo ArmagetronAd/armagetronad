@@ -145,7 +145,6 @@ public:
     template<class T> void BinWrite (const T &x){
         for (unsigned int i=0;i<sizeof(T)/2;i++)
             Write((reinterpret_cast<const unsigned short *>(&x))[i]);
-        return *this;
     }
 
     bool End(){
@@ -165,7 +164,6 @@ public:
     template<class T> void BinRead (const T &x){
         for (unsigned int i=0;i<sizeof(T)/2;i++)
             Read(reinterpret_cast<unsigned short *>(&x)[i]);
-        return *this;
     }
 
 

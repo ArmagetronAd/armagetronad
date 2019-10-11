@@ -101,7 +101,7 @@ public:
 
     virtual bool EdgeIsDangerous(const eWall *w, REAL time, REAL a) const;
 
-    virtual void PassEdge(const eWall *w,REAL time,REAL a,int recursion=1);
+    virtual ePassEdgeResult PassEdge(const eWall *w,REAL time,REAL a,int recursion=1) override;
 
     virtual bool TimestepCore(REAL currentTime, bool calculateAcceleration = true );
 
@@ -178,7 +178,7 @@ class gCycle: public gCycleMovement
 
     friend class gCycleChatBot;
     friend class gAINavigator;
-    std::auto_ptr< gCycleChatBot > chatBot_;
+    std::unique_ptr< gCycleChatBot > chatBot_;
 
     bool dropWallRequested_; //!< flag indicating that someone requested a wall drop
 public:
@@ -312,7 +312,7 @@ public:
 
     virtual bool EdgeIsDangerous(const eWall *w, REAL time, REAL a) const;
 
-    virtual void PassEdge(const eWall *w,REAL time,REAL a,int recursion=1);
+    virtual ePassEdgeResult PassEdge(const eWall *w,REAL time,REAL a,int recursion=1) override;
 
     virtual REAL PathfindingModifier( const eWall *w ) const;
 

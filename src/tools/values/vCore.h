@@ -68,6 +68,8 @@ public:
     Base(Base const &other); //!< Copy constructor
     virtual ~Base() { };
 
+    Base & operator =(Base const &) = default;
+  
     virtual Base *copy(void) const; //!< Returns an exact copy of this object
 
     virtual int GetInt(void) const; //!< Returns an integer using the current value
@@ -133,10 +135,10 @@ public:
         Base *min = new Base,
         Base *max = new Base); //!< Default constructor
     */
-    Set(); //!< Constructor using std::auto_ptr
-    Set(BasePtr &val); //!< Constructor using std::auto_ptr
-    Set(BasePtr &val, BasePtr &min, BasePtr &max); //!< Constructor using std::auto_ptr
-    //    Set(BasePtr &val = BasePtr(), BasePtr &min = BasePtr(), BasePtr &max = BasePtr()); //!< Constructor using std::auto_ptr
+    Set(); //!< Constructor using std::unique_ptr
+    Set(BasePtr &val); //!< Constructor using std::unique_ptr
+    Set(BasePtr &val, BasePtr &min, BasePtr &max); //!< Constructor using std::unique_ptr
+    //    Set(BasePtr &val = BasePtr(), BasePtr &min = BasePtr(), BasePtr &max = BasePtr()); //!< Constructor using std::unique_ptr
     Set(const Set &other); //!< Copy constructor
     ~Set(); //!< Destructor
     void operator=(Set const &other); //!< Overloaded assignment operator

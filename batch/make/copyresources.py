@@ -4,8 +4,6 @@
 # links resources from one directory to another and sorts them there
 # usage: resources <source> <destination> <path to sortresources.py>
 
-from __future__ import print_function
-
 import sys, os
 import shutil
 foundModule = False
@@ -44,7 +42,7 @@ if __name__ == "__main__":
     source = sys.argv[1]
     destination = sys.argv[2]
     #sortresources = sys.argv[3]
-    print("Sorting resources from", source, "to", destination)
+    print("Sorting resources from " + source + " to " + destination)
     if os.path.exists(source) is False:
         sys.exit(1)
 

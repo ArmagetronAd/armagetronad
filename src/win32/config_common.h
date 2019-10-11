@@ -35,11 +35,6 @@
 // disable POD initialization behavior change warning in VisualC++ 2005
 #pragma warning ( disable: 4345 )
 
-// compatibility with later mingw versions
-#if defined(__GNUC__) && __GNUC__ >= 4
-#define HAVE_ISBLANK
-#endif
-
 // Define if this is a Windows OS.
 #ifndef WIN32
 #define WIN32
@@ -49,13 +44,8 @@
 // with Windows 9X. No guarantees.
 // #define SUPPORT_WIN9X
 
-// defines for data directories in Windows
-#ifndef DEBUG
-#define USER_DATA_DIR  "${APPDATA}/Armagetron"
-#define SCREENSHOT_DIR "${MYPICTURES}/Armagetron"
-#else
-#define USER_DATA_DIR  "."
-#endif
+// defines for old data directories in Windows
+#define LEGACY_USER_DATA_DIR  "${APPDATA}/Armagetron"
 
 // for now, no joystick support in Windows
 // #define NOJOYSTICK 1

@@ -135,7 +135,7 @@ public:
     static void SetIdle(FUNCPTR idle_func) {idle=idle_func;}
 
     // poll input, return true if ESC was pressed
-    static bool IdleInput();
+    static bool IdleInput( bool processInput );
 
     void SetCenter(REAL c) {center=c;}
     void SetTop(REAL t) {menuTop=t;}
@@ -232,7 +232,13 @@ public:
             menu->items.Remove(this,idnum);
     }
 
-virtual tString Help(){return tString(helpText);}
+    //! called when the menu item is selected, the incoming parameter says
+    //! whether help should be displayed, the function returns true if 
+    //! the menu code itself should handle the display or whether the menu item
+    //! does that.
+    virtual bool DisplayHelp( bool display, REAL y, REAL alpha ){return display;}
+
+    virtual tString Help(){return tString(helpText);}
     // displays the menuitem at position x,y. set selected to true
     // if the item is currently under the cursor
     virtual void Render(REAL ,REAL ,REAL =1,bool =0){}
@@ -257,8 +263,30 @@ virtual tString Help(){return tString(helpText);}
 
     virtual bool IsSelectable(){return true;};
 
+    virtual void Select() {}   // called when this item is selected and ready to set
+    virtual void Deselect() {} // called when this item is deselected
+
 protected:
     void SetColor( bool selected, REAL alpha );            //!< Sets the color of text output for this menuitem
+};
+
+// A menu-item that acts as a divider
+class uMenuItemDivider : public uMenuItem
+{
+public:
+    uMenuItemDivider( uMenu *menu )
+        :uMenuItem( menu, tOutput() )
+    {
+    }
+    
+    virtual bool IsSelectable()
+    {
+        return false;
+    }
+    
+    virtual void Render( REAL x, REAL y, REAL alpha=1, bool selected=false )
+    {
+    }
 };
 
 
@@ -311,18 +339,21 @@ protected:
     tOutput               	title;
     int                   	select;
     T *                   	target;
+    typedef void (*TFUNCPTR)(T const&);
+    TFUNCPTR                    onselect;
+    TFUNCPTR                    onenter;
 public:
 #ifdef SLOPPYLOCALE
     uMenuItemSelection(uMenu *m,
                        const char* tit,const char *help,
-                       T &targ)
-            :uMenuItem(m,help),title(tit),select(0),target(&targ){}
+                       T &targ, TFUNCPTR onsel=0, TFUNCPTR onent=0)
+            :uMenuItem(m,help),title(tit),select(0),target(&targ),onselect(onsel),onenter(onent){}
 #endif
 
     uMenuItemSelection(uMenu *m,
                        const tOutput &tit,const tOutput &help,
-                       T &targ)
-            :uMenuItem(m,help),title(tit),select(0),target(&targ){}
+                       T &targ, TFUNCPTR onsel=0, TFUNCPTR onent=0)
+            :uMenuItem(m,help),title(tit),select(0),target(&targ),onselect(onsel),onenter(onent){}
 
     ~uMenuItemSelection(){
         Clear();
@@ -354,12 +385,23 @@ public:
             select=0;
         if (choices.Len())
             *target=choices(select)->value;
+        if (onselect) onselect(*target);
     }
 
-    virtual void Render(REAL x,REAL y,REAL alpha=1,bool selected=0){
+    virtual void Enter(){
+        if (onenter) onenter(*target);
+    }
+    
+    // selects the correct item according to the value in the controlled variable
+    void PickFromValue()
+    {
         for(int i=choices.Len()-1;i>=0;i--)
             if (choices(i)->value==*target)
                 select=i;
+    }
+
+    virtual void Render(REAL x,REAL y,REAL alpha=1,bool selected=0){
+        PickFromValue();
 
         DisplayText(REAL(x-.02),y,title,selected,alpha,1);
         if (choices.Len()>0)
@@ -496,6 +538,12 @@ public:
     {
         return colorMode_;
     }
+
+    void Select();
+    void Deselect();
+
+    //! inserts an entire string at the current cursor
+    bool Insert(tString const &insertion);
 };
 
 //! A class that can provide auto- completion and supports overwriting of parts for special cases.

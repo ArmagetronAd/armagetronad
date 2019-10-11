@@ -163,20 +163,42 @@ static void MenuBackground(){
         se_glFloorTexture();
         se_glFloorColor(1,1);
 
-        REAL x=tSysTimeFloat()/3.0;
-        REAL y=tSysTimeFloat()/5.0;
+        double x1=tSysTimeFloat()/3.0;
+        double y1=tSysTimeFloat()/5.0;
         REAL width=16;
         REAL height=12;
 
-        static GLfloat tm[4][4]={{.8,.2,0,0},
-                                 {-.2,.8,0,0},
-                                 {0,0,1,0},
-                                 {0,0,0,1}};
+        GLfloat tm[4][4]={{.8,.2,0,0},
+                          {-.2,.8,0,0},
+                          {0,0,1,0},
+                          {0,0,0,1}};
+
+
+
+        REAL scale = (sr_screenWidth*3.0)/(sr_screenHeight*4.0);
+        tm[0][0] *= scale;
+        tm[0][1] *= scale;
+
+        // make texture coordinates not too big, wrap them around.
+        // unfortunately, we need to transform them with tm, then clamp them,
+        // then transform them back.
+        double x2 = x1*tm[0][0] + y1*tm[1][0];
+        double y2 = x1*tm[0][1] + y1*tm[1][1];
+        x2-=floor(x2);
+        y2-=floor(y2);
+        REAL x = x2*tm[1][1] - y2*tm[1][0];
+        REAL y = -x2*tm[0][1] + y2*tm[0][0];
+        const REAL det=1/(tm[0][0]*tm[1][1]-tm[0][1]*tm[1][0]);
+        x*=det;
+        y*=det;
+        //x=x1;
+        //y=y1;
 
         TexMatrix();
         glLoadMatrixf(&tm[0][0]);
 
-        glScalef((REAL)sr_screenWidth/sr_screenHeight/4. * 3., 1., 1.);
+        // glScalef(1., 1., 1.);
+        // glScalef((REAL)sr_screenWidth/sr_screenHeight/4. * 3., 1., 1.);
 
 
         BeginQuads();

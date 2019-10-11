@@ -90,15 +90,18 @@ public:
 
     nServerInfoBase & operator = ( const nServerInfoBase & other );
 
-    inline const tString & GetName() const;     //!< returns the server's name
+    inline tString GetName() const;     //!< returns the server's name
+    
+    // helper function: server info to string
+    tString ToString() const;
 protected:
     virtual void DoGetFrom( nSocket const * socket );  //!< fills data from this server and the given socket
 
-    virtual const tString& DoGetName() const;   //!< returns the server's name
+    virtual tString DoGetName() const;   //!< returns the server's name
 private:
     tString         connectionName_;            //!< the internet name of the server ("192.168.10.10", "atron.dyndns.org")
     unsigned int    port_;                      //!< the network port the server listens on
-    mutable std::auto_ptr< nAddress > address_; //!< the network address of the server
+    mutable std::unique_ptr< nAddress > address_; //!< the network address of the server
 public:
     inline tString const & GetConnectionName( void ) const;	                                 //!< Gets the internet name of the server ("192.168.10.10", "atron.dyndns.org")
     inline nServerInfoBase const & GetConnectionName( tString & connectionName ) const;	     //!< Gets the internet name of the server ("192.168.10.10", "atron.dyndns.org")
@@ -312,11 +315,18 @@ public:
     static void Save();      // save/load all server infos
     static void Save(const tPath& path, const char *filename);      // save/load all server infos
     static void Load(const tPath& path, const char *filename);
+    static int ServerCount();
 
     static nServerInfo* GetMasters();              //!< get the list of master servers
     static nServerInfo* GetRandomMaster();         //!< gets a random master server
 
-    static void GetFromMaster(nServerInfoBase *masterInfo=NULL, char const * fileSuffix = NULL );  // get all the basic infos from the master server, stored in the server info file of the given suffix
+    // Get all the basic infos from the master server.
+    // 
+    // @param masterInfo If non-NULL, then this master server will be polled for data.
+    //                   Otherwise, a random master server will be selected from the defaults.
+    // @param fileSuffix A suffix used to determine the filename where master data is stored to on disk.
+    // @param loadKnownServers Preload known servers from the cache on disk.
+    static nServerInfoBase *GetFromMaster(nServerInfoBase *masterInfo=NULL, char const * fileSuffix = NULL, bool loadKnownServers=true );
 
     static void TellMasterAboutMe(nServerInfoBase *masterInfo=NULL);  // dedicated server: tell master server about my existence
 
@@ -366,6 +376,7 @@ public:
     int            MaxUsers()          const	{return maxUsers_;}
 
     const tString& UserNames()		const	{ return userNames_;  }
+    const tString& UserGlobalIDs()      const   { return userGlobalIDs_; }
     const tString& UserNamesOneLine()	const	{ return userNamesOneLine_;  }
     const tString& Options()			const	{ return options_;  }
     const tString& Release()			const	{ return release_;  }
@@ -396,12 +407,22 @@ public:
     }
 
 protected:
-    virtual const tString& DoGetName() const;   //!< returns the server's name
+    virtual tString DoGetName() const;   //!< returns the server's name
 
 private:
     QueryType queryType_; //!< the query type to use for this server
     SettingsDigest settings_; //!< most important settings
     Classification classification_; //!< classification according to settings
+};
+
+class nMasterLoader
+{
+public:
+    nMasterLoader();
+    ~nMasterLoader();
+    nServerInfo *AddMaster( const tString & connectionName, unsigned port );
+private:
+    nServerInfo *realFirstServer_;
 };
 
 //! callback to give other components a chance to help fill in the server info
@@ -423,7 +444,13 @@ class nServerInfoAdmin
     friend class nServerInfo;
 
 public:
+    static nServerInfoAdmin* GetAdmin();
 
+    // called before a new server browsing process is started
+    virtual void BeforeNewScan() = 0;
+    // if too few servers are displayed after a rescan
+    virtual void LowerThreshold() = 0;
+    virtual int MinValidServerCount() const = 0;
 protected:
     nServerInfoAdmin();
     virtual ~nServerInfoAdmin();
@@ -434,9 +461,10 @@ private:
     virtual tString	GetOptions()	const = 0;
     virtual tString GetUrl()		const = 0;
     virtual void Classify( nServerInfo::SettingsDigest const & in, 
-                           nServerInfo::Classification & out ) const = 0;  //!< classifies the server according to its setting digest
+                           nServerInfo::Classification & out ) = 0;  //!< classifies the server according to its setting digest
 
-    static nServerInfoAdmin* GetAdmin();
+    // returns true if all servers need reclassification. Resets flag after once returning true.
+    virtual bool NeedGlobalReclassification() = 0;
 };
 
 class nServerInfoCharacterFilter: public tCharacterFilter
@@ -456,7 +484,7 @@ public:
 //!
 // *******************************************************************************************
 
-const tString & nServerInfoBase::GetName( void ) const
+tString nServerInfoBase::GetName( void ) const
 {
     return DoGetName();
 }

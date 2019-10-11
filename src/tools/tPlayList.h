@@ -42,6 +42,7 @@ public:
     tSong();
     tSong(tString& pathToSong);
     tSong(const tSong& newSong);
+    tSong & operator = (const tSong &) = default;
 
     tString location;
 

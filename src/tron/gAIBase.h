@@ -102,6 +102,9 @@ public:
 
     static void ClearAll(); //!< remove all AI players
 
+    // add a coordinate to the path, switch to path follow mode IN REVERSE ORDER
+    void AddToPath( eCoord const & target, bool mindless = false );
+
     // called whenever cylce a drives close to the wall of cylce b.
     // directions: aDir tells whether the wall is to the left (-1) or right(1)
     // of a
@@ -227,7 +230,7 @@ private:
     REAL concentration_;
 
     //! navigator
-    std::auto_ptr< gAINavigator > navigator_;
+    std::unique_ptr< gAINavigator > navigator_;
 
     //! state
     tJUST_CONTROLLED_PTR< State > state_;

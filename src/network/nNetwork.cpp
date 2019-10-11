@@ -28,7 +28,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tMemManager.h"
 #include "tInitExit.h"
 #include "nSimulatePing.h"
-#include "nConfig.h"
 #include "nNetwork.h"
 #include "nServerInfo.h"
 #include "tConsole.h"
@@ -57,10 +56,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "nNetwork.pb.h"
 
 #include "nStreamMessage.h"
-
-#ifdef MACOSX_XCODE
-#include "version.h"
-#endif // MACOSX_XCODE
 
 // my IP address. Master server/game server hopefully tell me a correct one.
 static tString sn_myAddress ("*.*.*.*:*");
@@ -255,12 +250,12 @@ public:
     //! override currently active version
     static void Override( nVersion const & version )
     {
-        if ( overrider_ && ! overrider_->overridden_ )
+        if ( overrider_ )
         {
-            overrider_->overridden_ = true;
+            if ( !overrider_->overridden_ )
+                overrider_->overridden_ = true;
+            overrider_->version_ = version;
         }
-
-        overrider_->version_ = version;
     }
     
     //! accept version override message
@@ -304,6 +299,10 @@ static tSettingItem<int> sn_mav("MAX_PROTOCOL_VERSION",sn_maxVersion);
 
 static int sn_newFeatureDelay = 0;
 static tSettingItem<int> sn_nfd("NEW_FEATURE_DELAY",sn_newFeatureDelay);
+
+// color code strictness setting from tColor.cpp
+extern bool st_verifyColorCodeStrictly;
+static nSettingItemWatched< bool > stc_verifyColorCodeStrictly( "VERIFY_COLOR_STRICT", st_verifyColorCodeStrictly, nConfItemVersionWatcher::Group_Visual, 21 );
 
 // from nConfig.cpp. Adapt version string array there to bump protocol version.
 int sn_GetCurrentProtocolVersion();
@@ -387,14 +386,6 @@ bool nVersion::operator == ( const nVersion& other )
     return this->max_ == other.max_ && this->min_ == other.min_;
 }
 
-nVersion& nVersion::operator = ( const nVersion& other )
-{
-    this->min_ = other.min_;
-    this->max_ = other.max_;
-
-    return *this;
-}
-
 nMessage& operator >> ( nMessage& m, nVersion& ver )
 {
     int min,max;
@@ -435,7 +426,7 @@ std::ostream& operator << ( std::ostream& s, const nVersion& ver )
 
 nVersionFeature::nVersionFeature( int min, int max ) // creates a feature that is supported from version min to max; values of -1 indicate no bordera
 {
-    tASSERT( min_ >= sn_MyVersion().Min() );
+    tASSERT( min >= sn_MyVersion().Min() );
     tASSERT( max < 0 || max <= sn_MyVersion().Max() );
 
     min_ = min;
@@ -1324,8 +1315,10 @@ void nMessageBase::BroadCast(bool ack)
 //  Basic communication classes: login
 // **********************************************
 
+// flags indicating ongoing login result
 static bool login_failed=false;
 static bool login_succeeded=false;
+static bool sn_expired=true;
 
 // salt value sent as past login tokens. They are returned by
 // the server as you sent them, and make sure you only accept
@@ -1333,10 +1326,10 @@ static bool login_succeeded=false;
 static nKrawall::nSalt loginSalt;
 
 // the server we are redirected to
-static std::auto_ptr< nServerInfoBase > sn_redirectTo;
-std::auto_ptr< nServerInfoBase > sn_GetRedirectTo()
+static std::unique_ptr< nServerInfoBase > sn_redirectTo;
+std::unique_ptr< nServerInfoBase > sn_GetRedirectTo()
 {
-    return sn_redirectTo;
+    return std::move(sn_redirectTo);
 }
 
 nServerInfoBase * sn_PeekRedirectTo()
@@ -1345,6 +1338,10 @@ nServerInfoBase * sn_PeekRedirectTo()
 }
 
 static void sn_LoginDeniedHandler( Network::LoginDenied const & denied, nSenderInfo const & sender ){
+    // only the server is allowed to send this
+    if(sender.SenderID() != 0)
+        return;
+
     if ( denied.has_reason() )
     {
         sn_DenyReason = denied.reason();
@@ -1363,7 +1360,7 @@ static void sn_LoginDeniedHandler( Network::LoginDenied const & denied, nSenderI
         if ( connectionName.Len() > 1 )
         {
             // create server info and fill it with data
-            sn_redirectTo = std::auto_ptr< nServerInfoBase>( new nServerInfoRedirect( connectionName, port ) );
+            sn_redirectTo.reset(new nServerInfoRedirect( connectionName, port ) );
         }
     }
 
@@ -1431,7 +1428,6 @@ static void sn_LoginAcceptedHandler( Network::LoginAccepted const & accepted, nS
 #ifndef NOEXPIRE
 #ifndef DEDICATED
             // last checked to be compatible with 0.3.1_pb from trunk.
-            // It's ulikely this branch will introduce more bugs/network code revisions, so we're fine accepting all 
             int lastCheckedTrunkVersion = 21;
 
             // start of trunk as seen from this branch
@@ -1439,6 +1435,12 @@ static void sn_LoginAcceptedHandler( Network::LoginAccepted const & accepted, nS
 
             // maximal allowed version from this branch
             int maxVersionThisBranch = sn_currentProtocolVersion + 1;
+
+            // in case we forget to update lastCheckedTrunkVersion
+            if( lastCheckedTrunkVersion < maxVersionThisBranch )
+            {
+                lastCheckedTrunkVersion = maxVersionThisBranch;
+            }
 
             // expiration for public beta versions
             if ( !sn_AcceptingFromMaster &&
@@ -1448,7 +1450,11 @@ static void sn_LoginAcceptedHandler( Network::LoginAccepted const & accepted, nS
                      )
                 )
             {
-                throw tGenericException( tOutput("$testing_version_expired"), tOutput("$testing_version_expired_title" ) );
+                sn_expired=true;
+                login_failed=true;
+                login_succeeded=false;
+                sn_SetNetState(nSTANDALONE);
+                return;
             }
 #endif
 #endif
@@ -1636,7 +1642,7 @@ static tSettingItem< bool > sn_synCookieConf( "ANTI_SPOOF", sn_synCookie );
 
 
 // number of packets from unknown sources to process each call to rec_peer
-static int sn_connectionLimit = 100;
+static int sn_connectionLimit = 5;
 static tSettingItem< int > sn_connectionLimitConf( "CONNECTION_LIMIT", sn_connectionLimit );
 
 // turtle mode control
@@ -1984,6 +1990,11 @@ void sn_LoginHandler( Network::Login const & login, nSenderInfo const & sender )
 void sn_LogoutHandler( Network::Logout const &, nSenderInfo const & sender )
 {
     unsigned short id = sender.SenderID();
+
+    // only the server or legal clients are allowed to send this
+    // (client check comes later)
+    if(sn_GetNetState() == nCLIENT && id != 0)
+        return;
 
     if (sn_Connections[id].socket)
     {
@@ -2379,7 +2390,7 @@ static void rec_peer(unsigned int peer){
             nAddress addrFrom; // the sender of the current packet
             received = sn_Connections[peer].socket->Read( reinterpret_cast< int8 *>( buffer ), maxReceive, addrFrom);
 
-            if ( received > 0 )
+            if ( received >= 2 )
             {
                 if ( received >= maxReceive )
                 {
@@ -2501,6 +2512,10 @@ static void rec_peer(unsigned int peer){
                         continue;
                     }
 
+                    // logged in clients should ignore packets from unknown sources
+                    if(sn_GetNetState() != nSERVER && sn_myNetID != 0)
+                        continue;
+
                     // assume it's a new connection
                     id = MAXCLIENTS+1;
                     peers[ MAXCLIENTS+1 ] = addrFrom;
@@ -2509,7 +2524,7 @@ static void rec_peer(unsigned int peer){
 // #define NO_GLOBAL_FLOODPROTECTION
 #ifndef NO_GLOBAL_FLOODPROTECTION
                     // flood check for pings, logins and other potential nasties; as early as possible
-                    if( sn_turtleMode && count > sn_connectionLimit*10 )
+                    if( sn_turtleMode && count > sn_connectionLimit*5 )
                     {
                         continue;
                     }
@@ -2718,7 +2733,7 @@ static void rec_peer(unsigned int peer){
                 catch(nIgnore const &){
                     // well, do nothing.
                 }
-                catch(nKillHim)
+                catch(nKillHim const &)
                 {
                     con << "nKillHim signal caught: ";
                     sn_DisconnectUser(id, "$network_kill_error");
@@ -2821,6 +2836,11 @@ static bool sn_Listen( unsigned int & net_hostport, const tString& net_hostip )
             {
                 con << "sn_SetNetState: Unable to open accept socket on desired port " << net_hostport << ", Trying next ports...\n";
                 reported = true;
+
+                // just for safety, wait a bit. Does not do much good.
+                tDelay(100000);
+                
+                continue;
             }
 
             net_hostport++;
@@ -2991,20 +3011,16 @@ nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket
 {
     if ( loginType == Login_All )
     {
-        nConnectError ret = nABORT;
-        if ( sn_GetNetState() != nCLIENT )
-        {
-            // ret = sn_Connect( server, Login_Protobuf, socket );
-        }
-        if ( sn_GetNetState() != nCLIENT )
+        nConnectError ret = nTIMEOUT;
+        if ( sn_GetNetState() != nCLIENT && ret == nTIMEOUT )
         {
             ret = sn_Connect( server, Login_Post0252, socket );
         }
-        if ( sn_GetNetState() != nCLIENT )
+        if ( sn_GetNetState() != nCLIENT && ret == nTIMEOUT )
         {
             sn_Connect( server, Login_Protobuf, socket );
         }
-        if ( sn_GetNetState() != nCLIENT )
+        if ( sn_GetNetState() != nCLIENT && ret == nTIMEOUT )
         {
             ret = sn_Connect( server, Login_Pre0252, socket );
         }
@@ -3013,9 +3029,10 @@ nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket
     }
 
     sn_DenyReason = "";
+    sn_expired = false;
 
     // reset redirection
-    sn_redirectTo.release();
+    sn_redirectTo.reset();
 
     // first, get all pending messages, ignoring them.
     sn_SetNetState(nSTANDALONE);
@@ -3083,6 +3100,8 @@ nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket
     case Login_Protobuf:
         // switch server connection to protobuf capable version
         sn_Connections[0].version = sn_myVersion;
+        // [[fallthrough]];
+        // fallthrough on purpose
     case Login_Pre0252:
         // just write a protobuf message. In pre-0.2.5.2 mode, it'll get converted
         // to a stream message correctly.
@@ -3146,13 +3165,18 @@ nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket
         sn_SendPlanned();
 
         // check for user abort
-        if ( tConsole::Idle() )
+        if ( tConsole::Idle(true) )
         {
             con << tOutput("$network_login_failed_abort");
             sn_SetNetState(nSTANDALONE);
             return nABORT;
         }
     }
+    if( sn_expired )
+    {
+        con.Message( tOutput("$testing_version_expired_title" ), tOutput("$testing_version_expired") );
+    }
+
     if (login_failed)
     {
         con << tOutput("$network_login_failed");
@@ -3560,14 +3584,14 @@ void sn_Receive(){
     switch (current_state){
     case nSERVER:
         {
-            memset( &peers[0], 0, sizeof(sockaddr) );
+	    peers[0] = nAddress{};
 
             // listen on all sockets
             nSocketListener const & listener = sn_BasicNetworkSystem.GetListener();
             for ( nSocketListener::iterator i = listener.begin(); i != listener.end(); ++i )
             {
                 // clear peer info used for receiving
-                memset( &peers[MAXCLIENTS+1], 0, sizeof(sockaddr) );
+                peers[MAXCLIENTS+1] = nAddress{};
 
                 // copy socket info over to [MAXCLIENTS+1] and receive. The copy
                 // step is important, nAuthentication.cpp relies on the socket being set.
@@ -3626,9 +3650,9 @@ void sn_DisconnectUser(int i, const tOutput& reason, nServerInfoBase * redirectT
     }
 
     // clients can only disconnect from the server
-    if ( i != 0 && sn_GetNetState() == nCLIENT )
+    if ( i != 0 && i <= MAXCLIENTS && sn_GetNetState() == nCLIENT )
     {
-        tERR_ERROR( "Client tried to disconnect from another client: impossible and a bad idea." );
+        tERR_WARN( "Client tried to disconnect from another client: impossible and a bad idea." );
         return;
     }
 
@@ -4650,7 +4674,15 @@ typedef sockaddr nMachineKey;
 
 bool operator < ( nMachineKey const & a, nMachineKey const & b )
 {
-    return reinterpret_cast< sockaddr_in const & >( a ).sin_addr.s_addr < reinterpret_cast< sockaddr_in const & >( b ).sin_addr.s_addr;
+    sockaddr_in const & sa = reinterpret_cast< sockaddr_in const & >( a );
+    sockaddr_in const & sb = reinterpret_cast< sockaddr_in const & >( b );
+#ifdef DEBUG_X
+// compare ports first to make different clients appear as different voters
+    if(sa.sin_port != sb.sin_port)
+        return sa.sin_port < sb.sin_port;
+#endif
+
+    return sa.sin_addr.s_addr < sb.sin_addr.s_addr;
 }
 
 typedef std::map< nMachineKey, nMachinePTR > nMachineMap;
@@ -4695,6 +4727,46 @@ static nMachine & sn_LookupMachine( tString const & address )
     nAddress addr;
     addr.SetAddress( address );
     return sn_LookupMachine( addr );
+}
+
+class nMachineIteratorPimpl: public nMachineMap::iterator
+{
+public:
+    nMachineIteratorPimpl()
+    : nMachineMap::iterator(sn_GetMachineMap().begin())
+    {
+    }
+};
+
+nMachine & nMachine::iterator::operator *() const
+{
+    nMachineMap::iterator & i = *pimpl_;
+    nMachinePTR & ptr = (*i).second;
+    return *ptr.machine;
+}
+
+nMachine::iterator::iterator()
+{
+    pimpl_ = new nMachineIteratorPimpl();
+}
+
+nMachine::iterator::~iterator()
+{
+    delete pimpl_;
+}
+
+void nMachine::iterator::operator ++()
+{
+    (*pimpl_)++;
+}
+void nMachine::iterator::operator ++(int)
+{
+    (*pimpl_)++;
+}
+
+bool nMachine::iterator::Valid()
+{
+    return (*pimpl_) != sn_GetMachineMap().end();
 }
 
 // *******************************************************************************
@@ -4941,6 +5013,11 @@ void nMachine::Ban( REAL time )
             {
                 sn_DisconnectUser( i, banReason_ );
             }
+        }
+
+        for ( nMachineDecorator *decorator = decorators_; decorator != NULL; decorator = decorator->Next() )
+        {
+            decorator->OnBan();
         }
     }
 
@@ -5331,6 +5408,10 @@ static tConfItemFunc sn_listBanConf("BAN_LIST",&sn_ListBanConf);
 // *******************************************************************************
 
 void nMachineDecorator::OnDestroy( void )
+{
+}
+
+void nMachineDecorator::OnBan()
 {
 }
 

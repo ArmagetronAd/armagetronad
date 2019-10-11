@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 */
 
+#include "rGL.h"
 #include "eGameObject.h"
 #include "uInputQueue.h"
 #include "eTimer.h"
@@ -32,7 +33,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "eWall.h"
 #include "tConsole.h"
 #include "rScreen.h"
-#include "rGL.h"
 
 #include "eSound.h"
 #include "eSoundMixer.h"
@@ -159,8 +159,16 @@ REAL  eGameObject::Speed()const{return 0;}
 void eGameObject::InteractWith(eGameObject *,REAL,int){}
 
 // what happens if we pass eWall w?
-void eGameObject::PassEdge(const eWall *w,REAL,REAL,int){
-    if (w) Kill();
+eGameObject::ePassEdgeResult eGameObject::PassEdge(const eWall *w,REAL,REAL,int){
+    if (w)
+    {
+        Kill();
+        return eAbort;
+    }
+    else
+    {
+        return eContinue;
+    }
 }
 
 static int se_moveTimeout = 100;
@@ -178,10 +186,12 @@ typedef std::multimap< REAL, eTempEdgePassing > eTempEdgeMap;
 // moves
 void eGameObject::Move( const eCoord &dest, REAL startTime, REAL endTime, bool useTempWalls )
 {
+    diedWhileMoving_ = false;
+
 #ifdef DEBUG
     grid->Check();
 #endif
-    if (!finite(dest.x) || !finite(dest.y))
+    if (!isfinite(dest.x) || !isfinite(dest.y))
     {
         st_Breakpoint();
         return;
@@ -198,7 +208,7 @@ void eGameObject::Move( const eCoord &dest, REAL startTime, REAL endTime, bool u
     grid->Range(stop.NormSquared());
 
 #ifdef DEBUG
-    if (!finite(stop.x) || !finite(stop.y))
+    if (!isfinite(stop.x) || !isfinite(stop.y))
     {
         st_Breakpoint();
 
@@ -394,7 +404,12 @@ rerun:
                 while ( currentTempCollision != tempCollisions.end() && (*currentTempCollision).first < bestERatio )
                 {
                     eTempEdgePassing const & passing = (*currentTempCollision).second;
-                    PassEdge( passing.wall, TIME( (*currentTempCollision).first ), passing.ratio, 0 );
+                    auto res = PassEdge( passing.wall, TIME( (*currentTempCollision).first ), passing.ratio, 0 );
+                    if(res != eContinue)
+                    {
+                        pos = passing.wall->Point(passing.ratio);
+                        return;
+                    }
                     ++ currentTempCollision;
                 }
 
@@ -406,7 +421,13 @@ rerun:
                 // leave this face (through a wall)
                 eWall*     w     = best->GetWall();
                 if (w)
-                    PassEdge(w,time,bestRRatio,0);
+                {
+                    auto res = PassEdge(w,time,bestRRatio,0);
+                    if(res != eContinue)
+                    {
+                        return;
+                    }
+                }
 
                 // set next incoming edge
                 tASSERT(best->Other());
@@ -419,7 +440,13 @@ rerun:
                     w = in->GetWall();
 
                     if (w)
-                        PassEdge(w,time,bestRRatio,0);
+                    {
+                        auto res = PassEdge(w,time,bestRRatio,0);
+                        if(res != eContinue)
+                        {
+                            return;
+                        }
+                    }
                 }
 
                 // switch to the next face
@@ -443,7 +470,13 @@ rerun:
         while ( currentTempCollision != tempCollisions.end() )
         {
             eTempEdgePassing const & passing = (*currentTempCollision).second;
-            PassEdge( passing.wall, TIME( (*currentTempCollision).first ), passing.ratio, 0 );
+            auto res = PassEdge( passing.wall, TIME( (*currentTempCollision).first ), passing.ratio, 0 );
+            if(res != eContinue)
+            {
+                pos = passing.wall->Point(passing.ratio);
+                return;
+            }
+
             ++ currentTempCollision;
         }
     }
@@ -592,22 +625,16 @@ void eGameObject::FindCurrentFace(){
 #ifdef DEBUG
                 eFace * lastFace = currentFace;
 #endif
-                try
-                {
-                    Move( oldPos, lastTime, lastTime, false );
-                }
-                catch( eDeath & ) // ignore death exceptions and leave object where it would have died
+                Move( oldPos, lastTime, lastTime, false );
+                if(diedWhileMoving_) // ignore death exceptions and leave object where it would have died
                 {
 #ifdef DEBUG
                     // try again (yeah, this looks like a WTF, but it really helps in some cases because the situation has changed since the last try. /me blames floating points)
                     // besides, (now, this was changed) the start position changed.
-                    try
-                    {
-                        pos = center;
-                        currentFace = lastFace;
-                        Move( oldPos, lastTime, lastTime, false );
-                    }
-                    catch( eDeath & ){}
+                    pos = center;
+                    currentFace = lastFace;
+                    Move( oldPos, lastTime, lastTime, false );
+                    diedWhileMoving_ = false;
 #endif
                 }
 
@@ -658,6 +685,21 @@ void eGameObject::EnsureBorn() {
 }
 
 void eGameObject::Kill(){}
+
+bool eGameObject::diedWhileMoving_ = false;
+
+eGameObject::ePassEdgeResult eGameObject::DieWhileMoving()
+{
+    diedWhileMoving_ = true;
+    return eAbort;
+}
+
+bool eGameObject::DiedWhileMoving()
+{
+    bool ret = diedWhileMoving_;
+    diedWhileMoving_ = false;
+    return ret;
+}
 
 // draws it to the screen using OpenGL
 void eGameObject::Render(const eCamera *){}
@@ -718,6 +760,8 @@ bool eGameObject::TimestepThis(REAL currentTime,eGameObject *c){
 #ifdef DEBUG
     c->grid->Check();
 #endif
+
+    diedWhileMoving_ = false;
 
     tJUST_CONTROLLED_PTR< eGameObject > keep( c ); // keep object alive
 

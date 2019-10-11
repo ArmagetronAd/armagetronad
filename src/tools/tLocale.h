@@ -33,8 +33,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tError.h"
 #include "tVersion.h"
 
+#include <vector>
+#include <list>
+
+extern const tString st_internalEncoding;
+
 class tLocaleItem;
-class tOutputItemBase;
 
 //! transform a string from latin1 to utf8 unicode
 tColoredString st_Latin1ToUTF8( tString const & s );
@@ -63,6 +67,24 @@ public:
     }
 };
 
+class tOutputItemBase: public tListItem<tOutputItemBase>
+{
+public:
+    tOutputItemBase(tOutput& o);
+    virtual ~tOutputItemBase();
+    virtual void Print(tString& target) const = 0;
+    virtual void Clone(tOutput& o)      const = 0;
+};
+
+class tOutputItemTemplate: public tOutputItemBase
+{
+    int       num;
+    tString   parameter;
+public:
+    tOutputItemTemplate(tOutput& o, int n, const char *p);
+    virtual void Print(tString& target) const;
+    virtual void Clone(tOutput& o)      const;
+};
 
 // flexible output unit: the output string is generated on the fly from
 // the components.
@@ -85,7 +107,7 @@ class tOutput{
 
     tOutputItemBase *anchor;
 
-    tOutput& operator << (const tOutput &o);
+    // tOutput& operator << (const tOutput &o);
 public:
     tOutput();
     ~tOutput();
@@ -95,11 +117,17 @@ public:
     void AddLiteral(const char *);       // adds a language independent string
     void AddLocale(const char *);        // adds a language dependant string
     void AddSpace();                     // adds a simple space
+    void AddString(char const * pString); // checks the string, delegates to correct Add...()-Function
 
     // set a template parameter at this position of the output string
-    tOutput & SetTemplateParameter(int num, const char *parameter);
-    tOutput & SetTemplateParameter(int num, int         parameter);
-    tOutput & SetTemplateParameter(int num, float       parameter);
+    template<typename T> tOutput & SetTemplateParameter(int num, T const& parameter)
+    {
+        tString p;
+        p << parameter;
+        tNEW(tOutputItemTemplate)(*this, num, p);
+
+        return *this;
+    }
 
     // delete all elements
     void Clear();
@@ -118,7 +146,7 @@ public:
 
         SetTemplateParameter(1, template1);
 
-        *this << identifier;
+        AddString(identifier);
     }
 
     template< class T1, class T2 >
@@ -130,7 +158,7 @@ public:
         SetTemplateParameter(1, template1);
         SetTemplateParameter(2, template2);
 
-        *this << identifier;
+        AddString(identifier);
     }
 
     template< class T1, class T2, class T3 >
@@ -143,7 +171,7 @@ public:
         SetTemplateParameter(2, template2);
         SetTemplateParameter(3, template3);
 
-        *this << identifier;
+        AddString(identifier);
     }
 
     template< class T1, class T2, class T3, class T4 >
@@ -157,7 +185,7 @@ public:
         SetTemplateParameter(3, template3);
         SetTemplateParameter(4, template4);
 
-        *this << identifier;
+        AddString(identifier);
     }
 
     tOutput(const tOutput &o); // copy constructor
@@ -168,15 +196,6 @@ public:
     bool IsEmpty()const {
         return !anchor;
     }
-};
-
-class tOutputItemBase: public tListItem<tOutputItemBase>
-{
-public:
-    tOutputItemBase(tOutput& o);
-    virtual ~tOutputItemBase();
-    virtual void Print(tString& target) const = 0;
-    virtual void Clone(tOutput& o)      const = 0;
 };
 
 
@@ -226,5 +245,60 @@ std::ostream& operator<< (std::ostream& s, const tLocaleItem& o);
 //std::stringstream& operator<<(std::stringstream& s, const tLocaleItem &t);
 tString& operator<< (tString& s, const tLocaleItem& o);
 
+//! Print lists nicely (Carrots, Apples and Tomatoes)
+template<class T>
+tString& operator<< (tString& s, const tArray<T>& arr)
+{
+    int len = arr.Len() - 1;
+    for(int i = 0; i <= len; i++)
+    {
+        if(i && i == len)
+        {
+            s << tOutput("$and");
+        }
+        else if(i)
+        {
+            s << tOutput("$separator");
+        }
+        s << *(arr(i));
+    }
+    return s;
+}
+
+template<class T>
+tString& operator<< (tString& s, const std::vector<T>& arr)
+{
+    int len = arr.size() - 1;
+    for(int i = 0; i <= len; i++)
+    {
+        if(i)
+        {
+            if(i == len)
+                s << tOutput("$and");
+            else
+                s << tOutput("$separator");
+        }
+        s << arr[i];
+    }
+    return s;
+}
+
+template<class T>
+tString& operator<< (tString& s, const std::list<T>& arr)
+{
+    T last = *(arr.rbegin());
+    for(typename std::list<T>::const_iterator it = arr.begin(); it != arr.end(); ++it)
+    {
+        if(it != arr.begin())
+        {
+            if((*it) == last)
+                s << tOutput("$and");
+            else
+                s << tOutput("$separator");
+        }
+        s << **it;
+    }
+    return s;
+}
 
 #endif

@@ -83,11 +83,11 @@ public:
     }
 };
 
-static tArray<tMemStackItem, true>& ST_Stack()
+static tArray<tMemStackItem>& ST_Stack()
 
 {
 
-    static tArray<tMemStackItem, true> st_stack;
+    static tArray<tMemStackItem> st_stack;
 
     return st_stack;
 

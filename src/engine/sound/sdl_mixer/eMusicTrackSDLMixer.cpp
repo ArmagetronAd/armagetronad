@@ -138,7 +138,9 @@ void eMusicTrack::LoadAATrack(tSong& thesong) {
     if(isInstalledS == "yes") m_IsInstalled = true;
     else m_IsInstalled = false;
 
+#ifdef DEBUG
     std::cout << thesong.title << " by " << thesong.author << "\n";
+#endif
     thesong.tracklist = theFile.GetGroup("tracks");
     thesong.sequence = theFile.GetGroup("sequence");
 #endif
@@ -157,7 +159,9 @@ void eMusicTrack::LoadVorbisTrack(tSong& thesong) {
 
     thesong.tracklist[tString("only")] = thesong.location;
     thesong.sequence[tString("0")] = "only";
+#ifdef DEBUG
     std::cout << "Track: " << thesong.location << "\n";
+#endif
     thesong.title = thesong.location;
 #endif
 }
@@ -188,7 +192,9 @@ void eMusicTrack::MusicFinished() {
         return;
     }
     m_SequenceChange = true;
+#ifdef DEBUG
     std::cout << "Sequence change\n";
+#endif
 #endif
 }
 
@@ -208,7 +214,9 @@ bool eMusicTrack::Play() {
         musicIsPlaying = false;
         return false;
     } else {
+#ifdef DEBUG
         std::cout << "Should be playing the first sequence\n";
+#endif
         m_HasSong = true;
         PlayCurrentSequence();
     }
@@ -228,9 +236,13 @@ void eMusicTrack::PlayCurrentSequence() {
         musicIsPlaying = true;
         m_IsPlaying = true;
         currentMusic = this;
+#ifdef DEBUG
         std::cout << "Playing the sequence\n";
+#endif
     } else {
+#ifdef DEBUG
         std::cout << "Didn't play the sequence " << (*m_SequencePos).first << "\n";
+#endif
         musicIsPlaying = false;
         m_HasSong = false;
     }
@@ -349,7 +361,9 @@ void eMusicTrack::Update() {
         if(m_SequenceChange==true) {
             PlayCurrentSequence();
             m_SequenceChange = false;
+#ifdef DEBUG
             std::cout << "Sequence change updating\n";
+#endif
         }
         if(m_Playlist) {
             if(m_isDirty) {

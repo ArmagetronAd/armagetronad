@@ -1,0 +1,11 @@
+# each line is an animation frame.
+# the format is <frame duration> <list of texture files>.
+# the textures are displayed with the first in the background and the last in the foreground.
+# during the frame duration, the alpha test threshold for the last texture is continuously lowered
+# from 1 to 0. This makes translucent elements of the texture pop in and allows limited
+# in-frame smooth animation.
+# empty lines and lines starting with # are ignored.
+
+0.50 textures/tutorials/conquest/start.png
+4.27 textures/tutorials/conquest/start.png textures/tutorials/conquest/success.png
+1 textures/tutorials/conquest/start.png textures/tutorials/conquest/success.png textures/tutorials/clipart/circle.png textures/tutorials/clipart/check.png

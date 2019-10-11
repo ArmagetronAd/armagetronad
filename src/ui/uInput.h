@@ -35,6 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tConfiguration.h"
 #include "tLocale.h"
 #include "tSafePTR.h"
+#include "uMenu.h"
 
 #define uMAX_PLAYERS 4
 
@@ -56,6 +57,7 @@ class uAction:public tListItem<uAction>{
 
     uActionTooltip *tooltip_;
 protected:
+    bool shouldShowInGenericConfigurationMenu_;
     int localID;  // unique id on this host
     int globalID; // unique ID send from the server
 public:
@@ -70,6 +72,16 @@ public:
     uActionTooltip * GetTooltip() const
     {
         return tooltip_;
+    }
+    
+    void SetShowInGenericConfigurationMenu( bool shouldShow )
+    {
+        shouldShowInGenericConfigurationMenu_ = shouldShow;
+    }
+    
+    bool ShowInGenericConfigurationMenu() const
+    {
+        return shouldShowInGenericConfigurationMenu_;
     }
 
 #ifdef SLOPPYLOCALE
@@ -103,8 +115,8 @@ public:
     {
         Level_Essential, // turns
         Level_Basic,     // speed control
-        Level_Advanced,  // glancing
-        Level_Expert     // switch camera modes, game menu, chat
+        Level_Advanced,  // glancing, camera modes
+        Level_Expert     // game menu, chat
     };
 
     typedef bool VETOFUNC(int player);
@@ -117,6 +129,9 @@ public:
 
     //! call if an action was triggered
     void Count( int player );
+
+    //! call to show the tooltip one more time
+    void ShowAgain();
 private:
     virtual void WriteVal(std::ostream & s );
     virtual void ReadVal(std::istream & s );
@@ -188,8 +203,6 @@ class uInput;
 
 class uBind: public tReferencable< uBind >
 {
-    friend class uMenuItemInput;
-
     virtual bool Delayable()=0;
     virtual bool DoActivate(REAL x)=0;
     REAL lastValue_;
@@ -238,7 +251,7 @@ public:
     std::string const Name(){ return name_; }
 private:
     int ID_;               //!< local ID for this program run
-    tString persistentID_; //!< global ID that does not change over program runs
+    tString persistentID_; //!< global ID that does not change over program runs; scancode for SDL2
     tString name_;         //!< human readable name
 
     tJUST_CONTROLLED_PTR< uBind > bound_; //!< the binding
@@ -325,6 +338,30 @@ void su_KeyInit();
 
 // initialize joysticks
 void su_JoystickInit();
+
+// *****************************************************
+//  Menuitem for input selection
+// *****************************************************
+
+class uMenuItemInput: uMenuItem
+{
+    uAction      *act;
+    int         ePlayer;
+    bool        active;
+public:
+    uMenuItemInput(uMenu *M,uAction *a,int p);
+    virtual ~uMenuItemInput(){}
+    virtual void Render(REAL x,REAL y,REAL alpha=1,bool selected=0);
+    virtual void Enter();
+    virtual bool Event(SDL_Event &e);
+    virtual tString Help()
+    {
+        tString ret;
+        ret << helpText << "\n";
+        ret << tOutput("$input_item_help");
+        return ret;
+    }
+};
 
 #endif
 

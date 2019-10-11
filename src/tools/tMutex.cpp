@@ -72,9 +72,11 @@ namespace boost
 #ifdef HAVE_REAL_MUTEX
         // TODO: error checking
         pthread_mutexattr_t mta;
-        
+
+        pthread_mutexattr_init(&mta);
         pthread_mutexattr_settype(&mta, PTHREAD_MUTEX_RECURSIVE);
         pthread_mutex_init(&mutex_, &mta);
+        pthread_mutexattr_destroy(&mta);
 #endif
     }
 }

@@ -30,6 +30,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "tString.h"
 
+tString st_ProgramNameUppercase();
+
 extern tString  st_programName;         //!< The name of this game                                                          (\g)
 extern tString  st_programVersion;      //!< The build label, or version                                                    (\v)
 extern tString  st_programRevId;        //!< The revision ID this build is based from, if any.                              (\i)

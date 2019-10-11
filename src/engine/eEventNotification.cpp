@@ -32,11 +32,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "ePlayer.h"
 #include "nNetwork.h"
 #include "tString.h"
-#ifdef MACOSX_XCODE
-#ifndef DEDICATED
-#   include "AAGrowlBridge.h"
-#endif
-#endif
+// #ifdef MACOSX_XCODE
+// #ifndef DEDICATED
+// #   include "AAGrowlBridge.h"
+// #endif
+// #endif
 
 #include "nProtoBuf.h"
 
@@ -48,11 +48,11 @@ void se_eventNotificationHandler( Engine::EventNotification const & event, nSend
 {
     tString title = event.title();
     tString message = event.message();
-#ifdef MACOSX_XCODE
-#ifndef DEDICATED
-    Growl(title, message);
-#endif
-#endif
+// #ifdef MACOSX_XCODE
+// #ifndef DEDICATED
+//     Growl(title, message);
+// #endif
+// #endif
 }
 
 static nProtoBufDescriptor< Engine::EventNotification > se_eventNotificationDescriptor(  199, se_eventNotificationHandler );

@@ -1,38 +1,38 @@
 /*
- 
+
 *************************************************************************
- 
+
 ArmageTron -- Just another Tron Lightcycle Game in 3D.
 Copyright (C) 2000  Manuel Moos (manuel@moosnet.de)
 Copyright (C) 2004  Armagetron Advanced Team (http://sourceforge.net/projects/armagetronad/)
- 
+
 **************************************************************************
- 
+
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
 as published by the Free Software Foundation; either version 2
 of the License, or (at your option) any later version.
- 
+
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
- 
+
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 ***************************************************************************
- 
+
 */
 
 #include "aa_config.h"
 
 #ifndef DEDICATED
-#   ifdef MACOSX
-#       include "AAPaste.h"
+#   ifdef MACOSX_XCODE
+#       include "uOSXPaste.h"
 #       include <CoreFoundation/CoreFoundation.h>
-#   else
+#   elif !defined(MACOSX)
 #       include "scrap.h"
 #   endif
 #endif
@@ -96,6 +96,7 @@ uMenu::uMenu(const tOutput &t,bool exit_item)
 }
 
 uMenu::~uMenu(){
+    if( selected >=0 && selected < items.Len() ) items[selected]->Deselect();
     for (int i=items.Len()-1;i>=0;i--)
         delete items[i];
 }
@@ -190,7 +191,12 @@ void uMenu::OnEnter(){
 #endif
     if( selected >= items.Len() )
     {
-        selected = items.Len() - 1;
+        // skip to actually selectable item
+        bool wrapBack = wrap;
+        wrap = true;
+        selected = GetPrevSelectable(0);
+        if( selected >=0 && selected < items.Len() ) items[selected]->Select();
+        wrap = wrapBack;
     }
     while (!exitFlag && !quickexit && !exitToMain){
         st_DoToDo();
@@ -346,21 +352,27 @@ void uMenu::OnEnter(){
             if (YPos(menuentries-1)>menuTop && (int(tSysTimeFloat())+1)%2)
                 arrow(.9,menuTop,1,.05);
 
-            if (tSysTimeFloat()-lastkey>timeout){
-                disphelp=true;
+            REAL helpAlpha = tSysTimeFloat()-lastkey-timeout;
+            if( helpAlpha > 1 )
+            {
+                helpAlpha = 1;
+            }
+
+            disphelp = helpAlpha > 0;
+            if ( items[selected]->DisplayHelp( disphelp, menuBot, helpAlpha ) )
+            {
                 if (sr_alphaBlend)
-                    glColor4f(1,.8,.8,tSysTimeFloat()-lastkey-timeout);
+                    glColor4f(1,.8,.8, helpAlpha );
                 else
-                    Color(tSysTimeFloat()-lastkey-timeout,
-                          .8*(tSysTimeFloat()-lastkey-timeout),
-                          .8*(tSysTimeFloat()-lastkey-timeout));
+                    Color(helpAlpha,
+                          .8*helpAlpha,
+                          .8*helpAlpha);
 
                 rTextField c(-.95f,menuBot-.04f,rCHEIGHT_NORMAL, sr_fontMenu);
                 c.SetWidth(1.9f-items[selected]->SpaceRight());
                 c.EnableLineWrap();
                 c << items[selected]->Help();
             }
-            else disphelp=false;
         }
         else
 #endif
@@ -401,11 +413,15 @@ void uMenu::HandleEvent( SDL_Event event )
 
                 case(SDLK_UP):
                                 lastkey=tSysTimeFloat();
+                    if( selected >=0 && selected < items.Len() ) items[selected]->Deselect();
                     selected = GetNextSelectable(selected);
+                    if( selected >=0 && selected < items.Len() ) items[selected]->Select();
                     break;
                 case(SDLK_DOWN):
                                 lastkey=tSysTimeFloat();
+                    if( selected >=0 && selected < items.Len() ) items[selected]->Deselect();
                     selected = GetPrevSelectable(selected);
+                    if( selected >=0 && selected < items.Len() ) items[selected]->Select();
                     break;
 
             case(SDLK_LEFT):
@@ -493,6 +509,10 @@ int uMenu::GetPrevSelectable(int start)
     return start;
 }
 
+#ifndef DEDICATED
+static bool s_idleBackground = false;
+#endif
+
 // select the menu item above "start"
 int uMenu::GetNextSelectable(int start)
 {
@@ -521,6 +541,8 @@ void uMenu::GenericBackground(REAL top){
 #ifndef DEDICATED
     if (idle)
     {
+        s_idleBackground = true;
+
         try
         {
             // throw tGenericException("test"); // (test exception throw to see if error handling works right)
@@ -533,7 +555,7 @@ void uMenu::GenericBackground(REAL top){
             }
 
             // fade everything rendered so far to black
-            if( sr_alphaBlend )
+            if( sr_alphaBlend && sr_chatLayer > 0 )
             {
                 sr_ResetRenderState(true);
 
@@ -548,7 +570,7 @@ void uMenu::GenericBackground(REAL top){
                 else
                 {
                     alpha += timePassed;
-                    static const REAL limit = .5;
+                    REAL limit = sr_chatLayer;
 
                     if( alpha > limit )
                     {
@@ -564,10 +586,13 @@ void uMenu::GenericBackground(REAL top){
         }
         catch ( ... )
         {
+            s_idleBackground = false;
+
             // the idle background function is broken. Disable it and rethrow.
             idle = 0;
             throw;
         }
+        s_idleBackground = false;
     }
     else if (sr_glOut){
         uCallbackMenuBackground::MenuBackground();
@@ -580,6 +605,7 @@ void uMenu::GenericBackground(REAL top){
 
 // marks the menu for exit
 void uMenu::OnExit(){
+    if( selected >=0 && selected < items.Len() ) items[selected]->Deselect();
     exitFlag=1;
 }
 
@@ -826,171 +852,200 @@ void uMenuItemString::Render(REAL x,REAL y,
 
 bool uMenuItemString::Event(SDL_Event &e){
 #ifndef DEDICATED
-    if (e.type!=SDL_KEYDOWN)
-        return false;
-    bool ret=true;
-    SDL_keysym &c=e.key.keysym;
-    SDLMod mod = c.mod;
-    bool moveWordLeft, moveWordRight, deleteWordLeft, deleteWordRight, moveBeginning, moveEnd, killForwards;
-    moveWordLeft = moveWordRight = deleteWordLeft = deleteWordRight = moveBeginning = moveEnd = killForwards = false;
+    bool ret =  false;
+    if (e.type==SDL_KEYDOWN) {
+        ret=true;
+#if SDL_VERSION_ATLEAST(2,0,0)
+        SDL_Keysym &c  = e.key.keysym;
+        SDL_Keymod mod = static_cast<SDL_Keymod>(c.mod);
+#else
+        SDL_keysym &c = e.key.keysym;
+        SDLMod mod    = c.mod;
+#endif
+        bool moveWordLeft, moveWordRight, deleteWordLeft, deleteWordRight, moveBeginning, moveEnd, killForwards;
+        moveWordLeft = moveWordRight = deleteWordLeft = deleteWordRight = moveBeginning = moveEnd = killForwards = false;
 
 #if defined (MACOSX)
-    // For moving over/deleting words
-    if (mod & KMOD_ALT) {
-        if (c.sym == SDLK_LEFT) {
-            moveWordLeft = true;
-        }
-        else if (c.sym == SDLK_RIGHT) {
-            moveWordRight = true;
-        }
-        else if (c.sym == SDLK_DELETE) {
-            deleteWordRight = true;
-        }
-        else if (c.sym == SDLK_BACKSPACE) {
-            deleteWordLeft = true;
-        }
-    }
-    // For moving to extremes of the line
-    else if (mod & KMOD_META) {
-        if (c.sym == SDLK_LEFT) {
-            moveBeginning = true;
-        }
-        else if (c.sym == SDLK_RIGHT) {
-            moveEnd = true;
-        }
-    }
-    // Linux and Windows
-#else
-    // Word operations
-    if (mod & KMOD_CTRL) {
-        if (c.sym == SDLK_LEFT) {
-            moveWordLeft = true;
-        }
-        else if (c.sym == SDLK_RIGHT) {
-            moveWordRight = true;
-        }
-        else if (c.sym == SDLK_DELETE) {
-            deleteWordRight = true;
-        }
-        else if (c.sym == SDLK_BACKSPACE) {
-            deleteWordLeft = true;
-        }
-    }
-    else if (c.sym == SDLK_HOME) {
-        moveBeginning = true;
-    }
-    else if (c.sym == SDLK_END) {
-        moveEnd = true;
-    }
-#endif
-    // "bash" keys
-    if (mod & KMOD_CTRL) {
-        if (c.sym == SDLK_a) {
-            moveBeginning = true;
-        }
-        else if (c.sym == SDLK_e) {
-            moveEnd = true;
-        }
-        else if (c.sym == SDLK_k) {
-            killForwards = true;
-        }
-    }
-    // moveWordLeft = moveWordRight = deleteWordLeft = deleteWordRight = moveBeginning = moveEnd = killForwards
-
-    if (moveWordLeft) {
-        realCursorPos += content->PosWordLeft(realCursorPos);
-    }
-    else if (moveWordRight) {
-        realCursorPos += content->PosWordRight(realCursorPos);
-    }
-    else if (deleteWordLeft) {
-        realCursorPos += content->RemoveWordLeft(realCursorPos);
-    }
-    else if (deleteWordRight) {
-        content->RemoveWordRight(realCursorPos);
-    }
-    else if (moveBeginning) {
-        realCursorPos = 0;
-    }
-    else if (moveEnd) {
-        realCursorPos = content->size();
-    }
-    else if (killForwards) {
-        content->RemoveSubStr(realCursorPos,content->size()-realCursorPos);
-    }
-    else if (c.sym == SDLK_LEFT) {
-        if (realCursorPos > 0) {
-            while(((*content)[--realCursorPos]&0xc0) == 0x80) ;
-        }
-    }
-    else if (c.sym == SDLK_RIGHT) {
-        if ( realCursorPos < content->size() ) {
-            while(++realCursorPos < content->size() && ((*content)[realCursorPos]&0xc0) == 0x80) ;
-        }
-    }
-    else if (c.sym == SDLK_DELETE) {
-        if (realCursorPos < content->size() ) {
-            content->RemoveSubStrUtf8(realCursorPos,1);
-        }
-    }
-    else if (c.sym == SDLK_BACKSPACE) {
-        if (realCursorPos > 0) {
-            realCursorPos -= content->RemoveSubStrUtf8(realCursorPos,-1);
-        }
-    }
-    else if (c.sym == SDLK_KP_ENTER || c.sym == SDLK_RETURN || c.sym == SDLK_UP || c.sym == SDLK_DOWN || c.sym == SDLK_ESCAPE ) {
-        ret = false;
-        //        c.sym = SDLK_DOWN;
-    }
-#ifdef MACOSX
-    else if (c.sym == SDLK_v && mod & KMOD_META) {
-        CFDataRef data;
-        if (AAPastePasteboardData(data)) {
-            const UInt8 *bytes = CFDataGetBytePtr(data);
-            CFIndex bytesLength = CFDataGetLength(data);
-            
-            for (int i = 0; i < bytesLength; i++) {
-                if (!InsertChar(bytes[i], false))
-                    break;
+        // For moving over/deleting words
+        if (mod & KMOD_ALT) {
+            if (c.sym == SDLK_LEFT) {
+                moveWordLeft = true;
             }
-            
-            CFRelease(data);
+            else if (c.sym == SDLK_RIGHT) {
+                moveWordRight = true;
+            }
+            else if (c.sym == SDLK_DELETE) {
+                deleteWordRight = true;
+            }
+            else if (c.sym == SDLK_BACKSPACE) {
+                deleteWordLeft = true;
+            }
         }
-        else {
+        // For moving to extremes of the line
+#if SDL_VERSION_ATLEAST(2,0,0)
+        else if (mod & KMOD_GUI) {
+#else
+        else if (mod & KMOD_META) {
+#endif
+            if (c.sym == SDLK_LEFT) {
+                moveBeginning = true;
+            }
+            else if (c.sym == SDLK_RIGHT) {
+                moveEnd = true;
+            }
+        }
+        // Linux and Windows
+#else
+        // Word operations
+        if (mod & KMOD_CTRL) {
+            if (c.sym == SDLK_LEFT) {
+                moveWordLeft = true;
+            }
+            else if (c.sym == SDLK_RIGHT) {
+                moveWordRight = true;
+            }
+            else if (c.sym == SDLK_DELETE) {
+                deleteWordRight = true;
+            }
+            else if (c.sym == SDLK_BACKSPACE) {
+                deleteWordLeft = true;
+            }
+        }
+        else if (c.sym == SDLK_HOME) {
+            moveBeginning = true;
+        }
+        else if (c.sym == SDLK_END) {
+            moveEnd = true;
+        }
+#endif
+        // "bash" keys
+        if (mod & KMOD_CTRL) {
+            if (c.sym == SDLK_a) {
+                moveBeginning = true;
+            }
+            else if (c.sym == SDLK_e) {
+                moveEnd = true;
+            }
+            else if (c.sym == SDLK_k) {
+                killForwards = true;
+            }
+        }
+        // moveWordLeft = moveWordRight = deleteWordLeft = deleteWordRight = moveBeginning = moveEnd = killForwards
+
+        if (moveWordLeft) {
+            realCursorPos += content->PosWordLeft(realCursorPos);
+        }
+        else if (moveWordRight) {
+            realCursorPos += content->PosWordRight(realCursorPos);
+        }
+        else if (deleteWordLeft) {
+            realCursorPos += content->RemoveWordLeft(realCursorPos);
+        }
+        else if (deleteWordRight) {
+            content->RemoveWordRight(realCursorPos);
+        }
+        else if (moveBeginning) {
+            realCursorPos = 0;
+        }
+        else if (moveEnd) {
+            realCursorPos = content->size();
+        }
+        else if (killForwards) {
+            content->RemoveSubStr(realCursorPos,content->size()-realCursorPos);
+        }
+        else if (c.sym == SDLK_LEFT) {
+            if (realCursorPos > 0) {
+                while(((*content)[--realCursorPos]&0xc0) == 0x80) ;
+            }
+        }
+        else if (c.sym == SDLK_RIGHT) {
+            if ( realCursorPos < content->size() ) {
+                while(++realCursorPos < content->size() && ((*content)[realCursorPos]&0xc0) == 0x80) ;
+            }
+        }
+        else if (c.sym == SDLK_DELETE) {
+            if (realCursorPos < content->size() ) {
+                content->RemoveSubStrUtf8(realCursorPos,1);
+            }
+        }
+        else if (c.sym == SDLK_BACKSPACE) {
+            if (realCursorPos > 0) {
+                realCursorPos -= content->RemoveSubStrUtf8(realCursorPos,-1);
+            }
+        }
+        else if (c.sym == SDLK_KP_ENTER || c.sym == SDLK_RETURN || c.sym == SDLK_UP || c.sym == SDLK_DOWN || c.sym == SDLK_ESCAPE ) {
+            ret = false;
+//            c.sym = SDLK_DOWN;
+        }
+#ifdef MACOSX_XCODE
+#if SDL_VERSION_ATLEAST(2,0,0)
+        else if (c.sym == SDLK_v && mod & KMOD_GUI) {
+#else
+        else if (c.sym == SDLK_v && mod & KMOD_META) {
+#endif
+            CFDataRef data;
+            if (su_OSXPastePasteboardData(data)) {
+                const UInt8 *bytes = CFDataGetBytePtr(data);
+                CFIndex bytesLength = CFDataGetLength(data);
+
+                for (int i = 0; i < bytesLength; i++) {
+                    if (!InsertChar(bytes[i], false))
+                        break;
+                }
+
+                CFRelease(data);
+            }
+            else {
+                ret = false;
+            }
+        }
+#elif !defined(MACOSX)
+        else if (c.sym == SDLK_v && mod & KMOD_CTRL) {
+            char *scrap = 0;
+            int scraplen;
+            static bool initialized_scrap = false;
+
+            ret = false;
+
+            if(!initialized_scrap && init_scrap() >= 0) {
+                initialized_scrap = true;
+            }
+            if(initialized_scrap) {
+                get_scrap(SCRAP_TEXT, &scraplen, &scrap);
+                if(scraplen > 0) {
+                    std::cerr << "scrap: " << scrap << std::endl;
+                    for(unsigned char *c = (unsigned char *)scrap; *c; ++c) {
+                        if(!InsertChar(*c)) {
+                            break; // we hit a newline or were trying to
+                                  // paste binary stuff
+                        }
+                        ret = true;
+                    }
+                    //free(scrap);
+                }
+            }
+        }
+#endif
+#if SDL_VERSION_ATLEAST(2,0,0)
+        else
+        {
+            // typically, SDL2 text input does not handle key down events.
             ret = false;
         }
     }
+    else if (e.type==SDL_TEXTINPUT) {
+        ret = Insert(tString(e.text.text)); // just insert input text as utf8 string
+    }
+    else if (e.type==SDL_TEXTEDITING) {
+//        fprintf(stderr, "text editing \"%s\", selected range (%d, %d)\n",
+//                e.edit.text, e.edit.start, e.edit.length);
+    }
 #else
-    else if (c.sym == SDLK_v && mod & KMOD_CTRL) {
-        char *scrap = 0;
-        int scraplen;
-        static bool initialized_scrap = false;
-
-        ret = false;
-
-        if(!initialized_scrap && init_scrap() >= 0) {
-            initialized_scrap = true;
-        }
-        if(initialized_scrap) {
-            get_scrap(SCRAP_TEXT, &scraplen, &scrap);
-            if(scraplen > 0) {
-                std::cerr << "scrap: " << scrap << std::endl;
-                for(unsigned char *c = (unsigned char *)scrap; *c; ++c) {
-                    if(!InsertChar(*c)) {
-                        break; // we hit a newline or were trying to
-                              // paste binary stuff
-                    }
-                    ret = true;
-                }
-                //free(scrap);
-            }
+        else {
+            ret = InsertChar(c.unicode);
         }
     }
 #endif
-    else {
-        ret = InsertChar(c.unicode);
-    }
-
     if( realCursorPos > content->size()) {
         realCursorPos=content->size();
     }
@@ -999,6 +1054,37 @@ bool uMenuItemString::Event(SDL_Event &e){
 #else
     return false;
 #endif
+}
+
+void uMenuItemString::Select() {
+#ifndef DEDICATED
+#if SDL_VERSION_ATLEAST(2,0,0)
+    SDL_StartTextInput();
+#endif
+#endif
+}
+
+void uMenuItemString::Deselect() {
+#ifndef DEDICATED
+#if SDL_VERSION_ATLEAST(2,0,0)
+    SDL_StopTextInput();
+#endif
+#endif
+}
+
+bool uMenuItemString::Insert(const tString &insertion)
+{
+	// Len() includes the trailing \0
+	if ( insertion.Len() > 0 && content->Len() + insertion.Len() <= maxLength_ + 2 )
+    {
+        *content = content->SubStr( 0, realCursorPos ) + insertion + content->SubStr( realCursorPos );
+        realCursorPos += insertion.Len()-1;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 inline bool IsReservedCodePoint(int unicode)
@@ -1010,10 +1096,10 @@ inline bool IsReservedCodePoint(int unicode)
      Function keys code points. See the “Function-Key Unicodes” section.
      http://developer.apple.com/DOCUMENTATION/Cocoa/Reference/ApplicationKit/Classes/NSEvent_Class/Reference/Reference.html
      */
-     
+
     reserved = reserved || (unicode >= 0xF700 && unicode <= 0xF747);
 #endif
-    
+
     return reserved;
 }
 
@@ -1025,7 +1111,7 @@ bool uMenuItemString::InsertChar(int unicode, bool convert) {
         if ( content->LenUtf8() < maxLength_ )
         {
             tString utf8string;
-            
+
             if (convert)
             {
                 unsigned short utf16string[1];
@@ -1036,11 +1122,11 @@ bool uMenuItemString::InsertChar(int unicode, bool convert) {
             {
                 utf8string.push_back(unicode);
             }
-            
+
             content->insert(realCursorPos, utf8string);
             realCursorPos+=utf8string.size();
         }
-        
+
         return true;
     }
     else {
@@ -1511,13 +1597,21 @@ void uCallbackMenuBackground::MenuBackground(){
 }
 
 // poll input, return true if ESC was pressed
-bool uMenu::IdleInput()
+bool uMenu::IdleInput( bool processInput )
 {
 #ifndef DEDICATED
+    if( !processInput )
+    {
+        sr_LockSDL();
+        SDL_PumpEvents();
+        sr_UnlockSDL();
+        return uMenu::quickexit != uMenu::QuickExit_Off;
+    }
+
     SDL_Event event;
     uInputProcessGuard inputProcessGuard;
-    while (su_GetSDLInput(event))
-    {   
+    while (!s_idleBackground && su_GetSDLInput(event))
+    {
         switch (event.type)
         {
         case SDL_KEYDOWN:
@@ -1530,11 +1624,13 @@ bool uMenu::IdleInput()
                 break;
             default:
                 break;
-            }   
+            }
         default:
             break;
         }
-    }   
+    }
+
+    return uMenu::quickexit != uMenu::QuickExit_Off;
 #endif
 
     return false;
@@ -1588,7 +1684,7 @@ bool uAnimationFrame::Load( std::vector< uAnimationFrame > & animation, char con
     {
         return false;
     }
-        
+
     while( f.good() )
     {
         tString l;
@@ -1719,15 +1815,15 @@ void uAnimationPlayer::Render( tRectangle & drawArea )
 
         bool end = ( iter+1 == textures_.end() );
         if ( end )
-        { 
+        {
             glAlphaFunc(GL_GREATER,1-completion);
-            
+
         }
         else
         {
             glAlphaFunc(GL_GREATER,0);
         }
-        
+
         Color(1,1,1);
         BeginQuads();
         TexCoord(0,1);
@@ -1841,7 +1937,22 @@ bool uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL 
 
                 rSysDep::ClearGL();
 
-                GenericBackground();
+                // GenericBackground();
+                static rFileTexture background( rTextureGroups::TEX_FONT, "textures/message_background.png" );
+                background.Select();
+
+                Color(1,1,1);
+
+                BeginQuads();
+                TexCoord(0,0);
+                Vertex(-1,1);
+                TexCoord(1,0);
+                Vertex(1,1);
+                TexCoord(1,1);
+                Vertex(1,-1);
+                TexCoord(0,1);
+                Vertex(-1,-1);
+                RenderEnd();
 
                 REAL w=16*3/640.0;
                 REAL h=32*3/480.0;
@@ -1867,8 +1978,9 @@ bool uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL 
                 REAL center = .4;
                 if (offset >= lines.size()) offset = lines.size() - 1;
                 {
-                    rTextField c(-.8,.6, h, sr_fontError);
+                    rTextField c(-.9,.6, h, sr_fontError);
                     c.EnableLineWrap();
+                    c.SetWidth(1.8);
 
                     for (unsigned i = offset; i < lines.size(); ++i)
                         c << lines[i] << "\n";

@@ -29,26 +29,29 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tSysTime.h"
 #include "rFont.h"
 #include "nConfig.h"
+#include "eWarmup.h"
+#include "eLadderLog.h"
 
 #include <set>
+#include <climits>
 
 #include "nProtoBuf.h"
 #include "eTeam.pb.h"
 #include "aa_config.h"
 
-tString & operator << ( tString &s, const eTeam & team)
+tString & operator << ( tString &s, const eTeam * team)
 {
-    if ( !(&team) )
+    if ( !team )
         return s << tOutput("$player_spectator_message");
     else
-        return s << team.GetColoredName();
+        return s << team->GetColoredName();
 }
-std::ostream & operator << ( std::ostream &s, const eTeam & team)
+std::ostream & operator << ( std::ostream &s, const eTeam * team)
 {
-    if ( !(&team) )
+    if ( !team )
         return s << tOutput("$player_spectator_message");
     else
-        return s << team.GetColoredName();
+        return s << team->GetColoredName();
 }
 
 #define TEAMCOLORS 8
@@ -79,7 +82,7 @@ static tString se_team_name[TEAMCOLORS]=
 // static tList<eTeam> se_ColoredTeams;
 static eTeam * se_ColoredTeams[TEAMCOLORS]={0,0,0,0,0,0,0,0};
 
-static int IMPOSSIBLY_LOW_SCORE=(-1 << 31);
+static int IMPOSSIBLY_LOW_SCORE=INT_MIN;
 
 // class that creates config items for one team
 // TEAM_(NAME|RED|GREEN|BLUE)_X
@@ -150,8 +153,6 @@ static tSettingItem<bool> se_allowTeamNameColorConfig("ALLOW_TEAM_NAME_COLOR", s
 static tSettingItem<bool> se_allowTeamNamePlayerConfig("ALLOW_TEAM_NAME_PLAYER", se_allowTeamNamePlayer );
 static tSettingItem<bool> se_allowTeamNameCustomConfig("ALLOW_TEAM_NAME_LEADER", se_allowTeamNameLeader );
 
-int se_matches = 0;
-
 static REAL se_minReady = 0.51;
 static tSettingItem<REAL> se_minReadyConf("WARMUP_MIN_READY_FRAC", se_minReady);
 
@@ -210,30 +211,24 @@ void eTeam::UpdateProperties()
     for ( i = players.Len()-1; i>=0; --i )
     {
         ePlayerNetID * player = players(i);
-
-        // on the client, don't count players who already expressed their wish
-        // to leave a team as active players.
-        if ( sn_GetNetState() != nCLIENT || player->nextTeam == this )
+        if ( player->IsHuman() )
         {
-            if ( player->IsHuman() )
-            {
-                if ( player->IsActive() )
-                    ++numHumans;
-            }
-            else
-                ++numAIs;
+            if ( player->IsActive() )
+                ++numHumans;
         }
+        else
+            ++numAIs;
     }
 
     if ( nSERVER == sn_GetNetState() )
         RequestSync();
 }
 
-static eLadderLogWriter se_teamRenamedWriter("TEAM_RENAMED", true);
-static eLadderLogWriter se_teamCreateWriter("TEAM_CREATED", true);
-static eLadderLogWriter se_teamDestroyWriter("TEAM_DESTROYED", true);
-static eLadderLogWriter se_teamAddWriter("TEAM_PLAYER_ADDED", true);
-static eLadderLogWriter se_teamRemoveWriter("TEAM_PLAYER_REMOVED", true);
+static eLadderLogWriter se_teamRenamedWriter( "TEAM_RENAMED", true, "old_name new_name" );
+static eLadderLogWriter se_teamCreateWriter( "TEAM_CREATED", true, "team" );
+static eLadderLogWriter se_teamDestroyWriter( "TEAM_DESTROYED", true, "team" );
+static eLadderLogWriter se_teamAddWriter( "TEAM_PLAYER_ADDED", true, "team player" );
+static eLadderLogWriter se_teamRemoveWriter( "TEAM_PLAYER_REMOVED", true, "team player" );
 
 // update name and color
 void eTeam::UpdateAppearance()
@@ -273,6 +268,7 @@ void eTeam::UpdateAppearance()
         nameTeamColor = true;
 
     nameTeamColor = NameTeamAfterColor ( nameTeamColor );
+    bool isCustomTeamName = false;
 
     tString updateName;
     if ( oldest )
@@ -294,22 +290,20 @@ void eTeam::UpdateAppearance()
             // let oldest own the team
             if ( players.Len() > 1 )
             {
-                if ( oldest->IsHuman() )
+                // did the player set a custom teamname ?
+                if (se_allowTeamNameLeader && oldest->teamname.Len()>1)
                 {
-                    // did the player set a custom teamname ?
-                    if (se_allowTeamNameLeader && oldest->teamname.Len()>1)
-                    {
-                        // Use player's custom teamname
-                        updateName = oldest->teamname;
-                    }
-                    else
-                    {
-                        // name team after first/oldest player
-                        tOutput newname;
-                        newname.SetTemplateParameter( 1, oldest->GetName() );
-                        newname << "$team_owned_by";
-                        updateName = newname;
-                    }
+                    // Use player's custom teamname
+                    isCustomTeamName = true;
+                    updateName = oldest->teamname;
+                }
+                else if ( oldest->IsHuman() )
+                {
+                    // name team after first/oldest player
+                    tOutput newname;
+                    newname.SetTemplateParameter( 1, oldest->GetName() );
+                    newname << "$team_owned_by";
+                    updateName = newname;
                 }
                 else
                 {
@@ -324,11 +318,16 @@ void eTeam::UpdateAppearance()
             {
                 // did the player set a custom teamname ?
                 if (oldest->teamname.Len()>1)
+                {
                     // use custom teamname
+                    isCustomTeamName = true;
                     updateName = oldest->teamname;
+                }
                 else
+                {
                     // use player name as teamname
                     updateName = oldest->GetName();
+                }
             }
 
             color = oldest->color;
@@ -350,14 +349,13 @@ void eTeam::UpdateAppearance()
         color.r_ = color.g_ = color.b_ = 7;
         empty = true;
     }
-    
-    tString oldNameFiltered = ePlayerNetID::FilterName(oldName);
-    tString newNameFiltered = ePlayerNetID::FilterName(name);
-    if( oldNameFiltered != newNameFiltered )
+
+    tString newNameFiltered = ePlayerNetID::FilterName( updateName );
+    if( logName != newNameFiltered )
     {
         if( !empty && !lastEmpty_ )
         {
-            se_teamRenamedWriter << oldNameFiltered << newNameFiltered;
+            se_teamRenamedWriter << logName << newNameFiltered;
             se_teamRenamedWriter.write();
         }
         else if( !empty )
@@ -367,19 +365,25 @@ void eTeam::UpdateAppearance()
         }
         else if( !lastEmpty_ )
         {
-            se_teamDestroyWriter << oldNameFiltered;
+            LogScoreDifference();
+            se_teamDestroyWriter << logName;
             se_teamDestroyWriter.write();
         }
+        logName = newNameFiltered;
     }
     lastEmpty_ = empty;
 
     // if the name has been changed then update it
     if (name!=updateName)
     {
-        // only display a message if
-        // the oldest player changed the name of the team
-        // the server also sets the teamname sometimes
-        if(sn_GetNetState()!=nCLIENT && oldest && !( name == "" || name == tString(tOutput("$team_empty"))) )
+        // Notify other players of the team name change if it's interesting
+        if (
+            sn_GetNetState() != nCLIENT
+            && oldest
+            && name != ""
+            && name != tString( tOutput("$team_empty") )
+            && ( lastWasCustomTeamName_ || ( updateName != oldest->GetName() && !nameTeamColor ) )
+        )
         {
             tOutput message;
             tColoredString name;
@@ -396,6 +400,7 @@ void eTeam::UpdateAppearance()
             sn_ConsoleOut(message);
         }
         name = updateName;
+        lastWasCustomTeamName_ = isCustomTeamName;
     }
 
     if ( nSERVER == sn_GetNetState() )
@@ -481,14 +486,14 @@ void eTeam::Invite( ePlayerNetID * player )
     {
         sn_ConsoleOut( tOutput( "$invite_team_invite", player->GetColoredName(), Name() ) );
     }
-    player->invitations_.insert( this );
+    player->AddInvitation( this );
 }
 
 // revoke an invitation
 void eTeam::UnInvite( ePlayerNetID * player )
 {
     tASSERT( player );
-    size_t wasInvited = player->invitations_.erase( this );
+    bool wasInvited = player->RemoveInvitation( this );
     if ( player->CurrentTeam() == this && this->IsLockedFor( player ) )
     {
         sn_ConsoleOut( tOutput( "$invite_team_kick", player->GetColoredName(), Name() ) );
@@ -506,9 +511,21 @@ bool eTeam::IsInvited( ePlayerNetID const * player ) const
     return player->invitations_.find( const_cast< eTeam * >( this ) ) != player->invitations_.end();
 }
 
+std::vector< const ePlayerNetID * > eTeam::InterestingInvitedPlayers() const
+{
+    std::vector< const ePlayerNetID * > invites;
+    for ( int i = se_PlayerNetIDs.Len() - 1; i >= 0; --i )
+    {
+        ePlayerNetID *p = se_PlayerNetIDs( i );
+        if ( IsInvited( p ) && p->CurrentTeam() != this )
+            invites.push_back( p );
+    }
+    return invites;
+}
+
 void eTeam::AddScore ( int s )
 {
-    if(se_matches)
+    if( se_warmup.IsWarmupMode() )
         return;
 
     score += s;
@@ -535,15 +552,17 @@ void eTeam::SetScore ( int s )
 
 void eTeam::AddScore(int points,
                      const tOutput& reasonwin,
-                     const tOutput& reasonlose)
+                     const tOutput& reasonlose,
+                     const tOutput& reasonfree)
 {
-    if (points==0)
+    if( se_warmup.IsWarmupMode() ){
         return;
+    }
 
     // delegate to player if this is a one-player team
     if ( players.Len() == 1 && maxPlayersLocal == 1 )
     {
-        players[0]->AddScore( points, reasonwin, reasonlose );
+        players[0]->AddScore( points, reasonwin, reasonlose, reasonfree );
         return;
     }
 
@@ -551,8 +570,15 @@ void eTeam::AddScore(int points,
 
     tOutput message;
     message.SetTemplateParameter(1, GetColoredName());
-    message.SetTemplateParameter(2, points > 0 ? points : -points);
+    message.SetTemplateParameter(2, abs(points));
 
+    if (!points)
+    {
+        if (reasonfree.IsEmpty())
+            return;
+        else
+            message.Append(reasonfree);
+    }
     if (points>0)
     {
         if (reasonwin.IsEmpty())
@@ -569,9 +595,12 @@ void eTeam::AddScore(int points,
     }
 
     sn_ConsoleOut(message);
-    RequestSync(true);
 
-    se_SaveToScoreFile(message);
+    if( points )
+    {
+        RequestSync(true);
+        se_SaveToScoreFile(message);
+    }
 }
 
 // *******************************************************************************
@@ -620,16 +649,21 @@ void eTeam::LogScoreDifferences( void )
 //!
 // *******************************************************************************
 
-static eLadderLogWriter se_roundScoreTeamWriter("ROUND_SCORE_TEAM", true);
+static eLadderLogWriter se_roundScoreTeamWriter( "ROUND_SCORE_TEAM", true, "score:int team" );
 
 void eTeam::LogScoreDifference( void )
+{
+    LogScoreDifference( logName );
+}
+
+void eTeam::LogScoreDifference( const tString & teamName )
 {
     if ( lastScore_ > IMPOSSIBLY_LOW_SCORE && IsHuman() )
     {
         tString ret;
         int scoreDifference = score - lastScore_;
         lastScore_ = IMPOSSIBLY_LOW_SCORE;
-        se_roundScoreTeamWriter << scoreDifference << ePlayerNetID::FilterName( Name() );
+        se_roundScoreTeamWriter << scoreDifference << teamName;
         se_roundScoreTeamWriter.write();
     }
 }
@@ -1026,22 +1060,79 @@ void eTeam::WritePlayers( eLadderLogWriter & writer, const eTeam *team )
     }
 }
 
-static eLadderLogWriter se_positionWriter( "POSITIONS", false );
-void eTeam::WriteLaunchPositions()
+static eLadderLogWriter se_onlinePlayerWriter( "ONLINE_PLAYER", true, "player ping:float team access_level:int total_score:int color_screen_name+" );
+static eLadderLogWriter se_onlineAIWriter( "ONLINE_AI", true, "player team total_score:int color_screen_name+" );
+static eLadderLogWriter se_onlineTeamWriter( "ONLINE_TEAM", true, "team total_score:int color_screen_name+" );
+static eLadderLogWriter se_numHumansWriter( "NUM_HUMANS", false, "number_humans:int" );
+
+// Writes the data for the ONLINE_PLAYER ladderlog event.
+// Returns true if the player is a human and is active.
+static bool se_WriteOnlinePlayerData( ePlayerNetID *player, eTeam *team )
 {
+    if ( !player->IsActive() )
+        return false;
+
+    bool isHuman = player->IsHuman();
+    if ( isHuman )
+    {
+        se_onlinePlayerWriter << player->GetLogName();
+        se_onlinePlayerWriter << player->ping;
+        if ( team )
+            se_onlinePlayerWriter << team->GetLogName();
+        else
+            se_onlinePlayerWriter << "";
+        se_onlinePlayerWriter << player->GetAccessLevel();
+        se_onlinePlayerWriter << player->Score();
+        se_onlinePlayerWriter << player->GetUserName() << player->GetColoredName();
+        se_onlinePlayerWriter.write();
+    }
+    else
+    {
+        se_onlineAIWriter << player->GetLogName();
+        if ( team )
+            se_onlineAIWriter << team->GetLogName();
+        else
+            se_onlineAIWriter << "";
+        se_onlineAIWriter << player->Score();
+        se_onlineAIWriter << player->GetUserName() << player->GetColoredName();
+        se_onlineAIWriter.write();
+    }
+    return isHuman;    
+}
+
+void eTeam::WriteOnlinePlayers()
+{
+    if ( sn_GetNetState() != nSERVER )
+        return;
+
+    int numHumans = 0;
+
+    // Write teams and players (ordered by launch position)
     for ( int i = teams.Len() - 1; i >= 0; --i )
     {
-        eTeam *team = teams(i);
-        
-        // AI teams are boring.
-        if ( !team->IsHuman() )
-            continue;
+        eTeam *team = teams( i );
+        se_onlineTeamWriter << team->GetLogName();
+        se_onlineTeamWriter << team->Score();
+        se_onlineTeamWriter << team->GetColoredName();
+        se_onlineTeamWriter.write();
 
-        se_positionWriter << ePlayerNetID::FilterName( team->Name() );
-        for ( int j = 0; j < team->players.Len(); j++ )
-            se_positionWriter << team->players( j )->GetLogName();
-        se_positionWriter.write();
+        for ( int j = 0; j < team->players.Len(); j++)
+        {
+            if ( se_WriteOnlinePlayerData( team->players( j ), team ) )
+                numHumans++;
+        }
     }
+
+    // Write spectators
+    for ( int i = se_PlayerNetIDs.Len() - 1; i >= 0; --i )
+    {
+        ePlayerNetID * p = se_PlayerNetIDs(i);
+        if ( !p->CurrentTeam() )
+            se_WriteOnlinePlayerData( p, NULL );
+    }
+
+    se_numHumansWriter << numHumans;
+    se_numHumansWriter.write();
 }
 
 // inquire or set the ability to use a color as a team name
@@ -1119,7 +1210,7 @@ void eTeam::AddPlayer    ( ePlayerNetID* player )
     }
 
 
-    se_teamAddWriter << ePlayerNetID::FilterName( name ) << player->GetLogName();
+    se_teamAddWriter << logName << player->GetLogName();
     se_teamAddWriter.write();
 
     // anounce joining if there are is more than one member now or if the team is color-named
@@ -1192,7 +1283,7 @@ void eTeam::AddPlayerDirty   ( ePlayerNetID* player )
 
     player->UpdateName();
 
-    se_teamAddWriter << ePlayerNetID::FilterName( name ) << player->GetLogName();
+    se_teamAddWriter << logName << player->GetLogName();
     se_teamAddWriter.write();
 }
 
@@ -1216,7 +1307,7 @@ void eTeam::RemovePlayerDirty ( ePlayerNetID* player )
     players.Remove ( player, player->teamListID );
     player->currentTeam = NULL;
 
-    se_teamRemoveWriter << ePlayerNetID::FilterName( name ) << player->GetLogName();
+    se_teamRemoveWriter << logName << player->GetLogName();
     se_teamRemoveWriter.write();
 
     // remove team from list
@@ -1379,7 +1470,7 @@ ePlayerNetID*	eTeam::OldestPlayer	(		) const
 {
     ePlayerNetID* ret = NULL;
 
-    for (int i= players.Len(); i>=0; i--)
+    for (int i= players.Len()-1; i>=0; i--)
     {
         ePlayerNetID* p = players(i);
         if (!ret || ret->timeJoinedTeam > p->timeJoinedTeam || se_centerPlayerIsBoss )
@@ -1623,6 +1714,7 @@ eTeam::eTeam()
     maxImbalanceLocal = maxImbalance;
     color.r_ = color.g_ = color.b_ = 32; // initialize color so it will be updated, guaranteed
     lastEmpty_=true;
+    lastWasCustomTeamName_ = false;
     Update();
 }
 
@@ -1639,6 +1731,7 @@ eTeam::eTeam( Engine::TeamSync const & sync, nSenderInfo const & sender )
     maxImbalanceLocal = maxImbalance;
     color.r_ = color.g_ = color.b_ = 32; // initialize color so it will be updated, guaranteed
     lastEmpty_=true;
+    lastWasCustomTeamName_ = false;
     Update();
 }
 
@@ -1660,7 +1753,7 @@ eTeam::~eTeam()
     // revoke all invitations
     for ( int i = se_PlayerNetIDs.Len()-1; i >= 0; --i )
     {
-        se_PlayerNetIDs(i)->invitations_.erase( this );
+        se_PlayerNetIDs(i)->RemoveInvitation( this );
     }
 }
 // *******************************************************************************

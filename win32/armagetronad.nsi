@@ -82,9 +82,9 @@ Section "MainSection" SEC01
   CreateShortCut "$SMPROGRAMS\${PRODUCT_BASENAME}\Armagetron Forums.lnk" "$INSTDIR\Armagetron Forums.url"
   File "armagetronad.exe"
   CreateShortCut "$SMPROGRAMS\${PRODUCT_BASENAME}\${PRODUCT_BASENAME}.lnk" "$INSTDIR\armagetronad.exe"
-  CreateShortCut "$SMPROGRAMS\${PRODUCT_BASENAME}\${PRODUCT_BASENAME} Record.lnk" "$INSTDIR\armagetronad.exe" '--record "$DESKTOP\ArmagetronAdvancedDebugRecording.aarec"'
-  CreateShortCut "$SMPROGRAMS\${PRODUCT_BASENAME}\${PRODUCT_BASENAME} Playback.lnk" "$INSTDIR\armagetronad.exe" '--playback "$DESKTOP\ArmagetronAdvancedDebugRecording.aarec"'
-  CreateShortCut "$SMPROGRAMS\${PRODUCT_BASENAME}\${PRODUCT_BASENAME} Benchmark.lnk" "$INSTDIR\armagetronad.exe" '--benchmark --playback "$DESKTOP\ArmagetronAdvancedDebugRecording.aarec"'
+  CreateShortCut "$SMPROGRAMS\${PRODUCT_BASENAME}\${PRODUCT_BASENAME} Record.lnk" "$INSTDIR\armagetronad.exe" '--record "%USERPROFILE%\Desktop\ArmagetronAdvancedDebugRecording.aarec"'
+  CreateShortCut "$SMPROGRAMS\${PRODUCT_BASENAME}\${PRODUCT_BASENAME} Playback.lnk" "$INSTDIR\armagetronad.exe" '--playback "%USERPROFILE%\Desktop\ArmagetronAdvancedDebugRecording.aarec"'
+  CreateShortCut "$SMPROGRAMS\${PRODUCT_BASENAME}\${PRODUCT_BASENAME} Benchmark.lnk" "$INSTDIR\armagetronad.exe" '--benchmark --playback "%USERPROFILE%\Desktop\ArmagetronAdvancedDebugRecording.aarec"'
   CreateShortCut "$SMPROGRAMS\${PRODUCT_BASENAME}\${PRODUCT_BASENAME} User Data.lnk" "$APPDATA\Armagetron"
   CreateShortCut "$SMPROGRAMS\${PRODUCT_BASENAME}\${PRODUCT_BASENAME} System Data.lnk" "$INSTDIR"
   SetOutPath "$INSTDIR\config"
@@ -102,14 +102,8 @@ Section "MainSection" SEC01
   CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Documentation.lnk" "$INSTDIR\doc\index.html"
   SetOutPath "$INSTDIR\doc\net"
   File /nonfatal ".\doc\net\*.html"
-  SetOutPath "$INSTDIR"
-  File "iconv.dll"
-  File "jpeg.dll"
   SetOutPath "$INSTDIR\language"
   File ".\language\*.*"
-  SetOutPath "$INSTDIR"
-  File "libpng13.dll"
-  File "libxml2.dll"
   SetOutPath "$INSTDIR\models"
   File ".\models\*.mod"
   SetOutPath "$INSTDIR\resource\included"
@@ -140,6 +134,11 @@ Section -Post
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayVersion" "${PRODUCT_VERSION}"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "URLInfoAbout" "${PRODUCT_WEB_SITE}"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "Publisher" "${PRODUCT_PUBLISHER}"
+
+  WriteRegStr HKCR "armagetronad" "" "URL:$(^Name)"
+  WriteRegStr HKCR "armagetronad" "URL Protocol" ""
+  WriteRegStr HKCR "armagetronad\DefaultIcon" "" "$INSTDIR\armagetronad.exe"
+  WriteRegStr HKCR "armagetronad\shell\open\command" "" "$INSTDIR\armagetronad.exe --connect %1"
 SectionEnd
 
 Function un.onInit
@@ -191,7 +190,17 @@ Section Uninstall
 
   RMDir "$SMPROGRAMS\${PRODUCT_NAME}"
 
+  # Check if the installed protocol association for armagetronad://
+  # points to this installation (we cheat and use the icon because it
+  # is shorter). Only if it does, we remove it.
+  ReadRegStr $0 HKCR "armagetronad\DefaultIcon" ""
+  StrCmp "$0" "$INSTDIR\armagetronad.exe" delassoc nodelassoc
+  delassoc:
+    DeleteRegKey HKCR "armagetronad"
+  nodelassoc:
+
   DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
   DeleteRegKey HKLM "${PRODUCT_DIR_REGKEY}"
+
   SetAutoClose true
 SectionEnd

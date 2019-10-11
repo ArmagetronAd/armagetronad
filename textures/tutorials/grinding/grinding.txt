@@ -6,24 +6,14 @@
 # in-frame smooth animation.
 # empty lines and lines starting with # are ignored.
 
-1 textures/tutorials/grinding/start.png
-1 textures/tutorials/grinding/1_1.png
-1 textures/tutorials/grinding/1_2.png
-1 textures/tutorials/grinding/1_3.png
-.5 textures/tutorials/grinding/1_3.png textures/tutorials/clipart/circle.png textures/tutorials/clipart/check.png
-1.5 textures/tutorials/grinding/1_3.png textures/tutorials/clipart/circle.png textures/tutorials/clipart/check.png textures/tutorials/clipart/check.png
+4.27 textures/tutorials/clipart/background.png textures/tutorials/grinding/grind.png
+1.00 textures/tutorials/clipart/background.png textures/tutorials/grinding/grind.png textures/tutorials/clipart/circle.png textures/tutorials/clipart/check.png
 
-1 textures/tutorials/grinding/start.png
-1 textures/tutorials/grinding/2_1.png
-1 textures/tutorials/grinding/2_2.png
-1 textures/tutorials/grinding/2_3.png
-.5 textures/tutorials/grinding/2_3.png textures/tutorials/clipart/circle.png textures/tutorials/clipart/fail.png
-2.5 textures/tutorials/grinding/2_3.png textures/tutorials/clipart/circle.png textures/tutorials/clipart/fail.png textures/tutorials/clipart/fail.png
+4.27 textures/tutorials/clipart/background.png textures/tutorials/grinding/nogrind.png
+1.00 textures/tutorials/clipart/background.png textures/tutorials/grinding/nogrind.png textures/tutorials/clipart/circle.png textures/tutorials/clipart/fail.png
 
-1 textures/tutorials/grinding/start.png
-1 textures/tutorials/grinding/1_1.png
-1 textures/tutorials/grinding/3_2.png
-.25 textures/tutorials/grinding/3_3.png
-.5 textures/tutorials/grinding/3_4.png
-.5 textures/tutorials/grinding/3_4.png textures/tutorials/clipart/circle.png textures/tutorials/clipart/fail.png
-2.5 textures/tutorials/grinding/3_4.png textures/tutorials/clipart/circle.png textures/tutorials/clipart/fail.png textures/tutorials/clipart/fail.png
+4.27 textures/tutorials/clipart/background.png textures/tutorials/grinding/fail1.png
+.25 textures/tutorials/clipart/background.png textures/tutorials/grinding/fail1.png textures/tutorials/grinding/fail2.png
+.25 textures/tutorials/clipart/background.png textures/tutorials/grinding/fail1.png textures/tutorials/grinding/fail2.png textures/tutorials/grinding/fail3.png
+.5 textures/tutorials/clipart/background.png textures/tutorials/grinding/fail1.png textures/tutorials/grinding/fail3.png textures/tutorials/grinding/fail3.png
+1 textures/tutorials/clipart/background.png textures/tutorials/grinding/fail1.png textures/tutorials/grinding/fail3.png textures/tutorials/clipart/circle.png textures/tutorials/clipart/fail.png

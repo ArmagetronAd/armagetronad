@@ -231,6 +231,7 @@ class ePlayerNetID: public nNetObject, public eAccessLevelHolder{
     // access level. lower numeric values are better.
 public:
     typedef std::set< eTeam * > eTeamSet;
+    static const int MAX_NAME_LENGTH = 15;
 private:
 
     int listID;                          // ID in the list of all players
@@ -244,7 +245,7 @@ private:
     tCONTROLLED_PTR(eTeam)			nextTeam;		// the team we're in ( logically )
     tCONTROLLED_PTR(eTeam)			currentTeam;	// the team we currently are spawned for
     eTeamSet                        invitations_;   // teams this player is invited to
-    tCONTROLLED_PTR(eVoter)			voter_;			// voter assigned to this player
+    bool                            invitationsChanged_;
 
     tCHECKED_PTR(eNetGameObject) object; // the object this player is
     // controlling
@@ -254,7 +255,7 @@ private:
 
     int favoriteNumberOfPlayersPerTeam;		// join team if number of players on it is less than this; create new team otherwise
     bool nameTeamAfterMe; 					// player prefers to call his team after his name
-    bool greeted;        					// did the server already greet him?
+    bool greeted;        					// did the server already greet him? (On the client: was the first sync back already received?)
     bool disconnected;   					// did he disconnect from the game?
 
     static void SwapPlayersNo(int a,int b); // swaps the players a and b
@@ -313,6 +314,11 @@ public:
     virtual bool ActionOnQuit();
     virtual void ActionOnDelete();
 
+    // Check if a player can be respawned. Relaying on team alone is not enough.
+    // If a player enters as spectator, they are still assumed to be on a team.
+    // When a player is suspeded they are also on a team until the end of the round.
+    bool CanRespawn() const { return currentTeam && suspended_ == 0 && ! spectating_; }
+ 
     // chatting
     bool IsChatting() const { return chatting_; }
     void SetChatting ( ChatFlags flag, bool chatting );
@@ -331,7 +337,8 @@ public:
     int  TeamListID() const { return teamListID; }		// return my position in the team
     void SetShuffleWish( int pos ); 	        //!< sets a desired team position
     eTeam* FindDefaultTeam();					// find a good default team for us
-    void SetDefaultTeam( bool isScrambleCommand=false );    // register me in a good default team
+    void SetDefaultTeam( bool overrideNoAuto=false );    // register me in a good default team
+    void SetDefaultTeamWish();                  // register me in a good default team (broadcasts with to server on client)
     void SetTeamForce(eTeam* team );           	// register me in the given team without checks
     void SetTeam(eTeam* team);          		// register me in the given team (callable on the server)
     void SetTeamWish(eTeam* team); 				// express the wish to be part of the given team (always callable)
@@ -339,6 +346,8 @@ public:
     void UpdateTeamForce();						// update team membership without checks
     void UpdateTeam();							// update team membership
 
+    void AddInvitation( eTeam *team );
+    bool RemoveInvitation( eTeam *team );
     eTeamSet const & GetInvitations() const ;   //!< teams this player is invited to
 
     void CreateNewTeam(); 	    				// create a new team and join it (on the server)
@@ -397,13 +406,15 @@ public:
     bool IsActive() const { return !disconnected; }
 
     bool IsSilenced( void ) const { return silenced_; }
-    void SetSilenced( bool silenced ) { silenced_ = silenced; }
+    void SetSilenced( bool silenced ); // { silenced_ = silenced; }
+
+    // only for the menu
     bool& AccessSilenced( void ) { return silenced_; }
 
-    bool IsSuspended ( void ) { return suspended_ > 0; }
+    bool IsSuspended ( void ) const { return suspended_ > 0; }
+    int  RoundsSuspended ( void ) const { return suspended_; }
+    bool IsGreeted() const { return greeted; }
 
-    eVoter * GetVoter() const {return voter_;}     // returns our voter
-    void CreateVoter();						// create our voter or find it
     static void SilenceMenu();				// menu where you can silence players
     static void PoliceMenu();				// menu where you can silence and kick players
 
@@ -431,14 +442,14 @@ public:
 
     static float RankingGraph( float y, int MAX );     // prints a ranking list
 
-    static void RankingLadderLog();     // writes a small ranking list to ladderlog
-
     static void  ResetScore();  // resets the ranking list
 
     static void DisplayScores(); // display scores on the screen
 
     void GreetHighscores(tString &s); // tell him his positions in the
     // highscore lists (defined in game.cpp)
+
+    static ePlayerNetID * ReadPlayer( std::istream & s ); //!< reads a player from the stream
 
     static void Update();           // creates ePlayerNetIDs for new players
     // and destroys those of players that have left
@@ -498,6 +509,7 @@ private:
 
     REAL            wait_;                  //!< time in seconds WaitToLeaveChat() will wait for this player
 
+    void CreateVoter();						// create our voter or find it
     void			MyInitAfterCreation();
 
 protected:
@@ -538,7 +550,7 @@ private:
     inline ePlayerNetID & SetColoredName( tColoredString const & coloredName ); //!< Sets this player's name, cleared by the server. Use this for onscreen screen display.
 
     //! accesses the suspension count
-    int & AccessSuspended();
+    // int & AccessSuspended();
 
     //! returns the suspension count
     int GetSuspended() const;
@@ -551,31 +563,6 @@ extern bool se_assignTeamAutomatically;
 void se_ChatState( ePlayerNetID::ChatFlags flag, bool cs);
 
 void se_SaveToScoreFile( tOutput const & out );  //!< writes something to scorelog.txt
-void se_SaveToChatLog( tOutput const & out );  //!< writes something to chatlog.txt (if enabled) and/or ladderlog
-
-//! create a global instance of this to write stuff to ladderlog.txt
-class eLadderLogWriter {
-    static std::list<eLadderLogWriter *> &writers();
-    tString id;
-    bool enabled;
-    tSettingItem<bool> *conf;
-    tColoredString cache;
-public:
-    eLadderLogWriter(char const *ID, bool enabledByDefault);
-    ~eLadderLogWriter();
-    //! append a field to the current message. Spaces are added automatically.
-    template<typename T> eLadderLogWriter &operator<<(T const &s) {
-        if(enabled) {
-            cache << ' ' << s;
-        }
-        return *this;
-    }
-    void write(); //!< send to ladderlog and clear message
-
-    bool isEnabled() { return enabled; } //!< check this if you're going to make expensive calculations for ladderlog output
-
-    static void setAll(bool enabled); //!< enable or disable all writers
-};
 
 tColoredString & operator << (tColoredString &s,const ePlayer &p);
 tColoredString & operator << (tColoredString &s,const ePlayerNetID &p);

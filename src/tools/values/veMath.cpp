@@ -123,6 +123,30 @@ Base *Divide::copy(void) const {
     return new Divide(*this);
 }
 
+//! Returns the result of lvalue ^ rvalue
+//! @returns the result
+Variant
+Power::GetValue(void) const {
+    // Operate on both values as floats, using pow() fron math.h which is #included in veMath.h
+    return (float) pow(m_lvalue->GetFloat(),m_rvalue->GetFloat());
+}
+
+Base *Power::copy(void) const {
+    return new Power(*this);
+}
+
+//! Returns the rvalue th root of lvalue
+//! @returns the result
+Variant
+Root::GetValue(void) const {
+    // Operate on both values as floats, using pow() fron math.h which is #included in veMath.h
+    return (float) pow(m_lvalue->GetFloat(), 1 / m_rvalue->GetFloat());
+}
+
+Base *Root::copy(void) const {
+    return new Root(*this);
+}
+
 
 Registration register_sin("func\nmath", "sin", 1, (Registration::fptr)
                           ( ctor::a1* )& Creator<Trig::Sin>::create<BasePtr> );
