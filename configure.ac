@@ -304,11 +304,13 @@ test $DEBUGLEVEL -ge 4 && CXXFLAGS="$CXXFLAGS -DDEBUG_EXPENSIVE"
 test $DEBUGLEVEL -ge 5 && CXXFLAGS="$CXXFLAGS -DMEM_DEB"
 
 dnl oddly, this macro needs to be called once unconditionally, or automake
-dnl borks up. Backup CXXFLAGS and restore them in case the test passes. Which it does
-dnl for some versions of GCC.
-CXXFLAGS_BACK="${CXXFLAGS}"
-AX_CXXFLAGS_GCC_OPTION(-nobodyreadsconfigureoutputanyway)
-CXXFLAGS="${CXXFLAGS_BACK}"
+dnl borks up. On the 0.2.8.3 branch, we use the first call to disable warnings
+dnl we are not going to fix.
+AX_CXXFLAGS_GCC_OPTION(-Wno-deprecated-declarations)
+AX_CXXFLAGS_GCC_OPTION(-Wno-deprecated-copy)
+AX_CXXFLAGS_GCC_OPTION(-Wno-implicit-fallthrough)
+dnl and maybe someday we need this:
+dnl AX_CXXFLAGS_GCC_OPTION(-fpermissive)
 
 if test $CODELEVEL -ge 1; then
     CXXFLAGS="$CXXFLAGS -Wall"
