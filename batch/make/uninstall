@@ -38,7 +38,7 @@ EOF
 
 # do an installation
 echo -n "Performing test installation..."
-P=$(mktemp -t armagetronad-test-install.XXX)
+P=$(mktemp -t armagetronad-test-install.XXXXXX)
 rm -f ${P}
 DEST=${P}.${PROGNAME}.foruninstall
 
