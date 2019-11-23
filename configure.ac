@@ -529,7 +529,6 @@ dnl		])
 dnl	])
 dnl])
 
-
 if test $CODELEVEL -ge 1; then
     CXXFLAGS="$CXXFLAGS -Wall"
     
