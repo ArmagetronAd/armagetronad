@@ -69,7 +69,7 @@ done
 
 # compose uninstall script from file and directory list
 cat ${UNINSTALL}.files >> ${UNINSTALL}
-sort ${UNINSTALL}.dir --reverse --unique >> ${UNINSTALL}
+sort ${UNINSTALL}.dir -ru >> ${UNINSTALL}
 
 rm -rf ${DEST}
 
