@@ -1,5 +1,13 @@
 image: docker:19.03.0
 
+only:
+  - master
+  - legacy_0.2.8
+  - legacy_0.2.8.3
+
+services:
+  - docker:19.03.0-dind
+
 variables:
   DOCKER_DRIVER: overlay2
   DOCKER_TLS_CERTDIR: ""
@@ -9,11 +17,5 @@ stages:
 
 build_image:
   stage: build
-  services:
-  - docker:19.03.0-dind
   script:
     - docker build .
-  only:
-    - master
-    - legacy_0.2.8
-    - legacy_0.2.8.3
