@@ -1,0 +1,10 @@
+build_image:
+  image: docker:git
+  services:
+  - docker:dind
+  script:
+    - docker build .
+  only:
+    - master
+    - legacy_0.2.8
+    - legacy_0.2.8.3
