@@ -1,4 +1,8 @@
+stages:
+  - build
+
 build_image:
+  stage: build
   image: docker:git
   services:
   - docker:dind
