@@ -1,11 +1,16 @@
+image: docker:19.03.0
+
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: ""
+
 stages:
   - build
 
 build_image:
   stage: build
-  image: docker:git
   services:
-  - docker:dind
+  - docker:19.03.0-dind
   script:
     - docker build .
   only:
