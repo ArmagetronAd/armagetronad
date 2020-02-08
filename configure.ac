@@ -540,6 +540,9 @@ if test $CODELEVEL -ge 1; then
         AX_CXXFLAGS_GCC_OPTION(-Wno-error=maybe-uninitialized)
     fi
     
+    dnl protobuf deprecated MessageLite::ByteSize(), not sure if we can already switch safely to ByteSizeLong()
+    AX_CXXFLAGS_GCC_OPTION(-Wno-error=deprecated-declarations)
+    
     dnl dropped out of support
     dnl AX_CXXFLAGS_GCC_OPTION(-Wno-mismatched-tags)
 
