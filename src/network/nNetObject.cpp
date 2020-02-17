@@ -1492,6 +1492,9 @@ static void net_sync_handler(nMessage &m){
 static nDescriptor net_sync(24,net_sync_handler,"net_sync");
 
 bool nNetObject::AcceptClientSync() const{
+    return AcceptClientSyncStatic();
+}
+bool nNetObject::AcceptClientSyncStatic(){
     return false;
 }
 

@@ -341,6 +341,7 @@ public:
     virtual void 			PrintName(tString &s) const;
 
     virtual bool 			AcceptClientSync() const;
+    static  bool 			AcceptClientSyncStatic();
     virtual void 			WriteSync(nMessage &m);
     virtual void 			ReadSync(nMessage &m);
     virtual nDescriptor&	CreatorDescriptor() const;

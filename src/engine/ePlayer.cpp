@@ -4887,6 +4887,9 @@ void ePlayerNetID::PrintName(tString &s) const
 
 
 bool ePlayerNetID::AcceptClientSync() const{
+    return AcceptClientSyncStatic();
+}
+bool ePlayerNetID::AcceptClientSyncStatic(){
     return true;
 }
 
