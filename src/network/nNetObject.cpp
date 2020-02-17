@@ -1617,6 +1617,9 @@ nMessageStreamer * nNetObjectDescriptorBase::SyncStreamer()
 }
 
 bool nNetObject::AcceptClientSync() const{
+    return AcceptClientSyncStatic();
+}
+bool nNetObject::AcceptClientSyncStatic(){
     return false;
 }
 

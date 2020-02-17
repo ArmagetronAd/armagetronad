@@ -233,11 +233,6 @@ public:												// public methods
     //! returns the descriptor responsible for this class
     virtual nNetObjectDescriptorBase const & DoGetDescriptor() const;
 
-    // shall the server accept sync messages from the clients?
-    virtual bool AcceptClientSync() const	{
-        return false;
-    }
-
     // con/desstruction
     eTeam();											// default constructor
     ~eTeam();											// destructor

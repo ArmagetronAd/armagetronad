@@ -364,6 +364,7 @@ public:
     virtual void 			PrintName(tString &s) const;
 
     virtual bool 			AcceptClientSync() const;
+    static  bool 			AcceptClientSyncStatic();
     virtual void			InitAfterCreation();
     virtual bool			ClearToTransmit(int user) const;
 

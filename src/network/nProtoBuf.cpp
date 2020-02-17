@@ -1204,16 +1204,20 @@ void nNetObjectDescriptorBase::PostCheck( nNetObject * object, nSenderInfo sende
       con << "Received object " << str << "\n";
     */
 #endif
-            
-    if ( sn_GetNetState()==nSERVER && !object->AcceptClientSync() )
+
+    if(!object)
+        return;
+
+    if (sn_GetNetState()==nSERVER && !object->AcceptClientSync())
     {
-        object->Release();
-        Cheater( sender.SenderID() ); // cheater!
-    }
-    else if ( static_cast< nNetObject* >( sn_netObjects[ object->ID() ] ) != object )
-    {
-        // object was unable to be registered
-        object->Release(); // silently delete it.
+#ifdef DEBUG
+        tERR_WARN("AcceptClientSync was supposed to be checked earler.");
+#endif
+        Cheater(sender.SenderID());
+
+        // deregister
+        if(sn_netObjects[ object->ID() ].operator->() == object)
+            sn_netObjects[ object->ID() ] = NULL;
     }
 }
 

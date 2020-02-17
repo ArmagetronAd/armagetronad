@@ -342,6 +342,7 @@ public:
 
     // shall the server accept sync messages from the clients?
     virtual bool AcceptClientSync() const;
+    static bool AcceptClientSyncStatic();
 
     void GetID();			// get a network ID
     void RequestSync(bool ack=true);  // request a sync

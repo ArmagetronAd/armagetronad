@@ -59,6 +59,9 @@ public:
 
     // disable security
     virtual bool AcceptClientSync() const{
+        return AcceptClientSyncStatic();
+    }
+    static bool AcceptClientSyncStatic(){
         return true;
     }
 
@@ -153,8 +156,12 @@ public:
 
     // disable security
     virtual bool AcceptClientSync() const{
+        return AcceptClientSyncStatic();
+    }
+    static bool AcceptClientSyncStatic(){
         return true;
     }
+
 
     // synchronisation: not needed
 
