@@ -32,6 +32,9 @@
 #define WIN32
 #endif
 
+// exists in windows headers
+#define HAVE_ISBLANK
+
 // defines for data directories in Windows
 #ifndef DEBUG
 #define USER_DATA_DIR  "${APPDATA}/Armagetron" 

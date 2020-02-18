@@ -357,9 +357,11 @@ struct eFaceReplacementArgument
 
 eFaceScorePair se_FindBestReplacement( const eFace *old, eFaceReplacementArgument& arg )
 {
+    eFace * const nullEFace = NULL;
+
     // return invalid return if the face was already visited
     if ( arg.visited.find( old ) != arg.visited.end() )
-        return eFaceScorePair( 0, -se_maxGridSize );
+        return eFaceScorePair( nullEFace, -se_maxGridSize );
 
     // register face as visited
     arg.visited.insert( old );
@@ -374,7 +376,7 @@ eFaceScorePair se_FindBestReplacement( const eFace *old, eFaceReplacementArgumen
         // iterate it
 
         // the currently best face/insideness pair
-        std::pair< eFace*, REAL > best( 0, -100000 );
+        std::pair< eFace*, REAL > best( nullEFace, -100000 );
         for( eReplacementStorage::const_iterator i = storage.begin(); i != storage.end(); ++i )
         {
             // the current face/insideness pair
