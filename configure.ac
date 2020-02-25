@@ -41,6 +41,10 @@ AM_CONDITIONAL(HAVE_M4, test $HAVE_M4 = true)
 dnl check whether date accepts -r to refer to a file
 AM_CONDITIONAL(DATE_R, date +"%Y" -r $0 > /dev/null 2>&1)
 
+dnl dirty trick to allow verbatim output to Makefile.in -> Makefile
+dnl source: http://gnu-automake.7480.n7.nabble.com/ifdef-endif-issue-td2662.html
+AC_SUBST([protect], [""])
+
 dnl export version
 version=$VERSION
 AC_SUBST(version)

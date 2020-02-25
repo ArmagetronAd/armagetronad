@@ -12,12 +12,19 @@ htmlm4 = $(top_builddir)/src/doc/html.m4
 $(htmlm4): $(top_builddir)/config.status Makefile $(top_srcdir)/src/doc/html.m4.in
 	cd ${top_builddir}; ./config.status src/doc/html.m4
 
+@protect@DATE_FMT = %Y-%m-%d
+@protect@ifdef SOURCE_DATE_EPOCH
+@protect@	BUILD_DATE ?= $(shell date -u -d "@$(SOURCE_DATE_EPOCH)" "+$(DATE_FMT)"  2>/dev/null || date -u -r "$(SOURCE_DATE_EPOCH)" "+$(DATE_FMT)" 2>/dev/null || date -u "+$(DATE_FMT)")
+@protect@else
+@protect@	BUILD_DATE ?= $(shell date "+$(DATE_FMT)")
+@protect@endif
+
 if HAVE_M4
 %.html : $(srcdir)/%.html.m4 %.html.dep $(htmlm4) Makefile 
 if DATE_R
-	{ echo "define(CHANGEDATE,`date +"%b %d %Y" -r $<`) include($(htmlm4))" ; cat $< ; } | m4 -I ${srcdir} > $@ || cp $< $@
+	{ echo "define(CHANGEDATE, $(BUILD_DATE)) include($(htmlm4))" ; cat $< ; } | m4 -I ${srcdir} > $@ || cp $< $@
 else
-	{ echo "define(CHANGEDATE,`date +"%b %d %Y"`) include($(htmlm4))" ; cat $< ; } | m4 -I ${srcdir} > $@ || cp $< $@
+	{ echo "define(CHANGEDATE, $(BUILD_DATE)) include($(htmlm4))" ; cat $< ; } | m4 -I ${srcdir} > $@ || cp $< $@
 endif
 
 %.dep: %.m4 Makefile
