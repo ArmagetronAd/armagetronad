@@ -21,11 +21,7 @@ $(htmlm4): $(top_builddir)/config.status Makefile $(top_srcdir)/src/doc/html.m4.
 
 if HAVE_M4
 %.html : $(srcdir)/%.html.m4 %.html.dep $(htmlm4) Makefile 
-if DATE_R
 	{ echo "define(CHANGEDATE, $(BUILD_DATE)) include($(htmlm4))" ; cat $< ; } | m4 -I ${srcdir} > $@ || cp $< $@
-else
-	{ echo "define(CHANGEDATE, $(BUILD_DATE)) include($(htmlm4))" ; cat $< ; } | m4 -I ${srcdir} > $@ || cp $< $@
-endif
 
 %.dep: %.m4 Makefile
 	echo $*.dep ":\\" > $@
