@@ -7,6 +7,8 @@
 #include <windows.h>
 #endif
 
+
+#define NO_SDL_GLEXT
 #include <SDL_opengl.h>
 
 /*

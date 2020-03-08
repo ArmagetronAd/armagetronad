@@ -750,7 +750,7 @@ PARTICLEDLL_API int pSetMaxParticles(int max_count)
         return pg->max_particles;
     }
 
-    memcpy(pg2, pg, (pg->p_count + 2) * sizeof(Particle));
+    memcpy(static_cast<void *>(pg2), static_cast<void *>(pg), (pg->p_count + 2) * sizeof(Particle));
 
     delete [] pg;
 

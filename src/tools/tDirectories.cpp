@@ -1278,13 +1278,15 @@ public:
         char const * bestGuess = "./" PROGNAME;
 #endif// win32
 
-#ifndef ENABLE_BINRELOC
-        // if the passed default path is a real path, let it override the best guess
-        if ( strstr( defaultPath, "/" ) || strstr( defaultPath, "\\" ) )
-            bestGuess = defaultPath;
-        //            bestGuess = "./armagetronad-dedicated";
+#ifdef ENABLE_BINRELOC
+	if ( !bestGuess || 0 == strlen(bestGuess) )
 #endif
-
+        {
+            // if the passed default path is a real path, let it override the best guess
+            if ( strstr( defaultPath, "/" ) || strstr( defaultPath, "\\" ) )
+                bestGuess = defaultPath;
+            //            bestGuess = "./armagetronad-dedicated";
+        }
         path_ = bestGuess;
 
 #ifdef DEBUG_PATH
@@ -1324,6 +1326,8 @@ static tString GeneratePrefix()
     tString const & bindirCompiled = st_bindirCompiled;
     // and the current binary path
     tString bindirNow(GenerateParentOfExecutable(1));
+    if(bindirNow.Len() <= 1)
+        return prefixCompiled;
 
     // the length of the bindir suffix, the part that is added below prefix
     int bindirSuffixLength=bindirCompiled.Len() - prefixCompiled.Len();
