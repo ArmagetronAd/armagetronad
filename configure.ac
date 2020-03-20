@@ -52,7 +52,6 @@ dnl export version
 version=$VERSION
 AC_SUBST(version)
 
-AC_ARG_VAR(XML2_CONFIG,[Configuration script of libxml2 to use, defaults to xml2-config])
 AC_ARG_VAR(SDL_CONFIG,[Configuration script of SDL to use, defaults to sdl-config])
 AC_ARG_VAR(SDL2_CONFIG,[Configuration script of SDL to use, defaults to sdl2-config])
 AC_ARG_VAR(FREETYPE_CONFIG,[Configuration script of freetype to use, defaults to freetype-config])
@@ -71,6 +70,8 @@ AC_ARG_VAR(ARMAGETRONAD_OS_X_TOOLKIT, [Path to the OS X toolkit directory.])
 
 dnl a modern autoconf is required to process this
 AC_PREREQ(2.50)
+
+PKG_PROG_PKG_CONFIG
 
 build_regular=true
 default_enable_sysinstall=yes
@@ -848,30 +849,10 @@ dnl         libxml2
 dnl *************************************************
 
 if test x$armamain = xtrue; then
-
-test -z "$XML2_CONFIG" && XML2_CONFIG=xml2-config
-
-if ! $XML2_CONFIG --libs > /dev/null; then
-  AC_MSG_ERROR([Fatal error: the libxml2 configuration script $XML2_CONFIG does not work/exist.])
-fi
-
-# if test x$armamain = xtrue; then
-AC_CHECK_LIB(xml2,xmlParseMemory,
-CPPFLAGS="$CPPFLAGS `$XML2_CONFIG --cflags`"
-LIBS="`$XML2_CONFIG --libs` $LIBS"
-AC_DEFINE(HAVE_LIBXML2, 1, [Define if you have the xml2 library (-lxml2).]),
-AC_MSG_ERROR([You need the library xml2 to compile ${progtitle}. Read the file documentation/installation.txt.])
-,`$XML2_CONFIG --libs`)
-
-AC_CHECK_FUNC(xmlParserInputBufferCreateFilenameDefault,
-,
-AC_MSG_ERROR([
-	Your xml2 library is obsolete!
-	Please upgrade to 2.6.11 or later
-])
-)
-
-# fi
+  PKG_CHECK_MODULES([XML2], [libxml-2.0 >= 2.6.11])
+  CPPFLAGS="$CPPFLAGS $XML2_CFLAGS"
+  LIBS="$LIBS $XML2_LIBS"
+  AC_DEFINE(HAVE_LIBXML2, 1, [Define if you have the libxml2 library])
 
 dnl *************************************************
 dnl         Threading
@@ -1186,7 +1167,7 @@ if test -z "$ARMAGETRONAD_OS_X_TOOLKIT"; then
 
 	# `pkg-config ftgl --cflags` doesn't reliably give the include path to FTGL itself, we are on our own finding the includes in some cases.
 	# look for FTGL headers in default system header locations and the prefixes of the libraries that do have a -config script
-	FTGL_HEADERS="/usr/include/FTGL /usr/local/include/FTGL `$FREETYPE_CONFIG --prefix`/include/FTGL `$SDL_CONFIG --prefix`/include/FTGL `$XML2_CONFIG --prefix/`include/FTGL ${prefix}/include/FTGL "
+	FTGL_HEADERS="/usr/include/FTGL /usr/local/include/FTGL `$FREETYPE_CONFIG --prefix`/include/FTGL `$SDL_CONFIG --prefix`/include/FTGL ${prefix}/include/FTGL "
 
 	AC_ARG_WITH(ftgl,
 	    AC_HELP_STRING([--with-ftgl],
