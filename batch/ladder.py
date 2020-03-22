@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # purpose: process ladderlog.txt and generate a usefull ladder league from it
 
+from __future__ import print_function
+
 import math
 
 
@@ -150,12 +152,12 @@ class PairScoreDictionary:
             if diagonal < minDiagonal: minDiagonal = diagonal
             averageDiagonal += diagonal/len(players)
 
-        print averageDiagonal   
+        print(averageDiagonal)
 
         maxDeviation = 1
         if minDiagonal < 0:
             maxDeviation = -1/minDiagonal
-        print maxDeviation
+        print(maxDeviation)
 
         # initialize score vector
         score = {}
@@ -197,7 +199,7 @@ class PairScoreDictionary:
                 error += abs(deltascore[i])
 
             if iter == 100:
-                print error 
+                print(error)
                 iter = 0   
             iter += 1
 
@@ -230,9 +232,9 @@ class PairScoreDictionary:
 
 scoreDataBase = PairScoreDictionary()
 scoreDataBase.ReadLog( open( "ladderlog.txt" ) )
-#print "read"
+#print("read")
 ladder = scoreDataBase.GenerateLadder()
 
 for entry in ladder:
-    print entry[1], entry[0]
+    print(entry[1], entry[0])
 
