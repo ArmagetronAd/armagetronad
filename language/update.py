@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 # usage: call here to bring all translations up to date
 # usage forms:
 # update.py [--complete] <list of language files>
@@ -14,6 +14,8 @@
 #
 # update.py --dist
 #           compactifies translations: strips comments and whitespace
+
+from __future__ import print_function
 
 import sys
 import os
