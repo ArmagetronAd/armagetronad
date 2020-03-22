@@ -1,9 +1,11 @@
-#!/usr/bin/python2
+#!/usr/bin/python
 # sorts resources by their included name and version information
 # usage: call from the directory containing the resources or
 # call
 # sortresources.py <path_to_seach_and_sort>
 # use sortresources.py -h to get command line option help
+
+from __future__ import print_function
 
 from xml import sax
 from xml.sax import handler
@@ -75,7 +77,7 @@ def parseResource(filename, data):
 
               # fallback: return empty stream, result: no dtd checking is done.
               # Not horribly bad in this context
-              print "warning, could not find requested entity", sysid
+              print("warning, could not find requested entity", sysid)
               return StringIO.StringIO("")
 
     # parse: create parser...
@@ -143,7 +145,7 @@ def Print(oldFile, newFile, canonicalPath ):
         return False
 
     if doPrint:
-        print "renaming", oldFile, "->", newFile
+        print("renaming", oldFile, "->", newFile)
 
 # move file oldFile to newFile, setting apache rewrite rules to keep the file
 # fetchable from its old position
@@ -177,7 +179,7 @@ def Redirect(oldFile, newFile, canonicalPath ):
                         # nothing to do
                         return
                     else:
-                        print "Warning: There already is a different RewriteRule for", oldFile, "in place."
+                        print("Warning: There already is a different RewriteRule for", oldFile, "in place.")
         except: pass
 
         # open .htaccess file for appended writing
@@ -192,15 +194,15 @@ def Redirect(oldFile, newFile, canonicalPath ):
 
 # print usage message and exit.
 def Options( ret ):
-    print
-    print "Usage: sortresources.py [OPTIONS] <source directory> <destination directory>"
-    print "       Omitting the destination directory makes it equal to the source."
-    print "       Omitting both directories makes them the current working directory."
-    print "Options: -r add apache rewrite rules"
-    print "         -n don't do anything, just print what would be done"
-    print "         -v print non-warning status messages"
-    print "         -h print this message"
-    print
+    print()
+    print("Usage: sortresources.py [OPTIONS] <source directory> <destination directory>")
+    print("       Omitting the destination directory makes it equal to the source.")
+    print("       Omitting both directories makes them the current working directory.")
+    print("Options: -r add apache rewrite rules")
+    print("         -n don't do anything, just print what would be done")
+    print("         -v print non-warning status messages")
+    print("         -h print this message")
+    print()
     sys.exit( ret )
     
 if __name__ == "__main__":
@@ -229,7 +231,7 @@ if __name__ == "__main__":
                 if arg[1] == "v":
                     doPrint = True
                     continue
-                print "\nUnknown option:", arg
+                print("\nUnknown option:", arg)
                 Options(-1)
             else:
                 Options(-1)
@@ -239,7 +241,7 @@ if __name__ == "__main__":
                 sourceDirectory = arg
             destinationDirectory = arg
     
-    # print sourceDirectory, destinationDirectory
+    # print(sourceDirectory, destinationDirectory)
 
     # do the work
     scanDir(sourceDirectory, destinationDirectory, function)
