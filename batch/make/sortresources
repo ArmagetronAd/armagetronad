@@ -27,7 +27,7 @@ find ${destination}/ -depth -type d -name .svn -exec rm -rf \{\} \;
 find ${destination}/ -name "*~" -exec rm -rf \{\} \;
 
 # rename them properly
-python2 ${sortresources} -v ${destination} || exit 1
+python ${sortresources} -v ${destination} || exit 1
 
 # silently remove empty directories
 find ${destination} -type d -depth -exec rmdir \{\} \; > /dev/null 2>&1 
