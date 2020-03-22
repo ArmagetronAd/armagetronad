@@ -43,6 +43,7 @@ config/aiplayers.cfg
 config/rc.config
 desktop/armagetronad-armagetronad.desktop
 language/languages.txt
+language/*.bak
 resource/included/
 resource/automatic/
 .deps
