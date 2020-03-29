@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -301,13 +301,13 @@ public:
     {
         // basic stuff
         Test( "abc", "abc" );
-        
+
         // quoted
         Test( "'abc'", "abc" );
 
         // escaped
         Test( "\\'a\\\"b", "'a\"b" );
-        
+
         // chained backslashes
         Test( "\\\\", "\\" );
         Test( "\\\\\\\\", "\\\\" );
@@ -684,7 +684,7 @@ tString & tString::operator+=(const tString &s)
 //static int   st_TempStringLength = 1000;
 #endif
 
-// static int	 
+// static int
 
 class tTempStringCleanup
 {
@@ -1134,7 +1134,7 @@ tString tColoredString::RemoveColors( const char * c, bool darkonly )
     tString ret;
     int len = strlen(c);
     bool removed = false;
-    
+
     // walk through string
     while (*c!='\0'){
         // skip color codes
@@ -1149,7 +1149,7 @@ tString tColoredString::RemoveColors( const char * c, bool darkonly )
                     removed = true;
 
                 c   += 8;
-                len -= 8;	
+                len -= 8;
             }
             else if( len >= 8 )
             {
@@ -1170,9 +1170,9 @@ tString tColoredString::RemoveColors( const char * c, bool darkonly )
             len--;
         }
     }
-    
+
     // st_Breakpoint();
-    
+
     return removed ? RemoveColors( ret, darkonly ) : ret;
 }
 
@@ -1407,7 +1407,7 @@ void tColoredString::RemoveHex( void )
     //    newS.RemoveHex();
     //    }
     //    }
-    //    } 
+    //    }
     //this = newS; */
 }
 
@@ -1689,7 +1689,7 @@ bool tIsInList( tString const & list_, tString const & item )
         }
 
         // check whether the match is a true list match
-        if ( 
+        if (
             ( pos == 0 || list[pos-1] == ',' || isblank(list[pos-1]) )
             &&
             ( pos + item.Len() >= list.Len() || list[pos+item.Len()-1] == ',' || isblank(list[pos+item.Len()-1]) )
@@ -1703,7 +1703,7 @@ bool tIsInList( tString const & list_, tString const & item )
             list = list.SubStr( pos + 1 );
         }
     }
-    
+
     return false;
 }
 

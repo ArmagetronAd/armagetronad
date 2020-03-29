@@ -13,4 +13,4 @@ stages:
 build_image:
   stage: build
   script:
-    - docker build .
+    - docker build -t armagetronad_server .

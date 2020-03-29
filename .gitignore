@@ -31,6 +31,7 @@ Makefile
 /config.h
 /config.log
 /config.status
+/config.guess
 /extrapaths
 /stamp-h1
 /universal_variable*
@@ -42,6 +43,7 @@ config/aiplayers.cfg
 config/rc.config
 desktop/armagetronad-armagetronad.desktop
 language/languages.txt
+language/*.bak
 resource/included/
 resource/automatic/
 .deps
