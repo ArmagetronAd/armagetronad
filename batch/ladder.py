@@ -2,6 +2,7 @@
 # purpose: process ladderlog.txt and generate a usefull ladder league from it
 
 from __future__ import print_function
+
 import math
 
 

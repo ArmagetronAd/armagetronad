@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python
 
 import sys, os
 
@@ -26,6 +26,3 @@ while not foundModule:
 
 if __name__ == "__main__":
     armabuild.resource.main(sys.argv[1:])
-
-
-    

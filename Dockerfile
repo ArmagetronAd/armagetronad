@@ -32,7 +32,7 @@ make \
 libpng-dev \
 libxml2-dev \
 protobuf-dev \
-python2 \
+python \
 sdl-dev \
 sdl_image-dev \
 sdl_mixer-dev \
@@ -103,7 +103,7 @@ RUN apk add \
 boost-thread \
 libxml2 \
 protobuf \
-python2 \
+python \
 shadow \
 --no-cache
 

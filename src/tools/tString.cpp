@@ -30,7 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tColor.h"
 #include "tLocale.h"
 #include "tConfiguration.h"
-#include "tException.h"
+// #include "tException.h"
 #include <ctype.h>
 #include <time.h>
 #include <string>

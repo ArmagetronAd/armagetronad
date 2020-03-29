@@ -3,6 +3,7 @@
 """checks bugle trace log for OpenGL problems"""
 
 from __future__ import print_function
+
 import sys
 
 count = 0
@@ -43,7 +44,7 @@ for line in sys.stdin:
     lineNo=lineNo+1
     
     if False and function.find( 'List' ) >= 0 and function.find( 'Call' ) < 0:
-        print(" ".join((count, line[:-1], function, args, result)))
+        print("%d (%s) (%s) (%s) (%s)" % (count, line[:-1], function, args, result))
 
         count = count + 1
         if count > 100:
@@ -91,7 +92,7 @@ for line in sys.stdin:
     elif inList:
         if not function in usedInList:
             usedInList[function]=lineNo
-            #print lineNo, function
+            #print(lineNo, function)
         
     if function == 'glCallList':
         l=args

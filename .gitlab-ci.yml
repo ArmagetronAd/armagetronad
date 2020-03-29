@@ -12,7 +12,7 @@ build_image:
   services:
   - docker:19.03.0-dind
   script:
-    - docker build .
+    - docker build -t armagetronad_server .
   only:
     - master
     - legacy_0.2.8

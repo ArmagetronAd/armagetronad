@@ -19,6 +19,7 @@ Makefile.in
 ./config.h.in
 ./config.sub
 ./configure
+./compile
 ./depcomp
 ./install-sh
 ./ylwrap
@@ -31,6 +32,7 @@ Makefile
 ./config.h
 ./config.log
 ./config.status
+./config.guess
 ./extrapaths
 ./stamp-h1
 ./universal_variable*

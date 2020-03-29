@@ -6,8 +6,6 @@ define(HEADSTART,dnl
 <head>
    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 changequote([,])dnl
-   <meta name="date" content="esyscmd(echo -n [`date +%Y-%m-%dT%H:%M:%S+01:00`])">
-
    <meta name="author" content="Manuel Moos">
    <title>$1</title>)dnl
 define(HEAD,HEADSTART($1)</head><body>)dnl
