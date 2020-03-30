@@ -9,7 +9,6 @@ from __future__ import print_function
 
 from xml import sax
 from xml.sax import handler
-import string
 import os.path
 import os
 import sys
@@ -65,7 +64,7 @@ def parseResource(filename, data):
               path = self.path
 
               # extract data type: the base name of the DTD
-              self.data.type = string.split(sysid,"-")[0]
+              self.data.type = str.split(sysid,"-")[0]
 
               # look in current and parent directories for dtds
               while len(path) > 0:
@@ -165,8 +164,8 @@ def Redirect(oldFile, newFile, canonicalPath ):
             # open .htaccess file in the old directory for reading
             accessFile = open(htaccessPath)
             for line in accessFile:
-                splitLineLower = string.split(line.lower())
-                splitLine      = string.split(line)
+                splitLineLower = str.split(line.lower())
+                splitLine      = str.split(line)
                 if splitLineLower[0] == "rewriteengine":
                     # rewriting is already mentioned; we don't have to enable it laster.
                     needEngine = False
