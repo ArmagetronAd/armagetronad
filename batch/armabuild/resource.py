@@ -10,7 +10,6 @@
 
 from xml import sax
 from xml.sax import handler
-import string
 import os.path
 import os
 import sys
@@ -183,8 +182,8 @@ def Redirect(oldFile, newFile, canonicalPath ):
             # open .htaccess file in the old directory for reading
             accessFile = open(htaccessPath)
             for line in accessFile:
-                splitLineLower = string.split(line.lower())
-                splitLine      = string.split(line)
+                splitLineLower = str.split(line.lower())
+                splitLine      = str.split(line)
                 if splitLineLower[0] == "rewriteengine":
                     # rewriting is already mentioned; we don't have to enable it laster.
                     needEngine = False
