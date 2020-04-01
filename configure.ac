@@ -573,7 +573,7 @@ fi
 dnl Strip pedantic flags from general CXXFLAGS and put them into a separate variable
 CXXFLAGS_OURFILES=''
 
-if echo ${CXXFLAGS} | grep -- '-Werror' > /dev/null; then
+if echo ${CXXFLAGS} | grep -- '-Werror[^=]' > /dev/null; then
   CXXFLAGS_OURFILES="${CXXFLAGS_OURFILES} -Werror"
 fi
 
@@ -581,7 +581,7 @@ if echo ${CXXFLAGS} | grep -- '--pedantic' > /dev/null; then
   CXXFLAGS_OURFILES="${CXXFLAGS_OURFILES} --pedantic"
 fi
 
-CXXFLAGS="`echo ${CXXFLAGS} | sed -e 's,-Werror,,g' | sed -e 's,--pedantic,,g'`"
+CXXFLAGS="`echo ${CXXFLAGS} | sed -e 's,-Werror[^=],,g' | sed -e 's,--pedantic,,g'`"
 
 dnl CXX flags for our own hand-written files. Can be pedantic.
 AC_SUBST(CXXFLAGS_OURFILES)
