@@ -468,7 +468,7 @@ void nProtoBufMessageBase::OnRead( unsigned char const * & buffer, unsigned char
 
 int nProtoBufMessageBase::Size() const
 {
-    return GetProtoBuf().ByteSize() + 5;
+    return GetProtoBuf().ByteSizeLong() + 5;
 }
 
 nMessageTranslatorBase::nMessageTranslatorBase(){}
