@@ -468,7 +468,19 @@ void nProtoBufMessageBase::OnRead( unsigned char const * & buffer, unsigned char
 
 int nProtoBufMessageBase::Size() const
 {
-    return GetProtoBuf().ByteSizeLong() + 5;
+#ifndef GOOGLE_PROTOBUF_VERSION
+#error protobuf version not defined
+#endif
+    auto rawByteSize = [&]()
+    {
+#if GOOGLE_PROTOBUF_VERSION >= 3001000
+        return GetProtoBuf().ByteSizeLong();
+#else
+        return GetProtoBuf().ByteSize();
+#endif
+    };
+
+    return rawByteSize() + 5;
 }
 
 nMessageTranslatorBase::nMessageTranslatorBase(){}
