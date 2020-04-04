@@ -762,7 +762,7 @@ Reader::decodeNumber( Token &token )
                                                    : Value::maxLargestUInt;
    Value::LargestUInt threshold = maxIntegerValue / 10;
    Value::UInt lastDigitThreshold = Value::UInt( maxIntegerValue % 10 );
-   assert( lastDigitThreshold >=0  &&  lastDigitThreshold <= 9 );
+   assert( lastDigitThreshold <= 9 );
    Value::LargestUInt value = 0;
    while ( current < token.end_ )
    {
@@ -1696,7 +1696,7 @@ Value::CZString::CZString( const CZString &other )
 : cstr_( other.index_ != noDuplication &&  other.cstr_ != 0
                 ?  duplicateStringValue( other.cstr_ )
                 : other.cstr_ )
-   , index_( other.cstr_ ? (other.index_ == noDuplication ? noDuplication : duplicate)
+   , index_( other.cstr_ ? static_cast<ArrayIndex>(other.index_ == noDuplication ? noDuplication : duplicate)
                          : other.index_ )
 {
 }
