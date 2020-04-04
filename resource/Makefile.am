@@ -5,8 +5,11 @@ resourcedir=${aa_datadir}/resource
 
 sourcefiles = $(shell test -d ${srcdir}/proto && find ${srcdir}/proto -type f | grep -v CVS | grep -v "~")
 
+# find working python interpreter
+PYTHON=`which python3 python python2 2> /dev/null | head -n 1`
+
 included: ${sourcefiles} ${top_srcdir}/batch/make/sortresources.py ${top_srcdir}/batch/make/copyresources.py Makefile
-	if test -d ${srcdir}/proto; then python ${top_srcdir}/batch/make/copyresources.py ${srcdir}/proto $@ && cp -r ${srcdir}/binary/* $@/; fi
+	if test -d ${srcdir}/proto; then ${PYTHON} ${top_srcdir}/batch/make/copyresources.py ${srcdir}/proto $@ && cp -r ${srcdir}/binary/* $@/; fi
 # @sh ${top_srcdir}/batch/make/sortresources ${srcdir}/proto $@ ${top_srcdir}/batch/make/sortresources.py || { rm -rf $@; false; }
 
 all: included
