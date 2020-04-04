@@ -270,8 +270,10 @@ ROperation operator,(const ROperation& op1,const ROperation& op2)
 ROperation operator+(const ROperation& op1,const ROperation& op2)
 {
     if(op1.op==Num&&op2.op==Num)return op1.ValC+op2.ValC;
-    if(op1==0.)return op2;if(op2==0.)return op1;
-    if(op1.op==Opp)return op2-*(op1.mmb2);if(op2.op==Opp)return op1-*(op2.mmb2);
+    if(op1==0.)return op2;
+    if(op2==0.)return op1;
+    if(op1.op==Opp)return op2-*(op1.mmb2);
+    if(op2.op==Opp)return op1-*(op2.mmb2);
     ROperation resultat;
     resultat.op=Add;resultat.mmb1=new ROperation(op1);
     resultat.mmb2=new ROperation(op2);
@@ -281,8 +283,10 @@ ROperation operator+(const ROperation& op1,const ROperation& op2)
 ROperation operator-(const ROperation& op1,const ROperation& op2)
 {
     if(op1.op==Num&&op2.op==Num)return op1.ValC-op2.ValC;
-    if(op1==0.)return -op2;if(op2==0.)return op1;
-    if(op1.op==Opp)return -(op2+*(op1.mmb2));if(op2.op==Opp)return op1+*(op2.mmb2);
+    if(op1==0.)return -op2;
+    if(op2==0.)return op1;
+    if(op1.op==Opp)return -(op2+*(op1.mmb2));
+    if(op2.op==Opp)return op1+*(op2.mmb2);
     ROperation resultat;
     resultat.op=Sub;resultat.mmb1=new ROperation(op1);
     resultat.mmb2=new ROperation(op2);
@@ -293,8 +297,10 @@ ROperation operator*(const ROperation& op1,const ROperation& op2)
 {
     if(op1.op==Num&&op2.op==Num)return op1.ValC*op2.ValC;
     if(op1==0.||op2==0.)return 0.;
-    if(op1==1.)return op2;if(op2==1.)return op1;
-    if(op1.op==Opp)return -(*(op1.mmb2)*op2);if(op2.op==Opp)return -(op1**(op2.mmb2));
+    if(op1==1.)return op2;
+    if(op2==1.)return op1;
+    if(op1.op==Opp)return -(*(op1.mmb2)*op2);
+    if(op2.op==Opp)return -(op1**(op2.mmb2));
     ROperation resultat;
     resultat.op=Mult;resultat.mmb1=new ROperation(op1);
     resultat.mmb2=new ROperation(op2);
@@ -303,8 +309,11 @@ ROperation operator*(const ROperation& op1,const ROperation& op2)
 
 ROperation operator/(const ROperation& op1,const ROperation& op2)
 {if(op1.op==Num&&op2.op==Num)return (op2.ValC?op1.ValC/op2.ValC:ErrVal);
-    if(op1==0.0)return 0.;if(op2==1.)return op1;if(op2==0.)return ErrVal;
-    if(op1.op==Opp)return -(*(op1.mmb2)/op2);if(op2.op==Opp)return -(op1/(*(op2.mmb2)));
+    if(op1==0.0)return 0.;
+    if(op2==1.)return op1;
+    if(op2==0.)return ErrVal;
+    if(op1.op==Opp)return -(*(op1.mmb2)/op2);
+    if(op2.op==Opp)return -(op1/(*(op2.mmb2)));
     ROperation resultat;
     resultat.op=Div;resultat.mmb1=new ROperation(op1);
     resultat.mmb2=new ROperation(op2);
@@ -524,7 +533,8 @@ void IsolateNumbers(char*&s,int nvar,RVar**ppvar,int nfunc,RFunction**ppfunc)//D
         if(s[i]=='('){i=SearchCorOpenbracket(s,i);if(i==-1)return;continue;};
         if(!ind&&IsNumeric(s[i])){i2=i;ind=1;};
     };
-    if(ind)InsStr(s,i2,'(');i++;InsStr(s,i,')');
+    if(ind)InsStr(s,i2,'(');
+    i++;InsStr(s,i,')');
 }
 
 ROperation::ROperation(char const*sp,int nvar,PRVar*ppvarp,int nfuncp,PRFunction*ppfuncp)
@@ -595,7 +605,8 @@ ROperation::ROperation(char const*sp,int nvar,PRVar*ppvarp,int nfuncp,PRFunction
                     if(IsFunction(s,j,nfuncp,ppfuncp))break;
                 }
             if(flag==0){flag=1;break;}
-                while(j>i&&s[j-1]!=')')j--;if(j<=i+1)break;
+                while(j>i&&s[j-1]!=')')j--;
+		if(j<=i+1)break;
                 InsStr(s,i,'(');InsStr(s,j+1,')');
                 i=j+1;
             }
@@ -994,7 +1005,8 @@ if(mmb1!=NULL){s1=mmb1->Expr();n+=strlen(s1);f=IsFunction(mmb1->op);}
         break;
     default:return CopyStr("Error");
     };
-    if(s1!=NULL)delete[] s1;if(s2!=NULL)delete[] s2;
+    if(s1!=NULL)delete[] s1;
+    if(s2!=NULL)delete[] s2;
     return s;
 }
 
