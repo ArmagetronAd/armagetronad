@@ -12,7 +12,7 @@ htmlm4 = $(top_builddir)/src/doc/html.m4
 $(htmlm4): $(top_builddir)/config.status Makefile $(top_srcdir)/src/doc/html.m4.in
 	cd ${top_builddir}; ./config.status src/doc/html.m4
 
-@protect@DATE_FMT = %Y-%m-%d
+@protect@ DATE_FMT = %Y-%m-%d
 @protect@ifdef SOURCE_DATE_EPOCH
 @protect@	BUILD_DATE ?= $(shell date -u -d "@$(SOURCE_DATE_EPOCH)" "+$(DATE_FMT)"  2>/dev/null || date -u -r "$(SOURCE_DATE_EPOCH)" "+$(DATE_FMT)" 2>/dev/null || date -u "+$(DATE_FMT)")
 @protect@else

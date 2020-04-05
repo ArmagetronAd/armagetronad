@@ -67,7 +67,7 @@ FROM build AS bootstrap
 ENV SOURCE_DIR /root/armagetronad_src
 WORKDIR ${SOURCE_DIR}
 COPY . ${SOURCE_DIR}
-RUN ./bootstrap.sh
+RUN test -r configure || ./bootstrap.sh
 
 ########################################
 
