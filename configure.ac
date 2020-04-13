@@ -29,7 +29,7 @@ dnl AC_CANONICAL_BUILD
 dnl AC_CANONICAL_HOST
 
 AC_PROG_RANLIB
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([tar-ustar -Wno-portability])
 
 dnl detect which link commant to use
 AC_PROG_LN_S
@@ -133,7 +133,7 @@ AM_CONDITIONAL(BUILDMAIN, test x$armamain = xtrue)
 
 # flag to set when mockup versions of the executables should be built to save
 # compile time when testing the release process
-AM_CONDITIONAL(BUILDFAKERELEASE, test "$ARMAGETRONAD_FAKERELEASE" != "")
+AM_CONDITIONAL(BUILDFAKERELEASE, test "$ARMAGETRONAD_FAKERELEASE" != "" && test "$ARMAGETRONAD_FAKERELEASE" != "false" && test "$ARMAGETRONAD_FAKERELEASE" != "no")
 
 # set replacement variables for dedicated server
 progtitle_serverorclient=" Client"
@@ -951,6 +951,9 @@ src/thirdparty/particles/Makefile
 resource/Makefile
 config/Makefile
 desktop/Makefile
+docker/build/Makefile
+docker/build/context/version.sh
+docker/deploy/targets.sh
 desktop/armagetronad.desktop
 )
 
