@@ -38,7 +38,7 @@ private:
 
 public:
 	tString friends[MAX_FRIENDS];
-    std::auto_ptr< tConfItemLine > confItems[MAX_FRIENDS];
+    std::unique_ptr< tConfItemLine > confItems[MAX_FRIENDS];
 
 	gFriends();
     static void FriendsMenu();

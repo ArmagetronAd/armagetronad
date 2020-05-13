@@ -2463,7 +2463,7 @@ void ConnectToServer(nServerInfoBase *server)
     // check for redirection
     while( okToRedirect )
     {
-        std::auto_ptr< nServerInfoBase > redirectTo( sn_GetRedirectTo() );
+        auto redirectTo = sn_GetRedirectTo();
 
         // abort loop
         if ( !(&(*redirectTo)) )

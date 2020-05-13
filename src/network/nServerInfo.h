@@ -83,7 +83,7 @@ protected:
 private:
     tString         connectionName_;            //!< the internet name of the server ("192.168.10.10", "atron.dyndns.org")
     unsigned int    port_;                      //!< the network port the server listens on
-    mutable std::auto_ptr< nAddress > address_; //!< the network address of the server
+    mutable std::unique_ptr< nAddress > address_; //!< the network address of the server
 public:
     inline tString const & GetConnectionName( void ) const;	                                 //!< Gets the internet name of the server ("192.168.10.10", "atron.dyndns.org")
     inline nServerInfoBase const & GetConnectionName( tString & connectionName ) const;	     //!< Gets the internet name of the server ("192.168.10.10", "atron.dyndns.org")
