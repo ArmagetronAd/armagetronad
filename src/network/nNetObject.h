@@ -128,14 +128,32 @@ public:
 
     virtual void Dump( tConsole& con ); // dumps object stats
 
+    static unsigned short ID(nNetObject const *pThis)
+    {
+        if (pThis)
+            return pThis->id;
+        else
+            return 0;
+    }
+
     unsigned short ID() const{
+        tASSERT(this);
         if (this)
             return id;
         else
             return 0;
     }
 
+    static unsigned short Owner(nNetObject const *pThis)
+    {
+        if (pThis)
+            return pThis->owner;
+        else
+            return ::sn_myNetID;
+    }
+
     unsigned short Owner() const{
+        tASSERT(this);
         if (this)
             return owner;
         else
