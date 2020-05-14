@@ -4110,7 +4110,7 @@ static void sg_Respawn( REAL time, eGrid *grid, gArena & arena )
     {
         ePlayerNetID *p = se_PlayerNetIDs(i);
 
-        if ( !p->CurrentTeam() )
+        if ( !p->CanRespawn() )
             continue;
 
         eGameObject *e=p->Object();
@@ -4160,7 +4160,7 @@ static void sg_RespawnAll(eGrid *grid, gArena & arena, bool respawn_all)
         ePlayerNetID *p = se_PlayerNetIDs(i);
 
         //  don't spawn spectators
-        if ( !p->CurrentTeam() )
+        if ( !p->CanRespawn() )
             continue;
 
         eGameObject *e=p->Object();
