@@ -6805,6 +6805,13 @@ void gCycle::ProcessShoot(bool deathShot)
 
                 eCoord shotPos = pos + (dirDrive * (shotRadius + sg_shotStartDistance));
                 eCoord shotVelocity = dirDrive * Speed() * sg_shotVelocityMultiplier;
+                
+                if(shotRadius <= 0) //HACK but useful for scripts that don't actually need a zone
+                {
+                    sg_ZoneShotReleased << deathShot << "-1" << Player()->GetUserName() << shotPos.x << shotPos.y << shotVelocity.x << shotVelocity.y;
+                    sg_ZoneShotReleased.write();
+                    return;
+                }
 
                 gDeathZoneHack *pZone = new gDeathZoneHack(grid, shotPos, true);
                 pZone->SetRadius(shotRadius);
