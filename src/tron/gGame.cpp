@@ -1240,13 +1240,19 @@ gDelayCommand::gDelayCommand(std::string command, REAL time, REAL interval)
     delayedCommands_[currentID] = this;
 }
 
+void gDelayCommand::Update()
+{
+    time_ += Interval();
+}
+
 void gDelayCommand::Run(REAL currentTime)
 {
     if (delayedCommands_.empty()) return;
 
-    std::map<int, gDelayCommand *>::iterator it = delayedCommands_.begin();
-    for (; it != delayedCommands_.end(); it++)
+    std::map<int, gDelayCommand *>::iterator it = delayedCommands_.begin(), itNext = it;
+    for (; it != delayedCommands_.end(); it=itNext)
     {
+        itNext++;
         gDelayCommand *delayCmd = it->second;
         if (delayCmd && (delayCmd->Time() <= currentTime))
         {
@@ -1255,10 +1261,8 @@ void gDelayCommand::Run(REAL currentTime)
             std::stringstream st(delayCmd->Command());
             tConfItemBase::LoadAll(st); // run command if it's not too old, otherwise, just skip it ...
 
-            if (delayCmd->Interval() > 0)
-                new gDelayCommand(delayCmd->Command(), currentTime+delayCmd->Interval(), delayCmd->Interval());
-
-            delayedCommands_.erase(it); // erase current and get next iterator
+            if(delayCmd->Interval() > 0) delayCmd->Update();
+            else delayedCommands_.erase(it);
         }
     }
 }

@@ -273,6 +273,7 @@ class gDelayCommand
             con << "Clearing delayed commands ...\n";
         }
         static void Run(REAL currentTime);
+        void Update();
 };
 
 extern gGameSettings* sg_currentSettings;
