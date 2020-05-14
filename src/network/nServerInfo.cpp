@@ -3148,7 +3148,7 @@ nAddress & nServerInfoBase::AccessAddress( void ) const
     // create address if it is not already there
     if ( !this->address_.get() )
     {
-        std::unique_ptr< nAddress > address( tNEW( nAddress ) );
+        this->address_.reset( tNEW( nAddress ) );
 
         // fill it with hostname and port
         address_->SetHostname( this->GetConnectionName() );
