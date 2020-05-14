@@ -50,6 +50,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "eDebugLine.h"
 #include "eLagCompensation.h"
 #include "gArena.h"
+#include "gSpawn.h"
 #include "gZone.h"
 
 #include "gRace.h"
@@ -7088,7 +7089,7 @@ static void sg_RespawnPlayer(std::istream &s)
         tString params;
         params.ReadLine( s );
 
-        // first parse the line to get the params : <player name> <message flag> <x> <y> <dirx> <diry>
+        // first parse the line to get the params : <player name> <x> <y> <dirx> <diry>
         int pos = 0; //
         tString PlayerName = ePlayerNetID::FilterName(params.ExtractNonBlankSubString(pos));
         ePlayerNetID *pPlayer = ePlayerNetID::FindPlayerByName(PlayerName);
@@ -7107,11 +7108,15 @@ static void sg_RespawnPlayer(std::istream &s)
         REAL diry = atof(diry_str);
         // prepare coord and direction ...
         eCoord ppos, pdir;
-        if (((x_str == "") && (y_str == "")) || ((dirx ==0) && (diry == 0))) {
-            return;
+        if(x_str == "" && y_str == "") 
+        {
+            Arena.LeastDangerousSpawnPoint()->Spawn(ppos,pdir);
         }
-        ppos = eCoord(x * gArena::SizeMultiplier(),y * gArena::SizeMultiplier());
-        pdir = eCoord(dirx,diry);
+        else
+        {
+            ppos = eCoord(x * gArena::SizeMultiplier(),y * gArena::SizeMultiplier());
+            pdir = eCoord(dirx,diry);
+        }
 
         // let's respawn now ...
         if (!pPlayer->Object() || !pPlayer->Object()->Alive())
@@ -7133,6 +7138,7 @@ static void sg_RespawnPlayer(std::istream &s)
 }
 
 static tConfItemFunc sg_RespawnPlayer_conf("RESPAWN_PLAYER",&sg_RespawnPlayer);
+static tConfItemFunc sg_Respawn_conf("RESPAWN",&sg_RespawnPlayer);
 
 
 static void sg_TeleportPlayer(std::istream &s)
@@ -7146,18 +7152,20 @@ static void sg_TeleportPlayer(std::istream &s)
 	tString params;
 	params.ReadLine( s, true );
 
-	// first parse the line to get the params : <player name> <x> <y> <dirx> <diry>
+	// first parse the line to get the params : <player name> <x> <y> <rel|abs> <dirx> <diry>
 	int pos = 0; //
 	tString PlayerName = ePlayerNetID::FilterName(params.ExtractNonBlankSubString(pos));
 	ePlayerNetID *pPlayer = 0;
 	pPlayer = ePlayerNetID::FindPlayerByName(PlayerName);
-	if(!pPlayer) {
-		return;
-	}
 	const tString x_str = params.ExtractNonBlankSubString(pos);
 	REAL x = atof(x_str);
 	const tString y_str = params.ExtractNonBlankSubString(pos);
 	REAL y = atof(y_str);
+	if(!pPlayer || (x_str == "" && y_str == ""))
+	{
+		con << "Usage: TELEPORT <player> <x> <y> <rel|abs> <xdir> <ydir>\n";
+		return;
+	}
 	tString relabs = params.ExtractNonBlankSubString(pos);
 	if (relabs=="") relabs="rel";
 
@@ -7172,9 +7180,6 @@ static void sg_TeleportPlayer(std::istream &s)
 
 	// prepare new coord ...
 	eCoord ppos;
-	if ((x_str == "") && (y_str == "")) {
-		return;
-	}
 	ppos = eCoord(x * gArena::SizeMultiplier(),y * gArena::SizeMultiplier());
 
 	// let's teleport now ...
@@ -7190,6 +7195,7 @@ static void sg_TeleportPlayer(std::istream &s)
 }
 
 static tConfItemFunc sg_TeleportPlayer_conf("TELEPORT_PLAYER",&sg_TeleportPlayer);
+static tConfItemFunc sg_Teleport_conf("TELEPORT",&sg_TeleportPlayer);
 
 
 static void sg_setCycleSpeed(std::istream &s)
