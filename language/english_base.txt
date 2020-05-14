@@ -3744,6 +3744,7 @@ cycle_walls_length_help             The length of the tails, automatically sets 
 cycle_walls_stay_up_delay_help      The number of seconds the tails remain on the field after their owner is dead.
 cycle_zones_approch_help            The distance a cycle can approch the zone without trigging the OnNear() event.
 cycle_zones_avoid_help              If set to 1, cycles will do their best at avoiding the zone. Is slightly buggy but works often.
+cycle_zones_avoid_chatbot_help      If enabled, chatbots are also included in CYCLE_ZONES_AVOID.
 death_shot_help                     If set to 1, killed players will release a death shot if they had been about to shoot.
 
 delay_command_help                  A command to execute at given time. Usage: DELAY_COMMAND [time] [command] [parameters] ...

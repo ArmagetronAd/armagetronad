@@ -1043,8 +1043,11 @@ void gZone::OnVanish( void )
 //!
 // *******************************************************************************
 
-bool sg_cyclesZonesAvoid = false;
+bool sg_cyclesZonesAvoid = true;
 static tSettingItem<bool> sg_cyclesZonesAvoidConf("CYCLE_ZONES_AVOID", sg_cyclesZonesAvoid);
+
+bool sg_chatbotAvoidZones = false;
+static tSettingItem<bool> sg_chatbotAvoidZonesConf("CYCLE_ZONES_AVOID_CHATBOT", sg_chatbotAvoidZones);
 
 REAL sg_cycleZonesApproch = 100.0;
 static tSettingItem<REAL>sg_cycleZoneApprochConf("CYCLE_ZONES_APPROCH", sg_cycleZonesApproch);
@@ -1058,8 +1061,10 @@ static void TriggerAvoidZone(gCycle *target, gZone *Zone, REAL currentTime)
     eGrid *grid = eGrid::CurrentGrid();
     if (!grid) return;
 
+    if(!target->Alive() || target->GetLastTurnTime()+target->GetTurnDelay() > currentTime) return;
+    
     ePlayerNetID *player = target->Player();
-    if ((player->IsChatting()) && (player->IsActive()) || (!player->IsHuman()))
+    if ((!player->IsHuman()) || (sg_chatbotAvoidZones && player->IsChatting() && player->IsActive()))
     {
         REAL tarX = target->Position().x;
         REAL tarY = target->Position().y;
@@ -1068,6 +1073,31 @@ static void TriggerAvoidZone(gCycle *target, gZone *Zone, REAL currentTime)
 
         REAL tarDirX = target->Direction().x;
         REAL tarDirY = target->Direction().y;
+        
+        bool shouldTurn = false;
+        //A bad way to do this: loop through the zone's perimeter and determine if they intersect with the cycle direction
+        REAL radi = Zone->GetRadius();
+        REAL adjPosX = tarX+(tarDirX*sg_cycleZonesApproch), adjPosY = tarY+(tarDirY*sg_cycleZonesApproch);
+        REAL pX, pY, s1_x, s1_y, s2_x, s2_y, s, t, lpX = radi, lpY = 0;
+        for(int i=41;i>0;--i)
+        {
+            pX = (radi*cos(M_PI*2*(i/42.f)))+zonX; pY = (radi*sin(M_PI*2*(i/42.f)))+zonY;
+            
+            s1_x = adjPosX - tarX; s1_y = adjPosY - tarY; s2_x = pX - lpX; s2_y = pY - lpY;
+            s = (-s1_y * (tarX - lpX) + s1_x * (tarY - lpY)) / (-s2_x * s1_y + s1_x * s2_y);
+            t = ( s2_x * (tarY - lpY) - s2_y * (tarX - lpX)) / (-s2_x * s1_y + s1_x * s2_y);
+            
+            if(s >= 0 && s <= 1 && t >= 0 && t <= 1) { shouldTurn = true; break; };
+            
+            lpX = pX; lpY = pY;
+        }
+        
+        if(!shouldTurn)
+            return;
+        
+#ifdef DEBUG
+        con << player->GetName() << " turning away from zone...\n";
+#endif
 
         if ((tarX == zonX) || (tarY == zonY))
         {
