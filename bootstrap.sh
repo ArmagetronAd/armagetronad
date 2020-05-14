@@ -10,7 +10,7 @@ if test -r batch/make/version; then
     rm -f version
 fi
 echo "Copying license..."
-cp COPYING.txt COPYING
+test -r COPYING || cp COPYING.txt COPYING || exit $?
 echo "Running aclocal..."
 aclocal || { rm aclocal.m4; exit 1; }
 echo "Running autoheader..."
