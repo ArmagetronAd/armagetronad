@@ -80,6 +80,9 @@ dist-hook:
 #	clear SVN
 	find $(distdir) -depth -name .svn -exec rm -rf \{\} \;
 
+#	clear git and bzr
+	rm -rf .git .bzr
+
 #   	strip comments from translated files
 	cd $(distdir)/language; `which python3 python python2 2> /dev/null | head -n 1` ./update.py --dist
 #	restore timestamps
