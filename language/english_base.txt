@@ -3635,8 +3635,10 @@ spawn_zone_help                                spawn a zone onto the grid
 collapse_zone_help                             collapse a zone
 set_zone_radius_help                           change zones radius
 set_zone_id_radius_help                        change zones radius
-set_zone_position_help                         change a zones position
-set_zone_id_position_help                      change a zones position
+set_zone_position_help                         add to a zones path
+set_zone_id_position_help                      add to a zones path
+set_zone_coord_help                            change a zones actual position
+set_zone_id_coord_help                         change a zones actual position
 set_zone_speed_help                            change a zones speed
 set_zone_id_speed_help                         change a zones speed
 set_zone_color_help                            Change the color of a zone
