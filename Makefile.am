@@ -80,8 +80,8 @@ dist-hook:
 #	clear SVN
 	find $(distdir) -depth -name .svn -exec rm -rf \{\} \;
 
-#   strip comments from translated files
-	cd $(distdir)/language; python2 ./update.py --dist
+#   	strip comments from translated files
+	cd $(distdir)/language; `which python3 python python2 2> /dev/null | head -n 1` ./update.py --dist
 #	restore timestamps
 	cd $(distdir)/language; for f in *.txt; do test -r $$f.bak && touch -r $$f.bak $$f; done
 	rm -f $(distdir)/language/*.bak
