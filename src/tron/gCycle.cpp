@@ -3872,6 +3872,9 @@ private:
     eCoord const * lastFakeDir_;
 };
 
+bool sg_playerGridPosOnTurn = false;
+static tSettingItem<bool> sg_playerGridPosOnTurnConf("PLAYER_GRIDPOS_ON_TURN",sg_playerGridPosOnTurn);
+
 bool gCycle::DoTurn(int d)
 {
 #ifdef DELAYEDTURN_DEBUG
@@ -3990,6 +3993,9 @@ bool gCycle::DoTurn(int d)
             tString logTurnPos;
             logTurnPos << pos.x << " " << pos.y << " " << dirDrive.x << " " << dirDrive.y;
             LogPlayersCycleTurns(this, logTurnPos);
+            
+            if(sg_playerGridPosOnTurn)
+                Player()->GridPosLadderLog();
 
             turnedPositions.push_back(pos);
             turnedDirections.push_back(dirDrive);

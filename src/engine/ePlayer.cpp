@@ -8270,7 +8270,7 @@ void ePlayerNetID::GridPosLadderLog()
 
                 se_playerGridPosWriter << p->GetUserName();
                 se_playerGridPosWriter << pCycle->MapPosition().x << pCycle->MapPosition().y;
-                se_playerGridPosWriter << pCycle->MapDirection().x << pCycle->MapDirection().y;
+                se_playerGridPosWriter << pCycle->Direction().x << pCycle->Direction().y;
                 se_playerGridPosWriter << pCycle->verletSpeed_;
                 se_playerGridPosWriter << pCycle->GetRubber() << sg_rubberCycle;
 
