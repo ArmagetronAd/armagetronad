@@ -3253,7 +3253,10 @@ void gBaseZoneHack::OnConquest( void )
             //sg_basezoneConquererTeamWriter.write();
 
             if (sg_condenseConquestOutput){
-                (*iter)->AddScore( score);
+                if((*iter)->maxPlayers == 1 && (*iter)->players.Len() == 1)
+                    (*iter)->players[0]->AddScore(score,tString("\n"),tString(),false);
+                else
+                    (*iter)->AddScore(score);
                 if(tCount==0){
                     lastTeam = (*iter)->GetColoredName();
                 }

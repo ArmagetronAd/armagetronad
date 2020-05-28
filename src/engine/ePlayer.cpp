@@ -7887,6 +7887,18 @@ void ePlayerNetID::SetRubber(ePlayerNetID *player, REAL rubber)
 }
 */
 
+void ePlayerNetID::AddScore(int points)
+{
+    if(points==0)
+        return;
+
+    score += points;
+    if(currentTeam)
+        currentTeam->AddScore( points );
+    
+    RequestSync(true);
+}
+
 void ePlayerNetID::AddScore(int points,
                             const tOutput& reasonwin,
                             const tOutput& reasonlose,

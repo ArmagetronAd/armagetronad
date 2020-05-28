@@ -419,6 +419,7 @@ public:
     eNetGameObject *Object() const;
 
     //void SetRubber(ePlayerNetID *player, REAL rubber);
+    void AddScore(int points);
     void AddScore(int points, const tOutput& reasonwin, const tOutput& reasonlose, bool shouldPrint=true);
     int Score()const {return score;}
     int TotalScore() const;
