@@ -21,7 +21,7 @@ if test -z "${CI_DEFAULT_BRANCH}" || test -z "${CI_COMMIT_REF_PROTECTED}"; then
 fi
 
 if test "${CI_COMMIT_REF_PROTECTED}" = "true"; then
-	SERIES="LTS_0283"
+	SERIES="CURRENT"
 	if test -z "${CI_COMMIT_TAG}"; then
 		# protected branch
 		case ${CI_COMMIT_BRANCH} in
