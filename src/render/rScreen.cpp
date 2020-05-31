@@ -625,7 +625,7 @@ static bool lowlevel_sr_InitDisplay(){
         // MacOSX SDL 1.2.4 crashes if we SetCaption after switch to fullscreen. (fixed in 1.2.5)
         if(!currentScreensetting.fullscreen)
         {
-            tOutput o("Armagetron Advanced");
+            tOutput o("$game_name");
             tString s;
             s << o;
             SDL_WM_SetCaption(s, s);
