@@ -533,7 +533,7 @@ result.deploy_zi: context.deploy_zi
 	echo > $@
 
 # deploy to download site (additional dependency here only, standard rules apply)
-result.deploy_download: result.deploy_zi
+result.deploy_download: result.deploy_scp result.deploy_lp
 
 # individual deploy targets
 deploy_lp: result.deploy_lp
