@@ -1,0 +1,89 @@
+#!/bin/bash
+# builds portable client
+
+# set -x
+
+#   add AppRun and desktop file
+cp portable/AppRun ${APPDIR}/
+find ${APPDIR} -type f -name "*.desktop" -exec mv \{\} ${APPDIR}/ \;
+find ${APPDIR} -type l -name "*.desktop" -exec rm \{\} \;
+
+#   hack Icon
+for f in $(find ${APPDIR} -type d -name "desktop"); do
+  cp $f/icons/small/*.png ${APPDIR}/${PACKAGE}.png
+done
+
+# correct absolute symlinks
+APPDIR=${APPDIR} $(dirname $0)/fixlinks
+
+lastpath=/usr/lib/*linux-gnu
+otherpath=${lastpath}
+
+function copylib()
+{
+    baselib=$1
+    path=$(dirname ${baselib})
+    baselib=$(basename ${baselib})
+    echo "Found in ${path}."
+    if test "$lastpath" != "$path"; then
+        otherpath=$lastpath
+    fi
+    lastpath=$path
+    while test -n "${baselib}"; do
+      # copy libary
+      echo Copying ${baselib}...
+      cp -a "${path}/${baselib}" ${APPDIR}/usr/lib/
+      # resolve links
+      baselib=$(ls -l ${path}/${baselib} | grep -- "->" | sed -e "s,.*-> ,,")
+    done
+}
+
+#   include libraries
+mkdir -p ${APPDIR}/usr/lib/
+mkdir -p ${APPDIR}/usr/local/lib/
+for library in \
+libxml2 \
+libZThread \
+libSDL-1 \
+libboost_thread \
+libSDL_image libpng \
+libSDL_mixer \
+libGLEW \
+libfreetype \
+libftgl \
+libprotobuf \
+; do
+  echo "Checking for library ${library}...."
+  baselib=$(ldd ${APPDIR}/usr/local/bin/${PACKAGE} | grep "${library}" | sed -e "s,.*=> ,," -e "s, (.*,,")
+  if test -z "${baselib}"; then
+    echo "Not linked."
+  else
+    copylib ${baselib}
+  fi
+done
+
+if ! echo ${PACKAGE} | grep dedicated; then
+# libraries we know are dynamically loaded later, so they don't appear in ldd's output
+for library in \
+libjpeg.so.8 \
+; do
+    echo "Installing library ${library} anyway, we know it's needed."
+    if test -r ${lastpath}/${library}; then
+        copylib ${lastpath}/${library}
+    else
+        copylib ${otherpath}/${library}
+    fi
+done
+fi
+
+# more libraries for 0.4, later
+#libogg.so \
+#libogg.so.0 \
+#libvorbis.so \
+#libvorbis.so.0 \
+#libvorbisfile.so \
+#libvorbisfile.so.3 \
+#libmikmod.so \
+#libmikmod.so.2 \
+
+echo $lastpath

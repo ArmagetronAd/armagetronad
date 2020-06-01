@@ -1,0 +1,241 @@
+#! /usr/bin/python
+
+# Copyright (c) 2009 Canonical Ltd.
+#
+# This program is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the
+# Free Software Foundation; either version 2, or (at your option) any
+# later version.
+#
+# lp-project-upload is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+
+# Authors:
+#  Martin Pitt <martin.pitt@ubuntu.com>, based on
+#  http://blog.launchpad.net/api/recipe-for-uploading-files-via-the-api
+#  Dustin Kirkland <kirkland@ubuntu.com>
+#  - support files for changelog and release notes
+#  Adapted to upload all the file types of Armagetron Advanced, not just tarballs
+
+'''Upload a release tarball to a Launchpad project.'''
+
+import datetime
+import os
+import sys
+import tempfile
+import os.path
+
+from launchpadlib.errors import HTTPError
+from launchpadlib.launchpad import Launchpad
+from launchpadlib.credentials import UnencryptedFileCredentialStore
+
+import subprocess
+
+from lptools import config
+
+def create_release(project, series_name, version):
+    '''Create new release and milestone for LP project.'''
+
+    series = None
+    for ser in project.series:
+        if ser.display_name == series_name:
+            series = ser
+            break
+    if not series:
+        print >> sys.stderr, 'Series %s not found, available:' % series_name
+        for s in proj.series.entries:
+            print '%s: %s' % (s['display_name'], s['summary'])
+        sys.exit(3)
+
+    release_date = datetime.date.today().strftime('%Y-%m-%d')
+
+    milestone = series.newMilestone(name=version,
+            date_targeted=release_date)
+    return milestone.createProductRelease(date_released=release_date)
+
+def edit_file(prefix, description):
+    (fd, f) = tempfile.mkstemp(prefix=prefix+'.')
+    os.write(fd, '\n\n#------\n# Please enter the %s here. '
+                 'Lines which start with "#" are ignored.\n' % description)
+    os.close(fd)
+    subprocess.call(['sensible-editor', f])
+    return cat_file(f)
+
+def cat_file(f):
+    content = ''
+    for line in open(f):
+        if line.startswith('#'):
+            continue
+        content += line
+    return content.strip()
+
+def main():
+    if len(sys.argv) < 5 or len(sys.argv) > 7:
+        print >> sys.stderr, '''Upload a release tarball to a Launchpad project.
+
+    Usage: %s <project name> <series> <version> <tarball> [changelog file] [releasenotes file]''' % sys.argv[0]
+        sys.exit(1)
+
+    new_milestone = None
+    changelog_file = None
+    releasenotes_file = None
+    if len(sys.argv) == 5:
+        (project, series, version, tarball) = sys.argv[1:]
+    elif len(sys.argv) == 6:
+        (project, series, version, tarball, changelog_file) = sys.argv[1:]
+    elif len(sys.argv) == 7:
+        (project, series, version, tarball, changelog_file, releasenotes_file) = sys.argv[1:]
+
+    #print("login")
+    
+    scriptPath = sys.argv[0] #executable
+    secretFile = os.path.join(os.path.dirname(scriptPath),"secrets","lp-credentials")
+    # print secretFile
+    launchpad = Launchpad.login_with("lptools-project-upload","production",credential_store=UnencryptedFileCredentialStore(secretFile))
+
+    #print("login done")
+
+    try:
+        # Look up the project using the Launchpad instance.
+        proj = launchpad.projects[project]
+
+        # Get the file contents.
+        file_content = open(tarball, 'r').read()
+        # Get the signature, if available.
+        signature = tarball + '.asc'
+        if not os.path.exists(signature):
+            print 'Calling GPG to create tarball signature...'
+            cmd = ['gpg', '--armor', '--sign', '--detach-sig', tarball]
+            if subprocess.call(cmd) != 0:
+                print >> sys.stderr, 'gpg failed, aborting'
+
+        if os.path.exists(signature):
+            signature_content = open(signature, 'r').read()
+        else:
+            signature_content = None
+
+        # Create a new product release file.
+        filename = os.path.basename(tarball)
+
+        # default types
+        mime_type="application/octet-stream"
+        file_type="Installer file"
+        description="Portable App for Linux"
+        
+        basename, extension = os.path.splitext(filename)
+        basename, secondextension = os.path.splitext(basename)
+        basename, thirdextension = os.path.splitext(basename)
+        fn = filename.replace("-", "_")
+        # print basename, thirdextension, secondextension, extension
+
+        if extension == ".tbz":
+            file_type="Linux Binary Tarball"
+            mime_type="application/bzip2"
+            if "_client32_" in fn:
+                description="32 Bit Client"
+            elif "_server32_" in fn:
+                description="32 Bit Server"
+            elif "_client64_" in fn:
+                description="64 Bit Client"
+            elif "_server64_" in fn:
+                description="64 Bit Server"
+            else:
+                file_type="Code Release Tarball"
+                description="Source"
+        else:
+            if fn == "PATCHNOTES.md":
+                description="Patch Notes"
+            if extension == ".deb":
+                description="Debian Package"
+                Linux=True
+            if extension == ".dmg":
+                description="OSX Disk Image"
+                mime_type="application/x-apple-diskimage"
+                Mac=True
+            if extension == ".exe":
+                description="Windows Installer"
+                mime_type="application/exe"
+                Windows=True
+            if extension == ".zip":
+                description="Windows Binary Zip"
+                mime_type="application/zip"
+                Windows=True
+            if "Portable App" in description:
+                Linux=True
+                if "_32bit" in fn:
+                    description = description.replace("Linux", "32 bit Linux")
+                else:
+                    description = description.replace("Linux", "64 bit Linux")
+            if "edicated" in filename:
+                description="Server " + description
+            else:
+                if "-common" in filename and extension == ".deb":
+                    description="Common " + description
+                else:
+                    description="Client " + description
+
+        print (filename,description,mime_type,file_type)
+
+        # Find the release in the project's releases collection.
+        release = None
+        for rel in proj.releases:
+            if rel.version == version:
+                release = rel
+                break
+        if not release:
+            for milestone in proj.all_milestones:
+                if milestone.name == version:
+                    today = datetime.date.today().strftime('%Y-%m-%d')
+                    release = milestone.createProductRelease(date_released=today)
+        if not release:
+            release = create_release(proj, series, version)
+
+        #print("release created")
+
+        for file in release.files:
+            #print(file.self_link)
+            #print(os.path.basename(file.self_link))
+            if os.path.basename(file.self_link) == filename and file.description == description:
+                print("file already released")
+                return 
+        
+        release.add_file(filename=filename, description=description,
+                file_content=file_content, content_type=mime_type,
+                file_type=file_type, signature_filename=signature,
+                signature_content=signature_content)
+
+        print("file added")
+
+        changelog = None
+        if changelog_file is not None:
+            changelog = cat_file(changelog_file)
+        if changelog is not None:
+            release.changelog = changelog
+
+        release_notes = None
+        if releasenotes_file is not None:
+            release_notes = cat_file(releasenotes_file)
+        if release_notes is not None:
+            release.release_notes = release_notes
+
+        release.lp_save()
+
+        # print("release saved")
+
+        return
+        
+        # Create a new milestone if requested
+        if new_milestone is not None:
+            mil = release.milestone
+            for series in proj.series:
+                if mil.name in [milestone.name for milestone in series.all_milestones]:
+                    series.newMilestone(name=new_milestone)
+
+    except HTTPError, error:
+        print 'An error happened in the upload:', error.content
+        sys.exit(1)
+
+if __name__ == '__main__':
+    main()

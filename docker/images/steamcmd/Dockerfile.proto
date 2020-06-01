@@ -1,0 +1,13 @@
+#LABEL maintainer="Manuel Moos <z-man@users.sf.net>"
+
+#USER root
+
+# more build dependencies
+#RUN apt-get -y update && apt-get install \
+#debhelper \
+#dh-systemd \
+#devscripts \
+#0install \
+#-y
+
+#USER docker

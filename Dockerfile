@@ -1,73 +1,47 @@
-ARG BASE_LINUX=amd64/alpine:3.7
-ARG PROGRAM_NAME=armagetronad
-ARG PROGRAM_TITLE="Armagetron Advanced"
-
-FROM ${BASE_LINUX} AS download
-MAINTAINER Manuel Moos <z-man@users.sf.net>
-
-# download zthread and patch
-WORKDIR /root/
-RUN mkdir download && mkdir src
-RUN wget https://forums3.armagetronad.net/download/file.php?id=9628 -O download/zthread.patch.bz2
-ENV ZTHREAD_VER=2.3.2
-RUN wget https://sourceforge.net/projects/zthread/files/ZThread/${ZTHREAD_VER}/ZThread-${ZTHREAD_VER}.tar.gz/download -O download/ZThread-${ZTHREAD_VER}.tar.gz
-
-########################################
-
-FROM download AS build_base
-
-# build dependencies
-RUN apk add \
-autoconf \
-automake \
-bison \
-boost-dev \
-boost-thread \
-glew-dev \
-freetype-dev \
-ftgl-dev \
-git \
-g++ \
-make \
-libpng-dev \
-libxml2-dev \
-protobuf-dev \
-python \
-sdl-dev \
-sdl_image-dev \
-sdl_mixer-dev \
-sdl2-dev \
-sdl2_image-dev \
-sdl2_mixer-dev \
---no-cache
-
-########################################
-
-FROM build_base as zbuild
-
-# build zthread
-WORKDIR /root/
-RUN cd src && tar -xzf ../download/ZThread-${ZTHREAD_VER}.tar.gz \
-&& cd ZThread-${ZTHREAD_VER} && bzcat ../../download/zthread.patch.bz2 | patch -p 1 \
-&& CXXFLAGS="-fpermissive -DPTHREAD_MUTEX_RECURSIVE_NP=PTHREAD_MUTEX_RECURSIVE" ./configure --prefix=/usr --enable-shared=false \
-&& make install -j$(nproc)
-
-########################################
-
-# pack up result
-From build_base AS build
-COPY --from=zbuild /usr/include/zthread /usr/include/
-COPY --from=zbuild /usr/bin/zthread* /usr/bin/
-COPY --from=zbuild /usr/lib/libZ* /usr/lib/
+ARG BASE_BUILD_SMALL=registry.gitlab.com/armagetronad/armagetronad/armalpine_32:028_0
+ARG BASE_BUILD_FULL=registry.gitlab.com/armagetronad/armagetronad/armabuild_64:028_0
+ARG BASE_LINUX=i386/alpine:3.7
+ARG PROGRAM_NAME=armagetronad-unk
+ARG PROGRAM_TITLE="Armagetron UNK"
+ARG FAKERELEASE=false
+ARG BRANCH=master-fix-unknown-bug
 
 ########################################
 
 # bootstrap source
-FROM build AS bootstrap
-ENV SOURCE_DIR /root/armagetronad_src
+FROM ${BASE_BUILD_FULL} AS bootstrap
+MAINTAINER Manuel Moos <z-man@users.sf.net>
+
+ENV SOURCE_DIR /home/docker/armagetronad
+ENV BUILD_DIR /home/docker/build
+
+COPY --chown=docker . ${SOURCE_DIR}
+RUN chmod 755 ${SOURCE_DIR}
 WORKDIR ${SOURCE_DIR}
-COPY . ${SOURCE_DIR}
+# these files are in .dockerignore, but if they're in git, restore them.
+RUN test -d .git && git checkout .dockerignore .gitlab-ci.yml Dockerfile
+RUN git status
+#RUN ./batch/make/version .
+#RUN false
 RUN test -r configure || ./bootstrap.sh
+RUN cat version.m4
+#RUN false
+
+########################################
+
+# build tarball
+FROM bootstrap AS configured
+
+#ARG PROGRAM_NAME
+#ARG PROGRAM_TITLE
+ARG FAKERELEASE
+ARG BRANCH
+
+RUN mkdir -p ${BUILD_DIR} && chmod 755 ${BUILD_DIR}
+WORKDIR ${BUILD_DIR}
+RUN . ../armagetronad/docker/scripts/brand.sh . && ARMAGETRONAD_FAKERELEASE=${FAKERELEASE} ../armagetronad/configure --prefix=/usr/local --disable-glout --disable-sysinstall --disable-desktop progname="${PROGRAM_NAME}" progtitle="${PROGRAM_TITLE}"
+RUN make -j$(nproc) dist && make -C docker/build tag.gits
+RUN if [ ${FAKERELEASE} = true ]; then cp ../armagetronad/docker/build/fakerelease_proto.sh docker/build/fakerelease.sh; fi
 
 ########################################
 
@@ -79,7 +53,7 @@ ARG PROGRAM_TITLE
 
 RUN bash ./configure --prefix=/usr/local --disable-glout --disable-sysinstall --disable-desktop progname="${PROGRAM_NAME}" progtitle="${PROGRAM_TITLE}"
 RUN make -j$(nproc)
-RUN DESTDIR=/root/destdir make install
+RUN DESTDIR=/home/docker/destdir make install
 
 ########################################
 
@@ -91,7 +65,7 @@ ARG PROGRAM_TITLE
 
 RUN bash ./configure --prefix=/usr/local --disable-sysinstall --disable-desktop progname="${PROGRAM_NAME}" progtitle="${PROGRAM_TITLE}"
 RUN make -j$(nproc)
-RUN DESTDIR=/root/destdir make install
+RUN DESTDIR=/home/docker/destdir make install
 
 ########################################
 
@@ -115,6 +89,6 @@ MAINTAINER Manuel Moos <z-man@users.sf.net>
 ARG PROGRAM_NAME
 
 WORKDIR /
-COPY --from=build_server /root/destdir/ /
+COPY --chown=root --from=build_server /home/docker/destdir/ /
 RUN sh /usr/local/share/games/${PROGRAM_NAME}-dedicated/scripts/sysinstall install /usr/local
 

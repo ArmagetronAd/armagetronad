@@ -1,0 +1,6 @@
+PACKAGE_VERSION=@version@
+PACKAGE_NAME=@prognamebase@
+PACKAGE_TITLE="@progtitle@"
+
+# depends on whether the current build is configured as client or server, maybe don't use?
+# PACKAGE_NAME_FULL=@progname@

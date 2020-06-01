@@ -647,7 +647,7 @@ static bool lowlevel_sr_InitDisplay(){
         if(!currentScreensetting.fullscreen)
 #endif
         {
-            tOutput o("Armagetron Advanced");
+            tOutput o("$game_name");
             tString s;
             s << o;
             SDL_WM_SetCaption(s, s);
