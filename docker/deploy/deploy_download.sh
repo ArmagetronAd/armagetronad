@@ -47,7 +47,7 @@ for f in *; do
 	*win32.zip)
 	    ;;
 	*-${PACKAGE_VERSION}.zip)
-A	    SOURCE_ZIP=$f
+	    SOURCE_ZIP=$f
 	    ;;
     esac
 done
