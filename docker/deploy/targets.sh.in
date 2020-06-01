@@ -89,16 +89,20 @@ fi
 # **********************************************************************
 
 # ubuntu PPA
-case ${STAGING}+${ZI_SERIES} in
-    true+stable)
+case ${STAGING}+${ZI_SERIES}+${SERIES} in
+    true+stable+CURRENT)
 	# deploy to staging ppa
 	UBUNTU_PPA=ppa:armagetronad-dev/staging
 	;;
-    true+*)
+    true+*+*)
 	# do not deploy at all
 	UBUNTU_PPA=""
 	;;
-    false+*)
+    false+*+LTS*)
+	# deploy to LTS ppa
+	UBUNTU_PPA=ppa:armagetronad-dev/lts
+	;;
+    false+*+*)
 	# deploy to regular PPA
 	UBUNTU_PPA=ppa:armagetronad-dev/ppa
 	;;
