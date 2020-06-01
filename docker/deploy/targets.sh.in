@@ -42,6 +42,13 @@ case ${SERIES}+${SUFFIX} in
 	ZI_SERIES="stable"
 	STEAM_BRANCH=""
 	;;
+    LTS_028*+alpha)
+	STAGING=false
+	SF_DIR="alpha"
+	LP_SERIES="0.2.8-snapshots"
+	ZI_SERIES="alpha"
+	STEAM_BRANCH=""
+	;;
     LTS_028*+*)
 	STAGING=false
 	SF_DIR="beta"
