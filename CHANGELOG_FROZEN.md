@@ -1,3 +1,13 @@
+#### Changes since 0.2.8.3.4:
+
+- Security fix: Check that the remote is allowed to create an object
+  before creating it, not decide whether it gets to keep it after
+  it already has been created and potential damage has been done.
+  No arbitrary code could be executed, but a client could effectively 
+  shut down a server by sending crucial objects, such as the main game
+  timer or the game itself.
+- Compilation fixes for current systems.
+
 #### Changes since 0.2.8.3.3:
 
 - Eliminated undefined behavior that was fine in gcc 5, but now
