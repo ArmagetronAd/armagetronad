@@ -3,12 +3,13 @@ Changes since 0.2.8.3.5:
 
   Fixed Bugs
 
-- Debian builds: Documentation html files have empty last change (https://gitlab.com/armagetronad/armagetronad/-/issues/9)
+- Debian builds: Documentation html files have empty last change (#9)
 
   New Features
 
-- Adapt ChangeLog and fingerprint generation to git (https://gitlab.com/armagetronad/armagetronad/-/issues/11)
-- Integrated build system (https://gitlab.com/armagetronad/armagetronad/-/issues/14)
+- Adapt ChangeLog and fingerprint generation to git (#11)
+- Integrated build system (#14)
+
 
 Changes since 0.2.8.3.4:
 
@@ -21,6 +22,7 @@ Changes since 0.2.8.3.4:
 - Compilation fixes for current systems.
 
 Changes since 0.2.8.3.3:
+
 - Eliminated undefined behavior that was fine in gcc 5, but now
   (rightfully!) turned into crashes in gcc 6.
 - Eliminated compilation disambiguity that was just causing a mild
@@ -28,6 +30,7 @@ Changes since 0.2.8.3.3:
   gcc 6.
   
 Changes since 0.2.8.3.2:
+
 - security fix: do not read ahead of the beginning of network buffer.
 - security fix: don't attribute network errors from processing random
   packets to the connection to the server 
@@ -39,6 +42,7 @@ Changes since 0.2.8.3.2:
 - fix for camera turning for bizarre axis configurations
 
 Changes since 0.2.8.3.1:
+
 - security fix: old style action commands from clients no loger cause hangs and crashes
 - security fix: oversized packets are ignored properly
 - security fix: never read one byte outside of the received buffer
@@ -49,6 +53,7 @@ Changes since 0.2.8.3.1:
 - Additional checks against illegal values passed to renderer
 
 Changes since 0.2.8.3:
+
 - fixed temporary sound disappearance when alt-tabbing away and back
 - default subcultures are now distributed
 - enable 32 bit color depth at desktop resolution
@@ -56,6 +61,7 @@ Changes since 0.2.8.3:
 - spelling mistakes and missing German translations
 
 Changes since 0.2.8.3_rc4:
+
 - Intercepted chat commands are now written to ladderlog.txt. Format:
   COMMAND /command-intercepted player [command arguments]
 - Increased default speed of server pinging
@@ -63,6 +69,7 @@ Changes since 0.2.8.3_rc4:
 - fast finish works again
 
 Changes since 0.2.8.3_rc3:
+
 - Pinging previously popular servers earlier for quicker server
   browsing
 - Improved master server random polling, the second polled master now
@@ -75,6 +82,7 @@ Changes since 0.2.8.3_rc3:
   changes user level for name\_with\_spaces@forums
 
 Changes since 0.2.8.3_rc2:
+
 - Fixed crash with server polling
 - ROUND_WINNER and MATCH_WINNER logged to ladderlog
 - Camera switches to user preferred camera when you die in incam mode
@@ -84,12 +92,14 @@ Changes since 0.2.8.3_rc2:
   of shuffle messages displayed.
 
 Changes since 0.2.8.3_rc1:
+
 - Fixed dark color filters, such as FILTER_DARK_COLOR_STRINGS, to not filter
   the reset color.
 - ASE moviepack models no longer have a vertex count limit
 - Fixed endless recursion crash between rounds
 
 Changes since 0.2.8.3_beta3:
+
 - Chat prefix spam protection. Guards against prefix spam, such as when a
   user always changes their chat message color, or prefixes all messages
   with a clan tag. Toggle with the PREFIX_SPAM_ENABLE setting.
@@ -124,7 +134,8 @@ Changes since 0.2.8.3_beta1:
 
 Changes since 0.2.8.2:
 
-  New settings and commands:
+New settings and commands:
+
 - MIN_PLAY_TIME_*: minimal play time required before you are allowed to
   play on this server.
 - SPAM_AUTOKICK_COUNT: minimal number of spam warning messages you get in a
@@ -214,6 +225,7 @@ Changes since 0.2.8.2:
   when AUTO_TEAM is enabled
 
 If --enable-armathentication was activated:
+
 - /lock, /unlock, /invite and /uninvite team management chat for players of
   access level ACCESS_LEVEL_TEAM or better.
 - /teams chat command that rougly prints team layout.
@@ -234,7 +246,8 @@ If --enable-armathentication was activated:
 - /login chat command then uses the more secure hashed base logins
 - new chat commands /op and /deop to change other players' access rights
 
-  Featurelets:
+Featurelets:
+
 - Added Polish language file
 - clientside play time tracking and server controlled minimal required experience
   to be allowed to play.
@@ -307,7 +320,8 @@ If --enable-armathentication was activated:
 - /players now shows the players' color and allows searching
 - TEAM_ELIMINATION_MODE sets the way ArmagetronAd removes teams when there's too much teams.
 
-  Bugfixes:
+Bugfixes:
+
 - Added compensation for drifting timers (observed often with
   overclocked mainboards)
 - Text input fields now let the text wrap correctly and make use of the space allocated
@@ -336,7 +350,8 @@ If --enable-armathentication was activated:
 - More accurate Lag-O-Meter by meriton.
 - Zones were sometimes invisible.
 
-  Internals:
+Internals:
+
 - A complete netsync cycle is now sn_Receive(); nNetObject::SyncAll(); sn_SendPlanned();.
 - Ping charity is now completely server controlled.
 
@@ -407,6 +422,7 @@ Changes since 0.2.8.0:
 
 Changes since 0.2.8.0_rc4:
 Bugfixes:
+
 - SECURITY FIX: via a MAP_FILE path with included .., it was possible
   to write files anywhere, provided they did not exist previously.
   Clients with this vulnerability are locked out of the server now.
@@ -598,7 +614,7 @@ Changes since 0.2.7.0:
 - Colored explosions!
 - HUD enhancements: customization, works in splitscreen mode
 - Directory scanning code added ( not yet visible, will be used for
-  moviepack/cycle selection )
+   moviepack/cycle selection )
 - Moviepack sky texture support
 - Master server can now run on windows, too
 - Explosion sound now actually works
@@ -743,3 +759,4 @@ Changes since 0.1.4.9:
 - the moviepack title screen is displayed
 - Linux version: easier system-wide installation with RPM packages 
   or "make install"
+
