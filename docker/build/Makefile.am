@@ -364,6 +364,19 @@ result.wininst_%: context.wininst_%
 	$(srcdir)/context_to_result.sh $@.dir ./wininst.sh
 	echo > $@
 
+# windows source zip
+WINZIP_SOURCE_NAME:=$(PACKAGE_NAME)-source-$(PACKAGE_VERSION)
+WINZIP_SOURCE_DIR:=proto/$(WINZIP_SOURCE_NAME)
+WINZIP_SOURCE:=upload/$(WINZIP_SOURCE_NAME).zip
+$(WINZIP_SOURCE_DIR): result.winsource_32 proto.tag Makefile
+	rm -rf $@.dir
+	cp -al $<.dir/winsource $@.dir
+	echo > $@
+$(WINZIP_SOURCE): $(WINZIP_SOURCE_DIR) upload/.tag
+	cd $(WINZIP_SOURCE_DIR).dir; zip -9 -r ../../$(WINZIP_SOURCE) *
+winzip_source.tag: $(WINZIP_SOURCE)
+	echo > $@
+
 # windows client zip
 WINZIP_CLIENT_NAME:=$(PACKAGE_NAME)-client-$(PACKAGE_VERSION)
 WINZIP_CLIENT_DIR:=proto/$(WINZIP_CLIENT_NAME)
@@ -394,7 +407,7 @@ $(WINZIP_SERVER): $(WINZIP_SERVER_DIR) upload/.tag
 winzip_server.tag: $(WINZIP_SERVER)
 	echo > $@
 
-winzip.tag: winzip_server.tag winzip_client.tag
+winzip.tag: winzip_server.tag winzip_client.tag winzip_source.tag
 	echo > $@
 
 
@@ -520,7 +533,7 @@ result.deploy_zi: context.deploy_zi
 	echo > $@
 
 # deploy to download site (additional dependency here only, standard rules apply)
-result.deploy_download: result.deploy_zi
+result.deploy_download: result.deploy_scp result.deploy_lp
 
 # individual deploy targets
 deploy_lp: result.deploy_lp
