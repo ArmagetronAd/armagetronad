@@ -119,6 +119,10 @@ def GetMarkupLine(team, project, issue):
 			return 'Fixed Bugs', line
 		elif 'Type::Feature' in labels:
 			return 'New Features', line
+		elif 'Type::Removed' in labels:
+			return 'Removed', line
+		elif 'Type::Breaking' in labels:
+			return 'Breaking Changes', line
 		else:
 			return 'Other Changes', line
 
