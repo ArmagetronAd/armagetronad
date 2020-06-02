@@ -952,6 +952,7 @@ resource/Makefile
 config/Makefile
 desktop/Makefile
 docker/build/Makefile
+docker/build/setup_ci_test.sh
 docker/build/context/version.sh
 docker/deploy/targets.sh
 desktop/armagetronad.desktop
