@@ -559,8 +559,8 @@ deploy: deploy_lp deploy_scp deploy_ppa deploy_zi deploy_steam deploy_download
 
 unstaged_%:
 # disable staging, deploy for real
-	sed -i ../deploy/targets.sh -e "s/^STAGING=true/STAGING=false/"
-	MAKE=$(MAKE) ${srcdir}/make_deploy.sh $*
+	sed -i ../deploy/targets.sh -e "s/STAGING=true/STAGING=false/"
+	STAGING=false MAKE=$(MAKE) ${srcdir}/make_deploy.sh $*
 
 staged_%:
 # enforce staging

@@ -9,7 +9,10 @@ CI_COMMIT_SHA=`cat CI_INFO | grep CI_COMMIT_SHA= | sed -e s/^CI_COMMIT_SHA=//` |
 CI_COMMIT_REF_NAME=`cat CI_INFO | grep CI_COMMIT_REF_NAME= | sed -e s/^CI_COMMIT_REF_NAME=//` || exit $?
 
 # if staging is true, hold back release
-STAGING=true
+if test "${STAGING}" != "false"; then
+	# make sure STAGING is always either true or false (the makefile rewrites the following line)
+	STAGING=true
+fi
 
 test -z ${SERIES} && exit 1
 test -z ${SUFFIX} && exit 1
@@ -22,14 +25,12 @@ case ${SERIES}+${SUFFIX} in
 	STEAM_BRANCH="staging"
 	;;
     CURRENT+beta)
-	STAGING=false
 	SF_DIR="beta"
 	LP_SERIES="0.2.8-snapshots"
 	ZI_SERIES="beta"
 	STEAM_BRANCH="beta"
 	;;
     CURRENT+*)
-	STAGING=false
 	SF_DIR="snapshots"
 	LP_SERIES="0.2.8-snapshots"
 	ZI_SERIES="alpha"
@@ -43,14 +44,12 @@ case ${SERIES}+${SUFFIX} in
 	STEAM_BRANCH=""
 	;;
     LTS_028*+alpha)
-	STAGING=false
 	SF_DIR="alpha"
 	LP_SERIES="0.2.8-snapshots"
 	ZI_SERIES="alpha"
 	STEAM_BRANCH=""
 	;;
     LTS_028*+*)
-	STAGING=false
 	SF_DIR="beta"
 	LP_SERIES="0.2.8-snapshots"
 	ZI_SERIES="beta"
@@ -58,7 +57,6 @@ case ${SERIES}+${SUFFIX} in
 	;;
 
     *+experimental|EXPERIMENTAL+*)
-	STAGING=false
 	SF_DIR="snapshots"
 	LP_SERIES="trunk-snapshots"
 	ZI_SERIES="experimental"
@@ -66,16 +64,12 @@ case ${SERIES}+${SUFFIX} in
 	;;
     
     *)
-	STAGING=false
 	SF_DIR="wip"
 	LP_SERIES="hacks"
 	ZI_SERIES="wip"
 	STEAM_BRANCH="experimental"
 	;;
 esac
-
-# This is going to be overwritten by the staged- nonstaged- make targets the CI builds are using
-STAGING=true
 
 # **********************************************************************
 
