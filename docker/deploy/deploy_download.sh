@@ -61,6 +61,14 @@ pushd site || exit $?
 TITLE="Build ${PACKAGE_VERSION} available"
 DL_BRANCH=${ZI_SERIES}
 
+BUILD_TYPE=build
+if test "${CI_COMMIT_REF_PROTECTED}" == "true" && test "${ZI_SERIES}" == "stable"; then
+	# only releases have no _rc_, _alpha_ or _beta_ in their version
+	if ! echo ${PACKAGE_VERSION} | grep -q '_[a-z]*_'; then
+		BUILD_TYPE="release build"
+	fi
+fi
+
 # add release post
 POST=_posts/`date +%F`-build-${DL_BRANCH}-${PACKAGE_VERSION}.md || exit $?
 cat > ${POST} <<EOF
@@ -68,7 +76,7 @@ cat > ${POST} <<EOF
 layout: post
 title:  "${TITLE}"
 date:   `date +"%F %T %z" -u`
-categories: ${DL_BRANCH}
+categories: ${BUILD_TYPE} ${DL_BRANCH}
 
 version: ${PACKAGE_VERSION}
 

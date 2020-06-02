@@ -1,3 +1,16 @@
+
+#### Changes since 0.2.8.3.5:
+
+##### Fixed Bugs
+
+ * Debian builds: Documentation html files have empty last change ([#9](https://gitlab.com/armagetronad/armagetronad/-/issues/9))
+
+##### New Features
+
+ * Adapt ChangeLog and fingerprint generation to git ([#11](https://gitlab.com/armagetronad/armagetronad/-/issues/11))
+ * Integrated build system ([#14](https://gitlab.com/armagetronad/armagetronad/-/issues/14))
+
+
 #### Changes since 0.2.8.3.4:
 
  * Security fix: Check that the remote is allowed to create an object
@@ -746,3 +759,4 @@ Bugfixes:
  * the moviepack title screen is displayed
  * Linux version: easier system-wide installation with RPM packages 
    or "make install"
+

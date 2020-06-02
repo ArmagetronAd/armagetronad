@@ -29,7 +29,7 @@ trust_gitlab || exit $?
 git clone ${ZI_GIT} zeroinstall || exit $?
 cp zeroinstall/*.gpg . || exit $?
 
-ZEROVERSION=$(echo ${PACKAGE_VERSION} | sed -e "s,_,-,g" -e "s,-alpha,-pre0.," -e "s,-beta,-pre1.," -e "s,\.-z,.," -e "s,\.-r,.," )
+ZEROVERSION=$(echo ${PACKAGE_VERSION} | sed -e "s,_,-,g" -e "s,-alpha-,-pre0.X," -e "s,-beta-,-pre1.X," -e "s,-rc-,-pre2.X," -e "s,\.Xz,.," -e "s,\.Xr,.," -e "s,\.X,.," )
 
 case ${STAGING}+${ZI_SERIES} in
     false+stable)
