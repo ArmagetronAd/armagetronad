@@ -19,11 +19,6 @@ case $1 in
 	CI_COMMIT_SHA=
 	CI_DEFAULT_BRANCH=
 	;;
-    protected_tag)
-	CI_COMMIT_REF_PROTECTED=true
-	CI_COMMIT_REF_NAME=v0.2.7.3.4
-	CI_COMMIT_TAG=v0.2.7.3.4
-	;;
     tag)
 	CI_COMMIT_REF_NAME=v0.2.7.3.4
 	CI_COMMIT_TAG=v0.2.7.3.4
@@ -38,10 +33,15 @@ case $1 in
 	CI_COMMIT_REF_NAME=beta_0.2.8.3
 	CI_COMMIT_BRANCH=beta_0.2.8.3
 	;;
-    staging)
+    rc)
 	CI_COMMIT_REF_PROTECTED=true
 	CI_COMMIT_REF_NAME=release_0.2.8.3
 	CI_COMMIT_BRANCH=release_0.2.8.3
+	;;
+    release)
+	CI_COMMIT_REF_PROTECTED=true
+	CI_COMMIT_REF_NAME=v0.2.7.3.4
+	CI_COMMIT_TAG=v0.2.7.3.4
 	;;
     merge)
 	CI_COMMIT_REF_NAME=release_0.2.8.3 # CAN BE ANYTHING, merger chooses
@@ -52,6 +52,10 @@ case $1 in
 	CI_MERGE_REQUEST_ID=60167617
 	CI_MERGE_REQUEST_SOURCE_BRANCH_NAME=mr_test
 	CI_MERGE_REQUEST_TARGET_BRANCH_NAME=master
+	;;
+	*)
+	echo "NO VALID CONFIGURATION SELECTED, available: raw (no CI), alpha, beta, rc, release, tag (unprotected), merge"
+	exit 1
 	;;
 esac
 

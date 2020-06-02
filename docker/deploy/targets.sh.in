@@ -9,7 +9,10 @@ CI_COMMIT_SHA=`cat CI_INFO | grep CI_COMMIT_SHA= | sed -e s/^CI_COMMIT_SHA=//` |
 CI_COMMIT_REF_NAME=`cat CI_INFO | grep CI_COMMIT_REF_NAME= | sed -e s/^CI_COMMIT_REF_NAME=//` || exit $?
 
 # if staging is true, hold back release
-STAGING=true
+if test "${STAGING}" != "false"; then
+	# make sure STAGING is always either true or false (the makefile rewrites the following line)
+	STAGING=true
+fi
 
 test -z ${SERIES} && exit 1
 test -z ${SUFFIX} && exit 1
@@ -22,14 +25,12 @@ case ${SERIES}+${SUFFIX} in
 	STEAM_BRANCH="staging"
 	;;
     CURRENT+beta)
-	STAGING=false
 	SF_DIR="beta"
 	LP_SERIES="0.2.8-snapshots"
 	ZI_SERIES="beta"
 	STEAM_BRANCH="beta"
 	;;
     CURRENT+*)
-	STAGING=false
 	SF_DIR="snapshots"
 	LP_SERIES="0.2.8-snapshots"
 	ZI_SERIES="alpha"
@@ -43,14 +44,12 @@ case ${SERIES}+${SUFFIX} in
 	STEAM_BRANCH=""
 	;;
     LTS_028*+alpha)
-	STAGING=false
 	SF_DIR="alpha"
 	LP_SERIES="0.2.8-snapshots"
 	ZI_SERIES="alpha"
 	STEAM_BRANCH=""
 	;;
     LTS_028*+*)
-	STAGING=false
 	SF_DIR="beta"
 	LP_SERIES="0.2.8-snapshots"
 	ZI_SERIES="beta"
@@ -58,7 +57,6 @@ case ${SERIES}+${SUFFIX} in
 	;;
 
     *+experimental|EXPERIMENTAL+*)
-	STAGING=false
 	SF_DIR="snapshots"
 	LP_SERIES="trunk-snapshots"
 	ZI_SERIES="experimental"
@@ -66,16 +64,12 @@ case ${SERIES}+${SUFFIX} in
 	;;
     
     *)
-	STAGING=false
 	SF_DIR="wip"
 	LP_SERIES="hacks"
 	ZI_SERIES="wip"
 	STEAM_BRANCH="experimental"
 	;;
 esac
-
-# UNDO_DEPLOY
-STAGING=true
 
 # **********************************************************************
 
@@ -89,24 +83,41 @@ fi
 # **********************************************************************
 
 # ubuntu PPA
-case ${STAGING}+${ZI_SERIES}+${SERIES} in
-    true+stable+CURRENT)
-	# deploy to staging ppa
-	UBUNTU_PPA=ppa:armagetronad-dev/staging
-	;;
-    true+*+*)
-	# do not deploy at all
-	UBUNTU_PPA=""
-	;;
-    false+*+LTS*)
-	# deploy to LTS ppa
-	UBUNTU_PPA=ppa:armagetronad-dev/lts
-	;;
-    false+*+*)
-	# deploy to regular PPA
-	UBUNTU_PPA=ppa:armagetronad-dev/ppa
-	;;
-esac
+if ${STAGING} == true; then
+	case ${ZI_SERIES}+${SERIES} in
+		stable+CURRENT)
+		# deploy to staging ppa
+		UBUNTU_PPA=ppa:armagetronad-dev/staging
+		;;
+		stable+LTS*)
+		# deploy to LTS staging ppa
+		UBUNTU_PPA=ppa:armagetronad-dev/lts-staging
+		;;
+		*+*)
+		# do not deploy at all
+		UBUNTU_PPA=""
+		;;
+	esac
+else
+	case ${SERIES}+@version@ in
+		LTS*+*_rc_*)
+		# almost! But just a release candidate. deploy to LTS staging PPA
+		UBUNTU_PPA=ppa:armagetronad-dev/lts-staging
+		;;
+		*+*_rc_*)
+		# almost! But just a release candidate. deploy to staging PPA
+		UBUNTU_PPA=ppa:armagetronad-dev/staging
+		;;
+		LTS*+*)
+		# A proper final build. Deploy to LTS ppa.
+		UBUNTU_PPA=ppa:armagetronad-dev/lts
+		;;
+		*+*)
+		# A proper final build. Deploy to regular PPA.
+		UBUNTU_PPA=ppa:armagetronad-dev/ppa
+		;;
+	esac
+fi
 
 # required public data: gpgkey_pub.gpg
 # required secret: gpgkey_sec.gpg

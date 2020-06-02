@@ -31,11 +31,14 @@ cp zeroinstall/*.gpg . || exit $?
 
 ZEROVERSION=$(echo ${PACKAGE_VERSION} | sed -e "s,_,-,g" -e "s,-alpha-,-pre0.X," -e "s,-beta-,-pre1.X," -e "s,-rc-,-pre2.X," -e "s,\.Xz,.," -e "s,\.Xr,.," -e "s,\.X,.," )
 
-case ${STAGING}+${ZI_SERIES} in
-    false+stable)
+case ${STAGING}+${ZI_SERIES}+${ZEROVERSION} in
+    false+stable+*-pre*)
+	STABILITY=testing
+	;;
+    false+stable+*)
 	STABILITY=stable
 	;;
-    true+stable)
+    true+stable+*)
 	STABILITY=testing
 	;;
     *)

@@ -1,0 +1,13 @@
+# sets up build environemnt to match CI situation
+
+if @top_srcdir@/docker/scripts/setup_ci_variables_test.sh $*; then
+	. @top_srcdir@/docker/scripts/setup_ci_variables_test.sh $*
+	. @top_srcdir@/docker/scripts/brand.sh @top_srcdir@
+	pushd @top_builddir@
+	pushd @abs_top_srcdir@
+	./bootstrap.sh
+	popd
+	@abs_top_srcdir@/configure --disable-glout progname=${PROGRAM_NAME} progtitle="${PROGRAM_TITLE}"
+	popd
+fi
+
