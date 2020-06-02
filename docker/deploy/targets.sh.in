@@ -74,7 +74,7 @@ case ${SERIES}+${SUFFIX} in
 	;;
 esac
 
-# UNDO_DEPLOY
+# This is going to be overwritten by the staged- nonstaged- make targets the CI builds are using
 STAGING=true
 
 # **********************************************************************
@@ -89,24 +89,41 @@ fi
 # **********************************************************************
 
 # ubuntu PPA
-case ${STAGING}+${ZI_SERIES}+${SERIES} in
-    true+stable+CURRENT)
-	# deploy to staging ppa
-	UBUNTU_PPA=ppa:armagetronad-dev/staging
-	;;
-    true+*+*)
-	# do not deploy at all
-	UBUNTU_PPA=""
-	;;
-    false+*+LTS*)
-	# deploy to LTS ppa
-	UBUNTU_PPA=ppa:armagetronad-dev/lts
-	;;
-    false+*+*)
-	# deploy to regular PPA
-	UBUNTU_PPA=ppa:armagetronad-dev/ppa
-	;;
-esac
+if ${STAGING} == true; then
+	case ${ZI_SERIES}+${SERIES} in
+		stable+CURRENT)
+		# deploy to staging ppa
+		UBUNTU_PPA=ppa:armagetronad-dev/staging
+		;;
+		stable+LTS*)
+		# deploy to LTS staging ppa
+		UBUNTU_PPA=ppa:armagetronad-dev/lts-staging
+		;;
+		*+*)
+		# do not deploy at all
+		UBUNTU_PPA=""
+		;;
+	esac
+else
+	case ${SERIES}+@version@ in
+		LTS*+*_rc_*)
+		# almost! But just a release candidate. deploy to LTS staging PPA
+		UBUNTU_PPA=ppa:armagetronad-dev/lts-staging
+		;;
+		*+*_rc_*)
+		# almost! But just a release candidate. deploy to staging PPA
+		UBUNTU_PPA=ppa:armagetronad-dev/staging
+		;;
+		LTS*+*)
+		# A proper final build. Deploy to LTS ppa.
+		UBUNTU_PPA=ppa:armagetronad-dev/lts
+		;;
+		*+*)
+		# A proper final build. Deploy to regular PPA.
+		UBUNTU_PPA=ppa:armagetronad-dev/ppa
+		;;
+	esac
+fi
 
 # required public data: gpgkey_pub.gpg
 # required secret: gpgkey_sec.gpg
