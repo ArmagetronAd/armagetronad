@@ -1,3 +1,42 @@
+##### Changes on the 0.2.9 branch
+
+ * Added detection and reaction code for timing assist bots
+ * /shuffle now works before you actually join a team
+ * Implemented /shout command and associated settings
+ * Fixed suspension and silenced status not being re-applied after a player
+   disconnects and rejoins a server.
+ * Tweaks to enemy influence system.
+ * Ingame menu and console now are drawn on top of a semi-transparent,
+   darkened area for increased readability.
+ * New first start menu with clearer language selection and initial setup.
+ * Tutorial match against one AI at slower speed.
+ * Tutorial tooltips for the most important keybindings.
+ * ADD_MASTER_SERVER command to announce a server to a new master server.
+   Simplifies the process to list your server on a subculture.
+ * Team launch positions logged to ladderlog with POSITIONS event. Disabled by
+   default.
+ * New command-line option "--input" added to poll for input from a file
+   instead of stdin.
+ * Added WHITELIST_ENEMIES_[IP/USERNAME] to allow players to be enemies, even
+   if they come from the same IP address and ALLOW_ENEMIES_SAME_IP is
+   disabled (which is its default setting).
+ * GAME_END, NEW_MATCH, and NEW_ROUND ladderlog events include date and time.
+ * Added ENCODING ladderlog event, which specifies the encoding for data in
+   ladderlog.txt.
+ * "--input" now can be used more than once to read from multiple files or pipes.
+ * new team management ladderlog messages:
+   TEAM_CREATED <team name>
+   TEAM_DESTROYED <team name>
+   TEAM_RENAMED <old team name> <new team name>
+   TEAM_PLAYER_ADDED <team name> <player>
+   TEAM_PLAYER_REMOVED <team name> <player>
+ * Manage external scripts on Unix dedicated servers. New commands: 
+   SPAWN_SCRIPT, RESPAWN_SCRIPT, FORCE_RESPAWN_SCRIPT, KILL_SCRIPT,
+   LIST_SCRIPTS, SCRIPT_ENV.
+ * New setting ACCESS_LEVEL_ANNOUNCE_LOGIN that determines if a player's
+   login/logout message can be announced.
+ * Authentication is now enabled by default.
+
 #### Changes since 0.2.8.3.4:
 
  * Security fix: Check that the remote is allowed to create an object
@@ -49,6 +88,10 @@
 
 #### Changes since 0.2.8.3_rc4:
 
+ * New setting: KEEP_PLAYER_SLOT allows the server to kick (preferably) spectators
+   if it gets full so there is always one slot open for players
+ * New setting: ACCESS_LEVEL_AUTOKICK_IMMUNITY sets the access level required 
+   to be immune from such kicks (and idle autokicks, too)
  * Intercepted chat commands are now written to ladderlog.txt. Format:
    COMMAND /command-intercepted player [command arguments]
  * Increased default speed of server pinging
@@ -71,7 +114,8 @@
 #### Changes since 0.2.8.3_rc2:
 
  * Fixed crash with server polling
- * ROUND_WINNER and MATCH_WINNER logged to ladderlog
+ * ROUND_WINNER and MATCH_WINNER ladderlog events now include the players of
+   the team.
  * Camera switches to user preferred camera when you die in incam mode
  * Better support for custom language files
  * Players can no longer spam chat with /shuffle messages. Added new setting

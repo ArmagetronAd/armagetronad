@@ -1,4 +1,18 @@
-Changes since 0.2.8.3.x:
+
+Changes since 0.2.8.3.5:
+
+  Fixed Bugs
+
+- Debian builds: Documentation html files have empty last change (#9)
+
+  New Features
+
+- Adapt ChangeLog and fingerprint generation to git (#11)
+- Integrated build system (#14)
+
+
+  Changes on the 0.2.9 branch
+
 - Added detection and reaction code for timing assist bots
 - /shuffle now works before you actually join a team
 - Implemented /shout command and associated settings
@@ -35,18 +49,6 @@ Changes since 0.2.8.3.x:
 - New setting ACCESS_LEVEL_ANNOUNCE_LOGIN that determines if a player's
   login/logout message can be announced.
 - Authentication is now enabled by default.
-
-Changes since 0.2.8.3.5:
-
-  Fixed Bugs
-
-- Debian builds: Documentation html files have empty last change (#9)
-
-  New Features
-
-- Adapt ChangeLog and fingerprint generation to git (#11)
-- Integrated build system (#14)
-
 
 Changes since 0.2.8.3.4:
 
