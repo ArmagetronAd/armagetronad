@@ -459,9 +459,9 @@ steamdirs/steam_windows: result.winbuild_steam steamdirs/.tag
 	rm -rf $@.dir/banner*
 	echo > $@
 
-steam_linux.tag: #steamdirs/steam_linux result.appdir_client_steam result.appdir_server_steam
+steam_linux.tag: steamdirs/steam_linux result.appdir_client_steam result.appdir_server_steam
 	echo > $@
-steam_windows.tag: #steamdirs/steam_windows result.winbuild_steam
+steam_windows.tag: steamdirs/steam_windows result.winbuild_steam
 	echo > $@
 
 steam.tag: steam_windows.tag steam_linux.tag
@@ -538,7 +538,7 @@ result.deploy_download: result.deploy_scp result.deploy_lp
 # individual deploy targets
 deploy_lp: result.deploy_lp
 deploy_scp: result.deploy_scp
-deploy_steam: #result.deploy_steam
+deploy_steam: result.deploy_steam
 deploy_zi: result.deploy_zi
 deploy_download: result.deploy_download
 
