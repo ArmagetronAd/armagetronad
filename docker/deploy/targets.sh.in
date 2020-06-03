@@ -74,7 +74,7 @@ esac
 # **********************************************************************
 
 # git identity
-if which git > /dev/null; then
+if which git > /dev/null && test -z "`git config --global user.name`"; then
     git config --global user.email "z-man@users.sf.net"
     git config --global user.name "Manuel Moos (From GitLab CI)"
     git config --global push.default simple
