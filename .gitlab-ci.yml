@@ -105,7 +105,7 @@ build_merge:
   rules:
   - if: $CI_MERGE_REQUEST_ID
     when: on_success
-    when: never
+  - when: never
   script:
     - target=CI_merge_nodeb
     # check if (fake!) secrets are available, if yes, copy them and build debtest
