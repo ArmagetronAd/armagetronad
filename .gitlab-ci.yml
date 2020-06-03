@@ -74,7 +74,7 @@ build:
   stage: build
   rules:
   - if: $CI_MERGE_REQUEST_ID
-    when: on_success
+    when: never
   - if: $CI_COMMIT_REF_PROTECTED == "true"
     when: on_success
   - when: manual
@@ -98,7 +98,30 @@ build:
     untracked: true
     expire_in: 1 week
 
-
+# leaner version of build_ for merge request checks, still builds windows and some linux, but no Steam and only one of 32/64 bit
+build_merge:
+  dependencies: []
+  stage: build
+  rules:
+  - if: $CI_MERGE_REQUEST_ID
+    when: on_success
+  - when: never
+  script:
+    - target=CI_merge_nodeb
+    # check if (fake!) secrets are available, if yes, copy them and build debtest
+    - if test -r /secrets/sec.gpg; then
+    -   cp -a /secrets gitlab_build/docker/deploy/
+    -   target="CI_merge"
+    - fi
+    # build
+    - cd gitlab_build/docker/build
+    - if ! make -O -j$(nproc) ${target}; then
+    -   make -d ${target} || exit $?
+    -   exit 1
+    - fi
+    - make artifactclean
+    - cd ../../
+    - rm -rf src
 
 # for non-release builds, just deploy as the build system itself sees fit
 deploy:

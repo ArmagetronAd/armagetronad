@@ -17,14 +17,20 @@ fi
 test -z ${SERIES} && exit 1
 test -z ${SUFFIX} && exit 1
 
-case ${SERIES}+${SUFFIX} in
-    CURRENT+armagetronad)
+case ${SERIES}+${SUFFIX}+@version@ in
+    CURRENT+armagetronad+*_rc_*)
+	SF_DIR="rc"
+	LP_SERIES="0.2.8"
+	ZI_SERIES="rc"
+	STEAM_BRANCH="staging"
+	;;
+    CURRENT+armagetronad+*)
 	SF_DIR="stable"
 	LP_SERIES="0.2.8"
 	ZI_SERIES="stable"
 	STEAM_BRANCH="staging"
 	;;
-    CURRENT+beta)
+    CURRENT+beta+*)
 	SF_DIR="beta"
 	LP_SERIES="0.2.8-snapshots"
 	ZI_SERIES="beta"
@@ -37,13 +43,19 @@ case ${SERIES}+${SUFFIX} in
 	STEAM_BRANCH="alpha"
 	;;
 
-    LTS_028*+armagetronad)
+    LTS_028*+armagetronad+*_rc_*)
+	SF_DIR="rc"
+	LP_SERIES="0.2.8"
+	ZI_SERIES="rc"
+	STEAM_BRANCH=""
+	;;
+    LTS_028*+armagetronad+*)
 	SF_DIR="stable"
 	LP_SERIES="0.2.8"
 	ZI_SERIES="stable"
 	STEAM_BRANCH=""
 	;;
-    LTS_028*+alpha)
+    LTS_028*+alpha+*)
 	SF_DIR="alpha"
 	LP_SERIES="0.2.8-snapshots"
 	ZI_SERIES="alpha"
@@ -74,7 +86,7 @@ esac
 # **********************************************************************
 
 # git identity
-if which git > /dev/null; then
+if which git > /dev/null && test -z "`git config --global user.name`"; then
     git config --global user.email "z-man@users.sf.net"
     git config --global user.name "Manuel Moos (From GitLab CI)"
     git config --global push.default simple
@@ -99,16 +111,16 @@ if ${STAGING} == true; then
 		;;
 	esac
 else
-	case ${SERIES}+@version@ in
-		LTS*+*_rc_*)
-		# almost! But just a release candidate. deploy to LTS staging PPA
-		UBUNTU_PPA=ppa:armagetronad-dev/lts-staging
-		;;
-		*+*_rc_*)
+	case ${ZI_SERIES}+${SERIES} in
+		rc+CURENT)
 		# almost! But just a release candidate. deploy to staging PPA
 		UBUNTU_PPA=ppa:armagetronad-dev/staging
 		;;
-		LTS*+*)
+		rc+LTS*)
+		# almost! But just a release candidate. deploy to LTS staging PPA
+		UBUNTU_PPA=ppa:armagetronad-dev/lts-staging
+		;;
+		*+LTS*)
 		# A proper final build. Deploy to LTS ppa.
 		UBUNTU_PPA=ppa:armagetronad-dev/lts
 		;;

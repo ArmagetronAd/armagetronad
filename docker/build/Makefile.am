@@ -44,6 +44,14 @@ CI_windows.tag: CI_base.tag steam_windows.tag closed_regular.tag
 CI_free.tag: CI_base.tag free.tag
 	touch $@
 
+# targets for CI merge tests, a bit leaner than a full build
+CI_merge.tag: windows.tag debtest.tag
+	touch $@
+CI_merge: CI_merge.tag
+CI_merge_nodeb.tag: windows.tag CI_base.tag
+	touch $@
+CI_merge_nodeb: CI_merge_nodeb.tag
+
 # all builds
 #CI.tag: CI_pack.tag apptar_server_64.tag
 CI.tag: CI_windows.tag CI_free.tag full.tag CI_pack.tag
