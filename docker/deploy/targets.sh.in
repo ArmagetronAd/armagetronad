@@ -112,7 +112,7 @@ if ${STAGING} == true; then
 	esac
 else
 	case ${ZI_SERIES}+${SERIES} in
-		rc+CURENT)
+		rc+CURRENT)
 		# almost! But just a release candidate. deploy to staging PPA
 		UBUNTU_PPA=ppa:armagetronad-dev/staging
 		;;
@@ -124,9 +124,13 @@ else
 		# A proper final build. Deploy to LTS ppa.
 		UBUNTU_PPA=ppa:armagetronad-dev/lts
 		;;
-		*+*)
+		*+CURRENT|*+EXPERIMENTAL|experimental+*)
 		# A proper final build. Deploy to regular PPA.
 		UBUNTU_PPA=ppa:armagetronad-dev/ppa
+		;;
+		*+*)
+		# Unknown. Do not deploy.
+		UBUNTU_PPA=
 		;;
 	esac
 fi

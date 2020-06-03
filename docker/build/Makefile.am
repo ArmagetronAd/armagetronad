@@ -29,7 +29,7 @@ full.tag: result.winsource_32 result.winsource_steam closed.tag free.tag
 full: full.tag
 
 # what to build from GitLab CI, divided into stages
-CI_base.tag: gits.tag source.tag result.build_server_64 result.build_client_64 context.64
+CI_base.tag: gits.tag source.tag result.build_server_32 result.build_client_64 context.64
 	touch $@
 
 # minimal expected build to be packable
@@ -236,6 +236,15 @@ context.build_client_%: context.%
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*'
 	echo "client" > $@.dir/serverclient
 	echo > $@
+
+# OPTIMIZATION:
+# delay build of things not needed for windows or debtest
+# windows needs build_server_32, so do not delay that
+result.build_client_64: | result.build_server_32
+result.build_server_64: | result.build_client_64
+result.build_client_32: | result.build_server_64
+result.build_server_steam: | result.build_server_32
+result.build_client_steam: | result.build_server_steam
 
 .PRECIOUS: context.build_server_32 context.build_client_32  context.build_server_64 context.build_client_64
 
