@@ -73,6 +73,8 @@ build:
    - prepare_build
   stage: build
   rules:
+  - if: $CI_MERGE_REQUEST_ID
+    when: never
   - if: $CI_COMMIT_REF_PROTECTED == "true"
     when: on_success
   - when: manual
@@ -98,8 +100,7 @@ build:
 
 # leaner version of build_ for merge request checks, still builds windows and some linux, but no Steam and only one of 32/64 bit
 build_merge:
-  dependencies:
-   - prepare_build
+  dependencies: []
   stage: build
   rules:
   - if: $CI_MERGE_REQUEST_ID
