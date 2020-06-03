@@ -1,4 +1,4 @@
-dnl I would like to do this to generate the version number...
+/dnl I would like to do this to generate the version number...
 dnl AC_DEFUN([AUTOMATIC_VERSION],syscmd([sh batch/make/version .]))
 
 dnl but have to do this with version generated in bootstrap.sh instead for some reason
@@ -172,7 +172,7 @@ AM_CONDITIONAL(BUILDMAIN, test x$armamain = xtrue)
 
 # flag to set when mockup versions of the executables should be built to save
 # compile time when testing the release process
-AM_CONDITIONAL(BUILDFAKERELEASE, test "$ARMAGETRONAD_FAKERELEASE" != "")
+AM_CONDITIONAL(BUILDFAKERELEASE, test "$ARMAGETRONAD_FAKERELEASE" != "" && test "$ARMAGETRONAD_FAKERELEASE" != "false" && test "$ARMAGETRONAD_FAKERELEASE" != "no")
 
 # set replacement variables for dedicated server
 progtitle_serverorclient=" Client"
@@ -1497,6 +1497,10 @@ desktop/armagetronad-armagetronad-handler.desktop
 desktop/armagetronad-link.xml
 desktop/armagetronad.protocol
 desktop/os-x/Info.plist
+docker/build/Makefile
+docker/build/setup_ci_test.sh
+docker/build/context/version.sh
+docker/deploy/targets.sh
 )
 
 # m4_define(FULLEVAL,stage1=`eval echo $1`; stage2
