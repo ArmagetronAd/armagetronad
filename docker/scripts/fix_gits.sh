@@ -14,13 +14,12 @@ function fix_git(){
 }
 
 function fix_gits(){
-    ${wd}/ensure_gits.sh legacy_0.2.8.3 || return $?
+    ${wd}/ensure_gits.sh master || return $?
 
     set -x
 
-    fix_git winlibs d03e20bf8973a6cbd1e0ecb47dd8333c5614b139 || return $?
-    fix_git codeblocks 4a51998b7f12723c40cca3e2558da3ab8af85814 || return $?
-    fix_git ubuntu aa14f9e1987239b890faa49ea03a32a2dbaa8af7 || return $?
+    fix_git winlibs dd07262970713dcf0e193d0608178963af73eb15 || return $?
+    fix_git ubuntu 7f986541eee743291482d0a0045cd480a986b587 || return $?
 }
 
 if ! fix_gits; then
