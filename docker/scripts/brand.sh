@@ -21,7 +21,7 @@ if test -z "${CI_DEFAULT_BRANCH}" || test -z "${CI_COMMIT_REF_PROTECTED}"; then
 fi
 
 if test "${CI_COMMIT_REF_PROTECTED}" = "true"; then
-	SERIES="CURRENT"
+	SERIES="EXPERIMENTAL"
 	if test -z "${CI_COMMIT_TAG}"; then
 		# protected branch
 		case ${CI_COMMIT_BRANCH} in
@@ -59,3 +59,8 @@ else
 	PROGRAM_NAME="armagetronad-wip"
 	PROGRAM_TITLE="Armagetron WIP"
 fi
+
+# for now, always count as experimental
+SERIES="EXPERIMENTAL"
+PROGRAM_NAME="armagetronad-experimental"
+PROGRAM_TITLE="Armagetron Experimental"
