@@ -355,7 +355,7 @@ appimage.tag: appimage_client_64.tag appimage_server_64.tag appimage_client_32.t
 
 # windows source
 context.winsource_%: result.build_server_% ${srcdir}/context/winsource.sh gits.tag
-	${srcdir}/prepare_context.sh $@.dir $<.dir/* ${srcdir}/context/winsource.sh $(GITS)/codeblocks
+	${srcdir}/prepare_context.sh $@.dir $<.dir/* ${srcdir}/context/winsource.sh
 	echo > $@
 result.winsource_%: context.winsource_%
 	$(srcdir)/context_to_result.sh $@.dir ./winsource.sh
@@ -429,8 +429,8 @@ winzip.tag: winzip_server.tag winzip_client.tag winzip_source.tag
 
 
 # copy installers into upload
-WININST_CLIENT_NAME:=$(PACKAGE_NAME)-$(PACKAGE_VERSION).gcc.win32.exe
-WININST_SERVER_NAME:=$(PACKAGE_NAME)-dedicated-$(PACKAGE_VERSION).gcc.win32.exe
+WININST_CLIENT_NAME:=$(PACKAGE_NAME)-$(PACKAGE_VERSION).win32.exe
+WININST_SERVER_NAME:=$(PACKAGE_NAME)-dedicated-$(PACKAGE_VERSION).win32.exe
 WININST_CLIENT=upload/$(WININST_CLIENT_NAME)
 WININST_SERVER=upload/$(WININST_SERVER_NAME)
 $(WININST_CLIENT): result.wininst_32 upload/.tag

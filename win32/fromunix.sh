@@ -12,19 +12,25 @@ popd
 
 pushd code_blocks
 
-CODEBLOCKS="C:\Program Files\CodeBlocks-13.12\codeblocks.exe"
+if test -r ~/.wine/drive_c/Program\ Files\ \(x86\)/CodeBlocks/codeblocks.exe; then
+    CODEBLOCKS="C:\Program Files (x86)\CodeBlocks\codeblocks.exe"
+elif test -r ~/.wine/drive_c/Program\ Files/CodeBlocks/codeblocks.exe; then
+    CODEBLOCKS="C:\Program Files\CodeBlocks\codeblocks.exe"
+else
+    CODEBLOCKS="C:\Program Files\CodeBlocks-13.12\codeblocks.exe"
+fi
 
 # parallel build of server and client
-for p in Dedicated.cbp ArmagetronAd.cbp; do 
-    wine "${CODEBLOCKS}" /ns /nd $p --build --target="Win32 Release" &
-done
-wait
+#for p in Dedicated.cbp ArmagetronAd.cbp; do 
+#    wine "${CODEBLOCKS}" /ns /nd $p --build --target="Win32 Release" &
+#done
+#wait
 
 # batch build sans master
 grep -v Master.cbp < ArmagetronAd.workspace > ArmagetronAdNoMaster.workspace
 wine "${CODEBLOCKS}" /ns /nd ArmagetronAdNoMaster.workspace --build --target="Win32 Release" || exit 1
 popd
-wait
+#wait
 
 # copy files
 echo -e "makedist.bat\n exit" | wine cmd
