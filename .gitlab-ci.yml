@@ -1,4 +1,4 @@
-image: registry.gitlab.com/armagetronad/armagetronad/armaroot_64@sha256:182493edea0ad5b31f8dfe0c27b414cc2a3d710a051b6f2359a21da791ca8a68
+image: registry.gitlab.com/armagetronad/armagetronad/armaroot_64@sha256:83482674bbb17981bdb6776001ceae62564e6ea5938f2a0f448ac79885266bf3
 
 variables:
   # https://docs.gitlab.com/ee/ci/docker/using_docker_build.html

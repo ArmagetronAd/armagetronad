@@ -9,11 +9,12 @@ RUN apt-get -y update && apt-get install \
 g++ \
 git \
 make \
-#libboost-dev \
-#libboost-thread-dev \
-#libprotobuf-dev \
+libboost-dev \
+libboost-thread-dev \
+libprotobuf-dev \
 libxml2-dev \
 libzthread-dev \
+protobuf-compiler \
 recode \
 -y
 
@@ -28,23 +29,23 @@ curl \
 g++ \
 git \
 make \
-#libboost-dev \
-#libboost-thread-dev \
-#libfreetype6-dev \
-#libftgl-dev \
-#libglew-dev \
-#libjpeg-dev \
-#libpng-dev \
-#libprotobuf-dev \
-libsdl1.2-dev \
-libsdl-image1.2-dev \
-libsdl-mixer1.2-dev \
-#libsdl2-dev \
-#libsdl2-image-dev \
-#libsdl2-mixer-dev \
-#libxml2-dev \
+libboost-dev \
+libboost-thread-dev \
+libfreetype6-dev \
+libftgl-dev \
+libglew-dev \
+libjpeg-dev \
+libpng-dev \
+libprotobuf-dev \
+#libsdl1.2-dev \
+#libsdl-image1.2-dev \
+#libsdl-mixer1.2-dev \
+libsdl2-dev \
+libsdl2-image-dev \
+libsdl2-mixer-dev \
 libzthread-dev \
 recode \
+protobuf-compiler \
 -y
 
 # copy appimage tools
@@ -102,14 +103,14 @@ RUN apk add \
 autoconf \
 automake \
 bash \
-#bison \
-#boost-dev \
-#boost-thread \
+bison \
+boost-dev \
+boost-thread \
 git \
 g++ \
 make \
 libxml2-dev \
-#protobuf-dev \
+protobuf-dev \
 pkgconfig \
 python3 \
 py3-packaging \
@@ -156,12 +157,13 @@ automake \
 g++ \
 git \
 make \
-#libboost-dev \
-#libboost-thread-dev \
-#libprotobuf-dev \
+libboost-dev \
+libboost-thread-dev \
+libprotobuf-dev \
 libxml2-dev \
 libzthread-dev \
 pkg-config \
+protobuf-compiler \
 python3 \
 recode \
 zip \
