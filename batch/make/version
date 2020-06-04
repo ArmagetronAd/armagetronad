@@ -145,6 +145,9 @@ GIT_BRANCH="alpha"
 if test -d "${srcdir}/.git"; then
     # check for a tag
     cd $srcdir
+    revid=`git rev-parse HEAD`
+    branchnick=
+    revcount=`git rev-list HEAD --count`
     # todo: once we have make tags, consider just git describe --tags as version ID.
     if tag=`git describe --tags --candidates=0` > /dev/null 2>&1; then
         major_version=`echo ${tag} | sed -e s/version_// -e s/release_//`
@@ -153,16 +156,18 @@ if test -d "${srcdir}/.git"; then
     else
         if git diff-index --quiet HEAD --; then
             # local checkout clean, just use revno
-            DATE=_z`git rev-list HEAD --count`
+            DATE=_z${revcount}
         else
             # local changes, add date
-            DATE=_z`git rev-list HEAD --count`_$DATE
+            DATE=_z${revcount}_$DATE
         fi
     fi
 
     GIT_BRANCH=`git -C ${srcdir} rev-parse --abbrev-ref HEAD`
 fi
 test -z "${CI_COMMIT_BRANCH}" || GIT_BRANCH=${CI_COMMIT_BRANCH}
+test -z "${CI_COMMIT_TAG}" || tag=${CI_COMMIT_BRANCH}
+test -z "${branchnick}" && branchnick=${GIT_BRANCH}
 
 if test -z "$minor_version"
 then
@@ -180,6 +185,7 @@ fi
 
 if test $verbose
 then
+    echo MAJOR_VERSION 1,`echo $major_version | sed -e "s/\\.//g"`,0,${revcount}
     echo VERSION \"$major_version$minor_version\"
     echo REVID \"$revid\"
     echo REVNO $revno
