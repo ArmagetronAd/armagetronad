@@ -13,6 +13,11 @@ for f in $(find ${APPDIR} -type d -name "desktop"); do
   cp $f/icons/small/*.png ${APPDIR}/${PACKAGE}.png
 done
 
+# make sure desktop file references the right icon
+for f in ${APPDIR}/*.desktop; do
+  sed -i $f -e s/Icon=.*/Icon=${PACKAGE}/ || exit $?
+done
+
 # correct absolute symlinks
 APPDIR=${APPDIR} $(dirname $0)/fixlinks
 
@@ -45,6 +50,7 @@ for library in \
 libxml2 \
 libZThread \
 libSDL-1 \
+libboost_system \
 libboost_thread \
 libSDL_image libpng \
 libSDL_mixer \
