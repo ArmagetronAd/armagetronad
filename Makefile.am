@@ -167,7 +167,7 @@ dist-hook:
 
 #   generate yaml version info
 	echo "---" > $(distdir)/version.yaml
-	sed -e 's,^.*TRUE_ARMAGETRONAD_,,' -e 's, \+,: ,' -e 's, *\([0-9a-Z]\+\)$$, "\1",' < $(distdir)/src/tFakeVersion.h >> $(distdir)/version.yaml
+	sed -e 's,^.*TRUE_ARMAGETRONAD_,,' -e 's, \+,: ,' -e 's, *\([0-9a-zA-Z]\+\)$$, "\1",' < $(distdir)/src/tFakeVersion.h >> $(distdir)/version.yaml
 
 if USE_UNINSTALL
 
