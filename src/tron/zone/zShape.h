@@ -208,7 +208,7 @@ private:
     virtual nNetObjectDescriptorBase const & DoGetDescriptor() const;
 };
 
-//typedef boost::shared_ptr<zShape> zShapePtr;
+//typedef std::shared_ptr<zShape> zShapePtr;
 #include "tSafePTR.h"
 typedef tJUST_CONTROLLED_PTR< zShape> zShapePtr;
 

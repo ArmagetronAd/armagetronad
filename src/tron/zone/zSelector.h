@@ -39,7 +39,7 @@ class gCycle;
 
 class zEffector;
 
-typedef boost::shared_ptr<zEffector> zEffectorPtr;
+typedef std::shared_ptr<zEffector> zEffectorPtr;
 typedef std::vector< zEffectorPtr >  zEffectorPtrs;
 
 enum LivingStatus {

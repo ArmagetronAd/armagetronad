@@ -2102,7 +2102,7 @@ const
 void
 gParser::State_t::setAny(std::string const & var, boost::any val)
 {
-    _varstack.front()[var] = boost::shared_ptr<boost::any>(new boost::any(val));
+    _varstack.front()[var] = std::shared_ptr<boost::any>(new boost::any(val));
 }
 
 void

@@ -13,11 +13,11 @@
 #include "nNetwork.h"
 
 class zZone;
-//typedef boost::shared_ptr< zZone > zZonePtr;
+//typedef std::shared_ptr< zZone > zZonePtr;
 typedef tJUST_CONTROLLED_PTR< zZone> zZonePtr;
 
 class zZoneInfluenceItem;
-typedef boost::shared_ptr<zZoneInfluenceItem> zZoneInfluenceItemPtr;
+typedef std::shared_ptr<zZoneInfluenceItem> zZoneInfluenceItemPtr;
 typedef std::vector<zZoneInfluenceItemPtr> zZoneInfluenceItemList;
 
 class zZoneInfluence {

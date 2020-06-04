@@ -122,7 +122,7 @@ public:
 
     ~zEffectorManager();
 private:
-    typedef std::map<std::string, boost::shared_ptr<VoidFactoryBase> > FactoryList;
+    typedef std::map<std::string, std::shared_ptr<VoidFactoryBase> > FactoryList;
     static FactoryList & _effectors();
 
     //! We make the constructor private so that nobody else can
