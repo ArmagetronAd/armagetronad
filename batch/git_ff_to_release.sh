@@ -1,6 +1,7 @@
 #!/bin/sh
 
-# Depending on which branch this is invoked on, merge all other branches that can be deemed safe
+# Depending on which branch this is invoked on, fast forward from next a little less stable branch
+# master -> beta, beta -> release
 
 #set -x
 
@@ -9,29 +10,24 @@ test -z "${sd}" && sd=`dirname $0`
 
 HASH=`git -C ${sd} rev-parse HEAD`
 BRANCH=`git -C ${sd} rev-parse --abbrev-ref HEAD`
-#BRANCH=beta_0.2.9
+# BRANCH=beta_0.2.9
 SUFFIX=`echo ${BRANCH} | sed -e s/^release// -e s/^beta// -e s/^legacy//`
 
 MERGE_FROM=""
 
 case ${BRANCH} in
     release*)
-        echo "Release branch, nothing safe to merge."
+        MERGE_FROM=beta${SUFFIX}
         exit 0
         ;;
+    beta)
+        MERGE_FROM=master
+        ;;
     beta*)
-        MERGE_FROM=release${SUFFIX}
-        ;;
-    legacy*)
-        if test "${SUFFIX}" = "_0.2.8"; then
-            SUFFIX=_0.2.9
-            MERGE_FROM=legacy_0.2.8.3
+        if test "${SUFFIX}" = "_0.2.9"; then
+            SUFFIX=_0.2.8
         fi
-        MERGE_FROM="${MERGE_FROM} release${SUFFIX} beta${SUFFIX}"
-        ;;
-    master)
-        MERGE_FROM="legacy_0.2.8 legacy_0.2.8.3"
-        #MERGE_FROM="release beta legacy_0.2.8 legacy_0.2.8.3"
+        MERGE_FROM=legacy${SUFFIX}
         ;;
     *)
         echo "Unknown branch, don't know what to do."
@@ -50,7 +46,7 @@ for s in ${MERGE_FROM}; do
     fi
 done
 
-git -C ${sd} merge ${TOTAL_MERGE} || exit $?
+git -C ${sd} merge --ff-only ${TOTAL_MERGE} || exit $?
 
 NEW_HASH=`git -C ${sd} rev-parse HEAD`
 test ${NEW_HASH} = ${HASH} && exit 0
