@@ -18,7 +18,6 @@ MERGE_FROM=""
 case ${BRANCH} in
     release*)
         MERGE_FROM=beta${SUFFIX}
-        exit 0
         ;;
     beta)
         MERGE_FROM=master
