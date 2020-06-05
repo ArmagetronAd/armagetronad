@@ -18,7 +18,7 @@ stages:
   - build
   - test
   - mark
-  - staging
+  - stage
   - delay
   - deploy
 
@@ -148,13 +148,13 @@ deploy:
 
 
 
-# deploy to staging environment
-deploy-staging:
+# deploy to staged environment
+deploy-staged:
   needs:
    - build
   dependencies:
    - build
-  stage: staging
+  stage: stage
   tags:
    - armagetronad_deploy
   rules:
@@ -178,7 +178,7 @@ deploy-staging:
 delay-release:
   needs:
    - build
-   - deploy-staging
+   - deploy-staged
   dependencies: []
   stage: delay
   tags:
@@ -231,7 +231,7 @@ deploy-release:
 
 # pack up the downloadable build files in one handy artifact
 pack:
-  stage: staging
+  stage: stage
   needs:
    - build
   dependencies:
