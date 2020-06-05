@@ -162,12 +162,9 @@ dist-hook:
 # 	generate ChangeLog and configure.ac
 	test -r $(srcdir)/version.m4 && $(MAKE) dist-hook-scm || echo "Version not from SCM, skipping version fixing."
 
-#   fix internal version info
-	mv $(distdir)/src/tTrueVersion.h $(distdir)/src/tFakeVersion.h
-
 #   generate yaml version info
 	echo "---" > $(distdir)/version.yaml
-	sed -e 's,^.*TRUE_ARMAGETRONAD_,,' -e 's, \+,: ,' -e 's, *\([0-9a-zA-Z]\+\)$$, "\1",' < $(distdir)/src/tFakeVersion.h >> $(distdir)/version.yaml
+	sed -e 's,^.*TRUE_ARMAGETRONAD_,,' -e 's, \+,: ,' -e 's, *\([0-9a-zA-Z]\+\)$$, "\1",' < $(distdir)/src/tTrueVersion.h >> $(distdir)/version.yaml
 
 if USE_UNINSTALL
 

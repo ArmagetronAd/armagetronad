@@ -20,7 +20,7 @@ rm -rf $WINDIR/doc
 cp -r $DOCDIR $WINDIR/doc || exit 1
 cp -r $BUILDDIR/language/languages.txt $WINDIR/language || exit 1
 cp -r $BUILDDIR/config/aiplayers.cfg $WINDIR/config || exit 1
-cp -r $BUILDDIR/src/tTrueVersion.h $WINDIR/src || exit 1
+cp -r $SRCDIR/src/tTrueVersion.h $WINDIR/src || exit 1
 
 # rename text files
 for f in $WINDIR/INSTALL $WINDIR/COPYING $WINDIR/AUTHORS $WINDIR/NEWS $WINDIR/ChangeLog `find $WINDIR -name "*README*"`; do
