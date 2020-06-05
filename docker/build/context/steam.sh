@@ -24,9 +24,12 @@ else
     mv appdir/armagetronad-armagetronad.desktop appdir/${STEAM_PACKAGE_NAME}-dedicated.desktop || exit $?
 fi
     
-# all in the steam runtime
-rm -f appdir/usr/lib/libSDL*
-rm -f appdir/usr/lib/libjpeg*
-rm -f appdir/usr/lib/libxml2*
-rm -f appdir/usr/lib/libpng*
-rm -f appdir/usr/lib/libfreetype*
+# we do not need to include libraries that already are in the steam runtime
+pushd appdir/usr/lib || exit $?
+rm -f `cat /usr/share/steam_sdk_lib`
+popd || exit $?
+if test -d appdir/lib; then
+    pushd appdir/lib || exit $?
+    rm -f `cat /usr/share/steam_sdk_lib`
+    popd || exit $?
+fi
