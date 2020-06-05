@@ -417,7 +417,7 @@ $(WINZIP_SERVER_DIR): result.winbuild_32 proto.tag Makefile
 	cp -al $<.dir/dist $@.dir
 	rm -r $@.dir/$(PACKAGE_NAME).exe $@.dir/*.nsi $@.dir/banner* \
 		$@.dir/INSTALL.txt $@.dir/models $@.dir/sound $@.dir/textures \
-		$@.dir/SDL* $@.dir/libpng* $@.dir/jpeg*
+		$@.dir/SDL* $@.dir/libpng* $@.dir/libjpeg*
 	echo > $@
 $(WINZIP_SERVER): $(WINZIP_SERVER_DIR) upload/.tag
 	cd $(WINZIP_SERVER_DIR).dir; zip -9 -r ../../$(WINZIP_SERVER) *
