@@ -90,11 +90,14 @@ def FixedAfterTag(repo, team, project, tags):
 
 	fixed_after_tag={}
 	for issue in issues:
-		fixed_in = last_fixed_in[issue]
-		if fixed_in is None:
+		fixed_in = None
+		if issue in last_fixed_in:
+			fixed_in = last_fixed_in[issue]
+		if fixed_in == None and issue in last_mentioned_in:
 			fixed_in = last_mentioned_in[issue]
-		# print(issue, fixed_in)
-		fixed_after_tag.setdefault(fixed_in, []).append(issue)
+		if fixed_in != None:
+			#print(issue, fixed_in)
+			fixed_after_tag.setdefault(fixed_in, []).append(issue)
 
 	#print(fixed_after_tag)
 	return fixed_after_tag
