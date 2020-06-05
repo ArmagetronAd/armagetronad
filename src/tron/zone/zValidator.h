@@ -40,15 +40,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tPolynomial.h"
 
 class zSelector;
-typedef boost::shared_ptr<zSelector> zSelectorPtr;
+typedef std::shared_ptr<zSelector> zSelectorPtr;
 typedef std::vector< zSelectorPtr > zSelectorPtrs;
 
 class zMonitorInfluence;
-typedef boost::shared_ptr<zMonitorInfluence> zMonitorInfluencePtr;
+typedef std::shared_ptr<zMonitorInfluence> zMonitorInfluencePtr;
 typedef std::vector< zMonitorInfluencePtr > zMonitorInfluencePtrs;
 
 class zZoneInfluence;
-typedef boost::shared_ptr<zZoneInfluence> zZoneInfluencePtr;
+typedef std::shared_ptr<zZoneInfluence> zZoneInfluencePtr;
 typedef std::vector< zZoneInfluencePtr > zZoneInfluencePtrs;
 
 class zValidator

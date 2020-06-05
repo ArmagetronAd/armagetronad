@@ -24,7 +24,7 @@ class gXMLCharReturn;
 
 class gParserState {
 private:
-    typedef std::map<std::string, boost::shared_ptr<boost::any> > my_map_t;
+    typedef std::map<std::string, std::shared_ptr<boost::any> > my_map_t;
     std::deque< my_map_t > _varstack;
 public:
     gParserState();

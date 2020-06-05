@@ -43,7 +43,7 @@ public:
     tResourcePath const &Path() const {return m_Path;}
 
     //! Convenient typedef for references to tResources
-    typedef boost::shared_ptr<tResource> Reference;
+    typedef std::shared_ptr<tResource> Reference;
 protected:
     bool ValidateXml(FILE* docfd, const char* uri, const char* filepath);
     tResourcePath m_Path; //!< the resource identifier of this resource

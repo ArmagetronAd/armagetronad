@@ -2,7 +2,7 @@
 # determines the version of the sources
 # usage: version <source directory>
 
-#set -x
+# set -x
 
 show_usage()
 {
@@ -28,6 +28,12 @@ then
     echo "ERROR: Invalid argument count" >&2
     show_usage $0
     exit 1
+fi
+
+# if we're building via CI from a protected tag, that is our version
+if test "${CI_COMMIT_REF_PROTECTED}" = "true" && ! test -z "${CI_COMMIT_TAG}"; then
+    echo "${CI_COMMIT_TAG}" | sed -e s/^v//
+    exit 0
 fi
 
 # set version parts to defaults for CVS snapshot
@@ -133,9 +139,15 @@ then
     fi
 fi
 
+# try to get a good guess about which branch we're on
+GIT_BRANCH="alpha"
+
 if test -d "${srcdir}/.git"; then
     # check for a tag
     cd $srcdir
+    revid=`git rev-parse HEAD`
+    branchnick=
+    revcount=`git rev-list HEAD --count`
     # todo: once we have make tags, consider just git describe --tags as version ID.
     if tag=`git describe --tags --candidates=0` > /dev/null 2>&1; then
         major_version=`echo ${tag} | sed -e s/version_// -e s/release_//`
@@ -144,21 +156,36 @@ if test -d "${srcdir}/.git"; then
     else
         if git diff-index --quiet HEAD --; then
             # local checkout clean, just use revno
-            DATE=_z`git rev-list HEAD --count`
+            DATE=_z${revcount}
         else
             # local changes, add date
-            DATE=_z`git rev-list HEAD --count`_$DATE
+            DATE=_z${revcount}_$DATE
         fi
     fi
+
+    GIT_BRANCH=`git -C ${srcdir} rev-parse --abbrev-ref HEAD`
 fi
+test -z "${CI_COMMIT_BRANCH}" || GIT_BRANCH=${CI_COMMIT_BRANCH}
+test -z "${CI_COMMIT_TAG}" || tag=${CI_COMMIT_BRANCH}
+test -z "${branchnick}" && branchnick=${GIT_BRANCH}
 
 if test -z "$minor_version"
 then
     test -z "$DATE" || minor_version=`echo ${minor_version_proto} | sed -e "s,DATE,$DATE," -e "s,YYYYMMDD,$DATE,"`
 fi
 
+if test "${CI_COMMIT_REF_PROTECTED}" = "true"; then
+    # determine alpha/beta/rc status based on branch
+    if echo ${GIT_BRANCH} | grep -q "^beta"; then
+        minor_version=`echo ${minor_version} | sed -e s,alpha,beta,`
+    elif echo ${GIT_BRANCH} | grep -q "^release"; then
+        minor_version=`echo ${minor_version} | sed -e s,alpha,rc,`
+    fi
+fi
+
 if test $verbose
 then
+    echo MAJOR_VERSION 1,`echo $major_version | sed -e "s/\\.//g"`,0,${revcount}
     echo VERSION \"$major_version$minor_version\"
     echo REVID \"$revid\"
     echo REVNO $revno
@@ -180,4 +207,3 @@ then
 else
     echo $major_version$minor_version
 fi
-

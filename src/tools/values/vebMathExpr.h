@@ -49,7 +49,7 @@ public:
     typedef std::map<tString, float *> varmap_t; //!< map of variable names and their references
     typedef std::map<tString, float ((*)(float))> funcmap_t; //!< map of function names and their references
 private:
-    boost::shared_ptr<ROperation> m_operation;
+    std::shared_ptr<ROperation> m_operation;
     RVar **m_vararray;
     RFunction **m_funcarray;
     int m_varsSize, m_functionsSize;

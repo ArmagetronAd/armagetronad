@@ -61,7 +61,7 @@ public:
 
     //! Convenient typedef for a type that stores references to the resource
     /// type.
-    typedef boost::shared_ptr<tResourceType> Reference;
+    typedef std::shared_ptr<tResourceType> Reference;
 
     Reference Get_reference() { return Reference(this); };
 private:

@@ -35,7 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tPolynomial.h"
 
 class zValidator;
-typedef boost::shared_ptr<zValidator> zValidatorPtr;
+typedef std::shared_ptr<zValidator> zValidatorPtr;
 
 
 class zEffectGroup
@@ -72,7 +72,7 @@ protected:
 
 };
 
-typedef boost::shared_ptr<zEffectGroup> zEffectGroupPtr;
+typedef std::shared_ptr<zEffectGroup> zEffectGroupPtr;
 typedef std::vector< zEffectGroupPtr > zEffectGroupPtrs;
 
 

@@ -55,7 +55,7 @@ MathExpr::MathExpr(tString const &expr, varmap_t const &vars, funcmap_t const &f
         m_funcarray[j] = new RFunction(iter->second);
         m_funcarray[j]->SetName(iter->first.c_str());
     }
-    m_operation = boost::shared_ptr<ROperation>(new ROperation(expr.c_str(), vars.size(), m_vararray, functions.size(), m_funcarray));
+    m_operation = std::shared_ptr<ROperation>(new ROperation(expr.c_str(), vars.size(), m_vararray, functions.size(), m_funcarray));
 }
 
 MathExpr::~MathExpr() {

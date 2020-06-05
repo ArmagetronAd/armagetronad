@@ -1,0 +1,56 @@
+LABEL maintainer="Manuel Moos <z-man@users.sf.net>"
+
+# make a list of all libraries in Steam SDK so we later know what we do not need
+RUN ls /lib > /usr/share/steam_sdk_lib && ls /usr/lib >> /usr/share/steam_sdk_lib
+
+# dependencies that are fine to get from steam SDK 
+RUN apt-get -y update && apt-get install \
+g++ \
+git \
+make \
+#libboost-dev \
+#libboost-thread-dev \
+libfreetype6-dev \
+libftgl-dev \
+libglew-dev \
+libjpeg-dev \
+libpng-dev \
+libprotobuf-dev \
+#libxml2-dev \
+#libzthread-dev \
+protobuf-compiler \
+recode \
+-y
+
+# switch to updated package sources
+FROM amd64/ubuntu:16.04 as copysrc
+FROM base as full
+COPY --from=copysrc /etc/apt/sources.list /etc/apt/sources.list
+
+# dependencies where we need more recent versions
+RUN apt-get -y update && apt-get install \
+#curl \
+#g++ \
+#git \
+#make \
+libboost-dev \
+libboost-thread-dev \
+#libfreetype6-dev \
+#libftgl-dev \
+#libglew-dev \
+#libjpeg-dev \
+#libpng-dev \
+#libprotobuf-dev \
+#libsdl2-dev \
+#libsdl2-image-dev \
+#libsdl2-mixer-dev \
+#libzthread-dev \
+#recode \
+#protobuf-compiler \
+-y
+
+# set up builder user
+RUN useradd builder && mkdir -p /home/builder && chown builder:builder /home/builder # && chmod 777 /home/builder
+WORKDIR /home/builder
+USER builder
+

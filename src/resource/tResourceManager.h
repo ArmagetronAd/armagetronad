@@ -87,7 +87,7 @@ public:
 
     //! Convenient typedef for a type that stores references to the resource
     /// manager.
-    typedef boost::shared_ptr<tResourceManager> Reference;
+    typedef std::shared_ptr<tResourceManager> Reference;
 
     //! tResourceManager is a singleton, and this is how you get the
     /// global instance of it.

@@ -43,7 +43,7 @@ namespace Legacy {
 //! Stores a function pointer to a function within another class and offers functions to get that function's return value
 template<typename T> class Callback : public Base {
 public:
-    typedef boost::shared_ptr<Base> (T::*cb_ptr)(void); //!< convinience typedef for a callback that can be used with this class
+    typedef std::shared_ptr<Base> (T::*cb_ptr)(void); //!< convinience typedef for a callback that can be used with this class
 private:
     cb_ptr m_value; //!< Pointer to the function
     T *m_cockpit; //!< Pointer to the object that the function will be called within

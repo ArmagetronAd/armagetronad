@@ -1,5 +1,4 @@
 Changes since 0.3.1
-===================
 - New Low Latency or High Throughput optimizing swap/sync system.
 - Switched to utf-8 encoded strings internally and for config files.
   Language files can be either utf-8 or latin-1.
@@ -167,8 +166,21 @@ Changes since 0.2.8
 - Added support for armagetronad URLs on Mac OS X and KDE -- armagetronad://<server>[:<port>]. port defaults to 4534.
 - New command-line flag: --connect <server>[:<port>]. Startup the game and connect directly to <server>.
 
-Changes since 0.2.8.3.x:
-==========================
+
+Changes since 0.2.8.3.5:
+
+  Fixed Bugs
+
+- Debian builds: Documentation html files have empty last change (#9)
+
+  New Features
+
+- Adapt ChangeLog and fingerprint generation to git (#11)
+- Integrated build system (#14)
+
+
+  Changes on the 0.2.9 branch
+
 - Added detection and reaction code for timing assist bots
 - /shuffle now works before you actually join a team
 - Implemented /shout command and associated settings
@@ -206,7 +218,18 @@ Changes since 0.2.8.3.x:
   login/logout message can be announced.
 - Authentication is now enabled by default.
 
+Changes since 0.2.8.3.4:
+
+- Security fix: Check that the remote is allowed to create an object
+  before creating it, not decide whether it gets to keep it after
+  it already has been created and potential damage has been done.
+  No arbitrary code could be executed, but a client could effectively 
+  shut down a server by sending crucial objects, such as the main game
+  timer or the game itself.
+- Compilation fixes for current systems.
+
 Changes since 0.2.8.3.3:
+
 - Eliminated undefined behavior that was fine in gcc 5, but now
   (rightfully!) turned into crashes in gcc 6.
 - Eliminated compilation disambiguity that was just causing a mild
@@ -214,6 +237,7 @@ Changes since 0.2.8.3.3:
   gcc 6.
   
 Changes since 0.2.8.3.2:
+
 - security fix: do not read ahead of the beginning of network buffer.
 - security fix: don't attribute network errors from processing random
   packets to the connection to the server 
@@ -225,6 +249,7 @@ Changes since 0.2.8.3.2:
 - fix for camera turning for bizarre axis configurations
 
 Changes since 0.2.8.3.1:
+
 - security fix: old style action commands from clients no loger cause hangs and crashes
 - security fix: oversized packets are ignored properly
 - security fix: never read one byte outside of the received buffer
@@ -235,6 +260,7 @@ Changes since 0.2.8.3.1:
 - Additional checks against illegal values passed to renderer
 
 Changes since 0.2.8.3:
+
 - fixed temporary sound disappearance when alt-tabbing away and back
 - default subcultures are now distributed
 - enable 32 bit color depth at desktop resolution
@@ -242,9 +268,9 @@ Changes since 0.2.8.3:
 - spelling mistakes and missing German translations
 
 Changes since 0.2.8.3_rc4:
-==========================
+
 - New setting: KEEP_PLAYER_SLOT allows the server to kick (preferably) spectators
-   if it gets full so there is always one slot open for players
+  if it gets full so there is always one slot open for players
 - New setting: ACCESS_LEVEL_AUTOKICK_IMMUNITY sets the access level required 
   to be immune from such kicks (and idle autokicks, too)
 - Intercepted chat commands are now written to ladderlog.txt. Format:
@@ -254,7 +280,7 @@ Changes since 0.2.8.3_rc4:
 - fast finish works again
 
 Changes since 0.2.8.3_rc3:
-==========================
+
 - Pinging previously popular servers earlier for quicker server
   browsing
 - Improved master server random polling, the second polled master now
@@ -267,7 +293,6 @@ Changes since 0.2.8.3_rc3:
   changes user level for name\_with\_spaces@forums
 
 Changes since 0.2.8.3_rc2:
-==========================
 - Fixed crash with server polling
 - ROUND_WINNER and MATCH_WINNER ladderlog events now include the players of
   the team.
@@ -278,14 +303,12 @@ Changes since 0.2.8.3_rc2:
   of shuffle messages displayed.
 
 Changes since 0.2.8.3_rc1:
-==========================
 - Fixed dark color filters, such as FILTER_DARK_COLOR_STRINGS, to not filter
   the reset color.
 - ASE moviepack models no longer have a vertex count limit
 - Fixed endless recursion crash between rounds
 
 Changes since 0.2.8.3_beta3:
-============================
 - Chat prefix spam protection. Guards against prefix spam, such as when a
   user always changes their chat message color, or prefixes all messages
   with a clan tag. Toggle with the PREFIX_SPAM_ENABLE setting.
@@ -327,7 +350,8 @@ Changes since 0.2.8.2
 New settings
 ------------
 
-  New settings and commands:
+New settings and commands:
+
 - MIN_PLAY_TIME_*: minimal play time required before you are allowed to
   play on this server.
 - SPAM_AUTOKICK_COUNT: minimal number of spam warning messages you get in a
@@ -417,6 +441,10 @@ New settings
   when AUTO_TEAM is enabled
 
 If --enable-armathentication was activated:
+
+- /lock, /unlock, /invite and /uninvite team management chat for players of
+  access level ACCESS_LEVEL_TEAM or better.
+- /teams chat command that rougly prints team layout.
 - ACCESS_LEVEL_IPS to let admins see IPs of players in the list.
 - ACCESS_LEVEL_SPY_MSG/TEAM to let admins spy on team/private messages.
 - CASACL to temporarily raise the access level
@@ -440,6 +468,8 @@ Featurelets
 -----------
 
 - /teams chat command that rougly prints team layout.
+Featurelets:
+
 - Added Polish language file
 - clientside play time tracking and server controlled minimal required experience
   to be allowed to play.
@@ -619,10 +649,6 @@ Changes since 0.2.8.0
 - Fallback to default map on map load failure works again (broken sine 0.2.8.0_rc4)
 
 Changes since 0.2.8.0_rc4
-=========================
-
-Bugfixes
---------
 
 - SECURITY FIX: via a MAP_FILE path with included .., it was possible
   to write files anywhere, provided they did not exist previously.
@@ -847,7 +873,7 @@ Changes since 0.2.7.0
 - Colored explosions!
 - HUD enhancements: customization, works in splitscreen mode
 - Directory scanning code added ( not yet visible, will be used for
-  moviepack/cycle selection )
+   moviepack/cycle selection )
 - Moviepack sky texture support
 - Master server can now run on windows, too
 - Explosion sound now actually works
@@ -1019,3 +1045,4 @@ Changes since 0.1.4.9
 - the moviepack title screen is displayed
 - Linux version: easier system-wide installation with RPM packages
   or "make install"
+

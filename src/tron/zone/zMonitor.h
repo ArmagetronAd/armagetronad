@@ -19,7 +19,7 @@ class zMonitor;
 
 typedef tJUST_CONTROLLED_PTR<zMonitor> zMonitorPtr;
 
-typedef boost::shared_ptr<zMonitorRule> zMonitorRulePtr;
+typedef std::shared_ptr<zMonitorRule> zMonitorRulePtr;
 typedef std::vector<zMonitorRulePtr> zMonitorRulePtrs;
 
 typedef gVectorExtra<Triggerer> triggerers;
