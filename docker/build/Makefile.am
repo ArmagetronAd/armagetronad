@@ -44,7 +44,7 @@ CI_windows.tag: CI_base.tag steam_windows.tag closed_regular.tag
 CI_free.tag: CI_base.tag free.tag
 	touch $@
 
-# targets for CI merge tests, a bit leaner than a full build
+# (OBSOLETE) targets for CI merge tests, a bit leaner than a full build
 CI_merge.tag: windows.tag debtest.tag
 	touch $@
 CI_merge: CI_merge.tag

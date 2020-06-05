@@ -14,10 +14,9 @@ variables:
   DOCKER_TLS_CERTDIR: ""
 
 stages:
-  - prepare
+  - minimal_build
   - build
   - test
-  - mark
   - stage
   - delay
   - deploy
@@ -50,11 +49,15 @@ default:
      - docker/scripts/.cache
 
 
-# prepare a build environment, do the first basic builds
-prepare_build:
-  stage: prepare
-  #tags:
-  #  - docker
+# lean tests for non-protected branches
+minimal_build:
+  stage: minimal_build
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+      when: never
+    - if: $CI_COMMIT_REF_PROTECTED == "true"
+      when: never
+    - when: on_success
   script:
     - cd gitlab_build/docker/build
     - target=CI_base
@@ -69,12 +72,10 @@ prepare_build:
 
 # do the bulk of the building
 build:
-  dependencies:
-   - prepare_build
   stage: build
   rules:
   - if: $CI_MERGE_REQUEST_ID
-    when: never
+    when: on_success
   - if: $CI_COMMIT_REF_PROTECTED == "true"
     when: on_success
   - when: manual
@@ -97,56 +98,6 @@ build:
   artifacts:
     untracked: true
     expire_in: 1 week
-
-# leaner version of build_ for merge request checks, still builds windows and some linux, but no Steam and only one of 32/64 bit
-build_merge:
-  dependencies: []
-  stage: build
-  rules:
-  - if: $CI_MERGE_REQUEST_ID
-    when: on_success
-  - when: never
-  script:
-    - target=CI_merge_nodeb
-    # check if (fake!) secrets are available, if yes, copy them and build debtest
-    - if test -r /secrets/sec.gpg; then
-    -   cp -a /secrets gitlab_build/docker/deploy/
-    -   target="CI_merge"
-    - fi
-    # build
-    - cd gitlab_build/docker/build
-    - if ! make -O -j$(nproc) ${target}; then
-    -   make -d ${target} || exit $?
-    -   exit 1
-    - fi
-    - make artifactclean
-    - cd ../../
-    - rm -rf src
-
-# for non-release builds, just deploy as the build system itself sees fit
-deploy:
-  needs:
-   - build
-  dependencies:
-   - build
-  stage: deploy
-  tags:
-   - armagetronad_deploy
-  rules:
-  - if: $CI_MERGE_REQUEST_ID
-    when: never
-  - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_REF_NAME !~ /^release/'
-    when: never
-  - when: never
-  before_script:
-    - ./docker/deploy/prepare_deploy.sh
-
-  script:
-    # now enter the docker build directory and just invoke make there
-    - cd gitlab_build/docker/build
-    - make deploy # -O -j$(nproc) -k
-
-
 
 # deploy to staged environment
 deploy-staged:
