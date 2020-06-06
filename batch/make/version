@@ -106,7 +106,7 @@ fi
 # try to get a good guess about which branch we're on
 GIT_BRANCH="alpha"
 
-if test -d "${srcdir}/.git"; then
+if test -e "${srcdir}/.git"; then
     # check for a tag
     cd $srcdir
     # todo: once we have make tags, consider just git describe --tags as version ID.
