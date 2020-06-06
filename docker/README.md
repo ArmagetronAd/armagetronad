@@ -62,3 +62,27 @@ To update to another branch, you may have to adapt related branch names in scrip
 To make builds use up to date versions of additional git repositories, call scripts/update_gits.sh.
 
 All scripts can be invoked from any work directory as long as you invoke them with a relative or absoulte path, they find their relevant data directories and other scripts automatically.
+
+## GitLab CI
+
+The root .gitlab-ci.yml uses the files in this directory to do the builds. The building should work fine in any gitlab runner configured to use docker, especially the shared runners.
+
+For deployment, however, an own runner needs to be set up. A stadard setup will do fine, but then run as root. To run a rootless gitlab runner, you must do the following. Install gitlab runner normally, but disable the default service with
+
+    systemctl disable gitlab-runner
+
+As a regular user, register a runner with
+
+    gitlab-runner register
+
+the data to fill in is described on the GitLab CI configuration of the project. Then, normally, gitlab-runner uses docker-in-docker to run additional containers. That does not work rootless. Instead, you can just make the docker control socket available to gitlab's container by editing the volumes line in '.gitlab-runer/config.toml' to
+
+    volumes = ["/var/run/user/UID/docker.sock:/var/run/docker.sock", "/cache", "/home/USERNAME/secrets:/secrets:ro"]
+
+replacing UID with your user ID and USERNAME with your username.
+If you want to use the runner for deployment, the secrets folder then has to contain the credentials required to do so. Read deploy/targets.sh for details.
+
+Then, run the runner with
+
+    gitlab-runner run
+
