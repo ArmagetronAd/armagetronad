@@ -75,7 +75,7 @@ As a regular user, register a runner with
 
     gitlab-runner register
 
-the data to fill in is described on the GitLab CI configuration of the project. Then, normally, gitlab-runner uses docker-in-docker to run additional containers. That does not work rootless. Instead, you can just make the docker control socket available to gitlab's container by editing the volumes line in '.gitlab-runer/config.toml' to
+the data to fill in is described on the GitLab CI configuration of the project. Then, normally, gitlab-runner uses docker-in-docker to run additional containers. That does not work rootless. Instead, you can just make the docker control socket available to gitlab's container by editing the volumes line in `~/.gitlab-runer/config.toml` to
 
     volumes = ["/var/run/user/UID/docker.sock:/var/run/docker.sock", "/cache", "/home/USERNAME/secrets:/secrets:ro"]
 
