@@ -18,6 +18,18 @@ For Ubuntu, to be on the safe side:
 
 Then follow the instructions from the rootless docker and x11docker above.
 
+If you are not using Ubuntu on your main machine, you can run Rootless Docker inside
+an Ubuntu virtual machine and export the socket for use on your main machine. The safest way to run such a machine is with two network interfaces; one NAT network for connections of the docker containers to the outside world, one HOST ONLY network for you to connect to the docker daemon. [Here](https://askubuntu.com/questions/778392/install-second-network-interface-on-virtualized-ubuntu-server) are instructions how to enable the second interface on the guest.
+Once that is set up, assuming your UID is 1000 on the host and 1001 on the host, connect to the guest with
+
+    ssh guest -L /run/user/1001/docker.sock:/run/user/1000/docker.sock
+
+as suggested [here](https://docs.docker.com/engine/security/security/#docker-daemon-attack-surface) and keep that running. Inform your local docker client about the socket with
+
+    export DOCKER_HOST=unix:///run/user/1000/docker.sock
+
+and off you go. Only your host user can access that socket and can only control a Docker daemon on a virtual machine running as a non-root user.
+
 ## Contents
 
  * scripts/ contains helper scripts
@@ -50,3 +62,27 @@ To update to another branch, you may have to adapt related branch names in scrip
 To make builds use up to date versions of additional git repositories, call scripts/update_gits.sh.
 
 All scripts can be invoked from any work directory as long as you invoke them with a relative or absoulte path, they find their relevant data directories and other scripts automatically.
+
+## GitLab CI
+
+The root .gitlab-ci.yml uses the files in this directory to do the builds. The building should work fine in any gitlab runner configured to use docker, especially the shared runners.
+
+For deployment, however, an own runner needs to be set up. A stadard setup will do fine, but then run as root. To run a rootless gitlab runner, you must do the following. Install gitlab runner normally, but disable the default service with
+
+    systemctl disable gitlab-runner
+
+As a regular user, register a runner with
+
+    gitlab-runner register
+
+the data to fill in is described on the GitLab CI configuration of the project. Then, normally, gitlab-runner uses docker-in-docker to run additional containers. That does not work rootless. Instead, you can just make the docker control socket available to gitlab's container by editing the volumes line in `~/.gitlab-runer/config.toml` to
+
+    volumes = ["/var/run/user/UID/docker.sock:/var/run/docker.sock", "/cache", "/home/USERNAME/secrets:/secrets:ro"]
+
+replacing UID with your user ID and USERNAME with your username.
+If you want to use the runner for deployment, the secrets folder then has to contain the credentials required to do so. Read deploy/targets.sh for details.
+
+Then, run the runner with
+
+    gitlab-runner run
+

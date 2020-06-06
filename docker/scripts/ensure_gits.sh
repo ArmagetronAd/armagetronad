@@ -19,7 +19,7 @@ function ensure_git(){
     test -z "${my_branch}" && exit 1
     
     dir=${download_dir}/${name}
-    if ! test -d ${dir}/.git; then
+    if ! test -e ${dir}/.git; then
 	rm -rf ${dir}
     fi
     if ! test -d ${dir}; then
