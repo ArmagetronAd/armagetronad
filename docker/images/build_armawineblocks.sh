@@ -26,7 +26,7 @@ ${sd}/build_image.sh ${BASE_32} armabuild_wine_1 "${bd}" || exit 1
 docker rm armadev
 x11docker --name armadev --keepcache --user=RETAIN ${REGISTRY}armabuild_wine_1:${EPOCH} ./install.sh || exit 1
 docker commit armadev ${REGISTRY}armawineblocks:${EPOCH} || exit
-touch ${id}/armawineblocks.digest.local
+touch ${wd}/armawineblocks.digest.local
 docker rm armadev
 
 #echo TEST installation:
