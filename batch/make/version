@@ -115,7 +115,8 @@ if test -e "${srcdir}/.git"; then
         minor_version=""
         DATE=""
     else
-        if git diff-index --quiet HEAD --; then
+      git update-index --refresh 
+      if git diff-index --quiet HEAD --; then
             # local checkout clean, just use revno
             DATE=_z`git rev-list HEAD --count`
         else
