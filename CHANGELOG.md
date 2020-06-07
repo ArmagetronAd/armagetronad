@@ -12,7 +12,172 @@
  * Integrated build system ([#14](https://gitlab.com/armagetronad/armagetronad/-/issues/14))
 
 
-##### Changes on the 0.2.9 branch
+##### Changes since 0.3.1:
+
+ * New Low Latency or High Throughput optimizing swap/sync system.
+ * Switched to utf-8 encoded strings internally and for config files.
+  Language files can be either utf-8 or latin-1.
+ * New command: “TOGGLE”. Cycle between 0 and 1 for a boolean config item.
+  Example: Create an instant chat with the text “/console toggle predict_objects”.
+ * New setting SILENCE_ENEMIES (boolean). When enabled, chat sent from enemies
+  is not displayed on your client if you are alive. If you are dead all chat
+  is displayed.
+ * New console commands OP and DEOP replicate the functionnality of chat commands /op and /deop
+ * New vote: /callvote referee <player>: Elevates <player> to access level 6. /callvote demotereferee reverts.
+ * Config and map rotation can be manually reset with the command
+  “RESET_ROTATION”. Rotation can automatically be reset when a START_NEW_MATCH
+  command is issued by enabling “RESET_ROTATION_ON_START_NEW_MATCH”.
+ * New admin command: "SCRAMBLE". Scrambles/randomises which players are in which team.
+ * New vote: /callvote scramble: Executes the SCRAMBLE command.
+ * Teams now retain their spawn for later respawing
+ * New ladderlog entries:
+	- PLAYER_RESPAWN <RESPAWNEE> <RESPAWNEE'S TEAM> [RESPAWNER]
+	- DEATH_DEATHZONE <player>
+	- WINZONE_PLAYER_ENTER <player>
+    - ONLINE_TEAM <name> <total score>
+	- ONLINE_AI <player> <team> <total score>
+ * Changes to the ONLINE_PLAYER ladderlog event:
+    - It is now enabled by default.
+    - Added additional information about the access level and total score of
+      the player.
+    - Players are written in the order of their launch position on the team.
+ * Removed POSITIONS ladderlog event. ONLINE_PLAYER and ONLINE_AI now include all
+  the information it provided.
+ * Ladderlog events now have a specification that defines their format. See
+  settings_dedicated.cfg for more documentation.
+ * New commands LADDERLOG_SCRIPT_WRITE, and LADDERLOG_SCRIPT_WRITE_ALL that
+  allow better control over which events are sent to spawned scripts.
+ * The CONSOLE_LADDER_LOG setting has been removed. Its functionality has been
+  reimplemented in scripts/examples/echo.sh.
+ * New warmup mode:
+    - DO_WARMUP N>0 will make the game enter warmup mode after each N matches
+    - In warmup mode, players can use the /ready command to set themselves ready and start the match
+    - Team joins/switches/leaves(when using /teamleave) are done instantly
+    - By default, players respawn in warmup mode (WARMUP_RESPAWN_TIME)
+    - The game starts when each team has ready/total > WARMUP_MIN_READY(0.51)
+    - However, there should be at least WARMUP_MIN_PLAYERS(2) humans before the warmup can end
+    - Readiness state is synced to clients so that newer ones can show an icon on the scoreboard
+    - ALL_READY makes the game behave as if all players had readied up.
+    - New ladderlog entries:
+        - NEW_WARMUP replaces NEW_MATCH when appropriate: NEW_WARMUP <N> <TIMESTAMP>
+          with N the number of matches to be played consecutively
+        - MATCHES_LEFT <N>
+ * DEADLY_EXPLOSIONS setting. When enabled, cycles in the blast radius of an
+  explosion will be destroyed, and DEATH_EXPLOSION will be written to ladderlog.
+  Scoring can be applied with the SCORE_EXPLOSION and SCORE_EXPLOSION_OWNER
+  settings.
+ * Team invitations are synced to clients and conditionally displayed in the
+  score table.
+ * Added /invites chat command to list team invitations.
+ * New helper program armagetronad-serverquery. Fetches the master list and
+  advanced server information, and outputs it in a JSON format. Only available
+  in dedicated server builds.
+ * Tutorials and Challenges
+ * Resource corruption can be detected in some cases and triggers a redownload.
+ * New camera settings: CAMERA_FREE_START_PITCH/ROTATE adjust direction of free camera
+ * New camera commands: WARP_CAMERA warps one camera to a specified setup,
+  SAVE_CAMERAS prints the commands to restore the current configuration.
+ * Upper sky can now be loaded from moviepack/upper_sky.png resp. textures/upper_sky.png;
+  if they do not exist, the floor is used, as previously. New settings
+  UPPER_SKY_RED, _GREEN, _BLUE, _SCALE and _HEIGHT as well as LOWER_SKY_HEIGHT
+  control the look.
+ * Conforming partly to FreeDesktop standards on Unix
+  (http://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html) :
+  UserDataDir defaults to $XDG_DATA_HOME/.armagetronad,
+  VarDir to $XDG_DATA_HOME/.armagetronad/var and
+  UserConfigDir to $XDG_CONFIG_HOME/.armagetronad.
+ * user*.cfg now resides in UserConfigDir.
+ * Configuration files, with the exception of legacy user*.cfg files, are no longer
+  read from the var directory.
+ * Added support for streaming tArrays, lists and vectors to tStrings, producing text
+  looking a bit like this entry.
+ * There is now only one score message per zone conquest instead of one per conquerer.
+ * Instant chat options have been merged into one menu.
+ * The OS X dedicated server can now be run by opening the executable in the Finder.
+ * The OS X builds are now created using automake.
+
+##### Changes since 0.3.0:
+
+ * FULL_REDIRECT_SERVER/PORT: redirection target used when the server is full.
+ * The chat and console history are now remembered between restarts of arma
+ * Added an incremental reverse search for the console and chat history:
+  In chat or console mode press CTRL-R and start entering your search term.
+  It will show you the last found match in a new line, press right or left
+  to jump to it in the history.
+ * New cockpit data sources current_name, current_colored_name,
+  current_pos_x, current_pos_y and player_acceleration
+ * Growl notifications (http://growl.info) for Mac OS X when the server
+  supports it. Messages sent: Player left, Player entered, Player renamed, 
+  Death suicide, Death frag, Death teamkill, Game end, New Round, Round winner,
+  Match winner, and New match. Note that not all notifications are enabled by
+  default — you can toggle notifications and do many more things in the Growl
+  System Preferences panel.
+ * Red/Green or Red/Cyan 3D rendering. Activate it by setting
+  CAMERA_EYE_DISTANCE to something ≠ 0.
+
+##### Changes since 0.3.0_alpha4941:
+
+ * Added setting to toggle custom teamnames
+ * New team menu item: autoselect team mode
+ * New team menu item: join spectators
+ * Added name hilighting: If your name appears in someone else's chat
+  message it gets hilighted in red
+ * Added new cockpit data sources: top_score_team and current_score_team
+ * The tab completion for names now uses the same mechanism as the /msg
+  command: Nicks are simplified and latin-1 characters mapped to ASCII
+  ones
+ * The /msg command now gets correctly recognized by the tab completion:
+  Spaces in the name are now replaced by '_'
+ * The names that are displayed over other cycles now get colored in the
+  same color as the cycle. Disable this by setting
+  DISPLAY_COLORED_NAMES_OVER_CYCLES to 0.
+
+##### Changes since 0.3.0_alpha4872:
+
+ * Tab completion now looks for partial matches in nicknames, instead of
+  just at the beginning of the nick. Only the beginning of words (a series
+  of alphanumerical characters) is matched.
+ * Fixed the <Reverse> tag in cockpit files
+ * Little changes to the default cockpit file
+    - The brake meter now becomes red when it's almost empty (before it
+      became green again, after becoming yellow)
+    - Switched the colors of the FPS gauge, they are more intuitive like that
+ * The "currently playing" display in the cockpit is now cropped to the
+  basename on Windows
+ * Fixed handling of the mercam mode in the cockpit
+ * New serverside settings FORBID_HUD_MAP (boolean) and FORBID_COCKPIT_DATA
+  (colon separated list of forbidden cockpit data sources)
+ * New setting FONT_SIZE_FACTOR, a global factor to all font sizes
+ * A winner is now only declared if there are points for winning or the
+  game mode is not "Freestyle"
+ * Disabled web server in playback mode
+ * Language fix: "...renamed it's team to..." becomes "...renames its team
+  to..."
+
+##### Changes between 0.2.9 and 0.3.0_alpha4872:
+
+ * New team join menu (colored, shows number of players per team)
+ * Customizable teamname
+ * Updated Windows libraries (SDL,SDL_mixer,SDL_image,libxml2)
+ * New SDL_mixer-based sound engine
+ * Experimental particle system for sparks (disabled, probably crashes on some machines)
+ * Embedded web-server that serves up the resource directory
+ * Switched from proprietary class to a class derived from standard std::string for strings
+ * Tab completion for chat and console
+ * New cockpit files as resources, replacing the old HUD
+ * HUD mini-map
+ * New fonts, font are now truetype files and can be non-proportional
+ * New chat command /console--works like /admin, but on the local client and doesn't require being logged in
+ * Score table shows the number of players alive/total on each team
+ * "Member of team:" column in score table is only displayed if there are teams
+ * "Member of team:" column shows the team names in the teams' colors
+ * Players that are chatting have a star in front of their names in the score table
+ * Chat lines of dead players are marked with "*DEAD*" in front of them
+ * Voting outcome messages show how many players voted for/against the poll and how many didn't vote yet
+ * Added support for armagetronad URLs on Mac OS X and KDE -- armagetronad://<server>[:<port>]. port defaults to 4534.
+ * New command-line flag: --connect <server>[:<port>]. Startup the game and connect directly to <server>.
+
+##### Changes on the 0.2.9 branch:
 
  * Added detection and reaction code for timing assist bots
  * /shuffle now works before you actually join a team
