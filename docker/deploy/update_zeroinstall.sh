@@ -25,26 +25,30 @@ set -x
 . ./version.sh || exit $?
 . ./targets.sh || exit $?
 
-trust_gitlab || exit $?
-git clone ${ZI_GIT} zeroinstall || exit $?
-cp zeroinstall/*.gpg . || exit $?
-
 ZEROVERSION=$(echo ${PACKAGE_VERSION} | sed -e "s,_,-,g" -e "s,-alpha-,-pre0.X," -e "s,-beta-,-pre1.X," -e "s,-rc-,-pre2.X," -e "s,\.Xz,.," -e "s,\.Xr,.," -e "s,\.X,.," )
 
 case ${STAGING}+${ZI_SERIES}+${ZEROVERSION} in
-    false+stable+*-pre*)
-	STABILITY=testing
-	;;
-    false+stable+*)
-	STABILITY=stable
+    false+*+**)
+    # feed determines default stability
+	STABILITY=""
 	;;
     true+stable+*)
+    # staged release; shoud be > last RC (by version) but < last true release (by stability)
 	STABILITY=testing
 	;;
-    *)
+    true+*+*)
+    # alpha/beta/other staging, go to lowest sensible stability
 	STABILITY=developer
 	;;
+    *)
+    # unknown, feed default makes the call
+	STABILITY=""
+	;;
 esac
+
+trust_gitlab || exit $?
+git clone ${ZI_GIT} zeroinstall || exit $?
+cp zeroinstall/*.gpg . || exit $?
 
 # FeedLint requires this
 export TERM=linux
