@@ -4,6 +4,7 @@ Changes since 0.2.8.3.5:
   Fixed Bugs
 
 - Debian builds: Documentation html files have empty last change (#9)
+- Ubuntu PPA release candidate builds would overwrite previous stable releases (#15)
 
   New Features
 
@@ -471,11 +472,11 @@ Changes since 0.2.8.0_rc1:
   Cycle turns are now executed more accurately on the server.
   Timer stuttering at end of round (was non-critical, but ugly).
   Custom camera did not turn when the internal camera was
-  configured not to turn.
+    configured not to turn.
   Idle player kick code crashed when it kicked a client with
-  many players.
+    many players.
   The code that removes inactive players after a while removed
-  the AI players.
+    the AI players.
 - Reverted smart camera movement to pre-beta4 behavior,
   the new code made some players seasick :)
 - Ingame admin interface gives more useful information to the invoker 
@@ -515,7 +516,7 @@ Changes since 0.2.8_beta4:
   Cycles sometimes warped to odd locations.
 - Tweaked smart camera to not stay in front of the cycle so much.
   Tweaked smart camera custom glancing.
-  Report back whether you like or hate it!
+    Report back whether you like or hate it!
 - Made custom camera even more configurable, changed default settings.
   (old ones are still in settings.cfg)
 - Forced glancing end on cycle turn now looks better.
