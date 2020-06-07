@@ -4,6 +4,7 @@
 ##### Fixed Bugs
 
  * Debian builds: Documentation html files have empty last change ([#9](https://gitlab.com/armagetronad/armagetronad/-/issues/9))
+ * Ubuntu PPA release candidate builds would overwrite previous stable releases ([#15](https://gitlab.com/armagetronad/armagetronad/-/issues/15))
 
 ##### New Features
 
@@ -511,15 +512,15 @@ Bugfixes:
 
 #### Changes since 0.2.8.0_rc1: 
  * Bugfixes:
-   Dedicated server for Windows works again.
-   Cycle turns are now executed more accurately on the server.
-   Timer stuttering at end of round (was non-critical, but ugly).
-   Custom camera did not turn when the internal camera was
-   configured not to turn.
-   Idle player kick code crashed when it kicked a client with
-   many players.
-   The code that removes inactive players after a while removed
-   the AI players.
+   - Dedicated server for Windows works again.
+   - Cycle turns are now executed more accurately on the server.
+   - Timer stuttering at end of round (was non-critical, but ugly).
+   - Custom camera did not turn when the internal camera was
+     configured not to turn.
+   - Idle player kick code crashed when it kicked a client with
+     many players.
+   - The code that removes inactive players after a while removed
+     the AI players.
  * Reverted smart camera movement to pre-beta4 behavior,
    the new code made some players seasick :)
  * Ingame admin interface gives more useful information to the invoker 
@@ -529,13 +530,13 @@ Bugfixes:
 
 #### Changes since 0.2.8_beta4.2:
  * Fixed bugs:
-   Random client disconnection
-   Another vote-not-appearing-on-client bug
-   Invisible wall segments right after turn
-   Arena initialization before all settings are transmitted from the server
-   The server was using more rubber than the client sometimes
-   Crash with moviepack and some maps
-   Object sync messages not accepted by client in second network session
+   - Random client disconnection
+   - Another vote-not-appearing-on-client bug
+   - Invisible wall segments right after turn
+   - Arena initialization before all settings are transmitted from the server
+   - The server was using more rubber than the client sometimes
+   - Crash with moviepack and some maps
+   - Object sync messages not accepted by client in second network session
  * Improved kill/suicide/team kill distinction (ENEMY_* settings)
  * Chatbots and idle players can be removed from the game and kicked
    (CHATTER/IDLE_REMOVE_TIME,IDLE_KICK_TIME)
@@ -552,14 +553,14 @@ Bugfixes:
 
 #### Changes since 0.2.8_beta4:
  * Fixed bugs:
-   Windows version had a memory overwrite error causing crashes and weird behavior.
-   The game quit when the chat key and a key bound to an instant chat were pressed to quickly.
-   Votes expired too early on the client.
-   Performance: a lot of unused temporary walls were hanging around each round.
-   Cycles sometimes warped to odd locations.
+   - Windows version had a memory overwrite error causing crashes and weird behavior.
+   - The game quit when the chat key and a key bound to an instant chat were pressed to quickly.
+   - Votes expired too early on the client.
+   - Performance: a lot of unused temporary walls were hanging around each round.
+   - Cycles sometimes warped to odd locations.
  * Tweaked smart camera to not stay in front of the cycle so much.
-   Tweaked smart camera custom glancing.
-   Report back whether you like or hate it!
+   - Tweaked smart camera custom glancing.
+     Report back whether you like or hate it!
  * Made custom camera even more configurable, changed default settings.
    (old ones are still in settings.cfg)
  * Forced glancing end on cycle turn now looks better.
@@ -569,11 +570,11 @@ Bugfixes:
 
 #### Changes since 0.2.8_beta3:
  * Famous fixed bugs: 
-   Random huge felt lag or blank screen (it was actually a problem with the timer) is gone.
-   Bogus "possible phase bug" message.
-   Seemingly random walls popping out of nothing, only to disappear a second later.
-   Random camera focus changes while you were still alive.
-   Every 100th console line got deleted.
+   - Random huge felt lag or blank screen (it was actually a problem with the timer) is gone.
+   - Bogus "possible phase bug" message.
+   - Seemingly random walls popping out of nothing, only to disappear a second later.
+   - Random camera focus changes while you were still alive.
+   - Every 100th console line got deleted.
  * Reduced pings! Actually, just the measurement is improved, the actual latency
    stays the same. I hope nobody notices that. Good thing nobody reads NEWS files :)
  * New text editing convenience: Home and end keys work, and CTRL+left/right/del/backspace
@@ -607,19 +608,19 @@ Bugfixes:
 
 #### Changes since 0.2.7.1:
  * Server side cycle synchronization issues fixed:
-   destination removal fixed
-   lag sliding caused by different interpretation of grinding turn commands on client and server fixed
-   niceness for older clients: sync interval decreased, no sync in front of wall to prevent local tunneling
+   - destination removal fixed
+   - lag sliding caused by different interpretation of grinding turn commands on client and server fixed
+   - niceness for older clients: sync interval decreased, no sync in front of wall to prevent local tunneling
  * Client side cycle synchronization issues fixed:
-   smooth corrections now only affect the appearance, the correct values are used internally
-   sync messages are no longer ignored,
-   new extrapolating sync method implemented,
-   ghosting fixed,
-   wall ends sticking out fixed ( for enemy cycles ),
-   the sophisticated distance based sync code implemented years ago is now actually used, oh dear.
+   - smooth corrections now only affect the appearance, the correct values are used internally
+   - sync messages are no longer ignored,
+   - new extrapolating sync method implemented,
+   - ghosting fixed,
+   - wall ends sticking out fixed ( for enemy cycles ),
+   - the sophisticated distance based sync code implemented years ago is now actually used, oh dear.
  * Performance improvements:
-   netobject synchronization does no longer traverse all netobjects
-   disabled gameobject-gameobject interaction
+   - netobject synchronization does no longer traverse all netobjects
+   - disabled gameobject-gameobject interaction
  * added support for nonorthogonal driving directions
  * added support for debug recording and playback
  * switched to using automake

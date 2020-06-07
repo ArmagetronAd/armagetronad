@@ -117,7 +117,7 @@ EOF
 	cat ../upload/PATCHNOTES.md >> ${POST}
 fi
 
-CURRENT=_includes/current_${DL_BRANCH}.md || exit $?
+CURRENT=_includes/current_${SERIES}_${DL_BRANCH}.md || exit $?
 cat > ${CURRENT} <<EOF
 {% assign ${DL_BRANCH}_version = "${PACKAGE_VERSION}" %}
 {% capture ${DL_BRANCH}_link %}{% link ${POST} %}{% endcapture %}
