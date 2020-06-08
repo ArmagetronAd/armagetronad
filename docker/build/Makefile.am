@@ -209,10 +209,12 @@ result.debsrc_%: context.debsrc_%
 # test build a debian package (with a really old ubuntu codename)
 context.debtest: result.debsrc_dapper
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*'
+	echo "cd source && debuild -i -us -uc -b && rm -rf *" > $@.dir/build_deb.sh
+	chmod +x $@.dir/build_deb.sh
 	echo > $@
 
 result.debtest: context.debtest
-	+$(srcdir)/context_to_result.sh $@.dir "cd source && debuild -i -us -uc -b && rm -rf *"
+	+$(srcdir)/context_to_result.sh $@.dir bash ./build_deb.sh
 	echo > $@
 
 debtest.tag: result.debtest
