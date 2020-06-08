@@ -203,16 +203,18 @@ context.debsrc_%: rootcontext.64 ${srcdir}/rebrand_debian_core.sh ${srcdir}/debi
 	echo "armadeb_64" > $@.dir/image
 	echo > $@
 result.debsrc_%: context.debsrc_%
-	$(srcdir)/context_to_result.sh $@.dir ./debian_source.sh $*
+	+$(srcdir)/context_to_result.sh $@.dir ./debian_source.sh $*
 	echo > $@
 
 # test build a debian package (with a really old ubuntu codename)
 context.debtest: result.debsrc_dapper
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*'
+	echo "cd source && debuild -i -us -uc -b && rm -rf *" > $@.dir/build_deb.sh
+	chmod +x $@.dir/build_deb.sh
 	echo > $@
 
 result.debtest: context.debtest
-	$(srcdir)/context_to_result.sh $@.dir "cd source && debuild -i -us -uc -b && rm -rf *"
+	+$(srcdir)/context_to_result.sh $@.dir bash ./build_deb.sh
 	echo > $@
 
 debtest.tag: result.debtest
@@ -252,12 +254,12 @@ result.build_client_steam: | result.build_server_steam
 
 # server build for further processing
 result.build_server_%: context.build_server_%
-	$(srcdir)/context_to_result.sh $@.dir ./build.sh $(CONFIGURE_ARGUMENTS) $(CONFIGURE_ARGUMENTS_SERVER)
+	+$(srcdir)/context_to_result.sh $@.dir ./build.sh $(CONFIGURE_ARGUMENTS) $(CONFIGURE_ARGUMENTS_SERVER)
 	echo > $@
 
 # client build for further processing
 result.build_client_%: context.build_client_%
-	$(srcdir)/context_to_result.sh $@.dir ./build.sh $(CONFIGURE_ARGUMENTS)
+	+$(srcdir)/context_to_result.sh $@.dir ./build.sh $(CONFIGURE_ARGUMENTS)
 	echo > $@
 
 .PRECIOUS: result.build_server_32 result.build_client_32  result.build_server_64 result.build_client_64
@@ -270,12 +272,12 @@ context.appdir_%: result.build_% ${srcdir}/context/portable/* ${srcdir}/context/
 	echo > $@
 
 result.appdir_%: context.appdir_%
-	$(srcdir)/context_to_result.sh $@.dir ./appdir.sh
+	+$(srcdir)/context_to_result.sh $@.dir ./appdir.sh
 	echo > $@
 
 # use different script for steam builds, rearranging some things
 result.appdir_%_steam: context.appdir_%_steam
-	$(srcdir)/context_to_result.sh $@.dir ./steam.sh
+	+$(srcdir)/context_to_result.sh $@.dir ./steam.sh
 	echo > $@
 
 # tarball of appdir
@@ -319,7 +321,7 @@ context.appimage_%: result.appdir_% ${srcdir}/context/appimage.sh
 	echo > $@
 
 result.appimage_%: context.appimage_%
-	$(srcdir)/context_to_result.sh $@.dir "./appimage.sh AppImage"
+	+$(srcdir)/context_to_result.sh $@.dir "./appimage.sh AppImage"
 	echo > $@
 
 APPIMAGE_BASENAME:=$(shell echo $(PACKAGE_TITLE) | sed -e "s, ,,g")
@@ -358,7 +360,7 @@ context.winsource_%: result.build_server_% ${srcdir}/context/winsource.sh gits.t
 	${srcdir}/prepare_context.sh $@.dir $<.dir/* ${srcdir}/context/winsource.sh $(GITS)/codeblocks
 	echo > $@
 result.winsource_%: context.winsource_%
-	$(srcdir)/context_to_result.sh $@.dir ./winsource.sh
+	+$(srcdir)/context_to_result.sh $@.dir ./winsource.sh
 	echo > $@
 
 # windows build
@@ -368,7 +370,7 @@ context.winbuild_%: result.winsource_% ${srcdir}/context/winbuild.sh gits.tag
 	echo "armawineblocks" > $@.dir/image
 	echo > $@
 result.winbuild_%: context.winbuild_%
-	$(srcdir)/context_to_result.sh $@.dir ./winbuild.sh
+	+$(srcdir)/context_to_result.sh $@.dir ./winbuild.sh
 	echo > $@
 
 # windows installers
@@ -378,7 +380,7 @@ context.wininst_%: result.winbuild_% ${srcdir}/context/wininst.sh
 	echo "armawineblocks" > $@.dir/image
 	echo > $@
 result.wininst_%: context.wininst_%
-	$(srcdir)/context_to_result.sh $@.dir ./wininst.sh
+	+$(srcdir)/context_to_result.sh $@.dir ./wininst.sh
 	echo > $@
 
 # windows source zip
@@ -503,7 +505,7 @@ context.deploy_%: context.deploy_base_%
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*'
 	echo > $@
 result.deploy_%: context.deploy_%
-	$(srcdir)/context_to_result.sh $@.dir ./deploy_$*.sh
+	+$(srcdir)/context_to_result.sh $@.dir ./deploy_$*.sh
 	echo > $@
 
 # special case steam: run in steamcmd image
@@ -522,7 +524,7 @@ context.deploy_ppa_%: result.debsrc_% ${srcdir}/../deploy/deploy_ppa.sh ../deplo
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' ${srcdir}/../deploy/deploy_ppa.sh ../deploy/targets.sh ../deploy/secrets/*.gpg CI_INFO
 	echo > $@
 result.deploy_ppa_%: context.deploy_ppa_%
-	$(srcdir)/context_to_result.sh $@.dir ./deploy_ppa.sh $*
+	+$(srcdir)/context_to_result.sh $@.dir ./deploy_ppa.sh $*
 	echo > $@
 
 # deploy for launchpad needs armadeb image
@@ -538,7 +540,7 @@ context.update_zi: context.deploy_base_zeroinstall ${srcdir}/../deploy/*_zeroins
 	echo "armadeploy_64" > $@.dir/image
 	echo > $@
 result.update_zi: context.update_zi
-	$(srcdir)/context_to_result.sh $@.dir ./update_zeroinstall.sh
+	+$(srcdir)/context_to_result.sh $@.dir ./update_zeroinstall.sh
 	echo > $@
 context.deploy_zi: context.deploy_base_zeroinstall result.update_zi ${srcdir}/../deploy/*_zeroinstall.sh result.deploy_lp result.deploy_scp
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' result.update_zi.dir/zeroinstall ${srcdir}/../deploy/*_zeroinstall.sh
@@ -546,7 +548,7 @@ context.deploy_zi: context.deploy_base_zeroinstall result.update_zi ${srcdir}/..
 	echo "armadeploy_64" > $@.dir/image
 	echo > $@
 result.deploy_zi: context.deploy_zi
-	$(srcdir)/context_to_result.sh $@.dir ./deploy_zeroinstall.sh
+	+$(srcdir)/context_to_result.sh $@.dir ./deploy_zeroinstall.sh
 	echo > $@
 
 # deploy to download site (additional dependency here only, standard rules apply)

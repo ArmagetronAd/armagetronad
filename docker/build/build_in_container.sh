@@ -31,9 +31,7 @@ if test -z "$dockeruser";then
     home=/root
 fi
 
-rm -f exiterror
-
-# create dockerfile on the fly
+# create dockerfile with prepared input files
 tmp=`mktemp`
 container_name=image_${PPID}_`basename ${tmp} | tr '[:upper:]' '[:lower:]'`
 function build(){
@@ -42,24 +40,27 @@ FROM ${REGISTRY}${base}${REFERENCE}
 RUN mkdir -p ${home}/BUILDDIR
 COPY --chown=${dockeruser} ./ ${home}/BUILDDIR
 WORKDIR ${home}/BUILDDIR
-RUN $@ || (echo \$? > exiterror)
 EOF
 }
 
-build $@ || exit $?
+build || exit $?
 
-# extract output from container
-function extract(){
-    container_id=$(docker run -it -d ${container_name}) || return $?
-    docker cp ${container_id}:${home}/BUILDDIR ${result} || return $?
+# run command and extract output from container
+function run_and_extract(){
+    EXITCODE=0
+    cidfile=${result}.CID
+    rm -f ${cidfile}
+    docker run --cidfile ${cidfile} ${container_name} $@ || EXITCODE=$?
+    container_id=`cat ${cidfile}`
+    rm -f ${cidfile}
+    docker cp ${container_id}:${home}/BUILDDIR ${result} || EXITCODE=$?
     docker rm -f ${container_id} || true
     docker rmi -f ${container_name} || true
-    test -r ${result}/exiterror && return `cat ${result}/exiterror`
-    return 0
+    return ${EXITCODE}
 }
 
-# on failure, remove output
-if ! extract; then
+if ! run_and_extract "$@"; then
+    # on failure, remove output
     rm -rf ${tmp}
     rm -rf ${result}.error
     mv ${result} ${result}.error
