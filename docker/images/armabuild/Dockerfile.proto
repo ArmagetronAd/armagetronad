@@ -25,6 +25,7 @@ recode \
 FROM commonground as armabuild_base
 # full build dependencies
 RUN apt-get -y update && apt-get install \
+bison \
 curl \
 g++ \
 git \
@@ -85,6 +86,7 @@ debhelper \
 dh-systemd \
 devscripts \
 lptools \
+xdg-utils \
 -y
 
 FROM armadeb_base as armadeb
