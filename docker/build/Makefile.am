@@ -191,10 +191,14 @@ context.steam: context.64
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*'
 	rm $@.dir/image
 	echo "armasteam_64" > $@.dir/image
-#	echo "steamrt_scout_amd64" > $@/image
+#	rebrand
 	sed -i $@.dir/version.sh -e s/PACKAGE_NAME=armagetronad/PACKAGE_NAME=$(STEAM_PACKAGE_TITLE)/ -e s/PACKAGE_TITLE=\"Armagetron\ Advanced/PACKAGE_TITLE=\"$(STEAM_PACKAGE_TITLE)/ -e s/PACKAGE_TITLE=\"Armagetron/PACKAGE_TITLE=\"$(STEAM_PACKAGE_TITLE)/
 # 	no remotely adult stuff
 	sed -i $@.dir/source/src/engine/ePlayer.cpp -e "s/pr0n/cat videos/"
+#   install alternative title, adapt sources
+	cp ${srcdir}/../scripts/.cache/gits/steam-art/good/title.png $@.dir/source/textures/
+	sed -i $@.dir/source/src/tron/gLogo.cpp $@.dir/source/Makefile.* -e "s,textures/title.jpg,textures/title.png,"
+#   done
 	echo > $@
 
 # add debian/ubuntu build info for release %. Requires GPG key from ~/.gnupg

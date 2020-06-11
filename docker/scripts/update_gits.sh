@@ -49,6 +49,7 @@ EOF
 fix_git winlibs
 fix_git codeblocks
 fix_git ubuntu
+fix_git steam-art
 
 cat >> ${of} <<EOF
 }
