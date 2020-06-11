@@ -97,6 +97,7 @@ extern bool sr_smoothShading;
 extern bool sr_glOut;           // do we have gl-output at all?
 extern bool sr_textOut;          // display game text graphically?
 extern bool sr_FPSOut;           // display frame counter?
+extern bool sr_RecordingTimeOut;  // display recording/playback timer?
 
 //! how should caching display lists be used?
 enum rDisplayListUsage

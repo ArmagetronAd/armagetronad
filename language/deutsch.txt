@@ -787,6 +787,7 @@ ladderlog_write_wait_for_external_script_help Schreibt in ladderlog.txt: WAIT_FO
 ladderlog_game_time_interval_help Wenn dies auf einen positiven Wert gesetz wird, so wird alle n Sekunden eine Statusmeldung ins Ladder-Log geschrieben.
 chat_log_help                 Schreibt maschinenlesbares Chatlog in var/chatlog.txt
 show_fps_help                 Aktiviert Performance-Anzeige 
+show_recording_time_help      Aktiviert Aufzeichnungszeit-Anzeige
 floor_mirror_help             Spiegelung des Bodens
 floor_detail_help             Detail des Bodens
 high_rim_help                 Aktiviert sehr hohe Randwände
@@ -2055,6 +2056,9 @@ pref_showrubber_help          Zeigt den Status des etwas obskuren Gummifüllstand
 
 misc_fps_text                 FPS-Anzeige:
 misc_fps_help                 Wenn die FPS-Anzeige aktiviert ist, wird die aktuelle Geschwindigkeit der Graphikausgabe am unteren linken Bildschirmrand in Bildern pro Sekunde (frames per second) angezeigt.
+
+misc_recording_time_text      Aufzeichnungszeit-Anzeige:
+misc_recording_time_help      Wenn die Aufzeichnungszeit-Anzeige aktiviert ist, wird die aktuelle Laufzeit einer Aufzeichnung oben rechts angezeigt.
 
 #tweaks menu
 tweaks_displaylists_text      Display Lists:
