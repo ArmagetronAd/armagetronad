@@ -133,14 +133,14 @@ def main():
         if extension == ".tbz":
             file_type="Linux Binary Tarball"
             mime_type="application/bzip2"
-            if "_client32_" in fn:
-                description="32 Bit Client"
-            elif "_server32_" in fn:
-                description="32 Bit Server"
-            elif "_client64_" in fn:
-                description="64 Bit Client"
-            elif "_server64_" in fn:
-                description="64 Bit Server"
+            if "_client_32_" in fn:
+                description="Client Linux 32 Bit Tarball for Zero Install"
+            elif "_server_32_" in fn:
+                description="Server Linux 32 Bit Tarball for Zero Install"
+            elif "_client_64_" in fn:
+                description="Client Linux 64 Bit Tarball for Zero Install"
+            elif "_server_64_" in fn:
+                description="Server Linux 64 Bit Tarball for Zero Install"
             else:
                 file_type="Code Release Tarball"
                 description="Source"
@@ -159,7 +159,10 @@ def main():
                 mime_type="application/exe"
                 Windows=True
             if extension == ".zip":
-                description="Windows Binary Zip"
+                if "source" in filename:
+                    description="Windows Source Zip"
+                else:
+                    description="Windows Binary Zip for Zero Install"
                 mime_type="application/zip"
                 Windows=True
             if "Portable App" in description:
@@ -168,15 +171,17 @@ def main():
                     description = description.replace("Linux", "32 bit Linux")
                 else:
                     description = description.replace("Linux", "64 bit Linux")
-            if "edicated" in filename:
+            if "edicated" in filename or "server" in filename:
                 description="Server " + description
             else:
-                if "-common" in filename and extension == ".deb":
+                if "common" in filename and extension == ".deb":
                     description="Common " + description
                 else:
                     description="Client " + description
 
         print (filename,description,mime_type,file_type)
+
+        exit(0)
 
         # Find the release in the project's releases collection.
         release = None
