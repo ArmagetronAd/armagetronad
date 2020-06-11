@@ -1518,7 +1518,7 @@ int nSocket::Create( void )
     sn_InitOSNetworking();
 
     // open new socket
-    socket_ = socket( family_, socktype_, protocol_ );
+    socket_ = socket( family_, socktype_ | SOCK_CLOEXEC, protocol_ );
     if ( socket_ < 0 )
         return -1;
 
