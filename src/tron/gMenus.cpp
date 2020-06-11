@@ -154,6 +154,7 @@ static tConfItem<bool>    ab("ALPHA_BLEND",sr_alphaBlend);
 static tConfItem<bool>    ss("SMOOTH_SHADING",sr_smoothShading);
 static tConfItem<bool>    to("TEXT_OUT",sr_textOut);
 static tConfItem<bool>    fps("SHOW_FPS",sr_FPSOut);
+static tConfItem<bool>    pbt("SHOW_RECORDING_TIME",sr_RecordingTimeOut);
 // tConfItem<> ("",&);
 static tConfItem<int> fm("FLOOR_MIRROR",sr_floorMirror);
 static tConfItem<int> fd("FLOOR_DETAIL",sr_floorDetail);
@@ -480,6 +481,10 @@ static ArmageTron_texmode_menuitem tmm3(&screen_menu_detail,
                                         rTextureGroups::TextureGroupDescription[3],
                                         rTextureGroups::TextureMode[3],true);
 
+
+uMenuItemToggle bpt2
+(&screen_menu_prefs,"$misc_recording_time_text",
+ "$misc_recording_time_help",sr_RecordingTimeOut);
 
 static uMenuItemToggle s2
 (&screen_menu_prefs,"$pref_highrim_text",

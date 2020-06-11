@@ -830,6 +830,7 @@ ladderlog_game_time_interval_help If non-negative, write a line with the current
 chat_log_help			Write machine parsable chat messages to var/chatlog.txt
 console_log_help		Write all console messages to var/consolelog.txt
 show_fps_help			Enable fps display
+show_recording_time_help Enable display of recording/playback time
 floor_mirror_help		Floor mirror mode
 floor_detail_help		Floor detail settings
 high_rim_help			Draw high rim walls
@@ -2147,6 +2148,9 @@ pref_showrubber_help		Shows the status of your rubber in a meter in the HUD (Nee
 
 misc_fps_text			Show FPS:
 misc_fps_help			Toggles the display of the current FPS (frames per second) rate in the upper right corner (Needs Show HUD = On to work).
+
+misc_recording_time_text			Show Recording Time:
+misc_recording_time_help			Toggles the display of the current running time of a recording in the upper right corner.
 
 #tweaks menu
 tweaks_displaylists_text	Display Lists:
