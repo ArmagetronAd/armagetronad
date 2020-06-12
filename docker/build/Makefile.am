@@ -16,7 +16,7 @@ CI_linux_server_64: appimage_server_64.tag apptar_server_64.tag
 CI_linux_client_64: appimage_client_64.tag apptar_client_64.tag
 	rm -rf *.dir
 CI_windows: winzip.tag windows.tag
-	rm -rf *.dir
+	rm -rf *.dir proto/*.dir
 CI_debtest: debtest.tag
 	rm -rf *.dir
 

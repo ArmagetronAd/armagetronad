@@ -112,6 +112,7 @@ build_windows:
     - gitlab_build/docker/build/make.sh CI_windows
   artifacts:
     paths:
+    - gitlab_build/docker/build/proto
     - gitlab_build/docker/build/upload
     - gitlab_build/docker/build/result.*
     - gitlab_build/docker/build/context.*
