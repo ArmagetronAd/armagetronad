@@ -17,6 +17,8 @@ CI_linux_client_64: appimage_client_64.tag apptar_client_64.tag
 	rm -rf *.dir
 CI_windows: winzip.tag windows.tag
 	rm -rf *.dir
+CI_debtest: debtest.tag
+	rm -rf *.dir
 
 # full open source builds
 free.tag: appimage.tag apptar.tag sourcetar.tag

@@ -90,10 +90,10 @@ build_debtest:
     when: on_success
   - when: on_success
   script:
-    - gitlab_build/docker/build/make.sh debtest.tag
+    - gitlab_build/docker/build/make.sh CI_debtest
   artifacts:
     paths:
-    - gitlab_build/docker/build/debtest.tag
+    - gitlab_build/docker/build/*deb*
     expire_in: 1 day
 
 build_windows:
