@@ -147,6 +147,9 @@ def main():
             if fn == "PATCHNOTES.md":
                 file_type="Release notes"
                 description="Patch Notes"
+            if fn == "CHANGELOG.md":
+                file_type="ChangeLog File"
+                description="Changelog"
             if extension == ".deb":
                 description="Debian Package"
                 Linux=True

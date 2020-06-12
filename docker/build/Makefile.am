@@ -33,7 +33,7 @@ CI_base.tag: gits.tag source.tag result.build_server_32 result.build_client_64 c
 	touch $@
 
 # minimal expected build to be packable
-CI_pack.tag: gits_artifacts.tag source.tag CI_base.tag free.tag upload/PATCHNOTES.md
+CI_pack.tag: gits_artifacts.tag source.tag CI_base.tag free.tag upload/PATCHNOTES.md upload/CHANGELOG.md
 	touch $@
 
 # all windows builds
@@ -162,6 +162,9 @@ gits_artifacts.tag: gits.tag
 
 upload/PATCHNOTES.md: sourcetar.tag upload/.tag
 	${top_srcdir}/batch/make/patchnotes.py ${top_srcdir} ${top_srcdir}/CHANGELOG_FROZEN.md armagetronad armagetronad -p > $@
+
+upload/CHANGELOG.md: sourcetar.tag upload/.tag
+	${top_srcdir}/batch/make/patchnotes.py ${top_srcdir} ${top_srcdir}/CHANGELOG_FROZEN.md armagetronad armagetronad > $@
 
 #***************************************************************
 
