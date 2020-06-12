@@ -40,7 +40,7 @@ default:
     -  ../configure  --prefix=/usr/local --disable-glout --disable-sysinstall --disable-desktop progname="${PROGRAM_NAME}" progtitle="${PROGRAM_TITLE}"
     -  test "x${ARMAGETRONAD_FAKERELEASE}" == "xtrue" && cp ../docker/build/fakerelease_proto.sh docker/build/fakerelease.sh 
     -  cd docker/build
-    -  make gits_artifacts.tag source make.sh
+    -  make gits_artifacts.tag source make.sh -j`nproc`
     -  cd ../../../
     - else
     -  find . -newer timestamp.tag ! -path "./gitlab_build" -exec touch -r timestamp.tag \{\} \;
