@@ -181,8 +181,6 @@ def main():
 
         print (filename,description,mime_type,file_type)
 
-        exit(0)
-
         # Find the release in the project's releases collection.
         release = None
         for rel in proj.releases:
