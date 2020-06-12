@@ -201,8 +201,9 @@ context.steam: context.64
 	echo > $@
 
 # add debian/ubuntu build info for release %. Requires GPG key from ~/.gnupg
-context.debsrc_%: rootcontext.64 ${srcdir}/rebrand_debian_core.sh ${srcdir}/debian_source.sh gits_artifacts.tag $(TARBALL) #../deploy/secrets/*.gpg
-	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' $(TARBALL) ${srcdir}/rebrand_debian_core.sh ${srcdir}/debian_source.sh ./gits/debian ../deploy/secrets/*.gpg
+context.debsrc_%: rootcontext.64 ${srcdir}/rebrand_debian_core.sh ${srcdir}/debian_source.sh gits_artifacts.tag $(TARBALL)
+	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' $(TARBALL) ${srcdir}/rebrand_debian_core.sh ${srcdir}/debian_source.sh ./gits/debian
+	if test -r  ../deploy/secrets/*.gpg; then cp -lrf ../deploy/secrets/*.gpg $@.dir/; fi
 	echo "armadeb_64" > $@.dir/image
 	echo > $@
 result.debsrc_%: context.debsrc_%
@@ -210,7 +211,14 @@ result.debsrc_%: context.debsrc_%
 	echo > $@
 
 # test build a debian package (with a really old ubuntu codename)
-context.debtest: result.debsrc_dapper
+context.debsrc_test: context.debsrc_dapper
+	${srcdir}/prepare_context.sh $@.dir $<.dir/'*'
+#	extract fake secrets
+	base64 -d < ${srcdir}/../deploy/anonymous_secrets.b64 | tar -xjf - --one-top-level=$@.dir
+	mv $@.dir/secrets/* $@.dir
+	rmdir $@.dir/secrets/
+	echo > $@
+context.debtest: result.debsrc_test
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*'
 	echo "cd source && debuild -i -us -uc -b && rm -rf *" > $@.dir/build_deb.sh
 	chmod +x $@.dir/build_deb.sh

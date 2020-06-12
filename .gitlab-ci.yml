@@ -80,13 +80,8 @@ build:
     when: on_success
   - when: manual
   script:
-    - target=CI
-    # check if (fake!) secrets are available, if yes, copy them and build debtest
-    - if test -r /secrets/sec.gpg; then
-    -   cp -a /secrets gitlab_build/docker/deploy/
-    -   target="debtest.tag CI"
-    - fi
     # build
+    - target= debtest.tag CI
     - cd gitlab_build/docker/build
     - if ! make -O -j$(nproc) ${target}; then
     -   make -d ${target} || exit $?
