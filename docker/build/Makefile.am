@@ -640,7 +640,7 @@ artifactclean:
 	rm -rf context.*.dir result.*.dir source proto/*.dir
 
 clean: intermediateclean
-	rm -rf upload source gits result.* *.tag
+	rm -rf upload source gits result.* *.tag proto
 	if git -C ${srcdir} rev-parse --abbrev-ref HEAD > /dev/null; then rm -f CI_INFO; fi
 distclean: clean
 	rm -rf $(TARBALL) CI_INFO
