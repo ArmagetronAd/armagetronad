@@ -4,9 +4,6 @@
 
 set -x
 
-# start daemon on demand
-docker info > /dev/null 2>&1 || { systemctl --user start docker; sleep 5; }
-
 wd=`dirname $0`
 ref=`git rev-parse HEAD`
 
