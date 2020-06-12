@@ -98,8 +98,10 @@ build_debtest:
 
 build_windows:
   needs:
+  - build_prepare
   - build_server_32_raw
   dependencies:
+  - build_prepare
   - build_server_32_raw
   stage: build_main
   rules:
@@ -117,6 +119,7 @@ build_windows:
 
 build_server_32:
   dependencies:
+  - build_prepare
   - build_server_32_raw
   stage: build_main
   rules:
