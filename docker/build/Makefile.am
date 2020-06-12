@@ -29,7 +29,7 @@ free: free.tag
 closed_regular.tag: windows.tag winzip.tag
 	touch $@
 closed_regular: closed.tag
-closed_steam.tag: steam_windows.tag steam_linux.tag
+closed_steam.tag: # steam_windows.tag steam_linux.tag
 	touch $@
 closed_steam: closed_steam.tag
 closed.tag: closed_steam.tag closed_regular.tag
@@ -37,7 +37,7 @@ closed.tag: closed_steam.tag closed_regular.tag
 closed: closed.tag
 
 # closed comes first because windows builds take the longest and are not internally parallelized
-full.tag: result.winsource_32 result.winsource_steam closed.tag free.tag
+full.tag: result.winsource_32 closed.tag free.tag # result.winsource_steam
 	touch $@
 full: full.tag
 
@@ -50,7 +50,7 @@ CI_pack.tag: gits_artifacts.tag source.tag CI_base.tag free.tag upload/PATCHNOTE
 	touch $@
 
 # all windows builds
-CI_windows.tag: CI_base.tag steam_windows.tag closed_regular.tag
+CI_windows.tag: CI_base.tag closed_regular.tag # steam_windows.tag
 	touch $@
 
 # all free linux builds (so, no steam)
