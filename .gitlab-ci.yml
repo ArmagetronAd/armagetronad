@@ -17,7 +17,6 @@ stages:
   - minimal_build
   - build_prepare
   - build_base
-  - build_delay
   - build_main
   - build_collect
   - test
@@ -78,15 +77,6 @@ build_server_32:
     untracked: true
     expire_in: 1 day
 
-build_delay:
-  dependencies: []
-  stage: build_delay
-  rules:
-  - if: $CI_MERGE_REQUEST_ID
-    when: on_success
-  - when: on_success
-  script: [""]
-
 build_windows:
   needs:
   - build_server_32
@@ -103,6 +93,23 @@ build_windows:
     untracked: true
     expire_in: 1 day
 
+build_debtest:
+  needs:
+  - build_prepare
+  dependencies:
+  - build_prepare
+  stage: build_main
+  rules:
+  - if: $CI_MERGE_REQUEST_ID
+    when: on_success
+  - when: on_success
+  script:
+    - gitlab_build/docker/build/make.sh debtest.tag
+  artifacts:
+    paths:
+    - debtest.tag
+    expire_in: 1 day
+
 build_server_64:
   stage: build_main
   rules:
@@ -111,6 +118,30 @@ build_server_64:
   - when: on_success
   script:
     - gitlab_build/docker/build/make.sh result.build_server_64
+  artifacts:
+    untracked: true
+    expire_in: 1 day
+
+build_client_32:
+  stage: build_main
+  rules:
+  - if: $CI_MERGE_REQUEST_ID
+    when: on_success
+  - when: on_success
+  script:
+    - gitlab_build/docker/build/make.sh result.build_client_32
+  artifacts:
+    untracked: true
+    expire_in: 1 day
+
+build_client_64:
+  stage: build_main
+  rules:
+  - if: $CI_MERGE_REQUEST_ID
+    when: on_success
+  - when: on_success
+  script:
+    - gitlab_build/docker/build/make.sh result.build_client_64
   artifacts:
     untracked: true
     expire_in: 1 day
