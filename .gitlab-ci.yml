@@ -97,6 +97,10 @@ build_debtest:
     - gitlab_build/docker/build/*deb*
     expire_in: 1 day
 
+# It seems like GitLab CI, all else being equal, schedules jobs in the order
+# listed here. So list the ones that take longest first.
+# Windows builds are worst because they have an additional layer of emulation,
+# are not parallelized and are client and server build in one.
 build_windows:
   needs:
   - build_prepare
