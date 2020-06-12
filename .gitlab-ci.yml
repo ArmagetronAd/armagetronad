@@ -80,23 +80,6 @@ build_server_32_raw:
     - gitlab_build/docker/build/result.build_server_32.dir
     expire_in: 1 day
 
-build_debtest:
-  needs:
-  - build_prepare
-  dependencies:
-  - build_prepare
-  stage: build_main
-  rules:
-  - if: $CI_MERGE_REQUEST_ID
-    when: on_success
-  - when: on_success
-  script:
-    - gitlab_build/docker/build/make.sh CI_debtest
-  artifacts:
-    paths:
-    - gitlab_build/docker/build/*deb*
-    expire_in: 1 day
-
 # It seems like GitLab CI, all else being equal, schedules jobs in the order
 # listed here. So list the ones that take longest first.
 # Windows builds are worst because they have an additional layer of emulation,
@@ -122,6 +105,22 @@ build_windows:
     - gitlab_build/docker/build/upload
     - gitlab_build/docker/build/result.*
     - gitlab_build/docker/build/context.*
+    expire_in: 1 day
+
+# debtest is faster, but also not paralellized
+build_debtest:
+  dependencies:
+  - build_prepare
+  stage: build_main
+  rules:
+  - if: $CI_MERGE_REQUEST_ID
+    when: on_success
+  - when: on_success
+  script:
+    - gitlab_build/docker/build/make.sh CI_debtest
+  artifacts:
+    paths:
+    - gitlab_build/docker/build/*deb*
     expire_in: 1 day
 
 build_client_64:
