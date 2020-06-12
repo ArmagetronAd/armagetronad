@@ -37,7 +37,7 @@ default:
     -  ../configure  --prefix=/usr/local --disable-glout --disable-sysinstall --disable-desktop progname="${PROGRAM_NAME}" progtitle="${PROGRAM_TITLE}"
     -  test "x${ARMAGETRONAD_FAKERELEASE}" == "xtrue" && cp ../docker/build/fakerelease_proto.sh docker/build/fakerelease.sh 
     -  cd docker/build
-    -  make gits.tag source
+    -  make gits.tag source make.sh
     -  cd ../../../
     - else
     -  find . -newer timestamp.tag ! -path "./gitlab_build" -exec touch -r timestamp.tag \{\} \;
@@ -59,12 +59,7 @@ minimal_build:
       when: never
     - when: on_success
   script:
-    - cd gitlab_build/docker/build
-    - target=CI_base
-    - if ! make -O -j$(nproc) ${target}; then
-    -   make -d ${target} || exit $?
-    -   exit 1
-    - fi
+    - gitlab_build/docker/build/make.sh CI_base || exit $?
   artifacts:
     untracked: true
     expire_in: 1 day
@@ -81,14 +76,8 @@ build:
   - when: manual
   script:
     # build
-    - target= debtest.tag CI
-    - cd gitlab_build/docker/build
-    - if ! make -O -j$(nproc) ${target}; then
-    -   make -d ${target} || exit $?
-    -   exit 1
-    - fi
-    - make artifactclean
-    - cd ../../
+    - gitlab_build/docker/build/make.sh debtest.tag CI || exit $?
+    - gitlab_build/docker/build/make.sh artifactclean
     - rm -rf src
   artifacts:
     untracked: true

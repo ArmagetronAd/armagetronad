@@ -113,6 +113,9 @@ proto.tag:
 	mkdir -p proto
 	echo > $@
 
+make.sh: ${srcdir}/make.sh.in
+	cp $< $@
+
 context/version.sh: ${srcdir}/context/version.sh.in
 	cd ../../; ./config.status docker/build/context/version.sh
 
