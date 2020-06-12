@@ -74,7 +74,9 @@ build_server_32_raw:
   script:
     - gitlab_build/docker/build/make.sh result.build_server_32
   artifacts:
-    untracked: true
+    paths:
+    - gitlab_build/docker/build/*_32
+    - gitlab_build/docker/build/result.build_server_32.dir
     expire_in: 1 day
 
 build_debtest:
@@ -131,6 +133,8 @@ build_server_32:
     expire_in: 1 day
 
 build_server_64:
+  dependencies:
+  - build_prepare
   stage: build_main
   rules:
   - if: $CI_MERGE_REQUEST_ID
@@ -146,6 +150,8 @@ build_server_64:
     expire_in: 1 day
 
 build_client_32:
+  dependencies:
+  - build_prepare
   stage: build_main
   rules:
   - if: $CI_MERGE_REQUEST_ID
@@ -161,6 +167,8 @@ build_client_32:
     expire_in: 1 day
 
 build_client_64:
+  dependencies:
+  - build_prepare
   stage: build_main
   rules:
   - if: $CI_MERGE_REQUEST_ID
