@@ -117,6 +117,7 @@ build_windows:
     - gitlab_build/docker/build/make.sh CI_windows
   artifacts:
     paths:
+    - gitlab_build/docker/build/*.tag
     - gitlab_build/docker/build/proto
     - gitlab_build/docker/build/upload
     - gitlab_build/docker/build/result.*
@@ -135,6 +136,7 @@ build_client_64:
     - gitlab_build/docker/build/make.sh CI_linux_client_64
   artifacts:
     paths:
+    - gitlab_build/docker/build/*.tag
     - gitlab_build/docker/build/upload
     - gitlab_build/docker/build/result.*
     - gitlab_build/docker/build/context.*
@@ -152,6 +154,7 @@ build_client_32:
     - gitlab_build/docker/build/make.sh CI_linux_client_32
   artifacts:
     paths:
+    - gitlab_build/docker/build/*.tag
     - gitlab_build/docker/build/upload
     - gitlab_build/docker/build/result.*
     - gitlab_build/docker/build/context.*
@@ -169,6 +172,7 @@ build_server_64:
     - gitlab_build/docker/build/make.sh CI_linux_server_64
   artifacts:
     paths:
+    - gitlab_build/docker/build/*.tag
     - gitlab_build/docker/build/upload
     - gitlab_build/docker/build/result.*
     - gitlab_build/docker/build/context.*
@@ -188,6 +192,7 @@ build_server_32:
     - gitlab_build/docker/build/make.sh CI_linux_server_32
   artifacts:
     paths:
+    - gitlab_build/docker/build/*.tag
     - gitlab_build/docker/build/upload
     - gitlab_build/docker/build/result.*
     - gitlab_build/docker/build/context.*
