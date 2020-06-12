@@ -438,7 +438,7 @@ pid_t SpawnProcess(const char *program, char *const argv[], int *infp, int *outf
 
         execve(program, argv,  envp);
         perror("execve");
-        exit(1);
+        _exit(1);
     }
 
     if (infp == NULL)
