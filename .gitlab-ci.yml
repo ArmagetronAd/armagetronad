@@ -15,7 +15,11 @@ variables:
 
 stages:
   - minimal_build
-  - build
+  - build_prepare
+  - build_base
+  - build_delay
+  - build_main
+  - build_collect
   - test
   - stage
   - delay
@@ -49,33 +53,75 @@ default:
      - docker/scripts/.cache
 
 
-# lean tests for non-protected branches
-minimal_build:
-  stage: minimal_build
+# very basic build
+build_prepare:
+  stage: build_prepare
   rules:
     - if: $CI_MERGE_REQUEST_ID
-      when: never
-    - if: $CI_COMMIT_REF_PROTECTED == "true"
-      when: never
+      when: on_success
     - when: on_success
-  script:
-    - gitlab_build/docker/build/make.sh CI_base || exit $?
+  script: [""]
   artifacts:
     untracked: true
     expire_in: 1 day
 
 
-# do the bulk of the building
-build:
-  stage: build
+build_server_32:
+  stage: build_base
   rules:
   - if: $CI_MERGE_REQUEST_ID
     when: on_success
-  - if: $CI_COMMIT_REF_PROTECTED == "true"
-    when: on_success
-  - when: manual
+  - when: on_success
   script:
-    # build
+    - gitlab_build/docker/build/make.sh result.build_server_32
+  artifacts:
+    untracked: true
+    expire_in: 1 day
+
+build_delay:
+  dependencies: []
+  stage: build_delay
+  rules:
+  - if: $CI_MERGE_REQUEST_ID
+    when: on_success
+  - when: on_success
+  script: [""]
+
+build_windows:
+  needs:
+  - build_server_32
+  dependencies:
+  - build_server_32
+  stage: build_main
+  rules:
+  - if: $CI_MERGE_REQUEST_ID
+    when: on_success
+  - when: on_success
+  script:
+    - gitlab_build/docker/build/make.sh result.wininst_32
+  artifacts:
+    untracked: true
+    expire_in: 1 day
+
+build_server_64:
+  stage: build_main
+  rules:
+  - if: $CI_MERGE_REQUEST_ID
+    when: on_success
+  - when: on_success
+  script:
+    - gitlab_build/docker/build/make.sh result.build_server_64
+  artifacts:
+    untracked: true
+    expire_in: 1 day
+
+build_collect:
+  stage: build_collect
+  rules:
+  - if: $CI_MERGE_REQUEST_ID
+    when: on_success
+  - when: on_success
+  script:
     - gitlab_build/docker/build/make.sh debtest.tag CI || exit $?
     - gitlab_build/docker/build/make.sh artifactclean
     - rm -rf src
@@ -86,9 +132,9 @@ build:
 # deploy to staged environment
 deploy-staged:
   needs:
-   - build
+   - build_collect
   dependencies:
-   - build
+   - build_collect
   stage: stage
   tags:
    - armagetronad_deploy
@@ -112,7 +158,7 @@ deploy-staged:
 # do the actual release; manually for final releases, delayed to avoid spam for everyone else
 delay-release:
   needs:
-   - build
+   - build_collect
    - deploy-staged
   dependencies: []
   stage: delay
@@ -133,10 +179,10 @@ delay-release:
 # do the actual release; manually for final releases, delayed to avoid spam for everyone else
 deploy-release:
   needs:
-   - build
+   - build_collect
    - delay-release
   dependencies:
-   - build
+   - build_collect
   stage: deploy
   tags:
    - armagetronad_deploy
@@ -168,9 +214,9 @@ deploy-release:
 pack:
   stage: stage
   needs:
-   - build
+   - build_collect
   dependencies:
-   - build
+   - build_collect
   script: [""]
   before_script:
     # test that everything has been prepared correctly
@@ -203,7 +249,7 @@ testbuild:
 
 # for local testing
 complete_build:
-  stage: build
+  stage: build_main
   rules:
   - when: never
   script:

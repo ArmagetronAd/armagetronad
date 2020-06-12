@@ -253,15 +253,6 @@ context.build_client_%: context.%
 	echo "client" > $@.dir/serverclient
 	echo > $@
 
-# OPTIMIZATION:
-# delay build of things not needed for windows or debtest
-# windows needs build_server_32, so do not delay that
-result.build_client_64: | result.build_server_32
-result.build_server_64: | result.build_client_64
-result.build_client_32: | result.build_server_64
-result.build_server_steam: | result.build_server_32
-result.build_client_steam: | result.build_server_steam
-
 .PRECIOUS: context.build_server_32 context.build_client_32  context.build_server_64 context.build_client_64
 
 #***************************************************************
