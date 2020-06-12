@@ -65,7 +65,7 @@ build_prepare:
     expire_in: 1 day
 
 
-build_server_32:
+build_server_32_raw:
   stage: build_base
   rules:
   - if: $CI_MERGE_REQUEST_ID
@@ -73,22 +73,6 @@ build_server_32:
   - when: on_success
   script:
     - gitlab_build/docker/build/make.sh result.build_server_32
-  artifacts:
-    untracked: true
-    expire_in: 1 day
-
-build_windows:
-  needs:
-  - build_server_32
-  dependencies:
-  - build_server_32
-  stage: build_main
-  rules:
-  - if: $CI_MERGE_REQUEST_ID
-    when: on_success
-  - when: on_success
-  script:
-    - gitlab_build/docker/build/make.sh result.wininst_32
   artifacts:
     untracked: true
     expire_in: 1 day
@@ -107,7 +91,43 @@ build_debtest:
     - gitlab_build/docker/build/make.sh debtest.tag
   artifacts:
     paths:
-    - debtest.tag
+    - gitlab_build/docker/build/debtest.tag
+    expire_in: 1 day
+
+build_windows:
+  needs:
+  - build_server_32_raw
+  dependencies:
+  - build_server_32_raw
+  stage: build_main
+  rules:
+  - if: $CI_MERGE_REQUEST_ID
+    when: on_success
+  - when: on_success
+  script:
+    - gitlab_build/docker/build/make.sh CI_windows
+  artifacts:
+    paths:
+    - gitlab_build/docker/build/upload
+    - gitlab_build/docker/build/result.*
+    - gitlab_build/docker/build/context.*
+    expire_in: 1 day
+
+build_server_32:
+  dependencies:
+  - build_server_32_raw
+  stage: build_main
+  rules:
+  - if: $CI_MERGE_REQUEST_ID
+    when: on_success
+  - when: on_success
+  script:
+    - gitlab_build/docker/build/make.sh CI_linux_server_32
+  artifacts:
+    paths:
+    - gitlab_build/docker/build/upload
+    - gitlab_build/docker/build/result.*
+    - gitlab_build/docker/build/context.*
     expire_in: 1 day
 
 build_server_64:
@@ -117,9 +137,12 @@ build_server_64:
     when: on_success
   - when: on_success
   script:
-    - gitlab_build/docker/build/make.sh result.build_server_64
+    - gitlab_build/docker/build/make.sh CI_linux_server_64
   artifacts:
-    untracked: true
+    paths:
+    - gitlab_build/docker/build/upload
+    - gitlab_build/docker/build/result.*
+    - gitlab_build/docker/build/context.*
     expire_in: 1 day
 
 build_client_32:
@@ -129,9 +152,12 @@ build_client_32:
     when: on_success
   - when: on_success
   script:
-    - gitlab_build/docker/build/make.sh result.build_client_32
+    - gitlab_build/docker/build/make.sh CI_linux_client_32
   artifacts:
-    untracked: true
+    paths:
+    - gitlab_build/docker/build/upload
+    - gitlab_build/docker/build/result.*
+    - gitlab_build/docker/build/context.*
     expire_in: 1 day
 
 build_client_64:
@@ -141,9 +167,12 @@ build_client_64:
     when: on_success
   - when: on_success
   script:
-    - gitlab_build/docker/build/make.sh result.build_client_64
+    - gitlab_build/docker/build/make.sh CI_linux_client_64
   artifacts:
-    untracked: true
+    paths:
+    - gitlab_build/docker/build/upload
+    - gitlab_build/docker/build/result.*
+    - gitlab_build/docker/build/context.*
     expire_in: 1 day
 
 build_collect:
