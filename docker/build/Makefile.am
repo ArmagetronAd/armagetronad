@@ -6,6 +6,18 @@
 default:
 	echo "Nothing generic to do."
 
+# individual targets for split jobs
+CI_linux_server_32: appimage_server_32.tag apptar_server_32.tag
+	rm -rf *.dir
+CI_linux_client_32: appimage_client_32.tag apptar_client_32.tag
+	rm -rf *.dir
+CI_linux_server_64: appimage_server_64.tag apptar_server_64.tag
+	rm -rf *.dir
+CI_linux_client_64: appimage_client_64.tag apptar_client_64.tag
+	rm -rf *.dir
+CI_windows: winzip.tag windows.tag
+	rm -rf *.dir
+
 # full open source builds
 free.tag: appimage.tag apptar.tag sourcetar.tag
 	touch $@
