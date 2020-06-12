@@ -22,7 +22,6 @@ closed.tag: closed_steam.tag closed_regular.tag
 	touch $@
 closed: closed.tag
 
-
 # closed comes first because windows builds take the longest and are not internally parallelized
 full.tag: result.winsource_32 result.winsource_steam closed.tag free.tag
 	touch $@
@@ -336,13 +335,13 @@ APPIMAGE_CLIENT_32:=$(APPIMAGE_BASENAME)-32bit-$(PACKAGE_VERSION)
 APPIMAGE_SERVER_32:=$(APPIMAGE_BASENAME)Dedicated-32bit-$(PACKAGE_VERSION)
 
 upload/$(APPIMAGE_CLIENT_64): result.appimage_client_64 upload/.tag
-	ln -f $<.dir/AppImage $@
+	cp $<.dir/AppImage $@
 upload/$(APPIMAGE_SERVER_64): result.appimage_server_64 upload/.tag
-	ln -f $<.dir/AppImage $@
+	cp $<.dir/AppImage $@
 upload/$(APPIMAGE_CLIENT_32): result.appimage_client_32 upload/.tag
-	ln -f $<.dir/AppImage $@
+	cp $<.dir/AppImage $@
 upload/$(APPIMAGE_SERVER_32): result.appimage_server_32 upload/.tag
-	ln -f $<.dir/AppImage $@
+	cp $<.dir/AppImage $@
 
 appimage_client_64.tag: upload/$(APPIMAGE_CLIENT_64)
 	echo > $@
@@ -442,10 +441,10 @@ WININST_CLIENT=upload/$(WININST_CLIENT_NAME)
 WININST_SERVER=upload/$(WININST_SERVER_NAME)
 $(WININST_CLIENT): result.wininst_32 upload/.tag
 	rm -f $@
-	cp -l $<.dir/$(WININST_CLIENT_NAME) $@
+	cp $<.dir/$(WININST_CLIENT_NAME) $@
 $(WININST_SERVER): result.wininst_32 upload/.tag
 	rm -f $@
-	cp -l $<.dir/$(WININST_SERVER_NAME) $@
+	cp $<.dir/$(WININST_SERVER_NAME) $@
 windows.tag: $(WININST_CLIENT) $(WININST_SERVER)
 	echo > $@
 
