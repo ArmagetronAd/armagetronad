@@ -76,6 +76,7 @@ build_server_32_raw:
   artifacts:
     paths:
     - gitlab_build/docker/build/*_32
+    - gitlab_build/docker/build/*context*
     - gitlab_build/docker/build/result.build_server_32.dir
     expire_in: 1 day
 
