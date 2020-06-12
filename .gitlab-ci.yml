@@ -118,25 +118,7 @@ build_windows:
     - gitlab_build/docker/build/context.*
     expire_in: 1 day
 
-build_server_32:
-  dependencies:
-  - build_prepare
-  - build_server_32_raw
-  stage: build_main
-  rules:
-  - if: $CI_MERGE_REQUEST_ID
-    when: on_success
-  - when: on_success
-  script:
-    - gitlab_build/docker/build/make.sh CI_linux_server_32
-  artifacts:
-    paths:
-    - gitlab_build/docker/build/upload
-    - gitlab_build/docker/build/result.*
-    - gitlab_build/docker/build/context.*
-    expire_in: 1 day
-
-build_server_64:
+build_client_64:
   dependencies:
   - build_prepare
   stage: build_main
@@ -145,7 +127,7 @@ build_server_64:
     when: on_success
   - when: on_success
   script:
-    - gitlab_build/docker/build/make.sh CI_linux_server_64
+    - gitlab_build/docker/build/make.sh CI_linux_client_64
   artifacts:
     paths:
     - gitlab_build/docker/build/upload
@@ -170,7 +152,7 @@ build_client_32:
     - gitlab_build/docker/build/context.*
     expire_in: 1 day
 
-build_client_64:
+build_server_64:
   dependencies:
   - build_prepare
   stage: build_main
@@ -179,7 +161,26 @@ build_client_64:
     when: on_success
   - when: on_success
   script:
-    - gitlab_build/docker/build/make.sh CI_linux_client_64
+    - gitlab_build/docker/build/make.sh CI_linux_server_64
+  artifacts:
+    paths:
+    - gitlab_build/docker/build/upload
+    - gitlab_build/docker/build/result.*
+    - gitlab_build/docker/build/context.*
+    expire_in: 1 day
+
+# this one is special, it can rely on previous build work
+build_server_32:
+  dependencies:
+  - build_prepare
+  - build_server_32_raw
+  stage: build_main
+  rules:
+  - if: $CI_MERGE_REQUEST_ID
+    when: on_success
+  - when: on_success
+  script:
+    - gitlab_build/docker/build/make.sh CI_linux_server_32
   artifacts:
     paths:
     - gitlab_build/docker/build/upload
