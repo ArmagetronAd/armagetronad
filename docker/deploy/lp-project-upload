@@ -145,7 +145,7 @@ def main():
                 description="Source"
         else:
             if fn == "PATCHNOTES.md":
-                file_type="Release notes"
+                file_type="Release Notes"
                 description="Patch Notes"
             if fn == "CHANGELOG.md":
                 file_type="ChangeLog File"
