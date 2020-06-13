@@ -21,7 +21,6 @@ stages:
   - build_collect
   - test
   - stage
-  - delay
   - deploy
 
 default:
@@ -221,11 +220,8 @@ deploy-staged:
 
 # do the actual release; manually for final releases, delayed to avoid spam for everyone else
 delay-release:
-  needs:
-   - build_collect
-   - deploy-staged
   dependencies: []
-  stage: delay
+  stage: stage
   tags:
    - armagetronad_deploy
   rules: 
@@ -242,9 +238,6 @@ delay-release:
 
 # do the actual release; manually for final releases, delayed to avoid spam for everyone else
 deploy-release:
-  needs:
-   - build_collect
-   - delay-release
   dependencies:
    - build_collect
   stage: deploy
