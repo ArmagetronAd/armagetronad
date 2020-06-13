@@ -221,8 +221,6 @@ deploy-staged:
 delay-release:
   dependencies: []
   stage: stage
-  tags:
-   - armagetronad_deploy
   rules: 
   - if: $CI_MERGE_REQUEST_ID
     when: never
