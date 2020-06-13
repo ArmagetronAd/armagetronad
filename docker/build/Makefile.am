@@ -7,6 +7,7 @@ default:
 	echo "Nothing generic to do."
 
 # individual targets for split jobs
+CI_prepare: gits_artifacts.tag source make_ci.sh rootcontext_64
 CI_linux_server_32: appimage_server_32.tag apptar_server_32.tag
 CI_linux_client_32: appimage_client_32.tag apptar_client_32.tag
 CI_linux_server_64: appimage_server_64.tag apptar_server_64.tag

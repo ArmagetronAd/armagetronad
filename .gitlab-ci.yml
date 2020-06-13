@@ -39,7 +39,7 @@ default:
     -  ../configure  --prefix=/usr/local --disable-glout --disable-sysinstall --disable-desktop progname="${PROGRAM_NAME}" progtitle="${PROGRAM_TITLE}"
     -  test "x${ARMAGETRONAD_FAKERELEASE}" == "xtrue" && cp ../docker/build/fakerelease_proto.sh docker/build/fakerelease.sh 
     -  cd docker/build
-    -  make gits_artifacts.tag source make_ci.sh -j`nproc`
+    -  make CI_prepare -j`nproc`
     -  cd ../../../
     - else
     -  find . -newer timestamp.tag ! -path "./gitlab_build" -exec touch -r timestamp.tag \{\} \;
@@ -194,9 +194,8 @@ build_collect:
 
 # deploy to staged environment
 deploy-staged:
-  needs:
-   - build_collect
   dependencies:
+   - build_prepare
    - build_collect
   stage: stage
   tags:
@@ -239,6 +238,7 @@ delay-release:
 # do the actual release; manually for final releases, delayed to avoid spam for everyone else
 deploy-release:
   dependencies:
+   - build_prepare
    - build_collect
   stage: deploy
   tags:
