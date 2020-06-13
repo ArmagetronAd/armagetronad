@@ -15,10 +15,12 @@ variables:
 
 stages:
   - minimal_build
-  - build
+  - build_prepare
+  - build_base
+  - build_main
+  - build_collect
   - test
   - stage
-  - delay
   - deploy
 
 default:
@@ -37,7 +39,7 @@ default:
     -  ../configure  --prefix=/usr/local --disable-glout --disable-sysinstall --disable-desktop progname="${PROGRAM_NAME}" progtitle="${PROGRAM_TITLE}"
     -  test "x${ARMAGETRONAD_FAKERELEASE}" == "xtrue" && cp ../docker/build/fakerelease_proto.sh docker/build/fakerelease.sh 
     -  cd docker/build
-    -  make gits.tag source
+    -  make CI_prepare -j`nproc`
     -  cd ../../../
     - else
     -  find . -newer timestamp.tag ! -path "./gitlab_build" -exec touch -r timestamp.tag \{\} \;
@@ -49,51 +51,142 @@ default:
      - docker/scripts/.cache
 
 
-# lean tests for non-protected branches
-minimal_build:
-  stage: minimal_build
+# very basic build
+build_prepare:
+  stage: build_prepare
   rules:
     - if: $CI_MERGE_REQUEST_ID
-      when: never
-    - if: $CI_COMMIT_REF_PROTECTED == "true"
-      when: never
+      when: on_success
     - when: on_success
-  script:
-    - cd gitlab_build/docker/build
-    - target=CI_base
-    - if ! make -O -j$(nproc) ${target}; then
-    -   make -d ${target} || exit $?
-    -   exit 1
-    - fi
+  script: [""]
   artifacts:
     untracked: true
     expire_in: 1 day
 
 
-# do the bulk of the building
-build:
-  stage: build
+build_server_32_raw:
+  stage: build_base
   rules:
   - if: $CI_MERGE_REQUEST_ID
     when: on_success
-  - if: $CI_COMMIT_REF_PROTECTED == "true"
-    when: on_success
-  - when: manual
+  - when: on_success
   script:
-    - target=CI
-    # check if (fake!) secrets are available, if yes, copy them and build debtest
-    - if test -r /secrets/sec.gpg; then
-    -   cp -a /secrets gitlab_build/docker/deploy/
-    -   target="debtest.tag CI"
-    - fi
-    # build
-    - cd gitlab_build/docker/build
-    - if ! make -O -j$(nproc) ${target}; then
-    -   make -d ${target} || exit $?
-    -   exit 1
-    - fi
-    - make artifactclean
-    - cd ../../
+    - gitlab_build/docker/build/make_ci.sh -k result.build_server_32
+  artifacts:
+    paths:
+    - gitlab_build/docker/build/*_32
+    - gitlab_build/docker/build/result.build_server_32.dir
+    expire_in: 1 day
+
+# It seems like GitLab CI, all else being equal, schedules jobs in the order
+# listed here. So list the ones that take longest first.
+# Windows builds are worst because they have an additional layer of emulation,
+# are not parallelized and are client and server build in one.
+build_windows:
+  needs:
+  - build_prepare
+  - build_server_32_raw
+  dependencies:
+  - build_prepare
+  - build_server_32_raw
+  stage: build_main
+  rules:
+  - if: $CI_MERGE_REQUEST_ID
+    when: on_success
+  - when: on_success
+  script:
+    - gitlab_build/docker/build/make_ci.sh CI_windows
+  artifacts:
+    paths:
+    - gitlab_build/docker/build/
+    expire_in: 1 day
+
+# debtest is faster, but also not paralellized
+build_debtest:
+  dependencies:
+  - build_prepare
+  stage: build_main
+  rules:
+  - if: $CI_MERGE_REQUEST_ID
+    when: on_success
+  - when: on_success
+  script:
+    - gitlab_build/docker/build/make_ci.sh CI_debtest
+  artifacts:
+    paths:
+    - gitlab_build/docker/build/
+    expire_in: 1 day
+
+build_client_64:
+  dependencies:
+  - build_prepare
+  stage: build_main
+  rules:
+  - if: $CI_MERGE_REQUEST_ID
+    when: on_success
+  - when: on_success
+  script:
+    - gitlab_build/docker/build/make_ci.sh CI_linux_client_64
+  artifacts:
+    paths:
+    - gitlab_build/docker/build/
+    expire_in: 1 day
+
+build_client_32:
+  dependencies:
+  - build_prepare
+  stage: build_main
+  rules:
+  - if: $CI_MERGE_REQUEST_ID
+    when: on_success
+  - when: on_success
+  script:
+    - gitlab_build/docker/build/make_ci.sh CI_linux_client_32
+  artifacts:
+    paths:
+    - gitlab_build/docker/build/
+    expire_in: 1 day
+
+build_server_64:
+  dependencies:
+  - build_prepare
+  stage: build_main
+  rules:
+  - if: $CI_MERGE_REQUEST_ID
+    when: on_success
+  - when: on_success
+  script:
+    - gitlab_build/docker/build/make_ci.sh CI_linux_server_64
+  artifacts:
+    paths:
+    - gitlab_build/docker/build/
+    expire_in: 1 day
+
+# this one is special, it can rely on previous build work
+build_server_32:
+  dependencies:
+  - build_prepare
+  - build_server_32_raw
+  stage: build_main
+  rules:
+  - if: $CI_MERGE_REQUEST_ID
+    when: on_success
+  - when: on_success
+  script:
+    - gitlab_build/docker/build/make_ci.sh CI_linux_server_32
+  artifacts:
+    paths:
+    - gitlab_build/docker/build/
+    expire_in: 1 day
+
+build_collect:
+  stage: build_collect
+  rules:
+  - if: $CI_MERGE_REQUEST_ID
+    when: on_success
+  - when: on_success
+  script:
+    - gitlab_build/docker/build/make_ci.sh debtest.tag CI || exit $?
     - rm -rf src
   artifacts:
     untracked: true
@@ -101,10 +194,9 @@ build:
 
 # deploy to staged environment
 deploy-staged:
-  needs:
-   - build
   dependencies:
-   - build
+   - build_prepare
+   - build_collect
   stage: stage
   tags:
    - armagetronad_deploy
@@ -127,13 +219,8 @@ deploy-staged:
 
 # do the actual release; manually for final releases, delayed to avoid spam for everyone else
 delay-release:
-  needs:
-   - build
-   - deploy-staged
   dependencies: []
-  stage: delay
-  tags:
-   - armagetronad_deploy
+  stage: stage
   rules: 
   - if: $CI_MERGE_REQUEST_ID
     when: never
@@ -148,11 +235,9 @@ delay-release:
 
 # do the actual release; manually for final releases, delayed to avoid spam for everyone else
 deploy-release:
-  needs:
-   - build
-   - delay-release
   dependencies:
-   - build
+   - build_prepare
+   - build_collect
   stage: deploy
   tags:
    - armagetronad_deploy
@@ -184,9 +269,9 @@ deploy-release:
 pack:
   stage: stage
   needs:
-   - build
+   - build_collect
   dependencies:
-   - build
+   - build_collect
   script: [""]
   before_script:
     # test that everything has been prepared correctly
@@ -219,7 +304,7 @@ testbuild:
 
 # for local testing
 complete_build:
-  stage: build
+  stage: build_main
   rules:
   - when: never
   script:

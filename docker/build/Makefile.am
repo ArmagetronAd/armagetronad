@@ -6,6 +6,15 @@
 default:
 	echo "Nothing generic to do."
 
+# individual targets for split jobs
+CI_prepare: gits_artifacts.tag source make_ci.sh rootcontext.64
+CI_linux_server_32: appimage_server_32.tag apptar_server_32.tag
+CI_linux_client_32: appimage_client_32.tag apptar_client_32.tag
+CI_linux_server_64: appimage_server_64.tag apptar_server_64.tag
+CI_linux_client_64: appimage_client_64.tag apptar_client_64.tag
+CI_windows: winzip.tag windows.tag
+CI_debtest: debtest.tag
+
 # full open source builds
 free.tag: appimage.tag apptar.tag sourcetar.tag
 	touch $@
@@ -15,16 +24,15 @@ free: free.tag
 closed_regular.tag: windows.tag winzip.tag
 	touch $@
 closed_regular: closed.tag
-closed_steam.tag: steam_windows.tag steam_linux.tag
+closed_steam.tag: # steam_windows.tag steam_linux.tag
 	touch $@
 closed_steam: closed_steam.tag
 closed.tag: closed_steam.tag closed_regular.tag
 	touch $@
 closed: closed.tag
 
-
 # closed comes first because windows builds take the longest and are not internally parallelized
-full.tag: result.winsource_32 result.winsource_steam closed.tag free.tag
+full.tag: result.winsource_32 closed.tag free.tag # result.winsource_steam
 	touch $@
 full: full.tag
 
@@ -33,11 +41,11 @@ CI_base.tag: gits.tag source.tag result.build_server_32 result.build_client_64 c
 	touch $@
 
 # minimal expected build to be packable
-CI_pack.tag: gits_artifacts.tag source.tag CI_base.tag free.tag upload/PATCHNOTES.md
+CI_pack.tag: gits_artifacts.tag source.tag CI_base.tag free.tag upload/PATCHNOTES.md upload/CHANGELOG.md
 	touch $@
 
 # all windows builds
-CI_windows.tag: CI_base.tag steam_windows.tag closed_regular.tag
+CI_windows.tag: CI_base.tag closed_regular.tag # steam_windows.tag
 	touch $@
 
 # all free linux builds (so, no steam)
@@ -113,6 +121,9 @@ proto.tag:
 	mkdir -p proto
 	echo > $@
 
+make_ci.sh: ${srcdir}/make_ci.sh.in
+	cp $< $@
+
 context/version.sh: ${srcdir}/context/version.sh.in
 	cd ../../; ./config.status docker/build/context/version.sh
 
@@ -163,6 +174,9 @@ gits_artifacts.tag: gits.tag
 upload/PATCHNOTES.md: sourcetar.tag upload/.tag
 	${top_srcdir}/batch/make/patchnotes.py ${top_srcdir} ${top_srcdir}/CHANGELOG_FROZEN.md armagetronad armagetronad -p > $@
 
+upload/CHANGELOG.md: sourcetar.tag upload/.tag
+	${top_srcdir}/batch/make/patchnotes.py ${top_srcdir} ${top_srcdir}/CHANGELOG_FROZEN.md armagetronad armagetronad > $@
+
 #***************************************************************
 
 # generic context with source
@@ -202,8 +216,9 @@ context.steam: context.64
 	echo > $@
 
 # add debian/ubuntu build info for release %. Requires GPG key from ~/.gnupg
-context.debsrc_%: rootcontext.64 ${srcdir}/rebrand_debian_core.sh ${srcdir}/debian_source.sh gits_artifacts.tag $(TARBALL) #../deploy/secrets/*.gpg
-	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' $(TARBALL) ${srcdir}/rebrand_debian_core.sh ${srcdir}/debian_source.sh ./gits/debian ../deploy/secrets/*.gpg
+context.debsrc_%: rootcontext.64 ${srcdir}/rebrand_debian_core.sh ${srcdir}/debian_source.sh gits_artifacts.tag $(TARBALL)
+	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' $(TARBALL) ${srcdir}/rebrand_debian_core.sh ${srcdir}/debian_source.sh ./gits/debian
+	if test -r  ../deploy/secrets/sec.gpg; then cp -lrf ../deploy/secrets/*.gpg $@.dir/; fi
 	echo "armadeb_64" > $@.dir/image
 	echo > $@
 result.debsrc_%: context.debsrc_%
@@ -211,7 +226,14 @@ result.debsrc_%: context.debsrc_%
 	echo > $@
 
 # test build a debian package (with a really old ubuntu codename)
-context.debtest: result.debsrc_dapper
+context.debsrc_test: context.debsrc_dapper
+	${srcdir}/prepare_context.sh $@.dir $<.dir/'*'
+#	extract fake secrets
+	base64 -d < ${srcdir}/../deploy/anonymous_secrets.b64 | tar -xjf - --one-top-level=$@.dir
+	mv $@.dir/secrets/* $@.dir
+	rmdir $@.dir/secrets/
+	echo > $@
+context.debtest: result.debsrc_test
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*'
 	echo "cd source && debuild -i -us -uc -b && rm -rf *" > $@.dir/build_deb.sh
 	chmod +x $@.dir/build_deb.sh
@@ -242,15 +264,6 @@ context.build_client_%: context.%
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*'
 	echo "client" > $@.dir/serverclient
 	echo > $@
-
-# OPTIMIZATION:
-# delay build of things not needed for windows or debtest
-# windows needs build_server_32, so do not delay that
-result.build_client_64: | result.build_server_32
-result.build_server_64: | result.build_client_64
-result.build_client_32: | result.build_server_64
-result.build_server_steam: | result.build_server_32
-result.build_client_steam: | result.build_server_steam
 
 .PRECIOUS: context.build_server_32 context.build_client_32  context.build_server_64 context.build_client_64
 
@@ -335,13 +348,13 @@ APPIMAGE_CLIENT_32:=$(APPIMAGE_BASENAME)-32bit-$(PACKAGE_VERSION)
 APPIMAGE_SERVER_32:=$(APPIMAGE_BASENAME)Dedicated-32bit-$(PACKAGE_VERSION)
 
 upload/$(APPIMAGE_CLIENT_64): result.appimage_client_64 upload/.tag
-	ln -f $<.dir/AppImage $@
+	cp $<.dir/AppImage $@
 upload/$(APPIMAGE_SERVER_64): result.appimage_server_64 upload/.tag
-	ln -f $<.dir/AppImage $@
+	cp $<.dir/AppImage $@
 upload/$(APPIMAGE_CLIENT_32): result.appimage_client_32 upload/.tag
-	ln -f $<.dir/AppImage $@
+	cp $<.dir/AppImage $@
 upload/$(APPIMAGE_SERVER_32): result.appimage_server_32 upload/.tag
-	ln -f $<.dir/AppImage $@
+	cp $<.dir/AppImage $@
 
 appimage_client_64.tag: upload/$(APPIMAGE_CLIENT_64)
 	echo > $@
@@ -441,10 +454,10 @@ WININST_CLIENT=upload/$(WININST_CLIENT_NAME)
 WININST_SERVER=upload/$(WININST_SERVER_NAME)
 $(WININST_CLIENT): result.wininst_32 upload/.tag
 	rm -f $@
-	cp -l $<.dir/$(WININST_CLIENT_NAME) $@
+	cp $<.dir/$(WININST_CLIENT_NAME) $@
 $(WININST_SERVER): result.wininst_32 upload/.tag
 	rm -f $@
-	cp -l $<.dir/$(WININST_SERVER_NAME) $@
+	cp $<.dir/$(WININST_SERVER_NAME) $@
 windows.tag: $(WININST_CLIENT) $(WININST_SERVER)
 	echo > $@
 
@@ -623,10 +636,10 @@ intermediateclean:
 
 # keep the artifacts clean of junk not needed in the next phase
 artifactclean:
-	rm -rf context.*.dir result.*.dir source proto/*.dir
+	rm -rf *.dir source proto/*.dir
 
 clean: intermediateclean
-	rm -rf upload source gits result.* *.tag
+	rm -rf upload source gits result.* *.tag proto
 	if git -C ${srcdir} rev-parse --abbrev-ref HEAD > /dev/null; then rm -f CI_INFO; fi
 distclean: clean
 	rm -rf $(TARBALL) CI_INFO

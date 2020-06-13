@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# Helper script for building, just calls make <args>
+# Optional first argument: -k, keeps intermediate directories
+# (default: delete intermediates)
+
+set -x
+
+keep=false
+if test "$1" = -k; then
+    keep=true
+    shift
+fi
+
+EXIT=0
+
+pushd `dirname $0` || exit $?
+
+# first make run
+if ! make $*; then
+    # try again with better debug output
+    make -d $* || EXIT=$?
+fi
+
+# remove heavy intermediate directories
+if test ${keep} = false; then
+    make artifactclean
+fi
+
+popd
+
+# communicate final make return
+exit ${EXIT}
+

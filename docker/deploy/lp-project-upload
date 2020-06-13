@@ -131,7 +131,6 @@ def main():
         # print basename, thirdextension, secondextension, extension
 
         if extension == ".tbz":
-            file_type="Linux Binary Tarball"
             mime_type="application/bzip2"
             if "_client_32_" in fn:
                 description="Client Linux 32 Bit Tarball for Zero Install"
@@ -146,7 +145,11 @@ def main():
                 description="Source"
         else:
             if fn == "PATCHNOTES.md":
+                file_type="Release Notes"
                 description="Patch Notes"
+            if fn == "CHANGELOG.md":
+                file_type="ChangeLog File"
+                description="Changelog"
             if extension == ".deb":
                 description="Debian Package"
                 Linux=True

@@ -21,9 +21,6 @@ wd=`dirname $0`
 ${wd}/../scripts/ensure_image.sh "${base}" -d
 . ${wd}/../images/digest.sh "${base}" || exit $?
 
-# start daemon on demand
-docker info > /dev/null || { systemctl --user start docker; sleep 5; }
-
 dockeruser=`docker inspect --format '{{.Config.User}}' ${REGISTRY}${base}${REFERENCE}` || exit $?
 home=/home/${dockeruser}
 if test -z "$dockeruser";then
