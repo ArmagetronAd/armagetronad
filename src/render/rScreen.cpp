@@ -1564,6 +1564,7 @@ bool sr_texturesTruecolor=true;
 
 bool sr_textOut=false;
 bool sr_FPSOut=true;
+bool sr_RecordingTimeOut=true;
 
 bool sr_keepWindowActive=true;
 

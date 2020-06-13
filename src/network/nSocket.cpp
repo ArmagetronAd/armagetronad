@@ -1883,8 +1883,13 @@ int nSocket::Create( void )
     // initialize networking at OS level
     sn_InitOSNetworking();
 
+    int socktype = socktype_;
+#ifndef WIN32
+    socktype |= SOCK_CLOEXEC;
+#endif
+
     // open new socket
-    socket_ = socket( family_, socktype_, protocol_ );
+    socket_ = socket( family_, socktype, protocol_ );
     if ( socket_ < 0 )
         return -1;
 
