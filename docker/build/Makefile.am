@@ -136,7 +136,7 @@ context/version.sh: ${srcdir}/context/version.sh.in
 
 # create source tarball
 TARBALL:=../../armagetronad-@version@.tar.gz
-$(TARBALL): context/version.sh
+$(TARBALL):
 	$(MAKE) -C ../../ dist GZIP_ENV=""
 tarball: $(TARBALL)
 
@@ -216,6 +216,7 @@ context.steam: context.64 gits_artifacts.tag
 #   install alternative title, adapt sources
 	cp gits/steam/title.png $@.dir/source/textures/
 	sed -i $@.dir/source/src/tron/gLogo.cpp $@.dir/source/Makefile.* -e "s,textures/title.jpg,textures/title.png,"
+	cd $@.dir/source; automake
 #   done
 	echo > $@
 
