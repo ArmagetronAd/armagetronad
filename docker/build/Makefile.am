@@ -171,6 +171,8 @@ gits_artifacts.tag: gits.tag
 	rm -rf gits
 	mkdir -p gits
 	cp -a ${GITS}/ubuntu/debian gits/
+	mkdir -p gits/steam
+	cp -a ${GITS}/steam-art/good/title.png gits/steam
 	echo > $@
 
 upload/PATCHNOTES.md: sourcetar.tag upload/.tag
@@ -203,7 +205,7 @@ context.32: context.64
 	echo > $@
 
 # switch container to use to steam SDK, rebrand
-context.steam: context.64
+context.steam: context.64 gits_artifacts.tag
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*'
 	rm $@.dir/image
 	echo "armasteam_64" > $@.dir/image
@@ -212,7 +214,7 @@ context.steam: context.64
 # 	no remotely adult stuff
 	sed -i $@.dir/source/src/engine/ePlayer.cpp -e "s/pr0n/cat videos/"
 #   install alternative title, adapt sources
-	cp ${srcdir}/../scripts/.cache/gits/steam-art/good/title.png $@.dir/source/textures/
+	cp gits/steam/title.png $@.dir/source/textures/
 	sed -i $@.dir/source/src/tron/gLogo.cpp $@.dir/source/Makefile.* -e "s,textures/title.jpg,textures/title.png,"
 #   done
 	echo > $@
