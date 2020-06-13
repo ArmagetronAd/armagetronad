@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# Helper script for building, just calls make <args>
+
+set -x
+
+EXIT=0
+
+pushd `dirname $0` || exit $?
+
+# first make run
+#if ! make -O -j`nproc` $*; then
+if ! make $*; then
+    # try again with better debug output
+    make -d $* || EXIT=$?
+fi
+
+popd
+
+# communicate final make return
+exit ${EXIT}
+
