@@ -44,6 +44,7 @@ default:
     -  cd ../../../
     - else
     -  find . -newer timestamp.tag ! -path "./gitlab_build" -exec touch -r timestamp.tag \{\} \;
+    -  ./docker/scripts/fix_gits.sh || exit $?
     - fi
     
   # cache git checkouts of repositories we depend on
@@ -73,10 +74,10 @@ build_server_32_raw:
   - when: on_success
   script:
     - gitlab_build/docker/build/make_ci.sh -k result.build_server_32
+  after_script:
+    - rm -rf gitlab_build/docker/build/context*.dir
   artifacts:
-    paths:
-    - gitlab_build/docker/build/*_32
-    - gitlab_build/docker/build/result.build_server_32.dir
+    untracked: true
     expire_in: 1 day
 
 build_server_steam_raw:
@@ -88,9 +89,7 @@ build_server_steam_raw:
   script:
     - gitlab_build/docker/build/make_ci.sh -k result.build_server_steam
   artifacts:
-    paths:
-    - gitlab_build/docker/build/*_steam
-    - gitlab_build/docker/build/result.build_server_steam.dir
+    untracked: true
     expire_in: 1 day
 
     # It seems like GitLab CI, all else being equal, schedules jobs in the order
@@ -99,10 +98,8 @@ build_server_steam_raw:
 # are not parallelized and are client and server build in one.
 build_windows:
   needs:
-  - build_prepare
   - build_server_32_raw
   dependencies:
-  - build_prepare
   - build_server_32_raw
   stage: build_main
   rules:
@@ -118,10 +115,8 @@ build_windows:
 
 build_windows_steam:
   needs:
-  - build_prepare
   - build_server_steam_raw
   dependencies:
-  - build_prepare
   - build_server_steam_raw
   stage: build_main
   rules:
@@ -154,7 +149,6 @@ build_debtest:
 # steam builds server and client in one go (the server is already pre-built), they are packed together
 build_linux_steam:
   dependencies:
-  - build_prepare
   - build_server_steam_raw
   stage: build_main
   rules:
@@ -216,7 +210,6 @@ build_server_64:
 # this one is special, it can rely on previous build work
 build_server_32:
   dependencies:
-  - build_prepare
   - build_server_32_raw
   stage: build_main
   rules:
@@ -258,7 +251,8 @@ deploy-staged:
     when: on_success
   - when: never
   before_script:
-    - ./docker/deploy/prepare_deploy.sh
+    - ./docker/scripts/fix_gits.sh || exit $?
+    - ./docker/deploy/prepare_deploy.sh || exit $?
 
   script:
     # mark 
@@ -301,6 +295,7 @@ deploy-release:
      when: on_success
    - when: never
   before_script:
+    - ./docker/scripts/fix_gits.sh || exit $?
     - ./docker/deploy/prepare_deploy.sh || exit $?
   script:
     - tagfile=/messageboard/current_pipeline_${CI_COMMIT_REF_NAME}
@@ -335,6 +330,7 @@ pack:
     -  make -d -C gitlab_build/docker/build -q CI_pack.tag || exit $?
     -  exit 1
     - fi
+    - ./docker/scripts/fix_gits.sh || exit $?
   artifacts:
     expire_in: 1 week
     paths:
