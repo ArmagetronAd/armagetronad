@@ -3,11 +3,12 @@
 #USER root
 
 # more build dependencies
-#RUN apt-get -y update && apt-get install \
+RUN apt-get -y update && apt-get install \
+curl \
 #debhelper \
 #dh-systemd \
 #devscripts \
 #0install \
-#-y
+-y
 
 #USER docker
