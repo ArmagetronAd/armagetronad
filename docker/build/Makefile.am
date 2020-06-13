@@ -136,7 +136,7 @@ context/version.sh: ${srcdir}/context/version.sh.in
 
 # create source tarball
 TARBALL:=../../armagetronad-@version@.tar.gz
-$(TARBALL): context/version.sh
+$(TARBALL):
 	$(MAKE) -C ../../ dist GZIP_ENV=""
 tarball: $(TARBALL)
 
