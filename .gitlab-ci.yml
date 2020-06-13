@@ -72,10 +72,10 @@ build_server_32_raw:
   - when: on_success
   script:
     - gitlab_build/docker/build/make_ci.sh -k result.build_server_32
+  after_script:
+    - rm -rf gitlab_build/docker/build/context*.dir
   artifacts:
-    paths:
-    - gitlab_build/docker/build/*_32
-    - gitlab_build/docker/build/result.build_server_32.dir
+    untracked: true
     expire_in: 1 day
 
 build_server_steam_raw:
@@ -98,10 +98,8 @@ build_server_steam_raw:
 # are not parallelized and are client and server build in one.
 build_windows:
   needs:
-  - build_prepare
   - build_server_32_raw
   dependencies:
-  - build_prepare
   - build_server_32_raw
   stage: build_main
   rules:
@@ -215,7 +213,6 @@ build_server_64:
 # this one is special, it can rely on previous build work
 build_server_32:
   dependencies:
-  - build_prepare
   - build_server_32_raw
   stage: build_main
   rules:
