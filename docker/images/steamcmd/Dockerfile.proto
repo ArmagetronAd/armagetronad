@@ -11,4 +11,4 @@ curl \
 #0install \
 -y
 
-USER docker
+USER steam
