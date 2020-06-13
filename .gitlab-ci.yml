@@ -78,7 +78,21 @@ build_server_32_raw:
     - gitlab_build/docker/build/result.build_server_32.dir
     expire_in: 1 day
 
-# It seems like GitLab CI, all else being equal, schedules jobs in the order
+build_server_steam_raw:
+  stage: build_base
+  rules:
+  - if: $CI_MERGE_REQUEST_ID
+    when: on_success
+  - when: on_success
+  script:
+    - gitlab_build/docker/build/make_ci.sh -k result.build_server_steam
+  artifacts:
+    paths:
+    - gitlab_build/docker/build/*_steam
+    - gitlab_build/docker/build/result.build_server_steam.dir
+    expire_in: 1 day
+
+    # It seems like GitLab CI, all else being equal, schedules jobs in the order
 # listed here. So list the ones that take longest first.
 # Windows builds are worst because they have an additional layer of emulation,
 # are not parallelized and are client and server build in one.
@@ -101,6 +115,25 @@ build_windows:
     - gitlab_build/docker/build/
     expire_in: 1 day
 
+build_windows_steam:
+  needs:
+  - build_prepare
+  - build_server_steam_raw
+  dependencies:
+  - build_prepare
+  - build_server_steam_raw
+  stage: build_main
+  rules:
+  - if: $CI_MERGE_REQUEST_ID
+    when: on_success
+  - when: on_success
+  script:
+    - gitlab_build/docker/build/make_ci.sh CI_windows_steam
+  artifacts:
+    paths:
+    - gitlab_build/docker/build/
+    expire_in: 1 day
+
 # debtest is faster, but also not paralellized
 build_debtest:
   dependencies:
@@ -112,6 +145,23 @@ build_debtest:
   - when: on_success
   script:
     - gitlab_build/docker/build/make_ci.sh CI_debtest
+  artifacts:
+    paths:
+    - gitlab_build/docker/build/
+    expire_in: 1 day
+
+# steam builds server and client in one go (the server is already pre-built), they are packed together
+build_linux_steam:
+  dependencies:
+  - build_prepare
+  - build_server_steam_raw
+  stage: build_main
+  rules:
+  - if: $CI_MERGE_REQUEST_ID
+    when: on_success
+  - when: on_success
+  script:
+    - gitlab_build/docker/build/make_ci.sh CI_linux_steam
   artifacts:
     paths:
     - gitlab_build/docker/build/

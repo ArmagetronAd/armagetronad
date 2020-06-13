@@ -14,6 +14,8 @@ CI_linux_server_64: appimage_server_64.tag apptar_server_64.tag
 CI_linux_client_64: appimage_client_64.tag apptar_client_64.tag
 CI_windows: winzip.tag windows.tag
 CI_debtest: debtest.tag
+CI_linux_steam: steamdirs/steam_linux
+CI_windows_steam: steamdirs/steam_windows
 
 # full open source builds
 free.tag: appimage.tag apptar.tag sourcetar.tag
