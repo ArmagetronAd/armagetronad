@@ -87,9 +87,7 @@ build_server_steam_raw:
   script:
     - gitlab_build/docker/build/make_ci.sh -k result.build_server_steam
   artifacts:
-    paths:
-    - gitlab_build/docker/build/*_steam
-    - gitlab_build/docker/build/result.build_server_steam.dir
+    untracked: true
     expire_in: 1 day
 
     # It seems like GitLab CI, all else being equal, schedules jobs in the order
@@ -115,10 +113,8 @@ build_windows:
 
 build_windows_steam:
   needs:
-  - build_prepare
   - build_server_steam_raw
   dependencies:
-  - build_prepare
   - build_server_steam_raw
   stage: build_main
   rules:
@@ -151,7 +147,6 @@ build_debtest:
 # steam builds server and client in one go (the server is already pre-built), they are packed together
 build_linux_steam:
   dependencies:
-  - build_prepare
   - build_server_steam_raw
   stage: build_main
   rules:
