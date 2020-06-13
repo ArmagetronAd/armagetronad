@@ -40,7 +40,7 @@ default:
     -  ../configure  --prefix=/usr/local --disable-glout --disable-sysinstall --disable-desktop progname="${PROGRAM_NAME}" progtitle="${PROGRAM_TITLE}"
     -  test "x${ARMAGETRONAD_FAKERELEASE}" == "xtrue" && cp ../docker/build/fakerelease_proto.sh docker/build/fakerelease.sh 
     -  cd docker/build
-    -  make gits_artifacts.tag source make.sh -j`nproc`
+    -  make gits_artifacts.tag source make_ci.sh -j`nproc`
     -  cd ../../../
     - else
     -  find . -newer timestamp.tag ! -path "./gitlab_build" -exec touch -r timestamp.tag \{\} \;
@@ -72,11 +72,10 @@ build_server_32_raw:
     when: on_success
   - when: on_success
   script:
-    - gitlab_build/docker/build/make.sh result.build_server_32
+    - gitlab_build/docker/build/make_ci.sh -k result.build_server_32
   artifacts:
     paths:
     - gitlab_build/docker/build/*_32
-    - gitlab_build/docker/build/*context*
     - gitlab_build/docker/build/result.build_server_32.dir
     expire_in: 1 day
 
@@ -97,14 +96,10 @@ build_windows:
     when: on_success
   - when: on_success
   script:
-    - gitlab_build/docker/build/make.sh CI_windows
+    - gitlab_build/docker/build/make_ci.sh CI_windows
   artifacts:
     paths:
-    - gitlab_build/docker/build/*.tag
-    - gitlab_build/docker/build/proto
-    - gitlab_build/docker/build/upload
-    - gitlab_build/docker/build/result.*
-    - gitlab_build/docker/build/context.*
+    - gitlab_build/docker/build/
     expire_in: 1 day
 
 # debtest is faster, but also not paralellized
@@ -117,10 +112,10 @@ build_debtest:
     when: on_success
   - when: on_success
   script:
-    - gitlab_build/docker/build/make.sh CI_debtest
+    - gitlab_build/docker/build/make_ci.sh CI_debtest
   artifacts:
     paths:
-    - gitlab_build/docker/build/*deb*
+    - gitlab_build/docker/build/
     expire_in: 1 day
 
 build_client_64:
@@ -132,13 +127,10 @@ build_client_64:
     when: on_success
   - when: on_success
   script:
-    - gitlab_build/docker/build/make.sh CI_linux_client_64
+    - gitlab_build/docker/build/make_ci.sh CI_linux_client_64
   artifacts:
     paths:
-    - gitlab_build/docker/build/*.tag
-    - gitlab_build/docker/build/upload
-    - gitlab_build/docker/build/result.*
-    - gitlab_build/docker/build/context.*
+    - gitlab_build/docker/build/
     expire_in: 1 day
 
 build_client_32:
@@ -150,13 +142,10 @@ build_client_32:
     when: on_success
   - when: on_success
   script:
-    - gitlab_build/docker/build/make.sh CI_linux_client_32
+    - gitlab_build/docker/build/make_ci.sh CI_linux_client_32
   artifacts:
     paths:
-    - gitlab_build/docker/build/*.tag
-    - gitlab_build/docker/build/upload
-    - gitlab_build/docker/build/result.*
-    - gitlab_build/docker/build/context.*
+    - gitlab_build/docker/build/
     expire_in: 1 day
 
 build_server_64:
@@ -168,13 +157,10 @@ build_server_64:
     when: on_success
   - when: on_success
   script:
-    - gitlab_build/docker/build/make.sh CI_linux_server_64
+    - gitlab_build/docker/build/make_ci.sh CI_linux_server_64
   artifacts:
     paths:
-    - gitlab_build/docker/build/*.tag
-    - gitlab_build/docker/build/upload
-    - gitlab_build/docker/build/result.*
-    - gitlab_build/docker/build/context.*
+    - gitlab_build/docker/build/
     expire_in: 1 day
 
 # this one is special, it can rely on previous build work
@@ -188,13 +174,10 @@ build_server_32:
     when: on_success
   - when: on_success
   script:
-    - gitlab_build/docker/build/make.sh CI_linux_server_32
+    - gitlab_build/docker/build/make_ci.sh CI_linux_server_32
   artifacts:
     paths:
-    - gitlab_build/docker/build/*.tag
-    - gitlab_build/docker/build/upload
-    - gitlab_build/docker/build/result.*
-    - gitlab_build/docker/build/context.*
+    - gitlab_build/docker/build/
     expire_in: 1 day
 
 build_collect:
@@ -204,8 +187,7 @@ build_collect:
     when: on_success
   - when: on_success
   script:
-    - gitlab_build/docker/build/make.sh debtest.tag CI || exit $?
-    - gitlab_build/docker/build/make.sh artifactclean
+    - gitlab_build/docker/build/make_ci.sh debtest.tag CI || exit $?
     - rm -rf src
   artifacts:
     untracked: true

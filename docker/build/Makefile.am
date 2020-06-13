@@ -8,17 +8,11 @@ default:
 
 # individual targets for split jobs
 CI_linux_server_32: appimage_server_32.tag apptar_server_32.tag
-	rm -rf *.dir
 CI_linux_client_32: appimage_client_32.tag apptar_client_32.tag
-	rm -rf *.dir
 CI_linux_server_64: appimage_server_64.tag apptar_server_64.tag
-	rm -rf *.dir
 CI_linux_client_64: appimage_client_64.tag apptar_client_64.tag
-	rm -rf *.dir
 CI_windows: winzip.tag windows.tag
-	rm -rf *.dir proto/*.dir
 CI_debtest: debtest.tag
-	rm -rf *.dir
 
 # full open source builds
 free.tag: appimage.tag apptar.tag sourcetar.tag
@@ -126,7 +120,7 @@ proto.tag:
 	mkdir -p proto
 	echo > $@
 
-make.sh: ${srcdir}/make.sh.in
+make_ci.sh: ${srcdir}/make_ci.sh.in
 	cp $< $@
 
 context/version.sh: ${srcdir}/context/version.sh.in
@@ -637,7 +631,7 @@ intermediateclean:
 
 # keep the artifacts clean of junk not needed in the next phase
 artifactclean:
-	rm -rf context.*.dir result.*.dir source proto/*.dir
+	rm -rf *.dir source proto/*.dir
 
 clean: intermediateclean
 	rm -rf upload source gits result.* *.tag proto
