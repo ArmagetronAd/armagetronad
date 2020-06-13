@@ -43,6 +43,7 @@ default:
     -  cd ../../../
     - else
     -  find . -newer timestamp.tag ! -path "./gitlab_build" -exec touch -r timestamp.tag \{\} \;
+    -  ./docker/scripts/fix_gits.sh || exit $?
     - fi
     
   # cache git checkouts of repositories we depend on
@@ -204,7 +205,8 @@ deploy-staged:
     when: on_success
   - when: never
   before_script:
-    - ./docker/deploy/prepare_deploy.sh
+    - ./docker/scripts/fix_gits.sh || exit $?
+    - ./docker/deploy/prepare_deploy.sh || exit $?
 
   script:
     # mark 
@@ -247,6 +249,7 @@ deploy-release:
      when: on_success
    - when: never
   before_script:
+    - ./docker/scripts/fix_gits.sh || exit $?
     - ./docker/deploy/prepare_deploy.sh || exit $?
   script:
     - tagfile=/messageboard/current_pipeline_${CI_COMMIT_REF_NAME}
@@ -281,6 +284,7 @@ pack:
     -  make -d -C gitlab_build/docker/build -q CI_pack.tag || exit $?
     -  exit 1
     - fi
+    - ./docker/scripts/fix_gits.sh || exit $?
   artifacts:
     expire_in: 1 week
     paths:
