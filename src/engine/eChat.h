@@ -58,9 +58,9 @@ class eChatPrefixSpamTester;
 class eChatSaidEntry
 {
 public:
-    eChatSaidEntry(const tString & message, const tString & playerName, const nTimeRolling &t, eChatMessageType);
+    eChatSaidEntry(const tString & message, const tString & playerName, const nTimeRolling &, eChatMessageType);
     ~eChatSaidEntry();
-
+    
     /**
      * @return The string that was said.
      */
@@ -70,7 +70,7 @@ public:
      * @return The player name at that time.
      */
     const tString & PlayerName() const;
-
+    
     /**
      * @return The time the user sent the message.
      */
@@ -152,15 +152,15 @@ public:
     void AddSaid( const eChatSaidEntry & saidEntry );
 
     /**
-    * Marks chatter as disconnected (gets reverted on AddSaid())
-    */
+     * Marks chatter as disconnected (gets reverted on AddSaid())
+     */
     void MarkDisconnected();
-
+    
     /**
-    * Is this chatter to be considered disconnected?
-    *
-    * @return true if disconnected
-    */
+     * Is this chatter to be considered disconnected?
+     * 
+     * @return true if disconnected
+     */
     bool Disconnected() const;
 
     /**

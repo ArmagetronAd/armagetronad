@@ -2,9 +2,15 @@
 # determines the version of the sources
 # usage: version <source directory>
 
-#set -x
+# set -x
 
 srcdir="$1"
+
+# if we're building via CI from a protected tag, that is our version
+if test "${CI_COMMIT_REF_PROTECTED}" = "true" && ! test -z "${CI_COMMIT_TAG}"; then
+    echo "${CI_COMMIT_TAG}" | sed -e s/^v//
+    exit 0
+fi
 
 # set version parts to defaults for CVS snapshot
 major_version=`cat ${srcdir}/major_version`
@@ -97,7 +103,10 @@ then
     fi
 fi
 
-if test -d "${srcdir}/.git"; then
+# try to get a good guess about which branch we're on
+GIT_BRANCH="alpha"
+
+if test -e "${srcdir}/.git"; then
     # check for a tag
     cd $srcdir
     # todo: once we have make tags, consider just git describe --tags as version ID.
@@ -106,7 +115,8 @@ if test -d "${srcdir}/.git"; then
         minor_version=""
         DATE=""
     else
-        if git diff-index --quiet HEAD --; then
+      git update-index --refresh > /dev/null
+      if git diff-index --quiet HEAD --; then
             # local checkout clean, just use revno
             DATE=_z`git rev-list HEAD --count`
         else
@@ -114,11 +124,23 @@ if test -d "${srcdir}/.git"; then
             DATE=_z`git rev-list HEAD --count`_$DATE
         fi
     fi
+
+    GIT_BRANCH=`git -C ${srcdir} rev-parse --abbrev-ref HEAD`
 fi
+test -z "${CI_COMMIT_BRANCH}" || GIT_BRANCH=${CI_COMMIT_BRANCH}
 
 if test -z "$minor_version"
 then
     test -z "$DATE" || minor_version=`echo ${minor_version_proto} | sed -e "s,DATE,$DATE," -e "s,YYYYMMDD,$DATE,"`
+fi
+
+if test "${CI_COMMIT_REF_PROTECTED}" = "true"; then
+    # determine alpha/beta/rc status based on branch
+    if echo ${GIT_BRANCH} | grep -q "^beta"; then
+        minor_version=`echo ${minor_version} | sed -e s,alpha,beta,`
+    elif echo ${GIT_BRANCH} | grep -q "^release"; then
+        minor_version=`echo ${minor_version} | sed -e s,alpha,rc,`
+    fi
 fi
 
 echo $major_version$minor_version

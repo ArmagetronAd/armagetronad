@@ -4030,7 +4030,7 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
             // the control code calling this has no clue that the cycle has entered the rubber gap
             // and would respect the destination's position, allowing for extremely deep grinds.
             if( sn_GetNetState() != nCLIENT &&
-                currentDestination && !currentDestination->hasBeenUsed &&
+                currentDestination && !currentDestination->hasBeenUsed && 
                 rubberneeded >= rubberAvailable &&
                 space * 1.25 < (currentDestination->gameTime - lastTime) * verletSpeed_)
             {
@@ -4181,7 +4181,7 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
     // use up rubber from tunneling (calculated by CalculateAcceleration)
     if ( rubberEffectiveness > 0 )
     {
-        rubber += rubberUsage * ts * verletSpeed_ / rubberEffectiveness;
+        rubber += rubberUsage * ts * verletSpeed_ / rubberEffectiveness; 
     }
     else if ( rubberUsage > 0 )
     {

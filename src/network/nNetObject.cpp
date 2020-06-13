@@ -561,14 +561,11 @@ nDescriptor& nNetObject::CreatorDescriptor() const{
 */
 
 void nNetObject::AddRef(){
-    tASSERT ( this );
+    tASSERT_THIS();
 
-    if ( this )
-    {
-        tASSERT( refCtr_ >= 0 );
-        refCtr_++;
-        tASSERT( refCtr_ >= 0 );
-    }
+    tASSERT( refCtr_ >= 0 );
+    refCtr_++;
+    tASSERT( refCtr_ >= 0 );
 }
 
 void nNetObject::ReleaseOwnership(){
@@ -588,9 +585,9 @@ void nNetObject::TakeOwnership(){
 }
 
 void nNetObject::Release(){
-    tASSERT( this );
+    tASSERT_THIS();
 
-    if (this){
+    {
         if (refCtr_>0)
             refCtr_--;
         else
@@ -1495,6 +1492,9 @@ static void net_sync_handler(nMessage &m){
 static nDescriptor net_sync(24,net_sync_handler,"net_sync");
 
 bool nNetObject::AcceptClientSync() const{
+    return AcceptClientSyncStatic();
+}
+bool nNetObject::AcceptClientSyncStatic(){
     return false;
 }
 
@@ -1808,10 +1808,9 @@ void nNetObject::ClearKnows(int user, bool clear){
                         sn_BreakOnObjectID(i);
 #endif
                         bool destroy = no->ActionOnQuit();
-                        no=sn_netObjects(i);
                         if(!noObserved)
-                            continue;
-
+                          continue;
+                        
                         // take ownership of the object in any case
                         no->createdLocally=true;
                         no->owner=::sn_myNetID;

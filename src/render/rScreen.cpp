@@ -394,7 +394,7 @@ static bool lowlevel_sr_InitDisplay(){
     rScreenSize & res = currentScreensetting.fullscreen ? currentScreensetting.res : currentScreensetting.windowSize;
 
     // update pixel aspect ratio
-    if ( res.res != ArmageTron_Invalid )
+    if ( res.res != ArmageTron_Invalid && size_t(res.res) < sizeof(aspect)/sizeof(aspect[0]) )
         currentScreensetting.aspect = aspect[res.res];
 
 #ifndef DIRTY
@@ -647,7 +647,7 @@ static bool lowlevel_sr_InitDisplay(){
         if(!currentScreensetting.fullscreen)
 #endif
         {
-            tOutput o("Armagetron Advanced");
+            tOutput o("$game_name");
             tString s;
             s << o;
             SDL_WM_SetCaption(s, s);
@@ -938,6 +938,7 @@ bool sr_texturesTruecolor=false;
 
 bool sr_textOut=false;
 bool sr_FPSOut=true;
+bool sr_RecordingTimeOut=true;
 
 bool sr_keepWindowActive=true;
 

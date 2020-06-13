@@ -89,11 +89,9 @@ static bool reported=false;
 #ifdef HAVE_LIBZTHREAD
 #include <zthread/FastRecursiveMutex.h>
 
-//static ZThread::FastRecursiveMutex st_mutex;
 typedef ZThread::FastRecursiveMutex MUTEX;
 #elif defined(HAVE_PTHREAD)
 #include "pthread-binding.h"
-//static tPThreadRecursiveMutex st_mutex;
 typedef tPThreadRecursiveMutex MUTEX;
 #else
 class tMockMutex
@@ -102,10 +100,7 @@ public:
     void acquire(){}
     void release(){}
 };
-/*
-static tMockMutex st_mutex;
-#endif
-*/
+
 typedef tMockMutex MUTEX;
 #endif
 
@@ -281,7 +276,6 @@ private:
 };
 
 //static bool inited=false;
-
 #ifdef LEAKFINDER
 #include <fstream>
 #define MAXCHECKSUM 100001
@@ -1099,6 +1093,7 @@ static tMemManager & st_MemMan(int id)
 }
 
 
+
 void tMemManager::Dispose(tAllocationInfo const & info, void *p, bool keep){
     int size;
 
@@ -1109,7 +1104,6 @@ void tMemManager::Dispose(tAllocationInfo const & info, void *p, bool keep){
 #ifndef DOUBLEFREEFINDER
     if (inited && block){
         tBottleNeck neck;
-        //memman[size >> 2].complete_Dispose(block);
         st_MemMan(size >> 2).complete_Dispose(block);
 #ifdef WIN32
         LeaveCriticalSection(&mutex);
@@ -1159,7 +1153,6 @@ void *tMemMan::Alloc(tAllocationInfo const & info, size_t s){
     if (inited && s < (MAX_SIZE << 2))
     {
         tBottleNeck neck;
-        //ret=memman[((s+3)>>2)].Alloc( info );
         ret=st_MemMan(((s+3)>>2)).Alloc( info );
     }
     else
@@ -1228,7 +1221,6 @@ void tMemManBase::Check(){
 #endif
 
     for (int i=MAX_SIZE;i>=0;i--)
-        //memman[i].Check();
         st_MemMan(i).Check();
 
 #ifdef WIN32

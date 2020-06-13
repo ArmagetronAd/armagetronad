@@ -1818,7 +1818,7 @@ static tSettingItem< bool > sn_synCookieConf( "ANTI_SPOOF", sn_synCookie );
 
 
 // number of packets from unknown sources to process each call to rec_peer
-static int sn_connectionLimit = 100;
+static int sn_connectionLimit = 5;
 static tSettingItem< int > sn_connectionLimitConf( "CONNECTION_LIMIT", sn_connectionLimit );
 
 // turtle mode control
@@ -2659,7 +2659,7 @@ static void rec_peer(unsigned int peer){
 // #define NO_GLOBAL_FLOODPROTECTION
 #ifndef NO_GLOBAL_FLOODPROTECTION
                     // flood check for pings, logins and other potential nasties; as early as possible
-                    if( sn_turtleMode && count > sn_connectionLimit*10 )
+                    if( sn_turtleMode && count > sn_connectionLimit*5 )
                     {
                         continue;
                     }
@@ -2952,6 +2952,11 @@ static bool sn_Listen( unsigned int & net_hostport, const tString& net_hostip )
             {
                 con << "sn_SetNetState: Unable to open accept socket on desired port " << net_hostport << ", Trying next ports...\n";
                 reported = true;
+
+                // just for safety, wait a bit. Does not do much good.
+                tDelay(100000);
+                
+                continue;
             }
 
             net_hostport++;
@@ -4730,6 +4735,7 @@ bool operator < ( nMachineKey const & a, nMachineKey const & b )
     if(sa.sin_port != sb.sin_port)
         return sa.sin_port < sb.sin_port;
 #endif
+
     return sa.sin_addr.s_addr < sb.sin_addr.s_addr;
 }
 
@@ -4780,10 +4786,10 @@ static nMachine & sn_LookupMachine( tString const & address )
 class nMachineIteratorPimpl: public nMachineMap::iterator
 {
 public:
-nMachineIteratorPimpl()
-: nMachineMap::iterator(sn_GetMachineMap().begin())
-{
-}
+    nMachineIteratorPimpl()
+    : nMachineMap::iterator(sn_GetMachineMap().begin())
+    {
+    }
 };
 
 nMachine & nMachine::iterator::operator *() const

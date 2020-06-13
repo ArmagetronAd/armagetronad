@@ -727,14 +727,14 @@ public:
 
     class iterator
     {
-        public:
-            nMachine & operator *() const;
-            iterator();
-            ~iterator();
-            void operator ++();
-            void operator ++(int);
-            bool Valid();
-        private:
+    public:
+        nMachine & operator *() const;
+        iterator();
+        ~iterator();
+        void operator ++();
+        void operator ++(int);
+        bool Valid();
+    private:
         nMachineIteratorPimpl * pimpl_;
     };
 

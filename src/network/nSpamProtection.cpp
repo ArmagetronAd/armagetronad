@@ -83,14 +83,12 @@ REAL	nSpamProtection::BlockTime()					// time left in silenced mode
 void nSpamProtection::ResetTime()
 {
     double now = tSysTimeFloat();
-
     // but move ahead this much
     double ahead = 1;
 
     now += ahead;
     spamProtectTime_ = now;
 }
-
 void nSpamProtection::ResetSpam()
 {
     spamProtect_ = 0;

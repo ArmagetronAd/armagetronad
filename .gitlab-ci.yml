@@ -1,0 +1,233 @@
+image: registry.gitlab.com/armagetronad/armagetronad/armaroot_64@sha256:182493edea0ad5b31f8dfe0c27b414cc2a3d710a051b6f2359a21da791ca8a68
+
+variables:
+  # https://docs.gitlab.com/ee/ci/docker/using_docker_build.html
+  #DOCKER_TLS_CERTDIR: "/certs"
+  #DOCKER_HOST: ""
+
+services:
+  # required for shared runners, does not hurt for our runner (just some diagnostic complaints)
+  - name: docker:19.03.0-dind
+    alias: docker
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: ""
+
+stages:
+  - minimal_build
+  - build
+  - test
+  - stage
+  - delay
+  - deploy
+
+default:
+  # common before script: bootstrap, configure, make dist, prepare docker builds
+  before_script:
+    - if ! test -d gitlab_build; then
+    -  docker help > /dev/null
+    -  touch timestamp.tag
+    -  test "x${ARMAGETRONAD_FAKERELEASE}" == "x" && export ARMAGETRONAD_FAKERELEASE=false
+    -  test -r configure || ./bootstrap.sh
+    -  ls docker/build -al
+    -  cat version.m4
+    -  mkdir -p gitlab_build
+    -  cd gitlab_build
+    -  . ../docker/scripts/brand.sh .
+    -  ../configure  --prefix=/usr/local --disable-glout --disable-sysinstall --disable-desktop progname="${PROGRAM_NAME}" progtitle="${PROGRAM_TITLE}"
+    -  test "x${ARMAGETRONAD_FAKERELEASE}" == "xtrue" && cp ../docker/build/fakerelease_proto.sh docker/build/fakerelease.sh 
+    -  cd docker/build
+    -  make gits.tag source
+    -  cd ../../../
+    - else
+    -  find . -newer timestamp.tag ! -path "./gitlab_build" -exec touch -r timestamp.tag \{\} \;
+    - fi
+    
+  # cache git checkouts of repositories we depend on
+  cache:
+    paths:
+     - docker/scripts/.cache
+
+
+# lean tests for non-protected branches
+minimal_build:
+  stage: minimal_build
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+      when: never
+    - if: $CI_COMMIT_REF_PROTECTED == "true"
+      when: never
+    - when: on_success
+  script:
+    - cd gitlab_build/docker/build
+    - target=CI_base
+    - if ! make -O -j$(nproc) ${target}; then
+    -   make -d ${target} || exit $?
+    -   exit 1
+    - fi
+  artifacts:
+    untracked: true
+    expire_in: 1 day
+
+
+# do the bulk of the building
+build:
+  stage: build
+  rules:
+  - if: $CI_MERGE_REQUEST_ID
+    when: on_success
+  - if: $CI_COMMIT_REF_PROTECTED == "true"
+    when: on_success
+  - when: manual
+  script:
+    - target=CI
+    # check if (fake!) secrets are available, if yes, copy them and build debtest
+    - if test -r /secrets/sec.gpg; then
+    -   cp -a /secrets gitlab_build/docker/deploy/
+    -   target="debtest.tag CI"
+    - fi
+    # build
+    - cd gitlab_build/docker/build
+    - if ! make -O -j$(nproc) ${target}; then
+    -   make -d ${target} || exit $?
+    -   exit 1
+    - fi
+    - make artifactclean
+    - cd ../../
+    - rm -rf src
+  artifacts:
+    untracked: true
+    expire_in: 1 week
+
+# deploy to staged environment
+deploy-staged:
+  needs:
+   - build
+  dependencies:
+   - build
+  stage: stage
+  tags:
+   - armagetronad_deploy
+  rules:
+  - if: $CI_MERGE_REQUEST_ID
+    when: never
+  - if: $CI_COMMIT_REF_PROTECTED == "true"
+    when: on_success
+  - when: never
+  before_script:
+    - ./docker/deploy/prepare_deploy.sh
+
+  script:
+    # mark 
+    - echo ${CI_PIPELINE_IID} > /messageboard/current_pipeline_${CI_COMMIT_REF_NAME}
+    # now enter the docker build directory and just invoke make there
+    - cd gitlab_build/docker/build
+    - make staged_deploy -O -j$(nproc) -k
+
+
+# do the actual release; manually for final releases, delayed to avoid spam for everyone else
+delay-release:
+  needs:
+   - build
+   - deploy-staged
+  dependencies: []
+  stage: delay
+  tags:
+   - armagetronad_deploy
+  rules: 
+  - if: $CI_MERGE_REQUEST_ID
+    when: never
+  - if: '$CI_COMMIT_REF_PROTECTED == "false"'
+    when: never
+  - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_REF_NAME !~ /^release/'
+    when: delayed
+    start_in: '6 hours'
+  - when: on_success
+  before_script: [""]
+  script: [""]
+
+# do the actual release; manually for final releases, delayed to avoid spam for everyone else
+deploy-release:
+  needs:
+   - build
+   - delay-release
+  dependencies:
+   - build
+  stage: deploy
+  tags:
+   - armagetronad_deploy
+  rules: 
+   - if: $CI_MERGE_REQUEST_ID
+     when: never
+   - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_REF_NAME =~ /^release/'
+     when: manual
+   - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_REF_NAME !~ /^release/'
+     when: on_success
+   - when: never
+  before_script:
+    - ./docker/deploy/prepare_deploy.sh || exit $?
+  script:
+    - tagfile=/messageboard/current_pipeline_${CI_COMMIT_REF_NAME}
+    - if ! echo ${CI_COMMIT_REF_NAME} | grep -q ^release && test -r ${tagfile} && ! test ${CI_PIPELINE_IID} == `cat ${tagfile}`; then
+    -   echo "A newer build is already in the pipeline, abort."
+    -   exit 0
+    - fi
+
+    # now enter the docker build directory and just invoke make there
+    - cd gitlab_build/docker/build
+    - make unstaged_deploy -O -j$(nproc) -k
+
+
+
+
+# pack up the downloadable build files in one handy artifact
+pack:
+  stage: stage
+  needs:
+   - build
+  dependencies:
+   - build
+  script: [""]
+  before_script:
+    # test that everything has been prepared correctly
+    - if ! test -d gitlab_build; then
+    -  echo "No build yet!"
+    -  exit 1
+    - fi
+    - find . -newer timestamp.tag ! -path "./gitlab_build" -exec touch -r timestamp.tag \{\} \;
+    - if ! make -C gitlab_build/docker/build -q CI_pack.tag; then
+    -  make -d -C gitlab_build/docker/build -q CI_pack.tag || exit $?
+    -  exit 1
+    - fi
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - gitlab_build/docker/build/upload
+
+
+
+
+testbuild:
+  stage: test
+  rules:
+   - when: never
+  script:
+    - docker build -t armagetronad_server .
+
+
+
+
+# for local testing
+complete_build:
+  stage: build
+  rules:
+  - when: never
+  script:
+    - cd gitlab_build/docker/build
+    - make -O -j$(nproc) CI_base
+    - make -O -j$(nproc) CI
+    
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - gitlab_build/docker/build/upload

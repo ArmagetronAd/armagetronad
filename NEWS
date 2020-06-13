@@ -1,4 +1,19 @@
-Changes since 0.2.8.3.x:
+
+Changes since 0.2.8.3.5:
+
+  Fixed Bugs
+
+- Debian builds: Documentation html files have empty last change (#9)
+- Ubuntu PPA release candidate builds would overwrite previous stable releases (#15)
+
+  New Features
+
+- Adapt ChangeLog and fingerprint generation to git (#11)
+- Integrated build system (#14)
+
+
+  Changes on the 0.2.9 branch
+
 - Added detection and reaction code for timing assist bots
 - /shuffle now works before you actually join a team
 - Implemented /shout command and associated settings
@@ -36,7 +51,38 @@ Changes since 0.2.8.3.x:
   login/logout message can be announced.
 - Authentication is now enabled by default.
 
+Changes since 0.2.8.3.4:
+
+- Security fix: Check that the remote is allowed to create an object
+  before creating it, not decide whether it gets to keep it after
+  it already has been created and potential damage has been done.
+  No arbitrary code could be executed, but a client could effectively 
+  shut down a server by sending crucial objects, such as the main game
+  timer or the game itself.
+- Compilation fixes for current systems.
+
+Changes since 0.2.8.3.3:
+
+- Eliminated undefined behavior that was fine in gcc 5, but now
+  (rightfully!) turned into crashes in gcc 6.
+- Eliminated compilation disambiguity that was just causing a mild
+  performance degradation in gcc 5 and is now a compilation failure in
+  gcc 6.
+  
+Changes since 0.2.8.3.2:
+
+- security fix: do not read ahead of the beginning of network buffer.
+- security fix: don't attribute network errors from processing random
+  packets to the connection to the server 
+- security fix: while at it, don't process random packets unless they
+  may be important
+- fix for potential crash with friend list filtering
+- intel driver compatibility
+- fix for rare crash with sound lock
+- fix for camera turning for bizarre axis configurations
+
 Changes since 0.2.8.3.1:
+
 - security fix: old style action commands from clients no loger cause hangs and crashes
 - security fix: oversized packets are ignored properly
 - security fix: never read one byte outside of the received buffer
@@ -47,6 +93,7 @@ Changes since 0.2.8.3.1:
 - Additional checks against illegal values passed to renderer
 
 Changes since 0.2.8.3:
+
 - fixed temporary sound disappearance when alt-tabbing away and back
 - default subcultures are now distributed
 - enable 32 bit color depth at desktop resolution
@@ -54,8 +101,9 @@ Changes since 0.2.8.3:
 - spelling mistakes and missing German translations
 
 Changes since 0.2.8.3_rc4:
+
 - New setting: KEEP_PLAYER_SLOT allows the server to kick (preferably) spectators
-   if it gets full so there is always one slot open for players
+  if it gets full so there is always one slot open for players
 - New setting: ACCESS_LEVEL_AUTOKICK_IMMUNITY sets the access level required 
   to be immune from such kicks (and idle autokicks, too)
 - Intercepted chat commands are now written to ladderlog.txt. Format:
@@ -65,6 +113,7 @@ Changes since 0.2.8.3_rc4:
 - fast finish works again
 
 Changes since 0.2.8.3_rc3:
+
 - Pinging previously popular servers earlier for quicker server
   browsing
 - Improved master server random polling, the second polled master now
@@ -77,6 +126,7 @@ Changes since 0.2.8.3_rc3:
   changes user level for name\_with\_spaces@forums
 
 Changes since 0.2.8.3_rc2:
+
 - Fixed crash with server polling
 - ROUND_WINNER and MATCH_WINNER ladderlog events now include the players of
   the team.
@@ -87,12 +137,14 @@ Changes since 0.2.8.3_rc2:
   of shuffle messages displayed.
 
 Changes since 0.2.8.3_rc1:
+
 - Fixed dark color filters, such as FILTER_DARK_COLOR_STRINGS, to not filter
   the reset color.
 - ASE moviepack models no longer have a vertex count limit
 - Fixed endless recursion crash between rounds
 
 Changes since 0.2.8.3_beta3:
+
 - Chat prefix spam protection. Guards against prefix spam, such as when a
   user always changes their chat message color, or prefixes all messages
   with a clan tag. Toggle with the PREFIX_SPAM_ENABLE setting.
@@ -127,7 +179,8 @@ Changes since 0.2.8.3_beta1:
 
 Changes since 0.2.8.2:
 
-  New settings and commands:
+New settings and commands:
+
 - MIN_PLAY_TIME_*: minimal play time required before you are allowed to
   play on this server.
 - SPAM_AUTOKICK_COUNT: minimal number of spam warning messages you get in a
@@ -217,6 +270,7 @@ Changes since 0.2.8.2:
   when AUTO_TEAM is enabled
 
 If --enable-armathentication was activated:
+
 - /lock, /unlock, /invite and /uninvite team management chat for players of
   access level ACCESS_LEVEL_TEAM or better.
 - /teams chat command that rougly prints team layout.
@@ -237,7 +291,8 @@ If --enable-armathentication was activated:
 - /login chat command then uses the more secure hashed base logins
 - new chat commands /op and /deop to change other players' access rights
 
-  Featurelets:
+Featurelets:
+
 - Added Polish language file
 - clientside play time tracking and server controlled minimal required experience
   to be allowed to play.
@@ -286,19 +341,19 @@ If --enable-armathentication was activated:
   Armagetron Advanced, the paths it uses, links to the main site, wiki
   and forums and the names of the project admins.
 - New entries in ladderlog.txt:
-  - GAME_TIME <time> (only if enabled via the LADDERLOG_GAME_TIME_INTERVAL
+  GAME_TIME <time> (only if enabled via the LADDERLOG_GAME_TIME_INTERVAL
     setting): The time that has passed since the last start of a round
-  - BASEZONE_CONQUERED <team> <x> <y>: A fortress zone belonging to <team>
+  BASEZONE_CONQUERED <team> <x> <y>: A fortress zone belonging to <team>
     at the coordinates (<x>, <y>) has been conquered
-  - BASEZONE_CONQUERER <player>: at the time of the last BASEZONE_CONQUERED
+  BASEZONE_CONQUERER <player>: at the time of the last BASEZONE_CONQUERED
     message, <player> has been in the conquered zone
-  - ONLINE_PLAYER <player> [<ping [<team>]]: At the beginning of the round,
+  ONLINE_PLAYER <player> [<ping [<team>]]: At the beginning of the round,
     <player> had <ping> and was on <team>. This line is not printed for bots
-  - NUM_HUMANS <n>: There are <n> players that are not AIs and are part of a
+  NUM_HUMANS <n>: There are <n> players that are not AIs and are part of a
     team.
-  - ROUND_SCORE has the player's team name appended.
-  - ROUND_SCORE_TEAM: score a team accumulated during the last round.
-  - WAIT_FOR_EXTENAL_SCRIPT: printed if the setting of the same name is
+  ROUND_SCORE has the player's team name appended.
+  ROUND_SCORE_TEAM: score a team accumulated during the last round.
+  WAIT_FOR_EXTENAL_SCRIPT: printed if the setting of the same name is
     enabled. In this case the server will delay the start of the next round
     until WAIT_FOR_EXTENAL_SCRIPT_TIMEOUT is reached or the setting is
     disabled.
@@ -310,7 +365,8 @@ If --enable-armathentication was activated:
 - /players now shows the players' color and allows searching
 - TEAM_ELIMINATION_MODE sets the way ArmagetronAd removes teams when there's too much teams.
 
-  Bugfixes:
+Bugfixes:
+
 - Added compensation for drifting timers (observed often with
   overclocked mainboards)
 - Text input fields now let the text wrap correctly and make use of the space allocated
@@ -339,7 +395,8 @@ If --enable-armathentication was activated:
 - More accurate Lag-O-Meter by meriton.
 - Zones were sometimes invisible.
 
-  Internals:
+Internals:
+
 - A complete netsync cycle is now sn_Receive(); nNetObject::SyncAll(); sn_SendPlanned();.
 - Ping charity is now completely server controlled.
 
@@ -410,6 +467,7 @@ Changes since 0.2.8.0:
 
 Changes since 0.2.8.0_rc4:
 Bugfixes:
+
 - SECURITY FIX: via a MAP_FILE path with included .., it was possible
   to write files anywhere, provided they did not exist previously.
   Clients with this vulnerability are locked out of the server now.
@@ -458,11 +516,11 @@ Changes since 0.2.8.0_rc1:
   Cycle turns are now executed more accurately on the server.
   Timer stuttering at end of round (was non-critical, but ugly).
   Custom camera did not turn when the internal camera was
-  configured not to turn.
+    configured not to turn.
   Idle player kick code crashed when it kicked a client with
-  many players.
+    many players.
   The code that removes inactive players after a while removed
-  the AI players.
+    the AI players.
 - Reverted smart camera movement to pre-beta4 behavior,
   the new code made some players seasick :)
 - Ingame admin interface gives more useful information to the invoker 
@@ -502,7 +560,7 @@ Changes since 0.2.8_beta4:
   Cycles sometimes warped to odd locations.
 - Tweaked smart camera to not stay in front of the cycle so much.
   Tweaked smart camera custom glancing.
-  Report back whether you like or hate it!
+    Report back whether you like or hate it!
 - Made custom camera even more configurable, changed default settings.
   (old ones are still in settings.cfg)
 - Forced glancing end on cycle turn now looks better.
@@ -601,7 +659,7 @@ Changes since 0.2.7.0:
 - Colored explosions!
 - HUD enhancements: customization, works in splitscreen mode
 - Directory scanning code added ( not yet visible, will be used for
-  moviepack/cycle selection )
+   moviepack/cycle selection )
 - Moviepack sky texture support
 - Master server can now run on windows, too
 - Explosion sound now actually works
@@ -746,3 +804,4 @@ Changes since 0.1.4.9:
 - the moviepack title screen is displayed
 - Linux version: easier system-wide installation with RPM packages 
   or "make install"
+

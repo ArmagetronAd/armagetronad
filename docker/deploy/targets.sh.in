@@ -1,0 +1,233 @@
+# All secrets are expected in the 'secrets' subfolder of the build directory
+
+SUFFIX=`echo @prognamebase@ | sed -e s/.*-//` || exit $?
+PACKAGE_NAME_BASE=`echo @prognamebase@ | sed -e s/-.*//` || exit $?
+
+SERIES=`cat CI_INFO | grep SERIES= | sed -e s/^SERIES=//` || exit $?
+CI_COMMIT_REF_PROTECTED=`cat CI_INFO | grep CI_COMMIT_REF_PROTECTED= | sed -e s/^CI_COMMIT_REF_PROTECTED=//` || exit $?
+CI_COMMIT_SHA=`cat CI_INFO | grep CI_COMMIT_SHA= | sed -e s/^CI_COMMIT_SHA=//` || exit $?
+CI_COMMIT_REF_NAME=`cat CI_INFO | grep CI_COMMIT_REF_NAME= | sed -e s/^CI_COMMIT_REF_NAME=//` || exit $?
+
+# if staging is true, hold back release
+if test "${STAGING}" != "false"; then
+	# make sure STAGING is always either true or false (the makefile rewrites the following line)
+	STAGING=true
+fi
+
+test -z ${SERIES} && exit 1
+test -z ${SUFFIX} && exit 1
+
+case ${SERIES}+${SUFFIX}+@version@ in
+    CURRENT+armagetronad+*_rc_*)
+	SF_DIR="rc"
+	LP_SERIES="0.2.8"
+	ZI_SERIES="rc"
+	STEAM_BRANCH="staging"
+	;;
+    CURRENT+armagetronad+*)
+	SF_DIR="stable"
+	LP_SERIES="0.2.8"
+	ZI_SERIES="stable"
+	STEAM_BRANCH="staging"
+	;;
+    CURRENT+beta+*)
+	SF_DIR="beta"
+	LP_SERIES="0.2.8-snapshots"
+	ZI_SERIES="beta"
+	STEAM_BRANCH="beta"
+	;;
+    CURRENT+*)
+	SF_DIR="snapshots"
+	LP_SERIES="0.2.8-snapshots"
+	ZI_SERIES="alpha"
+	STEAM_BRANCH="alpha"
+	;;
+
+    LTS_028*+armagetronad+*_rc_*)
+	SF_DIR="rc"
+	LP_SERIES="0.2.8"
+	ZI_SERIES="rc"
+	STEAM_BRANCH=""
+	;;
+    LTS_028*+armagetronad+*)
+	SF_DIR="stable"
+	LP_SERIES="0.2.8"
+	ZI_SERIES="stable"
+	STEAM_BRANCH=""
+	;;
+    LTS_028*+alpha+*)
+	SF_DIR="alpha"
+	LP_SERIES="0.2.8-snapshots"
+	ZI_SERIES="alpha"
+	STEAM_BRANCH=""
+	;;
+    LTS_028*+*)
+	SF_DIR="beta"
+	LP_SERIES="0.2.8-snapshots"
+	ZI_SERIES="beta"
+	STEAM_BRANCH=""
+	;;
+
+    *+experimental|EXPERIMENTAL+*)
+	SF_DIR="snapshots"
+	LP_SERIES="trunk-snapshots"
+	ZI_SERIES="experimental"
+	STEAM_BRANCH="experimental"
+	;;
+    
+    *)
+	SF_DIR="wip"
+	LP_SERIES="hacks"
+	ZI_SERIES="wip"
+	STEAM_BRANCH="experimental"
+	;;
+esac
+
+# **********************************************************************
+
+# git identity
+if which git > /dev/null && test -z "`git config --global user.name`"; then
+    git config --global user.email "z-man@users.sf.net"
+    git config --global user.name "Manuel Moos (From GitLab CI)"
+    git config --global push.default simple
+fi
+
+# **********************************************************************
+
+# ubuntu PPA
+if ${STAGING} == true; then
+	case ${ZI_SERIES}+${SERIES} in
+		stable+CURRENT)
+		# deploy to staging ppa
+		UBUNTU_PPA=ppa:armagetronad-dev/staging
+		;;
+		stable+LTS*)
+		# deploy to LTS staging ppa
+		UBUNTU_PPA=ppa:armagetronad-dev/lts-staging
+		;;
+		*+*)
+		# do not deploy at all
+		UBUNTU_PPA=""
+		;;
+	esac
+else
+	case ${ZI_SERIES}+${SERIES} in
+		rc+CURRENT)
+		# almost! But just a release candidate. deploy to staging PPA
+		UBUNTU_PPA=ppa:armagetronad-dev/staging
+		;;
+		rc+LTS*)
+		# almost! But just a release candidate. deploy to LTS staging PPA
+		UBUNTU_PPA=ppa:armagetronad-dev/lts-staging
+		;;
+		*+LTS*)
+		# A proper final build. Deploy to LTS ppa.
+		UBUNTU_PPA=ppa:armagetronad-dev/lts
+		;;
+		*+CURRENT|*+EXPERIMENTAL|experimental+*)
+		# A proper final build. Deploy to regular PPA.
+		UBUNTU_PPA=ppa:armagetronad-dev/ppa
+		;;
+		*+*)
+		# Unknown. Do not deploy.
+		UBUNTU_PPA=
+		;;
+	esac
+fi
+
+# required public data: gpgkey_pub.gpg
+# required secret: gpgkey_sec.gpg
+# both together must be a public/private key pair authorized to upload to that ppa
+# needs to match the signer in debian_source.sh
+# see https://www.debuntu.org/how-to-importexport-gpg-key-pair/
+
+# **********************************************************************
+
+if test ${STAGING} == true; then
+    UPLOAD_SCP_BASE=arma0install@builder.armagetronad.org:/home/arma0install/staging/
+else
+    UPLOAD_SCP_BASE=bazaaarmagetron,armagetronad@frs.sourceforge.net:/home/frs/project/a/ar/armagetronad/
+fi
+
+# destination for raw SCP/rsync uploads
+UPLOAD_SCP=${UPLOAD_SCP_BASE}${SF_DIR}/
+# required secrets: ssh subdirectory with the relevant contents of ~/.ssh, private key without passphrase
+# keys must have canonical names (id_dsa, id_rsa or id_ed25519)
+
+# **********************************************************************
+
+# steam: no configurable data here, look into ../build/context/steamcontentbuilder
+# required secrets: script steamuser.sh, content
+# STEAM_USER=<steam username authorized to upload packages>
+# STEAM_PASSWORD=<their password>
+# 
+# file ssfn<id> optained after the first failed login due to Steam Guard
+
+# **********************************************************************
+
+# Launchpad files: project to upload to
+LP_PROJECT=armagetronad
+#LP_SERIES series to upload to (configured above)
+LP_VERSION=`echo @version@ | sed -e s/_/-/g`
+
+# Launchpad uploads require an authentication token in the plain text file secrets/lp-credentials.
+# Just run lp-project-upload with some garbage parameters, log in, and it will be created for you.
+# To GPG-sign the uploads, provide gpg keys in secrets/pub.gpg and secrets/sec.gpg.
+
+# **********************************************************************
+
+# ZeroInstall git to edit streams into
+ZI_GIT=git@gitlab.com:armagetronad/zeroinstall.git
+
+# scp target to publish zeroinstall streams
+UPLOAD_ZI_SCP=arma0install@builder.armagetronad.org:/home/arma0install/0install/
+#UPLOAD_ZI_SCP=arma0install@builder.armagetronad.org:/home/arma0install/0install-staging/
+
+if test ${STAGING} == true; then
+    # download URI base to use for zeroinstall
+    DOWNLOAD_URI_BASE=http://download.armagetronad.org/staging/${SF_DIR}/${PACKAGE_VERSION}/
+else
+    DOWNLOAD_URI_BASE=https://launchpad.net/${LP_PROJECT}/${LP_SERIES}/${LP_VERSION}/+download/
+fi
+
+# **********************************************************************
+
+# download site: git repository
+DOWNLOAD_SITE_GIT=git@gitlab.com:armagetronad/downloads.git
+
+# **********************************************************************
+
+function trust_bugfarm(){
+# trust 0install hoster ssh host keys
+cat >> ~/.ssh/known_hosts <<EOF
+|1|IQsnrFzF+xc7UpzVH0ZgRehX5J4=|3JZPjzsKe/lmC+v5L3V1wp8z4j4= ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFsnvkpv4UWhmrt+l4DWvcsJPXdNKKbES12DTMoDdxLI6ofYVBuRw9mnrdLcAphmBCORaRT+M4wd8vZocJrYVZE=
+|1|kcWjcRE5DYV8KSPdJJCHCLn7+0E=|kVOPZia7i0WRp5jYlls3ZZvLvPE= ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFsnvkpv4UWhmrt+l4DWvcsJPXdNKKbES12DTMoDdxLI6ofYVBuRw9mnrdLcAphmBCORaRT+M4wd8vZocJrYVZE=
+EOF
+}
+
+function trust_gitlab(){
+# GitLab's ssh host keys
+cat >> ~/.ssh/known_hosts <<EOF
+|1|8y0lCy+vAcMMUA/WHRlwhCI/4FY=|HFJc/qi8WvgywwEtI/871TqwUwA= ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFSMqzJeV9rUzU4kWitGjeR4PWSa29SPqJ1fVkhtj3Hw9xjLVXVYrU9QlYWrOLXBpQ6KWjbjTDTdDkoohFzgbEY=
+|1|K5IGevrCwWL+vF9CoEMeQaKINMs=|GMi0dv2Wm5oWoJJrCNGWU8+eLqU= ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFSMqzJeV9rUzU4kWitGjeR4PWSa29SPqJ1fVkhtj3Hw9xjLVXVYrU9QlYWrOLXBpQ6KWjbjTDTdDkoohFzgbEY=
+EOF
+}
+
+# requires both the ssh and gpg keys
+
+# **********************************************************************
+
+# Deployment requires net access, wait a bit for it to come online
+
+for host in download.armagetronad.org builder.armagetronad.org 0install.armagetronad.org gitlab.com launchpad.net; do
+    timeout=5
+    while test ${timeout} -gt 0; do
+	if curl ${host}	--fail --silent --show-error > /dev/null; then
+	    timeout=0
+	else
+	    echo "Waiting for network: ${timeout}"
+	    sleep 5
+	    timeout=$(( ${timeout} - 1 ))
+	fi
+    done
+done

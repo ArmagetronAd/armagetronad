@@ -3529,6 +3529,7 @@ bool gBaseZoneHack::CheckTeamAssignmentOnTeam()
             int count = 0;
             CountZonesOfTeam( Grid(), team, count, farthest );
             // discard team of farthest zone
+            // No NULL check is required here for farthest, since count is greater than 0 which implies farthest was set.
             if ( count > sg_baseZonesPerTeam )
             {
                 farthest->team = NULL;

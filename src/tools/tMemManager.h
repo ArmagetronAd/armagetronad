@@ -68,10 +68,14 @@ public:
 #define THROW_BADALLOC
 #define THROW_NOTHING
 #else
+#if __cplusplus >= 201103L
+#define THROW_BADALLOC
+#define THROW_NOTHING  throw ()
+#else
 #define THROW_BADALLOC throw (std::bad_alloc)
 #define THROW_NOTHING  throw ()
 #endif
-
+#endif
 
 #ifndef DONTUSEMEMMANAGER
 

@@ -1,0 +1,13 @@
+#!/bin/sh
+# Updates CHANGELOG.md from CHANGELOG_FROZEN.md, git history and launchpad issues
+# usage: update_changelog
+
+set -x
+
+md=`dirname $0`
+top_srcdir=${md}/../../
+
+${md}/patchnotes.py ${top_srcdir} ${top_srcdir}/CHANGELOG_FROZEN.md armagetronad armagetronad > ${top_srcdir}/CHANGELOG.md
+
+sed < ${top_srcdir}/CHANGELOG.md > ${top_srcdir}/NEWS -e "s/^ \* /- /" -e "s/^   - /   /" -e "s/^   /  /" -e "s/^##### */  /" -e "s/^#### *//" -e "s/^##* *//" -e 's,(\[\(.*\)\](\(.*\))),(\1),'
+

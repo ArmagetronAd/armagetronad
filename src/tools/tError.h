@@ -81,6 +81,10 @@ void st_Breakpoint();
 void st_PresentError( const char* caption, const char *message );
 void st_PresentMessage( const char* caption, const char *message );
 
+// complaint free check for THIS pointer so dereferencing null objects can get caugt in debug builds
+bool st_CheckThis(void const *in);
+#define tASSERT_THIS() tASSERT(st_CheckThis(this));
+
 /*
 #ifndef WIN32
 

@@ -217,6 +217,11 @@ public:
 
     virtual nDescriptor&	CreatorDescriptor() const;
     gAIPlayer(nMessage &m);
+
+    // don't accept syncs from client
+    virtual bool AcceptClientSync() const	{
+        return false;
+    }
 };
 
 // the AI team

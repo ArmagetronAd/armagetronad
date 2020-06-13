@@ -702,6 +702,7 @@ void eTeam::LogScoreDifference(const tString &teamName)
         se_roundScoreTeamWriter << scoreDifference << ePlayerNetID::FilterName( teamName );
         se_roundScoreTeamWriter.write();
     }
+    
 }
 
 void eTeam::SwapTeamsNo(int a,int b){

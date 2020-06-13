@@ -1,12 +1,11 @@
 [Desktop Entry]
 Type=Application
 Name=@progtitle@@progtitle_server@
-Exec=@progname@
+Exec=@progname@ %f
 Comment=3d light cycle game
 Comment[de]=dreidimensionales Lichtradspiel
 Icon=@progname@
 Terminal=@build_dedicated@
-Path=@prefix@/bin
 Categories=Game;ActionGame;
 StartupNotify=@build_dedicated@
 MimeType=application/x-armagetronad;

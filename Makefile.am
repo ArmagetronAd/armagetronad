@@ -19,7 +19,7 @@ models sound textures bootstrap.sh accustomdir.m4 fingerprint
 
 # resource is included as a subdir for the purpose of keeping this makefile short and delegating
 # resource management to a more appropriate place anyway
-SUBDIRS = src resource batch config desktop
+SUBDIRS = src resource batch config desktop docker/build
 
 # special tasks to do if we're building the master server
 if BUILDMASTER
@@ -80,8 +80,11 @@ dist-hook:
 #	clear SVN
 	find $(distdir) -depth -name .svn -exec rm -rf \{\} \;
 
-#   strip comments from translated files
-	cd $(distdir)/language; python2 ./update.py --dist
+#	clear git and bzr
+	rm -rf .git .bzr
+
+#   	strip comments from translated files
+	cd $(distdir)/language; `which python3 python python2 2> /dev/null | head -n 1` ./update.py --dist
 #	restore timestamps
 	cd $(distdir)/language; for f in *.txt; do test -r $$f.bak && touch -r $$f.bak $$f; done
 	rm -f $(distdir)/language/*.bak

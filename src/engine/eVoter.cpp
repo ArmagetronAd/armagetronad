@@ -97,7 +97,6 @@ static tSettingItem< int > se_vbKick( "VOTING_BIAS_KICK", se_votingBiasKick );
 // the number set here always acts as additional votes against a silence vote.
 static int se_votingBiasSilence = 0;
 static tSettingItem< int > se_vbSilence( "VOTING_BIAS_SILENCE", se_votingBiasSilence );
- 
 // the number set here always acts as additional votes against a voice vote.
 static int se_votingBiasVoice = 0;
 static tSettingItem< int > se_vbVoice( "VOTING_BIAS_VOICE", se_votingBiasVoice );
@@ -1015,7 +1014,6 @@ protected:
     {
         return expired_;
     }
-    
     bool Pending() const
     {
         return !expired_;
@@ -1180,7 +1178,7 @@ protected:
         {
             return true;
         }
-
+        
         eVoter * sender = eVoter::GetVoter( senderID  );
 
         double time = tSysTimeFloat();
@@ -1219,15 +1217,12 @@ protected:
         // prevent the sender from changing his name for confusion
         if ( sender )
             sender->lastNameChangePreventor_ = time;
-        
         return true;
     }
-    
     virtual bool DoCheckValid( int senderID )
     {
         if(!CheckValidNoHarm(senderID))
             return false;
-           
         double time = tSysTimeFloat();
 
         // check if player is protected from kicking
@@ -1289,7 +1284,6 @@ protected:
 
 protected:
     virtual void DoExecuteHarm() = 0;               // Called when the vote passes. Do the harmful action.
-
     virtual nDescriptor& DoGetDescriptor() const;	// returns the creation descriptor
 
     // get the language string prefix
@@ -1453,7 +1447,6 @@ protected:
 
         eVoteItemServerControlled::DoFillToMessage( m );
     }
-
     virtual void DoExecute()
     {
         eVoteItemHarm::DoExecute();
@@ -1519,6 +1512,7 @@ protected:
         }
     }
 };
+
 //  vote on silencing
 class eVoteItemSilence: public virtual eVoteItemHarmServerControlled
 {
@@ -1527,13 +1521,11 @@ public:
     eVoteItemSilence( ePlayerNetID* player)
         : eVoteItemHarm( player )
         {}
- 
     ~eVoteItemSilence()
     {}
 protected:
     // get the language string prefix
     virtual char const * DoGetPrefix() const{ return "silence"; }
- 
  
 #ifdef KRAWALL_SERVER
     // access level required for this kind of vote
@@ -1548,7 +1540,6 @@ protected:
     {
         return se_votingBiasSilence;
     }
- 
     virtual void DoExecuteHarm()                                                // called when the voting was successful
     {
         ePlayerNetID * player = GetPlayer();
@@ -1558,7 +1549,6 @@ protected:
         }
     }
 };
- 
  
 //  vote on giving players their voice back (not really harmful, but it's a convenient base class)
 class eVoteItemVoice: public virtual eVoteItemHarmServerControlled
@@ -1575,7 +1565,6 @@ public:
 protected:
     // get the language string prefix
     virtual char const * DoGetPrefix() const{ return "voice"; }
- 
 #ifdef KRAWALL_SERVER
     // access level required for this kind of vote
     virtual tAccessLevel DoGetAccessLevel() const
@@ -1584,13 +1573,11 @@ protected:
     }
 #endif
  
- 
     // return vote-specific extra bias
     virtual int DoGetExtraBias() const
     {
         return se_votingBiasVoice;
     }
- 
  
     virtual bool DoCheckValid( int senderID )
     {
@@ -1599,7 +1586,6 @@ protected:
 
         return eVoteItem::DoCheckValid( senderID );
     }
- 
     virtual void DoExecuteHarm()                                                // called when the voting was successful
     {
         ePlayerNetID * player = GetPlayer();
@@ -1624,7 +1610,6 @@ public:
 protected:
     virtual bool DoCheckValid( int senderID )
     {
-
         // check whether enough harmful votes were collected already
         ePlayerNetID * p = GetPlayer();
         if ( fromMenu_ && p )

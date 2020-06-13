@@ -8,9 +8,10 @@
 # sortresources.py <path_to_seach_and_sort>
 # use sortresources.py -h to get command line option help
 
+from __future__ import print_function
+
 from xml import sax
 from xml.sax import handler
-import string
 import os.path
 import os
 import sys
@@ -161,7 +162,7 @@ def Print(oldFile, newFile, canonicalPath ):
         return False
 
     if doPrint:
-        print("renaming " + oldFile + " -> " + newFile)
+        print("renaming", oldFile, "->", newFile)
 
 # move file oldFile to newFile, setting apache rewrite rules to keep the file
 # fetchable from its old position
@@ -183,8 +184,8 @@ def Redirect(oldFile, newFile, canonicalPath ):
             # open .htaccess file in the old directory for reading
             accessFile = open(htaccessPath)
             for line in accessFile:
-                splitLineLower = string.split(line.lower())
-                splitLine      = string.split(line)
+                splitLineLower = str.split(line.lower())
+                splitLine      = str.split(line)
                 if splitLineLower[0] == "rewriteengine":
                     # rewriting is already mentioned; we don't have to enable it laster.
                     needEngine = False
@@ -195,7 +196,7 @@ def Redirect(oldFile, newFile, canonicalPath ):
                         # nothing to do
                         return
                     else:
-                        print("Warning: There already is a different RewriteRule for " + oldFile + " in place.")
+                        print("Warning: There already is a different RewriteRule for", oldFile, "in place.")
         except: pass
 
         # open .htaccess file for appended writing
@@ -273,7 +274,7 @@ def main(argList):
                 if arg[1] == "v":
                     doPrint = True
                     continue
-                print("\nUnknown option: " + arg)
+                print("\nUnknown option:", arg)
                 Options(-1)
             else:
                 Options(-1)

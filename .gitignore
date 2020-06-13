@@ -3,10 +3,16 @@ Armagetron Advanced Dedicated
 Armagetron Advanced.app
 desktop/os-x/Info.plist
 .gdbinit
+.cache
+.lock.*
+docker/images/context
+docker/deploy/*.gpg
+docker/deploy/ssh
 batch/rcd_config
 batch/rcd_server
 batch/rcd_startstop
 batch/serverstarter
+*.digest.local
 ./armagetronad-dedicated
 COPYING
 ChangeLog
@@ -19,6 +25,7 @@ Makefile.in
 /config.h.in
 /config.sub
 /configure
+/builds
 /depcomp
 /install-sh
 /ylwrap
@@ -31,6 +38,7 @@ Makefile
 /config.h
 /config.log
 /config.status
+/config.guess
 /extrapaths
 /stamp-h1
 /universal_variable*
@@ -42,6 +50,7 @@ config/aiplayers.cfg
 config/rc.config
 desktop/armagetronad-armagetronad.desktop
 language/languages.txt
+language/*.bak
 resource/included/
 resource/automatic/
 .deps

@@ -412,7 +412,7 @@ void gServerMenu::Update()
 			tString userNames = run->UserNames();
 			tArray<tString> userNamesList = userNames.Split("\n");
 			tString* friends = getFriends();
-            for (i = MAX_FRIENDS; i>=0; i--)
+			for (i = MAX_FRIENDS-1; i>=0; i--)
             {
                 tString friendName;
                 friendName << friends[i];

@@ -549,7 +549,7 @@ static void display_fps_subby()
     float size =.15;
     rTextField c2(.7,.85,.15*size, .3*size);
 
-    if ( tRecorder::IsRunning() )
+    if ( sr_RecordingTimeOut && tRecorder::IsRunning() )
     {
         std::stringstream time;
         time.precision( 5 );

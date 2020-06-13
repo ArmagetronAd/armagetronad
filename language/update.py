@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 # usage: call here to bring all translations up to date
 # usage forms:
 # update.py [--complete] <list of language files>
@@ -15,10 +15,18 @@
 # update.py --dist
 #           compactifies translations: strips comments and whitespace
 
+from __future__ import print_function
+
 import sys
 import os
 import string
 
+def OpenFile( filename, mode ):
+    if sys.version_info[0] > 2:
+        return open(filename, mode, encoding = "latin1" )
+    else:
+        return open(filename, mode )
+        
 # parse line for identifier/value pattern
 class LanguageUpdater:
     def __init__(self):
@@ -67,7 +75,7 @@ class LanguageUpdater:
     # opens file, writes dictionary
     def WriteDictionary1( self, translation ):
         # open outfile
-        self.outfile = open( translation, "w" )
+        self.outfile = OpenFile( translation, "w" ) 
 
         # write to it in condensed form
         self.WriteHeader()
@@ -89,7 +97,7 @@ class LanguageUpdater:
         # read translation into dictionary
         self.leadingComment = ""
         started = False
-        outfilein = open( translation, "r" )
+        outfilein = OpenFile( translation, "r" )
         self.dictionary = {}
         self.lostcomments = {}
         for line in outfilein.readlines():
@@ -110,10 +118,10 @@ class LanguageUpdater:
     # write contents of dictionary in the order its items appear in the file base.
     def WriteDictionary( self, base, translation ):
         # open outfile
-        self.outfile = open( translation, "w" )
+        self.outfile = OpenFile( translation, "w" )
         
         # open infile
-        infile  = open( base, "r" )
+        infile  = OpenFile( base, "r" )
     
         self.WriteHeader()
 
@@ -202,7 +210,7 @@ if __name__ == "__main__":
     # determine languages to update: everything included from
     # languages.txt.in except am/eng and custom.
     files = []
-    listfile = open("languages.txt.in")
+    listfile = OpenFile( "languages.txt.in", "r" )
     for line in listfile.readlines():
         if line.startswith("include"):
             file =line.split()[1]

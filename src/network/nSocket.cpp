@@ -835,25 +835,22 @@ int ANET_GetSocketAddr (int sock, struct sockaddr *addr)
 }
 
 //=============================================================================
-
-#if 0
-int ANET_AddrCompare(const struct sockaddr *addr1, const struct sockaddr *addr2)
+/*
+int ANET_AddrCompare (struct sockaddr *addr1, struct sockaddr *addr2)
 {
     if (addr1->sa_family != addr2->sa_family)
         return -1;
 
-    const struct sockaddr_in *addr1_in = reinterpret_cast< const struct sockaddr_in * >( addr1 );
-    const struct sockaddr_in *addr2_in = reinterpret_cast< const struct sockaddr_in * >( addr2 );
-
-    if (addr1_in->sin_addr.s_addr != addr2_in->sin_addr.s_addr)
+    if (((struct sockaddr_in *)addr1)->sin_addr.s_addr != ((struct sockaddr_in *)addr2)->sin_addr.s_addr)
         return -1;
 
-    if (addr1_in->sin_port != addr2_in->sin_port)
+    if (((struct sockaddr_in *)addr1)->sin_port != ((struct sockaddr_in *)addr2)->sin_port)
         return 1;
 
     return 0;
 }
-#endif
+*/
+    
 }   // namespace
 
 //=============================================================================
@@ -1522,8 +1519,13 @@ int nSocket::Create( void )
     // initialize networking at OS level
     sn_InitOSNetworking();
 
+    int socktype = socktype_;
+#ifndef WIN32
+    socktype |= SOCK_CLOEXEC;
+#endif
+
     // open new socket
-    socket_ = socket( family_, socktype_, protocol_ );
+    socket_ = socket( family_, socktype, protocol_ );
     if ( socket_ < 0 )
         return -1;
 

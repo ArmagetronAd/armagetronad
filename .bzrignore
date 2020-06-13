@@ -17,12 +17,14 @@ COPYING
 ChangeLog
 EclipseBuild
 ./INSTALL
+./compile
 Makefile.in
 ./aclocal.m4
 ./autom4te.cache
 ./config.h.in
 ./config.sub
 ./configure
+./compile
 ./depcomp
 ./install-sh
 ./missing
@@ -34,6 +36,7 @@ Makefile
 ./config.h
 ./config.log
 ./config.status
+./config.guess
 ./extrapaths
 ./stamp-h1
 ./universal_variable*
@@ -65,3 +68,4 @@ a.out.dSYM
 src/armagetronad_main_master
 src/doc/COPYING.txt
 rubbish
+./version.h

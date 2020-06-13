@@ -440,7 +440,7 @@ pid_t SpawnProcess(const char *program, char *const argv[], int *infp, int *outf
 
         execve(program, argv,  envp);
         perror("execve");
-        exit(1);
+        _exit(1);
     }
 
     if (infp == NULL)
@@ -473,26 +473,26 @@ static rScriptStream * sr_FindScriptStream( tString const & name )
 
 class rExecArray
 {
-    public:
-        rExecArray()
+public:
+    rExecArray()
         :data(), rawData_()
+    {
+    }
+    
+    char * const * GetRaw()
+    {
+        rawData_.SetLen( 0 );
+        for ( int i = 0; i < data.Len(); i++ )
         {
+            rawData_[ i ] = &( data( i ) )[ 0 ];
         }
-
-        char * const * GetRaw()
-        {
-            rawData_.SetLen( 0 );
-            for ( int i = 0; i < data.Len(); i++ )
-            {
-                rawData_[ i ] = &( data( i ) )[ 0 ];
-            }
-            rawData_.Insert( NULL );
-            return &rawData_[ 0 ];
-        }
-
-        tArray< tString > data;
-    private:
-        tArray< char * > rawData_;
+        rawData_.Insert( NULL );
+        return &rawData_[ 0 ];
+    }
+    
+    tArray< tString > data;
+private:
+    tArray< char * > rawData_;
 };
 
 class rEnvironment
@@ -503,7 +503,7 @@ public:
     :env_()
     {
     }
-
+    
     char * const * GetRaw()
     {
         return env_.GetRaw();
@@ -517,6 +517,7 @@ public:
             Add( it->first, it->second );
         }
     }
+
     void Add( char const * var, tString const & value )
     {
         env_.data[env_.data.Len()] = tString(var) + "=" + value;
@@ -543,6 +544,7 @@ static void sr_ScriptEnv( std::istream & s )
 static tConfItemFunc sr_scriptEnvConf( "SCRIPT_ENV", sr_ScriptEnv );
 static tAccessLevelSetter sr_scriptEnvALS( sr_scriptEnvConf, tAccessLevel_Owner );
 
+
 static void sr_SpawnScript( tString const & command )
 {
     // yes, rincludes are the one bit where CASACL is forbidden. And Maps, which
@@ -567,7 +569,7 @@ static void sr_SpawnScript( tString const & command )
             con << "Error: provide a command to spawn.\n";
             return;
         }
-
+        
         // Find the full path of the script
         {
             tString fullScriptPath = tDirectories::Data().GetReadPath( tString( "scripts/" ) + script );
@@ -576,10 +578,9 @@ static void sr_SpawnScript( tString const & command )
                 con << "Command \'" << script << "\' not found in <datadir>/scripts/.\n";
                 return;
             }
-
             script = fullScriptPath;
         }
-
+        
         arguments.data.Insert( script );
         while ( !stream.eof() && !stream.fail() )
         {
@@ -633,11 +634,11 @@ static void sr_SpawnScript( tString const & command )
         env.AddPath( "ARMAGETRONAD_PATH_VAR", tDirectories::Var() );
         env.AddPath( "ARMAGETRONAD_PATH_SCREENSHOT", tDirectories::Screenshot() );
         env.AddPath( "ARMAGETRONAD_PATH_RESOURCE", tDirectories::Resource() );
-
+        
         // add other data
-        env.Add("ARMAGETRONAD_ENCODING", st_internalEncoding);
+        env.Add( "ARMAGETRONAD_ENCODING", st_internalEncoding );
         env.Add( "ARMAGETRONAD_VERSION", tString( TRUE_ARMAGETRONAD_VERSION ) );
-
+        
         // add user-specified variables
         env.AddAll( sr_globalScriptEnv );
 

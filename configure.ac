@@ -1,4 +1,4 @@
-dnl I would like to do this to generate the version number...
+/dnl I would like to do this to generate the version number...
 dnl AC_DEFUN([AUTOMATIC_VERSION],syscmd([sh batch/make/version .]))
 
 dnl but have to do this with version generated in bootstrap.sh instead for some reason
@@ -29,7 +29,7 @@ dnl AC_CANONICAL_BUILD
 dnl AC_CANONICAL_HOST
 
 AC_PROG_RANLIB
-AM_INIT_AUTOMAKE([subdir-objects])
+AM_INIT_AUTOMAKE([subdir-objects tar-ustar])
 
 dnl detect which link commant to use
 AC_PROG_LN_S
@@ -38,14 +38,14 @@ dnl check whether m4 is available for documentation processing
 AC_CHECK_PROG(HAVE_M4,m4,true,false)
 AM_CONDITIONAL(HAVE_M4, test $HAVE_M4 = true)
 
-dnl check whether date accepts -r to refer to a file
-AM_CONDITIONAL(DATE_R, date +"%Y" -r $0 > /dev/null 2>&1)
+dnl dirty trick to allow verbatim output to Makefile.in -> Makefile
+dnl source: http://gnu-automake.7480.n7.nabble.com/ifdef-endif-issue-td2662.html
+AC_SUBST([protect], [""])
 
 dnl export version
 version=$VERSION
 AC_SUBST(version)
 
-AC_ARG_VAR(XML2_CONFIG,[Configuration script of libxml2 to use, defaults to xml2-config])
 AC_ARG_VAR(CXXFLAGS,Flags passed to the C++ compiler)
 AC_ARG_VAR(DEBUGLEVEL,[Debug level for developers, normal users can safely ignore it. Accepted values go from 0 to 5. See README-DEVELOPER for details.])
 AC_ARG_VAR(CODELEVEL,[Code checking strictness level for developers, normal users can safely ignore it. Accepted values go from 0 to 4. See README-DEVELOPER for details.])
@@ -60,6 +60,8 @@ AC_ARG_VAR(APBUILD_STATIC,[Autopackage static libraries.])
 
 dnl a modern autoconf is required to process this
 AC_PREREQ(2.50)
+
+PKG_PROG_PKG_CONFIG
 
 build_regular=true
 
@@ -131,7 +133,7 @@ AM_CONDITIONAL(BUILDMAIN, test x$armamain = xtrue)
 
 # flag to set when mockup versions of the executables should be built to save
 # compile time when testing the release process
-AM_CONDITIONAL(BUILDFAKERELEASE, test "$ARMAGETRONAD_FAKERELEASE" != "")
+AM_CONDITIONAL(BUILDFAKERELEASE, test "$ARMAGETRONAD_FAKERELEASE" != "" && test "$ARMAGETRONAD_FAKERELEASE" != "false" && test "$ARMAGETRONAD_FAKERELEASE" != "no")
 
 # set replacement variables for dedicated server
 progtitle_serverorclient=" Client"
@@ -330,12 +332,18 @@ dnl		])
 dnl	])
 dnl])
 
-
 if test $CODELEVEL -ge 1; then
     CXXFLAGS="$CXXFLAGS -Wall"
     
     dnl careful, only supported on GCC 4.2 and later
     AX_CXXFLAGS_GCC_OPTION(-Wno-strict-overflow)
+
+    dnl this one is from GCC 7 (change to 1 or 2 in the future,
+    dnl leave at default and use [[fallthrough]] (std C++ 17)
+    AX_CXXFLAGS_GCC_OPTION(-Wimplicit-fallthrough=1)
+
+
+
 fi
 
 dnl test $CODELEVEL -ge 2 && CXXFLAGS="$CXXFLAGS -Wshadow -Wpointer-arith -Wfloat-equal -W -Wcast-qual -Wcast-align -Wconversion -Wunreachable-code --pedantic -Winline"
@@ -572,29 +580,10 @@ dnl         libxml2
 dnl *************************************************
 
 if test x$armamain = xtrue; then
-
-test -z "$XML2_CONFIG" && XML2_CONFIG=xml2-config
-
-if ! $XML2_CONFIG --libs > /dev/null; then
-  AC_MSG_ERROR([Fatal error: the libxml2 configuration script $XML2_CONFIG does not work/exist.])
-fi
-
-# if test x$armamain = xtrue; then
-AC_CHECK_LIB(xml2,xmlParseMemory,
-CPPFLAGS="$CPPFLAGS `$XML2_CONFIG --cflags`"
-LIBS="`$XML2_CONFIG --libs` $LIBS"
-AC_DEFINE(HAVE_LIBXML2, 1, [Define if you have the xml2 library (-lxml2).]),
-AC_MSG_ERROR([You need the library xml2 to compile ${progtitle}. Read the file doc/install_linux.html.])
-,`$XML2_CONFIG --libs`)
-
-AC_CHECK_FUNC(xmlParserInputBufferCreateFilenameDefault,
-,
-AC_MSG_ERROR([
-	Your xml2 library is obsolete!
-	Please upgrade to 2.6.11 or later
-])
-)
-# fi
+  PKG_CHECK_MODULES([XML2], [libxml-2.0 >= 2.6.11])
+  CPPFLAGS="$CPPFLAGS $XML2_CFLAGS"
+  LIBS="$LIBS $XML2_LIBS"
+  AC_DEFINE(HAVE_LIBXML2, 1, [Define if you have the libxml2 library])
 
 dnl *************************************************
 dnl         Armathentication Threading
@@ -994,6 +983,10 @@ src/thirdparty/particles/Makefile
 resource/Makefile
 config/Makefile
 desktop/Makefile
+docker/build/Makefile
+docker/build/setup_ci_test.sh
+docker/build/context/version.sh
+docker/deploy/targets.sh
 desktop/armagetronad.desktop
 )
 

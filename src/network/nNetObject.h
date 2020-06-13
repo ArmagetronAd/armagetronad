@@ -137,11 +137,8 @@ public:
     }
 
     unsigned short ID() const{
-        tASSERT(this);
-        if (this)
-            return id;
-        else
-            return 0;
+        tASSERT_THIS();
+        return id;
     }
 
     static unsigned short Owner(nNetObject const *pThis)
@@ -153,11 +150,8 @@ public:
     }
 
     unsigned short Owner() const{
-        tASSERT(this);
-        if (this)
-            return owner;
-        else
-            return ::sn_myNetID;
+        tASSERT_THIS();
+        return owner;
     }
 
     inline nMachine & GetMachine() const;  //!< returns the machine this object belongs to
@@ -256,6 +250,7 @@ public:
 
     // shall the server accept sync messages from the clients?
     virtual bool AcceptClientSync() const;
+    static bool AcceptClientSyncStatic();
 
 
     void GetID();			// get a network ID
@@ -349,6 +344,13 @@ template<class T> class nNOInitialisator:public nDescriptor{
             }
             else
             {
+                if (sn_GetNetState()==nSERVER && !T::AcceptClientSyncStatic())
+                {
+                    // client is not allowed to send objects of this type, kick and ignore
+                    Cheater(m.SenderID());
+                    return;
+                }
+
                 nNetObjectRegistrar registrar;
                 //			nNetObject::RegisterRegistrar( registrar );
                 tJUST_CONTROLLED_PTR< T > n=new T(m);
@@ -366,13 +368,15 @@ template<class T> class nNOInitialisator:public nDescriptor{
 
                 if (sn_GetNetState()==nSERVER && !n->AcceptClientSync())
                 {
-                    Cheater(m.SenderID()); // cheater!
-                    n->Release();
-                }
-                else if ( static_cast< nNetObject* >( sn_netObjects[ n->ID() ] ) != n )
-                {
-                    // object was unable to be registered
-                    n->Release(); // silently delete it.
+#ifdef DEBUG
+                    tERR_WARN("AcceptClientSync was supposed to be checked earler.");
+#endif
+                    Cheater(m.SenderID());
+
+                    // deregister
+                    if(sn_netObjects[ n->ID() ].operator->() == n.operator->() )
+                        sn_netObjects[ n->ID() ] = NULL;
+                    n = NULL;
                 }
             }
 #ifndef NOEXCEPT

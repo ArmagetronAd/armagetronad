@@ -45,7 +45,6 @@ class eNetGameObject:public eGameObject,public nNetObject{
 protected:
     REAL lastClientsideAction;
     REAL lastAttemptedSyncTime;
-    REAL pingOverflow;
 
     tCHECKED_PTR(ePlayerNetID)    player; // the player controlling this cycle.
     // NULL means the AI.

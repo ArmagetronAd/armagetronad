@@ -323,10 +323,10 @@ public:
     virtual void ActionOnDelete();
 
     // Check if a player can be respawned. Relaying on team alone is not enough.
-	// If a player enters as spectator, they are still assumed to be on a team.
-	// When a player is suspeded they are also on a team until the end of the round.
-	bool CanRespawn() const { return currentTeam && suspended_ == 0 && ! spectating_; }
-	
+    // If a player enters as spectator, they are still assumed to be on a team.
+    // When a player is suspeded they are also on a team until the end of the round.
+    bool CanRespawn() const { return currentTeam && suspended_ == 0 && ! spectating_; }
+ 
     // chatting
     bool IsChatting() const { return chatting_; }
     void SetChatting ( ChatFlags flag, bool chatting );
@@ -366,6 +366,7 @@ public:
     virtual void 			PrintName(tString &s) const;
 
     virtual bool 			AcceptClientSync() const;
+    static  bool 			AcceptClientSyncStatic();
     virtual void 			WriteSync(nMessage &m);
     virtual void 			ReadSync(nMessage &m);
     virtual nDescriptor&	CreatorDescriptor() const;
@@ -399,7 +400,9 @@ public:
     bool IsActive() const { return !disconnected; }
 
     bool IsSilenced( void ) const { return silenced_; }
-    void SetSilenced( bool silenced ) { silenced_ = silenced; }
+    void SetSilenced( bool silenced ); // { silenced_ = silenced; }
+
+    // only for the menu
     bool& AccessSilenced( void ) { return silenced_; }
 
     bool IsSuspended ( void ) { return suspended_; }
