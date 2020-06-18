@@ -2958,7 +2958,7 @@ bool gBaseZoneHack::Timestep( REAL time )
                 eGameObject *pGameObject = pPlayer->Object();
 
                 if ((!pGameObject) ||
-                    ((!pGameObject->Alive()) &&
+                    ((pPlayer->CanRespawn()) &&
                     (pGameObject->DeathTime() < (time - 1))))
                 {
                     lastRespawnRemindTime_ = time - sg_baseRespawnRemindTime - 1;
@@ -3016,11 +3016,11 @@ bool gBaseZoneHack::Timestep( REAL time )
             eGameObject *pGameObject = pPlayer->Object();
 
             if ((!pGameObject) ||
-                (!pGameObject->Alive()))
+                (pPlayer->CanRespawn()))
             {
                 waiting++;
             }
-            else
+            else if(pGameObject->Alive())
             {
                 alive++;
             }
@@ -3779,7 +3779,7 @@ void gBaseZoneHack::OnEnter( gZone * target, REAL time )
                     eGameObject *pGameObject = pPlayer->Object();
 
                     if ((!pGameObject) ||
-                        ((!pGameObject->Alive()) &&
+                        ((pPlayer->CanRespawn()) &&
                         (pGameObject->DeathTime() < (time - 1))))
                     {
                         lastRespawnRemindTime_ = time - sg_baseRespawnRemindTime - 1;
@@ -3894,7 +3894,7 @@ void gBaseZoneHack::OnEnter( gZone * target, REAL time )
                         eGameObject *pGameObject = pPlayer->Object();
 
                         if ((!pGameObject) ||
-                            ((!pGameObject->Alive()) &&
+                            ((pPlayer->CanRespawn()) &&
                             (pGameObject->DeathTime() < (time - 1))))
                         {
                             lastRespawnRemindTime_ = time - sg_baseRespawnRemindTime - 1;
@@ -7650,7 +7650,8 @@ void gSoccerZoneHack::OnEnter( gCycle *target, REAL time )
                         if (p)
                         {
                             gCycle *cycle = dynamic_cast<gCycle *>(p->Object());
-                            if (!cycle || (!cycle->Alive()))
+                            //if (!cycle || (!cycle->Alive()))
+                            if(p->CanRespawn())
                             {
                                 eCoord cyclePos, cycleDir;
                                 pSpawn->Spawn(cyclePos, cycleDir);
@@ -8062,6 +8063,7 @@ void gRespawnZoneHack::OnEnter( gCycle * target, REAL time )
 
         if (sg_cycleRespawnZone && (deadPlayer_->CurrentTeam() == target->Team()))
         {
+            if(!deadPlayer_->CanRespawn()) return;
             gCycle *newCycle = new gCycle(grid, GetPosition(), SpawnDirection(), deadPlayer_);
             deadPlayer_->ControlObject(newCycle);
 
@@ -8088,6 +8090,7 @@ void gRespawnZoneHack::OnEnter( gCycle * target, REAL time )
 
         if (sg_cycleRespawnZoneEnemies && (deadPlayer_->CurrentTeam() != target->Team()))
         {
+            if(!deadPlayer_->CanRespawn()) return;
             gCycle *newCycle = new gCycle(grid, GetPosition(), SpawnDirection(), deadPlayer_);
             deadPlayer_->ControlObject(newCycle);
 
