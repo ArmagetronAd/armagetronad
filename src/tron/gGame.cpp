@@ -192,7 +192,7 @@ gGameSettings::gGameSettings(int a_scoreWin,
                              int a_limitTime, int a_limitRounds, int a_limitScore,
                              int a_numAIs,    int a_minPlayers,  int a_AI_IQ,
                              bool a_autoNum, bool a_autoIQ,
-                             int a_speedFactor, int a_sizeFactor,
+                             REAL a_speedFactor, REAL a_sizeFactor,
                              gGameType a_gameType,  gFinishType a_finishType,
                              int a_minTeams,
                              REAL a_winZoneMinRoundTime, REAL a_winZoneMinLastDeath
@@ -366,17 +366,17 @@ void gGameSettings::Menu()
     					gHUMAN_VS_AI);
     */
 
-    uMenuItemInt speedconf
+    uMenuItemReal speedconf
     (&GameSettings,
      "$game_menu_speed_text",
      "$game_menu_speed_help",
-     speedFactor,-10,10);
+     speedFactor,(REAL)-10,(REAL)10,(REAL)0.5);
 
-    uMenuItemInt sizeconf
+    uMenuItemReal sizeconf
     (&GameSettings,
      "$game_menu_size_text",
      "$game_menu_size_help",
-     sizeFactor,-10,10);
+     sizeFactor,(REAL)-10,(REAL)10,(REAL)0.5);
 
     uMenuItemSelection<REAL> wsuconf
     (&GameSettings,
@@ -547,8 +547,8 @@ static tConfItem<int>    mp_iq("AI_IQ"       ,multiPlayer.AI_IQ);
 static tConfItem<bool>   mp_an("AUTO_AIS"    ,multiPlayer.autoNum);
 static tConfItem<bool>   mp_aq("AUTO_IQ"     ,multiPlayer.autoIQ);
 
-static tConfItem<int>    mp_sf("SPEED_FACTOR",multiPlayer.speedFactor);
-static tConfItem<int>    mp_zf("SIZE_FACTOR" ,multiPlayer.sizeFactor);
+static tConfItem<REAL>   mp_sf("SPEED_FACTOR",multiPlayer.speedFactor);
+static tConfItem<REAL>   mp_zf("SIZE_FACTOR" ,multiPlayer.sizeFactor);
 
 static tConfItem<gGameType>    mp_gt("GAME_TYPE",multiPlayer.gameType);
 static tConfItem<gFinishType>  mp_ft("FINISH_TYPE",multiPlayer.finishType);
@@ -580,8 +580,8 @@ static tConfItem<int>    sp_iq("SP_AI_IQ"       ,singlePlayer.AI_IQ);
 static tConfItem<bool>   sp_an("SP_AUTO_AIS"    ,singlePlayer.autoNum);
 static tConfItem<bool>   sp_aq("SP_AUTO_IQ"     ,singlePlayer.autoIQ);
 
-static tConfItem<int>    sp_sf("SP_SPEED_FACTOR",singlePlayer.speedFactor);
-static tConfItem<int>    sp_zf("SP_SIZE_FACTOR" ,singlePlayer.sizeFactor);
+static tConfItem<REAL>   sp_sf("SP_SPEED_FACTOR",singlePlayer.speedFactor);
+static tConfItem<REAL>   sp_zf("SP_SIZE_FACTOR" ,singlePlayer.sizeFactor);
 
 static tConfItem<gGameType>    sp_gt("SP_GAME_TYPE",singlePlayer.gameType);
 static tConfItem<gFinishType>  sp_ft("SP_FINISH_TYPE",singlePlayer.finishType);
@@ -1272,7 +1272,7 @@ void exit_game_objects(eGrid *grid){
     exit_game_grid(grid);
 }
 
-REAL exponent(int i)
+/*REAL exponent(int i)
 {
     int abs = i;
     if ( abs < 0 )
@@ -1294,6 +1294,11 @@ REAL exponent(int i)
         ret = 1/ret;
 
     return ret;
+}*/
+
+REAL exponent(REAL i)
+{
+	return pow(2,(i/2));
 }
 
 extern REAL max_player_speed;
