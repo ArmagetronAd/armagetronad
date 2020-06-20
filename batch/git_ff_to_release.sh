@@ -8,7 +8,8 @@
 sd=$1
 test -z "${sd}" && sd=`dirname $0`
 
-if git -C ${sd} status; then
+git update-index --refresh 
+if ! git diff-index --quiet HEAD --; then
     echo ""
     echo "Local modifications detected, abort. Commit first."
     exit 1
