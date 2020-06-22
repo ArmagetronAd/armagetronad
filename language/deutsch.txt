@@ -1584,8 +1584,8 @@ player_police_help            Hier kann man andere Spieler stummschalten oder vo
 player_police_silence_text    Stummschaltung
 player_police_silence_help    Hier kann man andere Spieler zum schweigen bringen ( nur lokal ).
 
-silence_player_help           Wenn dieser Menupunkt aktiviert ist, dann werden alle Nachrichten von diesem Spieler ignoriert.
-silence_player_text           Ignoriere \1 :
+ignore_player_help            Wenn dieser Menupunkt aktiviert ist, dann werden alle Nachrichten von diesem Spieler ignoriert.
+ignore_player_text            Ignoriere \1 :
 
 player_police_kick_text       Rausschmiss
 player_police_kick_help       Hier kann man vorschlagen, andere Spieler vom Server zu verweisen.
