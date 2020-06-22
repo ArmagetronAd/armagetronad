@@ -99,7 +99,8 @@ cycle_rubber_legacy_help      Restauriert das alte, von der Darstellungsgeschwin
 cycle_rubber_timebased_help   Die Rate, mit der sich das Rubber-Meter füllt, wird von der Geschwindigkeit des Vehikels bestimmt, wenn diese Variable 0 ist. Bei einem Wert von 0 ist ist die Rate konstant. Zwischenwerte und Werte außerhalb von 0 und 1 sind ebenfalls erlaubt.
 cycle_rubber_speed_help       Maximale logarithmische Annäherungsgeschwindigket an Wände, wenn Kollisionstoleranz aktiv ist (pro Sekunde kann das Vehikel der Wand nur um den Faktor ca. 0.4^{dieser Wert} näher kommen)
 cycle_rubber_mindistance_help Die Kollisionstoleranz hält Vehikel mindestens in diesem Abstand zu Wänden
-cycle_rubber_mindistance_gap_help Wenn dies auf einen positiven Wert gesetzt wird, dann wirkt es als maximalwert für CYCLE_RUBBER_MINDISTANCE: Wenn ein kleines Loch der Breite x sichtbar ist, wird der effektive Wert von _MINDISTANCE nicht größer als x * CYCLE_RUBBER_MINDISTANCE_GAP. Nützlich für "offenes" Spiel.
+cycle_rubber_mindistance_gap_help Wenn dies auf einen positiven Wert gesetzt wird, dann wirkt es als Maximalwert für CYCLE_RUBBER_MINDISTANCE: Wenn ein kleines Loch der Breite x sichtbar ist, wird der effektive Wert von _MINDISTANCE nicht größer als x * CYCLE_RUBBER_MINDISTANCE_GAP. Nützlich für "offenes" Spiel.
+cycle_rubber_mindistance_gap_backdoor_help Wie CYCLE_RUBBER_MINDISTANCE_GAP, bezieht sich aber nur auf Öffnungen, die zur Flucht nach hinten verwendet werden können. Wenn es auf 0 gesetzt bleibt, gilt dafür einfach CYCLE_RUBBER_MINDISTANCE_GAP. 
 cycle_rubber_mindistance_gap_side_help Löcher für CYCLE_RUBBER_MINDISTANCE_GAP werden links und rechts in diesem Abstand gesucht.
 cycle_rubber_mindistance_ratio_help Zusatzwert zu CYCLE_RUBBER_MINDISTANCE, wächst mit der Länge der Wand an
 cycle_rubber_mindistance_reservoir_help Zusatzwert zu CYCLE_RUBBER_MINDISTANCE, der bei leerem Rubber-Meter voll und zum tragen kommt und mit steigendem Füllstand langsam ausgeblendet wird.
@@ -334,9 +335,17 @@ player_chat_wait_teamleader_help Setze dies auf 1, wenn nur Teamchefs eine Spiel
 wait_for_external_script_help Lässt den Server zwischen zwei Runden auf ein externes Script warten, bis das Script den Wert wieder auf 0 setzt.
 wait_for_external_script_timeout_help Maximale Zeit in Sekunden, die der Server über WAIT_FOR_EXTERNAL_SCRIPT pausiert werden kann. Wenn die Zeit abgelaufen ist, startet die nächste Runde auch so.
 
+spawn_script_help             Startet ein externes Skript aus dem Verzeichnis scripts/ im Datenpfad.
+respawn_script_help           Startet ein externes Skript aus dem Verzeichnis scripts/ im Datenpfad, falls es nicht schon läuft.
+force_respawn_script_help     Startet ein externes Skript aus dem Verzeichnis scripts/ im Datenpfad, bricht vorher eine eventuell schon laufende Instanz ab.
+kill_script_help              Bricht ein Skript ab. Das Argument muss genau dem von *SPAWN_SCRIPT entsprechen.
+list_scripts_help             Zeigt die gerade laufenden Skripte an.
+script_env_help               Setzt Umgebungsvariablen für Skripte. Verwendung: SCRIPT_ENV <Variabeln-Name> <Wert>
+
 chatter_remove_time_help      Zeit in Sekunden im Chatbot-Zustand, nach der ein Spieler aus dem Spiel geworfen wird
 idle_remove_time_help         Zeit in Sekunden ohne Steuerungsbefehl, nach der ein Spieler aus dem Spiel geworfen wird
 idle_kick_time_help           Zeit in Sekunden ohne Steuerungsbefehl, nach der ein Spieler vom Server geworfen wird
+keep_player_slot_help         Wenn dies auf 1 gesetzt wird, so hält der Server immer einen Platz für Neuankömmlinge frei, indem als unwürdig erachtete Zuschauer entfernt werden.
 
 #********************************************
 #********************************************
@@ -389,6 +398,11 @@ ping_flood_time_20_help       Kürzeste tolerierte Zeit, während der 10 Pings von
 ping_flood_time_50_help       Kürzeste tolerierte Zeit, während der 10 Pings von einer Maschine kommen dürfen.
 ping_flood_time_100_help      Kürzeste tolerierte Zeit, während der 10 Pings von einer Maschine kommen dürfen.
 ping_flood_global_help        Die Zeiten, die bei PING_FLOOD_TIME_X angegeben sind, zählen, mit diesem Faktor multipliziert, auch für Pings von allen Maschinen zusammengenommen. Ein negativer Wert schaltet dieses Feature ab.
+connection_flood_sensitivity_help Die Zeiten, die bei PING_FLOOD_TIME_X angegeben sind, zählen, mit diesem Faktor multipliziert, auch für alle Nachrichten von allen noch nicht verbundenen Maschinen. Ein negativer Wert schaltet dieses Feature ab.
+connection_limit_help         Maximale Zahl von Paketen von umbekannten anderen Maschinen, die in einem Rutsch behandelt werden
+anti_spoof_help               Wenn dies auf 1 gesetzt wird, werden alle Clients, die eine Verbindung aufbauen wollen, erst auf gefälschte IP-Adressen getestet. Im Schutzmodus passiert das automatisch, kann aber auch so nützlich sein.
+turtle_mode_activated         Der Server ist unter schwerer Last, aktiviere Schutzmodus. Kommunikation mit neuen Clients wird wird rationiert.\n
+turtle_mode_deactivated       Die erhöhte Last hat sich wieder normalisiert, deaktiviere Schutzmodus.\n
 
 shuffle_spam_messages_per_round_help Maximale Zahl an Positionsänderungsnachrichten, die pro Spieler und pro Runde gezeigt werden. Null bedeutet keine Grenze.
 spam_protection_repeat_help   Mindestzeit, die zwischen gleichlautenden Chat-Nachrichten liegen muss.
@@ -419,6 +433,10 @@ spam_teamchage                Du hast zu oft das Team gewechselt.
 spam_vote_kick_issue          Du wolltest zu viele andere Spieler vom Server werfen.
 spam_vote_rejected            Zu viele deiner Abstimmungen sind fehlgeschlagen.
 
+# default shouting
+default_shout_spectator_help  0: Zuschauer reden als Standard nur mit Zuschauern. 1: Zuschauer reden als Standard mit allen. 2: Zuschauer reden als Standard mit allen, und die übliche Zugriffslevelprüfung fällt dabei aus.
+default_shout_player_help     0: Spieler reden als Standard nur mit Teammitgliedern. 1: Spieler reden als Standard mit allen. 2: Spieler reden als Standard mit allen, und die übliche Zugriffslevelprüfung fällt dabei aus.
+
 #********************************************
 #********************************************
 #
@@ -429,11 +447,24 @@ spam_vote_rejected            Zu viele deiner Abstimmungen sind fehlgeschlagen.
 
 allow_enemies_same_ip_help    Wenn dies auf 1 gesetzt wird, dürfen Spieler von derselben Netwerkverbindung für Punkte gegeneinander spielen.
 allow_enemies_same_client_help Wenn dies auf 1 gesetzt wird, dürfen Spieler von derselben Netwerkverbindung für Punkte gegeneinander spielen.
+whitelist_enemies_username_help Spieler mit Login-Namen auf dieser Liste (mit Leerzeichen getrennt) können für Punkte gegeneinander spielen.
+whitelist_enemies_ip_help     Alle Spieler mit IP-Adressen von dieser Liste (mit Leerzeichen getrennt) können für Punkte gegeneinander spielen.
+whitelist_enemies_success     \1 Einträge zur Liste der erlaubten Feinde hinzugefügt.
 
 allow_control_during_chat_help Wenn dies auf 1 gesetzt wird, dürfen Spieler vom Chat-Modus aus ihr Vehikel steuern (dabei verlieren sie natürlich den Chatbot und die gelbe Pyramide über dem Vehikel).
 
 allow_imposters_help          Wenn dies auf 1 gesetzt wird, dürfen zwei Spieler denselben Namen tragen. Sonst wird einer automatisch umbenannt.
 allow_impostors_help          Wenn dies auf 1 gesetzt wird, dürfen zwei Spieler denselben Namen tragen. Sonst wird einer automatisch umbenannt.
+
+timebot_kick_severity_help    Wenn Spieler von der Timebot-Erkennung vom Server geworfen werden, geschiet es mit diesem Schweregrad. Das bestimmt die Zeit, die ein automatischer Ban dauert.
+timebot_sensitivity_help      Empfindlichkeit des Timebot-Erkennungscodes. 1.0 ist der Standard und davon sollte man nicht mehr als 0.5 abweichen.
+timebot_action_medium_help    Konsequenz, wenn ein mittelmäßiger Verdacht auf Timebot-Unterstützung vorliegt. 0: nichts, 1: es wird geloggt, 2: Moderatoren werden benachrichtigt, 3: alle Spieler werden benachrichtigt, 4: der Spieler wird rausgeworfen.
+timebot_action_high_help      Konsequenz, wenn ein starker Verdacht auf Timebot-Unterstützung vorliegt. 0: nichts, 1: es wird geloggt, 2: Moderatoren werden benachrichtigt, 3: alle Spieler werden benachrichtigt, 4: der Spieler wird rausgeworfen.
+timebot_action_max_help       Konsequenz, wenn ein sehr starker Verdacht auf Timebot-Unterstützung vorliegt. 0: nichts, 1: es wird geloggt, 2: Moderatoren werden benachrichtigt, 3: alle Spieler werden benachrichtigt, 4: der Spieler wird rausgeworfen.
+
+timebot_action_medium         \1 kann seine Aktionen hervorragend timen, fast besser als ein Mensch das können sollte.\n
+timebot_action_high           \1 kann seine Aktionen sehr verdächtig gut timen.\n
+timebot_action_max            \1 verwendet wahrscheinlich einen Timing-Assistenten.\n
 
 #********************************************
 #********************************************
@@ -497,9 +528,11 @@ votes_cancel_help             Bricht alle laufenden Abstimmungen a.
 max_votes_per_voter_help      Maximalzahl der Abstimmungen von jedem Stimmberechtigten, die gleichzeitig laufen könnnen.
 voting_start_decay_help       Nach sovielen Sekunden wird begonnen, die Enthaltungen in einer Abstimmung zu ignorieren; es kommt dadurch auch bei nicht absoluten Mehrheiten zu einem Ergebnis.
 voting_decay_help             Alle soviele Sekunden wird eine Enthaltung mehr ignoriert.
-voting_bias_help              fügt so viele virtuelle Wähler hinzu, die sich gegen jede Veränderung aussprechen.
-voting_bias_kick_help         fügt so viele virtuelle Wähler hinzu, die sich gegen jeden Rauswurf aussprechen.
-voting_bias_suspend_help      fügt so viele virtuelle Wähler hinzu, die sich gegen jede Suspendierung stellen.
+voting_bias_help              Fügt so viele virtuelle Wähler hinzu, die sich gegen jede Veränderung aussprechen.
+voting_bias_kick_help         Fügt so viele virtuelle Wähler hinzu, die sich gegen jeden Rauswurf aussprechen.
+voting_bias_suspend_help      Fügt so viele virtuelle Wähler hinzu, die sich gegen jede Suspendierung stellen.
+voting_bias_silence_help      Fügt so viele virtuelle Wähler hinzu, die sich gegen jede Stummschaltung stellen.
+voting_bias_voice_help        Fügt so viele virtuelle Wähler hinzu, die sich gegen jede Aufhebung einer Stummschaltung stellen.
 voting_bias_include_help      fügt so viele virtuelle Wähler hinzu, die sich gegen jede Include-Abstimmung stellen.
 voting_bias_command_help      fügt so viele virtuelle Wähler hinzu, die sich gegen jede Kommando-Abstimmung stellen.
 
@@ -541,6 +574,7 @@ recording_debuglevel_help     Niveau der zusätzlichen Informationen, die zur Feh
 fast_forward_maxstep_help     Maximale Zeit in aufgezeichneten Sekunden, die zwischen Renderschritten im schnellen Vorlauf liegt
 fast_forward_maxstep_real_help Maximale Zeit in echten Sekunden, die zwischen Renderschritten im schnellen Vorlauf liegt
 fast_forward_maxstep_rel_help Maximale Zeit gemessen in der Zeit bis zum Vorspulziel, die zwischen Renderschritten liegt
+stop_recording_help           Stoppt eine laufende Debug-Aufzeichnung, um resourcen zu sparen. Eine Wiederaufnahme ist nicht möglich.
 
 #********************************************
 #********************************************
@@ -628,6 +662,7 @@ dedicated_idle_help           Nach dieser Zeit (in Stunden) beendet sich der Ded
 dedicated_fps_help            Maximale Zahl der Simulationsschritte pro Sekunde, die der Server ausführen soll
 dedicated_fps_idle_factor_help Maximale Zahl der Simulationsschritte pro Sekunde, die der Server ausführen soll, währent gerade kein eingehender Netzwerkverkehr vorliegt
 talk_to_master_help           Soll dieser Server im Internet bekannt gemacht werden?
+add_master_server_help        Macht diesen Server einem weiterem Master-Server bekannt. Werwendung: ADD_MASTER_SERVER <server IP/DNS-Name> <port>(optional, standard=4533).
 max_out_rate_help             Maximale Netzwerkbandbreite (Ausgabe)
 max_in_rate_help              Maximale Netzwerkbandbreite (Eingabe)
 ping_charity_help             Ping-Spende: Wieviel Ping möchtest Du gerne von deinen minderbemittelten Mitspielern übernehmen?
@@ -701,6 +736,7 @@ score_locx_help               Horizontale Position der Punktzahl in der Anzeige
 score_locy_help               Vertikale Position der Punktzahl in der Anzeige
 score_size_help               Göße der Punktzahl in der Anzeige
 cm_locy_help                  Vertikale Position der Zentralnachrichten vom Server
+hud_cache_threshold_help      Update-Schwelle für HUD-Anzeigen, wenn Display-Listen-Optimierung aktiv ist. Erst, wenn die Änderung der Anzeigen eine durch diesen Wert bestimmte Schwelle überschreiten, werden sie neu gezeichnet.
 
 #floor
 grid_size_help                Abstand zwischen Rasterlinien
@@ -766,9 +802,11 @@ ladderlog_write_authority_blurb_help Schreibt in ladderlog.txt: AUTHORITY_BLURB 
 ladderlog_write_basezone_conquered_help Schreibt in ladderlog.txt: BASEZONE_CONQUERED <Team> <cx> <cy>
 ladderlog_write_basezone_conquerer_help Schreibt in ladderlog.txt: BASEZONE_CONQUERER <Spieler>
 ladderlog_write_chat_help     Schreibt in ladderlog.txt: CHAT <Redner> [/me] <was er sagt>
+ladderlog_write_command_help  Schreibe in ladderlog.txt: COMMAND <Kommando> <Spieler> <Text>
 ladderlog_write_death_frag_help Schreibt in ladderlog.txt: DEATH_FRAG <Beute> <Jäger>
 ladderlog_write_death_suicide_help Schreibt in ladderlog.txt: DEATH_SUICIDE <Spieler>
 ladderlog_write_death_teamkill_help Schreibt in ladderlog.txt: DEATH_TEAMKILL <Beute> <Jäger>
+ladderlog_write_encoding_help Schreibt in ladderlog.txt: ENCODING <zeichensatz>. Spezifiziert die verwendete Zeichensatz-Encodierung.
 ladderlog_write_game_end_help Schreibt in ladderlog.txt: GAME_END
 ladderlog_write_game_time_help Schreibt in ladderlog.txt:  GAME_TIME <Zeit> (beachte ebenfalls: GAME_TIME_INTERVAL)
 ladderlog_write_match_winner_help Schreibt in ladderlog.txt: MATCH_WINNER <Gewinner>
@@ -779,13 +817,20 @@ ladderlog_write_online_player_help Schreibt in ladderlog.txt: ONLINE_PLAYER <Nam
 ladderlog_write_player_entered_help Schreibt in ladderlog.txt: PLAYER_ENTERED <Name> <IP> <Spitzname>
 ladderlog_write_player_left_help Schreibt in ladderlog.txt: PLAYER_LEFT <Name> <IP>
 ladderlog_write_player_renamed_help Schreibt in ladderlog.txt: PLAYER_RENAMED <alter Name> <neuer Name> <IP> <Spitzname>
+ladderlog_write_positions_help Schreibt in ladderlog.txt: POSITIONS <Team> <Spieler1 Spieler2 ...>
 ladderlog_write_round_score_help Schreibt in ladderlog.txt: ROUND_SCORE <Punktzahl diese Runde> <Spieler> [<Team>]
 ladderlog_write_round_score_team_help Schreibt in ladderlog.txt: ROUND_SCORE_TEAM <Punktzahl diese Runde> <Team>
 ladderlog_write_round_winner_help Schreibt in ladderlog.txt: ROUND_WINNER <Gewinner>
 ladderlog_write_sacrifice_help Schreibt in ladderlog.txt: SACRIFICE <Spieler, der das Loch benutzt hat> <Spieler, der das Loch gemacht hat> <Spieler, dessen Wand durchlöchert wurde>
 ladderlog_write_wait_for_external_script_help Schreibt in ladderlog.txt: WAIT_FOR_EXTERNAL_SCRIPT (beachte ebenfalls: WAIT_FOR_EXTERNAL_SCRIPT und WAIT_FOR_EXTERNAL_SCRIPT_TIMEOUT)
+ladderlog_write_team_created_help Schreibt in ladderlog.txt: TEAM_CREATED <Teamname>
+ladderlog_write_team_destroyed_help Schreibt in ladderlog.txt: TEAM_DESTROYED <Teamname>
+ladderlog_write_team_renamed_help Schreibt in ladderlog.txt: TEAM_RENAMED <alter Name> <neuer Name>
+ladderlog_write_team_player_added_help Schreibt in ladderlog.txt: TEAM_PLAYER_ADDED <Teamname> <Spieler>
+ladderlog_write_team_player_removed_help Schreibt in ladderlog.txt: TEAM_PLAYER_REMOVED <Teamname> <Spieler>
 ladderlog_game_time_interval_help Wenn dies auf einen positiven Wert gesetz wird, so wird alle n Sekunden eine Statusmeldung ins Ladder-Log geschrieben.
 chat_log_help                 Schreibt maschinenlesbares Chatlog in var/chatlog.txt
+console_log_help              Schreibt alle Konsolennachrichten in ladderlog.txt
 show_fps_help                 Aktiviert Performance-Anzeige 
 show_recording_time_help      Aktiviert Aufzeichnungszeit-Anzeige
 floor_mirror_help             Spiegelung des Bodens
@@ -849,6 +894,9 @@ software_renderer_help        Ist der OpenGL Renderer nicht Hadware-Beschleunigt
 #model
 use_displaylists_help         Sollen display lists für die Vehikel verwendet werden?
 
+#walls
+simple_trail_help             Wenn dies auf 1 gesetzt wird, werden die Wände der Vehikel nur vereinfacht dargestellt. Für sehr alte Rechner.
+
 #********************************************
 #********************************************
 #
@@ -899,6 +947,8 @@ admin_pass_help               Kennwort für das grundlegende im Spiel admin
 
 backward_compatibility_help   Maximale Zahl älterer Versionen, die noch unterstützt werden.
 new_feature_delay_help        Deaktiviert alle Features, die erst während der letzten X Versionen des Netzwerkprotokolls hinzugekommen sind.
+min_protocol_version_help     Kleinste Protokoll-Version, die zum Spielen zugelassen ist.
+max_protocol_version_help     Wenn dies > 0 ist, ist es die höchste unterstützte Protokollversion. Features, die erst un höheren Versionen dazugekommen sind, werden abgeschaltet.
 
 # program control
 quit_help                     Beendet den Serverprozess.
@@ -938,6 +988,7 @@ player_list_search            \1: Suchmuster "\n" passt auf:\n
 player_list_search_no_results \1: Suchmuster "\2" liefert keine Treffer.\n
 player_list_search_end        \1: Ende der Suchergebnisse (\2 Treffer).\n
 player_list_end               \1: \2 Spieler.\n
+player_list_disconnected      Kürzlich vom Server gegangene Spieler und ihre letzten Äußerungen.
 
 admins_help                   Gibt eine Liste der Administratoren. Siehe auch /admins and /listadmins chat commands.
 
@@ -995,6 +1046,8 @@ bug_color_overflow_help       Verhindert nicht den Überlaufsfehler, der es Spiel
 input_items_unbound           Nicht belegt
 input_items_global            Sondertasten
 
+# used for listing key bindings
+input_or                      oder
 
 #********************************************
 #********************************************
@@ -1010,9 +1063,11 @@ input_console_input_help      Hiermit kann man einen Befehl in der Konsole einge
 input_screenshot_text         Screenshot
 input_screenshot_help         Macht einen Screenshot und speichert ihn in der Datei screenshot_X.bmp
 
+input_chat_tooltip            Drücke \1 zum Plaudern.
 input_chat_text               Chat
 input_chat_help               Zum Plaudern in Netzwerkspielen
 
+input_toggle_spectator_tooltip Drücke \1, um in/aus dem Zuschauermodus zu wechseln.
 input_toggle_spectator_text   Zuschauermodus An/Aus
 input_toggle_spectator_help   Aktiviert/Deaktiviert den Zuschauermodus für kleinere Spielpausen.
 
@@ -1028,6 +1083,7 @@ input_toggle_mousegrab_help   Fängt den Mauszeiger im Fenster ein oder befreit i
 input_reload_textures_text    Texturen neu laden
 input_reload_textures_help    Lädt alle Texturen neu. Nützlich für Grafiker, um ihre neuen Werke zu testen.
 
+input_ingame_menu_tooltip     Drücke \1, um das Menu zu aktivieren.
 input_ingame_menu_text        Menu aktivieren
 input_ingame_menu_help        Aktiviert das Menu aus dem Spiel heraus. ESC is zusätzlich zu den hier gesetzten Tasten fest darauf einprogrammiert, damit niemand im Spiel gefangen bleibt :)
 
@@ -1048,6 +1104,9 @@ input_mess_up_help            Scrollt die Nachrichten eine Seite nach oben.
 input_mess_down_text          nach unten scrollen
 input_mess_down_help          Scrollt die Nachrichten eine Seite nach unten.
 
+input_mess_end_text           ans Ende scrollen
+input_mess_end_help           Scrollt ans Ende der Nachrichten und zeigt die neuesten.
+
 #********************************************
 #********************************************
 #
@@ -1056,15 +1115,18 @@ input_mess_down_help          Scrollt die Nachrichten eine Seite nach unten.
 #********************************************
 #********************************************
 
+input_cycle_brake_tooltip     Drücke \1 zum Bremsen (oder um, auf einigen Serven, Spezialfunktionen zu aktivieren)
 input_cycle_brake_text        Bremsen
 input_cycle_brake_help        Verringert die Geschwindigkeit
 
 input_cycle_brake_toggle_text Bremse ein/ausschalten
 input_cycle_brake_toggle_help Schaltet die Bremse permanent ein oder aus, ohne dass man eine Taste gedrückt halten muss
 
+input_cycle_turn_right_tooltip Drücke \1, um nach rechts abzubiegen.
 input_cycle_turn_right_text   Rechts
 input_cycle_turn_right_help   Macht eine scharfe Rechtskurve
 
+input_cycle_turn_left_tooltip Drücke \1, um nach links abzubiegen.
 input_cycle_turn_left_text    Links
 input_cycle_turn_left_help    Macht eine scharfe Linkskurve
 
@@ -1101,12 +1163,15 @@ input_zoom_out_help           Vergrössert den Bildausschnitt
 input_zoom_in_text            Reinzoomen
 input_zoom_in_help            Verkleinert den Bildauschnitt (erhöht die Vergrösserung)
 
+input_glance_back_tooltip     Drücke \1, um nach hinten zu blicken.
 input_glance_back_text        Rückspiegel
 input_glance_back_help        Kehrt die Kamerarichtung um, solange die Taste gedrückt ist.
 
+input_glance_right_tooltip    Drücke \1, um nach rechts zu blicken.
 input_glance_right_text       Rechtsblick
 input_glance_right_help       Dreht die Kamera für kurze Zeit nach rechts.
 
+input_glance_left_tooltip     Drücke \1, um nach links zu blicken.
 input_glance_left_text        Linksblick
 input_glance_left_help        Dreht die Kamera für kurze Zeit nach links.
 
@@ -1122,6 +1187,7 @@ input_look_right_help         Dreht die Kamera nach rechts (falls das erlaubt is
 input_look_left_text          Linksdrehung
 input_look_left_help          Dreht die Kamera nach links (falls das erlaubt ist) oder bewegt sie nach rechts
 
+input_switch_view_tooltip     Drücke \1, um den Kameramodus zu wechseln.
 input_switch_view_text        Umschalten
 input_switch_view_help        Verändert den Kameramodus. Zur Verfügung steheh: Schlaue extene Kamera (Voreinstellung), dumme extene Kamera sowie freie Kamera und interne Kamera.
 
@@ -1154,6 +1220,15 @@ input_instant_chat_help       Aktiviert eine der vorher eingespeicherten Kurznac
 #********************************************
 #********************************************
 
+#********************************************
+#********************************************
+#
+#             console
+#
+#********************************************
+#********************************************
+
+console_repetition            (\1 mal)\n
 
 #********************************************
 #********************************************
@@ -1217,6 +1292,12 @@ path_info_resource            Resourcen:
 path_info_data                Daten-Verzeichnisse:
 path_info_screenshot          Screenshot-Verzeichnisse:
 path_info_var                 Verzeichnisse für Spieldaten:
+
+version_info_gl_intro         \n\n0xff8888OpenGL-Informationen:0xRESETT 
+version_info_gl_vendor        \n  GL Hersteller : 
+version_info_gl_renderer      \n  GL Renderer   : 
+version_info_gl_version       \n  GL Version    : 
+
 
 #********************************************
 #********************************************
@@ -1547,6 +1628,8 @@ misc_textout_help             Kontolliert die Ausgabe diverser Textnachrichten (
 misc_moviepack_text           Moviepack:
 misc_moviepack_help           Aktiviert die Unterstützung für das separat verfügbare Moviepack, das die Graphiken mehr an den Film "Tron" angleicht.
 
+misc_initial_menu_title       Ersteinstellung wiederholen
+misc_initial_menu_help        Geht erneut in das kleine Menu, in dem man Farbe und Tastatureinstellungs-Vorgaben wählen kann.
 
 #*************************************
 #*************************************
@@ -1597,6 +1680,11 @@ kick_player_help              Dieser Menupunkt schlägt den anderen Spielern vor,
 suspend_player_details_text   Wenn dieser Vorschlag akzeptiert wird, dann wird \1 für einige Zeit aus dem Spiel entfernt und zum Zuschauen gezwungen.
 suspend_player_text           Entferne \1
 
+silence_player_details_text   Wenn dieser Vorschlag akzeptiert wird, dann wird \1 stumm geschaltet.
+silence_player_text           Schalte \1 stumm
+voice_player_details_text     Wenn dieser Vorschlag akzeptiert wird, dann wird \1 seine Stimme zurückgegeben.
+voice_player_text             Stummschaltung für \1 aufheben
+
 vote_include_details_text     Wenn dieser Vorschlag akzeptiert wird, wird die Konfigurationsdatei \1 geladen.
 vote_include_text             Lade \1
 vote_include_error            Konnte Datei \1 nicht finden oder nicht lesen.\n
@@ -1628,6 +1716,8 @@ vote_reject_help              Damit lehnst du den Vorschlag ab.
 
 vote_details_help             Dieser Menupunkt bestimmt deine Stimmabgabe. Details: \1
 vote_submitter_text           Dieser Vorschlag kommt von \1.
+
+vote_expired                  \1 (Bereits gelöst)
 
 #*************************************
 #*************************************
@@ -1975,6 +2065,9 @@ detail_floor_mirror_ow_help   eingentlich alles, was im Spiel momentan vorkommt.
 detail_floor_mirror_ev_text   Alles
 detail_floor_mirror_ev_help   (Kein Unterschied zu "Objekte und Wände")
 
+detail_simple_trail_text      Einfache Wände
+detail_simple_trail_help      Wenn das hier aktiviert ist, werden die Wände der Vehikel nur auf extrem einfache Art dargestellt. In einem Fall half das, einen Absturz im Grafiktreiber zu umgehen.
+
 detail_dither_text            Rasterung:
 detail_dither_help            Wenn die derzeitigen Einstellungen eine Farbe nicht darstellen können wird sie durch Mischung simuliert. In niedrigen Auflösungen sieht das allerdings nicht gut aus. Auf manchen Systemen erhöht das abschalten die Geschwindigkeit.
 
@@ -2124,12 +2217,64 @@ timer_hickup                  Die Systemuhr scheint gerade um \1 Sekunden gespru
 #********************************************
 
 welcome_message_heading       Wilkommen bei \g!
-welcome_message_intro         Die Graphikeinstellungen wurden auf die OpenGL-Konfiguration\n\n
-welcome_message_vendor        Hersteller : 
-welcome_message_renderer      Typ        : 
-welcome_message_version       Version    : 
-welcome_message_finish        \nangepasst.\n\nViel Spass!\n
-#\n\nThis Game is supported from KGN (Krawall Gaming Network, www.krawall.de).
+
+welcome_message               Wir starten jetzt direkt ein Spiel gegen einen Bot, alles ist etwas langsamer als normal. Aufgabe: Das andere Vehikel in eine Wand zu zwingen. Keine Panik und viel Spaß!
+
+welcome_message_2_heading     Hoffentlich hat es bisher Spaß gemacht.
+welcome_message_2             Jetzt geht es weiter ins Hauptmenu. Spiele gegen Bots sind unter "Spielen"/"Solospiel" zu finden.\n\nAber die Hauptattraktion sind die Online-Spiele. Viele einfallsreiche und fleißige Administratoren haben interessante Server mit Spielvarianten online gestellt, die es im Solospiel nicht gibt.\nUm online zu gehen, folge "Spielen"/"Mehrspieler"/"Spiel im Internet".
+
+#********************************************
+#********************************************
+#
+#   Initial setup menu and first game
+#
+#********************************************
+#********************************************
+
+first_setup                   Ersteinstellung
+first_game_title              Erstes Spiel
+
+first_setup_color             Farbe:
+first_setup_color_help        Wählt die Farbe des Vehikels. Später kann man sie noch feiner einstellen.
+first_setup_color_red         0xff0000Rot0xRESETT
+first_setup_color_green       0x00ff00Grün0xRESETT
+first_setup_color_blue        0x0000ffBlau0xRESETT
+first_setup_color_yellow      0xffff00Gelb0xRESETT
+first_setup_color_purple      0x7f00ffViolett0xRESETT
+first_setup_color_orange      0xff7f00Orange0xRESETT
+first_setup_color_magenta     0xff00ffMagenta0xRESETT
+first_setup_color_cyan        0x00ffffCyan0xRESETT
+first_setup_color_white       0xffffffWeiß0xRESETT
+first_setup_color_dark        0x000000Dunkel0xRESETT
+
+first_setup_leave             Unverändert lassen
+first_setup_leave_help        Nichts verändern
+
+first_setup_keys              Steuerung:
+first_setup_keys_help         Hier kann man ein Tastaturbelegungs-Schema auswählen. Später können natürlich einzelne Tasten individuell belegt werden. Cursor Links/Rects wählt aus.
+first_setup_keys_cursor       Cursortasten
+first_setup_keys_cursor_help  Das Vehikel wird über die Cursortasten gesteuert, der Rest der Tastatur ist für die Kamera, Zusatzfunktionen und einen zweiten Spieler. Gut für Rechtshänder und unsere Empfehlung.
+first_setup_keys_cursor_single Cursortasten, ein Spieler
+first_setup_keys_cursor_single_help Das Vehikel wird über die Cursortasten gesteuert, der Rest der Tastatur ist für die Kamera und Zusatzfunktionen. Gut für Rechtshänder, wenn keine Freunde in der Nähe sind.
+first_setup_keys_wasd         WASD-Tasten
+first_setup_keys_wasd_help    Das Vehikel wird über die ASD-Tasten und Umgebung gesteuert, der Rest der Tastatur ist für die Kamera und Zusatzfunktionen. Gut für Linkshänder und alle, die sich an WASD zur Bewegung gewöhnt haben.
+first_setup_keys_zqsd         ZQSD-Tasten
+first_setup_keys_zqsd_help    Das Vehikel wird über die QSD-Tasten und Umgebung gesteuert, der Rest der Tastatur ist für die Kamera und Zusatzfunktionen. Gut für Linkshänder und alle, die sich an ZQSD auf AZERTY-Tastaturen zur Bewegung gewöhnt haben.
+#first_setup_keys_both       Two Handed
+#first_setup_keys_both_help  Turn and look left with your left hand, turn and look right with the right hand. Good for ambidextrous people who don't want to use the mouse in any way and never play with a second player in split-screen.
+first_setup_keys_x            Traditionell
+first_setup_keys_x_help       Standardeinstellungen von früheren Versionen des Spiels. X biegt rechts ab, die Taste links davon nach links. Für Veteranen.
+first_setup_keys_leave        Unverändert lassen
+
+first_setup_net               Verbindung:
+first_setup_net_help          Wähle ungefähr die Stärke der Verbindung zum Internet.
+first_setup_net_dialup        Modem
+first_setup_net_dialup_help   Die Verbindung zum Internet erfolgt über ein Modem über eine Telefonleitung.
+first_setup_net_isdn          ISDN
+first_setup_net_isdn_help     Die Verbindung erfolgt über eine einfache digitale Leitung.
+first_setup_net_dsl           ADLS, Kabel oder besser
+first_setup_net_dsl_help      Irgendeine Breitbandverbindung.
+
 
 #********************************************
 #********************************************
@@ -2147,7 +2292,7 @@ setting_legacy_change_blocked Die Einstellung \1 (Gruppe: \2) kann jetzt nicht g
 #********************************************
 #********************************************
 #
-#      leaque/highscore messages
+#      league/highscore messages
 #
 #********************************************
 #********************************************
@@ -2250,6 +2395,8 @@ player_win_conquest_specific  \1 bekam \2 Punkte für das erobern der Basis von \
 player_kill_collapse          \1 wurde von seiner kollabierenden Zone vernichtet.\n
 player_win_hole               \1 erhält \2 Punkte für Opferbereitschaft.\n
 player_lose_hole              0xffff00ZOMG! 0xff7f00HOLER!!1!!0xRESETT \1 verliert \2 Punkte. Weil er ein n00b ist, oder so.\n
+player_win_command            \1 erhält \2 Punkte als Rundensieger.\n
+declare_round_winner_help     Erklärt einen Spieler zum Rundensieger und beendet die Runde. Verwendung: DECLARE_ROUND_WINNER <Spieler>
 
 player_no_longer_suspended    \1 0x77ff77darf wieder spielen.\n
 player_suspended              \1 0xff7777wird für \2 Runde(n) zum Zuschauen verdammt.\n
@@ -2277,6 +2424,8 @@ spam_protection_prefix        LABER_SCHUTZ: deine Nachrichten fangen alle mit \1
 spam_protection_silenceall    LABER-SCHUTZ: öffentliches Reden ist verboten.\n
 spam_protection_silenced      LABER-SCHUTZ: du wurdest vom Administrator geknebelt.\n
 spam_protection_silenced_default LABER-SCHUTZ: der Administrator hat dir dein Rederecht zurückgegeben.
+vote_silenced                 Als stummgeschalteter Spieler darf man keine Abstimmungen starten.\n
+player_rename_silenced        Stummgeschaltete Spieler dürfen ihren Namen nicht ändern.\n
 player_silenced               \10xff7777 wurde geknebelt.\n
 player_voiced                 \10x77ff77 hat seine Stimme wieder.\n
 player_allowed_teamchange     \10x77ff77 darf nun das Team wechseln.\n
@@ -2327,6 +2476,7 @@ no_real_teams                 Keine Teams mit mehr als einem Spieler.\n
 player_topologypolice         Die Topologiepolizei befiehlt: \1
 
 team_shuffle                  \1 wird von Position \2 auf \3 verschoben.
+team_preshuffle               \1 wird auf Platz \2 einsteigen.
 team_shuffle_suppress         Diese Runde werden keine weiteren Verschiebenachrichten für diesen Spieler mehr gezeigt.\n
 player_noshuffleup            Du darfst dich hier nicht selbst befördern.\n
 player_noshuffle              Dein Positionsänderungswunsch hat keinen Effekt.\n
@@ -2506,6 +2656,7 @@ network_kill_maxidgrabber     Keine ObjektIDs mehr frei; Dein Client hatte die m
 network_kill_maxiduser        Keine ObjektIDs mehr frei; Dein Client hatte die meisten davon belegt ( Bug? ).
 network_kill_cheater          Du hast den Cheater-Alarm ausgelöst. Wenn das nicht gerechtfertigt war, sende bitte einen Bug-Report.
 network_kill_error            Beim Bearbeiten eines Netzwerkpakets von Deinem Client wurde ein Fehler festgestellt. Vermutlich gibt es entweder im Server oder im Client einen Bug.
+network_kill_servercomplete   Übertragung der Serverliste abgeschlossen.
 network_kill_timeout          Dein Client hat zu lange nicht geantwortet.
 network_kill_logout           Du hast dich ausgeloggt.
 network_kill_incompatible     Die Version deines Clients passt nicht zum Server.
@@ -2521,6 +2672,10 @@ network_kill_unknown          Kein Grund angegeben.
 network_kill_spamkick         Du wurdest wegen Spammings automatisch vom Server entfernt. Sei bitte etwas vorsichtiger.
 voted_kill_kick               Du wurdest von einem wütenden Mob vom Server geschmissen; wahrscheinlich hassen sie dich. Gute Arbeit! Versuche, woanders zu spielen.
 network_kill_spectator        Du warst zu lange nur Beobachter.
+network_kill_unworthy         Der Server ist überfüllt; Du wurdest rausgeworfen, um Platz für mögliche Spieler zu schaffen. Bitte komme nur zurück, wenn Du musst.
+network_kill_unworthy_banreason Der Server ist überlastet und neue Verbindungen können nur nach und nach angenommen werden. Wir entschuldigen uns für die Unannehmlichkeiten.
+network_kill_unworthy_ban     Der Server ist überfüllt; Du wurdest rausgeworfen, um Platz für mögliche Spieler zu schaffen. Bitte komme nur zurück, wenn Du musst, und warte damit \1 Minuten.
+network_kill_unworthy_log     Unwürdiger Zuschauer \1 wurde für \2 Minuten rausgeworfen.\n
 
 network_ban_kph               IP \1 ist nun mit \2 Kicks pro Stunde registriert.\n
 network_ban                   Spieler von IP \1 sind für die nächsten \2 minuten gesperrt. Grund: \3\n
@@ -2578,6 +2733,8 @@ network_master_reqlist        Fordere Server-Liste an...\n
 network_master_status         Empfange Server \1...\n
 network_master_finish         \1 Server empfangen.\n
 network_master_start          Spiel leiten
+network_master_pollanswer     Antworte auf Ping von \1.\n
+network_master_pollanswer_last Antworte auf Ping von \1. Das ist der letzte geloggte Ping.\n
 network_master_host_inet_help Startet einen Server auf diesem Rechner und macht ihn im Internet bekannt.
 network_master_host_lan_help  Startet einen Server auf diesem Rechner, der nur in diesem lokalen Netz sichtbar ist.
 
@@ -2688,6 +2845,7 @@ config_command_other          Wahrscheinlich war in deinem Sinn:\n
 config_command_more           Es gibt noch weitere Kommandos, aber die wurden weggelassen, um die Konsole nicht zu überfluten.
 config_file_write_error       Konnte Konfiguration nicht speichern!\n
 config_value_changed          \1 wurde von \2 auf \3 verändert.\n
+config_value_not_changed      \1 nicht von \2 nach \3 geändert: Die Wächterfunktion hat Einspruch eingelegt.\n
 config_error_read             Eingabefehler beim Lesen von \1: Ungültiges Format.\n
 config_message_info           \1 steht momentan auf \2.\n
 config_sighup                 SIGHUP erhalten, Konfigurationsdateien werden neu gelesen.\n
@@ -2714,7 +2872,9 @@ config_accesslevel_20         Programm
 
 access_level_help             Ändert den Zugriffslevel einer Einstellung, um sie z.B. Benutzern mit niedrigeren Rechten zugänglich zu machen.
 access_level_usage            Verwendung: ACCESS_LEVEL <Kommando> <minimaler nötiger Zugriffslevel (numerisch)>\n
-access_level_change           Zugriffslevel von Kommando \1 auf "\2" geändert.\n
+access_level_change           Erforderlicher Zugriffslevel für Kommando \1 auf "\2" geändert.\n
+access_level_nochange_now     Kann Zugriffslevel von \1 nicht ändern: Er ist zur Zeit "\2", Du hast nur "\3", das würde Zugriffsrechte stehlen.\n
+access_level_nochange_later   Kann Zugriffslevel von \1 nicht auf "\2" ändern: Du hast nur "\3" und könntest ihn nicht mehr zurückändern.\n
 access_level_error            Erforderlicher Zugriffslevel von Kommando \1 ist "\2", du hast aber nur "\3".\n
 
 casacl_help                   Erhöht für den Rest der Datei, in der das Kommando auftaucht, den Zugriffslevel.
@@ -2781,8 +2941,10 @@ access_level_op_help          Minimaler Zugriffslevel für die /op und /deop Hilf
 access_level_op_max_help      Maximaler Zugriffslevel, den man mit /op erhalten kann.
 access_level_admin_help       Minimaler Zugriffslevel für das /admin-Kommando.
 access_level_rtfm_help        Minimaler Zugriffslevel für /teach und /rtfm.
-access_level_chat_help        Minimaler Zugriffslevel, um Reden zu dürfen.
+access_level_chat_help        Minimaler Zugriffslevel, um reden zu dürfen.
+access_level_shout_help       Minimaler Zugriffslevel, um mit allen reden zu dürfen.
 access_level_ips_help         Minimaler Zugriffslevel, um IPs anderer Spieler in der Ausgabe von /players zu sehen.
+access_level_autokick_immunity_help Minimaler Zugriffslevel, um gegen automatische Kicks geschützt zu sein.
 access_level_nver_help        Minimaler Zugriffslevel, um die Netzwerkversionen von anderen Spielern in /players zu sehen.
 access_level_spy_console_help Minimaler Zugriffslevel, um die Konsoleneingabe anderer Administratoren zu sehen.
 access_level_spy_team_help    Minimaler Zugriffslevel, um als Zuschauer /team-Nachrichten lesen zu können.
@@ -2794,6 +2956,7 @@ access_level_play_sliders_help Der Zugriffslevel, der zum Spielen nötig ist, wir
 access_level_play_changed     Zum Spielen benötigter Zugriffslevel von \1 auf \2 verschoben.\n
 
 access_level_vote_suspend_help Minimaler Zugriffslevel, um Suspendierungsabstimmungen starten zu dürfen.
+access_level_vote_silence_help Minimaler Zugriffslevel, um Abstimmungen über das Rederecht anderer starten zu dürfen.
 access_level_vote_kick_help   Minimaler Zugriffslevel, um Rauschmissabstimmungen starten zu dürfen.
 access_level_vote_include_help Minimaler Zugriffslevel, um Konfigurationseinbindungsabstimmungen starten zu dürfen.
 access_level_vote_include_execute_help Minimaler Zugriffslevel, auf dem erfolgreiche Konfigurationseinbindungsabstimmungen ausgeführt werden.
@@ -2803,6 +2966,7 @@ access_level_vote_command_execute_help Minimaler Zugriffslevel, auf dem erfolgre
 access_level_chat_timeout_help Zeit in Sekunden zwischen öffentlichen Nachrichten, dass jemand gerne etwas sagen würde, aber nicht darf. Ein Wert von 0 schaltet die Nachrichten ab.
 access_level_chat_request     \10xRESETT würde gerne Reden, aber darf nicht. Wäre jemand so nett, "/op \2" zu sagen?\n
 access_level_chat_denied      0xff7f7fRede verweigert,0xffffff ungenügender Zugriffslevel.\n
+access_level_shout_denied     0xff7f7fSchreien verweigert,0xffffff ungenügender Zugriffslevel.\n
 access_level_op_denied        0xff7f7f\1 verweigert,0xffffff ungenügender Zugriffslevel.\n
 access_level_op_overpowered   0xff7f7f\1 verweigert,0xffffff du brauchst einen höheren Zugriffslevel als dein Opfer.\n
 access_level_op_self          0xff7f7f\1 verweigert,0xffffff du kannst dir das nicht selbst antun :).\n
@@ -2821,6 +2985,8 @@ rtfm_denied                   Um andere zu belehren, ist es erforderlich, eingel
 
 access_level_list_admins_help Minimaler Zugriffslevel, um das /admins-Kommando benutzen zu dürfen.
 access_level_list_admins_see_everyone_help Benutzer mit diesem oder besserem Zugriffslevel dürfen unabhängig von ADMIN_LIST_MIN_ACCESS_LEVEL jeden Administrator sehen.
+
+access_level_announce_login_help Höchster Zugriffslevel, für den bei einem Spieler die Ein/Ausloggvorgänge öffentlich angekündigt werden.
 
 intercept_commands_help       Liste von Chat-Kommandos, die angenommen und in der Standardausgabe geloggt werden sollen.
 intercept_unknown_commands_help Wenn dies 1 ist, so werden alle unbekannten Chat-Kommandos angenommen und geloggt.
