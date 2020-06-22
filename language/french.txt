@@ -1060,8 +1060,8 @@ player_police_help            Permet de faire taire un joueur ou de lancer un vo
 player_police_silence_text    Faire taire qqn
 player_police_silence_help    Permet d'empecher a un spammeur de chatter sur ce serveur
 
-silence_player_help           Si cette option est activee, les messages (chat) de ce joueur ne seront plus affiches.
-silence_player_text           Faire taire \1
+ignore_player_help            Si cette option est activee, les messages (chat) de ce joueur ne seront plus affiches.
+ignore_player_text            Faire taire \1
 
 player_police_kick_text       Bannir qqn
 player_police_kick_help       Lance un vote pour "mettre qqn a la porte"

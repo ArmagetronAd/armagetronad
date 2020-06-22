@@ -1665,8 +1665,8 @@ player_police_help					Allows you to silence other players or issue a kick vote
 player_police_silence_text			Silence Menu
 player_police_silence_help			Allows you to silence spamming players locally
 
-silence_player_help					If activated, all chat messages from this player will be omitted.
-silence_player_text					Silence \1
+ignore_player_help					If activated, all chat messages from this player will be omitted.
+ignore_player_text					Silence \1
 
 player_police_kick_text				Kick Menu
 player_police_kick_help				Allows to issue a kick vote for a player
