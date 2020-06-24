@@ -1250,8 +1250,8 @@ player_police_help            Permite silenciar a otros jugadores o lanzar un vo
 player_police_silence_text    Silenciar
 player_police_silence_help    Permite silenciar un spammer en este servidor
 
-silence_player_help           Si esta opción está activa, todos los mensajes de chat de este jugador se omitirán.
-silence_player_text           Silenciar a \1
+ignore_player_help            Si esta opción está activa, todos los mensajes de chat de este jugador se omitirán.
+ignore_player_text            Silenciar a \1
 
 player_police_kick_text       Expulsar
 player_police_kick_help       Permite lanzar un voto de expulsión contra un jugador

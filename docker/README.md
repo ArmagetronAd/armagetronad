@@ -19,16 +19,31 @@ For Ubuntu, to be on the safe side:
 Then follow the instructions from the rootless docker and x11docker above.
 
 If you are not using Ubuntu on your main machine, you can run Rootless Docker inside
-an Ubuntu virtual machine and export the socket for use on your main machine. The safest way to run such a machine is with two network interfaces; one NAT network for connections of the docker containers to the outside world, one HOST ONLY network for you to connect to the docker daemon. [Here](https://askubuntu.com/questions/778392/install-second-network-interface-on-virtualized-ubuntu-server) are instructions how to enable the second interface on the guest.
-Once that is set up, assuming your UID is 1000 on the host and 1001 on the host, connect to the guest with
+an Ubuntu virtual machine and export the socket for use on your main machine. The safest way to run such a machine is with one NAT network connection that you enable
+a port forwarding [rule for SSH](https://bobcares.com/blog/virtualbox-ssh-nat/) for.
+Once that is set up, assuming your UID is 1000 on the host and 1001 on the host and you went with the example 2522 source port, connect to the guest with
 
-    ssh guest -L /run/user/1001/docker.sock:/run/user/1000/docker.sock
+    ssh -p 2522 guest -L /run/user/1001/docker.sock:/run/user/1000/docker.sock
 
 as suggested [here](https://docs.docker.com/engine/security/security/#docker-daemon-attack-surface) and keep that running. Inform your local docker client about the socket with
 
     export DOCKER_HOST=unix:///run/user/1000/docker.sock
 
 and off you go. Only your host user can access that socket and can only control a Docker daemon on a virtual machine running as a non-root user.
+
+To secure the VM some more, you may want to restrict its access to your LAN. You can use [ufw](https://linuxize.com/post/how-to-setup-a-firewall-with-ufw-on-ubuntu-20-04/) for that. Assuming 192.160.0.1 is your router's IP on the LAN, execute on the VM:
+
+    sudo ufw allow ssh                      # default is to block everything, so before we enable ufw, we better make sure ssh will keep working
+    sudo ufw enable
+    sudo ufw allow out to 192.168.0.1       # this allows traffic to your router and therefore the internet
+    sudo ufw deny out to 10.0.0.0/8         # these block all private subnets; LANs usually use these IPs. If yours does not, adapt.
+    sudo ufw deny out to 172.16.0.0/12
+    sudo ufw deny out to 192.168.0.0/16
+    sudo ufw deny in from 10.0.0.0/8
+    sudo ufw deny in from 172.16.0.0/12
+    sudo ufw deny in from 192.168.0.0/16
+
+The 'deny in' rules are redundant because the VM is behind a NAT anyway, but you never know. Maybe you switch it to 'bridged' one day.
 
 ## Contents
 
@@ -79,10 +94,10 @@ the data to fill in is described on the GitLab CI configuration of the project. 
 
     volumes = ["/var/run/user/UID/docker.sock:/var/run/docker.sock", "/cache", "/home/USERNAME/secrets:/secrets:ro"]
 
-replacing UID with your user ID and USERNAME with your username.
-If you want to use the runner for deployment, the secrets folder then has to contain the credentials required to do so. Read deploy/targets.sh for details.
+replacing UID with your user ID and USERNAME with your username. If you want to use the runner for deployment, the secrets folder then has to contain the credentials required to do so. Read deploy/targets.sh for details.
 
 Then, run the runner with
 
     gitlab-runner run
 
+ Security and consistency implication: You then only have one docker instance. Jobs running on your runner can therefore modify the same docker images, for example apply tags. Therefore, all our CI scripts reference used images by their digest and use randomized names for containers so they don't get into one another's way.

@@ -201,8 +201,8 @@ public:
     bool autoNum;    // automatically adjust number of AIs
     bool autoIQ;     // automatically adjust IQ of AIs
 
-    int  speedFactor; // logarithm of cycle speed multiplier
-    int  sizeFactor;  // logarithm of arena size multiplier
+    REAL speedFactor; // logarithm of cycle speed multiplier
+    REAL sizeFactor;  // logarithm of arena size multiplier
 
     int  autoAIFraction; // helper variable for the autoAI functions
 
@@ -228,7 +228,7 @@ public:
                   int a_limitScoreMinLead, int a_maxBlowout,
                   int a_numAIs,    int a_minPlayers,  int a_AI_IQ,
                   bool a_autoNum, bool a_autoIQ,
-                  int a_speedFactor, int a_sizeFactor,
+                  REAL a_speedFactor, REAL a_sizeFactor,
                   gGameType a_gameType,  gFinishType a_finishType,
                   int a_minTeams,
                   REAL a_winZoneMinRoundTime, REAL a_winZoneMinLastDeath
