@@ -687,6 +687,22 @@ static bool lowlevel_sr_InitDisplay(){
         defaultY = lastWindowY;
     }
 
+    // reinit on color/z depth change
+    if(currentScreensetting.zDepth != lastSuccess.zDepth ||
+       currentScreensetting.colorDepth != lastSuccess.zDepth)
+    {
+        if(sr_screenRenderer)
+        {
+            SDL_DestroyRenderer(sr_screenRenderer);
+            sr_screenRenderer=nullptr;
+        }
+        if(sr_screen)
+        {
+            SDL_DestroyWindow(sr_screen);
+            sr_screen=nullptr;
+        }
+    }
+
     if (!sr_screen)
     {
         int singleCD_R	= 5;
