@@ -1682,6 +1682,7 @@ suspend_player_text           Entferne \1
 
 silence_player_details_text   Wenn dieser Vorschlag akzeptiert wird, dann wird \1 stumm geschaltet.
 silence_player_text           Schalte \1 stumm
+
 voice_player_details_text     Wenn dieser Vorschlag akzeptiert wird, dann wird \1 seine Stimme zurückgegeben.
 voice_player_text             Stummschaltung für \1 aufheben
 

@@ -2874,7 +2874,6 @@ access_level_usage          usage: ACCESS_LEVEL <config command> <required minim
 access_level_change         Required access level of command \1 changed to "\2".\n
 access_level_nochange_now   Cannot change access level of \1: it is currently at "\2", you only have "\3", you would steal access.\n
 access_level_nochange_later   Cannot change access level of \1 to "\2", you only have "\3" and would not be able to change it back.\n
-access_level_change         Required access level of command \1 changed to "\2".\n
 access_level_error          Required access level of command \1 is "\2", you only have "\3".\n
 
 casacl_help                   For the duration of the rest of the configuration file  this directive appears in, elevate the access level.
