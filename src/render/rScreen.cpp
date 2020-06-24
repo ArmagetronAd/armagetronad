@@ -90,9 +90,11 @@ static tSettingItem<int>  at_ch("CUSTOM_SCREEN_HEIGHT"	, height[ArmageTron_Custo
 static tSettingItem<int>  at_cw("CUSTOM_SCREEN_WIDTH" 	, width	[ArmageTron_Custom]);
 static tSettingItem<REAL> at_ca("CUSTOM_SCREEN_ASPECT" , aspect[ArmageTron_Custom]);
 
-    #define MAXEMERGENCY 5
+    #define MAXEMERGENCY 7
 
 rScreenSettings lastSuccess(ArmageTron_640_480, false);
+rScreenSettings lastSuccessLowZBuffer(ArmageTron_640_480, false);
+rScreenSettings lastSuccessLowColor(ArmageTron_640_480, false);
 
 /*
 std::ostream & operator << ( std::ostream & s, rScreenSize const & size )
@@ -112,7 +114,7 @@ static rScreenSettings em3(ArmageTron_640_480, false,ArmageTron_ColorDepth_16);
 static rScreenSettings em2(ArmageTron_640_480, true, ArmageTron_ColorDepth_16);
 static rScreenSettings em1(ArmageTron_640_480);
 
-static rScreenSettings *emergency[MAXEMERGENCY+2]={ &lastSuccess, &lastSuccess, &em1, &em2 , &em3, &em4, &em5};
+static rScreenSettings *emergency[MAXEMERGENCY+2]={ &lastSuccess, &lastSuccess, &lastSuccessLowZBuffer, &lastSuccessLowColor, &em1, &em2 , &em3, &em4, &em5};
 
     #ifdef DEBUG
 rScreenSettings currentScreensetting(ArmageTron_640_480);
@@ -1439,6 +1441,12 @@ bool cycleprograminited = false;
 
 bool sr_InitDisplay(){
 //    use_directx_back = sr_useDirectX;
+
+    lastSuccessLowZBuffer = lastSuccess;
+    lastSuccessLowZBuffer.zDepth = rColorDepth::ArmageTron_ColorDepth_16;
+    lastSuccessLowColor = lastSuccess;
+    lastSuccessLowColor.colorDepth = rColorDepth::ArmageTron_ColorDepth_16;
+    lastSuccessLowColor.zDepth = rColorDepth::ArmageTron_ColorDepth_16;
 
     cycleprograminited = false;
     while (failed_attempts <= MAXEMERGENCY+1)
