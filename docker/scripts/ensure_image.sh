@@ -18,6 +18,7 @@ fi
 id=${wd}/images
 
 . ${id}/digest.sh "${image}" || exit $?
+. ${id}/epoch.sh || exit $?
 
 lock=${sd}/.lock.`echo ${image} | sed -e s,/,_,`
 while test -r ${lock} && ps -eo pid | grep "[\^ ]`cat ${lock}`\$"; do
@@ -46,6 +47,7 @@ function build(){
 	if test "x$2" = "x-d"; then
 	    echo "Trying to download base image ${image}..."
 	    docker pull ${REGISTRY}${image}${REFERENCE}
+	    docker tag ${REGISTRY}${image}${REFERENCE} ${REGISTRY}${image}:${EPOCH}
 	    rm -f ${id}/${image}.digest.local
 	    exit 0
 	fi
