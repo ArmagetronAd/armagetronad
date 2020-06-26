@@ -192,6 +192,17 @@ fi
 
 # **********************************************************************
 
+# itch.io release stream follows steam
+# required secret: secrets/butler_creds: the API key stored by 'butler login'
+ITCH_PROJECT=zmanuel/armagetronad
+
+ITCH_CHANNEL=${ZI_SERIES}
+#if test "${ITCH_CHANNEL}" = staging; then
+#	ITCH_CHANNEL="stable"
+#fi
+
+# **********************************************************************
+
 # download site: git repository
 DOWNLOAD_SITE_GIT=git@gitlab.com:armagetronad/downloads.git
 
