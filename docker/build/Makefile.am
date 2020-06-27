@@ -572,6 +572,17 @@ context.deploy_zi: context.deploy_base_zeroinstall result.update_zi ${srcdir}/..
 result.deploy_zi: context.deploy_zi
 	+$(srcdir)/context_to_result.sh $@.dir ./deploy_zeroinstall.sh
 	echo > $@
+context.deploy_itch: context.deploy_base_itch ${srcdir}/../deploy/*_itch.sh upload/$(APPTAR_CLIENT_64) upload/$(APPTAR_CLIENT_32) $(WINZIP_CLIENT)
+	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' ${srcdir}/../deploy/*_itch.sh
+	mkdir -p $@.dir/appdir_linux_64; cd $@.dir/appdir_linux_64; tar -xjf ../../upload/$(APPTAR_CLIENT_64)
+	mkdir -p $@.dir/appdir_linux_32; cd $@.dir/appdir_linux_32; tar -xjf ../../upload/$(APPTAR_CLIENT_32)
+	mkdir -p $@.dir/appdir_windows; cd $@.dir/appdir_windows; unzip ../../$(WINZIP_CLIENT)
+	rm -f $@.dir/image
+	echo "armadeploy_64" > $@.dir/image
+	echo > $@
+result.deploy_itch: context.deploy_itch
+	+$(srcdir)/context_to_result.sh $@.dir ./deploy_itch.sh
+	echo > $@
 
 # deploy to download site (additional dependency here only, standard rules apply)
 result.deploy_download: result.deploy_scp result.deploy_lp
@@ -582,6 +593,7 @@ deploy_scp: result.deploy_scp
 deploy_steam: result.deploy_steam
 deploy_zi: result.deploy_zi
 deploy_download: result.deploy_download
+deploy_itch: result.deploy_itch
 
 deploy_ppa: \
 deploy_ppa_focal \
@@ -593,7 +605,7 @@ deploy_ppa_trusty
 deploy_ppa_%: result.deploy_ppa_%
 	@echo Deployed $*
 
-deploy: deploy_lp deploy_scp deploy_ppa deploy_zi deploy_steam deploy_download
+deploy: deploy_lp deploy_scp deploy_ppa deploy_zi deploy_steam deploy_download deploy_itch
 #deploy: deploy_scp
 #deploy: deploy_zi
 #deploy: deploy_ppa

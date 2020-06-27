@@ -152,7 +152,7 @@ static tConfItem<int> winsize_h("ARMAGETRON_WINDOWSIZE_H",currentScreensetting.w
 static tConfItem<int> winsizeLast_h("ARMAGETRON_LAST_WINDOWSIZE_H",lastSuccess.windowSize.height);
 
 static tConfItem<bool> fs_ci("FULLSCREEN",currentScreensetting.fullscreen);
-static tConfItem<bool> fs_lci("LAST_FULLSCREEN",currentScreensetting.fullscreen);
+static tConfItem<bool> fs_lci("LAST_FULLSCREEN",lastSuccess.fullscreen);
 
 static tConfItem<rColorDepth> tc("COLORDEPTH",currentScreensetting.colorDepth);
 static tConfItem<rColorDepth> ltc("LAST_COLORDEPTH",lastSuccess.colorDepth);
