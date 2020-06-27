@@ -2,8 +2,8 @@
 
 #set -x
 
-root=$(dirname "${0}")
-EXEC=$(grep -h -m 1 -r Exec= ${root}/*.desktop | cut -d "=" -f 2 | cut -d % -f 1 | cut -d " " -f 1 | head -n 1)
+root="$(dirname "${0}")"
+EXEC=$(grep -h -m 1 -r Exec= "${root}"/*.desktop | cut -d "=" -f 2 | cut -d % -f 1 | cut -d " " -f 1 | head -n 1)
 # append library path so system libraries are found first (if we put our libs into /usr/lib),
 # same for executables.
 
@@ -21,7 +21,7 @@ if test "x${LD_DEBUG_APP}" = xtrue; then
 else
   CACHE=~/.${EXEC}/.syslibs
   mkdir -p ~/.${EXEC}
-  if test ! -e ${CACHE} || test ${0} -nt ${CACHE}; then
+  if test ! -e ${CACHE} || test "${0}" -nt ${CACHE}; then
     # find all directories in ld's cache
     for lib in $({ /sbin/ldconfig -p || ldconfig -p; } | tail -n +2 | sed -e "s,.* =>,," -e "s,/[^/]*$,," | sort -u); do
       extralib=${extralib}:${lib}
