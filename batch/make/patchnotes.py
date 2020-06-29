@@ -107,7 +107,8 @@ author_email_filter=re.compile(r" *<.*>")
 author_replacements={
 	"Bazaarmagetron": None,
 	"Manuel Moos (From GitLab CI)": None,
-	"z-man": "Manuel Moos",
+	"z-man": "Z-Man",
+	"Manuel Moos": "Z-Man",
 	"Daniel Lee Harple": "Daniel Harple",
 	"Luke Dashjr": "Luke-Jr",
 	None: None
