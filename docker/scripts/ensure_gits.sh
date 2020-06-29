@@ -35,4 +35,5 @@ function ensure_git(){
 ensure_git winlibs https://gitlab.com/armagetronad/winlibs.git || exit $?
 ensure_git codeblocks https://gitlab.com/armagetronad/build_codeblocks.git || exit $?
 ensure_git steam-art https://gitlab.com/armagetronad/steam-art.git master || exit $?
+ensure_git pkg2appimage https://github.com/AppImage/pkg2appimage.git master || exit $?
 
