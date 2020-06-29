@@ -47,7 +47,6 @@ function copylib()
 
 #   include libraries
 mkdir -p ${APPDIR}/usr/lib/
-mkdir -p ${APPDIR}/usr/local/lib/
 for library in \
 libasound \
 libasyncns \
