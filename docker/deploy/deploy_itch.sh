@@ -30,7 +30,10 @@ set -x
 # butler gets frequent updates, that is why we do not bake it into the docker images
 mkdir -p ~/bin || exit $?
 pushd ~/bin || exit $?
-curl -L -o butler.zip https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default || exit $?
+if ! curl -L -o butler.zip https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default; then
+ sleep 30
+ curl -L -o butler.zip https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default || exit $?
+fi
 unzip butler.zip || exit $?
 rm -f butler.zip || exit $?
 chmod +x butler || exit $?
@@ -38,7 +41,10 @@ chmod +x butler || exit $?
 popd || exit $?
 
 # upload
-~/bin/butler push appdir_linux_32 ${ITCH_PROJECT}:linux-32${CHANNEL_SUFFIX} --userversion=${PACKAGE_VERSION} --if-changed || exit $?
+if ! ~/bin/butler push appdir_linux_32 ${ITCH_PROJECT}:linux-32${CHANNEL_SUFFIX} --userversion=${PACKAGE_VERSION} --if-changed; then
+  sleep 30
+  ~/bin/butler push appdir_linux_32 ${ITCH_PROJECT}:linux-32${CHANNEL_SUFFIX} --userversion=${PACKAGE_VERSION} --if-changed || exit $?
+fi
 ~/bin/butler push appdir_linux_64 ${ITCH_PROJECT}:linux-64${CHANNEL_SUFFIX} --userversion=${PACKAGE_VERSION} --if-changed || exit $?
 ~/bin/butler push appdir_windows ${ITCH_PROJECT}:windows-32${CHANNEL_SUFFIX} --userversion=${PACKAGE_VERSION} --if-changed || exit $?
 
