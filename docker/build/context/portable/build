@@ -42,6 +42,9 @@ function copylib()
 mkdir -p ${APPDIR}/usr/lib/
 mkdir -p ${APPDIR}/usr/local/lib/
 for library in \
+libicuuc \
+libicudata \
+libwebp \
 libxml2 \
 libZThread \
 libSDL-1 \
