@@ -8040,13 +8040,13 @@ static bool show_scores=false;
 void ePlayerNetID::DisplayScores()
 {
     //  block displaying scores during chat mode
-    if (se_BlockScores)
+    /*if (se_BlockScores)
     {
         se_alreadyDisplayedScores = false;
         show_scores = false;
 
         return;
-    }
+    }*/
 
     if( !show_scores || !se_mainGameTimer || se_alreadyDisplayedScores )
     {
@@ -9201,7 +9201,7 @@ static uActionGlobal score("SCORE");
 
 static bool sf(REAL x)
 {
-    if (x>0) show_scores = !show_scores;
+    if(!se_BlockScores && x>0) show_scores = !show_scores;
     return true;
 }
 
