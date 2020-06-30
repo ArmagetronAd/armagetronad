@@ -35,4 +35,4 @@ LD_LIBRARY_PATH="${extralib}:${LD_LIBRARY_PATH}:${root}/usr/lib"
 PATH="${root}/usr/bin:${PATH}" 
 export LD_LIBRARY_PATH
 export PATH
-exec $EXEC ${extraarg} $@
+exec $EXEC ${extraarg} "$@"
