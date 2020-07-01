@@ -1351,6 +1351,49 @@ tString tColoredString::RemoveColors( const char * c )
     return RemoveColors ( c, false );
 }
 
+// *******************************************************************************************
+// *
+// *	EscapeBadColors
+// *
+// *******************************************************************************************
+//!
+//!		@param	c	C style string to process color codes in
+//!		@param	lastKnownGoodColor	safe color
+//!		@return   	string with only real colors
+//!
+// *******************************************************************************************
+tString tColoredString::EscapeBadColors(const char *c,std::string lastKnownGoodColor)
+{
+    tString ret;
+    int len = strlen(c);
+    
+    // walk through string
+    while(*c!='\0')
+    {
+        if (*c=='0' && len >= 8 && c[1]=='x')
+        {
+            tString color; color << c[0] << c[1] << c[2] << c[3] << c[4] << c[5] << c[6] << c[7];
+            std::stringstream color2; color2 << color;
+            const char *ccolor = color2.str().c_str();
+            if(color == "0xRESETT" || tColor::VerifyColorCode(ccolor))
+            {
+                lastKnownGoodColor = color;
+                ret << color;
+                c += 8; len -= 8;
+            }
+            else
+            {
+                ret << (*(c++)); --len;
+                ret << lastKnownGoodColor;
+                continue;
+            }
+        }
+        ret << (*(c++));
+        --len;
+    }
+    return ret;
+}
+
 // helper function: removes trailing color of string and returns number of chars
 // used by color codes
 static int RemoveTrailingColor( tString& s, int maxLen=-1 )

@@ -201,6 +201,9 @@ public:
 
     static tString RemoveColors( const char *c );           //!< Removes the color codes from a string
     static tString RemoveColors( const char *c, bool darkonly );           //!< Removes the color codes from a string
+    
+    static tString EscapeBadColors( const char *c, std::string lastKnownGoodColor = "0xRESETT" ); // !< Cancels out nonexistant color codes.
+    
     void SetPos( int len, bool cut=false );                 //!< Makes sure string has length len when color codes are removed
 
     void RemoveTrailingColor();                             //!< Removes trailing, unfinished color code

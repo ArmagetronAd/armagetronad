@@ -474,7 +474,7 @@ rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode )
         }
 
         // detect presence of color code
-        if (*c == '0' && my_strnlen(c, 8) >= 8 && c[1] == 'x' && colorMode != COLOR_IGNORE && tColor::VerifyColorCode(c))
+        if (*c == '0' && my_strnlen(c, 8) >= 8 && c[1] == 'x' && colorMode != COLOR_IGNORE && (strncmp(c,"0xRESETT",8) == 0 || tColor::VerifyColorCode(c)))
         {
             tColor color;
 

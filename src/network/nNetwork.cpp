@@ -226,6 +226,11 @@ static tSettingItem<int> sn_mav("MAX_PROTOCOL_VERSION",sn_maxVersion);
 static int sn_newFeatureDelay = 0;
 static tSettingItem<int> sn_nfd("NEW_FEATURE_DELAY",sn_newFeatureDelay);
 
+// color code strictness setting from tColor.cpp
+extern bool st_verifyColorCodeStrictly;
+//static nSettingItemWatched< bool > stc_verifyColorCodeStrictly( "VERIFY_COLOR_STRICT", st_verifyColorCodeStrictly, nConfItemVersionWatcher::Group_Visual, 18 );
+static nSettingItem<bool> stc_verifyColorCodeStrictly("VERIFY_COLOR_STRICT",st_verifyColorCodeStrictly);
+
 // from nConfig.cpp. Adapt version string array there to bump protocol version.
 int sn_GetCurrentProtocolVersion();
 
@@ -1226,6 +1231,7 @@ nMessage& nMessage::operator >> (tColoredString &s )
     if (tColoredString::HasColors(s))
     {
         s = tColoredString::LowerColors(s);
+        if(st_verifyColorCodeStrictly) s = tColoredString::EscapeBadColors(s);
     }
 
     // filter color codes away
@@ -3409,6 +3415,12 @@ void sn_ConsoleOutRaw( tString & message,int client){
 }
 
 void sn_ConsoleOutString( tString & message,int client){
+    // Make sure string has valid color codes
+    if(st_verifyColorCodeStrictly)
+    {
+        message = tColoredString::EscapeBadColors(message);
+    }
+    
     // check if string is too long
     if ( message.Len() <= MTU )
     {
@@ -3459,6 +3471,12 @@ static nDescriptor client_cen_nd(9,client_cen_handler,"client_cen");
 // causes the connected clients to print a message in the center of the screeen
 void sn_CenterMessage(const tOutput &o,int client){
     tString message(o);
+    
+    // Make sure string has valid color codes
+    if(st_verifyColorCodeStrictly)
+    {
+        message = tColoredString::EscapeBadColors(message);
+    }
 
     tJUST_CONTROLLED_PTR< nMessage > m=new nMessage(client_cen_nd);
     *m << message;

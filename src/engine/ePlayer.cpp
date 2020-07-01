@@ -1840,12 +1840,12 @@ template< class TARGET >
 void se_AppendChat( TARGET & out, tString const & message )
 {
     if ( message.Len() <= se_SpamMaxLen*2 || se_SpamMaxLen == 0 )
-        out << message;
+        out << tColoredString::EscapeBadColors(message,"0xffff7f");
     else
     {
         tString cut( message );
         cut.SetLen( se_SpamMaxLen*2 );
-        out << cut;
+        out << tColoredString::EscapeBadColors(cut,"0xffff7f");
     }
 }
 

@@ -810,6 +810,7 @@ explosion_help                Schaltet Explosionen ein
 wrap_menu_help                Kann man ein Menu nach oben verlassen (und es somit von unten wieder betreten)?
 floor_mirror_int_help         Stärke der Bodenspiegelungen
 color_strings_help            Markiere Texte farblich (z.B. Namen im Chat)
+verify_color_strict_help      Verifiziere color codes vor deren Interpretation, wenn dies auf 1 steht. Gro?buchstaben und alles was nicht 0-9 oder a-f ist, wird dann nicht als color code gewertet. Wenn auf 0 (Standard), werden ungew?hnliche ASCII-Zeichen akzeptiert und als 0 gelesen.
 filter_color_strings_help     Entferne Farbcodierungen aus allen Texten, die über das Netwerk empfangen werden.
 filter_dark_color_strings_help Entferne zu dunkle Farbcodierungen aus Zeichenketten.
 filter_color_names_help       Entferne Farbcodierungen aus Spielernamen.
