@@ -203,7 +203,7 @@ private:
 
 
 void rConsole::DoCenterDisplay(const tString &s,REAL timeout,REAL r,REAL g,REAL b){
-    std::cout << tColoredString::RemoveColors(s) << '\n';
+    std::cout << tColoredString::RemoveColorsLoose(s) << '\n';
     DisplayAtNewline();
 }
 

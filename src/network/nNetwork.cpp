@@ -1231,7 +1231,7 @@ nMessage& nMessage::operator >> (tColoredString &s )
     if (tColoredString::HasColors(s))
     {
         s = tColoredString::LowerColors(s);
-        if(st_verifyColorCodeStrictly) s = tColoredString::EscapeBadColors(s);
+        //if(st_verifyColorCodeStrictly) s = tColoredString::EscapeBadColors(s);
     }
 
     // filter color codes away

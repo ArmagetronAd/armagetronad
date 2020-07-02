@@ -100,9 +100,8 @@ static tConfItem<bool> sr_consoleLogConf("CONSOLE_LOG", sr_consoleLog);
 static bool sr_consoleLogColor = false;
 static tConfItem<bool> sr_consoleLogColorConf("CONSOLE_LOG_COLOR", sr_consoleLogColor);
 
-// I'll fix it later...
-//static bool sr_consoleLogColorTimestamp = true;
-//static tConfItem<bool> sr_consoleLogColorTimestampConf("CONSOLE_LOG_COLOR_DECORATE_TIMESTAMP", sr_consoleLogColorTimestamp);
+static bool sr_consoleLogColorTimestamp = false;
+static tConfItem<bool> sr_consoleLogColorTimestampConf("CONSOLE_LOG_COLOR_DECORATE_TIMESTAMP", sr_consoleLogColorTimestamp);
 
 tConsole & rConsole::DoPrint(const tString &s){
     bool print_to_stdout=false;
@@ -115,23 +114,22 @@ tConsole & rConsole::DoPrint(const tString &s){
         print_to_stdout=true;
     if (print_to_stdout)
     {
-        std::cout << tColoredString::RemoveColors(s);
+        std::cout << tColoredString::RemoveColorsLoose(s);
         std::cout.flush();
     }
 
     if(!tRecorder::IsPlayingBack() && sr_consoleLog) {
             std::ofstream o;
             if ( tDirectories::Var().Open(o, "consolelog.txt", std::ios::app) ) {
-                o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << tColoredString::RemoveColors(s);
+                o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << tColoredString::RemoveColorsLoose(s);
             }
     }
     
     if(!tRecorder::IsPlayingBack() && sr_consoleLogColor) {
             std::ofstream o;
-            if ( tDirectories::Var().Open(o, "consolelogcolor.txt", std::ios::app /*&& sr_consoleLogColorTimestamp*/) ) {
-            //    o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << s;
-            //}
-            //else {
+            if ( tDirectories::Var().Open(o, "consolelogcolor.txt", std::ios::app ) ) {
+                if(sr_consoleLogColorTimestamp)
+                    o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ");
                 o << s;
             }
     }

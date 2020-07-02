@@ -1353,6 +1353,41 @@ tString tColoredString::RemoveColors( const char * c )
 
 // *******************************************************************************************
 // *
+// *	RemoveColorsLoose
+// *
+// *******************************************************************************************
+//!
+//!		@param	c	C style string or tString to clear of unescaped color codes
+//!		@return   	cleared string
+//!
+// *******************************************************************************************
+
+tString tColoredString::RemoveColorsLoose( const char * c )
+{
+    tString ret;
+    int len = strlen(c);
+    
+    // walk through string
+    while(*c!='\0')
+    {
+        if (*c=='0' && len >= 8 && c[1]=='x')
+        {
+            tString color; color << c[0] << c[1] << c[2] << c[3] << c[4] << c[5] << c[6] << c[7];
+            std::stringstream color2; color2 << color;
+            const char *ccolor = color2.str().c_str();
+            if(strncmp(c,"0xRESETT",8) == 0 || tColor::VerifyColorCode(ccolor))
+            {
+                c += 8; len -= 8;
+            }
+        }
+        ret << (*(c++));
+        --len;
+    }
+    return ret;
+}
+
+// *******************************************************************************************
+// *
 // *	EscapeBadColors
 // *
 // *******************************************************************************************

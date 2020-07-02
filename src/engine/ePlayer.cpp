@@ -7339,6 +7339,9 @@ static void se_OptionalNameFilters( tString & remoteName, int owner )
     // console messages go out of sync.
     if ( sn_GetNetState() == nCLIENT )
         return;
+    
+    if(sn_GetNetState() == nSERVER)
+        remoteName = tColoredString::EscapeBadColors(remoteName);
 
     // strip whitespace
     if ( se_stripNames )
@@ -7430,12 +7433,13 @@ void ePlayerNetID::ReadSync(nMessage &m)
         se_OptionalNameFilters( remoteName, Owner() );
 
         //  remove all colors from name
-        tString colorlessName = tColoredString::RemoveColors(remoteName, false);
+        tString colorlessName = tColoredString::RemoveColorsLoose(remoteName);
 
         //  check if the colorless name's length is longer than the limited length
         if (colorlessName.Len() > 16)
         {
-            se_CutString( remoteName, 16 );
+            se_CutString( colorlessName, 16 );
+            remoteName = colorlessName;
         }
     }
 
@@ -7885,7 +7889,7 @@ void se_SaveToScoreFile(const tOutput &o)
 
         std::ofstream o;
         if ( tDirectories::Var().Open(o, "scorelog.txt", std::ios::app) )
-            o << tColoredString::RemoveColors(s);
+            o << tColoredString::RemoveColorsLoose(s);
     }
 #ifdef DEBUG
 }
@@ -11091,7 +11095,7 @@ ePlayerNetID & ePlayerNetID::ForceName( tString const & name )
         this->nameFromAdmin_.NetFilter();
 
         //  remove all colors from name
-        tString colorlessName = tColoredString::RemoveColors(this->nameFromAdmin_, false);
+        tString colorlessName = tColoredString::RemoveColorsLoose(this->nameFromAdmin_);
 
         //  check if the colorless name's length is longer than the limited length
         if (colorlessName.Len() > 16)
