@@ -531,7 +531,10 @@ gServerMenu::~gServerMenu()
 
 #ifndef DEDICATED
 static REAL text_height=.05;
-static REAL text_width=.025;
+#define gSBTEXTWIDTH 0.025
+static REAL text_width=gSBTEXTWIDTH;
+static REAL aspect = 1;
+static int resW=1, resH=1;
 
 static REAL shrink = .6f;
 static REAL displace = .15;
@@ -559,7 +562,7 @@ void gServerMenu::Render(REAL y,
 
         if (ping.Len() > 1)
         {
-            text.SetPos(static_cast<int>(1.35/c.GetCWidth())  - tColoredString::RemoveColors( ping ).Len() - 1, true );
+            text.SetPos(static_cast<int>((2.0-0.45*aspect-0.2)/c.GetCWidth())  - tColoredString::RemoveColors( ping ).Len() - 1, true );
             text << "0xRESETT";
             text << " " << ping;
         }
@@ -570,7 +573,7 @@ void gServerMenu::Render(REAL y,
 
         if (users.Len() > 1)
         {
-            text.SetPos(static_cast<int>(1.6/c.GetCWidth()) - tColoredString::RemoveColors( users ).Len(), false );
+            text.SetPos(static_cast<int>((2.0-0.2*aspect-0.2)/c.GetCWidth()) - tColoredString::RemoveColors( users ).Len(), false );
             text << users;
         }
 
@@ -877,6 +880,15 @@ bool gServerMenuItem::Event( SDL_Event& event )
 
 void gBrowserMenuItem::RenderBackground()
 {
+    if(resH != sr_screenHeight || resW != sr_screenWidth)
+    {
+        // since we're rendering a little more text
+        // here's a (probably minimal) performance benefit over doing this math every time
+        aspect = (REAL(sr_screenHeight)/sr_screenWidth)*(4.0/3.0);
+        text_width = gSBTEXTWIDTH*aspect;
+        resH = sr_screenHeight; resW = sr_screenWidth;
+    }
+    
     if( menu )
     {
         double now = tSysTimeFloat();
