@@ -1526,6 +1526,16 @@ void gZone::Render( const eCamera * cam )
         sg_zoneSegLength = .5;
     if ( sg_zoneSegments < 1 )
         sg_zoneSegments = 11;
+    
+    if(lastTime == 0)
+    {
+        static REAL fakeTime = 0;
+        if(createTime_ == 0)
+        {
+            fakeTime = tSysTimeFloat();
+        }
+        createTime_ -= (tSysTimeFloat()-fakeTime)/20;
+    }
 
     REAL alpha = ( lastTime - createTime_ ) * .2f;
     if ( alpha > .7f )
