@@ -880,6 +880,7 @@ bool gServerMenuItem::Event( SDL_Event& event )
 
 void gBrowserMenuItem::RenderBackground()
 {
+#ifndef DEDICATED
     if(resH != sr_screenHeight || resW != sr_screenWidth)
     {
         // since we're rendering a little more text
@@ -888,6 +889,7 @@ void gBrowserMenuItem::RenderBackground()
         text_width = gSBTEXTWIDTH*aspect;
         resH = sr_screenHeight; resW = sr_screenWidth;
     }
+#endif
     
     if( menu )
     {
