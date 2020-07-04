@@ -2968,7 +2968,7 @@ bool gBaseZoneHack::Timestep( REAL time )
                 eGameObject *pGameObject = pPlayer->Object();
 
                 if ((!pGameObject) ||
-                    ((pPlayer->CanRespawn()) &&
+                    ((pPlayer->CanRespawn() && !pGameObject->Alive()) &&
                     (pGameObject->DeathTime() < (time - 1))))
                 {
                     lastRespawnRemindTime_ = time - sg_baseRespawnRemindTime - 1;
@@ -3026,11 +3026,11 @@ bool gBaseZoneHack::Timestep( REAL time )
             eGameObject *pGameObject = pPlayer->Object();
 
             if ((!pGameObject) ||
-                (pPlayer->CanRespawn()))
+                (pPlayer->CanRespawn() && !pGameObject->Alive()))
             {
                 waiting++;
             }
-            else if(pGameObject->Alive())
+            else
             {
                 alive++;
             }
@@ -3789,7 +3789,7 @@ void gBaseZoneHack::OnEnter( gZone * target, REAL time )
                     eGameObject *pGameObject = pPlayer->Object();
 
                     if ((!pGameObject) ||
-                        ((pPlayer->CanRespawn()) &&
+                        (((pPlayer->CanRespawn() && !pGameObject->Alive())) &&
                         (pGameObject->DeathTime() < (time - 1))))
                     {
                         lastRespawnRemindTime_ = time - sg_baseRespawnRemindTime - 1;
@@ -3904,7 +3904,7 @@ void gBaseZoneHack::OnEnter( gZone * target, REAL time )
                         eGameObject *pGameObject = pPlayer->Object();
 
                         if ((!pGameObject) ||
-                            ((pPlayer->CanRespawn()) &&
+                            ((pPlayer->CanRespawn() && !pGameObject->Alive()) &&
                             (pGameObject->DeathTime() < (time - 1))))
                         {
                             lastRespawnRemindTime_ = time - sg_baseRespawnRemindTime - 1;
@@ -7660,7 +7660,7 @@ void gSoccerZoneHack::OnEnter( gCycle *target, REAL time )
                         if (p)
                         {
                             gCycle *cycle = dynamic_cast<gCycle *>(p->Object());
-                            //if (!cycle || (!cycle->Alive()))
+                            if (!cycle || (!cycle->Alive()))
                             if(p->CanRespawn())
                             {
                                 eCoord cyclePos, cycleDir;
