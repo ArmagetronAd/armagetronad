@@ -96,7 +96,7 @@ protected:
     eCoord startPos_;          // starting position
     eCoord startDir_;          // starting direction
 
-    eTeam *team;       		 				// the team we belong to
+    tJUST_CONTROLLED_PTR<eTeam> team;       		 				// the team we belong to
 
     tJUST_CONTROLLED_PTR<eFace> currentFace;  // the eFace pos it is currently
     tCHECKED_PTR(eGrid) grid;         // the game grid we are on

@@ -7641,7 +7641,7 @@ void gSoccerZoneHack::OnEnter( gCycle *target, REAL time )
     {
         if (sg_soccerGoalKillEnemies)
         {
-            if (target && (team != target->Team()))
+            if (target && (Team() != target->Team()))
             {
                 sn_ConsoleOut(tOutput("$soccer_goal_enemy_entered", target->Player()->GetColoredName(), Team()->GetColoredName()));
                 target->Kill();
@@ -7649,7 +7649,7 @@ void gSoccerZoneHack::OnEnter( gCycle *target, REAL time )
         }
         else
         {
-            if (sg_soccerGoalRespawnAllies && (team == target->Team()))
+            if (sg_soccerGoalRespawnAllies && (Team() == target->Team()))
             {
                 gSpawnPoint *pSpawn = Arena.ClosestSpawnPoint(GetPosition());
                 if (pSpawn)

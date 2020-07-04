@@ -350,7 +350,7 @@ void eTeam::UpdateAppearance()
     else
     {
         // empty team
-        name = tOutput("$team_empty");
+        name = updateName = tOutput("$team_empty");
         r = g = b = 7;
         empty = true;
     }
@@ -366,7 +366,6 @@ void eTeam::UpdateAppearance()
             sn_GetNetState() != nCLIENT
             && oldest
             && name != ""
-            && name != tString( tOutput("$team_empty") )
             && ( lastWasCustomTeamName_ || ( updateName != oldest->GetName() && !nameTeamColor ) )
         )
         {
