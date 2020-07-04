@@ -27,7 +27,7 @@ bzr_count_revisions()
 
     test -z "$limit" || limit="-l $limit"
 
-    count=$(bzr log --include-merges --line $limit "${srcdir}" 2>/dev/null | wc -l)
+    count=$(bzr log -n 0 --line $limit "${srcdir}" 2>/dev/null | wc -l)
     echo $count
 }
 
