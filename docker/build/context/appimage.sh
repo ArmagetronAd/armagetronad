@@ -18,7 +18,10 @@ cp -l appdir/usr/local/share/games/${PACKAGE_NAME}*/desktop/icons/large/${PACKAG
 #   https://github.com/AppImage/AppImageKit/releases
 
 rm -f $1
-ARCH=${ARCH} appimagetool-${ARCH}.AppImage --appimage-extract-and-run appdir $1
+ARCH=${ARCH} appimagetool-${ARCH}.AppImage --appimage-extract-and-run appdir $1 || exit $?
+
+# test
+./$1 --appimage-extract --version || exit $?
 
 # comment out to inspect result for debug purposes
 rm -rf appdir

@@ -1903,8 +1903,8 @@ player_police_silence_help            Allows you to silence spamming players loc
 player_police_silence_enemies_help        If enabled, you can only view team messages while alive
 player_police_silence_enemies_enable        Silence Enemies
 
-silence_player_help                    If activated, all chat messages from this player will be omitted.
-silence_player_text                    Silence \1
+ignore_player_help					If activated, all chat messages from this player will be omitted.
+ignore_player_text					Silence \1
 
 player_police_kick_text                Kick Menu
 player_police_kick_help                Allows to issue a kick vote for a player

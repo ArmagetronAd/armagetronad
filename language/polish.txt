@@ -1595,8 +1595,8 @@ player_police_help            Pozwala wyciszyc jakiegos gracza, lub zaglosowac z
 player_police_silence_text    Menu Wyciszenia
 player_police_silence_help    Pozwala lokalnie wyciszyc spamujacych graczy.
 
-silence_player_help           Po wybraniu wszystkie wiadomosci od tego gracza zostana zablokowane.
-silence_player_text           Wycisz \1
+ignore_player_help            Po wybraniu wszystkie wiadomosci od tego gracza zostana zablokowane.
+ignore_player_text            Wycisz \1
 
 player_police_kick_text       Menu Wyrzucania
 player_police_kick_help       Pozwala utworzyc ankiete dotyczaca wyrzucenia gracza z serwera.

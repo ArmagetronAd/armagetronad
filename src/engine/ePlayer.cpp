@@ -1008,11 +1008,11 @@ class eMenuItemSilence: public uMenuItemToggle
 {
 public:
     eMenuItemSilence(uMenu *m, ePlayerNetID* p )
-        : uMenuItemToggle( m, tOutput(""),tOutput("$silence_player_help" ),  p->AccessSilenced() )
+            : uMenuItemToggle( m, tOutput(""),tOutput("$ignore_player_help" ),  p->AccessSilenced() )
     {
         this->title.Clear();
         this->title.SetTemplateParameter(1, p->GetColoredName() );
-        this->title << "$silence_player_text";
+        this->title << "$ignore_player_text";
         player_ = p;
     }
 

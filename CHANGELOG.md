@@ -1,16 +1,27 @@
 
 #### Changes since 0.2.8.3.5:
 
+##### New Features
+
+ * Update German translation ([#2](https://gitlab.com/armagetronad/armagetronad/-/issues/2))
+ * Adapt ChangeLog and fingerprint generation to git ([#11](https://gitlab.com/armagetronad/armagetronad/-/issues/11))
+ * Integrated build system ([#14](https://gitlab.com/armagetronad/armagetronad/-/issues/14))
+ * Make playback time display optional ([#16](https://gitlab.com/armagetronad/armagetronad/-/issues/16))
+ * Deploy to itch.io ([#19](https://gitlab.com/armagetronad/armagetronad/-/issues/19))
+ * Credit contributors in patch notes ([#21](https://gitlab.com/armagetronad/armagetronad/-/issues/21))
+
 ##### Fixed Bugs
 
  * Debian builds: Documentation html files have empty last change ([#9](https://gitlab.com/armagetronad/armagetronad/-/issues/9))
+ * Socket and unclean exit trouble due to fork(), execve() and exit() interaction ([#13](https://gitlab.com/armagetronad/armagetronad/-/issues/13))
  * Ubuntu PPA release candidate builds would overwrite previous stable releases ([#15](https://gitlab.com/armagetronad/armagetronad/-/issues/15))
+ * Language string identifier silence_player_text used twice ([#22](https://gitlab.com/armagetronad/armagetronad/-/issues/22))
+ * Bad video mode error recovery ([#23](https://gitlab.com/armagetronad/armagetronad/-/issues/23))
+ * AppRun script does not work if call path contains spaces ([#24](https://gitlab.com/armagetronad/armagetronad/-/issues/24))
 
-##### New Features
+##### Contributors
 
- * Adapt ChangeLog and fingerprint generation to git ([#11](https://gitlab.com/armagetronad/armagetronad/-/issues/11))
- * Integrated build system ([#14](https://gitlab.com/armagetronad/armagetronad/-/issues/14))
-
+Daniel Harple, Hugh McMaster, Luke-Jr, Manuel Moos, Uzix, fman23, zolk3ri
 
 ##### Changes on the 0.2.9 branch
 

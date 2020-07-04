@@ -40,8 +40,10 @@ function copylib()
 
 #   include libraries
 mkdir -p ${APPDIR}/usr/lib/
-mkdir -p ${APPDIR}/usr/local/lib/
 for library in \
+libicuuc \
+libicudata \
+libwebp \
 libxml2 \
 libZThread \
 libSDL-1 \
@@ -54,7 +56,7 @@ libftgl \
 libprotobuf \
 ; do
   echo "Checking for library ${library}...."
-  baselib=$(ldd ${APPDIR}/usr/local/bin/${PACKAGE} | grep "${library}" | sed -e "s,.*=> ,," -e "s, (.*,,")
+  baselib=$(ldd ${APPDIR}/usr/bin/${PACKAGE} | grep "${library}" | sed -e "s,.*=> ,," -e "s, (.*,,")
   if test -z "${baselib}"; then
     echo "Not linked."
   else
