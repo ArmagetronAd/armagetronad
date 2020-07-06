@@ -12,7 +12,7 @@ if test `getconf LONG_BIT` -eq 32; then
 fi
 
 # copy icon
-cp -l appdir/usr/local/share/games/${PACKAGE_NAME}*/desktop/icons/large/${PACKAGE_NAME}*.png appdir/
+# cp -l appdir/usr/share/games/${PACKAGE_NAME}*/desktop/icons/large/*.png appdir/${PACKAGE_NAME}.png || exit $?
 
 #   pack it up. The appimagetool package is available here:
 #   https://github.com/AppImage/AppImageKit/releases
@@ -20,7 +20,6 @@ cp -l appdir/usr/local/share/games/${PACKAGE_NAME}*/desktop/icons/large/${PACKAG
 rm -f $1
 ARCH=${ARCH} appimagetool-${ARCH}.AppImage --appimage-extract-and-run appdir $1 || exit $?
 
-# test
 ./$1 --appimage-extract --version || exit $?
 
 # comment out to inspect result for debug purposes

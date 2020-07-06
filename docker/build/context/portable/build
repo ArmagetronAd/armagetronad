@@ -3,12 +3,21 @@
 
 # set -x
 
-#   add AppRun and desktop file
+# add AppRun
 cp portable/AppRun ${APPDIR}/
-find ${APPDIR} -type f -name "*.desktop" -exec mv \{\} ${APPDIR}/ \;
-find ${APPDIR} -type l -name "*.desktop" -exec rm \{\} \;
 
-#   hack Icon
+# add desktop file to main dir and canonical place
+find ${APPDIR} -type f -name "*.desktop" -exec mv \{\} ${APPDIR}/org.armagetronad.${PACKAGE}.desktop \;
+find ${APPDIR} -type l -name "*.desktop" -exec rm -f \{\} \;
+mkdir -p ${APPDIR}/usr/share/applications/
+cp ${APPDIR}/org.armagetronad.${PACKAGE}.desktop ${APPDIR}/usr/share/applications/ || exit $?
+
+# add appinfo
+mkdir -p ${APPDIR}/usr/share/metainfo || exit $?
+cp ${APPDIR}/usr/share/games/${PACKAGE}/desktop/armagetronad.appdata.xml ${APPDIR}/usr/share/metainfo/org.armagetronad.${PACKAGE}.appdata.xml || exit $?
+#sed -i -e 's,type="desktop-id">,type="desktop-id">../../../,' ${APPDIR}/usr/share/metainfo/org.armagetronad.${PACKAGE}.appdata.xml || exit $?
+
+# hack Icon
 for f in $(find ${APPDIR} -type d -name "desktop"); do
   cp $f/icons/small/*.png ${APPDIR}/${PACKAGE}.png
 done
