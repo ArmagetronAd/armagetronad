@@ -4,11 +4,12 @@
 desktopfiledir=${aa_datadir}/desktop
 
 # files for desktop integration
-nobase_desktopfile_DATA=armagetronad.desktop icons/small/armagetronad.png icons/medium/armagetronad.png icons/large/armagetronad.png
+nobase_desktopfile_DATA=armagetronad.desktop \
+	icons/small/armagetronad.png icons/medium/armagetronad.png icons/large/armagetronad.png \
+	armagetronad.appdata.xml
 
 EXTRA_DIST=icons/small/armagetronad.png\
            icons/medium/armagetronad.png\
 		   icons/large/armagetronad.png\
-		   armagetronad.desktop.in
-
-
+		   armagetronad.desktop.in\
+		   armagetronad.appdata.xml.in
