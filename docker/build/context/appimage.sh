@@ -11,8 +11,13 @@ if test `getconf LONG_BIT` -eq 32; then
   ARCH=i686
 fi
 
-# copy icon
-# cp -l appdir/usr/share/games/${PACKAGE_NAME}*/desktop/icons/large/*.png appdir/${PACKAGE_NAME}.png || exit $?
+# link icon
+cp appdir/usr/share/games/${PACKAGE_NAME}*/desktop/icons/large/*.png appdir/.DirIcon || exit $?
+
+# lint according to https://github.com/AppImage/appimage.github.io#checklist-for-submitting-your-own-appimage
+chmod +x pkg2appimage/appdir-lint.sh
+desktop-file-validate appdir/*.desktop || exit $?
+./pkg2appimage/appdir-lint.sh ./appdir || exit $?
 
 #   pack it up. The appimagetool package is available here:
 #   https://github.com/AppImage/AppImageKit/releases
