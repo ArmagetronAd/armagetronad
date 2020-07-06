@@ -700,7 +700,7 @@ dedicated_idle_help           Nach dieser Zeit (in Stunden) beendet sich der Ded
 dedicated_fps_help            Maximale Zahl der Simulationsschritte pro Sekunde, die der Server ausführen soll
 dedicated_fps_idle_factor_help Maximale Zahl der Simulationsschritte pro Sekunde, die der Server ausführen soll, währent gerade kein eingehender Netzwerkverkehr vorliegt
 talk_to_master_help           Soll dieser Server im Internet bekannt gemacht werden?
-add_master_server_help        Kündige diesen Server einem anderen Master Server an. Anwendung: ADD_MASTER_SERVER host port(optional, Standard=4533).
+add_master_server_help        Macht diesen Server einem weiterem Master-Server bekannt. Verwendung: ADD_MASTER_SERVER <server IP/DNS-Name> <port>(optional, standard=4533).
 max_out_rate_help             Maximale Netzwerkbandbreite (Ausgabe)
 max_in_rate_help              Maximale Netzwerkbandbreite (Eingabe)
 message_cache_size_help       Größe des Netzwerk-Nachrichten-Caches in Nachrichten.

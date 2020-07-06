@@ -170,7 +170,6 @@ gits.tag: $(SCRIPTDIR)/fix_gits.sh
 gits_artifacts.tag: gits.tag
 	rm -rf gits
 	mkdir -p gits
-	cp -a ${GITS}/ubuntu/debian gits/
 	mkdir -p gits/steam
 	cp -a ${GITS}/steam-art/good/title.png gits/steam
 	echo > $@
@@ -222,7 +221,7 @@ context.steam: context.64 gits_artifacts.tag
 
 # add debian/ubuntu build info for release %. Requires GPG key from ~/.gnupg
 context.debsrc_%: rootcontext.64 ${srcdir}/rebrand_debian_core.sh ${srcdir}/debian_source.sh gits_artifacts.tag $(TARBALL)
-	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' $(TARBALL) ${srcdir}/rebrand_debian_core.sh ${srcdir}/debian_source.sh ./gits/debian
+	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' $(TARBALL) ${srcdir}/rebrand_debian_core.sh ${srcdir}/debian_source.sh ${srcdir}/context/debian
 	if test -r  ../deploy/secrets/sec.gpg; then cp -lrf ../deploy/secrets/*.gpg $@.dir/; fi
 	echo "armadeb_64" > $@.dir/image
 	echo > $@
@@ -572,6 +571,17 @@ context.deploy_zi: context.deploy_base_zeroinstall result.update_zi ${srcdir}/..
 result.deploy_zi: context.deploy_zi
 	+$(srcdir)/context_to_result.sh $@.dir ./deploy_zeroinstall.sh
 	echo > $@
+context.deploy_itch: context.deploy_base_itch ${srcdir}/../deploy/*_itch.sh upload/$(APPTAR_CLIENT_64) upload/$(APPTAR_CLIENT_32) $(WINZIP_CLIENT)
+	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' ${srcdir}/../deploy/*_itch.sh
+	mkdir -p $@.dir/appdir_linux_64; cd $@.dir/appdir_linux_64; tar -xjf ../../upload/$(APPTAR_CLIENT_64)
+	mkdir -p $@.dir/appdir_linux_32; cd $@.dir/appdir_linux_32; tar -xjf ../../upload/$(APPTAR_CLIENT_32)
+	mkdir -p $@.dir/appdir_windows; cd $@.dir/appdir_windows; unzip ../../$(WINZIP_CLIENT)
+	rm -f $@.dir/image
+	echo "armadeploy_64" > $@.dir/image
+	echo > $@
+result.deploy_itch: context.deploy_itch
+	+$(srcdir)/context_to_result.sh $@.dir ./deploy_itch.sh
+	echo > $@
 
 # deploy to download site (additional dependency here only, standard rules apply)
 result.deploy_download: result.deploy_scp result.deploy_lp
@@ -582,6 +592,7 @@ deploy_scp: result.deploy_scp
 deploy_steam: result.deploy_steam
 deploy_zi: result.deploy_zi
 deploy_download: result.deploy_download
+deploy_itch: result.deploy_itch
 
 deploy_ppa: \
 deploy_ppa_focal \
@@ -593,7 +604,7 @@ deploy_ppa_trusty
 deploy_ppa_%: result.deploy_ppa_%
 	@echo Deployed $*
 
-deploy: deploy_lp deploy_scp deploy_ppa deploy_zi deploy_steam deploy_download
+deploy: deploy_lp deploy_scp deploy_ppa deploy_zi deploy_steam deploy_download deploy_itch
 #deploy: deploy_scp
 #deploy: deploy_zi
 #deploy: deploy_ppa

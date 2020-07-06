@@ -16,7 +16,10 @@ fi
 
 rm -f $1
 rm -f appdir/*-handler.desktop
-ARCH=${ARCH} appimagetool-${ARCH}.AppImage --appimage-extract-and-run appdir $1
+ARCH=${ARCH} appimagetool-${ARCH}.AppImage --appimage-extract-and-run appdir $1 || exit $?
+
+# test
+./$1 --appimage-extract --version || exit $?
 
 # comment out to inspect result for debug purposes
 # rm -rf appdir

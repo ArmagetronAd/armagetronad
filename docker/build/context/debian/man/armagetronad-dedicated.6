@@ -1,0 +1,67 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.TH ARMAGETRONAD-DEDICATED 6 "February 08, 2007"
+.SH NAME
+armagetronad-dedicated \- an Armagetron Advanced dedicated game server
+.SH SYNOPSIS
+.B /etc/init.d/armagetronad-dedicated \{start|stop|restart|force-reload|status\}
+.PP
+\fBarmagetronad-dedicated\fP [\fB\-h, \-\-help\fP] [\fB\-v, \-\-version\fP] [\fB\-\-doc\fP] [\fB\-\-fastforward\fP] [\fB\-\-benchmark\fP] [\fB\-\-record\fP] [\fB\-\-playback\fP]
+.SH DESCRIPTION
+.PP
+The Armagetron Advanced dedicated server runs from an initscript --
+to enable running it on boot, edit \fB/etc/default/armagetronad-dedicated\fP.
+.PP
+The server program will read default settings from
+\fB/etc/armagetronad/settings_dedicated.cfg\fP. Modifications and custom
+server settings should be implemented in the file
+\fB/etc/armagetronad/settings_custom.cfg\fP.
+.PP
+To edit configuration on-the-fly or make time-sensitive temporary
+changes, it's best to log onto the server from the armagetronad
+client and log on as an administrator (using the password set in
+the server configuration). Console input is not available when
+running the server as a daemon.
+.PP
+Before each round is started, the file \fB/etc/armagetronad/everytime.cfg\fP
+is read; it may be useful to use this for things like randomly
+changing maps or other quickly changing settings.
+.SH OPTIONS
+Note: Only options that are relevant for invoking armagetron-dedicated
+via the command line (and not the initscript) are documented here. See
+\fBarmagetronad-dedicated \-\-help\fP for a complete reference.
+.IP "\fB\-h, \-\-help\fP" 10
+Show help message.
+.IP "\fB\-v, \-\-version\fP" 10
+Print version number.
+.IP "\fB\-\-doc\fP" 10
+Print documentation for all console commands. These are also configuration
+settings for config files.
+.IP "\fB\-\-fastforward \fITIME\fR\fP" 10
+Lets time run very fast until the given time is reached.
+.IP "\fB\-\-benchmark\fP" 10
+Renders frames as they were recorded.
+.IP "\fB\-\-record \fIFILENAME\fP" 10
+Creates a DEBUG recording while running.
+.IP "\fB\-\-playback \fIFILENAME\fP" 10
+Plays back a DEBUG recording.
+.SH FILES
+.TP 3n
+\fI/etc/armagetronad/settings_dedicated.cfg\fP
+.SH SEE ALSO
+armagetronad(6)
+.PP
+Armagetron Advanced is documented fully by the provided HTML docs, found
+under /usr/share/doc/armagetronad-common/html/.
+.PP
+A thorough guide to running a server can be found on the Armagetron
+Advanced wiki:
+http:\/\/wiki.armagetronad.net\/index.php\/Server_Administration_Guide
+and:
+http:\/\/wiki.armagetronad.net\/index.php\/Advanced_Server_Administration_Guide
+.SH AUTHOR
+Armagetron Advanced was written by Manuel Moos <z-man@users.sourceforge.net>
+and the Armagetron Advanced development team.
+.PP
+This manual page was adapted from the original HTML version by Marcelo
+E. Magallon <mmagallo@debian.org> (and later Christine Spang <spang@mit.edu>),
+for the Debian GNU/Linux system (but may be used by others).
