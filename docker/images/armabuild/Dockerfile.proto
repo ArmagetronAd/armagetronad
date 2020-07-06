@@ -50,9 +50,10 @@ recode \
 # copy appimage tools
 COPY appimage/* /usr/bin/
 
+# optional: appstream
 RUN apt-get -y update && apt-get install \
 appstream \
--y
+-y || true
 
 FROM armabuild_base as armabuild
 # set up builder user
