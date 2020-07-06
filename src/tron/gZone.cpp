@@ -7182,7 +7182,7 @@ static void sg_SpawnObjectZone(std::istream &s)
         }
 
         bool zoneInteractiveBool = false;
-        if (zoneInteractive.ToLower() == "true")
+        if (zoneInteractive.ToLower() == "true" || zoneInteractive.ToLower() == "1")
             zoneInteractiveBool = true;
 
         Zone = tNEW(gObjectZoneHack(grid, zonePos, true));
@@ -7254,15 +7254,10 @@ static void sg_SpawnObjectZone(std::istream &s)
 
     usage:
     {
-        tString usageMem;
-        ePlayerNetID *rec = 0;  //  get the caller to send the message
-
-        usageMem << "Usage:\n"
+        con << "Usage:\n"
                     "SPAWN_OBJECTZONE <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> <seek_owner> <seek_speed> <seek_update_time>\n"
                     "Instead of <x> <y> one can write: L <x1> <y1> <x2> <y2> [...] Z\n"
                     "To give the zone a name, SPAWN_OBJECTZONE n <name> ...\n";
-
-        sn_ConsoleOut(usageMem, rec->Owner());
     }
 }
 static tConfItemFunc sg_SpawnObjectZoneConf("SPAWN_OBJECTZONE", &sg_SpawnObjectZone);
@@ -7532,7 +7527,13 @@ bool gSoccerZoneHack::Timestep( REAL time )
         //  set new velocity
         SetVelocity(currentVelocity);
 
-        //RequestSync();
+        static REAL lasttime = 0;
+        REAL systime = tSysTimeFloat();
+        if(systime > lasttime)
+        {
+            lasttime = systime+sg_soccerBallSlowdownSpeed;
+            RequestSync();
+        }
     }
 
     return (returnStatus);
@@ -7797,19 +7798,19 @@ static void sg_SpawnSoccer(std::istream &s)
             type = name;
             name = "";
         }
-
-        if (type.ToLower() == "soccerball")
+        
+        type = type.ToLower();
+        
+        if(type == "ball" || type == "soccerball")
         {
-            //  good...
+            //nothing additional to be done.
         }
-        else if (type.ToLower() == "soccergoal")
+        else if(type == "goal" || type == "soccergoal")
         {
-            //  good...
             team = params.ExtractNonBlankSubString(pos);
         }
         else
         {
-            //  bad...
             goto usage;
             return;
         }
@@ -7922,14 +7923,14 @@ static void sg_SpawnSoccer(std::istream &s)
         }
 
         //  time to create the zone
-        if (type.ToLower() == "soccerball")
+        if(type == "ball" || type == "soccerball")
         {
             gSoccerZoneHack *sZone = new gSoccerZoneHack(grid, zonePos, true, false);
             sZone->SetType(gSoccerZoneHack::gSoccer_BALL);
 
             Zone = sZone;
         }
-        else if (type.ToLower() == "soccergoal")
+        else if(type == "goal" || type == "soccergoal")
         {
             gSoccerZoneHack *sZone = new gSoccerZoneHack(grid, zonePos, true, zoneTeam, false);
             sZone->SetType(gSoccerZoneHack::gSoccer_GOAL);
@@ -7939,7 +7940,7 @@ static void sg_SpawnSoccer(std::istream &s)
 
         REAL targetRadius = atof(targetRadiusStr)*sizeMultiplier;
         bool zoneInteractiveBool = false;
-        if (zoneInteractive.ToLower() == "true")
+        if (zoneInteractive.ToLower() == "true" || zoneInteractive.ToLower() == "1")
             zoneInteractiveBool = true;
 
         CreateZone(tString("soccerball"), Zone, zoneSize, zoneGrowth, zoneDir, setColorFlag, zoneColor, zoneInteractiveBool, targetRadius, route, name);
@@ -7948,16 +7949,11 @@ static void sg_SpawnSoccer(std::istream &s)
 
     usage:
     {
-        tString usageMem;
-        ePlayerNetID *rec = 0;  //  get the caller to send the message
-
-        usageMem << "Usage:\n"
-                    "SPAWN_SOCCER <soccerball> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
-                    "SPAWN_SOCCER <soccergoal> <team> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
+        con << "Usage:\n"
+                    "SPAWN_SOCCER ball <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
+                    "SPAWN_SOCCER goal <team> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
                     "Instead of <x> <y> one can write: L <x1> <y1> <x2> <y2> [...] Z\n"
                     "To give the zone a name, SPAWN_SOCCER n <name> ...\n";
-
-        sn_ConsoleOut(usageMem, rec->Owner());
     }
 }
 static tConfItemFunc sg_SpawnSoccerConf("SPAWN_SOCCER", &sg_SpawnSoccer);
@@ -8834,11 +8830,11 @@ static void sg_CreateZone_conf(std::istream &s)
 
     REAL targetRadius = atof(targetRadiusStr) * sizeMultiplier;
     bool zoneInteractiveBool =false;
-    if ((zoneInteractive == "true") || (zoneInteractive == "1")){
+    if ((zoneInteractive.ToLower() == "true") || (zoneInteractive.ToLower() == "1")){
         zoneInteractiveBool=true;
     }
     bool zonePenetrateBool = false;
-    if (zonePenetrate == "true" || zonePenetrate == "1")
+    if (zonePenetrate.ToLower() == "true" || zonePenetrate.ToLower() == "1")
         zonePenetrateBool = true;
     CreateZone(zoneTypeStr, Zone, zoneSize, zoneGrowth, zoneDir, setColorFlag, zoneColor, zoneInteractiveBool, targetRadius, route, zoneNameStr, zonePenetrateBool);
 }
