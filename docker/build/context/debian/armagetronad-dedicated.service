@@ -1,0 +1,14 @@
+[Unit]
+Description=Armagetron Advanced multiplayer server
+Documentation=man:armagetronad-dedicated(6)
+After=network.target
+RequiresMountsFor=/var/games/armagetronad
+
+[Service]
+Restart=on-failure
+User=armagetronad
+Group=games
+ExecStart=/usr/games/armagetronad-dedicated.real --datadir /usr/share/games/armagetronad --configdir /etc/armagetronad --userdatadir /var/games/armagetronad -d
+
+[Install]
+WantedBy=multi-user.target

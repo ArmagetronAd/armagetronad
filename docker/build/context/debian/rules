@@ -1,0 +1,71 @@
+#!/usr/bin/make -f
+# export DH_VERBOSE=1
+include /usr/share/dpkg/pkg-info.mk
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
+
+# These are used for cross-compiling and for saving the configure script
+# from having to guess our platform (since we know it already)
+DEB_HOST_GNU_TYPE   ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+DEB_BUILD_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+
+# I'm going to assume that this is still true - armagetron relies on
+# arithmetics with denormals.
+ifeq ($(shell dpkg-architecture -qDEB_HOST_ARCH),alpha)
+	export DEB_CFLAGS_MAINT_APPEND = -mieee
+endif
+
+# Special options to ./configure for client and server builds.
+SHARED_OPTS := --disable-uninstall --host=$(DEB_HOST_GNU_TYPE)
+SHARED_OPTS += --build=$(DEB_BUILD_GNU_TYPE) --prefix=/usr
+SHARED_OPTS += --mandir=\$${prefix}/share/man --sysconfdir=/etc --disable-etc
+SHARED_OPTS += --datadir=/usr/share --disable-games --bindir=/usr/games
+SHARED_OPTS += --enable-binreloc
+SERVER_OPTS := --disable-glout --disable-useradd --disable-init --enable-authentication
+CLIENT_OPTS := --enable-glout
+
+%:
+	dh $@ --without autoreconf --with autotools_dev,systemd
+
+override_dh_auto_configure:
+	mkdir -p client
+	cd client && ../configure $(SHARED_OPTS) $(CLIENT_OPTS)
+	mkdir -p server
+	cd server  && ../configure $(SHARED_OPTS) $(SERVER_OPTS)
+
+override_dh_auto_build:
+	$(MAKE) -C client
+	$(MAKE) -C server
+
+override_dh_clean:
+	$(RM) -r client server debian/tmp-client debian/tmp-server
+	dh_clean
+
+override_dh_auto_install:
+	$(MAKE) -C client DESTDIR=$(CURDIR)/debian/tmp-client install
+	$(MAKE) -C server DESTDIR=$(CURDIR)/debian/tmp-server install
+	# Fix weird stuff that can't be corrected in the upstream makefile.
+	test -d debian/tmp-client/usr/share/games || mkdir -p debian/tmp-client/usr/share/games
+	cp -r debian/tmp-client/usr/share/armagetronad debian/tmp-client/usr/share/games/armagetronad
+	cp -r debian/tmp-client/usr/games/armagetronad debian/tmp-client/usr/games/armagetronad.real
+	mv debian/tmp-server/usr/games/armagetronad-dedicated debian/tmp-server/usr/games/armagetronad-dedicated.real
+
+override_dh_install:
+	# Copy wrapper scripts to temporary install directories
+	cp debian/bin/armagetronad debian/tmp-client/usr/games/
+	cp debian/bin/armagetronad-dedicated debian/tmp-server/usr/games/
+	mkdir -p debian/tmp-client/usr/share/icons/hicolor/128x128/apps
+	cp debian/armagetronad.png debian/tmp-client/usr/share/icons/hicolor/128x128/apps
+	# Install from temporary directories into specific packages
+	dh_install -parmagetronad --sourcedir=debian/tmp-client
+	dh_install -parmagetronad-common --sourcedir=debian/tmp-client
+	dh_install -parmagetronad-dedicated --sourcedir=debian/tmp-server
+	# Clean up cruft.
+	$(RM) -r debian/armagetronad/usr/share/games/armagetronad/desktop
+	$(RM) debian/armagetronad-common/etc/armagetronad/rc.config
+	# There's no reason to ship this script.
+	$(RM) debian/armagetronad-common/usr/share/games/armagetronad/language/update.py
+
+get-orig-source:
+	# Uncomment the second debian/watch file paragraph
+	uscan --verbose --download-current-version --force-download

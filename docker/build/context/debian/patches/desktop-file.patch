@@ -1,0 +1,29 @@
+From: Markus Koschany <apo@debian.org>
+Date: Tue, 26 Aug 2014 23:42:04 +0200
+Subject: desktop file
+
+Forwarded: http://forums3.armagetronad.net/viewtopic.php?f=4&t=23750
+---
+ desktop/armagetronad.desktop.in | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/desktop/armagetronad.desktop.in b/desktop/armagetronad.desktop.in
+index eeee58b..8b5eb77 100644
+--- a/desktop/armagetronad.desktop.in
++++ b/desktop/armagetronad.desktop.in
+@@ -1,11 +1,13 @@
+ [Desktop Entry]
+ Type=Application
+ Name=@progtitle@@progtitle_server@
+-Exec=@progname@
++Exec=@progname@ %f
+ Comment=3d light cycle game
+-Icon=@progname@.png
++Comment[de]=dreidimensionales Lichtradspiel
++Icon=@progname@
+ Terminal=@build_dedicated@
+ Path=@prefix@/bin
+ Categories=Game;ActionGame;
+ StartupNotify=@build_dedicated@
+ MimeType=application/x-armagetronad;
++Keywords=tron-like;light;cycle;3D;multiplayer;networked;server;

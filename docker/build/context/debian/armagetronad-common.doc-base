@@ -1,0 +1,9 @@
+Document: armagetronad
+Title: Armagetron Manual - A 3D Tron-like high speed game
+Author: Manuel Moss
+Abstract: Users manual for Armagetron, A 3D Tron-like high speed game.
+Section: Games/Action
+
+Format: HTML
+Index: /usr/share/doc/armagetronad-common/html/index.html
+Files: /usr/share/doc/armagetronad-common/html/*.html
