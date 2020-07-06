@@ -50,6 +50,10 @@ recode \
 # copy appimage tools
 COPY appimage/* /usr/bin/
 
+RUN apt-get -y update && apt-get install \
+appstream \
+-y
+
 FROM armabuild_base as armabuild
 # set up builder user
 RUN useradd builder && mkdir -p /home/builder && chown builder:builder /home/builder # && chmod 777 /home/builder
