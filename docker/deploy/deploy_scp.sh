@@ -24,8 +24,8 @@ function upload(){
     if ! test -z "${UPLOAD_SCP_APPIMAGE}"; then
         APPIMAGE_BASENAME=`echo ${PACKAGE_TITLE} | sed -e "s, ,,g"`
         for f in upload/${APPIMAGE_BASENAME}*; do
-            target=`echo $f | sed -e s,upload/,, -e s,-${PACKAGE_VERSION},,`
-            scp $f ${UPLOAD_SCP_APPIMAGE}${target} || return $?
+            target=`echo $f | sed -e s,upload/,, -e s,-${PACKAGE_VERSION}.*,,`
+            scp $f ${UPLOAD_SCP_APPIMAGE}${target}.AppImage || return $?
         done
         # return 0
     fi
