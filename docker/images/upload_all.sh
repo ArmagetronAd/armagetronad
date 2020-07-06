@@ -8,7 +8,7 @@ wd="`dirname $0`"
 #set -x
 
 function store(){
-    logfile=`tempfile`
+    logfile=`tempfile 2>/dev/null` || logfile=`mktemp` || exit $?
     docker push ${REGISTRY}$1:${EPOCH} | tee ${logfile}
     grep "digest:" ${logfile} || exit 0
     grep "digest:" ${logfile} | sed -e "s/.*digest: //" -e "s/ .*//" > ${wd}/$1.digest
