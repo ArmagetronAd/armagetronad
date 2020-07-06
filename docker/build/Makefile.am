@@ -337,8 +337,8 @@ apptar: apptar.tag
 #***************************************************************
 
 # AppImages
-context.appimage_%: result.appdir_% ${srcdir}/context/appimage.sh
-	${srcdir}/prepare_context.sh $@.dir $<.dir/appdir $<.dir/image $<.dir/version.sh ${srcdir}/context/appimage.sh
+context.appimage_%: result.appdir_% ${srcdir}/context/appimage.sh gits.tag
+	${srcdir}/prepare_context.sh $@.dir $<.dir/appdir $<.dir/image $<.dir/version.sh ${srcdir}/context/appimage.sh $(GITS)/pkg2appimage
 	echo > $@
 
 result.appimage_%: context.appimage_%
