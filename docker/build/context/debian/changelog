@@ -1,0 +1,615 @@
+armagetronad (0.2.8.3.4-2) unstable; urgency=medium
+
+  * Declare compliance with Debian Policy 4.0.0.
+  * Use https for Format field.
+  * Switch to compat level 10.
+  * Drop deprecated menu file.
+  * Drop README.Debian. Quite outdated and no longer needed.
+  * Don't convert and install the xpm icon anymore.
+  * Update reproducible-build.patch. Use SOURCE_DATE_EPOCH variable or remove
+    any occurrences of the date command.
+    Thanks to Chris Lamb for the report. (Closes: #861773)
+
+ -- Markus Koschany <apo@debian.org>  Sun, 25 Jun 2017 17:05:13 +0200
+
+armagetronad (0.2.8.3.4-1) unstable; urgency=medium
+
+  * New upstream version 0.2.8.3.4.
+  * Drop gcc-6-ftbfs.patch. Fixed upstream.
+
+ -- Markus Koschany <apo@debian.org>  Tue, 29 Nov 2016 13:59:05 +0100
+
+armagetronad (0.2.8.3.3-3) unstable; urgency=medium
+
+  * Declare compliance with Debian Policy 3.9.8.
+  * Vcs-Git: Use https.
+  * debian/watch: Use version=4.
+  * Add gcc-6-ftbfs.patch and fix FTBFS with GCC-6.
+    Thanks to Martin Michlmayr for the report and Z-Man for the patch.
+    (Closes: #812293)
+  * Add new 128x128 hicolor png icon and install it.
+  * Add reproducible-build.patch and make the build reproducible.
+
+ -- Markus Koschany <apo@debian.org>  Tue, 12 Jul 2016 08:46:42 +0200
+
+armagetronad (0.2.8.3.3-2) unstable; urgency=medium
+
+  * debian/rules: Fix FTBFS when building arch-indep packages by changing
+    the icon path to an existing directory.
+
+ -- Markus Koschany <apo@debian.org>  Fri, 30 Oct 2015 14:22:26 +0100
+
+armagetronad (0.2.8.3.3-1) unstable; urgency=medium
+
+  * Imported Upstream version 0.2.8.3.3.
+  * Add get-orig-source target.
+  * Add another watch file paragraph for downloading the original sources. The
+    first one detects only stable releases, the other one lets users download
+    the corresponding tarball from sourceforge.
+  * Declare compliance with Debian Policy 3.9.6.
+  * Vcs-Browser: Switch to cgit and https.
+  * Change homepage to armagetronad.org.
+  * Update copyright years.
+  * Drop security.patch. Fixed upstream.
+  * Add armagetronad-dedicated.service file. The server will be enabled by
+    default from now on. /etc/default/armagetronad-dedicated is deprecated and
+    should only be used with the old sysV-Init system.
+  * debian/rules: Build --with systemd
+
+ -- Markus Koschany <apo@debian.org>  Thu, 29 Oct 2015 15:02:40 +0100
+
+armagetronad (0.2.8.3.2-4) unstable; urgency=medium
+
+  * Add security.patch and fix possible remotely exploitable
+    security vulnerabilities that could terminate network connections
+    of client and server. (Closes: #780178)
+
+ -- Markus Koschany <apo@gambaru.de>  Tue, 10 Mar 2015 08:00:31 +0100
+
+armagetronad (0.2.8.3.2-3) unstable; urgency=medium
+
+  * Fix all remaining bashisms in armagetronad-dedicated wrapper script by
+    removing the run_continuous function. Users are advised to use a real
+    monitoring solution like Monit instead.
+    As a consequence do not use a second PID file for the server and remove the
+    STARTERPIDFILE option from /etc/default/armagetron-dedicated because it is
+    useless now. (Closes: #772191)
+  * armagetronad.desktop: Fix lintian warning desktop-mime-but-no-exec-code by
+    adding %f parameter to Exec key. Add Forwarded header.
+  * debian/copyright: Fix wrong path to public-domain licensed files.
+
+ -- Markus Koschany <apo@gambaru.de>  Sat, 06 Dec 2014 11:02:22 +0100
+
+armagetronad (0.2.8.3.2-2) unstable; urgency=medium
+
+  * New maintainer Debian Games Team.
+    - Add myself to Uploaders. (Closes: #759144)
+  * Drop TODO file.
+  * Drop NEWS file. It is obsolete.
+  * wrap-and-sort -sa.
+  * debian/control:
+    - Use compat level 9 and require debhelper >= 9.
+    - Declare compliance with Debian Policy 3.9.5.
+    - Move packaging to pkg-games VCS.
+    - Remove versioned dependencies from build-dependencies. They are trivially
+      satisfied now.
+    - armagetronad-dedicated: Do not depend on bash anymore. Instead fix
+      bashisms in armagetronad-dedicated wrapper script by removing or
+      replacing bash specific expressions which are not defined by POSIX.
+  * Drop *.dirs files. Creating directories is handled by dh_install and
+    compat level 9 now.
+  * Update debian/copyright to copyright format 1.0.
+    - Add missing Public Domain license.
+  * Install armagetronad and armagetronad-dedicated wrappers with install
+    files.
+  * Install armagetronad.6 and armagetronad-dedicated.6 with manpages files.
+  * Switch to dh sequencer and simplify debian/rules.
+    - Use DEB_CFLAGS_MAINT_APPEND instead of just CFLAGS for overriding build
+      flags on alpha.
+    - Build with autotools_dev and parallel.
+    - Fix that client and server are compiled twice in a row.
+    - Export DEB_BUILD_MAINT_OPTIONS = hardening=+all.
+    - Export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed to avoid useless
+      dependencies.
+  * armagetronad-dedicated.6: Fix lintian warning hyphen-used-as-minus-sign.
+  * postinst/prerm: Fix lintian warning maintainer-script-without-set-e.
+  * Improve watch file. Thanks to Bart Martens.
+  * Switch to libpng-dev from libpng12-dev. (Closes: #662271)
+  * Move prerm script to postrm.
+    - Do not delete armagetronad system user after purge to prevent that the
+      package might left unowned files of that user which is a possible
+      security risk. Remove /var/games/armagetronad when purging the package
+      and recreate it in postinst if necessary.
+      (Closes: #668729)
+  * Add desktop-file.patch:
+    - Create a valid desktop file. Add keywords and a comment in German.
+      Do not use sed commands in debian/rules for that anymore.
+      (Closes: #433372)
+  * Add --enable-authentication to SERVER_OPTS in debian/rules.
+    - Enable server side code for the krawall style user authentication.
+      (Closes: #725152)
+  * Add longtitle to armagetronad.menu.
+  * Install icons to appropriate hicolor directories instead of
+    /usr/share/pixmaps.
+  * Use set -e in wrapper scripts.
+
+ -- Markus Koschany <apo@gambaru.de>  Wed, 27 Aug 2014 22:17:17 +0200
+
+armagetronad (0.2.8.3.2-1) unstable; urgency=low
+
+  * New upstream bugfix release
+    - security fix: old style action commands from clients no longer cause
+      hangs and crashes
+    - security fix: oversized packets are ignored properly
+    - security fix: never read one byte outside of the received buffer
+    - security fix: only include .cfg files from the var subfolder
+    - compiler compatibility: adapted to gcc 4.60 (Closes: #625079)
+    - smaller spelling fixes
+    - FOV calculations now correct for widescreen and horizontal splitscreen
+    - Additional checks against illegal values passed to renderer
+
+  * Reference to armagetronad-server in armageronad-common's
+    description should really be armagetronad-dedicated. (Closes: #575468)
+
+  * Incorporate changes from Ubuntu, thanks to Daniel Chen
+    <crimsun@ubuntu.com>:
+    - debian/rules: Apply patch from upstream to disable uninstall
+      script that breaks with newer automake versions.
+    - debian/armagetronad-dedicated.wrapper: Apply patch from
+      upstream to fix the directory in which the dedicated server
+      stores its log files.
+      NOTE: This "breaks" ban lists and high scores, though the
+      server admin can manually migrate them and then restart the
+      server.
+
+ -- Christine Spang <christine@debian.org>  Tue, 20 Sep 2011 20:16:41 -0400
+
+armagetronad (0.2.8.3.1-1) unstable; urgency=low
+
+  * New upstream bugfix release.
+  * Lintian-inspired fixes:
+    - Add ${misc:Depends} to debian/control for all binary packages.
+    - Add dep on $remote_fs for server initscript.
+
+ -- Christine Spang <christine@debian.org>  Thu, 11 Mar 2010 23:59:27 -0500
+
+armagetronad (0.2.8.3-1) unstable; urgency=low
+
+  * New upstream stable release.
+    - Intercepted chat commands are now written to ladderlog.txt. Format:
+      COMMAND /command-intercepted player [command arguments]
+      - Increased default speed of server pinging
+      - Reordered game menus a bit
+      - fast finish works again
+
+ -- Christine Spang <christine@debian.org>  Fri, 05 Feb 2010 22:06:18 -0500
+
+armagetronad (0.2.8.3~rc4-1) unstable; urgency=low
+
+  * New upstream release candidate.
+    - Pinging previously popular servers earlier for quicker server browsing
+    - Improved master server random polling, the second polled master now also
+    is random, and all masters are polled if need be
+    - Custom camera snaps to cycle direction once when activated if the turn
+    speed is zero.
+    - RESERVE_SCREEN_NAME now works regardless of the ALLOW_IMPOSTOR setting.
+    - USER_LEVEL now escapes the given authenticated name so you don't have to
+    guess the escaping rules. Ex: USER_LEVEL "name with spaces@forums" 2
+    changes user level for name\_with\_spaces@forums
+  * Fix server initscript not providing itself.
+
+ -- Christine Spang <christine@debian.org>  Fri, 27 Nov 2009 12:17:04 -0500
+
+armagetronad (0.2.8.3~rc3-1) unstable; urgency=low
+
+  * New upstream release candidate. (Closes: #521187)
+  * Drop armagetron-* dummy packages for squeeze.
+  * Reformat some descriptions in debian/control which had long lines.
+
+ -- Christine Spang <christine@debian.org>  Fri, 11 Sep 2009 20:45:56 -0400
+
+armagetronad (0.2.8.2.1-10) unstable; urgency=low
+
+  * Copy over updated config.sub/config.guess during configure
+    rather than clean rule (Closes: #482723)
+
+ -- Christine Spang <christine@debian.org>  Tue, 08 Jul 2008 11:58:23 -0400
+
+armagetronad (0.2.8.2.1-9) unstable; urgency=low
+
+  * Clean up some unnecessary includes in 00_gcc-4.3 patch.
+  * Make armagetron-common remove stale conffiles from old
+    non-dummy package on purge. (Closes: #454398)
+
+ -- Christine Spang <christine@debian.org>  Fri, 01 Feb 2008 10:43:18 -0500
+
+armagetronad (0.2.8.2.1-8) unstable; urgency=low
+
+  * Sync packaging fixes with experimental.
+    - Update 00_gcc-4.3 patch so we really actually can build with gcc 4.3.
+      (Closes: #454857)
+
+ -- Christine Spang <christine@debian.org>  Sat, 26 Jan 2008 21:30:24 -0500
+
+armagetronad (0.2.8.2.1-7) unstable; urgency=low
+
+  * A better solution for the adduser dilemma: Depend on adduser
+    and use deluser in armagetronad-dedicated's prerm rather than
+    postrm. Thanks, Ari.
+
+ -- Christine Spang <christine@debian.org>  Fri, 06 Jul 2007 20:53:15 +0000
+
+armagetronad (0.2.8.2.1-6) unstable; urgency=low
+
+  * armagetronad-dedicated Pre-Depends on adduser since its postinst uses it.
+  * Use userdel rather than deluser to remove the armagetronad system
+    user. (Closes: #431511)
+  * Use ${source:Version} instead of the deprecated ${Source-Version} in
+    debian/control
+  * Use [ ! -f Makefile ] || $(MAKE) distclean instead of ignoring distclean
+    errors. Thanks, lintian.
+
+ -- Christine Spang <christine@debian.org>  Wed, 04 Jul 2007 21:45:00 +0000
+
+armagetronad (0.2.8.2.1-5) unstable; urgency=low
+
+  * Added debian/watch.
+
+ -- Christine Spang <christine@debian.org>  Tue, 01 May 2007 16:04:25 -0400
+
+armagetronad (0.2.8.2.1-4) unstable; urgency=low
+
+  * Remove bashism in armagetronad-dedicated initscript. (Closes: #420715)
+  * Really fix the .desktop file's icon path. No, really. (Closes: #420730)
+  * Remove some cruft from debian/
+  * Build-Depend on quilt (>= 0.40). Thanks, lintian.
+
+ -- Christine Spang <christine@debian.org>  Tue, 24 Apr 2007 11:38:26 -0400
+
+armagetronad (0.2.8.2.1-3) unstable; urgency=low
+
+  * Set the armagetronad user's shell to /bin/false in the
+    armagetronad-dedicated package's postinst.
+  * Fix .desktop icon path.
+  * Fix /etc/armagetronad-dedicated symlink in armagetronad-dedicated.links
+    (Closes: #420453)
+  * Use quilt to manage patches.
+  * Incorporate patch to fix building with gcc 4.3, thanks to Martin
+    Michlmayr. (Closes: #417103)
+
+ -- Christine Spang <christine@debian.org>  Sun, 22 Apr 2007 15:28:54 -0400
+
+armagetronad (0.2.8.2.1-2) unstable; urgency=low
+
+  * Change my maintainer e-mail address.
+  * Upload to unstable.
+
+ -- Christine Spang <christine@debian.org>  Tue, 10 Apr 2007 11:25:58 -0400
+
+armagetronad (0.2.8.2.1-1) experimental; urgency=low
+
+  * New maintainer. (Closes: #402225)
+  * Acknowledge NMU. Thanks Petter! (Closes: #325110, #318998, #311736)
+  * Updated to Standards-Version 3.7.2.2.
+  * Fixed minor grammar mistake in manpage.
+  * armagetron.menu updates:
+    - made more readable
+    - properly update menus in armagetron.{postinst,postrm}
+    - added menu hints (Closes: #312905)
+  * New upstream version. (Closes: #325101)
+    - Fixes security bugs:
+        - CAN-2005-0371 (Closes: #296840)
+        - CVE-2006-3673 (Closes: #379062)
+        - CVE-2006-3674
+  * Updated dependencies.
+  * Remove now-unnecessary g++ 4.0 patch and remove dependency
+    on dpatch.
+  * Almost completely rewrite debian/rules since so many changes
+    have occurred since last release.
+    - Add {armagetron,armagetron-common,armagetron-server}.install
+      and use dh_install to install files into separate tmpdirs.
+    - Add armagetron-common.docs and use dh_installdocs.
+    - Use dh_link and add appropriate files.
+  * Clean up debian/copyright.
+  * Upstream has changed names. Renamed packages.
+  * Removed old armagetron.xpm in debian/ and instead use the shipped
+    medium PNG file for the Debian menu (converted to XPM during build).
+  * Added lsb-compliant initscript and default file for armagetronad-server.
+  * Removed cruft from pre/post-inst scripts.
+  * Improved package descriptions.
+  * Migrated old armagetron packages to dummy upgrade packages.
+  * Almost completely rewrote manpages for both armagetronad and
+    armagetronad-dedicated.
+  * Fix bug in server initscript so startup honours setting in
+    /etc/default/armagetronad-dedicated.
+  * Don't start the server if it's already running.
+
+ -- Christine Spang <spang@mit.edu>  Mon,  5 Mar 2007 10:25:44 -0500
+
+armagetron (0.2.7.0-1.1) unstable; urgency=low
+
+  * Non-maintainer upload with approval from the maintainer to move
+    this package to the new C++ ABI.
+  * Convert to use dpatch for use by the new patch, add build-depend
+    on dpatch.
+  * Fix C++ build problem. (Closes: #318998)
+  * Correct grammar in package description. (Closes: #311736)
+  * Add quotes to needs, section and icon field in the menu file to
+    avoid lintian/linda warning.
+  * Avoid multiline build-depend, move it all to one long line to
+    avoid lintian warning.
+  * Updated config.sub and config.guess to make sure it build on as
+    many platforms as possible.
+  * Correct the upstream URL in README.Debian to match the one in the
+    copyright file.
+
+ -- Petter Reinholdtsen <pere@debian.org>  Fri, 26 Aug 2005 08:55:46 +0200
+
+armagetron (0.2.7.0-1) unstable; urgency=high
+
+  * Apply security patch from upstream to fix out-of-bounds array access
+    (CAN-2005-0369) and DOS by empty UDP packets (CAN-2005-0370).
+    (closes: #295294)
+  * Acknowledge NMU. (closes: #263331)
+  * New upstream is Armagetron Advanced, change all references.
+    (closes: #275838)
+  * Fix contents of copyright file.  Also fix upgrade from 0.1 versions of the
+    package by moving the /usr/share/doc directories out of the way to allow
+    them to be replaced with symlinks.  (closes: #290051)
+  * Use absolute path in armagetron menu entry. (closes: #243538)
+  * Make the wrappers more robust with respect to directory creation.
+    (closes: #250070)
+
+ -- Andreas Bombe <aeb@debian.org>  Fri, 25 Feb 2005 01:48:20 +0100
+
+armagetron (0.2.5.2-3.1) unstable; urgency=high
+
+  * Non-maintainer upload.
+  * Urgency=high because it fixes an RC bug affecting sarge.
+  * Install the missing shell wrapper for armagetron-dedicated
+    (closes: #263331).
+
+ -- Steve Langasek <vorlon@debian.org>  Mon, 16 Aug 2004 12:28:25 -0700
+
+armagetron (0.2.5.2-3) unstable; urgency=low
+
+  * Compile with -mieee for Alpha to fix floating point exception
+    there. (closes: #97720)
+  * Add menu icon converted from textures/icon.png. (closes: #209047)
+  * Bump Standards-Version to 3.6.1 (no changes necessary).
+
+ -- Andreas Bombe <aeb@debian.org>  Mon,  9 Feb 2004 01:59:46 +0100
+
+armagetron (0.2.5.2-2) unstable; urgency=low
+
+  * src/network/net_udp.cpp: Change typedef NET_SIZE from size_t to proper
+    type socklen_t.  Fixes compilation error on 64 bit platforms.
+    (closes: #208484)
+
+ -- Andreas Bombe <aeb@debian.org>  Wed,  3 Sep 2003 15:04:51 +0200
+
+armagetron (0.2.5.2-1) unstable; urgency=low
+
+  * New upstream release. (closes: #205077)
+  * Give general description of the game in the common and dedicated
+    server package descriptions too. (closes: #202025)
+  * Fix all calculations where pointers were cast to int to use long int
+    instead, should hopefully fix 64 bit issues. (closes: #201638)
+  * Bump Standards-Version to 3.6.0 (no changes necessary).
+
+ -- Andreas Bombe <aeb@debian.org>  Wed,  3 Sep 2003 04:09:02 +0200
+
+armagetron (0.2.2-1) unstable; urgency=low
+
+  * New upstream release.  (And there I was wondering that nobody reported
+    "new version" wishlist bugs, but just wait a few days, and here it is;
+    closes: #199572)
+  * Upstream updated to current C++ standards, now compiles with the
+    current default compiler gcc 3.3. (closes: #196990)
+  * Fix the reported spelling error in the man pages as well as a few
+    others and change the web page link to the current address.
+    (closes:#194966)
+  * Default config is now in /etc/armagetron.
+  * Added new armagetron-common package to hold the configuration and
+    documentation files.
+  * Bump Standards-Version to 3.5.10 (no changes necessary).
+  * Do not repeat synopsis in long description of package and change
+    homepage link to DD Reference's recommended format.
+  * Remove --keep-going flags from recursive make invocations in
+    Makefile.in.
+  * Wrapper script uses new armagetron options to point it to its data
+    instead of symlink kludge and changing directories.
+  * Wrapper script creates ~/.armagetron directory for user if it doesn't
+    exist.
+  * Removed the obsolete example rc files.
+  * Changed build dependencies to seperate GL/GLU packages.
+  * Changed dedicated server binary name to armagetron-dedicated to be
+    consistent with upstream.
+
+ -- Andreas Bombe <aeb@debian.org>  Thu,  3 Jul 2003 03:51:38 +0200
+
+armagetron (0.1.4.9-9) unstable; urgency=low
+
+  * Fix null dereference in src/render/rScreen.cpp (thanks David Fries,
+    closes: #174870).
+  * Bump Debian Standards-Version to 3.5.8 (no changes neccessary).
+
+ -- Andreas Bombe <aeb@debian.org>  Wed,  8 Jan 2003 01:15:07 +0100
+
+armagetron (0.1.4.9-8) unstable; urgency=low
+
+  * New maintainer. (closes: #158975)
+  * Installing files explicitly to get rid of unwanted files (like
+    .cvsignore, closes: #159962).
+  * Wrapper script now execs armagetron instead of running it as a child.
+  * Moved real armagetron from /usr/lib/armagetron/armagetron to
+    /usr/games/armagetron.real.
+  * Moved armagetron-server from /usr/lib/armagetron/armagetron-server to
+    /usr/games/.
+  * Added missing build dependency on libsdl1.2-dev (this was usually
+    pulled in by libsdl-image1.2-dev and therefore unnoticed).
+  * Bump Standards-Version to 3.5.7.0.
+  * Setting debhelper compatibility level to 4, removing dh_testversion
+    call, changing dh_installmanpages to dh_installman.
+  * Honor $DEB_BUILD_OPTIONS in debian/rules.
+  * Make armagetron-server description less ambiguous.
+
+ -- Andreas Bombe <aeb@debian.org>  Fri, 20 Sep 2002 05:22:50 +0200
+
+armagetron (0.1.4.9-7) unstable; urgency=low
+
+  * debian/control: update URL in description
+
+ -- Marcelo E. Magallon <mmagallo@debian.org>  Sat, 31 Aug 2002 11:49:40 +0200
+
+armagetron (0.1.4.9-6) unstable; urgency=low
+
+  * debian/copyright: update URL (thanks Leonardo) (closes: bug#157978)
+  * src/tron/gGame.cpp: typo (thanks Stephen Williams, sorry about the
+    delay, I can't remember why I didn't apply this right away) (closes:
+    bug#130164)
+  * debian/control: weee! dependency ping-pong! libpng2... no, libpng3...
+    no, libpng2... actually, remove Build-Conflicts, -4 should have taken
+    care of this.
+
+ -- Marcelo E. Magallon <mmagallo@debian.org>  Sat, 31 Aug 2002 10:06:05 +0200
+
+armagetron (0.1.4.9-5) unstable; urgency=low
+
+  * debian/rules: post-operative fixes on the Makefile to remove -lpng and -lz
+    from the link line.  Prevents future breakage.
+  * debian/control: bump dependency on libsdl-image1.2-dev to 1.2.2-1.
+    Build-Depend on xlibmesa-dev | libgl1-dev
+
+ -- Marcelo E. Magallon <mmagallo@debian.org>  Mon, 22 Jul 2002 08:29:36 +0200
+
+armagetron (0.1.4.9-4) unstable; urgency=low
+
+  * recompile with current libsdl-image1.2-dev (someone's got a rather
+    creative approach to team coordination)
+  * debian/control: Build-Conflicts libpng2-dev.  libsdl-image1.2-dev is
+    fubar.
+
+ -- Marcelo E. Magallon <mmagallo@debian.org>  Sun, 21 Jul 2002 00:57:07 +0200
+
+armagetron (0.1.4.9-3) unstable; urgency=low
+
+  * Acknowledge NMU from Martin (thanks!) (closes: bug#132051, bug#123131)
+  * debian/rules: remove .cvsignore files (closes: bug#124164)
+  * debian/contro: fix typo (closes: bug#124418)
+  * Fixed typos (thanks Stephen Williams)
+
+ -- Marcelo E. Magallon <mmagallo@debian.org>  Sun,  3 Feb 2002 17:29:40 +0100
+
+armagetron (0.1.4.9-2.1) unstable; urgency=low
+
+  * NMU
+  * Applied patch from Jamie Wilkinson to fix build errors on
+    alpha (Closes: #123131).
+
+ -- Martin Michlmayr <tbm@cyrius.com>  Sun, 03 Feb 2002 14:06:47 +0100
+
+armagetron (0.1.4.9-2) unstable; urgency=low
+
+  * configure: s/==/=/, won't build correctly if /bin/sh is ash
+    (closes: bug#121709)
+  * src/network/net_udp.cpp: use socklen_t insatead of size_t (closes:
+    bug#121829)
+
+ -- Marcelo E. Magallon <mmagallo@debian.org>  Sat,  8 Dec 2001 17:43:52 +0100
+
+armagetron (0.1.4.9-1) unstable; urgency=low
+
+  * New upstream version.
+  * Tweaked Michael's patch a bit to get it to apply to the current sources.
+    (closes: bug#115209)
+  * Rebuild with current SDL.
+  * src/tools/memmanager.h: new operator takes size_t as first argument,
+    not unsigned int. (thanks Robert) (closes: bug#85968, bug#112660,
+    bug#114036)
+  * Build-depend on newest libsdl-image1.2-dev to pick up correct
+    libsdl-image1.2 dependency. (closes: bug#115523)
+  * HTML files shipped as HTML. (closes: bug#104016)
+  * debian/control: add b-dep on autotools-dev
+  * debian/rules: use config.guess and config.sub from autotools-dev
+
+ -- Marcelo E. Magallon <mmagallo@debian.org>  Sun, 11 Nov 2001 18:38:10 +0100
+
+armagetron (0.1.4.3-5) unstable; urgency=low
+
+  * debian/control: play arround with build dependencies.  Use SDL 1.2.
+
+ -- Marcelo E. Magallon <mmagallo@debian.org>  Thu,  7 Jun 2001 20:56:09 +0200
+
+armagetron (0.1.4.3-4) unstable; urgency=low
+
+  * ARGH! Forgot to include the proper replaces in debian/control because
+    of the fix for #84373
+
+ -- Marcelo E. Magallon <mmagallo@debian.org>  Sat,  3 Feb 2001 23:02:07 +0100
+
+armagetron (0.1.4.3-3) unstable; urgency=low
+
+  * debian/rules: get dh_installmanpages syntax right (closes: bug#84373)
+  * *sigh*, more size_t bugs (thanks Paul) (closes: bug#84358)
+
+ -- Marcelo E. Magallon <mmagallo@debian.org>  Thu,  1 Feb 2001 21:22:59 +0100
+
+armagetron (0.1.4.3-2) unstable; urgency=low
+
+  * src/network/net_udp.cpp: s/size_t/socklen_t/ (closes: bug#84012)
+
+ -- Marcelo E. Magallon <mmagallo@debian.org>  Mon, 29 Jan 2001 21:41:29 +0100
+
+armagetron (0.1.4.3-1) unstable; urgency=low
+
+  * New upstream release.
+  * debian/rules: use src/tron/armagetron instead of src/armagetron for
+    the binary.
+
+ -- Marcelo E. Magallon <mmagallo@debian.org>  Wed, 24 Jan 2001 01:24:55 +0100
+
+armagetron (0.1.3.20000730-4) unstable; urgency=low
+
+  * Recompiled with new libsdl-image1.1 (did I forget to upload the last
+    one?) (closes: bug#79564)
+  * Fixed extra space in doc-help section
+
+ -- Marcelo E. Magallon <mmagallo@debian.org>  Wed, 18 Oct 2000 23:10:20 +0200
+
+armagetron (0.1.3.20000730-3) unstable; urgency=low
+
+  * Recompiled with new libsdl-image1.1 from CTS
+
+ -- Marcelo E. Magallon <mmagallo@debian.org>  Wed, 18 Oct 2000 23:10:20 +0200
+
+armagetron (0.1.3.20000730-2) unstable; urgency=low
+
+  * The great blooper fixup.
+  * Recompiled with new libsdl-image1.1 (thanks cts!) (closes: bug#75069)
+  * Hmmm... libsdl-image1.1 removed the inversion of alpha.  Remove here
+    likewise.
+  * src/textures.cpp: accept 8 bpp images (GL_LUMINANCE)
+  * Oops.  Armagetron's server manpage is not there.  Make one. (closes:
+    bug#74505)
+  * debian/rules: add armagetron-server.6 manpage.
+  * debian/rules: Moved data files to /usr/share/games/armagetron/ (closes:
+    bug#74517)
+  * debian/menu: zap /usr/bin (closes: bug#74576)
+  * debian/armagetron.6: added link to website.
+
+ -- Marcelo E. Magallon <mmagallo@debian.org>  Wed, 18 Oct 2000 23:10:20 +0200
+
+armagetron (0.1.3.20000730-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Marcelo E. Magallon <mmagallo@debian.org>  Tue,  3 Oct 2000 09:43:25 +0200
+
+armagetron (0.1.3-0) unstable; urgency=low
+
+  * Initial Release.
+
+ -- Marcelo E. Magallon <mmagallo@debian.org>  Sun, 30 Jul 2000 21:46:08 +0200
+
+

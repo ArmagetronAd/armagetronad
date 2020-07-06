@@ -1,0 +1,16 @@
+# 0 = don't start, 1 = start
+ARMAGETRONAD_SERVER_START=0
+# User to run as.
+ARMAGETRONAD_USER=armagetronad
+# Directories for variable data.
+VARDIR=/var/games/armagetronad
+# Directories for pid and log files.
+PIDDIR=/var/games/armagetronad
+LOGDIR=/var/log
+# pidfile names.
+NAME=armagetronad-dedicated
+MAINPIDFILE=$PIDDIR/$NAME.pid
+# Logfile.
+LOGFILE=$LOGDIR/$NAME.log
+# Niceness level of the server.
+NICENESS="-5"

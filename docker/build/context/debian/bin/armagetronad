@@ -1,0 +1,35 @@
+#!/bin/sh
+
+set -e
+
+REALTRON=/usr/games/armagetronad.real
+
+DATADIR=/usr/share/games/armagetronad
+CONFDIR=/etc/armagetronad
+USERCONFDIR=$HOME/.armagetronad
+USERDATADIR=$USERCONFDIR/data
+VARDIR=$USERCONFDIR/var
+
+
+if [ ! -d $USERCONFDIR ]; then
+    # have to create configuration directory
+    mkdir $USERCONFDIR
+
+    if [ -f $HOME/.ArmageTronrc ]; then
+	# upgrade from before 0.2
+	cp $HOME/.ArmageTronrc $USERCONFDIR/user.cfg
+    fi
+fi
+
+if [ ! -d $VARDIR ]; then
+    mkdir $VARDIR
+fi
+
+
+CMDLINE="--datadir $DATADIR --configdir $CONFDIR --userconfigdir $USERCONFDIR --vardir $VARDIR"
+if [ -d $USERDATADIR ]; then
+    CMDLINE="$CMDLINE --userdatadir $USERDATADIR"
+fi
+
+
+exec $REALTRON $CMDLINE "$@"

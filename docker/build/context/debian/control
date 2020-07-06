@@ -1,0 +1,81 @@
+Source: armagetronad
+Section: games
+Priority: optional
+Maintainer: Debian Games Team <pkg-games-devel@lists.alioth.debian.org>
+Uploaders:
+ Markus Koschany <apo@debian.org>
+Build-Depends:
+ autotools-dev,
+ debhelper (>= 9),
+ dh-systemd (>= 1.5),
+ libgl1-mesa-dev,
+ libglu1-mesa-dev,
+ libpng-dev,
+ libsdl-image1.2-dev,
+ libsdl-mixer1.2-dev,
+ libsdl1.2-dev,
+ libxml2-dev,
+ pkg-config,
+ libzthread-dev,
+ zlib1g-dev
+Standards-Version: 4.0.0
+Homepage: http://armagetronad.org
+Vcs-Git: https://anonscm.debian.org/git/pkg-games/armagetronad.git
+Vcs-Browser: https://anonscm.debian.org/cgit/pkg-games/armagetronad.git
+
+Package: armagetronad-common
+Recommends:
+ armagetronad | armagetronad-dedicated
+Depends:
+ ${misc:Depends}
+Architecture: all
+Description: Common files for the Armagetron Advanced packages
+ Armagetron Advanced is a 3D game based on the light cycle racing in the 80s-
+ era movie "Tron".
+ .
+ You have to control a light cycle that can only turn in steps of 90 degrees,
+ leaves a solid wall behind and can not be stopped.  The aim is to survive the
+ longest of all players by not crashing into any walls.
+ .
+ This package contains the common configuration files and documentation shared
+ between the armagetronad and armagetronad-dedicated packages.
+
+Package: armagetronad
+Architecture: any
+Depends:
+ armagetronad-common (= ${source:Version}),
+ ${misc:Depends},
+ ${shlibs:Depends}
+Description: 3D Tron-like high speed game
+ The rules are simple: you ride a light cycle (a kind of motorbike that can
+ only turn 90 degrees at a time, leaves a wall behind and cannot be stopped)
+ and have to avoid running into walls while at the same time you have to try to
+ get your opponent to run into them.
+ .
+ The idea is based on the Disney movie from 1982 called "Tron".  If you ever
+ wanted to take a try at one of those speed demons features in the movie, this
+ is your chance.
+ .
+ Armagetron Advanced can be played against AI opponents, against other humans
+ over the network, or a mixture of both.
+
+Package: armagetronad-dedicated
+Architecture: any
+Depends:
+ adduser,
+ armagetronad-common (= ${source:Version}),
+ lsb-base (>= 3.0-6),
+ ${misc:Depends},
+ ${shlibs:Depends}
+Description: dedicated game server for Armagetron Advanced
+ Armagetron Advanced is a 3D game based on the light cycle racing in the movie
+ "Tron". You have to control a light cycle that can only turn in steps of 90
+ degrees, leaves a solid wall behind and can not be stopped.  The aim is to
+ survive the longest of all players by not crashing into any walls.
+ .
+ This version of Armagetron Advanced can only be used as a network game server.
+ It does not have graphical output and can be controlled via the text console.
+ .
+ The normal Armagetron Advanced used for playing is also capable to serve
+ games, but will require X to display its graphics, will provide a player and
+ is therefore unsuited for permanent game servers.

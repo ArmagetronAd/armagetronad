@@ -34,5 +34,4 @@ function ensure_git(){
 
 ensure_git winlibs https://gitlab.com/armagetronad/winlibs.git || exit $?
 ensure_git codeblocks https://gitlab.com/armagetronad/build_codeblocks.git || exit $?
-ensure_git ubuntu https://gitlab.com/armagetronad/ubuntu-packaging.git ${UBUNTU_BRANCH} || exit $?
 

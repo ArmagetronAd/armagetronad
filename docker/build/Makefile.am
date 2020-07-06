@@ -172,7 +172,6 @@ gits.tag: $(SCRIPTDIR)/fix_gits.sh
 gits_artifacts.tag: gits.tag
 	rm -rf gits
 	mkdir -p gits
-	cp -a ${GITS}/ubuntu/debian gits/
 	echo > $@
 
 upload/PATCHNOTES.md: sourcetar.tag upload/.tag
@@ -220,9 +219,8 @@ context.steam: context.64
 
 # add debian/ubuntu build info for release %. Requires GPG key from ~/.gnupg
 context.debsrc_%: rootcontext.64 ${srcdir}/rebrand_debian_core.sh ${srcdir}/debian_source.sh gits_artifacts.tag $(TARBALL)
-	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' $(TARBALL) ${srcdir}/rebrand_debian_core.sh ${srcdir}/debian_source.sh ./gits/debian
-	if test -r  ../deploy/secrets/sec.gpg; then ln -f ../deploy/secrets/*.gpg $@.dir/; fi
-	rm -f $@.dir/image
+	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' $(TARBALL) ${srcdir}/rebrand_debian_core.sh ${srcdir}/debian_source.sh ${srcdir}/context/debian
+	if test -r  ../deploy/secrets/sec.gpg; then cp -lrf ../deploy/secrets/*.gpg $@.dir/; fi
 	echo "armadeb_64" > $@.dir/image
 	echo > $@
 result.debsrc_%: context.debsrc_%
