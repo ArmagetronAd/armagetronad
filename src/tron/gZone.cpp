@@ -93,6 +93,9 @@ static tSettingItem<bool> sg_ballKillerConfig( "BALL_KILLS", sg_ballKiller );
 static REAL sg_ballSpeedDecay = 0;
 static tSettingItem<REAL> sg_ballSpeedDecayConf( "BALL_SPEED_DECAY", sg_ballSpeedDecay );
 
+static REAL sg_ballSpeedHitDecay = 0;
+static tSettingItem<REAL> sg_ballSpeedHitDecayConf( "BALL_SPEED_HIT_DECAY", sg_ballSpeedHitDecay );
+
 static REAL sg_ballCycleBoost = 0;
 static tSettingItem<REAL> sg_ballCycleBoostConf( "BALL_CYCLE_ACCEL_BOOST", sg_ballCycleBoost );
 
@@ -901,7 +904,20 @@ bool gZone::Timestep( REAL time )
                             wallBouncesLeft_--;
                         }
                     }
-
+                    
+                    if(sg_ballSpeedHitDecay > 0)
+                    {
+                        eCoord V = GetVelocity();
+                        REAL speed = V.Norm();
+                        if(speed > 0)
+                        {
+                            speed -= sg_ballSpeedHitDecay;
+                            if(speed < 0) speed = 0;
+                            V.Normalize();
+                            SetVelocity(V*speed);
+                            RequestSync();
+                        }
+                    }
                     return false;
                 }
             }
