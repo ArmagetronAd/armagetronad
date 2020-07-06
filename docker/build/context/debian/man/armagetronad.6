@@ -1,0 +1,56 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.TH ARMAGETRONAD 6 "February 07, 2007"
+.SH NAME
+armagetronad \- a 3D Tron-like high speed game
+.SH SYNOPSIS
+\fBarmagetronad\fP [\fB\-h, \-\-help\fP] [\fB\-v, \-\-version\fP] [\fB\-\-doc\fP] [\fB\-f, \-\-fullscreen\fP] [\fB\-w, \-\-window, \-\-windowed\fP] [\fB\-\-fastforward\fP] [\fB\-\-benchmark\fP] [\fB\-\-record\fP] [\fB\-\-playback\fP]
+.SH DESCRIPTION
+The rules are simple: you ride a lightcycle (a kind of motorbike that
+can only turn 90 degrees at a time, leaves a wall behind and cannot be
+stopped). Avoid running into a wall. Make your opponent run into a
+wall.  This idea comes from the 1982 Disney movie "Tron".
+.PP
+One thing is different than in other Tron clones: you can accelerate.
+However, there is a catch. The only way to accelerate is to drive close
+to player walls. This allows for some interesting tactics. Every time you
+make a turn, you lose 5% of your speed -- so don't be too nervous, speed
+is your only resource against other players!
+.PP
+First thing you shold do is go into the "Player Menu" to set your name and
+your keyboard and mouse configuration. Then, go into the "Game Menu" and
+start a single player game against one AI opponent (the game mode does
+not really matter here). Then, get some friends together and try the
+multiplayer modes!
+.PP
+\fBSHIFT-ESC\fP is the "boss key" and quits Armagetron as fast as
+possible.
+.SH OPTIONS
+.IP "\fB\-h, \-\-help\fP" 10
+Show help message.
+.IP "\fB\-v, \-\-version\fP" 10
+Print version number.
+.IP "\fB\-\-doc\fP" 10
+Print documentation for all console commands. These are also configuration
+settings for config files.
+.IP "\fB\-f \-\-fullscreen\fP" 10
+Start in fullscreen mode.
+.IP "\fB\-w \-\-window, \-\-windowed\fP" 10
+Start in windowed mode.
+.IP "\fB\-\-fastforward \fITIME\fR\fP" 10
+Lets time run very fast until the given time is reached.
+.IP "\fB\-\-benchmark\fP" 10
+Renders frames as they were recorded.
+.IP "\fB\-\-record \fIFILENAME\fP" 10
+Creates a DEBUG recording while running.
+.IP "\fB\-\-playback \fIFILENAME\fP" 10
+Plays back a DEBUG recording.
+.SH SEE ALSO
+Armagetron Advanced is documented fully by the provided HTML docs, found under
+/usr/share/doc/armagetronad-common/html/.
+.SH AUTHOR
+Armagetron Advanced was written by Manuel Moos <z-man@users.sourceforge.net>
+and the Armagetron Advanced development team.
+.P
+This manual page was adapted from the original HTML version by Marcelo
+E. Magallon <mmagallo@debian.org>, (and later Christine Spang
+<spang@mit.edu>) for the Debian GNU/Linux system (but may be used by others).

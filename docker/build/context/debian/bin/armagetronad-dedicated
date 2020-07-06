@@ -1,0 +1,31 @@
+#!/bin/sh
+
+set -e
+
+REALTRON=/usr/games/armagetronad-dedicated.real
+
+DATADIR=/usr/share/games/armagetronad
+CONFDIR=/etc/armagetronad
+
+# Source configuration variables.
+. /etc/default/armagetronad-dedicated
+
+CMDLINE="--datadir $DATADIR --configdir $CONFDIR --userdatadir $VARDIR -d"
+
+run()
+{
+    exec $REALTRON $CMDLINE $* &
+    echo $! > $MAINPIDFILE
+    wait
+    echo Terminated
+}
+
+
+# Still allow other arguments to be executed, e.g. --doc
+if [ "$1" != "" ]; then
+    exec $REALTRON $CMDLINE $1 $2 $3
+    exit 0
+fi
+
+# Run the server
+run
