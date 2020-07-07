@@ -299,18 +299,29 @@ install_link ${BINDIR}/@prognamebase@-master-@version@ ${BINDIR}/@prognamebase@-
 # install desktop files
 if test @enable_desktop@ = yes; then
     DESKTOPSOURCE=@aa_datadir@/desktop
+    METADEST=${PREFIX}/share/metainfo
 
     # rebrand icons and desktop file
     if test "$MODE" = "install"; then
         if test @prognamebase@ = armagetronad; then
             true # echo no rebranding
         else
-            for f in large small medium; do mv ${DESTDIR}${DESKTOPSOURCE}/icons/$f/armagetronad.png ${DESTDIR}${DESKTOPSOURCE}/icons/$f/@prognamebase@.png; done
-            for suffix in .desktop -handler.desktop;
-            do
-                mv ${DESTDIR}${DESKTOPSOURCE}/armagetronad-armagetronad${suffix} ${DESTDIR}${DESKTOPSOURCE}/armagetronad-@prognamebase@${suffix}
-            done
+            for f in large small medium; do mv ${DESTDIR}${DESKTOPSOURCE}/icons/$f/armagetronad.png ${DESTDIR}${DESKTOPSOURCE}/icons/$f/@prognamebase@.png || exit $?; done
         fi
+
+        for suffix in .desktop -handler.desktop; do
+            mv ${DESTDIR}${DESKTOPSOURCE}/armagetronad-armagetronad${suffix} ${DESTDIR}${DESKTOPSOURCE}/org.armagetronad.@progname@${suffix} || exit $?
+        done
+
+        # add appstream metadata
+        mkdir_p ${DESTDIR}${METADEST}
+        mv ${DESTDIR}${DESKTOPSOURCE}/armagetronad.appdata.xml ${DESTDIR}${METADEST}/@progname@.appdata.xml || exit $?
+    else
+        for f in large small medium; do rm -f ${DESTDIR}${DESKTOPSOURCE}/icons/$f/@prognamebase@.png; done
+        for suffix in .desktop -handler.desktop; do
+            rm -f ${DESTDIR}${DESKTOPSOURCE}/org.armagetronad.@progname@${suffix}
+        done
+        rm -f ${DESTDIR}${METADEST}/@progname@.appdata.xml
     fi
 
     # add standard icons
@@ -321,11 +332,11 @@ if test @enable_desktop@ = yes; then
     done
 
     # add standard menu entry
-    xdg-desktop-menu install ${DESTDIR}${DESKTOPSOURCE}/armagetronad-@prognamebase@.desktop
+    xdg-desktop-menu install ${DESTDIR}${DESKTOPSOURCE}/org.armagetronad.@progname@..desktop
 
     # add standard filetype and association for armagetronad:// links
     xdg-mime install ${DESTDIR}${DESKTOPSOURCE}/armagetronad-link.xml
-    xdg-desktop-menu install ${DESTDIR}${DESKTOPSOURCE}/armagetronad-@prognamebase@-handler.desktop
+    xdg-desktop-menu install ${DESTDIR}${DESKTOPSOURCE}/org.armagetronad.@progname@.-handler.desktop
 
     # add KDE icons and desktop link
     if kde-config --install icon > /dev/null 2>&1; then
@@ -342,9 +353,10 @@ if test @enable_desktop@ = yes; then
             echo "No permission to write to KDE application menu directory."
         else
             echo "${INSTALLING} KDE start menu entry in ${DESKTOPDEST}..."
-            install_link ${DESKTOPSOURCE}/@prognamebase@.desktop ${DESKTOPDEST}/@progname@.desktop
+            install_link ${DESKTOPSOURCE}/org.armagetronad.@progname@..desktop ${DESKTOPDEST}/@progname@.desktop
         fi
     fi
+
 fi
 
 # on uninstallation, look for other installed versions in the same prefix

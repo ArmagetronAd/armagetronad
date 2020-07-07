@@ -13,15 +13,15 @@ STEAM_PACKAGE_TITLE=`echo ${PACKAGE_TITLE} | sed -e s/-.*// -e "s/ .*//"` || exi
 ./appdir.sh $@ || exit $?
 
 # move stuff around
-sed -i appdir/armagetronad-armagetronad.desktop -e s/armagetronad/${STEAM_PACKAGE_NAME}/g || exit $?
+sed -i appdir/*.desktop -e s/armagetronad/${STEAM_PACKAGE_NAME}/g || exit $?
 if test `cat serverclient` = client; then
     sed -i appdir/AppRun -e s/EXEC=.*\$/EXEC=${PACKAGE_NAME}/g || exit $?
     mv appdir/AppRun appdir/${STEAM_PACKAGE_TITLE} || exit $?
-    mv appdir/armagetronad-armagetronad.desktop appdir/${STEAM_PACKAGE_NAME}.desktop || exit $?
+    mv appdir/*.desktop appdir/${STEAM_PACKAGE_NAME}.desktop || exit $?
 else
     sed -i appdir/AppRun -e s/EXEC=.*\$/EXEC=${PACKAGE_NAME}-dedicated/g || exit $?
     mv appdir/AppRun appdir/${STEAM_PACKAGE_TITLE}_Dedicated || exit $?
-    mv appdir/armagetronad-armagetronad.desktop appdir/${STEAM_PACKAGE_NAME}-dedicated.desktop || exit $?
+    mv appdir/*.desktop appdir/${STEAM_PACKAGE_NAME}-dedicated.desktop || exit $?
 fi
     
 # we do not need to include libraries that already are in the steam runtime

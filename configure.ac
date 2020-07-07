@@ -1496,6 +1496,7 @@ desktop/armagetronad-armagetronad.desktop
 desktop/armagetronad-armagetronad-handler.desktop
 desktop/armagetronad-link.xml
 desktop/armagetronad.protocol
+desktop/armagetronad.appdata.xml
 desktop/os-x/Info.plist
 docker/build/Makefile
 docker/build/setup_ci_test.sh

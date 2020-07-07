@@ -5,7 +5,9 @@ desktopfiledir=${aa_datadir}/desktop
 protocolfiledir=${datadir}/services
 
 # files for desktop integration
-nobase_desktopfile_DATA=armagetronad-armagetronad.desktop icons/small/armagetronad.png icons/medium/armagetronad.png icons/large/armagetronad.png armagetronad-armagetronad-handler.desktop armagetronad-link.xml
+nobase_desktopfile_DATA=armagetronad-armagetronad.desktop armagetronad-armagetronad-handler.desktop \
+	icons/small/armagetronad.png icons/medium/armagetronad.png icons/large/armagetronad.png \
+	armagetronad-link.xml armagetronad.appdata.xml
 nobase_protocolfile_DATA=armagetronad.protocol
 
 if OS_X_TOOLKIT
@@ -19,4 +21,5 @@ EXTRA_DIST=icons/small/armagetronad.png\
 		   armagetronad-armagetronad-handler.desktop.in\
 		   armagetronad-link.xml.in\
 		   armagetronad.protocol.in\
-		   os-x/armagetronad.icns os-x/Info.plist.in
+		   os-x/armagetronad.icns os-x/Info.plist.in\
+   		   armagetronad.appdata.xml.in

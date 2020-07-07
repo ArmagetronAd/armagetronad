@@ -48,6 +48,7 @@ EOF
 
 fix_git winlibs
 fix_git steam-art
+fix_git pkg2appimage
 
 cat >> ${of} <<EOF
 }
