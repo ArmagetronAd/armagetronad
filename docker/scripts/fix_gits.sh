@@ -21,6 +21,7 @@ function fix_gits(){
     fix_git winlibs d03e20bf8973a6cbd1e0ecb47dd8333c5614b139 || return $?
     fix_git codeblocks 4a51998b7f12723c40cca3e2558da3ab8af85814 || return $?
     fix_git steam-art 42688f1bcf1bf1f2befc81a1143fb20f346b92f8 || return $?
+    fix_git pkg2appimage 678e5e14122f14a12c54847213585ea803e1f0e1 || return $?
 }
 
 if ! fix_gits; then

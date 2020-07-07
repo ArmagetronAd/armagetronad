@@ -988,6 +988,7 @@ docker/build/setup_ci_test.sh
 docker/build/context/version.sh
 docker/deploy/targets.sh
 desktop/armagetronad.desktop
+desktop/armagetronad.appdata.xml
 )
 
 # m4_define(FULLEVAL,stage1=`eval echo $1`; stage2 

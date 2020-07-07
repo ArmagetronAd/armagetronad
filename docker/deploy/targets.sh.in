@@ -143,6 +143,15 @@ fi
 
 # **********************************************************************
 
+# upload destination for version-less AppImages
+if test ${STAGING} == true; then
+   UPLOAD_SCP_APPIMAGE=
+   #arma0install@builder.armagetronad.org:/home/arma0install/appimage/
+else
+   UPLOAD_SCP_APPIMAGE=arma0install@builder.armagetronad.org:/home/arma0install/appimage/
+fi
+
+# base directory for versioned uploads
 if test ${STAGING} == true; then
     UPLOAD_SCP_BASE=arma0install@builder.armagetronad.org:/home/arma0install/staging/
 else

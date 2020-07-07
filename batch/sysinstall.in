@@ -299,15 +299,24 @@ install_link ${BINDIR}/@prognamebase@-master-@version@ ${BINDIR}/@prognamebase@-
 # install desktop files
 if test @enable_desktop@ = yes; then
     DESKTOPSOURCE=@aa_datadir@/desktop
+    METADEST=${PREFIX}/share/metainfo
 
     # rebrand icons and desktop file
     if test "$MODE" = "install"; then
         if test @prognamebase@ = armagetronad; then
             true # echo no rebranding
         else
-            for f in large small medium; do mv ${DESTDIR}${DESKTOPSOURCE}/icons/$f/armagetronad.png ${DESTDIR}${DESKTOPSOURCE}/icons/$f/@prognamebase@.png; done
-            mv ${DESTDIR}${DESKTOPSOURCE}/armagetronad.desktop ${DESTDIR}${DESKTOPSOURCE}/@prognamebase@.desktop
+            for f in large small medium; do mv ${DESTDIR}${DESKTOPSOURCE}/icons/$f/armagetronad.png ${DESTDIR}${DESKTOPSOURCE}/icons/$f/@prognamebase@.png || exit $?; done
         fi
+        mv ${DESTDIR}${DESKTOPSOURCE}/armagetronad.desktop ${DESTDIR}${DESKTOPSOURCE}/org.armagetronad.@progname@.desktop || exit $?
+
+        # add appstream metadata
+        mkdir_p ${DESTDIR}${METADEST}
+        mv ${DESTDIR}${DESKTOPSOURCE}/armagetronad.appdata.xml ${DESTDIR}${METADEST}/@progname@.appdata.xml || exit $?
+    else
+        for f in large small medium; do rm -f ${DESTDIR}${DESKTOPSOURCE}/icons/$f/@prognamebase@.png; done
+        rm -f ${DESTDIR}${DESKTOPSOURCE}/org.armagetronad.@progname@.desktop
+        rm -f ${DESTDIR}${METADEST}/@progname@.appdata.xml
     fi
 
     # add KDE icons and desktop link
@@ -328,6 +337,7 @@ if test @enable_desktop@ = yes; then
             install_link ${DESKTOPSOURCE}/@prognamebase@.desktop ${DESKTOPDEST}/@progname@.desktop
         fi
     fi
+
 fi
 
 # on uninstallation, look for other installed versions in the same prefix

@@ -1,6 +1,6 @@
 usr/games/armagetronad
 usr/games/armagetronad.real
-usr/share/games/armagetronad/desktop/armagetronad.desktop usr/share/applications
+usr/share/games/armagetronad/desktop/org.armagetronad.armagetronad.desktop usr/share/applications
 usr/share/games/armagetronad/desktop/icons/large/* usr/share/icons/hicolor/48x48/apps
 usr/share/games/armagetronad/desktop/icons/medium/* usr/share/icons/hicolor/32x32/apps
 usr/share/games/armagetronad/desktop/icons/small/* usr/share/icons/hicolor/16x16/apps
