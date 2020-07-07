@@ -12,7 +12,7 @@ if test `getconf LONG_BIT` -eq 32; then
 fi
 
 # link icon
-cp appdir/usr/share/games/${PACKAGE_NAME}*/desktop/icons/large/*.png appdir/.DirIcon || exit $?
+cp appdir/usr/share/games/${PACKAGE_NAME}*/desktop/icons/48x48/*.png appdir/.DirIcon || exit $?
 
 # lint according to https://github.com/AppImage/appimage.github.io#checklist-for-submitting-your-own-appimage
 chmod +x pkg2appimage/appdir-lint.sh

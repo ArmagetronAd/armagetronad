@@ -19,7 +19,7 @@ cp ${APPDIR}/usr/share/games/${PACKAGE}/desktop/armagetronad.appdata.xml ${APPDI
 
 # hack Icon
 for f in $(find ${APPDIR} -type d -name "desktop"); do
-  cp $f/icons/small/*.png ${APPDIR}/${PACKAGE}.png
+  cp $f/icons/48x48/*.png ${APPDIR}/${PACKAGE}.png
 done
 
 # correct absolute symlinks
