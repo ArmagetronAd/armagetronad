@@ -954,6 +954,7 @@ ladderlog_write_sacrifice_help                Write to ladderlog: SACRIFICE <pla
 ladderlog_write_shutdown_help                 Write to ladderlog: SHUTDOWN <time> when the server has been shut down using exit/quit commands
 ladderlog_write_soccer_ball_player_entered_help Write to ladderlog: SOCCER_BALL_PLAYER_ENTERED [player_auth_name] [team]
 ladderlog_write_soccer_goal_player_entered_help Write to ladderlog: SOCCER_GOAL_PLAYER_ENTERED [player_auth_name] [player_team] [team owner of the goal]
+ladderlog_write_soccer_goal_scored_help       Write to ladderlog: SOCCER_GOAL_SCORED <goal's team> <scored team> <scored player> <time>
 ladderlog_write_targetzone_conquered_help     Write to ladderlog: TARGETZONE_CONQUERED <object_id> <zone_name> <cx> <cy> [<player> [<team>]]
 ladderlog_write_targetzone_player_left_help   Write to ladderlog: TARGETZONE_PLAYER_LEFT <object_id> <zone_name> <cx> <cy> <player> <x> <y> <xdir> <ydir>
 ladderlog_write_targetzone_player_enter_help  Write to ladderlog: TARGETZONE_PLAYER_ENTER <object_id> <zone_name> <cx> <cy> <player> <x> <y> <xdir> <ydir> <time>

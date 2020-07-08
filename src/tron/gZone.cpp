@@ -7554,6 +7554,16 @@ bool gSoccerZoneHack::Timestep( REAL time )
             RequestSync();
         }
     }
+    
+    if(zoneType == gSoccer_BALL_SCORED && (GetVelocity() != eCoord(0,0)))
+    {
+        REAL dt = time - referenceTime_;
+        eCoord dir = GetVelocity();
+        dir.x *= 1-dt; dir.y *= 1-dt;
+        SetReferenceTime();
+        SetVelocity(dir);
+        RequestSync(false);
+    }
 
     return (returnStatus);
 }
@@ -7568,6 +7578,7 @@ void gSoccerZoneHack::GoHome()
 {
     //  clear last team to hit the soccer ball
     lastTeamIn_ = NULL;
+    lastPlayerIn_ = NULL;
 
     //  send soccer ball back to it's oriignal place on the grid
     SetReferenceTime();
@@ -7603,7 +7614,7 @@ static eLadderLogWriter sg_soccerGoalPlayerEntered("SOCCER_GOAL_PLAYER_ENTERED",
 
 void gSoccerZoneHack::OnEnter( gCycle *target, REAL time )
 {
-    if (!team && (zoneType == gSoccer_BALL))
+    if (!team && (zoneType == gSoccer_BALL || zoneType == gSoccer_BALL_SCORED))
     {
         //  calculate the bounce off. Source: gBallZoneHack
         eCoord p2 = target->Position();
@@ -7652,6 +7663,7 @@ void gSoccerZoneHack::OnEnter( gCycle *target, REAL time )
 
         //  set last player to hit the zone
         lastTeamIn_ = target->Team();
+        lastPlayerIn_ = target->Player();
 
         sg_soccerBallPlayerEntered << target->Player()->GetUserName() << target->Team()->Name().Filter();
         sg_soccerBallPlayerEntered.write();
@@ -7712,11 +7724,16 @@ static tSettingItem<int> sg_soccerBallShotsWinConf("SOCCER_BALL_SHOTS_WIN", sg_s
 bool sg_soccerBallOwnGoalNR = false;
 static tSettingItem<bool> sg_soccerBallOwnGoalNRConf("SOCCER_BALL_SCORE_OWN_GOAL", sg_soccerBallOwnGoalNR);
 
+static eLadderLogWriter sg_soccerGoalScored("SOCCER_GOAL_SCORED",true);
+
 void gSoccerZoneHack::OnEnter( gSoccerZoneHack *target, REAL time )
 {
     //  check if the zone entering the goal is actually a soccer ball
     if ((GetType() == gSoccer_GOAL) && (target->GetType() == gSoccer_BALL) && target->lastTeamIn_)
     {
+        sg_soccerGoalScored << Team()->Name().Filter() << target->lastTeamIn_->Name().Filter() << target->lastPlayerIn_->GetUserName() << time;
+        sg_soccerGoalScored.write();
+        
         bool ownGoal = (target->lastTeamIn_ == team);
         if(ownGoal && !sg_soccerBallOwnGoalNR)
         {
@@ -7761,9 +7778,10 @@ void gSoccerZoneHack::OnEnter( gSoccerZoneHack *target, REAL time )
                     sg_DeclareWinner(target->lastTeamIn_, tOutput("$soccer_winner"));
                 
                 //  ball must vanish after having a winner
-                target->Collapse();
+                target->SetType(gSoccer_BALL_SCORED);
+                target->SetReferenceTime();
             }
-            else if ((sg_soccerBallShotsWin > 0) && (target->ballShots_ >= sg_soccerBallShotsWin) && !ownGoal)
+            else if ((sg_soccerBallShotsWin > 0) && (target->ballShots_ >= sg_soccerBallShotsWin))
             {
                 eTeam *thisTeam = team;                     //  the team owner of the goal
                 eTeam *shotTeam = target->lastTeamIn_;      //  the last team to hit the ball
@@ -7777,7 +7795,8 @@ void gSoccerZoneHack::OnEnter( gSoccerZoneHack *target, REAL time )
                         sg_DeclareWinner(shotTeam, tOutput("$soccer_winner"));
 
                     //  ball must vanish after having a winner
-                    target->Collapse();
+                    target->SetType(gSoccer_BALL_SCORED);
+                    target->SetReferenceTime();
                 }
             }
             else

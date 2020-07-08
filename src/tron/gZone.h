@@ -717,7 +717,8 @@ class gSoccerZoneHack: public gZone
         enum
         {
             gSoccer_GOAL,
-            gSoccer_BALL
+            gSoccer_BALL,
+			gSoccer_BALL_SCORED
         };
 
         gSoccerZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false, bool delayCreation = false);
@@ -745,6 +746,7 @@ class gSoccerZoneHack: public gZone
         REAL originalRadius_;       //  the initial spawned radius of the zone
 
         eTeam *lastTeamIn_;     //  store the last player's team to enter the zone
+		ePlayerNetID *lastPlayerIn_;
 
         int ballShots_;     //  number of times ball has entered goals
 
