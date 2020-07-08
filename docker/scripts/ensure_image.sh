@@ -25,9 +25,6 @@ while test -r ${lock} && ps -eo pid | grep "[\^ ]`cat ${lock}`\$"; do
 done
 echo $$ > ${lock}
 
-# start daemon on demand
-docker info > /dev/null 2>&1 || { systemctl --user start docker; sleep 5; }
-
 function invalidate_digest(){
     touch ${id}/${image}.digest.local
 }

@@ -27,7 +27,7 @@ bzr_count_revisions()
 
     test -z "$limit" || limit="-l $limit"
 
-    count=$(bzr log --include-merges --line $limit "${srcdir}" 2>/dev/null | wc -l)
+    count=$(bzr log -n 0 --line $limit "${srcdir}" 2>/dev/null | wc -l)
     echo $count
 }
 
@@ -106,7 +106,7 @@ fi
 # try to get a good guess about which branch we're on
 GIT_BRANCH="alpha"
 
-if test -d "${srcdir}/.git"; then
+if test -e "${srcdir}/.git"; then
     # check for a tag
     cd $srcdir
     # todo: once we have make tags, consider just git describe --tags as version ID.
@@ -115,7 +115,8 @@ if test -d "${srcdir}/.git"; then
         minor_version=""
         DATE=""
     else
-        if git diff-index --quiet HEAD --; then
+      git update-index --refresh > /dev/null
+      if git diff-index --quiet HEAD --; then
             # local checkout clean, just use revno
             DATE=_z`git rev-list HEAD --count`
         else

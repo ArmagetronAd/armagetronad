@@ -66,13 +66,16 @@ function update_stream(){
     XML=zeroinstall/${PACKAGE_NAME_BASE}-${ZI_SERIES}-${STREAM}.xml
     test -f ${XML} || exit 1
     grep -q version=\"${ZEROVERSION}\" ${XML} && return 0
-    
+
+    STAB=""
+    test -z "${STABILITY}" || STAB="--set-stability=${STABILITY}"
+
     0launch -o -c 'http://0install.net/2006/interfaces/0publish' \
 	    ${XML} \
 	    --add-version ${ZEROVERSION} \
 	    --archive-url=${URI} \
 	    --archive-file=${FILE} \
-	    --set-stability=${STABILITY} \
+	    ${STAB} \
 	    --set-main=${MAIN} \
 	    --set-released=today -c -x || exit $?
 

@@ -7,6 +7,13 @@
 sd=$1
 test -z "${sd}" && sd=`dirname $0`
 
+git -C ${sd} update-index --refresh 
+if ! git -C ${sd} diff-index --quiet HEAD --; then
+    echo ""
+    echo "Local modifications detected, abort. Commit first."
+    exit 1
+fi
+
 HASH=`git -C ${sd} rev-parse HEAD`
 BRANCH=`git -C ${sd} rev-parse --abbrev-ref HEAD`
 #BRANCH=beta_0.2.9
@@ -50,6 +57,7 @@ for s in ${MERGE_FROM}; do
     fi
 done
 
+git -C ${sd} pull --ff-only origin || exit $?
 git -C ${sd} merge ${TOTAL_MERGE} || exit $?
 
 NEW_HASH=`git -C ${sd} rev-parse HEAD`

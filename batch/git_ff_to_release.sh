@@ -8,6 +8,13 @@
 sd=$1
 test -z "${sd}" && sd=`dirname $0`
 
+git update-index --refresh 
+if ! git diff-index --quiet HEAD --; then
+    echo ""
+    echo "Local modifications detected, abort. Commit first."
+    exit 1
+fi
+
 HASH=`git -C ${sd} rev-parse HEAD`
 BRANCH=`git -C ${sd} rev-parse --abbrev-ref HEAD`
 # BRANCH=beta_0.2.9
