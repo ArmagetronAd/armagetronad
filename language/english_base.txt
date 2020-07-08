@@ -3624,8 +3624,10 @@ soccer_goal_respawn_enemies_help    If set to 1, players entering opponent's goa
 
 soccer_ball_first_win_help          If set to 1, first team to shot the ball into other team's goal wubs the round.
 soccer_ball_shots_win_help          If set to > 0, the number of times the ball must enter other team's goal. Sending the ball in their own goal does not count.
+soccer_ball_score_own_goal_help     If enabled, counts scoring your own goal as points to the enemy teams through the usual systems. If disabled, the ball will just move back to where it started.
 soccer_ball_slowdown_help           If set to 1, soccer balls will slow down.
 soccer_ball_slowdown_time_help      # If SOCCER_BALL_SLOWDOWN is set to 1, then the soccer ball will slow down depending on the value set for this command.
+soccer_ball_slowdown_sync_interval_help Time in seconds between synchronizations when slowing down soccerballs.
 
 ## Other sty commands
 base_respawn_help                   Flag indicating whether a base will respawn team if a team player enters it

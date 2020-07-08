@@ -7496,6 +7496,9 @@ bool restrictBallSlowdownSpeed(const REAL &newValue)
 }
 static tSettingItem<REAL> sg_soccerBallSlowdownSpeedConf("SOCCER_BALL_SLOWDOWN_SPEED", sg_soccerBallSlowdownSpeed, &restrictBallSlowdownSpeed);
 
+REAL sg_soccerBallSlowdownSync = 0.05;
+static tSettingItem<REAL> sg_soccerBallSlowdownSyncConf("SOCCER_BALL_SLOWDOWN_SYNC_INTERVAL", sg_soccerBallSlowdownSync);
+
 bool gSoccerZoneHack::Timestep( REAL time )
 {
     // delegate
@@ -7545,9 +7548,9 @@ bool gSoccerZoneHack::Timestep( REAL time )
 
         static REAL lasttime = 0;
         REAL systime = tSysTimeFloat();
-        if(systime > lasttime)
+        if(systime > lasttime || currentVelocity == eCoord(0,0))
         {
-            lasttime = systime+sg_soccerBallSlowdownSpeed;
+            lasttime = systime+sg_soccerBallSlowdownSync;
             RequestSync();
         }
     }
@@ -7706,12 +7709,16 @@ static tSettingItem<bool> sg_soccerBallFirstWinConf("SOCCER_BALL_FIRST_WIN", sg_
 int sg_soccerBallShotsWin = 0;
 static tSettingItem<int> sg_soccerBallShotsWinConf("SOCCER_BALL_SHOTS_WIN", sg_soccerBallShotsWin);
 
+bool sg_soccerBallOwnGoalNR = false;
+static tSettingItem<bool> sg_soccerBallOwnGoalNRConf("SOCCER_BALL_SCORE_OWN_GOAL", sg_soccerBallOwnGoalNR);
+
 void gSoccerZoneHack::OnEnter( gSoccerZoneHack *target, REAL time )
 {
     //  check if the zone entering the goal is actually a soccer ball
     if ((GetType() == gSoccer_GOAL) && (target->GetType() == gSoccer_BALL) && target->lastTeamIn_)
     {
-        if (target->lastTeamIn_ == team)
+        bool ownGoal = (target->lastTeamIn_ == team);
+        if(ownGoal && !sg_soccerBallOwnGoalNR)
         {
             sn_ConsoleOut(tOutput("$soccer_goal_self", Team()->GetColoredName()));
 
@@ -7723,15 +7730,40 @@ void gSoccerZoneHack::OnEnter( gSoccerZoneHack *target, REAL time )
             //  increase the number of times the ball entered other team's goal
             target->ballShots_++;
 
-            target->lastTeamIn_->AddScore(sg_soccerGoalScore, tOutput("$soccer_goal_score", target->lastTeamIn_->GetColoredName(), Team()->GetColoredName(), sg_soccerGoalScore), tOutput());
+            if(ownGoal)
+            {
+                for(int i=eTeam::teams.Len()-1;i>=0;--i)
+                {
+                    if(eTeam::teams(i) != Team())
+                        (eTeam::teams(i))->AddScore(sg_soccerGoalScore);
+                }
+                sn_ConsoleOut(tOutput("$player_score_own_goal", Team()->GetColoredName()));
+            }
+            else
+                target->lastTeamIn_->AddScore(sg_soccerGoalScore, tOutput("$soccer_goal_score", target->lastTeamIn_->GetColoredName(), Team()->GetColoredName(), sg_soccerGoalScore), tOutput());
+            
             if (sg_soccerBallFirstWin && (target->ballShots_ == 1))
             {
-                sg_DeclareWinner(target->lastTeamIn_, tOutput("$soccer_winner"));
-
+                if(ownGoal)
+                {
+                    bool win = false;
+                    for(int i=eTeam::teams.Len()-1;i>=0;--i)
+                    {
+                        if(eTeam::teams(i) != Team())
+                        {
+                            sg_DeclareWinner(eTeam::teams(i));
+                            win = true;
+                        }
+                    }
+                    if(!win) sg_DeclareWinner(target->lastTeamIn_);
+                }
+                else 
+                    sg_DeclareWinner(target->lastTeamIn_, tOutput("$soccer_winner"));
+                
                 //  ball must vanish after having a winner
                 target->Collapse();
             }
-            else if ((sg_soccerBallShotsWin > 0) && (target->ballShots_ >= sg_soccerBallShotsWin))
+            else if ((sg_soccerBallShotsWin > 0) && (target->ballShots_ >= sg_soccerBallShotsWin) && !ownGoal)
             {
                 eTeam *thisTeam = team;                     //  the team owner of the goal
                 eTeam *shotTeam = target->lastTeamIn_;      //  the last team to hit the ball
