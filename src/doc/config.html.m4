@@ -341,7 +341,7 @@ the most important ones to play with first are CI(CYCLE_RUBBER), CI(CYCLE_RUBBER
 (set it to something low to feel its effect) and CI(CYCLE_RUBBER_TIME). They determine
 how long you survive, how fast you grind, and how fast your rubber replenishes (in that
 order). An alternative description can be found in 
-ELINK([forums.armagetronad.net/viewtopic.php?t=1774],[this forum thread]).
+ELINK([forums3.armagetronad.net/viewtopic.php?t=1774],[this forum thread]).
 ])
 
 SUBSECTION(Camera Modes)
