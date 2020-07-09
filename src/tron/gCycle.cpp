@@ -7091,6 +7091,9 @@ void gCycle::TeleportTo(eCoord dest, eCoord dir, REAL time) {
 	RequestSync();
 }
 
+bool sg_RespawnPlayerStrict = false;
+static tConfItem<bool> sg_RespawnPlayerStrictConf("RESPAWN_STRICT",sg_RespawnPlayerStrict);
+
 static void sg_RespawnPlayer(std::istream &s)
 {
         eGrid *grid = eGrid::CurrentGrid();
@@ -7107,6 +7110,9 @@ static void sg_RespawnPlayer(std::istream &s)
         tString PlayerName = ePlayerNetID::FilterName(params.ExtractNonBlankSubString(pos));
         ePlayerNetID *pPlayer = ePlayerNetID::FindPlayerByName(PlayerName);
         if(!pPlayer)
+            return;
+        
+        if(sg_RespawnPlayerStrict && !pPlayer->CanRespawn())
             return;
 
         //const tString message_str = params.ExtractNonBlankSubString(pos);
