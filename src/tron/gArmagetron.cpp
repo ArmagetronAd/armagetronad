@@ -706,7 +706,8 @@ int main(int argc,char **argv){
             // disable DirectX by default; it causes problems with some boards.
             if (!getenv( "SDL_VIDEODRIVER") ) {
                 if (sr_useDirectX) {
-                    sg_PutEnv( "SDL_VIDEODRIVER=directx" );
+                    // NO. Causes crashes with SDL1.2 on Windows on window deactivation/alt-tabbing away
+                    // sg_PutEnv( "SDL_VIDEODRIVER=directx" );
                 }
                 else
                 {

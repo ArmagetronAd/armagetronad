@@ -32,9 +32,14 @@ if test -n "${CODEBLOCKS}" && test -d ${CODEBLOCKS}; then
     # adapt relative paths to source
     for f in `ls ${CODEBLOCKS} -1 | egrep ".*\.cbp$|.*.\.bat$"`; do
         echo $f
-	sed < ${CODEBLOCKS}/$f > ${WINDIR}/$f -e "s,=\.\.\\\\armagetronad,=.,g" -e "s,\.\./armagetronad[^_],,g" -e "s,\.\.\\\\armagetronad[^_],,g" -e "s,armagetronad,${PACKAGE_NAME},g"
+	sed < ${CODEBLOCKS}/$f > ${WINDIR}/$f -e "s,=\.\.\\\\armagetronad,=.,g" -e "s,\.\./armagetronad[^_],,g" -e "s,\.\.\\\\armagetronad[^_],,g" -e "s,armagetronad,${PACKAGE_NAME},g" || exit $?
     done
 fi
+
+# rebrand storage directory
+STORAGE=${PACKAGE_TITLE}
+test "${STORAGE}" = "Armagetron Advanced" && STORAGE="Armagetron" # 'Armagetron' used to be the only storage directory name before
+sed -i ${WINDIR}/src/win32/config_common.h -e "s,\}/Armagetron\",}/${STORAGE}\"," || exit $?
 
 # transcribe nsi scripts
 for source in ${CODEBLOCKS}/*.nsi; do

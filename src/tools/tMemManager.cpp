@@ -1200,6 +1200,7 @@ void tMemMan::Dispose(tAllocationInfo const & info, void *p){
 
 
 void tMemManBase::Check(){
+#ifndef DONTUSEMEMMANAGER
     if (!inited)
         return;
 
@@ -1213,6 +1214,8 @@ void tMemManBase::Check(){
 #ifdef WIN32
     LeaveCriticalSection(&mutex);
 #endif
+
+#endif // DONTUSEMEMMANAGER
 }
 
 /*

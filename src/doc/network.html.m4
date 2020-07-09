@@ -190,7 +190,7 @@ PARAGRAPH([
 The new authentication code allows you to securely log into servers using various accounts;
  check out the ELINK([wiki.armagetronad.net/index.php?title=HostingFAQ#Signing_in_.28Authentication.29],Wiki FAQ)
 for details.
-The quick and simple way to get an account you can use is if you sign up on the ELINK([forums.armagetronad.net],Forums);
+The quick and simple way to get an account you can use is if you sign up on the ELINK([forums3.armagetronad.net],Forums);
 pick a simple username without fancy characters.
 Your Global ID (GID) associated with that account will then be "&lt;your username&gt;@forums".
 Enter that in the "Global ID" field of your "Player Setup" menu and activate "Auto Login".
