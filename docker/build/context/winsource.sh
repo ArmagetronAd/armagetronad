@@ -33,6 +33,11 @@ for f in `ls ${CODEBLOCKS} -1 | egrep ".*\.cbp$|.*.\.bat$"`; do
     sed -i ${CODEBLOCKS}/$f -e "s,=\.\.\\\\armagetronad,=.,g" -e "s,\.\./armagetronad[^_],,g" -e "s,\.\.\\\\armagetronad[^_],,g" -e "s,armagetronad,${PACKAGE_NAME},g" -e "s,ArmagetronAd,${PACKAGE_NAME},g" || exit $?
 done
 
+# rebrand storage directory
+STORAGE=${PACKAGE_TITLE}
+test "${STORAGE}" = "Armagetron Advanced" && STORAGE="Armagetron" # 'Armagetron' used to be the only storage directory name before
+sed -i ${WINDIR}/src/win32/config_common.h -e "s,\}/Armagetron\",}/${STORAGE}\"," || exit $?
+
 # transcribe nsi scripts
 for source in ${WIN32}/*.nsi; do
     #echo Adapting installer script $f...

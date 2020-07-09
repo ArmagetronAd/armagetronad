@@ -1437,7 +1437,7 @@ game_menu_disconnect_help     Trennt die Verbindung zum Server und führt wieder 
 #********************************************
 version_info_title            Über diese Installation von \g
 version_info_version          Version von \g: \1
-version_info_misc_stuff       \n0xff8888Offizielle Website:0xRESETT http://armagetronad.net/\n0xff8888Offizielles Forum:0xRESETT http://forums.armagetronad.net/\n0xff8888Wiki (Strategie, Turniere, Dokumentation, ...):0xRESETT http://wiki.armagetronad.net/\n0xff8888Projektverwalter:0xRESETT z-man, Tank Program (guru3), Lucifer
+version_info_misc_stuff       \n0xff8888Offizielle Website:0xRESETT http://armagetronad.net/\n0xff8888Offizielles Forum:0xRESETT https://forums3.armagetronad.net/\n0xff8888Wiki (Strategie, Turniere, Dokumentation, ...):0xRESETT http://wiki.armagetronad.net/\n0xff8888Projektverwalter:0xRESETT z-man, Tank Program (guru3), Lucifer
 
 path_info_user_cfg            Pfad zu user.cfg:
 path_info_config              Konfigurationsverzeichnisse:
@@ -2106,7 +2106,7 @@ player_teamname_text          Teamname:
 player_teamname_help          Zur Navigation verwende <left>/<right>, Entf, Rücktaste und all die anderen Tasten.
 
 player_global_id_text         Globale ID:
-player_global_id_help         Falls vorhanden, kannst du deine Globale ID hier eintragen. We sie aussieht, hängt von deinem Melteamt ab. Bist du auf forums.armagetronad.net angemeltet, ist sie z.B. dein Benutzername dort, gefolgt von "@forums".
+player_global_id_help         Falls vorhanden, kannst du deine Globale ID hier eintragen. We sie aussieht, hängt von deinem Melteamt ab. Bist du auf forums3.armagetronad.net angemeltet, ist sie z.B. dein Benutzername dort, gefolgt von "@forums".
 
 player_input_text             Spiel-Tasten
 player_input_help             Stellt die Tastaturbelegung für die Steuerung der Vehikel ein
@@ -2942,7 +2942,7 @@ help_commands_pp_shortdesc    Polizeikommandos
 help_commands_pp_text         0x88ff88/players [<Suchmuster>]0xffff88: Gibt dir eine Liste aller Spieler und Zusatzinfos. Das optionale Suchmuster schränkt die Liste auf die Spieler ein, deren Name das Suchmuster enthält.\n0x88ff88/admins [<Zugriffslevel> [<Zugriffslevel>]]0xffff88: Gibt dir eine Liste aller Administratoren. Wenn nur das erste Argument gegeben wird, werden nur Administratoren auf genau diesem Level gelistet. Mit beiden Argumenten werden alle Administratoren mit Zugriffslevel in diesem Bereich gelistet.\n0x88ff88/vote kick|suspend <Spieler>0xffff88: Regt eine Abstimmung zum Rauswurf oder zur Suspendierung eines Spielers an.
 
 help_commands_auth_shortdesc  Authentifizierungskommandos
-help_commands_auth_text       0x88ff88/login [<Benutzer>]@<Meldeamt>0xffff88: Authentfiziert dich über das angegebene Meldeamt. Mit einem Account auf http://forums.armagetronad.net/ ist 'forums' dein Meldeamt.\n0x88ff88/logout0xffff88: Hebt die Authentifizierung auf.\n0x88ff88/vote include <Datei>0xffff88: Regt eine Abstimmung zum Einbinden einer Konfigurationsdatei an.\n0x88ff88/vote command <Kommando>0xffff88: Regt eine Abstimmung zum ausführen eines Kommandos an.\n0x88ff88/admin <Kommando>0xffff88: Führt ein Kommando aus, falls dein Zugriffslevel hoch genug ist.\n0x88ff88/op <Spieler> [+|-]<Zugriffslevel>0xffff88: Gibt einem anderen Spieler einen höheren oder niedrigeren Zugriffslevel; standardmässig wird der Level eins under deinem Level genommen, was auch der maximale Level ist.\n0x88ff88/deop <Spieler>0xffff88: Kehrt /op um.
+help_commands_auth_text       0x88ff88/login [<Benutzer>]@<Meldeamt>0xffff88: Authentfiziert dich über das angegebene Meldeamt. Mit einem Account auf https://forums3.armagetronad.net/ ist 'forums' dein Meldeamt.\n0x88ff88/logout0xffff88: Hebt die Authentifizierung auf.\n0x88ff88/vote include <Datei>0xffff88: Regt eine Abstimmung zum Einbinden einer Konfigurationsdatei an.\n0x88ff88/vote command <Kommando>0xffff88: Regt eine Abstimmung zum ausführen eines Kommandos an.\n0x88ff88/admin <Kommando>0xffff88: Führt ein Kommando aus, falls dein Zugriffslevel hoch genug ist.\n0x88ff88/op <Spieler> [+|-]<Zugriffslevel>0xffff88: Gibt einem anderen Spieler einen höheren oder niedrigeren Zugriffslevel; standardmässig wird der Level eins under deinem Level genommen, was auch der maximale Level ist.\n0x88ff88/deop <Spieler>0xffff88: Kehrt /op um.
 help_commands_auth_levels_shortdesc Liste aller Zugriffslevel
 help_commands_auth_levels_text 0x88ff880 (Besitzer)0xffff88: Der Serverbesitzer. Konsolenkommandos laufen mit diesen Rechten.\n0x88ff881 (Administrator)0xffff88: Ein Serveradministrator. Kann fast alles, was auch der Besitzer kann.\n0x88ff882 (Moderator)0xffff88: Ein Moderator. Kann normalerweise nur Spielermanagement-Kommandos ausführen.\n0x88ff887 (Team-Anführer)0xffff88: Anführer eines Teams. Hat normalerweise keine Sonderrechte, kann auf Turnierservern aber für Teammanagement verantwortlich gemacht werden.\n0x88ff888 (Teammitglied)0xffff88: Mitglied eines Teams. Locale Team-Accounts begommen diesen Zugriffslevel.\n0x88ff8812 (Localer Benutzer)0xffff88: Spieler mit einem lokalen Account auf diesem Server bekommen diesen Level.\n0x88ff8815 (Frember)0xffff88: Spieler mit Accounts von Meldeämtern bekommen diesen Level.\n0x88ff8816 (Missbilligt)0xffff88: In Ungnade gefallene Spieler.\n0x88ff8817 (Ausgestoßen)0xffff88: Genauso, nur noch schlimmer :)\n0x88ff8819 (Eingeloggt)0xffff88: Minimaler Level für authentifizierte Spieler.\n0x88ff8820 (Programm)0xffff88: Nicht eingeloggter Spieler.
 
@@ -3229,7 +3229,7 @@ classification_maps           Benutzerdefinierte Karte
 
 resource_not_cached           Datei \1 befindet sich nicht im lokalen Speicher. Bitte etwas Geduld, sie wird heruntergeladen...\n
 resource_downloading          Lade \1 herunter ...\n
-resource_fetcherror_noconnect FEHLER: Der host von URI \1 ist nicht erreichbar. Das kann ein DNS Namensauflösungsfehler sein. Falls es sich um das Hauptlager für Resourcen (http://resource.armagetronad.net/resource/) handelt, melde dies bitte auf http://forums.armagetronad.net/.\n
+resource_fetcherror_noconnect FEHLER: Der host von URI \1 ist nicht erreichbar. Das kann ein DNS Namensauflösungsfehler sein. Falls es sich um das Hauptlager für Resourcen (http://resource.armagetronad.net/resource/) handelt, melde dies bitte auf https://forums3.armagetronad.net/.\n
 resource_fetcherror_404       FEHLER 404 : Datei nicht gefunden.\n
 resource_fetcherror           FEHLER \1 != 200.\n
 resource_no_filename          FEHLER: Leerer Dateiname.\n

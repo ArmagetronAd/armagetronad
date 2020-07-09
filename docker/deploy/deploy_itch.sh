@@ -40,13 +40,24 @@ chmod +x butler || exit $?
 ./butler -V || exit $?
 popd || exit $?
 
+function upload()
+{
+	if ! ~/bin/butler push $1 ${ITCH_PROJECT}:$2${CHANNEL_SUFFIX} --userversion=${PACKAGE_VERSION} --if-changed; then
+		sleep 30
+		if ! ~/bin/butler push $1 ${ITCH_PROJECT}:$2${CHANNEL_SUFFIX} --userversion=${PACKAGE_VERSION} --if-changed; then
+			sleep 30
+			if ! ~/bin/butler push $1 ${ITCH_PROJECT}:$2${CHANNEL_SUFFIX} --userversion=${PACKAGE_VERSION} --if-changed; then
+				sleep 30
+				~/bin/butler push $1 ${ITCH_PROJECT}:$2${CHANNEL_SUFFIX} --userversion=${PACKAGE_VERSION} --if-changed || exit $?
+			fi
+		fi
+	fi
+}
+
 # upload
-if ! ~/bin/butler push appdir_linux_32 ${ITCH_PROJECT}:linux-32${CHANNEL_SUFFIX} --userversion=${PACKAGE_VERSION} --if-changed; then
-  sleep 30
-  ~/bin/butler push appdir_linux_32 ${ITCH_PROJECT}:linux-32${CHANNEL_SUFFIX} --userversion=${PACKAGE_VERSION} --if-changed || exit $?
-fi
-~/bin/butler push appdir_linux_64 ${ITCH_PROJECT}:linux-64${CHANNEL_SUFFIX} --userversion=${PACKAGE_VERSION} --if-changed || exit $?
-~/bin/butler push appdir_windows ${ITCH_PROJECT}:windows-32${CHANNEL_SUFFIX} --userversion=${PACKAGE_VERSION} --if-changed || exit $?
+upload appdir_linux_32 linux-32
+upload appdir_linux_64 linux-64
+upload appdir_windows windows-32
 
 # cleanup
 rm -rf secrets ~/.config/itch appdir_*

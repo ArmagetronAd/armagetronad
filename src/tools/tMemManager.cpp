@@ -1246,7 +1246,7 @@ void tMemManBase::Check(){
 #ifdef WIN32
     LeaveCriticalSection(&mutex);
 #endif
-#endif
+#endif // DONTUSEMEMMANAGER
 }
 
 /*
