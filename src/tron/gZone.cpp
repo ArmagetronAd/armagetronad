@@ -7848,7 +7848,6 @@ static void sg_SpawnSoccer(std::istream &s)
     else
     {
         float sizeMultiplier = gArena::SizeMultiplier();
-        float radius, growth;
         tString name, type, team;
         std::vector<eCoord> route;
         int pos = 0;

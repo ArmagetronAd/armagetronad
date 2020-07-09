@@ -260,7 +260,7 @@ class gWinZoneHack: public gZone
 		gWinZoneHack(nMessage &m);
 		~gWinZoneHack();		 //!< destructor
 
-		static bool WinnerPlayer() { winnerPlayer_; }
+		static bool WinnerPlayer() { return winnerPlayer_; }
 		static void SetWinnerPlayer(bool val) { winnerPlayer_ = val; }
 
 	protected:
@@ -768,7 +768,7 @@ class gRespawnZoneHack: public gZone
         void ClearDeadPlayer() { deadPlayer_ = NULL; }
 
         eCoord SpawnDirection() { return this->spawnDirection_; }
-        void SetSpawnDirection(eCoord dir) { this->spawnDirection_;  }
+        void SetSpawnDirection(eCoord dir) { this->spawnDirection_ = dir;  }
 
         void Finish();
 

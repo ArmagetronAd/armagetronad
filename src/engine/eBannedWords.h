@@ -11,7 +11,7 @@ class eBannedWords
     public:
         eBannedWords();
 
-        tArray<tString> BannedWordsList() { bannedWords_; }
+        tArray<tString> BannedWordsList() { return bannedWords_; }
 
         void Add(tString word) { bannedWords_.Insert(word); }
 
