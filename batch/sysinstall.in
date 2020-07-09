@@ -324,19 +324,22 @@ if test @enable_desktop@ = yes; then
         rm -f ${DESTDIR}${METADEST}/@progname@.appdata.xml
     fi
 
-    # add standard icons
-    for icontype in "16 small" "32 medium" "48 large"
-    do
-        set -- $icontype
-        xdg-icon-resource ${MODE} --size $1 ${DESTDIR}${DESKTOPSOURCE}/icons/$2/@prognamebase@.png armagetronad-@prognamebase@ || exit $?
-    done
+    if test -z "${DESTDIR}"; then
+        # systemwide installation
+        # add standard icons
+        for icontype in "16 small" "32 medium" "48 large"
+        do
+            set -- $icontype
+            xdg-icon-resource ${MODE} --novendor --size $1 ${DESTDIR}${DESKTOPSOURCE}/icons/$2/@prognamebase@.png org.armagetronad.@prognamebase@ || exit $?
+        done
 
-    # add standard menu entry
-    xdg-desktop-menu ${MODE} --novendor ${DESTDIR}${DESKTOPSOURCE}/org.armagetronad.@progname@.desktop || exit $?
+        # add standard menu entry
+        xdg-desktop-menu ${MODE} --novendor ${DESTDIR}${DESKTOPSOURCE}/org.armagetronad.@progname@.desktop || exit $?
 
-    # add standard filetype and association for armagetronad:// links
-    xdg-mime ${MODE} ${DESTDIR}${DESKTOPSOURCE}/armagetronad-link.xml || exit $?
-    xdg-desktop-menu ${MODE} --novendor ${DESTDIR}${DESKTOPSOURCE}/org.armagetronad.@progname@-handler.desktop || exit $?
+        # add standard filetype and association for armagetronad:// links
+        xdg-mime ${MODE} ${DESTDIR}${DESKTOPSOURCE}/armagetronad-link.xml || exit $?
+        xdg-desktop-menu ${MODE} --novendor ${DESTDIR}${DESKTOPSOURCE}/org.armagetronad.@progname@-handler.desktop || exit $?
+    fi
 
     # add KDE icons and desktop link
     if kde-config --install icon > /dev/null 2>&1; then
