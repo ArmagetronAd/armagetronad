@@ -29,7 +29,16 @@ else
     EXIT=0
     for f in upload/*${PACKAGE_VERSION}* upload/*.md; do
 	if test -r $f; then
-	    ./lp-project-upload ${LP_PROJECT} ${LP_SERIES} ${LP_VERSION} $f || EXIT=$?
+	    if ! ./lp-project-upload ${LP_PROJECT} ${LP_SERIES} ${LP_VERSION} $f; then
+            sleep 10
+            if ! ./lp-project-upload ${LP_PROJECT} ${LP_SERIES} ${LP_VERSION} $f; then
+                sleep 10
+                if ! ./lp-project-upload ${LP_PROJECT} ${LP_SERIES} ${LP_VERSION} $f; then
+                    sleep 10
+                    ./lp-project-upload ${LP_PROJECT} ${LP_SERIES} ${LP_VERSION} $f || EXIT=$?
+                fi
+            fi
+        fi
 	fi
     done
 fi
