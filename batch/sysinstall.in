@@ -328,15 +328,15 @@ if test @enable_desktop@ = yes; then
     for icontype in "16 small" "32 medium" "48 large"
     do
         set -- $icontype
-        xdg-icon-resource install --size $1 ${DESTDIR}${DESKTOPSOURCE}/icons/$2/@prognamebase@.png armagetronad-@prognamebase@
+        xdg-icon-resource ${MODE} --size $1 ${DESTDIR}${DESKTOPSOURCE}/icons/$2/@prognamebase@.png armagetronad-@prognamebase@ || exit $?
     done
 
     # add standard menu entry
-    xdg-desktop-menu install ${DESTDIR}${DESKTOPSOURCE}/org.armagetronad.@progname@..desktop
+    xdg-desktop-menu ${MODE} --novendor ${DESTDIR}${DESKTOPSOURCE}/org.armagetronad.@progname@.desktop || exit $?
 
     # add standard filetype and association for armagetronad:// links
-    xdg-mime install ${DESTDIR}${DESKTOPSOURCE}/armagetronad-link.xml
-    xdg-desktop-menu install ${DESTDIR}${DESKTOPSOURCE}/org.armagetronad.@progname@.-handler.desktop
+    xdg-mime ${MODE} ${DESTDIR}${DESKTOPSOURCE}/armagetronad-link.xml || exit $?
+    xdg-desktop-menu ${MODE} --novendor ${DESTDIR}${DESKTOPSOURCE}/org.armagetronad.@progname@-handler.desktop || exit $?
 
     # add KDE icons and desktop link
     if kde-config --install icon > /dev/null 2>&1; then
