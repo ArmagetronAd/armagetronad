@@ -9807,6 +9807,8 @@ static void CenterPlayerMessage_conf(std::istream &s)
 
 static tConfItemFunc CenterPlayerMessage_c("CENTER_PLAYER_MESSAGE",&CenterPlayerMessage_conf);
 static tAccessLevelSetter sn_CenterPlayerConfLevel( CenterPlayerMessage_c, tAccessLevel_Moderator );
+static tConfItemFunc PlayerCenterMessage_c("PLAYER_CENTER_MESSAGE",&CenterPlayerMessage_conf);
+static tAccessLevelSetter sn_PlayerCenterConfLevel( PlayerCenterMessage_c, tAccessLevel_Moderator );
 
 static tString se_defaultKickReason("");
 static tConfItemLine se_defaultKickReasonConf( "DEFAULT_KICK_REASON", se_defaultKickReason );
