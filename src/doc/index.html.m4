@@ -104,7 +104,7 @@ SUBSECTION([Feedback, support, keeping up to date:])
 PARAGRAPH([
 Visit the ELINK([www.armagetronad.net/],main webpage) for up to date information
 about PROGTITLE and the latest stable builds. Check out the 
-ELINK([forums.armagetronad.net/],Forums) for keeping in touch with
+ELINK([forums3.armagetronad.net/],Forums) for keeping in touch with
 current development and venting your anger that we broke your favorite feature
 in the current release. Check the ELINK([wiki.armagetronad.net],Wiki) for community maintained documentation, the pages you're reading right now only scratch the surface. Visit the 
 ELINK(sourceforge.net/projects/armagetronad/,SourceForge project page) to get

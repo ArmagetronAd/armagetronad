@@ -614,7 +614,7 @@ convention.
 
 - AuthorName: The name of the person who currently maintains the resource,
 usually also one of the creators. This should be either a nickname on
-forums.armagetronad.net, a nickname registered for the central resource
+forums3.armagetronad.net, a nickname registered for the central resource
 repository (we're making sure they don't collide) or, for lone wolves who
 don't want to register, the slightly long construct 
 "unofficial/mailto/<Domain>/<User>", where <User>@<Domain> is a valid email
