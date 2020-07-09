@@ -101,9 +101,9 @@ static int myFetch(const char *URIs, const char *filename, const char *savepath)
 /*
 Allows for the fetching and caching of ressources available on the web,
 such as maps (xml), texture (jpg, gif, bmp), sound and models.
-Nota: On some forums (such as forums.armagetronad.net), it is possible
+Nota: On some forums (such as forums3.armagetronad.net), it is possible
 for the download link not give information about the filename or type,
-ie: http://forums.armagetronad.net/download/file.php?id=1191. This is
+ie: https://forums3.armagetronad.net/download/file.php?id=1191. This is
 why the filename parameter is required.
 Parameters:
 uri: The full uri to obtain the ressource
