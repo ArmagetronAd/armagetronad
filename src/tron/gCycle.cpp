@@ -7256,3 +7256,26 @@ static void sg_setCycleRubber(std::istream &s)
     }
 }
 static tConfItemFunc sg_setCycleRubberConf("SET_CYCLE_RUBBER", sg_setCycleRubber);
+
+static void sg_setCycleBraking(std::istream &s)
+{
+    tString playerStr, brakingStr;
+    s >> playerStr;
+
+    ePlayerNetID *player = ePlayerNetID::FindPlayerByName(playerStr);
+
+    if (player)
+    {
+        gCycle *pCycle = dynamic_cast<gCycle *>(player->Object());
+        if (pCycle && pCycle->Alive())
+        {
+            s >> brakingStr;
+            bool braking = false;
+            if(brakingStr.ToLower() == "true" || brakingStr == "1") braking = true;
+
+            pCycle->SetBraking(braking);
+            pCycle->RequestSync();
+        }
+    }
+}
+static tConfItemFunc sg_setCycleBrakingConf("SET_CYCLE_BRAKING",sg_setCycleBraking);

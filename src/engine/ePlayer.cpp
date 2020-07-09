@@ -8309,6 +8309,8 @@ void ePlayerNetID::GridPosLadderLog()
 
                 if (pCycle && pCycle->Team()) se_playerGridPosWriter << FilterName(pCycle->Team()->Name());
                 else se_playerGridPosWriter << " ";
+                
+                se_playerGridPosWriter << pCycle->GetBraking() << pCycle->GetBrakingReservoir();
 
                 se_playerGridPosWriter.write();
             }

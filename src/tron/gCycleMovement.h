@@ -277,13 +277,13 @@ public:
     inline REAL const & GetLastTurnTime( void ) const;	//!< Gets the time of the last turn
     inline gCycleMovement const & GetLastTurnTime( REAL & lastTurnTime ) const;	//!< Gets the time of the last turn
     inline gCycleMovement & SetRubber( REAL rubber );   //!< Sets the amount rubber used up by the cycle
+    inline gCycleMovement & SetBraking( unsigned short braking );   //!< Sets flag indicating status of brakes ( on/off )
 protected:
     inline gCycleMovement & SetLastTurnPos( eCoord const & lastTurnPos );	//!< Sets the location of the last turn
     inline gCycleMovement & SetLastTurnTime( REAL const & lastTurnTime );	//!< Sets the time of the last turn
 private:
     inline gCycleMovement & SetDistance( REAL distance );   //!< Sets the distance traveled so far
     inline gCycleMovement & SetTurns( unsigned short turns );   //!< Sets the number of turns taken so far
-    inline gCycleMovement & SetBraking( unsigned short braking );   //!< Sets flag indicating status of brakes ( on/off )
     inline gCycleMovement & SetBrakingReservoir( REAL brakingReservoir );	//!< Sets the reservoir for braking. 1 means full, 0 is empty
     inline gCycleMovement & SetRubberMalus( REAL rubberMalus );	//!< Sets additional rubber usage factor
 };
