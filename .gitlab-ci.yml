@@ -62,7 +62,7 @@ build_prepare:
   script: [""]
   artifacts:
     untracked: true
-    expire_in: 1 day
+    expire_in: 1 week
 
 
 build_server_32_raw:
