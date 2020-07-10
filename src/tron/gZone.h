@@ -348,6 +348,7 @@ class gRubberZoneHack: public gZone
 
 	private:
 								 //!< reacts on objects inside the zone (kills them)
+		virtual bool Timestep(REAL currentTime);
 		virtual void OnEnter( gCycle *target, REAL time );
 
 		gCycle * getPlayerCycle(ePlayerNetID *pPlayer);

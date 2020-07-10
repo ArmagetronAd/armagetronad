@@ -2560,11 +2560,15 @@ gRubberZoneHack::gRubberZoneHack( eGrid * grid, const eCoord & pos, bool dynamic
 
 gRubberZoneHack::~gRubberZoneHack( void )
 {
+    SetReferenceTime();
 }
 
 
 static int score_rubberzone=-1;
 static tSettingItem<int> s_rz("SCORE_RUBBERZONE",score_rubberzone);
+
+static REAL sg_rubberZoneRate=40;
+static tSettingItem<REAL> sg_rubberZoneRateConf("RUBBERZONE_RATE",sg_rubberZoneRate);
 
 void gRubberZoneHack::OnVanish( void )
 {
@@ -2612,6 +2616,13 @@ gCycle * gRubberZoneHack::getPlayerCycle(ePlayerNetID *pPlayer)
     return (pPlayerCycle);
 }
 
+bool gRubberZoneHack::Timestep(REAL time)
+{
+    bool ret = gZone::Timestep(time);
+    SetReferenceTime();
+    return ret;
+}
+
 // *******************************************************************************
 // *
 // *    sg_RubberZoneHurt
@@ -2624,12 +2635,16 @@ gCycle * gRubberZoneHack::getPlayerCycle(ePlayerNetID *pPlayer)
 // *******************************************************************************
 static eLadderLogWriter sg_deathRubberZoneWriter("DEATH_RUBBERZONE", true);
 
-void sg_RubberZoneHurt( gCycle * target, gRubberZoneHack *rubberZone)
+void sg_RubberZoneHurt( gCycle * target, gRubberZoneHack *rubberZone,REAL timestep=1)
 {
     REAL rubber = target->GetRubber();
     if (rubberZone->GetRubberType() == gRubberZoneHack::TYPE_RUBBER)
     {
-        if ( rubber + rubberZone->GetRubber() >= sg_rubberCycle )       // max rubber amount reached, kill the cycle
+        REAL newRubber = rubberZone->GetRubber();
+        if(sg_rubberZoneRate >= 0)
+            newRubber *= timestep*sg_rubberZoneRate;
+
+        if ( rubber + newRubber >= sg_rubberCycle )       // max rubber amount reached, kill the cycle
         {
             target->Player()->AddScore( score_rubberzone, tOutput(), "$player_lose_rubberzone" );
             target->Kill();
@@ -2639,7 +2654,7 @@ void sg_RubberZoneHurt( gCycle * target, gRubberZoneHack *rubberZone)
         }
         else if ( rubber + rubberZone->GetRubber() > 0 )            // sg_deathZoneRubberMalus might be negative, avoid setting a negative rubber!
         {
-            target->SetRubber( rubber + rubberZone->GetRubber() );
+            target->SetRubber( rubber + newRubber );
         }
         else                                                        // too low value, just set to zero
             target->SetRubber( 0 );
@@ -2667,7 +2682,8 @@ void sg_RubberZoneHurt( gCycle * target, gRubberZoneHack *rubberZone)
 
 void gRubberZoneHack::OnEnter( gCycle * target, REAL time )
 {
-    sg_RubberZoneHurt( target, this );
+    REAL timestep = time-referenceTime_;
+    sg_RubberZoneHurt(target,this,timestep);
 }
 
 // *******************************************************************************
@@ -7105,7 +7121,6 @@ static void sg_SpawnObjectZone(std::istream &s)
     else
     {
         float sizeMultiplier = gArena::SizeMultiplier();
-        float radius, growth;
         tString name;
         std::vector<eCoord> route;
         int pos = 0;

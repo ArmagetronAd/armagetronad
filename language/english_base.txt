@@ -3612,6 +3612,7 @@ koh_score_time_help                 The interval that KOH_SCORE is added
 
 ## rubberzone
 score_rubberzone_help               Score player is given for dieing on a rubber zone.
+rubberzone_rate_help                Rate multiplier at which rubber zones take rubber.
 
 ## soccer goal|ball zone
 soccer_goal_enemy_entered           \1 0xRESETTwas killed for entering \20xRESETT's goal.\n
