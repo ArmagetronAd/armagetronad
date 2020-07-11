@@ -1070,7 +1070,7 @@ static char const * default_instant_chat[]=
      "Speed for weaks!",
      "This server sucks! I'm going home.",
      "Grind EVERYTHING! And 180 some more!",
-     "/me has an interesting mental disorder.",
+     "Look ma, no left turns!",
      "Ah, a nice, big, roomy box all for me!",
      "Go that way! No, the other way!",
      "WD! No points!",
