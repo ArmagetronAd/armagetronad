@@ -3152,7 +3152,12 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s, tString co
         {
             tos << p2->GetColoredName() << tColoredString::ColorString(1,1,1) << " ( )";
         }
-        if ( ( p2->Owner() != 0 && tCurrentAccessLevel::GetAccessLevel() <= se_ipAccessLevel ) || ( p2->Owner() != 0 && p2->Owner() == receiverOwner ) )
+
+        if ( p2->Owner() != 0 && p2->Owner() == receiverOwner )
+        {
+                tos << ", IP = 127.0.0.1";
+        }
+        else if ( p2->Owner() != 0 && tCurrentAccessLevel::GetAccessLevel() <= se_ipAccessLevel )
         {
             tString IP = p2->GetMachine().GetIP();
             if ( IP.Len() > 1 )
@@ -3160,6 +3165,7 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s, tString co
                 tos << ", IP = " << IP;
             }
         }
+        
         if ( sn_GetNetState() != nCLIENT && ( ( p2->Owner() != 0 && tCurrentAccessLevel::GetAccessLevel() <= se_nVerAccessLevel ) || ( p2->Owner() != 0 && p2->Owner() == receiverOwner ) ) )
         {
             tos << ", " << sn_GetClientVersionString( sn_Connections[ p2->Owner() ].version.Max() ) << " (ID: " << sn_Connections[ p2->Owner() ].version.Max() << ")";
