@@ -3717,7 +3717,11 @@ void ePlayerNetID::Chat(const tString &s_orig)
 
 #ifndef DEDICATED
     // check for direct console commands
-    if( s_orig.StartsWith("/console") )
+    tString command("");
+    if(s_orig.StartsWith("/"))
+        command = s_orig.SubStr(0,s_orig.StrPos(" "));
+
+    if(command == "/console")
     {
         // direct commands are executed at owner level
         tCurrentAccessLevel level( tAccessLevel_Owner, true );
