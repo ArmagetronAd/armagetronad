@@ -410,6 +410,7 @@ keep_player_slot_help               If set to 1, every time the server gets full
 
 respawn_time_help                   Seconds greater than 0 makes sure any dead player will be respawned within that time of them being dead. Default: -1.
 respawn_strict_help                 If enabled, players in spectator or going into spectator cannot be respawned.
+respawn_message_help                Display the "You've been respawned" message for RESPAWN?
 respawn_help                        Respawns a player that had been killed.\nUSAGE: RESPAWN <player> <xpos> <ypos> <xdir> <ydir>.
 respawn_player_help                 Respawns a player that had been killed.\nUSAGE: RESPAWN_PLAYER <player> <xpos> <ypos> <xdir> <ydir>.
 respawn_all_help                    Respawns all players that were killed during the round at a random spot.
@@ -3640,6 +3641,7 @@ base_enemy_kill_help                Flag indicating whether a base will kill ene
 
 ## General zone commands
 spawn_zone_help                                spawn a zone onto the grid
+styct_compatibility_spawn_zone_help            If eanbled, SPAWN_ZONE will take colors out of 1 rather than 15.
 collapse_zone_help                             collapse a zone
 set_zone_radius_help                           change zones radius
 set_zone_id_radius_help                        change zones radius
@@ -3793,6 +3795,7 @@ ladderlog_write_objectzone_zone_entered_help        Write to ladderlog: OBJECTZO
 ladderlog_write_player_ai_left_help                 Write to ladderlog: PLAYER_AI_LEFT [ai_name]
 ladderlog_write_player_colored_name_help            Write to ladderlog: PLAYER_COLORED_NAME [player_useranme] [player_colored_name]
 ladderlog_write_player_gridpos_help                 Write to ladderlog: PLAYER_GRIDPOS [player_username] [pos_x] [pos_y] [dir_x] [dir_y] [cycle_speed] [player_rubber] [cycle_rubber] [team] [player_braking] [player_brake_reservoir]
+styct_compatibility_ladderlog_player_gridpos_help   PLAYER_GRIDPOS becomes: PLAYER_GRIDPOS [player_username] [pos_x] [pos_y] [dir_x] [dir_y] [team] [cycle_speed] [player_rubber] [cycle_rubber] [player_braking] [player_brake_reservoir]
 ladderlog_write_custom_invalid_command_help         Write to ladderlog: CUSTOM_INVALID_COMMAND <command> <player_log> <ip> <access_level> <params>
 ladderlog_write_player_killed_help                  Write to ladderlog: PLAYER_KILLED [player_username] [ip_address] [pos_x] [pos_y] [dir_x] [dir_y]
 ladderlog_write_queue_started_help                  Write to ladderlog: QUEUE_STARTED [time]

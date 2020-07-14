@@ -8285,6 +8285,9 @@ void ePlayerNetID::RankingLadderLog()
 
 static eLadderLogWriter se_playerGridPosWriter("PLAYER_GRIDPOS", false);
 
+bool styctcompat_se_playerGridPos = false;
+static tConfItem<bool> styctcompat_se_playerGridPosConf("STYCT_COMPATIBILITY_LADDERLOG_PLAYER_GRIDPOS",styctcompat_se_playerGridPos);
+
 void ePlayerNetID::GridPosLadderLog()
 {
     if(!se_playerGridPosWriter.isEnabled())
@@ -8304,12 +8307,20 @@ void ePlayerNetID::GridPosLadderLog()
                 se_playerGridPosWriter << p->GetUserName();
                 se_playerGridPosWriter << pCycle->MapPosition().x << pCycle->MapPosition().y;
                 se_playerGridPosWriter << pCycle->Direction().x << pCycle->Direction().y;
+                if(!styctcompat_se_playerGridPos)
+                {
                 se_playerGridPosWriter << pCycle->verletSpeed_;
                 se_playerGridPosWriter << pCycle->GetRubber() << sg_rubberCycle;
+                }
 
                 if (pCycle && pCycle->Team()) se_playerGridPosWriter << FilterName(pCycle->Team()->Name());
                 else se_playerGridPosWriter << " ";
                 
+                if(styctcompat_se_playerGridPos)
+                {
+                    se_playerGridPosWriter << pCycle->verletSpeed_;
+                    se_playerGridPosWriter << pCycle->GetRubber() << sg_rubberCycle;
+                }
                 se_playerGridPosWriter << pCycle->GetBraking() << pCycle->GetBrakingReservoir();
 
                 se_playerGridPosWriter.write();

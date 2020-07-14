@@ -8528,6 +8528,9 @@ void gCheckpointZoneHack::OnVanish( void )
 // *
 // *******************************************************************************
 
+bool styctcompat_se_spawnZone = false;
+static tConfItem<bool> styctcompat_se_spawnZoneConf("STYCT_COMPATIBILITY_SPAWN_ZONE",styctcompat_se_spawnZone);
+
 
 static void sg_CreateZone_conf(std::istream &s)
 {
@@ -8681,31 +8684,30 @@ static void sg_CreateZone_conf(std::istream &s)
             tRandomizer &randomizer = tRandomizer::GetInstance();
             zoneColor.r = randomizer.Get(0, 15.0) / 15.0;
         }
-
+        else if(styctcompat_se_spawnZone)
+            zoneColor.r = atof(zoneRedStr);
         else
-        {
             zoneColor.r = atof(zoneRedStr) / 15.0;
-        }
 
         if (zoneGreenStr == "g_rand")
         {
             tRandomizer &randomizer = tRandomizer::GetInstance();
             zoneColor.g = randomizer.Get(0, 15.0) / 15.0;
         }
+        else if(styctcompat_se_spawnZone)
+            zoneColor.g = atof(zoneGreenStr);
         else
-        {
             zoneColor.g = atof(zoneGreenStr) / 15.0;
-        }
 
         if (zoneBlueStr == "b_rand")
         {
             tRandomizer &randomizer = tRandomizer::GetInstance();
             zoneColor.b = randomizer.Get(0, 15.0) / 15.0;
         }
+        else if(styctcompat_se_spawnZone)
+            zoneColor.b = atof(zoneBlueStr);
         else
-        {
             zoneColor.b = atof(zoneBlueStr) / 15.0;
-        }
 
         setColorFlag = true;
     }

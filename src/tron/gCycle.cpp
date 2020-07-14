@@ -7091,6 +7091,9 @@ void gCycle::TeleportTo(eCoord dest, eCoord dir, REAL time) {
 	RequestSync();
 }
 
+bool sg_RespawnPlayerCM = false;
+static tConfItem<bool> sg_RespawnPlayerCMConf("RESPAWN_MESSAGE",sg_RespawnPlayerCM);
+
 bool sg_RespawnPlayerStrict = false;
 static tConfItem<bool> sg_RespawnPlayerStrictConf("RESPAWN_STRICT",sg_RespawnPlayerStrict);
 
@@ -7102,29 +7105,40 @@ static void sg_RespawnPlayer(std::istream &s)
                 return;
         }
 
-        tString params;
-        params.ReadLine( s );
-
         // first parse the line to get the params : <player name> <x> <y> <dirx> <diry>
         int pos = 0; //
-        tString PlayerName = ePlayerNetID::FilterName(params.ExtractNonBlankSubString(pos));
-        ePlayerNetID *pPlayer = ePlayerNetID::FindPlayerByName(PlayerName);
+        tString PlayerName("");
+        s >> PlayerName;
+        ePlayerNetID *pPlayer = ePlayerNetID::FindPlayerByName(ePlayerNetID::FilterName(PlayerName));
         if(!pPlayer)
             return;
         
         if(sg_RespawnPlayerStrict && !pPlayer->CanRespawn())
             return;
-
-        //const tString message_str = params.ExtractNonBlankSubString(pos);
-        //int message = atoi(message_str);
-        const tString x_str = params.ExtractNonBlankSubString(pos);
-        REAL x = atof(x_str);
-        const tString y_str = params.ExtractNonBlankSubString(pos);
-        REAL y = atof(y_str);
-        const tString dirx_str = params.ExtractNonBlankSubString(pos);
-        REAL dirx = atof(dirx_str);
-        const tString diry_str = params.ExtractNonBlankSubString(pos);
-        REAL diry = atof(diry_str);
+        
+        bool message = sg_RespawnPlayerCM;
+        tString x_str, y_str;
+        REAL dirx,diry;
+        
+        tString str0(""); s >> str0;
+        tString str1(""); s >> str1;
+        tString str2(""); s >> str2;
+        tString str3(""); s >> str3;
+        tString str4(""); s >> str4;
+        
+        if(str0[0] == 't' || str0[0] == 'f' || str4 != "") // we'll assume the first one is the message flag
+        {
+            if(str0 == "1" || str0[0] == 't') message = true;
+            else message = false;
+            x_str = str1; y_str = str2;
+            dirx = atof(str3); diry = atof(str4);
+        }
+        else
+        {
+            x_str = str0; y_str = str1;
+            dirx = atof(str2); diry = atof(str3);
+        }
+        
         // prepare coord and direction ...
         eCoord ppos, pdir;
         if(x_str == "" && y_str == "") 
@@ -7133,6 +7147,7 @@ static void sg_RespawnPlayer(std::istream &s)
         }
         else
         {
+            REAL x = atof(x_str), y = atof(y_str);
             ppos = eCoord(x * gArena::SizeMultiplier(),y * gArena::SizeMultiplier());
             pdir = eCoord(dirx,diry);
         }
@@ -7145,14 +7160,16 @@ static void sg_RespawnPlayer(std::istream &s)
             gCycle *pCycle = new gCycle(grid, ppos, pdir, pPlayer);
             pPlayer->ControlObject(pCycle);
 
-            /*if (message) {
+            if(message)
+            {
+                /*
                 tColoredString playerName;
                 playerName << *pPlayer << tColoredString::ColorString(1,1,1);
+                */
 
                 // send a console message to the player
                 sn_CenterMessage(tOutput("$player_respawn_center_message"), pPlayer->Owner());
             }
-            */
         }
 }
 
