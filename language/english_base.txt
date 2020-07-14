@@ -2564,6 +2564,7 @@ player_scoretable_nobody	Nobody there.\n
 player_scoretable_inactive	Disconnected
 
 
+show_own_ip_help Should your public IP be displayed when connecting to the master server?
 
 #********************************************
 #********************************************
