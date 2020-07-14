@@ -2,26 +2,26 @@
 
 . targets.sh || exit $?
 
-case ${STAGING}+${STEAM_BRANCH} in
-    *+)
+case ${STAGING}+${STEAM_BRANCH}+${ZI_SERIES} in
+    *++*)
 	echo "No steam branch, no release"
 	exit 0
 	;;
-    true+staging)
+    true+*+stable)
 	# put up on staging branch
 	;;
-    false+staging)
+    false+*+stable)
 	# staging already happened when STAGING was true
 	exit 0
 	;;	
-    true+*)
+    true+*+*)
 	# just staging, do not put up on steam yet
 	exit 0
 	;;
-    false+*)
+    false+*+*)
 	# final release of that branch, deploy
 	;;
-    *+*)
+    *+*+*)
 	echo "Unexpected STAGING+STEAM_BRANCH combination" ${STAGING}+${STEAM_BRANCH}
 	exit 1
 	;;
