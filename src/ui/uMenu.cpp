@@ -1538,7 +1538,7 @@ bool uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL 
                 GenericBackground();
 
                 //16*3/640.0, 32*3/480.0
-                REAL w=0.1*(REAL(sr_screenHeight)/sr_screenWidth),h=0.2;
+                REAL w=0.1*(REAL(sr_screenHeight)/sr_screenWidth),h=0.17;
 
                 //REAL middle=-.6;
 
@@ -1553,9 +1553,9 @@ bool uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL 
                 Color(1,1,1);
                 DisplayText(0,.8,w,h, message);
 
-                //16/640.0
+                //16/640.0, 32/480.0
                 w = 1/30.0*(REAL(sr_screenHeight)/sr_screenWidth);
-                h = 32/480.0;
+                h = 0.06;
 
                 if (offset >= lines.size()) offset = lines.size() - 1;
                 {

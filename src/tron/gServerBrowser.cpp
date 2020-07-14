@@ -885,7 +885,7 @@ void gBrowserMenuItem::RenderBackground()
     {
         // since we're rendering a little more text
         // here's a (probably minimal) performance benefit over doing this math every time
-        aspect = (REAL(sr_screenHeight)/sr_screenWidth)*(4.0/3.0);
+        aspect = (REAL(sr_screenHeight)/sr_screenWidth)*1.15;
         text_width = gSBTEXTWIDTH*aspect;
         resH = sr_screenHeight; resW = sr_screenWidth;
     }

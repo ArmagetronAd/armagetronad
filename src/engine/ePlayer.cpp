@@ -8149,7 +8149,7 @@ tString ePlayerNetID::Ranking( int MAX, bool cut )
             if (p->IsChatting())
                 line << tColoredString::ColorString(-1,-1,-1) << "*";
             line.SetPos(2, cut);
-            line << *p;
+            line << *p << tColoredString::ColorString(-1,-1,-1);
             line.SetPos(19, false );
             if ( p->Object() && p->Object()->Alive() )
             {
