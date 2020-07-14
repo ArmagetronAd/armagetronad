@@ -135,6 +135,7 @@ void rConsole::Render(){
             DisplayText(0,centerMessageY,rCWIDTH_CON*4*fak,rCHEIGHT_CON*4*fak,sr_centerString);
             RenderEnd();
             sr_ResetRenderState(true);
+            rTextField::SetDefaultColor(tColor(1,1,1));
         }
 
         if (sr_textOut || rForceTextCallback::ForceText()){
