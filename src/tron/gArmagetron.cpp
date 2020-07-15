@@ -558,6 +558,10 @@ class gAutoStringArray
 public:
     ~gAutoStringArray()
     {
+#ifndef WIN32        
+        clearenv();
+#endif
+
         for ( std::vector< char * >::iterator i = strings.begin(); i != strings.end(); ++i )
         {
             free( *i );

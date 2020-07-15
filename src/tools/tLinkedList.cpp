@@ -30,16 +30,20 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 void tListItemBase::Remove(){
     if (anchor){
         *anchor      = next;
-        if (next)
-            next->anchor = anchor;
-        anchor       = NULL;
-        next         = NULL;
     }
+    if (next){
+        next->anchor = anchor;
+    }
+
+    anchor       = NULL;
+    next         = NULL;
 }
 
 void  tListItemBase::Insert(tListItemBase *&a){
-    if (anchor)
+    if (anchor || next){
         Remove();
+    }
+
     anchor = &a;
     next   =  a;
     a      =  this;
@@ -60,7 +64,8 @@ int  tListItemBase::Len(){
 void tListItemBase::Sort( Comparator* compare )
 {
     tASSERT_THIS();
-    
+    tASSERT(*anchor == this);
+
     // early return statements: empty list or single element in list
     if (!next )
     {
@@ -70,7 +75,7 @@ void tListItemBase::Sort( Comparator* compare )
     tListItemBase* middle = this;
     {
         // locate the middle of the list
-        tListItemBase* run = *anchor;
+        tListItemBase* run = this;
         while ( run )
         {
             middle = middle->next;
