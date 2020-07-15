@@ -6978,6 +6978,9 @@ static void se_AnnounceLogin( tOutput const &out, ePlayerNetID const *player, eP
     se_SecretConsoleOut( out, player, hideFunc, admin, player, canHideFunc );
 }
 
+static eLadderLogWriter se_playerLoginWriter("PLAYER_LOGIN", true);
+static eLadderLogWriter se_playerLogoutWriter("PLAYER_LOGOUT", true);
+
 void ePlayerNetID::Authenticate( tString const & authName, tAccessLevel accessLevel_, ePlayerNetID const * admin, bool messages )
 {
     tString newAuthenticatedName( se_EscapeName( authName ).c_str() );
@@ -7057,6 +7060,9 @@ void ePlayerNetID::Authenticate( tString const & authName, tAccessLevel accessLe
             }
 
             SetLoggedIn(true);
+
+            se_playerLoginWriter << ePlayerNetID::FilterName(GetName()) << authenticatedname;
+            se_playerLoginWriter.write();
         }
     }
 
@@ -7082,6 +7088,9 @@ void ePlayerNetID::DeAuthenticate( ePlayerNetID const * admin )
         }
 
         SetLoggedIn(false);
+        
+        se_playerLogoutWriter << GetFilteredAuthenticatedName() << ePlayerNetID::FilterName(GetName());
+        se_playerLogoutWriter.write();
     }
 
     // force falling back to regular user name on next update
