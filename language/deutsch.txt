@@ -2565,7 +2565,8 @@ player_scoretable_pingcharity Ping-Spende:
 player_scoretable_nobody      Niemand da.\n
 player_scoretable_inactive    nicht aktiv
 
-
+own_ip_in_players             deine
+show_own_ip_help              Soll die öffentliche IP-Adresse beim Verbindungsaufbau mit den Master-Servern angezeigt werden?
 
 #********************************************
 #********************************************
