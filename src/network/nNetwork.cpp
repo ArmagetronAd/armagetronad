@@ -1598,7 +1598,7 @@ extern bool sn_AcceptingFromMaster;
 static bool sn_showOwnIP = false;
 static tConfItem<bool> sn_showOwnIPConf("SHOW_OWN_IP",sn_showOwnIP);
 #else
-static const bool sn_showOwnIP = true;
+static constexpr bool sn_showOwnIP = true;
 #endif
 
 void login_accept_handler(nMessage &m){
