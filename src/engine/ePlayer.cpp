@@ -3155,7 +3155,8 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s, tString co
 
         if ( p2->Owner() != 0 && p2->Owner() == receiverOwner )
         {
-                tos << ", IP = 127.0.0.1";
+            auto IP = tOutput( "$own_ip_in_players" );
+            tos << ", IP = " << IP;
         }
         else if ( p2->Owner() != 0 && tCurrentAccessLevel::GetAccessLevel() <= se_ipAccessLevel )
         {
