@@ -2757,7 +2757,7 @@ nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket
     sn_DenyReason = "";
 
     // reset redirection
-    sn_redirectTo.release();
+    sn_redirectTo.reset();
 
     // pings in the beginning of the login are not really representative
     nPingAverager::SetWeight(.0001);
