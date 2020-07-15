@@ -124,7 +124,7 @@ REAL remf(REAL x, REAL y) {
 }
 
 REAL angledifff(REAL x, REAL y) {
-    return std::abs(remf(x - y + M_PI, 2*M_PI) - M_PI);
+    return fabsf(static_cast<REAL>(remf(x - y + M_PI, 2*M_PI) - M_PI));
 }
 
 /*
