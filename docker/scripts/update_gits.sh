@@ -16,6 +16,7 @@ function fix_git(){
 
     dir=${download_dir}/${name}
     git -C ${dir} fetch || return $?
+    git -C ${dir} pull || return $?
     rev=`git -C ${dir} rev-parse HEAD`
 
     echo "    fix_git $1 ${rev} || return \$?" >> ${of}
