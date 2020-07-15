@@ -754,7 +754,7 @@ public:
             {
                 hit = true;
                 distance = front.distance;
-                if (character->properties[AI_LOOP] > 3 + fabsf(winding) * 3)
+                if (character->properties[AI_LOOP] > 3 + abs(winding) * 3)
                     DetectLoop(front, frontLoop);
             }
         } while (!front.Hit() && count++ < character->properties[AI_RANGE]);
@@ -792,7 +792,7 @@ public:
 
                 if (sides[i].Hit())
                 {
-                    if (character->properties[AI_LOOP] > 6 + fabsf(winding) * 3)
+                    if (character->properties[AI_LOOP] > 6 + abs(winding) * 3)
                         DetectLoop(sides[i], sideLoop[i]);
 
                     if (sideLoop[i][1-i].loop ||
