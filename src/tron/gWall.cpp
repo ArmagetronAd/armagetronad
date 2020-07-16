@@ -2011,6 +2011,8 @@ gPlayerWall *gNetPlayerWall::Wall(){
 
 void gNetPlayerWall::ReleaseData()
 {
+    Remove();
+
     if (this->cycle_){
         if (this->cycle_->currentWall==this)
             this->cycle_->currentWall=NULL;
@@ -2038,8 +2040,6 @@ void gNetPlayerWall::ReleaseData()
 
     sg_netPlayerWalls.Remove(this,id);
     sg_netPlayerWallsGridded.Remove(this,griddedid);
-
-    Remove();
 }
 
 gNetPlayerWall::~gNetPlayerWall()
