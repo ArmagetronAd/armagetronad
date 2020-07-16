@@ -1644,7 +1644,6 @@ gNetPlayerWall::gNetPlayerWall(gCycle *cyc,
         cycle_(cyc),lastWall_(NULL),dir(d),dbegin(dbeg),
         beg(begi),end(begi),tBeg(tBegi),tEnd(tBegi),
         inGrid(false){
-    dir=dir; // Don't normalize: *REAL(1/sqrt(dir.NormSquared()));
     preliminary=(sn_GetNetState()==nCLIENT);
     obsoleted_=-100;
     gridding=1E+20;
@@ -2047,6 +2046,8 @@ gPlayerWall *gNetPlayerWall::Wall(){
 
 void gNetPlayerWall::ReleaseData()
 {
+    Remove();
+
     if (this->cycle_){
         if (this->cycle_->currentWall==this)
             this->cycle_->currentWall=NULL;

@@ -2662,7 +2662,7 @@ bool gCycleMovement::Timestep( REAL currentTime )
     // request the function gets called again right away.
     if( !vetoSimulationRequest &&
         ( currentDestination || 
-          ( !pendingTurns.empty() && GetNextTurn( pendingTurns.front() < currentTime + MaxSimulateAhead() ) != 0 )
+          ( !pendingTurns.empty() && GetNextTurn( pendingTurns.front() ) < currentTime + MaxSimulateAhead() )
             )
         )
     {

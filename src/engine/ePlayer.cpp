@@ -1087,7 +1087,7 @@ static char const * default_instant_chat[]=
      "Speed for weaks!",
      "This server sucks! I'm going home.",
      "Grind EVERYTHING! And 180 some more!",
-     "/me has an interesting mental disorder.",
+     "Look ma, no left turns!",
      "Ah, a nice, big, roomy box all for me!",
      "Go that way! No, the other way!",
      "WD! No points!",
@@ -3667,7 +3667,12 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s, tString co
         }
         if(sn_GetNetState() == nSERVER)
         {
-            if ( ( p2->Owner() != 0 && tCurrentAccessLevel::GetAccessLevel() <= se_ipAccessLevel ) || ( p2->Owner() != 0 && p2->Owner() == receiverOwner ) )
+            if ( p2->Owner() != 0 && p2->Owner() == receiverOwner )
+            {
+                auto IP = tOutput( "$own_ip_in_players" );
+                tos << ", IP = " << IP;
+            }
+            else if ( p2->Owner() != 0 && tCurrentAccessLevel::GetAccessLevel() <= se_ipAccessLevel )
             {
                 tString IP = p2->GetMachine().GetIP();
                 if ( IP.Len() > 1 )
@@ -4304,7 +4309,11 @@ void ePlayerNetID::Chat(const tString &s_orig)
 
 #ifndef DEDICATED
     // check for direct console commands
-    if( s_orig.StartsWith("/console") )
+    tString command("");
+    if(s_orig.StartsWith("/"))
+        command = s_orig.SubStr(0,s_orig.StrPos(" "));
+
+    if(command == "/console")
     {
         // direct commands are executed at owner level
         tCurrentAccessLevel level( tAccessLevel_Owner, true );

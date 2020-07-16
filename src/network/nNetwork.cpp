@@ -1399,6 +1399,13 @@ void first_fill_ids();
 // from nServerInfo.cpp
 extern bool sn_AcceptingFromMaster;
 
+#ifndef DEDICATED
+static bool sn_showOwnIP = false;
+static tConfItem<bool> sn_showOwnIPConf("SHOW_OWN_IP",sn_showOwnIP);
+#else
+static constexpr bool sn_showOwnIP = true;
+#endif
+
 static void sn_LoginAcceptedHandler( Network::LoginAccepted const & accepted, nSenderInfo const & sender )
 {
     // accepted.PrintDebugString();
@@ -1490,7 +1497,10 @@ static void sn_LoginAcceptedHandler( Network::LoginAccepted const & accepted, nS
             {
                 if ( sn_myAddress != address )
                 {
-                    con << "Got address " << address << ".\n";
+                    if(sn_showOwnIP)
+                        con << "Got address " << address << ".\n";
+                    else
+                        con << "Got address.\n";
                 }
                 sn_myAddress = address;
             }
