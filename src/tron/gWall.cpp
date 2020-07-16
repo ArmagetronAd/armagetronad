@@ -2038,6 +2038,8 @@ void gNetPlayerWall::ReleaseData()
 
     sg_netPlayerWalls.Remove(this,id);
     sg_netPlayerWallsGridded.Remove(this,griddedid);
+
+    Remove();
 }
 
 gNetPlayerWall::~gNetPlayerWall()
