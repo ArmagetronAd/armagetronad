@@ -1223,7 +1223,7 @@ game_menu_disconnect_help     Rozlacza gre i powraca do glównego menu.
 #********************************************
 version_info_title            Informacje o tej instalacji \g
 version_info_version          Posiadana wersja gry \g: \1
-version_info_misc_stuff       \n0xff8888Oficjalna strona:0xRESETT http://armagetronad.net/\n0xff8888Oficjalne forum:0xRESETT http://forums.armagetronad.net/\n0xff8888Wiki (strategie, zawody, ...):0xRESETT http://wiki.armagetronad.net/\n0xff8888Administratorzy projektu:0xRESETT z-man, Tank Program (guru3), Lucifer
+version_info_misc_stuff       \n0xff8888Oficjalna strona:0xRESETT http://armagetronad.net/\n0xff8888Oficjalne forum:0xRESETT https://forums3.armagetronad.net/\n0xff8888Wiki (strategie, zawody, ...):0xRESETT http://wiki.armagetronad.net/\n0xff8888Administratorzy projektu:0xRESETT z-man, Tank Program (guru3), Lucifer
 
 path_info_user_cfg            Polozenie pliku user.cfg:
 path_info_config              Foldery konfiguracji:
@@ -1679,7 +1679,7 @@ player_name_text              Imie:
 player_name_help              To, co zastapi wielokropek w zdaniu "Zwyciezca zostal  ... ". Uzyj klawiszy <lewo>/<prawo>, delete, backspace i wszystkich pozostalych klawiszy.
 
 player_global_id_text         Globalne ID:
-player_global_id_help         Wpisz tutaj globalne ID gracza, jesli takie posiadasz. Jesli masz konto na forum forums.armagetronad.net, Twoim ID bedzie Twój login, zakonczony "@forums". Konta na innych stronach moge dac Ci inne ID.
+player_global_id_help         Wpisz tutaj globalne ID gracza, jesli takie posiadasz. Jesli masz konto na forum forums3.armagetronad.net, Twoim ID bedzie Twój login, zakonczony "@forums". Konta na innych stronach moge dac Ci inne ID.
 
 player_input_text             Konfiguracja Sterowania
 player_input_help             Ustaw kontrole klawiatura i mysza dla tego gracza.
@@ -2366,7 +2366,7 @@ help_commands_pp_shortdesc    Komendy zachowan graczy
 help_commands_pp_text         0x88ff88/players [<szukany>]0xffff88: Wyswietla liste graczy z odrobina innych informacji. Mozesz tez wyszukiwac graczy w ten sposób.\n0x88ff88/vote kick|suspend <player>0xffff88: Rozpoczyna ankiete o wykopaniu/zawieszeniu gracza.
 
 help_commands_auth_shortdesc  Komendy zwiazane z autentykacja.
-help_commands_auth_text       0x88ff88/login [<uzytkownik>]@<autentykujacy>0xffff88: Autentykuje Cie. Spróbuj @forums jesli masz konto na http://forums.armagetronad.net/\n0x88ff88/logout0xffff88: Wylogowuje, abys mógl sie zalogowac, jako ktos inny.\n0x88ff88/vote include <plik>0xffff88: Zaczyna ankiete o dolaczeniu jakiegos pliku\n0x88ff88/vote command <komenda>0xffff88: Zaczyna ankiete o wykonaniu jakejs komendy na serwerze\n0x88ff88/admin <komenda>0xffff88: Wykonaj komende na konsoli, o ile masz odpowiednie uprawnienia.\n0x88ff88/op <gracz> [+|-]<poziom dostepu>0xffff88: Daje temu graczu nowy poziom dostepu; domyslnie o jeden lepszy.\n0x88ff88/deop <gracz>0xffff88: Przeciwienstwo /op; zabiera jeden poziom graczu. OOczywiscie, dziala tylko na graczach, którzy maja mniejszy poziom dostepu od ciebie.\n
+help_commands_auth_text       0x88ff88/login [<uzytkownik>]@<autentykujacy>0xffff88: Autentykuje Cie. Spróbuj @forums jesli masz konto na https://forums3.armagetronad.net/\n0x88ff88/logout0xffff88: Wylogowuje, abys mógl sie zalogowac, jako ktos inny.\n0x88ff88/vote include <plik>0xffff88: Zaczyna ankiete o dolaczeniu jakiegos pliku\n0x88ff88/vote command <komenda>0xffff88: Zaczyna ankiete o wykonaniu jakejs komendy na serwerze\n0x88ff88/admin <komenda>0xffff88: Wykonaj komende na konsoli, o ile masz odpowiednie uprawnienia.\n0x88ff88/op <gracz> [+|-]<poziom dostepu>0xffff88: Daje temu graczu nowy poziom dostepu; domyslnie o jeden lepszy.\n0x88ff88/deop <gracz>0xffff88: Przeciwienstwo /op; zabiera jeden poziom graczu. OOczywiscie, dziala tylko na graczach, którzy maja mniejszy poziom dostepu od ciebie.\n
 help_commands_auth_levels_shortdesc Poziomy dostepu
 help_commands_auth_levels_text 0x88ff880 (Wlasciciel)0xffff88: Wlasciciel serwera. Komendy wpisane na konsoli sa wykonywane z jego uprawnieniami.\n0x88ff881 (Administrator)0xffff88: Administrator serwera. Domyslnie, jest tak samo potezny jak wlasciciel.\n0x88ff882 (Moderator)0xffff88: Moderator serwera. Moze uzywac komendy /admin, ale tylko do zarzadzania uzytkownikami.\n0x88ff887 (Kapitan druzyny)0xffff88: Domyslnie, nie ma praw administratora.\n0x88ff888 (Czlonek druzyny)0xffff88: Wlasciciele zwyklych kont w druzynie otrzymuja ten poziom.\n0x88ff8812 (Lokalny uzytkownik)0xffff88: Gracze z kontem lokalnym otrzymuja ten poziom.\n0x88ff8815 (Zdalny uzytkownik)0xffff88: Gracze z kontem zdalnym domyslnie dostaja ten poziom.\n0x88ff8816 (Uzytkownik z ograniczonym dostepem)0xffff88: Autentykowany garzc, który zasluzyl sobie na obnizenie jsgo praw.\n0x88ff8817 (Unikany)0xffff88: Tak, jak powyzej, tylko mocniej :)\n0x88ff8819 (Autentykowany)0xffff88: Najmniejszy poziom, dla autentykowanych graczy.\n0x88ff8820 (Program)0xffff88: Niezautentykowani.
 
@@ -2446,7 +2446,7 @@ network_message_abortconn_inter Serwer przerwal polaczenie.
 
 network_master_timeout_retry  Jeden z glównych serwerów nie odpowiedzial. Próbowanie nastepnego...\n
 network_master_timeout_title  Serwery glówne nie odpowiedzialy
-network_master_timeout_inter  Serwery glówne nie odpowiedzialy, przez co nie dalo sie odswiezyc listy serwerów z gra. Bedziesz teraz przegladal stara liste.\n\nPrzyczyna moze byc problem z Twoim polaczeniem sieciowym. Sprawdz:\n- czy masz dzialajace polaczenie internetowe: wejdz za pomoca przegladarki internetowej na strone http://www.armagetronad.net.\n- czy przypadkiem zapora ogniowa/firewall (o ile masz taki) nie blokuje Armagetron'a. Aby zobaczyc, czy w tym lezy problem, wylacz swój firewall i spróbuj ponownie. Jezeli wtedy zadziala, wlacz firewall ponownie, ale kaz mu nie blokowac Armagetron'a: \g uzywa UDP i zazwyczaj portów od 4533 do 4540. Niektóre firewallem maja takze opcje blokowania programów po ich nazwie; upewnij sie, ze armagetronad(.exe) nie jest zablokowany.\nJezeli natomiast nie kontrolujesz ustawien swojej sieci, powinienes skonsultowac sie z jej administratorem, aby wprowadzil on odpowiednie konfiguracje.\nOstatnia mozliwa, acz malo prawdopodobna przyczyna tego bledu, moze byc fakt, ze infrastruktura serwerów jest aktualnie wylaczona. Odwiedz forum na forums.armagetronad.net lub kanal IRC #armagetron na irc.freenode.net by sprawdzic, czy ktos jeszcze ma ten sam problem.
+network_master_timeout_inter  Serwery glówne nie odpowiedzialy, przez co nie dalo sie odswiezyc listy serwerów z gra. Bedziesz teraz przegladal stara liste.\n\nPrzyczyna moze byc problem z Twoim polaczeniem sieciowym. Sprawdz:\n- czy masz dzialajace polaczenie internetowe: wejdz za pomoca przegladarki internetowej na strone http://www.armagetronad.net.\n- czy przypadkiem zapora ogniowa/firewall (o ile masz taki) nie blokuje Armagetron'a. Aby zobaczyc, czy w tym lezy problem, wylacz swój firewall i spróbuj ponownie. Jezeli wtedy zadziala, wlacz firewall ponownie, ale kaz mu nie blokowac Armagetron'a: \g uzywa UDP i zazwyczaj portów od 4533 do 4540. Niektóre firewallem maja takze opcje blokowania programów po ich nazwie; upewnij sie, ze armagetronad(.exe) nie jest zablokowany.\nJezeli natomiast nie kontrolujesz ustawien swojej sieci, powinienes skonsultowac sie z jej administratorem, aby wprowadzil on odpowiednie konfiguracje.\nOstatnia mozliwa, acz malo prawdopodobna przyczyna tego bledu, moze byc fakt, ze infrastruktura serwerów jest aktualnie wylaczona. Odwiedz forum na forums3.armagetronad.net lub kanal IRC #armagetron na irc.freenode.net by sprawdzic, czy ktos jeszcze ma ten sam problem.
 
 network_master_denied_title   Logowanie zabronione
 network_master_denied_inter   Serwer glówny nie pozwolil Ci sie zalogowac, co oznacza, ze najprawdopodobniej jest pelny. Spróbuj ponownie z kilka chwil.
@@ -2595,7 +2595,7 @@ network_master_host_lan_help  Rozpocznie gre sieciowa na Twoim komputerze, która
 resource_not_cached           Plik \1 nie znaleziony. Pobieranie go, prosze czekac...\n
 resource_downloading          Pobieranie \1 ...\n
 
-resource_fetcherror_noconnect BLAD: Nie udalo sie osiagnac hosta \1. Prosze zglosic ten blad na http://forums.armagetronad.net/ jezeli dzieje sie to z glówna baza plików (http://resource.armagetronad.net/resource/).\n
+resource_fetcherror_noconnect BLAD: Nie udalo sie osiagnac hosta \1. Prosze zglosic ten blad na https://forums3.armagetronad.net/ jezeli dzieje sie to z glówna baza plików (http://resource.armagetronad.net/resource/).\n
 resource_fetcherror_404       BLAD: Zwrócona wartosc 404: File not found.\n
 resource_fetcherror           BLAD: Zwrócona wartosc \1 != 200.\n
 resource_no_filename          BLAD: NULL lub pusta nazwa pliku.\n

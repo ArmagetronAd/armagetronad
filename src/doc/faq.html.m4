@@ -261,7 +261,7 @@ Gaa! Enough is enough! This is a FAQ, not a ACQ (All conceivable questions ).
 Read at settings.cfg and settings_dedicated.cfg and the 
 LINK(config.html#files
 ,documentation). Yes, it is long. If you don't find your answer there,
-look for help ELINK([forums.armagetronad.net/viewtopic.php?t=1360],[on the Forums]).
+look for help ELINK([forums3.armagetronad.net/viewtopic.php?t=1360],[on the Forums]).
 ])
 
 </ol>

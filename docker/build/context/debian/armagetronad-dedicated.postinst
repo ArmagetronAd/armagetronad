@@ -1,0 +1,17 @@
+#!/bin/sh
+
+set -e
+
+# Create armagetronad user if it isn't already there.
+if [ ! `getent passwd armagetronad` > /dev/null ]
+then
+    echo 'Adding system user for armagetronad' 1>&2
+    adduser --system --quiet --disabled-password --shell /bin/false --home /var/games/armagetronad --ingroup games armagetronad
+else
+    # If armagetronad user still exists, then make sure that the home directory
+    # is created again
+    mkdir -p /var/games/armagetronad
+    chown -R armagetronad:games /var/games/armagetronad
+fi
+
+#DEBHELPER#

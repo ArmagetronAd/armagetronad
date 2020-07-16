@@ -2475,7 +2475,7 @@ void ConnectToServer(nServerInfoBase *server)
         auto redirectTo = sn_GetRedirectTo();
 
         // abort loop
-        if ( !(&(*redirectTo)) )
+        if ( !redirectTo.get() )
         {
             break;
         }

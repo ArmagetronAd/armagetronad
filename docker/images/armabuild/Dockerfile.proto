@@ -25,11 +25,13 @@ FROM commonground as armabuild_base
 # full build dependencies
 RUN apt-get -y update && apt-get install \
 curl \
+desktop-file-utils \
 g++ \
 git \
 make \
 #libboost-dev \
 #libboost-thread-dev \
+libfile-mimeinfo-perl \
 #libfreetype6-dev \
 #libftgl-dev \
 #libglew-dev \
@@ -49,6 +51,11 @@ recode \
 
 # copy appimage tools
 COPY appimage/* /usr/bin/
+
+# optional: appstream
+RUN apt-get -y update && apt-get install \
+appstream \
+-y || true
 
 FROM armabuild_base as armabuild
 # set up builder user

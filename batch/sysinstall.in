@@ -299,16 +299,32 @@ install_link ${BINDIR}/@prognamebase@-master-@version@ ${BINDIR}/@prognamebase@-
 # install desktop files
 if test @enable_desktop@ = yes; then
     DESKTOPSOURCE=@aa_datadir@/desktop
+    METADEST=${PREFIX}/share/metainfo
 
     # rebrand icons and desktop file
     if test "$MODE" = "install"; then
         if test @prognamebase@ = armagetronad; then
             true # echo no rebranding
         else
-            for f in large small medium; do mv ${DESTDIR}${DESKTOPSOURCE}/icons/$f/armagetronad.png ${DESTDIR}${DESKTOPSOURCE}/icons/$f/@prognamebase@.png; done
-            mv ${DESTDIR}${DESKTOPSOURCE}/armagetronad.desktop ${DESTDIR}${DESKTOPSOURCE}/@prognamebase@.desktop
+            for f in 16x16 32x32 48x48; do mv ${DESTDIR}${DESKTOPSOURCE}/icons/$f/armagetronad.png ${DESTDIR}${DESKTOPSOURCE}/icons/$f/@prognamebase@.png || exit $?; done
         fi
+        mv ${DESTDIR}${DESKTOPSOURCE}/armagetronad.desktop ${DESTDIR}${DESKTOPSOURCE}/org.armagetronad.@progname@.desktop || exit $?
+
+        # add appstream metadata
+        mkdir_p ${DESTDIR}${METADEST}
+        mv ${DESTDIR}${DESKTOPSOURCE}/armagetronad.appdata.xml ${DESTDIR}${METADEST}/@progname@.appdata.xml || exit $?
+    else
+        for f in 16x16 32x32 48x48; do rm -f ${DESTDIR}${DESKTOPSOURCE}/icons/$f/@prognamebase@.png; done
+        rm -f ${DESTDIR}${DESKTOPSOURCE}/org.armagetronad.@progname@.desktop
+        rm -f ${DESTDIR}${METADEST}/@progname@.appdata.xml
     fi
+
+    # install icons in canonical locations
+    for f in 16x16 32x32 48x48; do
+        icontarget=${DESTDIR}${PREFIX}/share/icons/hicolor/$f/apps
+        mkdir -p ${icontarget} || exit $?
+        install_link ${DESTDIR}${DESKTOPSOURCE}/icons/$f/@prognamebase@.png ${icontarget}/ || exit $?
+    done
 
     # add KDE icons and desktop link
     if kde-config --install icon > /dev/null 2>&1; then
@@ -317,7 +333,7 @@ if test @enable_desktop@ = yes; then
             echo "No permission to write to KDE icons directory."
         else
             echo "${INSTALLING} KDE icon in ${ICONSDEST}..."
-            install_link ${DESKTOPSOURCE}/icons/large/@prognamebase@.png ${ICONSDEST}/@progname@.png
+            install_link ${DESKTOPSOURCE}/icons/48x48/@prognamebase@.png ${ICONSDEST}/@progname@.png
         fi
 
         DESKTOPDEST=`kde_get_write_path apps ${DESTDIR}`
@@ -328,6 +344,7 @@ if test @enable_desktop@ = yes; then
             install_link ${DESKTOPSOURCE}/@prognamebase@.desktop ${DESKTOPDEST}/@progname@.desktop
         fi
     fi
+
 fi
 
 # on uninstallation, look for other installed versions in the same prefix

@@ -1,0 +1,8 @@
+version=4
+opts=uversionmangle=s/(\db?)[_\-\.](src)$/$1/ \
+http://armagetronad.org/downloads.php \
+(?:.*/|.*=|)armagetronad[\-\._]?(\d\S*)\.(?:tar\.xz|txz|tar\.bz2|tbz2|tar\.gz|tgz)(?:/\S*)?
+
+#Use this for downloading the original source tarball
+#version=4
+#http://sf.net/armagetronad/armagetronad-(\d\S*)\.src\.(?:zip|tgz|tbz|txz|(?:tar\.(?:gz|bz2|xz)))

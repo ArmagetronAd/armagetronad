@@ -16,6 +16,7 @@ function fix_git(){
 
     dir=${download_dir}/${name}
     git -C ${dir} fetch || return $?
+    git -C ${dir} pull || return $?
     rev=`git -C ${dir} rev-parse HEAD`
 
     echo "    fix_git $1 ${rev} || return \$?" >> ${of}
@@ -48,8 +49,8 @@ EOF
 
 fix_git winlibs
 fix_git codeblocks
-fix_git ubuntu
 fix_git steam-art
+fix_git pkg2appimage
 
 cat >> ${of} <<EOF
 }
@@ -64,19 +65,4 @@ EOF
 chmod 755 ${of}
 
 ${of}
-
-#set -x
-
-# fetch rebrand script from ubuntu daily builds
-rd=${wd}/../build/rebrand_debian_core.sh
-git -C ${download_dir}/ubuntu show origin/${UBUNTU_BRANCH}-dailydeb:rebrand.sh |\
-    sed -e s/PACKAGE=.*/PACKAGE=\${PACKAGE_NAME}/ \
-	-e s/NAME=.*/NAME=\${PACKAGE_TITLE}/ \
-	-e "s/pushd.*/pushd debian/" |\
-    grep -v topdir | grep -v branch > ${rd} >\
-	 ${rd}
-
-#cat ${rd}
-chmod 755 ${rd}
-
 

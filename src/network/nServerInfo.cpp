@@ -225,7 +225,7 @@ void nServerInfo::CalcScore()
         score -= 400;
     }
 
-    score -= fabsf( this->Version().Max() - sn_MyVersion().Max() ) * 10;
+    score -= abs( this->Version().Max() - sn_MyVersion().Max() ) * 10;
 
     score += scoreBias_;
 }

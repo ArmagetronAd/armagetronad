@@ -1,0 +1,98 @@
+#! /bin/sh
+#
+# start/stop armagatronad dedicated server.
+
+### BEGIN INIT INFO
+# Provides:          armagetronad-dedicated
+# Required-Start:    $local_fs $network $remote_fs
+# Required-Stop:     $local_fs $network $remote_fs
+# Should-Start:
+# Should-Stop:
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Armagetron Advanced dedicated server
+# Description:       Runs the Armagetron Advanced dedicated game
+#                    server.
+### END INIT INFO
+
+# Author: Christine Spang <spang@mit.edu>
+
+NAME=armagetronad-dedicated
+
+ARMAGETRONAD_SERVER_START=1
+
+# Include armagetronad configuration variables if present.
+[ -r /etc/default/$NAME ] && . /etc/default/$NAME
+PATH=/usr/games:/usr/bin:/usr/sbin:/sbin:/bin
+
+DAEMON="/usr/games/$NAME"
+DESC="Armagetron Advanced dedicated server"
+SCRIPTNAME=/etc/init.d/$NAME
+
+# Exit if the package has been removed.
+[ -x "$DAEMON" ] || exit 0
+
+# Load the VERBOSE setting and other rcS variables.
+. /lib/init/vars.sh
+
+# Define LSB functions.
+. /lib/lsb/init-functions
+
+# Don't start if /etc/default/armagetronad-server says not to.
+if [ "$ARMAGETRONAD_SERVER_START" != "1" -a "$1" != "stop" ]; then
+    echo "Not starting $DESC $NAME, disabled via /etc/default/$NAME"
+    exit 0
+fi
+
+run()
+{
+    start-stop-daemon \
+        --start \
+        --quiet \
+        --chuid $ARMAGETRONAD_USER \
+        --oknodo \
+        --pidfile $MAINPIDFILE \
+        --nicelevel $NICENESS \
+        --exec $DAEMON >$LOGFILE &
+}
+
+case "$1" in
+  start)
+    if [ -r $MAINPIDFILE ]; then
+        log_warning_msg "$DESC is already running; not starting."
+    else
+	    log_daemon_msg "Starting $DESC" "$NAME"
+        run
+        log_end_msg $?
+    fi
+	;;
+  stop)
+	log_daemon_msg "Stopping $DESC" "$NAME"
+    start-stop-daemon --stop --pidfile $MAINPIDFILE --quiet --oknodo || return 1
+	log_end_msg $?
+    rm -f $MAINPIDFILE
+	;;
+  restart|force-reload)
+    $0 stop
+    $0 start
+	;;
+  reload)
+    exit 3
+    ;;
+  status)
+    [ -e $MAINPIDFILE ]
+    status=$?
+    if [ $status -eq 0 ]; then
+        log_success_msg "$DESC is running."
+    else
+        log_failure_msg "$DESC is not running."
+    fi
+    exit $status
+    ;;
+  *)
+	echo "Usage: $SCRIPTNAME {start|stop|restart|force-reload|status}" >&2
+	exit 1
+	;;
+esac
+
+exit 0

@@ -1614,6 +1614,13 @@ void first_fill_ids();
 // from nServerInfo.cpp
 extern bool sn_AcceptingFromMaster;
 
+#ifndef DEDICATED
+static bool sn_showOwnIP = false;
+static tConfItem<bool> sn_showOwnIPConf("SHOW_OWN_IP",sn_showOwnIP);
+#else
+static constexpr bool sn_showOwnIP = true;
+#endif
+
 void login_accept_handler(nMessage &m){
     if (sn_GetNetState()!=nSERVER && m.SenderID() == 0){
         if(m.End())
@@ -1672,7 +1679,10 @@ void login_accept_handler(nMessage &m){
             {
                 if ( sn_myAddress != address )
                 {
-                    con << "Got address " << address << ".\n";
+                    if(sn_showOwnIP)
+                        con << "Got address " << address << ".\n";
+                    else
+                        con << "Got address.\n";
                 }
                 sn_myAddress = address;
             }

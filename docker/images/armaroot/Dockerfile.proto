@@ -1,6 +1,10 @@
 LABEL maintainer="Manuel Moos <z-man@users.sf.net>"
 
-RUN apk add bash make zip --no-cache || true
+RUN apk add \
+bash \
+make \
+zip \
+--no-cache || true
 
 # build dependencies
 #RUN apk add \

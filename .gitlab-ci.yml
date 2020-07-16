@@ -1,4 +1,4 @@
-image: registry.gitlab.com/armagetronad/armagetronad/armaroot_64@sha256:182493edea0ad5b31f8dfe0c27b414cc2a3d710a051b6f2359a21da791ca8a68
+image: registry.gitlab.com/armagetronad/armagetronad/armaroot_64@sha256:c45680095075ba85cc33a4dae7034738a3e7f828d6eb9d3613c6e6091987e481
 
 variables:
   # https://docs.gitlab.com/ee/ci/docker/using_docker_build.html
@@ -57,12 +57,12 @@ build_prepare:
   stage: build_prepare
   rules:
     - if: $CI_MERGE_REQUEST_ID
-      when: on_success
-    - when: on_success
+      when: always
+    - when: always
   script: [""]
   artifacts:
     untracked: true
-    expire_in: 1 day
+    expire_in: 1 week
 
 
 build_server_32_raw:
@@ -91,7 +91,7 @@ build_server_steam_raw:
     untracked: true
     expire_in: 1 day
 
-    # It seems like GitLab CI, all else being equal, schedules jobs in the order
+# It seems like GitLab CI, all else being equal, schedules jobs in the order
 # listed here. So list the ones that take longest first.
 # Windows builds are worst because they have an additional layer of emulation,
 # are not parallelized and are client and server build in one.
@@ -270,7 +270,7 @@ delay-release:
     when: never
   - if: '$CI_COMMIT_REF_PROTECTED == "false"'
     when: never
-  - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_REF_NAME !~ /^release/'
+  - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_BRANCH'
     when: delayed
     start_in: '6 hours'
   - when: on_success
@@ -288,9 +288,9 @@ deploy-release:
   rules: 
    - if: $CI_MERGE_REQUEST_ID
      when: never
-   - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_REF_NAME =~ /^release/'
+   - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_TAG'
      when: manual
-   - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_REF_NAME !~ /^release/'
+   - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_BRANCH'
      when: on_success
    - when: never
   before_script:
