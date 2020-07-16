@@ -2041,6 +2041,8 @@ gPlayerWall *gNetPlayerWall::Wall(){
 
 void gNetPlayerWall::ReleaseData()
 {
+    Remove();
+
     if (this->cycle_){
         if (this->cycle_->currentWall==this)
             this->cycle_->currentWall=NULL;
