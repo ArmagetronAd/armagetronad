@@ -4047,6 +4047,15 @@ gCycleWallsDisplayListManager::gCycleWallsDisplayListManager()
 {
 }
 
+gCycleWallsDisplayListManager::~gCycleWallsDisplayListManager()
+{
+    while(wallList_)
+        wallList_->Remove();
+    while(wallsWithDisplayList_)
+        wallsWithDisplayList_->Remove();
+}
+
+
 bool gCycleWallsDisplayListManager::CannotHaveList( REAL distance, gCycle const * cycle )
 {
     return
