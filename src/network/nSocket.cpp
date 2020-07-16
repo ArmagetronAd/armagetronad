@@ -1536,8 +1536,8 @@ int nSocket::Create( void )
 #endif    
 
     // unblock it
-    bool _true = true;
-    return ioctl (socket_, FIONBIO, reinterpret_cast<char *>(&_true)) == -1;
+    unsigned long _true = true;
+    return ioctl (socket_, FIONBIO, &_true) == -1;
 }
 
 // archives the binding procedure
