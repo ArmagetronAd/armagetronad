@@ -35,6 +35,9 @@
 // exists in windows headers
 #define HAVE_ISBLANK
 
+// does not exist
+#undef HAVE_CLEARENV
+
 // defines for data directories in Windows
 #ifndef DEBUG
 #define USER_DATA_DIR  "${APPDATA}/Armagetron" 

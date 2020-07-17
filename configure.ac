@@ -793,6 +793,7 @@ dnl Checks for library functions.
 AC_CHECK_FUNCS(select)
 AC_CHECK_FUNCS(isblank atan2f sinf cosf tanf sqrtf logf expf fabsf floorf)
 AC_CHECK_FUNCS(wmemset)
+AC_CHECK_FUNCS(clearenv)
 
 # if the compiler is GCC -Os produces faulty code (exceptions cause crashes), at least on AMD64. Replace it with -O2.
 test -z "`$CXX --version | grep '(GCC)'`" || CXXFLAGS="`echo $CXXFLAGS | sed -e 's,-Os,-O2,g' `" CFLAGS="`echo $CFLAGS | sed -e 's,-Os,-O2,g' `"
