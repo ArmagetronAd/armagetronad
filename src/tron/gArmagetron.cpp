@@ -639,7 +639,7 @@ class gAutoStringArray
 public:
     ~gAutoStringArray()
     {
-#ifndef WIN32        
+#ifdef HAVE_CLEARENV
         clearenv();
 #endif
 
