@@ -1029,8 +1029,9 @@ bool uMenuItemString::Event(SDL_Event &e){
 #if SDL_VERSION_ATLEAST(2,0,0)
         else
         {
-            // typically, SDL2 text input does not handle key down events.
-            ret = false;
+            // only the top row of keys counts as unhandled
+            if(c.scancode >= SDL_SCANCODE_F1 && c.scancode <= SDL_SCANCODE_PAUSE)
+                ret = false;
         }
     }
     else if (e.type==SDL_TEXTINPUT) {
