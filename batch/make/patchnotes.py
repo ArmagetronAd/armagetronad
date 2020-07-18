@@ -106,14 +106,24 @@ def FixedAfterTag(repo, team, project, tags):
 author_email_filter=re.compile(r" *<.*>")
 author_replacements={
 	"Bazaarmagetron": None,
+	"bazaarmagetron": None,
 	"Manuel Moos (From GitLab CI)": None,
-	"z-man": "Z-Man",
-	"Manuel Moos": "Z-Man",
+	"epsy46": "epsy",
 	"Daniel Lee Harple": "Daniel Harple",
+	"dlh3": "Daniel Harple",
+	"davidfancella": "Dave Fancella",
 	"Luke Dashjr": "Luke-Jr",
+	"luke-jr": "Luke-Jr",
+	"nemostultae": "Daniel Harple",
+	"voodoo": "Voodoo",
+	"z-man": "Manuel Moos",
 	None: None
 }
 full_author_replacements={
+	"armagetron <armagetron@ensemble-fnm.de>": "armagetron at ensemble-fnm.de",
+	"David <jip@unk.me>": "Jip",
+	"unknown <dave@davefancella.com>": "Dave Fancella",
+	"unknown <pnoexz@gmail.com>": "pnoexz at gmail.com",
 	None: None
 }
 def MapAuthor(full_author):
