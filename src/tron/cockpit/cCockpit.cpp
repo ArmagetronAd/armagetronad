@@ -834,7 +834,7 @@ static void display_cockpit_lucifer() {
         port->EqualAspectBottom().Select();
 
         cCockpit *player_cockpit;
-        if(!(player_cockpit = dynamic_cast<cCockpit *>(&*player->cockpit))) {
+        if(!(player_cockpit = dynamic_cast<cCockpit *>(player->cockpit.get()))) {
             player_cockpit = new cCockpit(cCockpit::VIEWPORT_ALL);
             player->cockpit = player_cockpit;
             float factor = 4./3. / (static_cast<float>(sr_screenWidth)/static_cast<float>(sr_screenHeight));
