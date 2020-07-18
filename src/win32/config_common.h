@@ -50,8 +50,9 @@
 // for now, no joystick support in Windows
 // #define NOJOYSTICK 1
 
-// does not exist
+// do not exist
 #undef HAVE_CLEARENV
+#undef HAVE_EXP10
 
 // Define this for the particle library
 #define PARTICLEDLL_EXPORTS

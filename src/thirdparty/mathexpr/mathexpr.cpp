@@ -1049,10 +1049,10 @@ void  Puiss10(float*&p)
     if(*p==ErrVal||fabs(*p)>DBL_MAX_10_EXP){*(--p)=ErrVal;return;};
     if(fabs(*(--p))<sqrtminfloat)*p=0;else if(*p==ErrVal||fabs(*p)>sqrtmaxfloat)
     {*p=ErrVal;return;};
-#ifdef WIN32
-	*p*=pow(10, *(p+1));}
+#ifdef HAVE_EXP10
+    *p*=exp10(*(p+1));}
 #else
-	*p*=exp10(*(p+1));}
+	*p*=pow(10, *(p+1));}
 #endif // _WIN32
 void  ArcTangente2(float*&p)
 {if(*p==ErrVal||fabs(*p)>inveps){*(--p)=ErrVal;return;};
