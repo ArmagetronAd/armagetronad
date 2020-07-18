@@ -466,6 +466,7 @@ public:
     ~gAutoStringArray()
     {
 #ifdef HAVE_CLEARENV
+        // Optional. Systems that don't have this function better make copies of putenv() arguments.
         clearenv();
 #endif
 
