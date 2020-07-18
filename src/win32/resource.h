@@ -4,6 +4,9 @@
 //
 #define IDI_ICON1                       101
 
+#define CREATEPROCESS_MANIFEST_RESOURCE_ID 1 /*Defined manifest file*/
+#define RT_MANIFEST                       24
+
 // Next default values for new objects
 //
 #ifdef APSTUDIO_INVOKED

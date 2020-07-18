@@ -657,6 +657,7 @@
 		<Unit filename="../../src/ui/uMenu.cpp" />
 		<Unit filename="../../src/ui/uMenu.h" />
 		<Unit filename="../../src/win32/aa_config.h" />
+		<Unit filename="../../src/win32/app.manifest" />
 		<Unit filename="../../src/win32/armagetron.rc">
 			<Option compilerVar="WINDRES" />
 		</Unit>
