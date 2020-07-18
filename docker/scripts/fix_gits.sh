@@ -19,9 +19,9 @@ function fix_gits(){
     set -x
 
     fix_git winlibs d03e20bf8973a6cbd1e0ecb47dd8333c5614b139 || return $?
-    fix_git codeblocks 4a51998b7f12723c40cca3e2558da3ab8af85814 || return $?
-    fix_git ubuntu aa14f9e1987239b890faa49ea03a32a2dbaa8af7 || return $?
-    fix_git steam-art 42688f1bcf1bf1f2befc81a1143fb20f346b92f8 || return $?
+    fix_git codeblocks 5ab4c626eb7cfa692a0bda7dbf26fed3721e4aa3 || return $?
+    fix_git ubuntu c4910e573fefd62f8241d4a484482ab8bb205b4d || return $?
+    fix_git steam-art 7b3930ab85a3dfbb1caffaa17442b670c823f314 || return $?
 }
 
 if ! fix_gits; then
