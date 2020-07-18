@@ -71,10 +71,11 @@ public:
     tCheckedPTR<T> &operator=(T *x){tCheckedPTRBase::operator=(x); return *this;}
     tCheckedPTR<T> &operator=(const tCheckedPTR<T> &x)
     {tCheckedPTRBase::operator=(x.target); return *this;}
-    T * operator->() const {return reinterpret_cast<T*>(target);}
-    T & operator*() const {return *reinterpret_cast<T*>(target);}
-    operator T*() const {return reinterpret_cast<T*>(target);}
-    //  T** operator&() {return reinterpret_cast<T **>(&target);}
+
+    T * get() const {return static_cast<T*>(target);}
+    T * operator->() const {return get();}
+    T & operator*() const {return get();}
+    operator T*() const {return get();}
 
     bool operator==(const T* x)const{return target==x;}
     bool operator!=(const T* x)const{return target!=x;}
@@ -106,10 +107,10 @@ public:
     tCheckedPTRConst<T> &operator=(const tCheckedPTR<T> &x)
     {tCheckedPTRBase::operator=(x.operator->()); return *this;}
 
-    const T * operator->() const {return target;}
-    const T & operator*() const {return *reinterpret_cast<T*>(target);}
-    operator const T*() const {return reinterpret_cast<const T*>(target);}
-    //  const T** operator&() {return reinterpret_cast<const T **>(&target);}
+    const T * get() const {return static_cast<T const *>(target);}
+    const T * operator->() const {return get();}
+    const T & operator*() const {return *get();}
+    operator const T*() const {return get();}
 
     bool operator==(const T* x)const{return target==x;}
     bool operator!=(const T* x)const{return target!=x;}
@@ -213,6 +214,10 @@ public:
             AddRef();
         }
         return *this;
+    }
+
+    T * get() const {
+        return target;
     }
 
     T * operator->() const {
@@ -320,6 +325,10 @@ public:
     tJUST_CONTROLLED_PTR<T> &operator=(const tJUST_CONTROLLED_PTR<T> &x){
         operator=(x.target);
         return *this;
+    }
+
+    T * get() const {
+        return target;
     }
 
     T * operator->() const {
