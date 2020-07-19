@@ -1295,7 +1295,7 @@ bool gQueuePlayers::CanQueue(ePlayerNetID *p)
         if (p->GetAccessLevel() <= sg_queueLimitExcempt) return true;
 
         //  no need to let player queue if set <= 0
-        if (sg_queueRefill <= 0) return false;
+        if (sg_queueLimit <= 0) return false;
 
         gQueuePlayers *qPlayer = NULL;
         if (!gQueuePlayers::PlayerExists(p))
