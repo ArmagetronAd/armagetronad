@@ -574,6 +574,7 @@ void nNetObject::TakeOwnership(){
     if ( !this->createdLocally )
     {
         this->createdLocally = true;
+        this->owner = sn_myNetID;
         //		AddRef();
     }
 }
