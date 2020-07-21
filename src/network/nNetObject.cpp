@@ -1780,9 +1780,12 @@ void nNetObject::ClearKnows(int user, bool clear){
         for(int i=sn_netObjects.Len()-1;i>=0;i--){
             nNetObject *no=sn_netObjects(i);
             if (no){
+                nObserverPtr<nNetObject> no_observer(no);
                 no->knowsAbout[user].Reset();
 
                 no->DoBroadcastExistence();  // immediately transfer the thing
+                if(!no_observer)
+                    continue;
 
                 if (clear){
                     if (no->owner==user && user!=sn_myNetID){
@@ -1791,15 +1794,21 @@ void nNetObject::ClearKnows(int user, bool clear){
 #endif
                         if (no->ActionOnQuit())
                         {
-                            no->createdLocally=true;
-                            tControlledPTR< nNetObject > bounce( no ); // destroy it, if noone wants it
+                            if(no_observer)
+                            {
+                                no->createdLocally=true;
+                                tControlledPTR< nNetObject > bounce( no ); // destroy it, if noone wants it
+                            }
                         }
                         else
                         {
-                            no->owner=::sn_myNetID; // or make it mine.
-                            sn_netObjectsOwner(i)=::sn_myNetID;
-                            if (no->AcceptClientSync()){
-                                tControlledPTR< nNetObject > bounce( no ); // destroy it, if noone wants it
+                            if(no_observer)
+                            {
+                                no->owner=::sn_myNetID; // or make it mine.
+                                sn_netObjectsOwner(i)=::sn_myNetID;
+                                if (no->AcceptClientSync()){
+                                    tControlledPTR< nNetObject > bounce( no ); // destroy it, if noone wants it
+                                }
                             }
                         }
                     }
