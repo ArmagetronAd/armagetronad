@@ -43,6 +43,8 @@ config/Makefile
 config/aiplayers.cfg
 config/rc.config
 desktop/armagetronad-armagetronad.desktop
+desktop/armagetronad.desktop
+docker/scripts/.cache
 language/languages.txt
 resource/included/
 resource/automatic/

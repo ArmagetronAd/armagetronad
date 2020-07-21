@@ -44,6 +44,7 @@ function fix_gits(){
     \${wd}/ensure_gits.sh ${branch} || return \$?
 
     set -x
+    # On merge conflicts here: run update_gits.sh, that sorts things out
 
 EOF
 
