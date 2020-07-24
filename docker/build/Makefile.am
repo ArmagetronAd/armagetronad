@@ -487,13 +487,14 @@ steamdirs/steam_linux: result.appdir_server_steam result.appdir_client_steam ste
 	cp -al result.appdir_client_steam.dir/appdir/* $@.dir/
 	echo > $@
 
-steamdirs/steam_windows: result.winbuild_steam steamdirs/.tag
+steamdirs/steam_windows: result.winbuild_steam steamdirs/.tag ${srcdir}/context/steam/windows/*
 	rm -rf $@.dir
 	cp -al $<.dir/dist $@.dir
 	mv $@.dir/*dedicated.exe $@.dir/DEDICATED.hex
 	mv $@.dir/*.exe $@.dir/CLIENT.hex
 	mv $@.dir/CLIENT.hex $@.dir/$(STEAM_PACKAGE_TITLE).exe
 	mv $@.dir/DEDICATED.hex $@.dir/$(STEAM_PACKAGE_TITLE)_Dedicated.exe
+	cp -al ${srcdir}/context/steam/windows/* $@.dir/
 	rm -rf $@.dir/*.nsi
 	rm -rf $@.dir/*.url
 	rm -rf $@.dir/banner*

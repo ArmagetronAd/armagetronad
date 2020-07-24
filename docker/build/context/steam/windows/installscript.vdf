@@ -1,0 +1,43 @@
+"InstallScript"
+{
+	"Registry"
+	{
+		"HKEY_CLASSES_ROOT\\.aarec"
+		{
+			"string"
+			{
+				"(Default)"      "Retrocycles.Recording"
+			}
+		}
+
+		"HKEY_CLASSES_ROOT\\Retrocycles.Recording"
+		{
+			"string"
+			{
+				"(Default)"      "Retrocycles Debug Recording"
+			}
+		}
+
+		"HKEY_CLASSES_ROOT\\Retrocycles.Recording\\shell\\DefaultIcon"
+		{
+			"string"
+			{
+				"(Default)"      "%INSTALLDIR%\\Retrocycles.exe,1"
+			}
+		}
+
+		"HKEY_CLASSES_ROOT\\Retrocycles.Recording\\shell\\open\\command"
+		{
+			"string"
+			{
+				"(Default)"      "\"%INSTALLDIR%\\Retrocycles.exe\" --playback \"%1\""
+			}
+		}
+	}
+
+	"Firewall"
+	{
+		"Retrocycles Client" "%INSTALLDIR%\\Retrocycles.exe"
+		"Retrocycles Server" "%INSTALLDIR%\\Retrocycles_Dedicated.exe"
+	}
+}
