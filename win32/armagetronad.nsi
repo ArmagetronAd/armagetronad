@@ -135,10 +135,17 @@ Section -Post
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "URLInfoAbout" "${PRODUCT_WEB_SITE}"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "Publisher" "${PRODUCT_PUBLISHER}"
 
+  # register URI protocol
   WriteRegStr HKCR "armagetronad" "" "URL:$(^Name)"
   WriteRegStr HKCR "armagetronad" "URL Protocol" ""
   WriteRegStr HKCR "armagetronad\DefaultIcon" "" "$INSTDIR\armagetronad.exe"
   WriteRegStr HKCR "armagetronad\shell\open\command" "" "$INSTDIR\armagetronad.exe --connect %1"
+
+  # register recording playback
+  WriteRegStr HKCR ".aarec" "" "ArmagetronAd.Recording"
+  WriteRegStr HKCR "ArmagetronAd.Recording" "" "Armagetron Advanced Debug Recording"
+  WriteRegStr HKCR "ArmagetronAd.Recording\shell\DefaultIcon" "" "$INSTDIR\armagetronad.exe,1"
+  WriteRegStr HKCR "ArmagetronAd.Recording\shell\open\command" "" '"$INSTDIR\armagetronad.exe" --playback "%1"'
 SectionEnd
 
 Function un.onInit
