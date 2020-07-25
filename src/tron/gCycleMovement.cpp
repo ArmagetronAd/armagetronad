@@ -538,7 +538,7 @@ static tSettingItem<REAL> sg_enemyCurrentTimeInfluenceConf( "ENEMY_CURRENTTIME_I
 // the last enemy possibly responsible for our death
 const ePlayerNetID* gEnemyInfluence::GetEnemy() const
 {
-    return lastEnemyInfluence.GetPointer();
+    return lastEnemyInfluence.get();
 }
 
 REAL gEnemyInfluence::GetTime() const
@@ -656,7 +656,7 @@ void gEnemyInfluence::AddWall( const gPlayerWall * wall, REAL timeBuilt, REAL ti
             time = cycle->GetLastTurnTime();
         time -= sg_enemyFriendTimePenalty;
     }
-    const ePlayerNetID* pInfluence = this->lastEnemyInfluence.GetPointer();
+    const ePlayerNetID* pInfluence = this->lastEnemyInfluence.get();
 
     // calculate effective last time. Add malus if the player is dead.
     REAL lastEffectiveTime = lastTime;
