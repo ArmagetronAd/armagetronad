@@ -1467,7 +1467,7 @@ static bool ReadDir( tCommandLineParser & parser, tString & target, const char* 
 class tDirectoriesCommandLineAnalyzer: public tCommandLineAnalyzer
 {
 private:
-    virtual void DoInitialize( tCommandLineParser & parser )
+    void DoInitialize( tCommandLineParser & parser ) override
     {
         // Puts the data files in the executable's bundle
 #ifndef MACOSX
@@ -1495,8 +1495,11 @@ private:
 
     }
 
-    virtual bool DoAnalyze( tCommandLineParser & parser )
+    bool DoAnalyze( tCommandLineParser & parser, int pass ) override
     {
+        if(pass > 0)
+            return false;
+
         if( ReadDir( parser, st_DataDir, "--datadir" ) ) return true;
         if( ReadDir( parser, st_UserDataDir, "--userdatadir" ) ) return true;
         if( ReadDir( parser, st_ConfigDir, "--configdir" ) ) return true;
@@ -1533,7 +1536,7 @@ private:
         return false;
     }
 
-    virtual void DoHelp( std::ostream & s )
+    void DoHelp( std::ostream & s ) override
     {                                      //
         s << "--datadir <Directory>        : read game data (textures, sounds and texts)\n"
         <<   "                               from this directory\n";

@@ -89,11 +89,11 @@ public:
     ~tCommandLineAnalyzer(); //!destructor
 
     inline void Initialize( tCommandLineParser & parser ); //! Analyzes the command line
-    inline bool Analyze( tCommandLineParser & parser );    //! Analyzes the command line option
+    inline bool Analyze( tCommandLineParser & parser, int pass ); //! Analyzes the command line option
     inline void Help( std::ostream & s );                  //! Prints option help
 private:
     virtual void DoInitialize( tCommandLineParser & parser );     //! Analyzes the command line option
-    virtual bool DoAnalyze( tCommandLineParser & parser ) = 0;    //! Analyzes the command line option
+    virtual bool DoAnalyze( tCommandLineParser & parser, int pass ) = 0; //! Analyzes the command line option
     virtual void DoHelp( std::ostream & s ) = 0;                  //! Prints option help
 };
 
@@ -123,9 +123,9 @@ void tCommandLineAnalyzer::Initialize( tCommandLineParser & parser )
 //!
 // *******************************************************************************************
 
-bool tCommandLineAnalyzer::Analyze( tCommandLineParser & parser )
+bool tCommandLineAnalyzer::Analyze( tCommandLineParser & parser, int pass )
 {
-    return DoAnalyze( parser );
+    return DoAnalyze( parser, pass );
 }
 
 // *******************************************************************************************

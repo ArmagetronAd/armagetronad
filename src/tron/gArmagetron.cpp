@@ -83,8 +83,11 @@ public:
 
 
 private:
-    virtual bool DoAnalyze( tCommandLineParser & parser )
+    bool DoAnalyze( tCommandLineParser & parser, int pass ) override
     {
+        if(pass > 0)
+            return false;
+
         if ( parser.GetSwitch( "-fullscreen", "-f" ) )
         {
             fullscreen_=true;
@@ -111,7 +114,7 @@ private:
         return true;
     }
 
-    virtual void DoHelp( std::ostream & s )
+    void DoHelp( std::ostream & s ) override
     {                                      //
 #ifndef DEDICATED
         s << "-f, --fullscreen             : start in fullscreen mode\n";

@@ -296,8 +296,11 @@ void sr_Read_stdin(){
 class rInputCommandLineAnalyzer: public tCommandLineAnalyzer
 {
 public:
-    virtual bool DoAnalyze( tCommandLineParser & parser )
+    bool DoAnalyze( tCommandLineParser & parser, int pass ) override
     {
+        if(pass > 0)
+            return false;
+
         tString pipe;
         if ( parser.GetSwitch( "--daemon","-d") )
         {
@@ -324,7 +327,7 @@ public:
         return false;
     }
 
-    virtual void DoHelp( std::ostream & s )
+    void DoHelp( std::ostream & s ) override
     {                                      //
 #ifndef WIN32
         s << "-d, --daemon                 : allow the dedicated server to run as a daemon\n"
