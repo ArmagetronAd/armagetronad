@@ -1166,7 +1166,7 @@ ePlayer::ePlayer(){
                    centerIncamOnTurn) );
 
     confname.Clear();
-    startCamera=CAMERA_SMART;
+    startCamera=CAMERA_CUSTOM;
     confname << "START_CAM_"<< id+1;
     StoreConfitem(tNEW(tConfItem<eCamMode>) (confname,
                   "$start_cam_help",
