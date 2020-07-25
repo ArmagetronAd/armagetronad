@@ -294,7 +294,7 @@ void tPlayback::AdvanceSection( void )
 class tRecordingCommandLineAnalyzer: public tCommandLineAnalyzer
 {
 private:
-    virtual bool DoAnalyze( tCommandLineParser & parser )
+    bool DoAnalyze( tCommandLineParser & parser ) override
     {
         tString filename;
         if ( parser.GetOption( filename, "--record" ) )
@@ -315,7 +315,7 @@ private:
         return false;
     }
 
-    virtual void DoHelp( std::ostream & s )
+    void DoHelp( std::ostream & s ) override
     {                                      //
         s << "--record <filename>          : creates a DEBUG recording while running\n";
         s << "--playback <filename>        : plays back a DEBUG recording\n";
