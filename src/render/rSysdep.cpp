@@ -409,8 +409,11 @@ static bool   s_benchmark   =false;
 class rFastForwardCommandLineAnalyzer: public tCommandLineAnalyzer
 {
 private:
-    bool DoAnalyze( tCommandLineParser & parser ) override
+    bool DoAnalyze( tCommandLineParser & parser, int pass ) override
     {
+        if(pass > 0)
+            return false;
+
         // get option
         tString forward;
         if ( parser.GetOption( forward, "--fastforward" ) )

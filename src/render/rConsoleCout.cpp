@@ -296,8 +296,11 @@ void sr_Read_stdin(){
 class rInputCommandLineAnalyzer: public tCommandLineAnalyzer
 {
 public:
-    bool DoAnalyze( tCommandLineParser & parser ) override
+    bool DoAnalyze( tCommandLineParser & parser, int pass ) override
     {
+        if(pass > 0)
+            return false;
+
         tString pipe;
         if ( parser.GetSwitch( "--daemon","-d") )
         {

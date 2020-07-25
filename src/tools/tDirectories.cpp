@@ -1495,8 +1495,11 @@ private:
 
     }
 
-    bool DoAnalyze( tCommandLineParser & parser ) override
+    bool DoAnalyze( tCommandLineParser & parser, int pass ) override
     {
+        if(pass > 0)
+            return false;
+
         if( ReadDir( parser, st_DataDir, "--datadir" ) ) return true;
         if( ReadDir( parser, st_UserDataDir, "--userdatadir" ) ) return true;
         if( ReadDir( parser, st_ConfigDir, "--configdir" ) ) return true;

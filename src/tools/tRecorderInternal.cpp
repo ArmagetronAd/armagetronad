@@ -294,8 +294,11 @@ void tPlayback::AdvanceSection( void )
 class tRecordingCommandLineAnalyzer: public tCommandLineAnalyzer
 {
 private:
-    bool DoAnalyze( tCommandLineParser & parser ) override
+    bool DoAnalyze( tCommandLineParser & parser, int pass ) override
     {
+        if(pass > 0)
+            return false;
+
         tString filename;
         if ( parser.GetOption( filename, "--record" ) )
         {

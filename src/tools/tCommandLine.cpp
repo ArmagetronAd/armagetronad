@@ -173,14 +173,17 @@ bool tCommandLineData::Analyse(int argc,char **argv)
         }
         else
         {
-            // let the registered command line anelyzers have a go
-            tCommandLineAnalyzer * commandLineAnalyzer = s_commandLineAnalyzerAnchor;
             bool success = false;
-            while ( commandLineAnalyzer )
+            for(int pass = 0; pass < 2 && !success; ++pass)
             {
-                if ( ( success = commandLineAnalyzer->Analyze( parser ) ) )
-                    break;
-                commandLineAnalyzer = commandLineAnalyzer->Next();
+                // let the registered command line anelyzers have a go
+                tCommandLineAnalyzer * commandLineAnalyzer = s_commandLineAnalyzerAnchor;
+                while ( commandLineAnalyzer )
+                {
+                    if ( ( success = commandLineAnalyzer->Analyze( parser, pass ) ) )
+                        break;
+                    commandLineAnalyzer = commandLineAnalyzer->Next();
+                }
             }
             if ( success )
                 continue;
@@ -419,7 +422,7 @@ void tCommandLineAnalyzer::DoInitialize( tCommandLineParser & parser )
 //!
 // *******************************************************************************************
 
-bool tCommandLineAnalyzer::DoAnalyze( tCommandLineParser & parser )
+bool tCommandLineAnalyzer::DoAnalyze( tCommandLineParser & parser, int pass )
 {
     return false;
 }
