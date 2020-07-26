@@ -881,7 +881,7 @@ bool uActionTooltip::Help( int player )
         return false;
 
     // find most needed tooltip
-    uActionTooltip * mostWanted = NULL;
+    uActionTooltip * mostWanted{};
 
     // keys bound to the action of the tooltip that needs help
     tString maps;
@@ -928,6 +928,30 @@ bool uActionTooltip::Help( int player )
 
     if( mostWanted )
     {
+        // notice repeats, hint at how to silence them
+        {
+            static uActionTooltip * lastMostWanted{};
+            static int identicalTooltipCount{};
+
+            if(mostWanted == lastMostWanted)
+            {
+                identicalTooltipCount++;
+                if(identicalTooltipCount >= 3)
+                {
+                    identicalTooltipCount-=2;
+                    con.CenterDisplay(tString(tOutput("$tooltip_how_to_get_rid_of")));
+                    return true;
+                }
+            }
+            else
+            {
+                identicalTooltipCount = 0;
+            }
+
+            lastMostWanted = mostWanted;
+        }
+
+
         if( last.Len() > 1 )
         {
             if( maps.Len() > 1 )
