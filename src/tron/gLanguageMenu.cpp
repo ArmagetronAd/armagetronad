@@ -55,6 +55,12 @@ void sg_LanguageInit()
     tLanguage::Find(sg_SecondLanguage)->SetSecondLanguage();
 }
 
+static void sg_LanguageInit_conf(std::istream &s)
+{
+    sg_LanguageInit();
+}
+static tConfItemFunc sg_li("LANGUAGE_RELOAD",&sg_LanguageInit_conf);
+
 // Language menu
 void sg_LanguageMenu()
 {
