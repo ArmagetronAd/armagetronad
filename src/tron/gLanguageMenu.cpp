@@ -57,6 +57,8 @@ void sg_LanguageInit()
 
 static void sg_LanguageInit_conf(std::istream &s)
 {
+    tLocale::Clear();
+    tLocale::Load("languages.txt");
     sg_LanguageInit();
 }
 static tConfItemFunc sg_li("LANGUAGE_RELOAD",&sg_LanguageInit_conf);
