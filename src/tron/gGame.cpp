@@ -6163,6 +6163,39 @@ static void sg_CustomCenterMessage(std::istream &s)
 }
 static tConfItemFunc sg_CustomCenterMessageConf("CUSTOM_CENTER_MESSAGE", &sg_CustomCenterMessage);
 
+static void sg_CustomCenterPlayerMessage(std::istream &s)
+{
+    int pos = 0;
+    {
+        ePlayerNetID *receiver, *sender = 0;
+        tString player_name;
+        s >> player_name;
+        receiver = ePlayerNetID::FindPlayerByName(player_name);
+
+        if (receiver)
+        {
+            std::ostringstream str;
+            tString language_string_command;
+            s >> language_string_command;
+            str << "$" << language_string_command.Filter();
+
+            tOutput output;
+            while(!s.eof())
+            {
+                tColoredString msg;
+                s >> msg;
+                output.SetTemplateParameter(++pos,msg);
+            }
+            output << str.str().c_str();
+
+            sn_CenterMessage(tColoredString(output), receiver->Owner());
+            con << output;
+        }
+    }
+}
+static tConfItemFunc sg_CustomPlayerCenterMessageConf("CUSTOM_PLAYER_CENTER_MESSAGE", &sg_CustomCenterPlayerMessage);
+static tConfItemFunc sg_CustomCenterPlayerMessageConf("CUSTOM_CENTER_PLAYER_MESSAGE", &sg_CustomCenterPlayerMessage);
+
 static void sg_getCurrentMap(std::istream &s)
 {
     ePlayerNetID *receiver = 0;
