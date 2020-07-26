@@ -533,6 +533,8 @@ static void s_InputConfigGeneric(int ePlayer, uAction *&actions,const tOutput &t
 
     uMenu input_menu(title);
 
+    uActionTooltip::Disable(ePlayer+1);
+
     if(actions)
         actions->tListItemBase::Sort(&Input_Compare);
 
@@ -875,8 +877,11 @@ uActionTooltip::~uActionTooltip()
 
 bool uActionTooltip::Help( int player )
 {
+    if(player < 0 || player > uMAX_PLAYERS)
+        return false;
+
     // find most needed tooltip
-    uActionTooltip * mostWanted = NULL;
+    uActionTooltip * mostWanted{};
 
     // keys bound to the action of the tooltip that needs help
     tString maps;
@@ -923,6 +928,30 @@ bool uActionTooltip::Help( int player )
 
     if( mostWanted )
     {
+        // notice repeats, hint at how to silence them
+        {
+            static uActionTooltip * lastMostWanted{};
+            static int identicalTooltipCount{};
+
+            if(mostWanted == lastMostWanted)
+            {
+                identicalTooltipCount++;
+                if(identicalTooltipCount >= 3)
+                {
+                    identicalTooltipCount-=2;
+                    con.CenterDisplay(tString(tOutput("$tooltip_how_to_get_rid_of")));
+                    return true;
+                }
+            }
+            else
+            {
+                identicalTooltipCount = 0;
+            }
+
+            lastMostWanted = mostWanted;
+        }
+
+
         if( last.Len() > 1 )
         {
             if( maps.Len() > 1 )
@@ -936,7 +965,31 @@ bool uActionTooltip::Help( int player )
         return true;
     }
 
-        return false;
+    return false;
+}
+
+void uActionTooltip::Disable(int player)
+{
+    if(player < 0 || player > uMAX_PLAYERS)
+        return;
+
+    // run through binds
+    for( int i = SDLK_NEWLAST - 1; i >= 0; --i )
+    {
+        uBind * bind = keymap[i];
+        if( !bind ||!bind->CheckPlayer(player) )
+            continue;
+        uAction * action = bind->act;
+        if( !action )
+            continue;
+        uActionTooltip * tooltip = action->GetTooltip();
+        if( !tooltip )
+        {
+            continue;
+        }
+
+        tooltip->activationsLeft_[player] = 0;
+    }
 }
 
 void uActionTooltip::Count( int player )

@@ -1048,6 +1048,7 @@ input_items_global            Sondertasten
 
 # used for listing key bindings
 input_or                      oder
+tooltip_how_to_get_rid_of     Oder sieh dir die Tastaturbelegung im Menu "Spieler Konfigurieren/Einstellungen für Spieler 1/Spiel-Tasten" an.
 
 #********************************************
 #********************************************
