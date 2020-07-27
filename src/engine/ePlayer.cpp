@@ -11443,7 +11443,6 @@ void ePlayerNetID::Suspend( int rounds, tString reason )
         sn_ConsoleOut( tOutput( "$player_no_longer_suspended", GetColoredName() ) );
         FindDefaultTeam();
 
-        suspended_ = false;
         suspendReason_ = "";
     }
     else
@@ -11453,7 +11452,6 @@ void ePlayerNetID::Suspend( int rounds, tString reason )
         if ( Object() && Object()->Alive() )
             Object()->Kill();
 
-        suspended_ = true;
         suspendReason_= reason;
     }
 }
