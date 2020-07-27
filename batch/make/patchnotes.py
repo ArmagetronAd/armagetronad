@@ -14,7 +14,7 @@
 # Fixes #11
 # looks up the referenced issues in the GitLab API, generates a ChangeLog/Patch Note line for each
 
-import sys, argparse
+import sys, argparse, re
 import subprocess
 from packaging import version
 from string import Template
@@ -33,7 +33,8 @@ def RepresentsInt(s):
 def GetTags(repo, tag_lower_limit):
 	alltags_raw=subprocess.run(["git", "-C", repo, "tag", "-l", "--merged"], stdout=subprocess.PIPE)
 	alltags=alltags_raw.stdout.decode('utf-8').split('\n')
-	return list(filter(lambda x: len(x) > 0 and version.parse(x) >= version.parse(tag_lower_limit), alltags))
+	tags=list(filter(lambda x: len(x) > 0 and version.parse(x) >= version.parse(tag_lower_limit), alltags))
+	#return tags
 
 	# sort tags in chronological order (assuming they're all on the same branch)
 	revisions={}
@@ -42,8 +43,8 @@ def GetTags(repo, tag_lower_limit):
 		revisions_since_tag_raw=subprocess.run(["git", "-C", repo, "rev-list", "--count", tag + ".."], stdout=subprocess.PIPE)
 		revisions[tag]=int(revisions_since_tag_raw.stdout.decode('utf-8'))
 
-	print(revisions)
-	tags.sort(key=lambda x: revisions[x], reverse=True)
+	#print(revisions)
+	tags.sort(key=lambda x: -revisions[x], reverse=False)
 	return tags
 
 # return (tag, list of issues fixed after tag as integers)
@@ -59,6 +60,7 @@ def FixedAfterTag(repo, team, project, tags):
 	issues=set([])
 
 	for tag in tags:
+		#print(tag)
 		log_raw=subprocess.run(["git", "-C", repo, "log", tag + ".."], stdout=subprocess.PIPE)
 		log=log_raw.stdout.decode('utf-8').split('\n')
 
@@ -102,8 +104,83 @@ def FixedAfterTag(repo, team, project, tags):
 	#print(fixed_after_tag)
 	return fixed_after_tag
 
+# replaces full author with email with just the name
+author_email_filter=re.compile(r" *<.*>")
+author_replacements={
+	"Bazaarmagetron": None,
+	"bazaarmagetron": None,
+	"Manuel Moos (From GitLab CI)": None,
+	"epsy46": "epsy",
+	"Daniel Lee Harple": "Daniel Harple",
+	"dlh3": "Daniel Harple",
+	"davidfancella": "Dave Fancella",
+	"Luke Dashjr": "Luke-Jr",
+	"luke-jr": "Luke-Jr",
+	"nemostultae": "Daniel Harple",
+	"voodoo": "Voodoo",
+	"z-man": "Manuel Moos",
+	None: None
+}
+full_author_replacements={
+	"armagetron <armagetron@ensemble-fnm.de>": "armagetron at ensemble-fnm.de",
+	"David <jip@unk.me>": "Jip",
+	"unknown <dave@davefancella.com>": "Dave Fancella",
+	"unknown <pnoexz@gmail.com>": "pnoexz at gmail.com",
+	None: None
+}
+def MapAuthor(full_author):
+	if full_author in full_author_replacements:
+		return full_author_replacements[full_author]
+	author = author_email_filter.sub("", full_author)
+	if author in author_replacements:
+		return author_replacements[author]
+	return author
+
+# return (tag, list of contributing authors)
+def ContributorsAfterTag(repo, team, project, tags):
+	uri_start=Template('https://gitlab.com/${team}/${project}/-/issues/').substitute(team=team, project=project)
+	# The build system is on Python 3.5, so we're stuck with this mechanism
+	# print(uri_start)
+
+	revisions_already_seen=set([])
+	authors_by_tag={}
+
+	for tag in reversed(tags):
+		log_raw=subprocess.run(["git", "-C", repo, "log", tag + ".."], stdout=subprocess.PIPE)
+		log=log_raw.stdout.decode('utf-8').split('\n')
+
+		authors=set([])
+		commit=""
+
+		commit_start="commit "
+		author_start="Author: "
+		ignore_commit=True
+
+		for logline in log:
+			if logline.startswith(commit_start):
+				commit=logline[len(commit_start):]
+
+				# do not count twice
+				if commit in revisions_already_seen:
+					ignore_commit = True
+				else:
+					ignore_commit = False
+					revisions_already_seen.add(commit)
+
+			elif logline.startswith(author_start):
+				author=MapAuthor(logline[len(author_start):])
+				if not ignore_commit and not author is None and not author in authors:
+					authors.add(author)
+
+		authors_by_tag[tag] = authors
+
+	# print(authors_by_tag)
+	return authors_by_tag
+
 # retrieves metadata for an issue from gitlab, composes markup patch note line
 def GetMarkupLine(team, project, issue):
+	#return "X", issue
+
 	uri=Template('https://gitlab.com/api/v4/projects/${team}%2F${project}/issues?scope=all&state=closed&iids[]=${issue}').substitute(team=team, project=project, issue=issue)
 	#print(uri)
 	with urllib.request.urlopen(uri) as content:
@@ -171,9 +248,13 @@ tags=GetTags(repo, tag_lower_limit)
 
 fixed_after_tag=FixedAfterTag(repo, team, project, tags)
 #print(fixed_after_tag)
+contributors_after_tag=ContributorsAfterTag(repo, team, project, tags)
 
-for tag in fixed_after_tag:
-	# print(tag)
+for tag in reversed(tags):
+	#print(tag)
+	if not tag in fixed_after_tag:
+		continue
+
 	fixed = fixed_after_tag[tag]
 	# luckily, the category names are alphabetically in the order we want them in :)
 	categories={}
@@ -196,6 +277,14 @@ for tag in fixed_after_tag:
 			for line in categories[category]:
 				print(line)
 			print()
+		authors=contributors_after_tag[tag]
+		if not authors is None:
+			sorted_authors=list(authors)
+			sorted_authors.sort()
+			print("##### Contributors")
+			print()
+			print(", ".join(sorted_authors))
+
 		if patchnotes:
 			exit(0)
 		print()
