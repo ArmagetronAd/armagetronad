@@ -55,8 +55,8 @@ public:
 private:
     bool _shouldConnect;
     tString _raw;
-    virtual bool DoAnalyze( tCommandLineParser & parser );
-    virtual void DoHelp( std::ostream & s );
+    bool DoAnalyze( tCommandLineParser & parser, int pass ) override;
+    void DoHelp( std::ostream & s ) override;
 };
 
 void ExtractConnectionInformation( tString &raw, tString &servername, tString &port );

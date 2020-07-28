@@ -87,7 +87,7 @@ public:
     ~tCommandLineAnalyzer(); //!destructor
 
     inline void Initialize( tCommandLineParser & parser ); //! Analyzes the command line
-    inline bool Analyze( tCommandLineParser & parser );    //! Analyzes the command line option
+    inline bool Analyze( tCommandLineParser & parser, int pass ); //! Analyzes the command line option
     inline void Help( std::ostream & s );                  //! Prints option help
     
     //! Executes the command line option actions after program initialization
@@ -95,7 +95,7 @@ public:
     inline bool Execute();
 private:
     virtual void DoInitialize( tCommandLineParser & parser );     //! Analyzes the command line option
-    virtual bool DoAnalyze( tCommandLineParser & parser ) = 0;    //! Analyzes the command line option
+    virtual bool DoAnalyze( tCommandLineParser & parser, int pass ) = 0; //! Analyzes the command line option
     virtual void DoHelp( std::ostream & s ) = 0;                  //! Prints option help
     virtual bool DoExecute();
 };
@@ -105,9 +105,9 @@ class tDefaultCommandLineAnalyzer: public tCommandLineAnalyzer
 public:
     tDefaultCommandLineAnalyzer(): docOption_(false), versioninfoOption_(false) {}
 private:
-    virtual bool DoAnalyze( tCommandLineParser & parser );
-    virtual void DoHelp( std::ostream & s );
-    virtual bool DoExecute();
+    bool DoAnalyze( tCommandLineParser & parser, int pass ) override;
+    void DoHelp( std::ostream & s ) override;
+    bool DoExecute() override;
     bool docOption_;
     bool versioninfoOption_;
 };
@@ -138,9 +138,9 @@ void tCommandLineAnalyzer::Initialize( tCommandLineParser & parser )
 //!
 // *******************************************************************************************
 
-bool tCommandLineAnalyzer::Analyze( tCommandLineParser & parser )
+bool tCommandLineAnalyzer::Analyze( tCommandLineParser & parser, int pass )
 {
-    return DoAnalyze( parser );
+    return DoAnalyze( parser, pass );
 }
 
 // *******************************************************************************************

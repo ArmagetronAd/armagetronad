@@ -154,9 +154,9 @@ public:
     tDirectoriesCommandLineAnalyzer() : tCommandLineAnalyzer(), enableExtraOptions_( true ) {}
     tDirectoriesCommandLineAnalyzer( tCommandLineAnalyzer *& anchor, bool enableExtraOptions ) : tCommandLineAnalyzer( anchor ), enableExtraOptions_( enableExtraOptions ) {}
 private:
-    virtual void DoInitialize( tCommandLineParser & parser );
-    virtual bool DoAnalyze( tCommandLineParser & parser );
-    virtual void DoHelp( std::ostream & s );
+    void DoInitialize( tCommandLineParser & parser ) override;
+    bool DoAnalyze( tCommandLineParser & parser, int pass ) override;
+    void DoHelp( std::ostream & s ) override;
     
     bool enableExtraOptions_;
 };

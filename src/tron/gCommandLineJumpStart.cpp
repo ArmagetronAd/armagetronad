@@ -37,8 +37,11 @@
 // *****************************************************************************
 // *****************************************************************************
 
-bool gCommandLineJumpStartAnalyzer::DoAnalyze( tCommandLineParser & parser )
+bool gCommandLineJumpStartAnalyzer::DoAnalyze( tCommandLineParser & parser, int pass )
 {
+    if(pass > 0)
+        return false;
+
     if ( parser.GetOption( _raw, "--connect" ) )
     {
         _shouldConnect = true;

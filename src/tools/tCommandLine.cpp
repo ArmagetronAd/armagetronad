@@ -115,14 +115,17 @@ bool tCommandLineData::Analyse(int argc,char **argv)
         }
         else
         {
-            // let the registered command line anelyzers have a go
-            tCommandLineAnalyzer * commandLineAnalyzer = commandLineAnalyzerAnchor_;
             bool success = false;
-            while ( commandLineAnalyzer )
+            for(int pass = 0; pass < 2 && !success; ++pass)
             {
-                if ( ( success = commandLineAnalyzer->Analyze( parser ) ) )
-                    break;
-                commandLineAnalyzer = commandLineAnalyzer->Next();
+                // let the registered command line anelyzers have a go
+                tCommandLineAnalyzer * commandLineAnalyzer = commandLineAnalyzerAnchor_;
+                while ( commandLineAnalyzer )
+                {
+                    if ( ( success = commandLineAnalyzer->Analyze( parser, pass ) ) )
+                        break;
+                    commandLineAnalyzer = commandLineAnalyzer->Next();
+                }
             }
             
             if ( !success )
@@ -378,7 +381,7 @@ void tCommandLineAnalyzer::DoInitialize( tCommandLineParser & parser )
 //!
 // *******************************************************************************************
 
-bool tCommandLineAnalyzer::DoAnalyze( tCommandLineParser & parser )
+bool tCommandLineAnalyzer::DoAnalyze( tCommandLineParser & parser, int pass )
 {
     return false;
 }
@@ -402,8 +405,11 @@ bool tCommandLineAnalyzer::DoExecute()
     return true;
 }
 
-bool tDefaultCommandLineAnalyzer::DoAnalyze( tCommandLineParser & parser )
+bool tDefaultCommandLineAnalyzer::DoAnalyze( tCommandLineParser & parser, int pass )
 {
+    if(pass > 0)
+        return false;
+
 #ifdef HELP_AVAILABLE
     if ( parser.GetSwitch( "--doc" ) )
     {

@@ -188,8 +188,11 @@ namespace sq
             return exitStatus_;
         }
     private:
-        virtual bool DoAnalyze(tCommandLineParser & parser)
+        bool DoAnalyze(tCommandLineParser & parser, int pass) override
         {
+            if(pass > 0)
+                return false;
+
             if (parser.GetSwitch("--list", "-l"))
             {
                 listOption_ = true;
@@ -223,7 +226,7 @@ namespace sq
             return false;
         }
 
-        virtual void DoHelp(std::ostream & s)
+        void DoHelp(std::ostream & s) override
         {
             s << "\nQuery options\n"
               << "=============\n\n"

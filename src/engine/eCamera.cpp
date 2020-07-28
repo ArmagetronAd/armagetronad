@@ -219,10 +219,10 @@ uActionCamera eCamera::se_lookLeft("LOOK_LEFT",
 
 uActionCamera eCamera::se_switchView("SWITCH_VIEW", -160);
 
-uActionTooltip eCamera::se_glanceBackTooltip( uActionTooltip::Level_Advanced, eCamera::se_glance[GLANCE_BACK], 2 );
+uActionTooltip eCamera::se_glanceBackTooltip( uActionTooltip::Level_Advanced, eCamera::se_glance[GLANCE_BACK], 1 );
 uActionTooltip eCamera::se_glanceForwardTooltip( uActionTooltip::Level_Advanced, eCamera::se_glance[GLANCE_FORWARD], 1 );
-uActionTooltip eCamera::se_glanceRightTooltip( uActionTooltip::Level_Advanced, eCamera::se_glance[GLANCE_RIGHT], 3 );
-uActionTooltip eCamera::se_glanceLeftTooltip( uActionTooltip::Level_Advanced, eCamera::se_glance[GLANCE_LEFT], 3 );
+uActionTooltip eCamera::se_glanceRightTooltip( uActionTooltip::Level_Advanced, eCamera::se_glance[GLANCE_RIGHT], 1 );
+uActionTooltip eCamera::se_glanceLeftTooltip( uActionTooltip::Level_Advanced, eCamera::se_glance[GLANCE_LEFT], 1 );
 uActionTooltip eCamera::se_switchViewTooltip( uActionTooltip::Level_Advanced, eCamera::se_switchView, 2 );
 
 static REAL s_startFollowX = -30, s_startFollowY = -30, s_startFollowZ = 80;
@@ -489,8 +489,11 @@ static eGameObject * se_GetPleaseWatch()
 class rWatchCommandLineAnalyzer: public tCommandLineAnalyzer
 {
 private:
-    virtual bool DoAnalyze( tCommandLineParser & parser )
+    bool DoAnalyze( tCommandLineParser & parser, int pass ) override
     {
+        if(pass > 0)
+            return false;
+
         // get option
         tString name;
         if ( parser.GetOption( name, "--watch" ) )
@@ -504,7 +507,7 @@ private:
         return false;
     }
 
-    virtual void DoHelp( std::ostream & s )
+    void DoHelp( std::ostream & s ) override
     {                                      //
         s << "--watch <name>               : during playback, prefers to watch a player with that\n"
              "                               name (part) instead of the originally active player.";

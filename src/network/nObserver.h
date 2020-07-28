@@ -74,7 +74,7 @@ public:
         return !operator bool();
     }
 
-    const T* GetPointer() const
+    const T* get() const
     {
         if ( this->observer_ )
             return dynamic_cast< const T* >( observer_->GetNetObject() );
@@ -84,7 +84,7 @@ public:
 
     operator const T* () const
     {
-        return this->GetPointer();
+        return this->get();
     }
 
     const T* operator->() const

@@ -41,6 +41,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include    "tCommandLine.h"
 #include    "tConsole.h"
 #include    "tError.h"
+#include    "tDirectories.h"
 
 #undef  INLINE_DEF
 #define INLINE_DEF
@@ -295,31 +296,54 @@ void tPlayback::AdvanceSection( void )
 class tRecordingCommandLineAnalyzer: public tCommandLineAnalyzer
 {
 private:
-    virtual bool DoAnalyze( tCommandLineParser & parser )
+    bool DoAnalyze( tCommandLineParser & parser, int pass ) override
     {
-        tString filename;
-        if ( parser.GetOption( filename, "--record" ) )
+        switch(pass)
         {
-            // start a recorder
-            static tRecorderImp< tRecording, std::ofstream > recorder( static_cast< char const * >( filename ) );
-            return true;
+            // pass 0: only accept strict options
+            case 0:
+            {
+                tString filename;
+                if ( parser.GetOption( filename, "--record" ) )
+                {
+                    // start a recorder
+                    static tRecorderImp< tRecording, std::ofstream > recorder( static_cast< char const * >( filename ) );
+                    return true;
+                }
+
+                if ( parser.GetOption( filename, "--playback" ) )
+                {
+                    // start a playback
+                    static tRecorderImp< tPlayback, std::ifstream > recorder( static_cast< char const * >( filename ) );
+                    recorder.InitPlayback();
+                    return true;
+                }
+            }
+            break;
+            // pass 1: anything may be a recording to play back
+            case 1:
+            {
+                auto *filename = parser.Current();
+                if(tDirectories::FileMatchesWildcard(filename, "*.aarec"))
+                {
+                    static tRecorderImp< tPlayback, std::ifstream > recorder( parser.Current() );
+                    recorder.InitPlayback();
+                    parser.Advance();
+                    return true;
+                }
+            }
+            break;
         }
 
-        if ( parser.GetOption( filename, "--playback" ) )
-        {
-            // start a playback
-            static tRecorderImp< tPlayback, std::ifstream > recorder( static_cast< char const * >( filename ) );
-            recorder.InitPlayback();
-            return true;
-        }
 
         return false;
     }
 
-    virtual void DoHelp( std::ostream & s )
+    void DoHelp( std::ostream & s ) override
     {                                      //
         s << "--record <filename>          : creates a DEBUG recording while running\n";
         s << "--playback <filename>        : plays back a DEBUG recording\n";
+        s << "<filename.aarec>             : short form, plays back a DEBUG recording, recording must end in .aarec\n";
     }
 };
 

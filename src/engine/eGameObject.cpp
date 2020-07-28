@@ -47,10 +47,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <map>
 
 uActionPlayer eGameObject::se_turnRight("CYCLE_TURN_RIGHT", -10);
-static uActionTooltip se_turnRightTooltip( uActionTooltip::Level_Essential, eGameObject::se_turnRight, 11, &ePlayer::VetoActiveTooltip );
+static uActionTooltip se_turnRightTooltip( uActionTooltip::Level_Essential, eGameObject::se_turnRight, 2, &ePlayer::VetoActiveTooltip );
 
 uActionPlayer eGameObject::se_turnLeft("CYCLE_TURN_LEFT", -10);
-static uActionTooltip se_turnLeftTooltip( uActionTooltip::Level_Essential, eGameObject::se_turnLeft, 10, &ePlayer::VetoActiveTooltip );
+static uActionTooltip se_turnLeftTooltip( uActionTooltip::Level_Essential, eGameObject::se_turnLeft, 2, &ePlayer::VetoActiveTooltip );
 
 
 // entry and deletion in the list of all gameObjects

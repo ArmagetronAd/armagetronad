@@ -1852,8 +1852,11 @@ void tDirectoriesCommandLineAnalyzer::DoInitialize( tCommandLineParser & parser 
     }
 }
 
-bool tDirectoriesCommandLineAnalyzer::DoAnalyze( tCommandLineParser & parser )
+bool tDirectoriesCommandLineAnalyzer::DoAnalyze( tCommandLineParser & parser, int pass )
 {
+    if(pass > 0)
+        return false;
+
     if( ReadDir( parser, st_DataDir, "--datadir" ) ) return true;
     if( ReadDir( parser, st_UserDataDir, "--userdatadir" ) ) return true;
     if( ReadDir( parser, st_ConfigDir, "--configdir" ) ) return true;

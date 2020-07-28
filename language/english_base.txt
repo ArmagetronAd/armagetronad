@@ -1114,6 +1114,7 @@ input_items_global		Global Controls
 
 # used for listing key bindings
 input_or                or
+tooltip_how_to_get_rid_of Or review the input configuration in the menu "Player Setup/Player 1 Settings/Input Configuration".
 
 # used for printing lists
 separator               ,\ 
