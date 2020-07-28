@@ -122,7 +122,7 @@ def main():
         # default types
         mime_type="application/octet-stream"
         file_type="Installer file"
-        description="Portable App for Linux"
+        description="Unknown File"
         
         basename, extension = os.path.splitext(filename)
         basename, secondextension = os.path.splitext(basename)
@@ -150,6 +150,9 @@ def main():
             if fn == "CHANGELOG.md":
                 file_type="ChangeLog File"
                 description="Changelog"
+            if extension == ".AppImage":
+                description="AppImage for Linux"
+                Linux=True
             if extension == ".deb":
                 description="Debian Package"
                 Linux=True
@@ -168,7 +171,7 @@ def main():
                     description="Windows Binary Zip for Zero Install"
                 mime_type="application/zip"
                 Windows=True
-            if "Portable App" in description:
+            if "AppImage" in description:
                 Linux=True
                 if "_32bit" in fn:
                     description = description.replace("Linux", "32 bit Linux")

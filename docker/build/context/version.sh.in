@@ -4,3 +4,8 @@ PACKAGE_TITLE="@progtitle@"
 
 # depends on whether the current build is configured as client or server, maybe don't use?
 # PACKAGE_NAME_FULL=@progname@
+
+# **********************************************************************
+
+# used in several places, must be consistent
+DEBIAN_VERSION_BASE=`echo ${PACKAGE_VERSION} | sed -e s,_,~,g -e s,-,+,g -e s,~rc~,~~rc~,`~ppa1 || exit $?

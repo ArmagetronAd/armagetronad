@@ -3,6 +3,7 @@
 function test_targets(){
 	. ../deploy/targets.sh
 	echo LP_VERSION=${LP_VERSION}
+	echo DEBIAN_VERSION_BASE=${DEBIAN_VERSION_BASE}
 	echo SERIES=${SERIES}
 	echo SUFFIX=${SUFFIX}
 	echo SF_DIR=${SF_DIR}
@@ -19,9 +20,7 @@ if @top_srcdir@/docker/scripts/setup_ci_variables_test.sh $*; then
 	. @top_srcdir@/docker/scripts/setup_ci_variables_test.sh $*
 	. @top_srcdir@/docker/scripts/brand.sh @top_srcdir@
 	pushd @top_builddir@
-	pushd @abs_top_srcdir@
-	./bootstrap.sh
-	popd
+	make distclean
 	@abs_top_srcdir@/configure --disable-glout progname=${PROGRAM_NAME} progtitle="${PROGRAM_TITLE}"
 	popd
 	rm -f CI_INFO

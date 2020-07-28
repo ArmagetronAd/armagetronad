@@ -22,7 +22,7 @@ test -z ${SERIES} && SERIES=unstable
 
 . version.sh || exit $?
 
-DEBIAN_VERSION=`echo ${PACKAGE_VERSION} | sed -e s,_,~,g -e s,-,+,g`~ppa1~${SERIES}
+DEBIAN_VERSION=${DEBIAN_VERSION_BASE}~ppa1~${SERIES} || exit $?
 
 mv debian/changelog changelog_orig || exit $?
 cat > debian/changelog <<EOF
