@@ -27,16 +27,16 @@ for f in *; do
 	*.exe)
 	    WIN_CLIENT=$f
 	    ;;
-	*Dedicated-32bit-${PACKAGE_VERSION})
+	*Dedicated-32bit-${PACKAGE_VERSION}.AppImage)
 	    LIN32_SERVER=$f
 	    ;;
-	*-32bit-${PACKAGE_VERSION})
+	*-32bit-${PACKAGE_VERSION}.AppImage)
 	    LIN32_CLIENT=$f
 	    ;;
-	*Dedicated-${PACKAGE_VERSION})
+	*Dedicated-${PACKAGE_VERSION}.AppImage)
 	    LIN64_SERVER=$f
 	    ;;
-	*-${PACKAGE_VERSION})
+	*-${PACKAGE_VERSION}.AppImage)
 	    LIN64_CLIENT=$f
 	    ;;
 	*-client*.tbz|*-server*.tbz)
