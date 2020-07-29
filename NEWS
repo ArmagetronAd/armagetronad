@@ -59,11 +59,13 @@ Daniel Harple, Hugh McMaster, Luke-Jr, Manuel Moos, Uzix, fman23, zolk3ri
   ladderlog.txt.
 - "--input" now can be used more than once to read from multiple files or pipes.
 - new team management ladderlog messages:
-  TEAM_CREATED <team name>
-  TEAM_DESTROYED <team name>
-  TEAM_RENAMED <old team name> <new team name>
-  TEAM_PLAYER_ADDED <team name> <player>
-  TEAM_PLAYER_REMOVED <team name> <player>
+
+       TEAM_CREATED <team name>
+       TEAM_DESTROYED <team name>
+       TEAM_RENAMED <old team name> <new team name>
+       TEAM_PLAYER_ADDED <team name> <player>
+       TEAM_PLAYER_REMOVED <team name> <player>
+       
 - Manage external scripts on Unix dedicated servers. New commands: 
   SPAWN_SCRIPT, RESPAWN_SCRIPT, FORCE_RESPAWN_SCRIPT, KILL_SCRIPT,
   LIST_SCRIPTS, SCRIPT_ENV.
