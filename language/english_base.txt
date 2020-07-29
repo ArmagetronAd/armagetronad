@@ -3644,8 +3644,8 @@ base_enemy_kill_help                Flag indicating whether a base will kill ene
 spawn_zone_help                                spawn a zone onto the grid
 styct_compatibility_spawn_zone_help            If eanbled, SPAWN_ZONE will take colors out of 1 rather than 15.
 collapse_zone_help                             collapse a zone by name (or, if no arguments, collapses all zones without assigned names)
-set_zone_radius_help                           change zones radius\nUsage: SET_ZONE_RADIUS <name> <radius> <speed>
-set_zone_id_radius_help                        change zones radius\nUsage: SET_ZONE_ID_RADIUS <id> <radius> <speed>
+set_zone_radius_help                           change zones radius\nUsage: SET_ZONE_RADIUS <name> <radius> <rate>
+set_zone_id_radius_help                        change zones radius\nUsage: SET_ZONE_ID_RADIUS <id> <radius> <rate>
 set_zone_position_help                         add to a zones path\nUsage: SET_ZONE_POSITION <name> <x1> <y1> [<x2> <y2> ...]
 set_zone_id_position_help                      add to a zones path\nUsage: SET_ZONE_ID_POSITION <id> <x1> <y1> [<x2> <y2> ...]
 set_zone_coord_help                            change a zones actual position\nUsage: SET_ZONE_COORD <name> <x> <y>
