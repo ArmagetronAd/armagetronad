@@ -8991,7 +8991,7 @@ void gZone::GridPosLadderLog()
     for (int i = 0; i < gameObjects.Len(); i++)
     {
         gZone *zone = dynamic_cast<gZone *>(gameObjects[i]);
-        if (zone)
+        if (zone && !zone->destroyed_)
         {
             sg_zoneGridPosWriter << zone->GetEffect() << zone->GOID() << zone->GetName();
             sg_zoneGridPosWriter << zone->GetRadius() << zone->GetExpansionSpeed();
@@ -9274,16 +9274,15 @@ static void sg_SetZoneCoord(std::istream &s)
         con << "Must be called while a grid exists!\n";
         return;
     }
-	
-	tString obj_id;
-	s >> obj_id;
-	
-	float posX, posY;
-	s >> posX; posX *= gArena::SizeMultiplier();
-	s >> posY; posY *= gArena::SizeMultiplier();
-	eCoord pos(posX,posY);
-	
-	
+    
+    tString obj_id;
+    s >> obj_id;
+    
+    float posX, posY;
+    s >> posX; posX *= gArena::SizeMultiplier();
+    s >> posY; posY *= gArena::SizeMultiplier();
+    eCoord pos(posX,posY);
+    
     // first check for the name
     int zone_id = -1;
     zone_id = gZone::FindFirst(obj_id);
@@ -9302,7 +9301,7 @@ static void sg_SetZoneCoord(std::istream &s)
         gZone *zone=dynamic_cast<gZone *>(gameObjects(zone_id));
         if(zone)
         {
-			zone->SetPosition(pos);
+            zone->SetPosition(pos);
             zone->RequestSync();
         }
         zone_id=gZone::FindNext(obj_id, zone_id);
@@ -9764,16 +9763,16 @@ static void sg_SetZoneIdCoord(std::istream &s)
         con << "Must be called while a grid exists!\n";
         return;
     }
-	
-	tString obj_id;
-	s >> obj_id;
-	
-	float posX, posY;
-	s >> posX; posX *= gArena::SizeMultiplier();
-	s >> posY; posY *= gArena::SizeMultiplier();
-	eCoord pos(posX,posY);
-	
-	
+    
+    tString obj_id;
+    s >> obj_id;
+    
+    float posX, posY;
+    s >> posX; posX *= gArena::SizeMultiplier();
+    s >> posY; posY *= gArena::SizeMultiplier();
+    eCoord pos(posX,posY);
+    
+        
     // first check for the name
     int zone_id = -1;
     zone_id = gZone::FindFirst(obj_id);
@@ -9789,13 +9788,12 @@ static void sg_SetZoneIdCoord(std::istream &s)
     for(int i = 0; i < gameObjects.Len(); i++)
     {
         // get the zone ...
-        gZone *zone=dynamic_cast<gZone *>(gameObjects(zone_id));
+        gZone *zone=dynamic_cast<gZone *>(gameObjects(i));
         if(zone && zone->GOID() == zone_id)
         {
-			zone->SetPosition(pos);
+            zone->SetPosition(pos);
             zone->RequestSync();
         }
-        zone_id=gZone::FindNext(obj_id, zone_id);
     }
 }
 
