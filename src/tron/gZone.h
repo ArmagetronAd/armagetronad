@@ -124,12 +124,17 @@ public:
     gZone &         SetFallSpeed        (REAL speed) {fallSpeed_ = speed; return *this;}      //!< Sets the fall speed
     void BounceOffPoint(eCoord dest, eCoord collide);
     gZone & AddWaypoint(eCoord const &point);
+	gZone & ClearWaypoints();
+	bool HasNoWaypoints() { return route_.empty(); }
+	
     void Destroy();
     bool destroyed_;
     tString             GetName() {return name_;}
     void                SetName(tString name) {name_ = name;}
     static int          FindFirst(tString name);
     static int          FindNext(tString name, int prev_pos);
+    static int          FindIdFirst(int id);
+    static int          FindIdNext(int id, int prev_pos);
 
     tString             GetEffect() {return effect_;}
     void                SetEffect(tString newEffect) {effect_ = newEffect;}

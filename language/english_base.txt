@@ -3662,22 +3662,28 @@ base_enemy_kill_help                Flag indicating whether a base will kill ene
 spawn_zone_help                                spawn a zone onto the grid
 styct_compatibility_spawn_zone_help            If eanbled, SPAWN_ZONE will take colors out of 1 rather than 15.
 collapse_zone_help                             collapse a zone by name (or, if no arguments, collapses all zones without assigned names)
-set_zone_radius_help                           change zones radius\nUsage: SET_ZONE_RADIUS <name> <radius> <rate>
-set_zone_id_radius_help                        change zones radius\nUsage: SET_ZONE_ID_RADIUS <id> <radius> <rate>
-set_zone_position_help                         add to a zones path\nUsage: SET_ZONE_POSITION <name> <x1> <y1> [<x2> <y2> ...]
-set_zone_id_position_help                      add to a zones path\nUsage: SET_ZONE_ID_POSITION <id> <x1> <y1> [<x2> <y2> ...]
-set_zone_coord_help                            change a zones actual position\nUsage: SET_ZONE_COORD <name> <x> <y>
-set_zone_id_coord_help                         change a zones actual position\nUsage: SET_ZONE_ID_COORD <id> <x> <y>
-set_zone_speed_help                            change a zones speed\nUsage: SET_ZONE_SPEED <name> <speed>
-set_zone_id_speed_help                         change a zones speed\nUsage: SET_ZONE_ID_SPEED <id> <speed>
-set_zone_color_help                            Change the color of a zone (floats always out of 1)\nUsage: SET_ZONE_COLOR <name> <r> <g> <b>
-set_zone_id_color_help                         Change the color of a zone (floats always out of 1)\nUsage: SET_ZONE_ID_COLOR <id> <r> <g> <b>
-set_zone_expansion_help                        Change the Expansion rate of a zone\nUsage: SET_ZONE_EXPANSION <name> <growth>
-set_zone_id_expansion_help                     Change the Expansion rate of a zone\nUsage: SET_ZONE_ID_EXPANSION <id> <growth>
-set_zone_rotation_help                         Change the rotation speed of a zone\nUsage: SET_ZONE_ROTATION <name> <rotation>
-set_zone_id_rotation_help                      Change the rotation speed of a zone\nUsage: SET_ZONE_ID_ROTATION <id> <rotation>
-set_zone_penetrate_help                        Change whether the zone penetrates through walls\nUsage: SET_ZONE_PENETRATE <name> <bool>
-set_zone_id_penetrate_help                     Change whether the zone penetrates through walls\nUsage: SET_ZONE_ID_PENETRATE <id> <bool>
+set_zone_radius_help                           change zones radius. Usage: SET_ZONE_RADIUS <name> <radius> <rate>
+set_zone_id_radius_help                        change zones radius. Usage: SET_ZONE_ID_RADIUS <id> <radius> <rate>
+set_zone_position_help                         UNDOCUMENTED
+set_zone_id_position_help                      UNDOCUMENTED
+set_zone_route_help                            Sets a zones route. Usage: SET_ZONE_ROUTE <name> <x1> <y1> [<x2> <y2> ...]
+set_zone_id_route_help                         Sets a zones route. Usage: SET_ZONE_ROUTE <name> <x1> <y1> [<x2> <y2> ...]
+add_zone_route_help                            add to a zones route. Usage: ADD_ZONE_ROUTE <name> <x1> <y1> [<x2> <y2> ...]
+add_zone_id_route_help                         add to a zones route. Usage: ADD_ZONE_ROUTE <name> <x1> <y1> [<x2> <y2> ...]
+set_zone_coord_help                            change a zones actual position. Usage: SET_ZONE_COORD <name> <x> <y>
+set_zone_id_coord_help                         change a zones actual position. Usage: SET_ZONE_ID_COORD <id> <x> <y>
+set_zone_dir_help                              change a zones direction. Usage: SET_ZONE_DIR <name> <xdir> <ydir>
+set_zone_id_dir_help                           change a zones direction. Usage: SET_ZONE_ID_DIR <id> <xdir> <ydir>
+set_zone_speed_help                            change a zones speed. Usage: SET_ZONE_SPEED <name> <speed>
+set_zone_id_speed_help                         change a zones speed. Usage: SET_ZONE_ID_SPEED <id> <speed>
+set_zone_color_help                            Change the color of a zone (floats always out of 1). Usage: SET_ZONE_COLOR <name> <r> <g> <b>
+set_zone_id_color_help                         Change the color of a zone (floats always out of 1). Usage: SET_ZONE_ID_COLOR <id> <r> <g> <b>
+set_zone_expansion_help                        Change the Expansion rate of a zone. Usage: SET_ZONE_EXPANSION <name> <growth>
+set_zone_id_expansion_help                     Change the Expansion rate of a zone. Usage: SET_ZONE_ID_EXPANSION <id> <growth>
+set_zone_rotation_help                         Change the rotation speed of a zone. Usage: SET_ZONE_ROTATION <name> <rotation>
+set_zone_id_rotation_help                      Change the rotation speed of a zone. Usage: SET_ZONE_ID_ROTATION <id> <rotation>
+set_zone_penetrate_help                        Change whether the zone penetrates through walls. Usage: SET_ZONE_PENETRATE <name> <bool>
+set_zone_id_penetrate_help                     Change whether the zone penetrates through walls. Usage: SET_ZONE_ID_PENETRATE <id> <bool>
 condense_conquest_output                       Zone conquest output condensed into one line
 
 cycle_target_assignment      0xff9900Your target is now \1.\n
