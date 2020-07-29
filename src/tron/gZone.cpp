@@ -9685,8 +9685,13 @@ static void sg_SetZoneDir(std::istream &s,bool byId)
         zone_id = gZone::FindFirst(object_id_str);
     if (zone_id <= -1)
     {
-        zone_id = atoi(object_id_str);
-        if (zone_id < 0) return;
+        zone_id = gZone::FindIdFirst(objIntId);
+        if(zone_id < 0)
+        {
+            con << "Couldn't find the zone specified.\n";
+            return;
+        }
+        byId = true;
     }
 
     const tList<eGameObject>& gameObjects = grid->GameObjects();
