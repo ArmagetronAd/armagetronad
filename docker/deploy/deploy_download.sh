@@ -66,6 +66,7 @@ if test "${CI_COMMIT_REF_PROTECTED}" == "true" && test "${ZI_SERIES}" == "stable
 	# only releases have no _rc_, _alpha_ or _beta_ in their version
 	if ! echo ${PACKAGE_VERSION} | grep -q '_[a-z]*_'; then
 		BUILD_TYPE="release build"
+		TITLE="${PACKAGE_VERSION} released"
 	fi
 fi
 
