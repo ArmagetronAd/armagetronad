@@ -3,14 +3,23 @@
 
 ##### Fixed Bugs
 
+ * Windows: DPI scaling behavior wrong ([#33](https://gitlab.com/armagetronad/armagetronad/-/issues/33))
  * Debian builds: Documentation html files have empty last change ([#9](https://gitlab.com/armagetronad/armagetronad/-/issues/9))
  * Ubuntu PPA release candidate builds would overwrite previous stable releases ([#15](https://gitlab.com/armagetronad/armagetronad/-/issues/15))
+ * AppRun script does not work if call path contains spaces ([#24](https://gitlab.com/armagetronad/armagetronad/-/issues/24))
+ * Included forum links outdated ([#25](https://gitlab.com/armagetronad/armagetronad/-/issues/25))
+ * Client segfaults on OpenBSD ([#26](https://gitlab.com/armagetronad/armagetronad/-/issues/26))
+ * Client compiled with clang 10.0 (optimized) sefgaults on logout ([#28](https://gitlab.com/armagetronad/armagetronad/-/issues/28))
+ * Valgrind reports uses of unitialized, freed or invalid memory ([#29](https://gitlab.com/armagetronad/armagetronad/-/issues/29))
 
 ##### New Features
 
  * Adapt ChangeLog and fingerprint generation to git ([#11](https://gitlab.com/armagetronad/armagetronad/-/issues/11))
  * Integrated build system ([#14](https://gitlab.com/armagetronad/armagetronad/-/issues/14))
 
+##### Contributors
+
+Hugh McMaster, Manuel Moos
 
 #### Changes since 0.2.8.3.4:
 
