@@ -2953,7 +2953,7 @@ input_cockpit_key_3_text      Klawisz kokpitu 3
 screen_vsync_default_text     Domyslne
 screen_vsync_text             VSync:
 hud_fastest                   Najszybszy:
-forbid_hud_map                Zabronic klientom uzycia minimapy?
+forbid_hud_map_help           Zabronic klientom uzycia minimapy?
 screen_vsync_motionblur_help  Tworz wlasne klatki do zmiekczania ruchu, co zmniejsza ilosc artefaktow. Zalecane zaawansowanym graczom.
 sound_error_unknown           Plik \1 nie mogl byc zaladowany: \2
 tweaks_ztrick_text            ZTrick:

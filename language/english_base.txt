@@ -384,6 +384,8 @@ win_zone_randomness_help            Randomness factor of the initial win zone po
 
 swap_winzone_deathzone_colors_help  0:Default, original colors and 1:Swap, swaps their colors with each other.
 
+round_wait_help                     UNDOCUMENTED
+
 game_timeout_help                    Base timeout for game state synchronisation; gives approximately the maximum time between rounds.
 last_chat_break_time_help           Last round time a player in chat mode is able to pause the timer
 extra_round_time_help               Length of an extra pause at the beginning of the round
@@ -400,6 +402,7 @@ respawn_script_help                 Spawns an external script from a scripts/ su
 force_respawn_script_help           Spawns an external script from a scripts/ subdirectory on the data path after killing the other possibly running instance.
 kill_script_help                    Kills a script. Argument must match the SPAWN_SCRIPT argument.
 list_scripts_help                   Lists active scripts.
+kill_all_scripts_help               Kills all active scripts.
 script_env_help                     Set custom environment variables for scripts. Usage: SCRIPT_ENV <variable name> <value>
 
 chatter_remove_time_help            Time in seconds after which a permanent chatter is removed from the game
@@ -672,6 +675,7 @@ camera_forbid_free_help        Forbids the use of the free camera on all clients
 camera_forbid_follow_help    Forbids the use of the fixed external camera on all clients
 camera_forbid_custom_help    Forbids the use of the custom camera on all clients
 camera_forbid_server_custom_help  Forbids the use of the server custom camera
+camera_forbid_mer_help       Forbids the use of Meriton's camera
 
 camera_forbid_custom_glance_help                 Forbids use of special glance camera settings
 camera_override_custom_glance_help               Overrides custom glance settings with values from the server
@@ -823,7 +827,7 @@ score_locy_help                   Vertical position of the score display
 score_size_help                   Size of the score display
 cm_locy_help                      Vertical position of the center messages
 hud_cache_threshold_help          Update threshold for HUD gauges, only in effect when display lists are activated: if the relative change times the amount of time since the last update is bigger than this, the gauge gets updated.
-forbid_hud_map                    Disallow clients to display the HUD minimap?
+forbid_hud_map_help               Disallow clients to display the HUD minimap?
 
 #floor
 grid_size_help            Distance between grid lines
@@ -978,6 +982,7 @@ chatlog_write_pm_help        Write Private messages (/msg) to chatlog [1: on | 0
 chatlog_write_enemy_help     Write /enemy messages to chatlog [1: on | 0: off]
 chatlog_write_player_help    Write /player messages to chatlog [1: on | 0: off]
 console_log_help        Write all console messages to var/consolelog.txt
+console_log_color_help  Write color console messages to var/consolelogcolor.txt
 admin_log_help      Write all admin chat commands to var/adminlog.txt (Works only in a server)
 show_fps_help            Enable fps display
 show_recording_time_help Enable display of recording/playback time
@@ -1175,6 +1180,8 @@ admin_list_min_access_level_help   Minimal access level to be shown in /admins
 # communication
 console_message_help        Prints a message on the console of all connected clients.
 center_message_help            Prints a big message on the screen of all connected clients.
+center_player_message_help  Sends a center message to a specified player.
+player_center_message_help  Sends a center message to a specified player.
 fullscreen_message_help     Prints a big message all over the screen, interrupting gameplay for a configurable timeout. Use with care.
 say_help                    Dedicated server only: let the server administrator say something.
 rename_help            Renames the given player.
@@ -1877,6 +1884,7 @@ misc_initial_menu_help Restarts the first setup menu where you can select color 
 
 language_first_help        The language \g will use
 language_second_help        Fallback language if the first language is not available
+language_reload_help       Immediately reload languages from file.
 
 language_menu_title        Language Settings
 language_menu_help        Choose the language used for all onscreen texts
@@ -2646,7 +2654,9 @@ player_admin_slap_free          \1 0xRESETThas been slapped by an administrator.
 player_admin_slap_win          \1 has been hugged by an administrator and got \2 points.\n
 player_admin_slap_lose          \1 has been slapped by an administrator and lost \2 points.\n
 slap_help                   Slaps the given player by penalizing them with the specified amount of points. Be smart and you may be able to hug your users, too ;)
+give_points_help              "Hugs" a player, giving them a specified amount of points.
 take_points_help              Slaps the given player by punishing them with the specified amound of points. Be careful or you will lose a of points :P \n
+points_help                   UNDOCUMENTED
 player_win_instant              \1 was awarded \2 points for hitting the instant win zone.\n
 player_win_race                  \1 was awarded \2 points for winning the race.\n
 player_win_conquest              \1 was awarded \2 points for conquering the enemy base.\n
@@ -2659,6 +2669,8 @@ player_win_conquest_specific  \1 was awarded \2 points for conquering \3's base.
 player_kill_collapse          \1 was eradicated by its collapsing zone.\n
 player_win_hole               \1 got \2 points for a sacrifice for the good of the team.\n
 player_lose_hole              0xffff00ZOMG! 0xff7f00HOLER!!1!!0xRESETT \1 lost \2 points for being a cheap ass lamer.\n
+
+declare_round_winner_help     Declare the winner of the current round and end the round. Usage: DECLARE_ROUND_WINNER <player>
 
 player_blastzone_score        \1 exploded on a blastzone and lost \2 points.\n
 
@@ -2802,6 +2814,8 @@ player_message_usage    Usage: PLAYER_MESSAGE <user ID or name> "<Message>"\n
 kick_usage              Usage: KICK <user ID or name> <Reason>\n
 ban_usage               Usage: BAN <user ID or name> <time in minutes(defaults to 60)> <Reason>\n
 kickmove_usage          Usage: \1 <user ID or name> <server IP to kick to>:<server port to kick to> <Reason>\n
+
+help_help               /help
 
 add_help_topic_help     Add a new help topic to be used with /help. Usage: ADD_HELP_TOPIC <topic> <short description> <text>
 add_help_topic_usage    Usage: ADD_HELP_TOPIC <topic> <short description> <text>\n
@@ -3226,6 +3240,9 @@ authority_level_help             Changes the access level for all users from the
 authority_level_usage            usage: AUTHORITY_LEVEL <authority> <new access level (numerical)>\n
 authority_level_change           Access level of users from authority \1 changed to "\2".\n
 
+op_help                     Gives another player a higher or a lower access level. OP <player> [+|-]<optional access level>
+deop_help                   Reverses /op; it takes away a player's access level, effectively making them unauthenticated again.
+
 #*************************************
 #*************************************
 #
@@ -3566,6 +3583,7 @@ flag_home_randomness_x_help         Y direction the flag can vary from its start
 flag_home_randomness_y_help         X direction the flag can vary from its starting spot when returned.
 flag_required_home_help             Flag indicating whether flags need to be home to score
 flag_team_help                      0 - Flags are neutral, 1 Flags have team that own them
+flag_controls_help                  Is a player allowed to use flag commands (/drop, /pass) ?
 score_flag_help                     Number of points a player scores on returning a captured flag to their base
 
 ## Shooting
@@ -3772,6 +3790,7 @@ glance_back_tooltip_help            UNDOCUMENTED
 glance_left_tooltip_help            UNDOCUMENTED
 glance_right_tooltip_help           UNDOCUMENTED
 player_gridpos_interval_help        The time between previous "player_gridpos" output to the next.
+player_gridpos_on_turn_help         Write PLAYER_GRIDPOS event when someone turns?
 zone_gridpos_interval_help          The time between previous "zone_gridpos" output to the next.
 online_stats_interval_help          The time between previous "online_players_*" output to the next.
 help_message_help                   A help message sent to those calling it. Works through "/help" as well.
@@ -3947,6 +3966,7 @@ targetzone_color_b_help   The blue portion of the target zone's color.
 
 set_cycle_speed_help      Set the current travelling speed of the owner: Usage: SET_CYCLE_SPEED <name> <speed>
 set_cycle_rubber_help     Set the current used up rubber of the owner: Usage: SET_CYCLE_RUBBER <name> <rubber>
+set_cycle_braking_help    Sets whether a player is braking. Usage: SET_CYCLE_BRAKING <name> <braking>
 
 #*************************************
 #*************************************

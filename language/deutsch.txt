@@ -737,6 +737,7 @@ score_locy_help               Vertikale Position der Punktzahl in der Anzeige
 score_size_help               Göße der Punktzahl in der Anzeige
 cm_locy_help                  Vertikale Position der Zentralnachrichten vom Server
 hud_cache_threshold_help      Update-Schwelle für HUD-Anzeigen, wenn Display-Listen-Optimierung aktiv ist. Erst, wenn die Änderung der Anzeigen eine durch diesen Wert bestimmte Schwelle überschreiten, werden sie neu gezeichnet.
+forbid_hud_map_help           Verbiete Clients das Zeigen der HUD Minikarte?
 
 #floor
 grid_size_help                Abstand zwischen Rasterlinien
