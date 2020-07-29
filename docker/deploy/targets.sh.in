@@ -20,32 +20,32 @@ test -z ${SUFFIX} && exit 1
 case ${SERIES}+${SUFFIX}+@version@ in
     CURRENT+armagetronad+*_rc_*)
 	SF_DIR="rc"
-	LP_SERIES="0.2.8"
+	LP_SERIES="0.2.9"
 	ZI_SERIES="rc"
 	STEAM_BRANCH="staging"
 	;;
     CURRENT+armagetronad+*)
 	SF_DIR="stable"
-	LP_SERIES="0.2.8"
+	LP_SERIES="0.2.9"
 	ZI_SERIES="stable"
 	STEAM_BRANCH="staging"
 	;;
     CURRENT+beta+*)
 	SF_DIR="beta"
-	LP_SERIES="0.2.8-snapshots"
+	LP_SERIES="0.2.9-snapshots"
 	ZI_SERIES="beta"
 	STEAM_BRANCH="beta"
 	;;
     CURRENT+*)
 	SF_DIR="snapshots"
-	LP_SERIES="0.2.8-snapshots"
+	LP_SERIES="0.2.9-snapshots"
 	ZI_SERIES="alpha"
 	STEAM_BRANCH="alpha"
 	;;
 
     LTS_028*+armagetronad+*_rc_*)
 	SF_DIR="rc"
-	LP_SERIES="0.2.8"
+	LP_SERIES="0.2.9"
 	ZI_SERIES="rc"
 	STEAM_BRANCH=""
 	;;
