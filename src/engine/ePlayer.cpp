@@ -3532,7 +3532,7 @@ static tArray<tString> se_ReportsMessages()
 tAccessLevel se_AccessLevelReportsRead = tAccessLevel_Default;
 static tSettingItem<tAccessLevel> se_AccessLevelReportsReadConf("ACCESS_LEVEL_REPORTS_READ", se_AccessLevelReportsRead);
 
-tAccessLevel se_AccessLevelReportsClear = tAccessLevel_Admin;
+tAccessLevel se_AccessLevelReportsClear = tAccessLevel_Owner;
 static tSettingItem<tAccessLevel> se_AccessLevelReportsClearConf("ACCESS_LEVEL_REPORTS_CLEAR", se_AccessLevelReportsClear);
 
 static void se_ChatReadReport( ePlayerNetID * p, std::istream & s )

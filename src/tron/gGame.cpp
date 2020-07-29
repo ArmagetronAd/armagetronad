@@ -6221,6 +6221,7 @@ static void sg_ladderlogClear(std::istream &s)
     o.close();
 }
 static tConfItemFunc sg_ladderlogClearConf("CLEAR_LADDERLOG", &sg_ladderlogClear);
+static tAccessLevelSetter sg_ladderlogClearLevel(sg_ladderlogClearConf, tAccessLevel_Owner);
 
 static void sg_chatlogClear(std::istream &s)
 {
@@ -6231,6 +6232,7 @@ static void sg_chatlogClear(std::istream &s)
     o.close();
 }
 static tConfItemFunc sg_chatlogClearConf("CLEAR_CHATLOG", &sg_chatlogClear);
+static tAccessLevelSetter sg_chatlogClearConfLevel(sg_chatlogClearConf, tAccessLevel_Owner);
 
 static void sg_scorelogClear(std::istream &s)
 {
@@ -6239,6 +6241,7 @@ static void sg_scorelogClear(std::istream &s)
     o.close();
 }
 static tConfItemFunc sg_scorelogClearConf("CLEAR_SCORELOG", &sg_scorelogClear);
+static tAccessLevelSetter sg_scorelogClearConfLevel(sg_scorelogClearConf, tAccessLevel_Owner);
 
 static void sg_reportsClear(std::istream &s)
 {
@@ -6247,3 +6250,4 @@ static void sg_reportsClear(std::istream &s)
     o.close();
 }
 static tConfItemFunc sg_reportsClearConf("CLEAR_REPORTS", &sg_reportsClear);
+static tAccessLevelSetter sg_reportsClearConfLevel(sg_reportsClearConf, tAccessLevel_Owner);
