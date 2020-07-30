@@ -9567,6 +9567,17 @@ static void sg_AddZoneRoute(std::istream &s,bool byId,bool clear)
                         zone->SetPosition(route.front());
                     }
                 }
+                if(route.size() != 1 && (speed == 0 || speedovr))
+                {
+                    if(speed == 0)
+                        dir = route.at(1) - zone->GetPosition();
+                    if(dir.Norm() != 0)
+                        dir.Normalize();
+                    if(speedovr || speed == 0)
+                        dir *= newSpeed;
+                    else
+                        dir *= speed;
+                }
                 
                 for(std::vector<eCoord>::const_iterator iter = route.begin(); iter != route.end(); ++iter)
                 {
