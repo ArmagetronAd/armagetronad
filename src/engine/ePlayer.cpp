@@ -3415,27 +3415,40 @@ static void se_ChatTeam( ePlayerNetID * p, std::istream &s, eChatSpamTester & sp
 // /enemy chat command: talk to enemies
 static void se_ChatEnemy(ePlayerNetID *p, std::istream &s, eChatSpamTester &spam)
 {
+    // check for global chat access right
+    if ( !se_CheckAccessLevelShout( p ) )
+    {
+        return;
+    }
+
+    if ( IsSilencedWithWarning(p) || spam.Block() )
+    {
+        return;
+    }
+
 // read the message
     tString message;
     message.ReadLine( s, true );
 
-    switch (sn_GetNetState())
+    //switch (sn_GetNetState())
     {
-        case nSERVER:
+        //case nSERVER:
         {
             tColoredString send;
             send << p->GetColoredName();
             send << tColoredString::ColorString( 1,1,.5 );
             send << " --> ";
             send << tColoredString::ColorString( 1,0,0 );
-            send << "Enemies";
+            send << tOutput("$player_enemies_message");
             send << tColoredString::ColorString( 1,1,.5 );
-            send << ": " << message << "\n";
+            send << ": " << message;
 
             // display it
-            sn_ConsoleOut( send );
+            se_BroadcastChatLine( p, send, send );
+            send << "\n";
+            sn_ConsoleOut( send, 0 );
 
-            break;
+            //break;
         }
     }
 }
@@ -4406,6 +4419,7 @@ void handle_chat( nMessage &m )
                     else if (command == "/enemy" || command == "/enemies")
                     {
                         spam.lastSaidType_ = eChatMessageType_Public;
+                        spam.say_ = spam.say_.SubStr(command.Len());
                         se_ChatEnemy( p, s, spam );
                         return;
                     }

@@ -2758,6 +2758,7 @@ player_not_on_team               You are not on a team.\n
 team_renamed                     \1 renamed it's team to \2.\n
 player_team_message              Teammates
 player_spectator_message         Spectators
+player_enemies_message           Enemies
 no_real_teams                    No teams with more than one player.\n
 player_topologypolice             Order from Topology Police: \1
 player_win_shot                     \1 shot \3 for \2 points.\n
