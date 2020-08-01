@@ -108,12 +108,20 @@ uri_zipsrc: ${SOURCE_ZIP}
 
 EOF
 
+if test -r ../upload/RELEASENOTES.md; then
+	cat >> ${POST} <<EOF
+### Release Notes
+
+EOF
+	cat ../upload/RELEASENOTES.md >> ${POST}
+	echo >> ${POST}
+fi
+
 if test -r ../upload/PATCHNOTES.md; then
 	cat >> ${POST} <<EOF
 ### Patch Notes
 
 EOF
-
 	cat ../upload/PATCHNOTES.md >> ${POST}
 fi
 
