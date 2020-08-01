@@ -23,19 +23,23 @@ set -x
 . ./version.sh || exit $?
 . ./targets.sh || exit $?
 
+mv upload/RELEASENOTES.txt . || exit $?
+mv upload/PATCHNOTES.txt . || exit $?
+rm -f upload/*.md upload/*.html 
+
 if test ${STAGING} == true; then
     echo "Just staging, no upload to Launchpad"
 else
     EXIT=0
-    for f in upload/*${PACKAGE_VERSION}* upload/*.md; do
+    for f in upload/*${PACKAGE_VERSION}* upload/*.txt; do
 	if test -r $f; then
-	    if ! ./lp-project-upload ${LP_PROJECT} ${LP_SERIES} ${LP_VERSION} $f; then
+	    if ! ./lp-project-upload ${LP_PROJECT} ${LP_SERIES} ${LP_VERSION} $f PATCHNOTES.txt RELEASENOTES.txt; then
             sleep 10
-            if ! ./lp-project-upload ${LP_PROJECT} ${LP_SERIES} ${LP_VERSION} $f; then
+            if ! ./lp-project-upload ${LP_PROJECT} ${LP_SERIES} ${LP_VERSION} $f PATCHNOTES.txt RELEASENOTES.txt; then
                 sleep 10
-                if ! ./lp-project-upload ${LP_PROJECT} ${LP_SERIES} ${LP_VERSION} $f; then
+                if ! ./lp-project-upload ${LP_PROJECT} ${LP_SERIES} ${LP_VERSION} $f PATCHNOTES.txt RELEASENOTES.txt; then
                     sleep 10
-                    ./lp-project-upload ${LP_PROJECT} ${LP_SERIES} ${LP_VERSION} $f || EXIT=$?
+                    ./lp-project-upload ${LP_PROJECT} ${LP_SERIES} ${LP_VERSION} $f  PATCHNOTES.txt RELEASENOTES.txt || EXIT=$?
                 fi
             fi
         fi
