@@ -138,6 +138,7 @@ zip \
 FROM armabuild_base as armadeploy_base
 RUN apt-get -y update && apt-get install \
 0install-core \
+pandoc \
 -y
 
 FROM armadeploy_base as armadeploy
