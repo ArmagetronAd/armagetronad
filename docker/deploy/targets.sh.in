@@ -185,7 +185,7 @@ UPLOAD_ZI_SCP=arma0install@builder.armagetronad.org:/home/arma0install/0install/
 
 if test ${STAGING} == true; then
     # download URI base to use for zeroinstall
-    DOWNLOAD_URI_BASE=http://download.armagetronad.org/staging/${SF_DIR}/${PACKAGE_VERSION}/
+    DOWNLOAD_URI_BASE=http://download.armagetronad.org/staging/${SF_DIR}/@version@/
 elif test "${SF_DIR}" == "stable"; then
 	# only stable builds go to launchpad permanently
 	DOWNLOAD_URI_BASE=https://launchpad.net/${LP_PROJECT}/${LP_SERIES}/${LP_VERSION}/+download/
