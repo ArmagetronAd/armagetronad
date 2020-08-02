@@ -1373,11 +1373,10 @@ tString tColoredString::RemoveColorsLoose( const char * c )
         if (*c=='0' && len >= 8 && c[1]=='x')
         {
             tString color; color << c[0] << c[1] << c[2] << c[3] << c[4] << c[5] << c[6] << c[7];
-            std::stringstream color2; color2 << color;
-            const char *ccolor = color2.str().c_str();
-            if(strncmp(c,"0xRESETT",8) == 0 || tColor::VerifyColorCode(ccolor))
+            if(color == "0xRESETT" || tColor::VerifyColorCode(color))
             {
                 c += 8; len -= 8;
+                continue;
             }
         }
         ret << (*(c++));
@@ -1408,9 +1407,7 @@ tString tColoredString::EscapeBadColors(const char *c,std::string lastKnownGoodC
         if (*c=='0' && len >= 8 && c[1]=='x')
         {
             tString color; color << c[0] << c[1] << c[2] << c[3] << c[4] << c[5] << c[6] << c[7];
-            std::stringstream color2; color2 << color;
-            const char *ccolor = color2.str().c_str();
-            if(color == "0xRESETT" || tColor::VerifyColorCode(ccolor))
+            if(color == "0xRESETT" || tColor::VerifyColorCode(color))
             {
                 lastKnownGoodColor = color;
                 ret << color;
