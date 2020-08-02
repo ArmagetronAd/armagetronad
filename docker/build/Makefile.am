@@ -595,6 +595,7 @@ deploy_zi: result.deploy_zi
 deploy_download: result.deploy_download
 
 deploy_ppa: \
+deploy_ppa_groovy \
 deploy_ppa_focal \
 deploy_ppa_eoan \
 deploy_ppa_bionic \
