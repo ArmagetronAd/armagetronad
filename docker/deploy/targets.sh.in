@@ -20,32 +20,32 @@ test -z ${SUFFIX} && exit 1
 case ${SERIES}+${SUFFIX}+@version@ in
     CURRENT+armagetronad+*_rc_*)
 	SF_DIR="rc"
-	LP_SERIES="0.2.8"
+	LP_SERIES="0.2.9"
 	ZI_SERIES="rc"
 	STEAM_BRANCH="staging"
 	;;
     CURRENT+armagetronad+*)
 	SF_DIR="stable"
-	LP_SERIES="0.2.8"
+	LP_SERIES="0.2.9"
 	ZI_SERIES="stable"
 	STEAM_BRANCH="staging"
 	;;
     CURRENT+beta+*)
 	SF_DIR="beta"
-	LP_SERIES="0.2.8-snapshots"
+	LP_SERIES="0.2.9-snapshots"
 	ZI_SERIES="beta"
 	STEAM_BRANCH="beta"
 	;;
     CURRENT+*)
 	SF_DIR="snapshots"
-	LP_SERIES="0.2.8-snapshots"
+	LP_SERIES="0.2.9-snapshots"
 	ZI_SERIES="alpha"
 	STEAM_BRANCH="alpha"
 	;;
 
     LTS_028*+armagetronad+*_rc_*)
 	SF_DIR="rc"
-	LP_SERIES="0.2.8"
+	LP_SERIES="0.2.9"
 	ZI_SERIES="rc"
 	STEAM_BRANCH=""
 	;;
@@ -194,9 +194,13 @@ UPLOAD_ZI_SCP=arma0install@builder.armagetronad.org:/home/arma0install/0install/
 
 if test ${STAGING} == true; then
     # download URI base to use for zeroinstall
-    DOWNLOAD_URI_BASE=http://download.armagetronad.org/staging/${SF_DIR}/${PACKAGE_VERSION}/
+    DOWNLOAD_URI_BASE=http://download.armagetronad.org/staging/${SF_DIR}/@version@/
+elif test "${SF_DIR}" == "stable"; then
+	# only stable builds go to launchpad permanently
+	DOWNLOAD_URI_BASE=https://launchpad.net/${LP_PROJECT}/${LP_SERIES}/${LP_VERSION}/+download/
 else
-    DOWNLOAD_URI_BASE=https://launchpad.net/${LP_PROJECT}/${LP_SERIES}/${LP_VERSION}/+download/
+	# the rest reference to sourceforge
+	DOWNLOAD_URI_BASE=https://sourceforge.net/projects/armagetronad/files/${SF_DIR}/@version@/
 fi
 
 # **********************************************************************

@@ -27,16 +27,16 @@ for f in *; do
 	*.exe)
 	    WIN_CLIENT=$f
 	    ;;
-	*Dedicated-32bit-${PACKAGE_VERSION})
+	*Dedicated-32bit-${PACKAGE_VERSION}.AppImage)
 	    LIN32_SERVER=$f
 	    ;;
-	*-32bit-${PACKAGE_VERSION})
+	*-32bit-${PACKAGE_VERSION}.AppImage)
 	    LIN32_CLIENT=$f
 	    ;;
-	*Dedicated-${PACKAGE_VERSION})
+	*Dedicated-${PACKAGE_VERSION}.AppImage)
 	    LIN64_SERVER=$f
 	    ;;
-	*-${PACKAGE_VERSION})
+	*-${PACKAGE_VERSION}.AppImage)
 	    LIN64_CLIENT=$f
 	    ;;
 	*-client*.tbz|*-server*.tbz)
@@ -66,6 +66,7 @@ if test "${CI_COMMIT_REF_PROTECTED}" == "true" && test "${ZI_SERIES}" == "stable
 	# only releases have no _rc_, _alpha_ or _beta_ in their version
 	if ! echo ${PACKAGE_VERSION} | grep -q '_[a-z]*_'; then
 		BUILD_TYPE="release build"
+		TITLE="${PACKAGE_VERSION} released"
 	fi
 fi
 
@@ -108,12 +109,20 @@ uri_zipsrc: ${SOURCE_ZIP}
 
 EOF
 
+if test -r ../upload/RELEASENOTES.md; then
+	cat >> ${POST} <<EOF
+### Release Notes
+
+EOF
+	cat ../upload/RELEASENOTES.md >> ${POST}
+	echo >> ${POST}
+fi
+
 if test -r ../upload/PATCHNOTES.md; then
 	cat >> ${POST} <<EOF
 ### Patch Notes
 
 EOF
-
 	cat ../upload/PATCHNOTES.md >> ${POST}
 fi
 

@@ -43,7 +43,7 @@ CI_base.tag: gits.tag source.tag result.build_server_32 result.build_client_64 c
 	touch $@
 
 # minimal expected build to be packable
-CI_pack.tag: gits_artifacts.tag source.tag CI_base.tag free.tag upload/PATCHNOTES.md upload/CHANGELOG.md
+CI_pack.tag: gits_artifacts.tag source.tag CI_base.tag free.tag upload/PATCHNOTES.md upload/CHANGELOG.md upload/RELEASENOTES.md
 	touch $@
 
 # all windows builds
@@ -51,7 +51,7 @@ CI_windows.tag: CI_base.tag steam_windows.tag closed_regular.tag
 	touch $@
 
 # all free linux builds (so, no steam)
-CI_free.tag: CI_base.tag free.tag
+CI_free.tag: CI_base.tag free.tag reformat.tag
 	touch $@
 
 # (OBSOLETE) targets for CI merge tests, a bit leaner than a full build
@@ -179,6 +179,9 @@ upload/PATCHNOTES.md: sourcetar.tag upload/.tag
 
 upload/CHANGELOG.md: sourcetar.tag upload/.tag
 	${top_srcdir}/batch/make/patchnotes.py ${top_srcdir} ${top_srcdir}/CHANGELOG_FROZEN.md armagetronad armagetronad > $@
+
+upload/RELEASENOTES.md: ${src_dir}../deploy/RELEASENOTES.md upload/.tag
+	cp $< $@
 
 #***************************************************************
 
@@ -346,10 +349,10 @@ result.appimage_%: context.appimage_%
 	echo > $@
 
 APPIMAGE_BASENAME:=$(shell echo $(PACKAGE_TITLE) | sed -e "s, ,,g")
-APPIMAGE_CLIENT_64:=$(APPIMAGE_BASENAME)-$(PACKAGE_VERSION)
-APPIMAGE_SERVER_64:=$(APPIMAGE_BASENAME)Dedicated-$(PACKAGE_VERSION)
-APPIMAGE_CLIENT_32:=$(APPIMAGE_BASENAME)-32bit-$(PACKAGE_VERSION)
-APPIMAGE_SERVER_32:=$(APPIMAGE_BASENAME)Dedicated-32bit-$(PACKAGE_VERSION)
+APPIMAGE_CLIENT_64:=$(APPIMAGE_BASENAME)-$(PACKAGE_VERSION).AppImage
+APPIMAGE_SERVER_64:=$(APPIMAGE_BASENAME)Dedicated-$(PACKAGE_VERSION).AppImage
+APPIMAGE_CLIENT_32:=$(APPIMAGE_BASENAME)-32bit-$(PACKAGE_VERSION).AppImage
+APPIMAGE_SERVER_32:=$(APPIMAGE_BASENAME)Dedicated-32bit-$(PACKAGE_VERSION).AppImage
 
 upload/$(APPIMAGE_CLIENT_64): result.appimage_client_64 upload/.tag
 	cp $<.dir/AppImage $@
@@ -512,11 +515,28 @@ steam.tag: steam_windows.tag steam_linux.tag
 .PRECIOUS:  context.build_client_steam result.build_client_steam context.appdir_client_steam result.build_server_steam context.build_server_steam context.appdir_server_steam context.winbuild_steam context.winsource_steam
 
 #***************************************************************
+# Reformat .md files
+
+context.reformat: rootcontext.64 CI_pack.tag ${srcdir}/context/reformat.sh
+	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' upload/*.md ${srcdir}/context/reformat.sh
+	rm -f $@.dir/image
+	echo "armadeploy_64" > $@.dir/image
+	echo > $@
+result.reformat: context.reformat
+	+$(srcdir)/context_to_result.sh $@.dir ./reformat.sh $*
+	echo > $@
+
+reformat.tag: result.reformat
+	cp -a $<.dir/*.txt upload/
+	cp -a $<.dir/*.html upload/
+	echo > $@
+
+#***************************************************************
 
 # for testing, we want minimal builds before any deployment
 # in production, the CI solution is responsible for having built
 # everything not explicitly required here
-deploy_base.tag: CI_pack.tag debtest.tag ../deploy/targets.sh
+deploy_base.tag: CI_pack.tag debtest.tag reformat.tag ../deploy/targets.sh
 	echo > $@
 deploy_base: deploy_base.tag
 
@@ -596,6 +616,7 @@ deploy_download: result.deploy_download
 deploy_itch: result.deploy_itch
 
 deploy_ppa: \
+deploy_ppa_groovy \
 deploy_ppa_focal \
 deploy_ppa_eoan \
 deploy_ppa_bionic \
