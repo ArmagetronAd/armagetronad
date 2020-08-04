@@ -22,36 +22,52 @@ otherpath=${lastpath}
 function copylib()
 {
     baselib=$1
-    path=$(dirname ${baselib})
-    baselib=$(basename ${baselib})
-    echo "Found in ${path}."
-    if test "$lastpath" != "$path"; then
-        otherpath=$lastpath
-    fi
-    lastpath=$path
     while test -n "${baselib}"; do
+      if echo ${baselib} | grep -q \^/; then
+        # absolute path, split
+        path=$(dirname ${baselib})
+        baselib=$(basename ${baselib})
+        echo "Found in ${path}."
+        if test "$lastpath" != "$path"; then
+            otherpath=$lastpath
+        fi
+        lastpath=$path
+      fi
       # copy libary
       echo Copying ${baselib}...
-      cp -a "${path}/${baselib}" ${APPDIR}/usr/lib/
+      cp -a "${path}/${baselib}" ${APPDIR}/usr/lib/ || exit $?
       # resolve links
       baselib=$(ls -l ${path}/${baselib} | grep -- "->" | sed -e "s,.*-> ,,")
     done
 }
 
+# Luckily, This seems to only be an OPTIONAL dependency of libxml. It's huge.
+#libicudata \
+#libtiff \
+
 #   include libraries
 mkdir -p ${APPDIR}/usr/lib/
 mkdir -p ${APPDIR}/usr/local/lib/
 for library in \
-libxml2 \
-libZThread \
-libSDL-1 \
 libboost_thread \
-libSDL_image libpng \
-libSDL_mixer \
-libGLEW \
+libcaca \
 libfreetype \
 libftgl \
+libGLEW \
+libGLU \
+libicuuc \
+libncursesw \
+libpng \
 libprotobuf \
+libSDL-1 \
+libslang \
+libstdc++ \
+libSDL_image \
+libSDL_mixer \
+libtinfo \
+libwebp \
+libxml2 \
+libZThread \
 ; do
   echo "Checking for library ${library}...."
   baselib=$(ldd ${APPDIR}/usr/local/bin/${PACKAGE} | grep "${library}" | sed -e "s,.*=> ,," -e "s, (.*,,")
