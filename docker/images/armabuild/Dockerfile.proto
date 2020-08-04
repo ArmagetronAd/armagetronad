@@ -5,14 +5,20 @@ LABEL maintainer="Manuel Moos <z-man@users.sf.net>"
 # ###########################
 
 FROM base as commonground
-RUN apt-get -y update && apt-get install \
+
+# record libraries present in base system, install things we know we need
+RUN ls /usr/lib/*.so* /usr/lib/x86_64-linux-gnu/*.so* /usr/lib/i386-linux-gnu/*.so* \
+           /lib/*.so*     /lib/x86_64-linux-gnu/*.so*     /lib/i386-linux-gnu/*.so* \ 
+    2>/dev/null | sed -e s,.*/,, > /usr/base_library_list && \
+apt-get -y update && apt-get install \
+curl \
 g++ \
 git \
 make \
 #libboost-dev \
 #libboost-thread-dev \
 #libprotobuf-dev \
-libxml2-dev \
+#libxml2-dev \
 libzthread-dev \
 recode \
 -y
@@ -25,6 +31,8 @@ FROM commonground as armabuild_base
 # full build dependencies
 RUN apt-get -y update && apt-get install \
 curl \
+desktop-file-utils \
+file \
 g++ \
 git \
 make \
@@ -32,27 +40,56 @@ make \
 #libboost-thread-dev \
 #libfreetype6-dev \
 #libftgl-dev \
+libgl1-mesa-dev \
 #libglew-dev \
-#libjpeg-dev \
-#libpng-dev \
+libglu1-mesa-dev \
+libjpeg-dev \
+libpng-dev \
 #libprotobuf-dev \
-libsdl1.2-dev \
-libsdl-image1.2-dev \
-libsdl-mixer1.2-dev \
+#libsdl1.2-dev \
+#libsdl-image1.2-dev \
+#libsdl-mixer1.2-dev \
 #libsdl2-dev \
 #libsdl2-image-dev \
 #libsdl2-mixer-dev \
 #libxml2-dev \
 libzthread-dev \
+pkg-config \
 recode \
 -y
 
 # copy appimage tools
 COPY appimage/* /usr/bin/
 
+# optional: appstream
+RUN apt-get -y update && apt-get install \
+appstream \
+-y || true
+
 FROM armabuild_base as armabuild
-# set up builder user
-RUN useradd builder && mkdir -p /home/builder && chown builder:builder /home/builder # && chmod 777 /home/builder
+
+# for debugging, do the manual builds one at a time
+
+# install our version of libxml2
+#COPY build_libxml2.sh .
+#RUN ./build_libxml2.sh libxml2-2.9.10 && rm ./build_libxml2.sh
+
+# install our version of libsdl
+#COPY libsdl-1.2.15-const-xdata32.patch build_libsdl.sh ./
+#RUN ./build_libsdl.sh SDL-1.2.15 && rm ./build_libsdl.sh
+
+# install our version of libsdl_image
+#COPY build_libsdl_image.sh .
+#RUN ./build_libsdl_image.sh SDL_image-1.2.12 && rm ./build_libsdl_image.sh
+
+# for production: do all manual builds in one go, set up builder user
+COPY build*.sh *.patch ./
+RUN ./build_libxml2.sh libxml2-2.9.10 && rm ./build_libxml2.sh && \
+    ./build_libsdl.sh SDL-1.2.15 && rm ./build_libsdl.sh && \
+    ./build_libsdl_image.sh SDL_image-1.2.12 && rm ./build_libsdl_image.sh && \
+    useradd builder && mkdir -p /home/builder && chown builder:builder /home/builder # && chmod 777 /home/builder
+
+# set up rest of builder user
 WORKDIR /home/builder
 USER builder
 
@@ -83,6 +120,10 @@ RUN apt-get -y update && apt-get install \
 debhelper \
 dh-systemd \
 devscripts \
+libsdl1.2-dev \
+libsdl-image1.2-dev \
+libsdl-mixer1.2-dev \
+libxml2-dev \
 lptools \
 -y
 
@@ -160,7 +201,7 @@ make \
 #libboost-dev \
 #libboost-thread-dev \
 #libprotobuf-dev \
-libxml2-dev \
+#libxml2-dev \
 libzthread-dev \
 pkg-config \
 python3 \

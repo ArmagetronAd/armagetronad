@@ -1,0 +1,6 @@
+FROM i386/debian:9
+
+COPY *.AppImage .
+RUN ./*.AppImage --appimage-extract-and-run --version
+
+RUN LD_DEBUG_APP=true ./*.AppImage --appimage-extract-and-run --version

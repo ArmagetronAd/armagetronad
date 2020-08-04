@@ -1,0 +1,8 @@
+FROM fedora:24
+
+RUN yum -y install mesa-libGL && yum clean all
+
+COPY *.AppImage .
+RUN ./*.AppImage --appimage-extract-and-run --version
+
+RUN LD_DEBUG_APP=true ./*.AppImage --appimage-extract-and-run --version

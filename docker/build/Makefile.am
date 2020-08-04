@@ -68,6 +68,9 @@ CI.tag: CI_windows.tag CI_free.tag full.tag CI_pack.tag
 CI_base: CI_base.tag
 CI: CI.tag
 
+# all tests
+test: debtest.tag appimagetests.tag CI.tag deploy_base.tag
+
 all:	default
 
 dockertest.tag:
@@ -218,6 +221,7 @@ context.steam: context.64
 context.debsrc_%: rootcontext.64 ${srcdir}/rebrand_debian_core.sh ${srcdir}/debian_source.sh gits_artifacts.tag $(TARBALL)
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' $(TARBALL) ${srcdir}/rebrand_debian_core.sh ${srcdir}/debian_source.sh ./gits/debian
 	if test -r  ../deploy/secrets/sec.gpg; then cp -lrf ../deploy/secrets/*.gpg $@.dir/; fi
+	rm -f $@.dir/image
 	echo "armadeb_64" > $@.dir/image
 	echo > $@
 result.debsrc_%: context.debsrc_%
@@ -368,6 +372,80 @@ appimage.tag: appimage_client_64.tag appimage_server_64.tag appimage_client_32.t
 	echo > $@
 
 .PRECIOUS: context.appimage_server_32 context.appimage_client_32 context.appimage_server_64 context.appimage_client_64
+
+#***************************************************************
+
+# appimage tests; test scripts are in contest/tests/Dockerfile.*
+
+test.appimage_server_64_ubuntu_latest: upload/$(APPIMAGE_SERVER_64)
+test.appimage_server_64_ubuntu_oldest: upload/$(APPIMAGE_SERVER_64)
+test.appimage_client_64_ubuntu_latest: upload/$(APPIMAGE_CLIENT_64)
+test.appimage_client_64_ubuntu_oldest: upload/$(APPIMAGE_CLIENT_64)
+
+test.appimage_client_64_ubuntu_latest_skewed: upload/$(APPIMAGE_CLIENT_64)
+test.appimage_client_64_ubuntu_oldest_skewed: upload/$(APPIMAGE_CLIENT_64)
+
+test.appimage_server_64_fedora_latest: upload/$(APPIMAGE_SERVER_64)
+test.appimage_server_64_fedora_oldest: upload/$(APPIMAGE_SERVER_64)
+test.appimage_client_64_fedora_latest: upload/$(APPIMAGE_CLIENT_64)
+test.appimage_client_64_fedora_oldest: upload/$(APPIMAGE_CLIENT_64)
+
+test.appimage_server_64_centos_latest: upload/$(APPIMAGE_SERVER_64)
+test.appimage_server_64_centos_oldest: upload/$(APPIMAGE_SERVER_64)
+test.appimage_client_64_centos_latest: upload/$(APPIMAGE_CLIENT_64)
+test.appimage_client_64_centos_oldest: upload/$(APPIMAGE_CLIENT_64)
+
+test.appimage_server_32_debian_latest: upload/$(APPIMAGE_SERVER_32)
+test.appimage_server_32_debian_oldest: upload/$(APPIMAGE_SERVER_32)
+test.appimage_client_32_debian_latest: upload/$(APPIMAGE_CLIENT_32)
+test.appimage_client_32_debian_oldest: upload/$(APPIMAGE_CLIENT_32)
+
+test.%: context/tests/Dockerfile.%
+	rm -rf $@.dir
+	mkdir -p $@.dir
+	cp $^ $@.dir
+	cd $@.dir; docker rmi $*:last || true
+	cd $@.dir; docker tag $*:latest $*:last || true
+	cd $@.dir; docker build . -f Dockerfile.* -t $*:latest
+	cd $@.dir; docker rmi $*:last || true
+	echo > $@
+
+appimagetests.tag: \
+	test.appimage_server_64_ubuntu_latest \
+	test.appimage_server_64_ubuntu_oldest \
+	test.appimage_client_64_ubuntu_latest \
+	test.appimage_client_64_ubuntu_oldest \
+	test.appimage_client_64_ubuntu_latest_skewed \
+	test.appimage_client_64_ubuntu_oldest_skewed \
+	test.appimage_server_64_fedora_latest \
+	test.appimage_server_64_fedora_oldest \
+	test.appimage_client_64_fedora_latest \
+	test.appimage_client_64_fedora_oldest \
+	test.appimage_server_64_centos_latest \
+	test.appimage_server_64_centos_oldest \
+	test.appimage_client_64_centos_latest \
+	test.appimage_client_64_centos_oldest \
+	test.appimage_server_32_debian_latest \
+	test.appimage_server_32_debian_oldest \
+	test.appimage_client_32_debian_latest \
+	test.appimage_client_32_debian_oldest \
+	upload/.tag
+	echo > $@
+
+appimagetests: appimagetests.tag
+
+appimagetests_ci.tag: \
+	test.appimage_client_64_ubuntu_latest \
+	test.appimage_client_64_ubuntu_oldest_skewed \
+	test.appimage_client_64_fedora_latest \
+	test.appimage_server_64_centos_oldest \
+	test.appimage_client_64_centos_oldest \
+	test.appimage_server_32_debian_oldest \
+	test.appimage_client_32_debian_oldest \
+	upload/.tag
+	echo > $@
+
+appimagetests_ci: appimagetests_ci.tag
 
 #***************************************************************
 
@@ -659,10 +737,23 @@ intermediateclean:
 
 # keep the artifacts clean of junk not needed in the next phase
 artifactclean:
-	rm -rf *.dir source proto/*.dir
+	rm *.dir \
+	proto/*.dir \
+	source \
+	-rf
 
 clean: intermediateclean
-	rm -rf upload source gits result.* *.tag proto
+	rm \
+	*.tag \
+	gits \
+	proto \
+	result.* \
+	rootcontext.* \
+	source \
+	steamdirs \
+	test.* \
+	upload \
+	-rf
 	if git -C ${srcdir} rev-parse --abbrev-ref HEAD > /dev/null; then rm -f CI_INFO; fi
 distclean: clean
 	rm -rf $(TARBALL) CI_INFO
