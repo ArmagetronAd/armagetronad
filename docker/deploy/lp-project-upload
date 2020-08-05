@@ -164,7 +164,7 @@ def main():
                 if "source" in filename:
                     description="Windows Source Zip"
                 else:
-                    description="Windows Binary Zip for Zero Install"
+                    description="Client Windows Binary Zip for Zero Install"
                 mime_type="application/zip"
                 Windows=True
             if "AppImage" in description:
@@ -173,8 +173,8 @@ def main():
                     description = description.replace("Linux", "32 bit Linux")
                 else:
                     description = description.replace("Linux", "64 bit Linux")
-            if "edicated" in filename or "server" in filename:
-                description=description.replace("Client ", "Server ")
+        if "edicated" in filename or "server" in filename:
+            description=description.replace("Client ", "Server ")
 
         print (filename,description,mime_type,file_type)
 
