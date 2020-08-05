@@ -5702,8 +5702,7 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), timeC
     chatFlags_          = 0;
     disconnected        = false;
 
-    suspended_          = false;
-    roundsSuspended_    = 0;
+    suspended_          = 0;
     suspendReason_      = "";
 
     substitute          = NULL;
@@ -5771,8 +5770,7 @@ ePlayerNetID::ePlayerNetID(nMessage &m):nNetObject(m),listID(-1), teamListID(-1)
     greeted     =false;
     chatting_   =false;
 
-    suspended_          = false;
-    roundsSuspended_    = 0;
+    suspended_          = 0;
     suspendReason_      = "";
 
     stealth_    =false;

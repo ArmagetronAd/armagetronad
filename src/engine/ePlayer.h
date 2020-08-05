@@ -233,8 +233,7 @@ private:
 
     bool							silenced_;		    // flag indicating whether the player has been silenced
 
-    int                             roundsSuspended_;   // number of rounds the player is currently suspended from playing
-    bool                            suspended_;         // flag indicating whether the player has been suspended
+    int                             suspended_;         //! number of rounds the player is currently suspended from playing
     tString                         suspendReason_;     // what was the reason for suspending this person...?
 
     nTimeAbsolute                   timeCreated_;   // the time the player was created
@@ -405,10 +404,10 @@ public:
     // only for the menu
     bool& AccessSilenced( void ) { return silenced_; }
 
-    bool IsSuspended ( void ) { return suspended_; }
-    bool IsSuspended ( void ) const { return suspended_; }
-    int RoundsSuspended() { return roundsSuspended_; }
-    int RoundsSuspended() const { return roundsSuspended_; }
+    bool IsSuspended ( void ) { return suspended_ > 0; }
+    bool IsSuspended ( void ) const { return suspended_ > 0; }
+    int RoundsSuspended() { return suspended_; }
+    int RoundsSuspended() const { return suspended_; }
     tString ReasonSuspended() { return suspendReason_; }
 
     static void SilenceMenu();				// menu where you can silence players
