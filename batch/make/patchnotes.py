@@ -159,7 +159,6 @@ def ContributorsAfterTag(repo, team, project, tags):
 		for logline in log:
 			if logline.startswith(commit_start):
 				commit=logline[len(commit_start):]
-
 				# do not count twice
 				if commit in revisions_already_seen:
 					ignore_commit = True
@@ -196,15 +195,15 @@ def GetMarkupLine(team, project, issue):
 			line = Template(' * ${title} ([#${issue}](${weblink}))').substitute(title=title.strip(), issue=issue, weblink=weblink)
 		#print(line, labels)
 		if 'Type::Bug' in labels:
-			return 'Fixed Bugs', line
+			return '01 Fixed Bugs', line
 		elif 'Type::Feature' in labels:
-			return 'New Features', line
+			return '02 New Features', line
 		elif 'Type::Removed' in labels:
-			return 'Removed', line
+			return '03 Removed', line
 		elif 'Type::Breaking' in labels:
-			return 'Breaking Changes', line
+			return '04 Breaking Changes', line
 		else:
-			return 'Other Changes', line
+			return '09 Other Changes', line
 
 # parse given frozen changelog, look for last 'changes since' note, extract tag name
 def GetLastFrozenTag(frozen):
@@ -256,7 +255,6 @@ for tag in reversed(tags):
 		continue
 
 	fixed = fixed_after_tag[tag]
-	# luckily, the category names are alphabetically in the order we want them in :)
 	categories={}
 	#categories={'Fixed Bugs' : [], 'New Features' : [], 'Other Changes': []}
 	for issue in fixed:
@@ -264,6 +262,10 @@ for tag in reversed(tags):
 		if not line is None:
 			categories.setdefault(category, []).append(line)
 	
+	sorted_categories=list(categories)
+	sorted_categories.sort()
+	#print(sorted_categories)
+
 	if len(categories) > 0:
 		printtag=tag
 		if tag[0] == 'v':
@@ -271,8 +273,8 @@ for tag in reversed(tags):
 		print()
 		print("#### Changes since", printtag + ":")
 		print()
-		for category in categories:
-			print("#####", category)
+		for category in sorted_categories:
+			print("#####", category[3:])
 			print()
 			for line in categories[category]:
 				print(line)
