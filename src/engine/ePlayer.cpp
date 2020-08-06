@@ -8332,7 +8332,7 @@ void ePlayerNetID::GridPosLadderLog()
         for(int i=0; i<max; i++)
         {
             ePlayerNetID *p=se_PlayerNetIDs(i);
-            if (p->IsActive() && p->currentTeam && p->Object() && p->Object()->Alive() )
+            if (p->IsActive() && p->Object() && p->Object()->Alive() )
             {
                 gCycle *pCycle = dynamic_cast<gCycle *>(p->Object());
 
@@ -8346,7 +8346,7 @@ void ePlayerNetID::GridPosLadderLog()
                 }
 
                 if (pCycle && pCycle->Team()) se_playerGridPosWriter << FilterName(pCycle->Team()->Name());
-                else se_playerGridPosWriter << " ";
+                else se_playerGridPosWriter << "";
                 
                 if(styctcompat_se_playerGridPos)
                 {
