@@ -1,9 +1,19 @@
 
+#### Changes since 0.2.9.0:
+
+##### Fixed Bugs
+
+ * Can't open the .appimage file. Missing libwebp.so.5 ([#54](https://gitlab.com/armagetronad/armagetronad/-/issues/54))
+
+##### Contributors
+
+Manuel Moos
+
+
 #### Changes since 0.2.8.3.5:
 
 ##### Fixed Bugs
 
- * Windows: DPI scaling behavior wrong ([#33](https://gitlab.com/armagetronad/armagetronad/-/issues/33))
  * Debian builds: Documentation html files have empty last change ([#9](https://gitlab.com/armagetronad/armagetronad/-/issues/9))
  * Socket and unclean exit trouble due to fork(), execve() and exit() interaction ([#13](https://gitlab.com/armagetronad/armagetronad/-/issues/13))
  * Ubuntu PPA release candidate builds would overwrite previous stable releases ([#15](https://gitlab.com/armagetronad/armagetronad/-/issues/15))
@@ -14,6 +24,7 @@
  * Client segfaults on OpenBSD ([#26](https://gitlab.com/armagetronad/armagetronad/-/issues/26))
  * Client compiled with clang 10.0 (optimized) sefgaults on logout ([#28](https://gitlab.com/armagetronad/armagetronad/-/issues/28))
  * Valgrind reports uses of unitialized, freed or invalid memory ([#29](https://gitlab.com/armagetronad/armagetronad/-/issues/29))
+ * Windows: DPI scaling behavior wrong ([#33](https://gitlab.com/armagetronad/armagetronad/-/issues/33))
 
 ##### New Features
 
