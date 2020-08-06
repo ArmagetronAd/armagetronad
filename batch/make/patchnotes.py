@@ -33,7 +33,8 @@ def RepresentsInt(s):
 def GetTags(repo, tag_lower_limit):
 	alltags_raw=subprocess.run(["git", "-C", repo, "tag", "-l", "--merged"], stdout=subprocess.PIPE)
 	alltags=alltags_raw.stdout.decode('utf-8').split('\n')
-	return list(filter(lambda x: len(x) > 0 and version.parse(x) >= version.parse(tag_lower_limit), alltags))
+	tags=list(filter(lambda x: len(x) > 0 and version.parse(x) >= version.parse(tag_lower_limit), alltags))
+	#return tags
 
 	# sort tags in chronological order (assuming they're all on the same branch)
 	revisions={}
@@ -42,8 +43,8 @@ def GetTags(repo, tag_lower_limit):
 		revisions_since_tag_raw=subprocess.run(["git", "-C", repo, "rev-list", "--count", tag + ".."], stdout=subprocess.PIPE)
 		revisions[tag]=int(revisions_since_tag_raw.stdout.decode('utf-8'))
 
-	print(revisions)
-	tags.sort(key=lambda x: revisions[x], reverse=True)
+	#print(revisions)
+	tags.sort(key=lambda x: -revisions[x], reverse=False)
 	return tags
 
 # return (tag, list of issues fixed after tag as integers)
@@ -59,6 +60,7 @@ def FixedAfterTag(repo, team, project, tags):
 	issues=set([])
 
 	for tag in tags:
+		#print(tag)
 		log_raw=subprocess.run(["git", "-C", repo, "log", tag + ".."], stdout=subprocess.PIPE)
 		log=log_raw.stdout.decode('utf-8').split('\n')
 
@@ -106,13 +108,24 @@ def FixedAfterTag(repo, team, project, tags):
 author_email_filter=re.compile(r" *<.*>")
 author_replacements={
 	"Bazaarmagetron": None,
+	"bazaarmagetron": None,
 	"Manuel Moos (From GitLab CI)": None,
-	"z-man": "Manuel Moos",
+	"epsy46": "epsy",
 	"Daniel Lee Harple": "Daniel Harple",
+	"dlh3": "Daniel Harple",
+	"davidfancella": "Dave Fancella",
 	"Luke Dashjr": "Luke-Jr",
+	"luke-jr": "Luke-Jr",
+	"nemostultae": "Daniel Harple",
+	"voodoo": "Voodoo",
+	"z-man": "Manuel Moos",
 	None: None
 }
 full_author_replacements={
+	"armagetron <armagetron@ensemble-fnm.de>": "armagetron at ensemble-fnm.de",
+	"David <jip@unk.me>": "Jip",
+	"unknown <dave@davefancella.com>": "Dave Fancella",
+	"unknown <pnoexz@gmail.com>": "pnoexz at gmail.com",
 	None: None
 }
 def MapAuthor(full_author):
@@ -132,7 +145,7 @@ def ContributorsAfterTag(repo, team, project, tags):
 	revisions_already_seen=set([])
 	authors_by_tag={}
 
-	for tag in tags:
+	for tag in reversed(tags):
 		log_raw=subprocess.run(["git", "-C", repo, "log", tag + ".."], stdout=subprocess.PIPE)
 		log=log_raw.stdout.decode('utf-8').split('\n')
 
@@ -146,7 +159,6 @@ def ContributorsAfterTag(repo, team, project, tags):
 		for logline in log:
 			if logline.startswith(commit_start):
 				commit=logline[len(commit_start):]
-				
 				# do not count twice
 				if commit in revisions_already_seen:
 					ignore_commit = True
@@ -166,6 +178,8 @@ def ContributorsAfterTag(repo, team, project, tags):
 
 # retrieves metadata for an issue from gitlab, composes markup patch note line
 def GetMarkupLine(team, project, issue):
+	#return "X", issue
+
 	uri=Template('https://gitlab.com/api/v4/projects/${team}%2F${project}/issues?scope=all&state=closed&iids[]=${issue}').substitute(team=team, project=project, issue=issue)
 	#print(uri)
 	with urllib.request.urlopen(uri) as content:
@@ -235,8 +249,11 @@ fixed_after_tag=FixedAfterTag(repo, team, project, tags)
 #print(fixed_after_tag)
 contributors_after_tag=ContributorsAfterTag(repo, team, project, tags)
 
-for tag in fixed_after_tag:
-	# print(tag)
+for tag in reversed(tags):
+	#print(tag)
+	if not tag in fixed_after_tag:
+		continue
+
 	fixed = fixed_after_tag[tag]
 	# luckily, the category names are alphabetically in the order we want them in :)
 	categories={}
