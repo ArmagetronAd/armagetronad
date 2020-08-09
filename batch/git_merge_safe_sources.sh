@@ -36,7 +36,7 @@ case ${BRANCH} in
         fi
         MERGE_FROM="${MERGE_FROM} release${SUFFIX} beta${SUFFIX}"
         ;;
-    master)
+    trunk)
         MERGE_FROM="legacy_0.2.8 legacy_0.2.8.3"
         #MERGE_FROM="release beta legacy_0.2.8 legacy_0.2.8.3"
         ;;
