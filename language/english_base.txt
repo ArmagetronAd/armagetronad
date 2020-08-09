@@ -573,6 +573,7 @@ fast_forward_maxstep_help           Maximum recording time between rendered fram
 fast_forward_maxstep_real_help      Maximum real time between rendered frames in fast forward mode
 fast_forward_maxstep_rel_help       Maximum fraction of the time left until the end of FF mode between rendered frames
 stop_recording_help                 Stops a currently running recording to save resources. Resuming is impossible.
+expect_ack_on_client_playback_help  If 1, a client playing back a recording will expect correct ack responses from the server, at the default of 0 it tries to hobble along. Activate to accurately debug network problems.
 
 #********************************************
 #********************************************

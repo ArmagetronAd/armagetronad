@@ -921,7 +921,7 @@ void nWaitForAck::Resend(){
             if(netTime - pendingAck->timeFirstSent  >  killTimeout &&
                     ::timeouts[pendingAck->receiver] > 20){
                 // total timeout. Kill connection.
-                if (pendingAck->receiver<=MAXCLIENTS){
+                if (pendingAck->receiver<=MAXCLIENTS && nWaitForAck::ExpectAcks()){
                     tOutput o;
                     o.SetTemplateParameter(1, pendingAck->receiver);
                     o << "$network_error_timeout";
@@ -934,7 +934,10 @@ void nWaitForAck::Resend(){
                         i=sn_pendingAcks.Len()-1;
                 }
                 else // it is just in the login slot. Ignore it.
+                {
+                    ::timeouts[pendingAck->receiver] = 0;
                     delete pendingAck;
+                }
             }
             else{
 #ifdef DEBUG
@@ -964,6 +967,14 @@ void nWaitForAck::Resend(){
             }
         }
     }
+}
+
+static bool sn_noExpectAckOnClientPlayback = false;
+static tSettingItem< bool > sn_noExpectAckOnClientPlaybackConf( "EXPECT_ACK_ON_CLIENT_PLAYBACK", sn_noExpectAckOnClientPlayback );
+
+bool nWaitForAck::ExpectAcks()
+{
+    return !tRecorder::IsPlayingBack() || (sn_GetNetState() != nCLIENT) || sn_noExpectAckOnClientPlayback;
 }
 
 

@@ -575,6 +575,7 @@ fast_forward_maxstep_help     Maximale Zeit in aufgezeichneten Sekunden, die zwi
 fast_forward_maxstep_real_help Maximale Zeit in echten Sekunden, die zwischen Renderschritten im schnellen Vorlauf liegt
 fast_forward_maxstep_rel_help Maximale Zeit gemessen in der Zeit bis zum Vorspulziel, die zwischen Renderschritten liegt
 stop_recording_help           Stoppt eine laufende Debug-Aufzeichnung, um resourcen zu sparen. Eine Wiederaufnahme ist nicht möglich.
+expect_ack_on_client_playback_help  Setze auf 1, um im Playback Netzwerkproblem zu debuggen. Auf dem Default von 0 ignoriert der Client fehlende Ack-Pakete vom Server und versucht, sich irgendwie durchzuwursteln, was besser für das Debugging vom Spielecode ist.
 
 #********************************************
 #********************************************

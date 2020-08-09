@@ -606,6 +606,8 @@ public:
     static void AckAllPeer(unsigned short peer);
 
     static void Resend();
+
+    static bool ExpectAcks();
 };
 
 
