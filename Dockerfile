@@ -4,7 +4,7 @@ ARG BASE_LINUX=i386/alpine:3.7
 ARG PROGRAM_NAME=armagetronad-unk
 ARG PROGRAM_TITLE="Armagetron UNK"
 ARG FAKERELEASE=false
-ARG BRANCH=master-fix-unknown-bug
+ARG BRANCH=trunk-fix-unknown-bug
 
 ########################################
 

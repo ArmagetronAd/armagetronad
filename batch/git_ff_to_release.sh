@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Depending on which branch this is invoked on, fast forward from next a little less stable branch
-# master -> beta, beta -> release
+# trunk -> beta, beta -> release
 
 #set -x
 
@@ -27,7 +27,7 @@ case ${BRANCH} in
         MERGE_FROM=beta${SUFFIX}
         ;;
     beta)
-        MERGE_FROM=master
+        MERGE_FROM=trunk
         ;;
     beta*)
         if test "${SUFFIX}" = "_0.2.9"; then

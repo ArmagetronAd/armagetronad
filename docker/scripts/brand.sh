@@ -9,7 +9,7 @@ BRANCH=
 if test -z "${CI_DEFAULT_BRANCH}" || test -z "${CI_COMMIT_REF_PROTECTED}"; then
 	# no CI, get info from git directly
 	CI_COMMIT_REF_PROTECTED=false
-	CI_DEFAULT_BRANCH=master
+	CI_DEFAULT_BRANCH=trunk
 	CI_COMMIT_SHA=`git -C ${git_repo} rev-parse HEAD`
 	CI_COMMIT_BRANCH=`git -C ${git_repo} rev-parse --abbrev-ref HEAD`
 	CI_COMMIT_REF_NAME=${CI_COMMIT_BRANCH}
@@ -37,7 +37,7 @@ if test "${CI_COMMIT_REF_PROTECTED}" = "true"; then
 			PROGRAM_NAME="armagetronad-alpha"
 			PROGRAM_TITLE="Armagetron Alpha"
 			;;
-		    master)
+		    trunk)
 			SERIES="EXPERIMENTAL"
 			PROGRAM_NAME="armagetronad-experimental"
 			PROGRAM_TITLE="Armagetron Experimental"
