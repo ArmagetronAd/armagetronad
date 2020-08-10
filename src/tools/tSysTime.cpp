@@ -332,11 +332,11 @@ void tAdvanceFrame( int usecdelay )
     }
     else
     {
-        // must never be called when a recording is running
-        tASSERT( !tRecorder::IsPlayingBack() );
-
-        // timeAdvance = timeRealRelative - timeRelative;
-        timeRelative = timeNewRelative;
+        if( !tRecorder::IsPlayingBack() )
+        {
+            // timeAdvance = timeRealRelative - timeRelative;
+            timeRelative = timeNewRelative;
+        }
     }
 
 
