@@ -3998,6 +3998,8 @@ void nConnectionInfo::AckReceived()          //!< call whenever an ackownledgeme
 
 REAL nConnectionInfo::PacketLoss() const     //!< returns the average packet loss ratio
 {
+    if(nWaitForAck::DesyncedPlayback())
+        return 0;
     REAL ret = packetLoss_.GetAverage();
     return ret > 0 ? ret : 0;
 }
@@ -4302,6 +4304,9 @@ REAL nAverager::GetDataVariance( void ) const
 
 REAL nAverager::GetAverageVariance( void ) const
 {
+    if(nWaitForAck::DesyncedPlayback())
+        return 0;
+
     if ( weight_ > 0 )
     {
         REAL square = weight_ * weight_;
@@ -4451,6 +4456,9 @@ nPingAverager::~nPingAverager( void )
 
 REAL nPingAverager::GetPing( void ) const
 {
+    if(nWaitForAck::DesyncedPlayback())
+        return 0.001;
+
     // collect data
     // determine the lowest guessed value for variance.
     // lag spikes should not contribute here too much.
@@ -4566,6 +4574,9 @@ REAL nPingAverager::GetPingFast( void ) const
 
 bool nPingAverager::IsSpiking( void ) const
 {
+    if(nWaitForAck::DesyncedPlayback())
+        return false;
+
     REAL difference = slow_.GetAverage() - fast_.GetAverage();
     return slow_.GetAverageVariance() < difference * difference;
 }
