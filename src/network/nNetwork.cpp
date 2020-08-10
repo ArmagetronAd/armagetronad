@@ -971,10 +971,17 @@ void nWaitForAck::Resend(){
 
 static bool sn_noExpectAckOnClientPlayback = false;
 static tSettingItem< bool > sn_noExpectAckOnClientPlaybackConf( "EXPECT_ACK_ON_CLIENT_PLAYBACK", sn_noExpectAckOnClientPlayback );
+static bool sn_desyncedPlayback{};
 
 bool nWaitForAck::ExpectAcks()
 {
-    return !tRecorder::IsPlayingBack() || (sn_GetNetState() != nCLIENT) || sn_noExpectAckOnClientPlayback;
+    bool ret = !tRecorder::IsPlayingBack() || (sn_GetNetState() != nCLIENT) || sn_noExpectAckOnClientPlayback;
+    sn_desyncedPlayback |= !ret;
+    return ret;
+}
+bool nWaitForAck::DesyncedPlayback()
+{
+    return sn_desyncedPlayback;
 }
 
 

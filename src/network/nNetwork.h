@@ -608,6 +608,7 @@ public:
     static void Resend();
 
     static bool ExpectAcks();
+    static bool DesyncedPlayback();
 };
 
 
