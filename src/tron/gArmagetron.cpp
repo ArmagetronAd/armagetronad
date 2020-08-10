@@ -625,6 +625,15 @@ int main(int argc,char **argv){
             tString version( sn_programVersion );
             tRecorder::Playback( versionSection, version );
             tRecorder::Record( versionSection, version );
+#ifndef DEDICATED
+            if(version != sn_programVersion)
+            {
+#ifdef DEBUG
+                tERR_WARN( "Recording from a different version, consider desynced right away." );
+#endif
+                nWaitForAck::ActivateDesyncedPlayback();
+            }
+#endif
         }
 
         {

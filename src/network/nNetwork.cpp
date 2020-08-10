@@ -921,7 +921,7 @@ void nWaitForAck::Resend(){
             if(netTime - pendingAck->timeFirstSent  >  killTimeout &&
                     ::timeouts[pendingAck->receiver] > 20){
                 // total timeout. Kill connection.
-                if (pendingAck->receiver<=MAXCLIENTS){
+                if (pendingAck->receiver<=MAXCLIENTS && nWaitForAck::ExpectAcks()){
                     tOutput o;
                     o.SetTemplateParameter(1, pendingAck->receiver);
                     o << "$network_error_timeout";
@@ -934,7 +934,10 @@ void nWaitForAck::Resend(){
                         i=sn_pendingAcks.Len()-1;
                 }
                 else // it is just in the login slot. Ignore it.
+                {
+                    ::timeouts[pendingAck->receiver] = 0;
                     delete pendingAck;
+                }
             }
             else{
 #ifdef DEBUG
@@ -964,6 +967,26 @@ void nWaitForAck::Resend(){
             }
         }
     }
+}
+
+static bool sn_noExpectAckOnClientPlayback = false;
+static tSettingItem< bool > sn_noExpectAckOnClientPlaybackConf( "EXPECT_ACK_ON_CLIENT_PLAYBACK", sn_noExpectAckOnClientPlayback );
+static bool sn_desyncedPlayback{};
+
+bool nWaitForAck::ExpectAcks()
+{
+    bool ret = !tRecorder::IsPlayingBack() || (sn_GetNetState() != nCLIENT) || sn_noExpectAckOnClientPlayback;
+    sn_desyncedPlayback |= !ret;
+    return ret;
+}
+bool nWaitForAck::DesyncedPlayback()
+{
+    return sn_desyncedPlayback;
+}
+
+void nWaitForAck::ActivateDesyncedPlayback()
+{
+    sn_desyncedPlayback = true;
 }
 
 
@@ -3980,6 +4003,8 @@ void nConnectionInfo::AckReceived()          //!< call whenever an ackownledgeme
 
 REAL nConnectionInfo::PacketLoss() const     //!< returns the average packet loss ratio
 {
+    if(nWaitForAck::DesyncedPlayback())
+        return 0;
     REAL ret = packetLoss_.GetAverage();
     return ret > 0 ? ret : 0;
 }
@@ -4284,6 +4309,9 @@ REAL nAverager::GetDataVariance( void ) const
 
 REAL nAverager::GetAverageVariance( void ) const
 {
+    if(nWaitForAck::DesyncedPlayback())
+        return 0;
+
     if ( weight_ > 0 )
     {
         REAL square = weight_ * weight_;
@@ -4433,6 +4461,9 @@ nPingAverager::~nPingAverager( void )
 
 REAL nPingAverager::GetPing( void ) const
 {
+    if(nWaitForAck::DesyncedPlayback())
+        return 0.001;
+
     // collect data
     // determine the lowest guessed value for variance.
     // lag spikes should not contribute here too much.
@@ -4548,6 +4579,9 @@ REAL nPingAverager::GetPingFast( void ) const
 
 bool nPingAverager::IsSpiking( void ) const
 {
+    if(nWaitForAck::DesyncedPlayback())
+        return false;
+
     REAL difference = slow_.GetAverage() - fast_.GetAverage();
     return slow_.GetAverageVariance() < difference * difference;
 }
