@@ -278,7 +278,7 @@ std::istream & operator >> ( std::istream & s, tLineString & line )
 //!
 // *****************************************************************************************
 
-bool tRecordingBlockBase::Initialize( char const * section, tRecording * recording )
+bool tRecordingBlockBase::Initialize( char const * section, tRecording * recording, bool )
 {
     // initialize recording pointer
     recording_ = recording;
@@ -303,10 +303,10 @@ bool tRecordingBlockBase::Initialize( char const * section, tRecording * recordi
 //!
 // *****************************************************************************************
 
-bool tRecordingBlockBase::Initialize( char const * section )
+bool tRecordingBlockBase::Initialize( char const * section, bool skipToIt )
 {
     // delegate
-    return Initialize( section, tRecording::currentRecording_ );
+    return Initialize( section, tRecording::currentRecording_, skipToIt );
 }
 
 // *****************************************************************************************
@@ -431,7 +431,7 @@ tRecordingBlock::~tRecordingBlock( void )
 //!
 // *****************************************************************************************
 
-bool tPlaybackBlockBase::Initialize( char const * section, tPlayback * playback )
+bool tPlaybackBlockBase::Initialize( char const * section, tPlayback * playback, bool skipToIt )
 {
     // initialize playback pointer
     playback_ = playback;
@@ -441,10 +441,18 @@ bool tPlaybackBlockBase::Initialize( char const * section, tPlayback * playback 
     // std::cout << playback_->GetNextSection() << "," << section << "\n";
 
     // read section
-    if( playback_->GetNextSection() != section )
+    if(skipToIt)
     {
-        playback_ = NULL;
-        return false;
+        while(playback->GetNextSection() != section && playback->GetNextSection() != "EOF")
+            playback->AdvanceSection(true);
+    }
+    else
+    {
+        if( playback_->GetNextSection() != section )
+        {
+            playback_ = NULL;
+            return false;
+        }
     }
 
     // return success
@@ -462,9 +470,9 @@ bool tPlaybackBlockBase::Initialize( char const * section, tPlayback * playback 
 //!
 // *****************************************************************************************
 
-bool tPlaybackBlockBase::Initialize( char const * section )
+bool tPlaybackBlockBase::Initialize( char const * section, bool skipToIt )
 {
-    return Initialize( section, tPlayback::currentPlayback_ );
+    return Initialize( section, tPlayback::currentPlayback_, skipToIt );
 }
 
 // *****************************************************************************************

@@ -268,10 +268,15 @@ void EatWhite( std::istream & stream )
 //!
 // ******************************************************************************************
 
-void tPlayback::AdvanceSection( void )
+void tPlayback::AdvanceSection( bool skipLines )
 {
     std::istream& stream = DoGetStream();
 
+    if(skipLines)
+    {
+        std::string line;
+        std::getline(stream, line);
+    }
     std::ws( stream );
     stream >> nextSection_;
     std::ws( stream );

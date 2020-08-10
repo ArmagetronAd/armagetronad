@@ -258,8 +258,8 @@ class tRecording;
 class tRecordingBlockBase
 {
 public:
-    bool Initialize( char const * section, tRecording * recording );  //!< initializes this for recording
-    bool Initialize( char const * section );                          //!< initializes this for recording
+    bool Initialize( char const * section, tRecording * recording, bool skipToIt = false  );  //!< initializes this for recording
+    bool Initialize( char const * section, bool skipToIt = false );                           //!< initializes this for recording
 
     void Separator();                                                 //!< separates two recorded elements (more than usual)
     static tRecording * GetArchive();                                 //!< returns the active recording
@@ -314,8 +314,8 @@ class tPlayback;
 class tPlaybackBlockBase
 {
 public:
-    bool Initialize( char const * section, tPlayback * playback );    //!< initializes this for recording
-    bool Initialize( char const * section );                          //!< initializes this for recording
+    bool Initialize( char const * section, tPlayback * playback, bool skipToIt = false  );    //!< initializes this for recording
+    bool Initialize( char const * section, bool skipToIt = false  );                          //!< initializes this for recording
 
     void Separator() const;                                           //!< separate output (Nothing done here while playing back)
     static tPlayback * GetArchive();                                  //!< returns the active playback
