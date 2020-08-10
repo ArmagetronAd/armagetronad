@@ -984,6 +984,11 @@ bool nWaitForAck::DesyncedPlayback()
     return sn_desyncedPlayback;
 }
 
+void nWaitForAck::ActivateDesyncedPlayback()
+{
+    sn_desyncedPlayback = true;
+}
+
 
 // defined in netobjec.C
 // void ClearKnows(int user);

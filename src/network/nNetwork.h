@@ -609,6 +609,7 @@ public:
 
     static bool ExpectAcks();
     static bool DesyncedPlayback();
+    static void ActivateDesyncedPlayback();
 };
 
 
