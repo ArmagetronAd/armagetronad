@@ -918,8 +918,22 @@ void nWaitForAck::Resend(){
             ::timeouts[pendingAck->receiver]++;
             pendingAck->timeouts++;
 
-            if(netTime - pendingAck->timeFirstSent  >  killTimeout &&
-                    ::timeouts[pendingAck->receiver] > 20){
+            REAL timeoutTimeLimit;
+            int timeoutPacketLimit;
+            if(nWaitForAck::ProbablyDesyncedPlayback())
+            {
+                // allow quick timeouts in probably-broken-anyway playback mode
+                timeoutTimeLimit = killTimeout/4;
+                timeoutPacketLimit = 5;
+            }
+            else
+            {
+                timeoutTimeLimit = killTimeout;
+                timeoutPacketLimit = 20;
+            }
+
+            if(netTime - pendingAck->timeFirstSent > timeoutTimeLimit &&
+                    ::timeouts[pendingAck->receiver] > timeoutPacketLimit){
                 // total timeout. Kill connection.
                 if (pendingAck->receiver<=MAXCLIENTS && nWaitForAck::ExpectAcks()){
                     tOutput o;
@@ -972,6 +986,7 @@ void nWaitForAck::Resend(){
 static bool sn_noExpectAckOnClientPlayback = false;
 static tSettingItem< bool > sn_noExpectAckOnClientPlaybackConf( "EXPECT_ACK_ON_CLIENT_PLAYBACK", sn_noExpectAckOnClientPlayback );
 static bool sn_desyncedPlayback{};
+static bool sn_probablyDesyncedPlayback{};
 
 bool nWaitForAck::ExpectAcks()
 {
@@ -984,9 +999,14 @@ bool nWaitForAck::DesyncedPlayback()
     return sn_desyncedPlayback;
 }
 
-void nWaitForAck::ActivateDesyncedPlayback()
+bool nWaitForAck::ProbablyDesyncedPlayback()
 {
-    sn_desyncedPlayback = true;
+    return sn_probablyDesyncedPlayback;
+}
+
+void nWaitForAck::ActivateProbablyDesyncedPlayback()
+{
+    sn_probablyDesyncedPlayback = true;
 }
 
 
