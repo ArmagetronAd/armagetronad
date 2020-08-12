@@ -126,6 +126,11 @@ public:
     template< class DATA1, class DATA2 >
     static bool PlaybackStrict( char const * section, DATA1 & data1, DATA2 & data2 )
     { return tRecorderTemplate3< tPlaybackBlock, DATA1 &, DATA2 & >::Archive( true, section, data1, data2 ); }
+
+    static bool DesyncedPlayback();
+    static void ActivateDesyncedPlayback();
+    static bool ProbablyDesyncedPlayback();
+    static void ActivateProbablyDesyncedPlayback();
 };
 
 class tPath;
@@ -997,7 +1002,9 @@ bool tRecorderTemplate1< BLOCK >::Archive( bool strict, char const * section )
     }
 
     // report failure
-    tASSERT( !strict  || !BLOCK::GetArchive() );
+    if(strict && BLOCK::GetArchive())
+        tRecorder::ActivateDesyncedPlayback();
+
     return false;
 }
 
@@ -1031,7 +1038,9 @@ bool tRecorderTemplate2< BLOCK, DATA >::Archive( bool strict, char const * secti
     }
 
     // report failure
-    tASSERT( !strict || !BLOCK::GetArchive() );
+    if(strict && BLOCK::GetArchive())
+        tRecorder::ActivateDesyncedPlayback();
+
     return false;
 }
 
@@ -1066,7 +1075,9 @@ bool tRecorderTemplate3< BLOCK, DATA1, DATA2 >::Archive( bool strict, char const
     }
 
     // report failure
-    tASSERT( !strict  || !BLOCK::GetArchive() );
+    if(strict && BLOCK::GetArchive())
+        tRecorder::ActivateDesyncedPlayback();
+
     return false;
 }
 

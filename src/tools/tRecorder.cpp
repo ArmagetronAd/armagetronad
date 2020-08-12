@@ -154,6 +154,34 @@ bool tRecorder::PlaybackStrict( char const * section )
     return tRecorderTemplate1< tPlaybackBlock >::Archive( true, section );
 }
 
+static bool st_desyncedPlayback{};
+static bool st_probablyDesyncedPlayback{};
+
+bool tRecorder::DesyncedPlayback()
+{
+    return st_desyncedPlayback;
+}
+
+void tRecorder::ActivateDesyncedPlayback()
+{
+    if(!st_desyncedPlayback)
+    {
+        tERR_WARN("Playback no longer in sync.");
+
+        st_desyncedPlayback = true;
+    }
+}
+
+bool tRecorder::ProbablyDesyncedPlayback()
+{
+    return st_probablyDesyncedPlayback;
+}
+
+void tRecorder::ActivateProbablyDesyncedPlayback()
+{
+    st_probablyDesyncedPlayback = true;
+}
+
 // *****************************************************************************************
 // *****************************************************************************************
 // *****************************************************************************************

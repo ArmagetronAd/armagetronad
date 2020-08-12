@@ -1973,7 +1973,7 @@ void sn_Sync(REAL timeout,bool sync_sn_netObjects, bool otherEnd){
 
             // wait for all packets to be sent and the sync ack packet to be received
             while ( sn_Connections[0].socket &&
-                    !nWaitForAck::DesyncedPlayback() &&
+                    !tRecorder::DesyncedPlayback() &&
                     ( sync_ack[0] == false || sn_Connections[0].ackPending>0 || sn_QueueLen(0)) &&
                     tSysTimeFloat()<endTime){
                 sn_Delay();

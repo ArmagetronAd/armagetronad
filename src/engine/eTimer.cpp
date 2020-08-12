@@ -242,7 +242,7 @@ void eTimer::ProcessSync()
 
     // check for unusually delayed packets, give them lower weight
     REAL delay =  remoteStartTimeOffset - startTimeOffset_.GetAverage();
-    if( delay > 0 && !nWaitForAck::DesyncedPlayback())
+    if( delay > 0 && !tRecorder::DesyncedPlayback())
     {
         // fluctuations up to the ping variance are acceptable,
         // (plus some extra factors, like a 1 ms offset and 10% of the current ping)

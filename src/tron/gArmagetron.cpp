@@ -631,7 +631,7 @@ int main(int argc,char **argv){
 #ifdef DEBUG
                 tERR_WARN( "Recording from a different version, consider at high risk of desync." );
 #endif
-                nWaitForAck::ActivateProbablyDesyncedPlayback();
+                tRecorder::ActivateProbablyDesyncedPlayback();
             }
 #endif
         }
