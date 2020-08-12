@@ -134,6 +134,10 @@ void eTimer::ReadSync(nMessage &m){
     m >> remoteSpeed_;
     sync_ = true;
 
+    // record ping in case we desync on playback
+    if(sn_GetNetState() == nCLIENT)
+        sn_Connections[0].ping.Record();
+
     //std::cerr << "Got sync:" << remote_currentTime << ":" << speed << '\n';
 }
 

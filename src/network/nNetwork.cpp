@@ -4329,9 +4329,6 @@ REAL nAverager::GetDataVariance( void ) const
 
 REAL nAverager::GetAverageVariance( void ) const
 {
-    if(nWaitForAck::DesyncedPlayback())
-        return 0;
-
     if ( weight_ > 0 )
     {
         REAL square = weight_ * weight_;
@@ -4482,7 +4479,7 @@ nPingAverager::~nPingAverager( void )
 REAL nPingAverager::GetPing( void ) const
 {
     if(nWaitForAck::DesyncedPlayback())
-        return 0.001;
+        return recordedPing_;
 
     // collect data
     // determine the lowest guessed value for variance.
@@ -4554,6 +4551,9 @@ nPingAverager::operator REAL( void ) const
 
 REAL nPingAverager::GetPingSnail( void ) const
 {
+    if(nWaitForAck::DesyncedPlayback())
+        return recordedPing_;
+
     return snail_.GetAverage();
 }
 
@@ -4569,6 +4569,9 @@ REAL nPingAverager::GetPingSnail( void ) const
 
 REAL nPingAverager::GetPingSlow( void ) const
 {
+    if(nWaitForAck::DesyncedPlayback())
+        return recordedPing_;
+
     return slow_.GetAverage();
 }
 
@@ -4584,6 +4587,9 @@ REAL nPingAverager::GetPingSlow( void ) const
 
 REAL nPingAverager::GetPingFast( void ) const
 {
+    if(nWaitForAck::DesyncedPlayback())
+        return recordedPing_;
+
     return fast_.GetAverage();
 }
 
@@ -4683,6 +4689,20 @@ void nPingAverager::Reset( void )
     // pin snail averager close to zero
     // snail_.Add(0,10);
     // not such a good idea after all. The above line caused massive resending of packets.
+}
+
+// archive ping
+void nPingAverager::Record()
+{
+    recordedPing_ = GetPing();
+
+    static constexpr auto section = "PING";
+    tRecorder::Playback(section, recordedPing_);
+    tRecorder::Record(section, recordedPing_);
+    if(nWaitForAck::DesyncedPlayback())
+    {
+        Add(recordedPing_, 1);
+    }
 }
 
 REAL nPingAverager::weight_=1;
