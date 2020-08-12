@@ -629,9 +629,9 @@ int main(int argc,char **argv){
             if(version != sn_programVersion)
             {
 #ifdef DEBUG
-                tERR_WARN( "Recording from a different version, consider desynced right away." );
+                tERR_WARN( "Recording from a different version, consider at high risk of desync." );
 #endif
-                nWaitForAck::ActivateDesyncedPlayback();
+                tRecorder::ActivateProbablyDesyncedPlayback();
             }
 #endif
         }

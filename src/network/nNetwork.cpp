@@ -918,8 +918,22 @@ void nWaitForAck::Resend(){
             ::timeouts[pendingAck->receiver]++;
             pendingAck->timeouts++;
 
-            if(netTime - pendingAck->timeFirstSent  >  killTimeout &&
-                    ::timeouts[pendingAck->receiver] > 20){
+            REAL timeoutTimeLimit;
+            int timeoutPacketLimit;
+            if(tRecorder::ProbablyDesyncedPlayback())
+            {
+                // allow quick timeouts in probably-broken-anyway playback mode
+                timeoutTimeLimit = killTimeout/4;
+                timeoutPacketLimit = 5;
+            }
+            else
+            {
+                timeoutTimeLimit = killTimeout;
+                timeoutPacketLimit = 20;
+            }
+
+            if(netTime - pendingAck->timeFirstSent > timeoutTimeLimit &&
+                    ::timeouts[pendingAck->receiver] > timeoutPacketLimit){
                 // total timeout. Kill connection.
                 if (pendingAck->receiver<=MAXCLIENTS && nWaitForAck::ExpectAcks()){
                     tOutput o;
@@ -971,24 +985,16 @@ void nWaitForAck::Resend(){
 
 static bool sn_noExpectAckOnClientPlayback = false;
 static tSettingItem< bool > sn_noExpectAckOnClientPlaybackConf( "EXPECT_ACK_ON_CLIENT_PLAYBACK", sn_noExpectAckOnClientPlayback );
-static bool sn_desyncedPlayback{};
 
 bool nWaitForAck::ExpectAcks()
 {
     bool ret = !tRecorder::IsPlayingBack() || (sn_GetNetState() != nCLIENT) || sn_noExpectAckOnClientPlayback;
-    sn_desyncedPlayback |= !ret;
+
+    if(!ret)
+        tRecorder::ActivateDesyncedPlayback();
+
     return ret;
 }
-bool nWaitForAck::DesyncedPlayback()
-{
-    return sn_desyncedPlayback;
-}
-
-void nWaitForAck::ActivateDesyncedPlayback()
-{
-    sn_desyncedPlayback = true;
-}
-
 
 // defined in netobjec.C
 // void ClearKnows(int user);
@@ -4003,7 +4009,7 @@ void nConnectionInfo::AckReceived()          //!< call whenever an ackownledgeme
 
 REAL nConnectionInfo::PacketLoss() const     //!< returns the average packet loss ratio
 {
-    if(nWaitForAck::DesyncedPlayback())
+    if(tRecorder::DesyncedPlayback())
         return 0;
     REAL ret = packetLoss_.GetAverage();
     return ret > 0 ? ret : 0;
@@ -4309,9 +4315,6 @@ REAL nAverager::GetDataVariance( void ) const
 
 REAL nAverager::GetAverageVariance( void ) const
 {
-    if(nWaitForAck::DesyncedPlayback())
-        return 0;
-
     if ( weight_ > 0 )
     {
         REAL square = weight_ * weight_;
@@ -4461,8 +4464,8 @@ nPingAverager::~nPingAverager( void )
 
 REAL nPingAverager::GetPing( void ) const
 {
-    if(nWaitForAck::DesyncedPlayback())
-        return 0.001;
+    if(tRecorder::DesyncedPlayback())
+        return recordedPing_;
 
     // collect data
     // determine the lowest guessed value for variance.
@@ -4534,6 +4537,9 @@ nPingAverager::operator REAL( void ) const
 
 REAL nPingAverager::GetPingSnail( void ) const
 {
+    if(tRecorder::DesyncedPlayback())
+        return recordedPing_;
+
     return snail_.GetAverage();
 }
 
@@ -4549,6 +4555,9 @@ REAL nPingAverager::GetPingSnail( void ) const
 
 REAL nPingAverager::GetPingSlow( void ) const
 {
+    if(tRecorder::DesyncedPlayback())
+        return recordedPing_;
+
     return slow_.GetAverage();
 }
 
@@ -4564,6 +4573,9 @@ REAL nPingAverager::GetPingSlow( void ) const
 
 REAL nPingAverager::GetPingFast( void ) const
 {
+    if(tRecorder::DesyncedPlayback())
+        return recordedPing_;
+
     return fast_.GetAverage();
 }
 
@@ -4579,7 +4591,7 @@ REAL nPingAverager::GetPingFast( void ) const
 
 bool nPingAverager::IsSpiking( void ) const
 {
-    if(nWaitForAck::DesyncedPlayback())
+    if(tRecorder::DesyncedPlayback())
         return false;
 
     REAL difference = slow_.GetAverage() - fast_.GetAverage();
@@ -4663,6 +4675,20 @@ void nPingAverager::Reset( void )
     // pin snail averager close to zero
     // snail_.Add(0,10);
     // not such a good idea after all. The above line caused massive resending of packets.
+}
+
+// archive ping
+void nPingAverager::Record()
+{
+    recordedPing_ = GetPing();
+
+    static constexpr auto section = "PING";
+    tRecorder::Playback(section, recordedPing_);
+    tRecorder::Record(section, recordedPing_);
+    if(tRecorder::DesyncedPlayback())
+    {
+        Add(recordedPing_, 1);
+    }
 }
 
 REAL nPingAverager::weight_=1;

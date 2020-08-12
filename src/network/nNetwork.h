@@ -272,11 +272,13 @@ public:
     void Add( REAL value, REAL weight ); //!< adds a value to the average
     void Add( REAL value );              //!< adds a value to the average
     void Reset();                 //!< resets average to zero
+    void Record();                //!< archive ping to/from recording
 private:
     nAverager snail_;    //!< extremely slow averager
     nAverager slow_;     //!< slow, reliable averager
     nAverager fast_;     //!< fast averager for detecting ping spikes
     static REAL weight_; //!< current default weight
+    REAL recordedPing_{};//!< ping from recording
 public:
     // accessors
     inline static void SetWeight( REAL const & weight ); //!< Sets the default statistical weight
@@ -608,8 +610,6 @@ public:
     static void Resend();
 
     static bool ExpectAcks();
-    static bool DesyncedPlayback();
-    static void ActivateDesyncedPlayback();
 };
 
 
