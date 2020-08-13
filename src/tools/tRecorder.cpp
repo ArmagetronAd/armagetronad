@@ -172,6 +172,9 @@ void tRecorder::ActivateDesyncedPlayback()
         {
             tERR_WARN("Playback no longer in sync.");
         }
+        constexpr auto desyncTag = "DESYNC_DETECTED";
+        tRecorder::Record(desyncTag);
+        tRecorder::Playback(desyncTag);
 
         st_desyncedPlayback = true;
     }
