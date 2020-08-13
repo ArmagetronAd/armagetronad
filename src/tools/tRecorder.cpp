@@ -166,7 +166,9 @@ void tRecorder::ActivateDesyncedPlayback()
 {
     if(!st_desyncedPlayback)
     {
+#ifndef DEBUG
         if(!st_probablyDesyncedPlayback)
+#endif
         {
             tERR_WARN("Playback no longer in sync.");
         }
