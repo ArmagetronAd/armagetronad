@@ -405,7 +405,10 @@ test.%: context/tests/Dockerfile.%
 	rm -rf $@.dir
 	mkdir -p $@.dir
 	cp $^ $@.dir
-	cd $@.dir; docker build . -f Dockerfile.* -t $*
+	cd $@.dir; docker rmi $*:last || true
+	cd $@.dir; docker tag $*:latest $*:last || true
+	cd $@.dir; docker build . -f Dockerfile.* -t $*:latest
+	cd $@.dir; docker rmi $*:last || true
 	echo > $@
 
 appimagetests.tag: \
