@@ -379,6 +379,59 @@ appimage.tag: appimage_client_64.tag appimage_server_64.tag appimage_client_32.t
 
 #***************************************************************
 
+# appimage tests; test scripts are in contest/tests/Dockerfile.*
+
+test.appimage_server_64_ubuntu_latest: upload/$(APPIMAGE_SERVER_64)
+test.appimage_server_64_ubuntu_oldest: upload/$(APPIMAGE_SERVER_64)
+test.appimage_client_64_ubuntu_latest: upload/$(APPIMAGE_CLIENT_64)
+test.appimage_client_64_ubuntu_oldest: upload/$(APPIMAGE_CLIENT_64)
+
+test.appimage_server_64_fedora_latest: upload/$(APPIMAGE_SERVER_64)
+test.appimage_server_64_fedora_oldest: upload/$(APPIMAGE_SERVER_64)
+test.appimage_client_64_fedora_latest: upload/$(APPIMAGE_CLIENT_64)
+test.appimage_client_64_fedora_oldest: upload/$(APPIMAGE_CLIENT_64)
+
+test.appimage_server_64_centos_latest: upload/$(APPIMAGE_SERVER_64)
+test.appimage_server_64_centos_oldest: upload/$(APPIMAGE_SERVER_64)
+test.appimage_client_64_centos_latest: upload/$(APPIMAGE_CLIENT_64)
+test.appimage_client_64_centos_oldest: upload/$(APPIMAGE_CLIENT_64)
+
+test.appimage_server_32_debian_latest: upload/$(APPIMAGE_SERVER_32)
+test.appimage_server_32_debian_oldest: upload/$(APPIMAGE_SERVER_32)
+test.appimage_client_32_debian_latest: upload/$(APPIMAGE_CLIENT_32)
+test.appimage_client_32_debian_oldest: upload/$(APPIMAGE_CLIENT_32)
+
+test.%: context/tests/Dockerfile.%
+	rm -rf $@.dir
+	mkdir -p $@.dir
+	cp $^ $@.dir
+	cd $@.dir; docker build . -f Dockerfile.* -t $*
+	echo > $@
+
+appimagetests.tag: \
+	test.appimage_server_64_ubuntu_latest \
+	test.appimage_server_64_ubuntu_oldest \
+	test.appimage_client_64_ubuntu_latest \
+	test.appimage_client_64_ubuntu_oldest \
+	test.appimage_server_64_fedora_latest \
+	test.appimage_server_64_fedora_oldest \
+	test.appimage_client_64_fedora_latest \
+	test.appimage_client_64_fedora_oldest \
+	test.appimage_server_64_centos_latest \
+	test.appimage_server_64_centos_oldest \
+	test.appimage_client_64_centos_latest \
+	test.appimage_client_64_centos_oldest \
+	test.appimage_server_32_debian_latest \
+	test.appimage_server_32_debian_oldest \
+	test.appimage_client_32_debian_latest \
+	test.appimage_client_32_debian_oldest \
+	upload/.tag
+	echo > $@
+
+appimagetests: appimagetests.tag
+
+#***************************************************************
+
 # windows source
 context.winsource_%: result.build_server_% ${srcdir}/context/winsource.sh gits.tag
 	${srcdir}/prepare_context.sh $@.dir $<.dir/* ${srcdir}/context/winsource.sh $(GITS)/codeblocks
