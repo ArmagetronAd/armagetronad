@@ -316,7 +316,7 @@ deploy-release:
 post_test:
   stage: build_collect
   script:
-    - make -d -C gitlab_build/docker/build appimagetests_ci
+    - make -C gitlab_build/docker/build appimagetests_ci || exit $?
 
 # pack up the downloadable build files in one handy artifact
 pack:
