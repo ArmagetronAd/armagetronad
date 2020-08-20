@@ -405,7 +405,10 @@ test.%: context/tests/Dockerfile.%
 	rm -rf $@.dir
 	mkdir -p $@.dir
 	cp $^ $@.dir
-	cd $@.dir; docker build . -f Dockerfile.* -t $*
+	cd $@.dir; docker rmi $*:last || true
+	cd $@.dir; docker tag $*:latest $*:last || true
+	cd $@.dir; docker build . -f Dockerfile.* -t $*:latest
+	cd $@.dir; docker rmi $*:last || true
 	echo > $@
 
 appimagetests.tag: \
@@ -429,6 +432,18 @@ appimagetests.tag: \
 	echo > $@
 
 appimagetests: appimagetests.tag
+
+appimagetests_ci.tag: \
+	test.appimage_client_64_ubuntu_latest \
+	test.appimage_client_64_fedora_latest \
+	test.appimage_server_64_centos_oldest \
+	test.appimage_client_64_centos_oldest \
+	test.appimage_server_32_debian_oldest \
+	test.appimage_client_32_debian_oldest \
+	upload/.tag
+	echo > $@
+
+appimagetests_ci: appimagetests_ci.tag
 
 #***************************************************************
 
