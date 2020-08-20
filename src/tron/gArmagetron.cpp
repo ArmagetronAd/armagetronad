@@ -701,7 +701,7 @@ int main(int argc,char **argv){
             tRecorder::Playback( versionSection, version );
             tRecorder::Record( versionSection, version );
 #ifndef DEDICATED
-            if(version != sn_programVersion)
+            if(version != st_programVersion)
             {
 #ifdef DEBUG
                 tERR_WARN( "Recording from a different version, consider at high risk of desync." );
