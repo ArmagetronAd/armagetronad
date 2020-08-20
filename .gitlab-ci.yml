@@ -314,12 +314,7 @@ deploy-release:
 
 # post-build tests
 post_test:
-  stage: stage
-  needs:
-   - build_collect
-  dependencies:
-   - build_collect
-  script:
+  stage: build_collect
   script:
     - make -d -C gitlab_build/docker/build appimagetests_ci
 
