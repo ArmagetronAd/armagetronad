@@ -444,8 +444,6 @@ void tAdvanceFrame( int usecdelay )
     }
     else
     {
-        // must never be called when a recording is running
-        tASSERT( !tRecorder::IsPlayingBack() );
 
 #ifdef FIXED_FRAMERATE
         tTime fixed, catchup, timeFixedRelative;
@@ -470,8 +468,11 @@ void tAdvanceFrame( int usecdelay )
         }
 #endif
 
-        // timeAdvance = timeRealRelative - timeRelative;
-        timeRelative = timeNewRelative;
+        if( !tRecorder::IsPlayingBack() )
+        {
+            // timeAdvance = timeRealRelative - timeRelative;
+            timeRelative = timeNewRelative;
+        }
     }
 
 

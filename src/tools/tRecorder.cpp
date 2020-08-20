@@ -156,6 +156,42 @@ bool tRecorder::PlaybackStrict( char const * section )
     return tRecorderTemplate1< tPlaybackBlock >::Archive( true, section );
 }
 
+static bool st_desyncedPlayback{};
+static bool st_probablyDesyncedPlayback{};
+
+bool tRecorder::DesyncedPlayback()
+{
+    return st_desyncedPlayback;
+}
+
+void tRecorder::ActivateDesyncedPlayback()
+{
+    if(!st_desyncedPlayback)
+    {
+#ifndef DEBUG
+        if(!st_probablyDesyncedPlayback)
+#endif
+        {
+            tERR_WARN("Playback no longer in sync.");
+        }
+        constexpr auto desyncTag = "DESYNC_DETECTED";
+        tRecorder::Record(desyncTag);
+        tRecorder::Playback(desyncTag);
+
+        st_desyncedPlayback = true;
+    }
+}
+
+bool tRecorder::ProbablyDesyncedPlayback()
+{
+    return st_probablyDesyncedPlayback;
+}
+
+void tRecorder::ActivateProbablyDesyncedPlayback()
+{
+    st_probablyDesyncedPlayback = true;
+}
+
 // *****************************************************************************************
 // *****************************************************************************************
 // *****************************************************************************************
@@ -280,7 +316,7 @@ std::istream & operator >> ( std::istream & s, tLineString & line )
 //!
 // *****************************************************************************************
 
-bool tRecordingBlockBase::Initialize( char const * section, tRecording * recording )
+bool tRecordingBlockBase::Initialize( char const * section, tRecording * recording, bool )
 {
     // initialize recording pointer
     recording_ = recording;
@@ -305,10 +341,10 @@ bool tRecordingBlockBase::Initialize( char const * section, tRecording * recordi
 //!
 // *****************************************************************************************
 
-bool tRecordingBlockBase::Initialize( char const * section )
+bool tRecordingBlockBase::Initialize( char const * section, bool skipToIt )
 {
     // delegate
-    return Initialize( section, tRecording::currentRecording_ );
+    return Initialize( section, tRecording::currentRecording_, skipToIt );
 }
 
 // *****************************************************************************************
@@ -433,7 +469,7 @@ tRecordingBlock::~tRecordingBlock( void )
 //!
 // *****************************************************************************************
 
-bool tPlaybackBlockBase::Initialize( char const * section, tPlayback * playback )
+bool tPlaybackBlockBase::Initialize( char const * section, tPlayback * playback, bool skipToIt )
 {
     // initialize playback pointer
     playback_ = playback;
@@ -443,10 +479,18 @@ bool tPlaybackBlockBase::Initialize( char const * section, tPlayback * playback 
     // std::cout << playback_->GetNextSection() << "," << section << "\n";
 
     // read section
-    if( playback_->GetNextSection() != section )
+    if(skipToIt)
     {
-        playback_ = NULL;
-        return false;
+        while(playback->GetNextSection() != section && playback->GetNextSection() != "EOF")
+            playback->AdvanceSection(true);
+    }
+    else
+    {
+        if( playback_->GetNextSection() != section )
+        {
+            playback_ = NULL;
+            return false;
+        }
     }
 
     // return success
@@ -464,9 +508,9 @@ bool tPlaybackBlockBase::Initialize( char const * section, tPlayback * playback 
 //!
 // *****************************************************************************************
 
-bool tPlaybackBlockBase::Initialize( char const * section )
+bool tPlaybackBlockBase::Initialize( char const * section, bool skipToIt )
 {
-    return Initialize( section, tPlayback::currentPlayback_ );
+    return Initialize( section, tPlayback::currentPlayback_, skipToIt );
 }
 
 // *****************************************************************************************

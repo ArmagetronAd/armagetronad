@@ -379,6 +379,74 @@ appimage.tag: appimage_client_64.tag appimage_server_64.tag appimage_client_32.t
 
 #***************************************************************
 
+# appimage tests; test scripts are in contest/tests/Dockerfile.*
+
+test.appimage_server_64_ubuntu_latest: upload/$(APPIMAGE_SERVER_64)
+test.appimage_server_64_ubuntu_oldest: upload/$(APPIMAGE_SERVER_64)
+test.appimage_client_64_ubuntu_latest: upload/$(APPIMAGE_CLIENT_64)
+test.appimage_client_64_ubuntu_oldest: upload/$(APPIMAGE_CLIENT_64)
+
+test.appimage_server_64_fedora_latest: upload/$(APPIMAGE_SERVER_64)
+test.appimage_server_64_fedora_oldest: upload/$(APPIMAGE_SERVER_64)
+test.appimage_client_64_fedora_latest: upload/$(APPIMAGE_CLIENT_64)
+test.appimage_client_64_fedora_oldest: upload/$(APPIMAGE_CLIENT_64)
+
+test.appimage_server_64_centos_latest: upload/$(APPIMAGE_SERVER_64)
+test.appimage_server_64_centos_oldest: upload/$(APPIMAGE_SERVER_64)
+test.appimage_client_64_centos_latest: upload/$(APPIMAGE_CLIENT_64)
+test.appimage_client_64_centos_oldest: upload/$(APPIMAGE_CLIENT_64)
+
+test.appimage_server_32_debian_latest: upload/$(APPIMAGE_SERVER_32)
+test.appimage_server_32_debian_oldest: upload/$(APPIMAGE_SERVER_32)
+test.appimage_client_32_debian_latest: upload/$(APPIMAGE_CLIENT_32)
+test.appimage_client_32_debian_oldest: upload/$(APPIMAGE_CLIENT_32)
+
+test.%: context/tests/Dockerfile.%
+	rm -rf $@.dir
+	mkdir -p $@.dir
+	cp $^ $@.dir
+	cd $@.dir; docker rmi $*:last || true
+	cd $@.dir; docker tag $*:latest $*:last || true
+	cd $@.dir; docker build . -f Dockerfile.* -t $*:latest
+	cd $@.dir; docker rmi $*:last || true
+	echo > $@
+
+appimagetests.tag: \
+	test.appimage_server_64_ubuntu_latest \
+	test.appimage_server_64_ubuntu_oldest \
+	test.appimage_client_64_ubuntu_latest \
+	test.appimage_client_64_ubuntu_oldest \
+	test.appimage_server_64_fedora_latest \
+	test.appimage_server_64_fedora_oldest \
+	test.appimage_client_64_fedora_latest \
+	test.appimage_client_64_fedora_oldest \
+	test.appimage_server_64_centos_latest \
+	test.appimage_server_64_centos_oldest \
+	test.appimage_client_64_centos_latest \
+	test.appimage_client_64_centos_oldest \
+	test.appimage_server_32_debian_latest \
+	test.appimage_server_32_debian_oldest \
+	test.appimage_client_32_debian_latest \
+	test.appimage_client_32_debian_oldest \
+	upload/.tag
+	echo > $@
+
+appimagetests: appimagetests.tag
+
+appimagetests_ci.tag: \
+	test.appimage_client_64_ubuntu_latest \
+	test.appimage_client_64_fedora_latest \
+	test.appimage_server_64_centos_oldest \
+	test.appimage_client_64_centos_oldest \
+	test.appimage_server_32_debian_oldest \
+	test.appimage_client_32_debian_oldest \
+	upload/.tag
+	echo > $@
+
+appimagetests_ci: appimagetests_ci.tag
+
+#***************************************************************
+
 # windows source
 context.winsource_%: result.build_server_% ${srcdir}/context/winsource.sh gits.tag
 	${srcdir}/prepare_context.sh $@.dir $<.dir/* ${srcdir}/context/winsource.sh
@@ -540,6 +608,13 @@ deploy_base.tag: CI_pack.tag debtest.tag reformat.tag ../deploy/targets.sh
 	echo > $@
 deploy_base: deploy_base.tag
 
+# out of our control deploy targets that break from time to time; the whole deploy process needs to be delayed if they fail
+deploy_essential: result.deploy_lp result.deploy_scp
+deploy_external: deploy_essential deploy_steam
+
+# targets in our control
+deploy_ours: result.deploy_zi result.deploy_download deploy_external
+
 context.deploy_base_%: rootcontext.64 deploy_base.tag ${srcdir}/../deploy/deploy_%.sh ../deploy/* CI_INFO
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' upload ../deploy/'*' ${srcdir}/../deploy/deploy_$*.sh CI_INFO
 	echo > $@
@@ -551,7 +626,7 @@ result.deploy_%: context.deploy_%
 	echo > $@
 
 # special case steam: run in steamcmd image
-context.deploy_steam: context.deploy_base_steam ${srcdir}/../deploy/steamcontentbuilder/*/* steamdirs/*
+context.deploy_steam: context.deploy_base_steam ${srcdir}/../deploy/steamcontentbuilder/*/* steamdirs/* deploy_essential
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' ${srcdir}/../deploy/steamcontentbuilder
 	sed -i $@.dir/steamcontentbuilder/scripts/app_build_1306180.vdf -e "s/BUILD_DESCRIPTION/$(STEAM_PACKAGE_TITLE)$(PACKAGE_TITLE_SUFFIX) $(PACKAGE_VERSION)/"
 	mkdir -p $@.dir/steamcontentbuilder/content $@.dir/steamcontentbuilder/output
@@ -565,7 +640,7 @@ context.deploy_steam: context.deploy_base_steam ${srcdir}/../deploy/steamcontent
 context.deploy_ppa_%: result.debsrc_% ${srcdir}/../deploy/deploy_ppa.sh ../deploy/targets.sh CI_INFO
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' ${srcdir}/../deploy/deploy_ppa.sh ../deploy/targets.sh ../deploy/secrets/*.gpg CI_INFO
 	echo > $@
-result.deploy_ppa_%: context.deploy_ppa_%
+result.deploy_ppa_%: context.deploy_ppa_% deploy_ours
 	+$(srcdir)/context_to_result.sh $@.dir ./deploy_ppa.sh $*
 	echo > $@
 
@@ -584,12 +659,12 @@ context.update_zi: context.deploy_base_zeroinstall ${srcdir}/../deploy/*_zeroins
 result.update_zi: context.update_zi
 	+$(srcdir)/context_to_result.sh $@.dir ./update_zeroinstall.sh
 	echo > $@
-context.deploy_zi: context.deploy_base_zeroinstall result.update_zi ${srcdir}/../deploy/*_zeroinstall.sh result.deploy_lp result.deploy_scp
+context.deploy_zi: context.deploy_base_zeroinstall result.update_zi ${srcdir}/../deploy/*_zeroinstall.sh
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' result.update_zi.dir/zeroinstall ${srcdir}/../deploy/*_zeroinstall.sh
 	rm -f $@.dir/image
 	echo "armadeploy_64" > $@.dir/image
 	echo > $@
-result.deploy_zi: context.deploy_zi
+result.deploy_zi: context.deploy_zi deploy_external
 	+$(srcdir)/context_to_result.sh $@.dir ./deploy_zeroinstall.sh
 	echo > $@
 context.deploy_itch: context.deploy_base_itch ${srcdir}/../deploy/*_itch.sh upload/$(APPTAR_CLIENT_64) upload/$(APPTAR_CLIENT_32) $(WINZIP_CLIENT)
@@ -605,7 +680,7 @@ result.deploy_itch: context.deploy_itch
 	echo > $@
 
 # deploy to download site (additional dependency here only, standard rules apply)
-result.deploy_download: result.deploy_scp result.deploy_lp
+result.deploy_download: deploy_external
 
 # individual deploy targets
 deploy_lp: result.deploy_lp

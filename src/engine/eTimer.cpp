@@ -170,6 +170,10 @@ void eTimer::ReadSync( Engine::TimerSync const & sync, nSenderInfo const & sende
 
     sync_ = true;
 
+    // record ping in case we desync on playback
+    if(sn_GetNetState() == nCLIENT)
+        sn_Connections[0].ping.Record();
+
     //std::cerr << "Got sync:" << remote_currentTime << ":" << speed << '\n';
 }
 
@@ -327,6 +331,7 @@ void eTimer::ProcessSync()
     startTimeOffset_.Add( remoteStartTimeOffsetClamped_, 1/remoteTimeNonQuality );
 
     // sanity check offset average.
+    if(!tRecorder::DesyncedPlayback())
     {
         REAL tolerance = spf * .25 + .001;
         double minOffset = remoteStartTimeOffset - tolerance;

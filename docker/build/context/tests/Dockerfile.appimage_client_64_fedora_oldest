@@ -1,0 +1,10 @@
+FROM fedora:24
+
+# BUG SDL_image should not be required
+RUN yum -y install mesa-libGL SDL_image && yum clean all
+
+COPY *.AppImage .
+RUN ./*.AppImage --appimage-extract-and-run --version
+
+# BUG this should work
+# RUN LD_DEBUG_APP=true ./*.AppImage --appimage-extract-and-run --version

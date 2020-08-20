@@ -73,7 +73,7 @@ public:
 protected:
     virtual ~tPlayback     ()        ;   //!< destructor
 
-    void    AdvanceSection ()        ;   //!< begin reading next section
+    void    AdvanceSection (bool skipLines = false)        ;   //!< begin reading next section
 private:
     // forbid copying
     tPlayback                      ( tPlayback const &            other       ) ;   //!< copy constructor
