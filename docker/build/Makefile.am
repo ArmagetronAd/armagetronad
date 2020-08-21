@@ -576,7 +576,6 @@ deploy_download: result.deploy_download
 
 deploy_ppa: \
 deploy_ppa_focal \
-deploy_ppa_eoan \
 deploy_ppa_bionic \
 deploy_ppa_xenial \
 deploy_ppa_trusty
