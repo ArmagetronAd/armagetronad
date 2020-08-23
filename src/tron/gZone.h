@@ -84,7 +84,9 @@ public:
     gZone(nMessage &m);                    //!< network constructor
     ~gZone();                              //!< destructor
 
-    void SetReferenceTime();               //!< sets the reference time to the current time
+    int GetID() { return id_; }; //!< Gets the static zone ID
+	
+	void SetReferenceTime();               //!< sets the reference time to the current time
 
     gZone &         SetPosition         ( eCoord const & position );	//!< Sets the current position
     eCoord          GetPosition         ( void ) const;	                //!< Gets the current position
@@ -150,6 +152,8 @@ public:
     static void GridPosLadderLog(); //  gridpos ladderlog for the zones
 
 protected:
+	int id_; 
+
     bool wallInteract_;
     int wallBouncesLeft_;
     eWall *pLastWall_; // dumb pointer is OK, it is never dereferenced.
