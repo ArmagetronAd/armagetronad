@@ -246,12 +246,12 @@ rTextField::rTextField(REAL Left,REAL Top,
 
 REAL rTextField::AspectWidthMultiplier()
 {
-    return ((4.0/3.0)*sr_screenHeight)/sr_screenWidth;
+    return std::min(((4.0f/3.0f)*sr_screenHeight)/sr_screenWidth,1.0f);
 }
 
 REAL rTextField::AspectHeightMultiplier()
 {
-    return ((3.0/4.0)*sr_screenWidth)/sr_screenHeight;
+    return std::min(((3.0f/4.0f)*sr_screenWidth)/sr_screenHeight,1.0f);
 }
 
 
