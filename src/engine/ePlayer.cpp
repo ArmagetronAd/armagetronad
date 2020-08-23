@@ -6441,7 +6441,7 @@ void ePlayerNetID::DisplayScores()
 #ifndef DEDICATED
     if (sr_glOut){
         ::Color(1,1,1);
-        float wmult = (REAL(sr_screenHeight)/sr_screenWidth)*(4.0/3.0);
+        float wmult = rTextField::AspectWidthMultiplier();
         rTextField c(-.7*wmult,.6,(10/W)*wmult,18/H);
 
         // print team ranking if there actually is a team with more than one player

@@ -90,6 +90,14 @@ public:
                REAL Cwidth=rCWIDTH_NORMAL,REAL Cheight=rCHEIGHT_NORMAL,
                rFont *f=&rFont::s_defaultFont);
 
+    // all the basic code assumes a 4:3 screen. We won't fix that here on 0.2.9.
+    // instead, users need to either multiply their witdh (and maybe left) with
+    // AspectWidthMultiplier() or their height (and Top) with AspectHeightMultiplier().
+    // Pick one for each context and stick with it. The Width modification should be
+    // the default.
+    static REAL AspectWidthMultiplier();
+    static REAL AspectHeightMultiplier();
+
     virtual ~rTextField(); // for future extensions (buffered console?)
 
     REAL GetCWidth() const {

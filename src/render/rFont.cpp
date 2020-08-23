@@ -244,6 +244,16 @@ rTextField::rTextField(REAL Left,REAL Top,
     cursor_y = -100;
 }
 
+REAL rTextField::AspectWidthMultiplier()
+{
+    return ((4.0/3.0)*sr_screenHeight)/sr_screenWidth;
+}
+
+REAL rTextField::AspectHeightMultiplier()
+{
+    return ((3.0/4.0)*sr_screenWidth)/sr_screenHeight;
+}
+
 
 rTextField::~rTextField(){
 #ifndef DEDICATED
