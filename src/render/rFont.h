@@ -190,6 +190,12 @@ template<class T> rTextField & operator<<(rTextField &c,const T &x){
 void DisplayText(REAL x,REAL y,REAL w,REAL h,const char *text,int center=0,
                  int cursor=0,int cursorPos=0, rTextField::ColorMode colorMode = rTextField::COLOR_USE );
 
+void DisplayTextAutoWidth(REAL x,REAL y,const char *text,REAL h=rCHEIGHT_NORMAL,int center=0,
+                 int cursor=0,int cursorPos=0, rTextField::ColorMode colorMode = rTextField::COLOR_USE );
+
+void DisplayTextAutoHeight(REAL x,REAL y,const char *text,REAL w=rCWIDTH_NORMAL,int center=0,
+                 int cursor=0,int cursorPos=0, rTextField::ColorMode colorMode = rTextField::COLOR_USE );
+
 // *******************************************************************************************
 // *
 // *	GetColor

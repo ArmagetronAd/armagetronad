@@ -573,6 +573,17 @@ void DisplayText(REAL x,REAL y,REAL w,REAL h,const char *text,int center,int cur
         c.SetCursor(cursor,cursorPos);
     c.StringOutput(text, colorMode );
 }
+
+void DisplayTextAutoWidth(REAL x, REAL y, const char *text, REAL h, int center, int cursor, int cursorPos, rTextField::ColorMode colorMode)
+{
+    DisplayText(x, y, h*(rCWIDTH_NORMAL/rCHEIGHT_NORMAL)*rTextField::AspectWidthMultiplier(), h, text, center, cursor, cursorPos, colorMode);
+}
+
+void DisplayTextAutoHeight(REAL x, REAL y, const char *text, REAL w, int center, int cursor, int cursorPos, rTextField::ColorMode colorMode)
+{
+    DisplayText(x, y, w, w*(rCHEIGHT_NORMAL/rCWIDTH_NORMAL)*rTextField::AspectHeightMultiplier(), text, center, cursor, cursorPos, colorMode);
+}
+
 // *******************************************************************************************
 // *
 // *	GetDefaultColor
@@ -680,6 +691,4 @@ void rTextField::SetBlendColor( tColor const & blendColor )
 
 tColor rTextField::defaultColor_;
 tColor rTextField::blendColor_;
-
-
 
