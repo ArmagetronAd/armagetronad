@@ -510,7 +510,8 @@ void gServerMenu::Render(REAL y,
 {
     if (sr_glOut)
     {
-        rTextField c(-.9f, y+text_height*.5, text_width, text_height);
+        REAL const xAspectMultiplier = rTextField::AspectWidthMultiplier();
+        rTextField c(-.9f * xAspectMultiplier, y+text_height*.5, text_width * xAspectMultiplier, text_height);
         c.SetWidth(1000);
 
         c.SetIndent(5);
@@ -527,7 +528,7 @@ void gServerMenu::Render(REAL y,
 
         if (ping.Len() > 1)
         {
-            text.SetPos(static_cast<int>(1.35/c.GetCWidth())  - tColoredString::RemoveColors( ping ).Len() - 1, true );
+            text.SetPos(static_cast<int>(1.35*xAspectMultiplier/c.GetCWidth())  - tColoredString::RemoveColors( ping ).Len() - 1, true );
             text << "0xRESETT";
             text << " " << ping;
         }
@@ -538,13 +539,13 @@ void gServerMenu::Render(REAL y,
 
         if (users.Len() > 1)
         {
-            text.SetPos(static_cast<int>(1.6/c.GetCWidth()) - tColoredString::RemoveColors( users ).Len(), false );
+            text.SetPos(static_cast<int>(1.6*xAspectMultiplier/c.GetCWidth()) - tColoredString::RemoveColors( users ).Len(), false );
             text << users;
         }
 
         if (score.Len() > 1)
         {
-            text.SetPos(static_cast<int>(1.8/c.GetCWidth()) - tColoredString::RemoveColors( score ).Len(), false );
+            text.SetPos(static_cast<int>(1.8*xAspectMultiplier/c.GetCWidth()) - tColoredString::RemoveColors( score ).Len(), false );
             text << score;
         }
 
@@ -705,7 +706,8 @@ void gServerMenuItem::RenderBackground()
 
     rTextField::SetDefaultColor( tColor(1,1,1) );
 
-    rTextField players( -.9, helpTopReal, text_width, text_height );
+    REAL const xAspectMultiplier = rTextField::AspectWidthMultiplier();
+    rTextField players( -.9, helpTopReal, text_width * xAspectMultiplier, text_height );
     if ( server )
     {
         players << tOutput( "$network_master_players" );
