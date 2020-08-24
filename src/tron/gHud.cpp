@@ -596,7 +596,7 @@ static void display_fps_subby()
         }
 
         // float timesize = subby_ScoreSize; // -((.15*timesize*(10-1.5))/2.0)
-        rTextField the_time(.7,.9,.15*size, .3*size);
+        rTextField the_time(.9-.2*rTextField::AspectWidthMultiplier(),.9,.15*size*rTextField::AspectWidthMultiplier(), .3*size);
 
         the_time << "0xffffff" << theTime;
     }
