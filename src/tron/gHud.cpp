@@ -56,7 +56,7 @@ bool subby_ShowHUD=true, subby_ShowSpeedFastest=true, subby_ShowScore=true, subb
 bool showTime=false;
 bool show24hour=false;
 REAL subby_ScoreLocX=-0.95, subby_ScoreLocY=-0.85, subby_ScoreSize =.13;
-REAL subby_FastestLocX=-0.0, subby_FastestLocY=-0.95, subby_FastestSize =.12;
+REAL subby_FastestLocX=-0.2, subby_FastestLocY=-0.95, subby_FastestSize =.12;
 REAL subby_AlivePeopleLocX=.45, subby_AlivePeopleLocY=-0.95, subby_AlivePeopleSize =.13;
 REAL subby_PingLocX=.80, subby_PingLocY=-0.95, subby_PingSize =.13;
 
@@ -596,7 +596,7 @@ static void display_fps_subby()
         }
 
         // float timesize = subby_ScoreSize; // -((.15*timesize*(10-1.5))/2.0)
-        rTextField the_time(.7,.9,.15*size, .3*size);
+        rTextField the_time(.9-.2*rTextField::AspectWidthMultiplier(),.9,.15*size*rTextField::AspectWidthMultiplier(), .3*size);
 
         the_time << "0xffffff" << theTime;
     }
