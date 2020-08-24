@@ -738,6 +738,7 @@ score_locy_help               Vertikale Position der Punktzahl in der Anzeige
 score_size_help               Göße der Punktzahl in der Anzeige
 cm_locy_help                  Vertikale Position der Zentralnachrichten vom Server
 hud_cache_threshold_help      Update-Schwelle für HUD-Anzeigen, wenn Display-Listen-Optimierung aktiv ist. Erst, wenn die Änderung der Anzeigen eine durch diesen Wert bestimmte Schwelle überschreiten, werden sie neu gezeichnet.
+hud_max_width_help            Maximale Breite des unteren HUD in Relation zur Bildschirmhöhe. Ein Wert von 0 sorgt für das alte Verhalten (<=0.2.9.0), bei dem das HUD einfach über die gesamte Breite gestreckt wird, ohne die Höhe an Bildschirme in nicht-4:3-Formaten anzupassen.
 
 #floor
 grid_size_help                Abstand zwischen Rasterlinien

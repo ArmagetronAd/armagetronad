@@ -329,6 +329,10 @@ void rViewport::SetDirectionOfCorrection(int vp, int dir){
     vpb_dir[vp] = dir;
 }
 
+
+static REAL sr_HUDMaxWidth{1.333333};
+static tConfItem<REAL> sr_HUDAspectModeConf("HUD_MAX_WIDTH", sr_HUDMaxWidth);
+
 // *******************************************************************************************
 // *
 // *	CorrectAspectBottom
@@ -342,7 +346,27 @@ void rViewport::SetDirectionOfCorrection(int vp, int dir){
 rViewport rViewport::CorrectAspectBottom( void ) const
 {
     rViewport ret( *this );
-    ret.height = width * 4.0 / 3.0;
+
+    if(sr_HUDMaxWidth <= 0)
+    {
+        ret.height = width * 4.0 / 3.0;
+        return ret;
+    }
+
+    // start with giving it the correct aspect ratio
+    REAL aspect = 4.0 / 3.0 /  rTextField::AspectWidthMultiplier();
+    ret.height = width * aspect;
+
+    REAL const max_aspect = sr_HUDMaxWidth * std::max(height/width, 1.0f);
+
+    if(max_aspect < aspect)
+    {
+        // clamp the width down, keep viewport centered
+        ret.height = width * max_aspect;
+        REAL clampedWidth = ret.height/aspect;
+        ret.left = ret.left + (ret.width - clampedWidth)*.5f;
+        ret.width = clampedWidth;
+    }
 
     return ret;
 }
