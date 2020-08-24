@@ -530,7 +530,7 @@ static void display_fps_subby()
     rDisplayListFiller filler( cache.list_ );
 
     float size =.15;
-    rTextField c2(.7,.85,.15*size, .3*size);
+    rTextField c2(.9-.2*rTextField::AspectWidthMultiplier(),.85,.15*size*rTextField::AspectWidthMultiplier(), .3*size);
 
     if ( sr_RecordingTimeOut && tRecorder::IsRunning() )
     {

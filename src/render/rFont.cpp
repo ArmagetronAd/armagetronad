@@ -244,6 +244,16 @@ rTextField::rTextField(REAL Left,REAL Top,
     cursor_y = -100;
 }
 
+REAL rTextField::AspectWidthMultiplier()
+{
+    return std::min(((4.0f/3.0f)*sr_screenHeight)/sr_screenWidth,1.0f);
+}
+
+REAL rTextField::AspectHeightMultiplier()
+{
+    return std::min(((3.0f/4.0f)*sr_screenWidth)/sr_screenHeight,1.0f);
+}
+
 
 rTextField::~rTextField(){
 #ifndef DEDICATED
@@ -563,6 +573,17 @@ void DisplayText(REAL x,REAL y,REAL w,REAL h,const char *text,int center,int cur
         c.SetCursor(cursor,cursorPos);
     c.StringOutput(text, colorMode );
 }
+
+void DisplayTextAutoWidth(REAL x, REAL y, const char *text, REAL h, int center, int cursor, int cursorPos, rTextField::ColorMode colorMode)
+{
+    DisplayText(x, y, h*(rCWIDTH_NORMAL/rCHEIGHT_NORMAL)*rTextField::AspectWidthMultiplier(), h, text, center, cursor, cursorPos, colorMode);
+}
+
+void DisplayTextAutoHeight(REAL x, REAL y, const char *text, REAL w, int center, int cursor, int cursorPos, rTextField::ColorMode colorMode)
+{
+    DisplayText(x, y, w, w*(rCHEIGHT_NORMAL/rCWIDTH_NORMAL)*rTextField::AspectHeightMultiplier(), text, center, cursor, cursorPos, colorMode);
+}
+
 // *******************************************************************************************
 // *
 // *	GetDefaultColor
@@ -670,6 +691,4 @@ void rTextField::SetBlendColor( tColor const & blendColor )
 
 tColor rTextField::defaultColor_;
 tColor rTextField::blendColor_;
-
-
 

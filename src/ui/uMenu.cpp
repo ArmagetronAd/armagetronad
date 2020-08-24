@@ -314,7 +314,7 @@ void uMenu::OnEnter(){
 
             Color(.6,.6,1,1);
             ::DisplayText(0,menuTop+text_height*titlefac
-                          ,text_width*titlefac,text_height*titlefac,
+                          ,text_width*titlefac*rTextField::AspectWidthMultiplier(),text_height*titlefac,
                           title,0);
 
             glDisable(GL_TEXTURE_2D);
@@ -341,7 +341,7 @@ void uMenu::OnEnter(){
                           .8*helpAlpha,
                           .8*helpAlpha);
 
-                rTextField c(-.95f,menuBot-.04f);
+                rTextField c(-.95f,menuBot-.04f,rCWIDTH_NORMAL*rTextField::AspectWidthMultiplier());
                 c.SetWidth(static_cast<int>((1.9f-items[selected]->SpaceRight())/c.GetCWidth()));
                 c << items[selected]->Help();
             }
@@ -588,6 +588,9 @@ void uMenuItem::DisplayText(REAL x,REAL y,const char *text,
 
         REAL tw = text_width;
         REAL th = text_height;
+        
+        //aspect ratio correction
+        tw *= (REAL(sr_screenHeight)/sr_screenWidth)*(4.0/3.0);
 
         
 #if 0
@@ -1276,9 +1279,8 @@ bool uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL 
 
                 GenericBackground();
 
-                REAL w=16*3/640.0;
-                REAL h=32*3/480.0;
-
+                //16*3/640.0, 32*3/480.0
+                REAL w=0.1*(REAL(sr_screenHeight)/sr_screenWidth),h=0.2;
 
                 //REAL middle=-.6;
 
@@ -1293,7 +1295,8 @@ bool uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL 
                 Color(1,1,1);
                 DisplayText(0,.8,w,h, message);
 
-                w = 16/640.0;
+                //16/640.0
+                w = 1/30.0*(REAL(sr_screenHeight)/sr_screenWidth);
                 h = 32/480.0;
 
                 if (offset >= lines.size()) offset = lines.size() - 1;

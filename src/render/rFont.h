@@ -90,6 +90,14 @@ public:
                REAL Cwidth=rCWIDTH_NORMAL,REAL Cheight=rCHEIGHT_NORMAL,
                rFont *f=&rFont::s_defaultFont);
 
+    // all the basic code assumes a 4:3 screen. We won't fix that here on 0.2.9.
+    // instead, users need to either multiply their witdh (and maybe left) with
+    // AspectWidthMultiplier() or their height (and Top) with AspectHeightMultiplier().
+    // Pick one for each context and stick with it. The Width modification should be
+    // the default.
+    static REAL AspectWidthMultiplier();
+    static REAL AspectHeightMultiplier();
+
     virtual ~rTextField(); // for future extensions (buffered console?)
 
     REAL GetCWidth() const {
@@ -180,6 +188,12 @@ template<class T> rTextField & operator<<(rTextField &c,const T &x){
 }
 
 void DisplayText(REAL x,REAL y,REAL w,REAL h,const char *text,int center=0,
+                 int cursor=0,int cursorPos=0, rTextField::ColorMode colorMode = rTextField::COLOR_USE );
+
+void DisplayTextAutoWidth(REAL x,REAL y,const char *text,REAL h=rCHEIGHT_NORMAL,int center=0,
+                 int cursor=0,int cursorPos=0, rTextField::ColorMode colorMode = rTextField::COLOR_USE );
+
+void DisplayTextAutoHeight(REAL x,REAL y,const char *text,REAL w=rCWIDTH_NORMAL,int center=0,
                  int cursor=0,int cursorPos=0, rTextField::ColorMode colorMode = rTextField::COLOR_USE );
 
 // *******************************************************************************************
