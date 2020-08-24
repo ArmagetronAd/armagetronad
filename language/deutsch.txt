@@ -787,7 +787,7 @@ zone_bottom_help              Unterer Rand der Zonen. Default: 0.0
 zone_height_help              Höhe der Zonen: Default: 5.0
 smooth_shading_help           Aktiviert "Rundes Licht"
 text_out_help                 Aktiviert Textausgabe
-console_columns_help          Anzahl der Spalten der Textausgabe
+console_columns_help          Anzahl der Spalten der Textausgabe. 0 für Automatikmodus.
 console_rows_help             Anzahl der Zeilen der Textausgabe (normal)
 console_rows_max_help         Anzahl der Zeilen der Textausgabe (maximal beim Hochscrollen)
 console_indent_help           Anzahl der Leerzeichen, mit denen die Vortsetzung einer automatisch umgebrochenen Konsolenzeile eingerückt wird
