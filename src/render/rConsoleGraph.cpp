@@ -74,7 +74,7 @@ REAL centerMessageY=0;
 
 static tConfItem<REAL> cmlocy("CM_LOCY",centerMessageY);
 
-static int sr_columns = 78;
+static int sr_columns = 0;
 static tConfItem<int> sr_columnsConf("CONSOLE_COLUMNS",sr_columns);
 
 static int sr_indent = 3;
@@ -108,12 +108,25 @@ void rConsole::Render(){
     // rCWIDTH_CON=10/W;
     // rCHEIGHT_CON=18/H;
 
-    // the text field has an openGL coordinate with of 1.9; cram the specified number
-    // of columns in it
-    rCWIDTH_CON=1.9/sr_columns;
+    auto columns = sr_columns;
+    if(columns <= 0 && (W < 1280 || H < 720))
+        columns = 78; // the old default for small screens
 
-    // get corresponding character height
-    rCHEIGHT_CON=rCWIDTH_CON*W*9/(5*H);
+    if(columns > 0)
+    {
+        // the text field has an openGL coordinate with of 1.9; cram the specified number
+        // of columns in it
+        rCWIDTH_CON=1.9/columns;
+
+        // get corresponding character height
+        rCHEIGHT_CON=rCWIDTH_CON*W*9/(5*H);
+    }
+    else
+    {
+        // show big font in its native pixel size
+        rCHEIGHT_CON=31*2.0/H;
+        rCWIDTH_CON=15*2.0/W;
+    }
 
     if (sr_screen){
         Time=tSysTimeFloat();
@@ -142,7 +155,12 @@ void rConsole::Render(){
                 lastTimeout=Time;
             }
 
-            rTextField out(-.95f,.99f,rCWIDTH_CON,rCHEIGHT_CON);//,&rFont::s_defaultFontSmall);
+            auto pixelize = [](REAL in, int total)
+            {
+                auto pixelIn = static_cast<int>(.5f * in * total);
+                return (2.0f*(pixelIn+.5f))/total;
+            };
+            rTextField out(pixelize(-.95f,W),pixelize(.99f,H),rCWIDTH_CON,rCHEIGHT_CON);//,&rFont::s_defaultFontSmall);
             out.SetWidth(static_cast<int>(1.9f/out.GetCWidth()));
 
             static int lastTop = currentTop;
