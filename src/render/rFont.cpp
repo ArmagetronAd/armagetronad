@@ -201,7 +201,7 @@ static REAL sr_bigFontThresholdHeight = 24;
 static tSettingItem< REAL > sr_bigFontThresholdWidthConf(  "FONT_BIG_THRESHOLD_WIDTH", sr_bigFontThresholdWidth );
 static tSettingItem< REAL > sr_bigFontThresholdHeightConf( "FONT_BIG_THRESHOLD_HEIGHT", sr_bigFontThresholdHeight );
 
-static REAL sr_smallFontThresholdWidth  = 5;
+static REAL sr_smallFontThresholdWidth  = 4;
 static REAL sr_smallFontThresholdHeight = 8;
 
 static tSettingItem< REAL > sr_smallFontThresholdWidthConf(  "FONT_SMALL_THRESHOLD_WIDTH", sr_smallFontThresholdWidth );
@@ -215,19 +215,19 @@ rTextField::rTextField(REAL Left,REAL Top,
         F(f),x(0),y(0),realx(0),cursor(0),cursorPos(0){
     if ( cwidth*sr_screenWidth < sr_bigFontThresholdWidth*2 || cheight*sr_screenHeight < sr_bigFontThresholdHeight*2 )
         F=&rFont::s_defaultFontSmall;
-    if (cwidth*sr_screenWidth<sr_smallFontThresholdWidth*2)
+    if (cwidth*sr_screenWidth <= sr_smallFontThresholdWidth*2 + 1E-4)
     {
         cwidth=sr_smallFontThresholdWidth*2/REAL(sr_screenWidth);
 
         // try to place font at exact pixels
-        // left = ( int( ( 1 + left ) * sr_screenWidth -.5 ) +.5 )/REAL(sr_screenWidth) - 1;
+        left = Pixelize(left, sr_screenWidth);
     }
-    if (cheight*sr_screenHeight<sr_smallFontThresholdHeight*2)
+    if (cheight*sr_screenHeight <= sr_smallFontThresholdHeight*2 + 1E-4)
     {
         cheight=sr_smallFontThresholdHeight*2/REAL(sr_screenHeight);
 
         // try to place font at exact pixels
-        // top = ( int( ( 1 + top ) * sr_screenHeight - .5 ) + .5)/REAL(sr_screenHeight) - 1;
+        top = Pixelize(top, sr_screenHeight);
     }
 
     color_ = defaultColor_;
