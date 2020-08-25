@@ -126,6 +126,15 @@ void rConsole::Render(){
         // show big font in its native pixel size
         rCHEIGHT_CON=31*2.0/H;
         rCWIDTH_CON=15*2.0/W;
+
+        // but don't make it more than MAX_ROWS of text rows for the whole screen, more may be too small for hires small screens
+        constexpr auto MAX_ROWS = 47;
+        if(columns >= 0 && rCHEIGHT_CON * MAX_ROWS < 2)
+        {
+            auto clamped_CHEIGHT = 2.0f/MAX_ROWS;
+            rCWIDTH_CON *= clamped_CHEIGHT / rCHEIGHT_CON;
+            rCHEIGHT_CON = clamped_CHEIGHT;
+        }
     }
 
     if (sr_screen){

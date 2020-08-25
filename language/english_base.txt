@@ -785,7 +785,7 @@ zone_bottom_help        Where to put the zone along the Z axis. Default is 0.0
 zone_height_help        The zone segments' height. Default is 5.0
 smooth_shading_help     Enable smooth shading
 text_out_help			Enable console text output
-console_columns_help    Number of characters in each line of console output. 0 for automatic mode.
+console_columns_help    Number of characters in each line of console output. 0 for automatic mode. -1 to take the large bitmap font in its native size no matter what.
 console_rows_help       Number of lines of console output without user intervention
 console_rows_max_help   Number of lines of console output when scrolling back
 console_indent_help     Number of spaces each continuation of a wrapped console line is indented by
