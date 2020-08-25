@@ -98,6 +98,9 @@ public:
     static REAL AspectWidthMultiplier();
     static REAL AspectHeightMultiplier();
 
+    // puts x/y right into the middle of a screen pixel given Width or Height.
+    static REAL Pixelize(REAL xy, int WidthHeight);
+
     virtual ~rTextField(); // for future extensions (buffered console?)
 
     REAL GetCWidth() const {

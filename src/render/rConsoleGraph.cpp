@@ -164,12 +164,7 @@ void rConsole::Render(){
                 lastTimeout=Time;
             }
 
-            auto pixelize = [](REAL in, int total)
-            {
-                auto pixelIn = static_cast<int>(.5f * in * total);
-                return (2.0f*(pixelIn+.5f))/total;
-            };
-            rTextField out(pixelize(-.95f,W),pixelize(.99f,H),rCWIDTH_CON,rCHEIGHT_CON);//,&rFont::s_defaultFontSmall);
+            rTextField out(rTextField::Pixelize(-.95f,W),rTextField::Pixelize(.99f,H),rCWIDTH_CON,rCHEIGHT_CON);//,&rFont::s_defaultFontSmall);
             out.SetWidth(static_cast<int>(1.9f/out.GetCWidth()));
 
             static int lastTop = currentTop;

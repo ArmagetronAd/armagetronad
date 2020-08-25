@@ -254,6 +254,12 @@ REAL rTextField::AspectHeightMultiplier()
     return std::min(((3.0f/4.0f)*sr_screenWidth)/sr_screenHeight,1.0f);
 }
 
+REAL rTextField::Pixelize(REAL xy, int WidthHeight)
+{
+    auto pixelIn = static_cast<int>(.5f * xy * WidthHeight);
+    return (2.0f*(pixelIn+.5f))/WidthHeight;
+}
+
 
 rTextField::~rTextField(){
 #ifndef DEDICATED
