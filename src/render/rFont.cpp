@@ -68,14 +68,14 @@ static size_t my_strnlen(char const *c, size_t i) {
 
 static rFont sr_lowerPartFont("textures/font_extra.png");
 rFont rFont::s_defaultFont("textures/font.png", &sr_lowerPartFont);
-rFont rFont::s_defaultFontSmall("textures/font_s.png",32,5/128.0,9/128.0,1/128.0);
+rFont rFont::s_defaultFontSmall("textures/font_s.png",32,5/128.0,9/128.0,1/128.0, -1);
 //rFont rFont::s_defaultFontSmall("textures/Font.png",0,16/256.0,32/256.0);
 //rFont rFont::s_defaultFontSmall("textures/Font.png",0,1/16.0,1/8.0);
 
-rFont::rFont(const char *fileName,int Offset,REAL CWidth,REAL CHeight,REAL op, rFont *lower):
+rFont::rFont(const char *fileName,int Offset,REAL CWidth,REAL CHeight,REAL op, int border, rFont *lower):
         rFileTexture(rTextureGroups::TEX_FONT,fileName,0,0),
         offset(Offset),cwidth(CWidth),cheight(CHeight),
-        onepixel(op),lowerPart(lower)
+        onepixel(op),borderExtension(border), lowerPart(lower)
 {
     StoreAlpha();
 }
@@ -136,6 +136,11 @@ void rFont::OnSelect( bool enforce )
         // abort. It makes no sense to continue without a font.
         tERR_ERROR( "Font file " << this->GetFileName() << " could not be loaded.");
     }
+
+#ifndef DEDICATED
+    // wrap around so we can use the transparent pixel on the right side on the left
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+#endif
 }
 
 // displays c
@@ -159,7 +164,7 @@ void rFont::Render(unsigned char c,REAL left,REAL top,REAL right,REAL bot){
 
         REAL ttop=y*cheight+pix;
         REAL tbot=(y+1)*cheight-pix;
-        REAL tleft=x*cwidth+pix;
+        REAL tleft=x*cwidth+borderExtension*pix;
         REAL tright=(x+1)*cwidth-pix;
 
         rFont* select = this;
@@ -201,7 +206,7 @@ static REAL sr_bigFontThresholdHeight = 24;
 static tSettingItem< REAL > sr_bigFontThresholdWidthConf(  "FONT_BIG_THRESHOLD_WIDTH", sr_bigFontThresholdWidth );
 static tSettingItem< REAL > sr_bigFontThresholdHeightConf( "FONT_BIG_THRESHOLD_HEIGHT", sr_bigFontThresholdHeight );
 
-static REAL sr_smallFontThresholdWidth  = 4;
+static REAL sr_smallFontThresholdWidth  = 5;
 static REAL sr_smallFontThresholdHeight = 8;
 
 static tSettingItem< REAL > sr_smallFontThresholdWidthConf(  "FONT_SMALL_THRESHOLD_WIDTH", sr_smallFontThresholdWidth );
