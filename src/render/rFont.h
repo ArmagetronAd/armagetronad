@@ -40,10 +40,11 @@ class rFont:public rFileTexture{
     REAL cwidth;
     REAL cheight;
     REAL onepixel;
+    int borderExtension{1}; // does the left side pixel border of a character get moved half a pixel left or right?
     rFont *lowerPart;
 public:
     rFont(const char *fileName,int Offset=0,REAL CWidth=(1/16.0),
-          REAL CHeight=(1/8.0),REAL onepixel=1/256.0, rFont *lower=NULL);
+          REAL CHeight=(1/8.0),REAL onepixel=1/256.0, int borderExtension = 1, rFont *lower=NULL);
     rFont(const char *fileName, rFont *lower);
     virtual ~rFont();
 
@@ -97,6 +98,9 @@ public:
     // the default.
     static REAL AspectWidthMultiplier();
     static REAL AspectHeightMultiplier();
+
+    // puts x/y right into the middle of a screen pixel given Width or Height.
+    static REAL Pixelize(REAL xy, int WidthHeight);
 
     virtual ~rTextField(); // for future extensions (buffered console?)
 
