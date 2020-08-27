@@ -42,6 +42,11 @@ if test "${CI_COMMIT_REF_PROTECTED}" = "true"; then
 			PROGRAM_NAME="armagetronad-experimental"
 			PROGRAM_TITLE="Armagetron Experimental"
 			;;
+			hack-0.2.8-sty+ct+ap)
+			SERIES="AP"
+			PROGRAM_NAME="armagetronad-ap"
+			PROGRAM_TITLE="Armagetron aP"
+			;;
 			*)
 			SERIES="WIP"
 			PROGRAM_NAME="armagetronad-wip"
