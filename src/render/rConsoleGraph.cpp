@@ -111,7 +111,7 @@ void rConsole::Render(){
     // rCHEIGHT_CON=18/H;
 
     auto columns = sr_columns;
-    if(columns <= 0 && (W < 1280 || H < 720))
+    if(columns == 0 && (W < 1280 || H < 720))
         columns = 78; // the old default for small screens
 
     if(columns > 0)
@@ -126,7 +126,9 @@ void rConsole::Render(){
     else
     {
         // show big font in its native pixel size
-        rCHEIGHT_CON=31*2.0/H;
+        //rCHEIGHT_CON=31*2.0/H;
+        //nelg: with +ap's font, the narrower font was very noticeable. Tweaked below.
+        rCHEIGHT_CON=31*1.75/H;
         rCWIDTH_CON=15*2.0/W;
 
         // but don't make it more than MAX_ROWS of text rows for the whole screen, more may be too small for hires small screens
