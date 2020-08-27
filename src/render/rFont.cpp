@@ -68,14 +68,15 @@ static size_t my_strnlen(char const *c, size_t i) {
 
 static rFont sr_lowerPartFont("textures/font_extra.png");
 rFont rFont::s_defaultFont("textures/font.png", &sr_lowerPartFont);
+//rFont rFont::s_defaultFontSmall("textures/font_s.png",32,5/128.0,9/128.0,1/128.0, -1);
 rFont rFont::s_defaultFontSmall("textures/font_s.png",32,5/128.0,9/128.0,1/128.0);
 //rFont rFont::s_defaultFontSmall("textures/Font.png",0,16/256.0,32/256.0);
 //rFont rFont::s_defaultFontSmall("textures/Font.png",0,1/16.0,1/8.0);
 
-rFont::rFont(const char *fileName,int Offset,REAL CWidth,REAL CHeight,REAL op, rFont *lower):
+rFont::rFont(const char *fileName,int Offset,REAL CWidth,REAL CHeight,REAL op, int border, rFont *lower):
         rFileTexture(rTextureGroups::TEX_FONT,fileName,0,0),
         offset(Offset),cwidth(CWidth),cheight(CHeight),
-        onepixel(op),lowerPart(lower)
+        onepixel(op),borderExtension(border), lowerPart(lower)
 {
     StoreAlpha();
 }
@@ -136,6 +137,11 @@ void rFont::OnSelect( bool enforce )
         // abort. It makes no sense to continue without a font.
         tERR_ERROR( "Font file " << this->GetFileName() << " could not be loaded.");
     }
+
+#ifndef DEDICATED
+    // wrap around so we can use the transparent pixel on the right side on the left
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+#endif
 }
 
 // displays c
@@ -159,7 +165,7 @@ void rFont::Render(unsigned char c,REAL left,REAL top,REAL right,REAL bot){
 
         REAL ttop=y*cheight+pix;
         REAL tbot=(y+1)*cheight-pix;
-        REAL tleft=x*cwidth+pix;
+        REAL tleft=x*cwidth+borderExtension*pix;
         REAL tright=(x+1)*cwidth-pix;
 
         rFont* select = this;
@@ -215,19 +221,19 @@ rTextField::rTextField(REAL Left,REAL Top,
         F(f),x(0),y(0),realx(0),cursor(0),cursorPos(0){
     if ( cwidth*sr_screenWidth < sr_bigFontThresholdWidth*2 || cheight*sr_screenHeight < sr_bigFontThresholdHeight*2 )
         F=&rFont::s_defaultFontSmall;
-    if (cwidth*sr_screenWidth<sr_smallFontThresholdWidth*2)
+    if (cwidth*sr_screenWidth <= sr_smallFontThresholdWidth*2 + 1E-4)
     {
         cwidth=sr_smallFontThresholdWidth*2/REAL(sr_screenWidth);
 
         // try to place font at exact pixels
-        // left = ( int( ( 1 + left ) * sr_screenWidth -.5 ) +.5 )/REAL(sr_screenWidth) - 1;
+        left = Pixelize(left, sr_screenWidth);
     }
-    if (cheight*sr_screenHeight<sr_smallFontThresholdHeight*2)
+    if (cheight*sr_screenHeight <= sr_smallFontThresholdHeight*2 + 1E-4)
     {
         cheight=sr_smallFontThresholdHeight*2/REAL(sr_screenHeight);
 
         // try to place font at exact pixels
-        // top = ( int( ( 1 + top ) * sr_screenHeight - .5 ) + .5)/REAL(sr_screenHeight) - 1;
+        top = Pixelize(top, sr_screenHeight);
     }
 
     color_ = defaultColor_;
@@ -242,6 +248,22 @@ rTextField::rTextField(REAL Left,REAL Top,
 
     cursor_x = -100;
     cursor_y = -100;
+}
+
+REAL rTextField::AspectWidthMultiplier()
+{
+    return std::min(((4.0f/3.0f)*sr_screenHeight)/sr_screenWidth,1.0f);
+}
+
+REAL rTextField::AspectHeightMultiplier()
+{
+    return std::min(((3.0f/4.0f)*sr_screenWidth)/sr_screenHeight,1.0f);
+}
+
+REAL rTextField::Pixelize(REAL xy, int WidthHeight)
+{
+    auto pixelIn = static_cast<int>(.5f * xy * WidthHeight);
+    return (2.0f*(pixelIn+.5f))/WidthHeight;
 }
 
 
@@ -562,6 +584,17 @@ void DisplayText(REAL x,REAL y,REAL w,REAL h,const char *text,int center,int cur
         c.SetCursor(cursor,cursorPos);
     c.StringOutput(text, colorMode );
 }
+
+void DisplayTextAutoWidth(REAL x, REAL y, const char *text, REAL h, int center, int cursor, int cursorPos, rTextField::ColorMode colorMode)
+{
+    DisplayText(x, y, h*(rCWIDTH_NORMAL/rCHEIGHT_NORMAL)*rTextField::AspectWidthMultiplier(), h, text, center, cursor, cursorPos, colorMode);
+}
+
+void DisplayTextAutoHeight(REAL x, REAL y, const char *text, REAL w, int center, int cursor, int cursorPos, rTextField::ColorMode colorMode)
+{
+    DisplayText(x, y, w, w*(rCHEIGHT_NORMAL/rCWIDTH_NORMAL)*rTextField::AspectHeightMultiplier(), text, center, cursor, cursorPos, colorMode);
+}
+
 // *******************************************************************************************
 // *
 // *	GetDefaultColor
@@ -669,6 +702,4 @@ void rTextField::SetBlendColor( tColor const & blendColor )
 
 tColor rTextField::defaultColor_;
 tColor rTextField::blendColor_;
-
-
 

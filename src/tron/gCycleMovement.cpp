@@ -538,7 +538,7 @@ static tSettingItem<REAL> sg_enemyCurrentTimeInfluenceConf( "ENEMY_CURRENTTIME_I
 // the last enemy possibly responsible for our death
 const ePlayerNetID* gEnemyInfluence::GetEnemy() const
 {
-    return lastEnemyInfluence.GetPointer();
+    return lastEnemyInfluence.get();
 }
 
 REAL gEnemyInfluence::GetTime() const
@@ -656,7 +656,7 @@ void gEnemyInfluence::AddWall( const gPlayerWall * wall, REAL timeBuilt, REAL ti
             time = cycle->GetLastTurnTime();
         time -= sg_enemyFriendTimePenalty;
     }
-    const ePlayerNetID* pInfluence = this->lastEnemyInfluence.GetPointer();
+    const ePlayerNetID* pInfluence = this->lastEnemyInfluence.get();
 
     // calculate effective last time. Add malus if the player is dead.
     REAL lastEffectiveTime = lastTime;
@@ -1341,11 +1341,11 @@ void gCycleMovement::OnDropTempWall( gPlayerWall * wall, eCoord const & pos, eCo
 gDestination * gCycleMovement::GetDestinationBefore( const SyncData & sync, gDestination * first )
 {
     // message IDs smaller than 16 don't exist
-    if ( sync.messageID != 1 )
+    if ( sync.messageID != 1 && !tRecorder::DesyncedPlayback())
     {
         gDestination * ret = first;
 
-        // deterimine last passed destination by the message ID
+        // determine last passed destination by the message ID
         while ( ret && ret->messageID != sync.messageID )
             ret = ret->next;
 
@@ -1399,7 +1399,9 @@ gDestination * gCycleMovement::GetDestinationBefore( const SyncData & sync, gDes
             }
 
             // see if brake status and driving direction match; this is a must
-            if ( eCoord::F( run->direction, sync.dir ) > .9*sync.dir.NormSquared() && run->braking == ( sync.braking != 0 ) )
+            if ( eCoord::F( run->direction, sync.dir ) > .9*sync.dir.NormSquared() &&
+                 run->braking == ( sync.braking != 0 ) &&
+                 (!tRecorder::DesyncedPlayback() || !sync.turns || sync.turns == run->turns))
             {
                 if ( !bestMatch || distance < bestMatchDistance )
                 {

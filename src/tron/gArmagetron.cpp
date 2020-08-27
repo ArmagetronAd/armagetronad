@@ -83,8 +83,11 @@ public:
 
 
 private:
-    virtual bool DoAnalyze( tCommandLineParser & parser )
+    bool DoAnalyze( tCommandLineParser & parser, int pass ) override
     {
+        if(pass > 0)
+            return false;
+
         if ( parser.GetSwitch( "-fullscreen", "-f" ) )
         {
             fullscreen_=true;
@@ -116,7 +119,7 @@ private:
         return true;
     }
 
-    virtual void DoHelp( std::ostream & s )
+    void DoHelp( std::ostream & s ) override
     {                                      //
 #ifndef DEDICATED
         s << "-f, --fullscreen             : start in fullscreen mode\n";
@@ -378,12 +381,26 @@ static void welcome(){
     uMenu::Message( tOutput("$welcome_message_heading"), tOutput("$welcome_message"), 300 );
 
     // start a first single player game
+    auto speedFactor = sg_currentSettings->speedFactor;
+    auto autoNum = sg_currentSettings->autoNum;
+    auto sizeFactor = sg_currentSettings->sizeFactor;
+    auto wallsLength = sg_currentSettings->wallsLength;
+    auto rubber = sg_rubberCycle;
+    auto delayCycle = sg_delayCycle;
     sg_currentSettings->speedFactor = -2;
     sg_currentSettings->autoNum = 0;
+    sg_currentSettings->sizeFactor -= 2;
+    sg_currentSettings->wallsLength = 400;
+    sg_rubberCycle = 5;
+    sg_delayCycle = 0.05;
     sr_textOut = textOutBack;
     sg_SinglePlayerGame();
-    sg_currentSettings->autoNum = 1;
-    sg_currentSettings->speedFactor = 0;
+    sg_currentSettings->autoNum = autoNum;
+    sg_currentSettings->speedFactor = speedFactor;
+    sg_currentSettings->sizeFactor= sizeFactor;
+    sg_currentSettings->wallsLength = wallsLength;
+    sg_rubberCycle = rubber;
+    sg_delayCycle = delayCycle;
 
     sr_textOut = textOutBack;
     uMenu::Message( tOutput("$welcome_message_2_heading"), tOutput("$welcome_message_2"), 300 );
@@ -614,6 +631,15 @@ int main(int argc,char **argv){
             tString version( sn_programVersion );
             tRecorder::Playback( versionSection, version );
             tRecorder::Record( versionSection, version );
+#ifndef DEDICATED
+            if(version != sn_programVersion)
+            {
+#ifdef DEBUG
+                tERR_WARN( "Recording from a different version, consider at high risk of desync." );
+#endif
+                tRecorder::ActivateProbablyDesyncedPlayback();
+            }
+#endif
         }
 
         {

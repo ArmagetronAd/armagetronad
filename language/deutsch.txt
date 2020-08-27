@@ -575,6 +575,7 @@ fast_forward_maxstep_help     Maximale Zeit in aufgezeichneten Sekunden, die zwi
 fast_forward_maxstep_real_help Maximale Zeit in echten Sekunden, die zwischen Renderschritten im schnellen Vorlauf liegt
 fast_forward_maxstep_rel_help Maximale Zeit gemessen in der Zeit bis zum Vorspulziel, die zwischen Renderschritten liegt
 stop_recording_help           Stoppt eine laufende Debug-Aufzeichnung, um resourcen zu sparen. Eine Wiederaufnahme ist nicht möglich.
+expect_ack_on_client_playback_help  Setze auf 1, um im Playback Netzwerkproblem zu debuggen. Auf dem Default von 0 ignoriert der Client fehlende Ack-Pakete vom Server und versucht, sich irgendwie durchzuwursteln, was besser für das Debugging vom Spielecode ist.
 
 #********************************************
 #********************************************
@@ -786,7 +787,7 @@ zone_bottom_help              Unterer Rand der Zonen. Default: 0.0
 zone_height_help              Höhe der Zonen: Default: 5.0
 smooth_shading_help           Aktiviert "Rundes Licht"
 text_out_help                 Aktiviert Textausgabe
-console_columns_help          Anzahl der Spalten der Textausgabe
+console_columns_help          Anzahl der Spalten der Textausgabe. 0 für Automatikmodus. -1, um den Bitmap-Font 1:1 zu verwenden, egal wie klein das wird.
 console_rows_help             Anzahl der Zeilen der Textausgabe (normal)
 console_rows_max_help         Anzahl der Zeilen der Textausgabe (maximal beim Hochscrollen)
 console_indent_help           Anzahl der Leerzeichen, mit denen die Vortsetzung einer automatisch umgebrochenen Konsolenzeile eingerückt wird
@@ -1050,6 +1051,7 @@ input_items_global            Sondertasten
 
 # used for listing key bindings
 input_or                      oder
+tooltip_how_to_get_rid_of     Oder sieh dir die Tastaturbelegung im Menu "Spieler Konfigurieren/Einstellungen für Spieler 1/Spiel-Tasten" an.
 
 #********************************************
 #********************************************

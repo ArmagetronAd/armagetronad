@@ -122,7 +122,7 @@ def main():
         # default types
         mime_type="application/octet-stream"
         file_type="Installer file"
-        description="Portable App for Linux"
+        description="Unknown File"
         
         basename, extension = os.path.splitext(filename)
         basename, secondextension = os.path.splitext(basename)
@@ -132,55 +132,49 @@ def main():
 
         if extension == ".tbz":
             mime_type="application/bzip2"
-            if "_client_32_" in fn:
+            if "_32_" in fn:
                 description="Client Linux 32 Bit Tarball for Zero Install"
-            elif "_server_32_" in fn:
-                description="Server Linux 32 Bit Tarball for Zero Install"
-            elif "_client_64_" in fn:
+            elif "_64_" in fn:
                 description="Client Linux 64 Bit Tarball for Zero Install"
-            elif "_server_64_" in fn:
-                description="Server Linux 64 Bit Tarball for Zero Install"
             else:
                 file_type="Code Release Tarball"
                 description="Source"
         else:
-            if fn == "PATCHNOTES.md":
+            if fn == "CHANGELOG.txt":
                 file_type="Release Notes"
                 description="Patch Notes"
             if fn == "CHANGELOG.md":
                 file_type="ChangeLog File"
                 description="Changelog"
+            if extension == ".AppImage":
+                description="Client AppImage for Linux"
+                Linux=True
             if extension == ".deb":
-                description="Debian Package"
+                description="Client Debian Package"
                 Linux=True
             if extension == ".dmg":
-                description="OSX Disk Image"
+                description="Client OSX Disk Image"
                 mime_type="application/x-apple-diskimage"
                 Mac=True
             if extension == ".exe":
-                description="Windows Installer"
+                description="Client Windows Installer"
                 mime_type="application/exe"
                 Windows=True
             if extension == ".zip":
                 if "source" in filename:
                     description="Windows Source Zip"
                 else:
-                    description="Windows Binary Zip for Zero Install"
+                    description="Client Windows Binary Zip for Zero Install"
                 mime_type="application/zip"
                 Windows=True
-            if "Portable App" in description:
+            if "AppImage" in description:
                 Linux=True
                 if "_32bit" in fn:
                     description = description.replace("Linux", "32 bit Linux")
                 else:
                     description = description.replace("Linux", "64 bit Linux")
-            if "edicated" in filename or "server" in filename:
-                description="Server " + description
-            else:
-                if "common" in filename and extension == ".deb":
-                    description="Common " + description
-                else:
-                    description="Client " + description
+        if "edicated" in filename or "server" in filename:
+            description=description.replace("Client ", "Server ")
 
         print (filename,description,mime_type,file_type)
 
@@ -240,7 +234,7 @@ def main():
                     series.newMilestone(name=new_milestone)
 
     except HTTPError, error:
-        print 'An error happened in the upload:', error.content
+        print('An error happened in the upload:', error.content, error)
         sys.exit(1)
 
 if __name__ == '__main__':

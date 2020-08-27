@@ -5268,7 +5268,7 @@ void gCycle::RenderName( const eCamera* cam ) {
             name << this->player->GetColoredName();
         else
             name << this->player->GetName();
-        DisplayText(0, 0, rCWIDTH_NORMAL, rCHEIGHT_NORMAL, name, 0, 0);
+    DisplayText(xp, yp, rCWIDTH_NORMAL, rCHEIGHT_NORMAL, this->player->GetName(), 0, 0);
     }
 
     ProjMatrix();

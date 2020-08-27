@@ -409,8 +409,11 @@ static bool   s_benchmark   =false;
 class rFastForwardCommandLineAnalyzer: public tCommandLineAnalyzer
 {
 private:
-    virtual bool DoAnalyze( tCommandLineParser & parser )
+    bool DoAnalyze( tCommandLineParser & parser, int pass ) override
     {
+        if(pass > 0)
+            return false;
+
         // get option
         tString forward;
         if ( parser.GetOption( forward, "--fastforward" ) )
@@ -435,7 +438,7 @@ private:
         return false;
     }
 
-    virtual void DoHelp( std::ostream & s )
+    void DoHelp( std::ostream & s ) override
     {                                      //
         s << "--fastforward <time>         : lets time run very fast until the given time is reached\n";
         s << "--benchmark                  : renders frames as they were recorded\n";

@@ -1,5 +1,40 @@
 
+#### Changes since 0.2.9.0:
+
+##### New Features
+
+ * Make AppImage builds fit for registration at AppImageHub ([#17](https://gitlab.com/armagetronad/armagetronad/-/issues/17))
+ * Make SIZE_ and SPEED_FACTOR floating point instead of integer ([#20](https://gitlab.com/armagetronad/armagetronad/-/issues/20))
+ * Do not show a player's own IP on the client ([#27](https://gitlab.com/armagetronad/armagetronad/-/issues/27))
+ * Make --playback optional so recordings can be more easily played back ([#37](https://gitlab.com/armagetronad/armagetronad/-/issues/37))
+ * Steam on Windows: Add playback registry keys so .aarec files automatically playback with a doubleclick ([#38](https://gitlab.com/armagetronad/armagetronad/-/issues/38))
+
+##### Other Changes
+
+ * Make custom camera the default for new players ([#35](https://gitlab.com/armagetronad/armagetronad/-/issues/35))
+ * Turn down tutorial tooltip spam ([#36](https://gitlab.com/armagetronad/armagetronad/-/issues/36))
+ * Onboarding game improvements ([#39](https://gitlab.com/armagetronad/armagetronad/-/issues/39))
+
+##### Contributors
+
+Armanelgtron, Manuel Moos, SwagTron
+
+
 #### Changes since 0.2.8.3.5:
+
+##### Fixed Bugs
+
+ * Debian builds: Documentation html files have empty last change ([#9](https://gitlab.com/armagetronad/armagetronad/-/issues/9))
+ * Socket and unclean exit trouble due to fork(), execve() and exit() interaction ([#13](https://gitlab.com/armagetronad/armagetronad/-/issues/13))
+ * Ubuntu PPA release candidate builds would overwrite previous stable releases ([#15](https://gitlab.com/armagetronad/armagetronad/-/issues/15))
+ * Language string identifier silence_player_text used twice ([#22](https://gitlab.com/armagetronad/armagetronad/-/issues/22))
+ * Bad video mode error recovery ([#23](https://gitlab.com/armagetronad/armagetronad/-/issues/23))
+ * AppRun script does not work if call path contains spaces ([#24](https://gitlab.com/armagetronad/armagetronad/-/issues/24))
+ * Included forum links outdated ([#25](https://gitlab.com/armagetronad/armagetronad/-/issues/25))
+ * Client segfaults on OpenBSD ([#26](https://gitlab.com/armagetronad/armagetronad/-/issues/26))
+ * Client compiled with clang 10.0 (optimized) sefgaults on logout ([#28](https://gitlab.com/armagetronad/armagetronad/-/issues/28))
+ * Valgrind reports uses of unitialized, freed or invalid memory ([#29](https://gitlab.com/armagetronad/armagetronad/-/issues/29))
+ * Windows: DPI scaling behavior wrong ([#33](https://gitlab.com/armagetronad/armagetronad/-/issues/33))
 
 ##### New Features
 
@@ -10,7 +45,7 @@
  * Deploy to itch.io ([#19](https://gitlab.com/armagetronad/armagetronad/-/issues/19))
  * Credit contributors in patch notes ([#21](https://gitlab.com/armagetronad/armagetronad/-/issues/21))
 
-##### Fixed Bugs
+##### Other Changes
 
  * Debian builds: Documentation html files have empty last change ([#9](https://gitlab.com/armagetronad/armagetronad/-/issues/9))
  * Socket and unclean exit trouble due to fork(), execve() and exit() interaction ([#13](https://gitlab.com/armagetronad/armagetronad/-/issues/13))
@@ -18,6 +53,11 @@
  * Language string identifier silence_player_text used twice ([#22](https://gitlab.com/armagetronad/armagetronad/-/issues/22))
  * Bad video mode error recovery ([#23](https://gitlab.com/armagetronad/armagetronad/-/issues/23))
  * AppRun script does not work if call path contains spaces ([#24](https://gitlab.com/armagetronad/armagetronad/-/issues/24))
+ * Included forum links outdated ([#25](https://gitlab.com/armagetronad/armagetronad/-/issues/25))
+ * Client segfaults on OpenBSD ([#26](https://gitlab.com/armagetronad/armagetronad/-/issues/26))
+ * Client compiled with clang 10.0 (optimized) sefgaults on logout ([#28](https://gitlab.com/armagetronad/armagetronad/-/issues/28))
+ * Valgrind reports uses of unitialized, freed or invalid memory ([#29](https://gitlab.com/armagetronad/armagetronad/-/issues/29))
+ * Windows: DPI scaling behavior wrong ([#33](https://gitlab.com/armagetronad/armagetronad/-/issues/33))
 
 ##### Contributors
 
@@ -50,11 +90,13 @@ Daniel Harple, Hugh McMaster, Luke-Jr, Manuel Moos, Uzix, fman23, zolk3ri
    ladderlog.txt.
  * "--input" now can be used more than once to read from multiple files or pipes.
  * new team management ladderlog messages:
-   TEAM_CREATED <team name>
-   TEAM_DESTROYED <team name>
-   TEAM_RENAMED <old team name> <new team name>
-   TEAM_PLAYER_ADDED <team name> <player>
-   TEAM_PLAYER_REMOVED <team name> <player>
+
+        TEAM_CREATED <team name>
+        TEAM_DESTROYED <team name>
+        TEAM_RENAMED <old team name> <new team name>
+        TEAM_PLAYER_ADDED <team name> <player>
+        TEAM_PLAYER_REMOVED <team name> <player>
+        
  * Manage external scripts on Unix dedicated servers. New commands: 
    SPAWN_SCRIPT, RESPAWN_SCRIPT, FORCE_RESPAWN_SCRIPT, KILL_SCRIPT,
    LIST_SCRIPTS, SCRIPT_ENV.

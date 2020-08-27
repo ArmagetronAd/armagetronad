@@ -660,6 +660,7 @@ fast_forward_maxstep_help           Maximum recording time between rendered fram
 fast_forward_maxstep_real_help      Maximum real time between rendered frames in fast forward mode
 fast_forward_maxstep_rel_help       Maximum fraction of the time left until the end of FF mode between rendered frames
 stop_recording_help                 Stops a currently running recording to save resources. Resuming is impossible.
+expect_ack_on_client_playback_help  If 1, a client playing back a recording will expect correct ack responses from the server, at the default of 0 it tries to hobble along. Activate to accurately debug network problems.
 
 #********************************************
 #********************************************
@@ -886,7 +887,7 @@ zone_bottom_help        Where to put the zone along the Z axis. Default is 0.0
 zone_height_help        The zone segments' height. Default is 5.0
 smooth_shading_help     Enable smooth shading
 text_out_help            Enable console text output
-console_columns_help    Number of characters in each line of console output
+console_columns_help    Number of characters in each line of console output. 0 for automatic mode. -1 to take the large bitmap font in its native size no matter what.
 console_rows_help       Number of lines of console output without user intervention
 console_rows_max_help   Number of lines of console output when scrolling back
 console_indent_help     Number of spaces each continuation of a wrapped console line is indented by
@@ -1237,6 +1238,7 @@ input_items_global        Global Controls
 
 # used for listing key bindings
 input_or                or
+tooltip_how_to_get_rid_of Or review the input configuration in the menu "Player Setup/Player 1 Settings/Input Configuration".
 
 #********************************************
 #********************************************

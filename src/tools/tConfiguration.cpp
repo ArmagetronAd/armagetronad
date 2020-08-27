@@ -1326,12 +1326,15 @@ tString extraConfig("NONE");
 class tExtraConfigCommandLineAnalyzer: public tCommandLineAnalyzer
 {
 private:
-    virtual bool DoAnalyze( tCommandLineParser & parser )
+    bool DoAnalyze( tCommandLineParser & parser, int pass ) override
     {
+        if(pass > 0)
+            return false;
+
         return parser.GetOption(extraConfig, "--extraconfig", "-e");
     }
 
-    virtual void DoHelp( std::ostream & s )
+    void DoHelp( std::ostream & s ) override
     {                                      //
         s << "-e, --extraconfig            : open an extra configuration file after\n"
         << "                               settings_dedicated.cfg\n";

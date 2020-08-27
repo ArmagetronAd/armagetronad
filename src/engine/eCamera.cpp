@@ -222,9 +222,9 @@ uActionCamera eCamera::se_lookLeft("LOOK_LEFT",
 uActionCamera eCamera::se_switchView("SWITCH_VIEW", -160);
 
 uActionTooltip eCamera::se_glanceBackTooltip( eCamera::se_glanceBack, 1 );
-uActionTooltip eCamera::se_glanceRightTooltip( eCamera::se_glanceRight, 3 );
-uActionTooltip eCamera::se_glanceLeftTooltip( eCamera::se_glanceLeft, 3 );
-uActionTooltip eCamera::se_switchViewTooltip( eCamera::se_switchView, 2 );
+uActionTooltip eCamera::se_glanceRightTooltip( eCamera::se_glanceRight, 1 );
+uActionTooltip eCamera::se_glanceLeftTooltip( eCamera::se_glanceLeft, 1 );
+uActionTooltip eCamera::se_switchViewTooltip( eCamera::se_switchView, 1 );
 
 
 static REAL s_startFollowX = -30, s_startFollowY = -30, s_startFollowZ = 80;

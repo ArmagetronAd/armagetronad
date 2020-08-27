@@ -1942,7 +1942,7 @@ public:
     {
         // start archive block if archiving is active
         Archiver archive;
-        if( archive.Initialize( recordingSectionRead ) )
+        if( archive.Initialize( recordingSectionRead, true ) )
         {
             // archive length of message
             archive.Archive( len );

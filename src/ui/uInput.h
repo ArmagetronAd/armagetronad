@@ -108,6 +108,10 @@ public:
     //! player = 0 helps on global actions. Returns true if help was given.
     static bool Help( int player = 0 );
 
+    //! sets remaining tooltip counts to 0, preventing further appearance
+    //! player = 0 helps on global actions. Returns true if help was given.
+    static void Disable( int player = 0 );
+
     //! call if an action was triggered
     void Count( int player );
 private:

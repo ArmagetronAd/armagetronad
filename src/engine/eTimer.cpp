@@ -136,6 +136,10 @@ void eTimer::ReadSync(nMessage &m){
     m >> remoteSpeed_;
     sync_ = true;
 
+    // record ping in case we desync on playback
+    if(sn_GetNetState() == nCLIENT)
+        sn_Connections[0].ping.Record();
+
     //std::cerr << "Got sync:" << remote_currentTime << ":" << speed << '\n';
 }
 
@@ -240,7 +244,7 @@ void eTimer::ProcessSync()
 
     // check for unusually delayed packets, give them lower weight
     REAL delay =  remoteStartTimeOffset - startTimeOffset_.GetAverage();
-    if( delay > 0 )
+    if( delay > 0 && !tRecorder::DesyncedPlayback())
     {
         // fluctuations up to the ping variance are acceptable,
         // (plus some extra factors, like a 1 ms offset and 10% of the current ping)

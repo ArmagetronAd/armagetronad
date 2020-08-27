@@ -51,6 +51,10 @@ default:
     paths:
      - docker/scripts/.cache
 
+# dummy workflow rules to silence spammy gitlab warnings
+workflow:
+  rules:
+    - when: always
 
 # very basic build
 build_prepare:
@@ -308,7 +312,11 @@ deploy-release:
     - make unstaged_deploy -O -j$(nproc) -k
 
 
-
+# post-build tests
+post_test:
+  stage: build_collect
+  script:
+    - make -C gitlab_build/docker/build appimagetests_ci || exit $?
 
 # pack up the downloadable build files in one handy artifact
 pack:

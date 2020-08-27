@@ -1,0 +1,10 @@
+FROM centos:8
+
+# BUG All but mesa-libGL are unwanted
+RUN yum -y install mesa-libGL libtiff alsa-lib pulseaudio && yum clean all
+
+COPY *.AppImage .
+RUN ./*.AppImage --appimage-extract-and-run --version
+
+# BUG this should work
+#RUN LD_DEBUG_APP=true ./*.AppImage --appimage-extract-and-run --version

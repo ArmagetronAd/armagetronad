@@ -126,6 +126,11 @@ public:
     template< class DATA1, class DATA2 >
     static bool PlaybackStrict( char const * section, DATA1 & data1, DATA2 & data2 )
     { return tRecorderTemplate3< tPlaybackBlock, DATA1 &, DATA2 & >::Archive( true, section, data1, data2 ); }
+
+    static bool DesyncedPlayback();
+    static void ActivateDesyncedPlayback();
+    static bool ProbablyDesyncedPlayback();
+    static void ActivateProbablyDesyncedPlayback();
 };
 
 class tPath;
@@ -258,8 +263,8 @@ class tRecording;
 class tRecordingBlockBase
 {
 public:
-    bool Initialize( char const * section, tRecording * recording );  //!< initializes this for recording
-    bool Initialize( char const * section );                          //!< initializes this for recording
+    bool Initialize( char const * section, tRecording * recording, bool skipToIt = false  );  //!< initializes this for recording
+    bool Initialize( char const * section, bool skipToIt = false );                           //!< initializes this for recording
 
     void Separator();                                                 //!< separates two recorded elements (more than usual)
     static tRecording * GetArchive();                                 //!< returns the active recording
@@ -314,8 +319,8 @@ class tPlayback;
 class tPlaybackBlockBase
 {
 public:
-    bool Initialize( char const * section, tPlayback * playback );    //!< initializes this for recording
-    bool Initialize( char const * section );                          //!< initializes this for recording
+    bool Initialize( char const * section, tPlayback * playback, bool skipToIt = false  );    //!< initializes this for recording
+    bool Initialize( char const * section, bool skipToIt = false  );                          //!< initializes this for recording
 
     void Separator() const;                                           //!< separate output (Nothing done here while playing back)
     static tPlayback * GetArchive();                                  //!< returns the active playback
@@ -997,7 +1002,9 @@ bool tRecorderTemplate1< BLOCK >::Archive( bool strict, char const * section )
     }
 
     // report failure
-    tASSERT( !strict  || !BLOCK::GetArchive() );
+    if(strict && BLOCK::GetArchive())
+        tRecorder::ActivateDesyncedPlayback();
+
     return false;
 }
 
@@ -1031,7 +1038,9 @@ bool tRecorderTemplate2< BLOCK, DATA >::Archive( bool strict, char const * secti
     }
 
     // report failure
-    tASSERT( !strict || !BLOCK::GetArchive() );
+    if(strict && BLOCK::GetArchive())
+        tRecorder::ActivateDesyncedPlayback();
+
     return false;
 }
 
@@ -1066,7 +1075,9 @@ bool tRecorderTemplate3< BLOCK, DATA1, DATA2 >::Archive( bool strict, char const
     }
 
     // report failure
-    tASSERT( !strict  || !BLOCK::GetArchive() );
+    if(strict && BLOCK::GetArchive())
+        tRecorder::ActivateDesyncedPlayback();
+
     return false;
 }
 

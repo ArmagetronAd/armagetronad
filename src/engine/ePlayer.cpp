@@ -1229,7 +1229,7 @@ ePlayer::ePlayer()
                    centerIncamOnTurn) );
 
     confname.Clear();
-    startCamera=CAMERA_SMART;
+    startCamera=CAMERA_CUSTOM;
     confname << "START_CAM_"<< id+1;
     StoreConfitem(tNEW(tConfItem<eCamMode>) (confname,
                   "$start_cam_help",
@@ -8105,10 +8105,9 @@ void ePlayerNetID::DisplayScores()
         H=MH;
 
 #ifndef DEDICATED
-    if (sr_glOut)
-    {
+    if (sr_glOut){
         ::Color(1,1,1);
-        float wmult = (REAL(sr_screenHeight)/sr_screenWidth)*(4.0/3.0);
+        float wmult = rTextField::AspectWidthMultiplier();
         rTextField c(-.7*wmult,.6,(10/W)*wmult,18/H);
 
         // print team ranking if there actually is a team with more than one player

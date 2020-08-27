@@ -1,0 +1,14 @@
+FROM ubuntu:16.04
+
+# BUG apart from openGL, this should not be required
+RUN apt-get -y update && apt-get install \
+mesa-utils \
+libsdl-image1.2 \
+libxml2 \
+-y
+
+COPY *.AppImage .
+RUN ./*.AppImage --appimage-extract-and-run --version
+
+# BUG this should work
+# RUN LD_DEBUG_APP=true ./*.AppImage --appimage-extract-and-run --version
