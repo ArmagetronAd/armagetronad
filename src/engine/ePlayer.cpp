@@ -8190,14 +8190,18 @@ tString ePlayerNetID::Ranking( int MAX, bool cut )
             {
                 line << tColoredString::ColorString(1,0,0) << tOutput("$player_scoretable_alive_no") << tColoredString::ColorString(-1,-1,-1);
             }
-            line.SetPos(26, cut );
-            line << p->score;
+            tString score; score << p->score;
+            line.SetPos(26+(7-score.Len()), cut );
+            line << tColoredString::ColorString(1,1,1);
+            line << score;
 
             if (p->IsActive())
             {
-                line.SetPos(33, cut );
                 //line << "ping goes here";
-                line << int(p->ping*1000);
+                tString ping; ping << int(p->ping*1000);
+                line.SetPos(33+(6-ping.Len()), cut );
+                line << ping;
+                
                 line.SetPos(39, cut );
                 if ( p->currentTeam )
                 {

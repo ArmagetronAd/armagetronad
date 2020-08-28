@@ -760,8 +760,12 @@ tString eTeam::Ranking( int MAX, bool cut ){
         ret << tColoredString::ColorString(1,.5,.5);
         ret << tOutput("$team_scoretable_name");
         ret << tColoredString::ColorString(1,1,1);
-        ret.SetPos(24, cut );
+        ret.SetPos(19, cut );
+        ret << tOutput("$player_scoretable_alive");
+        ret.SetPos(26, cut );
         ret << tOutput("$team_scoretable_score");
+        //ret.SetPos(39, cut );
+        //ret << tOutput("Members:");
         ret << "\n";
 
         int max = teams.Len();
@@ -776,12 +780,43 @@ tString eTeam::Ranking( int MAX, bool cut ){
             line << ColorString(t);
             tString name = t->Name();
             //name.RemoveHex();
+            name << "0xRESETT";
             name.SetPos( 24, cut );
 
             line << name;
             line << tColoredString::ColorString(1,1,1);
-            line.SetPos(24, false );
-            line << t->score;
+            
+            line.SetPos(19, false );
+            int numAlive = 0, numMembers = t->players.Len();
+            for (int i=numMembers-1;i>=0;--i)
+            {
+                ePlayerNetID* p = t->players(i);
+                if(p->Object() && p->Object()->Alive()) ++numAlive;
+            }
+            if(numAlive == 0)
+                line << tColoredString::ColorString(1,0,0);
+            else if(numMembers == numAlive)
+                line << tColoredString::ColorString(0,1,0);
+            else if(numMembers != 0)
+            {
+                REAL g = (float(numAlive)/numMembers)+0.7, r = (float(numMembers)/numAlive)-g;
+                line << tColoredString::ColorString(fmin(1,r),fmin(1,g),0);
+            }
+            //tString alive; alive << numAlive;
+            //line << std::string(std::max(0,7-alive.Len(),' ')) << alive;
+            tString alive; alive << numAlive << "/" << t->players.Len();
+            line << alive << tColoredString::ColorString(1,1,1);
+            
+            tString score; score << t->score;
+            int pos = 7-score.Len();
+            if(score.Len() > 13-alive.Len()) pos = alive.Len()-7;
+            line.SetPos(26+pos, cut);
+            line << score;
+            
+            //line.SetPos(39, cut);
+            //tString members; members << t->players.Len();
+            //line << std::string(std::max(0,9-members.Len()),' ') << members;
+            
             ret << line << "\n";
         }
         if ( max < teams.Len() )
