@@ -112,7 +112,7 @@ void GLmeter_subby(float value,float max, float locx, float locy, float size, co
     max_t << "0xcccccc" << (reverse?0:max);
 
     if(displayvalue){
-        rTextField speed_t(-x*1.45*size+locx,y*1.35*size+locy,.1*size,.2*size);
+        rTextField speed_t(-x*1.45*size+locx,y*1.35*size+locy,.12*size,.24*size);
         sprintf(string,"%.1f",value);
         speed_t << "0xccffff" << (string);
     }
