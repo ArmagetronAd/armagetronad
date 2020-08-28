@@ -148,7 +148,7 @@ void rConsole::Render(){
             rTextField::SetBlendColor(tColor(1,1,1,alpha));
 
             REAL space = 1.6;
-            REAL needed = rCWIDTH_CON * 4 * sr_centerString.Len();
+            REAL needed = rCWIDTH_CON * 4 * tColoredString::RemoveColors(sr_centerString).Len();
             REAL fak = 1;
             if (needed > space)
                 fak = space/needed;
