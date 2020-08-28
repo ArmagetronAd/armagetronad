@@ -56,7 +56,7 @@ bool subby_ShowHUD=true, subby_ShowSpeedFastest=true, subby_ShowScore=true, subb
 bool showTime=false;
 bool show24hour=false;
 REAL subby_ScoreLocX=-0.95, subby_ScoreLocY=-0.85, subby_ScoreSize =.13;
-REAL subby_FastestLocX=-0.2, subby_FastestLocY=-0.95, subby_FastestSize =.12;
+REAL subby_FastestLocX=-0.2, subby_FastestLocY=-0.95, subby_FastestSize =.13;
 REAL subby_AlivePeopleLocX=.45, subby_AlivePeopleLocY=-0.95, subby_AlivePeopleSize =.13;
 REAL subby_PingLocX=.80, subby_PingLocY=-0.95, subby_PingSize =.13;
 
