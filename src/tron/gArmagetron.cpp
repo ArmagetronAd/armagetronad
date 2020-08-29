@@ -672,7 +672,8 @@ int main(int argc,char **argv){
 
             tConfigMigration::Migrate(sn_configurationSavedInVersion);
         }
-        sn_configurationSavedInVersion = sn_programVersion;
+        if(tConfigMigration::SavedBefore(sn_configurationSavedInVersion, sn_programVersion))
+            sn_configurationSavedInVersion = sn_programVersion;
 
         // record and play back the recording debug level
         tRecorderSyncBase::GetDebugLevelPlayback();
