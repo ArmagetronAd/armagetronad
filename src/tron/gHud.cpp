@@ -56,11 +56,25 @@ bool subby_ShowHUD=true, subby_ShowSpeedFastest=true, subby_ShowScore=true, subb
 bool showTime=false;
 bool show24hour=false;
 REAL subby_ScoreLocX=-0.95, subby_ScoreLocY=-0.85, subby_ScoreSize =.13;
-REAL subby_FastestLocX=-0.2, subby_FastestLocY=-0.95, subby_FastestSize =.12;
+REAL subby_FastestLocX=-0.2, subby_FastestLocY=-0.95, subby_FastestSize =.13;
 REAL subby_AlivePeopleLocX=.45, subby_AlivePeopleLocY=-0.95, subby_AlivePeopleSize =.13;
 REAL subby_PingLocX=.80, subby_PingLocY=-0.95, subby_PingSize =.13;
 
 REAL max_player_speed=0;
+
+namespace
+{
+static tConfigMigration migrate([](tString const &savedInVersion){
+    // defaults for subby_FastestSize and subby_FastestLocX changed on 0.2.9.1
+    if(tConfigMigration::SavedBefore(savedInVersion, "0.2.9.1_alpha"))
+    {
+        if(subby_FastestSize < subby_AlivePeopleSize)
+            subby_FastestSize = .13; // was .12
+        if(subby_FastestLocX > -.1)
+            subby_FastestLocX = -.2; // was -0.0
+    }
+});
+}
 
 #ifndef DEDICATED
 
@@ -112,7 +126,7 @@ void GLmeter_subby(float value,float max, float locx, float locy, float size, co
     max_t << "0xcccccc" << (reverse?0:max);
 
     if(displayvalue){
-        rTextField speed_t(-x*1.45*size+locx,y*1.35*size+locy,.1*size,.2*size);
+        rTextField speed_t(-x*1.45*size+locx,y*1.35*size+locy,.12*size,.24*size);
         sprintf(string,"%.1f",value);
         speed_t << "0xccffff" << (string);
     }

@@ -200,8 +200,8 @@ void rFont::Render(unsigned char c,REAL left,REAL top,REAL right,REAL bot){
 
 // **************************************************
 
-static REAL sr_bigFontThresholdWidth  = 12;
-static REAL sr_bigFontThresholdHeight = 24;
+static REAL sr_bigFontThresholdWidth  = 10;
+static REAL sr_bigFontThresholdHeight = 20;
 
 static tSettingItem< REAL > sr_bigFontThresholdWidthConf(  "FONT_BIG_THRESHOLD_WIDTH", sr_bigFontThresholdWidth );
 static tSettingItem< REAL > sr_bigFontThresholdHeightConf( "FONT_BIG_THRESHOLD_HEIGHT", sr_bigFontThresholdHeight );
