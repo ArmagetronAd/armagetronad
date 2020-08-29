@@ -5262,12 +5262,14 @@ void gCycle::RenderName( const eCamera* cam ) {
     DisplayText(xp, yp, rCWIDTH_NORMAL, rCHEIGHT_NORMAL, this->player->GetName(), 0, 0);*/
     glTranslatef(xp, yp, 0.);
     if(doname) {
+        rTextField::SetBlendColor(tColor(1,1,1,alpha));
         tColoredString name;
         if(sg_showColoredName)
             name << this->player->GetColoredName();
         else
             name << this->player->GetName();
         DisplayTextAutoWidth(0, 0, name, rCHEIGHT_NORMAL, 0, 0);
+        rTextField::SetDefaultColor(tColor(1,1,1));
     }
 
     ProjMatrix();
