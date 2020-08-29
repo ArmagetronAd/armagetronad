@@ -133,7 +133,7 @@ void rConsole::Render(){
 
         // but don't make it more than MAX_ROWS of text rows for the whole screen, more may be too small for hires small screens
         constexpr auto MAX_ROWS = 47;
-        if(columns >= 0 && rCHEIGHT_CON * MAX_ROWS < 2)
+        if(columns == 0 && rCHEIGHT_CON * MAX_ROWS < 2)
         {
             auto clamped_CHEIGHT = 2.0f/MAX_ROWS;
             rCWIDTH_CON *= clamped_CHEIGHT / rCHEIGHT_CON;
@@ -148,7 +148,8 @@ void rConsole::Render(){
             REAL alpha=center_fadetime-Time+1;
             if (alpha>1) alpha=1;
             if (alpha<0) alpha=0;
-            rTextField::SetDefaultColor( tColor(center_r,center_g,center_b,alpha) );
+            rTextField::SetDefaultColor(tColor(center_r,center_g,center_b));
+            rTextField::SetBlendColor(tColor(1,1,1,alpha));
 
             REAL space = 1.6;
             REAL needed = rCWIDTH_CON * 4 * tColoredString::RemoveColorsLoose(sr_centerString).Len();
@@ -158,8 +159,8 @@ void rConsole::Render(){
 
             DisplayText(0,centerMessageY,rCWIDTH_CON*4*fak,rCHEIGHT_CON*4*fak,sr_centerString);
             RenderEnd();
-            sr_ResetRenderState(true);
             rTextField::SetDefaultColor(tColor(1,1,1));
+            sr_ResetRenderState(true);
         }
 
         if (sr_textOut || rForceTextCallback::ForceText()){
