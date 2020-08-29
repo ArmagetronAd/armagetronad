@@ -80,6 +80,17 @@ static tConfItem<int> sr_columnsConf("CONSOLE_COLUMNS",sr_columns);
 static int sr_indent = 3;
 static tConfItem<int> sr_indentConf("CONSOLE_INDENT",sr_indent);
 
+namespace
+{
+static tConfigMigration migrate([](tString const &savedInVersion){
+    // default for sr_columns changed from 78 to 0 (fixed pixel size) on 0.2.9.1
+    if(sr_columns == 78 && tConfigMigration::SavedBefore(savedInVersion, "0.2.9.1_alpha"))
+    {
+        sr_columns = 0;
+    }
+});
+}
+
 void rConsole::Render(){
     if( sr_alreadyDisplayed )
     {
