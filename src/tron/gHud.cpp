@@ -62,6 +62,20 @@ REAL subby_PingLocX=.80, subby_PingLocY=-0.95, subby_PingSize =.13;
 
 REAL max_player_speed=0;
 
+namespace
+{
+static tConfigMigration migrate([](tString const &savedInVersion){
+    // defaults for subby_FastestSize and subby_FastestLocX changed on 0.2.9.1
+    if(tConfigMigration::SavedBefore(savedInVersion, "0.2.9.1_alpha"))
+    {
+        if(subby_FastestSize < subby_AlivePeopleSize)
+            subby_FastestSize = .13; // was .12
+        if(subby_FastestLocX > -.1)
+            subby_FastestLocX = -.2; // was -0.0
+    }
+});
+}
+
 #ifndef DEDICATED
 
 void GLmeter_subby(float value,float max, float locx, float locy, float size, const char * t,bool displayvalue = true, bool reverse = false, REAL r=.5, REAL g=.5, REAL b=1)
