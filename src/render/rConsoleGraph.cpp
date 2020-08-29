@@ -144,16 +144,18 @@ void rConsole::Render(){
             REAL alpha=center_fadetime-Time+1;
             if (alpha>1) alpha=1;
             if (alpha<0) alpha=0;
-            rTextField::SetDefaultColor( tColor(center_r,center_g,center_b,alpha) );
+            rTextField::SetDefaultColor(tColor(center_r,center_g,center_b));
+            rTextField::SetBlendColor(tColor(1,1,1,alpha));
 
             REAL space = 1.6;
-            REAL needed = rCWIDTH_CON * 4 * sr_centerString.Len();
+            REAL needed = rCWIDTH_CON * 4 * tColoredString::RemoveColors(sr_centerString).Len();
             REAL fak = 1;
             if (needed > space)
                 fak = space/needed;
 
             DisplayText(0,centerMessageY,rCWIDTH_CON*4*fak,rCHEIGHT_CON*4*fak,sr_centerString);
             RenderEnd();
+            rTextField::SetDefaultColor(tColor(1,1,1));
             sr_ResetRenderState(true);
         }
 
