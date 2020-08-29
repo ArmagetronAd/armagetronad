@@ -251,6 +251,8 @@ cycle_wall_time_override_help  UNDOCUMENTED
 
 authority_no_check_help     UNDOCUMENTED
 
+saved_in_version_help Used internally to remember which version the user configuration file was last saved it
+
 # yet undefined access levels, reserved for future use (we only want them to pop up for
 # translators then)
 
