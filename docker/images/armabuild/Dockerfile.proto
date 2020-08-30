@@ -6,16 +6,20 @@ LABEL maintainer="Manuel Moos <z-man@users.sf.net>"
 
 FROM base as commonground
 RUN apt-get -y update && apt-get install \
+curl \
 g++ \
 git \
 make \
 #libboost-dev \
 #libboost-thread-dev \
 #libprotobuf-dev \
-libxml2-dev \
+#libxml2-dev \
 libzthread-dev \
 recode \
 -y
+
+COPY build_libxml2.sh .
+RUN ./build_libxml2.sh libxml2-2.9.10 && rm ./build_libxml2.sh
 
 # #####################################
 # client and server build dependencies
@@ -24,7 +28,6 @@ recode \
 FROM commonground as armabuild_base
 # full build dependencies
 RUN apt-get -y update && apt-get install \
-curl \
 desktop-file-utils \
 g++ \
 git \
@@ -51,6 +54,11 @@ recode \
 
 # copy appimage tools
 COPY appimage/* /usr/bin/
+
+# prefer our version of libxml
+RUN \
+if test -d /usr/lib/x86_64-linux-gnu/ && test -r /usr/lib/libxml2.so; then cp -fl /usr/lib/libxml2.* /usr/lib/x86_64-linux-gnu/; fi && \
+if test -d /usr/lib/i386-linux-gnu/ && test -r /usr/lib/libxml2.so; then cp -fl /usr/lib/libxml2.* /usr/lib/i386-linux-gnu/; fi
 
 # optional: appstream
 RUN apt-get -y update && apt-get install \
@@ -167,7 +175,7 @@ make \
 #libboost-dev \
 #libboost-thread-dev \
 #libprotobuf-dev \
-libxml2-dev \
+#libxml2-dev \
 libzthread-dev \
 pkg-config \
 python3 \
