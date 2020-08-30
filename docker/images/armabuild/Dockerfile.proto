@@ -5,14 +5,20 @@ LABEL maintainer="Manuel Moos <z-man@users.sf.net>"
 # ###########################
 
 FROM base as commonground
-RUN apt-get -y update && apt-get install \
+
+# record libraries present in base system, install things we know we need
+RUN ls /usr/lib/*.so* /usr/lib/x86_64-linux-gnu/*.so* /usr/lib/i386-linux-gnu/*.so* \
+           /lib/*.so*     /lib/x86_64-linux-gnu/*.so*     /lib/i386-linux-gnu/*.so* \ 
+    2>/dev/null | sed -e s,.*/,, > /usr/base_library_list && \
+apt-get -y update && apt-get install \
+curl \
 g++ \
 git \
 make \
 #libboost-dev \
 #libboost-thread-dev \
 #libprotobuf-dev \
-libxml2-dev \
+#libxml2-dev \
 libzthread-dev \
 recode \
 -y
@@ -24,7 +30,6 @@ recode \
 FROM commonground as armabuild_base
 # full build dependencies
 RUN apt-get -y update && apt-get install \
-curl \
 desktop-file-utils \
 g++ \
 git \
@@ -58,6 +63,11 @@ appstream \
 -y || true
 
 FROM armabuild_base as armabuild
+
+# install our version of libxml2
+COPY build_libxml2.sh .
+RUN ./build_libxml2.sh libxml2-2.9.10 && rm ./build_libxml2.sh
+
 # set up builder user
 RUN useradd builder && mkdir -p /home/builder && chown builder:builder /home/builder # && chmod 777 /home/builder
 WORKDIR /home/builder
@@ -90,6 +100,7 @@ RUN apt-get -y update && apt-get install \
 debhelper \
 dh-systemd \
 devscripts \
+libxml2-dev \
 lptools \
 -y
 
@@ -167,7 +178,7 @@ make \
 #libboost-dev \
 #libboost-thread-dev \
 #libprotobuf-dev \
-libxml2-dev \
+#libxml2-dev \
 libzthread-dev \
 pkg-config \
 python3 \

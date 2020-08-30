@@ -1,10 +1,6 @@
 FROM ubuntu:16.04
 
-# BUG this should not be required
-RUN apt-get -y update && apt-get install \
-libicu55 \
--y
-
 COPY *.AppImage .
 RUN ./*.AppImage --appimage-extract-and-run --version
+
 RUN LD_DEBUG_APP=true ./*.AppImage --appimage-extract-and-run --version

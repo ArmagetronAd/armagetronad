@@ -24,9 +24,9 @@ else
     mv appdir/*.desktop appdir/${STEAM_PACKAGE_NAME}-dedicated.desktop || exit $?
 fi
     
-# all in the steam runtime
-rm -f appdir/usr/lib/libSDL*
-rm -f appdir/usr/lib/libjpeg*
-rm -f appdir/usr/lib/libxml2*
-rm -f appdir/usr/lib/libpng*
-rm -f appdir/usr/lib/libfreetype*
+# remove libraries that are in the steam runtime
+pushd appdir/usr/lib/
+    for f in *; do
+        grep ^$f\$ /usr/base_library_list && rm $f
+    done
+popd

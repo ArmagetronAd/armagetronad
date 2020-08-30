@@ -1,12 +1,6 @@
 FROM i386/debian:10
 
-# BUG this should not be required
-RUN apt-get -y update && apt-get install \
-libxml2 \
--y
-
 COPY *.AppImage .
 RUN ./*.AppImage --appimage-extract-and-run --version
 
-# BUG this should work
-# RUN LD_DEBUG_APP=true ./*.AppImage --appimage-extract-and-run --version
+RUN LD_DEBUG_APP=true ./*.AppImage --appimage-extract-and-run --version
