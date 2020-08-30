@@ -5,7 +5,12 @@ LABEL maintainer="Manuel Moos <z-man@users.sf.net>"
 # ###########################
 
 FROM base as commonground
-RUN apt-get -y update && apt-get install \
+
+# record libraries present in base system, install things we know we need
+RUN ls /usr/lib/*.so* /usr/lib/x86_64-linux-gnu/*.so* /usr/lib/i386-linux-gnu/*.so* \
+           /lib/*.so*     /lib/x86_64-linux-gnu/*.so*     /lib/i386-linux-gnu/*.so* \ 
+    2>/dev/null | sed -e s,.*/,, > /usr/base_library_list && \
+apt-get -y update && apt-get install \
 curl \
 g++ \
 git \
