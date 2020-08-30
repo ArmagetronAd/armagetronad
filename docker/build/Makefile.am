@@ -749,10 +749,23 @@ intermediateclean:
 
 # keep the artifacts clean of junk not needed in the next phase
 artifactclean:
-	rm -rf *.dir source proto/*.dir
+	rm *.dir \
+	proto/*.dir \
+	source \
+	-rf
 
 clean: intermediateclean
-	rm -rf upload source gits result.* *.tag proto
+	rm \
+	*.tag \
+	gits \
+	proto \
+	result.* \
+	rootcontext.* \
+	source \
+	steamdirs \
+	test.* \
+	upload \
+	-rf
 	if git -C ${srcdir} rev-parse --abbrev-ref HEAD > /dev/null; then rm -f CI_INFO; fi
 distclean: clean
 	rm -rf $(TARBALL) CI_INFO
