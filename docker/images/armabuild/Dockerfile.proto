@@ -23,9 +23,6 @@ libzthread-dev \
 recode \
 -y
 
-COPY build_libxml2.sh .
-RUN ./build_libxml2.sh libxml2-2.9.10 && rm ./build_libxml2.sh
-
 # #####################################
 # client and server build dependencies
 # #####################################
@@ -60,17 +57,17 @@ recode \
 # copy appimage tools
 COPY appimage/* /usr/bin/
 
-# prefer our version of libxml
-RUN \
-if test -d /usr/lib/x86_64-linux-gnu/ && test -r /usr/lib/libxml2.so; then cp -fl /usr/lib/libxml2.* /usr/lib/x86_64-linux-gnu/; fi && \
-if test -d /usr/lib/i386-linux-gnu/ && test -r /usr/lib/libxml2.so; then cp -fl /usr/lib/libxml2.* /usr/lib/i386-linux-gnu/; fi
-
 # optional: appstream
 RUN apt-get -y update && apt-get install \
 appstream \
 -y || true
 
 FROM armabuild_base as armabuild
+
+# install our version of libxml2
+COPY build_libxml2.sh .
+RUN ./build_libxml2.sh libxml2-2.9.10 && rm ./build_libxml2.sh
+
 # set up builder user
 RUN useradd builder && mkdir -p /home/builder && chown builder:builder /home/builder # && chmod 777 /home/builder
 WORKDIR /home/builder
@@ -103,6 +100,7 @@ RUN apt-get -y update && apt-get install \
 debhelper \
 dh-systemd \
 devscripts \
+libxml2-dev \
 lptools \
 -y
 
