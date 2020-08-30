@@ -70,6 +70,9 @@ CI.tag: CI_windows.tag CI_free.tag full.tag CI_pack.tag
 CI_base: CI_base.tag
 CI: CI.tag
 
+# all tests
+test: debtest.tag appimagetests.tag CI.tag deploy_base.tag
+
 all:	default
 
 dockertest.tag:
