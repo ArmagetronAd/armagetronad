@@ -19,16 +19,8 @@ curl ftp://xmlsoft.org/libxml2/${archive}.tar.gz -o ${archive}.tar.gz || exit $?
 tar -xzf ${archive}.tar.gz
 rm ${archive}.tar.gz
 cd ${archive}
-./configure --without-icu --without-python --prefix=/usr/ || exit $?
+CFLAGS=-Os ./configure --without-icu --without-python --prefix=/usr/ || exit $?
 make -j 5 || exit $?
 make install || exit $?
 cd .. && rm -rf ${archive}
-
-# prefer our version of libxml
-#if test -d /usr/lib/x86_64-linux-gnu/; then 
-#    cp -fl /usr/lib/libxml2.* /usr/lib/x86_64-linux-gnu/
-#fi
-#if test -d /usr/lib/i386-linux-gnu/; then
-#    cp -fl /usr/lib/libxml2.* /usr/lib/i386-linux-gnu/
-#fi
 
