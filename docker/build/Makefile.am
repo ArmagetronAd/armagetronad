@@ -229,6 +229,7 @@ context.steam: context.64 gits_artifacts.tag
 context.debsrc_%: rootcontext.64 ${srcdir}/rebrand_debian_core.sh ${srcdir}/debian_source.sh gits_artifacts.tag $(TARBALL)
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' $(TARBALL) ${srcdir}/rebrand_debian_core.sh ${srcdir}/debian_source.sh ${srcdir}/context/debian
 	if test -r  ../deploy/secrets/sec.gpg; then cp -lrf ../deploy/secrets/*.gpg $@.dir/; fi
+	rm -f $@.dir/image
 	echo "armadeb_64" > $@.dir/image
 	echo > $@
 result.debsrc_%: context.debsrc_%
