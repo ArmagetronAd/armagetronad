@@ -31,6 +31,7 @@ FROM commonground as armabuild_base
 # full build dependencies
 RUN apt-get -y update && apt-get install \
 desktop-file-utils \
+file \
 g++ \
 git \
 make \
@@ -39,18 +40,21 @@ make \
 libfile-mimeinfo-perl \
 #libfreetype6-dev \
 #libftgl-dev \
+libgl1-mesa-dev \
 #libglew-dev \
-#libjpeg-dev \
-#libpng-dev \
+libglu1-mesa-dev \
+libjpeg-dev \
+libpng-dev \
 #libprotobuf-dev \
-libsdl1.2-dev \
-libsdl-image1.2-dev \
-libsdl-mixer1.2-dev \
+#libsdl1.2-dev \
+#libsdl-image1.2-dev \
+#libsdl-mixer1.2-dev \
 #libsdl2-dev \
 #libsdl2-image-dev \
 #libsdl2-mixer-dev \
 #libxml2-dev \
 libzthread-dev \
+pkg-config \
 recode \
 -y
 
@@ -64,12 +68,28 @@ appstream \
 
 FROM armabuild_base as armabuild
 
-# install our version of libxml2
-COPY build_libxml2.sh .
-RUN ./build_libxml2.sh libxml2-2.9.10 && rm ./build_libxml2.sh
+# for debugging, do the manual builds one at a time
 
-# set up builder user
-RUN useradd builder && mkdir -p /home/builder && chown builder:builder /home/builder # && chmod 777 /home/builder
+# install our version of libxml2
+#COPY build_libxml2.sh .
+#RUN ./build_libxml2.sh libxml2-2.9.10 && rm ./build_libxml2.sh
+
+# install our version of libsdl
+#COPY libsdl-1.2.15-const-xdata32.patch build_libsdl.sh ./
+#RUN ./build_libsdl.sh SDL-1.2.15 && rm ./build_libsdl.sh
+
+# install our version of libsdl_image
+#COPY build_libsdl_image.sh .
+#RUN ./build_libsdl_image.sh SDL_image-1.2.12 && rm ./build_libsdl_image.sh
+
+# for production: do all manual builds in one go, set up builder user
+COPY build*.sh *.patch ./
+RUN ./build_libxml2.sh libxml2-2.9.10 && rm ./build_libxml2.sh && \
+    ./build_libsdl.sh SDL-1.2.15 && rm ./build_libsdl.sh && \
+    ./build_libsdl_image.sh SDL_image-1.2.12 && rm ./build_libsdl_image.sh && \
+    useradd builder && mkdir -p /home/builder && chown builder:builder /home/builder # && chmod 777 /home/builder
+
+# set up rest of builder user
 WORKDIR /home/builder
 USER builder
 
@@ -100,6 +120,9 @@ RUN apt-get -y update && apt-get install \
 debhelper \
 dh-systemd \
 devscripts \
+libsdl1.2-dev \
+libsdl-image1.2-dev \
+libsdl-mixer1.2-dev \
 libxml2-dev \
 lptools \
 -y
