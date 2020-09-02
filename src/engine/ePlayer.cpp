@@ -5046,9 +5046,25 @@ static char const * const se_chatCmdCommands[] = {
 };
 
 //! The tab completion function for in-chat mode
-static void ChatTabCompletition(tString &strString, int &curserPos)
+static void ChatTabCompletition(tString &strString, int &curserPos, bool changeLast)
 {
     if (!se_tabCompletion) return;
+    
+    static tString oldString;
+    static int cfgPos;
+    static int lastPos;
+    if(changeLast)
+    {
+        strString = oldString;
+        cfgPos++;
+        curserPos = lastPos;
+    }
+    else
+    {
+        oldString = strString;
+        lastPos = curserPos;
+        cfgPos = 0;
+    }
 
     tArray<tString> msgsExt = strString.Split(" ");
     tArray<ePlayerNetID *> foundPlayers;
@@ -5061,6 +5077,7 @@ static void ChatTabCompletition(tString &strString, int &curserPos)
     bool isFirst = true;
     bool isChat  = false;
     bool isAdmin = false;
+    int chatPos = 0;
 
     int i = 0;
     for (i = sizeof(se_chatNormalCommands)/sizeof(se_chatNormalCommands[0]) - 1; i >= 0; --i)
@@ -5068,6 +5085,12 @@ static void ChatTabCompletition(tString &strString, int &curserPos)
         if (strString.StartsWith(se_chatNormalCommands[i]))
         {
             isChat = true;
+            int z = 0;
+            while(se_chatNormalCommands[i][z] != '\0')
+            {
+                if(se_chatNormalCommands[i][z] == ' ') ++chatPos;
+                ++z;
+            }
             break;
         }
     }
@@ -5081,7 +5104,7 @@ static void ChatTabCompletition(tString &strString, int &curserPos)
             break;
         }
     }
-
+    
     for(int i = 0; i < msgsExt.Len(); i++)
     {
         tString word = msgsExt[i];
@@ -5091,9 +5114,11 @@ static void ChatTabCompletition(tString &strString, int &curserPos)
         {
             if (isAdmin)
             {
-                tString found_command = tConfItemBase::FindConfigItem(word.Filter());
+                tString found_command = tConfItemBase::FindConfigItem(word.Filter(),cfgPos);
                 if (found_command != "")
                     word = found_command + " ";
+                else
+                    cfgPos = -1;
             }
             else
             {
@@ -5119,7 +5144,7 @@ static void ChatTabCompletition(tString &strString, int &curserPos)
                     }
                 }
 
-                if (foundPlayers.Len() == 1)
+                if (!changeLast && foundPlayers.Len() == 1)
                 {
                     p = foundPlayers[0];
                     if (p && p->IsActive())
@@ -5130,32 +5155,45 @@ static void ChatTabCompletition(tString &strString, int &curserPos)
                             word = (se_tabCompletionWithColors ? p->GetColoredName() + breaker : p->GetName()) + " ";
                     }
                 }
-                else if (foundPlayers.Len() > 1)
+                else //if (foundPlayers.Len() > 1)
                 {
+                    int currPos = 0;
+                    bool found = false;
                     for(int k = 0; k < foundPlayers.Len(); k++)
                     {
                         p = foundPlayers[k];
-                        if (p && p->IsActive() && p->GetName().Filter() == word.Filter())
+                        if (p && p->IsActive() && ( changeLast || p->GetName().Filter() == word.Filter() ))
                         {
+                            // exact match forced first
+                            if(!changeLast) cfgPos = -1;
+                            if(currPos != cfgPos)
+                            {
+                                currPos++;
+                                continue;
+                            }
                             if (isFirst && !isChat)
                                 word = (se_tabCompletionWithColors ? p->GetColoredName() + breaker : p->GetName()) + ": ";
                             else
                                 word = (se_tabCompletionWithColors ? p->GetColoredName() + breaker : p->GetName()) + " ";
+                            found = true;
                             break;
                         }
                     }
+                    if(!found && changeLast) cfgPos = -1; //reset
                 }
             }
         }
 
         cusPos++;
+        
+        if(isChat && i == chatPos) word = word.Filter();
 
         if ((i + 1) == msgsExt.Len())
             newString << word;
         else
             newString << word << " ";
 
-        if ((i > 0) && isFirst) isFirst = false;
+        if (/*(i > 0) && */isFirst) isFirst = false;
     }
 
     strString = newString;
@@ -5206,7 +5244,11 @@ public:
         }
         else if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_TAB)
         {
-            ChatTabCompletition(*content, cursorPos);
+            static tString lastContent;
+            bool changeLast = (lastContent == *content);
+            ChatTabCompletition(*content, cursorPos, changeLast);
+            lastContent = *content;
+            return true;
         }
         else if (e.type==SDL_KEYDOWN &&
                  uActionGlobal::IsBreakingGlobalBind(e.key.keysym.sym))
@@ -9254,6 +9296,7 @@ static uActionGlobal score("SCORE");
 
 static bool sf(REAL x)
 {
+    se_BlockScores = false;
     if(!se_BlockScores && x>0) show_scores = !show_scores;
     return true;
 }

@@ -626,8 +626,9 @@ void tConfItemBase::LoadLine(std::istream &s){
     //  std::cout << line << " lines read.\n";
 }
 
-tString tConfItemBase::FindConfigItem(tString name)
+tString tConfItemBase::FindConfigItem(tString name,int pos)
 {
+    int currPos = 0;
     tConfItemMap & confmap = ConfItemMap();
     for(tConfItemMap::iterator iter = confmap.begin(); iter != confmap.end() ; ++iter)
     {
@@ -638,6 +639,11 @@ tString tConfItemBase::FindConfigItem(tString name)
         {
             if (command.StartsWith(name.ToLower()))
             {
+                if(currPos != pos)
+                {
+                    currPos++;
+                    continue;
+                }
                 return ci->title;
             }
         }

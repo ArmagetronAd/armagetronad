@@ -461,6 +461,7 @@ static tConfItem<bool> se_highlightMyNameConf("HIGHLIGHT_NAME", se_highlightMyNa
 
 static tConfItem<bool> se_tabCompletionConf("TAB_COMPLETION", se_tabCompletion);
 static tConfItem<bool> se_tabCompletionColors("TAB_COMPLETION_WITH_COLORS", se_tabCompletionWithColors);
+static tConfItem<bool> se_autoComplColor("AUTO_COMPLETE_WITH_COLOR", se_tabCompletionWithColors);
 
 void sg_SpecialMenu()
 {
@@ -687,8 +688,24 @@ uMenuItemToggle hud2
 
 static tConfItem<bool> WRAP("WRAP_MENU",uMenu::wrap);
 
-static void ConTabCompletition(tString &strString, int &curserPos)
+static void ConTabCompletition(tString &strString, int &curserPos, bool changeLast)
 {
+    static tString oldString;
+    static int cfgPos;
+    static int lastPos;
+    if(changeLast)
+    {
+        strString = oldString;
+        cfgPos++;
+        curserPos = lastPos;
+    }
+    else
+    {
+        oldString = strString;
+        lastPos = curserPos;
+        cfgPos = 0;
+    }
+
     tArray<tString> msgsExt = strString.Split(" ");
     tString newString;
     int cusPos = 0;
@@ -701,9 +718,11 @@ static void ConTabCompletition(tString &strString, int &curserPos)
 
         if (cusPos == curserPos)
         {
-            tString found_command = tConfItemBase::FindConfigItem(word.Filter());
+            tString found_command = tConfItemBase::FindConfigItem(word.Filter(),cfgPos);
             if (found_command != "")
                 word = found_command + " ";
+            else
+                cfgPos = -1;
         }
 
         cusPos++;
@@ -749,10 +768,16 @@ public:
             {
                 tString strString;
                 strString << *content;
+                
+                static tString lastContent;
+                bool changeLast = (lastContent == strString);
 
-                ConTabCompletition(strString, cursorPos);
+                ConTabCompletition(strString, cursorPos, changeLast);
                 *content = strString;
+                
+                lastContent = strString;
             }
+            return true;
         }
         else if (e.type==SDL_KEYDOWN &&
                  uActionGlobal::IsBreakingGlobalBind(e.key.keysym.sym))

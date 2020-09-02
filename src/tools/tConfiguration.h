@@ -288,7 +288,7 @@ public:
     static void WriteAllToFile();
     static void WriteAllLevelsToFile();
     static void WriteChangedToFile();
-    static tString FindConfigItem(tString name);    //! Returns the config name of the searching string name
+    static tString FindConfigItem(tString name,int pos = 0);    //! Returns the config name of the searching string name
     static void SetAllAccessLevel(int newLevel);
 
     static void DownloadSettings_Go(nMessage &m);
