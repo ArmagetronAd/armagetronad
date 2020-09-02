@@ -697,7 +697,6 @@ deploy_itch: result.deploy_itch
 deploy_ppa: \
 deploy_ppa_groovy \
 deploy_ppa_focal \
-deploy_ppa_eoan \
 deploy_ppa_bionic \
 deploy_ppa_xenial \
 deploy_ppa_trusty
