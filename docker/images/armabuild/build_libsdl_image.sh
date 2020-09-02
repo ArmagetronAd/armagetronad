@@ -17,7 +17,7 @@ curl https://www.libsdl.org/projects/SDL_image/release/${archive}.tar.gz -o ${ar
 tar -xzf ${archive}.tar.gz
 rm ${archive}.tar.gz
 cd ${archive}
-CFLAGS=-Os ./configure --prefix=/usr/ || exit $?
+CFLAGS=-Os ./configure --prefix=/usr/ --disable-tif --disable-webp || exit $?
 make -j 5 || exit $?
 make install || exit $?
 cd .. && rm -rf ${archive}
