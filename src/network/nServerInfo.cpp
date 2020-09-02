@@ -2536,8 +2536,11 @@ nServerInfo* nServerInfo::GetRandomMaster()
     tASSERT( masterInfo );
 
     // store and return
-    masterInfo->Remove();
-    masterInfo->Insert( sn_masterList );
+    if(masterInfo)
+    {
+        masterInfo->Remove();
+        masterInfo->Insert( sn_masterList );
+    }
 
     return masterInfo;
 }

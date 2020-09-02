@@ -24,12 +24,16 @@ else
     mv appdir/*.desktop appdir/${STEAM_PACKAGE_NAME}-dedicated.desktop || exit $?
 fi
     
-# we do not need to include libraries that already are in the steam runtime
-pushd appdir/usr/lib || exit $?
-rm -f `cat /usr/share/steam_sdk_lib`
+# remove libraries that are in the steam runtime
+pushd appdir/usr/lib/
+    for f in *; do
+        grep ^$f\$ /usr/base_library_list && rm $f
+    done
 popd || exit $?
 if test -d appdir/lib; then
-    pushd appdir/lib || exit $?
-    rm -f `cat /usr/share/steam_sdk_lib`
+    pushd appdir/lib/
+        for f in *; do
+            grep ^$f\$ /usr/base_library_list && rm $f
+        done
     popd || exit $?
 fi

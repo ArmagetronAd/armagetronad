@@ -62,10 +62,14 @@ function copylib()
 #   include libraries
 mkdir -p ${APPDIR}/usr/lib/
 for library in \
+libasound \
+libasyncns \
 libboost_thread \
 libboost_system \
 libcaca \
 libfluidsynth \
+libdbus-[0-9\.]* \
+libFLAC \
 libfreetype \
 libftgl \
 libGLEW \
@@ -74,28 +78,40 @@ libicuuc \
 libjack \
 libmad \
 libmodplug \
+libjbig \
 libncursesw \
-libpng \
+libnsl \
+libogg \
+libpng[0-9]* \
+libpulse \
+libpulsecommon-[0-9\.]* \
+libpulse-simple \
 libprotobuf \
 libreadline \
-libSDL2-2 \
+libSDL2-[0-9\.]* \
 libslang \
+libsndfile \
 libstdc++ \
-libSDL2_image \
-libSDL2_mixer \
+libSDL2_image-[0-9\.]* \
+libSDL2_mixer-[0-9\.]* \
 libtinfo \
+libvorbis \
+libvorbisenc \
 libwebp \
+libwrap \
 libxml2 \
-libZThread \
+libZThread-[0-9\.]* \
 ; do
   echo "Checking for library ${library}...."
-  baselib=$(ldd ${APPDIR}/usr/bin/${PACKAGE} | grep "${library}" | sed -e "s,.*=> ,," -e "s, (.*,,")
+  baselib=$(ldd ${APPDIR}/usr/bin/${PACKAGE} | grep "${library}\.so[0-9\.]*" | sed -e "s,.*=> ,," -e "s, (.*,,")
   if test -z "${baselib}"; then
     echo "Not linked."
   else
     copylib ${baselib}
   fi
 done
+
+# ldd ${APPDIR}/usr/bin/${PACKAGE}
 
 if ! echo ${PACKAGE} | grep dedicated; then
 # libraries we know are dynamically loaded later, so they don't appear in ldd's output
@@ -112,12 +128,6 @@ done
 fi
 
 # more libraries for 0.4, later
-#libogg.so \
-#libogg.so.0 \
-#libvorbis.so \
-#libvorbis.so.0 \
-#libvorbisfile.so \
-#libvorbisfile.so.3 \
 #libmikmod.so \
 #libmikmod.so.2 \
 

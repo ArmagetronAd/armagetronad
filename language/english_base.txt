@@ -767,6 +767,7 @@ cockpit_file_help                 File that contains the information for renderi
 forbid_hud_map                    Disallow clients to display the HUD minimap?
 forbid_cockpit_data_help          Colon- separated list of cockpit data sources clients aren't allowed to use in the cockpit
 cm_locy_help                      Vertical position of the center messages
+hud_max_width_help                The maximal width of the lower HUD relative to the screen height. 0 is the legacy setting that makes the HUD just stretch sideways and not adapt the height to screens that don't have a 4:3 aspect ratio, which is what versions 0.2.9.0 and earlier did.
 
 #floor
 grid_size_help			Distance between grid lines
@@ -851,7 +852,7 @@ zone_bottom_help        Where to put the zone along the Z axis. Default is 0.0
 zone_height_help        The zone segments' height. Default is 5.0
 smooth_shading_help     Enable smooth shading
 text_out_help			Enable console text output
-console_columns_help    Number of characters in each line of console output
+console_columns_help    Number of characters in each line of console output. 0 for automatic mode. -1 to take the large bitmap font in its native size no matter what.
 console_rows_help       Number of lines of console output without user intervention
 console_rows_max_help   Number of lines of console output when scrolling back
 chat_layer_help         Opacity of the console and menu background: 0 for fully transparent, 1 for fully opaque.

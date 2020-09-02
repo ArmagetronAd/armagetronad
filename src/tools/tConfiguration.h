@@ -40,6 +40,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <string>
 #include <deque>
 #include <map>
+#include <functional>
 #include <boost/tuple/tuple.hpp>
 #include <boost/tuple/tuple_comparison.hpp>
 #include <boost/tuple/tuple_io.hpp>
@@ -468,6 +469,20 @@ void st_Include( tString const & file );
 
 void st_LoadConfig();
 void st_SaveConfig();
+
+struct tConfigMigration
+{
+    using Callback = std::function<void(tString const &)>;
+
+    // registers a config migration callback
+    explicit tConfigMigration(Callback &&cb);
+
+    // calls all migration callbacks
+    static void Migrate(tString const &savedInVersion);
+
+    // alphanumerically compares version strings
+    static bool SavedBefore(char const *savedInVersion, char const *beforeVersion);
+};
 
 extern bool st_FirstUse;
 

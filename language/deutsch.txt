@@ -764,6 +764,7 @@ forbid_hud_map                Verbiete Clients das Zeigen der HUD Minikarte?
 forbid_cockpit_data_help      Durch Doppelpunkte unterteilte Liste von Cockpitdatenquellen, die Clients nicht für ihre Cockpits verwenden dürfen (z.B. der Rubber ihrer Gegner)
 cm_locy_help                  Vertikale Position der Zentralnachrichten vom Server
 hud_cache_threshold_help      Update-Schwelle für HUD-Anzeigen, wenn Display-Listen-Optimierung aktiv ist. Erst, wenn die Änderung der Anzeigen eine durch diesen Wert bestimmte Schwelle überschreiten, werden sie neu gezeichnet.
+hud_max_width_help            Maximale Breite des unteren HUD in Relation zur Bildschirmhöhe. Ein Wert von 0 sorgt für das alte Verhalten (<=0.2.9.0), bei dem das HUD einfach über die gesamte Breite gestreckt wird, ohne die Höhe an Bildschirme in nicht-4:3-Formaten anzupassen.
 
 #floor
 grid_size_help                Abstand zwischen Rasterlinien
@@ -844,7 +845,7 @@ zone_bottom_help              Unterer Rand der Zonen. Default: 0.0
 zone_height_help              Höhe der Zonen: Default: 5.0
 smooth_shading_help           Aktiviert "Rundes Licht"
 text_out_help                 Aktiviert Textausgabe
-console_columns_help          Anzahl der Spalten der Textausgabe
+console_columns_help          Anzahl der Spalten der Textausgabe. 0 für Automatikmodus. -1, um den Bitmap-Font 1:1 zu verwenden, egal wie klein das wird.
 console_rows_help             Anzahl der Zeilen der Textausgabe (normal)
 console_rows_max_help         Anzahl der Zeilen der Textausgabe (maximal beim Hochscrollen)
 chat_layer_help               Transparenz der Konsole und des Menühintergrundes: 0 für totale Transparenz, 1 für totale Intransparenz
