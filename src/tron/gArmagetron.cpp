@@ -812,7 +812,7 @@ int main(int argc,char **argv){
         st_LoadConfig();
 
         // migrate user configuration from previous versions
-        if(sn_configurationSavedInVersion != sn_programVersion)
+        if(sn_configurationSavedInVersion != st_programVersion)
         {
             if(st_FirstUse)
             {
@@ -821,8 +821,8 @@ int main(int argc,char **argv){
 
             tConfigMigration::Migrate(sn_configurationSavedInVersion);
         }
-        if(tConfigMigration::SavedBefore(sn_configurationSavedInVersion, sn_programVersion))
-            sn_configurationSavedInVersion = sn_programVersion;
+        if(tConfigMigration::SavedBefore(sn_configurationSavedInVersion, st_programVersion))
+            sn_configurationSavedInVersion = st_programVersion;
 
         // record and play back the recording debug level
         tRecorderSyncBase::GetDebugLevelPlayback();

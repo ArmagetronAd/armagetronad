@@ -193,7 +193,7 @@ void rConsole::Render(){
                 lastTimeout=Time;
             }
 
-            rTextField out(rTextField::Pixelize(-.95f,W),rTextField::Pixelize(.99f,H),rCWIDTH_CON,rCHEIGHT_CON, sr_fontConsole);//,&rFont::s_defaultFontSmall);
+            rTextField out(rTextField::Pixelize(-.95f,W),rTextField::Pixelize(.99f,H),rCHEIGHT_CON, sr_fontConsole);//,&rFont::s_defaultFontSmall);
 
             static int lastTop = currentTop;
             static int lastIn  = currentIn;

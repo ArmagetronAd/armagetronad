@@ -744,14 +744,16 @@ void DisplayText(REAL x,REAL y,REAL h,const char *t,sr_fontClass type,int center
 #endif
 }
 
+// only here for compatibility with stuff merged from 0.2.9
 void DisplayTextAutoWidth(REAL x, REAL y, const char *text, REAL h, int center, int cursor, int cursorPos, rTextField::ColorMode colorMode)
 {
-    DisplayText(x, y, h*(rCWIDTH_NORMAL/rCHEIGHT_NORMAL)*rTextField::AspectWidthMultiplier(), h, text, center, cursor, cursorPos, colorMode);
+    DisplayText(x, y, h, text, sr_fontClass::sr_fontConsole, center, cursor, cursorPos, colorMode);
 }
 
+// only here for compatibility with stuff merged from 0.2.9
 void DisplayTextAutoHeight(REAL x, REAL y, const char *text, REAL w, int center, int cursor, int cursorPos, rTextField::ColorMode colorMode)
 {
-    DisplayText(x, y, w, w*(rCHEIGHT_NORMAL/rCWIDTH_NORMAL)*rTextField::AspectHeightMultiplier(), text, center, cursor, cursorPos, colorMode);
+    DisplayText(x, y, w*(rCHEIGHT_NORMAL/rCWIDTH_NORMAL)*rTextField::AspectHeightMultiplier(), text, sr_fontClass::sr_fontConsole, center, cursor, cursorPos, colorMode);
 }
 
 // *******************************************************************************************

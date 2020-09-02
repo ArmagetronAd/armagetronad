@@ -650,9 +650,6 @@ void uMenuItem::DisplayText(REAL x,REAL y,const char *text,
 
         REAL th = text_height;
         
-        //aspect ratio correction
-        tw *= (REAL(sr_screenHeight)/sr_screenWidth)*(4.0/3.0);
-
         REAL availw = 1.9f;
         if (center < 0) availw = (.9f-x);
         if (center > 0) availw = (x + .9f);

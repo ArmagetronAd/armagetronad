@@ -1,8 +1,5 @@
 LABEL maintainer="Manuel Moos <z-man@users.sf.net>"
 
-# make a list of all libraries in Steam SDK so we later know what we do not need
-RUN ls /lib > /usr/share/steam_sdk_lib && ls /usr/lib >> /usr/share/steam_sdk_lib
-
 # dependencies that are fine to get from steam SDK 
 RUN apt-get -y update && apt-get install \
 g++ \
