@@ -68,6 +68,7 @@ libftgl \
 libGLEW \
 libGLU \
 libjbig \
+libjpeg[0-9\.]* \
 libncursesw \
 libnsl \
 libogg \
@@ -102,7 +103,7 @@ done
 
 # ldd ${APPDIR}/usr/bin/${PACKAGE}
 
-if ! echo ${PACKAGE} | grep dedicated; then
+if false && ! echo ${PACKAGE} | grep dedicated; then
 # libraries we know are dynamically loaded later, so they don't appear in ldd's output
 for library in \
 libjpeg.so.8 \
