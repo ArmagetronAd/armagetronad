@@ -5,7 +5,7 @@ set -x
 archive=$1
 
 # if it already exists (Steam SDK), don't bother
-test -r /usr/include/SDL/SDL_mixer.h && exit 0
+test -r /usr/include/SDL2/SDL_mixer.h && exit 0
 
 # remove system provided libxml2
 # rm -f /usr/lib/libxml2.so.2 /usr/lib/x86_64-linux-gnu/libxml2.so.2 /usr/lib/i386-linux-gnu/libxml2.so.2
@@ -17,7 +17,7 @@ curl https://www.libsdl.org/projects/SDL_mixer/release/${archive}.tar.gz -o ${ar
 tar -xzf ${archive}.tar.gz
 rm ${archive}.tar.gz
 cd ${archive}
-CFLAGS=-Os ./configure --prefix=/usr/ || exit $?
+CFLAGS=-Os ./configure --prefix=/usr/ --enable-music-ogg --disable-music-ogg-shared --disable-music-mod --disable-music-flac --disable-music-midi --disable-music-mp3 --disable-music-mp3-mpg123 --disable-music-opus || exit $?
 make -j 5 || exit $?
 make install || exit $?
 cd .. && rm -rf ${archive}

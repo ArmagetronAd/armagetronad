@@ -6,7 +6,7 @@ set -x
 archive=$1
 
 # if it already exists (Steam SDK), don't bother
-test -d /usr/include/SDL && exit 0
+test -d /usr/include/SDL2 && exit 0
 
 # remove system provided libxml2
 # rm -f /usr/lib/libxml2.so.2 /usr/lib/x86_64-linux-gnu/libxml2.so.2 /usr/lib/i386-linux-gnu/libxml2.so.2
@@ -18,8 +18,8 @@ curl https://www.libsdl.org/release/${archive}.tar.gz -o ${archive}.tar.gz || ex
 tar -xzf ${archive}.tar.gz
 rm ${archive}.tar.gz
 cd ${archive}
-patch -Np1 -i ../libsdl-1.2.15-const-xdata32.patch || exit $?
-rm -f ../libsdl-1.2.15-const-xdata32.patch
+#patch -Np1 -i ../libsdl-1.2.15-const-xdata32.patch || exit $?
+#rm -f ../libsdl-1.2.15-const-xdata32.patch
 CFLAGS=-Os ./configure --prefix=/usr/ || exit $?
 make -j 5 || exit $?
 make install || exit $?
