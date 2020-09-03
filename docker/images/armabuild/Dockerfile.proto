@@ -47,7 +47,9 @@ libgl1-mesa-dev \
 libglew-dev \
 libglu1-mesa-dev \
 libjpeg-dev \
+libogg-dev \
 libpng-dev \
+libpulse-dev \
 libprotobuf-dev \
 #libsdl1.2-dev \
 #libsdl-image1.2-dev \
@@ -55,6 +57,8 @@ libprotobuf-dev \
 libsdl2-dev \
 libsdl2-image-dev \
 libsdl2-mixer-dev \
+libsndio-dev \
+libvorbis-dev \
 libzthread-dev \
 pkg-config \
 recode \
@@ -78,18 +82,23 @@ FROM armabuild_base as armabuild
 #RUN ./build_libxml2.sh libxml2-2.9.10 && rm ./build_libxml2.sh
 
 # install our version of libsdl
-#COPY libsdl-1.2.15-const-xdata32.patch build_libsdl.sh ./
-#RUN ./build_libsdl.sh SDL-1.2.15 && rm ./build_libsdl.sh
+#COPY build_libsdl.sh ./
+#RUN ./build_libsdl.sh SDL2-2.0.12 && rm ./build_libsdl.sh
 
 # install our version of libsdl_image
 #COPY build_libsdl_image.sh .
-#RUN ./build_libsdl_image.sh SDL_image-1.2.12 && rm ./build_libsdl_image.sh
+#RUN ./build_libsdl_image.sh SDL2_image-2.0.5 && rm ./build_libsdl_image.sh
+
+# install our version of libsdl_mixer
+#COPY build_libsdl_mixer.sh .
+#RUN ./build_libsdl_mixer.sh SDL2_mixer-2.0.4 && rm ./build_libsdl_mixer.sh
 
 # for production: do all manual builds in one go, set up builder user
 COPY build*.sh *.patch ./
 RUN ./build_libxml2.sh libxml2-2.9.10 && rm ./build_libxml2.sh && \
-    ./build_libsdl.sh SDL-1.2.15 && rm ./build_libsdl.sh && \
-    ./build_libsdl_image.sh SDL_image-1.2.12 && rm ./build_libsdl_image.sh && \
+    ./build_libsdl.sh SDL2-2.0.12 && rm ./build_libsdl.sh && \
+    ./build_libsdl_image.sh SDL2_image-2.0.5 && rm ./build_libsdl_image.sh && \
+    ./build_libsdl_mixer.sh SDL2_mixer-2.0.4 && rm ./build_libsdl_mixer.sh && \
     useradd builder && mkdir -p /home/builder && chown builder:builder /home/builder # && chmod 777 /home/builder
 
 # set up rest of builder user
@@ -123,9 +132,9 @@ RUN apt-get -y update && apt-get install \
 debhelper \
 dh-systemd \
 devscripts \
-libsdl1.2-dev \
-libsdl-image1.2-dev \
-libsdl-mixer1.2-dev \
+libsdl2-dev \
+libsdl2-image-dev \
+libsdl2-mixer-dev \
 libxml2-dev \
 lptools \
 xdg-utils \
