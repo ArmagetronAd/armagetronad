@@ -3721,6 +3721,7 @@ void gGame::StateUpdate(){
                     con << tOutput( "$map_file_reverting", lastMapfile );
                     conf_mapfile.Set( lastMapfile );
                 }
+                lastMapfile = mapfile;
             }
 
             nConfItemBase::s_SendConfig(false);
@@ -3740,7 +3741,16 @@ void gGame::StateUpdate(){
             // reset queue stuff
             gQueuePlayers::Reset();
 
+            try{
             sg_ParseMap( aParser );
+            }catch(tException const & e)
+            {
+                // this should never happen unless someone is
+                // messing around with the raw map files
+                con << tOutput("$map_file_reverting",tString(DEFAULT_MAP));
+                conf_mapfile.Set(tString(DEFAULT_MAP));
+                sg_ParseMap(aParser);
+            }
 
             sg_currentMapWriter << sg_currentSettings->sizeFactor << gArena::SizeMultiplier() << mapfile;
             sg_currentMapWriter.write();
@@ -4018,9 +4028,12 @@ void gGame::StateUpdate(){
                         tConfItemBase::ReadFile(s);
                     s.close();
 
+                    if(tConfItemBase::Config != tConfItemBase::Var) // So we don't load the same file twice
+                    {
                     if ( tConfItemBase::OpenFile(s, everytime, tConfItemBase::Var ) )
                         tConfItemBase::ReadFile(s);
                     s.close();
+                    }
                 }
             }
 #endif
