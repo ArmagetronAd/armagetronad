@@ -1,7 +1,11 @@
 LABEL maintainer="Manuel Moos <z-man@users.sf.net>"
 
+# record libraries present in base system
 # dependencies that are fine to get from steam SDK 
-RUN apt-get -y update && apt-get install \
+RUN ls /usr/lib/*.so* /usr/lib/x86_64-linux-gnu/*.so* /usr/lib/i386-linux-gnu/*.so* \
+           /lib/*.so*     /lib/x86_64-linux-gnu/*.so*     /lib/i386-linux-gnu/*.so* \ 
+    2>/dev/null | sed -e s,.*/,, > /usr/base_library_list && \
+apt-get -y update && apt-get install \
 g++ \
 git \
 make \
