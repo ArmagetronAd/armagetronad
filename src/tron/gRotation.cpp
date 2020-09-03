@@ -801,6 +801,9 @@ void sg_QueueRotation(tString lang_output_name, tString item, gRotation *ThisRot
     searchFindings.Clear();
 }
 
+bool sg_queueEnabled = false;
+static tSettingItem<bool> sg_queueEnabledConf("QUEUE_ENABLED", sg_queueEnabled);
+
 static void sg_MapQueueingFunc(std::istream &s)
 {
     tString params;
@@ -1289,6 +1292,7 @@ void gQueuePlayers::Reset(REAL time)
 
 bool gQueuePlayers::CanQueue(ePlayerNetID *p)
 {
+    if(!sg_queueEnabled) return false;
     if (sg_queueLimitEnabled)
     {
         //  allow access level of players from excempted to queue
@@ -1909,8 +1913,10 @@ void QueRotate()
 static eLadderLogWriter sg_QueueStartedWriter("QUEUE_STARTED", false);
 static eLadderLogWriter sg_QueueFinishedWriter("QUEUE_FINISHED", false);
 
+int roundNum = 0;
 void gRotation::HandleNewRound(int rounds)
 {
+    roundNum = rounds;
     if (rotationtype == gROTATION_NEVER) return;
 
     if ((sg_MapQueueing->Size() == 0) && (sg_ConfigQueueing->Size() == 0))
@@ -1945,7 +1951,7 @@ void gRotation::HandleNewRound(int rounds)
             else if (rotationtype == gROTATION_ROUND)
             {
                 //  load in the map for that round
-                gRotationRoundSelection *mapRoundSelection = mapRoundRotation->Get(rounds);
+                gRotationRoundSelection *mapRoundSelection = mapRoundRotation->Get(std::max(0,rounds));
                 if (mapRoundSelection)
                 {
                     gRotationItem *mapRotItem = mapRoundSelection->Current();
@@ -2065,6 +2071,14 @@ void gRotation::HandleNewMatch()
     gMatchEventRuby::DoMatchEvents();
 #endif
 }
+
+void sg_ApplyRotation(std::istream &)
+{
+    con << "Applying rotation...\n";
+    gRotation::HandleNewMatch();
+    gRotation::HandleNewRound(roundNum);
+}
+static tConfItemFunc sg_ApplyRotationFunc("APPLY_ROTATION", sg_ApplyRotation);
 
 #ifdef HAVE_LIBRUBY
 

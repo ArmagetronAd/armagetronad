@@ -328,6 +328,8 @@ map_remove_failed                       0xff7777Could not find map "\1" in rotat
 config_remove_success                   An Administrator removed "0x88ff22\10xRESETT" from the config rotation.\n
 config_remove_failed                    0xff7777Could not find map "\1" in rotation.\n
 
+apply_rotation_help                     Applies current round's map or next map, depending on ROTATION_TYPE.
+
 reset_rotation_help                     Resets map and config rotation
 reset_rotation_on_start_new_match_help  If enabled, map and config rotation will be reset when a START_NEW_MATCH command is issued
 reset_rotation_message                  Map and config rotation have been reset.
@@ -3695,6 +3697,8 @@ cycle_target_timeout         You fail core dumping your target \1 in time.\n
 cycle_target_cancel          Your target assignment has been cancelled by server.\n
 
 ## MAP/CONFIG _queueing commands and helping hints - LOVER$BOY's additions
+queue_enabled_help                 Should players be allowed to queue maps?
+
 queue_map_help                        Stores map that exist in MAP_ROTATION. Stops rotation temporarly to complete the listed maps.
 map_queue_stored_file_found        Map \1 has already been stored in list in \2 order. This addition has been ignored.\n
 map_queue_file_stored              Map \1 has successfully been added to the que by \2.\n
