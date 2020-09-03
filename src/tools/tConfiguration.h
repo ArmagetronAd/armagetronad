@@ -40,6 +40,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <ctype.h>
 #include <string>
 #include <map>
+#include <functional>
 
 // Define this to disable compiling the new interface
 #define NEW_CONFIGURATION_NO_COMPILE
@@ -608,6 +609,20 @@ void st_LoadConfig();
 void st_SaveConfig();
 void st_LoadUserConfig();
 void st_SaveChangedConfig();
+
+struct tConfigMigration
+{
+    using Callback = std::function<void(tString const &)>;
+
+    // registers a config migration callback
+    explicit tConfigMigration(Callback &&cb);
+
+    // calls all migration callbacks
+    static void Migrate(tString const &savedInVersion);
+
+    // alphanumerically compares version strings
+    static bool SavedBefore(char const *savedInVersion, char const *beforeVersion);
+};
 
 extern bool st_FirstUse;
 

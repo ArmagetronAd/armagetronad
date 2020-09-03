@@ -70,6 +70,9 @@ CI.tag: CI_windows.tag CI_free.tag full.tag CI_pack.tag
 CI_base: CI_base.tag
 CI: CI.tag
 
+# all tests
+test: debtest.tag appimagetests.tag CI.tag deploy_base.tag
+
 all:	default
 
 dockertest.tag:
@@ -226,6 +229,7 @@ context.steam: context.64 gits_artifacts.tag
 context.debsrc_%: rootcontext.64 ${srcdir}/rebrand_debian_core.sh ${srcdir}/debian_source.sh gits_artifacts.tag $(TARBALL)
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' $(TARBALL) ${srcdir}/rebrand_debian_core.sh ${srcdir}/debian_source.sh ${srcdir}/context/debian
 	if test -r  ../deploy/secrets/sec.gpg; then cp -lrf ../deploy/secrets/*.gpg $@.dir/; fi
+	rm -f $@.dir/image
 	echo "armadeb_64" > $@.dir/image
 	echo > $@
 result.debsrc_%: context.debsrc_%
@@ -693,7 +697,6 @@ deploy_itch: result.deploy_itch
 deploy_ppa: \
 deploy_ppa_groovy \
 deploy_ppa_focal \
-deploy_ppa_eoan \
 deploy_ppa_bionic \
 deploy_ppa_xenial \
 deploy_ppa_trusty
@@ -749,10 +752,23 @@ intermediateclean:
 
 # keep the artifacts clean of junk not needed in the next phase
 artifactclean:
-	rm -rf *.dir source proto/*.dir
+	rm *.dir \
+	proto/*.dir \
+	source \
+	-rf
 
 clean: intermediateclean
-	rm -rf upload source gits result.* *.tag proto
+	rm \
+	*.tag \
+	gits \
+	proto \
+	result.* \
+	rootcontext.* \
+	source \
+	steamdirs \
+	test.* \
+	upload \
+	-rf
 	if git -C ${srcdir} rev-parse --abbrev-ref HEAD > /dev/null; then rm -f CI_INFO; fi
 distclean: clean
 	rm -rf $(TARBALL) CI_INFO

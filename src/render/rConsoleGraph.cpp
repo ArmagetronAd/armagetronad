@@ -82,6 +82,17 @@ static tConfItem<int> sr_indentConf("CONSOLE_INDENT",sr_indent);
 float sr_chatLayer = 0.5;
 static tConfItem<float> sr_chatLayerConf("CHAT_LAYER",sr_chatLayer);
 
+namespace
+{
+static tConfigMigration migrate([](tString const &savedInVersion){
+    // default for sr_columns changed from 78 to 0 (fixed pixel size) on 0.2.9.1
+    if(sr_columns == 78 && tConfigMigration::SavedBefore(savedInVersion, "0.2.9.1_alpha"))
+    {
+        sr_columns = 0;
+    }
+});
+}
+
 void rConsole::Render(){
     if( sr_alreadyDisplayed )
     {

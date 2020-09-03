@@ -3647,7 +3647,8 @@ void gGame::StateUpdate(){
             con << tOutput("$gamestate_deleting_grid");
 #endif
             //				sn_ConsoleOut(sg_roundCenterMessage + "\n");
-            sn_CenterMessage(sg_roundCenterMessage);
+            if(sn_GetNetState() != nCLIENT)
+                sn_CenterMessage(sg_roundCenterMessage);
 
             //				for (unsigned short int mycy = 0; mycy > sg_roundConsoleMessage5.Len(); c++)
 

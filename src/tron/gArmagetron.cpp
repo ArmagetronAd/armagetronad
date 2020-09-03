@@ -604,6 +604,12 @@ void sg_PutEnv( char const * s )
     putenv( store.Store( s ) );
 }
 
+namespace
+{
+tString sn_configurationSavedInVersion{"0.2.8"};
+tConfItem<tString> sn_configurationSavedInVersionConf("SAVED_IN_VERSION",sn_configurationSavedInVersion);
+}
+
 int main(int argc,char **argv){
     //std::cout << "enter\n";
     //  net_test();
@@ -661,6 +667,19 @@ int main(int argc,char **argv){
         tLocale::Load("languages.txt");
 
         st_LoadConfig();
+
+        // migrate user configuration from previous versions
+        if(sn_configurationSavedInVersion != sn_programVersion)
+        {
+            if(st_FirstUse)
+            {
+                sn_configurationSavedInVersion = "0.0";
+            }
+
+            tConfigMigration::Migrate(sn_configurationSavedInVersion);
+        }
+        if(tConfigMigration::SavedBefore(sn_configurationSavedInVersion, sn_programVersion))
+            sn_configurationSavedInVersion = sn_programVersion;
 
         // record and play back the recording debug level
         tRecorderSyncBase::GetDebugLevelPlayback();
