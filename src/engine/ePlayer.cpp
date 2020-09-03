@@ -5200,9 +5200,20 @@ static void ChatTabCompletition(tString &strString, int &curserPos, bool changeL
     curserPos = newString.Len();
 }
 
-static bool se_displayScoresDuringChat = false;
+static bool se_displayScoresDuringChat = true;
 bool se_BlockScores = false;
 static tConfItem<bool> se_displayScoresDuringChatConf("DISPLAY_SCORES_DURING_CHAT", se_displayScoresDuringChat);
+
+namespace
+{
+    static tConfigMigration migrate([](tString const &savedInVersion)
+    {
+        if(!se_displayScoresDuringChat && tConfigMigration::SavedBefore(savedInVersion,"0.2.9-sty+ct+ap_alpha_z2945"))
+        {
+            se_displayScoresDuringChat = true;
+        }
+    });
+}
 
 static std::deque<tString> se_chatHistory; // global since the class doesn't live beyond the execution of the command
 static int se_chatHistoryMaxSize=10; // maximal size of chat history
@@ -8118,13 +8129,13 @@ static bool show_scores=false;
 void ePlayerNetID::DisplayScores()
 {
     //  block displaying scores during chat mode
-    /*if (se_BlockScores)
+    if (se_BlockScores)
     {
         se_alreadyDisplayedScores = false;
         show_scores = false;
 
         return;
-    }*/
+    }
 
     if( !show_scores || !se_mainGameTimer || se_alreadyDisplayedScores )
     {
@@ -9297,7 +9308,7 @@ static uActionGlobal score("SCORE");
 static bool sf(REAL x)
 {
     se_BlockScores = false;
-    if(!se_BlockScores && x>0) show_scores = !show_scores;
+    if(x>0) show_scores = !show_scores;
     return true;
 }
 

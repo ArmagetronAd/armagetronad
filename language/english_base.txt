@@ -3791,7 +3791,7 @@ delay_command_remove_help           Removes a delay command at the specified id 
 
 destroy_zone_help                   Destroy, simply meaning: causes the zone with the given name to disappear instantly.
 destroy_zone_id_help                Destroy, simply meaning: causes the zone with the given id to disappear instantly.
-display_scores_during_chat_help     If set to 1, score board will appear during chat when we hit the "TAB" button on our keyboard.
+display_scores_during_chat_help     If enabled, scores will continue showing while in chat.
 enable_friends_casing_help          If set to 1, matching friends will appear. If set to 0, no matter what casing it is, names with our friends will appear.
 end_challenge_help                  UNDOCUMENTED
 get_current_map_help                Displays the current map players are playing in.
