@@ -47,21 +47,20 @@ libgl1-mesa-dev \
 libglew-dev \
 libglu1-mesa-dev \
 libjpeg-dev \
+libmodplug-dev \
 libogg-dev \
 libpng-dev \
 libpulse-dev \
 libprotobuf-dev \
-#libsdl1.2-dev \
-#libsdl-image1.2-dev \
-#libsdl-mixer1.2-dev \
-libsdl2-dev \
-libsdl2-image-dev \
-libsdl2-mixer-dev \
+#libsdl2-dev \
+#libsdl2-image-dev \
+#libsdl2-mixer-dev \
 libsndio-dev \
 libvorbis-dev \
 libzthread-dev \
 pkg-config \
 recode \
+libxml2 \
 protobuf-compiler \
 -y
 
@@ -74,6 +73,24 @@ appstream \
 -y || true
 
 FROM armabuild_base as armabuild
+
+#RUN apt-get -y update
+#RUN apt-get install \
+#libmikmod2-dev \
+#libreadline-dev \
+#libtool \
+#dh-autoreconf \
+ #dpkg-dev \
+#libflac-dev \
+#libfluidsynth-dev \
+#libmikmod2-dev \
+#libmpg123-dev \
+#libopus-dev \
+#libopusfile-dev \
+#libogg-dev \
+ #libtool \
+#libvorbis-dev \
+#-y
 
 # for debugging, do the manual builds one at a time
 
@@ -91,14 +108,16 @@ FROM armabuild_base as armabuild
 
 # install our version of libsdl_mixer
 #COPY build_libsdl_mixer.sh .
-#RUN ./build_libsdl_mixer.sh SDL2_mixer-2.0.4 && rm ./build_libsdl_mixer.sh
+#RUN ./build_libsdl_mixer.sh SDL2_mixer-2.0.1 && rm ./build_libsdl_mixer.sh
+## we have problems playing back our music with 2.0.4
+##RUN ./build_libsdl_mixer.sh SDL2_mixer-2.0.4 && rm ./build_libsdl_mixer.sh
 
 # for production: do all manual builds in one go, set up builder user
 COPY build*.sh *.patch ./
 RUN ./build_libxml2.sh libxml2-2.9.10 && rm ./build_libxml2.sh && \
     ./build_libsdl.sh SDL2-2.0.12 && rm ./build_libsdl.sh && \
     ./build_libsdl_image.sh SDL2_image-2.0.5 && rm ./build_libsdl_image.sh && \
-    ./build_libsdl_mixer.sh SDL2_mixer-2.0.4 && rm ./build_libsdl_mixer.sh && \
+    ./build_libsdl_mixer.sh SDL2_mixer-2.0.1 && rm ./build_libsdl_mixer.sh && \
     useradd builder && mkdir -p /home/builder && chown builder:builder /home/builder # && chmod 777 /home/builder
 
 # set up rest of builder user
