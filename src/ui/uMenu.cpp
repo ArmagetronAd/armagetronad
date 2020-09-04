@@ -649,7 +649,7 @@ void uMenuItem::DisplayText(REAL x,REAL y,const char *text,
         SetColor( selected, alpha );
 
         REAL th = text_height;
-
+        
         REAL availw = 1.9f;
         if (center < 0) availw = (.9f-x);
         if (center > 0) availw = (x + .9f);
@@ -1957,9 +1957,8 @@ bool uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL 
                 Vertex(-1,-1);
                 RenderEnd();
 
-                REAL w=16*3/640.0;
-                REAL h=32*3/480.0;
-
+                //16*3/640.0, 32*3/480.0
+                REAL w=0.1*(REAL(sr_screenHeight)/sr_screenWidth),h=0.2;
 
                 //REAL middle=-.6;
 
@@ -1975,7 +1974,8 @@ bool uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL 
                 Color(1,1,1);
                 DisplayText(0,.8,w,message,sr_fontError);
 
-                w = 16/640.0;
+                //16/640.0
+                w = 1/30.0*(REAL(sr_screenHeight)/sr_screenWidth);
                 h = 32/480.0;
 
                 REAL center = .4;
