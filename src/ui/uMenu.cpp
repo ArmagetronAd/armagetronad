@@ -1013,9 +1013,11 @@ bool uMenuItemString::Event(SDL_Event &e){
             if(initialized_scrap) {
                 get_scrap(SCRAP_TEXT, &scraplen, &scrap);
                 if(scraplen > 0) {
+                    bool convToUnicode = (!utf8::is_valid(scrap,scrap+scraplen));
+                    if(!convToUnicode) std::cerr << "utf8 ";
                     std::cerr << "scrap: " << scrap << std::endl;
                     for(unsigned char *c = (unsigned char *)scrap; *c; ++c) {
-                        if(!InsertChar(*c)) {
+                        if(!InsertChar(*c,convToUnicode)) {
                             break; // we hit a newline or were trying to
                                   // paste binary stuff
                         }
