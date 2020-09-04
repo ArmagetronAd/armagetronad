@@ -1770,6 +1770,7 @@ void init_game_objects(eGrid *grid){
             team->PlayRound();
 
             gSpawnPoint *spawn = Arena.LeastDangerousSpawnPoint();
+            team->SetSpawnPoint(spawn);
             spawnPointsUsed++;
 
             // if the spawn points are grouped, make sure the last player is not in a group of his
@@ -4108,6 +4109,8 @@ void gGame::StateUpdate(){
 static float sg_respawnTime = -1;
 static tSettingItem<float> sg_respawnTimeConfig( "RESPAWN_TIME", sg_respawnTime );
 
+extern void sg_DetermineSpawnPoint(ePlayerNetID *p,eCoord &pos,eCoord &dir);
+
 static bool respawn_all=false;
 
 static void respawnallenable(std::istream &s)
@@ -4156,7 +4159,7 @@ static void sg_Respawn( REAL time, eGrid *grid, gArena & arena )
             }
             else
 #endif
-                arena.LeastDangerousSpawnPoint()->Spawn( pos, dir );
+                sg_DetermineSpawnPoint(p,pos,dir);
 #ifdef DEBUG
             //                std::cout << "spawning player " << pni->name << "\n";
 #endif

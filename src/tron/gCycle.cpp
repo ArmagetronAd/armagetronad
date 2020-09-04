@@ -7101,6 +7101,42 @@ void gCycle::TeleportTo(eCoord dest, eCoord dir, REAL time) {
 	RequestSync();
 }
 
+int sg_defaultRespawnPosition = 0;
+static tConfItem<int> sg_defaultRespawnPositionConf("RESPAWN_DEFAULT_POSITION",sg_defaultRespawnPosition);
+
+void sg_DetermineSpawnPoint(ePlayerNetID *p,eCoord &pos,eCoord &dir)
+{
+    switch(sg_defaultRespawnPosition)
+    {
+        case 2:
+            if(p->Object())
+            {
+                pos = p->Object()->Position();
+                dir = p->Object()->Direction();
+                break;
+            }
+            //falls through
+        case 1:
+        {
+            gSpawnPoint *spawn = p->CurrentTeam()->SpawnPoint();
+            if(spawn)
+            {
+                spawn->Spawn(pos,dir);
+                break;
+            }
+        }
+            //falls through
+        case 0:
+        {
+            gSpawnPoint *spawn = Arena.LeastDangerousSpawnPoint();
+            spawn->Spawn(pos,dir);
+            if(!p->CurrentTeam()->SpawnPoint())
+                p->CurrentTeam()->SetSpawnPoint(spawn);
+            break;
+        }
+    }
+}
+
 bool sg_RespawnPlayerCM = false;
 static tConfItem<bool> sg_RespawnPlayerCMConf("RESPAWN_MESSAGE",sg_RespawnPlayerCM);
 
@@ -7153,7 +7189,7 @@ static void sg_RespawnPlayer(std::istream &s)
         eCoord ppos, pdir;
         if(x_str == "" && y_str == "") 
         {
-            Arena.LeastDangerousSpawnPoint()->Spawn(ppos,pdir);
+            sg_DetermineSpawnPoint(pPlayer,ppos,pdir);
         }
         else
         {

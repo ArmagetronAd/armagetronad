@@ -414,6 +414,7 @@ idle_kick_exempt_help               Exempt the access_level from being idle kick
 keep_player_slot_help               If set to 1, every time the server gets full, an unworthy spectator is kicked.
 
 respawn_time_help                   Seconds greater than 0 makes sure any dead player will be respawned within that time of them being dead. Default: -1.
+respawn_default_position_help       The default position to respawn players at. 0="Least dangerous"; 1=Original spawnpoint; 2=Last position
 respawn_strict_help                 If enabled, players in spectator or going into spectator cannot be respawned.
 respawn_message_help                Display the "You've been respawned" message for RESPAWN?
 respawn_help                        Respawns a player that had been killed.\nUSAGE: RESPAWN <player> <xpos> <ypos> <xdir> <ydir>.

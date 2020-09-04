@@ -64,6 +64,8 @@ protected:							// protected attributes
 
     bool locked_;                   //!< if set, only invited players may join
 
+    gSpawnPoint * spawnPoint;
+
     static void UpdateStaticFlags();// update all internal information
 
 public:							// public configuration options
@@ -153,6 +155,15 @@ public:												// public methods
     static void		ResetAllSets	(		);
 
 	static bool ongoingChallenge;		 // a challenge is currently underway, block any new challenge request
+
+    gSpawnPoint * SpawnPoint() {
+        return spawnPoint;
+    }
+
+    void SetSpawnPoint(gSpawnPoint * sp)
+    {
+        spawnPoint = sp;
+    }
 
     static void ResetScoreDifferences(); //<! Resets the last stored score so ScoreDifferences takes this as a reference time
     static void LogScoreDifferences();   //<! Logs accumulated scores of all players since the last call to ResetScoreDifferences() to ladderlog.txt
