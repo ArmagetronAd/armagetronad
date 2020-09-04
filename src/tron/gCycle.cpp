@@ -7117,6 +7117,7 @@ void sg_DetermineSpawnPoint(ePlayerNetID *p,eCoord &pos,eCoord &dir)
             }
             //falls through
         case 1:
+        if(p->CurrentTeam())
         {
             gSpawnPoint *spawn = p->CurrentTeam()->SpawnPoint();
             if(spawn)
@@ -7130,7 +7131,7 @@ void sg_DetermineSpawnPoint(ePlayerNetID *p,eCoord &pos,eCoord &dir)
         {
             gSpawnPoint *spawn = Arena.LeastDangerousSpawnPoint();
             spawn->Spawn(pos,dir);
-            if(!p->CurrentTeam()->SpawnPoint())
+            if(p->CurrentTeam() && !p->CurrentTeam()->SpawnPoint())
                 p->CurrentTeam()->SetSpawnPoint(spawn);
             break;
         }
