@@ -53,6 +53,25 @@ cp zeroinstall/*.gpg . || exit $?
 # FeedLint requires this
 export TERM=linux
 
+function wait_for_upload(){
+    URI="$1"
+
+    # wait a bit for file to be available. SF and LP can take some minutes.
+    timeout=10
+    while test ${timeout} -gt -1; do
+        if curl ${URI} --fail --silent --show-error > /dev/null; then
+            return
+        elif test ${timeout} -gt 0; then
+            echo "Waiting for download ${URI}: ${timeout}"
+            sleep 120
+        fi
+        timeout=$(( ${timeout} - 1 ))
+    done
+
+    # timed out, fail. The high level retry is going to loop around a couple of times.
+    exit 1
+}
+
 function update_stream(){
     STREAM=$1
     FILE=$2
@@ -62,6 +81,8 @@ function update_stream(){
     test -r "${FILE}" || return 0
     
     URI=${DOWNLOAD_URI_BASE}`basename ${FILE}`
+
+    wait_for_upload "${URI}"
 
     XML=zeroinstall/${PACKAGE_NAME_BASE}-${ZI_SERIES}-${STREAM}.xml
     test -f ${XML} || exit 1
