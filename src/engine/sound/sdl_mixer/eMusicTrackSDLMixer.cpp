@@ -75,6 +75,7 @@ eMusicTrack::~eMusicTrack() {
 
     for(trackIter = m_Tracklist.begin(); trackIter != m_Tracklist.end(); trackIter++) {
         Mix_FreeMusic( (*trackIter).second );
+        (*trackIter).second = nullptr;
     }
 
     delete m_Playlist;
@@ -84,6 +85,7 @@ eMusicTrack::~eMusicTrack() {
 void eMusicTrack::UnloadSong() {
 #ifdef HAVE_LIBSDL_MIXER
     if(m_Music) Mix_FreeMusic(m_Music);
+    m_Music = nullptr;
     m_Pos = 0.0;
     m_StartTime = 0;
     m_HasSong = false;
@@ -96,6 +98,7 @@ bool eMusicTrack::LoadSong(tSong thesong) {
     m_Filename = thesong.location;
 
     if(m_Music) Mix_FreeMusic(m_Music);
+    m_Music = nullptr;
 
     extension = thesong.location.GetFileMimeExtension();
     if(extension == ".aatrack") {

@@ -237,35 +237,19 @@ int se_mixerFrequency = 1;
 
 void eSoundMixer::Init() {
 #ifdef HAVE_LIBSDL_MIXER
-    bool initbase = false;
+    if(!SDL_WasInit( SDL_INIT_AUDIO )) {
+        int rc;
+        rc = se_Wrap_SDL_InitSubSystem();
+        if ( rc < 0 ) {
+            //std::cerr << "Couldn't initialize audio, disabling.  I'm very sorry about that.\n";
+            return;
+            // todo: disable audio if we can't initialize it
+        }
+    }
+
+    Mix_Init(MIX_INIT_MOD | MIX_INIT_OGG);
 
     m_active = false;
-
-    const tPath& vpath = tDirectories::Data();
-
-    // We haven't started playing any music yet
-    m_musicIsPlaying = false;
-
-    tString musFile;
-
-    musFile = vpath.GetReadPath( titleTrack );
-#ifdef DEBUG
-    std::cout << titleTrack << "\n";
-#endif
-    m_TitleTrack = new eMusicTrack(musFile, true);
-    musFile = vpath.GetReadPath( guiTrack );
-#ifdef DEBUG
-    std::cout << guiTrack << "\n";
-#endif
-    m_GuiTrack = new eMusicTrack(musFile, true);
-
-    //m_GuiTrack->Loop();
-
-    // Don't load a file for this, we don't know what we're playing until it's time
-    // to play.
-    m_GameTrack = new eMusicTrack();
-
-    LoadPlaylist();
 
     int frequency;
 
@@ -281,24 +265,6 @@ void eSoundMixer::Init() {
         return; break;
     default:
         frequency=22050;
-    }
-
-    if(!SDL_WasInit( SDL_INIT_AUDIO )) {
-        int rc;
-        rc = se_Wrap_SDL_InitSubSystem();
-        if ( rc < 0 ) {
-            //std::cerr << "Couldn't initialize audio, disabling.  I'm very sorry about that.\n";
-            initbase = false;
-            // todo: disable audio if we can't initialize it
-        } else {
-            initbase = true;
-        }
-    } else {
-        initbase = true;
-    }
-
-    if( !initbase ) {
-        return;
     }
 
     int rc;
@@ -339,6 +305,32 @@ void eSoundMixer::Init() {
 
     // register old school sound filler callback
     Mix_SetPostMix( &fill_audio, NULL );
+
+    const tPath& vpath = tDirectories::Data();
+
+    // We haven't started playing any music yet
+    m_musicIsPlaying = false;
+
+    tString musFile;
+
+    musFile = vpath.GetReadPath( titleTrack );
+#ifdef DEBUG
+    std::cout << titleTrack << "\n";
+#endif
+    m_TitleTrack = new eMusicTrack(musFile, true);
+    musFile = vpath.GetReadPath( guiTrack );
+#ifdef DEBUG
+    std::cout << guiTrack << "\n";
+#endif
+    m_GuiTrack = new eMusicTrack(musFile, true);
+
+    //m_GuiTrack->Loop();
+
+    // Don't load a file for this, we don't know what we're playing until it's time
+    // to play.
+    m_GameTrack = new eMusicTrack();
+
+    LoadPlaylist();
 
     // Now we're done with music and initializing sdl_mixer, we'll setup the sound
     // effect stuff
@@ -575,17 +567,17 @@ void eSoundMixer::ShutDown() {
     if ( _instance )
         _instance->SetMicrophoneOwner( NULL );
 
-    if ( _instance && _instance->m_active )
-    {
-        Mix_CloseAudio();
-        SDL_QuitSubSystem( SDL_INIT_AUDIO );
-    }
-
     delete _instance;
     delete m_TitleTrack;
     delete m_GuiTrack;
     if(m_GameTrack) delete m_GameTrack;
 
+    if ( _instance && _instance->m_active )
+    {
+        Mix_CloseAudio();
+        Mix_Quit();
+        SDL_QuitSubSystem( SDL_INIT_AUDIO );
+    }
 
 #endif // DEDICATED
 }
