@@ -108,16 +108,14 @@ FROM armabuild_base as armabuild
 
 # install our version of libsdl_mixer
 #COPY build_libsdl_mixer.sh .
-#RUN ./build_libsdl_mixer.sh SDL2_mixer-2.0.1 && rm ./build_libsdl_mixer.sh
-## we have problems playing back our music with 2.0.4
-##RUN ./build_libsdl_mixer.sh SDL2_mixer-2.0.4 && rm ./build_libsdl_mixer.sh
+#RUN ./build_libsdl_mixer.sh SDL2_mixer-2.0.4 && rm ./build_libsdl_mixer.sh
 
 # for production: do all manual builds in one go, set up builder user
 COPY build*.sh *.patch ./
 RUN ./build_libxml2.sh libxml2-2.9.10 && rm ./build_libxml2.sh && \
     ./build_libsdl.sh SDL2-2.0.12 && rm ./build_libsdl.sh && \
     ./build_libsdl_image.sh SDL2_image-2.0.5 && rm ./build_libsdl_image.sh && \
-    ./build_libsdl_mixer.sh SDL2_mixer-2.0.1 && rm ./build_libsdl_mixer.sh && \
+    ./build_libsdl_mixer.sh SDL2_mixer-2.0.4 && rm ./build_libsdl_mixer.sh && \
     useradd builder && mkdir -p /home/builder && chown builder:builder /home/builder # && chmod 777 /home/builder
 
 # set up rest of builder user
