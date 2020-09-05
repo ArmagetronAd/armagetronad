@@ -32,10 +32,13 @@ while test -r ${lock} && ps -eo pid | grep "[\^ ]`cat ${lock}`\$"; do
 done
 echo $$ > ${lock}
 
+result=0
 if echo FROM ${BASE} AS base > Dockerfile; then
     if cat Dockerfile.proto >> Dockerfile; then
 	if docker image build . -t "${REGISTRY}${IMAGE}:${EPOCH}" $*; then
 	    echo "Done!"
+    else
+        result=$?
 	fi
     fi
 fi
@@ -43,3 +46,5 @@ fi
 rm -f ${lock}
 
 popd
+
+exit ${result}

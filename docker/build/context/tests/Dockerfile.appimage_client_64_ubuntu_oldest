@@ -1,0 +1,10 @@
+FROM ubuntu:16.04
+
+RUN apt-get -y update && apt-get install \
+mesa-utils \
+-y
+
+COPY *.AppImage .
+RUN ./*.AppImage --appimage-extract-and-run --version
+
+RUN LD_DEBUG_APP=true ./*.AppImage --appimage-extract-and-run --version
