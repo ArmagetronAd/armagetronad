@@ -3,15 +3,20 @@ FROM ubuntu:20.04
 # skewed installation: add some of our dependencies, most indirect ones
 RUN apt-get -y update && apt-get install \
 mesa-utils \
-libsdl1.2debian \
+#libsdl2-dev \
+libsdl2-2.0-0 \
+#libogg-dev \
+libogg0 \
+#libpng-dev \
 libpng16-16 \
+#libprotobuf-dev \
+libprotobuf17 \
+#libjpeg-dev \
 libjpeg8 \
+#libvorbis-dev \
+libvorbis0a \
 libxml2 \
 -y
-
-#libsdl1.2dev \
-#libpng-dev \
-#libjpeg-dev \
 
 COPY *.AppImage .
 RUN ./*.AppImage --appimage-extract-and-run --version
